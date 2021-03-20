@@ -172,7 +172,7 @@ bool CSoundFile::ReadMUS_KM(FileReader &file, ModLoadingFlags loadFlags)
 
 	InitializeGlobals(MOD_TYPE_MOD);
 	InitializeChannels();
-	m_SongFlags = SONG_AMIGALIMITS;
+	m_SongFlags = SONG_AMIGALIMITS | SONG_IMPORTED;
 	m_nChannels = 4;
 	m_nSamples = 0;
 

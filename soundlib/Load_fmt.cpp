@@ -91,6 +91,7 @@ bool CSoundFile::ReadFMT(FileReader &file, ModLoadingFlags loadFlags)
 	m_nSamples = 8;
 	m_nDefaultTempo = TEMPO(45.5);  // 18.2 Hz timer
 	m_playBehaviour.set(kOPLNoteStopWith0Hz);
+	m_SongFlags.set(SONG_IMPORTED);
 	m_songName = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, fileHeader.songName);
 
 	for(CHANNELINDEX chn = 0; chn < 8; chn++)
