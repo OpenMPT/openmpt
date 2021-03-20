@@ -845,6 +845,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	else
 		SetType(MOD_TYPE_XM);
 
+	m_SongFlags.set(SONG_IMPORTED);
 	if(fileHeader.flags & MO3FileHeader::linearSlides)
 		m_SongFlags.set(SONG_LINEARSLIDES);
 	if((fileHeader.flags & MO3FileHeader::s3mAmigaLimits) && m_nType == MOD_TYPE_S3M)
