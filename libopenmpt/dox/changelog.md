@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.4.19-pre
 
+ *  Fixed excessive memory consumption with malformed files in various formats.
+
 ### libopenmpt 0.4.18 (2021-03-14)
 
  *  AMS: Avoid allocating excessive amount of memory for compressed song message
