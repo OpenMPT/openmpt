@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.5.8-pre
+
 ### libopenmpt 0.5.7 (2021-03-20)
 
  *  [**Sec**] Possible null-pointer dereference read caused by a sequence of
