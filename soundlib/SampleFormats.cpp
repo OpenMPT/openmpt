@@ -2463,14 +2463,14 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, std::ostream &f, cons
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-// 8SVX / 16SVX Samples
+// 8SVX / 16SVX / MAUD Samples
 
 // IFF File Header
 struct IFFHeader
 {
 	char     form[4];   // "FORM"
 	uint32be size;
-	char     magic[4];  // "8SVX" or "16SV"
+	char     magic[4];  // "8SVX", "16SV", "MAUD"
 };
 
 MPT_BINARY_STRUCT(IFFHeader, 12)
@@ -2482,10 +2482,16 @@ struct IFFChunk
 	// 32-Bit chunk identifiers
 	enum ChunkIdentifiers
 	{
+		// 8SVX / 16SV
 		idVHDR = MagicBE("VHDR"),
 		idBODY = MagicBE("BODY"),
-		idNAME = MagicBE("NAME"),
 		idCHAN = MagicBE("CHAN"),
+
+		// MAUD
+		idMHDR = MagicBE("MHDR"),
+		idMDAT = MagicBE("MDAT"),
+
+		idNAME = MagicBE("NAME"),
 	};
 
 	uint32be id;      // See ChunkIdentifiers
@@ -2527,60 +2533,110 @@ bool CSoundFile::ReadIFFSample(SAMPLEINDEX nSample, FileReader &file)
 
 	IFFHeader fileHeader;
 	if(!file.ReadStruct(fileHeader)
-		|| memcmp(fileHeader.form, "FORM", 4 )
-		|| (memcmp(fileHeader.magic, "8SVX", 4) && memcmp(fileHeader.magic, "16SV", 4)))
+	   || memcmp(fileHeader.form, "FORM", 4)
+	   || (memcmp(fileHeader.magic, "8SVX", 4) && memcmp(fileHeader.magic, "16SV", 4) && memcmp(fileHeader.magic, "MAUD", 4)))
 	{
 		return false;
 	}
 
 	ChunkReader chunkFile(file);
-	ChunkReader::ChunkList<IFFChunk> chunks = chunkFile.ReadChunks<IFFChunk>(2);
+	const auto chunks = chunkFile.ReadChunks<IFFChunk>(2);
+	FileReader sampleData;
 
-	FileReader vhdrChunk = chunks.GetChunk(IFFChunk::idVHDR);
-	FileReader bodyChunk = chunks.GetChunk(IFFChunk::idBODY);
-	FileReader chanChunk = chunks.GetChunk(IFFChunk::idCHAN);
-	IFFSampleHeader sampleHeader;
-	if(!bodyChunk.IsValid()
-		|| !vhdrChunk.IsValid()
-		|| !vhdrChunk.ReadStruct(sampleHeader))
+	SampleIO sampleIO(SampleIO::_8bit, SampleIO::mono, SampleIO::bigEndian, SampleIO::signedPCM);
+	uint32 numSamples = 0, sampleRate = 0, loopStart = 0, loopLength = 0, volume = 0;
+
+	if(!memcmp(fileHeader.magic, "MAUD", 4))
 	{
-		return false;
+		FileReader mhdrChunk = chunks.GetChunk(IFFChunk::idMHDR);
+		sampleData = chunks.GetChunk(IFFChunk::idMDAT);
+		if(!mhdrChunk.LengthIs(32)
+		   || !sampleData.IsValid())
+		{
+			return false;
+		}
+
+		numSamples = mhdrChunk.ReadUint32BE();
+		const uint16 bitsPerSample = mhdrChunk.ReadUint16BE();
+		mhdrChunk.Skip(2);  // bits per sample after decompression
+		sampleRate = mhdrChunk.ReadUint32BE();
+		const auto [clockDivide, channelInformation, numChannels, compressionType] = mhdrChunk.ReadArray<uint16be, 4>();
+		if(!clockDivide)
+			return false;
+		else
+			sampleRate /= clockDivide;
+
+		if(numChannels != (channelInformation + 1))
+			return false;
+		if(numChannels == 2)
+			sampleIO |= SampleIO::stereoInterleaved;
+
+		if(bitsPerSample == 8 && compressionType == 0)
+			sampleIO |= SampleIO::unsignedPCM;
+		else if(bitsPerSample == 8 && compressionType == 2)
+			sampleIO |= SampleIO::aLaw;
+		else if(bitsPerSample == 8 && compressionType == 3)
+			sampleIO |= SampleIO::uLaw;
+		else if(bitsPerSample == 16 && compressionType == 0)
+			sampleIO |= SampleIO::_16bit;
+		else
+			return false;
+	} else
+	{
+		FileReader vhdrChunk = chunks.GetChunk(IFFChunk::idVHDR);
+		FileReader chanChunk = chunks.GetChunk(IFFChunk::idCHAN);
+		sampleData           = chunks.GetChunk(IFFChunk::idBODY);
+		IFFSampleHeader sampleHeader;
+		if(!sampleData.IsValid()
+			|| !vhdrChunk.IsValid()
+			|| !vhdrChunk.ReadStruct(sampleHeader))
+		{
+			return false;
+		}
+
+		const uint8 bytesPerSample = memcmp(fileHeader.magic, "8SVX", 4) ? 2 : 1;
+		const uint8 numChannels    = chanChunk.ReadUint32BE() == 6 ? 2 : 1;
+		const uint8 bytesPerFrame  = bytesPerSample * numChannels;
+
+		// While this is an Amiga format, the 16SV version appears to be only used on PC, and only with little-endian sample data.
+		if(bytesPerSample == 2)
+			sampleIO = SampleIO(SampleIO::_16bit, SampleIO::mono, SampleIO::littleEndian, SampleIO::signedPCM);
+		if(numChannels == 2)
+			sampleIO |= SampleIO::stereoSplit;
+
+		loopStart  = sampleHeader.oneShotHiSamples / bytesPerFrame;
+		loopLength = sampleHeader.repeatHiSamples / bytesPerFrame;
+		sampleRate = sampleHeader.samplesPerSec;
+		volume     = sampleHeader.volume;
+		numSamples = mpt::saturate_cast<SmpLength>(sampleData.GetLength() / bytesPerFrame);
 	}
 
 	DestroySampleThreadsafe(nSample);
-	// Default values
-	const uint8 bytesPerSample = memcmp(fileHeader.magic, "8SVX", 4) ? 2 : 1;
-	const uint8 channels = chanChunk.ReadUint32BE() == 6 ? 2 : 1;
 	ModSample &sample = Samples[nSample];
 	sample.Initialize();
-	sample.nLoopStart = sampleHeader.oneShotHiSamples / bytesPerSample;
-	sample.nLoopEnd = sample.nLoopStart + sampleHeader.repeatHiSamples / bytesPerSample;
-	sample.nC5Speed = sampleHeader.samplesPerSec;
-	sample.nVolume = static_cast<uint16>(sampleHeader.volume >> 8);
-	if(!sample.nVolume || sample.nVolume > 256) sample.nVolume = 256;
-	if(!sample.nC5Speed) sample.nC5Speed = 22050;
+	sample.nLength    = numSamples;
+	sample.nLoopStart = loopStart;
+	sample.nLoopEnd   = sample.nLoopStart + loopLength;
+	if((sample.nLoopStart + 4 < sample.nLoopEnd) && (sample.nLoopEnd <= sample.nLength))
+		sample.uFlags.set(CHN_LOOP);
+
+	sample.nC5Speed = sampleRate;
+	if(!sample.nC5Speed)
+		sample.nC5Speed = 22050;
+
+	sample.nVolume = static_cast<uint16>(volume / 256);
+	if(!sample.nVolume || sample.nVolume > 256)
+		sample.nVolume = 256;
 
 	sample.Convert(MOD_TYPE_IT, GetType());
 
 	FileReader nameChunk = chunks.GetChunk(IFFChunk::idNAME);
 	if(nameChunk.IsValid())
-	{
 		nameChunk.ReadString<mpt::String::maybeNullTerminated>(m_szNames[nSample], nameChunk.GetLength());
-	} else
-	{
+	else
 		m_szNames[nSample] = "";
-	}
 
-	sample.nLength = mpt::saturate_cast<SmpLength>(bodyChunk.GetLength() / (bytesPerSample * channels));
-	if((sample.nLoopStart + 4 < sample.nLoopEnd) && (sample.nLoopEnd <= sample.nLength)) sample.uFlags.set(CHN_LOOP);
-
-	// While this is an Amiga format, the 16SV version appears to be only used on PC, and only with little-endian sample data.
-	SampleIO(
-		(bytesPerSample == 2) ? SampleIO::_16bit : SampleIO::_8bit,
-		(channels == 2) ? SampleIO::stereoSplit : SampleIO::mono,
-		SampleIO::littleEndian,
-		SampleIO::signedPCM)
-		.ReadSample(sample, bodyChunk);
+	sampleIO.ReadSample(sample, sampleData);
 	sample.PrecomputeLoops(*this, false);
 
 	return true;
