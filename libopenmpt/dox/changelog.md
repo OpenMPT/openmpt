@@ -8,8 +8,9 @@ is just a high-level summary.
 ### libopenmpt 0.5.7-pre
 
  *  [**Sec**] Possible null-pointer dereference read caused by a sequence of
-    read, set_position_seconds with a position past the song end, and another
-    read call.
+    `openmpt::module::read`, `openmpt::module::set_position_seconds` with a
+    position past the song end, and another `openmpt::module::read` call.
+    (r14363)
 
  *  IT: Instrument / sample panning was reset on note-off / fade commands.
  *  IMF: Set Finetune is now implemented correctly.
