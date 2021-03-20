@@ -455,15 +455,20 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 				m_songMessage.assign(mpt::ToCharset(mpt::Charset::Locale, unarchiver.GetComment()));
 			}
 #endif
+#ifdef MODPLUG_TRACKER
 		} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
 		{
 			MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
+			return false;
+#endif  // MODPLUG_TRACKER
+		} catch(const std::exception &)
+		{
 #ifdef MODPLUG_TRACKER
 			return false;
 #else
 			// libopenmpt already handles this.
 			throw;
-#endif // MODPLUG_TRACKER
+#endif  // MODPLUG_TRACKER
 		}
 	} else
 	{
