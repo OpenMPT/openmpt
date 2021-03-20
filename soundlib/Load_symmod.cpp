@@ -1200,9 +1200,9 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 
-	if(!m_nChannels || !trackLen)
+	if(!m_nChannels || !trackLen || instruments.empty())
 		return false;
-	if(positions.empty() || instruments.empty() || (patternData.empty() && (loadFlags & loadPatternData)) || (sequences.empty() && (loadFlags & loadPatternData)))
+	if((loadFlags & loadPatternData) && (positions.empty() || patternData.empty() || sequences.empty()))
 		return false;
 
 	// Let's hope noone is going to use the 256th instrument ;)
