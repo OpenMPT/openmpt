@@ -1,8 +1,12 @@
 
-CC  = contrib/fuzzing/afl/afl-clang-fast
-CXX = contrib/fuzzing/afl/afl-clang-fast++
-LD  = contrib/fuzzing/afl/afl-clang-fast++
+CC  = contrib/fuzzing/afl/afl-clang-lto
+CXX = contrib/fuzzing/afl/afl-clang-lto++
+LD  = contrib/fuzzing/afl/afl-clang-lto++
 AR  = ar 
+
+DYNLINK=0
+SHARED_LIB=0
+STATIC_LIB=1
 
 CPPFLAGS +=
 CXXFLAGS += -std=c++11 -fPIC -fno-strict-aliasing
