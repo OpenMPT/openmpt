@@ -7,6 +7,14 @@ is just a high-level summary.
 
 ### libopenmpt 0.5.7-pre
 
+ *  [**Sec**] Possible null-pointer dereference read caused by a sequence of
+    read, set_position_seconds with a position past the song end, and another
+	read call.
+
+ *  IT: Instrument / sample panning was reset on note-off / fade commands.
+ *  IMF: Set Finetune is now implemented correctly.
+ *  Fixed excessive memory consumption with malformed files in various formats.
+
 ### libopenmpt 0.5.6 (2021-03-14)
 
  *  AMS: Avoid allocating excessive amount of memory for compressed song message
