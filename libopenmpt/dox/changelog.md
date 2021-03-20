@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.4.20-pre
+
 ### libopenmpt 0.4.19 (2021-03-20)
 
  *  Fixed excessive memory consumption with malformed files in various formats.
