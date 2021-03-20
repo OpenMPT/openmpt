@@ -9,7 +9,7 @@ is just a high-level summary.
 
  *  [**Sec**] Possible null-pointer dereference read caused by a sequence of
     read, set_position_seconds with a position past the song end, and another
-	read call.
+    read call.
 
  *  IT: Instrument / sample panning was reset on note-off / fade commands.
  *  IMF: Set Finetune is now implemented correctly.
