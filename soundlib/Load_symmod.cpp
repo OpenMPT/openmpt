@@ -11,7 +11,7 @@
  * Authors: Devin Acker
  *          OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
-*/
+ */
 
 #include "stdafx.h"
 #include "Loaders.h"
@@ -1319,8 +1319,9 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 		bool stopped           = false;  // Sample paused or not (affects volume and pitch slides)
 		uint8 lastNote         = 0;      // Last note played on a channel
 		uint8 lastInst         = 0;      // Last instrument played on a channel
-		uint8 lastVol          = 0;      // Last specified volume of a channel (to avoid excessive Mxx commands)
+		uint8 lastVol          = 64;     // Last specified volume of a channel (to avoid excessive Mxx commands)
 		uint8 channelVol       = 100;    // Volume multiplier, 0...100
+		uint8 calculatedVol    = 64;     // Final channel volume
 		uint8 fromAdd          = 0;      // Base sample offset for FROM and FR&P effects
 		uint8 curVibrato       = 0;
 		uint8 curTremolo       = 0;
@@ -1406,15 +1407,22 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 							m.Clear();
 						}
 
+						auto &chnState = chnStates[chn];
+
 						if(applySyncPlay)
 						{
 							applySyncPlay = false;
 							m = syncPlayCommand;
+							if(m.command == CMD_NONE && chnState.calculatedVol != chnStates[chn - 1].calculatedVol)
+							{
+								m.command = CMD_CHANNELVOLUME;
+								m.param = chnState.calculatedVol = chnStates[chn - 1].calculatedVol;
+							}
 							if(!event.IsGlobal())
 								continue;
 						}
 
-						auto &chnState = chnStates[chn];
+						bool applyVolume = false;
 						switch(static_cast<SymEvent::Command>(event.command.get()))
 						{
 						case SymEvent::KeyOn:
@@ -1505,17 +1513,20 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 
 									if(event.param > 0)
 									{
-										uint8 newVol = mpt::saturate_round<uint8>(event.param * 0.64);
-
-										if(chnState.lastVol != newVol || chnState.curVolSlide != 0)
-										{
-											chnState.lastVol = newVol;
-											m.command = CMD_CHANNELVOLUME;
-											m.param = static_cast<ModCommand::PARAM>(Util::muldivr_unsigned(newVol, chnState.channelVol, 100));
-										}
+										chnState.lastVol = mpt::saturate_round<uint8>(event.param * 0.64);
+										if(chnState.curVolSlide != 0)
+											applyVolume = true;
 										chnState.curVolSlide = 0;
 									}
 								}
+							}
+
+							if(const uint8 newVol = static_cast<uint8>(Util::muldivr_unsigned(chnState.lastVol, chnState.channelVol, 100));
+							   applyVolume || chnState.calculatedVol != newVol)
+							{
+								chnState.calculatedVol = newVol;
+								m.command = CMD_CHANNELVOLUME;
+								m.param = newVol;
 							}
 
 							// Key-On commands with stereo instruments are played on both channels - unless there's already some sort of event
@@ -1656,14 +1667,15 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 									chnState.channelVol = volL;
 
 									m.command = CMD_CHANNELVOLUME;
-									m.param   = static_cast<ModCommand::PARAM>(Util::muldivr_unsigned(chnState.lastVol, chnState.channelVol, 100));
-								} if(event.note == 4 && chn < (m_nChannels - 1) && chnStates[chn + 1].channelVol != volR)
+									m.param   = chnState.calculatedVol = static_cast<uint8>(Util::muldivr_unsigned(chnState.lastVol, chnState.channelVol, 100));
+								}
+								if(event.note == 4 && chn < (m_nChannels - 1) && chnStates[chn + 1].channelVol != volR)
 								{
 									chnStates[chn + 1].channelVol = volR;
 
 									ModCommand &next = rowBase[chn + 1];
 									next.command = CMD_CHANNELVOLUME;
-									next.param   = static_cast<ModCommand::PARAM>(Util::muldivr_unsigned(chnState.lastVol, chnState.channelVol, 100));
+									next.param   = chnState.calculatedVol = static_cast<uint8>(Util::muldivr_unsigned(chnState.lastVol, chnState.channelVol, 100));
 								}
 							}
 							break;
