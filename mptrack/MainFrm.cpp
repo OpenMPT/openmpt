@@ -769,13 +769,14 @@ void CMainFrame::SoundSourceLockedReadImpl(SoundDevice::BufferFormat bufferForma
 	{
 		// The sound device interface expects the whole buffer to be filled, always.
 		// Clear remaining buffer if not enough samples got rendered.
-		std::size_t frameSize = bufferFormat.Channels * (bufferFormat.sampleFormat.GetSampleSize());
-		if(bufferFormat.sampleFormat.IsUnsigned())
+		while(remainingFrames > 0)
 		{
-			std::memset(buffer + renderedFrames * bufferFormat.Channels, 0x80, remainingFrames * frameSize);
-		} else
-		{
-			std::memset(buffer + renderedFrames * bufferFormat.Channels, 0, remainingFrames * frameSize);
+			for(uint32 channel = 0; channel < bufferFormat.Channels; ++channel)
+			{
+				buffer[(renderedFrames * bufferFormat.Channels) + channel] = SC::sample_cast<Tsample>(static_cast<int16>(0));
+			}
+			renderedFrames += 1;
+			remainingFrames -= 1;
 		}
 	}
 }

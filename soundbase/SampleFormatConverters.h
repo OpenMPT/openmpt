@@ -1582,6 +1582,14 @@ struct NormalizationChain
 
 
 
+template <typename Tdst, typename Tsrc>
+MPT_FORCEINLINE Tdst sample_cast(Tsrc src)
+{
+	return SC::Convert<Tdst, Tsrc>{}(src);
+}
+
+
+
 }  // namespace SC
 
 
