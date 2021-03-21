@@ -696,7 +696,7 @@ public:
 	inline void FillCallback(MixSampleInt * const *MixInputBuffers, std::size_t channels, std::size_t countChunk) override
 	{
 		audio_buffer_planar<MixSampleInt> dst(MixInputBuffers, channels, countChunk);
-		bufferio.ReadFixedPoint<MixSampleIntTraits::mix_fractional_bits()>(dst, countChunk);
+		bufferio.ReadFixedPoint<MixSampleIntTraits::mix_fractional_bits>(dst, countChunk);
 		vumeter.Process(MixInputBuffers, channels, countChunk);
 	}
 	inline void FillCallback(MixSampleFloat * const *MixInputBuffers, std::size_t channels, std::size_t countChunk) override
@@ -726,7 +726,7 @@ public:
 	{
 		vumeter.Process(MixSoundBuffer, channels, countChunk);
 		audio_buffer_interleaved<const MixSampleInt> src(MixSoundBuffer, channels, countChunk);
-		bufferio.WriteFixedPoint<MixSampleIntTraits::mix_fractional_bits()>(src, countChunk);
+		bufferio.WriteFixedPoint<MixSampleIntTraits::mix_fractional_bits>(src, countChunk);
 	}
 	inline void DataCallback(MixSampleFloat *MixSoundBuffer, std::size_t channels, std::size_t countChunk) override
 	{
@@ -913,7 +913,7 @@ void CMainFrame::audioCloseDevice()
 void VUMeter::Process(Channel &c, MixSampleInt sample)
 {
 	c.peak = std::max(c.peak, std::abs(sample));
-	if(sample < MixSampleIntTraits::mix_clip_min() || MixSampleIntTraits::mix_clip_max() < sample)
+	if(sample < MixSampleIntTraits::mix_clip_min || MixSampleIntTraits::mix_clip_max < sample)
 	{
 		c.clipped = true;
 	}
@@ -922,7 +922,7 @@ void VUMeter::Process(Channel &c, MixSampleInt sample)
 
 void VUMeter::Process(Channel &c, MixSampleFloat sample)
 {
-	Process(c, SC::ConvertToFixedPoint<MixSampleInt, MixSampleFloat, MixSampleIntTraits::filter_fractional_bits()>()(sample));
+	Process(c, SC::ConvertToFixedPoint<MixSampleInt, MixSampleFloat, MixSampleIntTraits::filter_fractional_bits>()(sample));
 }
 
 
@@ -996,7 +996,7 @@ const float VUMeter::dynamicRange = 48.0f; // corresponds to the current impleme
 void VUMeter::SetDecaySpeedDecibelPerSecond(float decibelPerSecond)
 {
 	float linearDecayRate = decibelPerSecond / dynamicRange;
-	decayParam = mpt::saturate_round<int32>(linearDecayRate * MixSampleIntTraits::mix_clip_max());
+	decayParam = mpt::saturate_round<int32>(linearDecayRate * MixSampleIntTraits::mix_clip_max);
 }
 
 

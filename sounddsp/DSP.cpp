@@ -444,11 +444,11 @@ void BitCrush::Process(int * MixSoundBuffer, int * MixRearBuffer, int count, uin
 	{
 		return;
 	}
-	if(m_Settings.m_Bits > MixSampleIntTraits::mix_precision_bits())
+	if(m_Settings.m_Bits > MixSampleIntTraits::mix_precision_bits)
 	{
 		return;
 	}
-	unsigned int mask = ~((1u << (MixSampleIntTraits::mix_precision_bits() - m_Settings.m_Bits)) - 1u);
+	unsigned int mask = ~((1u << (MixSampleIntTraits::mix_precision_bits - m_Settings.m_Bits)) - 1u);
 	if(nChannels == 4)
 	{
 		for(int frame = 0; frame < count; ++frame)

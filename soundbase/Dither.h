@@ -76,21 +76,21 @@ public:
 		{
 			MPT_UNREFERENCED_PARAMETER(rng);
 			return sample;
-		} else if constexpr(targetbits + MixSampleIntTraits::mix_headroom_bits() + 1 >= 32)
+		} else if constexpr(targetbits + MixSampleIntTraits::mix_headroom_bits + 1 >= 32)
 		{
 			MPT_UNREFERENCED_PARAMETER(rng);
 			return sample;
 		} else
 		{
-			sample += mpt::rshift_signed(static_cast<int32>(mpt::random<uint32>(rng)), (targetbits + MixSampleIntTraits::mix_headroom_bits() + 1));
+			sample += mpt::rshift_signed(static_cast<int32>(mpt::random<uint32>(rng)), (targetbits + MixSampleIntTraits::mix_headroom_bits + 1));
 			return sample;
 		}
 	}
 	template <uint32 targetbits, typename Trng>
 	MPT_FORCEINLINE MixSampleFloat process(MixSampleFloat sample, Trng &prng)
 	{
-		SC::ConvertToFixedPoint<MixSampleInt, MixSampleFloat, MixSampleIntTraits::mix_fractional_bits()> conv1;
-		SC::ConvertFixedPoint<MixSampleFloat, MixSampleInt, MixSampleIntTraits::mix_fractional_bits()> conv2;
+		SC::ConvertToFixedPoint<MixSampleInt, MixSampleFloat, MixSampleIntTraits::mix_fractional_bits> conv1;
+		SC::ConvertFixedPoint<MixSampleFloat, MixSampleInt, MixSampleIntTraits::mix_fractional_bits> conv2;
 		return conv2(process<targetbits>(conv1(sample), prng));
 	}
 };
@@ -121,7 +121,7 @@ public:
 		} else
 		{
 			static_assert(sizeof(MixSampleInt) == 4);
-			constexpr int rshift = (32 - targetbits) - MixSampleIntTraits::mix_headroom_bits();
+			constexpr int rshift = (32 - targetbits) - MixSampleIntTraits::mix_headroom_bits;
 			if constexpr(rshift <= 1)
 			{
 				MPT_UNREFERENCED_PARAMETER(prng);
@@ -160,8 +160,8 @@ public:
 	template <uint32 targetbits, typename Trng>
 	MPT_FORCEINLINE MixSampleFloat process(MixSampleFloat sample, Trng &prng)
 	{
-		SC::ConvertToFixedPoint<MixSampleInt, MixSampleFloat, MixSampleIntTraits::mix_fractional_bits()> conv1;
-		SC::ConvertFixedPoint<MixSampleFloat, MixSampleInt, MixSampleIntTraits::mix_fractional_bits()> conv2;
+		SC::ConvertToFixedPoint<MixSampleInt, MixSampleFloat, MixSampleIntTraits::mix_fractional_bits> conv1;
+		SC::ConvertFixedPoint<MixSampleFloat, MixSampleInt, MixSampleIntTraits::mix_fractional_bits> conv2;
 		return conv2(process<targetbits>(conv1(sample), prng));
 	}
 };

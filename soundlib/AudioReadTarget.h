@@ -48,7 +48,7 @@ public:
 		dither.WithDither(
 			[&](auto &ditherInstance)
 			{
-				ConvertBufferMixFixedToBuffer<MixSampleIntTraits::mix_fractional_bits(), false>(advance_audio_buffer(outputBuffer, countRendered), audio_buffer_interleaved<MixSampleInt>(MixSoundBuffer, channels, countChunk), ditherInstance, channels, countChunk);
+				ConvertBufferMixFixedToBuffer<MixSampleIntTraits::mix_fractional_bits, false>(advance_audio_buffer(outputBuffer, countRendered), audio_buffer_interleaved<MixSampleInt>(MixSoundBuffer, channels, countChunk), ditherInstance, channels, countChunk);
 			}
 		);
 		countRendered += countChunk;
