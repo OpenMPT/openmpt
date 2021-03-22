@@ -21,7 +21,7 @@ struct ColorScheme
 	struct { ModColor id : 8; COLORREF color : 24; } colors[MAX_MODCOLORS];
 };
 
-static constexpr ColorScheme ColorSchemes[] =
+inline constexpr ColorScheme ColorSchemes[] =
 {
 { _T("Blue (FT2)"),
 {
