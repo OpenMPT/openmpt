@@ -438,7 +438,7 @@ void CMainFrame::OnDropFiles(HDROP hDropInfo)
 						failed++;
 					total++;
 				}
-				Reporting::Information(MPT_UFORMAT("Scanned {} files, {} failed")(total, failed));
+				Reporting::Information(mpt::format(U_("Scanned {} files, {} failed"))(total, failed));
 				break;
 			}
 #endif
