@@ -35,20 +35,20 @@ OPENMPT_NAMESPACE_BEGIN
 
 #ifdef MPT_INTMIXER
 // quantizer scale of window coefs - only required for integer mixing
-static constexpr int WFIR_QUANTBITS = 15;
-static constexpr double WFIR_QUANTSCALE = 1 << WFIR_QUANTBITS;
-static constexpr int WFIR_8SHIFT = (WFIR_QUANTBITS - 8);
-static constexpr int WFIR_16BITSHIFT = (WFIR_QUANTBITS);
+inline constexpr int WFIR_QUANTBITS = 15;
+inline constexpr double WFIR_QUANTSCALE = 1 << WFIR_QUANTBITS;
+inline constexpr int WFIR_8SHIFT = (WFIR_QUANTBITS - 8);
+inline constexpr int WFIR_16BITSHIFT = (WFIR_QUANTBITS);
 using WFIR_TYPE = int16;
 #else
 using WFIR_TYPE = mixsample_t;
 #endif // INTMIXER
 // log2(number)-1 of precalculated taps range is [4..12]
-static constexpr int WFIR_FRACBITS = 12;  //10
-static constexpr int WFIR_LUTLEN = ((1 << (WFIR_FRACBITS + 1)) + 1);
+inline constexpr int WFIR_FRACBITS = 12;  //10
+inline constexpr int WFIR_LUTLEN = ((1 << (WFIR_FRACBITS + 1)) + 1);
 // number of samples in window
-static constexpr int WFIR_LOG2WIDTH = 3;
-static constexpr int WFIR_WIDTH = (1 << WFIR_LOG2WIDTH);
+inline constexpr int WFIR_LOG2WIDTH = 3;
+inline constexpr int WFIR_WIDTH = (1 << WFIR_LOG2WIDTH);
 // cutoff (1.0 == pi/2)
 // wfir type
 enum WFIRType
@@ -65,9 +65,9 @@ enum WFIRType
 
 
 // fir interpolation
-static constexpr int WFIR_FRACSHIFT = (16 - (WFIR_FRACBITS + 1 + WFIR_LOG2WIDTH));
-static constexpr int WFIR_FRACMASK = ((((1 << (17 - WFIR_FRACSHIFT)) - 1) & ~(WFIR_WIDTH - 1)));
-static constexpr int WFIR_FRACHALVE = (1 << (16 - (WFIR_FRACBITS + 2)));
+inline constexpr int WFIR_FRACSHIFT = (16 - (WFIR_FRACBITS + 1 + WFIR_LOG2WIDTH));
+inline constexpr int WFIR_FRACMASK = ((((1 << (17 - WFIR_FRACSHIFT)) - 1) & ~(WFIR_WIDTH - 1)));
+inline constexpr int WFIR_FRACHALVE = (1 << (16 - (WFIR_FRACBITS + 2)));
 
 class CWindowedFIR
 {

@@ -24,7 +24,7 @@
 namespace Vst
 {
 
-static constexpr int32 kVstVersion = 2400;
+inline constexpr int32 kVstVersion = 2400;
 
 enum VstStringLengths
 {
@@ -547,37 +547,37 @@ enum VstAutomationState : int32
 
 namespace HostCanDo
 {
-static constexpr char sendVstEvents[] = "sendVstEvents";
-static constexpr char sendVstMidiEvent[] = "sendVstMidiEvent";
-static constexpr char sendVstTimeInfo[] = "sendVstTimeInfo";
-static constexpr char receiveVstEvents[] = "receiveVstEvents";
-static constexpr char receiveVstMidiEvent[] = "receiveVstMidiEvent";
-static constexpr char reportConnectionChanges[] = "reportConnectionChanges";
-static constexpr char acceptIOChanges[] = "acceptIOChanges";
-static constexpr char sizeWindow[] = "sizeWindow";
-static constexpr char asyncProcessing[] = "asyncProcessing";
-static constexpr char ofline[] = "offline";
-static constexpr char supplyIdle[] = "supplyIdle";
-static constexpr char supportShell[] = "supportShell";
-static constexpr char openFileSelector[] = "openFileSelector";
-static constexpr char closeFileSelector[] = "closeFileSelector";
-static constexpr char startStopProcess[] = "startStopProcess";
-static constexpr char shellCategory[] = "shellCategory";
-static constexpr char editFile[] = "editFile";
-static constexpr char sendVstMidiEventFlagIsRealtime[] = "sendVstMidiEventFlagIsRealtime";
+inline constexpr char sendVstEvents[] = "sendVstEvents";
+inline constexpr char sendVstMidiEvent[] = "sendVstMidiEvent";
+inline constexpr char sendVstTimeInfo[] = "sendVstTimeInfo";
+inline constexpr char receiveVstEvents[] = "receiveVstEvents";
+inline constexpr char receiveVstMidiEvent[] = "receiveVstMidiEvent";
+inline constexpr char reportConnectionChanges[] = "reportConnectionChanges";
+inline constexpr char acceptIOChanges[] = "acceptIOChanges";
+inline constexpr char sizeWindow[] = "sizeWindow";
+inline constexpr char asyncProcessing[] = "asyncProcessing";
+inline constexpr char ofline[] = "offline";
+inline constexpr char supplyIdle[] = "supplyIdle";
+inline constexpr char supportShell[] = "supportShell";
+inline constexpr char openFileSelector[] = "openFileSelector";
+inline constexpr char closeFileSelector[] = "closeFileSelector";
+inline constexpr char startStopProcess[] = "startStopProcess";
+inline constexpr char shellCategory[] = "shellCategory";
+inline constexpr char editFile[] = "editFile";
+inline constexpr char sendVstMidiEventFlagIsRealtime[] = "sendVstMidiEventFlagIsRealtime";
 }  // namespace HostCanDo
 
 namespace PluginCanDo
 {
-static constexpr char sendVstEvents[] = "sendVstEvents";
-static constexpr char sendVstMidiEvent[] = "sendVstMidiEvent";
-static constexpr char receiveVstEvents[] = "receiveVstEvents";
-static constexpr char receiveVstMidiEvent[] = "receiveVstMidiEvent";
-static constexpr char receiveVstTimeInfo[] = "receiveVstTimeInfo";
-static constexpr char offline[] = "offline";
-static constexpr char midiProgramNames[] = "midiProgramNames";
-static constexpr char bypass[] = "bypass";
-static constexpr char MPE[] = "MPE";
+inline constexpr char sendVstEvents[] = "sendVstEvents";
+inline constexpr char sendVstMidiEvent[] = "sendVstMidiEvent";
+inline constexpr char receiveVstEvents[] = "receiveVstEvents";
+inline constexpr char receiveVstMidiEvent[] = "receiveVstMidiEvent";
+inline constexpr char receiveVstTimeInfo[] = "receiveVstTimeInfo";
+inline constexpr char offline[] = "offline";
+inline constexpr char midiProgramNames[] = "midiProgramNames";
+inline constexpr char bypass[] = "bypass";
+inline constexpr char MPE[] = "MPE";
 }  // namespace PluginCanDo
 
 
@@ -908,7 +908,7 @@ int32 constexpr FourCC(const char (&cc)[5])
 	return static_cast<int32>(static_cast<uint32>(cc[3]) | (static_cast<uint32>(cc[2]) << 8) | (static_cast<uint32>(cc[1]) << 16) | (static_cast<uint32>(cc[0]) << 24));
 }
 
-constexpr int32 kEffectMagic = FourCC("VstP");
+inline constexpr int32 kEffectMagic = FourCC("VstP");
 
 template <typename T>
 constexpr T *FromIntPtr(intptr_t v)

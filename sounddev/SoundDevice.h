@@ -104,13 +104,13 @@ public:
 };
 
 
-static constexpr mpt::uchar TypeWAVEOUT          [] = UL_("WaveOut");
-static constexpr mpt::uchar TypeDSOUND           [] = UL_("DirectSound");
-static constexpr mpt::uchar TypeASIO             [] = UL_("ASIO");
-static constexpr mpt::uchar TypePORTAUDIO_WASAPI [] = UL_("WASAPI");
-static constexpr mpt::uchar TypePORTAUDIO_WDMKS  [] = UL_("WDM-KS");
-static constexpr mpt::uchar TypePORTAUDIO_WMME   [] = UL_("MME");
-static constexpr mpt::uchar TypePORTAUDIO_DS     [] = UL_("DS");
+inline constexpr mpt::uchar TypeWAVEOUT          [] = UL_("WaveOut");
+inline constexpr mpt::uchar TypeDSOUND           [] = UL_("DirectSound");
+inline constexpr mpt::uchar TypeASIO             [] = UL_("ASIO");
+inline constexpr mpt::uchar TypePORTAUDIO_WASAPI [] = UL_("WASAPI");
+inline constexpr mpt::uchar TypePORTAUDIO_WDMKS  [] = UL_("WDM-KS");
+inline constexpr mpt::uchar TypePORTAUDIO_WMME   [] = UL_("MME");
+inline constexpr mpt::uchar TypePORTAUDIO_DS     [] = UL_("DS");
 
 typedef mpt::ustring Type;
 
@@ -634,17 +634,17 @@ public:
 namespace Legacy
 {
 typedef uint16 ID;
-static constexpr SoundDevice::Legacy::ID MaskType = 0xff00;
-static constexpr SoundDevice::Legacy::ID MaskIndex = 0x00ff;
-static constexpr int ShiftType = 8;
-static constexpr int ShiftIndex = 0;
-static constexpr SoundDevice::Legacy::ID TypeWAVEOUT          = 0;
-static constexpr SoundDevice::Legacy::ID TypeDSOUND           = 1;
-static constexpr SoundDevice::Legacy::ID TypeASIO             = 2;
-static constexpr SoundDevice::Legacy::ID TypePORTAUDIO_WASAPI = 3;
-static constexpr SoundDevice::Legacy::ID TypePORTAUDIO_WDMKS  = 4;
-static constexpr SoundDevice::Legacy::ID TypePORTAUDIO_WMME   = 5;
-static constexpr SoundDevice::Legacy::ID TypePORTAUDIO_DS     = 6;
+inline constexpr SoundDevice::Legacy::ID MaskType = 0xff00;
+inline constexpr SoundDevice::Legacy::ID MaskIndex = 0x00ff;
+inline constexpr int ShiftType = 8;
+inline constexpr int ShiftIndex = 0;
+inline constexpr SoundDevice::Legacy::ID TypeWAVEOUT          = 0;
+inline constexpr SoundDevice::Legacy::ID TypeDSOUND           = 1;
+inline constexpr SoundDevice::Legacy::ID TypeASIO             = 2;
+inline constexpr SoundDevice::Legacy::ID TypePORTAUDIO_WASAPI = 3;
+inline constexpr SoundDevice::Legacy::ID TypePORTAUDIO_WDMKS  = 4;
+inline constexpr SoundDevice::Legacy::ID TypePORTAUDIO_WMME   = 5;
+inline constexpr SoundDevice::Legacy::ID TypePORTAUDIO_DS     = 6;
 }
 
 
