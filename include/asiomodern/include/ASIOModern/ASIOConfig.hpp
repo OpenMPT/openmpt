@@ -345,13 +345,13 @@ public:
 	}
 };
 
-static constexpr std::size_t SizeOfChar         = sizeof(Char);
-static constexpr std::size_t SizeOfByte         = sizeof(Byte);
-static constexpr std::size_t SizeOfBool         = sizeof(Bool);
-static constexpr std::size_t SizeOfLong         = sizeof(Long);
-static constexpr std::size_t SizeOfLongLong     = sizeof(LongLong);
-static constexpr std::size_t SizeOfDouble       = sizeof(Double);
-static constexpr std::size_t SizeOfHiLoLongLong = sizeof(HiLoLongLong);
+inline constexpr std::size_t SizeOfChar         = sizeof(Char);
+inline constexpr std::size_t SizeOfByte         = sizeof(Byte);
+inline constexpr std::size_t SizeOfBool         = sizeof(Bool);
+inline constexpr std::size_t SizeOfLong         = sizeof(Long);
+inline constexpr std::size_t SizeOfLongLong     = sizeof(LongLong);
+inline constexpr std::size_t SizeOfDouble       = sizeof(Double);
+inline constexpr std::size_t SizeOfHiLoLongLong = sizeof(HiLoLongLong);
 
 static_assert(SizeOfChar == 1);
 static_assert(SizeOfByte == 1);
