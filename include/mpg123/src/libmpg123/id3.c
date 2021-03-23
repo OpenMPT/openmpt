@@ -1089,16 +1089,19 @@ int parse_new_id3(mpg123_handle *fr, unsigned long first4bytes)
 						tagpos += framesize; /* the important advancement in whole tag */
 						/* for sanity, after full parsing tagpos should be == pos */
 						/* debug4("ID3v2: found %s frame, size %lu (as bytes: 0x%08lx), flags 0x%016lx", id, framesize, framesize, fflags); */
-						/* %0abc0000 %0h00kmnp */
-						#define BAD_FFLAGS (unsigned long) 36784
-						#define PRES_TAG_FFLAG 16384
-						#define PRES_FILE_FFLAG 8192
-						#define READ_ONLY_FFLAG 4096
-						#define GROUP_FFLAG 64
-						#define COMPR_FFLAG 8
-						#define ENCR_FFLAG 4
-						#define UNSYNC_FFLAG 2
-						#define DATLEN_FFLAG 1
+						/* v2.4: %0abc0000 %0h00kmnp */
+						/* v2.3: %abc00000 %ijk00000 */
+						/* v2.2: just zero */
+						#define V3 (major == 3)
+						#define BAD_FFLAGS      (unsigned long) (V3 ? 7967 : 36784)
+						#define PRES_TAG_FFLAG  (unsigned long) (V3 ? 32768 : 16384)
+						#define PRES_FILE_FFLAG (unsigned long) (V3 ? 16384 : 8192)
+						#define READ_ONLY_FFLAG (unsigned long) (V3 ? 8192 : 4096)
+						#define GROUP_FFLAG     (unsigned long) (V3 ? 32 : 64)
+						#define COMPR_FFLAG     (unsigned long) (V3 ? 128 : 8)
+						#define ENCR_FFLAG      (unsigned long) (V3 ? 64 : 4)
+						#define UNSYNC_FFLAG    (unsigned long) (V3 ? 0 : 2)
+						#define DATLEN_FFLAG    (unsigned long) (V3 ? 0 : 1)
 						if(head_part < 4 && promote_framename(fr, id) != 0) continue;
 
 						/* shall not or want not handle these */
@@ -1147,6 +1150,44 @@ int parse_new_id3(mpg123_handle *fr, unsigned long first4bytes)
 								/* Append a zero to keep strlen() safe. */
 								realdata[realsize] = 0;
 								debug2("ID3v2: de-unsync made %lu out of %lu bytes", realsize, framesize);
+							}
+							// The spec says there is a group byte, without explicitly saying that it is
+							// the first thing following the header. I just assume so, because of the
+							// ordering of the flags.
+							if(fflags & GROUP_FFLAG)
+							{ // Just skip group byte.
+								if(realsize)
+								{
+									if(VERBOSE3)
+										fprintf(stderr, "Note: frame of group %d\n", realdata[0]);
+									--realsize;
+									++realdata;
+								} else if(NOQUIET)
+									error("Grouped frame without group byte, even.");
+							}
+							if(fflags & DATLEN_FFLAG)
+							{
+								// Spec says the original (without compression or unsync) data length follows,
+								// so it should match de-unsynced data now.
+								if(realsize >= 4)
+								{
+									unsigned long datlen;
+									if(bytes_to_long(realdata, datlen) && datlen == realsize-4)
+									{
+										realsize  -= 4;
+										realdata  += 4;
+									} else
+									{
+										if(NOQUIET)
+											error("frame data length bad, skipping");
+										realsize = 0;
+									}
+								} else
+								{
+									realsize = 0;
+									if(NOQUIET)
+										error("frame truncated at frame data length, skipping");
+								}
 							}
 							pos = 0; /* now at the beginning again... */
 							/* Avoid reading over boundary, even if there is a */
@@ -1219,6 +1260,7 @@ int parse_new_id3(mpg123_handle *fr, unsigned long first4bytes)
 							if(unsyncbuffer)
 								free(unsyncbuffer);
 						}
+						#undef V3
 						#undef BAD_FFLAGS
 						#undef PRES_TAG_FFLAG
 						#undef PRES_FILE_FFLAG

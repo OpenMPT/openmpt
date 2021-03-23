@@ -1,4 +1,4 @@
-libmpg123 library version 1.26.4.
+libmpg123 library version 1.26.5.
 The following changes have been made:
 - DEBUG build format string type mismatches in frame.c have benn fixed.
 - DEBUG build format string type mismatches in id3.c have benn fixed.
