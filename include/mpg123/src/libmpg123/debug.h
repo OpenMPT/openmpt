@@ -30,6 +30,14 @@
 #define DBGPRFX ""
 #endif
 
+#ifdef XDEBUG
+#define mxdebug(s, ...) mdebug(s, __VA_ARGS__)
+#define xdebug(s) debug(s)
+#else
+#define mxdebug(s, ...)
+#define xdebug(s)
+#endif
+
 #ifdef DEBUG
 
 #include <stdio.h>
@@ -53,6 +61,7 @@
 #define debug13(s, a, b, c, d, e, f, g, h, i, j, k, l, m) fprintf(stderr, DBGPRFX"[" __FILE__ ":%i] debug: " s "\n", __LINE__, a, b, c, d, e, f, g, h, i, j, k, l, m)
 #define debug14(s, a, b, c, d, e, f, g, h, i, j, k, l, m, n) fprintf(stderr, DBGPRFX"[" __FILE__ ":%i] debug: " s "\n", __LINE__, a, b, c, d, e, f, g, h, i, j, k, l, m, n)
 #define debug15(s, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) fprintf(stderr, DBGPRFX"[" __FILE__ ":%i] debug: " s "\n", __LINE__, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o)
+
 #else
 
 #define mdebug(s, ...) 
