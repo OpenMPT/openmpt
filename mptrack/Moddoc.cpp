@@ -2730,7 +2730,7 @@ void CModDoc::LearnMacro(int macroToSet, PlugParamIndex paramToUse)
 			&& m_SndFile.m_MidiCfg.MacroToPlugParam(checkMacro) == paramToUse)
 		{
 			CString message;
-			message.Format(_T("Parameter %u can already be controlled with macro %X."), paramToUse, checkMacro);
+			message.Format(_T("Parameter %i can already be controlled with macro %X."), static_cast<int>(paramToUse), checkMacro);
 			Reporting::Information(message, _T("Macro exists for this parameter"));
 			return;
 		}
@@ -2743,13 +2743,13 @@ void CModDoc::LearnMacro(int macroToSet, PlugParamIndex paramToUse)
 	} else
 	{
 		CString message;
-		message.Format(_T("Parameter %u beyond controllable range. Use Parameter Control Events to automate this parameter."), paramToUse);
+		message.Format(_T("Parameter %i beyond controllable range. Use Parameter Control Events to automate this parameter."), static_cast<int>(paramToUse));
 		Reporting::Information(message, _T("Macro not assigned for this parameter"));
 		return;
 	}
 
 	CString message;
-	message.Format(_T("Parameter %u can now be controlled with macro %X."), paramToUse, macroToSet);
+	message.Format(_T("Parameter %i can now be controlled with macro %X."), static_cast<int>(paramToUse), macroToSet);
 	Reporting::Information(message, _T("Macro assigned for this parameter"));
 
 	return;
