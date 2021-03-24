@@ -248,14 +248,10 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 	RowVisitor visitedRows(*this, sequence);
 
 	// If sequence starts with some non-existent patterns, find a better start
+	while(target.startOrder < orderList.size() && !orderList.IsValidPat(target.startOrder))
 	{
-		ORDERINDEX startOrder = target.startOrder;
-		ROWINDEX startRow = target.startRow;
-		if(visitedRows.GetFirstUnvisitedRow(startOrder, startRow, true))
-		{
-			target.startOrder = startOrder;
-			target.startRow = startRow;
-		}
+		target.startOrder++;
+		target.startRow = 0;
 	}
 	retval.startRow = playState.m_nNextRow = playState.m_nRow = target.startRow;
 	retval.startOrder = playState.m_nNextOrder = playState.m_nCurrentOrder = target.startOrder;
