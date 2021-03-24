@@ -1838,6 +1838,12 @@ void CCtrlSamples::ApplyResample(uint32 newRate, ResamplingMode mode)
 	}
 
 	const uint32 oldRate = sample.GetSampleRate(m_sndFile.GetType());
+	if(newRate < 1 || oldRate < 1)
+	{
+		MessageBeep(MB_ICONWARNING);
+		EndWaitCursor();
+		return;
+	}
 	const SmpLength oldLength = sample.nLength;
 	const SmpLength selLength = (selection.nEnd - selection.nStart);
 	const SmpLength newSelLength = Util::muldivr_unsigned(selLength, newRate, oldRate);
@@ -1845,7 +1851,7 @@ void CCtrlSamples::ApplyResample(uint32 newRate, ResamplingMode mode)
 	const SmpLength newTotalLength = sample.nLength - selLength + newSelLength;
 	const uint8 numChannels = sample.GetNumChannels();
 
-	if(newRate < 1 || oldRate < 1 || newTotalLength <= 1)
+	if(newTotalLength <= 1)
 	{
 		MessageBeep(MB_ICONWARNING);
 		EndWaitCursor();
