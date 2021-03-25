@@ -882,6 +882,8 @@ void CChannelManagerDlg::OnLButtonUp(UINT /*nFlags*/,CPoint point)
 
 			std::vector<CHANNELINDEX> newOrder{ pattern.begin(), pattern.begin() + numChannels };
 			// How many selected channels are there before the drop target?
+			// cppcheck false-positive
+			// cppcheck-suppress danglingTemporaryLifetime
 			const CHANNELINDEX selectedBeforeDropChn = static_cast<CHANNELINDEX>(std::count_if(pattern.begin(), pattern.begin() + dropChn, IsSelected));
 			dropChn -= selectedBeforeDropChn;
 			// Remove all selected channels from the order
