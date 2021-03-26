@@ -14,7 +14,7 @@
 #include "BuildSettings.h"
 
 
-#include "SampleTypes.h"
+#include "MixSample.h"
 #include "SampleFormatConverters.h"
 #include "../common/mptRandom.h"
 

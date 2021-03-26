@@ -195,7 +195,7 @@
 				B52E177AA13EC34A0AF82769 /* vorbis */,
 			);
 			name = "include";
-			path = "../../include";
+			path = "../../../include";
 			sourceTree = "<group>";
 		};
 		B52E177AA13EC34A0AF82769 /* vorbis */ = {

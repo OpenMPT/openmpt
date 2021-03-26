@@ -1003,12 +1003,14 @@
     <ClInclude Include="..\..\common\stdafx.h" />
     <ClInclude Include="..\..\common\version.h" />
     <ClInclude Include="..\..\common\versionNumber.h" />
+    <ClInclude Include="..\..\soundbase\AudioSample.h" />
     <ClInclude Include="..\..\soundbase\Dither.h" />
+    <ClInclude Include="..\..\soundbase\MixSample.h" />
+    <ClInclude Include="..\..\soundbase\MixSampleConvert.h" />
     <ClInclude Include="..\..\soundbase\SampleBuffer.h" />
     <ClInclude Include="..\..\soundbase\SampleFormat.h" />
     <ClInclude Include="..\..\soundbase\SampleFormatConverters.h" />
     <ClInclude Include="..\..\soundbase\SampleFormatCopy.h" />
-    <ClInclude Include="..\..\soundbase\SampleTypes.h" />
     <ClInclude Include="..\..\soundlib\AudioCriticalSection.h" />
     <ClInclude Include="..\..\soundlib\AudioReadTarget.h" />
     <ClInclude Include="..\..\soundlib\BitReader.h" />

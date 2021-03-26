@@ -647,12 +647,14 @@
     <ClInclude Include="..\..\libopenmpt\libopenmpt_stream_callbacks_fd.h" />
     <ClInclude Include="..\..\libopenmpt\libopenmpt_stream_callbacks_file.h" />
     <ClInclude Include="..\..\libopenmpt\libopenmpt_version.h" />
+    <ClInclude Include="..\..\soundbase\AudioSample.h" />
     <ClInclude Include="..\..\soundbase\Dither.h" />
+    <ClInclude Include="..\..\soundbase\MixSample.h" />
+    <ClInclude Include="..\..\soundbase\MixSampleConvert.h" />
     <ClInclude Include="..\..\soundbase\SampleBuffer.h" />
     <ClInclude Include="..\..\soundbase\SampleFormat.h" />
     <ClInclude Include="..\..\soundbase\SampleFormatConverters.h" />
     <ClInclude Include="..\..\soundbase\SampleFormatCopy.h" />
-    <ClInclude Include="..\..\soundbase\SampleTypes.h" />
     <ClInclude Include="..\..\sounddsp\AGC.h" />
     <ClInclude Include="..\..\sounddsp\DSP.h" />
     <ClInclude Include="..\..\sounddsp\EQ.h" />

@@ -11,11 +11,11 @@
 
 #include "BuildSettings.h"
 
+#include "../common/mptBaseMacros.h"
+#include "../common/Endianness.h"
+
 
 OPENMPT_NAMESPACE_BEGIN
-
-
-struct int24;
 
 
 class SampleFormat

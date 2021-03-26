@@ -17,7 +17,6 @@
 #include "../common/mptOS.h"
 #include "../common/mptThread.h"
 #include "../soundbase/SampleFormat.h"
-#include "../soundbase/SampleTypes.h"
 
 #include <map>
 #include <vector>

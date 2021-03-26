@@ -12,7 +12,7 @@
 
 #include "BuildSettings.h"
 
-#include "../soundbase/SampleTypes.h"
+#include "../soundbase/MixSample.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -22,7 +22,7 @@ OPENMPT_NAMESPACE_BEGIN
 using mixsample_t = MixSampleIntTraits::sample_type;
 enum { MIXING_FILTER_PRECISION = MixSampleIntTraits::filter_precision_bits };  // Fixed point resonant filter bits
 #else
-using mixsample_t = AudioSampleFloat;
+using mixsample_t = MixSampleFloat;
 #endif
 enum { MIXING_ATTENUATION = MixSampleIntTraits::mix_headroom_bits };
 enum { MIXING_FRACTIONAL_BITS = MixSampleIntTraits::mix_fractional_bits };

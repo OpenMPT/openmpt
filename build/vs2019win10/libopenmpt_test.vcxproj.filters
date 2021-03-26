@@ -183,7 +183,16 @@
     <ClInclude Include="..\..\libopenmpt\libopenmpt_version.h">
       <Filter>libopenmpt</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\soundbase\AudioSample.h">
+      <Filter>soundbase</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\soundbase\Dither.h">
+      <Filter>soundbase</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundbase\MixSample.h">
+      <Filter>soundbase</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundbase\MixSampleConvert.h">
       <Filter>soundbase</Filter>
     </ClInclude>
     <ClInclude Include="..\..\soundbase\SampleBuffer.h">
@@ -196,9 +205,6 @@
       <Filter>soundbase</Filter>
     </ClInclude>
     <ClInclude Include="..\..\soundbase\SampleFormatCopy.h">
-      <Filter>soundbase</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\soundbase\SampleTypes.h">
       <Filter>soundbase</Filter>
     </ClInclude>
     <ClInclude Include="..\..\sounddsp\AGC.h">

@@ -1649,12 +1649,14 @@
     <ClInclude Include="..\..\mptrack\view_com.h" />
     <ClInclude Include="..\..\pluginBridge\BridgeCommon.h" />
     <ClInclude Include="..\..\pluginBridge\BridgeWrapper.h" />
+    <ClInclude Include="..\..\soundbase\AudioSample.h" />
     <ClInclude Include="..\..\soundbase\Dither.h" />
+    <ClInclude Include="..\..\soundbase\MixSample.h" />
+    <ClInclude Include="..\..\soundbase\MixSampleConvert.h" />
     <ClInclude Include="..\..\soundbase\SampleBuffer.h" />
     <ClInclude Include="..\..\soundbase\SampleFormat.h" />
     <ClInclude Include="..\..\soundbase\SampleFormatConverters.h" />
     <ClInclude Include="..\..\soundbase\SampleFormatCopy.h" />
-    <ClInclude Include="..\..\soundbase\SampleTypes.h" />
     <ClInclude Include="..\..\sounddev\SoundDevice.h" />
     <ClInclude Include="..\..\sounddev\SoundDeviceASIO.h" />
     <ClInclude Include="..\..\sounddev\SoundDeviceBase.h" />

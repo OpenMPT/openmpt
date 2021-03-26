@@ -1,6 +1,6 @@
 /*
- * SampleTypes.h
- * -------------
+ * MixSample.h
+ * -----------
  * Purpose: Basic audio sample types.
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
@@ -11,6 +11,7 @@
 
 #include "BuildSettings.h"
 
+#include "AudioSample.h"
 #include "../common/mptBaseMacros.h"
 #include "../common/mptBaseTypes.h"
 
@@ -19,12 +20,6 @@
 
 
 OPENMPT_NAMESPACE_BEGIN
-
-
-using AudioSampleInt = int16;
-using AudioSampleFloat = nativefloat;
-
-using AudioSample = std::conditional<mpt::float_traits<AudioSampleFloat>::is_hard, AudioSampleFloat, AudioSampleInt>::type;
 
 
 template <typename Tsample, std::size_t MIX_HEADROOM_BITS, std::size_t FILTER_HEADROOM_BITS>
