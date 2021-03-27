@@ -49,6 +49,16 @@ rm genie.lua
 
 echo dofile \"build/premake/premake.lua\" > premake5.lua
 
+${PREMAKE} --group=libopenmpt_test vs2017 --winxp
+${PREMAKE} --group=in_openmpt vs2017 --winxp
+${PREMAKE} --group=xmp-openmpt vs2017 --winxp
+${PREMAKE} --group=libopenmpt-small vs2017 --winxp
+${PREMAKE} --group=libopenmpt vs2017 --winxp
+${PREMAKE} --group=openmpt123 vs2017 --winxp
+${PREMAKE} --group=PluginBridge vs2017 --winxp
+${PREMAKE} --group=OpenMPT vs2017 --winxp
+${PREMAKE} --group=all-externals vs2017 --winxp
+
 ${PREMAKE} --group=libopenmpt_test vs2017 --win7
 ${PREMAKE} --group=in_openmpt vs2017 --win7
 ${PREMAKE} --group=xmp-openmpt vs2017 --win7

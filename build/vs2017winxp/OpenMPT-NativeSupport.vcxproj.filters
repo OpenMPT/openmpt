@@ -1,0 +1,399 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="common">
+      <UniqueIdentifier>{AEFEE3F6-9AA0-0ECD-835B-22216F9C951D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include">
+      <UniqueIdentifier>{89AF369E-F58E-B539-FEA6-40106A051C9B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\asiomodern">
+      <UniqueIdentifier>{E97649C5-D55A-0A1B-3EBB-046E2ABEF49C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\asiomodern\include">
+      <UniqueIdentifier>{5C772F5A-4887-DB2A-B140-40499D6FCAC3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\asiomodern\include\ASIOModern">
+      <UniqueIdentifier>{3C486619-A80C-6509-7172-95D3DDF5003F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="misc">
+      <UniqueIdentifier>{B1A29A7C-9DD9-9B0D-46C6-811032DC170F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="mptrack">
+      <UniqueIdentifier>{778900D8-E368-7F73-EC80-0A4A58DFE5D4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="mptrack\wine">
+      <UniqueIdentifier>{D999E983-C5FC-7828-6E82-B1DE5AC444AB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="soundbase">
+      <UniqueIdentifier>{69D0CCEC-D53A-8163-1E79-32098A225FB8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sounddev">
+      <UniqueIdentifier>{8DE8B016-79B5-0B22-A2CE-F9C98EFA40B0}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\common\BuildSettings.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\CompilerDetect.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\ComponentManager.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\Endianness.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\FileReader.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\FileReaderFwd.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\FlagSet.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\Logging.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\Profiler.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\misc_util.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptAlloc.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptAssert.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptBaseMacros.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptBaseTypes.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptBaseUtils.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptCRC.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptException.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptExceptionText.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptFileIO.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptIO.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptLibrary.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptMemory.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptMutex.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptOS.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptOSError.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptOSException.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptPathString.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptRandom.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptSpan.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptString.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptStringBuffer.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptStringFormat.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptStringParse.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptThread.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptTime.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\mptUUID.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\serialization_utils.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\stdafx.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\version.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\versionNumber.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\asiomodern\include\ASIOModern\ASIO.hpp">
+      <Filter>include\asiomodern\include\ASIOModern</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\asiomodern\include\ASIOModern\ASIOConfig.hpp">
+      <Filter>include\asiomodern\include\ASIOModern</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\asiomodern\include\ASIOModern\ASIOCore.hpp">
+      <Filter>include\asiomodern\include\ASIOModern</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\asiomodern\include\ASIOModern\ASIOModern.hpp">
+      <Filter>include\asiomodern\include\ASIOModern</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\asiomodern\include\ASIOModern\ASIOSampleConvert.hpp">
+      <Filter>include\asiomodern\include\ASIOModern</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\asiomodern\include\ASIOModern\ASIOSystemWindows.hpp">
+      <Filter>include\asiomodern\include\ASIOModern</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\asiomodern\include\ASIOModern\ASIOVerifyABI.hpp">
+      <Filter>include\asiomodern\include\ASIOModern</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\asiomodern\include\ASIOModern\ASIOVersion.hpp">
+      <Filter>include\asiomodern\include\ASIOModern</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\asiomodern\include\ASIOModern\ASIOstdcxx20bit.hpp">
+      <Filter>include\asiomodern\include\ASIOModern</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\misc\JSON.h">
+      <Filter>misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\misc\WriteMemoryDump.h">
+      <Filter>misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\misc\mptCPU.h">
+      <Filter>misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\misc\mptColor.h">
+      <Filter>misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\misc\mptCrypto.h">
+      <Filter>misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\misc\mptUUIDNamespace.h">
+      <Filter>misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\misc\mptWine.h">
+      <Filter>misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mptrack\wine\Native.h">
+      <Filter>mptrack\wine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mptrack\wine\NativeConfig.h">
+      <Filter>mptrack\wine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mptrack\wine\NativeSoundDevice.h">
+      <Filter>mptrack\wine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mptrack\wine\NativeSoundDeviceMarshalling.h">
+      <Filter>mptrack\wine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mptrack\wine\NativeUtils.h">
+      <Filter>mptrack\wine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundbase\AudioSample.h">
+      <Filter>soundbase</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundbase\Dither.h">
+      <Filter>soundbase</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundbase\MixSample.h">
+      <Filter>soundbase</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundbase\MixSampleConvert.h">
+      <Filter>soundbase</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundbase\SampleBuffer.h">
+      <Filter>soundbase</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundbase\SampleFormat.h">
+      <Filter>soundbase</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundbase\SampleFormatConverters.h">
+      <Filter>soundbase</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\soundbase\SampleFormatCopy.h">
+      <Filter>soundbase</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\sounddev\SoundDevice.h">
+      <Filter>sounddev</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\sounddev\SoundDeviceASIO.h">
+      <Filter>sounddev</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\sounddev\SoundDeviceBase.h">
+      <Filter>sounddev</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\sounddev\SoundDeviceBuffer.h">
+      <Filter>sounddev</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\sounddev\SoundDeviceManager.h">
+      <Filter>sounddev</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\sounddev\SoundDevicePortAudio.h">
+      <Filter>sounddev</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\sounddev\SoundDevicePulseSimple.h">
+      <Filter>sounddev</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\sounddev\SoundDevicePulseaudio.h">
+      <Filter>sounddev</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\sounddev\SoundDeviceRtAudio.h">
+      <Filter>sounddev</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\sounddev\SoundDeviceStub.h">
+      <Filter>sounddev</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\sounddev\SoundDeviceUtilities.h">
+      <Filter>sounddev</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\sounddev\SoundDeviceWaveout.h">
+      <Filter>sounddev</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\common\ComponentManager.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\FileReader.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\Logging.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\Profiler.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\misc_util.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\mptFileIO.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\mptIO.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\mptLibrary.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\mptOS.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\mptPathString.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\mptRandom.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\mptString.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\mptStringBuffer.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\mptStringFormat.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\mptStringParse.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\mptTime.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\mptUUID.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\serialization_utils.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\version.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\misc\mptCPU.cpp">
+      <Filter>misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\misc\mptColor.cpp">
+      <Filter>misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\misc\mptCrypto.cpp">
+      <Filter>misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\misc\mptUUIDNamespace.cpp">
+      <Filter>misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\misc\mptWine.cpp">
+      <Filter>misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mptrack\wine\Native.cpp">
+      <Filter>mptrack\wine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mptrack\wine\NativeSoundDevice.cpp">
+      <Filter>mptrack\wine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mptrack\wine\NativeUtils.cpp">
+      <Filter>mptrack\wine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\sounddev\SoundDevice.cpp">
+      <Filter>sounddev</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\sounddev\SoundDeviceASIO.cpp">
+      <Filter>sounddev</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\sounddev\SoundDeviceBase.cpp">
+      <Filter>sounddev</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\sounddev\SoundDeviceBuffer.cpp">
+      <Filter>sounddev</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\sounddev\SoundDeviceManager.cpp">
+      <Filter>sounddev</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\sounddev\SoundDevicePortAudio.cpp">
+      <Filter>sounddev</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\sounddev\SoundDevicePulseSimple.cpp">
+      <Filter>sounddev</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\sounddev\SoundDevicePulseaudio.cpp">
+      <Filter>sounddev</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\sounddev\SoundDeviceRtAudio.cpp">
+      <Filter>sounddev</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\sounddev\SoundDeviceStub.cpp">
+      <Filter>sounddev</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\sounddev\SoundDeviceUtilities.cpp">
+      <Filter>sounddev</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\sounddev\SoundDeviceWaveout.cpp">
+      <Filter>sounddev</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

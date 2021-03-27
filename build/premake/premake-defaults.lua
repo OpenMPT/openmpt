@@ -10,6 +10,18 @@
 	filter {}
 
 	filter {}
+		if _OPTIONS["winxp"] then
+			if _ACTION == "vs2017" then
+				toolset "v141_xp"
+			end
+			defines { "MPT_BUILD_RETRO" }
+			filter { "action:vs*" }
+				buildoptions { "/Zc:threadSafeInit-" }
+			filter {}
+		end
+	filter {}
+
+	filter {}
 
 	filter {}
 	filter { "action:vs*", "language:C++" }
@@ -28,7 +40,7 @@
 
 	filter {}
 	filter { "action:vs*" }
-		if not _OPTIONS["clang"] then
+		if not _OPTIONS["clang"] and not _OPTIONS["winxp"] then
 			spectremitigations "On"
 		end
 	filter {}
@@ -224,19 +236,31 @@
 	filter {}
 		flags { "MultiProcessorCompile" }
 
-	filter { "architecture:x86", "configurations:Checked" }
-		vectorextensions "SSE2"
+	if _OPTIONS["winxp"] then
 
-	filter { "architecture:x86", "configurations:CheckedShared" }
-		vectorextensions "SSE2"
+		filter { "architecture:x86" }
+			vectorextensions "IA32"
+		filter {}
 
-	filter { "architecture:x86", "configurations:Release" }
-		vectorextensions "SSE2"
+	else
 
-	filter { "architecture:x86", "configurations:ReleaseShared" }
-		vectorextensions "SSE2"
+		filter {}
 
-	filter {}
+		filter { "architecture:x86", "configurations:Checked" }
+			vectorextensions "SSE2"
+
+		filter { "architecture:x86", "configurations:CheckedShared" }
+			vectorextensions "SSE2"
+
+		filter { "architecture:x86", "configurations:Release" }
+			vectorextensions "SSE2"
+
+		filter { "architecture:x86", "configurations:ReleaseShared" }
+			vectorextensions "SSE2"
+
+		filter {}
+	
+	end
 
   filter {}
 	defines { "MPT_BUILD_MSVC" }
@@ -258,6 +282,11 @@
 		defines { "_WIN32_WINNT=0x0603" }
 	elseif _OPTIONS["win7"] then
 		defines { "_WIN32_WINNT=0x0601" }
+	elseif _OPTIONS["winxp"] then
+		filter { "architecture:x86" }
+			defines { "_WIN32_WINNT=0x0501" }
+		filter { "architecture:x86_64" }
+			defines { "_WIN32_WINNT=0x0502" }
 	end
 
   filter {}
