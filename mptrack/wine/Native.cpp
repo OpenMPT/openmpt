@@ -19,6 +19,9 @@
 #pragma comment(lib, "strmiids.lib")
 
 #pragma comment(lib, "avrt.lib")
+#if defined(MPT_WITH_DIRECTSOUND)
+#pragma comment(lib, "dsound.lib")
+#endif // MPT_WITH_DIRECTSOUND
 #pragma comment(lib, "winmm.lib")
 
 #pragma comment(lib, "ksuser.lib")

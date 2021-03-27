@@ -252,6 +252,9 @@
     <ClInclude Include="..\..\sounddev\SoundDeviceBuffer.h">
       <Filter>sounddev</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\sounddev\SoundDeviceDirectSound.h">
+      <Filter>sounddev</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\sounddev\SoundDeviceManager.h">
       <Filter>sounddev</Filter>
     </ClInclude>
@@ -369,6 +372,9 @@
       <Filter>sounddev</Filter>
     </ClCompile>
     <ClCompile Include="..\..\sounddev\SoundDeviceBuffer.cpp">
+      <Filter>sounddev</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\sounddev\SoundDeviceDirectSound.cpp">
       <Filter>sounddev</Filter>
     </ClCompile>
     <ClCompile Include="..\..\sounddev\SoundDeviceManager.cpp">

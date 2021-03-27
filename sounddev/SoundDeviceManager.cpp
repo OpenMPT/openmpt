@@ -15,6 +15,7 @@
 #include "SoundDevice.h"
 
 #include "SoundDeviceASIO.h"
+#include "SoundDeviceDirectSound.h"
 #include "SoundDevicePortAudio.h"
 #include "SoundDeviceRtAudio.h"
 #include "SoundDeviceWaveout.h"
@@ -125,6 +126,14 @@ void Manager::ReEnumerate()
 		EnumerateDevices<CWaveDevice>(GetSysInfo());
 	}
 #endif // MPT_OS_WINDOWS
+
+#if MPT_WITH_DIRECTSOUND
+	// kind of deprecated by now
+	if(IsComponentAvailable(m_DirectSound))
+	{
+		EnumerateDevices<CDSoundDevice>(GetSysInfo());
+	}
+#endif // MPT_WITH_DIRECTSOUND
 
 #ifdef MPT_WITH_ASIO
 	if(IsComponentAvailable(m_ASIO))

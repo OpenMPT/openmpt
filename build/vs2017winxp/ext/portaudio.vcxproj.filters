@@ -25,11 +25,11 @@
     <Filter Include="include\portaudio\src\hostapi">
       <UniqueIdentifier>{CD6F053A-3988-EC63-0235-7CFD6E0C81FD}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\portaudio\src\hostapi\dsound">
+      <UniqueIdentifier>{C9EDFEF1-B5D4-C0E9-5E25-27074AEB3950}</UniqueIdentifier>
+    </Filter>
     <Filter Include="include\portaudio\src\hostapi\skeleton">
       <UniqueIdentifier>{C10780C5-AD59-57B5-9678-94C58269709E}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\portaudio\src\hostapi\wasapi">
-      <UniqueIdentifier>{61150D1D-4DFC-CE14-F64C-3532E212487B}</UniqueIdentifier>
     </Filter>
     <Filter Include="include\portaudio\src\hostapi\wdmks">
       <UniqueIdentifier>{E2E2C384-4E9C-2E2F-D7FB-480943B4E49E}</UniqueIdentifier>
@@ -126,6 +126,9 @@
     <ClInclude Include="..\..\..\include\portaudio\src\common\pa_util.h">
       <Filter>include\portaudio\src\common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\portaudio\src\hostapi\dsound\pa_win_ds_dynlink.h">
+      <Filter>include\portaudio\src\hostapi\dsound</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\include\portaudio\src\os\win\pa_win_coinitialize.h">
       <Filter>include\portaudio\src\os\win</Filter>
     </ClInclude>
@@ -167,11 +170,14 @@
     <ClCompile Include="..\..\..\include\portaudio\src\common\pa_trace.c">
       <Filter>include\portaudio\src\common</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\include\portaudio\src\hostapi\dsound\pa_win_ds.c">
+      <Filter>include\portaudio\src\hostapi\dsound</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\include\portaudio\src\hostapi\dsound\pa_win_ds_dynlink.c">
+      <Filter>include\portaudio\src\hostapi\dsound</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\include\portaudio\src\hostapi\skeleton\pa_hostapi_skeleton.c">
       <Filter>include\portaudio\src\hostapi\skeleton</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\include\portaudio\src\hostapi\wasapi\pa_win_wasapi.c">
-      <Filter>include\portaudio\src\hostapi\wasapi</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\portaudio\src\hostapi\wdmks\pa_win_wdmks.c">
       <Filter>include\portaudio\src\hostapi\wdmks</Filter>

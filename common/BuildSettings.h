@@ -84,6 +84,9 @@
 
 // OpenMPT-only dependencies
 #define MPT_WITH_ASIO
+#if defined(OPENMPT_BUILD_RETRO)
+#define MPT_WITH_DIRECTSOUND
+#endif
 #define MPT_WITH_DMO
 #define MPT_WITH_LAME
 #define MPT_WITH_LHASA

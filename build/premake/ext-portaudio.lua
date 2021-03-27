@@ -12,15 +12,28 @@
 	filter { "action:vs*" }
 		characterset "Unicode"
 	filter {}
-  defines {
-   "PAWIN_USE_WDMKS_DEVICE_INFO",
-   "PA_WDMKS_NO_KSGUID_LIB",
-   "PA_USE_ASIO=0",
-   "PA_USE_DS=0",
-   "PA_USE_WMME=1",
-   "PA_USE_WASAPI=1",
-   "PA_USE_WDMKS=1",
-  }
+		if _OPTIONS["winxp"] then
+			defines {
+				"PAWIN_USE_WDMKS_DEVICE_INFO",
+				"PA_WDMKS_NO_KSGUID_LIB",
+				"PA_USE_ASIO=0",
+				"PA_USE_DS=1",
+				"PA_USE_WMME=1",
+				"PA_USE_WASAPI=0",
+				"PA_USE_WDMKS=1",
+			}
+		else
+			defines {
+				"PAWIN_USE_WDMKS_DEVICE_INFO",
+				"PA_WDMKS_NO_KSGUID_LIB",
+				"PA_USE_ASIO=0",
+				"PA_USE_DS=0",
+				"PA_USE_WMME=1",
+				"PA_USE_WASAPI=1",
+				"PA_USE_WDMKS=1",
+			}
+		end
+	filter {}
   files {
    "../../include/portaudio/src/common/pa_allocation.c",
    "../../include/portaudio/src/common/pa_allocation.h",
@@ -48,7 +61,6 @@
    "../../include/portaudio/src/common/pa_types.h",
    "../../include/portaudio/src/common/pa_util.h",
    "../../include/portaudio/src/hostapi/skeleton/pa_hostapi_skeleton.c",
-   "../../include/portaudio/src/hostapi/wasapi/pa_win_wasapi.c",
    "../../include/portaudio/src/hostapi/wdmks/pa_win_wdmks.c",
    "../../include/portaudio/src/hostapi/wmme/pa_win_wmme.c",
    "../../include/portaudio/src/os/win/pa_win_coinitialize.c",
@@ -61,6 +73,19 @@
    "../../include/portaudio/src/os/win/pa_x86_plain_converters.c",
    "../../include/portaudio/src/os/win/pa_x86_plain_converters.h",
   }
+	filter {}
+		if _OPTIONS["winxp"] then
+			files {
+			   "../../include/portaudio/src/hostapi/dsound/pa_win_ds.c",
+			   "../../include/portaudio/src/hostapi/dsound/pa_win_ds_dynlink.c",
+			   "../../include/portaudio/src/hostapi/dsound/pa_win_ds_dynlink.h",
+			}
+		else
+			files {
+				"../../include/portaudio/src/hostapi/wasapi/pa_win_wasapi.c",
+			}
+		end
+	filter {}
   files {
    "../../include/portaudio/include/pa_asio.h",
    "../../include/portaudio/include/pa_jack.h",

@@ -32,6 +32,9 @@ class ComponentPulseaudio;
 #endif // MPT_ENABLE_PULSEAUDIO_FULL
 class ComponentPulseaudioSimple;
 class ComponentWaveOut;
+#if defined(MPT_WITH_DIRECTSOUND)
+class ComponentDirectSound;
+#endif // MPT_WITH_DIRECTSOUND
 class ComponentASIO;
 class ComponentPortAudio;
 class ComponentRtAudio;
@@ -64,6 +67,9 @@ private:
 #if MPT_OS_WINDOWS
 	ComponentHandle<ComponentWaveOut> m_WaveOut;
 #endif // MPT_OS_WINDOWS
+#if MPT_WITH_DIRECTSOUND
+	ComponentHandle<ComponentDirectSound> m_DirectSound;
+#endif // MPT_WITH_DIRECTSOUND
 #ifdef MPT_WITH_ASIO
 	ComponentHandle<ComponentASIO> m_ASIO;
 #endif // MPT_WITH_ASIO

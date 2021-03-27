@@ -680,6 +680,9 @@ public:
 	SoundDevice::Legacy::ID m_SoundDeviceID_DEPRECATED;
 	SoundDevice::Settings m_SoundDeviceSettingsDefaults;
 	SoundDevice::Settings GetSoundDeviceSettingsDefaults() const;
+#if defined(MPT_WITH_DIRECTSOUND)
+	bool m_SoundDeviceDirectSoundOldDefaultIdentifier;
+#endif // MPT_WITH_DIRECTSOUND
 
 	Setting<SoundDevice::Identifier> m_SoundDeviceIdentifier;
 	SoundDevice::Identifier GetSoundDeviceIdentifier() const;
