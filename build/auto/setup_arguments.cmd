@@ -17,14 +17,14 @@ goto setupargumentsstart
 
 :setupargumentserror
 echo "Usage: foo.cmd vs2019 xp Win32 Release 7z default"
-rem vs2019     xp            Win32       Release     x86-32       winxp          release      static
+rem vs2019     winxp         Win32       Release     x86-32       winxp          release      static
 rem MPT_VS_VER MPT_VS_TARGET MPT_VS_ARCH MPT_VS_CONF MPT_BIN_ARCH MPT_BIN_TARGET MPT_BIN_CONF MPT_BIN_RUNTIME
 exit 1
 
 :setupargumentsstart
 
 
-if "%MPT_VS_TARGET%" == "xp"      set MPT_VS_WITHTARGET=%MPT_VS_VER%winxp
+if "%MPT_VS_TARGET%" == "winxp"   set MPT_VS_WITHTARGET=%MPT_VS_VER%winxp
 if "%MPT_VS_TARGET%" == "vista"   set MPT_VS_WITHTARGET=%MPT_VS_VER%winvista
 if "%MPT_VS_TARGET%" == "win7"    set MPT_VS_WITHTARGET=%MPT_VS_VER%win7
 if "%MPT_VS_TARGET%" == "win81"   set MPT_VS_WITHTARGET=%MPT_VS_VER%win81
@@ -33,7 +33,7 @@ if "%MPT_VS_TARGET%" == "default" set MPT_VS_WITHTARGET=%MPT_VS_VER%win81
 
 
 if "%MPT_VS_ARCH%" == "Win32" (
-	if "%MPT_VS_TARGET%" == "xp"      set MPT_BIN_TARGET=winxp
+	if "%MPT_VS_TARGET%" == "winxp"   set MPT_BIN_TARGET=winxp
 	if "%MPT_VS_TARGET%" == "vista"   set MPT_BIN_TARGET=vista
 	if "%MPT_VS_TARGET%" == "win7"    set MPT_BIN_TARGET=win7
 	if "%MPT_VS_TARGET%" == "win81"   set MPT_BIN_TARGET=win81
@@ -41,7 +41,7 @@ if "%MPT_VS_ARCH%" == "Win32" (
 	if "%MPT_VS_TARGET%" == "default" set MPT_BIN_TARGET=win81
 )
 if "%MPT_VS_ARCH%" == "x64" (
-	if "%MPT_VS_TARGET%" == "xp"      set MPT_BIN_TARGET=winxp
+	if "%MPT_VS_TARGET%" == "winxp"   set MPT_BIN_TARGET=winxp
 	if "%MPT_VS_TARGET%" == "vista"   set MPT_BIN_TARGET=vista
 	if "%MPT_VS_TARGET%" == "win7"    set MPT_BIN_TARGET=win7
 	if "%MPT_VS_TARGET%" == "win81"   set MPT_BIN_TARGET=win81
@@ -49,7 +49,7 @@ if "%MPT_VS_ARCH%" == "x64" (
 	if "%MPT_VS_TARGET%" == "default" set MPT_BIN_TARGET=win81
 )
 if "%MPT_VS_ARCH%" == "ARM" (
-	if "%MPT_VS_TARGET%" == "xp"      set MPT_BIN_TARGET=winxp
+	if "%MPT_VS_TARGET%" == "winxp"   set MPT_BIN_TARGET=winxp
 	if "%MPT_VS_TARGET%" == "vista"   set MPT_BIN_TARGET=vista
 	if "%MPT_VS_TARGET%" == "win7"    set MPT_BIN_TARGET=win7
 	if "%MPT_VS_TARGET%" == "win81"   set MPT_BIN_TARGET=win81
@@ -57,7 +57,7 @@ if "%MPT_VS_ARCH%" == "ARM" (
 	if "%MPT_VS_TARGET%" == "default" set MPT_BIN_TARGET=win81
 )
 if "%MPT_VS_ARCH%" == "ARM64" (
-	if "%MPT_VS_TARGET%" == "xp"      set MPT_BIN_TARGET=winxp
+	if "%MPT_VS_TARGET%" == "winxp"   set MPT_BIN_TARGET=winxp
 	if "%MPT_VS_TARGET%" == "vista"   set MPT_BIN_TARGET=vista
 	if "%MPT_VS_TARGET%" == "win7"    set MPT_BIN_TARGET=win7
 	if "%MPT_VS_TARGET%" == "win81"   set MPT_BIN_TARGET=win81
@@ -65,14 +65,14 @@ if "%MPT_VS_ARCH%" == "ARM64" (
 	if "%MPT_VS_TARGET%" == "default" set MPT_BIN_TARGET=win81
 )
 
-if "%MPT_VS_TARGET%" == "xp"      set MPT_BIN_TARGET32=winxp
+if "%MPT_VS_TARGET%" == "winxp"   set MPT_BIN_TARGET32=winxp
 if "%MPT_VS_TARGET%" == "vista"   set MPT_BIN_TARGET32=vista
 if "%MPT_VS_TARGET%" == "win7"    set MPT_BIN_TARGET32=win7
 if "%MPT_VS_TARGET%" == "win81"   set MPT_BIN_TARGET32=win81
 if "%MPT_VS_TARGET%" == "win10"   set MPT_BIN_TARGET32=win10
 if "%MPT_VS_TARGET%" == "default" set MPT_BIN_TARGET32=win81
 
-if "%MPT_VS_TARGET%" == "xp"      set MPT_BIN_TARGET64=winxp
+if "%MPT_VS_TARGET%" == "winxp"   set MPT_BIN_TARGET64=winxp
 if "%MPT_VS_TARGET%" == "vista"   set MPT_BIN_TARGET64=vista
 if "%MPT_VS_TARGET%" == "win7"    set MPT_BIN_TARGET64=win7
 if "%MPT_VS_TARGET%" == "win81"   set MPT_BIN_TARGET64=win81
@@ -101,7 +101,7 @@ if "%MPT_VS_ARCH%" == "x64"   set MPT_DIST_VARIANT_ARCH=amd64
 if "%MPT_VS_ARCH%" == "ARM"   set MPT_DIST_VARIANT_ARCH=arm
 if "%MPT_VS_ARCH%" == "ARM64" set MPT_DIST_VARIANT_ARCH=arm64
 
-if "%MPT_VS_TARGET%" == "xp"      set MPT_DIST_VARIANT_OS=winxp
+if "%MPT_VS_TARGET%" == "winxp"   set MPT_DIST_VARIANT_OS=winxp
 if "%MPT_VS_TARGET%" == "vista"   set MPT_DIST_VARIANT_OS=winvista
 if "%MPT_VS_TARGET%" == "win7"    set MPT_DIST_VARIANT_OS=win7
 if "%MPT_VS_TARGET%" == "win81"   set MPT_DIST_VARIANT_OS=win81
@@ -116,7 +116,7 @@ if "%MPT_VS_ARCH%" == "x64"   set MPT_DIST_VARIANT_PREFIX=win64
 if "%MPT_VS_ARCH%" == "ARM"   set MPT_DIST_VARIANT_PREFIX=arm32
 if "%MPT_VS_ARCH%" == "ARM64" set MPT_DIST_VARIANT_PREFIX=arm64
 
-if "%MPT_VS_TARGET%" == "xp"      set MPT_DIST_VARIANT_SUFFIX=old
+if "%MPT_VS_TARGET%" == "winxp"   set MPT_DIST_VARIANT_SUFFIX=old
 if "%MPT_VS_TARGET%" == "vista"   set MPT_DIST_VARIANT_SUFFIX=old
 if "%MPT_VS_TARGET%" == "win7"    set MPT_DIST_VARIANT_SUFFIX=win7
 if "%MPT_VS_TARGET%" == "win81"   set MPT_DIST_VARIANT_SUFFIX=win81
