@@ -265,9 +265,24 @@ void CCtrlPatterns::UpdateView(UpdateHint hint, CObject *pObj)
 		m_ToolBar.SetState(ID_OVERFLOWPASTE, ((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_OVERFLOWPASTE) ? TBSTATE_CHECKED : 0) | TBSTATE_ENABLED);
 	}
 
+	bool instrPluginsChanged = false;
+	if(hint.GetCategory() == HINTCAT_PLUGINS && hintType[HINT_PLUGINNAMES])
+	{
+		const auto changedPlug = hint.ToType<PluginHint>().GetPlugin();
+		for(INSTRUMENTINDEX i = 1; i <= m_sndFile.GetNumInstruments(); i++)
+		{
+			const auto ins = m_sndFile.Instruments[i];
+			if(ins != nullptr && (!changedPlug && ins->nMixPlug != 0) || (changedPlug && ins->nMixPlug == changedPlug))
+			{
+				instrPluginsChanged = true;
+				break;
+			}
+		}
+	}
+
 	const bool updatePatNames = patternHint.GetType()[HINT_PATNAMES];
 	const bool updateSmpNames = hint.GetCategory() == HINTCAT_SAMPLES && hintType[HINT_SMPNAMES];
-	const bool updateInsNames = hint.GetCategory() == HINTCAT_INSTRUMENTS && hintType[HINT_INSNAMES];
+	const bool updateInsNames = (hint.GetCategory() == HINTCAT_INSTRUMENTS && hintType[HINT_INSNAMES]) || instrPluginsChanged;
 	if(updateAll || updatePatNames || updateSmpNames || updateInsNames)
 	{
 		LockControls();
