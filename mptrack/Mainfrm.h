@@ -536,6 +536,7 @@ protected:
 	afx_msg BOOL OnDeviceChange(UINT nEventType, DWORD_PTR dwData);
 	afx_msg void OnDropFiles(HDROP hDropInfo);
 	afx_msg BOOL OnQueryEndSession();
+	afx_msg void OnActivateApp(BOOL active, DWORD threadID);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 public:

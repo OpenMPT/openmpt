@@ -123,6 +123,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_WM_KILLFOCUS()
 	ON_WM_MOUSEWHEEL()
 	ON_WM_SHOWWINDOW()
+	ON_WM_ACTIVATEAPP()
 END_MESSAGE_MAP()
 
 // Globals
@@ -446,6 +447,14 @@ void CMainFrame::OnDropFiles(HDROP hDropInfo)
 		}
 	}
 	::DragFinish(hDropInfo);
+}
+
+
+void CMainFrame::OnActivateApp(BOOL active, DWORD /*threadID*/)
+{
+	// Ensure modifiers are reset when we leave the window (e.g. Alt-Tab)
+	if(!active)
+		m_InputHandler->SetModifierMask(ModNone);
 }
 
 
