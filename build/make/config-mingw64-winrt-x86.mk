@@ -13,8 +13,10 @@ CPPFLAGS += -DWIN32 -D_WIN32 -DWINAPI_FAMILY=0x2 -D_WIN32_WINNT=0x0602
 CXXFLAGS += -municode -mconsole
 CFLAGS   += -municode -mconsole
 LDFLAGS  +=
-LDLIBS   += -lm -lole32 -lwinmm
+LDLIBS   += -lm -lole32 -lrpcrt4 -lwinmm
 ARFLAGS  := rcs
+
+PC_LIBS_PRIVATE += -lole32 -lrpcrt4
 
 include build/make/warnings-gcc.mk
 

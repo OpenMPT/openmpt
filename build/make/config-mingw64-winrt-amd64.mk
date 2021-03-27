@@ -16,6 +16,8 @@ LDFLAGS  +=
 LDLIBS   += -lm -lole32 -lwinmm
 ARFLAGS  := rcs
 
+PC_LIBS_PRIVATE += -lole32 -lrpcrt4
+
 include build/make/warnings-gcc.mk
 
 EXESUFFIX=.exe
