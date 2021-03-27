@@ -496,7 +496,7 @@ std::size_t module_impl::read_wrapper( std::size_t count, std::int16_t * left, s
 	m_sndFile->m_bIsRendering = ( m_ctl_play_at_end != song_end_action::fadeout_song );
 	std::size_t count_read = 0;
 	std::int16_t * const buffers[4] = { left, right, rear_left, rear_right };
-	AudioReadTargetGainBuffer<audio_buffer_planar<std::int16_t>> target( audio_buffer_planar<std::int16_t>( buffers, planar_audio_buffer_valid_channels( buffers, std::size( buffers) ), count ), *m_Dither, m_Gain );
+	AudioReadTargetGainBuffer<audio_buffer_planar<std::int16_t>> target( audio_buffer_planar<std::int16_t>( buffers, planar_audio_buffer_valid_channels( buffers, std::size( buffers ) ), count ), *m_Dither, m_Gain );
 	while ( count > 0 ) {
 		std::size_t count_chunk = m_sndFile->Read(
 			static_cast<CSoundFile::samplecount_t>( std::min( static_cast<std::uint64_t>( count ), static_cast<std::uint64_t>( std::numeric_limits<CSoundFile::samplecount_t>::max() / 2 / 4 / 4 ) ) ), // safety margin / samplesize / channels
@@ -519,7 +519,7 @@ std::size_t module_impl::read_wrapper( std::size_t count, float * left, float * 
 	m_sndFile->m_bIsRendering = ( m_ctl_play_at_end != song_end_action::fadeout_song );
 	std::size_t count_read = 0;
 	float * const buffers[4] = { left, right, rear_left, rear_right };
-	AudioReadTargetGainBuffer<audio_buffer_planar<float>> target( audio_buffer_planar<float>( buffers, planar_audio_buffer_valid_channels( buffers, std::size( buffers) ), count ), *m_Dither, m_Gain );
+	AudioReadTargetGainBuffer<audio_buffer_planar<float>> target( audio_buffer_planar<float>( buffers, planar_audio_buffer_valid_channels( buffers, std::size( buffers ) ), count ), *m_Dither, m_Gain );
 	while ( count > 0 ) {
 		std::size_t count_chunk = m_sndFile->Read(
 			static_cast<CSoundFile::samplecount_t>( std::min( static_cast<std::uint64_t>( count ), static_cast<std::uint64_t>( std::numeric_limits<CSoundFile::samplecount_t>::max() / 2 / 4 / 4 ) ) ), // safety margin / samplesize / channels
