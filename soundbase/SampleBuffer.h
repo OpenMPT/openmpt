@@ -89,7 +89,7 @@ public:
 	using sample_type = SampleType;
 
 private:
-	SampleType * const m_buffer;
+	SampleType *const m_buffer;
 	std::size_t m_channels;
 	std::size_t m_frames;
 
