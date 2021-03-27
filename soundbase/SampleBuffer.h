@@ -216,6 +216,21 @@ public:
 };
 
 
+template <typename SampleType>
+inline std::size_t planar_audio_buffer_valid_channels(SampleType *const *buffers, std::size_t maxChannels)
+{
+	std::size_t channel;
+	for(channel = 0; channel < maxChannels; ++channel)
+	{
+		if(!buffers[channel])
+		{
+			break;
+		}
+	}
+	return channel;
+}
+
+
 template <typename BufferType>
 inline audio_buffer_offset<BufferType> advance_audio_buffer(BufferType buf, std::size_t numFrames) noexcept
 {
