@@ -176,9 +176,10 @@ protected:
 	mpt::PathString m_cachedBankName;
 
 	CString m_compareStrL, m_compareStrR;  // Cache for ModTreeInsLibCompareNamesProc to avoid constant re-allocations
-	DWORD m_stringCompareFlags = NORM_IGNORECASE | NORM_IGNOREWIDTH;
 #if (_WIN32_WINNT >= _WIN32_WINNT_WIN7)
-	m_stringCompareFlags |= SORT_DIGITSASNUMBERS;
+	DWORD m_stringCompareFlags = NORM_IGNORECASE | NORM_IGNOREWIDTH | SORT_DIGITSASNUMBERS;
+#else
+	DWORD m_stringCompareFlags = NORM_IGNORECASE | NORM_IGNOREWIDTH;
 #endif
 
 	// Instrument library
