@@ -42,6 +42,8 @@
 
 #include "libopenmpt.hpp"
 
+#include "libopenmpt_plugin_settings.hpp"
+
 #if !defined(MPT_BUILD_RETRO)
 #include "libopenmpt_plugin_gui.hpp"
 #endif // !MPT_BUILD_RETRO
@@ -67,6 +69,8 @@ static const char * in_openmpt_string = "in_openmpt " OPENMPT_API_VERSION_STRING
 #include <iostream>
 #include <iterator>
 #include <sstream>
+
+#include <cstring>
 
 #define BPS 16
 

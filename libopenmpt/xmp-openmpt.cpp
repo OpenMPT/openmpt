@@ -46,6 +46,8 @@
 #include "libopenmpt.hpp"
 #include "libopenmpt_ext.hpp"
 
+#include "libopenmpt_plugin_settings.hpp"
+
 #if !defined(MPT_BUILD_RETRO)
 #include "libopenmpt_plugin_gui.hpp"
 #endif // !MPT_BUILD_RETRO
