@@ -41,6 +41,7 @@
 #endif
 #include <windows.h>
 #include <WindowsX.h>
+#include <cstring>
 
 #include "libopenmpt.hpp"
 #include "libopenmpt_ext.hpp"
