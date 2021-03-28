@@ -48,6 +48,7 @@ public:
 		}
 	}
 
+#if NTDDI_VERSION >= NTDDI_VISTA
 	// MFC's AddPlace() is declared as throw() but can in fact throw if any of the COM calls fail, e.g. because the place does not exist.
 	// Avoid this by re-implementing our own version which doesn't throw.
 	void AddPlace(const mpt::PathString &path)
@@ -62,6 +63,7 @@ public:
 			}
 		}
 	}
+#endif
 
 protected:
 	std::vector<TCHAR> m_fileNameBuf;
@@ -108,6 +110,7 @@ bool FileDialog::Show(CWnd *parent)
 	{
 		ofn.lpstrInitialDir = m_workingDirectory.c_str();
 	}
+#if NTDDI_VERSION >= NTDDI_VISTA
 	const auto places =
 	{
 		&TrackerSettings::Instance().PathPluginPresets,
@@ -124,6 +127,7 @@ bool FileDialog::Show(CWnd *parent)
 	{
 		dlg.AddPlace(place);
 	}
+#endif
 
 	// Do it!
 	BypassInputHandler bih;
