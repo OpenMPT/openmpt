@@ -46,6 +46,8 @@
 #  STATIC_LIB=1     Build static library
 #  EXAMPLES=1       Build examples
 #  OPENMPT123=1     Build openmpt123
+#  IN_OPENMPT=0     Build in_openmpt (WinAMP 2.x plugin)
+#  XMP_OPENMPT=0    Build xmp-openmpt (XMPlay plugin)
 #  SHARED_SONAME=1  Set SONAME of shared library
 #  DEBUG=0          Build debug binaries without optimization and with symbols
 #  OPTIMIZE=1       Build optimized binaries
@@ -168,8 +170,12 @@ SOSUFFIX=.so
 SOSUFFIXWINDOWS=0
 NO_SHARED_LINKER_FLAG=0
 OPENMPT123=1
+IN_OPENMPT=0
+XMP_OPENMPT=0
 MODERN=0
 STRICT=0
+
+FORCE_UNIX_STYLE_COMMANDS=0
 
 CHECKED=0
 CHECKED_ADDRESS=0
@@ -287,6 +293,13 @@ include build/make/config-$(CONFIG).mk
 endif
 
 
+ifeq ($(FORCE_UNIX_STYLE_COMMANDS),1)
+MKDIR_P = mkdir -p
+RM = rm -f
+RMTREE = rm -rf
+endif
+
+
 # build setup
 
 ifeq ($(SOSUFFIXWINDOWS),1)
@@ -302,6 +315,10 @@ INSTALL_DATA_DIR = $(INSTALL_DIR)
 INSTALL_MAKE_DIR += -m 0755
 
 CPPFLAGS += -Icommon -I. -Iinclude
+
+ifeq ($(XMP_OPENMPT),1)
+CPPFLAGS += -Iinclude/pugixml/src
+endif
 
 ifeq ($(MPT_COMPILER_GENERIC),1)
 
@@ -943,6 +960,27 @@ OBJECTS_LIBOPENMPT += $(LIBOPENMPT_OBJECTS)
 endif
 
 
+INOPENMPT_CXX_SOURCES += \
+ libopenmpt/in_openmpt.cpp \
+ 
+
+INOPENMPT_OBJECTS += $(INOPENMPT_CXX_SOURCES:.cpp=.o) $(INOPENMPT_C_SOURCES:.c=.o)
+INOPENMPT_DEPENDS = $(INOPENMPT_OBJECTS:.o=.d)
+ALL_OBJECTS += $(INOPENMPT_OBJECTS)
+ALL_DEPENDS += $(INOPENMPT_DEPENDS)
+
+
+XMPOPENMPT_CXX_SOURCES += \
+ include/pugixml/src/pugixml.cpp \
+ libopenmpt/xmp-openmpt.cpp \
+ 
+
+XMPOPENMPT_OBJECTS += $(XMPOPENMPT_CXX_SOURCES:.cpp=.o) $(XMPOPENMPT_C_SOURCES:.c=.o)
+XMPOPENMPT_DEPENDS = $(XMPOPENMPT_OBJECTS:.o=.d)
+ALL_OBJECTS += $(XMPOPENMPT_OBJECTS)
+ALL_DEPENDS += $(XMPOPENMPT_DEPENDS)
+
+
 OPENMPT123_CXX_SOURCES += \
  $(sort $(wildcard openmpt123/*.cpp)) \
  
@@ -996,6 +1034,12 @@ OUTPUTS += bin/libopenmpt$(SOSUFFIX)
 endif
 ifeq ($(STATIC_LIB),1)
 OUTPUTS += bin/libopenmpt.a
+endif
+ifeq ($(IN_OPENMPT),1)
+OUTPUTS += bin/in_openmpt$(SOSUFFIX)
+endif
+ifeq ($(XMP_OPENMPT),1)
+OUTPUTS += bin/xmp-openmpt$(SOSUFFIX)
 endif
 ifeq ($(OPENMPT123),1)
 OUTPUTS += bin/openmpt123$(EXESUFFIX)
@@ -1481,6 +1525,22 @@ endif
 bin/openmpt123.1: bin/openmpt123$(EXESUFFIX) openmpt123/openmpt123.h2m
 	$(INFO) [HELP2MAN] $@
 	$(SILENT)help2man --no-discard-stderr --no-info --version-option=--man-version --help-option=--man-help --include=openmpt123/openmpt123.h2m $< > $@
+
+bin/in_openmpt$(SOSUFFIX): $(INOPENMPT_OBJECTS) $(LIBOPENMPT_OBJECTS)
+	$(INFO) [LD] $@
+ifeq ($(NO_SHARED_LINKER_FLAG),1)
+	$(SILENT)$(LINK.cc) $(LIBOPENMPT_LDFLAGS) $(SO_LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) -o $@
+else
+	$(SILENT)$(LINK.cc) -shared $(LIBOPENMPT_LDFLAGS) $(SO_LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) -o $@
+endif
+
+bin/xmp-openmpt$(SOSUFFIX): $(XMPOPENMPT_OBJECTS) $(LIBOPENMPT_OBJECTS)
+	$(INFO) [LD] $@
+ifeq ($(NO_SHARED_LINKER_FLAG),1)
+	$(SILENT)$(LINK.cc) $(LIBOPENMPT_LDFLAGS) $(SO_LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) -lgdi32 -o $@
+else
+	$(SILENT)$(LINK.cc) -shared $(LIBOPENMPT_LDFLAGS) $(SO_LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) -lgdi32 -o $@
+endif
 
 openmpt123/openmpt123.o: openmpt123/openmpt123.cpp
 	$(INFO) [CXX] $<
