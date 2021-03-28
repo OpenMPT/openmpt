@@ -2142,7 +2142,7 @@ void CModTree::MonitorInstrumentLibrary()
 	DWORD result;
 	mpt::PathString lastWatchDir;
 	HANDLE hWatchDir = INVALID_HANDLE_VALUE;
-	DWORD64 lastRefresh = GetTickCount64();
+	DWORD64 lastRefresh = Util::GetTickCount64();
 	DWORD timeout = INFINITE;
 	DWORD interval = TrackerSettings::Instance().FSUpdateInterval;
 	do
@@ -2166,7 +2166,7 @@ void CModTree::MonitorInstrumentLibrary()
 		}
 		const HANDLE waitHandles[3] = {m_hWatchDirKillThread, m_hSwitchWatchDir, hWatchDir};
 		result = WaitForMultipleObjects(hWatchDir != INVALID_HANDLE_VALUE ? 3 : 2, waitHandles, FALSE, timeout);
-		DWORD64 now = GetTickCount64();
+		DWORD64 now = Util::GetTickCount64();
 		if(result == WAIT_TIMEOUT)
 		{
 			PostMessage(WM_COMMAND, ID_MODTREE_REFRESHINSTRLIB);
