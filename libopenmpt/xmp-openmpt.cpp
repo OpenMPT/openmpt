@@ -42,6 +42,8 @@
 #include "libopenmpt.hpp"
 #include "libopenmpt_ext.hpp"
 
+#include "libopenmpt_plugin_settings.hpp"
+
 #include "libopenmpt_plugin_gui.hpp"
 
 #include "svn_version.h"
