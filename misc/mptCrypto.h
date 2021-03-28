@@ -34,6 +34,7 @@
 #ifdef MODPLUG_TRACKER
 #if MPT_OS_WINDOWS
 #include <windows.h>
+#include <wincrypt.h>
 #include <bcrypt.h>
 #include <ncrypt.h>
 #endif // MPT_OS_WINDOWS
