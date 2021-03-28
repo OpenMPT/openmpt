@@ -175,7 +175,7 @@ end
    "vorbis",
   }
   filter {}
-	if not _OPTIONS["xp"] then
+	if not _OPTIONS["winxp"] then
   linkoptions {
    "/DELAYLOAD:mf.dll",
    "/DELAYLOAD:mfplat.dll",
