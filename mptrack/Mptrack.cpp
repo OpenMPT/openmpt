@@ -1069,6 +1069,7 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 		new WelcomeDlg(m_pMainWnd);
 	} else
 	{
+#if !defined(MPT_BUILD_RETRO)
 		bool deprecatedSoundDevice = GetSoundDevicesManager()->FindDeviceInfo(TrackerSettings::Instance().GetSoundDeviceIdentifier()).IsDeprecated();
 		bool showSettings = deprecatedSoundDevice && !TrackerSettings::Instance().m_SoundDeprecatedDeviceWarningShown && (Reporting::Confirm(
 			U_("You have currently selected a sound device which is deprecated. MME/WaveOut support will be removed in a future OpenMPT version.\n") +
@@ -1081,6 +1082,7 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 			TrackerSettings::Instance().m_SoundDeprecatedDeviceWarningShown = true;
 			m_pMainWnd->PostMessage(WM_COMMAND, ID_VIEW_OPTIONS);
 		}
+#endif // !MPT_BUILD_RETRO
 	}
 
 #ifdef ENABLE_TESTS
