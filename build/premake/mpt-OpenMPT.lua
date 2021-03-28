@@ -70,8 +70,12 @@ end
 			"../../mptrack/res/OpenMPT-win7.manifest",
 		}
 	end
+	if not _OPTIONS["winxp"] then
+		files {
+			"../../include/asiomodern/include/ASIOModern/*.hpp",
+		}
+	end
   files {
-   "../../include/asiomodern/include/ASIOModern/*.hpp",
    "../../common/*.cpp",
    "../../common/*.h",
    "../../soundbase/*.cpp",

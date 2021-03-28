@@ -83,7 +83,9 @@
 #endif // MPT_OS_WINDOWS
 
 // OpenMPT-only dependencies
+#if !defined(OPENMPT_BUILD_RETRO)
 #define MPT_WITH_ASIO
+#endif
 #if defined(OPENMPT_BUILD_RETRO)
 #define MPT_WITH_DIRECTSOUND
 #endif

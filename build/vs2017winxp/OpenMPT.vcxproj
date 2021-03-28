@@ -776,15 +776,6 @@
     <ClInclude Include="..\..\common\stdafx.h" />
     <ClInclude Include="..\..\common\version.h" />
     <ClInclude Include="..\..\common\versionNumber.h" />
-    <ClInclude Include="..\..\include\asiomodern\include\ASIOModern\ASIO.hpp" />
-    <ClInclude Include="..\..\include\asiomodern\include\ASIOModern\ASIOConfig.hpp" />
-    <ClInclude Include="..\..\include\asiomodern\include\ASIOModern\ASIOCore.hpp" />
-    <ClInclude Include="..\..\include\asiomodern\include\ASIOModern\ASIOModern.hpp" />
-    <ClInclude Include="..\..\include\asiomodern\include\ASIOModern\ASIOSampleConvert.hpp" />
-    <ClInclude Include="..\..\include\asiomodern\include\ASIOModern\ASIOSystemWindows.hpp" />
-    <ClInclude Include="..\..\include\asiomodern\include\ASIOModern\ASIOVerifyABI.hpp" />
-    <ClInclude Include="..\..\include\asiomodern\include\ASIOModern\ASIOVersion.hpp" />
-    <ClInclude Include="..\..\include\asiomodern\include\ASIOModern\ASIOstdcxx20bit.hpp" />
     <ClInclude Include="..\..\misc\JSON.h" />
     <ClInclude Include="..\..\misc\WriteMemoryDump.h" />
     <ClInclude Include="..\..\misc\mptCPU.h" />
