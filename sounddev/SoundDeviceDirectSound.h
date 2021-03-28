@@ -30,12 +30,13 @@ namespace SoundDevice {
 
 class ComponentDirectSound : public ComponentBuiltin
 {
-	MPT_DECLARE_COMPONENT_MEMBERS
+	MPT_DECLARE_COMPONENT_MEMBERS(ComponentDirectSound, "DirectSound")
 public:
 	ComponentDirectSound() { }
 	virtual ~ComponentDirectSound() { }
 	bool DoInitialize() override { return true; }
 };
+
 
 class CDSoundDevice: public CSoundDeviceWithThread
 {

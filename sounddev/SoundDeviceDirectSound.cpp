@@ -30,9 +30,6 @@ namespace SoundDevice {
 #if defined(MPT_WITH_DIRECTSOUND)
 
 
-MPT_REGISTERED_COMPONENT(ComponentDirectSound, "DirectSound")
-
-
 
 namespace Legacy
 {
