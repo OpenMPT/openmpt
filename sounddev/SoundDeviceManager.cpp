@@ -127,7 +127,7 @@ void Manager::ReEnumerate()
 	}
 #endif // MPT_OS_WINDOWS
 
-#if MPT_WITH_DIRECTSOUND
+#if defined(MPT_WITH_DIRECTSOUND)
 	// kind of deprecated by now
 	if(IsComponentAvailable(m_DirectSound))
 	{

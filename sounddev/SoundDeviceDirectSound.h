@@ -18,7 +18,7 @@
 
 #include "../common/ComponentManager.h"
 
-#if MPT_WITH_DIRECTSOUND
+#if defined(MPT_WITH_DIRECTSOUND)
 #include <dsound.h>
 #endif // MPT_WITH_DIRECTSOUND
 
@@ -26,7 +26,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 namespace SoundDevice {
 
-#if MPT_WITH_DIRECTSOUND
+#if defined(MPT_WITH_DIRECTSOUND)
 
 class ComponentDirectSound : public ComponentBuiltin
 {
