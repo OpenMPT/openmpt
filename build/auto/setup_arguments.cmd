@@ -116,11 +116,11 @@ if "%MPT_VS_ARCH%" == "x64"   set MPT_DIST_VARIANT_PREFIX=win64
 if "%MPT_VS_ARCH%" == "ARM"   set MPT_DIST_VARIANT_PREFIX=arm32
 if "%MPT_VS_ARCH%" == "ARM64" set MPT_DIST_VARIANT_PREFIX=arm64
 
-if "%MPT_VS_TARGET%" == "winxp"   set MPT_DIST_VARIANT_SUFFIX=retro-winxp
-if "%MPT_VS_TARGET%" == "vista"   set MPT_DIST_VARIANT_SUFFIX=retro-winvista
-if "%MPT_VS_TARGET%" == "win7"    set MPT_DIST_VARIANT_SUFFIX=win7
-if "%MPT_VS_TARGET%" == "win81"   set MPT_DIST_VARIANT_SUFFIX=win81
-if "%MPT_VS_TARGET%" == "win10"   set MPT_DIST_VARIANT_SUFFIX=win10
+if "%MPT_VS_TARGET%" == "winxp"   set MPT_DIST_VARIANT_SUFFIX=-retro-winxp
+if "%MPT_VS_TARGET%" == "vista"   set MPT_DIST_VARIANT_SUFFIX=-retro-winvista
+if "%MPT_VS_TARGET%" == "win7"    set MPT_DIST_VARIANT_SUFFIX=-win7
+if "%MPT_VS_TARGET%" == "win81"   set MPT_DIST_VARIANT_SUFFIX=-win81
+if "%MPT_VS_TARGET%" == "win10"   set MPT_DIST_VARIANT_SUFFIX=-win10
 if "%MPT_VS_TARGET%" == "default" set MPT_DIST_VARIANT_SUFFIX=
 
 set MPT_DIST_VARIANT_TRK=%MPT_DIST_VARIANT_PREFIX%%MPT_DIST_VARIANT_SUFFIX%
