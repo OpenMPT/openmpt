@@ -51,6 +51,8 @@ typedef ::uint64_t uint64_t;
 }
 #endif
 
+#include "libopenmpt_plugin_settings.hpp"
+
 #include "libopenmpt_plugin_gui.hpp"
 
 #include "svn_version.h"
@@ -74,6 +76,8 @@ static char * in_openmpt_string = "in_openmpt " OPENMPT_API_VERSION_STRING;
 #include <iostream>
 #include <iterator>
 #include <sstream>
+
+#include <cstring>
 
 #define BPS 16
 

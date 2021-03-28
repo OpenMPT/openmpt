@@ -58,6 +58,8 @@ typedef ::uint64_t uint64_t;
 }
 #endif
 
+#include "libopenmpt_plugin_settings.hpp"
+
 #include "libopenmpt_plugin_gui.hpp"
 
 #include "svn_version.h"
