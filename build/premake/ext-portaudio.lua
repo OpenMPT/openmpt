@@ -112,5 +112,9 @@
   filter { "configurations:DebugMDd" }
    defines { "PA_ENABLE_DEBUG_OUTPUT" }
   filter { "kind:SharedLib" }
-   files { "../../include/portaudio/build/msvc/portaudio.def" }
+	if _OPTIONS["winxp"] then
+		files { "../../build/premake/def/ext-portaudio-retro.def" }
+	else
+		files { "../../include/portaudio/build/msvc/portaudio.def" }
+	end
   filter {}

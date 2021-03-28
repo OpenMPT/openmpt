@@ -7,12 +7,6 @@
     <Filter Include="include\portaudio">
       <UniqueIdentifier>{4F714A9A-BB87-4830-04FF-D351705419B8}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\portaudio\build">
-      <UniqueIdentifier>{CEBCA554-3AF4-EDEB-43FE-510FAFB414E5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\portaudio\build\msvc">
-      <UniqueIdentifier>{562BB271-42E6-A11D-EB9D-1A68D737ECAD}</UniqueIdentifier>
-    </Filter>
     <Filter Include="include\portaudio\include">
       <UniqueIdentifier>{C2771F1F-2E3A-53A9-77EA-E135E3EB2B87}</UniqueIdentifier>
     </Filter>
@@ -42,6 +36,9 @@
     </Filter>
     <Filter Include="premake">
       <UniqueIdentifier>{8A6487C2-F643-065E-FF5B-91346BBA6CBF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="premake\def">
+      <UniqueIdentifier>{281676C9-94CB-EEBE-1DC0-E8958974E5C2}</UniqueIdentifier>
     </Filter>
     <Filter Include="premake\lnk">
       <UniqueIdentifier>{5E3976C9-CAEE-EEBE-53E3-E895BF97E5C2}</UniqueIdentifier>
@@ -202,8 +199,8 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\..\include\portaudio\build\msvc\portaudio.def">
-      <Filter>include\portaudio\build\msvc</Filter>
+    <None Include="..\..\premake\def\ext-portaudio-retro.def">
+      <Filter>premake\def</Filter>
     </None>
   </ItemGroup>
 </Project>
