@@ -202,7 +202,6 @@ end
   includedirs {
    "../../common",
    "../../include",
-   "../../include/msinttypes/inttypes",
    "../../include/asiomodern/include",
    "../../include/ASIOSDK2/common",
    "../../include/nlohmann-json/include",
@@ -249,7 +248,6 @@ end
   includedirs {
    "../../common",
    "../../include",
-   "../../include/msinttypes/inttypes",
    "$(IntDir)/svn_version",
    "../../build/svn_version",
   }
