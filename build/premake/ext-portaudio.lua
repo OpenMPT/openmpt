@@ -14,13 +14,11 @@
 	filter {}
 		if _OPTIONS["winxp"] then
 			defines {
-				"PAWIN_USE_WDMKS_DEVICE_INFO",
-				"PA_WDMKS_NO_KSGUID_LIB",
 				"PA_USE_ASIO=0",
 				"PA_USE_DS=1",
 				"PA_USE_WMME=1",
 				"PA_USE_WASAPI=0",
-				"PA_USE_WDMKS=1",
+				"PA_USE_WDMKS=0",
 			}
 		else
 			defines {
