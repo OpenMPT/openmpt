@@ -31,9 +31,6 @@
     <Filter Include="include\portaudio\src\hostapi\skeleton">
       <UniqueIdentifier>{C10780C5-AD59-57B5-9678-94C58269709E}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\portaudio\src\hostapi\wdmks">
-      <UniqueIdentifier>{E2E2C384-4E9C-2E2F-D7FB-480943B4E49E}</UniqueIdentifier>
-    </Filter>
     <Filter Include="include\portaudio\src\hostapi\wmme">
       <UniqueIdentifier>{D2F68913-BE32-8D7D-2745-A57413A03598}</UniqueIdentifier>
     </Filter>
@@ -178,9 +175,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\include\portaudio\src\hostapi\skeleton\pa_hostapi_skeleton.c">
       <Filter>include\portaudio\src\hostapi\skeleton</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\include\portaudio\src\hostapi\wdmks\pa_win_wdmks.c">
-      <Filter>include\portaudio\src\hostapi\wdmks</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\portaudio\src\hostapi\wmme\pa_win_wmme.c">
       <Filter>include\portaudio\src\hostapi\wmme</Filter>

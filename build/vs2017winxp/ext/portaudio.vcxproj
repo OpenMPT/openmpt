@@ -582,7 +582,6 @@
     <ClCompile Include="..\..\..\include\portaudio\src\hostapi\dsound\pa_win_ds.c" />
     <ClCompile Include="..\..\..\include\portaudio\src\hostapi\dsound\pa_win_ds_dynlink.c" />
     <ClCompile Include="..\..\..\include\portaudio\src\hostapi\skeleton\pa_hostapi_skeleton.c" />
-    <ClCompile Include="..\..\..\include\portaudio\src\hostapi\wdmks\pa_win_wdmks.c" />
     <ClCompile Include="..\..\..\include\portaudio\src\hostapi\wmme\pa_win_wmme.c" />
     <ClCompile Include="..\..\..\include\portaudio\src\os\win\pa_win_coinitialize.c" />
     <ClCompile Include="..\..\..\include\portaudio\src\os\win\pa_win_hostapis.c" />

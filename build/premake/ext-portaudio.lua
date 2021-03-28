@@ -59,7 +59,6 @@
    "../../include/portaudio/src/common/pa_types.h",
    "../../include/portaudio/src/common/pa_util.h",
    "../../include/portaudio/src/hostapi/skeleton/pa_hostapi_skeleton.c",
-   "../../include/portaudio/src/hostapi/wdmks/pa_win_wdmks.c",
    "../../include/portaudio/src/hostapi/wmme/pa_win_wmme.c",
    "../../include/portaudio/src/os/win/pa_win_coinitialize.c",
    "../../include/portaudio/src/os/win/pa_win_coinitialize.h",
@@ -81,6 +80,7 @@
 		else
 			files {
 				"../../include/portaudio/src/hostapi/wasapi/pa_win_wasapi.c",
+				"../../include/portaudio/src/hostapi/wdmks/pa_win_wdmks.c",
 			}
 		end
 	filter {}
