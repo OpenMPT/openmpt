@@ -7053,6 +7053,7 @@ bool CViewPattern::PastePattern(PATTERNINDEX nPattern, const PatternCursor &past
 	pos.channel = pastePos.GetChannel();
 	pos.order = GetCurrentOrder();
 	PatternRect rect;
+	const bool patternExisted = GetSoundFile()->Patterns.IsValidPat(nPattern);
 	bool orderChanged = false;
 	bool result = PatternClipboard::Paste(*GetSoundFile(), pos, mode, rect, orderChanged);
 	EndWaitCursor();
@@ -7064,7 +7065,7 @@ bool CViewPattern::PastePattern(PATTERNINDEX nPattern, const PatternCursor &past
 		SetCurrentPattern(pos.pattern);
 		SetCurrentOrder(pos.order);
 	}
-	if(orderChanged)
+	if(orderChanged || (patternExisted != GetSoundFile()->Patterns.IsValidPat(nPattern)))
 	{
 		updateHint.Names();
 		GetDocument()->UpdateAllViews(nullptr, SequenceHint(GetSoundFile()->Order.GetCurrentSequenceIndex()).Data(), nullptr);
