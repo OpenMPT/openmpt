@@ -142,6 +142,7 @@ bool FileDialog::Show(CWnd *parent)
 
 	if(m_multiSelect)
 	{
+#if NTDDI_VERSION >= NTDDI_VISTA
 		// Multiple files might have been selected
 		if(CComPtr<IShellItemArray> shellItems = dlg.GetResults(); shellItems != nullptr)
 		{
@@ -162,6 +163,7 @@ bool FileDialog::Show(CWnd *parent)
 				}
 			}
 		} else
+#endif
 		{
 			POSITION pos = dlg.GetStartPosition();
 			while(pos != nullptr)
