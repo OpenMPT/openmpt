@@ -77,7 +77,9 @@ IMPLEMENT_SERIAL(CViewInstrument, CModScrollView, 0)
 
 BEGIN_MESSAGE_MAP(CViewInstrument, CModScrollView)
 	//{{AFX_MSG_MAP(CViewInstrument)
+#if !defined(MPT_BUILD_RETRO)
 	ON_MESSAGE(WM_DPICHANGED, &CViewInstrument::OnDPIChanged)
+#endif
 	ON_WM_ERASEBKGND()
 	ON_WM_SETFOCUS()
 	ON_WM_SIZE()
