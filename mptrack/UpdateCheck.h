@@ -24,6 +24,9 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
+#if defined(MPT_ENABLE_UPDATE)
+
+
 namespace HTTP {
 class InternetSession;
 }
@@ -204,6 +207,9 @@ private:
 	SettingChangedNotifyGuard m_SettingChangedNotifyGuard;
 	CComboBox m_CbnUpdateFrequency;
 };
+
+
+#endif // MPT_ENABLE_UPDATE
 
 
 OPENMPT_NAMESPACE_END

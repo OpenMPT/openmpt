@@ -32,6 +32,8 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
+#if defined(MPT_ENABLE_UPDATE)
+
 
 namespace Update {
 
@@ -1860,6 +1862,9 @@ void CUpdateSetupDlg::OnCheckNow()
 {
 	CUpdateCheck::DoManualUpdateCheck();
 }
+
+
+#endif // MPT_ENABLE_UPDATE
 
 
 OPENMPT_NAMESPACE_END

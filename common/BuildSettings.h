@@ -242,6 +242,10 @@
 // Use inline assembly
 #define ENABLE_ASM
 
+#if !defined(MPT_BUILD_RETRO)
+#define MPT_ENABLE_UPDATE
+#endif // !MPT_BUILD_RETRO
+
 // Disable unarchiving support
 //#define NO_ARCHIVE_SUPPORT
 

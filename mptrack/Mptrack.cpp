@@ -1099,10 +1099,12 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 
 	if(!TrackerSettings::Instance().FirstRun)
 	{
+#if defined(MPT_ENABLE_UPDATE)
 		if(CUpdateCheck::IsSuitableUpdateMoment())
 		{
 			CUpdateCheck::DoAutoUpdateCheck();
 		}
+#endif // MPT_ENABLE_UPDATE
 	}
 
 	return TRUE;

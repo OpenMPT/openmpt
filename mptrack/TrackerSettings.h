@@ -857,6 +857,8 @@ public:
 	Setting<bool> BrokenPluginsWorkaroundVSTMaskAllCrashes;
 	Setting<bool> BrokenPluginsWorkaroundVSTNeverUnloadAnyPlugin;
 
+#if defined(MPT_ENABLE_UPDATE)
+
 	// Update
 
 	Setting<bool> UpdateEnabled;
@@ -882,6 +884,8 @@ public:
 #endif // MPT_UPDATE_LEGACY
 	Setting<bool> UpdateSkipSignatureVerificationUNSECURE;
 	Setting<std::vector<mpt::ustring>> UpdateSigningKeysRootAnchors;
+
+#endif // MPT_ENABLE_UPDATE
 
 	// Wine support
 

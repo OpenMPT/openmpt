@@ -319,6 +319,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	// Broken Plugins Workarounds
 	, BrokenPluginsWorkaroundVSTMaskAllCrashes(conf, U_("Broken Plugins Workarounds"), U_("VSTMaskAllCrashes"), true)  // TODO: really should be false
 	, BrokenPluginsWorkaroundVSTNeverUnloadAnyPlugin(conf, U_("BrokenPluginsWorkarounds"), U_("VSTNeverUnloadAnyPlugin"), false)
+#if defined(MPT_ENABLE_UPDATE)
 	// Update
 	, UpdateEnabled(conf, U_("Update"), U_("Enabled"), true)
 	, UpdateInstallAutomatically(conf, U_("Update"), U_("InstallAutomatically"), false)
@@ -345,6 +346,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 #endif // MPT_UPDATE_LEGACY
 	, UpdateSkipSignatureVerificationUNSECURE(conf, U_("Update"), U_("SkipSignatureVerification"), false)
 	, UpdateSigningKeysRootAnchors(conf, U_("Update"), U_("SigningKeysRootAnchors"), CUpdateCheck::GetDefaultUpdateSigningKeysRootAnchors())
+#endif // MPT_ENABLE_UPDATE
 	// Wine suppport
 	, WineSupportEnabled(conf, U_("WineSupport"), U_("Enabled"), false)
 	, WineSupportAlwaysRecompile(conf, U_("WineSupport"), U_("AlwaysRecompile"), false)
@@ -678,6 +680,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 		m_dwPatternSetup &= ~0x200;
 	}
 
+#if defined(MPT_ENABLE_UPDATE)
 	// Update
 	if(storedVersion < MPT_V("1.28.00.39"))
 	{
@@ -712,6 +715,8 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 		conf.Forget(UpdateUpdateURL_DEPRECATED.GetPath());
 		conf.Forget(UpdateSendGUID_DEPRECATED.GetPath());
 	}
+#endif // MPT_ENABLE_UPDATE
+
 	if(storedVersion < MPT_V("1.29.00.39"))
 	{
 		// ASIO device IDs are now normalized to upper-case in the device enumeration code.

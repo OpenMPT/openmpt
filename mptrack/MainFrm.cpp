@@ -112,11 +112,13 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_MESSAGE(WM_MOD_SETMODIFIED,			&CMainFrame::OnSetModified)
 	ON_COMMAND(ID_INTERNETUPDATE,			&CMainFrame::OnInternetUpdate)
 	ON_COMMAND(ID_HELP_SHOWSETTINGSFOLDER,	&CMainFrame::OnShowSettingsFolder)
+#if defined(MPT_ENABLE_UPDATE)
 	ON_MESSAGE(MPT_WM_APP_UPDATECHECK_START, &CMainFrame::OnUpdateCheckStart)
 	ON_MESSAGE(MPT_WM_APP_UPDATECHECK_PROGRESS, &CMainFrame::OnUpdateCheckProgress)
 	ON_MESSAGE(MPT_WM_APP_UPDATECHECK_CANCELED, &CMainFrame::OnUpdateCheckCanceled)
 	ON_MESSAGE(MPT_WM_APP_UPDATECHECK_FAILURE, &CMainFrame::OnUpdateCheckFailure)
 	ON_MESSAGE(MPT_WM_APP_UPDATECHECK_SUCCESS, &CMainFrame::OnUpdateCheckSuccess)
+#endif // MPT_ENABLE_UPDATE
 	ON_COMMAND(ID_HELPSHOW,					&CMainFrame::OnHelp)
 
 	ON_COMMAND_RANGE(ID_MRU_LIST_FIRST, ID_MRU_LIST_LAST, &CMainFrame::OnOpenMRUItem)
@@ -1973,7 +1975,9 @@ void CMainFrame::OnViewOptions()
 	COptionsMixer mixerdlg;
 	CMidiSetupDlg mididlg(TrackerSettings::Instance().m_dwMidiSetup, TrackerSettings::Instance().GetCurrentMIDIDevice());
 	PathConfigDlg pathsdlg;
+#if defined(MPT_ENABLE_UPDATE)
 	CUpdateSetupDlg updatedlg;
+#endif // MPT_ENABLE_UPDATE
 	COptionsAdvanced advanced;
 	COptionsWine winedlg;
 	dlg.AddPage(&general);
@@ -1988,15 +1992,21 @@ void CMainFrame::OnViewOptions()
 	dlg.AddPage(&colors);
 	dlg.AddPage(&mididlg);
 	dlg.AddPage(&pathsdlg);
+#if defined(MPT_ENABLE_UPDATE)
 	dlg.AddPage(&updatedlg);
+#endif // MPT_ENABLE_UPDATE
 	dlg.AddPage(&advanced);
 	if(mpt::OS::Windows::IsWine()) dlg.AddPage(&winedlg);
 	m_bOptionsLocked = true;
 	m_SoundCardOptionsDialog = &sounddlg;
+#if defined(MPT_ENABLE_UPDATE)
 	m_UpdateOptionsDialog = &updatedlg;
+#endif // MPT_ENABLE_UPDATE
 	dlg.DoModal();
 	m_SoundCardOptionsDialog = nullptr;
+#if defined(MPT_ENABLE_UPDATE)
 	m_UpdateOptionsDialog = nullptr;
+#endif // MPT_ENABLE_UPDATE
 	m_bOptionsLocked = false;
 	m_wndTree.OnOptionsChanged();
 }
@@ -2625,7 +2635,9 @@ void CMainFrame::OnShowWindow(BOOL bShow, UINT /*nStatus*/)
 
 void CMainFrame::OnInternetUpdate()
 {
+#if defined(MPT_ENABLE_UPDATE)
 	CUpdateCheck::DoManualUpdateCheck();
+#endif // MPT_ENABLE_UPDATE
 }
 
 
@@ -2652,6 +2664,8 @@ public:
 
 static std::unique_ptr<CUpdateCheckProgressDialog> g_UpdateCheckProgressDialog = nullptr;
 
+
+#if defined(MPT_ENABLE_UPDATE)
 
 
 LRESULT CMainFrame::OnUpdateCheckStart(WPARAM wparam, LPARAM lparam)
@@ -2818,6 +2832,9 @@ void CMainFrame::OnToolbarUpdateIndicatorClick()
 	// TODO
 	CUpdateCheck::DoManualUpdateCheck();
 }
+
+
+#endif // MPT_ENABLE_UPDATE
 
 
 void CMainFrame::OnHelp()

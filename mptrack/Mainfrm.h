@@ -303,7 +303,9 @@ protected:
 	UINT m_nAvgMixChn = 0, m_nMixChn = 0;
 	// Misc
 	class COptionsSoundcard *m_SoundCardOptionsDialog = nullptr;
+#if defined(MPT_ENABLE_UPDATE)
 	class CUpdateSetupDlg *m_UpdateOptionsDialog = nullptr;
+#endif // MPT_ENABLE_UPDATE
 	DWORD helpCookie = 0;
 	bool m_bOptionsLocked = false;
 
@@ -538,12 +540,14 @@ protected:
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
 	afx_msg void OnInternetUpdate();
 	afx_msg void OnShowSettingsFolder();
+#if defined(MPT_ENABLE_UPDATE)
 	afx_msg LRESULT OnUpdateCheckStart(WPARAM wparam, LPARAM lparam);
 	afx_msg LRESULT OnUpdateCheckProgress(WPARAM wparam, LPARAM lparam);
 	afx_msg LRESULT OnUpdateCheckCanceled(WPARAM wparam, LPARAM lparam);
 	afx_msg LRESULT OnUpdateCheckFailure(WPARAM wparam, LPARAM lparam);
 	afx_msg LRESULT OnUpdateCheckSuccess(WPARAM wparam, LPARAM lparam);
 	afx_msg void OnToolbarUpdateIndicatorClick();
+#endif // MPT_ENABLE_UPDATE
 	afx_msg void OnHelp();
 	afx_msg BOOL OnDeviceChange(UINT nEventType, DWORD_PTR dwData);
 	afx_msg void OnDropFiles(HDROP hDropInfo);
