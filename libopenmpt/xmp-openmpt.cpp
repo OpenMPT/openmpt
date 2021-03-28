@@ -42,6 +42,7 @@
 #endif // _MSC_VER
 
 #include <cctype>
+#include <cstring>
 
 #include "libopenmpt.hpp"
 #include "libopenmpt_ext.hpp"
