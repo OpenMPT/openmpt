@@ -684,6 +684,8 @@ void CTrackApp::CreatePaths()
 }
 
 
+#if !defined(MPT_BUILD_RETRO)
+
 bool CTrackApp::CheckSystemSupport()
 {
 	const mpt::ustring lf = U_("\n");
@@ -715,6 +717,8 @@ bool CTrackApp::CheckSystemSupport()
 	}
 	return true;
 }
+
+#endif // !MPT_BUILD_RETRO
 
 
 BOOL CTrackApp::InitInstanceEarly(CMPTCommandLineInfo &cmdInfo)
@@ -1050,6 +1054,7 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 
 	// Perform startup tasks.
 
+#if !defined(MPT_BUILD_RETRO)
 	// Check whether we are running the best build for the given system.
 	if(!cmdInfo.m_noSysCheck)
 	{
@@ -1059,6 +1064,7 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 			return FALSE;
 		}
 	}
+#endif // !MPT_BUILD_RETRO
 
 	if(TrackerSettings::Instance().FirstRun)
 	{

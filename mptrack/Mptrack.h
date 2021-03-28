@@ -287,7 +287,9 @@ public:
 	void SetupPaths(bool overridePortable);
 	void CreatePaths();
 
+#if !defined(MPT_BUILD_RETRO)
 	bool CheckSystemSupport();
+#endif // !MPT_BUILD_RETRO
 
 	// Relative / absolute paths conversion
 	mpt::PathString PathAbsoluteToInstallRelative(const mpt::PathString &path) { return path.AbsolutePathToRelative(GetInstallPath()); }
