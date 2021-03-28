@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt 0.5.8-pre
 
+ *  [**Bug**] `libopenmpt.pc` did not list required system libraries `ole32.lib`
+    and `rpcrt4.lib` on Windows in `Libs.Private` field for static builds.
+
  *  mpg123: Update to v1.26.5 (2021-03-22).
 
 ### libopenmpt 0.5.7 (2021-03-20)
