@@ -142,6 +142,7 @@ CPriorityBooster::CPriorityBooster(SoundDevice::SysInfo sysInfo, bool boostPrior
 	, m_BoostPriority(boostPriority)
 	, task_idx(0)
 	, hTask(NULL)
+	, oldPriority(0)
 {
 	MPT_TRACE_SCOPE();
 	#ifdef MPT_BUILD_DEBUG
@@ -154,9 +155,11 @@ CPriorityBooster::CPriorityBooster(SoundDevice::SysInfo sysInfo, bool boostPrior
 		{
 			hTask = AvSetMmThreadCharacteristics(priorityClass.c_str(), &task_idx);
 		}
+		MPT_UNREFERENCED_PARAMETER(priority);
 #else // < Vista
 		oldPriority = GetThreadPriority(GetCurrentThread());
 		SetThreadPriority(GetCurrentThread(), m_Priority);
+		MPT_UNREFERENCED_PARAMETER(priorityClass);
 #endif
 	}
 }
