@@ -16,10 +16,14 @@
 #ifndef _WIN32_WINNT
 #define _WIN32_WINNT 0x0501 // _WIN32_WINNT_WINXP
 #endif
+#if !defined(MPT_BUILD_RETRO)
 #define _AFX_NO_MFC_CONTROLS_IN_DIALOGS // Avoid binary bloat from linking unused MFC controls
+#endif // !MPT_BUILD_RETRO
 #define NOMINMAX
+#if !defined(MPT_BUILD_RETRO)
 #include <afxwin.h>
 #include <afxcmn.h>
+#endif // !MPT_BUILD_RETRO
 #include <windows.h>
 #endif // _MFC_VER
 
@@ -38,7 +42,9 @@
 
 #include "libopenmpt.hpp"
 
+#if !defined(MPT_BUILD_RETRO)
 #include "libopenmpt_plugin_gui.hpp"
+#endif // !MPT_BUILD_RETRO
 
 #include "svn_version.h"
 #if defined(OPENMPT_VERSION_REVISION)
@@ -85,6 +91,8 @@ static std::string StringEncode( const std::wstring &src, UINT codepage )
 	return &encoded_string[0];
 }
 
+#if defined(UNICODE)
+
 static std::wstring StringDecode( const std::string & src, UINT codepage )
 {
 	int required_size = MultiByteToWideChar( codepage, 0, src.c_str(), -1, NULL, 0 );
@@ -96,6 +104,22 @@ static std::wstring StringDecode( const std::string & src, UINT codepage )
 	MultiByteToWideChar( codepage, 0, src.c_str(), -1, &decoded_string[0], decoded_string.size() );
 	return &decoded_string[0];
 }
+
+#else
+
+static std::string StringDecode( const std::string & src, UINT codepage )
+{
+	int required_size = MultiByteToWideChar( codepage, 0, src.c_str(), -1, NULL, 0 );
+	if(required_size <= 0)
+	{
+		return std::string();
+	}
+	std::vector<WCHAR> decoded_string( required_size );
+	MultiByteToWideChar( codepage, 0, src.c_str(), -1, &decoded_string[0], decoded_string.size() );
+	return StringEncode( &decoded_string[0], CP_ACP );
+}
+
+#endif
 
 template <typename Tstring, typename Tstring2, typename Tstring3>
 static inline Tstring StringReplace( Tstring str, const Tstring2 & oldStr_, const Tstring3 & newStr_ ) {
@@ -203,7 +227,9 @@ static std::wstring generate_infotext( const std::wstring & filename, const open
 }
 
 static void config( HWND hwndParent ) {
+#if !defined(MPT_BUILD_RETRO)
 	libopenmpt::plugin::gui_edit_settings( &self->settings, hwndParent, TEXT(SHORT_TITLE) );
+#endif // !MPT_BUILD_RETRO
 	apply_options();
 }
 
@@ -221,7 +247,11 @@ static void about( HWND hwndParent ) {
 	}
 	std::ostringstream credits;
 	credits << openmpt::string::get( "credits" );
-	libopenmpt::plugin::gui_show_file_info( hwndParent, TEXT(SHORT_TITLE), StringReplace( StringDecode( credits.str(), CP_UTF8 ), L"\n", L"\r\n" ) );
+#if !defined(MPT_BUILD_RETRO)
+	libopenmpt::plugin::gui_show_file_info( hwndParent, TEXT(SHORT_TITLE), StringReplace( StringDecode( credits.str(), CP_UTF8 ), TEXT("\n"), TEXT("\r\n") ) );
+#else
+	MessageBox( hwndParent, StringReplace(StringDecode(credits.str(), CP_UTF8), TEXT("\n"), TEXT("\r\n")).c_str(), TEXT(SHORT_TITLE), MB_OK );
+#endif
 }
 
 static void init() {
@@ -332,14 +362,23 @@ static int infobox( const in_char * fn, HWND hWndParent ) {
 		try {
 			std::ifstream s( fn, std::ios::binary );
 			openmpt::module mod( s );
-			libopenmpt::plugin::gui_show_file_info( hWndParent, TEXT(SHORT_TITLE), StringReplace( generate_infotext( fn, mod ), L"\n", L"\r\n" ) );
+#if !defined(MPT_BUILD_RETRO)
+			libopenmpt::plugin::gui_show_file_info( hWndParent, TEXT(SHORT_TITLE), StringReplace( generate_infotext( fn, mod ), TEXT("\n"), TEXT("\r\n") ) );
+#else
+			MessageBox( hwndParent, StringReplace( generate_infotext( fn, mod ), TEXT("\n"), TEXT("\r\n") ).c_str(), TEXT(SHORT_TITLE), MB_OK );
+#endif
 		} catch ( ... ) {
 		}
 	} else {
-		libopenmpt::plugin::gui_show_file_info( hWndParent, TEXT(SHORT_TITLE), StringReplace( self->cached_infotext, L"\n", L"\r\n" ) );
+#if !defined(MPT_BUILD_RETRO)
+		libopenmpt::plugin::gui_show_file_info( hWndParent, TEXT(SHORT_TITLE), StringReplace( self->cached_infotext, TEXT("\n"), TEXT("\r\n") ) );
+#else
+		MessageBox( hWndParent, StringReplace( self->cached_infotext, TEXT("\n"), TEXT("\r\n") ).c_str(), TEXT(SHORT_TITLE), MB_OK );
+#endif
 	}
 	return 0;
 }
+
 
 static void getfileinfo( const in_char * filename, in_char * title, int * length_in_ms ) {
 	if ( !filename || *filename == '\0' ) {
@@ -488,6 +527,8 @@ extern "C" __declspec(dllexport) In_Module * winampGetInModule2() {
 }
 
 
+#if !defined(MPT_BUILD_RETRO)
+
 #ifdef _MFC_VER
 
 namespace libopenmpt {
@@ -509,6 +550,8 @@ void DllMainDetach() {
 // nothing
 
 #endif
+
+#endif // !MPT_BUILD_RETRO
 
 
 #endif // NO_WINAMP
