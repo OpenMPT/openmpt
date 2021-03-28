@@ -42,15 +42,15 @@ struct libopenmpt_settings {
 
 class settings : public libopenmpt_settings {
 private:
-	std::wstring subkey;
+	std::basic_string<TCHAR> subkey;
 protected:
-	virtual void read_setting( const std::string & /* key */ , const std::wstring & keyW, int & val ) {
+	virtual void read_setting( const std::string & /* key */ , const std::basic_string<TCHAR> & key, int & val ) {
 		HKEY regkey = HKEY();
-		if ( RegOpenKeyEx( HKEY_CURRENT_USER, ( L"Software\\libopenmpt\\" + subkey ).c_str(), 0, KEY_READ, &regkey ) == ERROR_SUCCESS ) {
+		if ( RegOpenKeyEx( HKEY_CURRENT_USER, ( TEXT("Software\\libopenmpt\\") + subkey ).c_str(), 0, KEY_READ, &regkey ) == ERROR_SUCCESS ) {
 			DWORD v = val;
 			DWORD type = REG_DWORD;
 			DWORD typesize = sizeof(v);
-			if ( RegQueryValueEx( regkey, keyW.c_str(), NULL, &type, (BYTE *)&v, &typesize ) == ERROR_SUCCESS )
+			if ( RegQueryValueEx( regkey, key.c_str(), NULL, &type, (BYTE *)&v, &typesize ) == ERROR_SUCCESS )
 			{
 				val = v;
 			}
@@ -58,13 +58,13 @@ protected:
 			regkey = HKEY();
 		}
 	}
-	virtual void write_setting( const std::string & /* key */, const std::wstring & keyW, int val ) {
+	virtual void write_setting( const std::string & /* key */, const std::basic_string<TCHAR> & key, int val ) {
 		HKEY regkey = HKEY();
-		if ( RegCreateKeyEx( HKEY_CURRENT_USER, ( L"Software\\libopenmpt\\" + subkey ).c_str(), 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &regkey, NULL ) == ERROR_SUCCESS ) {
+		if ( RegCreateKeyEx( HKEY_CURRENT_USER, ( TEXT("Software\\libopenmpt\\") + subkey ).c_str(), 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &regkey, NULL ) == ERROR_SUCCESS ) {
 			DWORD v = val;
 			DWORD type = REG_DWORD;
 			DWORD typesize = sizeof(v);
-			if ( RegSetValueEx( regkey, keyW.c_str(), NULL, type, (const BYTE *)&v, typesize ) == ERROR_SUCCESS )
+			if ( RegSetValueEx( regkey, key.c_str(), NULL, type, (const BYTE *)&v, typesize ) == ERROR_SUCCESS )
 			{
 				// ok
 			}
@@ -73,7 +73,7 @@ protected:
 		}
 	}
 public:
-	settings( const std::wstring & subkey, bool no_default_format )
+	settings( const std::basic_string<TCHAR> & subkey, bool no_default_format )
 		: subkey(subkey)
 	{
 		libopenmpt_settings::no_default_format = no_default_format;
@@ -91,7 +91,11 @@ public:
 	}
 	void load()
 	{
+		#ifdef UNICODE
 		#define read_setting(a,b,c) read_setting( b , L ## b , c)
+		#else
+		#define read_setting(a,b,c) read_setting( b , b , c)
+		#endif
 			read_setting( subkey, "Samplerate_Hz", samplerate );
 			read_setting( subkey, "Channels", channels );
 			read_setting( subkey, "MasterGain_milliBel", mastergain_millibel );
@@ -106,7 +110,11 @@ public:
 	}
 	void save()
 	{
+		#ifdef UNICODE
 		#define write_setting(a,b,c) write_setting( b , L ## b , c)
+		#else
+		#define write_setting(a,b,c) write_setting( b , b , c)
+		#endif
 			write_setting( subkey, "Samplerate_Hz", samplerate );
 			write_setting( subkey, "Channels", channels );
 			write_setting( subkey, "MasterGain_milliBel", mastergain_millibel );
