@@ -431,9 +431,6 @@ mpt::ustring GetBuildFeaturesString()
 		#ifdef NO_PLUGINS
 			UL_(" NO_PLUGINS")
 		#endif
-		#ifndef MPT_WITH_ASIO
-			UL_(" NO_ASIO")
-		#endif
 			;
 	#endif
 	return retval;

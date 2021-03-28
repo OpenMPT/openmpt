@@ -203,9 +203,6 @@ void CMainFrame::Initialize()
 	#ifdef NO_PLUGINS
 		title += _T(" NO_PLUGINS");
 	#endif
-	#ifndef MPT_WITH_ASIO
-		title += _T(" NO_ASIO");
-	#endif
 	SetTitle(title);
 	OnUpdateFrameTitle(false);
 
