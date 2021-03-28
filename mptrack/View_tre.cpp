@@ -155,9 +155,11 @@ CModTree::CModTree(CModTree *pDataTree)
 	MemsetZero(m_tiMidi);
 	MemsetZero(m_tiPerc);
 
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN7)
 	// Wine does not support natural sorting with SORT_DIGITSASNUMBERS, fall back to normal sorting
 	if(!::CompareString(LOCALE_USER_DEFAULT, m_stringCompareFlags, _T(""), -1, _T(""), -1))
 		m_stringCompareFlags &= ~SORT_DIGITSASNUMBERS;
+#endif
 }
 
 
