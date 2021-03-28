@@ -15,12 +15,16 @@
 #ifndef _WIN32_WINNT
 #define _WIN32_WINNT 0x0501 // _WIN32_WINNT_WINXP
 #endif
+#if !defined(MPT_BUILD_RETRO)
 #define _AFX_NO_MFC_CONTROLS_IN_DIALOGS // Avoid binary bloat from linking unused MFC controls
+#endif // !MPT_BUILD_RETRO
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
+#if !defined(MPT_BUILD_RETRO)
 #include <afxwin.h>
 #include <afxcmn.h>
+#endif // !MPT_BUILD_RETRO
 #include <windows.h>
 #include <WindowsX.h>
 
@@ -42,7 +46,9 @@
 #include "libopenmpt.hpp"
 #include "libopenmpt_ext.hpp"
 
+#if !defined(MPT_BUILD_RETRO)
 #include "libopenmpt_plugin_gui.hpp"
+#endif // !MPT_BUILD_RETRO
 
 #include "svn_version.h"
 #if defined(OPENMPT_VERSION_REVISION)
@@ -194,6 +200,8 @@ static std::string StringEncode( const std::wstring &src, UINT codepage )
 	return &encoded_string[0];
 }
 
+#if defined(UNICODE)
+
 static std::wstring StringDecode( const std::string & src, UINT codepage )
 {
 	int required_size = MultiByteToWideChar( codepage, 0, src.c_str(), -1, nullptr, 0 );
@@ -205,6 +213,22 @@ static std::wstring StringDecode( const std::string & src, UINT codepage )
 	MultiByteToWideChar( codepage, 0, src.c_str(), -1, &decoded_string[0], decoded_string.size() );
 	return &decoded_string[0];
 }
+
+#else
+
+static std::string StringDecode( const std::string & src, UINT codepage )
+{
+	int required_size = MultiByteToWideChar( codepage, 0, src.c_str(), -1, nullptr, 0 );
+	if(required_size <= 0)
+	{
+		return std::string();
+	}
+	std::vector<WCHAR> decoded_string( required_size );
+	MultiByteToWideChar( codepage, 0, src.c_str(), -1, &decoded_string[0], decoded_string.size() );
+	return StringEncode( &decoded_string[0], CP_ACP );
+}
+
+#endif
 
 template <typename Tstring, typename Tstring2, typename Tstring3>
 static inline Tstring StringReplace( Tstring str, const Tstring2 & oldStr_, const Tstring3 & newStr_ ) {
@@ -480,11 +504,17 @@ static void WINAPI openmpt_About( HWND win ) {
 	credits << std::endl;
 	credits << "Arseny Kapoulkine for pugixml" << std::endl;
 	credits << "https://pugixml.org/" << std::endl;
-	libopenmpt::plugin::gui_show_file_info( win, TEXT(SHORT_TITLE), StringReplace( StringDecode( credits.str(), CP_UTF8 ), L"\n", L"\r\n" ) );
+#if !defined(MPT_BUILD_RETRO)
+	libopenmpt::plugin::gui_show_file_info( win, TEXT(SHORT_TITLE), StringReplace( StringDecode( credits.str(), CP_UTF8 ), TEXT("\n"), TEXT("\r\n") ) );
+#else
+		MessageBox( win, StringReplace( StringDecode( credits.str(), CP_UTF8 ), TEXT("\n"), TEXT("\r\n") ).c_str(), TEXT(SHORT_TITLE), MB_OK );
+#endif
 }
 
 static void WINAPI openmpt_Config( HWND win ) {
+#if !defined(MPT_BUILD_RETRO)
 	libopenmpt::plugin::gui_edit_settings( &self->settings, win, TEXT(SHORT_TITLE) );
+#endif
 	apply_and_save_options();
 }
 
@@ -1382,7 +1412,7 @@ static BOOL WINAPI VisRenderDC( HDC dc, SIZE size, DWORD flags ) {
 		// Force usage of a nice monospace font
 		LOGFONT logfont;
 		GetObject ( GetCurrentObject( dc, OBJ_FONT ), sizeof(logfont), &logfont );
-		wcscpy( logfont.lfFaceName, L"Lucida Console" );
+		wcscpy( logfont.lfFaceName, TEXT("Lucida Console") );
 		visfont = CreateFontIndirect( &logfont );
 	}
 	SIZE text_size;
@@ -1748,7 +1778,7 @@ XMPIN * WINAPI XMPIN_GetInterface( DWORD face, InterfaceProc faceproc ) {
 }; // extern "C"
 
 
-#ifdef _MFC_VER
+#if !defined(MPT_BUILD_RETRO) && defined(_MFC_VER)
 
 namespace libopenmpt {
 namespace plugin {
