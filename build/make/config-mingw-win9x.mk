@@ -9,12 +9,21 @@ CFLAGS_STDC = -std=gnu99
 CXXFLAGS += $(CXXFLAGS_STDCXX)
 CFLAGS += $(CFLAGS_STDC)
 
-CPPFLAGS += -DWIN32 -D_WIN32 -DWINVER=0x0410 -D_WIN32_WINDOWS=0x0410
+CPPFLAGS += -DWIN32 -D_WIN32 -DWINVER=0x0410 -D_WIN32_WINDOWS=0x0410 -DMPT_BUILD_RETRO
 CXXFLAGS += -mconsole
 CFLAGS   += -mconsole
-LDFLAGS  +=
+LDFLAGS  += 
 LDLIBS   += -lm -lole32 -lrpcrt4 -lwinmm
 ARFLAGS  := rcs
+
+LDFLAGS  += -static -static-libgcc -static-libstdc++
+
+#CXXFLAGS += -ffunction-sections -fdata-sections
+#CFLAGS   += -ffunction-sections -fdata-sections
+#LDFLAGS  += -Wl,--gc-sections
+
+CXXFLAGS += -march=i486 -m80387 -mtune=pentium
+CFLAGS   += -march=i486 -m80387 -mtune=pentium
 
 PC_LIBS_PRIVATE += -lole32 -lrpcrt4
 
@@ -25,7 +34,7 @@ SOSUFFIX=.dll
 SOSUFFIXWINDOWS=1
 
 DYNLINK=0
-SHARED_LIB=1
+SHARED_LIB=0
 STATIC_LIB=0
 SHARED_SONAME=0
 
