@@ -502,8 +502,8 @@ void CDSoundDevice::InternalFillAudioBuffer()
 
 		SourceLockedAudioReadPrepare(dwSize1/bytesPerFrame + dwSize2/bytesPerFrame, dwLatency/bytesPerFrame);
 
-		SourceLockedAudioRead(buf1, nullptr, dwSize1/bytesPerFrame);
-		SourceLockedAudioRead(buf2, nullptr, dwSize2/bytesPerFrame);
+		SourceLockedAudioReadVoid(buf1, nullptr, dwSize1/bytesPerFrame);
+		SourceLockedAudioReadVoid(buf2, nullptr, dwSize2/bytesPerFrame);
 
 		if(m_pMixBuffer->Unlock(buf1, dwSize1, buf2, dwSize2) != DS_OK)
 		{
