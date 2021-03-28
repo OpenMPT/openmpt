@@ -92,7 +92,10 @@ SoundDevice::Caps CWaveDevice::InternalGetDeviceCaps()
 	caps.CanDriverPanel = false;
 	caps.HasInternalDither = false;
 	caps.ExclusiveModeDescription = U_("Use direct mode");
-	if(GetSysInfo().IsOriginal())
+	if(GetSysInfo().IsWine)
+	{
+		caps.DefaultSettings.sampleFormat = SampleFormat::Int16;
+	} else if(GetSysInfo().WindowsVersion.IsAtLeast(mpt::OS::Windows::Version::WinVista))
 	{
 		caps.DefaultSettings.sampleFormat = SampleFormat::Float32;
 	} else
@@ -107,7 +110,7 @@ SoundDevice::DynamicCaps CWaveDevice::GetDeviceDynamicCaps(const std::vector<uin
 {
 	MPT_TRACE_SCOPE();
 	SoundDevice::DynamicCaps caps;
-	if(GetSysInfo().IsOriginal())
+	if(GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::OS::Windows::Version::WinVista))
 	{
 		caps.supportedSampleFormats = { SampleFormat::Float32 };
 		caps.supportedExclusiveModeSampleFormats = { SampleFormat::Float32 };
@@ -232,7 +235,7 @@ bool CWaveDevice::InternalOpen()
 	}
 	SetWakeupEvent(m_ThreadWakeupEvent);
 	SetWakeupInterval(m_nWaveBufferSize * 1.0 / m_Settings.GetBytesPerSecond());
-	m_Flags.NeedsClippedFloat = GetSysInfo().IsOriginal();
+	m_Flags.NeedsClippedFloat = (GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::OS::Windows::Version::WinVista));
 	return true;
 }
 
@@ -370,7 +373,11 @@ void CWaveDevice::InternalFillAudioBuffer()
 	ULONG nBytesWritten = 0;
 	while((oldBuffersPending < m_nPreparedHeaders) && !m_Failed)
 	{
+#if (_WIN32_WINNT >= 0x0600)
 		DWORD oldFlags = InterlockedOr(interlocked_access(&m_WaveBuffers[m_nWriteBuffer].dwFlags), 0);
+#else
+		DWORD oldFlags = _InterlockedOr(interlocked_access(&m_WaveBuffers[m_nWriteBuffer].dwFlags), 0);
+#endif
 		uint32 driverBugs = 0;
 		if(oldFlags & WHDR_INQUEUE)
 		{
@@ -405,7 +412,11 @@ void CWaveDevice::InternalFillAudioBuffer()
 		SourceLockedAudioReadPrepare(m_nWaveBufferSize / bytesPerFrame, nLatency / bytesPerFrame);
 		SourceLockedAudioReadVoid(m_WaveBuffers[m_nWriteBuffer].lpData, nullptr, m_nWaveBufferSize / bytesPerFrame);
 		nBytesWritten += m_nWaveBufferSize;
+#if (_WIN32_WINNT >= 0x0600)
 		InterlockedAnd(interlocked_access(&m_WaveBuffers[m_nWriteBuffer].dwFlags), ~static_cast<DWORD>(WHDR_INQUEUE|WHDR_DONE));
+#else
+		_InterlockedAnd(interlocked_access(&m_WaveBuffers[m_nWriteBuffer].dwFlags), ~static_cast<DWORD>(WHDR_INQUEUE|WHDR_DONE));
+#endif
 		InterlockedExchange(interlocked_access(&m_WaveBuffers[m_nWriteBuffer].dwBufferLength), m_nWaveBufferSize);
 		InterlockedIncrement(&m_nBuffersPending);
 		oldBuffersPending++; // increment separately to avoid looping without leaving at all when rendering takes more than 100% CPU
@@ -512,7 +523,11 @@ int64 CWaveDevice::InternalGetStreamPositionFrames() const
 void CWaveDevice::HandleWaveoutDone(WAVEHDR *hdr)
 {
 	MPT_TRACE_SCOPE();
+#if (_WIN32_WINNT >= 0x0600)
 	DWORD flags = InterlockedOr(interlocked_access(&hdr->dwFlags), 0);
+#else
+	DWORD flags = _InterlockedOr(interlocked_access(&hdr->dwFlags), 0);
+#endif
 	std::size_t hdrIndex = hdr - &(m_WaveBuffers[0]);
 	uint32 driverBugs = 0;
 	if(hdrIndex != m_nDoneBuffer)
@@ -609,10 +624,10 @@ std::vector<SoundDevice::Info> CWaveDevice::EnumerateDevices(SoundDevice::SysInf
 		}
 		info.default_ = ((index == 0) ? Info::Default::Managed : Info::Default::None);
 		info.flags = {
-			sysInfo.SystemClass == mpt::OS::Class::Windows ? Info::Usability::Deprecated : Info::Usability::NotAvailable,
+			sysInfo.SystemClass == mpt::OS::Class::Windows ? sysInfo.IsWindowsOriginal() && sysInfo.WindowsVersion.IsBefore(mpt::OS::Windows::Version::Win7) ? Info::Usability::Usable : Info::Usability::Deprecated : Info::Usability::NotAvailable,
 			Info::Level::Primary,
 			sysInfo.SystemClass == mpt::OS::Class::Windows && sysInfo.IsWindowsOriginal() ? Info::Compatible::Yes : Info::Compatible::No,
-			Info::Api::Emulated,
+			sysInfo.SystemClass == mpt::OS::Class::Windows ? sysInfo.IsWindowsWine() ? Info::Api::Emulated : sysInfo.WindowsVersion.IsAtLeast(mpt::OS::Windows::Version::WinVista) ? Info::Api::Emulated : Info::Api::Native : Info::Api::Emulated,
 			Info::Io::OutputOnly,
 			Info::Mixing::Software,
 			Info::Implementor::OpenMPT

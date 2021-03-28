@@ -160,7 +160,11 @@ void COptionsAdvanced::ReInit()
 			if(gi == m_groups.end())
 			{
 				LVGROUP group;
+	#if _WIN32_WINNT >= 0x0600
 				group.cbSize = LVGROUP_V5_SIZE;
+	#else
+				group.cbSize = sizeof(group);
+	#endif
 				group.mask = LVGF_HEADER | LVGF_GROUPID;
 #if MPT_USTRING_MODE_WIDE
 				group.pszHeader = const_cast<wchar_t *>(section.c_str());

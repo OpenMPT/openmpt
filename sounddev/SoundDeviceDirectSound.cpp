@@ -109,10 +109,10 @@ static BOOL WINAPI DSEnumCallback(GUID * lpGuid, LPCTSTR lpstrDescription, LPCTS
 	info.apiName = U_("DirectSound");
 	info.useNameAsIdentifier = false;
 	info.flags = {
-		sysInfo.SystemClass == mpt::OS::Class::Windows ? Info::Usability::Deprecated : Info::Usability::NotAvailable,
+		sysInfo.SystemClass == mpt::OS::Class::Windows ? sysInfo.IsWindowsOriginal() && sysInfo.WindowsVersion.IsBefore(mpt::OS::Windows::Version::Win7) ? Info::Usability::Usable : Info::Usability::Deprecated : Info::Usability::NotAvailable,
 		Info::Level::Primary,
 		sysInfo.SystemClass == mpt::OS::Class::Windows && sysInfo.IsWindowsWine() ? Info::Compatible::Yes : Info::Compatible::No,
-		Info::Api::Emulated,
+		sysInfo.SystemClass == mpt::OS::Class::Windows ? sysInfo.IsWindowsWine() ? Info::Api::Emulated : sysInfo.WindowsVersion.IsAtLeast(mpt::OS::Windows::Version::WinVista) ? Info::Api::Emulated : Info::Api::Native : Info::Api::Emulated,
 		Info::Io::OutputOnly,
 		Info::Mixing::Software,
 		Info::Implementor::OpenMPT
@@ -165,7 +165,7 @@ SoundDevice::Caps CDSoundDevice::InternalGetDeviceCaps()
 	caps.HasNamedInputSources = false;
 	caps.CanDriverPanel = false;
 	caps.ExclusiveModeDescription = U_("Use primary buffer");
-	caps.DefaultSettings.sampleFormat = GetSysInfo().IsOriginal() ? SampleFormatFloat32 : SampleFormatInt16;
+	caps.DefaultSettings.sampleFormat = (GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::OS::Windows::Version::WinVista)) ? SampleFormat::Float32 : SampleFormat::Int16;
 	IDirectSound *dummy = nullptr;
 	IDirectSound *ds = nullptr;
 	if(m_piDS)
@@ -244,33 +244,34 @@ SoundDevice::DynamicCaps CDSoundDevice::GetDeviceDynamicCaps(const std::vector<u
 				}
 			}
 		}
-		if(GetSysInfo().IsOriginal())
+		if(GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::OS::Windows::Version::WinVista))
 		{
-			caps.supportedSampleFormats = { SampleFormatFloat32 };
-			caps.supportedExclusiveModeSampleFormats = { SampleFormatFloat32 };
+			// Vista
+			caps.supportedSampleFormats = { SampleFormat::Float32 };
+			caps.supportedExclusiveModeSampleFormats = { SampleFormat::Float32 };
 		} else if(!(dscaps.dwFlags & DSCAPS_EMULDRIVER))
 		{
-			// Wine wdm-style
-			caps.supportedSampleFormats = { SampleFormatFloat32, SampleFormatInt32, SampleFormatInt24, SampleFormatInt16, SampleFormatUnsigned8 };
+			// XP wdm
+			caps.supportedSampleFormats = { SampleFormat::Float32, SampleFormat::Int32, SampleFormat::Int24, SampleFormat::Int16, SampleFormat::Unsigned8 };
 			caps.supportedExclusiveModeSampleFormats.clear();
 			if(dscaps.dwFlags & DSCAPS_PRIMARY8BIT)
 			{
-				caps.supportedExclusiveModeSampleFormats.push_back(SampleFormatUnsigned8);
+				caps.supportedExclusiveModeSampleFormats.push_back(SampleFormat::Unsigned8);
 			}
 			if(dscaps.dwFlags & DSCAPS_PRIMARY16BIT)
 			{
-				caps.supportedExclusiveModeSampleFormats.push_back(SampleFormatInt16);
+				caps.supportedExclusiveModeSampleFormats.push_back(SampleFormat::Int16);
 			}
 			if(caps.supportedExclusiveModeSampleFormats.empty())
 			{
-				caps.supportedExclusiveModeSampleFormats = { SampleFormatFloat32, SampleFormatInt32, SampleFormatInt24, SampleFormatInt16, SampleFormatUnsigned8 };
+				caps.supportedExclusiveModeSampleFormats = { SampleFormat::Float32, SampleFormat::Int32, SampleFormat::Int24, SampleFormat::Int16, SampleFormat::Unsigned8 };
 			}
 		} else
 		{
-			// Wine vdx-style
+			// XP vdx
 			// nothing, announce all, fail later
-			caps.supportedSampleFormats = { SampleFormatFloat32, SampleFormatInt32, SampleFormatInt24, SampleFormatInt16, SampleFormatUnsigned8 };
-			caps.supportedExclusiveModeSampleFormats = { SampleFormatFloat32, SampleFormatInt32, SampleFormatInt24, SampleFormatInt16, SampleFormatUnsigned8 };
+			caps.supportedSampleFormats = { SampleFormat::Float32, SampleFormat::Int32, SampleFormat::Int24, SampleFormat::Int16, SampleFormat::Unsigned8 };
+			caps.supportedExclusiveModeSampleFormats = { SampleFormat::Float32, SampleFormat::Int32, SampleFormat::Int24, SampleFormat::Int16, SampleFormat::Unsigned8 };
 		}
 	}
 	if(dummy)
@@ -365,9 +366,9 @@ bool CDSoundDevice::InternalOpen()
 		m_pMixBuffer = m_pPrimary;
 		m_pMixBuffer->AddRef();
 	}
-	if(m_Settings.sampleFormat == SampleFormatInt8)
+	if(m_Settings.sampleFormat == SampleFormat::Int8)
 	{
-		m_Settings.sampleFormat  = SampleFormatUnsigned8;
+		m_Settings.sampleFormat  = SampleFormat::Unsigned8;
 	}
 	LPVOID lpBuf1, lpBuf2;
 	DWORD dwSize1, dwSize2;
@@ -385,7 +386,7 @@ bool CDSoundDevice::InternalOpen()
 	}
 	m_dwWritePos = 0xFFFFFFFF;
 	SetWakeupInterval(std::min(m_Settings.UpdateInterval, m_nDSoundBufferSize / (2.0 * m_Settings.GetBytesPerSecond())));
-	m_Flags.NeedsClippedFloat = GetSysInfo().IsOriginal();
+	m_Flags.NeedsClippedFloat = (GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::OS::Windows::Version::WinVista));
 	return true;
 }
 

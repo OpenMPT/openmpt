@@ -18,7 +18,9 @@
 
 #pragma comment(lib, "strmiids.lib")
 
+#if (_WIN32_WINNT >= 0x600)
 #pragma comment(lib, "avrt.lib")
+#endif
 #if defined(MPT_WITH_DIRECTSOUND)
 #pragma comment(lib, "dsound.lib")
 #endif // MPT_WITH_DIRECTSOUND

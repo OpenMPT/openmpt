@@ -108,7 +108,9 @@
 #define MPT_WITH_FLAC
 //#define MPT_WITH_LTDL
 #if MPT_OS_WINDOWS
+#if (_WIN32_WINNT >= 0x0601)
 #define MPT_WITH_MEDIAFOUNDATION
+#endif
 #endif
 //#define MPT_WITH_MINIMP3
 //#define MPT_WITH_MINIZ

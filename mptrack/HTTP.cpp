@@ -473,6 +473,27 @@ Request &Request::SetURI(const URI &uri)
 }
 
 
+#if defined(MPT_BUILD_RETRO)
+Request &Request::InsecureTLSDowngradeWindowsXP()
+{
+	if(mpt::Windows::IsOriginal() && mpt::Windows::Version::Current().IsBefore(mpt::Windows::Version::WinVista))
+	{
+		// TLS 1.0 is not enabled by default until IE7. Since WinInet won't let us override this setting, we cannot assume that HTTPS
+		// is going to work on older systems. Besides... Windows XP is already enough of a security risk by itself. :P
+		if(protocol == Protocol::HTTPS)
+		{
+			protocol = Protocol::HTTP;
+		}
+		if(port == Port::HTTPS)
+		{
+			port = Port::HTTP;
+		}
+	}
+	return *this;
+}
+#endif // MPT_BUILD_RETRO
+
+
 Result SimpleGet(InternetSession &internet, Protocol protocol, const mpt::ustring &host, const mpt::ustring &path)
 {
 	HTTP::Request request;

@@ -19,7 +19,9 @@
 #include <algorithm>
 
 #if MPT_OS_WINDOWS
+#if (_WIN32_WINNT >= 0x600)
 #include <avrt.h>
+#endif
 #include <mmsystem.h>
 #endif // MPT_OS_WINDOWS
 
@@ -135,7 +137,7 @@ CAudioThread::~CAudioThread()
 }
 
 
-CPriorityBooster::CPriorityBooster(SoundDevice::SysInfo sysInfo, bool boostPriority, const mpt::winstring & priorityClass)
+CPriorityBooster::CPriorityBooster(SoundDevice::SysInfo sysInfo, bool boostPriority, const mpt::winstring & priorityClass, int priority)
 	: m_SysInfo(sysInfo)
 	, m_BoostPriority(boostPriority)
 	, task_idx(0)
@@ -147,10 +149,15 @@ CPriorityBooster::CPriorityBooster(SoundDevice::SysInfo sysInfo, bool boostPrior
 	#endif
 	if(m_BoostPriority)
 	{
+#if (_WIN32_WINNT >= 0x600)
 		if(!priorityClass.empty())
 		{
 			hTask = AvSetMmThreadCharacteristics(priorityClass.c_str(), &task_idx);
 		}
+#else // < Vista
+		oldPriority = GetThreadPriority(GetCurrentThread());
+		SetThreadPriority(GetCurrentThread(), m_Priority);
+#endif
 	}
 }
 
@@ -160,12 +167,16 @@ CPriorityBooster::~CPriorityBooster()
 	MPT_TRACE_SCOPE();
 	if(m_BoostPriority)
 	{
+#if (_WIN32_WINNT >= 0x600)
 		if(hTask)
 		{
 			AvRevertMmThreadCharacteristics(hTask);
 		}
 		hTask = NULL;
 		task_idx = 0;
+#else // < Vista
+		SetThreadPriority(GetCurrentThread(), oldPriority);
+#endif
 	}
 }
 
@@ -289,7 +300,7 @@ DWORD CAudioThread::AudioThread()
 		if(!terminate)
 		{
 
-			CPriorityBooster priorityBooster(m_SoundDevice.GetSysInfo(), m_SoundDevice.m_Settings.BoostThreadPriority, m_MMCSSClass);
+			CPriorityBooster priorityBooster(m_SoundDevice.GetSysInfo(), m_SoundDevice.m_Settings.BoostThreadPriority, m_MMCSSClass, m_SoundDevice.m_AppInfo.BoostedThreadPriorityXP);
 			CPeriodicWaker periodicWaker(m_WakeupInterval);
 
 			m_SoundDevice.StartFromSoundThread();

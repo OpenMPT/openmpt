@@ -52,10 +52,12 @@ class CPriorityBooster
 private:
 	SoundDevice::SysInfo m_SysInfo;
 	bool m_BoostPriority;
+	int m_Priority;
 	DWORD task_idx;
 	HANDLE hTask;
+	int oldPriority;
 public:
-	CPriorityBooster(SoundDevice::SysInfo sysInfo, bool boostPriority, const mpt::winstring & priorityClass);
+	CPriorityBooster(SoundDevice::SysInfo sysInfo, bool boostPriority, const mpt::winstring & priorityClass, int priority);
 	~CPriorityBooster();
 };
 

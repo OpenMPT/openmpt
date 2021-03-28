@@ -60,7 +60,29 @@ namespace GDIP
 static CComPtr<IStream> GetStream(mpt::const_byte_span data)
 {
 	CComPtr<IStream> stream;
+#if (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
 	stream.Attach(SHCreateMemStream(mpt::byte_cast<const unsigned char *>(data.data()), mpt::saturate_cast<UINT>(data.size())));
+#else
+	HGLOBAL hGlobal = GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT, data.size());
+	if(hGlobal == NULL)
+	{
+		throw bad_image();
+	}
+	void * mem = GlobalLock(hGlobal);
+	if(!mem)
+	{
+		hGlobal = GlobalFree(hGlobal);
+		throw bad_image();
+	}
+	std::memcpy(mem, data.data(), data.size());
+	GlobalUnlock(hGlobal);
+	if(CreateStreamOnHGlobal(hGlobal, TRUE, &stream) != S_OK)
+	{
+		hGlobal = GlobalFree(hGlobal);
+		throw bad_image();
+	}
+	hGlobal = NULL;
+#endif
 	if(!stream)
 	{
 		throw bad_image();
