@@ -14,6 +14,10 @@
 
 #include <vector>
 
+#if (_WIN32_WINNT < _WIN32_WINNT_VISTA)
+#include <intrin.h>
+#endif
+
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -231,27 +235,47 @@ public:
 	{
 		static_assert(sizeof(m_value) >= sizeof(T));
 		MPT_ASSERT((intptr_t(&m_value) & 3) == 0);
+#if (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
 		InterlockedExchange(&m_value, static_cast<LONG>(value));
+#else
+		_InterlockedExchange(&m_value, static_cast<LONG>(value));
+#endif
 		return *this;
 	}
 	operator T() const
 	{
+#if (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
 		return static_cast<T>(InterlockedAdd(&m_value, 0));
+#else
+		return static_cast<T>(_InterlockedExchangeAdd(&m_value, 0));
+#endif
 	}
 
 	T exchange(T desired)
 	{
+#if (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
 		return static_cast<T>(InterlockedExchange(&m_value, static_cast<LONG>(desired)));
+#else
+		return static_cast<T>(_InterlockedExchange(&m_value, static_cast<LONG>(desired)));
+#endif
 	}
 
 	T fetch_add(T arg)
 	{
+#if (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
 		return static_cast<T>(InterlockedExchangeAdd(&m_value, static_cast<LONG>(arg)));
+#else
+		return static_cast<T>(_InterlockedExchangeAdd(&m_value, static_cast<LONG>(arg)));
+#endif
 	}
 
 	bool compare_exchange_strong(T &expected, T desired)
 	{
+#if (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
 		return InterlockedCompareExchange(&m_value, static_cast<LONG>(desired), static_cast<LONG>(expected)) == static_cast<LONG>(expected);
+#else
+		return _InterlockedCompareExchange(&m_value, static_cast<LONG>(desired), static_cast<LONG>(expected)) == static_cast<LONG>(expected);
+#endif
 	}
 
 private:
