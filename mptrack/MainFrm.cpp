@@ -185,6 +185,9 @@ void CMainFrame::Initialize()
 	//Adding version number to the frame title
 	CString title = GetTitle();
 	title += _T(" ") + mpt::cfmt::val(Version::Current());
+	#if defined(MPT_BUILD_RETRO)
+		title += UL_(" RETRO");
+	#endif // MPT_BUILD_RETRO
 	if(Build::IsDebugBuild())
 	{
 		title += _T(" DEBUG");
