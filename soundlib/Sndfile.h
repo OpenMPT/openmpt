@@ -381,6 +381,8 @@ public:
 
 	typedef uint32 samplecount_t; // Number of rendered samples
 
+	static constexpr uint32 TICKS_ROW_FINISHED = uint32_max - 1u;
+
 public:	// for Editing
 #ifdef MODPLUG_TRACKER
 	CModDoc *m_pModDoc = nullptr; // Can be a null pointer for example when previewing samples from the treeview.

@@ -1092,6 +1092,7 @@ double module_impl::set_position_order_row( std::int32_t order, std::int32_t row
 	m_sndFile->m_PlayState.m_nCurrentOrder = static_cast<ORDERINDEX>( order );
 	m_sndFile->SetCurrentOrder( static_cast<ORDERINDEX>( order ) );
 	m_sndFile->m_PlayState.m_nNextRow = static_cast<ROWINDEX>( row );
+	m_sndFile->m_PlayState.m_nTickCount = CSoundFile::TICKS_ROW_FINISHED;
 	m_currentPositionSeconds = m_sndFile->GetLength( m_ctl_seek_sync_samples ? eAdjustSamplePositions : eAdjust, GetLengthTarget( static_cast<ORDERINDEX>( order ), static_cast<ROWINDEX>( row ) ) ).back().duration;
 	return m_currentPositionSeconds;
 }
