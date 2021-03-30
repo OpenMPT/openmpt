@@ -7,6 +7,13 @@ is just a high-level summary.
 
 ### libopenmpt 0.4.20-pre
 
+ *  [**Sec**] Possible null-pointer dereference read caused by a sequence of
+    `openmpt::module::read`, `openmpt::module::set_position_order_row` pointing
+    to an invalid pattern, and another `openmpt::module::read` call. To trigger
+    the crash, pattern 0 must not exist in the file and the tick speed before
+    the position jump must be lower than the initial speed of the module.
+    (r14531)
+
  *  [**Bug**] `libopenmpt.pc` did not list required system libraries `ole32.lib`
     and `rpcrt4.lib` on Windows in `Libs.Private` field for static builds.
 
