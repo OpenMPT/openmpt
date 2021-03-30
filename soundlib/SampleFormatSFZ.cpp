@@ -425,7 +425,7 @@ struct SFZRegion
 			Read(value, loopStart, SmpLength(0), MAX_SAMPLE_LENGTH);
 		else if(key == "loop_end" || key == "loopend")
 			Read(value, loopEnd, SmpLength(0), MAX_SAMPLE_LENGTH);
-		else if(key == "loop_crossfade")
+		else if(key == "loop_crossfade" || key == "loopcrossfade")
 			Read(value, loopCrossfade, 0.0, DBL_MAX);
 		else if(key == "loop_mode" || key == "loopmode")
 		{
@@ -685,7 +685,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 					break;
 				}
 				const std::string key = mpt::ToLowerCaseAscii(s.substr(0, keyEnd));
-				if(key == "sample" || key == "default_path" || SFZStartsWith(key, "label_cc") || SFZStartsWith(key, "region_label"))
+				if(key == "sample" || key == "default_path" || SFZStartsWith(key, "label_cc") || SFZStartsWith(key, "label_key") || SFZStartsWith(key, "region_label"))
 				{
 					// Sample / CC name may contain spaces...
 					charsRead = s.find_first_of("=\t<", valueStart);
