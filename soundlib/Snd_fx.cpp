@@ -1223,7 +1223,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			m_PlayState = std::move(playState);
 			m_PlayState.m_nNextRow = m_PlayState.m_nRow;
 			m_PlayState.m_nFrameDelay = m_PlayState.m_nPatternDelay = 0;
-			m_PlayState.m_nTickCount = Util::MaxValueOfType(m_PlayState.m_nTickCount) - 1;
+			m_PlayState.m_nTickCount = TICKS_ROW_FINISHED;
 			m_PlayState.m_bPositionChanged = true;
 			for(CHANNELINDEX n = 0; n < GetNumChannels(); n++)
 			{
@@ -3485,6 +3485,15 @@ void CSoundFile::UpdateS3MEffectMemory(ModChannel *pChn, ModCommand::PARAM param
 uint32 CSoundFile::CalculateXParam(PATTERNINDEX pat, ROWINDEX row, CHANNELINDEX chn, bool *isExtended) const
 {
 	if(isExtended != nullptr) *isExtended = false;
+	if(!Patterns.IsValidPat(pat))
+	{
+#ifdef MPT_BUILD_FUZZER
+		// Ending up in this situation implies a logic error
+		std::abort();
+#else
+		return 0;
+#endif
+	}
 	ROWINDEX maxCommands = 4;
 	const ModCommand *m = Patterns[pat].GetpModCommand(row, chn);
 	uint32 val = m->param;
