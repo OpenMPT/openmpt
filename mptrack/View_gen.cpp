@@ -121,6 +121,7 @@ BEGIN_MESSAGE_MAP(CViewGlobals, CFormView)
 	ON_COMMAND(ID_EDIT_REDO, &CViewGlobals::OnEditRedo)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_UNDO, &CViewGlobals::OnUpdateUndo)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_REDO, &CViewGlobals::OnUpdateRedo)
+	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXT, 0, 0xFFFF, &CViewGlobals::OnToolTipText)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -175,6 +176,7 @@ void CViewGlobals::OnInitialUpdate()
 	m_nCurrentPlugin = 0;
 	m_nCurrentParam = 0;
 	CFormView::OnInitialUpdate();
+	EnableToolTips();
 
 	if (pFrame)
 	{
@@ -274,7 +276,7 @@ void CViewGlobals::RecalcLayout()
 		GetClientRect(&rect);
 		if (rect.right < m_rcClient.right) rect.right = m_rcClient.right;
 		if (rect.bottom < m_rcClient.bottom) rect.bottom = m_rcClient.bottom;
-		m_TabCtrl.SetWindowPos(NULL, 0,0, rect.right, rect.bottom, SWP_NOZORDER|SWP_NOMOVE);
+		m_TabCtrl.SetWindowPos(&CWnd::wndBottom, 0,0, rect.right, rect.bottom, SWP_NOMOVE);
 	}
 }
 
@@ -1708,6 +1710,70 @@ void CViewGlobals::FillPluginProgramBox(int32 firstProg, int32 lastProg)
 
 	m_CbnPreset.SetRedraw(TRUE);
 	m_CbnPreset.Invalidate(FALSE);
+}
+
+
+BOOL CViewGlobals::OnToolTipText(UINT, NMHDR *pNMHDR, LRESULT *pResult)
+{
+	auto pTTT = reinterpret_cast<TOOLTIPTEXT *>(pNMHDR);
+	UINT_PTR id = pNMHDR->idFrom;
+	if(pTTT->uFlags & TTF_IDISHWND)
+	{
+		// idFrom is actually the HWND of the tool
+		id = static_cast<UINT_PTR>(::GetDlgCtrlID(reinterpret_cast<HWND>(id)));
+	}
+
+	mpt::tstring text;
+	const auto &chnSettings = GetDocument()->GetSoundFile().ChnSettings;
+	switch(id)
+	{
+		case IDC_EDIT1:
+		case IDC_EDIT3:
+		case IDC_EDIT5:
+		case IDC_EDIT7:
+			text = CModDoc::LinearToDecibels(chnSettings[m_nActiveTab * CHANNELS_IN_TAB + (id - IDC_EDIT1) / 2].nVolume, 64.0);
+			break;
+		case IDC_SLIDER1:
+		case IDC_SLIDER3:
+		case IDC_SLIDER5:
+		case IDC_SLIDER7:
+			text = CModDoc::LinearToDecibels(chnSettings[m_nActiveTab * CHANNELS_IN_TAB + (id - IDC_SLIDER1) / 2].nVolume, 64.0);
+			break;
+		case IDC_EDIT2:
+		case IDC_EDIT4:
+		case IDC_EDIT6:
+		case IDC_EDIT8:
+			text = CModDoc::PanningToString(chnSettings[m_nActiveTab * CHANNELS_IN_TAB + (id - IDC_EDIT2) / 2].nPan, 128);
+			break;
+		case IDC_SLIDER2:
+		case IDC_SLIDER4:
+		case IDC_SLIDER6:
+		case IDC_SLIDER8:
+			text = CModDoc::PanningToString(chnSettings[m_nActiveTab * CHANNELS_IN_TAB + (id - IDC_SLIDER2) / 2].nPan, 128);
+			break;
+		case IDC_EDIT16:
+			{
+				const auto gain = GetDocument()->GetSoundFile().m_MixPlugins[m_nCurrentPlugin].GetGain();
+				text = CModDoc::LinearToDecibels(gain ? gain : 10, 10.0);
+			}
+			break;
+		case IDC_BUTTON5:
+			text = _T("Previous Plugin");
+			break;
+		case IDC_BUTTON4:
+			text = _T("Next Plugin");
+			break;
+		default:
+			return FALSE;
+	}
+
+	mpt::String::WriteWinBuf(pTTT->szText) = text;
+	*pResult = 0;
+
+	// bring the tooltip window above other popup windows
+	::SetWindowPos(pNMHDR->hwndFrom, HWND_TOP, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOSIZE | SWP_NOMOVE | SWP_NOOWNERZORDER);
+
+	return TRUE;  // message was handled
 }
 
 

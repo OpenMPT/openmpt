@@ -1640,6 +1640,14 @@ BOOL QuickChannelProperties::OnToolTipText(UINT, NMHDR *pNMHDR, LRESULT *pResult
 	CommandID cmd = kcNull;
 	switch (id)
 	{
+	case IDC_EDIT1:
+	case IDC_SLIDER1:
+		text = CModDoc::LinearToDecibels(m_document->GetSoundFile().ChnSettings[m_channel].nVolume, 64.0);
+		break;
+	case IDC_EDIT2:
+	case IDC_SLIDER2:
+		text = CModDoc::PanningToString(m_document->GetSoundFile().ChnSettings[m_channel].nPan, 128);
+		break;
 	case IDC_BUTTON1:
 		text = _T("Previous Channel");
 		cmd = kcChnSettingsPrev;
