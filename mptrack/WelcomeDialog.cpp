@@ -113,6 +113,11 @@ BOOL WelcomeDlg::OnInitDialog()
 			int i = combo->AddString(_T("OpenMPT / Chromatic (") + CString(keyFileName) + _T(")"));
 			combo->SetItemDataPtr(i, (void *)keyFile);
 			combo->SetCurSel(i);
+
+			// As this is presented as the default, load it right now, even if the user closes the dialog through the close button
+			auto cmdSet = std::make_unique<CCommandSet>();
+			cmdSet->LoadFile(GetFullKeyPath(keyFile));
+			CMainFrame::GetInputHandler()->SetNewCommandSet(cmdSet.get());
 		}
 	}
 	combo->SetItemDataPtr(combo->AddString(_T("Impulse Tracker")), (void*)("US_mpt-it2_classic"));
@@ -162,12 +167,13 @@ void WelcomeDlg::OnOK()
 
 	CComboBox *combo = (CComboBox *)GetDlgItem(IDC_COMBO1);
 	const char *keyFile = static_cast<char *>(combo->GetItemDataPtr(combo->GetCurSel()));
+	auto cmdSet = std::make_unique<CCommandSet>();
 	if(keyFile != nullptr)
-	{
-		auto cmdSet = std::make_unique<CCommandSet>();
 		cmdSet->LoadFile(GetFullKeyPath(keyFile));
-		CMainFrame::GetInputHandler()->SetNewCommandSet(cmdSet.get());
-	}
+	else
+		cmdSet->LoadDefaultKeymap();
+	CMainFrame::GetInputHandler()->SetNewCommandSet(cmdSet.get());
+
 	if(runUpdates)
 	{
 		CUpdateCheck::DoAutoUpdateCheck();
