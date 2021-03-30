@@ -709,20 +709,20 @@ struct SymPosition
 {
 	uint8be  dummy[4];
 	uint16be loopNum;
-	uint16be loopCount;  // only used during playback
+	uint16be loopCount;  // Only used during playback
 	uint16be pattern;
 	uint16be start;
 	uint16be length;
 	uint16be speed;
 	int16be  transpose;
-	uint16be eventsPerLine;  // unused
+	uint16be eventsPerLine;  // Unused
 
 	uint8be  padding[12];
 
-	// used to compare position entries for mapping them to OpenMPT patterns
+	// Used to compare position entries for mapping them to OpenMPT patterns
 	bool operator<(const SymPosition &other) const
 	{
-		return std::tie(pattern, start, length, transpose, speed, loopNum) < std::tie(other.pattern, other.start, other.length, other.transpose, other.speed, other.loopNum);
+		return std::tie(pattern, start, length, transpose, speed) < std::tie(other.pattern, other.start, other.length, other.transpose, other.speed);
 	}
 };
 
