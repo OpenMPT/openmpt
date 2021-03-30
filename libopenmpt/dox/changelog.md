@@ -7,6 +7,13 @@ is just a high-level summary.
 
 ### libopenmpt 0.3.29-pre
 
+  *  [**Sec**] Possible null-pointer dereference read caused by a sequence of
+    `openmpt::module::read`, `openmpt::module::set_position_order_row` pointing
+    to an invalid pattern, and another `openmpt::module::read` call. To trigger
+    the crash, pattern 0 must not exist in the file and the tick speed before
+    the position jump must be lower than the initial speed of the module.
+    (r14532)
+
  *  mpg123: Update to v1.26.5 (2021-03-22).
 
 ### libopenmpt 0.3.28 (2021-03-20)
