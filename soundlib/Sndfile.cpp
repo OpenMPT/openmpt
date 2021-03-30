@@ -567,7 +567,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 	m_PlayState.m_nPattern = 0;
 	m_PlayState.m_nBufferCount = 0;
 	m_PlayState.m_dBufferDiff = 0;
-	m_PlayState.m_nTickCount = m_PlayState.m_nMusicSpeed;
+	m_PlayState.m_nTickCount = TICKS_ROW_FINISHED;
 	m_PlayState.m_nNextRow = 0;
 	m_PlayState.m_nRow = 0;
 	m_PlayState.m_nPatternDelay = 0;
@@ -790,7 +790,7 @@ void CSoundFile::ResetPlayPos()
 
 	m_PlayState.m_nNextOrder = 0;
 	m_PlayState.m_nNextRow = 0;
-	m_PlayState.m_nTickCount = m_PlayState.m_nMusicSpeed;
+	m_PlayState.m_nTickCount = TICKS_ROW_FINISHED;
 	m_PlayState.m_nBufferCount = 0;
 	m_PlayState.m_nPatternDelay = 0;
 	m_PlayState.m_nFrameDelay = 0;
@@ -838,7 +838,7 @@ void CSoundFile::SetCurrentOrder(ORDERINDEX nOrder)
 		m_PlayState.m_nNextOrder = nOrder;
 		m_PlayState.m_nRow = m_PlayState.m_nNextRow = 0;
 		m_PlayState.m_nPattern = 0;
-		m_PlayState.m_nTickCount = m_PlayState.m_nMusicSpeed;
+		m_PlayState.m_nTickCount = TICKS_ROW_FINISHED;
 		m_PlayState.m_nBufferCount = 0;
 		m_PlayState.m_nPatternDelay = 0;
 		m_PlayState.m_nFrameDelay = 0;
@@ -968,7 +968,7 @@ void CSoundFile::LoopPattern(PATTERNINDEX nPat, ROWINDEX nRow)
 		if(nRow >= Patterns[nPat].GetNumRows()) nRow = 0;
 		m_PlayState.m_nPattern = nPat;
 		m_PlayState.m_nRow = m_PlayState.m_nNextRow = nRow;
-		m_PlayState.m_nTickCount = m_PlayState.m_nMusicSpeed;
+		m_PlayState.m_nTickCount = TICKS_ROW_FINISHED;
 		m_PlayState.m_nPatternDelay = 0;
 		m_PlayState.m_nFrameDelay = 0;
 		m_PlayState.m_nextPatStartRow = 0;
@@ -984,7 +984,7 @@ void CSoundFile::DontLoopPattern(PATTERNINDEX nPat, ROWINDEX nRow)
 	if(nRow >= Patterns[nPat].GetNumRows()) nRow = 0;
 	m_PlayState.m_nPattern = nPat;
 	m_PlayState.m_nRow = m_PlayState.m_nNextRow = nRow;
-	m_PlayState.m_nTickCount = m_PlayState.m_nMusicSpeed;
+	m_PlayState.m_nTickCount = TICKS_ROW_FINISHED;
 	m_PlayState.m_nPatternDelay = 0;
 	m_PlayState.m_nFrameDelay = 0;
 	m_PlayState.m_nBufferCount = 0;
