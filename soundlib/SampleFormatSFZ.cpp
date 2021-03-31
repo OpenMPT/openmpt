@@ -1171,24 +1171,31 @@ bool CSoundFile::SaveSFZInstrument(INSTRUMENTINDEX nInstr, std::ostream &f, cons
 		else
 			sampleName += P_(".wav");
 
+		bool success = false;
 		try
 		{
-			mpt::SafeOutputFile fSmp(sampleName, std::ios::binary, flushMode);
-			if(fSmp)
+			mpt::SafeOutputFile sfSmp(sampleName, std::ios::binary, flushMode);
+			if(sfSmp)
 			{
-				//fSmp.exceptions(fSmp.exceptions() | std::ios::badbit | std::ios::failbit);
+				mpt::ofstream &fSmp = sfSmp;
+				fSmp.exceptions(fSmp.exceptions() | std::ios::badbit | std::ios::failbit);
 
 				if(isAdlib)
-					SaveS3ISample(ins->Keyboard[i], fSmp);
+					success = SaveS3ISample(ins->Keyboard[i], fSmp);
 				else if(useFLACsamples)
-					SaveFLACSample(ins->Keyboard[i], fSmp);
+					success = SaveFLACSample(ins->Keyboard[i], fSmp);
 				else
-					SaveWAVSample(ins->Keyboard[i], fSmp);
+					success = SaveWAVSample(ins->Keyboard[i], fSmp);
 			}
 		} catch(const std::exception &)
 		{
+			success = false;
+		}
+		if(!success)
+		{
 			AddToLog(LogError, MPT_USTRING("Unable to save sample: ") + sampleName.ToUnicode());
 		}
+
 
 		f << "\n\n<region>";
 		if(!m_szNames[ins->Keyboard[i]].empty())

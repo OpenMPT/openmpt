@@ -380,9 +380,12 @@ bool CModDoc::SaveSample(SAMPLEINDEX smp)
 
 			try
 			{
-				mpt::SafeOutputFile f(filename, std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
-				if(f)
+				mpt::SafeOutputFile sf(filename, std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
+				if(sf)
 				{
+					mpt::ofstream &f = sf;
+					f.exceptions(f.exceptions() | std::ios::badbit | std::ios::failbit);
+
 					if(sample.uFlags[CHN_ADLIB] || format == dfS3I)
 						success = m_SndFile.SaveS3ISample(smp, f);
 					else if(format != dfWAV)
