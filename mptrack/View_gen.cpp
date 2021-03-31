@@ -394,9 +394,12 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 				s = mpt::ToCString(sndFile.GetCharsetInternal(), chnSettings.szName);
 				SetDlgItemText(IDC_EDIT9 + ichn, s);
 				((CEdit*)(GetDlgItem(IDC_EDIT9 + ichn)))->LimitText(MAX_CHANNELNAME - 1);
-			}
-			else
+			} else
+			{
 				SetDlgItemText(IDC_TEXT1 + ichn, _T(""));
+				SetDlgItemText(IDC_EDIT9 + ichn, _T(""));
+				m_channelColor[ichn].EnableWindow(FALSE);
+			}
 
 			// Enable/Disable controls for this channel
 			BOOL bIT = ((bEnable) && (sndFile.m_nType & (MOD_TYPE_IT|MOD_TYPE_MPT)));
