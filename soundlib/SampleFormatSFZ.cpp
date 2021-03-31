@@ -1064,8 +1064,10 @@ bool CSoundFile::SaveSFZInstrument(INSTRUMENTINDEX nInstr, std::ostream &f, cons
 	if(ins == nullptr)
 		return false;
 
-	const mpt::PathString sampleBaseName = mpt::PathString::FromNative(mpt::String::Trim(filename.GetFileName().AsNative()));
-	const mpt::PathString sampleDirName = sampleBaseName + P_("/");
+	// Creating directory names with trailing spaces or dots is a bad idea, as they are difficult to remove in Windows.
+	const mpt::RawPathString whitespaceDirName = PL_(" \n\r\t.");
+	const mpt::PathString sampleBaseName = mpt::PathString::FromNative(mpt::String::Trim(filename.GetFileName().AsNative(), whitespaceDirName));
+	const mpt::PathString sampleDirName = (sampleBaseName.empty() ? P_("Samples") : sampleBaseName)  + P_("/");
 	const mpt::PathString sampleBasePath = filename.GetPath() + sampleDirName;
 	if(!sampleBasePath.IsDirectory() && !::CreateDirectory(sampleBasePath.AsNative().c_str(), nullptr))
 		return false;
@@ -1161,7 +1163,7 @@ bool CSoundFile::SaveSFZInstrument(INSTRUMENTINDEX nInstr, std::ostream &f, cons
 		}
 
 		numSamples++;
-		mpt::PathString sampleName = sampleBasePath + sampleBaseName + P_(" ") + mpt::PathString::FromUnicode(mpt::ufmt::val(numSamples));
+		mpt::PathString sampleName = sampleBasePath + (sampleBaseName.empty() ? P_("Sample") : sampleBaseName) + P_(" ") + mpt::PathString::FromUnicode(mpt::ufmt::val(numSamples));
 		if(isAdlib)
 			sampleName += P_(".s3i");
 		else if(useFLACsamples)
