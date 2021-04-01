@@ -1639,14 +1639,11 @@ void CViewPattern::UpdateIndicator(bool updateAccessibility)
 		return;
 
 	mainFrm->SetUserText(MPT_CFORMAT("Row {}, Col {}")(GetCurrentRow(), GetCurrentChannel() + 1));
-	const bool hasSelection = m_Selection.GetUpperLeft() != m_Selection.GetLowerRight();
-	if(hasSelection)
-	{
-		mainFrm->SetInfoText(MPT_CFORMAT("Selection: {} row{}, {} channel{}")
-			(m_Selection.GetNumRows(), m_Selection.GetNumRows() != 1 ? CString(_T("s")) : CString(_T("")), m_Selection.GetNumChannels(), m_Selection.GetNumChannels() != 1 ? CString(_T("s")) : CString(_T(""))));
-	}
 	if(::GetFocus() == m_hWnd)
 	{
+		const bool hasSelection = m_Selection.GetUpperLeft() != m_Selection.GetLowerRight();
+		if(hasSelection)
+			mainFrm->SetInfoText(MPT_CFORMAT("Selection: {} row{}, {} channel{}")(m_Selection.GetNumRows(), CString(m_Selection.GetNumRows() != 1 ? _T("s") : _T("")), m_Selection.GetNumChannels(), CString(m_Selection.GetNumChannels() != 1 ? _T("s") : _T(""))));
 		if(GetCurrentRow() < sndFile->Patterns[m_nPattern].GetNumRows() && m_Cursor.GetChannel() < sndFile->GetNumChannels())
 		{
 			if(!hasSelection)
