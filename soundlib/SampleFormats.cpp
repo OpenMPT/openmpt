@@ -416,7 +416,7 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, bool mayNo
 {
 	WAVReader wavFile(file);
 
-	static constexpr auto SupportedFormats = {WAVFormatChunk::fmtPCM, WAVFormatChunk::fmtFloat, WAVFormatChunk::fmtIMA_ADPCM, WAVFormatChunk::fmtMP3, WAVFormatChunk::fmtALaw, WAVFormatChunk::fmtULaw};
+	static constexpr std::array<WAVFormatChunk::SampleFormats, 6> SupportedFormats = {WAVFormatChunk::fmtPCM, WAVFormatChunk::fmtFloat, WAVFormatChunk::fmtIMA_ADPCM, WAVFormatChunk::fmtMP3, WAVFormatChunk::fmtALaw, WAVFormatChunk::fmtULaw};
 	if(!wavFile.IsValid()
 	   || wavFile.GetNumChannels() == 0
 	   || wavFile.GetNumChannels() > 2
