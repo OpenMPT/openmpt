@@ -297,6 +297,7 @@ std::string CUpdateCheck::GetStatisticsDataV3(const Settings &settings)
 		j["OpenMPT"]["cpuid"] = ((GetRealProcSupport() & PROCSUPPORT_CPUID) != 0);
 		j["System"]["Processor"]["Vendor"] = std::string(mpt::String::ReadAutoBuf(ProcVendorID));
 		j["System"]["Processor"]["Brand"] = std::string(mpt::String::ReadAutoBuf(ProcBrandID));
+		j["System"]["Processor"]["CpuidRaw"] = mpt::fmt::hex0<8>(ProcRawCPUID);
 		j["System"]["Processor"]["Id"]["Family"] = ProcFamily;
 		j["System"]["Processor"]["Id"]["Model"] = ProcModel;
 		j["System"]["Processor"]["Id"]["Stepping"] = ProcStepping;
