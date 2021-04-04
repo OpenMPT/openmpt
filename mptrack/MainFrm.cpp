@@ -188,7 +188,7 @@ void CMainFrame::Initialize()
 	CString title = GetTitle();
 	title += _T(" ") + mpt::cfmt::val(Version::Current());
 	#if defined(MPT_BUILD_RETRO)
-		title += UL_(" RETRO");
+		title += _T(" RETRO");
 	#endif // MPT_BUILD_RETRO
 	if(Build::IsDebugBuild())
 	{
