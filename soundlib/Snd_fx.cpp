@@ -3934,27 +3934,25 @@ void CSoundFile::ExtraFinePortamentoDown(ModChannel &chn, ModCommand::PARAM para
 	}
 }
 
-// Implemented for IMF compatibility, can't actually save this in any formats
+// Implemented for IMF / PTM compatibility, can't actually save this in any formats
 // Slide up / down every x ticks by y semitones
 void CSoundFile::NoteSlide(ModChannel &chn, uint32 param, bool slideUp, bool retrig) const
 {
-	uint8 x, y;
 	if(m_SongFlags[SONG_FIRSTTICK])
 	{
-		x = param & 0xF0;
-		if (x)
-			chn.nNoteSlideSpeed = (x >> 4);
-		y = param & 0x0F;
-		if (y)
-			chn.nNoteSlideStep = y;
-		chn.nNoteSlideCounter = chn.nNoteSlideSpeed;
+		if(param & 0xF0)
+			chn.noteSlideParam = static_cast<uint8>(param & 0xF0) | (chn.noteSlideParam & 0x0F);
+		if(param & 0x0F)
+			chn.noteSlideParam = (chn.noteSlideParam & 0xF0) | static_cast<uint8>(param & 0x0F);
+		chn.noteSlideCounter = (chn.noteSlideParam >> 4);
 	} else
 	{
-		if (--chn.nNoteSlideCounter == 0)
+		if(--chn.noteSlideCounter == 0)
 		{
-			chn.nNoteSlideCounter = chn.nNoteSlideSpeed;
+			const uint8 speed = (chn.noteSlideParam >> 4), steps = (chn.noteSlideParam & 0x0F);
+			chn.noteSlideCounter = speed;
 			// update it
-			const int32 delta = (slideUp ? 1 : -1) * chn.nNoteSlideStep;
+			const int32 delta = (slideUp ? steps : -steps);
 			if(chn.HasCustomTuning())
 				chn.m_PortamentoFineSteps += delta * chn.pModInstrument->pTuning->GetFineStepCount();
 			else
@@ -5388,7 +5386,7 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, int offset)
 	// Retrig: bit 8 is set if it's the new XM retrig
 	ModChannel &chn = m_PlayState.Chn[nChn];
 	int retrigSpeed = param & 0x0F;
-	int16 retrigCount = chn.nRetrigCount;
+	uint8 retrigCount = chn.nRetrigCount;
 	bool doRetrig = false;
 
 	// IT compatibility 15. Retrigger
@@ -5396,10 +5394,10 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, int offset)
 	{
 		if(m_PlayState.m_nTickCount == 0 && chn.rowCommand.note)
 		{
-			chn.nRetrigCount = param & 0xf;
+			chn.nRetrigCount = param & 0x0F;
 		} else if(!chn.nRetrigCount || !--chn.nRetrigCount)
 		{
-			chn.nRetrigCount = param & 0xf;
+			chn.nRetrigCount = param & 0x0F;
 			doRetrig = true;
 		}
 	} else if(m_playBehaviour[kFT2Retrigger] && (param & 0x100))
@@ -5686,7 +5684,7 @@ void CSoundFile::KeyOff(ModChannel &chn) const
 
 		if (pIns->VolEnv.nReleaseNode != ENV_RELEASE_NODE_UNSET && chn.VolEnv.nEnvValueAtReleaseJump == NOT_YET_RELEASED)
 		{
-			chn.VolEnv.nEnvValueAtReleaseJump = pIns->VolEnv.GetValueFromPosition(chn.VolEnv.nEnvPosition, 256);
+			chn.VolEnv.nEnvValueAtReleaseJump = mpt::saturate_cast<int16>(pIns->VolEnv.GetValueFromPosition(chn.VolEnv.nEnvPosition, 256));
 			chn.VolEnv.nEnvPosition = pIns->VolEnv[pIns->VolEnv.nReleaseNode].tick;
 		}
 	}

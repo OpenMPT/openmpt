@@ -28,9 +28,9 @@ struct ModChannel
 	// Envelope playback info
 	struct EnvInfo
 	{
-		FlagSet<EnvelopeFlags> flags;
 		uint32 nEnvPosition = 0;
-		int32 nEnvValueAtReleaseJump = NOT_YET_RELEASED;
+		int16 nEnvValueAtReleaseJump = NOT_YET_RELEASED;
+		FlagSet<EnvelopeFlags> flags;
 
 		void Reset()
 		{
@@ -81,22 +81,22 @@ struct ModChannel
 	int32 nFineTune, nTranspose;
 	int32 nPortamentoSlide, nAutoVibDepth;
 	uint32 nEFxOffset;                // Offset memory for Invert Loop (EFx, .MOD only)
+	ROWINDEX nPatternLoop;
 	int16 nVolSwing, nPanSwing;
 	int16 nCutSwing, nResSwing;
-	uint16 nRestorePanOnNewNote;      //If > 0, nPan should be set to nRestorePanOnNewNote - 1 on new note. Used to recover from pan swing and IT sample / instrument panning. High bit set = surround
-	int16 nRetrigCount, nRetrigParam;
-	ROWINDEX nPatternLoop;
+	uint16 nRestorePanOnNewNote;  // If > 0, nPan should be set to nRestorePanOnNewNote - 1 on new note. Used to recover from pan swing and IT sample / instrument panning. High bit set = surround
 	CHANNELINDEX nMasterChn;
 	ModCommand rowCommand;
 	// 8-bit members
 	ResamplingMode resamplingMode;
-	uint8 nRestoreResonanceOnNewNote; // See nRestorePanOnNewNote
-	uint8 nRestoreCutoffOnNewNote;    // ditto
+	uint8 nRestoreResonanceOnNewNote;  // See nRestorePanOnNewNote
+	uint8 nRestoreCutoffOnNewNote;     // ditto
 	uint8 nNote;
 	NewNoteAction nNNA;
-	uint8 nLastNote;                  // Last note, ignoring note offs and cuts - for MIDI macros
-	uint8 nArpeggioLastNote, nArpeggioBaseNote; // For plugin arpeggio
+	uint8 nLastNote;  // Last note, ignoring note offs and cuts - for MIDI macros
+	uint8 nArpeggioLastNote, nArpeggioBaseNote;  // For plugin arpeggio
 	uint8 nNewNote, nNewIns, nOldIns, nCommand, nArpeggio;
+	uint8 nRetrigParam, nRetrigCount;
 	uint8 nOldVolumeSlide, nOldFineVolUpDown;
 	uint8 nOldPortaUp, nOldPortaDown, nOldFinePortaUpDown, nOldExtraFinePortaUpDown;
 	uint8 nOldPanSlide, nOldChnVolSlide;
@@ -114,8 +114,8 @@ struct ModChannel
 	uint8 nLeftVU, nRightVU;
 	uint8 nActiveMacro;
 	FilterMode nFilterMode;
-	uint8 nEFxSpeed, nEFxDelay; // memory for Invert Loop (EFx, .MOD only)
-	uint8 nNoteSlideCounter, nNoteSlideSpeed, nNoteSlideStep; // IMF / PTM Note Slide
+	uint8 nEFxSpeed, nEFxDelay;              // memory for Invert Loop (EFx, .MOD only)
+	uint8 noteSlideParam, noteSlideCounter;  // IMF / PTM Note Slide
 	uint8 lastZxxParam; // Memory for \xx slides
 	bool isFirstTick : 1;
 	bool isPreviewNote : 1;
