@@ -736,6 +736,7 @@ static constexpr struct
 	{2014, kcChannelAddBefore, _T("Add Channel Before Current")},
 	{2015, kcChannelAddAfter, _T("Add Channel After Current") },
 	{2016, kcChannelRemove, _T("Remove Channel") },
+	{2019, kcOrderlistEditInsertSeparator, _T("Insert Separator") },
 };
 
 // Get command descriptions etc.. loaded up.
