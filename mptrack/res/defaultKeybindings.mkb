@@ -432,6 +432,7 @@ version:1
 //----( Orderlist )------------
 19:1802:0:46:5		//Delete Order: DELETE (KeyDown|KeyHold)
 19:1803:0:45:5		//Insert Order: INSERT (KeyDown|KeyHold)
+19:2019:2:45:5		//Insert Separator: Ctrl+INSERT (KeyDown|KeyHold)
 19:1950:3:67:1		//Copy Orders: Shift+Ctrl+C (KeyDown)
 19:1804:0:13:5		//Edit Pattern: ENTER (KeyDown|KeyHold)
 19:1805:0:9:5		//Switch to pattern editor: TAB (KeyDown|KeyHold)

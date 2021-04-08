@@ -743,6 +743,7 @@ static constexpr struct
 	{2016, kcChannelRemove, _T("Remove Channel") },
 	{2017, kcSetFXFinetune, _T("Finetune") },
 	{2018, kcSetFXFinetuneSmooth, _T("Finetune (Smooth)")},
+	{2019, kcOrderlistEditInsertSeparator, _T("Insert Separator") },
 };
 
 // Get command descriptions etc.. loaded up.

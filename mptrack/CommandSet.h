@@ -818,6 +818,7 @@ enum CommandID
 	kcStartOrderlistEdit = kcStartOrderlistCommands,
 	kcOrderlistEditDelete = kcStartOrderlistEdit,
 	kcOrderlistEditInsert,
+	kcOrderlistEditInsertSeparator,
 	kcOrderlistEditCopyOrders,
 	kcMergePatterns,
 	kcOrderlistEditPattern,

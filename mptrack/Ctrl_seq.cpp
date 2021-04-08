@@ -509,6 +509,8 @@ LRESULT COrderList::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		OnDeleteOrder(); return wParam;
 	case kcOrderlistEditInsert:
 		OnInsertOrder(); return wParam;
+	case kcOrderlistEditInsertSeparator:
+		OnInsertSeparatorPattern(); return wParam;
 	case kcOrderlistSwitchToPatternView:
 		OnSwitchToView(); return wParam;
 	case kcOrderlistEditPattern:
@@ -1097,7 +1099,7 @@ void COrderList::OnRButtonDown(UINT nFlags, CPoint pt)
 		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_INSERT, ih->GetKeyTextFromCommand(kcOrderlistEditInsert, _T("&Insert Pattern")));
 		if(sndFile.GetModSpecifications().hasIgnoreIndex)
 		{
-			AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_INSERT_SEPARATOR, ih->GetKeyTextFromCommand(kcOrderlistPatIgnore, _T("&Insert Separator")));
+			AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_INSERT_SEPARATOR, ih->GetKeyTextFromCommand(kcOrderlistEditInsertSeparator, _T("&Insert Separator")));
 		}
 		AppendMenu(hMenu, MF_STRING, ID_ORDERLIST_DELETE, ih->GetKeyTextFromCommand(kcOrderlistEditDelete, _T("&Remove Pattern")));
 		AppendMenu(hMenu, MF_SEPARATOR, NULL, _T(""));
