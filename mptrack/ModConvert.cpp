@@ -568,7 +568,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		m_SndFile.m_SongFlags.set(SONG_ISAMIGA);
 		m_SndFile.InitAmigaResampler();
 	}
-	m_SndFile.m_SongFlags &= (specs.GetSongFlags() | SONG_PLAY_FLAGS);
+	m_SndFile.m_SongFlags &= (specs.songFlags | SONG_PLAY_FLAGS);
 
 	// Adjust mix levels
 	if(newTypeIsMOD || newTypeIsS3M)

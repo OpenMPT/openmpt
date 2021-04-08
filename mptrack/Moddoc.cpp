@@ -175,7 +175,7 @@ BOOL CModDoc::OnNewDocument()
 	m_SndFile.ChangeModTypeTo(CTrackApp::GetDefaultDocType());
 
 	theApp.GetDefaultMidiMacro(m_SndFile.m_MidiCfg);
-	m_SndFile.m_SongFlags.set((SONG_LINEARSLIDES | SONG_ISAMIGA) & m_SndFile.GetModSpecifications().GetSongFlags());
+	m_SndFile.m_SongFlags.set((SONG_LINEARSLIDES | SONG_ISAMIGA) & m_SndFile.GetModSpecifications().songFlags);
 
 	ReinitRecordState();
 	InitializeMod();

@@ -19,11 +19,6 @@ namespace ModSpecs
 {
 
 
-// Force built-in integer operations.
-// C++11 constexpr operations on the enum value_type would also solve this.
-#define SongFlag(x) (FlagSet<SongFlags>::store_type(0) | x)
-
-
 constexpr CModSpecifications mptm_ =
 {
 	/*
@@ -55,7 +50,7 @@ constexpr CModSpecifications mptm_ =
 	3999,										// SamplesMax
 	255,										// instrumentMax
 	MixLevels::v1_17RC3,						// defaultMixLevels
-	SongFlag(SONG_LINEARSLIDES | SONG_EXFILTERRANGE | SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX),	// Supported song flags
+	SONG_LINEARSLIDES | SONG_EXFILTERRANGE | SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX,	// Supported song flags
 	200,										// Max MIDI mapping directives
 	MAX_ENVPOINTS,								// Envelope point count
 	true,										// Has notecut.
@@ -105,7 +100,7 @@ constexpr CModSpecifications mod_ =
 	31,											// SamplesMax
 	0,											// instrumentMax
 	MixLevels::Compatible,						// defaultMixLevels
-	SongFlag(SONG_PT_MODE | SONG_AMIGALIMITS | SONG_ISAMIGA),	// Supported song flags
+	SONG_PT_MODE | SONG_AMIGALIMITS | SONG_ISAMIGA,	// Supported song flags
 	0,											// Max MIDI mapping directives
 	0,											// No instrument envelopes
 	false,										// No notecut.
@@ -153,7 +148,7 @@ constexpr CModSpecifications xm_ =
 	128 * 16,									// SamplesMax (actually 16 per instrument)
 	128,										// instrumentMax
 	MixLevels::CompatibleFT2,					// defaultMixLevels
-	SongFlag(SONG_LINEARSLIDES),				// Supported song flags
+	SONG_LINEARSLIDES,							// Supported song flags
 	0,											// Max MIDI mapping directives
 	12,											// Envelope point count
 	false,										// No notecut.
@@ -201,7 +196,7 @@ constexpr CModSpecifications xmEx_ =
 	MAX_SAMPLES - 1,							// SamplesMax (actually 32 per instrument(256 * 32 = 8192), but limited to MAX_SAMPLES = 4000)
 	255,										// instrumentMax
 	MixLevels::CompatibleFT2,					// defaultMixLevels
-	SongFlag(SONG_LINEARSLIDES | SONG_EXFILTERRANGE),	// Supported song flags
+	SONG_LINEARSLIDES | SONG_EXFILTERRANGE,		// Supported song flags
 	200,										// Max MIDI mapping directives
 	12,											// Envelope point count
 	false,										// No notecut.
@@ -248,7 +243,7 @@ constexpr CModSpecifications s3m_ =
 	99,											// SamplesMax
 	0,											// instrumentMax
 	MixLevels::Compatible,						// defaultMixLevels
-	SongFlag(SONG_FASTVOLSLIDES | SONG_AMIGALIMITS | SONG_S3MOLDVIBRATO),	// Supported song flags
+	SONG_FASTVOLSLIDES | SONG_AMIGALIMITS | SONG_S3MOLDVIBRATO,	// Supported song flags
 	0,											// Max MIDI mapping directives
 	0,											// No instrument envelopes
 	true,										// Has notecut.
@@ -296,7 +291,7 @@ constexpr CModSpecifications s3mEx_ =
 	99,											// SamplesMax
 	0,											// instrumentMax
 	MixLevels::Compatible,						// defaultMixLevels
-	SongFlag(SONG_FASTVOLSLIDES | SONG_AMIGALIMITS),	// Supported song flags
+	SONG_FASTVOLSLIDES | SONG_AMIGALIMITS,		// Supported song flags
 	0,											// Max MIDI mapping directives
 	0,											// No instrument envelopes
 	true,										// Has notecut.
@@ -343,7 +338,7 @@ constexpr CModSpecifications it_ =
 	99,											// SamplesMax
 	99,											// instrumentMax
 	MixLevels::Compatible,						// defaultMixLevels
-	SongFlag(SONG_LINEARSLIDES | SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX),	// Supported song flags
+	SONG_LINEARSLIDES | SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX,	// Supported song flags
 	0,											// Max MIDI mapping directives
 	25,											// Envelope point count
 	true,										// Has notecut.
@@ -390,7 +385,7 @@ constexpr CModSpecifications itEx_ =
 	3999,										// SamplesMax
 	255,										// instrumentMax
 	MixLevels::Compatible,						// defaultMixLevels
-	SongFlag(SONG_LINEARSLIDES | SONG_EXFILTERRANGE | SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX),	// Supported song flags
+	SONG_LINEARSLIDES | SONG_EXFILTERRANGE | SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX,	// Supported song flags
 	200,										// Max MIDI mapping directives
 	25,											// Envelope point count
 	true,										// Has notecut.
@@ -411,16 +406,16 @@ constexpr CModSpecifications itEx_ =
 	" vpcdab?h??gfe??",							// Supported Volume Column commands
 };
 
-const CModSpecifications *Collection[8] = { &mptm_, &mod_, &s3m_, &s3mEx_, &xm_, &xmEx_, &it_, &itEx_ };
+const std::array<const CModSpecifications *, 8> Collection = { &mptm_, &mod_, &s3m_, &s3mEx_, &xm_, &xmEx_, &it_, &itEx_ };
 
-const CModSpecifications & mptm = mptm_;
-const CModSpecifications & mod = mod_;
-const CModSpecifications & s3m = s3m_;
-const CModSpecifications & s3mEx = s3mEx_;
-const CModSpecifications & xm = xm_;
-const CModSpecifications & xmEx = xmEx_;
-const CModSpecifications & it = it_;
-const CModSpecifications & itEx = itEx_;
+const CModSpecifications &mptm = mptm_;
+const CModSpecifications &mod = mod_;
+const CModSpecifications &s3m = s3m_;
+const CModSpecifications &s3mEx = s3mEx_;
+const CModSpecifications &xm = xm_;
+const CModSpecifications &xmEx = xmEx_;
+const CModSpecifications &it = it_;
+const CModSpecifications &itEx = itEx_;
 
 } // namespace ModSpecs
 
