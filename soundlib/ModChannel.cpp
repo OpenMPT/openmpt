@@ -160,4 +160,32 @@ void ModChannel::RecalcTuningFreq(Tuning::RATIOTYPE vibratoFactor, Tuning::NOTEI
 }
 
 
+// IT command S73-S7E
+void ModChannel::InstrumentControl(uint8 param, const CSoundFile &sndFile)
+{
+	param &= 0x0F;
+	switch(param)
+	{
+		case 0x3: nNNA = NewNoteAction::NoteCut; break;
+		case 0x4: nNNA = NewNoteAction::Continue; break;
+		case 0x5: nNNA = NewNoteAction::NoteOff; break;
+		case 0x6: nNNA = NewNoteAction::NoteFade; break;
+		case 0x7: VolEnv.flags.reset(ENV_ENABLED); break;
+		case 0x8: VolEnv.flags.set(ENV_ENABLED); break;
+		case 0x9: PanEnv.flags.reset(ENV_ENABLED); break;
+		case 0xA: PanEnv.flags.set(ENV_ENABLED); break;
+		case 0xB: PitchEnv.flags.reset(ENV_ENABLED); break;
+		case 0xC: PitchEnv.flags.set(ENV_ENABLED); break;
+		case 0xD:  // S7D: Enable pitch envelope, force to play as pitch envelope
+		case 0xE:  // S7E: Enable pitch envelope, force to play as filter envelope
+			if(sndFile.GetType() == MOD_TYPE_MPT)
+			{
+				PitchEnv.flags.set(ENV_ENABLED);
+				PitchEnv.flags.set(ENV_FILTER, param != 0xD);
+			}
+			break;
+	}
+}
+
+
 OPENMPT_NAMESPACE_END

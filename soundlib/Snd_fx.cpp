@@ -1062,12 +1062,12 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 						if(m.param == 0x9E)
 						{
 							// Play forward
-							memory.RenderChannel(nChn, oldTickDuration);	// Re-sync what we've got so far
+							memory.RenderChannel(nChn, oldTickDuration);  // Re-sync what we've got so far
 							chn.dwFlags.reset(CHN_PINGPONGFLAG);
 						} else if(m.param == 0x9F)
 						{
 							// Reverse
-							memory.RenderChannel(nChn, oldTickDuration);	// Re-sync what we've got so far
+							memory.RenderChannel(nChn, oldTickDuration);  // Re-sync what we've got so far
 							chn.dwFlags.set(CHN_PINGPONGFLAG);
 							if(!chn.position.GetInt() && chn.nLength && (m.IsNote() || !chn.dwFlags[CHN_LOOP]))
 							{
@@ -1075,8 +1075,8 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 							}
 						} else if((m.param & 0xF0) == 0x70)
 						{
-							// TODO
-							//ExtendedS3MCommands(nChn, param);
+							if(m.param >= 0x73)
+								chn.InstrumentControl(m.param, *this);
 						}
 						break;
 					}
@@ -4645,23 +4645,8 @@ void CSoundFile::ExtendedS3MCommands(CHANNELINDEX nChn, ModCommand::PARAM param)
 						}
 					}
 					break;
-				case 3:		chn.nNNA = NewNoteAction::NoteCut; break;
-				case 4:		chn.nNNA = NewNoteAction::Continue; break;
-				case 5:		chn.nNNA = NewNoteAction::NoteOff; break;
-				case 6:		chn.nNNA = NewNoteAction::NoteFade; break;
-				case 7:		chn.VolEnv.flags.reset(ENV_ENABLED); break;
-				case 8:		chn.VolEnv.flags.set(ENV_ENABLED); break;
-				case 9:		chn.PanEnv.flags.reset(ENV_ENABLED); break;
-				case 10:	chn.PanEnv.flags.set(ENV_ENABLED); break;
-				case 11:	chn.PitchEnv.flags.reset(ENV_ENABLED); break;
-				case 12:	chn.PitchEnv.flags.set(ENV_ENABLED); break;
-				case 13:	// S7D: Enable pitch envelope, force to play as pitch envelope
-				case 14:	// S7E: Enable pitch envelope, force to play as filter envelope
-					if(GetType() == MOD_TYPE_MPT)
-					{
-						chn.PitchEnv.flags.set(ENV_ENABLED);
-						chn.PitchEnv.flags.set(ENV_FILTER, param != 13);
-					}
+				default:  // S73-S7E
+					chn.InstrumentControl(param, *this);
 					break;
 				}
 				break;
