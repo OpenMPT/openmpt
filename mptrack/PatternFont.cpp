@@ -434,7 +434,7 @@ void PatternFont::UpdateFont(HWND hwnd)
 		}
 		HGDIOBJ oldBitmap = hDC.SelectObject(bitmap);
 
-		hDC.FillSolidRect(0, 0, pf.dibASCII->bmiHeader.biWidth, pf.dibASCII->bmiHeader.biHeight, RGB(0xFF, 0xFF, 0xFF));
+		hDC.FillSolidRect(0, 0, pf.dibASCII->bmiHeader.biWidth, -pf.dibASCII->bmiHeader.biHeight, RGB(0xFF, 0xFF, 0xFF));
 		hDC.SetTextColor(RGB(0x00, 0x00, 0x00));
 		hDC.SetBkColor(RGB(0xFF, 0xFF, 0xFF));
 		hDC.SetTextAlign(TA_TOP | TA_LEFT);
