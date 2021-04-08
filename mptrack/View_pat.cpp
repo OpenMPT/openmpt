@@ -3716,6 +3716,7 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 		return 1;
 	}
 
+	const auto &modSpecs = sndFile.GetModSpecifications();
 	bool recordParamAsZxx = false;
 
 	switch(event)
@@ -3754,7 +3755,7 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 		break;
 
 	case MIDIEvents::evPitchBend:  // Pitch wheel
-		recordParamAsZxx = (TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_MIDIMACROPITCHBEND) != 0;
+		recordParamAsZxx = (TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_MIDIMACROPITCHBEND) != 0 || modSpecs.HasCommand(CMD_FINETUNE);
 		break;
 
 	case MIDIEvents::evControllerChange:  //Controller change
@@ -3816,12 +3817,17 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 	{
 		const bool liveRecord = IsLiveRecord();
 
-		const auto &modSpecs = sndFile.GetModSpecifications();
 		const auto editpos = GetEditPos(sndFile, liveRecord);
 		ModCommand &m = GetModCommand(sndFile, editpos);
 		bool update = false;
 
-		if(m.IsPcNote())
+		if(event == MIDIEvents::evPitchBend && (m.command == CMD_NONE || m.command == CMD_FINETUNE || m.command == CMD_FINETUNE_SMOOTH) && modSpecs.HasCommand(CMD_FINETUNE))
+		{
+			pModDoc->GetPatternUndo().PrepareUndo(editpos.pattern, editpos.channel, editpos.row, 1, 1, "MIDI Record Entry");
+			m.command = (m.command == CMD_NONE) ? CMD_FINETUNE : CMD_FINETUNE_SMOOTH;
+			m.param = (midiByte2 << 1) | (midiByte1 >> 7);
+			update = true;
+		} else if(m.IsPcNote())
 		{
 			pModDoc->GetPatternUndo().PrepareUndo(editpos.pattern, editpos.channel, editpos.row, 1, 1, "MIDI Record Entry");
 			m.SetValueEffectCol(static_cast<decltype(m.GetValueEffectCol())>(Util::muldivr(midiByte2, ModCommand::maxColumnValue, 127)));

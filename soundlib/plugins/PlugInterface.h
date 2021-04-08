@@ -143,6 +143,7 @@ public:
 	virtual bool MidiSend(uint32 /*midiCode*/) { return true; }
 	virtual bool MidiSysexSend(mpt::const_byte_span /*sysex*/) { return true; }
 	virtual void MidiCC(MIDIEvents::MidiCC /*nController*/, uint8 /*nParam*/, CHANNELINDEX /*trackChannel*/) { }
+	virtual void MidiPitchBendRaw(int32 /*pitchbend*/, CHANNELINDEX /*trackChannel*/) {}
 	virtual void MidiPitchBend(int32 /*increment*/, int8 /*pwd*/, CHANNELINDEX /*trackChannel*/) { }
 	virtual void MidiVibrato(int32 /*depth*/, int8 /*pwd*/, CHANNELINDEX /*trackerChn*/) { }
 	virtual void MidiCommand(const ModInstrument &/*instr*/, uint16 /*note*/, uint16 /*vol*/, CHANNELINDEX /*trackChannel*/) { }
@@ -246,27 +247,28 @@ protected:
 	enum
 	{
 		// Pitch wheel constants
-		vstPitchBendShift	= 12,		// Use lowest 12 bits for fractional part and vibrato flag => 16.11 fixed point precision
-		vstPitchBendMask	= (~1),
-		vstVibratoFlag		= 1,
+		kPitchBendShift = 12,  // Use lowest 12 bits for fractional part and vibrato flag => 16.11 fixed point precision
+		kPitchBendMask  = (~1),
+		kVibratoFlag    = 1,
 	};
 
 	struct PlugInstrChannel
 	{
-		int32  midiPitchBendPos;		// Current Pitch Wheel position, in 16.11 fixed point format. Lowest bit is used for indicating that vibrato was applied. Vibrato offset itself is not stored in this value.
-		uint16 currentProgram;
-		uint16 currentBank;
+		int32 midiPitchBendPos = 0;  // Current Pitch Wheel position, in 16.11 fixed point format. Lowest bit is used for indicating that vibrato was applied. Vibrato offset itself is not stored in this value.
+		uint16 currentProgram = 0;
+		uint16 currentBank = 0;
 		uint8  noteOnMap[128][MAX_CHANNELS];
 
 		void ResetProgram() { currentProgram = 0; currentBank = 0; }
 	};
 
-	std::array<PlugInstrChannel, 16> m_MidiCh;	// MIDI channel state
+	std::array<PlugInstrChannel, 16> m_MidiCh;  // MIDI channel state
 
 public:
 	IMidiPlugin(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct);
 
 	void MidiCC(MIDIEvents::MidiCC nController, uint8 nParam, CHANNELINDEX trackChannel) override;
+	void MidiPitchBendRaw(int32 pitchbend, CHANNELINDEX trackerChn) override;
 	void MidiPitchBend(int32 increment, int8 pwd, CHANNELINDEX trackerChn) override;
 	void MidiVibrato(int32 depth, int8 pwd, CHANNELINDEX trackerChn) override;
 	void MidiCommand(const ModInstrument &instr, uint16 note, uint16 vol, CHANNELINDEX trackChannel) override;
@@ -281,13 +283,13 @@ protected:
 	virtual void ReceiveSysex(mpt::const_byte_span sysex);
 
 	// Converts a 14-bit MIDI pitch bend position to our internal pitch bend position representation
-	static constexpr int32 EncodePitchBendParam(int32 position) { return (position << vstPitchBendShift); }
+	static constexpr int32 EncodePitchBendParam(int32 position) { return (position << kPitchBendShift); }
 	// Converts the internal pitch bend position to a 14-bit MIDI pitch bend position
-	static constexpr int16 DecodePitchBendParam(int32 position) { return static_cast<int16>(position >> vstPitchBendShift); }
+	static constexpr int16 DecodePitchBendParam(int32 position) { return static_cast<int16>(position >> kPitchBendShift); }
 	// Apply Pitch Wheel Depth (PWD) to some MIDI pitch bend value.
 	static inline void ApplyPitchWheelDepth(int32 &value, int8 pwd);
 
-	void MidiPitchBend(uint8 nMidiCh, int32 pitchBendPos);
+	void SendMidiPitchBend(uint8 midiCh, int32 newPitchBendPos);
 };
 
 OPENMPT_NAMESPACE_END

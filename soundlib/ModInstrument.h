@@ -26,8 +26,8 @@ class CSoundFile;
 // Instrument Nodes
 struct EnvelopeNode
 {
-	typedef uint16 tick_t;
-	typedef uint8 value_t;
+	using tick_t = uint16 ;
+	using value_t = uint8;
 
 	tick_t tick = 0;   // Envelope node position (x axis)
 	value_t value = 0; // Envelope node value (y axis)
@@ -61,7 +61,7 @@ struct InstrumentEnvelope : public std::vector<EnvelopeNode>
 	uint32 size() const { return static_cast<uint32>(std::vector<EnvelopeNode>::size()); }
 
 	using std::vector<EnvelopeNode>::push_back;
-	void push_back(EnvelopeNode::tick_t tick, EnvelopeNode::value_t value) { push_back(EnvelopeNode(tick, value)); }
+	void push_back(EnvelopeNode::tick_t tick, EnvelopeNode::value_t value) { emplace_back(tick, value); }
 };
 
 // Instrument Struct
@@ -75,7 +75,7 @@ struct ModInstrument
 
 	ResamplingMode resampling = SRCMODE_DEFAULT;  // Resampling mode
 
-	FlagSet<InstrumentFlags> dwFlags;        // Instrument flags
+	FlagSet<InstrumentFlags> dwFlags;                         // Instrument flags
 	NewNoteAction nNNA = NewNoteAction::NoteCut;              // New note action
 	DuplicateCheckType nDCT = DuplicateCheckType::None;       // Duplicate check type (i.e. which condition will trigger the duplicate note action)
 	DuplicateNoteAction nDNA = DuplicateNoteAction::NoteCut;  // Duplicate note action
@@ -96,7 +96,7 @@ struct ModInstrument
 	uint8 nMidiProgram = 0;  // MIDI Program (1...128). 0 = Don't send.
 	uint8 nMidiChannel = 0;  // MIDI Channel (1...16). 0 = Don't send. 17 = Mapped (Send to tracker channel modulo 16).
 	uint8 nMidiDrumKey = 0;  // Drum set note mapping (currently only used by the .MID loader)
-	int8 midiPWD = 2;        // MIDI Pitch Wheel Depth in semitones
+	int8 midiPWD = 2;        // MIDI Pitch Wheel Depth and CMD_FINETUNE depth in semitones
 	PLUGINDEX nMixPlug = 0;  // Plugin assigned to this instrument (0 = no plugin, 1 = first plugin)
 
 	PlugVelocityHandling pluginVelocityHandling = PLUGIN_VELOCITYHANDLING_CHANNEL;  // How to deal with plugin velocity

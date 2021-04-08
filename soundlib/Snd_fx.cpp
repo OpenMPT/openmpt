@@ -1079,6 +1079,12 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 								chn.InstrumentControl(m.param, *this);
 						}
 						break;
+
+					case CMD_FINETUNE:
+					case CMD_FINETUNE_SMOOTH:
+						memory.RenderChannel(nChn, oldTickDuration);  // Re-sync what we've got so far
+						SetFinetune(nChn, playState, false);  // TODO should render each tick individually for CMD_FINETUNE_SMOOTH for higher sync accuracy
+						break;
 					}
 					chn.isFirstTick = true;
 					switch(m.volcmd)
@@ -1276,8 +1282,11 @@ void CSoundFile::InstrumentChange(ModChannel &chn, uint32 instr, bool bPorta, bo
 	// instrumentChanged is used for IT carry-on env option
 	bool instrumentChanged = (pIns != chn.pModInstrument);
 	const bool sampleChanged = (chn.pModSample != nullptr) && (pSmp != chn.pModSample);
-
 	const bool newTuning = (GetType() == MOD_TYPE_MPT && pIns && pIns->pTuning);
+
+	if(!bPorta || instrumentChanged || sampleChanged)
+		chn.microTuning = 0;
+
 	// Playback behavior change for MPT: With portamento don't change sample if it is in
 	// the same instrument as previous sample.
 	if(bPorta && newTuning && pIns == chn.pModInstrument && sampleChanged)
@@ -3292,6 +3301,18 @@ bool CSoundFile::ProcessEffects()
 			}
 			break;
 
+		case CMD_FINETUNE:
+		case CMD_FINETUNE_SMOOTH:
+			if(m_SongFlags[SONG_FIRSTTICK] || cmd == CMD_FINETUNE_SMOOTH)
+			{
+				SetFinetune(nChn, m_PlayState, cmd == CMD_FINETUNE_SMOOTH);
+#ifndef NO_PLUGINS
+				if(IMixPlugin *plugin = GetChannelInstrumentPlugin(nChn); plugin != nullptr)
+					plugin->MidiPitchBendRaw(chn.GetMIDIPitchBend(), nChn);
+#endif  // NO_PLUGINS
+			}
+			break;
+
 		// Set Channel Global Volume
 		case CMD_CHANNELVOLUME:
 			if(!m_SongFlags[SONG_FIRSTTICK]) break;
@@ -3519,6 +3540,7 @@ uint32 CSoundFile::CalculateXParam(PATTERNINDEX pat, ROWINDEX row, CHANNELINDEX 
 	}
 	ROWINDEX maxCommands = 4;
 	const ModCommand *m = Patterns[pat].GetpModCommand(row, chn);
+	const auto startCmd = m->command;
 	uint32 val = m->param;
 
 	switch(m->command)
@@ -3530,6 +3552,8 @@ uint32 CSoundFile::CalculateXParam(PATTERNINDEX pat, ROWINDEX row, CHANNELINDEX 
 	case CMD_TEMPO:
 	case CMD_PATTERNBREAK:
 	case CMD_POSITIONJUMP:
+	case CMD_FINETUNE:
+	case CMD_FINETUNE_SMOOTH:
 		// 16 bit command
 		maxCommands = 1;
 		break;
@@ -3539,13 +3563,13 @@ uint32 CSoundFile::CalculateXParam(PATTERNINDEX pat, ROWINDEX row, CHANNELINDEX 
 
 	const bool xmTempoFix = m->command == CMD_TEMPO && GetType() == MOD_TYPE_XM;
 	ROWINDEX numRows = std::min(Patterns[pat].GetNumRows() - row - 1, maxCommands);
+	uint32 extRows = 0;
 	while(numRows > 0)
 	{
 		m += Patterns[pat].GetNumChannels();
 		if(m->command != CMD_XPARAM)
-		{
 			break;
-		}
+		
 		if(xmTempoFix && val < 256)
 		{
 			// With XM, 0x20 is the lowest tempo. Anything below changes ticks per row.
@@ -3553,9 +3577,16 @@ uint32 CSoundFile::CalculateXParam(PATTERNINDEX pat, ROWINDEX row, CHANNELINDEX 
 		}
 		val = (val << 8) | m->param;
 		numRows--;
-		if(extendedRows != nullptr)
-			(*extendedRows)++;
+		extRows++;
 	}
+
+	// Always return a full-precision value for finetune
+	if((startCmd == CMD_FINETUNE || startCmd == CMD_FINETUNE_SMOOTH) && !extRows)
+		val <<= 8;
+		
+	if(extendedRows != nullptr)
+		*extendedRows = extRows;
+
 	return val;
 }
 
@@ -3933,6 +3964,25 @@ void CSoundFile::ExtraFinePortamentoDown(ModChannel &chn, ModCommand::PARAM para
 		}
 	}
 }
+
+
+void CSoundFile::SetFinetune(CHANNELINDEX channel, PlayState &playState, bool isSmooth) const
+{
+	ModChannel &chn = playState.Chn[channel];
+	int16 newTuning = mpt::saturate_cast<int16>(static_cast<int32>(CalculateXParam(playState.m_nPattern, playState.m_nRow, channel, nullptr)) - 0x8000);
+
+	if(isSmooth)
+	{
+		const int32 ticksLeft = playState.TicksOnRow() - playState.m_nTickCount;
+		if(ticksLeft > 1)
+		{
+			const int32 step = (newTuning - chn.microTuning) / ticksLeft;
+			newTuning = mpt::saturate_cast<int16>(chn.microTuning + step);
+		}
+	}
+	chn.microTuning = newTuning;
+}
+
 
 // Implemented for IMF / PTM compatibility, can't actually save this in any formats
 // Slide up / down every x ticks by y semitones
@@ -4533,13 +4583,6 @@ void CSoundFile::ExtendedS3MCommands(CHANNELINDEX nChn, ModCommand::PARAM param)
 				{
 					chn.nFineTune = param - 8;
 					chn.m_CalculateFreq = true;
-				} else if(GetType() == MOD_TYPE_IMF)
-				{
-					if(chn.nPeriod && chn.pModSample)
-					{
-						chn.nC5Speed = Util::muldivr(chn.pModSample->nC5Speed, 1712, ProTrackerTunedPeriods[param * 12]);
-						chn.nPeriod = GetPeriodFromNote(chn.nNote, 0, chn.nC5Speed);
-					}
 				} else if(GetType() != MOD_TYPE_669)
 				{
 					chn.nC5Speed = S3MFineTuneTable[param];

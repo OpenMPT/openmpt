@@ -28,8 +28,9 @@ const EffectType effectTypes[] =
 	EFFECT_TYPE_GLOBAL, EFFECT_TYPE_NORMAL,  EFFECT_TYPE_PITCH,  EFFECT_TYPE_PANNING,
 	EFFECT_TYPE_PITCH,  EFFECT_TYPE_PANNING, EFFECT_TYPE_NORMAL, EFFECT_TYPE_NORMAL,
 	EFFECT_TYPE_NORMAL, EFFECT_TYPE_NORMAL,  EFFECT_TYPE_NORMAL, EFFECT_TYPE_PITCH,
-	EFFECT_TYPE_PITCH,  EFFECT_TYPE_PITCH,   EFFECT_TYPE_PITCH,  EFFECT_TYPE_NORMAL,
-	EFFECT_TYPE_NORMAL, EFFECT_TYPE_NORMAL,  EFFECT_TYPE_NORMAL,
+	EFFECT_TYPE_PITCH,  EFFECT_TYPE_NORMAL,  EFFECT_TYPE_PITCH,  EFFECT_TYPE_PITCH,
+	EFFECT_TYPE_PITCH,  EFFECT_TYPE_PITCH,   EFFECT_TYPE_NORMAL, EFFECT_TYPE_NORMAL,
+	EFFECT_TYPE_NORMAL,
 };
 
 static_assert(std::size(effectTypes) == MAX_EFFECTS);
@@ -207,16 +208,30 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 			instr = 0;
 		}
 
-		// adjust extended envelope control commands
 		if((command == CMD_S3MCMDEX) && ((param & 0xF0) == 0x70) && ((param & 0x0F) > 0x0C))
 		{
+			// Extended pitch envelope control commands
 			param = 0x7C;
-		}
-
-		if(command == CMD_DELAYCUT)
+		} else if(command == CMD_DELAYCUT)
 		{
-			command = CMD_S3MCMDEX;			// When converting to MOD/XM, this will be converted to CMD_MODCMDEX later
-			param = 0xD0 | (param >> 4);	// Preserve delay nibble.
+			command = CMD_S3MCMDEX;       // When converting to MOD/XM, this will be converted to CMD_MODCMDEX later
+			param = 0xD0 | (param >> 4);  // Preserve delay nibble
+		} else if(command == CMD_FINETUNE || command == CMD_FINETUNE_SMOOTH)
+		{
+			// Convert finetune from +/-128th of a semitone to (extra-)fine portamento (assumes linear slides, plus we're missing the actual pitch wheel depth of the instrument)
+			if(param < 0x80)
+			{
+				command = CMD_PORTAMENTODOWN;
+				param = 0x80 - param;
+			} else if(param > 0x80)
+			{
+				command = CMD_PORTAMENTOUP;
+				param -= 0x80;
+			}
+			if(param <= 30)
+				param = 0xE0 | ((param + 1u) / 2u);
+			else
+				param = 0xF0 | std::min(static_cast<PARAM>((param + 7u) / 8u), PARAM(15));
 		}
 	} // End if(oldTypeIsMPT)
 
@@ -913,6 +928,8 @@ size_t ModCommand::GetEffectWeight(COMMAND cmd)
 		CMD_FINEVIBRATO,
 		CMD_VIBRATO,
 		CMD_XFINEPORTAUPDOWN,
+		CMD_FINETUNE,
+		CMD_FINETUNE_SMOOTH,
 		CMD_PANBRELLO,
 		CMD_S3MCMDEX,
 		CMD_MODCMDEX,

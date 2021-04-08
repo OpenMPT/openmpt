@@ -377,7 +377,7 @@ private:
 #endif // MODPLUG_TRACKER
 
 private: //Misc private methods.
-	static void SetModSpecsPointer(const CModSpecifications*& pModSpecs, const MODTYPE type);
+	static void SetModSpecsPointer(const CModSpecifications* &pModSpecs, const MODTYPE type);
 
 private: //Misc data
 	const CModSpecifications *m_pModSpecs;
@@ -728,7 +728,7 @@ public:
 	constexpr bool CanAddMoreInstruments(INSTRUMENTINDEX amount = 1) const noexcept { return (amount < MAX_INSTRUMENTS) && m_nInstruments < (MAX_INSTRUMENTS - amount); }
 
 #ifndef NO_PLUGINS
-	IMixPlugin* GetInstrumentPlugin(INSTRUMENTINDEX instr) const;
+	IMixPlugin* GetInstrumentPlugin(INSTRUMENTINDEX instr) const noexcept;
 #endif
 	const CModSpecifications& GetModSpecifications() const {return *m_pModSpecs;}
 	static const CModSpecifications& GetModSpecifications(const MODTYPE type);
@@ -774,7 +774,7 @@ public:
 	void InitAmigaResampler();
 
 	void InitOPL();
-	static constexpr bool SupportsOPL(MODTYPE type) { return type & (MOD_TYPE_S3M | MOD_TYPE_MPT); }
+	static constexpr bool SupportsOPL(MODTYPE type) noexcept { return type & (MOD_TYPE_S3M | MOD_TYPE_MPT); }
 	bool SupportsOPL() const noexcept { return SupportsOPL(m_nType); }
 
 	static ProbeResult ProbeFileHeaderMMCMP(MemoryFileReader file, const uint64 *pfilesize);
@@ -849,7 +849,7 @@ public:
 	bool ReadIT(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadITP(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadJ2B(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
-	bool ReadMUS_KM(FileReader& file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadMUS_KM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadM15(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadMDL(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadMED(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
@@ -867,7 +867,7 @@ public:
 	bool ReadSFX(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadSTM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadSTP(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
-	bool ReadSymMOD(FileReader& file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadULT(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadXM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 
@@ -1027,6 +1027,7 @@ protected:
 	void PortamentoMPT(ModChannel &chn, int);
 	void PortamentoFineMPT(ModChannel &chn, int);
 	void PortamentoExtraFineMPT(ModChannel &chn, int);
+	void SetFinetune(CHANNELINDEX channel, PlayState &playState, bool isSmooth) const;
 	void NoteSlide(ModChannel &chn, uint32 param, bool slideUp, bool retrig) const;
 	std::pair<uint32, bool> GetVolCmdTonePorta(const ModCommand &m, uint32 startTick) const;
 	void TonePortamento(ModChannel &chn, uint32 param) const;
@@ -1041,7 +1042,7 @@ protected:
 	void Panbrello(ModChannel &chn, uint32 param) const;
 	void Panning(ModChannel &chn, uint32 param, PanningType panBits) const;
 	void RetrigNote(CHANNELINDEX nChn, int param, int offset = 0);
-	void ProcessSampleOffset(ModChannel& chn, CHANNELINDEX nChn, const PlayState &playState) const;
+	void ProcessSampleOffset(ModChannel &chn, CHANNELINDEX nChn, const PlayState &playState) const;
 	void SampleOffset(ModChannel &chn, SmpLength param) const;
 	void ReverseSampleOffset(ModChannel &chn, ModCommand::PARAM param) const;
 	void NoteCut(CHANNELINDEX nChn, uint32 nTick, bool cutSample);
@@ -1051,7 +1052,7 @@ protected:
 	void ExtendedS3MCommands(CHANNELINDEX nChn, ModCommand::PARAM param);
 	void ExtendedChannelEffect(ModChannel &chn, uint32 param);
 	void InvertLoop(ModChannel &chn);
-	void PositionJump(PlayState& state, CHANNELINDEX chn) const;
+	void PositionJump(PlayState &state, CHANNELINDEX chn) const;
 	ROWINDEX PatternBreak(PlayState &state, CHANNELINDEX chn, uint8 param) const;
 	void GlobalVolSlide(ModCommand::PARAM param, uint8 &nOldGlobalVolSlide);
 
@@ -1125,7 +1126,7 @@ protected:
 	bool ReadITSSample(SAMPLEINDEX nSample, FileReader &file, bool rewind = true);
 	bool ReadITISample(SAMPLEINDEX nSample, FileReader &file);
 	bool ReadIFFSample(SAMPLEINDEX sample, FileReader &file);
-	bool ReadBRRSample(SAMPLEINDEX sample, FileReader& file);
+	bool ReadBRRSample(SAMPLEINDEX sample, FileReader &file);
 	bool ReadFLACSample(SAMPLEINDEX sample, FileReader &file);
 	bool ReadOpusSample(SAMPLEINDEX sample, FileReader &file);
 	bool ReadVorbisSample(SAMPLEINDEX sample, FileReader &file);
@@ -1146,8 +1147,8 @@ public:
 	static bool CanReadMediaFoundation();
 
 	// Instrument file I/O
-	bool ReadInstrumentFromFile(INSTRUMENTINDEX nInstr, FileReader &file, bool mayNormalize=false);
-	bool ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, FileReader &file, bool mayNormalize=false);
+	bool ReadInstrumentFromFile(INSTRUMENTINDEX nInstr, FileReader &file, bool mayNormalize = false);
+	bool ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, FileReader &file, bool mayNormalize = false);
 protected:
 	bool ReadXIInstrument(INSTRUMENTINDEX nInstr, FileReader &file);
 	bool ReadITIInstrument(INSTRUMENTINDEX nInstr, FileReader &file);
@@ -1198,7 +1199,7 @@ public:
 
 
 #ifndef NO_PLUGINS
-inline IMixPlugin* CSoundFile::GetInstrumentPlugin(INSTRUMENTINDEX instr) const
+inline IMixPlugin* CSoundFile::GetInstrumentPlugin(INSTRUMENTINDEX instr) const noexcept
 {
 	if(instr > 0 && instr <= GetNumInstruments() && Instruments[instr] && Instruments[instr]->nMixPlug && Instruments[instr]->nMixPlug <= MAX_MIXPLUGINS)
 		return m_MixPlugins[Instruments[instr]->nMixPlug - 1].pMixPlugin;

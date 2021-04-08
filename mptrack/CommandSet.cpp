@@ -741,6 +741,8 @@ static constexpr struct
 	{2014, kcChannelAddBefore, _T("Add Channel Before Current")},
 	{2015, kcChannelAddAfter, _T("Add Channel After Current") },
 	{2016, kcChannelRemove, _T("Remove Channel") },
+	{2017, kcSetFXFinetune, _T("Finetune") },
+	{2018, kcSetFXFinetuneSmooth, _T("Finetune (Smooth)")},
 };
 
 // Get command descriptions etc.. loaded up.

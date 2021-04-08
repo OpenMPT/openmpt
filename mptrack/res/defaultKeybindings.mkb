@@ -274,6 +274,8 @@ version:1
 6:1295:1:186:1		//Combined Note Delay and Note Cut: Shift+; (KeyDown)
 6:1295:0:186:1		//Combined Note Delay and Note Cut: ; (KeyDown)
 6:1666:0:191:1		//Parameter Extension Command: / (KeyDown)
+6:2017:0:187:1		//Finetune: = (KeyDown)
+6:2018:1:187:1		//Finetune (Smooth): Shift+= (KeyDown)
 
 //----( Pattern Context [bottom] - Param Col )------------
 7:1247:0:48:1		//Effect Parameter Digit 0: 0 (KeyDown)

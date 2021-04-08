@@ -218,7 +218,6 @@ static void ConvertMDLCommand(uint8 &cmd, uint8 &param)
 		{
 		case 0x0: // unused
 		case 0x3: // unused
-		case 0x5: // Set Finetune
 		case 0x8: // Set Samplestatus (loop type)
 			cmd = CMD_NONE;
 			break;
@@ -232,6 +231,10 @@ static void ConvertMDLCommand(uint8 &cmd, uint8 &param)
 			break;
 		case 0x4: // Vibrato Waveform
 			param = 0x30 | (param & 0x0F);
+			break;
+		case 0x5:  // Set Finetune
+			cmd = CMD_FINETUNE;
+			param = (param << 4) ^ 0x80;
 			break;
 		case 0x6: // Pattern Loop
 			param = 0xB0 | (param & 0x0F);

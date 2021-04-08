@@ -60,28 +60,30 @@ struct ModChannel
 	mixsample_t nROfs, nLOfs;
 	uint32 nRampLength;
 
-	const ModSample *pModSample;         // Currently assigned sample slot (may already be stopped)
+	const ModSample *pModSample;  // Currently assigned sample slot (may already be stopped)
 	Paula::State paulaState;
 
 	// Information not used in the mixer
-	const ModInstrument *pModInstrument; // Currently assigned instrument slot
-	SmpLength prevNoteOffset;            // Offset for instrument-less notes for ProTracker/ScreamTracker
-	SmpLength oldOffset;
-	FlagSet<ChannelFlags> dwOldFlags;    // Flags from previous tick
+	const ModInstrument *pModInstrument;  // Currently assigned instrument slot
+	SmpLength prevNoteOffset;             // Offset for instrument-less notes for ProTracker/ScreamTracker
+	SmpLength oldOffset;                  // Offset command memory
+	FlagSet<ChannelFlags> dwOldFlags;     // Flags from previous tick
 	int32 newLeftVol, newRightVol;
 	int32 nRealVolume, nRealPan;
 	int32 nVolume, nPan, nFadeOutVol;
-	int32 nPeriod;                    // Frequency in Hz if !CSoundFile::PeriodsAreFrequencies() or using custom tuning, 4x Amiga periods otherwise
+	int32 nPeriod;  // Frequency in Hz if !CSoundFile::PeriodsAreFrequencies() or using custom tuning, 4x Amiga periods otherwise
 	int32 nC5Speed, nPortamentoDest;
 	int32 cachedPeriod, glissandoPeriod;
-	int32 nCalcVolume;                // Calculated channel volume, 14-Bit (without global volume, pre-amp etc applied) - for MIDI macros
-	EnvInfo VolEnv, PanEnv, PitchEnv; // Envelope playback info
-	int32 nGlobalVol;                 // Channel volume (CV in ITTECH.TXT) 0...64
-	int32 nInsVol;                    // Sample / Instrument volume (SV * IV in ITTECH.TXT) 0...64
-	int32 nFineTune, nTranspose;
+	int32 nCalcVolume;                 // Calculated channel volume, 14-Bit (without global volume, pre-amp etc applied) - for MIDI macros
+	EnvInfo VolEnv, PanEnv, PitchEnv;  // Envelope playback info
+	int32 nGlobalVol;                  // Channel volume (CV in ITTECH.TXT) 0...64
+	int32 nInsVol;                     // Sample / Instrument volume (SV * IV in ITTECH.TXT) 0...64
 	int32 nPortamentoSlide, nAutoVibDepth;
-	uint32 nEFxOffset;                // Offset memory for Invert Loop (EFx, .MOD only)
+	uint32 nEFxOffset;  // Offset memory for Invert Loop (EFx, .MOD only)
 	ROWINDEX nPatternLoop;
+	int16 nTranspose;
+	int16 nFineTune;
+	int16 microTuning;  // Micro-tuning / MIDI pitch wheel command
 	int16 nVolSwing, nPanSwing;
 	int16 nCutSwing, nResSwing;
 	uint16 nRestorePanOnNewNote;  // If > 0, nPan should be set to nRestorePanOnNewNote - 1 on new note. Used to recover from pan swing and IT sample / instrument panning. High bit set = surround
@@ -116,7 +118,7 @@ struct ModChannel
 	FilterMode nFilterMode;
 	uint8 nEFxSpeed, nEFxDelay;              // memory for Invert Loop (EFx, .MOD only)
 	uint8 noteSlideParam, noteSlideCounter;  // IMF / PTM Note Slide
-	uint8 lastZxxParam; // Memory for \xx slides
+	uint8 lastZxxParam;                      // Memory for \xx slides
 	bool isFirstTick : 1;
 	bool isPreviewNote : 1;
 
@@ -199,6 +201,8 @@ struct ModChannel
 
 	// IT command S73-S7E
 	void InstrumentControl(uint8 param, const CSoundFile &sndFile);
+
+	int32 GetMIDIPitchBend() const noexcept { return (static_cast<int32>(microTuning) + 0x8000) / 4; }
 };
 
 

@@ -299,6 +299,13 @@ namespace MidiExport
 			IMidiPlugin::MidiCommand(instr, note, vol, trackChannel);
 		}
 
+		void MidiPitchBendRaw(int32 pitchbend, CHANNELINDEX trackerChn) override
+		{
+			SynchronizeMidiChannelState();
+			SynchronizeMidiPitchWheelDepth(trackerChn);
+			IMidiPlugin::MidiPitchBendRaw(pitchbend, trackerChn);
+		}
+
 		void MidiPitchBend(int32 increment, int8 pwd, CHANNELINDEX trackerChn) override
 		{
 			SynchronizeMidiChannelState();

@@ -24,48 +24,50 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
+static constexpr EffectCommand ExtendedCommands[] = {CMD_OFFSET, CMD_PATTERNBREAK, CMD_POSITIONJUMP, CMD_TEMPO, CMD_FINETUNE, CMD_FINETUNE_SMOOTH};
+
 // For a given pattern cell, check if it contains a command supported by the X-Param mechanism.
 // If so, calculate the multipler for this cell and the value of all the other cells belonging to this param.
 void getXParam(ModCommand::COMMAND command, PATTERNINDEX nPat, ROWINDEX nRow, CHANNELINDEX nChannel, const CSoundFile &sndFile, UINT &xparam, UINT &multiplier)
 {
 	UINT xp = 0, mult = 1;
-	int nCmdRow = static_cast<int>(nRow);
+	int cmdRow = static_cast<int>(nRow);
 	const auto &pattern = sndFile.Patterns[nPat];
 
 	if(command == CMD_XPARAM)
 	{
 		// current command is a parameter extension command
-		nCmdRow--;
+		cmdRow--;
 
 		// Try to find previous command parameter to be extended
-		while(nCmdRow >= 0)
+		while(cmdRow >= 0)
 		{
-			const ModCommand &m = *pattern.GetpModCommand(nCmdRow, nChannel);
-			if(m.command == CMD_OFFSET || m.command == CMD_PATTERNBREAK || m.command == CMD_POSITIONJUMP || m.command == CMD_TEMPO)
+			const ModCommand &m = *pattern.GetpModCommand(cmdRow, nChannel);
+			if(mpt::contains(ExtendedCommands, m.command))
 				break;
 			if(m.command != CMD_XPARAM)
 			{
-				nCmdRow = -1;
+				cmdRow = -1;
 				break;
 			}
-			nCmdRow--;
+			cmdRow--;
 		}
-	} else if(command != CMD_OFFSET && command != CMD_PATTERNBREAK && command != CMD_POSITIONJUMP && command != CMD_TEMPO)
+	} else if(!mpt::contains(ExtendedCommands, command))
 	{
 		// If current row do not own any satisfying command parameter to extend, set return state
-		nCmdRow = -1;
+		cmdRow = -1;
 	}
 
-	if(nCmdRow >= 0)
+	if(cmdRow >= 0)
 	{
 		// An 'extendable' command parameter has been found
-		const ModCommand &m = *pattern.GetpModCommand(nCmdRow, nChannel);
+		const ModCommand &m = *pattern.GetpModCommand(cmdRow, nChannel);
 
 		// Find extension resolution (8 to 24 bits)
 		uint32 n = 1;
-		while(n < 4 && nCmdRow + n < pattern.GetNumRows())
+		while(n < 4 && cmdRow + n < pattern.GetNumRows())
 		{
-			if(pattern.GetpModCommand(nCmdRow + n, nChannel)->command != CMD_XPARAM)
+			if(pattern.GetpModCommand(cmdRow + n, nChannel)->command != CMD_XPARAM)
 				break;
 			n++;
 		}
@@ -82,15 +84,15 @@ void getXParam(ModCommand::COMMAND command, PATTERNINDEX nPat, ROWINDEX nRow, CH
 			// its value is changed by user
 			for(uint32 j = 0; j < n; j++)
 			{
-				const ModCommand &mx = *pattern.GetpModCommand(nCmdRow + j, nChannel);
+				const ModCommand &mx = *pattern.GetpModCommand(cmdRow + j, nChannel);
 
 				uint32 k = 8 * (n - j - 1);
-				if(nCmdRow + j == nRow)
+				if(cmdRow + j == nRow)
 					mult = 1 << k;
 				else
 					xp += (mx.param << k);
 			}
-		} else if(m.command == CMD_OFFSET)
+		} else if(m.command == CMD_OFFSET || m.command == CMD_FINETUNE || m.command == CMD_FINETUNE_SMOOTH)
 		{
 			// No parameter extension to perform (8 bits standard parameter),
 			// just care about offset command special case (16 bits, fake)
@@ -734,7 +736,7 @@ void CEditCommand::OnCommandChanged()
 		newCommand = static_cast<ModCommand::COMMAND>((ndx >= 0) ? effectInfo.GetEffectFromIndex(ndx, newParam) : CMD_NONE);
 	}
 
-	if(newCommand == CMD_OFFSET || newCommand == CMD_PATTERNBREAK || newCommand == CMD_POSITIONJUMP || newCommand == CMD_TEMPO || newCommand == CMD_XPARAM)
+	if(newCommand == CMD_XPARAM || mpt::contains(ExtendedCommands, newCommand))
 	{
 		xParam = 0;
 		xMultiplier = 1;

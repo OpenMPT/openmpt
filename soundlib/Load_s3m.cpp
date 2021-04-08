@@ -55,10 +55,12 @@ void CSoundFile::S3MConvert(ModCommand &m, bool fromIT)
 	case 'X': m.command = CMD_PANNING8; break;
 	case 'Y': m.command = CMD_PANBRELLO; break;
 	case 'Z': m.command = CMD_MIDI; break;
-	case '\\': m.command = static_cast<ModCommand::COMMAND>(fromIT ? CMD_SMOOTHMIDI : CMD_MIDI); break;
-	// Chars under 0x40 don't save properly, so map : to ] and # to [.
-	case ']': m.command = CMD_DELAYCUT; break;
-	case '[': m.command = CMD_XPARAM; break;
+	case '\\': m.command = fromIT ? CMD_SMOOTHMIDI : CMD_MIDI; break;
+	// Chars under 0x40 don't save properly, so the following commands don't map to their pattern editor representations
+	case ']': m.command = fromIT ? CMD_DELAYCUT : CMD_NONE; break;
+	case '[': m.command = fromIT ? CMD_XPARAM : CMD_NONE; break;
+	case '^': m.command = fromIT ? CMD_FINETUNE : CMD_NONE; break;
+	case '_': m.command = fromIT ? CMD_FINETUNE_SMOOTH : CMD_NONE; break;
 	default: m.command = CMD_NONE;
 	}
 }
@@ -67,6 +69,7 @@ void CSoundFile::S3MConvert(ModCommand &m, bool fromIT)
 
 void CSoundFile::S3MSaveConvert(uint8 &command, uint8 &param, bool toIT, bool compatibilityExport) const
 {
+	const bool extendedIT = !compatibilityExport && toIT;
 	switch(command)
 	{
 	case CMD_DUMMY:           command = (param ? '@' : 0); break;
@@ -110,10 +113,10 @@ void CSoundFile::S3MSaveConvert(uint8 &command, uint8 &param, bool toIT, bool co
 	case CMD_PANBRELLO: command = 'Y'; break;
 	case CMD_MIDI:      command = 'Z'; break;
 	case CMD_SMOOTHMIDI:
-		if(compatibilityExport || !toIT)
-			command = 'Z';
-		else
+		if(extendedIT)
 			command = '\\';
+		else
+			command = 'Z';
 		break;
 	case CMD_XFINEPORTAUPDOWN:
 		switch(param & 0xF0)
@@ -137,10 +140,16 @@ void CSoundFile::S3MSaveConvert(uint8 &command, uint8 &param, bool toIT, bool co
 		return;
 	// Chars under 0x40 don't save properly, so map : to ] and # to [.
 	case CMD_DELAYCUT:
-		command = (compatibilityExport || !toIT) ? 0 : ']';
+		command = extendedIT ? ']' : 0;
 		break;
 	case CMD_XPARAM:
-		command = (compatibilityExport || !toIT) ? 0 : '[';
+		command = extendedIT ? '[' : 0;
+		break;
+	case CMD_FINETUNE:
+		command = extendedIT ? '^' : 0;
+		break;
+	case CMD_FINETUNE_SMOOTH:
+		command = extendedIT ? '_' : 0;
 		break;
 	default:
 		command = 0;

@@ -338,6 +338,10 @@ void CViewPattern::DrawLetter(int x, int y, char letter, int sizex, int ofsx)
 		srcx = pfnt->nAlphaNZ_X;
 		srcy = pfnt->nAlphaNZ_Y + 15 * pfnt->spacingY;
 		break;
+	case '*':
+		srcx = pfnt->nAlphaNZ_X;
+		srcy = pfnt->nAlphaNZ_Y + 16 * pfnt->spacingY;
+		break;
 	case ' ':
 		srcx = pfnt->nSpaceX;
 		srcy = pfnt->nSpaceY;

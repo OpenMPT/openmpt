@@ -1175,7 +1175,7 @@ int CSoundFile::ProcessPitchFilterEnvelope(ModChannel &chn, int &period) const
 			{
 				if(chn.nFineTune != envval)
 				{
-					chn.nFineTune = envval;
+					chn.nFineTune = mpt::saturate_cast<int16>(envval);
 					chn.m_CalculateFreq = true;
 					//Preliminary tests indicated that this behavior
 					//is very close to original(with 12TET) when finestep count
@@ -1992,8 +1992,17 @@ SamplePosition CSoundFile::GetChannelIncrement(const ModChannel &chn, uint32 per
 	else
 		freq = chn.nPeriod;
 
-	// Applying Pitch/Tempo lock
 	const ModInstrument *ins = chn.pModInstrument;
+
+	if(int32 finetune = chn.microTuning; finetune != 0)
+	{
+		if(ins)
+			finetune *= ins->midiPWD;
+		if(finetune)
+			freq = mpt::saturate_round<uint32>(freq * std::pow(2.0, finetune / (12.0 * 256.0 * 128.0)));
+	}
+
+	// Applying Pitch/Tempo lock
 	if(ins && ins->pitchToTempoLock.GetRaw())
 	{
 		freq = Util::muldivr(freq, m_PlayState.m_nMusicTempo.GetRaw(), ins->pitchToTempoLock.GetRaw());

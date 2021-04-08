@@ -646,10 +646,12 @@ enum CommandID
 	kcSetFXsetEnvPos,           //l,?
 	kcSetFXmacro,               //z,z
 	kcFixedFXend = kcSetFXmacro,
-	kcSetFXmacroSlide,  //?,\ ,
-	kcSetFXdelaycut,    //?,:
-	kcSetFXextension,   //?,#
-	kcSetFXEnd = kcSetFXextension,
+	kcSetFXmacroSlide,      //?,\ ,
+	kcSetFXdelaycut,        //?,:
+	kcSetFXextension,       //?,#
+	kcSetFXFinetune,        //?,+
+	kcSetFXFinetuneSmooth,  //?,*
+	kcSetFXEnd = kcSetFXFinetuneSmooth,
 
 	kcStartInstrumentMisc,
 	// Note: Order must be the same as kcStartSampleMisc because commands are propagated!

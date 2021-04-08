@@ -1533,7 +1533,7 @@ void CVstPlugin::HardAllNotesOff()
 		PlugInstrChannel &channel = m_MidiCh[mc];
 		channel.ResetProgram();
 
-		MidiPitchBend(mc, EncodePitchBendParam(MIDIEvents::pitchBendCentre));		// centre pitch bend
+		SendMidiPitchBend(mc, EncodePitchBendParam(MIDIEvents::pitchBendCentre));  // centre pitch bend
 
 		if(!isWavestation && !isSawer)
 		{
@@ -1541,14 +1541,14 @@ void CVstPlugin::HardAllNotesOff()
 			// prevent new notes from being played.
 			// Image-Line Sawer does not like it either and resets some parameters so that the plugin is all
 			// distorted afterwards.
-			MidiSend(MIDIEvents::CC(MIDIEvents::MIDICC_AllControllersOff, mc, 0));		// reset all controllers
+			MidiSend(MIDIEvents::CC(MIDIEvents::MIDICC_AllControllersOff, mc, 0));
 		}
 		if(!isSawer)
 		{
 			// Image-Line Sawer takes ages to execute this CC.
-			MidiSend(MIDIEvents::CC(MIDIEvents::MIDICC_AllNotesOff, mc, 0));			// all notes off
+			MidiSend(MIDIEvents::CC(MIDIEvents::MIDICC_AllNotesOff, mc, 0));
 		}
-		MidiSend(MIDIEvents::CC(MIDIEvents::MIDICC_AllSoundOff, mc, 0));			// all sounds off
+		MidiSend(MIDIEvents::CC(MIDIEvents::MIDICC_AllSoundOff, mc, 0));
 
 		for(std::size_t i = 0; i < std::size(channel.noteOnMap); i++)	//all notes
 		{

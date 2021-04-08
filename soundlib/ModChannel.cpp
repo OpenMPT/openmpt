@@ -36,6 +36,7 @@ void ModChannel::Reset(ResetFlags resetMask, const CSoundFile &sndFile, CHANNELI
 			nRetrigParam = 1;
 			nRetrigCount = 0;
 		}
+		microTuning = 0;
 		nTremorCount = 0;
 		nEFxSpeed = 0;
 		prevNoteOffset = 0;

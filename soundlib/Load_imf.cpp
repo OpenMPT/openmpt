@@ -130,6 +130,7 @@ struct IMFInstrument
 		}
 
 		mptIns.nFadeOut = fadeout;
+		mptIns.midiPWD = 1;  // For CMD_FINETUNE
 
 		ConvertEnvelope(mptIns.VolEnv, volEnv);
 		ConvertEnvelope(mptIns.PanEnv, panEnv);
@@ -218,7 +219,7 @@ static constexpr EffectCommand imfEffects[] =
 	CMD_VOLUME,			// 0x0C Cxx Set Volume
 	CMD_VOLUMESLIDE,	// 0x0D Dxy Volume Slide
 	CMD_VOLUMESLIDE,	// 0x0E Exy Fine Volume Slide
-	CMD_S3MCMDEX,		// 0x0F Fxx Set Finetune
+	CMD_FINETUNE,		// 0x0F Fxx Set Finetune
 	CMD_NOTESLIDEUP,	// 0x10 Gxy Note Slide Up
 	CMD_NOTESLIDEDOWN,	// 0x11 Hxy Note Slide Down
 	CMD_PORTAMENTOUP,	// 0x12 Ixx Slide Up
@@ -271,8 +272,7 @@ static void ImportIMFEffect(ModCommand &m)
 			m.param |= 0xF0;
 		break;
 	case 0xF: // set finetune
-		// we don't implement this, but let's at least import the value
-		m.param = 0x20 | std::min(static_cast<uint8>(m.param >> 4), uint8(0x0F));
+		m.param ^= 0x80;
 		break;
 	case 0x14: // fine slide up
 	case 0x15: // fine slide down
