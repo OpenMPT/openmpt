@@ -17,6 +17,11 @@ is just a high-level summary.
  *  [**Bug**] `libopenmpt.pc` did not list required system libraries `ole32.lib`
     and `rpcrt4.lib` on Windows in `Libs.Private` field for static builds.
 
+ *  libopenmpt 0.5.7 broke seeking in some subsongs.
+ *  The built-in LFO plugin did not load the correct initial LFO frequency.
+ *  IT command S7x (instrument control) is now supported when seeking with
+    sample sync enabled.
+
  *  mpg123: Update to v1.26.5 (2021-03-22).
 
 ### libopenmpt 0.5.7 (2021-03-20)
