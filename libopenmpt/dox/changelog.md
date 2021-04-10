@@ -14,6 +14,11 @@ is just a high-level summary.
     the position jump must be lower than the initial speed of the module.
     (r14532)
 
+ *  libopenmpt 0.3.28 broke seeking in some subsongs.
+ *  The built-in LFO plugin did not load the correct initial LFO frequency.
+ *  libopenmpt_ext `play_note` was cutting of channels even when there were
+    plenty of free channels to use.
+
  *  mpg123: Update to v1.26.5 (2021-03-22).
 
 ### libopenmpt 0.3.28 (2021-03-20)
