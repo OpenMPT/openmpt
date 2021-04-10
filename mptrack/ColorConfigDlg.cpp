@@ -128,7 +128,7 @@ BOOL COptionsColors::OnInitDialog()
 	SetDlgItemInt(IDC_PRIMARYHILITE, TrackerSettings::Instance().m_nRowHighlightMeasures);
 	SetDlgItemInt(IDC_SECONDARYHILITE, TrackerSettings::Instance().m_nRowHighlightBeats);
 	CheckRadioButton(IDC_RADIO1, IDC_RADIO2, TrackerSettings::Instance().accidentalFlats ? IDC_RADIO2 : IDC_RADIO1);
-	CheckRadioButton(IDC_RADIO3, IDC_RADIO4, TrackerSettings::Instance().defaultRainbowChannelColors ? IDC_RADIO4 : IDC_RADIO3);
+	CheckRadioButton(IDC_RADIO3, IDC_RADIO5, IDC_RADIO3 + static_cast<int>(TrackerSettings::Instance().defaultRainbowChannelColors.Get()));
 
 	patternFont = TrackerSettings::Instance().patternFont;
 	m_ComboFont.AddString(_T("Built-in (small)"));
@@ -196,7 +196,13 @@ void COptionsColors::OnOK()
 	if(IsDlgButtonChecked(IDC_CHECK4)) TrackerSettings::Instance().m_dwPatternSetup |= PATTERN_2NDHIGHLIGHT;
 	TrackerSettings::Instance().rememberSongWindows = IsDlgButtonChecked(IDC_CHECK5) != BST_UNCHECKED;
 	TrackerSettings::Instance().accidentalFlats = IsDlgButtonChecked(IDC_RADIO2) != BST_UNCHECKED;
-	TrackerSettings::Instance().defaultRainbowChannelColors = IsDlgButtonChecked(IDC_RADIO4) != BST_UNCHECKED;
+
+	if(IsDlgButtonChecked(IDC_RADIO3))
+		TrackerSettings::Instance().defaultRainbowChannelColors = DefaultChannelColors::NoColors;
+	else if(IsDlgButtonChecked(IDC_RADIO4))
+		TrackerSettings::Instance().defaultRainbowChannelColors = DefaultChannelColors::Rainbow;
+	else if(IsDlgButtonChecked(IDC_RADIO5))
+		TrackerSettings::Instance().defaultRainbowChannelColors = DefaultChannelColors::Random;
 
 	FontSetting newPatternFont = patternFont;
 	const int fontSel = m_ComboFont.GetCurSel();

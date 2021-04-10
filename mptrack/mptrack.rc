@@ -1233,7 +1233,8 @@ BEGIN
     CONTROL         "Flats (&b)",IDC_RADIO2,"Button",BS_AUTORADIOBUTTON,168,54,108,12
     LTEXT           "Default channel colours:",IDC_STATIC,18,67,78,12,SS_CENTERIMAGE
     CONTROL         "&No Colours",IDC_RADIO3,"Button",BS_AUTORADIOBUTTON,102,67,66,12
-    CONTROL         "&Rainbow",IDC_RADIO4,"Button",BS_AUTORADIOBUTTON,168,67,108,12
+    CONTROL         "&Rainbow",IDC_RADIO4,"Button",BS_AUTORADIOBUTTON,168,67,60,12
+    CONTROL         "Ran&dom",IDC_RADIO5,"Button",BS_AUTORADIOBUTTON,228,66,48,12
     CONTROL         "&Enable effect highlighting",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,84,114,10
     CONTROL         "Remember each song's &window positions",IDC_CHECK5,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,102,168,10

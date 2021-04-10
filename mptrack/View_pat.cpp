@@ -3060,7 +3060,7 @@ void CViewPattern::OnRemoveChannel()
 }
 
 
-void CViewPattern::AddChannelBefore(CHANNELINDEX nBefore)
+void CViewPattern::AddChannel(CHANNELINDEX parent, bool afterCurrent)
 {
 	CModDoc *pModDoc = GetDocument();
 	if(pModDoc == nullptr)
@@ -3072,7 +3072,7 @@ void CViewPattern::AddChannelBefore(CHANNELINDEX nBefore)
 	CHANNELINDEX i = 0;
 	for(CHANNELINDEX nChn = 0; nChn < pModDoc->GetNumChannels() + 1; nChn++)
 	{
-		if(nChn != nBefore)
+		if(nChn != (parent + (afterCurrent ? 1 : 0)))
 		{
 			channels[nChn] = i++;
 		}
@@ -3080,6 +3080,8 @@ void CViewPattern::AddChannelBefore(CHANNELINDEX nBefore)
 
 	if(pModDoc->ReArrangeChannels(channels) != CHANNELINDEX_INVALID)
 	{
+		auto &chnSettings = pModDoc->GetSoundFile().ChnSettings;
+		chnSettings[parent + (afterCurrent ? 1 : 0)].color = chnSettings[parent + (afterCurrent ? 0 : 1)].color;
 		pModDoc->SetModified();
 		pModDoc->UpdateAllViews(nullptr, GeneralHint().General().Channels(), this);  //refresh channel headers
 		SetCurrentPattern(m_nPattern);

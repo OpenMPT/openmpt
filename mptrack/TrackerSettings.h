@@ -241,6 +241,13 @@ enum class TimelineFormat
 	SamplesPow2,
 };
 
+enum class DefaultChannelColors
+{
+	NoColors = 0,
+	Rainbow,
+	Random,
+};
+
 
 class SampleUndoBufferSize
 {
@@ -282,6 +289,9 @@ template<> inline SampleEditorKeyBehaviour FromSettingValue(const SettingValue &
 
 template<> inline SettingValue ToSettingValue(const TimelineFormat &val) { return SettingValue(int32(val)); }
 template<> inline TimelineFormat FromSettingValue(const SettingValue &val) { return TimelineFormat(val.as<int32>()); }
+
+template<> inline SettingValue ToSettingValue(const DefaultChannelColors & val) { return SettingValue(int32(val)); }
+template<> inline DefaultChannelColors FromSettingValue(const SettingValue& val) { return DefaultChannelColors(val.as<int32>()); }
 
 template<> inline SettingValue ToSettingValue(const MODTYPE &val) { return SettingValue(SettingsModTypeToString(val), "MODTYPE"); }
 template<> inline MODTYPE FromSettingValue(const SettingValue &val) { ASSERT(val.GetTypeTag() == "MODTYPE"); return SettingsStringToModType(val.as<mpt::ustring>()); }
@@ -648,7 +658,7 @@ public:
 	CachedSetting<bool> accidentalFlats;
 	Setting<bool> rememberSongWindows;
 	Setting<bool> showDirsInSampleBrowser;
-	Setting<bool> defaultRainbowChannelColors;
+	Setting<DefaultChannelColors> defaultRainbowChannelColors;
 
 	Setting<FontSetting> commentsFont;
 

@@ -626,9 +626,10 @@ void CModDoc::InitializeMod()
 
 void CModDoc::SetDefaultChannelColors()
 {
-	if(TrackerSettings::Instance().defaultRainbowChannelColors)
+	if(TrackerSettings::Instance().defaultRainbowChannelColors != DefaultChannelColors::NoColors)
 	{
-		const double hueFactor = (1.5 * M_PI) / std::max(1, GetNumChannels() - 1);  // Three quarters of the color wheel, red to purple
+		const bool rainbow = TrackerSettings::Instance().defaultRainbowChannelColors == DefaultChannelColors::Rainbow;
+		const double hueFactor = rainbow ? (1.5 * M_PI) / std::max(1, GetNumChannels() - 1) : 1000.0;  // Three quarters of the color wheel, red to purple
 		for(CHANNELINDEX i = 0; i < GetNumChannels(); i++)
 		{
 			const double hue = i * hueFactor;  // 0...2pi
