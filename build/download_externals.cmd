@@ -44,7 +44,7 @@ call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://www.un4seen.com/fi
 call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://web.archive.org/web/20200918004813if_/http://download.microsoft.com/download/0/A/9/0A939EF6-E31C-430F-A3DF-DFAE7960D564/htmlhelp.exe" "build\externals\htmlhelp.exe"                 d91371244ea98c691b4674ee266c4a2496a296800c176adae069d21f5c52c0763b21cc7859cfffa865b89e50171a2c99a6d14620c32f7d72c0ef04045348f856 3509072 || goto error
 
 
-call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://www.python.org/ftp/python/3.8.2/python-3.8.2-embed-win32.zip"                            "build\externals\python-3.8.2-embed-win32.zip" ff3fac1286d3608370f3ded451d51227376abeece0bed25f5fa48b38609a1942f3b256e9611355df32a24ecb65817bac0678789932c95ee75661662c510c1efa 7147713 || goto error
+call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://www.python.org/ftp/python/3.9.4/python-3.9.4-embed-amd64.zip"                            "build\externals\python-3.9.4-embed-amd64.zip" 6e314c6f8b18da28c7702e7908ff3d64988f18b13b8fab54acfe32683e92e52bec1c8cbd94defd058faaeb700be805f1213a5e79ed0edb9039e107b7c5d89dbb 8419530 || goto error
 
 
 call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://netcologne.dl.sourceforge.net/project/innounp/innounp/innounp%%%%200.50/innounp050.rar"  "build\externals\innounp050.rar"               dbbc809308267a866db9d6b751fdeda6d179e1a65d8ddb14bb51984431ae91493f9a76105e1789b245732043a2c696c869ed10964b48cf59f81e55bd52f85330  141621 || goto error
