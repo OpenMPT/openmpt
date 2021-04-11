@@ -16,8 +16,8 @@ is just a high-level summary.
 
  *  [**Bug**] `libopenmpt.pc` did not list required system libraries `ole32.lib`
     and `rpcrt4.lib` on Windows in `Libs.Private` field for static builds.
+ *  [**Bug**] libopenmpt 0.4.19 broke seeking in some subsongs.
 
- *  libopenmpt 0.4.19 broke seeking in some subsongs.
  *  The built-in LFO plugin did not load the correct initial LFO frequency.
  *  libopenmpt_ext `play_note` was cutting of channels even when there were
     plenty of free channels to use.
