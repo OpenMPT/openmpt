@@ -31,6 +31,44 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.29.09.00 (11 April 2021, revision 14577)
+-------------------------------------------
+Tree view
+- [Fix] <js> Holding a key to preview a sample or instrument in module now works as expected (no more cycling through items / playing "Ding" sound).
+
+Pattern tab
+- [New] <js> Added a new keyboard shortcut "Insert Separator" (Ctrl + Insert by default) to the order list which does the same thing as the identically-named context menu entry (http://bugs.openmpt.org/view.php?id=1437).
+- [Imp] <js> Support instrument control S7x command when seeking with sample sync.
+- [Fix] <js> Possible crash when resuming playback with "Play song from pattern start" combined with "Maintain sample sync on seek" (tx melcom).
+- [Fix] <js> Pasting into a non-existent pattern (which would create a new pattern) didn't update the list of existing patterns in the tree view.
+- [Fix] <js> Plugin names in instrument list are now updated immediately when renaming a plugin.
+- [Fix] <js> Some characters were surrounded by colored frames when using proportional fonts.
+- [Fix] <js> Avoid status bar updates (pattern selection size) from playing song while another song is being edited.
+
+Instrument tab
+- [Imp] <js> SFZ: Support loopcrossfade as an alias for loop_crossfade.
+- [Fix] <js> SFZ: label_keyN values with spaces no longer break the parsing of following opcodes on the same line.
+- [Fix] <js> SFZ export: Avoid creating folder names with trailing spaces and dots, as they are difficult to delete or move on Windows.
+
+IT
+- [Fix] <js> Instrument / sample panning was reset on note-off / fade commands (http://bugs.openmpt.org/view.php?id=1432).
+
+Other formats
+- [Fix] <js> With some imported formats, the "Save As" dialog didn't show up when trying to save them, overwriting the original file instead. 
+- [Fix] <js> Possible crash when loading some malformed files.
+- [Fix] <js> Fix excessive memory consumption with malformed files in various formats.
+
+General
+- [Mod] <js> Welcome Dialog: The initial key map suggestion is now used even when not clicking the OK button.
+- [Fix] <js> Modifier key state (Ctrl, Alt, Shift, Win) could sometimes get stuck when switching to another application.
+
+Bundled plugins
+- [Fix] <js> LFO Plugin: Frequency was not immediately reset when restoring parameters from saved file (http://bugs.openmpt.org/view.php?id=1440).
+
+Third-Party Libraries
+- [Imp] Update mpg123 (v1.26.5)
+
+
 v1.29.08.00 (14 March 2021, revision 14303)
 -------------------------------------------
 General tab
