@@ -431,9 +431,11 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 	const bool updateWholePluginView = updateAll || (plugHint.GetType()[HINT_MIXPLUGINS] && updatePlug);
 	if(updateWholePluginView)
 	{
+		const PLUGINDEX plugIndex = (plugHint.GetPlugin() != 0) ? plugHint.GetPlugin() - 1 : PLUGINDEX_INVALID;
 		m_CbnPlugin.SetRedraw(FALSE);
-		m_CbnPlugin.ResetContent();
-		AddPluginNamesToCombobox(m_CbnPlugin, sndFile.m_MixPlugins, true);
+		if(plugIndex == PLUGINDEX_INVALID)
+			m_CbnPlugin.ResetContent();
+		AddPluginNamesToCombobox(m_CbnPlugin, sndFile.m_MixPlugins, true, plugIndex);
 		m_CbnPlugin.SetRedraw(TRUE);
 		m_CbnPlugin.SetCurSel(m_nCurrentPlugin);
 		if (m_nCurrentPlugin >= MAX_MIXPLUGINS) m_nCurrentPlugin = 0;
@@ -1042,6 +1044,12 @@ void CViewGlobals::OnPluginNameChanged()
 			}
 			// Update channel plugin assignments
 			PopulateChannelPlugins(m_nCurrentPlugin);
+
+			m_CbnPlugin.SetRedraw(FALSE);
+			AddPluginNamesToCombobox(m_CbnPlugin, sndFile.m_MixPlugins, true, m_nCurrentPlugin);
+			m_CbnPlugin.SetCurSel(m_nCurrentPlugin);
+			m_CbnPlugin.Invalidate(FALSE);
+			m_CbnPlugin.SetRedraw(TRUE);
 		}
 	}
 }

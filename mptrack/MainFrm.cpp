@@ -3169,30 +3169,50 @@ ULONG TfLanguageProfileNotifySink::Release()
 //Misc helper functions
 /////////////////////////////////////////////
 
-void AddPluginNamesToCombobox(CComboBox &CBox, const SNDMIXPLUGIN *plugarray, const bool librarynames)
+void AddPluginNamesToCombobox(CComboBox &CBox, const SNDMIXPLUGIN *plugarray, const bool libraryName, const PLUGINDEX updatePlug)
 {
 #ifndef NO_PLUGINS
-	mpt::ustring str;
-	str.reserve(80);
-	for (PLUGINDEX iPlug = 0; iPlug < MAX_MIXPLUGINS; iPlug++)
+	int insertAt = CBox.GetCount();
+	if(updatePlug != PLUGINDEX_INVALID)
 	{
-		const SNDMIXPLUGIN &plugin = plugarray[iPlug];
+		const int items = insertAt;
+		for(insertAt = 0; insertAt < items; insertAt++)
+		{
+			auto thisPlugin = static_cast<PLUGINDEX>(CBox.GetItemData(insertAt));
+			if(thisPlugin == (updatePlug + 1))
+				CBox.DeleteString(insertAt);
+			if(thisPlugin >= (updatePlug + 1))
+				break;
+		}
+	}
+
+	mpt::tstring str;
+	str.reserve(80);
+	for(PLUGINDEX plug = 0; plug < MAX_MIXPLUGINS; plug++)
+	{
+		if(updatePlug != PLUGINDEX_INVALID && plug != updatePlug)
+			continue;
+		const SNDMIXPLUGIN &plugin = plugarray[plug];
 		str.clear();
-		str += MPT_UFORMAT("FX{}: ")(iPlug + 1);
-		const size_t size0 = str.size();
-		str += (librarynames) ? plugin.GetLibraryName() : plugin.GetName();
-		if(str.size() <= size0) str += U_("--");
-		
+		str += MPT_TFORMAT("FX{}: ")(plug + 1);
+		const auto plugName = plugin.GetName(), libName = plugin.GetLibraryName();
+		str += plugName;
+		if(libraryName && plugName != libName && !libName.empty())
+			str += _T(" (") + libName + _T(")");
+		else if(plugName.empty() && (!libraryName || libName.empty()))
+			str += _T("--");
 #ifndef NO_VST
 		auto *vstPlug = dynamic_cast<const CVstPlugin *>(plugin.pMixPlugin);
 		if(vstPlug != nullptr && vstPlug->isBridged)
 		{
 			VSTPluginLib &lib = vstPlug->GetPluginFactory();
-			str += MPT_UFORMAT(" ({} Bridged)")(lib.GetDllArchNameUser());
+			str += MPT_TFORMAT(" ({} Bridged)")(lib.GetDllArchNameUser());
 		}
 #endif // NO_VST
 
-		CBox.SetItemData(static_cast<int>(::SendMessageW(CBox.m_hWnd, CB_ADDSTRING, 0, (LPARAM)str.c_str())), iPlug + 1);
+		insertAt = CBox.InsertString(insertAt, str.c_str());
+		CBox.SetItemData(insertAt, plug + 1);
+		insertAt++;
 	}
 #endif // NO_PLUGINS
 }
