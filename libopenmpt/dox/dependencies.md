@@ -41,7 +41,7 @@ Dependencies
          *  `signed` integer overflow is undefined
          *  `float` and `double` can be non-IEEE754
         
-        libopenmpt can optionally support for certain incomplete C++
+        libopenmpt can optionally support certain incomplete C++
         implementations:
          *  platforms without `wchar_t` support (like DJGPP)
          *  platforms without working `std::random_device` (like Emscripten when
