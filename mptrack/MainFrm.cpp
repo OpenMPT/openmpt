@@ -3196,9 +3196,9 @@ void AddPluginNamesToCombobox(CComboBox &CBox, const SNDMIXPLUGIN *plugarray, co
 		str.clear();
 		str += MPT_TFORMAT("FX{}: ")(plug + 1);
 		const auto plugName = plugin.GetName(), libName = plugin.GetLibraryName();
-		str += plugName;
+		str += mpt::ToWin(plugName);
 		if(libraryName && plugName != libName && !libName.empty())
-			str += _T(" (") + libName + _T(")");
+			str += _T(" (") + mpt::ToWin(libName) + _T(")");
 		else if(plugName.empty() && (!libraryName || libName.empty()))
 			str += _T("--");
 #ifndef NO_VST
