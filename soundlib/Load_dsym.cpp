@@ -106,9 +106,14 @@ static std::vector<std::byte> DecompressDSymLZW(FileReader &file, uint32 size)
 		{
 			dictionary[nextIndex].value = match[writeOffset];
 			dictionary[nextIndex].prev = prevCode;
-			if(nextIndex != MaxNodes - 1 && nextIndex == ((1u << codeSize) - 1))
-				codeSize++;
-			nextIndex++;
+			// Special case for FULLEFFECT and NARCOSIS, which end with a dictionary size of 512
+			// right before the end-of-stream token, but the code size is expected to be 9
+			if(output.size() < size)
+			{
+				nextIndex++;
+				if(nextIndex != MaxNodes && nextIndex == (1u << codeSize))
+					codeSize++;
+			}
 		}
 
 		prevCode = newCode;
