@@ -927,6 +927,8 @@
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_dsm.cpp">
     </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_dsym.cpp">
+    </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_dtm.cpp">
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_far.cpp">

@@ -244,7 +244,6 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 		{
 			bytesRead = DMFUnpack(file, mpt::byte_cast<uint8 *>(sample.sampleb()), sample.GetSampleSizeInBytes());
 		}
-#ifdef MODPLUG_TRACKER
 	} else if((GetEncoding() == uLaw || GetEncoding() == aLaw) && GetBitDepth() == 16 && (GetChannelFormat() == mono || GetChannelFormat() == stereoInterleaved))
 	{
 
@@ -270,8 +269,6 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 				*(outBuf++) = conv(inBuf++);
 			}
 		}
-
-#endif // MODPLUG_TRACKER
 	}
 
 
