@@ -232,16 +232,17 @@ bool CSoundFile::ReadDSym(FileReader &file, ModLoadingFlags loadFlags)
 
 	const auto allowedCommands = file.ReadArray<uint8, 8>();
 
-	std::vector<std::byte> sequenceData(fileHeader.numOrders * fileHeader.numChannels * 2u);
+	std::vector<std::byte> sequenceData;
 	if(fileHeader.numOrders)
 	{
+		const uint32 sequenceSize = fileHeader.numOrders * fileHeader.numChannels * 2u;
 		const uint8 packingType = file.ReadUint8();
 		if(packingType > 1)
 			return false;
 		if(packingType)
-			sequenceData = DecompressDSymLZW(file, sequenceData.size());
+			sequenceData = DecompressDSymLZW(file, sequenceSize);
 		else
-			file.ReadVector(sequenceData, sequenceData.size());
+			file.ReadVector(sequenceData, sequenceSize);
 	}
 	const auto sequence = mpt::as_span(reinterpret_cast<uint16le *>(sequenceData.data()), sequenceData.size() / 2u);
 	if(sequence.size() < fileHeader.numOrders * static_cast<size_t>(m_nChannels))
@@ -254,14 +255,15 @@ bool CSoundFile::ReadDSym(FileReader &file, ModLoadingFlags loadFlags)
 		// For some reason, patterns are stored in 512K chunks
 		for(uint16 offset = 0; offset < fileHeader.numTracks; offset += 2000)
 		{
-			std::vector<std::byte> chunk(std::min(fileHeader.numTracks - offset, 2000) * 256);
+			const uint32 chunkSize = std::min(fileHeader.numTracks - offset, 2000) * 256;
+			std::vector<std::byte> chunk;
 			const uint8 packingType = file.ReadUint8();
 			if(packingType > 1)
 				return false;
 			if(packingType)
-				trackData = DecompressDSymLZW(file, chunk.size());
+				trackData = DecompressDSymLZW(file, chunkSize);
 			else
-				file.ReadVector(chunk, chunk.size());
+				file.ReadVector(chunk, chunkSize);
 
 			trackData.insert(trackData.end(), chunk.begin(), chunk.end());
 		}
