@@ -34,6 +34,8 @@ dmf="SMPD"
 dsm="RIFF"
 dsm="DSMF"
 
+dsym="\x02\x01\x13\x13\x14\x12\x01\x0B\x01"
+
 dtm="D.T."
 dtm="S.Q."
 #dtm="PATT"

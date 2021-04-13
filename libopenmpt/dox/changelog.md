@@ -13,6 +13,7 @@ is just a high-level summary.
     supported.
  *  [**New**] `FMT` files created with Davey W Taylor's FM Tracker are now
     supported.
+ *  [**New**] Digital Symphony files are now supported.
  *  [**New**] openmpt123: openmpt123 will now expand file wildcards passed on
     the command line in Windows when built with MSVC.
  *  [**New**] `Makefile` `CONFIG=emscripten` now supports
