@@ -57,8 +57,8 @@ static std::vector<std::byte> DecompressDSymLZW(FileReader &file, uint32 size)
 
 	struct LZWEntry
 	{
-		uint16 prev = MaxNodes;
-		std::byte value{};
+		uint16 prev;
+		std::byte value;
 	};
 	std::vector<LZWEntry> dictionary(MaxNodes);
 	std::vector<std::byte> match(MaxNodes);
@@ -66,6 +66,7 @@ static std::vector<std::byte> DecompressDSymLZW(FileReader &file, uint32 size)
 	// Initialize dictionary
 	for(int i = 0; i < 256; i++)
 	{
+		dictionary[i].prev = MaxNodes;
 		dictionary[i].value = static_cast<std::byte>(i);
 	}
 	uint8 codeSize = 9;
@@ -104,16 +105,17 @@ static std::vector<std::byte> DecompressDSymLZW(FileReader &file, uint32 size)
 		// Add to dictionary
 		if(nextIndex < MaxNodes)
 		{
+			// Special case for FULLEFFECT, NARCOSIS and NEWDANCE, which end with a dictionary size of 512
+			// right before the end-of-stream token, but the code size is expected to be 9
+			if(output.size() >= size)
+				continue;
+
 			dictionary[nextIndex].value = match[writeOffset];
 			dictionary[nextIndex].prev = prevCode;
-			// Special case for FULLEFFECT and NARCOSIS, which end with a dictionary size of 512
-			// right before the end-of-stream token, but the code size is expected to be 9
-			if(output.size() < size)
-			{
-				nextIndex++;
-				if(nextIndex != MaxNodes && nextIndex == (1u << codeSize))
-					codeSize++;
-			}
+			
+			nextIndex++;
+			if(nextIndex != MaxNodes && nextIndex == (1u << codeSize))
+				codeSize++;
 		}
 
 		prevCode = newCode;
@@ -221,6 +223,7 @@ bool CSoundFile::ReadDSym(FileReader &file, ModLoadingFlags loadFlags)
 
 	for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
 	{
+		InitChannel(chn);
 		ChnSettings[chn].nPan = (((chn & 3) == 1) || ((chn & 3) == 2)) ? 64 : 192;
 	}
 
