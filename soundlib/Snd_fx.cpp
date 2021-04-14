@@ -4808,22 +4808,24 @@ void CSoundFile::InvertLoop(ModChannel &chn)
 	if(GetType() != MOD_TYPE_MOD || chn.nEFxSpeed == 0)
 		return;
 
-	// we obviously also need a sample for this
 	ModSample *pModSample = const_cast<ModSample *>(chn.pModSample);
-	if(pModSample == nullptr || !pModSample->HasSampleData() || !pModSample->uFlags[CHN_LOOP])
+	if(pModSample == nullptr || !pModSample->HasSampleData() || !pModSample->uFlags[CHN_LOOP | CHN_SUSTAINLOOP])
 		return;
 
 	chn.nEFxDelay += ModEFxTable[chn.nEFxSpeed & 0x0F];
 	if(chn.nEFxDelay < 128)
-		return;  // only applied if the "delay" reaches 128
+		return;
 	chn.nEFxDelay = 0;
 
-	if (++chn.nEFxOffset >= pModSample->nLoopEnd - pModSample->nLoopStart)
+	const SmpLength loopStart = pModSample->uFlags[CHN_LOOP] ? pModSample->nLoopStart : pModSample->nSustainStart;
+	const SmpLength loopEnd = pModSample->uFlags[CHN_LOOP] ? pModSample->nLoopEnd : pModSample->nSustainEnd;
+
+	if(++chn.nEFxOffset >= loopEnd - loopStart)
 		chn.nEFxOffset = 0;
 
 	// TRASH IT!!! (Yes, the sample!)
 	const uint8 bps = pModSample->GetBytesPerSample();
-	uint8 *begin = mpt::byte_cast<uint8 *>(pModSample->sampleb()) + (pModSample->nLoopStart + chn.nEFxOffset) * bps;
+	uint8 *begin = mpt::byte_cast<uint8 *>(pModSample->sampleb()) + (loopStart + chn.nEFxOffset) * bps;
 	for(auto &sample : mpt::as_span(begin, bps))
 	{
 		sample = ~sample;
