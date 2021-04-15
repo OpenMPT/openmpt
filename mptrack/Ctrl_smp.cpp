@@ -683,7 +683,7 @@ void CCtrlSamples::UpdateView(UpdateHint hint, CObject *pObj)
 	const SampleHint sampleHint = hint.ToType<SampleHint>();
 	FlagSet<HintType> hintType = sampleHint.GetType();
 	if (!m_bInitialized) hintType.set(HINT_MODTYPE);
-	if(!hintType[HINT_SAMPLEINFO | HINT_MODTYPE]) return;
+	if(!hintType[HINT_SMPNAMES | HINT_SAMPLEINFO | HINT_MODTYPE]) return;
 
 	const SAMPLEINDEX updateSmp = sampleHint.GetSample();
 	if(updateSmp != m_nSample && updateSmp != 0 && !hintType[HINT_MODTYPE]) return;
@@ -694,7 +694,7 @@ void CCtrlSamples::UpdateView(UpdateHint hint, CObject *pObj)
 
 	LockControls();
 	// Updating Ranges
-	if (hintType[HINT_MODTYPE])
+	if(hintType[HINT_MODTYPE])
 	{
 
 		// Limit text fields
@@ -803,9 +803,6 @@ void CCtrlSamples::UpdateView(UpdateHint hint, CObject *pObj)
 		else
 			s = MPT_CFORMAT("{}-bit {}, len: {}")(sample.GetElementarySampleSize() * 8, CString(sample.uFlags[CHN_STEREO] ? _T("stereo") : _T("mono")), mpt::cfmt::dec(3, ',', sample.nLength));
 		SetDlgItemText(IDC_TEXT5, s);
-		// Name
-		s = mpt::ToCString(m_sndFile.GetCharsetInternal(), m_sndFile.m_szNames[m_nSample]);
-		SetDlgItemText(IDC_SAMPLE_NAME, s);
 		// File Name
 		s = mpt::ToCString(m_sndFile.GetCharsetInternal(), sample.filename);
 		if (specs.sampleFilenameLengthMax == 0) s.Empty();
@@ -887,8 +884,11 @@ void CCtrlSamples::UpdateView(UpdateHint hint, CObject *pObj)
 		s = mpt::cfmt::val(sample.nSustainEnd);
 		m_EditSustainEnd.SetWindowText(s);
 	}
-	if (hintType[HINT_MODTYPE | HINT_SAMPLEINFO | HINT_SMPNAMES])
+	if(hintType[HINT_MODTYPE | HINT_SAMPLEINFO | HINT_SMPNAMES])
 	{
+		// Name
+		SetDlgItemText(IDC_SAMPLE_NAME, mpt::ToWin(m_sndFile.GetCharsetInternal(), m_sndFile.m_szNames[m_nSample]).c_str());
+
 		CheckDlgButton(IDC_CHECK2, m_sndFile.GetSample(m_nSample).uFlags[SMP_KEEPONDISK] ? BST_CHECKED : BST_UNCHECKED);
 		GetDlgItem(IDC_CHECK2)->EnableWindow((m_sndFile.SampleHasPath(m_nSample) && m_sndFile.GetType() == MOD_TYPE_MPT) ? TRUE : FALSE);
 	}
@@ -2698,7 +2698,7 @@ void CCtrlSamples::OnNameChanged()
 	{
 		if(!m_startedEdit) PrepareUndo("Set Name");
 		m_sndFile.m_szNames[m_nSample] = s;
-		SetModified(SampleHint().Info().Names(), false, false);
+		SetModified(SampleHint().Names(), false, false);
 	}
 }
 
