@@ -1007,7 +1007,7 @@ protected:
 
 	void ProcessRamping(ModChannel &chn) const;
 
-	SamplePosition GetChannelIncrement(const ModChannel &chn, uint32 period, int periodFrac) const;
+	std::pair<SamplePosition, uint32> GetChannelIncrement(const ModChannel &chn, uint32 period, int periodFrac) const;
 
 protected:
 	// Type of panning command

@@ -1984,7 +1984,8 @@ void CSoundFile::ProcessRamping(ModChannel &chn) const
 }
 
 
-SamplePosition CSoundFile::GetChannelIncrement(const ModChannel &chn, uint32 period, int periodFrac) const
+// Returns channel increment and frequency with FREQ_FRACBITS fractional bits
+std::pair<SamplePosition, uint32> CSoundFile::GetChannelIncrement(const ModChannel &chn, uint32 period, int periodFrac) const
 {
 	uint32 freq;
 	if(!chn.HasCustomTuning())
@@ -2010,7 +2011,7 @@ SamplePosition CSoundFile::GetChannelIncrement(const ModChannel &chn, uint32 per
 
 	// Avoid increment to overflow and become negative with unrealisticly high frequencies.
 	LimitMax(freq, uint32(int32_max));
-	return SamplePosition::Ratio(freq, m_MixerSettings.gdwMixingFreq << FREQ_FRACBITS);
+	return {SamplePosition::Ratio(freq, m_MixerSettings.gdwMixingFreq << FREQ_FRACBITS), freq};
 }
 
 
@@ -2300,6 +2301,16 @@ bool CSoundFile::ReadNote()
 				}
 			}
 
+			auto [ninc, freq] = GetChannelIncrement(chn, period, nPeriodFrac);
+#ifndef MODPLUG_TRACKER
+			ninc.MulDiv(m_nFreqFactor, 65536);
+#endif  // !MODPLUG_TRACKER
+			if(ninc.IsZero())
+			{
+				ninc.Set(0, 1);
+			}
+			chn.increment = ninc;
+
 			if((chn.dwFlags & (CHN_ADLIB | CHN_MUTE | CHN_SYNCMUTE)) == CHN_ADLIB && m_opl)
 			{
 				const bool doProcess = m_playBehaviour[kOPLFlexibleNoteOff] || !chn.dwFlags[CHN_NOTEFADE] || GetType() == MOD_TYPE_S3M;
@@ -2307,11 +2318,8 @@ bool CSoundFile::ReadNote()
 				{
 					// In ST3, a sample rate of 8363 Hz is mapped to middle-C, which is 261.625 Hz in a tempered scale at A4 = 440.
 					// Hence, we have to translate our "sample rate" into pitch.
-					const auto freq = hasTuning ? chn.nPeriod : GetFreqFromPeriod(period, chn.nC5Speed, nPeriodFrac);
 					auto milliHertz = Util::muldivr_unsigned(freq, 261625, 8363 << FREQ_FRACBITS);
-#ifndef MODPLUG_TRACKER
-					milliHertz = Util::muldivr_unsigned(milliHertz, m_nFreqFactor, 65536);
-#endif  // !MODPLUG_TRACKER
+
 					const bool keyOff = chn.dwFlags[CHN_KEYOFF] || (chn.dwFlags[CHN_NOTEFADE] && chn.nFadeOutVol == 0);
 					if(!m_playBehaviour[kOPLNoteStopWith0Hz] || !keyOff)
 						m_opl->Frequency(nChn, milliHertz, keyOff, m_playBehaviour[kOPLBeatingOscillators]);
@@ -2341,16 +2349,6 @@ bool CSoundFile::ReadNote()
 					chn.dwFlags.reset(CHN_ADLIB);
 				}
 			}
-
-			SamplePosition ninc = GetChannelIncrement(chn, period, nPeriodFrac);
-#ifndef MODPLUG_TRACKER
-			ninc.MulDiv(m_nFreqFactor, 65536);
-#endif // !MODPLUG_TRACKER
-			if(ninc.IsZero())
-			{
-				ninc.Set(0, 1);
-			}
-			chn.increment = ninc;
 		}
 
 		// Increment envelope positions

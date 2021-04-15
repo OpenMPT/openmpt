@@ -164,7 +164,7 @@ public:
 					else
 						chn.m_CalculateFreq = false;
 				}
-				chn.increment = sndFile.GetChannelIncrement(chn, period, 0);
+				chn.increment = sndFile.GetChannelIncrement(chn, period, 0).first;
 				chnSettings[channel].incChanged = false;
 				inc = chn.increment * tickDuration;
 				if(chn.dwFlags[CHN_PINGPONGFLAG]) inc.Negate();
@@ -924,7 +924,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					if(porta && memory.chnSettings[nChn].incChanged)
 					{
 						// If there's a portamento, the current channel increment mustn't be 0 in NoteChange()
-						chn.increment = GetChannelIncrement(chn, chn.nPeriod, 0);
+						chn.increment = GetChannelIncrement(chn, chn.nPeriod, 0).first;
 					}
 					int32 setPan = chn.nPan;
 					chn.nNewNote = chn.nLastNote;
