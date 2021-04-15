@@ -1437,8 +1437,7 @@ void CViewGlobals::OnMovePlugToSlot()
 
 		m_CbnPlugin.SetCurSel(dlg.GetSlot());
 		OnPluginChanged();
-		PopulateChannelPlugins();
-		GetDocument()->UpdateAllViews(this, PluginHint().Names(), this);
+		GetDocument()->UpdateAllViews(nullptr, PluginHint().Names().Info());
 	}
 }
 
@@ -1604,10 +1603,9 @@ void CViewGlobals::OnInsertSlot()
 			}
 		}
 
-		m_CbnPlugin.SetCurSel(m_nCurrentPlugin);
+		m_CbnPlugin.SetCurSel(m_nCurrentPlugin + 1);
 		OnPluginChanged();
-		PopulateChannelPlugins();
-		GetDocument()->UpdateAllViews(this, PluginHint().Names(), this);
+		GetDocument()->UpdateAllViews(nullptr, PluginHint().Names().Info());
 
 		SetPluginModified();
 	}
