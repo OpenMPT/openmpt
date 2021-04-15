@@ -1950,10 +1950,15 @@ void CSoundFile::NoteChange(ModChannel &chn, int note, bool bPorta, bool bResetE
 			if(cutoff >= 0 && chn.dwFlags[CHN_ADLIB] && m_opl && channelHint != CHANNELINDEX_INVALID)
 				m_opl->Volume(channelHint, chn.nCutOff / 2u, true);
 		}
-	}
 
-	if(m_playBehaviour[kOPLNoteStopWith0Hz] && chn.dwFlags[CHN_ADLIB] && m_opl && channelHint != CHANNELINDEX_INVALID)
-		m_opl->Frequency(channelHint, 0, true, false);
+		if(chn.dwFlags[CHN_ADLIB] && m_opl && channelHint != CHANNELINDEX_INVALID)
+		{
+			if(m_playBehaviour[kOPLNoteOffOnNoteChange])
+				m_opl->NoteOff(channelHint);
+			else if(m_playBehaviour[kOPLNoteStopWith0Hz])
+				m_opl->Frequency(channelHint, 0, true, false);
+		}
+	}
 
 	// Special case for MPT
 	if (bManual) chn.dwFlags.reset(CHN_MUTE);

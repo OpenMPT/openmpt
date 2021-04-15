@@ -537,6 +537,7 @@ enum PlayBehaviour
 	kOPLRealRetrig,                 // Retrigger effect (Qxy) restarts OPL notes
 	kOPLNoResetAtEnvelopeEnd,       // Do not reset OPL channel status at end of envelope (OpenMPT 1.28 inconsistency with samples)
 	kOPLNoteStopWith0Hz,            // Set note frequency to 0 Hz to "stop" OPL notes
+	kOPLNoteOffOnNoteChange,        // Send note-off events for old note on every note change
 
 	// Add new play behaviours here.
 

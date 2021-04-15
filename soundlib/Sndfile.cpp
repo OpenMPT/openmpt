@@ -1062,6 +1062,7 @@ PlayBehaviourSet CSoundFile::GetSupportedPlaybackBehaviour(MODTYPE type)
 			playBehaviour.set(kOPLFlexibleNoteOff);
 			playBehaviour.set(kOPLwithNNA);
 			playBehaviour.set(kOPLRealRetrig);
+			playBehaviour.set(kOPLNoteOffOnNoteChange);
 		}
 		break;
 
@@ -1122,6 +1123,7 @@ PlayBehaviourSet CSoundFile::GetSupportedPlaybackBehaviour(MODTYPE type)
 		playBehaviour.set(kST3OffsetWithoutInstrument);
 		playBehaviour.set(kST3RetrigAfterNoteCut);
 		playBehaviour.set(kST3SampleSwap);
+		playBehaviour.set(kOPLNoteOffOnNoteChange);
 		break;
 
 	case MOD_TYPE_MOD:
