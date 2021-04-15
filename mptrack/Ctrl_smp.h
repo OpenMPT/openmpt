@@ -52,6 +52,7 @@ protected:
 	uint32 m_nSeekWindowMs = 0;
 	uint32 m_nOverlapMs = 0;
 	SAMPLEINDEX m_nSample = 1;
+	INSTRUMENTINDEX m_editInstrumentName = INSTRUMENTINDEX_INVALID;
 	bool m_rememberRawFormat = false;
 	bool m_startedEdit = false;
 
@@ -69,6 +70,8 @@ protected:
 	void PropagateAutoVibratoChanges();
 
 	bool IsOPLInstrument() const;
+
+	INSTRUMENTINDEX GetParentInstrumentWithSameName() const;
 
 public:
 	CCtrlSamples(CModControlView &parent, CModDoc &document);

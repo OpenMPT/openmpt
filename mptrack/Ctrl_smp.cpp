@@ -979,6 +979,7 @@ bool CCtrlSamples::OpenSample(const mpt::PathString &fileName, FlagSet<OpenSampl
 	}
 
 	PrepareUndo("Replace", sundo_replace);
+	const auto parentIns = GetParentInstrumentWithSameName();
 	bool bOk = false;
 	if(types[OpenSampleKnown])
 	{
@@ -1066,6 +1067,16 @@ bool CCtrlSamples::OpenSample(const mpt::PathString &fileName, FlagSet<OpenSampl
 		}
 		SetModified(SampleHint().Info().Data().Names(), true, false);
 		sample.uFlags.reset(SMP_KEEPONDISK);
+
+		if(parentIns <= m_sndFile.GetNumInstruments())
+		{
+			if(auto instr = m_sndFile.Instruments[parentIns]; instr != nullptr)
+			{
+				m_modDoc.GetInstrumentUndo().PrepareUndo(parentIns, "Set Name");
+				instr->name = m_sndFile.m_szNames[m_nSample];
+				m_modDoc.UpdateAllViews(nullptr, InstrumentHint(parentIns).Names(), this);
+			}
+		}
 	}
 	return true;
 }
@@ -1078,9 +1089,19 @@ bool CCtrlSamples::OpenSample(const CSoundFile &sndFile, SAMPLEINDEX nSample)
 	BeginWaitCursor();
 
 	PrepareUndo("Replace", sundo_replace);
+	const auto parentIns = GetParentInstrumentWithSameName();
 	if(m_sndFile.ReadSampleFromSong(m_nSample, sndFile, nSample))
 	{
 		SetModified(SampleHint().Info().Data().Names(), true, false);
+		if(parentIns <= m_sndFile.GetNumInstruments())
+		{
+			if(auto instr = m_sndFile.Instruments[parentIns]; instr != nullptr)
+			{
+				m_modDoc.GetInstrumentUndo().PrepareUndo(parentIns, "Set Name");
+				instr->name = m_sndFile.m_szNames[m_nSample];
+				m_modDoc.UpdateAllViews(nullptr, InstrumentHint(parentIns).Names(), this);
+			}
+		}
 	} else
 	{
 		m_modDoc.GetSampleUndo().RemoveLastUndoStep(m_nSample);
@@ -2696,7 +2717,23 @@ void CCtrlSamples::OnNameChanged()
 	const std::string s = mpt::ToCharset(m_sndFile.GetCharsetInternal(), tmp);
 	if(s != m_sndFile.m_szNames[m_nSample])
 	{
-		if(!m_startedEdit) PrepareUndo("Set Name");
+		const bool startedEdit = m_startedEdit;
+		if(!m_startedEdit)
+		{
+			PrepareUndo("Set Name");
+			m_editInstrumentName = GetParentInstrumentWithSameName();
+			if(m_editInstrumentName != INSTRUMENTINDEX_INVALID)
+				m_modDoc.GetInstrumentUndo().PrepareUndo(m_editInstrumentName, "Set Name");
+		}
+		if(m_editInstrumentName <= m_sndFile.GetNumInstruments())
+		{
+			if(auto instr = m_sndFile.Instruments[m_editInstrumentName]; instr != nullptr)
+			{
+				instr->name = s;
+				m_modDoc.UpdateAllViews(nullptr, InstrumentHint(m_editInstrumentName).Names(), this);
+			}
+		}
+
 		m_sndFile.m_szNames[m_nSample] = s;
 		SetModified(SampleHint().Names(), false, false);
 	}
@@ -3651,6 +3688,21 @@ void CCtrlSamples::OnInitOPLInstrument()
 		SetModified(SampleHint().Info().Data().Names(), true, true);
 		SwitchToView();
 	}
+}
+
+
+INSTRUMENTINDEX CCtrlSamples::GetParentInstrumentWithSameName() const
+{
+	auto ins = m_modDoc.FindSampleParent(m_nSample);
+	if(ins == INSTRUMENTINDEX_INVALID)
+		return INSTRUMENTINDEX_INVALID;
+	auto instr = m_sndFile.Instruments[ins];
+	if(instr == nullptr)
+		return INSTRUMENTINDEX_INVALID;
+	if((!instr->name.empty() && instr->name.str() != m_sndFile.m_szNames[m_nSample]) || instr->GetSamples().size() != 1)
+		return INSTRUMENTINDEX_INVALID;
+
+	return ins;
 }
 
 
