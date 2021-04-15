@@ -664,7 +664,7 @@ void CSoundFile::UpgradeModule()
 		}
 	}
 
-	if(GetType() == MOD_TYPE_MPT && GetNumInstruments() && m_dwLastSavedWithVersion >= MPT_V("1.28.00.20") && m_dwLastSavedWithVersion <= MPT_V("1.29.55.00"))
+	if(GetType() == MOD_TYPE_MPT && GetNumInstruments() && m_dwLastSavedWithVersion >= MPT_V("1.28.00.20") && m_dwLastSavedWithVersion <= MPT_V("1.29.00.55"))
 	{
 		for(SAMPLEINDEX i = 1; i <= GetNumSamples(); i++)
 		{
