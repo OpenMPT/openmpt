@@ -1,4 +1,4 @@
- *  Portaudio git commit 799a6834a58592eadc5712cba73b35956dc51579 (2020-03-26)
+ *  Portaudio v19.7.0 (2021-04-06)
  *  `build/msvc/portaudio.def` has been modified. Modifications are marked with
     `;OpenMPT`.
  *  `src/hostapi/dsound/pa_win_ds.c` unconditionally defined `_WIN32_WINNT`.
@@ -7,8 +7,6 @@
  *  A small modification to portaudio code has been made in
     `src/hostapi/wdmks/pa_win_wdmks.c` to facilitate linking against
     `strmiids.lib`. Modifications have been marked with `// OpenMPT`.
- *  Non-fatal assertions in `src/hostapi/wdmks/pa_win_wdmks.c` concerning pin
-    conections which trigger with some Windows 10 drivers have been removed.
  *  `src/os/win/pa_x86_plain_converters.c` has been modified to exclude inline
     asm for non-x86 platforms. Modifications have been marked with `// OpenMPT`.
  *  A couple of unnecessary folders have been omitted in SVN:

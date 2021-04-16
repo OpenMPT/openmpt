@@ -52,5 +52,7 @@ PaUtil_SetDebugPrintFunction        @55
 ;OpenMPT PaWasapi_GetFramesPerHostBuffer     @64
 ;OpenMPT PaWasapi_GetJackCount               @65
 ;OpenMPT PaWasapi_GetJackDescription         @66
-;OpenMPT PaWasapi_SetDefaultInterfaceId      @67
+;OpenMPT PaWasapiWinrt_SetDefaultDeviceId    @67
 ;OpenMPT PaWasapi_SetStreamStateHandler      @68
+;OpenMPT PaWasapiWinrt_PopulateDeviceList    @69
+;OpenMPT PaWasapi_GetIMMDevice               @70
