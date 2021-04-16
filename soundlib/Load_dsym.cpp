@@ -216,7 +216,7 @@ bool CSoundFile::ReadDSym(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 
 	InitializeGlobals(MOD_TYPE_MOD);
-	m_SongFlags.set(SONG_IMPORTED);
+	m_SongFlags.set(SONG_IMPORTED | SONG_AMIGALIMITS);
 	m_SongFlags.reset(SONG_ISAMIGA);
 	m_nChannels = fileHeader.numChannels;
 	m_nSamples = 63;
