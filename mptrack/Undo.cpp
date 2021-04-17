@@ -54,7 +54,7 @@ bool CPatternUndo::PrepareUndo(PATTERNINDEX pattern, CHANNELINDEX firstChn, ROWI
 }
 
 
-bool CPatternUndo::PrepareChannelUndo(CHANNELINDEX firstChn, CHANNELINDEX numChns, const char* description)
+bool CPatternUndo::PrepareChannelUndo(CHANNELINDEX firstChn, CHANNELINDEX numChns, const char *description)
 {
 	return PrepareUndo(PATTERNINDEX_INVALID, firstChn, 0, numChns, 0, description, false, true);
 }
@@ -64,6 +64,11 @@ bool CPatternUndo::PrepareBuffer(undobuf_t &buffer, PATTERNINDEX pattern, CHANNE
 {
 	const CSoundFile &sndFile = modDoc.GetSoundFile();
 	const bool onlyChannelInfo = storeChannelInfo && numRows < 1;
+
+	if(storeChannelInfo && pattern != PATTERNINDEX_INVALID && firstChn == 0 && numChns != sndFile.GetNumChannels())
+	{
+		numChns = sndFile.GetNumChannels();
+	}
 
 	ROWINDEX patRows = 0;
 	if(sndFile.Patterns.IsValidPat(pattern))
@@ -170,8 +175,8 @@ PATTERNINDEX CPatternUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, bool linke
 	if(modifyChannels)
 	{
 		const bool modifyChannelCount =
-		    (!onlyChannelSettings && undo.channelInfo.size() != sndFile.GetNumChannels())
-		    || (onlyChannelSettings && (undo.firstChannel + undo.channelInfo.size()) > sndFile.GetNumChannels());
+		    (undo.pattern != PATTERNINDEX_INVALID && undo.channelInfo.size() != sndFile.GetNumChannels())
+		    || (undo.pattern == PATTERNINDEX_INVALID && (undo.firstChannel + undo.channelInfo.size()) > sndFile.GetNumChannels());
 		if(modifyChannelCount)
 		{
 			// Add or remove channels
