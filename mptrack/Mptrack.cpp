@@ -825,6 +825,9 @@ BOOL CTrackApp::InitInstanceEarly(CMPTCommandLineInfo &cmdInfo)
 		_CrtSetDebugFillThreshold(0); // Disable buffer filling in secure enhanced CRT functions.
 	#endif
 
+	// Avoid e.g. audio APIs trying to load wdmaud.drv from arbitrary working directory
+	::SetCurrentDirectory(mpt::GetExecutablePath().AsNative().c_str());
+
 	// Initialize OLE MFC support
 	BOOL oleinit = AfxOleInit();
 	ASSERT(oleinit != FALSE); // no MPT_ASSERT here!
