@@ -58,6 +58,11 @@ bool CPatternUndo::PrepareBuffer(undobuf_t &buffer, PATTERNINDEX pattern, CHANNE
 {
 	const CSoundFile &sndFile = modDoc.GetSoundFile();
 
+	if(storeChannelInfo && firstChn == 0)
+	{
+		numChns = sndFile.GetNumChannels();
+	}
+
 	if (!sndFile.Patterns.IsValidPat(pattern)) return false;
 	ROWINDEX nRows = sndFile.Patterns[pattern].GetNumRows();
 	if ((firstRow >= nRows) || (numChns < 1) || (numRows < 1) || (firstChn >= sndFile.GetNumChannels())) return false;
