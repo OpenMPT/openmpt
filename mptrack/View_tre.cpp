@@ -1946,7 +1946,7 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 				InsertInsLibItem(s, sample.uFlags[CHN_ADLIB] ? IMAGE_OPLINSTR : IMAGE_SAMPLES, selectedItem);
 			}
 		}
-	} else
+	} else if(!m_InstrLibPath.empty())
 	{
 		if(!IsSampleBrowser())
 		{
