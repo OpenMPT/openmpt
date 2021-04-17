@@ -178,7 +178,8 @@ int CCtrlGeneral::TempoToSlider(TEMPO tempo) const
 	{
 		if(tempo >= TEMPO_SPLIT_THRESHOLD)
 			tempo = TEMPO((tempo - TEMPO_SPLIT_THRESHOLD).GetInt() / TEMPO_SPLIT_PRECISION + TEMPO_SPLIT_THRESHOLD.GetInt(), 0);
-		return (TempoSliderRange() - tempo).GetInt();
+		const auto range = TempoSliderRange();
+		return (range - std::min(tempo, range)).GetInt();
 	}
 }
 
