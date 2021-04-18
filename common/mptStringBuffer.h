@@ -236,8 +236,10 @@ public:
 public:
 	friend bool operator!=(const std::string & a, const charbuf & b) { return a != b.str(); }
 	friend bool operator!=(const charbuf & a, const std::string & b) { return a.str() != b; }
+	friend bool operator!=(const charbuf & a, const charbuf & b) { return strncmp(a.buf, b.buf, len) != 0; }
 	friend bool operator==(const std::string & a, const charbuf & b) { return a == b.str(); }
 	friend bool operator==(const charbuf & a, const std::string & b) { return a.str() == b; }
+	friend bool operator==(const charbuf & a, const charbuf & b) { return strncmp(a.buf, b.buf, len) == 0; }
 };
 
 template <typename Tchar>
