@@ -2535,11 +2535,17 @@ void CViewPattern::Interpolate(PatternCursor::Columns type)
 			verr = (distance * 63) / 128;
 			if(srcCmd.volcmd == VOLCMD_NONE)
 			{
-				vsrc = vdest;
 				vcmd = destCmd.volcmd;
+				if(vcmd == VOLCMD_VOLUME && srcCmd.IsNote() && srcCmd.instr)
+					vsrc = GetDefaultVolume(srcCmd);
+				else
+					vsrc = vdest;
 			} else if(destCmd.volcmd == VOLCMD_NONE)
 			{
-				vdest = vsrc;
+				if(vcmd == VOLCMD_VOLUME && destCmd.IsNote() && destCmd.instr)
+					vdest = GetDefaultVolume(srcCmd);
+				else
+					vdest = vsrc;
 			}
 			break;
 
