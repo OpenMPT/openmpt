@@ -269,7 +269,7 @@ bool CSoundFile::ReadDSym(FileReader &file, ModLoadingFlags loadFlags)
 			if(packingType > 1)
 				return false;
 			if(packingType)
-				trackData = DecompressDSymLZW(file, chunkSize);
+				chunk = DecompressDSymLZW(file, chunkSize);
 			else
 				file.ReadVector(chunk, chunkSize);
 
@@ -430,11 +430,11 @@ bool CSoundFile::ReadDSym(FileReader &file, ModLoadingFlags loadFlags)
 						break;
 					case 0x30:  // 30 xxy Set Stereo
 						m->command = CMD_PANNING8;
-						if((param & 7) && !(param & 8))
+						if(param & 7)
 						{
 							static constexpr uint8 panning[8] = {0x00, 0x00, 0x2B, 0x56, 0x80, 0xAA, 0xD4, 0xFF};
 							m->param = panning[param & 7];
-						} else if(!(param & 7) && (param >> 4) != 0x80)
+						} else if((param >> 4) != 0x80)
 						{
 							m->param = static_cast<ModCommand::PARAM>(param >> 4);
 							if(m->param < 0x80)
