@@ -3699,7 +3699,7 @@ INSTRUMENTINDEX CCtrlSamples::GetParentInstrumentWithSameName() const
 	auto instr = m_sndFile.Instruments[ins];
 	if(instr == nullptr)
 		return INSTRUMENTINDEX_INVALID;
-	if((!instr->name.empty() && instr->name.str() != m_sndFile.m_szNames[m_nSample]) || instr->GetSamples().size() != 1)
+	if((!instr->name.empty() && instr->name != m_sndFile.m_szNames[m_nSample]) || instr->GetSamples().size() != 1)
 		return INSTRUMENTINDEX_INVALID;
 
 	return ins;

@@ -629,12 +629,23 @@ void CModDoc::SetDefaultChannelColors()
 	if(TrackerSettings::Instance().defaultRainbowChannelColors != DefaultChannelColors::NoColors)
 	{
 		const bool rainbow = TrackerSettings::Instance().defaultRainbowChannelColors == DefaultChannelColors::Rainbow;
-		const double hueFactor = rainbow ? (1.5 * M_PI) / std::max(1, GetNumChannels() - 1) : 1000.0;  // Three quarters of the color wheel, red to purple
-		for(CHANNELINDEX i = 0; i < GetNumChannels(); i++)
+		CHANNELINDEX numGroups = 0;
+		if(rainbow)
 		{
-			const double hue = i * hueFactor;  // 0...2pi
-			const double saturation = 0.3;     // 0...2/3
-			const double brightness = 1.2;     // 0...4/3
+			for(CHANNELINDEX i = 1; i < GetNumChannels(); i++)
+			{
+				if(m_SndFile.ChnSettings[i].szName.empty() || m_SndFile.ChnSettings[i].szName != m_SndFile.ChnSettings[i - 1].szName)
+					numGroups++;
+			}
+		}
+		const double hueFactor = rainbow ? (1.5 * M_PI) / std::max(1, numGroups - 1) : 1000.0;  // Three quarters of the color wheel, red to purple
+		for(CHANNELINDEX i = 0, group = 0; i < GetNumChannels(); i++)
+		{
+			if(i > 0 && (m_SndFile.ChnSettings[i].szName.empty() || m_SndFile.ChnSettings[i].szName != m_SndFile.ChnSettings[i - 1].szName))
+				group++;
+			const double hue = group * hueFactor;  // 0...2pi
+			const double saturation = 0.3;         // 0...2/3
+			const double brightness = 1.2;         // 0...4/3
 			const double r = brightness * (1 + saturation * (std::cos(hue) - 1.0));
 			const double g = brightness * (1 + saturation * (std::cos(hue - 2.09439) - 1.0));
 			const double b = brightness * (1 + saturation * (std::cos(hue + 2.09439) - 1.0));
