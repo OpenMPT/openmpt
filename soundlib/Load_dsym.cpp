@@ -377,6 +377,7 @@ bool CSoundFile::ReadDSym(FileReader &file, ModLoadingFlags loadFlags)
 					case 0x14:  // 14 xxy Set Vibrato Waveform
 					case 0x15:  // 15 xxy Set Fine Tune
 					case 0x17:  // 17 xxy Set Tremolo Waveform
+					case 0x1F:  // 1F xxy Invert Loop
 						m->command = CMD_MODCMDEX;
 						m->param = (command << 4) | (m->param & 0x0F);
 						break;
@@ -387,10 +388,6 @@ bool CSoundFile::ReadDSym(FileReader &file, ModLoadingFlags loadFlags)
 					case 0x1E:  // 1E xxx Pattern Delay
 						m->command = CMD_MODCMDEX;
 						m->param = (command << 4) | static_cast<ModCommand::PARAM>(std::min(param, uint16(0x0F)));
-						break;
-					case 0x1F:  // 1F xxy Invert Loop
-						m->command = CMD_MODCMDEX;
-						m->param = (param & 0x0F) ? 0xFF : 0xF0;
 						break;
 					case 0x11:  // 11 xyy Fine Slide Up + Fine Volume Slide Up
 					case 0x12:  // 12 xyy Fine Slide Down + Fine Volume Slide Up
