@@ -101,7 +101,7 @@
  * threads for internal use.
  * - You must ensure to only ever access a particular libopenmpt object via
  * non-const member functions from a single thread at a time.
- * - You may access a particular libopenmpt objects concurrently from different
+ * - You may access a particular libopenmpt object concurrently from different
  * threads when using only const member functions from all threads.
  * - Consecutive accesses can happen from different threads.
  * - Different objects can be accessed concurrently from different threads.
