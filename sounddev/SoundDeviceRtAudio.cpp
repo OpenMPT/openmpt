@@ -227,7 +227,7 @@ void CRtAudioDevice::AudioCallback(void *outputBuffer, void *inputBuffer, unsign
 
 SoundDevice::Statistics CRtAudioDevice::GetStatistics() const
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	SoundDevice::Statistics result;
 	long latency = 0;
 	try
@@ -259,7 +259,7 @@ SoundDevice::Statistics CRtAudioDevice::GetStatistics() const
 
 SoundDevice::Caps CRtAudioDevice::InternalGetDeviceCaps()
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	SoundDevice::Caps caps;
 	if(!m_RtAudio)
 	{
@@ -292,7 +292,7 @@ SoundDevice::Caps CRtAudioDevice::InternalGetDeviceCaps()
 
 SoundDevice::DynamicCaps CRtAudioDevice::GetDeviceDynamicCaps(const std::vector<uint32> & /* baseSampleRates */ )
 {
-	MPT_TRACE();
+	MPT_TRACE_SCOPE();
 	SoundDevice::DynamicCaps caps;
 	RtAudio::DeviceInfo rtinfo;
 	try
