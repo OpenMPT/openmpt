@@ -594,24 +594,6 @@ std::vector<SoundDevice::Info> CRtAudioDevice::EnumerateDevices(SoundDevice::Sys
 }
 
 
-ComponentRtAudio::ComponentRtAudio()
-{
-	return;
-}
-
-
-bool ComponentRtAudio::DoInitialize()
-{
-	return true;
-}
-
-
-ComponentRtAudio::~ComponentRtAudio()
-{
-	return;
-}
-
-
 #endif // MPT_WITH_RTAUDIO
 
 

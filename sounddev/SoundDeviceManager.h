@@ -15,7 +15,9 @@
 
 #include "SoundDevice.h"
 
+#if defined(MODPLUG_TRACKER)
 #include "../common/ComponentManager.h"
+#endif // MODPLUG_TRACKER
 
 #include <map>
 #include <vector>
@@ -27,17 +29,29 @@ OPENMPT_NAMESPACE_BEGIN
 namespace SoundDevice {
 
 
-#if defined(MPT_ENABLE_PULSEAUDIO_FULL)
+#if defined(MODPLUG_TRACKER)
+#if defined(MPT_WITH_PULSEAUDIO) && defined(MPT_ENABLE_PULSEAUDIO_FULL)
 class ComponentPulseaudio;
-#endif // MPT_ENABLE_PULSEAUDIO_FULL
+#endif // MPT_WITH_PULSEAUDIO && MPT_ENABLE_PULSEAUDIO_FULL
+#if defined(MPT_WITH_PULSEAUDIO) && defined(MPT_WITH_PULSEAUDIOSIMPLE)
 class ComponentPulseaudioSimple;
+#endif // MPT_WITH_PULSEAUDIO && MPT_WITH_PULSEAUDIOSIMPLE
+#if MPT_OS_WINDOWS
 class ComponentWaveOut;
+#endif // MPT_OS_WINDOWS
 #if defined(MPT_WITH_DIRECTSOUND)
 class ComponentDirectSound;
 #endif // MPT_WITH_DIRECTSOUND
+#ifdef MPT_WITH_ASIO
 class ComponentASIO;
+#endif // MPT_WITH_ASIO
+#ifdef MPT_WITH_PORTAUDIO
 class ComponentPortAudio;
+#endif // MPT_WITH_PORTAUDIO
+#ifdef MPT_WITH_RTAUDIO
 class ComponentRtAudio;
+#endif // MPT_WITH_RTAUDIO
+#endif // MODPLUG_TRACKER
 
 
 class Manager
@@ -56,11 +70,10 @@ private:
 	const SoundDevice::SysInfo m_SysInfo;
 	const SoundDevice::AppInfo m_AppInfo;
 
-#if defined(MPT_ENABLE_PULSEAUDIO_FULL)
-#if defined(MPT_WITH_PULSEAUDIO)
+#if defined(MODPLUG_TRACKER)
+#if defined(MPT_WITH_PULSEAUDIO) && defined(MPT_ENABLE_PULSEAUDIO_FULL)
 	ComponentHandle<ComponentPulseaudio> m_Pulseaudio;
-#endif // MPT_WITH_PULSEAUDIO
-#endif // MPT_ENABLE_PULSEAUDIO_FULL
+#endif // MPT_WITH_PULSEAUDIO && MPT_ENABLE_PULSEAUDIO_FULL
 #if defined(MPT_WITH_PULSEAUDIO) && defined(MPT_WITH_PULSEAUDIOSIMPLE)
 	ComponentHandle<ComponentPulseaudioSimple> m_PulseaudioSimple;
 #endif // MPT_WITH_PULSEAUDIO && MPT_WITH_PULSEAUDIOSIMPLE
@@ -79,6 +92,7 @@ private:
 #ifdef MPT_WITH_RTAUDIO
 	ComponentHandle<ComponentRtAudio> m_RtAudio;
 #endif // MPT_WITH_RTAUDIO
+#endif // MODPLUG_TRACKER
 
 	std::vector<SoundDevice::Info> m_SoundDevices;
 	std::map<SoundDevice::Identifier, bool> m_DeviceUnavailable;

@@ -16,7 +16,9 @@
 #include "SoundDeviceBase.h"
 #include "SoundDeviceUtilities.h"
 
+#if defined(MODPLUG_TRACKER)
 #include "../common/ComponentManager.h"
+#endif // MODPLUG_TRACKER
 
 #if MPT_OS_WINDOWS
 #include <MMSystem.h>
@@ -31,6 +33,7 @@ namespace SoundDevice {
 
 #if MPT_OS_WINDOWS
 
+#if defined(MODPLUG_TRACKER)
 class ComponentWaveOut : public ComponentBuiltin
 {
 	MPT_DECLARE_COMPONENT_MEMBERS(ComponentWaveOut, "WaveOut")
@@ -39,6 +42,7 @@ public:
 	virtual ~ComponentWaveOut() { }
 	bool DoInitialize() override { return true; }
 };
+#endif // MODPLUG_TRACKER
 
 
 class CWaveDevice: public CSoundDeviceWithThread

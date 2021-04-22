@@ -16,7 +16,9 @@
 #include "SoundDeviceBase.h"
 #include "SoundDeviceUtilities.h"
 
+#if defined(MODPLUG_TRACKER)
 #include "../common/ComponentManager.h"
+#endif // MODPLUG_TRACKER
 
 #if defined(MPT_ENABLE_PULSEAUDIO_FULL)
 #if defined(MPT_WITH_PULSEAUDIO)
@@ -37,6 +39,7 @@ namespace SoundDevice {
 #if defined(MPT_WITH_PULSEAUDIO)
 
 
+#if defined(MODPLUG_TRACKER)
 class ComponentPulseaudio
 	: public ComponentBuiltin
 {
@@ -46,6 +49,7 @@ public:
 	virtual ~ComponentPulseaudio() { }
 	bool DoInitialize() override { return true; }
 };
+#endif // MODPLUG_TRACKER
 
 
 class Pulseaudio

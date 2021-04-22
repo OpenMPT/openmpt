@@ -100,13 +100,17 @@ void Manager::ReEnumerate()
 	m_DeviceCaps.clear();
 	m_DeviceDynamicCaps.clear();
 
+#if defined(MODPLUG_TRACKER)
 #ifdef MPT_WITH_PORTAUDIO
 	m_PortAudio.Reload();
 #endif // MPT_WITH_PORTAUDIO
+#endif // MODPLUG_TRACKER
 
 #if defined(MPT_ENABLE_PULSEAUDIO_FULL)
 #if defined(MPT_WITH_PULSEAUDIO)
+#if defined(MODPLUG_TRACKER)
 	if(IsComponentAvailable(m_Pulseaudio))
+#endif // MODPLUG_TRACKER
 	{
 		EnumerateDevices<Pulseaudio>(GetSysInfo());
 	}
@@ -114,14 +118,18 @@ void Manager::ReEnumerate()
 #endif // MPT_ENABLE_PULSEAUDIO_FULL
 
 #if defined(MPT_WITH_PULSEAUDIO) && defined(MPT_WITH_PULSEAUDIOSIMPLE)
+#if defined(MODPLUG_TRACKER)
 	if(IsComponentAvailable(m_PulseaudioSimple))
+#endif // MODPLUG_TRACKER
 	{
 		EnumerateDevices<PulseaudioSimple>(GetSysInfo());
 	}
 #endif // MPT_WITH_PULSEAUDIO && MPT_WITH_PULSEAUDIOSIMPLE
 
 #if MPT_OS_WINDOWS
+#if defined(MODPLUG_TRACKER)
 	if(IsComponentAvailable(m_WaveOut))
+#endif // MODPLUG_TRACKER
 	{
 		EnumerateDevices<CWaveDevice>(GetSysInfo());
 	}
@@ -129,28 +137,36 @@ void Manager::ReEnumerate()
 
 #if defined(MPT_WITH_DIRECTSOUND)
 	// kind of deprecated by now
+#if defined(MODPLUG_TRACKER)
 	if(IsComponentAvailable(m_DirectSound))
+#endif // MODPLUG_TRACKER
 	{
 		EnumerateDevices<CDSoundDevice>(GetSysInfo());
 	}
 #endif // MPT_WITH_DIRECTSOUND
 
 #ifdef MPT_WITH_ASIO
+#if defined(MODPLUG_TRACKER)
 	if(IsComponentAvailable(m_ASIO))
+#endif // MODPLUG_TRACKER
 	{
 		EnumerateDevices<CASIODevice>(GetSysInfo());
 	}
 #endif // MPT_WITH_ASIO
 
 #ifdef MPT_WITH_PORTAUDIO
+#if defined(MODPLUG_TRACKER)
 	if(IsComponentAvailable(m_PortAudio))
+#endif // MODPLUG_TRACKER
 	{
 		EnumerateDevices<CPortaudioDevice>(GetSysInfo());
 	}
 #endif // MPT_WITH_PORTAUDIO
 
 #ifdef MPT_WITH_RTAUDIO
+#if defined(MODPLUG_TRACKER)
 	if(IsComponentAvailable(m_RtAudio))
+#endif // MODPLUG_TRACKER
 	{
 		EnumerateDevices<CRtAudioDevice>(GetSysInfo());
 	}

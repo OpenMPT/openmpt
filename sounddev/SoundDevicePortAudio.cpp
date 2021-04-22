@@ -1029,6 +1029,8 @@ static void PortaudioLog(const char *text)
 #endif // MPT_COMPILER_MSVC
 
 
+#if defined(MODPLUG_TRACKER)
+
 ComponentPortAudio::ComponentPortAudio()
 {
 	return;
@@ -1051,6 +1053,8 @@ ComponentPortAudio::~ComponentPortAudio()
 		Pa_Terminate();
 	}
 }
+
+#endif // MODPLUG_TRACKER
 
 
 #endif // MPT_WITH_PORTAUDIO

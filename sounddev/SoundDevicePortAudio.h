@@ -14,7 +14,9 @@
 
 #include "SoundDeviceBase.h"
 
+#if defined(MODPLUG_TRACKER)
 #include "../common/ComponentManager.h"
+#endif // MODPLUG_TRACKER
 
 #ifdef MPT_WITH_PORTAUDIO
 #include <portaudio.h>
@@ -101,6 +103,7 @@ private:
 };
 
 
+#if defined(MODPLUG_TRACKER)
 class ComponentPortAudio : public ComponentBuiltin
 {
 	MPT_DECLARE_COMPONENT_MEMBERS(ComponentPortAudio, "PortAudio")
@@ -109,6 +112,7 @@ public:
 	virtual ~ComponentPortAudio();
 	bool DoInitialize() override;
 };
+#endif // MODPLUG_TRACKER
 
 
 #endif // MPT_WITH_PORTAUDIO
