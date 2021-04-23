@@ -150,7 +150,7 @@ public:
 };
 
 
-class GlobalLogger
+class GlobalLogger final
 	: public ILogger
 {
 public:
