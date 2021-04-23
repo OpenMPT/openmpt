@@ -83,7 +83,7 @@ struct DevicesAndLoggerAndSysInfo
 
 static BOOL WINAPI DSEnumCallback(GUID * lpGuid, LPCTSTR lpstrDescription, LPCTSTR lpstrDriver, LPVOID lpContext)
 {
-	DevicesAndLoggerAndSysInfo &devicesAndLoggerAndSysInfo = *(DevicesAndSysInfo*)lpContext;
+	DevicesAndLoggerAndSysInfo &devicesAndLoggerAndSysInfo = *(DevicesAndLoggerAndSysInfo*)lpContext;
 	std::vector<SoundDevice::Info> &devices = devicesAndLoggerAndSysInfo.devices;
 	mpt::log::ILogger &logger = *devicesAndLoggerAndSysInfo.logger;
 	SoundDevice::SysInfo &sysInfo = devicesAndLoggerAndSysInfo.sysInfo;
