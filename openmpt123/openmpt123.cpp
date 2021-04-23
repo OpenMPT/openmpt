@@ -1448,7 +1448,7 @@ static void probe_mod_file( commandlineflags & flags, const std::string & filena
 		set_field( fields, "Size" ).ostream() << bytes_to_string( filesize );
 	}
 	
-	int probe_result = openmpt::probe_file_header( openmpt::probe_file_header_flags_default, data_stream );
+	int probe_result = openmpt::probe_file_header( openmpt::probe_file_header_flags_default2, data_stream );
 	std::string probe_result_string;
 	switch ( probe_result ) {
 		case openmpt::probe_file_header_result_success:

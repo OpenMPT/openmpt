@@ -622,7 +622,7 @@ double module_impl::could_open_probability( const OpenMPT::FileReader & file, do
 			return 0.6;
 		} else if ( effort >= 0.1 ) {
 			FileReader::PinnedRawDataView view = file.GetPinnedRawDataView( probe_file_header_get_recommended_size() );
-			int probe_file_header_result = probe_file_header( probe_file_header_flags_default, view.data(), view.size(), file.GetLength() );
+			int probe_file_header_result = probe_file_header( probe_file_header_flags_default2, view.data(), view.size(), file.GetLength() );
 			double result = 0.0;
 			switch ( probe_file_header_result ) {
 				case probe_file_header_result_success:
