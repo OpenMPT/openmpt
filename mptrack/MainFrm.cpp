@@ -432,7 +432,7 @@ void CMainFrame::OnDropFiles(HDROP hDropInfo)
 					if(!inputFile.IsValid())
 						continue;
 					auto sndFile = std::make_unique<CSoundFile>();
-					MPT_LOG(LogDebug, "info", U_("Loading ") + scanName.ToUnicode());
+					MPT_LOG_GLOBAL(LogDebug, "info", U_("Loading ") + scanName.ToUnicode());
 					if(!sndFile->Create(GetFileReader(inputFile), CSoundFile::loadCompleteModule, nullptr))
 						failed++;
 					total++;

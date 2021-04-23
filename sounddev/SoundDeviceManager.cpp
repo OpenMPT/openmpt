@@ -272,17 +272,17 @@ void Manager::ReEnumerate()
 	}
 	std::stable_sort(m_SoundDevices.begin(), m_SoundDevices.end(), CompareInfo());
 
-	MPT_LOG(LogDebug, "sounddev", MPT_UFORMAT("Sound Devices enumerated:")());
+	MPT_LOG_GLOBAL(LogDebug, "sounddev", MPT_UFORMAT("Sound Devices enumerated:")());
 	for(const auto &device : m_SoundDevices)
 	{
-		MPT_LOG(LogDebug, "sounddev", MPT_UFORMAT(" Identifier : {}")(device.GetIdentifier()));
-		MPT_LOG(LogDebug, "sounddev", MPT_UFORMAT("  Type      : {}")(device.type));
-		MPT_LOG(LogDebug, "sounddev", MPT_UFORMAT("  InternalID: {}")(device.internalID));
-		MPT_LOG(LogDebug, "sounddev", MPT_UFORMAT("  API Name  : {}")(device.apiName));
-		MPT_LOG(LogDebug, "sounddev", MPT_UFORMAT("  Name      : {}")(device.name));
+		MPT_LOG_GLOBAL(LogDebug, "sounddev", MPT_UFORMAT(" Identifier : {}")(device.GetIdentifier()));
+		MPT_LOG_GLOBAL(LogDebug, "sounddev", MPT_UFORMAT("  Type      : {}")(device.type));
+		MPT_LOG_GLOBAL(LogDebug, "sounddev", MPT_UFORMAT("  InternalID: {}")(device.internalID));
+		MPT_LOG_GLOBAL(LogDebug, "sounddev", MPT_UFORMAT("  API Name  : {}")(device.apiName));
+		MPT_LOG_GLOBAL(LogDebug, "sounddev", MPT_UFORMAT("  Name      : {}")(device.name));
 		for(const auto &extra : device.extraData)
 		{
-			MPT_LOG(LogDebug, "sounddev", MPT_UFORMAT("  Extra Data: {} = {}")(extra.first, extra.second));
+			MPT_LOG_GLOBAL(LogDebug, "sounddev", MPT_UFORMAT("  Extra Data: {} = {}")(extra.first, extra.second));
 		}
 	}
 	

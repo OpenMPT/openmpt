@@ -200,7 +200,7 @@ AEffect *CVstPlugin::LoadPlugin(bool maskCrashes, VSTPluginLib &plugin, HMODULE 
 		} else
 		{
 #ifdef VST_LOG
-			MPT_LOG(LogDebug, "VST", MPT_UFORMAT("Entry point not found! (handle={})")(mpt::ufmt::PTR(library)));
+			MPT_LOG_GLOBAL(LogDebug, "VST", MPT_UFORMAT("Entry point not found! (handle={})")(mpt::ufmt::PTR(library)));
 #endif // VST_LOG
 			return nullptr;
 		}
@@ -217,7 +217,7 @@ static void operator|= (Vst::VstTimeInfoFlags &lhs, Vst::VstTimeInfoFlags rhs)
 intptr_t VSTCALLBACK CVstPlugin::MasterCallBack(AEffect *effect, VstOpcodeToHost opcode, int32 index, intptr_t value, void *ptr, float opt)
 {
 #ifdef VST_LOG
-	MPT_LOG(LogDebug, "VST", MPT_UFORMAT("VST plugin to host: Eff: {}, Opcode = {}, Index = {}, Value = {}, PTR = {}, OPT = {}\n")(
+	MPT_LOG_GLOBAL(LogDebug, "VST", MPT_UFORMAT("VST plugin to host: Eff: {}, Opcode = {}, Index = {}, Value = {}, PTR = {}, OPT = {}\n")(
 		mpt::ufmt::PTR(effect), mpt::ufmt::val(opcode),
 		mpt::ufmt::val(index), mpt::ufmt::PTR(value), mpt::ufmt::PTR(ptr), mpt::ufmt::flt(opt, 3)));
 	MPT_TRACE();
@@ -373,7 +373,7 @@ intptr_t VSTCALLBACK CVstPlugin::MasterCallBack(AEffect *effect, VstOpcodeToHost
 
 	// DEPRECATED in VST 2.4
 	case audioMasterSetTime:
-		MPT_LOG(LogDebug, "VST", U_("VST plugin to host: Set Time"));
+		MPT_LOG_GLOBAL(LogDebug, "VST", U_("VST plugin to host: Set Time"));
 		break;
 
 	// returns tempo (in bpm * 10000) at sample frame location passed in <value> - DEPRECATED in VST 2.4
@@ -387,7 +387,7 @@ intptr_t VSTCALLBACK CVstPlugin::MasterCallBack(AEffect *effect, VstOpcodeToHost
 
 	// parameters - DEPRECATED in VST 2.4
 	case audioMasterGetNumAutomatableParameters:
-		//MPT_LOG(LogDebug, "VST", U_("VST plugin to host: Get Num Automatable Parameters"));
+		//MPT_LOG_GLOBAL(LogDebug, "VST", U_("VST plugin to host: Get Num Automatable Parameters"));
 		if(pVstPlugin != nullptr)
 		{
 			return pVstPlugin->GetNumParameters();
@@ -396,7 +396,7 @@ intptr_t VSTCALLBACK CVstPlugin::MasterCallBack(AEffect *effect, VstOpcodeToHost
 
 	// Apparently, this one is broken in VST SDK anyway. - DEPRECATED in VST 2.4
 	case audioMasterGetParameterQuantization:
-		MPT_LOG(LogDebug, "VST", U_("VST plugin to host: Audio Master Get Parameter Quantization"));
+		MPT_LOG_GLOBAL(LogDebug, "VST", U_("VST plugin to host: Audio Master Get Parameter Quantization"));
 		break;
 
 	// numInputs and/or numOutputs has changed
@@ -427,7 +427,7 @@ intptr_t VSTCALLBACK CVstPlugin::MasterCallBack(AEffect *effect, VstOpcodeToHost
 				pVstEditor->SetSize(index, static_cast<int>(value));
 			}
 		}
-		MPT_LOG(LogDebug, "VST", U_("VST plugin to host: Size Window"));
+		MPT_LOG_GLOBAL(LogDebug, "VST", U_("VST plugin to host: Size Window"));
 		return 1;
 
 	case audioMasterGetSampleRate:
@@ -444,7 +444,7 @@ intptr_t VSTCALLBACK CVstPlugin::MasterCallBack(AEffect *effect, VstOpcodeToHost
 		return MIXBUFFERSIZE;
 
 	case audioMasterGetInputLatency:
-		MPT_LOG(LogDebug, "VST", U_("VST plugin to host: Get Input Latency"));
+		MPT_LOG_GLOBAL(LogDebug, "VST", U_("VST plugin to host: Get Input Latency"));
 		break;
 
 	case audioMasterGetOutputLatency:
@@ -504,37 +504,37 @@ intptr_t VSTCALLBACK CVstPlugin::MasterCallBack(AEffect *effect, VstOpcodeToHost
 	case audioMasterGetAutomationState:
 		// Not entirely sure what this means. We can write automation TO the plug.
 		// Is that "read" in this context?
-		//MPT_LOG(LogDebug, "VST", U_("VST plugin to host: Get Automation State"));
+		//MPT_LOG_GLOBAL(LogDebug, "VST", U_("VST plugin to host: Get Automation State"));
 		return kVstAutomationReadWrite;
 
 	case audioMasterOfflineStart:
-		MPT_LOG(LogDebug, "VST", U_("VST plugin to host: Offlinestart"));
+		MPT_LOG_GLOBAL(LogDebug, "VST", U_("VST plugin to host: Offlinestart"));
 		break;
 
 	case audioMasterOfflineRead:
-		MPT_LOG(LogDebug, "VST", U_("VST plugin to host: Offlineread"));
+		MPT_LOG_GLOBAL(LogDebug, "VST", U_("VST plugin to host: Offlineread"));
 		break;
 
 	case audioMasterOfflineWrite:
-		MPT_LOG(LogDebug, "VST", U_("VST plugin to host: Offlinewrite"));
+		MPT_LOG_GLOBAL(LogDebug, "VST", U_("VST plugin to host: Offlinewrite"));
 		break;
 
 	case audioMasterOfflineGetCurrentPass:
-		MPT_LOG(LogDebug, "VST", U_("VST plugin to host: OfflineGetcurrentpass"));
+		MPT_LOG_GLOBAL(LogDebug, "VST", U_("VST plugin to host: OfflineGetcurrentpass"));
 		break;
 
 	case audioMasterOfflineGetCurrentMetaPass:
-		MPT_LOG(LogDebug, "VST", U_("VST plugin to host: OfflineGetCurrentMetapass"));
+		MPT_LOG_GLOBAL(LogDebug, "VST", U_("VST plugin to host: OfflineGetCurrentMetapass"));
 		break;
 
 	// for variable i/o, sample rate in <opt> - DEPRECATED in VST 2.4
 	case audioMasterSetOutputSampleRate:
-		MPT_LOG(LogDebug, "VST", U_("VST plugin to host: Set Output Sample Rate"));
+		MPT_LOG_GLOBAL(LogDebug, "VST", U_("VST plugin to host: Set Output Sample Rate"));
 		break;
 
 	// result in ret - DEPRECATED in VST 2.4
 	case audioMasterGetOutputSpeakerArrangement:
-		MPT_LOG(LogDebug, "VST", U_("VST plugin to host: Get Output Speaker Arrangement"));
+		MPT_LOG_GLOBAL(LogDebug, "VST", U_("VST plugin to host: Get Output Speaker Arrangement"));
 		break;
 
 	case audioMasterGetVendorString:
@@ -553,7 +553,7 @@ intptr_t VSTCALLBACK CVstPlugin::MasterCallBack(AEffect *effect, VstOpcodeToHost
 
 	// void* in <ptr>, format not defined yet - DEPRECATED in VST 2.4
 	case audioMasterSetIcon:
-		MPT_LOG(LogDebug, "VST", U_("VST plugin to host: Set Icon"));
+		MPT_LOG_GLOBAL(LogDebug, "VST", U_("VST plugin to host: Set Icon"));
 		break;
 
 	// string in ptr, see below
@@ -582,17 +582,17 @@ intptr_t VSTCALLBACK CVstPlugin::MasterCallBack(AEffect *effect, VstOpcodeToHost
 
 	// returns platform specific ptr - DEPRECATED in VST 2.4
 	case audioMasterOpenWindow:
-		MPT_LOG(LogDebug, "VST", U_("VST plugin to host: Open Window"));
+		MPT_LOG_GLOBAL(LogDebug, "VST", U_("VST plugin to host: Open Window"));
 		break;
 
 	// close window, platform specific handle in <ptr> - DEPRECATED in VST 2.4
 	case audioMasterCloseWindow:
-		MPT_LOG(LogDebug, "VST", U_("VST plugin to host: Close Window"));
+		MPT_LOG_GLOBAL(LogDebug, "VST", U_("VST plugin to host: Close Window"));
 		break;
 
 	// get plugin directory, FSSpec on MAC, else char*
 	case audioMasterGetDirectory:
-		//MPT_LOG(LogDebug, "VST", U_("VST plugin to host: Get Directory"));
+		//MPT_LOG_GLOBAL(LogDebug, "VST", U_("VST plugin to host: Get Directory"));
 		// Need to allocate space for path only, but I guess noone relies on this anyway.
 		//return ToVstPtr(pVstPlugin->GetPluginFactory().dllPath.GetPath().ToLocale());
 		//return ToVstPtr(TrackerSettings::Instance().PathPlugins.GetDefaultDir());
@@ -615,12 +615,12 @@ intptr_t VSTCALLBACK CVstPlugin::MasterCallBack(AEffect *effect, VstOpcodeToHost
 
 	// begin of automation session (when mouse down), parameter index in <index>
 	case audioMasterBeginEdit:
-		MPT_LOG(LogDebug, "VST", U_("VST plugin to host: Begin Edit"));
+		MPT_LOG_GLOBAL(LogDebug, "VST", U_("VST plugin to host: Begin Edit"));
 		break;
 
 	// end of automation session (when mouse up),     parameter index in <index>
 	case audioMasterEndEdit:
-		MPT_LOG(LogDebug, "VST", U_("VST plugin to host: End Edit"));
+		MPT_LOG_GLOBAL(LogDebug, "VST", U_("VST plugin to host: End Edit"));
 		break;
 
 	// open a fileselector window with VstFileSelect* in <ptr>
@@ -637,7 +637,7 @@ intptr_t VSTCALLBACK CVstPlugin::MasterCallBack(AEffect *effect, VstOpcodeToHost
 
 	// open an editor for audio (defined by XML text in ptr) - DEPRECATED in VST 2.4
 	case audioMasterEditFile:
-		MPT_LOG(LogDebug, "VST", U_("VST plugin to host: Edit File"));
+		MPT_LOG_GLOBAL(LogDebug, "VST", U_("VST plugin to host: Edit File"));
 		break;
 
 	// get the native path of currently loading bank or project
@@ -670,14 +670,14 @@ intptr_t VSTCALLBACK CVstPlugin::MasterCallBack(AEffect *effect, VstOpcodeToHost
 			return 1;
 		}
 #endif
-		MPT_LOG(LogDebug, "VST", U_("VST plugin to host: Get Chunk File"));
+		MPT_LOG_GLOBAL(LogDebug, "VST", U_("VST plugin to host: Get Chunk File"));
 		break;
 
 	//---from here VST 2.3 extension opcodes------------------------------------------------------
 
 	// result a VstSpeakerArrangement in ret - DEPRECATED in VST 2.4
 	case audioMasterGetInputSpeakerArrangement:
-		MPT_LOG(LogDebug, "VST", U_("VST plugin to host: Get Input Speaker Arrangement"));
+		MPT_LOG_GLOBAL(LogDebug, "VST", U_("VST plugin to host: Get Input Speaker Arrangement"));
 		break;
 
 	}
@@ -1093,7 +1093,7 @@ intptr_t CVstPlugin::Dispatch(VstOpcodeToPlugin opCode, int32 index, intptr_t va
 		{
 			codeStr = mpt::ufmt::val(opCode);
 		}
-		MPT_LOG(LogDebug, "VST", MPT_UFORMAT("About to Dispatch({}) (Plugin=\"{}\"), index: {}, value: {}, ptr: {}, opt: {}!\n")(codeStr, m_Factory.libraryName, index, mpt::ufmt::PTR(value), mpt::ufmt::PTR(ptr), mpt::ufmt::flt(opt, 3)));
+		MPT_LOG_GLOBAL(LogDebug, "VST", MPT_UFORMAT("About to Dispatch({}) (Plugin=\"{}\"), index: {}, value: {}, ptr: {}, opt: {}!\n")(codeStr, m_Factory.libraryName, index, mpt::ufmt::PTR(value), mpt::ufmt::PTR(ptr), mpt::ufmt::flt(opt, 3)));
 	}
 #endif
 	if(!m_Effect.dispatcher)

@@ -110,7 +110,7 @@ uint64 Base::SourceGetReferenceClockNowNanoseconds() const
 		return 0;
 	}
 	uint64 result = m_Source->SoundSourceGetReferenceClockNowNanoseconds();
-	//MPT_LOG(LogDebug, "sounddev", MPT_UFORMAT("clock: {}")(result));
+	//MPT_LOG_GLOBAL(LogDebug, "sounddev", MPT_UFORMAT("clock: {}")(result));
 	return result;
 }
 
@@ -123,7 +123,7 @@ uint64 Base::SourceLockedGetReferenceClockNowNanoseconds() const
 		return 0;
 	}
 	uint64 result = m_Source->SoundSourceLockedGetReferenceClockNowNanoseconds();
-	//MPT_LOG(LogDebug, "sounddev", MPT_UFORMAT("clock-rt: {}")(result));
+	//MPT_LOG_GLOBAL(LogDebug, "sounddev", MPT_UFORMAT("clock-rt: {}")(result));
 	return result;
 }
 
@@ -302,7 +302,7 @@ void Base::SourceLockedAudioReadDone()
 void Base::SendDeviceMessage(LogLevel level, const mpt::ustring &str)
 {
 	MPT_TRACE_SCOPE();
-	MPT_LOG(level, "sounddev", str);
+	MPT_LOG_GLOBAL(level, "sounddev", str);
 	if(m_MessageReceiver)
 	{
 		m_MessageReceiver->SoundDeviceMessage(level, str);

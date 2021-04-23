@@ -169,7 +169,7 @@ BOOL CModDocManager::OnDDECommand(LPTSTR lpszCommand)
 {
 	BOOL bResult, bActivate;
 #ifdef DDEDEBUG
-	MPT_LOG(LogDebug, "DDE", U_("OnDDECommand: ") + mpt::ToUnicode(mpt::winstring(lpszCommand)));
+	MPT_LOG_GLOBAL(LogDebug, "DDE", U_("OnDDECommand: ") + mpt::ToUnicode(mpt::winstring(lpszCommand)));
 #endif
 	// Handle any DDE commands recognized by your application
 	// and return TRUE.  See implementation of CWinApp::OnDDEComand
@@ -218,7 +218,7 @@ BOOL CModDocManager::OnDDECommand(LPTSTR lpszCommand)
 			bActivate = TRUE;
 		}
 	#ifdef DDEDEBUG
-		MPT_LOG(LogDebug, "DDE", MPT_UFORMAT("{}({})")(mpt::winstring(pszCmd), mpt::winstring(pszData)));
+		MPT_LOG_GLOBAL(LogDebug, "DDE", MPT_UFORMAT("{}({})")(mpt::winstring(pszCmd), mpt::winstring(pszData)));
 	#endif
 		if ((bActivate) && (theApp.m_pMainWnd->m_hWnd))
 		{
@@ -230,7 +230,7 @@ BOOL CModDocManager::OnDDECommand(LPTSTR lpszCommand)
 #ifdef DDEDEBUG
 	if (!bResult)
 	{
-		MPT_LOG(LogDebug, "DDE", U_("WARNING: failure in CModDocManager::OnDDECommand()"));
+		MPT_LOG_GLOBAL(LogDebug, "DDE", U_("WARNING: failure in CModDocManager::OnDDECommand()"));
 	}
 #endif
 	return bResult;

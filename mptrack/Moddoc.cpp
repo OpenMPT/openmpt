@@ -196,7 +196,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 
 	{
 
-		MPT_LOG(LogDebug, "Loader", U_("Open..."));
+		MPT_LOG_GLOBAL(LogDebug, "Loader", U_("Open..."));
 
 		InputFile f(filename, TrackerSettings::Instance().MiscCacheCompleteFileBeforeLoading);
 		if (f.IsValid())
@@ -208,7 +208,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 				return FALSE;
 		}
 
-		MPT_LOG(LogDebug, "Loader", U_("Open."));
+		MPT_LOG_GLOBAL(LogDebug, "Loader", U_("Open."));
 
 	}
 

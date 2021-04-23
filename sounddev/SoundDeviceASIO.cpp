@@ -121,13 +121,13 @@ std::vector<SoundDevice::Info> CASIODevice::EnumerateDevices(SoundDevice::SysInf
 		info.extraData[U_("Name")] = mpt::ToUnicode(AsWinstring(driver.Name));;
 		info.extraData[U_("Description")] = mpt::ToUnicode(AsWinstring(driver.Description));;
 		info.extraData[U_("DisplayName")] = mpt::ToUnicode(AsWinstring(driver.DisplayName()));;
-		MPT_LOG(LogDebug, "sounddev", MPT_UFORMAT("ASIO: Found driver:")());
-		MPT_LOG(LogDebug, "sounddev", MPT_UFORMAT("ASIO:  Key         = '{}'")(info.extraData[U_("Key")]));
-		MPT_LOG(LogDebug, "sounddev", MPT_UFORMAT("ASIO:  Id          = '{}'")(info.extraData[U_("Id")]));
-		MPT_LOG(LogDebug, "sounddev", MPT_UFORMAT("ASIO:  CLSID       = '{}'")(info.extraData[U_("CLSID")]));
-		MPT_LOG(LogDebug, "sounddev", MPT_UFORMAT("ASIO:  Name        = '{}'")(info.extraData[U_("Name")]));
-		MPT_LOG(LogDebug, "sounddev", MPT_UFORMAT("ASIO:  Description = '{}'")(info.extraData[U_("Description")]));
-		MPT_LOG(LogDebug, "sounddev", MPT_UFORMAT("ASIO:  DisplayName = '{}'")(info.extraData[U_("DisplayName")]));
+		MPT_LOG_GLOBAL(LogDebug, "sounddev", MPT_UFORMAT("ASIO: Found driver:")());
+		MPT_LOG_GLOBAL(LogDebug, "sounddev", MPT_UFORMAT("ASIO:  Key         = '{}'")(info.extraData[U_("Key")]));
+		MPT_LOG_GLOBAL(LogDebug, "sounddev", MPT_UFORMAT("ASIO:  Id          = '{}'")(info.extraData[U_("Id")]));
+		MPT_LOG_GLOBAL(LogDebug, "sounddev", MPT_UFORMAT("ASIO:  CLSID       = '{}'")(info.extraData[U_("CLSID")]));
+		MPT_LOG_GLOBAL(LogDebug, "sounddev", MPT_UFORMAT("ASIO:  Name        = '{}'")(info.extraData[U_("Name")]));
+		MPT_LOG_GLOBAL(LogDebug, "sounddev", MPT_UFORMAT("ASIO:  Description = '{}'")(info.extraData[U_("Description")]));
+		MPT_LOG_GLOBAL(LogDebug, "sounddev", MPT_UFORMAT("ASIO:  DisplayName = '{}'")(info.extraData[U_("DisplayName")]));
 		devices.push_back(info);
 	}
 	return devices;
@@ -216,7 +216,7 @@ bool CASIODevice::InternalOpen()
 
 	InitMembers();
 
-	MPT_LOG(LogDebug, "sounddev", MPT_UFORMAT("ASIO: Open('{}'): {}-bit, ({},{}) channels, {}Hz, hw-timing={}")
+	MPT_LOG_GLOBAL(LogDebug, "sounddev", MPT_UFORMAT("ASIO: Open('{}'): {}-bit, ({},{}) channels, {}Hz, hw-timing={}")
 		( GetDeviceInternalID()
 		, m_Settings.sampleFormat.GetBitsPerSample()
 		, m_Settings.InputChannels
@@ -238,7 +238,7 @@ bool CASIODevice::InternalOpen()
 		}
 
 		ASIO::Channels channels = AsioDriver()->getChannels();
-		MPT_LOG(LogDebug, "sounddev", MPT_UFORMAT("ASIO: getChannels() => inputChannels={} outputChannel={}")(channels.Input, channels.Output));
+		MPT_LOG_GLOBAL(LogDebug, "sounddev", MPT_UFORMAT("ASIO: getChannels() => inputChannels={} outputChannel={}")(channels.Input, channels.Output));
 		if(channels.Input <= 0 && channels.Output <= 0)
 		{
 			m_DeviceUnavailableOnOpen = true;
@@ -261,11 +261,11 @@ bool CASIODevice::InternalOpen()
 			throw ASIOException("Channel mapping requires more channels than available.");
 		}
 
-		MPT_LOG(LogDebug, "sounddev", MPT_UFORMAT("ASIO: setSampleRate(sampleRate={})")(m_Settings.Samplerate));
+		MPT_LOG_GLOBAL(LogDebug, "sounddev", MPT_UFORMAT("ASIO: setSampleRate(sampleRate={})")(m_Settings.Samplerate));
 		AsioDriver()->setSampleRate(m_Settings.Samplerate);
 
 		ASIO::BufferSizes bufferSizes = AsioDriver()->getBufferSizes();
-		MPT_LOG(LogDebug, "sounddev", MPT_UFORMAT("ASIO: getBufferSize() => minSize={} maxSize={} preferredSize={} granularity={}")(
+		MPT_LOG_GLOBAL(LogDebug, "sounddev", MPT_UFORMAT("ASIO: getBufferSize() => minSize={} maxSize={} preferredSize={} granularity={}")(
 			bufferSizes.Min, bufferSizes.Max, bufferSizes.Preferred, bufferSizes.Granularity));
 		m_nAsioBufferLen = mpt::saturate_round<int32>(m_Settings.Latency * m_Settings.Samplerate / 2.0);
 		if(bufferSizes.Min <= 0 || bufferSizes.Max <= 0 || bufferSizes.Min > bufferSizes.Max)
@@ -342,7 +342,7 @@ bool CASIODevice::InternalOpen()
 				m_BufferInfo[channel].channelNum = m_Settings.Channels.ToDevice(channel - m_Settings.InputChannels);
 			}
 		}
-		MPT_LOG(LogDebug, "sounddev", MPT_UFORMAT("ASIO: createBuffers(numChannels={}, bufferSize={})")(m_Settings.Channels.GetNumHostChannels(), m_nAsioBufferLen));
+		MPT_LOG_GLOBAL(LogDebug, "sounddev", MPT_UFORMAT("ASIO: createBuffers(numChannels={}, bufferSize={})")(m_Settings.Channels.GetNumHostChannels(), m_nAsioBufferLen));
 		AsioDriver()->template createBuffers<AppID1, AppID2>(m_BufferInfo, m_nAsioBufferLen, *this);
 		m_BuffersCreated = true;
 		for(std::size_t i = 0; i < m_BufferInfo.size(); ++i)
@@ -364,7 +364,7 @@ bool CASIODevice::InternalOpen()
 				m_ChannelInfo[channel] = AsioDriver()->getChannelInfo(m_Settings.Channels.ToDevice(channel - m_Settings.InputChannels), false);
 			}
 			MPT_ASSERT(m_ChannelInfo[channel].isActive);
-			MPT_LOG(LogDebug, "sounddev", MPT_UFORMAT("ASIO: getChannelInfo(isInput={} channel={}) => isActive={} channelGroup={} type={} name='{}'")
+			MPT_LOG_GLOBAL(LogDebug, "sounddev", MPT_UFORMAT("ASIO: getChannelInfo(isInput={} channel={}) => isActive={} channelGroup={} type={} name='{}'")
 				( (channel < m_Settings.InputChannels)
 				, m_Settings.Channels.ToDevice(channel)
 				, value_cast(m_ChannelInfo[channel].isActive)
@@ -705,7 +705,7 @@ void CASIODevice::OpenDriver()
 		ExceptionHandler(__func__);
 		return;
 	}
-	MPT_LOG(LogInformation, "sounddev", MPT_UFORMAT("ASIO: Opened driver {} Version 0x{}: {}")(mpt::ToUnicode(mpt::Charset::Locale, driverName), mpt::ufmt::HEX0<8>(driverVersion), mpt::ToUnicode(mpt::Charset::Locale, driverErrorMessage)));
+	MPT_LOG_GLOBAL(LogInformation, "sounddev", MPT_UFORMAT("ASIO: Opened driver {} Version 0x{}: {}")(mpt::ToUnicode(mpt::Charset::Locale, driverName), mpt::ufmt::HEX0<8>(driverVersion), mpt::ToUnicode(mpt::Charset::Locale, driverErrorMessage)));
 }
 
 
@@ -1149,7 +1149,7 @@ ASIO::Long CASIODevice::MessageMMCCommand(ASIO::Long value, const void * message
 {
 	MPT_TRACE_SCOPE();
 	ASIO::Long result = 0;
-	MPT_LOG(LogDebug, "sounddev", MPT_UFORMAT("ASIO: MMCCommand(value={}, message={}, opt={}) => result={}")
+	MPT_LOG_GLOBAL(LogDebug, "sounddev", MPT_UFORMAT("ASIO: MMCCommand(value={}, message={}, opt={}) => result={}")
 		( value
 		, reinterpret_cast<std::uintptr_t>(message)
 		, opt ? mpt::ufmt::val(*opt) : U_("NULL")
@@ -1168,7 +1168,7 @@ ASIO::Long CASIODevice::MessageUnknown(ASIO::MessageSelector selector, ASIO::Lon
 {
 	MPT_TRACE_SCOPE();
 	ASIO::Long result = 0;
-	MPT_LOG(LogDebug, "sounddev", MPT_UFORMAT("ASIO: AsioMessage(selector={}, value={}, message={}, opt={}) => result={}")
+	MPT_LOG_GLOBAL(LogDebug, "sounddev", MPT_UFORMAT("ASIO: AsioMessage(selector={}, value={}, message={}, opt={}) => result={}")
 		(mpt::to_underlying(selector)
 		, value
 		, reinterpret_cast<std::uintptr_t>(message)
@@ -1190,26 +1190,26 @@ void CASIODevice::ExceptionHandler(const char * func)
 		#if !defined(MPT_BUILD_WINESUPPORT)
 			ExceptionHandler::TaintProcess(ExceptionHandler::TaintReason::Driver);
 		#endif // !MPT_BUILD_WINESUPPORT
-		MPT_LOG(LogError, "sounddev", MPT_UFORMAT("ASIO: {}: Driver Crash: {}!")(mpt::ToUnicode(mpt::CharsetSource, func), mpt::ToUnicode(mpt::CharsetSource, std::string(e.func()))));
+		MPT_LOG_GLOBAL(LogError, "sounddev", MPT_UFORMAT("ASIO: {}: Driver Crash: {}!")(mpt::ToUnicode(mpt::CharsetSource, func), mpt::ToUnicode(mpt::CharsetSource, std::string(e.func()))));
 		SendDeviceMessage(LogError, MPT_UFORMAT("ASIO Driver Crash: {}")(mpt::ToUnicode(mpt::CharsetSource, std::string(e.func()))));
 	} catch(const std::bad_alloc &)
 	{
 		mpt::throw_out_of_memory();
 	} catch(const ASIO::Windows::DriverLoadFailed &e)
 	{
-		MPT_LOG(LogDebug, "sounddev", MPT_UFORMAT("ASIO: {}: Driver Load: {}")(mpt::ToUnicode(mpt::CharsetSource, func), mpt::get_exception_text<mpt::ustring>(e)));
+		MPT_LOG_GLOBAL(LogDebug, "sounddev", MPT_UFORMAT("ASIO: {}: Driver Load: {}")(mpt::ToUnicode(mpt::CharsetSource, func), mpt::get_exception_text<mpt::ustring>(e)));
 	} catch(const ASIO::Windows::DriverInitFailed &e)
 	{
-		MPT_LOG(LogDebug, "sounddev", MPT_UFORMAT("ASIO: {}: Driver Init: {}")(mpt::ToUnicode(mpt::CharsetSource, func), mpt::get_exception_text<mpt::ustring>(e)));
+		MPT_LOG_GLOBAL(LogDebug, "sounddev", MPT_UFORMAT("ASIO: {}: Driver Init: {}")(mpt::ToUnicode(mpt::CharsetSource, func), mpt::get_exception_text<mpt::ustring>(e)));
 	} catch(const ASIO::Error &e)
 	{
-		MPT_LOG(LogDebug, "sounddev", MPT_UFORMAT("ASIO: {}: Error: {}")(mpt::ToUnicode(mpt::CharsetSource, func), mpt::get_exception_text<mpt::ustring>(e)));
+		MPT_LOG_GLOBAL(LogDebug, "sounddev", MPT_UFORMAT("ASIO: {}: Error: {}")(mpt::ToUnicode(mpt::CharsetSource, func), mpt::get_exception_text<mpt::ustring>(e)));
 	} catch(const std::exception &e)
 	{
-		MPT_LOG(LogDebug, "sounddev", MPT_UFORMAT("ASIO: {}: Exception: {}")(mpt::ToUnicode(mpt::CharsetSource, func), mpt::get_exception_text<mpt::ustring>(e)));
+		MPT_LOG_GLOBAL(LogDebug, "sounddev", MPT_UFORMAT("ASIO: {}: Exception: {}")(mpt::ToUnicode(mpt::CharsetSource, func), mpt::get_exception_text<mpt::ustring>(e)));
 	} catch(...)
 	{
-		MPT_LOG(LogDebug, "sounddev", MPT_UFORMAT("ASIO: {}: Unknown Exception")(mpt::ToUnicode(mpt::CharsetSource, func)));
+		MPT_LOG_GLOBAL(LogDebug, "sounddev", MPT_UFORMAT("ASIO: {}: Unknown Exception")(mpt::ToUnicode(mpt::CharsetSource, func)));
 	}
 }
 

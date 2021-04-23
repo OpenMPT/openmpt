@@ -63,7 +63,7 @@ void SetFacilities(const std::string &solo, const std::string &blocked)
 	std::strcpy(g_FacilityBlocked, blocked.c_str());
 }
 
-bool IsFacilityActive(const char *facility)
+bool IsFacilityActive(const char *facility) noexcept
 {
 	if(facility)
 	{
@@ -88,7 +88,7 @@ bool IsFacilityActive(const char *facility)
 #endif
 
 
-void Logger::SendLogMessage(const mpt::source_location &loc, LogLevel level, const char *facility, const mpt::ustring &text)
+void GlobalLogger::SendLogMessage(const mpt::source_location &loc, LogLevel level, const char *facility, const mpt::ustring &text) const
 {
 #ifdef MPT_LOG_IS_DISABLED
 	MPT_UNREFERENCED_PARAMETER(loc);

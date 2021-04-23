@@ -413,7 +413,7 @@ void CVstPluginManager::EnumerateDirectXDMOs()
 									delete plug;
 								}
 #ifdef DMO_LOG
-								MPT_LOG(LogDebug, "DMO", MPT_UFORMAT("Found \"{}\" clsid={}\n")(plug->libraryName, plug->dllPath));
+								MPT_LOG_GLOBAL(LogDebug, "DMO", MPT_UFORMAT("Found \"{}\" clsid={}\n")(plug->libraryName, plug->dllPath));
 #endif
 							}
 						}
@@ -473,7 +473,7 @@ static bool TryLoadPlugin(bool maskCrashes, VSTPluginLib *plug, HINSTANCE hLib, 
 #ifdef VST_LOG
 	intptr_t nver = CVstPlugin::DispatchSEH(maskCrashes, pEffect, Vst::effGetVstVersion, 0,0, nullptr, 0, exception);
 	if (!nver) nver = pEffect->version;
-	MPT_LOG(LogDebug, "VST", MPT_UFORMAT("{}: v{}.0, {} in, {} out, {} programs, {} params, flags=0x{} realQ={} offQ={}")(
+	MPT_LOG_GLOBAL(LogDebug, "VST", MPT_UFORMAT("{}: v{}.0, {} in, {} out, {} programs, {} params, flags=0x{} realQ={} offQ={}")(
 		plug->libraryName, nver,
 		pEffect->numInputs, pEffect->numOutputs,
 		mpt::ufmt::dec0<2>(pEffect->numPrograms), mpt::ufmt::dec0<2>(pEffect->numParams),
@@ -546,13 +546,13 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 			plug->vendor = cacheFile.Read<CString>(cacheSection, IDs + U_(".Vendor"), CString());
 
 #ifdef VST_LOG
-			MPT_LOG(LogDebug, "VST", MPT_UFORMAT("Plugin \"{}\" found in PluginCache")(plug->libraryName));
+			MPT_LOG_GLOBAL(LogDebug, "VST", MPT_UFORMAT("Plugin \"{}\" found in PluginCache")(plug->libraryName));
 #endif // VST_LOG
 			return plug;
 		} else
 		{
 #ifdef VST_LOG
-			MPT_LOG(LogDebug, "VST", MPT_UFORMAT("Plugin mismatch in PluginCache: \"{}\" [{}]")(dllPath, IDs));
+			MPT_LOG_GLOBAL(LogDebug, "VST", MPT_UFORMAT("Plugin mismatch in PluginCache: \"{}\" [{}]")(dllPath, IDs));
 #endif // VST_LOG
 		}
 	}
@@ -775,7 +775,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 	{
 		// "plug not found" notification code MOVED to CSoundFile::Create
 #ifdef VST_LOG
-		MPT_LOG(LogDebug, "VST", U_("Unknown plugin"));
+		MPT_LOG_GLOBAL(LogDebug, "VST", U_("Unknown plugin"));
 #endif
 	}
 #endif // NO_VST
@@ -814,7 +814,7 @@ void CVstPluginManager::ReportPlugException(const mpt::ustring &msg)
 {
 	Reporting::Notification(msg);
 #ifdef VST_LOG
-	MPT_LOG(LogDebug, "VST", mpt::ToUnicode(msg));
+	MPT_LOG_GLOBAL(LogDebug, "VST", mpt::ToUnicode(msg));
 #endif
 }
 

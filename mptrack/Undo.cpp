@@ -425,7 +425,7 @@ bool CSampleUndo::PrepareBuffer(undobuf_t &buffer, const SAMPLEINDEX smp, sample
 
 #ifdef MPT_ALL_LOGGING
 			const size_t nSize = (GetBufferCapacity(UndoBuffer) + GetBufferCapacity(RedoBuffer) + changeLen * bytesPerSample) >> 10;
-			MPT_LOG(LogDebug, "Undo", MPT_UFORMAT("Sample undo/redo buffer size is now {}.{} MB")(nSize >> 10, (nSize & 1023) * 100 / 1024));
+			MPT_LOG_GLOBAL(LogDebug, "Undo", MPT_UFORMAT("Sample undo/redo buffer size is now {}.{} MB")(nSize >> 10, (nSize & 1023) * 100 / 1024));
 #endif
 
 		}

@@ -89,7 +89,7 @@ void CALLBACK MidiInCallBack(HMIDIIN, UINT wMsg, DWORD_PTR, DWORD_PTR dwParam1, 
 	DWORD dwMidiByte1 = (dwParam1 >> 8) & 0xFF;
 	DWORD dwMidiByte2 = (dwParam1 >> 16) & 0xFF;
 	DWORD dwTimeStamp = (DWORD)dwParam2;
-	MPT_LOG(LogDebug, "MIDI", MPT_UFORMAT("time={}ms status={} data={}.{}")(mpt::ufmt::dec(dwTimeStamp), mpt::ufmt::HEX0<2>(dwMidiStatus), mpt::ufmt::HEX0<2>(dwMidiByte1), mpt::ufmt::HEX0<2>(dwMidiByte2)));
+	MPT_LOG_GLOBAL(LogDebug, "MIDI", MPT_UFORMAT("time={}ms status={} data={}.{}")(mpt::ufmt::dec(dwTimeStamp), mpt::ufmt::HEX0<2>(dwMidiStatus), mpt::ufmt::HEX0<2>(dwMidiByte1), mpt::ufmt::HEX0<2>(dwMidiByte2)));
 #endif
 
 	hWndMidi = pMainFrm->GetMidiRecordWnd();

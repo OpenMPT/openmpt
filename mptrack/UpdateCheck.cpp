@@ -837,7 +837,7 @@ void CUpdateCheck::SendStatistics(HTTP::InternetSession &internet, const CUpdate
 		requestStatistics.dataMimeType = HTTP::MimeType::JSON();
 		requestStatistics.acceptMimeTypes = HTTP::MimeTypes::JSON();
 		std::string jsondata = statistics;
-		MPT_LOG(LogInformation, "Update", mpt::ToUnicode(mpt::Charset::UTF8, jsondata));
+		MPT_LOG_GLOBAL(LogInformation, "Update", mpt::ToUnicode(mpt::Charset::UTF8, jsondata));
 		requestStatistics.data = mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(jsondata));
 #if defined(MPT_BUILD_RETRO)
 		requestSatistics.InsecureTLSDowngradeWindowsXP();

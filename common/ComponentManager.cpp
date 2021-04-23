@@ -189,7 +189,7 @@ std::string ComponentFactoryBase::GetSettingsKey() const
 
 void ComponentFactoryBase::PreConstruct() const
 {
-	MPT_LOG(LogInformation, "Components", 
+	MPT_LOG_GLOBAL(LogInformation, "Components", 
 		MPT_UFORMAT("Constructing Component {}")
 			( mpt::ToUnicode(mpt::Charset::ASCII, m_ID)
 			)
@@ -245,7 +245,7 @@ static std::shared_ptr<ComponentManager> g_ComponentManager;
 
 void ComponentManager::Init(const IComponentManagerSettings &settings)
 {
-	MPT_LOG(LogInformation, "Components", U_("Init"));
+	MPT_LOG_GLOBAL(LogInformation, "Components", U_("Init"));
 	// cannot use make_shared because the constructor is private
 	g_ComponentManager = std::shared_ptr<ComponentManager>(new ComponentManager(settings));
 }
@@ -253,7 +253,7 @@ void ComponentManager::Init(const IComponentManagerSettings &settings)
 
 void ComponentManager::Release()
 {
-	MPT_LOG(LogInformation, "Components", U_("Release"));
+	MPT_LOG_GLOBAL(LogInformation, "Components", U_("Release"));
 	g_ComponentManager = nullptr;
 }
 
@@ -292,7 +292,7 @@ void ComponentManager::Register(const IComponentFactory &componentFactory)
 
 void ComponentManager::Startup()
 {
-	MPT_LOG(LogDebug, "Components", U_("Startup"));
+	MPT_LOG_GLOBAL(LogDebug, "Components", U_("Startup"));
 	if(m_Settings.LoadOnStartup())
 	{
 		for(auto &it : m_Components)

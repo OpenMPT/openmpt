@@ -823,7 +823,7 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 	// Start loading
 	BeginWaitCursor();
 
-	MPT_LOG(LogInformation, "", U_("OpenMPT Start"));
+	MPT_LOG_GLOBAL(LogInformation, "", U_("OpenMPT Start"));
 
 	// create the tracker-global random device
 	m_RD = std::make_unique<mpt::random_device>();
@@ -866,7 +866,7 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 
 	m_pTrackerSettings = new TrackerSettings(*m_pSettings);
 
-	MPT_LOG(LogInformation, "", U_("OpenMPT settings initialized."));
+	MPT_LOG_GLOBAL(LogInformation, "", U_("OpenMPT settings initialized."));
 
 	if(ExceptionHandler::useAnyCrashHandler)
 	{

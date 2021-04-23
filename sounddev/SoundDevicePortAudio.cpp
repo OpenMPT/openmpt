@@ -37,7 +37,7 @@ namespace SoundDevice {
 #ifdef MPT_WITH_PORTAUDIO
 
 #ifdef MPT_ALL_LOGGING
-#define PALOG(x) MPT_LOG(LogDebug, "PortAudio", x)
+#define PALOG(x) MPT_LOG_GLOBAL(LogDebug, "PortAudio", x)
 #else
 #define PALOG(x) do { } while(0)
 #endif

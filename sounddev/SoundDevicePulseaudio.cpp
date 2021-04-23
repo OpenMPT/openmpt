@@ -51,7 +51,7 @@ mpt::ustring Pulseaudio::PulseErrorString(int error)
 
 static void PulseAudioSinkInfoListCallback(pa_context * /* c */ , const pa_sink_info *i, int /* eol */ , void *userdata)
 {
-	MPT_LOG(LogDebug, "sounddev", U_("PulseAudioSinkInfoListCallback"));
+	MPT_LOG_GLOBAL(LogDebug, "sounddev", U_("PulseAudioSinkInfoListCallback"));
 	std::vector<SoundDevice::Info> *devices_ = reinterpret_cast<std::vector<SoundDevice::Info>*>(userdata);
 	if(!devices_)
 	{
@@ -143,18 +143,18 @@ std::vector<SoundDevice::Info> Pulseaudio::EnumerateDevices(SoundDevice::SysInfo
 	m = pa_mainloop_new();
 	if(!m)
 	{
-		MPT_LOG(LogError, "sounddev", U_("pa_mainloop_new"));
+		MPT_LOG_GLOBAL(LogError, "sounddev", U_("pa_mainloop_new"));
 		goto cleanup;
 	}
 	c = pa_context_new(pa_mainloop_get_api(m), mpt::ToCharset(mpt::Charset::UTF8, mpt::ustring()).c_str()); // TODO: get AppInfo
 	if(!c)
 	{
-		MPT_LOG(LogError, "sounddev", U_("pa_context_new"));
+		MPT_LOG_GLOBAL(LogError, "sounddev", U_("pa_context_new"));
 		goto cleanup;
 	}
 	if(pa_context_connect(c, NULL, PA_CONTEXT_NOFLAGS, NULL) < 0)
 	{
-		MPT_LOG(LogError, "sounddev", U_("pa_context_connect"));
+		MPT_LOG_GLOBAL(LogError, "sounddev", U_("pa_context_connect"));
 		goto cleanup;
 	}
 	doneConnect = false;
@@ -162,7 +162,7 @@ std::vector<SoundDevice::Info> Pulseaudio::EnumerateDevices(SoundDevice::SysInfo
 	{
 		if(pa_mainloop_iterate(m, 1, &result) < 0)
 		{
-			MPT_LOG(LogError, "sounddev", U_("pa_mainloop_iterate"));
+			MPT_LOG_GLOBAL(LogError, "sounddev", U_("pa_mainloop_iterate"));
 			goto cleanup;
 		}
 		cs = pa_context_get_state(c);
@@ -180,7 +180,7 @@ std::vector<SoundDevice::Info> Pulseaudio::EnumerateDevices(SoundDevice::SysInfo
 		case PA_CONTEXT_TERMINATED:
 		default:
 			{
-				MPT_LOG(LogError, "sounddev", U_("pa_context_connect"));
+				MPT_LOG_GLOBAL(LogError, "sounddev", U_("pa_context_connect"));
 				goto cleanup;
 			}
 			break;
@@ -189,7 +189,7 @@ std::vector<SoundDevice::Info> Pulseaudio::EnumerateDevices(SoundDevice::SysInfo
 	o = pa_context_get_sink_info_list(c, &PulseAudioSinkInfoListCallback, &devices);
 	if(!o)
 	{
-		MPT_LOG(LogError, "sounddev", U_("pa_context_get_sink_info_list: ") + PulseErrorString(pa_context_errno(c)));
+		MPT_LOG_GLOBAL(LogError, "sounddev", U_("pa_context_get_sink_info_list: ") + PulseErrorString(pa_context_errno(c)));
 		goto cleanup;
 	}
 	s = PA_OPERATION_RUNNING;
@@ -197,13 +197,13 @@ std::vector<SoundDevice::Info> Pulseaudio::EnumerateDevices(SoundDevice::SysInfo
 	{
 		if(pa_mainloop_iterate(m, 1, &result) < 0)
 		{
-			MPT_LOG(LogError, "sounddev", U_("pa_mainloop_iterate"));
+			MPT_LOG_GLOBAL(LogError, "sounddev", U_("pa_mainloop_iterate"));
 			goto cleanup;
 		}
 	}
 	if(s == PA_OPERATION_CANCELLED)
 	{
-		MPT_LOG(LogError, "sounddev", U_("pa_operation_get_state"));
+		MPT_LOG_GLOBAL(LogError, "sounddev", U_("pa_operation_get_state"));
 		goto cleanup;
 	}
 	goto cleanup;

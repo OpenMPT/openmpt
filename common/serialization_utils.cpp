@@ -32,7 +32,7 @@ namespace srlztn
 
 
 #ifdef SSB_LOGGING
-#define SSB_LOG(x) MPT_LOG(LogDebug, "serialization", x)
+#define SSB_LOG(x) MPT_LOG_GLOBAL(LogDebug, "serialization", x)
 #else
 #define SSB_LOG(x) do { } while(0)
 #endif

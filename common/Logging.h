@@ -46,16 +46,16 @@ If the context is related to a particular CSoundfile instance, use
 CSoundfile::AddToLog.
 
 Logging a simple message:
-MPT_LOG(LogWarning, "sounddev", "some message");
-MPT_LOG(LogWarning, "sounddev", U_("some message"));
+MPT_LOG_GLOBAL(LogWarning, "sounddev", "some message");
+MPT_LOG_GLOBAL(LogWarning, "sounddev", U_("some message"));
 Facility is some course grained code section identifier (more coarse grained
 than the current file name probably), useful to do some selective logging.
 
 Logging a more complex message:
-MPT_LOG(LogWarning, "sounddev", MPT_UFORMAT("Some message: foo={}, bar=0x{}")(foo, mpt::ufmt::hex0<8>(bar)));
+MPT_LOG_GLOBAL(LogWarning, "sounddev", MPT_UFORMAT("Some message: foo={}, bar=0x{}")(foo, mpt::ufmt::hex0<8>(bar)));
 
 Note that even with full enabled logging and a runtime configurable logging
-level, the runtime overhead of a MPT_LOG(level, facility, text) call is just a
+level, the runtime overhead of a MPT_LOG_GLOBAL(level, facility, text) call is just a
 single conditional in case the verbosity does not require logging the respective
 message. Even the expression "text" is not evaluated.
 
@@ -124,9 +124,9 @@ extern bool FileEnabled;
 extern bool DebuggerEnabled;
 extern bool ConsoleEnabled;
 void SetFacilities(const std::string &solo, const std::string &blocked);
-bool IsFacilityActive(const char *facility);
+bool IsFacilityActive(const char *facility) noexcept;
 #else
-MPT_FORCEINLINE bool IsFacilityActive(const char * /*facility*/ ) { return true; }
+MPT_FORCEINLINE bool IsFacilityActive(const char * /*facility*/ ) noexcept { return true; }
 #endif
 
 
@@ -137,31 +137,61 @@ MPT_FORCEINLINE bool IsFacilityActive(const char * /*facility*/ ) { return true;
 #ifndef NO_LOGGING
 
 
-class Logger
+class ILogger
 {
+protected:
+	virtual ~ILogger() = default;
 public:
+	virtual bool IsLevelActive(LogLevel level) const noexcept = 0;
 	// facility:ASCII
-	void SendLogMessage(const mpt::source_location &loc, LogLevel level, const char *facility, const mpt::ustring &text);
+	virtual bool IsFacilityActive(const char *facility) const noexcept = 0;
+	// facility:ASCII
+	virtual void SendLogMessage(const mpt::source_location &loc, LogLevel level, const char *facility, const mpt::ustring &text) const = 0;
 };
 
-#define MPT_LOG(level, facility, text) \
+
+class GlobalLogger
+	: public ILogger
+{
+public:
+	GlobalLogger() = default;
+	~GlobalLogger() final = default;
+public:
+	bool IsLevelActive(LogLevel level) const noexcept final
+	{
+		return (mpt::log::GlobalLogLevel >= level);
+	}
+	bool IsFacilityActive(const char *facility) const noexcept final
+	{
+		return mpt::log::IsFacilityActive(facility);
+	}
+	void SendLogMessage(const mpt::source_location &loc, LogLevel level, const char *facility, const mpt::ustring &message) const final;
+};
+
+
+#define MPT_LOG(logger, level, facility, text) \
 	do \
 	{ \
-		MPT_MAYBE_CONSTANT_IF(mpt::log::GlobalLogLevel >= ( level )) \
+		if((logger).IsLevelActive((level))) \
 		{ \
-			MPT_MAYBE_CONSTANT_IF(mpt::log::IsFacilityActive(( facility ))) \
+			if((logger).IsFacilityActive((facility))) \
 			{ \
-				mpt::log::Logger().SendLogMessage( MPT_SOURCE_LOCATION_CURRENT() , ( level ), ( facility ), ( text )); \
+				(logger).SendLogMessage(MPT_SOURCE_LOCATION_CURRENT(), (level), (facility), (text)); \
 			} \
 		} \
 	} while(0) \
 /**/
 
 
+#define MPT_LOG_GLOBAL(level, facility, text) MPT_LOG(mpt::log::GlobalLogger{}, (level), (facility), (text))
+
+
 #else // !NO_LOGGING
 
 
-#define MPT_LOG(level, facility, text) do { } while(0)
+#define MPT_LOG(logger, level, facility, text) do { } while(0)
+
+#define MPT_LOG_GLOBAL(level, facility, text) do { } while(0)
 
 
 #endif // NO_LOGGING

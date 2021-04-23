@@ -49,7 +49,7 @@ CInputHandler::CInputHandler(CWnd *mainframe)
 		if (!bSuccess)
 		{
 			// Load keybindings from resources.
-			MPT_LOG(LogDebug, "InputHandler", U_("Loading keybindings from resources\n"));
+			MPT_LOG_GLOBAL(LogDebug, "InputHandler", U_("Loading keybindings from resources\n"));
 			bSuccess = m_activeCommandSet->LoadDefaultKeymap();
 			if (bSuccess && bNoExistingKbdFileSetting)
 			{
@@ -298,11 +298,11 @@ int CInputHandler::GetKeyListSize(CommandID cmd) const
 
 void CInputHandler::LogModifiers()
 {
-	MPT_LOG(LogDebug, "InputHandler", U_("----------------------------------\n"));
-	if (m_modifierMask[ModCtrl])  MPT_LOG(LogDebug, "InputHandler", U_("Ctrl On")); else MPT_LOG(LogDebug, "InputHandler", U_("Ctrl --"));
-	if (m_modifierMask[ModShift]) MPT_LOG(LogDebug, "InputHandler", U_("\tShft On")); else MPT_LOG(LogDebug, "InputHandler", U_("\tShft --"));
-	if (m_modifierMask[ModAlt])   MPT_LOG(LogDebug, "InputHandler", U_("\tAlt  On")); else MPT_LOG(LogDebug, "InputHandler", U_("\tAlt  --"));
-	if (m_modifierMask[ModWin])   MPT_LOG(LogDebug, "InputHandler", U_("\tWin  On\n")); else MPT_LOG(LogDebug, "InputHandler", U_("\tWin  --\n")); // Feature: use Windows keys as modifier keys
+	MPT_LOG_GLOBAL(LogDebug, "InputHandler", U_("----------------------------------\n"));
+	if (m_modifierMask[ModCtrl])  MPT_LOG_GLOBAL(LogDebug, "InputHandler", U_("Ctrl On")); else MPT_LOG_GLOBAL(LogDebug, "InputHandler", U_("Ctrl --"));
+	if (m_modifierMask[ModShift]) MPT_LOG_GLOBAL(LogDebug, "InputHandler", U_("\tShft On")); else MPT_LOG_GLOBAL(LogDebug, "InputHandler", U_("\tShft --"));
+	if (m_modifierMask[ModAlt])   MPT_LOG_GLOBAL(LogDebug, "InputHandler", U_("\tAlt  On")); else MPT_LOG_GLOBAL(LogDebug, "InputHandler", U_("\tAlt  --"));
+	if (m_modifierMask[ModWin])   MPT_LOG_GLOBAL(LogDebug, "InputHandler", U_("\tWin  On\n")); else MPT_LOG_GLOBAL(LogDebug, "InputHandler", U_("\tWin  --\n")); // Feature: use Windows keys as modifier keys
 }
 
 
@@ -557,7 +557,7 @@ void CInputHandler::SetNewCommandSet(const CCommandSet *newSet)
 
 bool CInputHandler::SetEffectLetters(const CModSpecifications &modSpecs)
 {
-	MPT_LOG(LogDebug, "InputHandler", U_("Changing command set."));
+	MPT_LOG_GLOBAL(LogDebug, "InputHandler", U_("Changing command set."));
 	bool retval = m_activeCommandSet->QuickChange_SetEffects(modSpecs);
 	if(retval) m_activeCommandSet->GenKeyMap(m_keyMap);
 	return retval;

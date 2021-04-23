@@ -129,7 +129,7 @@ void CSoundFile::AddToLog(LogLevel level, const mpt::ustring &text) const
 		#ifdef MODPLUG_TRACKER
 			if(GetpModDoc()) GetpModDoc()->AddToLog(level, text);
 		#else
-			MPT_LOG(level, "soundlib", text);
+			MPT_LOG_GLOBAL(level, "soundlib", text);
 		#endif
 	}
 }

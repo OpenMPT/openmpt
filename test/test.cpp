@@ -509,9 +509,9 @@ static void TestFloatFormat(Tfloat x, std::string format, mpt::FormatFlags f, st
 #endif
 	std::string str_iostreams = mpt::fmt::fmt(x, mpt::FormatSpec().SetFlags(f).SetWidth(width).SetPrecision(precision));
 #ifdef MODPLUG_TRACKER
-	//MPT_LOG(LogDebug, "test", mpt::ToUnicode(mpt::Charset::ASCII, str_sprintf));
+	//MPT_LOG_GLOBAL(LogDebug, "test", mpt::ToUnicode(mpt::Charset::ASCII, str_sprintf));
 #endif
-	//MPT_LOG(LogDebug, "test", mpt::ToUnicode(mpt::Charset::ASCII, str_iostreams));
+	//MPT_LOG_GLOBAL(LogDebug, "test", mpt::ToUnicode(mpt::Charset::ASCII, str_iostreams));
 #ifdef MODPLUG_TRACKER
 #if MPT_MSVC_AT_LEAST(2019,4) || MPT_GCC_AT_LEAST(11,1,0)
 	// to_chars generates shortest form instead of 0-padded precision
@@ -5312,7 +5312,7 @@ static MPT_NOINLINE void TestSampleConversion()
 				lastMatch = true;
 			}
 			*/
-			//MPT_LOG(LogNotification, "test", MPT_UFORMAT("{} {} {}")(i, ulaw_encode(i), mpt::byte_cast<uint8>(SC::EncodeuLaw{}(i))));
+			//MPT_LOG_GLOBAL(LogNotification, "test", MPT_UFORMAT("{} {} {}")(i, ulaw_encode(i), mpt::byte_cast<uint8>(SC::EncodeuLaw{}(i))));
 			VERIFY_EQUAL_NONCONT(SC::EncodeuLaw{}(i), mpt::byte_cast<std::byte>(ulaw_encode(i)));
 		}
 #endif
