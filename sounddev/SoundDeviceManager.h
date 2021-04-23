@@ -63,10 +63,11 @@ public:
 
 private:
 
-	typedef SoundDevice::IBase* (*CreateSoundDeviceFunc)(const SoundDevice::Info &info, SoundDevice::SysInfo sysInfo);
+	typedef SoundDevice::IBase* (*CreateSoundDeviceFunc)(mpt::log::ILogger &logger, const SoundDevice::Info &info, SoundDevice::SysInfo sysInfo);
 
 private:
 
+	mpt::log::ILogger &m_Logger;
 	const SoundDevice::SysInfo m_SysInfo;
 	const SoundDevice::AppInfo m_AppInfo;
 
@@ -102,16 +103,17 @@ private:
 
 public:
 
-	Manager(SoundDevice::SysInfo sysInfo, SoundDevice::AppInfo appInfo);
+	Manager(mpt::log::ILogger &logger, SoundDevice::SysInfo sysInfo, SoundDevice::AppInfo appInfo);
 	~Manager();
 
 private:
 
-	template <typename Tdevice> void EnumerateDevices(SoundDevice::SysInfo sysInfo);
-	template <typename Tdevice> static SoundDevice::IBase* ConstructSoundDevice(const SoundDevice::Info &info, SoundDevice::SysInfo sysInfo);
+	template <typename Tdevice> void EnumerateDevices(mpt::log::ILogger &logger, SoundDevice::SysInfo sysInfo);
+	template <typename Tdevice> static SoundDevice::IBase* ConstructSoundDevice(mpt::log::ILogger &logger, const SoundDevice::Info &info, SoundDevice::SysInfo sysInfo);
 
 public:
 
+	mpt::log::ILogger &GetLogger() const { return m_Logger; }
 	SoundDevice::SysInfo GetSysInfo() const { return m_SysInfo; }
 	SoundDevice::AppInfo GetAppInfo() const { return m_AppInfo; }
 

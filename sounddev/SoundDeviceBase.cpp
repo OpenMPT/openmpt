@@ -20,8 +20,9 @@ OPENMPT_NAMESPACE_BEGIN
 namespace SoundDevice {
 	
 	
-Base::Base(SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
-	: m_Source(nullptr)
+Base::Base(mpt::log::ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
+	: m_Logger(logger)
+	, m_Source(nullptr)
 	, m_MessageReceiver(nullptr)
 	, m_Info(info)
 	, m_SysInfo(sysInfo)
@@ -110,7 +111,7 @@ uint64 Base::SourceGetReferenceClockNowNanoseconds() const
 		return 0;
 	}
 	uint64 result = m_Source->SoundSourceGetReferenceClockNowNanoseconds();
-	//MPT_LOG_GLOBAL(LogDebug, "sounddev", MPT_UFORMAT("clock: {}")(result));
+	//MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT("clock: {}")(result));
 	return result;
 }
 
@@ -123,7 +124,7 @@ uint64 Base::SourceLockedGetReferenceClockNowNanoseconds() const
 		return 0;
 	}
 	uint64 result = m_Source->SoundSourceLockedGetReferenceClockNowNanoseconds();
-	//MPT_LOG_GLOBAL(LogDebug, "sounddev", MPT_UFORMAT("clock-rt: {}")(result));
+	//MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT("clock-rt: {}")(result));
 	return result;
 }
 
@@ -302,7 +303,7 @@ void Base::SourceLockedAudioReadDone()
 void Base::SendDeviceMessage(LogLevel level, const mpt::ustring &str)
 {
 	MPT_TRACE_SCOPE();
-	MPT_LOG_GLOBAL(level, "sounddev", str);
+	MPT_LOG(GetLogger(), level, "sounddev", str);
 	if(m_MessageReceiver)
 	{
 		m_MessageReceiver->SoundDeviceMessage(level, str);

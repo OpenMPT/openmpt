@@ -69,9 +69,9 @@ struct CompareInfo
 
 
 template <typename Tdevice>
-void Manager::EnumerateDevices(SoundDevice::SysInfo sysInfo)
+void Manager::EnumerateDevices(mpt::log::ILogger &logger, SoundDevice::SysInfo sysInfo)
 {
-	const auto infos = Tdevice::EnumerateDevices(sysInfo);
+	const auto infos = Tdevice::EnumerateDevices(logger, sysInfo);
 	mpt::append(m_SoundDevices, infos);
 	for(const auto &info : infos)
 	{
@@ -85,9 +85,9 @@ void Manager::EnumerateDevices(SoundDevice::SysInfo sysInfo)
 
 
 template <typename Tdevice>
-SoundDevice::IBase* Manager::ConstructSoundDevice(const SoundDevice::Info &info, SoundDevice::SysInfo sysInfo)
+SoundDevice::IBase* Manager::ConstructSoundDevice(mpt::log::ILogger &logger, const SoundDevice::Info &info, SoundDevice::SysInfo sysInfo)
 {
-	return new Tdevice(info, sysInfo);
+	return new Tdevice(logger, info, sysInfo);
 }
 
 
@@ -112,7 +112,7 @@ void Manager::ReEnumerate()
 	if(IsComponentAvailable(m_Pulseaudio))
 #endif // MODPLUG_TRACKER
 	{
-		EnumerateDevices<Pulseaudio>(GetSysInfo());
+		EnumerateDevices<Pulseaudio>(GetLogger(), GetSysInfo());
 	}
 #endif // MPT_WITH_PULSEAUDIO
 #endif // MPT_ENABLE_PULSEAUDIO_FULL
@@ -122,7 +122,7 @@ void Manager::ReEnumerate()
 	if(IsComponentAvailable(m_PulseaudioSimple))
 #endif // MODPLUG_TRACKER
 	{
-		EnumerateDevices<PulseaudioSimple>(GetSysInfo());
+		EnumerateDevices<PulseaudioSimple>(GetLogger(), GetSysInfo());
 	}
 #endif // MPT_WITH_PULSEAUDIO && MPT_WITH_PULSEAUDIOSIMPLE
 
@@ -131,7 +131,7 @@ void Manager::ReEnumerate()
 	if(IsComponentAvailable(m_WaveOut))
 #endif // MODPLUG_TRACKER
 	{
-		EnumerateDevices<CWaveDevice>(GetSysInfo());
+		EnumerateDevices<CWaveDevice>(GetLogger(), GetSysInfo());
 	}
 #endif // MPT_OS_WINDOWS
 
@@ -141,7 +141,7 @@ void Manager::ReEnumerate()
 	if(IsComponentAvailable(m_DirectSound))
 #endif // MODPLUG_TRACKER
 	{
-		EnumerateDevices<CDSoundDevice>(GetSysInfo());
+		EnumerateDevices<CDSoundDevice>(GetLogger(), GetSysInfo());
 	}
 #endif // MPT_WITH_DIRECTSOUND
 
@@ -150,7 +150,7 @@ void Manager::ReEnumerate()
 	if(IsComponentAvailable(m_ASIO))
 #endif // MODPLUG_TRACKER
 	{
-		EnumerateDevices<CASIODevice>(GetSysInfo());
+		EnumerateDevices<CASIODevice>(GetLogger(), GetSysInfo());
 	}
 #endif // MPT_WITH_ASIO
 
@@ -159,7 +159,7 @@ void Manager::ReEnumerate()
 	if(IsComponentAvailable(m_PortAudio))
 #endif // MODPLUG_TRACKER
 	{
-		EnumerateDevices<CPortaudioDevice>(GetSysInfo());
+		EnumerateDevices<CPortaudioDevice>(GetLogger(), GetSysInfo());
 	}
 #endif // MPT_WITH_PORTAUDIO
 
@@ -168,13 +168,13 @@ void Manager::ReEnumerate()
 	if(IsComponentAvailable(m_RtAudio))
 #endif // MODPLUG_TRACKER
 	{
-		EnumerateDevices<CRtAudioDevice>(GetSysInfo());
+		EnumerateDevices<CRtAudioDevice>(GetLogger(), GetSysInfo());
 	}
 #endif // MPT_WITH_RTAUDIO
 
 #ifndef MPT_BUILD_WINESUPPORT
 	{
-		EnumerateDevices<SoundDeviceStub>(GetSysInfo());
+		EnumerateDevices<SoundDeviceStub>(GetLogger(), GetSysInfo());
 	}
 #endif // !MPT_BUILD_WINESUPPORT
 
@@ -272,17 +272,17 @@ void Manager::ReEnumerate()
 	}
 	std::stable_sort(m_SoundDevices.begin(), m_SoundDevices.end(), CompareInfo());
 
-	MPT_LOG_GLOBAL(LogDebug, "sounddev", MPT_UFORMAT("Sound Devices enumerated:")());
+	MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT("Sound Devices enumerated:")());
 	for(const auto &device : m_SoundDevices)
 	{
-		MPT_LOG_GLOBAL(LogDebug, "sounddev", MPT_UFORMAT(" Identifier : {}")(device.GetIdentifier()));
-		MPT_LOG_GLOBAL(LogDebug, "sounddev", MPT_UFORMAT("  Type      : {}")(device.type));
-		MPT_LOG_GLOBAL(LogDebug, "sounddev", MPT_UFORMAT("  InternalID: {}")(device.internalID));
-		MPT_LOG_GLOBAL(LogDebug, "sounddev", MPT_UFORMAT("  API Name  : {}")(device.apiName));
-		MPT_LOG_GLOBAL(LogDebug, "sounddev", MPT_UFORMAT("  Name      : {}")(device.name));
+		MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT(" Identifier : {}")(device.GetIdentifier()));
+		MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT("  Type      : {}")(device.type));
+		MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT("  InternalID: {}")(device.internalID));
+		MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT("  API Name  : {}")(device.apiName));
+		MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT("  Name      : {}")(device.name));
 		for(const auto &extra : device.extraData)
 		{
-			MPT_LOG_GLOBAL(LogDebug, "sounddev", MPT_UFORMAT("  Extra Data: {} = {}")(extra.first, extra.second));
+			MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT("  Extra Data: {} = {}")(extra.first, extra.second));
 		}
 	}
 	
@@ -460,7 +460,7 @@ SoundDevice::IBase * Manager::CreateSoundDevice(SoundDevice::Identifier identifi
 	{
 		return nullptr;
 	}
-	SoundDevice::IBase *result = m_DeviceFactoryMethods[identifier](info, GetSysInfo());
+	SoundDevice::IBase *result = m_DeviceFactoryMethods[identifier](GetLogger(), info, GetSysInfo());
 	if(!result)
 	{
 		return nullptr;
@@ -476,8 +476,9 @@ SoundDevice::IBase * Manager::CreateSoundDevice(SoundDevice::Identifier identifi
 }
 
 
-Manager::Manager(SoundDevice::SysInfo sysInfo, SoundDevice::AppInfo appInfo)
-	: m_SysInfo(sysInfo)
+Manager::Manager(mpt::log::ILogger &logger, SoundDevice::SysInfo sysInfo, SoundDevice::AppInfo appInfo)
+	: m_Logger(logger)
+	, m_SysInfo(sysInfo)
 	, m_AppInfo(appInfo)
 {
 	ReEnumerate();

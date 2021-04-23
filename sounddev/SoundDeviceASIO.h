@@ -173,7 +173,7 @@ protected:
 
 public:
 
-	CASIODevice(SoundDevice::Info info, SoundDevice::SysInfo sysInfo);
+	CASIODevice(mpt::log::ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo);
 	~CASIODevice();
 
 private:
@@ -211,7 +211,7 @@ public:
 
 public:
 	
-	static std::vector<SoundDevice::Info> EnumerateDevices(SoundDevice::SysInfo sysInfo);
+	static std::vector<SoundDevice::Info> EnumerateDevices(mpt::log::ILogger &logger, SoundDevice::SysInfo sysInfo);
 
 protected:
 

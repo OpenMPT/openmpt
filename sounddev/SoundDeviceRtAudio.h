@@ -59,7 +59,7 @@ protected:
 
 public:
 
-	CRtAudioDevice(SoundDevice::Info info, SoundDevice::SysInfo sysInfo);
+	CRtAudioDevice(mpt::log::ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo);
 	~CRtAudioDevice();
 
 public:
@@ -90,7 +90,7 @@ private:
 
 public:
 
-	static std::vector<SoundDevice::Info> EnumerateDevices(SoundDevice::SysInfo sysInfo);
+	static std::vector<SoundDevice::Info> EnumerateDevices(mpt::log::ILogger &logger, SoundDevice::SysInfo sysInfo);
 
 };
 

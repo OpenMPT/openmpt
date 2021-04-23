@@ -58,13 +58,14 @@ static SoundDevice::Info RemoveTypePrefix(SoundDevice::Info info)
 }
 
 
-std::vector<SoundDevice::Info> SoundDeviceStub::EnumerateDevices(SoundDevice::SysInfo sysInfo)
+std::vector<SoundDevice::Info> SoundDeviceStub::EnumerateDevices(mpt::log::ILogger &logger, SoundDevice::SysInfo sysInfo)
 {
 	ComponentHandle<ComponentWineWrapper> WineWrapper;
 	if(!IsComponentAvailable(WineWrapper))
 	{
 		return std::vector<SoundDevice::Info>();
 	}
+	MPT_UNREFERENCED_PARAMETER(logger);
 	MPT_UNREFERENCED_PARAMETER(sysInfo); // we do not want to pass this to the native layer because it would actually be totally wrong
 	std::vector<SoundDevice::Info> result = json_cast<std::vector<SoundDevice::Info> >(WineWrapper->SoundDevice_EnumerateDevices());
 	for(auto &info : result)
@@ -74,9 +75,10 @@ std::vector<SoundDevice::Info> SoundDeviceStub::EnumerateDevices(SoundDevice::Sy
 	return result;
 }
 
-SoundDeviceStub::SoundDeviceStub(SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
+SoundDeviceStub::SoundDeviceStub(mpt::log::ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
 	: impl(nullptr)
 {
+	MPT_UNREFERENCED_PARAMETER(logger);
 	MPT_UNREFERENCED_PARAMETER(sysInfo); // we do not want to pass this to the native layer because it would actually be totally wrong
 	info = RemoveTypePrefix(info);
 	impl = w->OpenMPT_Wine_Wrapper_SoundDevice_Construct(json_cast<std::string>(info).c_str());

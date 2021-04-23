@@ -55,7 +55,7 @@ protected:
 
 public:
 
-	CPortaudioDevice(SoundDevice::Info info, SoundDevice::SysInfo sysInfo);
+	CPortaudioDevice(mpt::log::ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo);
 	~CPortaudioDevice();
 
 public:
@@ -92,7 +92,7 @@ public:
 		void *userData
 		);
 
-	static std::vector<SoundDevice::Info> EnumerateDevices(SoundDevice::SysInfo sysInfo);
+	static std::vector<SoundDevice::Info> EnumerateDevices(mpt::log::ILogger &logger, SoundDevice::SysInfo sysInfo);
 
 private:
 

@@ -58,9 +58,9 @@ class Pulseaudio
 private:
 	static mpt::ustring PulseErrorString(int error);
 public:
-	static std::vector<SoundDevice::Info> EnumerateDevices(SoundDevice::SysInfo sysInfo);
+	static std::vector<SoundDevice::Info> EnumerateDevices(mpt::log::ILogger &logger, SoundDevice::SysInfo sysInfo);
 public:
-	Pulseaudio(SoundDevice::Info info, SoundDevice::SysInfo sysInfo);
+	Pulseaudio(mpt::log::ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo);
 	SoundDevice::Caps InternalGetDeviceCaps();
 	SoundDevice::DynamicCaps GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates);
 	bool InternalIsOpen() const;

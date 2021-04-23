@@ -103,7 +103,7 @@ protected:
 	void SetWakeupEvent(HANDLE ev);
 	void SetWakeupInterval(double seconds);
 public:
-	CSoundDeviceWithThread(SoundDevice::Info info, SoundDevice::SysInfo sysInfo);
+	CSoundDeviceWithThread(mpt::log::ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo);
 	virtual ~CSoundDeviceWithThread();
 	bool InternalStart();
 	void InternalStop();

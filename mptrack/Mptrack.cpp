@@ -1005,7 +1005,7 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 	appInfo.BoostedThreadRtprioPosix = TrackerSettings::Instance().SoundBoostedThreadRtprioPosix;
 	appInfo.MaskDriverCrashes = TrackerSettings::Instance().SoundMaskDriverCrashes;
 	appInfo.AllowDeferredProcessing = TrackerSettings::Instance().SoundAllowDeferredProcessing;
-	m_pSoundDevicesManager = new SoundDevice::Manager(sysInfo, appInfo);
+	m_pSoundDevicesManager = new SoundDevice::Manager(m_GlobalLogger, sysInfo, appInfo);
 	m_pTrackerSettings->MigrateOldSoundDeviceSettings(*m_pSoundDevicesManager);
 
 	// Set default note names

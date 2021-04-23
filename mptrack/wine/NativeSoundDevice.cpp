@@ -38,10 +38,11 @@ class ComponentSoundDeviceManager
 {
 	MPT_DECLARE_COMPONENT_MEMBERS(ComponentSoundDeviceManager, "SoundDeviceManager")
 private:
+	mpt::log::GlobalLogger logger;
 	SoundDevice::Manager manager;
 public:
 	ComponentSoundDeviceManager()
-		: manager(SoundDevice::SysInfo::Current(), SoundDevice::AppInfo())
+		: manager(logger, SoundDevice::SysInfo::Current(), SoundDevice::AppInfo())
 	{
 		return;
 	}

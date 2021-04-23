@@ -56,7 +56,7 @@ protected:
 	std::atomic<uint32> m_StatisticPeriodFrames;
 
 public:
-	CDSoundDevice(SoundDevice::Info info, SoundDevice::SysInfo sysInfo);
+	CDSoundDevice(mpt::log::ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo);
 	~CDSoundDevice();
 
 public:
@@ -72,7 +72,7 @@ public:
 	SoundDevice::DynamicCaps GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates);
 
 public:
-	static std::vector<SoundDevice::Info> EnumerateDevices(SoundDevice::SysInfo sysInfo);
+	static std::vector<SoundDevice::Info> EnumerateDevices(mpt::log::ILogger &logger, SoundDevice::SysInfo sysInfo);
 };
 
 #endif // MPT_WITH_DIRECTSOUND

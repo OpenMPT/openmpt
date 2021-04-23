@@ -43,8 +43,8 @@ static inline LONG* interlocked_access(DWORD* p)
 }
 
 
-CWaveDevice::CWaveDevice(SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
-	: CSoundDeviceWithThread(info, sysInfo)
+CWaveDevice::CWaveDevice(mpt::log::ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
+	: CSoundDeviceWithThread(logger, info, sysInfo)
 	, m_DriverBugs(0)
 {
 	MPT_TRACE_SCOPE();
@@ -592,8 +592,9 @@ SoundDevice::Statistics CWaveDevice::GetStatistics() const
 }
 
 
-std::vector<SoundDevice::Info> CWaveDevice::EnumerateDevices(SoundDevice::SysInfo sysInfo)
+std::vector<SoundDevice::Info> CWaveDevice::EnumerateDevices(mpt::log::ILogger &logger, SoundDevice::SysInfo sysInfo)
 {
+	auto GetLogger = [&]() -> mpt::log::ILogger& { return logger; };
 	MPT_TRACE_SCOPE();
 	std::vector<SoundDevice::Info> devices;
 	UINT numDevs = waveOutGetNumDevs();

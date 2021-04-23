@@ -72,9 +72,10 @@ mpt::ustring GetDirectSoundDefaultDeviceIdentifier_1_25_00_04()
 
 namespace
 {
-struct DevicesAndSysInfo
+struct DevicesAndLoggerAndSysInfo
 {
 	std::vector<SoundDevice::Info> devices;
+	mpt::log::ILogger *logger;
 	SoundDevice::SysInfo sysInfo;
 };
 }
@@ -82,9 +83,11 @@ struct DevicesAndSysInfo
 
 static BOOL WINAPI DSEnumCallback(GUID * lpGuid, LPCTSTR lpstrDescription, LPCTSTR lpstrDriver, LPVOID lpContext)
 {
-	DevicesAndSysInfo &devicesAndSysInfo = *(DevicesAndSysInfo*)lpContext;
-	std::vector<SoundDevice::Info> &devices = devicesAndSysInfo.devices;
-	SoundDevice::SysInfo &sysInfo = devicesAndSysInfo.sysInfo;
+	DevicesAndLoggerAndSysInfo &devicesAndLoggerAndSysInfo = *(DevicesAndSysInfo*)lpContext;
+	std::vector<SoundDevice::Info> &devices = devicesAndLoggerAndSysInfo.devices;
+	mpt::log::ILogger &logger = *devicesAndLoggerAndSysInfo.logger;
+	SoundDevice::SysInfo &sysInfo = devicesAndLoggerAndSysInfo.sysInfo;
+	auto GetLogger = [&]() -> mpt::log::ILogger& { return logger; };
 	if(!lpstrDescription)
 	{
 		return TRUE;
@@ -119,16 +122,16 @@ static BOOL WINAPI DSEnumCallback(GUID * lpGuid, LPCTSTR lpstrDescription, LPCTS
 }
 
 
-std::vector<SoundDevice::Info> CDSoundDevice::EnumerateDevices(SoundDevice::SysInfo sysInfo)
+std::vector<SoundDevice::Info> CDSoundDevice::EnumerateDevices(mpt::log::ILogger &logger, SoundDevice::SysInfo sysInfo)
 {
-	DevicesAndSysInfo devicesAndSysInfo = { std::vector<SoundDevice::Info>(), sysInfo };
-	DirectSoundEnumerate(DSEnumCallback, &devicesAndSysInfo);
-	return devicesAndSysInfo.devices;
+	DevicesAndLoggerAndSysInfo devicesAndLoggerAndSysInfo = { std::vector<SoundDevice::Info>(), &logger, sysInfo };
+	DirectSoundEnumerate(DSEnumCallback, &devicesAndLoggerAndSysInfo);
+	return devicesAndLoggerAndSysInfo.devices;
 }
 
 
-CDSoundDevice::CDSoundDevice(SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
-	: CSoundDeviceWithThread(info, sysInfo)
+CDSoundDevice::CDSoundDevice(mpt::log::ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
+	: CSoundDeviceWithThread(logger, info, sysInfo)
 	, m_piDS(NULL)
 	, m_pPrimary(NULL)
 	, m_pMixBuffer(NULL)

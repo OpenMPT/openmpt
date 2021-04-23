@@ -50,6 +50,10 @@ private:
 		}
 	};
 
+protected:
+
+	mpt::log::ILogger &m_Logger;
+
 private:
 
 	SoundDevice::ISource *m_Source;
@@ -83,6 +87,7 @@ private:
 
 public:
 
+	mpt::log::ILogger &GetLogger() const { return m_Logger; }
 	SoundDevice::SysInfo GetSysInfo() const { return m_SysInfo; }
 	SoundDevice::AppInfo GetAppInfo() const { return m_AppInfo; }
 
@@ -147,7 +152,7 @@ protected:
 
 protected:
 
-	Base(SoundDevice::Info info, SoundDevice::SysInfo sysInfo);
+	Base(mpt::log::ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo);
 
 public:
 

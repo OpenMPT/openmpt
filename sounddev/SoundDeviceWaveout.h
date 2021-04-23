@@ -72,7 +72,7 @@ protected:
 	std::atomic<uint32> m_DriverBugs;
 
 public:
-	CWaveDevice(SoundDevice::Info info, SoundDevice::SysInfo sysInfo);
+	CWaveDevice(mpt::log::ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo);
 	~CWaveDevice();
 
 public:
@@ -102,7 +102,7 @@ private:
 	
 public:
 	static void CALLBACK WaveOutCallBack(HWAVEOUT, UINT uMsg, DWORD_PTR, DWORD_PTR dw1, DWORD_PTR dw2);
-	static std::vector<SoundDevice::Info> EnumerateDevices(SoundDevice::SysInfo sysInfo);
+	static std::vector<SoundDevice::Info> EnumerateDevices(mpt::log::ILogger &logger, SoundDevice::SysInfo sysInfo);
 };
 
 #endif // MPT_OS_WINDOWS

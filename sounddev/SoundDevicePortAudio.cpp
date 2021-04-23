@@ -37,15 +37,15 @@ namespace SoundDevice {
 #ifdef MPT_WITH_PORTAUDIO
 
 #ifdef MPT_ALL_LOGGING
-#define PALOG(x) MPT_LOG_GLOBAL(LogDebug, "PortAudio", x)
+#define PALOG(x) MPT_LOG(GetLogger(), LogDebug, "PortAudio", x)
 #else
 #define PALOG(x) do { } while(0)
 #endif
 
 
 
-CPortaudioDevice::CPortaudioDevice(SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
-	: SoundDevice::Base(info, sysInfo)
+CPortaudioDevice::CPortaudioDevice(mpt::log::ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
+	: SoundDevice::Base(logger, info, sysInfo)
 	, m_StatisticPeriodFrames(0)
 {
 	mpt::ustring internalID = GetDeviceInternalID();
@@ -729,8 +729,9 @@ int CPortaudioDevice::StreamCallbackWrapper(
 }
 
 
-std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(SoundDevice::SysInfo sysInfo)
+std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(mpt::log::ILogger &logger, SoundDevice::SysInfo sysInfo)
 {
+	auto GetLogger = [&]() -> mpt::log::ILogger& { return logger; };
 	std::vector<SoundDevice::Info> devices;
 	for(PaDeviceIndex dev = 0; dev < Pa_GetDeviceCount(); ++dev)
 	{
