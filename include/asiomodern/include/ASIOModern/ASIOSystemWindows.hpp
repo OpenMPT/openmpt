@@ -152,7 +152,7 @@ inline std::vector<DriverInfo> EnumerateDrivers() {
 		if (CheckLRESULTOutOfMemory(RegQueryValueEx(hkDriver, TEXT("CLSID"), NULL, &typeClsid, reinterpret_cast<LPBYTE>(bufClsid.data()), &lenClsid)) != ERROR_SUCCESS) {
 			continue;
 		}
-		std::basic_string<TCHAR> strClsid(bufClsid.data(), bufClsid.data() + (lenClsid / sizeof(TCHAR)));
+		std::basic_string<TCHAR> strClsid = std::basic_string<TCHAR>(bufClsid.data(), bufClsid.data() + (lenClsid / sizeof(TCHAR))).c_str();
 		std::vector<OLECHAR>     oleClsid(strClsid.c_str(), strClsid.c_str() + strClsid.length() + 1);
 		CLSID                    clsid = CLSID();
 		if (CheckHRESULTOutOfMemory(CLSIDFromString(oleClsid.data(), &clsid)) != NOERROR) {
@@ -163,14 +163,14 @@ inline std::vector<DriverInfo> EnumerateDrivers() {
 		DWORD                    typeName = REG_SZ;
 		std::basic_string<TCHAR> name;
 		if (CheckLRESULTOutOfMemory(RegQueryValueEx(hkDriver, TEXT(""), NULL, &typeName, reinterpret_cast<LPBYTE>(bufName.data()), &lenName)) == ERROR_SUCCESS) {
-			name = std::basic_string<TCHAR>(bufName.data(), bufName.data() + (lenName / sizeof(TCHAR)));
+			name = std::basic_string<TCHAR>(bufName.data(), bufName.data() + (lenName / sizeof(TCHAR))).c_str();
 		}
 		std::vector<TCHAR>       bufDesc(static_cast<std::size_t>(maxValueLen) + 1);
 		DWORD                    lenDesc  = static_cast<DWORD>(bufDesc.size()) * sizeof(TCHAR);
 		DWORD                    typeDesc = REG_SZ;
 		std::basic_string<TCHAR> desc;
 		if (CheckLRESULTOutOfMemory(RegQueryValueEx(hkDriver, TEXT("Description"), NULL, &typeDesc, reinterpret_cast<LPBYTE>(bufDesc.data()), &lenDesc)) == ERROR_SUCCESS) {
-			desc = std::basic_string<TCHAR>(bufDesc.data(), bufDesc.data() + (lenDesc / sizeof(TCHAR)));
+			desc = std::basic_string<TCHAR>(bufDesc.data(), bufDesc.data() + (lenDesc / sizeof(TCHAR))).c_str();
 		}
 		DriverInfo info;
 		info.Key         = key;
