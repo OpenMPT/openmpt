@@ -157,15 +157,15 @@ public:
 	GlobalLogger() = default;
 	~GlobalLogger() final = default;
 public:
-	bool IsLevelActive(LogLevel level) const noexcept final
+	bool IsLevelActive(LogLevel level) const noexcept override
 	{
 		return (mpt::log::GlobalLogLevel >= level);
 	}
-	bool IsFacilityActive(const char *facility) const noexcept final
+	bool IsFacilityActive(const char *facility) const noexcept override
 	{
 		return mpt::log::IsFacilityActive(facility);
 	}
-	void SendLogMessage(const mpt::source_location &loc, LogLevel level, const char *facility, const mpt::ustring &message) const final;
+	void SendLogMessage(const mpt::source_location &loc, LogLevel level, const char *facility, const mpt::ustring &message) const override;
 };
 
 
