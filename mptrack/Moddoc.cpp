@@ -486,7 +486,8 @@ BOOL CModDoc::DoSave(const mpt::PathString &filename, bool setPath)
 	if(OnSaveDocument(saveFileName, setPath))
 	{
 		SetModified(false);
-		m_bHasValidPath=true;
+		m_SndFile.m_SongFlags.reset(SONG_IMPORTED);
+		m_bHasValidPath = true;
 		m_ShowSavedialog = false;
 		CMainFrame::GetMainFrame()->UpdateTree(this, GeneralHint().General()); // Update treeview (e.g. filename might have changed)
 		return TRUE;
