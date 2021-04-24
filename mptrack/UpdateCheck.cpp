@@ -252,6 +252,7 @@ std::string CUpdateCheck::GetStatisticsDataV3(const Settings &settings)
 	j["OpenMPT"]["BuildVariant"] = BuildVariants().GuessCurrentBuildName();
 	j["OpenMPT"]["Architecture"] = mpt::Windows::Name(mpt::Windows::GetProcessArchitecture());
 	j["Update"]["PeriodDays"] = settings.periodDays;
+	j["Update"]["Channel"] = ((settings.channel == UpdateChannelRelease) ? U_("Release") : (settings.channel == UpdateChannelNext) ? U_("Next") : (settings.channel == UpdateChannelDevelopment) ? U_("Development") : U_(""));
 	j["System"]["Windows"]["Version"]["Name"] = mpt::Windows::Version::Current().GetName();
 	j["System"]["Windows"]["Version"]["Major"] = mpt::Windows::Version::Current().GetSystem().Major;
 	j["System"]["Windows"]["Version"]["Minor"] = mpt::Windows::Version::Current().GetSystem().Minor;
