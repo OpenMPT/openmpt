@@ -230,4 +230,17 @@ std::string getenv(const std::string &env_var, const std::string &def = std::str
 #endif // MODPLUG_TRACKER || (LIBOPENMPT_BUILD && LIBOPENMPT_BUILD_TEST)
 
 
+#if MPT_OS_WINDOWS
+
+template <typename Tchar, typename Tbuf>
+std::basic_string<Tchar> ParseMaybeNullTerminatedStringFromBufferWithSizeInBytes(const Tbuf *buf, DWORD sizeBytes)
+{
+	// REG_SZ may contain a single NUL terminator, multiple NUL terminators, or no NUL terminator at all
+	return std::basic_string<Tchar>(reinterpret_cast<const Tchar*>(buf), reinterpret_cast<const Tchar*>(buf) + (sizeBytes / sizeof(Tchar))).c_str();
+}
+
+
+#endif // MPT_OS_WINDOWS
+
+
 OPENMPT_NAMESPACE_END
