@@ -811,9 +811,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 				break;
 			case 0x51: // Tempo
 				{
-					uint8 tempoRaw[3];
-					chunk.ReadArray(tempoRaw);
-					uint32 tempoInt = (tempoRaw[0] << 16) | (tempoRaw[1] << 8) | tempoRaw[2];
+					uint32 tempoInt = chunk.ReadUint24BE();
 					if(tempoInt == 0)
 						break;
 					TEMPO newTempo(60000000.0 / tempoInt);

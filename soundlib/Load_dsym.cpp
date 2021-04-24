@@ -47,7 +47,7 @@ static std::vector<std::byte> DecompressDSymLZW(FileReader &file, uint32 size)
 	BitReader bitFile(file);
 	const auto startPos = bitFile.GetPosition();
 
-	// In the best case, 9 bits decode 8192 bytes, a ratio of approximately 1:7282.
+	// In the best case, 13 bits decode 8192 bytes, a ratio of approximately 1:5042.
 	// Too much for reserving memory in case of malformed files, just choose an arbitrary but realistic upper limit.
 	std::vector<std::byte> output;
 	output.reserve(std::min(size, std::min(mpt::saturate_cast<uint32>(file.BytesLeft()), Util::MaxValueOfType(size) / 50u) * 50u));
@@ -185,13 +185,6 @@ static std::vector<std::byte> DecompressDSymSigmaDelta(FileReader &file, uint32 
 }
 
 
-static uint32 ReadDSym24Bit(FileReader &file)
-{
-	const auto val = file.ReadArray<uint8, 3>();
-	return (val[0] << 1) | (val[1] << 9) | (val[2] << 17);
-}
-
-
 CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderDSym(MemoryFileReader file, const uint64 *pfilesize)
 {
 	DSymFileHeader fileHeader;
@@ -233,7 +226,7 @@ bool CSoundFile::ReadDSym(FileReader &file, ModLoadingFlags loadFlags)
 		Samples[smp].Initialize(MOD_TYPE_MOD);
 		sampleNameLength[smp] = file.ReadUint8();
 		if(!(sampleNameLength[smp] & 0x80))
-			Samples[smp].nLength = ReadDSym24Bit(file);
+			Samples[smp].nLength = file.ReadUint24LE() << 1;
 	}
 
 	file.ReadSizedString<uint8le, mpt::String::spacePadded>(m_songName);
@@ -468,8 +461,8 @@ bool CSoundFile::ReadDSym(FileReader &file, ModLoadingFlags loadFlags)
 			continue;
 
 		ModSample &mptSmp = Samples[smp];
-		mptSmp.nSustainStart = ReadDSym24Bit(file);
-		if(const auto loopLen = ReadDSym24Bit(file); loopLen > 2)
+		mptSmp.nSustainStart = file.ReadUint24LE() << 1;
+		if(const auto loopLen = file.ReadUint24LE() << 1; loopLen > 2)
 		{
 			mptSmp.nSustainEnd = mptSmp.nSustainStart + loopLen;
 			mptSmp.uFlags.set(CHN_SUSTAINLOOP);

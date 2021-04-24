@@ -185,11 +185,9 @@ bool UnpackPP20(std::vector<ContainerItem> &containerItems, FileReader &file, Co
 		return false;
 
 	file.Seek(length - 4);
-	uint32 dstLen = 0;
-	dstLen |= file.ReadUint8() << 16;
-	dstLen |= file.ReadUint8() << 8;
-	dstLen |= file.ReadUint8() << 0;
-	if(dstLen == 0) return false;
+	uint32 dstLen = file.ReadUint24BE();
+	if(dstLen == 0)
+		return false;
 	try
 	{
 		unpackedData.resize(dstLen);

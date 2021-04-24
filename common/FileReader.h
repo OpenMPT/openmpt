@@ -126,6 +126,68 @@ namespace FileReader
 		return true;
 	}
 
+	// Read an array of binary-safe T values.
+	// If successful, the file cursor is advanced by the size of the array.
+	// Otherwise, the target is zeroed.
+	template <typename T, std::size_t destSize, typename TFileCursor>
+	bool ReadArray(TFileCursor &f, T (&destArray)[destSize])
+	{
+		static_assert(mpt::is_binary_safe<T>::value);
+		if(f.CanRead(sizeof(destArray)))
+		{
+			f.ReadRaw(mpt::as_raw_memory(destArray));
+			return true;
+		} else
+		{
+			Clear(destArray);
+			return false;
+		}
+	}
+
+	// Read an array of binary-safe T values.
+	// If successful, the file cursor is advanced by the size of the array.
+	// Otherwise, the target is zeroed.
+	template <typename T, std::size_t destSize, typename TFileCursor>
+	bool ReadArray(TFileCursor &f, std::array<T, destSize> &destArray)
+	{
+		static_assert(mpt::is_binary_safe<T>::value);
+		if(f.CanRead(sizeof(destArray)))
+		{
+			f.ReadRaw(mpt::as_raw_memory(destArray));
+			return true;
+		} else
+		{
+			destArray.fill(T{});
+			return false;
+		}
+	}
+
+	// Read destSize elements of binary-safe type T into a vector.
+	// If successful, the file cursor is advanced by the size of the vector.
+	// Otherwise, the vector is resized to destSize, but possibly existing contents are not cleared.
+	template <typename T, typename TFileCursor>
+	bool ReadVector(TFileCursor &f, std::vector<T> &destVector, size_t destSize)
+	{
+		static_assert(mpt::is_binary_safe<T>::value);
+		destVector.resize(destSize);
+		if(f.CanRead(sizeof(T) * destSize))
+		{
+			f.ReadRaw(mpt::as_raw_memory(destVector));
+			return true;
+		} else
+		{
+			return false;
+		}
+	}
+
+	template <typename T, std::size_t destSize, typename TFileCursor>
+	std::array<T, destSize> ReadArray(TFileCursor &f)
+	{
+		std::array<T, destSize> destArray;
+		ReadArray(f, destArray);
+		return destArray;
+	}
+
 	// Read some kind of integer in little-endian format.
 	// If successful, the file cursor is advanced by the size of the integer.
 	template <typename T, typename TFileCursor>
@@ -249,6 +311,24 @@ namespace FileReader
 	int32 ReadInt32BE(TFileCursor &f)
 	{
 		return ReadIntBE<int32>(f);
+	}
+
+	// Read unsigned 24-Bit integer in little-endian format.
+	// If successful, the file cursor is advanced by the size of the integer.
+	template <typename TFileCursor>
+	uint32 ReadUint24LE(TFileCursor &f)
+	{
+		const auto arr = ReadArray<uint8, 3>(f);
+		return arr[0] | (arr[1] << 8) | (arr[2] << 16);
+	}
+
+	// Read unsigned 24-Bit integer in big-endian format.
+	// If successful, the file cursor is advanced by the size of the integer.
+	template <typename TFileCursor>
+	uint32 ReadUint24BE(TFileCursor &f)
+	{
+		const auto arr = ReadArray<uint8, 3>(f);
+		return (arr[0] << 16) | (arr[1] << 8) | arr[2];
 	}
 
 	// Read unsigned 16-Bit integer in little-endian format.
@@ -571,68 +651,6 @@ namespace FileReader
 			mpt::delete_out_of_memory(e);
 		}
 		return true;
-	}
-
-	// Read an array of binary-safe T values.
-	// If successful, the file cursor is advanced by the size of the array.
-	// Otherwise, the target is zeroed.
-	template<typename T, std::size_t destSize, typename TFileCursor>
-	bool ReadArray(TFileCursor &f, T (&destArray)[destSize])
-	{
-		static_assert(mpt::is_binary_safe<T>::value);
-		if(f.CanRead(sizeof(destArray)))
-		{
-			f.ReadRaw(mpt::as_raw_memory(destArray));
-			return true;
-		} else
-		{
-			Clear(destArray);
-			return false;
-		}
-	}
-
-	// Read an array of binary-safe T values.
-	// If successful, the file cursor is advanced by the size of the array.
-	// Otherwise, the target is zeroed.
-	template<typename T, std::size_t destSize, typename TFileCursor>
-	bool ReadArray(TFileCursor &f, std::array<T, destSize> &destArray)
-	{
-		static_assert(mpt::is_binary_safe<T>::value);
-		if(f.CanRead(sizeof(destArray)))
-		{
-			f.ReadRaw(mpt::as_raw_memory(destArray));
-			return true;
-		} else
-		{
-			destArray.fill(T());
-			return false;
-		}
-	}
-
-	// Read destSize elements of binary-safe type T into a vector.
-	// If successful, the file cursor is advanced by the size of the vector.
-	// Otherwise, the vector is resized to destSize, but possibly existing contents are not cleared.
-	template<typename T, typename TFileCursor>
-	bool ReadVector(TFileCursor &f, std::vector<T> &destVector, size_t destSize)
-	{
-		static_assert(mpt::is_binary_safe<T>::value);
-		destVector.resize(destSize);
-		if(f.CanRead(sizeof(T) * destSize))
-		{
-			f.ReadRaw(mpt::as_raw_memory(destVector));
-			return true;
-		} else
-		{
-			return false;
-		}
-	}
-
-	template <typename T, std::size_t destSize, typename TFileCursor>
-	std::array<T, destSize> ReadArray(TFileCursor &f)
-	{
-		std::array<T, destSize> destArray;
-		ReadArray(f, destArray);
-		return destArray;
 	}
 
 	// Compare a magic string with the current stream position.
@@ -1168,6 +1186,16 @@ public:
 	int32 ReadInt32BE()
 	{
 		return mpt::FileReader::ReadInt32BE(*this);
+	}
+
+	uint32 ReadUint24LE()
+	{
+		return mpt::FileReader::ReadUint24LE(*this);
+	}
+
+	uint32 ReadUint24BE()
+	{
+		return mpt::FileReader::ReadUint24BE(*this);
 	}
 
 	uint16 ReadUint16LE()

@@ -585,9 +585,7 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 	for(uint16 i = 0; i < trackCount; i++)
 	{
 		// Track size is a 24-Bit value describing the number of byte triplets in this track.
-		uint8 trackSize[3];
-		file.ReadArray(trackSize);
-		trackData[i] = file.ReadChunk((trackSize[0] | (trackSize[1] << 8) | (trackSize[2] << 16)) * 3);
+		trackData[i] = file.ReadChunk(file.ReadUint24LE() * 3);
 	}
 
 	if(loadFlags & loadSampleData)
