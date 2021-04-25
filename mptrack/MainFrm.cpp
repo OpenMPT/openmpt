@@ -2470,9 +2470,15 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcPlaySongFromPattern:
 		case kcStopSong:
 		case kcToggleLoopSong:
+		case kcPanic:
 		case kcEstimateSongLength:
 		case kcApproxRealBPM:
-		case kcPanic:
+		case kcTempoIncrease:
+		case kcTempoDecrease:
+		case kcTempoIncreaseFine:
+		case kcTempoDecreaseFine:
+		case kcSpeedIncrease:
+		case kcSpeedDecrease:
 			{
 				CModDoc *modDoc = GetActiveDoc();
 				if (modDoc)

@@ -2546,6 +2546,7 @@ void CModDoc::OnViewTempoSwingSettings()
 
 LRESULT CModDoc::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 {
+	const auto &modSpecs = m_SndFile.GetModSpecifications();
 	switch(wParam)
 	{
 		case kcViewGeneral: OnEditGlobals(); break;
@@ -2581,6 +2582,32 @@ LRESULT CModDoc::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcStopSong: OnPlayerStop(); break;
 		case kcPanic: OnPanic(); break;
 		case kcToggleLoopSong: SetLoopSong(!TrackerSettings::Instance().gbLoopSong); break;
+
+		case kcTempoIncreaseFine:
+			if(!modSpecs.hasFractionalTempo)
+				break;
+			[[fallthrough]];
+		case kcTempoIncrease:
+			if(auto tempo = m_SndFile.m_PlayState.m_nMusicTempo; tempo < modSpecs.GetTempoMax())
+				m_SndFile.m_PlayState.m_nMusicTempo = std::min(modSpecs.GetTempoMax(), tempo + TEMPO(wParam == kcTempoIncrease ? 1.0 : 0.1));
+			break;
+		case kcTempoDecreaseFine:
+			if(!modSpecs.hasFractionalTempo)
+				break;
+			[[fallthrough]];
+		case kcTempoDecrease:
+			if(auto tempo = m_SndFile.m_PlayState.m_nMusicTempo; tempo > modSpecs.GetTempoMin())
+				m_SndFile.m_PlayState.m_nMusicTempo = std::max(modSpecs.GetTempoMin(), tempo - TEMPO(wParam == kcTempoDecrease ? 1.0 : 0.1));
+			break;
+		case kcSpeedIncrease:
+			if(auto speed = m_SndFile.m_PlayState.m_nMusicSpeed; speed < modSpecs.speedMax)
+				m_SndFile.m_PlayState.m_nMusicSpeed = speed + 1;
+			break;
+		case kcSpeedDecrease:
+			if(auto speed = m_SndFile.m_PlayState.m_nMusicSpeed; speed > modSpecs.speedMin)
+				m_SndFile.m_PlayState.m_nMusicSpeed = speed -  1;
+			break;
+
 		default: return kcNull;
 	}
 

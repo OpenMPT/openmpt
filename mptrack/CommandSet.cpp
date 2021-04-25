@@ -737,6 +737,12 @@ static constexpr struct
 	{2015, kcChannelAddAfter, _T("Add Channel After Current") },
 	{2016, kcChannelRemove, _T("Remove Channel") },
 	{2019, kcOrderlistEditInsertSeparator, _T("Insert Separator") },
+	{2020, kcTempoIncrease, _T("Increase Tempo")},
+	{2021, kcTempoDecrease, _T("Decrease Tempo")},
+	{2022, kcTempoIncreaseFine, _T("Increase Tempo (Fine)")},
+	{2023, kcTempoDecreaseFine, _T("Decrease Tempo (Fine)")},
+	{2024, kcSpeedIncrease, _T("Increase Ticks per Row")},
+	{2025, kcSpeedDecrease, _T("Decrease Ticks per Row")},
 };
 
 // Get command descriptions etc.. loaded up.
