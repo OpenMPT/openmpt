@@ -216,7 +216,7 @@ protected:
 
 class CResamplingDlg: public CDialog
 {
-protected:
+public:
 	enum ResamplingOption
 	{
 		Upsample,
@@ -224,15 +224,18 @@ protected:
 		Custom
 	};
 
+protected:
 	ResamplingMode m_srcMode;
 	uint32 m_frequency;
+	bool m_resampleAll;
 	static uint32 lastFrequency;
 	static ResamplingOption lastChoice;
 
 public:
-	CResamplingDlg(CWnd *parent, uint32 frequency, ResamplingMode srcMode) : CDialog(IDD_RESAMPLE, parent), m_srcMode(srcMode), m_frequency(frequency) { };
+	CResamplingDlg(CWnd *parent, uint32 frequency, ResamplingMode srcMode, bool resampleAll) : CDialog(IDD_RESAMPLE, parent), m_srcMode(srcMode), m_frequency(frequency), m_resampleAll(resampleAll) { };
 	uint32 GetFrequency() const { return m_frequency; }
 	ResamplingMode GetFilter() const { return m_srcMode; }
+	static ResamplingOption GetResamplingOption() { return lastChoice; }
 
 protected:
 	BOOL OnInitDialog() override;

@@ -357,28 +357,24 @@ public:
 					double error            = 0.0;
 					for(uint8 chn = 0; chn < numChannels; chn++)
 					{
-						int32 prev = 0;
+						const auto ComputeSampleError = [](auto *v, SmpLength length, uint8 numChannels)
+						{
+							const double factor = 1.0 / (1u << (sizeof(*v) * 8u - 1u));
+							double error        = 0.0;
+							int32 prev          = 0;
+							for(SmpLength i = length; i != 0; i--, v += numChannels)
+							{
+								auto diff = (*v - prev) * factor;
+								error += diff * diff;
+								prev = *v;
+							}
+							return error;
+						};
+
 						if(sample.uFlags[CHN_16BIT])
-						{
-							const double factor = 1.0 / 32768.0;
-							const auto *v       = sample.sample16() + chn;
-							for(SmpLength i = sample.nLength; i != 0; i--, v += numChannels)
-							{
-								auto diff = (*v - prev) * factor;
-								error += diff * diff;
-								prev = *v;
-							}
-						} else
-						{
-							const double factor = 1.0 / 128.0;
-							const auto *v       = sample.sample8() + chn;
-							for(SmpLength i = sample.nLength; i != 0; i--, v += numChannels)
-							{
-								auto diff = (*v - prev) * factor;
-								error += diff * diff;
-								prev = *v;
-							}
-						}
+							error += ComputeSampleError(sample.sample16() + chn, sample.nLength, numChannels);
+						else
+							error += ComputeSampleError(sample.sample8() + chn, sample.nLength, numChannels);
 					}
 					sample.FreeSample();
 
@@ -754,14 +750,24 @@ END_MESSAGE_MAP()
 BOOL CResamplingDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
+	SetWindowText(m_resampleAll ? _T("Resample All") : _T("Resample"));
+
 	CheckRadioButton(IDC_RADIO1, IDC_RADIO3, IDC_RADIO1 + lastChoice);
-	TCHAR s[32];
-	wsprintf(s, _T("&Upsample (%u Hz)"), m_frequency * 2);
-	SetDlgItemText(IDC_RADIO1, s);
-	wsprintf(s, _T("&Downsample (%u Hz)"), m_frequency / 2);
-	SetDlgItemText(IDC_RADIO2, s);
-	
-	if(!lastFrequency) lastFrequency = m_frequency;
+	if(m_frequency > 0)
+	{
+		TCHAR s[32];
+		wsprintf(s, _T("&Upsample (%u Hz)"), m_frequency * 2);
+		SetDlgItemText(IDC_RADIO1, s);
+		wsprintf(s, _T("&Downsample (%u Hz)"), m_frequency / 2);
+		SetDlgItemText(IDC_RADIO2, s);
+
+		if(!lastFrequency)
+			lastFrequency = m_frequency;
+	}
+	if(!lastFrequency)
+		lastFrequency = 48000;
+
+
 	SetDlgItemInt(IDC_EDIT1, lastFrequency, FALSE);
 	CSpinButtonCtrl *spin = static_cast<CSpinButtonCtrl *>(GetDlgItem(IDC_SPIN1));
 	spin->SetRange32(1, 999999);
