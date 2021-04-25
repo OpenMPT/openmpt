@@ -527,14 +527,24 @@ END_MESSAGE_MAP()
 BOOL CResamplingDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
+	SetWindowText(m_resampleAll ? _T("Resample All") : _T("Resample"));
+
 	CheckRadioButton(IDC_RADIO1, IDC_RADIO3, IDC_RADIO1 + lastChoice);
-	TCHAR s[32];
-	wsprintf(s, _T("&Upsample (%u Hz)"), m_frequency * 2);
-	SetDlgItemText(IDC_RADIO1, s);
-	wsprintf(s, _T("&Downsample (%u Hz)"), m_frequency / 2);
-	SetDlgItemText(IDC_RADIO2, s);
-	
-	if(!lastFrequency) lastFrequency = m_frequency;
+	if(m_frequency > 0)
+	{
+		TCHAR s[32];
+		wsprintf(s, _T("&Upsample (%u Hz)"), m_frequency * 2);
+		SetDlgItemText(IDC_RADIO1, s);
+		wsprintf(s, _T("&Downsample (%u Hz)"), m_frequency / 2);
+		SetDlgItemText(IDC_RADIO2, s);
+
+		if(!lastFrequency)
+			lastFrequency = m_frequency;
+	}
+	if(!lastFrequency)
+		lastFrequency = 48000;
+
+
 	SetDlgItemInt(IDC_EDIT1, lastFrequency, FALSE);
 	CSpinButtonCtrl *spin = static_cast<CSpinButtonCtrl *>(GetDlgItem(IDC_SPIN1));
 	spin->SetRange32(1, 999999);

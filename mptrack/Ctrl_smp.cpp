@@ -1822,22 +1822,39 @@ void CCtrlSamples::OnResample()
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
 	if(!sample.HasSampleData() || sample.uFlags[CHN_ADLIB]) return;
 
-	const uint32 oldRate = sample.GetSampleRate(m_sndFile.GetType());
-	CResamplingDlg dlg(this, oldRate, TrackerSettings::Instance().sampleEditorDefaultResampler);
-	if(dlg.DoModal() != IDOK || oldRate == dlg.GetFrequency())
+	SAMPLEINDEX first = m_nSample, last = m_nSample;
+	if(CMainFrame::GetInputHandler()->ShiftPressed())
 	{
-		return;
+		first = 1;
+		last = m_sndFile.GetNumSamples();
 	}
+	
+	const uint32 oldRate = sample.GetSampleRate(m_sndFile.GetType());
+	CResamplingDlg dlg(this, oldRate, TrackerSettings::Instance().sampleEditorDefaultResampler, first != last);
+	if(dlg.DoModal() != IDOK)
+		return;
+	
 	TrackerSettings::Instance().sampleEditorDefaultResampler = dlg.GetFilter();
-	ApplyResample(dlg.GetFrequency(), dlg.GetFilter());
+	for(SAMPLEINDEX smp = first; smp <= last; smp++)
+	{
+		const uint32 sampleFreq = m_sndFile.GetSample(smp).GetSampleRate(m_sndFile.GetType());
+		uint32 newFreq = dlg.GetFrequency();
+		if(dlg.GetResamplingOption() == CResamplingDlg::Upsample)
+			newFreq = sampleFreq * 2;
+		else if(dlg.GetResamplingOption() == CResamplingDlg::Downsample)
+			newFreq = sampleFreq / 2;
+		else if(newFreq == sampleFreq)
+			continue;
+		ApplyResample(smp, newFreq, dlg.GetFilter(), first != last);
+	}
 }
 
 
-void CCtrlSamples::ApplyResample(uint32 newRate, ResamplingMode mode)
+void CCtrlSamples::ApplyResample(SAMPLEINDEX smp, uint32 newRate, ResamplingMode mode, bool ignoreSelection)
 {
 	BeginWaitCursor();
 
-	ModSample &sample = m_sndFile.GetSample(m_nSample);
+	ModSample &sample = m_sndFile.GetSample(smp);
 	if(!sample.HasSampleData() || sample.uFlags[CHN_ADLIB])
 	{
 		EndWaitCursor();
@@ -1846,7 +1863,7 @@ void CCtrlSamples::ApplyResample(uint32 newRate, ResamplingMode mode)
 
 	SampleSelectionPoints selection = GetSelectionPoints();
 	LimitMax(selection.nEnd, sample.nLength);
-	if(selection.nStart >= selection.nEnd)
+	if(selection.nStart >= selection.nEnd || ignoreSelection)
 	{
 		selection.nStart = 0;
 		selection.nEnd = sample.nLength;
@@ -2016,7 +2033,7 @@ void CCtrlSamples::ApplyResample(uint32 newRate, ResamplingMode mode)
 			}
 		}
 
-		PrepareUndo((newRate > oldRate) ? "Upsample" : "Downsample", sundo_replace);
+		m_modDoc.GetSampleUndo().PrepareUndo(smp, sundo_replace, (newRate > oldRate) ? "Upsample" : "Downsample");
 
 		// Adjust loops and cues
 		for(SmpLength &point : SampleEdit::GetCuesAndLoops(sample))
@@ -2043,9 +2060,14 @@ void CCtrlSamples::ApplyResample(uint32 newRate, ResamplingMode mode)
 		// Update loop wrap-around buffer
 		sample.PrecomputeLoops(m_sndFile);
 
-		SetModified(SampleHint().Info().Data(), true, true);
+		auto updateHint = SampleHint(smp).Info().Data();
+		if(sample.uFlags[SMP_KEEPONDISK] && !sample.uFlags[SMP_MODIFIED])
+			updateHint.Names();
+		sample.uFlags.set(SMP_MODIFIED);
+		m_modDoc.SetModified();
+		m_modDoc.UpdateAllViews(nullptr, updateHint, nullptr);
 
-		if(selection.selectionActive)
+		if(selection.selectionActive && !ignoreSelection)
 		{
 			SetSelectionPoints(selection.nStart, newSelEnd);
 		}
@@ -3381,7 +3403,7 @@ LRESULT CCtrlSamples::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 	case kcSampleDownsample:
 		{
 			uint32 oldRate = m_sndFile.GetSample(m_nSample).GetSampleRate(m_sndFile.GetType());
-			ApplyResample(wParam == kcSampleUpsample ? oldRate * 2 : oldRate / 2, TrackerSettings::Instance().sampleEditorDefaultResampler);
+			ApplyResample(m_nSample, wParam == kcSampleUpsample ? oldRate * 2 : oldRate / 2, TrackerSettings::Instance().sampleEditorDefaultResampler);
 		}
 		return wParam;
 	case kcSampleResample:
