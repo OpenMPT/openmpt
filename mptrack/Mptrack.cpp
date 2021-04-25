@@ -318,7 +318,7 @@ void CTrackApp::LoadDefaultDLSBanks()
 			std::vector<TCHAR> filenameT(dwSize / sizeof(TCHAR));
 			if (RegQueryValueEx(key, _T("GMFilePath"), NULL, &dwRegType, reinterpret_cast<LPBYTE>(filenameT.data()), &dwSize) == ERROR_SUCCESS)
 			{
-				std::basic_string<TCHAR> filenamestr = ParseMaybeNullTerminatedStringFromBufferWithSizeInBytes<TCHAR>(filenameT.data(), dwSize);
+				mpt::winstring filenamestr = ParseMaybeNullTerminatedStringFromBufferWithSizeInBytes<mpt::winstring>(filenameT.data(), dwSize);
 				std::vector<TCHAR> filenameExpanded(::ExpandEnvironmentStrings(filenamestr.c_str(), nullptr, 0));
 				::ExpandEnvironmentStrings(filenamestr.c_str(), filenameExpanded.data(), static_cast<DWORD>(filenameExpanded.size()));
 				auto filename = mpt::PathString::FromNative(filenameExpanded.data());
