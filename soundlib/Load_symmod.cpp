@@ -1343,8 +1343,9 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 			break;
 
 		if(seq.start >= positions.size()
-			|| seq.length > positions.size()
-			|| positions.size() - seq.length < seq.start)
+		   || seq.length > positions.size()
+		   || seq.length == 0
+		   || positions.size() - seq.length < seq.start)
 			continue;
 		auto seqPositions = mpt::as_span(positions).subspan(seq.start, seq.length);
 
