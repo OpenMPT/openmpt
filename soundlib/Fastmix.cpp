@@ -362,6 +362,15 @@ void CSoundFile::CreateStereoMix(int count)
 				if (nrampsamples > chn.nRampLength) nrampsamples = chn.nRampLength;
 			}
 
+			if(chn.isPaused)
+			{
+				EndChannelOfs(chn, pbuffer, nsamples);
+				*pOfsR += chn.nROfs;
+				*pOfsL += chn.nLOfs;
+				chn.nROfs = chn.nLOfs = 0;
+				break;
+			}
+
 			if((nSmpCount = mixLoopState.GetSampleCount(chn, nrampsamples, ITPingPongMode)) <= 0)
 			{
 				// Stopping the channel

@@ -896,7 +896,7 @@ static constexpr MPTVolCmdInfo gVolCmdInfo[] =
 	{VOLCMD_TONEPORTAMENTO,	MOD_TYPE_XMITMPT,	_T("Tone portamento")},
 	{VOLCMD_PORTAUP,		MOD_TYPE_ITMPT,		_T("Portamento up")},
 	{VOLCMD_PORTADOWN,		MOD_TYPE_ITMPT,		_T("Portamento down")},
-	{VOLCMD_DELAYCUT,		MOD_TYPE_NONE,		_T("")},
+	{VOLCMD_PLAYCONTROL,	MOD_TYPE_NONE,		_T("Play Control")},
 	{VOLCMD_OFFSET,			MOD_TYPE_MPT,		_T("Sample Cue")},
 };
 
@@ -1022,6 +1022,13 @@ bool EffectInfo::GetVolCmdParamInfo(const ModCommand &m, CString *s) const
 		{
 			*s = _T("continue");
 		}
+		break;
+
+	case VOLCMD_PLAYCONTROL:
+		if(m.vol == 0)
+			*s = _T("Pause Playback");
+		else if(m.vol == 1)
+			*s = _T("Continue Playback");
 		break;
 
 	default:

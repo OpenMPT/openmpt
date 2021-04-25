@@ -1327,8 +1327,10 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 		uint8 curTremolo       = 0;
 		uint8 sampleVibSpeed   = 0;
 		uint8 sampleVibDepth   = 0;
+		uint8 tonePortaAmt     = 0;
 		uint16 sampleVibPhase  = 0;
 		uint16 retriggerRemain = 0;
+		uint16 tonePortaRemain = 0;
 	};
 	std::vector<ChnState> chnStates(m_nChannels);
 
@@ -1431,14 +1433,14 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 								switch(event.param)
 								{
 								case SymEvent::StopSample:
-									m.volcmd = VOLCMD_VOLUME;
+									m.volcmd = VOLCMD_PLAYCONTROL;
 									m.vol = 0;
 									chnState.stopped = true;
 									break;
 
 								case SymEvent::ContSample:
-									m.volcmd = VOLCMD_VOLUME;
-									m.vol = 64;
+									m.volcmd = VOLCMD_PLAYCONTROL;
+									m.vol = 1;
 									chnState.stopped = false;
 									break;
 
@@ -1472,6 +1474,7 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 									m.command = CMD_TONEPORTAMENTO;
 									m.param = 0xFF;
 									chnState.curPitchSlide = 0;
+									chnState.tonePortaRemain = 0;
 									break;
 
 								// fine portamentos with range up to half a semitone
@@ -1509,6 +1512,7 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 										m.note = chnState.lastNote = note;
 										m.instr = chnState.lastInst = mappedInst;
 										chnState.curPitchSlide = 0;
+										chnState.tonePortaRemain = 0;
 									}
 
 									if(event.param > 0)
@@ -1581,14 +1585,24 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 						case SymEvent::PitchSlideUp:
 							chnState.curPitchSlideAmt = 0;
 							chnState.curPitchSlide = event.param * 0.0333f;
+							chnState.tonePortaRemain = 0;
 							break;
 						case SymEvent::PitchSlideDown:
 							chnState.curPitchSlideAmt = 0;
 							chnState.curPitchSlide = event.param * -0.0333f;
+							chnState.tonePortaRemain = 0;
 							break;
 
 						case SymEvent::PitchSlideTo:
-							m.command = m.param = 0;
+							if(note >= 0 && event.param > 0)
+							{
+								const int distance = std::abs((note - chnState.lastNote) * 32);
+								chnState.curPitchSlide = 0;
+								m.note = chnState.lastNote = note;
+								m.command = CMD_TONEPORTAMENTO;
+								chnState.tonePortaAmt = m.param = mpt::saturate_cast<ModCommand::PARAM>(distance / (2 * event.param));
+								chnState.tonePortaRemain = static_cast<uint16>(distance - std::min(distance, chnState.tonePortaAmt * (patternSpeed - 1)));
+							}
 							break;
 						case SymEvent::AddPitch:
 							// "The range (-128...127) is about 4 half notes."
@@ -1608,6 +1622,7 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 							m.note = chnState.lastNote = Clamp(static_cast<uint8>(chnState.lastNote + event.param), NOTE_MIN, NOTE_MAX);
 							m.command = CMD_TONEPORTAMENTO;
 							m.param = 0xFF;
+							chnState.tonePortaRemain = 0;
 							break;
 
 							// DSP effects
@@ -1725,10 +1740,11 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 								m.command = CMD_OFFSETPERCENTAGE;
 								m.param   = mpt::saturate_round<ModCommand::PARAM>(event.param + chnState.fromAdd + sampleVib);
 							}
+							chnState.tonePortaRemain = 0;
 							break;
 						}
 
-						// any event which plays a note should re-enable continuous effects
+						// Any event which plays a note should re-enable continuous effects
 						if(m.note != NOTE_NONE)
 							chnState.stopped = false;
 						else if(chnState.stopped)
@@ -1744,7 +1760,7 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 							}
 						}
 
-						// handle fractional volume slides
+						// Handle fractional volume slides
 						if(chnState.curVolSlide != 0)
 						{
 							chnState.curVolSlideAmt += chnState.curVolSlide * patternSpeed;
@@ -1781,7 +1797,7 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 								}
 							}
 						}
-						// handle fractional pitch slides
+						// Handle fractional pitch slides
 						if(chnState.curPitchSlide != 0)
 						{
 							chnState.curPitchSlideAmt += chnState.curPitchSlide * patternSpeed;
@@ -1835,7 +1851,7 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 								}
 							}
 						}
-						// vibrato and tremolo
+						// Vibrato and Tremolo
 						if(m.command == CMD_NONE && chnState.curVibrato != 0)
 						{
 							m.command = CMD_VIBRATO;
@@ -1845,6 +1861,15 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 						{
 							m.command = CMD_TREMOLO;
 							m.param = chnState.curTremolo;
+						}
+						// Tone Portamento
+						if(m.command != CMD_TONEPORTAMENTO && chnState.tonePortaRemain)
+						{
+							if(m.command == CMD_NONE)
+								m.command = CMD_TONEPORTAMENTO;
+							else
+								m.volcmd = VOLCMD_TONEPORTAMENTO;
+							chnState.tonePortaRemain -= std::min(chnState.tonePortaRemain, static_cast<uint16>(chnState.tonePortaAmt * (patternSpeed - 1)));
 						}
 
 						chnState.sampleVibPhase = (chnState.sampleVibPhase + chnState.sampleVibSpeed * patternSpeed) & 1023;
@@ -1863,7 +1888,7 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 				Patterns[patternIndex].WriteEffect(EffectWriter(CMD_SPEED, static_cast<uint8>(pos.speed)).Row(0).RetryNextRow());
 			}
 			order.insert(order.GetLength(), std::max(pos.loopNum.get(), uint16(1)), patternIndex);
-			// undo transpose tweak
+			// Undo transpose tweak
 			pos.transpose -= seq.transpose;
 		}
 	}

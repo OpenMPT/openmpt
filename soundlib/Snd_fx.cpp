@@ -1112,8 +1112,14 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 							}
 						}
 						break;
+					case VOLCMD_PLAYCONTROL:
+						if(m.vol <= 1)
+							chn.isPaused = (m.vol == 0);
+						break;
 					}
 
+					if(chn.isPaused)
+						continue;
 					if(porta)
 					{
 						// Portamento needs immediate syncing, as the pitch changes on each tick
@@ -1729,6 +1735,7 @@ void CSoundFile::NoteChange(ModChannel &chn, int note, bool bPorta, bool bResetE
 		chn.nNote = static_cast<ModCommand::NOTE>(note);
 	}
 	chn.m_CalculateFreq = true;
+	chn.isPaused = false;
 
 	if ((!bPorta) || (GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)))
 		chn.nNewIns = 0;
@@ -1953,6 +1960,7 @@ void CSoundFile::NoteChange(ModChannel &chn, int note, bool bPorta, bool bResetE
 
 		if(chn.dwFlags[CHN_ADLIB] && m_opl && channelHint != CHANNELINDEX_INVALID)
 		{
+			// Test case: AdlibZeroVolumeNote.s3m
 			if(m_playBehaviour[kOPLNoteOffOnNoteChange])
 				m_opl->NoteOff(channelHint);
 			else if(m_playBehaviour[kOPLNoteStopWith0Hz])
@@ -3013,6 +3021,11 @@ bool CSoundFile::ProcessEffects()
 							offset = chn.oldOffset = chn.pModSample->cues[vol - 1];
 						SampleOffset(chn, offset);
 					}
+					break;
+
+				case VOLCMD_PLAYCONTROL:
+					if(vol <= 1)
+						chn.isPaused = (vol == 0);
 					break;
 				}
 			}

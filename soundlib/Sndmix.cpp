@@ -2368,7 +2368,7 @@ bool CSoundFile::ReadNote()
 
 		chn.newLeftVol = chn.newRightVol = 0;
 		chn.pCurrentSample = (chn.pModSample && chn.pModSample->HasSampleData() && chn.nLength && chn.IsSamplePlaying()) ? chn.pModSample->samplev() : nullptr;
-		if (chn.pCurrentSample || (chn.HasMIDIOutput() && !chn.dwFlags[CHN_KEYOFF | CHN_NOTEFADE]))
+		if((chn.pCurrentSample || (chn.HasMIDIOutput() && !chn.dwFlags[CHN_KEYOFF | CHN_NOTEFADE])) && !chn.isPaused)
 		{
 			// Update VU-Meter (nRealVolume is 14-bit)
 			uint32 vul = (chn.nRealVolume * (256-chn.nRealPan)) / (1 << 14);

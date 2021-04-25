@@ -53,7 +53,7 @@ enum VolumeCommand : uint8
 	VOLCMD_TONEPORTAMENTO = 11,
 	VOLCMD_PORTAUP        = 12,
 	VOLCMD_PORTADOWN      = 13,
-	VOLCMD_DELAYCUT       = 14, //currently unused
+	VOLCMD_PLAYCONTROL    = 14,
 	VOLCMD_OFFSET         = 15,
 	MAX_VOLCMDS
 };
