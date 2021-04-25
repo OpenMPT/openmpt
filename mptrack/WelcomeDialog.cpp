@@ -52,10 +52,10 @@ BOOL WelcomeDlg::OnInitDialog()
 	if(RegOpenKey(HKEY_LOCAL_MACHINE, _T("Software\\VST"), &hkEnum) == ERROR_SUCCESS
 		&& RegQueryValueEx(hkEnum, _T("VSTPluginsPath"), 0, &datatype, (LPBYTE)str, &datasize) == ERROR_SUCCESS)
 	{
-		m_vstPath = mpt::PathString::FromNative(ParseMaybeNullTerminatedStringFromBufferWithSizeInBytes<TCHAR>(str, datasize));
+		m_vstPath = mpt::PathString::FromNative(ParseMaybeNullTerminatedStringFromBufferWithSizeInBytes<mpt::winstring>(str, datasize));
 	} else if(SHGetSpecialFolderPath(0, str, CSIDL_PROGRAM_FILES, FALSE))
 	{
-		m_vstPath = mpt::PathString::FromNative(ParseMaybeNullTerminatedStringFromBufferWithSizeInBytes<TCHAR>(str, datasize)) + P_("\\Steinberg\\VstPlugins\\");
+		m_vstPath = mpt::PathString::FromNative(ParseMaybeNullTerminatedStringFromBufferWithSizeInBytes<mpt::winstring>(str, datasize)) + P_("\\Steinberg\\VstPlugins\\");
 		if(!m_vstPath.IsDirectory())
 		{
 			m_vstPath = mpt::PathString();

@@ -232,11 +232,11 @@ std::string getenv(const std::string &env_var, const std::string &def = std::str
 
 #if MPT_OS_WINDOWS
 
-template <typename Tchar, typename Tbuf, typename Tsize>
-std::basic_string<Tchar> ParseMaybeNullTerminatedStringFromBufferWithSizeInBytes(const Tbuf *buf, Tsize sizeBytes)
+template <typename Tstring, typename Tbuf, typename Tsize>
+Tstring ParseMaybeNullTerminatedStringFromBufferWithSizeInBytes(const Tbuf *buf, Tsize sizeBytes)
 {
 	// REG_SZ may contain a single NUL terminator, multiple NUL terminators, or no NUL terminator at all
-	return std::basic_string<Tchar>(reinterpret_cast<const Tchar*>(buf), reinterpret_cast<const Tchar*>(buf) + (sizeBytes / sizeof(Tchar))).c_str();
+	return Tstring(reinterpret_cast<const typename Tstring::value_type*>(buf), reinterpret_cast<const typename Tstring::value_type*>(buf) + (sizeBytes / sizeof(typename Tstring::value_type))).c_str();
 }
 
 
