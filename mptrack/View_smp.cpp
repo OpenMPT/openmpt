@@ -630,7 +630,7 @@ static bool HitTest(int pointX, int objX, int marginL, int marginR, int top, int
 	if(!IsInRange(pointX, objX - marginL, objX + marginR))
 		return false;
 	if(rect)
-		*rect = {objX - marginL, top, objX + marginR + 1, bottom};
+		*rect = CRect{objX - marginL, top, objX + marginR + 1, bottom};
 	return true;
 }
 
