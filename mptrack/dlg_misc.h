@@ -282,8 +282,8 @@ public:
 	// Initialize text input box
 	CInputDlg(CWnd *parent, const TCHAR *desc, const TCHAR *defaultString, int32 maxLength = -1) : CDialog(IDD_INPUT, parent)
 		, m_description(desc)
-		, resultAsString(defaultString)
 		, m_maxLength(maxLength)
+		, resultAsString(defaultString)
 	{ }
 	// Initialize numeric input box (float)
 	CInputDlg(CWnd *parent, const TCHAR *desc, double minVal, double maxVal, double defaultNumber) : CDialog(IDD_INPUT, parent)
