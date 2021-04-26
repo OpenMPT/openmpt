@@ -347,6 +347,15 @@ void CSoundFile::CreateStereoMix(int count)
 		}
 #endif // NO_PLUGINS
 
+		if(chn.isPaused)
+		{
+			EndChannelOfs(chn, pbuffer, count);
+			*pOfsR += chn.nROfs;
+			*pOfsL += chn.nLOfs;
+			chn.nROfs = chn.nLOfs = 0;
+			continue;
+		}
+
 		MixLoopState mixLoopState(chn);
 
 		////////////////////////////////////////////////////
@@ -360,15 +369,6 @@ void CSoundFile::CreateStereoMix(int count)
 			if(chn.nRampLength > 0)
 			{
 				if (nrampsamples > chn.nRampLength) nrampsamples = chn.nRampLength;
-			}
-
-			if(chn.isPaused)
-			{
-				EndChannelOfs(chn, pbuffer, nsamples);
-				*pOfsR += chn.nROfs;
-				*pOfsL += chn.nLOfs;
-				chn.nROfs = chn.nLOfs = 0;
-				break;
 			}
 
 			if((nSmpCount = mixLoopState.GetSampleCount(chn, nrampsamples, ITPingPongMode)) <= 0)
