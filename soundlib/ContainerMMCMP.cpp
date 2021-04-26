@@ -194,6 +194,8 @@ bool UnpackMMCMP(std::vector<ContainerItem> &containerItems, FileReader &file, C
 			// Data is not packed
 			for(uint32 i = 0; i < blk.sub_blk; i++)
 			{
+				if(!psubblk)
+					return false;
 				if(!psubblk->Validate(unpackedData, unpackedSize))
 					return false;
 #ifdef MMCMP_LOG
