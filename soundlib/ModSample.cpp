@@ -464,7 +464,7 @@ std::pair<int8, int8> ModSample::FrequencyToTranspose(uint32 freq)
 		return {};
 
 	const auto f2t = mpt::saturate_round<int32>(std::log(freq * (1.0 / 8363.0)) * (12.0 * 128.0 * (1.0 / M_LN2)));
-	const auto fine = std::div(Clamp(f2t, -16384, 16383), 128);
+	const auto fine = std::div(Clamp(f2t, -16384, 16383), int32(128));
 	return {static_cast<int8>(fine.quot), static_cast<int8>(fine.rem)};
 }
 
