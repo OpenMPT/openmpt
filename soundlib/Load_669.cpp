@@ -140,9 +140,9 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 	m_nDefaultTempo.Set(78);
 	m_nDefaultSpeed = 4;
 	m_nChannels = 8;
-#ifdef MODPLUG_TRACEKR
+#ifdef MODPLUG_TRACKER
 	// 669 uses frequencies rather than periods, so linear slides mode will sound better in the higher octaves.
-	m_SongFlags.set(SONG_LINEARSLIDES);
+	//m_SongFlags.set(SONG_LINEARSLIDES);
 #endif // MODPLUG_TRACKER
 
 	m_modFormat.formatName = U_("Composer 669");
