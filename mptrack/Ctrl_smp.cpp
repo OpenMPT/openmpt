@@ -831,7 +831,7 @@ void CCtrlSamples::UpdateView(UpdateHint hint, CObject *pObj)
 			s = mpt::cfmt::val(sample.nC5Speed);
 			m_EditFineTune.SetWindowText(s);
 			if(sample.nC5Speed != 0)
-				transp = ModSample::FrequencyToTranspose(sample.nC5Speed) / 128;
+				transp = ModSample::FrequencyToTranspose(sample.nC5Speed).first;
 		} else
 		{
 			int ftune = ((int)sample.nFineTune);
@@ -2850,7 +2850,7 @@ void CCtrlSamples::OnFineTuneChanged()
 		if ((n > 0) && (n <= (m_sndFile.GetType() == MOD_TYPE_S3M ? 65535 : 9999999)) && (n != (int)m_sndFile.GetSample(m_nSample).nC5Speed))
 		{
 			sample.nC5Speed = n;
-			int transp = ModSample::FrequencyToTranspose(n) / 128;
+			int transp = ModSample::FrequencyToTranspose(n).first;
 			int basenote = (NOTE_MIDDLEC - NOTE_MIN) + transp;
 			Clamp(basenote, BASENOTE_MIN, BASENOTE_MAX);
 			basenote -= BASENOTE_MIN;
@@ -2908,13 +2908,13 @@ void CCtrlSamples::OnBaseNoteChanged()
 
 	if(!m_sndFile.UseFinetuneAndTranspose())
 	{
-		const int oldTransp = ModSample::FrequencyToTranspose(sample.nC5Speed) / 128;
-		const uint32 newTrans = mpt::saturate_round<uint32>(sample.nC5Speed * std::pow(2.0, (n - oldTransp) / 12.0));
-		if (newTrans > 0 && newTrans <= (m_sndFile.GetType() == MOD_TYPE_S3M ? 65535u : 9999999u) && newTrans != sample.nC5Speed)
+		const int oldTransp = ModSample::FrequencyToTranspose(sample.nC5Speed).first;
+		const uint32 newFreq = mpt::saturate_round<uint32>(sample.nC5Speed * std::pow(2.0, (n - oldTransp) / 12.0));
+		if (newFreq > 0 && newFreq <= (m_sndFile.GetType() == MOD_TYPE_S3M ? 65535u : 9999999u) && newFreq != sample.nC5Speed)
 		{
-			sample.nC5Speed = newTrans;
+			sample.nC5Speed = newFreq;
 			LockControls();
-			SetDlgItemInt(IDC_EDIT5, newTrans, FALSE);
+			SetDlgItemInt(IDC_EDIT5, newFreq, FALSE);
 			OnFineTuneChangedDone();
 			UnlockControls();
 			SetModified(SampleHint().Info(), false, false);
@@ -3322,7 +3322,7 @@ NoSample:
 			if(sample.nC5Speed == oldFreq)
 				sample.nC5Speed += pos;
 			Limit(sample.nC5Speed, 1u, 9999999u); // 9999999 is max. in Impulse Tracker
-			int transp = ModSample::FrequencyToTranspose(sample.nC5Speed) / 128;
+			int transp = ModSample::FrequencyToTranspose(sample.nC5Speed).first;
 			int basenote = (NOTE_MIDDLEC - NOTE_MIN) + transp;
 			Clamp(basenote, BASENOTE_MIN, BASENOTE_MAX);
 			basenote -= BASENOTE_MIN;
