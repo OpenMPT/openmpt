@@ -18,15 +18,28 @@
 #endif
 #endif
 #if !defined(MPT_BUILD_RETRO)
+#if defined(_MSC_VER)
+#define MPT_WITH_MFC
+#endif
+#else
+#if defined(_WIN32_WINNT)
+#if (_WIN32_WINNT >= 0x0501)
+#if defined(_MSC_VER)
+#define MPT_WITH_MFC
+#endif
+#endif
+#endif
+#endif
+#if defined(MPT_WITH_MFC)
 #define _AFX_NO_MFC_CONTROLS_IN_DIALOGS // Avoid binary bloat from linking unused MFC controls
-#endif // !MPT_BUILD_RETRO
+#endif // MPT_WITH_MFC
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
-#if !defined(MPT_BUILD_RETRO)
+#if defined(MPT_WITH_MFC)
 #include <afxwin.h>
 #include <afxcmn.h>
-#endif // !MPT_BUILD_RETRO
+#endif // MPT_WITH_MFC
 #include <windows.h>
 #include <WindowsX.h>
 
@@ -53,9 +66,9 @@
 
 #include "libopenmpt_plugin_settings.hpp"
 
-#if !defined(MPT_BUILD_RETRO)
+#if defined(MPT_WITH_MFC)
 #include "libopenmpt_plugin_gui.hpp"
-#endif // !MPT_BUILD_RETRO
+#endif // MPT_WITH_MFC
 
 #include "svn_version.h"
 #if defined(OPENMPT_VERSION_REVISION)
@@ -522,7 +535,7 @@ static void WINAPI openmpt_About( HWND win ) {
 	credits << std::endl;
 	credits << "Arseny Kapoulkine for pugixml" << std::endl;
 	credits << "https://pugixml.org/" << std::endl;
-#if !defined(MPT_BUILD_RETRO)
+#if defined(MPT_WITH_MFC)
 	libopenmpt::plugin::gui_show_file_info( win, TEXT(SHORT_TITLE), StringReplace( StringDecode( credits.str(), CP_UTF8 ), L"\n", L"\r\n" ) );
 #else
 	MessageBox( win, StringToWINAPI( StringReplace( StringDecode( credits.str(), CP_UTF8 ), L"\n", L"\r\n" ) ).c_str(), TEXT(SHORT_TITLE), MB_OK );
@@ -530,7 +543,7 @@ static void WINAPI openmpt_About( HWND win ) {
 }
 
 static void WINAPI openmpt_Config( HWND win ) {
-#if !defined(MPT_BUILD_RETRO)
+#if defined(MPT_WITH_MFC)
 	libopenmpt::plugin::gui_edit_settings( &self->settings, win, TEXT(SHORT_TITLE) );
 #endif
 	apply_and_save_options();
@@ -1803,7 +1816,7 @@ XMPIN * WINAPI XMPIN_GetInterface( DWORD face, InterfaceProc faceproc ) {
 }; // extern "C"
 
 
-#if !defined(MPT_BUILD_RETRO) && defined(_MFC_VER)
+#if defined(MPT_WITH_MFC) && defined(_MFC_VER)
 
 namespace libopenmpt {
 namespace plugin {
