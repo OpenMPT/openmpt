@@ -432,9 +432,25 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 			bool loaderSuccess = false;
 			for(const auto &format : ModuleFormatLoaders)
 			{
-				loaderSuccess = (this->*(format.loader))(file, loadFlags);
-				if(loaderSuccess)
-					break;
+				try
+				{
+					loaderSuccess = (this->*(format.loader))(file, loadFlags);
+					if(loaderSuccess)
+						break;
+				} catch(mpt::out_of_memory e)
+				{
+#ifdef MODPLUG_TRACKER
+					mpt::delete_out_of_memory(e);
+					return false;
+#else
+					// libopenmpt already handles this.
+					throw;
+#endif  // MODPLUG_TRACKER
+				} catch(const std::exception &)
+				{
+					// Try next loader
+					continue;
+				}
 			}
 
 			if(!loaderSuccess)
