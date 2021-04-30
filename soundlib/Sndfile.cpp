@@ -444,6 +444,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 					return false;
 #else
 					// libopenmpt already handles this.
+					MPT_UNUSED_VARIABLE(e);
 					throw;
 #endif  // MODPLUG_TRACKER
 				} catch(const std::exception &)
