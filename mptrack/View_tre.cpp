@@ -432,7 +432,17 @@ bool CModTree::InsLibSetFullPath(const mpt::PathString &libPath, const mpt::Path
 				}
 				if(m_SongFile != nullptr)
 				{
-					if(!m_SongFile->Create(file, CSoundFile::loadNoPatternOrPluginData, nullptr))
+					try
+					{
+						if(!m_SongFile->Create(file, CSoundFile::loadNoPatternOrPluginData, nullptr))
+						{
+							return false;
+						}
+					} catch(mpt::out_of_memory e)
+					{
+						mpt::delete_out_of_memory(e);
+						return false;
+					} catch(const std::exception &)
 					{
 						return false;
 					}
@@ -454,10 +464,20 @@ bool CModTree::InsLibSetFullPath(const mpt::PathString &libPath, const mpt::Path
 
 bool CModTree::SetSoundFile(FileReader &file)
 {
-	CSoundFile *sndFile = new(std::nothrow) CSoundFile;
-	if(sndFile == nullptr || !sndFile->Create(file, CSoundFile::loadNoPatternOrPluginData))
+	std::unique_ptr<CSoundFile> sndFile;
+	try
 	{
-		delete sndFile;
+		sndFile = std::make_unique<CSoundFile>();
+		if(!sndFile->Create(file, CSoundFile::loadNoPatternOrPluginData))
+		{
+			return false;
+		}
+	} catch(mpt::out_of_memory e)
+	{
+		mpt::delete_out_of_memory(e);
+		return false;
+	} catch(const std::exception &)
+	{
 		return false;
 	}
 
@@ -466,7 +486,7 @@ bool CModTree::SetSoundFile(FileReader &file)
 		m_SongFile->Destroy();
 		delete m_SongFile;
 	}
-	m_SongFile = sndFile;
+	m_SongFile = sndFile.release();
 	m_SongFile->Patterns.DestroyPatterns();
 	m_SongFile->m_songMessage.clear();
 	const mpt::PathString fileName = file.GetOptionalFileName().value_or(P_(""));

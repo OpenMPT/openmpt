@@ -204,7 +204,18 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 			FileReader file = GetFileReader(f);
 			MPT_ASSERT(GetPathNameMpt().empty());
 			SetPathName(filename, FALSE);	// Path is not set yet, but loaders processing external samples/instruments (ITP/MPTM) need this for relative paths.
-			if(!m_SndFile.Create(file, CSoundFile::loadCompleteModule, this))
+			try
+			{
+				if(!m_SndFile.Create(file, CSoundFile::loadCompleteModule, this))
+				{
+					EndWaitCursor();
+					return FALSE;
+				}
+			} catch(mpt::out_of_memory e)
+			{
+				EndWaitCursor();
+				mpt::rethrow_out_of_memory(e);
+			} catch(const std::exception &)
 			{
 				EndWaitCursor();
 				return FALSE;
@@ -524,15 +535,26 @@ void CModDoc::OnAppendModule()
 		for(const auto &file : files)
 		{
 			InputFile f(file, TrackerSettings::Instance().MiscCacheCompleteFileBeforeLoading);
-			if(f.IsValid() && source->Create(GetFileReader(f), CSoundFile::loadCompleteModule))
-			{
-				AppendModule(*source);
-				source->Destroy();
-				SetModified();
-			} else
+			if(!f.IsValid())
 			{
 				AddToLog("Unable to open source file!");
+				continue;
 			}
+			try
+			{
+				if(!source->Create(GetFileReader(f), CSoundFile::loadCompleteModule))
+				{
+					AddToLog("Unable to open source file!");
+					continue;
+				}
+			} catch(const std::exception &)
+			{
+				AddToLog("Unable to open source file!");
+				continue;
+			}
+			AppendModule(*source);
+			source->Destroy();
+			SetModified();
 		}
 	} catch(mpt::out_of_memory e)
 	{

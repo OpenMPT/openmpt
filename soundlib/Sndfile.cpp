@@ -385,7 +385,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 
 	if(file.IsValid())
 	{
-		try
+
 		{
 
 #ifndef NO_ARCHIVE_SUPPORT
@@ -461,20 +461,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 #endif
 
 			m_visitedRows.Initialize(true);
-#ifdef MODPLUG_TRACKER
-		} catch(mpt::out_of_memory e)
-		{
-			mpt::delete_out_of_memory(e);
-			return false;
-#endif  // MODPLUG_TRACKER
-		} catch(const std::exception &)
-		{
-#ifdef MODPLUG_TRACKER
-			return false;
-#else
-			// libopenmpt already handles this.
-			throw;
-#endif  // MODPLUG_TRACKER
+
 		}
 	} else
 	{
