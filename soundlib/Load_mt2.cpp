@@ -1148,8 +1148,8 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 
 #if defined(MPT_EXTERNAL_SAMPLES)
 			if(filename.length() >= 2
-				&& filename.at(0) != '\\'	// Relative path on same drive
-				&& filename.at(1) != ':')	// Absolute path
+				&& filename[0] != '\\'	// Relative path on same drive
+				&& filename[1] != ':')	// Absolute path
 			{
 				// Relative path in same folder or sub folder
 				filename = ".\\" + filename;
