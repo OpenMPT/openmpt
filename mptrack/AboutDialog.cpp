@@ -249,8 +249,10 @@ BOOL CAboutDlg::OnInitDialog()
 	CDialog::OnInitDialog();
 
 	mpt::ustring app;
-	app += MPT_UFORMAT("OpenMPT ({}) ({} bit)")(mpt::OS::Windows::Name(mpt::OS::Windows::GetProcessArchitecture()), mpt::arch_bits)
-		+ (!BuildVariants().CurrentBuildIsModern() ? U_(" for older Windows") : U_(""))
+	app += MPT_UFORMAT("OpenMPT{} ({}) ({} bit)")(
+			BuildVariants().GetBuildVariantDescription(BuildVariants().GetBuildVariant()),
+			mpt::OS::Windows::Name(mpt::OS::Windows::GetProcessArchitecture()),
+			mpt::arch_bits)
 		+ U_("\n");
 	app += U_("Version ") + Build::GetVersionStringSimple() + U_("\n\n");
 	app += Build::GetURL(Build::Url::Website) + U_("\n");
