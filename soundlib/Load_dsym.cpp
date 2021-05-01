@@ -185,6 +185,28 @@ static std::vector<std::byte> DecompressDSymSigmaDelta(FileReader &file, uint32 
 }
 
 
+static bool ReadDSymChunk(FileReader &file, std::vector<std::byte> &data, uint32 size)
+{
+	const uint8 packingType = file.ReadUint8();
+	if(packingType > 1)
+		return false;
+	if(packingType)
+	{
+		try
+		{
+			data = DecompressDSymLZW(file, size);
+		} catch(const BitReader::eof &)
+		{
+			return false;
+		}
+	} else
+	{
+		file.ReadVector(data, size);
+	}
+	return data.size() >= size;
+}
+
+
 CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderDSym(MemoryFileReader file, const uint64 *pfilesize)
 {
 	DSymFileHeader fileHeader;
@@ -237,17 +259,10 @@ bool CSoundFile::ReadDSym(FileReader &file, ModLoadingFlags loadFlags)
 	if(fileHeader.numOrders)
 	{
 		const uint32 sequenceSize = fileHeader.numOrders * fileHeader.numChannels * 2u;
-		const uint8 packingType = file.ReadUint8();
-		if(packingType > 1)
+		if(!ReadDSymChunk(file, sequenceData, sequenceSize))
 			return false;
-		if(packingType)
-			sequenceData = DecompressDSymLZW(file, sequenceSize);
-		else
-			file.ReadVector(sequenceData, sequenceSize);
 	}
 	const auto sequence = mpt::as_span(reinterpret_cast<uint16le *>(sequenceData.data()), sequenceData.size() / 2u);
-	if(sequence.size() < fileHeader.numOrders * static_cast<size_t>(m_nChannels))
-		return false;
 
 	std::vector<std::byte> trackData;
 	if(fileHeader.numTracks)
@@ -258,20 +273,12 @@ bool CSoundFile::ReadDSym(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			const uint32 chunkSize = std::min(fileHeader.numTracks - offset, 2000) * 256;
 			std::vector<std::byte> chunk;
-			const uint8 packingType = file.ReadUint8();
-			if(packingType > 1)
+			if(!ReadDSymChunk(file, chunk, chunkSize))
 				return false;
-			if(packingType)
-				chunk = DecompressDSymLZW(file, chunkSize);
-			else
-				file.ReadVector(chunk, chunkSize);
-
 			trackData.insert(trackData.end(), chunk.begin(), chunk.end());
 		}
 	}
 	const auto tracks = mpt::byte_cast<mpt::span<uint8>>(mpt::as_span(trackData));
-	if(tracks.size() < fileHeader.numTracks * 256u)
-		return false;
 
 	Order().resize(fileHeader.numOrders);
 	for(ORDERINDEX pat = 0; pat < fileHeader.numOrders; pat++)
@@ -484,7 +491,7 @@ bool CSoundFile::ReadDSym(FileReader &file, ModLoadingFlags loadFlags)
 				for(auto &b : sampleData)
 				{
 					uint8 v = mpt::byte_cast<uint8>(b);
-					v = (v << 7) | (((~v) & 0xFE) >> 1);
+					v = (v << 7) | (static_cast<uint8>(~v) >> 1);
 					b = mpt::byte_cast<std::byte>(v);
 				}
 
@@ -502,7 +509,14 @@ bool CSoundFile::ReadDSym(FileReader &file, ModLoadingFlags loadFlags)
 			break;
 		case 1:  // 13-bit LZW applied to linear sample data differences
 			{
-				auto sampleData = DecompressDSymLZW(file, mptSmp.nLength);
+				std::vector<std::byte> sampleData;
+				try
+				{
+					sampleData = DecompressDSymLZW(file, mptSmp.nLength);
+				} catch(const BitReader::eof &)
+				{
+					return false;
+				}
 				if(!(loadFlags & loadSampleData))
 					break;
 				FileReader sampleDataFile = mpt::as_span(sampleData);
@@ -532,7 +546,14 @@ bool CSoundFile::ReadDSym(FileReader &file, ModLoadingFlags loadFlags)
 		case 4:  // Sigma-Delta compression applied to linear sample differences
 		case 5:  // Sigma-Delta compression applied to logarithmic sample differences
 			{
-				auto sampleData = DecompressDSymSigmaDelta(file, mptSmp.nLength);
+				std::vector<std::byte> sampleData;
+				try
+				{
+					sampleData = DecompressDSymSigmaDelta(file, mptSmp.nLength);
+				} catch(const BitReader::eof &)
+				{
+					return false;
+				}
 				if(!(loadFlags & loadSampleData))
 					break;
 				if(packingType == 5)
@@ -560,16 +581,12 @@ bool CSoundFile::ReadDSym(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 
-	const uint32 infoLen = fileHeader.infoLenLo | (fileHeader.infoLenHi << 16);
-	if(infoLen)
+	if(const uint32 infoLen = fileHeader.infoLenLo | (fileHeader.infoLenHi << 16); infoLen > 0)
 	{
 		std::vector<std::byte> infoData;
-		FileReader infoChunk;
-		const uint8 packingType = file.ReadUint8();
-		if(packingType)
-			infoChunk = mpt::as_span(infoData = DecompressDSymLZW(file, infoLen));
-		else
-			infoChunk = file.ReadChunk(infoLen);
+		if(!ReadDSymChunk(file, infoData, infoLen))
+			return false;
+		FileReader infoChunk = mpt::as_span(infoData);
 		m_songMessage.Read(infoChunk, infoLen, SongMessage::leLF);
 	}
 
