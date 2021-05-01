@@ -143,11 +143,11 @@ public:
 
 	reference operator[](index_type index)
 	{
-		return at(index);
+		return m_beg[index];
 	}
 	const_reference operator[](index_type index) const
 	{
-		return at(index);
+		return m_beg[index];
 	}
 
 	bool operator==(span const & other) const noexcept
@@ -157,15 +157,6 @@ public:
 	bool operator!=(span const & other) const noexcept
 	{
 		return !(*this == other);
-	}
-
-	reference at(index_type index)
-	{
-		return m_beg[index];
-	}
-	const_reference at(index_type index) const
-	{
-		return m_beg[index];
 	}
 
 	pointer data() const noexcept
