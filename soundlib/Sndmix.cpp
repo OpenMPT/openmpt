@@ -207,18 +207,6 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioReadTarget
 {
 	MPT_ASSERT_ALWAYS(m_MixerSettings.IsValid());
 
-	bool mixPlugins = false;
-#ifndef NO_PLUGINS
-	for(const auto &plug : m_MixPlugins)
-	{
-		if(plug.pMixPlugin)
-		{
-			mixPlugins = true;
-			break;
-		}
-	}
-#endif // NO_PLUGINS
-
 	samplecount_t countRendered = 0;
 	samplecount_t countToRender = count;
 
@@ -304,14 +292,16 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioReadTarget
 			m_opl->Mix(MixSoundBuffer, countChunk, m_OPLVolumeFactor * m_nVSTiVolume / 48);
 		}
 
-		#ifndef NO_REVERB
-			m_Reverb.Process(MixSoundBuffer, countChunk);
-		#endif // NO_REVERB
+#ifndef NO_REVERB
+		m_Reverb.Process(MixSoundBuffer, countChunk);
+#endif  // NO_REVERB
 
-		if(mixPlugins)
+#ifndef NO_PLUGINS
+		if(m_loadedPlugins)
 		{
 			ProcessPlugins(countChunk);
 		}
+#endif  // NO_PLUGINS
 
 		if(m_MixerSettings.gnChannels == 1)
 		{

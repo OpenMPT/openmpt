@@ -432,16 +432,17 @@ public:
 	ResamplingMode m_nResampling; // Resampling mode (if overriding the globally set resampling)
 	int32 m_nRepeatCount = 0;     // -1 means repeat infinitely.
 	ORDERINDEX m_nMaxOrderPosition;
-	ModChannelSettings ChnSettings[MAX_BASECHANNELS];	// Initial channels settings
+	ModChannelSettings ChnSettings[MAX_BASECHANNELS];  // Initial channels settings
 	CPatternContainer Patterns;
-	ModSequenceSet Order;								// Pattern sequences (order lists)
+	ModSequenceSet Order;  // Pattern sequences (order lists)
 protected:
-	ModSample Samples[MAX_SAMPLES];						// Sample Headers
+	ModSample Samples[MAX_SAMPLES];
 public:
-	ModInstrument *Instruments[MAX_INSTRUMENTS];		// Instrument Headers
-	MIDIMacroConfig m_MidiCfg;							// MIDI Macro config table
+	ModInstrument *Instruments[MAX_INSTRUMENTS];  // Instrument Headers
+	MIDIMacroConfig m_MidiCfg;                    // MIDI Macro config table
 #ifndef NO_PLUGINS
-	SNDMIXPLUGIN m_MixPlugins[MAX_MIXPLUGINS];			// Mix plugins
+	SNDMIXPLUGIN m_MixPlugins[MAX_MIXPLUGINS];  // Mix plugins
+	uint32 m_loadedPlugins = 0;                 // Not a PLUGINDEX because number of loaded plugins may exceed MAX_MIXPLUGINS during MIDI conversion
 #endif
 	char m_szNames[MAX_SAMPLES][MAX_SAMPLENAME];		// Sample names
 
