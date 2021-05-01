@@ -116,22 +116,14 @@ public:
 
 	struct Result
 	{
-		time_t CheckTime;
+		time_t CheckTime = time_t{};
 		std::vector<std::byte> json;
 #if MPT_UPDATE_LEGACY
-		bool UpdateAvailable;
+		bool UpdateAvailable = false;
 		CString Version;
 		CString Date;
 		CString URL;
 #endif // MPT_UPDATE_LEGACY
-		Result()
-			: CheckTime(time_t())
-#if MPT_UPDATE_LEGACY
-			, UpdateAvailable(false)
-#endif // MPT_UPDATE_LEGACY
-		{
-			return;
-		}
 	};
 
 	static bool IsAutoUpdateFromMessage(WPARAM wparam, LPARAM lparam);
