@@ -272,7 +272,7 @@ int MIDIMacroConfig::MacroToPlugParam(uint32 macroIndex) const
 	if ((param[1] >= '0') && (param[1] <= '9')) code += (param[1] - '0'); else
 		if ((param[1] >= 'A') && (param[1] <= 'F')) code += (param[1] - 'A' + 0x0A);
 
-	if (macro.size() >= 4 && macro.at(3) == '0')
+	if (macro.size() >= 4 && macro[3] == '0')
 		return (code - 128);
 	else
 		return (code + 128);
