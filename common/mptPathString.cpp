@@ -371,7 +371,7 @@ PathString PathString::RelativePathToAbsolute(const PathString &relativeTo) cons
 	{
 		return result;
 	}
-	if(path.length() >= 2 && path.at(0) == PC_('\\') && path.at(1) != PC_('\\'))
+	if(path.length() >= 2 && path[0] == PC_('\\') && path[1] != PC_('\\'))
 	{
 		// Path is on the same drive as OpenMPT ("\Somepath\" => "C:\Somepath\"), but ignore network paths starting with "\\"
 		result = mpt::PathString::FromNative(relativeTo.AsNative().substr(0, 2));
