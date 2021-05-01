@@ -1314,6 +1314,16 @@ bin/dist-dos.tar: bin/dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.dos.zip
 	cd bin/dist-dos/ && cp libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.dos.zip libopenmpt/bin.dos/$(DIST_LIBOPENMPT_TARBALL_VERSION)/
 	cd bin/dist-dos/ && tar cvf ../dist-dos.tar libopenmpt
 
+.PHONY: dist-retro-win9x
+dist-retro-win9x: bin/dist-retro-win9x.tar
+
+bin/dist-retro-win9x.tar: bin/dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.retro.win9x.tar.gz
+	rm -rf bin/dist-retro-win9x.tar
+	cd bin/dist-retro-win9x/ && rm -rf libopenmpt
+	cd bin/dist-retro-win9x/ && mkdir -p libopenmpt/bin.retro.win9x/$(DIST_LIBOPENMPT_TARBALL_VERSION)/
+	cd bin/dist-retro-win9x/ && cp libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.retro.win9x.tar.gz libopenmpt/bin.retro.win9x/$(DIST_LIBOPENMPT_TARBALL_VERSION)/
+	cd bin/dist-retro-win9x/ && tar cvf ../dist-retro-win9x.tar libopenmpt
+
 .PHONY: bin/dist.mk
 bin/dist.mk:
 	rm -rf $@
@@ -1505,6 +1515,34 @@ endif
 	cp include/cwsdpmi/bin/CWSDSTUB.EXE          bin/dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/BIN/CWSDSTUB.EXE
 	cp include/cwsdpmi/bin/CWSDSTR0.EXE          bin/dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/BIN/CWSDSTR0.EXE
 	cd bin/dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/ && zip -r ../libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.dos.zip --compression-method deflate -9 *
+
+.PHONY: bin/dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.retro.win9x.tar.gz
+bin/dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.retro.win9x.tar.gz:
+	mkdir -p bin/dist-retro-win9x
+	rm -rf                                       bin/dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)
+	mkdir -p                                     bin/dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)
+	mkdir -p                                     bin/dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Licenses
+	svn export ./LICENSE                         bin/dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/LICENSE.TXT --native-eol CRLF
+	svn export ./libopenmpt/dox/changelog.md     bin/dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Changelog.txt --native-eol CRLF
+ifeq ($(ALLOW_LGPL),1)
+	svn export ./include/mpg123/COPYING          bin/dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Licenses/License.mpg123.txt --native-eol CRLF
+	svn export ./include/mpg123/AUTHORS          bin/dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Licenses/License.Authors.txt --native-eol CRLF
+	svn export ./include/vorbis/COPYING          bin/dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Licenses/License.Vorbis.txt --native-eol CRLF
+	svn export ./include/zlib/README             bin/dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Licenses/License.zlib.txt --native-eol CRLF
+else
+	svn export ./include/minimp3/LICENSE         bin/dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Licenses/License.minimp3.txt --native-eol CRLF
+	svn export ./include/miniz/miniz.c           bin/dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Licenses/License.miniz.txt --native-eol CRLF
+	svn export ./include/stb_vorbis/stb_vorbis.c bin/dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Licenses/License.stb_vorbis.txt --native-eol CRLF
+endif
+	mkdir -p                                     bin/dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/openmpt123
+	cp bin/openmpt123.exe                        bin/dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/openmpt123/openmpt123.exe
+	mkdir -p                                     bin/dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/XMPlay
+	svn export ./libopenmpt/doc/xmp-openmpt.txt  bin/dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/XMPlay/xmp-openmpt.txt --native-eol CRLF
+	cp bin/xmp-openmpt.dll                       bin/dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/XMPlay/xmp-openmpt.dll
+	mkdir -p                                     bin/dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Winamp
+	svn export ./libopenmpt/doc/xmp-openmpt.txt  bin/dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Winamp/in_openmpt.txt --native-eol CRLF
+	cp bin/in_openmpt.dll                        bin/dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Winamp/in_openmpt.dll
+	cd bin/dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/ && tar cvaf ../libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.retro.win9x.tar.gz *
 
 bin/libopenmpt.a: $(LIBOPENMPT_OBJECTS)
 	$(INFO) [AR] $@
