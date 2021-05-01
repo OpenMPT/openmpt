@@ -1532,37 +1532,42 @@ void CUpdateCheck::ShowSuccessGUI(WPARAM wparam, LPARAM lparam)
 
 	} else
 	{
-		
+		const TCHAR *action = _T("&View Announcement");
+		const bool canInstall = !updateInfo.download.empty() && versionInfo.downloads[updateInfo.download].can_autoupdate && (Version::Current() >= Version::Parse(versionInfo.downloads[updateInfo.download].autoupdate_minversion));
+		const bool canDownload = !canInstall && !updateInfo.download.empty() && !versionInfo.downloads[updateInfo.download].download_url.empty();
+		if(canInstall)
+		{
+			action = _T("&Install Now");
+		} else if(canDownload)
+		{
+			action = _T("&Download Now");
+		}
+
 		UpdateDialog dlg(
 			mpt::ToCString(versionInfo.version),
 			mpt::ToCString(versionInfo.date),
 			mpt::ToCString(versionInfo.changelog_url),
-				(!updateInfo.download.empty() && versionInfo.downloads[updateInfo.download].can_autoupdate && (Version::Current() >= Version::Parse(versionInfo.downloads[updateInfo.download].autoupdate_minversion))) ? _T("&Install now...") :
-				(!updateInfo.download.empty()) ? _T("&Download now...") :
-				_T("&View Announcement...")
-			);
+			action);
 		if(dlg.DoModal() != IDOK)
 		{
 			return;
 		}
 
-		if(!updateInfo.download.empty() && versionInfo.downloads[updateInfo.download].can_autoupdate && (Version::Current() >= Version::Parse(versionInfo.downloads[updateInfo.download].autoupdate_minversion)))
+		if(canInstall)
 		{
 			CDoUpdate updateDlg(versionInfo.downloads[updateInfo.download], theApp.GetMainWnd());
 			if(updateDlg.DoModal() != IDOK)
 			{
 				return;
 			}
-		} else if(!updateInfo.download.empty() && !versionInfo.downloads[updateInfo.download].download_url.empty())
+		} else if(canDownload)
 		{
 			CTrackApp::OpenURL(versionInfo.downloads[updateInfo.download].download_url);
 		} else
 		{
 			CTrackApp::OpenURL(versionInfo.announcement_url);
 		}
-
 	}
-
 }
 
 
