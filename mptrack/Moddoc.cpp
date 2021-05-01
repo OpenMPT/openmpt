@@ -213,8 +213,10 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 				}
 			} catch(mpt::out_of_memory e)
 			{
+				mpt::delete_out_of_memory(e);
 				EndWaitCursor();
-				mpt::rethrow_out_of_memory(e);
+				AddToLog(LogError, U_("Out of Memory"));
+				return FALSE;
 			} catch(const std::exception &)
 			{
 				EndWaitCursor();
