@@ -1726,7 +1726,7 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 							m.note = chnState.lastNote;
 							if(note >= 0)
 								m.instr = chnState.lastInst = mappedInst;
-							else if(event.command == SymEvent::ReplayFrom)
+							if(event.command == SymEvent::ReplayFrom)
 							{
 								m.volcmd = VOLCMD_TONEPORTAMENTO;
 								m.vol = 1;
