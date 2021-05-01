@@ -403,7 +403,7 @@ void CSoundFile::CreateStereoMix(int count)
 				size_t smp = std::distance(static_cast<const ModSample*>(static_cast<std::decay<decltype(Samples)>::type>(Samples)), chn.pModSample);
 				if(smp < m_SamplePlayLengths->size())
 				{
-					m_SamplePlayLengths->at(smp) = std::max(m_SamplePlayLengths->at(smp), chn.position.GetUInt());
+					m_SamplePlayLengths->at(smp) = std::max((*m_SamplePlayLengths)[smp], chn.position.GetUInt());
 				}
 			}
 #endif
