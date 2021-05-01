@@ -1215,7 +1215,7 @@ public:
 							try
 							{
 #if defined(MPT_BUILD_RETRO)
-								reuqest.InsecureTLSDowngradeWindowsXP();
+								request.InsecureTLSDowngradeWindowsXP();
 #endif // MPT_BUILD_RETRO
 								HTTP::Result resultHTTP = internet(request);
 								resultHTTP.CheckStatus(200);
