@@ -983,12 +983,13 @@ void COptionsSoundcard::UpdateStatistics()
 BEGIN_MESSAGE_MAP(COptionsMixer, CPropertyPage)
 	ON_WM_HSCROLL()
 	ON_WM_VSCROLL()
-	ON_CBN_SELCHANGE(IDC_COMBO_FILTER,			&COptionsMixer::OnSettingsChanged)
-	ON_CBN_SELCHANGE(IDC_COMBO_AMIGA_TYPE,		&COptionsMixer::OnSettingsChanged)
-	ON_EN_UPDATE(IDC_RAMPING_IN,				&COptionsMixer::OnRampingChanged)
-	ON_EN_UPDATE(IDC_RAMPING_OUT,				&COptionsMixer::OnRampingChanged)
-	ON_COMMAND(IDC_CHECK_SOFTPAN,				&COptionsMixer::OnSettingsChanged)
-	ON_COMMAND(IDC_CHECK1,						&COptionsMixer::OnAmigaChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO_FILTER,     &COptionsMixer::OnSettingsChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO_AMIGA_TYPE, &COptionsMixer::OnSettingsChanged)
+	ON_EN_UPDATE(IDC_RAMPING_IN,           &COptionsMixer::OnRampingChanged)
+	ON_EN_UPDATE(IDC_RAMPING_OUT,          &COptionsMixer::OnRampingChanged)
+	ON_COMMAND(IDC_CHECK_SOFTPAN,          &COptionsMixer::OnSettingsChanged)
+	ON_COMMAND(IDC_CHECK1,                 &COptionsMixer::OnAmigaChanged)
+	ON_COMMAND(IDC_BUTTON1,                &COptionsMixer::OnDefaultRampSettings)
 END_MESSAGE_MAP()
 
 
@@ -1112,6 +1113,14 @@ void COptionsMixer::OnRampingChanged()
 		return;
 	UpdateRamping();
 	OnSettingsChanged();
+}
+
+
+void COptionsMixer::OnDefaultRampSettings()
+{
+	m_CEditRampUp.SetWindowText(mpt::ToCString(mpt::ufmt::val(MixerSettings().GetVolumeRampUpMicroseconds())));
+	m_CEditRampDown.SetWindowText(mpt::ToCString(mpt::ufmt::val(MixerSettings().GetVolumeRampDownMicroseconds())));
+	OnRampingChanged();
 }
 
 

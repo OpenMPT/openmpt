@@ -124,6 +124,7 @@ protected:
 	afx_msg void OnSettingsChanged() { SetModified(TRUE); }
 	afx_msg void OnAmigaChanged();
 	afx_msg void OnRampingChanged();
+	afx_msg void OnDefaultRampSettings();
 
 	afx_msg void OnHScroll(UINT n, UINT pos, CScrollBar *p);
 
