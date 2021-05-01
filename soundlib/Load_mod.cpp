@@ -2205,7 +2205,7 @@ bool CSoundFile::ReadPT36(FileReader &file, ModLoadingFlags loadFlags)
 	m_SongFlags.set(SONG_PT_MODE);
 	m_playBehaviour.set(kMODIgnorePanning);
 	m_playBehaviour.set(kMODOneShotLoops);
-	m_playBehaviour.set(kMODSampleSwap);
+	m_playBehaviour.reset(kMODSampleSwap);
 
 	return ok;
 }
