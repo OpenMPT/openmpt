@@ -1126,7 +1126,7 @@ private:
 		}
 	};
 public:
-	CDoUpdate(Update::download download, CWnd *parent = NULL)
+	CDoUpdate(Update::download download, CWnd *parent = nullptr)
 		: CProgressDialog(parent)
 		, download(download)
 	{
