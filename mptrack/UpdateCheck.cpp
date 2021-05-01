@@ -1466,16 +1466,22 @@ public:
 };
 
 
+void CUpdateCheck::AcknowledgeSuccess(WPARAM wparam, LPARAM lparam)
+{
+	MPT_UNREFERENCED_PARAMETER(wparam);
+	const CUpdateCheck::Result& result = *reinterpret_cast<CUpdateCheck::Result*>(lparam);
+	if(result.CheckTime != time_t{})
+	{
+		TrackerSettings::Instance().UpdateLastUpdateCheck = mpt::Date::Unix(result.CheckTime);
+	}
+}
+
+
 void CUpdateCheck::ShowSuccessGUI(WPARAM wparam, LPARAM lparam)
 {
 
 	const CUpdateCheck::Result &result = *reinterpret_cast<CUpdateCheck::Result*>(lparam);
 	bool autoUpdate = wparam != 0;
-
-	if(result.CheckTime != time_t{})
-	{
-		TrackerSettings::Instance().UpdateLastUpdateCheck = mpt::Date::Unix(result.CheckTime);
-	}
 
 #if MPT_UPDATE_LEGACY
 

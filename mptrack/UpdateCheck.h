@@ -131,6 +131,8 @@ public:
 	static CUpdateCheck::Result ResultFromMessage(WPARAM wparam, LPARAM lparam);
 	static CUpdateCheck::Error ErrorFromMessage(WPARAM wparam, LPARAM lparam);
 
+	static void AcknowledgeSuccess(WPARAM wparam, LPARAM lparam);
+
 	static void ShowSuccessGUI(WPARAM wparam, LPARAM lparam);
 	static void ShowFailureGUI(WPARAM wparam, LPARAM lparam);
 
