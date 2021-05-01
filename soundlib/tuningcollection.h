@@ -51,12 +51,31 @@ public:
 	bool Remove(const std::size_t i);
 	bool Remove(const CTuning *pT);
 
-	CTuning& GetTuning(size_t i) {return *m_Tunings.at(i).get();}
-	const CTuning& GetTuning(size_t i) const {return *m_Tunings.at(i).get();}
+	std::size_t GetNumTunings() const
+	{
+		return m_Tunings.size();
+	}
+
+	CTuning* GetTuning(std::size_t i)
+	{
+		if(i >= m_Tunings.size())
+		{
+			return nullptr;
+		}
+		return m_Tunings[i].get();
+	}
+	const CTuning* GetTuning(std::size_t i) const
+	{
+		if (i >= m_Tunings.size())
+		{
+			return nullptr;
+		}
+		return m_Tunings[i].get();
+	}
+	
 	CTuning* GetTuning(const mpt::ustring &name);
 	const CTuning* GetTuning(const mpt::ustring &name) const;
 
-	size_t GetNumTunings() const {return m_Tunings.size();}
 
 	Tuning::SerializationResult Serialize(std::ostream &oStrm, const mpt::ustring &name) const;
 	Tuning::SerializationResult Deserialize(std::istream &iStrm, mpt::ustring &name, mpt::Charset defaultCharset);

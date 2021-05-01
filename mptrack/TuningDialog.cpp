@@ -677,7 +677,7 @@ void CTuningDialog::OnBnClickedButtonExport()
 
 		for(std::size_t i = 0; i < pTC->GetNumTunings(); ++i)
 		{
-			const CTuning & tuning = pTC->GetTuning(i);
+			const CTuning & tuning = *(pTC->GetTuning(i));
 			fileName = dlg.GetFirstFile();
 			mpt::ustring tuningName = mpt::ToUnicode(tuning.GetName());
 			if(tuningName.empty())
@@ -822,7 +822,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 				if(pTC->GetNumTunings() == 1)
 				{
 					Reporting::Message(LogInformation, U_("- Tuning Collection with a Tuning file extension (.tun) detected. It only contains a single Tuning, importing the file as a Tuning.\n"), this);
-					pT = std::unique_ptr<CTuning>(new CTuning(pTC->GetTuning(0)));
+					pT = std::unique_ptr<CTuning>(new CTuning(*(pTC->GetTuning(0))));
 					delete pTC;
 					pTC = nullptr;
 					// ok

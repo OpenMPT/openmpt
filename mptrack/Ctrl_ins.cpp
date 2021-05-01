@@ -2918,7 +2918,7 @@ void CCtrlInstruments::OnCbnSelchangeCombotuning()
 	{
 		CriticalSection cs;
 		PrepareUndo("Set Tuning");
-		instr->SetTuning(&m_sndFile.GetTuneSpecificTunings().GetTuning(sel));
+		instr->SetTuning(m_sndFile.GetTuneSpecificTunings().GetTuning(sel));
 		cs.Leave();
 
 		SetModified(InstrumentHint().Info(), true);
@@ -2957,7 +2957,7 @@ void CCtrlInstruments::UpdateTuningComboBox()
 
 	for(size_t i = 0; i < m_sndFile.GetTuneSpecificTunings().GetNumTunings(); i++)
 	{
-		if(pIns->pTuning == &m_sndFile.GetTuneSpecificTunings().GetTuning(i))
+		if(pIns->pTuning == m_sndFile.GetTuneSpecificTunings().GetTuning(i))
 		{
 			m_ComboTuning.SetCurSel((int)(i + 1));
 			return;
