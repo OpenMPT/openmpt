@@ -67,7 +67,6 @@ public:
 	virtual std::size_t size() const;
 	virtual IArchive::const_iterator begin() const;
 	virtual IArchive::const_iterator end() const;
-	virtual const ArchiveFileInfo & at(std::size_t index) const;
 	virtual const ArchiveFileInfo & operator [] (std::size_t index) const;
 
 public:
