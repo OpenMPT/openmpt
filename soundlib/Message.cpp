@@ -81,22 +81,22 @@ bool SongMessage::Read(const std::byte *data, size_t length, LineEnding lineEndi
 		{
 		case '\r':
 			if(lineEnding != leLF)
-				at(cpos) = InternalLineEnding;
+				operator[](cpos) = InternalLineEnding;
 			else
-				at(cpos) = ' ';
+				operator[](cpos) = ' ';
 			if(lineEnding == leCRLF) i++;	// skip the LF
 			break;
 		case '\n':
 			if(lineEnding != leCR && lineEnding != leCRLF)
-				at(cpos) = InternalLineEnding;
+				operator[](cpos) = InternalLineEnding;
 			else
-				at(cpos) = ' ';
+				operator[](cpos) = ' ';
 			break;
 		case '\0':
-			at(cpos) = ' ';
+			operator[](cpos) = ' ';
 			break;
 		default:
-			at(cpos) = c;
+			operator[](cpos) = c;
 			break;
 		}
 	}
@@ -137,12 +137,12 @@ bool SongMessage::ReadFixedLineLength(const std::byte *data, const size_t length
 		// Fix weird chars
 		for(size_t pos = writePos; pos < writePos + thisLineLength; pos++)
 		{
-			switch(at(pos))
+			switch(operator[](pos))
 			{
 			case '\0':
 			case '\n':
 			case '\r':
-				at(pos) = ' ';
+				operator[](pos) = ' ';
 				break;
 			}
 
