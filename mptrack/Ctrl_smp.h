@@ -45,6 +45,7 @@ protected:
 	CSpinButtonCtrl m_SpinVolume, m_SpinGlobalVol, m_SpinPanning, m_SpinVibSweep, m_SpinVibDepth, m_SpinVibRate;
 	CSpinButtonCtrl m_SpinLoopStart, m_SpinLoopEnd, m_SpinSustainStart, m_SpinSustainEnd;
 	CSpinButtonCtrl m_SpinFineTune, m_SpinSample;
+	CSpinButtonCtrl m_SpinSequenceMs, m_SpinSeekWindowMs, m_SpinOverlap, m_SpinStretchAmount;
 	CComboBox m_ComboAutoVib, m_ComboLoopType, m_ComboSustainType, m_ComboZoom, m_CbnBaseNote;
 	CButton m_CheckPanning;
 	double m_dTimeStretchRatio = 100;
@@ -58,7 +59,7 @@ protected:
 
 	CComboBox m_ComboPitch, m_ComboQuality, m_ComboFFT;
 
-	void UpdateTimeStretchParameterString();
+	void UpdateTimeStretchParameters();
 	void ReadTimeStretchParameters();
 
 	void ApplyAmplify(const double amp, const double fadeInStart, const double fadeOutEnd, const bool fadeIn, const bool fadeOut, const Fade::Law fadeLaw);
@@ -150,7 +151,7 @@ protected:
 	afx_msg void OnStereoSeparation();
 	afx_msg void OnKeepSampleOnDisk();
 	afx_msg void OnVScroll(UINT, UINT, CScrollBar *);
-	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM); //rewbs.customKeys
+	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
 	afx_msg void OnXButtonUp(UINT nFlags, UINT nButton, CPoint point);
 
 	afx_msg void OnPitchShiftTimeStretch();

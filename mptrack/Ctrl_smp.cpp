@@ -128,46 +128,50 @@ void CCtrlSamples::DoDataExchange(CDataExchange* pDX)
 {
 	CModControlDlg::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CCtrlSamples)
-	DDX_Control(pDX, IDC_TOOLBAR1,				m_ToolBar1);
-	DDX_Control(pDX, IDC_TOOLBAR2,				m_ToolBar2);
-	DDX_Control(pDX, IDC_SAMPLE_NAME,			m_EditName);
-	DDX_Control(pDX, IDC_SAMPLE_FILENAME,		m_EditFileName);
-	DDX_Control(pDX, IDC_SAMPLE_NAME,			m_EditName);
-	DDX_Control(pDX, IDC_SAMPLE_FILENAME,		m_EditFileName);
-	DDX_Control(pDX, IDC_COMBO_ZOOM,			m_ComboZoom);
-	DDX_Control(pDX, IDC_COMBO_BASENOTE,		m_CbnBaseNote);
-	DDX_Control(pDX, IDC_SPIN_SAMPLE,			m_SpinSample);
-	DDX_Control(pDX, IDC_EDIT_SAMPLE,			m_EditSample);
-	DDX_Control(pDX, IDC_CHECK1,				m_CheckPanning);
-	DDX_Control(pDX, IDC_SPIN1,					m_SpinLoopStart);
-	DDX_Control(pDX, IDC_SPIN2,					m_SpinLoopEnd);
-	DDX_Control(pDX, IDC_SPIN3,					m_SpinSustainStart);
-	DDX_Control(pDX, IDC_SPIN4,					m_SpinSustainEnd);
-	DDX_Control(pDX, IDC_SPIN5,					m_SpinFineTune);
-	DDX_Control(pDX, IDC_SPIN7,					m_SpinVolume);
-	DDX_Control(pDX, IDC_SPIN8,					m_SpinGlobalVol);
-	DDX_Control(pDX, IDC_SPIN9,					m_SpinPanning);
-	DDX_Control(pDX, IDC_SPIN11,				m_SpinVibSweep);
-	DDX_Control(pDX, IDC_SPIN12,				m_SpinVibDepth);
-	DDX_Control(pDX, IDC_SPIN13,				m_SpinVibRate);
-	DDX_Control(pDX, IDC_COMBO1,				m_ComboLoopType);
-	DDX_Control(pDX, IDC_COMBO2,				m_ComboSustainType);
-	DDX_Control(pDX, IDC_COMBO3,				m_ComboAutoVib);
-	DDX_Control(pDX, IDC_EDIT1,					m_EditLoopStart);
-	DDX_Control(pDX, IDC_EDIT2,					m_EditLoopEnd);
-	DDX_Control(pDX, IDC_EDIT3,					m_EditSustainStart);
-	DDX_Control(pDX, IDC_EDIT4,					m_EditSustainEnd);
-	DDX_Control(pDX, IDC_EDIT5,					m_EditFineTune);
-	DDX_Control(pDX, IDC_EDIT7,					m_EditVolume);
-	DDX_Control(pDX, IDC_EDIT8,					m_EditGlobalVol);
-	DDX_Control(pDX, IDC_EDIT9,					m_EditPanning);
-	DDX_Control(pDX, IDC_EDIT14,				m_EditVibSweep);
-	DDX_Control(pDX, IDC_EDIT15,				m_EditVibDepth);
-	DDX_Control(pDX, IDC_EDIT16,				m_EditVibRate);
-	DDX_Control(pDX, IDC_COMBO4,				m_ComboPitch);
-	DDX_Control(pDX, IDC_COMBO5,				m_ComboQuality);
-	DDX_Control(pDX, IDC_COMBO6,				m_ComboFFT);
-	DDX_Text(pDX,	 IDC_EDIT6,					m_dTimeStretchRatio);
+	DDX_Control(pDX, IDC_TOOLBAR1, m_ToolBar1);
+	DDX_Control(pDX, IDC_TOOLBAR2, m_ToolBar2);
+	DDX_Control(pDX, IDC_SAMPLE_NAME, m_EditName);
+	DDX_Control(pDX, IDC_SAMPLE_FILENAME, m_EditFileName);
+	DDX_Control(pDX, IDC_SAMPLE_NAME, m_EditName);
+	DDX_Control(pDX, IDC_SAMPLE_FILENAME, m_EditFileName);
+	DDX_Control(pDX, IDC_COMBO_ZOOM, m_ComboZoom);
+	DDX_Control(pDX, IDC_COMBO_BASENOTE, m_CbnBaseNote);
+	DDX_Control(pDX, IDC_SPIN_SAMPLE, m_SpinSample);
+	DDX_Control(pDX, IDC_EDIT_SAMPLE, m_EditSample);
+	DDX_Control(pDX, IDC_CHECK1, m_CheckPanning);
+	DDX_Control(pDX, IDC_SPIN1, m_SpinLoopStart);
+	DDX_Control(pDX, IDC_SPIN2, m_SpinLoopEnd);
+	DDX_Control(pDX, IDC_SPIN3, m_SpinSustainStart);
+	DDX_Control(pDX, IDC_SPIN4, m_SpinSustainEnd);
+	DDX_Control(pDX, IDC_SPIN5, m_SpinFineTune);
+	DDX_Control(pDX, IDC_SPIN7, m_SpinVolume);
+	DDX_Control(pDX, IDC_SPIN8, m_SpinGlobalVol);
+	DDX_Control(pDX, IDC_SPIN9, m_SpinPanning);
+	DDX_Control(pDX, IDC_SPIN11, m_SpinVibSweep);
+	DDX_Control(pDX, IDC_SPIN12, m_SpinVibDepth);
+	DDX_Control(pDX, IDC_SPIN13, m_SpinVibRate);
+	DDX_Control(pDX, IDC_COMBO1, m_ComboLoopType);
+	DDX_Control(pDX, IDC_COMBO2, m_ComboSustainType);
+	DDX_Control(pDX, IDC_COMBO3, m_ComboAutoVib);
+	DDX_Control(pDX, IDC_EDIT1, m_EditLoopStart);
+	DDX_Control(pDX, IDC_EDIT2, m_EditLoopEnd);
+	DDX_Control(pDX, IDC_EDIT3, m_EditSustainStart);
+	DDX_Control(pDX, IDC_EDIT4, m_EditSustainEnd);
+	DDX_Control(pDX, IDC_EDIT5, m_EditFineTune);
+	DDX_Control(pDX, IDC_EDIT7, m_EditVolume);
+	DDX_Control(pDX, IDC_EDIT8, m_EditGlobalVol);
+	DDX_Control(pDX, IDC_EDIT9, m_EditPanning);
+	DDX_Control(pDX, IDC_EDIT14, m_EditVibSweep);
+	DDX_Control(pDX, IDC_EDIT15, m_EditVibDepth);
+	DDX_Control(pDX, IDC_EDIT16, m_EditVibRate);
+	DDX_Control(pDX, IDC_COMBO4, m_ComboPitch);
+	DDX_Control(pDX, IDC_COMBO5, m_ComboQuality);
+	DDX_Control(pDX, IDC_COMBO6, m_ComboFFT);
+	DDX_Control(pDX, IDC_SPIN10, m_SpinSequenceMs);
+	DDX_Control(pDX, IDC_SPIN14, m_SpinSeekWindowMs);
+	DDX_Control(pDX, IDC_SPIN15, m_SpinOverlap);
+	DDX_Control(pDX, IDC_SPIN16, m_SpinStretchAmount);
+	DDX_Text(pDX, IDC_EDIT6, m_dTimeStretchRatio);
 	//}}AFX_DATA_MAP
 }
 
@@ -271,16 +275,6 @@ BOOL CCtrlSamples::OnInitDialog()
 	m_ComboQuality.ShowWindow(SW_SHOW);
 	m_ComboFFT.ShowWindow(SW_SHOW);
 
-	GetDlgItem(IDC_BUTTON1)->ShowWindow(SW_SHOW); // PitchShiftTimeStretch
-	GetDlgItem(IDC_BUTTON2)->ShowWindow(SW_SHOW); // EstimateSampleSize
-	GetDlgItem(IDC_CHECK3)->ShowWindow(SW_SHOW);  // EnableStretchToSize
-	GetDlgItem(IDC_EDIT6)->ShowWindow(SW_SHOW);
-	GetDlgItem(IDC_GROUPBOX_PITCH_TIME)->ShowWindow(SW_SHOW);
-	GetDlgItem(IDC_TEXT_PITCH)->ShowWindow(SW_SHOW);
-	GetDlgItem(IDC_TEXT_QUALITY)->ShowWindow(SW_SHOW);
-	GetDlgItem(IDC_TEXT_FFT)->ShowWindow(SW_SHOW);
-	GetDlgItem(IDC_GROUPBOX_PITCH_TIME)->ShowWindow(SW_SHOW);
-
 	// Pitch selection
 	// Allow pitch from -12 (1 octave down) to +12 (1 octave up)
 	m_ComboPitch.InitStorage(25, 4);
@@ -328,6 +322,10 @@ BOOL CCtrlSamples::OnInitDialog()
 
 	// Stretch to size check box
 	OnEnableStretchToSize();
+	m_SpinSequenceMs.SetRange32(0, 9999);
+	m_SpinSeekWindowMs.SetRange32(0, 9999);
+	m_SpinOverlap.SetRange32(0, 9999);
+	m_SpinStretchAmount.SetRange32(50, 200);
 
 	SetRedraw(TRUE);
 	return TRUE;
@@ -648,9 +646,6 @@ BOOL CCtrlSamples::GetToolTipText(UINT uId, LPTSTR pszText)
 			}
 			return TRUE;
 
-		case IDC_EDIT_STRETCHPARAMS:
-			s = _T("SequenceMs SeekwindowMs OverlapMs");
-			break;
 		case IDC_CHECK2:
 			s = _T("Keep a reference to the original waveform instead of saving it in the module.");
 			break;
@@ -2086,21 +2081,17 @@ void CCtrlSamples::ApplyResample(SAMPLEINDEX smp, uint32 newRate, ResamplingMode
 
 void CCtrlSamples::ReadTimeStretchParameters()
 {
-	CString str;
-	GetDlgItemText(IDC_EDIT_STRETCHPARAMS, str);
-	_stscanf(str, _T("%u %u %u"),
-		&m_nSequenceMs, &m_nSeekWindowMs, &m_nOverlapMs);
+	m_nSequenceMs = GetDlgItemInt(IDC_EDIT10);
+	m_nSeekWindowMs = GetDlgItemInt(IDC_EDIT11);
+	m_nOverlapMs = GetDlgItemInt(IDC_EDIT12);
 }
 
 
-void CCtrlSamples::UpdateTimeStretchParameterString()
+void CCtrlSamples::UpdateTimeStretchParameters()
 {
-	CString str;
-	str.Format(_T("%u %u %u"),
-				m_nSequenceMs,
-				m_nSeekWindowMs,
-				m_nOverlapMs);
-	SetDlgItemText(IDC_EDIT_STRETCHPARAMS, str);
+	GetDlgItem(IDC_EDIT10)->SetWindowText(((m_nSequenceMs <= 0) ? _T("auto") : MPT_TFORMAT("{}ms")(m_nSequenceMs)).c_str());
+	GetDlgItem(IDC_EDIT11)->SetWindowText(((m_nSeekWindowMs <= 0) ? _T("auto") : MPT_TFORMAT("{}ms")(m_nSeekWindowMs)).c_str());
+	GetDlgItem(IDC_EDIT12)->SetWindowText(((m_nOverlapMs <= 0) ? _T("auto") : MPT_TFORMAT("{}ms")(m_nOverlapMs)).c_str());
 }
 
 void CCtrlSamples::OnEnableStretchToSize()
@@ -2111,16 +2102,25 @@ void CCtrlSamples::OnEnableStretchToSize()
 	((CComboBox *)GetDlgItem(IDC_COMBO4))->EnableWindow(timeStretch ? FALSE : TRUE);
 	((CEdit *)GetDlgItem(IDC_EDIT6))->EnableWindow(timeStretch ? TRUE : FALSE);
 	((CButton *)GetDlgItem(IDC_BUTTON2))->EnableWindow(timeStretch ? TRUE : FALSE); //rewbs.timeStretchMods
-	GetDlgItem(IDC_TEXT_QUALITY)->ShowWindow(timeStretch ? SW_HIDE : SW_SHOW);
-	GetDlgItem(IDC_COMBO5)->ShowWindow(timeStretch ? SW_HIDE : SW_SHOW);
-	GetDlgItem(IDC_TEXT_FFT)->ShowWindow(timeStretch ? SW_HIDE : SW_SHOW);
-	GetDlgItem(IDC_COMBO6)->ShowWindow(timeStretch ? SW_HIDE : SW_SHOW);
-	GetDlgItem(IDC_TEXT_STRETCHPARAMS)->ShowWindow(timeStretch ? SW_SHOW : SW_HIDE);
-	GetDlgItem(IDC_EDIT_STRETCHPARAMS)->ShowWindow(timeStretch ? SW_SHOW : SW_HIDE);
-	GetDlgItem(IDC_TEXT_PITCH)->ShowWindow(timeStretch ? SW_HIDE : SW_SHOW);
+
+	GetDlgItem(IDC_TEXT_PITCH)->SetWindowText(timeStretch ? _T("Sequence") : _T("Pitch"));
+	GetDlgItem(IDC_TEXT_QUALITY)->SetWindowText(timeStretch ? _T("Seek Window") : _T("Quality"));
+	GetDlgItem(IDC_TEXT_FFT)->SetWindowText(timeStretch ? _T("Overlap") : _T("FFT Size"));
+
+	GetDlgItem(IDC_EDIT10)->ShowWindow(timeStretch ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_EDIT11)->ShowWindow(timeStretch ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_EDIT12)->ShowWindow(timeStretch ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_SPIN10)->ShowWindow(timeStretch ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_SPIN14)->ShowWindow(timeStretch ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_SPIN15)->ShowWindow(timeStretch ? SW_SHOW : SW_HIDE);
+	
 	GetDlgItem(IDC_COMBO4)->ShowWindow(timeStretch ? SW_HIDE : SW_SHOW);
+	GetDlgItem(IDC_COMBO5)->ShowWindow(timeStretch ? SW_HIDE : SW_SHOW);
+	GetDlgItem(IDC_COMBO6)->ShowWindow(timeStretch ? SW_HIDE : SW_SHOW);
+
 	SetDlgItemText(IDC_BUTTON1, timeStretch ? _T("Time Stretch") : _T("Pitch Shift"));
-	if(timeStretch) UpdateTimeStretchParameterString();
+	if(timeStretch)
+		UpdateTimeStretchParameters();
 }
 
 void CCtrlSamples::OnEstimateSampleSize()
@@ -2224,20 +2224,17 @@ public:
 
 		// Set settings to soundtouch. Zero value means 'use default', and
 		// setting value is read back after setting because not all settings are accepted.
-		if(m_parent.m_nSequenceMs != 0)
-			soundtouch_setSetting(handleSt, SETTING_SEQUENCE_MS, m_parent.m_nSequenceMs);
+		soundtouch_setSetting(handleSt, SETTING_SEQUENCE_MS, m_parent.m_nSequenceMs);
 		m_parent.m_nSequenceMs = soundtouch_getSetting(handleSt, SETTING_SEQUENCE_MS);
 
-		if(m_parent.m_nSeekWindowMs != 0)
-			soundtouch_setSetting(handleSt, SETTING_SEEKWINDOW_MS, m_parent.m_nSeekWindowMs);
+		soundtouch_setSetting(handleSt, SETTING_SEEKWINDOW_MS, m_parent.m_nSeekWindowMs);
 		m_parent.m_nSeekWindowMs = soundtouch_getSetting(handleSt, SETTING_SEEKWINDOW_MS);
 
-		if(m_parent.m_nOverlapMs != 0)
-			soundtouch_setSetting(handleSt, SETTING_OVERLAP_MS, m_parent.m_nOverlapMs);
+		soundtouch_setSetting(handleSt, SETTING_OVERLAP_MS, m_parent.m_nOverlapMs);
 		m_parent.m_nOverlapMs = soundtouch_getSetting(handleSt, SETTING_OVERLAP_MS);
 
 		// Update GUI with the actual SoundTouch parameters in effect.
-		m_parent.UpdateTimeStretchParameterString();
+		m_parent.UpdateTimeStretchParameters();
 
 		const SmpLength inBatchSize = soundtouch_getSetting(handleSt, SETTING_NOMINAL_INPUT_SEQUENCE) + 1; // approximate value, add 1 to play safe
 		const SmpLength outBatchSize = soundtouch_getSetting(handleSt, SETTING_NOMINAL_OUTPUT_SEQUENCE) + 1; // approximate value, add 1 to play safe
@@ -3370,6 +3367,11 @@ NoSample:
 		redraw = true;
 		m_SpinFineTune.SetPos(0);
 		OnFineTuneChangedDone();
+	}
+	if(scrollBar->m_hWnd == m_SpinSequenceMs.m_hWnd || scrollBar->m_hWnd == m_SpinSeekWindowMs.m_hWnd || scrollBar->m_hWnd == m_SpinOverlap.m_hWnd)
+	{
+		ReadTimeStretchParameters();
+		UpdateTimeStretchParameters();
 	}
 	if(nCode == SB_ENDSCROLL) SwitchToView();
 	if(redraw)
