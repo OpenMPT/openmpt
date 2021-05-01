@@ -56,6 +56,7 @@ IMixPlugin::IMixPlugin(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN 
 	, m_passKeypressesToPlug(false)
 	, m_recordMIDIOut(false)
 {
+	m_SndFile.m_loadedPlugins++;
 	m_MixState.pMixBuffer = (mixsample_t *)((((intptr_t)m_MixBuffer) + 7) & ~7);
 
 	m_MixState.dwFlags = 0;
@@ -88,6 +89,7 @@ IMixPlugin::~IMixPlugin()
 	if (m_pPrev) m_pPrev->m_pNext = m_pNext;
 	m_pPrev = nullptr;
 	m_pNext = nullptr;
+	m_SndFile.m_loadedPlugins--;
 }
 
 

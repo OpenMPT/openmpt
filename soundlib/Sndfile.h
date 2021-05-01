@@ -397,12 +397,13 @@ public:
 	CPatternContainer Patterns;							// Patterns
 	ModSequenceSet Order;								// Modsequences. Order[x] returns an index of a pattern located at order x of the current sequence.
 protected:
-	ModSample Samples[MAX_SAMPLES];						// Sample Headers
+	ModSample Samples[MAX_SAMPLES];
 public:
-	ModInstrument *Instruments[MAX_INSTRUMENTS];		// Instrument Headers
-	MIDIMacroConfig m_MidiCfg;							// MIDI Macro config table
+	ModInstrument *Instruments[MAX_INSTRUMENTS];  // Instrument Headers
+	MIDIMacroConfig m_MidiCfg;                    // MIDI Macro config table
 #ifndef NO_PLUGINS
-	SNDMIXPLUGIN m_MixPlugins[MAX_MIXPLUGINS];			// Mix plugins
+	SNDMIXPLUGIN m_MixPlugins[MAX_MIXPLUGINS];  // Mix plugins
+	uint32 m_loadedPlugins = 0;                 // Not a PLUGINDEX because number of loaded plugins may exceed MAX_MIXPLUGINS during MIDI conversion
 #endif
 	char m_szNames[MAX_SAMPLES][MAX_SAMPLENAME];		// Sample names
 
