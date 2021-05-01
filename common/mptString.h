@@ -484,7 +484,7 @@ std::string ToCharset(Charset to, const CString &str);
 //  are variable-length encodings and mpt::ustring is implemented as a
 //  std::basic_string, all member functions that require individual character
 //  access will not work consistently or even at all in a meaningful way.
-//  This in particular affects operator[], at(), find() and substr().
+//  This in particular affects operator[], find() and substr().
 //  The code makes no effort in preventing these or generating warnings when
 //  these are used on mpt::ustring objects. However, compiling in the
 //  respectively other mpt::ustring mode will catch most of these anyway.
