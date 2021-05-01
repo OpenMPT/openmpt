@@ -66,6 +66,7 @@ static constexpr ModFormatInfo modFormatInfo[] =
 	{ MOD_TYPE_DIGI, UL_("DigiBooster"),                "digi" },
 	{ MOD_TYPE_DMF,  UL_("X-Tracker"),                  "dmf" },
 	{ MOD_TYPE_DSM,  UL_("DSIK Format"),                "dsm" },
+	{ MOD_TYPE_MOD,  UL_("Digital Symphony"),           "dsym" },
 	{ MOD_TYPE_DTM,  UL_("Digital Tracker"),            "dtm" },
 	{ MOD_TYPE_FAR,  UL_("Farandole Composer"),         "far" },
 	{ MOD_TYPE_S3M,  UL_("FM Tracker"),                 "fmt" },
