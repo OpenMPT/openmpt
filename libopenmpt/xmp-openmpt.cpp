@@ -1029,7 +1029,7 @@ static void WINAPI openmpt_SetFormat( XMPFORMAT * form ) {
 	if ( self->settings.samplerate != 0 ) {
 		form->rate = self->samplerate;
 	} else {
-		if ( form->rate && form->rate > 0 ) {
+		if ( form->rate > 0 ) {
 			self->samplerate = form->rate;
 		} else {
 			form->rate = 48000;
@@ -1039,7 +1039,7 @@ static void WINAPI openmpt_SetFormat( XMPFORMAT * form ) {
 	if ( self->settings.channels != 0 ) {
 		form->chan = self->num_channels;
 	} else {
-		if ( form->chan && form->chan > 0 ) {
+		if ( form->chan > 0 ) {
 			if ( form->chan > 2 ) {
 				form->chan = 4;
 				self->num_channels = 4;
