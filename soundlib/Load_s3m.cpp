@@ -309,7 +309,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 			m_nMinPeriod = 1;
 			isSchism = true;
 			if(schismDateVersion >= SchismVersionFromDate<2021, 05, 02>::date)
-				m_playBehaviour.reset(kPeriodsAreHertz);
+				m_playBehaviour.set(kPeriodsAreHertz);
 		}
 		nonCompatTracker = true;
 		break;
