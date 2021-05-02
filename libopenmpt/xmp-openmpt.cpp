@@ -1424,10 +1424,13 @@ static void WINAPI VisSize( HDC /* dc */ , SIZE * /* size */ ) {
 	xmpopenmpt_lock guard;
 	last_pattern = -1;	// Force redraw
 }
+
+#if 0
 static BOOL WINAPI VisRender( DWORD * /* buf */ , SIZE /* size */ , DWORD /* flags */ ) {
 	xmpopenmpt_lock guard;
 	return FALSE;
 }
+#endif
 
 static int get_pattern_width( int chars_per_channel, int spaces_per_channel, int num_cols, int text_size, int channels )
 {
@@ -1673,9 +1676,11 @@ static BOOL WINAPI VisRenderDC( HDC dc, SIZE size, DWORD flags ) {
 	return TRUE;
 }
 
+#if 0
 static void WINAPI VisButton( DWORD /* x */ , DWORD /* y */ ) {
 	//xmpopenmpt_lock guard;
 }
+#endif
 
 static XMPIN xmpin = {
 #ifdef USE_XMPLAY_FILE_IO
