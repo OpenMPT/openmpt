@@ -1317,11 +1317,11 @@ bin/dist-dos.tar: bin/dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.dos.zip
 .PHONY: dist-retro-win9x
 dist-retro-win9x: bin/dist-retro-win9x.tar
 
-bin/dist-retro-win9x.tar: bin/dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.retro.win9x.tar.gz
+bin/dist-retro-win9x.tar: bin/dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.retro.win9x.zip
 	rm -rf bin/dist-retro-win9x.tar
 	cd bin/dist-retro-win9x/ && rm -rf libopenmpt
 	cd bin/dist-retro-win9x/ && mkdir -p libopenmpt/bin.retro.win9x/$(DIST_LIBOPENMPT_TARBALL_VERSION)/
-	cd bin/dist-retro-win9x/ && cp libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.retro.win9x.tar.gz libopenmpt/bin.retro.win9x/$(DIST_LIBOPENMPT_TARBALL_VERSION)/
+	cd bin/dist-retro-win9x/ && cp libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.retro.win9x.zip libopenmpt/bin.retro.win9x/$(DIST_LIBOPENMPT_TARBALL_VERSION)/
 	cd bin/dist-retro-win9x/ && tar cvf ../dist-retro-win9x.tar libopenmpt
 
 .PHONY: bin/dist.mk
@@ -1516,8 +1516,8 @@ endif
 	cp include/cwsdpmi/bin/CWSDSTR0.EXE          bin/dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/BIN/CWSDSTR0.EXE
 	cd bin/dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/ && zip -r ../libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.dos.zip --compression-method deflate -9 *
 
-.PHONY: bin/dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.retro.win9x.tar.gz
-bin/dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.retro.win9x.tar.gz:
+.PHONY: bin/dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.retro.win9x.zip
+bin/dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.retro.win9x.zip:
 	mkdir -p bin/dist-retro-win9x
 	rm -rf                                       bin/dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)
 	mkdir -p                                     bin/dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)
@@ -1542,7 +1542,7 @@ endif
 	mkdir -p                                     bin/dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Winamp
 	svn export ./libopenmpt/doc/xmp-openmpt.txt  bin/dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Winamp/in_openmpt.txt --native-eol CRLF
 	cp bin/in_openmpt.dll                        bin/dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Winamp/in_openmpt.dll
-	cd bin/dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/ && tar cvaf ../libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.retro.win9x.tar.gz *
+	cd bin/dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/ && ../../../build/tools/7zip/7z a -tzip -mx=9 ../libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.retro.win9x.zip *
 
 bin/libopenmpt.a: $(LIBOPENMPT_OBJECTS)
 	$(INFO) [AR] $@
