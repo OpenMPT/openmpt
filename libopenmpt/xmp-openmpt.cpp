@@ -1824,12 +1824,10 @@ XMPIN * WINAPI XMPIN_GetInterface_( DWORD face, InterfaceProc faceproc );
 XMPIN * WINAPI XMPIN_GetInterface_( DWORD face, InterfaceProc faceproc ) {
 	return XMPIN_GetInterface_cxx( face, faceproc );
 }
-#ifdef __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wattribute-alias"
 __declspec(dllexport) void XMPIN_GetInterface() __attribute__((alias("XMPIN_GetInterface_@8")));
 #pragma GCC diagnostic pop
-#endif
 #else
 XMPIN * WINAPI XMPIN_GetInterface( DWORD face, InterfaceProc faceproc ) {
 	return XMPIN_GetInterface_cxx( face, faceproc );
