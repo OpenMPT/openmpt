@@ -253,6 +253,8 @@ static std::basic_string<TCHAR> generate_infotext( const std::basic_string<TCHAR
 static void config( HWND hwndParent ) {
 #if defined(MPT_WITH_MFC)
 	libopenmpt::plugin::gui_edit_settings( &self->settings, hwndParent, TEXT(SHORT_TITLE) );
+#else // !MPT_WITH_MFC
+	static_cast<void>(hwndParent);
 #endif // MPT_WITH_MFC
 	apply_options();
 }
