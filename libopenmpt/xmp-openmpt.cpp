@@ -1478,7 +1478,7 @@ static BOOL WINAPI VisRenderDC( HDC dc, SIZE size, DWORD flags ) {
 	const std::size_t rows = self->mod->get_pattern_num_rows( pattern );
 
 	const std::size_t num_half_chars = std::max( static_cast<std::size_t>( 2 * size.cx / text_size.cx ), std::size_t(8) ) - 8;
-	const std::size_t num_rows = size.cy / text_size.cy;
+	//const std::size_t num_rows = size.cy / text_size.cy;
 
 	// Spaces between pattern components are half width, full space at channel end
 	const std::size_t half_chars_per_channel = num_half_chars / channels;
