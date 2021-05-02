@@ -352,7 +352,7 @@ mpt::ustring CSoundFile::GetSchismTrackerVersion(uint16 cwtv, uint32 reserved)
 	cwtv &= 0xFFF;
 	if(cwtv > 0x050)
 	{
-		int32 date = SchismVersionFromDate<2009, 10, 31>::date + (cwtv < 0xFFF ? cwtv - 0x050 : reserved);
+		int32 date = SchismTrackerEpoch + (cwtv < 0xFFF ? cwtv - 0x050 : reserved);
 		int32 y = static_cast<int32>((Util::mul32to64(10000, date) + 14780) / 3652425);
 		int32 ddd = date - (365 * y + y / 4 - y / 100 + y / 400);
 		if(ddd < 0)
@@ -1154,6 +1154,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	} else
 	{
+		const int32 schismDateVersion = SchismTrackerEpoch + ((fileHeader.cwtv == 0x1FFF) ? fileHeader.reserved : (fileHeader.cwtv - 0x1050));
 		switch(fileHeader.cwtv >> 12)
 		{
 		case 0:
@@ -1215,19 +1216,19 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		case 1:
 			madeWithTracker = GetSchismTrackerVersion(fileHeader.cwtv, fileHeader.reserved);
 			// Hertz in linear mode: Added 2015-01-29, https://github.com/schismtracker/schismtracker/commit/671b30311082a0e7df041fca25f989b5d2478f69
-			if(fileHeader.cwtv < SchismVersionFromDate<2015, 01, 29>::Version() && m_SongFlags[SONG_LINEARSLIDES])
+			if(schismDateVersion < SchismVersionFromDate<2015, 01, 29>::date && m_SongFlags[SONG_LINEARSLIDES])
 				m_playBehaviour.reset(kPeriodsAreHertz);
 			// Hertz in Amiga mode: Added 2021-05-02, https://github.com/schismtracker/schismtracker/commit/c656a6cbd5aaf81198a7580faf81cb7960cb6afa
-			else if(fileHeader.cwtv < SchismVersionFromDate<2021, 05, 02>::Version() && !m_SongFlags[SONG_LINEARSLIDES])
+			else if(schismDateVersion < SchismVersionFromDate<2021, 05, 02>::date && !m_SongFlags[SONG_LINEARSLIDES])
 				m_playBehaviour.reset(kPeriodsAreHertz);
 			// Qxx with short samples: Added 2016-05-13, https://github.com/schismtracker/schismtracker/commit/e7b1461fe751554309fd403713c2a1ef322105ca
-			if(fileHeader.cwtv < SchismVersionFromDate<2016, 05, 13>::Version())
+			if(schismDateVersion < SchismVersionFromDate<2016, 05, 13>::date)
 				m_playBehaviour.reset(kITShortSampleRetrig);
 			// Instrument pan doesn't override channel pan: Added 2021-05-02, https://github.com/schismtracker/schismtracker/commit/a34ec86dc819915debc9e06f4727b77bf2dd29ee
-			if(fileHeader.cwtv < SchismVersionFromDate<2021, 05, 02>::Version())
+			if(schismDateVersion < SchismVersionFromDate<2021, 05, 02>::date)
 				m_playBehaviour.reset(kITDoNotOverrideChannelPan);
 			// Notes set instrument panning, not instrument numbers: Added 2021-05-02, https://github.com/schismtracker/schismtracker/commit/648f5116f984815c69e11d018b32dfec53c6b97a
-			if(fileHeader.cwtv < SchismVersionFromDate<2021, 05, 02>::Version())
+			if(schismDateVersion < SchismVersionFromDate<2021, 05, 02>::date)
 				m_playBehaviour.reset(kITPanningReset);
 			break;
 		case 4:

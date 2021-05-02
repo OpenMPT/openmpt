@@ -248,6 +248,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	bool nonCompatTracker = false;
 	bool isST3 = false;
 	bool isSchism = false;
+	const int32 schismDateVersion = SchismTrackerEpoch + ((fileHeader.cwtv == 0x4FFF) ? fileHeader.reserved2 : (fileHeader.cwtv - 0x4050));
 	switch(fileHeader.cwtv & S3MFileHeader::trackerMask)
 	{
 	case S3MFileHeader::trkScreamTracker:
@@ -307,7 +308,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 			madeWithTracker = GetSchismTrackerVersion(fileHeader.cwtv, fileHeader.reserved2);
 			m_nMinPeriod = 1;
 			isSchism = true;
-			if(fileHeader.cwtv >= SchismVersionFromDate<2021, 05, 02>::Version(S3MFileHeader::trkSchismTracker))
+			if(schismDateVersion >= SchismVersionFromDate<2021, 05, 02>::date)
 				m_playBehaviour.reset(kPeriodsAreHertz);
 		}
 		nonCompatTracker = true;
@@ -411,7 +412,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Approximately as loud as in DOSBox and a real SoundBlaster 16
 	m_nVSTiVolume = 36;
-	if(isSchism && fileHeader.cwtv < SchismVersionFromDate<2018, 11, 12>::Version(S3MFileHeader::trkSchismTracker))
+	if(isSchism && schismDateVersion < SchismVersionFromDate<2018, 11, 12>::date)
 		m_nVSTiVolume = 64;
 
 	// Channel setup
