@@ -1771,7 +1771,7 @@ static void xmp_openmpt_on_dll_unload() {
 	delete self;
 	self = nullptr;
 	if ( xmpin.exts != xmp_openmpt_default_exts ) {
-		HeapFree(GetProcessHeap(), 0, (LPVOID)xmpin.exts);
+		HeapFree(GetProcessHeap(), 0, (LPVOID)const_cast<char*>(xmpin.exts));
 	}
 	xmpin.exts = nullptr;
 	DeleteCriticalSection( &xmpopenmpt_mutex );
