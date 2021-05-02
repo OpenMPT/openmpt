@@ -1168,11 +1168,11 @@ static double WINAPI openmpt_SetPosition( DWORD pos ) {
 	if ( !self->mod ) {
 		return -1.0;
 	}
-	if ( pos == XMPIN_POS_LOOP ) {
+	if ( pos == static_cast<DWORD>(static_cast<LONG>(XMPIN_POS_LOOP)) ) {
 		// If the time of the loop start position is known, that should be returned, otherwise -2 can be returned to let the time run on.
 		// There is currently no way to easily figure out at which time the loop restarts.
 		return -2;
-	} else if ( pos == XMPIN_POS_AUTOLOOP ) {
+	} else if ( pos == static_cast<DWORD>(static_cast<LONG>(XMPIN_POS_AUTOLOOP)) ) {
 		// In the auto-looping case, the function should only loop when a loop has been detected, and otherwise return -1
 		// If the time of the loop start position is known, that should be returned, otherwise -2 can be returned to let the time run on.
 		// There is currently no way to easily figure out at which time the loop restarts.
