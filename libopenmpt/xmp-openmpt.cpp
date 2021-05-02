@@ -1718,7 +1718,7 @@ XMPIN * WINAPI XMPIN_GetInterface( DWORD face, InterfaceProc faceproc ) {
 }
 #pragma comment(linker, "/EXPORT:XMPIN_GetInterface=_XMPIN_GetInterface@8")
 
-}; // extern "C"
+} // extern "C"
 
 
 #ifdef _MFC_VER
