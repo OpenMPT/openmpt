@@ -25,18 +25,18 @@ namespace plugin {
 typedef void (*changed_func)();
 
 struct libopenmpt_settings {
-	bool no_default_format;
-	int samplerate;
-	int channels;
-	int mastergain_millibel;
-	int stereoseparation;
-	int use_amiga_resampler;
-	int amiga_filter_type;
-	int repeatcount;
-	int interpolationfilterlength;
-	int ramping;
-	int vis_allow_scroll;
-	changed_func changed;
+	bool no_default_format = true;
+	int samplerate = 48000;
+	int channels = 2;
+	int mastergain_millibel = 0;
+	int stereoseparation = 100;
+	int use_amiga_resampler = 0;
+	int amiga_filter_type = 0;
+	int repeatcount = 0;
+	int interpolationfilterlength = 8;
+	int ramping = -1;
+	int vis_allow_scroll = 1;
+	changed_func changed = nullptr;
 };
 
 
@@ -73,21 +73,10 @@ protected:
 		}
 	}
 public:
-	settings( const std::basic_string<TCHAR> & subkey, bool no_default_format )
+	settings( const std::basic_string<TCHAR> & subkey, bool no_default_format_ )
 		: subkey(subkey)
 	{
-		libopenmpt_settings::no_default_format = no_default_format;
-		samplerate = 48000;
-		channels = 2;
-		mastergain_millibel = 0;
-		stereoseparation = 100;
-		repeatcount = 0;
-		interpolationfilterlength = 8;
-		use_amiga_resampler = 0;
-		amiga_filter_type = 0;
-		ramping = -1;
-		vis_allow_scroll = 1;
-		changed = 0;
+		no_default_format = no_default_format_;
 	}
 	void load()
 	{
