@@ -1858,6 +1858,8 @@ void DllMainDetach() {
 
 BOOL WINAPI DllMain( HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved );
 BOOL WINAPI DllMain( HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved ) {
+	static_cast<void>(hinstDLL);
+	static_cast<void>(lpvReserved);
 	switch ( fdwReason ) {
 	case DLL_PROCESS_ATTACH:
 		xmp_openmpt_on_dll_load();
