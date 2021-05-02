@@ -516,7 +516,7 @@ static DWORD WINAPI DecodeThread( LPVOID ) {
 	return 0;
 }
 
-In_Module inmod = {
+static In_Module inmod = {
 	IN_VER,
 	const_cast< char * >( in_openmpt_string ), // SHORT_TITLE,
 	0, // hMainWindow
