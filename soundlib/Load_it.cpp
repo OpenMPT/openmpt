@@ -1223,6 +1223,12 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			// Qxx with short samples: Added 2016-05-13, https://github.com/schismtracker/schismtracker/commit/e7b1461fe751554309fd403713c2a1ef322105ca
 			if(fileHeader.cwtv < SchismVersionFromDate<2016, 05, 13>::Version())
 				m_playBehaviour.reset(kITShortSampleRetrig);
+			// Instrument pan doesn't override channel pan: Added 2021-05-02, https://github.com/schismtracker/schismtracker/commit/a34ec86dc819915debc9e06f4727b77bf2dd29ee
+			if(fileHeader.cwtv < SchismVersionFromDate<2021, 05, 02>::Version())
+				m_playBehaviour.reset(kITDoNotOverrideChannelPan);
+			// Notes set instrument panning, not instrument numbers: Added 2021-05-02, https://github.com/schismtracker/schismtracker/commit/648f5116f984815c69e11d018b32dfec53c6b97a
+			if(fileHeader.cwtv < SchismVersionFromDate<2021, 05, 02>::Version())
+				m_playBehaviour.reset(kITPanningReset);
 			break;
 		case 4:
 			madeWithTracker = MPT_UFORMAT("pyIT {}.{}")((fileHeader.cwtv & 0x0F00) >> 8, mpt::ufmt::hex0<2>(fileHeader.cwtv & 0xFF));
