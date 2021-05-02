@@ -64,7 +64,7 @@ protected:
 			DWORD v = val;
 			DWORD type = REG_DWORD;
 			DWORD typesize = sizeof(v);
-			if ( RegSetValueEx( regkey, key.c_str(), NULL, type, (const BYTE *)&v, typesize ) == ERROR_SUCCESS )
+			if ( RegSetValueEx( regkey, key.c_str(), 0, type, (const BYTE *)&v, typesize ) == ERROR_SUCCESS )
 			{
 				// ok
 			}
