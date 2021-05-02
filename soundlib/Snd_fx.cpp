@@ -140,7 +140,7 @@ public:
 				updateInc = true;
 			}
 
-			int period = chn.nPeriod;
+			int32 period = chn.nPeriod;
 			if(itEnvMode) sndFile.IncrementEnvelopePositions(chn);
 			if(updatePitchEnv)
 			{
