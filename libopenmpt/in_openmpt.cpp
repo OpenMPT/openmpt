@@ -516,6 +516,9 @@ static DWORD WINAPI DecodeThread( LPVOID ) {
 	return 0;
 }
 
+#if defined(__GNUC__)
+extern In_Module inmod;
+#endif
 In_Module inmod = {
 	IN_VER,
 	const_cast< char * >( in_openmpt_string ), // SHORT_TITLE,
