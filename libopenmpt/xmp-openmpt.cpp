@@ -1337,11 +1337,18 @@ static void assure_width( std::string & str, std::size_t width ) {
 	}
 }
 
+struct ColorRGBA
+{
+	uint8_t r, g, b, a;
+};
+
 union Color
 {
-	struct { uint8_t r, g, b, a; };
+	ColorRGBA rgba;
 	COLORREF dw;
 };
+
+static_assert(sizeof(Color) == 4);
 
 HDC visDC;
 HGDIOBJ visbitmap;
@@ -1354,10 +1361,10 @@ static int last_pattern = -1;
 
 static Color invert_color( Color c ) {
 	Color res;
-	res.a = c.a;
-	res.r = 255 - c.r;
-	res.g = 255 - c.g;
-	res.b = 255 - c.b;
+	res.rgba.a = c.rgba.a;
+	res.rgba.r = 255 - c.rgba.r;
+	res.rgba.g = 255 - c.rgba.g;
+	res.rgba.b = 255 - c.rgba.b;
 	return res;
 }
 
@@ -1373,20 +1380,20 @@ static BOOL WINAPI VisOpen(DWORD colors[3]) {
 
 	viscolors[col_global] = invert_color( viscolors[col_background] );
 
-	const int r = viscolors[col_text].r, g = viscolors[col_text].g, b = viscolors[col_text].b;
-	viscolors[col_empty].r = static_cast<std::uint8_t>( (r + viscolors[col_background].r) / 2 );
-	viscolors[col_empty].g = static_cast<std::uint8_t>( (g + viscolors[col_background].g) / 2 );
-	viscolors[col_empty].b = static_cast<std::uint8_t>( (b + viscolors[col_background].b) / 2 );
-	viscolors[col_empty].a = 0;
+	const int r = viscolors[col_text].rgba.r, g = viscolors[col_text].rgba.g, b = viscolors[col_text].rgba.b;
+	viscolors[col_empty].rgba.r = static_cast<std::uint8_t>( (r + viscolors[col_background].rgba.r) / 2 );
+	viscolors[col_empty].rgba.g = static_cast<std::uint8_t>( (g + viscolors[col_background].rgba.g) / 2 );
+	viscolors[col_empty].rgba.b = static_cast<std::uint8_t>( (b + viscolors[col_background].rgba.b) / 2 );
+	viscolors[col_empty].rgba.a = 0;
 
 #define MIXCOLOR(col, c1, c2, c3) { \
 	viscolors[col] = viscolors[col_text]; \
-	int mix = viscolors[col].c1 + 0xA0; \
-	viscolors[col].c1 = static_cast<std::uint8_t>( mix ); \
+	int mix = viscolors[col].rgba.c1 + 0xA0; \
+	viscolors[col].rgba.c1 = static_cast<std::uint8_t>( mix ); \
 	if ( mix > 0xFF ) { \
-		viscolors[col].c2 = std::max( static_cast<std::uint8_t>( c2 - viscolors[col].c1 / 2 ), std::uint8_t(0) ); \
-		viscolors[col].c3 = std::max( static_cast<std::uint8_t>( c3 - viscolors[col].c1 / 2 ), std::uint8_t(0) ); \
-		viscolors[col].c1 = 0xFF; \
+		viscolors[col].rgba.c2 = std::max( static_cast<std::uint8_t>( c2 - viscolors[col].rgba.c1 / 2 ), std::uint8_t(0) ); \
+		viscolors[col].rgba.c3 = std::max( static_cast<std::uint8_t>( c3 - viscolors[col].rgba.c1 / 2 ), std::uint8_t(0) ); \
+		viscolors[col].rgba.c1 = 0xFF; \
 	} }
 
 	MIXCOLOR(col_instr, g, r, b);
