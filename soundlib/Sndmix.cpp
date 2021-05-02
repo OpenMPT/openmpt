@@ -1116,7 +1116,7 @@ void CSoundFile::ProcessPanningEnvelope(ModChannel &chn) const
 }
 
 
-int CSoundFile::ProcessPitchFilterEnvelope(ModChannel &chn, int &period) const
+int CSoundFile::ProcessPitchFilterEnvelope(ModChannel &chn, int32 &period) const
 {
 	if(IsEnvelopeProcessed(chn, ENV_PITCH))
 	{
@@ -1397,7 +1397,7 @@ void CSoundFile::ProcessPanbrello(ModChannel &chn) const
 }
 
 
-void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int &period, Tuning::NOTEINDEXTYPE &arpeggioSteps)
+void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int32 &period, Tuning::NOTEINDEXTYPE &arpeggioSteps)
 {
 	ModChannel &chn = m_PlayState.Chn[nChn];
 
@@ -1582,7 +1582,7 @@ void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int &period, Tuning::NOTEIND
 }
 
 
-void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, Tuning::RATIOTYPE &vibratoFactor)
+void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int32 &period, Tuning::RATIOTYPE &vibratoFactor)
 {
 	ModChannel &chn = m_PlayState.Chn[nChn];
 
@@ -1704,7 +1704,7 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, Tuning::RATIOTYP
 }
 
 
-void CSoundFile::ProcessSampleAutoVibrato(ModChannel &chn, int &period, Tuning::RATIOTYPE &vibratoFactor, int &nPeriodFrac) const
+void CSoundFile::ProcessSampleAutoVibrato(ModChannel &chn, int32 &period, Tuning::RATIOTYPE &vibratoFactor, int &nPeriodFrac) const
 {
 	// Sample Auto-Vibrato
 	if(chn.pModSample != nullptr && chn.pModSample->nVibDepth)
@@ -2081,7 +2081,7 @@ bool CSoundFile::ReadNote()
 		const ModInstrument *pIns = chn.pModInstrument;
 
 		// Calc Frequency
-		int period;
+		int32 period = 0;
 
 		// Also process envelopes etc. when there's a plugin on this channel, for possible fake automation using volume and pan data.
 		// We only care about master channels, though, since automation only "happens" on them.

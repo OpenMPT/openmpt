@@ -992,7 +992,7 @@ protected:
 	bool IsEnvelopeProcessed(const ModChannel &chn, EnvelopeType env) const;
 	void ProcessVolumeEnvelope(ModChannel &chn, int &vol) const;
 	void ProcessPanningEnvelope(ModChannel &chn) const;
-	int ProcessPitchFilterEnvelope(ModChannel &chn, int &period) const;
+	int ProcessPitchFilterEnvelope(ModChannel &chn, int32 &period) const;
 
 	void IncrementEnvelopePosition(ModChannel &chn, EnvelopeType envType) const;
 	void IncrementEnvelopePositions(ModChannel &chn) const;
@@ -1002,9 +1002,9 @@ protected:
 	void ProcessPitchPanSeparation(ModChannel &chn) const;
 	void ProcessPanbrello(ModChannel &chn) const;
 
-	void ProcessArpeggio(CHANNELINDEX nChn, int &period, Tuning::NOTEINDEXTYPE &arpeggioSteps);
-	void ProcessVibrato(CHANNELINDEX nChn, int &period, Tuning::RATIOTYPE &vibratoFactor);
-	void ProcessSampleAutoVibrato(ModChannel &chn, int &period, Tuning::RATIOTYPE &vibratoFactor, int &nPeriodFrac) const;
+	void ProcessArpeggio(CHANNELINDEX nChn, int32 &period, Tuning::NOTEINDEXTYPE &arpeggioSteps);
+	void ProcessVibrato(CHANNELINDEX nChn, int32 &period, Tuning::RATIOTYPE &vibratoFactor);
+	void ProcessSampleAutoVibrato(ModChannel &chn, int32 &period, Tuning::RATIOTYPE &vibratoFactor, int &nPeriodFrac) const;
 
 	void ProcessRamping(ModChannel &chn) const;
 
