@@ -557,7 +557,7 @@ class xmplay_streambuf : public std::streambuf {
 public:
 	explicit xmplay_streambuf( XMPFILE & file );
 private:
-	int_type underflow();
+	int_type underflow() override;
 	xmplay_streambuf( const xmplay_streambuf & );
 	xmplay_streambuf & operator = ( const xmplay_streambuf & );
 private:
