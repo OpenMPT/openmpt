@@ -71,12 +71,12 @@ call build\scriptlib\unpack.cmd "build\tools\htmlhelp" "build\externals\htmlhelp
 call build\scriptlib\unpack.cmd "include\winamp"   "build\externals\WA5.55_SDK.exe" "."          || goto error
 call build\scriptlib\unpack.cmd "include\xmplay"   "build\externals\xmp-sdk.zip"    "."          || goto error
 
-call build\scriptlib\unpack.cmd "build\tools\python3" "build\externals\python-3.8.2-embed-win32.zip" "." || goto error
+call build\scriptlib\unpack.cmd "build\tools\python3" "build\externals\python-3.9.4-embed-amd64.zip" "." || goto error
 
 call :killdir "build\tools\innounp"   || goto error
 call :killdir "build\tools\innosetup" || goto error
-call build\scriptlib\unpack.cmd "build\tools\innounp" "build\externals\innounp049.rar" "." || goto error
-build\tools\innounp\innounp.exe -x -dbuild\tools\innosetup "build\externals\innosetup-6.0.5.exe" || goto error
+call build\scriptlib\unpack.cmd "build\tools\innounp" "build\externals\innounp050.rar" "." || goto error
+build\tools\innounp\innounp.exe -x -dbuild\tools\innosetup "build\externals\innosetup-6.1.2.exe" || goto error
 
 call build\scriptlib\unpack.cmd "packageTemplate\ExampleSongs" "build\externals\example_songs_ompt_1_29.7z" "." || goto error
 
