@@ -307,7 +307,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 			madeWithTracker = GetSchismTrackerVersion(fileHeader.cwtv, fileHeader.reserved2);
 			m_nMinPeriod = 1;
 			isSchism = true;
-			if(fileHeader.cwtv >= SchismVersionFromDate<2021, 05, 02>::Version())
+			if(fileHeader.cwtv >= SchismVersionFromDate<2021, 05, 02>::Version(S3MFileHeader::trkSchismTracker))
 				m_playBehaviour.reset(kPeriodsAreHertz);
 		}
 		nonCompatTracker = true;
