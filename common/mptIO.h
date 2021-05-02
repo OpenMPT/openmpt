@@ -1302,8 +1302,6 @@ private:
 };
 
 
-#if defined(MPT_FILEREADER_CALLBACK_STREAM)
-
 
 struct CallbackStream
 {
@@ -1344,8 +1342,6 @@ private:
 	mpt::byte_span InternalRead(mpt::byte_span dst) const override;
 };
 
-
-#endif // MPT_FILEREADER_CALLBACK_STREAM
 
 
 class FileDataContainerMemory

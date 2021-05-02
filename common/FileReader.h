@@ -1373,7 +1373,6 @@ template <typename Tbyte> inline FileReader make_FileReader(mpt::span<Tbyte> byt
 	return FileReader(mpt::byte_cast<mpt::const_byte_span>(bytedata), std::move(filename));
 }
 
-#if defined(MPT_FILEREADER_CALLBACK_STREAM)
 
 // Initialize file reader object with a CallbackStream.
 inline FileReader make_FileReader(CallbackStream s, std::shared_ptr<mpt::PathString> filename = nullptr)
@@ -1386,8 +1385,8 @@ inline FileReader make_FileReader(CallbackStream s, std::shared_ptr<mpt::PathStr
 			, std::move(filename)
 		);
 }
-#endif // MPT_FILEREADER_CALLBACK_STREAM
-	
+
+
 // Initialize file reader object with a std::istream.
 inline FileReader make_FileReader(std::istream *s, std::shared_ptr<mpt::PathString> filename = nullptr)
 {

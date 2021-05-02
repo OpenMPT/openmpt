@@ -230,9 +230,6 @@
 #define NO_ASSERTS
 #endif
 
-// Enable callback stream wrapper for FileReader (required by libopenmpt C API).
-//#define MPT_FILEREADER_CALLBACK_STREAM
-
 // Support for externally linked samples e.g. in MPTM files
 #define MPT_EXTERNAL_SAMPLES
 
@@ -295,7 +292,6 @@
 #endif
 //#define NO_LOGGING
 //#define MPT_ALL_LOGGING
-#define MPT_FILEREADER_CALLBACK_STREAM
 //#define MPT_EXTERNAL_SAMPLES
 #if defined(ENABLE_TESTS) || defined(MPT_BUILD_HACK_ARCHIVE_SUPPORT)
 #define MPT_ENABLE_CHARSET_LOCALE

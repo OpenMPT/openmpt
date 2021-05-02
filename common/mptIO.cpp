@@ -510,9 +510,6 @@ mpt::byte_span FileDataContainerStdStream::InternalRead(mpt::byte_span dst) cons
 
 
 
-#if defined(MPT_FILEREADER_CALLBACK_STREAM)
-
-
 bool FileDataContainerCallbackStreamSeekable::IsSeekable(CallbackStream stream)
 {
 	if(!stream.stream)
@@ -668,9 +665,6 @@ mpt::byte_span FileDataContainerCallbackStream::InternalRead(mpt::byte_span dst)
 	}
 	return dst.first(static_cast<std::size_t>(totalread));
 }
-
-
-#endif // MPT_FILEREADER_CALLBACK_STREAM
 
 
 
