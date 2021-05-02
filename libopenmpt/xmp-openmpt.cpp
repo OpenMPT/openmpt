@@ -1811,6 +1811,7 @@ extern "C" {
 
 // XMPLAY expects a WINAPI (which is __stdcall) function using an undecorated symbol name.
 #if defined(__GNUC__)
+XMPIN * WINAPI XMPIN_GetInterface_( DWORD face, InterfaceProc faceproc );
 XMPIN * WINAPI XMPIN_GetInterface_( DWORD face, InterfaceProc faceproc ) {
 	return XMPIN_GetInterface_cxx( face, faceproc );
 }
