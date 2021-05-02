@@ -551,6 +551,7 @@ In_Module inmod = {
 	0 // out_mod
 };
 
+extern "C" __declspec(dllexport) In_Module * winampGetInModule2();
 extern "C" __declspec(dllexport) In_Module * winampGetInModule2() {
 	return &inmod;
 }
