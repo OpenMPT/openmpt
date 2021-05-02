@@ -545,7 +545,9 @@ static void WINAPI openmpt_About( HWND win ) {
 static void WINAPI openmpt_Config( HWND win ) {
 #if defined(MPT_WITH_MFC)
 	libopenmpt::plugin::gui_edit_settings( &self->settings, win, TEXT(SHORT_TITLE) );
-#endif
+#else // !MPT_WITH_MFC
+	static_cast<void>(win);
+#endif // MPT_WITH_MFC
 	apply_and_save_options();
 }
 
