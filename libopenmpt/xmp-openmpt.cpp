@@ -1593,10 +1593,14 @@ static BOOL WINAPI VisRenderDC( HDC dc, SIZE size, DWORD flags ) {
 					}
 					switch ( cols[col].text[0] ) {
 						case ' ':
+							[[fallthrough]];
 						case '.':
 							cols[col].is_empty = true;
+							[[fallthrough]];
 						case '^':
+							[[fallthrough]];
 						case '=':
+							[[fallthrough]];
 						case '~':
 							color = col_empty;
 							break;
