@@ -1068,7 +1068,7 @@ protected:
 	int SetupChannelFilter(ModChannel &chn, bool bReset, int envModifier = 256) const;
 
 	// Low-Level effect processing
-	void DoFreqSlide(ModChannel &chn, int32 nFreqSlide) const;
+	void DoFreqSlide(ModChannel &chn, int32 &period, int32 amount) const;
 	void UpdateTimeSignature();
 
 public:
@@ -1078,9 +1078,9 @@ public:
 	uint32 CutOffToFrequency(uint32 nCutOff, int envModifier = 256) const; // [0-127] => [1-10KHz]
 
 	// Returns true if periods are actually plain frequency values in Hz.
-	bool PeriodsAreFrequencies() const
+	bool PeriodsAreFrequencies() const noexcept
 	{
-		return m_SongFlags[SONG_LINEARSLIDES] && m_playBehaviour[kHertzInLinearMode] && GetType() != MOD_TYPE_XM;
+		return m_playBehaviour[kPeriodsAreHertz] && GetType() != MOD_TYPE_XM;
 	}
 	
 	// Returns true if the current format uses transpose+finetune rather than frequency in Hz to specify middle-C.

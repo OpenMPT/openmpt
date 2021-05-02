@@ -47,13 +47,6 @@ static constexpr uint8 PreAmpAGCTable[16] =
 #endif
 
 
-// Compensate frequency slide LUTs depending on whether we are handling periods or frequency - "up" and "down" in function name are seen from frequency perspective.
-static uint32 GetLinearSlideDownTable    (const CSoundFile *sndFile, uint32 i) { MPT_ASSERT(i < std::size(LinearSlideDownTable));     return sndFile->m_playBehaviour[kHertzInLinearMode] ? LinearSlideDownTable[i]     : LinearSlideUpTable[i]; }
-static uint32 GetLinearSlideUpTable      (const CSoundFile *sndFile, uint32 i) { MPT_ASSERT(i < std::size(LinearSlideDownTable));     return sndFile->m_playBehaviour[kHertzInLinearMode] ? LinearSlideUpTable[i]       : LinearSlideDownTable[i]; }
-static uint32 GetFineLinearSlideDownTable(const CSoundFile *sndFile, uint32 i) { MPT_ASSERT(i < std::size(FineLinearSlideDownTable)); return sndFile->m_playBehaviour[kHertzInLinearMode] ? FineLinearSlideDownTable[i] : FineLinearSlideUpTable[i]; }
-static uint32 GetFineLinearSlideUpTable  (const CSoundFile *sndFile, uint32 i) { MPT_ASSERT(i < std::size(FineLinearSlideDownTable)); return sndFile->m_playBehaviour[kHertzInLinearMode] ? FineLinearSlideUpTable[i]   : FineLinearSlideDownTable[i]; }
-
-
 void CSoundFile::SetMixerSettings(const MixerSettings &mixersettings)
 {
 	SetPreAmp(mixersettings.m_nPreAmp); // adjust agc
@@ -1672,26 +1665,9 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, Tuning::RATIOTYP
 					vdepth += 2;
 			}
 
-			vdelta = (vdelta * (int)chn.nVibratoDepth) / (1 << vdepth);
-#ifndef NO_PLUGINS
-			int16 midiDelta = static_cast<int16>(-vdelta);	// Periods are upside down
-#endif // NO_PLUGINS
+			vdelta = (-vdelta * static_cast<int>(chn.nVibratoDepth)) / (1 << vdepth);
 
-			if (m_SongFlags[SONG_LINEARSLIDES] && GetType() != MOD_TYPE_XM)
-			{
-				int l = vdelta;
-				if (l < 0)
-				{
-					l = -l;
-					vdelta = Util::muldiv(period, GetLinearSlideUpTable(this, l / 4u), 65536) - period;
-					if (l & 0x03) vdelta += Util::muldiv(period, GetFineLinearSlideUpTable(this, l & 0x03), 65536) - period;
-				} else
-				{
-					vdelta = Util::muldiv(period, GetLinearSlideDownTable(this, l / 4u), 65536) - period;
-					if (l & 0x03) vdelta += Util::muldiv(period, GetFineLinearSlideDownTable(this, l & 0x03), 65536) - period;
-				}
-			}
-			period += vdelta;
+			DoFreqSlide(chn, period, vdelta);
 
 			// Process MIDI vibrato for plugins:
 #ifndef NO_PLUGINS
@@ -1705,7 +1681,7 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int &period, Tuning::RATIOTYP
 				{
 					pwd = chn.pModInstrument->midiPWD;
 				}
-				plugin->MidiVibrato(midiDelta, pwd, nChn);
+				plugin->MidiVibrato(vdelta, pwd, nChn);
 			}
 #endif // NO_PLUGINS
 		}
@@ -1736,7 +1712,7 @@ void CSoundFile::ProcessSampleAutoVibrato(ModChannel &chn, int &period, Tuning::
 		const ModSample *pSmp = chn.pModSample;
 		const bool hasTuning = chn.HasCustomTuning();
 
-		// In IT linear slide mode, we use frequencies, otherwise we use periods, which are upside down.
+		// In IT compatible mode, we use always frequencies, otherwise we use periods, which are upside down.
 		// In this context, the "up" tables refer to the tables that increase frequency, and the down tables are the ones that decrease frequency.
 		const bool useFreq = PeriodsAreFrequencies();
 		const uint32 (&upTable)[256] = useFreq ? LinearSlideUpTable : LinearSlideDownTable;

@@ -1215,8 +1215,8 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		case 1:
 			madeWithTracker = GetSchismTrackerVersion(fileHeader.cwtv, fileHeader.reserved);
 			// Hertz in linear mode: Added 2015-01-29, https://github.com/schismtracker/schismtracker/commit/671b30311082a0e7df041fca25f989b5d2478f69
-			if(fileHeader.cwtv < SchismVersionFromDate<2015, 01, 29>::Version())
-				m_playBehaviour.reset(kHertzInLinearMode);
+			if(fileHeader.cwtv < SchismVersionFromDate<2015, 01, 29>::Version() || !m_SongFlags[SONG_LINEARSLIDES])
+				m_playBehaviour.reset(kPeriodsAreHertz);
 			// Qxx with short samples: Added 2016-05-13, https://github.com/schismtracker/schismtracker/commit/e7b1461fe751554309fd403713c2a1ef322105ca
 			if(fileHeader.cwtv < SchismVersionFromDate<2016, 05, 13>::Version())
 				m_playBehaviour.reset(kITShortSampleRetrig);

@@ -995,7 +995,7 @@ PlayBehaviourSet CSoundFile::GetSupportedPlaybackBehaviour(MODTYPE type)
 	case MOD_TYPE_MPT:
 	case MOD_TYPE_IT:
 		playBehaviour.set(MSF_COMPATIBLE_PLAY);
-		playBehaviour.set(kHertzInLinearMode);
+		playBehaviour.set(kPeriodsAreHertz);
 		playBehaviour.set(kTempoClamp);
 		playBehaviour.set(kPerChannelGlobalVolSlide);
 		playBehaviour.set(kPanOverride);
@@ -1126,7 +1126,7 @@ PlayBehaviourSet CSoundFile::GetSupportedPlaybackBehaviour(MODTYPE type)
 
 	default:
 		playBehaviour.set(MSF_COMPATIBLE_PLAY);
-		playBehaviour.set(kHertzInLinearMode);
+		playBehaviour.set(kPeriodsAreHertz);
 		playBehaviour.set(kTempoClamp);
 		playBehaviour.set(kPanOverride);
 		break;
@@ -1141,7 +1141,7 @@ PlayBehaviourSet CSoundFile::GetDefaultPlaybackBehaviour(MODTYPE type)
 	switch(type)
 	{
 	case MOD_TYPE_MPT:
-		playBehaviour.set(kHertzInLinearMode);
+		playBehaviour.set(kPeriodsAreHertz);
 		playBehaviour.set(kPerChannelGlobalVolSlide);
 		playBehaviour.set(kPanOverride);
 		playBehaviour.set(kITArpeggio);

@@ -169,7 +169,7 @@ bool CSoundFile::ReadFAR(FileReader &file, ModLoadingFlags loadFlags)
 	m_nDefaultTempo.Set(80);
 	m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 	m_SongFlags = SONG_LINEARSLIDES;
-	m_playBehaviour.set(kHertzInLinearMode);
+	m_playBehaviour.set(kPeriodsAreHertz);
 
 	m_modFormat.formatName = U_("Farandole Composer");
 	m_modFormat.type = U_("far");

@@ -39,10 +39,10 @@ static constexpr auto GLOBALVOL_7BIT_FORMATS = MOD_TYPE_IT | MOD_TYPE_MPT | MOD_
 
 
 // Compensate frequency slide LUTs depending on whether we are handling periods or frequency - "up" and "down" in function name are seen from frequency perspective.
-static uint32 GetLinearSlideDownTable    (const CSoundFile *sndFile, uint32 i) { MPT_ASSERT(i < std::size(LinearSlideDownTable));     return sndFile->m_playBehaviour[kHertzInLinearMode] ? LinearSlideDownTable[i]     : LinearSlideUpTable[i]; }
-static uint32 GetLinearSlideUpTable      (const CSoundFile *sndFile, uint32 i) { MPT_ASSERT(i < std::size(LinearSlideDownTable));     return sndFile->m_playBehaviour[kHertzInLinearMode] ? LinearSlideUpTable[i]       : LinearSlideDownTable[i]; }
-static uint32 GetFineLinearSlideDownTable(const CSoundFile *sndFile, uint32 i) { MPT_ASSERT(i < std::size(FineLinearSlideDownTable)); return sndFile->m_playBehaviour[kHertzInLinearMode] ? FineLinearSlideDownTable[i] : FineLinearSlideUpTable[i]; }
-static uint32 GetFineLinearSlideUpTable  (const CSoundFile *sndFile, uint32 i) { MPT_ASSERT(i < std::size(FineLinearSlideDownTable)); return sndFile->m_playBehaviour[kHertzInLinearMode] ? FineLinearSlideUpTable[i]   : FineLinearSlideDownTable[i]; }
+static uint32 GetLinearSlideDownTable    (const CSoundFile *sndFile, uint32 i) { MPT_ASSERT(i < std::size(LinearSlideDownTable));     return sndFile->m_playBehaviour[kPeriodsAreHertz] ? LinearSlideDownTable[i]     : LinearSlideUpTable[i]; }
+static uint32 GetLinearSlideUpTable      (const CSoundFile *sndFile, uint32 i) { MPT_ASSERT(i < std::size(LinearSlideDownTable));     return sndFile->m_playBehaviour[kPeriodsAreHertz] ? LinearSlideUpTable[i]       : LinearSlideDownTable[i]; }
+static uint32 GetFineLinearSlideDownTable(const CSoundFile *sndFile, uint32 i) { MPT_ASSERT(i < std::size(FineLinearSlideDownTable)); return sndFile->m_playBehaviour[kPeriodsAreHertz] ? FineLinearSlideDownTable[i] : FineLinearSlideUpTable[i]; }
+static uint32 GetFineLinearSlideUpTable  (const CSoundFile *sndFile, uint32 i) { MPT_ASSERT(i < std::size(FineLinearSlideDownTable)); return sndFile->m_playBehaviour[kPeriodsAreHertz] ? FineLinearSlideUpTable[i]   : FineLinearSlideDownTable[i]; }
 
 
 ////////////////////////////////////////////////////////////
@@ -3700,7 +3700,7 @@ void CSoundFile::PortamentoUp(CHANNELINDEX nChn, ModCommand::PARAM param, const 
 	   || GetType() == MOD_TYPE_669
 	   || (GetType() == MOD_TYPE_MED && m_SongFlags[SONG_FASTVOLSLIDES]))
 	{
-		DoFreqSlide(chn, -int(param) * 4);
+		DoFreqSlide(chn, chn.nPeriod, param * 4);
 	}
 }
 
@@ -3768,7 +3768,7 @@ void CSoundFile::PortamentoDown(CHANNELINDEX nChn, ModCommand::PARAM param, cons
 	   || GetType() == MOD_TYPE_669
 	   || (GetType() == MOD_TYPE_MED && m_SongFlags[SONG_FASTVOLSLIDES]))
 	{
-		DoFreqSlide(chn, int(param) * 4);
+		DoFreqSlide(chn, chn.nPeriod, param * -4);
 	}
 }
 
@@ -3834,39 +3834,8 @@ void CSoundFile::FinePortamentoUp(ModChannel &chn, ModCommand::PARAM param) cons
 		if(param) chn.nOldFinePortaUpDown = param; else param = chn.nOldFinePortaUpDown;
 	}
 
-	if(chn.isFirstTick)
-	{
-		if ((chn.nPeriod) && (param))
-		{
-			if(GetType() == MOD_TYPE_FAR)
-			{
-				chn.nPeriod += (param * 4 * 36318 / 1024);
-			} else if(m_SongFlags[SONG_LINEARSLIDES] && GetType() != MOD_TYPE_XM)
-			{
-				const auto oldPeriod = chn.nPeriod;
-				chn.nPeriod = Util::muldivr(chn.nPeriod, GetLinearSlideUpTable(this, param & 0x0F), 65536);
-				if(oldPeriod == chn.nPeriod)
-				{
-					if(m_playBehaviour[kHertzInLinearMode] && chn.nPeriod < Util::MaxValueOfType(chn.nPeriod))
-						chn.nPeriod++;
-					else if(!m_playBehaviour[kHertzInLinearMode] && chn.nPeriod > 1)
-						chn.nPeriod--;
-				}
-			} else
-			{
-				chn.nPeriod -= (int)(param * 4);
-				if (chn.nPeriod < 1)
-				{
-					chn.nPeriod = 1;
-					if(GetType() == MOD_TYPE_S3M)
-					{
-						chn.nFadeOutVol = 0;
-						chn.dwFlags.set(CHN_NOTEFADE | CHN_FASTVOLRAMP);
-					}
-				}
-			}
-		}
-	}
+	if(chn.isFirstTick && chn.nPeriod && param)
+		DoFreqSlide(chn, chn.nPeriod, param * 4);
 }
 
 
@@ -3883,31 +3852,11 @@ void CSoundFile::FinePortamentoDown(ModChannel &chn, ModCommand::PARAM param) co
 		if(param) chn.nOldFinePortaUpDown = param; else param = chn.nOldFinePortaUpDown;
 	}
 
-	if(chn.isFirstTick)
+	if(chn.isFirstTick && chn.nPeriod && param)
 	{
-		if ((chn.nPeriod) && (param))
-		{
-			if (GetType() == MOD_TYPE_FAR)
-			{
-				chn.nPeriod -= (param * 4 * 36318 / 1024);
-			} else if (m_SongFlags[SONG_LINEARSLIDES] && GetType() != MOD_TYPE_XM)
-			{
-				const auto oldPeriod = chn.nPeriod;
-				chn.nPeriod = Util::muldivr(chn.nPeriod, GetLinearSlideDownTable(this, param & 0x0F), 65536);
-				if(oldPeriod == chn.nPeriod)
-				{
-					if(!m_playBehaviour[kHertzInLinearMode] && chn.nPeriod < Util::MaxValueOfType(chn.nPeriod))
-						chn.nPeriod++;
-					else if(m_playBehaviour[kHertzInLinearMode] && chn.nPeriod > 1)
-						chn.nPeriod--;
-				}
-			} else
-			{
-				chn.nPeriod += (int)(param * 4);
-				if(chn.nPeriod > 0xFFFF)
-					chn.nPeriod = 0xFFFF;
-			}
-		}
+		DoFreqSlide(chn, chn.nPeriod, param * -4);
+		if(chn.nPeriod > 0xFFFF && !m_playBehaviour[kPeriodsAreHertz] && (!m_SongFlags[SONG_LINEARSLIDES] || GetType() == MOD_TYPE_XM))
+			chn.nPeriod = 0xFFFF;
 	}
 }
 
@@ -3925,30 +3874,8 @@ void CSoundFile::ExtraFinePortamentoUp(ModChannel &chn, ModCommand::PARAM param)
 		if(param) chn.nOldFinePortaUpDown = param; else param = chn.nOldFinePortaUpDown;
 	}
 
-	if(chn.isFirstTick)
-	{
-		if ((chn.nPeriod) && (param))
-		{
-			if(m_SongFlags[SONG_LINEARSLIDES] && GetType() != MOD_TYPE_XM)
-			{
-				int oldPeriod = chn.nPeriod;
-				chn.nPeriod = Util::muldivr(chn.nPeriod, GetFineLinearSlideUpTable(this, param & 0x0F), 65536);
-				if(oldPeriod == chn.nPeriod) chn.nPeriod++;
-			} else
-			{
-				chn.nPeriod -= (int)(param);
-				if (chn.nPeriod < 1)
-				{
-					chn.nPeriod = 1;
-					if(GetType() == MOD_TYPE_S3M)
-					{
-						chn.nFadeOutVol = 0;
-						chn.dwFlags.set(CHN_NOTEFADE | CHN_FASTVOLRAMP);
-					}
-				}
-			}
-		}
-	}
+	if(chn.isFirstTick && chn.nPeriod && param)
+		DoFreqSlide(chn, chn.nPeriod, param);
 }
 
 
@@ -3965,21 +3892,11 @@ void CSoundFile::ExtraFinePortamentoDown(ModChannel &chn, ModCommand::PARAM para
 		if(param) chn.nOldFinePortaUpDown = param; else param = chn.nOldFinePortaUpDown;
 	}
 
-	if(chn.isFirstTick)
+	if(chn.isFirstTick && chn.nPeriod && param)
 	{
-		if ((chn.nPeriod) && (param))
-		{
-			if(m_SongFlags[SONG_LINEARSLIDES] && GetType() != MOD_TYPE_XM)
-			{
-				int oldPeriod = chn.nPeriod;
-				chn.nPeriod = Util::muldivr(chn.nPeriod, GetFineLinearSlideDownTable(this, param & 0x0F), 65536);
-				if(oldPeriod == chn.nPeriod) chn.nPeriod--;
-			} else
-			{
-				chn.nPeriod += (int)(param);
-				if (chn.nPeriod > 0xFFFF) chn.nPeriod = 0xFFFF;
-			}
-		}
+		DoFreqSlide(chn, chn.nPeriod, -static_cast<int32>(param));
+		if(chn.nPeriod > 0xFFFF && !m_playBehaviour[kPeriodsAreHertz] && (!m_SongFlags[SONG_LINEARSLIDES] || GetType() == MOD_TYPE_XM))
+			chn.nPeriod = 0xFFFF;
 	}
 }
 
@@ -4133,42 +4050,24 @@ void CSoundFile::TonePortamento(ModChannel &chn, uint32 param) const
 
 	if(param)
 	{
-		if(GetType() == MOD_TYPE_669)
-		{
-			param *= 10;
-		}
-		chn.nPortamentoSlide = param * 4;
+		chn.nPortamentoSlide = param * ((GetType() == MOD_TYPE_669) ? 2u : 4u);
 	}
 
 	if(chn.nPeriod && chn.nPortamentoDest && doPorta)
 	{
-		if (chn.nPeriod < chn.nPortamentoDest)
+		int32 delta = chn.nPortamentoSlide;
+		if(!PeriodsAreFrequencies())
+			delta = -delta;
+		if(chn.nPeriod < chn.nPortamentoDest)
 		{
-			int32 delta = chn.nPortamentoSlide;
-			if(m_SongFlags[SONG_LINEARSLIDES] && GetType() != MOD_TYPE_XM)
-			{
-				uint32 n = chn.nPortamentoSlide / 4;
-				if (n > 255) n = 255;
-				// Return (a*b+c/2)/c - no divide error
-				// Table is 65536*2(n/192)
-				delta = Util::muldivr(chn.nPeriod, LinearSlideUpTable[n], 65536) - chn.nPeriod;
-				if (delta < 1) delta = 1;
-			}
-			chn.nPeriod += delta;
-			if (chn.nPeriod > chn.nPortamentoDest) chn.nPeriod = chn.nPortamentoDest;
-		} else
-		if (chn.nPeriod > chn.nPortamentoDest)
+			DoFreqSlide(chn, chn.nPeriod, delta);
+			if(chn.nPeriod > chn.nPortamentoDest)
+				chn.nPeriod = chn.nPortamentoDest;
+		} else if(chn.nPeriod > chn.nPortamentoDest)
 		{
-			int32 delta = -chn.nPortamentoSlide;
-			if(m_SongFlags[SONG_LINEARSLIDES] && GetType() != MOD_TYPE_XM)
-			{
-				uint32 n = chn.nPortamentoSlide / 4;
-				if (n > 255) n = 255;
-				delta = Util::muldivr(chn.nPeriod, LinearSlideDownTable[n], 65536) - chn.nPeriod;
-				if (delta > -1) delta = -1;
-			}
-			chn.nPeriod += delta;
-			if (chn.nPeriod < chn.nPortamentoDest) chn.nPeriod = chn.nPortamentoDest;
+			DoFreqSlide(chn, chn.nPeriod, -delta);
+			if(chn.nPeriod < chn.nPortamentoDest)
+				chn.nPeriod = chn.nPortamentoDest;
 		}
 	}
 
@@ -5416,7 +5315,6 @@ void CSoundFile::SampleOffset(ModChannel &chn, SmpLength param) const
 }
 
 
-// 
 void CSoundFile::ReverseSampleOffset(ModChannel &chn, ModCommand::PARAM param) const
 {
 	if(chn.pModSample != nullptr)
@@ -5613,9 +5511,12 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, int offset)
 }
 
 
-void CSoundFile::DoFreqSlide(ModChannel &chn, int32 nFreqSlide) const
+// Execute a frequency slide on given channel.
+// Positive amounts increase the frequency, negative amounts decrease it.
+// The period or frequency that is read and written is in the period variable, chn.nPeriod is not touched.
+void CSoundFile::DoFreqSlide(ModChannel &chn, int32 &period, int32 amount) const
 {
-	if(!chn.nPeriod)
+	if(!period)
 		return;
 	MPT_ASSERT(!chn.HasCustomTuning());
 
@@ -5624,33 +5525,68 @@ void CSoundFile::DoFreqSlide(ModChannel &chn, int32 nFreqSlide) const
 		// Like other oldskool trackers, Composer 669 doesn't have linear slides...
 		// But the slides are done in Hertz rather than periods, meaning that they
 		// are more effective in the lower notes (rather than the higher notes).
-		nFreqSlide *= -20;
-	}
-	if(m_SongFlags[SONG_LINEARSLIDES] && GetType() != MOD_TYPE_XM)
+		period += amount * 20;
+	} else if(GetType() == MOD_TYPE_FAR)
+	{
+		period += (amount * 36318 / 1024);
+	} else if(m_SongFlags[SONG_LINEARSLIDES] && GetType() != MOD_TYPE_XM)
 	{
 		// IT Linear slides
-		const auto nOldPeriod = chn.nPeriod;
-		uint32 n = std::abs(nFreqSlide) / 4u;
-		LimitMax(n, 255u);
-		if(n != 0)
+		const auto oldPeriod = period;
+		uint32 n = std::abs(amount), delta = 0;
+		LimitMax(n, 255u * 4u);
+
+		// Note: IT ignores the lower 2 bits when abs(delta) > 16, this is currently not emulated (it either uses the fine *or* the regular table, not both)
+		// This detail would only be required for more accurate vibrato, it cannot happen with regular slides.
+		if(amount > 0)
 		{
-			chn.nPeriod = Util::muldivr(chn.nPeriod, nFreqSlide < 0 ? GetLinearSlideUpTable(this, n) : GetLinearSlideDownTable(this, n), 65536);
-			if(chn.nPeriod == nOldPeriod)
+			if(n >= 4)
+				delta = Util::muldiv(period, GetLinearSlideUpTable(this, n / 4u), 65536) - period;
+			if(n & 0x03)
+				delta += Util::muldiv(period, GetFineLinearSlideUpTable(this, n & 0x03), 65536) - period;
+		} else
+		{
+			if(n >= 4)
+				delta = Util::muldiv(period, GetLinearSlideDownTable(this, n / 4u), 65536) - period;
+			if(n & 0x03)
+				delta += Util::muldiv(period, GetFineLinearSlideDownTable(this, n & 0x03), 65536) - period;
+		}
+		period += delta;
+
+		if(period == oldPeriod)
+		{
+			const bool incPeriod = m_playBehaviour[kPeriodsAreHertz] == (amount > 0);
+			if(incPeriod && period < Util::MaxValueOfType(period))
+				period++;
+			else if(!incPeriod && period > 1)
+				period--;
+		}
+	} else if(!m_SongFlags[SONG_LINEARSLIDES] && m_playBehaviour[kPeriodsAreHertz])
+	{
+		if(amount < 0)
+		{
+			// Go down
+			period = mpt::saturate_cast<int32>(Util::mul32to64_unsigned(1712 * 8363, period) / (Util::mul32to64_unsigned(period, -amount) + 1712 * 8363));
+		} else if(amount > 0)
+		{
+			// Go up
+			const auto periodDiv = 1712 * 8363 - Util::mul32to64(period, amount);
+			if(periodDiv <= 0)
 			{
-				const bool incPeriod = m_playBehaviour[kHertzInLinearMode] == (nFreqSlide < 0);
-				if(incPeriod && chn.nPeriod < Util::MaxValueOfType(chn.nPeriod))
-					chn.nPeriod++;
-				else if(!incPeriod && chn.nPeriod > 1)
-					chn.nPeriod--;
+				period = 0;
+				chn.nFadeOutVol = 0;
+				chn.dwFlags.set(CHN_NOTEFADE | CHN_FASTVOLRAMP);
+				return;
 			}
+			period = mpt::saturate_cast<int32>(Util::mul32to64_unsigned(1712 * 8363, period) / periodDiv);
 		}
 	} else
 	{
-		chn.nPeriod += nFreqSlide;
+		period -= amount;
 	}
-	if (chn.nPeriod < 1)
+	if(period < 1)
 	{
-		chn.nPeriod = 1;
+		period = 1;
 		if(GetType() == MOD_TYPE_S3M)
 		{
 			chn.nFadeOutVol = 0;
@@ -5971,20 +5907,20 @@ uint32 CSoundFile::GetPeriodFromNote(uint32 note, int32 nFineTune, uint32 nC5Spe
 {
 	if (note == NOTE_NONE || (note >= NOTE_MIN_SPECIAL)) return 0;
 	note -= NOTE_MIN;
-	if (!UseFinetuneAndTranspose())
+	if(!UseFinetuneAndTranspose())
 	{
 		if(GetType() & (MOD_TYPE_MDL | MOD_TYPE_DTM))
 		{
 			// MDL uses non-linear slides, but their effectiveness does not depend on the middle-C frequency.
 			return (FreqS3MTable[note % 12u] << 4) >> (note / 12);
 		}
-		if(m_SongFlags[SONG_LINEARSLIDES] || GetType() == MOD_TYPE_669)
+		if(PeriodsAreFrequencies())
 		{
-			// In IT linear slide mode, directly use frequency in Hertz rather than periods.
-			if(m_playBehaviour[kHertzInLinearMode] || GetType() == MOD_TYPE_669)
-				return Util::muldiv_unsigned(nC5Speed, LinearSlideUpTable[(note % 12u) * 16u] << (note / 12u), 65536 << 5);
-			else
-				return (FreqS3MTable[note % 12u] << 5) >> (note / 12);
+			// Compute everything in Hertz rather than periods.
+			return Util::muldiv_unsigned(nC5Speed, LinearSlideUpTable[(note % 12u) * 16u] << (note / 12u), 65536 << 5);
+		} else if(m_SongFlags[SONG_LINEARSLIDES])
+		{
+			return (FreqS3MTable[note % 12u] << 5) >> (note / 12);
 		} else
 		{
 			if (!nC5Speed)
@@ -5994,7 +5930,7 @@ uint32 CSoundFile::GetPeriodFromNote(uint32 note, int32 nFineTune, uint32 nC5Spe
 			return Util::muldiv_unsigned(8363, (FreqS3MTable[note % 12u] << 5), nC5Speed << (note / 12u));
 			//8363 * freq[note%12] / nC5Speed * 2^(5-note/12)
 		}
-	} else if (GetType() & (MOD_TYPE_XM | MOD_TYPE_MTM))
+	} else if(GetType() & (MOD_TYPE_XM | MOD_TYPE_MTM))
 	{
 		if (note < 12) note = 12;
 		note -= 12;
@@ -6083,7 +6019,7 @@ uint32 CSoundFile::GetFreqFromPeriod(uint32 period, uint32 c5speed, int32 nPerio
 			if(!period) period = 1;
 			return ((8363 * 1712L) << FREQ_FRACBITS) / period;
 		}
-	} else if (UseFinetuneAndTranspose())
+	} else if(UseFinetuneAndTranspose())
 	{
 		return ((3546895L * 4) << FREQ_FRACBITS) / period;
 	} else if(GetType() == MOD_TYPE_669)
@@ -6098,18 +6034,16 @@ uint32 CSoundFile::GetFreqFromPeriod(uint32 period, uint32 c5speed, int32 nPerio
 	} else
 	{
 		LimitMax(period, Util::MaxValueOfType(period) >> 8);
-		if(m_SongFlags[SONG_LINEARSLIDES])
+		if(PeriodsAreFrequencies())
 		{
-			if(m_playBehaviour[kHertzInLinearMode])
-			{
-				// IT linear slides already use frequencies instead of periods.
-				static_assert(FREQ_FRACBITS <= 8, "Check this shift operator");
-				return uint32(((uint64(period) << 8) + nPeriodFrac) >> (8 - FREQ_FRACBITS));
-			} else
-			{
-				if (!c5speed) c5speed = 8363;
-				return Util::muldiv_unsigned(c5speed, (1712L << 8) << FREQ_FRACBITS, (period << 8) + nPeriodFrac);
-			}
+			// Input is already a frequency in Hertz, not a period.
+			static_assert(FREQ_FRACBITS <= 8, "Check this shift operator");
+			return uint32(((uint64(period) << 8) + nPeriodFrac) >> (8 - FREQ_FRACBITS));
+		} else if(m_SongFlags[SONG_LINEARSLIDES])
+		{
+			if(!c5speed)
+				c5speed = 8363;
+			return Util::muldiv_unsigned(c5speed, (1712L << 8) << FREQ_FRACBITS, (period << 8) + nPeriodFrac);
 		} else
 		{
 			return Util::muldiv_unsigned(8363, (1712L << 8) << FREQ_FRACBITS, (period << 8) + nPeriodFrac);

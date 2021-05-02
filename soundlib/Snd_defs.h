@@ -426,7 +426,7 @@ enum PlayBehaviour
 	kFT2VolumeRamping,              // Smooth volume ramping like in FT2 (XM)
 	kMODVBlankTiming,               // F21 and above set speed instead of tempo
 	kSlidesAtSpeed1,                // Execute normal slides at speed 1 as if they were fine slides
-	kHertzInLinearMode,             // Compute note frequency in hertz rather than periods
+	kPeriodsAreHertz,               // Compute note frequency in Hertz rather than periods
 	kTempoClamp,                    // Clamp tempo to 32-255 range.
 	kPerChannelGlobalVolSlide,      // Global volume slide memory is per-channel
 	kPanOverride,                   // Panning commands override surround and random pan variation

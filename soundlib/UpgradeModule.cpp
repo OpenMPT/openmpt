@@ -638,14 +638,24 @@ void CSoundFile::UpgradeModule()
 		m_playBehaviour.set(kSlidesAtSpeed1);
 	}
 
-	if(m_dwLastSavedWithVersion < MPT_V("1.24.00.00"))
+	if(m_SongFlags[SONG_LINEARSLIDES])
 	{
-		// No frequency slides in Hz before OpenMPT 1.24
-		m_playBehaviour.reset(kHertzInLinearMode);
-	} else if(m_dwLastSavedWithVersion >= MPT_V("1.24.00.00") && m_dwLastSavedWithVersion < MPT_V("1.26.00.00") && (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)))
+		if(m_dwLastSavedWithVersion < MPT_V("1.24.00.00"))
+		{
+			// No frequency slides in Hz before OpenMPT 1.24
+			m_playBehaviour.reset(kPeriodsAreHertz);
+		} else if(m_dwLastSavedWithVersion >= MPT_V("1.24.00.00") && m_dwLastSavedWithVersion < MPT_V("1.26.00.00") && (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)))
+		{
+			// Frequency slides were always in Hz rather than periods in this version range.
+			m_playBehaviour.set(kPeriodsAreHertz);
+		}
+	} else
 	{
-		// Frequency slides were always in Hz rather than periods in this version range.
-		m_playBehaviour.set(kHertzInLinearMode);
+		if(m_dwLastSavedWithVersion < MPT_V("1.30.00.36") && m_dwLastSavedWithVersion != MPT_V("1.30.00.00"))
+		{
+			// No frequency slides in Hz before OpenMPT 1.30
+			m_playBehaviour.reset(kPeriodsAreHertz);
+		}
 	}
 
 	if(m_playBehaviour[kITEnvelopePositionHandling]
