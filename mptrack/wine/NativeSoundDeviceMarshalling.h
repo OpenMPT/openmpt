@@ -29,11 +29,11 @@ OPENMPT_NAMESPACE_BEGIN
 
 #ifdef MPT_WITH_NLOHMANNJSON
 
-inline void to_json(JSON::value &j, const SampleFormat &val)
+inline void to_json(nlohmann::json &j, const SampleFormat &val)
 {
 	j = SampleFormat::ToInt(val);
 }
-inline void from_json(const JSON::value &j, SampleFormat &val)
+inline void from_json(const nlohmann::json &j, SampleFormat &val)
 {
 	val = SampleFormat::FromInt(j);
 }
@@ -41,20 +41,20 @@ inline void from_json(const JSON::value &j, SampleFormat &val)
 namespace SoundDevice
 {
 
-	inline void to_json(JSON::value &j, const SoundDevice::ChannelMapping &val)
+	inline void to_json(nlohmann::json &j, const SoundDevice::ChannelMapping &val)
 	{
 		j = val.ToUString();
 	}
-	inline void from_json(const JSON::value &j, SoundDevice::ChannelMapping &val)
+	inline void from_json(const nlohmann::json &j, SoundDevice::ChannelMapping &val)
 	{
 		val = SoundDevice::ChannelMapping::FromString(j);
 	}
 
-	inline void to_json(JSON::value &j, const SoundDevice::Info::Default &val)
+	inline void to_json(nlohmann::json &j, const SoundDevice::Info::Default &val)
 	{
 		j = static_cast<int>(val);
 	}
-	inline void from_json(const JSON::value &j, SoundDevice::Info::Default &val)
+	inline void from_json(const nlohmann::json &j, SoundDevice::Info::Default &val)
 	{
 		val = static_cast<SoundDevice::Info::Default>(static_cast<int>(j));
 	}
@@ -174,24 +174,20 @@ Tdst json_cast(const Tsrc &src)
 
 
 template <typename Tsrc>
-struct json_cast_impl<JSON::value, Tsrc>
+struct json_cast_impl<nlohmann::json, Tsrc>
 {
-	JSON::value operator () (const Tsrc &src)
+	nlohmann::json operator () (const Tsrc &src)
 	{
-		JSON::value j;
-		JSON::enc(j, src);
-		return j;
+		return static_cast<nlohmann::json>(src);
 	}
 };
 
 template <typename Tdst>
-struct json_cast_impl<Tdst, JSON::value>
+struct json_cast_impl<Tdst, nlohmann::json>
 {
-	Tdst operator () (const JSON::value &j)
+	Tdst operator () (const nlohmann::json &src)
 	{
-		Tdst val;
-		JSON::dec(val, j);
-		return val;
+		return src.get<Tdst>();
 	}
 };
 
@@ -200,7 +196,7 @@ struct json_cast_impl<std::string, Tsrc>
 {
 	std::string operator () (const Tsrc &src)
 	{
-		return JSON::serialize(json_cast<JSON::value>(src));
+		return json_cast<nlohmann::json>(src).dump(4);
 	}
 };
 
@@ -209,7 +205,7 @@ struct json_cast_impl<Tdst, std::string>
 {
 	Tdst operator () (const std::string &str)
 	{
-		return json_cast<Tdst>(JSON::deserialize(str));
+		return json_cast<Tdst>(nlohmann::json::parse(str));
 	}
 };
 

@@ -587,7 +587,7 @@ void CUpdateCheck::ThreadFunc::operator () ()
 
 std::string CUpdateCheck::GetStatisticsDataV3(const Settings &settings)
 {
-	JSON::value j;
+	nlohmann::json j;
 	j["OpenMPT"]["Version"] = mpt::ufmt::val(Version::Current());
 	j["OpenMPT"]["BuildVariant"] = BuildVariants().GetBuildVariantName(BuildVariants().GetBuildVariant());
 	j["OpenMPT"]["Architecture"] = mpt::OS::Windows::Name(mpt::OS::Windows::GetProcessArchitecture());
