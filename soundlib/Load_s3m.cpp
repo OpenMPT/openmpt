@@ -294,8 +294,9 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 			m_FileHistory.push_back(hist);
 		}
 		nonCompatTracker = true;
-		m_playBehaviour.set(kST3SampleSwap);  // Not exactly like ST3, but close enough
 		m_playBehaviour.set(kPeriodsAreHertz);
+		m_playBehaviour.set(kITRetrigger);
+		m_playBehaviour.set(kST3SampleSwap);  // Not exactly like ST3, but close enough
 		m_nMinPeriod = 1;
 		break;
 	case S3MFileHeader::trkSchismTracker:
@@ -310,6 +311,8 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 			isSchism = true;
 			if(schismDateVersion >= SchismVersionFromDate<2021, 05, 02>::date)
 				m_playBehaviour.set(kPeriodsAreHertz);
+			if(schismDateVersion >= SchismVersionFromDate<2016, 05, 13>::date)
+				m_playBehaviour.set(kITShortSampleRetrig);
 		}
 		nonCompatTracker = true;
 		break;
