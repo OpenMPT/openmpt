@@ -823,7 +823,7 @@ void CASIODevice::FillAsioBuffer(bool useSource)
 		}
 	} else
 	{
-		SourceLockedAudioReadPrepare(countChunk, m_nAsioBufferLen);
+		SourceLockedAudioReadPrepare(countChunk, m_nAsioBufferLen * 2);
 		if(m_Settings.sampleFormat == SampleFormat::Float64)
 		{
 			SourceLockedAudioRead(m_SampleBufferDouble.data(), (m_SampleInputBufferDouble.size() > 0) ? m_SampleInputBufferDouble.data() : nullptr, countChunk);
