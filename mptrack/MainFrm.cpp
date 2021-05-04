@@ -436,7 +436,10 @@ void CMainFrame::OnDropFiles(HDROP hDropInfo)
 					auto sndFile = std::make_unique<CSoundFile>();
 					MPT_LOG(LogDebug, "info", U_("Loading ") + scanName.ToUnicode());
 					if(!sndFile->Create(GetFileReader(inputFile), CSoundFile::loadCompleteModule, nullptr))
+					{
+						MPT_LOG_GLOBAL(LogDebug, "info", U_("FAILED: ") + scanName.ToUnicode());
 						failed++;
+					}
 					total++;
 				}
 				Reporting::Information(mpt::format(U_("Scanned {} files, {} failed"))(total, failed));
@@ -2647,11 +2650,27 @@ void CMainFrame::OnHelp()
 	} else if(view != nullptr)
 	{
 		const char *className = view->GetRuntimeClass()->m_lpszClassName;
-		if(!strcmp("CViewGlobals", className))			page = "::/General.html";
-		else if(!strcmp("CViewPattern", className))		page = "::/Patterns.html";
-		else if(!strcmp("CViewSample", className))		page = "::/Samples.html";
-		else if(!strcmp("CViewInstrument", className))	page = "::/Instruments.html";
-		else if(!strcmp("CModControlView", className))	page = "::/Comments.html";
+		if(!strcmp("CViewGlobals", className))
+			page = "::/General.html";
+		else if(!strcmp("CViewPattern", className))
+			page = "::/Patterns.html";
+		else if(!strcmp("CViewSample", className))
+			page = "::/Samples.html";
+		else if(!strcmp("CViewInstrument", className))
+			page = "::/Instruments.html";
+		else if(!strcmp("CViewComments", className))
+			page = "::/Comments.html";
+		else if(!strcmp("CModControlView", className))
+		{
+			switch(static_cast<CModControlView*>(view)->GetActivePage())
+			{
+				case CModControlView::VIEW_GLOBALS: page = "::/General.html"; break;
+				case CModControlView::VIEW_PATTERNS: page = "::/Patterns.html"; break;
+				case CModControlView::VIEW_SAMPLES: page = "::/Samples.html"; break;
+				case CModControlView::VIEW_INSTRUMENTS: page = "::/Instruments.html"; break;
+				case CModControlView::VIEW_COMMENTS: page = "::/Comments.html"; break;
+			}
+		}
 	}
 
 	const mpt::PathString helpFile = theApp.GetInstallPath() + P_("OpenMPT Manual.chm") + mpt::PathString::FromUTF8(page) + P_(">OpenMPT");
