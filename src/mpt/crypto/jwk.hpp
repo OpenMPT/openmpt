@@ -32,8 +32,8 @@
 
 #if MPT_OS_WINDOWS
 #include <bcrypt.h>
+#include <wincrypt.h> // must be before ncrypt.h
 #include <ncrypt.h>
-#include <wincrypt.h>
 #include <windows.h>
 #endif // MPT_OS_WINDOWS
 
