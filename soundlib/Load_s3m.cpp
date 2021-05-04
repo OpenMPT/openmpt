@@ -296,6 +296,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		nonCompatTracker = true;
 		m_playBehaviour.set(kPeriodsAreHertz);
 		m_playBehaviour.set(kITRetrigger);
+		m_playBehaviour.set(kITShortSampleRetrig);
 		m_playBehaviour.set(kST3SampleSwap);  // Not exactly like ST3, but close enough
 		m_nMinPeriod = 1;
 		break;
