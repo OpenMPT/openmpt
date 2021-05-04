@@ -487,6 +487,8 @@ bool CSoundFile::ReadDSym(FileReader &file, ModLoadingFlags loadFlags)
 			if(loadFlags & loadSampleData)
 			{
 				std::vector<std::byte> sampleData;
+				if(!file.CanRead(mptSmp.nLength))
+					return false;
 				file.ReadVector(sampleData, mptSmp.nLength);
 				for(auto &b : sampleData)
 				{
