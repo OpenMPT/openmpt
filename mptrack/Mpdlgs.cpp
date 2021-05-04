@@ -951,6 +951,10 @@ void COptionsSoundcard::UpdateStatistics()
 	{
 		const SoundDevice::BufferAttributes bufferAttributes = pMainFrm->gpSoundDevice->GetEffectiveBufferAttributes();
 		const SoundDevice::Statistics stats = pMainFrm->gpSoundDevice->GetStatistics();
+#if 0
+		const SoundDevice::TimeInfo timeInfo = pMainFrm->gpSoundDevice->GetTimeInfo();
+		const SoundDevice::StreamPosition streamPosition = pMainFrm->gpSoundDevice->GetStreamPosition();
+#endif
 		const uint32 samplerate = pMainFrm->gpSoundDevice->GetSettings().Samplerate;
 		mpt::ustring s;
 		if(bufferAttributes.NumBuffers > 2)
@@ -962,6 +966,12 @@ void COptionsSoundcard::UpdateStatistics()
 		}
 		s += MPT_UFORMAT("Latency: {} ms (current: {} ms, {} frames)\r\n")(mpt::ufmt::fix(bufferAttributes.Latency * 1000.0, 1), mpt::ufmt::fix(stats.InstantaneousLatency * 1000.0, 1), mpt::saturate_round<int64>(stats.InstantaneousLatency * samplerate));
 		s += MPT_UFORMAT("Period: {} ms (current: {} ms, {} frames)\r\n")(mpt::ufmt::fix(bufferAttributes.UpdateInterval * 1000.0, 1), mpt::ufmt::fix(stats.LastUpdateInterval * 1000.0, 1), mpt::saturate_round<int64>(stats.LastUpdateInterval * samplerate));
+#if 0
+		s += MPT_UFORMAT("TimeInfo: latency = {} ms / speed = {} / latency = {} ms\r\n")(
+			mpt::ufmt::fix(timeInfo.Latency * 1000.0, 1),
+			mpt::ufmt::flt(timeInfo.Speed, 4),
+			mpt::ufmt::fix((timeInfo.RenderStreamPositionBefore.Seconds - streamPosition.Seconds) * 1000.0, 1));
+#endif
 		s += stats.text;
 		m_EditStatistics.SetWindowText(mpt::ToCString(s));
 	}	else
