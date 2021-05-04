@@ -9,10 +9,6 @@
 
 #include <type_traits>
 
-#if MPT_OS_WINDOWS
-#include <windows.h>
-#endif // MPT_OS_WINDOWS
-
 
 
 // Advanced inline attributes
@@ -95,11 +91,7 @@
 
 
 
-#if MPT_OS_WINDOWS
-#define MPT_UNUSED(x) UNREFERENCED_PARAMETER(x)
-#else
 #define MPT_UNUSED(x) static_cast<void>(x)
-#endif
 
 
 
