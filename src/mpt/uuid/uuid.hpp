@@ -18,8 +18,11 @@
 #include "mpt/string/utility.hpp"
 
 #if MPT_OS_WINDOWS
+#if defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0600)
 #include <guiddef.h>
+#endif // _WIN32_WINNT
 #include <objbase.h>
+#include <rpc.h>
 #endif // MPT_OS_WINDOWS
 
 
