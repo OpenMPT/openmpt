@@ -30,6 +30,7 @@
 #include "mptTime.h"
 #include "mptLibrary.h"
 
+#include <stdexcept>
 #include <vector>
 
 #include <cstdlib>
