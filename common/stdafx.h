@@ -90,6 +90,7 @@ struct IUnknown;
 // <vector>
 // <cmath>
 // <cstdlib>
+// <stdexcept>
 // <cstring>
 // <time.h>
 
