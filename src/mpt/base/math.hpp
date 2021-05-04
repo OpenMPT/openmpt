@@ -19,7 +19,7 @@ inline namespace MPT_INLINE_NS {
 #if MPT_OS_DJGPP
 
 inline long double log2(const long double val) {
-	return static_cast<long double>::log2(static_cast<double>(val));
+	return static_cast<long double>(::log2(static_cast<double>(val)));
 }
 
 inline double log2(const double val) {
