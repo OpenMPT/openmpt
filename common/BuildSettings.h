@@ -539,14 +539,6 @@
 #define OPENMPT_NAMESPACE_END   }
 #endif
 
-namespace mpt {
-} // namespace mpt
-OPENMPT_NAMESPACE_BEGIN
-namespace mpt {
-using namespace ::mpt;
-} // namespace mpt
-OPENMPT_NAMESPACE_END
-
 #endif
 
 
