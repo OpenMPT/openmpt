@@ -1215,7 +1215,7 @@ void CDoWaveConvert::Run()
 				MPT_ASSERT(!mpt::endian_is_weird());
 				if(fileEnc->GetConvertedEndianness() != mpt::get_endian())
 				{
-					mpt::SwapBufferEndian(m_Settings.FinalSampleFormat.GetSampleSize(), buffer, lRead * encSettings.Channels);
+					SwapBufferEndian(m_Settings.FinalSampleFormat.GetSampleSize(), buffer, lRead * encSettings.Channels);
 				}
 				fileEnc->WriteInterleavedConverted(lRead, buffer);
 			}
@@ -1359,7 +1359,7 @@ void CDoWaveConvert::Run()
 				MPT_ASSERT(!mpt::endian_is_weird());
 				if(fileEnc->GetConvertedEndianness() != mpt::get_endian())
 				{
-					mpt::SwapBufferEndian(m_Settings.FinalSampleFormat.GetSampleSize(), buffer, framesChunk * channels);
+					SwapBufferEndian(m_Settings.FinalSampleFormat.GetSampleSize(), buffer, framesChunk * channels);
 				}
 				fileEnc->WriteInterleavedConverted(framesChunk, buffer);
 			}

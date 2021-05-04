@@ -14,10 +14,13 @@
 
 #ifdef ENABLE_TESTS
 
+#include "mpt/crc/crc.hpp"
+#include "mpt/environment/environment.hpp"
+#include "mpt/test/test.hpp"
+#include "mpt/test/test_macros.hpp"
 
 #include "../common/version.h"
 #include "../common/misc_util.h"
-#include "../common/mptCRC.h"
 #include "../common/mptStringBuffer.h"
 #include "../common/serialization_utils.h"
 #include "../common/mptUUID.h"
@@ -43,8 +46,9 @@
 #endif // MODPLUG_TRACKER
 #include "../common/mptFileIO.h"
 #ifdef MODPLUG_TRACKER
-#include "../misc/mptCrypto.h"
-#include "../misc/mptUUIDNamespace.h"
+#include "mpt/crypto/hash.hpp"
+#include "mpt/crypto/jwk.hpp"
+#include "mpt/uuid_namespace/uuid_namespace.hpp"
 #endif // MODPLUG_TRACKER
 #ifdef LIBOPENMPT_BUILD
 #include "../libopenmpt/libopenmpt_version.h"
@@ -106,13 +110,11 @@ static MPT_NOINLINE void TestMisc2();
 static MPT_NOINLINE void TestRandom();
 static MPT_NOINLINE void TestCharsets();
 static MPT_NOINLINE void TestStringFormatting();
-static MPT_NOINLINE void TestCrypto();
 static MPT_NOINLINE void TestSettings();
 static MPT_NOINLINE void TestStringIO();
 static MPT_NOINLINE void TestMIDIEvents();
 static MPT_NOINLINE void TestSampleConversion();
 static MPT_NOINLINE void TestITCompression();
-static MPT_NOINLINE void TestTunings();
 static MPT_NOINLINE void TestPCnoteSerialization();
 static MPT_NOINLINE void TestLoadSaveFile();
 static MPT_NOINLINE void TestEditing();
@@ -197,6 +199,12 @@ void DoTests()
 
 	#endif
 
+	void (*do_mpt_test)(void) = []() {
+		mpt_test_reporter reporter{};
+		mpt::test::run_all(reporter);
+	};
+	DO_TEST(do_mpt_test);
+
 	mpt::random_device rd;
 	s_PRNG = new mpt::default_prng(mpt::make_prng<mpt::default_prng>(rd));
 
@@ -207,13 +215,11 @@ void DoTests()
 	DO_TEST(TestRandom);
 	DO_TEST(TestCharsets);
 	DO_TEST(TestStringFormatting);
-	DO_TEST(TestCrypto);
 	DO_TEST(TestSettings);
 	DO_TEST(TestStringIO);
 	DO_TEST(TestMIDIEvents);
 	DO_TEST(TestSampleConversion);
 	DO_TEST(TestITCompression);
-	DO_TEST(TestTunings);
 
 	// slower tests, require opening a CModDoc
 	DO_TEST(TestPCnoteSerialization);
@@ -442,31 +448,6 @@ static MPT_NOINLINE void TestTypes()
 	static_assert(int64_max == std::numeric_limits<int64>::max());
 	static_assert(uint64_max == std::numeric_limits<uint64>::max());
 
-
-	static_assert(std::numeric_limits<int8le>::min() == std::numeric_limits<int8>::min());
-	static_assert(std::numeric_limits<uint8le>::min() == std::numeric_limits<uint8>::min());
-
-	static_assert(std::numeric_limits<int16le>::min() == std::numeric_limits<int16>::min());
-	static_assert(std::numeric_limits<uint16le>::min() == std::numeric_limits<uint16>::min());
-
-	static_assert(std::numeric_limits<int32le>::min() == std::numeric_limits<int32>::min());
-	static_assert(std::numeric_limits<uint32le>::min() == std::numeric_limits<uint32>::min());
-
-	static_assert(std::numeric_limits<int64le>::min() == std::numeric_limits<int64>::min());
-	static_assert(std::numeric_limits<uint64le>::min() == std::numeric_limits<uint64>::min());
-
-	static_assert(std::numeric_limits<int8le>::max() == std::numeric_limits<int8>::max());
-	static_assert(std::numeric_limits<uint8le>::max() == std::numeric_limits<uint8>::max());
-
-	static_assert(std::numeric_limits<int16le>::max() == std::numeric_limits<int16>::max());
-	static_assert(std::numeric_limits<uint16le>::max() == std::numeric_limits<uint16>::max());
-
-	static_assert(std::numeric_limits<int32le>::max() == std::numeric_limits<int32>::max());
-	static_assert(std::numeric_limits<uint32le>::max() == std::numeric_limits<uint32>::max());
-
-	static_assert(std::numeric_limits<int64le>::max() == std::numeric_limits<int64>::max());
-	static_assert(std::numeric_limits<uint64le>::max() == std::numeric_limits<uint64>::max());
-
 }
 
 
@@ -544,39 +525,6 @@ static void TestFloatFormats(Tfloat x)
 	TestFloatFormat(x, "%0.1f", mpt::fmt::NotaFix | mpt::fmt::FillNul, 0, 1);
 	TestFloatFormat(x, "%02.0f", mpt::fmt::NotaFix | mpt::fmt::FillNul, 2, 0);
 }
-
-
-
-static bool BeginsWith(const std::string &str, const std::string &match)
-{
-	return (str.find(match) == 0);
-}
-static bool EndsWith(const std::string &str, const std::string &match)
-{
-	return (str.rfind(match) == (str.length() - match.length()));
-}
-
-#if MPT_WSTRING_CONVERT
-static bool BeginsWith(const std::wstring &str, const std::wstring &match)
-{
-	return (str.find(match) == 0);
-}
-static bool EndsWith(const std::wstring &str, const std::wstring &match)
-{
-	return (str.rfind(match) == (str.length() - match.length()));
-}
-#endif
-
-#if MPT_USTRING_MODE_UTF8
-static bool BeginsWith(const mpt::ustring &str, const mpt::ustring &match)
-{
-	return (str.find(match) == 0);
-}
-static bool EndsWith(const mpt::ustring &str, const mpt::ustring &match)
-{
-	return (str.rfind(match) == (str.length() - match.length()));
-}
-#endif
 
 
 
@@ -868,116 +816,9 @@ static Gregorian TestDate2(int s, int m, int h, int D, int M, int Y) {
 	return Gregorian{Y,M,D,h,m,s};
 }
 
-static MPT_CONSTEXPR20_FUN int32le TestEndianConstexpr(uint32 x)
-{
-	int32le foo{};
-	foo = x;
-	return foo;
-}
 
 static MPT_NOINLINE void TestMisc1()
 {
-
-	#if MPT_CXX_BEFORE(20)
-		VERIFY_EQUAL(mpt::get_endian(), mpt::detail::endian_probe());
-	#endif
-	MPT_MAYBE_CONSTANT_IF(mpt::endian_is_little())
-	{
-		VERIFY_EQUAL(mpt::get_endian(), mpt::endian::little);
-		MPT_MAYBE_CONSTANT_IF((mpt::endian::native == mpt::endian::little) || (mpt::endian::native == mpt::endian::big))
-		{
-			VERIFY_EQUAL(mpt::endian::native, mpt::endian::little);
-		}
-		#if MPT_CXX_BEFORE(20)
-			VERIFY_EQUAL(mpt::detail::endian_probe(), mpt::endian::little);
-		#endif
-	}
-	MPT_MAYBE_CONSTANT_IF(mpt::endian_is_big())
-	{
-		VERIFY_EQUAL(mpt::get_endian(), mpt::endian::big);
-		MPT_MAYBE_CONSTANT_IF((mpt::endian::native == mpt::endian::little) || (mpt::endian::native == mpt::endian::big))
-		{
-			VERIFY_EQUAL(mpt::endian::native, mpt::endian::big);
-		}
-		#if MPT_CXX_BEFORE(20)
-			VERIFY_EQUAL(mpt::detail::endian_probe(), mpt::endian::big);
-		#endif
-	}
-
-	MPT_CONSTEXPR20_VAR int32le foo = TestEndianConstexpr(23);
-	static_cast<void>(foo);
-
-	VERIFY_EQUAL(mpt::detail::SwapBytes(uint8(0x12)), 0x12);
-	VERIFY_EQUAL(mpt::detail::SwapBytes(uint16(0x1234)), 0x3412);
-	VERIFY_EQUAL(mpt::detail::SwapBytes(uint32(0x12345678u)), 0x78563412u);
-	VERIFY_EQUAL(mpt::detail::SwapBytes(uint64(0x123456789abcdef0ull)), 0xf0debc9a78563412ull);
-
-	VERIFY_EQUAL(mpt::detail::SwapBytes(int8(int8_min)), int8_min);
-	VERIFY_EQUAL(mpt::detail::SwapBytes(int16(int16_min)), int16(0x80));
-	VERIFY_EQUAL(mpt::detail::SwapBytes(int32(int32_min)), int32(0x80));
-	VERIFY_EQUAL(mpt::detail::SwapBytes(int64(int64_min)), int64(0x80));
-
-	VERIFY_EQUAL(EncodeIEEE754binary32(1.0f), 0x3f800000u);
-	VERIFY_EQUAL(EncodeIEEE754binary32(-1.0f), 0xbf800000u);
-	VERIFY_EQUAL(DecodeIEEE754binary32(0x00000000u), 0.0f);
-	VERIFY_EQUAL(DecodeIEEE754binary32(0x41840000u), 16.5f);
-	VERIFY_EQUAL(DecodeIEEE754binary32(0x3faa0000u),  1.328125f);
-	VERIFY_EQUAL(DecodeIEEE754binary32(0xbfaa0000u), -1.328125f);
-	VERIFY_EQUAL(DecodeIEEE754binary32(0x3f800000u),  1.0f);
-	VERIFY_EQUAL(DecodeIEEE754binary32(0x00000000u),  0.0f);
-	VERIFY_EQUAL(DecodeIEEE754binary32(0xbf800000u), -1.0f);
-	VERIFY_EQUAL(DecodeIEEE754binary32(0x3f800000u),  1.0f);
-	VERIFY_EQUAL(IEEE754binary32LE(1.0f).GetInt32(), 0x3f800000u);
-	VERIFY_EQUAL(IEEE754binary32BE(1.0f).GetInt32(), 0x3f800000u);
-	VERIFY_EQUAL(IEEE754binary32LE(mpt::as_byte(0x00),mpt::as_byte(0x00),mpt::as_byte(0x80),mpt::as_byte(0x3f)), 1.0f);
-	VERIFY_EQUAL(IEEE754binary32BE(mpt::as_byte(0x3f),mpt::as_byte(0x80),mpt::as_byte(0x00),mpt::as_byte(0x00)), 1.0f);
-	VERIFY_EQUAL(IEEE754binary32LE(1.0f), IEEE754binary32LE(mpt::as_byte(0x00),mpt::as_byte(0x00),mpt::as_byte(0x80),mpt::as_byte(0x3f)));
-	VERIFY_EQUAL(IEEE754binary32BE(1.0f), IEEE754binary32BE(mpt::as_byte(0x3f),mpt::as_byte(0x80),mpt::as_byte(0x00),mpt::as_byte(0x00)));
-
-	VERIFY_EQUAL(EncodeIEEE754binary64(1.0), 0x3ff0000000000000ull);
-	VERIFY_EQUAL(EncodeIEEE754binary64(-1.0), 0xbff0000000000000ull);
-	VERIFY_EQUAL(DecodeIEEE754binary64(0x0000000000000000ull), 0.0);
-	VERIFY_EQUAL(DecodeIEEE754binary64(0x4030800000000000ull), 16.5);
-	VERIFY_EQUAL(DecodeIEEE754binary64(0x3FF5400000000000ull),  1.328125);
-	VERIFY_EQUAL(DecodeIEEE754binary64(0xBFF5400000000000ull), -1.328125);
-	VERIFY_EQUAL(DecodeIEEE754binary64(0x3ff0000000000000ull),  1.0);
-	VERIFY_EQUAL(DecodeIEEE754binary64(0x0000000000000000ull),  0.0);
-	VERIFY_EQUAL(DecodeIEEE754binary64(0xbff0000000000000ull), -1.0);
-	VERIFY_EQUAL(DecodeIEEE754binary64(0x3ff0000000000000ull),  1.0);
-	VERIFY_EQUAL(IEEE754binary64LE(1.0).GetInt64(), 0x3ff0000000000000ull);
-	VERIFY_EQUAL(IEEE754binary64BE(1.0).GetInt64(), 0x3ff0000000000000ull);
-	VERIFY_EQUAL(IEEE754binary64LE(mpt::as_byte(0x00),mpt::as_byte(0x00),mpt::as_byte(0x00),mpt::as_byte(0x00),mpt::as_byte(0x00),mpt::as_byte(0x00),mpt::as_byte(0xf0),mpt::as_byte(0x3f)), 1.0);
-	VERIFY_EQUAL(IEEE754binary64BE(mpt::as_byte(0x3f),mpt::as_byte(0xf0),mpt::as_byte(0x00),mpt::as_byte(0x00),mpt::as_byte(0x00),mpt::as_byte(0x00),mpt::as_byte(0x00),mpt::as_byte(0x00)), 1.0);
-	VERIFY_EQUAL(IEEE754binary64LE(1.0), IEEE754binary64LE(mpt::as_byte(0x00),mpt::as_byte(0x00),mpt::as_byte(0x00),mpt::as_byte(0x00),mpt::as_byte(0x00),mpt::as_byte(0x00),mpt::as_byte(0xf0),mpt::as_byte(0x3f)));
-	VERIFY_EQUAL(IEEE754binary64BE(1.0), IEEE754binary64BE(mpt::as_byte(0x3f),mpt::as_byte(0xf0),mpt::as_byte(0x00),mpt::as_byte(0x00),mpt::as_byte(0x00),mpt::as_byte(0x00),mpt::as_byte(0x00),mpt::as_byte(0x00)));
-
-	// Packed integers with defined endianness
-	{
-		int8le le8; le8.set(-128);
-		int8be be8; be8.set(-128);
-		VERIFY_EQUAL(le8, -128);
-		VERIFY_EQUAL(be8, -128);
-		VERIFY_EQUAL(memcmp(&le8, "\x80", 1), 0);
-		VERIFY_EQUAL(memcmp(&be8, "\x80", 1), 0);
-		int16le le16; le16.set(0x1234);
-		int16be be16; be16.set(0x1234);
-		VERIFY_EQUAL(le16, 0x1234);
-		VERIFY_EQUAL(be16, 0x1234);
-		VERIFY_EQUAL(memcmp(&le16, "\x34\x12", 2), 0);
-		VERIFY_EQUAL(memcmp(&be16, "\x12\x34", 2), 0);
-		uint32le le32; le32.set(0xFFEEDDCCu);
-		uint32be be32; be32.set(0xFFEEDDCCu);
-		VERIFY_EQUAL(le32, 0xFFEEDDCCu);
-		VERIFY_EQUAL(be32, 0xFFEEDDCCu);
-		VERIFY_EQUAL(memcmp(&le32, "\xCC\xDD\xEE\xFF", 4), 0);
-		VERIFY_EQUAL(memcmp(&be32, "\xFF\xEE\xDD\xCC", 4), 0);
-		uint64le le64; le64.set(0xDEADC0DE15C0FFEEull);
-		uint64be be64; be64.set(0xDEADC0DE15C0FFEEull);
-		VERIFY_EQUAL(le64, 0xDEADC0DE15C0FFEEull);
-		VERIFY_EQUAL(be64, 0xDEADC0DE15C0FFEEull);
-		VERIFY_EQUAL(memcmp(&le64, "\xEE\xFF\xC0\x15\xDE\xC0\xAD\xDE", 8), 0);
-		VERIFY_EQUAL(memcmp(&be64, "\xDE\xAD\xC0\xDE\x15\xC0\xFF\xEE", 8), 0);
-	}
 
 	VERIFY_EQUAL(ModCommand::IsPcNote(NOTE_MAX), false);
 	VERIFY_EQUAL(ModCommand::IsPcNote(NOTE_PC), true);
@@ -999,637 +840,6 @@ static MPT_NOINLINE void TestMisc1()
 	VERIFY_EQUAL(CModSpecifications::ExtensionToType("s2m"), MOD_TYPE_NONE);
 	VERIFY_EQUAL(CModSpecifications::ExtensionToType(""), MOD_TYPE_NONE);
 
-	VERIFY_EQUAL( mpt::round(1.99), 2.0 );
-	VERIFY_EQUAL( mpt::round(1.5), 2.0 );
-	VERIFY_EQUAL( mpt::round(1.1), 1.0 );
-	VERIFY_EQUAL( mpt::round(-0.1), 0.0 );
-	VERIFY_EQUAL( mpt::round(-0.5), -1.0 );
-	VERIFY_EQUAL( mpt::round(-0.9), -1.0 );
-	VERIFY_EQUAL( mpt::round(-1.4), -1.0 );
-	VERIFY_EQUAL( mpt::round(-1.7), -2.0 );
-	VERIFY_EQUAL( mpt::saturate_round<int32>(int32_max + 0.1), int32_max );
-	VERIFY_EQUAL( mpt::saturate_round<int32>(int32_max - 0.4), int32_max );
-	VERIFY_EQUAL( mpt::saturate_round<int32>(int32_min + 0.1), int32_min );
-	VERIFY_EQUAL( mpt::saturate_round<int32>(int32_min - 0.1), int32_min );
-	VERIFY_EQUAL( mpt::saturate_round<uint32>(uint32_max + 0.499), uint32_max );
-	VERIFY_EQUAL( mpt::saturate_round<int8>(110.1), 110 );
-	VERIFY_EQUAL( mpt::saturate_round<int8>(-110.1), -110 );
-
-	VERIFY_EQUAL(mpt::popcount(static_cast<uint32>(int32(-1))), 32);
-	VERIFY_EQUAL(mpt::popcount(0u), 0);
-	VERIFY_EQUAL(mpt::popcount(1u), 1);
-	VERIFY_EQUAL(mpt::popcount(2u), 1);
-	VERIFY_EQUAL(mpt::popcount(3u), 2);
-
-	VERIFY_EQUAL(mpt::has_single_bit(0u), false);
-	VERIFY_EQUAL(mpt::has_single_bit(1u), true);
-	VERIFY_EQUAL(mpt::has_single_bit(2u), true);
-	VERIFY_EQUAL(mpt::has_single_bit(3u), false);
-	VERIFY_EQUAL(mpt::has_single_bit(4u), true);
-	VERIFY_EQUAL(mpt::has_single_bit(5u), false);
-	VERIFY_EQUAL(mpt::has_single_bit(6u), false);
-	VERIFY_EQUAL(mpt::has_single_bit(7u), false);
-	VERIFY_EQUAL(mpt::has_single_bit(8u), true);
-	VERIFY_EQUAL(mpt::has_single_bit(9u), false);
-	VERIFY_EQUAL(mpt::has_single_bit(uint32(0x7fffffffu)), false);
-	VERIFY_EQUAL(mpt::has_single_bit(uint32(0x80000000u)), true);
-	VERIFY_EQUAL(mpt::has_single_bit(uint32(0x80000001u)), false);
-	VERIFY_EQUAL(mpt::has_single_bit(uint32(0xfffffffeu)), false);
-	VERIFY_EQUAL(mpt::has_single_bit(uint32(0xffffffffu)), false);
-
-	VERIFY_EQUAL(mpt::bit_ceil(0u), 1u);
-	VERIFY_EQUAL(mpt::bit_ceil(1u), 1u);
-	VERIFY_EQUAL(mpt::bit_ceil(2u), 2u);
-	VERIFY_EQUAL(mpt::bit_ceil(3u), 4u);
-	VERIFY_EQUAL(mpt::bit_ceil(4u), 4u);
-	VERIFY_EQUAL(mpt::bit_ceil(5u), 8u);
-	VERIFY_EQUAL(mpt::bit_ceil(6u), 8u);
-	VERIFY_EQUAL(mpt::bit_ceil(7u), 8u);
-	VERIFY_EQUAL(mpt::bit_ceil(8u), 8u);
-	VERIFY_EQUAL(mpt::bit_ceil(9u), 16u);
-	VERIFY_EQUAL(mpt::bit_ceil(uint32(0x7fffffffu)), 0x80000000u);
-	VERIFY_EQUAL(mpt::bit_ceil(uint32(0x80000000u)), 0x80000000u);
-	//VERIFY_EQUAL(mpt::bit_ceil(uint32(0x80000001u)), 0u);
-	//VERIFY_EQUAL(mpt::bit_ceil(uint32(0xfffffffeu)), 0u);
-	//VERIFY_EQUAL(mpt::bit_ceil(uint32(0xffffffffu)), 0u);
-
-	VERIFY_EQUAL(mpt::bit_floor(0u), 0u);
-	VERIFY_EQUAL(mpt::bit_floor(1u), 1u);
-	VERIFY_EQUAL(mpt::bit_floor(2u), 2u);
-	VERIFY_EQUAL(mpt::bit_floor(3u), 2u);
-	VERIFY_EQUAL(mpt::bit_floor(4u), 4u);
-	VERIFY_EQUAL(mpt::bit_floor(5u), 4u);
-	VERIFY_EQUAL(mpt::bit_floor(6u), 4u);
-	VERIFY_EQUAL(mpt::bit_floor(7u), 4u);
-	VERIFY_EQUAL(mpt::bit_floor(8u), 8u);
-	VERIFY_EQUAL(mpt::bit_floor(9u), 8u);
-	VERIFY_EQUAL(mpt::bit_floor(uint32(0x7fffffffu)), 0x40000000u);
-	VERIFY_EQUAL(mpt::bit_floor(uint32(0x80000000u)), 0x80000000u);
-	VERIFY_EQUAL(mpt::bit_floor(uint32(0x80000001u)), 0x80000000u);
-	VERIFY_EQUAL(mpt::bit_floor(uint32(0xfffffffeu)), 0x80000000u);
-	VERIFY_EQUAL(mpt::bit_floor(uint32(0xffffffffu)), 0x80000000u);
-
-	VERIFY_EQUAL(mpt::bit_width(0u), 0u);
-	VERIFY_EQUAL(mpt::bit_width(1u), 1u);
-	VERIFY_EQUAL(mpt::bit_width(2u), 2u);
-	VERIFY_EQUAL(mpt::bit_width(3u), 2u);
-	VERIFY_EQUAL(mpt::bit_width(4u), 3u);
-	VERIFY_EQUAL(mpt::bit_width(5u), 3u);
-	VERIFY_EQUAL(mpt::bit_width(6u), 3u);
-	VERIFY_EQUAL(mpt::bit_width(7u), 3u);
-	VERIFY_EQUAL(mpt::bit_width(8u), 4u);
-	VERIFY_EQUAL(mpt::bit_width(9u), 4u);
-	VERIFY_EQUAL(mpt::bit_width(uint32(0x7fffffffu)), 31u);
-	VERIFY_EQUAL(mpt::bit_width(uint32(0x80000000u)), 32u);
-	VERIFY_EQUAL(mpt::bit_width(uint32(0x80000001u)), 32u);
-	VERIFY_EQUAL(mpt::bit_width(uint32(0xfffffffeu)), 32u);
-	VERIFY_EQUAL(mpt::bit_width(uint32(0xffffffffu)), 32u);
-
-	VERIFY_EQUAL(mpt::countl_one(uint8(0b00000000)), 0);
-	VERIFY_EQUAL(mpt::countl_one(uint8(0b00000001)), 0);
-	VERIFY_EQUAL(mpt::countl_one(uint8(0b00000011)), 0);
-	VERIFY_EQUAL(mpt::countl_one(uint8(0b00000111)), 0);
-	VERIFY_EQUAL(mpt::countl_one(uint8(0b00001111)), 0);
-	VERIFY_EQUAL(mpt::countl_one(uint8(0b00011111)), 0);
-	VERIFY_EQUAL(mpt::countl_one(uint8(0b00111111)), 0);
-	VERIFY_EQUAL(mpt::countl_one(uint8(0b01111111)), 0);
-	VERIFY_EQUAL(mpt::countl_one(uint8(0b11111111)), 8);
-	VERIFY_EQUAL(mpt::countl_one(uint8(0b11111110)), 7);
-	VERIFY_EQUAL(mpt::countl_one(uint8(0b11111100)), 6);
-	VERIFY_EQUAL(mpt::countl_one(uint8(0b11111000)), 5);
-	VERIFY_EQUAL(mpt::countl_one(uint8(0b11110000)), 4);
-	VERIFY_EQUAL(mpt::countl_one(uint8(0b11100000)), 3);
-	VERIFY_EQUAL(mpt::countl_one(uint8(0b11000000)), 2);
-	VERIFY_EQUAL(mpt::countl_one(uint8(0b10000000)), 1);
-	VERIFY_EQUAL(mpt::countl_one(uint8(0b00000000)), 0);
-
-	VERIFY_EQUAL(mpt::countl_zero(uint8(0b00000000)), 8);
-	VERIFY_EQUAL(mpt::countl_zero(uint8(0b00000001)), 7);
-	VERIFY_EQUAL(mpt::countl_zero(uint8(0b00000011)), 6);
-	VERIFY_EQUAL(mpt::countl_zero(uint8(0b00000111)), 5);
-	VERIFY_EQUAL(mpt::countl_zero(uint8(0b00001111)), 4);
-	VERIFY_EQUAL(mpt::countl_zero(uint8(0b00011111)), 3);
-	VERIFY_EQUAL(mpt::countl_zero(uint8(0b00111111)), 2);
-	VERIFY_EQUAL(mpt::countl_zero(uint8(0b01111111)), 1);
-	VERIFY_EQUAL(mpt::countl_zero(uint8(0b11111111)), 0);
-	VERIFY_EQUAL(mpt::countl_zero(uint8(0b11111110)), 0);
-	VERIFY_EQUAL(mpt::countl_zero(uint8(0b11111100)), 0);
-	VERIFY_EQUAL(mpt::countl_zero(uint8(0b11111000)), 0);
-	VERIFY_EQUAL(mpt::countl_zero(uint8(0b11110000)), 0);
-	VERIFY_EQUAL(mpt::countl_zero(uint8(0b11100000)), 0);
-	VERIFY_EQUAL(mpt::countl_zero(uint8(0b11000000)), 0);
-	VERIFY_EQUAL(mpt::countl_zero(uint8(0b10000000)), 0);
-	VERIFY_EQUAL(mpt::countl_zero(uint8(0b00000000)), 8);
-
-	VERIFY_EQUAL(mpt::countr_one(uint8(0b00000000)), 0);
-	VERIFY_EQUAL(mpt::countr_one(uint8(0b00000001)), 1);
-	VERIFY_EQUAL(mpt::countr_one(uint8(0b00000011)), 2);
-	VERIFY_EQUAL(mpt::countr_one(uint8(0b00000111)), 3);
-	VERIFY_EQUAL(mpt::countr_one(uint8(0b00001111)), 4);
-	VERIFY_EQUAL(mpt::countr_one(uint8(0b00011111)), 5);
-	VERIFY_EQUAL(mpt::countr_one(uint8(0b00111111)), 6);
-	VERIFY_EQUAL(mpt::countr_one(uint8(0b01111111)), 7);
-	VERIFY_EQUAL(mpt::countr_one(uint8(0b11111111)), 8);
-	VERIFY_EQUAL(mpt::countr_one(uint8(0b11111110)), 0);
-	VERIFY_EQUAL(mpt::countr_one(uint8(0b11111100)), 0);
-	VERIFY_EQUAL(mpt::countr_one(uint8(0b11111000)), 0);
-	VERIFY_EQUAL(mpt::countr_one(uint8(0b11110000)), 0);
-	VERIFY_EQUAL(mpt::countr_one(uint8(0b11100000)), 0);
-	VERIFY_EQUAL(mpt::countr_one(uint8(0b11000000)), 0);
-	VERIFY_EQUAL(mpt::countr_one(uint8(0b10000000)), 0);
-	VERIFY_EQUAL(mpt::countr_one(uint8(0b00000000)), 0);
-
-	VERIFY_EQUAL(mpt::countr_zero(uint8(0b00000000)), 8);
-	VERIFY_EQUAL(mpt::countr_zero(uint8(0b00000001)), 0);
-	VERIFY_EQUAL(mpt::countr_zero(uint8(0b00000011)), 0);
-	VERIFY_EQUAL(mpt::countr_zero(uint8(0b00000111)), 0);
-	VERIFY_EQUAL(mpt::countr_zero(uint8(0b00001111)), 0);
-	VERIFY_EQUAL(mpt::countr_zero(uint8(0b00011111)), 0);
-	VERIFY_EQUAL(mpt::countr_zero(uint8(0b00111111)), 0);
-	VERIFY_EQUAL(mpt::countr_zero(uint8(0b01111111)), 0);
-	VERIFY_EQUAL(mpt::countr_zero(uint8(0b11111111)), 0);
-	VERIFY_EQUAL(mpt::countr_zero(uint8(0b11111110)), 1);
-	VERIFY_EQUAL(mpt::countr_zero(uint8(0b11111100)), 2);
-	VERIFY_EQUAL(mpt::countr_zero(uint8(0b11111000)), 3);
-	VERIFY_EQUAL(mpt::countr_zero(uint8(0b11110000)), 4);
-	VERIFY_EQUAL(mpt::countr_zero(uint8(0b11100000)), 5);
-	VERIFY_EQUAL(mpt::countr_zero(uint8(0b11000000)), 6);
-	VERIFY_EQUAL(mpt::countr_zero(uint8(0b10000000)), 7);
-	VERIFY_EQUAL(mpt::countr_zero(uint8(0b00000000)), 8);
-
-	// trivials
-	VERIFY_EQUAL( mpt::saturate_cast<int>(-1), -1 );
-	VERIFY_EQUAL( mpt::saturate_cast<int>(0), 0 );
-	VERIFY_EQUAL( mpt::saturate_cast<int>(1), 1 );
-	VERIFY_EQUAL( mpt::saturate_cast<int>(std::numeric_limits<int>::min()), std::numeric_limits<int>::min() );
-	VERIFY_EQUAL( mpt::saturate_cast<int>(std::numeric_limits<int>::max()), std::numeric_limits<int>::max() );
-
-	// signed / unsigned
-	VERIFY_EQUAL( mpt::saturate_cast<int16>(std::numeric_limits<uint16>::min()), std::numeric_limits<uint16>::min() );
-	VERIFY_EQUAL( mpt::saturate_cast<int16>(std::numeric_limits<uint16>::max()), std::numeric_limits<int16>::max() );
-	VERIFY_EQUAL( mpt::saturate_cast<int32>(std::numeric_limits<uint32>::min()), (int32)std::numeric_limits<uint32>::min() );
-	VERIFY_EQUAL( mpt::saturate_cast<int32>(std::numeric_limits<uint32>::max()), std::numeric_limits<int32>::max() );
-	VERIFY_EQUAL( mpt::saturate_cast<int64>(std::numeric_limits<uint64>::min()), (int64)std::numeric_limits<uint64>::min() );
-	VERIFY_EQUAL( mpt::saturate_cast<int64>(std::numeric_limits<uint64>::max()), std::numeric_limits<int64>::max() );
-	VERIFY_EQUAL( mpt::saturate_cast<uint16>(std::numeric_limits<int16>::min()), std::numeric_limits<uint16>::min() );
-	VERIFY_EQUAL( mpt::saturate_cast<uint16>(std::numeric_limits<int16>::max()), std::numeric_limits<int16>::max() );
-	VERIFY_EQUAL( mpt::saturate_cast<uint32>(std::numeric_limits<int32>::min()), std::numeric_limits<uint32>::min() );
-	VERIFY_EQUAL( mpt::saturate_cast<uint32>(std::numeric_limits<int32>::max()), (uint32)std::numeric_limits<int32>::max() );
-	VERIFY_EQUAL( mpt::saturate_cast<uint64>(std::numeric_limits<int64>::min()), std::numeric_limits<uint64>::min() );
-	VERIFY_EQUAL( mpt::saturate_cast<uint64>(std::numeric_limits<int64>::max()), (uint64)std::numeric_limits<int64>::max() );
-
-	// overflow
-	VERIFY_EQUAL( mpt::saturate_cast<int16>(std::numeric_limits<int16>::min() - 1), std::numeric_limits<int16>::min() );
-	VERIFY_EQUAL( mpt::saturate_cast<int16>(std::numeric_limits<int16>::max() + 1), std::numeric_limits<int16>::max() );
-	VERIFY_EQUAL( mpt::saturate_cast<int32>(std::numeric_limits<int32>::min() - int64(1)), std::numeric_limits<int32>::min() );
-	VERIFY_EQUAL( mpt::saturate_cast<int32>(std::numeric_limits<int32>::max() + int64(1)), std::numeric_limits<int32>::max() );
-
-	VERIFY_EQUAL( mpt::saturate_cast<uint16>(std::numeric_limits<int16>::min() - 1), std::numeric_limits<uint16>::min() );
-	VERIFY_EQUAL( mpt::saturate_cast<uint16>(std::numeric_limits<int16>::max() + 1), (uint16)std::numeric_limits<int16>::max() + 1 );
-	VERIFY_EQUAL( mpt::saturate_cast<uint32>(std::numeric_limits<int32>::min() - int64(1)), std::numeric_limits<uint32>::min() );
-	VERIFY_EQUAL( mpt::saturate_cast<uint32>(std::numeric_limits<int32>::max() + int64(1)), (uint32)std::numeric_limits<int32>::max() + 1 );
-	
-	VERIFY_EQUAL( mpt::saturate_cast<int8>( int16(32000) ), 127 );
-	VERIFY_EQUAL( mpt::saturate_cast<int8>( int16(-32000) ), -128 );
-	VERIFY_EQUAL( mpt::saturate_cast<int8>( uint16(32000) ), 127 );
-	VERIFY_EQUAL( mpt::saturate_cast<int8>( uint16(64000) ), 127 );
-	VERIFY_EQUAL( mpt::saturate_cast<uint8>( int16(32000) ), 255 );
-	VERIFY_EQUAL( mpt::saturate_cast<uint8>( int16(-32000) ), 0 );
-	VERIFY_EQUAL( mpt::saturate_cast<uint8>( uint16(32000) ), 255 );
-	VERIFY_EQUAL( mpt::saturate_cast<uint8>( uint16(64000) ), 255 );
-	VERIFY_EQUAL( mpt::saturate_cast<int16>( int16(32000) ), 32000 );
-	VERIFY_EQUAL( mpt::saturate_cast<int16>( int16(-32000) ), -32000 );
-	VERIFY_EQUAL( mpt::saturate_cast<int16>( uint16(32000) ), 32000 );
-	VERIFY_EQUAL( mpt::saturate_cast<int16>( uint16(64000) ), 32767 );
-	VERIFY_EQUAL( mpt::saturate_cast<uint16>( int16(32000) ), 32000 );
-	VERIFY_EQUAL( mpt::saturate_cast<uint16>( int16(-32000) ), 0 );
-	VERIFY_EQUAL( mpt::saturate_cast<uint16>( uint16(32000) ), 32000 );
-	VERIFY_EQUAL( mpt::saturate_cast<uint16>( uint16(64000) ), 64000 );
-	VERIFY_EQUAL( mpt::saturate_cast<int32>( int16(32000) ), 32000 );
-	VERIFY_EQUAL( mpt::saturate_cast<int32>( int16(-32000) ), -32000 );
-	VERIFY_EQUAL( mpt::saturate_cast<int32>( uint16(32000) ), 32000 );
-	VERIFY_EQUAL( mpt::saturate_cast<int32>( uint16(64000) ), 64000 );
-	VERIFY_EQUAL( mpt::saturate_cast<uint32>( int16(32000) ), 32000 );
-	VERIFY_EQUAL( mpt::saturate_cast<uint32>( int16(-32000) ), 0 );
-	VERIFY_EQUAL( mpt::saturate_cast<uint32>( uint16(32000) ), 32000 );
-	VERIFY_EQUAL( mpt::saturate_cast<uint32>( uint16(64000) ), 64000 );
-	
-	VERIFY_EQUAL( mpt::saturate_cast<uint32>(std::numeric_limits<int64>::max() - 1), std::numeric_limits<uint32>::max() );
-
-	VERIFY_EQUAL( mpt::saturate_cast<int32>(std::numeric_limits<uint64>::max() - 1), std::numeric_limits<int32>::max() );
-	
-	VERIFY_EQUAL( mpt::saturate_cast<uint32>(static_cast<double>(std::numeric_limits<int64>::max())), std::numeric_limits<uint32>::max() );
-
-	VERIFY_EQUAL(mpt::rshift_signed<int16>(-32768,  1), mpt::rshift_signed_standard<int16>(-32768,  1));
-	VERIFY_EQUAL(mpt::rshift_signed<int16>(-32767,  1), mpt::rshift_signed_standard<int16>(-32767,  1));
-	VERIFY_EQUAL(mpt::rshift_signed<int16>(-32766,  1), mpt::rshift_signed_standard<int16>(-32766,  1));
-	VERIFY_EQUAL(mpt::rshift_signed<int16>(    -2,  1), mpt::rshift_signed_standard<int16>(    -2,  1));
-	VERIFY_EQUAL(mpt::rshift_signed<int16>(    -1,  1), mpt::rshift_signed_standard<int16>(    -1,  1));
-	VERIFY_EQUAL(mpt::rshift_signed<int16>(     0,  1), mpt::rshift_signed_standard<int16>(     0,  1));
-	VERIFY_EQUAL(mpt::rshift_signed<int16>(     1,  1), mpt::rshift_signed_standard<int16>(     1,  1));
-	VERIFY_EQUAL(mpt::rshift_signed<int16>(     2,  1), mpt::rshift_signed_standard<int16>(     2,  1));
-	VERIFY_EQUAL(mpt::rshift_signed<int16>( 32766,  1), mpt::rshift_signed_standard<int16>( 32766,  1));
-	VERIFY_EQUAL(mpt::rshift_signed<int16>( 32767,  1), mpt::rshift_signed_standard<int16>( 32767,  1));
-	VERIFY_EQUAL(mpt::rshift_signed<int16>(-32768, 14), mpt::rshift_signed_standard<int16>(-32768, 14));
-	VERIFY_EQUAL(mpt::rshift_signed<int16>(-32767, 14), mpt::rshift_signed_standard<int16>(-32767, 14));
-	VERIFY_EQUAL(mpt::rshift_signed<int16>(-32766, 14), mpt::rshift_signed_standard<int16>(-32766, 14));
-	VERIFY_EQUAL(mpt::rshift_signed<int16>(    -2, 14), mpt::rshift_signed_standard<int16>(    -2, 14));
-	VERIFY_EQUAL(mpt::rshift_signed<int16>(    -1, 14), mpt::rshift_signed_standard<int16>(    -1, 14));
-	VERIFY_EQUAL(mpt::rshift_signed<int16>(     0, 14), mpt::rshift_signed_standard<int16>(     0, 14));
-	VERIFY_EQUAL(mpt::rshift_signed<int16>(     1, 14), mpt::rshift_signed_standard<int16>(     1, 14));
-	VERIFY_EQUAL(mpt::rshift_signed<int16>(     2, 14), mpt::rshift_signed_standard<int16>(     2, 14));
-	VERIFY_EQUAL(mpt::rshift_signed<int16>( 32766, 14), mpt::rshift_signed_standard<int16>( 32766, 14));
-	VERIFY_EQUAL(mpt::rshift_signed<int16>( 32767, 14), mpt::rshift_signed_standard<int16>( 32767, 14));
-	VERIFY_EQUAL(mpt::rshift_signed<int16>(-32768, 15), mpt::rshift_signed_standard<int16>(-32768, 15));
-	VERIFY_EQUAL(mpt::rshift_signed<int16>(-32767, 15), mpt::rshift_signed_standard<int16>(-32767, 15));
-	VERIFY_EQUAL(mpt::rshift_signed<int16>(-32766, 15), mpt::rshift_signed_standard<int16>(-32766, 15));
-	VERIFY_EQUAL(mpt::rshift_signed<int16>(    -2, 15), mpt::rshift_signed_standard<int16>(    -2, 15));
-	VERIFY_EQUAL(mpt::rshift_signed<int16>(    -1, 15), mpt::rshift_signed_standard<int16>(    -1, 15));
-	VERIFY_EQUAL(mpt::rshift_signed<int16>(     0, 15), mpt::rshift_signed_standard<int16>(     0, 15));
-	VERIFY_EQUAL(mpt::rshift_signed<int16>(     1, 15), mpt::rshift_signed_standard<int16>(     1, 15));
-	VERIFY_EQUAL(mpt::rshift_signed<int16>(     2, 15), mpt::rshift_signed_standard<int16>(     2, 15));
-	VERIFY_EQUAL(mpt::rshift_signed<int16>( 32766, 15), mpt::rshift_signed_standard<int16>( 32766, 15));
-	VERIFY_EQUAL(mpt::rshift_signed<int16>( 32767, 15), mpt::rshift_signed_standard<int16>( 32767, 15));
-
-	VERIFY_EQUAL(mpt::lshift_signed<int16>(-32768,  1), mpt::lshift_signed_standard<int16>(-32768,  1));
-	VERIFY_EQUAL(mpt::lshift_signed<int16>(-32767,  1), mpt::lshift_signed_standard<int16>(-32767,  1));
-	VERIFY_EQUAL(mpt::lshift_signed<int16>(-32766,  1), mpt::lshift_signed_standard<int16>(-32766,  1));
-	VERIFY_EQUAL(mpt::lshift_signed<int16>(    -2,  1), mpt::lshift_signed_standard<int16>(    -2,  1));
-	VERIFY_EQUAL(mpt::lshift_signed<int16>(    -1,  1), mpt::lshift_signed_standard<int16>(    -1,  1));
-	VERIFY_EQUAL(mpt::lshift_signed<int16>(     0,  1), mpt::lshift_signed_standard<int16>(     0,  1));
-	VERIFY_EQUAL(mpt::lshift_signed<int16>(     1,  1), mpt::lshift_signed_standard<int16>(     1,  1));
-	VERIFY_EQUAL(mpt::lshift_signed<int16>(     2,  1), mpt::lshift_signed_standard<int16>(     2,  1));
-	VERIFY_EQUAL(mpt::lshift_signed<int16>( 32766,  1), mpt::lshift_signed_standard<int16>( 32766,  1));
-	VERIFY_EQUAL(mpt::lshift_signed<int16>( 32767,  1), mpt::lshift_signed_standard<int16>( 32767,  1));
-	VERIFY_EQUAL(mpt::lshift_signed<int16>(-32768, 14), mpt::lshift_signed_standard<int16>(-32768, 14));
-	VERIFY_EQUAL(mpt::lshift_signed<int16>(-32767, 14), mpt::lshift_signed_standard<int16>(-32767, 14));
-	VERIFY_EQUAL(mpt::lshift_signed<int16>(-32766, 14), mpt::lshift_signed_standard<int16>(-32766, 14));
-	VERIFY_EQUAL(mpt::lshift_signed<int16>(    -2, 14), mpt::lshift_signed_standard<int16>(    -2, 14));
-	VERIFY_EQUAL(mpt::lshift_signed<int16>(    -1, 14), mpt::lshift_signed_standard<int16>(    -1, 14));
-	VERIFY_EQUAL(mpt::lshift_signed<int16>(     0, 14), mpt::lshift_signed_standard<int16>(     0, 14));
-	VERIFY_EQUAL(mpt::lshift_signed<int16>(     1, 14), mpt::lshift_signed_standard<int16>(     1, 14));
-	VERIFY_EQUAL(mpt::lshift_signed<int16>(     2, 14), mpt::lshift_signed_standard<int16>(     2, 14));
-	VERIFY_EQUAL(mpt::lshift_signed<int16>( 32766, 14), mpt::lshift_signed_standard<int16>( 32766, 14));
-	VERIFY_EQUAL(mpt::lshift_signed<int16>( 32767, 14), mpt::lshift_signed_standard<int16>( 32767, 14));
-	VERIFY_EQUAL(mpt::lshift_signed<int16>(-32768, 15), mpt::lshift_signed_standard<int16>(-32768, 15));
-	VERIFY_EQUAL(mpt::lshift_signed<int16>(-32767, 15), mpt::lshift_signed_standard<int16>(-32767, 15));
-	VERIFY_EQUAL(mpt::lshift_signed<int16>(-32766, 15), mpt::lshift_signed_standard<int16>(-32766, 15));
-	VERIFY_EQUAL(mpt::lshift_signed<int16>(    -2, 15), mpt::lshift_signed_standard<int16>(    -2, 15));
-	VERIFY_EQUAL(mpt::lshift_signed<int16>(    -1, 15), mpt::lshift_signed_standard<int16>(    -1, 15));
-	VERIFY_EQUAL(mpt::lshift_signed<int16>(     0, 15), mpt::lshift_signed_standard<int16>(     0, 15));
-	VERIFY_EQUAL(mpt::lshift_signed<int16>(     1, 15), mpt::lshift_signed_standard<int16>(     1, 15));
-	VERIFY_EQUAL(mpt::lshift_signed<int16>(     2, 15), mpt::lshift_signed_standard<int16>(     2, 15));
-	VERIFY_EQUAL(mpt::lshift_signed<int16>( 32766, 15), mpt::lshift_signed_standard<int16>( 32766, 15));
-	VERIFY_EQUAL(mpt::lshift_signed<int16>( 32767, 15), mpt::lshift_signed_standard<int16>( 32767, 15));
-
-#if MPT_COMPILER_SHIFT_SIGNED
-
-	VERIFY_EQUAL(mpt::rshift_signed<int16>(-32768,  1), (-32768) >>  1);
-	VERIFY_EQUAL(mpt::rshift_signed<int16>(-32767,  1), (-32767) >>  1);
-	VERIFY_EQUAL(mpt::rshift_signed<int16>(-32766,  1), (-32766) >>  1);
-	VERIFY_EQUAL(mpt::rshift_signed<int16>(    -2,  1), (    -2) >>  1);
-	VERIFY_EQUAL(mpt::rshift_signed<int16>(    -1,  1), (    -1) >>  1);
-	VERIFY_EQUAL(mpt::rshift_signed<int16>(     0,  1), (     0) >>  1);
-	VERIFY_EQUAL(mpt::rshift_signed<int16>(     1,  1), (     1) >>  1);
-	VERIFY_EQUAL(mpt::rshift_signed<int16>(     2,  1), (     2) >>  1);
-	VERIFY_EQUAL(mpt::rshift_signed<int16>( 32766,  1), ( 32766) >>  1);
-	VERIFY_EQUAL(mpt::rshift_signed<int16>( 32767,  1), ( 32767) >>  1);
-	VERIFY_EQUAL(mpt::rshift_signed<int16>(-32768, 14), (-32768) >> 14);
-	VERIFY_EQUAL(mpt::rshift_signed<int16>(-32767, 14), (-32767) >> 14);
-	VERIFY_EQUAL(mpt::rshift_signed<int16>(-32766, 14), (-32766) >> 14);
-	VERIFY_EQUAL(mpt::rshift_signed<int16>(    -2, 14), (    -2) >> 14);
-	VERIFY_EQUAL(mpt::rshift_signed<int16>(    -1, 14), (    -1) >> 14);
-	VERIFY_EQUAL(mpt::rshift_signed<int16>(     0, 14), (     0) >> 14);
-	VERIFY_EQUAL(mpt::rshift_signed<int16>(     1, 14), (     1) >> 14);
-	VERIFY_EQUAL(mpt::rshift_signed<int16>(     2, 14), (     2) >> 14);
-	VERIFY_EQUAL(mpt::rshift_signed<int16>( 32766, 14), ( 32766) >> 14);
-	VERIFY_EQUAL(mpt::rshift_signed<int16>( 32767, 14), ( 32767) >> 14);
-	VERIFY_EQUAL(mpt::rshift_signed<int16>(-32768, 15), (-32768) >> 15);
-	VERIFY_EQUAL(mpt::rshift_signed<int16>(-32767, 15), (-32767) >> 15);
-	VERIFY_EQUAL(mpt::rshift_signed<int16>(-32766, 15), (-32766) >> 15);
-	VERIFY_EQUAL(mpt::rshift_signed<int16>(    -2, 15), (    -2) >> 15);
-	VERIFY_EQUAL(mpt::rshift_signed<int16>(    -1, 15), (    -1) >> 15);
-	VERIFY_EQUAL(mpt::rshift_signed<int16>(     0, 15), (     0) >> 15);
-	VERIFY_EQUAL(mpt::rshift_signed<int16>(     1, 15), (     1) >> 15);
-	VERIFY_EQUAL(mpt::rshift_signed<int16>(     2, 15), (     2) >> 15);
-	VERIFY_EQUAL(mpt::rshift_signed<int16>( 32766, 15), ( 32766) >> 15);
-	VERIFY_EQUAL(mpt::rshift_signed<int16>( 32767, 15), ( 32767) >> 15);
-
-	VERIFY_EQUAL(mpt::lshift_signed<int16>(-32768,  1), (-32768) <<  1);
-	VERIFY_EQUAL(mpt::lshift_signed<int16>(-32767,  1), (-32767) <<  1);
-	VERIFY_EQUAL(mpt::lshift_signed<int16>(-32766,  1), (-32766) <<  1);
-	VERIFY_EQUAL(mpt::lshift_signed<int16>(    -2,  1), (    -2) <<  1);
-	VERIFY_EQUAL(mpt::lshift_signed<int16>(    -1,  1), (    -1) <<  1);
-	VERIFY_EQUAL(mpt::lshift_signed<int16>(     0,  1), (     0) <<  1);
-	VERIFY_EQUAL(mpt::lshift_signed<int16>(     1,  1), (     1) <<  1);
-	VERIFY_EQUAL(mpt::lshift_signed<int16>(     2,  1), (     2) <<  1);
-	VERIFY_EQUAL(mpt::lshift_signed<int16>( 32766,  1), ( 32766) <<  1);
-	VERIFY_EQUAL(mpt::lshift_signed<int16>( 32767,  1), ( 32767) <<  1);
-	VERIFY_EQUAL(mpt::lshift_signed<int16>(-32768, 14), (-32768) << 14);
-	VERIFY_EQUAL(mpt::lshift_signed<int16>(-32767, 14), (-32767) << 14);
-	VERIFY_EQUAL(mpt::lshift_signed<int16>(-32766, 14), (-32766) << 14);
-	VERIFY_EQUAL(mpt::lshift_signed<int16>(    -2, 14), (    -2) << 14);
-	VERIFY_EQUAL(mpt::lshift_signed<int16>(    -1, 14), (    -1) << 14);
-	VERIFY_EQUAL(mpt::lshift_signed<int16>(     0, 14), (     0) << 14);
-	VERIFY_EQUAL(mpt::lshift_signed<int16>(     1, 14), (     1) << 14);
-	VERIFY_EQUAL(mpt::lshift_signed<int16>(     2, 14), (     2) << 14);
-	VERIFY_EQUAL(mpt::lshift_signed<int16>( 32766, 14), ( 32766) << 14);
-	VERIFY_EQUAL(mpt::lshift_signed<int16>( 32767, 14), ( 32767) << 14);
-	VERIFY_EQUAL(mpt::lshift_signed<int16>(-32768, 15), (-32768) << 15);
-	VERIFY_EQUAL(mpt::lshift_signed<int16>(-32767, 15), (-32767) << 15);
-	VERIFY_EQUAL(mpt::lshift_signed<int16>(-32766, 15), (-32766) << 15);
-	VERIFY_EQUAL(mpt::lshift_signed<int16>(    -2, 15), (    -2) << 15);
-	VERIFY_EQUAL(mpt::lshift_signed<int16>(    -1, 15), (    -1) << 15);
-	VERIFY_EQUAL(mpt::lshift_signed<int16>(     0, 15), (     0) << 15);
-	VERIFY_EQUAL(mpt::lshift_signed<int16>(     1, 15), (     1) << 15);
-	VERIFY_EQUAL(mpt::lshift_signed<int16>(     2, 15), (     2) << 15);
-	VERIFY_EQUAL(mpt::lshift_signed<int16>( 32766, 15), ( 32766) << 15);
-	VERIFY_EQUAL(mpt::lshift_signed<int16>( 32767, 15), ( 32767) << 15);
-
-#endif
-
-	VERIFY_EQUAL(mpt::rshift_signed<int32>(0-0x80000000,  1), mpt::rshift_signed_standard<int32>(0-0x80000000,  1));
-	VERIFY_EQUAL(mpt::rshift_signed<int32>(-0x7fffffff,  1), mpt::rshift_signed_standard<int32>(-0x7fffffff,  1));
-	VERIFY_EQUAL(mpt::rshift_signed<int32>(-0x7ffffffe,  1), mpt::rshift_signed_standard<int32>(-0x7ffffffe,  1));
-	VERIFY_EQUAL(mpt::rshift_signed<int32>(         -1,  1), mpt::rshift_signed_standard<int32>(         -1,  1));
-	VERIFY_EQUAL(mpt::rshift_signed<int32>(          0,  1), mpt::rshift_signed_standard<int32>(          0,  1));
-	VERIFY_EQUAL(mpt::rshift_signed<int32>(          1,  1), mpt::rshift_signed_standard<int32>(          1,  1));
-	VERIFY_EQUAL(mpt::rshift_signed<int32>( 0x7ffffffe,  1), mpt::rshift_signed_standard<int32>( 0x7ffffffe,  1));
-	VERIFY_EQUAL(mpt::rshift_signed<int32>( 0x7fffffff,  1), mpt::rshift_signed_standard<int32>( 0x7fffffff,  1));
-
-	VERIFY_EQUAL(mpt::rshift_signed<int32>(0-0x80000000, 31), mpt::rshift_signed_standard<int32>(0-0x80000000, 31));
-	VERIFY_EQUAL(mpt::rshift_signed<int32>(-0x7fffffff, 31), mpt::rshift_signed_standard<int32>(-0x7fffffff, 31));
-	VERIFY_EQUAL(mpt::rshift_signed<int32>(-0x7ffffffe, 31), mpt::rshift_signed_standard<int32>(-0x7ffffffe, 31));
-	VERIFY_EQUAL(mpt::rshift_signed<int32>(         -1, 31), mpt::rshift_signed_standard<int32>(         -1, 31));
-	VERIFY_EQUAL(mpt::rshift_signed<int32>(          0, 31), mpt::rshift_signed_standard<int32>(          0, 31));
-	VERIFY_EQUAL(mpt::rshift_signed<int32>(          1, 31), mpt::rshift_signed_standard<int32>(          1, 31));
-	VERIFY_EQUAL(mpt::rshift_signed<int32>( 0x7ffffffe, 31), mpt::rshift_signed_standard<int32>( 0x7ffffffe, 31));
-	VERIFY_EQUAL(mpt::rshift_signed<int32>( 0x7fffffff, 31), mpt::rshift_signed_standard<int32>( 0x7fffffff, 31));
-
-	VERIFY_EQUAL(mpt::lshift_signed<int32>(0-0x80000000,  1), mpt::lshift_signed_standard<int32>(0-0x80000000,  1));
-	VERIFY_EQUAL(mpt::lshift_signed<int32>(-0x7fffffff,  1), mpt::lshift_signed_standard<int32>(-0x7fffffff,  1));
-	VERIFY_EQUAL(mpt::lshift_signed<int32>(-0x7ffffffe,  1), mpt::lshift_signed_standard<int32>(-0x7ffffffe,  1));
-	VERIFY_EQUAL(mpt::lshift_signed<int32>(         -1,  1), mpt::lshift_signed_standard<int32>(         -1,  1));
-	VERIFY_EQUAL(mpt::lshift_signed<int32>(          0,  1), mpt::lshift_signed_standard<int32>(          0,  1));
-	VERIFY_EQUAL(mpt::lshift_signed<int32>(          1,  1), mpt::lshift_signed_standard<int32>(          1,  1));
-	VERIFY_EQUAL(mpt::lshift_signed<int32>( 0x7ffffffe,  1), mpt::lshift_signed_standard<int32>( 0x7ffffffe,  1));
-	VERIFY_EQUAL(mpt::lshift_signed<int32>( 0x7fffffff,  1), mpt::lshift_signed_standard<int32>( 0x7fffffff,  1));
-
-	VERIFY_EQUAL(mpt::lshift_signed<int32>(0-0x80000000, 31), mpt::lshift_signed_standard<int32>(0-0x80000000, 31));
-	VERIFY_EQUAL(mpt::lshift_signed<int32>(-0x7fffffff, 31), mpt::lshift_signed_standard<int32>(-0x7fffffff, 31));
-	VERIFY_EQUAL(mpt::lshift_signed<int32>(-0x7ffffffe, 31), mpt::lshift_signed_standard<int32>(-0x7ffffffe, 31));
-	VERIFY_EQUAL(mpt::lshift_signed<int32>(         -1, 31), mpt::lshift_signed_standard<int32>(         -1, 31));
-	VERIFY_EQUAL(mpt::lshift_signed<int32>(          0, 31), mpt::lshift_signed_standard<int32>(          0, 31));
-	VERIFY_EQUAL(mpt::lshift_signed<int32>(          1, 31), mpt::lshift_signed_standard<int32>(          1, 31));
-	VERIFY_EQUAL(mpt::lshift_signed<int32>( 0x7ffffffe, 31), mpt::lshift_signed_standard<int32>( 0x7ffffffe, 31));
-	VERIFY_EQUAL(mpt::lshift_signed<int32>( 0x7fffffff, 31), mpt::lshift_signed_standard<int32>( 0x7fffffff, 31));
-
-#if MPT_COMPILER_SHIFT_SIGNED
-
-	VERIFY_EQUAL(mpt::rshift_signed<int32>(0-0x80000000,  1), mpt::rshift_signed_undefined<int32>(0-0x80000000,  1));
-	VERIFY_EQUAL(mpt::rshift_signed<int32>(-0x7fffffff,  1), mpt::rshift_signed_undefined<int32>(-0x7fffffff,  1));
-	VERIFY_EQUAL(mpt::rshift_signed<int32>(-0x7ffffffe,  1), mpt::rshift_signed_undefined<int32>(-0x7ffffffe,  1));
-	VERIFY_EQUAL(mpt::rshift_signed<int32>(         -1,  1), mpt::rshift_signed_undefined<int32>(         -1,  1));
-	VERIFY_EQUAL(mpt::rshift_signed<int32>(          0,  1), mpt::rshift_signed_undefined<int32>(          0,  1));
-	VERIFY_EQUAL(mpt::rshift_signed<int32>(          1,  1), mpt::rshift_signed_undefined<int32>(          1,  1));
-	VERIFY_EQUAL(mpt::rshift_signed<int32>( 0x7ffffffe,  1), mpt::rshift_signed_undefined<int32>( 0x7ffffffe,  1));
-	VERIFY_EQUAL(mpt::rshift_signed<int32>( 0x7fffffff,  1), mpt::rshift_signed_undefined<int32>( 0x7fffffff,  1));
-
-	VERIFY_EQUAL(mpt::rshift_signed<int32>(0-0x80000000, 31), mpt::rshift_signed_undefined<int32>(0-0x80000000, 31));
-	VERIFY_EQUAL(mpt::rshift_signed<int32>(-0x7fffffff, 31), mpt::rshift_signed_undefined<int32>(-0x7fffffff, 31));
-	VERIFY_EQUAL(mpt::rshift_signed<int32>(-0x7ffffffe, 31), mpt::rshift_signed_undefined<int32>(-0x7ffffffe, 31));
-	VERIFY_EQUAL(mpt::rshift_signed<int32>(         -1, 31), mpt::rshift_signed_undefined<int32>(         -1, 31));
-	VERIFY_EQUAL(mpt::rshift_signed<int32>(          0, 31), mpt::rshift_signed_undefined<int32>(          0, 31));
-	VERIFY_EQUAL(mpt::rshift_signed<int32>(          1, 31), mpt::rshift_signed_undefined<int32>(          1, 31));
-	VERIFY_EQUAL(mpt::rshift_signed<int32>( 0x7ffffffe, 31), mpt::rshift_signed_undefined<int32>( 0x7ffffffe, 31));
-	VERIFY_EQUAL(mpt::rshift_signed<int32>( 0x7fffffff, 31), mpt::rshift_signed_undefined<int32>( 0x7fffffff, 31));
-
-	VERIFY_EQUAL(mpt::lshift_signed<int32>(0-0x80000000,  1), mpt::lshift_signed_undefined<int32>(0-0x80000000,  1));
-	VERIFY_EQUAL(mpt::lshift_signed<int32>(-0x7fffffff,  1), mpt::lshift_signed_undefined<int32>(-0x7fffffff,  1));
-	VERIFY_EQUAL(mpt::lshift_signed<int32>(-0x7ffffffe,  1), mpt::lshift_signed_undefined<int32>(-0x7ffffffe,  1));
-	VERIFY_EQUAL(mpt::lshift_signed<int32>(         -1,  1), mpt::lshift_signed_undefined<int32>(         -1,  1));
-	VERIFY_EQUAL(mpt::lshift_signed<int32>(          0,  1), mpt::lshift_signed_undefined<int32>(          0,  1));
-	VERIFY_EQUAL(mpt::lshift_signed<int32>(          1,  1), mpt::lshift_signed_undefined<int32>(          1,  1));
-	VERIFY_EQUAL(mpt::lshift_signed<int32>( 0x7ffffffe,  1), mpt::lshift_signed_undefined<int32>( 0x7ffffffe,  1));
-	VERIFY_EQUAL(mpt::lshift_signed<int32>( 0x7fffffff,  1), mpt::lshift_signed_undefined<int32>( 0x7fffffff,  1));
-
-	VERIFY_EQUAL(mpt::lshift_signed<int32>(0-0x80000000, 31), mpt::lshift_signed_undefined<int32>(0-0x80000000, 31));
-	VERIFY_EQUAL(mpt::lshift_signed<int32>(-0x7fffffff, 31), mpt::lshift_signed_undefined<int32>(-0x7fffffff, 31));
-	VERIFY_EQUAL(mpt::lshift_signed<int32>(-0x7ffffffe, 31), mpt::lshift_signed_undefined<int32>(-0x7ffffffe, 31));
-	VERIFY_EQUAL(mpt::lshift_signed<int32>(         -1, 31), mpt::lshift_signed_undefined<int32>(         -1, 31));
-	VERIFY_EQUAL(mpt::lshift_signed<int32>(          0, 31), mpt::lshift_signed_undefined<int32>(          0, 31));
-	VERIFY_EQUAL(mpt::lshift_signed<int32>(          1, 31), mpt::lshift_signed_undefined<int32>(          1, 31));
-	VERIFY_EQUAL(mpt::lshift_signed<int32>( 0x7ffffffe, 31), mpt::lshift_signed_undefined<int32>( 0x7ffffffe, 31));
-	VERIFY_EQUAL(mpt::lshift_signed<int32>( 0x7fffffff, 31), mpt::lshift_signed_undefined<int32>( 0x7fffffff, 31));
-
-#endif
-	
-	VERIFY_EQUAL(mpt::rshift_signed<int64>(0ull-0x8000000000000000ull,  1), mpt::rshift_signed_standard<int64>(0ull-0x8000000000000000ull,  1));
-	VERIFY_EQUAL(mpt::rshift_signed<int64>(-0x7fffffffffffffffll,  1), mpt::rshift_signed_standard<int64>(-0x7fffffffffffffffll,  1));
-	VERIFY_EQUAL(mpt::rshift_signed<int64>(-0x7ffffffffffffffell,  1), mpt::rshift_signed_standard<int64>(-0x7ffffffffffffffell,  1));
-	VERIFY_EQUAL(mpt::rshift_signed<int64>(                 -1ll,  1), mpt::rshift_signed_standard<int64>(                 -1ll,  1));
-	VERIFY_EQUAL(mpt::rshift_signed<int64>(                  0ll,  1), mpt::rshift_signed_standard<int64>(                  0ll,  1));
-	VERIFY_EQUAL(mpt::rshift_signed<int64>(                  1ll,  1), mpt::rshift_signed_standard<int64>(                  1ll,  1));
-	VERIFY_EQUAL(mpt::rshift_signed<int64>( 0x7ffffffffffffffell,  1), mpt::rshift_signed_standard<int64>( 0x7ffffffffffffffell,  1));
-	VERIFY_EQUAL(mpt::rshift_signed<int64>( 0x7fffffffffffffffll,  1), mpt::rshift_signed_standard<int64>( 0x7fffffffffffffffll,  1));
-
-	VERIFY_EQUAL(mpt::rshift_signed<int64>(0ull-0x8000000000000000ull, 63), mpt::rshift_signed_standard<int64>(0ull-0x8000000000000000ull, 63));
-	VERIFY_EQUAL(mpt::rshift_signed<int64>(-0x7fffffffffffffffll, 63), mpt::rshift_signed_standard<int64>(-0x7fffffffffffffffll, 63));
-	VERIFY_EQUAL(mpt::rshift_signed<int64>(-0x7ffffffffffffffell, 63), mpt::rshift_signed_standard<int64>(-0x7ffffffffffffffell, 63));
-	VERIFY_EQUAL(mpt::rshift_signed<int64>(                 -1ll, 63), mpt::rshift_signed_standard<int64>(                 -1ll, 63));
-	VERIFY_EQUAL(mpt::rshift_signed<int64>(                  0ll, 63), mpt::rshift_signed_standard<int64>(                  0ll, 63));
-	VERIFY_EQUAL(mpt::rshift_signed<int64>(                  1ll, 63), mpt::rshift_signed_standard<int64>(                  1ll, 63));
-	VERIFY_EQUAL(mpt::rshift_signed<int64>( 0x7ffffffffffffffell, 63), mpt::rshift_signed_standard<int64>( 0x7ffffffffffffffell, 63));
-	VERIFY_EQUAL(mpt::rshift_signed<int64>( 0x7fffffffffffffffll, 63), mpt::rshift_signed_standard<int64>( 0x7fffffffffffffffll, 63));
-
-	VERIFY_EQUAL(mpt::lshift_signed<int64>(0ull-0x8000000000000000ull,  1), mpt::lshift_signed_standard<int64>(0ull-0x8000000000000000ull,  1));
-	VERIFY_EQUAL(mpt::lshift_signed<int64>(-0x7fffffffffffffffll,  1), mpt::lshift_signed_standard<int64>(-0x7fffffffffffffffll,  1));
-	VERIFY_EQUAL(mpt::lshift_signed<int64>(-0x7ffffffffffffffell,  1), mpt::lshift_signed_standard<int64>(-0x7ffffffffffffffell,  1));
-	VERIFY_EQUAL(mpt::lshift_signed<int64>(                 -1ll,  1), mpt::lshift_signed_standard<int64>(                 -1ll,  1));
-	VERIFY_EQUAL(mpt::lshift_signed<int64>(                  0ll,  1), mpt::lshift_signed_standard<int64>(                  0ll,  1));
-	VERIFY_EQUAL(mpt::lshift_signed<int64>(                  1ll,  1), mpt::lshift_signed_standard<int64>(                  1ll,  1));
-	VERIFY_EQUAL(mpt::lshift_signed<int64>( 0x7ffffffffffffffell,  1), mpt::lshift_signed_standard<int64>( 0x7ffffffffffffffell,  1));
-	VERIFY_EQUAL(mpt::lshift_signed<int64>( 0x7fffffffffffffffll,  1), mpt::lshift_signed_standard<int64>( 0x7fffffffffffffffll,  1));
-
-	VERIFY_EQUAL(mpt::lshift_signed<int64>(0ull-0x8000000000000000ull, 63), mpt::lshift_signed_standard<int64>(0ull-0x8000000000000000ull, 63));
-	VERIFY_EQUAL(mpt::lshift_signed<int64>(-0x7fffffffffffffffll, 63), mpt::lshift_signed_standard<int64>(-0x7fffffffffffffffll, 63));
-	VERIFY_EQUAL(mpt::lshift_signed<int64>(-0x7ffffffffffffffell, 63), mpt::lshift_signed_standard<int64>(-0x7ffffffffffffffell, 63));
-	VERIFY_EQUAL(mpt::lshift_signed<int64>(                 -1ll, 63), mpt::lshift_signed_standard<int64>(                 -1ll, 63));
-	VERIFY_EQUAL(mpt::lshift_signed<int64>(                  0ll, 63), mpt::lshift_signed_standard<int64>(                  0ll, 63));
-	VERIFY_EQUAL(mpt::lshift_signed<int64>(                  1ll, 63), mpt::lshift_signed_standard<int64>(                  1ll, 63));
-	VERIFY_EQUAL(mpt::lshift_signed<int64>( 0x7ffffffffffffffell, 63), mpt::lshift_signed_standard<int64>( 0x7ffffffffffffffell, 63));
-	VERIFY_EQUAL(mpt::lshift_signed<int64>( 0x7fffffffffffffffll, 63), mpt::lshift_signed_standard<int64>( 0x7fffffffffffffffll, 63));
-
-#if MPT_COMPILER_SHIFT_SIGNED
-
-	VERIFY_EQUAL(mpt::rshift_signed<int64>(0ull-0x8000000000000000ull,  1), mpt::rshift_signed_undefined<int64>(0ull-0x8000000000000000ull,  1));
-	VERIFY_EQUAL(mpt::rshift_signed<int64>(-0x7fffffffffffffffll,  1), mpt::rshift_signed_undefined<int64>(-0x7fffffffffffffffll,  1));
-	VERIFY_EQUAL(mpt::rshift_signed<int64>(-0x7ffffffffffffffell,  1), mpt::rshift_signed_undefined<int64>(-0x7ffffffffffffffell,  1));
-	VERIFY_EQUAL(mpt::rshift_signed<int64>(                 -1ll,  1), mpt::rshift_signed_undefined<int64>(                 -1ll,  1));
-	VERIFY_EQUAL(mpt::rshift_signed<int64>(                  0ll,  1), mpt::rshift_signed_undefined<int64>(                  0ll,  1));
-	VERIFY_EQUAL(mpt::rshift_signed<int64>(                  1ll,  1), mpt::rshift_signed_undefined<int64>(                  1ll,  1));
-	VERIFY_EQUAL(mpt::rshift_signed<int64>( 0x7ffffffffffffffell,  1), mpt::rshift_signed_undefined<int64>( 0x7ffffffffffffffell,  1));
-	VERIFY_EQUAL(mpt::rshift_signed<int64>( 0x7fffffffffffffffll,  1), mpt::rshift_signed_undefined<int64>( 0x7fffffffffffffffll,  1));
-
-	VERIFY_EQUAL(mpt::rshift_signed<int64>(0ull-0x8000000000000000ull, 63), mpt::rshift_signed_undefined<int64>(0ull-0x8000000000000000ull, 63));
-	VERIFY_EQUAL(mpt::rshift_signed<int64>(-0x7fffffffffffffffll, 63), mpt::rshift_signed_undefined<int64>(-0x7fffffffffffffffll, 63));
-	VERIFY_EQUAL(mpt::rshift_signed<int64>(-0x7ffffffffffffffell, 63), mpt::rshift_signed_undefined<int64>(-0x7ffffffffffffffell, 63));
-	VERIFY_EQUAL(mpt::rshift_signed<int64>(                 -1ll, 63), mpt::rshift_signed_undefined<int64>(                 -1ll, 63));
-	VERIFY_EQUAL(mpt::rshift_signed<int64>(                  0ll, 63), mpt::rshift_signed_undefined<int64>(                  0ll, 63));
-	VERIFY_EQUAL(mpt::rshift_signed<int64>(                  1ll, 63), mpt::rshift_signed_undefined<int64>(                  1ll, 63));
-	VERIFY_EQUAL(mpt::rshift_signed<int64>( 0x7ffffffffffffffell, 63), mpt::rshift_signed_undefined<int64>( 0x7ffffffffffffffell, 63));
-	VERIFY_EQUAL(mpt::rshift_signed<int64>( 0x7fffffffffffffffll, 63), mpt::rshift_signed_undefined<int64>( 0x7fffffffffffffffll, 63));
-
-	VERIFY_EQUAL(mpt::lshift_signed<int64>(0ull-0x8000000000000000ull,  1), mpt::lshift_signed_undefined<int64>(0ull-0x8000000000000000ull,  1));
-	VERIFY_EQUAL(mpt::lshift_signed<int64>(-0x7fffffffffffffffll,  1), mpt::lshift_signed_undefined<int64>(-0x7fffffffffffffffll,  1));
-	VERIFY_EQUAL(mpt::lshift_signed<int64>(-0x7ffffffffffffffell,  1), mpt::lshift_signed_undefined<int64>(-0x7ffffffffffffffell,  1));
-	VERIFY_EQUAL(mpt::lshift_signed<int64>(                 -1ll,  1), mpt::lshift_signed_undefined<int64>(                 -1ll,  1));
-	VERIFY_EQUAL(mpt::lshift_signed<int64>(                  0ll,  1), mpt::lshift_signed_undefined<int64>(                  0ll,  1));
-	VERIFY_EQUAL(mpt::lshift_signed<int64>(                  1ll,  1), mpt::lshift_signed_undefined<int64>(                  1ll,  1));
-	VERIFY_EQUAL(mpt::lshift_signed<int64>( 0x7ffffffffffffffell,  1), mpt::lshift_signed_undefined<int64>( 0x7ffffffffffffffell,  1));
-	VERIFY_EQUAL(mpt::lshift_signed<int64>( 0x7fffffffffffffffll,  1), mpt::lshift_signed_undefined<int64>( 0x7fffffffffffffffll,  1));
-
-	VERIFY_EQUAL(mpt::lshift_signed<int64>(0ull-0x8000000000000000ull, 63), mpt::lshift_signed_undefined<int64>(0ull-0x8000000000000000ull, 63));
-	VERIFY_EQUAL(mpt::lshift_signed<int64>(-0x7fffffffffffffffll, 63), mpt::lshift_signed_undefined<int64>(-0x7fffffffffffffffll, 63));
-	VERIFY_EQUAL(mpt::lshift_signed<int64>(-0x7ffffffffffffffell, 63), mpt::lshift_signed_undefined<int64>(-0x7ffffffffffffffell, 63));
-	VERIFY_EQUAL(mpt::lshift_signed<int64>(                 -1ll, 63), mpt::lshift_signed_undefined<int64>(                 -1ll, 63));
-	VERIFY_EQUAL(mpt::lshift_signed<int64>(                  0ll, 63), mpt::lshift_signed_undefined<int64>(                  0ll, 63));
-	VERIFY_EQUAL(mpt::lshift_signed<int64>(                  1ll, 63), mpt::lshift_signed_undefined<int64>(                  1ll, 63));
-	VERIFY_EQUAL(mpt::lshift_signed<int64>( 0x7ffffffffffffffell, 63), mpt::lshift_signed_undefined<int64>( 0x7ffffffffffffffell, 63));
-	VERIFY_EQUAL(mpt::lshift_signed<int64>( 0x7fffffffffffffffll, 63), mpt::lshift_signed_undefined<int64>( 0x7fffffffffffffffll, 63));
-
-#endif
-
-
-	VERIFY_EQUAL(mpt::wrapping_modulo(-25, 12), 11);
-	VERIFY_EQUAL(mpt::wrapping_modulo(-24, 12), 0);
-	VERIFY_EQUAL(mpt::wrapping_modulo(-23, 12), 1);
-	VERIFY_EQUAL(mpt::wrapping_modulo(-8, 7), 6);
-	VERIFY_EQUAL(mpt::wrapping_modulo(-7, 7), 0);
-	VERIFY_EQUAL(mpt::wrapping_modulo(-6, 7), 1);
-	VERIFY_EQUAL(mpt::wrapping_modulo(-5, 7), 2);
-	VERIFY_EQUAL(mpt::wrapping_modulo(-4, 7), 3);
-	VERIFY_EQUAL(mpt::wrapping_modulo(-3, 7), 4);
-	VERIFY_EQUAL(mpt::wrapping_modulo(-2, 7), 5);
-	VERIFY_EQUAL(mpt::wrapping_modulo(-1, 7), 6);
-	VERIFY_EQUAL(mpt::wrapping_modulo(0, 12), 0);
-	VERIFY_EQUAL(mpt::wrapping_modulo(0, 7), 0);
-	VERIFY_EQUAL(mpt::wrapping_modulo(1, 7), 1);
-	VERIFY_EQUAL(mpt::wrapping_modulo(2, 7), 2);
-	VERIFY_EQUAL(mpt::wrapping_modulo(3, 7), 3);
-	VERIFY_EQUAL(mpt::wrapping_modulo(4, 7), 4);
-	VERIFY_EQUAL(mpt::wrapping_modulo(5, 7), 5);
-	VERIFY_EQUAL(mpt::wrapping_modulo(6, 7), 6);
-	VERIFY_EQUAL(mpt::wrapping_modulo(7, 7), 0);
-	VERIFY_EQUAL(mpt::wrapping_modulo(8, 7), 1);
-	VERIFY_EQUAL(mpt::wrapping_modulo(23, 12), 11);
-	VERIFY_EQUAL(mpt::wrapping_modulo(24, 12), 0);
-	VERIFY_EQUAL(mpt::wrapping_modulo(25, 12), 1);
-	VERIFY_EQUAL(mpt::wrapping_modulo(uint32(0x7fffffff), uint32(0x80000000)), uint32(0x7fffffff));
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(0x7ffffffe), int32(0x7fffffff)), int32(0x7ffffffe));
-
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-0x80000000ll), int32(1)), int32(0));
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-0x80000000ll), int32(2)), int32(0));
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-0x7fffffff), int32(1)), int32(0));
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-0x7fffffff), int32(2)), int32(1));
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-0x7ffffffe), int32(1)), int32(0));
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-0x7ffffffe), int32(2)), int32(0));
-
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-0x80000000ll), int32(0x7fffffff)), int32(0x7ffffffe));
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-0x7fffffff)  , int32(0x7fffffff)), int32(0));
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-0x7ffffffe)  , int32(0x7fffffff)), int32(1));
-
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-0x80000000ll), int32(0x7ffffffe)), int32(0x7ffffffc));
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-0x7fffffff)  , int32(0x7ffffffe)), int32(0x7ffffffd));
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-0x7ffffffe)  , int32(0x7ffffffe)), int32(0));
-
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-0x80000000ll), int32(0x7ffffffd)), int32(0x7ffffffa));
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-0x7fffffff)  , int32(0x7ffffffd)), int32(0x7ffffffb));
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-0x7ffffffe)  , int32(0x7ffffffd)), int32(0x7ffffffc));
-
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(0) , int32(0x7fffffff)), int32(0));
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-1), int32(0x7fffffff)), int32(0x7ffffffe));
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-2), int32(0x7fffffff)), int32(0x7ffffffd));
-
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(0) , int32(0x7ffffffe)), int32(0));
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-1), int32(0x7ffffffe)), int32(0x7ffffffd));
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-2), int32(0x7ffffffe)), int32(0x7ffffffc));
-
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-0x80000000ll), uint32(1)), int32(0));
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-0x80000000ll), uint32(2)), int32(0));
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-0x7fffffff), uint32(1)), int32(0));
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-0x7fffffff), uint32(2)), int32(1));
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-0x7ffffffe), uint32(1)), int32(0));
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-0x7ffffffe), uint32(2)), int32(0));
-
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-0x40000001)  , uint32(0xffffffff)), uint32(0xbffffffe));
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-0x40000000)  , uint32(0xffffffff)), uint32(0xbfffffff));
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-0x3fffffff)  , uint32(0xffffffff)), uint32(0xc0000000));
-
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-0x80000000ll), uint32(0x80000000)), uint32(0));
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-0x7fffffff)  , uint32(0x80000000)), uint32(1));
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-0x7ffffffe)  , uint32(0x80000000)), uint32(2));
-
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-0x80000000ll), uint32(0x80000001)), uint32(1));
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-0x7fffffff)  , uint32(0x80000001)), uint32(2));
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-0x7ffffffe)  , uint32(0x80000001)), uint32(3));
-
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-0x80000000ll), uint32(0x80000000)), uint32(0));
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-0x7fffffff)  , uint32(0x80000000)), uint32(1));
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-0x7ffffffe)  , uint32(0x80000000)), uint32(2));
-
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-0x80000000ll), uint32(0x7fffffff)), uint32(0x7ffffffe));
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-0x7fffffff)  , uint32(0x7fffffff)), uint32(0));
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-0x7ffffffe)  , uint32(0x7fffffff)), uint32(1));
-
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-0x80000000ll), uint32(0x7ffffffe)), uint32(0x7ffffffc));
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-0x7fffffff)  , uint32(0x7ffffffe)), uint32(0x7ffffffd));
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-0x7ffffffe)  , uint32(0x7ffffffe)), uint32(0));
-
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-0x80000000ll), uint32(0x7ffffffd)), uint32(0x7ffffffa));
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-0x7fffffff)  , uint32(0x7ffffffd)), uint32(0x7ffffffb));
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-0x7ffffffe)  , uint32(0x7ffffffd)), uint32(0x7ffffffc));
-
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(0) , uint32(0x7fffffff)), uint32(0));
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-1), uint32(0x7fffffff)), uint32(0x7ffffffe));
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-2), uint32(0x7fffffff)), uint32(0x7ffffffd));
-
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(0) , uint32(0x7ffffffe)), uint32(0));
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-1), uint32(0x7ffffffe)), uint32(0x7ffffffd));
-	VERIFY_EQUAL(mpt::wrapping_modulo(int32(-2), uint32(0x7ffffffe)), uint32(0x7ffffffc));
-
-	VERIFY_EQUAL(mpt::wrapping_divide(-15, 7), -3);
-	VERIFY_EQUAL(mpt::wrapping_divide(-14, 7), -2);
-	VERIFY_EQUAL(mpt::wrapping_divide(-13, 7), -2);
-	VERIFY_EQUAL(mpt::wrapping_divide(-12, 7), -2);
-	VERIFY_EQUAL(mpt::wrapping_divide(-11, 7), -2);
-	VERIFY_EQUAL(mpt::wrapping_divide(-10, 7), -2);
-	VERIFY_EQUAL(mpt::wrapping_divide(-9, 7), -2);
-	VERIFY_EQUAL(mpt::wrapping_divide(-8, 7), -2);
-	VERIFY_EQUAL(mpt::wrapping_divide(-7, 7), -1);
-	VERIFY_EQUAL(mpt::wrapping_divide(-6, 7), -1);
-	VERIFY_EQUAL(mpt::wrapping_divide(-5, 7), -1);
-	VERIFY_EQUAL(mpt::wrapping_divide(-4, 7), -1);
-	VERIFY_EQUAL(mpt::wrapping_divide(-3, 7), -1);
-	VERIFY_EQUAL(mpt::wrapping_divide(-2, 7), -1);
-	VERIFY_EQUAL(mpt::wrapping_divide(-1, 7), -1);
-	VERIFY_EQUAL(mpt::wrapping_divide(0, 7), 0);
-	VERIFY_EQUAL(mpt::wrapping_divide(1, 7), 0);
-	VERIFY_EQUAL(mpt::wrapping_divide(2, 7), 0);
-	VERIFY_EQUAL(mpt::wrapping_divide(3, 7), 0);
-	VERIFY_EQUAL(mpt::wrapping_divide(4, 7), 0);
-	VERIFY_EQUAL(mpt::wrapping_divide(5, 7), 0);
-	VERIFY_EQUAL(mpt::wrapping_divide(6, 7), 0);
-	VERIFY_EQUAL(mpt::wrapping_divide(7, 7), 1);
-	VERIFY_EQUAL(mpt::wrapping_divide(8, 7), 1);
-	VERIFY_EQUAL(mpt::wrapping_divide(9, 7), 1);
-	VERIFY_EQUAL(mpt::wrapping_divide(10, 7), 1);
-	VERIFY_EQUAL(mpt::wrapping_divide(11, 7), 1);
-	VERIFY_EQUAL(mpt::wrapping_divide(12, 7), 1);
-	VERIFY_EQUAL(mpt::wrapping_divide(13, 7), 1);
-	VERIFY_EQUAL(mpt::wrapping_divide(14, 7), 2);
-	VERIFY_EQUAL(mpt::wrapping_divide(15, 7), 2);
-
 }
 
 
@@ -1645,141 +855,12 @@ static MPT_NOINLINE void TestMisc2()
 	VERIFY_EQUAL( mpt::String::RTrim(std::string("\0\ta\0b ",6)), std::string("\0\ta\0b",5) );
 	VERIFY_EQUAL( mpt::String::Trim(std::string("\0\ta\0b\0",6),std::string("\0",1)), std::string("\ta\0b",4) );
 
-	{
-		std::string expecteds = std::string("pleasure.");
-		std::vector<std::byte> expected(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).data(), mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).data() + mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).size());
-		VERIFY_EQUAL(Util::BinToBase64(mpt::as_span(expected)), U_("cGxlYXN1cmUu"));
-	}
-	{
-		std::string expecteds = std::string("leasure.");
-		std::vector<std::byte> expected(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).data(), mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).data() + mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).size());
-		VERIFY_EQUAL(Util::BinToBase64(mpt::as_span(expected)), U_("bGVhc3VyZS4="));
-	}
-	{
-		std::string expecteds = std::string("easure.");
-		std::vector<std::byte> expected(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).data(), mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).data() + mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).size());
-		VERIFY_EQUAL(Util::BinToBase64(mpt::as_span(expected)), U_("ZWFzdXJlLg=="));
-	}
-	{
-		std::string expecteds = std::string("pleasure.");
-		std::vector<std::byte> expected(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).data(), mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).data() + mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).size());
-		VERIFY_EQUAL(expected, Util::Base64ToBin(U_("cGxlYXN1cmUu")));
-	}
-	{
-		std::string expecteds = std::string("leasure.");
-		std::vector<std::byte> expected(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).data(), mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).data() + mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).size());
-		VERIFY_EQUAL(expected, Util::Base64ToBin(U_("bGVhc3VyZS4=")));
-	}
-	{
-		std::string expecteds = std::string("easure.");
-		std::vector<std::byte> expected(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).data(), mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).data() + mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).size());
-		VERIFY_EQUAL(expected, Util::Base64ToBin(U_("ZWFzdXJlLg==")));
-	}
-
-	{
-		std::string expecteds = std::string("pleasure.");
-		std::vector<std::byte> expected(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).data(), mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).data() + mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).size());
-		VERIFY_EQUAL(Util::BinToBase64url(mpt::as_span(expected)), U_("cGxlYXN1cmUu"));
-	}
-	{
-		std::string expecteds = std::string("leasure.");
-		std::vector<std::byte> expected(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).data(), mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).data() + mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).size());
-		VERIFY_EQUAL(Util::BinToBase64url(mpt::as_span(expected)), U_("bGVhc3VyZS4"));
-	}
-	{
-		std::string expecteds = std::string("easure.");
-		std::vector<std::byte> expected(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).data(), mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).data() + mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).size());
-		VERIFY_EQUAL(Util::BinToBase64url(mpt::as_span(expected)), U_("ZWFzdXJlLg"));
-	}
-	{
-		std::string expecteds = std::string("pleasure.");
-		std::vector<std::byte> expected(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).data(), mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).data() + mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).size());
-		VERIFY_EQUAL(expected, Util::Base64urlToBin(U_("cGxlYXN1cmUu")));
-	}
-	{
-		std::string expecteds = std::string("leasure.");
-		std::vector<std::byte> expected(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).data(), mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).data() + mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).size());
-		VERIFY_EQUAL(expected, Util::Base64urlToBin(U_("bGVhc3VyZS4")));
-	}
-	{
-		std::string expecteds = std::string("easure.");
-		std::vector<std::byte> expected(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).data(), mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).data() + mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(expecteds)).size());
-		VERIFY_EQUAL(expected, Util::Base64urlToBin(U_("ZWFzdXJlLg")));
-	}
-
-	// These should fail to compile
-	//mpt::saturate_round<std::string>(1.0);
-	//mpt::saturate_round<int64>(1.0);
-	//mpt::saturate_round<uint64>(1.0);
-
-	// This should trigger assert in Round.
-	//VERIFY_EQUAL( mpt::saturate_round<int8>(-129), 0 );
-
 	// Check for completeness of supported effect list in mod specifications
 	for(const auto &spec : ModSpecs::Collection)
 	{
 		VERIFY_EQUAL(strlen(spec->commands), (size_t)MAX_EFFECTS);
 		VERIFY_EQUAL(strlen(spec->volcommands), (size_t)MAX_VOLCMDS);
 	}
-
-	// UUID
-	{
-		VERIFY_EQUAL(mpt::UUID(0x2ed6593au, 0xdfe6, 0x4cf8, 0xb2e575ad7f600c32ull).ToUString(), U_("2ed6593a-dfe6-4cf8-b2e5-75ad7f600c32"));
-		#if defined(MODPLUG_TRACKER) || defined(MPT_WITH_DMO)
-			constexpr mpt::UUID uuid_tmp = "2ed6593a-dfe6-4cf8-b2e5-75ad7f600c32"_uuid;
-			VERIFY_EQUAL(mpt::UUID(0x2ed6593au, 0xdfe6, 0x4cf8, 0xb2e575ad7f600c32ull), uuid_tmp);
-			VERIFY_EQUAL(mpt::UUID(0x2ed6593au, 0xdfe6, 0x4cf8, 0xb2e575ad7f600c32ull), mpt::UUID(Util::StringToGUID(_T("{2ed6593a-dfe6-4cf8-b2e5-75ad7f600c32}"))));
-			VERIFY_EQUAL(mpt::UUID(0x2ed6593au, 0xdfe6, 0x4cf8, 0xb2e575ad7f600c32ull), mpt::UUID(Util::StringToCLSID(_T("{2ed6593a-dfe6-4cf8-b2e5-75ad7f600c32}"))));
-			VERIFY_EQUAL(mpt::UUID(0x00112233u, 0x4455, 0x6677, 0x8899AABBCCDDEEFFull), mpt::UUID(Util::StringToGUID(_T("{00112233-4455-6677-8899-AABBCCDDEEFF}"))));
-			VERIFY_EQUAL(mpt::UUID(0x00112233u, 0x4455, 0x6677, 0xC899AABBCCDDEEFFull), mpt::UUID(Util::StringToGUID(_T("{00112233-4455-6677-C899-AABBCCDDEEFF}"))));
-			VERIFY_EQUAL(Util::GUIDToString(mpt::UUID(0x00112233u, 0x4455, 0x6677, 0x8899AABBCCDDEEFFull)), _T("{00112233-4455-6677-8899-AABBCCDDEEFF}"));
-			VERIFY_EQUAL(Util::GUIDToString(mpt::UUID(0x00112233u, 0x4455, 0x6677, 0xC899AABBCCDDEEFFull)), _T("{00112233-4455-6677-C899-AABBCCDDEEFF}"));
-		#endif
-
-#if defined(MODPLUG_TRACKER) || defined(MPT_WITH_DMO)
-	VERIFY_EQUAL(Util::IsValid(Util::CreateGUID()), true);
-	{
-		mpt::UUID uuid = mpt::UUID::Generate();
-		VERIFY_EQUAL(uuid, mpt::UUID::FromString(mpt::UUID(uuid).ToUString()));
-		VERIFY_EQUAL(uuid, mpt::UUID(Util::StringToGUID(Util::GUIDToString(uuid))));
-		VERIFY_EQUAL(uuid, mpt::UUID(Util::StringToIID(Util::IIDToString(uuid))));
-		VERIFY_EQUAL(uuid, mpt::UUID(Util::StringToCLSID(Util::CLSIDToString(uuid))));
-	}
-	{
-		GUID guid = mpt::UUID::Generate();
-		VERIFY_EQUAL(IsEqualGUID(guid, static_cast<GUID>(mpt::UUID::FromString(mpt::UUID(guid).ToUString()))), TRUE);
-		VERIFY_EQUAL(IsEqualGUID(guid, Util::StringToGUID(Util::GUIDToString(guid))), TRUE);
-		VERIFY_EQUAL(IsEqualGUID(guid, Util::StringToIID(Util::IIDToString(guid))), TRUE);
-		VERIFY_EQUAL(IsEqualGUID(guid, Util::StringToCLSID(Util::CLSIDToString(guid))), TRUE);
-	}
-#endif
-	VERIFY_EQUAL(mpt::UUID::Generate().IsValid(), true);
-	VERIFY_EQUAL(mpt::UUID::GenerateLocalUseOnly().IsValid(), true);
-	VERIFY_EQUAL(mpt::UUID::Generate() != mpt::UUID::Generate(), true);
-	mpt::UUID a = mpt::UUID::Generate();
-	VERIFY_EQUAL(a, mpt::UUID::FromString(a.ToUString()));
-	std::byte uuiddata[16]{};
-	for(std::size_t i = 0; i < 16; ++i)
-	{
-		uuiddata[i] = mpt::byte_cast<std::byte>(static_cast<uint8>(i));
-	}
-	static_assert(sizeof(mpt::UUID) == 16);
-	UUIDbin uuid2;
-	std::memcpy(&uuid2, uuiddata, 16);
-	VERIFY_EQUAL(mpt::UUID(uuid2).ToUString(), U_("00010203-0405-0607-0809-0a0b0c0d0e0f"));
-	}
-
-	constexpr mpt::UUID uuid3 = "2ed6593a-dfe6-4cf8-b2e5-75ad7f600c32"_uuid;
-	VERIFY_EQUAL(mpt::UUID(0x2ed6593au, 0xdfe6, 0x4cf8, 0xb2e575ad7f600c32ull), uuid3);
-
-#if defined(MODPLUG_TRACKER)
-	{
-		constexpr mpt::UUID uuid_ns_dns = "6ba7b810-9dad-11d1-80b4-00c04fd430c8"_uuid;
-		constexpr mpt::UUID expected = "74738ff5-5367-5958-9aee-98fffdcd1876"_uuid;
-		mpt::UUID gotten = mpt::UUIDRFC4122NamespaceV5(uuid_ns_dns, U_("www.example.org"));
-		VERIFY_EQUAL(gotten, expected);
-	}
-#endif
 
 	// check that empty stringstream behaves correctly with our MSVC workarounds when using iostream interface directly
 
@@ -2227,8 +1308,6 @@ static MPT_NOINLINE void TestMisc2()
 #ifdef MPT_WITH_MINIZ
 	VERIFY_EQUAL(mz_crc32(0, mpt::byte_cast<const unsigned char*>(std::string("123456789").c_str()), 9), 0xCBF43926u);
 #endif
-	VERIFY_EQUAL(mpt::crc32(std::string("123456789")), 0xCBF43926u);
-	VERIFY_EQUAL(mpt::crc32_ogg(std::string("123456789")), 0x89a1897fu);
 
 	// Check floating-point accuracy in TransposeToFrequency
 	static constexpr int32 transposeToFrequency[] =
@@ -2515,51 +1594,10 @@ static MPT_NOINLINE void TestMisc2()
 static MPT_NOINLINE void TestRandom()
 {
 
-	VERIFY_EQUAL(mpt::detail::lower_bound_entropy_bits(0xffffffffu), 32);
-	VERIFY_EQUAL(mpt::detail::lower_bound_entropy_bits(0xfffffffeu), 31);
-
-	VERIFY_EQUAL(mpt::detail::lower_bound_entropy_bits(0x80000000u), 31);
-	VERIFY_EQUAL(mpt::detail::lower_bound_entropy_bits(0x7fffffffu), 31);
-	VERIFY_EQUAL(mpt::detail::lower_bound_entropy_bits(0x7ffffffeu), 30);
-
-	VERIFY_EQUAL(mpt::detail::lower_bound_entropy_bits(0x00000007u), 3);
-	VERIFY_EQUAL(mpt::detail::lower_bound_entropy_bits(0x00000006u), 2);
-	VERIFY_EQUAL(mpt::detail::lower_bound_entropy_bits(0x00000005u), 2);
-	VERIFY_EQUAL(mpt::detail::lower_bound_entropy_bits(0x00000004u), 2);
-	VERIFY_EQUAL(mpt::detail::lower_bound_entropy_bits(0x00000003u), 2);
-	VERIFY_EQUAL(mpt::detail::lower_bound_entropy_bits(0x00000002u), 1);
-	VERIFY_EQUAL(mpt::detail::lower_bound_entropy_bits(0x00000001u), 1);
-	VERIFY_EQUAL(mpt::detail::lower_bound_entropy_bits(0x00000000u), 0);
-
-	mpt::default_prng & prng = *s_PRNG;
-	for(std::size_t i = 0; i < 10000; ++i)
-	{
-		VERIFY_EQUAL_QUIET_NONCONT(IsInRange(mpt::random<uint16, 7>(prng), 0u, 127u), true);
-		VERIFY_EQUAL_QUIET_NONCONT(IsInRange(mpt::random<uint16, 8>(prng), 0u, 255u), true);
-		VERIFY_EQUAL_QUIET_NONCONT(IsInRange(mpt::random<uint16, 9>(prng), 0u, 511u), true);
-		VERIFY_EQUAL_QUIET_NONCONT(IsInRange(mpt::random<uint64, 1>(prng), 0u, 1u), true);
-		VERIFY_EQUAL_QUIET_NONCONT(IsInRange(mpt::random<uint16>(prng, 7), 0u, 127u), true);
-		VERIFY_EQUAL_QUIET_NONCONT(IsInRange(mpt::random<uint16>(prng, 8), 0u, 255u), true);
-		VERIFY_EQUAL_QUIET_NONCONT(IsInRange(mpt::random<uint16>(prng, 9), 0u, 511u), true);
-		VERIFY_EQUAL_QUIET_NONCONT(IsInRange(mpt::random<uint64>(prng, 1), 0u, 1u), true);
-
-		VERIFY_EQUAL_QUIET_NONCONT(IsInRange(mpt::random<int16, 7>(prng), 0, 127), true);
-		VERIFY_EQUAL_QUIET_NONCONT(IsInRange(mpt::random<int16, 8>(prng), 0, 255), true);
-		VERIFY_EQUAL_QUIET_NONCONT(IsInRange(mpt::random<int16, 9>(prng), 0, 511), true);
-		VERIFY_EQUAL_QUIET_NONCONT(IsInRange(mpt::random<int64, 1>(prng), 0, 1), true);
-		VERIFY_EQUAL_QUIET_NONCONT(IsInRange(mpt::random<int16>(prng, 7), 0, 127), true);
-		VERIFY_EQUAL_QUIET_NONCONT(IsInRange(mpt::random<int16>(prng, 8), 0, 255), true);
-		VERIFY_EQUAL_QUIET_NONCONT(IsInRange(mpt::random<int16>(prng, 9), 0, 511), true);
-		VERIFY_EQUAL_QUIET_NONCONT(IsInRange(mpt::random<int64>(prng, 1), 0, 1), true);
-
-		VERIFY_EQUAL_QUIET_NONCONT(IsInRange(mpt::random<float>(prng, 0.0f, 1.0f), 0.0f, 1.0f), true);
-		VERIFY_EQUAL_QUIET_NONCONT(IsInRange(mpt::random<double>(prng, 0.0, 1.0), 0.0, 1.0), true);
-		VERIFY_EQUAL_QUIET_NONCONT(IsInRange(mpt::random<double>(prng, -1.0, 1.0), -1.0, 1.0), true);
-		VERIFY_EQUAL_QUIET_NONCONT(IsInRange(mpt::random<double>(prng, -1.0, 0.0), -1.0, 0.0), true);
-		VERIFY_EQUAL_QUIET_NONCONT(IsInRange(mpt::random<double>(prng, 1.0, 2.0), 1.0, 2.0), true);
-		VERIFY_EQUAL_QUIET_NONCONT(IsInRange(mpt::random<double>(prng, 1.0, 3.0), 1.0, 3.0), true);
-	}
 	#ifdef FLAKY_TESTS
+
+		mpt::default_prng& prng = *s_PRNG;
+
 		{
 			std::vector<std::size_t> hist(256);
 			for(std::size_t i = 0; i < 256*256; ++i)
@@ -2608,245 +1646,6 @@ static MPT_NOINLINE void TestRandom()
 
 static MPT_NOINLINE void TestCharsets()
 {
-
-	// MPT_UTF8 version
-
-	// Charset conversions (basic sanity checks)
-	VERIFY_EQUAL(mpt::ToCharset(mpt::Charset::UTF8, U_("a")), "a");
-	VERIFY_EQUAL(mpt::ToCharset(mpt::Charset::ISO8859_1, U_("a")), "a");
-	VERIFY_EQUAL(mpt::ToCharset(mpt::Charset::ASCII, U_("a")), "a");
-	VERIFY_EQUAL(mpt::ToUnicode(mpt::Charset::UTF8, "a"), U_("a"));
-	VERIFY_EQUAL(mpt::ToUnicode(mpt::Charset::ISO8859_1, "a"), U_("a"));
-	VERIFY_EQUAL(mpt::ToUnicode(mpt::Charset::ASCII, "a"), U_("a"));
-#if defined(MPT_ENABLE_CHARSET_LOCALE)
-	VERIFY_EQUAL(mpt::ToCharset(mpt::Charset::Locale, U_("a")), "a");
-	VERIFY_EQUAL(mpt::ToUnicode(mpt::Charset::Locale, "a"), U_("a"));
-#endif
-	VERIFY_EQUAL(mpt::ToCharset(mpt::Charset::UTF8, MPT_UTF8("a")), "a");
-	VERIFY_EQUAL(mpt::ToCharset(mpt::Charset::ISO8859_1, MPT_UTF8("a")), "a");
-	VERIFY_EQUAL(mpt::ToCharset(mpt::Charset::ASCII, MPT_UTF8("a")), "a");
-	VERIFY_EQUAL(mpt::ToUnicode(mpt::Charset::UTF8, "a"), MPT_UTF8("a"));
-	VERIFY_EQUAL(mpt::ToUnicode(mpt::Charset::ISO8859_1, "a"), MPT_UTF8("a"));
-	VERIFY_EQUAL(mpt::ToUnicode(mpt::Charset::ASCII, "a"), MPT_UTF8("a"));
-#if defined(MPT_ENABLE_CHARSET_LOCALE)
-	VERIFY_EQUAL(mpt::ToCharset(mpt::Charset::Locale, MPT_UTF8("a")), "a");
-	VERIFY_EQUAL(mpt::ToUnicode(mpt::Charset::Locale, "a"), MPT_UTF8("a"));
-#endif
-
-#if MPT_OS_EMSCRIPTEN
-	VERIFY_EQUAL(mpt::ToCharset(mpt::Charset::Locale, MPT_UTF8("\xe2\x8c\x82")), "\xe2\x8c\x82");
-#endif // MPT_OS_EMSCRIPTEN
-
-	// Check that some character replacement is done (and not just empty strings or truncated strings are returned)
-	// We test german umlaut-a (U+00E4) (\xC3\xA4) and CJK U+5BB6 (\xE5\xAE\xB6)
-
-	VERIFY_EQUAL(EndsWith(mpt::ToCharset(mpt::Charset::ASCII,MPT_UTF8("abc\xC3\xA4xyz")),"xyz"),true);
-	VERIFY_EQUAL(EndsWith(mpt::ToCharset(mpt::Charset::ISO8859_1,MPT_UTF8("abc\xC3\xA4xyz")),"xyz"),true);
-	VERIFY_EQUAL(EndsWith(mpt::ToCharset(mpt::Charset::CP437,MPT_UTF8("abc\xC3\xA4xyz")),"xyz"),true);
-	VERIFY_EQUAL(EndsWith(mpt::ToCharset(mpt::Charset::UTF8,MPT_UTF8("abc\xC3\xA4xyz")),"xyz"),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToCharset(mpt::Charset::ASCII,MPT_UTF8("abc\xC3\xA4xyz")),"abc"),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToCharset(mpt::Charset::ISO8859_1,MPT_UTF8("abc\xC3\xA4xyz")),"abc"),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToCharset(mpt::Charset::CP437,MPT_UTF8("abc\xC3\xA4xyz")),"abc"),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToCharset(mpt::Charset::UTF8,MPT_UTF8("abc\xC3\xA4xyz")),"abc"),true);
-#if defined(MPT_ENABLE_CHARSET_LOCALE)
-	VERIFY_EQUAL(EndsWith(mpt::ToCharset(mpt::Charset::Locale,MPT_UTF8("abc\xC3\xA4xyz")),"xyz"),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToCharset(mpt::Charset::Locale,MPT_UTF8("abc\xC3\xA4xyz")),"abc"),true);
-#endif
-
-	VERIFY_EQUAL(EndsWith(mpt::ToCharset(mpt::Charset::ASCII,MPT_UTF8("abc\xE5\xAE\xB6xyz")),"xyz"),true);
-	VERIFY_EQUAL(EndsWith(mpt::ToCharset(mpt::Charset::ISO8859_1,MPT_UTF8("abc\xE5\xAE\xB6xyz")),"xyz"),true);
-	VERIFY_EQUAL(EndsWith(mpt::ToCharset(mpt::Charset::CP437,MPT_UTF8("abc\xE5\xAE\xB6xyz")),"xyz"),true);
-	VERIFY_EQUAL(EndsWith(mpt::ToCharset(mpt::Charset::UTF8,MPT_UTF8("abc\xE5\xAE\xB6xyz")),"xyz"),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToCharset(mpt::Charset::ASCII,MPT_UTF8("abc\xE5\xAE\xB6xyz")),"abc"),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToCharset(mpt::Charset::ISO8859_1,MPT_UTF8("abc\xE5\xAE\xB6xyz")),"abc"),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToCharset(mpt::Charset::CP437,MPT_UTF8("abc\xE5\xAE\xB6xyz")),"abc"),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToCharset(mpt::Charset::UTF8,MPT_UTF8("abc\xE5\xAE\xB6xyz")),"abc"),true);
-#if defined(MPT_ENABLE_CHARSET_LOCALE)
-	VERIFY_EQUAL(EndsWith(mpt::ToCharset(mpt::Charset::Locale,MPT_UTF8("abc\xE5\xAE\xB6xyz")),"xyz"),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToCharset(mpt::Charset::Locale,MPT_UTF8("abc\xE5\xAE\xB6xyz")),"abc"),true);
-#endif
-
-	VERIFY_EQUAL(EndsWith(mpt::ToUnicode(mpt::Charset::ASCII,"abc\xC3\xA4xyz"),U_("xyz")),true);
-	VERIFY_EQUAL(EndsWith(mpt::ToUnicode(mpt::Charset::ISO8859_1,"abc\xC3\xA4xyz"),U_("xyz")),true);
-	VERIFY_EQUAL(EndsWith(mpt::ToUnicode(mpt::Charset::CP437,"abc\xC3\xA4xyz"),U_("xyz")),true);
-	VERIFY_EQUAL(EndsWith(mpt::ToUnicode(mpt::Charset::UTF8,"abc\xC3\xA4xyz"),U_("xyz")),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToUnicode(mpt::Charset::ASCII,"abc\xC3\xA4xyz"),U_("abc")),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToUnicode(mpt::Charset::ISO8859_1,"abc\xC3\xA4xyz"),U_("abc")),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToUnicode(mpt::Charset::CP437,"abc\xC3\xA4xyz"),U_("abc")),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToUnicode(mpt::Charset::UTF8,"abc\xC3\xA4xyz"),U_("abc")),true);
-#if defined(MPT_ENABLE_CHARSET_LOCALE)
-	VERIFY_EQUAL(EndsWith(mpt::ToUnicode(mpt::Charset::Locale,"abc\xC3\xA4xyz"),U_("xyz")),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToUnicode(mpt::Charset::Locale,"abc\xC3\xA4xyz"),U_("abc")),true);
-#endif
-
-	VERIFY_EQUAL(EndsWith(mpt::ToUnicode(mpt::Charset::ASCII,"abc\xE5\xAE\xB6xyz"),U_("xyz")),true);
-	VERIFY_EQUAL(EndsWith(mpt::ToUnicode(mpt::Charset::ISO8859_1,"abc\xE5\xAE\xB6xyz"),U_("xyz")),true);
-	VERIFY_EQUAL(EndsWith(mpt::ToUnicode(mpt::Charset::CP437,"abc\xE5\xAE\xB6xyz"),U_("xyz")),true);
-	VERIFY_EQUAL(EndsWith(mpt::ToUnicode(mpt::Charset::UTF8,"abc\xE5\xAE\xB6xyz"),U_("xyz")),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToUnicode(mpt::Charset::ASCII,"abc\xE5\xAE\xB6xyz"),U_("abc")),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToUnicode(mpt::Charset::ISO8859_1,"abc\xE5\xAE\xB6xyz"),U_("abc")),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToUnicode(mpt::Charset::CP437,"abc\xE5\xAE\xB6xyz"),U_("abc")),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToUnicode(mpt::Charset::UTF8,"abc\xE5\xAE\xB6xyz"),U_("abc")),true);
-#if defined(MPT_ENABLE_CHARSET_LOCALE)
-	VERIFY_EQUAL(EndsWith(mpt::ToUnicode(mpt::Charset::Locale,"abc\xE5\xAE\xB6xyz"),U_("xyz")),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToUnicode(mpt::Charset::Locale,"abc\xE5\xAE\xB6xyz"),U_("abc")),true);
-#endif
-
-	// Check that characters are correctly converted
-	// We test german umlaut-a (U+00E4) and CJK U+5BB6
-
-	// cp437
-	VERIFY_EQUAL(mpt::ToCharset(mpt::Charset::CP437,MPT_UTF8("abc\xC3\xA4xyz")),"abc\x84xyz");
-	VERIFY_EQUAL(MPT_UTF8("abc\xC3\xA4xyz"),mpt::ToUnicode(mpt::Charset::CP437,"abc\x84xyz"));
-
-	// iso8859
-	VERIFY_EQUAL(mpt::ToCharset(mpt::Charset::ISO8859_1,MPT_UTF8("abc\xC3\xA4xyz")),"abc\xE4xyz");
-	VERIFY_EQUAL(MPT_UTF8("abc\xC3\xA4xyz"),mpt::ToUnicode(mpt::Charset::ISO8859_1,"abc\xE4xyz"));
-
-	// utf8
-	VERIFY_EQUAL(mpt::ToCharset(mpt::Charset::UTF8,MPT_UTF8("abc\xC3\xA4xyz")),"abc\xC3\xA4xyz");
-	VERIFY_EQUAL(MPT_UTF8("abc\xC3\xA4xyz"),mpt::ToUnicode(mpt::Charset::UTF8,"abc\xC3\xA4xyz"));
-	VERIFY_EQUAL(mpt::ToCharset(mpt::Charset::UTF8,MPT_UTF8("abc\xE5\xAE\xB6xyz")),"abc\xE5\xAE\xB6xyz");
-	VERIFY_EQUAL(MPT_UTF8("abc\xE5\xAE\xB6xyz"),mpt::ToUnicode(mpt::Charset::UTF8,"abc\xE5\xAE\xB6xyz"));
-
-
-#if MPT_WSTRING_CONVERT
-
-	// wide L"" version
-
-	// Charset conversions (basic sanity checks)
-	VERIFY_EQUAL(mpt::ToCharset(mpt::Charset::UTF8, L"a"), "a");
-	VERIFY_EQUAL(mpt::ToCharset(mpt::Charset::ISO8859_1, L"a"), "a");
-	VERIFY_EQUAL(mpt::ToCharset(mpt::Charset::ASCII, L"a"), "a");
-	VERIFY_EQUAL(mpt::ToWide(mpt::Charset::UTF8, "a"), L"a");
-	VERIFY_EQUAL(mpt::ToWide(mpt::Charset::ISO8859_1, "a"), L"a");
-	VERIFY_EQUAL(mpt::ToWide(mpt::Charset::ASCII, "a"), L"a");
-#if defined(MPT_ENABLE_CHARSET_LOCALE)
-	VERIFY_EQUAL(mpt::ToCharset(mpt::Charset::Locale, L"a"), "a");
-	VERIFY_EQUAL(mpt::ToWide(mpt::Charset::Locale, "a"), L"a");
-#endif
-
-	// Check that some character replacement is done (and not just empty strings or truncated strings are returned)
-	// We test german umlaut-a (U+00E4) and CJK U+5BB6
-
-#if MPT_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable:4428) // universal-character-name encountered in source
-#endif
-
-	VERIFY_EQUAL(EndsWith(mpt::ToCharset(mpt::Charset::ASCII,L"abc\u00E4xyz"),"xyz"),true);
-	VERIFY_EQUAL(EndsWith(mpt::ToCharset(mpt::Charset::ISO8859_1,L"abc\u00E4xyz"),"xyz"),true);
-	VERIFY_EQUAL(EndsWith(mpt::ToCharset(mpt::Charset::CP437,L"abc\u00E4xyz"),"xyz"),true);
-	VERIFY_EQUAL(EndsWith(mpt::ToCharset(mpt::Charset::UTF8,L"abc\u00E4xyz"),"xyz"),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToCharset(mpt::Charset::ASCII,L"abc\u00E4xyz"),"abc"),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToCharset(mpt::Charset::ISO8859_1,L"abc\u00E4xyz"),"abc"),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToCharset(mpt::Charset::CP437,L"abc\u00E4xyz"),"abc"),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToCharset(mpt::Charset::UTF8,L"abc\u00E4xyz"),"abc"),true);
-#if defined(MPT_ENABLE_CHARSET_LOCALE)
-	VERIFY_EQUAL(EndsWith(mpt::ToCharset(mpt::Charset::Locale,L"abc\u00E4xyz"),"xyz"),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToCharset(mpt::Charset::Locale,L"abc\u00E4xyz"),"abc"),true);
-#endif
-
-	VERIFY_EQUAL(EndsWith(mpt::ToCharset(mpt::Charset::ASCII,L"abc\u5BB6xyz"),"xyz"),true);
-	VERIFY_EQUAL(EndsWith(mpt::ToCharset(mpt::Charset::ISO8859_1,L"abc\u5BB6xyz"),"xyz"),true);
-	VERIFY_EQUAL(EndsWith(mpt::ToCharset(mpt::Charset::CP437,L"abc\u5BB6xyz"),"xyz"),true);
-	VERIFY_EQUAL(EndsWith(mpt::ToCharset(mpt::Charset::UTF8,L"abc\u5BB6xyz"),"xyz"),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToCharset(mpt::Charset::ASCII,L"abc\u5BB6xyz"),"abc"),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToCharset(mpt::Charset::ISO8859_1,L"abc\u5BB6xyz"),"abc"),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToCharset(mpt::Charset::CP437,L"abc\u5BB6xyz"),"abc"),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToCharset(mpt::Charset::UTF8,L"abc\u5BB6xyz"),"abc"),true);
-#if defined(MPT_ENABLE_CHARSET_LOCALE)
-	VERIFY_EQUAL(EndsWith(mpt::ToCharset(mpt::Charset::Locale,L"abc\u5BB6xyz"),"xyz"),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToCharset(mpt::Charset::Locale,L"abc\u5BB6xyz"),"abc"),true);
-#endif
-
-	VERIFY_EQUAL(EndsWith(mpt::ToWide(mpt::Charset::ASCII,"abc\xC3\xA4xyz"),L"xyz"),true);
-	VERIFY_EQUAL(EndsWith(mpt::ToWide(mpt::Charset::ISO8859_1,"abc\xC3\xA4xyz"),L"xyz"),true);
-	VERIFY_EQUAL(EndsWith(mpt::ToWide(mpt::Charset::CP437,"abc\xC3\xA4xyz"),L"xyz"),true);
-	VERIFY_EQUAL(EndsWith(mpt::ToWide(mpt::Charset::UTF8,"abc\xC3\xA4xyz"),L"xyz"),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToWide(mpt::Charset::ASCII,"abc\xC3\xA4xyz"),L"abc"),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToWide(mpt::Charset::ISO8859_1,"abc\xC3\xA4xyz"),L"abc"),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToWide(mpt::Charset::CP437,"abc\xC3\xA4xyz"),L"abc"),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToWide(mpt::Charset::UTF8,"abc\xC3\xA4xyz"),L"abc"),true);
-#if defined(MPT_ENABLE_CHARSET_LOCALE)
-	VERIFY_EQUAL(EndsWith(mpt::ToWide(mpt::Charset::Locale,"abc\xC3\xA4xyz"),L"xyz"),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToWide(mpt::Charset::Locale,"abc\xC3\xA4xyz"),L"abc"),true);
-#endif
-
-	VERIFY_EQUAL(EndsWith(mpt::ToWide(mpt::Charset::ASCII,"abc\xE5\xAE\xB6xyz"),L"xyz"),true);
-	VERIFY_EQUAL(EndsWith(mpt::ToWide(mpt::Charset::ISO8859_1,"abc\xE5\xAE\xB6xyz"),L"xyz"),true);
-	VERIFY_EQUAL(EndsWith(mpt::ToWide(mpt::Charset::CP437,"abc\xE5\xAE\xB6xyz"),L"xyz"),true);
-	VERIFY_EQUAL(EndsWith(mpt::ToWide(mpt::Charset::UTF8,"abc\xE5\xAE\xB6xyz"),L"xyz"),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToWide(mpt::Charset::ASCII,"abc\xE5\xAE\xB6xyz"),L"abc"),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToWide(mpt::Charset::ISO8859_1,"abc\xE5\xAE\xB6xyz"),L"abc"),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToWide(mpt::Charset::CP437,"abc\xE5\xAE\xB6xyz"),L"abc"),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToWide(mpt::Charset::UTF8,"abc\xE5\xAE\xB6xyz"),L"abc"),true);
-#if defined(MPT_ENABLE_CHARSET_LOCALE)
-	VERIFY_EQUAL(EndsWith(mpt::ToWide(mpt::Charset::Locale,"abc\xE5\xAE\xB6xyz"),L"xyz"),true);
-	VERIFY_EQUAL(BeginsWith(mpt::ToWide(mpt::Charset::Locale,"abc\xE5\xAE\xB6xyz"),L"abc"),true);
-#endif
-
-	// Check that characters are correctly converted
-	// We test german umlaut-a (U+00E4) and CJK U+5BB6
-
-	// cp437
-	VERIFY_EQUAL(mpt::ToCharset(mpt::Charset::CP437,L"abc\u00E4xyz"),"abc\x84xyz");
-	VERIFY_EQUAL(L"abc\u00E4xyz",mpt::ToWide(mpt::Charset::CP437,"abc\x84xyz"));
-
-	// iso8859
-	VERIFY_EQUAL(mpt::ToCharset(mpt::Charset::ISO8859_1,L"abc\u00E4xyz"),"abc\xE4xyz");
-	VERIFY_EQUAL(L"abc\u00E4xyz",mpt::ToWide(mpt::Charset::ISO8859_1,"abc\xE4xyz"));
-
-	// utf8
-	VERIFY_EQUAL(mpt::ToCharset(mpt::Charset::UTF8,L"abc\u00E4xyz"),"abc\xC3\xA4xyz");
-	VERIFY_EQUAL(L"abc\u00E4xyz",mpt::ToWide(mpt::Charset::UTF8,"abc\xC3\xA4xyz"));
-	VERIFY_EQUAL(mpt::ToCharset(mpt::Charset::UTF8,L"abc\u5BB6xyz"),"abc\xE5\xAE\xB6xyz");
-	VERIFY_EQUAL(L"abc\u5BB6xyz",mpt::ToWide(mpt::Charset::UTF8,"abc\xE5\xAE\xB6xyz"));
-
-#if MPT_COMPILER_MSVC
-#pragma warning(pop)
-#endif
-
-#endif
-
-	{
-		char buf[4] = { 'x','x','x','x' };
-		mpt::String::WriteAutoBuf(buf) = std::string("foobar");
-		VERIFY_EQUAL(buf[0], 'f');
-		VERIFY_EQUAL(buf[1], 'o');
-		VERIFY_EQUAL(buf[2], 'o');
-		VERIFY_EQUAL(buf[3], '\0');
-	}
-	{
-		char buf[4] = { 'x','x','x','x' };
-		char foobar[] = {'f','o','o','b','a','r','\0'};
-		mpt::String::WriteTypedBuf<std::string>(buf) = (char*)foobar;
-		VERIFY_EQUAL(buf[0], 'f');
-		VERIFY_EQUAL(buf[1], 'o');
-		VERIFY_EQUAL(buf[2], 'o');
-		VERIFY_EQUAL(buf[3], '\0');
-	}
-	{
-		char buf[4] = { 'x','x','x','x' };
-		mpt::String::WriteTypedBuf<std::string>(buf) = (const char*)"foobar";
-		VERIFY_EQUAL(buf[0], 'f');
-		VERIFY_EQUAL(buf[1], 'o');
-		VERIFY_EQUAL(buf[2], 'o');
-		VERIFY_EQUAL(buf[3], '\0');
-	}
-	{
-		char buf[4] = { 'x','x','x','x' };
-		mpt::String::WriteTypedBuf<std::string>(buf) = "foobar";
-		VERIFY_EQUAL(buf[0], 'f');
-		VERIFY_EQUAL(buf[1], 'o');
-		VERIFY_EQUAL(buf[2], 'o');
-		VERIFY_EQUAL(buf[3], '\0');
-	}
-	{
-		const char buf[4] = { 'f','o','o','b' };
-		std::string foo = mpt::String::ReadAutoBuf(buf);
-		VERIFY_EQUAL(foo, std::string("foob"));
-	}
 
 	// Path splitting
 
@@ -3116,7 +1915,6 @@ static MPT_NOINLINE void TestCharsets()
 #endif
 #endif
 
-
 	VERIFY_EQUAL(mpt::CompareNoCaseAscii("f", "f", 6) == 0, true);
 	VERIFY_EQUAL(mpt::CompareNoCaseAscii("f", "F", 6) == 0, true);
 	VERIFY_EQUAL(mpt::CompareNoCaseAscii("F", "f", 6) == 0, true);
@@ -3137,7 +1935,6 @@ static MPT_NOINLINE void TestCharsets()
 	VERIFY_EQUAL(mpt::CompareNoCaseAscii("FgH", "fghi", 4) < 0, true);
 	VERIFY_EQUAL(mpt::CompareNoCaseAscii("FIH", "fghi", 1) == 0, true);
 	VERIFY_EQUAL(mpt::CompareNoCaseAscii("FIH", "fghi", 2) > 0, true);
-
 
 }
 
@@ -3177,63 +1974,6 @@ inline SettingValue ToSettingValue(const Test::CustomSettingsTestType &val)
 namespace Test {
 
 #endif // MODPLUG_TRACKER
-
-
-static MPT_NOINLINE void TestCrypto()
-{
-
-#ifdef MODPLUG_TRACKER
-
-	mpt::crypto::hash::SHA512::result_type sha512_abc{
-		std::byte{0xdd},std::byte{0xaf},std::byte{0x35},std::byte{0xa1},std::byte{0x93},std::byte{0x61},std::byte{0x7a},std::byte{0xba},
-		std::byte{0xcc},std::byte{0x41},std::byte{0x73},std::byte{0x49},std::byte{0xae},std::byte{0x20},std::byte{0x41},std::byte{0x31},
-		std::byte{0x12},std::byte{0xe6},std::byte{0xfa},std::byte{0x4e},std::byte{0x89},std::byte{0xa9},std::byte{0x7e},std::byte{0xa2},
-		std::byte{0x0a},std::byte{0x9e},std::byte{0xee},std::byte{0xe6},std::byte{0x4b},std::byte{0x55},std::byte{0xd3},std::byte{0x9a},
-		std::byte{0x21},std::byte{0x92},std::byte{0x99},std::byte{0x2a},std::byte{0x27},std::byte{0x4f},std::byte{0xc1},std::byte{0xa8},
-		std::byte{0x36},std::byte{0xba},std::byte{0x3c},std::byte{0x23},std::byte{0xa3},std::byte{0xfe},std::byte{0xeb},std::byte{0xbd},
-		std::byte{0x45},std::byte{0x4d},std::byte{0x44},std::byte{0x23},std::byte{0x64},std::byte{0x3c},std::byte{0xe8},std::byte{0x0e},
-		std::byte{0x2a},std::byte{0x9a},std::byte{0xc9},std::byte{0x4f},std::byte{0xa5},std::byte{0x4c},std::byte{0xa4},std::byte{0x9f}
-	};
-	VERIFY_EQUAL(mpt::crypto::hash::SHA512().process(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(std::string("abc")))).result(), sha512_abc);
-
-	{
-
-		std::vector<std::byte> data = { std::byte{0x11}, std::byte{0x12}, std::byte{0x13}, std::byte{0x14} };
-
-		mpt::crypto::keystore keystore(mpt::crypto::keystore::domain::user);
-
-		mpt::crypto::asymmetric::rsassa_pss<>::managed_private_key key(keystore, U_("OpenMPT Test Key 1"));
-
-		auto publickeydata = key.get_public_key_data();
-
-		mpt::crypto::asymmetric::rsassa_pss<>::public_key pk{publickeydata};
-		mpt::crypto::asymmetric::rsassa_pss<>::public_key pk_copy{pk};
-		mpt::ustring jwk = publickeydata.as_jwk();
-
-		std::vector<std::byte> signature = key.sign(mpt::as_span(data));
-		mpt::ustring jws = key.jws_sign(mpt::as_span(data));
-		mpt::ustring jws_compact = key.jws_compact_sign(mpt::as_span(data));
-
-		try
-		{
-			pk.verify(mpt::as_span(data), signature);
-			auto verifieddata1 = mpt::crypto::asymmetric::rsassa_pss<>::public_key(mpt::crypto::asymmetric::rsassa_pss<>::public_key_data::from_jwk(jwk)).jws_verify(jws);
-			auto verifieddata2 = mpt::crypto::asymmetric::rsassa_pss<>::public_key(mpt::crypto::asymmetric::rsassa_pss<>::public_key_data::from_jwk(jwk)).jws_compact_verify(jws_compact);
-			VERIFY_EQUAL(true, true);
-			VERIFY_EQUAL(data, verifieddata1);
-			VERIFY_EQUAL(data, verifieddata2);
-		} catch(const mpt::crypto::asymmetric::signature_verification_failed &)
-		{
-			VERIFY_EQUAL(true, false);
-		}
-
-		key.destroy();
-
-	}
-
-#endif // MODPLUG_TRACKER
-
-}
 
 
 static MPT_NOINLINE void TestSettings()
@@ -4633,14 +3373,6 @@ static void CheckEqualTuningCollections(const CTuningCollection &a, const CTunin
 }
 
 #endif
-
-
-static MPT_NOINLINE void TestTunings()
-{
-
-	// nothing for now
-
-}
 
 
 

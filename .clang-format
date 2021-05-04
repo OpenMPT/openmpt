@@ -81,8 +81,8 @@ InsertTrailingCommas: None
 #JavaScriptQuotes
 #JavaScriptWrapImports
 KeepEmptyLinesAtTheStartOfBlocks: true
-MacroBlockBegin: '^BEGIN_MESSAGE_MAP$' #?
-MacroBlockEnd: '^END_MESSAGE_MAP$' #?
+MacroBlockBegin: '^MPT_TEST_GROUP_BEGIN|BEGIN_MESSAGE_MAP$' #?
+MacroBlockEnd: '^MPT_TEST_GROUP_END|END_MESSAGE_MAP$' #?
 MaxEmptyLinesToKeep: 5
 NamespaceIndentation: None
 NamespaceMacros: [] #?
@@ -123,7 +123,7 @@ SpacesInConditionalStatement: false
 SpacesInContainerLiterals: false
 SpacesInParentheses: false
 SpacesInSquareBrackets: false
-StatementMacros: [ 'OPENMPT_NAMESPACE_BEGIN', 'OPENMPT_NAMESPACE_END', 'MPT_MSVC_WORKAROUND_LNK4221' ] #?
+StatementMacros: [ 'OPENMPT_NAMESPACE_BEGIN', 'OPENMPT_NAMESPACE_END', 'MPT_MSVC_WORKAROUND_LNK4221', 'MPT_WARNING', 'MPT_TEST_GROUP_INLINE_IDENTIFIER', 'MPT_TEST_GROUP_INLINE', 'MPT_TEST_GROUP_STATIC' ] #?
 TabWidth: 4
 TypenameMacros: [] #?
 UseCRLF: false

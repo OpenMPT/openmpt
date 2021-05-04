@@ -41,7 +41,35 @@ svn export ./doc/openmpt_styleguide.md    bin/dist-autotools/doc/openmpt_stylegu
 svn export ./soundbase       bin/dist-autotools/soundbase
 svn export ./soundlib        bin/dist-autotools/soundlib
 svn export ./sounddsp        bin/dist-autotools/sounddsp
+mkdir -p bin/dist-autotools/src/mpt
+svn export ./src/mpt/.clang-format bin/dist-autotools/src/mpt/.clang-format
+svn export ./src/mpt/LICENSE.BSD-3-Clause.txt bin/dist-autotools/src/mpt/LICENSE.BSD-3-Clause.txt
+svn export ./src/mpt/LICENSE.BSL-1.0.txt bin/dist-autotools/src/mpt/LICENSE.BSL-1.0.txt
+svn export ./src/mpt/base           bin/dist-autotools/src/mpt/base
+svn export ./src/mpt/binary         bin/dist-autotools/src/mpt/binary
+svn export ./src/mpt/check          bin/dist-autotools/src/mpt/check
+svn export ./src/mpt/crc            bin/dist-autotools/src/mpt/crc
+#svn export ./src/mpt/crypto         bin/dist-autotools/src/mpt/crypto
+svn export ./src/mpt/detect         bin/dist-autotools/src/mpt/detect
+svn export ./src/mpt/endian         bin/dist-autotools/src/mpt/endian
+svn export ./src/mpt/environment    bin/dist-autotools/src/mpt/environment
+svn export ./src/mpt/exception_text bin/dist-autotools/src/mpt/exception_text
+svn export ./src/mpt/format         bin/dist-autotools/src/mpt/format
+#svn export ./src/mpt/json           bin/dist-autotools/src/mpt/json
+svn export ./src/mpt/mutex          bin/dist-autotools/src/mpt/mutex
+svn export ./src/mpt/out_of_memory  bin/dist-autotools/src/mpt/out_of_memory
+svn export ./src/mpt/osinfo         bin/dist-autotools/src/mpt/osinfo
+svn export ./src/mpt/parse          bin/dist-autotools/src/mpt/parse
+svn export ./src/mpt/random         bin/dist-autotools/src/mpt/random
+svn export ./src/mpt/string         bin/dist-autotools/src/mpt/string
+svn export ./src/mpt/string_convert bin/dist-autotools/src/mpt/string_convert
+svn export ./src/mpt/system_error   bin/dist-autotools/src/mpt/system_error
+svn export ./src/mpt/test           bin/dist-autotools/src/mpt/test
+svn export ./src/mpt/uuid           bin/dist-autotools/src/mpt/uuid
+#svn export ./src/mpt/uuid_namespace bin/dist-autotools/src/mpt/uuid_namespace
 svn export ./test            bin/dist-autotools/test
+rm bin/dist-autotools/test/mpt_tests_crypto.cpp
+rm bin/dist-autotools/test/mpt_tests_uuid_namespace.cpp
 svn export ./libopenmpt      bin/dist-autotools/libopenmpt
 svn export ./examples        bin/dist-autotools/examples
 svn export ./openmpt123      bin/dist-autotools/openmpt123
@@ -68,7 +96,35 @@ cp -r ./doc/openmpt_styleguide.md    bin/dist-autotools/doc/openmpt_styleguide.m
 cp -r ./soundbase       bin/dist-autotools/soundbase
 cp -r ./soundlib        bin/dist-autotools/soundlib
 cp -r ./sounddsp        bin/dist-autotools/sounddsp
+mkdir -p bin/dist-autotools/src/mpt
+cp -r ./src/mpt/.clang-format bin/dist-autotools/src/mpt/.clang-format
+cp -r ./src/mpt/LICENSE.BSD-3-Clause.txt bin/dist-autotools/src/mpt/LICENSE.BSD-3-Clause.txt
+cp -r ./src/mpt/LICENSE.BSL-1.0.txt bin/dist-autotools/src/mpt/LICENSE.BSL-1.0.txt
+cp -r ./src/mpt/base           bin/dist-autotools/src/mpt/base
+cp -r ./src/mpt/binary         bin/dist-autotools/src/mpt/binary
+cp -r ./src/mpt/check          bin/dist-autotools/src/mpt/check
+cp -r ./src/mpt/crc            bin/dist-autotools/src/mpt/crc
+#cp -r ./src/mpt/crypto         bin/dist-autotools/src/mpt/crypto
+cp -r ./src/mpt/detect         bin/dist-autotools/src/mpt/detect
+cp -r ./src/mpt/endian         bin/dist-autotools/src/mpt/endian
+cp -r ./src/mpt/environment    bin/dist-autotools/src/mpt/environment
+cp -r ./src/mpt/exception_text bin/dist-autotools/src/mpt/exception_text
+cp -r ./src/mpt/format         bin/dist-autotools/src/mpt/format
+#cp -r ./src/mpt/json           bin/dist-autotools/src/mpt/json
+cp -r ./src/mpt/mutex          bin/dist-autotools/src/mpt/mutex
+cp -r ./src/mpt/out_of_memory  bin/dist-autotools/src/mpt/out_of_memory
+cp -r ./src/mpt/osinfo         bin/dist-autotools/src/mpt/osinfo
+cp -r ./src/mpt/parse          bin/dist-autotools/src/mpt/parse
+cp -r ./src/mpt/random         bin/dist-autotools/src/mpt/random
+cp -r ./src/mpt/string         bin/dist-autotools/src/mpt/string
+cp -r ./src/mpt/string_convert bin/dist-autotools/src/mpt/string_convert
+cp -r ./src/mpt/system_error   bin/dist-autotools/src/mpt/system_error
+cp -r ./src/mpt/test           bin/dist-autotools/src/mpt/test
+cp -r ./src/mpt/uuid           bin/dist-autotools/src/mpt/uuid
+#cp -r ./src/mpt/uuid_namespace bin/dist-autotools/src/mpt/uuid_namespace
 cp -r ./test            bin/dist-autotools/test
+rm bin/dist-autotools/test/mpt_tests_crypto.cpp
+rm bin/dist-autotools/test/mpt_tests_uuid_namespace.cpp
 cp -r ./libopenmpt      bin/dist-autotools/libopenmpt
 cp -r ./examples        bin/dist-autotools/examples
 cp -r ./openmpt123      bin/dist-autotools/openmpt123

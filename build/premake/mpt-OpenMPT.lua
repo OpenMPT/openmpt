@@ -52,6 +52,7 @@ end
 		sysincludedirs ( extincludedirs )
 	filter {}
   includedirs {
+   "../../src",
    "../../common",
    "../../soundlib",
    "$(IntDir)/svn_version",
@@ -76,6 +77,8 @@ end
 		}
 	end
   files {
+   "../../src/mpt/**.cpp",
+   "../../src/mpt/**.hpp",
    "../../common/*.cpp",
    "../../common/*.h",
    "../../soundbase/*.cpp",
@@ -200,6 +203,7 @@ end
   dofile "../../build/premake/premake-defaults-DLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
   includedirs {
+   "../../src",
    "../../common",
    "../../include",
    "../../include/asiomodern/include",
@@ -212,6 +216,8 @@ end
   }
   files {
    "../../include/asiomodern/include/ASIOModern/*.hpp",
+   "../../src/mpt/**.cpp",
+   "../../src/mpt/**.hpp",
    "../../common/*.cpp",
    "../../common/*.h",
    "../../soundbase/*.cpp",
@@ -246,6 +252,7 @@ end
   dofile "../../build/premake/premake-defaults-DLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
   includedirs {
+   "../../src",
    "../../common",
    "../../include",
    "$(IntDir)/svn_version",

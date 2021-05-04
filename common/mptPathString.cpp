@@ -13,6 +13,7 @@
 #include "misc_util.h"
 
 #include "mptUUID.h"
+#include "mptRandom.h"
 
 #if MPT_OS_WINDOWS
 #include <windows.h>
@@ -586,7 +587,7 @@ mpt::PathString CreateTempFileName(const mpt::PathString &fileNamePrefix, const 
 {
 	mpt::PathString filename = mpt::GetTempDirectory();
 	filename += (!fileNamePrefix.empty() ? fileNamePrefix + P_("_") : mpt::PathString());
-	filename += mpt::PathString::FromUnicode(mpt::UUID::GenerateLocalUseOnly().ToUString());
+	filename += mpt::PathString::FromUnicode(mpt::UUID::GenerateLocalUseOnly(mpt::global_prng()).ToUString());
 	filename += (!fileNameExtension.empty() ? P_(".") + fileNameExtension : mpt::PathString());
 	return filename;
 }

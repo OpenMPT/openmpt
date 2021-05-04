@@ -9,8 +9,8 @@
 
 #include "stdafx.h"
 #include "OggStream.h"
+#include "mpt/crc/crc.hpp"
 #include "../common/FileReader.h"
-#include "../common/mptCRC.h"
 #include "../common/mptIO.h"
 
 

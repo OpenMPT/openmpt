@@ -1,6 +1,14 @@
 
 #include "BuildSettings.h"
 
+#include "mpt/base/span.hpp"
+#include "mpt/crypto/hash.hpp"
+#include "mpt/crypto/jwk.hpp"
+#include "mpt/environment/environment.hpp"
+#include "mpt/exception_text/exception_text.hpp"
+#include "mpt/out_of_memory/out_of_memory.hpp"
+#include "mpt/uuid_namespace/uuid_namespace.hpp"
+
 #include "../common/mptBaseMacros.h"
 #include "../common/mptBaseTypes.h"
 #include "../common/mptBaseUtils.h"
@@ -9,15 +17,9 @@
 #include "../common/mptPathString.h"
 #include "../common/mptIO.h"
 #include "../common/mptFileIO.h"
-#include "../common/mptException.h"
-#include "../common/mptExceptionText.h"
-#include "../common/mptSpan.h"
 #include "../common/mptUUID.h"
 #include "../common/Logging.h"
 #include "../common/misc_util.h"
-
-#include "../misc/mptCrypto.h"
-#include "../misc/mptUUIDNamespace.h"
 
 #include <exception>
 #include <iostream>

@@ -22,12 +22,15 @@
   filter {}
   includedirs {
    "../..",
+   "../../src",
    "../../common",
    "../../soundlib",
    "$(IntDir)/svn_version",
    "../../build/svn_version",
   }
   files {
+   "../../src/mpt/**.cpp",
+   "../../src/mpt/**.hpp",
    "../../common/*.cpp",
    "../../common/*.h",
    "../../soundbase/*.cpp",
@@ -57,7 +60,16 @@
    "../../libopenmpt/libopenmpt_ext_impl.cpp",
    "../../libopenmpt/libopenmpt_impl.cpp",
   }
-
+	excludes {
+		"../../src/mpt/crypto/**.cpp",
+		"../../src/mpt/crypto/**.hpp",
+		"../../src/mpt/json/**.cpp",
+		"../../src/mpt/json/**.hpp",
+		"../../src/mpt/test/**.cpp",
+		"../../src/mpt/test/**.hpp",
+		"../../src/mpt/uuid_namespace/**.cpp",
+		"../../src/mpt/uuid_namespace/**.hpp",
+	}
 	filter { "action:vs*", "kind:SharedLib or ConsoleApp or WindowedApp" }
 		resdefines {
 			"MPT_BUILD_VER_FILENAME=\"" .. mpt_projectname .. ".dll\"",

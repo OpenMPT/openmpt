@@ -57,7 +57,7 @@
 #include "../../mptrack/AbstractVstEditor.h"
 #include "../../soundlib/AudioCriticalSection.h"
 #include "../mptrack/ExceptionHandler.h"
-#include "../common/mptCRC.h"
+#include "mpt/crc/crc.hpp"
 #endif // MODPLUG_TRACKER
 
 OPENMPT_NAMESPACE_BEGIN

@@ -99,6 +99,9 @@ OPENMPT_NAMESPACE_END
 #ifndef MPT_NO_NAMESPACE
 using namespace OPENMPT_NAMESPACE;
 #endif
+namespace openmpt {
+	namespace mpt = OPENMPT_NAMESPACE::mpt;
+} // namespace openmpt
 
 namespace openmpt {
 

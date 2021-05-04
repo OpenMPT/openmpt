@@ -24,7 +24,7 @@
 #include "../common/mptThread.h"
 #include "../common/mptUUID.h"
 #include "../common/mptOS.h"
-#include "../common/mptCRC.h"
+#include "mpt/crc/crc.hpp"
 #include "../common/FileReader.h"
 #include "../misc/mptWine.h"
 #include "MPTrackUtilWine.h"
@@ -92,7 +92,7 @@ static std::string SanitizeBuildID(std::string id)
 namespace WineIntegration {
 
 
-static mpt::checksum::crc64_jones WineHashVersion(mpt::checksum::crc64_jones crc)
+static mpt::crc64_jones WineHashVersion(mpt::crc64_jones crc)
 {
 	std::string s;
 	s += mpt::ToCharset(mpt::Charset::UTF8, Build::GetVersionStringExtended());
@@ -105,7 +105,7 @@ static mpt::checksum::crc64_jones WineHashVersion(mpt::checksum::crc64_jones crc
 }
 
 
-static mpt::checksum::crc64_jones WineHashFile(mpt::checksum::crc64_jones crc, mpt::PathString filename)
+static mpt::crc64_jones WineHashFile(mpt::crc64_jones crc, mpt::PathString filename)
 {
 	InputFile file(filename, TrackerSettings::Instance().MiscCacheCompleteFileBeforeLoading);
 	if(!file.IsValid())
@@ -119,7 +119,7 @@ static mpt::checksum::crc64_jones WineHashFile(mpt::checksum::crc64_jones crc, m
 }
 
 
-static mpt::checksum::crc64_jones WineHashSettings(mpt::checksum::crc64_jones crc)
+static mpt::crc64_jones WineHashSettings(mpt::crc64_jones crc)
 {
 	std::string result;
 	result += std::string() + "-c";
@@ -318,7 +318,7 @@ void Initialize()
 			{
 				std::string ver;
 				ver += mpt::String::Replace(mpt::ToCharset(mpt::Charset::UTF8, Build::GetVersionStringPure()), std::string(" "), std::string("_"));
-				mpt::checksum::crc64_jones crc;
+				mpt::crc64_jones crc;
 				crc = WineHashVersion(crc);
 				crc = WineHashFile(crc, theApp.GetInstallPath() + WineGetSupportZipFilename());
 				crc = WineHashSettings(crc);

@@ -12,6 +12,7 @@
 
 #include "BuildSettings.h"
 
+#include "mpt/uuid/uuid.hpp"
 
 #include "Endianness.h"
 
@@ -64,148 +65,8 @@ bool IsValid(UUID uuid);
 
 #endif // MPT_OS_WINDOWS
 
-// Microsoft on-disk layout
-struct GUIDms
-{
-	uint32le Data1;
-	uint16le Data2;
-	uint16le Data3;
-	uint64be Data4; // yes, big endian here
-};
-MPT_BINARY_STRUCT(GUIDms, 16)
 
-// RFC binary format
-struct UUIDbin
-{
-	uint32be Data1;
-	uint16be Data2;
-	uint16be Data3;
-	uint64be Data4;
-};
-MPT_BINARY_STRUCT(UUIDbin, 16)
-
-namespace mpt {
-
-struct UUID
-{
-private:
-	uint32 Data1;
-	uint16 Data2;
-	uint16 Data3;
-	uint64 Data4;
-public:
-	MPT_CONSTEXPRINLINE uint32 GetData1() const noexcept { return Data1; }
-	MPT_CONSTEXPRINLINE uint16 GetData2() const noexcept { return Data2; }
-	MPT_CONSTEXPRINLINE uint16 GetData3() const noexcept { return Data3; }
-	MPT_CONSTEXPRINLINE uint64 GetData4() const noexcept { return Data4; }
-public:
-	MPT_CONSTEXPRINLINE uint64 GetData64_1() const noexcept { return (static_cast<uint64>(Data1) << 32) | (static_cast<uint64>(Data2) << 16) | (static_cast<uint64>(Data3) << 0); }
-	MPT_CONSTEXPRINLINE uint64 GetData64_2() const noexcept { return Data4; }
-public:
-	// xxxxxxxx-xxxx-Mmxx-Nnxx-xxxxxxxxxxxx
-	// <--32-->-<16>-<16>-<-------64------>
-	MPT_CONSTEXPRINLINE bool IsNil() const noexcept { return (Data1 == 0) && (Data2 == 0) && (Data3 == 0) && (Data4 == 0); }
-	MPT_CONSTEXPRINLINE bool IsValid() const noexcept { return (Data1 != 0) || (Data2 != 0) || (Data3 != 0) || (Data4 != 0); }
-	MPT_CONSTEXPRINLINE uint8 Variant() const noexcept { return Nn() >> 4u; }
-	MPT_CONSTEXPRINLINE uint8 Version() const noexcept { return Mm() >> 4u; }
-	MPT_CONSTEXPRINLINE bool IsRFC4122() const noexcept { return (Variant() & 0xcu) == 0x8u; }
-private:
-	MPT_CONSTEXPRINLINE uint8 Mm() const noexcept { return static_cast<uint8>((Data3 >> 8) & 0xffu); }
-	MPT_CONSTEXPRINLINE uint8 Nn() const noexcept { return static_cast<uint8>((Data4 >> 56) & 0xffu); }
-	void MakeRFC4122(uint8 version) noexcept;
-public:
-#if MPT_OS_WINDOWS && (defined(MODPLUG_TRACKER) || defined(MPT_WITH_DMO))
-	explicit UUID(::UUID uuid);
-	operator ::UUID () const;
-#endif // MPT_OS_WINDOWS && (MODPLUG_TRACKER || MPT_WITH_DMO)
-private:
-	static MPT_CONSTEXPRINLINE uint8 NibbleFromChar(char x)
-	{
-		return
-			('0' <= x && x <= '9') ? static_cast<uint8>(x - '0' +  0) :
-			('a' <= x && x <= 'z') ? static_cast<uint8>(x - 'a' + 10) :
-			('A' <= x && x <= 'Z') ? static_cast<uint8>(x - 'A' + 10) :
-			mpt::constexpr_throw<uint8>(std::domain_error(""));
-	}
-	static MPT_CONSTEXPRINLINE uint8 ByteFromHex(char x, char y)
-	{
-		return static_cast<uint8>(uint8(0)
-			| (NibbleFromChar(x) << 4)
-			| (NibbleFromChar(y) << 0)
-			);
-	}
-	static MPT_CONSTEXPRINLINE uint16 ParseHex16(const char * str)
-	{
-		return static_cast<uint16>(uint16(0)
-			| (static_cast<uint16>(ByteFromHex(str[0], str[1])) << 8)
-			| (static_cast<uint16>(ByteFromHex(str[2], str[3])) << 0)
-			);
-	}
-	static MPT_CONSTEXPRINLINE uint32 ParseHex32(const char * str)
-	{
-		return static_cast<uint32>(uint32(0)
-			| (static_cast<uint32>(ByteFromHex(str[0], str[1])) << 24)
-			| (static_cast<uint32>(ByteFromHex(str[2], str[3])) << 16)
-			| (static_cast<uint32>(ByteFromHex(str[4], str[5])) <<  8)
-			| (static_cast<uint32>(ByteFromHex(str[6], str[7])) <<  0)
-			);
-	}
-public:
-	static MPT_CONSTEXPRINLINE UUID ParseLiteral(const char * str, std::size_t len)
-	{
-		return
-			(len == 36 && str[8] == '-' && str[13] == '-' && str[18] == '-' && str[23] == '-') ?
-			mpt::UUID(
-				ParseHex32(str + 0),
-				ParseHex16(str + 9),
-				ParseHex16(str + 14),
-				uint64(0)
-					| (static_cast<uint64>(ParseHex16(str + 19)) << 48)
-					| (static_cast<uint64>(ParseHex16(str + 24)) << 32)
-					| (static_cast<uint64>(ParseHex32(str + 28)) <<  0)
-			)
-			: mpt::constexpr_throw<mpt::UUID>(std::domain_error(""));
-	}
-public:
-	MPT_CONSTEXPRINLINE UUID() noexcept : Data1(0), Data2(0), Data3(0), Data4(0) { }
-	MPT_CONSTEXPRINLINE explicit UUID(uint32 Data1, uint16 Data2, uint16 Data3, uint64 Data4) noexcept : Data1(Data1), Data2(Data2), Data3(Data3), Data4(Data4) { }
-	explicit UUID(UUIDbin uuid);
-	explicit UUID(GUIDms guid);
-	operator UUIDbin () const;
-	operator GUIDms () const;
-public:
-	// Create a UUID
-	static UUID Generate();
-	// Create a UUID that contains local, traceable information.
-	// Safe for local use. May be faster.
-	static UUID GenerateLocalUseOnly();
-	// Create a RFC4122 Random UUID.
-	static UUID RFC4122Random();
-	friend UUID UUIDRFC4122NamespaceV3(const UUID &ns, const mpt::ustring &name);
-	friend UUID UUIDRFC4122NamespaceV5(const UUID &ns, const mpt::ustring &name);
-public:
-	// General UUID<->string conversion.
-	// The string must/will be in standard UUID format: 4f9a455d-e7ef-4367-b2f0-0c83a38a5c72
-	static UUID FromString(const mpt::ustring &str);
-	mpt::ustring ToUString() const;
-};
-
-MPT_CONSTEXPRINLINE bool operator==(const mpt::UUID & a, const mpt::UUID & b) noexcept
-{
-	return (a.GetData1() == b.GetData1()) && (a.GetData2() == b.GetData2()) && (a.GetData3() == b.GetData3()) && (a.GetData4() == b.GetData4());
-}
-MPT_CONSTEXPRINLINE bool operator!=(const mpt::UUID & a, const mpt::UUID & b) noexcept
-{
-	return (a.GetData1() != b.GetData1()) || (a.GetData2() != b.GetData2()) || (a.GetData3() != b.GetData3()) || (a.GetData4() != b.GetData4());	
-}
-
-} // namespace mpt
-
-
-MPT_CONSTEXPRINLINE mpt::UUID operator "" _uuid (const char * str, std::size_t len)
-{
-	return mpt::UUID::ParseLiteral(str, len);
-}
+using namespace mpt::uuid_literals;
 
 
 OPENMPT_NAMESPACE_END

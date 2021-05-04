@@ -58,6 +58,19 @@
 #endif
 
 
+#include "mpt/base/span.hpp"
+#include "mpt/check/libc.hpp"
+#if defined(MPT_WITH_MFC)
+#include "mpt/check/mfc.hpp"
+#endif
+#if MPT_OS_WINDOWS
+#include "mpt/check/windows.hpp"
+#endif
+#include "mpt/exception_text/exception_text.hpp"
+#include "mpt/out_of_memory/out_of_memory.hpp"
+#include "mpt/system_error/system_error.hpp"
+
+
 // this will be available everywhere
 
 #include "../common/mptBaseMacros.h"
@@ -85,20 +98,10 @@
 // <numeric>
 // <utility>
 
-#include "../common/mptException.h"
-// <exception>
-// <new>
-// <afx.h>
-
-#include "../common/mptSpan.h"
-// "mptBaseTypes.h"
-// <array>
-// <iterator>
-
 #include "../common/mptMemory.h"
 // "mptAssert.h"
 // "mptBaseTypes.h"
-// "mptSpan.h"
+// #include "mpt/base/span.hpp"
 // <utility>
 // <type_traits>
 // <cstring>
@@ -106,7 +109,7 @@
 #include "../common/mptAlloc.h"
 // "mptBaseMacros.h"
 // "mptMemory.h"
-// "mptSpan.h"
+// #include "mpt/base/span.hpp"
 // <version>
 // <array>
 // <memory>
@@ -122,17 +125,6 @@
 // <cstring>
 
 #include "../common/mptStringBuffer.h"
-
-#include "../common/mptOSError.h"
-// "mptException.h"
-// "mptString.h"
-// <exception>
-// <stdexcept>
-
-#include "../common/mptExceptionText.h"
-// "mptException.h"
-// "mptString.h"
-// <exception>
 
 #include "../common/mptStringFormat.h"
 // <stdexcept>

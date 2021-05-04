@@ -40,19 +40,24 @@
 #endif // MODPLUG_TRACKER
 
 
+#include "mpt/base/span.hpp"
+#include "mpt/crc/crc.hpp"
+#include "mpt/crypto/hash.hpp"
+#include "mpt/crypto/jwk.hpp"
+#include "mpt/exception_text/exception_text.hpp"
+#include "mpt/out_of_memory/out_of_memory.hpp"
+#include "mpt/system_error/system_error.hpp"
+
+
 #include "../common/mptBaseMacros.h"
 #include "../common/mptBaseTypes.h"
 #include "../common/mptAssert.h"
 #include "../common/mptBaseUtils.h"
-#include "../common/mptException.h"
-#include "../common/mptSpan.h"
 #include "../common/mptMemory.h"
 #include "../common/mptAlloc.h"
 #include "../common/mptString.h"
-#include "../common/mptExceptionText.h"
 #include "../common/mptStringFormat.h"
 #include "../common/mptStringParse.h"
-#include "../common/mptOSError.h"
 #include "../common/mptPathString.h"
 #include "../common/Logging.h"
 #include "../common/misc_util.h"
@@ -61,7 +66,6 @@
 #include "../common/Endianness.h"
 #include "../common/FileReader.h"
 #include "../common/FlagSet.h"
-#include "../common/mptCRC.h"
 #include "../common/mptFileIO.h"
 #include "../common/mptIO.h"
 #include "../common/mptLibrary.h"
@@ -77,8 +81,8 @@
 #include "../common/version.h"
 
 #include "../misc/mptCPU.h"
-#include "../misc/mptCrypto.h"
 #include "../misc/mptWine.h"
+
 
 
 #include <algorithm>

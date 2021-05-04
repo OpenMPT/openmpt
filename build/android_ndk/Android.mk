@@ -11,7 +11,7 @@ LOCAL_CPPFLAGS += -std=c++17 -fexceptions -frtti
 
 LOCAL_CPP_FEATURES += exceptions rtti
 
-LOCAL_C_INCLUDES += $(LOCAL_PATH) $(LOCAL_PATH)/common $(LOCAL_PATH)/build/svn_version
+LOCAL_C_INCLUDES += $(LOCAL_PATH) $(LOCAL_PATH)/src $(LOCAL_PATH)/common $(LOCAL_PATH)/build/svn_version
 
 LOCAL_CFLAGS   += -fvisibility=hidden -Wall -DLIBOPENMPT_BUILD -DMPT_WITH_ZLIB
 LOCAL_CPPFLAGS +=#-fvisibility=hidden -Wall -DLIBOPENMPT_BUILD -DMPT_WITH_ZLIB

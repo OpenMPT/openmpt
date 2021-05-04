@@ -122,10 +122,10 @@ MPT_BINARY_STRUCT(WAVFormatChunk, 16)
 // Extension of the WAVFormatChunk structure, used if format == formatExtensible
 struct WAVFormatChunkExtension
 {
-	uint16le size;
-	uint16le validBitsPerSample;
-	uint32le channelMask;
-	GUIDms   subFormat;
+	uint16le    size;
+	uint16le    validBitsPerSample;
+	uint32le    channelMask;
+	mpt::GUIDms subFormat;
 };
 
 MPT_BINARY_STRUCT(WAVFormatChunkExtension, 24)

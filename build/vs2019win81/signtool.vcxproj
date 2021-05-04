@@ -275,7 +275,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0603;MODPLUG_TRACKER;MPT_BUILD_SIGNTOOL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\..\include;..\..\include\nlohmann-json\include;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\src;..\..\common;..\..\include;..\..\include\nlohmann-json\include;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
@@ -299,7 +299,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0603;MODPLUG_TRACKER;MPT_BUILD_SIGNTOOL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\..\include;..\..\include\nlohmann-json\include;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\src;..\..\common;..\..\include;..\..\include\nlohmann-json\include;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
@@ -323,7 +323,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0603;MODPLUG_TRACKER;MPT_BUILD_SIGNTOOL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\..\include;..\..\include\nlohmann-json\include;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\src;..\..\common;..\..\include;..\..\include\nlohmann-json\include;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -353,7 +353,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0603;MODPLUG_TRACKER;MPT_BUILD_SIGNTOOL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\..\include;..\..\include\nlohmann-json\include;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\src;..\..\common;..\..\include;..\..\include\nlohmann-json\include;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -382,7 +382,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0603;MODPLUG_TRACKER;MPT_BUILD_SIGNTOOL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\..\include;..\..\include\nlohmann-json\include;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\src;..\..\common;..\..\include;..\..\include\nlohmann-json\include;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -412,7 +412,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0603;MODPLUG_TRACKER;MPT_BUILD_SIGNTOOL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\..\include;..\..\include\nlohmann-json\include;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\src;..\..\common;..\..\include;..\..\include\nlohmann-json\include;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -441,7 +441,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0603;MODPLUG_TRACKER;MPT_BUILD_SIGNTOOL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\..\include;..\..\include\nlohmann-json\include;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\src;..\..\common;..\..\include;..\..\include\nlohmann-json\include;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
@@ -464,7 +464,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0603;MODPLUG_TRACKER;MPT_BUILD_SIGNTOOL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\..\include;..\..\include\nlohmann-json\include;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\src;..\..\common;..\..\include;..\..\include\nlohmann-json\include;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
@@ -487,7 +487,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0603;MODPLUG_TRACKER;MPT_BUILD_SIGNTOOL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\..\include;..\..\include\nlohmann-json\include;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\src;..\..\common;..\..\include;..\..\include\nlohmann-json\include;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -517,7 +517,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0603;MODPLUG_TRACKER;MPT_BUILD_SIGNTOOL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\..\include;..\..\include\nlohmann-json\include;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\src;..\..\common;..\..\include;..\..\include\nlohmann-json\include;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -546,7 +546,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0603;MODPLUG_TRACKER;MPT_BUILD_SIGNTOOL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\..\include;..\..\include\nlohmann-json\include;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\src;..\..\common;..\..\include;..\..\include\nlohmann-json\include;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -576,7 +576,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0603;MODPLUG_TRACKER;MPT_BUILD_SIGNTOOL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\common;..\..\include;..\..\include\nlohmann-json\include;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\src;..\..\common;..\..\include;..\..\include\nlohmann-json\include;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -602,7 +602,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\common\BuildSettings.h" />
-    <ClInclude Include="..\..\common\CompilerDetect.h" />
     <ClInclude Include="..\..\common\ComponentManager.h" />
     <ClInclude Include="..\..\common\Endianness.h" />
     <ClInclude Include="..\..\common\FileReader.h" />
@@ -616,20 +615,15 @@
     <ClInclude Include="..\..\common\mptBaseMacros.h" />
     <ClInclude Include="..\..\common\mptBaseTypes.h" />
     <ClInclude Include="..\..\common\mptBaseUtils.h" />
-    <ClInclude Include="..\..\common\mptCRC.h" />
-    <ClInclude Include="..\..\common\mptException.h" />
-    <ClInclude Include="..\..\common\mptExceptionText.h" />
     <ClInclude Include="..\..\common\mptFileIO.h" />
     <ClInclude Include="..\..\common\mptIO.h" />
     <ClInclude Include="..\..\common\mptLibrary.h" />
     <ClInclude Include="..\..\common\mptMemory.h" />
     <ClInclude Include="..\..\common\mptMutex.h" />
     <ClInclude Include="..\..\common\mptOS.h" />
-    <ClInclude Include="..\..\common\mptOSError.h" />
     <ClInclude Include="..\..\common\mptOSException.h" />
     <ClInclude Include="..\..\common\mptPathString.h" />
     <ClInclude Include="..\..\common\mptRandom.h" />
-    <ClInclude Include="..\..\common\mptSpan.h" />
     <ClInclude Include="..\..\common\mptString.h" />
     <ClInclude Include="..\..\common\mptStringBuffer.h" />
     <ClInclude Include="..\..\common\mptStringFormat.h" />
@@ -641,13 +635,112 @@
     <ClInclude Include="..\..\common\stdafx.h" />
     <ClInclude Include="..\..\common\version.h" />
     <ClInclude Include="..\..\common\versionNumber.h" />
-    <ClInclude Include="..\..\misc\JSON.h" />
     <ClInclude Include="..\..\misc\WriteMemoryDump.h" />
     <ClInclude Include="..\..\misc\mptCPU.h" />
     <ClInclude Include="..\..\misc\mptColor.h" />
-    <ClInclude Include="..\..\misc\mptCrypto.h" />
-    <ClInclude Include="..\..\misc\mptUUIDNamespace.h" />
     <ClInclude Include="..\..\misc\mptWine.h" />
+    <ClInclude Include="..\..\src\mpt\base\algorithm.hpp" />
+    <ClInclude Include="..\..\src\mpt\base\alloc.hpp" />
+    <ClInclude Include="..\..\src\mpt\base\arithmetic_shift.hpp" />
+    <ClInclude Include="..\..\src\mpt\base\array.hpp" />
+    <ClInclude Include="..\..\src\mpt\base\bit.hpp" />
+    <ClInclude Include="..\..\src\mpt\base\check_platform.hpp" />
+    <ClInclude Include="..\..\src\mpt\base\compiletime_warning.hpp" />
+    <ClInclude Include="..\..\src\mpt\base\constexpr_throw.hpp" />
+    <ClInclude Include="..\..\src\mpt\base\detect.hpp" />
+    <ClInclude Include="..\..\src\mpt\base\detect_compiler.hpp" />
+    <ClInclude Include="..\..\src\mpt\base\detect_libc.hpp" />
+    <ClInclude Include="..\..\src\mpt\base\detect_libcxx.hpp" />
+    <ClInclude Include="..\..\src\mpt\base\detect_os.hpp" />
+    <ClInclude Include="..\..\src\mpt\base\detect_quirks.hpp" />
+    <ClInclude Include="..\..\src\mpt\base\floatingpoint.hpp" />
+    <ClInclude Include="..\..\src\mpt\base\integer.hpp" />
+    <ClInclude Include="..\..\src\mpt\base\macros.hpp" />
+    <ClInclude Include="..\..\src\mpt\base\math.hpp" />
+    <ClInclude Include="..\..\src\mpt\base\memory.hpp" />
+    <ClInclude Include="..\..\src\mpt\base\namespace.hpp" />
+    <ClInclude Include="..\..\src\mpt\base\numeric.hpp" />
+    <ClInclude Include="..\..\src\mpt\base\pointer.hpp" />
+    <ClInclude Include="..\..\src\mpt\base\preprocessor.hpp" />
+    <ClInclude Include="..\..\src\mpt\base\saturate_cast.hpp" />
+    <ClInclude Include="..\..\src\mpt\base\saturate_round.hpp" />
+    <ClInclude Include="..\..\src\mpt\base\secure.hpp" />
+    <ClInclude Include="..\..\src\mpt\base\semantic_version.hpp" />
+    <ClInclude Include="..\..\src\mpt\base\source_location.hpp" />
+    <ClInclude Include="..\..\src\mpt\base\span.hpp" />
+    <ClInclude Include="..\..\src\mpt\base\tests\tests_base_arithmetic_shift.hpp" />
+    <ClInclude Include="..\..\src\mpt\base\tests\tests_base_bit.hpp" />
+    <ClInclude Include="..\..\src\mpt\base\tests\tests_base_math.hpp" />
+    <ClInclude Include="..\..\src\mpt\base\tests\tests_base_saturate_cast.hpp" />
+    <ClInclude Include="..\..\src\mpt\base\tests\tests_base_saturate_round.hpp" />
+    <ClInclude Include="..\..\src\mpt\base\tests\tests_base_wrapping_divide.hpp" />
+    <ClInclude Include="..\..\src\mpt\base\utility.hpp" />
+    <ClInclude Include="..\..\src\mpt\base\version.hpp" />
+    <ClInclude Include="..\..\src\mpt\base\wrapping_divide.hpp" />
+    <ClInclude Include="..\..\src\mpt\binary\base64.hpp" />
+    <ClInclude Include="..\..\src\mpt\binary\base64url.hpp" />
+    <ClInclude Include="..\..\src\mpt\binary\hex.hpp" />
+    <ClInclude Include="..\..\src\mpt\binary\tests\tests_binary.hpp" />
+    <ClInclude Include="..\..\src\mpt\check\libc.hpp" />
+    <ClInclude Include="..\..\src\mpt\check\mfc.hpp" />
+    <ClInclude Include="..\..\src\mpt\check\windows.hpp" />
+    <ClInclude Include="..\..\src\mpt\crc\crc.hpp" />
+    <ClInclude Include="..\..\src\mpt\crc\tests\tests_crc.hpp" />
+    <ClInclude Include="..\..\src\mpt\crypto\exception.hpp" />
+    <ClInclude Include="..\..\src\mpt\crypto\hash.hpp" />
+    <ClInclude Include="..\..\src\mpt\crypto\jwk.hpp" />
+    <ClInclude Include="..\..\src\mpt\crypto\tests\tests_crypto.hpp" />
+    <ClInclude Include="..\..\src\mpt\detect\mfc.hpp" />
+    <ClInclude Include="..\..\src\mpt\detect\nlohmann_json.hpp" />
+    <ClInclude Include="..\..\src\mpt\endian\floatingpoint.hpp" />
+    <ClInclude Include="..\..\src\mpt\endian\integer.hpp" />
+    <ClInclude Include="..\..\src\mpt\endian\tests\tests_endian_floatingpoint.hpp" />
+    <ClInclude Include="..\..\src\mpt\endian\tests\tests_endian_integer.hpp" />
+    <ClInclude Include="..\..\src\mpt\environment\environment.hpp" />
+    <ClInclude Include="..\..\src\mpt\exception_text\exception_text.hpp" />
+    <ClInclude Include="..\..\src\mpt\format\default_floatingpoint.hpp" />
+    <ClInclude Include="..\..\src\mpt\format\default_formatter.hpp" />
+    <ClInclude Include="..\..\src\mpt\format\default_integer.hpp" />
+    <ClInclude Include="..\..\src\mpt\format\default_string.hpp" />
+    <ClInclude Include="..\..\src\mpt\format\helpers.hpp" />
+    <ClInclude Include="..\..\src\mpt\format\message.hpp" />
+    <ClInclude Include="..\..\src\mpt\format\message_macros.hpp" />
+    <ClInclude Include="..\..\src\mpt\format\simple.hpp" />
+    <ClInclude Include="..\..\src\mpt\format\simple_floatingpoint.hpp" />
+    <ClInclude Include="..\..\src\mpt\format\simple_integer.hpp" />
+    <ClInclude Include="..\..\src\mpt\format\simple_spec.hpp" />
+    <ClInclude Include="..\..\src\mpt\format\tests\tests_format_message.hpp" />
+    <ClInclude Include="..\..\src\mpt\format\tests\tests_format_simple.hpp" />
+    <ClInclude Include="..\..\src\mpt\json\json.hpp" />
+    <ClInclude Include="..\..\src\mpt\mutex\mutex.hpp" />
+    <ClInclude Include="..\..\src\mpt\osinfo\windows_version.hpp" />
+    <ClInclude Include="..\..\src\mpt\out_of_memory\out_of_memory.hpp" />
+    <ClInclude Include="..\..\src\mpt\parse\parse.hpp" />
+    <ClInclude Include="..\..\src\mpt\parse\tests\tests_parse.hpp" />
+    <ClInclude Include="..\..\src\mpt\random\crand.hpp" />
+    <ClInclude Include="..\..\src\mpt\random\default_engines.hpp" />
+    <ClInclude Include="..\..\src\mpt\random\device.hpp" />
+    <ClInclude Include="..\..\src\mpt\random\engine.hpp" />
+    <ClInclude Include="..\..\src\mpt\random\engine_lcg.hpp" />
+    <ClInclude Include="..\..\src\mpt\random\random.hpp" />
+    <ClInclude Include="..\..\src\mpt\random\seed.hpp" />
+    <ClInclude Include="..\..\src\mpt\random\tests\tests_random.hpp" />
+    <ClInclude Include="..\..\src\mpt\string\buffer.hpp" />
+    <ClInclude Include="..\..\src\mpt\string\tests\tests_string_buffer.hpp" />
+    <ClInclude Include="..\..\src\mpt\string\tests\tests_string_utility.hpp" />
+    <ClInclude Include="..\..\src\mpt\string\types.hpp" />
+    <ClInclude Include="..\..\src\mpt\string\utility.hpp" />
+    <ClInclude Include="..\..\src\mpt\string_convert\convert.hpp" />
+    <ClInclude Include="..\..\src\mpt\string_convert\macros.hpp" />
+    <ClInclude Include="..\..\src\mpt\string_convert\tests\tests_string_convert.hpp" />
+    <ClInclude Include="..\..\src\mpt\system_error\system_error.hpp" />
+    <ClInclude Include="..\..\src\mpt\test\test.hpp" />
+    <ClInclude Include="..\..\src\mpt\test\test_macros.hpp" />
+    <ClInclude Include="..\..\src\mpt\uuid\guid.hpp" />
+    <ClInclude Include="..\..\src\mpt\uuid\tests\tests_uuid.hpp" />
+    <ClInclude Include="..\..\src\mpt\uuid\uuid.hpp" />
+    <ClInclude Include="..\..\src\mpt\uuid_namespace\tests\tests_uuid_namespace.hpp" />
+    <ClInclude Include="..\..\src\mpt\uuid_namespace\uuid_namespace.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\common\ComponentManager.cpp" />
@@ -672,8 +765,6 @@
     <ClCompile Include="..\..\installer\signtool\signtool.cpp" />
     <ClCompile Include="..\..\misc\mptCPU.cpp" />
     <ClCompile Include="..\..\misc\mptColor.cpp" />
-    <ClCompile Include="..\..\misc\mptCrypto.cpp" />
-    <ClCompile Include="..\..\misc\mptUUIDNamespace.cpp" />
     <ClCompile Include="..\..\misc\mptWine.cpp" />
   </ItemGroup>
   <ItemGroup>

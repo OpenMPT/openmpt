@@ -52,8 +52,8 @@ struct SNDMIXPLUGININFO
 	uint8le reserved;
 	uint32le dwOutputRouting;		// 0 = send to master 0x80 + x = send to plugin x
 	uint32le dwReserved[4];			// Reserved for routing info
-	mpt::charbuf<32, mpt::String::nullTerminated> szName;         // User-chosen plugin display name - this is locale ANSI!
-	mpt::charbuf<64, mpt::String::nullTerminated> szLibraryName;  // original DLL name - this is UTF-8!
+	mpt::modecharbuf<32, mpt::String::nullTerminated> szName;         // User-chosen plugin display name - this is locale ANSI!
+	mpt::modecharbuf<64, mpt::String::nullTerminated> szLibraryName;  // original DLL name - this is UTF-8!
 
 	// Should only be called from SNDMIXPLUGIN::SetBypass() and IMixPlugin::Bypass()
 	void SetBypass(bool bypass = true) { if(bypass) routingFlags |= irBypass; else routingFlags &= uint8(~irBypass); }

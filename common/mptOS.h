@@ -12,8 +12,9 @@
 
 #include "BuildSettings.h"
 
-
 #include "mptLibrary.h"
+
+#include "mpt/osinfo/windows_version.hpp"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -56,84 +57,12 @@ namespace Windows
 
 
 class Version
+	: public mpt::osinfo::windows::Version
 {
 
 public:
 
-	enum Number : uint64
-	{
-		WinNT4   = 0x0000000400000000ull,
-		Win2000  = 0x0000000500000000ull,
-		WinXP    = 0x0000000500000001ull,
-		WinXP64  = 0x0000000500000002ull,
-		WinVista = 0x0000000600000000ull,
-		Win7     = 0x0000000600000001ull,
-		Win8     = 0x0000000600000002ull,
-		Win81    = 0x0000000600000003ull,
-		Win10    = 0x0000000a00000000ull,
-		WinNewer = Win10 + 1ull
-	};
-
-	struct System
-	{
-		uint32 Major = 0;
-		uint32 Minor = 0;
-		System() = default;
-		constexpr System(Number number) noexcept
-			: Major(static_cast<uint32>((static_cast<uint64>(number) >> 32) & 0xffffffffu))
-			, Minor(static_cast<uint32>((static_cast<uint64>(number) >>  0) & 0xffffffffu))
-		{
-		}
-		explicit constexpr System(uint64 number) noexcept
-			: Major(static_cast<uint32>((number >> 32) & 0xffffffffu))
-			, Minor(static_cast<uint32>((number >>  0) & 0xffffffffu))
-		{
-		}
-		explicit constexpr System(uint32 major, uint32 minor) noexcept
-			: Major(major)
-			, Minor(minor)
-		{
-		}
-		constexpr operator uint64 () const noexcept
-		{
-			return (static_cast<uint64>(Major) << 32) | (static_cast<uint64>(Minor) << 0);
-		}
-	};
-
-	struct ServicePack
-	{
-		uint16 Major = 0;
-		uint16 Minor = 0;
-		ServicePack() = default;
-		explicit constexpr ServicePack(uint16 major, uint16 minor) noexcept
-			: Major(major)
-			, Minor(minor)
-		{
-		}
-		constexpr bool HasServicePack() const noexcept
-		{
-			return Major != 0 || Minor != 0;
-		}
-		constexpr operator uint32 () const noexcept
-		{
-			return (static_cast<uint32>(Major) << 16) | (static_cast<uint32>(Minor) << 0);
-		}
-	};
-
-	typedef uint32 Build;
-
-	typedef uint32 TypeId;
-
 	static mpt::ustring VersionToString(mpt::OS::Windows::Version::System version);
-
-private:
-
-	bool m_SystemIsWindows;
-
-	System m_System;
-	ServicePack m_ServicePack;
-	Build m_Build;
-	TypeId m_Type;
 
 private:
 
@@ -143,6 +72,12 @@ public:
 
 	static Version NoWindows() noexcept;
 
+public:
+
+	Version(mpt::osinfo::windows::Version v) noexcept;
+
+public:
+
 	Version(mpt::OS::Windows::Version::System system, mpt::OS::Windows::Version::ServicePack servicePack, mpt::OS::Windows::Version::Build build, mpt::OS::Windows::Version::TypeId type) noexcept;
 
 public:
@@ -150,23 +85,6 @@ public:
 	static mpt::OS::Windows::Version Current() noexcept;
 
 public:
-
-	bool IsWindows() const noexcept;
-
-	bool IsBefore(mpt::OS::Windows::Version::System version) const noexcept;
-	bool IsBefore(mpt::OS::Windows::Version::System version, mpt::OS::Windows::Version::ServicePack servicePack) const noexcept;
-	bool IsBefore(mpt::OS::Windows::Version::System version, mpt::OS::Windows::Version::Build build) const noexcept;
-	bool IsBefore(mpt::OS::Windows::Version::System version, mpt::OS::Windows::Version::ServicePack servicePack, mpt::OS::Windows::Version::Build build) const noexcept;
-
-	bool IsAtLeast(mpt::OS::Windows::Version::System version) const noexcept;
-	bool IsAtLeast(mpt::OS::Windows::Version::System version, mpt::OS::Windows::Version::ServicePack servicePack) const noexcept;
-	bool IsAtLeast(mpt::OS::Windows::Version::System version, mpt::OS::Windows::Version::Build build) const noexcept;
-	bool IsAtLeast(mpt::OS::Windows::Version::System version, mpt::OS::Windows::Version::ServicePack servicePack, mpt::OS::Windows::Version::Build build) const noexcept;
-
-	mpt::OS::Windows::Version::System GetSystem() const noexcept;
-	mpt::OS::Windows::Version::ServicePack GetServicePack() const noexcept;
-	mpt::OS::Windows::Version::Build GetBuild() const noexcept;
-	mpt::OS::Windows::Version::TypeId GetTypeId() const noexcept;
 
 	mpt::ustring GetName() const;
 #ifdef MODPLUG_TRACKER

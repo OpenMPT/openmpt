@@ -14,7 +14,7 @@
 #pragma warning(push)
 #pragma warning(disable:4127) // conditional expression is constant
 #endif // MPT_COMPILER_MSVC
-#include "../../misc/JSON.h"
+#include "mpt/json/json.hpp"
 #if MPT_COMPILER_MSVC
 #pragma warning(pop)
 #endif // MPT_COMPILER_MSVC

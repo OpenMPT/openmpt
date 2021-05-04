@@ -11,7 +11,7 @@
 #pragma once
 
 #include "BuildSettings.h"
-#include "../common/mptSpan.h"
+#include "mpt/base/span.hpp"
 
 OPENMPT_NAMESPACE_BEGIN
 

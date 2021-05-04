@@ -580,9 +580,9 @@ bool CSoundFile::SaveWAVSample(SAMPLEINDEX nSample, std::ostream &f) const
 
 struct Wave64FileHeader
 {
-	GUIDms   GuidRIFF;
-	uint64le FileSize;
-	GUIDms   GuidWAVE;
+	mpt::GUIDms GuidRIFF;
+	uint64le    FileSize;
+	mpt::GUIDms GuidWAVE;
 };
 
 MPT_BINARY_STRUCT(Wave64FileHeader, 40)
@@ -590,8 +590,8 @@ MPT_BINARY_STRUCT(Wave64FileHeader, 40)
 
 struct Wave64ChunkHeader
 {
-	GUIDms   GuidChunk;
-	uint64le Size;
+	mpt::GUIDms GuidChunk;
+	uint64le    Size;
 };
 
 MPT_BINARY_STRUCT(Wave64ChunkHeader, 24)

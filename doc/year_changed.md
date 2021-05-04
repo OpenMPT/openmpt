@@ -3,6 +3,7 @@ Things to update when the year has changed
 ==========================================
 
  *  `LICENSE` (1 occurrence)
+ *  `src/mpt/LICENSE.BSD-3-Clause.txt` (1 occurrence)
  *  `common/version.cpp` (2 occurrences plus 1 for each current contributor)
  *  `mptrack/res/MPTRACK.RC2` (1 occurence)
  *  `pluginBridge/PluginBridge.rc` (1 occurence)

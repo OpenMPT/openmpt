@@ -12,7 +12,7 @@
 
 #include "BuildSettings.h"
 
-#include "../common/mptSpan.h"
+#include "mpt/base/span.hpp"
 #include "Snd_defs.h"
 
 #include <map>

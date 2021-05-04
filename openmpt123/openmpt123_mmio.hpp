@@ -51,7 +51,7 @@ public:
 		waveformatex.nAvgBytesPerSec = waveformatex.nSamplesPerSec * waveformatex.nBlockAlign;
 
 		#if defined(WIN32) && defined(UNICODE)
-			wchar_t * tmp = _wcsdup( utf8_to_wstring( filename ).c_str() );
+			wchar_t * tmp = _wcsdup( mpt::convert<std::wstring>( mpt::common_encoding::utf8, filename ).c_str() );
 			mmio = mmioOpen( tmp, NULL, MMIO_ALLOCBUF | MMIO_READWRITE | MMIO_CREATE );
 			free( tmp );
 			tmp = 0;

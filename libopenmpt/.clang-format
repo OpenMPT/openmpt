@@ -122,7 +122,7 @@ SpacesInConditionalStatement: true
 SpacesInContainerLiterals: true
 SpacesInParentheses: true
 SpacesInSquareBrackets: false
-StatementMacros: ['MPT_WARNING'] #?
+StatementMacros: [ 'MPT_WARNING', 'MPT_TEST_GROUP_INLINE_IDENTIFIER', 'MPT_TEST_GROUP_INLINE', 'MPT_TEST_GROUP_STATIC' ] #?
 TabWidth: 2
 TypenameMacros: [] #?
 UseCRLF: false

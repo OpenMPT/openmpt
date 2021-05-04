@@ -21,6 +21,8 @@
 //#define MPT_TEST_CXX11
 
 
+#include "mpt/test/test.hpp"
+
 #include <type_traits>
 
 #include "../common/Endianness.h"
@@ -32,6 +34,23 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 namespace Test {
+
+
+
+class mpt_test_reporter
+	: public mpt::test::silent_reporter
+{
+public:
+	mpt_test_reporter() = default;
+	~mpt_test_reporter() override = default;
+public:
+	void case_run(const mpt::source_location & loc) override;
+	void case_run(const mpt::source_location & loc, const char * text_e) override;
+	void case_run(const mpt::source_location & loc, const char * text_ex, const char * text_e) override;
+	void case_run(const mpt::source_location & loc, const char * text_a, const char * text_cmp, const char * text_b) override;
+	void case_result(const mpt::source_location & loc, const mpt::test::result & result) override;
+};
+
 
 
 extern int fail_count;

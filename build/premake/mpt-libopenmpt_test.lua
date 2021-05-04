@@ -22,12 +22,15 @@
 	filter {}
   includedirs {
    "../..",
+   "../../src",
    "../../common",
    "../../soundlib",
    "$(IntDir)/svn_version",
    "../../build/svn_version",
   }
   files {
+   "../../src/mpt/**.cpp",
+   "../../src/mpt/**.hpp",
    "../../common/*.cpp",
    "../../common/*.h",
    "../../soundbase/*.cpp",
@@ -60,6 +63,16 @@
    "../../libopenmpt/libopenmpt_impl.cpp",
    "../../libopenmpt/libopenmpt_test.cpp",
   }
+	excludes {
+		"../../src/mpt/crypto/**.cpp",
+		"../../src/mpt/crypto/**.hpp",
+		"../../src/mpt/json/**.cpp",
+		"../../src/mpt/json/**.hpp",
+		"../../src/mpt/uuid_namespace/**.cpp",
+		"../../src/mpt/uuid_namespace/**.hpp",
+		"../../test/mpt_tests_crypto.cpp",
+		"../../test/mpt_tests_uuid_namespace.cpp",
+	}
   characterset "Unicode"
   warnings "Extra"
   defines { "LIBOPENMPT_BUILD", "LIBOPENMPT_BUILD_TEST" }

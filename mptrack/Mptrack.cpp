@@ -835,7 +835,7 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 	// make the best PRNG available to non-tracker-only code
 	mpt::set_global_prng(m_PRNG.get());
 	// additionally, seed the C rand() PRNG, just in case any third party library calls rand()
-	mpt::rng::crand::reseed(RandomDevice());
+	mpt::crand::reseed(RandomDevice());
 
 	m_Gdiplus = std::make_unique<GdiplusRAII>();
 

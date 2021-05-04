@@ -11,7 +11,7 @@
 #include "stdafx.h"
 #include "HTTP.h"
 #include "../common/mptIO.h"
-#include "../common/mptOSError.h"
+#include "mpt/system_error/system_error.hpp"
 #include <WinInet.h>
 
 
@@ -117,7 +117,7 @@ class LastErrorException
 {
 public:
 	LastErrorException()
-		: exception(mpt::Windows::GetErrorMessage(GetLastError(), GetModuleHandle(TEXT("wininet.dll"))))
+		: exception(mpt::windows::GetErrorMessage(GetLastError(), GetModuleHandle(TEXT("wininet.dll"))))
 	{
 	}
 };

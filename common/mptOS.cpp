@@ -89,95 +89,6 @@ namespace Windows
 
 
 #if MPT_OS_WINDOWS
-
-
-static mpt::OS::Windows::Version VersionFromNTDDI_VERSION() noexcept
-{
-	// Initialize to used SDK version
-	mpt::OS::Windows::Version::System System =
-		#if NTDDI_VERSION >= 0x0A000000 // NTDDI_WIN10
-			mpt::OS::Windows::Version::Win10
-		#elif NTDDI_VERSION >= 0x06030000 // NTDDI_WINBLUE
-			mpt::OS::Windows::Version::Win81
-		#elif NTDDI_VERSION >= 0x06020000 // NTDDI_WIN8
-			mpt::OS::Windows::Version::Win8
-		#elif NTDDI_VERSION >= 0x06010000 // NTDDI_WIN7
-			mpt::OS::Windows::Version::Win7
-		#elif NTDDI_VERSION >= 0x06000000 // NTDDI_VISTA
-			mpt::OS::Windows::Version::WinVista
-		#elif NTDDI_VERSION >= 0x05020000 // NTDDI_WS03
-			mpt::OS::Windows::Version::WinXP64
-		#elif NTDDI_VERSION >= NTDDI_WINXP
-			mpt::OS::Windows::Version::WinXP
-		#elif NTDDI_VERSION >= NTDDI_WIN2K
-			mpt::OS::Windows::Version::Win2000
-		#else
-			mpt::OS::Windows::Version::WinNT4
-		#endif
-		;
-	return mpt::OS::Windows::Version(System, mpt::OS::Windows::Version::ServicePack(((NTDDI_VERSION & 0xffffu) >> 8) & 0xffu, ((NTDDI_VERSION & 0xffffu) >> 0) & 0xffu), 0, 0);
-}
-
-
-static mpt::OS::Windows::Version::System SystemVersionFrom_WIN32_WINNT() noexcept
-{
-	#if defined(_WIN32_WINNT)
-		return mpt::OS::Windows::Version::System((static_cast<uint64>(_WIN32_WINNT) & 0xff00u) >> 8, (static_cast<uint64>(_WIN32_WINNT) & 0x00ffu) >> 0);
-	#else
-		return mpt::OS::Windows::Version::System();
-	#endif
-}
-
-
-static mpt::OS::Windows::Version GatherWindowsVersion() noexcept
-{
-#if MPT_OS_WINDOWS_WINRT
-	return VersionFromNTDDI_VERSION();
-#else // !MPT_OS_WINDOWS_WINRT
-	OSVERSIONINFOEXW versioninfoex;
-	MemsetZero(versioninfoex);
-	versioninfoex.dwOSVersionInfoSize = sizeof(versioninfoex);
-#if MPT_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable:4996) // 'GetVersionExW': was declared deprecated
-#pragma warning(disable:28159) // Consider using 'IsWindows*' instead of 'GetVersionExW'. Reason: Deprecated. Use VerifyVersionInfo* or IsWindows* macros from VersionHelpers.
-#endif // MPT_COMPILER_MSVC
-#if MPT_COMPILER_CLANG
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-#endif // MPT_COMPILER_CLANG
-	if(GetVersionExW((LPOSVERSIONINFOW)&versioninfoex) == FALSE)
-	{
-		return VersionFromNTDDI_VERSION();
-	}
-#if MPT_COMPILER_MSVC
-#pragma warning(pop)
-#endif // MPT_COMPILER_MSVC
-#if MPT_COMPILER_CLANG
-#pragma clang diagnostic pop
-#endif // MPT_COMPILER_CLANG
-	if(versioninfoex.dwPlatformId != VER_PLATFORM_WIN32_NT)
-	{
-		return VersionFromNTDDI_VERSION();
-	}
-	DWORD dwProductType = 0;
-	#if (_WIN32_WINNT >= 0x0600) // _WIN32_WINNT_VISTA
-		dwProductType = PRODUCT_UNDEFINED;
-		if(GetProductInfo(versioninfoex.dwMajorVersion, versioninfoex.dwMinorVersion, versioninfoex.wServicePackMajor, versioninfoex.wServicePackMinor, &dwProductType) == FALSE)
-		{
-			dwProductType = PRODUCT_UNDEFINED;
-		}
-	#endif
-	return mpt::OS::Windows::Version(
-		mpt::OS::Windows::Version::System(versioninfoex.dwMajorVersion, versioninfoex.dwMinorVersion),
-		mpt::OS::Windows::Version::ServicePack(versioninfoex.wServicePackMajor, versioninfoex.wServicePackMinor),
-		versioninfoex.dwBuildNumber,
-		dwProductType
-		);
-#endif // MPT_OS_WINDOWS_WINRT
-}
-
-
 #ifdef MODPLUG_TRACKER
 
 namespace {
@@ -185,7 +96,7 @@ struct WindowsVersionCache
 {
 	mpt::OS::Windows::Version version;
 	WindowsVersionCache() noexcept
-		: version(GatherWindowsVersion())
+		: version(mpt::osinfo::windows::Version::Current())
 	{
 	}
 };
@@ -198,17 +109,25 @@ static mpt::OS::Windows::Version GatherWindowsVersionFromCache() noexcept
 }
 
 #endif // MODPLUG_TRACKER
-
-
 #endif // MPT_OS_WINDOWS
 
 
+mpt::OS::Windows::Version Version::Current() noexcept
+{
+	#if MPT_OS_WINDOWS
+		#ifdef MODPLUG_TRACKER
+			return GatherWindowsVersionFromCache();
+		#else // !MODPLUG_TRACKER
+			return mpt::osinfo::windows::Version::Current();
+		#endif // MODPLUG_TRACKER
+	#else // !MPT_OS_WINDOWS
+		return mpt::OS::Windows::Version::NoWindows();
+	#endif // MPT_OS_WINDOWS
+}
+
+
 Version::Version() noexcept
-	: m_SystemIsWindows(false)
-	, m_System()
-	, m_ServicePack()
-	, m_Build()
-	, m_Type()
+	: mpt::osinfo::windows::Version(mpt::osinfo::windows::Version::NoWindows())
 {
 }
 
@@ -219,201 +138,15 @@ Version Version::NoWindows() noexcept
 }
 
 
+Version::Version(mpt::osinfo::windows::Version v) noexcept
+	: mpt::osinfo::windows::Version(v)
+{
+}
+
+
 Version::Version(mpt::OS::Windows::Version::System system, mpt::OS::Windows::Version::ServicePack servicePack, mpt::OS::Windows::Version::Build build, mpt::OS::Windows::Version::TypeId type) noexcept
-	: m_SystemIsWindows(true)
-	, m_System(system)
-	, m_ServicePack(servicePack)
-	, m_Build(build)
-	, m_Type(type)
+	: mpt::osinfo::windows::Version(system, servicePack, build, type)
 {
-}
-
-
-mpt::OS::Windows::Version Version::Current() noexcept
-{
-	#if MPT_OS_WINDOWS
-		#ifdef MODPLUG_TRACKER
-			return GatherWindowsVersionFromCache();
-		#else // !MODPLUG_TRACKER
-			return GatherWindowsVersion();
-		#endif // MODPLUG_TRACKER
-	#else // !MPT_OS_WINDOWS
-		return mpt::OS::Windows::Version::NoWindows();
-	#endif // MPT_OS_WINDOWS
-}
-
-
-bool Version::IsWindows() const noexcept
-{
-	return m_SystemIsWindows;
-}
-
-
-bool Version::IsBefore(mpt::OS::Windows::Version::System version) const noexcept
-{
-	if(!m_SystemIsWindows)
-	{
-		return false;
-	}
-	return m_System < version;
-}
-
-
-bool Version::IsBefore(mpt::OS::Windows::Version::System version, mpt::OS::Windows::Version::ServicePack servicePack) const noexcept
-{
-	if(!m_SystemIsWindows)
-	{
-		return false;
-	}
-	if(m_System > version)
-	{
-		return false;
-	}
-	if(m_System < version)
-	{
-		return true;
-	}
-	return m_ServicePack < servicePack;
-}
-
-
-bool Version::IsBefore(mpt::OS::Windows::Version::System version, mpt::OS::Windows::Version::Build build) const noexcept
-{
-	if(!m_SystemIsWindows)
-	{
-		return false;
-	}
-	if(m_System > version)
-	{
-		return false;
-	}
-	if(m_System < version)
-	{
-		return true;
-	}
-	return m_Build < build;
-}
-
-
-bool Version::IsBefore(mpt::OS::Windows::Version::System version, mpt::OS::Windows::Version::ServicePack servicePack, mpt::OS::Windows::Version::Build build) const noexcept
-{
-	if(!m_SystemIsWindows)
-	{
-		return false;
-	}
-	if(m_System > version)
-	{
-		return false;
-	}
-	if(m_System < version)
-	{
-		return true;
-	}
-	if(m_ServicePack > servicePack)
-	{
-		return false;
-	}
-	if(m_ServicePack < servicePack)
-	{
-		return true;
-	}
-	return m_Build < build;
-}
-
-
-bool Version::IsAtLeast(mpt::OS::Windows::Version::System version) const noexcept
-{
-	if(!m_SystemIsWindows)
-	{
-		return false;
-	}
-	return m_System >= version;
-}
-
-
-bool Version::IsAtLeast(mpt::OS::Windows::Version::System version, mpt::OS::Windows::Version::ServicePack servicePack) const noexcept
-{
-	if(!m_SystemIsWindows)
-	{
-		return false;
-	}
-	if(m_System < version)
-	{
-		return false;
-	}
-	if(m_System > version)
-	{
-		return true;
-	}
-	return m_ServicePack >= servicePack;
-}
-
-
-bool Version::IsAtLeast(mpt::OS::Windows::Version::System version, mpt::OS::Windows::Version::Build build) const noexcept
-{
-	if(!m_SystemIsWindows)
-	{
-		return false;
-	}
-	if(m_System < version)
-	{
-		return false;
-	}
-	if(m_System > version)
-	{
-		return true;
-	}
-	return m_Build >= build;
-}
-
-
-bool Version::IsAtLeast(mpt::OS::Windows::Version::System version, mpt::OS::Windows::Version::ServicePack servicePack, mpt::OS::Windows::Version::Build build) const noexcept
-{
-	if(!m_SystemIsWindows)
-	{
-		return false;
-	}
-	if(m_System < version)
-	{
-		return false;
-	}
-	if(m_System > version)
-	{
-		return true;
-	}
-	if(m_ServicePack < servicePack)
-	{
-		return false;
-	}
-	if(m_ServicePack > servicePack)
-	{
-		return true;
-	}
-	return m_Build >= build;
-}
-
-
-mpt::OS::Windows::Version::System Version::GetSystem() const noexcept
-{
-	return m_System;
-}
-
-
-mpt::OS::Windows::Version::ServicePack Version::GetServicePack() const noexcept
-{
-	return m_ServicePack;
-}
-
-
-mpt::OS::Windows::Version::Build Version::GetBuild() const noexcept
-{
-	return m_Build;
-}
-
-
-mpt::OS::Windows::Version::TypeId Version::GetTypeId() const noexcept
-{
-	return m_Type;
 }
 
 

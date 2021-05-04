@@ -18,9 +18,12 @@
 #ifdef MODPLUG_TRACKER
 
 
+#include "mpt/test/test.hpp"
+
+
 OPENMPT_NAMESPACE_BEGIN
 
-	
+
 namespace Test {
 
 
@@ -30,6 +33,19 @@ namespace Test {
 #else
 #define MyDebugBreak() DebugBreak()
 #endif
+
+
+class mpt_test_reporter
+	: public mpt::test::silent_reporter
+{
+public:
+	mpt_test_reporter() = default;
+	~mpt_test_reporter() override = default;
+public:
+	inline void immediate_breakpoint() override {
+		MyDebugBreak();
+	}
+};
 
 
 // Verify that given parameters are 'equal'. Break directly into the debugger if not.

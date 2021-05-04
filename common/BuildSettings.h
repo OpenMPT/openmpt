@@ -12,7 +12,9 @@
 
 
 
-#include "CompilerDetect.h"
+#include "mpt/base/detect_compiler.hpp"
+#include "mpt/base/detect_os.hpp"
+#include "mpt/base/detect_quirks.hpp"
 
 
 
@@ -40,8 +42,10 @@
 #error "either MODPLUG_TRACKER or LIBOPENMPT_BUILD has to be defined"
 #elif defined(MODPLUG_TRACKER)
 // nothing
+#define MPT_INLINE_NS mptx
 #elif defined(LIBOPENMPT_BUILD)
 // nothing
+#define MPT_INLINE_NS mpt_libopenmpt
 #else
 #error "either MODPLUG_TRACKER or LIBOPENMPT_BUILD has to be defined"
 #endif // MODPLUG_TRACKER || LIBOPENMPT_BUILD
@@ -334,29 +338,14 @@
 
 #elif MPT_OS_DJGPP
 
-	#ifndef MPT_LOCALE_ASSUME_CHARSET
-	#define MPT_LOCALE_ASSUME_CHARSET DJGPP_GetLocaleCharset()
-	#endif
-
 #endif
 
 
 
-#if MPT_COMPILER_MSVC && !defined(MPT_USTRING_MODE_UTF8_FORCE)
+#if (MPT_COMPILER_MSVC && !defined(MPT_USTRING_MODE_UTF8_FORCE)) || defined(MODPLUG_TRACKER)
 
 	// Use wide strings for MSVC because this is the native encoding on 
 	// microsoft platforms.
-	#define MPT_USTRING_MODE_WIDE 1
-	#define MPT_USTRING_MODE_UTF8 0
-
-#else // !MPT_COMPILER_MSVC
-
-	#define MPT_USTRING_MODE_WIDE 0
-	#define MPT_USTRING_MODE_UTF8 1
-
-#endif // MPT_COMPILER_MSVC
-
-#if defined(MODPLUG_TRACKER) || MPT_USTRING_MODE_WIDE
 
 	// mpt::ToWString, mpt::wfmt, ConvertStrTo<std::wstring>
 	// Required by the tracker to ease interfacing with WinAPI.
@@ -369,7 +358,7 @@
 
 #endif
 
-#if MPT_OS_WINDOWS || MPT_USTRING_MODE_WIDE || MPT_WSTRING_FORMAT
+#if (MPT_COMPILER_MSVC && !defined(MPT_USTRING_MODE_UTF8_FORCE)) || MPT_OS_WINDOWS || MPT_WSTRING_FORMAT
 
 	// mpt::ToWide
 	// Required on Windows by mpt::PathString.
@@ -550,6 +539,14 @@
 #define OPENMPT_NAMESPACE_END   }
 #endif
 
+namespace mpt {
+} // namespace mpt
+OPENMPT_NAMESPACE_BEGIN
+namespace mpt {
+using namespace ::mpt;
+} // namespace mpt
+OPENMPT_NAMESPACE_END
+
 #endif
 
 
@@ -617,6 +614,7 @@
 #endif
 
 #define __STDC_CONSTANT_MACROS
+#define __STDC_FORMAT_MACROS
 #define __STDC_LIMIT_MACROS
 
 #define _USE_MATH_DEFINES
@@ -683,6 +681,12 @@
 
 // third-party library configuration
 
+#if MPT_OS_WINDOWS
+#ifndef UNICODE
+#define MPT_CHECK_WINDOWS_IGNORE_WARNING_NO_UNICODE
+#endif // !UNICODE
+#endif // MPT_OS_WINDOWS
+
 #ifdef MPT_WITH_FLAC
 #ifdef MPT_BUILD_MSVC_STATIC
 #define FLAC__NO_DLL
@@ -717,3 +721,22 @@
 #endif
 #endif
 
+
+
+#ifdef __cplusplus
+
+#include "mpt/base/namespace.hpp"
+
+OPENMPT_NAMESPACE_BEGIN
+
+namespace mpt {
+
+#ifndef MPT_NO_NAMESPACE
+using namespace ::mpt;
+#endif
+
+} // namespace mpt
+
+OPENMPT_NAMESPACE_END
+
+#endif

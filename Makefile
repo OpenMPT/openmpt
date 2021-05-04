@@ -314,7 +314,7 @@ INSTALL_LIB = $(INSTALL) -m 0644
 INSTALL_DATA_DIR = $(INSTALL_DIR)
 INSTALL_MAKE_DIR += -m 0755
 
-CPPFLAGS += -Icommon -I. -Iinclude
+CPPFLAGS += -Isrc -Icommon -I. -Iinclude
 
 ifeq ($(XMP_OPENMPT),1)
 CPPFLAGS += -Iinclude/pugixml/src
@@ -859,6 +859,7 @@ CPPFLAGS += -DLIBOPENMPT_BUILD
 
 COMMON_CXX_SOURCES += \
  $(sort $(wildcard common/*.cpp)) \
+ $(sort $(wildcard src/mpt/src/*.cpp)) \
  
 SOUNDLIB_CXX_SOURCES += \
  $(COMMON_CXX_SOURCES) \
@@ -993,8 +994,22 @@ ALL_DEPENDS += $(OPENMPT123_DEPENDS)
 LIBOPENMPTTEST_CXX_SOURCES += \
  libopenmpt/libopenmpt_test.cpp \
  $(SOUNDLIB_CXX_SOURCES) \
- $(sort $(wildcard test/*.cpp)) \
+ test/mpt_tests_base.cpp \
+ test/mpt_tests_binary.cpp \
+ test/mpt_tests_crc.cpp \
+ test/mpt_tests_endian.cpp \
+ test/mpt_tests_format.cpp \
+ test/mpt_tests_parse.cpp \
+ test/mpt_tests_random.cpp \
+ test/mpt_tests_string.cpp \
+ test/mpt_tests_string_convert.cpp \
+ test/mpt_tests_uuid.cpp \
+ test/test.cpp \
+ test/TestToolsLib.cpp \
  
+# test/mpt_tests_crypto.cpp \
+# test/mpt_tests_uuid_namespace.cpp \
+
 LIBOPENMPTTEST_OBJECTS = $(LIBOPENMPTTEST_CXX_SOURCES:.cpp=.test.o) $(LIBOPENMPTTEST_C_SOURCES:.c=.test.o)
 LIBOPENMPTTEST_DEPENDS = $(LIBOPENMPTTEST_CXX_SOURCES:.cpp=.test.d) $(LIBOPENMPTTEST_C_SOURCES:.c=.test.d)
 ALL_OBJECTS += $(LIBOPENMPTTEST_OBJECTS)
@@ -1364,6 +1379,8 @@ bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION).makefile.tar: bin/dist.mk bin
 	mkdir -p bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build
 	mkdir -p bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/doc
 	mkdir -p bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include
+	mkdir -p bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src
+	mkdir -p bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt
 	svn export ./LICENSE            bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/LICENSE
 	svn export ./README.md          bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/README.md
 	svn export ./Makefile           bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Makefile
@@ -1379,7 +1396,34 @@ bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION).makefile.tar: bin/dist.mk bin
 	svn export ./soundbase          bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/soundbase
 	svn export ./soundlib           bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/soundlib
 	svn export ./sounddsp           bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/sounddsp
+	svn export ./src/mpt/.clang-format bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/.clang-format
+	svn export ./src/mpt/LICENSE.BSD-3-Clause.txt bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/LICENSE.BSD-3-Clause.txt
+	svn export ./src/mpt/LICENSE.BSL-1.0.txt bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/LICENSE.BSL-1.0.txt
+	svn export ./src/mpt/base           bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/base
+	svn export ./src/mpt/binary         bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/binary
+	svn export ./src/mpt/check          bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/check
+	svn export ./src/mpt/crc            bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/crc
+	#svn export ./src/mpt/crypto         bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/crypto
+	svn export ./src/mpt/detect         bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/detect
+	svn export ./src/mpt/endian         bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/endian
+	svn export ./src/mpt/environment    bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/environment
+	svn export ./src/mpt/exception_text bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/exception_text
+	svn export ./src/mpt/format         bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/format
+	#svn export ./src/mpt/json           bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/json
+	svn export ./src/mpt/mutex          bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/mutex
+	svn export ./src/mpt/out_of_memory  bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/out_of_memory
+	svn export ./src/mpt/osinfo         bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/osinfo
+	svn export ./src/mpt/parse          bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/parse
+	svn export ./src/mpt/random         bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/random
+	svn export ./src/mpt/string         bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/string
+	svn export ./src/mpt/string_convert bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/string_convert
+	svn export ./src/mpt/system_error   bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/system_error
+	svn export ./src/mpt/test           bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/test
+	svn export ./src/mpt/uuid           bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/uuid
+	#svn export ./src/mpt/uuid_namespace bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/uuid_namespace
 	svn export ./test               bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/test
+	rm bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/test/mpt_tests_crypto.cpp
+	rm bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/test/mpt_tests_uuid_namespace.cpp
 	svn export ./libopenmpt         bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/libopenmpt
 	svn export ./examples           bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/examples
 	svn export ./openmpt123         bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/openmpt123
@@ -1403,6 +1447,8 @@ bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION).msvc.zip: bin/dist.mk bin/svn
 	mkdir -p bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/premake
 	mkdir -p bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/doc
 	mkdir -p bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include
+	mkdir -p bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src
+	mkdir -p bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt
 	svn export ./LICENSE               bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/LICENSE               --native-eol CRLF
 	svn export ./README.md             bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/README.md             --native-eol CRLF
 	svn export ./Makefile              bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Makefile              --native-eol CRLF
@@ -1431,7 +1477,34 @@ bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION).msvc.zip: bin/dist.mk bin/svn
 	svn export ./soundbase             bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/soundbase             --native-eol CRLF
 	svn export ./soundlib              bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/soundlib              --native-eol CRLF
 	svn export ./sounddsp              bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/sounddsp              --native-eol CRLF
+	svn export ./src/mpt/.clang-format bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/.clang-format --native-eol CRLF
+	svn export ./src/mpt/LICENSE.BSD-3-Clause.txt bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/LICENSE.BSD-3-Clause.txt --native-eol CRLF
+	svn export ./src/mpt/LICENSE.BSL-1.0.txt bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/LICENSE.BSL-1.0.txt --native-eol CRLF
+	svn export ./src/mpt/base           bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/base           --native-eol CRLF
+	svn export ./src/mpt/binary         bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/binary         --native-eol CRLF
+	svn export ./src/mpt/check          bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/check          --native-eol CRLF
+	svn export ./src/mpt/crc            bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/crc            --native-eol CRLF
+	#svn export ./src/mpt/crypto         bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/crypto         --native-eol CRLF
+	svn export ./src/mpt/detect         bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/detect         --native-eol CRLF
+	svn export ./src/mpt/endian         bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/endian         --native-eol CRLF
+	svn export ./src/mpt/environment    bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/environment    --native-eol CRLF
+	svn export ./src/mpt/exception_text bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/exception_text --native-eol CRLF
+	svn export ./src/mpt/format         bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/format         --native-eol CRLF
+	#svn export ./src/mpt/json           bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/json           --native-eol CRLF
+	svn export ./src/mpt/mutex          bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/mutex          --native-eol CRLF
+	svn export ./src/mpt/out_of_memory  bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/out_of_memory  --native-eol CRLF
+	svn export ./src/mpt/osinfo         bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/osinfo         --native-eol CRLF
+	svn export ./src/mpt/parse          bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/parse          --native-eol CRLF
+	svn export ./src/mpt/random         bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/random         --native-eol CRLF
+	svn export ./src/mpt/string         bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/string         --native-eol CRLF
+	svn export ./src/mpt/string_convert bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/string_convert --native-eol CRLF
+	svn export ./src/mpt/system_error   bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/system_error   --native-eol CRLF
+	svn export ./src/mpt/test           bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/test           --native-eol CRLF
+	svn export ./src/mpt/uuid           bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/uuid           --native-eol CRLF
+	#svn export ./src/mpt/uuid_namespace bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/uuid_namespace --native-eol CRLF
 	svn export ./test                  bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/test                  --native-eol CRLF
+	rm bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/test/mpt_tests_crypto.cpp
+	rm bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/test/mpt_tests_uuid_namespace.cpp
 	svn export ./libopenmpt            bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/libopenmpt            --native-eol CRLF
 	svn export ./examples              bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/examples              --native-eol CRLF
 	svn export ./openmpt123            bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/openmpt123            --native-eol CRLF
@@ -1467,6 +1540,8 @@ bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION).dev.js.tar:
 	mkdir -p                                     bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION)
 	mkdir -p                                     bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/licenses
 	svn export ./LICENSE                         bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/license.txt
+	svn export ./src/mpt/LICENSE.BSD-3-Clause.txt bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/licenses/license.mpt.BSD-3-Clause.txt
+	svn export ./src/mpt/LICENSE.BSL-1.0.txt     bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/licenses/license.mpt.BSL-1.0.txt
 	svn export ./include/minimp3/LICENSE         bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/licenses/license.minimp3.txt
 	svn export ./include/miniz/miniz.c           bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/licenses/license.miniz.txt
 	svn export ./include/stb_vorbis/stb_vorbis.c bin/dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/licenses/license.stb_vorbis.txt
@@ -1491,6 +1566,8 @@ bin/dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.dos.zip:
 	mkdir -p                                     bin/dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)
 	mkdir -p                                     bin/dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/LICENSES
 	svn export ./LICENSE                         bin/dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/LICENSE.TXT          --native-eol CRLF
+	svn export ./src/mpt/LICENSE.BSD-3-Clause.txt bin/dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/LICENSES/MPT_BSD3.TXT --native-eol CRLF
+	svn export ./src/mpt/LICENSE.BSL-1.0.txt     bin/dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/LICENSES/MPT_BSL1.TXT --native-eol CRLF
 	cp include/allegro42/readme.txt              bin/dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/LICENSES/ALLEGRO.TXT
 	cp include/cwsdpmi/bin/cwsdpmi.doc           bin/dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/LICENSES/CWSDPMI.TXT
 ifeq ($(ALLOW_LGPL),1)
@@ -1524,6 +1601,8 @@ bin/dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.retro.win9x.zip:
 	mkdir -p                                     bin/dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Licenses
 	svn export ./LICENSE                         bin/dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/LICENSE.TXT --native-eol CRLF
 	svn export ./libopenmpt/dox/changelog.md     bin/dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Changelog.txt --native-eol CRLF
+	svn export ./src/mpt/LICENSE.BSD-3-Clause.txt bin/dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Licenses/license.mpt.BSD-3-Clause.txt --native-eol CRLF
+	svn export ./src/mpt/LICENSE.BSL-1.0.txt     bin/dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Licenses/license.mpt.BSL-1.0.txt --native-eol CRLF
 ifeq ($(ALLOW_LGPL),1)
 	svn export ./include/mpg123/COPYING          bin/dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Licenses/License.mpg123.txt --native-eol CRLF
 	svn export ./include/mpg123/AUTHORS          bin/dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Licenses/License.Authors.txt --native-eol CRLF

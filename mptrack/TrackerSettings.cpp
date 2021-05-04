@@ -13,6 +13,7 @@
 #include "Mptrack.h"
 #include "Moddoc.h"
 #include "Mainfrm.h"
+#include "mpt/environment/environment.hpp"
 #include "../sounddev/SoundDevice.h"
 #include "../sounddev/SoundDeviceManager.h"
 #include "../common/version.h"
@@ -471,7 +472,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	if(!VersionInstallGUID.Get().IsValid())
 	{
 		// No UUID found - generate one.
-		VersionInstallGUID = mpt::UUID::Generate();
+		VersionInstallGUID = mpt::UUID::Generate(mpt::global_prng());
 	}
 
 	// Plugins

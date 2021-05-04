@@ -8,6 +8,7 @@
   dofile "../../build/premake/premake-defaults-EXE.lua"
   dofile "../../build/premake/premake-defaults.lua"
   includedirs {
+   "../../src",
    "../../common",
    "../../include",
    "../../include/nlohmann-json/include",
@@ -15,6 +16,8 @@
    "../../build/svn_version",
   }
   files {
+   "../../src/mpt/**.cpp",
+   "../../src/mpt/**.hpp",
    "../../common/*.cpp",
    "../../common/*.h",
    "../../misc/*.cpp",

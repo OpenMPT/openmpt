@@ -28,6 +28,95 @@ OPENMPT_NAMESPACE_BEGIN
 namespace Test {
 
 
+
+void mpt_test_reporter::case_run(const mpt::source_location& loc)
+{
+	#if !MPT_OS_DJGPP
+		std::cout << "TEST..: " << MPT_FORMAT("{}({}):")(loc.file_name() ? loc.file_name() : "", loc.line()) << ": " << std::endl;
+	#else
+		MPT_UNUSED(loc);
+	#endif
+}
+
+void mpt_test_reporter::case_run(const mpt::source_location& loc, const char* text_e)
+{
+	#if !MPT_OS_DJGPP
+		std::cout << "TEST..: " << MPT_FORMAT("{}({}): {}")(loc.file_name() ? loc.file_name() : "", loc.line(), text_e) << ": " << std::endl;
+	#else
+		MPT_UNUSED(loc);
+		MPT_UNUSED(text_e);
+	#endif
+}
+
+void mpt_test_reporter::case_run(const mpt::source_location& loc, const char* text_ex, const char* text_e)
+{
+	if(text_ex)
+	{
+		#if !MPT_OS_DJGPP
+			std::cout << "TEST..: " << MPT_FORMAT("{}({}): {} throws {}")(loc.file_name() ? loc.file_name() : "", loc.line(), text_e, text_ex) << ": " << std::endl;
+		#else
+			MPT_UNUSED(loc);
+			MPT_UNUSED(text_ex);
+			MPT_UNUSED(text_e);
+		#endif
+	} else
+	{
+		#if !MPT_OS_DJGPP
+			std::cout << "TEST..: " << MPT_FORMAT("{}({}): {} throws")(loc.file_name() ? loc.file_name() : "", loc.line(), text_e) << ": " << std::endl;
+		#else
+			MPT_UNUSED(loc);
+			MPT_UNUSED(text_ex);
+			MPT_UNUSED(text_e);
+		#endif
+	}
+}
+
+void mpt_test_reporter::case_run(const mpt::source_location& loc, const char* text_a, const char* text_cmp, const char* text_b)
+{
+	#if !MPT_OS_DJGPP
+		std::cout << "TEST..: " << MPT_FORMAT("{}({}): {} {} {}")(loc.file_name() ? loc.file_name() : "", loc.line(), text_a, text_cmp, text_b) << ": " << std::endl;
+	#else
+		MPT_UNUSED(loc);
+		MPT_UNUSED(text_a);
+		MPT_UNUSED(text_cmp);
+		MPT_UNUSED(text_b);
+	#endif
+}
+
+void mpt_test_reporter::case_result(const mpt::source_location& loc, const mpt::test::result& result)
+{
+	MPT_UNUSED(loc);
+	if(std::holds_alternative<mpt::test::result_success>(result.info))
+	{
+		#if !MPT_OS_DJGPP
+			std::cout << "RESULT: PASS" << std::endl;
+		#endif
+	} else if(std::holds_alternative<mpt::test::result_failure>(result.info))
+	{
+		fail_count++;
+		std::cout << "RESULT: FAIL" << std::endl;
+		std::cout.flush();
+		std::cerr << "FAIL: " << "FAILURE: " << std::get<mpt::test::result_failure>(result.info).text << std::endl;
+		std::cerr.flush();
+	} else if(std::holds_alternative<mpt::test::result_unexpected_exception>(result.info))
+	{
+		fail_count++;
+		std::cout << "RESULT: FAIL" << std::endl;
+		std::cout.flush();
+		std::cerr << "FAIL: " << "UNEXPECTED EXCEPTION: " << std::get<mpt::test::result_unexpected_exception>(result.info).text << std::endl;
+		std::cerr.flush();
+	} else
+	{
+		fail_count++;
+		std::cout << "RESULT: FAIL" << std::endl;
+		std::cout.flush();
+		std::cerr << "FAIL: " << "UNKOWN" << std::endl;
+		std::cerr.flush();
+	}
+}
+
+
+
 int fail_count = 0;
 
 

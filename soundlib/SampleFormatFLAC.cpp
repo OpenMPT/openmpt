@@ -25,7 +25,7 @@
 #include "../soundbase/SampleFormatConverters.h"
 #include "../soundbase/SampleFormatCopy.h"
 #include "../soundlib/ModSampleCopy.h"
-//#include "../common/mptCRC.h"
+//#include "mpt/crc/crc.hpp"
 #include "OggStream.h"
 #ifdef MPT_WITH_OGG
 #if MPT_COMPILER_CLANG

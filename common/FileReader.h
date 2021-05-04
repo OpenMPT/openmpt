@@ -556,7 +556,7 @@ namespace FileReader
 	template<typename Tsize, mpt::String::ReadWriteMode mode, size_t destSize, typename TFileCursor>
 	bool ReadSizedString(TFileCursor &f, char (&destBuffer)[destSize], const typename TFileCursor::off_t maxLength = std::numeric_limits<typename TFileCursor::off_t>::max())
 	{
-		packed<typename Tsize::base_type, typename Tsize::endian_type> srcSize;	// Enforce usage of a packed type by ensuring that the passed type has the required typedefs
+		mpt::packed<typename Tsize::base_type, typename Tsize::endian_type> srcSize;	// Enforce usage of a packed type by ensuring that the passed type has the required typedefs
 		if(!Read(f, srcSize))
 			return false;
 		return ReadString<mode>(f, destBuffer, std::min(static_cast<typename TFileCursor::off_t>(srcSize), maxLength));
@@ -568,7 +568,7 @@ namespace FileReader
 	template<typename Tsize, mpt::String::ReadWriteMode mode, typename TFileCursor>
 	bool ReadSizedString(TFileCursor &f, std::string &dest, const typename TFileCursor::off_t maxLength = std::numeric_limits<typename TFileCursor::off_t>::max())
 	{
-		packed<typename Tsize::base_type, typename Tsize::endian_type> srcSize;	// Enforce usage of a packed type by ensuring that the passed type has the required typedefs
+		mpt::packed<typename Tsize::base_type, typename Tsize::endian_type> srcSize;	// Enforce usage of a packed type by ensuring that the passed type has the required typedefs
 		if(!Read(f, srcSize))
 			return false;
 		return ReadString<mode>(f, dest, std::min(static_cast<typename TFileCursor::off_t>(srcSize), maxLength));
@@ -580,7 +580,7 @@ namespace FileReader
 	template<typename Tsize, mpt::String::ReadWriteMode mode, std::size_t len, typename TFileCursor>
 	bool ReadSizedString(TFileCursor &f, mpt::charbuf<len> &dest, const typename TFileCursor::off_t maxLength = std::numeric_limits<typename TFileCursor::off_t>::max())
 	{
-		packed<typename Tsize::base_type, typename Tsize::endian_type> srcSize;	// Enforce usage of a packed type by ensuring that the passed type has the required typedefs
+		mpt::packed<typename Tsize::base_type, typename Tsize::endian_type> srcSize;	// Enforce usage of a packed type by ensuring that the passed type has the required typedefs
 		if(!Read(f, srcSize))
 			return false;
 		return ReadString<mode>(f, dest, std::min(static_cast<typename TFileCursor::off_t>(srcSize), maxLength));

@@ -15,11 +15,14 @@
 		sysincludedirs ( extincludedirs )
 	filter {}
   includedirs {
+   "../../src",
    "../../common",
    "$(IntDir)/svn_version",
    "../../build/svn_version",
   }
   files {
+   "../../src/mpt/**.cpp",
+   "../../src/mpt/**.hpp",
    "../../pluginBridge/AEffectWrapper.h",
    "../../pluginBridge/Bridge.cpp",
    "../../pluginBridge/Bridge.h",
@@ -75,11 +78,14 @@
 		sysincludedirs ( extincludedirs )
 	filter {}
   includedirs {
+   "../../src",
    "../../common",
    "$(IntDir)/svn_version",
    "../../build/svn_version",
   }
   files {
+   "../../src/mpt/**.cpp",
+   "../../src/mpt/**.hpp",
    "../../pluginBridge/AEffectWrapper.h",
    "../../pluginBridge/Bridge.cpp",
    "../../pluginBridge/Bridge.h",

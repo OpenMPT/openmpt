@@ -12,8 +12,8 @@
 #include "FileReader.h"
 
 #if defined(MPT_ENABLE_TEMPFILE) && MPT_OS_WINDOWS
+#include "mpt/system_error/system_error.hpp"
 #include "mptFileIO.h"
-#include "mptOSError.h"
 #endif // MPT_ENABLE_TEMPFILE && MPT_OS_WINDOWS
 
 #if defined(MPT_ENABLE_TEMPFILE) && MPT_OS_WINDOWS
@@ -74,9 +74,9 @@ OnDiskFileWrapper::OnDiskFileWrapper(FileReader &file, const mpt::PathString &fi
 
 			HANDLE hFile = NULL;
 			#if MPT_OS_WINDOWS_WINRT
-				hFile = mpt::Windows::CheckFileHANDLE(CreateFile2(tempName.AsNative().c_str(), GENERIC_WRITE, FILE_SHARE_READ, CREATE_ALWAYS, NULL));
+				hFile = mpt::windows::CheckFileHANDLE(CreateFile2(tempName.AsNative().c_str(), GENERIC_WRITE, FILE_SHARE_READ, CREATE_ALWAYS, NULL));
 			#else
-				hFile = mpt::Windows::CheckFileHANDLE(CreateFile(tempName.AsNative().c_str(), GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_TEMPORARY, NULL));
+				hFile = mpt::windows::CheckFileHANDLE(CreateFile(tempName.AsNative().c_str(), GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_TEMPORARY, NULL));
 			#endif
 			while(!file.EndOfFile())
 			{
@@ -89,7 +89,7 @@ OnDiskFileWrapper::OnDiskFileWrapper(FileReader &file, const mpt::PathString &fi
 					DWORD chunkDone = 0;
 					try
 					{
-						mpt::Windows::CheckBOOL(WriteFile(hFile, view.data() + written, chunkSize, &chunkDone, NULL));
+						mpt::windows::CheckBOOL(WriteFile(hFile, view.data() + written, chunkSize, &chunkDone, NULL));
 					} catch(...)
 					{
 						CloseHandle(hFile);

@@ -12,9 +12,12 @@
 
 #include "BuildSettings.h"
 
+#include "mpt/base/span.hpp"
+#include "mpt/string/types.hpp"
+#include "mpt/string/utility.hpp"
+
 #include "mptAlloc.h"
 #include "mptBaseTypes.h"
-#include "mptSpan.h"
 
 #include <algorithm>
 #include <limits>
@@ -22,6 +25,7 @@
 #include <string_view>
 
 #include <cstring>
+
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -32,127 +36,6 @@ namespace mpt
 
 
 
-template <typename T> inline span<T> as_span(std::basic_string<T> & str)
-{
-	return span<T>(str.data(), str.size());
-}
-
-template <typename T> inline span<const T> as_span(const std::basic_string<T> & str)
-{
-	return span<const T>(str.data(), str.size());
-}
-
-
-
-template <typename T> inline std::vector<typename std::remove_const<T>::type> make_vector(const std::basic_string<T> & str)
-{
-	return std::vector<typename std::remove_const<T>::type>(str.begin(), str.end());
-}
-
-
-
-template <typename T> inline std::basic_string<typename std::remove_const<T>::type> make_basic_string(T * beg, T * end)
-{
-	return std::basic_string<typename std::remove_const<T>::type>(beg, end);
-}
-
-template <typename T> inline std::basic_string<typename std::remove_const<T>::type> make_basic_string(T * data, std::size_t size)
-{
-	return std::basic_string<typename std::remove_const<T>::type>(data, data + size);
-}
-
-template <typename T> inline std::basic_string<typename std::remove_const<T>::type> make_basic_string(mpt::span<T> data)
-{
-	return std::basic_string<typename std::remove_const<T>::type>(data.data(), data.data() + data.size());
-}
-
-template <typename T, std::size_t N> inline std::basic_string<typename std::remove_const<T>::type> make_basic_string(T (&arr)[N])
-{
-	return std::basic_string<typename std::remove_const<T>::type>(std::begin(arr), std::end(arr));
-}
-
-template <typename T> inline std::basic_string<typename std::remove_const<T>::type> make_basic_string(const std::vector<T> & str)
-{
-	return std::vector<typename std::remove_const<T>::type>(str.begin(), str.end());
-}
-
-
-template <typename T>
-MPT_CONSTEXPRINLINE unsigned char char_value(T x) noexcept = delete;
-template <>
-MPT_CONSTEXPRINLINE unsigned char char_value<char>(char x) noexcept
-{
-	return static_cast<unsigned char>(x);
-}
-template <>
-MPT_CONSTEXPRINLINE unsigned char char_value<unsigned char>(unsigned char x) noexcept
-{
-	return static_cast<unsigned char>(x);
-}
-#if MPT_CXX_AT_LEAST(20)
-template <>
-MPT_CONSTEXPRINLINE unsigned char char_value<char8_t>(char8_t x) noexcept
-{
-	return static_cast<unsigned char>(x);
-}
-#endif // C++20
-
-
-// string_traits abstract the API of underlying string classes, in particular they allow adopting to CString without having to specialize for CString explicitly 
-
-template <typename Tstring>
-struct string_traits
-{
-
-	using string_type = Tstring;
-	using size_type = typename string_type::size_type;
-	using char_type = typename string_type::value_type;
-
-	static inline std::size_t length(const string_type &str) { return str.length(); }
-
-	static inline void reserve(string_type &str, std::size_t size) { str.reserve(size); }
-
-	static inline string_type& append(string_type &str, const string_type &a) { return str.append(a); }
-	static inline string_type& append(string_type &str, string_type &&a) { return str.append(std::move(a)); }
-	static inline string_type& append(string_type &str, std::size_t count, char_type c) { return str.append(count, c); }
-
-	static inline string_type pad(string_type str, std::size_t left, std::size_t right)
-	{
-		str.insert(str.begin(), left, char_type(' '));
-		str.insert(str.end(), right, char_type(' '));
-		return str;
-	}
-
-};
-
-#if defined(MPT_WITH_MFC)
-template <>
-struct string_traits<CString>
-{
-
-	using string_type = CString;
-	using size_type = int;
-	using char_type = typename CString::XCHAR;
-
-	static inline size_type length(const string_type &str) { return str.GetLength(); }
-
-	static inline void reserve(string_type &str, size_type size) { str.Preallocate(size); }
-
-	static inline string_type& append(string_type &str, const string_type &a) { str += a; return str; }
-	static inline string_type& append(string_type &str, size_type count, char_type c) { while(count--) str.AppendChar(c); return str; }
-
-	static inline string_type pad(const string_type &str, size_type left, size_type right)
-	{
-		CString tmp;
-		while(left--) tmp.AppendChar(char_type(' '));
-		tmp += str;
-		while(right--) tmp.AppendChar(char_type(' '));
-		return tmp;
-	}
-
-};
-#endif // MPT_WITH_MFC
-
 
 
 namespace String
@@ -160,18 +43,15 @@ namespace String
 
 
 template <typename Tstring> struct Traits {
-	static MPT_FORCEINLINE const char * GetDefaultWhitespace() noexcept { return " \n\r\t"; }
 	static MPT_FORCEINLINE bool IsLineEnding(char c) noexcept { return c == '\r' || c == '\n'; }
 };
 
 template <> struct Traits<std::string> {
-	static MPT_FORCEINLINE const char * GetDefaultWhitespace() noexcept { return " \n\r\t"; }
 	static MPT_FORCEINLINE bool IsLineEnding(char c) noexcept { return c == '\r' || c == '\n'; }
 };
 
 #if !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
 template <> struct Traits<std::wstring> {
-	static MPT_FORCEINLINE const wchar_t * GetDefaultWhitespace() noexcept { return L" \n\r\t"; }
 	static MPT_FORCEINLINE bool IsLineEnding(wchar_t c) noexcept { return c == L'\r' || c == L'\n'; }
 };
 #endif // !MPT_COMPILER_QUIRK_NO_WCHAR
@@ -179,41 +59,23 @@ template <> struct Traits<std::wstring> {
 
 // Remove whitespace at start of string
 template <typename Tstring>
-inline Tstring LTrim(Tstring str, const Tstring &whitespace = Tstring(mpt::String::Traits<Tstring>::GetDefaultWhitespace()))
+inline Tstring LTrim(Tstring str, const Tstring & whitespace = mpt::default_whitespace<Tstring>())
 {
-	typename Tstring::size_type pos = str.find_first_not_of(whitespace);
-	if(pos != Tstring::npos)
-	{
-		str.erase(str.begin(), str.begin() + pos);
-	} else if(pos == Tstring::npos && str.length() > 0 && str.find_last_of(whitespace) == str.length() - 1)
-	{
-		return Tstring();
-	}
-	return str;
+	return mpt::trim_left(str, whitespace);
 }
-
 
 // Remove whitespace at end of string
 template <typename Tstring>
-inline Tstring RTrim(Tstring str, const Tstring &whitespace = Tstring(mpt::String::Traits<Tstring>::GetDefaultWhitespace()))
+inline Tstring RTrim(Tstring str, const Tstring& whitespace = mpt::default_whitespace<Tstring>())
 {
-	typename Tstring::size_type pos = str.find_last_not_of(whitespace);
-	if(pos != Tstring::npos)
-	{
-		str.erase(str.begin() + pos + 1, str.end());
-	} else if(pos == Tstring::npos && str.length() > 0 && str.find_first_of(whitespace) == 0)
-	{
-		return Tstring();
-	}
-	return str;
+	return mpt::trim_right(str, whitespace);
 }
-
 
 // Remove whitespace at start and end of string
 template <typename Tstring>
-inline Tstring Trim(Tstring str, const Tstring &whitespace = Tstring(mpt::String::Traits<Tstring>::GetDefaultWhitespace()))
+inline Tstring Trim(Tstring str, const Tstring& whitespace = mpt::default_whitespace<Tstring>())
 {
-	return RTrim(LTrim(str, whitespace), whitespace);
+	return mpt::trim(str, whitespace);
 }
 
 
@@ -308,82 +170,6 @@ inline constexpr Charset CharsetException = Charset::UTF8;
 bool IsUTF8(const std::string &str);
 
 
-#if !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
-using wstring = std::wstring;
-using wchar = wchar_t;
-#define MPT_WCHAR(x)     L ## x
-#define MPT_WLITERAL(x)  L ## x
-#define MPT_WSTRING(x)   std::wstring( L ## x )
-#else // MPT_COMPILER_QUIRK_NO_WCHAR
-using wstring = std::u32string;
-using wchar = char32_t;
-#define MPT_WCHAR(x)     U ## x
-#define MPT_WLITERAL(x)  U ## x
-#define MPT_WSTRING(x)   std::u32string( U ## x )
-#endif // !MPT_COMPILER_QUIRK_NO_WCHAR
-
-
-template <mpt::Charset charset_tag>
-struct charset_char_traits : std::char_traits<char> {
-	static constexpr mpt::Charset charset() noexcept { return charset_tag; }
-};
-
-
-#if defined(MPT_ENABLE_CHARSET_LOCALE)
-
-using lstring = std::basic_string<char, mpt::charset_char_traits<mpt::Charset::Locale>>;
-
-#endif // MPT_ENABLE_CHARSET_LOCALE
-
-#if MPT_OS_WINDOWS
-
-template <typename Tchar> struct windows_char_traits { };
-template <> struct windows_char_traits<char>  { using string_type = mpt::lstring; };
-template <> struct windows_char_traits<wchar_t> { using string_type = std::wstring; };
-
-#ifdef UNICODE
-using tstring = windows_char_traits<wchar_t>::string_type;
-#else
-using tstring = windows_char_traits<char>::string_type;
-#endif
-
-using winstring = mpt::tstring;
-
-#endif // MPT_OS_WINDOWS
-
-
-#if MPT_CXX_AT_LEAST(20)
-
-using u8string = std::u8string;
-using u8char = char8_t;
-#define MPT_U8CHAR(x)    u8 ## x
-#define MPT_U8LITERAL(x) u8 ## x
-#define MPT_U8STRING(x)  std::u8string( u8 ## x )
-
-#else // !C++20
-
-using u8string = std::basic_string<char, mpt::charset_char_traits<mpt::Charset::UTF8>>;
-using u8char = char;
-#define MPT_U8CHAR(x)    x
-#define MPT_U8LITERAL(x) x
-#define MPT_U8STRING(x)  mpt::u8string( x )
-
-// mpt::u8string is a moderately type-safe string that is meant to contain
-// UTF-8 encoded char bytes.
-//
-// mpt::u8string is not implicitely convertible to/from std::string, but
-// it is convertible to/from C strings the same way as std::string is.
-//
-// The implementation of mpt::u8string is a compromise of compatibilty
-// with implementation-defined STL details, efficiency, source code size,
-// executable bloat, type-safety  and simplicity.
-//
-// mpt::u8string is not meant to be used directly though.
-// mpt::u8string is meant as an alternative implementaion to std::wstring
-// for implementing the unicode string type mpt::ustring.
-
-#endif // C++20
-
 
 #if MPT_WSTRING_CONVERT
 // Convert to a wide character string.
@@ -468,56 +254,12 @@ std::string ToCharset(Charset to, const CString &str);
 #endif // MPT_WITH_MFC
 
 
-// mpt::ustring
-//
-// mpt::ustring is a string type that can hold unicode strings.
-// It is implemented as a std::basic_string either based on wchar_t (i.e. the
-//  same as std::wstring) or a custom-defined char_traits class that is derived
-//  from std::char_traits<char>.
-// The selection of the underlying implementation is done at compile-time.
-// MPT_UCHAR, MPT_ULITERAL and MPT_USTRING are macros that ease construction
-//  of ustring char literals, ustring char array literals and ustring objects
-//  from ustring char literals that work consistently in both modes.
-//  Note that these are not supported for non-ASCII characters appearing in
-//  the macro argument.
-// Also note that, as both UTF8 and UTF16 (it is less of an issue for UTF32)
-//  are variable-length encodings and mpt::ustring is implemented as a
-//  std::basic_string, all member functions that require individual character
-//  access will not work consistently or even at all in a meaningful way.
-//  This in particular affects operator[], find() and substr().
-//  The code makes no effort in preventing these or generating warnings when
-//  these are used on mpt::ustring objects. However, compiling in the
-//  respectively other mpt::ustring mode will catch most of these anyway.
-
-#if MPT_USTRING_MODE_WIDE
-#if MPT_USTRING_MODE_UTF8
-#error "MPT_USTRING_MODE_WIDE and MPT_USTRING_MODE_UTF8 are mutually exclusive."
-#endif
-
-using ustring = std::wstring;
-using uchar = wchar_t;
-#define MPT_UCHAR(x)     L ## x
-#define MPT_ULITERAL(x)  L ## x
-#define MPT_USTRING(x)   std::wstring( L ## x )
-
-#endif // MPT_USTRING_MODE_WIDE
-
-#if MPT_USTRING_MODE_UTF8
-#if MPT_USTRING_MODE_WIDE
-#error "MPT_USTRING_MODE_WIDE and MPT_USTRING_MODE_UTF8 are mutually exclusive."
-#endif
-
-using ustring = mpt::u8string;
-using uchar = mpt::u8char;
-#define MPT_UCHAR(x)     MPT_U8CHAR( x )
-#define MPT_ULITERAL(x)  MPT_U8LITERAL( x )
-#define MPT_USTRING(x)   MPT_U8STRING( x )
-
-#endif // MPT_USTRING_MODE_UTF8
 
 #define UC_(x)           MPT_UCHAR(x)
 #define UL_(x)           MPT_ULITERAL(x)
 #define U_(x)            MPT_USTRING(x)
+
+
 
 #if MPT_USTRING_MODE_WIDE
 #if !(MPT_WSTRING_CONVERT)
@@ -570,12 +312,16 @@ CString ToCString(const mpt::ustring &str);
 #endif // MPT_WITH_MFC
 #endif // MPT_USTRING_MODE_WIDE
 
+
+
+
+
 // The MPT_UTF8 allows specifying UTF8 char arrays.
 // The resulting type is mpt::ustring and the construction might require runtime translation,
 // i.e. it is NOT generally available at compile time.
 // Use explicit UTF8 encoding,
 // i.e. U+00FC (LATIN SMALL LETTER U WITH DIAERESIS) would be written as "\xC3\xBC".
-#define MPT_UTF8(x) mpt::ToUnicode(mpt::Charset::UTF8, x )
+#define MPT_UTF8(x) mpt::ToUnicode(mpt::Charset::UTF8, x)
 
 
 

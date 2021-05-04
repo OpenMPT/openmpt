@@ -19,10 +19,11 @@
 // Setup dialog stuff
 #include "Mainfrm.h"
 #include "../common/mptThread.h"
-#include "../common/mptOSError.h"
-#include "../misc/mptCrypto.h"
+#include "mpt/system_error/system_error.hpp"
+#include "mpt/crypto/hash.hpp"
+#include "mpt/crypto/jwk.hpp"
 #include "HTTP.h"
-#include "../misc/JSON.h"
+#include "mpt/json/json.hpp"
 #include "dlg_misc.h"
 #include "../sounddev/SoundDeviceManager.h"
 #include "ProgressDialog.h"
@@ -1608,7 +1609,7 @@ CUpdateCheck::Error::Error(CString errorMessage, DWORD errorCode)
 
 CString CUpdateCheck::Error::FormatErrorCode(CString errorMessage, DWORD errorCode)
 {
-	errorMessage += mpt::ToCString(mpt::Windows::GetErrorMessage(errorCode, GetModuleHandle(TEXT("wininet.dll"))));
+	errorMessage += mpt::ToCString(mpt::windows::GetErrorMessage(errorCode, GetModuleHandle(TEXT("wininet.dll"))));
 	return errorMessage;
 }
 

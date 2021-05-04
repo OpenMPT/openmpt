@@ -3,13 +3,14 @@
   uuid "2879F62E-9E2F-4EAB-AE7D-F60C194DD5CB"
   language "C++"
   location ( "../../build/" .. mpt_projectpathname )
-  vpaths { ["*"] = "../../openmpt123/" }
+  vpaths { ["*"] = "../../" }
   mpt_projectname = "openmpt123"
   dofile "../../build/premake/premake-defaults-EXE.lua"
   dofile "../../build/premake/premake-defaults.lua"
   warnings "Extra"
   local extincludedirs = {
    "../..",
+   "../../src",
    "../../include/flac/include",
    "../../include/portaudio/include",
   }
@@ -25,6 +26,9 @@
    "../../build/svn_version",
   }
   files {
+   "../../src/mpt/base/*.hpp",
+   "../../src/mpt/detect/*.hpp",
+   "../../src/mpt/string/*.hpp",
    "../../openmpt123/*.cpp",
    "../../openmpt123/*.hpp",
   }

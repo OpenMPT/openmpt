@@ -12,18 +12,16 @@
 
 #include "BuildSettings.h"
 
+#include "mpt/base/namespace.hpp"
+
 #include <vector>
 
 #include "FlagSet.h"
 
-OPENMPT_NAMESPACE_BEGIN
-
-
-
 #define MPT_DEPRECATED_PATH
 //#define MPT_DEPRECATED_PATH [[deprecated]]
 
-
+OPENMPT_NAMESPACE_BEGIN
 
 namespace mpt
 {
