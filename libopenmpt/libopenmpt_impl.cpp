@@ -96,12 +96,46 @@ MPT_NOINLINE void AssertHandler(const mpt::source_location &loc, const char *exp
 
 OPENMPT_NAMESPACE_END
 
+#if MPT_MSVC_BEFORE(2019,0)
+
+namespace openmpt {
+
+	#ifndef MPT_NO_NAMESPACE
+		using namespace ::OPENMPT_NAMESPACE;
+	#endif
+
+	namespace mpt {
+
+		namespace String = ::OPENMPT_NAMESPACE::mpt::String;
+
+		using ::mpt::MPT_INLINE_NS::as_span;
+		using ::mpt::MPT_INLINE_NS::byte_cast;
+		using ::mpt::MPT_INLINE_NS::saturate_cast;
+		using ::mpt::MPT_INLINE_NS::saturate_round;
+		using ::mpt::MPT_INLINE_NS::span;
+		using ::mpt::MPT_INLINE_NS::ustring;
+		using ::mpt::MPT_INLINE_NS::void_cast;
+
+		using ::OPENMPT_NAMESPACE::mpt::Charset;
+		using ::OPENMPT_NAMESPACE::mpt::ToCharset;
+		using ::OPENMPT_NAMESPACE::mpt::ToUnicode;
+		using ::OPENMPT_NAMESPACE::mpt::fmt;
+		using ::OPENMPT_NAMESPACE::mpt::global_prng;
+
+	} // namespace mpt
+
+} // namespace openmpt
+
+#else
+
 #ifndef MPT_NO_NAMESPACE
 using namespace OPENMPT_NAMESPACE;
 #endif
 namespace openmpt {
 	namespace mpt = OPENMPT_NAMESPACE::mpt;
 } // namespace openmpt
+
+#endif
 
 namespace openmpt {
 

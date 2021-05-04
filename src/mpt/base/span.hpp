@@ -155,8 +155,8 @@ public:
 		return size();
 	}
 
-	span subspan(std::size_t offset, std::size_t count = mpt::dynamic_extent) const {
-		return span(data() + offset, (count == mpt::dynamic_extent) ? (size() - offset) : count);
+	span subspan(std::size_t offset, std::size_t count = dynamic_extent) const {
+		return span(data() + offset, (count == dynamic_extent) ? (size() - offset) : count);
 	}
 
 	span first(std::size_t count) const {

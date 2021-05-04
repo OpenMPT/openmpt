@@ -301,16 +301,16 @@ public:
 		return static_cast<std::string>(*this);
 	}
 	operator string_type() const {
-		return mpt::ReadAutoBuf(buf);
+		return ReadAutoBuf(buf);
 	}
 	explicit operator string_view_type() const {
-		return static_cast<string_view_type>(mpt::ReadAutoBuf(buf));
+		return static_cast<string_view_type>(ReadAutoBuf(buf));
 	}
 	bool empty() const {
-		return mpt::ReadAutoBuf(buf).empty();
+		return ReadAutoBuf(buf).empty();
 	}
 	charbuf & operator=(const string_type & str) {
-		mpt::WriteAutoBuf(buf) = str;
+		WriteAutoBuf(buf) = str;
 		return *this;
 	}
 
