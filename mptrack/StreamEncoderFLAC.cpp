@@ -135,7 +135,7 @@ public:
 		{
 			case 1:
 			{
-				const uint8 *p = reinterpret_cast<const uint8*>(data);
+				const int8 *p = reinterpret_cast<const int8*>(data);
 				for(std::size_t frame = 0; frame < frameCount; ++frame)
 				{
 					for(int channel = 0; channel < formatInfo.Channels; ++channel)
