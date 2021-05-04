@@ -6,8 +6,10 @@
 #include "mpt/base/compiletime_warning.hpp"
 
 #if defined(MPT_WITH_MFC)
+#if !defined(CPPCHECK)
 #if !__has_include(<afx.h>)
 #error "MPT_WITH_MFC defined but <afx.h> not found."
+#endif
 #endif
 #if !MPT_COMPILER_GENERIC && !MPT_COMPILER_MSVC && !MPT_COMPILER_CLANG
 MPT_WARNING("Using MFC with unsupported compiler.")
