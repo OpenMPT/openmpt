@@ -227,6 +227,7 @@ struct ITSample
 		enablePanning		= 0x80,
 
 		cvtSignedSample		= 0x01,
+		cvtOPLInstrument	= 0x40,		// FM instrument in MPTM
 		cvtExternalSample	= 0x80,		// Keep MPTM sample on disk
 		cvtADPCMSample		= 0xFF,		// MODPlugin :(
 

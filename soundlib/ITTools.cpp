@@ -585,6 +585,12 @@ SampleIO ITSample::GetSampleFormat(uint16 cwtv) const
 		SampleIO::littleEndian,
 		(cvt & ITSample::cvtSignedSample) ? SampleIO::signedPCM: SampleIO::unsignedPCM);
 
+	if(cvt == cvtOPLInstrument)  // FM instrument in MPTM
+	{
+		sampleIO |= SampleIO::_8bit;
+		return sampleIO;
+	}
+
 	// Some old version of IT didn't clear the stereo flag when importing samples. Luckily, all other trackers are identifying as IT 2.14+, so let's check for old IT versions.
 	if((flags & ITSample::sampleStereo) && cwtv >= 0x214)
 	{
