@@ -29,7 +29,7 @@
 #if MPT_DETECTED_MFC
 #define MPT_CWFORMAT_MESSAGE(f) mpt::format_message_typed<mpt::default_formatter, mpt::parse_format_string_argument_count(L##f), CStringW>(L##f)
 #define MPT_CAFORMAT_MESSAGE(f) mpt::format_message_typed<mpt::default_formatter, mpt::parse_format_string_argument_count(f), CStringA>(f)
-#define MPT_CFORMAT_MESSAGE(f) mpt::format_message_typed<mpt::default_formatter, mpt::parse_format_string_argument_count(TEXT(f)), CString>(TEXT(f))
+#define MPT_CFORMAT_MESSAGE(f)  mpt::format_message_typed<mpt::default_formatter, mpt::parse_format_string_argument_count(TEXT(f)), CString>(TEXT(f))
 #endif // MPT_DETECTED_MFC
 
 

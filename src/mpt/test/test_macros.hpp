@@ -32,29 +32,29 @@ namespace test {
 
 #define MPT_TEST_GROUP_INLINE_IDENTIFIER(identifier, name) \
 	inline void MPT_PP_JOIN(mpt_test_group_func_, identifier)(mpt::test::context & mpt_test_context); \
-	inline mpt::test::group MPT_PP_JOIN(mpt_test_group_name_, identifier) { \
+	inline mpt::test::group MPT_PP_JOIN(mpt_test_group_name_, identifier){ \
 		name, [](mpt::test::context & mpt_test_context) { \
-			MPT_PP_JOIN(mpt_test_group_func_, identifier)(mpt_test_context); \
-		} \
-	}; \
+			MPT_PP_JOIN(mpt_test_group_func_, identifier) \
+			(mpt_test_context); \
+		}}; \
 	inline void MPT_PP_UNIQUE_IDENTIFIER(mpt_test_group_func)(mpt::test::context & mpt_test_context)
 
 #define MPT_TEST_GROUP_INLINE(name) \
 	inline void MPT_PP_UNIQUE_IDENTIFIER(mpt_test_group_func)(mpt::test::context & mpt_test_context); \
-	inline mpt::test::group MPT_PP_UNIQUE_IDENTIFIER(mpt_test_group_name) { \
+	inline mpt::test::group MPT_PP_UNIQUE_IDENTIFIER(mpt_test_group_name){ \
 		name, [](mpt::test::context & mpt_test_context) { \
-			MPT_PP_UNIQUE_IDENTIFIER(mpt_test_group_func)(mpt_test_context); \
-		} \
-	}; \
+			MPT_PP_UNIQUE_IDENTIFIER(mpt_test_group_func) \
+			(mpt_test_context); \
+		}}; \
 	inline void MPT_PP_UNIQUE_IDENTIFIER(mpt_test_group_func)(mpt::test::context & mpt_test_context)
 
 #define MPT_TEST_GROUP_STATIC(name) \
 	static void MPT_PP_UNIQUE_IDENTIFIER(mpt_test_group_func)(mpt::test::context & mpt_test_context); \
-	static mpt::test::group MPT_PP_UNIQUE_IDENTIFIER(mpt_test_group_name) { \
+	static mpt::test::group MPT_PP_UNIQUE_IDENTIFIER(mpt_test_group_name){ \
 		name, [](mpt::test::context & mpt_test_context) { \
-			MPT_PP_UNIQUE_IDENTIFIER(mpt_test_group_func)(mpt_test_context); \
-		} \
-	}; \
+			MPT_PP_UNIQUE_IDENTIFIER(mpt_test_group_func) \
+			(mpt_test_context); \
+		}}; \
 	static void MPT_PP_UNIQUE_IDENTIFIER(mpt_test_group_func)(mpt::test::context & mpt_test_context)
 
 #define MPT_TEST_DELAYED(x) [&] { \

@@ -20,7 +20,7 @@ inline namespace MPT_INLINE_NS {
 
 
 namespace tests {
-namespace string_convert{
+namespace string_convert {
 
 #if MPT_COMPILER_CLANG
 #pragma clang diagnostic push
