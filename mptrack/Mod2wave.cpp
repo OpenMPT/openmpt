@@ -597,7 +597,7 @@ void CWaveConvert::FillDither()
 	Encoder::Settings &encSettings = m_Settings.GetEncoderSettings();
 	m_CbnDither.CComboBox::ResetContent();
 	int format = m_CbnSampleFormat.GetItemData(m_CbnSampleFormat.GetCurSel()) & 0xffff;
-	if((encTraits->modes & Encoder::ModeEnumerated) && encTraits->formats[format].Sampleformat != SampleFormatInvalid && encTraits->formats[format].Sampleformat != SampleFormatFloat32)
+	if((encTraits->modes & Encoder::ModeEnumerated) && encTraits->formats[format].Sampleformat != SampleFormatInvalid && !encTraits->formats[format].Sampleformat.IsFloat())
 	{
 		m_CbnDither.EnableWindow(TRUE);
 		for(int dither = 0; dither < NumDitherModes; ++dither)
