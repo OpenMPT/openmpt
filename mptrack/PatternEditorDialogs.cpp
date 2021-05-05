@@ -1316,7 +1316,7 @@ void QuickChannelProperties::Show(CModDoc *modDoc, CHANNELINDEX chn, CPoint posi
 	    Clamp(static_cast<int>(position.y) - rect.Height() / 2, 0, static_cast<int>(screenRect.bottom) - rect.Height()));
 	MoveWindow(rect);
 
-	SetWindowText(MPT_TFORMAT("Settings for Channel {}")(chn).c_str());
+	SetWindowText(MPT_TFORMAT("Settings for Channel {}")(chn + 1).c_str());
 
 	UpdateDisplay();
 
