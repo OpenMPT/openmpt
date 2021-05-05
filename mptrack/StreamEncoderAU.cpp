@@ -17,6 +17,7 @@
 #include "TrackerSettings.h"
 
 #include "../common/mptFileIO.h"
+#include "../soundbase/SampleFormatConverters.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -78,21 +79,34 @@ public:
 		mpt::IO::WriteIntBE<uint32>(f, mpt::saturate_cast<uint32>(24u + annotationTotalSize));
 		mpt::IO::WriteIntBE<uint32>(f, ~uint32(0));
 		uint32 encoding = 0;
-		if(formatInfo.Sampleformat.IsFloat())
+		if(formatInfo.Bitrate < 0)
 		{
-			switch(formatInfo.Sampleformat.GetBitsPerSample())
-			{
-			case 32: encoding = 6; break;
-			case 64: encoding = 7; break;
+			MPT_ASSERT(formatInfo.Sampleformat == SampleFormat::Int16);
+			if(formatInfo.Bitrate == -1)
+			{ // A-law
+				encoding = 27;
+			} else
+			{ // u-law
+				encoding = 1;
 			}
 		} else
 		{
-			switch(formatInfo.Sampleformat.GetBitsPerSample())
+			if(formatInfo.Sampleformat.IsFloat())
 			{
-			case  8: encoding = 2; break;
-			case 16: encoding = 3; break;
-			case 24: encoding = 4; break;
-			case 32: encoding = 5; break;
+				switch(formatInfo.Sampleformat.GetBitsPerSample())
+				{
+				case 32: encoding = 6; break;
+				case 64: encoding = 7; break;
+				}
+			} else
+			{
+				switch(formatInfo.Sampleformat.GetBitsPerSample())
+				{
+				case  8: encoding = 2; break;
+				case 16: encoding = 3; break;
+				case 24: encoding = 4; break;
+				case 32: encoding = 5; break;
+				}
 			}
 		}
 		mpt::IO::WriteIntBE<uint32>(f, encoding);
@@ -135,7 +149,42 @@ public:
 	}
 	void WriteInterleavedConverted(size_t frameCount, const std::byte *data) override
 	{
-		mpt::IO::WriteRaw(f, data, frameCount * formatInfo.Channels * formatInfo.Sampleformat.GetSampleSize());
+		if(formatInfo.Bitrate < 0)
+		{
+			MPT_ASSERT(formatInfo.Sampleformat == SampleFormat::Int16);
+			if(formatInfo.Bitrate == -1)
+			{
+				SC::EncodeALaw conv;
+				for(std::size_t frame = 0; frame < frameCount; ++frame)
+				{
+					for(int channel = 0; channel < formatInfo.Channels; ++channel)
+					{
+						int16be sample;
+						std::memcpy(&sample, data, sizeof(int16));
+						std::byte sampledata = conv(sample);
+						mpt::IO::WriteRaw(f, &sampledata, 1);
+						data += sizeof(int16);
+					}
+				}
+			} else
+			{
+				SC::EncodeuLaw conv; 
+				for(std::size_t frame = 0; frame < frameCount; ++frame)
+				{
+					for(int channel = 0; channel < formatInfo.Channels; ++channel)
+					{
+						int16be sample;
+						std::memcpy(&sample, data, sizeof(int16));
+						std::byte sampledata = conv(sample);
+						mpt::IO::WriteRaw(f, &sampledata, 1);
+						data += sizeof(int16);
+					}
+				}
+			}
+		} else
+		{
+			mpt::IO::WriteRaw(f, data, frameCount * formatInfo.Channels * formatInfo.Sampleformat.GetSampleSize());
+		}
 	}
 	void WriteCues(const std::vector<uint64> &cues) override
 	{
@@ -185,6 +234,24 @@ AUEncoder::AUEncoder()
 					format.Description = MPT_UFORMAT("{} Bit")(sampleFormat.GetBitsPerSample());
 				}
 				format.Bitrate = 0;
+				traits.formats.push_back(format);
+			}
+			{
+				Encoder::Format format;
+				format.Samplerate = samplerate;
+				format.Channels = channels;
+				format.Sampleformat = SampleFormat::Int16;
+				format.Description = U_("A-law");
+				format.Bitrate = -1;
+				traits.formats.push_back(format);
+			}
+			{
+				Encoder::Format format;
+				format.Samplerate = samplerate;
+				format.Channels = channels;
+				format.Sampleformat = SampleFormat::Int16;
+				format.Description = MPT_UTF8("\xce\xbc-law");
+				format.Bitrate = -2;
 				traits.formats.push_back(format);
 			}
 		}
