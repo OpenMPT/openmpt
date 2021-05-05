@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt 0.5.9-pre
 
+ *  `Makefile` `CONFIG=emscripten` does not pass linker options to the compiler
+    any more, which caused latest Emscripten to issue warnings.
+
 ### libopenmpt 0.5.8 (2021-04-11)
 
  *  [**Sec**] Possible null-pointer dereference read caused by a sequence of
