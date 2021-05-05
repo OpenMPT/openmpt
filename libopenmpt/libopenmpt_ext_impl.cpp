@@ -209,7 +209,7 @@ namespace openmpt {
 	
 	void module_ext_impl::set_instrument_mute_status( std::int32_t instrument, bool mute ) {
 		const bool instrument_mode = get_num_instruments() != 0;
-		const int32_t max_instrument = instrument_mode ? get_num_instruments() : get_num_samples();
+		const std::int32_t max_instrument = instrument_mode ? get_num_instruments() : get_num_samples();
 		if ( instrument < 0 || instrument >= max_instrument ) {
 			throw openmpt::exception("invalid instrument");
 		}
@@ -224,7 +224,7 @@ namespace openmpt {
 
 	bool module_ext_impl::get_instrument_mute_status( std::int32_t instrument ) const {
 		const bool instrument_mode = get_num_instruments() != 0;
-		const int32_t max_instrument = instrument_mode ? get_num_instruments() : get_num_samples();
+		const std::int32_t max_instrument = instrument_mode ? get_num_instruments() : get_num_samples();
 		if ( instrument < 0 || instrument >= max_instrument ) {
 			throw openmpt::exception("invalid instrument");
 		}
@@ -240,7 +240,7 @@ namespace openmpt {
 
 	std::int32_t module_ext_impl::play_note( std::int32_t instrument, std::int32_t note, double volume, double panning ) {
 		const bool instrument_mode = get_num_instruments() != 0;
-		const int32_t max_instrument = instrument_mode ? get_num_instruments() : get_num_samples();
+		const std::int32_t max_instrument = instrument_mode ? get_num_instruments() : get_num_samples();
 		if ( instrument < 0 || instrument >= max_instrument ) {
 			throw openmpt::exception("invalid instrument");
 		}
@@ -262,8 +262,8 @@ namespace openmpt {
 		m_sndFile->InstrumentChange(&chn, instrument + 1);
 		chn.nFadeOutVol = 0x10000;
 		m_sndFile->NoteChange(&chn, note, false, true, true);
-		chn.nPan = Util::Round<int32_t>( Clamp( panning * 128.0, -128.0, 128.0 ) + 128.0 );
-		chn.nVolume = Util::Round<int32_t>( Clamp( volume * 256.0, 0.0, 256.0 ) );
+		chn.nPan = Util::Round<std::int32_t>( Clamp( panning * 128.0, -128.0, 128.0 ) + 128.0 );
+		chn.nVolume = Util::Round<std::int32_t>( Clamp( volume * 256.0, 0.0, 256.0 ) );
 
 		// Remove channel from list of mixed channels to fix https://bugs.openmpt.org/view.php?id=209
 		// This is required because a previous note on the same channel might have just stopped playing,
