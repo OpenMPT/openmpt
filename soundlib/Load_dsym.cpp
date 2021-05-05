@@ -201,6 +201,8 @@ static bool ReadDSymChunk(FileReader &file, std::vector<std::byte> &data, uint32
 		}
 	} else
 	{
+		if(!file.CanRead(size))
+			return false;
 		file.ReadVector(data, size);
 	}
 	return data.size() >= size;
