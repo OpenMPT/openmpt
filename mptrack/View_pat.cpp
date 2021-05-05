@@ -203,32 +203,28 @@ bool CViewPattern::SetCurrentPattern(PATTERNINDEX pat, ROWINDEX row)
 {
 	const CSoundFile *pSndFile = GetSoundFile();
 
-	if(pSndFile == nullptr || pat >= pSndFile->Patterns.Size())
+	if(pSndFile == nullptr)
+		return false;
+	if(pat == pSndFile->Order.GetIgnoreIndex() || pat == pSndFile->Order.GetInvalidPatIndex())
 		return false;
 	if(m_pEditWnd && m_pEditWnd->IsWindowVisible())
 		m_pEditWnd->ShowWindow(SW_HIDE);
 
-	if(pat + 1 < pSndFile->Patterns.Size() && !pSndFile->Patterns.IsValidPat(pat))
-		pat = 0;
-	while(pat > 0 && !pSndFile->Patterns.IsValidPat(pat))
-		pat--;
-
-	if(!pSndFile->Patterns.IsValidPat(pat))
-	{
-		return false;
-	}
-
-	bool updateScroll = false;
 	m_nPattern = pat;
-	if(row != ROWINDEX_INVALID && row != GetCurrentRow() && row < pSndFile->Patterns[m_nPattern].GetNumRows())
+	bool updateScroll = false;
+
+	if(pSndFile->Patterns.IsValidPat(pat))
 	{
-		m_Cursor.SetRow(row);
-		updateScroll = true;
-	}
-	if(GetCurrentRow() >= pSndFile->Patterns[m_nPattern].GetNumRows())
-	{
-		m_Cursor.SetRow(0);
-		updateScroll = true;
+		if(row != ROWINDEX_INVALID && row != GetCurrentRow() && row < pSndFile->Patterns[m_nPattern].GetNumRows())
+		{
+			m_Cursor.SetRow(row);
+			updateScroll = true;
+		}
+		if(GetCurrentRow() >= pSndFile->Patterns[m_nPattern].GetNumRows())
+		{
+			m_Cursor.SetRow(0);
+			updateScroll = true;
+		}
 	}
 
 	SetSelToCursor();
@@ -3897,11 +3893,8 @@ LRESULT CViewPattern::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 		return m_nPattern;
 
 	case VIEWMSG_SETCURRENTPATTERN:
-		if(GetSoundFile()->Patterns.IsValidPat(static_cast<PATTERNINDEX>(lParam)))
-		{
-			m_nOrder = static_cast<ORDERINDEX>(SendCtrlMessage(CTRLMSG_GETCURRENTORDER));
-			SetCurrentPattern(static_cast<PATTERNINDEX>(lParam));
-		}
+		m_nOrder = static_cast<ORDERINDEX>(SendCtrlMessage(CTRLMSG_GETCURRENTORDER));
+		SetCurrentPattern(static_cast<PATTERNINDEX>(lParam));
 		break;
 
 	case VIEWMSG_GETCURRENTPOS:

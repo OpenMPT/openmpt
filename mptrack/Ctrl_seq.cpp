@@ -420,6 +420,9 @@ bool COrderList::SetCurSel(ORDERINDEX sel, bool setPlayPos, bool shiftClick, boo
 		}
 
 		m_pParent.SetCurrentPattern(n);
+	} else if(setPlayPos && !shiftClick && n != Order().GetIgnoreIndex() && n != Order().GetInvalidPatIndex())
+	{
+		m_pParent.SetCurrentPattern(n);
 	}
 	UpdateInfoText();
 	if(m_nScrollPos == m_nScrollPos2nd)
@@ -637,6 +640,7 @@ void COrderList::EnterPatternNum(int enterNum)
 		m_modDoc.SetModified();
 		m_modDoc.UpdateAllViews(nullptr, SequenceHint().Data(), this);
 		InvalidateSelection();
+		m_pParent.SetCurrentPattern(curIndex);
 	}
 }
 
