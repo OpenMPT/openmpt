@@ -55,6 +55,8 @@ struct MixLoopState
 	{
 		samplePointer = static_cast<const int8 *>(chn.pCurrentSample);
 		lookaheadPointer = nullptr;
+		if(!samplePointer)
+			return;
 		if(chn.nLoopEnd < InterpolationMaxLookahead)
 			lookaheadStart = chn.nLoopStart;
 		else
@@ -90,7 +92,8 @@ struct MixLoopState
 		int32 nLoopStart = chn.dwFlags[CHN_LOOP] ? chn.nLoopStart : 0;
 		SamplePosition nInc = chn.increment;
 
-		if ((nSamples <= 0) || nInc.IsZero() || (!chn.nLength)) return 0;
+		if(nSamples <= 0 || nInc.IsZero() || !chn.nLength || !samplePointer)
+			return 0;
 
 		// Part 1: Making sure the play position is valid, and if necessary, invert the play direction in case we reached a loop boundary of a ping-pong loop.
 		chn.pCurrentSample = samplePointer;
