@@ -135,21 +135,7 @@ public:
 	}
 	void WriteInterleavedConverted(size_t frameCount, const std::byte *data) override
 	{
-		if(formatInfo.Sampleformat.GetBitsPerSample() == 8)
-		{
-			for(std::size_t frame = 0; frame < frameCount; ++frame)
-			{
-				for(int channel = 0; channel < formatInfo.Channels; ++channel)
-				{
-					int8 sample = static_cast<int8>(mpt::byte_cast<uint8>(*data) - 0x80);
-					mpt::IO::WriteIntBE<int8>(f, sample);
-					data++;
-				}
-			}
-		} else
-		{
-			mpt::IO::WriteRaw(f, data, frameCount * formatInfo.Channels * (formatInfo.Sampleformat.GetBitsPerSample()/8));
-		}
+		mpt::IO::WriteRaw(f, data, frameCount * formatInfo.Channels * (formatInfo.Sampleformat.GetBitsPerSample()/8));
 	}
 	void WriteCues(const std::vector<uint64> &cues) override
 	{
@@ -180,7 +166,7 @@ AUEncoder::AUEncoder()
 		int samplerate = traits.samplerates[i];
 		for(int channels = 1; channels <= traits.maxChannels; channels *= 2)
 		{
-			const std::array<SampleFormat, 6> sampleFormats = { SampleFormatFloat64, SampleFormatFloat32, SampleFormatInt32, SampleFormatInt24, SampleFormatInt16, SampleFormatUnsigned8 };
+			const std::array<SampleFormat, 6> sampleFormats = { SampleFormatFloat64, SampleFormatFloat32, SampleFormatInt32, SampleFormatInt24, SampleFormatInt16, SampleFormatInt8 };
 			for(const auto sampleFormat : sampleFormats)
 			{
 				Encoder::Format format;
@@ -190,9 +176,6 @@ AUEncoder::AUEncoder()
 				if(sampleFormat.IsFloat())
 				{
 					format.Description = mpt::format(U_("Floating Point (%1 Bit)"))(sampleFormat.GetBitsPerSample());
-				} else if(sampleFormat.IsUnsigned())
-				{
-					format.Description = mpt::format(U_("%1 Bit (unsigned)"))(sampleFormat.GetBitsPerSample());
 				} else
 				{
 					format.Description = mpt::format(U_("%1 Bit"))(sampleFormat.GetBitsPerSample());
