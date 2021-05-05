@@ -32,10 +32,10 @@ OPENMPT_NAMESPACE_BEGIN
 
 struct MixLoopState
 {
-	const int8 * samplePointer;
-	const int8 * lookaheadPointer;
-	SmpLength lookaheadStart;
-	uint32 maxSamples;
+	const int8 * samplePointer = nullptr;
+	const int8 * lookaheadPointer = nullptr;
+	SmpLength lookaheadStart = 0;
+	uint32 maxSamples = 0;
 
 	MixLoopState(const ModChannel &chn)
 	{
