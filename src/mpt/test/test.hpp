@@ -423,7 +423,9 @@ struct test {
 
 	template <typename Texception, typename Tcallable, typename std::enable_if<std::is_invocable<Tcallable>::value, bool>::type = true>
 	inline test & expect_throws(Tcallable c, const char * text_ex = nullptr, const char * text_e = nullptr) {
-		report_run(text_ex ? text_ex : typeid(Texception).name(), text_e ? text_e : typeid(decltype(c())).name());
+		const std::type_info & tiexception = typeid(Texception);
+		const std::type_info & tic = typeid(decltype(c()));
+		report_run(text_ex ? text_ex : tiexception.name(), text_e ? text_e : tic.name());
 		mpt::test::result result;
 		try {
 			c();
@@ -441,7 +443,8 @@ struct test {
 
 	template <typename Tcallable, typename std::enable_if<std::is_invocable<Tcallable>::value, bool>::type = true>
 	inline test & expect_throws_any(Tcallable c, const char * text_e = nullptr) {
-		report_run(nullptr, text_e ? text_e : typeid(decltype(c())).name());
+		const std::type_info & tic = typeid(decltype(c()));
+		report_run(nullptr, text_e ? text_e : tic.name());
 		mpt::test::result result;
 		try {
 			c();
@@ -456,7 +459,8 @@ struct test {
 
 	template <typename Texpr, typename std::enable_if<std::is_invocable<Texpr>::value, bool>::type = true>
 	inline test & expect(Texpr e, const char * text_e = nullptr) {
-		report_run(text_e ? text_e : typeid(decltype(std::invoke(e))).name());
+		const std::type_info & tie = typeid(decltype(std::invoke(e)));
+		report_run(text_e ? text_e : tie.name());
 		mpt::test::result result;
 		try {
 			const auto ve = std::invoke(e);
@@ -476,7 +480,10 @@ struct test {
 
 	template <typename Ta, typename Tcmp, typename Tb, typename std::enable_if<std::is_invocable<Ta>::value, bool>::type = true, typename std::enable_if<std::is_invocable<Tb>::value, bool>::type = true>
 	inline test & expect(Ta && a, Tcmp cmp, Tb && b, const char * text_a = nullptr, const char * text_cmp = nullptr, const char * text_b = nullptr) {
-		report_run(text_a ? text_a : typeid(decltype(std::invoke(a))).name(), text_cmp ? text_cmp : typeid(decltype(cmp)).name(), text_b ? text_b : typeid(decltype(std::invoke(b))).name());
+		const std::type_info & tia = typeid(decltype(std::invoke(a)));
+		const std::type_info & ticmp = typeid(decltype(cmp));
+		const std::type_info & tib = typeid(decltype(std::invoke(b)));
+		report_run(text_a ? text_a : tia.name(), text_cmp ? text_cmp : ticmp.name(), text_b ? text_b : tib.name());
 		mpt::test::result result;
 		try {
 			const auto va = std::invoke(a);
@@ -497,7 +504,8 @@ struct test {
 
 	template <typename Texpr, typename std::enable_if<!std::is_invocable<Texpr>::value, bool>::type = true>
 	inline test & expect(Texpr && e, const char * text_e = nullptr) {
-		report_run(text_e ? text_e : typeid(decltype(std::forward<Texpr>(e))).name());
+		const std::type_info & tie = typeid(decltype(std::forward<Texpr>(e)));
+		report_run(text_e ? text_e : tie.name());
 		mpt::test::result result;
 		try {
 			const auto ve = std::forward<Texpr>(e);
@@ -517,7 +525,10 @@ struct test {
 
 	template <typename Ta, typename Tcmp, typename Tb, typename std::enable_if<!std::is_invocable<Ta>::value, bool>::type = true, typename std::enable_if<!std::is_invocable<Tb>::value, bool>::type = true>
 	inline test & expect(Ta && a, Tcmp cmp, Tb && b, const char * text_a = nullptr, const char * text_cmp = nullptr, const char * text_b = nullptr) {
-		report_run(text_a ? text_a : typeid(decltype(std::forward<Ta>(a))).name(), text_cmp ? text_cmp : typeid(decltype(cmp)).name(), text_b ? text_b : typeid(decltype(std::forward<Tb>(b))).name());
+		const std::type_info & tia = typeid(decltype(std::forward<Ta>(a)));
+		const std::type_info & ticmp = typeid(decltype(cmp));
+		const std::type_info & tib = typeid(decltype(std::forward<Tb>(b)));
+		report_run(text_a ? text_a : tia.name(), text_cmp ? text_cmp : ticmp.name(), text_b ? text_b : tib.name());
 		mpt::test::result result;
 		try {
 			const auto va = std::forward<Ta>(a);
