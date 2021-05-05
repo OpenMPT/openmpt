@@ -1291,6 +1291,8 @@ void QuickChannelProperties::Show(CModDoc *modDoc, CHANNELINDEX chn, PATTERNINDE
 	    Clamp(static_cast<int>(position.y) - rect.Height() / 2, 0, static_cast<int>(screenRect.bottom) - rect.Height()));
 	MoveWindow(rect);
 
+	SetWindowText(mpt::cformat(_T("Settings for Channel %1"))(chn + 1));
+
 	UpdateDisplay();
 
 	const BOOL enablePan = (m_document->GetModType() & (MOD_TYPE_XM | MOD_TYPE_MOD)) ? FALSE : TRUE;

@@ -437,7 +437,7 @@ void CMainFrame::OnDropFiles(HDROP hDropInfo)
 					MPT_LOG(LogDebug, "info", U_("Loading ") + scanName.ToUnicode());
 					if(!sndFile->Create(GetFileReader(inputFile), CSoundFile::loadCompleteModule, nullptr))
 					{
-						MPT_LOG_GLOBAL(LogDebug, "info", U_("FAILED: ") + scanName.ToUnicode());
+						MPT_LOG(LogDebug, "info", U_("FAILED: ") + scanName.ToUnicode());
 						failed++;
 					}
 					total++;
