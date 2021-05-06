@@ -14,23 +14,36 @@
 
 #include "SoundDeviceBase.h"
 
+#if defined(MODPLUG_TRACKER) && !defined(MPT_BUILD_WINESUPPORT)
+
 #include "../common/ComponentManager.h"
 
+#endif
+
+
+#if defined(MODPLUG_TRACKER) && !defined(MPT_BUILD_WINESUPPORT)
 
 extern "C" {
 	typedef struct OpenMPT_Wine_Wrapper_SoundDevice OpenMPT_Wine_Wrapper_SoundDevice;
 };
 
+#endif
+
 
 OPENMPT_NAMESPACE_BEGIN
 
 
+#if defined(MODPLUG_TRACKER) && !defined(MPT_BUILD_WINESUPPORT)
+
 class ComponentWineWrapper;
+
+#endif
 
 
 namespace SoundDevice {
 
-#if !defined(MPT_BUILD_WINESUPPORT)
+
+#if defined(MODPLUG_TRACKER) && !defined(MPT_BUILD_WINESUPPORT)
 
 class SoundDeviceStub
 	: public SoundDevice::IBase
@@ -96,7 +109,8 @@ private:
 
 };
 
-#endif // !MPT_BUILD_WINESUPPORT
+#endif
+
 
 } // namespace SoundDevice
 

@@ -31,7 +31,91 @@ OPENMPT_NAMESPACE_BEGIN
 
 namespace SoundDevice {
 
-	
+
+
+#if defined(MODPLUG_TRACKER)
+
+#ifdef MPT_WITH_ASIO
+class ComponentASIO
+	: public ComponentBuiltin
+{
+	MPT_DECLARE_COMPONENT_MEMBERS(ComponentASIO, "ASIO")
+public:
+	ComponentASIO() = default;
+	virtual ~ComponentASIO() = default;
+};
+#endif // MPT_WITH_ASIO
+
+#if defined(MPT_WITH_DIRECTSOUND)
+class ComponentDirectSound 
+	: public ComponentBuiltin
+{
+	MPT_DECLARE_COMPONENT_MEMBERS(ComponentDirectSound, "DirectSound")
+public:
+	ComponentDirectSound() = default;
+	virtual ~ComponentDirectSound() = default;
+};
+#endif // MPT_WITH_DIRECTSOUND
+
+#if defined(MPT_WITH_PORTAUDIO)
+class ComponentPortAudio
+	: public ComponentBuiltin
+{
+	MPT_DECLARE_COMPONENT_MEMBERS(ComponentPortAudio, "PortAudio")
+public:
+	ComponentPortAudio() = default;
+	virtual ~ComponentPortAudio() = default;
+};
+#endif // MPT_WITH_PORTAUDIO
+
+#if defined(MPT_WITH_PULSEAUDIO)
+class ComponentPulseaudio
+	: public ComponentBuiltin
+{
+	MPT_DECLARE_COMPONENT_MEMBERS(ComponentPulseaudio, "Pulseaudio")
+public:
+	ComponentPulseaudio() = default;
+	virtual ~ComponentPulseaudio() = default;
+};
+#endif // MPT_WITH_PULSEAUDIO
+
+#if defined(MPT_WITH_PULSEAUDIO) && defined(MPT_WITH_PULSEAUDIOSIMPLE)
+class ComponentPulseaudioSimple
+	: public ComponentBuiltin
+{
+	MPT_DECLARE_COMPONENT_MEMBERS(ComponentPulseaudioSimple, "PulseaudioSimple")
+public:
+	ComponentPulseaudioSimple() = default;
+	virtual ~ComponentPulseaudioSimple() = default;
+};
+#endif // MPT_WITH_PULSEAUDIO && MPT_WITH_PULSEAUDIOSIMPLE
+
+#if defined(MPT_WITH_RTAUDIO)
+class ComponentRtAudio
+	: public ComponentBuiltin
+{
+	MPT_DECLARE_COMPONENT_MEMBERS(ComponentRtAudio, "RtAudio")
+public:
+	ComponentRtAudio() = default;
+	virtual ~ComponentRtAudio() = default;
+};
+#endif // MPT_WITH_RTAUDIO
+
+#if MPT_OS_WINDOWS
+class ComponentWaveOut
+	: public ComponentBuiltin
+{
+	MPT_DECLARE_COMPONENT_MEMBERS(ComponentWaveOut, "WaveOut")
+public:
+	ComponentWaveOut() = default;
+	virtual ~ComponentWaveOut() = default;
+};
+#endif // MPT_OS_WINDOWS
+
+
+#endif // MODPLUG_TRACKER
+
+
 struct CompareInfo
 {
 	static int64 score(const SoundDevice::Info &x)
@@ -175,11 +259,11 @@ void Manager::ReEnumerate(bool firstRun)
 	}
 #endif // MPT_WITH_RTAUDIO
 
-#ifndef MPT_BUILD_WINESUPPORT
+#if defined(MODPLUG_TRACKER) && !defined(MPT_BUILD_WINESUPPORT)
 	{
 		EnumerateDevices<SoundDeviceStub>(GetLogger(), GetSysInfo());
 	}
-#endif // !MPT_BUILD_WINESUPPORT
+#endif
 
 	struct Default
 	{
@@ -187,7 +271,6 @@ void Manager::ReEnumerate(bool firstRun)
 	};
 
 	std::map<SoundDevice::Type, Default> typeDefault;
-#ifdef MPT_BUILD_WINESUPPORT
 	if(GetSysInfo().SystemClass == mpt::OS::Class::Linux)
 	{
 #if defined(MPT_WITH_PULSEAUDIO)
@@ -239,7 +322,6 @@ void Manager::ReEnumerate(bool firstRun)
 		typeDefault[MPT_UFORMAT("PortAudio-{}")(paBeOS)].value = Info::DefaultFor::System;
 #endif
 	} else
-#endif
 	if(GetSysInfo().SystemClass == mpt::OS::Class::Windows && GetSysInfo().IsWindowsWine() && GetSysInfo().WineHostClass == mpt::OS::Class::Linux)
 	{ // Wine on Linux
 		typeDefault[SoundDevice::TypePORTAUDIO_WASAPI].value = Info::DefaultFor::System;
@@ -483,6 +565,7 @@ Manager::Manager(mpt::log::ILogger &logger, SoundDevice::SysInfo sysInfo, SoundD
 	: m_Logger(logger)
 	, m_SysInfo(sysInfo)
 	, m_AppInfo(appInfo)
+	, m_PortAudioInitializer(std::make_unique<PortAudioInitializer>())
 {
 	ReEnumerate(true);
 }

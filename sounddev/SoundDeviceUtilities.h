@@ -115,7 +115,7 @@ public:
 #endif // MPT_OS_WINDOWS
 
 
-#if defined(MODPLUG_TRACKER) && defined(MPT_BUILD_WINESUPPORT) && !MPT_OS_WINDOWS
+#if MPT_OS_LINUX || MPT_OS_MACOSX_OR_IOS || MPT_OS_FREEBSD
 
 
 class semaphore {
@@ -192,7 +192,7 @@ public:
 };
 
 
-#endif // MODPLUG_TRACKER && MPT_BUILD_WINESUPPORT && !MPT_OS_WINDOWS
+#endif // MPT_OS_LINUX || MPT_OS_MACOSX_OR_IOS || MPT_OS_FREEBSD
 
 
 } // namespace SoundDevice

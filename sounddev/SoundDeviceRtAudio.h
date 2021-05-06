@@ -14,10 +14,6 @@
 
 #include "SoundDeviceBase.h"
 
-#if defined(MODPLUG_TRACKER)
-#include "../common/ComponentManager.h"
-#endif // MODPLUG_TRACKER
-
 #ifdef MPT_WITH_RTAUDIO
 #if MPT_COMPILER_MSVC
 #pragma warning(push)
@@ -93,18 +89,6 @@ public:
 	static std::vector<SoundDevice::Info> EnumerateDevices(mpt::log::ILogger &logger, SoundDevice::SysInfo sysInfo);
 
 };
-
-
-#if defined(MODPLUG_TRACKER)
-class ComponentRtAudio : public ComponentBuiltin
-{
-	MPT_DECLARE_COMPONENT_MEMBERS(ComponentRtAudio, "RtAudio")
-public:
-	ComponentRtAudio() { }
-	virtual ~ComponentRtAudio() { }
-	virtual bool DoInitialize() { return true; }
-};
-#endif // MODPLUG_TRACKER
 
 
 #endif // MPT_WITH_RTAUDIO

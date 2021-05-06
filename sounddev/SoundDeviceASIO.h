@@ -17,10 +17,6 @@
 
 #include <atomic>
 
-#if defined(MODPLUG_TRACKER)
-#include "../common/ComponentManager.h"
-#endif // MODPLUG_TRACKER
-
 #ifdef MPT_WITH_ASIO
 #if !defined(MPT_BUILD_WINESUPPORT)
 #include "../mptrack/ExceptionHandler.h"
@@ -38,17 +34,6 @@ namespace SoundDevice {
 
 #ifdef MPT_WITH_ASIO
 
-
-#if defined(MODPLUG_TRACKER)
-class ComponentASIO : public ComponentBuiltin
-{
-	MPT_DECLARE_COMPONENT_MEMBERS(ComponentASIO, "ASIO")
-public:
-	ComponentASIO() { }
-	virtual ~ComponentASIO() { }
-	bool DoInitialize() override { return true; }
-};
-#endif // MODPLUG_TRACKER
 
 class ASIOException
 	: public std::runtime_error

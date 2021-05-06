@@ -14,10 +14,6 @@
 
 #include "SoundDeviceBase.h"
 
-#if defined(MODPLUG_TRACKER)
-#include "../common/ComponentManager.h"
-#endif // MODPLUG_TRACKER
-
 #ifdef MPT_WITH_PORTAUDIO
 #include <portaudio.h>
 #if MPT_OS_WINDOWS
@@ -31,8 +27,24 @@ namespace SoundDevice {
 
 #ifdef MPT_WITH_PORTAUDIO
 
+class PortAudioInitializer
+{
+private:
+	bool m_initialized = false;
+public:
+	PortAudioInitializer();
+	PortAudioInitializer(const PortAudioInitializer &) = delete;
+	PortAudioInitializer &operator=(const PortAudioInitializer &) = delete;
+	void Reload();
+	~PortAudioInitializer();
+};
+
 class CPortaudioDevice: public SoundDevice::Base
 {
+
+private:
+
+	PortAudioInitializer m_PortAudio;
 
 protected:
 
@@ -101,18 +113,6 @@ private:
 	static std::vector<std::pair<PaDeviceIndex, mpt::ustring> > EnumerateInputOnlyDevices(PaHostApiTypeId hostApiType);
 
 };
-
-
-#if defined(MODPLUG_TRACKER)
-class ComponentPortAudio : public ComponentBuiltin
-{
-	MPT_DECLARE_COMPONENT_MEMBERS(ComponentPortAudio, "PortAudio")
-public:
-	ComponentPortAudio();
-	virtual ~ComponentPortAudio();
-	bool DoInitialize() override;
-};
-#endif // MODPLUG_TRACKER
 
 
 #endif // MPT_WITH_PORTAUDIO

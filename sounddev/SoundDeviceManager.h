@@ -54,6 +54,11 @@ class ComponentRtAudio;
 #endif // MODPLUG_TRACKER
 
 
+#ifdef MPT_WITH_PORTAUDIO
+class PortAudioInitializer;
+#endif // MPT_WITH_PORTAUDIO
+
+
 class Manager
 {
 
@@ -94,6 +99,10 @@ private:
 	ComponentHandle<ComponentRtAudio> m_RtAudio;
 #endif // MPT_WITH_RTAUDIO
 #endif // MODPLUG_TRACKER
+
+#ifdef MPT_WITH_PORTAUDIO
+	std::unique_ptr<PortAudioInitializer> m_PortAudioInitializer;
+#endif // MPT_WITH_PORTAUDIO
 
 	std::vector<SoundDevice::Info> m_SoundDevices;
 	std::map<SoundDevice::Identifier, bool> m_DeviceUnavailable;

@@ -18,14 +18,14 @@
 
 #include "SoundDeviceStub.h"
 
-#if !defined(MPT_BUILD_WINESUPPORT)
+#if defined(MODPLUG_TRACKER) && !defined(MPT_BUILD_WINESUPPORT)
 
 #include "../common/misc_util.h"
 
 #include "../mptrack/MPTrackWine.h"
 #include "../mptrack/wine/NativeSoundDeviceMarshalling.h"
 
-#endif // !MPT_BUILD_WINESUPPORT
+#endif
 
 
 
@@ -35,7 +35,7 @@ OPENMPT_NAMESPACE_BEGIN
 namespace SoundDevice {
 
 
-#if !defined(MPT_BUILD_WINESUPPORT)
+#if defined(MODPLUG_TRACKER) && !defined(MPT_BUILD_WINESUPPORT)
 
 
 static mpt::ustring GetTypePrefix()
@@ -391,7 +391,7 @@ bool SoundDeviceStub::OpenDriverSettings() {
 }
 
 
-#endif // !MPT_BUILD_WINESUPPORT
+#endif
 
 
 } // namespace SoundDevice

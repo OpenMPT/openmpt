@@ -1030,32 +1030,34 @@ static void PortaudioLog(const char *text)
 #endif // MPT_COMPILER_MSVC
 
 
-#if defined(MODPLUG_TRACKER)
-
-ComponentPortAudio::ComponentPortAudio()
+PortAudioInitializer::PortAudioInitializer()
 {
-	return;
+#if defined(MODPLUG_TRACKER) && MPT_COMPILER_MSVC
+	PaUtil_SetDebugPrintFunction(PortaudioLog);
+#endif
+	m_initialized = (Pa_Initialize() == paNoError);
 }
 
 
-bool ComponentPortAudio::DoInitialize()
+void PortAudioInitializer::Reload()
 {
-	#if defined(MODPLUG_TRACKER) && MPT_COMPILER_MSVC
-		PaUtil_SetDebugPrintFunction(PortaudioLog);
-	#endif
-	return (Pa_Initialize() == paNoError);
-}
-
-
-ComponentPortAudio::~ComponentPortAudio()
-{
-	if(IsAvailable())
+	if(m_initialized)
 	{
 		Pa_Terminate();
+		m_initialized = false;
 	}
+	m_initialized = (Pa_Initialize() == paNoError);
 }
 
-#endif // MODPLUG_TRACKER
+
+PortAudioInitializer::~PortAudioInitializer()
+{
+	if(!m_initialized)
+	{
+		return;
+	}
+	Pa_Terminate();
+}
 
 
 #endif // MPT_WITH_PORTAUDIO

@@ -16,10 +16,6 @@
 #include "SoundDeviceBase.h"
 #include "SoundDeviceUtilities.h"
 
-#if defined(MODPLUG_TRACKER)
-#include "../common/ComponentManager.h"
-#endif // MODPLUG_TRACKER
-
 #if defined(MPT_WITH_DIRECTSOUND)
 #include <dsound.h>
 #endif // MPT_WITH_DIRECTSOUND
@@ -29,17 +25,6 @@ OPENMPT_NAMESPACE_BEGIN
 namespace SoundDevice {
 
 #if defined(MPT_WITH_DIRECTSOUND)
-
-#if defined(MODPLUG_TRACKER)
-class ComponentDirectSound : public ComponentBuiltin
-{
-	MPT_DECLARE_COMPONENT_MEMBERS(ComponentDirectSound, "DirectSound")
-public:
-	ComponentDirectSound() { }
-	virtual ~ComponentDirectSound() { }
-	bool DoInitialize() override { return true; }
-};
-#endif // MODPLUG_TRACKER
 
 
 class CDSoundDevice: public CSoundDeviceWithThread
