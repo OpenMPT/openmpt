@@ -117,7 +117,7 @@ public:
 	SoundDevice::SysInfo GetSysInfo() const { return m_SysInfo; }
 	SoundDevice::AppInfo GetAppInfo() const { return m_AppInfo; }
 
-	void ReEnumerate();
+	void ReEnumerate(bool firstRun = false);
 
 	std::vector<SoundDevice::Info>::const_iterator begin() const { return m_SoundDevices.begin(); }
 	std::vector<SoundDevice::Info>::const_iterator end() const { return m_SoundDevices.end(); }

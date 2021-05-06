@@ -91,7 +91,7 @@ SoundDevice::IBase* Manager::ConstructSoundDevice(mpt::log::ILogger &logger, con
 }
 
 
-void Manager::ReEnumerate()
+void Manager::ReEnumerate(bool firstRun)
 {
 	MPT_TRACE_SCOPE();
 	m_SoundDevices.clear();
@@ -102,7 +102,10 @@ void Manager::ReEnumerate()
 
 #if defined(MODPLUG_TRACKER)
 #ifdef MPT_WITH_PORTAUDIO
-	m_PortAudio.Reload();
+	if(!firstRun)
+	{
+		m_PortAudio.Reload();
+	}
 #endif // MPT_WITH_PORTAUDIO
 #endif // MODPLUG_TRACKER
 
@@ -481,7 +484,7 @@ Manager::Manager(mpt::log::ILogger &logger, SoundDevice::SysInfo sysInfo, SoundD
 	, m_SysInfo(sysInfo)
 	, m_AppInfo(appInfo)
 {
-	ReEnumerate();
+	ReEnumerate(true);
 }
 
 
