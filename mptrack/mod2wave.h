@@ -34,8 +34,6 @@ struct CWaveConvertSettings
 	Setting<mpt::ustring> EncoderName;
 	std::size_t EncoderIndex;
 
-	SampleFormat FinalSampleFormat;
-
 	StoredTags storedTags;
 	FileTags Tags;
 

@@ -244,12 +244,36 @@ protected:
 public:
 	virtual ~IAudioStreamEncoder() = default;
 public:
-	virtual mpt::endian GetConvertedEndianness() const = 0;
-	virtual void WriteInterleaved(size_t count, const float *interleaved) = 0;
-	virtual void WriteInterleavedConverted(size_t frameCount, const std::byte *data) = 0;
+	virtual SampleFormat GetSampleFormat() const = 0;
+	virtual void WriteInterleaved(std::size_t frameCount, const double *interleaved) = 0;
+	virtual void WriteInterleaved(std::size_t frameCount, const float *interleaved) = 0;
+	virtual void WriteInterleaved(std::size_t frameCount, const int32 *interleaved) = 0;
+	virtual void WriteInterleaved(std::size_t frameCount, const int24 *interleaved) = 0;
+	virtual void WriteInterleaved(std::size_t frameCount, const int16 *interleaved) = 0;
+	virtual void WriteInterleaved(std::size_t frameCount, const int8 *interleaved) = 0;
+	virtual void WriteInterleaved(std::size_t frameCount, const uint8 *interleaved) = 0;
 	virtual void WriteCues(const std::vector<uint64> &cues) = 0; // optional
 	virtual void WriteFinalize() = 0;
 };
+
+
+
+std::pair<bool, std::size_t> WriteInterleavedLE(std::ostream &f, uint16 channels, Encoder::Format format, std::size_t frameCount, const double *interleaved);
+std::pair<bool, std::size_t> WriteInterleavedLE(std::ostream &f, uint16 channels, Encoder::Format format, std::size_t frameCount, const float *interleaved);
+std::pair<bool, std::size_t> WriteInterleavedLE(std::ostream &f, uint16 channels, Encoder::Format format, std::size_t frameCount, const int32 *interleaved);
+std::pair<bool, std::size_t> WriteInterleavedLE(std::ostream &f, uint16 channels, Encoder::Format format, std::size_t frameCount, const int24 *interleaved);
+std::pair<bool, std::size_t> WriteInterleavedLE(std::ostream &f, uint16 channels, Encoder::Format format, std::size_t frameCount, const int16 *interleaved);
+std::pair<bool, std::size_t> WriteInterleavedLE(std::ostream &f, uint16 channels, Encoder::Format format, std::size_t frameCount, const int8 *interleaved);
+std::pair<bool, std::size_t> WriteInterleavedLE(std::ostream &f, uint16 channels, Encoder::Format format, std::size_t frameCount, const uint8 *interleaved);
+
+std::pair<bool, std::size_t> WriteInterleavedBE(std::ostream &f, uint16 channels, Encoder::Format format, std::size_t frameCount, const double *interleaved);
+std::pair<bool, std::size_t> WriteInterleavedBE(std::ostream &f, uint16 channels, Encoder::Format format, std::size_t frameCount, const float *interleaved);
+std::pair<bool, std::size_t> WriteInterleavedBE(std::ostream &f, uint16 channels, Encoder::Format format, std::size_t frameCount, const int32 *interleaved);
+std::pair<bool, std::size_t> WriteInterleavedBE(std::ostream &f, uint16 channels, Encoder::Format format, std::size_t frameCount, const int24 *interleaved);
+std::pair<bool, std::size_t> WriteInterleavedBE(std::ostream &f, uint16 channels, Encoder::Format format, std::size_t frameCount, const int16 *interleaved);
+std::pair<bool, std::size_t> WriteInterleavedBE(std::ostream &f, uint16 channels, Encoder::Format format, std::size_t frameCount, const int8 *interleaved);
+std::pair<bool, std::size_t> WriteInterleavedBE(std::ostream &f, uint16 channels, Encoder::Format format, std::size_t frameCount, const uint8 *interleaved);
+
 
 
 class StreamWriterBase
@@ -263,9 +287,14 @@ public:
 	StreamWriterBase(std::ostream &stream);
 	virtual ~StreamWriterBase();
 public:
-	mpt::endian GetConvertedEndianness() const override;
-	void WriteInterleaved(size_t count, const float *interleaved) override = 0;
-	void WriteInterleavedConverted(size_t frameCount, const std::byte *data) override;
+	SampleFormat GetSampleFormat() const override;
+	void WriteInterleaved(std::size_t frameCount, const double *interleaved) override;
+	void WriteInterleaved(std::size_t frameCount, const float *interleaved) override;
+	void WriteInterleaved(std::size_t frameCount, const int32 *interleaved) override;
+	void WriteInterleaved(std::size_t frameCount, const int24 *interleaved) override;
+	void WriteInterleaved(std::size_t frameCount, const int16 *interleaved) override;
+	void WriteInterleaved(std::size_t frameCount, const int8 *interleaved) override;
+	void WriteInterleaved(std::size_t frameCount, const uint8 *interleaved) override;
 	void WriteCues(const std::vector<uint64> &cues) override;
 	void WriteFinalize() override;
 protected:

@@ -429,6 +429,24 @@ void WAVWriter::Write(mpt::const_byte_span data)
 }
 
 
+void WAVWriter::WriteBeforeDirect()
+{
+	MPT_ASSERT(!finalized);
+}
+
+
+void WAVWriter::WriteAfterDirect(bool success, std::size_t count)
+{
+	MPT_ASSERT(success); // this assertion is useful to catch mis-calculation of required buffer size for pre-allocate in-memory file buffers (like in View_smp.cpp for clipboard)
+	if (!success)
+	{
+		return;
+	}
+	position += count;
+	totalSize = std::max(totalSize, position);
+}
+
+
 // Write the WAV format to the file.
 void WAVWriter::WriteFormat(uint32 sampleRate, uint16 bitDepth, uint16 numChannels, WAVFormatChunk::SampleFormats encoding)
 {

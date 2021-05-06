@@ -41,18 +41,37 @@ public:
 		MPT_ASSERT(settings.Channels > 0);
 		MPT_UNREFERENCED_PARAMETER(tags);
 	}
-	mpt::endian GetConvertedEndianness() const override
+	SampleFormat GetSampleFormat() const override
 	{
-		return settings.Format.endian;
+		return settings.Format.GetSampleFormat();
 	}
-	void WriteInterleaved(size_t count, const float *interleaved) override
+	void WriteInterleaved(std::size_t frameCount, const double *interleaved) override
 	{
-		MPT_ASSERT(settings.Format.GetSampleFormat().IsFloat());
-		WriteInterleavedConverted(count, reinterpret_cast<const std::byte*>(interleaved));
+		WriteInterleavedBE(f, settings.Channels, settings.Format, frameCount, interleaved);
 	}
-	void WriteInterleavedConverted(size_t frameCount, const std::byte *data) override
+	void WriteInterleaved(std::size_t frameCount, const float *interleaved) override
 	{
-		mpt::IO::WriteRaw(f, data, frameCount * settings.Channels * settings.Format.GetSampleFormat().GetSampleSize());
+		WriteInterleavedBE(f, settings.Channels, settings.Format, frameCount, interleaved);
+	}
+	void WriteInterleaved(std::size_t frameCount, const int32 *interleaved) override
+	{
+		WriteInterleavedBE(f, settings.Channels, settings.Format, frameCount, interleaved);
+	}
+	void WriteInterleaved(std::size_t frameCount, const int24 *interleaved) override
+	{
+		WriteInterleavedBE(f, settings.Channels, settings.Format, frameCount, interleaved);
+	}
+	void WriteInterleaved(std::size_t frameCount, const int16 *interleaved) override
+	{
+		WriteInterleavedBE(f, settings.Channels, settings.Format, frameCount, interleaved);
+	}
+	void WriteInterleaved(std::size_t frameCount, const int8 *interleaved) override
+	{
+		WriteInterleavedBE(f, settings.Channels, settings.Format, frameCount, interleaved);
+	}
+	void WriteInterleaved(std::size_t frameCount, const uint8 *interleaved) override
+	{
+		WriteInterleavedBE(f, settings.Channels, settings.Format, frameCount, interleaved);
 	}
 	void WriteCues(const std::vector<uint64> &cues) override
 	{

@@ -12,6 +12,8 @@
 
 #include "StreamEncoder.h"
 
+#include "../soundbase/SampleFormatConverters.h"
+
 #include <ostream>
 
 
@@ -31,16 +33,240 @@ StreamWriterBase::~StreamWriterBase()
 }
 
 
-mpt::endian StreamWriterBase::GetConvertedEndianness() const
+
+template <mpt::endian endian, typename Tsample>
+static inline std::pair<bool, std::size_t> WriteInterleavedImpl(std::ostream &f, uint16 channels, Encoder::Format format, std::size_t frameCount, const Tsample *interleaved)
 {
-	return mpt::get_endian();
+	MPT_ASSERT(endian == format.endian);
+	MPT_ASSERT(format.GetSampleFormat() == SampleFormatTraits<Tsample>::sampleFormat());
+	bool success = true;
+	std::size_t written = 0;
+	MPT_MAYBE_CONSTANT_IF(endian == mpt::get_endian() && format.encoding != Encoder::Format::Encoding::Alaw && format.encoding != Encoder::Format::Encoding::ulaw)
+	{
+		if(!mpt::IO::WriteRaw(f, reinterpret_cast<const std::byte*>(interleaved), frameCount * channels * format.GetSampleFormat().GetSampleSize()))
+		{
+			success = false;
+		}
+		written += frameCount * channels * format.GetSampleFormat().GetSampleSize();
+	} else
+	{
+		std::array<std::byte, mpt::IO::BUFFERSIZE_TINY> fbuf;
+		mpt::IO::WriteBuffer<std::ostream> bf{f, fbuf};
+		if(format.encoding == Encoder::Format::Encoding::Alaw)
+		{
+			if constexpr(std::is_same<Tsample, int16>::value)
+			{
+				SC::EncodeALaw conv;
+				for(std::size_t frame = 0; frame < frameCount; ++frame)
+				{
+					for(uint16 channel = 0; channel < channels; ++channel)
+					{
+						std::byte sampledata = conv(interleaved[channel]);
+						mpt::IO::WriteRaw(bf, &sampledata, 1);
+						written += 1;
+					}
+					interleaved += channels;
+				}
+			}
+		} else if(format.encoding == Encoder::Format::Encoding::ulaw)
+		{
+			if constexpr(std::is_same<Tsample, int16>::value)
+			{
+				SC::EncodeuLaw conv;
+				for(std::size_t frame = 0; frame < frameCount; ++frame)
+				{
+					for(uint16 channel = 0; channel < channels; ++channel)
+					{
+						std::byte sampledata = conv(interleaved[channel]);
+						mpt::IO::WriteRaw(bf, &sampledata, 1);
+						written += 1;
+					}
+					interleaved += channels;
+				}
+			}
+		} else
+		{
+			if constexpr(std::is_floating_point<Tsample>::value)
+			{
+				std::vector<typename mpt::make_float_endian<endian, Tsample>::type> frameData(channels);
+				for(std::size_t frame = 0; frame < frameCount; ++frame)
+				{
+					for(uint16 channel = 0; channel < channels; ++channel)
+					{
+						frameData[channel] = typename mpt::make_float_endian<endian, Tsample>::type(interleaved[channel]);
+					}
+					mpt::IO::WriteRaw(bf, reinterpret_cast<const std::byte*>(frameData.data()), channels * format.GetSampleFormat().GetSampleSize());
+					written += channels * format.GetSampleFormat().GetSampleSize();
+					interleaved += channels;
+				}
+			} else if constexpr(std::is_same<Tsample, int24>::value)
+			{
+				MPT_ASSERT(!mpt::endian_is_weird());
+				for(std::size_t frame = 0; frame < frameCount; ++frame)
+				{
+					for(uint16 channel = 0; channel < channels; ++channel)
+					{
+						std::array<std::byte, 3> data;
+						std::memcpy(data.data(), interleaved, 3);
+						MPT_MAYBE_CONSTANT_IF(endian != mpt::get_endian())
+						{
+							std::reverse(data.begin(), data.end());
+						}
+						mpt::IO::Write(bf, data);
+						written += data.size();
+						interleaved += 3;
+					}
+				}
+			} else
+			{
+				std::vector<typename mpt::make_endian<endian, Tsample>::type> frameData(channels);
+				for(std::size_t frame = 0; frame < frameCount; ++frame)
+				{
+					for(uint16 channel = 0; channel < channels; ++channel)
+					{
+						frameData[channel] = interleaved[channel];
+					}
+					mpt::IO::WriteRaw(bf, reinterpret_cast<const std::byte*>(frameData.data()), channels * format.GetSampleFormat().GetSampleSize());
+					written += channels * format.GetSampleFormat().GetSampleSize();
+					interleaved += channels;
+				}
+			}
+		}
+		if(bf.HasWriteError())
+		{
+			success = false;
+		}
+	}
+	return std::make_pair(success, written);
+}
+
+std::pair<bool, std::size_t> WriteInterleavedLE(std::ostream &f, uint16 channels, Encoder::Format format, std::size_t frameCount, const double *interleaved)
+{
+	MPT_ASSERT(format.endian == mpt::endian::little);
+	return WriteInterleavedImpl<mpt::endian::little>(f, channels, format, frameCount, interleaved);
+}
+std::pair<bool, std::size_t> WriteInterleavedLE(std::ostream &f, uint16 channels, Encoder::Format format, std::size_t frameCount, const float *interleaved)
+{
+	MPT_ASSERT(format.endian == mpt::endian::little);
+	return WriteInterleavedImpl<mpt::endian::little>(f, channels, format, frameCount, interleaved);
+}
+std::pair<bool, std::size_t> WriteInterleavedLE(std::ostream &f, uint16 channels, Encoder::Format format, std::size_t frameCount, const int32 *interleaved)
+{
+	MPT_ASSERT(format.endian == mpt::endian::little);
+	return WriteInterleavedImpl<mpt::endian::little>(f, channels, format, frameCount, interleaved);
+}
+std::pair<bool, std::size_t> WriteInterleavedLE(std::ostream &f, uint16 channels, Encoder::Format format, std::size_t frameCount, const int24 *interleaved)
+{
+	MPT_ASSERT(format.endian == mpt::endian::little);
+	return WriteInterleavedImpl<mpt::endian::little>(f, channels, format, frameCount, interleaved);
+}
+std::pair<bool, std::size_t> WriteInterleavedLE(std::ostream &f, uint16 channels, Encoder::Format format, std::size_t frameCount, const int16 *interleaved)
+{
+	MPT_ASSERT(format.endian == mpt::endian::little);
+	return WriteInterleavedImpl<mpt::endian::little>(f, channels, format, frameCount, interleaved);
+}
+std::pair<bool, std::size_t> WriteInterleavedLE(std::ostream &f, uint16 channels, Encoder::Format format, std::size_t frameCount, const int8 *interleaved)
+{
+	MPT_ASSERT(format.endian == mpt::endian::little);
+	return WriteInterleavedImpl<mpt::endian::little>(f, channels, format, frameCount, interleaved);
+}
+std::pair<bool, std::size_t> WriteInterleavedLE(std::ostream &f, uint16 channels, Encoder::Format format, std::size_t frameCount, const uint8 *interleaved)
+{
+	MPT_ASSERT(format.endian == mpt::endian::little);
+	return WriteInterleavedImpl<mpt::endian::little>(f, channels, format, frameCount, interleaved);
+}
+
+std::pair<bool, std::size_t> WriteInterleavedBE(std::ostream &f, uint16 channels, Encoder::Format format, std::size_t frameCount, const double *interleaved)
+{
+	MPT_ASSERT(format.endian == mpt::endian::big);
+	return WriteInterleavedImpl<mpt::endian::big>(f, channels, format, frameCount, interleaved);
+}
+std::pair<bool, std::size_t> WriteInterleavedBE(std::ostream &f, uint16 channels, Encoder::Format format, std::size_t frameCount, const float *interleaved)
+{
+	MPT_ASSERT(format.endian == mpt::endian::big);
+	return WriteInterleavedImpl<mpt::endian::big>(f, channels, format, frameCount, interleaved);
+}
+std::pair<bool, std::size_t> WriteInterleavedBE(std::ostream &f, uint16 channels, Encoder::Format format, std::size_t frameCount, const int32 *interleaved)
+{
+	MPT_ASSERT(format.endian == mpt::endian::big);
+	return WriteInterleavedImpl<mpt::endian::big>(f, channels, format, frameCount, interleaved);
+}
+std::pair<bool, std::size_t> WriteInterleavedBE(std::ostream &f, uint16 channels, Encoder::Format format, std::size_t frameCount, const int24 *interleaved)
+{
+	MPT_ASSERT(format.endian == mpt::endian::big);
+	return WriteInterleavedImpl<mpt::endian::big>(f, channels, format, frameCount, interleaved);
+}
+std::pair<bool, std::size_t> WriteInterleavedBE(std::ostream &f, uint16 channels, Encoder::Format format, std::size_t frameCount, const int16 *interleaved)
+{
+	MPT_ASSERT(format.endian == mpt::endian::big);
+	return WriteInterleavedImpl<mpt::endian::big>(f, channels, format, frameCount, interleaved);
+}
+std::pair<bool, std::size_t> WriteInterleavedBE(std::ostream &f, uint16 channels, Encoder::Format format, std::size_t frameCount, const int8 *interleaved)
+{
+	MPT_ASSERT(format.endian == mpt::endian::big);
+	return WriteInterleavedImpl<mpt::endian::big>(f, channels, format, frameCount, interleaved);
+}
+std::pair<bool, std::size_t> WriteInterleavedBE(std::ostream &f, uint16 channels, Encoder::Format format, std::size_t frameCount, const uint8 *interleaved)
+{
+	MPT_ASSERT(format.endian == mpt::endian::big);
+	return WriteInterleavedImpl<mpt::endian::big>(f, channels, format, frameCount, interleaved);
 }
 
 
-void StreamWriterBase::WriteInterleavedConverted(size_t frameCount, const std::byte *data)
+
+SampleFormat StreamWriterBase::GetSampleFormat() const
+{
+	return SampleFormat::Float32;
+}
+
+
+void StreamWriterBase::WriteInterleaved(std::size_t frameCount, const double *interleaved)
 {
 	MPT_UNREFERENCED_PARAMETER(frameCount);
-	MPT_UNREFERENCED_PARAMETER(data);
+	MPT_UNREFERENCED_PARAMETER(interleaved);
+	MPT_ASSERT_NOTREACHED();
+}
+
+void StreamWriterBase::WriteInterleaved(std::size_t frameCount, const float *interleaved)
+{
+	MPT_UNREFERENCED_PARAMETER(frameCount);
+	MPT_UNREFERENCED_PARAMETER(interleaved);
+	MPT_ASSERT_NOTREACHED();
+}
+
+void StreamWriterBase::WriteInterleaved(std::size_t frameCount, const int32 *interleaved)
+{
+	MPT_UNREFERENCED_PARAMETER(frameCount);
+	MPT_UNREFERENCED_PARAMETER(interleaved);
+	MPT_ASSERT_NOTREACHED();
+}
+
+void StreamWriterBase::WriteInterleaved(std::size_t frameCount, const int24 *interleaved)
+{
+	MPT_UNREFERENCED_PARAMETER(frameCount);
+	MPT_UNREFERENCED_PARAMETER(interleaved);
+	MPT_ASSERT_NOTREACHED();
+}
+
+void StreamWriterBase::WriteInterleaved(std::size_t frameCount, const int16 *interleaved)
+{
+	MPT_UNREFERENCED_PARAMETER(frameCount);
+	MPT_UNREFERENCED_PARAMETER(interleaved);
+	MPT_ASSERT_NOTREACHED();
+}
+
+void StreamWriterBase::WriteInterleaved(std::size_t frameCount, const int8 *interleaved)
+{
+	MPT_UNREFERENCED_PARAMETER(frameCount);
+	MPT_UNREFERENCED_PARAMETER(interleaved);
+	MPT_ASSERT_NOTREACHED();
+}
+
+void StreamWriterBase::WriteInterleaved(std::size_t frameCount, const uint8 *interleaved)
+{
+	MPT_UNREFERENCED_PARAMETER(frameCount);
+	MPT_UNREFERENCED_PARAMETER(interleaved);
+	MPT_ASSERT_NOTREACHED();
 }
 
 

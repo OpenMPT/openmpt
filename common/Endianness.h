@@ -66,18 +66,6 @@ using float64le_fast = mpt::IEEE754binary64LE;
 using float64be_fast = mpt::IEEE754binary64BE;
 
 
-template <typename Tbyte>
-inline void SwapBufferEndian(std::size_t elementSize, Tbyte * buffer, std::size_t elements)
-{
-	static_assert(sizeof(Tbyte) == 1);
-	for(std::size_t element = 0; element < elements; ++element)
-	{
-		std::reverse(&buffer[0], &buffer[elementSize]);
-		buffer += elementSize;
-	}
-}
-
-
 
 // 24-bit integer wrapper (for 24-bit PCM)
 struct int24

@@ -123,55 +123,22 @@ public:
 		FLAC__stream_encoder_init_stream(encoder, FLACWriteCallback, FLACSeekCallback, FLACTellCallback, nullptr, this);
 
 	}
-	void WriteInterleaved(size_t count, const float *interleaved) override
+	SampleFormat GetSampleFormat() const
 	{
-		MPT_ASSERT(settings.Format.GetSampleFormat().IsFloat());
-		WriteInterleavedConverted(count, reinterpret_cast<const std::byte*>(interleaved));
+		return settings.Format.GetSampleFormat();
 	}
-	void WriteInterleavedConverted(size_t frameCount, const std::byte *data) override
+	template <typename Tsample>
+	void WriteInterleavedInt(std::size_t frameCount, const Tsample *p)
 	{
+		MPT_ASSERT(settings.Format.GetSampleFormat() == SampleFormatTraits<Tsample>::sampleFormat());
 		sampleBuf.resize(frameCount * settings.Channels);
-		switch(settings.Format.GetSampleFormat().GetSampleSize())
+		for(std::size_t frame = 0; frame < frameCount; ++frame)
 		{
-			case 1:
+			for(int channel = 0; channel < settings.Channels; ++channel)
 			{
-				const int8 *p = reinterpret_cast<const int8*>(data);
-				for(std::size_t frame = 0; frame < frameCount; ++frame)
-				{
-					for(int channel = 0; channel < settings.Channels; ++channel)
-					{
-						sampleBuf[frame * settings.Channels + channel] = *p;
-						p++;
-					}
-				}
+				sampleBuf[frame * settings.Channels + channel] = *p;
+				p++;
 			}
-			break;
-			case 2:
-			{
-				const int16 *p = reinterpret_cast<const int16*>(data);
-				for(std::size_t frame = 0; frame < frameCount; ++frame)
-				{
-					for(int channel = 0; channel < settings.Channels; ++channel)
-					{
-						sampleBuf[frame * settings.Channels + channel] = *p;
-						p++;
-					}
-				}
-			}
-			break;
-			case 3:
-			{
-				const int24 *p = reinterpret_cast<const int24*>(data);
-				for(std::size_t frame = 0; frame < frameCount; ++frame)
-				{
-					for(int channel = 0; channel < settings.Channels; ++channel)
-					{
-						sampleBuf[frame * settings.Channels + channel] = *p;
-						p++;
-					}
-				}
-			}
-			break;
 		}
 		while(frameCount > 0)
 		{
@@ -179,6 +146,18 @@ public:
 			FLAC__stream_encoder_process_interleaved(encoder, sampleBuf.data(), frameCountChunk);
 			frameCount -= frameCountChunk;
 		}
+	}
+	void WriteInterleaved(std::size_t frameCount, const int8 *interleaved) override
+	{
+		WriteInterleavedInt(frameCount, interleaved);
+	}
+	void WriteInterleaved(std::size_t frameCount, const int16 *interleaved) override
+	{
+		WriteInterleavedInt(frameCount, interleaved);
+	}
+	void WriteInterleaved(std::size_t frameCount, const int24 *interleaved) override
+	{
+		WriteInterleavedInt(frameCount, interleaved);
 	}
 	void WriteFinalize() override
 	{

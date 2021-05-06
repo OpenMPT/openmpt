@@ -57,33 +57,51 @@ public:
 		fileWAV->StartChunk(RIFFChunk::iddata);
 
 	}
-	mpt::endian GetConvertedEndianness() const override
+	SampleFormat GetSampleFormat() const override
 	{
-		return mpt::endian::little;
+		return settings.Format.GetSampleFormat();
 	}
-	void WriteInterleaved(size_t count, const float *interleaved) override
+	void WriteInterleaved(std::size_t frameCount, const double *interleaved) override
 	{
-		MPT_ASSERT(settings.Format.GetSampleFormat().IsFloat());
-		MPT_MAYBE_CONSTANT_IF(mpt::endian_is_little())
-		{
-			WriteInterleavedConverted(count, reinterpret_cast<const std::byte*>(interleaved));
-		} else
-		{
-			std::vector<IEEE754binary32LE> frameData(settings.Channels);
-			for(std::size_t frame = 0; frame < count; ++frame)
-			{
-				for(int channel = 0; channel < settings.Channels; ++channel)
-				{
-					frameData[channel] = IEEE754binary32LE(interleaved[channel]);
-				}
-				fileWAV->Write(mpt::span(reinterpret_cast<const std::byte*>(frameData.data()), settings.Channels * settings.Format.GetSampleFormat().GetSampleSize()));
-				interleaved += settings.Channels;
-			}
-		}
+		fileWAV->WriteBeforeDirect();
+		auto result = WriteInterleavedLE(f, settings.Channels, settings.Format, frameCount, interleaved);
+		fileWAV->WriteAfterDirect(result.first, result.second);
 	}
-	void WriteInterleavedConverted(size_t frameCount, const std::byte *data) override
+	void WriteInterleaved(std::size_t frameCount, const float *interleaved) override
 	{
-		fileWAV->Write(mpt::span(data, frameCount * settings.Channels * settings.Format.GetSampleFormat().GetSampleSize()));
+		fileWAV->WriteBeforeDirect();
+		auto result = WriteInterleavedLE(f, settings.Channels, settings.Format, frameCount, interleaved);
+		fileWAV->WriteAfterDirect(result.first, result.second);
+	}
+	void WriteInterleaved(std::size_t frameCount, const int32 *interleaved) override
+	{
+		fileWAV->WriteBeforeDirect();
+		auto result = WriteInterleavedLE(f, settings.Channels, settings.Format, frameCount, interleaved);
+		fileWAV->WriteAfterDirect(result.first, result.second);
+	}
+	void WriteInterleaved(std::size_t frameCount, const int24 *interleaved) override
+	{
+		fileWAV->WriteBeforeDirect();
+		auto result = WriteInterleavedLE(f, settings.Channels, settings.Format, frameCount, interleaved);
+		fileWAV->WriteAfterDirect(result.first, result.second);
+	}
+	void WriteInterleaved(std::size_t frameCount, const int16 *interleaved) override
+	{
+		fileWAV->WriteBeforeDirect();
+		auto result = WriteInterleavedLE(f, settings.Channels, settings.Format, frameCount, interleaved);
+		fileWAV->WriteAfterDirect(result.first, result.second);
+	}
+	void WriteInterleaved(std::size_t frameCount, const int8 *interleaved) override
+	{
+		fileWAV->WriteBeforeDirect();
+		auto result = WriteInterleavedLE(f, settings.Channels, settings.Format, frameCount, interleaved);
+		fileWAV->WriteAfterDirect(result.first, result.second);
+	}
+	void WriteInterleaved(std::size_t frameCount, const uint8 *interleaved) override
+	{
+		fileWAV->WriteBeforeDirect();
+		auto result = WriteInterleavedLE(f, settings.Channels, settings.Format, frameCount, interleaved);
+		fileWAV->WriteAfterDirect(result.first, result.second);
 	}
 	void WriteCues(const std::vector<uint64> &cues) override
 	{

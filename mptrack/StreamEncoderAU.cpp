@@ -17,7 +17,6 @@
 #include "TrackerSettings.h"
 
 #include "../common/mptFileIO.h"
-#include "../soundbase/SampleFormatConverters.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -116,69 +115,41 @@ public:
 		}
 
 	}
-	mpt::endian GetConvertedEndianness() const override
+
+	SampleFormat GetSampleFormat() const override
 	{
-		return mpt::endian::big;
+		return settings.Format.GetSampleFormat();
 	}
-	void WriteInterleaved(size_t count, const float *interleaved) override
+
+	void WriteInterleaved(std::size_t frameCount, const double *interleaved) override
 	{
-		MPT_ASSERT(settings.Format.GetSampleFormat().IsFloat());
-		MPT_MAYBE_CONSTANT_IF(mpt::endian_is_big())
-		{
-			WriteInterleavedConverted(count, reinterpret_cast<const std::byte*>(interleaved));
-		} else
-		{
-			std::vector<IEEE754binary32BE> frameData(settings.Channels);
-			for(std::size_t frame = 0; frame < count; ++frame)
-			{
-				for(int channel = 0; channel < settings.Channels; ++channel)
-				{
-					frameData[channel] = IEEE754binary32BE(interleaved[channel]);
-				}
-				mpt::IO::WriteRaw(f, reinterpret_cast<const char*>(frameData.data()), settings.Channels * settings.Format.GetSampleFormat().GetSampleSize());
-				interleaved += settings.Channels;
-			}
-		}
+		WriteInterleavedBE(f, settings.Channels, settings.Format, frameCount, interleaved);
 	}
-	void WriteInterleavedConverted(size_t frameCount, const std::byte *data) override
+	void WriteInterleaved(std::size_t frameCount, const float *interleaved) override
 	{
-		if(settings.Format.encoding == Encoder::Format::Encoding::Alaw)
-		{
-			std::array<std::byte, mpt::IO::BUFFERSIZE_TINY> fbuf;
-			mpt::IO::WriteBuffer<std::ostream> bf{f, fbuf};
-			SC::EncodeALaw conv;
-			for(std::size_t frame = 0; frame < frameCount; ++frame)
-			{
-				for(uint16 channel = 0; channel < settings.Channels; ++channel)
-				{
-					int16be sample;
-					std::memcpy(&sample, data, sizeof(int16));
-					std::byte sampledata = conv(sample);
-					mpt::IO::WriteRaw(bf, &sampledata, 1);
-					data += sizeof(int16);
-				}
-			}
-		} else if(settings.Format.encoding == Encoder::Format::Encoding::ulaw)
-		{
-			std::array<std::byte, mpt::IO::BUFFERSIZE_TINY> fbuf;
-			mpt::IO::WriteBuffer<std::ostream> bf{f, fbuf};
-			SC::EncodeuLaw conv;
-			for(std::size_t frame = 0; frame < frameCount; ++frame)
-			{
-				for(uint16 channel = 0; channel < settings.Channels; ++channel)
-				{
-					int16be sample;
-					std::memcpy(&sample, data, sizeof(int16));
-					std::byte sampledata = conv(sample);
-					mpt::IO::WriteRaw(bf, &sampledata, 1);
-					data += sizeof(int16);
-				}
-			}
-		} else
-		{
-			mpt::IO::WriteRaw(f, data, frameCount * settings.Channels * settings.Format.GetSampleFormat().GetSampleSize());
-		}
+		WriteInterleavedBE(f, settings.Channels, settings.Format, frameCount, interleaved);
 	}
+	void WriteInterleaved(std::size_t frameCount, const int32 *interleaved) override
+	{
+		WriteInterleavedBE(f, settings.Channels, settings.Format, frameCount, interleaved);
+	}
+	void WriteInterleaved(std::size_t frameCount, const int24 *interleaved) override
+	{
+		WriteInterleavedBE(f, settings.Channels, settings.Format, frameCount, interleaved);
+	}
+	void WriteInterleaved(std::size_t frameCount, const int16 *interleaved) override
+	{
+		WriteInterleavedBE(f, settings.Channels, settings.Format, frameCount, interleaved);
+	}
+	void WriteInterleaved(std::size_t frameCount, const int8 *interleaved) override
+	{
+		WriteInterleavedBE(f, settings.Channels, settings.Format, frameCount, interleaved);
+	}
+	void WriteInterleaved(std::size_t frameCount, const uint8 *interleaved) override
+	{
+		WriteInterleavedBE(f, settings.Channels, settings.Format, frameCount, interleaved);
+	}
+
 	void WriteCues(const std::vector<uint64> &cues) override
 	{
 		MPT_UNREFERENCED_PARAMETER(cues);

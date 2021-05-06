@@ -369,6 +369,11 @@ public:
 	// Write a buffer to the file.
 	void Write(mpt::const_byte_span data);
 
+	// Use before writing raw data directly to the underlying stream s
+	void WriteBeforeDirect();
+	// Use after writing raw data directly to the underlying stream s
+	void WriteAfterDirect(bool success, std::size_t count);
+
 	// Write the WAV format to the file.
 	void WriteFormat(uint32 sampleRate, uint16 bitDepth, uint16 numChannels, WAVFormatChunk::SampleFormats encoding);
 	// Write text tags to the file.
