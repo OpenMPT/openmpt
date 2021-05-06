@@ -43,15 +43,7 @@ public:
 	}
 	mpt::endian GetConvertedEndianness() const override
 	{
-		if(settings.Format.endian == mpt::endian::big)
-		{
-			return mpt::endian::big;
-		}
-		if(settings.Format.endian == mpt::endian::little)
-		{
-			return mpt::endian::little;
-		}
-		return mpt::get_endian();
+		return settings.Format.endian;
 	}
 	void WriteInterleaved(size_t count, const float *interleaved) override
 	{
