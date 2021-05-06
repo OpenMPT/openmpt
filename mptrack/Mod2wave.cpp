@@ -1018,7 +1018,7 @@ CWaveConvertSettings::CWaveConvertSettings(SettingsContainer &conf, const std::v
 
 void CDoWaveConvert::Run()
 {
-	static std::byte buffer[MIXBUFFERSIZE * 4 * 4]; // channels * sizeof(biggestsample)
+	static std::byte buffer[MIXBUFFERSIZE * 4 * 8]; // channels * sizeof(biggestsample)
 	static MixSampleFloat floatbuffer[MIXBUFFERSIZE * 4]; // channels
 	static MixSampleInt mixbuffer[MIXBUFFERSIZE * 4]; // channels
 
