@@ -36,7 +36,7 @@ StoredTags::StoredTags(SettingsContainer &conf)
 }
 
 
-EncoderSettingsConf::EncoderSettingsConf(SettingsContainer &conf, const mpt::ustring &encoderName, bool cues, bool tags, uint32 samplerate, uint16 channels, Encoder::Mode mode, int bitrate, float quality, int format, int dither)
+EncoderSettingsConf::EncoderSettingsConf(SettingsContainer &conf, const mpt::ustring &encoderName, bool cues, bool tags, uint32 samplerate, uint16 channels, Encoder::Mode mode, int bitrate, float quality, Encoder::Format format, int dither)
 	: Cues(conf, U_("Export"), encoderName + U_("_") + U_("Cues"), cues)
 	, Tags(conf, U_("Export"), encoderName + U_("_") + U_("Tags"), tags)
 	, Samplerate(conf, U_("Export"), encoderName + U_("_") + U_("Samplerate"), samplerate)
@@ -44,7 +44,7 @@ EncoderSettingsConf::EncoderSettingsConf(SettingsContainer &conf, const mpt::ust
 	, Mode(conf, U_("Export"), encoderName + U_("_") + U_("Mode"), mode)
 	, Bitrate(conf, U_("Export"), encoderName + U_("_") + U_("Bitrate"), bitrate)
 	, Quality(conf, U_("Export"), encoderName + U_("_") + U_("Quality"), quality)
-	, Format(conf, U_("Export"), encoderName + U_("_") + U_("Format"), format)
+	, Format2(conf, U_("Export"), encoderName + U_("_") + U_("Format2"), format)
 	, Dither(conf, U_("Export"), encoderName + U_("_") + U_("Dither"), dither)
 {
 	return;
@@ -61,7 +61,7 @@ EncoderSettingsConf::operator Encoder::Settings() const
 	result.Mode = Mode;
 	result.Bitrate = Bitrate;
 	result.Quality = Quality;
-	result.Format = Format;
+	result.Format = Format2;
 	result.Dither = Dither;
 	return result;
 }

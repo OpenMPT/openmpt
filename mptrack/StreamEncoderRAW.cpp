@@ -28,32 +28,39 @@ class RawStreamWriter : public IAudioStreamEncoder
 private:
 	const RAWEncoder &enc;
 	std::ostream &f;
-	Encoder::Format formatInfo;
+	Encoder::Settings settings;
 
 public:
-	RawStreamWriter(const RAWEncoder &enc_, std::ostream &file, const Encoder::Settings &settings, const FileTags &tags)
+	RawStreamWriter(const RAWEncoder &enc_, std::ostream &file, const Encoder::Settings &settings_, const FileTags &tags)
 		: enc(enc_)
 		, f(file)
+		, settings(settings_)
 	{
-		formatInfo = enc.GetTraits().formats[settings.Format];
-		ASSERT(formatInfo.Sampleformat.IsValid());
-		ASSERT(formatInfo.Samplerate > 0);
-		ASSERT(formatInfo.Channels > 0);
-
+		MPT_ASSERT(settings.Format.GetSampleFormat().IsValid());
+		MPT_ASSERT(settings.Samplerate > 0);
+		MPT_ASSERT(settings.Channels > 0);
 		MPT_UNREFERENCED_PARAMETER(tags);
 	}
 	mpt::endian GetConvertedEndianness() const override
 	{
+		if(settings.Format.endian == mpt::endian::big)
+		{
+			return mpt::endian::big;
+		}
+		if(settings.Format.endian == mpt::endian::little)
+		{
+			return mpt::endian::little;
+		}
 		return mpt::get_endian();
 	}
 	void WriteInterleaved(size_t count, const float *interleaved) override
 	{
-		ASSERT(formatInfo.Sampleformat.IsFloat());
+		MPT_ASSERT(settings.Format.GetSampleFormat().IsFloat());
 		WriteInterleavedConverted(count, reinterpret_cast<const std::byte*>(interleaved));
 	}
 	void WriteInterleavedConverted(size_t frameCount, const std::byte *data) override
 	{
-		mpt::IO::WriteRaw(f, data, frameCount * formatInfo.Channels * formatInfo.Sampleformat.GetSampleSize());
+		mpt::IO::WriteRaw(f, data, frameCount * settings.Channels * settings.Format.GetSampleFormat().GetSampleSize());
 	}
 	void WriteCues(const std::vector<uint64> &cues) override
 	{
@@ -82,38 +89,23 @@ RAWEncoder::RAWEncoder()
 	traits.canCues = false;
 	traits.maxChannels = 4;
 	traits.samplerates = TrackerSettings::Instance().GetSampleRates();
-	traits.modes = Encoder::ModeEnumerated;
-	for(std::size_t i = 0; i < traits.samplerates.size(); ++i)
-	{
-		int samplerate = traits.samplerates[i];
-		for(int channels = 1; channels <= traits.maxChannels; channels *= 2)
-		{
-			const std::array<SampleFormat, 7> sampleFormats = { SampleFormat::Float64, SampleFormat::Float32, SampleFormat::Int32, SampleFormat::Int24, SampleFormat::Int16, SampleFormat::Int8, SampleFormat::Unsigned8 };
-			for(const auto sampleFormat : sampleFormats)
-			{
-				Encoder::Format format;
-				format.Samplerate = samplerate;
-				format.Channels = channels;
-				format.Sampleformat = sampleFormat;
-				if(sampleFormat.IsFloat())
-				{
-					format.Description = MPT_UFORMAT("{} Bit Floating Point Little-Endian")(sampleFormat.GetBitsPerSample());
-				} else if(sampleFormat.IsUnsigned())
-				{
-					format.Description = MPT_UFORMAT("{} Bit Little-Endian (unsigned)")(sampleFormat.GetBitsPerSample());
-				} else
-				{
-					format.Description = MPT_UFORMAT("{} Bit Little-Endian")(sampleFormat.GetBitsPerSample());
-				}
-				format.Bitrate = 0;
-				traits.formats.push_back(format);
-			}
-		}
-	}
+	traits.modes = Encoder::ModeLossless;
+	traits.formats.push_back({ Encoder::Format::Encoding::Float, 64, mpt::endian::little });
+	traits.formats.push_back({ Encoder::Format::Encoding::Float, 64, mpt::endian::big });
+	traits.formats.push_back({ Encoder::Format::Encoding::Float, 32, mpt::endian::little });
+	traits.formats.push_back({ Encoder::Format::Encoding::Float, 32, mpt::endian::big });
+	traits.formats.push_back({ Encoder::Format::Encoding::Integer, 32, mpt::endian::little });
+	traits.formats.push_back({ Encoder::Format::Encoding::Integer, 32, mpt::endian::big });
+	traits.formats.push_back({ Encoder::Format::Encoding::Integer, 24, mpt::endian::little });
+	traits.formats.push_back({ Encoder::Format::Encoding::Integer, 24, mpt::endian::big });
+	traits.formats.push_back({ Encoder::Format::Encoding::Integer, 16, mpt::endian::little });
+	traits.formats.push_back({ Encoder::Format::Encoding::Integer, 16, mpt::endian::big });
+	traits.formats.push_back({ Encoder::Format::Encoding::Integer, 8, mpt::endian::little });
+	traits.formats.push_back({ Encoder::Format::Encoding::Unsigned, 8, mpt::endian::little });
 	traits.defaultSamplerate = 48000;
 	traits.defaultChannels = 2;
-	traits.defaultMode = Encoder::ModeEnumerated;
-	traits.defaultFormat = 1;  // 32-bit float
+	traits.defaultMode = Encoder::ModeLossless;
+	traits.defaultFormat = { Encoder::Format::Encoding::Float, 32, mpt::endian::little };
 	SetTraits(traits);
 }
 

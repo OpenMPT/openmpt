@@ -500,69 +500,61 @@ void CWaveConvert::FillFormats()
 			}
 		}
 	}
-	if(encTraits->modes & Encoder::ModeEnumerated)
+	if(encTraits->modes & Encoder::ModeLossless)
 	{
+		bool allBig = true;
+		bool allLittle = true;
+		for(const auto &format : encTraits->formats)
+		{
+			if(format.endian != mpt::endian::little)
+			{
+				allLittle = false;
+			}
+			if(format.endian != mpt::endian::big)
+			{
+				allBig = false;
+			}
+		}
+		bool showEndian = !(allBig || allLittle);
 		for(std::size_t i = 0; i < encTraits->formats.size(); ++i)
 		{
 			const Encoder::Format &format = encTraits->formats[i];
-			if(static_cast<int32>(format.Samplerate) != samplerate || format.Channels != channels)
+			mpt::ustring description;
+			switch(format.encoding)
 			{
-				continue;
-			}
-			if(i > 0xffff)
-			{
-				// too may formats
+			case Encoder::Format::Encoding::Float:
+				description = MPT_UFORMAT("{} Bit Floating Point")(format.bits);
+				break;
+			case Encoder::Format::Encoding::Integer:
+				description = MPT_UFORMAT("{} Bit")(format.bits);
+				break;
+			case Encoder::Format::Encoding::Alaw:
+				description = U_("A-law");
+				break;
+			case Encoder::Format::Encoding::ulaw:
+				description = MPT_UTF8("\xce\xbc-law");
+				break;
+			case Encoder::Format::Encoding::Unsigned:
+				description = MPT_UFORMAT("{} Bit (unsigned)")(format.bits);
 				break;
 			}
-			int ndx = m_CbnSampleFormat.AddString(mpt::ToCString(format.Description));
-			m_CbnSampleFormat.SetItemData(ndx, i & 0xffff);
-			if(encSettings.Mode & Encoder::ModeEnumerated && (int)i == encSettings.Format)
+			if(showEndian && format.bits != 8)
+			{
+				switch(format.endian)
+				{
+				case mpt::endian::big:
+					description += U_(" Big-Endian");
+					break;
+				case mpt::endian::little:
+					description += U_(" Little-Endian");
+					break;
+				}
+			}
+			int ndx = m_CbnSampleFormat.AddString(mpt::ToCString(description));
+			m_CbnSampleFormat.SetItemData(ndx, format.AsInt());
+			if(encSettings.Mode & Encoder::ModeLossless && format == encSettings.Format2)
 			{
 				sel = ndx;
-			}
-		}
-		if(sel == -1 && encSettings.Mode & Encoder::ModeEnumerated && encTraits->defaultBitrate != 0)
-		{
-			// select enumerated format based on bitrate
-			for(int ndx = 0; ndx < m_CbnSampleFormat.GetCount(); ++ndx)
-			{
-				int i = static_cast<int>((m_CbnSampleFormat.GetItemData(ndx) >> 0) & 0xffff);
-				const Encoder::Format &format = encTraits->formats[i];
-				if(format.Bitrate != 0 && encSettings.Bitrate == format.Bitrate)
-				{
-					sel = ndx;
-				}
-			}
-			if(sel == -1)
-			{
-				// select enumerated format based on default bitrate
-				for(int ndx = 0; ndx < m_CbnSampleFormat.GetCount(); ++ndx)
-				{
-					int i = static_cast<int>((m_CbnSampleFormat.GetItemData(ndx) >> 0) & 0xffff);
-					const Encoder::Format &format = encTraits->formats[i];
-					if(format.Bitrate == encTraits->defaultBitrate)
-					{
-						sel = ndx;
-					}
-				}
-			}
-		}
-		if(sel == -1 && encSettings.Mode & Encoder::ModeEnumerated && encTraits->defaultBitrate == 0)
-		{
-			// select enumerated format based on sampleformat
-			for(int ndx = 0; ndx < m_CbnSampleFormat.GetCount(); ++ndx)
-			{
-				int i = static_cast<int>((m_CbnSampleFormat.GetItemData(ndx) >> 0) & 0xffff);
-				const Encoder::Format &format = encTraits->formats[i];
-				int32 currentFormat = encSettings.Format;
-				if(encSettings.Format < 0 || (std::size_t)currentFormat >= encTraits->formats.size())
-				{ // out of bounds
-					continue;
-				}
-				if(format.Sampleformat != SampleFormat::Invalid && encTraits->formats[currentFormat].Sampleformat == format.Sampleformat)
-				{
-					sel = ndx;
-				}
 			}
 		}
 	}
@@ -578,8 +570,8 @@ void CWaveConvert::FillDither()
 {
 	EncoderSettingsConf &encSettings = m_Settings.GetEncoderSettings();
 	m_CbnDither.CComboBox::ResetContent();
-	int format = m_CbnSampleFormat.GetItemData(m_CbnSampleFormat.GetCurSel()) & 0xffff;
-	if((encTraits->modes & Encoder::ModeEnumerated) && encTraits->formats[format].Sampleformat != SampleFormat::Invalid && !encTraits->formats[format].Sampleformat.IsFloat())
+	int format = m_CbnSampleFormat.GetItemData(m_CbnSampleFormat.GetCurSel()) & 0xffffff;
+	if((encTraits->modes & Encoder::ModeLossless) && Encoder::Format::FromInt(format).GetSampleFormat() != SampleFormat::Invalid && !Encoder::Format::FromInt(format).GetSampleFormat().IsFloat())
 	{
 		m_CbnDither.EnableWindow(TRUE);
 		for(int dither = 0; dither < NumDitherModes; ++dither)
@@ -880,20 +872,20 @@ void CWaveConvert::SaveEncoderSettings()
 	encSettings.Channels = static_cast<uint16>(m_CbnChannels.GetItemData(m_CbnChannels.GetCurSel()));
 	DWORD_PTR dwFormat = m_CbnSampleFormat.GetItemData(m_CbnSampleFormat.GetCurSel());
 
-	if(encTraits->modes & Encoder::ModeEnumerated)
+	if(encTraits->modes & Encoder::ModeLossless)
 	{
-		int format = (int)((dwFormat >> 0) & 0xffff);
-		if(encTraits->formats[format].Sampleformat == SampleFormat::Invalid)
+		int format = (int)((dwFormat >> 0) & 0xffffff);
+		if(Encoder::Format::FromInt(format).GetSampleFormat() == SampleFormat::Invalid)
 		{
 			m_Settings.FinalSampleFormat = SampleFormat::Float32;
 		} else
 		{
-			m_Settings.FinalSampleFormat = encTraits->formats[format].Sampleformat;
+			m_Settings.FinalSampleFormat = Encoder::Format::FromInt(format).GetSampleFormat();
 		}
 		encSettings.Dither = static_cast<int>(m_CbnDither.GetItemData(m_CbnDither.GetCurSel()));
-		encSettings.Format = format;
-		encSettings.Mode = Encoder::ModeEnumerated;
-		encSettings.Bitrate = encTraits->formats[format].Bitrate != 0 ? encTraits->formats[format].Bitrate : encTraits->defaultBitrate;
+		encSettings.Format2 = Encoder::Format::FromInt(format);
+		encSettings.Mode = Encoder::ModeLossless;
+		encSettings.Bitrate = 0;
 		encSettings.Quality = encTraits->defaultQuality;
 	} else
 	{
@@ -905,7 +897,7 @@ void CWaveConvert::SaveEncoderSettings()
 		encSettings.Mode = mode;
 		encSettings.Bitrate = bitrate;
 		encSettings.Quality = static_cast<float>(quality) * 0.01f;
-		encSettings.Format = -1;
+		encSettings.Format2 = { Encoder::Format::Encoding::Float, 32, mpt::endian::little };
 	}
 	
 	encSettings.Cues = IsDlgButtonChecked(IDC_CHECK3) ? true : false;

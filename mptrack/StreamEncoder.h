@@ -64,24 +64,109 @@ inline constexpr uint32 mpeg1layer3_samplerates [] = {
 namespace Encoder
 {
 
-	struct Format
-	{
-		uint32 Samplerate = 0;
-		int Channels = 0;
-		SampleFormat Sampleformat = SampleFormat::Invalid;
-
-		int Bitrate = 0;
-		mpt::ustring Description;
-	};
-
 	enum Mode
 	{
-		ModeCBR        = 1<<0,
-		ModeABR        = 1<<1,
-		ModeVBR        = 1<<2,
-		ModeQuality    = 1<<3,
-		ModeEnumerated = 1<<4,
-		ModeInvalid    = 0
+		ModeCBR      = 1<<0,
+		ModeABR      = 1<<1,
+		ModeVBR      = 1<<2,
+		ModeQuality  = 1<<3,
+		ModeLossless = 1<<4,
+		ModeInvalid  = 0
+	};
+
+	struct Format
+	{
+		enum class Encoding
+		{
+			Float = 1,
+			Integer = 2,
+			Alaw = 3,
+			ulaw = 4,
+			Unsigned = 5,
+		};
+		Encoding encoding;
+		uint8 bits;
+		mpt::endian endian;
+		bool operator==(const Format &other) const
+		{
+			return encoding == other.encoding && bits == other.bits && endian == other.endian;
+		}	
+		bool operator!=(const Format& other) const
+		{
+			return encoding != other.encoding || bits != other.bits || endian != other.endian;
+		}
+		int32 AsInt() const
+		{
+			return (static_cast<int32>(endian == mpt::endian::little) << 16) | (static_cast<int32>(encoding) << 8) | static_cast<int32>(bits);
+		}
+		static Format FromInt(int32 val)
+		{
+			Encoder::Format f;
+			f.bits = val & 0xff;
+			f.encoding = static_cast<Encoder::Format::Encoding>((val >> 8) & 0xff);
+			f.endian = ((val >> 16) & 0xff) ? mpt::endian::little : mpt::endian::big;
+			return f;
+		}
+		SampleFormat GetSampleFormat() const
+		{
+			SampleFormat result = SampleFormat::Invalid;
+			switch(encoding)
+			{
+			case Encoding::Float:
+				switch(bits)
+				{
+				case 32:
+					result = SampleFormat::Float32;
+					break;
+				case 64:
+					result = SampleFormat::Float64;
+					break;
+				}
+				break;
+			case Encoding::Integer:
+				switch(bits)
+				{
+				case 8:
+					result = SampleFormat::Int8;
+					break;
+				case 16:
+					result = SampleFormat::Int16;
+					break;
+				case 24:
+					result = SampleFormat::Int24;
+					break;
+				case 32:
+					result = SampleFormat::Int32;
+					break;
+				}
+				break;
+			case Encoding::Alaw:
+				switch (bits)
+				{
+				case 16:
+					result = SampleFormat::Int16;
+					break;
+				}
+				break;
+			case Encoding::ulaw:
+				switch (bits)
+				{
+				case 16:
+					result = SampleFormat::Int16;
+					break;
+				}
+				break;
+			case Encoding::Unsigned:
+				switch (bits)
+				{
+				case 8:
+					result = SampleFormat::Unsigned8;
+					break;
+				}
+				break;
+			}
+			return result;
+		}
 	};
 
 	struct Traits
@@ -104,15 +189,15 @@ namespace Encoder
 		
 		int modes = Encoder::ModeInvalid;
 		std::vector<int> bitrates;
-		std::vector<Encoder::Format> formats;
-		
+		std::vector<Format> formats;
+
 		uint32 defaultSamplerate = 48000;
 		uint16 defaultChannels = 2;
 
 		Encoder::Mode defaultMode = Encoder::ModeInvalid;
 		int defaultBitrate = 0;
 		float defaultQuality = 0.0f;
-		int defaultFormat = 0;
+		Format defaultFormat = { Encoder::Format::Encoding::Float, 32, mpt::endian::little };
 		int defaultDitherType = 1;
 	};
 
@@ -142,7 +227,7 @@ namespace Encoder
 		Encoder::Mode Mode;
 		int Bitrate;
 		float Quality;
-		int Format;
+		Encoder::Format Format;
 		int Dither;
 
 		StreamSettings Details;

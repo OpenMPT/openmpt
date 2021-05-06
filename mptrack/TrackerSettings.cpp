@@ -681,6 +681,129 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 		m_dwPatternSetup &= ~0x200;
 	}
 
+	// Export
+	if(storedVersion < MPT_V("1.30.00.38"))
+	{
+		{
+			conf.Write<mpt::ustring>(U_("Export"), U_("FLAC_Mode"), U_("Lossless"));
+			const int oldformat = conf.Read<int>(U_("Export"), U_("FLAC_Format"), 1);
+			Encoder::Format newformat = { Encoder::Format::Encoding::Integer, 24, mpt::get_endian() };
+			if (oldformat >= 0)
+			{
+				switch (oldformat % 3)
+				{
+				case 0:
+					newformat = { Encoder::Format::Encoding::Integer, 24, mpt::get_endian() };
+					break;
+				case 1:
+					newformat = { Encoder::Format::Encoding::Integer, 16, mpt::get_endian() };
+					break;
+				case 2:
+					newformat = { Encoder::Format::Encoding::Integer, 8, mpt::get_endian() };
+					break;
+				}
+			}
+			conf.Write<int32>(U_("Export"), U_("FLAC_Format2"), newformat.AsInt());
+			conf.Forget(U_("Export"), U_("FLAC_Format"));
+		}
+		{
+			conf.Write<mpt::ustring>(U_("Export"), U_("Wave_Mode"), U_("Lossless"));
+			const int oldformat = conf.Read<int>(U_("Export"), U_("Wave_Format"), 1);
+			Encoder::Format newformat = { Encoder::Format::Encoding::Float, 32, mpt::endian::little };
+			if (oldformat >= 0)
+			{
+				switch (oldformat % 6)
+				{
+				case 0:
+					newformat = { Encoder::Format::Encoding::Float, 64, mpt::endian::little };
+					break;
+				case 1:
+					newformat = { Encoder::Format::Encoding::Float, 32, mpt::endian::little };
+					break;
+				case 2:
+					newformat = { Encoder::Format::Encoding::Integer, 32, mpt::endian::little };
+					break;
+				case 3:
+					newformat = { Encoder::Format::Encoding::Integer, 24, mpt::endian::little };
+					break;
+				case 4:
+					newformat = { Encoder::Format::Encoding::Integer, 16, mpt::endian::little };
+					break;
+				case 5:
+					newformat = { Encoder::Format::Encoding::Unsigned, 8, mpt::endian::little };
+					break;
+				}
+			}
+			conf.Write<int32>(U_("Export"), U_("Wave_Format2"), newformat.AsInt());
+			conf.Forget(U_("Export"), U_("Wave_Format"));
+		}
+		{
+			conf.Write<mpt::ustring>(U_("Export"), U_("AU_Mode"), U_("Lossless"));
+			const int oldformat = conf.Read<int>(U_("Export"), U_("AU_Format"), 1);
+			Encoder::Format newformat = { Encoder::Format::Encoding::Float, 32, mpt::endian::big };
+			if(oldformat >= 0)
+			{
+				switch(oldformat % 6)
+				{
+				case 0:
+					newformat = { Encoder::Format::Encoding::Float, 64, mpt::endian::big };
+					break;
+				case 1:
+					newformat = { Encoder::Format::Encoding::Float, 32, mpt::endian::big };
+					break;
+				case 2:
+					newformat = { Encoder::Format::Encoding::Integer, 32, mpt::endian::big };
+					break;
+				case 3:
+					newformat = { Encoder::Format::Encoding::Integer, 24, mpt::endian::big };
+					break;
+				case 4:
+					newformat = { Encoder::Format::Encoding::Integer, 16, mpt::endian::big };
+					break;
+				case 5:
+					newformat = { Encoder::Format::Encoding::Integer, 8, mpt::endian::big };
+					break;
+				}
+			}
+			conf.Write<int32>(U_("Export"), U_("AU_Format2"), newformat.AsInt());
+			conf.Forget(U_("Export"), U_("AU_Format"));
+		}
+		{
+			conf.Write<mpt::ustring>(U_("Export"), U_("RAW_Mode"), U_("Lossless"));
+			const int oldformat = conf.Read<int>(U_("Export"), U_("RAW_Format"), 1);
+			Encoder::Format newformat = { Encoder::Format::Encoding::Float, 32, mpt::get_endian() };
+			if(oldformat >= 0)
+			{
+				switch(oldformat % 7)
+				{
+				case 0:
+					newformat = { Encoder::Format::Encoding::Float, 64, mpt::get_endian() };
+					break;
+				case 1:
+					newformat = { Encoder::Format::Encoding::Float, 32, mpt::get_endian() };
+					break;
+				case 2:
+					newformat = { Encoder::Format::Encoding::Integer, 32, mpt::get_endian() };
+					break;
+				case 3:
+					newformat = { Encoder::Format::Encoding::Integer, 24, mpt::get_endian() };
+					break;
+				case 4:
+					newformat = { Encoder::Format::Encoding::Integer, 16, mpt::get_endian() };
+					break;
+				case 5:
+					newformat = { Encoder::Format::Encoding::Integer, 8, mpt::get_endian() };
+					break;
+				case 6:
+					newformat = { Encoder::Format::Encoding::Unsigned, 8, mpt::get_endian() };
+					break;
+				}
+			}
+			conf.Write<int32>(U_("Export"), U_("RAW_Format2"), newformat.AsInt());
+			conf.Forget(U_("Export"), U_("RAW_Format"));
+		}
+	}
+
 #if defined(MPT_ENABLE_UPDATE)
 	// Update
 	if(storedVersion < MPT_V("1.28.00.39"))

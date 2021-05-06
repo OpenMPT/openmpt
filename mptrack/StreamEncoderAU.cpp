@@ -29,7 +29,7 @@ private:
 
 	const AUEncoder &enc;
 	std::ostream &f;
-	Encoder::Format formatInfo;
+	Encoder::Settings settings;
 
 private:
 	static std::string TagToAnnotation(const std::string & field, const mpt::ustring & tag)
@@ -42,15 +42,15 @@ private:
 	}
 
 public:
-	AUStreamWriter(const AUEncoder &enc_, std::ostream &file, const Encoder::Settings &settings, const FileTags &tags)
+	AUStreamWriter(const AUEncoder &enc_, std::ostream &file, const Encoder::Settings &settings_, const FileTags &tags)
 		: enc(enc_)
 		, f(file)
+		, settings(settings_)
 	{
 
-		formatInfo = enc.GetTraits().formats[settings.Format];
-		MPT_ASSERT(formatInfo.Sampleformat.IsValid());
-		MPT_ASSERT(formatInfo.Samplerate > 0);
-		MPT_ASSERT(formatInfo.Channels > 0);
+		MPT_ASSERT(settings.Format.GetSampleFormat().IsValid());
+		MPT_ASSERT(settings.Samplerate > 0);
+		MPT_ASSERT(settings.Channels > 0);
 
 		std::string annotation;
 		std::size_t annotationSize = 0;
@@ -79,35 +79,28 @@ public:
 		mpt::IO::WriteIntBE<uint32>(f, mpt::saturate_cast<uint32>(24u + annotationTotalSize));
 		mpt::IO::WriteIntBE<uint32>(f, ~uint32(0));
 		uint32 encoding = 0;
-		if(formatInfo.Bitrate < 0)
+		if(settings.Format.encoding == Encoder::Format::Encoding::Float)
 		{
-			MPT_ASSERT(formatInfo.Sampleformat == SampleFormat::Int16);
-			if(formatInfo.Bitrate == -1)
-			{ // A-law
-				encoding = 27;
-			} else
-			{ // u-law
-				encoding = 1;
+			switch(settings.Format.bits)
+			{
+			case 32: encoding = 6; break;
+			case 64: encoding = 7; break;
 			}
-		} else
+		} else if(settings.Format.encoding == Encoder::Format::Encoding::Integer)
 		{
-			if(formatInfo.Sampleformat.IsFloat())
+			switch(settings.Format.bits)
 			{
-				switch(formatInfo.Sampleformat.GetBitsPerSample())
-				{
-				case 32: encoding = 6; break;
-				case 64: encoding = 7; break;
-				}
-			} else
-			{
-				switch(formatInfo.Sampleformat.GetBitsPerSample())
-				{
-				case  8: encoding = 2; break;
-				case 16: encoding = 3; break;
-				case 24: encoding = 4; break;
-				case 32: encoding = 5; break;
-				}
+			case  8: encoding = 2; break;
+			case 16: encoding = 3; break;
+			case 24: encoding = 4; break;
+			case 32: encoding = 5; break;
 			}
+		} else if(settings.Format.encoding == Encoder::Format::Encoding::Alaw)
+		{
+			encoding = 27;
+		} else if (settings.Format.encoding == Encoder::Format::Encoding::ulaw)
+		{
+			encoding = 1;
 		}
 		mpt::IO::WriteIntBE<uint32>(f, encoding);
 		mpt::IO::WriteIntBE<uint32>(f, settings.Samplerate);
@@ -129,61 +122,57 @@ public:
 	}
 	void WriteInterleaved(size_t count, const float *interleaved) override
 	{
-		MPT_ASSERT(formatInfo.Sampleformat.IsFloat());
+		MPT_ASSERT(settings.Format.GetSampleFormat().IsFloat());
 		MPT_MAYBE_CONSTANT_IF(mpt::endian_is_big())
 		{
 			WriteInterleavedConverted(count, reinterpret_cast<const std::byte*>(interleaved));
 		} else
 		{
-			std::vector<IEEE754binary32BE> frameData(formatInfo.Channels);
+			std::vector<IEEE754binary32BE> frameData(settings.Channels);
 			for(std::size_t frame = 0; frame < count; ++frame)
 			{
-				for(int channel = 0; channel < formatInfo.Channels; ++channel)
+				for(int channel = 0; channel < settings.Channels; ++channel)
 				{
 					frameData[channel] = IEEE754binary32BE(interleaved[channel]);
 				}
-				mpt::IO::WriteRaw(f, reinterpret_cast<const char*>(frameData.data()), formatInfo.Channels * formatInfo.Sampleformat.GetSampleSize());
-				interleaved += formatInfo.Channels;
+				mpt::IO::WriteRaw(f, reinterpret_cast<const char*>(frameData.data()), settings.Channels * settings.Format.GetSampleFormat().GetSampleSize());
+				interleaved += settings.Channels;
 			}
 		}
 	}
 	void WriteInterleavedConverted(size_t frameCount, const std::byte *data) override
 	{
-		if(formatInfo.Bitrate < 0)
+		if(settings.Format.encoding == Encoder::Format::Encoding::Alaw)
 		{
-			MPT_ASSERT(formatInfo.Sampleformat == SampleFormat::Int16);
-			if(formatInfo.Bitrate == -1)
+			SC::EncodeALaw conv;
+			for(std::size_t frame = 0; frame < frameCount; ++frame)
 			{
-				SC::EncodeALaw conv;
-				for(std::size_t frame = 0; frame < frameCount; ++frame)
+				for(uint16 channel = 0; channel < settings.Channels; ++channel)
 				{
-					for(int channel = 0; channel < formatInfo.Channels; ++channel)
-					{
-						int16be sample;
-						std::memcpy(&sample, data, sizeof(int16));
-						std::byte sampledata = conv(sample);
-						mpt::IO::WriteRaw(f, &sampledata, 1);
-						data += sizeof(int16);
-					}
+					int16be sample;
+					std::memcpy(&sample, data, sizeof(int16));
+					std::byte sampledata = conv(sample);
+					mpt::IO::WriteRaw(f, &sampledata, 1);
+					data += sizeof(int16);
 				}
-			} else
+			}
+		} else if(settings.Format.encoding == Encoder::Format::Encoding::ulaw)
+		{
+			SC::EncodeuLaw conv; 
+			for(std::size_t frame = 0; frame < frameCount; ++frame)
 			{
-				SC::EncodeuLaw conv; 
-				for(std::size_t frame = 0; frame < frameCount; ++frame)
+				for(uint16 channel = 0; channel < settings.Channels; ++channel)
 				{
-					for(int channel = 0; channel < formatInfo.Channels; ++channel)
-					{
-						int16be sample;
-						std::memcpy(&sample, data, sizeof(int16));
-						std::byte sampledata = conv(sample);
-						mpt::IO::WriteRaw(f, &sampledata, 1);
-						data += sizeof(int16);
-					}
+					int16be sample;
+					std::memcpy(&sample, data, sizeof(int16));
+					std::byte sampledata = conv(sample);
+					mpt::IO::WriteRaw(f, &sampledata, 1);
+					data += sizeof(int16);
 				}
 			}
 		} else
 		{
-			mpt::IO::WriteRaw(f, data, frameCount * formatInfo.Channels * formatInfo.Sampleformat.GetSampleSize());
+			mpt::IO::WriteRaw(f, data, frameCount * settings.Channels * settings.Format.GetSampleFormat().GetSampleSize());
 		}
 	}
 	void WriteCues(const std::vector<uint64> &cues) override
@@ -213,53 +202,19 @@ AUEncoder::AUEncoder()
 	traits.canCues = false;
 	traits.maxChannels = 4;
 	traits.samplerates = TrackerSettings::Instance().GetSampleRates();
-	traits.modes = Encoder::ModeEnumerated;
-	for(std::size_t i = 0; i < traits.samplerates.size(); ++i)
-	{
-		int samplerate = traits.samplerates[i];
-		for(int channels = 1; channels <= traits.maxChannels; channels *= 2)
-		{
-			const std::array<SampleFormat, 6> sampleFormats = { SampleFormat::Float64, SampleFormat::Float32, SampleFormat::Int32, SampleFormat::Int24, SampleFormat::Int16, SampleFormat::Int8 };
-			for(const auto sampleFormat : sampleFormats)
-			{
-				Encoder::Format format;
-				format.Samplerate = samplerate;
-				format.Channels = channels;
-				format.Sampleformat = sampleFormat;
-				if(sampleFormat.IsFloat())
-				{
-					format.Description = MPT_UFORMAT("Floating Point ({} Bit)")(sampleFormat.GetBitsPerSample());
-				} else
-				{
-					format.Description = MPT_UFORMAT("{} Bit")(sampleFormat.GetBitsPerSample());
-				}
-				format.Bitrate = 0;
-				traits.formats.push_back(format);
-			}
-			{
-				Encoder::Format format;
-				format.Samplerate = samplerate;
-				format.Channels = channels;
-				format.Sampleformat = SampleFormat::Int16;
-				format.Description = U_("A-law");
-				format.Bitrate = -1;
-				traits.formats.push_back(format);
-			}
-			{
-				Encoder::Format format;
-				format.Samplerate = samplerate;
-				format.Channels = channels;
-				format.Sampleformat = SampleFormat::Int16;
-				format.Description = MPT_UTF8("\xce\xbc-law");
-				format.Bitrate = -2;
-				traits.formats.push_back(format);
-			}
-		}
-	}
+	traits.modes = Encoder::ModeLossless;
+	traits.formats.push_back({ Encoder::Format::Encoding::Float, 64, mpt::endian::big });
+	traits.formats.push_back({ Encoder::Format::Encoding::Float, 32, mpt::endian::big });
+	traits.formats.push_back({ Encoder::Format::Encoding::Integer, 32, mpt::endian::big });
+	traits.formats.push_back({ Encoder::Format::Encoding::Integer, 24, mpt::endian::big });
+	traits.formats.push_back({ Encoder::Format::Encoding::Integer, 16, mpt::endian::big });
+	traits.formats.push_back({ Encoder::Format::Encoding::Integer, 8, mpt::endian::big });
+	traits.formats.push_back({ Encoder::Format::Encoding::Alaw, 16, mpt::endian::big });
+	traits.formats.push_back({ Encoder::Format::Encoding::ulaw, 16, mpt::endian::big });
 	traits.defaultSamplerate = 48000;
 	traits.defaultChannels = 2;
-	traits.defaultMode = Encoder::ModeEnumerated;
-	traits.defaultFormat = 1;  // 32-bit float
+	traits.defaultMode = Encoder::ModeLossless;
+	traits.defaultFormat = { Encoder::Format::Encoding::Float, 32, mpt::endian::big };
 	SetTraits(traits);
 }
 

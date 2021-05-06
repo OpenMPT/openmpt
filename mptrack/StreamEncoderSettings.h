@@ -28,7 +28,7 @@ template<> inline SettingValue ToSettingValue(const Encoder::Mode &val)
 	case Encoder::ModeABR: return SettingValue(U_("ABR"), "Encoder::Mode"); break;
 	case Encoder::ModeVBR: return SettingValue(U_("VBR"), "Encoder::Mode"); break;
 	case Encoder::ModeQuality: return SettingValue(U_("Quality"), "Encoder::Mode"); break;
-	case Encoder::ModeEnumerated: return SettingValue(U_("Enumerated"), "Encoder::Mode"); break;
+	case Encoder::ModeLossless: return SettingValue(U_("Lossless"), "Encoder::Mode"); break;
 	default: return SettingValue(U_("Invalid"), "Encoder::Mode"); break;
 	}
 }
@@ -40,8 +40,19 @@ template<> inline Encoder::Mode FromSettingValue(const SettingValue &val)
 	else if(val.as<mpt::ustring>() == U_("ABR")) { return Encoder::ModeABR; }
 	else if(val.as<mpt::ustring>() == U_("VBR")) { return Encoder::ModeVBR; }
 	else if(val.as<mpt::ustring>() == U_("Quality")) { return Encoder::ModeQuality; }
-	else if(val.as<mpt::ustring>() == U_("Enumerated")) { return Encoder::ModeEnumerated; }
+	else if(val.as<mpt::ustring>() == U_("Lossless")) { return Encoder::ModeLossless; }
 	else { return Encoder::ModeInvalid; }
+}
+
+
+template<> inline SettingValue ToSettingValue(const Encoder::Format &val)
+{
+	return SettingValue(val.AsInt(), "Encoder::Format");
+}
+template<> inline Encoder::Format FromSettingValue(const SettingValue &val)
+{
+	MPT_ASSERT(val.GetTypeTag() == "Encoder::Format");
+	return Encoder::Format::FromInt(val.as<int32>());
 }
 
 
@@ -72,10 +83,10 @@ struct EncoderSettingsConf
 	Setting<Encoder::Mode> Mode;
 	Setting<int> Bitrate;
 	Setting<float> Quality;
-	Setting<int> Format;
+	Setting<Encoder::Format> Format2;
 	Setting<int> Dither;
 
-	EncoderSettingsConf(SettingsContainer &conf, const mpt::ustring &encoderName, bool cues, bool tags, uint32 samplerate, uint16 channels, Encoder::Mode mode, int bitrate, float quality, int format, int dither);
+	EncoderSettingsConf(SettingsContainer &conf, const mpt::ustring &encoderName, bool cues, bool tags, uint32 samplerate, uint16 channels, Encoder::Mode mode, int bitrate, float quality, Encoder::Format format, int dither);
 
 	explicit operator Encoder::Settings() const;
 
