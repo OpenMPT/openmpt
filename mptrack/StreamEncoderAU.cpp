@@ -144,6 +144,8 @@ public:
 	{
 		if(settings.Format.encoding == Encoder::Format::Encoding::Alaw)
 		{
+			std::array<std::byte, mpt::IO::BUFFERSIZE_TINY> fbuf;
+			mpt::IO::WriteBuffer<std::ostream> bf{f, fbuf};
 			SC::EncodeALaw conv;
 			for(std::size_t frame = 0; frame < frameCount; ++frame)
 			{
@@ -152,13 +154,15 @@ public:
 					int16be sample;
 					std::memcpy(&sample, data, sizeof(int16));
 					std::byte sampledata = conv(sample);
-					mpt::IO::WriteRaw(f, &sampledata, 1);
+					mpt::IO::WriteRaw(bf, &sampledata, 1);
 					data += sizeof(int16);
 				}
 			}
 		} else if(settings.Format.encoding == Encoder::Format::Encoding::ulaw)
 		{
-			SC::EncodeuLaw conv; 
+			std::array<std::byte, mpt::IO::BUFFERSIZE_TINY> fbuf;
+			mpt::IO::WriteBuffer<std::ostream> bf{f, fbuf};
+			SC::EncodeuLaw conv;
 			for(std::size_t frame = 0; frame < frameCount; ++frame)
 			{
 				for(uint16 channel = 0; channel < settings.Channels; ++channel)
@@ -166,7 +170,7 @@ public:
 					int16be sample;
 					std::memcpy(&sample, data, sizeof(int16));
 					std::byte sampledata = conv(sample);
-					mpt::IO::WriteRaw(f, &sampledata, 1);
+					mpt::IO::WriteRaw(bf, &sampledata, 1);
 					data += sizeof(int16);
 				}
 			}
