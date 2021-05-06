@@ -1068,7 +1068,7 @@ protected:
 	int SetupChannelFilter(ModChannel &chn, bool bReset, int envModifier = 256) const;
 
 	// Low-Level effect processing
-	void DoFreqSlide(ModChannel &chn, int32 &period, int32 amount) const;
+	void DoFreqSlide(ModChannel &chn, int32 &period, int32 amount, bool isTonePorta = false) const;
 	void UpdateTimeSignature();
 
 public:

@@ -4060,12 +4060,12 @@ void CSoundFile::TonePortamento(ModChannel &chn, uint32 param) const
 			delta = -delta;
 		if(chn.nPeriod < chn.nPortamentoDest)
 		{
-			DoFreqSlide(chn, chn.nPeriod, delta);
+			DoFreqSlide(chn, chn.nPeriod, delta, true);
 			if(chn.nPeriod > chn.nPortamentoDest)
 				chn.nPeriod = chn.nPortamentoDest;
 		} else if(chn.nPeriod > chn.nPortamentoDest)
 		{
-			DoFreqSlide(chn, chn.nPeriod, -delta);
+			DoFreqSlide(chn, chn.nPeriod, -delta, true);
 			if(chn.nPeriod < chn.nPortamentoDest)
 				chn.nPeriod = chn.nPortamentoDest;
 		}
@@ -5514,7 +5514,7 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, int offset)
 // Execute a frequency slide on given channel.
 // Positive amounts increase the frequency, negative amounts decrease it.
 // The period or frequency that is read and written is in the period variable, chn.nPeriod is not touched.
-void CSoundFile::DoFreqSlide(ModChannel &chn, int32 &period, int32 amount) const
+void CSoundFile::DoFreqSlide(ModChannel &chn, int32 &period, int32 amount, bool isTonePorta) const
 {
 	if(!period)
 		return;
@@ -5563,6 +5563,7 @@ void CSoundFile::DoFreqSlide(ModChannel &chn, int32 &period, int32 amount) const
 		}
 	} else if(!m_SongFlags[SONG_LINEARSLIDES] && m_playBehaviour[kPeriodsAreHertz])
 	{
+		// IT Amiga slides
 		if(amount < 0)
 		{
 			// Go down
@@ -5573,9 +5574,16 @@ void CSoundFile::DoFreqSlide(ModChannel &chn, int32 &period, int32 amount) const
 			const auto periodDiv = 1712 * 8363 - Util::mul32to64(period, amount);
 			if(periodDiv <= 0)
 			{
-				period = 0;
-				chn.nFadeOutVol = 0;
-				chn.dwFlags.set(CHN_NOTEFADE | CHN_FASTVOLRAMP);
+				if(isTonePorta)
+				{
+					period = int32_max;
+					return;
+				} else
+				{
+					period = 0;
+					chn.nFadeOutVol = 0;
+					chn.dwFlags.set(CHN_NOTEFADE | CHN_FASTVOLRAMP);
+				}
 				return;
 			}
 			period = mpt::saturate_cast<int32>(Util::mul32to64_unsigned(1712 * 8363, period) / periodDiv);
@@ -5587,7 +5595,7 @@ void CSoundFile::DoFreqSlide(ModChannel &chn, int32 &period, int32 amount) const
 	if(period < 1)
 	{
 		period = 1;
-		if(GetType() == MOD_TYPE_S3M)
+		if(GetType() == MOD_TYPE_S3M && !isTonePorta)
 		{
 			chn.nFadeOutVol = 0;
 			chn.dwFlags.set(CHN_NOTEFADE | CHN_FASTVOLRAMP);
