@@ -447,6 +447,20 @@ struct make_be {
 	using type = packed<typename std::remove_const<T>::type, BigEndian_tag>;
 };
 
+template <mpt::endian endian, typename T>
+struct make_endian {
+};
+
+template <typename T>
+struct make_endian<mpt::endian::little, T> {
+	using type = packed<typename std::remove_const<T>::type, LittleEndian_tag>;
+};
+
+template <typename T>
+struct make_endian<mpt::endian::big, T> {
+	using type = packed<typename std::remove_const<T>::type, BigEndian_tag>;
+};
+
 template <typename T>
 MPT_CONSTEXPR20_FUN auto as_le(T v) noexcept -> typename mpt::make_le<typename std::remove_const<T>::type>::type {
 	typename mpt::make_le<typename std::remove_const<T>::type>::type res{};
