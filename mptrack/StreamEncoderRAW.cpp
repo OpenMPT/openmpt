@@ -113,6 +113,8 @@ RAWEncoder::RAWEncoder()
 	traits.formats.push_back({ Encoder::Format::Encoding::Integer, 16, mpt::endian::big });
 	traits.formats.push_back({ Encoder::Format::Encoding::Integer, 8, mpt::endian::little });
 	traits.formats.push_back({ Encoder::Format::Encoding::Unsigned, 8, mpt::endian::little });
+	traits.formats.push_back({ Encoder::Format::Encoding::Alaw, 16, mpt::get_endian() });
+	traits.formats.push_back({ Encoder::Format::Encoding::ulaw, 16, mpt::get_endian() });
 	traits.defaultSamplerate = 48000;
 	traits.defaultChannels = 2;
 	traits.defaultMode = Encoder::ModeLossless;

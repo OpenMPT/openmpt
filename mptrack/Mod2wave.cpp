@@ -540,7 +540,7 @@ void CWaveConvert::FillFormats()
 				description = MPT_UFORMAT("{} Bit (unsigned)")(format.bits);
 				break;
 			}
-			if(showEndian && format.bits != 8)
+			if(showEndian && format.bits != 8 && format.encoding != Encoder::Format::Encoding::Alaw && format.encoding != Encoder::Format::Encoding::ulaw)
 			{
 				switch(format.endian)
 				{
