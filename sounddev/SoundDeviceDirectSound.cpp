@@ -31,45 +31,6 @@ namespace SoundDevice {
 
 
 
-namespace Legacy
-{
-static BOOL WINAPI DSEnumCallbackGetDefaultName(GUID * lpGuid, LPCTSTR lpstrDescription, LPCTSTR, LPVOID lpContext)
-{
-	mpt::ustring & name = *reinterpret_cast<mpt::ustring*>(lpContext);
-	if(!lpGuid)
-	{
-		if(lpstrDescription)
-		{
-			name = mpt::ToUnicode(mpt::winstring(lpstrDescription));
-			return FALSE;
-		}
-	}
-	return TRUE;
-}
-mpt::ustring GetDirectSoundDefaultDeviceIdentifierPre_1_25_00_04()
-{
-	mpt::ustring name = mpt::ustring();
-	ComponentHandle<ComponentDirectSound> drectSound;
-	if(!IsComponentAvailable(drectSound))
-	{
-		return name;
-	}
-	DirectSoundEnumerate(DSEnumCallbackGetDefaultName, &name);
-	if(name.empty())
-	{
-		return name;
-	}
-	std::string utf8String = mpt::ToCharset(mpt::Charset::UTF8, name);
-	mpt::ustring hexString = Util::BinToHex(mpt::as_span(utf8String));
-	return U_("DirectSound") + U_("_") + hexString;
-}
-mpt::ustring GetDirectSoundDefaultDeviceIdentifier_1_25_00_04()
-{
-	return U_("DirectSound_{00000000-0000-0000-0000-000000000000}");
-}
-}
-
-
 namespace
 {
 struct DevicesAndLoggerAndSysInfo
