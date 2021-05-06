@@ -91,7 +91,7 @@ SoundDevice::IBase* Manager::ConstructSoundDevice(const SoundDevice::Info &info,
 }
 
 
-void Manager::ReEnumerate()
+void Manager::ReEnumerate(bool firstRun)
 {
 	MPT_TRACE_SCOPE();
 	m_SoundDevices.clear();
@@ -101,7 +101,10 @@ void Manager::ReEnumerate()
 	m_DeviceDynamicCaps.clear();
 
 #ifdef MPT_WITH_PORTAUDIO
-	m_PortAudio.Reload();
+	if(!firstRun)
+	{
+		m_PortAudio.Reload();
+	}
 #endif // MPT_WITH_PORTAUDIO
 
 #if defined(MPT_ENABLE_PULSEAUDIO_FULL)
@@ -464,7 +467,7 @@ Manager::Manager(SoundDevice::SysInfo sysInfo, SoundDevice::AppInfo appInfo)
 	: m_SysInfo(sysInfo)
 	, m_AppInfo(appInfo)
 {
-	ReEnumerate();
+	ReEnumerate(true);
 }
 
 
