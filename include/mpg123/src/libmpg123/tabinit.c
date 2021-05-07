@@ -7,45 +7,18 @@
 */
 
 #include "mpg123lib_intern.h"
+#if 0 // OpenMPT
 #include "debug.h"
+#endif // OpenMPT
 
-/* That altivec alignment part here should not hurt generic code, I hope */
-#ifdef OPT_ALTIVEC
-static ALIGNED(16) real cos64[16];
-static ALIGNED(16) real cos32[8];
-static ALIGNED(16) real cos16[4];
-static ALIGNED(16) real cos8[2];
-static ALIGNED(16) real cos4[1];
-#elif defined(REAL_IS_FIXED) && defined(PRECALC_TABLES)
-static real cos64[16] = 
-{
-	8398725,8480395,8647771,8909416,9279544,9780026,10443886,11321405,
-	12491246,14081950,16316987,19619946,24900150,34523836,57170182,170959967
-};
-static real cos32[8] =
-{
-	8429197,8766072,9511743,10851869,13223040,17795219,28897867,85583072
-};
-static real cos16[4] =
-{
-	8552951,10088893,15099095,42998586
-};
-static real cos8[2] =
-{
-	9079764,21920489
-};
-static real cos4[1] =
-{
-	11863283
-};
-#else
-static real cos64[16],cos32[8],cos16[4],cos8[2],cos4[1];
-#endif
+// The precomputed cos tables.
+#include "costabs.h"
+#if 1 // OpenMPT
+#include "debug.h" // OpenMPT
+#endif // OpenMPT
+const real *pnts[] = { cos64,cos32,cos16,cos8,cos4 };
 
-real *pnts[] = { cos64,cos32,cos16,cos8,cos4 };
-
-
-static long intwinbase[] = {
+static const long intwinbase[] = {
      0,    -1,    -1,    -1,    -1,    -1,    -1,    -2,    -2,    -2,
     -2,    -3,    -3,    -4,    -4,    -5,    -5,    -6,    -7,    -7,
     -8,    -9,   -10,   -11,   -13,   -14,   -16,   -17,   -19,   -21,
@@ -72,22 +45,6 @@ static long intwinbase[] = {
  48390, 50137, 51853, 53534, 55178, 56778, 58333, 59838, 61289, 62684,
  64019, 65290, 66494, 67629, 68692, 69679, 70590, 71420, 72169, 72835,
  73415, 73908, 74313, 74630, 74856, 74992, 75038 };
-
-void prepare_decode_tables()
-{
-#if !defined(REAL_IS_FIXED) || !defined(PRECALC_TABLES)
-  int i,k,kr,divv;
-  real *costab;
-
-  for(i=0;i<5;i++)
-  {
-    kr=0x10>>i; divv=0x40>>i;
-    costab = pnts[i];
-    for(k=0;k<kr;k++)
-      costab[k] = DOUBLE_TO_REAL(1.0 / (2.0 * cos(M_PI * ((double) k * 2.0 + 1.0) / (double) divv)));
-  }
-#endif
-}
 
 #ifdef OPT_MMXORSSE
 #if !defined(OPT_X86_64) && !defined(OPT_NEON) && !defined(OPT_NEON64) && !defined(OPT_AVX)

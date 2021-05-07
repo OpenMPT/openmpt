@@ -453,7 +453,7 @@ static void process_text(mpg123_handle *fr, unsigned char *realdata, size_t real
 		if(NOQUIET) error("Unable to attach new text!");
 		return;
 	}
-	mdebug("process_text: (over)writing entry with ID %s", t->id
+	mdebug("process_text: (over)writing entry with ID %s", t->id[0]
 	?	(char[5]) { t->id[0], t->id[1], t->id[2], t->id[3], 0 }
 	:	"(nil)" );
 	memcpy(t->id, id, 4);

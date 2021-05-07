@@ -111,6 +111,10 @@ typedef ptrdiff_t ssize_t;
 
 /* A safe realloc also for very old systems where realloc(NULL, size) returns NULL. */
 void *safe_realloc(void *ptr, size_t size);
+// Also freeing ptr if result is NULL. You can do
+// ptr = safer_realloc(ptr, size)
+// Also, ptr = safer_realloc(ptr, 0) will do free(ptr); ptr=NULL;.
+void *safer_realloc(void *ptr, size_t size);
 #ifndef HAVE_STRERROR
 const char *strerror(int errnum);
 #endif
@@ -193,8 +197,8 @@ int win32_wide_utf8(const wchar_t * const wptr, char **mbptr, size_t * buflen);
  * win32_mbc2uni
  * Converts a null terminated UTF-8 string to a UCS-2 equivalent.
  * Caller is supposed to free allocated buffer.
- * @param[out] mbptr Pointer to multibyte string.
- * @param[in] wptr Pointer to wide string.
+ * @param[in] mbptr Pointer to multibyte string.
+ * @param[out] wptr Pointer to wide string.
  * @param[out] buflen Optional parameter for length of allocated buffer.
  * @return status of WideCharToMultiByte conversion.
  *

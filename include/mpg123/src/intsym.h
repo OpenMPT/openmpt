@@ -233,7 +233,6 @@
 #define dectype INT123_dectype
 #define defdec INT123_defdec
 #define decclass INT123_decclass
-#define check_decoders INT123_check_decoders
 #define read_frame_init INT123_read_frame_init
 #define frame_bitrate INT123_frame_bitrate
 #define frame_freq INT123_frame_freq
