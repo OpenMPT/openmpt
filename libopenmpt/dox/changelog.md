@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.4.21-pre
 
+ *  mpg123: Update to v1.27.0 (2021-05-07).
+
 ### libopenmpt 0.4.20 (2021-04-11)
 
  *  [**Sec**] Possible null-pointer dereference read caused by a sequence of
