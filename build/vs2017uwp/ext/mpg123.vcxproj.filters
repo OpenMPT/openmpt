@@ -7,12 +7,6 @@
     <Filter Include="include\mpg123">
       <UniqueIdentifier>{DFE78AE5-CBB5-7EEB-B449-EF11A0B65A50}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\mpg123\ports">
-      <UniqueIdentifier>{D3379B1E-BFC6-24E8-68E5-38E35453358E}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\mpg123\ports\MSVC++">
-      <UniqueIdentifier>{5E17D384-CA24-016B-530B-FD55BF17CD21}</UniqueIdentifier>
-    </Filter>
     <Filter Include="include\mpg123\src">
       <UniqueIdentifier>{832A9EFE-6F0E-5F54-D86E-59A7C47149D6}</UniqueIdentifier>
     </Filter>
@@ -24,9 +18,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\include\mpg123\ports\MSVC++\msvc.c">
-      <Filter>include\mpg123\ports\MSVC++</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\include\mpg123\src\compat\compat.c">
       <Filter>include\mpg123\src\compat</Filter>
     </ClCompile>

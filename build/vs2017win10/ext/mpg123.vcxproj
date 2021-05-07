@@ -1147,7 +1147,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\include\mpg123\ports\MSVC++\msvc.c" />
     <ClCompile Include="..\..\..\include\mpg123\src\compat\compat.c" />
     <ClCompile Include="..\..\..\include\mpg123\src\compat\compat_str.c" />
     <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\dct64.c" />
