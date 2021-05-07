@@ -645,10 +645,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\include\mpg123\ports\MSVC++\msvc.c">
-      <ObjectFileName>$(IntDir)include\mpg123\ports\MSVC++\</ObjectFileName>
-      <CompileAsWinRT>FALSE</CompileAsWinRT>
-    </ClCompile>
     <ClCompile Include="..\..\..\include\mpg123\src\compat\compat.c">
       <ObjectFileName>$(IntDir)include\mpg123\src\compat\</ObjectFileName>
       <CompileAsWinRT>FALSE</CompileAsWinRT>
