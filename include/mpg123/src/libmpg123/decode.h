@@ -204,14 +204,14 @@ void dct64_altivec(real *,real *,real *);
 void dct64_i486(int*, int* , real*); /* Yeah, of no use outside of synth_i486.c .*/
 
 /* This is used by the layer 3 decoder, one generic function and 3DNow variants. */
-void dct36         (real *,real *,real *,real *,real *);
-void dct36_3dnow   (real *,real *,real *,real *,real *);
-void dct36_3dnowext(real *,real *,real *,real *,real *);
-void dct36_x86_64  (real *,real *,real *,real *,real *);
-void dct36_sse     (real *,real *,real *,real *,real *);
-void dct36_avx     (real *,real *,real *,real *,real *);
-void dct36_neon    (real *,real *,real *,real *,real *);
-void dct36_neon64  (real *,real *,real *,real *,real *);
+void dct36         (real *,real *,real *,const real *,real *);
+void dct36_3dnow   (real *,real *,real *,const real *,real *);
+void dct36_3dnowext(real *,real *,real *,const real *,real *);
+void dct36_x86_64  (real *,real *,real *,const real *,real *);
+void dct36_sse     (real *,real *,real *,const real *,real *);
+void dct36_avx     (real *,real *,real *,const real *,real *);
+void dct36_neon    (real *,real *,real *,const real *,real *);
+void dct36_neon64  (real *,real *,real *,const real *,real *);
 
 /* Tools for NtoM resampling synth, defined in ntom.c . */
 int synth_ntom_set_step(mpg123_handle *fr); /* prepare ntom decoding */
@@ -244,7 +244,7 @@ void  init_layer12_stuff(mpg123_handle *fr, real* (*init_table)(mpg123_handle *f
 
 void prepare_decode_tables(void);
 
-extern real *pnts[5]; /* tabinit provides, dct64 needs */
+extern const real *pnts[5]; /* tabinit provides, dct64 needs */
 
 /* Runtime (re)init functions; needed more often. */
 void make_decode_tables(mpg123_handle *fr); /* For every volume change. */

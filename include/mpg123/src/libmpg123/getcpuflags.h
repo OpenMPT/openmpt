@@ -10,6 +10,8 @@
 #ifndef MPG123_H_GETCPUFLAGS
 #define MPG123_H_GETCPUFLAGS
 
+#include "config.h"
+
 /* standard level flags part 1 (ECX)*/
 #define FLAG_SSE3      0x00000001
 #define FLAG_SSSE3     0x00000200
@@ -42,6 +44,22 @@ struct cpuflags
 
 unsigned int getcpuflags(struct cpuflags* cf);
 
+#ifdef WANT_GETCPUFLAGS
+#include <string.h>
+// Wrapper needed for ignorant clang memory sanitizer that chokes
+// because it does not know the assembly code intialized the vlaues.
+static unsigned int wrap_getcpuflags(struct cpuflags* cf)
+{
+	memset(cf, 0, sizeof(*cf));
+	return getcpuflags(cf);
+}
+#endif
+
+#if ((defined OPT_X86) || (defined OPT_X86_64) || (defined OPT_NEON) || (defined OPT_NEON64)) && (defined OPT_MULTI)
+
+// We really evaluate the CPU flags.
+#define OPT_CPU_FLAGS
+
 /* checks the family */
 #define cpu_i586(s) ( ((s.id & 0xf00)>>8) == 0 || ((s.id & 0xf00)>>8) > 4 )
 /* checking some flags... */
@@ -56,5 +74,24 @@ unsigned int getcpuflags(struct cpuflags* cf);
 #define cpu_fast_sse(s) ((((s.id & 0xf00)>>8) == 6 && FLAG_SSSE3 & s.std) /* for Intel/VIA; family 6 CPUs with SSSE3 */ || \
 						   (((s.id & 0xf00)>>8) == 0xf && (((s.id & 0x0ff00000)>>20) > 0 && ((s.id & 0x0ff00000)>>20) != 5))) /* for AMD; family > 0xF CPUs except Bobcat */
 #define cpu_neon(s) (s.has_neon)
+
+#else
+
+/* Faking stuff for non-multi builds. The same code for synth function choice is used.
+   Just no runtime dependency of result... */
+#define cpu_flags nothing
+#define cpu_i586(s)     1
+#define cpu_fpu(s)      1
+#define cpu_mmx(s)      1
+#define cpu_3dnow(s)    1
+#define cpu_3dnowext(s) 1
+#define cpu_sse(s)      1
+#define cpu_sse2(s)     1
+#define cpu_sse3(s)     1
+#define cpu_avx(s)      1
+#define cpu_neon(s)     1
+
+#endif
+
 
 #endif

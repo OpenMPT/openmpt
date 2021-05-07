@@ -8,49 +8,30 @@
 
 #include "mpg123lib_intern.h"
 #include "icy2utf8.h"
+#if 0 // OpenMPT
 #include "debug.h"
+#endif // OpenMPT
 
 #include "gapless.h"
 /* Want accurate rounding function regardless of decoder setup. */
 #define FORCE_ACCURATE
 #include "sample.h"
 #include "parse.h"
+#if 1 // OpenMPT
+#include "debug.h" // OpenMPT
+#endif // OpenMPT
 
 #define SEEKFRAME(mh) ((mh)->ignoreframe < 0 ? 0 : (mh)->ignoreframe)
 
-static int initialized = 0;
-
 int attribute_align_arg mpg123_init(void)
 {
-	if((sizeof(short) != 2) || (sizeof(long) < 4)) return MPG123_BAD_TYPES;
-
-	if(initialized) return MPG123_OK; /* no need to initialize twice */
-
-#ifndef NO_LAYER12
-	init_layer12(); /* inits also shared tables with layer1 */
-#endif
-#ifndef NO_LAYER3
-	init_layer3();
-#endif
-	prepare_decode_tables();
-	check_decoders();
-	initialized = 1;
-#if (defined REAL_IS_FLOAT) && (defined IEEE_FLOAT)
-	/* This is rather pointless but it eases my mind to check that we did
-	   not enable the special rounding on a VAX or something. */
-	if(12346 != REAL_TO_SHORT_ACCURATE(12345.67f))
-	{
-		error("Bad IEEE 754 rounding. Re-build libmpg123 properly.");
-		return MPG123_ERR;
-	}
-#endif
+	// Since 1.27.0, this is a no-op and shall stay that way.
 	return MPG123_OK;
 }
 
 void attribute_align_arg mpg123_exit(void)
 {
-	/* nothing yet, but something later perhaps */
-	/* Nope. This is dead space. */
+	// Nothing to ever happen here.
 }
 
 /* create a new handle with specified decoder, decoder can be "", "auto" or NULL for auto-detection */
@@ -65,8 +46,25 @@ mpg123_handle attribute_align_arg *mpg123_parnew(mpg123_pars *mp, const char* de
 	mpg123_handle *fr = NULL;
 	int err = MPG123_OK;
 
-	if(initialized) fr = (mpg123_handle*) malloc(sizeof(mpg123_handle));
-	else err = MPG123_NOT_INITIALIZED;
+	// Silly paranoia checks. Really silly, but libmpg123 has been ported to strange
+	// platforms in the past.
+	if((sizeof(short) != 2) || (sizeof(long) < 4))
+	{
+		if(error != NULL) *error = MPG123_BAD_TYPES;
+		return NULL;
+	}
+
+#if (defined REAL_IS_FLOAT) && (defined IEEE_FLOAT)
+	/* This is rather pointless but it eases my mind to check that we did
+	   not enable the special rounding on a VAX or something. */
+	if(12346 != REAL_TO_SHORT_ACCURATE(12345.67f))
+	{
+		if(error != NULL) *error = MPG123_BAD_FLOAT;
+		return NULL;
+	}
+#endif
+
+	fr = (mpg123_handle*) malloc(sizeof(mpg123_handle));
 	if(fr != NULL)
 	{
 		frame_init_par(fr, mp);
@@ -147,6 +145,11 @@ int attribute_align_arg mpg123_param(mpg123_handle *mh, enum mpg123_parms key, l
 #endif
 	}
 	return r;
+}
+
+int attribute_align_arg mpg123_param2(mpg123_handle *mh,  int key, long val, double fval)
+{
+	return mpg123_param(mh, key, val, fval);
 }
 
 int attribute_align_arg mpg123_par(mpg123_pars *mp, enum mpg123_parms key, long val, double fval)
@@ -265,6 +268,11 @@ int attribute_align_arg mpg123_par(mpg123_pars *mp, enum mpg123_parms key, long 
 	return ret;
 }
 
+int attribute_align_arg mpg123_par2(mpg123_pars *mp, int key, long val, double fval)
+{
+	return mpg123_par(mp, key, val, fval);
+}
+
 int attribute_align_arg mpg123_getparam(mpg123_handle *mh, enum mpg123_parms key, long *val, double *fval)
 {
 	int r;
@@ -273,6 +281,11 @@ int attribute_align_arg mpg123_getparam(mpg123_handle *mh, enum mpg123_parms key
 	r = mpg123_getpar(&mh->p, key, val, fval);
 	if(r != MPG123_OK){ mh->err = r; r = MPG123_ERR; }
 	return r;
+}
+
+int attribute_align_arg mpg123_getparam2(mpg123_handle *mh, int key, long *val, double *fval)
+{
+	return mpg123_getparam(mh, key, val, fval);
 }
 
 int attribute_align_arg mpg123_getpar(mpg123_pars *mp, enum mpg123_parms key, long *val, double *fval)
@@ -357,6 +370,11 @@ int attribute_align_arg mpg123_getpar(mpg123_pars *mp, enum mpg123_parms key, lo
 	return ret;
 }
 
+int attribute_align_arg mpg123_getpar2(mpg123_pars *mp, int key, long *val, double *fval)
+{
+	return mpg123_getpar(mp, key, val, fval);
+}
+
 int attribute_align_arg mpg123_getstate(mpg123_handle *mh, enum mpg123_state key, long *val, double *fval)
 {
 	int ret = MPG123_OK;
@@ -413,6 +431,11 @@ int attribute_align_arg mpg123_getstate(mpg123_handle *mh, enum mpg123_state key
 	return ret;
 }
 
+int attribute_align_arg mpg123_getstate2(mpg123_handle *mh, int key, long *val, double *fval)
+{
+	return mpg123_getstate(mh, key, val, fval);
+}
+
 int attribute_align_arg mpg123_eq(mpg123_handle *mh, enum mpg123_channels channel, int band, double val)
 {
 #ifndef NO_EQUALIZER
@@ -434,6 +457,11 @@ int attribute_align_arg mpg123_eq(mpg123_handle *mh, enum mpg123_channels channe
 	return MPG123_OK;
 }
 
+int attribute_align_arg mpg123_eq2(mpg123_handle *mh, int channel, int band, double val)
+{
+	return mpg123_eq(mh, channel, band, val);
+}
+
 double attribute_align_arg mpg123_geteq(mpg123_handle *mh, enum mpg123_channels channel, int band)
 {
 	double ret = 0.;
@@ -452,6 +480,11 @@ double attribute_align_arg mpg123_geteq(mpg123_handle *mh, enum mpg123_channels 
 	}
 #endif
 	return ret;
+}
+
+double attribute_align_arg mpg123_geteq2(mpg123_handle *mh, int channel, int band)
+{
+	return mpg123_geteq(mh, channel, band);
 }
 
 /* plain file access, no http! */
@@ -1084,43 +1117,50 @@ static int init_track(mpg123_handle *mh)
 	return 0;
 }
 
-int attribute_align_arg mpg123_info(mpg123_handle *mh, struct mpg123_frameinfo *mi)
-{
-	int b;
-
-	if(mh == NULL) return MPG123_BAD_HANDLE;
-	if(mi == NULL)
-	{
-		mh->err = MPG123_ERR_NULL;
-		return MPG123_ERR;
-	}
-	b = init_track(mh);
-	if(b < 0) return b;
-
-	mi->version = mh->mpeg25 ? MPG123_2_5 : (mh->lsf ? MPG123_2_0 : MPG123_1_0);
-	mi->layer = mh->lay;
-	mi->rate = frame_freq(mh);
-	switch(mh->mode)
-	{
-		case 0: mi->mode = MPG123_M_STEREO; break;
-		case 1: mi->mode = MPG123_M_JOINT;  break;
-		case 2: mi->mode = MPG123_M_DUAL;   break;
-		case 3: mi->mode = MPG123_M_MONO;   break;
-		default: mi->mode = 0; // Nothing good to do here.
-	}
-	mi->mode_ext = mh->mode_ext;
-	mi->framesize = mh->framesize+4; /* Include header. */
-	mi->flags = 0;
-	if(mh->error_protection) mi->flags |= MPG123_CRC;
-	if(mh->copyright)        mi->flags |= MPG123_COPYRIGHT;
-	if(mh->extension)        mi->flags |= MPG123_PRIVATE;
-	if(mh->original)         mi->flags |= MPG123_ORIGINAL;
-	mi->emphasis = mh->emphasis;
-	mi->bitrate  = frame_bitrate(mh);
-	mi->abr_rate = mh->abr_rate;
-	mi->vbr = mh->vbr;
-	return MPG123_OK;
+// Duplicating the code for the changed member types in struct mpg123_frameinfo2.
+#define MPG123_INFO_FUNC \
+{ \
+	int b; \
+ \
+	if(mh == NULL) return MPG123_BAD_HANDLE; \
+	if(mi == NULL) \
+	{ \
+		mh->err = MPG123_ERR_NULL; \
+		return MPG123_ERR; \
+	} \
+	b = init_track(mh); \
+	if(b < 0) return b; \
+ \
+	mi->version = mh->mpeg25 ? MPG123_2_5 : (mh->lsf ? MPG123_2_0 : MPG123_1_0); \
+	mi->layer = mh->lay; \
+	mi->rate = frame_freq(mh); \
+	switch(mh->mode) \
+	{ \
+		case 0: mi->mode = MPG123_M_STEREO; break; \
+		case 1: mi->mode = MPG123_M_JOINT;  break; \
+		case 2: mi->mode = MPG123_M_DUAL;   break; \
+		case 3: mi->mode = MPG123_M_MONO;   break; \
+		default: mi->mode = 0; /* Nothing good to do here. */ \
+	} \
+	mi->mode_ext = mh->mode_ext; \
+	mi->framesize = mh->framesize+4; /* Include header. */ \
+	mi->flags = 0; \
+	if(mh->error_protection) mi->flags |= MPG123_CRC; \
+	if(mh->copyright)        mi->flags |= MPG123_COPYRIGHT; \
+	if(mh->extension)        mi->flags |= MPG123_PRIVATE; \
+	if(mh->original)         mi->flags |= MPG123_ORIGINAL; \
+	mi->emphasis = mh->emphasis; \
+	mi->bitrate  = frame_bitrate(mh); \
+	mi->abr_rate = mh->abr_rate; \
+	mi->vbr = mh->vbr; \
+	return MPG123_OK; \
 }
+
+int attribute_align_arg mpg123_info(mpg123_handle *mh, struct mpg123_frameinfo *mi)
+MPG123_INFO_FUNC
+
+int attribute_align_arg mpg123_info2(mpg123_handle *mh, struct mpg123_frameinfo2 *mi)
+MPG123_INFO_FUNC
 
 int attribute_align_arg mpg123_getformat2( mpg123_handle *mh
 ,	long *rate, int *channels, int *encoding, int clear_flag )
@@ -1600,8 +1640,13 @@ enum mpg123_text_encoding attribute_align_arg mpg123_enc_from_id3(unsigned char 
 	}
 }
 
+int attribute_align_arg mpg123_enc_from_id3_2(unsigned char id3_enc_byte)
+{
+	return mpg123_enc_from_id3(id3_enc_byte);
+}
+
 #ifndef NO_STRING
-int mpg123_store_utf8(mpg123_string *sb, enum mpg123_text_encoding enc, const unsigned char *source, size_t source_size)
+int attribute_align_arg mpg123_store_utf8(mpg123_string *sb, enum mpg123_text_encoding enc, const unsigned char *source, size_t source_size)
 {
 	switch(enc)
 	{
@@ -1648,7 +1693,14 @@ int mpg123_store_utf8(mpg123_string *sb, enum mpg123_text_encoding enc, const un
 	/* At least a trailing null of some form should be there... */
 	return (sb->fill > 0) ? 1 : 0;
 }
+
+int attribute_align_arg mpg123_store_utf8_2(mpg123_string *sb, int enc, const unsigned char *source, size_t source_size)
+{
+	return mpg123_store_utf8(sb, enc, source, source_size);
+}
 #endif
+
+
 
 int attribute_align_arg mpg123_index(mpg123_handle *mh, off_t **offsets, off_t *step, size_t *fill)
 {
@@ -1770,6 +1822,7 @@ static const char *mpg123_error[] =
 	,"Custom I/O obviously not prepared."
 	,"Overflow in LFS (large file support) conversion."
 	,"Overflow in integer conversion."
+	,"Bad IEEE 754 rounding. Re-build libmpg123 properly."
 };
 
 const char* attribute_align_arg mpg123_plain_strerror(int errcode)

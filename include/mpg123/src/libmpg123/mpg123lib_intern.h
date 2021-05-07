@@ -23,6 +23,7 @@
 #define BUILD_MPG123_DLL
 #endif
 #include "compat.h"
+#define MPG123_ENUM_API
 #include "mpg123.h"
 
 #define SKIP_JUNK 1
@@ -41,9 +42,9 @@
 /* We don't really do long double... there are 3 options for REAL:
    float, long and double. */
 
-#ifdef REAL_IS_FLOAT
+#if defined(REAL_IS_FLOAT) && !defined(FORCE_FIXED)
 #  define real float
-#elif defined(REAL_IS_FIXED)
+#elif defined(REAL_IS_FIXED) || defined(FORCE_FIXED)
 
 # define real  int32_t
 # define dreal int64_t
@@ -166,9 +167,12 @@ static inline int32_t scale_rounded(int32_t x, int shift)
 
 /* I just changed the (int) to (real) there... seemed right. */
 # define DOUBLE_TO_REAL(x)					(double_to_long_rounded(x, REAL_FACTOR))
-# define DOUBLE_TO_REAL_15(x)				(double_to_long_rounded(x, 32768.0))
-# define DOUBLE_TO_REAL_POW43(x)			(double_to_long_rounded(x, 8192.0))
-# define DOUBLE_TO_REAL_SCALE_LAYER12(x)	(double_to_long_rounded(x, 1073741824.0))
+# define SCALE_15								32768.0
+# define DOUBLE_TO_REAL_15(x)				(double_to_long_rounded(x, SCALE_15))
+# define SCALE_POW43							8192.0
+# define DOUBLE_TO_REAL_POW43(x)			(double_to_long_rounded(x, SCALE_POW43))
+# define SCALE_LAYER12                  1073741824.0
+# define DOUBLE_TO_REAL_SCALE_LAYER12(x)	(double_to_long_rounded(x, SCALE_LAYER12))
 # define DOUBLE_TO_REAL_SCALE_LAYER3(x, y)	(double_to_long_rounded(x, pow(2.0,gainpow2_scale[y])))
 # define REAL_TO_DOUBLE(x)					((double)(x) / REAL_FACTOR)
 # ifdef REAL_MUL_ASM
@@ -198,10 +202,9 @@ static inline int32_t scale_rounded(int32_t x, int shift)
 # endif
 
 #else
-/* Just define a symbol to make things clear.
-   Existing code still uses (not (float or fixed)) for that. */
-#  define REAL_IS_DOUBLE
-#  define real double
+
+#error "Simple float or fixed-point, nothing else makes sense."
+
 #endif
 
 #ifndef REAL_IS_FIXED

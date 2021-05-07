@@ -25,7 +25,8 @@ void dct64(real *out0,real *out1,real *samples)
 
  {
   register int i,j;
-  register real *b1,*b2,*bs,*costab;
+  register real *b1,*b2,*bs;
+  register const real *costab;
 
   b1 = samples;
   bs = bufs;
