@@ -52,5 +52,5 @@
   links {
    "shlwapi",
   }
-    buildoptions { "/wd4018", "/wd4244", "/wd4267", "/wd4334" }
+    buildoptions { "/wd4018", "/wd4244", "/wd4267", "/wd4305", "/wd4334" }
     buildoptions { "/wd6011", "/wd6285", "/wd6297", "/wd6305", "/wd6385", "/wd6386" } -- /analyze
