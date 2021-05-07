@@ -153,7 +153,7 @@ struct mpg123_fmt
 	int encoding;
 };
 
-/* @} */
+/** @} */
 
 #endif
 

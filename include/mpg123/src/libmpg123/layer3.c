@@ -30,26 +30,7 @@
 #define CUT_SFB21
 #endif
 
-#ifdef REAL_IS_FIXED
-#define NEW_DCT9
-#include "l3_integer_tables.h"
-#else
-/* static one-time calculated tables... or so */
-static real ispow[8207];
-static real aa_ca[8],aa_cs[8];
-static ALIGNED(16) real win[4][36];
-static ALIGNED(16) real win1[4][36];
-real COS9[9]; /* dct36_3dnow wants to use that */
-static real COS6_1,COS6_2;
-real tfcos36[9]; /* dct36_3dnow wants to use that */
-static real tfcos12[3];
-#define NEW_DCT9
-#ifdef NEW_DCT9
-static real cos9[3],cos18[3];
-static real tan1_1[16],tan2_1[16],tan1_2[16],tan2_2[16];
-static real pow1_1[2][32],pow2_1[2][32],pow1_2[2][32],pow2_2[2][32];
-#endif
-#endif
+#include "l3tabs.h"
 
 /* Decoder state data, living on the stack of do_layer3. */
 
@@ -71,8 +52,13 @@ struct gr_info_s
 	unsigned preflag;
 	unsigned scalefac_scale;
 	unsigned count1table_select;
+#ifdef REAL_IS_FIXED
+	const real *full_gain[3];
+	const real *pow2gain;
+#else
 	real *full_gain[3];
 	real *pow2gain;
+#endif
 };
 
 struct III_sideinfo
@@ -83,83 +69,7 @@ struct III_sideinfo
 	struct { struct gr_info_s gr[2]; } ch[2];
 };
 
-struct bandInfoStruct
-{
-	unsigned short longIdx[23];
-	unsigned char longDiff[22];
-	unsigned short shortIdx[14];
-	unsigned char shortDiff[13];
-};
-
-/* Techy details about our friendly MPEG data. Fairly constant over the years;-) */
-static const struct bandInfoStruct bandInfo[9] =
-{
-	{ /* MPEG 1.0 */
-		{0,4,8,12,16,20,24,30,36,44,52,62,74, 90,110,134,162,196,238,288,342,418,576},
-		{4,4,4,4,4,4,6,6,8, 8,10,12,16,20,24,28,34,42,50,54, 76,158},
-		{0,4*3,8*3,12*3,16*3,22*3,30*3,40*3,52*3,66*3, 84*3,106*3,136*3,192*3},
-		{4,4,4,4,6,8,10,12,14,18,22,30,56}
-	},
-	{
-		{0,4,8,12,16,20,24,30,36,42,50,60,72, 88,106,128,156,190,230,276,330,384,576},
-		{4,4,4,4,4,4,6,6,6, 8,10,12,16,18,22,28,34,40,46,54, 54,192},
-		{0,4*3,8*3,12*3,16*3,22*3,28*3,38*3,50*3,64*3, 80*3,100*3,126*3,192*3},
-		{4,4,4,4,6,6,10,12,14,16,20,26,66}
-	},
-	{
-		{0,4,8,12,16,20,24,30,36,44,54,66,82,102,126,156,194,240,296,364,448,550,576},
-		{4,4,4,4,4,4,6,6,8,10,12,16,20,24,30,38,46,56,68,84,102, 26},
-		{0,4*3,8*3,12*3,16*3,22*3,30*3,42*3,58*3,78*3,104*3,138*3,180*3,192*3},
-		{4,4,4,4,6,8,12,16,20,26,34,42,12}
-	},
-	{ /* MPEG 2.0 */
-		{0,6,12,18,24,30,36,44,54,66,80,96,116,140,168,200,238,284,336,396,464,522,576},
-		{6,6,6,6,6,6,8,10,12,14,16,20,24,28,32,38,46,52,60,68,58,54 } ,
-		{0,4*3,8*3,12*3,18*3,24*3,32*3,42*3,56*3,74*3,100*3,132*3,174*3,192*3} ,
-		{4,4,4,6,6,8,10,14,18,26,32,42,18 }
-	},
-	{ /* Twiddling 3 values here (not just 330->332!) fixed bug 1895025. */
-		{0,6,12,18,24,30,36,44,54,66,80,96,114,136,162,194,232,278,332,394,464,540,576},
-		{6,6,6,6,6,6,8,10,12,14,16,18,22,26,32,38,46,54,62,70,76,36 },
-		{0,4*3,8*3,12*3,18*3,26*3,36*3,48*3,62*3,80*3,104*3,136*3,180*3,192*3},
-		{4,4,4,6,8,10,12,14,18,24,32,44,12 }
-	},
-	{
-		{0,6,12,18,24,30,36,44,54,66,80,96,116,140,168,200,238,284,336,396,464,522,576},
-		{6,6,6,6,6,6,8,10,12,14,16,20,24,28,32,38,46,52,60,68,58,54 },
-		{0,4*3,8*3,12*3,18*3,26*3,36*3,48*3,62*3,80*3,104*3,134*3,174*3,192*3},
-		{4,4,4,6,8,10,12,14,18,24,30,40,18 }
-	},
-	{ /* MPEG 2.5 */
-		{0,6,12,18,24,30,36,44,54,66,80,96,116,140,168,200,238,284,336,396,464,522,576},
-		{6,6,6,6,6,6,8,10,12,14,16,20,24,28,32,38,46,52,60,68,58,54},
-		{0,12,24,36,54,78,108,144,186,240,312,402,522,576},
-		{4,4,4,6,8,10,12,14,18,24,30,40,18}
-	},
-	{
-		{0,6,12,18,24,30,36,44,54,66,80,96,116,140,168,200,238,284,336,396,464,522,576},
-		{6,6,6,6,6,6,8,10,12,14,16,20,24,28,32,38,46,52,60,68,58,54},
-		{0,12,24,36,54,78,108,144,186,240,312,402,522,576},
-		{4,4,4,6,8,10,12,14,18,24,30,40,18}
-	},
-	{
-		{0,12,24,36,48,60,72,88,108,132,160,192,232,280,336,400,476,566,568,570,572,574,576},
-		{12,12,12,12,12,12,16,20,24,28,32,40,48,56,64,76,90,2,2,2,2,2},
-		{0, 24, 48, 72,108,156,216,288,372,480,486,492,498,576},
-		{8,8,8,12,16,20,24,28,36,2,2,2,26}
-	}
-};
-
-static int mapbuf0[9][152];
-static int mapbuf1[9][156];
-static int mapbuf2[9][44];
-static int *map[9][3];
-static int *mapend[9][3];
-
-static unsigned int n_slen2[512]; /* MPEG 2.0 slen for 'normal' mode */
-static unsigned int i_slen2[256]; /* MPEG 2.0 slen for intensity stereo */
-
-/* Some helpers used in init_layer3 */
+#include "l3bandgain.h"
 
 #ifdef OPT_MMXORSSE
 real init_layer3_gainpow2_mmx(mpg123_handle *fr, int i)
@@ -171,239 +81,19 @@ real init_layer3_gainpow2_mmx(mpg123_handle *fr, int i)
 
 real init_layer3_gainpow2(mpg123_handle *fr, int i)
 {
-#if defined(REAL_IS_FIXED) && defined(PRECALC_TABLES)
-	return gainpow2[i+256];
-#else
 	return DOUBLE_TO_REAL_SCALE_LAYER3(pow((double)2.0,-0.25 * (double) (i+210)),i+256);
-#endif
 }
 
-
-/* init tables for layer-3 ... specific with the downsampling... */
-void init_layer3(void)
-{
-	int i,j,k,l;
-
-#if !defined(REAL_IS_FIXED) || !defined(PRECALC_TABLES)
-	for(i=0;i<8207;i++)
-	ispow[i] = DOUBLE_TO_REAL_POW43(pow((double)i,(double)4.0/3.0));
-
-	for(i=0;i<8;i++)
-	{
-		const double Ci[8] = {-0.6,-0.535,-0.33,-0.185,-0.095,-0.041,-0.0142,-0.0037};
-		double sq = sqrt(1.0+Ci[i]*Ci[i]);
-		aa_cs[i] = DOUBLE_TO_REAL(1.0/sq);
-		aa_ca[i] = DOUBLE_TO_REAL(Ci[i]/sq);
-	}
-
-	for(i=0;i<18;i++)
-	{
-		win[0][i]    = win[1][i]    =
-			DOUBLE_TO_REAL( 0.5*sin(M_PI/72.0 * (double)(2*(i+0) +1)) / cos(M_PI * (double)(2*(i+0) +19) / 72.0) );
-		win[0][i+18] = win[3][i+18] =
-			DOUBLE_TO_REAL( 0.5*sin(M_PI/72.0 * (double)(2*(i+18)+1)) / cos(M_PI * (double)(2*(i+18)+19) / 72.0) );
-	}
-	for(i=0;i<6;i++)
-	{
-		win[1][i+18] = DOUBLE_TO_REAL(0.5 / cos ( M_PI * (double) (2*(i+18)+19) / 72.0 ));
-		win[3][i+12] = DOUBLE_TO_REAL(0.5 / cos ( M_PI * (double) (2*(i+12)+19) / 72.0 ));
-		win[1][i+24] = DOUBLE_TO_REAL(0.5 * sin( M_PI / 24.0 * (double) (2*i+13) ) / cos ( M_PI * (double) (2*(i+24)+19) / 72.0 ));
-		win[1][i+30] = win[3][i] = DOUBLE_TO_REAL(0.0);
-		win[3][i+6 ] = DOUBLE_TO_REAL(0.5 * sin( M_PI / 24.0 * (double) (2*i+1 ) ) / cos ( M_PI * (double) (2*(i+6 )+19) / 72.0 ));
-	}
-
-	for(i=0;i<9;i++)
-	COS9[i] = DOUBLE_TO_REAL(cos( M_PI / 18.0 * (double) i));
-
-	for(i=0;i<9;i++)
-	tfcos36[i] = DOUBLE_TO_REAL(0.5 / cos ( M_PI * (double) (i*2+1) / 36.0 ));
-
-	for(i=0;i<3;i++)
-	tfcos12[i] = DOUBLE_TO_REAL(0.5 / cos ( M_PI * (double) (i*2+1) / 12.0 ));
-
-	COS6_1 = DOUBLE_TO_REAL(cos( M_PI / 6.0 * (double) 1));
-	COS6_2 = DOUBLE_TO_REAL(cos( M_PI / 6.0 * (double) 2));
-
-#ifdef NEW_DCT9
-	cos9[0]  = DOUBLE_TO_REAL(cos(1.0*M_PI/9.0));
-	cos9[1]  = DOUBLE_TO_REAL(cos(5.0*M_PI/9.0));
-	cos9[2]  = DOUBLE_TO_REAL(cos(7.0*M_PI/9.0));
-	cos18[0] = DOUBLE_TO_REAL(cos(1.0*M_PI/18.0));
-	cos18[1] = DOUBLE_TO_REAL(cos(11.0*M_PI/18.0));
-	cos18[2] = DOUBLE_TO_REAL(cos(13.0*M_PI/18.0));
-#endif
-
-	for(i=0;i<12;i++)
-	{
-		win[2][i] = DOUBLE_TO_REAL(0.5 * sin( M_PI / 24.0 * (double) (2*i+1) ) / cos ( M_PI * (double) (2*i+7) / 24.0 ));
-	}
-
-	for(i=0;i<16;i++)
-	{
-		// Special-casing possibly troublesome values where t=inf or
-		// t=-1 in theory. In practice, this never caused issues, but there might
-		// be a system with enough precision in M_PI to raise an exception.
-		// Actually, the special values are not excluded from use in the code, but
-		// in practice, they even have no effect in the compliance tests.
-		if(i > 11) // It's periodic!
-		{
-			tan1_1[i] = tan1_1[i-12];
-			tan2_1[i] = tan2_1[i-12];
-			tan1_2[i] = tan1_2[i-12];
-			tan2_2[i] = tan2_2[i-12];
-		} else if(i == 6) // t=inf
-		{
-			tan1_1[i] = DOUBLE_TO_REAL_15(1.0);
-			tan2_1[i] = DOUBLE_TO_REAL_15(0.0);
-			tan1_2[i] = DOUBLE_TO_REAL_15(M_SQRT2);
-			tan2_2[i] = DOUBLE_TO_REAL_15(0.0);
-		} else if(i == 9) // t=-1
-		{
-			tan1_1[i] = DOUBLE_TO_REAL_15(-HUGE_VAL);
-			tan2_1[i] = DOUBLE_TO_REAL_15(HUGE_VAL);
-			tan1_2[i] = DOUBLE_TO_REAL_15(-HUGE_VAL);
-			tan2_2[i] = DOUBLE_TO_REAL_15(HUGE_VAL);
-		} else
-		{
-			double t = tan( (double) i * M_PI / 12.0 );
-			tan1_1[i] = DOUBLE_TO_REAL_15(t / (1.0+t));
-			tan2_1[i] = DOUBLE_TO_REAL_15(1.0 / (1.0 + t));
-			tan1_2[i] = DOUBLE_TO_REAL_15(M_SQRT2 * t / (1.0+t));
-			tan2_2[i] = DOUBLE_TO_REAL_15(M_SQRT2 / (1.0 + t));
-		}
-	}
-
-	for(i=0;i<32;i++)
-	{
-		for(j=0;j<2;j++)
-		{
-			double base = pow(2.0,-0.25*(j+1.0));
-			double p1=1.0,p2=1.0;
-			if(i > 0)
-			{
-				if( i & 1 ) p1 = pow(base,(i+1.0)*0.5);
-				else p2 = pow(base,i*0.5);
-			}
-			pow1_1[j][i] = DOUBLE_TO_REAL_15(p1);
-			pow2_1[j][i] = DOUBLE_TO_REAL_15(p2);
-			pow1_2[j][i] = DOUBLE_TO_REAL_15(M_SQRT2 * p1);
-			pow2_2[j][i] = DOUBLE_TO_REAL_15(M_SQRT2 * p2);
-		}
-	}
-#endif
-
-	for(j=0;j<4;j++)
-	{
-		const int len[4] = { 36,36,12,36 };
-		for(i=0;i<len[j];i+=2) win1[j][i] = + win[j][i];
-
-		for(i=1;i<len[j];i+=2) win1[j][i] = - win[j][i];
-	}
-
-	for(j=0;j<9;j++)
-	{
-		const struct bandInfoStruct *bi = &bandInfo[j];
-		int *mp;
-		int cb,lwin;
-		const unsigned char *bdf;
-		int switch_idx;
-
-		mp = map[j][0] = mapbuf0[j];
-		bdf = bi->longDiff;
-		switch_idx = (j < 3) ? 8 : 6;
-		for(i=0,cb = 0; cb < switch_idx ; cb++,i+=*bdf++)
-		{
-			*mp++ = (*bdf) >> 1;
-			*mp++ = i;
-			*mp++ = 3;
-			*mp++ = cb;
-		}
-		bdf = bi->shortDiff+3;
-		for(cb=3;cb<13;cb++)
-		{
-			int l = (*bdf++) >> 1;
-			for(lwin=0;lwin<3;lwin++)
-			{
-				*mp++ = l;
-				*mp++ = i + lwin;
-				*mp++ = lwin;
-				*mp++ = cb;
-			}
-			i += 6*l;
-		}
-		mapend[j][0] = mp;
-
-		mp = map[j][1] = mapbuf1[j];
-		bdf = bi->shortDiff+0;
-		for(i=0,cb=0;cb<13;cb++)
-		{
-			int l = (*bdf++) >> 1;
-			for(lwin=0;lwin<3;lwin++)
-			{
-				*mp++ = l;
-				*mp++ = i + lwin;
-				*mp++ = lwin;
-				*mp++ = cb;
-			}
-			i += 6*l;
-		}
-		mapend[j][1] = mp;
-
-		mp = map[j][2] = mapbuf2[j];
-		bdf = bi->longDiff;
-		for(cb = 0; cb < 22 ; cb++)
-		{
-			*mp++ = (*bdf++) >> 1;
-			*mp++ = cb;
-		}
-		mapend[j][2] = mp;
-	}
-
-	/* Now for some serious loopings! */
-	for(i=0;i<5;i++)
-	for(j=0;j<6;j++)
-	for(k=0;k<6;k++)
-	{
-		int n = k + j * 6 + i * 36;
-		i_slen2[n] = i|(j<<3)|(k<<6)|(3<<12);
-	}
-	for(i=0;i<4;i++)
-	for(j=0;j<4;j++)
-	for(k=0;k<4;k++)
-	{
-		int n = k + j * 4 + i * 16;
-		i_slen2[n+180] = i|(j<<3)|(k<<6)|(4<<12);
-	}
-	for(i=0;i<4;i++)
-	for(j=0;j<3;j++)
-	{
-		int n = j + i * 3;
-		i_slen2[n+244] = i|(j<<3) | (5<<12);
-		n_slen2[n+500] = i|(j<<3) | (2<<12) | (1<<15);
-	}
-	for(i=0;i<5;i++)
-	for(j=0;j<5;j++)
-	for(k=0;k<4;k++)
-	for(l=0;l<4;l++)
-	{
-		int n = l + k * 4 + j * 16 + i * 80;
-		n_slen2[n] = i|(j<<3)|(k<<6)|(l<<9)|(0<<12);
-	}
-	for(i=0;i<5;i++)
-	for(j=0;j<5;j++)
-	for(k=0;k<4;k++)
-	{
-		int n = k + j * 4 + i * 20;
-		n_slen2[n+400] = i|(j<<3)|(k<<6)|(1<<12);
-	}
-}
-
-
-void init_layer3_stuff(mpg123_handle *fr, real (*gainpow2)(mpg123_handle *fr, int i))
+void init_layer3_stuff(mpg123_handle *fr, real (*gainpow2_func)(mpg123_handle *fr, int i))
 {
 	int i,j;
 
-	for(i=-256;i<118+4;i++)	fr->gainpow2[i+256] = gainpow2(fr,i);
+#ifdef REAL_IS_FIXED
+	fr->gainpow2 = gainpow2;
+#else
+	for(i=-256;i<118+4;i++)
+		fr->gainpow2[i+256] = gainpow2_func(fr,i);
+#endif
 
 	for(j=0;j<9;j++)
 	{
@@ -824,7 +514,7 @@ static int III_dequantize_sample(mpg123_handle *fr, real xr[SBLIMIT][SSLIMIT],in
 	real *xrpnt = (real *) xr;
 	int l[3],l3;
 	int part2remain = gr_info->part2_3_length - part2bits;
-	int *me;
+	const short *me;
 #ifdef REAL_IS_FIXED
 	int gainpow2_scale_idx = 378;
 #endif
@@ -887,7 +577,8 @@ static int III_dequantize_sample(mpg123_handle *fr, real xr[SBLIMIT][SSLIMIT],in
 		int i,max[4];
 		int step=0,lwin=3,cb=0;
 		register real v = 0.0;
-		register int *m,mc;
+		register int mc;
+		register const short *m;
 
 		if(gr_info->mixed_block_flag)
 		{
@@ -1127,7 +818,7 @@ static int III_dequantize_sample(mpg123_handle *fr, real xr[SBLIMIT][SSLIMIT],in
 		const unsigned char *pretab = pretab_choice[gr_info->preflag];
 		int i,max = -1;
 		int cb = 0;
-		int *m = map[sfreq][2];
+		const short *m = map[sfreq][2];
 		register real v = 0.0;
 		int mc = 0;
 
@@ -1527,7 +1218,7 @@ static void III_antialias(real xr[SBLIMIT][SSLIMIT],struct gr_info_s *gr_info)
 		for(sb=sblim; sb; sb--,xr1+=10)
 		{
 			int ss;
-			real *cs=aa_cs,*ca=aa_ca;
+			const real *cs=aa_cs,*ca=aa_ca;
 			real *xr2 = xr1;
 
 			for(ss=7;ss>=0;ss--)
@@ -1577,11 +1268,9 @@ static void III_antialias(real xr[SBLIMIT][SSLIMIT],struct gr_info_s *gr_info)
 
 /* Calculation of the inverse MDCT
    used to be static without 3dnow - does that really matter? */
-void dct36(real *inbuf,real *o1,real *o2,real *wintab,real *tsbuf)
+void dct36(real *inbuf,real *o1,real *o2,const real *wintab,real *tsbuf)
 {
-#ifdef NEW_DCT9
 	real tmp[18];
-#endif
 
 	{
 		register real *in = inbuf;
@@ -1596,8 +1285,6 @@ void dct36(real *inbuf,real *o1,real *o2,real *wintab,real *tsbuf)
 		in[17]+=in[15]; in[15]+=in[13]; in[13]+=in[11]; in[11]+=in[9];
 		in[9] +=in[7];  in[7] +=in[5];  in[5] +=in[3];  in[3] +=in[1];
 
-
-#ifdef NEW_DCT9
 #if 1
 		{
 			real t3;
@@ -1753,7 +1440,7 @@ void dct36(real *inbuf,real *o1,real *o2,real *wintab,real *tsbuf)
 
 		{
 			register real *out2 = o2;
-			register real *w = wintab;
+			register const real *w = wintab;
 			register real *out1 = o1;
 			register real *ts = tsbuf;
 
@@ -1768,100 +1455,12 @@ void dct36(real *inbuf,real *o1,real *o2,real *wintab,real *tsbuf)
 			MACRO(8);
 		}
 
-#else
-
-		{
-
-#define MACRO0(v) { \
-	real tmp; \
-	out2[9+(v)] = REAL_MUL((tmp = sum0 + sum1), w[27+(v)]); \
-	out2[8-(v)] = REAL_MUL(tmp, w[26-(v)]);   } \
-	sum0 -= sum1; \
-	ts[SBLIMIT*(8-(v))] = out1[8-(v)] + REAL_MUL(sum0, w[8-(v)]); \
-	ts[SBLIMIT*(9+(v))] = out1[9+(v)] + REAL_MUL(sum0, w[9+(v)]);
-#define MACRO1(v) { \
-	real sum0,sum1; \
-	sum0 = tmp1a + tmp2a; \
-	sum1 = REAL_MUL((tmp1b + tmp2b), tfcos36[(v)]); \
-	MACRO0(v); }
-#define MACRO2(v) { \
-	real sum0,sum1; \
-	sum0 = tmp2a - tmp1a; \
-	sum1 = REAL_MUL((tmp2b - tmp1b), tfcos36[(v)]); \
-	MACRO0(v); }
-
-			register const real *c = COS9;
-			register real *out2 = o2;
-			register real *w = wintab;
-			register real *out1 = o1;
-			register real *ts = tsbuf;
-
-			real ta33,ta66,tb33,tb66;
-
-			ta33 = REAL_MUL(in[2*3+0], c[3]);
-			ta66 = REAL_MUL(in[2*6+0], c[6]);
-			tb33 = REAL_MUL(in[2*3+1], c[3]);
-			tb66 = REAL_MUL(in[2*6+1], c[6]);
-
-			{ 
-				real tmp1a,tmp2a,tmp1b,tmp2b;
-				tmp1a = REAL_MUL(in[2*1+0], c[1]) + ta33 + REAL_MUL(in[2*5+0], c[5]) + REAL_MUL(in[2*7+0], c[7]);
-				tmp1b = REAL_MUL(in[2*1+1], c[1]) + tb33 + REAL_MUL(in[2*5+1], c[5]) + REAL_MUL(in[2*7+1], c[7]);
-				tmp2a = REAL_MUL(in[2*2+0], c[2]) + REAL_MUL(in[2*4+0], c[4]) + ta66 + REAL_MUL(in[2*8+0], c[8]);
-				tmp2b = REAL_MUL(in[2*2+1], c[2]) + REAL_MUL(in[2*4+1], c[4]) + tb66 + REAL_MUL(in[2*8+1], c[8]);
-
-				MACRO1(0);
-				MACRO2(8);
-			}
-
-			{
-				real tmp1a,tmp2a,tmp1b,tmp2b;
-				tmp1a = REAL_MUL(( in[2*1+0] - in[2*5+0] - in[2*7+0] ), c[3]);
-				tmp1b = REAL_MUL(( in[2*1+1] - in[2*5+1] - in[2*7+1] ), c[3]);
-				tmp2a = REAL_MUL(( in[2*2+0] - in[2*4+0] - in[2*8+0] ), c[6]) - in[2*6+0] + in[2*0+0];
-				tmp2b = REAL_MUL(( in[2*2+1] - in[2*4+1] - in[2*8+1] ), c[6]) - in[2*6+1] + in[2*0+1];
-
-				MACRO1(1);
-				MACRO2(7);
-			}
-
-			{
-				real tmp1a,tmp2a,tmp1b,tmp2b;
-				tmp1a =   REAL_MUL(in[2*1+0], c[5]) - ta33 - REAL_MUL(in[2*5+0], c[7]) + REAL_MUL(in[2*7+0], c[1]);
-				tmp1b =   REAL_MUL(in[2*1+1], c[5]) - tb33 - REAL_MUL(in[2*5+1], c[7]) + REAL_MUL(in[2*7+1], c[1]);
-				tmp2a = - REAL_MUL(in[2*2+0], c[8]) - REAL_MUL(in[2*4+0], c[2]) + ta66 + REAL_MUL(in[2*8+0], c[4]);
-				tmp2b = - REAL_MUL(in[2*2+1], c[8]) - REAL_MUL(in[2*4+1], c[2]) + tb66 + REAL_MUL(in[2*8+1], c[4]);
-
-				MACRO1(2);
-				MACRO2(6);
-			}
-
-			{
-				real tmp1a,tmp2a,tmp1b,tmp2b;
-				tmp1a =   REAL_MUL(in[2*1+0], c[7]) - ta33 + REAL_MUL(in[2*5+0], c[1]) - REAL_MUL(in[2*7+0], c[5]);
-				tmp1b =   REAL_MUL(in[2*1+1], c[7]) - tb33 + REAL_MUL(in[2*5+1], c[1]) - REAL_MUL(in[2*7+1], c[5]);
-				tmp2a = - REAL_MUL(in[2*2+0], c[4]) + REAL_MUL(in[2*4+0], c[8]) + ta66 - REAL_MUL(in[2*8+0], c[2]);
-				tmp2b = - REAL_MUL(in[2*2+1], c[4]) + REAL_MUL(in[2*4+1], c[8]) + tb66 - REAL_MUL(in[2*8+1], c[2]);
-
-				MACRO1(3);
-				MACRO2(5);
-			}
-
-			{
-				real sum0,sum1;
-				sum0 =  in[2*0+0] - in[2*2+0] + in[2*4+0] - in[2*6+0] + in[2*8+0];
-				sum1 = REAL_MUL((in[2*0+1] - in[2*2+1] + in[2*4+1] - in[2*6+1] + in[2*8+1] ), tfcos36[4]);
-				MACRO0(4);
-			}
-		}
-#endif
-
 	}
 }
 
 
 /* new DCT12 */
-static void dct12(real *in,real *rawout1,real *rawout2,register real *wi,register real *ts)
+static void dct12(real *in,real *rawout1,real *rawout2,register const real *wi,register real *ts)
 {
 #define DCT12_PART1 \
 	in5 = in[5*3];  \
