@@ -18,13 +18,11 @@
 		characterset "Unicode"
 	filter {}
   files {
-   "../../include/mpg123/ports/MSVC++/msvc.c",
-  }
-  files {
    "../../include/mpg123/src/compat/compat.c",
    "../../include/mpg123/src/compat/compat_str.c",
   }
   files {
+   --"../../include/mpg123/src/libmpg123/calctables.c",
    "../../include/mpg123/src/libmpg123/dct64.c",
    --"../../include/mpg123/src/libmpg123/dither.c",
    "../../include/mpg123/src/libmpg123/equalizer.c",

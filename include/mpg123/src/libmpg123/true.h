@@ -8,6 +8,7 @@
 #ifndef MPG123_H_TRUE
 #define MPG123_H_TRUE
 
+#define MAYBE -1
 #define FALSE 0
 #define TRUE  1
 

@@ -11,58 +11,19 @@
 
 
 #include "mpg123lib_intern.h"
+
 #ifndef NO_LAYER2
 #include "l2tables.h"
 #endif
+
 #include "getbits.h"
 
 #ifndef NO_LAYER12 /* Stuff  needed for layer I and II. */
 
-static int grp_3tab[32 * 3] = { 0, };   /* used: 27 */
-static int grp_5tab[128 * 3] = { 0, };  /* used: 125 */
-static int grp_9tab[1024 * 3] = { 0, }; /* used: 729 */
+#include "l12tabs.h"
 
-#if defined(REAL_IS_FIXED) && defined(PRECALC_TABLES)
-#include "l12_integer_tables.h"
-#else
-static const double mulmul[27] =
-{
-	0.0 , -2.0/3.0 , 2.0/3.0 ,
-	2.0/7.0 , 2.0/15.0 , 2.0/31.0, 2.0/63.0 , 2.0/127.0 , 2.0/255.0 ,
-	2.0/511.0 , 2.0/1023.0 , 2.0/2047.0 , 2.0/4095.0 , 2.0/8191.0 ,
-	2.0/16383.0 , 2.0/32767.0 , 2.0/65535.0 ,
-	-4.0/5.0 , -2.0/5.0 , 2.0/5.0, 4.0/5.0 ,
-	-8.0/9.0 , -4.0/9.0 , -2.0/9.0 , 2.0/9.0 , 4.0/9.0 , 8.0/9.0
-};
-#endif
-
-void init_layer12(void)
-{
-	const int base[3][9] =
-	{
-		{ 1 , 0, 2 , } ,
-		{ 17, 18, 0 , 19, 20 , } ,
-		{ 21, 1, 22, 23, 0, 24, 25, 2, 26 }
-	};
-	int i,j,k,l,len;
-	const int tablen[3] = { 3 , 5 , 9 };
-	int *itable;
-	int *tables[3] = { grp_3tab , grp_5tab , grp_9tab };
-
-	for(i=0;i<3;i++)
-	{
-		itable = tables[i];
-		len = tablen[i];
-		for(j=0;j<len;j++)
-		for(k=0;k<len;k++)
-		for(l=0;l<len;l++)
-		{
-			*itable++ = base[i][l];
-			*itable++ = base[i][k];
-			*itable++ = base[i][j];
-		}
-	}
-}
+// The layer12_table is already in real format (fixed or float), just needs
+// a little scaling in the MMX/SSE case.
 
 void init_layer12_stuff(mpg123_handle *fr, real* (*init_table)(mpg123_handle *fr, real *table, int m))
 {
@@ -77,16 +38,9 @@ void init_layer12_stuff(mpg123_handle *fr, real* (*init_table)(mpg123_handle *fr
 
 real* init_layer12_table(mpg123_handle *fr, real *table, int m)
 {
-#if defined(REAL_IS_FIXED) && defined(PRECALC_TABLES)
 	int i;
 	for(i=0;i<63;i++)
-	*table++ = layer12_table[m][i];
-#else
-	int i,j;
-	for(j=3,i=0;i<63;i++,j--)
-	*table++ = DOUBLE_TO_REAL_SCALE_LAYER12(mulmul[m] * pow(2.0,(double) j / 3.0));
-#endif
-
+		*table++ = layer12_table[m][i];
 	return table;
 }
 
@@ -97,12 +51,12 @@ real* init_layer12_table_mmx(mpg123_handle *fr, real *table, int m)
 	if(!fr->p.down_sample) 
 	{
 		for(j=3,i=0;i<63;i++,j--)
-			*table++ = DOUBLE_TO_REAL(16384 * mulmul[m] * pow(2.0,(double) j / 3.0));
+			*table++ = 16384 * layer12_table[m][i];
 	}
 	else
 	{
 		for(j=3,i=0;i<63;i++,j--)
-		*table++ = DOUBLE_TO_REAL(mulmul[m] * pow(2.0,(double) j / 3.0));
+			*table++ = layer12_table[m][i];
 	}
 	return table;
 }
@@ -254,10 +208,10 @@ static void II_step_two(unsigned int *bit_alloc,real fraction[2][4][SBLIMIT],int
 				}        
 				else 
 				{
-					const int *table[] = { 0,0,0,grp_3tab,0,grp_5tab,0,0,0,grp_9tab };
-					unsigned int idx,*tab,m=scale[x1];
-					idx = (unsigned int) getbits(fr, k);
-					tab = (unsigned int *) (table[d1] + idx + idx + idx);
+					const unsigned char *table[] = { 0,0,0,grp_3tab,0,grp_5tab,0,0,0,grp_9tab };
+					unsigned int m=scale[x1];
+					unsigned int idx = (unsigned int) getbits(fr, k);
+					const unsigned char *tab = table[d1] + idx + idx + idx;
 					fraction[j][0][i] = REAL_SCALE_LAYER12(fr->muls[*tab++][m]);
 					fraction[j][1][i] = REAL_SCALE_LAYER12(fr->muls[*tab++][m]);
 					fraction[j][2][i] = REAL_SCALE_LAYER12(fr->muls[*tab][m]);  
@@ -295,11 +249,11 @@ static void II_step_two(unsigned int *bit_alloc,real fraction[2][4][SBLIMIT],int
 			}
 			else
 			{
-				const int *table[] = { 0,0,0,grp_3tab,0,grp_5tab,0,0,0,grp_9tab };
-				unsigned int idx,*tab,m1,m2;
-				m1 = scale[x1]; m2 = scale[x1+3];
-				idx = (unsigned int) getbits(fr, k);
-				tab = (unsigned int *) (table[d1] + idx + idx + idx);
+				const unsigned char *table[] = { 0,0,0,grp_3tab,0,grp_5tab,0,0,0,grp_9tab };
+				unsigned int m1 = scale[x1];
+				unsigned int m2 = scale[x1+3];
+				unsigned int idx = (unsigned int) getbits(fr, k);
+				const unsigned char *tab = table[d1] + idx + idx + idx;
 				fraction[0][0][i] = REAL_SCALE_LAYER12(fr->muls[*tab][m1]); fraction[1][0][i] = REAL_SCALE_LAYER12(fr->muls[*tab++][m2]);
 				fraction[0][1][i] = REAL_SCALE_LAYER12(fr->muls[*tab][m1]); fraction[1][1][i] = REAL_SCALE_LAYER12(fr->muls[*tab++][m2]);
 				fraction[0][2][i] = REAL_SCALE_LAYER12(fr->muls[*tab][m1]); fraction[1][2][i] = REAL_SCALE_LAYER12(fr->muls[*tab][m2]);

@@ -34,7 +34,7 @@
 #include "mangle.h"
 
 #ifdef ACCURATE_ROUNDING
-#ifndef __APPLE__
+#if !defined (__APPLE__) && !defined (__OS2__)
 	.section	.rodata
 #else
 	.data
