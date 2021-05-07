@@ -657,9 +657,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\include\mpg123\ports\MSVC++\msvc.c">
-      <CompileAsWinRT>FALSE</CompileAsWinRT>
-    </ClCompile>
     <ClCompile Include="..\..\..\include\mpg123\src\compat\compat.c">
       <CompileAsWinRT>FALSE</CompileAsWinRT>
     </ClCompile>

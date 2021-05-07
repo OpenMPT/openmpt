@@ -1,100 +1,88 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="ports">
-      <UniqueIdentifier>{FD8A2810-699F-50C1-3221-F4209EF44CF2}</UniqueIdentifier>
+    <Filter Include="compat">
+      <UniqueIdentifier>{A909E4F6-95AB-0ECD-7E66-22216AA7951D}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ports\MSVC++">
-      <UniqueIdentifier>{5B499528-47AC-24CD-F031-5D83DC73F04F}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src">
-      <UniqueIdentifier>{2DAB880B-99B4-887C-2230-9F7C8E38947C}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\compat">
-      <UniqueIdentifier>{E0E24254-CC9A-84A1-35A2-5DFD21791F92}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\libmpg123">
-      <UniqueIdentifier>{2D8288BB-9942-04F2-627D-4D6FCEFC48CE}</UniqueIdentifier>
+    <Filter Include="libmpg123">
+      <UniqueIdentifier>{5620CE7B-C28A-82F2-0BC9-339877726047}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\include\mpg123\ports\MSVC++\msvc.c">
-      <Filter>ports\MSVC++</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\include\mpg123\src\compat\compat.c">
-      <Filter>src\compat</Filter>
+      <Filter>compat</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\mpg123\src\compat\compat_str.c">
-      <Filter>src\compat</Filter>
+      <Filter>compat</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\dct64.c">
-      <Filter>src\libmpg123</Filter>
+      <Filter>libmpg123</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\equalizer.c">
-      <Filter>src\libmpg123</Filter>
+      <Filter>libmpg123</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\feature.c">
-      <Filter>src\libmpg123</Filter>
+      <Filter>libmpg123</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\format.c">
-      <Filter>src\libmpg123</Filter>
+      <Filter>libmpg123</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\frame.c">
-      <Filter>src\libmpg123</Filter>
+      <Filter>libmpg123</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\icy.c">
-      <Filter>src\libmpg123</Filter>
+      <Filter>libmpg123</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\icy2utf8.c">
-      <Filter>src\libmpg123</Filter>
+      <Filter>libmpg123</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\id3.c">
-      <Filter>src\libmpg123</Filter>
+      <Filter>libmpg123</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\index.c">
-      <Filter>src\libmpg123</Filter>
+      <Filter>libmpg123</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\layer1.c">
-      <Filter>src\libmpg123</Filter>
+      <Filter>libmpg123</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\layer2.c">
-      <Filter>src\libmpg123</Filter>
+      <Filter>libmpg123</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\layer3.c">
-      <Filter>src\libmpg123</Filter>
+      <Filter>libmpg123</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\libmpg123.c">
-      <Filter>src\libmpg123</Filter>
+      <Filter>libmpg123</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\ntom.c">
-      <Filter>src\libmpg123</Filter>
+      <Filter>libmpg123</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\optimize.c">
-      <Filter>src\libmpg123</Filter>
+      <Filter>libmpg123</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\parse.c">
-      <Filter>src\libmpg123</Filter>
+      <Filter>libmpg123</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\readers.c">
-      <Filter>src\libmpg123</Filter>
+      <Filter>libmpg123</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\stringbuf.c">
-      <Filter>src\libmpg123</Filter>
+      <Filter>libmpg123</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\synth.c">
-      <Filter>src\libmpg123</Filter>
+      <Filter>libmpg123</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\synth_8bit.c">
-      <Filter>src\libmpg123</Filter>
+      <Filter>libmpg123</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\synth_real.c">
-      <Filter>src\libmpg123</Filter>
+      <Filter>libmpg123</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\synth_s32.c">
-      <Filter>src\libmpg123</Filter>
+      <Filter>libmpg123</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\tabinit.c">
-      <Filter>src\libmpg123</Filter>
+      <Filter>libmpg123</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
