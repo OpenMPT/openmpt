@@ -193,7 +193,7 @@ public:
 	}
 	bool channels_are_contiguous() const noexcept
 	{
-		return false;
+		return m_buffer.channels_are_contiguous();
 	}
 	bool frames_are_contiguous() const noexcept
 	{
