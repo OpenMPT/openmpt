@@ -38,8 +38,10 @@ namespace SoundDevice {
 
 #ifdef MPT_ALL_LOGGING
 #define PALOG(x) MPT_LOG(GetLogger(), LogDebug, "PortAudio", x)
+#define PA_LOG_ENABLED 1
 #else
 #define PALOG(x) do { } while(0)
+#define PA_LOG_ENABLED 0
 #endif
 
 
@@ -1025,7 +1027,9 @@ static void PortaudioLog(const char *text)
 	{
 		return;
 	}
-	PALOG(MPT_UFORMAT("PortAudio: {}")(mpt::ToUnicode(mpt::Charset::UTF8, text)));
+#if PA_LOG_ENABLED
+	MPT_LOG(mpt::log::GlobalLogger(), LogDebug, "PortAudio", MPT_UFORMAT("PortAudio: {}")(mpt::ToUnicode(mpt::Charset::UTF8, text)));
+#endif
 }
 #endif // MPT_COMPILER_MSVC
 
