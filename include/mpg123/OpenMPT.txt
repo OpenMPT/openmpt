@@ -1,14 +1,7 @@
-libmpg123 library version 1.27.0.
+libmpg123 library version 1.27.2.
 The following changes have been made:
 - ports/MSVC++/config.h and ports/MSVC++/mpg123.h have been retained from older
   versions.
-- DEBUG build format string type mismatches in frame.c have benn fixed.
-- DEBUG build format string type mismatches in id3.c have benn fixed.
-- #include "debug.h" has been moved to the last included header in each file in
-  order to avoid #define warning clashing with pragmas. Affected files:
-  - src/compat/compat_str.c
-  - src/libmpg123/libmpg123.c
-  - src/libmpg123/tabinit.c
 - Modifications are marked by // OpenMPT.
 - Obviously, unnecessary folders and files have been removed.
 - For building, premake is used to generate Visual Studio project files.

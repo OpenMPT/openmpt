@@ -8,18 +8,14 @@
 
 #include "mpg123lib_intern.h"
 #include "icy2utf8.h"
-#if 0 // OpenMPT
-#include "debug.h"
-#endif // OpenMPT
 
 #include "gapless.h"
 /* Want accurate rounding function regardless of decoder setup. */
 #define FORCE_ACCURATE
 #include "sample.h"
 #include "parse.h"
-#if 1 // OpenMPT
-#include "debug.h" // OpenMPT
-#endif // OpenMPT
+
+#include "debug.h"
 
 #define SEEKFRAME(mh) ((mh)->ignoreframe < 0 ? 0 : (mh)->ignoreframe)
 
