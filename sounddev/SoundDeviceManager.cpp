@@ -188,7 +188,7 @@ void Manager::ReEnumerate(bool firstRun)
 #ifdef MPT_WITH_PORTAUDIO
 	if(!firstRun)
 	{
-		m_PortAudio.Reload();
+		m_PortAudioInitializer->Reload();
 	}
 #endif // MPT_WITH_PORTAUDIO
 #endif // MODPLUG_TRACKER
@@ -565,7 +565,9 @@ Manager::Manager(mpt::log::ILogger &logger, SoundDevice::SysInfo sysInfo, SoundD
 	: m_Logger(logger)
 	, m_SysInfo(sysInfo)
 	, m_AppInfo(appInfo)
+#ifdef MPT_WITH_PORTAUDIO
 	, m_PortAudioInitializer(std::make_unique<PortAudioInitializer>())
+#endif // MPT_WITH_PORTAUDIO
 {
 	ReEnumerate(true);
 }
