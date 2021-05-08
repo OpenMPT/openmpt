@@ -28,14 +28,12 @@ private:
 	SampleType *const *m_buffers;
 	std::size_t m_channels;
 	std::size_t m_frames;
-	std::size_t m_offset;
 
 public:
 	constexpr audio_buffer_planar(SampleType *const *buffers, std::size_t channels, std::size_t frames) noexcept
 		: m_buffers(buffers)
 		, m_channels(channels)
 		, m_frames(frames)
-		, m_offset(0)
 	{
 		return;
 	}
@@ -49,11 +47,11 @@ public:
 	}
 	SampleType &operator()(std::size_t channel, std::size_t frame)
 	{
-		return m_buffers[channel][m_offset + frame];
+		return m_buffers[channel][frame];
 	}
 	const SampleType &operator()(std::size_t channel, std::size_t frame) const
 	{
-		return m_buffers[channel][m_offset + frame];
+		return m_buffers[channel][frame];
 	}
 	bool is_contiguous() const noexcept
 	{
