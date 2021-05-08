@@ -21,13 +21,13 @@
 #include <mmreg.h>
 #endif // MPT_OS_WINDOWS
 
-#if defined(MODPLUG_TRACKER) && defined(MPT_BUILD_WINESUPPORT) && !MPT_OS_WINDOWS
+#if MPT_OS_LINUX || MPT_OS_MACOSX_OR_IOS || MPT_OS_FREEBSD
 // we use c++11 in native support library
 #include <atomic>
 #include <condition_variable>
 #include <mutex>
 #include <thread>
-#endif // MODPLUG_TRACKER && MPT_BUILD_WINESUPPORT && !MPT_OS_WINDOWS
+#endif // MPT_OS_LINUX || MPT_OS_MACOSX_OR_IOS || MPT_OS_FREEBSD
 
 
 OPENMPT_NAMESPACE_BEGIN
