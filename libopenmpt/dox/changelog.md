@@ -10,7 +10,7 @@ is just a high-level summary.
  *  `Makefile` `CONFIG=emscripten` does not pass linker options to the compiler
     any more, which caused latest Emscripten to issue warnings.
 
- *  mpg123: Update to v1.27.0 (2021-05-07).
+ *  mpg123: Update to v1.27.2 (2021-05-08).
 
 ### libopenmpt 0.5.8 (2021-04-11)
 
