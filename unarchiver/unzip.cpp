@@ -224,7 +224,8 @@ CZipArchive::CZipArchive(FileReader &file) : ArchiveBase(file)
 	mz_zip_archive *zip = static_cast<mz_zip_archive*>(zipFile);
 	
 	MemsetZero(*zip);
-	if(!mz_zip_reader_init_mem(zip, file.GetRawData(), file.GetLength(), 0))
+	const auto fileData = file.GetRawData();
+	if(!mz_zip_reader_init_mem(zip, fileData.data(), fileData.size(), 0))
 	{
 		delete zip;
 		zip = nullptr;
