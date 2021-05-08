@@ -74,6 +74,136 @@ static_assert(mpt::array_size<decltype(szSpecialNoteShortDesc)>::size == mpt::ar
 
 const char *szHexChar = "0123456789ABCDEF";
 
+
+#ifdef MPT_WITH_ASIO
+class ComponentASIO
+	: public ComponentBuiltin
+{
+	MPT_DECLARE_COMPONENT_MEMBERS(ComponentASIO, "ASIO")
+public:
+	ComponentASIO() = default;
+	virtual ~ComponentASIO() = default;
+};
+#endif // MPT_WITH_ASIO
+
+#if defined(MPT_WITH_DIRECTSOUND)
+class ComponentDirectSound 
+	: public ComponentBuiltin
+{
+	MPT_DECLARE_COMPONENT_MEMBERS(ComponentDirectSound, "DirectSound")
+public:
+	ComponentDirectSound() = default;
+	virtual ~ComponentDirectSound() = default;
+};
+#endif // MPT_WITH_DIRECTSOUND
+
+#if defined(MPT_WITH_PORTAUDIO)
+class ComponentPortAudio
+	: public ComponentBuiltin
+{
+	MPT_DECLARE_COMPONENT_MEMBERS(ComponentPortAudio, "PortAudio")
+public:
+	ComponentPortAudio() = default;
+	virtual ~ComponentPortAudio() = default;
+};
+#endif // MPT_WITH_PORTAUDIO
+
+#if defined(MPT_WITH_PULSEAUDIO)
+class ComponentPulseaudio
+	: public ComponentBuiltin
+{
+	MPT_DECLARE_COMPONENT_MEMBERS(ComponentPulseaudio, "Pulseaudio")
+public:
+	ComponentPulseaudio() = default;
+	virtual ~ComponentPulseaudio() = default;
+};
+#endif // MPT_WITH_PULSEAUDIO
+
+#if defined(MPT_WITH_PULSEAUDIO) && defined(MPT_WITH_PULSEAUDIOSIMPLE)
+class ComponentPulseaudioSimple
+	: public ComponentBuiltin
+{
+	MPT_DECLARE_COMPONENT_MEMBERS(ComponentPulseaudioSimple, "PulseaudioSimple")
+public:
+	ComponentPulseaudioSimple() = default;
+	virtual ~ComponentPulseaudioSimple() = default;
+};
+#endif // MPT_WITH_PULSEAUDIO && MPT_WITH_PULSEAUDIOSIMPLE
+
+#if defined(MPT_WITH_RTAUDIO)
+class ComponentRtAudio
+	: public ComponentBuiltin
+{
+	MPT_DECLARE_COMPONENT_MEMBERS(ComponentRtAudio, "RtAudio")
+public:
+	ComponentRtAudio() = default;
+	virtual ~ComponentRtAudio() = default;
+};
+#endif // MPT_WITH_RTAUDIO
+
+#if MPT_OS_WINDOWS
+class ComponentWaveOut
+	: public ComponentBuiltin
+{
+	MPT_DECLARE_COMPONENT_MEMBERS(ComponentWaveOut, "WaveOut")
+public:
+	ComponentWaveOut() = default;
+	virtual ~ComponentWaveOut() = default;
+};
+#endif // MPT_OS_WINDOWS
+
+struct AllSoundDeviceComponents
+{
+#if defined(MPT_WITH_PULSEAUDIO) && defined(MPT_ENABLE_PULSEAUDIO_FULL)
+	ComponentHandle<ComponentPulseaudio> m_Pulseaudio;
+#endif // MPT_WITH_PULSEAUDIO && MPT_ENABLE_PULSEAUDIO_FULL
+#if defined(MPT_WITH_PULSEAUDIO) && defined(MPT_WITH_PULSEAUDIOSIMPLE)
+	ComponentHandle<ComponentPulseaudioSimple> m_PulseaudioSimple;
+#endif // MPT_WITH_PULSEAUDIO && MPT_WITH_PULSEAUDIOSIMPLE
+#if MPT_OS_WINDOWS
+	ComponentHandle<ComponentWaveOut> m_WaveOut;
+#endif // MPT_OS_WINDOWS
+#if defined(MPT_WITH_DIRECTSOUND)
+	ComponentHandle<ComponentDirectSound> m_DirectSound;
+#endif // MPT_WITH_DIRECTSOUND
+#ifdef MPT_WITH_ASIO
+	ComponentHandle<ComponentASIO> m_ASIO;
+#endif // MPT_WITH_ASIO
+#ifdef MPT_WITH_PORTAUDIO
+	ComponentHandle<ComponentPortAudio> m_PortAudio;
+#endif // MPT_WITH_PORTAUDIO
+#ifdef MPT_WITH_RTAUDIO
+	ComponentHandle<ComponentRtAudio> m_RtAudio;
+#endif // MPT_WITH_RTAUDIO
+	operator SoundDevice::EnabledBackends() const
+	{
+		SoundDevice::EnabledBackends result;
+#if defined(MPT_WITH_PULSEAUDIO) && defined(MPT_ENABLE_PULSEAUDIO_FULL)
+		result.Pulseaudio = IsComponentAvailable(m_PulseAudio);
+#endif // MPT_WITH_PULSEAUDIO && MPT_ENABLE_PULSEAUDIO_FULL
+#if defined(MPT_WITH_PULSEAUDIO) && defined(MPT_WITH_PULSEAUDIOSIMPLE)
+		result.PulseaudioSimple = IsComponentAvailable(m_PulseAudioSimple);
+#endif // MPT_WITH_PULSEAUDIO && MPT_WITH_PULSEAUDIOSIMPLE
+#if MPT_OS_WINDOWS
+		result.WaveOut = IsComponentAvailable(m_WaveOut);
+#endif // MPT_OS_WINDOWS
+#if defined(MPT_WITH_DIRECTSOUND)
+		result.DirectSound = IsComponentAvailable(m_DirectSound);
+#endif // MPT_WITH_DIRECTSOUND
+#ifdef MPT_WITH_ASIO
+		result.ASIO = IsComponentAvailable(m_ASIO);
+#endif // MPT_WITH_ASIO
+#ifdef MPT_WITH_PORTAUDIO
+		result.PortAudio = IsComponentAvailable(m_PortAudio);
+#endif // MPT_WITH_PORTAUDIO
+#ifdef MPT_WITH_RTAUDIO
+		result.RtAudio = IsComponentAvailable(m_RtAudio);
+#endif // MPT_WITH_RTAUDIO
+		return result;
+	}
+};
+
+
 void CTrackApp::OnFileCloseAll()
 {
 	if(!(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_NOCLOSEDIALOG))
@@ -995,6 +1125,7 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 
 	// Load sound APIs
 	// requires TrackerSettings
+	m_pAllSoundDeviceComponents = std::make_unique<AllSoundDeviceComponents>();
 	SoundDevice::SysInfo sysInfo = SoundDevice::SysInfo::Current();
 	SoundDevice::AppInfo appInfo;
 	appInfo.SetName(U_("OpenMPT"));
@@ -1006,7 +1137,7 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 	appInfo.BoostedThreadRtprioPosix = TrackerSettings::Instance().SoundBoostedThreadRtprioPosix;
 	appInfo.MaskDriverCrashes = TrackerSettings::Instance().SoundMaskDriverCrashes;
 	appInfo.AllowDeferredProcessing = TrackerSettings::Instance().SoundAllowDeferredProcessing;
-	m_pSoundDevicesManager = new SoundDevice::Manager(m_GlobalLogger, sysInfo, appInfo);
+	m_pSoundDevicesManager = new SoundDevice::Manager(m_GlobalLogger, sysInfo, appInfo, *m_pAllSoundDeviceComponents);
 	m_pTrackerSettings->MigrateOldSoundDeviceSettings(*m_pSoundDevicesManager);
 
 	// Set default note names
@@ -1229,6 +1360,7 @@ int CTrackApp::ExitInstanceImpl()
 
 	delete m_pSoundDevicesManager;
 	m_pSoundDevicesManager = nullptr;
+	m_pAllSoundDeviceComponents = nullptr;
 	ExportMidiConfig(theApp.GetSettings());
 	SaveDefaultDLSBanks();
 	for(auto &bank : gpDLSBanks)

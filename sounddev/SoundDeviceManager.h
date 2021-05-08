@@ -15,10 +15,6 @@
 
 #include "SoundDevice.h"
 
-#if defined(MODPLUG_TRACKER)
-#include "../common/ComponentManager.h"
-#endif // MODPLUG_TRACKER
-
 #include <map>
 #include <vector>
 
@@ -29,29 +25,30 @@ OPENMPT_NAMESPACE_BEGIN
 namespace SoundDevice {
 
 
-#if defined(MODPLUG_TRACKER)
+struct EnabledBackends
+{
 #if defined(MPT_WITH_PULSEAUDIO) && defined(MPT_ENABLE_PULSEAUDIO_FULL)
-class ComponentPulseaudio;
+	bool Pulseaudio = true;
 #endif // MPT_WITH_PULSEAUDIO && MPT_ENABLE_PULSEAUDIO_FULL
 #if defined(MPT_WITH_PULSEAUDIO) && defined(MPT_WITH_PULSEAUDIOSIMPLE)
-class ComponentPulseaudioSimple;
+	bool PulseaudioSimple = true;
 #endif // MPT_WITH_PULSEAUDIO && MPT_WITH_PULSEAUDIOSIMPLE
 #if MPT_OS_WINDOWS
-class ComponentWaveOut;
+	bool WaveOut = true;
 #endif // MPT_OS_WINDOWS
 #if defined(MPT_WITH_DIRECTSOUND)
-class ComponentDirectSound;
+	bool DirectSound = true;
 #endif // MPT_WITH_DIRECTSOUND
 #ifdef MPT_WITH_ASIO
-class ComponentASIO;
+	bool ASIO = true;
 #endif // MPT_WITH_ASIO
 #ifdef MPT_WITH_PORTAUDIO
-class ComponentPortAudio;
+	bool PortAudio = true;
 #endif // MPT_WITH_PORTAUDIO
 #ifdef MPT_WITH_RTAUDIO
-class ComponentRtAudio;
+	bool RtAudio = true;
 #endif // MPT_WITH_RTAUDIO
-#endif // MODPLUG_TRACKER
+};
 
 
 #ifdef MPT_WITH_PORTAUDIO
@@ -76,29 +73,7 @@ private:
 	const SoundDevice::SysInfo m_SysInfo;
 	const SoundDevice::AppInfo m_AppInfo;
 
-#if defined(MODPLUG_TRACKER)
-#if defined(MPT_WITH_PULSEAUDIO) && defined(MPT_ENABLE_PULSEAUDIO_FULL)
-	ComponentHandle<ComponentPulseaudio> m_Pulseaudio;
-#endif // MPT_WITH_PULSEAUDIO && MPT_ENABLE_PULSEAUDIO_FULL
-#if defined(MPT_WITH_PULSEAUDIO) && defined(MPT_WITH_PULSEAUDIOSIMPLE)
-	ComponentHandle<ComponentPulseaudioSimple> m_PulseaudioSimple;
-#endif // MPT_WITH_PULSEAUDIO && MPT_WITH_PULSEAUDIOSIMPLE
-#if MPT_OS_WINDOWS
-	ComponentHandle<ComponentWaveOut> m_WaveOut;
-#endif // MPT_OS_WINDOWS
-#if defined(MPT_WITH_DIRECTSOUND)
-	ComponentHandle<ComponentDirectSound> m_DirectSound;
-#endif // MPT_WITH_DIRECTSOUND
-#ifdef MPT_WITH_ASIO
-	ComponentHandle<ComponentASIO> m_ASIO;
-#endif // MPT_WITH_ASIO
-#ifdef MPT_WITH_PORTAUDIO
-	ComponentHandle<ComponentPortAudio> m_PortAudio;
-#endif // MPT_WITH_PORTAUDIO
-#ifdef MPT_WITH_RTAUDIO
-	ComponentHandle<ComponentRtAudio> m_RtAudio;
-#endif // MPT_WITH_RTAUDIO
-#endif // MODPLUG_TRACKER
+	const EnabledBackends m_EnabledBackends;
 
 #ifdef MPT_WITH_PORTAUDIO
 	std::unique_ptr<PortAudioInitializer> m_PortAudioInitializer;
@@ -112,7 +87,7 @@ private:
 
 public:
 
-	Manager(mpt::log::ILogger &logger, SoundDevice::SysInfo sysInfo, SoundDevice::AppInfo appInfo);
+	Manager(mpt::log::ILogger &logger, SoundDevice::SysInfo sysInfo, SoundDevice::AppInfo appInfo, EnabledBackends enabledBackends = EnabledBackends{});
 	~Manager();
 
 private:

@@ -31,6 +31,7 @@ namespace SoundDevice
 {
 class Manager;
 }  // namespace SoundDevice
+struct AllSoundDeviceComponents;
 class CDLSBank;
 class DebugSettings;
 class TrackerSettings;
@@ -136,6 +137,7 @@ protected:
 	CModDocTemplate *m_pModTemplate = nullptr;
 	CVstPluginManager *m_pPluginManager = nullptr;
 	mpt::log::GlobalLogger m_GlobalLogger{};
+	std::unique_ptr<AllSoundDeviceComponents> m_pAllSoundDeviceComponents;
 	SoundDevice::Manager *m_pSoundDevicesManager = nullptr;
 
 	mpt::PathString m_InstallPath;         // i.e. "C:\Program Files\OpenMPT\" (installer mode) or "G:\OpenMPT\" (portable mode)

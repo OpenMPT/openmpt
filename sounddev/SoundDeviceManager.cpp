@@ -19,11 +19,9 @@
 #include "SoundDevicePortAudio.h"
 #include "SoundDeviceRtAudio.h"
 #include "SoundDeviceWaveout.h"
-#include "SoundDeviceStub.h"
-#if defined(MPT_ENABLE_PULSEAUDIO_FULL)
 #include "SoundDevicePulseaudio.h"
-#endif // MPT_ENABLE_PULSEAUDIO_FULL
 #include "SoundDevicePulseSimple.h"
+#include "SoundDeviceStub.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -35,82 +33,6 @@ namespace SoundDevice {
 
 #if defined(MODPLUG_TRACKER)
 
-#ifdef MPT_WITH_ASIO
-class ComponentASIO
-	: public ComponentBuiltin
-{
-	MPT_DECLARE_COMPONENT_MEMBERS(ComponentASIO, "ASIO")
-public:
-	ComponentASIO() = default;
-	virtual ~ComponentASIO() = default;
-};
-#endif // MPT_WITH_ASIO
-
-#if defined(MPT_WITH_DIRECTSOUND)
-class ComponentDirectSound 
-	: public ComponentBuiltin
-{
-	MPT_DECLARE_COMPONENT_MEMBERS(ComponentDirectSound, "DirectSound")
-public:
-	ComponentDirectSound() = default;
-	virtual ~ComponentDirectSound() = default;
-};
-#endif // MPT_WITH_DIRECTSOUND
-
-#if defined(MPT_WITH_PORTAUDIO)
-class ComponentPortAudio
-	: public ComponentBuiltin
-{
-	MPT_DECLARE_COMPONENT_MEMBERS(ComponentPortAudio, "PortAudio")
-public:
-	ComponentPortAudio() = default;
-	virtual ~ComponentPortAudio() = default;
-};
-#endif // MPT_WITH_PORTAUDIO
-
-#if defined(MPT_WITH_PULSEAUDIO)
-class ComponentPulseaudio
-	: public ComponentBuiltin
-{
-	MPT_DECLARE_COMPONENT_MEMBERS(ComponentPulseaudio, "Pulseaudio")
-public:
-	ComponentPulseaudio() = default;
-	virtual ~ComponentPulseaudio() = default;
-};
-#endif // MPT_WITH_PULSEAUDIO
-
-#if defined(MPT_WITH_PULSEAUDIO) && defined(MPT_WITH_PULSEAUDIOSIMPLE)
-class ComponentPulseaudioSimple
-	: public ComponentBuiltin
-{
-	MPT_DECLARE_COMPONENT_MEMBERS(ComponentPulseaudioSimple, "PulseaudioSimple")
-public:
-	ComponentPulseaudioSimple() = default;
-	virtual ~ComponentPulseaudioSimple() = default;
-};
-#endif // MPT_WITH_PULSEAUDIO && MPT_WITH_PULSEAUDIOSIMPLE
-
-#if defined(MPT_WITH_RTAUDIO)
-class ComponentRtAudio
-	: public ComponentBuiltin
-{
-	MPT_DECLARE_COMPONENT_MEMBERS(ComponentRtAudio, "RtAudio")
-public:
-	ComponentRtAudio() = default;
-	virtual ~ComponentRtAudio() = default;
-};
-#endif // MPT_WITH_RTAUDIO
-
-#if MPT_OS_WINDOWS
-class ComponentWaveOut
-	: public ComponentBuiltin
-{
-	MPT_DECLARE_COMPONENT_MEMBERS(ComponentWaveOut, "WaveOut")
-public:
-	ComponentWaveOut() = default;
-	virtual ~ComponentWaveOut() = default;
-};
-#endif // MPT_OS_WINDOWS
 
 
 #endif // MODPLUG_TRACKER
@@ -184,20 +106,19 @@ void Manager::ReEnumerate(bool firstRun)
 	m_DeviceCaps.clear();
 	m_DeviceDynamicCaps.clear();
 
-#if defined(MODPLUG_TRACKER)
 #ifdef MPT_WITH_PORTAUDIO
 	if(!firstRun)
 	{
-		m_PortAudioInitializer->Reload();
+		if(m_EnabledBackends.PortAudio)
+		{
+			m_PortAudioInitializer->Reload();
+		}
 	}
 #endif // MPT_WITH_PORTAUDIO
-#endif // MODPLUG_TRACKER
 
 #if defined(MPT_ENABLE_PULSEAUDIO_FULL)
 #if defined(MPT_WITH_PULSEAUDIO)
-#if defined(MODPLUG_TRACKER)
-	if(IsComponentAvailable(m_Pulseaudio))
-#endif // MODPLUG_TRACKER
+	if(m_EnabledBackends.Pulseaudio)
 	{
 		EnumerateDevices<Pulseaudio>(GetLogger(), GetSysInfo());
 	}
@@ -205,18 +126,14 @@ void Manager::ReEnumerate(bool firstRun)
 #endif // MPT_ENABLE_PULSEAUDIO_FULL
 
 #if defined(MPT_WITH_PULSEAUDIO) && defined(MPT_WITH_PULSEAUDIOSIMPLE)
-#if defined(MODPLUG_TRACKER)
-	if(IsComponentAvailable(m_PulseaudioSimple))
-#endif // MODPLUG_TRACKER
+	if(m_EnabledBackends.PulseaudioSimple)
 	{
 		EnumerateDevices<PulseaudioSimple>(GetLogger(), GetSysInfo());
 	}
 #endif // MPT_WITH_PULSEAUDIO && MPT_WITH_PULSEAUDIOSIMPLE
 
 #if MPT_OS_WINDOWS
-#if defined(MODPLUG_TRACKER)
-	if(IsComponentAvailable(m_WaveOut))
-#endif // MODPLUG_TRACKER
+	if(m_EnabledBackends.WaveOut)
 	{
 		EnumerateDevices<CWaveDevice>(GetLogger(), GetSysInfo());
 	}
@@ -224,36 +141,28 @@ void Manager::ReEnumerate(bool firstRun)
 
 #if defined(MPT_WITH_DIRECTSOUND)
 	// kind of deprecated by now
-#if defined(MODPLUG_TRACKER)
-	if(IsComponentAvailable(m_DirectSound))
-#endif // MODPLUG_TRACKER
+	if(m_EnabledBackends.DirectSound)
 	{
 		EnumerateDevices<CDSoundDevice>(GetLogger(), GetSysInfo());
 	}
 #endif // MPT_WITH_DIRECTSOUND
 
 #ifdef MPT_WITH_ASIO
-#if defined(MODPLUG_TRACKER)
-	if(IsComponentAvailable(m_ASIO))
-#endif // MODPLUG_TRACKER
+	if(m_EnabledBackends.ASIO)
 	{
 		EnumerateDevices<CASIODevice>(GetLogger(), GetSysInfo());
 	}
 #endif // MPT_WITH_ASIO
 
 #ifdef MPT_WITH_PORTAUDIO
-#if defined(MODPLUG_TRACKER)
-	if(IsComponentAvailable(m_PortAudio))
-#endif // MODPLUG_TRACKER
+	if(m_EnabledBackends.PortAudio)
 	{
 		EnumerateDevices<CPortaudioDevice>(GetLogger(), GetSysInfo());
 	}
 #endif // MPT_WITH_PORTAUDIO
 
 #ifdef MPT_WITH_RTAUDIO
-#if defined(MODPLUG_TRACKER)
-	if(IsComponentAvailable(m_RtAudio))
-#endif // MODPLUG_TRACKER
+	if(m_EnabledBackends.RtAudio)
 	{
 		EnumerateDevices<CRtAudioDevice>(GetLogger(), GetSysInfo());
 	}
@@ -561,12 +470,13 @@ SoundDevice::IBase * Manager::CreateSoundDevice(SoundDevice::Identifier identifi
 }
 
 
-Manager::Manager(mpt::log::ILogger &logger, SoundDevice::SysInfo sysInfo, SoundDevice::AppInfo appInfo)
+Manager::Manager(mpt::log::ILogger &logger, SoundDevice::SysInfo sysInfo, SoundDevice::AppInfo appInfo, EnabledBackends enabledBackends)
 	: m_Logger(logger)
 	, m_SysInfo(sysInfo)
 	, m_AppInfo(appInfo)
+	, m_EnabledBackends(enabledBackends)
 #ifdef MPT_WITH_PORTAUDIO
-	, m_PortAudioInitializer(std::make_unique<PortAudioInitializer>())
+	, m_PortAudioInitializer(m_EnabledBackends.PortAudio ? std::make_unique<PortAudioInitializer>() : nullptr)
 #endif // MPT_WITH_PORTAUDIO
 {
 	ReEnumerate(true);
