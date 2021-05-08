@@ -7,15 +7,10 @@
 */
 
 #include "mpg123lib_intern.h"
-#if 0 // OpenMPT
 #include "debug.h"
-#endif // OpenMPT
 
 // The precomputed cos tables.
 #include "costabs.h"
-#if 1 // OpenMPT
-#include "debug.h" // OpenMPT
-#endif // OpenMPT
 const real *pnts[] = { cos64,cos32,cos16,cos8,cos4 };
 
 static const long intwinbase[] = {
