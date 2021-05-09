@@ -655,17 +655,17 @@ std::pair<CViewSample::HitTestItem, SmpLength> CViewSample::PointToItem(CPoint p
 		const auto &sample = sndFile.GetSample(m_nSample);
 		if(sample.nSustainStart < sample.nSustainEnd && sample.nSustainStart < sample.nLength)
 		{
-			if(HitTest(point.x, SampleToScreen(sample.nSustainStart), 0, m_timelineHeight / 2, 0, m_timelineHeight, rect))
-				return {HitTestItem::SustainStart, sample.nSustainStart};
 			if(HitTest(point.x, SampleToScreen(sample.nSustainEnd), m_timelineHeight / 2, 0, 0, m_timelineHeight, rect))
 				return {HitTestItem::SustainEnd, sample.nSustainEnd};
+			if(HitTest(point.x, SampleToScreen(sample.nSustainStart), 0, m_timelineHeight / 2, 0, m_timelineHeight, rect))
+				return {HitTestItem::SustainStart, sample.nSustainStart};
 		}
 		if (sample.nLoopStart < sample.nLoopEnd && sample.nLoopStart < sample.nLength)
 		{
-			if(HitTest(point.x, SampleToScreen(sample.nLoopStart), 0, m_timelineHeight / 2, 0, m_timelineHeight, rect))
-				return {HitTestItem::LoopStart, sample.nLoopStart };
 			if(HitTest(point.x, SampleToScreen(sample.nLoopEnd), m_timelineHeight / 2, 0, 0, m_timelineHeight, rect))
 				return {HitTestItem::LoopEnd, sample.nLoopEnd};
+			if(HitTest(point.x, SampleToScreen(sample.nLoopStart), 0, m_timelineHeight / 2, 0, m_timelineHeight, rect))
+				return {HitTestItem::LoopStart, sample.nLoopStart };
 		}
 		for(size_t i = 0; i < std::size(sample.cues); i++)
 		{
