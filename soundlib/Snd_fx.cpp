@@ -4007,7 +4007,6 @@ void CSoundFile::TonePortamento(ModChannel &chn, uint32 param) const
 			if(chn.nPortamentoSlide == 0)
 				return;
 
-
 		if((chn.nPortamentoDest > 0 && chn.nPortamentoSlide < 0) ||
 			(chn.nPortamentoDest < 0 && chn.nPortamentoSlide > 0))
 			chn.nPortamentoSlide = -chn.nPortamentoSlide;
@@ -5454,7 +5453,8 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, int offset)
 		}
 		uint32 note = chn.nNewNote;
 		int32 oldPeriod = chn.nPeriod;
-		if(note >= NOTE_MIN && note <= NOTE_MAX && chn.nLength)
+		// ST3 doesn't retrigger OPL notes
+		if(note >= NOTE_MIN && note <= NOTE_MAX && chn.nLength && (!chn.dwFlags[CHN_ADLIB] || GetType() != MOD_TYPE_S3M || m_playBehaviour[kOPLRealRetrig]))
 			CheckNNA(nChn, 0, note, true);
 		bool resetEnv = false;
 		if(GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2))
@@ -5466,11 +5466,6 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, int offset)
 			}
 			if(param < 0x100)
 				resetEnv = true;
-		}
-		if(chn.dwFlags[CHN_ADLIB] && m_playBehaviour[kOPLRealRetrig] && chn.pModSample && m_opl)
-		{
-			m_opl->NoteCut(nChn);
-			m_opl->Patch(nChn, chn.pModSample->adlib);
 		}
 
 		const bool fading = chn.dwFlags[CHN_NOTEFADE];

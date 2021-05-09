@@ -1048,7 +1048,6 @@ PlayBehaviourSet CSoundFile::GetSupportedPlaybackBehaviour(MODTYPE type)
 		{
 			playBehaviour.set(kOPLFlexibleNoteOff);
 			playBehaviour.set(kOPLwithNNA);
-			playBehaviour.set(kOPLRealRetrig);
 			playBehaviour.set(kOPLNoteOffOnNoteChange);
 		}
 		break;
@@ -1171,7 +1170,6 @@ PlayBehaviourSet CSoundFile::GetDefaultPlaybackBehaviour(MODTYPE type)
 		playBehaviour.set(kITDoNotOverrideChannelPan);
 		playBehaviour.set(kITDCTBehaviour);
 		playBehaviour.set(kOPLwithNNA);
-		playBehaviour.set(kOPLRealRetrig);
 		break;
 
 	case MOD_TYPE_S3M:
