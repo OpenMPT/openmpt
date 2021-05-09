@@ -606,7 +606,11 @@ BOOL CCtrlSamples::GetToolTipText(UINT uId, LPTSTR pszText)
 
 		case IDC_EDIT14:
 			// Vibrato Sweep
-			if(m_nSample)
+			if(!(m_sndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM)))
+			{
+				s = _T("Only available in IT / MPTM / XM format");
+				break;
+			} else if(m_nSample)
 			{
 				const ModSample &sample = m_sndFile.GetSample(m_nSample);
 				int ticks = -1;
@@ -630,11 +634,18 @@ BOOL CCtrlSamples::GetToolTipText(UINT uId, LPTSTR pszText)
 			return TRUE;
 		case IDC_EDIT15:
 			// Vibrato Depth
-			_stprintf(pszText, _T("%u cents"), Util::muldivr_unsigned(val, 100, 64));
+			if(!(m_sndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM)))
+				_tcscpy(pszText, _T("Only available in IT / MPTM / XM format"));
+			else
+				_stprintf(pszText, _T("%u cents"), Util::muldivr_unsigned(val, 100, 64));
 			return TRUE;
 		case IDC_EDIT16:
 			// Vibrato Rate
-			if(val == 0)
+			if(!(m_sndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM)))
+			{
+				s = _T("Only available in IT / MPTM / XM format");
+				break;
+			} else if(val == 0)
 			{
 				s = _T("Stopped");
 				break;
@@ -645,6 +656,19 @@ BOOL CCtrlSamples::GetToolTipText(UINT uId, LPTSTR pszText)
 				_stprintf(pszText, _T("%.2f beats per cycle (%.2f ticks)"), ticksPerCycle / ticksPerBeat, ticksPerCycle);
 			}
 			return TRUE;
+
+		case IDC_CHECK1:
+		case IDC_EDIT3:
+		case IDC_EDIT4:
+		case IDC_COMBO2:
+			if(!(m_sndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)))
+				s = _T("Only available in IT / MPTM format");
+			break;
+
+		case IDC_COMBO3:
+			if(!(m_sndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM)))
+				s = _T("Only available in IT / MPTM / XM format");
+			break;
 
 		case IDC_CHECK2:
 			s = _T("Keep a reference to the original waveform instead of saving it in the module.");
