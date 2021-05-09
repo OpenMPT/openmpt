@@ -2310,7 +2310,7 @@ bool CSoundFile::ReadNote()
 		}
 
 		// Volume ramping
-		chn.dwFlags.set(CHN_VOLUMERAMP, (chn.nRealVolume | chn.rightVol | chn.leftVol) != 0);
+		chn.dwFlags.set(CHN_VOLUMERAMP, (chn.nRealVolume | chn.rightVol | chn.leftVol) != 0 && !chn.dwFlags[CHN_ADLIB]);
 
 		if (chn.nLeftVU > VUMETER_DECAY) chn.nLeftVU -= VUMETER_DECAY; else chn.nLeftVU = 0;
 		if (chn.nRightVU > VUMETER_DECAY) chn.nRightVU -= VUMETER_DECAY; else chn.nRightVU = 0;
