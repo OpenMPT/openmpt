@@ -5452,8 +5452,7 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, int offset)
 		}
 		uint32 note = chn.nNewNote;
 		int32 oldPeriod = chn.nPeriod;
-		const bool retrigAdlib = chn.dwFlags[CHN_ADLIB] && m_playBehaviour[kOPLRealRetrig];
-		if(note >= NOTE_MIN && note <= NOTE_MAX && chn.nLength && retrigAdlib)
+		if(note >= NOTE_MIN && note <= NOTE_MAX && chn.nLength)
 			CheckNNA(nChn, 0, note, true);
 		bool resetEnv = false;
 		if(GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2))
@@ -5466,7 +5465,7 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, int offset)
 			if(param < 0x100)
 				resetEnv = true;
 		}
-		if(retrigAdlib && chn.pModSample && m_opl)
+		if(chn.dwFlags[CHN_ADLIB] && m_playBehaviour[kOPLRealRetrig] && chn.pModSample && m_opl)
 		{
 			m_opl->NoteCut(nChn);
 			m_opl->Patch(nChn, chn.pModSample->adlib);
