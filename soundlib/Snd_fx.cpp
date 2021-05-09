@@ -2192,6 +2192,12 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 		if(!srcChn.nLength || srcChn.dwFlags[CHN_MUTE] || !(srcChn.rightVol | srcChn.leftVol))
 			return CHANNELINDEX_INVALID;
 
+		if(srcChn.dwFlags[CHN_ADLIB] && m_opl)
+		{
+			m_opl->NoteCut(nChn, false);
+			return CHANNELINDEX_INVALID;
+		}
+
 		const CHANNELINDEX nnaChn = GetNNAChannel(nChn);
 		if(nnaChn == CHANNELINDEX_INVALID)
 			return CHANNELINDEX_INVALID;
@@ -2211,10 +2217,6 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 		srcChn.position.Set(0);
 		srcChn.nROfs = srcChn.nLOfs = 0;
 		srcChn.rightVol = srcChn.leftVol = 0;
-		if(srcChn.dwFlags[CHN_ADLIB] && m_opl)
-		{
-			m_opl->NoteCut(nChn);
-		}
 		return nnaChn;
 	}
 	if(instr > GetNumInstruments())
