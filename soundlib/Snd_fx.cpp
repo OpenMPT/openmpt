@@ -5525,7 +5525,7 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, int offset)
 // The period or frequency that is read and written is in the period variable, chn.nPeriod is not touched.
 void CSoundFile::DoFreqSlide(ModChannel &chn, int32 &period, int32 amount, bool isTonePorta) const
 {
-	if(!period)
+	if(!period || !amount)
 		return;
 	MPT_ASSERT(!chn.HasCustomTuning());
 
@@ -5542,25 +5542,25 @@ void CSoundFile::DoFreqSlide(ModChannel &chn, int32 &period, int32 amount, bool 
 	{
 		// IT Linear slides
 		const auto oldPeriod = period;
-		uint32 n = std::abs(amount), delta = 0;
+		uint32 n = std::abs(amount);
 		LimitMax(n, 255u * 4u);
 
-		// Note: IT ignores the lower 2 bits when abs(delta) > 16, this is currently not emulated (it either uses the fine *or* the regular table, not both)
-		// This detail would only be required for more accurate vibrato, it cannot happen with regular slides.
+		// Note: IT ignores the lower 2 bits when abs(mount) > 16 (it either uses the fine *or* the regular table, not both)
+		// This means that vibratos are slightly less accurate in this range than they could be.
+		// Other code paths will *either* have an amount that's a multiple of 4 *or* it's less than 16.
 		if(amount > 0)
 		{
-			if(n >= 4)
-				delta = Util::muldiv(period, GetLinearSlideUpTable(this, n / 4u), 65536) - period;
-			if(n & 0x03)
-				delta += Util::muldiv(period, GetFineLinearSlideUpTable(this, n & 0x03), 65536) - period;
+			if(n < 16)
+				period = Util::muldivr(period, GetFineLinearSlideUpTable(this, n), 65536);
+			else
+				period = Util::muldivr(period, GetLinearSlideUpTable(this, n / 4u), 65536);
 		} else
 		{
-			if(n >= 4)
-				delta = Util::muldiv(period, GetLinearSlideDownTable(this, n / 4u), 65536) - period;
-			if(n & 0x03)
-				delta += Util::muldiv(period, GetFineLinearSlideDownTable(this, n & 0x03), 65536) - period;
+			if(n < 16)
+				period = Util::muldivr(period, GetFineLinearSlideDownTable(this, n), 65536);
+			else
+				period = Util::muldivr(period, GetLinearSlideDownTable(this, n / 4u), 65536);
 		}
-		period += delta;
 
 		if(period == oldPeriod)
 		{
