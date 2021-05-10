@@ -71,7 +71,7 @@ void CopyInterleavedSampleStreams(typename SampleConversion::output_t *MPT_RESTR
 
 // Copy numChannels interleaved sample streams.
 template <typename SampleConversion>
-void CopyInterleavedSampleStreams(typename SampleConversion::output_t *MPT_RESTRICT outBuf, const typename SampleConversion::input_t *MPT_RESTRICT inBuf, size_t numFrames, size_t numChannels, std::vector<SampleConversion> &conv)
+void CopyInterleavedSampleStreams(typename SampleConversion::output_t *MPT_RESTRICT outBuf, const typename SampleConversion::input_t *MPT_RESTRICT inBuf, size_t numFrames, size_t numChannels, mpt::span<SampleConversion> conv)
 {
 	MPT_ASSERT(conv.size() >= numChannels);
 	CopyInterleavedSampleStreams(outBuf, inBuf, numFrames, numChannels, &(conv[0]));

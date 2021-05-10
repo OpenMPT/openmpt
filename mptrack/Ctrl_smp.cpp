@@ -2338,10 +2338,10 @@ public:
 			switch(smpSize)
 			{
 			case 1:
-				CopyInterleavedSampleStreams(buffer.data(), sample.sample8() + inPos * numChannels, inChunkSize, numChannels, conv8f32);
+				CopyInterleavedSampleStreams(buffer.data(), sample.sample8() + inPos * numChannels, inChunkSize, numChannels, mpt::as_span(conv8f32));
 				break;
 			case 2:
-				CopyInterleavedSampleStreams(buffer.data(), sample.sample16() + inPos * numChannels, inChunkSize, numChannels, convf32);
+				CopyInterleavedSampleStreams(buffer.data(), sample.sample16() + inPos * numChannels, inChunkSize, numChannels, mpt::as_span(convf32));
 				break;
 			}
 			soundtouch_putSamples(handleSt, buffer.data(), inChunkSize);
@@ -2356,10 +2356,10 @@ public:
 					switch(smpSize)
 					{
 					case 1:
-						CopyInterleavedSampleStreams(static_cast<int8 *>(pNewSample) + numChannels * outPos, buffer.data(), outChunkSize, numChannels, convint8);
+						CopyInterleavedSampleStreams(static_cast<int8 *>(pNewSample) + numChannels * outPos, buffer.data(), outChunkSize, numChannels, mpt::as_span(convint8));
 						break;
 					case 2:
-						CopyInterleavedSampleStreams(static_cast<int16 *>(pNewSample) + numChannels * outPos, buffer.data(), outChunkSize, numChannels, convi16);
+						CopyInterleavedSampleStreams(static_cast<int16 *>(pNewSample) + numChannels * outPos, buffer.data(), outChunkSize, numChannels, mpt::as_span(convi16));
 						break;
 					}
 					outPos += outChunkSize;
@@ -2382,10 +2382,10 @@ public:
 				switch(smpSize)
 				{
 				case 1:
-					CopyInterleavedSampleStreams(static_cast<int8 *>(pNewSample) + numChannels * outPos, buffer.data(), outChunkSize, numChannels, convint8);
+					CopyInterleavedSampleStreams(static_cast<int8 *>(pNewSample) + numChannels * outPos, buffer.data(), outChunkSize, numChannels, mpt::as_span(convint8));
 					break;
 				case 2:
-					CopyInterleavedSampleStreams(static_cast<int16 *>(pNewSample) + numChannels * outPos, buffer.data(), outChunkSize, numChannels, convi16);
+					CopyInterleavedSampleStreams(static_cast<int16 *>(pNewSample) + numChannels * outPos, buffer.data(), outChunkSize, numChannels, mpt::as_span(convi16));
 					break;
 				}
 				outPos += outChunkSize;
