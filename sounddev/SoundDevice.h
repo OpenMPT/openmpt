@@ -146,12 +146,13 @@ struct Info
 	ManagerFlags managerFlags;
 
 	enum class Usability : int8 {
-		Usable                    =  2,
-		Experimental              =  1,
+		Usable                    =  3,
+		Experimental              =  2,
+		Legacy                    =  1,
 		Unknown                   =  0,
-		Deprecated                = -3,
-		Broken                    = -4,
-		NotAvailable              = -5,
+		Deprecated                = -4,
+		Broken                    = -5,
+		NotAvailable              = -6,
 	};
 	enum class Level : int8 {
 		Primary   =  1,
