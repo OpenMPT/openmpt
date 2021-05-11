@@ -625,7 +625,7 @@ std::vector<SoundDevice::Info> CWaveDevice::EnumerateDevices(mpt::log::ILogger &
 		}
 		info.default_ = ((index == 0) ? Info::Default::Managed : Info::Default::None);
 		info.flags = {
-			sysInfo.SystemClass == mpt::OS::Class::Windows ? sysInfo.IsWindowsOriginal() && sysInfo.WindowsVersion.IsBefore(mpt::OS::Windows::Version::Win7) ? Info::Usability::Usable : Info::Usability::Deprecated : Info::Usability::NotAvailable,
+			sysInfo.SystemClass == mpt::OS::Class::Windows ? sysInfo.IsWindowsOriginal() && sysInfo.WindowsVersion.IsBefore(mpt::OS::Windows::Version::Win7) ? Info::Usability::Usable : Info::Usability::Legacy : Info::Usability::NotAvailable,
 			Info::Level::Primary,
 			sysInfo.SystemClass == mpt::OS::Class::Windows && sysInfo.IsWindowsOriginal() ? Info::Compatible::Yes : Info::Compatible::No,
 			sysInfo.SystemClass == mpt::OS::Class::Windows ? sysInfo.IsWindowsWine() ? Info::Api::Emulated : sysInfo.WindowsVersion.IsAtLeast(mpt::OS::Windows::Version::WinVista) ? Info::Api::Emulated : Info::Api::Native : Info::Api::Emulated,
