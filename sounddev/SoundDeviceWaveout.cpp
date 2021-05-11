@@ -610,7 +610,7 @@ std::vector<SoundDevice::Info> CWaveDevice::EnumerateDevices(SoundDevice::SysInf
 		}
 		info.default_ = ((index == 0) ? Info::Default::Managed : Info::Default::None);
 		info.flags = {
-			sysInfo.SystemClass == mpt::OS::Class::Windows ? Info::Usability::Deprecated : Info::Usability::NotAvailable,
+			sysInfo.SystemClass == mpt::OS::Class::Windows ? Info::Usability::Legacy : Info::Usability::NotAvailable,
 			Info::Level::Primary,
 			sysInfo.SystemClass == mpt::OS::Class::Windows && sysInfo.IsWindowsOriginal() ? Info::Compatible::Yes : Info::Compatible::No,
 			Info::Api::Emulated,
