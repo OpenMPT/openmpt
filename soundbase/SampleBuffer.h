@@ -1,7 +1,7 @@
 /*
  * SampleBuffer.h
  * --------------
- * Purpose: C++2b audio_buffer-like thingy.
+ * Purpose: C++2b audio_span-like thingy.
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
@@ -19,7 +19,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 template <typename SampleType>
-struct audio_buffer_planar
+struct audio_span_planar
 {
 public:
 	using sample_type = SampleType;
@@ -30,7 +30,7 @@ private:
 	std::size_t m_frames;
 
 public:
-	constexpr audio_buffer_planar(SampleType *const *buffers, std::size_t channels, std::size_t frames) noexcept
+	constexpr audio_span_planar(SampleType *const *buffers, std::size_t channels, std::size_t frames) noexcept
 		: m_buffers(buffers)
 		, m_channels(channels)
 		, m_frames(frames)
@@ -81,7 +81,7 @@ public:
 
 
 template <typename SampleType>
-struct audio_buffer_contiguous
+struct audio_span_contiguous
 {
 public:
 	using sample_type = SampleType;
@@ -92,7 +92,7 @@ private:
 	std::size_t m_frames;
 
 public:
-	constexpr audio_buffer_contiguous(SampleType *buffer, std::size_t channels, std::size_t frames) noexcept
+	constexpr audio_span_contiguous(SampleType *buffer, std::size_t channels, std::size_t frames) noexcept
 		: m_buffer(buffer)
 		, m_channels(channels)
 		, m_frames(frames)
@@ -143,7 +143,7 @@ public:
 
 
 template <typename SampleType>
-struct audio_buffer_interleaved
+struct audio_span_interleaved
 {
 public:
 	using sample_type = SampleType;
@@ -154,7 +154,7 @@ private:
 	std::size_t m_frames;
 
 public:
-	constexpr audio_buffer_interleaved(SampleType *buffer, std::size_t channels, std::size_t frames) noexcept
+	constexpr audio_span_interleaved(SampleType *buffer, std::size_t channels, std::size_t frames) noexcept
 		: m_buffer(buffer)
 		, m_channels(channels)
 		, m_frames(frames)
@@ -204,26 +204,26 @@ public:
 };
 
 
-struct audio_buffer_frames_are_contiguous_t
+struct audio_span_frames_are_contiguous_t
 {
 };
-struct audio_buffer_channels_are_contiguous_t
+struct audio_span_channels_are_contiguous_t
 {
 };
-struct audio_buffer_channels_are_planar_t
+struct audio_span_channels_are_planar_t
 {
 };
-struct audio_buffer_channels_are_planar_and_strided_t
+struct audio_span_channels_are_planar_and_strided_t
 {
 };
 
-inline constexpr audio_buffer_frames_are_contiguous_t audio_buffer_frames_are_contiguous;
-inline constexpr audio_buffer_channels_are_contiguous_t audio_buffer_channels_are_contiguous;
-inline constexpr audio_buffer_channels_are_planar_t audio_buffer_channels_are_planar;
-inline constexpr audio_buffer_channels_are_planar_and_strided_t audio_buffer_channels_are_planar_and_strided;
+inline constexpr audio_span_frames_are_contiguous_t audio_span_frames_are_contiguous;
+inline constexpr audio_span_channels_are_contiguous_t audio_span_channels_are_contiguous;
+inline constexpr audio_span_channels_are_planar_t audio_span_channels_are_planar;
+inline constexpr audio_span_channels_are_planar_and_strided_t audio_span_channels_are_planar_and_strided;
 
 template <typename SampleType>
-struct audio_buffer
+struct audio_span
 {
 public:
 	using sample_type = SampleType;
@@ -240,7 +240,7 @@ private:
 	std::size_t m_frames;
 
 public:
-	constexpr audio_buffer(SampleType *buffer, std::size_t channels, std::size_t frames, audio_buffer_frames_are_contiguous_t) noexcept
+	constexpr audio_span(SampleType *buffer, std::size_t channels, std::size_t frames, audio_span_frames_are_contiguous_t) noexcept
 		: m_frame_stride(channels)
 		, m_channel_stride(1)
 		, m_channels(channels)
@@ -248,7 +248,7 @@ public:
 	{
 		m_buffer.contiguous = buffer;
 	}
-	constexpr audio_buffer(SampleType *buffer, std::size_t channels, std::size_t frames, audio_buffer_channels_are_contiguous_t) noexcept
+	constexpr audio_span(SampleType *buffer, std::size_t channels, std::size_t frames, audio_span_channels_are_contiguous_t) noexcept
 		: m_frame_stride(1)
 		, m_channel_stride(frames)
 		, m_channels(channels)
@@ -256,7 +256,7 @@ public:
 	{
 		m_buffer.contiguous = buffer;
 	}
-	constexpr audio_buffer(SampleType *const *planes, std::size_t channels, std::size_t frames, audio_buffer_channels_are_planar_t) noexcept
+	constexpr audio_span(SampleType *const *planes, std::size_t channels, std::size_t frames, audio_span_channels_are_planar_t) noexcept
 		: m_frame_stride(1)
 		, m_channel_stride(0)
 		, m_channels(channels)
@@ -264,7 +264,7 @@ public:
 	{
 		m_buffer.planes = planes;
 	}
-	constexpr audio_buffer(SampleType *const *planes, std::size_t channels, std::size_t frames, std::size_t frame_stride, audio_buffer_channels_are_planar_and_strided_t) noexcept
+	constexpr audio_span(SampleType *const *planes, std::size_t channels, std::size_t frames, std::size_t frame_stride, audio_span_channels_are_planar_and_strided_t) noexcept
 		: m_frame_stride(frame_stride)
 		, m_channel_stride(0)
 		, m_channels(channels)
@@ -315,18 +315,18 @@ public:
 };
 
 
-template <typename Taudio_buffer>
-struct audio_buffer_with_offset
+template <typename Taudio_span>
+struct audio_span_with_offset
 {
 public:
-	using sample_type = typename Taudio_buffer::sample_type;
+	using sample_type = typename Taudio_span::sample_type;
 
 private:
-	Taudio_buffer m_buffer;
+	Taudio_span m_buffer;
 	std::size_t m_offset;
 
 public:
-	audio_buffer_with_offset(Taudio_buffer buffer, std::size_t offsetFrames) noexcept
+	audio_span_with_offset(Taudio_span buffer, std::size_t offsetFrames) noexcept
 		: m_buffer(buffer)
 		, m_offset(offsetFrames)
 	{
@@ -384,7 +384,7 @@ public:
 
 
 template <typename SampleType>
-inline std::size_t planar_audio_buffer_valid_channels(SampleType *const *buffers, std::size_t maxChannels)
+inline std::size_t planar_audio_span_valid_channels(SampleType *const *buffers, std::size_t maxChannels)
 {
 	std::size_t channel;
 	for(channel = 0; channel < maxChannels; ++channel)
@@ -399,10 +399,10 @@ inline std::size_t planar_audio_buffer_valid_channels(SampleType *const *buffers
 
 
 template <typename BufferType>
-inline audio_buffer_with_offset<BufferType> make_audio_buffer_with_offset(BufferType buf, std::size_t numFrames) noexcept
+inline audio_span_with_offset<BufferType> make_audio_span_with_offset(BufferType buf, std::size_t numFrames) noexcept
 {
 	MPT_ASSERT(numFrames <= buf.size_frames());
-	return audio_buffer_with_offset<BufferType>{buf, numFrames};
+	return audio_span_with_offset<BufferType>{buf, numFrames};
 }
 
 

@@ -24,7 +24,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-template<typename Tbuffer>
+template<typename Tspan>
 class AudioReadTargetBuffer
 	: public IAudioReadTarget
 {
@@ -32,14 +32,14 @@ private:
 	std::size_t countRendered;
 	Dither &dither;
 protected:
-	Tbuffer outputBuffer;
+	Tspan outputBuffer;
 public:
-	AudioReadTargetBuffer(Tbuffer buf, Dither &dither_)
+	AudioReadTargetBuffer(Tspan buf, Dither &dither_)
 		: countRendered(0)
 		, dither(dither_)
 		, outputBuffer(buf)
 	{
-		MPT_ASSERT(SampleFormat(SampleFormatTraits<typename Tbuffer::sample_type>::sampleFormat()).IsValid());
+		MPT_ASSERT(SampleFormat(SampleFormatTraits<typename Tspan::sample_type>::sampleFormat()).IsValid());
 	}
 	std::size_t GetRenderedCount() const { return countRendered; }
 public:
@@ -48,7 +48,7 @@ public:
 		dither.WithDither(
 			[&](auto &ditherInstance)
 			{
-				ConvertBufferMixFixedToBuffer<MixSampleIntTraits::mix_fractional_bits, false>(make_audio_buffer_with_offset(outputBuffer, countRendered), audio_buffer_interleaved<MixSampleInt>(MixSoundBuffer, channels, countChunk), ditherInstance, channels, countChunk);
+				ConvertBufferMixFixedToBuffer<MixSampleIntTraits::mix_fractional_bits, false>(make_audio_span_with_offset(outputBuffer, countRendered), audio_span_interleaved<MixSampleInt>(MixSoundBuffer, channels, countChunk), ditherInstance, channels, countChunk);
 			}
 		);
 		countRendered += countChunk;
@@ -58,7 +58,7 @@ public:
 		dither.WithDither(
 			[&](auto &ditherInstance)
 			{
-				ConvertBufferMixFloatToBuffer<false>(make_audio_buffer_with_offset(outputBuffer, countRendered), audio_buffer_interleaved<MixSampleFloat>(MixSoundBuffer, channels, countChunk), ditherInstance, channels, countChunk);
+				ConvertBufferMixFloatToBuffer<false>(make_audio_span_with_offset(outputBuffer, countRendered), audio_span_interleaved<MixSampleFloat>(MixSoundBuffer, channels, countChunk), ditherInstance, channels, countChunk);
 			}
 		);
 		countRendered += countChunk;
@@ -69,16 +69,16 @@ public:
 #if defined(LIBOPENMPT_BUILD)
 
 
-template<typename Tbuffer>
+template<typename Tspan>
 class AudioReadTargetGainBuffer
-	: public AudioReadTargetBuffer<Tbuffer>
+	: public AudioReadTargetBuffer<Tspan>
 {
 private:
-	typedef AudioReadTargetBuffer<Tbuffer> Tbase;
+	typedef AudioReadTargetBuffer<Tspan> Tbase;
 private:
 	const float gainFactor;
 public:
-	AudioReadTargetGainBuffer(Tbuffer buf, Dither &dither, float gainFactor_)
+	AudioReadTargetGainBuffer(Tspan buf, Dither &dither, float gainFactor_)
 		: Tbase(buf, dither)
 		, gainFactor(gainFactor_)
 	{
@@ -88,7 +88,7 @@ public:
 	void DataCallback(MixSampleInt *MixSoundBuffer, std::size_t channels, std::size_t countChunk) override
 	{
 		const std::size_t countRendered_ = Tbase::GetRenderedCount();
-		if constexpr(!std::is_floating_point<typename Tbuffer::sample_type>::value)
+		if constexpr(!std::is_floating_point<typename Tspan::sample_type>::value)
 		{
 			int32 gainFactor16_16 = mpt::saturate_round<int32>(gainFactor * (1 << 16));
 			if(gainFactor16_16 != (1<<16))
@@ -104,7 +104,7 @@ public:
 			}
 		}
 		Tbase::DataCallback(MixSoundBuffer, channels, countChunk);
-		if constexpr(std::is_floating_point<typename Tbuffer::sample_type>::value)
+		if constexpr(std::is_floating_point<typename Tspan::sample_type>::value)
 		{
 			if(gainFactor != 1.0f)
 			{
