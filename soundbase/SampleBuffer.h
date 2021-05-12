@@ -81,6 +81,68 @@ public:
 
 
 template <typename SampleType>
+struct audio_buffer_contiguous
+{
+public:
+	using sample_type = SampleType;
+
+private:
+	SampleType *const m_buffer;
+	std::size_t m_channels;
+	std::size_t m_frames;
+
+public:
+	constexpr audio_buffer_contiguous(SampleType *buffer, std::size_t channels, std::size_t frames) noexcept
+		: m_buffer(buffer)
+		, m_channels(channels)
+		, m_frames(frames)
+	{
+		return;
+	}
+	SampleType *data() noexcept
+	{
+		return m_buffer;
+	}
+	const SampleType *data() const noexcept
+	{
+		return m_buffer;
+	}
+	SampleType &operator()(std::size_t channel, std::size_t frame)
+	{
+		return m_buffer[(m_frames * channel) + frame];
+	}
+	const SampleType &operator()(std::size_t channel, std::size_t frame) const
+	{
+		return m_buffer[(m_frames * channel) + frame];
+	}
+	bool is_contiguous() const noexcept
+	{
+		return true;
+	}
+	bool channels_are_contiguous() const noexcept
+	{
+		return true;
+	}
+	bool frames_are_contiguous() const noexcept
+	{
+		return false;
+	}
+	std::size_t size_channels() const noexcept
+	{
+		return m_channels;
+	}
+	std::size_t size_frames() const noexcept
+	{
+		return m_frames;
+	}
+	std::size_t size_samples() const noexcept
+	{
+		return m_channels * m_frames;
+	}
+};
+
+
+template <typename SampleType>
 struct audio_buffer_interleaved
 {
 public:
@@ -140,10 +202,6 @@ public:
 		return m_channels * m_frames;
 	}
 };
-
-
-template <typename SampleType>
-using audio_buffer = audio_buffer_interleaved<SampleType>;
 
 
 template <typename Taudio_buffer>
