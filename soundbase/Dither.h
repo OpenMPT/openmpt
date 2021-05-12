@@ -16,6 +16,7 @@
 
 #include "MixSample.h"
 #include "SampleFormatConverters.h"
+#include "MixSampleConvert.h"
 #include "../common/mptRandom.h"
 
 
@@ -89,9 +90,7 @@ public:
 	template <uint32 targetbits, typename Trng>
 	MPT_FORCEINLINE MixSampleFloat process(MixSampleFloat sample, Trng &prng)
 	{
-		SC::ConvertToFixedPoint<MixSampleInt, MixSampleFloat, MixSampleIntTraits::mix_fractional_bits> conv1;
-		SC::ConvertFixedPoint<MixSampleFloat, MixSampleInt, MixSampleIntTraits::mix_fractional_bits> conv2;
-		return conv2(process<targetbits>(conv1(sample), prng));
+		return mix_sample_cast<MixSampleFloat>(process<targetbits>(mix_sample_cast<MixSampleInt>(sample), prng));
 	}
 };
 
@@ -160,9 +159,7 @@ public:
 	template <uint32 targetbits, typename Trng>
 	MPT_FORCEINLINE MixSampleFloat process(MixSampleFloat sample, Trng &prng)
 	{
-		SC::ConvertToFixedPoint<MixSampleInt, MixSampleFloat, MixSampleIntTraits::mix_fractional_bits> conv1;
-		SC::ConvertFixedPoint<MixSampleFloat, MixSampleInt, MixSampleIntTraits::mix_fractional_bits> conv2;
-		return conv2(process<targetbits>(conv1(sample), prng));
+		return mix_sample_cast<MixSampleFloat>(process<targetbits>(mix_sample_cast<MixSampleInt>(sample), prng));
 	}
 };
 
