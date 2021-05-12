@@ -229,7 +229,8 @@ public:
 	using sample_type = SampleType;
 
 private:
-	union {
+	union
+	{
 		SampleType *const contiguous;
 		SampleType *const *const planes;
 	} m_buffer;
