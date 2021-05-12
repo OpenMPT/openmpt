@@ -71,11 +71,8 @@ using float64be_fast = mpt::IEEE754binary64BE;
 struct int24
 {
 	uint8 bytes[3];
-	int24() noexcept
-	{
-		bytes[0] = bytes[1] = bytes[2] = 0;
-	}
-	explicit int24(int other) noexcept
+	int24() = default;
+	explicit int24(int32 other) noexcept
 	{
 		MPT_MAYBE_CONSTANT_IF(mpt::endian_is_big())
 		{
