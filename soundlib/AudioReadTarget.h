@@ -69,47 +69,6 @@ public:
 #if defined(LIBOPENMPT_BUILD)
 
 
-template<typename Tsample>
-void ApplyGainBeforeConversionIfAppropriateFixed(MixSampleInt *MixSoundBuffer, std::size_t channels, std::size_t countChunk, float gainFactor)
-{
-	// Apply final output gain for non floating point output
-	ApplyGain(MixSoundBuffer, channels, countChunk, mpt::saturate_round<int32>(gainFactor * (1<<16)));
-}
-template<>
-void ApplyGainBeforeConversionIfAppropriateFixed<float>(MixSampleInt * /*MixSoundBuffer*/, std::size_t /*channels*/, std::size_t /*countChunk*/, float /*gainFactor*/)
-{
-	// nothing
-}
-
-template<typename Tsample>
-void ApplyGainAfterConversionIfAppropriateFixed(audio_buffer_interleaved<Tsample> /*buffer*/, std::size_t /*countRendered*/, std::size_t /*channels*/, std::size_t /*countChunk*/, float /*gainFactor*/)
-{
-	// nothing
-}
-template<typename Tsample>
-void ApplyGainAfterConversionIfAppropriateFixed(audio_buffer_planar<Tsample> /*buffer*/, std::size_t /*countRendered*/, std::size_t /*channels*/, std::size_t /*countChunk*/, float /*gainFactor*/)
-{
-	// nothing
-}
-template<>
-void ApplyGainAfterConversionIfAppropriateFixed<float>(audio_buffer_interleaved<float> buffer, std::size_t countRendered, std::size_t channels, std::size_t countChunk, float gainFactor)
-{
-	// Apply final output gain for floating point output after conversion so we do not suffer underflow or clipping
-	ApplyGain(buffer, countRendered, channels, countChunk, gainFactor);
-}
-template<>
-void ApplyGainAfterConversionIfAppropriateFixed<float>(audio_buffer_planar<float> buffer, std::size_t countRendered, std::size_t channels, std::size_t countChunk, float gainFactor)
-{
-	// Apply final output gain for floating point output after conversion so we do not suffer underflow or clipping
-	ApplyGain(buffer, countRendered, channels, countChunk, gainFactor);
-}
-
-inline void ApplyGainBeforeConversionIfAppropriateFloat(MixSampleFloat *MixSoundBuffer, std::size_t channels, std::size_t countChunk, float gainFactor)
-{
-	// Apply final output gain for non floating point output
-	ApplyGain(MixSoundBuffer, channels, countChunk, gainFactor);
-}
-
 template<typename Tbuffer>
 class AudioReadTargetGainBuffer
 	: public AudioReadTargetBuffer<Tbuffer>
@@ -129,13 +88,49 @@ public:
 	void DataCallback(MixSampleInt *MixSoundBuffer, std::size_t channels, std::size_t countChunk) override
 	{
 		const std::size_t countRendered_ = Tbase::GetRenderedCount();
-		ApplyGainBeforeConversionIfAppropriateFixed<typename Tbuffer::sample_type>(MixSoundBuffer, channels, countChunk, gainFactor);
+		if constexpr(!std::is_floating_point<typename Tbuffer::sample_type>::value)
+		{
+			int32 gainFactor16_16 = mpt::saturate_round<int32>(gainFactor * (1 << 16));
+			if(gainFactor16_16 != (1<<16))
+			{
+				// only apply gain when != +/- 0dB
+				// no clipping prevention is done here
+				MixSampleInt *buf = MixSoundBuffer;
+				for(std::size_t i = 0; i < countChunk * channels; ++i)
+				{
+					*buf = Util::muldiv(*buf, gainFactor16_16, 1<<16);
+					buf++;
+				}
+			}
+		}
 		Tbase::DataCallback(MixSoundBuffer, channels, countChunk);
-		ApplyGainAfterConversionIfAppropriateFixed<typename Tbuffer::sample_type>(Tbase::outputBuffer, countRendered_, channels, countChunk, gainFactor);
+		if constexpr(std::is_floating_point<typename Tbuffer::sample_type>::value)
+		{
+			if(gainFactor != 1.0f)
+			{
+				// only apply gain when != +/- 0dB
+				for(std::size_t i = 0; i < countChunk; ++i)
+				{
+					for(std::size_t channel = 0; channel < channels; ++channel)
+					{
+						Tbase::outputBuffer(channel, countRendered_ + i) *= gainFactor;
+					}
+				}
+			}
+		}
 	}
 	void DataCallback(MixSampleFloat *MixSoundBuffer, std::size_t channels, std::size_t countChunk) override
 	{
-		ApplyGainBeforeConversionIfAppropriateFloat(MixSoundBuffer, channels, countChunk, gainFactor);
+		if(gainFactor != 1.0f)
+		{
+			// only apply gain when != +/- 0dB
+			MixSampleFloat *buf = MixSoundBuffer;
+			for(std::size_t i = 0; i < countChunk * channels; ++i)
+			{
+				*buf *= gainFactor;
+				buf++;
+			}
+		}
 		Tbase::DataCallback(MixSoundBuffer, channels, countChunk);
 	}
 };

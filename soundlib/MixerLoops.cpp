@@ -11,12 +11,12 @@
 
 #include "stdafx.h"
 #include "MixerLoops.h"
-#include "../soundbase/SampleBuffer.h"
 #include "Snd_defs.h"
 #include "ModChannel.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
+
 
 
 void FloatToStereoMix(const float *pIn1, const float *pIn2, int32 *pOut, uint32 nCount, const float _f2ic)
@@ -64,6 +64,7 @@ void InitMixBuffer(mixsample_t *pBuffer, uint32 nSamples)
 }
 
 
+
 void InterleaveFrontRear(mixsample_t *pFrontBuf, mixsample_t *pRearBuf, uint32 nFrames)
 {
 	// copy backwards as we are writing back into FrontBuf
@@ -75,6 +76,7 @@ void InterleaveFrontRear(mixsample_t *pFrontBuf, mixsample_t *pRearBuf, uint32 n
 		pFrontBuf[i*4+0] = pFrontBuf[i*2+0];
 	}
 }
+
 
 
 void MonoFromStereo(mixsample_t *pMixBuf, uint32 nSamples)
@@ -186,76 +188,6 @@ void DeinterleaveStereo(const mixsample_t * MPT_RESTRICT input, mixsample_t * MP
 	}
 }
 
-
-#ifndef MODPLUG_TRACKER
-
-void ApplyGain(MixSampleInt *soundBuffer, std::size_t channels, std::size_t countChunk, int32 gainFactor16_16)
-{
-	if(gainFactor16_16 == (1<<16))
-	{
-		// nothing to do, gain == +/- 0dB
-		return; 
-	}
-	// no clipping prevention is done here
-	MixSampleInt * buf = soundBuffer;
-	for(std::size_t i=0; i<countChunk*channels; ++i)
-	{
-		*buf = Util::muldiv(*buf, gainFactor16_16, 1<<16);
-		buf++;
-	}
-}
-
-void ApplyGain(MixSampleFloat *soundBuffer, std::size_t channels, std::size_t countChunk, float gainFactor)
-{
-	if(gainFactor == 1.0f)
-	{
-		// nothing to do, gain == +/- 0dB
-		return;
-	}
-	// no clipping prevention is done here
-	MixSampleFloat * buf = soundBuffer;
-	for(std::size_t i=0; i<countChunk*channels; ++i)
-	{
-		*buf *= gainFactor;
-		buf++;
-	}
-}
-
-
-void ApplyGain(audio_buffer_interleaved<float> outputBuffer, std::size_t offset, std::size_t channels, std::size_t countChunk, float gainFactor)
-{
-	if(gainFactor == 1.0f)
-	{
-		// nothing to do, gain == +/- 0dB
-		return;
-	}
-	for(std::size_t i = 0; i < countChunk; ++i)
-	{
-		for(std::size_t channel = 0; channel < channels; ++channel)
-		{
-			outputBuffer(channel, offset + i) *= gainFactor;
-		}
-	}
-}
-
-void ApplyGain(audio_buffer_planar<float> outputBuffer, std::size_t offset, std::size_t channels, std::size_t countChunk, float gainFactor)
-{
-	if(gainFactor == 1.0f)
-	{
-		// nothing to do, gain == +/- 0dB
-		return;
-	}
-	for(std::size_t i = 0; i < countChunk; ++i)
-	{
-		for(std::size_t channel = 0; channel < channels; ++channel)
-		{
-			outputBuffer(channel, offset + i) *= gainFactor;
-		}
-	}
-}
-
-
-#endif // !MODPLUG_TRACKER
 
 
 OPENMPT_NAMESPACE_END
