@@ -36,99 +36,12 @@ OPENMPT_NAMESPACE_BEGIN
 extern const TCHAR *gszChnCfgNames[3];
 
 
-class AudioReadTargetBufferInterleavedDynamic
-	: public IAudioReadTarget
-{
-private:
-	const SampleFormat sampleFormat;
-	Dither &dither;
-	void *buffer;
-public:
-	AudioReadTargetBufferInterleavedDynamic(SampleFormat sampleFormat_, Dither &dither_, void *buffer_)
-		: sampleFormat(sampleFormat_)
-		, dither(dither_)
-		, buffer(buffer_)
-	{
-		MPT_ASSERT_ALWAYS(sampleFormat.IsValid());
-	}
-private:
-	template<typename MixSampleType>
-	void DataCallbackTemplate(MixSampleType *MixSoundBuffer, std::size_t channels, std::size_t countChunk)
-	{
-		switch(sampleFormat)
-		{
-			case SampleFormat::Unsigned8:
-				{
-					typedef SampleFormatToType<SampleFormat::Unsigned8>::type Tsample;
-					AudioReadTargetBuffer<audio_span_interleaved<Tsample>> target(audio_span_interleaved<Tsample>(reinterpret_cast<Tsample*>(buffer), channels, countChunk), dither);
-					target.DataCallback(MixSoundBuffer, channels, countChunk);
-				}
-				break;
-			case SampleFormat::Int8:
-				{
-					typedef SampleFormatToType<SampleFormat::Int8>::type Tsample;
-					AudioReadTargetBuffer<audio_span_interleaved<Tsample>> target(audio_span_interleaved<Tsample>(reinterpret_cast<Tsample*>(buffer), channels, countChunk), dither);
-					target.DataCallback(MixSoundBuffer, channels, countChunk);
-				}
-				break;
-			case SampleFormat::Int16:
-				{
-					typedef SampleFormatToType<SampleFormat::Int16>::type Tsample;
-					AudioReadTargetBuffer<audio_span_interleaved<Tsample>> target(audio_span_interleaved<Tsample>(reinterpret_cast<Tsample*>(buffer), channels, countChunk), dither);
-					target.DataCallback(MixSoundBuffer, channels, countChunk);
-				}
-				break;
-			case SampleFormat::Int24:
-				{
-					typedef SampleFormatToType<SampleFormat::Int24>::type Tsample;
-					AudioReadTargetBuffer<audio_span_interleaved<Tsample>> target(audio_span_interleaved<Tsample>(reinterpret_cast<Tsample*>(buffer), channels, countChunk), dither);
-					target.DataCallback(MixSoundBuffer, channels, countChunk);
-				}
-				break;
-			case SampleFormat::Int32:
-				{
-					typedef SampleFormatToType<SampleFormat::Int32>::type Tsample;
-					AudioReadTargetBuffer<audio_span_interleaved<Tsample>> target(audio_span_interleaved<Tsample>(reinterpret_cast<Tsample*>(buffer), channels, countChunk), dither);
-					target.DataCallback(MixSoundBuffer, channels, countChunk);
-				}
-				break;
-			case SampleFormat::Float32:
-				{
-					typedef SampleFormatToType<SampleFormat::Float32>::type Tsample;
-					AudioReadTargetBuffer<audio_span_interleaved<Tsample>> target(audio_span_interleaved<Tsample>(reinterpret_cast<Tsample*>(buffer), channels, countChunk), dither);
-					target.DataCallback(MixSoundBuffer, channels, countChunk);
-				}
-				break;
-			case SampleFormat::Float64:
-			{
-				typedef SampleFormatToType<SampleFormat::Float64>::type Tsample;
-				AudioReadTargetBuffer<audio_span_interleaved<Tsample>> target(audio_span_interleaved<Tsample>(reinterpret_cast<Tsample*>(buffer), channels, countChunk), dither);
-				target.DataCallback(MixSoundBuffer, channels, countChunk);
-			}
-			break;
-			case SampleFormat::Invalid:
-				// nothing
-				break;
-		}
-		// increment output buffer for potentially next callback
-		buffer = mpt::void_cast<std::byte*>(buffer) + (sampleFormat.GetSampleSize()) * channels * countChunk;
-	}
-public:
-	void DataCallback(MixSampleInt *MixSoundBuffer, std::size_t channels, std::size_t countChunk) override
-	{
-		DataCallbackTemplate(MixSoundBuffer, channels, countChunk);
-	}
-	void DataCallback(MixSampleFloat *MixSoundBuffer, std::size_t channels, std::size_t countChunk) override
-	{
-		DataCallbackTemplate(MixSoundBuffer, channels, countChunk);
-	}
-};
-
-
-static CSoundFile::samplecount_t ReadInterleaved(CSoundFile &sndFile, void *outputBuffer, CSoundFile::samplecount_t count, SampleFormat sampleFormat, Dither &dither)
+template <typename Tsample>
+static CSoundFile::samplecount_t ReadInterleaved(CSoundFile &sndFile, Tsample *outputBuffer, std::size_t channels, CSoundFile::samplecount_t count, Dither &dither)
 {
 	sndFile.ResetMixStat();
-	AudioReadTargetBufferInterleavedDynamic target(sampleFormat, dither, outputBuffer);
+	MPT_ASSERT(sndFile.m_MixerSettings.gnChannels == channels);
+	AudioReadTargetBuffer<audio_span_interleaved<Tsample>> target(audio_span_interleaved<Tsample>(outputBuffer, channels, count), dither);
 	return sndFile.Read(count, target);
 }
 
@@ -1197,31 +1110,31 @@ void CDoWaveConvert::Run()
 		UINT lRead = 0;
 		if(m_Settings.normalize)
 		{
-			lRead = ReadInterleaved(m_SndFile, normalizeBuffer, MIXBUFFERSIZE, SampleFormat::Float32, dither);
+			lRead = ReadInterleaved(m_SndFile, normalizeBuffer, channels, MIXBUFFERSIZE, dither);
 		} else
 		{
 			switch(fileEnc->GetSampleFormat())
 			{
 			case SampleFormat::Float64:
-				lRead = ReadInterleaved(m_SndFile, buffer.float64, MIXBUFFERSIZE, fileEnc->GetSampleFormat(), dither);
+				lRead = ReadInterleaved(m_SndFile, buffer.float64, channels, MIXBUFFERSIZE, dither);
 				break;
 			case SampleFormat::Float32:
-				lRead = ReadInterleaved(m_SndFile, buffer.float32, MIXBUFFERSIZE, fileEnc->GetSampleFormat(), dither);
+				lRead = ReadInterleaved(m_SndFile, buffer.float32, channels, MIXBUFFERSIZE, dither);
 				break;
 			case SampleFormat::Int32:
-				lRead = ReadInterleaved(m_SndFile, buffer.int32, MIXBUFFERSIZE, fileEnc->GetSampleFormat(), dither);
+				lRead = ReadInterleaved(m_SndFile, buffer.int32, channels, MIXBUFFERSIZE, dither);
 				break;
 			case SampleFormat::Int24:
-				lRead = ReadInterleaved(m_SndFile, buffer.int24, MIXBUFFERSIZE, fileEnc->GetSampleFormat(), dither);
+				lRead = ReadInterleaved(m_SndFile, buffer.int24, channels, MIXBUFFERSIZE, dither);
 				break;
 			case SampleFormat::Int16:
-				lRead = ReadInterleaved(m_SndFile, buffer.int16, MIXBUFFERSIZE, fileEnc->GetSampleFormat(), dither);
+				lRead = ReadInterleaved(m_SndFile, buffer.int16, channels, MIXBUFFERSIZE, dither);
 				break;
 			case SampleFormat::Int8:
-				lRead = ReadInterleaved(m_SndFile, buffer.int8, MIXBUFFERSIZE, fileEnc->GetSampleFormat(), dither);
+				lRead = ReadInterleaved(m_SndFile, buffer.int8, channels, MIXBUFFERSIZE, dither);
 				break;
 			case SampleFormat::Unsigned8:
-				lRead = ReadInterleaved(m_SndFile, buffer.uint8, MIXBUFFERSIZE, fileEnc->GetSampleFormat(), dither);
+				lRead = ReadInterleaved(m_SndFile, buffer.uint8, channels, MIXBUFFERSIZE, dither);
 				break;
 			}
 		}
