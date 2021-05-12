@@ -13,6 +13,7 @@
 #include "openmpt123_config.hpp"
 
 #include "mpt/base/compiletime_warning.hpp"
+#include "mpt/base/floatingpoint.hpp"
 #include "mpt/base/preprocessor.hpp"
 #include "mpt/string_convert/convert.hpp"
 
@@ -339,7 +340,7 @@ struct commandlineflags {
 #else
 		samplerate = 48000;
 		channels = 2;
-		use_float = true;
+		use_float = mpt::float_traits<float>::is_hard && mpt::float_traits<float>::is_ieee754_binary;
 #endif
 		gain = 0;
 		separation = 100;
