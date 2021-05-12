@@ -79,7 +79,7 @@ struct ConvertMixSample<MixSampleFloat, MixSampleInt>
 template <typename Tdst, typename Tsrc>
 MPT_FORCEINLINE Tdst mix_sample_cast(Tsrc src)
 {
-	return ConvertMixSample<Tdst, Tsrc>{}(src);
+	return ConvertMixSample<Tdst, Tsrc>{}.conv(src);
 }
 
 
