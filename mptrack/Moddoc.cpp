@@ -2829,6 +2829,7 @@ void CModDoc::LearnMacro(int macroToSet, PlugParamIndex paramToUse)
 
 void CModDoc::OnSongProperties()
 {
+	const bool wasUsingFrequencies = m_SndFile.PeriodsAreFrequencies();
 	CModTypeDlg dlg(m_SndFile, CMainFrame::GetMainFrame());
 	if(dlg.DoModal() == IDOK)
 	{
@@ -2852,6 +2853,14 @@ void CModDoc::OnSongProperties()
 			// Force update of pattern highlights / num channels
 			UpdateAllViews(nullptr, PatternHint().Data());
 			UpdateAllViews(nullptr, GeneralHint().Channels());
+		}
+
+		if(wasUsingFrequencies != m_SndFile.PeriodsAreFrequencies())
+		{
+			for(auto &chn : m_SndFile.m_PlayState.Chn)
+			{
+				chn.nPeriod = 0;
+			}
 		}
 
 		SetModified();
