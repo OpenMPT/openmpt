@@ -13,6 +13,8 @@
 
 #include "SoundDevice.h"
 
+#include "mpt/binary/hex.hpp"
+
 #include "../common/mptStringFormat.h"
 #include "../common/misc_util.h"
 
@@ -102,7 +104,7 @@ SoundDevice::Identifier Info::GetIdentifier() const
 		// UTF8-encode the name and convert the utf8 to hex.
 		// This ensures that no special characters are contained in the configuration key.
 		std::string utf8String = mpt::ToCharset(mpt::Charset::UTF8, name);
-		mpt::ustring hexString = Util::BinToHex(mpt::as_span(utf8String));
+		mpt::ustring hexString = mpt::encode_hex(mpt::as_span(utf8String));
 		result += hexString;
 	} else
 	{

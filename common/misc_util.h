@@ -204,22 +204,6 @@ namespace Util
 
 
 
-	std::vector<std::byte> HexToBin(const mpt::ustring &src);
-	mpt::ustring BinToHex(mpt::const_byte_span src);
-	template <typename T> inline mpt::ustring BinToHex(mpt::span<T> src) { return Util::BinToHex(mpt::byte_cast<mpt::const_byte_span>(src)); }
-
-	using base64_parse_error = std::runtime_error;
-
-	std::vector<std::byte> Base64ToBin(const mpt::ustring &src);
-	mpt::ustring BinToBase64(mpt::const_byte_span src);
-	template <typename T> inline mpt::ustring BinToBase64(mpt::span<T> src) { return Util::BinToBase64(mpt::byte_cast<mpt::const_byte_span>(src)); }
-
-	std::vector<std::byte> Base64urlToBin(const mpt::ustring &src);
-	mpt::ustring BinToBase64url(mpt::const_byte_span src);
-	template <typename T> inline mpt::ustring BinToBase64url(mpt::span<T> src) { return Util::BinToBase64url(mpt::byte_cast<mpt::const_byte_span>(src)); }
-
-
-
 	template <typename T>
 	class heap_value
 	{

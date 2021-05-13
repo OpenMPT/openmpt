@@ -11,6 +11,8 @@
 #include "stdafx.h"
 #include "mptOS.h"
 
+#include "mpt/binary/hex.hpp"
+
 #if MPT_OS_WINDOWS
 #include <windows.h>
 #endif
@@ -257,12 +259,12 @@ mpt::ustring Version::GetNameShort() const
 			name = MPT_UFORMAT("wine-{}")(v.Version().AsString());
 		} else if(v.RawVersion().length() > 0)
 		{
-			name = U_("wine-") + Util::BinToHex(mpt::as_span(v.RawVersion()));
+			name = U_("wine-") + mpt::encode_hex(mpt::as_span(v.RawVersion()));
 		} else
 		{
 			name = U_("wine-");
 		}
-		name += U_("-") + Util::BinToHex(mpt::as_span(v.RawHostSysName()));
+		name += U_("-") + mpt::encode_hex(mpt::as_span(v.RawHostSysName()));
 	} else
 	{
 		name = MPT_UFORMAT("{}.{}")(mpt::ufmt::dec(m_System.Major), mpt::ufmt::dec0<2>(m_System.Minor));

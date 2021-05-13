@@ -1335,7 +1335,7 @@ public:
 			{
 				if(algorithm == U_("SHA-512"))
 				{
-					std::vector<std::byte> binhash = Util::HexToBin(value);
+					std::vector<std::byte> binhash = mpt::decode_hex(value);
 					if(binhash.size() != 512/8)
 					{
 						throw Error(U_("Download verification failed."));

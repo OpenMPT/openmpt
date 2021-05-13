@@ -47,6 +47,7 @@
 #ifndef NO_PLUGINS
 #include "AbstractVstEditor.h"
 #endif
+#include "mpt/binary/hex.hpp"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -3156,7 +3157,7 @@ void CModDoc::SerializeViews() const
 	SettingsContainer &settings = theApp.GetSongSettings();
 	const std::string s = f.str();
 	settings.Write(U_("WindowSettings"), pathName.GetFullFileName().ToUnicode(), pathName);
-	settings.Write(U_("WindowSettings"), pathName.ToUnicode(), Util::BinToHex(mpt::as_span(s)));
+	settings.Write(U_("WindowSettings"), pathName.ToUnicode(), mpt::encode_hex(mpt::as_span(s)));
 }
 
 
@@ -3181,7 +3182,7 @@ void CModDoc::DeserializeViews()
 			if(s.size() < 2) return;
 		}
 	}
-	std::vector<std::byte> bytes = Util::HexToBin(s);
+	std::vector<std::byte> bytes = mpt::decode_hex(s);
 
 	FileReader file(mpt::as_span(bytes));
 
