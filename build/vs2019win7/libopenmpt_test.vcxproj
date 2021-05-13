@@ -536,7 +536,6 @@
     <ClCompile Include="..\..\common\FileReader.cpp" />
     <ClCompile Include="..\..\common\Logging.cpp" />
     <ClCompile Include="..\..\common\Profiler.cpp" />
-    <ClCompile Include="..\..\common\misc_util.cpp" />
     <ClCompile Include="..\..\common\mptFileIO.cpp" />
     <ClCompile Include="..\..\common\mptIO.cpp" />
     <ClCompile Include="..\..\common\mptLibrary.cpp" />

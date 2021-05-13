@@ -1219,8 +1219,6 @@
     </ClCompile>
     <ClCompile Include="..\..\common\Logging.cpp">
     </ClCompile>
-    <ClCompile Include="..\..\common\misc_util.cpp">
-    </ClCompile>
     <ClCompile Include="..\..\common\mptFileIO.cpp">
     </ClCompile>
     <ClCompile Include="..\..\common\mptIO.cpp">
