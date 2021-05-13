@@ -653,8 +653,9 @@ void CModDoc::InitializeMod()
 }
 
 
-void CModDoc::SetDefaultChannelColors()
+bool CModDoc::SetDefaultChannelColors()
 {
+	bool modified = false;
 	if(TrackerSettings::Instance().defaultRainbowChannelColors != DefaultChannelColors::NoColors)
 	{
 		const bool rainbow = TrackerSettings::Instance().defaultRainbowChannelColors == DefaultChannelColors::Rainbow;
@@ -678,15 +679,25 @@ void CModDoc::SetDefaultChannelColors()
 			const double r = brightness * (1 + saturation * (std::cos(hue) - 1.0));
 			const double g = brightness * (1 + saturation * (std::cos(hue - 2.09439) - 1.0));
 			const double b = brightness * (1 + saturation * (std::cos(hue + 2.09439) - 1.0));
-			m_SndFile.ChnSettings[i].color = RGB(mpt::saturate_round<uint8>(r * 255), mpt::saturate_round<uint8>(g * 255), mpt::saturate_round<uint8>(b * 255));
+			const auto color = RGB(mpt::saturate_round<uint8>(r * 255), mpt::saturate_round<uint8>(g * 255), mpt::saturate_round<uint8>(b * 255));
+			if(m_SndFile.ChnSettings[i].color != color)
+			{
+				m_SndFile.ChnSettings[i].color = color;
+				modified = true;
+			}
 		}
 	} else
 	{
 		for(CHANNELINDEX i = 0; i < GetNumChannels(); i++)
 		{
-			m_SndFile.ChnSettings[i].color = ModChannelSettings::INVALID_COLOR;
+			if(m_SndFile.ChnSettings[i].color != ModChannelSettings::INVALID_COLOR)
+			{
+				m_SndFile.ChnSettings[i].color = ModChannelSettings::INVALID_COLOR;
+				modified = true;
+			}
 		}
 	}
+	return modified;
 }
 
 

@@ -116,6 +116,7 @@ BEGIN_MESSAGE_MAP(CViewPattern, CModScrollView)
 	ON_COMMAND(ID_PATTERN_SETINSTRUMENT,		&CViewPattern::OnSetSelInstrument)
 	ON_COMMAND(ID_PATTERN_ADDCHANNEL_FRONT,		&CViewPattern::OnAddChannelFront)
 	ON_COMMAND(ID_PATTERN_ADDCHANNEL_AFTER,		&CViewPattern::OnAddChannelAfter)
+	ON_COMMAND(ID_PATTERN_RESETCHANNELCOLORS,	&CViewPattern::OnResetChannelColors)
 	ON_COMMAND(ID_PATTERN_TRANSPOSECHANNEL,		&CViewPattern::OnTransposeChannel)
 	ON_COMMAND(ID_PATTERN_DUPLICATECHANNEL,		&CViewPattern::OnDuplicateChannel)
 	ON_COMMAND(ID_PATTERN_REMOVECHANNEL,		&CViewPattern::OnRemoveChannel)
@@ -2653,6 +2654,22 @@ void CViewPattern::Interpolate(PatternCursor::Columns type)
 	{
 		SetModified(false);
 		InvalidatePattern(false);
+	}
+}
+
+
+void CViewPattern::OnResetChannelColors()
+{
+	CModDoc &modDoc = *GetDocument();
+	const CSoundFile &sndFile = *GetSoundFile();
+	modDoc.GetPatternUndo().PrepareChannelUndo(0, sndFile.GetNumChannels(), "Reset Channel Colors");
+	if(modDoc.SetDefaultChannelColors())
+	{
+		modDoc.SetModified();
+		modDoc.UpdateAllViews(nullptr, GeneralHint().Channels(), nullptr);
+	} else
+	{
+		modDoc.GetPatternUndo().RemoveLastUndoStep();
 	}
 }
 
@@ -6380,6 +6397,8 @@ bool CViewPattern::BuildChannelControlCtxMenu(HMENU hMenu, CInputHandler *ih) co
 	DWORD canRemoveChannels = (numChannels > specs.channelsMin) ? 0 : MF_GRAYED;
 
 	AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
+
+	AppendMenu(hMenu, MF_STRING, ID_PATTERN_RESETCHANNELCOLORS, _T("Reset Channel &Colours"));
 
 	AppendMenu(hMenu, MF_STRING, ID_PATTERN_TRANSPOSECHANNEL, ih->GetKeyTextFromCommand(kcChannelTranspose, _T("&Transpose Channel")));
 	AppendMenu(hMenu, MF_STRING | canAddChannels, ID_PATTERN_DUPLICATECHANNEL, ih->GetKeyTextFromCommand(kcChannelDuplicate, _T("&Duplicate Channel")));
