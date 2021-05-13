@@ -605,8 +605,9 @@ bool CSoundFile::ProcessRow()
 						m_visitedRows.Initialize(true);
 					}
 					// When jumping to the next subsong, stop all playing notes from the previous song...
+					const auto muteFlag = CSoundFile::GetChannelMuteFlag();
 					for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
-						m_PlayState.Chn[i].Reset(ModChannel::resetSetPosFull, *this, i);
+						m_PlayState.Chn[i].Reset(ModChannel::resetSetPosFull, *this, i, muteFlag);
 					StopAllVsti();
 					// ...and the global playback information.
 					m_PlayState.m_nMusicSpeed = m_nDefaultSpeed;
