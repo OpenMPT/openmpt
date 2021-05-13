@@ -917,7 +917,7 @@ CHANNELINDEX CModDoc::PlayNote(PlayNoteParam &params, NoteToChannelMap *noteChan
 		ModChannel &chn = m_SndFile.m_PlayState.Chn[channel];
 
 		// reset channel properties; in theory the chan is completely unused anyway.
-		chn.Reset(ModChannel::resetTotal, m_SndFile, CHANNELINDEX_INVALID);
+		chn.Reset(ModChannel::resetTotal, m_SndFile, CHANNELINDEX_INVALID, CHN_MUTE);
 		chn.nNewNote = chn.nLastNote = static_cast<uint8>(note);
 		chn.nVolume = 256;
 
@@ -1164,7 +1164,7 @@ bool CModDoc::MuteChannel(CHANNELINDEX nChn, bool doMute)
 
 bool CModDoc::UpdateChannelMuteStatus(CHANNELINDEX nChn)
 {
-	const ChannelFlags muteType = (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SYNCMUTE) ? CHN_SYNCMUTE : CHN_MUTE;
+	const ChannelFlags muteType = CSoundFile::GetChannelMuteFlag();
 
 	if (nChn >= m_SndFile.GetNumChannels())
 	{

@@ -1784,7 +1784,7 @@ void CViewPattern::ResetChannel(CHANNELINDEX chn)
 	const bool isMuted = pModDoc->IsChannelMuted(chn);
 	if(!isMuted)
 		pModDoc->MuteChannel(chn, true);
-	sndFile.m_PlayState.Chn[chn].Reset(ModChannel::resetTotal, sndFile, chn);
+	sndFile.m_PlayState.Chn[chn].Reset(ModChannel::resetTotal, sndFile, chn, CSoundFile::GetChannelMuteFlag());
 	if(!isMuted)
 		pModDoc->MuteChannel(chn, false);
 }
