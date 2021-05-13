@@ -1649,7 +1649,7 @@ static MPT_NOINLINE void TestCharsets()
 
 	// Path splitting
 
-#if MPT_OS_WINDOWS && defined(MPT_ENABLE_DYNBIND)
+#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
 
 	VERIFY_EQUAL(P_("").GetDrive(), P_(""));
 	VERIFY_EQUAL(P_("").GetDir(), P_(""));

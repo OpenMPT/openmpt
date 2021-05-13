@@ -1421,7 +1421,7 @@ FileReader GetFileReader(TInputFile &file)
 #endif // MPT_ENABLE_FILEIO
 
 
-#if defined(MPT_ENABLE_TEMPFILE) && MPT_OS_WINDOWS
+#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
 
 class OnDiskFileWrapper
 {
@@ -1445,7 +1445,7 @@ public:
 
 }; // class OnDiskFileWrapper
 
-#endif // MPT_ENABLE_TEMPFILE && MPT_OS_WINDOWS
+#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
 
 
 OPENMPT_NAMESPACE_END

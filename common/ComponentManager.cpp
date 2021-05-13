@@ -86,7 +86,7 @@ void ComponentBase::Initialize()
 }
 
 
-#if defined(MPT_ENABLE_DYNBIND)
+#if defined(MODPLUG_TRACKER)
 
 
 ComponentLibrary::ComponentLibrary(ComponentType type)
@@ -155,7 +155,7 @@ mpt::Library ComponentLibrary::GetLibrary(const std::string &libName) const
 }
 
 
-#endif // MPT_ENABLE_DYNBIND
+#endif // MODPLUG_TRACKER
 
 
 #if MPT_COMPONENT_MANAGER

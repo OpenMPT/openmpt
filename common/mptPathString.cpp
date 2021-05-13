@@ -151,7 +151,7 @@ namespace mpt
 {
 
 
-#if MPT_OS_WINDOWS && (defined(MPT_ENABLE_DYNBIND) || defined(MPT_ENABLE_TEMPFILE))
+#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
 
 void PathString::SplitPath(PathString *drive, PathString *dir, PathString *fname, PathString *ext) const
 {
@@ -314,7 +314,7 @@ bool PathString::IsFile() const
 	return ((dwAttrib != INVALID_FILE_ATTRIBUTES) && !(dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
 }
 
-#endif // MPT_OS_WINDOWS && (MPT_ENABLE_DYNBIND || MPT_ENABLE_TEMPFILE)
+#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
 
 
 #if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
@@ -522,9 +522,7 @@ bool DeleteWholeDirectoryTree(mpt::PathString path)
 
 
 
-#if MPT_OS_WINDOWS
-
-#if defined(MPT_ENABLE_DYNBIND) || defined(MPT_ENABLE_TEMPFILE)
+#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
 
 mpt::PathString GetExecutablePath()
 {
@@ -540,10 +538,6 @@ mpt::PathString GetExecutablePath()
 	return mpt::GetAbsolutePath(mpt::PathString::FromNative(exeFileName.data()).GetPath());
 }
 
-#endif // MPT_ENABLE_DYNBIND || MPT_ENABLE_TEMPFILE
-
-
-#if defined(MPT_ENABLE_DYNBIND)
 
 #if !MPT_OS_WINDOWS_WINRT
 
@@ -560,14 +554,11 @@ mpt::PathString GetSystemPath()
 
 #endif // !MPT_OS_WINDOWS_WINRT
 
-#endif // MPT_ENABLE_DYNBIND
-
-#endif // MPT_OS_WINDOWS
+#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
 
 
 
-#if defined(MPT_ENABLE_TEMPFILE)
-#if MPT_OS_WINDOWS
+#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
 
 mpt::PathString GetTempDirectory()
 {
@@ -612,7 +603,6 @@ TempFileGuard::~TempFileGuard()
 	}
 }
 
-#ifdef MODPLUG_TRACKER
 
 TempDirGuard::TempDirGuard(const mpt::PathString &dirname_)
 	: dirname(dirname_.WithTrailingSlash())
@@ -640,10 +630,7 @@ TempDirGuard::~TempDirGuard()
 	}
 }
 
-#endif // MODPLUG_TRACKER
-
-#endif // MPT_OS_WINDOWS
-#endif // MPT_ENABLE_TEMPFILE
+#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
 
 } // namespace mpt
 

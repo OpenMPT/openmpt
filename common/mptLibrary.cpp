@@ -11,7 +11,7 @@
 #include "stdafx.h"
 #include "mptLibrary.h"
 
-#if defined(MPT_ENABLE_DYNBIND)
+#if defined(MODPLUG_TRACKER)
 #if MPT_OS_WINDOWS
 #include <windows.h>
 #elif MPT_OS_ANDROID
@@ -27,7 +27,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-#if defined(MPT_ENABLE_DYNBIND)
+#if defined(MODPLUG_TRACKER)
 
 
 namespace mpt
@@ -550,13 +550,13 @@ FuncPtr Library::GetProcAddress(const std::string &symbol) const
 } // namespace mpt
 
 
-#else // !MPT_ENABLE_DYNBIND
+#else // !MODPLUG_TRACKER
 
 
 MPT_MSVC_WORKAROUND_LNK4221(mptLibrary)
 
 
-#endif // MPT_ENABLE_DYNBIND
+#endif // MODPLUG_TRACKER
 
 
 OPENMPT_NAMESPACE_END

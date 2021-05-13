@@ -451,22 +451,6 @@
 #undef MPT_WITH_MEDIAFOUNDATION // MediaFoundation requires MSVC or Clang due to ATL (no MinGW support)
 #endif
 
-#if defined(MPT_WITH_MEDIAFOUNDATION) && !defined(MPT_ENABLE_TEMPFILE)
-#define MPT_ENABLE_TEMPFILE
-#endif
-
-#if defined(MODPLUG_TRACKER) && !defined(MPT_ENABLE_TEMPFILE)
-#define MPT_ENABLE_TEMPFILE
-#endif
-
-#if defined(MODPLUG_TRACKER) && !defined(MPT_ENABLE_DYNBIND)
-#define MPT_ENABLE_DYNBIND // Tracker requires dynamic library loading for export codecs
-#endif
-
-#if defined(MPT_WITH_MEDIAFOUNDATION) && !defined(MPT_ENABLE_DYNBIND)
-#define MPT_ENABLE_DYNBIND // MediaFoundation needs dynamic loading in order to test availability of delay loaded libs
-#endif
-
 #if (defined(MPT_WITH_MPG123) || defined(MPT_WITH_MINIMP3)) && !defined(MPT_ENABLE_MP3_SAMPLES)
 #define MPT_ENABLE_MP3_SAMPLES
 #endif

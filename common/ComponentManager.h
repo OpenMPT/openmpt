@@ -135,7 +135,7 @@ public:
 #define MPT_GLOBAL_BIND(lib, name) name = &::name;
 
 
-#if defined(MPT_ENABLE_DYNBIND)
+#if defined(MODPLUG_TRACKER)
 
 
 class ComponentLibrary
@@ -238,7 +238,7 @@ public:
 };
 
 
-#endif // MPT_ENABLE_DYNBIND
+#endif // MODPLUG_TRACKER
 
 
 #if MPT_COMPONENT_MANAGER

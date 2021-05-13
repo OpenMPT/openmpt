@@ -111,7 +111,7 @@ public:
 #endif // !MPT_OS_WINDOWS_WINRT
 #endif
 
-#if MPT_OS_WINDOWS && (defined(MPT_ENABLE_DYNBIND) || defined(MPT_ENABLE_TEMPFILE))
+#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
 
 	void SplitPath(PathString *drive, PathString *dir, PathString *fname, PathString *ext) const;
 	// \\?\ prefixes will be removed and \\?\\UNC prefixes converted to canonical \\ form.
@@ -126,10 +126,6 @@ public:
 	bool IsDirectory() const;
 	// Verify if this path exists and is a file on the file system.
 	bool IsFile() const;
-
-#endif // MPT_OS_WINDOWS && (MPT_ENABLE_DYNBIND || MPT_ENABLE_TEMPFILE)
-
-#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
 
 	bool FileOrDirectoryExists() const;
 
@@ -333,28 +329,19 @@ bool DeleteWholeDirectoryTree(mpt::PathString path);
 
 #endif // MPT_OS_WINDOWS
 
-#if MPT_OS_WINDOWS
-
-#if defined(MPT_ENABLE_DYNBIND) || defined(MPT_ENABLE_TEMPFILE)
+#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
 
 // Returns the application executable path or an empty string (if unknown), e.g. "C:\mptrack\"
 mpt::PathString GetExecutablePath();
-
-#endif // MPT_ENABLE_DYNBIND || MPT_ENABLE_TEMPFILE
-
-#if defined(MPT_ENABLE_DYNBIND)
 
 #if !MPT_OS_WINDOWS_WINRT
 // Returns the system directory path, e.g. "C:\Windows\System32\"
 mpt::PathString GetSystemPath();
 #endif // !MPT_OS_WINDOWS_WINRT
 
-#endif // MPT_ENABLE_DYNBIND
+#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
 
-#endif // MPT_OS_WINDOWS
-
-#if defined(MPT_ENABLE_TEMPFILE)
-#if MPT_OS_WINDOWS
+#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
 
 // Returns temporary directory (with trailing backslash added) (e.g. "C:\TEMP\")
 mpt::PathString GetTempDirectory();
@@ -376,7 +363,6 @@ public:
 	~TempFileGuard();
 };
 
-#ifdef MODPLUG_TRACKER
 
 // Scoped temporary directory guard. Deletes the directory when going out of scope.
 // The directory itself is created automatically.
@@ -390,10 +376,7 @@ public:
 	~TempDirGuard();
 };
 
-#endif // MODPLUG_TRACKER
-
-#endif // MPT_OS_WINDOWS
-#endif // MPT_ENABLE_TEMPFILE
+#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
 
 } // namespace mpt
 

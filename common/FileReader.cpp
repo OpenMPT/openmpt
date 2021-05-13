@@ -11,20 +11,20 @@
 #include "stdafx.h"
 #include "FileReader.h"
 
-#if defined(MPT_ENABLE_TEMPFILE) && MPT_OS_WINDOWS
+#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
 #include "mpt/system_error/system_error.hpp"
 #include "mptFileIO.h"
-#endif // MPT_ENABLE_TEMPFILE && MPT_OS_WINDOWS
+#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
 
-#if defined(MPT_ENABLE_TEMPFILE) && MPT_OS_WINDOWS
+#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
 #include <windows.h>
-#endif // MPT_ENABLE_TEMPFILE && MPT_OS_WINDOWS
+#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
 
 
 OPENMPT_NAMESPACE_BEGIN
 
 
-#if defined(MPT_ENABLE_TEMPFILE) && MPT_OS_WINDOWS
+#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
 
 
 OnDiskFileWrapper::OnDiskFileWrapper(FileReader &file, const mpt::PathString &fileNameExtension)
@@ -154,7 +154,7 @@ mpt::PathString OnDiskFileWrapper::GetFilename() const
 MPT_MSVC_WORKAROUND_LNK4221(FileReader)
 
 
-#endif // MPT_ENABLE_TEMPFILE && MPT_OS_WINDOWS
+#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
 
 
 OPENMPT_NAMESPACE_END
