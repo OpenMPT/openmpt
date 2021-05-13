@@ -108,7 +108,8 @@ bool CPatternUndo::PrepareBuffer(undobuf_t &buffer, PATTERNINDEX pattern, CHANNE
 
 	buffer.push_back(std::move(undo));
 
-	modDoc.UpdateAllViews(nullptr, UpdateHint().Undo());
+	if(!linkToPrevious)
+		modDoc.UpdateAllViews(nullptr, UpdateHint().Undo());
 	return true;
 }
 
@@ -231,8 +232,11 @@ PATTERNINDEX CPatternUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, bool linke
 // Public helper function to remove the most recent undo point.
 void CPatternUndo::RemoveLastUndoStep()
 {
-	if(!UndoBuffer.empty())
-		UndoBuffer.pop_back();
+	if(UndoBuffer.empty())
+		return;
+
+	UndoBuffer.pop_back();
+	modDoc.UpdateAllViews(nullptr, UpdateHint().Undo());
 }
 
 
@@ -555,8 +559,11 @@ void CSampleUndo::DeleteStep(undobuf_t &buffer, const SAMPLEINDEX smp, const siz
 // Public helper function to remove the most recent undo point.
 void CSampleUndo::RemoveLastUndoStep(const SAMPLEINDEX smp)
 {
-	if(!CanUndo(smp)) return;
+	if(!CanUndo(smp))
+		return;
+
 	DeleteStep(UndoBuffer, smp, UndoBuffer[smp - 1].size() - 1);
+	modDoc.UpdateAllViews(nullptr, UpdateHint().Undo());
 }
 
 
