@@ -593,7 +593,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				if(chn.rowCommand.vol)
 				{
 					const auto [porta, clearEffectCommand] = GetVolCmdTonePorta(chn.rowCommand, 0);
-					chn.nPortamentoSlide = porta * 4;
+					chn.nPortamentoSlide = porta;
 					if(clearEffectCommand)
 						command = CMD_NONE;
 				}
@@ -792,7 +792,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				break;
 			// Tone-Portamento
 			case CMD_TONEPORTAMENTO:
-				if (param) chn.nPortamentoSlide = param << 2;
+				if (param) chn.nPortamentoSlide = param;
 				break;
 			// Offset
 			case CMD_OFFSET:
@@ -4196,17 +4196,17 @@ void CSoundFile::TonePortamento(ModChannel &chn, uint32 param) const
 		chn.nOldPortaUp = chn.nOldPortaDown = static_cast<uint8>(param);
 	}
 
+	if(param)
+		chn.nPortamentoSlide = param;
+
 	if(chn.HasCustomTuning())
 	{
 		//Behavior: Param tells number of finesteps(or 'fullsteps'(notes) with glissando)
 		//to slide per row(not per tick).
 		const int32 oldPortamentoTickSlide = (m_PlayState.m_nTickCount != 0) ? chn.m_PortamentoTickSlide : 0;
 
-		if(param)
-			chn.nPortamentoSlide = param;
-		else
-			if(chn.nPortamentoSlide == 0)
-				return;
+		if(chn.nPortamentoSlide == 0)
+			return;
 
 		if((chn.nPortamentoDest > 0 && chn.nPortamentoSlide < 0) ||
 			(chn.nPortamentoDest < 0 && chn.nPortamentoSlide > 0))
@@ -4244,26 +4244,24 @@ void CSoundFile::TonePortamento(ModChannel &chn, uint32 param) const
 	               || (GetType() & (MOD_TYPE_DBM | MOD_TYPE_669))
 	               || (m_PlayState.m_nMusicSpeed == 1 && m_playBehaviour[kSlidesAtSpeed1])
 	               || (GetType() == MOD_TYPE_MED && m_SongFlags[SONG_FASTVOLSLIDES]);
-	if(GetType() == MOD_TYPE_PLM && param >= 0xF0)
+
+	int32 delta = chn.nPortamentoSlide;
+	if(GetType() == MOD_TYPE_PLM && delta >= 0xF0)
 	{
-		param -= 0xF0;
+		delta -= 0xF0;
 		doPorta = chn.isFirstTick;
 	}
 
-	if(param)
+	if(GetType() == MOD_TYPE_669)
 	{
-		if(GetType() == MOD_TYPE_669)
-		{
-			param *= 10;
-		}
-		chn.nPortamentoSlide = param * 4;
+		delta *= 10;
 	}
+	delta *= 4;
 
 	if(chn.nPeriod && chn.nPortamentoDest && doPorta)
 	{
 		if (chn.nPeriod < chn.nPortamentoDest)
 		{
-			int32 delta = chn.nPortamentoSlide;
 			if(m_SongFlags[SONG_LINEARSLIDES] && GetType() != MOD_TYPE_XM)
 			{
 				uint32 n = chn.nPortamentoSlide / 4;
@@ -4278,7 +4276,7 @@ void CSoundFile::TonePortamento(ModChannel &chn, uint32 param) const
 		} else
 		if (chn.nPeriod > chn.nPortamentoDest)
 		{
-			int32 delta = -chn.nPortamentoSlide;
+			delta = -delta;
 			if(m_SongFlags[SONG_LINEARSLIDES] && GetType() != MOD_TYPE_XM)
 			{
 				uint32 n = chn.nPortamentoSlide / 4;
