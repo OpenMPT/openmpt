@@ -102,8 +102,6 @@ public:
 
 };
 
-using FileReaderTraitsDefault = FileReaderTraitsStdStream;
-
 namespace mpt
 {
 namespace FileReader
@@ -1362,7 +1360,7 @@ public:
 
 } // namespace detail
 
-using FileReader = detail::FileReader<FileReaderTraitsDefault>;
+using FileReader = detail::FileReader<FileReaderTraitsStdStream>;
 
 using MemoryFileReader = detail::FileReader<FileReaderTraitsMemory>;
 

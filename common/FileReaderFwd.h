@@ -18,8 +18,6 @@ class FileReaderTraitsMemory;
 
 class FileReaderTraitsStdStream;
 
-using FileReaderTraitsDefault = FileReaderTraitsStdStream;
-
 namespace detail {
 
 template <typename Ttraits>
@@ -27,7 +25,7 @@ class FileReader;
 
 } // namespace detail
 
-using FileReader = detail::FileReader<FileReaderTraitsDefault>;
+using FileReader = detail::FileReader<FileReaderTraitsStdStream>;
 
 using MemoryFileReader = detail::FileReader<FileReaderTraitsMemory>;
 
