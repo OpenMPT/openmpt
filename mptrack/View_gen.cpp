@@ -742,7 +742,8 @@ void CViewGlobals::OnEditColor(const CHANNELINDEX chnMod4)
 	{
 		PrepareUndo(chnMod4);
 		sndFile.ChnSettings[chn].color = *color;
-		modDoc->SetModified();
+		if(modDoc->SupportsChannelColors())
+			modDoc->SetModified();
 		modDoc->UpdateAllViews(nullptr, GeneralHint(chn).Channels());
 	}
 }

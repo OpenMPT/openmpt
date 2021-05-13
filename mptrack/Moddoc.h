@@ -292,7 +292,9 @@ public:
 	bool MoveOrder(ORDERINDEX nSourceNdx, ORDERINDEX nDestNdx, bool bUpdate = true, bool bCopy = false, SEQUENCEINDEX nSourceSeq = SEQUENCEINDEX_INVALID, SEQUENCEINDEX nDestSeq = SEQUENCEINDEX_INVALID);
 	BOOL ExpandPattern(PATTERNINDEX nPattern);
 	BOOL ShrinkPattern(PATTERNINDEX nPattern);
+
 	bool SetDefaultChannelColors();
+	bool SupportsChannelColors() const { return GetModType() & (MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT); }
 
 	bool CopyEnvelope(INSTRUMENTINDEX nIns, EnvelopeType nEnv);
 	bool SaveEnvelope(INSTRUMENTINDEX nIns, EnvelopeType nEnv, const mpt::PathString &fileName);

@@ -1521,7 +1521,8 @@ void QuickChannelProperties::OnChangeColor()
 	{
 		PrepareUndo();
 		m_document->GetSoundFile().ChnSettings[m_channel].color = *color;
-		m_document->SetModified();
+		if(m_document->SupportsChannelColors())
+			m_document->SetModified();
 		m_document->UpdateAllViews(nullptr, GeneralHint(m_channel).Channels(), this);
 	}
 	m_settingColor = false;
@@ -1550,7 +1551,8 @@ void QuickChannelProperties::PickColorFromChannel(CHANNELINDEX channel)
 		PrepareUndo();
 		channels[m_channel].color = channels[channel].color;
 		m_colorBtn.SetColor(channels[m_channel].color);
-		m_document->SetModified();
+		if(m_document->SupportsChannelColors())
+			m_document->SetModified();
 		m_document->UpdateAllViews(nullptr, GeneralHint(m_channel).Channels(), this);
 	}
 }

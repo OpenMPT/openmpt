@@ -2665,7 +2665,8 @@ void CViewPattern::OnResetChannelColors()
 	modDoc.GetPatternUndo().PrepareChannelUndo(0, sndFile.GetNumChannels(), "Reset Channel Colors");
 	if(modDoc.SetDefaultChannelColors())
 	{
-		modDoc.SetModified();
+		if(modDoc.SupportsChannelColors())
+			modDoc.SetModified();
 		modDoc.UpdateAllViews(nullptr, GeneralHint().Channels(), nullptr);
 	} else
 	{
