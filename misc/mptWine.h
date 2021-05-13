@@ -23,7 +23,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
+#if MPT_OS_WINDOWS
 
 
 namespace mpt
@@ -123,7 +123,7 @@ public:
 } // namespace mpt
 
 
-#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
+#endif // MODPLUG_TRACKER
 
 
 OPENMPT_NAMESPACE_END

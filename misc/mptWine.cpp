@@ -25,7 +25,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
+#if MPT_OS_WINDOWS
 
 
 namespace mpt
@@ -743,13 +743,13 @@ std::string Context::GetPosixEnvVar(std::string var, std::string def)
 } // namespace mpt
 
 
-#else // !(MODPLUG_TRACKER && MPT_OS_WINDOWS)
+#else // !MPT_OS_WINDOWS
 
 
 MPT_MSVC_WORKAROUND_LNK4221(mptWine)
 
 
-#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
+#endif // MPT_OS_WINDOWS
 
 
 OPENMPT_NAMESPACE_END
