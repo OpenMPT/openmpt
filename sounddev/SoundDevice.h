@@ -214,28 +214,7 @@ struct Info
 		return (static_cast<int8>(flags.usability) <= 0) || (static_cast<int8>(flags.level) <= 0);
 	}
 
-	SoundDevice::Identifier GetIdentifier() const
-	{
-		if(!IsValid())
-		{
-			return mpt::ustring();
-		}
-		mpt::ustring result = mpt::ustring();
-		result += type;
-		result += U_("_");
-		if(useNameAsIdentifier)
-		{
-			// UTF8-encode the name and convert the utf8 to hex.
-			// This ensures that no special characters are contained in the configuration key.
-			std::string utf8String = mpt::ToCharset(mpt::Charset::UTF8, name);
-			mpt::ustring hexString = Util::BinToHex(mpt::as_span(utf8String));
-			result += hexString;
-		} else
-		{
-			result += internalID; // safe to not contain special characters
-		}
-		return result;
-	}
+	SoundDevice::Identifier GetIdentifier() const;
 
 	mpt::ustring GetDisplayName() const;
 
