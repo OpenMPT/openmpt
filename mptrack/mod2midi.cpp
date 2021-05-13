@@ -494,9 +494,10 @@ namespace MidiExport
 			std::move(m_oldPlugins.cbegin(), m_oldPlugins.cend(), std::begin(m_sndFile.m_MixPlugins));
 
 			// Be sure that instrument pointers to our faked instruments are gone.
+			const auto muteFlag = CSoundFile::GetChannelMuteFlag();
 			for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 			{
-				m_sndFile.m_PlayState.Chn[i].Reset(ModChannel::resetTotal, m_sndFile, i);
+				m_sndFile.m_PlayState.Chn[i].Reset(ModChannel::resetTotal, m_sndFile, i, muteFlag);
 			}
 		}
 	};

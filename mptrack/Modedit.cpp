@@ -243,6 +243,7 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const std::vector<CHANNELINDEX> &newOrde
 	}
 
 	// Reassign NNA channels (note: if we increase the number of channels, the lowest-indexed NNA channels will still be lost)
+	const auto muteFlag = CSoundFile::GetChannelMuteFlag();
 	for(CHANNELINDEX chn = oldNumChannels; chn < MAX_CHANNELS; chn++)
 	{
 		auto &channel = m_SndFile.m_PlayState.Chn[chn];
@@ -250,7 +251,7 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const std::vector<CHANNELINDEX> &newOrde
 		if(masterChn > 0 && masterChn <= newIndex.size() && (newMasterChn = newIndex[masterChn - 1]) != CHANNELINDEX_INVALID)
 			channel.nMasterChn = newMasterChn + 1;
 		else
-			channel.Reset(ModChannel::resetTotal, m_SndFile, chn);
+			channel.Reset(ModChannel::resetTotal, m_SndFile, chn, muteFlag);
 	}
 
 	std::vector<ModChannel> chns(std::begin(m_SndFile.m_PlayState.Chn), std::begin(m_SndFile.m_PlayState.Chn) + oldNumChannels);
@@ -373,6 +374,7 @@ SAMPLEINDEX CModDoc::ReArrangeSamples(const std::vector<SAMPLEINDEX> &newOrder)
 
 	GetSampleUndo().RearrangeSamples(newIndex);
 
+	const auto muteFlag = CSoundFile::GetChannelMuteFlag();
 	for(CHANNELINDEX c = 0; c < std::size(m_SndFile.m_PlayState.Chn); c++)
 	{
 		ModChannel &chn = m_SndFile.m_PlayState.Chn[c];
@@ -383,7 +385,7 @@ SAMPLEINDEX CModDoc::ReArrangeSamples(const std::vector<SAMPLEINDEX> &newOrder)
 				chn.pModSample = &m_SndFile.GetSample(newIndex[i]);
 				if(i == 0 || i > newNumSamples)
 				{
-					chn.Reset(ModChannel::resetTotal, m_SndFile, c);
+					chn.Reset(ModChannel::resetTotal, m_SndFile, c, muteFlag);
 				}
 				break;
 			}

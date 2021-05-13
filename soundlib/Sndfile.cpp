@@ -472,11 +472,13 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 	}
 
 	// Adjust channels
-	for(CHANNELINDEX ich = 0; ich < MAX_BASECHANNELS; ich++)
+	const auto muteFlag = GetChannelMuteFlag();
+	for(CHANNELINDEX chn = 0; chn < MAX_BASECHANNELS; chn++)
 	{
-		LimitMax(ChnSettings[ich].nVolume, uint16(64));
-		if (ChnSettings[ich].nPan > 256) ChnSettings[ich].nPan = 128;
-		m_PlayState.Chn[ich].Reset(ModChannel::resetTotal, *this, ich);
+		LimitMax(ChnSettings[chn].nVolume, uint16(64));
+		if(ChnSettings[chn].nPan > 256)
+			ChnSettings[chn].nPan = 128;
+		m_PlayState.Chn[chn].Reset(ModChannel::resetTotal, *this, chn, muteFlag);
 	}
 
 	// Checking samples, load external samples
@@ -763,8 +765,9 @@ double CSoundFile::GetCurrentBPM() const
 
 void CSoundFile::ResetPlayPos()
 {
+	const auto muteFlag = GetChannelMuteFlag();
 	for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
-		m_PlayState.Chn[i].Reset(ModChannel::resetSetPosFull, *this, i);
+		m_PlayState.Chn[i].Reset(ModChannel::resetSetPosFull, *this, i, muteFlag);
 
 	m_visitedRows.Initialize(true);
 	m_SongFlags.reset(SONG_FADINGSONG | SONG_ENDREACHED);
@@ -1286,10 +1289,11 @@ const char *CSoundFile::GetInstrumentName(INSTRUMENTINDEX nInstr) const
 
 bool CSoundFile::InitChannel(CHANNELINDEX nChn)
 {
-	if(nChn >= MAX_BASECHANNELS) return true;
+	if(nChn >= MAX_BASECHANNELS)
+		return true;
 
 	ChnSettings[nChn].Reset();
-	m_PlayState.Chn[nChn].Reset(ModChannel::resetTotal, *this, nChn);
+	m_PlayState.Chn[nChn].Reset(ModChannel::resetTotal, *this, nChn, GetChannelMuteFlag());
 
 #ifdef MODPLUG_TRACKER
 	if(GetpModDoc() != nullptr)
@@ -1765,6 +1769,16 @@ const CModSpecifications& CSoundFile::GetModSpecifications(const MODTYPE type)
 	const CModSpecifications* p = nullptr;
 	SetModSpecsPointer(p, type);
 	return *p;
+}
+
+
+ChannelFlags CSoundFile::GetChannelMuteFlag()
+{
+#ifdef MODPLUG_TRACKER
+	return (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SYNCMUTE) ? CHN_SYNCMUTE : CHN_MUTE;
+#else
+	return CHN_SYNCMUTE;
+#endif
 }
 
 

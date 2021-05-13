@@ -90,9 +90,10 @@ public:
 		state->m_nMusicTempo = sndFile.m_nDefaultTempo;
 		state->m_nGlobalVolume = sndFile.m_nDefaultGlobalVolume;
 		chnSettings.assign(sndFile.GetNumChannels(), ChnSettings());
+		const auto muteFlag = CSoundFile::GetChannelMuteFlag();
 		for(CHANNELINDEX chn = 0; chn < sndFile.GetNumChannels(); chn++)
 		{
-			state->Chn[chn].Reset(ModChannel::resetTotal, sndFile, chn);
+			state->Chn[chn].Reset(ModChannel::resetTotal, sndFile, chn, muteFlag);
 			state->Chn[chn].nOldGlobalVolSlide = 0;
 			state->Chn[chn].nOldChnVolSlide = 0;
 			state->Chn[chn].nNote = state->Chn[chn].nNewNote = state->Chn[chn].nLastNote = NOTE_NONE;
@@ -5764,7 +5765,7 @@ void CSoundFile::SetTempo(TEMPO param, bool setFromUI)
 
 void CSoundFile::PatternLoop(PlayState &state, ModChannel &chn, ModCommand::PARAM param) const
 {
-	if(m_playBehaviour[kST3NoMutedChannels] && chn.dwFlags[CHN_MUTE])
+	if(m_playBehaviour[kST3NoMutedChannels] && chn.dwFlags[CHN_MUTE | CHN_SYNCMUTE])
 		return;  // not even effects are processed on muted S3M channels
 
 	if(!param)

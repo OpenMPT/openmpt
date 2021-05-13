@@ -734,6 +734,8 @@ public:
 	const CModSpecifications& GetModSpecifications() const {return *m_pModSpecs;}
 	static const CModSpecifications& GetModSpecifications(const MODTYPE type);
 
+	static ChannelFlags GetChannelMuteFlag();
+
 #ifdef MODPLUG_TRACKER
 	void PatternTranstionChnSolo(const CHANNELINDEX chnIndex);
 	void PatternTransitionChnUnmuteAll();
