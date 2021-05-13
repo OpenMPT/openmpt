@@ -2159,7 +2159,7 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 // Monitor changes in the instrument library folder.
 void CModTree::MonitorInstrumentLibrary()
 {
-	mpt::SetCurrentThreadPriority(mpt::ThreadPriorityLowest);
+	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_LOWEST);
 	mpt::log::Trace::SetThreadId(mpt::log::Trace::ThreadKindWatchdir, GetCurrentThreadId());
 	DWORD result;
 	mpt::PathString lastWatchDir;

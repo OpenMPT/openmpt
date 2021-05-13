@@ -19,7 +19,6 @@
 #include "TrackerSettings.h"
 // Setup dialog stuff
 #include "Mainfrm.h"
-#include "../common/mptThread.h"
 #include "mpt/system_error/system_error.hpp"
 #include "mpt/crypto/hash.hpp"
 #include "mpt/crypto/jwk.hpp"
@@ -582,7 +581,7 @@ CUpdateCheck::ThreadFunc::ThreadFunc(const CUpdateCheck::Settings &settings, con
 
 void CUpdateCheck::ThreadFunc::operator () ()
 {
-	mpt::SetCurrentThreadPriority(context.autoUpdate ? mpt::ThreadPriorityLower : mpt::ThreadPriorityNormal);
+	SetThreadPriority(GetCurrentThread(), context.autoUpdate ? THREAD_PRIORITY_BELOW_NORMAL : THREAD_PRIORITY_NORMAL);
 	CheckForUpdate(settings, context);
 }
 

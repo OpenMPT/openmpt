@@ -14,7 +14,7 @@
 #include <atomic>
 
 #include "BridgeCommon.h"
-#include "../common/mptThread.h"
+
 
 OPENMPT_NAMESPACE_BEGIN
 

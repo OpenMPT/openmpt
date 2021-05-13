@@ -15,7 +15,6 @@
 
 #include <vector>
 #include <bitset>
-#include "../common/mptThread.h"
 
 OPENMPT_NAMESPACE_BEGIN
 

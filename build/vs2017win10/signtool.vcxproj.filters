@@ -204,9 +204,6 @@
     <ClInclude Include="..\..\common\mptStringParse.h">
       <Filter>common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\common\mptThread.h">
-      <Filter>common</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\common\mptTime.h">
       <Filter>common</Filter>
     </ClInclude>

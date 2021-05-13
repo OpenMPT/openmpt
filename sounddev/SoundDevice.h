@@ -15,7 +15,6 @@
 
 #include "../common/FlagSet.h"
 #include "../common/mptOS.h"
-#include "../common/mptThread.h"
 #include "../soundbase/SampleFormat.h"
 
 #include <map>
@@ -338,7 +337,7 @@ struct AppInfo
 	bool AllowDeferredProcessing;
 	AppInfo()
 		: UIHandle(0)
-		, BoostedThreadPriorityXP(mpt::ThreadPriorityHighest)
+		, BoostedThreadPriorityXP(2)  // THREAD_PRIORITY_HIGHEST 
 		, BoostedThreadMMCSSClassVista(U_("Pro Audio"))
 		, BoostedThreadRealtimePosix(false)
 		, BoostedThreadNicenessPosix(-5)

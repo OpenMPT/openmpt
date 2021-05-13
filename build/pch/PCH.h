@@ -78,7 +78,6 @@
 #include "../common/mptRandom.h"
 #include "../common/mptStringBuffer.h"
 #include "../common/mptTime.h"
-#include "../common/mptThread.h"
 #include "../common/Profiler.h"
 #include "../common/serialization_utils.h"
 #include "../common/version.h"

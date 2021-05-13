@@ -255,7 +255,6 @@ MPT_FILES_COMMON += common/mptStringFormat.cpp
 MPT_FILES_COMMON += common/mptStringFormat.h
 MPT_FILES_COMMON += common/mptStringParse.cpp
 MPT_FILES_COMMON += common/mptStringParse.h
-MPT_FILES_COMMON += common/mptThread.h
 MPT_FILES_COMMON += common/mptTime.cpp
 MPT_FILES_COMMON += common/mptTime.h
 MPT_FILES_COMMON += common/Profiler.cpp
