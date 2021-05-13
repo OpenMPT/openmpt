@@ -147,10 +147,6 @@ public:
 	}
 	bool DoInitialize() override
 	{
-		if(!mpt::OS::Windows::Version::Current().IsAtLeast(mpt::OS::Windows::Version::Win7))
-		{
-			return false;
-		}
 #if !MPT_OS_WINDOWS_WINRT
 		if(!(true
 			&& AddLibrary("mf", mpt::LibraryPath::System(P_("mf")))
