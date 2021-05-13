@@ -79,8 +79,6 @@ mpt::OS::Class GetClass()
 }  // namespace OS
 }  // namespace mpt
 
-#endif // MODPLUG_TRACKER
-
 
 namespace mpt
 {
@@ -91,7 +89,6 @@ namespace Windows
 
 
 #if MPT_OS_WINDOWS
-#ifdef MODPLUG_TRACKER
 
 namespace {
 struct WindowsVersionCache
@@ -110,7 +107,6 @@ static mpt::OS::Windows::Version GatherWindowsVersionFromCache() noexcept
 	return gs_WindowsVersionCache.version;
 }
 
-#endif // MODPLUG_TRACKER
 #endif // MPT_OS_WINDOWS
 
 
@@ -247,7 +243,6 @@ mpt::ustring Version::GetName() const
 }
 
 
-#ifdef MODPLUG_TRACKER
 mpt::ustring Version::GetNameShort() const
 {
 	mpt::ustring name;
@@ -271,7 +266,6 @@ mpt::ustring Version::GetNameShort() const
 	}
 	return name;
 }
-#endif // MODPLUG_TRACKER
 
 
 mpt::OS::Windows::Version::System Version::GetMinimumKernelLevel() noexcept
@@ -294,7 +288,7 @@ mpt::OS::Windows::Version::System Version::GetMinimumAPILevel() noexcept
 }
 
 
-#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
+#if MPT_OS_WINDOWS
 
 
 #ifndef PROCESSOR_ARCHITECTURE_NEUTRAL
@@ -481,7 +475,7 @@ uint64 GetSystemMemorySize()
 }
 
 
-#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
+#endif // MPT_OS_WINDOWS
 
 
 #if defined(MODPLUG_TRACKER)
@@ -560,8 +554,6 @@ bool IsWine()
 } // namespace mpt
 
 
-
-#if defined(MODPLUG_TRACKER)
 
 namespace mpt
 {
@@ -745,6 +737,11 @@ VersionContext::VersionContext()
 } // namespace Wine
 } // namespace OS
 } // namespace mpt
+
+
+#else // !MODPLUG_TRACKER
+
+MPT_MSVC_WORKAROUND_LNK4221(mptOS)
 
 #endif // MODPLUG_TRACKER
 

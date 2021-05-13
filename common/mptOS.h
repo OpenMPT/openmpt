@@ -22,6 +22,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 #if defined(MODPLUG_TRACKER)
 
+
 namespace mpt
 {
 namespace OS
@@ -44,8 +45,6 @@ mpt::OS::Class GetClass();
 
 }  // namespace OS
 }  // namespace mpt
-
-#endif // MODPLUG_TRACKER
 
 
 namespace mpt
@@ -87,9 +86,7 @@ public:
 public:
 
 	mpt::ustring GetName() const;
-#ifdef MODPLUG_TRACKER
 	mpt::ustring GetNameShort() const;
-#endif // MODPLUG_TRACKER
 
 public:
 
@@ -98,7 +95,7 @@ public:
 
 }; // class Version
 
-#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
+#if MPT_OS_WINDOWS
 
 enum class Architecture
 {
@@ -141,7 +138,7 @@ std::vector<Architecture> GetSupportedProcessArchitectures(Architecture host);
 
 uint64 GetSystemMemorySize();
 
-#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
+#endif // MPT_OS_WINDOWS
 
 
 #if defined(MODPLUG_TRACKER)
@@ -157,8 +154,6 @@ bool IsWine();
 } // namespace OS
 } // namespace mpt
 
-
-#if defined(MODPLUG_TRACKER)
 
 namespace mpt
 {
@@ -221,6 +216,7 @@ public:
 } // namespace Wine
 } // namespace OS
 } // namespace mpt
+
 
 #endif // MODPLUG_TRACKER
 
