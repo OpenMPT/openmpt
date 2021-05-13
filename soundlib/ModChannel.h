@@ -78,9 +78,10 @@ struct ModChannel
 	EnvInfo VolEnv, PanEnv, PitchEnv;  // Envelope playback info
 	int32 nGlobalVol;                  // Channel volume (CV in ITTECH.TXT) 0...64
 	int32 nInsVol;                     // Sample / Instrument volume (SV * IV in ITTECH.TXT) 0...64
-	int32 nPortamentoSlide, nAutoVibDepth;
+	int32 nAutoVibDepth;
 	uint32 nEFxOffset;  // Offset memory for Invert Loop (EFx, .MOD only)
 	ROWINDEX nPatternLoop;
+	uint16 portamentoSlide;
 	int16 nTranspose;
 	int16 nFineTune;
 	int16 microTuning;  // Micro-tuning / MIDI pitch wheel command

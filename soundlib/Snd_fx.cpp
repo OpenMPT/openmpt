@@ -582,7 +582,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					if(chn.rowCommand.vol)
 					{
 						const auto [porta, clearEffectCommand] = GetVolCmdTonePorta(chn.rowCommand, 0);
-						chn.nPortamentoSlide = porta * 4;
+						chn.portamentoSlide = porta;
 						if(clearEffectCommand)
 							command = CMD_NONE;
 					}
@@ -709,7 +709,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				break;
 			// Tone-Portamento
 			case CMD_TONEPORTAMENTO:
-				if (param) chn.nPortamentoSlide = param << 2;
+				if (param) chn.portamentoSlide = param;
 				break;
 			// Offset
 			case CMD_OFFSET:
@@ -3065,7 +3065,7 @@ bool CSoundFile::ProcessEffects()
 
 		// Tone-Portamento
 		case CMD_TONEPORTAMENTO:
-			TonePortamento(chn, param);
+			TonePortamento(chn, static_cast<uint16>(param));
 			break;
 
 		// Tone-Portamento + Volume Slide
@@ -3955,7 +3955,7 @@ void CSoundFile::NoteSlide(ModChannel &chn, uint32 param, bool slideUp, bool ret
 }
 
 
-std::pair<uint32, bool> CSoundFile::GetVolCmdTonePorta(const ModCommand &m, uint32 startTick) const
+std::pair<uint16, bool> CSoundFile::GetVolCmdTonePorta(const ModCommand &m, uint32 startTick) const
 {
 	if(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_AMS | MOD_TYPE_DMF | MOD_TYPE_DBM | MOD_TYPE_IMF | MOD_TYPE_PSM | MOD_TYPE_J2B | MOD_TYPE_ULT | MOD_TYPE_OKT | MOD_TYPE_MT2 | MOD_TYPE_MDL))
 	{
@@ -3963,7 +3963,7 @@ std::pair<uint32, bool> CSoundFile::GetVolCmdTonePorta(const ModCommand &m, uint
 	} else
 	{
 		bool clearEffectColumn = false;
-		uint32 vol = m.vol;
+		uint16 vol = m.vol;
 		if(m.command == CMD_TONEPORTAMENTO && GetType() == MOD_TYPE_XM)
 		{
 			// Yes, FT2 is *that* weird. If there is a Mx command in the volume column
@@ -3977,15 +3977,15 @@ std::pair<uint32, bool> CSoundFile::GetVolCmdTonePorta(const ModCommand &m, uint
 		// FT2 compatibility: If there's a portamento and a note delay, execute the portamento, but don't update the parameter
 		// Test case: PortaDelay.xm
 		if(m_playBehaviour[kFT2PortaDelay] && startTick != 0)
-			return {0, clearEffectColumn};
+			return {uint16(0), clearEffectColumn};
 		else
-			return {vol * 16, clearEffectColumn};
+			return {static_cast<uint16>(vol * 16), clearEffectColumn};
 	}
 }
 
 
 // Portamento Slide
-void CSoundFile::TonePortamento(ModChannel &chn, uint32 param) const
+void CSoundFile::TonePortamento(ModChannel &chn, uint16 param) const
 {
 	chn.dwFlags.set(CHN_PORTAMENTO);
 
@@ -3996,23 +3996,23 @@ void CSoundFile::TonePortamento(ModChannel &chn, uint32 param) const
 		chn.nOldPortaUp = chn.nOldPortaDown = static_cast<uint8>(param);
 	}
 
+	if(param)
+		chn.portamentoSlide = param;
+
 	if(chn.HasCustomTuning())
 	{
 		//Behavior: Param tells number of finesteps(or 'fullsteps'(notes) with glissando)
 		//to slide per row(not per tick).
+		if(chn.portamentoSlide == 0)
+			return;
+
 		const int32 oldPortamentoTickSlide = (m_PlayState.m_nTickCount != 0) ? chn.m_PortamentoTickSlide : 0;
 
-		if(param)
-			chn.nPortamentoSlide = param;
-		else
-			if(chn.nPortamentoSlide == 0)
-				return;
+		int32 delta = chn.portamentoSlide;
+		if(chn.nPortamentoDest < 0)
+			delta = -delta;
 
-		if((chn.nPortamentoDest > 0 && chn.nPortamentoSlide < 0) ||
-			(chn.nPortamentoDest < 0 && chn.nPortamentoSlide > 0))
-			chn.nPortamentoSlide = -chn.nPortamentoSlide;
-
-		chn.m_PortamentoTickSlide = static_cast<int32>((m_PlayState.m_nTickCount + 1.0) * chn.nPortamentoSlide / m_PlayState.m_nMusicSpeed);
+		chn.m_PortamentoTickSlide = static_cast<int32>((m_PlayState.m_nTickCount + 1.0) * delta / m_PlayState.m_nMusicSpeed);
 
 		if(chn.dwFlags[CHN_GLISSANDO])
 		{
@@ -4044,20 +4044,17 @@ void CSoundFile::TonePortamento(ModChannel &chn, uint32 param) const
 	               || (GetType() & (MOD_TYPE_DBM | MOD_TYPE_669))
 	               || (m_PlayState.m_nMusicSpeed == 1 && m_playBehaviour[kSlidesAtSpeed1])
 	               || (GetType() == MOD_TYPE_MED && m_SongFlags[SONG_FASTVOLSLIDES]);
-	if(GetType() == MOD_TYPE_PLM && param >= 0xF0)
-	{
-		param -= 0xF0;
-		doPorta = chn.isFirstTick;
-	}
 
-	if(param)
+	int32 delta = chn.portamentoSlide;
+	if(GetType() == MOD_TYPE_PLM && delta >= 0xF0)
 	{
-		chn.nPortamentoSlide = param * ((GetType() == MOD_TYPE_669) ? 2u : 4u);
+		delta -= 0xF0;
+		doPorta = chn.isFirstTick;
 	}
 
 	if(chn.nPeriod && chn.nPortamentoDest && doPorta)
 	{
-		int32 delta = chn.nPortamentoSlide;
+		delta *= (GetType() == MOD_TYPE_669) ? 2 : 4;
 		if(!PeriodsAreFrequencies())
 			delta = -delta;
 		if(chn.nPeriod < chn.nPortamentoDest)

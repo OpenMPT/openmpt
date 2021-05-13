@@ -1034,8 +1034,8 @@ protected:
 	void PortamentoExtraFineMPT(ModChannel &chn, int);
 	void SetFinetune(CHANNELINDEX channel, PlayState &playState, bool isSmooth) const;
 	void NoteSlide(ModChannel &chn, uint32 param, bool slideUp, bool retrig) const;
-	std::pair<uint32, bool> GetVolCmdTonePorta(const ModCommand &m, uint32 startTick) const;
-	void TonePortamento(ModChannel &chn, uint32 param) const;
+	std::pair<uint16, bool> GetVolCmdTonePorta(const ModCommand &m, uint32 startTick) const;
+	void TonePortamento(ModChannel &chn, uint16 param) const;
 	void Vibrato(ModChannel &chn, uint32 param) const;
 	void FineVibrato(ModChannel &chn, uint32 param) const;
 	void VolumeSlide(ModChannel &chn, ModCommand::PARAM param);
