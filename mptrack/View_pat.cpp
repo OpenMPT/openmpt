@@ -2662,7 +2662,7 @@ void CViewPattern::OnResetChannelColors()
 {
 	CModDoc &modDoc = *GetDocument();
 	const CSoundFile &sndFile = *GetSoundFile();
-	modDoc.GetPatternUndo().PrepareChannelUndo(0, sndFile.GetNumChannels(), "Reset Channel Colors");
+	modDoc.GetPatternUndo().PrepareChannelUndo(0, sndFile.GetNumChannels(), "Reset Channel Colours");
 	if(modDoc.SetDefaultChannelColors())
 	{
 		if(modDoc.SupportsChannelColors())
