@@ -66,9 +66,6 @@ public:
 };
 
 
-#if defined(LIBOPENMPT_BUILD)
-
-
 template<typename Tspan>
 class AudioReadTargetGainBuffer
 	: public AudioReadTargetBuffer<Tspan>
@@ -134,9 +131,6 @@ public:
 		Tbase::DataCallback(MixSoundBuffer, channels, countChunk);
 	}
 };
-
-
-#endif // LIBOPENMPT_BUILD
 
 
 OPENMPT_NAMESPACE_END
