@@ -32,6 +32,7 @@ MPT_TEST_GROUP_INLINE("mpt/uuid_namespace")
 #pragma clang diagnostic pop
 #endif
 {
+	using namespace mpt::uuid_literals;
 	constexpr mpt::UUID uuid_ns_dns = "6ba7b810-9dad-11d1-80b4-00c04fd430c8"_uuid;
 	constexpr mpt::UUID expected = "74738ff5-5367-5958-9aee-98fffdcd1876"_uuid;
 	mpt::UUID gotten = mpt::UUIDRFC4122NamespaceV5(uuid_ns_dns, MPT_USTRING("www.example.org"));
