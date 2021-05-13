@@ -493,20 +493,6 @@ LibraryPath LibraryPath::AppFullName(const mpt::PathString &fullname)
 }
 
 
-#if defined(MODPLUG_TRACKER) && !defined(MPT_BUILD_WINESUPPORT)
-
-LibraryPath LibraryPath::AppDataFullName(const mpt::PathString &fullname, const mpt::PathString &appdata)
-{
-	if(appdata.empty())
-	{
-		return LibraryPath(mpt::LibrarySearchPath::Invalid, P_(""));
-	}
-	return LibraryPath(mpt::LibrarySearchPath::FullPath, appdata.WithTrailingSlash() + fullname + GetDefaultSuffix());
-}
-
-#endif // MODPLUG_TRACKER && !MPT_BUILD_WINESUPPORT
-
-
 LibraryPath LibraryPath::System(const mpt::PathString &basename)
 {
 	return LibraryPath(mpt::LibrarySearchPath::System, GetDefaultPrefix() + basename + GetDefaultSuffix());
