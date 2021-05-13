@@ -5564,6 +5564,15 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, int offset)
 			if(retrigCount && !(retrigCount % retrigSpeed))
 				doRetrig = true;
 			retrigCount++;
+		} else if(GetType() == MOD_TYPE_MOD)
+		{
+			// ProTracker-style retrigger
+			// Test case: PTRetrigger.mod
+			const auto tick = m_PlayState.m_nTickCount % m_PlayState.m_nMusicSpeed;
+			if(!tick && chn.rowCommand.IsNote())
+				return;
+			if(retrigSpeed && !(tick % retrigSpeed))
+				doRetrig = true;
 		} else if(GetType() == MOD_TYPE_MTM)
 		{
 			// In MultiTracker, E9x retriggers the last note at exactly the x-th tick of the row
