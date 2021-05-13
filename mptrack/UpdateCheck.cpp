@@ -10,6 +10,7 @@
 
 #include "stdafx.h"
 #include "UpdateCheck.h"
+#include "mpt/binary/hex.hpp"
 #include "BuildVariants.h"
 #include "../common/version.h"
 #include "../common/misc_util.h"
