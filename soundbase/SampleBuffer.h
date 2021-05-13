@@ -19,6 +19,70 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 template <typename SampleType>
+struct audio_span_planar_strided
+{
+public:
+	using sample_type = SampleType;
+
+private:
+	SampleType *const *m_buffers;
+	std::size_t m_frame_stride;
+	std::size_t m_channels;
+	std::size_t m_frames;
+
+public:
+	constexpr audio_span_planar_strided(SampleType *const *buffers, std::size_t channels, std::size_t frames, std::size_t frame_stride) noexcept
+		: m_buffers(buffers)
+		, m_frame_stride(frame_stride)
+		, m_channels(channels)
+		, m_frames(frames)
+	{
+		return;
+	}
+	SampleType *data() noexcept
+	{
+		return nullptr;
+	}
+	const SampleType *data() const noexcept
+	{
+		return nullptr;
+	}
+	SampleType &operator()(std::size_t channel, std::size_t frame)
+	{
+		return m_buffers[channel][frame * m_frame_stride];
+	}
+	const SampleType &operator()(std::size_t channel, std::size_t frame) const
+	{
+		return m_buffers[channel][frame * m_frame_stride];
+	}
+	bool is_contiguous() const noexcept
+	{
+		return false;
+	}
+	bool channels_are_contiguous() const noexcept
+	{
+		return false;
+	}
+	bool frames_are_contiguous() const noexcept
+	{
+		return false;
+	}
+	std::size_t size_channels() const noexcept
+	{
+		return m_channels;
+	}
+	std::size_t size_frames() const noexcept
+	{
+		return m_frames;
+	}
+	std::size_t size_samples() const noexcept
+	{
+		return m_channels * m_frames;
+	}
+};
+
+
+template <typename SampleType>
 struct audio_span_planar
 {
 public:
