@@ -463,10 +463,10 @@ inline std::size_t planar_audio_span_valid_channels(SampleType *const *buffers, 
 
 
 template <typename BufferType>
-inline audio_span_with_offset<BufferType> make_audio_span_with_offset(BufferType buf, std::size_t numFrames) noexcept
+inline audio_span_with_offset<BufferType> make_audio_span_with_offset(BufferType buf, std::size_t offsetFrames) noexcept
 {
-	MPT_ASSERT(numFrames <= buf.size_frames());
-	return audio_span_with_offset<BufferType>{buf, numFrames};
+	MPT_ASSERT(offsetFrames <= buf.size_frames());
+	return audio_span_with_offset<BufferType>{buf, offsetFrames};
 }
 
 
