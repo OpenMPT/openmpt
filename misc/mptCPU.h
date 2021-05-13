@@ -20,8 +20,6 @@ namespace CPU
 {
 
 
-#ifdef MODPLUG_TRACKER
-
 namespace feature {
 inline constexpr uint32 asm_intrinsics = 0x00001; // assembly and intrinsics are enabled at runtime
 inline constexpr uint32 cpuid          = 0x00002; // Processor supports modern cpuid
@@ -43,8 +41,6 @@ inline constexpr uint32 x86_sse  = 0u | feature::cpuid | feature::sse           
 inline constexpr uint32 x86_sse2 = 0u | feature::cpuid | feature::sse | feature::sse2              ;
 inline constexpr uint32 amd64    = 0u | feature::cpuid | feature::sse | feature::sse2 | feature::lm;
 } // namespace featureset
-
-#endif
 
 
 #ifdef ENABLE_ASM
@@ -80,11 +76,9 @@ MPT_FORCEINLINE bool HasFeatureSet(uint32 features)
 #endif // ENABLE_ASM
 
 
-#ifdef MODPLUG_TRACKER
 uint32 GetMinimumFeatures();
 int GetMinimumSSEVersion();
 int GetMinimumAVXVersion();
-#endif
 
 
 } // namespace CPU

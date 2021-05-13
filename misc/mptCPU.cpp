@@ -237,9 +237,6 @@ void Init()
 #endif // ENABLE_ASM
 
 
-#ifdef MODPLUG_TRACKER
-
-
 uint32 GetMinimumFeatures()
 {
 	uint32 flags = 0;
@@ -299,16 +296,6 @@ int GetMinimumAVXVersion()
 	#endif
 	return minimumAVXVersion;
 }
-
-
-#endif
-
-
-#if !defined(MODPLUG_TRACKER) && !defined(ENABLE_ASM)
-
-MPT_MSVC_WORKAROUND_LNK4221(mptCPU)
-
-#endif
 
 
 } // namespace CPU
