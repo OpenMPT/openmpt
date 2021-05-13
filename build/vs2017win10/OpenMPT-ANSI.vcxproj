@@ -1512,7 +1512,6 @@
     <ClInclude Include="..\..\common\mptStringParse.h" />
     <ClInclude Include="..\..\common\mptThread.h" />
     <ClInclude Include="..\..\common\mptTime.h" />
-    <ClInclude Include="..\..\common\mptUUID.h" />
     <ClInclude Include="..\..\common\serialization_utils.h" />
     <ClInclude Include="..\..\common\stdafx.h" />
     <ClInclude Include="..\..\common\version.h" />
@@ -1869,7 +1868,6 @@
     <ClCompile Include="..\..\common\mptStringFormat.cpp" />
     <ClCompile Include="..\..\common\mptStringParse.cpp" />
     <ClCompile Include="..\..\common\mptTime.cpp" />
-    <ClCompile Include="..\..\common\mptUUID.cpp" />
     <ClCompile Include="..\..\common\serialization_utils.cpp" />
     <ClCompile Include="..\..\common\version.cpp" />
     <ClCompile Include="..\..\misc\mptCPU.cpp" />

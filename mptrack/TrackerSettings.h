@@ -13,9 +13,10 @@
 
 #include "BuildSettings.h"
 
+#include "mpt/uuid/uuid.hpp"
+
 #include "../common/Logging.h"
 #include "../common/version.h"
-#include "../common/mptUUID.h"
 #include "../soundbase/SampleFormat.h"
 #include "../soundlib/MixerSettings.h"
 #include "../soundlib/Resampler.h"

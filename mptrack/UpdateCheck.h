@@ -12,7 +12,7 @@
 
 #include "BuildSettings.h"
 
-#include "../common/mptUUID.h"
+#include "mpt/uuid/uuid.hpp"
 
 #include <time.h>
 

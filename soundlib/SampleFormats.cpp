@@ -38,6 +38,10 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+
+using namespace mpt::uuid_literals;
+
+
 bool CSoundFile::ReadSampleFromFile(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize, bool includeInstrumentFormats)
 {
 	if(!nSample || nSample >= MAX_SAMPLES) return false;

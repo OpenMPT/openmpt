@@ -13,8 +13,8 @@
 #include "stdafx.h"
 
 #if defined(MPT_WITH_DMO)
+#include "mpt/uuid/guid.hpp"
 #include "../../Sndfile.h"
-#include "../../../common/mptUUID.h"
 #include "DMOPlugin.h"
 #include "../PluginManager.h"
 #include <uuids.h>
@@ -38,7 +38,7 @@ OPENMPT_NAMESPACE_BEGIN
 IMixPlugin* DMOPlugin::Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct)
 {
 	CLSID clsid;
-	if(Util::VerifyStringToCLSID(factory.dllPath.AsNative(), clsid))
+	if(mpt::VerifyStringToCLSID(factory.dllPath.AsNative(), clsid))
 	{
 		IMediaObject *pMO = nullptr;
 		IMediaObjectInPlace *pMOIP = nullptr;

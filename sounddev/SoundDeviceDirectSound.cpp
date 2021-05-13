@@ -16,8 +16,10 @@
 
 #include "SoundDeviceDirectSound.h"
 
+#include "mpt/uuid/guid.hpp"
+#include "mpt/uuid/uuid.hpp"
+
 #include "../common/misc_util.h"
-#include "../common/mptUUID.h"
 #include "../common/mptStringBuffer.h"
 
 
@@ -57,7 +59,7 @@ static BOOL WINAPI DSEnumCallback(GUID * lpGuid, LPCTSTR lpstrDescription, LPCTS
 	SoundDevice::Info info;
 	info.type = TypeDSOUND;
 	info.default_ = (!lpGuid ? Info::Default::Managed : Info::Default::None);
-	info.internalID = mpt::ToUnicode(Util::GUIDToString(guid));
+	info.internalID = mpt::ToUnicode(mpt::GUIDToString(guid));
 	info.name = mpt::ToUnicode(mpt::winstring(lpstrDescription));
 	if(lpstrDriver)
 	{
@@ -134,8 +136,8 @@ SoundDevice::Caps CDSoundDevice::InternalGetDeviceCaps()
 		ds = m_piDS;
 	} else
 	{
-		GUID guid = Util::StringToGUID(mpt::ToWin(GetDeviceInternalID()));
-		if(DirectSoundCreate(Util::IsValid(guid) ? &guid : NULL, &dummy, NULL) != DS_OK)
+		GUID guid = mpt::StringToGUID(mpt::ToWin(GetDeviceInternalID()));
+		if(DirectSoundCreate(mpt::IsValid(guid) ? &guid : NULL, &dummy, NULL) != DS_OK)
 		{
 			return caps;
 		}
@@ -175,8 +177,8 @@ SoundDevice::DynamicCaps CDSoundDevice::GetDeviceDynamicCaps(const std::vector<u
 		ds = m_piDS;
 	} else
 	{
-		GUID guid = Util::StringToGUID(mpt::ToWin(GetDeviceInternalID()));
-		if(DirectSoundCreate(Util::IsValid(guid) ? &guid : NULL, &dummy, NULL) != DS_OK)
+		GUID guid = mpt::StringToGUID(mpt::ToWin(GetDeviceInternalID()));
+		if(DirectSoundCreate(mpt::IsValid(guid) ? &guid : NULL, &dummy, NULL) != DS_OK)
 		{
 			return caps;
 		}
@@ -259,8 +261,8 @@ bool CDSoundDevice::InternalOpen()
 	DSBCAPS dsc;
 
 	if(m_piDS) return true;
-	GUID guid = Util::StringToGUID(mpt::ToWin(GetDeviceInternalID()));
-	if(DirectSoundCreate(Util::IsValid(guid) ? &guid : NULL, &m_piDS, NULL) != DS_OK) return false;
+	GUID guid = mpt::StringToGUID(mpt::ToWin(GetDeviceInternalID()));
+	if(DirectSoundCreate(mpt::IsValid(guid) ? &guid : NULL, &m_piDS, NULL) != DS_OK) return false;
 	if(!m_piDS) return false;
 	if(m_piDS->SetCooperativeLevel(m_AppInfo.GetHWND(), m_Settings.ExclusiveMode ? DSSCL_WRITEPRIMARY : DSSCL_PRIORITY) != DS_OK)
 	{

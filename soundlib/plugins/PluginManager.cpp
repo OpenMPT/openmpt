@@ -16,7 +16,8 @@
 #include "PluginManager.h"
 #include "PlugInterface.h"
 
-#include "../../common/mptUUID.h"
+#include "mpt/uuid/guid.hpp"
+#include "mpt/uuid/uuid.hpp"
 
 // Built-in plugins
 #include "DigiBoosterEcho.h"
@@ -60,7 +61,12 @@
 #include "mpt/crc/crc.hpp"
 #endif // MODPLUG_TRACKER
 
+
 OPENMPT_NAMESPACE_BEGIN
+
+
+using namespace mpt::uuid_literals;
+
 
 #ifdef MPT_ALL_LOGGING
 #define VST_LOG
@@ -382,7 +388,7 @@ void CVstPluginManager::EnumerateDirectXDMOs()
 		{
 			CLSID clsid;
 			mpt::winstring formattedKey = mpt::winstring(_T("{")) + mpt::winstring(keyname) + mpt::winstring(_T("}"));
-			if(Util::VerifyStringToCLSID(formattedKey, clsid))
+			if(mpt::VerifyStringToCLSID(formattedKey, clsid))
 			{
 				if(!mpt::contains(knownDMOs, clsid))
 				{
@@ -396,7 +402,7 @@ void CVstPluginManager::EnumerateDirectXDMOs()
 
 						if(ERROR_SUCCESS == RegQueryValueEx(hksub, nullptr, 0, &datatype, (LPBYTE)name, &datasize))
 						{
-							VSTPluginLib *plug = new (std::nothrow) VSTPluginLib(DMOPlugin::Create, true, mpt::PathString::FromNative(Util::GUIDToString(clsid)), mpt::PathString::FromNative(ParseMaybeNullTerminatedStringFromBufferWithSizeInBytes<mpt::winstring>(name, datasize)));
+							VSTPluginLib *plug = new (std::nothrow) VSTPluginLib(DMOPlugin::Create, true, mpt::PathString::FromNative(mpt::GUIDToString(clsid)), mpt::PathString::FromNative(ParseMaybeNullTerminatedStringFromBufferWithSizeInBytes<mpt::winstring>(name, datasize)));
 							if(plug != nullptr)
 							{
 								try

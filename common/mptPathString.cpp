@@ -10,9 +10,10 @@
 #include "stdafx.h"
 #include "mptPathString.h"
 
+#include "mpt/uuid/uuid.hpp"
+
 #include "misc_util.h"
 
-#include "mptUUID.h"
 #include "mptRandom.h"
 
 #if MPT_OS_WINDOWS

@@ -17,9 +17,11 @@
 
 #ifdef MPT_WITH_ASIO
 
+#include "mpt/uuid/guid.hpp"
+#include "mpt/uuid/uuid.hpp"
+
 #include "../common/Endianness.h"
 #include "../common/misc_util.h"
-#include "../common/mptUUID.h"
 
 #if !defined(MPT_BUILD_WINESUPPORT)
 #include "../mptrack/ExceptionHandler.h"
@@ -102,7 +104,7 @@ std::vector<SoundDevice::Info> CASIODevice::EnumerateDevices(mpt::log::ILogger &
 	{
 		SoundDevice::Info info;
 		info.type = TypeASIO;
-		info.internalID = mpt::ToUnicode(Util::CLSIDToString(driver.Clsid));
+		info.internalID = mpt::ToUnicode(mpt::CLSIDToString(driver.Clsid));
 		info.apiName = U_("ASIO");
 		info.name = mpt::ToUnicode(AsWinstring(driver.DisplayName()));
 		info.useNameAsIdentifier = false;
@@ -118,7 +120,7 @@ std::vector<SoundDevice::Info> CASIODevice::EnumerateDevices(mpt::log::ILogger &
 		};
 		info.extraData[U_("Key")] = mpt::ToUnicode(AsWinstring(driver.Key));;
 		info.extraData[U_("Id")] = mpt::ToUnicode(AsWinstring(driver.Id));
-		info.extraData[U_("CLSID")] = mpt::ToUnicode(Util::CLSIDToString(driver.Clsid));
+		info.extraData[U_("CLSID")] = mpt::ToUnicode(mpt::CLSIDToString(driver.Clsid));
 		info.extraData[U_("Name")] = mpt::ToUnicode(AsWinstring(driver.Name));;
 		info.extraData[U_("Description")] = mpt::ToUnicode(AsWinstring(driver.Description));;
 		info.extraData[U_("DisplayName")] = mpt::ToUnicode(AsWinstring(driver.DisplayName()));;
@@ -670,7 +672,7 @@ void CASIODevice::OpenDriver()
 	{
 		return;
 	}
-	CLSID clsid = Util::StringToCLSID(mpt::ToWin(GetDeviceInternalID()));
+	CLSID clsid = mpt::StringToCLSID(mpt::ToWin(GetDeviceInternalID()));
 	try
 	{
 		if(GetAppInfo().AllowDeferredProcessing)

@@ -7,6 +7,7 @@
 #include "mpt/environment/environment.hpp"
 #include "mpt/exception_text/exception_text.hpp"
 #include "mpt/out_of_memory/out_of_memory.hpp"
+#include "mpt/uuid/uuid.hpp"
 #include "mpt/uuid_namespace/uuid_namespace.hpp"
 
 #include "../common/mptBaseMacros.h"
@@ -17,7 +18,6 @@
 #include "../common/mptPathString.h"
 #include "../common/mptIO.h"
 #include "../common/mptFileIO.h"
-#include "../common/mptUUID.h"
 #include "../common/Logging.h"
 #include "../common/misc_util.h"
 
@@ -43,6 +43,9 @@
 
 
 OPENMPT_NAMESPACE_BEGIN
+
+
+using namespace mpt::uuid_literals;
 
 
 #if defined(MPT_ASSERT_HANDLER_NEEDED) && defined(MPT_BUILD_SIGNTOOL)

@@ -12,9 +12,10 @@
 
 #include "BuildSettings.h"
 
+#include "mpt/uuid/uuid.hpp"
+
 #include "ChunkReader.h"
 #include "Loaders.h"
-#include "../common/mptUUID.h"
 
 OPENMPT_NAMESPACE_BEGIN
 

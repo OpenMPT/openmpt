@@ -99,7 +99,6 @@ LOCAL_SRC_FILES += \
 	common/mptStringFormat.cpp \
 	common/mptStringParse.cpp \
 	common/mptTime.cpp \
-	common/mptUUID.cpp \
 	common/Profiler.cpp \
 	common/serialization_utils.cpp \
 	common/version.cpp \

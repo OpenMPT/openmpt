@@ -865,7 +865,6 @@
     <ClInclude Include="..\..\common\mptStringParse.h" />
     <ClInclude Include="..\..\common\mptThread.h" />
     <ClInclude Include="..\..\common\mptTime.h" />
-    <ClInclude Include="..\..\common\mptUUID.h" />
     <ClInclude Include="..\..\common\Profiler.h" />
     <ClInclude Include="..\..\common\serialization_utils.h" />
     <ClInclude Include="..\..\common\stdafx.h" />
@@ -994,8 +993,6 @@
     <ClCompile Include="..\..\common\mptStringParse.cpp">
     </ClCompile>
     <ClCompile Include="..\..\common\mptTime.cpp">
-    </ClCompile>
-    <ClCompile Include="..\..\common\mptUUID.cpp">
     </ClCompile>
     <ClCompile Include="..\..\common\Profiler.cpp">
     </ClCompile>

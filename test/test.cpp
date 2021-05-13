@@ -18,12 +18,12 @@
 #include "mpt/environment/environment.hpp"
 #include "mpt/test/test.hpp"
 #include "mpt/test/test_macros.hpp"
+#include "mpt/uuid/uuid.hpp"
 
 #include "../common/version.h"
 #include "../common/misc_util.h"
 #include "../common/mptStringBuffer.h"
 #include "../common/serialization_utils.h"
-#include "../common/mptUUID.h"
 #include "../soundlib/Sndfile.h"
 #include "../common/FileReader.h"
 #include "../soundlib/mod_specifications.h"

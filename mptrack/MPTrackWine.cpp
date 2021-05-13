@@ -15,6 +15,9 @@
 #endif // MPT_COMPILER_MSVC
 
 #include "MPTrackWine.h"
+
+#include "mpt/uuid/uuid.hpp"
+
 #include "Mptrack.h"
 #include "Mainfrm.h"
 #include "AboutDialog.h"
@@ -22,7 +25,6 @@
 #include "../common/ComponentManager.h"
 #include "../common/mptFileIO.h"
 #include "../common/mptThread.h"
-#include "../common/mptUUID.h"
 #include "../common/mptOS.h"
 #include "mpt/crc/crc.hpp"
 #include "../common/FileReader.h"

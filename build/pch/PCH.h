@@ -47,6 +47,10 @@
 #include "mpt/exception_text/exception_text.hpp"
 #include "mpt/out_of_memory/out_of_memory.hpp"
 #include "mpt/system_error/system_error.hpp"
+#if defined(MODPLUG_TRACKER)
+#include "mpt/uuid/guid.hpp"
+#endif // MODPLUG_TRACKER
+#include "mpt/uuid/uuid.hpp"
 
 
 #include "../common/mptBaseMacros.h"
@@ -75,7 +79,6 @@
 #include "../common/mptStringBuffer.h"
 #include "../common/mptTime.h"
 #include "../common/mptThread.h"
-#include "../common/mptUUID.h"
 #include "../common/Profiler.h"
 #include "../common/serialization_utils.h"
 #include "../common/version.h"
