@@ -261,7 +261,7 @@ namespace openmpt {
 			free_channel = MAX_CHANNELS - 1;
 
 		ModChannel &chn = m_sndFile->m_PlayState.Chn[free_channel];
-		chn.Reset(ModChannel::resetTotal, *m_sndFile, CHANNELINDEX_INVALID);
+		chn.Reset(ModChannel::resetTotal, *m_sndFile, CHANNELINDEX_INVALID, CHN_MUTE);
 		chn.nMasterChn = 0;	// remove NNA association
 		chn.nNewNote = chn.nLastNote = static_cast<uint8>(note);
 		chn.ResetEnvelopes();
