@@ -43,6 +43,7 @@ void ModChannel::Reset(ResetFlags resetMask, const CSoundFile &sndFile, CHANNELI
 		lastZxxParam = 0xFF;
 		isFirstTick = false;
 		isPreviewNote = false;
+		isPaused = false;
 		rowCommand.Clear();
 	}
 
