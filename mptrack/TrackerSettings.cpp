@@ -190,7 +190,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, rememberSongWindows(conf, U_("Display"), U_("RememberSongWindows"), true)
 	, showDirsInSampleBrowser(conf, U_("Display"), U_("ShowDirsInSampleBrowser"), false)
 	, commentsFont(conf, U_("Display"), U_("Comments Font"), FontSetting(U_("Courier New"), 120))
-	, defaultRainbowChannelColors(conf, U_("Display"), U_("DefaultChannelColors"), DefaultChannelColors::Rainbow)
+	, defaultRainbowChannelColors(conf, U_("Display"), U_("DefaultChannelColors"), DefaultChannelColors::Random)
 	// Misc
 	, defaultModType(conf, U_("Misc"), U_("DefaultModType"), MOD_TYPE_IT)
 	, defaultNewFileAction(conf, U_("Misc"), U_("DefaultNewFileAction"), nfDefaultFormat)
