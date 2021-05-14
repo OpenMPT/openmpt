@@ -4256,7 +4256,6 @@ void CSoundFile::TonePortamento(ModChannel &chn, uint32 param) const
 	{
 		delta *= 10;
 	}
-	delta *= 4;
 
 	if(chn.nPeriod && chn.nPortamentoDest && doPorta)
 	{
@@ -4264,25 +4263,30 @@ void CSoundFile::TonePortamento(ModChannel &chn, uint32 param) const
 		{
 			if(m_SongFlags[SONG_LINEARSLIDES] && GetType() != MOD_TYPE_XM)
 			{
-				uint32 n = chn.nPortamentoSlide / 4;
+				uint32 n = delta;
 				if (n > 255) n = 255;
 				// Return (a*b+c/2)/c - no divide error
 				// Table is 65536*2(n/192)
 				delta = Util::muldivr(chn.nPeriod, LinearSlideUpTable[n], 65536) - chn.nPeriod;
 				if (delta < 1) delta = 1;
+			} else
+			{
+				delta *= 4;
 			}
 			chn.nPeriod += delta;
 			if (chn.nPeriod > chn.nPortamentoDest) chn.nPeriod = chn.nPortamentoDest;
 		} else
 		if (chn.nPeriod > chn.nPortamentoDest)
 		{
-			delta = -delta;
 			if(m_SongFlags[SONG_LINEARSLIDES] && GetType() != MOD_TYPE_XM)
 			{
-				uint32 n = chn.nPortamentoSlide / 4;
+				uint32 n = delta;
 				if (n > 255) n = 255;
 				delta = Util::muldivr(chn.nPeriod, LinearSlideDownTable[n], 65536) - chn.nPeriod;
 				if (delta > -1) delta = -1;
+			} else
+			{
+				delta *= -4;
 			}
 			chn.nPeriod += delta;
 			if (chn.nPeriod < chn.nPortamentoDest) chn.nPeriod = chn.nPortamentoDest;
