@@ -106,6 +106,9 @@
     <Filter Include="src\mpt\json">
       <UniqueIdentifier>{F685D403-E2E8-63A8-8B6E-9C5E77B02F2B}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\mpt\library">
+      <UniqueIdentifier>{31CC822E-9D57-F0F2-A668-73E712734CF3}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\mpt\mutex">
       <UniqueIdentifier>{8FBB9C7E-FB7B-18B5-C4B6-613230365D91}</UniqueIdentifier>
     </Filter>
@@ -1050,6 +1053,12 @@
     <ClInclude Include="..\..\src\mpt\crypto\tests\tests_crypto.hpp">
       <Filter>src\mpt\crypto\tests</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\mpt\detect\dl.hpp">
+      <Filter>src\mpt\detect</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\detect\ltdl.hpp">
+      <Filter>src\mpt\detect</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\mpt\detect\mfc.hpp">
       <Filter>src\mpt\detect</Filter>
     </ClInclude>
@@ -1119,6 +1128,9 @@
     <ClInclude Include="..\..\src\mpt\json\json.hpp">
       <Filter>src\mpt\json</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\mpt\library\library.hpp">
+      <Filter>src\mpt\library</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\mpt\mutex\mutex.hpp">
       <Filter>src\mpt\mutex</Filter>
     </ClInclude>
@@ -1170,10 +1182,16 @@
     <ClInclude Include="..\..\src\mpt\string\types.hpp">
       <Filter>src\mpt\string</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\mpt\string\types_path.hpp">
+      <Filter>src\mpt\string</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\mpt\string\utility.hpp">
       <Filter>src\mpt\string</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\string_convert\convert.hpp">
+      <Filter>src\mpt\string_convert</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\string_convert\convert_path.hpp">
       <Filter>src\mpt\string_convert</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\string_convert\macros.hpp">

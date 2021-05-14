@@ -1022,6 +1022,8 @@
     <ClInclude Include="..\..\src\mpt\crypto\tests\tests_crypto.hpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="..\..\src\mpt\detect\dl.hpp" />
+    <ClInclude Include="..\..\src\mpt\detect\ltdl.hpp" />
     <ClInclude Include="..\..\src\mpt\detect\mfc.hpp" />
     <ClInclude Include="..\..\src\mpt\detect\nlohmann_json.hpp" />
     <ClInclude Include="..\..\src\mpt\endian\floatingpoint.hpp" />
@@ -1047,6 +1049,7 @@
     <ClInclude Include="..\..\src\mpt\json\json.hpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="..\..\src\mpt\library\library.hpp" />
     <ClInclude Include="..\..\src\mpt\mutex\mutex.hpp" />
     <ClInclude Include="..\..\src\mpt\osinfo\windows_version.hpp" />
     <ClInclude Include="..\..\src\mpt\out_of_memory\out_of_memory.hpp" />
@@ -1062,10 +1065,12 @@
     <ClInclude Include="..\..\src\mpt\random\tests\tests_random.hpp" />
     <ClInclude Include="..\..\src\mpt\string\buffer.hpp" />
     <ClInclude Include="..\..\src\mpt\string\types.hpp" />
+    <ClInclude Include="..\..\src\mpt\string\types_path.hpp" />
     <ClInclude Include="..\..\src\mpt\string\utility.hpp" />
     <ClInclude Include="..\..\src\mpt\string\tests\tests_string_buffer.hpp" />
     <ClInclude Include="..\..\src\mpt\string\tests\tests_string_utility.hpp" />
     <ClInclude Include="..\..\src\mpt\string_convert\convert.hpp" />
+    <ClInclude Include="..\..\src\mpt\string_convert\convert_path.hpp" />
     <ClInclude Include="..\..\src\mpt\string_convert\macros.hpp" />
     <ClInclude Include="..\..\src\mpt\string_convert\tests\tests_string_convert.hpp" />
     <ClInclude Include="..\..\src\mpt\system_error\system_error.hpp" />

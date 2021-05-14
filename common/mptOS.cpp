@@ -704,15 +704,15 @@ VersionContext::VersionContext()
 		{
 			return;
 		}
-		m_NTDLL = mpt::Library(mpt::LibraryPath::FullPath(P_("ntdll.dll")));
-		if(m_NTDLL.IsValid())
+		m_NTDLL = std::make_shared<std::optional<mpt::library>>(mpt::library::load({mpt::library::path_search::system, mpt::library::path_prefix::none, MPT_PATH("ntdll.dll"), mpt::library::path_suffix::none}));
+		if(m_NTDLL->has_value())
 		{
 			const char * (__cdecl * wine_get_version)(void) = nullptr;
 			const char * (__cdecl * wine_get_build_id)(void) = nullptr;
 			void (__cdecl * wine_get_host_version)(const char * *, const char * *) = nullptr;
-			m_NTDLL.Bind(wine_get_version, "wine_get_version");
-			m_NTDLL.Bind(wine_get_build_id, "wine_get_build_id");
-			m_NTDLL.Bind(wine_get_host_version, "wine_get_host_version");
+			(*m_NTDLL)->bind(wine_get_version, "wine_get_version");
+			(*m_NTDLL)->bind(wine_get_build_id, "wine_get_build_id");
+			(*m_NTDLL)->bind(wine_get_host_version, "wine_get_host_version");
 			const char * wine_version = nullptr;
 			const char * wine_build_id = nullptr;
 			const char * wine_host_sysname = nullptr;

@@ -87,7 +87,7 @@ class Context
 {
 protected:
 	mpt::OS::Wine::VersionContext m_VersionContext;
-	mpt::Library m_Kernel32;
+	std::shared_ptr<std::optional<mpt::library>> m_Kernel32;
 private:
 	LPWSTR (*CDECL wine_get_dos_file_name)(LPCSTR str);
 	LPSTR (*CDECL wine_get_unix_file_name)(LPCWSTR str);
@@ -109,7 +109,7 @@ public:
 	std::string GetPosixEnvVar(std::string var, std::string def = std::string());
 public:
 	mpt::OS::Wine::VersionContext VersionContext() const { return m_VersionContext; }
-	mpt::Library Kernel32() const { return m_Kernel32; }
+	std::shared_ptr<std::optional<mpt::library>> Kernel32() const { return m_Kernel32; }
 	std::string Uname_m() const { return m_Uname_m; }
 	std::string HOME() const { return m_HOME; }
 	std::string XDG_DATA_HOME() const { return m_XDG_DATA_HOME; }
@@ -123,7 +123,7 @@ public:
 } // namespace mpt
 
 
-#endif // MODPLUG_TRACKER
+#endif // MPT_OS_WINDOWS
 
 
 OPENMPT_NAMESPACE_END

@@ -11,6 +11,8 @@
 #include "stdafx.h"
 #include "mptLibrary.h"
 
+#include "mpt/library/library.hpp"
+
 #if defined(MODPLUG_TRACKER)
 #if MPT_OS_WINDOWS
 #include <windows.h>

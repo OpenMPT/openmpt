@@ -12,9 +12,10 @@
 
 #include "BuildSettings.h"
 
-#include "mptLibrary.h"
-
+#if defined(MODPLUG_TRACKER)
+#include "mpt/library/library.hpp"
 #include "mpt/osinfo/windows_version.hpp"
+#endif // MODPLUG_TRACKER
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -193,7 +194,7 @@ class VersionContext
 {
 protected:
 	bool m_IsWine;
-	mpt::Library m_NTDLL;
+	std::shared_ptr<std::optional<mpt::library>> m_NTDLL;
 	std::string m_RawVersion;
 	std::string m_RawBuildID;
 	std::string m_RawHostSysName;
@@ -204,7 +205,7 @@ public:
 	VersionContext();
 public:
 	bool IsWine() const { return m_IsWine; }
-	mpt::Library NTDLL() const { return m_NTDLL; }
+	std::shared_ptr<std::optional<mpt::library>> NTDLL() const { return m_NTDLL; }
 	std::string RawVersion() const { return m_RawVersion; }
 	std::string RawBuildID() const { return m_RawBuildID; }
 	std::string RawHostSysName() const { return m_RawHostSysName; }

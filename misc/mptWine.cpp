@@ -48,16 +48,16 @@ Context::Context(mpt::OS::Wine::VersionContext versionContext)
 	{
 		throw mpt::Wine::Exception("Unknown Wine version detected.");
 	}
-	m_Kernel32 = mpt::Library(mpt::LibraryPath::FullPath(P_("kernel32.dll")));
-	if(!m_Kernel32.IsValid())
+	m_Kernel32 = std::make_shared<std::optional<mpt::library>>(mpt::library::load({ mpt::library::path_search::system, mpt::library::path_prefix::none, MPT_PATH("kernel32.dll"), mpt::library::path_suffix::none }));
+	if(m_Kernel32->has_value())
 	{
 		throw mpt::Wine::Exception("Could not load Wine kernel32.dll.");
 	}
-	if(!m_Kernel32.Bind(wine_get_unix_file_name, "wine_get_unix_file_name"))
+	if((*m_Kernel32)->bind(wine_get_unix_file_name, "wine_get_unix_file_name"))
 	{
 		throw mpt::Wine::Exception("Could not bind Wine kernel32.dll:wine_get_unix_file_name.");
 	}
-	if(!m_Kernel32.Bind(wine_get_dos_file_name, "wine_get_dos_file_name"))
+	if((*m_Kernel32)->bind(wine_get_dos_file_name, "wine_get_dos_file_name"))
 	{
 		throw mpt::Wine::Exception("Could not bind Wine kernel32.dll:wine_get_dos_file_name.");
 	}

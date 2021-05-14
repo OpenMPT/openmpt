@@ -156,6 +156,12 @@
     <ClInclude Include="..\..\src\mpt\base\wrapping_divide.hpp">
       <Filter>src\mpt\base</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\mpt\detect\dl.hpp">
+      <Filter>src\mpt\detect</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\detect\ltdl.hpp">
+      <Filter>src\mpt\detect</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\mpt\detect\mfc.hpp">
       <Filter>src\mpt\detect</Filter>
     </ClInclude>
@@ -166,6 +172,9 @@
       <Filter>src\mpt\string</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\string\types.hpp">
+      <Filter>src\mpt\string</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\string\types_path.hpp">
       <Filter>src\mpt\string</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\string\utility.hpp">
