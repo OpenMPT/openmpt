@@ -47,7 +47,7 @@ CWaveDevice::CWaveDevice(mpt::log::ILogger &logger, SoundDevice::Info info, Soun
 	: CSoundDeviceWithThread(logger, info, sysInfo)
 	, m_DriverBugs(0)
 {
-	MPT_TRACE_SCOPE();
+	MPT_SOUNDDEV_TRACE_SCOPE();
 	m_ThreadWakeupEvent = NULL;
 	m_Failed = false;
 	m_hWaveOut = NULL;
@@ -64,7 +64,7 @@ CWaveDevice::CWaveDevice(mpt::log::ILogger &logger, SoundDevice::Info info, Soun
 
 CWaveDevice::~CWaveDevice()
 {
-	MPT_TRACE_SCOPE();
+	MPT_SOUNDDEV_TRACE_SCOPE();
 	Close();
 }
 
@@ -77,7 +77,7 @@ int CWaveDevice::GetDeviceIndex() const
 
 SoundDevice::Caps CWaveDevice::InternalGetDeviceCaps()
 {
-	MPT_TRACE_SCOPE();
+	MPT_SOUNDDEV_TRACE_SCOPE();
 	SoundDevice::Caps caps;
 	caps.Available = true;
 	caps.CanUpdateInterval = true;
@@ -108,7 +108,7 @@ SoundDevice::Caps CWaveDevice::InternalGetDeviceCaps()
 
 SoundDevice::DynamicCaps CWaveDevice::GetDeviceDynamicCaps(const std::vector<uint32> & /*baseSampleRates*/ )
 {
-	MPT_TRACE_SCOPE();
+	MPT_SOUNDDEV_TRACE_SCOPE();
 	SoundDevice::DynamicCaps caps;
 	if(GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::OS::Windows::Version::WinVista))
 	{
@@ -162,7 +162,7 @@ SoundDevice::DynamicCaps CWaveDevice::GetDeviceDynamicCaps(const std::vector<uin
 
 bool CWaveDevice::InternalOpen()
 {
-	MPT_TRACE_SCOPE();
+	MPT_SOUNDDEV_TRACE_SCOPE();
 	if(m_Settings.InputChannels > 0)
 	{
 		return false;
@@ -242,7 +242,7 @@ bool CWaveDevice::InternalOpen()
 
 bool CWaveDevice::InternalClose()
 {
-	MPT_TRACE_SCOPE();
+	MPT_SOUNDDEV_TRACE_SCOPE();
 	if(m_hWaveOut)
 	{
 		waveOutReset(m_hWaveOut);
@@ -282,7 +282,7 @@ bool CWaveDevice::InternalClose()
 
 void CWaveDevice::StartFromSoundThread()
 {
-	MPT_TRACE_SCOPE();
+	MPT_SOUNDDEV_TRACE_SCOPE();
 	if(m_hWaveOut)
 	{
 		{
@@ -298,7 +298,7 @@ void CWaveDevice::StartFromSoundThread()
 
 void CWaveDevice::StopFromSoundThread()
 {
-	MPT_TRACE_SCOPE();
+	MPT_SOUNDDEV_TRACE_SCOPE();
 	if(m_hWaveOut)
 	{
 		CheckResult(waveOutPause(m_hWaveOut));
@@ -359,7 +359,7 @@ bool CWaveDevice::CheckResult(MMRESULT result, DWORD param)
 
 void CWaveDevice::InternalFillAudioBuffer()
 {
-	MPT_TRACE_SCOPE();
+	MPT_SOUNDDEV_TRACE_SCOPE();
 	if(!m_hWaveOut)
 	{
 		return;
@@ -522,7 +522,7 @@ int64 CWaveDevice::InternalGetStreamPositionFrames() const
 
 void CWaveDevice::HandleWaveoutDone(WAVEHDR *hdr)
 {
-	MPT_TRACE_SCOPE();
+	MPT_SOUNDDEV_TRACE_SCOPE();
 #if (_WIN32_WINNT >= 0x0600)
 	DWORD flags = InterlockedOr(interlocked_access(&hdr->dwFlags), 0);
 #else
@@ -555,7 +555,7 @@ void CWaveDevice::HandleWaveoutDone(WAVEHDR *hdr)
 
 void CWaveDevice::WaveOutCallBack(HWAVEOUT, UINT uMsg, DWORD_PTR dwUser, DWORD_PTR param1, DWORD_PTR /* param2 */)
 {
-	MPT_TRACE_SCOPE();
+	MPT_SOUNDDEV_TRACE_SCOPE();
 	if((uMsg == WOM_DONE) && (dwUser))
 	{
 		CWaveDevice *that = (CWaveDevice *)dwUser;
@@ -576,7 +576,7 @@ SoundDevice::BufferAttributes CWaveDevice::InternalGetEffectiveBufferAttributes(
 
 SoundDevice::Statistics CWaveDevice::GetStatistics() const
 {
-	MPT_TRACE_SCOPE();
+	MPT_SOUNDDEV_TRACE_SCOPE();
 	SoundDevice::Statistics result;
 	result.InstantaneousLatency = InterlockedExchangeAdd(&m_nBuffersPending, 0) * m_nWaveBufferSize * 1.0 / m_Settings.GetBytesPerSecond();
 	result.LastUpdateInterval = 1.0 * m_nWaveBufferSize / m_Settings.GetBytesPerSecond();
@@ -595,7 +595,7 @@ SoundDevice::Statistics CWaveDevice::GetStatistics() const
 std::vector<SoundDevice::Info> CWaveDevice::EnumerateDevices(mpt::log::ILogger &logger, SoundDevice::SysInfo sysInfo)
 {
 	auto GetLogger = [&]() -> mpt::log::ILogger& { return logger; };
-	MPT_TRACE_SCOPE();
+	MPT_SOUNDDEV_TRACE_SCOPE();
 	std::vector<SoundDevice::Info> devices;
 	UINT numDevs = waveOutGetNumDevs();
 	for(UINT index = 0; index <= numDevs; ++index)

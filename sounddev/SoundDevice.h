@@ -27,6 +27,10 @@ OPENMPT_NAMESPACE_BEGIN
 namespace SoundDevice {
 
 
+#define MPT_SOUNDDEV_TRACE()       MPT_TRACE()
+#define MPT_SOUNDDEV_TRACE_SCOPE() MPT_TRACE_SCOPE()
+
+
 class IMessageReceiver
 {
 public:

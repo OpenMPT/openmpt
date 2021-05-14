@@ -350,7 +350,7 @@ bool CPortaudioDevice::OnIdle()
 
 SoundDevice::Statistics CPortaudioDevice::GetStatistics() const
 {
-	MPT_TRACE_SCOPE();
+	MPT_SOUNDDEV_TRACE_SCOPE();
 	SoundDevice::Statistics result;
 	result.InstantaneousLatency = m_CurrentRealLatency;
 	result.LastUpdateInterval = 1.0 * m_StatisticPeriodFrames / m_Settings.Samplerate;

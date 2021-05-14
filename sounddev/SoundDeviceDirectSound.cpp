@@ -541,7 +541,7 @@ SoundDevice::BufferAttributes CDSoundDevice::InternalGetEffectiveBufferAttribute
 
 SoundDevice::Statistics CDSoundDevice::GetStatistics() const
 {
-	MPT_TRACE_SCOPE();
+	MPT_SOUNDDEV_TRACE_SCOPE();
 	SoundDevice::Statistics result;
 	result.InstantaneousLatency = 1.0 * m_StatisticLatencyFrames.load() / m_Settings.Samplerate;
 	result.LastUpdateInterval = 1.0 * m_StatisticPeriodFrames.load() / m_Settings.Samplerate;

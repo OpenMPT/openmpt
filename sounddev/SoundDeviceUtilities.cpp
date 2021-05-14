@@ -92,7 +92,7 @@ bool FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat, const SoundDevic
 CAudioThread::CAudioThread(CSoundDeviceWithThread &SoundDevice)
 	: m_SoundDevice(SoundDevice)
 {
-	MPT_TRACE_SCOPE();
+	MPT_SOUNDDEV_TRACE_SCOPE();
 	m_MMCSSClass = mpt::ToWin(m_SoundDevice.m_AppInfo.BoostedThreadMMCSSClassVista);
 	m_WakeupInterval = 0.0;
 	m_hPlayThread = NULL;
@@ -111,7 +111,7 @@ CAudioThread::CAudioThread(CSoundDeviceWithThread &SoundDevice)
 
 CAudioThread::~CAudioThread()
 {
-	MPT_TRACE_SCOPE();
+	MPT_SOUNDDEV_TRACE_SCOPE();
 	if(m_hPlayThread != NULL)
 	{
 		SetEvent(m_hAudioThreadTerminateRequest);
@@ -145,7 +145,7 @@ CPriorityBooster::CPriorityBooster(SoundDevice::SysInfo sysInfo, bool boostPrior
 	, hTask(NULL)
 	, oldPriority(0)
 {
-	MPT_TRACE_SCOPE();
+	MPT_SOUNDDEV_TRACE_SCOPE();
 	#ifdef MPT_BUILD_DEBUG
 		m_BoostPriority = false;
 	#endif
@@ -168,7 +168,7 @@ CPriorityBooster::CPriorityBooster(SoundDevice::SysInfo sysInfo, bool boostPrior
 
 CPriorityBooster::~CPriorityBooster()
 {
-	MPT_TRACE_SCOPE();
+	MPT_SOUNDDEV_TRACE_SCOPE();
 	if(m_BoostPriority)
 	{
 #if (_WIN32_WINNT >= 0x600)
@@ -203,7 +203,7 @@ public:
 		: sleepSeconds(sleepSeconds_)
 	{
 
-		MPT_TRACE_SCOPE();
+		MPT_SOUNDDEV_TRACE_SCOPE();
 
 		sleepMilliseconds = static_cast<long>(sleepSeconds * 1000.0);
 		sleep100Nanoseconds = static_cast<int64>(sleepSeconds * 10000000.0);
@@ -250,7 +250,7 @@ public:
 
 	void Retrigger()
 	{
-		MPT_TRACE_SCOPE();
+		MPT_SOUNDDEV_TRACE_SCOPE();
 		if(!periodic_nt_timer)
 		{
 			LARGE_INTEGER dueTime;
@@ -261,7 +261,7 @@ public:
 
 	~CPeriodicWaker()
 	{
-		MPT_TRACE_SCOPE();
+		MPT_SOUNDDEV_TRACE_SCOPE();
 		if(periodic_nt_timer)
 		{
 			CancelWaitableTimer(sleepEvent);
@@ -279,7 +279,7 @@ DWORD WINAPI CAudioThread::AudioThreadWrapper(LPVOID user)
 }
 DWORD CAudioThread::AudioThread()
 {
-	MPT_TRACE_SCOPE();
+	MPT_SOUNDDEV_TRACE_SCOPE();
 
 	bool terminate = false;
 	while(!terminate)
@@ -353,14 +353,14 @@ DWORD CAudioThread::AudioThread()
 
 void CAudioThread::SetWakeupEvent(HANDLE ev)
 {
-	MPT_TRACE_SCOPE();
+	MPT_SOUNDDEV_TRACE_SCOPE();
 	m_hHardwareWakeupEvent = ev;
 }
 
 
 void CAudioThread::SetWakeupInterval(double seconds)
 {
-	MPT_TRACE_SCOPE();
+	MPT_SOUNDDEV_TRACE_SCOPE();
 	m_WakeupInterval = seconds;
 }
 
@@ -373,7 +373,7 @@ bool CAudioThread::IsActive()
 
 void CAudioThread::Activate()
 {
-	MPT_TRACE_SCOPE();
+	MPT_SOUNDDEV_TRACE_SCOPE();
 	if(InterlockedExchangeAdd(&m_AudioThreadActive, 0))
 	{
 		MPT_ASSERT_ALWAYS(false);
@@ -387,7 +387,7 @@ void CAudioThread::Activate()
 
 void CAudioThread::Deactivate()
 {
-	MPT_TRACE_SCOPE();
+	MPT_SOUNDDEV_TRACE_SCOPE();
 	if(!InterlockedExchangeAdd(&m_AudioThreadActive, 0))
 	{
 		MPT_ASSERT_ALWAYS(false);
@@ -413,28 +413,28 @@ CSoundDeviceWithThread::~CSoundDeviceWithThread()
 
 void CSoundDeviceWithThread::FillAudioBufferLocked()
 {
-	MPT_TRACE_SCOPE();
+	MPT_SOUNDDEV_TRACE_SCOPE();
 	SourceFillAudioBufferLocked();
 }
 
 
 void CSoundDeviceWithThread::SetWakeupEvent(HANDLE ev)
 {
-	MPT_TRACE_SCOPE();
+	MPT_SOUNDDEV_TRACE_SCOPE();
 	m_AudioThread.SetWakeupEvent(ev);
 }
 
 
 void CSoundDeviceWithThread::SetWakeupInterval(double seconds)
 {
-	MPT_TRACE_SCOPE();
+	MPT_SOUNDDEV_TRACE_SCOPE();
 	m_AudioThread.SetWakeupInterval(seconds);
 }
 
 
 bool CSoundDeviceWithThread::InternalStart()
 {
-	MPT_TRACE_SCOPE();
+	MPT_SOUNDDEV_TRACE_SCOPE();
 	m_AudioThread.Activate();
 	return true;
 }
@@ -442,7 +442,7 @@ bool CSoundDeviceWithThread::InternalStart()
 
 void CSoundDeviceWithThread::InternalStop()
 {
-	MPT_TRACE_SCOPE();
+	MPT_SOUNDDEV_TRACE_SCOPE();
 	m_AudioThread.Deactivate();
 }
 
