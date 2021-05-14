@@ -677,6 +677,7 @@ public:
 	Setting<ProcessPriorityClass> MiscProcessPriorityClass;
 	Setting<bool> MiscFlushFileBuffersOnSave;
 	Setting<bool> MiscCacheCompleteFileBeforeLoading;
+	Setting<bool> MiscUseSingleInstance;
 
 	// Sound Settings
 

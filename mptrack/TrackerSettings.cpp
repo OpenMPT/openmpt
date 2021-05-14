@@ -204,6 +204,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, MiscProcessPriorityClass(conf, U_("Misc"), U_("ProcessPriorityClass"), ProcessPriorityClassNORMAL)
 	, MiscFlushFileBuffersOnSave(conf, U_("Misc"), U_("FlushFileBuffersOnSave"), true)
 	, MiscCacheCompleteFileBeforeLoading(conf, U_("Misc"), U_("CacheCompleteFileBeforeLoading"), false)
+	, MiscUseSingleInstance(conf, U_("Misc"), U_("UseSingleInstance"), false)
 	// Sound Settings
 	, m_SoundShowRecordingSettings(false)
 	, m_SoundShowDeprecatedDevices(conf, U_("Sound Settings"), U_("ShowDeprecatedDevices"), false)

@@ -239,9 +239,7 @@ int CTrackApp::GetOpenDocumentCount() const
 std::vector<CModDoc *> CTrackApp::GetOpenDocuments() const
 {
 	std::vector<CModDoc *> documents;
-
-	CDocTemplate *pDocTmpl = GetModDocTemplate();
-	if(pDocTmpl)
+	if(auto *pDocTmpl = GetModDocTemplate())
 	{
 		POSITION pos = pDocTmpl->GetFirstDocPosition();
 		CDocument *pDoc;
@@ -907,8 +905,6 @@ BOOL CTrackApp::InitInstanceEarly(CMPTCommandLineInfo &cmdInfo)
 	ASSERT(nullptr == m_pDocManager); // no MPT_ASSERT here!
 	m_pDocManager = new CModDocManager();
 
-	IPCWindow::Open(m_hInstance);
-
 	if(IsDebuggerPresent() && cmdInfo.m_debugCrashHandler)
 	{
 		ExceptionHandler::useAnyCrashHandler = true;
@@ -1003,6 +999,13 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 	{
 		ExceptionHandler::ConfigureSystemHandler();
 	}
+
+	if(TrackerSettings::Instance().MiscUseSingleInstance && IPCWindow::SendToIPC(cmdInfo.m_fileNames))
+	{
+		ExitProcess(0);
+	}
+
+	IPCWindow::Open(m_hInstance);
 
 	m_pSongSettingsIniFile = new IniFileSettingsBackend(GetConfigPath() + P_("SongSettings.ini"));
 	m_pSongSettings = new SettingsContainer(m_pSongSettingsIniFile);
