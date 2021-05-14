@@ -218,6 +218,7 @@ public:
 		FreeLibrary(m_hModule);
 		m_hModule = other.m_hModule;
 		other.m_hModule = NULL;
+		return *this;
 	}
 
 private:
@@ -389,6 +390,7 @@ public:
 		dlclose(handle);
 		m_hModule = other.handle;
 		other.handle = NULL;
+		return *this;
 	}
 
 public:
@@ -439,6 +441,7 @@ public:
 		dlclose(handle);
 		m_hModule = other.handle;
 		other.handle = NULL;
+		return *this;
 	}
 
 public:
@@ -493,6 +496,7 @@ public:
 		dlclose(handle);
 		m_hModule = other.handle;
 		other.handle = NULL;
+		return *this;
 	}
 
 public:
