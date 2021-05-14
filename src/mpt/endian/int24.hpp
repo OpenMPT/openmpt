@@ -25,20 +25,22 @@ struct int24 {
 	std::array<std::byte, 3> bytes;
 	int24() = default;
 	explicit int24(int other) noexcept {
-		MPT_MAYBE_CONSTANT_IF (mpt::endian_is_big()) {
+		MPT_MAYBE_CONSTANT_IF(mpt::endian_is_big()) {
 			bytes[0] = mpt::byte_cast<std::byte>(static_cast<uint8>((static_cast<unsigned int>(other) >> 16) & 0xff));
 			bytes[1] = mpt::byte_cast<std::byte>(static_cast<uint8>((static_cast<unsigned int>(other) >> 8) & 0xff));
 			bytes[2] = mpt::byte_cast<std::byte>(static_cast<uint8>((static_cast<unsigned int>(other) >> 0) & 0xff));
-		} else {
+		}
+		else {
 			bytes[0] = mpt::byte_cast<std::byte>(static_cast<uint8>((static_cast<unsigned int>(other) >> 0) & 0xff));
 			bytes[1] = mpt::byte_cast<std::byte>(static_cast<uint8>((static_cast<unsigned int>(other) >> 8) & 0xff));
 			bytes[2] = mpt::byte_cast<std::byte>(static_cast<uint8>((static_cast<unsigned int>(other) >> 16) & 0xff));
 		}
 	}
 	operator int() const noexcept {
-		MPT_MAYBE_CONSTANT_IF (mpt::endian_is_big()) {
+		MPT_MAYBE_CONSTANT_IF(mpt::endian_is_big()) {
 			return (static_cast<int8>(mpt::byte_cast<uint8>(bytes[0])) * 65536) + (mpt::byte_cast<uint8>(bytes[1]) * 256) + mpt::byte_cast<uint8>(bytes[2]);
-		} else {
+		}
+		else {
 			return (static_cast<int8>(mpt::byte_cast<uint8>(bytes[2])) * 65536) + (mpt::byte_cast<uint8>(bytes[1]) * 256) + mpt::byte_cast<uint8>(bytes[0]);
 		}
 	}
