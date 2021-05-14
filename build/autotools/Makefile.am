@@ -158,6 +158,7 @@ MPT_FILES_SRC_MPT += src/mpt/crc/crc.hpp
 MPT_FILES_SRC_MPT += src/mpt/detect/mfc.hpp
 MPT_FILES_SRC_MPT += src/mpt/detect/nlohmann_json.hpp
 MPT_FILES_SRC_MPT += src/mpt/endian/floatingpoint.hpp
+MPT_FILES_SRC_MPT += src/mpt/endian/int24.hpp
 MPT_FILES_SRC_MPT += src/mpt/endian/integer.hpp
 MPT_FILES_SRC_MPT += src/mpt/environment/environment.hpp
 MPT_FILES_SRC_MPT += src/mpt/exception_text/exception_text.hpp

@@ -14,6 +14,7 @@
 
 #include "mpt/base/bit.hpp"
 #include "mpt/endian/floatingpoint.hpp"
+#include "mpt/endian/int24.hpp"
 #include "mpt/endian/integer.hpp"
 
 #include <algorithm>
@@ -66,37 +67,7 @@ using float64le_fast = mpt::IEEE754binary64LE;
 using float64be_fast = mpt::IEEE754binary64BE;
 
 
-
-// 24-bit integer wrapper (for 24-bit PCM)
-struct int24
-{
-	uint8 bytes[3];
-	int24() = default;
-	explicit int24(int32 other) noexcept
-	{
-		MPT_MAYBE_CONSTANT_IF(mpt::endian_is_big())
-		{
-			bytes[0] = (static_cast<unsigned int>(other)>>16)&0xff;
-			bytes[1] = (static_cast<unsigned int>(other)>> 8)&0xff;
-			bytes[2] = (static_cast<unsigned int>(other)>> 0)&0xff;
-		} else
-		{
-			bytes[0] = (static_cast<unsigned int>(other)>> 0)&0xff;
-			bytes[1] = (static_cast<unsigned int>(other)>> 8)&0xff;
-			bytes[2] = (static_cast<unsigned int>(other)>>16)&0xff;
-		}
-	}
-	operator int() const noexcept
-	{
-		MPT_MAYBE_CONSTANT_IF(mpt::endian_is_big())
-		{
-			return (static_cast<int8>(bytes[0]) * 65536) + (bytes[1] * 256) + bytes[2];
-		} else
-		{
-			return (static_cast<int8>(bytes[2]) * 65536) + (bytes[1] * 256) + bytes[0];
-		}
-	}
-};
+using int24 = mpt::int24;
 static_assert(sizeof(int24) == 3);
 inline constexpr int32 int24_min = (0 - 0x00800000);
 inline constexpr int32 int24_max = (0 + 0x007fffff);

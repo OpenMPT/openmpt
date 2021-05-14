@@ -393,6 +393,9 @@
     <ClInclude Include="..\..\src\mpt\endian\floatingpoint.hpp">
       <Filter>src\mpt\endian</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\mpt\endian\int24.hpp">
+      <Filter>src\mpt\endian</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\mpt\endian\integer.hpp">
       <Filter>src\mpt\endian</Filter>
     </ClInclude>

@@ -1447,6 +1447,7 @@
     <ClInclude Include="..\..\src\mpt\detect\mfc.hpp" />
     <ClInclude Include="..\..\src\mpt\detect\nlohmann_json.hpp" />
     <ClInclude Include="..\..\src\mpt\endian\floatingpoint.hpp" />
+    <ClInclude Include="..\..\src\mpt\endian\int24.hpp" />
     <ClInclude Include="..\..\src\mpt\endian\integer.hpp" />
     <ClInclude Include="..\..\src\mpt\endian\tests\tests_endian_floatingpoint.hpp" />
     <ClInclude Include="..\..\src\mpt\endian\tests\tests_endian_integer.hpp" />
