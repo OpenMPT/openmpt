@@ -220,7 +220,6 @@
 //#define MODPLUG_NO_FILESAVE
 
 // Disable any debug logging
-//#define NO_LOGGING
 #if !defined(MPT_BUILD_DEBUG) && !defined(MPT_BUILD_CHECKED) && !defined(MPT_BUILD_WINESUPPORT)
 #define MPT_LOG_GLOBAL_LEVEL_STATIC
 #define MPT_LOG_GLOBAL_LEVEL 0
@@ -294,7 +293,6 @@
 #else
 #define NO_ASSERTS
 #endif
-//#define NO_LOGGING
 //#define MPT_ALL_LOGGING
 //#define MPT_EXTERNAL_SAMPLES
 #if defined(ENABLE_TESTS) || defined(MPT_BUILD_HACK_ARCHIVE_SUPPORT)

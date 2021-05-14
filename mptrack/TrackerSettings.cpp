@@ -110,7 +110,7 @@ void SampleUndoBufferSize::CalculateSize()
 DebugSettings::DebugSettings(SettingsContainer &conf)
 	: conf(conf)
 	// Debug
-#if !defined(NO_LOGGING) && !defined(MPT_LOG_IS_DISABLED)
+#if !defined(MPT_LOG_IS_DISABLED)
 	, DebugLogLevel(conf, U_("Debug"), U_("LogLevel"), static_cast<int>(mpt::log::GlobalLogLevel))
 	, DebugLogFacilitySolo(conf, U_("Debug"), U_("LogFacilitySolo"), std::string())
 	, DebugLogFacilityBlocked(conf, U_("Debug"), U_("LogFacilityBlocked"), std::string())
@@ -132,7 +132,7 @@ DebugSettings::DebugSettings(SettingsContainer &conf)
 	ExceptionHandler::delegateToWindowsHandler = DebugDelegateToWindowsHandler;
 
 		// enable debug features (as early as possible after reading the settings)
-	#if !defined(NO_LOGGING) && !defined(MPT_LOG_IS_DISABLED)
+	#if !defined(MPT_LOG_IS_DISABLED)
 		#if !defined(MPT_LOG_GLOBAL_LEVEL_STATIC)
 			mpt::log::GlobalLogLevel = DebugLogLevel;
 		#endif

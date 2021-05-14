@@ -32,9 +32,6 @@ namespace mpt
 {
 namespace log
 {
-	
-
-#ifndef NO_LOGGING
 
 
 
@@ -182,11 +179,6 @@ void GlobalLogger::SendLogMessage(const mpt::source_location &loc, LogLevel leve
 	#endif // MODPLUG_TRACKER
 #endif // MPT_LOG_IS_DISABLED
 }
-
-
-
-
-#endif // !NO_LOGGING
 
 
 

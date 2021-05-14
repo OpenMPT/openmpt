@@ -23,11 +23,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 Build time logging configuration (in BuildSettings.h):
 
- *  #define NO_LOGGING
-    Disables all logging completely.
-    MPT_LOG calls are not even compiled but instead completely removed via the
-    preprocessor.
-
  *  #define MPT_LOG_GLOBAL_LEVEL_STATIC
     #define MPT_LOG_GLOBAL_LEVEL #
     Define the former (to anything) and the latter (to one of the log levels
@@ -104,12 +99,9 @@ namespace log
 
 
 
-#ifndef NO_LOGGING
-
-
 #if defined(MPT_LOG_GLOBAL_LEVEL_STATIC)
 #if (MPT_LOG_GLOBAL_LEVEL <= 0)
-// Logging framework is enabled (!NO_LOGGING) but all logging has beeen statically disabled.
+// All logging has beeen statically disabled.
 // All logging code gets compiled and immediately dead-code eliminated.
 #define MPT_LOG_IS_DISABLED
 #endif
@@ -129,12 +121,6 @@ bool IsFacilityActive(const char *facility) noexcept;
 MPT_FORCEINLINE bool IsFacilityActive(const char * /*facility*/ ) noexcept { return true; }
 #endif
 
-
-#endif // !NO_LOGGING
-
-
-
-#ifndef NO_LOGGING
 
 
 class ILogger
@@ -184,17 +170,6 @@ public:
 
 
 #define MPT_LOG_GLOBAL(level, facility, text) MPT_LOG(mpt::log::GlobalLogger{}, (level), (facility), (text))
-
-
-#else // !NO_LOGGING
-
-
-#define MPT_LOG(logger, level, facility, text) do { } while(0)
-
-#define MPT_LOG_GLOBAL(level, facility, text) do { } while(0)
-
-
-#endif // NO_LOGGING
 
 
 #if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS

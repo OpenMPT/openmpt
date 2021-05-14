@@ -588,7 +588,7 @@ private:
 
 	// Debug
 
-#if !defined(NO_LOGGING) && !defined(MPT_LOG_IS_DISABLED)
+#if !defined(MPT_LOG_IS_DISABLED)
 	Setting<int> DebugLogLevel;
 	Setting<std::string> DebugLogFacilitySolo;
 	Setting<std::string> DebugLogFacilityBlocked;
