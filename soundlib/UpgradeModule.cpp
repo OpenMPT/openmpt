@@ -577,7 +577,8 @@ void CSoundFile::UpgradeModule()
 			{ kFT2PortaUpDownMemory,         MPT_V("1.27.00.37") },
 			{ kFT2PanSustainRelease,         MPT_V("1.28.00.09") },
 			{ kFT2NoteDelayWithoutInstr,     MPT_V("1.28.00.44") },
-			{ kITFT2DontResetNoteOffOnPorta, MPT_V("1.29.00.34" )},
+			{ kITFT2DontResetNoteOffOnPorta, MPT_V("1.29.00.34") },
+			{ kFT2PortaResetDirection,       MPT_V("1.30.00.40") },
 		};
 
 		for(const auto &b : behaviours)

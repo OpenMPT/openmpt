@@ -538,6 +538,7 @@ enum PlayBehaviour
 	kOPLNoResetAtEnvelopeEnd,       // Do not reset OPL channel status at end of envelope (OpenMPT 1.28 inconsistency with samples)
 	kOPLNoteStopWith0Hz,            // Set note frequency to 0 Hz to "stop" OPL notes
 	kOPLNoteOffOnNoteChange,        // Send note-off events for old note on every note change
+	kFT2PortaResetDirection,        // Reset portamento direction when reaching portamento target from below
 
 	// Add new play behaviours here.
 

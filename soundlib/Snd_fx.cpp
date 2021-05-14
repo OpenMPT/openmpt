@@ -1807,6 +1807,7 @@ void CSoundFile::NoteChange(ModChannel &chn, int note, bool bPorta, bool bResetE
 			if(bPorta || !(m_playBehaviour[kFT2PortaTargetNoReset] || m_playBehaviour[kITClearPortaTarget] || GetType() == MOD_TYPE_MOD))
 			{
 				chn.nPortamentoDest = period;
+				chn.portaTargetReached = false;
 			}
 		}
 
@@ -4057,7 +4058,7 @@ void CSoundFile::TonePortamento(ModChannel &chn, uint16 param) const
 		delta *= (GetType() == MOD_TYPE_669) ? 2 : 4;
 		if(!PeriodsAreFrequencies())
 			delta = -delta;
-		if(chn.nPeriod < chn.nPortamentoDest)
+		if(chn.nPeriod < chn.nPortamentoDest || chn.portaTargetReached)
 		{
 			DoFreqSlide(chn, chn.nPeriod, delta, true);
 			if(chn.nPeriod > chn.nPortamentoDest)
@@ -4067,6 +4068,10 @@ void CSoundFile::TonePortamento(ModChannel &chn, uint16 param) const
 			DoFreqSlide(chn, chn.nPeriod, -delta, true);
 			if(chn.nPeriod < chn.nPortamentoDest)
 				chn.nPeriod = chn.nPortamentoDest;
+			// FT2 compatibility: Reaching portamento target from below forces subsequent portamentos on the same note to use the logic for reaching the note from above instead.
+			// Test case: PortaResetDirection.xm
+			if(chn.nPeriod == chn.nPortamentoDest && m_playBehaviour[kFT2PortaResetDirection])
+				chn.portaTargetReached = true;
 		}
 	}
 

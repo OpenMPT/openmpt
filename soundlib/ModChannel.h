@@ -123,6 +123,7 @@ struct ModChannel
 	bool isFirstTick : 1;
 	bool isPreviewNote : 1;
 	bool isPaused : 1;
+	bool portaTargetReached : 1;
 
 	//-->Variables used to make user-definable tuning modes work with pattern effects.
 	//If true, freq should be recalculated in ReadNote() on first tick.
