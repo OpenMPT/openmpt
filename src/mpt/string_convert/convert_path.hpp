@@ -83,7 +83,7 @@ struct string_converter<std::filesystem::path> {
 #if MPT_OS_WINDOWS && !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
 			return std::filesystem::path{mpt::convert<std::wstring>(src)};
 #elif MPT_OS_WINDOWS
-			return std::filesystem::path{ pt::convert<std::string>(mpt::logical_encoding::locale, src)};
+			return std::filesystem::path{pt::convert<std::string>(mpt::logical_encoding::locale, src)};
 #else
 			// completely unknown implementation, assume it can sanely convert to/from UTF16/UTF32
 			if constexpr (sizeof(mpt::widechar) == sizeof(char32_t)) {

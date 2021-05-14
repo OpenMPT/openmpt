@@ -40,11 +40,11 @@ inline namespace MPT_INLINE_NS {
 class library {
 
 public:
-
-	typedef void * (* func_ptr)(); // pointer to function returning void *
+	typedef void * (*func_ptr)(); // pointer to function returning void *
 	static_assert(sizeof(func_ptr) == sizeof(void *));
 
-	enum class path_search {
+	enum class path_search
+	{
 		invalid,
 		unsafe,
 		default_,
@@ -53,12 +53,14 @@ public:
 		none,
 	};
 
-	enum class path_prefix {
+	enum class path_prefix
+	{
 		none,
 		default_,
 	};
 
-	enum class path_suffix {
+	enum class path_suffix
+	{
 		none,
 		default_,
 	};
@@ -66,7 +68,6 @@ public:
 	struct path {
 
 	public:
-
 		path_search search = path_search::invalid;
 		path_prefix prefix = path_prefix::default_;
 		std::filesystem::path filename{};
@@ -162,28 +163,28 @@ public:
 
 		std::optional<std::filesystem::path> get_effective_filename() const {
 			switch (search) {
-			case library::path_search::unsafe:
-				break;
-			case library::path_search::default_:
-				break;
-			case library::path_search::system:
-				if (filename.is_absolute()) {
+				case library::path_search::unsafe:
+					break;
+				case library::path_search::default_:
+					break;
+				case library::path_search::system:
+					if (filename.is_absolute()) {
+						return std::nullopt;
+					}
+					break;
+				case library::path_search::application:
+					if (filename.is_absolute()) {
+						return std::nullopt;
+					}
+					break;
+				case library::path_search::none:
+					if (filename.is_relative()) {
+						return std::nullopt;
+					}
+					break;
+				case library::path_search::invalid:
 					return std::nullopt;
-				}
-				break;
-			case library::path_search::application:
-				if (filename.is_absolute()) {
-					return std::nullopt;
-				}
-				break;
-			case library::path_search::none:
-				if (filename.is_relative()) {
-					return std::nullopt;
-				}
-				break;
-			case library::path_search::invalid:
-				return std::nullopt;
-				break;
+					break;
 			}
 			std::filesystem::path result{};
 			result += filename.parent_path();
@@ -192,29 +193,24 @@ public:
 			result += ((suffix == path_suffix::default_) ? default_suffix() : std::filesystem::path{});
 			return result;
 		}
-
 	};
 
 #if MPT_OS_WINDOWS
 
 private:
-
 	HMODULE m_hModule = NULL;
 
 	library(HMODULE hModule)
-		: m_hModule(hModule)
-	{
+		: m_hModule(hModule) {
 		return;
 	}
 
 public:
-
 	library(const library &) = delete;
 	library & operator=(const library &) = delete;
 
 	library(library && other) noexcept
-		: m_hModule(other.m_hModule)
-	{
+		: m_hModule(other.m_hModule) {
 		other.m_hModule = NULL;
 	}
 
@@ -225,7 +221,6 @@ public:
 	}
 
 private:
-
 #if !MPT_OS_WINDOWS_WINRT
 #if (_WIN32_WINNT < 0x0602)
 
@@ -253,9 +248,8 @@ private:
 #endif // !MPT_OS_WINDOWS_WINRT
 
 public:
-
 	static std::optional<library> load(mpt::library::path path) {
-		
+
 		HMODULE hModule = NULL;
 
 		std::optional<std::filesystem::path> optionalfilename = path.get_effective_filename();
@@ -272,89 +266,89 @@ public:
 #if (_WIN32_WINNT < 0x0602)
 		MPT_UNUSED(path);
 		return std::nullopt;
-#else // Windows 8
+#else  // Windows 8
 		switch (path.search) {
-		case library::path_search::unsafe:
-			hModule = LoadPackagedLibrary(mpt::convert<mpt::winstring>(filename).c_str(), 0);
-			break;
-		case library::path_search::default_:
-			hModule = LoadPackagedLibrary(mpt::convert<mpt::winstring>(filename).c_str(), 0);
-			break;
-		case library::path_search::system:
-			hModule = NULL; // Only application packaged libraries can be loaded dynamically in WinRT
-			break;
-		case library::path_search::application:
-			hModule = LoadPackagedLibrary(mpt::convert<mpt::winstring>(filename).c_str(), 0);
-			break;
-		case library::path_search::none:
-			hModule = NULL; // Absolute path is not supported in WinRT
-			break;
-		case library::path_search::invalid:
-			hModule = NULL;
-			break;
+			case library::path_search::unsafe:
+				hModule = LoadPackagedLibrary(mpt::convert<mpt::winstring>(filename).c_str(), 0);
+				break;
+			case library::path_search::default_:
+				hModule = LoadPackagedLibrary(mpt::convert<mpt::winstring>(filename).c_str(), 0);
+				break;
+			case library::path_search::system:
+				hModule = NULL; // Only application packaged libraries can be loaded dynamically in WinRT
+				break;
+			case library::path_search::application:
+				hModule = LoadPackagedLibrary(mpt::convert<mpt::winstring>(filename).c_str(), 0);
+				break;
+			case library::path_search::none:
+				hModule = NULL; // Absolute path is not supported in WinRT
+				break;
+			case library::path_search::invalid:
+				hModule = NULL;
+				break;
 		}
 #endif // Windows Version
 
 #else // !MPT_OS_WINDOWS_WINRT
 
-#if (_WIN32_WINNT >= 0x0602)  // Windows 8
+#if (_WIN32_WINNT >= 0x0602) // Windows 8
 
 		switch (path.search) {
-		case library::path_search::unsafe:
-			hModule = LoadLibrary(mpt::convert<mpt::winstring>(filename).c_str());
-			break;
-		case library::path_search::default_:
-			hModule = LoadLibraryEx(mpt::convert<mpt::winstring>(filename).c_str(), NULL, LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
-			break;
-		case library::path_search::system:
-			hModule = LoadLibraryEx(mpt::convert<mpt::winstring>(filename).c_str(), NULL, LOAD_LIBRARY_SEARCH_SYSTEM32);
-			break;
-		case library::path_search::application:
-			hModule = LoadLibraryEx(mpt::convert<mpt::winstring>(filename).c_str(), NULL, LOAD_LIBRARY_SEARCH_APPLICATION_DIR);
-			break;
-		case library::path_search::none:
-			hModule = LoadLibraryEx(mpt::convert<mpt::winstring>(filename).c_str(), NULL, LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR);
-			break;
-		case library::path_search::invalid:
-			hModule = NULL;
-			break;
+			case library::path_search::unsafe:
+				hModule = LoadLibrary(mpt::convert<mpt::winstring>(filename).c_str());
+				break;
+			case library::path_search::default_:
+				hModule = LoadLibraryEx(mpt::convert<mpt::winstring>(filename).c_str(), NULL, LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
+				break;
+			case library::path_search::system:
+				hModule = LoadLibraryEx(mpt::convert<mpt::winstring>(filename).c_str(), NULL, LOAD_LIBRARY_SEARCH_SYSTEM32);
+				break;
+			case library::path_search::application:
+				hModule = LoadLibraryEx(mpt::convert<mpt::winstring>(filename).c_str(), NULL, LOAD_LIBRARY_SEARCH_APPLICATION_DIR);
+				break;
+			case library::path_search::none:
+				hModule = LoadLibraryEx(mpt::convert<mpt::winstring>(filename).c_str(), NULL, LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR);
+				break;
+			case library::path_search::invalid:
+				hModule = NULL;
+				break;
 		}
 
 #else // < Windows 8
 
 		switch (path.search) {
-		case library::path_search::unsafe:
-			hModule = LoadLibrary(mpt::convert<mpt::winstring>(filename).c_str());
-			break;
-		case library::path_search::default_:
-			hModule = LoadLibrary(mpt::convert<mpt::winstring>(filename).c_str());
-			break;
-		case library::path_search::system:
-			{
-				std::filesystem::path system_path = get_system_path();
-				if (system_path.empty()) {
-					hModule = NULL;
-				} else {
-					hModule = LoadLibrary(mpt::convert<mpt::winstring>(system_path / filename).c_str());
+			case library::path_search::unsafe:
+				hModule = LoadLibrary(mpt::convert<mpt::winstring>(filename).c_str());
+				break;
+			case library::path_search::default_:
+				hModule = LoadLibrary(mpt::convert<mpt::winstring>(filename).c_str());
+				break;
+			case library::path_search::system:
+				{
+					std::filesystem::path system_path = get_system_path();
+					if (system_path.empty()) {
+						hModule = NULL;
+					} else {
+						hModule = LoadLibrary(mpt::convert<mpt::winstring>(system_path / filename).c_str());
+					}
 				}
-			}
-			break;
-		case library::path_search::application:
-			{
-				std::filesystem::path application_path = get_application_path();
-				if (application_path.empty()) {
-					hModule = NULL;
-				} else {
-					hModule = LoadLibrary(mpt::convert<mpt::winstring>(application_path / filename).c_str());
+				break;
+			case library::path_search::application:
+				{
+					std::filesystem::path application_path = get_application_path();
+					if (application_path.empty()) {
+						hModule = NULL;
+					} else {
+						hModule = LoadLibrary(mpt::convert<mpt::winstring>(application_path / filename).c_str());
+					}
 				}
-			}
-			break;
-		case library::path_search::none:
-			hModule = LoadLibrary(mpt::convert<mpt::winstring>(filename).c_str());
-			break;
-		case library::path_search::invalid:
-			hModule = NULL;
-			break;
+				break;
+			case library::path_search::none:
+				hModule = LoadLibrary(mpt::convert<mpt::winstring>(filename).c_str());
+				break;
+			case library::path_search::invalid:
+				hModule = NULL;
+				break;
 		}
 
 #endif // MPT_OS_WINDOWS_WINRT
@@ -362,7 +356,6 @@ public:
 #endif
 
 		return library{hModule};
-
 	}
 
 	func_ptr get_address(const std::string & symbol) const {
@@ -376,23 +369,19 @@ public:
 #elif defined(MPT_WITH_DL)
 
 private:
-
 	void * handle = nullptr;
 
 	library(void * handle_)
-		: handle(handle_)
-	{
+		: handle(handle_) {
 		return;
 	}
 
 public:
-
 	library(const library &) = delete;
 	library & operator=(const library &) = delete;
 
 	library(library && other) noexcept
-		: handle(other.handle)
-	{
+		: handle(other.handle) {
 		other.handle = NULL;
 	}
 
@@ -401,8 +390,8 @@ public:
 		m_hModule = other.handle;
 		other.handle = NULL;
 	}
-public:
 
+public:
 	static std::optional<library> load(mpt::library::path path) {
 		std::optional<std::filesystem::path> optionalfilename = path.get_effective_filename();
 		if (!optionalfilename) {
@@ -430,23 +419,19 @@ public:
 #elif defined(MPT_WITH_LTDL)
 
 private:
-
 	lt_dlhandle handle{};
 
 	library(lt_dlhandle handle_)
-		: handle(handle_)
-	{
+		: handle(handle_) {
 		return;
 	}
 
 public:
-
 	library(const library &) = delete;
 	library & operator=(const library &) = delete;
 
 	library(library && other) noexcept
-		: handle(other.handle)
-	{
+		: handle(other.handle) {
 		other.handle = NULL;
 	}
 
@@ -455,8 +440,8 @@ public:
 		m_hModule = other.handle;
 		other.handle = NULL;
 	}
-public:
 
+public:
 	static std::optional<library> load(mpt::library::path path) {
 		if (lt_dlinit() != 0) {
 			return std::nullopt;
@@ -488,23 +473,19 @@ public:
 #else
 
 private:
-
 	void * handle = nullptr;
 
 	library(lt_dlhandle handle_)
-		: handle(handle_)
-	{
+		: handle(handle_) {
 		return;
 	}
 
 public:
-
 	library(const library &) = delete;
 	library & operator=(const library &) = delete;
 
 	library(library && other) noexcept
-		: handle(other.handle)
-	{
+		: handle(other.handle) {
 		other.handle = NULL;
 	}
 
@@ -515,7 +496,6 @@ public:
 	}
 
 public:
-
 	static std::optional<library> load(mpt::library::path path) {
 		MPT_UNUSED(path);
 		return std::nullopt;
@@ -524,7 +504,7 @@ public:
 	func_ptr get_address(const std::string & symbol) const {
 		MPT_UNUSED(symbol);
 		return nullptr;
-}
+	}
 
 	~library() {
 		return;
@@ -533,7 +513,7 @@ public:
 #endif
 
 	template <typename Tfunc>
-	bool bind(Tfunc * & f, const std::string & symbol) const {
+	bool bind(Tfunc *& f, const std::string & symbol) const {
 #if !(MPT_OS_WINDOWS && MPT_COMPILER_GCC)
 		// MinGW64 std::is_function is always false for non __cdecl functions.
 		// Issue is similar to <https://connect.microsoft.com/VisualStudio/feedback/details/774720/stl-is-function-bug>.
@@ -543,7 +523,6 @@ public:
 		f = reinterpret_cast<Tfunc *>(addr);
 		return (addr != nullptr);
 	}
-
 };
 
 
