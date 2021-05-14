@@ -18,6 +18,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
+// LxxxLxxxLxxxLxxxLxxx xRxxxRxxxRxxxRxxxRxx
 template <typename SampleType>
 struct audio_span_planar_strided
 {
@@ -82,6 +83,7 @@ public:
 };
 
 
+// LLLLL RRRRR
 template <typename SampleType>
 struct audio_span_planar
 {
@@ -144,6 +146,7 @@ public:
 };
 
 
+// LLLLLRRRRR
 template <typename SampleType>
 struct audio_span_contiguous
 {
@@ -206,6 +209,7 @@ public:
 };
 
 
+// LRLRLRLRLR
 template <typename SampleType>
 struct audio_span_interleaved
 {
@@ -271,19 +275,29 @@ public:
 struct audio_span_frames_are_contiguous_t
 {
 };
+
 struct audio_span_channels_are_contiguous_t
 {
 };
+
 struct audio_span_channels_are_planar_t
 {
 };
+
 struct audio_span_channels_are_planar_and_strided_t
 {
 };
 
+// LRLRLRLRLR
 inline constexpr audio_span_frames_are_contiguous_t audio_span_frames_are_contiguous;
+
+// LLLLLRRRRR
 inline constexpr audio_span_channels_are_contiguous_t audio_span_channels_are_contiguous;
+
+// LLLLL RRRRR
 inline constexpr audio_span_channels_are_planar_t audio_span_channels_are_planar;
+
+// LxxxLxxxLxxxLxxxLxxx xRxxxRxxxRxxxRxxxRxx
 inline constexpr audio_span_channels_are_planar_and_strided_t audio_span_channels_are_planar_and_strided;
 
 template <typename SampleType>
