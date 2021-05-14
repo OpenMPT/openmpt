@@ -4,7 +4,7 @@
  * Purpose: IMF (Imago Orpheus) module loader
  * Notes  : Reverb and Chorus are not supported.
  * Authors: Storlek (Original author - http://schismtracker.org/ - code ported with permission)
- *			Johannes Schultz (OpenMPT Port, tweaks)
+ *          Johannes Schultz (OpenMPT Port, tweaks)
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 

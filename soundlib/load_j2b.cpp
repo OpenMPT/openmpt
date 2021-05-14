@@ -6,7 +6,7 @@
  *          It seems like no other game used the AM(FF) format.
  *          RIFF AM is the newer version of the format, generally following the RIFF "standard" closely.
  * Authors: Johannes Schultz (OpenMPT port, reverse engineering + loader implementation of the instrument format)
- *          Chris Moeller (foo_dumb - this is almost a complete port of his code, thanks)
+ *          kode54 (foo_dumb - this is almost a complete port of his code, thanks)
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 

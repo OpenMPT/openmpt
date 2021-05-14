@@ -1,5 +1,5 @@
 /*
- * ctrl_pat.h
+ * Ctrl_pat.h
  * ----------
  * Purpose: Pattern tab, upper panel.
  * Notes  : (currently none)

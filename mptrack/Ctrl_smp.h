@@ -1,5 +1,5 @@
 /*
- * ctrl_smp.h
+ * Ctrl_smp.h
  * ----------
  * Purpose: Sample tab, upper panel.
  * Notes  : (currently none)

@@ -1,5 +1,5 @@
 /*
- * ctrl_com.h
+ * Ctrl_com.h
  * ----------
  * Purpose: Song comments tab, upper panel.
  * Notes  : (currently none)
