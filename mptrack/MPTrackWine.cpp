@@ -98,6 +98,8 @@ static mpt::crc64_jones WineHashVersion(mpt::crc64_jones crc)
 	std::string s;
 	s += mpt::ToCharset(mpt::Charset::UTF8, Build::GetVersionStringExtended());
 	s += " ";
+	s += mpt::ToCharset(mpt::Charset::UTF8, mpt::OS::Windows::Name(mpt::OS::Windows::GetProcessArchitecture()));
+	s += " ";
 	s += mpt::ToCharset(mpt::Charset::UTF8, SourceInfo::Current().GetUrlWithRevision());
 	s += " ";
 	s += mpt::ToCharset(mpt::Charset::UTF8, SourceInfo::Current().GetStateString());
@@ -318,7 +320,7 @@ void Initialize()
 			std::string GetOpenMPTVersion() const
 			{
 				std::string ver;
-				ver += mpt::String::Replace(mpt::ToCharset(mpt::Charset::UTF8, Build::GetVersionStringPure()), std::string(" "), std::string("_"));
+				ver += mpt::ToCharset(mpt::Charset::UTF8, Build::GetVersionStringPure() + U_("_") + mpt::OS::Windows::Name(mpt::OS::Windows::GetProcessArchitecture()));
 				mpt::crc64_jones crc;
 				crc = WineHashVersion(crc);
 				crc = WineHashFile(crc, theApp.GetInstallPath() + WineGetSupportZipFilename());

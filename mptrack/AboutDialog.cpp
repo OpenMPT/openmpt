@@ -249,7 +249,7 @@ BOOL CAboutDlg::OnInitDialog()
 	CDialog::OnInitDialog();
 
 	mpt::ustring app;
-	app += MPT_UFORMAT("OpenMPT{} ({}) ({} bit)")(
+	app += MPT_UFORMAT("OpenMPT{} ({} ({} bit))")(
 			BuildVariants().GetBuildVariantDescription(BuildVariants().GetBuildVariant()),
 			mpt::OS::Windows::Name(mpt::OS::Windows::GetProcessArchitecture()),
 			mpt::arch_bits)

@@ -295,8 +295,9 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 	}
 
 	errorMessage += UL_("\n\n");
-	errorMessage += MPT_UFORMAT("OpenMPT {} ({} ({}))")
+	errorMessage += MPT_UFORMAT("OpenMPT {} {} ({} ({}))")
 		( Build::GetVersionStringExtended()
+		, mpt::OS::Windows::Name(mpt::OS::Windows::GetProcessArchitecture())
 		, SourceInfo::Current().GetUrlWithRevision()
 		, SourceInfo::Current().GetStateString()
 		);
