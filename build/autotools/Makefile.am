@@ -244,6 +244,7 @@ MPT_FILES_COMMON += common/mptIO.cpp
 MPT_FILES_COMMON += common/mptIO.h
 MPT_FILES_COMMON += common/mptLibrary.cpp
 MPT_FILES_COMMON += common/mptLibrary.h
+MPT_FILES_COMMON += common/mptLog.h
 MPT_FILES_COMMON += common/mptMemory.h
 MPT_FILES_COMMON += common/mptMutex.h
 MPT_FILES_COMMON += common/mptOS.cpp

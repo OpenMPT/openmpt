@@ -1498,6 +1498,7 @@
     <ClInclude Include="..\..\common\mptFileIO.h" />
     <ClInclude Include="..\..\common\mptIO.h" />
     <ClInclude Include="..\..\common\mptLibrary.h" />
+    <ClInclude Include="..\..\common\mptLog.h" />
     <ClInclude Include="..\..\common\mptMemory.h" />
     <ClInclude Include="..\..\common\mptMutex.h" />
     <ClInclude Include="..\..\common\mptOS.h" />
