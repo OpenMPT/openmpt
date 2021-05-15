@@ -11,6 +11,7 @@
 #include "mpt/base/namespace.hpp"
 
 #include <array>
+#include <type_traits>
 
 #include <cstddef>
 
@@ -24,16 +25,18 @@ inline namespace MPT_INLINE_NS {
 struct int24 {
 	std::array<std::byte, 3> bytes;
 	int24() = default;
-	explicit int24(int other) noexcept {
+	template <typename T, typename std::enable_if<std::is_integral<T>::value,	bool>::type = true>
+	explicit int24(T other) noexcept {
+		using Tunsigned = typename std::make_unsigned<T>::type;
 		MPT_MAYBE_CONSTANT_IF(mpt::endian_is_big()) {
-			bytes[0] = mpt::byte_cast<std::byte>(static_cast<uint8>((static_cast<unsigned int>(other) >> 16) & 0xff));
-			bytes[1] = mpt::byte_cast<std::byte>(static_cast<uint8>((static_cast<unsigned int>(other) >> 8) & 0xff));
-			bytes[2] = mpt::byte_cast<std::byte>(static_cast<uint8>((static_cast<unsigned int>(other) >> 0) & 0xff));
+			bytes[0] = mpt::byte_cast<std::byte>(static_cast<uint8>((static_cast<Tunsigned>(other) >> 16) & 0xff));
+			bytes[1] = mpt::byte_cast<std::byte>(static_cast<uint8>((static_cast<Tunsigned>(other) >> 8) & 0xff));
+			bytes[2] = mpt::byte_cast<std::byte>(static_cast<uint8>((static_cast<Tunsigned>(other) >> 0) & 0xff));
 		}
 		else {
-			bytes[0] = mpt::byte_cast<std::byte>(static_cast<uint8>((static_cast<unsigned int>(other) >> 0) & 0xff));
-			bytes[1] = mpt::byte_cast<std::byte>(static_cast<uint8>((static_cast<unsigned int>(other) >> 8) & 0xff));
-			bytes[2] = mpt::byte_cast<std::byte>(static_cast<uint8>((static_cast<unsigned int>(other) >> 16) & 0xff));
+			bytes[0] = mpt::byte_cast<std::byte>(static_cast<uint8>((static_cast<Tunsigned>(other) >> 0) & 0xff));
+			bytes[1] = mpt::byte_cast<std::byte>(static_cast<uint8>((static_cast<Tunsigned>(other) >> 8) & 0xff));
+			bytes[2] = mpt::byte_cast<std::byte>(static_cast<uint8>((static_cast<Tunsigned>(other) >> 16) & 0xff));
 		}
 	}
 	operator int() const noexcept {
