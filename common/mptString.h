@@ -12,11 +12,11 @@
 
 #include "mptBuildSettings.h"
 
+#include "mpt/base/alloc.hpp"
 #include "mpt/base/span.hpp"
 #include "mpt/string/types.hpp"
 #include "mpt/string/utility.hpp"
 
-#include "mptAlloc.h"
 #include "mptBaseTypes.h"
 
 #include <algorithm>

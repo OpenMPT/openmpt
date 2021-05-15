@@ -13,7 +13,7 @@
 
 #include "mptBuildSettings.h"
 
-
+#include "mptAssert.h"
 #include "../common/Endianness.h"
 #include <algorithm>
 #include <array>

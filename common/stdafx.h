@@ -71,6 +71,10 @@
 #include "mpt/system_error/system_error.hpp"
 
 
+#include <memory>
+#include <new>
+
+
 // this will be available everywhere
 
 #include "../common/mptBaseMacros.h"
@@ -105,16 +109,6 @@
 // <utility>
 // <type_traits>
 // <cstring>
-
-#include "../common/mptAlloc.h"
-// "mptBaseMacros.h"
-// "mptMemory.h"
-// #include "mpt/base/span.hpp"
-// <version>
-// <array>
-// <memory>
-// <new>
-// <vector>
 
 #include "../common/mptString.h"
 // <algorithm>

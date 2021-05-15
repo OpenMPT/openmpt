@@ -683,6 +683,7 @@
     <ClInclude Include="..\..\pluginBridge\BridgeCommon.h" />
     <ClInclude Include="..\..\pluginBridge\BridgeOpCodes.h" />
     <ClInclude Include="..\..\src\mpt\base\algorithm.hpp" />
+    <ClInclude Include="..\..\src\mpt\base\aligned_array.hpp" />
     <ClInclude Include="..\..\src\mpt\base\alloc.hpp" />
     <ClInclude Include="..\..\src\mpt\base\arithmetic_shift.hpp" />
     <ClInclude Include="..\..\src\mpt\base\array.hpp" />

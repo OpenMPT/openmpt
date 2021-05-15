@@ -13,7 +13,7 @@
 #include "mptBuildSettings.h"
 
 
-
+#include "mpt/base/source_location.hpp"
 #include "mptBaseMacros.h"
 
 

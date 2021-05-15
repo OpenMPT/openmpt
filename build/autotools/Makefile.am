@@ -114,6 +114,7 @@ nobase_include_HEADERS =
 
 MPT_FILES_SRC_MPT = 
 MPT_FILES_SRC_MPT += src/mpt/base/algorithm.hpp
+MPT_FILES_SRC_MPT += src/mpt/base/aligned_array.hpp
 MPT_FILES_SRC_MPT += src/mpt/base/alloc.hpp
 MPT_FILES_SRC_MPT += src/mpt/base/arithmetic_shift.hpp
 MPT_FILES_SRC_MPT += src/mpt/base/array.hpp
@@ -233,7 +234,6 @@ MPT_FILES_COMMON += common/FlagSet.h
 MPT_FILES_COMMON += common/Logging.cpp
 MPT_FILES_COMMON += common/Logging.h
 MPT_FILES_COMMON += common/misc_util.h
-MPT_FILES_COMMON += common/mptAlloc.h
 MPT_FILES_COMMON += common/mptAssert.h
 MPT_FILES_COMMON += common/mptBaseMacros.h
 MPT_FILES_COMMON += common/mptBaseTypes.h

@@ -63,6 +63,9 @@
     <ClInclude Include="..\..\src\mpt\base\algorithm.hpp">
       <Filter>src\mpt\base</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\mpt\base\aligned_array.hpp">
+      <Filter>src\mpt\base</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\mpt\base\alloc.hpp">
       <Filter>src\mpt\base</Filter>
     </ClInclude>

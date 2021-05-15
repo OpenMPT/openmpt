@@ -586,7 +586,6 @@
     <ClInclude Include="..\..\common\Logging.h" />
     <ClInclude Include="..\..\common\Profiler.h" />
     <ClInclude Include="..\..\common\misc_util.h" />
-    <ClInclude Include="..\..\common\mptAlloc.h" />
     <ClInclude Include="..\..\common\mptAssert.h" />
     <ClInclude Include="..\..\common\mptBaseMacros.h" />
     <ClInclude Include="..\..\common\mptBaseTypes.h" />
@@ -702,6 +701,7 @@
     <ClInclude Include="..\..\soundlib\tuningbase.h" />
     <ClInclude Include="..\..\soundlib\tuningcollection.h" />
     <ClInclude Include="..\..\src\mpt\base\algorithm.hpp" />
+    <ClInclude Include="..\..\src\mpt\base\aligned_array.hpp" />
     <ClInclude Include="..\..\src\mpt\base\alloc.hpp" />
     <ClInclude Include="..\..\src\mpt\base\arithmetic_shift.hpp" />
     <ClInclude Include="..\..\src\mpt\base\array.hpp" />

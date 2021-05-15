@@ -1326,6 +1326,7 @@
     <ClInclude Include="..\..\openmpt123\openmpt123_stdout.hpp" />
     <ClInclude Include="..\..\openmpt123\openmpt123_waveout.hpp" />
     <ClInclude Include="..\..\src\mpt\base\algorithm.hpp" />
+    <ClInclude Include="..\..\src\mpt\base\aligned_array.hpp" />
     <ClInclude Include="..\..\src\mpt\base\alloc.hpp" />
     <ClInclude Include="..\..\src\mpt\base\arithmetic_shift.hpp" />
     <ClInclude Include="..\..\src\mpt\base\array.hpp" />

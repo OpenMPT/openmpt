@@ -171,9 +171,6 @@
     <ClInclude Include="..\..\common\misc_util.h">
       <Filter>common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\common\mptAlloc.h">
-      <Filter>common</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\common\mptAssert.h">
       <Filter>common</Filter>
     </ClInclude>
@@ -364,6 +361,9 @@
       <Filter>sounddev</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\base\algorithm.hpp">
+      <Filter>src\mpt\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\base\aligned_array.hpp">
       <Filter>src\mpt\base</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\base\alloc.hpp">

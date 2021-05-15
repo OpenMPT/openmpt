@@ -474,10 +474,6 @@
 #define NO_VST
 #endif
 
-#if defined(ENABLE_ASM) || !defined(NO_VST)
-#define MPT_ENABLE_ALIGNED_ALLOC
-#endif
-
 #if MPT_OS_WINDOWS && MPT_GCC_BEFORE(9,1,0)
 // GCC C++ library has no wchar_t overloads
 #define MPT_FSTREAM_NO_WCHAR
