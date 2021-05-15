@@ -12,7 +12,7 @@
 
 #include "BuildSettings.h"
 
-#include "../../common/mptMutex.h"
+#include "mpt/mutex/mutex.hpp"
 #include "../../common/mptTime.h"
 #include "../../soundlib/plugins/PlugInterface.h"
 #include <rtmidi/RtMidi.h>

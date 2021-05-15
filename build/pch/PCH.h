@@ -72,9 +72,6 @@
 #include "../common/FlagSet.h"
 #include "../common/mptFileIO.h"
 #include "../common/mptIO.h"
-#include "../common/mptLibrary.h"
-#include "../common/mptMutex.h"
-#include "../common/mptOS.h"
 #include "../common/mptRandom.h"
 #include "../common/mptStringBuffer.h"
 #include "../common/mptTime.h"
@@ -83,6 +80,9 @@
 #include "../common/version.h"
 
 #include "../misc/mptCPU.h"
+#include "../misc/mptLibrary.h"
+#include "../misc/mptMutex.h"
+#include "../misc/mptOS.h"
 #include "../misc/mptWine.h"
 
 

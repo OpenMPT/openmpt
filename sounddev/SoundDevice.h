@@ -14,7 +14,7 @@
 #include "BuildSettings.h"
 
 #include "../common/FlagSet.h"
-#include "../common/mptOS.h"
+#include "../misc/mptOS.h"
 #include "../soundbase/SampleFormat.h"
 
 #include <map>

@@ -12,7 +12,7 @@
 #include "AudioCriticalSection.h"
 
 #if defined(MODPLUG_TRACKER)
-#include "../common/mptMutex.h"
+#include "../misc/mptMutex.h"
 #endif
 
 OPENMPT_NAMESPACE_BEGIN

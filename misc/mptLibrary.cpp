@@ -11,7 +11,8 @@
 #include "stdafx.h"
 #include "mptLibrary.h"
 
-#if defined(MODPLUG_TRACKER)
+#include "mptOS.h"
+
 #if MPT_OS_WINDOWS
 #include <windows.h>
 #elif MPT_OS_ANDROID
@@ -21,13 +22,9 @@
 #elif defined(MPT_WITH_DL)
 #include <dlfcn.h>
 #endif
-#endif
 
 
 OPENMPT_NAMESPACE_BEGIN
-
-
-#if defined(MODPLUG_TRACKER)
 
 
 namespace mpt
@@ -548,15 +545,6 @@ FuncPtr Library::GetProcAddress(const std::string &symbol) const
 
 
 } // namespace mpt
-
-
-#else // !MODPLUG_TRACKER
-
-
-MPT_MSVC_WORKAROUND_LNK4221(mptLibrary)
-
-
-#endif // MODPLUG_TRACKER
 
 
 OPENMPT_NAMESPACE_END

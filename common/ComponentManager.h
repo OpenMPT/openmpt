@@ -12,10 +12,14 @@
 
 #include "BuildSettings.h"
 
+#include "mpt/mutex/mutex.hpp"
+
 #include <map>
 #include <vector>
 #include "../common/misc_util.h"
-#include "../common/mptMutex.h"
+#if defined(MODPLUG_TRACKER)
+#include "../misc/mptLibrary.h"
+#endif
 
 
 OPENMPT_NAMESPACE_BEGIN

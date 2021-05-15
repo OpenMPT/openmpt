@@ -17,17 +17,13 @@
 #include <windows.h>
 #endif
 
-#if defined(MODPLUG_TRACKER)
 #if !MPT_OS_WINDOWS
 #include <sys/utsname.h>
 #endif // !MPT_OS_WINDOWS
-#endif // MODPLUG_TRACKER
 
 
 OPENMPT_NAMESPACE_BEGIN
 
-
-#if defined(MODPLUG_TRACKER)
 
 namespace mpt
 {
@@ -737,14 +733,6 @@ VersionContext::VersionContext()
 } // namespace Wine
 } // namespace OS
 } // namespace mpt
-
-
-#else // !MODPLUG_TRACKER
-
-MPT_MSVC_WORKAROUND_LNK4221(mptOS)
-
-#endif // MODPLUG_TRACKER
-
 
 
 OPENMPT_NAMESPACE_END

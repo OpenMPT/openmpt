@@ -15,7 +15,7 @@
 
 
 #include "../common/misc_util.h"
-#include "../common/mptMutex.h"
+#include "mpt/mutex/mutex.hpp"
 
 #include <map>
 #include <set>

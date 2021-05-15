@@ -30,7 +30,7 @@
 #include "../pluginBridge/BridgeOpCodes.h"
 #include "../soundlib/plugins/OpCodes.h"
 #include "../soundlib/plugins/PluginManager.h"
-#include "../common/mptOSException.h"
+#include "../misc/mptOSException.h"
 
 using namespace Vst;
 DECLARE_FLAGSET(Vst::VstTimeInfoFlags)

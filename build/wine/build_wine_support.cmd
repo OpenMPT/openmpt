@@ -67,6 +67,7 @@ del /f /q "%OUTDIR%\openmpt-wine-support.zip"
  sounddev\*.h ^
  sounddev\*.cpp ^
  misc\*.h ^
+ misc\*.cpp ^
  mptrack\wine\*.h ^
  mptrack\wine\*.cpp ^
  mptrack\wine\*.c ^

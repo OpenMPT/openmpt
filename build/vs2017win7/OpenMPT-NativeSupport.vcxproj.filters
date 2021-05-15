@@ -192,22 +192,10 @@
     <ClInclude Include="..\..\common\mptIO.h">
       <Filter>common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\common\mptLibrary.h">
-      <Filter>common</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\common\mptLog.h">
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\common\mptMemory.h">
-      <Filter>common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\common\mptMutex.h">
-      <Filter>common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\common\mptOS.h">
-      <Filter>common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\common\mptOSException.h">
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\common\mptPathString.h">
@@ -277,6 +265,18 @@
       <Filter>misc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\misc\mptColor.h">
+      <Filter>misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\misc\mptLibrary.h">
+      <Filter>misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\misc\mptMutex.h">
+      <Filter>misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\misc\mptOS.h">
+      <Filter>misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\misc\mptOSException.h">
       <Filter>misc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\misc\mptWine.h">
@@ -704,12 +704,6 @@
     <ClCompile Include="..\..\common\mptIO.cpp">
       <Filter>common</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\common\mptLibrary.cpp">
-      <Filter>common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\common\mptOS.cpp">
-      <Filter>common</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\common\mptPathString.cpp">
       <Filter>common</Filter>
     </ClCompile>
@@ -741,6 +735,12 @@
       <Filter>misc</Filter>
     </ClCompile>
     <ClCompile Include="..\..\misc\mptColor.cpp">
+      <Filter>misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\misc\mptLibrary.cpp">
+      <Filter>misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\misc\mptOS.cpp">
       <Filter>misc</Filter>
     </ClCompile>
     <ClCompile Include="..\..\misc\mptWine.cpp">

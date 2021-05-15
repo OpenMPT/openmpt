@@ -90,8 +90,6 @@ LOCAL_SRC_FILES += \
 	common/Logging.cpp \
 	common/mptFileIO.cpp \
 	common/mptIO.cpp \
-	common/mptLibrary.cpp \
-	common/mptOS.cpp \
 	common/mptPathString.cpp \
 	common/mptRandom.cpp \
 	common/mptString.cpp \

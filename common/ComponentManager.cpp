@@ -11,9 +11,9 @@
 #include "stdafx.h"
 #include "ComponentManager.h"
 
-#include "Logging.h"
+#include "mpt/mutex/mutex.hpp"
 
-#include "mptMutex.h"
+#include "Logging.h"
 
 OPENMPT_NAMESPACE_BEGIN
 

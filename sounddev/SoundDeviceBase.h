@@ -15,7 +15,8 @@
 
 #include "SoundDevice.h"
 
-#include "../common/mptMutex.h"
+#include "mpt/mutex/mutex.hpp"
+
 #include "../common/misc_util.h"
 
 #include <atomic>

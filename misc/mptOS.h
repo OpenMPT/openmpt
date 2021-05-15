@@ -12,16 +12,11 @@
 
 #include "BuildSettings.h"
 
-#if defined(MODPLUG_TRACKER)
 #include "mpt/library/library.hpp"
 #include "mpt/osinfo/windows_version.hpp"
-#endif // MODPLUG_TRACKER
 
 
 OPENMPT_NAMESPACE_BEGIN
-
-
-#if defined(MODPLUG_TRACKER)
 
 
 namespace mpt
@@ -217,9 +212,6 @@ public:
 } // namespace Wine
 } // namespace OS
 } // namespace mpt
-
-
-#endif // MODPLUG_TRACKER
 
 
 OPENMPT_NAMESPACE_END

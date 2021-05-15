@@ -12,7 +12,7 @@
 
 #include "BuildSettings.h"
 
-#include "../common/mptOS.h"
+#include "mptOS.h"
 #include "../common/FlagSet.h"
 
 #include <map>

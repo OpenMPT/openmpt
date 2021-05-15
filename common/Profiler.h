@@ -13,7 +13,8 @@
 #include "BuildSettings.h"
 
 
-#include "../common/mptMutex.h"
+#include "mpt/mutex/mutex.hpp"
+
 #include <string>
 #include <vector>
 

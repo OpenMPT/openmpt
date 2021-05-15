@@ -1235,12 +1235,8 @@
     <ClInclude Include="..\..\common\mptBaseUtils.h" />
     <ClInclude Include="..\..\common\mptFileIO.h" />
     <ClInclude Include="..\..\common\mptIO.h" />
-    <ClInclude Include="..\..\common\mptLibrary.h" />
     <ClInclude Include="..\..\common\mptLog.h" />
     <ClInclude Include="..\..\common\mptMemory.h" />
-    <ClInclude Include="..\..\common\mptMutex.h" />
-    <ClInclude Include="..\..\common\mptOS.h" />
-    <ClInclude Include="..\..\common\mptOSException.h" />
     <ClInclude Include="..\..\common\mptPathString.h" />
     <ClInclude Include="..\..\common\mptRandom.h" />
     <ClInclude Include="..\..\common\mptString.h" />
@@ -1264,6 +1260,10 @@
     <ClInclude Include="..\..\misc\WriteMemoryDump.h" />
     <ClInclude Include="..\..\misc\mptCPU.h" />
     <ClInclude Include="..\..\misc\mptColor.h" />
+    <ClInclude Include="..\..\misc\mptLibrary.h" />
+    <ClInclude Include="..\..\misc\mptMutex.h" />
+    <ClInclude Include="..\..\misc\mptOS.h" />
+    <ClInclude Include="..\..\misc\mptOSException.h" />
     <ClInclude Include="..\..\misc\mptWine.h" />
     <ClInclude Include="..\..\mptrack\wine\Native.h" />
     <ClInclude Include="..\..\mptrack\wine\NativeConfig.h" />
@@ -1407,8 +1407,6 @@
     <ClCompile Include="..\..\common\Profiler.cpp" />
     <ClCompile Include="..\..\common\mptFileIO.cpp" />
     <ClCompile Include="..\..\common\mptIO.cpp" />
-    <ClCompile Include="..\..\common\mptLibrary.cpp" />
-    <ClCompile Include="..\..\common\mptOS.cpp" />
     <ClCompile Include="..\..\common\mptPathString.cpp" />
     <ClCompile Include="..\..\common\mptRandom.cpp" />
     <ClCompile Include="..\..\common\mptString.cpp" />
@@ -1420,6 +1418,8 @@
     <ClCompile Include="..\..\common\version.cpp" />
     <ClCompile Include="..\..\misc\mptCPU.cpp" />
     <ClCompile Include="..\..\misc\mptColor.cpp" />
+    <ClCompile Include="..\..\misc\mptLibrary.cpp" />
+    <ClCompile Include="..\..\misc\mptOS.cpp" />
     <ClCompile Include="..\..\misc\mptWine.cpp" />
     <ClCompile Include="..\..\mptrack\wine\Native.cpp" />
     <ClCompile Include="..\..\mptrack\wine\NativeSoundDevice.cpp" />

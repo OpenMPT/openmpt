@@ -10,7 +10,7 @@
 #include "stdafx.h"
 #include "BuildVariants.h"
 #include "../common/version.h"
-#include "../common/mptOS.h"
+#include "../misc/mptOS.h"
 #include "../misc/mptCPU.h"
 #include "Mptrack.h"
 

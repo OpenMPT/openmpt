@@ -11,6 +11,10 @@
 
 #include "BuildSettings.h"
 
+#if defined(MODPLUG_TRACKER)
+#include "../misc/mptMutex.h"
+#endif
+
 OPENMPT_NAMESPACE_BEGIN
 
 #if defined(MODPLUG_TRACKER)

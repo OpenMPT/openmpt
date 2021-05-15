@@ -171,22 +171,10 @@
     <ClInclude Include="..\..\common\mptIO.h">
       <Filter>common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\common\mptLibrary.h">
-      <Filter>common</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\common\mptLog.h">
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\common\mptMemory.h">
-      <Filter>common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\common\mptMutex.h">
-      <Filter>common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\common\mptOS.h">
-      <Filter>common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\common\mptOSException.h">
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\common\mptPathString.h">
@@ -837,12 +825,6 @@
       <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\common\mptIO.cpp">
-      <Filter>common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\common\mptLibrary.cpp">
-      <Filter>common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\common\mptOS.cpp">
       <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\common\mptPathString.cpp">

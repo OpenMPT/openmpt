@@ -13,7 +13,7 @@
 #include "BuildSettings.h"
 
 #include <deque>
-#include "../../common/mptMutex.h"
+#include "mpt/mutex/mutex.hpp"
 #include "VstDefinitions.h"
 
 OPENMPT_NAMESPACE_BEGIN

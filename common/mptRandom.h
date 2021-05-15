@@ -13,6 +13,7 @@
 #include "BuildSettings.h"
 
 #include "mpt/base/bit.hpp"
+#include "mpt/mutex/mutex.hpp"
 #ifdef MODPLUG_TRACKER
 #include "mpt/random/crand.hpp"
 #endif // MODPLUG_TRACKER
@@ -21,8 +22,6 @@
 #include "mpt/random/engine.hpp"
 #include "mpt/random/engine_lcg.hpp"
 #include "mpt/random/seed.hpp"
-
-#include "mptMutex.h"
 
 #include <limits>
 #include <random>

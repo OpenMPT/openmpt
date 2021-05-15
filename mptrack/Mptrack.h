@@ -19,7 +19,7 @@
 #include "../soundlib/MIDIMacros.h"
 #include "../soundlib/modcommand.h"
 #include "../common/ComponentManager.h"
-#include "../common/mptMutex.h"
+#include "../misc/mptMutex.h"
 #include "../common/mptRandom.h"
 
 OPENMPT_NAMESPACE_BEGIN

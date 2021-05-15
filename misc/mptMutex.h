@@ -13,15 +13,9 @@
 
 #include "mpt/mutex/mutex.hpp"
 
-#if defined(MODPLUG_TRACKER) && MPT_MUTEX_NONE
-#error "OpenMPT requires mutexes."
-#endif
-
 OPENMPT_NAMESPACE_BEGIN
 
 namespace mpt {
-
-#ifdef MODPLUG_TRACKER
 
 class recursive_mutex_with_lock_count {
 
@@ -79,8 +73,6 @@ public:
 	}
 
 };
-
-#endif // MODPLUG_TRACKER
 
 } // namespace mpt
 
