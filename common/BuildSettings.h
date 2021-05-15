@@ -233,6 +233,9 @@
 #define NO_ASSERTS
 #endif
 
+// Enable global ComponentManager
+#define MPT_COMPONENT_MANAGER 1
+
 // Support for externally linked samples e.g. in MPTM files
 #define MPT_EXTERNAL_SAMPLES
 
@@ -294,6 +297,7 @@
 #define NO_ASSERTS
 #endif
 //#define MPT_ALL_LOGGING
+#define MPT_COMPONENT_MANAGER 0
 //#define MPT_EXTERNAL_SAMPLES
 #if defined(ENABLE_TESTS) || defined(MPT_BUILD_HACK_ARCHIVE_SUPPORT)
 #define MPT_ENABLE_CHARSET_LOCALE

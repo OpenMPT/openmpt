@@ -21,19 +21,6 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-#define MPT_ENABLE_COMPONENTS
-
-
-#if defined(MPT_ENABLE_COMPONENTS)
-
-
-#if defined(MODPLUG_TRACKER)
-#define MPT_COMPONENT_MANAGER 1
-#else
-#define MPT_COMPONENT_MANAGER 0
-#endif
-
-
 enum ComponentType
 {
 	ComponentTypeUnknown = 0,
@@ -518,9 +505,6 @@ bool IsComponentAvailable(const ComponentHandle<T> &handle)
 {
 	return handle.IsAvailable();
 }
-
-
-#endif // MPT_ENABLE_COMPONENTS
 
 
 OPENMPT_NAMESPACE_END

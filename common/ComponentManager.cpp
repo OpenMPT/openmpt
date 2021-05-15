@@ -18,9 +18,6 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-#if defined(MPT_ENABLE_COMPONENTS)
-
-
 ComponentBase::ComponentBase(ComponentType type)
 	: m_Type(type)
 	, m_Initialized(false)
@@ -461,9 +458,6 @@ mpt::PathString ComponentManager::GetComponentPath() const
 
 
 #endif // MPT_COMPONENT_MANAGER
-
-
-#endif // MPT_ENABLE_COMPONENTS
 
 
 OPENMPT_NAMESPACE_END
