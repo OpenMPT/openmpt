@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "BuildSettings.h"
+#include "mptBuildSettings.h"
 #include "ColorPickerButton.h"
 
 OPENMPT_NAMESPACE_BEGIN

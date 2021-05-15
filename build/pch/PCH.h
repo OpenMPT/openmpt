@@ -6,7 +6,7 @@
 #if defined(MPT_BUILD_ENABLE_PCH)
 
 
-#include "BuildSettings.h"
+#include "mptBuildSettings.h"
 
 
 #if defined(MODPLUG_TRACKER)

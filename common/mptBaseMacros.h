@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "BuildSettings.h"
+#include "mptBuildSettings.h"
 
 #include "mpt/base/preprocessor.hpp"
 #include "mpt/base/compiletime_warning.hpp"

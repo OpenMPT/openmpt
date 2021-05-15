@@ -165,6 +165,9 @@
     <ClInclude Include="..\..\common\mptBaseUtils.h">
       <Filter>common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\common\mptBuildSettings.h">
+      <Filter>common</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\common\mptFileIO.h">
       <Filter>common</Filter>
     </ClInclude>

@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "BuildSettings.h"
+#include "mptBuildSettings.h"
 
 #include <Msctf.h>
 #include "Mptrack.h"

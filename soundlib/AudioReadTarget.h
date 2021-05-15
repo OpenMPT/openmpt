@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "BuildSettings.h"
+#include "mptBuildSettings.h"
 
 #include "Sndfile.h"
 #include "../soundbase/SampleFormat.h"

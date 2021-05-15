@@ -1,5 +1,5 @@
 
-#include "BuildSettings.h"
+#include "mptBuildSettings.h"
 
 #include "mpt/base/span.hpp"
 #include "mpt/crypto/hash.hpp"

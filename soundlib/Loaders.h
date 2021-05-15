@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "BuildSettings.h"
+#include "mptBuildSettings.h"
 
 #include "../common/misc_util.h"
 #include "../common/FileReader.h"

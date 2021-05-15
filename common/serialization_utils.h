@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "BuildSettings.h"
+#include "mptBuildSettings.h"
 
 #include "../common/mptBaseTypes.h"
 #include "../common/mptIO.h"

@@ -317,6 +317,7 @@
     <ClInclude Include="..\..\common\mptBaseMacros.h" />
     <ClInclude Include="..\..\common\mptBaseTypes.h" />
     <ClInclude Include="..\..\common\mptBaseUtils.h" />
+    <ClInclude Include="..\..\common\mptBuildSettings.h" />
     <ClInclude Include="..\..\common\mptFileIO.h" />
     <ClInclude Include="..\..\common\mptIO.h" />
     <ClInclude Include="..\..\common\mptLog.h" />

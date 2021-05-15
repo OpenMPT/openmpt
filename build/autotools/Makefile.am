@@ -238,6 +238,7 @@ MPT_FILES_COMMON += common/mptAssert.h
 MPT_FILES_COMMON += common/mptBaseMacros.h
 MPT_FILES_COMMON += common/mptBaseTypes.h
 MPT_FILES_COMMON += common/mptBaseUtils.h
+MPT_FILES_COMMON += common/mptBuildSettings.h
 MPT_FILES_COMMON += common/mptFileIO.cpp
 MPT_FILES_COMMON += common/mptFileIO.h
 MPT_FILES_COMMON += common/mptIO.cpp

@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "BuildSettings.h"
+#include "mptBuildSettings.h"
 
 #include "../soundlib/Mixer.h"	// For MIXBUFFERSIZE
 

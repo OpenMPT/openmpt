@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "BuildSettings.h"
+#include "mptBuildSettings.h"
 
 #include "mpt/base/pointer.hpp"
 #include "mpt/format/message.hpp"

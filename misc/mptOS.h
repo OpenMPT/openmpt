@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "BuildSettings.h"
+#include "mptBuildSettings.h"
 
 #include "mpt/library/library.hpp"
 #include "mpt/osinfo/windows_version.hpp"

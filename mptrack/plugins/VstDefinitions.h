@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include "BuildSettings.h"
+#include "mptBuildSettings.h"
 
 #if MPT_OS_WINDOWS
 #define VSTCALLBACK __cdecl

@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "BuildSettings.h"
+#include "mptBuildSettings.h"
 #include "../soundlib/Snd_defs.h"
 
 OPENMPT_NAMESPACE_BEGIN

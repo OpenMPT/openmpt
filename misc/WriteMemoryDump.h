@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "BuildSettings.h"
+#include "mptBuildSettings.h"
 
 #if MPT_COMPILER_MSVC
 #pragma warning(push)

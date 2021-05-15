@@ -1,7 +1,7 @@
 /*
  * StdAfx.h
  * --------
- * Purpose: Include file for standard system include files, or project specific include files that are used frequently, but are changed infrequently. Also includes the global build settings from BuildSettings.h.
+ * Purpose: Include file for standard system include files, or project specific include files that are used frequently, but are changed infrequently. Also includes the global build settings from mptBuildSettings.h.
  * Notes  : (currently none)
  * Authors: Olivier Lapicque
  *          OpenMPT Devs
@@ -13,7 +13,7 @@
 
 
 // has to be first
-#include "BuildSettings.h"
+#include "mptBuildSettings.h"
 
 
 #if defined(MODPLUG_TRACKER)

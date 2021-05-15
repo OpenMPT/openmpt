@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "BuildSettings.h"
+#include "mptBuildSettings.h"
 
 #include "mptLog.h"
 
@@ -23,7 +23,7 @@ OPENMPT_NAMESPACE_BEGIN
 /*
 
 
-Build time logging configuration (in BuildSettings.h):
+Build time logging configuration:
 
  *  #define MPT_LOG_GLOBAL_LEVEL_STATIC
     #define MPT_LOG_GLOBAL_LEVEL #

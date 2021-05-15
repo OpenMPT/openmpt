@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "BuildSettings.h"
+#include "mptBuildSettings.h"
 
 #include "../soundbase/SampleFormat.h"
 #include "../common/Endianness.h"

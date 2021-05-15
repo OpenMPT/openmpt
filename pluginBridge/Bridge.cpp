@@ -10,7 +10,7 @@
 
 // TODO: Translate pointer-sized members in remaining structs: VstVariableIo, VstOfflineTask, VstAudioFile, VstWindow (all these are currently not supported by OpenMPT, so not urgent at all)
 
-#include "../common/BuildSettings.h"
+#include "../common/mptBuildSettings.h"
 #include "../common/mptBaseMacros.h"
 #include "../common/mptBaseTypes.h"
 #include "../common/mptBaseUtils.h"

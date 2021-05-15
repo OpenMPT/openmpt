@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "BuildSettings.h"
+#include "mptBuildSettings.h"
 
 #include "Snd_defs.h"
 #include "modcommand.h"                       // ModCommand::

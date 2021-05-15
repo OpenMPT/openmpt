@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "BuildSettings.h"
+#include "mptBuildSettings.h"
 
 #if defined(MODPLUG_TRACKER)
 #include "../misc/mptMutex.h"
