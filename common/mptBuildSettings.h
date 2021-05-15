@@ -15,12 +15,11 @@
 #include "mpt/base/detect_compiler.hpp"
 #include "mpt/base/detect_os.hpp"
 #include "mpt/base/detect_quirks.hpp"
-#include "mpt/base/namespace.hpp"
 
 
 
 #if defined(MODPLUG_TRACKER) || defined(LIBOPENMPT_BUILD)
-#include "mptBuildSettings.h"
+#include "BuildSettings.h"
 #else
 
 
@@ -28,6 +27,10 @@
 #if defined(HAVE_CONFIG_H)
 #include "config.h"
 #endif // HAVE_CONFIG_H
+
+
+
+#include "mpt/base/namespace.hpp"
 
 
 
