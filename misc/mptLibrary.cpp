@@ -92,6 +92,9 @@ public:
 
 		mpt::OS::Windows::Version WindowsVersion = mpt::OS::Windows::Version::Current();
 
+#if (_WIN32_WINNT >= 0x0602)
+		bool hasKB2533623 = true;
+#else
 		// Check for KB2533623:
 		bool hasKB2533623 = false;
 		if(WindowsVersion.IsAtLeast(mpt::OS::Windows::Version::Win8))
@@ -99,7 +102,7 @@ public:
 			hasKB2533623 = true;
 		} else if(WindowsVersion.IsAtLeast(mpt::OS::Windows::Version::WinVista))
 		{
-			HMODULE hKernel32DLL = LoadLibraryW(L"kernel32.dll");
+			HMODULE hKernel32DLL = LoadLibrary(TEXT("kernel32.dll"));
 			if(hKernel32DLL)
 			{
 				if(::GetProcAddress(hKernel32DLL, "SetDefaultDllDirectories") != nullptr)
@@ -110,8 +113,9 @@ public:
 				hKernel32DLL = NULL;
 			}
 		}
+#endif
 
-		if(hasKB2533623)
+		MPT_MAYBE_CONSTANT_IF(hasKB2533623)
 		{
 			switch(path.GetSearchPath())
 			{
