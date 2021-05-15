@@ -90,13 +90,12 @@ public:
 
 #else // !MPT_OS_WINDOWS_WINRT
 
-		mpt::OS::Windows::Version WindowsVersion = mpt::OS::Windows::Version::Current();
-
 #if (_WIN32_WINNT >= 0x0602)
 		bool hasKB2533623 = true;
 #else
 		// Check for KB2533623:
 		bool hasKB2533623 = false;
+		mpt::OS::Windows::Version WindowsVersion = mpt::OS::Windows::Version::Current();
 		if(WindowsVersion.IsAtLeast(mpt::OS::Windows::Version::Win8))
 		{
 			hasKB2533623 = true;
