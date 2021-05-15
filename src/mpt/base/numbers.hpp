@@ -39,7 +39,7 @@ template <typename T> inline constexpr T sqrt2_v = std::numbers::sqrt2_v<T>;
 template <typename T> inline constexpr T sqrt3_v = std::numbers::sqrt3_v<T>;
 template <typename T> inline constexpr T inv_sqrt3_v = std::numbers::inv_sqrt3_v<T>;
 template <typename T> inline constexpr T egamma_v = std::numbers::egamma_v<T>;
-template <typename T> inline constexpr T phi_v = std::numbers::phi_v<T>:
+template <typename T> inline constexpr T phi_v = std::numbers::phi_v<T>;
 
 inline constexpr double e = e_v<double>;
 inline constexpr double log2e = log2e_v<double>;
