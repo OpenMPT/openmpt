@@ -367,23 +367,4 @@ bool CSoundFile::ReadVorbisSample(SAMPLEINDEX sample, FileReader &file)
 }
 
 
-bool CSoundFile::CanReadVorbis()
-{
-	bool result = false;
-	#if defined(MPT_WITH_OGG) && defined(MPT_WITH_VORBIS) && defined(MPT_WITH_VORBISFILE)
-		if(!result)
-		{
-			result = true;
-		}
-	#endif
-	#if defined(MPT_WITH_STBVORBIS)
-		if(!result)
-		{
-			result = true;
-		}
-	#endif
-	return result;
-}
-
-
 OPENMPT_NAMESPACE_END

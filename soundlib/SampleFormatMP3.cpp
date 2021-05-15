@@ -677,36 +677,4 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool raw, b
 }
 
 
-bool CSoundFile::CanReadMP3()
-{
-	bool result = false;
-	#if defined(MPT_WITH_MPG123)
-		if(!result)
-		{
-			ComponentHandle<ComponentMPG123> mpg123;
-			if(IsComponentAvailable(mpg123))
-			{
-				result = true;
-			}
-		}
-	#endif
-	#if defined(MPT_WITH_MINIMP3)
-		if(!result)
-		{
-			result = true;
-		}
-	#endif
-	#if defined(MPT_WITH_MEDIAFOUNDATION)
-		if(!result)
-		{
-			if(CanReadMediaFoundation())
-			{
-				result = true;
-			}
-		}
-	#endif
-	return result;
-}
-
-
 OPENMPT_NAMESPACE_END

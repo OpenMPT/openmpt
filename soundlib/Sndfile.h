@@ -1147,9 +1147,6 @@ public:
 	bool SaveFLACSample(SAMPLEINDEX nSample, std::ostream &f) const;
 	bool SaveS3ISample(SAMPLEINDEX smp, std::ostream &f) const;
 #endif
-	static bool CanReadMP3();
-	static bool CanReadVorbis();
-	static bool CanReadMediaFoundation();
 
 	// Instrument file I/O
 	bool ReadInstrumentFromFile(INSTRUMENTINDEX nInstr, FileReader &file, bool mayNormalize = false);

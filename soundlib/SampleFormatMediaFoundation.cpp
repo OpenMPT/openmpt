@@ -455,21 +455,4 @@ bool CSoundFile::ReadMediaFoundationSample(SAMPLEINDEX sample, FileReader &file,
 }
 
 
-bool CSoundFile::CanReadMediaFoundation()
-{
-	bool result = false;
-	#if defined(MPT_WITH_MEDIAFOUNDATION)
-		if(!result)
-		{
-			ComponentHandle<ComponentMediaFoundation> mf;
-			if(IsComponentAvailable(mf))
-			{
-				result = true;
-			}
-		}
-	#endif
-	return result;
-}
-
-
 OPENMPT_NAMESPACE_END
