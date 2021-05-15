@@ -20,8 +20,7 @@ inline namespace MPT_INLINE_NS {
 
 template <typename T, std::size_t count, std::align_val_t alignment>
 struct alignas(static_cast<std::size_t>(alignment)) aligned_array
-	: std::array<T, count>
-{
+	: std::array<T, count> {
 	static_assert(static_cast<std::size_t>(alignment) >= alignof(T));
 	static_assert(((count * sizeof(T)) % static_cast<std::size_t>(alignment)) == 0);
 	static_assert(sizeof(std::array<T, count>) == (sizeof(T) * count));
