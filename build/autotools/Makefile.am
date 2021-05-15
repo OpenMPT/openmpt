@@ -271,7 +271,6 @@ MPT_FILES_COMMON += common/version.cpp
 MPT_FILES_COMMON += common/version.h
 MPT_FILES_COMMON += common/versionNumber.h
 MPT_FILES_SOUNDBASE = 
-MPT_FILES_SOUNDBASE += soundbase/AudioSample.h
 MPT_FILES_SOUNDBASE += soundbase/Dither.h
 MPT_FILES_SOUNDBASE += soundbase/MixSample.h
 MPT_FILES_SOUNDBASE += soundbase/MixSampleConvert.h
