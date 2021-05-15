@@ -428,7 +428,7 @@ public:
 	}
 	const SampleType *const *data_planar() const noexcept
 	{
-		return (!is_contiguous()) ? m_buffer.planes: nullptr;
+		return (!is_contiguous()) ? m_buffer.planes : nullptr;
 	}
 	SampleType *data() noexcept
 	{
