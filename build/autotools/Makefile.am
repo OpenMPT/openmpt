@@ -134,6 +134,7 @@ MPT_FILES_SRC_MPT += src/mpt/base/macros.hpp
 MPT_FILES_SRC_MPT += src/mpt/base/math.hpp
 MPT_FILES_SRC_MPT += src/mpt/base/memory.hpp
 MPT_FILES_SRC_MPT += src/mpt/base/namespace.hpp
+MPT_FILES_SRC_MPT += src/mpt/base/numbers.hpp
 MPT_FILES_SRC_MPT += src/mpt/base/numeric.hpp
 MPT_FILES_SRC_MPT += src/mpt/base/pointer.hpp
 MPT_FILES_SRC_MPT += src/mpt/base/preprocessor.hpp

@@ -555,6 +555,9 @@
     <ClInclude Include="..\..\src\mpt\base\namespace.hpp">
       <Filter>src\mpt\base</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\mpt\base\numbers.hpp">
+      <Filter>src\mpt\base</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\mpt\base\numeric.hpp">
       <Filter>src\mpt\base</Filter>
     </ClInclude>

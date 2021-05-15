@@ -738,6 +738,7 @@
     <ClInclude Include="..\..\src\mpt\base\math.hpp" />
     <ClInclude Include="..\..\src\mpt\base\memory.hpp" />
     <ClInclude Include="..\..\src\mpt\base\namespace.hpp" />
+    <ClInclude Include="..\..\src\mpt\base\numbers.hpp" />
     <ClInclude Include="..\..\src\mpt\base\numeric.hpp" />
     <ClInclude Include="..\..\src\mpt\base\pointer.hpp" />
     <ClInclude Include="..\..\src\mpt\base\preprocessor.hpp" />
