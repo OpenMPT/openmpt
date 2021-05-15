@@ -25,7 +25,7 @@ inline namespace MPT_INLINE_NS {
 struct int24 {
 	std::array<std::byte, 3> bytes;
 	int24() = default;
-	template <typename T, typename std::enable_if<std::is_integral<T>::value,	bool>::type = true>
+	template <typename T, typename std::enable_if<std::is_integral<T>::value, bool>::type = true>
 	explicit int24(T other) noexcept {
 		using Tunsigned = typename std::make_unsigned<T>::type;
 		MPT_MAYBE_CONSTANT_IF(mpt::endian_is_big()) {
