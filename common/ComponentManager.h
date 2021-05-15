@@ -448,12 +448,6 @@ std::shared_ptr<const type> GetComponent()
 }
 
 
-inline mpt::PathString GetComponentPath()
-{
-	return mpt::PathString();
-}
-
-
 #endif // MPT_COMPONENT_MANAGER
 
 
