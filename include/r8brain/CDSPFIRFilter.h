@@ -8,8 +8,8 @@
  *
  * This file includes low-pass FIR filter generator and filter cache.
  *
- * r8brain-free-src Copyright (c) 2013-2019 Aleksey Vaneev
- * See the "License.txt" file for license.
+ * r8brain-free-src Copyright (c) 2013-2021 Aleksey Vaneev
+ * See the "LICENSE" file for license.
  */
 
 #ifndef R8B_CDSPFIRFILTER_INCLUDED

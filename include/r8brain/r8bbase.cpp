@@ -8,10 +8,10 @@
  * defines several global static objects used by the library.
  *
  * You may also need to include to your project: the "Kernel32" library
- * (on Windows) and the "pthread" library on Mac OS X and Linux.
+ * (on Windows) and the "pthread" library on macOS and Linux.
  *
- * r8brain-free-src Copyright (c) 2013-2019 Aleksey Vaneev
- * See the "License.txt" file for license.
+ * r8brain-free-src Copyright (c) 2013-2021 Aleksey Vaneev
+ * See the "LICENSE" file for license.
  */
 
 #include "CDSPFIRFilter.h"
@@ -21,7 +21,6 @@ namespace r8b {
 
 #if R8B_FLTTEST
 	int InterpFilterFracs = -1;
-	int InterpFilterFracsThird = -1;
 #endif // R8B_FLTTEST
 
 CSyncObject CDSPRealFFTKeeper :: StateSync;

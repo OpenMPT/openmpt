@@ -9,8 +9,8 @@
  * This file includes the master sample rate converter (resampler) class that
  * combines all elements of this library into a single front-end class.
  *
- * r8brain-free-src Copyright (c) 2013-2019 Aleksey Vaneev
- * See the "License.txt" file for license.
+ * r8brain-free-src Copyright (c) 2013-2021 Aleksey Vaneev
+ * See the "LICENSE" file for license.
  */
 
 #ifndef R8B_CDSPRESAMPLER_INCLUDED
@@ -64,7 +64,7 @@ public:
 	 * have to specify a higher ReqAtten value if you need a totally clean
 	 * high-frequency content. On the other hand, it may not be reasonable to
 	 * have a high-frequency content cleaner than the input signal itself: if
-	 * the input signal is 16-bit, setting ReqAtten to 150 will make its
+	 * the input signal is 16-bit, setting ReqAtten to 180 will make its
 	 * high-frequency content 24-bit, but the original part of the signal will
 	 * remain 16-bit.
 	 *
@@ -99,9 +99,9 @@ public:
 	 * inclusive. The actual attenuation may be 0.40-4.46 dB higher. The
 	 * general formula for selecting the ReqAtten is 6.02 * Bits + 40, where
 	 * "Bits" is the bit resolution (e.g. 16, 24), "40" is an added resolution
-	 * for stationary signals, this value can be decreased to 20 to 10 if the
-	 * signal being resampled is mostly non-stationary (e.g. impulse
-	 * response).
+	 * for dynamic signals; this value can be decreased to 20 to 10 if the
+	 * signal being resampled is non-dynamic (e.g., an impulse response or
+	 * filter, with a non-steep frequency response).
 	 * @param ReqPhase Required filter's phase response. Note that this
 	 * setting does not affect interpolator's phase response which is always
 	 * linear-phase. Also note that if the "power of 2" resampling was engaged
@@ -213,7 +213,7 @@ public:
 			}
 		}
 
-		if( DstSampleRate * 2 > SrcSampleRate )
+		if( DstSampleRate * 2.0 > SrcSampleRate )
 		{
 			// Upsampling or fractional downsampling down to 2X.
 
@@ -224,10 +224,16 @@ public:
 				CDSPFIRFilterCache :: getLPFilter( NormFreq, ReqTransBand,
 				ReqAtten, ReqPhase, 2.0 ), 2, 1, LatencyFrac ));
 
-			// Try intermediate interpolated'd resampling with subsequent 2X
+			// Try intermediate interpolated resampling with subsequent 2X
 			// or 3X upsampling.
 
-			const double ThreshSampleRate = SrcSampleRate * 1.01;
+			const double tbw = 0.0175; // Intermediate filter's transition
+				// band extension coefficient.
+			const double ThreshSampleRate = SrcSampleRate /
+				( 1.0 - tbw * ReqTransBand ); // Make sure intermediate
+				// filter's transition band is not steeper than ReqTransBand
+				// (this keeps the latency under control).
+
 			int c = 0;
 			int div = 1;
 
@@ -293,18 +299,20 @@ public:
 				addProcessor( new CDSPFracInterpolator( SrcSampleRate2 * div,
 					DstSampleRate, ReqAtten, false, LatencyFrac ));
 
-				const double tb = 100.0 * ( 1.0 - SrcSampleRate * div /
-					DstSampleRate ) / 1.75; // Divide TransBand by a constant
+				const double tb = ( 1.0 - SrcSampleRate * div /
+					DstSampleRate ) / tbw; // Divide TransBand by a constant
 					// that assures a linear response in the pass-band.
 
 				addProcessor( new CDSPBlockConvolver(
 					CDSPFIRFilterCache :: getLPFilter( 1.0 / num, tb,
 					ReqAtten, ReqPhase, num ), num, 1, LatencyFrac ));
 
+				const bool IsThird = ( num == 3 );
+
 				for( i = 1; i < c; i++ )
 				{
 					addProcessor( new CDSPHBUpsampler( ReqAtten, i - 1,
-						( num == 3 ), LatencyFrac ));
+						IsThird, LatencyFrac ));
 				}
 			}
 			else
@@ -558,6 +566,9 @@ public:
 	 * function should be called after the clear() function call or after
 	 * object's construction. The function itself calls the clear() function
 	 * before return.
+	 *
+	 * Note that it is advisable to cache the value returned by this function,
+	 * for each SrcSampleRate/DstSampleRate pair, if it is called frequently.
 	 */
 
 	int getInLenBeforeOutStart()
@@ -692,8 +703,8 @@ public:
  *
  * This class defines resampling parameters suitable for 16-bit impulse
  * response resampling, using linear-phase low-pass filter. Impulse responses
- * usually do not feature stationary signal components and thus need resampler
- * with a less SNR. See the r8b::CDSPResampler class for details.
+ * are non-dynamic signals, and thus need resampler with a lesser SNR. See the
+ * r8b::CDSPResampler class for details.
  */
 
 class CDSPResampler16IR : public CDSPResampler

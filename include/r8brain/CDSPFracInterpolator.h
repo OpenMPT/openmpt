@@ -8,8 +8,8 @@
  *
  * This file includes fractional delay interpolator class.
  *
- * r8brain-free-src Copyright (c) 2013-2019 Aleksey Vaneev
- * See the "License.txt" file for license.
+ * r8brain-free-src Copyright (c) 2013-2021 Aleksey Vaneev
+ * See the "LICENSE" file for license.
  */
 
 #ifndef R8B_CDSPFRACINTERPOLATOR_INCLUDED
@@ -23,9 +23,6 @@ namespace r8b {
 #if R8B_FLTTEST
 	extern int InterpFilterFracs; ///< Force this number of fractional filter
 		///< positions. -1 - use default.
-		///<
-	extern int InterpFilterFracsThird; ///< Force this number of fractional
-		///< filter positions for one-third filters. -1 - use default.
 		///<
 #endif // R8B_FLTTEST
 
@@ -82,24 +79,13 @@ public:
 
 		if( InitFilterFracs == -1 )
 		{
-			FilterFracs = (int) ceil( 1.792462178761753 *
-				exp( 0.033300466782047 * ReqAtten ));
+			FilterFracs = (int) ceil( pow( 6.4, ReqAtten / 50.0 ));
 
 			#if R8B_FLTTEST
 
-			if( IsThird )
+			if( InterpFilterFracs != -1 )
 			{
-				if( InterpFilterFracsThird != -1 )
-				{
-					FilterFracs = InterpFilterFracsThird;
-				}
-			}
-			else
-			{
-				if( InterpFilterFracs != -1 )
-				{
-					FilterFracs = InterpFilterFracs;
-				}
+				FilterFracs = InterpFilterFracs;
 			}
 
 			#endif // R8B_FLTTEST
@@ -242,7 +228,7 @@ public:
 	}
 
 	/**
-	 * This function should be called when the filter obtained via the
+	 * This function should be called when the filter bank obtained via the
 	 * filter bank cache is no longer needed.
 	 */
 
@@ -290,35 +276,36 @@ private:
 	static const double* getWinParams( double& att, const bool aIsThird,
 		int& fltlen )
 	{
-		const int CoeffCount = 13;
-		static const double Coeffs[ CoeffCount ][ 3 ] = {
-			{ 2.6504246356892924, 1.9035845248358245, 51.7280 }, // 0.0516
-			{ 4.0759654812373016, 1.5747323142948524, 67.1095 }, // 0.0048
-			{ 4.9036508646352033, 1.6207644759455790, 81.8379 }, // 0.0009
-			{ 5.6131421124830716, 1.6947677220415129, 96.4021 }, // 0.0002
-			{ 5.9433751253133691, 1.8730186383321272, 111.1300 }, // 0.0000
-			{ 6.8308658253825660, 1.8549555120377224, 125.4649 }, // 0.0000
-			{ 7.6648458853758372, 1.8565765953924642, 139.7378 }, // 0.0000
-			{ 8.2038730802326842, 1.9269521308895179, 154.0532 }, // 0.0000
-			{ 8.7865151489187561, 1.9775307528231671, 168.2101 }, // 0.0000
-			{ 9.5945013206755156, 1.9718457932433306, 182.1076 }, // 0.0000
-			{ 10.5163048616210250, 1.9504085061576968, 195.5668 }, // 0.0000
-			{ 10.2382664677006100, 2.1608878780497056, 209.0609 }, // 0.0000
-			{ 10.9976663155261660, 2.1536415815428249, 222.5009 }, // 0.0000
+		static const int Coeffs2Base = 8;
+		static const int Coeffs2Count = 12;
+		static const double Coeffs2[ Coeffs2Count ][ 3 ] = {
+			{ 4.1308468534586913, 1.1752580009977263, 55.5446 }, // 0.0256
+			{ 4.4241520324148826, 1.8004881791443044, 81.4191 }, // 0.0886
+			{ 5.2615232289173663, 1.8133318236025469, 96.3392 }, // 0.0481
+			{ 5.9433751227216174, 1.8730186391986436, 111.1315 }, // 0.0264
+			{ 6.8308658290513815, 1.8549555110340281, 125.4653 }, // 0.0146
+			{ 7.6648458290312904, 1.8565766090828464, 139.7379 }, // 0.0081
+			{ 8.2038728664307605, 1.9269521820570166, 154.0532 }, // 0.0045
+			{ 8.7865150946655142, 1.9775307667441668, 168.2101 }, // 0.0025
+			{ 9.5945017884101773, 1.9718456992078597, 182.1076 }, // 0.0014
+			{ 10.5163141145985240, 1.9504067820201083, 195.5668 }, // 0.0008
+			{ 10.2382465206362470, 2.1608923446870087, 209.0610 }, // 0.0004
+			{ 10.9976060250714000, 2.1536533525688935, 222.5010 }, // 0.0003
 		};
 
-		const int CoeffCountThird = 10;
-		static const double CoeffsThird[ CoeffCountThird ][ 3 ] = {
-			{ 4.0738201365282452, 1.5774150265957998, 67.2431 }, // 0.0050
-			{ 4.9502289040040495, 1.7149006172407628, 86.4870 }, // 0.0008
-			{ 5.5995071332976192, 1.8930163359641823, 106.1171 }, // 0.0001
-			{ 6.3627287856776054, 1.9945748303811506, 125.2304 }, // 0.0000
-			{ 7.4299554386534528, 1.9893399585993299, 144.3469 }, // 0.0000
-			{ 8.0667710807396436, 2.0928202837610885, 163.4098 }, // 0.0000
-			{ 8.7469991933128526, 2.1640274270903488, 181.0694 }, // 0.0000
-			{ 10.0823164330540570, 2.0896732996403280, 199.2880 }, // 0.0000
-			{ 19.1718281840114810, 1.2030083075440616, 215.2990 }, // 0.0000
-			{ 21.0914128488567630, 1.1919045429676862, 233.9152 }, // 0.0000
+		static const int Coeffs3Base = 6;
+		static const int Coeffs3Count = 10;
+		static const double Coeffs3[ Coeffs3Count ][ 3 ] = {
+			{ 3.9888564562781847, 1.5869927184268915, 66.5701 }, // 0.0467
+			{ 4.6986694038145007, 1.8086068597928262, 86.4715 }, // 0.0136
+			{ 5.5995071329337822, 1.8930163360942349, 106.1195 }, // 0.0040
+			{ 6.3627287800257228, 1.9945748322093975, 125.2307 }, // 0.0012
+			{ 7.4299550711428308, 1.9893400572347544, 144.3469 }, // 0.0004
+			{ 8.0667715944075642, 2.0928201458699909, 163.4099 }, // 0.0001
+			{ 8.7469970226288822, 2.1640279784268355, 181.0694 }, // 0.0000
+			{ 10.0823430069835230, 2.0896678025321922, 199.2880 }, // 0.0000
+			{ 10.9222206090489510, 2.1221681162186004, 216.6865 }, // 0.0000
+			{ 21.2017743894772010, 1.1856768080118900, 233.9188 }, // 0.0000
 		};
 
 		const double* Params;
@@ -326,26 +313,26 @@ private:
 
 		if( aIsThird )
 		{
-			while( i != CoeffCountThird - 1 && CoeffsThird[ i ][ 2 ] < att )
+			while( i != Coeffs3Count - 1 && Coeffs3[ i ][ 2 ] < att )
 			{
 				i++;
 			}
 
-			Params = &CoeffsThird[ i ][ 0 ];
-			att = CoeffsThird[ i ][ 2 ];
+			Params = &Coeffs3[ i ][ 0 ];
+			att = Coeffs3[ i ][ 2 ];
+			fltlen = Coeffs3Base + i * 2;
 		}
 		else
 		{
-			while( i != CoeffCount - 1 && Coeffs[ i ][ 2 ] < att )
+			while( i != Coeffs2Count - 1 && Coeffs2[ i ][ 2 ] < att )
 			{
 				i++;
 			}
 
-			Params = &Coeffs[ i ][ 0 ];
-			att = Coeffs[ i ][ 2 ];
+			Params = &Coeffs2[ i ][ 0 ];
+			att = Coeffs2[ i ][ 2 ];
+			fltlen = Coeffs2Base + i * 2;
 		}
-
-		fltlen = ( i + 3 ) * 2;
 
 		return( Params );
 	}
@@ -560,7 +547,7 @@ inline bool findGCD( double l, double s, double& GCD )
 /**
  * Function evaluates source and destination sample rate ratio and returns
  * the required input and output stepping. Function returns "false" if
- * *this class cannot be used to perform interpolation using these sample
+ * whole stepping cannot be used to perform interpolation using these sample
  * rates.
  *
  * @param SSampleRate Source sample rate.
@@ -705,9 +692,10 @@ public:
 			&CDSPFracInterpolator :: convolve2 );
 
 		R8BCONSOLE( "CDSPFracInterpolator: src=%.2f dst=%.2f taps=%i "
-			"fracs=%i third=%i step=%.6f\n", SrcSampleRate, DstSampleRate,
-			FilterLen, ( IsWhole ? OutStep : FilterBank -> getFilterFracs() ),
-			(int) IsThird, aSrcSampleRate / aDstSampleRate );
+			"fracs=%i whole=%i third=%i step=%.6f\n", SrcSampleRate,
+			DstSampleRate, FilterLen, ( IsWhole ? OutStep :
+			FilterBank -> getFilterFracs() ), (int) IsWhole, (int) IsThird,
+			aSrcSampleRate / aDstSampleRate );
 
 		clear();
 	}
