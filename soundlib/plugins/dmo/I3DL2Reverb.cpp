@@ -16,6 +16,7 @@
 #ifdef MODPLUG_TRACKER
 #include "../../../sounddsp/Reverb.h"
 #endif // MODPLUG_TRACKER
+#include "mpt/base/numbers.hpp"
 #endif // !NO_PLUGINS
 
 OPENMPT_NAMESPACE_BEGIN
@@ -505,7 +506,7 @@ void I3DL2Reverb::RecalculateI3DL2ReverbParams()
 		m_roomFilter = 0.0f;
 	} else
 	{
-		float freq = std::cos(HFReference() * static_cast<float>(2.0 * M_PI) / m_effectiveSampleRate);
+		float freq = std::cos(HFReference() * (2.0f * mpt::numbers::pi_v<float>) / m_effectiveSampleRate);
 		float roomFilter = (freq * (roomHF + roomHF) - 2.0f + std::sqrt(freq * (roomHF * roomHF * freq * 4.0f) + roomHF * 8.0f - roomHF * roomHF * 4.0f - roomHF * freq * 8.0f)) / (roomHF + roomHF - 2.0f);
 		m_roomFilter = Clamp(roomFilter, 0.0f, 1.0f);
 	}
@@ -607,10 +608,10 @@ void I3DL2Reverb::SetDecayCoeffs()
 
 float I3DL2Reverb::CalcDecayCoeffs(int32 index)
 {
-	float hfRef = static_cast<float>(2.0 * M_PI) / m_effectiveSampleRate * HFReference();
+	float hfRef = (2.0f * mpt::numbers::pi_v<float>) / m_effectiveSampleRate * HFReference();
 	float decayHFRatio = DecayHFRatio();
 	if(decayHFRatio > 1.0f)
-		hfRef = static_cast<float>(M_PI);
+		hfRef = mpt::numbers::pi_v<float>;
 
 	float c1 = std::pow(10.0f, ((m_delayTaps[index] / m_effectiveSampleRate) * -60.0f / DecayTime()) / 20.0f);
 	float c2 = 0.0f;

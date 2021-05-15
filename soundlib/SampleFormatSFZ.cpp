@@ -17,6 +17,7 @@
 #include "../common/mptFileIO.h"
 #endif // !MODPLUG_NO_FILESAVE
 #include "modsmp_ctrl.h"
+#include "mpt/base/numbers.hpp"
 
 #include <functional>
 
@@ -768,7 +769,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 			sample.uFlags.set(CHN_16BIT);
 			std::function<uint16(int32)> generator;
 			if(synthSample == "*sine")
-				generator = [](int32 i) { return mpt::saturate_round<int16>(std::sin(i * 2.0 * M_PI / 256.0) * int16_max); };
+				generator = [](int32 i) { return mpt::saturate_round<int16>(std::sin(i * ((2.0 * mpt::numbers::pi) / 256.0)) * int16_max); };
 			else if(synthSample == "*square")
 				generator = [](int32 i) { return i < 128 ? int16_max : int16_min; };
 			else if(synthSample == "*triangle" || synthSample == "*tri")
@@ -1126,12 +1127,12 @@ bool CSoundFile::SaveSFZInstrument(INSTRUMENTINDEX nInstr, std::ostream &f, cons
 	WriteSFZEnvelope(f, tickDuration, 2, ins->PanEnv, "pan", 100.0, [](int32 val) { return 2.0 * (val - ENVELOPE_MID) / (ENVELOPE_MAX - ENVELOPE_MIN); });
 	if(ins->PitchEnv.dwFlags[ENV_FILTER])
 	{
-		const auto envScale = 1200.0 * std::log(CutOffToFrequency(127, 256) / static_cast<double>(CutOffToFrequency(0, -256))) / M_LN2;
+		const auto envScale = 1200.0 * std::log(CutOffToFrequency(127, 256) / static_cast<double>(CutOffToFrequency(0, -256))) / mpt::numbers::ln2;
 		const auto cutoffNormal = CutOffToFrequency(cutoff);
 		WriteSFZEnvelope(f, tickDuration, 3, ins->PitchEnv, "cutoff", envScale, [this, cutoff, cutoffNormal, envScale](int32 val) {
 			// Convert interval between center frequency and envelope into cents
 			const auto freq = CutOffToFrequency(cutoff, (val - ENVELOPE_MID) * 256 / (ENVELOPE_MAX - ENVELOPE_MID));
-			return 1200.0 * std::log(freq / static_cast<double>(cutoffNormal)) / M_LN2 / envScale;
+			return 1200.0 * std::log(freq / static_cast<double>(cutoffNormal)) / mpt::numbers::ln2 / envScale;
 		});
 	} else
 	{

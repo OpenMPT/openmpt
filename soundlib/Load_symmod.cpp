@@ -23,6 +23,7 @@
 #ifdef MPT_EXTERNAL_SAMPLES
 #include "../common/mptPathString.h"
 #endif  // MPT_EXTERNAL_SAMPLES
+#include "mpt/base/numbers.hpp"
 
 #include <map>
 
@@ -1737,7 +1738,7 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 							{
 								double sampleVib = 0.0;
 								if(chnState.sampleVibDepth)
-									sampleVib = chnState.sampleVibDepth * (std::sin(chnState.sampleVibPhase * M_PI * 2.0 / 1024.0 + 1.5 * M_PI) - 1.0) / 4.0;
+									sampleVib = chnState.sampleVibDepth * (std::sin(chnState.sampleVibPhase * (mpt::numbers::pi * 2.0 / 1024.0) + 1.5 * mpt::numbers::pi) - 1.0) / 4.0;
 								m.command = CMD_OFFSETPERCENTAGE;
 								m.param   = mpt::saturate_round<ModCommand::PARAM>(event.param + chnState.fromAdd + sampleVib);
 							}

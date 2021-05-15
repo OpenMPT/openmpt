@@ -49,19 +49,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
-// cmath fixups
-#ifndef M_PI
-#define M_PI       3.14159265358979323846
-#endif
-#ifndef M_PI_2
-#define M_PI_2     1.57079632679489661923
-#endif
-#ifndef M_LN2
-#define M_LN2      0.69314718055994530942
-#endif
-
-
-
 // Limits 'val' to given range. If 'val' is less than 'lowerLimit', 'val' is set to value 'lowerLimit'.
 // Similarly if 'val' is greater than 'upperLimit', 'val' is set to value 'upperLimit'.
 // If 'lowerLimit' > 'upperLimit', 'val' won't be modified.

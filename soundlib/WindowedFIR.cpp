@@ -11,6 +11,7 @@
 
 #include "stdafx.h"
 #include "WindowedFIR.h"
+#include "mpt/base/numbers.hpp"
 #include <cmath>
 
 OPENMPT_NAMESPACE_BEGIN
@@ -21,7 +22,7 @@ double CWindowedFIR::coef( int _PCnr, double _POfs, double _PCut, int _PWidth, i
 	const double _LWidthM1 = _PWidth - 1;
 	const double _LWidthM1Half = 0.5 * _LWidthM1;
 	const double _LPosU = (_PCnr - _POfs);
-	const double _LPIdl = 2.0 * M_PI / _LWidthM1;
+	const double _LPIdl = (2.0 * mpt::numbers::pi) / _LWidthM1;
 	double _LPos = _LPosU - _LWidthM1Half;
 	double _LWc, _LSi;
 	if(std::abs(_LPos) < epsilon)
@@ -60,7 +61,7 @@ double CWindowedFIR::coef( int _PCnr, double _POfs, double _PCut, int _PWidth, i
 			_LWc = 1.0;
 			break;
 		}
-		_LPos *= M_PI;
+		_LPos *= mpt::numbers::pi;
 		_LSi = std::sin(_PCut * _LPos) / _LPos;
 	}
 	return (_LWc * _LSi);

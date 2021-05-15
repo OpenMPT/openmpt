@@ -13,6 +13,7 @@
 #ifndef NO_PLUGINS
 #include "../../Sndfile.h"
 #include "Chorus.h"
+#include "mpt/base/numbers.hpp"
 #endif // !NO_PLUGINS
 
 OPENMPT_NAMESPACE_BEGIN
@@ -264,7 +265,7 @@ void Chorus::RecalculateChorusParams()
 	if(IsTriangle())
 		m_waveShapeVal = frequencySamples * 2.0f;
 	else
-		m_waveShapeVal = std::sin(frequencySamples * float(M_PI)) * 2.0f;
+		m_waveShapeVal = std::sin(frequencySamples * mpt::numbers::pi_v<float>) * 2.0f;
 }
 
 } // namespace DMO

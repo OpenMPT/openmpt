@@ -15,6 +15,7 @@
 #include "Sndfile.h"
 #include "Tables.h"
 #include "../common/misc_util.h"
+#include "mpt/base/numbers.hpp"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -31,7 +32,7 @@ uint8 CSoundFile::FrequencyToCutOff(double frequency) const
 	// <==========> Rewrite as x = (log2(cutoff) - log2(110) - 0.25) * y.
 	// <==========> Rewrite as x = (ln(cutoff) - ln(110) - 0.25*ln(2)) * y/ln(2).
 	//                                           <4.8737671609324025>
-	double cutoff = (std::log(frequency) - 4.8737671609324025) * (m_SongFlags[SONG_EXFILTERRANGE] ? (20.0 / M_LN2) : (24.0 / M_LN2));
+	double cutoff = (std::log(frequency) - 4.8737671609324025) * (m_SongFlags[SONG_EXFILTERRANGE] ? (20.0 / mpt::numbers::ln2) : (24.0 / mpt::numbers::ln2));
 	Limit(cutoff, 0.0, 127.0);
 	return mpt::saturate_round<uint8>(cutoff);
 }
@@ -95,7 +96,7 @@ int CSoundFile::SetupChannelFilter(ModChannel &chn, bool bReset, int envModifier
 
 	// 2 * damping factor
 	const float dmpfac = std::pow(10.0f, -resonance * ((24.0f / 128.0f) / 20.0f));
-	const float fc = CutOffToFrequency(cutoff, envModifier) * (2.0f * (float)M_PI);
+	const float fc = CutOffToFrequency(cutoff, envModifier) * (2.0f * mpt::numbers::pi_v<float>);
 	float d, e;
 	if(m_playBehaviour[kITFilterBehaviour] && !m_SongFlags[SONG_EXFILTERRANGE])
 	{

@@ -11,6 +11,7 @@
 
 #include "mptBuildSettings.h"
 
+#include "mpt/base/numbers.hpp"
 #include <cmath>
 
 OPENMPT_NAMESPACE_BEGIN
@@ -39,9 +40,9 @@ namespace Fade
 	inline double LogFunc(double pos)
 		{ return std::log10(1.0 + pos * 99.0) * 0.5; }
 	inline double QuarterSineFunc(double pos)
-		{ return std::sin(M_PI_2 * pos); }
+		{ return std::sin((0.5 * mpt::numbers::pi) * pos); }
 	inline double HalfSineFunc(double pos)
-		{ return (1.0 + std::cos(M_PI + M_PI * pos)) * 0.5; }
+		{ return (1.0 + std::cos(mpt::numbers::pi + mpt::numbers::pi * pos)) * 0.5; }
 
 	inline Func GetFadeFunc(Law fadeLaw)
 	{

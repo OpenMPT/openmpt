@@ -14,6 +14,7 @@
 
 #ifdef ENABLE_TESTS
 
+#include "mpt/base/numbers.hpp"
 #include "mpt/crc/crc.hpp"
 #include "mpt/environment/environment.hpp"
 #include "mpt/test/test.hpp"
@@ -708,7 +709,7 @@ static MPT_NOINLINE void TestStringFormatting()
 	TestFloatFormats(1234567890000000.0);
 	TestFloatFormats(0.0000001234567890);
 
-	TestFloatFormats(M_PI);
+	TestFloatFormats(mpt::numbers::pi);
 	TestFloatFormats(3.14159265358979323846);
 	TestFloatFormats(3.14159265358979323846f);
 

@@ -16,6 +16,7 @@
 #include "../../Sndfile.h"
 #include "Compressor.h"
 #include "DMOUtils.h"
+#include "mpt/base/numbers.hpp"
 #endif // !NO_PLUGINS
 
 OPENMPT_NAMESPACE_BEGIN
@@ -222,7 +223,7 @@ void Compressor::RecalculateCompressorParams()
 	m_release = std::pow(10.0f, -1.0f / (ReleaseTime() * sampleRate));
 	const float _2e31 = float(1u << 31);
 	const float _2e26 = float(1u << 26);
-	m_threshold = std::min((_2e31 - 1.0f), (std::log(std::pow(10.0f, ThresholdInDecibel() / 20.0f) * _2e31) * _2e26) / static_cast<float>(M_LN2) + _2e26) * (1.0f / _2e31);
+	m_threshold = std::min((_2e31 - 1.0f), (std::log(std::pow(10.0f, ThresholdInDecibel() / 20.0f) * _2e31) * _2e26) / mpt::numbers::ln2_v<float> + _2e26) * (1.0f / _2e31);
 	m_ratio = 1.0f - (1.0f / CompressorRatio());
 	m_predelay = static_cast<int32>((PreDelay() * sampleRate) + 2.0f);
 }

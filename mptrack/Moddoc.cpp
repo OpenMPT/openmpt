@@ -48,6 +48,7 @@
 #include "AbstractVstEditor.h"
 #endif
 #include "mpt/binary/hex.hpp"
+#include "mpt/base/numbers.hpp"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -668,7 +669,7 @@ bool CModDoc::SetDefaultChannelColors()
 					numGroups++;
 			}
 		}
-		const double hueFactor = rainbow ? (1.5 * M_PI) / std::max(1, numGroups - 1) : 1000.0;  // Three quarters of the color wheel, red to purple
+		const double hueFactor = rainbow ? (1.5 * mpt::numbers::pi) / std::max(1, numGroups - 1) : 1000.0;  // Three quarters of the color wheel, red to purple
 		for(CHANNELINDEX i = 0, group = 0; i < GetNumChannels(); i++)
 		{
 			if(i > 0 && (m_SndFile.ChnSettings[i].szName.empty() || m_SndFile.ChnSettings[i].szName != m_SndFile.ChnSettings[i - 1].szName))

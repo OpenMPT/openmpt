@@ -17,6 +17,7 @@
 #ifdef MODPLUG_TRACKER
 #include "../../mptrack/plugins/LFOPluginEditor.h"
 #endif // MODPLUG_TRACKER
+#include "mpt/base/numbers.hpp"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -72,7 +73,7 @@ void LFOPlugin::Process(float *pOutL, float *pOutR, uint32 numFrames)
 		switch(m_waveForm)
 		{
 		case kSine:
-			value = std::sin(m_phase * 2.0 * M_PI);
+			value = std::sin(m_phase * (2.0 * mpt::numbers::pi));
 			break;
 		case kTriangle:
 			value = 1.0 - 4.0 * std::abs(m_phase - 0.5);
@@ -467,7 +468,7 @@ void LFOPlugin::RecalculateFrequency()
 	{
 		if(m_computedFrequency > 0.00045)
 		{
-			double freqLog = std::log(m_computedFrequency) / M_LN2;
+			double freqLog = std::log(m_computedFrequency) / mpt::numbers::ln2;
 			double freqFrac = freqLog - std::floor(freqLog);
 			freqLog -= freqFrac;
 
