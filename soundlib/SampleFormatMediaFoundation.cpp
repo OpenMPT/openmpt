@@ -113,7 +113,7 @@ static FileTags ReadMFMetadata(IMFMediaSource *mediaSource)
 				break;
 			} else if(hrToString == ERROR_INSUFFICIENT_BUFFER)
 			{
-				wcharVal.resize(Util::ExponentialGrow(wcharVal.size()));
+				wcharVal.resize(mpt::exponential_grow(wcharVal.size()));
 			} else
 			{
 				break;

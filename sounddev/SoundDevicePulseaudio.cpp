@@ -299,8 +299,8 @@ bool Pulseaudio::InternalOpen()
 	ss.channels = m_Settings.Channels;
 	pa_buffer_attr ba;
 	MemsetZero(ba);
-	ba.minreq = Util::AlignUp<uint32>(mpt::saturate_round<uint32>(m_Settings.GetBytesPerSecond() * m_Settings.UpdateInterval), m_Settings.GetBytesPerFrame());
-	ba.maxlength = Util::AlignUp<uint32>(mpt::saturate_round<uint32>(m_Settings.GetBytesPerSecond() * m_Settings.Latency), m_Settings.GetBytesPerFrame());
+	ba.minreq = mpt::align_up<uint32>(mpt::saturate_round<uint32>(m_Settings.GetBytesPerSecond() * m_Settings.UpdateInterval), m_Settings.GetBytesPerFrame());
+	ba.maxlength = mpt::align_up<uint32>(mpt::saturate_round<uint32>(m_Settings.GetBytesPerSecond() * m_Settings.Latency), m_Settings.GetBytesPerFrame());
 	ba.tlength = ba.maxlength - ba.minreq;
 	ba.prebuf = ba.tlength;
 	ba.fragsize = 0;

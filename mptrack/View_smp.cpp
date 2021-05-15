@@ -627,7 +627,7 @@ double CViewSample::ScreenToSeconds(int32 x, bool ignoreSampleLength) const
 
 static bool HitTest(int pointX, int objX, int marginL, int marginR, int top, int bottom, CRect *rect)
 {
-	if(!IsInRange(pointX, objX - marginL, objX + marginR))
+	if(!mpt::is_in_range(pointX, objX - marginL, objX + marginR))
 		return false;
 	if(rect)
 		*rect = CRect{objX - marginL, top, objX + marginR + 1, bottom};

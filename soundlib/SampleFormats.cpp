@@ -2057,7 +2057,7 @@ static bool AUIsAnnotationLineWithField(const std::string &line)
 	// Scan for invalid chars
 	for(auto c : field)
 	{
-		if(!IsInRange(c, 'a', 'z') && !IsInRange(c, 'A', 'Z') && !IsInRange(c, '0', '9') && c != '-' && c != '_')
+		if(!mpt::is_in_range(c, 'a', 'z') && !mpt::is_in_range(c, 'A', 'Z') && !mpt::is_in_range(c, '0', '9') && c != '-' && c != '_')
 		{
 			return false;
 		}

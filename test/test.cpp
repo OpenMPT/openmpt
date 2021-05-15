@@ -1602,7 +1602,7 @@ static MPT_NOINLINE void TestRandom()
 			}
 			for(std::size_t i = 0; i < 256; ++i)
 			{
-				VERIFY_EQUAL_QUIET_NONCONT(IsInRange(hist[i], 16u, 65520u), true);
+				VERIFY_EQUAL_QUIET_NONCONT(mpt::is_in_range(hist[i], 16u, 65520u), true);
 			}
 		}
 		{
@@ -1614,7 +1614,7 @@ static MPT_NOINLINE void TestRandom()
 			}
 			for(std::size_t i = 0; i < 256; ++i)
 			{
-				VERIFY_EQUAL_QUIET_NONCONT(IsInRange(hist[i], 16u, 65520u), true);
+				VERIFY_EQUAL_QUIET_NONCONT(mpt::is_in_range(hist[i], 16u, 65520u), true);
 			}
 		}
 		{
@@ -1628,7 +1628,7 @@ static MPT_NOINLINE void TestRandom()
 			{
 				if(i < 2)
 				{
-					VERIFY_EQUAL_QUIET_NONCONT(IsInRange(hist[i], 16u, 65520u), true);
+					VERIFY_EQUAL_QUIET_NONCONT(mpt::is_in_range(hist[i], 16u, 65520u), true);
 				} else
 				{
 					VERIFY_EQUAL_QUIET_NONCONT(hist[i], 0u);

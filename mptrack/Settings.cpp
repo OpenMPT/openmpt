@@ -310,7 +310,7 @@ mpt::ustring IniFileSettingsBackend::ReadSettingRaw(const SettingPath &path, con
 		{
 			return def;
 		}
-		buf.resize(Util::ExponentialGrow(buf.size(), std::numeric_limits<DWORD>::max()));
+		buf.resize(mpt::exponential_grow(buf.size(), std::numeric_limits<DWORD>::max()));
 	}
 	return mpt::ToUnicode(mpt::winstring(buf.data()));
 }
@@ -324,7 +324,7 @@ double IniFileSettingsBackend::ReadSettingRaw(const SettingPath &path, double de
 		{
 			return def;
 		}
-		buf.resize(Util::ExponentialGrow(buf.size(), std::numeric_limits<DWORD>::max()));
+		buf.resize(mpt::exponential_grow(buf.size(), std::numeric_limits<DWORD>::max()));
 	}
 	return ConvertStrTo<double>(mpt::winstring(buf.data()));
 }

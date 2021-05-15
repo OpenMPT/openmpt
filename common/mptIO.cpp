@@ -218,7 +218,7 @@ void FileDataContainerSeekable::CacheStream() const
 
 std::size_t FileDataContainerSeekable::InternalFillPageAndReturnIndex(off_t pos) const
 {
-	pos = Util::AlignDown(pos, static_cast<off_t>(CHUNK_SIZE));
+	pos = mpt::align_down(pos, static_cast<off_t>(CHUNK_SIZE));
 	for(std::size_t chunkLRUIndex = 0; chunkLRUIndex < NUM_CHUNKS; ++chunkLRUIndex)
 	{
 		std::size_t chunkIndex = m_ChunkIndexLRU[chunkLRUIndex];
@@ -362,13 +362,13 @@ void FileDataContainerUnseekable::EnsureCacheBuffer(std::size_t requiredbuffersi
 	}
 	if(cache.size() == 0)
 	{
-		cache.resize(Util::AlignUp<std::size_t>(cachesize + requiredbuffersize, BUFFER_SIZE));
-	} else if(Util::ExponentialGrow(cache.size()) < cachesize + requiredbuffersize)
+		cache.resize(mpt::align_up<std::size_t>(cachesize + requiredbuffersize, BUFFER_SIZE));
+	} else if(mpt::exponential_grow(cache.size()) < cachesize + requiredbuffersize)
 	{
-		cache.resize(Util::AlignUp<std::size_t>(cachesize + requiredbuffersize, BUFFER_SIZE));
+		cache.resize(mpt::align_up<std::size_t>(cachesize + requiredbuffersize, BUFFER_SIZE));
 	} else
 	{
-		cache.resize(Util::ExponentialGrow(cache.size()));
+		cache.resize(mpt::exponential_grow(cache.size()));
 	}
 }
 
@@ -402,7 +402,7 @@ void FileDataContainerUnseekable::CacheStreamUpTo(off_t pos, off_t length) const
 	{
 		return;
 	}
-	std::size_t alignedpos = Util::AlignUp<std::size_t>(target, QUANTUM_SIZE);
+	std::size_t alignedpos = mpt::align_up<std::size_t>(target, QUANTUM_SIZE);
 	std::size_t needcount = alignedpos - cachesize;
 	EnsureCacheBuffer(needcount);
 	std::size_t readcount = InternalRead(mpt::span(&cache[cachesize], alignedpos - cachesize)).size();

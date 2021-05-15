@@ -198,7 +198,7 @@ void ID3V2Tagger::WriteID3v2Tags(std::ostream &s, const FileTags &tags, ReplayGa
 	totalID3v2Size += paddingSize;
 	if(settings.MP3ID3v2PaddingAlignHint > 0)
 	{
-		totalID3v2Size = Util::AlignUp<uint32>(totalID3v2Size, settings.MP3ID3v2PaddingAlignHint);
+		totalID3v2Size = mpt::align_up<uint32>(totalID3v2Size, settings.MP3ID3v2PaddingAlignHint);
 		paddingSize = totalID3v2Size - totalID3v2SizeWithoutPadding;
 	}
 	for(size_t i = 0; i < paddingSize; i++)

@@ -61,29 +61,6 @@ OPENMPT_NAMESPACE_BEGIN
 #endif
 
 
-namespace Util
-{
-
-// Grows x with an exponential factor suitable for increasing buffer sizes.
-// Clamps the result at limit.
-// And avoids integer overflows while doing its business.
-// The growth factor is 1.5, rounding down, execpt for the initial x==1 case.
-template <typename T, typename Tlimit>
-inline T ExponentialGrow(const T &x, const Tlimit &limit)
-{
-	MPT_ASSERT(x > 0);
-	MPT_ASSERT(limit > 0);
-	return mpt::exponential_grow(x, limit);
-}
-									
-template <typename T>
-inline T ExponentialGrow(const T &x)
-{
-	return Util::ExponentialGrow(x, std::numeric_limits<T>::max());
-}
-
-} //namespace Util
-
 
 // Limits 'val' to given range. If 'val' is less than 'lowerLimit', 'val' is set to value 'lowerLimit'.
 // Similarly if 'val' is greater than 'upperLimit', 'val' is set to value 'upperLimit'.
@@ -104,15 +81,6 @@ inline T Clamp(T val, const C lowerLimit, const C upperLimit)
 	if(val < lowerLimit) return lowerLimit;
 	else if(val > upperLimit) return upperLimit;
 	else return val;
-}
-
-// Check if val is in [lo,hi] without causing compiler warnings
-// if theses checks are always true due to the domain of T.
-// GCC does not warn if the type is templated.
-template<typename T, typename C>
-inline bool IsInRange(T val, C lo, C hi)
-{
-	return mpt::is_in_range(val, lo, hi);
 }
 
 // Like Limit, but with upperlimit only.
@@ -202,20 +170,6 @@ namespace Util {
 		a *= b;
 		a += c / 2u;
 		return (a >= 0) ? mpt::saturate_cast<int32>(a / c) : mpt::saturate_cast<int32>((a - (c - 1)) / c);
-	}
-
-	// rounds x up to multiples of target
-	template <typename T>
-	constexpr T AlignUp(T x, T target)
-	{
-		return mpt::align_up(x, target);
-	}
-
-	// rounds x down to multiples of target
-	template <typename T>
-	constexpr T AlignDown(T x, T target)
-	{
-		return mpt::align_down(x, target);
 	}
 
 } // namespace Util

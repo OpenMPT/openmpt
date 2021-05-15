@@ -67,9 +67,9 @@ public:
 			annotationTotalSize = annotationSize;
 			if(settings.Details.AUPaddingAlignHint > 0)
 			{
-				annotationTotalSize = Util::AlignUp<std::size_t>(24u + annotationTotalSize, settings.Details.AUPaddingAlignHint) - 24u;
+				annotationTotalSize = mpt::align_up<std::size_t>(24u + annotationTotalSize, settings.Details.AUPaddingAlignHint) - 24u;
 			}
-			annotationTotalSize = Util::AlignUp<std::size_t>(annotationTotalSize, 8u);
+			annotationTotalSize = mpt::align_up<std::size_t>(annotationTotalSize, 8u);
 		}
 		MPT_ASSERT(annotationTotalSize >= annotationSize);
 		MPT_ASSERT(annotationTotalSize % 8 == 0);

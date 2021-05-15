@@ -1358,7 +1358,7 @@ SAMPLEINDEX CSoundFile::DetectUnusedSamples(std::vector<bool> &sampleUsed) const
 					if(!p->instr) instr = lastIns[c];
 					if (instr)
 					{
-						if(IsInRange(instr, (INSTRUMENTINDEX)0, MAX_INSTRUMENTS))
+						if(mpt::is_in_range(instr, (INSTRUMENTINDEX)0, MAX_INSTRUMENTS))
 						{
 							ModInstrument *pIns = Instruments[p->instr];
 							if (pIns)

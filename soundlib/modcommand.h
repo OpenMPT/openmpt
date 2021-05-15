@@ -177,11 +177,11 @@ public:
 	static bool IsPcNote(NOTE note) { return note == NOTE_PC || note == NOTE_PCS; }
 
 	// Returns true if and only if note is a valid musical note.
-	bool IsNote() const { return IsInRange(note, NOTE_MIN, NOTE_MAX); }
-	static bool IsNote(NOTE note) { return IsInRange(note, NOTE_MIN, NOTE_MAX); }
+	bool IsNote() const { return mpt::is_in_range(note, NOTE_MIN, NOTE_MAX); }
+	static bool IsNote(NOTE note) { return mpt::is_in_range(note, NOTE_MIN, NOTE_MAX); }
 	// Returns true if and only if note is a valid special note.
-	bool IsSpecialNote() const { return IsInRange(note, NOTE_MIN_SPECIAL, NOTE_MAX_SPECIAL); }
-	static bool IsSpecialNote(NOTE note) { return IsInRange(note, NOTE_MIN_SPECIAL, NOTE_MAX_SPECIAL); }
+	bool IsSpecialNote() const { return mpt::is_in_range(note, NOTE_MIN_SPECIAL, NOTE_MAX_SPECIAL); }
+	static bool IsSpecialNote(NOTE note) { return mpt::is_in_range(note, NOTE_MIN_SPECIAL, NOTE_MAX_SPECIAL); }
 	// Returns true if and only if note is a valid musical note or the note entry is empty.
 	bool IsNoteOrEmpty() const { return note == NOTE_NONE || IsNote(); }
 	static bool IsNoteOrEmpty(NOTE note) { return note == NOTE_NONE || IsNote(note); }
