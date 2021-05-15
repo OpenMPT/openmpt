@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: BSL-1.0 OR BSD-3-Clause */
 
 #ifndef MPT_AUDIO_SAMPLE_HPP
-#define MPT_AUDIO_SAMPLE_HPP	
+#define MPT_AUDIO_SAMPLE_HPP
 
 
 

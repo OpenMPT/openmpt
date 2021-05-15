@@ -19,12 +19,12 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 template <typename SampleType>
-inline std::size_t valid_channels(SampleType* const* buffers, std::size_t maxChannels)
+inline std::size_t valid_channels(SampleType *const *buffers, std::size_t maxChannels)
 {
 	std::size_t channel;
-	for (channel = 0; channel < maxChannels; ++channel)
+	for(channel = 0; channel < maxChannels; ++channel)
 	{
-		if (!buffers[channel])
+		if(!buffers[channel])
 		{
 			break;
 		}
