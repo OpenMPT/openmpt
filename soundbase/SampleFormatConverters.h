@@ -12,6 +12,7 @@
 
 #include "mptBuildSettings.h"
 
+#include "mpt/base/arithmetic_shift.hpp"
 
 #include "../common/Endianness.h"
 
@@ -37,27 +38,9 @@ namespace SC
 
 
 #if MPT_COMPILER_MSVC
-#define MPT_SC_AVOID_ROUND 1
-#else
-#define MPT_SC_AVOID_ROUND 0
-#endif
-
-#if MPT_SC_AVOID_ROUND
 #define MPT_SC_FASTROUND(x) std::floor((x) + 0.5f)
 #else
 #define MPT_SC_FASTROUND(x) mpt::round(x)
-#endif
-
-#if MPT_COMPILER_SHIFT_SIGNED
-
-#define MPT_SC_RSHIFT_SIGNED(val, shift) ((val) >> (shift))
-#define MPT_SC_LSHIFT_SIGNED(val, shift) ((val) << (shift))
-
-#else
-
-#define MPT_SC_RSHIFT_SIGNED(val, shift) mpt::rshift_signed((val), (shift))
-#define MPT_SC_LSHIFT_SIGNED(val, shift) mpt::lshift_signed((val), (shift))
-
 #endif
 
 
@@ -414,7 +397,7 @@ struct ConvertShift
 	typedef Tdst output_t;
 	MPT_FORCEINLINE output_t operator()(input_t val)
 	{
-		return mpt::saturate_cast<output_t>(MPT_SC_RSHIFT_SIGNED(val, shift));
+		return mpt::saturate_cast<output_t>(mpt::rshift_signed(val, shift));
 	}
 };
 
@@ -428,7 +411,7 @@ struct ConvertShiftUp
 	typedef Tdst output_t;
 	MPT_FORCEINLINE output_t operator()(input_t val)
 	{
-		return mpt::saturate_cast<output_t>(MPT_SC_LSHIFT_SIGNED(val, shift));
+		return mpt::saturate_cast<output_t>(mpt::lshift_signed(val, shift));
 	}
 };
 
@@ -472,7 +455,7 @@ struct Convert<uint8, int16>
 	typedef uint8 output_t;
 	MPT_FORCEINLINE output_t operator()(input_t val)
 	{
-		return static_cast<uint8>(static_cast<int8>(MPT_SC_RSHIFT_SIGNED(val, 8)) + 0x80);
+		return static_cast<uint8>(static_cast<int8>(mpt::rshift_signed(val, 8)) + 0x80);
 	}
 };
 
@@ -483,7 +466,7 @@ struct Convert<uint8, int24>
 	typedef uint8 output_t;
 	MPT_FORCEINLINE output_t operator()(input_t val)
 	{
-		return static_cast<uint8>(static_cast<int8>(MPT_SC_RSHIFT_SIGNED(static_cast<int>(val), 16)) + 0x80);
+		return static_cast<uint8>(static_cast<int8>(mpt::rshift_signed(static_cast<int>(val), 16)) + 0x80);
 	}
 };
 
@@ -494,7 +477,7 @@ struct Convert<uint8, int32>
 	typedef uint8 output_t;
 	MPT_FORCEINLINE output_t operator()(input_t val)
 	{
-		return static_cast<uint8>(static_cast<int8>(MPT_SC_RSHIFT_SIGNED(val, 24)) + 0x80);
+		return static_cast<uint8>(static_cast<int8>(mpt::rshift_signed(val, 24)) + 0x80);
 	}
 };
 
@@ -505,7 +488,7 @@ struct Convert<uint8, int64>
 	typedef uint8 output_t;
 	MPT_FORCEINLINE output_t operator()(input_t val)
 	{
-		return static_cast<uint8>(static_cast<int8>(MPT_SC_RSHIFT_SIGNED(val, 56)) + 0x80);
+		return static_cast<uint8>(static_cast<int8>(mpt::rshift_signed(val, 56)) + 0x80);
 	}
 };
 
@@ -553,7 +536,7 @@ struct Convert<int8, int16>
 	typedef int8 output_t;
 	MPT_FORCEINLINE output_t operator()(input_t val)
 	{
-		return static_cast<int8>(MPT_SC_RSHIFT_SIGNED(val, 8));
+		return static_cast<int8>(mpt::rshift_signed(val, 8));
 	}
 };
 
@@ -564,7 +547,7 @@ struct Convert<int8, int24>
 	typedef int8 output_t;
 	MPT_FORCEINLINE output_t operator()(input_t val)
 	{
-		return static_cast<int8>(MPT_SC_RSHIFT_SIGNED(static_cast<int>(val), 16));
+		return static_cast<int8>(mpt::rshift_signed(static_cast<int>(val), 16));
 	}
 };
 
@@ -575,7 +558,7 @@ struct Convert<int8, int32>
 	typedef int8 output_t;
 	MPT_FORCEINLINE output_t operator()(input_t val)
 	{
-		return static_cast<int8>(MPT_SC_RSHIFT_SIGNED(val, 24));
+		return static_cast<int8>(mpt::rshift_signed(val, 24));
 	}
 };
 
@@ -586,7 +569,7 @@ struct Convert<int8, int64>
 	typedef int8 output_t;
 	MPT_FORCEINLINE output_t operator()(input_t val)
 	{
-		return static_cast<int8>(MPT_SC_RSHIFT_SIGNED(val, 56));
+		return static_cast<int8>(mpt::rshift_signed(val, 56));
 	}
 };
 
@@ -623,7 +606,7 @@ struct Convert<int16, uint8>
 	typedef int16 output_t;
 	MPT_FORCEINLINE output_t operator()(input_t val)
 	{
-		return static_cast<int16>(MPT_SC_LSHIFT_SIGNED(static_cast<int>(val) - 0x80, 8));
+		return static_cast<int16>(mpt::lshift_signed(static_cast<int>(val) - 0x80, 8));
 	}
 };
 
@@ -634,7 +617,7 @@ struct Convert<int16, int8>
 	typedef int16 output_t;
 	MPT_FORCEINLINE output_t operator()(input_t val)
 	{
-		return static_cast<int16>(MPT_SC_LSHIFT_SIGNED(val, 8));
+		return static_cast<int16>(mpt::lshift_signed(val, 8));
 	}
 };
 
@@ -645,7 +628,7 @@ struct Convert<int16, int24>
 	typedef int16 output_t;
 	MPT_FORCEINLINE output_t operator()(input_t val)
 	{
-		return static_cast<int16>(MPT_SC_RSHIFT_SIGNED(static_cast<int>(val), 8));
+		return static_cast<int16>(mpt::rshift_signed(static_cast<int>(val), 8));
 	}
 };
 
@@ -656,7 +639,7 @@ struct Convert<int16, int32>
 	typedef int16 output_t;
 	MPT_FORCEINLINE output_t operator()(input_t val)
 	{
-		return static_cast<int16>(MPT_SC_RSHIFT_SIGNED(val, 16));
+		return static_cast<int16>(mpt::rshift_signed(val, 16));
 	}
 };
 
@@ -667,7 +650,7 @@ struct Convert<int16, int64>
 	typedef int16 output_t;
 	MPT_FORCEINLINE output_t operator()(input_t val)
 	{
-		return static_cast<int16>(MPT_SC_RSHIFT_SIGNED(val, 48));
+		return static_cast<int16>(mpt::rshift_signed(val, 48));
 	}
 };
 
@@ -704,7 +687,7 @@ struct Convert<int24, uint8>
 	typedef int24 output_t;
 	MPT_FORCEINLINE output_t operator()(input_t val)
 	{
-		return static_cast<int24>(MPT_SC_LSHIFT_SIGNED(static_cast<int>(val) - 0x80, 16));
+		return static_cast<int24>(mpt::lshift_signed(static_cast<int>(val) - 0x80, 16));
 	}
 };
 
@@ -715,7 +698,7 @@ struct Convert<int24, int8>
 	typedef int24 output_t;
 	MPT_FORCEINLINE output_t operator()(input_t val)
 	{
-		return static_cast<int24>(MPT_SC_LSHIFT_SIGNED(val, 16));
+		return static_cast<int24>(mpt::lshift_signed(val, 16));
 	}
 };
 
@@ -726,7 +709,7 @@ struct Convert<int24, int16>
 	typedef int24 output_t;
 	MPT_FORCEINLINE output_t operator()(input_t val)
 	{
-		return static_cast<int24>(MPT_SC_LSHIFT_SIGNED(val, 8));
+		return static_cast<int24>(mpt::lshift_signed(val, 8));
 	}
 };
 
@@ -737,7 +720,7 @@ struct Convert<int24, int32>
 	typedef int24 output_t;
 	MPT_FORCEINLINE output_t operator()(input_t val)
 	{
-		return static_cast<int24>(MPT_SC_RSHIFT_SIGNED(val, 8));
+		return static_cast<int24>(mpt::rshift_signed(val, 8));
 	}
 };
 
@@ -748,7 +731,7 @@ struct Convert<int24, int64>
 	typedef int24 output_t;
 	MPT_FORCEINLINE output_t operator()(input_t val)
 	{
-		return static_cast<int24>(MPT_SC_RSHIFT_SIGNED(val, 40));
+		return static_cast<int24>(mpt::rshift_signed(val, 40));
 	}
 };
 
@@ -761,7 +744,7 @@ struct Convert<int24, float32>
 	{
 		Limit(val, -1.0f, 1.0f);
 		val *= 2147483648.0f;
-		return static_cast<int24>(MPT_SC_RSHIFT_SIGNED(mpt::saturate_cast<int32>(static_cast<int64>(MPT_SC_FASTROUND(val))), 8));
+		return static_cast<int24>(mpt::rshift_signed(mpt::saturate_cast<int32>(static_cast<int64>(MPT_SC_FASTROUND(val))), 8));
 	}
 };
 
@@ -774,7 +757,7 @@ struct Convert<int24, double>
 	{
 		Limit(val, -1.0, 1.0);
 		val *= 2147483648.0;
-		return static_cast<int24>(MPT_SC_RSHIFT_SIGNED(mpt::saturate_cast<int32>(static_cast<int64>(MPT_SC_FASTROUND(val))), 8));
+		return static_cast<int24>(mpt::rshift_signed(mpt::saturate_cast<int32>(static_cast<int64>(MPT_SC_FASTROUND(val))), 8));
 	}
 };
 
@@ -785,7 +768,7 @@ struct Convert<int32, uint8>
 	typedef int32 output_t;
 	MPT_FORCEINLINE output_t operator()(input_t val)
 	{
-		return static_cast<int32>(MPT_SC_LSHIFT_SIGNED(static_cast<int>(val) - 0x80, 24));
+		return static_cast<int32>(mpt::lshift_signed(static_cast<int>(val) - 0x80, 24));
 	}
 };
 
@@ -796,7 +779,7 @@ struct Convert<int32, int8>
 	typedef int32 output_t;
 	MPT_FORCEINLINE output_t operator()(input_t val)
 	{
-		return static_cast<int32>(MPT_SC_LSHIFT_SIGNED(val, 24));
+		return static_cast<int32>(mpt::lshift_signed(val, 24));
 	}
 };
 
@@ -807,7 +790,7 @@ struct Convert<int32, int16>
 	typedef int32 output_t;
 	MPT_FORCEINLINE output_t operator()(input_t val)
 	{
-		return static_cast<int32>(MPT_SC_LSHIFT_SIGNED(val, 16));
+		return static_cast<int32>(mpt::lshift_signed(val, 16));
 	}
 };
 
@@ -818,7 +801,7 @@ struct Convert<int32, int24>
 	typedef int32 output_t;
 	MPT_FORCEINLINE output_t operator()(input_t val)
 	{
-		return static_cast<int32>(MPT_SC_LSHIFT_SIGNED(static_cast<int>(val), 8));
+		return static_cast<int32>(mpt::lshift_signed(static_cast<int>(val), 8));
 	}
 };
 
@@ -829,7 +812,7 @@ struct Convert<int32, int64>
 	typedef int32 output_t;
 	MPT_FORCEINLINE output_t operator()(input_t val)
 	{
-		return static_cast<int32>(MPT_SC_RSHIFT_SIGNED(val, 32));
+		return static_cast<int32>(mpt::rshift_signed(val, 32));
 	}
 };
 
@@ -866,7 +849,7 @@ struct Convert<int64, uint8>
 	typedef int64 output_t;
 	MPT_FORCEINLINE output_t operator()(input_t val)
 	{
-		return MPT_SC_LSHIFT_SIGNED(static_cast<int64>(val) - 0x80, 56);
+		return mpt::lshift_signed(static_cast<int64>(val) - 0x80, 56);
 	}
 };
 
@@ -877,7 +860,7 @@ struct Convert<int64, int8>
 	typedef int64 output_t;
 	MPT_FORCEINLINE output_t operator()(input_t val)
 	{
-		return MPT_SC_LSHIFT_SIGNED(static_cast<int64>(val), 56);
+		return mpt::lshift_signed(static_cast<int64>(val), 56);
 	}
 };
 
@@ -888,7 +871,7 @@ struct Convert<int64, int16>
 	typedef int64 output_t;
 	MPT_FORCEINLINE output_t operator()(input_t val)
 	{
-		return MPT_SC_LSHIFT_SIGNED(static_cast<int64>(val), 48);
+		return mpt::lshift_signed(static_cast<int64>(val), 48);
 	}
 };
 
@@ -899,7 +882,7 @@ struct Convert<int64, int24>
 	typedef int64 output_t;
 	MPT_FORCEINLINE output_t operator()(input_t val)
 	{
-		return MPT_SC_LSHIFT_SIGNED(static_cast<int64>(val), 40);
+		return mpt::lshift_signed(static_cast<int64>(val), 40);
 	}
 };
 
@@ -910,7 +893,7 @@ struct Convert<int64, int32>
 	typedef int64 output_t;
 	MPT_FORCEINLINE output_t operator()(input_t val)
 	{
-		return MPT_SC_LSHIFT_SIGNED(static_cast<int64>(val), 32);
+		return mpt::lshift_signed(static_cast<int64>(val), 32);
 	}
 };
 
@@ -1108,7 +1091,7 @@ struct ConvertFixedPoint<uint8, int32, fractionalBits>
 	{
 		static_assert(fractionalBits >= 0 && fractionalBits <= sizeof(input_t) * 8 - 1);
 		static_assert(shiftBits >= 1);
-		val = MPT_SC_RSHIFT_SIGNED((val + (1 << (shiftBits - 1))), shiftBits);  // round
+		val = mpt::rshift_signed((val + (1 << (shiftBits - 1))), shiftBits);  // round
 		if(val < int8_min) val = int8_min;
 		if(val > int8_max) val = int8_max;
 		return static_cast<uint8>(val + 0x80);  // unsigned
@@ -1125,7 +1108,7 @@ struct ConvertFixedPoint<int8, int32, fractionalBits>
 	{
 		static_assert(fractionalBits >= 0 && fractionalBits <= sizeof(input_t) * 8 - 1);
 		static_assert(shiftBits >= 1);
-		val = MPT_SC_RSHIFT_SIGNED((val + (1 << (shiftBits - 1))), shiftBits);  // round
+		val = mpt::rshift_signed((val + (1 << (shiftBits - 1))), shiftBits);  // round
 		if(val < int8_min) val = int8_min;
 		if(val > int8_max) val = int8_max;
 		return static_cast<int8>(val);
@@ -1142,7 +1125,7 @@ struct ConvertFixedPoint<int16, int32, fractionalBits>
 	{
 		static_assert(fractionalBits >= 0 && fractionalBits <= sizeof(input_t) * 8 - 1);
 		static_assert(shiftBits >= 1);
-		val = MPT_SC_RSHIFT_SIGNED((val + (1 << (shiftBits - 1))), shiftBits);  // round
+		val = mpt::rshift_signed((val + (1 << (shiftBits - 1))), shiftBits);  // round
 		if(val < int16_min) val = int16_min;
 		if(val > int16_max) val = int16_max;
 		return static_cast<int16>(val);
@@ -1159,7 +1142,7 @@ struct ConvertFixedPoint<int24, int32, fractionalBits>
 	{
 		static_assert(fractionalBits >= 0 && fractionalBits <= sizeof(input_t) * 8 - 1);
 		static_assert(shiftBits >= 1);
-		val = MPT_SC_RSHIFT_SIGNED((val + (1 << (shiftBits - 1))), shiftBits);  // round
+		val = mpt::rshift_signed((val + (1 << (shiftBits - 1))), shiftBits);  // round
 		if(val < int24_min) val = int24_min;
 		if(val > int24_max) val = int24_max;
 		return static_cast<int24>(val);
@@ -1228,7 +1211,7 @@ struct ConvertToFixedPoint<int32, uint8, fractionalBits>
 	{
 		static_assert(fractionalBits >= 0 && fractionalBits <= sizeof(output_t) * 8 - 1);
 		static_assert(shiftBits >= 1);
-		return MPT_SC_LSHIFT_SIGNED(static_cast<output_t>(static_cast<int>(val) - 0x80), shiftBits);
+		return mpt::lshift_signed(static_cast<output_t>(static_cast<int>(val) - 0x80), shiftBits);
 	}
 };
 
@@ -1242,7 +1225,7 @@ struct ConvertToFixedPoint<int32, int8, fractionalBits>
 	{
 		static_assert(fractionalBits >= 0 && fractionalBits <= sizeof(output_t) * 8 - 1);
 		static_assert(shiftBits >= 1);
-		return MPT_SC_LSHIFT_SIGNED(static_cast<output_t>(val), shiftBits);
+		return mpt::lshift_signed(static_cast<output_t>(val), shiftBits);
 	}
 };
 
@@ -1256,7 +1239,7 @@ struct ConvertToFixedPoint<int32, int16, fractionalBits>
 	{
 		static_assert(fractionalBits >= 0 && fractionalBits <= sizeof(output_t) * 8 - 1);
 		static_assert(shiftBits >= 1);
-		return MPT_SC_LSHIFT_SIGNED(static_cast<output_t>(val), shiftBits);
+		return mpt::lshift_signed(static_cast<output_t>(val), shiftBits);
 	}
 };
 
@@ -1270,7 +1253,7 @@ struct ConvertToFixedPoint<int32, int24, fractionalBits>
 	{
 		static_assert(fractionalBits >= 0 && fractionalBits <= sizeof(output_t) * 8 - 1);
 		static_assert(shiftBits >= 1);
-		return MPT_SC_LSHIFT_SIGNED(static_cast<output_t>(val), shiftBits);
+		return mpt::lshift_signed(static_cast<output_t>(val), shiftBits);
 	}
 };
 
@@ -1282,7 +1265,7 @@ struct ConvertToFixedPoint<int32, int32, fractionalBits>
 	MPT_FORCEINLINE output_t operator()(input_t val)
 	{
 		static_assert(fractionalBits >= 0 && fractionalBits <= sizeof(output_t) * 8 - 1);
-		return MPT_SC_RSHIFT_SIGNED(static_cast<output_t>(val), (sizeof(input_t) * 8 - 1 - fractionalBits));
+		return mpt::rshift_signed(static_cast<output_t>(val), (sizeof(input_t) * 8 - 1 - fractionalBits));
 	}
 };
 
@@ -1576,8 +1559,6 @@ struct NormalizationChain
 
 
 
-#undef MPT_SC_RSHIFT_SIGNED
-#undef MPT_SC_LSHIFT_SIGNED
 #undef MPT_SC_FASTROUND
 
 
