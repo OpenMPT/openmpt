@@ -7,6 +7,9 @@
     <Filter Include="src\mpt">
       <UniqueIdentifier>{1ACB48A9-86AA-C744-8FC2-521BFB202EA6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\mpt\audio">
+      <UniqueIdentifier>{08F9969C-74B9-12D3-3DF4-5B50A97357AF}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\mpt\base">
       <UniqueIdentifier>{B102DE80-9D65-6D25-46EB-A5DB322D39A8}</UniqueIdentifier>
     </Filter>
@@ -135,6 +138,12 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\src\mpt\audio\sample.hpp">
+      <Filter>src\mpt\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\audio\span.hpp">
+      <Filter>src\mpt\audio</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\mpt\base\algorithm.hpp">
       <Filter>src\mpt\base</Filter>
     </ClInclude>
@@ -551,9 +560,6 @@
     </ClInclude>
     <ClInclude Include="..\..\common\versionNumber.h">
       <Filter>common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\soundbase\AudioSample.h">
-      <Filter>soundbase</Filter>
     </ClInclude>
     <ClInclude Include="..\..\soundbase\Dither.h">
       <Filter>soundbase</Filter>

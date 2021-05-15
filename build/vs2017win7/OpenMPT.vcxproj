@@ -892,7 +892,6 @@
     <ClInclude Include="..\..\mptrack\view_com.h" />
     <ClInclude Include="..\..\pluginBridge\BridgeCommon.h" />
     <ClInclude Include="..\..\pluginBridge\BridgeWrapper.h" />
-    <ClInclude Include="..\..\soundbase\AudioSample.h" />
     <ClInclude Include="..\..\soundbase\Dither.h" />
     <ClInclude Include="..\..\soundbase\MixSample.h" />
     <ClInclude Include="..\..\soundbase\MixSampleConvert.h" />
@@ -987,6 +986,8 @@
     <ClInclude Include="..\..\soundlib\tuning.h" />
     <ClInclude Include="..\..\soundlib\tuningbase.h" />
     <ClInclude Include="..\..\soundlib\tuningcollection.h" />
+    <ClInclude Include="..\..\src\mpt\audio\sample.hpp" />
+    <ClInclude Include="..\..\src\mpt\audio\span.hpp" />
     <ClInclude Include="..\..\src\mpt\base\algorithm.hpp" />
     <ClInclude Include="..\..\src\mpt\base\aligned_array.hpp" />
     <ClInclude Include="..\..\src\mpt\base\alloc.hpp" />

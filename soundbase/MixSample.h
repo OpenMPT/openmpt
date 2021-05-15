@@ -11,7 +11,7 @@
 
 #include "mptBuildSettings.h"
 
-#include "AudioSample.h"
+#include "mpt/audio/sample.hpp"
 #include "../common/mptBaseMacros.h"
 #include "../common/mptBaseTypes.h"
 
@@ -48,7 +48,7 @@ struct FixedPointSampleTraits
 using MixSampleIntTraits = FixedPointSampleTraits<int32, 4, 8>;
 
 using MixSampleInt = MixSampleIntTraits::sample_type;
-using MixSampleFloat = AudioSampleFloat;
+using MixSampleFloat = mpt::audio_sample_float;
 
 using MixSample = std::conditional<mpt::float_traits<nativefloat>::is_hard, MixSampleFloat, MixSampleInt>::type;
 

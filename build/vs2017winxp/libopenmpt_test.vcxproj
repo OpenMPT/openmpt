@@ -340,7 +340,6 @@
     <ClInclude Include="..\..\libopenmpt\libopenmpt_stream_callbacks_fd.h" />
     <ClInclude Include="..\..\libopenmpt\libopenmpt_stream_callbacks_file.h" />
     <ClInclude Include="..\..\libopenmpt\libopenmpt_version.h" />
-    <ClInclude Include="..\..\soundbase\AudioSample.h" />
     <ClInclude Include="..\..\soundbase\Dither.h" />
     <ClInclude Include="..\..\soundbase\MixSample.h" />
     <ClInclude Include="..\..\soundbase\MixSampleConvert.h" />
@@ -422,6 +421,8 @@
     <ClInclude Include="..\..\soundlib\tuning.h" />
     <ClInclude Include="..\..\soundlib\tuningbase.h" />
     <ClInclude Include="..\..\soundlib\tuningcollection.h" />
+    <ClInclude Include="..\..\src\mpt\audio\sample.hpp" />
+    <ClInclude Include="..\..\src\mpt\audio\span.hpp" />
     <ClInclude Include="..\..\src\mpt\base\algorithm.hpp" />
     <ClInclude Include="..\..\src\mpt\base\aligned_array.hpp" />
     <ClInclude Include="..\..\src\mpt\base\alloc.hpp" />

@@ -49,6 +49,7 @@
 #include "ProgressDialog.h"
 #include <HtmlHelp.h>
 #include <Dbt.h>  // device change messages
+#include "mpt/audio/span.hpp"
 
 
 #ifdef _DEBUG
@@ -709,13 +710,13 @@ public:
 	}
 	inline void FillCallback(MixSampleInt * const *MixInputBuffers, std::size_t channels, std::size_t countChunk) override
 	{
-		audio_span_planar<MixSampleInt> dst(MixInputBuffers, channels, countChunk);
+		mpt::audio_span_planar<MixSampleInt> dst(MixInputBuffers, channels, countChunk);
 		bufferio.template ReadFixedPoint<MixSampleIntTraits::mix_fractional_bits>(dst, countChunk);
 		vumeter.Process(MixInputBuffers, channels, countChunk);
 	}
 	inline void FillCallback(MixSampleFloat * const *MixInputBuffers, std::size_t channels, std::size_t countChunk) override
 	{
-		audio_span_planar<MixSampleFloat> dst(MixInputBuffers, channels, countChunk);
+		mpt::audio_span_planar<MixSampleFloat> dst(MixInputBuffers, channels, countChunk);
 		bufferio.Read(dst, countChunk);
 		vumeter.Process(MixInputBuffers, channels, countChunk);
 	}
@@ -739,13 +740,13 @@ public:
 	inline void DataCallback(MixSampleInt *MixSoundBuffer, std::size_t channels, std::size_t countChunk) override
 	{
 		vumeter.Process(MixSoundBuffer, channels, countChunk);
-		audio_span_interleaved<const MixSampleInt> src(MixSoundBuffer, channels, countChunk);
+		mpt::audio_span_interleaved<const MixSampleInt> src(MixSoundBuffer, channels, countChunk);
 		bufferio.template WriteFixedPoint<MixSampleIntTraits::mix_fractional_bits>(src, countChunk);
 	}
 	inline void DataCallback(MixSampleFloat *MixSoundBuffer, std::size_t channels, std::size_t countChunk) override
 	{
 		vumeter.Process(MixSoundBuffer, channels, countChunk);
-		audio_span_interleaved<const MixSampleFloat> src(MixSoundBuffer, channels, countChunk);
+		mpt::audio_span_interleaved<const MixSampleFloat> src(MixSoundBuffer, channels, countChunk);
 		bufferio.Write(src, countChunk);
 	}
 };

@@ -45,6 +45,7 @@ mkdir -p bin/dist-autotools/src/mpt
 svn export ./src/mpt/.clang-format bin/dist-autotools/src/mpt/.clang-format
 svn export ./src/mpt/LICENSE.BSD-3-Clause.txt bin/dist-autotools/src/mpt/LICENSE.BSD-3-Clause.txt
 svn export ./src/mpt/LICENSE.BSL-1.0.txt bin/dist-autotools/src/mpt/LICENSE.BSL-1.0.txt
+svn export ./src/mpt/audio          bin/dist-autotools/src/mpt/audio
 svn export ./src/mpt/base           bin/dist-autotools/src/mpt/base
 svn export ./src/mpt/binary         bin/dist-autotools/src/mpt/binary
 svn export ./src/mpt/check          bin/dist-autotools/src/mpt/check
@@ -100,6 +101,7 @@ mkdir -p bin/dist-autotools/src/mpt
 cp -r ./src/mpt/.clang-format bin/dist-autotools/src/mpt/.clang-format
 cp -r ./src/mpt/LICENSE.BSD-3-Clause.txt bin/dist-autotools/src/mpt/LICENSE.BSD-3-Clause.txt
 cp -r ./src/mpt/LICENSE.BSL-1.0.txt bin/dist-autotools/src/mpt/LICENSE.BSL-1.0.txt
+cp -r ./src/mpt/audio          bin/dist-autotools/src/mpt/audio
 cp -r ./src/mpt/base           bin/dist-autotools/src/mpt/base
 cp -r ./src/mpt/binary         bin/dist-autotools/src/mpt/binary
 cp -r ./src/mpt/check          bin/dist-autotools/src/mpt/check

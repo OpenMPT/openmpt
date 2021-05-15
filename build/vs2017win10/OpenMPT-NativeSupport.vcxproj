@@ -1270,7 +1270,6 @@
     <ClInclude Include="..\..\mptrack\wine\NativeSoundDevice.h" />
     <ClInclude Include="..\..\mptrack\wine\NativeSoundDeviceMarshalling.h" />
     <ClInclude Include="..\..\mptrack\wine\NativeUtils.h" />
-    <ClInclude Include="..\..\soundbase\AudioSample.h" />
     <ClInclude Include="..\..\soundbase\Dither.h" />
     <ClInclude Include="..\..\soundbase\MixSample.h" />
     <ClInclude Include="..\..\soundbase\MixSampleConvert.h" />
@@ -1291,6 +1290,8 @@
     <ClInclude Include="..\..\sounddev\SoundDeviceStub.h" />
     <ClInclude Include="..\..\sounddev\SoundDeviceUtilities.h" />
     <ClInclude Include="..\..\sounddev\SoundDeviceWaveout.h" />
+    <ClInclude Include="..\..\src\mpt\audio\sample.hpp" />
+    <ClInclude Include="..\..\src\mpt\audio\span.hpp" />
     <ClInclude Include="..\..\src\mpt\base\algorithm.hpp" />
     <ClInclude Include="..\..\src\mpt\base\aligned_array.hpp" />
     <ClInclude Include="..\..\src\mpt\base\alloc.hpp" />

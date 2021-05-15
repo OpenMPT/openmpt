@@ -1399,6 +1399,7 @@ bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION).makefile.tar: bin/dist.mk bin
 	svn export ./src/mpt/.clang-format bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/.clang-format
 	svn export ./src/mpt/LICENSE.BSD-3-Clause.txt bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/LICENSE.BSD-3-Clause.txt
 	svn export ./src/mpt/LICENSE.BSL-1.0.txt bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/LICENSE.BSL-1.0.txt
+	svn export ./src/mpt/audio          bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/audio
 	svn export ./src/mpt/base           bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/base
 	svn export ./src/mpt/binary         bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/binary
 	svn export ./src/mpt/check          bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/check
@@ -1481,6 +1482,7 @@ bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION).msvc.zip: bin/dist.mk bin/svn
 	svn export ./src/mpt/.clang-format bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/.clang-format --native-eol CRLF
 	svn export ./src/mpt/LICENSE.BSD-3-Clause.txt bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/LICENSE.BSD-3-Clause.txt --native-eol CRLF
 	svn export ./src/mpt/LICENSE.BSL-1.0.txt bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/LICENSE.BSL-1.0.txt --native-eol CRLF
+	svn export ./src/mpt/audio          bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/audio          --native-eol CRLF
 	svn export ./src/mpt/base           bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/base           --native-eol CRLF
 	svn export ./src/mpt/binary         bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/binary         --native-eol CRLF
 	svn export ./src/mpt/check          bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/check          --native-eol CRLF

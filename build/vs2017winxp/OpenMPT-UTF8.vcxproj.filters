@@ -55,6 +55,9 @@
     <Filter Include="src\mpt">
       <UniqueIdentifier>{0D1E30A9-79FD-AE44-8215-3A1BEE7315A6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\mpt\audio">
+      <UniqueIdentifier>{EE51C37D-5A12-3FB4-234D-88318FCC8390}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\mpt\base">
       <UniqueIdentifier>{D7D6CF03-C339-5FA8-6CBF-975E58012B2B}</UniqueIdentifier>
     </Filter>
@@ -618,9 +621,6 @@
     <ClInclude Include="..\..\pluginBridge\BridgeWrapper.h">
       <Filter>pluginBridge</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\soundbase\AudioSample.h">
-      <Filter>soundbase</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\soundbase\Dither.h">
       <Filter>soundbase</Filter>
     </ClInclude>
@@ -902,6 +902,12 @@
     </ClInclude>
     <ClInclude Include="..\..\soundlib\tuningcollection.h">
       <Filter>soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\audio\sample.hpp">
+      <Filter>src\mpt\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\audio\span.hpp">
+      <Filter>src\mpt\audio</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\base\algorithm.hpp">
       <Filter>src\mpt\base</Filter>

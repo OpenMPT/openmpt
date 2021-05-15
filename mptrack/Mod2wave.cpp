@@ -21,12 +21,10 @@
 #include "../soundbase/SampleFormatCopy.h"
 #include "../soundlib/MixerLoops.h"
 #include "../soundbase/Dither.h"
-#include "../soundbase/SampleBuffer.h"
 #include "../soundlib/AudioReadTarget.h"
 #include "../soundlib/plugins/PlugInterface.h"
-
 #include "../common/mptFileIO.h"
-
+#include "mpt/audio/span.hpp"
 #include <variant>
 
 
@@ -41,7 +39,7 @@ static CSoundFile::samplecount_t ReadInterleaved(CSoundFile &sndFile, Tsample *o
 {
 	sndFile.ResetMixStat();
 	MPT_ASSERT(sndFile.m_MixerSettings.gnChannels == channels);
-	AudioReadTargetBuffer<audio_span_interleaved<Tsample>> target(audio_span_interleaved<Tsample>(outputBuffer, channels, count), dither);
+	AudioReadTargetBuffer<mpt::audio_span_interleaved<Tsample>> target(mpt::audio_span_interleaved<Tsample>(outputBuffer, channels, count), dither);
 	return sndFile.Read(count, target);
 }
 
@@ -1292,7 +1290,7 @@ void CDoWaveConvert::Run()
 				dither.WithDither(
 					[&](auto &ditherInstance)
 					{
-						ConvertBufferMixFloatToBuffer<false>(audio_span_interleaved<uint8>(buffer.uint8, channels, framesChunk), audio_span_interleaved<const MixSampleFloat>(normalizeBuffer, channels, framesChunk), ditherInstance, channels, framesChunk);
+						ConvertBufferMixFloatToBuffer<false>(mpt::audio_span_interleaved<uint8>(buffer.uint8, channels, framesChunk), mpt::audio_span_interleaved<const MixSampleFloat>(normalizeBuffer, channels, framesChunk), ditherInstance, channels, framesChunk);
 					}
 				);
 				break;
@@ -1300,7 +1298,7 @@ void CDoWaveConvert::Run()
 				dither.WithDither(
 					[&](auto &ditherInstance)
 					{
-						ConvertBufferMixFloatToBuffer<false>(audio_span_interleaved<int8>(buffer.int8, channels, framesChunk), audio_span_interleaved<const MixSampleFloat>(normalizeBuffer, channels, framesChunk), ditherInstance, channels, framesChunk);
+						ConvertBufferMixFloatToBuffer<false>(mpt::audio_span_interleaved<int8>(buffer.int8, channels, framesChunk), mpt::audio_span_interleaved<const MixSampleFloat>(normalizeBuffer, channels, framesChunk), ditherInstance, channels, framesChunk);
 					}
 				);
 				break;
@@ -1308,7 +1306,7 @@ void CDoWaveConvert::Run()
 				dither.WithDither(
 					[&](auto &ditherInstance)
 					{
-						ConvertBufferMixFloatToBuffer<false>(audio_span_interleaved<int16>(buffer.int16, channels, framesChunk), audio_span_interleaved<const MixSampleFloat>(normalizeBuffer, channels, framesChunk), ditherInstance, channels, framesChunk);
+						ConvertBufferMixFloatToBuffer<false>(mpt::audio_span_interleaved<int16>(buffer.int16, channels, framesChunk), mpt::audio_span_interleaved<const MixSampleFloat>(normalizeBuffer, channels, framesChunk), ditherInstance, channels, framesChunk);
 					}
 				);
 				break;
@@ -1316,7 +1314,7 @@ void CDoWaveConvert::Run()
 				dither.WithDither(
 					[&](auto &ditherInstance)
 					{
-						ConvertBufferMixFloatToBuffer<false>(audio_span_interleaved<int24>(buffer.int24, channels, framesChunk), audio_span_interleaved<const MixSampleFloat>(normalizeBuffer, channels, framesChunk), ditherInstance, channels, framesChunk);
+						ConvertBufferMixFloatToBuffer<false>(mpt::audio_span_interleaved<int24>(buffer.int24, channels, framesChunk), mpt::audio_span_interleaved<const MixSampleFloat>(normalizeBuffer, channels, framesChunk), ditherInstance, channels, framesChunk);
 					}
 				);
 				break;
@@ -1324,7 +1322,7 @@ void CDoWaveConvert::Run()
 				dither.WithDither(
 					[&](auto &ditherInstance)
 					{
-						ConvertBufferMixFloatToBuffer<false>(audio_span_interleaved<int32>(buffer.int32, channels, framesChunk), audio_span_interleaved<const MixSampleFloat>(normalizeBuffer, channels, framesChunk), ditherInstance, channels, framesChunk);
+						ConvertBufferMixFloatToBuffer<false>(mpt::audio_span_interleaved<int32>(buffer.int32, channels, framesChunk), mpt::audio_span_interleaved<const MixSampleFloat>(normalizeBuffer, channels, framesChunk), ditherInstance, channels, framesChunk);
 					}
 				);
 				break;
@@ -1332,7 +1330,7 @@ void CDoWaveConvert::Run()
 				dither.WithDither(
 					[&](auto &ditherInstance)
 					{
-						ConvertBufferMixFloatToBuffer<false>(audio_span_interleaved<float>(buffer.float32, channels, framesChunk), audio_span_interleaved<const MixSampleFloat>(normalizeBuffer, channels, framesChunk), ditherInstance, channels, framesChunk);
+						ConvertBufferMixFloatToBuffer<false>(mpt::audio_span_interleaved<float>(buffer.float32, channels, framesChunk), mpt::audio_span_interleaved<const MixSampleFloat>(normalizeBuffer, channels, framesChunk), ditherInstance, channels, framesChunk);
 					}
 				);
 				break;
@@ -1340,7 +1338,7 @@ void CDoWaveConvert::Run()
 				dither.WithDither(
 					[&](auto &ditherInstance)
 					{
-						ConvertBufferMixFloatToBuffer<false>(audio_span_interleaved<double>(buffer.float64, channels, framesChunk), audio_span_interleaved<const MixSampleFloat>(normalizeBuffer, channels, framesChunk), ditherInstance, channels, framesChunk);
+						ConvertBufferMixFloatToBuffer<false>(mpt::audio_span_interleaved<double>(buffer.float64, channels, framesChunk), mpt::audio_span_interleaved<const MixSampleFloat>(normalizeBuffer, channels, framesChunk), ditherInstance, channels, framesChunk);
 					}
 				);
 				break;

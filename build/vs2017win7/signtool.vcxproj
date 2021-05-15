@@ -627,6 +627,8 @@
     <ClInclude Include="..\..\misc\mptOS.h" />
     <ClInclude Include="..\..\misc\mptOSException.h" />
     <ClInclude Include="..\..\misc\mptWine.h" />
+    <ClInclude Include="..\..\src\mpt\audio\sample.hpp" />
+    <ClInclude Include="..\..\src\mpt\audio\span.hpp" />
     <ClInclude Include="..\..\src\mpt\base\algorithm.hpp" />
     <ClInclude Include="..\..\src\mpt\base\aligned_array.hpp" />
     <ClInclude Include="..\..\src\mpt\base\alloc.hpp" />

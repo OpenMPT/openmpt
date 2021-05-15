@@ -12,10 +12,10 @@
 #include "mptBuildSettings.h"
 
 #include "Sndfile.h"
+#include "mpt/audio/span.hpp"
 #include "../soundbase/SampleFormat.h"
 #include "../soundbase/SampleFormatConverters.h"
 #include "../soundbase/SampleFormatCopy.h"
-#include "../soundbase/SampleBuffer.h"
 #include "../soundbase/Dither.h"
 #include "MixerLoops.h"
 #include "Mixer.h"
@@ -48,7 +48,7 @@ public:
 		dither.WithDither(
 			[&](auto &ditherInstance)
 			{
-				ConvertBufferMixFixedToBuffer<MixSampleIntTraits::mix_fractional_bits, false>(make_audio_span_with_offset(outputBuffer, countRendered), audio_span_interleaved<MixSampleInt>(MixSoundBuffer, channels, countChunk), ditherInstance, channels, countChunk);
+				ConvertBufferMixFixedToBuffer<MixSampleIntTraits::mix_fractional_bits, false>(mpt::make_audio_span_with_offset(outputBuffer, countRendered), mpt::audio_span_interleaved<MixSampleInt>(MixSoundBuffer, channels, countChunk), ditherInstance, channels, countChunk);
 			}
 		);
 		countRendered += countChunk;
@@ -58,7 +58,7 @@ public:
 		dither.WithDither(
 			[&](auto &ditherInstance)
 			{
-				ConvertBufferMixFloatToBuffer<false>(make_audio_span_with_offset(outputBuffer, countRendered), audio_span_interleaved<MixSampleFloat>(MixSoundBuffer, channels, countChunk), ditherInstance, channels, countChunk);
+				ConvertBufferMixFloatToBuffer<false>(mpt::make_audio_span_with_offset(outputBuffer, countRendered), mpt::audio_span_interleaved<MixSampleFloat>(MixSoundBuffer, channels, countChunk), ditherInstance, channels, countChunk);
 			}
 		);
 		countRendered += countChunk;

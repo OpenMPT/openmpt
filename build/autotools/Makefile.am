@@ -113,6 +113,8 @@ pkgconfig_DATA =
 nobase_include_HEADERS = 
 
 MPT_FILES_SRC_MPT = 
+MPT_FILES_SRC_MPT += src/mpt/audio/sample.hpp
+MPT_FILES_SRC_MPT += src/mpt/audio/span.hpp
 MPT_FILES_SRC_MPT += src/mpt/base/algorithm.hpp
 MPT_FILES_SRC_MPT += src/mpt/base/aligned_array.hpp
 MPT_FILES_SRC_MPT += src/mpt/base/alloc.hpp

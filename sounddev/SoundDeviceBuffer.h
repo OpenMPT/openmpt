@@ -14,7 +14,7 @@
 
 #include "SoundDevice.h"
 
-#include "../soundbase/SampleBuffer.h"
+#include "mpt/audio/span.hpp"
 #include "../soundbase/SampleFormatCopy.h"
 #include "../soundbase/Dither.h"
 
@@ -31,14 +31,14 @@ namespace SoundDevice {
 template <int fractionalBits, typename Tspan, typename Tsample>
 inline void BufferReadTemplateFixed(Tspan & dst, const Tsample * src, std::size_t srcTotal, std::size_t srcPos, std::size_t numFrames, std::size_t numChannels)
 {
-	ConvertBufferToBufferMixFixed<fractionalBits>(dst, make_audio_span_with_offset(audio_span_interleaved<const Tsample>(src, numChannels, srcTotal), srcPos), numChannels, numFrames);
+	ConvertBufferToBufferMixFixed<fractionalBits>(dst, mpt::make_audio_span_with_offset(mpt::audio_span_interleaved<const Tsample>(src, numChannels, srcTotal), srcPos), numChannels, numFrames);
 }
 
 
 template <typename Tspan, typename Tsample>
 inline void BufferReadTemplateFloat(Tspan & dst, const Tsample * src, std::size_t srcTotal, std::size_t srcPos, std::size_t numFrames, std::size_t numChannels)
 {
-	ConvertBufferToBufferMixFloat(dst, make_audio_span_with_offset(audio_span_interleaved<const Tsample>(src, numChannels, srcTotal), srcPos), numChannels, numFrames);
+	ConvertBufferToBufferMixFloat(dst, mpt::make_audio_span_with_offset(mpt::audio_span_interleaved<const Tsample>(src, numChannels, srcTotal), srcPos), numChannels, numFrames);
 }
 
 
@@ -49,7 +49,7 @@ inline void BufferWriteTemplateFixed(Tsample * dst, std::size_t dstTotal, std::s
 	dither.WithDither(
 		[&](auto &ditherInstance)
 		{
-			ConvertBufferMixFixedToBuffer<fractionalBits, false>(make_audio_span_with_offset(audio_span_interleaved<Tsample>(dst, numChannels, dstTotal), dstPos), src, ditherInstance, numChannels, numFrames);
+			ConvertBufferMixFixedToBuffer<fractionalBits, false>(mpt::make_audio_span_with_offset(mpt::audio_span_interleaved<Tsample>(dst, numChannels, dstTotal), dstPos), src, ditherInstance, numChannels, numFrames);
 		}
 	);
 }
@@ -61,7 +61,7 @@ inline void BufferWriteTemplateFixed(Tsample * dst, std::size_t dstTotal, std::s
 		dither.WithDither(
 			[&](auto &ditherInstance)
 			{
-				ConvertBufferMixFixedToBuffer<fractionalBits, true>(make_audio_span_with_offset(audio_span_interleaved<Tsample>(dst, numChannels, dstTotal), dstPos), src, ditherInstance, numChannels, numFrames);
+				ConvertBufferMixFixedToBuffer<fractionalBits, true>(mpt::make_audio_span_with_offset(mpt::audio_span_interleaved<Tsample>(dst, numChannels, dstTotal), dstPos), src, ditherInstance, numChannels, numFrames);
 			}
 		);
 	} else
@@ -69,7 +69,7 @@ inline void BufferWriteTemplateFixed(Tsample * dst, std::size_t dstTotal, std::s
 		dither.WithDither(
 			[&](auto &ditherInstance)
 			{
-				ConvertBufferMixFixedToBuffer<fractionalBits, false>(make_audio_span_with_offset(audio_span_interleaved<Tsample>(dst, numChannels, dstTotal), dstPos), src, ditherInstance, numChannels, numFrames);
+				ConvertBufferMixFixedToBuffer<fractionalBits, false>(mpt::make_audio_span_with_offset(mpt::audio_span_interleaved<Tsample>(dst, numChannels, dstTotal), dstPos), src, ditherInstance, numChannels, numFrames);
 			}
 		);
 	}
@@ -83,7 +83,7 @@ void BufferWriteTemplateFloat(Tsample * dst, std::size_t dstTotal, std::size_t d
 	dither.WithDither(
 		[&](auto &ditherInstance)
 		{
-			ConvertBufferMixFloatToBuffer<false>(make_audio_span_with_offset(audio_span_interleaved<Tsample>(dst, numChannels, dstTotal), dstPos), src, ditherInstance, numChannels, numFrames);
+			ConvertBufferMixFloatToBuffer<false>(mpt::make_audio_span_with_offset(mpt::audio_span_interleaved<Tsample>(dst, numChannels, dstTotal), dstPos), src, ditherInstance, numChannels, numFrames);
 		}
 	);
 }
@@ -95,7 +95,7 @@ void BufferWriteTemplateFloat(Tsample * dst, std::size_t dstTotal, std::size_t d
 		dither.WithDither(
 			[&](auto &ditherInstance)
 			{
-				ConvertBufferMixFloatToBuffer<true>(make_audio_span_with_offset(audio_span_interleaved<Tsample>(dst, numChannels, dstTotal), dstPos), src, ditherInstance, numChannels, numFrames);
+				ConvertBufferMixFloatToBuffer<true>(mpt::make_audio_span_with_offset(mpt::audio_span_interleaved<Tsample>(dst, numChannels, dstTotal), dstPos), src, ditherInstance, numChannels, numFrames);
 			}
 		);
 	} else
@@ -103,7 +103,7 @@ void BufferWriteTemplateFloat(Tsample * dst, std::size_t dstTotal, std::size_t d
 		dither.WithDither(
 			[&](auto &ditherInstance)
 			{
-				ConvertBufferMixFloatToBuffer<false>(make_audio_span_with_offset(audio_span_interleaved<Tsample>(dst, numChannels, dstTotal), dstPos), src, ditherInstance, numChannels, numFrames);
+				ConvertBufferMixFloatToBuffer<false>(mpt::make_audio_span_with_offset(mpt::audio_span_interleaved<Tsample>(dst, numChannels, dstTotal), dstPos), src, ditherInstance, numChannels, numFrames);
 			}
 		);
 	}
