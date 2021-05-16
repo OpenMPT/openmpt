@@ -31,6 +31,67 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.29.10.00 (16 May 2021, revision 15016)
+-----------------------------------------
+General tab
+- [Fix] <js> The tempo slider handle was shown in the wrong position for tempos close to 1000 BPM.
+
+Pattern tab
+- [Imp] <js> Interpolating the volume column between a cell with a Set Volume command and a cell with no volume command but a note and instrument is now possible (it uses the default volume of that sample for interpolation).
+- [Fix] <js> Duplicating / adding / removing a channel, undoing and then redoing it caused the contents of the last channel to be lost (http://bugs.openmpt.org/view.php?id=1442).
+- [Fix] <js> "Maintain sample sync on mute" was only enforced after manually muting a channel, and e.g. by restarting playback broke it again (http://bugs.openmpt.org/view.php?id=1125).
+
+Sample tab
+- [Imp] <js> Can now resample all samples at once by holding shift when pressing the resample button (http://bugs.openmpt.org/view.php?id=1368).
+
+Instrument tab
+- [Fix] <js> Saving an XI instrument from an IT or MPTM module could case wrong transposition for samples with a middle-C frequency below 8363 Hz (http://bugs.openmpt.org/view.php?id=1449).
+- [Fix] <js> Saving an ITI instrument from an XM module converted auto-vibrato sweep incorrectly.
+
+Playback
+- [Fix] <jh> In quad surround mode, Bass Expansion incorrectly applied DC removal to the front channels twice instead of applying it once to front and back channels.
+
+MPTM
+- [Fix] <js> The "Do not reset OPL channel status at end of envelopes" compatibility flag was effectively force-enabled for all modules made with OpenMPT 1.29, while it should have been disabled.
+- [Fix] <js> Files with OPL instruments were sometimes written in a way so that older OpenMPT and libopenmpt versions without OPL support could no longer read certain song properties and warn that the file was created with a more recent version of OpenMPT.
+- [Fix] <js> The old OpenMPT 1.28 retrigger behaviour for OPL instruments differed depending on the chosen output sample rate. Retrigger now always retriggers notes as expected, which was already the case when the mix rate was chosen to be 48000 Hz. The corresponding compatibility setting was removed, as it is no longer required. 
+
+IT
+- [Imp] <js> Full OpenMPT version information (e.g. 1.29.10.00 instead of 1.29) is now written to IT files also when using compatibility export.
+
+S3M
+- [Imp] <js> Emulate IT short sample retrigger quirk in S3M files saved with Impulse Tracker and Schism Tracker.
+- [Imp] <js> Full OpenMPT version information (e.g. 1.29.10.00 instead of 1.29) is now written to S3M files.
+
+MOD
+- [Fix] <js> Fixed possible crash when sample-swapping to a previously-deleted sample (tx bryc).
+- [Fix] <js> ProTracker 3.6 doesn't support sample swapping. It is now disabled when loading a ProTracker 3.6 IFF module.
+- [Fix] <js> Some files with "hidden" garbage patterns (e.g. altoflyt.mod) were not played correctly since OpenMPT 1.29.05.00 (http://bugs.openmpt.org/view.php?id=1458).
+- [Fix] <js> E9x retrigger now works the same way as in ProTracker 2.
+
+Other formats
+- [Mod] <js> 669: Reject files that contain any pattern tempo higher than 15. 
+- [Fix] <js> MDL: Improve auto-vibrato accuracy.
+- [Fix] <js> In OpenMPT 1.29.09.00, the "Save As" dialog now may have shown up every time after opening a file in an import-only format. Some actions like running the Automatic Sample Trimmer may have also prevented the dialog from showing up. 
+- [Fix] <js> Reduce memory consumption of malformed XPK-compressed files.
+
+Stream Export
+- [Fix] <jh> Exported 8-bit FLAC output was distorted since OpenMPT 1.29.01.00.
+- [Fix] <jh> Do not offer dithering for 64-bit floating-point export.
+
+Audio I/O
+- [Mod] <jh> MME / Wave Out output devices are no longer marked as deprecated for now.
+
+Misc
+- [New] <js> Added keyboard shortcuts for increasing and decreasing tempo and ticks per row of currently playing module (tx jseb).
+- [Fix] <js> Launching OpenMPT could take longer than it should depending on the current working directory, e.g. when opening modules from the task bar's jump list (http://bugs.openmpt.org/view.php?id=1444).
+- [Fix] <js> Opening the help didn't open the correct page if the upper half of the view was focussed.
+- [Fix] <js> Stop all playing samples when toggling "Compute note frequency in Hertz" compatibility setting.
+
+Third-Party Libraries
+- [Imp] Update mpg123 (v1.27.2)
+
+
 v1.29.09.00 (11 April 2021, revision 14577)
 -------------------------------------------
 Tree view
@@ -58,7 +119,7 @@ Other formats
 - [Fix] <js> Possible crash when loading some malformed files.
 - [Fix] <js> Fix excessive memory consumption with malformed files in various formats.
 
-General
+Misc
 - [Mod] <js> Welcome Dialog: The initial key map suggestion is now used even when not clicking the OK button.
 - [Fix] <js> Modifier key state (Ctrl, Alt, Shift, Win) could sometimes get stuck when switching to another application.
 
@@ -93,7 +154,7 @@ Other formats
 - [Fix] <js> Possible crash when loading floating-point WAV file that claimed to have a bit depth of 8 bits or lower as a module.
 - [Fix] <js> AMS: Avoid allocating excessive amount of memory for compressed song message in malformed files.
 
-General
+Misc
 - [Mod] <js> Only force to rescan MIDI devices after receiving a device change notification from the system. Might fix a crash with buggy MIDI drivers.
 - [Fix] <js> Properly resize text labels on main toolbar according to actual font size used (http://forum.openmpt.org/index.php?topic=6569.0).
 - [Fix] <js> Some keys were missing when resetting the default keymap (tx isdera).
@@ -264,7 +325,7 @@ Misc
 - [Imp] <js> Channel Manager: Middle-clicking a channel now shows the quick channel settings rather than just a dialog to rename.
 - [Imp] <js> Channel Manager: Drag & drop now behave more naturally.
 - [Fix] <js> Channel Manager: If channels were rearranged but not applied yet, middle-clicking a channel might have renamed the wrong channel.
-- [Fix] <js> Some instruments with many key zones and instrument layers were no longer imported correctly since OpenMPT 1.29.01.00 (http://forum.openmpt.org/index.php?topic=6462.0).
+- [Fix] <js> Some soundfont instruments with many key zones and instrument layers were no longer imported correctly since OpenMPT 1.29.01.00 (http://forum.openmpt.org/index.php?topic=6462.0).
 
 Third-Party Libraries
 - [Imp] Update nlohmann json (v3.9.1)
