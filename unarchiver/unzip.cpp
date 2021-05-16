@@ -223,7 +223,7 @@ CZipArchive::CZipArchive(FileReader &file) : ArchiveBase(file)
 	
 	mz_zip_archive *zip = static_cast<mz_zip_archive*>(zipFile);
 	
-	MemsetZero(*zip);
+	(*zip) = {};
 	const auto fileData = file.GetRawData();
 	if(!mz_zip_reader_init_mem(zip, fileData.data(), fileData.size(), 0))
 	{
@@ -241,8 +241,7 @@ CZipArchive::CZipArchive(FileReader &file) : ArchiveBase(file)
 	{
 		ArchiveFileInfo info;
 		info.type = ArchiveFileType::Invalid;
-		mz_zip_archive_file_stat stat;
-		MemsetZero(stat);
+		mz_zip_archive_file_stat stat = {};
 		if(mz_zip_reader_file_stat(zip, i, &stat))
 		{
 			info.type = ArchiveFileType::Normal;
@@ -288,8 +287,7 @@ bool CZipArchive::ExtractFile(std::size_t index)
 
 	mz_uint bestFile = index;
 
-	mz_zip_archive_file_stat stat;
-	MemsetZero(stat);
+	mz_zip_archive_file_stat stat = {};
 	mz_zip_reader_file_stat(zip, bestFile, &stat);
 	if(stat.m_uncomp_size >= std::numeric_limits<std::size_t>::max())
 	{

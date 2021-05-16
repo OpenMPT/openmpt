@@ -110,8 +110,7 @@ CRarArchive::CRarArchive(FileReader &file)
 	std::wstring ArcName = diskFile->GetFilename().ToWide();
 	std::vector<wchar_t> ArcNameBuf(ArcName.c_str(), ArcName.c_str() + ArcName.length() + 1);
 	std::vector<wchar_t> CmtBuf(65536);
-	RAROpenArchiveDataEx ArchiveData;
-	MemsetZero(ArchiveData);
+	RAROpenArchiveDataEx ArchiveData = {};
 	ArchiveData.OpenMode = RAR_OM_LIST;
 	ArchiveData.ArcNameW = ArcNameBuf.data();
 	ArchiveData.CmtBufW = CmtBuf.data();
@@ -145,8 +144,7 @@ CRarArchive::CRarArchive(FileReader &file)
 	int RARResult = 0;
 	while(!eof)
 	{
-		RARHeaderDataEx HeaderData;
-		MemsetZero(HeaderData);
+		RARHeaderDataEx HeaderData = {};
 		RARResult = RARReadHeaderEx(rar, &HeaderData);
 		switch(RARResult)
 		{
@@ -201,8 +199,7 @@ bool CRarArchive::ExtractFile(std::size_t index)
 
 	std::wstring ArcName = diskFile->GetFilename().ToWide();
 	std::vector<wchar_t> ArcNameBuf(ArcName.c_str(), ArcName.c_str() + ArcName.length() + 1);
-	RAROpenArchiveDataEx ArchiveData;
-	MemsetZero(ArchiveData);
+	RAROpenArchiveDataEx ArchiveData = {};
 	ArchiveData.OpenMode = RAR_OM_EXTRACT;
 	ArchiveData.ArcNameW = ArcNameBuf.data();
 	ArchiveData.Callback = RARCallback;
@@ -219,8 +216,7 @@ bool CRarArchive::ExtractFile(std::size_t index)
 	bool eof = false;
 	while(!eof)
 	{
-		RARHeaderDataEx HeaderData;
-		MemsetZero(HeaderData);
+		RARHeaderDataEx HeaderData = {};
 		RARResult = RARReadHeaderEx(rar, &HeaderData);
 		switch(RARResult)
 		{
