@@ -58,16 +58,16 @@ private:
 public:
 
 	CUnarchiver(FileReader &file);
-	virtual ~CUnarchiver();
+	~CUnarchiver() override;
 
-	virtual bool IsArchive() const;
-	virtual mpt::ustring GetComment() const;
-	virtual bool ExtractFile(std::size_t index);
-	virtual FileReader GetOutputFile() const;
-	virtual std::size_t size() const;
-	virtual IArchive::const_iterator begin() const;
-	virtual IArchive::const_iterator end() const;
-	virtual const ArchiveFileInfo & operator [] (std::size_t index) const;
+	bool IsArchive() const override;
+	mpt::ustring GetComment() const override;
+	bool ExtractFile(std::size_t index) override;
+	FileReader GetOutputFile() const override;
+	std::size_t size() const override;
+	IArchive::const_iterator begin() const override;
+	IArchive::const_iterator end() const override;
+	const ArchiveFileInfo & operator [] (std::size_t index) const override;
 
 public:
 

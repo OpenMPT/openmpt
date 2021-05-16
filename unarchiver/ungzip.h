@@ -63,10 +63,10 @@ protected:
 
 public:
 
-	bool ExtractFile(std::size_t index);
+	bool ExtractFile(std::size_t index) override;
 
 	CGzipArchive(FileReader &file);
-	virtual ~CGzipArchive();
+	~CGzipArchive() override;
 };
 
 #endif // MPT_WITH_ZLIB || MPT_WITH_MINIZ
