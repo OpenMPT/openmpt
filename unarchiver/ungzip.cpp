@@ -41,7 +41,7 @@ CGzipArchive::CGzipArchive(FileReader &file) : ArchiveBase(file)
 		return;
 	}
 	ArchiveFileInfo info;
-	info.type = ArchiveFileNormal;
+	info.type = ArchiveFileType::Normal;
 	contents.push_back(info);
 }
 

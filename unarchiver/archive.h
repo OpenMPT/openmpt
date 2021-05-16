@@ -17,17 +17,17 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-enum ArchiveFileType
+enum class ArchiveFileType
 {
-	ArchiveFileInvalid,
-	ArchiveFileNormal,
-	ArchiveFileSpecial,
+	Invalid,
+	Normal,
+	Special,
 };
 
 struct ArchiveFileInfo
 {
 	mpt::PathString name;
-	ArchiveFileType type = ArchiveFileInvalid;
+	ArchiveFileType type = ArchiveFileType::Invalid;
 	uint64 size = 0;
 	mpt::ustring comment;
 	uint64 cookie1 = 0;

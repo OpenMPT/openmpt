@@ -163,7 +163,7 @@ CRarArchive::CRarArchive(FileReader &file)
 		}
 		ArchiveFileInfo fileInfo;
 		fileInfo.name = mpt::PathString::FromWide(HeaderData.FileNameW);
-		fileInfo.type = ArchiveFileNormal;
+		fileInfo.type = ArchiveFileType::Normal;
 		fileInfo.size = HeaderData.UnpSize;
 		contents.push_back(fileInfo);
 		RARResult = RARProcessFileW(rar, RAR_SKIP, NULL, NULL);

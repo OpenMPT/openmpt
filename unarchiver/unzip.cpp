@@ -151,7 +151,7 @@ CZipArchive::CZipArchive(FileReader &file)
 	{
 		ArchiveFileInfo fileinfo;
 
-		fileinfo.type = ArchiveFileNormal;
+		fileinfo.type = ArchiveFileType::Normal;
 		
 		unz_file_info info;
 		char name[256];
@@ -240,21 +240,21 @@ CZipArchive::CZipArchive(FileReader &file) : ArchiveBase(file)
 	for(mz_uint i = 0; i < mz_zip_reader_get_num_files(zip); ++i)
 	{
 		ArchiveFileInfo info;
-		info.type = ArchiveFileInvalid;
+		info.type = ArchiveFileType::Invalid;
 		mz_zip_archive_file_stat stat;
 		MemsetZero(stat);
 		if(mz_zip_reader_file_stat(zip, i, &stat))
 		{
-			info.type = ArchiveFileNormal;
+			info.type = ArchiveFileType::Normal;
 			info.name = mpt::PathString::FromUnicode(mpt::ToUnicode((stat.m_bit_flag & (1<<11)) ? mpt::Charset::UTF8 : mpt::Charset::CP437, stat.m_filename));
 			info.size = stat.m_uncomp_size;
 		}
 		if(mz_zip_reader_is_file_a_directory(zip, i))
 		{
-			info.type = ArchiveFileSpecial;
+			info.type = ArchiveFileType::Special;
 		} else if(mz_zip_reader_is_file_encrypted(zip, i))
 		{
-			info.type = ArchiveFileSpecial;
+			info.type = ArchiveFileType::Special;
 		}
 		contents.push_back(info);
 	}

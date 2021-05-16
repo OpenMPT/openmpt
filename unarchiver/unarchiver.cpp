@@ -76,7 +76,7 @@ std::size_t CUnarchiver::FindBestFile(const std::vector<const char *> &extension
 	std::size_t bestIndex = failIndex;
 	for(std::size_t i = 0; i < size(); ++i)
 	{
-		if(operator[](i).type != ArchiveFileNormal)
+		if(operator[](i).type != ArchiveFileType::Normal)
 		{
 			continue;
 		}

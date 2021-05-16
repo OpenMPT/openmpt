@@ -65,7 +65,7 @@ CLhaArchive::CLhaArchive(FileReader &file) : ArchiveBase(file), inputstream(null
 		ArchiveFileInfo info;
 		info.name = mpt::PathString::FromUnicode(mpt::ToUnicode(mpt::Charset::ISO8859_1, fileheader->filename));
 		info.size = fileheader->length;
-		info.type = ArchiveFileNormal;
+		info.type = ArchiveFileType::Normal;
 		contents.push_back(info);
 	}
 	CloseArchive();
