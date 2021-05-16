@@ -317,13 +317,11 @@ bool PulseaudioSimple::InternalOpen()
 		return false;
 	}
 	int error = 0;
-	pa_sample_spec ss;
-	MemsetZero(ss);
+	pa_sample_spec ss = {};
 	ss.format = PA_SAMPLE_FLOAT32;
 	ss.rate = m_Settings.Samplerate;
 	ss.channels = m_Settings.Channels;
-	pa_buffer_attr ba;
-	MemsetZero(ba);
+	pa_buffer_attr ba = {};
 	ba.minreq = mpt::align_up<uint32>(mpt::saturate_round<uint32>(m_Settings.GetBytesPerSecond() * m_Settings.UpdateInterval), m_Settings.GetBytesPerFrame());
 	ba.maxlength = mpt::align_up<uint32>(mpt::saturate_round<uint32>(m_Settings.GetBytesPerSecond() * m_Settings.Latency), m_Settings.GetBytesPerFrame());
 	ba.tlength = ba.maxlength - ba.minreq;

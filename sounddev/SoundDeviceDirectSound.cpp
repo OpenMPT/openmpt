@@ -147,8 +147,7 @@ SoundDevice::Caps CDSoundDevice::InternalGetDeviceCaps()
 		}
 		ds = dummy;
 	}
-	DSCAPS dscaps;
-	MemsetZero(dscaps);
+	DSCAPS dscaps = {};
 	dscaps.dwSize = sizeof(dscaps);
 	if(DS_OK == ds->GetCaps(&dscaps))
 	{
@@ -188,8 +187,7 @@ SoundDevice::DynamicCaps CDSoundDevice::GetDeviceDynamicCaps(const std::vector<u
 		}
 		ds = dummy;
 	}
-	DSCAPS dscaps;
-	MemsetZero(dscaps);
+	DSCAPS dscaps = {};
 	dscaps.dwSize = sizeof(dscaps);
 	if(DS_OK == ds->GetCaps(&dscaps))
 	{

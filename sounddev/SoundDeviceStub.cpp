@@ -103,8 +103,7 @@ static void __cdecl SoundDevice_MessageReceiver_SoundDeviceMessage(void * inst, 
 }
 
 void SoundDeviceStub::SetMessageReceiver(SoundDevice::IMessageReceiver *receiver) {
-	OpenMPT_Wine_Wrapper_SoundDevice_IMessageReceiver messageReceiver;
-	MemsetZero(messageReceiver);
+	OpenMPT_Wine_Wrapper_SoundDevice_IMessageReceiver messageReceiver = {};
 	messageReceiver.inst = receiver;
 	messageReceiver.SoundDeviceMessageFunc = &SoundDevice_MessageReceiver_SoundDeviceMessage;
 	return w->OpenMPT_Wine_Wrapper_SoundDevice_SetMessageReceiver(impl, &messageReceiver);
@@ -252,8 +251,7 @@ static void __cdecl SoundSourceUnlockFunc( void * inst ) {
 }
 
 void SoundDeviceStub::SetSource(SoundDevice::ISource *isource) {
-	OpenMPT_Wine_Wrapper_SoundDevice_ISource source;
-	MemsetZero(source);
+	OpenMPT_Wine_Wrapper_SoundDevice_ISource source = {};
 	source.inst = isource;
 	source.SoundSourceGetReferenceClockNowNanosecondsFunc = &SoundSourceGetReferenceClockNowNanosecondsFunc;
 	source.SoundSourcePreStartCallbackFunc = &SoundSourcePreStartCallbackFunc;

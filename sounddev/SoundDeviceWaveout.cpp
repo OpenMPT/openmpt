@@ -57,7 +57,7 @@ CWaveDevice::CWaveDevice(mpt::log::ILogger &logger, SoundDevice::Info info, Soun
 	m_nWriteBuffer = 0;
 	m_nDoneBuffer = 0;
 	m_nBuffersPending = 0;
-	MemsetZero(m_PositionLast);
+	m_PositionLast = {};
 	m_PositionWrappedCount = 0;
 }
 
@@ -119,8 +119,7 @@ SoundDevice::DynamicCaps CWaveDevice::GetDeviceDynamicCaps(const std::vector<uin
 		caps.supportedSampleFormats = { SampleFormat::Float32, SampleFormat::Int32, SampleFormat::Int24, SampleFormat::Int16, SampleFormat::Unsigned8 };
 		caps.supportedExclusiveModeSampleFormats = { SampleFormat::Float32, SampleFormat::Int32, SampleFormat::Int24, SampleFormat::Int16, SampleFormat::Unsigned8 };
 	}
-	WAVEOUTCAPS woc;
-	MemsetZero(woc);
+	WAVEOUTCAPS woc = {};
 	if(GetDeviceIndex() > 0)
 	{
 		caps.supportedExclusiveModeSampleFormats.clear();
@@ -204,7 +203,7 @@ bool CWaveDevice::InternalOpen()
 	m_WaveBuffersData.resize(numBuffers);
 	for(std::size_t buf = 0; buf < numBuffers; ++buf)
 	{
-		MemsetZero(m_WaveBuffers[buf]);
+		m_WaveBuffers[buf] = {};
 		m_WaveBuffersData[buf].resize(m_nWaveBufferSize);
 		m_WaveBuffers[buf].dwFlags = 0;
 		m_WaveBuffers[buf].lpData = &m_WaveBuffersData[buf][0];
@@ -230,7 +229,7 @@ bool CWaveDevice::InternalOpen()
 	m_nDoneBuffer = 0;
 	{
 		mpt::lock_guard<mpt::mutex> guard(m_PositionWraparoundMutex);
-		MemsetZero(m_PositionLast);
+		m_PositionLast = {};
 		m_PositionWrappedCount = 0;
 	}
 	SetWakeupEvent(m_ThreadWakeupEvent);
@@ -273,7 +272,7 @@ bool CWaveDevice::InternalClose()
 	}
 	{
 		mpt::lock_guard<mpt::mutex> guard(m_PositionWraparoundMutex);
-		MemsetZero(m_PositionLast);
+		m_PositionLast = {};
 		m_PositionWrappedCount = 0;
 	}
 	return true;
@@ -287,7 +286,7 @@ void CWaveDevice::StartFromSoundThread()
 	{
 		{
 			mpt::lock_guard<mpt::mutex> guard(m_PositionWraparoundMutex);
-			MemsetZero(m_PositionLast);
+			m_PositionLast = {};
 			m_PositionWrappedCount = 0;
 		}
 		m_JustStarted = true;
@@ -305,7 +304,7 @@ void CWaveDevice::StopFromSoundThread()
 		m_JustStarted = false;
 		{
 			mpt::lock_guard<mpt::mutex> guard(m_PositionWraparoundMutex);
-			MemsetZero(m_PositionLast);
+			m_PositionLast = {};
 			m_PositionWrappedCount = 0;
 		}
 	}
@@ -321,8 +320,7 @@ bool CWaveDevice::CheckResult(MMRESULT result)
 	if(!m_Failed)
 	{ // only show the first error
 		m_Failed = true;
-		TCHAR errortext[MAXERRORLENGTH + 1];
-		MemsetZero(errortext);
+		TCHAR errortext[MAXERRORLENGTH + 1] = {};
 		waveOutGetErrorText(result, errortext, MAXERRORLENGTH);
 		SendDeviceMessage(LogError, MPT_UFORMAT("WaveOut error: 0x{}: {}")
 			( mpt::ufmt::hex0<8>(result)
@@ -343,8 +341,7 @@ bool CWaveDevice::CheckResult(MMRESULT result, DWORD param)
 	if(!m_Failed)
 	{ // only show the first error
 		m_Failed = true;
-		TCHAR errortext[MAXERRORLENGTH + 1];
-		MemsetZero(errortext);
+		TCHAR errortext[MAXERRORLENGTH + 1] = {};
 		waveOutGetErrorText(result, errortext, MAXERRORLENGTH);
 		SendDeviceMessage(LogError, MPT_UFORMAT("WaveOut error: 0x{} (param 0x{}): {}")
 			( mpt::ufmt::hex0<8>(result)
@@ -453,8 +450,7 @@ int64 CWaveDevice::InternalGetStreamPositionFrames() const
 	static constexpr uint32 valid_mask = static_cast<uint32>((uint64(1) << valid_bits) - 1u);
 	static constexpr uint32 valid_watermark = static_cast<uint32>(uint64(1) << (valid_bits - 1u)); // half the valid range in order to be able to catch backwards fluctuations
 
-	MMTIME mmtime;
-	MemsetZero(mmtime);
+	MMTIME mmtime = {};
 	mmtime.wType = timeType;
 	if(waveOutGetPosition(m_hWaveOut, &mmtime, sizeof(mmtime)) != MMSYSERR_NOERROR)
 	{
@@ -605,8 +601,7 @@ std::vector<SoundDevice::Info> CWaveDevice::EnumerateDevices(mpt::log::ILogger &
 		info.internalID = mpt::ufmt::dec(index);
 		info.apiName = U_("MME");
 		info.useNameAsIdentifier = true;
-		WAVEOUTCAPS woc;
-		MemsetZero(woc);
+		WAVEOUTCAPS woc = {};
 		if(waveOutGetDevCaps((index == 0) ? WAVE_MAPPER : (index - 1), &woc, sizeof(woc)) == MMSYSERR_NOERROR)
 		{
 			info.name = mpt::ToUnicode(mpt::String::ReadWinBuf(woc.szPname));

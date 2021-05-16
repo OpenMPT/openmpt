@@ -61,10 +61,10 @@ CPortaudioDevice::CPortaudioDevice(mpt::log::ILogger &logger, SoundDevice::Info 
 		m_DeviceIndex = ConvertStrTo<PaDeviceIndex>(internalID);
 	}
 	m_HostApiType = Pa_GetHostApiInfo(Pa_GetDeviceInfo(m_DeviceIndex)->hostApi)->type;
-	MemsetZero(m_StreamParameters);
-	MemsetZero(m_InputStreamParameters);
+	m_StreamParameters = {};
+	m_InputStreamParameters = {};
 #if MPT_OS_WINDOWS
-	MemsetZero(m_WasapiStreamInfo);
+	m_WasapiStreamInfo = {};
 #endif // MPT_OS_WINDOWS
 	m_Stream = 0;
 	m_StreamInfo = 0;
@@ -83,8 +83,8 @@ CPortaudioDevice::~CPortaudioDevice()
 
 bool CPortaudioDevice::InternalOpen()
 {
-	MemsetZero(m_StreamParameters);
-	MemsetZero(m_InputStreamParameters);
+	m_StreamParameters = {};
+	m_InputStreamParameters = {};
 	m_Stream = 0;
 	m_StreamInfo = 0;
 	m_CurrentFrameBuffer = 0;
@@ -120,7 +120,7 @@ bool CPortaudioDevice::InternalOpen()
 	if(m_HostApiType == paWASAPI)
 	{
 #if MPT_OS_WINDOWS
-		MemsetZero(m_WasapiStreamInfo);
+		m_WasapiStreamInfo = {};
 		m_WasapiStreamInfo.size = sizeof(PaWasapiStreamInfo);
 		m_WasapiStreamInfo.hostApiType = paWASAPI;
 		m_WasapiStreamInfo.version = 1;
@@ -256,8 +256,8 @@ bool CPortaudioDevice::InternalClose()
 		{
 			Pa_Sleep(mpt::saturate_round<long>(bufferAttributes.Latency * 2.0 * 1000.0 + 0.5)); // wait for broken wdm drivers not closing the stream immediatly
 		}
-		MemsetZero(m_StreamParameters);
-		MemsetZero(m_InputStreamParameters);
+		m_StreamParameters = {};
+		m_InputStreamParameters = {};
 		m_StreamInfo = 0;
 		m_Stream = 0;
 		m_CurrentFrameCount = 0;
@@ -494,8 +494,7 @@ SoundDevice::DynamicCaps CPortaudioDevice::GetDeviceDynamicCaps(const std::vecto
 	}
 	for(std::size_t n = 0; n<baseSampleRates.size(); n++)
 	{
-		PaStreamParameters StreamParameters;
-		MemsetZero(StreamParameters);
+		PaStreamParameters StreamParameters = {};
 		StreamParameters.device = device;
 		StreamParameters.channelCount = 2;
 		StreamParameters.sampleFormat = paInt16;
@@ -542,8 +541,7 @@ SoundDevice::DynamicCaps CPortaudioDevice::GetDeviceDynamicCaps(const std::vecto
 		{
 			for(const auto sampleRate : caps.supportedExclusiveSampleRates)
 			{
-				PaStreamParameters StreamParameters;
-				MemsetZero(StreamParameters);
+				PaStreamParameters StreamParameters = {};
 				StreamParameters.device = device;
 				StreamParameters.channelCount = 2;
 				if(sampleFormat.IsFloat())
@@ -561,8 +559,7 @@ SoundDevice::DynamicCaps CPortaudioDevice::GetDeviceDynamicCaps(const std::vecto
 				}
 				StreamParameters.suggestedLatency = 0.0;
 				StreamParameters.hostApiSpecificStreamInfo = NULL;
-				PaWasapiStreamInfo wasapiStreamInfo;
-				MemsetZero(wasapiStreamInfo);
+				PaWasapiStreamInfo wasapiStreamInfo = {};
 				wasapiStreamInfo.size = sizeof(PaWasapiStreamInfo);
 				wasapiStreamInfo.hostApiType = paWASAPI;
 				wasapiStreamInfo.version = 1;
@@ -585,8 +582,7 @@ SoundDevice::DynamicCaps CPortaudioDevice::GetDeviceDynamicCaps(const std::vecto
 		{
 			for(const auto sampleRate : caps.supportedSampleRates)
 			{
-				PaStreamParameters StreamParameters;
-				MemsetZero(StreamParameters);
+				PaStreamParameters StreamParameters = {};
 				StreamParameters.device = device;
 				StreamParameters.channelCount = 2;
 				if(sampleFormat.IsFloat())
@@ -652,8 +648,7 @@ bool CPortaudioDevice::OpenDriverSettings()
 	}
 	bool hasVista = GetSysInfo().WindowsVersion.IsAtLeast(mpt::OS::Windows::Version::WinVista);
 	mpt::PathString controlEXE;
-	TCHAR systemDir[MAX_PATH];
-	MemsetZero(systemDir);
+	TCHAR systemDir[MAX_PATH] = {};
 	if(GetSystemDirectory(systemDir, mpt::saturate_cast<UINT>(std::size(systemDir))) > 0)
 	{
 		controlEXE += mpt::PathString::FromNative(systemDir);

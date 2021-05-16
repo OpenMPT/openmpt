@@ -52,7 +52,7 @@ namespace SoundDevice {
 
 bool FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat, const SoundDevice::Settings &m_Settings)
 {
-	MemsetZero(WaveFormat);
+	WaveFormat = {};
 	if(!m_Settings.sampleFormat.IsValid())
 	{
 		return false;
@@ -483,8 +483,7 @@ public:
 			if(realtime)
 			{
 				#ifdef _POSIX_PRIORITY_SCHEDULING
-					sched_param p;
-					MemsetZero(p);
+					sched_param p = sched_param{};
 					p.sched_priority = rt_priority;
 					#if MPT_OS_LINUX
 						if(sched_setscheduler(0, SCHED_RR|SCHED_RESET_ON_FORK, &p) == 0)
