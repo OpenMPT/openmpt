@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.5.9-pre
+### libopenmpt 0.5.9 (2021-05-16)
 
  *  `Makefile` `CONFIG=emscripten` does not pass linker options to the compiler
     any more, which caused latest Emscripten to issue warnings.
