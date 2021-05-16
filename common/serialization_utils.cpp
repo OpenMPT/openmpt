@@ -12,6 +12,7 @@
 
 #include "serialization_utils.h"
 
+#include <array>
 #include <istream>
 #include <ostream>
 #include <sstream>
@@ -424,13 +425,13 @@ void SsbRead::BeginRead(const ID &id, const uint64& nVersion)
 	// Compare IDs.
 	uint8 storedIdLen = 0;
 	Binaryread<uint8>(iStrm, storedIdLen);
-	char storedIdBuf[256];
-	Clear(storedIdBuf);
+	std::array<char, 256> storedIdBuf;
+	storedIdBuf = {};
 	if(storedIdLen > 0)
 	{
-		iStrm.read(storedIdBuf, storedIdLen);
+		iStrm.read(storedIdBuf.data(), storedIdLen);
 	}
-	if(!(id == ID(storedIdBuf, storedIdLen)))
+	if(!(id == ID(storedIdBuf.data(), storedIdLen)))
 	{
 		AddReadNote(SNR_OBJECTCLASS_IDMISMATCH);
 	}
