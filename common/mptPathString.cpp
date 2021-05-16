@@ -285,8 +285,7 @@ bool PathString::IsDirectory() const
 	// Using PathIsDirectoryW here instead would increase libopenmpt dependencies by shlwapi.dll.
 	// GetFileAttributesW also does the job just fine.
 	#if MPT_OS_WINDOWS_WINRT
-		WIN32_FILE_ATTRIBUTE_DATA data;
-		MemsetZero(data);
+		WIN32_FILE_ATTRIBUTE_DATA data = {};
 		if(::GetFileAttributesExW(path.c_str(), GetFileExInfoStandard, &data) == 0)
 		{
 			return false;
@@ -301,8 +300,7 @@ bool PathString::IsDirectory() const
 bool PathString::IsFile() const
 {
 	#if MPT_OS_WINDOWS_WINRT
-		WIN32_FILE_ATTRIBUTE_DATA data;
-		MemsetZero(data);
+		WIN32_FILE_ATTRIBUTE_DATA data = {};
 		if (::GetFileAttributesExW(path.c_str(), GetFileExInfoStandard, &data) == 0)
 		{
 			return false;
@@ -481,8 +479,7 @@ bool DeleteWholeDirectoryTree(mpt::PathString path)
 	}
 	path.EnsureTrailingSlash();
 	HANDLE hFind = NULL;
-	WIN32_FIND_DATA wfd;
-	MemsetZero(wfd);
+	WIN32_FIND_DATA wfd = {};
 	hFind = FindFirstFile((path + P_("*.*")).AsNative().c_str(), &wfd);
 	if(hFind != NULL && hFind != INVALID_HANDLE_VALUE)
 	{
