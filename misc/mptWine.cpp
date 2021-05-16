@@ -442,12 +442,10 @@ ExecResult Context::ExecutePosixShellScript(std::string script, FlagSet<ExecFlag
 
 		std::wstring unixcommandW = mpt::ToWide(mpt::Charset::UTF8, unixcommand);
 		std::wstring titleW = mpt::ToWide(mpt::Charset::UTF8, title);
-		STARTUPINFOW startupInfo;
-		MemsetZero(startupInfo);
+		STARTUPINFOW startupInfo = {};
 		startupInfo.lpTitle = titleW.data();
 		startupInfo.cb = sizeof(startupInfo);
-		PROCESS_INFORMATION processInformation;
-		MemsetZero(processInformation);
+		PROCESS_INFORMATION processInformation = {};
 
 		progress(userdata);
 
@@ -512,12 +510,10 @@ ExecResult Context::ExecutePosixShellScript(std::string script, FlagSet<ExecFlag
 
 		std::wstring unixcommandW = mpt::ToWide(mpt::Charset::UTF8, unixcommand);
 		std::wstring titleW = mpt::ToWide(mpt::Charset::UTF8, title);
-		STARTUPINFOW startupInfo;
-		MemsetZero(startupInfo);
+		STARTUPINFOW startupInfo = {};
 		startupInfo.lpTitle = titleW.data();
 		startupInfo.cb = sizeof(startupInfo);
-		PROCESS_INFORMATION processInformation;
-		MemsetZero(processInformation);
+		PROCESS_INFORMATION processInformation = {};
 
 		progress(userdata);
 
@@ -653,8 +649,7 @@ ExecResult Context::ExecutePosixShellScript(std::string script, FlagSet<ExecFlag
 		paths.pop_front();
 		path.EnsureTrailingSlash();
 		HANDLE hFind = NULL;
-		WIN32_FIND_DATA wfd;
-		MemsetZero(wfd);
+		WIN32_FIND_DATA wfd = {};
 		hFind = FindFirstFile((path + P_("*.*")).AsNative().c_str(), &wfd);
 		if(hFind != NULL && hFind != INVALID_HANDLE_VALUE)
 		{

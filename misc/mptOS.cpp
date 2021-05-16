@@ -401,8 +401,7 @@ mpt::ustring Name(Architecture arch)
 
 Architecture GetHostArchitecture() noexcept
 {
-	SYSTEM_INFO systemInfo;
-	MemsetZero(systemInfo);
+	SYSTEM_INFO systemInfo = {};
 	GetNativeSystemInfo(&systemInfo);
 	for(const auto &arch : architectures)
 	{
@@ -417,8 +416,7 @@ Architecture GetHostArchitecture() noexcept
 
 Architecture GetProcessArchitecture() noexcept
 {
-	SYSTEM_INFO systemInfo;
-	MemsetZero(systemInfo);
+	SYSTEM_INFO systemInfo = {};
 	GetSystemInfo(&systemInfo);
 	for(const auto &arch : architectures)
 	{
@@ -460,8 +458,7 @@ std::vector<Architecture> GetSupportedProcessArchitectures(Architecture host)
 
 uint64 GetSystemMemorySize()
 {
-	MEMORYSTATUSEX memoryStatus;
-	MemsetZero(memoryStatus);
+	MEMORYSTATUSEX memoryStatus = {};
 	memoryStatus.dwLength = sizeof(MEMORYSTATUSEX);
 	if(GlobalMemoryStatusEx(&memoryStatus) == 0)
 	{
