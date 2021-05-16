@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.4.22-pre
+
 ### libopenmpt 0.4.21 (2021-05-16)
 
  *  The retrigger effect didn't work correctly for OPL instruments in some cases
