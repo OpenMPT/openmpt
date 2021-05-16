@@ -11,8 +11,10 @@
 #include "mpt/base/span.hpp"
 
 #include <iterator>
+#include <memory>
 #include <string>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 
@@ -144,6 +146,27 @@ struct as_raw_memory_impl<const std::vector<T>> {
 	inline mpt::const_byte_span operator()(const std::vector<T> & v) const {
 		static_assert(mpt::is_binary_safe<typename std::remove_const<T>::type>::value);
 		return mpt::as_span(reinterpret_cast<const std::byte *>(v.data()), v.size() * sizeof(T));
+	}
+};
+
+
+
+template <typename T>
+class heap_value {
+private:
+	std::unique_ptr<T> m_value{};
+
+public:
+	template <typename... Targs>
+	heap_value(Targs &&... args)
+		: m_value(std::make_unique<T>(std::forward<Targs>(args)...)) {
+		return;
+	}
+	const T & operator*() const {
+		return *m_value;
+	}
+	T & operator*() {
+		return *m_value;
 	}
 };
 

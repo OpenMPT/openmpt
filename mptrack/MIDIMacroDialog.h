@@ -15,6 +15,7 @@
 #include "ColourEdit.h"
 #include "../common/misc_util.h"
 #include "../soundlib/MIDIMacros.h"
+#include "mpt/base/alloc.hpp"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -29,9 +30,9 @@ protected:
 	CSoundFile &m_SndFile;
 
 public:
-	CMidiMacroSetup(CSoundFile &sndFile, CWnd *parent = nullptr) : CDialog(IDD_MIDIMACRO, parent), m_SndFile(sndFile), m_vMidiCfg(sndFile.m_MidiCfg), m_MidiCfg(m_vMidiCfg.value()) { }
+	CMidiMacroSetup(CSoundFile &sndFile, CWnd *parent = nullptr) : CDialog(IDD_MIDIMACRO, parent), m_SndFile(sndFile), m_vMidiCfg(sndFile.m_MidiCfg), m_MidiCfg(*m_vMidiCfg) { }
 private:
-	Util::heap_value<MIDIMacroConfig> m_vMidiCfg;
+	mpt::heap_value<MIDIMacroConfig> m_vMidiCfg;
 public:
 	MIDIMacroConfig & m_MidiCfg;
 

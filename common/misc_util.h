@@ -202,30 +202,6 @@ namespace Util
 
 
 
-	template <typename T>
-	class heap_value
-	{
-	private:
-		std::unique_ptr<T> m_value{};
-	public:
-		template <typename ... Targs>
-		heap_value(Targs && ... args)
-			: m_value(std::make_unique<T>(std::forward<Targs>(args) ...))
-		{
-			return;
-		}
-		const T & value() const
-		{
-			return *m_value;
-		}
-		T & value()
-		{
-			return *m_value;
-		}
-	};
-
-
-
 } // namespace Util
 
 
