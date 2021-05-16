@@ -45,7 +45,7 @@ Sample tab
 - [Imp] <js> Can now resample all samples at once by holding shift when pressing the resample button (http://bugs.openmpt.org/view.php?id=1368).
 
 Instrument tab
-- [Fix] <js> Saving an XI instrument from an IT or MPTM module could case wrong transposition for samples with a middle-C frequency below 8363 Hz (http://bugs.openmpt.org/view.php?id=1449).
+- [Fix] <js> Saving an XI instrument from an IT or MPTM module could cause wrong transposition for samples with a middle-C frequency below 8363 Hz (http://bugs.openmpt.org/view.php?id=1449).
 - [Fix] <js> Saving an ITI instrument from an XM module converted auto-vibrato sweep incorrectly.
 
 Playback
