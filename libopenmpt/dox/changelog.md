@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.3.31-pre
+
 ### libopenmpt 0.3.30 (2021-05-16)
 
  *  MPTM: In some MPTM files with OPL instruments, specifically if sample
