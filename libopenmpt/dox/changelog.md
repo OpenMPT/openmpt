@@ -7,14 +7,14 @@ is just a high-level summary.
 
 ### libopenmpt 0.4.21-pre
 
- *  mpg123: Update to v1.27.2 (2021-05-08).
-
  *  The retrigger effect didn't work correctly for OPL instruments in some cases
     depending on the chosen output sample rate.
  *  ProTracker 3.6 doesn't support sample swapping. It is now disabled when
     loading a ProTracker 3.6 IFF module.
  *  669: Reject files that contain any pattern tempo higher than 15. 
  *  Reduce memory consumption of malformed XPK-compressed files.
+
+ *  mpg123: Update to v1.27.2 (2021-05-08).
 
 ### libopenmpt 0.4.20 (2021-04-11)
 
