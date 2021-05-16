@@ -105,10 +105,12 @@
 #include "../common/mptMemory.h"
 // "mptAssert.h"
 // "mptBaseTypes.h"
-// #include "mpt/base/span.hpp"
+// "mpt/base/bit.hpp"
+// "mpt/base/memory.hpp"
+// "mpt/base/span.hpp"
+// "mpt/base/utility.hpp"
 // <utility>
 // <type_traits>
-// <cstring>
 
 #include "../common/mptString.h"
 // <algorithm>

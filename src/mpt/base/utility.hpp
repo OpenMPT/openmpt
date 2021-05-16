@@ -15,6 +15,8 @@
 #include <type_traits>
 #include <utility>
 
+#include <cstddef>
+
 
 
 namespace mpt {
@@ -49,6 +51,31 @@ constexpr std::underlying_type_t<T> to_underlying(T value) noexcept {
 }
 
 #endif
+
+
+
+template <typename T>
+struct value_initializer {
+	inline void operator()(T & x) {
+		x = T{};
+	}
+};
+
+template <typename T, std::size_t N>
+struct value_initializer<T[N]> {
+	inline void operator()(T (&a)[N]) {
+		for (auto & e : a)
+		{
+			value_initializer<T>{}(e);
+		}
+	}
+};
+
+template <typename T>
+inline void reset(T & x) {
+	value_initializer<T>{}(x);
+}
+
 
 
 } // namespace MPT_INLINE_NS

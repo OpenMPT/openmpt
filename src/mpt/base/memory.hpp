@@ -13,6 +13,7 @@
 #include <type_traits>
 
 #include <cstddef>
+#include <cstring>
 
 
 
@@ -251,6 +252,15 @@ inline mpt::const_byte_span as_raw_memory(const T & v) {
 template <typename T>
 inline mpt::byte_span as_raw_memory(T & v) {
 	return mpt::as_raw_memory_impl<T>()(v);
+}
+
+
+
+template <class T>
+inline void memclear(T & x) {
+	static_assert(std::is_standard_layout<T>::value);
+	static_assert((std::is_trivially_default_constructible<T>::value && std::is_trivially_copyable<T>::value) || mpt::is_binary_safe<T>::value);
+	std::memset(&x, 0, sizeof(T));
 }
 
 
