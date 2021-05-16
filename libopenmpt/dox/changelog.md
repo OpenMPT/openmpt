@@ -7,6 +7,16 @@ is just a high-level summary.
 
 ### libopenmpt 0.3.30-pre
 
+ *  MPTM: In some MPTM files with OPL instruments, specifically if sample
+    compression was turned on in OpenMPT, reading extended song properties
+    failed. This is specially problematic because that means that there was no
+    warning was logged that those files were made with a more recent version of
+    OpenMPT than the playback core in libopenmpt 0.3.
+ *  ProTracker 3.6 doesn't support sample swapping. It is now disabled when
+    loading a ProTracker 3.6 IFF module.
+ *  669: Reject files that contain any pattern tempo higher than 15. 
+ *  Reduce memory consumption of malformed XPK-compressed files.
+
  *  mpg123: Update to v1.27.2 (2021-05-08).
 
 ### libopenmpt 0.3.29 (2021-04-11)
