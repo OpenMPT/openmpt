@@ -42,76 +42,46 @@ inline void BufferReadTemplateFloat(Tspan & dst, const Tsample * src, std::size_
 }
 
 
-template <int fractionalBits, typename Tsample, typename Tspan, std::enable_if_t<!std::is_floating_point<Tsample>::value, bool> = true>
-inline void BufferWriteTemplateFixed(Tsample * dst, std::size_t dstTotal, std::size_t dstPos, Tspan & src, std::size_t numFrames, std::size_t numChannels, Dither &dither, bool clipFloat)
+template <int fractionalBits, typename Tsample, typename Tspan, typename TDither, std::enable_if_t<!std::is_floating_point<Tsample>::value, bool> = true>
+inline void BufferWriteTemplateFixed(Tsample * dst, std::size_t dstTotal, std::size_t dstPos, Tspan & src, std::size_t numFrames, std::size_t numChannels, TDither &dither, bool clipFloat)
 {
 	MPT_UNUSED_VARIABLE(clipFloat);
-	dither.WithDither(
-		[&](auto &ditherInstance)
-		{
-			ConvertBufferMixFixedToBuffer<fractionalBits, false>(mpt::make_audio_span_with_offset(mpt::audio_span_interleaved<Tsample>(dst, numChannels, dstTotal), dstPos), src, ditherInstance, numChannels, numFrames);
-		}
-	);
+	ConvertBufferMixFixedToBuffer<fractionalBits, false>(mpt::make_audio_span_with_offset(mpt::audio_span_interleaved<Tsample>(dst, numChannels, dstTotal), dstPos), src, dither, numChannels, numFrames);
 }
-template <int fractionalBits, typename Tsample, typename Tspan, std::enable_if_t<std::is_floating_point<Tsample>::value, bool> = true>
-inline void BufferWriteTemplateFixed(Tsample * dst, std::size_t dstTotal, std::size_t dstPos, Tspan & src, std::size_t numFrames, std::size_t numChannels, Dither &dither, bool clipFloat)
+template <int fractionalBits, typename Tsample, typename Tspan, typename TDither, std::enable_if_t<std::is_floating_point<Tsample>::value, bool> = true>
+inline void BufferWriteTemplateFixed(Tsample * dst, std::size_t dstTotal, std::size_t dstPos, Tspan & src, std::size_t numFrames, std::size_t numChannels, TDither &dither, bool clipFloat)
 {
 	if(clipFloat)
 	{
-		dither.WithDither(
-			[&](auto &ditherInstance)
-			{
-				ConvertBufferMixFixedToBuffer<fractionalBits, true>(mpt::make_audio_span_with_offset(mpt::audio_span_interleaved<Tsample>(dst, numChannels, dstTotal), dstPos), src, ditherInstance, numChannels, numFrames);
-			}
-		);
+		ConvertBufferMixFixedToBuffer<fractionalBits, true>(mpt::make_audio_span_with_offset(mpt::audio_span_interleaved<Tsample>(dst, numChannels, dstTotal), dstPos), src, dither, numChannels, numFrames);
 	} else
 	{
-		dither.WithDither(
-			[&](auto &ditherInstance)
-			{
-				ConvertBufferMixFixedToBuffer<fractionalBits, false>(mpt::make_audio_span_with_offset(mpt::audio_span_interleaved<Tsample>(dst, numChannels, dstTotal), dstPos), src, ditherInstance, numChannels, numFrames);
-			}
-		);
+		ConvertBufferMixFixedToBuffer<fractionalBits, false>(mpt::make_audio_span_with_offset(mpt::audio_span_interleaved<Tsample>(dst, numChannels, dstTotal), dstPos), src, dither, numChannels, numFrames);
 	}
 }
 
 
-template <typename Tsample, typename Tspan, std::enable_if_t<!std::is_floating_point<Tsample>::value, bool> = true>
-void BufferWriteTemplateFloat(Tsample * dst, std::size_t dstTotal, std::size_t dstPos, Tspan & src, std::size_t numFrames, std::size_t numChannels, Dither &dither, bool clipFloat)
+template <typename Tsample, typename Tspan, typename TDither, std::enable_if_t<!std::is_floating_point<Tsample>::value, bool> = true>
+void BufferWriteTemplateFloat(Tsample * dst, std::size_t dstTotal, std::size_t dstPos, Tspan & src, std::size_t numFrames, std::size_t numChannels, TDither &dither, bool clipFloat)
 {
 	MPT_UNUSED_VARIABLE(clipFloat);
-	dither.WithDither(
-		[&](auto &ditherInstance)
-		{
-			ConvertBufferMixFloatToBuffer<false>(mpt::make_audio_span_with_offset(mpt::audio_span_interleaved<Tsample>(dst, numChannels, dstTotal), dstPos), src, ditherInstance, numChannels, numFrames);
-		}
-	);
+	ConvertBufferMixFloatToBuffer<false>(mpt::make_audio_span_with_offset(mpt::audio_span_interleaved<Tsample>(dst, numChannels, dstTotal), dstPos), src, dither, numChannels, numFrames);
 }
-template <typename Tsample, typename Tspan, std::enable_if_t<std::is_floating_point<Tsample>::value, bool> = true>
-void BufferWriteTemplateFloat(Tsample * dst, std::size_t dstTotal, std::size_t dstPos, Tspan & src, std::size_t numFrames, std::size_t numChannels, Dither &dither, bool clipFloat)
+template <typename Tsample, typename Tspan, typename TDither, std::enable_if_t<std::is_floating_point<Tsample>::value, bool> = true>
+void BufferWriteTemplateFloat(Tsample * dst, std::size_t dstTotal, std::size_t dstPos, Tspan & src, std::size_t numFrames, std::size_t numChannels, TDither &dither, bool clipFloat)
 {
 	if(clipFloat)
 	{
-		dither.WithDither(
-			[&](auto &ditherInstance)
-			{
-				ConvertBufferMixFloatToBuffer<true>(mpt::make_audio_span_with_offset(mpt::audio_span_interleaved<Tsample>(dst, numChannels, dstTotal), dstPos), src, ditherInstance, numChannels, numFrames);
-			}
-		);
+		ConvertBufferMixFloatToBuffer<true>(mpt::make_audio_span_with_offset(mpt::audio_span_interleaved<Tsample>(dst, numChannels, dstTotal), dstPos), src, dither, numChannels, numFrames);
 	} else
 	{
-		dither.WithDither(
-			[&](auto &ditherInstance)
-			{
-				ConvertBufferMixFloatToBuffer<false>(mpt::make_audio_span_with_offset(mpt::audio_span_interleaved<Tsample>(dst, numChannels, dstTotal), dstPos), src, ditherInstance, numChannels, numFrames);
-			}
-		);
+		ConvertBufferMixFloatToBuffer<false>(mpt::make_audio_span_with_offset(mpt::audio_span_interleaved<Tsample>(dst, numChannels, dstTotal), dstPos), src, dither, numChannels, numFrames);
 	}
 }
 
 
 
-template <typename Tsample>
+template <typename Tsample, typename TDither>
 class BufferIO
 {
 private:
@@ -119,11 +89,11 @@ private:
 	Tsample * const m_dst;
 	std::size_t m_countFramesReadProcessed;
 	std::size_t m_countFramesWriteProcessed;
-	Dither & m_dither;
+	TDither & m_dither;
 	const BufferFormat m_bufferFormat;
 	const std::size_t m_countFramesTotal;
 public:
-	inline BufferIO(Tsample * dst, const Tsample * src, std::size_t numFrames, Dither & dither, BufferFormat bufferFormat)
+	inline BufferIO(Tsample * dst, const Tsample * src, std::size_t numFrames, TDither & dither, BufferFormat bufferFormat)
 		: m_src(src)
 		, m_dst(dst)
 		, m_countFramesReadProcessed(0)

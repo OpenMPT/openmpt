@@ -694,15 +694,15 @@ void CMainFrame::SoundSourceUnlock()
 }
 
 
-template <typename Tsample>
+template <typename Tsample, typename Tdither>
 class StereoVuMeterSourceWrapper
 	: public IAudioSource
 {
 private:
-	SoundDevice::BufferIO<Tsample> &bufferio;
+	SoundDevice::BufferIO<Tsample, Tdither> &bufferio;
 	VUMeter &vumeter;
 public:
-	inline StereoVuMeterSourceWrapper(SoundDevice::BufferIO<Tsample> &bufferIO, VUMeter &vumeter)
+	inline StereoVuMeterSourceWrapper(SoundDevice::BufferIO<Tsample, Tdither> &bufferIO, VUMeter &vumeter)
 		: bufferio(bufferIO)
 		, vumeter(vumeter)
 	{
@@ -723,15 +723,15 @@ public:
 };
 
 
-template <typename Tsample>
+template <typename Tsample, typename Tdither>
 class StereoVuMeterTargetWrapper
 	: public IAudioReadTarget
 {
 private:
-	SoundDevice::BufferIO<Tsample> &bufferio;
+	SoundDevice::BufferIO<Tsample, Tdither> &bufferio;
 	VUMeter &vumeter;
 public:
-	inline StereoVuMeterTargetWrapper(SoundDevice::BufferIO<Tsample> &bufferIO, VUMeter &vumeter)
+	inline StereoVuMeterTargetWrapper(SoundDevice::BufferIO<Tsample, Tdither> &bufferIO, VUMeter &vumeter)
 		: bufferio(bufferIO)
 		, vumeter(vumeter)
 	{
@@ -774,26 +774,32 @@ void CMainFrame::SoundSourceLockedReadImpl(SoundDevice::BufferFormat bufferForma
 	MPT_ASSERT(numFrames <= std::numeric_limits<CSoundFile::samplecount_t>::max());
 	CSoundFile::samplecount_t framesToRender = static_cast<CSoundFile::samplecount_t>(numFrames);
 	m_Dither.SetMode((DitherMode)bufferFormat.DitherType);
-	SoundDevice::BufferIO<Tsample> bufferIO(buffer, inputBuffer, numFrames, m_Dither, bufferFormat);
-	StereoVuMeterSourceWrapper<Tsample> source(bufferIO, m_VUMeterInput);
-	StereoVuMeterTargetWrapper<Tsample> target(bufferIO, m_VUMeterOutput);
-	CSoundFile::samplecount_t renderedFrames = m_pSndFile->Read(framesToRender, target, source);
-	MPT_ASSERT(renderedFrames <= framesToRender);
-	CSoundFile::samplecount_t remainingFrames = framesToRender - renderedFrames;
-	if(remainingFrames > 0)
-	{
-		// The sound device interface expects the whole buffer to be filled, always.
-		// Clear remaining buffer if not enough samples got rendered.
-		while(remainingFrames > 0)
+	m_Dither.WithDither(
+		[&](auto &ditherInstance)
 		{
-			for(uint32 channel = 0; channel < bufferFormat.Channels; ++channel)
+			using Tdither = decltype(ditherInstance);
+			SoundDevice::BufferIO<Tsample, Tdither> bufferIO(buffer, inputBuffer, numFrames, ditherInstance, bufferFormat);
+			StereoVuMeterSourceWrapper<Tsample, Tdither> source(bufferIO, m_VUMeterInput);
+			StereoVuMeterTargetWrapper<Tsample, Tdither> target(bufferIO, m_VUMeterOutput);
+			CSoundFile::samplecount_t renderedFrames = m_pSndFile->Read(framesToRender, target, source);
+			MPT_ASSERT(renderedFrames <= framesToRender);
+			CSoundFile::samplecount_t remainingFrames = framesToRender - renderedFrames;
+			if(remainingFrames > 0)
 			{
-				buffer[(renderedFrames * bufferFormat.Channels) + channel] = SC::sample_cast<Tsample>(static_cast<int16>(0));
+				// The sound device interface expects the whole buffer to be filled, always.
+				// Clear remaining buffer if not enough samples got rendered.
+				while(remainingFrames > 0)
+				{
+					for(uint32 channel = 0; channel < bufferFormat.Channels; ++channel)
+					{
+						buffer[(renderedFrames * bufferFormat.Channels) + channel] = SC::sample_cast<Tsample>(static_cast<int16>(0));
+					}
+					renderedFrames += 1;
+					remainingFrames -= 1;
+				}
 			}
-			renderedFrames += 1;
-			remainingFrames -= 1;
 		}
-	}
+	);
 }
 
 
