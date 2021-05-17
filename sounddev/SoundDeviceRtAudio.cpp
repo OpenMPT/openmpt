@@ -113,10 +113,10 @@ bool CRtAudioDevice::InternalOpen()
 		}
 		if(m_RtAudio->getCurrentApi() == RtAudio::Api::WINDOWS_WASAPI)
 		{
-			m_Flags.NeedsClippedFloat = true;
+			m_Flags.WantsClippedOutput = true;
 		} else if(m_RtAudio->getCurrentApi() == RtAudio::Api::WINDOWS_DS)
 		{
-			m_Flags.NeedsClippedFloat = (GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::OS::Windows::Version::WinVista));
+			m_Flags.WantsClippedOutput = (GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::OS::Windows::Version::WinVista));
 		}
 		m_RtAudio->openStream((m_OutputStreamParameters.nChannels > 0) ? &m_OutputStreamParameters : nullptr, (m_InputStreamParameters.nChannels > 0) ? &m_InputStreamParameters : nullptr, SampleFormatToRtAudioFormat(m_Settings.sampleFormat), m_Settings.Samplerate, &m_FramesPerChunk, &RtAudioCallback, this, &m_StreamOptions, nullptr);
 	} catch (const RtAudioError &e)

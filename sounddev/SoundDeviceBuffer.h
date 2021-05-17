@@ -71,7 +71,7 @@ public:
 	inline void Write(audio_span_src src, std::size_t countChunk)
 	{
 		MPT_ASSERT(m_countFramesWriteProcessed + countChunk <= m_dst.size_frames());
-		if(m_bufferFormat.NeedsClippedFloat)
+		if(m_bufferFormat.WantsClippedOutput)
 		{
 			ConvertBufferMixInternalToBuffer<true>(mpt::make_audio_span_with_offset(m_dst, m_countFramesWriteProcessed), src, m_dither, m_bufferFormat.Channels, countChunk);
 		} else
@@ -85,7 +85,7 @@ public:
 	inline void WriteFixedPoint(audio_span_src src, std::size_t countChunk)
 	{
 		MPT_ASSERT(m_countFramesWriteProcessed + countChunk <= m_dst.size_frames());
-		if(m_bufferFormat.NeedsClippedFloat)
+		if(m_bufferFormat.WantsClippedOutput)
 		{
 			ConvertBufferMixInternalFixedToBuffer<fractionalBits, true>(mpt::make_audio_span_with_offset(m_dst, m_countFramesWriteProcessed), src, m_dither, m_bufferFormat.Channels, countChunk);
 		} else

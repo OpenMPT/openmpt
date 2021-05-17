@@ -257,12 +257,12 @@ static_assert(sizeof(OpenMPT_SoundDevice_Flags) % 8 == 0);
 inline OpenMPT_SoundDevice_Flags encode(SoundDevice::Flags src) {
 	OpenMPT_SoundDevice_Flags dst;
 	MemsetZero(dst);
-	dst.NeedsClippedFloat = src.NeedsClippedFloat;
+	dst.WantsClippedOutput = src.WantsClippedOutput;
 	return dst;
 }
 inline SoundDevice::Flags decode(OpenMPT_SoundDevice_Flags src) {
 	SoundDevice::Flags dst;
-	dst.NeedsClippedFloat = src.NeedsClippedFloat;
+	dst.WantsClippedOutput = src.WantsClippedOutput;
 	return dst;
 }
 
@@ -274,7 +274,7 @@ inline OpenMPT_SoundDevice_BufferFormat encode(SoundDevice::BufferFormat src) {
 	dst.Channels = src.Channels;
 	dst.InputChannels = src.InputChannels;
 	dst.sampleFormat = SampleFormat::ToInt(src.sampleFormat);
-	dst.NeedsClippedFloat = src.NeedsClippedFloat;
+	dst.WantsClippedOutput = src.WantsClippedOutput;
 	dst.DitherType = src.DitherType;
 	return dst;
 }
@@ -284,7 +284,7 @@ inline SoundDevice::BufferFormat decode(OpenMPT_SoundDevice_BufferFormat src) {
 	dst.Channels = src.Channels;
 	dst.InputChannels = src.InputChannels;
 	dst.sampleFormat = SampleFormat::FromInt(src.sampleFormat);
-	dst.NeedsClippedFloat = src.NeedsClippedFloat;
+	dst.WantsClippedOutput = src.WantsClippedOutput;
 	dst.DitherType = src.DitherType;
 	return dst;
 }

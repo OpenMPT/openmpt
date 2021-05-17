@@ -195,7 +195,7 @@ public:
 		bufferFormat.Channels = m_Settings.Channels;
 		bufferFormat.InputChannels = m_Settings.InputChannels;
 		bufferFormat.sampleFormat = m_Settings.sampleFormat;
-		bufferFormat.NeedsClippedFloat = m_Flags.NeedsClippedFloat;
+		bufferFormat.WantsClippedOutput = m_Flags.WantsClippedOutput;
 		bufferFormat.DitherType = m_Settings.DitherType;
 		return bufferFormat;
 	}

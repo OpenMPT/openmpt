@@ -436,9 +436,9 @@ struct Flags
 	// known way to disable this annoying behavior, avoid unclipped samples on
 	// affected windows versions and clip them ourselves before handing them to
 	// the APIs.
-	bool NeedsClippedFloat;
+	bool WantsClippedOutput;
 	Flags()
-		: NeedsClippedFloat(false)
+		: WantsClippedOutput(false)
 	{
 		return;
 	}
@@ -507,7 +507,7 @@ struct BufferFormat
 	uint32 Channels;
 	uint8 InputChannels;
 	SampleFormat sampleFormat;
-	bool NeedsClippedFloat;
+	bool WantsClippedOutput;
 	int DitherType;
 };
 

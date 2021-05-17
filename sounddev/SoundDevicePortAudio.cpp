@@ -160,28 +160,28 @@ bool CPortaudioDevice::InternalOpen()
 #endif // MPT_OS_WINDOWS
 		if(m_Settings.ExclusiveMode)
 		{
-			m_Flags.NeedsClippedFloat = false;
+			m_Flags.WantsClippedOutput = false;
 #if MPT_OS_WINDOWS
 			m_WasapiStreamInfo.flags |= paWinWasapiExclusive | paWinWasapiExplicitSampleFormat;
 			m_StreamParameters.hostApiSpecificStreamInfo = &m_WasapiStreamInfo;
 #endif // MPT_OS_WINDOWS
 		} else
 		{
-			m_Flags.NeedsClippedFloat = GetSysInfo().IsOriginal();
+			m_Flags.WantsClippedOutput = GetSysInfo().IsOriginal();
 		}
 	} else if(m_HostApiType == paWDMKS)
 	{
-		m_Flags.NeedsClippedFloat = false;
+		m_Flags.WantsClippedOutput = false;
 		framesPerBuffer = paFramesPerBufferUnspecified; // let portaudio choose
 	} else if(m_HostApiType == paMME)
 	{
-		m_Flags.NeedsClippedFloat = (GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::OS::Windows::Version::WinVista));
+		m_Flags.WantsClippedOutput = (GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::OS::Windows::Version::WinVista));
 	} else if(m_HostApiType == paDirectSound)
 	{
-		m_Flags.NeedsClippedFloat = (GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::OS::Windows::Version::WinVista));
+		m_Flags.WantsClippedOutput = (GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::OS::Windows::Version::WinVista));
 	} else
 	{
-		m_Flags.NeedsClippedFloat = false;
+		m_Flags.WantsClippedOutput = false;
 	}
 	m_InputStreamParameters = m_StreamParameters;
 	if(!HasInputChannelsOnSameDevice())

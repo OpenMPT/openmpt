@@ -29,7 +29,7 @@ typedef struct OpenMPT_SoundDevice_TimeInfo {
 } OpenMPT_SoundDevice_TimeInfo;
 
 typedef struct OpenMPT_SoundDevice_Flags {
-	uint8_t NeedsClippedFloat;
+	uint8_t WantsClippedOutput;
 	uint8_t pad1;
 	uint16_t pad2;
 	uint32_t pad3;
@@ -42,7 +42,7 @@ typedef struct OpenMPT_SoundDevice_BufferFormat {
 	uint8_t pad1;
 	uint16_t pad2; 
 	int32_t sampleFormat;
-	uint8_t NeedsClippedFloat;
+	uint8_t WantsClippedOutput;
 	uint8_t pad3;
 	uint16_t pad4; 
 	int32_t DitherType;
