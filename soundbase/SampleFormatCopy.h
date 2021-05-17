@@ -134,7 +134,7 @@ void ConvertBufferMixFloatToBuffer(TOutBuf outBuf, TInBuf inBuf, Tdither &dither
 	constexpr int ditherBits = SampleFormat(SampleFormatTraits<TOutSample>::sampleFormat()).IsInt()
 		? SampleFormat(SampleFormatTraits<TOutSample>::sampleFormat()).GetBitsPerSample()
 		: 0;
-	SC::ClipFloat<TInSample, clipOutput> clip;
+	SC::Clip<TInSample, clipOutput> clip;
 	SC::Convert<TOutSample, TInSample> conv;
 	for(std::size_t i = 0; i < count; ++i)
 	{
