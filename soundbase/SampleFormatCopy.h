@@ -79,7 +79,7 @@ void CopyInterleavedSampleStreams(typename SampleConversion::output_t *MPT_RESTR
 
 
 template <int fractionalBits, bool clipOutput, typename TOutBuf, typename TInBuf, typename Tdither>
-void ConvertBufferMixFixedToBuffer(TOutBuf outBuf, TInBuf inBuf, Tdither &dither, std::size_t channels, std::size_t count)
+void ConvertBufferMixInternalFixedToBuffer(TOutBuf outBuf, TInBuf inBuf, Tdither &dither, std::size_t channels, std::size_t count)
 {
 	using TOutSample = typename std::remove_const<typename TOutBuf::sample_type>::type;
 	using TInSample = typename std::remove_const<typename TInBuf::sample_type>::type;
@@ -103,7 +103,7 @@ void ConvertBufferMixFixedToBuffer(TOutBuf outBuf, TInBuf inBuf, Tdither &dither
 
 
 template <int fractionalBits, typename TOutBuf, typename TInBuf>
-void ConvertBufferToBufferMixFixed(TOutBuf outBuf, TInBuf inBuf, std::size_t channels, std::size_t count)
+void ConvertBufferToBufferMixInternalFixed(TOutBuf outBuf, TInBuf inBuf, std::size_t channels, std::size_t count)
 {
 	using TOutSample = typename std::remove_const<typename TOutBuf::sample_type>::type;
 	using TInSample = typename std::remove_const<typename TInBuf::sample_type>::type;
@@ -123,7 +123,7 @@ void ConvertBufferToBufferMixFixed(TOutBuf outBuf, TInBuf inBuf, std::size_t cha
 
 
 template <bool clipOutput, typename TOutBuf, typename TInBuf, typename Tdither>
-void ConvertBufferMixFloatToBuffer(TOutBuf outBuf, TInBuf inBuf, Tdither &dither, std::size_t channels, std::size_t count)
+void ConvertBufferMixInternalToBuffer(TOutBuf outBuf, TInBuf inBuf, Tdither &dither, std::size_t channels, std::size_t count)
 {
 	using TOutSample = typename std::remove_const<typename TOutBuf::sample_type>::type;
 	using TInSample = typename std::remove_const<typename TInBuf::sample_type>::type;
@@ -147,7 +147,7 @@ void ConvertBufferMixFloatToBuffer(TOutBuf outBuf, TInBuf inBuf, Tdither &dither
 
 
 template <typename TOutBuf, typename TInBuf>
-void ConvertBufferToBufferMixFloat(TOutBuf outBuf, TInBuf inBuf, std::size_t channels, std::size_t count)
+void ConvertBufferToBufferMixInternal(TOutBuf outBuf, TInBuf inBuf, std::size_t channels, std::size_t count)
 {
 	using TOutSample = typename std::remove_const<typename TOutBuf::sample_type>::type;
 	using TInSample = typename std::remove_const<typename TInBuf::sample_type>::type;

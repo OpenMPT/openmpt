@@ -48,7 +48,7 @@ public:
 		dither.WithDither(
 			[&](auto &ditherInstance)
 			{
-				ConvertBufferMixFixedToBuffer<MixSampleIntTraits::mix_fractional_bits, false>(mpt::make_audio_span_with_offset(outputBuffer, countRendered), mpt::audio_span_interleaved<MixSampleInt>(MixSoundBuffer, channels, countChunk), ditherInstance, channels, countChunk);
+				ConvertBufferMixInternalFixedToBuffer<MixSampleIntTraits::mix_fractional_bits, false>(mpt::make_audio_span_with_offset(outputBuffer, countRendered), mpt::audio_span_interleaved<MixSampleInt>(MixSoundBuffer, channels, countChunk), ditherInstance, channels, countChunk);
 			}
 		);
 		countRendered += countChunk;
@@ -58,7 +58,7 @@ public:
 		dither.WithDither(
 			[&](auto &ditherInstance)
 			{
-				ConvertBufferMixFloatToBuffer<false>(mpt::make_audio_span_with_offset(outputBuffer, countRendered), mpt::audio_span_interleaved<MixSampleFloat>(MixSoundBuffer, channels, countChunk), ditherInstance, channels, countChunk);
+				ConvertBufferMixInternalToBuffer<false>(mpt::make_audio_span_with_offset(outputBuffer, countRendered), mpt::audio_span_interleaved<MixSampleFloat>(MixSoundBuffer, channels, countChunk), ditherInstance, channels, countChunk);
 			}
 		);
 		countRendered += countChunk;

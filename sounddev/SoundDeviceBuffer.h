@@ -29,49 +29,41 @@ namespace SoundDevice {
 
 
 template <int fractionalBits, typename Tspan, typename Tsample>
-inline void BufferReadTemplateFixed(Tspan & dst, const Tsample * src, std::size_t srcTotal, std::size_t srcPos, std::size_t numFrames, std::size_t numChannels)
+inline void BufferReadFixed(Tspan & dst, const Tsample * src, std::size_t srcTotal, std::size_t srcPos, std::size_t numFrames, std::size_t numChannels)
 {
-	ConvertBufferToBufferMixFixed<fractionalBits>(dst, mpt::make_audio_span_with_offset(mpt::audio_span_interleaved<const Tsample>(src, numChannels, srcTotal), srcPos), numChannels, numFrames);
+	ConvertBufferToBufferMixInternalFixed<fractionalBits>(dst, mpt::make_audio_span_with_offset(mpt::audio_span_interleaved<const Tsample>(src, numChannels, srcTotal), srcPos), numChannels, numFrames);
 }
 
 
 template <typename Tspan, typename Tsample>
-inline void BufferReadTemplateFloat(Tspan & dst, const Tsample * src, std::size_t srcTotal, std::size_t srcPos, std::size_t numFrames, std::size_t numChannels)
+inline void BufferRead(Tspan & dst, const Tsample * src, std::size_t srcTotal, std::size_t srcPos, std::size_t numFrames, std::size_t numChannels)
 {
-	ConvertBufferToBufferMixFloat(dst, mpt::make_audio_span_with_offset(mpt::audio_span_interleaved<const Tsample>(src, numChannels, srcTotal), srcPos), numChannels, numFrames);
+	ConvertBufferToBufferMixInternal(dst, mpt::make_audio_span_with_offset(mpt::audio_span_interleaved<const Tsample>(src, numChannels, srcTotal), srcPos), numChannels, numFrames);
 }
 
 
 template <int fractionalBits, typename Tsample, typename Tspan, typename TDither>
-inline void BufferWriteTemplateFixed(Tsample * dst, std::size_t dstTotal, std::size_t dstPos, Tspan & src, std::size_t numFrames, std::size_t numChannels, TDither &dither, bool clipFloat)
+inline void BufferWriteFixed(Tsample * dst, std::size_t dstTotal, std::size_t dstPos, Tspan & src, std::size_t numFrames, std::size_t numChannels, TDither &dither, bool clipOutput)
 {
-	if constexpr(!std::is_floating_point<Tsample>::value)
+	if(clipOutput)
 	{
-		MPT_UNUSED_VARIABLE(clipFloat);
-		ConvertBufferMixFixedToBuffer<fractionalBits, false>(mpt::make_audio_span_with_offset(mpt::audio_span_interleaved<Tsample>(dst, numChannels, dstTotal), dstPos), src, dither, numChannels, numFrames);
-	} else if(clipFloat)
-	{
-		ConvertBufferMixFixedToBuffer<fractionalBits, true>(mpt::make_audio_span_with_offset(mpt::audio_span_interleaved<Tsample>(dst, numChannels, dstTotal), dstPos), src, dither, numChannels, numFrames);
+		ConvertBufferMixInternalFixedToBuffer<fractionalBits, true>(mpt::make_audio_span_with_offset(mpt::audio_span_interleaved<Tsample>(dst, numChannels, dstTotal), dstPos), src, dither, numChannels, numFrames);
 	} else
 	{
-		ConvertBufferMixFixedToBuffer<fractionalBits, false>(mpt::make_audio_span_with_offset(mpt::audio_span_interleaved<Tsample>(dst, numChannels, dstTotal), dstPos), src, dither, numChannels, numFrames);
+		ConvertBufferMixInternalFixedToBuffer<fractionalBits, false>(mpt::make_audio_span_with_offset(mpt::audio_span_interleaved<Tsample>(dst, numChannels, dstTotal), dstPos), src, dither, numChannels, numFrames);
 	}
 }
 
 
 template <typename Tsample, typename Tspan, typename TDither>
-void BufferWriteTemplateFloat(Tsample * dst, std::size_t dstTotal, std::size_t dstPos, Tspan & src, std::size_t numFrames, std::size_t numChannels, TDither &dither, bool clipFloat)
+void BufferWrite(Tsample * dst, std::size_t dstTotal, std::size_t dstPos, Tspan & src, std::size_t numFrames, std::size_t numChannels, TDither &dither, bool clipOutput)
 {
-	if constexpr(!std::is_floating_point<Tsample>::value)
+	if(clipOutput)
 	{
-		MPT_UNUSED_VARIABLE(clipFloat);
-		ConvertBufferMixFloatToBuffer<false>(mpt::make_audio_span_with_offset(mpt::audio_span_interleaved<Tsample>(dst, numChannels, dstTotal), dstPos), src, dither, numChannels, numFrames);
-	} else if(clipFloat)
-	{
-		ConvertBufferMixFloatToBuffer<true>(mpt::make_audio_span_with_offset(mpt::audio_span_interleaved<Tsample>(dst, numChannels, dstTotal), dstPos), src, dither, numChannels, numFrames);
+		ConvertBufferMixInternalToBuffer<true>(mpt::make_audio_span_with_offset(mpt::audio_span_interleaved<Tsample>(dst, numChannels, dstTotal), dstPos), src, dither, numChannels, numFrames);
 	} else
 	{
-		ConvertBufferMixFloatToBuffer<false>(mpt::make_audio_span_with_offset(mpt::audio_span_interleaved<Tsample>(dst, numChannels, dstTotal), dstPos), src, dither, numChannels, numFrames);
+		ConvertBufferMixInternalToBuffer<false>(mpt::make_audio_span_with_offset(mpt::audio_span_interleaved<Tsample>(dst, numChannels, dstTotal), dstPos), src, dither, numChannels, numFrames);
 	}
 }
 
@@ -104,28 +96,28 @@ public:
 	inline void Read(Tspan & dst, std::size_t countChunk)
 	{
 		MPT_ASSERT(m_countFramesReadProcessed + countChunk <= m_countFramesTotal);
-		SoundDevice::BufferReadTemplateFloat(dst, m_src, m_countFramesTotal, m_countFramesReadProcessed, countChunk, m_bufferFormat.InputChannels);
+		SoundDevice::BufferRead(dst, m_src, m_countFramesTotal, m_countFramesReadProcessed, countChunk, m_bufferFormat.InputChannels);
 		m_countFramesReadProcessed += countChunk;
 	}
 	template <int fractionalBits, typename Tspan>
 	inline void ReadFixedPoint(Tspan & dst, std::size_t countChunk)
 	{
 		MPT_ASSERT(m_countFramesReadProcessed + countChunk <= m_countFramesTotal);
-		SoundDevice::BufferReadTemplateFixed<fractionalBits>(dst, m_src, m_countFramesTotal, m_countFramesReadProcessed, countChunk, m_bufferFormat.InputChannels);
+		SoundDevice::BufferReadFixed<fractionalBits>(dst, m_src, m_countFramesTotal, m_countFramesReadProcessed, countChunk, m_bufferFormat.InputChannels);
 		m_countFramesReadProcessed += countChunk;
 	}
 	template <typename Tspan>
 	inline void Write(Tspan & src, std::size_t countChunk)
 	{
 		MPT_ASSERT(m_countFramesWriteProcessed + countChunk <= m_countFramesTotal);
-		SoundDevice::BufferWriteTemplateFloat(m_dst, m_countFramesTotal, m_countFramesWriteProcessed, src, countChunk, m_bufferFormat.Channels, m_dither, m_bufferFormat.NeedsClippedFloat);
+		SoundDevice::BufferWrite(m_dst, m_countFramesTotal, m_countFramesWriteProcessed, src, countChunk, m_bufferFormat.Channels, m_dither, m_bufferFormat.NeedsClippedFloat);
 		m_countFramesWriteProcessed += countChunk;
 	}
 	template <int fractionalBits, typename Tspan>
 	inline void WriteFixedPoint(Tspan & src, std::size_t countChunk)
 	{
 		MPT_ASSERT(m_countFramesWriteProcessed + countChunk <= m_countFramesTotal);
-		SoundDevice::BufferWriteTemplateFixed<fractionalBits>(m_dst, m_countFramesTotal, m_countFramesWriteProcessed, src, countChunk, m_bufferFormat.Channels, m_dither, m_bufferFormat.NeedsClippedFloat);
+		SoundDevice::BufferWriteFixed<fractionalBits>(m_dst, m_countFramesTotal, m_countFramesWriteProcessed, src, countChunk, m_bufferFormat.Channels, m_dither, m_bufferFormat.NeedsClippedFloat);
 		m_countFramesWriteProcessed += countChunk;
 	}
 };
