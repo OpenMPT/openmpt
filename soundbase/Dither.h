@@ -258,7 +258,7 @@ public:
 		MPT_ASSERT(mode == DitherNone);
 		return ditherNone;
 	}
-	MultiChannelDither<Dither_ModPlug> &DefaultDither()
+	MultiChannelDither<Dither_Simple> &DefaultDither()
 	{
 		MPT_ASSERT(mode == DitherDefault);
 		return ditherSimple;
