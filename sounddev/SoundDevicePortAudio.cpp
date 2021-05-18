@@ -792,7 +792,7 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(SoundDevice::S
 			result.apiName = U_("MME");
 			result.default_ = ((Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->defaultOutputDevice == static_cast<PaDeviceIndex>(dev)) ? Info::Default::Named : Info::Default::None);
 			result.flags = {
-				sysInfo.SystemClass == mpt::OS::Class::Windows ? Info::Usability::Deprecated : Info::Usability::NotAvailable,
+				sysInfo.SystemClass == mpt::OS::Class::Windows ? Info::Usability::Legacy : Info::Usability::NotAvailable,
 				Info::Level::Secondary,
 				Info::Compatible::No,
 				Info::Api::Emulated,
