@@ -8,6 +8,7 @@
 #include "mpt/base/namespace.hpp"
 
 #include <array>
+#include <random>
 
 #include <cstddef>
 
@@ -25,8 +26,9 @@ private:
 public:
 	template <typename Trd>
 	explicit seed_seq_values(Trd & rd) {
+		std::uniform_int_distribution<unsigned int> random_int{};
 		for (std::size_t i = 0; i < N; ++i) {
-			seeds[i] = rd();
+			seeds[i] = random_int(rd);
 		}
 	}
 	const unsigned int * begin() const {
