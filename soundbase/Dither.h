@@ -180,8 +180,8 @@ private:
 public:
 	template <typename Trd>
 	MultiChannelDither(Trd &rd, std::size_t channels = 4)
-		: prng(Tdither::prng_init(rd))
-		, DitherChannels(channels)
+		: DitherChannels(channels)
+		, prng(Tdither::prng_init(rd))
 	{
 		return;
 	}
@@ -241,8 +241,8 @@ public:
 		MultiChannelDither<Dither_Simple>>;
 
 private:
-	TAllDithers m_Dithers;
 	mpt::good_prng m_PRNG;
+	TAllDithers m_Dithers;
 
 public:
 	template <typename Trd>
@@ -308,6 +308,8 @@ public:
 				break;
 			case DitherSimple:
 				m_Dithers.template emplace<static_cast<std::size_t>(DitherSimple)>(m_PRNG, oldChannels);
+				break;
+			default:
 				break;
 		}
 	}
