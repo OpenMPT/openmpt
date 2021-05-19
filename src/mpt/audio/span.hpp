@@ -39,22 +39,13 @@ public:
 		, m_frames(frames) {
 		return;
 	}
-	SampleType * const * data_planar() noexcept {
+	SampleType * const * data_planar() const noexcept {
 		return m_buffers;
 	}
-	const SampleType * const * data_planar() const noexcept {
-		return m_buffers;
-	}
-	SampleType * data() noexcept {
+	SampleType * data() const noexcept {
 		return nullptr;
 	}
-	const SampleType * data() const noexcept {
-		return nullptr;
-	}
-	SampleType & operator()(std::size_t channel, std::size_t frame) {
-		return m_buffers[channel][frame * m_frame_stride];
-	}
-	const SampleType & operator()(std::size_t channel, std::size_t frame) const {
+	SampleType & operator()(std::size_t channel, std::size_t frame) const {
 		return m_buffers[channel][frame * m_frame_stride];
 	}
 	bool is_contiguous() const noexcept {
@@ -99,22 +90,13 @@ public:
 		, m_frames(frames) {
 		return;
 	}
-	SampleType * const * data_planar() noexcept {
+	SampleType * const * data_planar() const noexcept {
 		return m_buffers;
 	}
-	const SampleType * const * data_planar() const noexcept {
-		return m_buffers;
-	}
-	SampleType * data() noexcept {
+	SampleType * data() const noexcept {
 		return nullptr;
 	}
-	const SampleType * data() const noexcept {
-		return nullptr;
-	}
-	SampleType & operator()(std::size_t channel, std::size_t frame) {
-		return m_buffers[channel][frame];
-	}
-	const SampleType & operator()(std::size_t channel, std::size_t frame) const {
+	SampleType & operator()(std::size_t channel, std::size_t frame) const {
 		return m_buffers[channel][frame];
 	}
 	bool is_contiguous() const noexcept {
@@ -156,22 +138,13 @@ public:
 		, m_frames(frames) {
 		return;
 	}
-	SampleType * const * data_planar() noexcept {
+	SampleType * const * data_planar() const noexcept {
 		return nullptr;
 	}
-	const SampleType * const * data_planar() const noexcept {
-		return nullptr;
-	}
-	SampleType * data() noexcept {
+	SampleType * data() const noexcept {
 		return m_buffer;
 	}
-	const SampleType * data() const noexcept {
-		return m_buffer;
-	}
-	SampleType & operator()(std::size_t channel, std::size_t frame) {
-		return m_buffer[(m_frames * channel) + frame];
-	}
-	const SampleType & operator()(std::size_t channel, std::size_t frame) const {
+	SampleType & operator()(std::size_t channel, std::size_t frame) const {
 		return m_buffer[(m_frames * channel) + frame];
 	}
 	bool is_contiguous() const noexcept {
@@ -213,22 +186,13 @@ public:
 		, m_frames(frames) {
 		return;
 	}
-	SampleType * const * data_planar() noexcept {
+	SampleType * const * data_planar() const noexcept {
 		return nullptr;
 	}
-	const SampleType * const * data_planar() const noexcept {
-		return nullptr;
-	}
-	SampleType * data() noexcept {
+	SampleType * data() const noexcept {
 		return m_buffer;
 	}
-	const SampleType * data() const noexcept {
-		return m_buffer;
-	}
-	SampleType & operator()(std::size_t channel, std::size_t frame) {
-		return m_buffer[m_channels * frame + channel];
-	}
-	const SampleType & operator()(std::size_t channel, std::size_t frame) const {
+	SampleType & operator()(std::size_t channel, std::size_t frame) const {
 		return m_buffer[m_channels * frame + channel];
 	}
 	bool is_contiguous() const noexcept {
@@ -351,22 +315,13 @@ public:
 	bool is_contiguous() const noexcept {
 		return (m_channel_stride != 0);
 	}
-	SampleType * const * data_planar() noexcept {
+	SampleType * const * data_planar() const noexcept {
 		return (!is_contiguous()) ? m_buffer.planes : nullptr;
 	}
-	const SampleType * const * data_planar() const noexcept {
-		return (!is_contiguous()) ? m_buffer.planes : nullptr;
-	}
-	SampleType * data() noexcept {
+	SampleType * data() const noexcept {
 		return is_contiguous() ? m_buffer.contiguous : nullptr;
 	}
-	const SampleType * data() const noexcept {
-		return is_contiguous() ? m_buffer.contiguous : nullptr;
-	}
-	SampleType & operator()(std::size_t channel, std::size_t frame) {
-		return is_contiguous() ? m_buffer.contiguous[(m_channel_stride * channel) + (m_frame_stride * frame)] : m_buffer.planes[channel][frame * m_frame_stride];
-	}
-	const SampleType & operator()(std::size_t channel, std::size_t frame) const {
+	SampleType & operator()(std::size_t channel, std::size_t frame) const {
 		return is_contiguous() ? m_buffer.contiguous[(m_channel_stride * channel) + (m_frame_stride * frame)] : m_buffer.planes[channel][frame * m_frame_stride];
 	}
 	bool channels_are_contiguous() const noexcept {
@@ -402,24 +357,14 @@ public:
 		, m_offset(offsetFrames) {
 		return;
 	}
-	sample_type * data() noexcept {
+	sample_type * data() const noexcept {
 		if (!is_contiguous())
 		{
 			return nullptr;
 		}
 		return m_buffer.data() + (size_channels() * m_offset);
 	}
-	const sample_type * data() const noexcept {
-		if (!is_contiguous())
-		{
-			return nullptr;
-		}
-		return m_buffer.data() + (size_channels() * m_offset);
-	}
-	sample_type & operator()(std::size_t channel, std::size_t frame) {
-		return m_buffer(channel, m_offset + frame);
-	}
-	const sample_type & operator()(std::size_t channel, std::size_t frame) const {
+	sample_type & operator()(std::size_t channel, std::size_t frame) const {
 		return m_buffer(channel, m_offset + frame);
 	}
 	bool is_contiguous() const noexcept {
