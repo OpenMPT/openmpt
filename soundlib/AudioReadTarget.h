@@ -39,7 +39,7 @@ public:
 		, dither(dither_)
 		, outputBuffer(buf)
 	{
-		MPT_ASSERT(SampleFormat(SampleFormatTraits<typename Taudio_span::sample_type>::sampleFormat()).IsValid());
+		return;
 	}
 	std::size_t GetRenderedCount() const { return countRendered; }
 public:
