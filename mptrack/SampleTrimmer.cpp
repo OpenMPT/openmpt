@@ -23,11 +23,11 @@ class CRenderProgressDlg : public CProgressDialog
 {
 	CSoundFile &m_SndFile;
 
-	class DummyAudioTarget : public IAudioReadTarget
+	class DummyAudioTarget : public IAudioTarget
 	{
 	public:
-		void DataCallback(MixSampleInt *, std::size_t, std::size_t) override { }
-		void DataCallback(MixSampleFloat *, std::size_t, std::size_t) override { }
+		void Process(mpt::audio_span_interleaved<MixSampleInt>) override { }
+		void Process(mpt::audio_span_interleaved<MixSampleFloat>) override { }
 	};
 
 public:

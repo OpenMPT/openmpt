@@ -24,111 +24,113 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-template<typename Tspan>
-class AudioReadTargetBuffer
-	: public IAudioReadTarget
+template<typename Taudio_span>
+class AudioTargetBuffer
+	: public IAudioTarget
 {
 private:
 	std::size_t countRendered;
 	Dither &dither;
 protected:
-	Tspan outputBuffer;
+	Taudio_span outputBuffer;
 public:
-	AudioReadTargetBuffer(Tspan buf, Dither &dither_)
+	AudioTargetBuffer(Taudio_span buf, Dither &dither_)
 		: countRendered(0)
 		, dither(dither_)
 		, outputBuffer(buf)
 	{
-		MPT_ASSERT(SampleFormat(SampleFormatTraits<typename Tspan::sample_type>::sampleFormat()).IsValid());
+		MPT_ASSERT(SampleFormat(SampleFormatTraits<typename Taudio_span::sample_type>::sampleFormat()).IsValid());
 	}
 	std::size_t GetRenderedCount() const { return countRendered; }
 public:
-	void DataCallback(MixSampleInt *MixSoundBuffer, std::size_t channels, std::size_t countChunk) override
+	void Process(mpt::audio_span_interleaved<MixSampleInt> buffer) override
 	{
 		dither.WithDither(
 			[&](auto &ditherInstance)
 			{
-				ConvertBufferMixInternalFixedToBuffer<MixSampleIntTraits::mix_fractional_bits, false>(mpt::make_audio_span_with_offset(outputBuffer, countRendered), mpt::audio_span_interleaved<MixSampleInt>(MixSoundBuffer, channels, countChunk), ditherInstance, channels, countChunk);
+				ConvertBufferMixInternalFixedToBuffer<MixSampleIntTraits::mix_fractional_bits, false>(mpt::make_audio_span_with_offset(outputBuffer, countRendered), buffer, ditherInstance, buffer.size_channels(), buffer.size_frames());
 			}
 		);
-		countRendered += countChunk;
+		countRendered += buffer.size_frames();
 	}
-	void DataCallback(MixSampleFloat *MixSoundBuffer, std::size_t channels, std::size_t countChunk) override
+	void Process(mpt::audio_span_interleaved<MixSampleFloat> buffer) override
 	{
 		dither.WithDither(
 			[&](auto &ditherInstance)
 			{
-				ConvertBufferMixInternalToBuffer<false>(mpt::make_audio_span_with_offset(outputBuffer, countRendered), mpt::audio_span_interleaved<MixSampleFloat>(MixSoundBuffer, channels, countChunk), ditherInstance, channels, countChunk);
+				ConvertBufferMixInternalToBuffer<false>(mpt::make_audio_span_with_offset(outputBuffer, countRendered), buffer, ditherInstance, buffer.size_channels(), buffer.size_frames());
 			}
 		);
-		countRendered += countChunk;
+		countRendered += buffer.size_frames();
 	}
 };
 
 
-template<typename Tspan>
-class AudioReadTargetGainBuffer
-	: public AudioReadTargetBuffer<Tspan>
+template<typename Taudio_span>
+class AudioTargetBufferWithGain
+	: public AudioTargetBuffer<Taudio_span>
 {
 private:
-	typedef AudioReadTargetBuffer<Tspan> Tbase;
+	using Tbase = AudioTargetBuffer<Taudio_span>;
 private:
 	const float gainFactor;
 public:
-	AudioReadTargetGainBuffer(Tspan buf, Dither &dither, float gainFactor_)
+	AudioTargetBufferWithGain(Taudio_span buf, Dither &dither, float gainFactor_)
 		: Tbase(buf, dither)
 		, gainFactor(gainFactor_)
 	{
 		return;
 	}
 public:
-	void DataCallback(MixSampleInt *MixSoundBuffer, std::size_t channels, std::size_t countChunk) override
+	void Process(mpt::audio_span_interleaved<MixSampleInt> buffer) override
 	{
 		const std::size_t countRendered_ = Tbase::GetRenderedCount();
-		if constexpr(!std::is_floating_point<typename Tspan::sample_type>::value)
+		if constexpr(!std::is_floating_point<typename Taudio_span::sample_type>::value)
 		{
 			int32 gainFactor16_16 = mpt::saturate_round<int32>(gainFactor * (1 << 16));
 			if(gainFactor16_16 != (1<<16))
 			{
 				// only apply gain when != +/- 0dB
 				// no clipping prevention is done here
-				MixSampleInt *buf = MixSoundBuffer;
-				for(std::size_t i = 0; i < countChunk * channels; ++i)
+				for(std::size_t frame = 0; frame < buffer.size_frames(); ++frame)
 				{
-					*buf = Util::muldiv(*buf, gainFactor16_16, 1<<16);
-					buf++;
+					for(std::size_t channel = 0; channel < buffer.size_channels(); ++channel)
+					{
+						buffer(channel, frame) = Util::muldiv(buffer(channel, frame), gainFactor16_16, 1 << 16);
+					}
 				}
 			}
 		}
-		Tbase::DataCallback(MixSoundBuffer, channels, countChunk);
-		if constexpr(std::is_floating_point<typename Tspan::sample_type>::value)
+		Tbase::Process(buffer);
+		if constexpr(std::is_floating_point<typename Taudio_span::sample_type>::value)
 		{
 			if(gainFactor != 1.0f)
 			{
 				// only apply gain when != +/- 0dB
-				for(std::size_t i = 0; i < countChunk; ++i)
+				for(std::size_t frame = 0; frame < buffer.size_frames(); ++frame)
 				{
-					for(std::size_t channel = 0; channel < channels; ++channel)
+					for(std::size_t channel = 0; channel < buffer.size_channels(); ++channel)
 					{
-						Tbase::outputBuffer(channel, countRendered_ + i) *= gainFactor;
+						buffer(channel, countRendered_ + frame) *= gainFactor;
 					}
 				}
 			}
 		}
 	}
-	void DataCallback(MixSampleFloat *MixSoundBuffer, std::size_t channels, std::size_t countChunk) override
+	void Process(mpt::audio_span_interleaved<MixSampleFloat> buffer) override
 	{
 		if(gainFactor != 1.0f)
 		{
 			// only apply gain when != +/- 0dB
-			MixSampleFloat *buf = MixSoundBuffer;
-			for(std::size_t i = 0; i < countChunk * channels; ++i)
+			for(std::size_t frame = 0; frame < buffer.size_frames(); ++frame)
 			{
-				*buf *= gainFactor;
-				buf++;
+				for(std::size_t channel = 0; channel < buffer.size_channels(); ++channel)
+				{
+					buffer(channel, frame) *= gainFactor;
+				}
 			}
 		}
-		Tbase::DataCallback(MixSoundBuffer, channels, countChunk);
+		Tbase::Process(buffer);
 	}
 };
 

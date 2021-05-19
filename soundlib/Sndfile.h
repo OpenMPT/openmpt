@@ -54,6 +54,8 @@
 #include "patternContainer.h"
 #include "ModSequence.h"
 
+#include "mpt/audio/span.hpp"
+
 #include "../common/FileReaderFwd.h"
 
 
@@ -276,13 +278,13 @@ struct ModFormatDetails
 };
 
 
-class IAudioReadTarget
+class IAudioTarget
 {
 protected:
-	virtual ~IAudioReadTarget() = default;
+	virtual ~IAudioTarget() = default;
 public:
-	virtual void DataCallback(MixSampleInt *MixSoundBuffer, std::size_t channels, std::size_t countChunk) = 0;
-	virtual void DataCallback(MixSampleFloat *MixSoundBuffer, std::size_t channels, std::size_t countChunk) = 0;
+	virtual void Process(mpt::audio_span_interleaved<MixSampleInt> buffer) = 0;
+	virtual void Process(mpt::audio_span_interleaved<MixSampleFloat> buffer) = 0;
 };
 
 
@@ -291,8 +293,28 @@ class IAudioSource
 public:
 	virtual ~IAudioSource() = default;
 public:
-	virtual void FillCallback(MixSampleInt * const *MixSoundBuffers, std::size_t channels, std::size_t countChunk) = 0;
-	virtual void FillCallback(MixSampleFloat * const *MixSoundBuffers, std::size_t channels, std::size_t countChunk) = 0;
+	virtual void Process(mpt::audio_span_planar<MixSampleInt> buffer) = 0;
+	virtual void Process(mpt::audio_span_planar<MixSampleFloat> buffer) = 0;
+};
+
+
+class IMonitorInput
+{
+public:
+	virtual ~IMonitorInput() = default;
+public:
+	virtual void Process(mpt::audio_span_planar<const MixSampleInt> buffer) = 0;
+	virtual void Process(mpt::audio_span_planar<const MixSampleFloat> buffer) = 0;
+};
+
+
+class IMonitorOutput
+{
+public:
+	virtual ~IMonitorOutput() = default;
+public:
+	virtual void Process(mpt::audio_span_interleaved<const MixSampleInt> buffer) = 0;
+	virtual void Process(mpt::audio_span_interleaved<const MixSampleFloat> buffer) = 0;
 };
 
 
@@ -300,23 +322,23 @@ class AudioSourceNone
 	: public IAudioSource
 {
 public:
-	void FillCallback(MixSampleInt * const *MixSoundBuffers, std::size_t channels, std::size_t countChunk) override
+	void Process(mpt::audio_span_planar<MixSampleInt> buffer) override
 	{
-		for(std::size_t channel = 0; channel < channels; ++channel)
+		for(std::size_t channel = 0; channel < buffer.size_channels(); ++channel)
 		{
-			for(std::size_t frame = 0; frame < countChunk; ++frame)
+			for(std::size_t frame = 0; frame < buffer.size_frames(); ++frame)
 			{
-				MixSoundBuffers[channel][frame] = 0;
+				buffer(channel, frame) = 0;
 			}
 		}
 	}
-	void FillCallback(MixSampleFloat * const *MixSoundBuffers, std::size_t channels, std::size_t countChunk) override
+	void Process(mpt::audio_span_planar<MixSampleFloat> buffer) override
 	{
-		for(std::size_t channel = 0; channel < channels; ++channel)
+		for(std::size_t channel = 0; channel < buffer.size_channels(); ++channel)
 		{
-			for(std::size_t frame = 0; frame < countChunk; ++frame)
+			for(std::size_t frame = 0; frame < buffer.size_frames(); ++frame)
 			{
-				MixSoundBuffers[channel][frame] = MixSampleFloat(0.0);
+				buffer(channel, frame) = MixSampleFloat(0.0);
 			}
 		}
 	}
@@ -930,8 +952,14 @@ public:
 	void StopAllVsti();
 	void RecalculateGainForAllPlugs();
 	void ResetChannels();
-	samplecount_t Read(samplecount_t count, IAudioReadTarget &target) { AudioSourceNone source; return Read(count, target, source); }
-	samplecount_t Read(samplecount_t count, IAudioReadTarget &target, IAudioSource &source);
+	samplecount_t Read(samplecount_t count, IAudioTarget &target) { AudioSourceNone source; return Read(count, target, source); }
+	samplecount_t Read(
+		samplecount_t count,
+		IAudioTarget &target,
+		IAudioSource &source,
+		std::optional<std::reference_wrapper<IMonitorOutput>> outputMonitor = std::nullopt,
+		std::optional<std::reference_wrapper<IMonitorInput>> inputMonitor = std::nullopt
+		);
 private:
 	void CreateStereoMix(int count);
 public:

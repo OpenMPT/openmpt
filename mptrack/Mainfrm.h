@@ -20,6 +20,7 @@
 #include "mpt/mutex/mutex.hpp"
 #include "../soundlib/Sndfile.h"
 #include "../soundbase/Dither.h"
+#include "mpt/audio/span.hpp"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -203,6 +204,8 @@ template<> inline WINDOWPLACEMENT FromSettingValue(const SettingValue &val)
 
 
 class VUMeter
+	: public IMonitorInput
+	, public IMonitorOutput
 {
 public:
 	static constexpr std::size_t maxChannels = 4;
@@ -222,10 +225,10 @@ public:
 	void SetDecaySpeedDecibelPerSecond(float decibelPerSecond);
 public:
 	const Channel & operator [] (std::size_t channel) const { return channels[channel]; }
-	void Process(const MixSampleInt *mixbuffer, std::size_t numChannels, std::size_t numFrames); // mixbuffer is interleaved
-	void Process(const MixSampleInt *const *mixbuffers, std::size_t numChannels, std::size_t numFrames);
-	void Process(const MixSampleFloat *mixbuffer, std::size_t numChannels, std::size_t numFrames); // mixbuffer is interleaved
-	void Process(const MixSampleFloat *const *mixbuffers, std::size_t numChannels, std::size_t numFrames);
+	void Process(mpt::audio_span_interleaved<const MixSampleInt> buffer);
+	void Process(mpt::audio_span_planar<const MixSampleInt> buffer);
+	void Process(mpt::audio_span_interleaved<const MixSampleFloat> buffer);
+	void Process(mpt::audio_span_planar<const MixSampleFloat> buffer);
 	void Decay(int32 secondsNum, int32 secondsDen);
 	void ResetClipped();
 };

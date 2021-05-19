@@ -39,7 +39,7 @@ static CSoundFile::samplecount_t ReadInterleaved(CSoundFile &sndFile, Tsample *o
 {
 	sndFile.ResetMixStat();
 	MPT_ASSERT(sndFile.m_MixerSettings.gnChannels == channels);
-	AudioReadTargetBuffer<mpt::audio_span_interleaved<Tsample>> target(mpt::audio_span_interleaved<Tsample>(outputBuffer, channels, count), dither);
+	AudioTargetBuffer<mpt::audio_span_interleaved<Tsample>> target(mpt::audio_span_interleaved<Tsample>(outputBuffer, channels, count), dither);
 	return sndFile.Read(count, target);
 }
 

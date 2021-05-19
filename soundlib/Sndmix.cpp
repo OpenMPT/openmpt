@@ -191,11 +191,11 @@ void CSoundFile::ProcessInputChannels(IAudioSource &source, std::size_t countChu
 	{
 		buffers[channel] = MixInputBuffer[channel];
 	}
-	source.FillCallback(buffers, m_MixerSettings.NumInputChannels, countChunk);
+	source.Process(mpt::audio_span_planar(buffers, m_MixerSettings.NumInputChannels, countChunk));
 }
 
 
-CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioReadTarget &target, IAudioSource &source)
+CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioTarget &target, IAudioSource &source, std::optional<std::reference_wrapper<IMonitorOutput>> outputMonitor, std::optional<std::reference_wrapper<IMonitorInput>> inputMonitor)
 {
 	MPT_ASSERT_ALWAYS(m_MixerSettings.IsValid());
 
@@ -277,6 +277,16 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioReadTarget
 			ProcessInputChannels(source, countChunk);
 		}
 
+		if(inputMonitor)
+		{
+			mixsample_t *buffers[NUMMIXINPUTBUFFERS];
+			for(std::size_t channel = 0; channel < NUMMIXINPUTBUFFERS; ++channel)
+			{
+				buffers[channel] = MixInputBuffer[channel];
+			}
+			inputMonitor->get().Process(mpt::audio_span_planar<const mixsample_t>(buffers, m_MixerSettings.NumInputChannels, countChunk));
+		}
+
 		CreateStereoMix(countChunk);
 
 		if(m_opl)
@@ -320,7 +330,12 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioReadTarget
 			InterleaveFrontRear(MixSoundBuffer, MixRearBuffer, countChunk);
 		}
 
-		target.DataCallback(MixSoundBuffer, m_MixerSettings.gnChannels, countChunk);
+		if(outputMonitor)
+		{
+			outputMonitor->get().Process(mpt::audio_span_interleaved<const mixsample_t>(MixSoundBuffer, m_MixerSettings.gnChannels, countChunk));
+		}
+
+		target.Process(mpt::audio_span_interleaved<mixsample_t>(MixSoundBuffer, m_MixerSettings.gnChannels, countChunk));
 
 		// Buffer ready
 		countRendered += countChunk;

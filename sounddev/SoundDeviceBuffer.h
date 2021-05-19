@@ -52,47 +52,47 @@ public:
 	}
 
 	template <typename audio_span_dst>
-	inline void Read(audio_span_dst dst, std::size_t countChunk)
+	inline void Read(audio_span_dst dst)
 	{
-		MPT_ASSERT(m_countFramesReadProcessed + countChunk <= m_src.size_frames());
-		ConvertBufferToBufferMixInternal(dst, mpt::make_audio_span_with_offset(m_src, m_countFramesReadProcessed), m_bufferFormat.InputChannels, countChunk);
-		m_countFramesReadProcessed += countChunk;
+		MPT_ASSERT(m_countFramesReadProcessed + dst.size_frames() <= m_src.size_frames());
+		ConvertBufferToBufferMixInternal(dst, mpt::make_audio_span_with_offset(m_src, m_countFramesReadProcessed), m_bufferFormat.InputChannels, dst.size_frames());
+		m_countFramesReadProcessed += dst.size_frames();
 	}
 
 	template <int fractionalBits, typename audio_span_dst>
-	inline void ReadFixedPoint(audio_span_dst dst, std::size_t countChunk)
+	inline void ReadFixedPoint(audio_span_dst dst)
 	{
-		MPT_ASSERT(m_countFramesReadProcessed + countChunk <= m_src.size_frames());
-		ConvertBufferToBufferMixInternalFixed<fractionalBits>(dst, mpt::make_audio_span_with_offset(m_src, m_countFramesReadProcessed), m_bufferFormat.InputChannels, countChunk);
-		m_countFramesReadProcessed += countChunk;
+		MPT_ASSERT(m_countFramesReadProcessed + dst.size_frames() <= m_src.size_frames());
+		ConvertBufferToBufferMixInternalFixed<fractionalBits>(dst, mpt::make_audio_span_with_offset(m_src, m_countFramesReadProcessed), m_bufferFormat.InputChannels, dst.size_frames());
+		m_countFramesReadProcessed += dst.size_frames();
 	}
 
 	template <typename audio_span_src>
-	inline void Write(audio_span_src src, std::size_t countChunk)
+	inline void Write(audio_span_src src)
 	{
-		MPT_ASSERT(m_countFramesWriteProcessed + countChunk <= m_dst.size_frames());
+		MPT_ASSERT(m_countFramesWriteProcessed + src.size_frames() <= m_dst.size_frames());
 		if(m_bufferFormat.WantsClippedOutput)
 		{
-			ConvertBufferMixInternalToBuffer<true>(mpt::make_audio_span_with_offset(m_dst, m_countFramesWriteProcessed), src, m_dither, m_bufferFormat.Channels, countChunk);
+			ConvertBufferMixInternalToBuffer<true>(mpt::make_audio_span_with_offset(m_dst, m_countFramesWriteProcessed), src, m_dither, m_bufferFormat.Channels, src.size_frames());
 		} else
 		{
-			ConvertBufferMixInternalToBuffer<false>(mpt::make_audio_span_with_offset(m_dst, m_countFramesWriteProcessed), src, m_dither, m_bufferFormat.Channels, countChunk);
+			ConvertBufferMixInternalToBuffer<false>(mpt::make_audio_span_with_offset(m_dst, m_countFramesWriteProcessed), src, m_dither, m_bufferFormat.Channels, src.size_frames());
 		}
-		m_countFramesWriteProcessed += countChunk;
+		m_countFramesWriteProcessed += src.size_frames();
 	}
 
 	template <int fractionalBits, typename audio_span_src>
-	inline void WriteFixedPoint(audio_span_src src, std::size_t countChunk)
+	inline void WriteFixedPoint(audio_span_src src)
 	{
-		MPT_ASSERT(m_countFramesWriteProcessed + countChunk <= m_dst.size_frames());
+		MPT_ASSERT(m_countFramesWriteProcessed + src.size_frames() <= m_dst.size_frames());
 		if(m_bufferFormat.WantsClippedOutput)
 		{
-			ConvertBufferMixInternalFixedToBuffer<fractionalBits, true>(mpt::make_audio_span_with_offset(m_dst, m_countFramesWriteProcessed), src, m_dither, m_bufferFormat.Channels, countChunk);
+			ConvertBufferMixInternalFixedToBuffer<fractionalBits, true>(mpt::make_audio_span_with_offset(m_dst, m_countFramesWriteProcessed), src, m_dither, m_bufferFormat.Channels, src.size_frames());
 		} else
 		{
-			ConvertBufferMixInternalFixedToBuffer<fractionalBits, false>(mpt::make_audio_span_with_offset(m_dst, m_countFramesWriteProcessed), src, m_dither, m_bufferFormat.Channels, countChunk);
+			ConvertBufferMixInternalFixedToBuffer<fractionalBits, false>(mpt::make_audio_span_with_offset(m_dst, m_countFramesWriteProcessed), src, m_dither, m_bufferFormat.Channels, src.size_frames());
 		}
-		m_countFramesWriteProcessed += countChunk;
+		m_countFramesWriteProcessed += src.size_frames();
 	}
 
 };
