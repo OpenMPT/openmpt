@@ -103,7 +103,7 @@ public:
 	template <typename Trd>
 	static prng_type prng_init(Trd &rd)
 	{
-		return prng_type{rd};
+		return mpt::make_prng<prng_type>(rd);
 	}
 
 private:
