@@ -45,7 +45,7 @@ public:
 public:
 	void Process(mpt::audio_span_interleaved<MixSampleInt> buffer) override
 	{
-		dither.WithDither(
+		dither.visit(
 			[&](auto &ditherInstance)
 			{
 				ConvertBufferMixInternalFixedToBuffer<MixSampleIntTraits::mix_fractional_bits, false>(mpt::make_audio_span_with_offset(outputBuffer, countRendered), buffer, ditherInstance, buffer.size_channels(), buffer.size_frames());
@@ -55,7 +55,7 @@ public:
 	}
 	void Process(mpt::audio_span_interleaved<MixSampleFloat> buffer) override
 	{
-		dither.WithDither(
+		dither.visit(
 			[&](auto &ditherInstance)
 			{
 				ConvertBufferMixInternalToBuffer<false>(mpt::make_audio_span_with_offset(outputBuffer, countRendered), buffer, ditherInstance, buffer.size_channels(), buffer.size_frames());

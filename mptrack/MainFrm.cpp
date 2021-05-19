@@ -762,7 +762,7 @@ void CMainFrame::SoundSourceLockedReadImpl(SoundDevice::BufferFormat bufferForma
 	MPT_ASSERT(numFrames <= std::numeric_limits<CSoundFile::samplecount_t>::max());
 	CSoundFile::samplecount_t framesToRender = static_cast<CSoundFile::samplecount_t>(numFrames);
 	m_Dither.SetMode((DitherMode)bufferFormat.DitherType);
-	m_Dither.WithDither(
+	m_Dither.visit(
 		[&](auto &ditherInstance)
 		{
 			using Tdither = decltype(ditherInstance);

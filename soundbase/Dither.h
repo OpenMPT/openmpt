@@ -19,6 +19,8 @@
 #include "MixSampleConvert.h"
 #include "../common/mptRandom.h"
 
+#include <variant>
+
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -165,6 +167,8 @@ public:
 
 using Dither_Simple = Dither_SimpleImpl<>;
 
+using Dither_Default = Dither_Simple;
+
 
 template <typename Tdither>
 class MultiChannelDither
@@ -175,14 +179,19 @@ private:
 
 public:
 	template <typename Trd>
-	MultiChannelDither(Trd &rd)
+	MultiChannelDither(Trd &rd, std::size_t channels = 4)
 		: prng(Tdither::prng_init(rd))
+		, DitherChannels(channels)
 	{
 		return;
 	}
 	void SetChannels(std::size_t channels)
 	{
 		DitherChannels = std::vector<Tdither>(channels);
+	}
+	std::size_t GetChannels() const
+	{
+		return DitherChannels.size();
 	}
 	void Reset()
 	{
@@ -224,76 +233,87 @@ class Dither
 	: public DitherNames
 {
 
-private:
-	MultiChannelDither<Dither_None> ditherNone;
-	MultiChannelDither<Dither_ModPlug> ditherModPlug;
-	MultiChannelDither<Dither_Simple> ditherSimple;
+public:
+	using TAllDithers = std::variant<
+		MultiChannelDither<Dither_None>,
+		MultiChannelDither<Dither_Default>,
+		MultiChannelDither<Dither_ModPlug>,
+		MultiChannelDither<Dither_Simple>>;
 
-	DitherMode mode = DitherDefault;
+private:
+	TAllDithers m_Dithers;
+	mpt::good_prng m_PRNG;
 
 public:
 	template <typename Trd>
 	Dither(Trd &rd)
-		: ditherNone(rd)
-		, ditherModPlug(rd)
-		, ditherSimple(rd)
+		: m_PRNG(mpt::make_prng<mpt::good_prng>(rd))
+		, m_Dithers(std::in_place_index<static_cast<std::size_t>(DitherDefault)>, m_PRNG)
 	{
 		return;
 	}
+
 	void SetChannels(std::size_t channels)
 	{
-		ditherNone.SetChannels(channels);
-		ditherModPlug.SetChannels(channels);
-		ditherSimple.SetChannels(channels);
+		std::visit(
+			[&](auto &dither)
+			{
+				dither.SetChannels(channels);
+			},
+			m_Dithers);
 	}
-	void Reset()
+	std::size_t GetChannels() const
 	{
-		ditherNone.Reset();
-		ditherModPlug.Reset();
-		ditherSimple.Reset();
+		return std::visit(
+			[&](auto &dither)
+			{
+				return dither.GetChannels();
+			},
+			m_Dithers);
 	}
 
-	MultiChannelDither<Dither_None> &NoDither()
+	void Reset()
 	{
-		MPT_ASSERT(mode == DitherNone);
-		return ditherNone;
-	}
-	MultiChannelDither<Dither_Simple> &DefaultDither()
-	{
-		MPT_ASSERT(mode == DitherDefault);
-		return ditherSimple;
-	}
-	MultiChannelDither<Dither_ModPlug> &ModPlugDither()
-	{
-		MPT_ASSERT(mode == DitherModPlug);
-		return ditherModPlug;
-	}
-	MultiChannelDither<Dither_Simple> &SimpleDither()
-	{
-		MPT_ASSERT(mode == DitherSimple);
-		return ditherSimple;
+		std::visit(
+			[&](auto &dither)
+			{
+				dither.Reset();
+			},
+			m_Dithers);
 	}
 
 	template <typename Tfn>
-	auto WithDither(Tfn fn)
+	auto visit(Tfn fn)
 	{
-		switch(GetMode())
-		{
-			case DitherNone: return fn(NoDither()); break;
-			case DitherModPlug: return fn(ModPlugDither()); break;
-			case DitherSimple: return fn(SimpleDither()); break;
-			case DitherDefault: return fn(DefaultDither()); break;
-			default: return fn(DefaultDither()); break;
-		}
+		std::visit(fn, m_Dithers);
 	}
 
-	void SetMode(DitherMode mode_)
+	void SetMode(DitherMode mode)
 	{
-		mode = mode_;
+		if(mode == GetMode())
+		{
+			return;
+		}
+		const std::size_t oldChannels = GetChannels();
+		switch(mode)
+		{
+			case DitherNone:
+				m_Dithers.template emplace<static_cast<std::size_t>(DitherNone)>(m_PRNG, oldChannels);
+				break;
+			case DitherDefault:
+				m_Dithers.template emplace<static_cast<std::size_t>(DitherDefault)>(m_PRNG, oldChannels);
+				break;
+			case DitherModPlug:
+				m_Dithers.template emplace<static_cast<std::size_t>(DitherModPlug)>(m_PRNG, oldChannels);
+				break;
+			case DitherSimple:
+				m_Dithers.template emplace<static_cast<std::size_t>(DitherSimple)>(m_PRNG, oldChannels);
+				break;
+		}
 	}
 	DitherMode GetMode() const
 	{
-		return mode;
+		return static_cast<DitherMode>(m_Dithers.index());
 	}
 };
 

@@ -1284,7 +1284,7 @@ void CDoWaveConvert::Run()
 			}
 
 			const std::streampos oldPos = fileStream.tellp();
-			dither.WithDither(
+			dither.visit(
 				[&](auto& ditherInstance)
 				{
 					switch(fileEnc->GetSampleFormat())
