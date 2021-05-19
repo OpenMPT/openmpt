@@ -111,7 +111,7 @@ public:
 				{
 					for(std::size_t channel = 0; channel < buffer.size_channels(); ++channel)
 					{
-						buffer(channel, countRendered_ + frame) *= gainFactor;
+						Tbase::outputBuffer(channel, countRendered_ + frame) *= gainFactor;
 					}
 				}
 			}
