@@ -15,6 +15,7 @@
 #include "SoundDevice.h"
 
 #include "mpt/audio/span.hpp"
+#include "../soundbase/SampleFormatConverters.h"
 #include "../soundbase/SampleFormatCopy.h"
 #include "../soundbase/Dither.h"
 
@@ -93,6 +94,19 @@ public:
 			ConvertBufferMixInternalFixedToBuffer<fractionalBits, false>(mpt::make_audio_span_with_offset(m_dst, m_countFramesWriteProcessed), src, m_dither, m_bufferFormat.Channels, src.size_frames());
 		}
 		m_countFramesWriteProcessed += src.size_frames();
+	}
+
+	inline ~BufferIO()
+	{
+		// fill remaining buffer with silence
+		while(m_countFramesWriteProcessed < m_dst.size_frames())
+		{
+			for(std::size_t channel = 0; channel < m_dst.size_channels(); ++channel)
+			{
+				m_dst(channel, m_countFramesWriteProcessed) = SC::sample_cast<Tsample>(static_cast<int16>(0));
+			}
+			m_countFramesWriteProcessed += 1;
+		}
 	}
 
 };

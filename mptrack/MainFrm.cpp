@@ -772,20 +772,7 @@ void CMainFrame::SoundSourceLockedReadImpl(SoundDevice::BufferFormat bufferForma
 			CSoundFile::samplecount_t renderedFrames = m_pSndFile->Read(framesToRender, target, source, std::ref(m_VUMeterOutput), std::ref(m_VUMeterInput));
 			MPT_ASSERT(renderedFrames <= framesToRender);
 			CSoundFile::samplecount_t remainingFrames = framesToRender - renderedFrames;
-			if(remainingFrames > 0)
-			{
-				// The sound device interface expects the whole buffer to be filled, always.
-				// Clear remaining buffer if not enough samples got rendered.
-				while(remainingFrames > 0)
-				{
-					for(uint32 channel = 0; channel < bufferFormat.Channels; ++channel)
-					{
-						buffer[(renderedFrames * bufferFormat.Channels) + channel] = SC::sample_cast<Tsample>(static_cast<int16>(0));
-					}
-					renderedFrames += 1;
-					remainingFrames -= 1;
-				}
-			}
+			MPT_ASSERT(remainingFrames >= 0); // remaining buffer is filled in BufferIO::~BufferIO()
 		}
 	);
 }
