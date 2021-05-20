@@ -89,6 +89,8 @@ static_assert(sizeof(int24) == 3);
 
 
 
+#if !defined(CPPCHECK)
+// work-around crash in cppcheck 2.4.1
 namespace std {
 template <>
 class numeric_limits<mpt::uint24> : public std::numeric_limits<mpt::uint32> {
@@ -117,6 +119,7 @@ public:
 	}
 };
 } // namespace std
+#endif // !CPPCHECK
 
 
 
