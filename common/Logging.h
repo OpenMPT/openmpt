@@ -134,6 +134,9 @@ public:
 };
 
 
+#define MPT_LOG_GLOBAL(level, facility, text) MPT_LOG(mpt::log::GlobalLogger{}, (level), (facility), (text))
+
+
 
 #if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
 

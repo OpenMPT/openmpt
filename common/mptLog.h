@@ -52,8 +52,6 @@ public:
 	} while(0) \
 /**/
 
-#define MPT_LOG_GLOBAL(level, facility, text) MPT_LOG(mpt::log::GlobalLogger{}, (level), (facility), (text))
-
 } // namespace log
 } // namespace mpt
 
