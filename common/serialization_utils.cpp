@@ -258,7 +258,7 @@ void SsbWrite::WriteMapItem(const ID &id,
 void SsbWrite::IncrementWriteCounter()
 {
 	m_nCounter++;
-	if (m_nCounter >= (std::numeric_limits<uint16>::max() >> 2))
+	if(m_nCounter >= static_cast<uint16>(std::numeric_limits<uint16>::max() >> 2))
 	{
 		FinishWrite();
 		AddWriteNote(SNW_MAX_WRITE_COUNT_REACHED);
