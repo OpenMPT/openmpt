@@ -79,7 +79,7 @@ void CopyAudioChannels(TBufOut buf_out, TBufIn buf_in, std::size_t channels, std
 
 // Copy numChannels interleaved sample streams.
 template <typename Tin, typename Tout>
-void CopyAudioChannelsInterleaved(typename Tout *MPT_RESTRICT outBuf, const Tin *MPT_RESTRICT inBuf, std::size_t numChannels, std::size_t countFrames)
+void CopyAudioChannelsInterleaved(Tout *MPT_RESTRICT outBuf, const Tin *MPT_RESTRICT inBuf, std::size_t numChannels, std::size_t countFrames)
 {
 	CopyAudio(mpt::audio_span_interleaved<Tout>(outBuf, numChannels, countFrames), mpt::audio_span_interleaved<const Tin>(inBuf, numChannels, countFrames));
 }
