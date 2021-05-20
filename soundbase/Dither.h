@@ -270,6 +270,7 @@ private:
 			}
 		} else
 		{
+			MPT_UNUSED(mode);
 			m_Dithers.template emplace<defaultDither>(m_PRNG, channels);
 		}
 	}
