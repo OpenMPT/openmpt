@@ -563,19 +563,19 @@ void COptionsSoundcard::UpdateDither()
 		m_CbnDither.EnableWindow(TRUE);
 		for(int i=0; i<NumDitherModes; ++i)
 		{
-			m_CbnDither.AddString(mpt::ToCString(Dither::GetModeName((DitherMode)i) + U_(" dither")));
+			m_CbnDither.AddString(mpt::ToCString(DithersOpenMPT::GetModeName((DitherMode)i) + U_(" dither")));
 		}
 	} else if(m_CurrentDeviceCaps.HasInternalDither)
 	{
 		m_CbnDither.EnableWindow(TRUE);
-		m_CbnDither.AddString(mpt::ToCString(Dither::GetModeName(DitherNone) + U_(" dither")));
-		m_CbnDither.AddString(mpt::ToCString(Dither::GetModeName(DitherDefault) + U_(" dither")));
+		m_CbnDither.AddString(mpt::ToCString(DithersOpenMPT::GetModeName(DitherNone) + U_(" dither")));
+		m_CbnDither.AddString(mpt::ToCString(DithersOpenMPT::GetModeName(DitherDefault) + U_(" dither")));
 	} else
 	{
 		m_CbnDither.EnableWindow(FALSE);
 		for(int i=0; i<NumDitherModes; ++i)
 		{
-			m_CbnDither.AddString(mpt::ToCString(Dither::GetModeName(DitherNone) + U_(" dither")));
+			m_CbnDither.AddString(mpt::ToCString(DithersOpenMPT::GetModeName(DitherNone) + U_(" dither")));
 		}
 	}
 	if(m_Settings.DitherType < 0 || m_Settings.DitherType >= m_CbnDither.GetCount())

@@ -449,7 +449,7 @@ void module_impl::ctor( const std::map< std::string, std::string > & ctls ) {
 	m_sndFile = std::make_unique<OpenMPT::CSoundFile>();
 	m_loaded = false;
 	m_mixer_initialized = false;
-	m_Dither = std::make_unique<OpenMPT::Dither>( OpenMPT::mpt::global_prng() );
+	m_Dithers = std::make_unique<OpenMPT::DithersWrapperOpenMPT>( OpenMPT::mpt::global_prng(), OpenMPT::DithersWrapperOpenMPT::DefaultDither, 4 );
 	m_LogForwarder = std::make_unique<log_forwarder>( *m_Log );
 	m_sndFile->SetCustomLog( m_LogForwarder.get() );
 	m_current_subsong = 0;
@@ -507,7 +507,7 @@ std::size_t module_impl::read_wrapper( std::size_t count, std::int16_t * left, s
 	m_sndFile->m_bIsRendering = ( m_ctl_play_at_end != song_end_action::fadeout_song );
 	std::size_t count_read = 0;
 	std::int16_t * const buffers[4] = { left, right, rear_left, rear_right };
-	OpenMPT::AudioTargetBufferWithGain<mpt::audio_span_planar<std::int16_t>> target( mpt::audio_span_planar<std::int16_t>( buffers, OpenMPT::valid_channels( buffers, std::size( buffers ) ), count ), *m_Dither, m_Gain );
+	OpenMPT::AudioTargetBufferWithGain<mpt::audio_span_planar<std::int16_t>> target( mpt::audio_span_planar<std::int16_t>( buffers, OpenMPT::valid_channels( buffers, std::size( buffers ) ), count ), *m_Dithers, m_Gain );
 	while ( count > 0 ) {
 		std::size_t count_chunk = m_sndFile->Read(
 			static_cast<OpenMPT::CSoundFile::samplecount_t>( std::min( static_cast<std::uint64_t>( count ), static_cast<std::uint64_t>( std::numeric_limits<OpenMPT::CSoundFile::samplecount_t>::max() / 2 / 4 / 4 ) ) ), // safety margin / samplesize / channels
@@ -530,7 +530,7 @@ std::size_t module_impl::read_wrapper( std::size_t count, float * left, float * 
 	m_sndFile->m_bIsRendering = ( m_ctl_play_at_end != song_end_action::fadeout_song );
 	std::size_t count_read = 0;
 	float * const buffers[4] = { left, right, rear_left, rear_right };
-	OpenMPT::AudioTargetBufferWithGain<mpt::audio_span_planar<float>> target( mpt::audio_span_planar<float>( buffers, OpenMPT::valid_channels( buffers, std::size( buffers ) ), count ), *m_Dither, m_Gain );
+	OpenMPT::AudioTargetBufferWithGain<mpt::audio_span_planar<float>> target( mpt::audio_span_planar<float>( buffers, OpenMPT::valid_channels( buffers, std::size( buffers ) ), count ), *m_Dithers, m_Gain );
 	while ( count > 0 ) {
 		std::size_t count_chunk = m_sndFile->Read(
 			static_cast<OpenMPT::CSoundFile::samplecount_t>( std::min( static_cast<std::uint64_t>( count ), static_cast<std::uint64_t>( std::numeric_limits<OpenMPT::CSoundFile::samplecount_t>::max() / 2 / 4 / 4 ) ) ), // safety margin / samplesize / channels
@@ -552,7 +552,7 @@ std::size_t module_impl::read_interleaved_wrapper( std::size_t count, std::size_
 	m_sndFile->ResetMixStat();
 	m_sndFile->m_bIsRendering = ( m_ctl_play_at_end != song_end_action::fadeout_song );
 	std::size_t count_read = 0;
-	OpenMPT::AudioTargetBufferWithGain<mpt::audio_span_interleaved<std::int16_t>> target( mpt::audio_span_interleaved<std::int16_t>( interleaved, channels, count ), *m_Dither, m_Gain );
+	OpenMPT::AudioTargetBufferWithGain<mpt::audio_span_interleaved<std::int16_t>> target( mpt::audio_span_interleaved<std::int16_t>( interleaved, channels, count ), *m_Dithers, m_Gain );
 	while ( count > 0 ) {
 		std::size_t count_chunk = m_sndFile->Read(
 			static_cast<OpenMPT::CSoundFile::samplecount_t>( std::min( static_cast<std::uint64_t>( count ), static_cast<std::uint64_t>( std::numeric_limits<OpenMPT::CSoundFile::samplecount_t>::max() / 2 / 4 / 4 ) ) ), // safety margin / samplesize / channels
@@ -574,7 +574,7 @@ std::size_t module_impl::read_interleaved_wrapper( std::size_t count, std::size_
 	m_sndFile->ResetMixStat();
 	m_sndFile->m_bIsRendering = ( m_ctl_play_at_end != song_end_action::fadeout_song );
 	std::size_t count_read = 0;
-	OpenMPT::AudioTargetBufferWithGain<mpt::audio_span_interleaved<float>> target( mpt::audio_span_interleaved<float>( interleaved, channels, count ), *m_Dither, m_Gain );
+	OpenMPT::AudioTargetBufferWithGain<mpt::audio_span_interleaved<float>> target( mpt::audio_span_interleaved<float>( interleaved, channels, count ), *m_Dithers, m_Gain );
 	while ( count > 0 ) {
 		std::size_t count_chunk = m_sndFile->Read(
 			static_cast<OpenMPT::CSoundFile::samplecount_t>( std::min( static_cast<std::uint64_t>( count ), static_cast<std::uint64_t>( std::numeric_limits<OpenMPT::CSoundFile::samplecount_t>::max() / 2 / 4 / 4 ) ) ), // safety margin / samplesize / channels
@@ -1773,7 +1773,7 @@ std::int64_t module_impl::ctl_get_integer( std::string_view ctl, bool throw_if_u
 	} else if ( ctl == "subsong" ) {
 		return get_selected_subsong();
 	} else if ( ctl == "dither" ) {
-		return static_cast<int>( m_Dither->GetMode() );
+		return static_cast<int>( m_Dithers->GetMode() );
 	} else {
 		MPT_ASSERT_NOTREACHED();
 		return 0;
@@ -2005,7 +2005,7 @@ void module_impl::ctl_set_integer( std::string_view ctl, std::int64_t value, boo
 		if ( dither < 0 || dither >= OpenMPT::NumDitherModes ) {
 			dither = OpenMPT::DitherDefault;
 		}
-		m_Dither->SetMode( static_cast<OpenMPT::DitherMode>( dither ) );
+		m_Dithers->SetMode( dither );
 	} else {
 		MPT_ASSERT_NOTREACHED();
 	}

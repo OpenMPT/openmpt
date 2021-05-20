@@ -4061,15 +4061,15 @@ static MPT_NOINLINE void TestSampleConversion()
 	// Dither
 	{
 		std::vector<MixSampleInt> buffer(64);
-		Dither dithers(mpt::global_random_device());
-		dithers.SetMode(DitherModPlug);
+		DithersOpenMPT dithers(mpt::global_random_device(), DitherModPlug, 2);
 		for(std::size_t i = 0; i < 64; ++i)
 		{
-			dithers.visit(
+			std::visit(
 				[&](auto &dither)
 				{
 					buffer[i] = dither.template process<16>(0, buffer[i]);
-				}
+				},
+				dithers.Variant()
 			);
 		}
 		std::vector<MixSampleInt> expected = {

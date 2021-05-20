@@ -32,7 +32,7 @@ class FileReader;
 } // namespace detail
 typedef detail::FileReader<FileReaderTraitsDefault> FileReader;
 class CSoundFile;
-class Dither;
+struct DithersWrapperOpenMPT;
 } // namespace OpenMPT
 
 namespace openmpt {
@@ -117,7 +117,7 @@ protected:
 	std::unique_ptr<OpenMPT::CSoundFile> m_sndFile;
 	bool m_loaded;
 	bool m_mixer_initialized;
-	std::unique_ptr<OpenMPT::Dither> m_Dither;
+	std::unique_ptr<OpenMPT::DithersWrapperOpenMPT> m_Dithers;
 	subsongs_type m_subsongs;
 	float m_Gain;
 	song_end_action m_ctl_play_at_end;

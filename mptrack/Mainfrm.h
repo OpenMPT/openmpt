@@ -21,6 +21,7 @@
 #include "../soundlib/Sndfile.h"
 #include "../soundbase/Dither.h"
 #include "mpt/audio/span.hpp"
+#include "../sounddev/SoundDeviceBuffer.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -253,7 +254,11 @@ protected:
 };
 
 
-class CMainFrame: public CMDIFrameWnd, public SoundDevice::ISource, public SoundDevice::IMessageReceiver, public TfLanguageProfileNotifySink
+class CMainFrame
+	: public CMDIFrameWnd
+	, public SoundDevice::BufferHandler<DithersOpenMPT>
+	, public SoundDevice::IMessageReceiver
+	, public TfLanguageProfileNotifySink
 {
 	DECLARE_DYNAMIC(CMainFrame)
 	// static data
@@ -278,7 +283,6 @@ public:
 	Util::MultimediaClock m_SoundDeviceClock;
 	SoundDevice::IBase *gpSoundDevice = nullptr;
 	UINT_PTR m_NotifyTimer = 0;
-	Dither m_Dither;
 	VUMeter m_VUMeterInput;
 	VUMeter m_VUMeterOutput;
 
@@ -338,7 +342,7 @@ public:
 	static void UpdateDspEffects(CSoundFile &sndFile, bool reset=false);
 	static void UpdateAudioParameters(CSoundFile &sndFile, bool reset=false);
 
-	// from SoundDevice::ISource
+	// from SoundDevice::IBufferHandler
 	uint64 SoundSourceGetReferenceClockNowNanoseconds() const override;
 	void SoundSourcePreStartCallback() override;
 	void SoundSourcePostStopCallback() override;
@@ -346,15 +350,7 @@ public:
 	void SoundSourceLock() override;
 	uint64 SoundSourceLockedGetReferenceClockNowNanoseconds() const override;
 	void SoundSourceLockedReadPrepare(SoundDevice::TimeInfo timeInfo) override;
-	template <typename Tsample>
-	void SoundSourceLockedReadImpl(SoundDevice::BufferFormat bufferFormat, std::size_t numFrames, Tsample *buffer, const Tsample *inputBuffer);
-	void SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, std::size_t numFrames, uint8 *buffer, const uint8 *inputBuffer) override;
-	void SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, std::size_t numFrames, int8 *buffer, const int8 *inputBuffer) override;
-	void SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, std::size_t numFrames, int16 *buffer, const int16 *inputBuffer) override;
-	void SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, std::size_t numFrames, int24 *buffer, const int24 *inputBuffer) override;
-	void SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, std::size_t numFrames, int32 *buffer, const int32 *inputBuffer) override;
-	void SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, std::size_t numFrames, float *buffer, const float *inputBuffer) override;
-	void SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, std::size_t numFrames, double *buffer, const double *inputBuffer) override;
+	void SoundSourceLockedCallback(SoundDevice::CallbackBuffer<DithersOpenMPT> &buffer) override;
 	void SoundSourceLockedReadDone(SoundDevice::TimeInfo timeInfo) override;
 	void SoundSourceUnlock() override;
 

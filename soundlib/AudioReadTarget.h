@@ -24,19 +24,19 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-template<typename Taudio_span>
+template <typename Taudio_span, typename TDithers = DithersOpenMPT>
 class AudioTargetBuffer
 	: public IAudioTarget
 {
 private:
 	std::size_t countRendered;
-	Dither &dither;
+	TDithers &dithers;
 protected:
 	Taudio_span outputBuffer;
 public:
-	AudioTargetBuffer(Taudio_span buf, Dither &dither_)
+	AudioTargetBuffer(Taudio_span buf, TDithers &dithers_)
 		: countRendered(0)
-		, dither(dither_)
+		, dithers(dithers_)
 		, outputBuffer(buf)
 	{
 		return;
@@ -45,28 +45,30 @@ public:
 public:
 	void Process(mpt::audio_span_interleaved<MixSampleInt> buffer) override
 	{
-		dither.visit(
+		std::visit(
 			[&](auto &ditherInstance)
 			{
 				ConvertBufferMixInternalFixedToBuffer<MixSampleIntTraits::mix_fractional_bits, false>(mpt::make_audio_span_with_offset(outputBuffer, countRendered), buffer, ditherInstance, buffer.size_channels(), buffer.size_frames());
-			}
+			},
+			dithers.Variant()
 		);
 		countRendered += buffer.size_frames();
 	}
 	void Process(mpt::audio_span_interleaved<MixSampleFloat> buffer) override
 	{
-		dither.visit(
+		std::visit(
 			[&](auto &ditherInstance)
 			{
 				ConvertBufferMixInternalToBuffer<false>(mpt::make_audio_span_with_offset(outputBuffer, countRendered), buffer, ditherInstance, buffer.size_channels(), buffer.size_frames());
-			}
+			},
+			dithers.Variant()
 		);
 		countRendered += buffer.size_frames();
 	}
 };
 
 
-template<typename Taudio_span>
+template <typename Taudio_span, typename TDithers = DithersOpenMPT>
 class AudioTargetBufferWithGain
 	: public AudioTargetBuffer<Taudio_span>
 {
@@ -75,8 +77,8 @@ private:
 private:
 	const float gainFactor;
 public:
-	AudioTargetBufferWithGain(Taudio_span buf, Dither &dither, float gainFactor_)
-		: Tbase(buf, dither)
+	AudioTargetBufferWithGain(Taudio_span buf, TDithers &dithers, float gainFactor_)
+		: Tbase(buf, dithers)
 		, gainFactor(gainFactor_)
 	{
 		return;

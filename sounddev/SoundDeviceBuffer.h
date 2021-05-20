@@ -15,11 +15,11 @@
 #include "SoundDevice.h"
 
 #include "mpt/audio/span.hpp"
-#include "../soundbase/SampleFormatConverters.h"
-#include "../soundbase/SampleFormatCopy.h"
 #include "../soundbase/Dither.h"
+#include "../soundbase/SampleFormatCopy.h"
+#include "../soundbase/SampleFormatConverters.h"
 
-#include <type_traits>
+#include <variant>
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -28,7 +28,7 @@ OPENMPT_NAMESPACE_BEGIN
 namespace SoundDevice {
 
 
-template <typename Tsample, typename TDither>
+template <typename Tsample>
 class BufferIO
 {
 
@@ -37,16 +37,14 @@ private:
 	mpt::audio_span_interleaved<Tsample> const m_dst;
 	std::size_t m_countFramesReadProcessed;
 	std::size_t m_countFramesWriteProcessed;
-	TDither & m_dither;
 	const BufferFormat m_bufferFormat;
 
 public:
-	inline BufferIO(Tsample * dst, const Tsample * src, std::size_t numFrames, TDither & dither, BufferFormat bufferFormat)
+	inline BufferIO(Tsample * dst, const Tsample * src, std::size_t numFrames, BufferFormat bufferFormat)
 		: m_src(src, bufferFormat.InputChannels, numFrames)
 		, m_dst(dst, bufferFormat.Channels, numFrames)
 		, m_countFramesReadProcessed(0)
 		, m_countFramesWriteProcessed(0)
-		, m_dither(dither)
 		, m_bufferFormat(bufferFormat)
 	{
 		return;
@@ -68,30 +66,30 @@ public:
 		m_countFramesReadProcessed += dst.size_frames();
 	}
 
-	template <typename audio_span_src>
-	inline void Write(audio_span_src src)
+	template <typename audio_span_src, typename TDither>
+	inline void Write(audio_span_src src, TDither &dither)
 	{
 		MPT_ASSERT(m_countFramesWriteProcessed + src.size_frames() <= m_dst.size_frames());
 		if(m_bufferFormat.WantsClippedOutput)
 		{
-			ConvertBufferMixInternalToBuffer<true>(mpt::make_audio_span_with_offset(m_dst, m_countFramesWriteProcessed), src, m_dither, m_bufferFormat.Channels, src.size_frames());
+			ConvertBufferMixInternalToBuffer<true>(mpt::make_audio_span_with_offset(m_dst, m_countFramesWriteProcessed), src, dither, m_bufferFormat.Channels, src.size_frames());
 		} else
 		{
-			ConvertBufferMixInternalToBuffer<false>(mpt::make_audio_span_with_offset(m_dst, m_countFramesWriteProcessed), src, m_dither, m_bufferFormat.Channels, src.size_frames());
+			ConvertBufferMixInternalToBuffer<false>(mpt::make_audio_span_with_offset(m_dst, m_countFramesWriteProcessed), src, dither, m_bufferFormat.Channels, src.size_frames());
 		}
 		m_countFramesWriteProcessed += src.size_frames();
 	}
 
-	template <int fractionalBits, typename audio_span_src>
-	inline void WriteFixedPoint(audio_span_src src)
+	template <int fractionalBits, typename audio_span_src, typename TDither>
+	inline void WriteFixedPoint(audio_span_src src, TDither &dither)
 	{
 		MPT_ASSERT(m_countFramesWriteProcessed + src.size_frames() <= m_dst.size_frames());
 		if(m_bufferFormat.WantsClippedOutput)
 		{
-			ConvertBufferMixInternalFixedToBuffer<fractionalBits, true>(mpt::make_audio_span_with_offset(m_dst, m_countFramesWriteProcessed), src, m_dither, m_bufferFormat.Channels, src.size_frames());
+			ConvertBufferMixInternalFixedToBuffer<fractionalBits, true>(mpt::make_audio_span_with_offset(m_dst, m_countFramesWriteProcessed), src, dither, m_bufferFormat.Channels, src.size_frames());
 		} else
 		{
-			ConvertBufferMixInternalFixedToBuffer<fractionalBits, false>(mpt::make_audio_span_with_offset(m_dst, m_countFramesWriteProcessed), src, m_dither, m_bufferFormat.Channels, src.size_frames());
+			ConvertBufferMixInternalFixedToBuffer<fractionalBits, false>(mpt::make_audio_span_with_offset(m_dst, m_countFramesWriteProcessed), src, dither, m_bufferFormat.Channels, src.size_frames());
 		}
 		m_countFramesWriteProcessed += src.size_frames();
 	}
@@ -109,6 +107,157 @@ public:
 		}
 	}
 
+};
+
+
+template <typename TDithers>
+class CallbackBuffer
+{
+private:
+	std::variant<
+		BufferIO<uint8>,
+		BufferIO<int8>,
+		BufferIO<int16>,
+		BufferIO<int24>,
+		BufferIO<int32>,
+		BufferIO<float>,
+		BufferIO<double>
+	> m_BufferIO;
+	TDithers &m_Dithers;
+	std::size_t m_NumFrames;
+public:
+	template <typename Tsample>
+	explicit inline CallbackBuffer(Tsample * dst, const Tsample * src, std::size_t numFrames, TDithers &dithers, BufferFormat bufferFormat)
+		: m_BufferIO(BufferIO<Tsample>{dst, src, numFrames, bufferFormat})
+		, m_Dithers(dithers)
+		, m_NumFrames(numFrames)
+	{
+		return;
+	}
+
+	inline std::size_t GetNumFrames() const
+	{
+		return m_NumFrames;
+	}
+
+	template <typename audio_span_dst>
+	inline void Read(audio_span_dst dst)
+	{
+		std::visit(
+			[&](auto &bufferIO)
+			{
+				bufferIO.Read(dst);
+			},
+			m_BufferIO
+		);
+	}
+
+	template <int fractionalBits, typename audio_span_dst>
+	inline void ReadFixedPoint(audio_span_dst dst)
+	{
+		std::visit(
+			[&](auto &bufferIO)
+			{
+				bufferIO.template ReadFixedPoint<fractionalBits>(dst);
+			},
+			m_BufferIO
+		);
+	}
+
+	template <typename audio_span_src>
+	inline void Write(audio_span_src src)
+	{
+		std::visit(
+			[&](auto &bufferIO)
+			{
+				std::visit(
+					[&](auto &ditherInstance)
+					{
+						bufferIO.Write(src, ditherInstance);
+					},
+					m_Dithers.Variant()
+				);
+			},
+			m_BufferIO
+		);
+	}
+
+	template <int fractionalBits, typename audio_span_src>
+	inline void WriteFixedPoint(audio_span_src src)
+	{
+		std::visit(
+			[&](auto &bufferIO)
+			{
+				std::visit(
+					[&](auto &ditherInstance)
+					{
+						bufferIO.template WriteFixedPoint<fractionalBits>(src, ditherInstance);
+					},
+					m_Dithers.Variant()
+				);
+			},
+			m_BufferIO
+		);
+	}
+
+};
+
+
+template <typename TDithers>
+class BufferHandler
+	: public ISource
+{
+private:
+	TDithers m_Dithers;
+protected:
+	template <typename Trd>
+	explicit BufferHandler(Trd &rd)
+		: m_Dithers(rd)
+	{
+		return;
+	}
+protected:
+	inline TDithers &Dithers()
+	{
+		return m_Dithers;
+	}
+private:
+	template <typename Tsample>
+	inline void SoundSourceLockedReadImpl(BufferFormat bufferFormat, std::size_t numFrames, Tsample *buffer, const Tsample *inputBuffer)
+	{
+		CallbackBuffer<TDithers> callbackBuffer{buffer, inputBuffer, numFrames, m_Dithers, bufferFormat};
+		SoundSourceLockedCallback(callbackBuffer);
+	}
+public:
+	inline void SoundSourceLockedRead(BufferFormat bufferFormat, std::size_t numFrames, uint8 *buffer, const uint8 *inputBuffer) final
+	{
+		SoundSourceLockedReadImpl(bufferFormat, numFrames, buffer, inputBuffer);
+	}
+	inline void SoundSourceLockedRead(BufferFormat bufferFormat, std::size_t numFrames, int8 *buffer, const int8 *inputBuffer) final
+	{
+		SoundSourceLockedReadImpl(bufferFormat, numFrames, buffer, inputBuffer);
+	}
+	inline void SoundSourceLockedRead(BufferFormat bufferFormat, std::size_t numFrames, int16 *buffer, const int16 *inputBuffer) final
+	{
+		SoundSourceLockedReadImpl(bufferFormat, numFrames, buffer, inputBuffer);
+	}
+	inline void SoundSourceLockedRead(BufferFormat bufferFormat, std::size_t numFrames, int24 *buffer, const int24 *inputBuffer) final
+	{
+		SoundSourceLockedReadImpl(bufferFormat, numFrames, buffer, inputBuffer);
+	}
+	inline void SoundSourceLockedRead(BufferFormat bufferFormat, std::size_t numFrames, int32 *buffer, const int32 *inputBuffer) final
+	{
+		SoundSourceLockedReadImpl(bufferFormat, numFrames, buffer, inputBuffer);
+	}
+	inline void SoundSourceLockedRead(BufferFormat bufferFormat, std::size_t numFrames, float *buffer, const float *inputBuffer) final
+	{
+		SoundSourceLockedReadImpl(bufferFormat, numFrames, buffer, inputBuffer);
+	}
+	inline void SoundSourceLockedRead(BufferFormat bufferFormat, std::size_t numFrames, double *buffer, const double *inputBuffer) final
+	{
+		SoundSourceLockedReadImpl(bufferFormat, numFrames, buffer, inputBuffer);
+	}
+	virtual void SoundSourceLockedCallback(CallbackBuffer<TDithers> &buffer) = 0;
 };
 
 

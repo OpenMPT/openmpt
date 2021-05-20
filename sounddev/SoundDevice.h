@@ -76,9 +76,6 @@ struct Settings;
 struct Flags;
 struct BufferFormat;
 struct BufferAttributes;
-class AudioBufferSink;
-class AudioBufferSource;
-
 
 
 

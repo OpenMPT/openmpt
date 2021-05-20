@@ -169,8 +169,8 @@ static UINT indicators[] =
 /////////////////////////////////////////////////////////////////////////////
 // CMainFrame construction/destruction
 CMainFrame::CMainFrame()
-	: m_SoundDeviceFillBufferCriticalSection(CriticalSection::InitialState::Unlocked)
-	, m_Dither(theApp.PRNG())
+	: SoundDevice::BufferHandler<DithersOpenMPT>(theApp.PRNG())
+	, m_SoundDeviceFillBufferCriticalSection(CriticalSection::InitialState::Unlocked)
 {
 	m_szUserText[0] = 0;
 	m_szInfoText[0] = 0;
@@ -694,48 +694,46 @@ void CMainFrame::SoundSourceUnlock()
 }
 
 
-template <typename Tsample, typename Tdither>
 class BufferInputWrapper
 	: public IAudioSource
 {
 private:
-	SoundDevice::BufferIO<Tsample, Tdither> &bufferio;
+	SoundDevice::CallbackBuffer<DithersOpenMPT> &callbackBuffer;
 public:
-	inline BufferInputWrapper(SoundDevice::BufferIO<Tsample, Tdither> &bufferIO)
-		: bufferio(bufferIO)
+	inline BufferInputWrapper(SoundDevice::CallbackBuffer<DithersOpenMPT> &callbackBuffer_)
+		: callbackBuffer(callbackBuffer_)
 	{
 		return;
 	}
 	inline void Process(mpt::audio_span_planar<MixSampleInt> buffer) override
 	{
-		bufferio.template ReadFixedPoint<MixSampleIntTraits::mix_fractional_bits>(buffer);
+		callbackBuffer.template ReadFixedPoint<MixSampleIntTraits::mix_fractional_bits>(buffer);
 	}
 	inline void Process(mpt::audio_span_planar<MixSampleFloat> buffer) override
 	{
-		bufferio.Read(buffer);
+		callbackBuffer.Read(buffer);
 	}
 };
 
 
-template <typename Tsample, typename Tdither>
 class BufferOutputWrapper
 	: public IAudioTarget
 {
 private:
-	SoundDevice::BufferIO<Tsample, Tdither> &bufferio;
+	SoundDevice::CallbackBuffer<DithersOpenMPT> &callbackBuffer;
 public:
-	inline BufferOutputWrapper(SoundDevice::BufferIO<Tsample, Tdither> &bufferIO)
-		: bufferio(bufferIO)
+	inline BufferOutputWrapper(SoundDevice::CallbackBuffer<DithersOpenMPT> &callbackBuffer_)
+		: callbackBuffer(callbackBuffer_)
 	{
 		return;
 	}
 	inline void Process(mpt::audio_span_interleaved<MixSampleInt> buffer) override
 	{
-		bufferio.template WriteFixedPoint<MixSampleIntTraits::mix_fractional_bits>(buffer);
+		callbackBuffer.template WriteFixedPoint<MixSampleIntTraits::mix_fractional_bits>(buffer);
 	}
 	inline void Process(mpt::audio_span_interleaved<MixSampleFloat> buffer) override
 	{
-		bufferio.Write(buffer);
+		callbackBuffer.Write(buffer);
 	}
 };
 
@@ -753,64 +751,20 @@ void CMainFrame::SoundSourceLockedReadPrepare(SoundDevice::TimeInfo timeInfo)
 }
 
 
-template <typename Tsample>
-void CMainFrame::SoundSourceLockedReadImpl(SoundDevice::BufferFormat bufferFormat, std::size_t numFrames, Tsample *buffer, const Tsample *inputBuffer)
+void CMainFrame::SoundSourceLockedCallback(SoundDevice::CallbackBuffer<DithersOpenMPT> &buffer)
 {
 	MPT_TRACE_SCOPE();
 	MPT_ASSERT(InAudioThread());
 	OPENMPT_PROFILE_FUNCTION(Profiler::Audio);
-	MPT_ASSERT(numFrames <= std::numeric_limits<CSoundFile::samplecount_t>::max());
-	CSoundFile::samplecount_t framesToRender = static_cast<CSoundFile::samplecount_t>(numFrames);
-	m_Dither.SetMode((DitherMode)bufferFormat.DitherType);
-	m_Dither.visit(
-		[&](auto &ditherInstance)
-		{
-			using Tdither = decltype(ditherInstance);
-			SoundDevice::BufferIO<Tsample, Tdither> bufferIO(buffer, inputBuffer, numFrames, ditherInstance, bufferFormat);
-			BufferInputWrapper<Tsample, Tdither> source(bufferIO);
-			BufferOutputWrapper<Tsample, Tdither> target(bufferIO);
-			CSoundFile::samplecount_t renderedFrames = m_pSndFile->Read(framesToRender, target, source, std::ref(m_VUMeterOutput), std::ref(m_VUMeterInput));
-			MPT_ASSERT(renderedFrames <= framesToRender);
-			CSoundFile::samplecount_t remainingFrames = framesToRender - renderedFrames;
-			MPT_ASSERT(remainingFrames >= 0); // remaining buffer is filled in BufferIO::~BufferIO()
-		}
-	);
-}
-
-
-void CMainFrame::SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, std::size_t numFrames, uint8 *buffer, const uint8 *inputBuffer)
-{
-	SoundSourceLockedReadImpl(bufferFormat, numFrames, buffer, inputBuffer);
-}
-
-void CMainFrame::SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, std::size_t numFrames, int8 *buffer, const int8 *inputBuffer)
-{
-	SoundSourceLockedReadImpl(bufferFormat, numFrames, buffer, inputBuffer);
-}
-
-void CMainFrame::SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, std::size_t numFrames, int16 *buffer, const int16 *inputBuffer)
-{
-	SoundSourceLockedReadImpl(bufferFormat, numFrames, buffer, inputBuffer);
-}
-
-void CMainFrame::SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, std::size_t numFrames, int24 *buffer, const int24 *inputBuffer)
-{
-	SoundSourceLockedReadImpl(bufferFormat, numFrames, buffer, inputBuffer);
-}
-
-void CMainFrame::SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, std::size_t numFrames, int32 *buffer, const int32 *inputBuffer)
-{
-	SoundSourceLockedReadImpl(bufferFormat, numFrames, buffer, inputBuffer);
-}
-
-void CMainFrame::SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, std::size_t numFrames, float *buffer, const float *inputBuffer)
-{
-	SoundSourceLockedReadImpl(bufferFormat, numFrames, buffer, inputBuffer);
-}
-
-void CMainFrame::SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, std::size_t numFrames, double *buffer, const double *inputBuffer)
-{
-	SoundSourceLockedReadImpl(bufferFormat, numFrames, buffer, inputBuffer);
+	BufferInputWrapper source(buffer);
+	BufferOutputWrapper target(buffer);
+	MPT_ASSERT(buffer.GetNumFrames() <= std::numeric_limits<CSoundFile::samplecount_t>::max());
+	CSoundFile::samplecount_t framesToRender = static_cast<CSoundFile::samplecount_t>(buffer.GetNumFrames());
+	MPT_ASSERT(framesToRender > 0);
+	CSoundFile::samplecount_t renderedFrames = m_pSndFile->Read(framesToRender, target, source, std::ref(m_VUMeterOutput), std::ref(m_VUMeterInput));
+	MPT_ASSERT(renderedFrames <= framesToRender);
+	CSoundFile::samplecount_t remainingFrames = framesToRender - renderedFrames;
+	MPT_ASSERT(remainingFrames >= 0); // remaining buffer is filled with silence automatically
 }
 
 
@@ -884,6 +838,7 @@ bool CMainFrame::audioOpenDevice()
 		return false;
 	}
 	deviceSettings.sampleFormat = actualSampleFormat;
+	Dithers().SetMode(deviceSettings.DitherType, deviceSettings.Channels);
 	TrackerSettings::Instance().MixerSamplerate = gpSoundDevice->GetSettings().Samplerate;
 	TrackerSettings::Instance().SetSoundDeviceSettings(deviceIdentifier, deviceSettings);
 	return true;
@@ -1306,6 +1261,7 @@ bool CMainFrame::StartPlayback()
 	MPT_TRACE_SCOPE();
 	if(!m_pSndFile) return false; // nothing to play
 	if(!IsAudioDeviceOpen()) return false;
+	Dithers().Reset();
 	if(!gpSoundDevice->Start()) return false;
 	if(!m_NotifyTimer)
 	{

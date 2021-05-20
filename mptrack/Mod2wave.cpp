@@ -35,11 +35,11 @@ extern const TCHAR *gszChnCfgNames[3];
 
 
 template <typename Tsample>
-static CSoundFile::samplecount_t ReadInterleaved(CSoundFile &sndFile, Tsample *outputBuffer, std::size_t channels, CSoundFile::samplecount_t count, Dither &dither)
+static CSoundFile::samplecount_t ReadInterleaved(CSoundFile &sndFile, Tsample *outputBuffer, std::size_t channels, CSoundFile::samplecount_t count, DithersOpenMPT &dithers)
 {
 	sndFile.ResetMixStat();
 	MPT_ASSERT(sndFile.m_MixerSettings.gnChannels == channels);
-	AudioTargetBuffer<mpt::audio_span_interleaved<Tsample>> target(mpt::audio_span_interleaved<Tsample>(outputBuffer, channels, count), dither);
+	AudioTargetBuffer<mpt::audio_span_interleaved<Tsample>, DithersOpenMPT> target(mpt::audio_span_interleaved<Tsample>(outputBuffer, channels, count), dithers);
 	return sndFile.Read(count, target);
 }
 
@@ -489,7 +489,7 @@ void CWaveConvert::FillDither()
 		m_CbnDither.EnableWindow(TRUE);
 		for(int dither = 0; dither < NumDitherModes; ++dither)
 		{
-			int ndx = m_CbnDither.AddString(mpt::ToCString(Dither::GetModeName((DitherMode)dither) + U_(" dither")));
+			int ndx = m_CbnDither.AddString(mpt::ToCString(DithersOpenMPT::GetModeName((DitherMode)dither) + U_(" dither")));
 			m_CbnDither.SetItemData(ndx, dither);
 		}
 	} else
@@ -497,7 +497,7 @@ void CWaveConvert::FillDither()
 		m_CbnDither.EnableWindow(FALSE);
 		for(int dither = 0; dither < NumDitherModes; ++dither)
 		{
-			int ndx = m_CbnDither.AddString(mpt::ToCString(Dither::GetModeName(DitherNone) + U_(" dither")));
+			int ndx = m_CbnDither.AddString(mpt::ToCString(DithersOpenMPT::GetModeName(DitherNone) + U_(" dither")));
 			m_CbnDither.SetItemData(ndx, dither);
 		}
 	}
@@ -975,8 +975,7 @@ void CDoWaveConvert::Run()
 #endif
 	}
 
-	Dither dither(theApp.PRNG());
-	dither.SetMode(static_cast<DitherMode>(encSettings.Dither));
+	DithersOpenMPT dithers(theApp.PRNG(), encSettings.Dither, encSettings.Channels);
 
 	m_SndFile.ResetChannels();
 	m_SndFile.SetMixerSettings(mixersettings);
@@ -1108,31 +1107,31 @@ void CDoWaveConvert::Run()
 		UINT lRead = 0;
 		if(m_Settings.normalize)
 		{
-			lRead = ReadInterleaved(m_SndFile, normalizeBuffer, channels, MIXBUFFERSIZE, dither);
+			lRead = ReadInterleaved(m_SndFile, normalizeBuffer, channels, MIXBUFFERSIZE, dithers);
 		} else
 		{
 			switch(fileEnc->GetSampleFormat())
 			{
 			case SampleFormat::Float64:
-				lRead = ReadInterleaved(m_SndFile, buffer.float64, channels, MIXBUFFERSIZE, dither);
+				lRead = ReadInterleaved(m_SndFile, buffer.float64, channels, MIXBUFFERSIZE, dithers);
 				break;
 			case SampleFormat::Float32:
-				lRead = ReadInterleaved(m_SndFile, buffer.float32, channels, MIXBUFFERSIZE, dither);
+				lRead = ReadInterleaved(m_SndFile, buffer.float32, channels, MIXBUFFERSIZE, dithers);
 				break;
 			case SampleFormat::Int32:
-				lRead = ReadInterleaved(m_SndFile, buffer.int32, channels, MIXBUFFERSIZE, dither);
+				lRead = ReadInterleaved(m_SndFile, buffer.int32, channels, MIXBUFFERSIZE, dithers);
 				break;
 			case SampleFormat::Int24:
-				lRead = ReadInterleaved(m_SndFile, buffer.int24, channels, MIXBUFFERSIZE, dither);
+				lRead = ReadInterleaved(m_SndFile, buffer.int24, channels, MIXBUFFERSIZE, dithers);
 				break;
 			case SampleFormat::Int16:
-				lRead = ReadInterleaved(m_SndFile, buffer.int16, channels, MIXBUFFERSIZE, dither);
+				lRead = ReadInterleaved(m_SndFile, buffer.int16, channels, MIXBUFFERSIZE, dithers);
 				break;
 			case SampleFormat::Int8:
-				lRead = ReadInterleaved(m_SndFile, buffer.int8, channels, MIXBUFFERSIZE, dither);
+				lRead = ReadInterleaved(m_SndFile, buffer.int8, channels, MIXBUFFERSIZE, dithers);
 				break;
 			case SampleFormat::Unsigned8:
-				lRead = ReadInterleaved(m_SndFile, buffer.uint8, channels, MIXBUFFERSIZE, dither);
+				lRead = ReadInterleaved(m_SndFile, buffer.uint8, channels, MIXBUFFERSIZE, dithers);
 				break;
 			}
 		}
@@ -1284,7 +1283,7 @@ void CDoWaveConvert::Run()
 			}
 
 			const std::streampos oldPos = fileStream.tellp();
-			dither.visit(
+			std::visit(
 				[&](auto& ditherInstance)
 				{
 					switch(fileEnc->GetSampleFormat())
@@ -1312,7 +1311,8 @@ void CDoWaveConvert::Run()
 						break;
 					default: MPT_ASSERT_NOTREACHED(); break;
 					}
-				}
+				},
+				dithers.Variant()
 			);
 			switch(fileEnc->GetSampleFormat())
 			{
