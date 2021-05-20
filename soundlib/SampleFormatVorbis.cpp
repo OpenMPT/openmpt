@@ -20,6 +20,7 @@
 #include "modsmp_ctrl.h"
 #include "../soundbase/SampleFormatConverters.h"
 #include "../soundbase/SampleFormatCopy.h"
+#include "mpt/audio/span.hpp"
 #include "../soundlib/ModSampleCopy.h"
 //#include "mpt/crc/crc.hpp"
 #include "OggStream.h"
@@ -232,10 +233,7 @@ bool CSoundFile::ReadVorbisSample(SAMPLEINDEX sample, FileReader &file)
 						if(decodedSamples > 0 && (channels == 1 || channels == 2))
 						{
 							raw_sample_data.resize(raw_sample_data.size() + (channels * decodedSamples));
-							for(int chn = 0; chn < channels; chn++)
-							{
-								CopyChannelToInterleaved<SC::Convert<int16, float> >(&(raw_sample_data[0]) + offset * channels, output[chn], channels, decodedSamples, chn);
-							}
+							CopyAudio(mpt::audio_span_interleaved(raw_sample_data.data() + offset, channels, decodedSamples), mpt::audio_span_planar(output, channels, decodedSamples));
 							offset += decodedSamples;
 							if((raw_sample_data.size() / channels) > MAX_SAMPLE_LENGTH)
 							{
@@ -305,10 +303,7 @@ bool CSoundFile::ReadVorbisSample(SAMPLEINDEX sample, FileReader &file)
 		if(decodedSamples > 0 && (frame_channels == 1 || frame_channels == 2))
 		{
 			raw_sample_data.resize(raw_sample_data.size() + (channels * decodedSamples));
-			for(int chn = 0; chn < frame_channels; chn++)
-			{
-				CopyChannelToInterleaved<SC::Convert<int16, float> >(&(raw_sample_data[0]) + offset * channels, output[chn], channels, decodedSamples, chn);
-			}
+			CopyAudio(mpt::audio_span_interleaved(raw_sample_data.data() + (offset * channels), channels, decodedSamples), mpt::audio_span_planar(output, channels, decodedSamples));
 			offset += decodedSamples;
 			if((raw_sample_data.size() / channels) > MAX_SAMPLE_LENGTH)
 			{

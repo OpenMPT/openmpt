@@ -18,7 +18,7 @@
 
 #include "Tables.h"
 #include "../common/version.h"
-
+#include "mpt/audio/span.hpp"
 #include "MPEGFrame.h"
 #include "OggStream.h"
 
@@ -1659,15 +1659,12 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 								LimitMax(decodedSamples, mpt::saturate_cast<long>(sample.nLength - offset));
 								if(decodedSamples > 0 && channels == sample.GetNumChannels())
 								{
-									for(int chn = 0; chn < channels; chn++)
+									if(sample.uFlags[CHN_16BIT])
 									{
-										if(sample.uFlags[CHN_16BIT])
-										{
-											CopyChannelToInterleaved<SC::Convert<int16, float>>(sample.sample16() + offset * sample.GetNumChannels(), output[chn], channels, decodedSamples, chn);
-										} else
-										{
-											CopyChannelToInterleaved<SC::Convert<int8, float>>(sample.sample8() + offset * sample.GetNumChannels(), output[chn], channels, decodedSamples, chn);
-										}
+										CopyAudio(mpt::audio_span_interleaved(sample.sample16() + (offset * sample.GetNumChannels()), sample.GetNumChannels(), decodedSamples), mpt::audio_span_planar(output, channels, decodedSamples));
+									} else
+									{
+										CopyAudio(mpt::audio_span_interleaved(sample.sample8() + (offset * sample.GetNumChannels()), sample.GetNumChannels(), decodedSamples), mpt::audio_span_planar(output, channels, decodedSamples));
 									}
 								}
 								offset += decodedSamples;
@@ -1734,12 +1731,12 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 					LimitMax(decodedSamples, mpt::saturate_cast<int>(sample.nLength - offset));
 					if(decodedSamples > 0 && channels == sample.GetNumChannels())
 					{
-						for(int chn = 0; chn < channels; chn++)
+						if(sample.uFlags[CHN_16BIT])
 						{
-							if(sample.uFlags[CHN_16BIT])
-								CopyChannelToInterleaved<SC::Convert<int16, float>>(sample.sample16() + offset * sample.GetNumChannels(), output[chn], channels, decodedSamples, chn);
-							else
-								CopyChannelToInterleaved<SC::Convert<int8, float>>(sample.sample8() + offset * sample.GetNumChannels(), output[chn], channels, decodedSamples, chn);
+							CopyAudio(mpt::audio_span_interleaved(sample.sample16() + (offset * sample.GetNumChannels()), sample.GetNumChannels(), decodedSamples), mpt::audio_span_planar(output, channels, decodedSamples));
+						} else
+						{
+							CopyAudio(mpt::audio_span_interleaved(sample.sample8() + (offset * sample.GetNumChannels()), sample.GetNumChannels(), decodedSamples), mpt::audio_span_planar(output, channels, decodedSamples));
 						}
 					}
 					offset += decodedSamples;

@@ -37,6 +37,7 @@
 #include "ProgressDialog.h"
 #include "../include/r8brain/CDSPResampler.h"
 #include "../soundlib/MixFuncTable.h"
+#include "mpt/audio/span.hpp"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -2302,10 +2303,6 @@ public:
 		constexpr SmpLength MaxInputChunkSize = 1024;
 
 		std::vector<float> buffer(MaxInputChunkSize * numChannels);
-		std::vector<SC::Convert<float, int16>> convf32(numChannels);
-		std::vector<SC::Convert<int16, float>> convi16(numChannels);
-		std::vector<SC::Convert<float, int8>> conv8f32(numChannels);
-		std::vector<SC::Convert<int8, float>> convint8(numChannels);
 
 		SmpLength inPos = selection.nStart;
 		SmpLength outPos = selection.nStart; // Keeps count of the sample length received from stretching process.
@@ -2338,10 +2335,10 @@ public:
 			switch(smpSize)
 			{
 			case 1:
-				CopyInterleavedSampleStreams(buffer.data(), sample.sample8() + inPos * numChannels, inChunkSize, numChannels, mpt::as_span(conv8f32));
+				CopyAudioChannelsInterleaved(buffer.data(), sample.sample8() + inPos * numChannels, numChannels, inChunkSize);
 				break;
 			case 2:
-				CopyInterleavedSampleStreams(buffer.data(), sample.sample16() + inPos * numChannels, inChunkSize, numChannels, mpt::as_span(convf32));
+				CopyAudioChannelsInterleaved(buffer.data(), sample.sample16() + inPos * numChannels, numChannels, inChunkSize);
 				break;
 			}
 			soundtouch_putSamples(handleSt, buffer.data(), inChunkSize);
@@ -2356,10 +2353,10 @@ public:
 					switch(smpSize)
 					{
 					case 1:
-						CopyInterleavedSampleStreams(static_cast<int8 *>(pNewSample) + numChannels * outPos, buffer.data(), outChunkSize, numChannels, mpt::as_span(convint8));
+						CopyAudioChannelsInterleaved(static_cast<int8 *>(pNewSample) + numChannels * outPos, buffer.data(), numChannels, outChunkSize);
 						break;
 					case 2:
-						CopyInterleavedSampleStreams(static_cast<int16 *>(pNewSample) + numChannels * outPos, buffer.data(), outChunkSize, numChannels, mpt::as_span(convi16));
+						CopyAudioChannelsInterleaved(static_cast<int16 *>(pNewSample) + numChannels * outPos, buffer.data(), numChannels, outChunkSize);
 						break;
 					}
 					outPos += outChunkSize;
@@ -2382,10 +2379,10 @@ public:
 				switch(smpSize)
 				{
 				case 1:
-					CopyInterleavedSampleStreams(static_cast<int8 *>(pNewSample) + numChannels * outPos, buffer.data(), outChunkSize, numChannels, mpt::as_span(convint8));
+					CopyAudioChannelsInterleaved(static_cast<int8 *>(pNewSample) + numChannels * outPos, buffer.data(), numChannels, outChunkSize);
 					break;
 				case 2:
-					CopyInterleavedSampleStreams(static_cast<int16 *>(pNewSample) + numChannels * outPos, buffer.data(), outChunkSize, numChannels, mpt::as_span(convi16));
+					CopyAudioChannelsInterleaved(static_cast<int16 *>(pNewSample) + numChannels * outPos, buffer.data(), numChannels, outChunkSize);
 					break;
 				}
 				outPos += outChunkSize;

@@ -16,6 +16,7 @@
 #include "../common/Endianness.h"
 #include "SampleFormatConverters.h"
 #include "SampleFormat.h"
+#include "mpt/audio/span.hpp"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -23,6 +24,66 @@ OPENMPT_NAMESPACE_BEGIN
 
 //////////////////////////////////////////////////////
 // Actual sample conversion functions
+
+
+template <typename TBufOut, typename TBufIn>
+void CopyAudio(TBufOut buf_out, TBufIn buf_in)
+{
+	MPT_ASSERT(buf_in.size_frames() == buf_out.size_frames());
+	MPT_ASSERT(buf_in.size_channels() == buf_out.size_channels());
+	std::size_t countFrames = std::min(buf_in.size_frames(), buf_out.size_frames());
+	std::size_t channels = std::min(buf_in.size_channels(), buf_out.size_channels());
+	for(std::size_t frame = 0; frame < countFrames; ++frame)
+	{
+		for(std::size_t channel = 0; channel < channels; ++channel)
+		{
+			buf_out(channel, frame) = SC::sample_cast<typename TBufOut::sample_type>(buf_in(channel, frame));
+		}
+	}
+}
+
+
+template <typename TBufOut, typename TBufIn>
+void CopyAudio(TBufOut buf_out, TBufIn buf_in, std::size_t countFrames)
+{
+	MPT_ASSERT(countFrames <= buf_in.size_frames());
+	MPT_ASSERT(countFrames <= buf_out.size_frames());
+	MPT_ASSERT(buf_in.size_channels() == buf_out.size_channels());
+	std::size_t channels = std::min(buf_in.size_channels(), buf_out.size_channels());
+	for(std::size_t frame = 0; frame < countFrames; ++frame)
+	{
+		for(std::size_t channel = 0; channel < channels; ++channel)
+		{
+			buf_out(channel, frame) = SC::sample_cast<typename TBufOut::sample_type>(buf_in(channel, frame));
+		}
+	}
+}
+
+
+template <typename TBufOut, typename TBufIn>
+void CopyAudioChannels(TBufOut buf_out, TBufIn buf_in, std::size_t channels, std::size_t countFrames)
+{
+	MPT_ASSERT(countFrames <= buf_in.size_frames());
+	MPT_ASSERT(countFrames <= buf_out.size_frames());
+	MPT_ASSERT(channels <= buf_in.size_channels());
+	MPT_ASSERT(channels <= buf_out.size_channels());
+	for(std::size_t frame = 0; frame < countFrames; ++frame)
+	{
+		for(std::size_t channel = 0; channel < channels; ++channel)
+		{
+			buf_out(channel, frame) = SC::sample_cast<typename TBufOut::sample_type>(buf_in(channel, frame));
+		}
+	}
+}
+
+
+// Copy numChannels interleaved sample streams.
+template <typename Tin, typename Tout>
+void CopyAudioChannelsInterleaved(typename Tout *MPT_RESTRICT outBuf, const Tin *MPT_RESTRICT inBuf, std::size_t numChannels, std::size_t countFrames)
+{
+	CopyAudio(mpt::audio_span_interleaved<Tout>(outBuf, numChannels, countFrames), mpt::audio_span_interleaved<const Tin>(inBuf, numChannels, countFrames));
+}
+
 
 // Copy a sample data buffer.
 // targetBuffer: Buffer in which the sample should be copied into.
@@ -50,31 +111,6 @@ size_t CopySample(typename SampleConversion::output_t *MPT_RESTRICT outBuf, size
 	}
 
 	return copySize;
-}
-
-
-// Copy numChannels interleaved sample streams.
-template <typename SampleConversion>
-void CopyInterleavedSampleStreams(typename SampleConversion::output_t *MPT_RESTRICT outBuf, const typename SampleConversion::input_t *MPT_RESTRICT inBuf, size_t numFrames, size_t numChannels, SampleConversion *conv)
-{
-	while(numFrames--)
-	{
-		for(size_t channel = 0; channel < numChannels; ++channel)
-		{
-			*outBuf = conv[channel](*inBuf);
-			inBuf++;
-			outBuf++;
-		}
-	}
-}
-
-
-// Copy numChannels interleaved sample streams.
-template <typename SampleConversion>
-void CopyInterleavedSampleStreams(typename SampleConversion::output_t *MPT_RESTRICT outBuf, const typename SampleConversion::input_t *MPT_RESTRICT inBuf, size_t numFrames, size_t numChannels, mpt::span<SampleConversion> conv)
-{
-	MPT_ASSERT(conv.size() >= numChannels);
-	CopyInterleavedSampleStreams(outBuf, inBuf, numFrames, numChannels, &(conv[0]));
 }
 
 
@@ -162,56 +198,6 @@ void ConvertBufferToBufferMixInternal(TOutBuf outBuf, TInBuf inBuf, std::size_t 
 		{
 			outBuf(channel, i) = conv(inBuf(channel, i));
 		}
-	}
-}
-
-
-template <typename TOutBuf, typename TInBuf>
-void ConvertBufferToBuffer(TOutBuf outBuf, TInBuf inBuf, std::size_t channels, std::size_t count)
-{
-	using TOutSample = typename std::remove_const<typename TOutBuf::sample_type>::type;
-	using TInSample = typename std::remove_const<typename TInBuf::sample_type>::type;
-	MPT_ASSERT(inBuf.size_channels() >= channels);
-	MPT_ASSERT(outBuf.size_channels() >= channels);
-	MPT_ASSERT(inBuf.size_frames() >= count);
-	MPT_ASSERT(outBuf.size_frames() >= count);
-	SC::Convert<TOutSample, TInSample> conv;
-	for(std::size_t i = 0; i < count; ++i)
-	{
-		for(std::size_t channel = 0; channel < channels; ++channel)
-		{
-			outBuf(channel, i) = conv(inBuf(channel, i));
-		}
-	}
-}
-
-
-// Copy from an interleaed buffer of #channels.
-template <typename SampleConversion>
-void CopyInterleavedToChannel(typename SampleConversion::output_t *MPT_RESTRICT dst, const typename SampleConversion::input_t *MPT_RESTRICT src, std::size_t channels, std::size_t countChunk, std::size_t channel, SampleConversion conv = SampleConversion())
-{
-	SampleConversion sampleConv(conv);
-	src += channel;
-	for(std::size_t i = 0; i < countChunk; ++i)
-	{
-		*dst = sampleConv(*src);
-		src += channels;
-		dst++;
-	}
-}
-
-
-// Copy buffer to an interleaed buffer of #channels.
-template <typename SampleConversion>
-void CopyChannelToInterleaved(typename SampleConversion::output_t *MPT_RESTRICT dst, const typename SampleConversion::input_t *MPT_RESTRICT src, std::size_t channels, std::size_t countChunk, std::size_t channel, SampleConversion conv = SampleConversion())
-{
-	SampleConversion sampleConv(conv);
-	dst += channel;
-	for(std::size_t i = 0; i < countChunk; ++i)
-	{
-		*dst = sampleConv(*src);
-		src++;
-		dst += channels;
 	}
 }
 
