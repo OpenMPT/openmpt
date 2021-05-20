@@ -78,8 +78,8 @@ enum
 
 enum
 {
-	IdSizeVariable = uint16_max,
-	IdSizeMaxFixedSize = (uint8_max >> 1)
+	IdSizeVariable = std::numeric_limits<uint16>::max(),
+	IdSizeMaxFixedSize = (std::numeric_limits<uint8>::max() >> 1)
 };
 
 typedef int32 SsbStatus;

@@ -715,7 +715,7 @@ void CReverb::ReverbDCRemoval(int32 * MPT_RESTRICT pBuffer, uint32 nSamples)
 //
 
 // Save some typing
-static MPT_FORCEINLINE int32 Clamp16(int32 x) { return Clamp(x, int16_min, int16_max); }
+static MPT_FORCEINLINE int32 Clamp16(int32 x) { return Clamp(x, std::numeric_limits<int16>::min(), std::numeric_limits<int16>::max()); }
 
 void CReverb::ProcessPreDelay(SWRvbRefDelay * MPT_RESTRICT pPreDelay, const int32 * MPT_RESTRICT pIn, uint32 nSamples)
 {

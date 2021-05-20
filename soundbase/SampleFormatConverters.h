@@ -1092,8 +1092,8 @@ struct ConvertFixedPoint<uint8, int32, fractionalBits>
 		static_assert(fractionalBits >= 0 && fractionalBits <= sizeof(input_t) * 8 - 1);
 		static_assert(shiftBits >= 1);
 		val = mpt::rshift_signed((val + (1 << (shiftBits - 1))), shiftBits);  // round
-		if(val < int8_min) val = int8_min;
-		if(val > int8_max) val = int8_max;
+		if(val < std::numeric_limits<int8>::min()) val = std::numeric_limits<int8>::min();
+		if(val > std::numeric_limits<int8>::max()) val = std::numeric_limits<int8>::max();
 		return static_cast<uint8>(val + 0x80);  // unsigned
 	}
 };
@@ -1109,8 +1109,8 @@ struct ConvertFixedPoint<int8, int32, fractionalBits>
 		static_assert(fractionalBits >= 0 && fractionalBits <= sizeof(input_t) * 8 - 1);
 		static_assert(shiftBits >= 1);
 		val = mpt::rshift_signed((val + (1 << (shiftBits - 1))), shiftBits);  // round
-		if(val < int8_min) val = int8_min;
-		if(val > int8_max) val = int8_max;
+		if(val < std::numeric_limits<int8>::min()) val = std::numeric_limits<int8>::min();
+		if(val > std::numeric_limits<int8>::max()) val = std::numeric_limits<int8>::max();
 		return static_cast<int8>(val);
 	}
 };
@@ -1126,8 +1126,8 @@ struct ConvertFixedPoint<int16, int32, fractionalBits>
 		static_assert(fractionalBits >= 0 && fractionalBits <= sizeof(input_t) * 8 - 1);
 		static_assert(shiftBits >= 1);
 		val = mpt::rshift_signed((val + (1 << (shiftBits - 1))), shiftBits);  // round
-		if(val < int16_min) val = int16_min;
-		if(val > int16_max) val = int16_max;
+		if(val < std::numeric_limits<int16>::min()) val = std::numeric_limits<int16>::min();
+		if(val > std::numeric_limits<int16>::max()) val = std::numeric_limits<int16>::max();
 		return static_cast<int16>(val);
 	}
 };
@@ -1143,8 +1143,8 @@ struct ConvertFixedPoint<int24, int32, fractionalBits>
 		static_assert(fractionalBits >= 0 && fractionalBits <= sizeof(input_t) * 8 - 1);
 		static_assert(shiftBits >= 1);
 		val = mpt::rshift_signed((val + (1 << (shiftBits - 1))), shiftBits);  // round
-		if(val < int24_min) val = int24_min;
-		if(val > int24_max) val = int24_max;
+		if(val < std::numeric_limits<int24>::min()) val = std::numeric_limits<int24>::min();
+		if(val > std::numeric_limits<int24>::max()) val = std::numeric_limits<int24>::max();
 		return static_cast<int24>(val);
 	}
 };
@@ -1477,9 +1477,9 @@ struct Normalize<int32>
 	{
 		if(val < 0)
 		{
-			if(val == int32_min)
+			if(val == std::numeric_limits<int32>::min())
 			{
-				maxVal = static_cast<uint32>(-static_cast<int64>(int32_min));
+				maxVal = static_cast<uint32>(-static_cast<int64>(std::numeric_limits<int32>::min()));
 				return;
 			}
 			val = -val;
