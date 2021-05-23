@@ -873,7 +873,7 @@ void VUMeter::Process(Channel &c, MixSampleInt sample)
 
 void VUMeter::Process(Channel &c, MixSampleFloat sample)
 {
-	Process(c, SC::ConvertToFixedPoint<MixSampleInt, MixSampleFloat, MixSampleIntTraits::filter_fractional_bits>()(sample));
+	Process(c, SC::ConvertToFixedPoint<MixSampleInt, MixSampleFloat, MixSampleIntTraits::mix_fractional_bits>()(sample));
 }
 
 
