@@ -45,7 +45,6 @@
 #include "soundlib/Sndfile.h"
 #include "soundlib/mod_specifications.h"
 #include "soundlib/AudioReadTarget.h"
-#include "soundbase/SampleBuffer.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -362,6 +361,17 @@ static std::int32_t resamplingmode_to_filterlength(OpenMPT::ResamplingMode mode)
 	}
 }
 
+template < typename sample_type >
+static inline std::size_t valid_channels( sample_type * const * buffers, std::size_t max_channels ) {
+	std::size_t channel;
+	for ( channel = 0; channel < max_channels; ++channel ) {
+		if ( !buffers[ channel ] ) {
+			break;
+		}
+	}
+	return channel;
+}
+
 static OpenMPT::Resampling::AmigaFilter translate_amiga_filter_type( module_impl::amiga_filter_type amiga_type ) {
 	switch (amiga_type ) {
 		case module_impl::amiga_filter_type::a500:
@@ -507,7 +517,7 @@ std::size_t module_impl::read_wrapper( std::size_t count, std::int16_t * left, s
 	m_sndFile->m_bIsRendering = ( m_ctl_play_at_end != song_end_action::fadeout_song );
 	std::size_t count_read = 0;
 	std::int16_t * const buffers[4] = { left, right, rear_left, rear_right };
-	OpenMPT::AudioTargetBufferWithGain<mpt::audio_span_planar<std::int16_t>> target( mpt::audio_span_planar<std::int16_t>( buffers, OpenMPT::valid_channels( buffers, std::size( buffers ) ), count ), *m_Dithers, m_Gain );
+	OpenMPT::AudioTargetBufferWithGain<mpt::audio_span_planar<std::int16_t>> target( mpt::audio_span_planar<std::int16_t>( buffers, valid_channels( buffers, std::size( buffers ) ), count ), *m_Dithers, m_Gain );
 	while ( count > 0 ) {
 		std::size_t count_chunk = m_sndFile->Read(
 			static_cast<OpenMPT::CSoundFile::samplecount_t>( std::min( static_cast<std::uint64_t>( count ), static_cast<std::uint64_t>( std::numeric_limits<OpenMPT::CSoundFile::samplecount_t>::max() / 2 / 4 / 4 ) ) ), // safety margin / samplesize / channels
@@ -530,7 +540,7 @@ std::size_t module_impl::read_wrapper( std::size_t count, float * left, float * 
 	m_sndFile->m_bIsRendering = ( m_ctl_play_at_end != song_end_action::fadeout_song );
 	std::size_t count_read = 0;
 	float * const buffers[4] = { left, right, rear_left, rear_right };
-	OpenMPT::AudioTargetBufferWithGain<mpt::audio_span_planar<float>> target( mpt::audio_span_planar<float>( buffers, OpenMPT::valid_channels( buffers, std::size( buffers ) ), count ), *m_Dithers, m_Gain );
+	OpenMPT::AudioTargetBufferWithGain<mpt::audio_span_planar<float>> target( mpt::audio_span_planar<float>( buffers, valid_channels( buffers, std::size( buffers ) ), count ), *m_Dithers, m_Gain );
 	while ( count > 0 ) {
 		std::size_t count_chunk = m_sndFile->Read(
 			static_cast<OpenMPT::CSoundFile::samplecount_t>( std::min( static_cast<std::uint64_t>( count ), static_cast<std::uint64_t>( std::numeric_limits<OpenMPT::CSoundFile::samplecount_t>::max() / 2 / 4 / 4 ) ) ), // safety margin / samplesize / channels

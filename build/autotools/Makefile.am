@@ -274,7 +274,6 @@ MPT_FILES_SOUNDBASE =
 MPT_FILES_SOUNDBASE += soundbase/Dither.h
 MPT_FILES_SOUNDBASE += soundbase/MixSample.h
 MPT_FILES_SOUNDBASE += soundbase/MixSampleConvert.h
-MPT_FILES_SOUNDBASE += soundbase/SampleBuffer.h
 MPT_FILES_SOUNDBASE += soundbase/SampleFormat.h
 MPT_FILES_SOUNDBASE += soundbase/SampleFormatConverters.h
 MPT_FILES_SOUNDBASE += soundbase/SampleFormatCopy.h

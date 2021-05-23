@@ -879,7 +879,6 @@
     <ClInclude Include="..\..\soundbase\Dither.h" />
     <ClInclude Include="..\..\soundbase\MixSample.h" />
     <ClInclude Include="..\..\soundbase\MixSampleConvert.h" />
-    <ClInclude Include="..\..\soundbase\SampleBuffer.h" />
     <ClInclude Include="..\..\soundbase\SampleFormat.h" />
     <ClInclude Include="..\..\soundbase\SampleFormatConverters.h" />
     <ClInclude Include="..\..\soundbase\SampleFormatCopy.h" />

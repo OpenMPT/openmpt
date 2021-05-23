@@ -309,9 +309,6 @@
     <ClInclude Include="..\..\soundbase\MixSampleConvert.h">
       <Filter>soundbase</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\soundbase\SampleBuffer.h">
-      <Filter>soundbase</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\soundbase\SampleFormat.h">
       <Filter>soundbase</Filter>
     </ClInclude>
