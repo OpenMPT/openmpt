@@ -19,13 +19,10 @@ class CModDoc;
 class CAutoSaver
 {
 public:
-//Cons/Destr
 	CAutoSaver();
 	
-//Work
 	bool DoSave(DWORD curTime);
 
-//Member access
 	bool IsEnabled() const;
 	bool GetUseOriginalPath() const;
 	mpt::PathString GetPath() const;
@@ -33,23 +30,20 @@ public:
 	uint32 GetSaveInterval() const;
 	uint32 GetSaveIntervalMilliseconds() const
 	{
-		return Clamp(GetSaveInterval(), 0u, (1u<<30)/60u/1000u) * 60 * 1000;
+		return Clamp(GetSaveInterval(), 0u, (1u << 30) / 60u / 1000u) * 60 * 1000;
 	}
 
-//internal implementation
-private: 
-	bool SaveSingleFile(CModDoc &modDoc);
-	mpt::PathString BuildFileName(CModDoc &modDoc);
-	void CleanUpBackups(const CModDoc &modDoc);
-	bool CheckTimer(DWORD curTime);
-	
-//internal implementation members
 private:
-
+	bool SaveSingleFile(CModDoc &modDoc);
+	mpt::PathString GetBasePath(const CModDoc &modDoc, bool createPath) const;
+	mpt::PathString GetBaseName(const CModDoc &modDoc) const;
+	mpt::PathString BuildFileName(const CModDoc &modDoc) const;
+	void CleanUpBackups(const CModDoc &modDoc) const;
+	bool CheckTimer(DWORD curTime) const;
+	
+	DWORD m_lastSave = 0;
 	//Flag to prevent autosave from starting new saving if previous is still in progress.
-	bool m_bSaveInProgress; 
-
-	DWORD m_nLastSave;
+	bool m_saveInProgress = false;
 
 };
 
