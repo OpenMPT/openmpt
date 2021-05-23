@@ -19,6 +19,8 @@
 #include "../common/misc_util.h"
 #include "../common/mptStringBuffer.h"
 
+#include <set>
+
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -106,52 +108,95 @@ SoundDevice::Caps CWaveDevice::InternalGetDeviceCaps()
 }
 
 
-SoundDevice::DynamicCaps CWaveDevice::GetDeviceDynamicCaps(const std::vector<uint32> & /*baseSampleRates*/ )
+SoundDevice::DynamicCaps CWaveDevice::GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates)
 {
 	MPT_SOUNDDEV_TRACE_SCOPE();
 	SoundDevice::DynamicCaps caps;
 	if(GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::OS::Windows::Version::WinVista))
-	{
+	{  // emulated on WASAPI
 		caps.supportedSampleFormats = { SampleFormat::Float32 };
 		caps.supportedExclusiveModeSampleFormats = { SampleFormat::Float32 };
 	} else
-	{
+	{  // native WDM/VDX, or Wine
 		caps.supportedSampleFormats = { SampleFormat::Float32, SampleFormat::Int32, SampleFormat::Int24, SampleFormat::Int16, SampleFormat::Unsigned8 };
 		caps.supportedExclusiveModeSampleFormats = { SampleFormat::Float32, SampleFormat::Int32, SampleFormat::Int24, SampleFormat::Int16, SampleFormat::Unsigned8 };
 	}
-	WAVEOUTCAPS woc = {};
 	if(GetDeviceIndex() > 0)
-	{
-		caps.supportedExclusiveModeSampleFormats.clear();
-		if(waveOutGetDevCaps(GetDeviceIndex() - 1, &woc, sizeof(woc)) == MMSYSERR_NOERROR)
-		{
-			if(woc.dwFormats & (WAVE_FORMAT_96M08 | WAVE_FORMAT_96M16	| WAVE_FORMAT_96S08 | WAVE_FORMAT_96S16))
+	{  // direct mode
+		if((GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::OS::Windows::Version::WinVista)) || !GetSysInfo().IsOriginal())
+		{  // emulated on WASAPI, or Wine
+			WAVEOUTCAPS woc = {};
+			caps.supportedExclusiveModeSampleFormats.clear();
+			if(waveOutGetDevCaps(GetDeviceIndex() - 1, &woc, sizeof(woc)) == MMSYSERR_NOERROR)
 			{
-				caps.supportedExclusiveSampleRates.push_back(96000);
+				if(woc.dwFormats & (WAVE_FORMAT_96M08 | WAVE_FORMAT_96M16	| WAVE_FORMAT_96S08 | WAVE_FORMAT_96S16))
+				{
+					caps.supportedExclusiveSampleRates.push_back(96000);
+				}
+				if(woc.dwFormats & (WAVE_FORMAT_48M08 | WAVE_FORMAT_48M16	| WAVE_FORMAT_48S08 | WAVE_FORMAT_48S16))
+				{
+					caps.supportedExclusiveSampleRates.push_back(48000);
+				}
+				if(woc.dwFormats & (WAVE_FORMAT_4M08 | WAVE_FORMAT_4M16	| WAVE_FORMAT_4S08 | WAVE_FORMAT_4S16))
+				{
+					caps.supportedExclusiveSampleRates.push_back(44100);
+				}
+				if(woc.dwFormats & (WAVE_FORMAT_2M08 | WAVE_FORMAT_2M16	| WAVE_FORMAT_2S08 | WAVE_FORMAT_2S16))
+				{
+					caps.supportedExclusiveSampleRates.push_back(22050);
+				}
+				if(woc.dwFormats & (WAVE_FORMAT_1M08 | WAVE_FORMAT_1M16	| WAVE_FORMAT_1S08 | WAVE_FORMAT_1S16))
+				{
+					caps.supportedExclusiveSampleRates.push_back(11025);
+				}
+				if(woc.dwFormats & (WAVE_FORMAT_1M08 | WAVE_FORMAT_2M08 | WAVE_FORMAT_4M08 | WAVE_FORMAT_48M08 | WAVE_FORMAT_96M08 | WAVE_FORMAT_1S08 | WAVE_FORMAT_2S08 | WAVE_FORMAT_4S08 | WAVE_FORMAT_48S08 | WAVE_FORMAT_96S08))
+				{
+					caps.supportedExclusiveModeSampleFormats.push_back(SampleFormat::Unsigned8);
+				}
+				if(woc.dwFormats & (WAVE_FORMAT_1M16 | WAVE_FORMAT_2M16 | WAVE_FORMAT_4M16 | WAVE_FORMAT_48M16 | WAVE_FORMAT_96M16 | WAVE_FORMAT_1S16 | WAVE_FORMAT_2S16 | WAVE_FORMAT_4S16 | WAVE_FORMAT_48S16 | WAVE_FORMAT_96S16))
+				{
+					caps.supportedExclusiveModeSampleFormats.push_back(SampleFormat::Int16);
+				}
 			}
-			if(woc.dwFormats & (WAVE_FORMAT_48M08 | WAVE_FORMAT_48M16	| WAVE_FORMAT_48S08 | WAVE_FORMAT_48S16))
+		} else
+		{  // native WDM/VDX
+			caps.supportedExclusiveSampleRates.clear();
+			caps.supportedExclusiveModeSampleFormats.clear();
+			std::set<uint32> supportedSampleRates;
+			std::set<SampleFormat> supportedSampleFormats;
+			std::array<SampleFormat, 5> baseSampleFormats = { SampleFormat::Float32, SampleFormat::Int32, SampleFormat::Int24, SampleFormat::Int16, SampleFormat::Unsigned8 };
+			for(const uint32 sampleRate : baseSampleRates)
 			{
-				caps.supportedExclusiveSampleRates.push_back(48000);
+				for(const SampleFormat sampleFormat : baseSampleFormats)
+				{
+					WAVEFORMATEXTENSIBLE wfex = {};
+					Settings settings;
+					settings.Samplerate = sampleRate;
+					settings.Channels = 2;
+					settings.sampleFormat = sampleFormat;
+					if(FillWaveFormatExtensible(wfex, settings))
+					{
+						if(waveOutOpen(NULL, GetDeviceIndex() - 1, &wfex.Format, NULL, NULL, CALLBACK_NULL | WAVE_FORMAT_DIRECT | WAVE_FORMAT_QUERY) == MMSYSERR_NOERROR)
+						{
+							supportedSampleRates.insert(sampleRate);
+							supportedSampleFormats.insert(sampleFormat);
+						}
+					}
+				}
 			}
-			if(woc.dwFormats & (WAVE_FORMAT_4M08 | WAVE_FORMAT_4M16	| WAVE_FORMAT_4S08 | WAVE_FORMAT_4S16))
+			for(const uint32 sampleRate : baseSampleRates)
 			{
-				caps.supportedExclusiveSampleRates.push_back(44100);
+				if(supportedSampleRates.count(sampleRate) > 0)
+				{
+					caps.supportedExclusiveSampleRates.push_back(sampleRate);
+				}
 			}
-			if(woc.dwFormats & (WAVE_FORMAT_2M08 | WAVE_FORMAT_2M16	| WAVE_FORMAT_2S08 | WAVE_FORMAT_2S16))
+			for(const SampleFormat sampleFormat : baseSampleFormats)
 			{
-				caps.supportedExclusiveSampleRates.push_back(22050);
-			}
-			if(woc.dwFormats & (WAVE_FORMAT_1M08 | WAVE_FORMAT_1M16	| WAVE_FORMAT_1S08 | WAVE_FORMAT_1S16))
-			{
-				caps.supportedExclusiveSampleRates.push_back(11025);
-			}
-			if(woc.dwFormats & (WAVE_FORMAT_1M08 | WAVE_FORMAT_2M08 | WAVE_FORMAT_4M08 | WAVE_FORMAT_48M08 | WAVE_FORMAT_96M08 | WAVE_FORMAT_1S08 | WAVE_FORMAT_2S08 | WAVE_FORMAT_4S08 | WAVE_FORMAT_48S08 | WAVE_FORMAT_96S08))
-			{
-				caps.supportedExclusiveModeSampleFormats.push_back(SampleFormat::Unsigned8);
-			}
-			if(woc.dwFormats & (WAVE_FORMAT_1M16 | WAVE_FORMAT_2M16 | WAVE_FORMAT_4M16 | WAVE_FORMAT_48M16 | WAVE_FORMAT_96M16 | WAVE_FORMAT_1S16 | WAVE_FORMAT_2S16 | WAVE_FORMAT_4S16 | WAVE_FORMAT_48S16 | WAVE_FORMAT_96S16))
-			{
-				caps.supportedExclusiveModeSampleFormats.push_back(SampleFormat::Int16);
+				if(supportedSampleFormats.count(sampleFormat) > 0)
+				{
+					caps.supportedExclusiveModeSampleFormats.push_back(sampleFormat);
+				}
 			}
 		}
 	}
