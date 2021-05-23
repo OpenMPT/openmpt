@@ -12,11 +12,6 @@
 
 #define MPT_INLINE_NS mpt_openmpt123
 
-#if defined(HAVE_CONFIG_H)
-// wrapper for autoconf macros
-#include "config.h"
-#endif // HAVE_CONFIG_H
-
 #if defined(_WIN32)
 #ifndef WIN32
 #define WIN32
