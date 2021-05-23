@@ -1962,6 +1962,9 @@ bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file, bool mayN
 	{
 		sampleIO |= SampleIO::uLaw;
 		sampleIO |= SampleIO::_16bit;
+	} else if(!memcmp(compression, "raw ", 4))
+	{
+		sampleIO |= SampleIO::unsignedPCM;
 	}
 
 	if(mayNormalize)
