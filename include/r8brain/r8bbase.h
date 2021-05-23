@@ -9,9 +9,6 @@
  * converter. This inclusion file contains implementations of several small
  * utility classes and functions used by the library.
  *
- * r8brain-free-src Copyright (c) 2013-2019 Aleksey Vaneev
- * See the "License.txt" file for license.
- *
  * @mainpage
  *
  * @section intro_sec Introduction
@@ -30,7 +27,7 @@
  *
  * The MIT License (MIT)
  * 
- * r8brain-free-src Copyright (c) 2013-2019 Aleksey Vaneev
+ * r8brain-free-src Copyright (c) 2013-2021 Aleksey Vaneev
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -54,7 +51,7 @@
  * following way: "Sample rate converter designed by Aleksey Vaneev of
  * Voxengo"
  *
- * @version 4.6
+ * @version 5.2
  */
 
 #ifndef R8BBASE_INCLUDED
@@ -84,7 +81,7 @@ namespace r8b {
  * Macro defines r8brain-free-src version string.
  */
 
-#define R8B_VERSION "4.6"
+#define R8B_VERSION "5.2"
 
 #if !defined( M_PI )
 	/**
@@ -268,7 +265,7 @@ public:
  * This class manages memory space only - it does not perform element class
  * construction nor destruction operations.
  *
- * This class applies 256-bit memory address alignment to the allocated data
+ * This class applies 64-byte memory address alignment to the allocated data
  * block.
  *
  * @param T The class of the stored elements (e.g. "double").
@@ -344,9 +341,13 @@ public:
 			Alignment );
 
 		T* const NewData = (T*) alignptr( NewData0, Alignment );
+		const size_t CopySize = ( PrevCapacity > NewCapacity ?
+			NewCapacity : PrevCapacity ) * sizeof( T );
 
-		memcpy( NewData, Data, ( PrevCapacity > NewCapacity ?
-			NewCapacity : PrevCapacity ) * sizeof( T ));
+		if( CopySize > 0 )
+		{
+			memcpy( NewData, Data, CopySize );
+		}
 
 		freemem( Data0 );
 		Data0 = NewData0;
@@ -387,7 +388,7 @@ public:
 	}
 
 private:
-	static const size_t Alignment = 32; ///< Data buffer alignment, in bytes.
+	static const size_t Alignment = 64; ///< Data buffer alignment, in bytes.
 		///<
 	void* Data0; ///< Buffer pointer, original unaligned.
 		///<

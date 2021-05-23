@@ -10,8 +10,8 @@
  * close to 0 and "gtb" should be close to -3.01. Results will be sent to
  * the "stdout".
  *
- * r8brain-free-src Copyright (c) 2013-2014 Aleksey Vaneev
- * See the "License.txt" file for license.
+ * r8brain-free-src Copyright (c) 2013-2021 Aleksey Vaneev
+ * See the "LICENSE" file for license.
  */
 
 #include <stdio.h>

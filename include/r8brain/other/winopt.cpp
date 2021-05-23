@@ -1,21 +1,24 @@
 // Window function parameters optimizer - finds parameters for the specified
-// filter length for Kaiser window functions using the BiteOptDeep
+// filter bandwidth for Kaiser window functions using the BiteOptDeep
 // derivative-free optimization method.
+//
+// r8brain-free-src Copyright (c) 2013-2021 Aleksey Vaneev
+// See the "LICENSE" file for license.
 
 #include <stdio.h>
 #include <math.h>
 #include "/projects/biteopt/biteopt.h"
 #include "../CDSPSincFilterGen.h"
 
-const double CornerFreq = 1.0; // Corner frequency.
-const double LinFraction = 0.5; // Linear part of the spectrum.
-//const double LinFraction = 1.0 / 3.0; // Linear part of the spectrum one-third.
-const double StopFraction = 2.0 - LinFraction; // Stop-band part of the spectrum.
-const double StopFractionEnd = 4.0; // Stop-band part of the spectrum end.
+const int Bandwidth = 2; // Filter's bandwidth (2 or 3).
+const double LinFraction = 1.25 / Bandwidth; // Linear part of the spectrum.
+const double StopFraction = 2.0 - 1.0 / Bandwidth; // Stop-band part of the spectrum, start.
+const double StopFractionEnd = 4.0; // Stop-band part of the spectrum, end.
+const int MinFilterLen = 8; // Minimal filter length (must be even).
+const int MaxFilterLen = 30; // Maximal filter length (must be even).
 int FilterLen = 24; // Filter length.
 const int Oversample = 20; // Spectrum oversampling ratio.
-const int OptDepth = 9; // BiteOptDeep optimizer depth.
-bool DoPrintLin = false; // Print max linear part non-linearity?
+const int OptDepth = 8; // BiteOptDeep optimizer depth.
 
 class CWinOpt : public CBiteOptDeep
 {
@@ -27,21 +30,24 @@ public:
 
 	virtual void getMinValues( double* const p ) const
 	{
-		p[ 0 ] = 2.0;
-		p[ 1 ] = 0.5;
+		p[ 0 ] = 1.0;
+		p[ 1 ] = 1.0;
 	}
 
 	virtual void getMaxValues( double* const p ) const
 	{
-		p[ 0 ] = 30.0;
+		p[ 0 ] = 50.0;
 		p[ 1 ] = 3.0;
 	}
+
+	double opt_cost1;
+	double opt_cost2;
 
 	virtual double optcost( const double* const p )
 	{
 		r8b :: CDSPSincFilterGen gen;
 		gen.Freq1 = 0.0;
-		gen.Freq2 = M_PI * CornerFreq / Oversample;
+		gen.Freq2 = M_PI / Oversample;
 		gen.Len2 = FilterLen * 0.5 * Oversample;
 		gen.initBand( r8b :: CDSPSincFilterGen :: wftKaiser, p, true );
 
@@ -68,11 +74,6 @@ public:
 			cost1 = max( p, cost1 );
 		}
 
-		if( DoPrintLin )
-		{
-			printf( "%.4f\n", cost1 );
-		}
-
 		const int Count2 = 2000;
 		double cost2 = -1000.0;
 		const double th1 = M_PI * StopFraction / Oversample;
@@ -87,7 +88,10 @@ public:
 			cost2 = max( p, cost2 );
 		}
 
-		return( cost1 * 36.0 + cost2 );
+		opt_cost1 = cost1;
+		opt_cost2 = cost2;
+
+		return( cost1 * 180.0 + cost2 );
 	}
 };
 
@@ -98,16 +102,23 @@ int main()
 
 	CWinOpt opt;
 
-	printf( "\t\tstatic const double Coeffs[][ 3 ] = {\n" );
+	printf( "\t\tstatic const int Coeffs%iBase = %i;\n", Bandwidth,
+		MinFilterLen );
 
-	for( FilterLen = 6; FilterLen <= 30; FilterLen += 2 )
+	printf( "\t\tstatic const int Coeffs%iCount = %i;\n", Bandwidth,
+		( MaxFilterLen - MinFilterLen + 2 ) / 2 );
+
+	printf( "\t\tstatic const double Coeffs%i[ Coeffs%iCount ][ 3 ] = {\n",
+		Bandwidth, Bandwidth );
+
+	for( FilterLen = MinFilterLen; FilterLen <= MaxFilterLen; FilterLen += 2 )
 	{
 		opt.init( rnd );
 
-		const int sct = 15 * opt.getInitEvals() / OptDepth; // Plateau thresh.
+		const int sct = 2 * 128; // Plateau threshold.
 		int i;
 
-		for( i = 0; i < 1000000; i++ )
+		for( i = 0; i < 1500000; i++ )
 		{
 			if( opt.optimize( rnd ) > sct )
 			{
@@ -115,13 +126,11 @@ int main()
 			}
 		}
 
-		printf( "\t\t\t{ %.16f, %.16f, %.4f }, // ",
-			opt.getBestParams()[ 0 ], opt.getBestParams()[ 1 ],
-			-opt.getBestCost() );
-
-		DoPrintLin = true;
 		opt.optcost( opt.getBestParams() );
-		DoPrintLin = false;
+
+		printf( "\t\t\t{ %.16f, %.16f, %.4f }, // %.4f\n",
+			opt.getBestParams()[ 0 ], opt.getBestParams()[ 1 ],
+			-opt.opt_cost2, opt.opt_cost1 );
 	}
 
 	printf( "\t\t};\n" );

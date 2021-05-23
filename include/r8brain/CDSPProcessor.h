@@ -9,8 +9,8 @@
  * This file includes the base virtual class for DSP processing algorithm
  * classes like FIR filtering and interpolation.
  *
- * r8brain-free-src Copyright (c) 2013-2018 Aleksey Vaneev
- * See the "License.txt" file for license.
+ * r8brain-free-src Copyright (c) 2013-2021 Aleksey Vaneev
+ * See the "LICENSE" file for license.
  */
 
 #ifndef R8B_CDSPPROCESSOR_INCLUDED

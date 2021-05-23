@@ -8,8 +8,8 @@
  *
  * This file includes half-band upsampling class.
  *
- * r8brain-free-src Copyright (c) 2019 Aleksey Vaneev
- * See the "License.txt" file for license.
+ * r8brain-free-src Copyright (c) 2013-2021 Aleksey Vaneev
+ * See the "LICENSE" file for license.
  */
 
 #ifndef R8B_CDSPHBUPSAMPLER_INCLUDED
@@ -43,189 +43,200 @@ public:
 	static void getHBFilter( const double ReqAtten, const int SteepIndex,
 		const double*& flt, int& fltt, double& att )
 	{
-		static const int FltCount = 11;
-		static const double HBKernel_4[ 4 ] = { // att -64.9241 dB, frac 4.0
-			6.1073830069265711e-001, -1.4463982571471876e-001,
-			4.1136036923118187e-002, -7.4740105856914872e-003 };
-		static const double HBKernel_5[ 5 ] = { // att -87.4775 dB, frac 4.0
-			6.1553054142504338e-001, -1.5591352339398118e-001,
-			5.2404802661298266e-002, -1.4230574348726146e-002,
-			2.2457593805377831e-003 };
-		static const double HBKernel_6[ 6 ] = { // att -104.5154 dB, frac 4.0
-			6.1883766561934184e-001, -1.6396282655874558e-001,
-			6.1104571279325129e-002, -2.0317756445217543e-002,
-			5.0264527466018826e-003, -6.9392938429507279e-004 };
-		static const double HBKernel_7[ 7 ] = { // att -120.6199 dB, frac 4.0
-			6.2125313688727779e-001, -1.6999763849273491e-001,
-			6.8014108060738196e-002, -2.5679821316697125e-002,
-			7.9798828249699784e-003, -1.7871060154498470e-003,
-			2.1836606459564009e-004 };
-		static const double HBKernel_8[ 8 ] = { // att -136.5151 dB, frac 4.0
-			6.2309299085367287e-001, -1.7468969193368433e-001,
-			7.3628746444973150e-002, -3.0378268550055314e-002,
-			1.0908085227657214e-002, -3.1287343330312556e-003,
-			6.3632014609722092e-004, -6.9597139145649502e-005 };
-		static const double HBKernel_9[ 9 ] = { // att -152.3240 dB, frac 4.0
-			6.2454069594794803e-001, -1.7844303649890664e-001,
-			7.8279410808762842e-002, -3.4501119561829857e-002,
-			1.3717889826645487e-002, -4.6090109007760798e-003,
-			1.2192752061406873e-003, -2.2647618541786664e-004,
-			2.2395554542567748e-005 };
-		static const double HBKernel_10[ 10 ] = { // att -168.0859 dB, frac 4.0
-			6.2570883988448611e-001, -1.8151274643053061e-001,
-			8.2191863294185458e-002, -3.8131779329357615e-002,
-			1.6367492549512565e-002, -6.1530178832078578e-003,
-			1.9277693942420303e-003, -4.7165916432255402e-004,
-			8.0491894752808465e-005, -7.2581515842465856e-006 };
-		static const double HBKernel_11[ 11 ] = { // att -183.7962 dB, frac 4.0
-			6.2667167706646965e-001, -1.8407153341833782e-001,
-			8.5529995600327216e-002, -4.1346831452173063e-002,
-			1.8844831683400131e-002, -7.7125170314919214e-003,
-			2.7268674834296570e-003, -7.9745028391855826e-004,
-			1.8116344571770699e-004, -2.8569149678673122e-005,
-			2.3667021922861879e-006 };
-		static const double HBKernel_12[ 12 ] = { // att -199.4768 dB, frac 4.0
-			6.2747849729182659e-001, -1.8623616781335248e-001,
-			8.8409755856508648e-002, -4.4207468780136254e-002,
-			2.1149175912217915e-002, -9.2551508154301194e-003,
-			3.5871562052326249e-003, -1.1923167600753576e-003,
-			3.2627812001613326e-004, -6.9106902008709490e-005,
-			1.0122897772888322e-005, -7.7531878091292963e-007 };
-		static const double HBKernel_13[ 13 ] = { // att -215.1364 dB, frac 4.0
-			6.2816416238782957e-001, -1.8809076918442266e-001,
-			9.0918539368474965e-002, -4.6765502172995604e-002,
-			2.3287520069933797e-002, -1.0760626940880943e-002,
-			4.4853921118213676e-003, -1.6438774496992904e-003,
-			5.1441308429384374e-004, -1.3211724349740752e-004,
-			2.6191316362108199e-005, -3.5802424384280469e-006,
-			2.5491272423372411e-007 };
-		static const double HBKernel_14[ 14 ] = { // att -230.7526 dB, frac 4.0
-			6.2875473147254901e-001, -1.8969942008858576e-001,
-			9.3126095475258408e-002, -4.9067252227455962e-002,
-			2.5273009767563311e-002, -1.2218646838258702e-002,
-			5.4048946497798353e-003, -2.1409921992386689e-003,
-			7.4250304371305991e-004, -2.1924546773651068e-004,
-			5.3015823597863675e-005, -9.8743070771832892e-006,
-			1.2650397198764347e-006, -8.4146728313072455e-008 };
-		static const double FltAttens[ FltCount ] = {
-			64.9241, 87.4775, 104.5154, 120.6199, 136.5151, 152.3240,
-			168.0859, 183.7962, 199.4768, 215.1364, 230.7526 };
-		static const double* const FltPtrs[ FltCount ] = { HBKernel_4,
-			HBKernel_5, HBKernel_6, HBKernel_7, HBKernel_8, HBKernel_9,
-			HBKernel_10, HBKernel_11, HBKernel_12, HBKernel_13,
-			HBKernel_14 };
-
-		static const int FltCountB = 7; // 0.125
-		static const double HBKernel_2b[ 2 ] = { // StopAtten = -46.2556 dB
-			5.6965643437574798e-001, -7.0243561190601822e-002 };
-		static const double HBKernel_3b[ 3 ] = { // StopAtten = -93.6536 dB
-			5.9040785316467748e-001, -1.0462338733801557e-001,
-			1.4234900265846395e-002 };
-		static const double HBKernel_4b[ 4 ] = { // StopAtten = -123.4514 dB
-			6.0140277542879073e-001, -1.2564483854573050e-001,
-			2.7446500598030887e-002, -3.2051079559036744e-003 };
-		static const double HBKernel_5b[ 5 ] = { // StopAtten = -152.4403 dB
-			6.0818642429044178e-001, -1.3981140187082763e-001,
-			3.8489164053787661e-002, -7.6218861795043225e-003,
-			7.5772358126258155e-004 };
-		static const double HBKernel_6b[ 6 ] = { // StopAtten = -181.2501 dB
-			6.1278392271870352e-001, -1.5000053763409249e-001,
-			4.7575323519283508e-002, -1.2320702806281281e-002,
-			2.1462442604041065e-003, -1.8425092396978648e-004 };
-		static const double HBKernel_7b[ 7 ] = { // StopAtten = -209.9472 dB
-			6.1610372237019151e-001, -1.5767891821295410e-001,
-			5.5089690570484962e-002, -1.6895755290596615e-002,
-			3.9416641999499014e-003, -6.0603620400878633e-004,
-			4.5632598748568398e-005 };
-		static const double HBKernel_8b[ 8 ] = { // StopAtten = -238.5612 dB
-			6.1861282849648180e-001, -1.6367179296640288e-001,
-			6.1369859727781417e-002, -2.1184465440918565e-002,
-			5.9623352367661475e-003, -1.2483096884685629e-003,
-			1.7099294398059683e-004, -1.1448310399897466e-005 };
+		static const double HBKernel_4A[ 4 ] = { // -54.5176 dB, 4
+			6.1729335650971517e-001, -1.5963945620743250e-001,
+			5.5073370934086312e-002, -1.4603578989932850e-002,};
+		static const double HBKernel_5A[ 5 ] = { // -66.3075 dB, 4
+			6.2068807424902472e-001, -1.6827573634467302e-001,
+			6.5263016720721170e-002, -2.2483331611592005e-002,
+			5.2917326684281110e-003,};
+		static const double HBKernel_6A[ 6 ] = { // -89.5271 dB, 4
+			6.2187202340480707e-001, -1.7132842113816371e-001,
+			6.9019169178765674e-002, -2.5799728312695277e-002,
+			7.4880112525741666e-003, -1.2844465869952567e-003,};
+		static const double HBKernel_7A[ 7 ] = { // -105.2842 dB, 4
+			6.2354494135775851e-001, -1.7571220703702045e-001,
+			7.4529843603968457e-002, -3.0701736822442153e-002,
+			1.0716755639039573e-002, -2.7833422930759735e-003,
+			4.1118797093875510e-004,};
+		static const double HBKernel_8A[ 8 ] = { // -121.0063 dB, 4
+			6.2488363107953926e-001, -1.7924942606514119e-001,
+			7.9068155655640557e-002, -3.4907523415495731e-002,
+			1.3710256799907897e-002, -4.3991142586987933e-003,
+			1.0259190163889602e-003, -1.3278941979339359e-004,};
+		static const double HBKernel_9A[ 9 ] = { // -136.6982 dB, 4
+			6.2597763804021977e-001, -1.8216414325139055e-001,
+			8.2879104876726728e-002, -3.8563442248249404e-002,
+			1.6471530499739394e-002, -6.0489108881335227e-003,
+			1.7805283804140392e-003, -3.7533200112729561e-004,
+			4.3172840558735476e-005,};
+		static const double HBKernel_10A[ 10 ] = { // -152.3572 dB, 4
+			6.2688767582974092e-001, -1.8460766807559420e-001,
+			8.6128943000481864e-002, -4.1774474147006607e-002,
+			1.9014801985747346e-002, -7.6870397465866507e-003,
+			2.6264590175341853e-003, -7.1106660285478562e-004,
+			1.3645852036179345e-004, -1.4113888783332969e-005,};
+		static const double HBKernel_11A[ 11 ] = { // -183.7962 dB, 4
+			6.2667167706948146e-001, -1.8407153342635879e-001,
+			8.5529995610836046e-002, -4.1346831462361310e-002,
+			1.8844831691322637e-002, -7.7125170365394992e-003,
+			2.7268674860562087e-003, -7.9745028501057233e-004,
+			1.8116344606360795e-004, -2.8569149754241848e-005,
+			2.3667022010173616e-006,};
+		static const double HBKernel_12A[ 12 ] = { // -199.4768 dB, 4
+			6.2747849730367999e-001, -1.8623616784506747e-001,
+			8.8409755898467945e-002, -4.4207468821462342e-002,
+			2.1149175945115381e-002, -9.2551508371115209e-003,
+			3.5871562170822330e-003, -1.1923167653750219e-003,
+			3.2627812189920129e-004, -6.9106902511490413e-005,
+			1.0122897863125124e-005, -7.7531878906846174e-007,};
+		static const double HBKernel_13A[ 13 ] = { // -215.1364 dB, 4
+			6.2816416252367324e-001, -1.8809076955230414e-001,
+			9.0918539867353029e-002, -4.6765502683599310e-002,
+			2.3287520498995663e-002, -1.0760627245014184e-002,
+			4.4853922948425683e-003, -1.6438775426910800e-003,
+			5.1441312354764978e-004, -1.3211725685765050e-004,
+			2.6191319837779187e-005, -3.5802430606313093e-006,
+			2.5491278270628601e-007,};
+		static const double HBKernel_14A[ 14 ] = { // -230.7526 dB, 4
+			6.2875473120929948e-001, -1.8969941936903847e-001,
+			9.3126094480960403e-002, -4.9067251179869126e-002,
+			2.5273008851199916e-002, -1.2218646153393291e-002,
+			5.4048942085580280e-003, -2.1409919546078581e-003,
+			7.4250292812927973e-004, -2.1924542206832172e-004,
+			5.3015808983125091e-005, -9.8743034923598196e-006,
+			1.2650391141650221e-006, -8.4146674637474946e-008,};
+		static const int FltCountA = 11;
+		static const int FlttBaseA = 4;
+		static const double FltAttensA[ FltCountA ] = {
+			54.5176, 66.3075, 89.5271, 105.2842, 121.0063, 136.6982, 152.3572, 183.7962, 199.4768, 215.1364, 230.7526, };
+		static const double* const FltPtrsA[ FltCountA ] = {
+			HBKernel_4A, HBKernel_5A, HBKernel_6A, HBKernel_7A, HBKernel_8A, HBKernel_9A, HBKernel_10A, HBKernel_11A, HBKernel_12A, HBKernel_13A, HBKernel_14A, };
+		static const double HBKernel_2B[ 2 ] = { // -56.6007 dB, 8
+			5.7361525854329076e-001, -7.5092074924827903e-002,};
+		static const double HBKernel_3B[ 3 ] = { // -83.0295 dB, 8
+			5.9277038608066912e-001, -1.0851340190268854e-001,
+			1.5813570475513079e-002,};
+		static const double HBKernel_4B[ 4 ] = { // -123.4724 dB, 8
+			6.0140277542879617e-001, -1.2564483854574138e-001,
+			2.7446500598038322e-002, -3.2051079559057435e-003,};
+		static const double HBKernel_5B[ 5 ] = { // -152.4411 dB, 8
+			6.0818642429088932e-001, -1.3981140187175697e-001,
+			3.8489164054503623e-002, -7.6218861797853104e-003,
+			7.5772358130952392e-004,};
+		static const double HBKernel_6B[ 6 ] = { // -181.2501 dB, 8
+			6.1278392271464355e-001, -1.5000053762513338e-001,
+			4.7575323511364960e-002, -1.2320702802243476e-002,
+			2.1462442592348487e-003, -1.8425092381892940e-004,};
+		static const double HBKernel_7B[ 7 ] = { // -209.9472 dB, 8
+			6.1610372263478952e-001, -1.5767891882524138e-001,
+			5.5089691170294691e-002, -1.6895755656366061e-002,
+			3.9416643438213977e-003, -6.0603623791604668e-004,
+			4.5632602433393365e-005,};
+		static const double HBKernel_8B[ 8 ] = { // -238.5616 dB, 8
+			6.1861282914465976e-001, -1.6367179451225150e-001,
+			6.1369861342939716e-002, -2.1184466539006987e-002,
+			5.9623357510842061e-003, -1.2483098507454090e-003,
+			1.7099297537964702e-004, -1.1448313239478885e-005,};
+		static const int FltCountB = 7;
+		static const int FlttBaseB = 2;
 		static const double FltAttensB[ FltCountB ] = {
-			46.2556, 93.6536, 123.4514, 152.4403, 181.2501, 209.9472,
-			238.5612 };
-		static const double* const FltPtrsB[ FltCountB ] = { HBKernel_2b,
-			HBKernel_3b, HBKernel_4b, HBKernel_5b, HBKernel_6b, HBKernel_7b,
-			HBKernel_8b };
-
-		static const int FltCountC = 5; // 0.0625
-		static const double HBKernel_2c[ 2 ] = { // StopAtten = -87.9438 dB
-			5.6430278013478086e-001, -6.4338068855764208e-002 };
-		static const double HBKernel_3c[ 3 ] = { // StopAtten = -130.8862 dB
-			5.8706402915553113e-001, -9.9362380958695873e-002,
-			1.2298637065878193e-002 };
-		static const double HBKernel_4c[ 4 ] = { // StopAtten = -172.3191 dB
-			5.9896586135108265e-001, -1.2111680603660968e-001,
-			2.4763118077755664e-002, -2.6121758134936002e-003 };
-		static const double HBKernel_5c[ 5 ] = { // StopAtten = -213.4984 dB
-			6.0626808278478261e-001, -1.3588224019070938e-001,
-			3.5544305138258458e-002, -6.5127022013993230e-003,
-			5.8255449020627736e-004 };
-		static const double HBKernel_6c[ 6 ] = { // StopAtten = -254.5179 dB
-			6.1120171157732273e-001, -1.4654486624691154e-001,
-			4.4582957343679119e-002, -1.0840542911916273e-002,
-			1.7343703931622656e-003, -1.3363015552414481e-004 };
+			56.6007, 83.0295, 123.4724, 152.4411, 181.2501, 209.9472, 238.5616, };
+		static const double* const FltPtrsB[ FltCountB ] = {
+			HBKernel_2B, HBKernel_3B, HBKernel_4B, HBKernel_5B, HBKernel_6B, HBKernel_7B, HBKernel_8B, };
+		static const double HBKernel_2C[ 2 ] = { // -89.0473 dB, 16
+			5.6430278013478008e-001, -6.4338068855763375e-002,};
+		static const double HBKernel_3C[ 3 ] = { // -130.8951 dB, 16
+			5.8706402915551448e-001, -9.9362380958670449e-002,
+			1.2298637065869358e-002,};
+		static const double HBKernel_4C[ 4 ] = { // -172.3192 dB, 16
+			5.9896586134984675e-001, -1.2111680603434927e-001,
+			2.4763118076458895e-002, -2.6121758132212989e-003,};
+		static const double HBKernel_5C[ 5 ] = { // -213.4984 dB, 16
+			6.0626808285230716e-001, -1.3588224032740795e-001,
+			3.5544305238309003e-002, -6.5127022377289654e-003,
+			5.8255449565950768e-004,};
+		static const double HBKernel_6C[ 6 ] = { // -254.5186 dB, 16
+			6.1120171263351242e-001, -1.4654486853757870e-001,
+			4.4582959299131253e-002, -1.0840543858123995e-002,
+			1.7343706485509962e-003, -1.3363018567985596e-004,};
+		static const int FltCountC = 5;
+		static const int FlttBaseC = 2;
 		static const double FltAttensC[ FltCountC ] = {
-			87.9438, 130.8862, 172.3191, 213.4984, 254.5179 };
-		static const double* const FltPtrsC[ FltCountC ] = { HBKernel_2c,
-			HBKernel_3c, HBKernel_4c, HBKernel_5c, HBKernel_6c };
-
-		static const int FltCountD = 3; // 0.03125
-		static const double HBKernel_2d[ 2 ] = { // StopAtten = -113.1456 dB
-			5.6295152180538044e-001, -6.2953706070191726e-002 };
-		static const double HBKernel_3d[ 3 ] = { // StopAtten = -167.1446 dB
-			5.8621968728761675e-001, -9.8080551656624410e-002,
-			1.1860868762030571e-002 };
-		static const double HBKernel_4d[ 4 ] = { // StopAtten = -220.6519 dB
-			5.9835028661892165e-001, -1.1999986095168852e-001,
-			2.4132530901858028e-002, -2.4829565783680927e-003 };
+			89.0473, 130.8951, 172.3192, 213.4984, 254.5186, };
+		static const double* const FltPtrsC[ FltCountC ] = {
+			HBKernel_2C, HBKernel_3C, HBKernel_4C, HBKernel_5C, HBKernel_6C, };
+		static const double HBKernel_1D[ 1 ] = { // -54.4754 dB, 32
+			5.0188900022775451e-001,};
+		static const double HBKernel_2D[ 2 ] = { // -113.2139 dB, 32
+			5.6295152180538044e-001, -6.2953706070191726e-002,};
+		static const double HBKernel_3D[ 3 ] = { // -167.1447 dB, 32
+			5.8621968728755036e-001, -9.8080551656524531e-002,
+			1.1860868761997080e-002,};
+		static const double HBKernel_4D[ 4 ] = { // -220.6519 dB, 32
+			5.9835028657163591e-001, -1.1999986086623511e-001,
+			2.4132530854004228e-002, -2.4829565686819706e-003,};
+		static const int FltCountD = 4;
+		static const int FlttBaseD = 1;
 		static const double FltAttensD[ FltCountD ] = {
-			113.1456, 167.1446, 220.6519 };
-		static const double* const FltPtrsD[ FltCountD ] = { HBKernel_2d,
-			HBKernel_3d, HBKernel_4d };
-
-		static const int FltCountE = 4; // 0.015625
-		static const double HBKernel_1e[ 1 ] = { // StopAtten = -60.9962 dB
-			5.0030136284718241e-001 };
-		static const double HBKernel_2e[ 2 ] = { // StopAtten = -137.3130 dB
-			5.6261293163934145e-001, -6.2613067826625832e-002 };
-		static const double HBKernel_3e[ 3 ] = { // StopAtten = -203.2997 dB
-			5.8600808139033378e-001, -9.7762185874608526e-002,
-			1.1754104552667852e-002 };
-		static const double HBKernel_4e[ 4 ] = { // StopAtten = -268.8561 dB
-			5.9819599535791312e-001, -1.1972157884617740e-001,
-			2.3977307400990484e-002, -2.4517239127622593e-003 };
+			54.4754, 113.2139, 167.1447, 220.6519, };
+		static const double* const FltPtrsD[ FltCountD ] = {
+			HBKernel_1D, HBKernel_2D, HBKernel_3D, HBKernel_4D, };
+		static const double HBKernel_1E[ 1 ] = { // -66.5391 dB, 64
+			5.0047102586416625e-001,};
+		static const double HBKernel_2E[ 2 ] = { // -137.3173 dB, 64
+			5.6261293163933568e-001, -6.2613067826620017e-002,};
+		static const double HBKernel_3E[ 3 ] = { // -203.2997 dB, 64
+			5.8600808139396787e-001, -9.7762185880067784e-002,
+			1.1754104554493029e-002,};
+		static const double HBKernel_4E[ 4 ] = { // -268.8550 dB, 64
+			5.9819599352772002e-001, -1.1972157555011861e-001,
+			2.3977305567947922e-002, -2.4517235455853992e-003,};
+		static const int FltCountE = 4;
+		static const int FlttBaseE = 1;
 		static const double FltAttensE[ FltCountE ] = {
-			60.9962, 137.3130, 203.2997, 268.8561 };
-		static const double* const FltPtrsE[ FltCountE ] = { HBKernel_1e,
-			HBKernel_2e, HBKernel_3e, HBKernel_4e };
-
+			66.5391, 137.3173, 203.2997, 268.8550, };
+		static const double* const FltPtrsE[ FltCountE ] = {
+			HBKernel_1E, HBKernel_2E, HBKernel_3E, HBKernel_4E, };
+		static const double HBKernel_1F[ 1 ] = { // -82.4633 dB, 128
+			5.0007530666642896e-001,};
+		static const double HBKernel_2F[ 2 ] = { // -161.4049 dB, 128
+			5.6252823610146030e-001, -6.2528244608044792e-002,};
+		static const double HBKernel_3F[ 3 ] = { // -239.4313 dB, 128
+			5.8595514744674237e-001, -9.7682725156791952e-002,
+			1.1727577711117231e-002,};
+		static const int FltCountF = 3;
+		static const int FlttBaseF = 1;
+		static const double FltAttensF[ FltCountF ] = {
+			82.4633, 161.4049, 239.4313, };
+		static const double* const FltPtrsF[ FltCountF ] = {
+			HBKernel_1F, HBKernel_2F, HBKernel_3F, };
+		static const double HBKernel_1G[ 1 ] = { // -94.5052 dB, 256
+			5.0001882524896712e-001,};
+		static const double HBKernel_2G[ 2 ] = { // -185.4886 dB, 256
+			5.6250705922479682e-001, -6.2507059756378394e-002,};
+		static const double HBKernel_3G[ 3 ] = { // -275.5501 dB, 256
+			5.8594191201187384e-001, -9.7662868266991207e-002,
+			1.1720956255134043e-002,};
 		static const int FltCountG = 3;
-		static const double HBKernel_1g[ 1 ] = { // att -93.9165 dB, frac 256.0
-			5.0001882524896712e-001 };
-		static const double HBKernel_2g[ 2 ] = { // att -185.4886 dB, frac 256.0
-			5.6250705922473820e-001, -6.2507059756319761e-002 };
-		static const double HBKernel_3g[ 3 ] = { // att -275.5531 dB, frac 256.0
-			5.8594191093025305e-001, -9.7662866644414148e-002,
-			1.1720955714177778e-002 };
+		static const int FlttBaseG = 1;
 		static const double FltAttensG[ FltCountG ] = {
-			93.9165, 185.4886, 275.5531 };
-		static const double* const FltPtrsG[ FltCountG ] = { HBKernel_1g,
-			HBKernel_2g, HBKernel_3g };
+			94.5052, 185.4886, 275.5501, };
+		static const double* const FltPtrsG[ FltCountG ] = {
+			HBKernel_1G, HBKernel_2G, HBKernel_3G, };
 
 		int k = 0;
 
 		if( SteepIndex <= 0 )
 		{
-			while( k != FltCount - 1 && FltAttens[ k ] < ReqAtten )
+			while( k != FltCountA - 1 && FltAttensA[ k ] < ReqAtten )
 			{
 				k++;
 			}
 
-			flt = FltPtrs[ k ];
-			fltt = 4 + k;
-			att = FltAttens[ k ];
+			flt = FltPtrsA[ k ];
+			fltt = FlttBaseA + k;
+			att = FltAttensA[ k ];
 		}
 		else
 		if( SteepIndex == 1 )
@@ -236,7 +247,7 @@ public:
 			}
 
 			flt = FltPtrsB[ k ];
-			fltt = 2 + k;
+			fltt = FlttBaseB + k;
 			att = FltAttensB[ k ];
 		}
 		else
@@ -248,7 +259,7 @@ public:
 			}
 
 			flt = FltPtrsC[ k ];
-			fltt = 2 + k;
+			fltt = FlttBaseC + k;
 			att = FltAttensC[ k ];
 		}
 		else
@@ -260,11 +271,11 @@ public:
 			}
 
 			flt = FltPtrsD[ k ];
-			fltt = 2 + k;
+			fltt = FlttBaseD + k;
 			att = FltAttensD[ k ];
 		}
 		else
-		if( SteepIndex == 4 || SteepIndex == 5 )
+		if( SteepIndex == 4 )
 		{
 			while( k != FltCountE - 1 && FltAttensE[ k ] < ReqAtten )
 			{
@@ -272,8 +283,20 @@ public:
 			}
 
 			flt = FltPtrsE[ k ];
-			fltt = 1 + k;
+			fltt = FlttBaseE + k;
 			att = FltAttensE[ k ];
+		}
+		else
+		if( SteepIndex == 5 )
+		{
+			while( k != FltCountF - 1 && FltAttensF[ k ] < ReqAtten )
+			{
+				k++;
+			}
+
+			flt = FltPtrsF[ k ];
+			fltt = FlttBaseF + k;
+			att = FltAttensF[ k ];
 		}
 		else
 		{
@@ -283,7 +306,7 @@ public:
 			}
 
 			flt = FltPtrsG[ k ];
-			fltt = 1 + k;
+			fltt = FlttBaseG + k;
 			att = FltAttensG[ k ];
 		}
 	}
@@ -301,138 +324,152 @@ public:
 	static void getHBFilterThird( const double ReqAtten, const int SteepIndex,
 		const double*& flt, int& fltt, double& att )
 	{
-		static const int FltCount = 7;
-		static const double HBKernel_3[ 3 ] = { // att -75.0994 dB, frac 6.0
-			5.9381789425210385e-001, -1.1030344037819353e-001,
-			1.6601396044066741e-002 };
-		static const double HBKernel_4[ 4 ] = { // att -102.5310 dB, frac 6.0
-			6.0388679447131843e-001, -1.3043900369548017e-001,
-			3.0518777984447295e-002, -3.9738477033171900e-003 };
-		static const double HBKernel_5[ 5 ] = { // att -126.5360 dB, frac 6.0
-			6.1014115058940344e-001, -1.4393081816630204e-001,
-			4.1760642892854860e-002, -8.9692183234068596e-003,
-			9.9871340618369218e-004 };
-		static const double HBKernel_6[ 6 ] = { // att -150.1830 dB, frac 6.0
-			6.1439563420561982e-001, -1.5360187826939378e-001,
-			5.0840891346007507e-002, -1.4053648740740480e-002,
-			2.6771286587896391e-003, -2.5815816045721899e-004 };
-		static const double HBKernel_7[ 7 ] = { // att -173.7067 dB, frac 6.0
-			6.1747493476475102e-001, -1.6087373733655960e-001,
-			5.8263075644905349e-002, -1.8872408175697929e-002,
-			4.7421376553202421e-003, -8.0196529637661137e-004,
-			6.7964807425180754e-005 };
-		static const double HBKernel_8[ 8 ] = { // att -197.1454 dB, frac 6.0
-			6.1980610946074488e-001, -1.6654070574184196e-001,
-			6.4416567396953492e-002, -2.3307744316524541e-002,
-			6.9909157209589430e-003, -1.5871946236745982e-003,
-			2.4017727258609085e-004, -1.8125308111373566e-005 };
-		static const double HBKernel_9[ 9 ] = { // att -220.5199 dB, frac 6.0
-			6.2163188987470752e-001, -1.7108115412330563e-001,
-			6.9588371105224839e-002, -2.7339625869282957e-002,
-			9.2954473703765472e-003, -2.5537181861669997e-003,
-			5.2572296540671394e-004, -7.1813366796731157e-005,
-			4.8802392556669750e-006 };
-		static const double FltAttens[ FltCount ] = {
-			75.0994, 102.5310, 126.5360, 150.1830, 173.7067, 197.1454,
-			220.5199 };
-		static const double* const FltPtrs[ FltCount ] = { HBKernel_3,
-			HBKernel_4, HBKernel_5, HBKernel_6, HBKernel_7, HBKernel_8,
-			HBKernel_9 };
-
+		static const double HBKernel_3A[ 3 ] = { // -66.3726 dB, 6
+			5.9811355069551475e-001, -1.1793396656733847e-001,
+			2.0300557211946322e-002,};
+		static const double HBKernel_4A[ 4 ] = { // -90.2546 dB, 6
+			6.0645499250612578e-001, -1.3555496505481171e-001,
+			3.4022804962365975e-002, -4.9535418595798757e-003,};
+		static const double HBKernel_5A[ 5 ] = { // -126.5507 dB, 6
+			6.1014115058940210e-001, -1.4393081816629907e-001,
+			4.1760642892852244e-002, -8.9692183234056175e-003,
+			9.9871340618342070e-004,};
+		static const double HBKernel_6A[ 6 ] = { // -150.1839 dB, 6
+			6.1439563420546972e-001, -1.5360187826905250e-001,
+			5.0840891345687034e-002, -1.4053648740561121e-002,
+			2.6771286587305727e-003, -2.5815816044823123e-004,};
+		static const double HBKernel_7A[ 7 ] = { // -173.7068 dB, 6
+			6.1747493476329918e-001, -1.6087373733313212e-001,
+			5.8263075641409430e-002, -1.8872408173431318e-002,
+			4.7421376543513687e-003, -8.0196529612267474e-004,
+			6.7964807393798996e-005,};
+		static const double HBKernel_8A[ 8 ] = { // -197.1454 dB, 6
+			6.1980610947775050e-001, -1.6654070578314714e-001,
+			6.4416567441730327e-002, -2.3307744348719822e-002,
+			6.9909157372312443e-003, -1.5871946293364403e-003,
+			2.4017727382382763e-004, -1.8125308241541697e-005,};
+		static const double HBKernel_9A[ 9 ] = { // -220.5199 dB, 6
+			6.2163188951899306e-001, -1.7108115323810941e-001,
+			6.9588370095600260e-002, -2.7339625080613838e-002,
+			9.2954469183791771e-003, -2.5537179959555429e-003,
+			5.2572290897951021e-004, -7.1813356135154921e-005,
+			4.8802382808892154e-006,};
+		static const int FltCountA = 7;
+		static const int FlttBaseA = 3;
+		static const double FltAttensA[ FltCountA ] = {
+			66.3726, 90.2546, 126.5507, 150.1839, 173.7068, 197.1454, 220.5199, };
+		static const double* const FltPtrsA[ FltCountA ] = {
+			HBKernel_3A, HBKernel_4A, HBKernel_5A, HBKernel_6A, HBKernel_7A, HBKernel_8A, HBKernel_9A, };
+		static const double HBKernel_2B[ 2 ] = { // -71.0965 dB, 12
+			5.6748544264806311e-001, -6.7764090509431732e-002,};
+		static const double HBKernel_3B[ 3 ] = { // -115.7707 dB, 12
+			5.8793612182667199e-001, -1.0070583248877293e-001,
+			1.2771337947163834e-002,};
+		static const double HBKernel_4B[ 4 ] = { // -152.1535 dB, 12
+			5.9960155600862808e-001, -1.2228154335199336e-001,
+			2.5433718917694709e-002, -2.7537562530837154e-003,};
+		static const double HBKernel_5B[ 5 ] = { // -188.2914 dB, 12
+			6.0676859170554343e-001, -1.3689667009876413e-001,
+			3.6288512631926818e-002, -6.7838855305035351e-003,
+			6.2345167677087547e-004,};
+		static const double HBKernel_6B[ 6 ] = { // -224.2705 dB, 12
+			6.1161456341904397e-001, -1.4743901958274458e-001,
+			4.5344160157313275e-002, -1.1207371780924531e-002,
+			1.8328497112594935e-003, -1.4518193006359589e-004,};
 		static const int FltCountB = 5;
-		static const double HBKernel_2b[ 2 ] = { // att -75.4413 dB, frac 12.0
-			5.6569875353984056e-001, -6.5811416441328888e-002 };
-		static const double HBKernel_3b[ 3 ] = { // att -115.7198 dB, frac 12.0
-			5.8793612182667099e-001, -1.0070583248877137e-001,
-			1.2771337947163270e-002 };
-		static const double HBKernel_4b[ 4 ] = { // att -152.1528 dB, frac 12.0
-			5.9960155600859322e-001, -1.2228154335192955e-001,
-			2.5433718917658079e-002, -2.7537562530760588e-003 };
-		static const double HBKernel_5b[ 5 ] = { // att -188.2914 dB, frac 12.0
-			6.0676859170270769e-001, -1.3689667009297382e-001,
-			3.6288512627614941e-002, -6.7838855288962756e-003,
-			6.2345167652090897e-004 };
-		static const double HBKernel_6b[ 6 ] = { // att -224.2705 dB, frac 12.0
-			6.1161456377889145e-001, -1.4743902036519768e-001,
-			4.5344160828746795e-002, -1.1207372108402218e-002,
-			1.8328498006058664e-003, -1.4518194076022933e-004 };
+		static const int FlttBaseB = 2;
 		static const double FltAttensB[ FltCountB ] = {
-			75.4413, 115.7198, 152.1528, 188.2914, 224.2705 };
-		static const double* const FltPtrsB[ FltCountB ] = { HBKernel_2b,
-			HBKernel_3b, HBKernel_4b, HBKernel_5b, HBKernel_6b };
-
-		static const int FltCountC = 4;
-		static const double HBKernel_2c[ 2 ] = { // att -102.9806 dB, frac 24.0
-			5.6330232648142842e-001, -6.3309247177420730e-002 };
-		static const double HBKernel_3c[ 3 ] = { // att -152.1187 dB, frac 24.0
-			5.8643891113575064e-001, -9.8411593011501639e-002,
-			1.1972706651455891e-002 };
-		static const double HBKernel_4c[ 4 ] = { // att -200.6182 dB, frac 24.0
-			5.9851012364429712e-001, -1.2028885240905723e-001,
-			2.4294521088349529e-002, -2.5157924167197453e-003 };
-		static const double HBKernel_5c[ 5 ] = { // att -248.8728 dB, frac 24.0
-			6.0590922849004858e-001, -1.3515953371903033e-001,
-			3.5020856634677522e-002, -6.3256195330255094e-003,
-			5.5506812768978109e-004 };
+			71.0965, 115.7707, 152.1535, 188.2914, 224.2705, };
+		static const double* const FltPtrsB[ FltCountB ] = {
+			HBKernel_2B, HBKernel_3B, HBKernel_4B, HBKernel_5B, HBKernel_6B, };
+		static const double HBKernel_1C[ 1 ] = { // -49.4544 dB, 24
+			5.0336730531430562e-001,};
+		static const double HBKernel_2C[ 2 ] = { // -103.1970 dB, 24
+			5.6330232648142819e-001, -6.3309247177420452e-002,};
+		static const double HBKernel_3C[ 3 ] = { // -152.1195 dB, 24
+			5.8643891113580415e-001, -9.8411593011583087e-002,
+			1.1972706651483846e-002,};
+		static const double HBKernel_4C[ 4 ] = { // -200.6182 dB, 24
+			5.9851012363917222e-001, -1.2028885239978220e-001,
+			2.4294521083140615e-002, -2.5157924156609776e-003,};
+		static const double HBKernel_5C[ 5 ] = { // -248.8730 dB, 24
+			6.0590922882030196e-001, -1.3515953438018685e-001,
+			3.5020857107815606e-002, -6.3256196990467053e-003,
+			5.5506815147598793e-004,};
+		static const int FltCountC = 5;
+		static const int FlttBaseC = 1;
 		static const double FltAttensC[ FltCountC ] = {
-			102.9806, 152.1187, 200.6182, 248.8728 };
-		static const double* const FltPtrsC[ FltCountC ] = { HBKernel_2c,
-			HBKernel_3c, HBKernel_4c, HBKernel_5c };
-
+			49.4544, 103.1970, 152.1195, 200.6182, 248.8730, };
+		static const double* const FltPtrsC[ FltCountC ] = {
+			HBKernel_1C, HBKernel_2C, HBKernel_3C, HBKernel_4C, HBKernel_5C, };
+		static const double HBKernel_1D[ 1 ] = { // -61.5357 dB, 48
+			5.0083794231068057e-001,};
+		static const double HBKernel_2D[ 2 ] = { // -127.3167 dB, 48
+			5.6270074379958690e-001, -6.2701174487726344e-002,};
+		static const double HBKernel_3D[ 3 ] = { // -188.2990 dB, 48
+			5.8606296210323228e-001, -9.7844644765123029e-002,
+			1.1781683046528768e-002,};
+		static const double HBKernel_4D[ 4 ] = { // -248.8580 dB, 48
+			5.9823601243162516e-001, -1.1979368994739022e-001,
+			2.4017458606412575e-002, -2.4597810910081913e-003,};
 		static const int FltCountD = 4;
-		static const double HBKernel_1d[ 1 ] = { // att -48.6615 dB, frac 48.0
-			5.0053598654836240e-001 };
-		static const double HBKernel_2d[ 2 ] = { // att -127.3033 dB, frac 48.0
-			5.6270074379958679e-001, -6.2701174487726163e-002 };
-		static const double HBKernel_3d[ 3 ] = { // att -188.2989 dB, frac 48.0
-			5.8606296210257025e-001, -9.7844644764129421e-002,
-			1.1781683046197223e-002 };
-		static const double HBKernel_4d[ 4 ] = { // att -248.8578 dB, frac 48.0
-			5.9823601283411165e-001, -1.1979369067338455e-001,
-			2.4017459011435899e-002, -2.4597811725236445e-003 };
+		static const int FlttBaseD = 1;
 		static const double FltAttensD[ FltCountD ] = {
-			48.6615, 127.3033, 188.2989, 248.8578 };
-		static const double* const FltPtrsD[ FltCountD ] = { HBKernel_1d,
-			HBKernel_2d, HBKernel_3d, HBKernel_4d };
-
+			61.5357, 127.3167, 188.2990, 248.8580, };
+		static const double* const FltPtrsD[ FltCountD ] = {
+			HBKernel_1D, HBKernel_2D, HBKernel_3D, HBKernel_4D, };
+		static const double HBKernel_1E[ 1 ] = { // -77.4651 dB, 96
+			5.0013388897382527e-001,};
+		static const double HBKernel_2E[ 2 ] = { // -151.4084 dB, 96
+			5.6255019604317880e-001, -6.2550222932381064e-002,};
+		static const double HBKernel_3E[ 3 ] = { // -224.4365 dB, 96
+			5.8596887234201078e-001, -9.7703321113080305e-002,
+			1.1734448777069783e-002,};
 		static const int FltCountE = 3;
-		static const double HBKernel_1e[ 1 ] = { // att -73.2782 dB, frac 96.0
-			5.0013388897382527e-001 };
-		static const double HBKernel_2e[ 2 ] = { // att -151.4076 dB, frac 96.0
-			5.6255019604318290e-001, -6.2550222932385172e-002 };
-		static const double HBKernel_3e[ 3 ] = { // att -224.4366 dB, frac 96.0
-			5.8596887233874539e-001, -9.7703321108182931e-002,
-			1.1734448775437802e-002 };
+		static const int FlttBaseE = 1;
 		static const double FltAttensE[ FltCountE ] = {
-			73.2782, 151.4076, 224.4366 };
-		static const double* const FltPtrsE[ FltCountE ] = { HBKernel_1e,
-			HBKernel_2e, HBKernel_3e };
-
+			77.4651, 151.4084, 224.4365, };
+		static const double* const FltPtrsE[ FltCountE ] = {
+			HBKernel_1E, HBKernel_2E, HBKernel_3E, };
+		static const double HBKernel_1F[ 1 ] = { // -89.5075 dB, 192
+			5.0003346776264190e-001,};
+		static const double HBKernel_2F[ 2 ] = { // -175.4932 dB, 192
+			5.6251254964097952e-001, -6.2512551321105267e-002,};
+		static const double HBKernel_3F[ 3 ] = { // -260.5645 dB, 192
+			5.8594534336747051e-001, -9.7668015838639821e-002,
+			1.1722672471262996e-002,};
+		static const int FltCountF = 3;
+		static const int FlttBaseF = 1;
+		static const double FltAttensF[ FltCountF ] = {
+			89.5075, 175.4932, 260.5645, };
+		static const double* const FltPtrsF[ FltCountF ] = {
+			HBKernel_1F, HBKernel_2F, HBKernel_3F, };
+		static const double HBKernel_1G[ 1 ] = { // -101.5490 dB, 384
+			5.0000836666064941e-001,};
+		static const double HBKernel_2G[ 2 ] = { // -199.5761 dB, 384
+			5.6250313744943459e-001, -6.2503137554435345e-002,};
+		static const double HBKernel_3G[ 3 ] = { // -296.5185 dB, 384
+			5.8593945786963764e-001, -9.7659186853499613e-002,
+			1.1719728983863425e-002,};
 		static const int FltCountG = 3;
-		static const double HBKernel_1g[ 1 ] = { // att -101.2873 dB, frac 384.0
-			5.0000836666064941e-001 };
-		static const double HBKernel_2g[ 2 ] = { // att -199.5761 dB, frac 384.0
-			5.6250313744967606e-001, -6.2503137554676916e-002 };
-		static const double HBKernel_3g[ 3 ] = { // att -296.4833 dB, frac 384.0
-			5.8593945769687561e-001, -9.7659186594368730e-002,
-			1.1719728897494584e-002 };
+		static const int FlttBaseG = 1;
 		static const double FltAttensG[ FltCountG ] = {
-			101.2873, 199.5761, 296.4833 };
-		static const double* const FltPtrsG[ FltCountG ] = { HBKernel_1g,
-			HBKernel_2g, HBKernel_3g };
+			101.5490, 199.5761, 296.5185, };
+		static const double* const FltPtrsG[ FltCountG ] = {
+			HBKernel_1G, HBKernel_2G, HBKernel_3G, };
 
 		int k = 0;
 
 		if( SteepIndex <= 0 )
 		{
-			while( k != FltCount - 1 && FltAttens[ k ] < ReqAtten )
+			while( k != FltCountA - 1 && FltAttensA[ k ] < ReqAtten )
 			{
 				k++;
 			}
 
-			flt = FltPtrs[ k ];
-			fltt = 3 + k;
-			att = FltAttens[ k ];
+			flt = FltPtrsA[ k ];
+			fltt = FlttBaseA + k;
+			att = FltAttensA[ k ];
 		}
 		else
 		if( SteepIndex == 1 )
@@ -443,7 +480,7 @@ public:
 			}
 
 			flt = FltPtrsB[ k ];
-			fltt = 2 + k;
+			fltt = FlttBaseB + k;
 			att = FltAttensB[ k ];
 		}
 		else
@@ -455,7 +492,7 @@ public:
 			}
 
 			flt = FltPtrsC[ k ];
-			fltt = 2 + k;
+			fltt = FlttBaseC + k;
 			att = FltAttensC[ k ];
 		}
 		else
@@ -467,11 +504,11 @@ public:
 			}
 
 			flt = FltPtrsD[ k ];
-			fltt = 1 + k;
+			fltt = FlttBaseD + k;
 			att = FltAttensD[ k ];
 		}
 		else
-		if( SteepIndex == 4 || SteepIndex == 5 )
+		if( SteepIndex == 4 )
 		{
 			while( k != FltCountE - 1 && FltAttensE[ k ] < ReqAtten )
 			{
@@ -479,8 +516,20 @@ public:
 			}
 
 			flt = FltPtrsE[ k ];
-			fltt = 1 + k;
+			fltt = FlttBaseE + k;
 			att = FltAttensE[ k ];
+		}
+		else
+		if( SteepIndex == 5 )
+		{
+			while( k != FltCountF - 1 && FltAttensF[ k ] < ReqAtten )
+			{
+				k++;
+			}
+
+			flt = FltPtrsF[ k ];
+			fltt = FlttBaseF + k;
+			att = FltAttensF[ k ];
 		}
 		else
 		{
@@ -490,7 +539,7 @@ public:
 			}
 
 			flt = FltPtrsG[ k ];
-			fltt = 1 + k;
+			fltt = FlttBaseG + k;
 			att = FltAttensG[ k ];
 		}
 	}
