@@ -14,6 +14,7 @@
 #include "Moddoc.h"
 #include "AutoSaver.h"
 #include "FileDialog.h"
+#include "FolderScanner.h"
 #include "resource.h"
 #include "../soundlib/mod_specifications.h"
 #include <algorithm>
@@ -22,17 +23,8 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-///////////////////////////////////////////////////////////////////////////////////////
-// AutoSaver.cpp : implementation file
-///////////////////////////////////////////////////////////////////////////////////////
-
-///////////////////////////
-// Construction/Destruction
-///////////////////////////
-
 CAutoSaver::CAutoSaver()
-	: m_bSaveInProgress(false)
-	, m_nLastSave(timeGetTime())
+	: m_lastSave(timeGetTime())
 {
 }
 
@@ -63,19 +55,14 @@ uint32 CAutoSaver::GetSaveInterval() const
 }
 
 
-//////////////
-// Entry Point
-//////////////
-
-
 bool CAutoSaver::DoSave(DWORD curTime)
 {
 	bool success = true;
 
 	//If time to save and not already having save in progress.
-	if (CheckTimer(curTime) && !m_bSaveInProgress)
+	if (CheckTimer(curTime) && !m_saveInProgress)
 	{ 
-		m_bSaveInProgress = true;
+		m_saveInProgress = true;
 
 		theApp.BeginWaitCursor(); //display hour glass
 
@@ -95,54 +82,59 @@ bool CAutoSaver::DoSave(DWORD curTime)
 			}
 		}
 
-		m_nLastSave = timeGetTime();
-		theApp.EndWaitCursor(); //end display hour glass
-		m_bSaveInProgress = false;
+		m_lastSave = timeGetTime();
+		theApp.EndWaitCursor();  // End display hour glass
+		m_saveInProgress = false;
 	}
 	
 	return success;
 }
 
 
-///////////////////////////
-// Implementation internals
-///////////////////////////
-
-
-bool CAutoSaver::CheckTimer(DWORD curTime)
+bool CAutoSaver::CheckTimer(DWORD curTime) const
 {
-	return (curTime - m_nLastSave) >= GetSaveIntervalMilliseconds();
+	return (curTime - m_lastSave) >= GetSaveIntervalMilliseconds();
 }
 
 
-mpt::PathString CAutoSaver::BuildFileName(CModDoc &modDoc)
+mpt::PathString CAutoSaver::GetBasePath(const CModDoc &modDoc, bool createPath) const
 {
-	mpt::PathString name;
-	
+	mpt::PathString path;
 	if(GetUseOriginalPath())
 	{
-		if(modDoc.m_bHasValidPath && !(name = modDoc.GetPathNameMpt()).empty())
+		if(modDoc.m_bHasValidPath && !(path = modDoc.GetPathNameMpt()).empty())
 		{
-			// File has a user-chosen path - no change required
+			// File has a user-chosen path - remove filename
+			path = path.GetPath();
 		} else
 		{
 			// if it doesn't, put it in settings dir
-			name = theApp.GetConfigPath() + P_("Autosave\\");
-			if(!CreateDirectory(name.AsNative().c_str(), nullptr) && GetLastError() == ERROR_PATH_NOT_FOUND)
-			{
-				name = theApp.GetConfigPath();
-			}
-			name += mpt::PathString::FromCString(modDoc.GetTitle()).SanitizeComponent();
+			path = theApp.GetConfigPath() + P_("Autosave\\");
+			if(createPath && !CreateDirectory(path.AsNative().c_str(), nullptr) && GetLastError() == ERROR_PATH_NOT_FOUND)
+				path = theApp.GetConfigPath();
+			else if(!createPath && !path.IsDirectory())
+				path = theApp.GetConfigPath();
 		}
 	} else
 	{
-		name = GetPath() + mpt::PathString::FromCString(modDoc.GetTitle()).SanitizeComponent();
+		path = GetPath();
 	}
-	
-	const CString timeStamp = CTime::GetCurrentTime().Format(_T(".AutoSave.%Y%m%d.%H%M%S."));
-	name += mpt::PathString::FromCString(timeStamp);			//append backtup tag + timestamp
-	name += mpt::PathString::FromUTF8(modDoc.GetSoundFile().GetModSpecifications().fileExtension);
+	return path.EnsureTrailingSlash();
+}
 
+
+mpt::PathString CAutoSaver::GetBaseName(const CModDoc &modDoc) const
+{
+	return mpt::PathString::FromCString(modDoc.GetTitle()).SanitizeComponent();
+}
+
+
+mpt::PathString CAutoSaver::BuildFileName(const CModDoc &modDoc) const
+{
+	mpt::PathString name = GetBasePath(modDoc, true) + GetBaseName(modDoc);
+	const CString timeStamp = CTime::GetCurrentTime().Format(_T(".AutoSave.%Y%m%d.%H%M%S."));
+	name += mpt::PathString::FromCString(timeStamp);  //append backtup tag + timestamp
+	name += mpt::PathString::FromUTF8(modDoc.GetSoundFile().GetModSpecifications().fileExtension);
 	return name;
 }
 
@@ -151,7 +143,7 @@ bool CAutoSaver::SaveSingleFile(CModDoc &modDoc)
 {
 	// We do not call CModDoc::DoSave as this populates the Recent Files
 	// list with backups... hence we have duplicated code.. :(
-	CSoundFile &sndFile = modDoc.GetSoundFile(); 
+	CSoundFile &sndFile = modDoc.GetSoundFile();
 	
 	mpt::PathString fileName = BuildFileName(modDoc);
 
@@ -176,53 +168,22 @@ bool CAutoSaver::SaveSingleFile(CModDoc &modDoc)
 }
 
 
-void CAutoSaver::CleanUpBackups(const CModDoc &modDoc)
+void CAutoSaver::CleanUpBackups(const CModDoc &modDoc) const
 {
-	mpt::PathString path;
-	
-	if(GetUseOriginalPath())
-	{
-		if(modDoc.m_bHasValidPath && !(path = modDoc.GetPathNameMpt()).empty())
-		{
-			// File has a user-chosen path - remove filename
-			path = path.GetPath();
-		} else
-		{
-			// if it doesn't, put it in settings dir
-			path = theApp.GetConfigPath() + P_("Autosave\\");
-		}
-	} else
-	{
-		path = GetPath();
-	}
-
-	std::vector<mpt::RawPathString> foundfiles;
-	mpt::PathString searchPattern = path + mpt::PathString::FromCString(modDoc.GetTitle()).SanitizeComponent() + P_(".AutoSave.*");
-
 	// Find all autosave files for this document, and delete the oldest ones if there are more than the user wants.
-	WIN32_FIND_DATA findData;
-	MemsetZero(findData);
-	HANDLE hFindFile = FindFirstFile(searchPattern.AsNative().c_str(), &findData);
-	if(hFindFile != INVALID_HANDLE_VALUE)
+	std::vector<mpt::PathString> foundfiles;
+	FolderScanner scanner(GetBasePath(modDoc, false), FolderScanner::kOnlyFiles, GetBaseName(modDoc) + P_(".AutoSave.*"));
+	mpt::PathString fileName;
+	while(scanner.Next(fileName))
 	{
-		do
-		{
-			if(!(findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
-			{
-				foundfiles.push_back(findData.cFileName);
-			}
-		} while(FindNextFile(hFindFile, &findData));
-		FindClose(hFindFile);
-		hFindFile = INVALID_HANDLE_VALUE;
+		foundfiles.push_back(std::move(fileName));
 	}
 	std::sort(foundfiles.begin(), foundfiles.end());
-	
 	size_t filesToDelete = std::max(static_cast<size_t>(GetHistoryDepth()), foundfiles.size()) - GetHistoryDepth();
 	for(size_t i = 0; i < filesToDelete; i++)
 	{
-		DeleteFile((path + mpt::PathString::FromNative(foundfiles[i])).AsNative().c_str());
+		DeleteFile(foundfiles[i].AsNative().c_str());
 	}
-	
 }
 
 
