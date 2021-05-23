@@ -1950,7 +1950,7 @@ bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file, bool mayN
 		endian,
 		SampleIO::signedPCM);
 
-	if(!memcmp(compression, "fl32", 4) || !memcmp(compression, "FL32", 4) || !memcmp(compression, "fl64", 4))
+	if(!memcmp(compression, "fl32", 4) || !memcmp(compression, "FL32", 4) || !memcmp(compression, "fl64", 4) || !memcmp(compression, "FL64", 4))
 	{
 		sampleIO |= SampleIO::floatPCM;
 	} else if(!memcmp(compression, "alaw", 4) || !memcmp(compression, "ALAW", 4))
@@ -1961,6 +1961,9 @@ bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file, bool mayN
 	{
 		sampleIO |= SampleIO::uLaw;
 		sampleIO |= SampleIO::_16bit;
+	} else if(!memcmp(compression, "raw ", 4))
+	{
+		sampleIO |= SampleIO::unsignedPCM;
 	}
 
 	if(mayNormalize)
