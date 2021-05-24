@@ -84,7 +84,7 @@
 #endif // MPT_OS_WINDOWS
 
 // OpenMPT-only dependencies
-#define MPT_WITH_ANCIENT
+//#define MPT_WITH_ANCIENT
 #if !defined(MPT_BUILD_RETRO) && !MPT_COMPILER_CLANG
 #define MPT_WITH_ASIO
 #endif
