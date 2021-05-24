@@ -31,14 +31,16 @@ class modplug
 public:
 	typedef Tstate state_type;
 	typedef Tvalue result_type;
+
 private:
 	state_type state1;
 	state_type state2;
+
 public:
 	template <typename Trng>
 	explicit inline modplug(Trng &rd)
 		: state1(mpt::random<state_type>(rd))
-	  , state2(mpt::random<state_type>(rd))
+		, state2(mpt::random<state_type>(rd))
 	{
 	}
 	explicit inline modplug(state_type seed1, state_type seed2)
@@ -46,6 +48,7 @@ public:
 		, state2(seed2)
 	{
 	}
+
 public:
 	static MPT_CONSTEXPRINLINE result_type min()
 	{
@@ -79,10 +82,10 @@ public:
 typedef modplug<uint32, uint32, 0x10204080u, 0x78649E7Du, 4, 5, 1, 16> modplug_dither;
 
 
-} // namespace rng
+}  // namespace rng
 
 
-} // namespace mpt
+}  // namespace mpt
 
 
 OPENMPT_NAMESPACE_END

@@ -13,10 +13,6 @@ cd ..
 #	clang-format-11 -i *.hpp *.cpp
 #cd ..
 
-cd soundbase
-	clang-format-11 -i *.h
-cd ..
-
 cd src/mpt
 	find . -type f -iname '*hpp' | xargs clang-format-11 -i
 cd ../..

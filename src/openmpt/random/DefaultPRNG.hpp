@@ -24,24 +24,24 @@ namespace mpt
 using fast_prng = deterministic_fast_engine;
 using good_prng = deterministic_good_engine;
 
-#else // !MPT_BUILD_FUZZER
+#else  // !MPT_BUILD_FUZZER
 
 // We cannot use std::minstd_rand here because it has not a power-of-2 sized
 // output domain which we rely upon.
-using fast_prng = fast_engine; // about 3 ALU operations, ~32bit of state, suited for inner loops
+using fast_prng = fast_engine;  // about 3 ALU operations, ~32bit of state, suited for inner loops
 using good_prng = good_engine;
 
-#endif // MPT_BUILD_FUZZER
+#endif  // MPT_BUILD_FUZZER
 
-#else // !(MODPLUG_TRACKER || LIBOPENMPT_BUILD)
+#else  // !(MODPLUG_TRACKER || LIBOPENMPT_BUILD)
 
 using fast_prng = fast_engine;
 using good_prng = good_engine;
 
-#endif // MODPLUG_TRACKER || LIBOPENMPT_BUILD
+#endif  // MODPLUG_TRACKER || LIBOPENMPT_BUILD
 
 
-} // namespace mpt
+}  // namespace mpt
 
 
 OPENMPT_NAMESPACE_END
