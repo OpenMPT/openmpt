@@ -20,3 +20,8 @@ cd ..
 cd src/mpt
 	find . -type f -iname '*hpp' | xargs clang-format-11 -i
 cd ..
+
+cd src/openmpt
+	find . -type f -iname '*cpp' | xargs --no-run-if-empty clang-format-11 -i
+	find . -type f -iname '*hpp' | xargs --no-run-if-empty clang-format-11 -i
+cd ..

@@ -46,7 +46,7 @@ namespace SoundDevice {
 
 
 
-CPortaudioDevice::CPortaudioDevice(mpt::log::ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
+CPortaudioDevice::CPortaudioDevice(ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
 	: SoundDevice::Base(logger, info, sysInfo)
 	, m_StatisticPeriodFrames(0)
 {
@@ -726,9 +726,9 @@ int CPortaudioDevice::StreamCallbackWrapper(
 }
 
 
-std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(mpt::log::ILogger &logger, SoundDevice::SysInfo sysInfo)
+std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(ILogger &logger, SoundDevice::SysInfo sysInfo)
 {
-	auto GetLogger = [&]() -> mpt::log::ILogger& { return logger; };
+	auto GetLogger = [&]() -> ILogger& { return logger; };
 	std::vector<SoundDevice::Info> devices;
 	for(PaDeviceIndex dev = 0; dev < Pa_GetDeviceCount(); ++dev)
 	{

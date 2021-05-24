@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "mptBuildSettings.h"
+#include "openmpt/all/BuildSettings.hpp"
 
 #include "mptAssert.h"
 #include "../common/Endianness.h"

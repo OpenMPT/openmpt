@@ -18,6 +18,8 @@
   files {
    "../../src/mpt/**.cpp",
    "../../src/mpt/**.hpp",
+   "../../src/openmpt/**.cpp",
+   "../../src/openmpt/**.hpp",
    "../../common/*.cpp",
    "../../common/*.h",
    "../../misc/*.cpp",

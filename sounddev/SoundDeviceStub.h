@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "mptBuildSettings.h"
+#include "openmpt/all/BuildSettings.hpp"
 
 #include "SoundDeviceBase.h"
 
@@ -51,11 +51,11 @@ class SoundDeviceStub
 
 public:
 
-	static std::vector<SoundDevice::Info> EnumerateDevices(mpt::log::ILogger &logger, SoundDevice::SysInfo sysInfo);
+	static std::vector<SoundDevice::Info> EnumerateDevices(ILogger &logger, SoundDevice::SysInfo sysInfo);
 
 public:
 
-	SoundDeviceStub(mpt::log::ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo);
+	SoundDeviceStub(ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo);
 	
 	virtual ~SoundDeviceStub();
 

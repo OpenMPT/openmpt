@@ -398,7 +398,7 @@ void CAudioThread::Deactivate()
 }
 
 
-CSoundDeviceWithThread::CSoundDeviceWithThread(mpt::log::ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
+CSoundDeviceWithThread::CSoundDeviceWithThread(ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
 	: SoundDevice::Base(logger, info, sysInfo), m_AudioThread(*this)
 {
 	return;

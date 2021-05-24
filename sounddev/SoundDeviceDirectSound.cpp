@@ -38,7 +38,7 @@ namespace
 struct DevicesAndLoggerAndSysInfo
 {
 	std::vector<SoundDevice::Info> devices;
-	mpt::log::ILogger *logger;
+	ILogger *logger;
 	SoundDevice::SysInfo sysInfo;
 };
 }
@@ -48,9 +48,9 @@ static BOOL WINAPI DSEnumCallback(GUID * lpGuid, LPCTSTR lpstrDescription, LPCTS
 {
 	DevicesAndLoggerAndSysInfo &devicesAndLoggerAndSysInfo = *(DevicesAndLoggerAndSysInfo*)lpContext;
 	std::vector<SoundDevice::Info> &devices = devicesAndLoggerAndSysInfo.devices;
-	mpt::log::ILogger &logger = *devicesAndLoggerAndSysInfo.logger;
+	ILogger &logger = *devicesAndLoggerAndSysInfo.logger;
 	SoundDevice::SysInfo &sysInfo = devicesAndLoggerAndSysInfo.sysInfo;
-	auto GetLogger = [&]() -> mpt::log::ILogger& { return logger; };
+	auto GetLogger = [&]() -> ILogger& { return logger; };
 	if(!lpstrDescription)
 	{
 		return TRUE;
@@ -85,7 +85,7 @@ static BOOL WINAPI DSEnumCallback(GUID * lpGuid, LPCTSTR lpstrDescription, LPCTS
 }
 
 
-std::vector<SoundDevice::Info> CDSoundDevice::EnumerateDevices(mpt::log::ILogger &logger, SoundDevice::SysInfo sysInfo)
+std::vector<SoundDevice::Info> CDSoundDevice::EnumerateDevices(ILogger &logger, SoundDevice::SysInfo sysInfo)
 {
 	DevicesAndLoggerAndSysInfo devicesAndLoggerAndSysInfo = { std::vector<SoundDevice::Info>(), &logger, sysInfo };
 	DirectSoundEnumerate(DSEnumCallback, &devicesAndLoggerAndSysInfo);
@@ -93,7 +93,7 @@ std::vector<SoundDevice::Info> CDSoundDevice::EnumerateDevices(mpt::log::ILogger
 }
 
 
-CDSoundDevice::CDSoundDevice(mpt::log::ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
+CDSoundDevice::CDSoundDevice(ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
 	: CSoundDeviceWithThread(logger, info, sysInfo)
 	, m_piDS(NULL)
 	, m_pPrimary(NULL)

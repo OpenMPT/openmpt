@@ -75,7 +75,7 @@ struct CompareInfo
 
 
 template <typename Tdevice>
-void Manager::EnumerateDevices(mpt::log::ILogger &logger, SoundDevice::SysInfo sysInfo)
+void Manager::EnumerateDevices(ILogger &logger, SoundDevice::SysInfo sysInfo)
 {
 	const auto infos = Tdevice::EnumerateDevices(logger, sysInfo);
 	mpt::append(m_SoundDevices, infos);
@@ -91,7 +91,7 @@ void Manager::EnumerateDevices(mpt::log::ILogger &logger, SoundDevice::SysInfo s
 
 
 template <typename Tdevice>
-SoundDevice::IBase* Manager::ConstructSoundDevice(mpt::log::ILogger &logger, const SoundDevice::Info &info, SoundDevice::SysInfo sysInfo)
+SoundDevice::IBase* Manager::ConstructSoundDevice(ILogger &logger, const SoundDevice::Info &info, SoundDevice::SysInfo sysInfo)
 {
 	return new Tdevice(logger, info, sysInfo);
 }
@@ -470,7 +470,7 @@ SoundDevice::IBase * Manager::CreateSoundDevice(SoundDevice::Identifier identifi
 }
 
 
-Manager::Manager(mpt::log::ILogger &logger, SoundDevice::SysInfo sysInfo, SoundDevice::AppInfo appInfo, EnabledBackends enabledBackends)
+Manager::Manager(ILogger &logger, SoundDevice::SysInfo sysInfo, SoundDevice::AppInfo appInfo, EnabledBackends enabledBackends)
 	: m_Logger(logger)
 	, m_SysInfo(sysInfo)
 	, m_AppInfo(appInfo)

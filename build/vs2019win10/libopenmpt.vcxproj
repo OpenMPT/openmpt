@@ -1230,10 +1230,8 @@
     <ClInclude Include="..\..\common\mptBaseMacros.h" />
     <ClInclude Include="..\..\common\mptBaseTypes.h" />
     <ClInclude Include="..\..\common\mptBaseUtils.h" />
-    <ClInclude Include="..\..\common\mptBuildSettings.h" />
     <ClInclude Include="..\..\common\mptFileIO.h" />
     <ClInclude Include="..\..\common\mptIO.h" />
-    <ClInclude Include="..\..\common\mptLog.h" />
     <ClInclude Include="..\..\common\mptMemory.h" />
     <ClInclude Include="..\..\common\mptPathString.h" />
     <ClInclude Include="..\..\common\mptRandom.h" />
@@ -1441,6 +1439,9 @@
     <ClInclude Include="..\..\src\mpt\uuid\guid.hpp" />
     <ClInclude Include="..\..\src\mpt\uuid\tests\tests_uuid.hpp" />
     <ClInclude Include="..\..\src\mpt\uuid\uuid.hpp" />
+    <ClInclude Include="..\..\src\openmpt\all\BuildSettings.hpp" />
+    <ClInclude Include="..\..\src\openmpt\base\Types.hpp" />
+    <ClInclude Include="..\..\src\openmpt\logging\Logger.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\common\ComponentManager.cpp" />

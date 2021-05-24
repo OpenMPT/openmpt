@@ -23,6 +23,8 @@
   files {
    "../../src/mpt/**.cpp",
    "../../src/mpt/**.hpp",
+   "../../src/openmpt/**.cpp",
+   "../../src/openmpt/**.hpp",
    "../../pluginBridge/AEffectWrapper.h",
    "../../pluginBridge/Bridge.cpp",
    "../../pluginBridge/Bridge.h",
@@ -86,6 +88,8 @@
   files {
    "../../src/mpt/**.cpp",
    "../../src/mpt/**.hpp",
+   "../../src/openmpt/**.cpp",
+   "../../src/openmpt/**.hpp",
    "../../pluginBridge/AEffectWrapper.h",
    "../../pluginBridge/Bridge.cpp",
    "../../pluginBridge/Bridge.h",

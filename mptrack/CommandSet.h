@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "mptBuildSettings.h"
+#include "openmpt/all/BuildSettings.hpp"
 #include <string>
 #include "../common/FlagSet.h"
 #include <map>

@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "mptBuildSettings.h"
+#include "openmpt/all/BuildSettings.hpp"
 
 #if defined(MPT_ENABLE_FILEIO)
 

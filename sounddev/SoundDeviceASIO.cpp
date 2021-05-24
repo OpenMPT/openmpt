@@ -94,10 +94,10 @@ static mpt::winstring AsWinstring(const std::basic_string<TCHAR> & str)
 }
 
 
-std::vector<SoundDevice::Info> CASIODevice::EnumerateDevices(mpt::log::ILogger &logger, SoundDevice::SysInfo sysInfo)
+std::vector<SoundDevice::Info> CASIODevice::EnumerateDevices(ILogger &logger, SoundDevice::SysInfo sysInfo)
 {
 	MPT_SOUNDDEV_TRACE_SCOPE();
-	auto GetLogger = [&]() -> mpt::log::ILogger& { return logger; };
+	auto GetLogger = [&]() -> ILogger& { return logger; };
 	std::vector<SoundDevice::Info> devices;
 	std::vector<ASIO::Windows::DriverInfo> drivers = ASIO::Windows::EnumerateDrivers();
 	for(const auto & driver : drivers)
@@ -137,7 +137,7 @@ std::vector<SoundDevice::Info> CASIODevice::EnumerateDevices(mpt::log::ILogger &
 }
 
 
-CASIODevice::CASIODevice(mpt::log::ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
+CASIODevice::CASIODevice(ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
 	: SoundDevice::Base(logger, info, sysInfo)
 	, m_RenderSilence(false)
 	, m_RenderingSilence(false)

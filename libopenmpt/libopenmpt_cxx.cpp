@@ -7,7 +7,7 @@
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
-#include "mptBuildSettings.h"
+#include "openmpt/all/BuildSettings.hpp"
 
 #include "libopenmpt_internal.h"
 #include "libopenmpt.hpp"

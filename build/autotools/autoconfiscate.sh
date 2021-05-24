@@ -68,6 +68,10 @@ svn export ./src/mpt/system_error   bin/dist-autotools/src/mpt/system_error
 svn export ./src/mpt/test           bin/dist-autotools/src/mpt/test
 svn export ./src/mpt/uuid           bin/dist-autotools/src/mpt/uuid
 #svn export ./src/mpt/uuid_namespace bin/dist-autotools/src/mpt/uuid_namespace
+mkdir -p bin/dist-autotools/src/openmpt
+svn export ./src/openmpt/all        bin/dist-autotools/src/openmpt/all
+svn export ./src/openmpt/base       bin/dist-autotools/src/openmpt/base
+svn export ./src/openmpt/logging    bin/dist-autotools/src/openmpt/logging
 svn export ./test            bin/dist-autotools/test
 rm bin/dist-autotools/test/mpt_tests_crypto.cpp
 rm bin/dist-autotools/test/mpt_tests_uuid_namespace.cpp
@@ -124,6 +128,10 @@ cp -r ./src/mpt/system_error   bin/dist-autotools/src/mpt/system_error
 cp -r ./src/mpt/test           bin/dist-autotools/src/mpt/test
 cp -r ./src/mpt/uuid           bin/dist-autotools/src/mpt/uuid
 #cp -r ./src/mpt/uuid_namespace bin/dist-autotools/src/mpt/uuid_namespace
+mkdir -p bin/dist-autotools/src/openmpt
+cp -r ./src/openmpt/all        bin/dist-autotools/src/openmpt/all
+cp -r ./src/openmpt/base       bin/dist-autotools/src/openmpt/base
+cp -r ./src/openmpt/logging    bin/dist-autotools/src/openmpt/logging
 cp -r ./test            bin/dist-autotools/test
 rm bin/dist-autotools/test/mpt_tests_crypto.cpp
 rm bin/dist-autotools/test/mpt_tests_uuid_namespace.cpp

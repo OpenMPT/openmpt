@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "mptBuildSettings.h"
+#include "openmpt/all/BuildSettings.hpp"
 
 #include "SoundDeviceBase.h"
 
@@ -158,7 +158,7 @@ protected:
 
 public:
 
-	CASIODevice(mpt::log::ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo);
+	CASIODevice(ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo);
 	~CASIODevice();
 
 private:
@@ -196,7 +196,7 @@ public:
 
 public:
 	
-	static std::vector<SoundDevice::Info> EnumerateDevices(mpt::log::ILogger &logger, SoundDevice::SysInfo sysInfo);
+	static std::vector<SoundDevice::Info> EnumerateDevices(ILogger &logger, SoundDevice::SysInfo sysInfo);
 
 protected:
 

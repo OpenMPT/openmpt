@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include "mptBuildSettings.h"
+#include "openmpt/all/BuildSettings.hpp"
 #include <complex>
 
 OPENMPT_NAMESPACE_BEGIN

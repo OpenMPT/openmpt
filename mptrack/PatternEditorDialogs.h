@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "mptBuildSettings.h"
+#include "openmpt/all/BuildSettings.hpp"
 
 #include "dlg_misc.h"	// for keyboard control
 #include "EffectInfo.h"

@@ -11,7 +11,9 @@
 
 #pragma once
 
-#include "mptBuildSettings.h"
+#include "openmpt/all/BuildSettings.hpp"
+
+#include "openmpt/logging/Logger.hpp"
 
 #include "SoundDevice.h"
 
@@ -53,7 +55,7 @@ private:
 
 protected:
 
-	mpt::log::ILogger &m_Logger;
+	ILogger &m_Logger;
 
 private:
 
@@ -88,7 +90,7 @@ private:
 
 public:
 
-	mpt::log::ILogger &GetLogger() const { return m_Logger; }
+	ILogger &GetLogger() const { return m_Logger; }
 	SoundDevice::SysInfo GetSysInfo() const { return m_SysInfo; }
 	SoundDevice::AppInfo GetAppInfo() const { return m_AppInfo; }
 
@@ -153,7 +155,7 @@ protected:
 
 protected:
 
-	Base(mpt::log::ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo);
+	Base(ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo);
 
 public:
 

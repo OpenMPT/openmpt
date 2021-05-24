@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "mptBuildSettings.h"
+#include "openmpt/all/BuildSettings.hpp"
 
 #include "SoundDeviceBase.h"
 #include "SoundDeviceUtilities.h"
@@ -57,7 +57,7 @@ protected:
 	std::atomic<uint32> m_DriverBugs;
 
 public:
-	CWaveDevice(mpt::log::ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo);
+	CWaveDevice(ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo);
 	~CWaveDevice();
 
 public:
@@ -87,7 +87,7 @@ private:
 	
 public:
 	static void CALLBACK WaveOutCallBack(HWAVEOUT, UINT uMsg, DWORD_PTR, DWORD_PTR dw1, DWORD_PTR dw2);
-	static std::vector<SoundDevice::Info> EnumerateDevices(mpt::log::ILogger &logger, SoundDevice::SysInfo sysInfo);
+	static std::vector<SoundDevice::Info> EnumerateDevices(ILogger &logger, SoundDevice::SysInfo sysInfo);
 };
 
 #endif // MPT_OS_WINDOWS

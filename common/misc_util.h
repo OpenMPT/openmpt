@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "mptBuildSettings.h"
+#include "openmpt/all/BuildSettings.hpp"
 
 #include "mpt/base/span.hpp"
 #include "mpt/exception_text/exception_text.hpp"

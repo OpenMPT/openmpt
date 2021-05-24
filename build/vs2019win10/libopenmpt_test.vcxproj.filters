@@ -121,6 +121,18 @@
     <Filter Include="src\mpt\uuid\tests">
       <UniqueIdentifier>{F552058D-E136-C6E2-4A97-C035369AB064}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\openmpt">
+      <UniqueIdentifier>{BF961D7A-2B4C-966F-B440-904620F58C73}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\openmpt\all">
+      <UniqueIdentifier>{074F94E8-73DA-01AD-7CEB-84A1E8F55DAD}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\openmpt\base">
+      <UniqueIdentifier>{C98E1EFB-B587-3D4D-DEB9-22D2CA111D59}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\openmpt\logging">
+      <UniqueIdentifier>{755E42FE-E1BF-1F0C-6A2D-66BED68D56CB}</UniqueIdentifier>
+    </Filter>
     <Filter Include="test">
       <UniqueIdentifier>{65689E7C-519F-9F0D-FA8B-8510E6A11B0F}</UniqueIdentifier>
     </Filter>
@@ -165,16 +177,10 @@
     <ClInclude Include="..\..\common\mptBaseUtils.h">
       <Filter>common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\common\mptBuildSettings.h">
-      <Filter>common</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\common\mptFileIO.h">
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\common\mptIO.h">
-      <Filter>common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\common\mptLog.h">
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\common\mptMemory.h">
@@ -803,6 +809,15 @@
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\uuid\uuid.hpp">
       <Filter>src\mpt\uuid</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\openmpt\all\BuildSettings.hpp">
+      <Filter>src\openmpt\all</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\openmpt\base\Types.hpp">
+      <Filter>src\openmpt\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\openmpt\logging\Logger.hpp">
+      <Filter>src\openmpt\logging</Filter>
     </ClInclude>
     <ClInclude Include="..\..\test\TestTools.h">
       <Filter>test</Filter>

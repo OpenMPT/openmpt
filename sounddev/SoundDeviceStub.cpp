@@ -58,7 +58,7 @@ static SoundDevice::Info RemoveTypePrefix(SoundDevice::Info info)
 }
 
 
-std::vector<SoundDevice::Info> SoundDeviceStub::EnumerateDevices(mpt::log::ILogger &logger, SoundDevice::SysInfo sysInfo)
+std::vector<SoundDevice::Info> SoundDeviceStub::EnumerateDevices(ILogger &logger, SoundDevice::SysInfo sysInfo)
 {
 	ComponentHandle<ComponentWineWrapper> WineWrapper;
 	if(!IsComponentAvailable(WineWrapper))
@@ -75,7 +75,7 @@ std::vector<SoundDevice::Info> SoundDeviceStub::EnumerateDevices(mpt::log::ILogg
 	return result;
 }
 
-SoundDeviceStub::SoundDeviceStub(mpt::log::ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
+SoundDeviceStub::SoundDeviceStub(ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
 	: impl(nullptr)
 {
 	MPT_UNREFERENCED_PARAMETER(logger);

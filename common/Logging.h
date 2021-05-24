@@ -9,9 +9,9 @@
 
 #pragma once
 
-#include "mptBuildSettings.h"
+#include "openmpt/all/BuildSettings.hpp"
 
-#include "mptLog.h"
+#include "openmpt/logging/Logger.hpp"
 
 #if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
 #include <atomic>

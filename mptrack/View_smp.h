@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "mptBuildSettings.h"
+#include "openmpt/all/BuildSettings.hpp"
 #include "Globals.h"
 #include "../soundlib/modsmp_ctrl.h"
 

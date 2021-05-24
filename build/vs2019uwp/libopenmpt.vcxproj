@@ -1093,6 +1093,9 @@
     <ClInclude Include="..\..\src\mpt\uuid_namespace\tests\tests_uuid_namespace.hpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="..\..\src\openmpt\all\BuildSettings.hpp" />
+    <ClInclude Include="..\..\src\openmpt\base\Types.hpp" />
+    <ClInclude Include="..\..\src\openmpt\logging\Logger.hpp" />
     <ClInclude Include="..\..\common\BuildSettings.h" />
     <ClInclude Include="..\..\common\ComponentManager.h" />
     <ClInclude Include="..\..\common\Endianness.h" />
@@ -1105,10 +1108,8 @@
     <ClInclude Include="..\..\common\mptBaseMacros.h" />
     <ClInclude Include="..\..\common\mptBaseTypes.h" />
     <ClInclude Include="..\..\common\mptBaseUtils.h" />
-    <ClInclude Include="..\..\common\mptBuildSettings.h" />
     <ClInclude Include="..\..\common\mptFileIO.h" />
     <ClInclude Include="..\..\common\mptIO.h" />
-    <ClInclude Include="..\..\common\mptLog.h" />
     <ClInclude Include="..\..\common\mptMemory.h" />
     <ClInclude Include="..\..\common\mptPathString.h" />
     <ClInclude Include="..\..\common\mptRandom.h" />

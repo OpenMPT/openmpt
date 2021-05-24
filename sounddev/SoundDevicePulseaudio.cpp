@@ -111,9 +111,9 @@ static void PulseAudioSinkInfoListCallback(pa_context * /* c */ , const pa_sink_
 }
 
 
-std::vector<SoundDevice::Info> Pulseaudio::EnumerateDevices(mpt::log::ILogger &logger, SoundDevice::SysInfo sysInfo)
+std::vector<SoundDevice::Info> Pulseaudio::EnumerateDevices(ILogger &logger, SoundDevice::SysInfo sysInfo)
 {
-	auto GetLogger = [&]() -> mpt::log::ILogger& { return logger; };
+	auto GetLogger = [&]() -> ILogger& { return logger; };
 	std::vector<SoundDevice::Info> devices;
 	SoundDevice::Info info;
 	info.type = U_("PulseAudio");
@@ -234,7 +234,7 @@ std::vector<SoundDevice::Info> Pulseaudio::EnumerateDevices(mpt::log::ILogger &l
 }
 
 
-Pulseaudio::Pulseaudio(mpt::log::ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
+Pulseaudio::Pulseaudio(ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
 	: ThreadBase(logger, info, sysInfo)
 	, m_PA_SimpleOutput(nullptr)
 	, m_StatisticLastLatencyFrames(0)

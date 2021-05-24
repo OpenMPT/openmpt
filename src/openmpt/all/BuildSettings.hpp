@@ -1,11 +1,5 @@
-/*
- * mptBuildSettings.h
- * ------------------
- * Purpose: 
- * Notes  : (currently none)
- * Authors: OpenMPT Devs
- * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
- */
+/* SPDX-License-Identifier: BSD-3-Clause */
+/* SPDX-FileCopyrightText: OpenMPT Project Developers and Contributors */
 
 
 #pragma once
@@ -23,7 +17,7 @@
 #else
 
 
-	
+
 #include "mpt/base/namespace.hpp"
 
 

@@ -115,6 +115,18 @@
     <Filter Include="src\mpt\uuid_namespace\tests">
       <UniqueIdentifier>{A882657C-943D-5528-3DF5-CD72298F9FB8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\openmpt">
+      <UniqueIdentifier>{4C02B001-B8B7-28F7-41AC-22CEAD601FFB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\openmpt\all">
+      <UniqueIdentifier>{21667483-8DF1-E147-9602-653C020D3E48}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\openmpt\base">
+      <UniqueIdentifier>{238901F2-0F82-2044-38B4-05C9240C0050}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\openmpt\logging">
+      <UniqueIdentifier>{8F722CAB-FBD3-09B9-8441-506BF0A14078}</UniqueIdentifier>
+    </Filter>
     <Filter Include="common">
       <UniqueIdentifier>{AEFEE3F6-9AA0-0ECD-835B-22216F9C951D}</UniqueIdentifier>
     </Filter>
@@ -474,6 +486,15 @@
     <ClInclude Include="..\..\src\mpt\uuid_namespace\tests\tests_uuid_namespace.hpp">
       <Filter>src\mpt\uuid_namespace\tests</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\openmpt\all\BuildSettings.hpp">
+      <Filter>src\openmpt\all</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\openmpt\base\Types.hpp">
+      <Filter>src\openmpt\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\openmpt\logging\Logger.hpp">
+      <Filter>src\openmpt\logging</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\common\BuildSettings.h">
       <Filter>common</Filter>
     </ClInclude>
@@ -510,16 +531,10 @@
     <ClInclude Include="..\..\common\mptBaseUtils.h">
       <Filter>common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\common\mptBuildSettings.h">
-      <Filter>common</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\common\mptFileIO.h">
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\common\mptIO.h">
-      <Filter>common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\common\mptLog.h">
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\common\mptMemory.h">

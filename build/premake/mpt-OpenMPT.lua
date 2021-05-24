@@ -79,6 +79,8 @@ end
   files {
    "../../src/mpt/**.cpp",
    "../../src/mpt/**.hpp",
+   "../../src/openmpt/**.cpp",
+   "../../src/openmpt/**.hpp",
    "../../common/*.cpp",
    "../../common/*.h",
    "../../soundbase/*.cpp",
@@ -218,6 +220,8 @@ end
    "../../include/asiomodern/include/ASIOModern/*.hpp",
    "../../src/mpt/**.cpp",
    "../../src/mpt/**.hpp",
+   "../../src/openmpt/**.cpp",
+   "../../src/openmpt/**.hpp",
    "../../common/*.cpp",
    "../../common/*.h",
    "../../soundbase/*.cpp",

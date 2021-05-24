@@ -50,7 +50,7 @@ static RtAudioFormat SampleFormatToRtAudioFormat(SampleFormat sampleFormat)
 }
 
 
-CRtAudioDevice::CRtAudioDevice(mpt::log::ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
+CRtAudioDevice::CRtAudioDevice(ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
 	: SoundDevice::Base(logger, info, sysInfo)
 	, m_RtAudio(std::unique_ptr<RtAudio>())
 	, m_FramesPerChunk(0)
@@ -421,9 +421,9 @@ unsigned int CRtAudioDevice::GetDevice(SoundDevice::Info info)
 }
 
 
-std::vector<SoundDevice::Info> CRtAudioDevice::EnumerateDevices(mpt::log::ILogger &logger, SoundDevice::SysInfo sysInfo)
+std::vector<SoundDevice::Info> CRtAudioDevice::EnumerateDevices(ILogger &logger, SoundDevice::SysInfo sysInfo)
 {
-	auto GetLogger = [&]() -> mpt::log::ILogger& { return logger; };
+	auto GetLogger = [&]() -> ILogger& { return logger; };
 	std::vector<SoundDevice::Info> devices;
 	std::vector<RtAudio::Api> apis;
 	RtAudio::getCompiledApi(apis);

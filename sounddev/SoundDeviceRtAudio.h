@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "mptBuildSettings.h"
+#include "openmpt/all/BuildSettings.hpp"
 
 #include "SoundDeviceBase.h"
 
@@ -55,7 +55,7 @@ protected:
 
 public:
 
-	CRtAudioDevice(mpt::log::ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo);
+	CRtAudioDevice(ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo);
 	~CRtAudioDevice();
 
 public:
@@ -86,7 +86,7 @@ private:
 
 public:
 
-	static std::vector<SoundDevice::Info> EnumerateDevices(mpt::log::ILogger &logger, SoundDevice::SysInfo sysInfo);
+	static std::vector<SoundDevice::Info> EnumerateDevices(ILogger &logger, SoundDevice::SysInfo sysInfo);
 
 };
 

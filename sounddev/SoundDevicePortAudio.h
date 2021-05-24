@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "mptBuildSettings.h"
+#include "openmpt/all/BuildSettings.hpp"
 
 #include "SoundDeviceBase.h"
 
@@ -67,7 +67,7 @@ protected:
 
 public:
 
-	CPortaudioDevice(mpt::log::ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo);
+	CPortaudioDevice(ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo);
 	~CPortaudioDevice();
 
 public:
@@ -104,7 +104,7 @@ public:
 		void *userData
 		);
 
-	static std::vector<SoundDevice::Info> EnumerateDevices(mpt::log::ILogger &logger, SoundDevice::SysInfo sysInfo);
+	static std::vector<SoundDevice::Info> EnumerateDevices(ILogger &logger, SoundDevice::SysInfo sysInfo);
 
 private:
 

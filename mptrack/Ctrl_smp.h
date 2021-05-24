@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "mptBuildSettings.h"
+#include "openmpt/all/BuildSettings.hpp"
 
 #include "../soundlib/SampleIO.h"
 #include "../tracklib/FadeLaws.h"

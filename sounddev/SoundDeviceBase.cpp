@@ -20,7 +20,7 @@ OPENMPT_NAMESPACE_BEGIN
 namespace SoundDevice {
 	
 	
-Base::Base(mpt::log::ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
+Base::Base(ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
 	: m_Logger(logger)
 	, m_Source(nullptr)
 	, m_MessageReceiver(nullptr)

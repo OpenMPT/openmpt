@@ -6,7 +6,7 @@
 #if defined(MPT_BUILD_ENABLE_PCH)
 
 
-#include "mptBuildSettings.h"
+#include "openmpt/all/BuildSettings.hpp"
 
 
 #if defined(MODPLUG_TRACKER)
@@ -53,6 +53,8 @@
 #endif // MODPLUG_TRACKER
 #include "mpt/uuid/uuid.hpp"
 
+#include "openmpt/base/Types.hpp"
+#include "openmpt/logging/Logger.hpp"
 
 #include "../common/mptBaseMacros.h"
 #include "../common/mptBaseTypes.h"

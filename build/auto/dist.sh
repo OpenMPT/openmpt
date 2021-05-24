@@ -89,7 +89,7 @@ rm bin/empty.cpp
 rm bin/empty.c
 
 echo "Checking version helper ..."
-c++ -Wall -Wextra -I. -Isrc build/auto/helper_get_openmpt_version.cpp -o bin/helper_get_openmpt_version
+c++ -Wall -Wextra -I. -Isrc -Icommon build/auto/helper_get_openmpt_version.cpp -o bin/helper_get_openmpt_version
 rm bin/helper_get_openmpt_version
 
 # Clean dist

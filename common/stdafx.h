@@ -1,7 +1,7 @@
 /*
  * StdAfx.h
  * --------
- * Purpose: Include file for standard system include files, or project specific include files that are used frequently, but are changed infrequently. Also includes the global build settings from mptBuildSettings.h.
+ * Purpose: Include file for standard system include files, or project specific include files that are used frequently, but are changed infrequently. Also includes the global build settings from openmpt/all/BuildSettings.hpp.
  * Notes  : (currently none)
  * Authors: Olivier Lapicque
  *          OpenMPT Devs
@@ -13,7 +13,7 @@
 
 
 // has to be first
-#include "mptBuildSettings.h"
+#include "openmpt/all/BuildSettings.hpp"
 
 
 #if defined(MODPLUG_TRACKER)
@@ -70,6 +70,9 @@
 #include "mpt/out_of_memory/out_of_memory.hpp"
 #include "mpt/system_error/system_error.hpp"
 
+#include "openmpt/base/Types.hpp"
+#include "openmpt/logging/Logger.hpp"
+
 
 #include <memory>
 #include <new>
@@ -86,6 +89,7 @@
 // <cstdint>
 
 #include "../common/mptBaseTypes.h"
+// "openmpt/base/Types.hpp"
 // "mptBaseMacros.h"
 // <array>
 // <limits>
@@ -128,6 +132,7 @@
 #include "../common/mptPathString.h"
 
 #include "../common/Logging.h"
+// "openmpt/logging/Logger.hpp"
 // <atomic>
 
 #include "../common/misc_util.h"

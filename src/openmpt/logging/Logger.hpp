@@ -1,15 +1,12 @@
-/*
- * mptLog.h
- * --------
- * Purpose: Logging interface
- * Notes  : (currently none)
- * Authors: OpenMPT Devs
- * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
- */
+/* SPDX-License-Identifier: BSD-3-Clause */
+/* SPDX-FileCopyrightText: OpenMPT Project Developers and Contributors */
 
 #pragma once
 
-#include "mptBuildSettings.h"
+#include "openmpt/all/BuildSettings.hpp"
+
+#include "mpt/base/source_location.hpp"
+#include "mpt/string/types.hpp"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -22,20 +19,15 @@ enum LogLevel
 	LogError        = 1
 };
 
-namespace mpt
-{
-namespace log
-{
-
 class ILogger
 {
 protected:
 	virtual ~ILogger() = default;
 public:
 	virtual bool IsLevelActive(LogLevel level) const noexcept = 0;
-	// facility:ASCII
+	// facility: ASCII
 	virtual bool IsFacilityActive(const char *facility) const noexcept = 0;
-	// facility:ASCII
+	// facility: ASCII
 	virtual void SendLogMessage(const mpt::source_location &loc, LogLevel level, const char *facility, const mpt::ustring &text) const = 0;
 };
 
@@ -51,8 +43,5 @@ public:
 		} \
 	} while(0) \
 /**/
-
-} // namespace log
-} // namespace mpt
 
 OPENMPT_NAMESPACE_END
