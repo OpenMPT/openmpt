@@ -13,8 +13,9 @@
 #include "../soundlib/AudioCriticalSection.h"
 #include "../soundlib/Sndfile.h"
 #include "../soundlib/modsmp_ctrl.h"
-#include "../soundbase/SampleFormatConverters.h"
-#include "../soundbase/SampleFormatCopy.h"
+#include "openmpt/soundbase/SampleConvert.hpp"
+#include "openmpt/soundbase/SampleDecode.hpp"
+#include "../soundlib/SampleCopy.h"
 
 OPENMPT_NAMESPACE_BEGIN
 

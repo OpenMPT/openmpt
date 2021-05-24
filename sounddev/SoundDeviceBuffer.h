@@ -15,9 +15,8 @@
 #include "SoundDevice.h"
 
 #include "mpt/audio/span.hpp"
-#include "../soundbase/Dither.h"
-#include "../soundbase/SampleFormatCopy.h"
-#include "../soundbase/SampleFormatConverters.h"
+#include "openmpt/soundbase/Dither.hpp"
+#include "openmpt/soundbase/CopyMix.hpp"
 
 #include <variant>
 

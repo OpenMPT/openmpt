@@ -1,18 +1,15 @@
-/*
- * MixSampleConvert.h
- * ------------------
- * Purpose: Basic audio sample types.
- * Notes  : (currently none)
- * Authors: OpenMPT Devs
- * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
- */
+/* SPDX-License-Identifier: BSD-3-Clause */
+/* SPDX-FileCopyrightText: OpenMPT Project Developers and Contributors */
+
 
 #pragma once
 
 #include "openmpt/all/BuildSettings.hpp"
 
-#include "MixSample.h"
-#include "SampleFormatConverters.h"
+#include "mpt/base/macros.hpp"
+#include "openmpt/soundbase/MixSample.hpp"
+#include "openmpt/soundbase/SampleConvert.hpp"
+#include "openmpt/soundbase/SampleConvertFixedPoint.hpp"
 
 
 OPENMPT_NAMESPACE_BEGIN

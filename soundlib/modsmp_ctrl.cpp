@@ -12,8 +12,6 @@
 #include "modsmp_ctrl.h"
 #include "AudioCriticalSection.h"
 #include "Sndfile.h"
-#include "../soundbase/SampleFormatConverters.h"
-#include "../soundbase/SampleFormatCopy.h"
 
 OPENMPT_NAMESPACE_BEGIN
 

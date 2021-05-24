@@ -12,7 +12,7 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
-#include "../soundbase/MixSample.h"
+#include "openmpt/soundbase/MixSample.hpp"
 
 OPENMPT_NAMESPACE_BEGIN
 

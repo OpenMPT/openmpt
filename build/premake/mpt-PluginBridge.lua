@@ -33,6 +33,10 @@
    "../../misc/WriteMemoryDump.h",
    "../../common/versionNumber.h",
   }
+	excludes {
+		"../../src/openmpt/soundbase/**.cpp",
+		"../../src/openmpt/soundbase/**.hpp",
+	}
   files {
    "../../pluginBridge/PluginBridge.rc",
   }
@@ -98,6 +102,10 @@
    "../../misc/WriteMemoryDump.h",
    "../../common/versionNumber.h",
   }
+	excludes {
+		"../../src/openmpt/soundbase/**.cpp",
+		"../../src/openmpt/soundbase/**.hpp",
+	}
   files {
    "../../pluginBridge/PluginBridge.rc",
   }

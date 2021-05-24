@@ -12,7 +12,8 @@
 
 #include "StreamEncoder.h"
 
-#include "../soundbase/SampleFormatConverters.h"
+#include "openmpt/soundbase/SampleEncode.hpp"
+#include "openmpt/soundbase/SampleFormat.hpp"
 
 #include <ostream>
 

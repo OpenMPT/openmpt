@@ -1,18 +1,17 @@
-/*
- * SampleFormat.h
- * ---------------
- * Purpose: Utility enum and funcion to describe sample formats.
- * Notes  : (currently none)
- * Authors: OpenMPT Devs
- * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
- */
+/* SPDX-License-Identifier: BSD-3-Clause */
+/* SPDX-FileCopyrightText: OpenMPT Project Developers and Contributors */
+
 
 #pragma once
 
 #include "openmpt/all/BuildSettings.hpp"
 
-#include "../common/mptBaseMacros.h"
-#include "../common/Endianness.h"
+#include "mpt/base/macros.hpp"
+#include "mpt/base/utility.hpp"
+#include "openmpt/base/Int24.hpp"
+#include "openmpt/base/Types.hpp"
+
+#include <type_traits>
 
 
 OPENMPT_NAMESPACE_BEGIN

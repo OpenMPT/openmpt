@@ -17,7 +17,6 @@
 
 #include "../soundlib/Sndfile.h"
 
-#include "../soundbase/SampleFormatConverters.h"
 #include "../common/misc_util.h"
 #include "../common/mptStringBuffer.h"
 

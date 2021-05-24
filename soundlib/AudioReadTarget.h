@@ -13,12 +13,13 @@
 
 #include "Sndfile.h"
 #include "mpt/audio/span.hpp"
-#include "../soundbase/SampleFormat.h"
-#include "../soundbase/SampleFormatConverters.h"
-#include "../soundbase/SampleFormatCopy.h"
-#include "../soundbase/Dither.h"
+#include "openmpt/soundbase/SampleFormat.hpp"
+#include "openmpt/soundbase/CopyMix.hpp"
+#include "openmpt/soundbase/Dither.hpp"
 #include "MixerLoops.h"
 #include "Mixer.h"
+
+#include <type_traits>
 
 
 OPENMPT_NAMESPACE_BEGIN

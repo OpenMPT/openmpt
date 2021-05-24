@@ -18,8 +18,10 @@
 #include "Mixer.h"
 #include "MixFuncTable.h"
 #include "modsmp_ctrl.h"
-#include "../soundbase/SampleFormatConverters.h"
-#include "../soundbase/SampleFormatCopy.h"
+#include "openmpt/soundbase/SampleConvert.hpp"
+#include "openmpt/soundbase/SampleConvertFixedPoint.hpp"
+#include "openmpt/soundbase/SampleDecode.hpp"
+#include "SampleCopy.h"
 #ifdef MPT_EXTERNAL_SAMPLES
 #include "../common/mptPathString.h"
 #endif  // MPT_EXTERNAL_SAMPLES

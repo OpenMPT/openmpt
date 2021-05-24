@@ -12,7 +12,7 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
-#include "../soundbase/SampleFormat.h"
+#include "openmpt/soundbase/SampleFormat.hpp"
 #include "../common/Endianness.h"
 #include "../soundlib/Tagging.h"
 

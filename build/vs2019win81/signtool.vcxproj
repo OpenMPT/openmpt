@@ -749,8 +749,26 @@
     <ClInclude Include="..\..\src\mpt\uuid_namespace\tests\tests_uuid_namespace.hpp" />
     <ClInclude Include="..\..\src\mpt\uuid_namespace\uuid_namespace.hpp" />
     <ClInclude Include="..\..\src\openmpt\all\BuildSettings.hpp" />
+    <ClInclude Include="..\..\src\openmpt\base\Int24.hpp" />
     <ClInclude Include="..\..\src\openmpt\base\Types.hpp" />
     <ClInclude Include="..\..\src\openmpt\logging\Logger.hpp" />
+    <ClInclude Include="..\..\src\openmpt\random\DefaultPRNG.hpp" />
+    <ClInclude Include="..\..\src\openmpt\random\ModPlug.hpp" />
+    <ClInclude Include="..\..\src\openmpt\soundbase\Copy.hpp" />
+    <ClInclude Include="..\..\src\openmpt\soundbase\CopyMix.hpp" />
+    <ClInclude Include="..\..\src\openmpt\soundbase\Dither.hpp" />
+    <ClInclude Include="..\..\src\openmpt\soundbase\DitherModPlug.hpp" />
+    <ClInclude Include="..\..\src\openmpt\soundbase\DitherNone.hpp" />
+    <ClInclude Include="..\..\src\openmpt\soundbase\DitherSimple.hpp" />
+    <ClInclude Include="..\..\src\openmpt\soundbase\MixSample.hpp" />
+    <ClInclude Include="..\..\src\openmpt\soundbase\MixSampleConvert.hpp" />
+    <ClInclude Include="..\..\src\openmpt\soundbase\SampleClip.hpp" />
+    <ClInclude Include="..\..\src\openmpt\soundbase\SampleClipFixedPoint.hpp" />
+    <ClInclude Include="..\..\src\openmpt\soundbase\SampleConvert.hpp" />
+    <ClInclude Include="..\..\src\openmpt\soundbase\SampleConvertFixedPoint.hpp" />
+    <ClInclude Include="..\..\src\openmpt\soundbase\SampleDecode.hpp" />
+    <ClInclude Include="..\..\src\openmpt\soundbase\SampleEncode.hpp" />
+    <ClInclude Include="..\..\src\openmpt\soundbase\SampleFormat.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\common\ComponentManager.cpp" />

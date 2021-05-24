@@ -136,6 +136,9 @@
     <Filter Include="src\openmpt\logging">
       <UniqueIdentifier>{755E42FE-E1BF-1F0C-6A2D-66BED68D56CB}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\openmpt\random">
+      <UniqueIdentifier>{AF3B4D62-9B1F-0EB8-0480-080BF082F839}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\common\versionNumber.h">
@@ -495,11 +498,20 @@
     <ClInclude Include="..\..\src\openmpt\all\BuildSettings.hpp">
       <Filter>src\openmpt\all</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\openmpt\base\Int24.hpp">
+      <Filter>src\openmpt\base</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\openmpt\base\Types.hpp">
       <Filter>src\openmpt\base</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\openmpt\logging\Logger.hpp">
       <Filter>src\openmpt\logging</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\openmpt\random\DefaultPRNG.hpp">
+      <Filter>src\openmpt\random</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\openmpt\random\ModPlug.hpp">
+      <Filter>src\openmpt\random</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -28,8 +28,9 @@
 #include "../soundlib/WAVTools.h"
 #include "../common/FileReader.h"
 #include "../tracklib/SampleEdit.h"
-#include "../soundbase/SampleFormatConverters.h"
-#include "../soundbase/SampleFormatCopy.h"
+#include "openmpt/soundbase/SampleConvert.hpp"
+#include "openmpt/soundbase/SampleDecode.hpp"
+#include "../soundlib/SampleCopy.h"
 #include "../soundlib/mod_specifications.h"
 #include "../soundlib/S3MTools.h"
 

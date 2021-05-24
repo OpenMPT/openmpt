@@ -67,16 +67,5 @@ using float64le_fast = mpt::IEEE754binary64LE;
 using float64be_fast = mpt::IEEE754binary64BE;
 
 
-using uint24 = mpt::uint24;
-static_assert(sizeof(uint24) == 3);
-inline constexpr uint32 uint24_min = std::numeric_limits<uint24>::min();
-inline constexpr uint32 uint24_max = std::numeric_limits<uint24>::max();
-using int24 = mpt::int24;
-static_assert(sizeof(int24) == 3);
-inline constexpr int32 int24_min = std::numeric_limits<int24>::min();
-inline constexpr int32 int24_max = std::numeric_limits<int24>::max();
-
-
-
 OPENMPT_NAMESPACE_END
 

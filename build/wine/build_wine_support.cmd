@@ -61,12 +61,18 @@ del /f /q "%OUTDIR%\openmpt-wine-support.zip"
  src\mpt\uuid\test\*.hpp ^
  src\mpt\uuid_namespace\*.hpp ^
  src\mpt\uuid_namespace\tests\*.hpp ^
+ src\openmpt\all\*.cpp ^
+ src\openmpt\all\*.hpp ^
  src\openmpt\base\*.cpp ^
  src\openmpt\base\*.hpp ^
+ src\openmpt\logging\*.cpp ^
+ src\openmpt\logging\*.hpp ^
+ src\openmpt\random\*.cpp ^
+ src\openmpt\random\*.hpp ^
+ src\openmpt\soundbase\*.cpp ^
+ src\openmpt\soundbase\*.hpp ^
  common\*.h ^
  common\*.cpp ^
- soundbase\*.h ^
- soundbase\*.cpp ^
  sounddev\*.h ^
  sounddev\*.cpp ^
  misc\*.h ^

@@ -29,8 +29,6 @@
 #include "../common/version.h"
 #include "Loaders.h"
 #include "ChunkReader.h"
-#include "../soundbase/SampleFormatConverters.h"
-#include "../soundbase/SampleFormatCopy.h"
 #include "../soundlib/ModSampleCopy.h"
 #include <functional>
 #include <map>

@@ -17,7 +17,7 @@
 
 #include "../common/Logging.h"
 #include "../common/version.h"
-#include "../soundbase/SampleFormat.h"
+#include "openmpt/soundbase/SampleFormat.hpp"
 #include "../soundlib/MixerSettings.h"
 #include "../soundlib/Resampler.h"
 #include "../sounddsp/EQ.h"

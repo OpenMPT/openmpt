@@ -15,6 +15,7 @@
 #include "../common/misc_util.h"
 #include "../common/mptIO.h"
 #include "ModSample.h"
+#include "SampleCopy.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

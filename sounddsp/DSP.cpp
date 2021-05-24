@@ -11,7 +11,7 @@
 
 #include "stdafx.h"
 #include "DSP.h"
-#include "../soundbase/MixSample.h"
+#include "openmpt/soundbase/MixSample.hpp"
 #include <math.h>
 
 OPENMPT_NAMESPACE_BEGIN

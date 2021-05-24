@@ -72,6 +72,8 @@ mkdir -p bin/dist-autotools/src/openmpt
 svn export ./src/openmpt/all        bin/dist-autotools/src/openmpt/all
 svn export ./src/openmpt/base       bin/dist-autotools/src/openmpt/base
 svn export ./src/openmpt/logging    bin/dist-autotools/src/openmpt/logging
+svn export ./src/openmpt/random     bin/dist-autotools/src/openmpt/random
+svn export ./src/openmpt/soundbase  bin/dist-autotools/src/openmpt/soundbase
 svn export ./test            bin/dist-autotools/test
 rm bin/dist-autotools/test/mpt_tests_crypto.cpp
 rm bin/dist-autotools/test/mpt_tests_uuid_namespace.cpp
@@ -132,6 +134,8 @@ mkdir -p bin/dist-autotools/src/openmpt
 cp -r ./src/openmpt/all        bin/dist-autotools/src/openmpt/all
 cp -r ./src/openmpt/base       bin/dist-autotools/src/openmpt/base
 cp -r ./src/openmpt/logging    bin/dist-autotools/src/openmpt/logging
+cp -r ./src/openmpt/random     bin/dist-autotools/src/openmpt/random
+cp -r ./src/openmpt/soundbase  bin/dist-autotools/src/openmpt/soundbase
 cp -r ./test            bin/dist-autotools/test
 rm bin/dist-autotools/test/mpt_tests_crypto.cpp
 rm bin/dist-autotools/test/mpt_tests_uuid_namespace.cpp

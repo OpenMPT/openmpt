@@ -19,7 +19,7 @@
 #include "../soundlib/AudioCriticalSection.h"
 #include "mpt/mutex/mutex.hpp"
 #include "../soundlib/Sndfile.h"
-#include "../soundbase/Dither.h"
+#include "openmpt/soundbase/Dither.hpp"
 #include "mpt/audio/span.hpp"
 #include "../sounddev/SoundDeviceBuffer.h"
 
