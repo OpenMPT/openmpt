@@ -15,11 +15,11 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
-using int8   = mpt::int8;
-using int16  = mpt::int16;
-using int32  = mpt::int32;
-using int64  = mpt::int64;
-using uint8  = mpt::uint8;
+using int8 = mpt::int8;
+using int16 = mpt::int16;
+using int32 = mpt::int32;
+using int64 = mpt::int64;
+using uint8 = mpt::uint8;
 using uint16 = mpt::uint16;
 using uint32 = mpt::uint32;
 using uint64 = mpt::uint64;

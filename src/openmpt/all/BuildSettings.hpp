@@ -27,21 +27,28 @@
 #endif
 
 #ifndef OPENMPT_NAMESPACE_BEGIN
-#define OPENMPT_NAMESPACE_BEGIN namespace OPENMPT_NAMESPACE { inline namespace MPT_INLINE_NS {
+#define OPENMPT_NAMESPACE_BEGIN \
+	namespace OPENMPT_NAMESPACE \
+	{ \
+	inline namespace MPT_INLINE_NS \
+	{
 #endif
 #ifndef OPENMPT_NAMESPACE_END
-#define OPENMPT_NAMESPACE_END   } }
+#define OPENMPT_NAMESPACE_END \
+	} \
+	}
 #endif
 
 
 
 #ifdef __cplusplus
 OPENMPT_NAMESPACE_BEGIN
-namespace mpt {
+namespace mpt
+{
 #ifndef MPT_NO_NAMESPACE
 using namespace ::mpt;
 #endif
-} // namespace mpt
+}  // namespace mpt
 OPENMPT_NAMESPACE_END
 #endif
 

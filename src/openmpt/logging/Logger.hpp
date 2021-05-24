@@ -12,17 +12,18 @@ OPENMPT_NAMESPACE_BEGIN
 
 enum LogLevel
 {
-	LogDebug        = 5,
-	LogInformation  = 4,
+	LogDebug = 5,
+	LogInformation = 4,
 	LogNotification = 3,
-	LogWarning      = 2,
-	LogError        = 1
+	LogWarning = 2,
+	LogError = 1
 };
 
 class ILogger
 {
 protected:
 	virtual ~ILogger() = default;
+
 public:
 	virtual bool IsLevelActive(LogLevel level) const noexcept = 0;
 	// facility: ASCII
@@ -41,7 +42,6 @@ public:
 				(logger).SendLogMessage(MPT_SOURCE_LOCATION_CURRENT(), (level), (facility), (text)); \
 			} \
 		} \
-	} while(0) \
-/**/
+	} while(0)
 
 OPENMPT_NAMESPACE_END
