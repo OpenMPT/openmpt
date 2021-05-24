@@ -48,6 +48,8 @@ rmdir /s /q Licenses
 mkdir Licenses
 copy /y ..\..\src\mpt\LICENSE.BSD-3-Clause.txt               .\Licenses\License.mpt.BSD-3-Clause.txt || goto error
 copy /y ..\..\src\mpt\LICENSE.BSL-1.0.txt                    .\Licenses\License.mpt.BSL-1.0.txt || goto error
+rem copy /y ..\..\include\ancient\LICENSE                        .\Licenses\License.ancient.txt || goto error
+rem copy /y ..\..\include\ancient\src\BZIP2Table.hpp             .\Licenses\License.ancient.bzip2.txt || goto error
 copy /y ..\..\include\flac\COPYING.Xiph                      .\Licenses\License.FLAC.txt || goto error
 rem copy /y ..\..\include\lame\COPYING                           .\Licenses\License.lame.txt || goto error
 rem copy /y ..\..\include\lhasa\COPYING                          .\Licenses\License.lhasa.txt || goto error
@@ -167,6 +169,8 @@ rmdir /s /q Licenses
 mkdir Licenses
 copy /y ..\..\src\mpt\LICENSE.BSD-3-Clause.txt               .\Licenses\License.mpt.BSD-3-Clause.txt || goto error
 copy /y ..\..\src\mpt\LICENSE.BSL-1.0.txt                    .\Licenses\License.mpt.BSL-1.0.txt || goto error
+rem copy /y ..\..\include\ancient\LICENSE                        .\Licenses\License.ancient.txt || goto error
+rem copy /y ..\..\include\ancient\src\BZIP2Table.hpp             .\Licenses\License.ancient.bzip2.txt || goto error
 rem copy /y ..\..\include\flac\COPYING.Xiph                      .\Licenses\License.FLAC.txt || goto error
 rem copy /y ..\..\include\lame\COPYING                           .\Licenses\License.lame.txt || goto error
 rem copy /y ..\..\include\lhasa\COPYING                          .\Licenses\License.lhasa.txt || goto error

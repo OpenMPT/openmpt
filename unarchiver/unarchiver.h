@@ -27,6 +27,9 @@
 #ifdef MPT_WITH_UNRAR
 #include "unrar.h"
 #endif
+#ifdef MPT_WITH_ANCIENT
+#include "unancient.h"
+#endif
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -53,6 +56,9 @@ private:
 #endif
 #ifdef MPT_WITH_UNRAR
 	CRarArchive rarArchive;
+#endif
+#ifdef MPT_WITH_ANCIENT
+	CAncientArchive ancientArchive;
 #endif
 
 public:

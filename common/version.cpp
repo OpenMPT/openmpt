@@ -678,6 +678,11 @@ mpt::ustring GetFullCreditsString()
 		"https://rarlab.com/\n"
 		"\n"
 #endif
+#ifdef MPT_WITH_ANCIENT
+		"Teemu Suutari for ancient\n"
+		"https://github.com/temisu/ancient\n"
+		"\n"
+#endif
 #ifdef MPT_WITH_PORTAUDIO
 		"PortAudio contributors\n"
 		"http://www.portaudio.com/\n"

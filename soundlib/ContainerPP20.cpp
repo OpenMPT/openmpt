@@ -21,6 +21,9 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
+#if !defined(MPT_WITH_ANCIENT)
+
+
 struct PPBITBUFFER
 {
 	uint32 bitcount = 0;
@@ -206,6 +209,9 @@ bool UnpackPP20(std::vector<ContainerItem> &containerItems, FileReader &file, Co
 
 	return result;
 }
+
+
+#endif // !MPT_WITH_ANCIENT
 
 
 OPENMPT_NAMESPACE_END

@@ -20,6 +20,9 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
+#if !defined(MPT_WITH_ANCIENT)
+
+
 #ifdef MPT_ALL_LOGGING
 #define MMCMP_LOG
 #endif
@@ -374,6 +377,9 @@ bool UnpackMMCMP(std::vector<ContainerItem> &containerItems, FileReader &file, C
 
 	return true;
 }
+
+
+#endif // !MPT_WITH_ANCIENT
 
 
 OPENMPT_NAMESPACE_END

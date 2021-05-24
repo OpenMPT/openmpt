@@ -29,6 +29,7 @@ end
   filter {}
   local extincludedirs = {
    "../../include",
+   "../../include/ancient/api",
    "../../include/asiomodern/include",
    "../../include/ASIOSDK2/common",
    "../../include/flac/include",
@@ -160,6 +161,7 @@ end
   flags { "MFC" }
   warnings "Extra"
   links {
+   "ancient",
    "UnRAR",
    "zlib",
    "minizip",

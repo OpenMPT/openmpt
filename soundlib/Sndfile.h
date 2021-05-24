@@ -802,10 +802,12 @@ public:
 	static constexpr bool SupportsOPL(MODTYPE type) noexcept { return type & (MOD_TYPE_S3M | MOD_TYPE_MPT); }
 	bool SupportsOPL() const noexcept { return SupportsOPL(m_nType); }
 
+#if !defined(MPT_WITH_ANCIENT)
 	static ProbeResult ProbeFileHeaderMMCMP(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderPP20(MemoryFileReader file, const uint64 *pfilesize);
-	static ProbeResult ProbeFileHeaderUMX(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderXPK(MemoryFileReader file, const uint64 *pfilesize);
+#endif // !MPT_WITH_ANCIENT
+	static ProbeResult ProbeFileHeaderUMX(MemoryFileReader file, const uint64* pfilesize);
 
 	static ProbeResult ProbeFileHeader669(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderAM(MemoryFileReader file, const uint64 *pfilesize);

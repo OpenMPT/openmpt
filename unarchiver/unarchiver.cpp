@@ -32,6 +32,9 @@ CUnarchiver::CUnarchiver(FileReader &file)
 #ifdef MPT_WITH_UNRAR
 	, rarArchive(inFile)
 #endif
+#ifdef MPT_WITH_ANCIENT
+	, ancientArchive(inFile)
+#endif
 {
 	inFile.Rewind();
 #if (defined(MPT_WITH_ZLIB) && defined(MPT_WITH_MINIZIP)) || defined(MPT_WITH_MINIZ)
@@ -45,6 +48,9 @@ CUnarchiver::CUnarchiver(FileReader &file)
 #endif
 #ifdef MPT_WITH_UNRAR
 	if(rarArchive.IsArchive()) { impl = &rarArchive; return; }
+#endif
+#ifdef MPT_WITH_ANCIENT
+	if(ancientArchive.IsArchive()) { impl = &ancientArchive; return; }
 #endif
 	impl = &emptyArchive;
 }

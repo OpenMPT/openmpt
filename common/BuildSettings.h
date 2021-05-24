@@ -84,6 +84,7 @@
 #endif // MPT_OS_WINDOWS
 
 // OpenMPT-only dependencies
+#define MPT_WITH_ANCIENT
 #if !defined(MPT_BUILD_RETRO) && !MPT_COMPILER_CLANG
 #define MPT_WITH_ASIO
 #endif
@@ -653,6 +654,12 @@
 #define MPT_CHECK_WINDOWS_IGNORE_WARNING_NO_UNICODE
 #endif // !UNICODE
 #endif // MPT_OS_WINDOWS
+
+#ifdef MPT_WITH_ANCIENT
+#ifdef MPT_BUILD_MSVC_SHARED
+#define ANCIENT_API_DECLSPEC_DLLIMPORT
+#endif
+#endif
 
 #ifdef MPT_WITH_FLAC
 #ifdef MPT_BUILD_MSVC_STATIC

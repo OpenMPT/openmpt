@@ -1311,6 +1311,9 @@
     <ClInclude Include="..\..\unarchiver\archive.h">
       <Filter>unarchiver</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\unarchiver\unancient.h">
+      <Filter>unarchiver</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\unarchiver\unarchiver.h">
       <Filter>unarchiver</Filter>
     </ClInclude>
@@ -2140,6 +2143,9 @@
     </ClCompile>
     <ClCompile Include="..\..\tracklib\SampleEdit.cpp">
       <Filter>tracklib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\unarchiver\unancient.cpp">
+      <Filter>unarchiver</Filter>
     </ClCompile>
     <ClCompile Include="..\..\unarchiver\unarchiver.cpp">
       <Filter>unarchiver</Filter>
