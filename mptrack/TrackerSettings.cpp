@@ -1000,7 +1000,7 @@ private:
 	Setting<bool> BoostThreadPriority;
 	Setting<bool> KeepDeviceRunning;
 	Setting<bool> UseHardwareTiming;
-	Setting<int> DitherType;
+	Setting<int32> DitherType;
 	Setting<uint32> InputSourceID;
 
 public:
@@ -1019,7 +1019,7 @@ public:
 		, BoostThreadPriority(conf, U_("Sound Settings"), deviceInfo.GetIdentifier() + U_("_") + U_("BoostThreadPriority"), defaults.BoostThreadPriority)
 		, KeepDeviceRunning(conf, U_("Sound Settings"), deviceInfo.GetIdentifier() + U_("_") + U_("KeepDeviceRunning"), defaults.KeepDeviceRunning)
 		, UseHardwareTiming(conf, U_("Sound Settings"), deviceInfo.GetIdentifier() + U_("_") + U_("UseHardwareTiming"), defaults.UseHardwareTiming)
-		, DitherType(conf, U_("Sound Settings"), deviceInfo.GetIdentifier() + U_("_") + U_("DitherType"), defaults.DitherType)
+		, DitherType(conf, U_("Sound Settings"), deviceInfo.GetIdentifier() + U_("_") + U_("DitherType"), static_cast<int32>(defaults.DitherType))
 		, InputSourceID(conf, U_("Sound Settings"), deviceInfo.GetIdentifier() + U_("_") + U_("InputSourceID"), defaults.InputSourceID)
 	{
 		if(ChannelMapping.Get().GetNumHostChannels() != ChannelsOld)
@@ -1048,7 +1048,7 @@ public:
 		BoostThreadPriority = settings.BoostThreadPriority;
 		KeepDeviceRunning = settings.KeepDeviceRunning;
 		UseHardwareTiming = settings.UseHardwareTiming;
-		DitherType = settings.DitherType;
+		DitherType = static_cast<int32>(settings.DitherType);
 		InputSourceID = settings.InputSourceID;
 		return *this;
 	}

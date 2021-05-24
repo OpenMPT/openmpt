@@ -25,16 +25,6 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-enum DitherMode
-{
-	DitherNone = 0,
-	DitherDefault = 1,  // chosen by OpenMPT code, might change
-	DitherModPlug = 2,  // rectangular, 0.5 bit depth, no noise shaping (original ModPlug Tracker)
-	DitherSimple = 3,   // rectangular, 1 bit depth, simple 1st order noise shaping
-	NumDitherModes
-};
-
-
 struct Dither_None
 {
 public:
@@ -212,28 +202,43 @@ public:
 class DitherNamesOpenMPT
 {
 public:
-	static mpt::ustring GetModeName(DitherMode mode)
+	static mpt::ustring GetModeName(std::size_t mode)
 	{
 		mpt::ustring result;
 		switch(mode)
 		{
-			case DitherNone: result = U_("no"); break;
-			case DitherDefault: result = U_("default"); break;
-			case DitherModPlug: result = U_("0.5 bit"); break;
-			case DitherSimple: result = U_("1 bit"); break;
-			default: result = U_(""); break;
+			case 0:
+				// no dither
+				result = U_("no");
+				break;
+			case 1:
+				// chosen by OpenMPT code, might change
+				result = U_("default");
+				break;
+			case 2:
+				// rectangular, 0.5 bit depth, no noise shaping (original ModPlug Tracker)
+				result = U_("0.5 bit");
+				break;
+			case 3:
+				// rectangular, 1 bit depth, simple 1st order noise shaping
+				result = U_("1 bit");
+				break;
+			default:
+				result = U_("");
+				break;
 		}
 		return result;
 	}
 };
 
 
-template <typename AvailableDithers, typename DitherNames, std::size_t defaultDither, std::size_t defaultChannels>
+template <typename AvailableDithers, typename DitherNames, std::size_t defaultChannels, std::size_t defaultDither, std::size_t noDither>
 class Dithers
 	: public DitherNames
 {
 
 public:
+	static constexpr std::size_t NoDither = noDither;
 	static constexpr std::size_t DefaultDither = defaultDither;
 	static constexpr std::size_t DefaultChannels = defaultChannels;
 
@@ -253,6 +258,21 @@ public:
 	AvailableDithers &Variant()
 	{
 		return m_Dithers;
+	}
+
+	static std::size_t GetNumDithers()
+	{
+		return std::variant_size<AvailableDithers>::value;
+	}
+
+	static std::size_t GetDefaultDither()
+	{
+		return defaultDither;
+	}
+
+	static std::size_t GetNoDither()
+	{
+		return noDither;
 	}
 
 private:
@@ -326,7 +346,7 @@ public:
 
 
 using DithersOpenMPT =
-	Dithers<std::variant<MultiChannelDither<Dither_None>, MultiChannelDither<Dither_Default>, MultiChannelDither<Dither_ModPlug>, MultiChannelDither<Dither_Simple>>, DitherNamesOpenMPT, static_cast<std::size_t>(DitherDefault), 4>;
+	Dithers<std::variant<MultiChannelDither<Dither_None>, MultiChannelDither<Dither_Default>, MultiChannelDither<Dither_ModPlug>, MultiChannelDither<Dither_Simple>>, DitherNamesOpenMPT, 4, 1, 0>;
 
 
 struct DithersWrapperOpenMPT

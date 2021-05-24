@@ -1783,7 +1783,7 @@ std::int64_t module_impl::ctl_get_integer( std::string_view ctl, bool throw_if_u
 	} else if ( ctl == "subsong" ) {
 		return get_selected_subsong();
 	} else if ( ctl == "dither" ) {
-		return static_cast<int>( m_Dithers->GetMode() );
+		return static_cast<std::int64_t>( m_Dithers->GetMode() );
 	} else {
 		MPT_ASSERT_NOTREACHED();
 		return 0;
@@ -2011,9 +2011,9 @@ void module_impl::ctl_set_integer( std::string_view ctl, std::int64_t value, boo
 	} else if ( ctl == "subsong" ) {
 		select_subsong( mpt::saturate_cast<std::int32_t>( value ) );
 	} else if ( ctl == "dither" ) {
-		int dither = mpt::saturate_cast<int>( value );
-		if ( dither < 0 || dither >= OpenMPT::NumDitherModes ) {
-			dither = OpenMPT::DitherDefault;
+		std::size_t dither = mpt::saturate_cast<std::size_t>( value );
+		if ( dither < 0 || dither >= OpenMPT::DithersOpenMPT::GetNumDithers() ) {
+			dither = OpenMPT::DithersOpenMPT::GetDefaultDither();
 		}
 		m_Dithers->SetMode( dither );
 	} else {

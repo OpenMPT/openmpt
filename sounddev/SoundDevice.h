@@ -369,7 +369,7 @@ struct Settings
 	bool BoostThreadPriority; // Boost thread priority for glitch-free audio rendering
 	bool KeepDeviceRunning;
 	bool UseHardwareTiming;
-	int DitherType;
+	int32 DitherType;
 	uint32 InputSourceID;
 	Settings()
 		: Latency(0.1)
@@ -505,7 +505,7 @@ struct BufferFormat
 	uint8 InputChannels;
 	SampleFormat sampleFormat;
 	bool WantsClippedOutput;
-	int DitherType;
+	int32 DitherType;
 };
 
 

@@ -487,17 +487,17 @@ void CWaveConvert::FillDither()
 	if((encTraits->modes & Encoder::ModeLossless) && Encoder::Format::FromInt(format).GetSampleFormat() != SampleFormat::Invalid && !Encoder::Format::FromInt(format).GetSampleFormat().IsFloat())
 	{
 		m_CbnDither.EnableWindow(TRUE);
-		for(int dither = 0; dither < NumDitherModes; ++dither)
+		for(std::size_t dither = 0; dither < DithersOpenMPT::GetNumDithers(); ++dither)
 		{
-			int ndx = m_CbnDither.AddString(mpt::ToCString(DithersOpenMPT::GetModeName((DitherMode)dither) + U_(" dither")));
+			int ndx = m_CbnDither.AddString(mpt::ToCString(DithersOpenMPT::GetModeName(dither) + U_(" dither")));
 			m_CbnDither.SetItemData(ndx, dither);
 		}
 	} else
 	{
 		m_CbnDither.EnableWindow(FALSE);
-		for(int dither = 0; dither < NumDitherModes; ++dither)
+		for(std::size_t dither = 0; dither < DithersOpenMPT::GetNumDithers(); ++dither)
 		{
-			int ndx = m_CbnDither.AddString(mpt::ToCString(DithersOpenMPT::GetModeName(DitherNone) + U_(" dither")));
+			int ndx = m_CbnDither.AddString(mpt::ToCString(DithersOpenMPT::GetModeName(DithersOpenMPT::GetNoDither()) + U_(" dither")));
 			m_CbnDither.SetItemData(ndx, dither);
 		}
 	}

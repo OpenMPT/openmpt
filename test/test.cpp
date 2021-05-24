@@ -4061,7 +4061,7 @@ static MPT_NOINLINE void TestSampleConversion()
 	// Dither
 	{
 		std::vector<MixSampleInt> buffer(64);
-		DithersOpenMPT dithers(mpt::global_random_device(), DitherModPlug, 2);
+		DithersOpenMPT dithers(mpt::global_random_device(), 2 /* DitherModPlug */ , 2);
 		for(std::size_t i = 0; i < 64; ++i)
 		{
 			std::visit(
