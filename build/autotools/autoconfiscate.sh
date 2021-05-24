@@ -38,7 +38,6 @@ svn export ./doc/contributing.md          bin/dist-autotools/doc/contributing.md
 svn export ./doc/libopenmpt_styleguide.md bin/dist-autotools/doc/libopenmpt_styleguide.md
 svn export ./doc/module_formats.md        bin/dist-autotools/doc/module_formats.md
 svn export ./doc/openmpt_styleguide.md    bin/dist-autotools/doc/openmpt_styleguide.md
-svn export ./soundbase       bin/dist-autotools/soundbase
 svn export ./soundlib        bin/dist-autotools/soundlib
 svn export ./sounddsp        bin/dist-autotools/sounddsp
 mkdir -p bin/dist-autotools/src/mpt
@@ -100,7 +99,6 @@ cp -r ./doc/contributing.md          bin/dist-autotools/doc/contributing.md
 cp -r ./doc/libopenmpt_styleguide.md bin/dist-autotools/doc/libopenmpt_styleguide.md
 cp -r ./doc/module_formats.md        bin/dist-autotools/doc/module_formats.md
 cp -r ./doc/openmpt_styleguide.md    bin/dist-autotools/doc/openmpt_styleguide.md
-cp -r ./soundbase       bin/dist-autotools/soundbase
 cp -r ./soundlib        bin/dist-autotools/soundlib
 cp -r ./sounddsp        bin/dist-autotools/sounddsp
 mkdir -p bin/dist-autotools/src/mpt
