@@ -28,6 +28,7 @@ MMCMPDecompressor::MMCMPDecompressor(const Buffer &packedData,bool exactSizeKnow
 	if (!detectHeader(packedData.readBE32(0)) || packedData.readBE32(4U)!=FourCC("ONia") ||
 		packedData.readLE16(8U)!=14U || packedData.size()<24U)
 		throw InvalidFormatError();
+	_version=packedData.readLE16(10U);
 	_blocks=packedData.readLE16(12U);
 	_blocksOffset=packedData.readLE32(18U);
 	_rawSize=packedData.readLE32(14U);
@@ -110,7 +111,7 @@ void MMCMPDecompressor::decompressImpl(Buffer &rawData,bool verify)
 			currentSubBlock++;
 		};
 
-		uint32_t checksum=0;
+		uint32_t checksum=0,checksumPartial=0,checksumRot=0;
 		auto writeByte=[&](uint8_t value,bool allowOverrun=false)
 		{
 			while (!outputSize)
@@ -122,8 +123,20 @@ void MMCMPDecompressor::decompressImpl(Buffer &rawData,bool verify)
 			rawDataPtr[outputOffset++]=value;
 			if (verify)
 			{
-				checksum^=value;
-				checksum=(checksum<<1)|(checksum>>31);
+				if (_version>=0x1310)
+				{
+					checksum^=value;
+					checksum=(checksum<<1)|(checksum>>31);
+				} else {
+					checksumPartial|=((uint32_t)value)<<checksumRot;
+					checksumRot+=8U;
+					if (checksumRot==32U)
+					{
+						checksum^=checksumPartial;
+						checksumPartial=0;
+						checksumRot=0;
+					}
+				}
 			}
 		};
 		
