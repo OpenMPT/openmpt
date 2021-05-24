@@ -2012,7 +2012,7 @@ void module_impl::ctl_set_integer( std::string_view ctl, std::int64_t value, boo
 		select_subsong( mpt::saturate_cast<std::int32_t>( value ) );
 	} else if ( ctl == "dither" ) {
 		std::size_t dither = mpt::saturate_cast<std::size_t>( value );
-		if ( dither < 0 || dither >= OpenMPT::DithersOpenMPT::GetNumDithers() ) {
+		if ( dither >= OpenMPT::DithersOpenMPT::GetNumDithers() ) {
 			dither = OpenMPT::DithersOpenMPT::GetDefaultDither();
 		}
 		m_Dithers->SetMode( dither );
