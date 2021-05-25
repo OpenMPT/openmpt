@@ -13,7 +13,7 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
-#include "../common/FlagSet.h"
+#include "openmpt/base/FlagSet.hpp"
 
 
 OPENMPT_NAMESPACE_BEGIN

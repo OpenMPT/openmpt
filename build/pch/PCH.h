@@ -54,6 +54,7 @@
 #include "mpt/uuid/uuid.hpp"
 
 #include "openmpt/base/Endian.hpp"
+#include "openmpt/base/FlagSet.hpp"
 #include "openmpt/base/Types.hpp"
 #include "openmpt/logging/Logger.hpp"
 
@@ -71,7 +72,6 @@
 
 #include "../common/ComponentManager.h"
 #include "../common/FileReader.h"
-#include "../common/FlagSet.h"
 #include "../common/mptFileIO.h"
 #include "../common/mptIO.h"
 #include "../common/mptRandom.h"

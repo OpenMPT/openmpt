@@ -582,7 +582,6 @@
     <ClInclude Include="..\..\common\Dither.h" />
     <ClInclude Include="..\..\common\FileReader.h" />
     <ClInclude Include="..\..\common\FileReaderFwd.h" />
-    <ClInclude Include="..\..\common\FlagSet.h" />
     <ClInclude Include="..\..\common\Logging.h" />
     <ClInclude Include="..\..\common\Profiler.h" />
     <ClInclude Include="..\..\common\misc_util.h" />
@@ -799,6 +798,7 @@
     <ClInclude Include="..\..\src\mpt\uuid\uuid.hpp" />
     <ClInclude Include="..\..\src\openmpt\all\BuildSettings.hpp" />
     <ClInclude Include="..\..\src\openmpt\base\Endian.hpp" />
+    <ClInclude Include="..\..\src\openmpt\base\FlagSet.hpp" />
     <ClInclude Include="..\..\src\openmpt\base\Int24.hpp" />
     <ClInclude Include="..\..\src\openmpt\base\Types.hpp" />
     <ClInclude Include="..\..\src\openmpt\logging\Logger.hpp" />

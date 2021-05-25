@@ -1505,6 +1505,7 @@
     <ClInclude Include="..\..\src\mpt\uuid_namespace\uuid_namespace.hpp" />
     <ClInclude Include="..\..\src\openmpt\all\BuildSettings.hpp" />
     <ClInclude Include="..\..\src\openmpt\base\Endian.hpp" />
+    <ClInclude Include="..\..\src\openmpt\base\FlagSet.hpp" />
     <ClInclude Include="..\..\src\openmpt\base\Int24.hpp" />
     <ClInclude Include="..\..\src\openmpt\base\Types.hpp" />
     <ClInclude Include="..\..\src\openmpt\logging\Logger.hpp" />

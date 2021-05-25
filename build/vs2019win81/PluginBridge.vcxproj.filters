@@ -501,6 +501,9 @@
     <ClInclude Include="..\..\src\openmpt\base\Endian.hpp">
       <Filter>src\openmpt\base</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\openmpt\base\FlagSet.hpp">
+      <Filter>src\openmpt\base</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\openmpt\base\Int24.hpp">
       <Filter>src\openmpt\base</Filter>
     </ClInclude>

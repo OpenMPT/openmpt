@@ -15,7 +15,7 @@
 #include "modcommand.h"
 #include "tuningbase.h"
 #include "Snd_defs.h"
-#include "../common/FlagSet.h"
+#include "openmpt/base/FlagSet.hpp"
 #include "../common/misc_util.h"
 #include <set>
 

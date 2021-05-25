@@ -150,9 +150,6 @@
     <ClInclude Include="..\..\common\FileReaderFwd.h">
       <Filter>common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\common\FlagSet.h">
-      <Filter>common</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\common\Logging.h">
       <Filter>common</Filter>
     </ClInclude>
@@ -793,6 +790,9 @@
       <Filter>src\openmpt\all</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\openmpt\base\Endian.hpp">
+      <Filter>src\openmpt\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\openmpt\base\FlagSet.hpp">
       <Filter>src\openmpt\base</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\openmpt\base\Int24.hpp">

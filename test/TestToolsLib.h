@@ -26,7 +26,7 @@
 #include <type_traits>
 
 #include "mpt/base/bit.hpp"
-#include "../common/FlagSet.h"
+#include "openmpt/base/FlagSet.hpp"
 #include "../soundlib/Snd_defs.h"
 
 

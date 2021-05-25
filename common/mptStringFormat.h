@@ -21,7 +21,7 @@
 
 #include "mptString.h"
 
-#include "FlagSet.h"
+#include "openmpt/base/FlagSet.hpp"
 
 
 OPENMPT_NAMESPACE_BEGIN

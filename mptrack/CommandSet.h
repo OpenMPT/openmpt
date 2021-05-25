@@ -12,7 +12,7 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 #include <string>
-#include "../common/FlagSet.h"
+#include "openmpt/base/FlagSet.hpp"
 #include <map>
 #include <bitset>
 

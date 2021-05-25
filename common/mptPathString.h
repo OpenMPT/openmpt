@@ -16,7 +16,7 @@
 
 #include <vector>
 
-#include "FlagSet.h"
+#include "openmpt/base/FlagSet.hpp"
 
 #define MPT_DEPRECATED_PATH
 //#define MPT_DEPRECATED_PATH [[deprecated]]

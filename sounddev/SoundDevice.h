@@ -13,7 +13,7 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
-#include "../common/FlagSet.h"
+#include "openmpt/base/FlagSet.hpp"
 #include "../misc/mptOS.h"
 #include "openmpt/soundbase/SampleFormat.hpp"
 

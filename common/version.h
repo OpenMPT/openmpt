@@ -13,7 +13,7 @@
 #include "openmpt/all/BuildSettings.hpp"
 
 #include "mptString.h"
-#include "FlagSet.h"
+#include "openmpt/base/FlagSet.hpp"
 
 #include <stdexcept>
 
