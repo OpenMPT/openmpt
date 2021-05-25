@@ -35,6 +35,9 @@
 
 #include <ASIOModern/ASIO.hpp>
 #include <ASIOModern/ASIOSystemWindows.hpp>
+#if defined(MODPLUG_TRACKER)
+#include <ASIOModern/ASIOSystemWindowsSEH.hpp>
+#endif // MODPLUG_TRACKER
 #include <ASIOModern/ASIOSampleConvert.hpp>
 //#include <ASIOModern/ASIOVerifyABI.hpp>
 

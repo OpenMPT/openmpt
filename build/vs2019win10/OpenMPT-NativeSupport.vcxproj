@@ -1249,6 +1249,7 @@
     <ClInclude Include="..\..\include\asiomodern\include\ASIOModern\ASIOModern.hpp" />
     <ClInclude Include="..\..\include\asiomodern\include\ASIOModern\ASIOSampleConvert.hpp" />
     <ClInclude Include="..\..\include\asiomodern\include\ASIOModern\ASIOSystemWindows.hpp" />
+    <ClInclude Include="..\..\include\asiomodern\include\ASIOModern\ASIOSystemWindowsSEH.hpp" />
     <ClInclude Include="..\..\include\asiomodern\include\ASIOModern\ASIOVerifyABI.hpp" />
     <ClInclude Include="..\..\include\asiomodern\include\ASIOModern\ASIOVersion.hpp" />
     <ClInclude Include="..\..\include\asiomodern\include\ASIOModern\ASIOstdcxx20bit.hpp" />
