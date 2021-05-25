@@ -40,6 +40,7 @@
 
 #include "common/version.h"
 #include "common/misc_util.h"
+#include "common/Dither.h"
 #include "common/FileReader.h"
 #include "common/Logging.h"
 #include "soundlib/Sndfile.h"

@@ -19,6 +19,7 @@
 #include "../common/mptStringBuffer.h"
 #include "../sounddev/SoundDevice.h"
 #include "../sounddev/SoundDeviceManager.h"
+#include "../common/Dither.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

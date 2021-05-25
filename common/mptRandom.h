@@ -22,7 +22,6 @@
 #include "mpt/random/engine.hpp"
 #include "mpt/random/engine_lcg.hpp"
 #include "mpt/random/seed.hpp"
-#include "openmpt/random/DefaultPRNG.hpp"
 
 #include <limits>
 #include <random>
@@ -104,6 +103,23 @@ using random_device = deterministc_random_device;
 using random_device = mpt::sane_random_device;
 
 #endif // MPT_BUILD_FUZZER
+
+
+#ifdef MPT_BUILD_FUZZER
+
+// Use fast PRNGs in order to not waste time fuzzing more complex PRNG
+// implementations.
+using fast_prng = deterministic_fast_engine;
+using good_prng = deterministic_good_engine;
+
+#else  // !MPT_BUILD_FUZZER
+
+// We cannot use std::minstd_rand here because it has not a power-of-2 sized
+// output domain which we rely upon.
+using fast_prng = fast_engine;  // about 3 ALU operations, ~32bit of state, suited for inner loops
+using good_prng = good_engine;
+
+#endif  // MPT_BUILD_FUZZER
 
 
 using default_prng = mpt::good_prng;

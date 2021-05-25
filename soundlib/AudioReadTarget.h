@@ -18,6 +18,7 @@
 #include "openmpt/soundbase/Dither.hpp"
 #include "MixerLoops.h"
 #include "Mixer.h"
+#include "../common/Dither.h"
 
 #include <type_traits>
 

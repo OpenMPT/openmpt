@@ -8,6 +8,7 @@
 
 #include "mpt/base/macros.hpp"
 #include "mpt/random/engine.hpp"
+#include "mpt/random/default_engines.hpp"
 #include "mpt/random/random.hpp"
 #include "openmpt/base/Types.hpp"
 #include "openmpt/soundbase/MixSample.hpp"
@@ -21,7 +22,7 @@ template <int ditherdepth = 1, bool triangular = false, bool shaped = true>
 struct Dither_SimpleImpl
 {
 public:
-	using prng_type = mpt::fast_prng;
+	using prng_type = mpt::fast_engine;
 	template <typename Trd>
 	static prng_type prng_init(Trd &rd)
 	{

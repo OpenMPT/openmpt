@@ -507,9 +507,6 @@
     <ClInclude Include="..\..\src\openmpt\logging\Logger.hpp">
       <Filter>src\openmpt\logging</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\openmpt\random\DefaultPRNG.hpp">
-      <Filter>src\openmpt\random</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\openmpt\random\ModPlug.hpp">
       <Filter>src\openmpt\random</Filter>
     </ClInclude>

@@ -20,6 +20,7 @@
 #include "../common/version.h"
 #include "../soundlib/MixerLoops.h"
 #include "openmpt/soundbase/Dither.hpp"
+#include "../common/Dither.h"
 #include "../soundlib/AudioReadTarget.h"
 #include "../soundlib/plugins/PlugInterface.h"
 #include "../common/mptFileIO.h"

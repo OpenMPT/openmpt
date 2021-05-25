@@ -20,6 +20,7 @@
 #include "mpt/mutex/mutex.hpp"
 #include "../soundlib/Sndfile.h"
 #include "openmpt/soundbase/Dither.hpp"
+#include "../common/Dither.h"
 #include "mpt/audio/span.hpp"
 #include "../sounddev/SoundDeviceBuffer.h"
 

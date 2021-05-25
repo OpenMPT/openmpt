@@ -9,11 +9,6 @@
 #include "mpt/base/macros.hpp"
 #include "mpt/random/default_engines.hpp"
 #include "mpt/random/engine.hpp"
-#include "mpt/string/types.hpp"
-#include "openmpt/random/DefaultPRNG.hpp"
-#include "openmpt/soundbase/DitherModPlug.hpp"
-#include "openmpt/soundbase/DitherNone.hpp"
-#include "openmpt/soundbase/DitherSimple.hpp"
 #include "openmpt/soundbase/MixSample.hpp"
 
 #include <vector>
@@ -23,9 +18,6 @@
 
 
 OPENMPT_NAMESPACE_BEGIN
-
-
-using Dither_Default = Dither_Simple;
 
 
 template <typename Tdither>
@@ -67,40 +59,7 @@ public:
 };
 
 
-class DitherNamesOpenMPT
-{
-public:
-	static mpt::ustring GetModeName(std::size_t mode)
-	{
-		mpt::ustring result;
-		switch(mode)
-		{
-			case 0:
-				// no dither
-				result = MPT_USTRING("no");
-				break;
-			case 1:
-				// chosen by OpenMPT code, might change
-				result = MPT_USTRING("default");
-				break;
-			case 2:
-				// rectangular, 0.5 bit depth, no noise shaping (original ModPlug Tracker)
-				result = MPT_USTRING("0.5 bit");
-				break;
-			case 3:
-				// rectangular, 1 bit depth, simple 1st order noise shaping
-				result = MPT_USTRING("1 bit");
-				break;
-			default:
-				result = MPT_USTRING("");
-				break;
-		}
-		return result;
-	}
-};
-
-
-template <typename AvailableDithers, typename DitherNames, std::size_t defaultChannels, std::size_t defaultDither, std::size_t noDither, typename seeding_prng = mpt::good_prng>
+template <typename AvailableDithers, typename DitherNames, std::size_t defaultChannels, std::size_t defaultDither, std::size_t noDither, typename seeding_random_engine = mpt::good_engine>
 class Dithers
 	: public DitherNames
 {
@@ -111,13 +70,13 @@ public:
 	static constexpr std::size_t DefaultChannels = defaultChannels;
 
 private:
-	seeding_prng m_PRNG;
+	seeding_random_engine m_PRNG;
 	AvailableDithers m_Dithers;
 
 public:
 	template <typename Trd>
 	Dithers(Trd &rd, std::size_t mode = defaultDither, std::size_t channels = defaultChannels)
-		: m_PRNG(mpt::make_prng<seeding_prng>(rd))
+		: m_PRNG(mpt::make_prng<seeding_random_engine>(rd))
 		, m_Dithers(std::in_place_index<defaultDither>, m_PRNG, channels)
 	{
 		SetMode(mode, channels);
@@ -209,22 +168,6 @@ public:
 		return std::visit([](auto &dither)
 						  { return dither.GetChannels(); },
 						  m_Dithers);
-	}
-};
-
-
-using DithersOpenMPT =
-	Dithers<std::variant<MultiChannelDither<Dither_None>, MultiChannelDither<Dither_Default>, MultiChannelDither<Dither_ModPlug>, MultiChannelDither<Dither_Simple>>, DitherNamesOpenMPT, 4, 1, 0>;
-
-
-struct DithersWrapperOpenMPT
-	: DithersOpenMPT
-{
-	template <typename Trd>
-	DithersWrapperOpenMPT(Trd &rd, std::size_t mode = DithersOpenMPT::DefaultDither, std::size_t channels = DithersOpenMPT::DefaultChannels)
-		: DithersOpenMPT(rd, mode, channels)
-	{
-		return;
 	}
 };
 

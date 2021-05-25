@@ -816,7 +816,6 @@
     <ClInclude Include="..\..\src\openmpt\base\Int24.hpp" />
     <ClInclude Include="..\..\src\openmpt\base\Types.hpp" />
     <ClInclude Include="..\..\src\openmpt\logging\Logger.hpp" />
-    <ClInclude Include="..\..\src\openmpt\random\DefaultPRNG.hpp" />
     <ClInclude Include="..\..\src\openmpt\random\ModPlug.hpp" />
   </ItemGroup>
   <ItemGroup>
