@@ -335,13 +335,13 @@ public:
 
 namespace wine {
 
-class version
-{
+class version {
 protected:
 	bool valid = false;
 	uint8 vmajor = 0;
 	uint8 vminor = 0;
 	uint8 vupdate = 0;
+
 public:
 	version() {
 		return;
@@ -353,10 +353,12 @@ public:
 		, vupdate(vupdate_) {
 		return;
 	}
+
 public:
 	bool IsValid() const {
 		return true;
 	}
+
 private:
 	static mpt::osinfo::windows::wine::version FromInteger(uint32 version) {
 		mpt::osinfo::windows::wine::version result;
@@ -373,6 +375,7 @@ private:
 		version |= static_cast<uint32>(vupdate) << 0;
 		return version;
 	}
+
 public:
 	bool IsBefore(mpt::osinfo::windows::wine::version other) const {
 		if (!IsValid()) {

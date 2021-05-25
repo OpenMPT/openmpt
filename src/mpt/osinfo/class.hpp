@@ -27,7 +27,7 @@ enum class osclass
 	DOS,
 };
 
-} // namespace osinfo;
+} // namespace osinfo
 
 
 
