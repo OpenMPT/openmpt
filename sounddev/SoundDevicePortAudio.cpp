@@ -17,6 +17,10 @@
 
 #include "../common/misc_util.h"
 
+#include "mpt/format/message_macros.hpp"
+#include "mpt/format/simple.hpp"
+#include "mpt/string/types.hpp"
+#include "openmpt/base/Types.hpp"
 
 #ifdef MPT_WITH_PORTAUDIO
 #if defined(MODPLUG_TRACKER) && MPT_COMPILER_MSVC
@@ -51,7 +55,7 @@ CPortaudioDevice::CPortaudioDevice(ILogger &logger, SoundDevice::Info info, Soun
 	, m_StatisticPeriodFrames(0)
 {
 	mpt::ustring internalID = GetDeviceInternalID();
-	if(internalID == U_("WASAPI-Default"))
+	if(internalID == MPT_USTRING("WASAPI-Default"))
 	{
 		m_DeviceIsDefault = true;
 		m_DeviceIndex = Pa_GetHostApiInfo(Pa_HostApiTypeIdToHostApiIndex(paWASAPI))->defaultOutputDevice;
@@ -127,28 +131,28 @@ bool CPortaudioDevice::InternalOpen()
 		if(m_Settings.BoostThreadPriority)
 		{
 			m_WasapiStreamInfo.flags |= paWinWasapiThreadPriority;
-			if(GetAppInfo().BoostedThreadMMCSSClassVista == U_(""))
+			if(GetAppInfo().BoostedThreadMMCSSClassVista == MPT_USTRING(""))
 			{
 				m_WasapiStreamInfo.threadPriority = eThreadPriorityNone;
-			} else if(GetAppInfo().BoostedThreadMMCSSClassVista == U_("Audio"))
+			} else if(GetAppInfo().BoostedThreadMMCSSClassVista == MPT_USTRING("Audio"))
 			{
 				m_WasapiStreamInfo.threadPriority = eThreadPriorityAudio;
-			} else if(GetAppInfo().BoostedThreadMMCSSClassVista == U_("Capture"))
+			} else if(GetAppInfo().BoostedThreadMMCSSClassVista == MPT_USTRING("Capture"))
 			{
 				m_WasapiStreamInfo.threadPriority = eThreadPriorityCapture;
-			} else if(GetAppInfo().BoostedThreadMMCSSClassVista == U_("Distribution"))
+			} else if(GetAppInfo().BoostedThreadMMCSSClassVista == MPT_USTRING("Distribution"))
 			{
 				m_WasapiStreamInfo.threadPriority = eThreadPriorityDistribution;
-			} else if(GetAppInfo().BoostedThreadMMCSSClassVista == U_("Games"))
+			} else if(GetAppInfo().BoostedThreadMMCSSClassVista == MPT_USTRING("Games"))
 			{
 				m_WasapiStreamInfo.threadPriority = eThreadPriorityGames;
-			} else if(GetAppInfo().BoostedThreadMMCSSClassVista == U_("Playback"))
+			} else if(GetAppInfo().BoostedThreadMMCSSClassVista == MPT_USTRING("Playback"))
 			{
 				m_WasapiStreamInfo.threadPriority = eThreadPriorityPlayback;
-			} else if(GetAppInfo().BoostedThreadMMCSSClassVista == U_("Pro Audio"))
+			} else if(GetAppInfo().BoostedThreadMMCSSClassVista == MPT_USTRING("Pro Audio"))
 			{
 				m_WasapiStreamInfo.threadPriority = eThreadPriorityProAudio;
-			} else if(GetAppInfo().BoostedThreadMMCSSClassVista == U_("Window Manager"))
+			} else if(GetAppInfo().BoostedThreadMMCSSClassVista == MPT_USTRING("Window Manager"))
 			{
 				m_WasapiStreamInfo.threadPriority = eThreadPriorityWindowManager;
 			} else
@@ -362,19 +366,19 @@ SoundDevice::Statistics CPortaudioDevice::GetStatistics() const
 		{
 			if(m_StreamParameters.hostApiSpecificStreamInfo && (m_WasapiStreamInfo.flags & paWinWasapiExplicitSampleFormat))
 			{
-				result.text += U_("Exclusive stream.");
+				result.text += MPT_USTRING("Exclusive stream.");
 			} else
 			{
-				result.text += U_("Exclusive stream with sample format conversion.");
+				result.text += MPT_USTRING("Exclusive stream with sample format conversion.");
 			}
 		} else
 		{
 			if(m_StreamParameters.hostApiSpecificStreamInfo && (m_WasapiStreamInfo.flags & paWinWasapiAutoConvert))
 			{
-				result.text += U_("WASAPI stream resampling.");
+				result.text += MPT_USTRING("WASAPI stream resampling.");
 			} else
 			{
-				result.text += U_("No resampling.");
+				result.text += MPT_USTRING("No resampling.");
 			}
 		}
 	}
@@ -772,14 +776,14 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(ILogger &logge
 				result.type = TypePORTAUDIO_DS;
 				break;
 			default:
-				result.type = U_("PortAudio") + U_("-") + mpt::ufmt::dec(static_cast<int>(Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->type));
+				result.type = MPT_USTRING("PortAudio") + MPT_USTRING("-") + mpt::format<mpt::ustring>::dec(static_cast<int>(Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->type));
 				break;
 		}
-		result.internalID = mpt::ufmt::dec(dev);
+		result.internalID = mpt::format<mpt::ustring>::dec(dev);
 		result.name = mpt::ToUnicode(mpt::Charset::UTF8, Pa_GetDeviceInfo(dev)->name);
 		result.apiName = mpt::ToUnicode(mpt::Charset::UTF8, Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->name);
-		result.extraData[U_("PortAudio-HostAPI-name")] = mpt::ToUnicode(mpt::Charset::UTF8, Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->name);
-		result.apiPath.push_back(U_("PortAudio"));
+		result.extraData[MPT_USTRING("PortAudio-HostAPI-name")] = mpt::ToUnicode(mpt::Charset::UTF8, Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->name);
+		result.apiPath.push_back(MPT_USTRING("PortAudio"));
 		result.useNameAsIdentifier = true;
 		result.flags = {
 			Info::Usability::Unknown,
@@ -793,7 +797,7 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(ILogger &logge
 		switch(Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->type)
 		{
 		case paDirectSound:
-			result.apiName = U_("DirectSound");
+			result.apiName = MPT_USTRING("DirectSound");
 			result.default_ = ((Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->defaultOutputDevice == static_cast<PaDeviceIndex>(dev)) ? Info::Default::Managed : Info::Default::None);
 			result.flags = {
 				sysInfo.SystemClass == mpt::osinfo::osclass::Windows ? sysInfo.IsWindowsOriginal() && sysInfo.WindowsVersion.IsBefore(mpt::osinfo::windows::Version::Win7) ? Info::Usability::Usable : Info::Usability::Deprecated : Info::Usability::NotAvailable,
@@ -806,7 +810,7 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(ILogger &logge
 			};
 			break;
 		case paMME:
-			result.apiName = U_("MME");
+			result.apiName = MPT_USTRING("MME");
 			result.default_ = ((Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->defaultOutputDevice == static_cast<PaDeviceIndex>(dev)) ? Info::Default::Named : Info::Default::None);
 			result.flags = {
 				sysInfo.SystemClass == mpt::osinfo::osclass::Windows ? sysInfo.IsWindowsOriginal() && sysInfo.WindowsVersion.IsBefore(mpt::osinfo::windows::Version::Win7) ? Info::Usability::Usable : Info::Usability::Legacy : Info::Usability::NotAvailable,
@@ -819,7 +823,7 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(ILogger &logge
 			};
 			break;
 		case paASIO:
-			result.apiName = U_("ASIO");
+			result.apiName = MPT_USTRING("ASIO");
 			result.default_ = ((Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->defaultOutputDevice == static_cast<PaDeviceIndex>(dev)) ? Info::Default::Named : Info::Default::None);
 			result.flags = {
 				sysInfo.SystemClass == mpt::osinfo::osclass::Windows ? sysInfo.IsWindowsOriginal() ? Info::Usability::Usable : Info::Usability::Experimental : Info::Usability::NotAvailable,
@@ -832,7 +836,7 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(ILogger &logge
 			};
 			break;
 		case paCoreAudio:
-			result.apiName = U_("CoreAudio");
+			result.apiName = MPT_USTRING("CoreAudio");
 			result.default_ = ((Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->defaultOutputDevice == static_cast<PaDeviceIndex>(dev)) ? Info::Default::Named : Info::Default::None);
 			result.flags = {
 				sysInfo.SystemClass == mpt::osinfo::osclass::Darwin ? Info::Usability::Usable : Info::Usability::NotAvailable,
@@ -845,7 +849,7 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(ILogger &logge
 			};
 			break;
 		case paOSS:
-			result.apiName = U_("OSS");
+			result.apiName = MPT_USTRING("OSS");
 			result.default_ = ((Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->defaultOutputDevice == static_cast<PaDeviceIndex>(dev)) ? Info::Default::Named : Info::Default::None);
 			result.flags = {
 				sysInfo.SystemClass == mpt::osinfo::osclass::BSD ? Info::Usability::Usable : sysInfo.SystemClass == mpt::osinfo::osclass::Linux ? Info::Usability::Deprecated : Info::Usability::NotAvailable,
@@ -858,7 +862,7 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(ILogger &logge
 			};
 			break;
 		case paALSA:
-			result.apiName = U_("ALSA");
+			result.apiName = MPT_USTRING("ALSA");
 			result.default_ = ((Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->defaultOutputDevice == static_cast<PaDeviceIndex>(dev)) ? Info::Default::Named : Info::Default::None);
 			result.flags = {
 				sysInfo.SystemClass == mpt::osinfo::osclass::Linux ? Info::Usability::Usable : Info::Usability::Experimental,
@@ -871,7 +875,7 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(ILogger &logge
 			};
 			break;
 		case paAL:
-			result.apiName = U_("OpenAL");
+			result.apiName = MPT_USTRING("OpenAL");
 			result.default_ = ((Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->defaultOutputDevice == static_cast<PaDeviceIndex>(dev)) ? Info::Default::Named : Info::Default::None);
 			result.flags = {
 				Info::Usability::Usable,
@@ -884,7 +888,7 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(ILogger &logge
 			};
 			break;
 		case paWDMKS:
-			result.apiName = sysInfo.WindowsVersion.IsAtLeast(mpt::osinfo::windows::Version::WinVista) ? U_("WaveRT") : U_("WDM-KS");
+			result.apiName = sysInfo.WindowsVersion.IsAtLeast(mpt::osinfo::windows::Version::WinVista) ? MPT_USTRING("WaveRT") : MPT_USTRING("WDM-KS");
 			result.default_ = ((Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->defaultOutputDevice == static_cast<PaDeviceIndex>(dev)) ? Info::Default::Named : Info::Default::None);
 			result.flags = {
 				sysInfo.SystemClass == mpt::osinfo::osclass::Windows ? sysInfo.IsWindowsOriginal() ? sysInfo.WindowsVersion.IsBefore(mpt::osinfo::windows::Version::WinVista) ? Info::Usability::Usable : Info::Usability::Usable : Info::Usability::Broken : Info::Usability::NotAvailable,
@@ -897,7 +901,7 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(ILogger &logge
 			};
 			break;
 		case paJACK:
-			result.apiName = U_("JACK");
+			result.apiName = MPT_USTRING("JACK");
 			result.default_ = ((Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->defaultOutputDevice == static_cast<PaDeviceIndex>(dev)) ? Info::Default::Managed : Info::Default::None);
 			result.flags = {
 				sysInfo.SystemClass == mpt::osinfo::osclass::Linux ? Info::Usability::Usable : sysInfo.SystemClass == mpt::osinfo::osclass::Darwin ? Info::Usability::Usable : Info::Usability::Experimental,
@@ -910,7 +914,7 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(ILogger &logge
 			};
 			break;
 		case paWASAPI:
-			result.apiName = U_("WASAPI");
+			result.apiName = MPT_USTRING("WASAPI");
 			result.default_ = ((Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->defaultOutputDevice == static_cast<PaDeviceIndex>(dev)) ? Info::Default::Named : Info::Default::None);
 			result.flags = {
 				sysInfo.SystemClass == mpt::osinfo::osclass::Windows ?
@@ -938,15 +942,15 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(ILogger &logge
 			// nothing
 			break;
 		}
-		PALOG(MPT_UFORMAT("PortAudio: {}, {}, {}, {}")(result.internalID, result.name, result.apiName, static_cast<int>(result.default_)));
-		PALOG(MPT_UFORMAT(" low  : {}")(Pa_GetDeviceInfo(dev)->defaultLowOutputLatency));
-		PALOG(MPT_UFORMAT(" high : {}")(Pa_GetDeviceInfo(dev)->defaultHighOutputLatency));
+		PALOG(MPT_UFORMAT_MESSAGE("PortAudio: {}, {}, {}, {}")(result.internalID, result.name, result.apiName, static_cast<int>(result.default_)));
+		PALOG(MPT_UFORMAT_MESSAGE(" low  : {}")(Pa_GetDeviceInfo(dev)->defaultLowOutputLatency));
+		PALOG(MPT_UFORMAT_MESSAGE(" high : {}")(Pa_GetDeviceInfo(dev)->defaultHighOutputLatency));
 		if((result.default_ != Info::Default::None) && (Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->type == paWASAPI))
 		{
 			auto defaultResult = result;
 			defaultResult.default_ = Info::Default::Managed;
-			defaultResult.name = U_("Default Device");
-			defaultResult.internalID = U_("WASAPI-Default");
+			defaultResult.name = MPT_USTRING("Default Device");
+			defaultResult.internalID = MPT_USTRING("WASAPI-Default");
 			defaultResult.useNameAsIdentifier = false;
 			devices.push_back(defaultResult);
 			result.default_ = Info::Default::Named;
@@ -1023,7 +1027,7 @@ static void PortaudioLog(const char *text)
 		return;
 	}
 #if PA_LOG_ENABLED
-	MPT_LOG(mpt::log::GlobalLogger(), LogDebug, "PortAudio", MPT_UFORMAT("PortAudio: {}")(mpt::ToUnicode(mpt::Charset::UTF8, text)));
+	MPT_LOG(mpt::log::GlobalLogger(), LogDebug, "PortAudio", MPT_UFORMAT_MESSAGE("PortAudio: {}")(mpt::ToUnicode(mpt::Charset::UTF8, text)));
 #endif
 }
 #endif // MPT_COMPILER_MSVC

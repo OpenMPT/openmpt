@@ -22,6 +22,11 @@
 #include "SoundDevicePulseaudio.h"
 #include "SoundDevicePulseSimple.h"
 
+#include "mpt/format/message_macros.hpp"
+#include "mpt/format/simple.hpp"
+#include "mpt/string/types.hpp"
+#include "openmpt/base/Types.hpp"
+
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -184,52 +189,52 @@ void Manager::ReEnumerate(bool firstRun)
 	if(GetSysInfo().SystemClass == mpt::osinfo::osclass::Linux)
 	{
 #if defined(MPT_WITH_PULSEAUDIO)
-		typeDefault[U_("PulseAudio")].value = Info::DefaultFor::System;
+		typeDefault[MPT_USTRING("PulseAudio")].value = Info::DefaultFor::System;
 #endif
 #if defined(MPT_WITH_PULSEAUDIO) && defined(MPT_WITH_PULSEAUDIOSIMPLE)
-		typeDefault[U_("PulseAudio-Simple")].value = Info::DefaultFor::System;
+		typeDefault[MPT_USTRING("PulseAudio-Simple")].value = Info::DefaultFor::System;
 #endif
 #if defined(MPT_WITH_RTAUDIO)
-		typeDefault[MPT_UFORMAT("RtAudio-{}")(U_("pulse"))].value = Info::DefaultFor::System;
+		typeDefault[MPT_UFORMAT_MESSAGE("RtAudio-{}")(MPT_USTRING("pulse"))].value = Info::DefaultFor::System;
 #endif
 #if defined(MPT_WITH_RTAUDIO)
-		typeDefault[MPT_UFORMAT("RtAudio-{}")(U_("alsa"))].value = Info::DefaultFor::LowLevel;
+		typeDefault[MPT_UFORMAT_MESSAGE("RtAudio-{}")(MPT_USTRING("alsa"))].value = Info::DefaultFor::LowLevel;
 #endif
 #if defined(MPT_WITH_RTAUDIO)
-		typeDefault[MPT_UFORMAT("RtAudio-{}")(U_("jack"))].value = Info::DefaultFor::ProAudio;
+		typeDefault[MPT_UFORMAT_MESSAGE("RtAudio-{}")(MPT_USTRING("jack"))].value = Info::DefaultFor::ProAudio;
 #endif
 #if defined(MPT_WITH_PORTAUDIO)
-		typeDefault[MPT_UFORMAT("PortAudio-{}")(paALSA)].value = Info::DefaultFor::LowLevel;
+		typeDefault[MPT_UFORMAT_MESSAGE("PortAudio-{}")(mpt::to_underlying(paALSA))].value = Info::DefaultFor::LowLevel;
 #endif
 #if defined(MPT_WITH_PORTAUDIO)
-		typeDefault[MPT_UFORMAT("PortAudio-{}")(paJACK)].value = Info::DefaultFor::ProAudio;
+		typeDefault[MPT_UFORMAT_MESSAGE("PortAudio-{}")(mpt::to_underlying(paJACK))].value = Info::DefaultFor::ProAudio;
 #endif
 	} else if(GetSysInfo().SystemClass == mpt::osinfo::osclass::Darwin)
 	{
 #if defined(MPT_WITH_RTAUDIO)
-		typeDefault[MPT_UFORMAT("RtAudio-{}")(U_("core"))].value = Info::DefaultFor::System;
+		typeDefault[MPT_UFORMAT_MESSAGE("RtAudio-{}")(MPT_USTRING("core"))].value = Info::DefaultFor::System;
 #endif
 #if defined(MPT_WITH_PORTAUDIO)
-		typeDefault[MPT_UFORMAT("PortAudio-{}")(paCoreAudio)].value = Info::DefaultFor::System;
+		typeDefault[MPT_UFORMAT_MESSAGE("PortAudio-{}")(mpt::to_underlying(paCoreAudio))].value = Info::DefaultFor::System;
 #endif
 #if defined(MPT_WITH_RTAUDIO)
-		typeDefault[MPT_UFORMAT("RtAudio-{}")(U_("jack"))].value = Info::DefaultFor::ProAudio;
+		typeDefault[MPT_UFORMAT_MESSAGE("RtAudio-{}")(MPT_USTRING("jack"))].value = Info::DefaultFor::ProAudio;
 #endif
 #if defined(MPT_WITH_PORTAUDIO)
-		typeDefault[MPT_UFORMAT("PortAudio-{}")(paJACK)].value = Info::DefaultFor::ProAudio;
+		typeDefault[MPT_UFORMAT_MESSAGE("PortAudio-{}")(mpt::to_underlying(paJACK))].value = Info::DefaultFor::ProAudio;
 #endif
 	} else if(GetSysInfo().SystemClass == mpt::osinfo::osclass::BSD)
 	{
 #if defined(MPT_WITH_PORTAUDIO)
-		typeDefault[MPT_UFORMAT("PortAudio-{}")(paOSS)].value = Info::DefaultFor::System;
+		typeDefault[MPT_UFORMAT_MESSAGE("PortAudio-{}")(mpt::to_underlying(paOSS))].value = Info::DefaultFor::System;
 #endif
 #if defined(MPT_WITH_RTAUDIO)
-		typeDefault[MPT_UFORMAT("RtAudio-{}")(U_("oss"))].value = Info::DefaultFor::System;
+		typeDefault[MPT_UFORMAT_MESSAGE("RtAudio-{}")(MPT_USTRING("oss"))].value = Info::DefaultFor::System;
 #endif
 	} else if(GetSysInfo().SystemClass == mpt::osinfo::osclass::Haiku)
 	{
 #if defined(MPT_WITH_PORTAUDIO)
-		typeDefault[MPT_UFORMAT("PortAudio-{}")(paBeOS)].value = Info::DefaultFor::System;
+		typeDefault[MPT_UFORMAT_MESSAGE("PortAudio-{}")(mpt::to_underlying(paBeOS))].value = Info::DefaultFor::System;
 #endif
 	} else if(GetSysInfo().SystemClass == mpt::osinfo::osclass::Windows && GetSysInfo().IsWindowsWine() && GetSysInfo().WineHostClass == mpt::osinfo::osclass::Linux)
 	{ // Wine on Linux
@@ -266,17 +271,17 @@ void Manager::ReEnumerate(bool firstRun)
 	}
 	std::stable_sort(m_SoundDevices.begin(), m_SoundDevices.end(), CompareInfo());
 
-	MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT("Sound Devices enumerated:")());
+	MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT_MESSAGE("Sound Devices enumerated:")());
 	for(const auto &device : m_SoundDevices)
 	{
-		MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT(" Identifier : {}")(device.GetIdentifier()));
-		MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT("  Type      : {}")(device.type));
-		MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT("  InternalID: {}")(device.internalID));
-		MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT("  API Name  : {}")(device.apiName));
-		MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT("  Name      : {}")(device.name));
+		MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT_MESSAGE(" Identifier : {}")(device.GetIdentifier()));
+		MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT_MESSAGE("  Type      : {}")(device.type));
+		MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT_MESSAGE("  InternalID: {}")(device.internalID));
+		MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT_MESSAGE("  API Name  : {}")(device.apiName));
+		MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT_MESSAGE("  Name      : {}")(device.name));
 		for(const auto &extra : device.extraData)
 		{
-			MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT("  Extra Data: {} = {}")(extra.first, extra.second));
+			MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT_MESSAGE("  Extra Data: {} = {}")(extra.first, extra.second));
 		}
 	}
 	

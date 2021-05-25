@@ -19,6 +19,11 @@
 #include "mpt/uuid/guid.hpp"
 #include "mpt/uuid/uuid.hpp"
 
+#include "mpt/format/message_macros.hpp"
+#include "mpt/format/simple.hpp"
+#include "mpt/string/types.hpp"
+#include "openmpt/base/Types.hpp"
+
 #include "../common/misc_util.h"
 #include "../common/mptStringBuffer.h"
 
@@ -63,13 +68,13 @@ static BOOL WINAPI DSEnumCallback(GUID * lpGuid, LPCTSTR lpstrDescription, LPCTS
 	info.name = mpt::ToUnicode(mpt::winstring(lpstrDescription));
 	if(lpstrDriver)
 	{
-		info.extraData[U_("DriverName")] = mpt::ToUnicode(mpt::winstring(lpstrDriver));
+		info.extraData[MPT_USTRING("DriverName")] = mpt::ToUnicode(mpt::winstring(lpstrDriver));
 	}
 	if(lpGuid)
 	{
-		info.extraData[U_("UUID")] = mpt::ufmt::val(mpt::UUID(guid));
+		info.extraData[MPT_USTRING("UUID")] = mpt::format<mpt::ustring>::val(mpt::UUID(guid));
 	}
-	info.apiName = U_("DirectSound");
+	info.apiName = MPT_USTRING("DirectSound");
 	info.useNameAsIdentifier = false;
 	info.flags = {
 		sysInfo.SystemClass == mpt::osinfo::osclass::Windows ? sysInfo.IsWindowsOriginal() && sysInfo.WindowsVersion.IsBefore(mpt::osinfo::windows::Version::Win7) ? Info::Usability::Usable : Info::Usability::Deprecated : Info::Usability::NotAvailable,
@@ -127,7 +132,7 @@ SoundDevice::Caps CDSoundDevice::InternalGetDeviceCaps()
 	caps.CanInput = false;
 	caps.HasNamedInputSources = false;
 	caps.CanDriverPanel = false;
-	caps.ExclusiveModeDescription = U_("Use primary buffer");
+	caps.ExclusiveModeDescription = MPT_USTRING("Use primary buffer");
 	caps.DefaultSettings.sampleFormat = (GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::osinfo::windows::Version::WinVista)) ? SampleFormat::Float32 : SampleFormat::Int16;
 	IDirectSound *dummy = nullptr;
 	IDirectSound *ds = nullptr;

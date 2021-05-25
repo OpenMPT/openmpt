@@ -16,6 +16,10 @@
 
 #include "../common/misc_util.h"
 
+#include "mpt/format/message_macros.hpp"
+#include "mpt/string/types.hpp"
+#include "openmpt/base/Types.hpp"
+
 #include <algorithm>
 
 #if MPT_OS_WINDOWS
@@ -492,9 +496,9 @@ public:
 						} else
 						{
 							#if defined(MPT_WITH_DBUS) && defined(MPT_WITH_RTKIT)
-								MPT_LOG(GetLogger(), LogNotification, "sounddev", MPT_UFORMAT("sched_setscheduler: {}")(errno));
+								MPT_LOG(GetLogger(), LogNotification, "sounddev", MPT_UFORMAT_MESSAGE("sched_setscheduler: {}")(errno));
 							#else
-								MPT_LOG(GetLogger(), LogError, "sounddev", MPT_UFORMAT("sched_setscheduler: {}")(errno));
+								MPT_LOG(GetLogger(), LogError, "sounddev", MPT_UFORMAT_MESSAGE("sched_setscheduler: {}")(errno));
 							#endif
 						}
 					#else
@@ -504,9 +508,9 @@ public:
 						} else
 						{
 							#if defined(MPT_WITH_DBUS) && defined(MPT_WITH_RTKIT)
-								MPT_LOG(GetLogger(), LogNotification, "sounddev", MPT_UFORMAT("sched_setscheduler: {}")(errno));
+								MPT_LOG(GetLogger(), LogNotification, "sounddev", MPT_UFORMAT_MESSAGE("sched_setscheduler: {}")(errno));
 							#else
-								MPT_LOG(GetLogger(), LogError, "sounddev", MPT_UFORMAT("sched_setscheduler: {}")(errno));
+								MPT_LOG(GetLogger(), LogError, "sounddev", MPT_UFORMAT_MESSAGE("sched_setscheduler: {}")(errno));
 							#endif
 						}
 					#endif
@@ -519,9 +523,9 @@ public:
 				} else
 				{
 					#if defined(MPT_WITH_DBUS) && defined(MPT_WITH_RTKIT)
-						MPT_LOG(GetLogger(), LogNotification, "sounddev", MPT_UFORMAT("setpriority: {}")(errno));
+						MPT_LOG(GetLogger(), LogNotification, "sounddev", MPT_UFORMAT_MESSAGE("setpriority: {}")(errno));
 					#else
-						MPT_LOG(GetLogger(), LogError, "sounddev", MPT_UFORMAT("setpriority: {}")(errno));
+						MPT_LOG(GetLogger(), LogError, "sounddev", MPT_UFORMAT_MESSAGE("setpriority: {}")(errno));
 					#endif
 				}
 			}
@@ -533,7 +537,7 @@ public:
 					bus = dbus_bus_get(DBUS_BUS_SYSTEM, &error);
 					if(!bus)
 					{
-						MPT_LOG(GetLogger(), LogError, "sounddev", MPT_UFORMAT("DBus: dbus_bus_get: {}")(mpt::ToUnicode(mpt::Charset::UTF8, error.message)));
+						MPT_LOG(GetLogger(), LogError, "sounddev", MPT_UFORMAT_MESSAGE("DBus: dbus_bus_get: {}")(mpt::ToUnicode(mpt::Charset::UTF8, error.message)));
 					}
 					dbus_error_free(&error);
 					if(bus)
@@ -542,7 +546,7 @@ public:
 						{
 							int e = rtkit_make_realtime(bus, 0, rt_priority);
 							if(e != 0) {
-								MPT_LOG(GetLogger(), LogError, "sounddev", MPT_UFORMAT("RtKit: rtkit_make_realtime: {}")(e));
+								MPT_LOG(GetLogger(), LogError, "sounddev", MPT_UFORMAT_MESSAGE("RtKit: rtkit_make_realtime: {}")(e));
 							} else
 							{
 								successfull = true;
@@ -551,7 +555,7 @@ public:
 						{
 							int e = rtkit_make_high_priority(bus, 0, niceness);
 							if(e != 0) {
-								MPT_LOG(GetLogger(), LogError, "sounddev", MPT_UFORMAT("RtKit: rtkit_make_high_priority: {}")(e));
+								MPT_LOG(GetLogger(), LogError, "sounddev", MPT_UFORMAT_MESSAGE("RtKit: rtkit_make_high_priority: {}")(e));
 							} else
 							{
 								successfull = true;

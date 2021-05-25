@@ -17,6 +17,7 @@
 #include "mpt/osinfo/class.hpp"
 #include "mpt/osinfo/windows_version.hpp"
 #include "openmpt/soundbase/SampleFormat.hpp"
+#include "mpt/string/types.hpp"
 
 #include <map>
 #include <vector>
@@ -104,13 +105,13 @@ public:
 };
 
 
-inline constexpr mpt::uchar TypeWAVEOUT          [] = UL_("WaveOut");
-inline constexpr mpt::uchar TypeDSOUND           [] = UL_("DirectSound");
-inline constexpr mpt::uchar TypeASIO             [] = UL_("ASIO");
-inline constexpr mpt::uchar TypePORTAUDIO_WASAPI [] = UL_("WASAPI");
-inline constexpr mpt::uchar TypePORTAUDIO_WDMKS  [] = UL_("WDM-KS");
-inline constexpr mpt::uchar TypePORTAUDIO_WMME   [] = UL_("MME");
-inline constexpr mpt::uchar TypePORTAUDIO_DS     [] = UL_("DS");
+inline constexpr mpt::uchar TypeWAVEOUT          [] = MPT_ULITERAL("WaveOut");
+inline constexpr mpt::uchar TypeDSOUND           [] = MPT_ULITERAL("DirectSound");
+inline constexpr mpt::uchar TypeASIO             [] = MPT_ULITERAL("ASIO");
+inline constexpr mpt::uchar TypePORTAUDIO_WASAPI [] = MPT_ULITERAL("WASAPI");
+inline constexpr mpt::uchar TypePORTAUDIO_WDMKS  [] = MPT_ULITERAL("WDM-KS");
+inline constexpr mpt::uchar TypePORTAUDIO_WMME   [] = MPT_ULITERAL("MME");
+inline constexpr mpt::uchar TypePORTAUDIO_DS     [] = MPT_ULITERAL("DS");
 
 typedef mpt::ustring Type;
 
@@ -358,7 +359,7 @@ struct AppInfo
 	AppInfo()
 		: UIHandle(0)
 		, BoostedThreadPriorityXP(2)  // THREAD_PRIORITY_HIGHEST 
-		, BoostedThreadMMCSSClassVista(U_("Pro Audio"))
+		, BoostedThreadMMCSSClassVista(MPT_USTRING("Pro Audio"))
 		, BoostedThreadRealtimePosix(false)
 		, BoostedThreadNicenessPosix(-5)
 		, BoostedThreadRtprioPosix(10)
@@ -496,7 +497,7 @@ struct Caps
 		, HasNamedInputSources(false)
 		, CanDriverPanel(false)
 		, HasInternalDither(false)
-		, ExclusiveModeDescription(U_("Use device exclusively"))
+		, ExclusiveModeDescription(MPT_USTRING("Use device exclusively"))
 		, LatencyMin(0.002) // 2ms
 		, LatencyMax(0.5) // 500ms
 		, UpdateIntervalMin(0.001) // 1ms

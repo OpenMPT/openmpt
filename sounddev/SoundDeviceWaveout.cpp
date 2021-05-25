@@ -19,6 +19,11 @@
 #include "../common/misc_util.h"
 #include "../common/mptStringBuffer.h"
 
+#include "mpt/format/message_macros.hpp"
+#include "mpt/format/simple.hpp"
+#include "mpt/string/types.hpp"
+#include "openmpt/base/Types.hpp"
+
 #include <set>
 
 
@@ -93,7 +98,7 @@ SoundDevice::Caps CWaveDevice::InternalGetDeviceCaps()
 	caps.HasNamedInputSources = false;
 	caps.CanDriverPanel = false;
 	caps.HasInternalDither = false;
-	caps.ExclusiveModeDescription = U_("Use direct mode");
+	caps.ExclusiveModeDescription = MPT_USTRING("Use direct mode");
 	if(GetSysInfo().IsWine)
 	{
 		caps.DefaultSettings.sampleFormat = SampleFormat::Int16;
@@ -305,7 +310,7 @@ bool CWaveDevice::InternalClose()
 	#ifdef MPT_BUILD_DEBUG
 		if(m_DriverBugs.load())
 		{
-				SendDeviceMessage(LogError, U_("Errors were detected while playing sound:\n") + GetStatistics().text);
+				SendDeviceMessage(LogError, MPT_USTRING("Errors were detected while playing sound:\n") + GetStatistics().text);
 		}
 	#endif
 	m_DriverBugs = 0;
@@ -367,8 +372,8 @@ bool CWaveDevice::CheckResult(MMRESULT result)
 		m_Failed = true;
 		TCHAR errortext[MAXERRORLENGTH + 1] = {};
 		waveOutGetErrorText(result, errortext, MAXERRORLENGTH);
-		SendDeviceMessage(LogError, MPT_UFORMAT("WaveOut error: 0x{}: {}")
-			( mpt::ufmt::hex0<8>(result)
+		SendDeviceMessage(LogError, MPT_UFORMAT_MESSAGE("WaveOut error: 0x{}: {}")
+			( mpt::format<mpt::ustring>::hex0<8>(result)
 			, mpt::ToUnicode(mpt::String::ReadWinBuf(errortext))
 			));
 	}
@@ -388,9 +393,9 @@ bool CWaveDevice::CheckResult(MMRESULT result, DWORD param)
 		m_Failed = true;
 		TCHAR errortext[MAXERRORLENGTH + 1] = {};
 		waveOutGetErrorText(result, errortext, MAXERRORLENGTH);
-		SendDeviceMessage(LogError, MPT_UFORMAT("WaveOut error: 0x{} (param 0x{}): {}")
-			( mpt::ufmt::hex0<8>(result)
-			, mpt::ufmt::hex0<8>(param)
+		SendDeviceMessage(LogError, MPT_UFORMAT_MESSAGE("WaveOut error: 0x{} (param 0x{}): {}")
+			( mpt::format<mpt::ustring>::hex0<8>(result)
+			, mpt::format<mpt::ustring>::hex0<8>(param)
 			, mpt::ToUnicode(mpt::String::ReadWinBuf(errortext))
 			));
 	}
@@ -624,10 +629,10 @@ SoundDevice::Statistics CWaveDevice::GetStatistics() const
 	uint32 bugs = m_DriverBugs.load();
 	if(bugs != 0)
 	{
-		result.text = MPT_UFORMAT("Problematic driver detected! Error flags: {}")(mpt::ufmt::hex0<8>(bugs));
+		result.text = MPT_UFORMAT_MESSAGE("Problematic driver detected! Error flags: {}")(mpt::format<mpt::ustring>::hex0<8>(bugs));
 	} else
 	{
-		result.text = MPT_UFORMAT("Driver working as expected.")();
+		result.text = MPT_UFORMAT_MESSAGE("Driver working as expected.")();
 	}
 	return result;
 }
@@ -643,24 +648,24 @@ std::vector<SoundDevice::Info> CWaveDevice::EnumerateDevices(ILogger &logger, So
 	{
 		SoundDevice::Info info;
 		info.type = TypeWAVEOUT;
-		info.internalID = mpt::ufmt::dec(index);
-		info.apiName = U_("MME");
+		info.internalID = mpt::format<mpt::ustring>::dec(index);
+		info.apiName = MPT_USTRING("MME");
 		info.useNameAsIdentifier = true;
 		WAVEOUTCAPS woc = {};
 		if(waveOutGetDevCaps((index == 0) ? WAVE_MAPPER : (index - 1), &woc, sizeof(woc)) == MMSYSERR_NOERROR)
 		{
 			info.name = mpt::ToUnicode(mpt::String::ReadWinBuf(woc.szPname));
-			info.extraData[U_("DriverID")] = MPT_UFORMAT("{}:{}")(mpt::ufmt::hex0<4>(woc.wMid), mpt::ufmt::hex0<4>(woc.wPid));
-			info.extraData[U_("DriverVersion")] = MPT_UFORMAT("{}.{}")(mpt::ufmt::dec((static_cast<uint32>(woc.vDriverVersion) >> 24) & 0xff), mpt::ufmt::dec((static_cast<uint32>(woc.vDriverVersion) >>  0) & 0xff));
+			info.extraData[MPT_USTRING("DriverID")] = MPT_UFORMAT_MESSAGE("{}:{}")(mpt::format<mpt::ustring>::hex0<4>(woc.wMid), mpt::format<mpt::ustring>::hex0<4>(woc.wPid));
+			info.extraData[MPT_USTRING("DriverVersion")] = MPT_UFORMAT_MESSAGE("{}.{}")(mpt::format<mpt::ustring>::dec((static_cast<uint32>(woc.vDriverVersion) >> 24) & 0xff), mpt::format<mpt::ustring>::dec((static_cast<uint32>(woc.vDriverVersion) >>  0) & 0xff));
 		}
 		if(info.name.empty())
 		{
 			if(index == 0)
 			{
-				info.name = MPT_UFORMAT("Auto (Wave Mapper)")();
+				info.name = MPT_UFORMAT_MESSAGE("Auto (Wave Mapper)")();
 			} else
 			{
-				info.name = MPT_UFORMAT("Device {}")(index - 1);
+				info.name = MPT_UFORMAT_MESSAGE("Device {}")(index - 1);
 			}
 		}
 		info.default_ = ((index == 0) ? Info::Default::Managed : Info::Default::None);

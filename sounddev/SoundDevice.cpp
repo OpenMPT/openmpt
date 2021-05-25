@@ -18,6 +18,11 @@
 #include "../common/mptStringFormat.h"
 #include "../common/misc_util.h"
 
+#include "mpt/format/message_macros.hpp"
+#include "mpt/format/simple.hpp"
+#include "mpt/string/types.hpp"
+#include "openmpt/base/Types.hpp"
+
 #include <map>
 
 
@@ -29,7 +34,7 @@ namespace SoundDevice {
 
 SoundDevice::Type ParseType(const SoundDevice::Identifier &identifier)
 {
-	std::vector<mpt::ustring> tmp = mpt::String::Split<mpt::ustring>(identifier, U_("_"));
+	std::vector<mpt::ustring> tmp = mpt::String::Split<mpt::ustring>(identifier, MPT_USTRING("_"));
 	if(tmp.size() == 0)
 	{
 		return SoundDevice::Type();
@@ -40,20 +45,20 @@ SoundDevice::Type ParseType(const SoundDevice::Identifier &identifier)
 
 mpt::ustring Info::GetDisplayName() const
 {
-	mpt::ustring result = apiName + U_(" - ") + mpt::String::Trim(name);
+	mpt::ustring result = apiName + MPT_USTRING(" - ") + mpt::String::Trim(name);
 	switch(flags.usability)
 	{
 	case SoundDevice::Info::Usability::Experimental:
-		result += U_(" [experimental]");
+		result += MPT_USTRING(" [experimental]");
 		break;
 	case SoundDevice::Info::Usability::Deprecated:
-		result += U_(" [deprecated]");
+		result += MPT_USTRING(" [deprecated]");
 		break;
 	case SoundDevice::Info::Usability::Broken:
-		result += U_(" [broken]");
+		result += MPT_USTRING(" [broken]");
 		break;
 	case SoundDevice::Info::Usability::NotAvailable:
-		result += U_(" [alien]");
+		result += MPT_USTRING(" [alien]");
 		break;
 	default:
 		// nothing
@@ -61,11 +66,11 @@ mpt::ustring Info::GetDisplayName() const
 	}
 	if(default_ == SoundDevice::Info::Default::Named)
 	{
-		result += U_(" [default]");
+		result += MPT_USTRING(" [default]");
 	}
 	if(apiPath.size() > 0)
 	{
-		result += U_(" (") + mpt::String::Combine(apiPath, U_("/")) + U_(")");
+		result += MPT_USTRING(" (") + mpt::String::Combine(apiPath, MPT_USTRING("/")) + MPT_USTRING(")");
 	}
 	return result;
 }
@@ -79,7 +84,7 @@ SoundDevice::Identifier Info::GetIdentifier() const
 	}
 	mpt::ustring result = mpt::ustring();
 	result += type;
-	result += U_("_");
+	result += MPT_USTRING("_");
 	if(useNameAsIdentifier)
 	{
 		// UTF8-encode the name and convert the utf8 to hex.
@@ -156,13 +161,13 @@ bool ChannelMapping::IsValid(const std::vector<int32> &mapping)
 
 mpt::ustring ChannelMapping::ToUString() const
 {
-	return mpt::String::Combine<int32>(ChannelToDeviceChannel, U_(","));
+	return mpt::String::Combine<int32>(ChannelToDeviceChannel, MPT_USTRING(","));
 }
 
 
 ChannelMapping ChannelMapping::FromString(const mpt::ustring &str)
 {
-	return SoundDevice::ChannelMapping(mpt::String::Split<int32>(str, U_(",")));
+	return SoundDevice::ChannelMapping(mpt::String::Split<int32>(str, MPT_USTRING(",")));
 }
 
 

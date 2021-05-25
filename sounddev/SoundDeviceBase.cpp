@@ -13,13 +13,17 @@
 
 #include "SoundDeviceBase.h"
 
+#include "mpt/format/simple.hpp"
+#include "mpt/string/types.hpp"
+#include "openmpt/base/Types.hpp"
+
 
 OPENMPT_NAMESPACE_BEGIN
 
 
 namespace SoundDevice {
-	
-	
+
+
 Base::Base(ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
 	: m_Logger(logger)
 	, m_Source(nullptr)
@@ -111,7 +115,7 @@ uint64 Base::SourceGetReferenceClockNowNanoseconds() const
 		return 0;
 	}
 	uint64 result = m_Source->SoundSourceGetReferenceClockNowNanoseconds();
-	//MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT("clock: {}")(result));
+	//MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT_MESSAGE("clock: {}")(result));
 	return result;
 }
 
@@ -124,7 +128,7 @@ uint64 Base::SourceLockedGetReferenceClockNowNanoseconds() const
 		return 0;
 	}
 	uint64 result = m_Source->SoundSourceLockedGetReferenceClockNowNanoseconds();
-	//MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT("clock-rt: {}")(result));
+	//MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT_MESSAGE("clock-rt: {}")(result));
 	return result;
 }
 
