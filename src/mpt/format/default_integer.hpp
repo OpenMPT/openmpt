@@ -16,6 +16,7 @@
 #include "mpt/base/algorithm.hpp"
 #endif // MPT_FORMAT_CXX17_INT
 #include "mpt/base/namespace.hpp"
+#include "mpt/base/utility.hpp"
 #include "mpt/format/helpers.hpp"
 #include "mpt/string_convert/convert.hpp"
 
@@ -98,6 +99,12 @@ inline Tstring format_value_default(const T & x) {
 }
 
 #endif // !MPT_FORMAT_CXX17_INT
+
+
+template <typename Tstring, typename T, std::enable_if_t<std::is_enum<T>::value, bool> = true>
+inline Tstring format_value_default(const T & x) {
+	return mpt::format_value_default<Tstring>(mpt::to_underlying(x));
+}
 
 
 } // namespace MPT_INLINE_NS

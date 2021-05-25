@@ -204,10 +204,10 @@ void Manager::ReEnumerate(bool firstRun)
 		typeDefault[MPT_UFORMAT_MESSAGE("RtAudio-{}")(MPT_USTRING("jack"))].value = Info::DefaultFor::ProAudio;
 #endif
 #if defined(MPT_WITH_PORTAUDIO)
-		typeDefault[MPT_UFORMAT_MESSAGE("PortAudio-{}")(mpt::to_underlying(paALSA))].value = Info::DefaultFor::LowLevel;
+		typeDefault[MPT_UFORMAT_MESSAGE("PortAudio-{}")(paALSA)].value = Info::DefaultFor::LowLevel;
 #endif
 #if defined(MPT_WITH_PORTAUDIO)
-		typeDefault[MPT_UFORMAT_MESSAGE("PortAudio-{}")(mpt::to_underlying(paJACK))].value = Info::DefaultFor::ProAudio;
+		typeDefault[MPT_UFORMAT_MESSAGE("PortAudio-{}")(paJACK)].value = Info::DefaultFor::ProAudio;
 #endif
 	} else if(GetSysInfo().SystemClass == mpt::osinfo::osclass::Darwin)
 	{
@@ -215,18 +215,18 @@ void Manager::ReEnumerate(bool firstRun)
 		typeDefault[MPT_UFORMAT_MESSAGE("RtAudio-{}")(MPT_USTRING("core"))].value = Info::DefaultFor::System;
 #endif
 #if defined(MPT_WITH_PORTAUDIO)
-		typeDefault[MPT_UFORMAT_MESSAGE("PortAudio-{}")(mpt::to_underlying(paCoreAudio))].value = Info::DefaultFor::System;
+		typeDefault[MPT_UFORMAT_MESSAGE("PortAudio-{}")(paCoreAudio)].value = Info::DefaultFor::System;
 #endif
 #if defined(MPT_WITH_RTAUDIO)
 		typeDefault[MPT_UFORMAT_MESSAGE("RtAudio-{}")(MPT_USTRING("jack"))].value = Info::DefaultFor::ProAudio;
 #endif
 #if defined(MPT_WITH_PORTAUDIO)
-		typeDefault[MPT_UFORMAT_MESSAGE("PortAudio-{}")(mpt::to_underlying(paJACK))].value = Info::DefaultFor::ProAudio;
+		typeDefault[MPT_UFORMAT_MESSAGE("PortAudio-{}")(paJACK)].value = Info::DefaultFor::ProAudio;
 #endif
 	} else if(GetSysInfo().SystemClass == mpt::osinfo::osclass::BSD)
 	{
 #if defined(MPT_WITH_PORTAUDIO)
-		typeDefault[MPT_UFORMAT_MESSAGE("PortAudio-{}")(mpt::to_underlying(paOSS))].value = Info::DefaultFor::System;
+		typeDefault[MPT_UFORMAT_MESSAGE("PortAudio-{}")(paOSS)].value = Info::DefaultFor::System;
 #endif
 #if defined(MPT_WITH_RTAUDIO)
 		typeDefault[MPT_UFORMAT_MESSAGE("RtAudio-{}")(MPT_USTRING("oss"))].value = Info::DefaultFor::System;
@@ -234,7 +234,7 @@ void Manager::ReEnumerate(bool firstRun)
 	} else if(GetSysInfo().SystemClass == mpt::osinfo::osclass::Haiku)
 	{
 #if defined(MPT_WITH_PORTAUDIO)
-		typeDefault[MPT_UFORMAT_MESSAGE("PortAudio-{}")(mpt::to_underlying(paBeOS))].value = Info::DefaultFor::System;
+		typeDefault[MPT_UFORMAT_MESSAGE("PortAudio-{}")(paBeOS)].value = Info::DefaultFor::System;
 #endif
 	} else if(GetSysInfo().SystemClass == mpt::osinfo::osclass::Windows && GetSysInfo().IsWindowsWine() && GetSysInfo().WineHostClass == mpt::osinfo::osclass::Linux)
 	{ // Wine on Linux
