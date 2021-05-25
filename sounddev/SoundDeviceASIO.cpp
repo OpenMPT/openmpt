@@ -110,10 +110,10 @@ std::vector<SoundDevice::Info> CASIODevice::EnumerateDevices(ILogger &logger, So
 		info.useNameAsIdentifier = false;
 		info.default_ = Info::Default::None;
 		info.flags = {
-			sysInfo.SystemClass == mpt::OS::Class::Windows ? sysInfo.IsWindowsOriginal() ? Info::Usability::Usable : Info::Usability::Experimental : Info::Usability::NotAvailable,
+			sysInfo.SystemClass == mpt::osinfo::osclass::Windows ? sysInfo.IsWindowsOriginal() ? Info::Usability::Usable : Info::Usability::Experimental : Info::Usability::NotAvailable,
 			Info::Level::Primary,
 			Info::Compatible::No,
-			sysInfo.SystemClass == mpt::OS::Class::Windows && sysInfo.IsWindowsOriginal() ? Info::Api::Native : Info::Api::Emulated,
+			sysInfo.SystemClass == mpt::osinfo::osclass::Windows && sysInfo.IsWindowsOriginal() ? Info::Api::Native : Info::Api::Emulated,
 			Info::Io::FullDuplex,
 			Info::Mixing::Hardware,
 			Info::Implementor::OpenMPT

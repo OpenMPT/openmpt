@@ -27,25 +27,6 @@ OPENMPT_NAMESPACE_BEGIN
 namespace SoundDevice {
 
 
-SysInfo::SysInfo()
-	: SystemClass(mpt::OS::GetClass())
-	, WindowsVersion(mpt::OS::Windows::Version::Current())
-	, IsWine(mpt::OS::Windows::IsWine())
-	, WineHostClass(mpt::OS::Class::Unknown)
-	, WineVersion(mpt::OS::Wine::Version())
-{
-	mpt::OS::Wine::VersionContext wineVersionContext;
-	WineHostClass = wineVersionContext.HostClass();
-	WineVersion = wineVersionContext.Version();
-}
-
-
-SysInfo SysInfo::Current()
-{
-	return SysInfo();
-}
-
-
 SoundDevice::Type ParseType(const SoundDevice::Identifier &identifier)
 {
 	std::vector<mpt::ustring> tmp = mpt::String::Split<mpt::ustring>(identifier, U_("_"));

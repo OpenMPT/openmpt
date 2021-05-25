@@ -180,7 +180,7 @@ void Manager::ReEnumerate(bool firstRun)
 	};
 
 	std::map<SoundDevice::Type, Default> typeDefault;
-	if(GetSysInfo().SystemClass == mpt::OS::Class::Linux)
+	if(GetSysInfo().SystemClass == mpt::osinfo::osclass::Linux)
 	{
 #if defined(MPT_WITH_PULSEAUDIO)
 		typeDefault[U_("PulseAudio")].value = Info::DefaultFor::System;
@@ -203,7 +203,7 @@ void Manager::ReEnumerate(bool firstRun)
 #if defined(MPT_WITH_PORTAUDIO)
 		typeDefault[MPT_UFORMAT("PortAudio-{}")(paJACK)].value = Info::DefaultFor::ProAudio;
 #endif
-	} else if(GetSysInfo().SystemClass == mpt::OS::Class::Darwin)
+	} else if(GetSysInfo().SystemClass == mpt::osinfo::osclass::Darwin)
 	{
 #if defined(MPT_WITH_RTAUDIO)
 		typeDefault[MPT_UFORMAT("RtAudio-{}")(U_("core"))].value = Info::DefaultFor::System;
@@ -217,7 +217,7 @@ void Manager::ReEnumerate(bool firstRun)
 #if defined(MPT_WITH_PORTAUDIO)
 		typeDefault[MPT_UFORMAT("PortAudio-{}")(paJACK)].value = Info::DefaultFor::ProAudio;
 #endif
-	} else if(GetSysInfo().SystemClass == mpt::OS::Class::BSD)
+	} else if(GetSysInfo().SystemClass == mpt::osinfo::osclass::BSD)
 	{
 #if defined(MPT_WITH_PORTAUDIO)
 		typeDefault[MPT_UFORMAT("PortAudio-{}")(paOSS)].value = Info::DefaultFor::System;
@@ -225,30 +225,30 @@ void Manager::ReEnumerate(bool firstRun)
 #if defined(MPT_WITH_RTAUDIO)
 		typeDefault[MPT_UFORMAT("RtAudio-{}")(U_("oss"))].value = Info::DefaultFor::System;
 #endif
-	} else if(GetSysInfo().SystemClass == mpt::OS::Class::Haiku)
+	} else if(GetSysInfo().SystemClass == mpt::osinfo::osclass::Haiku)
 	{
 #if defined(MPT_WITH_PORTAUDIO)
 		typeDefault[MPT_UFORMAT("PortAudio-{}")(paBeOS)].value = Info::DefaultFor::System;
 #endif
 	} else
-	if(GetSysInfo().SystemClass == mpt::OS::Class::Windows && GetSysInfo().IsWindowsWine() && GetSysInfo().WineHostClass == mpt::OS::Class::Linux)
+	if(GetSysInfo().SystemClass == mpt::osinfo::osclass::Windows && GetSysInfo().IsWindowsWine() && GetSysInfo().WineHostClass == mpt::osinfo::osclass::Linux)
 	{ // Wine on Linux
 		typeDefault[SoundDevice::TypePORTAUDIO_WASAPI].value = Info::DefaultFor::System;
-	} else if(GetSysInfo().SystemClass == mpt::OS::Class::Windows && GetSysInfo().IsWindowsWine())
+	} else if(GetSysInfo().SystemClass == mpt::osinfo::osclass::Windows && GetSysInfo().IsWindowsWine())
 	{ // Wine
 		typeDefault[SoundDevice::TypePORTAUDIO_WASAPI].value = Info::DefaultFor::System;
 		typeDefault[SoundDevice::TypeDSOUND].value = Info::DefaultFor::LowLevel;
-	} else if(GetSysInfo().SystemClass == mpt::OS::Class::Windows && GetSysInfo().WindowsVersion.IsBefore(mpt::OS::Windows::Version::WinVista))
+	} else if(GetSysInfo().SystemClass == mpt::osinfo::osclass::Windows && GetSysInfo().WindowsVersion.IsBefore(mpt::osinfo::windows::Version::WinVista))
 	{ // WinXP
 		typeDefault[SoundDevice::TypeWAVEOUT].value = Info::DefaultFor::System;
 		typeDefault[SoundDevice::TypeASIO].value = Info::DefaultFor::ProAudio;
 		typeDefault[SoundDevice::TypePORTAUDIO_WDMKS].value = Info::DefaultFor::LowLevel;
-	} else if(GetSysInfo().SystemClass == mpt::OS::Class::Windows && GetSysInfo().WindowsVersion.IsBefore(mpt::OS::Windows::Version::Win7))
+	} else if(GetSysInfo().SystemClass == mpt::osinfo::osclass::Windows && GetSysInfo().WindowsVersion.IsBefore(mpt::osinfo::windows::Version::Win7))
 	{ // Vista
 		typeDefault[SoundDevice::TypeWAVEOUT].value = Info::DefaultFor::System;
 		typeDefault[SoundDevice::TypeASIO].value = Info::DefaultFor::ProAudio;
 		typeDefault[SoundDevice::TypePORTAUDIO_WDMKS].value = Info::DefaultFor::LowLevel;
-	} else if(GetSysInfo().SystemClass == mpt::OS::Class::Windows)
+	} else if(GetSysInfo().SystemClass == mpt::osinfo::osclass::Windows)
 	{ // >=Win7
 		typeDefault[SoundDevice::TypePORTAUDIO_WASAPI].value = Info::DefaultFor::System;
 		typeDefault[SoundDevice::TypeASIO].value = Info::DefaultFor::ProAudio;

@@ -557,20 +557,13 @@ namespace Wine
 
 
 Version::Version()
-	: valid(false)
-	, vmajor(0)
-	, vminor(0)
-	, vupdate(0)
 {
 	return;
 }
 
 
 Version::Version(const mpt::ustring &rawVersion)
-	: valid(false)
-	, vmajor(0)
-	, vminor(0)
-	, vupdate(0)
+	: mpt::osinfo::windows::wine::version()
 {
 	if(rawVersion.empty())
 	{
@@ -599,82 +592,17 @@ Version::Version(const mpt::ustring &rawVersion)
 
 
 Version::Version(uint8 vmajor, uint8 vminor, uint8 vupdate)
-	: valid((vmajor > 0) || (vminor > 0) || (vupdate > 0)) 
-	, vmajor(vmajor)
-	, vminor(vminor)
-	, vupdate(vupdate)
+	: mpt::osinfo::windows::wine::version(vmajor, vminor, vupdate)
 {
 	return;
 }
 
 
-mpt::OS::Wine::Version Version::FromInteger(uint32 version)
-{
-	mpt::OS::Wine::Version result;
-	result.valid = (version <= 0xffffff);
-	result.vmajor = static_cast<uint8>(version >> 16);
-	result.vminor = static_cast<uint8>(version >> 8);
-	result.vupdate = static_cast<uint8>(version >> 0);
-	return result;
-}
-
-
-bool Version::IsValid() const
-{
-	return valid;
-}
-
-
 mpt::ustring Version::AsString() const
 {
-	return mpt::ufmt::dec(vmajor) + U_(".") + mpt::ufmt::dec(vminor) + U_(".") + mpt::ufmt::dec(vupdate);
+	return mpt::ufmt::dec(GetMajor()) + U_(".") + mpt::ufmt::dec(GetMinor()) + U_(".") + mpt::ufmt::dec(GetUpdate());
 }
 
-
-uint32 Version::AsInteger() const
-{
-	uint32 version = 0;
-	version |= static_cast<uint32>(vmajor) << 16;
-	version |= static_cast<uint32>(vminor) << 8;
-	version |= static_cast<uint32>(vupdate) << 0;
-	return version;
-}
-
-
-bool Version::IsBefore(mpt::OS::Wine::Version other) const
-{
-	if(!IsValid())
-	{
-		return false;
-	}
-	return (AsInteger() < other.AsInteger());
-}
-
-
-bool Version::IsAtLeast(mpt::OS::Wine::Version other) const
-{
-	if(!IsValid())
-	{
-		return false;
-	}
-	return (AsInteger() >= other.AsInteger());
-}
-
-
-uint8 Version::GetMajor() const
-{
-	return vmajor;
-}
-
-uint8 Version::GetMinor() const
-{
-	return vminor;
-}
-
-uint8 Version::GetUpdate() const
-{
-	return vupdate;
-}
 
 
 mpt::OS::Wine::Version GetMinimumWineVersion()

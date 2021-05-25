@@ -1129,7 +1129,15 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 	// Load sound APIs
 	// requires TrackerSettings
 	m_pAllSoundDeviceComponents = std::make_unique<AllSoundDeviceComponents>();
-	SoundDevice::SysInfo sysInfo = SoundDevice::SysInfo::Current();
+	auto GetSysInfo = [&]()
+	{
+		if(mpt::OS::Windows::IsWine())
+		{
+			return SoundDevice::SysInfo(mpt::OS::GetClass(), mpt::OS::Windows::Version::Current(), mpt::OS::Windows::IsWine(), GetWineVersion()->HostClass(), GetWineVersion()->Version());
+		}
+		return SoundDevice::SysInfo(mpt::OS::GetClass(), mpt::OS::Windows::Version::Current(), mpt::OS::Windows::IsWine(), mpt::osinfo::osclass::Unknown, mpt::osinfo::windows::wine::version());
+	};
+	SoundDevice::SysInfo sysInfo = GetSysInfo();
 	SoundDevice::AppInfo appInfo;
 	appInfo.SetName(U_("OpenMPT"));
 	appInfo.SetHWND(*m_pMainWnd);

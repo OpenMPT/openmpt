@@ -13,6 +13,7 @@
 #include "openmpt/all/BuildSettings.hpp"
 
 #include "mpt/library/library.hpp"
+#include "mpt/osinfo/class.hpp"
 #include "mpt/osinfo/windows_version.hpp"
 
 
@@ -24,16 +25,7 @@ namespace mpt
 namespace OS
 {
 
-enum class Class
-{
-	Unknown,
-	Windows,
-	Linux,
-	Darwin,
-	BSD,
-	Haiku,
-	DOS,
-};
+using Class = mpt::osinfo::osclass;
 
 mpt::OS::Class GetClassFromSysname(mpt::ustring sysname);
 
@@ -159,28 +151,15 @@ namespace Wine
 {
 
 class Version
+	: public mpt::osinfo::windows::wine::version
+
 {
-private:
-	bool valid;
-	uint8 vmajor;
-	uint8 vminor;
-	uint8 vupdate;
 public:
 	Version();
 	Version(uint8 vmajor, uint8 vminor, uint8 vupdate);
 	explicit Version(const mpt::ustring &version);
 public:
-	bool IsValid() const;
 	mpt::ustring AsString() const;
-private:
-	static mpt::OS::Wine::Version FromInteger(uint32 version);
-	uint32 AsInteger() const;
-public:
-	bool IsBefore(mpt::OS::Wine::Version other) const;
-	bool IsAtLeast(mpt::OS::Wine::Version other) const;
-	uint8 GetMajor() const;
-	uint8 GetMinor() const;
-	uint8 GetUpdate() const;
 };
 
 mpt::OS::Wine::Version GetMinimumWineVersion();

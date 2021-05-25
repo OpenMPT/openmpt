@@ -14,7 +14,8 @@
 #include "openmpt/all/BuildSettings.hpp"
 
 #include "openmpt/base/FlagSet.hpp"
-#include "../misc/mptOS.h"
+#include "mpt/osinfo/class.hpp"
+#include "mpt/osinfo/windows_version.hpp"
 #include "openmpt/soundbase/SampleFormat.hpp"
 
 #include <map>
@@ -309,19 +310,35 @@ public:
 struct SysInfo
 {
 public:
-	mpt::OS::Class SystemClass;
-	mpt::OS::Windows::Version WindowsVersion;
-	bool IsWine;
-	mpt::OS::Class WineHostClass;
-	mpt::OS::Wine::Version WineVersion;
+	mpt::osinfo::osclass SystemClass = mpt::osinfo::osclass::Unknown;
+	mpt::osinfo::windows::Version WindowsVersion = mpt::osinfo::windows::Version::NoWindows();
+	bool IsWine = false;
+	mpt::osinfo::osclass WineHostClass = mpt::osinfo::osclass::Unknown;
+	mpt::osinfo::windows::wine::version WineVersion;
 public:
 	bool IsOriginal() const { return !IsWine; }
 	bool IsWindowsOriginal() const { return !IsWine; }
 	bool IsWindowsWine() const { return IsWine; }
 public:
-	static SysInfo Current();
-private:
-	SysInfo();
+	SysInfo() = delete;
+	SysInfo(mpt::osinfo::osclass systemClass)
+		: SystemClass(systemClass) {
+		MPT_ASSERT(SystemClass != mpt::osinfo::osclass::Windows);
+		return;
+	}
+	SysInfo(mpt::osinfo::osclass systemClass, mpt::osinfo::windows::Version windowsVersion)
+		: SystemClass(systemClass)
+		, WindowsVersion(windowsVersion) {
+		return;
+	}
+	SysInfo(mpt::osinfo::osclass systemClass, mpt::osinfo::windows::Version windowsVersion, bool isWine, mpt::osinfo::osclass wineHostClass, mpt::osinfo::windows::wine::version wineVersion)
+		: SystemClass(systemClass)
+		, WindowsVersion(windowsVersion)
+		, IsWine(isWine)
+		, WineHostClass(wineHostClass)
+		, WineVersion(wineVersion) {
+		return;
+	}
 };
 
 

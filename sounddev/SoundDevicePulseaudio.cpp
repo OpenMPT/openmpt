@@ -97,10 +97,10 @@ static void PulseAudioSinkInfoListCallback(pa_context * /* c */ , const pa_sink_
 		info.default_ = Info::Default::None;
 		info.useNameAsIdentifier = false;
 		info.flags = {
-			sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Usability::Usable : Info::Usability::Experimental,
+			sysInfo.SystemClass == mpt::osinfo::osclass::Linux ? Info::Usability::Usable : Info::Usability::Experimental,
 			Info::Level::Primary,
 			Info::Compatible::No,
-			sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Api::Native : Info::Api::Emulated,
+			sysInfo.SystemClass == mpt::osinfo::osclass::Linux ? Info::Api::Native : Info::Api::Emulated,
 			Info::Io::FullDuplex,
 			Info::Mixing::Server,
 			Info::Implementor::External
@@ -123,10 +123,10 @@ std::vector<SoundDevice::Info> Pulseaudio::EnumerateDevices(ILogger &logger, Sou
 	info.default_ = Info::Default::Managed;
 	info.useNameAsIdentifier = false;
 	info.flags = {
-		sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Usability::Usable : Info::Usability::Experimental,
+		sysInfo.SystemClass == mpt::osinfo::osclass::Linux ? Info::Usability::Usable : Info::Usability::Experimental,
 		Info::Level::Primary,
 		Info::Compatible::No,
-		sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Api::Native : Info::Api::Emulated,
+		sysInfo.SystemClass == mpt::osinfo::osclass::Linux ? Info::Api::Native : Info::Api::Emulated,
 		Info::Io::FullDuplex,
 		Info::Mixing::Server,
 		Info::Implementor::External

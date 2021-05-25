@@ -175,10 +175,10 @@ bool CPortaudioDevice::InternalOpen()
 		framesPerBuffer = paFramesPerBufferUnspecified; // let portaudio choose
 	} else if(m_HostApiType == paMME)
 	{
-		m_Flags.WantsClippedOutput = (GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::OS::Windows::Version::WinVista));
+		m_Flags.WantsClippedOutput = (GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::osinfo::windows::Version::WinVista));
 	} else if(m_HostApiType == paDirectSound)
 	{
-		m_Flags.WantsClippedOutput = (GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::OS::Windows::Version::WinVista));
+		m_Flags.WantsClippedOutput = (GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::osinfo::windows::Version::WinVista));
 	} else
 	{
 		m_Flags.WantsClippedOutput = false;
@@ -205,7 +205,7 @@ bool CPortaudioDevice::InternalOpen()
 				}
 			} else
 			{
-				if(!GetSysInfo().IsWine && GetSysInfo().WindowsVersion.IsAtLeast(mpt::OS::Windows::Version::Win7))
+				if(!GetSysInfo().IsWine && GetSysInfo().WindowsVersion.IsAtLeast(mpt::osinfo::windows::Version::Win7))
 				{ // retry with automatic stream format conversion (i.e. resampling)
 	#if MPT_OS_WINDOWS
 					m_WasapiStreamInfo.flags |= paWinWasapiAutoConvert;
@@ -438,7 +438,7 @@ SoundDevice::Caps CPortaudioDevice::InternalGetDeviceCaps()
 		caps.DefaultSettings.sampleFormat = SampleFormat::Int32;
 	} else if(m_HostApiType == paDirectSound)
 	{
-		if(GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::OS::Windows::Version::WinVista))
+		if(GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::osinfo::windows::Version::WinVista))
 		{
 			caps.DefaultSettings.sampleFormat = SampleFormat::Float32;
 		} else
@@ -450,7 +450,7 @@ SoundDevice::Caps CPortaudioDevice::InternalGetDeviceCaps()
 		if(GetSysInfo().IsWine)
 		{
 			caps.DefaultSettings.sampleFormat = SampleFormat::Int16;
-		} else if(GetSysInfo().WindowsVersion.IsAtLeast(mpt::OS::Windows::Version::WinVista))
+		} else if(GetSysInfo().WindowsVersion.IsAtLeast(mpt::osinfo::windows::Version::WinVista))
 		{
 			caps.DefaultSettings.sampleFormat = SampleFormat::Float32;
 		} else
@@ -463,13 +463,13 @@ SoundDevice::Caps CPortaudioDevice::InternalGetDeviceCaps()
 	}
 	if(m_HostApiType == paDirectSound)
 	{
-		if(GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::OS::Windows::Version::WinVista))
+		if(GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::osinfo::windows::Version::WinVista))
 		{
 			caps.HasInternalDither = false;
 		}
 	} else if(m_HostApiType == paMME)
 	{
-		if(GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::OS::Windows::Version::WinVista))
+		if(GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::osinfo::windows::Version::WinVista))
 		{
 			caps.HasInternalDither = false;
 		}
@@ -515,13 +515,13 @@ SoundDevice::DynamicCaps CPortaudioDevice::GetDeviceDynamicCaps(const std::vecto
 	}
 	if(m_HostApiType == paDirectSound)
 	{
-		if(GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::OS::Windows::Version::WinVista))
+		if(GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::osinfo::windows::Version::WinVista))
 		{
 			caps.supportedSampleFormats = { SampleFormat::Float32 };
 		}
 	} else if(m_HostApiType == paMME)
 	{
-		if(GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::OS::Windows::Version::WinVista))
+		if(GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::osinfo::windows::Version::WinVista))
 		{
 			caps.supportedSampleFormats = { SampleFormat::Float32 };
 		}
@@ -619,7 +619,7 @@ SoundDevice::DynamicCaps CPortaudioDevice::GetDeviceDynamicCaps(const std::vecto
 	}
 #endif // MPT_OS_WINDOWS
 #if MPT_OS_WINDOWS
-	if((m_HostApiType == paWASAPI) && GetSysInfo().WindowsVersion.IsAtLeast(mpt::OS::Windows::Version::Win7))
+	if((m_HostApiType == paWASAPI) && GetSysInfo().WindowsVersion.IsAtLeast(mpt::osinfo::windows::Version::Win7))
 	{
 		caps.supportedSampleRates = baseSampleRates;
 	}
@@ -646,7 +646,7 @@ bool CPortaudioDevice::OpenDriverSettings()
 	{
 		return false;
 	}
-	bool hasVista = GetSysInfo().WindowsVersion.IsAtLeast(mpt::OS::Windows::Version::WinVista);
+	bool hasVista = GetSysInfo().WindowsVersion.IsAtLeast(mpt::osinfo::windows::Version::WinVista);
 	mpt::PathString controlEXE;
 	TCHAR systemDir[MAX_PATH] = {};
 	if(GetSystemDirectory(systemDir, mpt::saturate_cast<UINT>(std::size(systemDir))) > 0)
@@ -796,10 +796,10 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(ILogger &logge
 			result.apiName = U_("DirectSound");
 			result.default_ = ((Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->defaultOutputDevice == static_cast<PaDeviceIndex>(dev)) ? Info::Default::Managed : Info::Default::None);
 			result.flags = {
-				sysInfo.SystemClass == mpt::OS::Class::Windows ? sysInfo.IsWindowsOriginal() && sysInfo.WindowsVersion.IsBefore(mpt::OS::Windows::Version::Win7) ? Info::Usability::Usable : Info::Usability::Deprecated : Info::Usability::NotAvailable,
+				sysInfo.SystemClass == mpt::osinfo::osclass::Windows ? sysInfo.IsWindowsOriginal() && sysInfo.WindowsVersion.IsBefore(mpt::osinfo::windows::Version::Win7) ? Info::Usability::Usable : Info::Usability::Deprecated : Info::Usability::NotAvailable,
 				Info::Level::Secondary,
 				Info::Compatible::No,
-				sysInfo.SystemClass == mpt::OS::Class::Windows ? sysInfo.IsWindowsWine() ? Info::Api::Emulated : sysInfo.WindowsVersion.IsAtLeast(mpt::OS::Windows::Version::WinVista) ? Info::Api::Emulated : Info::Api::Native : Info::Api::Emulated,
+				sysInfo.SystemClass == mpt::osinfo::osclass::Windows ? sysInfo.IsWindowsWine() ? Info::Api::Emulated : sysInfo.WindowsVersion.IsAtLeast(mpt::osinfo::windows::Version::WinVista) ? Info::Api::Emulated : Info::Api::Native : Info::Api::Emulated,
 				Info::Io::FullDuplex,
 				Info::Mixing::Software,
 				Info::Implementor::External
@@ -809,10 +809,10 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(ILogger &logge
 			result.apiName = U_("MME");
 			result.default_ = ((Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->defaultOutputDevice == static_cast<PaDeviceIndex>(dev)) ? Info::Default::Named : Info::Default::None);
 			result.flags = {
-				sysInfo.SystemClass == mpt::OS::Class::Windows ? sysInfo.IsWindowsOriginal() && sysInfo.WindowsVersion.IsBefore(mpt::OS::Windows::Version::Win7) ? Info::Usability::Usable : Info::Usability::Legacy : Info::Usability::NotAvailable,
+				sysInfo.SystemClass == mpt::osinfo::osclass::Windows ? sysInfo.IsWindowsOriginal() && sysInfo.WindowsVersion.IsBefore(mpt::osinfo::windows::Version::Win7) ? Info::Usability::Usable : Info::Usability::Legacy : Info::Usability::NotAvailable,
 				Info::Level::Secondary,
 				Info::Compatible::No,
-				sysInfo.SystemClass == mpt::OS::Class::Windows ? sysInfo.IsWindowsWine() ? Info::Api::Emulated : sysInfo.WindowsVersion.IsAtLeast(mpt::OS::Windows::Version::WinVista) ? Info::Api::Emulated : Info::Api::Native : Info::Api::Emulated,
+				sysInfo.SystemClass == mpt::osinfo::osclass::Windows ? sysInfo.IsWindowsWine() ? Info::Api::Emulated : sysInfo.WindowsVersion.IsAtLeast(mpt::osinfo::windows::Version::WinVista) ? Info::Api::Emulated : Info::Api::Native : Info::Api::Emulated,
 				Info::Io::FullDuplex,
 				Info::Mixing::Software,
 				Info::Implementor::External
@@ -822,10 +822,10 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(ILogger &logge
 			result.apiName = U_("ASIO");
 			result.default_ = ((Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->defaultOutputDevice == static_cast<PaDeviceIndex>(dev)) ? Info::Default::Named : Info::Default::None);
 			result.flags = {
-				sysInfo.SystemClass == mpt::OS::Class::Windows ? sysInfo.IsWindowsOriginal() ? Info::Usability::Usable : Info::Usability::Experimental : Info::Usability::NotAvailable,
+				sysInfo.SystemClass == mpt::osinfo::osclass::Windows ? sysInfo.IsWindowsOriginal() ? Info::Usability::Usable : Info::Usability::Experimental : Info::Usability::NotAvailable,
 				Info::Level::Secondary,
 				Info::Compatible::No,
-				sysInfo.SystemClass == mpt::OS::Class::Windows && sysInfo.IsWindowsOriginal() ? Info::Api::Native : Info::Api::Emulated,
+				sysInfo.SystemClass == mpt::osinfo::osclass::Windows && sysInfo.IsWindowsOriginal() ? Info::Api::Native : Info::Api::Emulated,
 				Info::Io::FullDuplex,
 				Info::Mixing::Hardware,
 				Info::Implementor::External
@@ -835,10 +835,10 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(ILogger &logge
 			result.apiName = U_("CoreAudio");
 			result.default_ = ((Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->defaultOutputDevice == static_cast<PaDeviceIndex>(dev)) ? Info::Default::Named : Info::Default::None);
 			result.flags = {
-				sysInfo.SystemClass == mpt::OS::Class::Darwin ? Info::Usability::Usable : Info::Usability::NotAvailable,
+				sysInfo.SystemClass == mpt::osinfo::osclass::Darwin ? Info::Usability::Usable : Info::Usability::NotAvailable,
 				Info::Level::Secondary,
 				Info::Compatible::Yes,
-				sysInfo.SystemClass == mpt::OS::Class::Darwin ? Info::Api::Native : Info::Api::Emulated,
+				sysInfo.SystemClass == mpt::osinfo::osclass::Darwin ? Info::Api::Native : Info::Api::Emulated,
 				Info::Io::FullDuplex,
 				Info::Mixing::Server,
 				Info::Implementor::External
@@ -848,12 +848,12 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(ILogger &logge
 			result.apiName = U_("OSS");
 			result.default_ = ((Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->defaultOutputDevice == static_cast<PaDeviceIndex>(dev)) ? Info::Default::Named : Info::Default::None);
 			result.flags = {
-				sysInfo.SystemClass == mpt::OS::Class::BSD ? Info::Usability::Usable : sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Usability::Deprecated : Info::Usability::NotAvailable,
+				sysInfo.SystemClass == mpt::osinfo::osclass::BSD ? Info::Usability::Usable : sysInfo.SystemClass == mpt::osinfo::osclass::Linux ? Info::Usability::Deprecated : Info::Usability::NotAvailable,
 				Info::Level::Primary,
 				Info::Compatible::No,
-				sysInfo.SystemClass == mpt::OS::Class::BSD ? Info::Api::Native : sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Api::Emulated : Info::Api::Emulated,
+				sysInfo.SystemClass == mpt::osinfo::osclass::BSD ? Info::Api::Native : sysInfo.SystemClass == mpt::osinfo::osclass::Linux ? Info::Api::Emulated : Info::Api::Emulated,
 				Info::Io::FullDuplex,
-				sysInfo.SystemClass == mpt::OS::Class::BSD ? Info::Mixing::Hardware : sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Mixing::Software : Info::Mixing::Software,
+				sysInfo.SystemClass == mpt::osinfo::osclass::BSD ? Info::Mixing::Hardware : sysInfo.SystemClass == mpt::osinfo::osclass::Linux ? Info::Mixing::Software : Info::Mixing::Software,
 				Info::Implementor::External
 			};
 			break;
@@ -861,12 +861,12 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(ILogger &logge
 			result.apiName = U_("ALSA");
 			result.default_ = ((Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->defaultOutputDevice == static_cast<PaDeviceIndex>(dev)) ? Info::Default::Named : Info::Default::None);
 			result.flags = {
-				sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Usability::Usable : Info::Usability::Experimental,
+				sysInfo.SystemClass == mpt::osinfo::osclass::Linux ? Info::Usability::Usable : Info::Usability::Experimental,
 				Info::Level::Primary,
 				Info::Compatible::No,
-				sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Api::Native : Info::Api::Emulated,
+				sysInfo.SystemClass == mpt::osinfo::osclass::Linux ? Info::Api::Native : Info::Api::Emulated,
 				Info::Io::FullDuplex,
-				sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Mixing::Hardware : Info::Mixing::Software,
+				sysInfo.SystemClass == mpt::osinfo::osclass::Linux ? Info::Mixing::Hardware : Info::Mixing::Software,
 				Info::Implementor::External
 			};
 			break;
@@ -877,20 +877,20 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(ILogger &logge
 				Info::Usability::Usable,
 				Info::Level::Primary,
 				Info::Compatible::No,
-				sysInfo.SystemClass == mpt::OS::Class::Windows && sysInfo.IsWindowsOriginal() && sysInfo.WindowsVersion.IsBefore(mpt::OS::Windows::Version::WinVista) ? Info::Api::Native : Info::Api::Emulated,
+				sysInfo.SystemClass == mpt::osinfo::osclass::Windows && sysInfo.IsWindowsOriginal() && sysInfo.WindowsVersion.IsBefore(mpt::osinfo::windows::Version::WinVista) ? Info::Api::Native : Info::Api::Emulated,
 				Info::Io::FullDuplex,
-				sysInfo.SystemClass == mpt::OS::Class::Windows && sysInfo.IsWindowsOriginal() && sysInfo.WindowsVersion.IsBefore(mpt::OS::Windows::Version::WinVista) ? Info::Mixing::Hardware : Info::Mixing::Software,
+				sysInfo.SystemClass == mpt::osinfo::osclass::Windows && sysInfo.IsWindowsOriginal() && sysInfo.WindowsVersion.IsBefore(mpt::osinfo::windows::Version::WinVista) ? Info::Mixing::Hardware : Info::Mixing::Software,
 				Info::Implementor::External
 			};
 			break;
 		case paWDMKS:
-			result.apiName = sysInfo.WindowsVersion.IsAtLeast(mpt::OS::Windows::Version::WinVista) ? U_("WaveRT") : U_("WDM-KS");
+			result.apiName = sysInfo.WindowsVersion.IsAtLeast(mpt::osinfo::windows::Version::WinVista) ? U_("WaveRT") : U_("WDM-KS");
 			result.default_ = ((Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->defaultOutputDevice == static_cast<PaDeviceIndex>(dev)) ? Info::Default::Named : Info::Default::None);
 			result.flags = {
-				sysInfo.SystemClass == mpt::OS::Class::Windows ? sysInfo.IsWindowsOriginal() ? sysInfo.WindowsVersion.IsBefore(mpt::OS::Windows::Version::WinVista) ? Info::Usability::Usable : Info::Usability::Usable : Info::Usability::Broken : Info::Usability::NotAvailable,
+				sysInfo.SystemClass == mpt::osinfo::osclass::Windows ? sysInfo.IsWindowsOriginal() ? sysInfo.WindowsVersion.IsBefore(mpt::osinfo::windows::Version::WinVista) ? Info::Usability::Usable : Info::Usability::Usable : Info::Usability::Broken : Info::Usability::NotAvailable,
 				Info::Level::Primary,
 				Info::Compatible::No,
-				sysInfo.SystemClass == mpt::OS::Class::Windows ? sysInfo.IsWindowsOriginal() ? sysInfo.WindowsVersion.IsBefore(mpt::OS::Windows::Version::WinVista) ? Info::Api::Native : Info::Api::Native : Info::Api::Emulated : Info::Api::Emulated,
+				sysInfo.SystemClass == mpt::osinfo::osclass::Windows ? sysInfo.IsWindowsOriginal() ? sysInfo.WindowsVersion.IsBefore(mpt::osinfo::windows::Version::WinVista) ? Info::Api::Native : Info::Api::Native : Info::Api::Emulated : Info::Api::Emulated,
 				Info::Io::FullDuplex,
 				Info::Mixing::Hardware,
 				Info::Implementor::External
@@ -900,10 +900,10 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(ILogger &logge
 			result.apiName = U_("JACK");
 			result.default_ = ((Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->defaultOutputDevice == static_cast<PaDeviceIndex>(dev)) ? Info::Default::Managed : Info::Default::None);
 			result.flags = {
-				sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Usability::Usable : sysInfo.SystemClass == mpt::OS::Class::Darwin ? Info::Usability::Usable : Info::Usability::Experimental,
+				sysInfo.SystemClass == mpt::osinfo::osclass::Linux ? Info::Usability::Usable : sysInfo.SystemClass == mpt::osinfo::osclass::Darwin ? Info::Usability::Usable : Info::Usability::Experimental,
 				Info::Level::Secondary,
 				Info::Compatible::Yes,
-				sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Api::Native : Info::Api::Emulated,
+				sysInfo.SystemClass == mpt::osinfo::osclass::Linux ? Info::Api::Native : Info::Api::Emulated,
 				Info::Io::FullDuplex,
 				Info::Mixing::Server,
 				Info::Implementor::External
@@ -913,12 +913,12 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(ILogger &logge
 			result.apiName = U_("WASAPI");
 			result.default_ = ((Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->defaultOutputDevice == static_cast<PaDeviceIndex>(dev)) ? Info::Default::Named : Info::Default::None);
 			result.flags = {
-				sysInfo.SystemClass == mpt::OS::Class::Windows ?
+				sysInfo.SystemClass == mpt::osinfo::osclass::Windows ?
 					sysInfo.IsWindowsOriginal() ?
-						sysInfo.WindowsVersion.IsAtLeast(mpt::OS::Windows::Version::Win7) ?
+						sysInfo.WindowsVersion.IsAtLeast(mpt::osinfo::windows::Version::Win7) ?
 							Info::Usability::Usable
 						:
-							sysInfo.WindowsVersion.IsAtLeast(mpt::OS::Windows::Version::WinVista) ?
+							sysInfo.WindowsVersion.IsAtLeast(mpt::osinfo::windows::Version::WinVista) ?
 								Info::Usability::Experimental
 							:
 								Info::Usability::NotAvailable
@@ -928,7 +928,7 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(ILogger &logge
 					Info::Usability::NotAvailable,
 				Info::Level::Primary,
 				Info::Compatible::No,
-				sysInfo.SystemClass == mpt::OS::Class::Windows ? Info::Api::Native : Info::Api::Emulated,
+				sysInfo.SystemClass == mpt::osinfo::osclass::Windows ? Info::Api::Native : Info::Api::Emulated,
 				Info::Io::FullDuplex,
 				Info::Mixing::Server,
 				Info::Implementor::External

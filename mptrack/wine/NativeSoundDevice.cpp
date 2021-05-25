@@ -16,6 +16,8 @@
 
 #include "../../common/ComponentManager.h"
 
+#include "../../misc/mptOS.h"
+
 #include "NativeSoundDeviceMarshalling.h"
 
 #include <string>
@@ -40,9 +42,16 @@ class ComponentSoundDeviceManager
 private:
 	mpt::log::GlobalLogger logger;
 	SoundDevice::Manager manager;
+private:
+	static SoundDevice::SysInfo GetSysInfo()
+	{
+		mpt::OS::Wine::VersionContext wineVersionContext;
+		return SoundDevice::SysInfo(mpt::OS::GetClass(), mpt::OS::Windows::Version::Current(), mpt::OS::Windows::IsWine(), wineVersionContext.HostClass(), wineVersionContext.Version());
+	}
+
 public:
 	ComponentSoundDeviceManager()
-		: manager(logger, SoundDevice::SysInfo::Current(), SoundDevice::AppInfo())
+		: manager(logger, GetSysInfo(), SoundDevice::AppInfo())
 	{
 		return;
 	}

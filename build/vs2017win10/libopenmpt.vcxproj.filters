@@ -708,6 +708,9 @@
     <ClInclude Include="..\..\src\mpt\mutex\mutex.hpp">
       <Filter>src\mpt\mutex</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\mpt\osinfo\class.hpp">
+      <Filter>src\mpt\osinfo</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\mpt\osinfo\windows_version.hpp">
       <Filter>src\mpt\osinfo</Filter>
     </ClInclude>

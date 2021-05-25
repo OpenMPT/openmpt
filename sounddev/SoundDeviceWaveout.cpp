@@ -97,7 +97,7 @@ SoundDevice::Caps CWaveDevice::InternalGetDeviceCaps()
 	if(GetSysInfo().IsWine)
 	{
 		caps.DefaultSettings.sampleFormat = SampleFormat::Int16;
-	} else if(GetSysInfo().WindowsVersion.IsAtLeast(mpt::OS::Windows::Version::WinVista))
+	} else if(GetSysInfo().WindowsVersion.IsAtLeast(mpt::osinfo::windows::Version::WinVista))
 	{
 		caps.DefaultSettings.sampleFormat = SampleFormat::Float32;
 	} else
@@ -112,7 +112,7 @@ SoundDevice::DynamicCaps CWaveDevice::GetDeviceDynamicCaps(const std::vector<uin
 {
 	MPT_SOUNDDEV_TRACE_SCOPE();
 	SoundDevice::DynamicCaps caps;
-	if(GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::OS::Windows::Version::WinVista))
+	if(GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::osinfo::windows::Version::WinVista))
 	{  // emulated on WASAPI
 		caps.supportedSampleFormats = { SampleFormat::Float32 };
 		caps.supportedExclusiveModeSampleFormats = { SampleFormat::Float32 };
@@ -123,7 +123,7 @@ SoundDevice::DynamicCaps CWaveDevice::GetDeviceDynamicCaps(const std::vector<uin
 	}
 	if(GetDeviceIndex() > 0)
 	{  // direct mode
-		if((GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::OS::Windows::Version::WinVista)) || !GetSysInfo().IsOriginal())
+		if((GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::osinfo::windows::Version::WinVista)) || !GetSysInfo().IsOriginal())
 		{  // emulated on WASAPI, or Wine
 			WAVEOUTCAPS woc = {};
 			caps.supportedExclusiveModeSampleFormats.clear();
@@ -279,7 +279,7 @@ bool CWaveDevice::InternalOpen()
 	}
 	SetWakeupEvent(m_ThreadWakeupEvent);
 	SetWakeupInterval(m_nWaveBufferSize * 1.0 / m_Settings.GetBytesPerSecond());
-	m_Flags.WantsClippedOutput = (GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::OS::Windows::Version::WinVista));
+	m_Flags.WantsClippedOutput = (GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::osinfo::windows::Version::WinVista));
 	return true;
 }
 
@@ -665,10 +665,10 @@ std::vector<SoundDevice::Info> CWaveDevice::EnumerateDevices(ILogger &logger, So
 		}
 		info.default_ = ((index == 0) ? Info::Default::Managed : Info::Default::None);
 		info.flags = {
-			sysInfo.SystemClass == mpt::OS::Class::Windows ? sysInfo.IsWindowsOriginal() && sysInfo.WindowsVersion.IsBefore(mpt::OS::Windows::Version::Win7) ? Info::Usability::Usable : Info::Usability::Legacy : Info::Usability::NotAvailable,
+			sysInfo.SystemClass == mpt::osinfo::osclass::Windows ? sysInfo.IsWindowsOriginal() && sysInfo.WindowsVersion.IsBefore(mpt::osinfo::windows::Version::Win7) ? Info::Usability::Usable : Info::Usability::Legacy : Info::Usability::NotAvailable,
 			Info::Level::Primary,
-			sysInfo.SystemClass == mpt::OS::Class::Windows && sysInfo.IsWindowsOriginal() ? Info::Compatible::Yes : Info::Compatible::No,
-			sysInfo.SystemClass == mpt::OS::Class::Windows ? sysInfo.IsWindowsWine() ? Info::Api::Emulated : sysInfo.WindowsVersion.IsAtLeast(mpt::OS::Windows::Version::WinVista) ? Info::Api::Emulated : Info::Api::Native : Info::Api::Emulated,
+			sysInfo.SystemClass == mpt::osinfo::osclass::Windows && sysInfo.IsWindowsOriginal() ? Info::Compatible::Yes : Info::Compatible::No,
+			sysInfo.SystemClass == mpt::osinfo::osclass::Windows ? sysInfo.IsWindowsWine() ? Info::Api::Emulated : sysInfo.WindowsVersion.IsAtLeast(mpt::osinfo::windows::Version::WinVista) ? Info::Api::Emulated : Info::Api::Native : Info::Api::Emulated,
 			Info::Io::OutputOnly,
 			Info::Mixing::Software,
 			Info::Implementor::OpenMPT

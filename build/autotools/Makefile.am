@@ -182,6 +182,7 @@ MPT_FILES_SRC_MPT += src/mpt/format/simple_spec.hpp
 #MPT_FILES_SRC_MPT += src/mpt/json/json.hpp
 #MPT_FILES_SRC_MPT += src/mpt/library/library.hpp
 MPT_FILES_SRC_MPT += src/mpt/mutex/mutex.hpp
+MPT_FILES_SRC_MPT += src/mpt/osinfo/class.hpp
 MPT_FILES_SRC_MPT += src/mpt/osinfo/windows_version.hpp
 MPT_FILES_SRC_MPT += src/mpt/out_of_memory/out_of_memory.hpp
 MPT_FILES_SRC_MPT += src/mpt/parse/parse.hpp

@@ -116,7 +116,7 @@ bool CRtAudioDevice::InternalOpen()
 			m_Flags.WantsClippedOutput = true;
 		} else if(m_RtAudio->getCurrentApi() == RtAudio::Api::WINDOWS_DS)
 		{
-			m_Flags.WantsClippedOutput = (GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::OS::Windows::Version::WinVista));
+			m_Flags.WantsClippedOutput = (GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::osinfo::windows::Version::WinVista));
 		}
 		m_RtAudio->openStream((m_OutputStreamParameters.nChannels > 0) ? &m_OutputStreamParameters : nullptr, (m_InputStreamParameters.nChannels > 0) ? &m_InputStreamParameters : nullptr, SampleFormatToRtAudioFormat(m_Settings.sampleFormat), m_Settings.Samplerate, &m_FramesPerChunk, &RtAudioCallback, this, &m_StreamOptions, nullptr);
 	} catch (const RtAudioError &e)
@@ -467,12 +467,12 @@ std::vector<SoundDevice::Info> CRtAudioDevice::EnumerateDevices(ILogger &logger,
 					info.apiName = U_("ALSA");
 					info.default_ = (rtinfo.isDefaultOutput ? Info::Default::Named : Info::Default::None);
 					info.flags = {
-						sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Usability::Usable : Info::Usability::Experimental,
+						sysInfo.SystemClass == mpt::osinfo::osclass::Linux ? Info::Usability::Usable : Info::Usability::Experimental,
 						Info::Level::Secondary,
 						Info::Compatible::No,
-						sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Api::Native : Info::Api::Emulated,
+						sysInfo.SystemClass == mpt::osinfo::osclass::Linux ? Info::Api::Native : Info::Api::Emulated,
 						Info::Io::FullDuplex,
-						sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Mixing::Hardware : Info::Mixing::Software,
+						sysInfo.SystemClass == mpt::osinfo::osclass::Linux ? Info::Mixing::Hardware : Info::Mixing::Software,
 						Info::Implementor::External
 					};
 					break;
@@ -480,10 +480,10 @@ std::vector<SoundDevice::Info> CRtAudioDevice::EnumerateDevices(ILogger &logger,
 					info.apiName = U_("PulseAudio");
 					info.default_ = (rtinfo.isDefaultOutput ? Info::Default::Managed : Info::Default::None);
 					info.flags = {
-						sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Usability::Usable : Info::Usability::Experimental,
+						sysInfo.SystemClass == mpt::osinfo::osclass::Linux ? Info::Usability::Usable : Info::Usability::Experimental,
 						Info::Level::Secondary,
 						Info::Compatible::No,
-						sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Api::Native : Info::Api::Emulated,
+						sysInfo.SystemClass == mpt::osinfo::osclass::Linux ? Info::Api::Native : Info::Api::Emulated,
 						Info::Io::FullDuplex,
 						Info::Mixing::Server,
 						Info::Implementor::External
@@ -493,12 +493,12 @@ std::vector<SoundDevice::Info> CRtAudioDevice::EnumerateDevices(ILogger &logger,
 					info.apiName = U_("OSS");
 					info.default_ = (rtinfo.isDefaultOutput ? Info::Default::Named : Info::Default::None);
 					info.flags = {
-						sysInfo.SystemClass == mpt::OS::Class::BSD ? Info::Usability::Usable : sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Usability::Deprecated : Info::Usability::NotAvailable,
+						sysInfo.SystemClass == mpt::osinfo::osclass::BSD ? Info::Usability::Usable : sysInfo.SystemClass == mpt::osinfo::osclass::Linux ? Info::Usability::Deprecated : Info::Usability::NotAvailable,
 						Info::Level::Secondary,
 						Info::Compatible::No,
-						sysInfo.SystemClass == mpt::OS::Class::BSD ? Info::Api::Native : sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Api::Emulated : Info::Api::Emulated,
+						sysInfo.SystemClass == mpt::osinfo::osclass::BSD ? Info::Api::Native : sysInfo.SystemClass == mpt::osinfo::osclass::Linux ? Info::Api::Emulated : Info::Api::Emulated,
 						Info::Io::FullDuplex,
-						sysInfo.SystemClass == mpt::OS::Class::BSD ? Info::Mixing::Hardware : sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Mixing::Software : Info::Mixing::Software,
+						sysInfo.SystemClass == mpt::osinfo::osclass::BSD ? Info::Mixing::Hardware : sysInfo.SystemClass == mpt::osinfo::osclass::Linux ? Info::Mixing::Software : Info::Mixing::Software,
 						Info::Implementor::External
 					};
 					break;
@@ -506,10 +506,10 @@ std::vector<SoundDevice::Info> CRtAudioDevice::EnumerateDevices(ILogger &logger,
 					info.apiName = U_("JACK");
 					info.default_ = (rtinfo.isDefaultOutput ? Info::Default::Managed : Info::Default::None);
 					info.flags = {
-						sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Usability::Usable : sysInfo.SystemClass == mpt::OS::Class::Darwin ? Info::Usability::Usable : Info::Usability::Experimental,
+						sysInfo.SystemClass == mpt::osinfo::osclass::Linux ? Info::Usability::Usable : sysInfo.SystemClass == mpt::osinfo::osclass::Darwin ? Info::Usability::Usable : Info::Usability::Experimental,
 						Info::Level::Primary,
 						Info::Compatible::Yes,
-						sysInfo.SystemClass == mpt::OS::Class::Linux ? Info::Api::Native : Info::Api::Emulated,
+						sysInfo.SystemClass == mpt::osinfo::osclass::Linux ? Info::Api::Native : Info::Api::Emulated,
 						Info::Io::FullDuplex,
 						Info::Mixing::Server,
 						Info::Implementor::External
@@ -519,10 +519,10 @@ std::vector<SoundDevice::Info> CRtAudioDevice::EnumerateDevices(ILogger &logger,
 					info.apiName = U_("CoreAudio");
 					info.default_ = (rtinfo.isDefaultOutput ? Info::Default::Named : Info::Default::None);
 					info.flags = {
-						sysInfo.SystemClass == mpt::OS::Class::Darwin ? Info::Usability::Usable : Info::Usability::NotAvailable,
+						sysInfo.SystemClass == mpt::osinfo::osclass::Darwin ? Info::Usability::Usable : Info::Usability::NotAvailable,
 						Info::Level::Primary,
 						Info::Compatible::Yes,
-						sysInfo.SystemClass == mpt::OS::Class::Darwin ? Info::Api::Native : Info::Api::Emulated,
+						sysInfo.SystemClass == mpt::osinfo::osclass::Darwin ? Info::Api::Native : Info::Api::Emulated,
 						Info::Io::FullDuplex,
 						Info::Mixing::Server,
 						Info::Implementor::External
@@ -532,12 +532,12 @@ std::vector<SoundDevice::Info> CRtAudioDevice::EnumerateDevices(ILogger &logger,
 					info.apiName = U_("WASAPI");
 					info.default_ = (rtinfo.isDefaultOutput ? Info::Default::Named : Info::Default::None);
 					info.flags = {
-						sysInfo.SystemClass == mpt::OS::Class::Windows ?
+						sysInfo.SystemClass == mpt::osinfo::osclass::Windows ?
 							sysInfo.IsWindowsOriginal() ?
-								sysInfo.WindowsVersion.IsAtLeast(mpt::OS::Windows::Version::Win7) ?
+								sysInfo.WindowsVersion.IsAtLeast(mpt::osinfo::windows::Version::Win7) ?
 									Info::Usability::Usable
 								:
-									sysInfo.WindowsVersion.IsAtLeast(mpt::OS::Windows::Version::WinVista) ?
+									sysInfo.WindowsVersion.IsAtLeast(mpt::osinfo::windows::Version::WinVista) ?
 										Info::Usability::Experimental
 									:
 										Info::Usability::NotAvailable
@@ -547,7 +547,7 @@ std::vector<SoundDevice::Info> CRtAudioDevice::EnumerateDevices(ILogger &logger,
 							Info::Usability::NotAvailable,
 						Info::Level::Secondary,
 						Info::Compatible::No,
-						sysInfo.SystemClass == mpt::OS::Class::Windows ? Info::Api::Native : Info::Api::Emulated,
+						sysInfo.SystemClass == mpt::osinfo::osclass::Windows ? Info::Api::Native : Info::Api::Emulated,
 						Info::Io::FullDuplex,
 						Info::Mixing::Server,
 						Info::Implementor::External
@@ -557,10 +557,10 @@ std::vector<SoundDevice::Info> CRtAudioDevice::EnumerateDevices(ILogger &logger,
 					info.apiName = U_("ASIO");
 					info.default_ = (rtinfo.isDefaultOutput ? Info::Default::Named : Info::Default::None);
 					info.flags = {
-						sysInfo.SystemClass == mpt::OS::Class::Windows ? sysInfo.IsWindowsOriginal() ? Info::Usability::Usable : Info::Usability::Experimental : Info::Usability::NotAvailable,
+						sysInfo.SystemClass == mpt::osinfo::osclass::Windows ? sysInfo.IsWindowsOriginal() ? Info::Usability::Usable : Info::Usability::Experimental : Info::Usability::NotAvailable,
 						Info::Level::Secondary,
 						Info::Compatible::No,
-						sysInfo.SystemClass == mpt::OS::Class::Windows && sysInfo.IsWindowsOriginal() ? Info::Api::Native : Info::Api::Emulated,
+						sysInfo.SystemClass == mpt::osinfo::osclass::Windows && sysInfo.IsWindowsOriginal() ? Info::Api::Native : Info::Api::Emulated,
 						Info::Io::FullDuplex,
 						Info::Mixing::Hardware,
 						Info::Implementor::External
@@ -570,10 +570,10 @@ std::vector<SoundDevice::Info> CRtAudioDevice::EnumerateDevices(ILogger &logger,
 					info.apiName = U_("DirectSound");
 					info.default_ = (rtinfo.isDefaultOutput ? Info::Default::Managed : Info::Default::None);
 					info.flags = {
-						Info::Usability::Broken, // sysInfo.SystemClass == mpt::OS::Class::Windows ? sysInfo.IsWindowsOriginal() && sysInfo.WindowsVersion.IsBefore(mpt::Windows::Version::Win7) ? Info::Usability:Usable : Info::Usability::Deprecated : Info::Usability::NotAvailable,
+						Info::Usability::Broken, // sysInfo.SystemClass == mpt::osinfo::osclass::Windows ? sysInfo.IsWindowsOriginal() && sysInfo.WindowsVersion.IsBefore(mpt::Windows::Version::Win7) ? Info::Usability:Usable : Info::Usability::Deprecated : Info::Usability::NotAvailable,
 						Info::Level::Secondary,
 						Info::Compatible::No,
-						sysInfo.SystemClass == mpt::OS::Class::Windows ? sysInfo.IsWindowsWine() ? Info::Api::Emulated : sysInfo.WindowsVersion.IsAtLeast(mpt::OS::Windows::Version::WinVista) ? Info::Api::Emulated : Info::Api::Native : Info::Api::Emulated,
+						sysInfo.SystemClass == mpt::osinfo::osclass::Windows ? sysInfo.IsWindowsWine() ? Info::Api::Emulated : sysInfo.WindowsVersion.IsAtLeast(mpt::osinfo::windows::Version::WinVista) ? Info::Api::Emulated : Info::Api::Native : Info::Api::Emulated,
 						Info::Io::FullDuplex,
 						Info::Mixing::Software,
 						Info::Implementor::External
