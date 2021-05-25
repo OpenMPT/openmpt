@@ -31,6 +31,7 @@
 
 #include <ASIOModern/ASIO.hpp>
 #include <ASIOModern/ASIOSystemWindows.hpp>
+#include <ASIOModern/ASIOSystemWindowsSEH.hpp>
 #include <ASIOModern/ASIOSampleConvert.hpp>
 //#include <ASIOModern/ASIOVerifyABI.hpp>
 

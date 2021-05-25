@@ -216,6 +216,9 @@
     <ClInclude Include="..\..\include\asiomodern\include\ASIOModern\ASIOSystemWindows.hpp">
       <Filter>include\asiomodern\include\ASIOModern</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\asiomodern\include\ASIOModern\ASIOSystemWindowsSEH.hpp">
+      <Filter>include\asiomodern\include\ASIOModern</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\include\asiomodern\include\ASIOModern\ASIOVerifyABI.hpp">
       <Filter>include\asiomodern\include\ASIOModern</Filter>
     </ClInclude>
