@@ -627,6 +627,9 @@
     <ClInclude Include="..\..\mptrack\WelcomeDialog.h">
       <Filter>mptrack</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\mptrack\WineSoundDeviceStub.h">
+      <Filter>mptrack</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\mptrack\dlg_misc.h">
       <Filter>mptrack</Filter>
     </ClInclude>
@@ -694,9 +697,6 @@
       <Filter>sounddev</Filter>
     </ClInclude>
     <ClInclude Include="..\..\sounddev\SoundDeviceRtAudio.h">
-      <Filter>sounddev</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\sounddev\SoundDeviceStub.h">
       <Filter>sounddev</Filter>
     </ClInclude>
     <ClInclude Include="..\..\sounddev\SoundDeviceUtilities.h">
@@ -1745,6 +1745,9 @@
     <ClCompile Include="..\..\mptrack\WelcomeDialog.cpp">
       <Filter>mptrack</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\mptrack\WineSoundDeviceStub.cpp">
+      <Filter>mptrack</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\mptrack\dlg_misc.cpp">
       <Filter>mptrack</Filter>
     </ClCompile>
@@ -1797,9 +1800,6 @@
       <Filter>sounddev</Filter>
     </ClCompile>
     <ClCompile Include="..\..\sounddev\SoundDeviceRtAudio.cpp">
-      <Filter>sounddev</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\sounddev\SoundDeviceStub.cpp">
       <Filter>sounddev</Filter>
     </ClCompile>
     <ClCompile Include="..\..\sounddev\SoundDeviceUtilities.cpp">

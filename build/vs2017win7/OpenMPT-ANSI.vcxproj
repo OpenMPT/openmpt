@@ -876,6 +876,7 @@
     <ClInclude Include="..\..\mptrack\VstPresets.h" />
     <ClInclude Include="..\..\mptrack\Vstplug.h" />
     <ClInclude Include="..\..\mptrack\WelcomeDialog.h" />
+    <ClInclude Include="..\..\mptrack\WineSoundDeviceStub.h" />
     <ClInclude Include="..\..\mptrack\dlg_misc.h" />
     <ClInclude Include="..\..\mptrack\mod2midi.h" />
     <ClInclude Include="..\..\mptrack\mod2wave.h" />
@@ -899,7 +900,6 @@
     <ClInclude Include="..\..\sounddev\SoundDevicePulseSimple.h" />
     <ClInclude Include="..\..\sounddev\SoundDevicePulseaudio.h" />
     <ClInclude Include="..\..\sounddev\SoundDeviceRtAudio.h" />
-    <ClInclude Include="..\..\sounddev\SoundDeviceStub.h" />
     <ClInclude Include="..\..\sounddev\SoundDeviceUtilities.h" />
     <ClInclude Include="..\..\sounddev\SoundDeviceWaveout.h" />
     <ClInclude Include="..\..\sounddsp\AGC.h" />
@@ -1250,6 +1250,7 @@
     <ClCompile Include="..\..\mptrack\VstPresets.cpp" />
     <ClCompile Include="..\..\mptrack\Vstplug.cpp" />
     <ClCompile Include="..\..\mptrack\WelcomeDialog.cpp" />
+    <ClCompile Include="..\..\mptrack\WineSoundDeviceStub.cpp" />
     <ClCompile Include="..\..\mptrack\dlg_misc.cpp" />
     <ClCompile Include="..\..\mptrack\mod2midi.cpp" />
     <ClCompile Include="..\..\mptrack\plugins\LFOPluginEditor.cpp" />
@@ -1268,7 +1269,6 @@
     <ClCompile Include="..\..\sounddev\SoundDevicePulseSimple.cpp" />
     <ClCompile Include="..\..\sounddev\SoundDevicePulseaudio.cpp" />
     <ClCompile Include="..\..\sounddev\SoundDeviceRtAudio.cpp" />
-    <ClCompile Include="..\..\sounddev\SoundDeviceStub.cpp" />
     <ClCompile Include="..\..\sounddev\SoundDeviceUtilities.cpp" />
     <ClCompile Include="..\..\sounddev\SoundDeviceWaveout.cpp" />
     <ClCompile Include="..\..\sounddsp\AGC.cpp" />

@@ -1243,7 +1243,6 @@
     <ClInclude Include="..\..\sounddev\SoundDevicePulseSimple.h" />
     <ClInclude Include="..\..\sounddev\SoundDevicePulseaudio.h" />
     <ClInclude Include="..\..\sounddev\SoundDeviceRtAudio.h" />
-    <ClInclude Include="..\..\sounddev\SoundDeviceStub.h" />
     <ClInclude Include="..\..\sounddev\SoundDeviceUtilities.h" />
     <ClInclude Include="..\..\sounddev\SoundDeviceWaveout.h" />
     <ClInclude Include="..\..\src\mpt\audio\sample.hpp" />
@@ -1416,7 +1415,6 @@
     <ClCompile Include="..\..\sounddev\SoundDevicePulseSimple.cpp" />
     <ClCompile Include="..\..\sounddev\SoundDevicePulseaudio.cpp" />
     <ClCompile Include="..\..\sounddev\SoundDeviceRtAudio.cpp" />
-    <ClCompile Include="..\..\sounddev\SoundDeviceStub.cpp" />
     <ClCompile Include="..\..\sounddev\SoundDeviceUtilities.cpp" />
     <ClCompile Include="..\..\sounddev\SoundDeviceWaveout.cpp" />
   </ItemGroup>

@@ -33,7 +33,7 @@
 #include "../common/ComponentManager.h"
 #include "WelcomeDialog.h"
 #include "../sounddev/SoundDeviceManager.h"
-#include "../sounddev/SoundDeviceStub.h"
+#include "WineSoundDeviceStub.h"
 #include "../soundlib/plugins/PluginManager.h"
 #include "MPTrackWine.h"
 #include "MPTrackUtil.h"

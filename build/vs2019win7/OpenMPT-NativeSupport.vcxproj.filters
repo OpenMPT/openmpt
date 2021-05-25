@@ -336,9 +336,6 @@
     <ClInclude Include="..\..\sounddev\SoundDeviceRtAudio.h">
       <Filter>sounddev</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\sounddev\SoundDeviceStub.h">
-      <Filter>sounddev</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\sounddev\SoundDeviceUtilities.h">
       <Filter>sounddev</Filter>
     </ClInclude>
@@ -849,9 +846,6 @@
       <Filter>sounddev</Filter>
     </ClCompile>
     <ClCompile Include="..\..\sounddev\SoundDeviceRtAudio.cpp">
-      <Filter>sounddev</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\sounddev\SoundDeviceStub.cpp">
       <Filter>sounddev</Filter>
     </ClCompile>
     <ClCompile Include="..\..\sounddev\SoundDeviceUtilities.cpp">

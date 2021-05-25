@@ -1,6 +1,6 @@
 /*
- * SoundDeviceStub.h
- * -----------------
+ * WineSoundDeviceStub.h
+ * ---------------------
  * Purpose: Stub sound device driver class connection to WineSupport Wrapper.
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
@@ -12,38 +12,24 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
-#include "SoundDeviceBase.h"
-
-#if defined(MODPLUG_TRACKER) && !defined(MPT_BUILD_WINESUPPORT)
+#include "../sounddev/SoundDeviceBase.h"
 
 #include "../common/ComponentManager.h"
 
-#endif
-
-
-#if defined(MODPLUG_TRACKER) && !defined(MPT_BUILD_WINESUPPORT)
 
 extern "C" {
 	typedef struct OpenMPT_Wine_Wrapper_SoundDevice OpenMPT_Wine_Wrapper_SoundDevice;
 };
 
-#endif
-
 
 OPENMPT_NAMESPACE_BEGIN
 
 
-#if defined(MODPLUG_TRACKER) && !defined(MPT_BUILD_WINESUPPORT)
-
 class ComponentWineWrapper;
-
-#endif
 
 
 namespace SoundDevice {
 
-
-#if defined(MODPLUG_TRACKER) && !defined(MPT_BUILD_WINESUPPORT)
 
 class SoundDeviceStub
 	: public SoundDevice::IBase
@@ -109,8 +95,6 @@ private:
 	OpenMPT_Wine_Wrapper_SoundDevice * impl;
 
 };
-
-#endif
 
 
 } // namespace SoundDevice

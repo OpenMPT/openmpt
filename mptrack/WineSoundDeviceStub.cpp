@@ -1,6 +1,6 @@
 /*
- * SoundDeviceStub.cpp
- * -------------------
+ * WineSoundDeviceStub.cpp
+ * -----------------------
  * Purpose: Stub sound device driver class connection to WineSupport Wrapper.
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
@@ -14,18 +14,14 @@
 #pragma warning(disable:4800) // 'T' : forcing value to bool 'true' or 'false' (performance warning)
 #endif // MPT_COMPILER_MSVC
 
-#include "SoundDevice.h"
+#include "WineSoundDeviceStub.h"
 
-#include "SoundDeviceStub.h"
-
-#if defined(MODPLUG_TRACKER) && !defined(MPT_BUILD_WINESUPPORT)
+#include "../sounddev/SoundDevice.h"
 
 #include "../common/misc_util.h"
 
-#include "../mptrack/MPTrackWine.h"
-#include "../mptrack/wine/NativeSoundDeviceMarshalling.h"
-
-#endif
+#include "MPTrackWine.h"
+#include "wine/NativeSoundDeviceMarshalling.h"
 
 
 
@@ -33,9 +29,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 namespace SoundDevice {
-
-
-#if defined(MODPLUG_TRACKER) && !defined(MPT_BUILD_WINESUPPORT)
 
 
 static mpt::ustring GetTypePrefix()
@@ -387,9 +380,6 @@ SoundDevice::Statistics SoundDeviceStub::GetStatistics() const {
 bool SoundDeviceStub::OpenDriverSettings() {
 	return w->OpenMPT_Wine_Wrapper_SoundDevice_OpenDriverSettings(impl);
 }
-
-
-#endif
 
 
 } // namespace SoundDevice
