@@ -567,6 +567,18 @@ struct Statistics
 };
 
 
+class BackendInitializer
+{
+public:
+	BackendInitializer() = default;
+	virtual void Reload()
+	{
+		return;
+	}
+	virtual ~BackendInitializer() = default;
+};
+
+
 class IBase
 {
 

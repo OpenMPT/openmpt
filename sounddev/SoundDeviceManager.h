@@ -53,9 +53,47 @@ struct EnabledBackends
 };
 
 
-#ifdef MPT_WITH_PORTAUDIO
-class PortAudioInitializer;
-#endif // MPT_WITH_PORTAUDIO
+class IDevicesEnumerator
+{
+protected:
+	typedef SoundDevice::IBase* (*CreateSoundDeviceFunc)(ILogger &logger, const SoundDevice::Info &info, SoundDevice::SysInfo sysInfo);
+protected:
+	IDevicesEnumerator() = default;
+public:
+	virtual ~IDevicesEnumerator() = default;
+public:
+	virtual std::unique_ptr<SoundDevice::BackendInitializer> BackendInitializer() = 0;
+	virtual std::vector<SoundDevice::Info> EnumerateDevices(ILogger &logger, SoundDevice::SysInfo sysInfo) = 0;
+	virtual CreateSoundDeviceFunc GetCreateFunc() = 0;
+};
+
+
+template <typename TSoundDevice>
+class DevicesEnumerator
+	: public IDevicesEnumerator
+{
+public:
+	DevicesEnumerator() = default;
+	~DevicesEnumerator() override = default;
+public:
+	std::unique_ptr<SoundDevice::BackendInitializer> BackendInitializer() override
+	{
+		return TSoundDevice::BackendInitializer();
+	}
+	std::vector<SoundDevice::Info> EnumerateDevices(ILogger &logger, SoundDevice::SysInfo sysInfo) override
+	{
+		return TSoundDevice::EnumerateDevices(logger, sysInfo);
+	}
+	virtual CreateSoundDeviceFunc GetCreateFunc() override
+	{
+		return &ConstructSoundDevice;
+	}
+public:
+	static SoundDevice::IBase* ConstructSoundDevice(ILogger& logger, const SoundDevice::Info& info, SoundDevice::SysInfo sysInfo)
+	{
+		return new TSoundDevice(logger, info, sysInfo);
+	}
+};
 
 
 class Manager
@@ -65,21 +103,19 @@ public:
 
 	typedef std::size_t GlobalID;
 
-private:
+protected:
 
 	typedef SoundDevice::IBase* (*CreateSoundDeviceFunc)(ILogger &logger, const SoundDevice::Info &info, SoundDevice::SysInfo sysInfo);
 
-private:
+protected:
 
 	ILogger &m_Logger;
 	const SoundDevice::SysInfo m_SysInfo;
 	const SoundDevice::AppInfo m_AppInfo;
 
-	const EnabledBackends m_EnabledBackends;
+	std::vector<std::shared_ptr<IDevicesEnumerator>> m_DeviceEnumerators;
 
-#ifdef MPT_WITH_PORTAUDIO
-	std::unique_ptr<PortAudioInitializer> m_PortAudioInitializer;
-#endif // MPT_WITH_PORTAUDIO
+	std::vector<std::unique_ptr<BackendInitializer>> m_BackendInitializers;
 
 	std::vector<SoundDevice::Info> m_SoundDevices;
 	std::map<SoundDevice::Identifier, bool> m_DeviceUnavailable;
@@ -89,19 +125,17 @@ private:
 
 public:
 
-	Manager(ILogger &logger, SoundDevice::SysInfo sysInfo, SoundDevice::AppInfo appInfo, EnabledBackends enabledBackends = EnabledBackends{});
+	Manager(ILogger &logger, SoundDevice::SysInfo sysInfo, SoundDevice::AppInfo appInfo, std::vector<std::shared_ptr<IDevicesEnumerator>> deviceEnumerators = GetDefaultEnumerators());
 	~Manager();
-
-private:
-
-	template <typename Tdevice> void EnumerateDevices(ILogger &logger, SoundDevice::SysInfo sysInfo);
-	template <typename Tdevice> static SoundDevice::IBase* ConstructSoundDevice(ILogger &logger, const SoundDevice::Info &info, SoundDevice::SysInfo sysInfo);
 
 public:
 
 	ILogger &GetLogger() const { return m_Logger; }
 	SoundDevice::SysInfo GetSysInfo() const { return m_SysInfo; }
 	SoundDevice::AppInfo GetAppInfo() const { return m_AppInfo; }
+
+	static std::vector<std::shared_ptr<IDevicesEnumerator>> GetDefaultEnumerators();
+	static std::vector<std::shared_ptr<IDevicesEnumerator>> GetEnabledEnumerators(EnabledBackends enabledBackends);
 
 	void ReEnumerate(bool firstRun = false);
 

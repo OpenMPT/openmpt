@@ -28,6 +28,7 @@ namespace SoundDevice {
 #ifdef MPT_WITH_PORTAUDIO
 
 class PortAudioInitializer
+	: public BackendInitializer
 {
 private:
 	bool m_initialized = false;
@@ -36,7 +37,7 @@ public:
 	PortAudioInitializer(const PortAudioInitializer &) = delete;
 	PortAudioInitializer &operator=(const PortAudioInitializer &) = delete;
 	void Reload();
-	~PortAudioInitializer();
+	~PortAudioInitializer() override;
 };
 
 class CPortaudioDevice: public SoundDevice::Base
@@ -103,6 +104,11 @@ public:
 		PaStreamCallbackFlags statusFlags,
 		void *userData
 		);
+
+	static std::unique_ptr<SoundDevice::BackendInitializer> BackendInitializer()
+	{
+		return std::make_unique<PortAudioInitializer>();
+	}
 
 	static std::vector<SoundDevice::Info> EnumerateDevices(ILogger &logger, SoundDevice::SysInfo sysInfo);
 

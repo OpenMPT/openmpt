@@ -138,7 +138,7 @@ protected:
 	CVstPluginManager *m_pPluginManager = nullptr;
 	mpt::log::GlobalLogger m_GlobalLogger{};
 	std::unique_ptr<AllSoundDeviceComponents> m_pAllSoundDeviceComponents;
-	SoundDevice::Manager *m_pSoundDevicesManager = nullptr;
+	std::unique_ptr<SoundDevice::Manager> m_pSoundDevicesManager;
 
 	mpt::PathString m_InstallPath;         // i.e. "C:\Program Files\OpenMPT\" (installer mode) or "G:\OpenMPT\" (portable mode)
 	mpt::PathString m_InstallBinPath;      // i.e. "C:\Program Files\OpenMPT\bin\" (multi-arch mode) or InstallPath (legacy mode)
@@ -208,7 +208,7 @@ public:
 	mpt::thread_safe_prng<mpt::default_prng> &PRNG() { return *m_PRNG; }
 	CModDocTemplate *GetModDocTemplate() const { return m_pModTemplate; }
 	CVstPluginManager *GetPluginManager() const { return m_pPluginManager; }
-	SoundDevice::Manager *GetSoundDevicesManager() const { return m_pSoundDevicesManager; }
+	SoundDevice::Manager *GetSoundDevicesManager() const { return m_pSoundDevicesManager.get(); }
 	void GetDefaultMidiMacro(MIDIMacroConfig &cfg) const { cfg = m_MidiCfg; }
 	void SetDefaultMidiMacro(const MIDIMacroConfig &cfg) { m_MidiCfg = cfg; }
 	mpt::PathString GetConfigFileName() const { return m_szConfigFileName; }

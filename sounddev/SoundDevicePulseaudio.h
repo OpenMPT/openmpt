@@ -3,8 +3,7 @@
  * -----------------------
  * Purpose: PulseAudio sound device driver class.
  * Notes  : (currently none)
- * Authors: Joern Heusipp
- *          OpenMPT Devs
+ * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
@@ -41,6 +40,7 @@ class Pulseaudio
 private:
 	static mpt::ustring PulseErrorString(int error);
 public:
+	static std::unique_ptr<SoundDevice::BackendInitializer> BackendInitializer() { return std::make_unique< SoundDevice::BackendInitializer>(); }
 	static std::vector<SoundDevice::Info> EnumerateDevices(ILogger &logger, SoundDevice::SysInfo sysInfo);
 public:
 	Pulseaudio(ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo);

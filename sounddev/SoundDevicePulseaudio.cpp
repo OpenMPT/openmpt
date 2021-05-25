@@ -3,8 +3,7 @@
  * -------------------------
  * Purpose: PulseAudio sound device driver class.
  * Notes  : (currently none)
- * Authors: Olivier Lapicque
- *          OpenMPT Devs
+ * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 

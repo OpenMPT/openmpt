@@ -33,6 +33,7 @@
 #include "../common/ComponentManager.h"
 #include "WelcomeDialog.h"
 #include "../sounddev/SoundDeviceManager.h"
+#include "../sounddev/SoundDeviceStub.h"
 #include "../soundlib/plugins/PluginManager.h"
 #include "MPTrackWine.h"
 #include "MPTrackUtil.h"
@@ -1148,7 +1149,9 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 	appInfo.BoostedThreadRtprioPosix = TrackerSettings::Instance().SoundBoostedThreadRtprioPosix;
 	appInfo.MaskDriverCrashes = TrackerSettings::Instance().SoundMaskDriverCrashes;
 	appInfo.AllowDeferredProcessing = TrackerSettings::Instance().SoundAllowDeferredProcessing;
-	m_pSoundDevicesManager = new SoundDevice::Manager(m_GlobalLogger, sysInfo, appInfo, *m_pAllSoundDeviceComponents);
+	std::vector<std::shared_ptr<SoundDevice::IDevicesEnumerator>> deviceEnumerators = SoundDevice::Manager::GetEnabledEnumerators(*m_pAllSoundDeviceComponents);
+	deviceEnumerators.push_back(std::static_pointer_cast<SoundDevice::IDevicesEnumerator>(std::make_shared<SoundDevice::DevicesEnumerator<SoundDevice::SoundDeviceStub>>()));
+	m_pSoundDevicesManager = std::make_unique<SoundDevice::Manager>(m_GlobalLogger, sysInfo, appInfo, std::move(deviceEnumerators));
 	m_pTrackerSettings->MigrateOldSoundDeviceSettings(*m_pSoundDevicesManager);
 
 	// Set default note names
@@ -1369,7 +1372,6 @@ int CTrackApp::ExitInstanceImpl()
 {
 	IPCWindow::Close();
 
-	delete m_pSoundDevicesManager;
 	m_pSoundDevicesManager = nullptr;
 	m_pAllSoundDeviceComponents = nullptr;
 	ExportMidiConfig(theApp.GetSettings());

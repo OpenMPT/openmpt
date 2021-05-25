@@ -21,7 +21,6 @@
 #include "SoundDeviceWaveout.h"
 #include "SoundDevicePulseaudio.h"
 #include "SoundDevicePulseSimple.h"
-#include "SoundDeviceStub.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -67,26 +66,67 @@ struct CompareInfo
 };
 
 
-template <typename Tdevice>
-void Manager::EnumerateDevices(ILogger &logger, SoundDevice::SysInfo sysInfo)
+std::vector<std::shared_ptr<IDevicesEnumerator>> Manager::GetDefaultEnumerators()
 {
-	const auto infos = Tdevice::EnumerateDevices(logger, sysInfo);
-	mpt::append(m_SoundDevices, infos);
-	for(const auto &info : infos)
-	{
-		SoundDevice::Identifier identifier = info.GetIdentifier();
-		if(!identifier.empty())
-		{
-			m_DeviceFactoryMethods[identifier] = ConstructSoundDevice<Tdevice>;
-		}
-	}
+	return GetEnabledEnumerators(EnabledBackends());
 }
 
 
-template <typename Tdevice>
-SoundDevice::IBase* Manager::ConstructSoundDevice(ILogger &logger, const SoundDevice::Info &info, SoundDevice::SysInfo sysInfo)
+std::vector<std::shared_ptr<IDevicesEnumerator>> Manager::GetEnabledEnumerators(EnabledBackends enabledBackends)
 {
-	return new Tdevice(logger, info, sysInfo);
+	std::vector<std::shared_ptr<IDevicesEnumerator>> result;
+#if defined(MPT_ENABLE_PULSEAUDIO_FULL)
+#if defined(MPT_WITH_PULSEAUDIO)
+	if(enabledBackends.Pulseaudio)
+	{
+		result.push_back(std::make_shared<DevicesEnumerator<Pulseaudio>>());
+	}
+#endif // MPT_WITH_PULSEAUDIO
+#endif // MPT_ENABLE_PULSEAUDIO_FULL
+
+#if defined(MPT_WITH_PULSEAUDIO) && defined(MPT_WITH_PULSEAUDIOSIMPLE)
+	if(enabledBackends.PulseaudioSimple)
+	{
+		result.push_back(std::make_shared<DevicesEnumerator<PulseaudioSimple>>());
+	}
+#endif // MPT_WITH_PULSEAUDIO && MPT_WITH_PULSEAUDIOSIMPLE
+
+#if MPT_OS_WINDOWS
+	if(enabledBackends.WaveOut)
+	{
+		result.push_back(std::make_shared<DevicesEnumerator<CWaveDevice>>());
+	}
+#endif // MPT_OS_WINDOWS
+
+#if defined(MPT_WITH_DIRECTSOUND)
+	// kind of deprecated by now
+	if(enabledBackends.DirectSound)
+	{
+		result.push_back(std::make_shared<DevicesEnumerator<CDSoundDevice>>());
+	}
+#endif // MPT_WITH_DIRECTSOUND
+
+#ifdef MPT_WITH_ASIO
+	if(enabledBackends.ASIO)
+	{
+		result.push_back(std::make_shared<DevicesEnumerator<CASIODevice>>());
+	}
+#endif // MPT_WITH_ASIO
+
+#ifdef MPT_WITH_PORTAUDIO
+	if(enabledBackends.PortAudio)
+	{
+		result.push_back(std::make_shared<DevicesEnumerator<CPortaudioDevice>>());
+	}
+#endif // MPT_WITH_PORTAUDIO
+
+#ifdef MPT_WITH_RTAUDIO
+	if(enabledBackends.RtAudio)
+	{
+		result.push_back(std::make_shared<DevicesEnumerator<CRtAudioDevice>>());
+	}
+#endif // MPT_WITH_RTAUDIO
+	return result;
 }
 
 
@@ -99,73 +139,41 @@ void Manager::ReEnumerate(bool firstRun)
 	m_DeviceCaps.clear();
 	m_DeviceDynamicCaps.clear();
 
-#ifdef MPT_WITH_PORTAUDIO
-	if(!firstRun)
+	if(firstRun)
 	{
-		if(m_EnabledBackends.PortAudio)
+		for(auto &deviceEnumerator : m_DeviceEnumerators)
 		{
-			m_PortAudioInitializer->Reload();
+			if(!deviceEnumerator)
+			{
+				continue;
+			}
+			m_BackendInitializers.push_back(deviceEnumerator->BackendInitializer());
+		}
+	} else
+	{
+		for(auto &initializer : m_BackendInitializers)
+		{
+			initializer->Reload();
 		}
 	}
-#endif // MPT_WITH_PORTAUDIO
 
-#if defined(MPT_ENABLE_PULSEAUDIO_FULL)
-#if defined(MPT_WITH_PULSEAUDIO)
-	if(m_EnabledBackends.Pulseaudio)
+	for(auto & enumerator : m_DeviceEnumerators)
 	{
-		EnumerateDevices<Pulseaudio>(GetLogger(), GetSysInfo());
+		if(!enumerator)
+		{
+			continue;
+		}
+		const auto infos = enumerator->EnumerateDevices(GetLogger(), GetSysInfo());
+		mpt::append(m_SoundDevices, infos);
+		for(const auto &info : infos)
+		{
+			SoundDevice::Identifier identifier = info.GetIdentifier();
+			if(!identifier.empty())
+			{
+				m_DeviceFactoryMethods[identifier] = enumerator->GetCreateFunc();
+			}
+		}
 	}
-#endif // MPT_WITH_PULSEAUDIO
-#endif // MPT_ENABLE_PULSEAUDIO_FULL
-
-#if defined(MPT_WITH_PULSEAUDIO) && defined(MPT_WITH_PULSEAUDIOSIMPLE)
-	if(m_EnabledBackends.PulseaudioSimple)
-	{
-		EnumerateDevices<PulseaudioSimple>(GetLogger(), GetSysInfo());
-	}
-#endif // MPT_WITH_PULSEAUDIO && MPT_WITH_PULSEAUDIOSIMPLE
-
-#if MPT_OS_WINDOWS
-	if(m_EnabledBackends.WaveOut)
-	{
-		EnumerateDevices<CWaveDevice>(GetLogger(), GetSysInfo());
-	}
-#endif // MPT_OS_WINDOWS
-
-#if defined(MPT_WITH_DIRECTSOUND)
-	// kind of deprecated by now
-	if(m_EnabledBackends.DirectSound)
-	{
-		EnumerateDevices<CDSoundDevice>(GetLogger(), GetSysInfo());
-	}
-#endif // MPT_WITH_DIRECTSOUND
-
-#ifdef MPT_WITH_ASIO
-	if(m_EnabledBackends.ASIO)
-	{
-		EnumerateDevices<CASIODevice>(GetLogger(), GetSysInfo());
-	}
-#endif // MPT_WITH_ASIO
-
-#ifdef MPT_WITH_PORTAUDIO
-	if(m_EnabledBackends.PortAudio)
-	{
-		EnumerateDevices<CPortaudioDevice>(GetLogger(), GetSysInfo());
-	}
-#endif // MPT_WITH_PORTAUDIO
-
-#ifdef MPT_WITH_RTAUDIO
-	if(m_EnabledBackends.RtAudio)
-	{
-		EnumerateDevices<CRtAudioDevice>(GetLogger(), GetSysInfo());
-	}
-#endif // MPT_WITH_RTAUDIO
-
-#if defined(MODPLUG_TRACKER) && !defined(MPT_BUILD_WINESUPPORT)
-	{
-		EnumerateDevices<SoundDeviceStub>(GetLogger(), GetSysInfo());
-	}
-#endif
 
 	struct Default
 	{
@@ -223,8 +231,7 @@ void Manager::ReEnumerate(bool firstRun)
 #if defined(MPT_WITH_PORTAUDIO)
 		typeDefault[MPT_UFORMAT("PortAudio-{}")(paBeOS)].value = Info::DefaultFor::System;
 #endif
-	} else
-	if(GetSysInfo().SystemClass == mpt::osinfo::osclass::Windows && GetSysInfo().IsWindowsWine() && GetSysInfo().WineHostClass == mpt::osinfo::osclass::Linux)
+	} else if(GetSysInfo().SystemClass == mpt::osinfo::osclass::Windows && GetSysInfo().IsWindowsWine() && GetSysInfo().WineHostClass == mpt::osinfo::osclass::Linux)
 	{ // Wine on Linux
 		typeDefault[SoundDevice::TypePORTAUDIO_WASAPI].value = Info::DefaultFor::System;
 	} else if(GetSysInfo().SystemClass == mpt::osinfo::osclass::Windows && GetSysInfo().IsWindowsWine())
@@ -463,14 +470,12 @@ SoundDevice::IBase * Manager::CreateSoundDevice(SoundDevice::Identifier identifi
 }
 
 
-Manager::Manager(ILogger &logger, SoundDevice::SysInfo sysInfo, SoundDevice::AppInfo appInfo, EnabledBackends enabledBackends)
+
+Manager::Manager(ILogger &logger, SoundDevice::SysInfo sysInfo, SoundDevice::AppInfo appInfo, std::vector<std::shared_ptr<IDevicesEnumerator>> deviceEnumerators)
 	: m_Logger(logger)
 	, m_SysInfo(sysInfo)
 	, m_AppInfo(appInfo)
-	, m_EnabledBackends(enabledBackends)
-#ifdef MPT_WITH_PORTAUDIO
-	, m_PortAudioInitializer(m_EnabledBackends.PortAudio ? std::make_unique<PortAudioInitializer>() : nullptr)
-#endif // MPT_WITH_PORTAUDIO
+	, m_DeviceEnumerators(std::move(deviceEnumerators))
 {
 	ReEnumerate(true);
 }
