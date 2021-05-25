@@ -615,6 +615,26 @@ public:
 };
 
 
+namespace SoundDevice
+{
+namespace Legacy
+{
+typedef uint16 ID;
+inline constexpr SoundDevice::Legacy::ID MaskType = 0xff00;
+inline constexpr SoundDevice::Legacy::ID MaskIndex = 0x00ff;
+inline constexpr int ShiftType = 8;
+inline constexpr int ShiftIndex = 0;
+inline constexpr SoundDevice::Legacy::ID TypeWAVEOUT          = 0;
+inline constexpr SoundDevice::Legacy::ID TypeDSOUND           = 1;
+inline constexpr SoundDevice::Legacy::ID TypeASIO             = 2;
+inline constexpr SoundDevice::Legacy::ID TypePORTAUDIO_WASAPI = 3;
+inline constexpr SoundDevice::Legacy::ID TypePORTAUDIO_WDMKS  = 4;
+inline constexpr SoundDevice::Legacy::ID TypePORTAUDIO_WMME   = 5;
+inline constexpr SoundDevice::Legacy::ID TypePORTAUDIO_DS     = 6;
+} // namespace Legacy
+} // namespace SoundDevice
+
+
 class TrackerSettings
 {
 

@@ -128,12 +128,6 @@ public:
 };
 
 
-namespace Legacy
-{
-SoundDevice::Info FindDeviceInfo(SoundDevice::Manager &manager, SoundDevice::Legacy::ID id);
-}
-
-
 } // namespace SoundDevice
 
 

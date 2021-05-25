@@ -31,13 +31,6 @@ namespace SoundDevice {
 
 
 
-#if defined(MODPLUG_TRACKER)
-
-
-
-#endif // MODPLUG_TRACKER
-
-
 struct CompareInfo
 {
 	static int64 score(const SoundDevice::Info &x)
@@ -486,66 +479,6 @@ Manager::Manager(ILogger &logger, SoundDevice::SysInfo sysInfo, SoundDevice::App
 Manager::~Manager()
 {
 	return;
-}
-
-
-namespace Legacy
-{
-SoundDevice::Info FindDeviceInfo(SoundDevice::Manager &manager, SoundDevice::Legacy::ID id)
-{
-	if(manager.GetDeviceInfos().empty())
-	{
-		return SoundDevice::Info();
-	}
-	SoundDevice::Type type = SoundDevice::Type();
-	switch((id & SoundDevice::Legacy::MaskType) >> SoundDevice::Legacy::ShiftType)
-	{
-		case SoundDevice::Legacy::TypeWAVEOUT:
-			type = SoundDevice::TypeWAVEOUT;
-			break;
-		case SoundDevice::Legacy::TypeDSOUND:
-			type = SoundDevice::TypeDSOUND;
-			break;
-		case SoundDevice::Legacy::TypeASIO:
-			type = SoundDevice::TypeASIO;
-			break;
-		case SoundDevice::Legacy::TypePORTAUDIO_WASAPI:
-			type = SoundDevice::TypePORTAUDIO_WASAPI;
-			break;
-		case SoundDevice::Legacy::TypePORTAUDIO_WDMKS:
-			type = SoundDevice::TypePORTAUDIO_WDMKS;
-			break;
-		case SoundDevice::Legacy::TypePORTAUDIO_WMME:
-			type = SoundDevice::TypePORTAUDIO_WMME;
-			break;
-		case SoundDevice::Legacy::TypePORTAUDIO_DS:
-			type = SoundDevice::TypePORTAUDIO_DS;
-			break;
-	}
-	if(type.empty())
-	{	// fallback to first device
-		return *manager.begin();
-	}
-	std::size_t index = static_cast<uint8>((id & SoundDevice::Legacy::MaskIndex) >> SoundDevice::Legacy::ShiftIndex);
-	std::size_t seenDevicesOfDesiredType = 0;
-	for(const auto &info : manager)
-	{
-		if(info.type == type)
-		{
-			if(seenDevicesOfDesiredType == index)
-			{
-				if(!info.IsValid())
-				{	// fallback to first device
-					return *manager.begin();
-				}
-				return info;
-			}
-			seenDevicesOfDesiredType++;
-		}
-	}
-	// default to first device
-	return *manager.begin();
-}
 }
 
 
