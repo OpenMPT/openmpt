@@ -17,10 +17,10 @@
 
 #ifdef MPT_WITH_ASIO
 
+#include "mpt/base/bit.hpp"
 #include "mpt/uuid/guid.hpp"
 #include "mpt/uuid/uuid.hpp"
 
-#include "../common/Endianness.h"
 #include "../common/misc_util.h"
 
 #if !defined(MPT_BUILD_WINESUPPORT)

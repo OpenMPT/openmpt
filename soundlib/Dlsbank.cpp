@@ -18,7 +18,7 @@
 #include "Dlsbank.h"
 #include "../common/mptStringBuffer.h"
 #include "../common/FileReader.h"
-#include "../common/Endianness.h"
+#include "openmpt/base/Endian.hpp"
 #include "SampleIO.h"
 #include "modsmp_ctrl.h"
 

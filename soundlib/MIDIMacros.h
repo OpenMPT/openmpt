@@ -12,6 +12,8 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
+#include "openmpt/base/Endian.hpp"
+
 OPENMPT_NAMESPACE_BEGIN
 
 enum

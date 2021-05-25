@@ -25,7 +25,7 @@
 
 #include <type_traits>
 
-#include "../common/Endianness.h"
+#include "mpt/base/bit.hpp"
 #include "../common/FlagSet.h"
 #include "../soundlib/Snd_defs.h"
 

@@ -9,6 +9,7 @@
 #include "mpt/base/floatingpoint.hpp"
 #include "mpt/base/macros.hpp"
 #include "mpt/base/memory.hpp"
+#include "openmpt/base/Endian.hpp"
 #include "openmpt/base/Types.hpp"
 
 #include <algorithm>
@@ -286,7 +287,7 @@ struct DecodeFloat32
 	static constexpr std::size_t input_inc = 4;
 	MPT_FORCEINLINE output_t operator()(const input_t *inBuf)
 	{
-		return mpt::IEEE754binary32LE(inBuf[loLoByteIndex], inBuf[loHiByteIndex], inBuf[hiLoByteIndex], inBuf[hiHiByteIndex]);
+		return IEEE754binary32LE(inBuf[loLoByteIndex], inBuf[loHiByteIndex], inBuf[hiLoByteIndex], inBuf[hiHiByteIndex]);
 	}
 };
 
@@ -299,7 +300,7 @@ struct DecodeScaledFloat32
 	float factor;
 	MPT_FORCEINLINE output_t operator()(const input_t *inBuf)
 	{
-		return factor * mpt::IEEE754binary32LE(inBuf[loLoByteIndex], inBuf[loHiByteIndex], inBuf[hiLoByteIndex], inBuf[hiHiByteIndex]);
+		return factor * IEEE754binary32LE(inBuf[loLoByteIndex], inBuf[loHiByteIndex], inBuf[hiLoByteIndex], inBuf[hiHiByteIndex]);
 	}
 	MPT_FORCEINLINE DecodeScaledFloat32(float scaleFactor)
 		: factor(scaleFactor)
@@ -316,7 +317,7 @@ struct DecodeFloat64
 	static constexpr std::size_t input_inc = 8;
 	MPT_FORCEINLINE output_t operator()(const input_t *inBuf)
 	{
-		return mpt::IEEE754binary64LE(inBuf[b0], inBuf[b1], inBuf[b2], inBuf[b3], inBuf[b4], inBuf[b5], inBuf[b6], inBuf[b7]);
+		return IEEE754binary64LE(inBuf[b0], inBuf[b1], inBuf[b2], inBuf[b3], inBuf[b4], inBuf[b5], inBuf[b6], inBuf[b7]);
 	}
 };
 

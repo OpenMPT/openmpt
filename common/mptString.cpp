@@ -10,8 +10,6 @@
 #include "stdafx.h"
 #include "mptString.h"
 
-#include "Endianness.h"
-
 #include "mpt/string/types.hpp"
 #include "mpt/string/utility.hpp"
 #include "mpt/string_convert/convert.hpp"

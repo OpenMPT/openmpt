@@ -14,7 +14,7 @@
 
 #include "../Snd_defs.h"
 #ifndef NO_PLUGINS
-#include "../../common/Endianness.h"
+#include "openmpt/base/Endian.hpp"
 #endif // NO_PLUGINS
 
 OPENMPT_NAMESPACE_BEGIN

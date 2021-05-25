@@ -53,6 +53,7 @@
 #endif // MODPLUG_TRACKER
 #include "mpt/uuid/uuid.hpp"
 
+#include "openmpt/base/Endian.hpp"
 #include "openmpt/base/Types.hpp"
 #include "openmpt/logging/Logger.hpp"
 
@@ -69,7 +70,6 @@
 #include "../common/misc_util.h"
 
 #include "../common/ComponentManager.h"
-#include "../common/Endianness.h"
 #include "../common/FileReader.h"
 #include "../common/FlagSet.h"
 #include "../common/mptFileIO.h"

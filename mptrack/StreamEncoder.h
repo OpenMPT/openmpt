@@ -12,8 +12,8 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
+#include "mpt/base/bit.hpp"
 #include "openmpt/soundbase/SampleFormat.hpp"
-#include "../common/Endianness.h"
 #include "../soundlib/Tagging.h"
 
 #include <iosfwd>

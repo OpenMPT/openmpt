@@ -15,7 +15,7 @@
 
 #include "mptStringBuffer.h"
 #include "misc_util.h"
-#include "Endianness.h"
+#include "openmpt/base/Endian.hpp"
 #include "mptIO.h"
 #include <algorithm>
 #include <limits>

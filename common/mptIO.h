@@ -14,7 +14,7 @@
 #include "openmpt/all/BuildSettings.hpp"
 
 #include "mptAssert.h"
-#include "../common/Endianness.h"
+#include "openmpt/base/Endian.hpp"
 #include <algorithm>
 #include <array>
 #include <iosfwd>

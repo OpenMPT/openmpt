@@ -30,12 +30,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 
-#define MPT_BINARY_STRUCT(type, size) \
-	constexpr bool declare_binary_safe(const type &) { return true; } \
-	static_assert(mpt::check_binary_size<type>(size)); \
-/**/
-
-
 template <typename T>
 inline void Clear(T & x)
 {

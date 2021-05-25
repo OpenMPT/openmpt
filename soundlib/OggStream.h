@@ -12,7 +12,7 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
-#include "../common/Endianness.h"
+#include "openmpt/base/Endian.hpp"
 #include "../common/mptIO.h"
 
 #include "../common/FileReaderFwd.h"
