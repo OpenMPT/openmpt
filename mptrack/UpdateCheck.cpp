@@ -602,7 +602,7 @@ std::string CUpdateCheck::GetStatisticsDataV3(const Settings &settings)
 	j["System"]["Windows"]["Build"] = mpt::OS::Windows::Version::Current().GetBuild();
 	j["System"]["Windows"]["Architecture"] = mpt::OS::Windows::Name(mpt::OS::Windows::GetHostArchitecture());
 	j["System"]["Windows"]["IsWine"] = mpt::OS::Windows::IsWine();
-	j["System"]["Windows"]["TypeRaw"] = MPT_FORMAT("0x{}")(mpt::fmt::HEX0<8>(mpt::OS::Windows::Version::Current().GetTypeId()));
+	j["System"]["Windows"]["TypeRaw"] = MPT_AFORMAT("0x{}")(mpt::afmt::HEX0<8>(mpt::OS::Windows::Version::Current().GetTypeId()));
 	std::vector<mpt::OS::Windows::Architecture> architectures = mpt::OS::Windows::GetSupportedProcessArchitectures(mpt::OS::Windows::GetHostArchitecture());
 	for(const auto & arch : architectures)
 	{
@@ -639,7 +639,7 @@ std::string CUpdateCheck::GetStatisticsDataV3(const Settings &settings)
 		j["OpenMPT"]["cpuid"] = ((CPU::GetAvailableFeatures() & CPU::feature::cpuid) != 0);
 		j["System"]["Processor"]["Vendor"] = std::string(mpt::String::ReadAutoBuf(CPU::ProcVendorID));
 		j["System"]["Processor"]["Brand"] = std::string(mpt::String::ReadAutoBuf(CPU::ProcBrandID));
-		j["System"]["Processor"]["CpuidRaw"] = mpt::fmt::hex0<8>(CPU::ProcRawCPUID);
+		j["System"]["Processor"]["CpuidRaw"] = mpt::afmt::hex0<8>(CPU::ProcRawCPUID);
 		j["System"]["Processor"]["Id"]["Family"] = CPU::ProcFamily;
 		j["System"]["Processor"]["Id"]["Model"] = CPU::ProcModel;
 		j["System"]["Processor"]["Id"]["Stepping"] = CPU::ProcStepping;

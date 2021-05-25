@@ -2094,7 +2094,7 @@ void CViewPattern::OnSplitPattern()
 	if(newPat == PATTERNINDEX_INVALID)
 	{
 		cs.Leave();
-		Reporting::Error(MPT_FORMAT("Pattern limit of the {} format ({} patterns) has been reached.")(mpt::ToUpperCaseAscii(specs.fileExtension), specs.patternsMax), "Split Pattern");
+		Reporting::Error(MPT_AFORMAT("Pattern limit of the {} format ({} patterns) has been reached.")(mpt::ToUpperCaseAscii(specs.fileExtension), specs.patternsMax), "Split Pattern");
 		return;
 	}
 	auto &sourcePattern = sndFile.Patterns[sourcePat];

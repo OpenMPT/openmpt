@@ -1236,7 +1236,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			channels.push_back(i);
 			if(modChnStatus[i].midiCh != ModChannelState::NOMIDI)
-				ChnSettings[i].szName = MPT_FORMAT("MIDI Ch {}")(1 + modChnStatus[i].midiCh);
+				ChnSettings[i].szName = MPT_AFORMAT("MIDI Ch {}")(1 + modChnStatus[i].midiCh);
 			else if(i == tempoChannel)
 				ChnSettings[i].szName = "Tempo";
 			else if(i == globalVolChannel)

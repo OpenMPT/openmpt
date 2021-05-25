@@ -760,7 +760,7 @@ template <typename Tfile, std::size_t N> static bool CheckMagic(Tfile &f, mpt::I
 
 void CTuningDialog::OnBnClickedButtonImport()
 {
-	std::string sFilter = MPT_FORMAT("Tuning files (*{}, *{}, *.scl)|*{};*{};*.scl|")(
+	std::string sFilter = MPT_AFORMAT("Tuning files (*{}, *{}, *.scl)|*{};*{};*.scl|")(
 		CTuning::s_FileExtension,
 		CTuningCollection::s_FileExtension,
 		CTuning::s_FileExtension,

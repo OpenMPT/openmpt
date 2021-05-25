@@ -1773,7 +1773,7 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, ui
 			std::string s = szMidiPercussionNames[key-24];
 			if(!mpt::String::ReadAutoBuf(pDlsIns->szName).empty())
 			{
-				s += MPT_FORMAT(" ({})")(mpt::String::RTrim<std::string>(mpt::String::ReadAutoBuf(pDlsIns->szName)));
+				s += MPT_AFORMAT(" ({})")(mpt::String::RTrim<std::string>(mpt::String::ReadAutoBuf(pDlsIns->szName)));
 			}
 			pIns->name = s;
 		} else

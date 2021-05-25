@@ -12,7 +12,7 @@
 
 
 
-#define MPT_FORMAT_MESSAGE(f) mpt::format_message<mpt::default_formatter, mpt::parse_format_string_argument_count(f)>(f)
+#define MPT_AFORMAT_MESSAGE(f) mpt::format_message<mpt::default_formatter, mpt::parse_format_string_argument_count(f)>(f)
 
 #if !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
 #define MPT_WFORMAT_MESSAGE(f) mpt::format_message_typed<mpt::default_formatter, mpt::parse_format_string_argument_count(L##f), std::wstring>(L##f)

@@ -371,7 +371,7 @@ bool CModCleanupDlg::RemoveDuplicatePatterns()
 
 	if(foundDupes != 0)
 	{
-		modDoc.AddToLog(MPT_FORMAT("{} duplicate pattern{} merged.")(foundDupes, foundDupes == 1 ? "" : "s"));
+		modDoc.AddToLog(MPT_AFORMAT("{} duplicate pattern{} merged.")(foundDupes, foundDupes == 1 ? "" : "s"));
 
 		// Fix order list
 		for(auto &order : sndFile.Order)
@@ -428,7 +428,7 @@ bool CModCleanupDlg::RemoveUnusedPatterns()
 
 	if(numRemovedPatterns)
 	{
-		modDoc.AddToLog(MPT_FORMAT("{} pattern{} removed.")(numRemovedPatterns, numRemovedPatterns == 1 ? "" : "s"));
+		modDoc.AddToLog(MPT_AFORMAT("{} pattern{} removed.")(numRemovedPatterns, numRemovedPatterns == 1 ? "" : "s"));
 		return true;
 	}
 	return false;
@@ -609,9 +609,9 @@ bool CModCleanupDlg::OptimizeSamples()
 
 	std::string s;
 	if(numLoopOpt)
-		s = MPT_FORMAT("{} sample{} unused data after the loop end point.\n")(numLoopOpt, (numLoopOpt == 1) ? " has" : "s have");
+		s = MPT_AFORMAT("{} sample{} unused data after the loop end point.\n")(numLoopOpt, (numLoopOpt == 1) ? " has" : "s have");
 	if(numStereoOpt)
-		s += MPT_FORMAT("{} stereo sample{} actually mono.\n")(numStereoOpt, (numStereoOpt == 1) ? " is" : "s are");
+		s += MPT_AFORMAT("{} stereo sample{} actually mono.\n")(numStereoOpt, (numStereoOpt == 1) ? " is" : "s are");
 	if(numLoopOpt + numStereoOpt == 1)
 		s += "Do you want to optimize it and remove this unused data?";
 	else
@@ -654,12 +654,12 @@ bool CModCleanupDlg::OptimizeSamples()
 	}
 	if(numLoopOpt)
 	{
-		s = MPT_FORMAT("{} sample loop{} optimized")(numLoopOpt, (numLoopOpt == 1) ? "" : "s");
+		s = MPT_AFORMAT("{} sample loop{} optimized")(numLoopOpt, (numLoopOpt == 1) ? "" : "s");
 		modDoc.AddToLog(s);
 	}
 	if(numStereoOpt)
 	{
-		s = MPT_FORMAT("{} sample{} converted to mono")(numStereoOpt, (numStereoOpt == 1) ? "" : "s");
+		s = MPT_AFORMAT("{} sample{} converted to mono")(numStereoOpt, (numStereoOpt == 1) ? "" : "s");
 		modDoc.AddToLog(s);
 	}
 	return true;

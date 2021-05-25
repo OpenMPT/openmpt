@@ -32,7 +32,7 @@ namespace Test {
 void mpt_test_reporter::case_run(const mpt::source_location& loc)
 {
 	#if !MPT_OS_DJGPP
-		std::cout << "TEST..: " << MPT_FORMAT("{}({}):")(loc.file_name() ? loc.file_name() : "", loc.line()) << ": " << std::endl;
+		std::cout << "TEST..: " << MPT_AFORMAT("{}({}):")(loc.file_name() ? loc.file_name() : "", loc.line()) << ": " << std::endl;
 	#else
 		MPT_UNUSED(loc);
 	#endif
@@ -41,7 +41,7 @@ void mpt_test_reporter::case_run(const mpt::source_location& loc)
 void mpt_test_reporter::case_run(const mpt::source_location& loc, const char* text_e)
 {
 	#if !MPT_OS_DJGPP
-		std::cout << "TEST..: " << MPT_FORMAT("{}({}): {}")(loc.file_name() ? loc.file_name() : "", loc.line(), text_e) << ": " << std::endl;
+		std::cout << "TEST..: " << MPT_AFORMAT("{}({}): {}")(loc.file_name() ? loc.file_name() : "", loc.line(), text_e) << ": " << std::endl;
 	#else
 		MPT_UNUSED(loc);
 		MPT_UNUSED(text_e);
@@ -53,7 +53,7 @@ void mpt_test_reporter::case_run(const mpt::source_location& loc, const char* te
 	if(text_ex)
 	{
 		#if !MPT_OS_DJGPP
-			std::cout << "TEST..: " << MPT_FORMAT("{}({}): {} throws {}")(loc.file_name() ? loc.file_name() : "", loc.line(), text_e, text_ex) << ": " << std::endl;
+			std::cout << "TEST..: " << MPT_AFORMAT("{}({}): {} throws {}")(loc.file_name() ? loc.file_name() : "", loc.line(), text_e, text_ex) << ": " << std::endl;
 		#else
 			MPT_UNUSED(loc);
 			MPT_UNUSED(text_ex);
@@ -62,7 +62,7 @@ void mpt_test_reporter::case_run(const mpt::source_location& loc, const char* te
 	} else
 	{
 		#if !MPT_OS_DJGPP
-			std::cout << "TEST..: " << MPT_FORMAT("{}({}): {} throws")(loc.file_name() ? loc.file_name() : "", loc.line(), text_e) << ": " << std::endl;
+			std::cout << "TEST..: " << MPT_AFORMAT("{}({}): {} throws")(loc.file_name() ? loc.file_name() : "", loc.line(), text_e) << ": " << std::endl;
 		#else
 			MPT_UNUSED(loc);
 			MPT_UNUSED(text_ex);
@@ -74,7 +74,7 @@ void mpt_test_reporter::case_run(const mpt::source_location& loc, const char* te
 void mpt_test_reporter::case_run(const mpt::source_location& loc, const char* text_a, const char* text_cmp, const char* text_b)
 {
 	#if !MPT_OS_DJGPP
-		std::cout << "TEST..: " << MPT_FORMAT("{}({}): {} {} {}")(loc.file_name() ? loc.file_name() : "", loc.line(), text_a, text_cmp, text_b) << ": " << std::endl;
+		std::cout << "TEST..: " << MPT_AFORMAT("{}({}): {} {} {}")(loc.file_name() ? loc.file_name() : "", loc.line(), text_a, text_cmp, text_b) << ": " << std::endl;
 	#else
 		MPT_UNUSED(loc);
 		MPT_UNUSED(text_a);
@@ -138,7 +138,7 @@ Testcase::Testcase(Fatality fatality, Verbosity verbosity, const char * const de
 
 std::string Testcase::AsString() const
 {
-	return MPT_FORMAT("{}({}): {}")(loc.file_name() ? loc.file_name() : "", loc.line(), remove_newlines(desc));
+	return MPT_AFORMAT("{}({}): {}")(loc.file_name() ? loc.file_name() : "", loc.line(), remove_newlines(desc));
 }
 
 

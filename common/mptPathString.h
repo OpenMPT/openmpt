@@ -271,12 +271,12 @@ public:
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
 #if MPT_OS_WINDOWS
 #ifdef UNICODE
-[[deprecated]] inline std::string ToString(const mpt::PathString & x) { return mpt::ToCharset(mpt::Charset::Locale, x.ToUnicode()); }
+[[deprecated]] inline std::string ToAString(const mpt::PathString & x) { return mpt::ToCharset(mpt::Charset::Locale, x.ToUnicode()); }
 #else
-MPT_DEPRECATED_PATH inline std::string ToString(const mpt::PathString & x) { return mpt::ToCharset(mpt::Charset::Locale, x.AsNative()); }
+MPT_DEPRECATED_PATH inline std::string ToAString(const mpt::PathString & x) { return mpt::ToCharset(mpt::Charset::Locale, x.AsNative()); }
 #endif
 #else
-MPT_DEPRECATED_PATH inline std::string ToString(const mpt::PathString & x) { return mpt::ToCharset(mpt::Charset::Locale, x.ToUnicode()); }
+MPT_DEPRECATED_PATH inline std::string ToAString(const mpt::PathString & x) { return mpt::ToCharset(mpt::Charset::Locale, x.ToUnicode()); }
 #endif
 #endif
 inline mpt::ustring ToUString(const mpt::PathString & x) { return x.ToUnicode(); }

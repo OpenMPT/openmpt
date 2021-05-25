@@ -103,7 +103,7 @@ bool PatternClipboard::Copy(const CSoundFile &sndFile, ORDERINDEX first, ORDERIN
 				patList[pattern] = insertedPats++;
 
 				const CPattern &pat = sndFile.Patterns[pattern];
-				patternData += MPT_FORMAT("Rows: {}\r\n")(pat.GetNumRows());
+				patternData += MPT_AFORMAT("Rows: {}\r\n")(pat.GetNumRows());
 				std::string name = pat.GetName();
 				if(!name.empty())
 				{
@@ -111,7 +111,7 @@ bool PatternClipboard::Copy(const CSoundFile &sndFile, ORDERINDEX first, ORDERIN
 				}
 				if(pat.GetOverrideSignature())
 				{
-					patternData += MPT_FORMAT("Signature: {}/{}\r\n")(pat.GetRowsPerBeat(), pat.GetRowsPerMeasure());
+					patternData += MPT_AFORMAT("Signature: {}/{}\r\n")(pat.GetRowsPerBeat(), pat.GetRowsPerMeasure());
 				}
 				if(pat.HasTempoSwing())
 				{
@@ -121,10 +121,10 @@ bool PatternClipboard::Copy(const CSoundFile &sndFile, ORDERINDEX first, ORDERIN
 					{
 						if(i == 0)
 						{
-							patternData += MPT_FORMAT("{}")(swing[i]);
+							patternData += MPT_AFORMAT("{}")(swing[i]);
 						} else
 						{
-							patternData += MPT_FORMAT(",{}")(swing[i]);
+							patternData += MPT_AFORMAT(",{}")(swing[i]);
 						}
 					}
 					patternData += "\r\n";
@@ -132,7 +132,7 @@ bool PatternClipboard::Copy(const CSoundFile &sndFile, ORDERINDEX first, ORDERIN
 				patternData += CreateClipboardString(sndFile, pattern, PatternRect(PatternCursor(), PatternCursor(sndFile.Patterns[pattern].GetNumRows() - 1, sndFile.GetNumChannels() - 1, PatternCursor::lastColumn)));
 			}
 
-			data += mpt::fmt::val(patList[pattern]);
+			data += mpt::afmt::val(patList[pattern]);
 		}
 	}
 	if(!onlyOrders)
@@ -273,14 +273,14 @@ std::string PatternClipboard::CreateClipboardString(const CSoundFile &sndFile, P
 			{
 				if(m->IsPcNote())
 				{
-					data += mpt::fmt::dec0<3>(m->GetValueVolCol());
+					data += mpt::afmt::dec0<3>(m->GetValueVolCol());
 				}
 				else
 				{
 					if(m->volcmd != VOLCMD_NONE && m->vol <= 99)
 					{
 						data += sndFile.GetModSpecifications().GetVolEffectLetter(m->volcmd);
-						data += mpt::fmt::dec0<2>(m->vol);
+						data += mpt::afmt::dec0<2>(m->vol);
 					} else
 					{
 						data += "...";
@@ -297,7 +297,7 @@ std::string PatternClipboard::CreateClipboardString(const CSoundFile &sndFile, P
 			{
 				if(m->IsPcNote())
 				{
-					data += mpt::fmt::dec0<3>(m->GetValueEffectCol());
+					data += mpt::afmt::dec0<3>(m->GetValueEffectCol());
 				}
 				else
 				{
@@ -311,7 +311,7 @@ std::string PatternClipboard::CreateClipboardString(const CSoundFile &sndFile, P
 
 					if(m->param != 0 && m->command != CMD_NONE)
 					{
-						data += mpt::fmt::HEX0<2>(m->param);
+						data += mpt::afmt::HEX0<2>(m->param);
 					} else
 					{
 						data += "..";

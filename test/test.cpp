@@ -390,10 +390,10 @@ static MPT_NOINLINE void TestVersion()
 		VERIFY_EQUAL_NONCONT(line_fields[0].length() > 0, true);
 		fields[line_fields[0]] = line_fields[1];
 	}
-	VERIFY_EQUAL(fields["LIBOPENMPT_VERSION_MAJOR"], mpt::fmt::val(OPENMPT_API_VERSION_MAJOR));
-	VERIFY_EQUAL(fields["LIBOPENMPT_VERSION_MINOR"], mpt::fmt::val(OPENMPT_API_VERSION_MINOR));
-	VERIFY_EQUAL(fields["LIBOPENMPT_VERSION_PATCH"], mpt::fmt::val(OPENMPT_API_VERSION_PATCH));
-	VERIFY_EQUAL(fields["LIBOPENMPT_VERSION_PREREL"], mpt::fmt::val(OPENMPT_API_VERSION_PREREL));
+	VERIFY_EQUAL(fields["LIBOPENMPT_VERSION_MAJOR"], mpt::afmt::val(OPENMPT_API_VERSION_MAJOR));
+	VERIFY_EQUAL(fields["LIBOPENMPT_VERSION_MINOR"], mpt::afmt::val(OPENMPT_API_VERSION_MINOR));
+	VERIFY_EQUAL(fields["LIBOPENMPT_VERSION_PATCH"], mpt::afmt::val(OPENMPT_API_VERSION_PATCH));
+	VERIFY_EQUAL(fields["LIBOPENMPT_VERSION_PREREL"], mpt::afmt::val(OPENMPT_API_VERSION_PREREL));
 	if(std::string(OPENMPT_API_VERSION_PREREL).length() > 0)
 	{
 		VERIFY_EQUAL(std::string(OPENMPT_API_VERSION_PREREL).substr(0, 1), "-");
@@ -489,7 +489,7 @@ static void TestFloatFormat(Tfloat x, std::string format, mpt::FormatFlags f, st
 #ifdef MODPLUG_TRACKER
 	std::string str_sprintf = StringFormat(format, x);
 #endif
-	std::string str_iostreams = mpt::fmt::fmt(x, mpt::FormatSpec().SetFlags(f).SetWidth(width).SetPrecision(precision));
+	std::string str_iostreams = mpt::afmt::fmt(x, mpt::FormatSpec().SetFlags(f).SetWidth(width).SetPrecision(precision));
 #ifdef MODPLUG_TRACKER
 	//MPT_LOG_GLOBAL(LogDebug, "test", mpt::ToUnicode(mpt::Charset::ASCII, str_sprintf));
 #endif
@@ -513,55 +513,55 @@ template <typename Tfloat>
 static void TestFloatFormats(Tfloat x)
 {
 
-	TestFloatFormat(x, "%.8g", mpt::fmt::NotaNrm | mpt::fmt::FillOff, 0, 8);
+	TestFloatFormat(x, "%.8g", mpt::afmt::NotaNrm | mpt::afmt::FillOff, 0, 8);
 
-	TestFloatFormat(x, MPT_FORMAT("%.{}g")(std::numeric_limits<Tfloat>::max_digits10), mpt::fmt::NotaNrm | mpt::fmt::FillOff);
-	TestFloatFormat(x, MPT_FORMAT("%.{}f")(std::numeric_limits<Tfloat>::digits10), mpt::fmt::NotaFix | mpt::fmt::FillOff);
-	TestFloatFormat(x, MPT_FORMAT("%.{}e")(std::numeric_limits<Tfloat>::max_digits10 - 1), mpt::fmt::NotaSci | mpt::fmt::FillOff);
+	TestFloatFormat(x, MPT_AFORMAT("%.{}g")(std::numeric_limits<Tfloat>::max_digits10), mpt::afmt::NotaNrm | mpt::afmt::FillOff);
+	TestFloatFormat(x, MPT_AFORMAT("%.{}f")(std::numeric_limits<Tfloat>::digits10), mpt::afmt::NotaFix | mpt::afmt::FillOff);
+	TestFloatFormat(x, MPT_AFORMAT("%.{}e")(std::numeric_limits<Tfloat>::max_digits10 - 1), mpt::afmt::NotaSci | mpt::afmt::FillOff);
 
-	TestFloatFormat(x, "%.0f", mpt::fmt::NotaFix | mpt::fmt::FillOff, 0, 0);
-	TestFloatFormat(x, "%.1f", mpt::fmt::NotaFix | mpt::fmt::FillOff, 0, 1);
-	TestFloatFormat(x, "%.2f", mpt::fmt::NotaFix | mpt::fmt::FillOff, 0, 2);
-	TestFloatFormat(x, "%.3f", mpt::fmt::NotaFix | mpt::fmt::FillOff, 0, 3);
-	TestFloatFormat(x, "%0.1f", mpt::fmt::NotaFix | mpt::fmt::FillNul, 0, 1);
-	TestFloatFormat(x, "%02.0f", mpt::fmt::NotaFix | mpt::fmt::FillNul, 2, 0);
+	TestFloatFormat(x, "%.0f", mpt::afmt::NotaFix | mpt::afmt::FillOff, 0, 0);
+	TestFloatFormat(x, "%.1f", mpt::afmt::NotaFix | mpt::afmt::FillOff, 0, 1);
+	TestFloatFormat(x, "%.2f", mpt::afmt::NotaFix | mpt::afmt::FillOff, 0, 2);
+	TestFloatFormat(x, "%.3f", mpt::afmt::NotaFix | mpt::afmt::FillOff, 0, 3);
+	TestFloatFormat(x, "%0.1f", mpt::afmt::NotaFix | mpt::afmt::FillNul, 0, 1);
+	TestFloatFormat(x, "%02.0f", mpt::afmt::NotaFix | mpt::afmt::FillNul, 2, 0);
 }
 
 
 
 static MPT_NOINLINE void TestStringFormatting()
 {
-	VERIFY_EQUAL(mpt::fmt::val(1.5f), "1.5");
-	VERIFY_EQUAL(mpt::fmt::val(true), "1");
-	VERIFY_EQUAL(mpt::fmt::val(false), "0");
-	//VERIFY_EQUAL(mpt::fmt::val('A'), "A"); // deprecated
-	//VERIFY_EQUAL(mpt::fmt::val(L'A'), "A"); // deprecated
+	VERIFY_EQUAL(mpt::afmt::val(1.5f), "1.5");
+	VERIFY_EQUAL(mpt::afmt::val(true), "1");
+	VERIFY_EQUAL(mpt::afmt::val(false), "0");
+	//VERIFY_EQUAL(mpt::afmt::val('A'), "A"); // deprecated
+	//VERIFY_EQUAL(mpt::afmt::val(L'A'), "A"); // deprecated
 
-	VERIFY_EQUAL(mpt::fmt::val(0), "0");
-	VERIFY_EQUAL(mpt::fmt::val(-23), "-23");
-	VERIFY_EQUAL(mpt::fmt::val(42), "42");
+	VERIFY_EQUAL(mpt::afmt::val(0), "0");
+	VERIFY_EQUAL(mpt::afmt::val(-23), "-23");
+	VERIFY_EQUAL(mpt::afmt::val(42), "42");
 
-	VERIFY_EQUAL(mpt::fmt::hex0<3>((int32)-1), "-001");
-	VERIFY_EQUAL(mpt::fmt::hex((int32)-1), "-1");
-	VERIFY_EQUAL(mpt::fmt::hex(-0xabcde), "-abcde");
-	VERIFY_EQUAL(mpt::fmt::hex(int32_min), "-80000000");
-	VERIFY_EQUAL(mpt::fmt::hex(int32_min + 1), "-7fffffff");
-	VERIFY_EQUAL(mpt::fmt::hex(0x123e), "123e");
-	VERIFY_EQUAL(mpt::fmt::hex0<6>(0x123e), "00123e");
-	VERIFY_EQUAL(mpt::fmt::hex0<2>(0x123e), "123e");
+	VERIFY_EQUAL(mpt::afmt::hex0<3>((int32)-1), "-001");
+	VERIFY_EQUAL(mpt::afmt::hex((int32)-1), "-1");
+	VERIFY_EQUAL(mpt::afmt::hex(-0xabcde), "-abcde");
+	VERIFY_EQUAL(mpt::afmt::hex(int32_min), "-80000000");
+	VERIFY_EQUAL(mpt::afmt::hex(int32_min + 1), "-7fffffff");
+	VERIFY_EQUAL(mpt::afmt::hex(0x123e), "123e");
+	VERIFY_EQUAL(mpt::afmt::hex0<6>(0x123e), "00123e");
+	VERIFY_EQUAL(mpt::afmt::hex0<2>(0x123e), "123e");
 
-	VERIFY_EQUAL(mpt::fmt::dec0<0>(1), "1");
-	VERIFY_EQUAL(mpt::fmt::dec0<1>(1), "1");
-	VERIFY_EQUAL(mpt::fmt::dec0<2>(1), "01");
-	VERIFY_EQUAL(mpt::fmt::dec0<3>(1), "001");
-	VERIFY_EQUAL(mpt::fmt::dec0<0>(11), "11");
-	VERIFY_EQUAL(mpt::fmt::dec0<1>(11), "11");
-	VERIFY_EQUAL(mpt::fmt::dec0<2>(11), "11");
-	VERIFY_EQUAL(mpt::fmt::dec0<3>(11), "011");
-	VERIFY_EQUAL(mpt::fmt::dec0<0>(-1), "-1");
-	VERIFY_EQUAL(mpt::fmt::dec0<1>(-1), "-1");
-	VERIFY_EQUAL(mpt::fmt::dec0<2>(-1), "-01");
-	VERIFY_EQUAL(mpt::fmt::dec0<3>(-1), "-001");
+	VERIFY_EQUAL(mpt::afmt::dec0<0>(1), "1");
+	VERIFY_EQUAL(mpt::afmt::dec0<1>(1), "1");
+	VERIFY_EQUAL(mpt::afmt::dec0<2>(1), "01");
+	VERIFY_EQUAL(mpt::afmt::dec0<3>(1), "001");
+	VERIFY_EQUAL(mpt::afmt::dec0<0>(11), "11");
+	VERIFY_EQUAL(mpt::afmt::dec0<1>(11), "11");
+	VERIFY_EQUAL(mpt::afmt::dec0<2>(11), "11");
+	VERIFY_EQUAL(mpt::afmt::dec0<3>(11), "011");
+	VERIFY_EQUAL(mpt::afmt::dec0<0>(-1), "-1");
+	VERIFY_EQUAL(mpt::afmt::dec0<1>(-1), "-1");
+	VERIFY_EQUAL(mpt::afmt::dec0<2>(-1), "-01");
+	VERIFY_EQUAL(mpt::afmt::dec0<3>(-1), "-001");
 
 	VERIFY_EQUAL(mpt::ufmt::HEX0<7>(0xa2345678), U_("A2345678"));
 	VERIFY_EQUAL(mpt::ufmt::HEX0<8>(0xa2345678), U_("A2345678"));
@@ -574,48 +574,48 @@ static MPT_NOINLINE void TestStringFormatting()
 	VERIFY_EQUAL(mpt::wfmt::hex0<2>(0x123e), L"123e");
 #endif
 
-	VERIFY_EQUAL(mpt::fmt::val(-87.0f), "-87");
-	if(mpt::fmt::val(-0.5e-6) != "-5e-007"
-		&& mpt::fmt::val(-0.5e-6) != "-5e-07"
-		&& mpt::fmt::val(-0.5e-6) != "-5e-7"
-		&& mpt::fmt::val(-0.5e-6) != "-4.9999999999999998e-7"
-		&& mpt::fmt::val(-0.5e-6) != "-4.9999999999999998e-07"
-		&& mpt::fmt::val(-0.5e-6) != "-4.9999999999999998e-007"
+	VERIFY_EQUAL(mpt::afmt::val(-87.0f), "-87");
+	if(mpt::afmt::val(-0.5e-6) != "-5e-007"
+		&& mpt::afmt::val(-0.5e-6) != "-5e-07"
+		&& mpt::afmt::val(-0.5e-6) != "-5e-7"
+		&& mpt::afmt::val(-0.5e-6) != "-4.9999999999999998e-7"
+		&& mpt::afmt::val(-0.5e-6) != "-4.9999999999999998e-07"
+		&& mpt::afmt::val(-0.5e-6) != "-4.9999999999999998e-007"
 		)
 	{
 		VERIFY_EQUAL(true, false);
 	}
-	if(mpt::fmt::val(-1.0 / 65536.0) != "-1.52587890625e-005"
-		&& mpt::fmt::val(-1.0 / 65536.0) != "-1.52587890625e-05"
-		&& mpt::fmt::val(-1.0 / 65536.0) != "-1.52587890625e-5"
+	if(mpt::afmt::val(-1.0 / 65536.0) != "-1.52587890625e-005"
+		&& mpt::afmt::val(-1.0 / 65536.0) != "-1.52587890625e-05"
+		&& mpt::afmt::val(-1.0 / 65536.0) != "-1.52587890625e-5"
 		)
 	{
 		VERIFY_EQUAL(true, false);
 	}
-	if(mpt::fmt::val(-1.0f / 65536.0f) != "-1.52587891e-005"
-		&& mpt::fmt::val(-1.0f / 65536.0f) != "-1.52587891e-05"
-		&& mpt::fmt::val(-1.0f / 65536.0f) != "-1.52587891e-5"
-		&& mpt::fmt::val(-1.0f / 65536.0f) != "-1.5258789e-005"
-		&& mpt::fmt::val(-1.0f / 65536.0f) != "-1.5258789e-05"
-		&& mpt::fmt::val(-1.0f / 65536.0f) != "-1.5258789e-5"
+	if(mpt::afmt::val(-1.0f / 65536.0f) != "-1.52587891e-005"
+		&& mpt::afmt::val(-1.0f / 65536.0f) != "-1.52587891e-05"
+		&& mpt::afmt::val(-1.0f / 65536.0f) != "-1.52587891e-5"
+		&& mpt::afmt::val(-1.0f / 65536.0f) != "-1.5258789e-005"
+		&& mpt::afmt::val(-1.0f / 65536.0f) != "-1.5258789e-05"
+		&& mpt::afmt::val(-1.0f / 65536.0f) != "-1.5258789e-5"
 		)
 	{
 		VERIFY_EQUAL(true, false);
 	}
-	if(mpt::fmt::val(58.65403492763) != "58.654034927630001"
-		&& mpt::fmt::val(58.65403492763) != "58.65403492763"
+	if(mpt::afmt::val(58.65403492763) != "58.654034927630001"
+		&& mpt::afmt::val(58.65403492763) != "58.65403492763"
 		)
 	{
 		VERIFY_EQUAL(true, false);
 	}
-	VERIFY_EQUAL(mpt::fmt::flt(58.65403492763, 6), "58.654");
-	VERIFY_EQUAL(mpt::fmt::fix(23.42, 1), "23.4");
-	VERIFY_EQUAL(mpt::fmt::fix(234.2, 1), "234.2");
-	VERIFY_EQUAL(mpt::fmt::fix(2342.0, 1), "2342.0");
+	VERIFY_EQUAL(mpt::afmt::flt(58.65403492763, 6), "58.654");
+	VERIFY_EQUAL(mpt::afmt::fix(23.42, 1), "23.4");
+	VERIFY_EQUAL(mpt::afmt::fix(234.2, 1), "234.2");
+	VERIFY_EQUAL(mpt::afmt::fix(2342.0, 1), "2342.0");
 	
-	VERIFY_EQUAL(mpt::fmt::dec(2, ';', 2345678), std::string("2;34;56;78"));
-	VERIFY_EQUAL(mpt::fmt::dec(2, ';', 12345678), std::string("12;34;56;78"));
-	VERIFY_EQUAL(mpt::fmt::hex(3, ':', 0xa2345678), std::string("a2:345:678"));
+	VERIFY_EQUAL(mpt::afmt::dec(2, ';', 2345678), std::string("2;34;56;78"));
+	VERIFY_EQUAL(mpt::afmt::dec(2, ';', 12345678), std::string("12;34;56;78"));
+	VERIFY_EQUAL(mpt::afmt::hex(3, ':', 0xa2345678), std::string("a2:345:678"));
 
 	VERIFY_EQUAL(mpt::ufmt::dec(2, ';', 12345678), U_("12;34;56;78"));
 	VERIFY_EQUAL(mpt::ufmt::hex(3, ':', 0xa2345678), U_("a2:345:678"));
@@ -640,10 +640,10 @@ static MPT_NOINLINE void TestStringFormatting()
 	VERIFY_EQUAL(mpt::ufmt::HEX0<6>(3, ':', -0x345678), U_("-345:678"));
 	VERIFY_EQUAL(mpt::ufmt::HEX0<7>(3, ':', -0x345678), U_("-0:345:678"));
 
-	VERIFY_EQUAL(mpt::fmt::left(3, "a"), "a  ");
-	VERIFY_EQUAL(mpt::fmt::right(3, "a"), "  a");
-	VERIFY_EQUAL(mpt::fmt::center(3, "a"), " a ");
-	VERIFY_EQUAL(mpt::fmt::center(4, "a"), " a  ");
+	VERIFY_EQUAL(mpt::afmt::left(3, "a"), "a  ");
+	VERIFY_EQUAL(mpt::afmt::right(3, "a"), "  a");
+	VERIFY_EQUAL(mpt::afmt::center(3, "a"), " a ");
+	VERIFY_EQUAL(mpt::afmt::center(4, "a"), " a  ");
 
 	#if defined(MPT_WITH_MFC)
 		VERIFY_EQUAL(mpt::cfmt::left(3, CString(_T("a"))), CString(_T("a  ")));
@@ -674,9 +674,9 @@ static MPT_NOINLINE void TestStringFormatting()
 	VERIFY_EQUAL_EPS(ConvertStrTo<double>("58.65403492763"), 58.65403492763, 0.0001);
 #endif
 
-	VERIFY_EQUAL(ConvertStrTo<float>(mpt::fmt::val(-87.0)), -87.0f);
+	VERIFY_EQUAL(ConvertStrTo<float>(mpt::afmt::val(-87.0)), -87.0f);
 #if !MPT_OS_DJGPP
-	VERIFY_EQUAL(ConvertStrTo<double>(mpt::fmt::val(-0.5e-6)), -0.5e-6);
+	VERIFY_EQUAL(ConvertStrTo<double>(mpt::afmt::val(-0.5e-6)), -0.5e-6);
 #endif
 
 	VERIFY_EQUAL(mpt::String::Parse::Hex<unsigned char>("fe"), 254);
@@ -718,10 +718,10 @@ static MPT_NOINLINE void TestStringFormatting()
 	TestFloatFormats(3.14159265358979323846);
 	TestFloatFormats(3.14159265358979323846f);
 
-	VERIFY_EQUAL(mpt::fmt::flt(6.12345, 3), "6.12");
-	VERIFY_EQUAL(mpt::fmt::fix(6.12345, 3), "6.123");
-	VERIFY_EQUAL(mpt::fmt::flt(6.12345, 4), "6.123");
-	VERIFY_EQUAL(mpt::fmt::fix(6.12345, 4), "6.1235");
+	VERIFY_EQUAL(mpt::afmt::flt(6.12345, 3), "6.12");
+	VERIFY_EQUAL(mpt::afmt::fix(6.12345, 3), "6.123");
+	VERIFY_EQUAL(mpt::afmt::flt(6.12345, 4), "6.123");
+	VERIFY_EQUAL(mpt::afmt::fix(6.12345, 4), "6.1235");
 
 #if MPT_WSTRING_FORMAT
 	VERIFY_EQUAL(mpt::wfmt::flt(6.12345, 3), L"6.12");
@@ -737,30 +737,30 @@ static MPT_NOINLINE void TestStringFormatting()
 	static_assert(mpt::parse_format_string_argument_count("{0}{1}") == 2);
 
 	// basic
-	VERIFY_EQUAL(MPT_FORMAT("{}{}{}")(1,2,3), "123");
-	VERIFY_EQUAL(MPT_FORMAT("{2}{1}{0}")(1,2,3), "321");
+	VERIFY_EQUAL(MPT_AFORMAT("{}{}{}")(1,2,3), "123");
+	VERIFY_EQUAL(MPT_AFORMAT("{2}{1}{0}")(1,2,3), "321");
 
-	VERIFY_EQUAL(MPT_FORMAT("{2}{1}{0}{4}{3}{6}{5}{7}{10}{9}{8}")(0,1,2,3,4,5,6,7,8,9,"a"), "21043657a98");
+	VERIFY_EQUAL(MPT_AFORMAT("{2}{1}{0}{4}{3}{6}{5}{7}{10}{9}{8}")(0,1,2,3,4,5,6,7,8,9,"a"), "21043657a98");
 
-	//VERIFY_EQUAL(MPT_FORMAT("{2}{1}{0}{2}{1}{0}{10}{9}{8}")(0,1,2,3,4,5,6,7,8,9,"a"), "210210a98");
+	//VERIFY_EQUAL(MPT_AFORMAT("{2}{1}{0}{2}{1}{0}{10}{9}{8}")(0,1,2,3,4,5,6,7,8,9,"a"), "210210a98");
 
 #if MPT_WSTRING_FORMAT
 	VERIFY_EQUAL(MPT_WFORMAT("{}{}{}")(1,2,3), L"123");
 #endif
 
 	// escaping behviour
-	VERIFY_EQUAL(MPT_FORMAT("%")(), "%");
-	VERIFY_EQUAL(MPT_FORMAT("%")(), "%");
-	VERIFY_EQUAL(MPT_FORMAT("%%")(), "%%");
-	VERIFY_EQUAL(MPT_FORMAT("{}")("a"), "a");
-	VERIFY_EQUAL(MPT_FORMAT("{}%")("a"), "a%");
-	VERIFY_EQUAL(MPT_FORMAT("{}%")("a"), "a%");
-	VERIFY_EQUAL(MPT_FORMAT("{}%%")("a"), "a%%");
-	VERIFY_EQUAL(MPT_FORMAT("%1")(), "%1");
-	VERIFY_EQUAL(MPT_FORMAT("%{}")("a"), "%a");
-	VERIFY_EQUAL(MPT_FORMAT("%b")(), "%b");
-	VERIFY_EQUAL(MPT_FORMAT("{{}}")(), "{}");
-	VERIFY_EQUAL(MPT_FORMAT("{{{}}}")("a"), "{a}");
+	VERIFY_EQUAL(MPT_AFORMAT("%")(), "%");
+	VERIFY_EQUAL(MPT_AFORMAT("%")(), "%");
+	VERIFY_EQUAL(MPT_AFORMAT("%%")(), "%%");
+	VERIFY_EQUAL(MPT_AFORMAT("{}")("a"), "a");
+	VERIFY_EQUAL(MPT_AFORMAT("{}%")("a"), "a%");
+	VERIFY_EQUAL(MPT_AFORMAT("{}%")("a"), "a%");
+	VERIFY_EQUAL(MPT_AFORMAT("{}%%")("a"), "a%%");
+	VERIFY_EQUAL(MPT_AFORMAT("%1")(), "%1");
+	VERIFY_EQUAL(MPT_AFORMAT("%{}")("a"), "%a");
+	VERIFY_EQUAL(MPT_AFORMAT("%b")(), "%b");
+	VERIFY_EQUAL(MPT_AFORMAT("{{}}")(), "{}");
+	VERIFY_EQUAL(MPT_AFORMAT("{{{}}}")("a"), "{a}");
 
 #if defined(MPT_WITH_MFC)
 	VERIFY_EQUAL(mpt::ufmt::val(CString(_T("foobar"))), U_("foobar"));

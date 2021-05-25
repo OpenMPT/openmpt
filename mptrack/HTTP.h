@@ -65,7 +65,7 @@ class status_exception
 {
 public:
 	status_exception(uint64 status)
-		: std::runtime_error(MPT_FORMAT("HTTP status {}")(status))
+		: std::runtime_error(MPT_AFORMAT("HTTP status {}")(status))
 	{
 		return;
 	}

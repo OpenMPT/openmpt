@@ -29,18 +29,18 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 // The following section demands a rationale.
-//  1. mpt::fmt::val(), mpt::wfmt::val() and mpt::ufmt::val() mimic the semantics of c++11 std::to_string() and std::to_wstring().
+//  1. mpt::afmt::val(), mpt::wfmt::val() and mpt::ufmt::val() mimic the semantics of c++11 std::to_string() and std::to_wstring().
 //     There is an important difference though. The c++11 versions are specified in terms of sprintf formatting which in turn
 //     depends on the current C locale. This renders these functions unusable in a library context because the current
 //     C locale is set by the library-using application and could be anything. There is no way a library can get reliable semantics
 //     out of these functions. It is thus better to just avoid them.
-//     ToString() and ToWString() are based on iostream internally, but the the locale of the stream is forced to std::locale::classic(),
+//     ToAString() and ToWString() are based on iostream internally, but the the locale of the stream is forced to std::locale::classic(),
 //     which results in "C" ASCII locale behavior.
 //  2. The full suite of printf-like or iostream like number formatting is generally not required. Instead, a sane subset functionality
 //     is provided here.
-//     When formatting integers, it is recommended to use mpt::fmt::dec or mpt::fmt::hex. Appending a template argument '<n>' sets the width,
+//     When formatting integers, it is recommended to use mpt::afmt::dec or mpt::afmt::hex. Appending a template argument '<n>' sets the width,
 //     the same way as '%nd' would do. Appending a '0' to the function name causes zero-filling as print-like '%0nd' would do. Spelling 'HEX'
-//     in upper-case generates upper-case hex digits. If these are not known at compile-time, a more verbose FormatVal(int, format) can be
+//     in upper-case generates upper-case hex digits. If these are not known at compile-time, a more verbose FormatValA(int, format) can be
 //     used.
 //  3. mpt::format(format)(...) provides simplified and type-safe message and localization string formatting.
 //     The only specifier allowed is '{}' enclosing a number n. It references to n-th parameter after the format string (1-based).
@@ -50,8 +50,8 @@ OPENMPT_NAMESPACE_BEGIN
 //  4. Every function is available for std::string, std::wstring and mpt::ustring. std::string makes no assumption about the encoding, which
 //     basically means, it should work for any 7-bit or 8-bit encoding, including for example ASCII, UTF8 or the current locale encoding.
 //     std::string         std::wstring          mpt::ustring                    mpt::tsrtring                        CString
-//     mpt::fmt            mpt::wfmt             mpt::ufmt                       mpt::tfmt                            mpt::cfmt
-//     MPT_FORMAT("{}")    MPT_WFORMAT("{}")     MPT_UFORMAT("{}")               MPT_TFORMAT("{}")                    MPT_CFORMAT("{}")
+//     mpt::afmt           mpt::wfmt             mpt::ufmt                       mpt::tfmt                            mpt::cfmt
+//     MPT_AFORMAT("{}")   MPT_WFORMAT("{}")     MPT_UFORMAT("{}")               MPT_TFORMAT("{}")                    MPT_CFORMAT("{}")
 //  5. All functionality here delegates real work outside of the header file so that <sstream> and <locale> do not need to be included when
 //     using this functionality.
 //     Advantages:
@@ -75,43 +75,43 @@ namespace mpt
 
 // fallback to member function ToUString()
 #if MPT_USTRING_MODE_UTF8
-template <typename T> [[deprecated]] auto ToString(const T & x) -> decltype(mpt::ToCharset(mpt::Charset::UTF8, x.ToUString())) { return mpt::ToCharset(mpt::Charset::UTF8, x.ToUString()); } // unknown encoding
+template <typename T> [[deprecated]] auto ToAString(const T & x) -> decltype(mpt::ToCharset(mpt::Charset::UTF8, x.ToUString())) { return mpt::ToCharset(mpt::Charset::UTF8, x.ToUString()); } // unknown encoding
 #else
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
-template <typename T> [[deprecated]] auto ToString(const T & x) -> decltype(mpt::ToCharset(mpt::Charset::Locale, x.ToUString())) { return mpt::ToCharset(mpt::Charset::Locale, x.ToUString()); } // unknown encoding
+template <typename T> [[deprecated]] auto ToAString(const T & x) -> decltype(mpt::ToCharset(mpt::Charset::Locale, x.ToUString())) { return mpt::ToCharset(mpt::Charset::Locale, x.ToUString()); } // unknown encoding
 #else // !MPT_ENABLE_CHARSET_LOCALE
-template <typename T> [[deprecated]] auto ToString(const T & x) -> decltype(mpt::ToCharset(mpt::Charset::UTF8, x.ToUString())) { return mpt::ToCharset(mpt::Charset::UTF8, x.ToUString()); } // unknown encoding
+template <typename T> [[deprecated]] auto ToAString(const T & x) -> decltype(mpt::ToCharset(mpt::Charset::UTF8, x.ToUString())) { return mpt::ToCharset(mpt::Charset::UTF8, x.ToUString()); } // unknown encoding
 #endif // MPT_ENABLE_CHARSET_LOCALE
 #endif
 
-inline std::string ToString(const std::string & x) { return x; }
-inline std::string ToString(const char * const & x) { return x; }
-std::string ToString(const char &x) = delete; // deprecated to catch potential API mis-use, use std::string(1, x) instead
+inline std::string ToAString(const std::string & x) { return x; }
+inline std::string ToAString(const char * const & x) { return x; }
+std::string ToAString(const char &x) = delete; // deprecated to catch potential API mis-use, use std::string(1, x) instead
 #if MPT_WSTRING_FORMAT
-std::string ToString(const std::wstring & x) = delete; // Unknown encoding.
-std::string ToString(const wchar_t * const & x) = delete; // Unknown encoding.
-std::string ToString(const wchar_t &x ) = delete; // deprecated to catch potential API mis-use, use std::wstring(1, x) instead
+std::string ToAString(const std::wstring & x) = delete; // Unknown encoding.
+std::string ToAString(const wchar_t * const & x) = delete; // Unknown encoding.
+std::string ToAString(const wchar_t &x ) = delete; // deprecated to catch potential API mis-use, use std::wstring(1, x) instead
 #endif
 #if MPT_USTRING_MODE_UTF8
-std::string ToString(const mpt::ustring & x) = delete; // Unknown encoding.
+std::string ToAString(const mpt::ustring & x) = delete; // Unknown encoding.
 #endif
 #if defined(MPT_WITH_MFC)
-std::string ToString(const CString & x) = delete; // unknown encoding
+std::string ToAString(const CString & x) = delete; // unknown encoding
 #endif // MPT_WITH_MFC
-std::string ToString(const bool & x);
-std::string ToString(const signed char & x);
-std::string ToString(const unsigned char & x);
-std::string ToString(const signed short & x);
-std::string ToString(const unsigned short & x);
-std::string ToString(const signed int & x);
-std::string ToString(const unsigned int & x);
-std::string ToString(const signed long & x);
-std::string ToString(const unsigned long & x);
-std::string ToString(const signed long long & x);
-std::string ToString(const unsigned long long & x);
-std::string ToString(const float & x);
-std::string ToString(const double & x);
-std::string ToString(const long double & x);
+std::string ToAString(const bool & x);
+std::string ToAString(const signed char & x);
+std::string ToAString(const unsigned char & x);
+std::string ToAString(const signed short & x);
+std::string ToAString(const unsigned short & x);
+std::string ToAString(const signed int & x);
+std::string ToAString(const unsigned int & x);
+std::string ToAString(const signed long & x);
+std::string ToAString(const unsigned long & x);
+std::string ToAString(const signed long long & x);
+std::string ToAString(const unsigned long long & x);
+std::string ToAString(const float & x);
+std::string ToAString(const double & x);
+std::string ToAString(const long double & x);
 
 // fallback to member function ToUString()
 template <typename T> auto ToUString(const T & x) -> decltype(x.ToUString()) { return x.ToUString(); }
@@ -187,7 +187,7 @@ template <> struct ToCStringHelper<CString> { CString operator () (const CString
 #endif // MPT_WITH_MFC
 
 template <typename Tstring> struct ToStringTFunctor {};
-template <> struct ToStringTFunctor<std::string> { template <typename T> inline std::string operator() (const T & x) { return ToString(x); } };
+template <> struct ToStringTFunctor<std::string> { template <typename T> inline std::string operator() (const T & x) { return ToAString(x); } };
 template <> struct ToStringTFunctor<mpt::ustring> { template <typename T> inline mpt::ustring operator() (const T & x) { return ToUString(x); } };
 #if MPT_WSTRING_FORMAT && MPT_USTRING_MODE_UTF8
 template <> struct ToStringTFunctor<std::wstring> { template <typename T> inline std::wstring operator() (const T & x) { return ToWString(x); } };
@@ -218,24 +218,24 @@ using FormatFlags = mpt::format_simple_flags;
 using fmt_base = mpt::format_simple_base;
 
 
-std::string FormatVal(const char & x, const FormatSpec & f) = delete; // deprecated to catch potential API mis-use, use std::string(1, x) instead
+std::string FormatValA(const char & x, const FormatSpec & f) = delete; // deprecated to catch potential API mis-use, use std::string(1, x) instead
 #if !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
-std::string FormatVal(const wchar_t & x, const FormatSpec & f) = delete; // deprecated to catch potential API mis-use, use std::wstring(1, x) instead
+std::string FormatValA(const wchar_t & x, const FormatSpec & f) = delete; // deprecated to catch potential API mis-use, use std::wstring(1, x) instead
 #endif // !MPT_COMPILER_QUIRK_NO_WCHAR
-std::string FormatVal(const bool & x, const FormatSpec & f);
-std::string FormatVal(const signed char & x, const FormatSpec & f);
-std::string FormatVal(const unsigned char & x, const FormatSpec & f);
-std::string FormatVal(const signed short & x, const FormatSpec & f);
-std::string FormatVal(const unsigned short & x, const FormatSpec & f);
-std::string FormatVal(const signed int & x, const FormatSpec & f);
-std::string FormatVal(const unsigned int & x, const FormatSpec & f);
-std::string FormatVal(const signed long & x, const FormatSpec & f);
-std::string FormatVal(const unsigned long & x, const FormatSpec & f);
-std::string FormatVal(const signed long long & x, const FormatSpec & f);
-std::string FormatVal(const unsigned long long & x, const FormatSpec & f);
-std::string FormatVal(const float & x, const FormatSpec & f);
-std::string FormatVal(const double & x, const FormatSpec & f);
-std::string FormatVal(const long double & x, const FormatSpec & f);
+std::string FormatValA(const bool & x, const FormatSpec & f);
+std::string FormatValA(const signed char & x, const FormatSpec & f);
+std::string FormatValA(const unsigned char & x, const FormatSpec & f);
+std::string FormatValA(const signed short & x, const FormatSpec & f);
+std::string FormatValA(const unsigned short & x, const FormatSpec & f);
+std::string FormatValA(const signed int & x, const FormatSpec & f);
+std::string FormatValA(const unsigned int & x, const FormatSpec & f);
+std::string FormatValA(const signed long & x, const FormatSpec & f);
+std::string FormatValA(const unsigned long & x, const FormatSpec & f);
+std::string FormatValA(const signed long long & x, const FormatSpec & f);
+std::string FormatValA(const unsigned long long & x, const FormatSpec & f);
+std::string FormatValA(const float & x, const FormatSpec & f);
+std::string FormatValA(const double & x, const FormatSpec & f);
+std::string FormatValA(const long double & x, const FormatSpec & f);
 
 mpt::ustring FormatValU(const char & x, const FormatSpec & f) = delete; // deprecated to catch potential API mis-use, use std::string(1, x) instead
 #if !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
@@ -278,19 +278,19 @@ std::wstring FormatValW(const long double & x, const FormatSpec & f);
 #endif
 
 template <typename Tstring> struct FormatValTFunctor {};
-template <> struct FormatValTFunctor<std::string> { template <typename T> inline std::string operator() (const T & x, const FormatSpec & f) { return FormatVal(x, f); } };
+template <> struct FormatValTFunctor<std::string> { template <typename T> inline std::string operator() (const T & x, const FormatSpec & f) { return FormatValA(x, f); } };
 template <> struct FormatValTFunctor<mpt::ustring> { template <typename T> inline mpt::ustring operator() (const T & x, const FormatSpec & f) { return FormatValU(x, f); } };
 #if MPT_USTRING_MODE_UTF8 && MPT_WSTRING_FORMAT
 template <> struct FormatValTFunctor<std::wstring> { template <typename T> inline std::wstring operator() (const T & x, const FormatSpec & f) { return FormatValW(x, f); } };
 #endif
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
-template <> struct FormatValTFunctor<mpt::lstring> { template <typename T> inline mpt::lstring operator() (const T & x, const FormatSpec & f) { return mpt::ToLocale(mpt::Charset::Locale, FormatVal(x, f)); } };
+template <> struct FormatValTFunctor<mpt::lstring> { template <typename T> inline mpt::lstring operator() (const T & x, const FormatSpec & f) { return mpt::ToLocale(mpt::Charset::Locale, FormatValA(x, f)); } };
 #endif // MPT_ENABLE_CHARSET_LOCALE
 #if defined(MPT_WITH_MFC)
 #ifdef UNICODE
 template <> struct FormatValTFunctor<CString> { template <typename T> inline CString operator() (const T & x, const FormatSpec & f) { return mpt::ToCString(FormatValW(x, f)); } };
 #else // !UNICODE
-template <> struct FormatValTFunctor<CString> { template <typename T> inline CString operator() (const T & x, const FormatSpec & f) { return mpt::ToCString(mpt::Charset::Locale, FormatVal(x, f)); } };
+template <> struct FormatValTFunctor<CString> { template <typename T> inline CString operator() (const T & x, const FormatSpec & f) { return mpt::ToCString(mpt::Charset::Locale, FormatValA(x, f)); } };
 #endif // UNICODE
 #endif // MPT_WITH_MFC
 
@@ -453,7 +453,7 @@ static inline Tstring center(std::size_t width_, const Tstring &str)
 }; // struct fmtT
 
 
-typedef fmtT<std::string> fmt;
+typedef fmtT<std::string> afmt;
 #if MPT_WSTRING_FORMAT
 typedef fmtT<std::wstring> wfmt;
 #endif
@@ -473,7 +473,7 @@ typedef fmtT<CString> cfmt;
 #endif // MPT_WITH_MFC
 
 
-#define MPT_FORMAT(f) mpt::format_message<mpt::ToStringFormatter, mpt::parse_format_string_argument_count(f)>(f)
+#define MPT_AFORMAT(f) mpt::format_message<mpt::ToStringFormatter, mpt::parse_format_string_argument_count(f)>(f)
 
 #if MPT_WSTRING_FORMAT
 #define MPT_WFORMAT(f) mpt::format_message_typed<mpt::ToStringFormatter, mpt::parse_format_string_argument_count( L ## f ), std::wstring>( L ## f )
@@ -526,7 +526,7 @@ std::string Combine(const std::vector<T> &vals, const std::string &sep=std::stri
 		{
 			str += sep;
 		}
-		str += mpt::fmt::val(vals[i]);
+		str += mpt::afmt::val(vals[i]);
 	}
 	return str;
 }

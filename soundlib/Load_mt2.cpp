@@ -798,7 +798,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 				ModInstrument *mptIns = AllocateInstrument(drumMap[i], drumHeader.DrumSamples[i] + 1);
 				if(mptIns != nullptr)
 				{
-					mptIns->name = MPT_FORMAT("Drum #{}")(i+1);
+					mptIns->name = MPT_AFORMAT("Drum #{}")(i+1);
 				}
 			} else
 			{

@@ -253,9 +253,9 @@ void ID3V2Tagger::WriteID3v2ReplayGainFrames(ReplayGain replayGain, std::ostream
 			content += "-";
 			gainTimes100 = std::abs(gainTimes100);
 		}
-		content += mpt::fmt::dec(gainTimes100 / 100);
+		content += mpt::afmt::dec(gainTimes100 / 100);
 		content += ".";
-		content += mpt::fmt::dec0<2>(gainTimes100 % 100);
+		content += mpt::afmt::dec0<2>(gainTimes100 % 100);
 		content += " ";
 		content += "dB";
 
@@ -286,9 +286,9 @@ void ID3V2Tagger::WriteID3v2ReplayGainFrames(ReplayGain replayGain, std::ostream
 
 		int32 peakTimes1000000 = mpt::saturate_round<int32>(std::fabs(replayGain.TrackPeak) * 1000000.0f);
 		std::string number;
-		number += mpt::fmt::dec(peakTimes1000000 / 1000000);
+		number += mpt::afmt::dec(peakTimes1000000 / 1000000);
 		number += ".";
-		number += mpt::fmt::dec0<6>(peakTimes1000000 % 1000000);
+		number += mpt::afmt::dec0<6>(peakTimes1000000 % 1000000);
 		content += number;
 
 		content += std::string(1, '\0');

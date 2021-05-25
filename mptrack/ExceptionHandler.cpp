@@ -324,11 +324,11 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 		mpt::SafeOutputFile sf(crashDirectory.path + P_("threads.txt"), std::ios::binary, mpt::FlushMode::Full);
 		mpt::ofstream& f = sf;
 		f.imbue(std::locale::classic());
-		f << MPT_FORMAT("current : {}")(mpt::fmt::hex0<8>(GetCurrentThreadId())) << "\r\n";
-		f << MPT_FORMAT("GUI     : {}")(mpt::fmt::hex0<8>(mpt::log::Trace::GetThreadId(mpt::log::Trace::ThreadKindGUI))) << "\r\n";
-		f << MPT_FORMAT("Audio   : {}")(mpt::fmt::hex0<8>(mpt::log::Trace::GetThreadId(mpt::log::Trace::ThreadKindAudio))) << "\r\n";
-		f << MPT_FORMAT("Notify  : {}")(mpt::fmt::hex0<8>(mpt::log::Trace::GetThreadId(mpt::log::Trace::ThreadKindNotify))) << "\r\n";
-		f << MPT_FORMAT("WatchDir: {}")(mpt::fmt::hex0<8>(mpt::log::Trace::GetThreadId(mpt::log::Trace::ThreadKindWatchdir))) << "\r\n";
+		f << MPT_AFORMAT("current : {}")(mpt::afmt::hex0<8>(GetCurrentThreadId())) << "\r\n";
+		f << MPT_AFORMAT("GUI     : {}")(mpt::afmt::hex0<8>(mpt::log::Trace::GetThreadId(mpt::log::Trace::ThreadKindGUI))) << "\r\n";
+		f << MPT_AFORMAT("Audio   : {}")(mpt::afmt::hex0<8>(mpt::log::Trace::GetThreadId(mpt::log::Trace::ThreadKindAudio))) << "\r\n";
+		f << MPT_AFORMAT("Notify  : {}")(mpt::afmt::hex0<8>(mpt::log::Trace::GetThreadId(mpt::log::Trace::ThreadKindNotify))) << "\r\n";
+		f << MPT_AFORMAT("WatchDir: {}")(mpt::afmt::hex0<8>(mpt::log::Trace::GetThreadId(mpt::log::Trace::ThreadKindWatchdir))) << "\r\n";
 	}
 
 	static constexpr struct { const mpt::uchar * section; const mpt::uchar * key; } configAnonymize[] =

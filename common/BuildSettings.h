@@ -363,7 +363,7 @@
 	// mpt::ToWide
 	// Required on Windows by mpt::PathString.
 	// Required by MPT_USTRING_MODE_WIDE as they share the conversion functions.
-	// Required by MPT_WSTRING_FORMAT because of std::string<->std::wstring conversion in mpt::ToString and mpt::ToWString.
+	// Required by MPT_WSTRING_FORMAT because of std::string<->std::wstring conversion in mpt::ToAString and mpt::ToWString.
 	#define MPT_WSTRING_CONVERT 1
 
 #else

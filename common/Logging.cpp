@@ -327,8 +327,8 @@ bool Dump(const mpt::PathString &filename)
 	{
 		double period = static_cast<double>(Entries[Entries.size() - 1].Timestamp - Entries[0].Timestamp) / static_cast<double>(qpcFreq.QuadPart);
 		double eventsPerSecond = Entries.size() / period;
-		f << "Period [s]: " << mpt::fmt::fix(period) << std::endl;
-		f << "Events/second: " << mpt::fmt::fix(eventsPerSecond) << std::endl;
+		f << "Period [s]: " << mpt::afmt::fix(period) << std::endl;
+		f << "Events/second: " << mpt::afmt::fix(eventsPerSecond) << std::endl;
 	}
 
 	for(auto &entry : Entries)
@@ -341,7 +341,7 @@ bool Dump(const mpt::PathString &filename)
 			time = mpt::ToCharset(mpt::CharsetLogfile, mpt::Date::ANSI::ToUString( ftNow - static_cast<int64>( static_cast<double>(qpcNow.QuadPart - entry.Timestamp) * (10000000.0 / static_cast<double>(qpcFreq.QuadPart) ) ) ) );
 		} else
 		{
-			time = MPT_FORMAT("0x{}")(mpt::fmt::hex0<16>(entry.Timestamp));
+			time = MPT_AFORMAT("0x{}")(mpt::afmt::hex0<16>(entry.Timestamp));
 		}
 		f << time;
 		if(entry.ThreadId == ThreadIdGUI)
@@ -358,7 +358,7 @@ bool Dump(const mpt::PathString &filename)
 			f << " WatchDir ";
 		} else
 		{
-			f << " " << mpt::fmt::hex0<8>(entry.ThreadId) << " ";
+			f << " " << mpt::afmt::hex0<8>(entry.ThreadId) << " ";
 		}
 		f << (entry.Direction == mpt::log::Trace::Direction::Enter ? ">" : entry.Direction == mpt::log::Trace::Direction::Leave ? "<" : " ") << " ";
 		f << entry.File << "(" << entry.Line << "): " << entry.Function;

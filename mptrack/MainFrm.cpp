@@ -2102,7 +2102,7 @@ void CMainFrame::OnTimerGUI()
 			cwnd->GetClientRect(&rect);
 			rect.left += width;
 			rect.top += i * height;
-			auto s = mpt::ToCString(mpt::Charset::ASCII, mpt::fmt::right(6, mpt::fmt::fix(cats[i] * 100.0, 3)) + "% " + catnames[i]);
+			auto s = mpt::ToCString(mpt::Charset::ASCII, mpt::afmt::right(6, mpt::afmt::fix(cats[i] * 100.0, 3)) + "% " + catnames[i]);
 			dc.DrawText(s, s.GetLength(), &rect, DT_LEFT);
 		}
 

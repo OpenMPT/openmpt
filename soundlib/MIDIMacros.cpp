@@ -82,8 +82,8 @@ void MIDIMacroConfig::CreateParameteredMacro(Macro &parameteredMacro, Parametere
 	case kSFxReso:       mpt::String::WriteAutoBuf(parameteredMacro) = "F0F001z"; break;
 	case kSFxFltMode:    mpt::String::WriteAutoBuf(parameteredMacro) = "F0F002z"; break;
 	case kSFxDryWet:     mpt::String::WriteAutoBuf(parameteredMacro) = "F0F003z"; break;
-	case kSFxCC:         mpt::String::WriteAutoBuf(parameteredMacro) = MPT_FORMAT("Bc{}z")(mpt::fmt::HEX0<2>(subType & 0x7F)); break;
-	case kSFxPlugParam:  mpt::String::WriteAutoBuf(parameteredMacro) = MPT_FORMAT("F0F{}z")(mpt::fmt::HEX0<3>(std::min(subType, 0x17F) + 0x80)); break;
+	case kSFxCC:         mpt::String::WriteAutoBuf(parameteredMacro) = MPT_AFORMAT("Bc{}z")(mpt::afmt::HEX0<2>(subType & 0x7F)); break;
+	case kSFxPlugParam:  mpt::String::WriteAutoBuf(parameteredMacro) = MPT_AFORMAT("F0F{}z")(mpt::afmt::HEX0<3>(std::min(subType, 0x17F) + 0x80)); break;
 	case kSFxChannelAT:  mpt::String::WriteAutoBuf(parameteredMacro) = "Dcz"; break;
 	case kSFxPolyAT:     mpt::String::WriteAutoBuf(parameteredMacro) = "Acnz"; break;
 	case kSFxPitch:      mpt::String::WriteAutoBuf(parameteredMacro) = "Ec00z"; break;
@@ -118,39 +118,39 @@ void MIDIMacroConfig::CreateFixedMacro(Macro (&fixedMacros)[128], FixedMacro mac
 		case kZxxReso4Bit:
 			param = i * 8;
 			if(i < 16)
-				mpt::String::WriteAutoBuf(fixedMacros[i]) = MPT_FORMAT("F0F001{}")(mpt::fmt::HEX0<2>(param));
+				mpt::String::WriteAutoBuf(fixedMacros[i]) = MPT_AFORMAT("F0F001{}")(mpt::afmt::HEX0<2>(param));
 			else
 				mpt::String::WriteAutoBuf(fixedMacros[i]) = "";
 			break;
 		case kZxxReso7Bit:
-			mpt::String::WriteAutoBuf(fixedMacros[i]) = MPT_FORMAT("F0F001{}")(mpt::fmt::HEX0<2>(param));
+			mpt::String::WriteAutoBuf(fixedMacros[i]) = MPT_AFORMAT("F0F001{}")(mpt::afmt::HEX0<2>(param));
 			break;
 		case kZxxCutoff:
-			mpt::String::WriteAutoBuf(fixedMacros[i]) = MPT_FORMAT("F0F000{}")(mpt::fmt::HEX0<2>(param));
+			mpt::String::WriteAutoBuf(fixedMacros[i]) = MPT_AFORMAT("F0F000{}")(mpt::afmt::HEX0<2>(param));
 			break;
 		case kZxxFltMode:
-			mpt::String::WriteAutoBuf(fixedMacros[i]) = MPT_FORMAT("F0F002{}")(mpt::fmt::HEX0<2>(param));
+			mpt::String::WriteAutoBuf(fixedMacros[i]) = MPT_AFORMAT("F0F002{}")(mpt::afmt::HEX0<2>(param));
 			break;
 		case kZxxResoFltMode:
 			param = (i & 0x0F) * 8;
 			if(i < 16)
-				mpt::String::WriteAutoBuf(fixedMacros[i]) = MPT_FORMAT("F0F001{}")(mpt::fmt::HEX0<2>(param));
+				mpt::String::WriteAutoBuf(fixedMacros[i]) = MPT_AFORMAT("F0F001{}")(mpt::afmt::HEX0<2>(param));
 			else if(i < 32)
-				mpt::String::WriteAutoBuf(fixedMacros[i]) = MPT_FORMAT("F0F002{}")(mpt::fmt::HEX0<2>(param));
+				mpt::String::WriteAutoBuf(fixedMacros[i]) = MPT_AFORMAT("F0F002{}")(mpt::afmt::HEX0<2>(param));
 			else
 				mpt::String::WriteAutoBuf(fixedMacros[i]) = "";
 			break;
 		case kZxxChannelAT:
-			mpt::String::WriteAutoBuf(fixedMacros[i]) = MPT_FORMAT("Dc{}")(mpt::fmt::HEX0<2>(param));
+			mpt::String::WriteAutoBuf(fixedMacros[i]) = MPT_AFORMAT("Dc{}")(mpt::afmt::HEX0<2>(param));
 			break;
 		case kZxxPolyAT:
-			mpt::String::WriteAutoBuf(fixedMacros[i]) = MPT_FORMAT("Acn{}")(mpt::fmt::HEX0<2>(param));
+			mpt::String::WriteAutoBuf(fixedMacros[i]) = MPT_AFORMAT("Acn{}")(mpt::afmt::HEX0<2>(param));
 			break;
 		case kZxxPitch:
-			mpt::String::WriteAutoBuf(fixedMacros[i]) = MPT_FORMAT("Ec00{}")(mpt::fmt::HEX0<2>(param));
+			mpt::String::WriteAutoBuf(fixedMacros[i]) = MPT_AFORMAT("Ec00{}")(mpt::afmt::HEX0<2>(param));
 			break;
 		case kZxxProgChange:
-			mpt::String::WriteAutoBuf(fixedMacros[i]) = MPT_FORMAT("Cc{}")(mpt::fmt::HEX0<2>(param));
+			mpt::String::WriteAutoBuf(fixedMacros[i]) = MPT_AFORMAT("Cc{}")(mpt::afmt::HEX0<2>(param));
 			break;
 		case kZxxCustom:
 		default:

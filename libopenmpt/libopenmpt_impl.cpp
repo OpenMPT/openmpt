@@ -1537,7 +1537,7 @@ std::pair< std::string, std::string > module_impl::format_and_highlight_pattern_
 			break;
 		case module::command_instrument:
 			return std::make_pair(
-					cell.instr ? OpenMPT::mpt::fmt::HEX0<2>( cell.instr ) : std::string("..")
+					cell.instr ? OpenMPT::mpt::afmt::HEX0<2>( cell.instr ) : std::string("..")
 				,
 					cell.instr ? std::string("ii") : std::string("..")
 				);
@@ -1551,21 +1551,21 @@ std::pair< std::string, std::string > module_impl::format_and_highlight_pattern_
 			break;
 		case module::command_volume:
 			return std::make_pair(
-					cell.IsPcNote() ? OpenMPT::mpt::fmt::HEX0<2>( cell.GetValueVolCol() & 0xff ) : cell.volcmd != OpenMPT::VOLCMD_NONE ? OpenMPT::mpt::fmt::HEX0<2>( cell.vol ) : std::string("..")
+					cell.IsPcNote() ? OpenMPT::mpt::afmt::HEX0<2>( cell.GetValueVolCol() & 0xff ) : cell.volcmd != OpenMPT::VOLCMD_NONE ? OpenMPT::mpt::afmt::HEX0<2>( cell.vol ) : std::string("..")
 				,
 					cell.IsPcNote() ? std::string("vv") : cell.volcmd != OpenMPT::VOLCMD_NONE ? std::string("vv") : std::string("..")
 				);
 			break;
 		case module::command_effect:
 			return std::make_pair(
-					cell.IsPcNote() ? OpenMPT::mpt::fmt::HEX0<1>( ( cell.GetValueEffectCol() & 0x0f00 ) > 16 ) : cell.command != OpenMPT::CMD_NONE ? std::string( 1, m_sndFile->GetModSpecifications().GetEffectLetter( cell.command ) ) : std::string(".")
+					cell.IsPcNote() ? OpenMPT::mpt::afmt::HEX0<1>( ( cell.GetValueEffectCol() & 0x0f00 ) > 16 ) : cell.command != OpenMPT::CMD_NONE ? std::string( 1, m_sndFile->GetModSpecifications().GetEffectLetter( cell.command ) ) : std::string(".")
 				,
 					cell.IsPcNote() ? std::string("e") : cell.command != OpenMPT::CMD_NONE ? std::string("e") : std::string(".")
 				);
 			break;
 		case module::command_parameter:
 			return std::make_pair(
-					cell.IsPcNote() ? OpenMPT::mpt::fmt::HEX0<2>( cell.GetValueEffectCol() & 0x00ff ) : cell.command != OpenMPT::CMD_NONE ? OpenMPT::mpt::fmt::HEX0<2>( cell.param ) : std::string("..")
+					cell.IsPcNote() ? OpenMPT::mpt::afmt::HEX0<2>( cell.GetValueEffectCol() & 0x00ff ) : cell.command != OpenMPT::CMD_NONE ? OpenMPT::mpt::afmt::HEX0<2>( cell.param ) : std::string("..")
 				,
 					cell.IsPcNote() ? std::string("ff") : cell.command != OpenMPT::CMD_NONE ? std::string("ff") : std::string("..")
 				);
@@ -1604,17 +1604,17 @@ std::pair< std::string, std::string > module_impl::format_and_highlight_pattern_
 	if ( ( width == 0 ) || ( width >= 6 ) ) {
 		text += std::string(" ");
 		high += std::string(" ");
-		text += cell.instr ? OpenMPT::mpt::fmt::HEX0<2>( cell.instr ) : std::string("..");
+		text += cell.instr ? OpenMPT::mpt::afmt::HEX0<2>( cell.instr ) : std::string("..");
 		high += cell.instr ? std::string("ii") : std::string("..");
 	}
 	if ( ( width == 0 ) || ( width >= 9 ) ) {
-		text += cell.IsPcNote() ? std::string(" ") + OpenMPT::mpt::fmt::HEX0<2>( cell.GetValueVolCol() & 0xff ) : cell.volcmd != OpenMPT::VOLCMD_NONE ? std::string( 1, m_sndFile->GetModSpecifications().GetVolEffectLetter( cell.volcmd ) ) + OpenMPT::mpt::fmt::HEX0<2>( cell.vol ) : std::string(" ..");
+		text += cell.IsPcNote() ? std::string(" ") + OpenMPT::mpt::afmt::HEX0<2>( cell.GetValueVolCol() & 0xff ) : cell.volcmd != OpenMPT::VOLCMD_NONE ? std::string( 1, m_sndFile->GetModSpecifications().GetVolEffectLetter( cell.volcmd ) ) + OpenMPT::mpt::afmt::HEX0<2>( cell.vol ) : std::string(" ..");
 		high += cell.IsPcNote() ? std::string(" vv") : cell.volcmd != OpenMPT::VOLCMD_NONE ? std::string("uvv") : std::string(" ..");
 	}
 	if ( ( width == 0 ) || ( width >= 13 ) ) {
 		text += std::string(" ");
 		high += std::string(" ");
-		text += cell.IsPcNote() ? OpenMPT::mpt::fmt::HEX0<3>( cell.GetValueEffectCol() & 0x0fff ) : cell.command != OpenMPT::CMD_NONE ? std::string( 1, m_sndFile->GetModSpecifications().GetEffectLetter( cell.command ) ) + OpenMPT::mpt::fmt::HEX0<2>( cell.param ) : std::string("...");
+		text += cell.IsPcNote() ? OpenMPT::mpt::afmt::HEX0<3>( cell.GetValueEffectCol() & 0x0fff ) : cell.command != OpenMPT::CMD_NONE ? std::string( 1, m_sndFile->GetModSpecifications().GetEffectLetter( cell.command ) ) + OpenMPT::mpt::afmt::HEX0<2>( cell.param ) : std::string("...");
 		high += cell.IsPcNote() ? std::string("eff") : cell.command != OpenMPT::CMD_NONE ? std::string("eff") : std::string("...");
 	}
 	if ( ( width != 0 ) && ( text.length() > width ) ) {

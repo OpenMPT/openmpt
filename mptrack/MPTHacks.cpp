@@ -118,7 +118,7 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 	// Pattern count
 	if(m_SndFile.Patterns.GetNumPatterns() > originalSpecs->patternsMax)
 	{
-		AddToLog(MPT_FORMAT("Found too many patterns ({} allowed)")(originalSpecs->patternsMax));
+		AddToLog(MPT_AFORMAT("Found too many patterns ({} allowed)")(originalSpecs->patternsMax));
 		foundHacks = true;
 		// REQUIRES (INTELLIGENT) AUTOFIX
 	}
@@ -156,7 +156,7 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 	}
 	if(foundHere)
 	{
-		AddToLog(MPT_FORMAT("Found incompatible pattern lengths (must be between {} and {} rows)")(originalSpecs->patternRowsMin, originalSpecs->patternRowsMax));
+		AddToLog(MPT_AFORMAT("Found incompatible pattern lengths (must be between {} and {} rows)")(originalSpecs->patternRowsMin, originalSpecs->patternRowsMax));
 	}
 
 	// Check for invalid pattern commands
@@ -228,7 +228,7 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 	// Check for too many channels
 	if(m_SndFile.GetNumChannels() > originalSpecs->channelsMax || m_SndFile.GetNumChannels() < originalSpecs->channelsMin)
 	{
-		AddToLog(MPT_FORMAT("Found incompatible channel count (must be between {} and {} channels)")(originalSpecs->channelsMin, originalSpecs->channelsMax));
+		AddToLog(MPT_AFORMAT("Found incompatible channel count (must be between {} and {} channels)")(originalSpecs->channelsMin, originalSpecs->channelsMax));
 		foundHacks = true;
 		if(autofix)
 		{
@@ -258,7 +258,7 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 	// Check for too many samples
 	if(m_SndFile.GetNumSamples() > originalSpecs->samplesMax)
 	{
-		AddToLog(MPT_FORMAT("Found too many samples ({} allowed)")(originalSpecs->samplesMax));
+		AddToLog(MPT_AFORMAT("Found too many samples ({} allowed)")(originalSpecs->samplesMax));
 		foundHacks = true;
 		// REQUIRES (INTELLIGENT) AUTOFIX
 	}
@@ -286,7 +286,7 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 	// Check for too many instruments
 	if(m_SndFile.GetNumInstruments() > originalSpecs->instrumentsMax)
 	{
-		AddToLog(MPT_FORMAT("Found too many instruments ({} allowed)")(originalSpecs->instrumentsMax));
+		AddToLog(MPT_AFORMAT("Found too many instruments ({} allowed)")(originalSpecs->instrumentsMax));
 		foundHacks = true;
 		// REQUIRES (INTELLIGENT) AUTOFIX
 	}
@@ -336,7 +336,7 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 	// Check for too many orders
 	if(m_SndFile.Order().GetLengthTailTrimmed() > originalSpecs->ordersMax)
 	{
-		AddToLog(MPT_FORMAT("Found too many orders ({} allowed)")(originalSpecs->ordersMax));
+		AddToLog(MPT_AFORMAT("Found too many orders ({} allowed)")(originalSpecs->ordersMax));
 		foundHacks = true;
 		if(autofix)
 		{
@@ -348,7 +348,7 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 	// Check for invalid default tempo
 	if(m_SndFile.m_nDefaultTempo > originalSpecs->GetTempoMax() || m_SndFile.m_nDefaultTempo < originalSpecs->GetTempoMin())
 	{
-		AddToLog(MPT_FORMAT("Found incompatible default tempo (must be between {} and {})")(originalSpecs->GetTempoMin().GetInt(), originalSpecs->GetTempoMax().GetInt()));
+		AddToLog(MPT_AFORMAT("Found incompatible default tempo (must be between {} and {})")(originalSpecs->GetTempoMin().GetInt(), originalSpecs->GetTempoMax().GetInt()));
 		foundHacks = true;
 		if(autofix)
 			m_SndFile.m_nDefaultTempo = Clamp(m_SndFile.m_nDefaultTempo, originalSpecs->GetTempoMin(), originalSpecs->GetTempoMax());
@@ -357,7 +357,7 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 	// Check for invalid default speed
 	if(m_SndFile.m_nDefaultSpeed > originalSpecs->speedMax || m_SndFile.m_nDefaultSpeed < originalSpecs->speedMin)
 	{
-		AddToLog(MPT_FORMAT("Found incompatible default speed (must be between {} and {})")(originalSpecs->speedMin, originalSpecs->speedMax));
+		AddToLog(MPT_AFORMAT("Found incompatible default speed (must be between {} and {})")(originalSpecs->speedMin, originalSpecs->speedMax));
 		foundHacks = true;
 		if(autofix)
 			m_SndFile.m_nDefaultSpeed = Clamp(m_SndFile.m_nDefaultSpeed, originalSpecs->speedMin, originalSpecs->speedMax);

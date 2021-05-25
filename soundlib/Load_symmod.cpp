@@ -952,9 +952,9 @@ static bool ConvertDSP(const SymEvent event, MIDIMacroConfigData::Macro &macro, 
 		const uint8 reso = static_cast<uint8>(std::min(127, event.inst * 127 / 185));
 
 		if(type == 1)  // lowpass filter
-			mpt::String::WriteAutoBuf(macro) = MPT_FORMAT("F0F000{} F0F001{} F0F00200")(mpt::fmt::HEX0<2>(cutoff), mpt::fmt::HEX0<2>(reso));
+			mpt::String::WriteAutoBuf(macro) = MPT_AFORMAT("F0F000{} F0F001{} F0F00200")(mpt::afmt::HEX0<2>(cutoff), mpt::afmt::HEX0<2>(reso));
 		else if(type == 2)  // highpass filter
-			mpt::String::WriteAutoBuf(macro) = MPT_FORMAT("F0F000{} F0F001{} F0F00210")(mpt::fmt::HEX0<2>(cutoff), mpt::fmt::HEX0<2>(reso));
+			mpt::String::WriteAutoBuf(macro) = MPT_AFORMAT("F0F000{} F0F001{} F0F00210")(mpt::afmt::HEX0<2>(cutoff), mpt::afmt::HEX0<2>(reso));
 		else  // no filter or unsupported filter type
 			mpt::String::WriteAutoBuf(macro) = "F0F0007F F0F00100";
 		return true;
@@ -963,7 +963,7 @@ static bool ConvertDSP(const SymEvent event, MIDIMacroConfigData::Macro &macro, 
 		const uint8 type = ((event.note < 5) ? event.note : 0);
 		const uint8 length = (event.param < 128) ? event.param : 127;
 		const uint8 feedback = (event.inst < 128) ? event.inst : 127;
-		mpt::String::WriteAutoBuf(macro) = MPT_FORMAT("F0F080{} F0F081{} F0F082{}")(mpt::fmt::HEX0<2>(type), mpt::fmt::HEX0<2>(length), mpt::fmt::HEX0<2>(feedback));
+		mpt::String::WriteAutoBuf(macro) = MPT_AFORMAT("F0F080{} F0F081{} F0F082{}")(mpt::afmt::HEX0<2>(type), mpt::afmt::HEX0<2>(length), mpt::afmt::HEX0<2>(feedback));
 		return true;
 	} else if(event.command == SymEvent::DSPDelay)
 	{

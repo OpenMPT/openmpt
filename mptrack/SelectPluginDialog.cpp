@@ -640,7 +640,7 @@ bool CSelectPluginDlg::VerifyPlugin(VSTPluginLib *plug, CWnd *parent)
 	{
 		if(p.id2 == plug->pluginId2 && p.id1 == plug->pluginId1)
 		{
-			std::string s = MPT_FORMAT("WARNING: This plugin has been identified as {},\nwhich is known to have the following problem with OpenMPT:\n\n{}\n\nWould you still like to add this plugin to the library?")(p.name, p.problem);
+			std::string s = MPT_AFORMAT("WARNING: This plugin has been identified as {},\nwhich is known to have the following problem with OpenMPT:\n\n{}\n\nWould you still like to add this plugin to the library?")(p.name, p.problem);
 			if(Reporting::Confirm(s, false, false, parent) == cnfNo)
 			{
 				return false;
@@ -781,7 +781,7 @@ VSTPluginLib *CSelectPluginDlg::ScanPlugins(const mpt::PathString &path, CWnd *p
 	if(update)
 	{
 		// Force selection to last added plug.
-		Reporting::Information(MPT_FORMAT("Found {} plugin{}.")(files, files == 1 ? "" : "s").c_str(), parent);
+		Reporting::Information(MPT_AFORMAT("Found {} plugin{}.")(files, files == 1 ? "" : "s").c_str(), parent);
 		return plugLib;
 	} else
 	{

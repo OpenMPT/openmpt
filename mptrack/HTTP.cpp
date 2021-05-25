@@ -340,13 +340,13 @@ Result Request::operator()(InternetSession &internet) const
 		std::string headersString;
 		if(!dataMimeType.empty())
 		{
-			headersString += MPT_FORMAT("Content-type: {}\r\n")(dataMimeType);
+			headersString += MPT_AFORMAT("Content-type: {}\r\n")(dataMimeType);
 		}
 		if(!headers.empty())
 		{
 			for(const auto &[key, value] : headers)
 			{
-				headersString += MPT_FORMAT("{}: {}\r\n")(key, value);
+				headersString += MPT_AFORMAT("{}: {}\r\n")(key, value);
 			}
 		}
 		if(HttpSendRequest(
