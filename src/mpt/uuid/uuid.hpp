@@ -11,6 +11,7 @@
 #include "mpt/base/memory.hpp"
 #include "mpt/base/namespace.hpp"
 #include "mpt/endian/integer.hpp"
+#include "mpt/format/default_formatter.hpp"
 #include "mpt/format/simple.hpp"
 #include "mpt/parse/parse.hpp"
 #include "mpt/random/random.hpp"
@@ -348,6 +349,19 @@ public:
 		result.Data4 = mpt::ConvertHexStringTo<uint64>(segments[3] + segments[4]);
 		return result;
 	}
+	std::string ToAString() const {
+		return std::string()
+			+ mpt::format<std::string>::hex0<8>(GetData1())
+			+ std::string("-")
+			+ mpt::format<std::string>::hex0<4>(GetData2())
+			+ std::string("-")
+			+ mpt::format<std::string>::hex0<4>(GetData3())
+			+ std::string("-")
+			+ mpt::format<std::string>::hex0<4>(static_cast<uint16>(GetData4() >> 48))
+			+ std::string("-")
+			+ mpt::format<std::string>::hex0<4>(static_cast<uint16>(GetData4() >> 32))
+			+ mpt::format<std::string>::hex0<8>(static_cast<uint32>(GetData4() >> 0));
+	}
 	mpt::ustring ToUString() const {
 		return mpt::ustring()
 			+ mpt::format<mpt::ustring>::hex0<8>(GetData1())
@@ -379,6 +393,22 @@ MPT_CONSTEXPRINLINE mpt::UUID operator"" _uuid(const char * str, std::size_t len
 }
 
 } // namespace uuid_literals
+
+
+template <typename Tstring>
+inline Tstring uuid_to_string(mpt::UUID uuid) {
+	return mpt::convert<Tstring>(uuid.ToUString());
+}
+
+template <>
+inline std::string uuid_to_string<std::string>(mpt::UUID uuid) {
+	return uuid.ToAString();
+}
+
+template <typename Tstring, typename T, std::enable_if_t<std::is_same<T, mpt::UUID>::value, bool> = true>
+inline Tstring format_value_default(const T & x) {
+	return mpt::convert<Tstring>(mpt::uuid_to_string<typename mpt::select_format_string_type<Tstring>::type>(x));
+}
 
 
 } // namespace MPT_INLINE_NS
