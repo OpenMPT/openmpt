@@ -23,9 +23,11 @@
 
 #include "../common/misc_util.h"
 
+#if defined(MODPLUG_TRACKER)
 #if !defined(MPT_BUILD_WINESUPPORT)
 #include "../mptrack/ExceptionHandler.h"
 #endif // !MPT_BUILD_WINESUPPORT
+#endif // MODPLUG_TRACKER
 
 #include <algorithm>
 #include <chrono>
@@ -146,9 +148,7 @@ CASIODevice::CASIODevice(ILogger &logger, SoundDevice::Info info, SoundDevice::S
 	, m_DebugRealtimeThreadID(0)
 {
 	MPT_SOUNDDEV_TRACE_SCOPE();
-	#if !defined(MPT_BUILD_WINESUPPORT)
-		m_Ectx.description = MPT_UFORMAT("ASIO Driver: {}")(GetDeviceInternalID());
-	#endif // !MPT_BUILD_WINESUPPORT
+	m_Ectx.SetDescription(MPT_UFORMAT("ASIO Driver: {}")(GetDeviceInternalID()));
 	InitMembers();
 }
 
@@ -681,10 +681,12 @@ void CASIODevice::OpenDriver()
 		}
 		{
 			CrashContextGuard guard{ &m_Ectx };
+#if defined(MODPLUG_TRACKER)
 			if(GetAppInfo().MaskDriverCrashes)
 			{
 				m_Driver = std::make_unique<ASIO::Driver>(std::make_unique<ASIO::Windows::SEH::Driver>(clsid, GetAppInfo().GetHWND()));
 			} else
+#endif // MODPLUG_TRACKER
 			{
 				m_Driver = std::make_unique<ASIO::Driver>(std::make_unique<ASIO::Windows::Driver>(clsid, GetAppInfo().GetHWND()));
 			}
@@ -1188,13 +1190,15 @@ void CASIODevice::ExceptionHandler(const char * func)
 	try
 	{
 		throw; // rethrow
+#if defined(MODPLUG_TRACKER)
 	} catch(const ASIO::Windows::SEH::DriverCrash &e)
 	{
-		#if !defined(MPT_BUILD_WINESUPPORT)
-			ExceptionHandler::TaintProcess(ExceptionHandler::TaintReason::Driver);
-		#endif // !MPT_BUILD_WINESUPPORT
+#if !defined(MPT_BUILD_WINESUPPORT)
+		ExceptionHandler::TaintProcess(ExceptionHandler::TaintReason::Driver);
+#endif // !MPT_BUILD_WINESUPPORT
 		MPT_LOG(GetLogger(), LogError, "sounddev", MPT_UFORMAT("ASIO: {}: Driver Crash: {}!")(mpt::ToUnicode(mpt::CharsetSource, func), mpt::ToUnicode(mpt::CharsetSource, std::string(e.func()))));
 		SendDeviceMessage(LogError, MPT_UFORMAT("ASIO Driver Crash: {}")(mpt::ToUnicode(mpt::CharsetSource, std::string(e.func()))));
+#endif // MODPLUG_TRACKER
 	} catch(const std::bad_alloc &)
 	{
 		mpt::throw_out_of_memory();

@@ -18,9 +18,11 @@
 #include <atomic>
 
 #ifdef MPT_WITH_ASIO
+#if defined(MODPLUG_TRACKER)
 #if !defined(MPT_BUILD_WINESUPPORT)
 #include "../mptrack/ExceptionHandler.h"
 #endif // !MPT_BUILD_WINESUPPORT
+#endif // MODPLUG_TRACKER
 #endif // MPT_WITH_ASIO
 
 #ifdef MPT_WITH_ASIO
@@ -58,11 +60,17 @@ protected:
 	std::unique_ptr<ASIO::Windows::IBufferSwitchDispatcher> m_DeferredBufferSwitchDispatcher;
 	std::unique_ptr<ASIO::Driver> m_Driver;
 
-	#if !defined(MPT_BUILD_WINESUPPORT)
+	#if defined(MODPLUG_TRACKER) && !defined(MPT_BUILD_WINESUPPORT)
 		using CrashContext = ExceptionHandler::Context;
 		using CrashContextGuard = ExceptionHandler::ContextSetter;
-	#else // MPT_BUILD_WINESUPPORT
-		using CrashContext = void *;
+	#else // !(MODPLUG_TRACKER && !MPT_BUILD_WINESUPPORT)
+		struct CrashContext
+		{
+			void SetDescription(mpt::ustring)
+			{
+				return;
+			}
+		};
 		struct CrashContextGuard
 		{
 			CrashContextGuard(CrashContext *)
@@ -70,7 +78,7 @@ protected:
 				return;
 			}
 		};
-	#endif // !MPT_BUILD_WINESUPPORT
+	#endif // MODPLUG_TRACKER && !MPT_BUILD_WINESUPPORT
 	CrashContext m_Ectx;
 
 	class ASIODriverWithContext

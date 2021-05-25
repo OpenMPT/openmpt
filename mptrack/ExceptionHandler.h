@@ -21,6 +21,10 @@ public:
 
 	struct Context
 	{
+		void SetDescription(mpt::ustring desc)
+		{
+			description = std::move(desc);
+		}
 		mpt::ustring description;
 	};
 

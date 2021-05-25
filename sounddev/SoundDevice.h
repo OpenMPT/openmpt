@@ -351,7 +351,9 @@ struct AppInfo
 	bool BoostedThreadRealtimePosix;
 	int BoostedThreadNicenessPosix;
 	int BoostedThreadRtprioPosix;
+#if defined(MODPLUG_TRACKER)
 	bool MaskDriverCrashes;
+#endif // MODPLUG_TRACKER
 	bool AllowDeferredProcessing;
 	AppInfo()
 		: UIHandle(0)
@@ -360,7 +362,9 @@ struct AppInfo
 		, BoostedThreadRealtimePosix(false)
 		, BoostedThreadNicenessPosix(-5)
 		, BoostedThreadRtprioPosix(10)
+#if defined(MODPLUG_TRACKER)
 		, MaskDriverCrashes(false)
+#endif // MODPLUG_TRACKER
 		, AllowDeferredProcessing(true)
 	{
 		return;
