@@ -41,6 +41,7 @@
 #include "../soundlib/tuningcollection.h"
 #include "../soundlib/tuning.h"
 #include "openmpt/soundbase/Dither.hpp"
+#include "../common/Dither.h"
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/Mptrack.h"
 #include "../mptrack/Moddoc.h"
