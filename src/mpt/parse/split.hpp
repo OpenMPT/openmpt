@@ -21,7 +21,7 @@ inline namespace MPT_INLINE_NS {
 
 
 template <typename T, typename Tstring>
-std::vector<T> split_parse(const Tstring & str, const Tstring & sep = Tstring(1, char_constants<typename Tstring::value_type>::comma) {
+std::vector<T> split_parse(const Tstring & str, const Tstring & sep = Tstring(1, char_constants<typename Tstring::value_type>::comma)) {
 	std::vector<T> vals;
 	std::size_t pos = 0;
 	while (str.find(sep, pos) != std::string::npos) {
