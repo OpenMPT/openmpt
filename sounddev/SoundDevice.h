@@ -1,26 +1,37 @@
-/*
- * SoundDevice.h
- * -------------
- * Purpose: Sound device interfaces.
- * Notes  : (currently none)
- * Authors: Olivier Lapicque
- *          OpenMPT Devs
- * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
- */
+/* SPDX-License-Identifier: BSD-3-Clause */
+/* SPDX-FileCopyrightText: Olivier Lapicque */
+/* SPDX-FileCopyrightText: OpenMPT Project Developers and Contributors */
 
 
 #pragma once
 
 #include "openmpt/all/BuildSettings.hpp"
 
-#include "openmpt/base/FlagSet.hpp"
+#include "mpt/base/detect.hpp"
+#include "mpt/base/saturate_round.hpp"
 #include "mpt/osinfo/class.hpp"
 #include "mpt/osinfo/windows_version.hpp"
-#include "openmpt/soundbase/SampleFormat.hpp"
 #include "mpt/string/types.hpp"
+#include "openmpt/base/FlagSet.hpp"
+#include "openmpt/base/Types.hpp"
+#include "openmpt/logging/Logger.hpp"
+#include "openmpt/soundbase/SampleFormat.hpp"
 
 #include <map>
+#include <utility>
 #include <vector>
+
+#include <cassert>
+#include <cstddef>
+#include <cstdint>
+
+#if MPT_OS_WINDOWS
+#include <windows.h>
+#endif // MPT_OS_WINDOWS
+
+#if defined(MODPLUG_TRACKER)
+#include "Logging.h"
+#endif // MODPLUG_TRACKER
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -29,8 +40,20 @@ OPENMPT_NAMESPACE_BEGIN
 namespace SoundDevice {
 
 
-#define MPT_SOUNDDEV_TRACE()       MPT_TRACE()
+#ifndef MPT_SOUNDDEV_TRACE
+#if defined(MODPLUG_TRACKER)
+#define MPT_SOUNDDEV_TRACE() MPT_TRACE()
+#else // !MODPLUG_TRACKER
+#define MPT_SOUNDDEV_TRACE() do { } while(0)
+#endif // MODPLUG_TRACKER
+#endif
+#ifndef MPT_SOUNDDEV_TRACE_SCOPE
+#if defined(MODPLUG_TRACKER)
 #define MPT_SOUNDDEV_TRACE_SCOPE() MPT_TRACE_SCOPE()
+#else // !MODPLUG_TRACKER
+#define MPT_SOUNDDEV_TRACE_SCOPE() do { } while(0)
+#endif // MODPLUG_TRACKER
+#endif
 
 
 class IMessageReceiver
@@ -324,7 +347,7 @@ public:
 	SysInfo() = delete;
 	SysInfo(mpt::osinfo::osclass systemClass)
 		: SystemClass(systemClass) {
-		MPT_ASSERT(SystemClass != mpt::osinfo::osclass::Windows);
+		assert(SystemClass != mpt::osinfo::osclass::Windows);
 		return;
 	}
 	SysInfo(mpt::osinfo::osclass systemClass, mpt::osinfo::windows::Version windowsVersion)
@@ -346,7 +369,7 @@ public:
 struct AppInfo
 {
 	mpt::ustring Name;
-	uintptr_t UIHandle; // HWND on Windows
+	std::uintptr_t UIHandle; // HWND on Windows
 	int BoostedThreadPriorityXP;
 	mpt::ustring BoostedThreadMMCSSClassVista;
 	bool BoostedThreadRealtimePosix;

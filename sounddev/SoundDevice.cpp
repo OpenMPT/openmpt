@@ -1,29 +1,26 @@
-/*
- * SoundDevice.cpp
- * ---------------
- * Purpose: Sound device interfaces.
- * Notes  : (currently none)
- * Authors: Olivier Lapicque
- *          OpenMPT Devs
- * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
- */
+/* SPDX-License-Identifier: BSD-3-Clause */
+/* SPDX-FileCopyrightText: Olivier Lapicque */
+/* SPDX-FileCopyrightText: OpenMPT Project Developers and Contributors */
 
 
-#include "stdafx.h"
+#include "openmpt/all/BuildSettings.hpp"
 
 #include "SoundDevice.h"
 
+#include "mpt/base/alloc.hpp"
 #include "mpt/binary/hex.hpp"
-
-#include "../common/mptStringFormat.h"
-#include "../common/misc_util.h"
-
+#include "mpt/format/join.hpp"
 #include "mpt/format/message_macros.hpp"
 #include "mpt/format/simple.hpp"
+#include "mpt/parse/split.hpp"
 #include "mpt/string/types.hpp"
+#include "mpt/string/utility.hpp"
+#include "mpt/string_convert/convert.hpp"
 #include "openmpt/base/Types.hpp"
 
 #include <map>
+#include <string>
+#include <vector>
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -34,7 +31,7 @@ namespace SoundDevice {
 
 SoundDevice::Type ParseType(const SoundDevice::Identifier &identifier)
 {
-	std::vector<mpt::ustring> tmp = mpt::String::Split<mpt::ustring>(identifier, MPT_USTRING("_"));
+	std::vector<mpt::ustring> tmp = mpt::split(identifier, MPT_USTRING("_"));
 	if(tmp.size() == 0)
 	{
 		return SoundDevice::Type();
@@ -45,7 +42,7 @@ SoundDevice::Type ParseType(const SoundDevice::Identifier &identifier)
 
 mpt::ustring Info::GetDisplayName() const
 {
-	mpt::ustring result = apiName + MPT_USTRING(" - ") + mpt::String::Trim(name);
+	mpt::ustring result = apiName + MPT_USTRING(" - ") + mpt::trim(name);
 	switch(flags.usability)
 	{
 	case SoundDevice::Info::Usability::Experimental:
@@ -70,7 +67,7 @@ mpt::ustring Info::GetDisplayName() const
 	}
 	if(apiPath.size() > 0)
 	{
-		result += MPT_USTRING(" (") + mpt::String::Combine(apiPath, MPT_USTRING("/")) + MPT_USTRING(")");
+		result += MPT_USTRING(" (") + mpt::join(apiPath, MPT_USTRING("/")) + MPT_USTRING(")");
 	}
 	return result;
 }
@@ -89,7 +86,7 @@ SoundDevice::Identifier Info::GetIdentifier() const
 	{
 		// UTF8-encode the name and convert the utf8 to hex.
 		// This ensures that no special characters are contained in the configuration key.
-		std::string utf8String = mpt::ToCharset(mpt::Charset::UTF8, name);
+		std::string utf8String = mpt::convert<std::string>(mpt::common_encoding::utf8, name);
 		mpt::ustring hexString = mpt::encode_hex(mpt::as_span(utf8String));
 		result += hexString;
 	} else
@@ -161,13 +158,13 @@ bool ChannelMapping::IsValid(const std::vector<int32> &mapping)
 
 mpt::ustring ChannelMapping::ToUString() const
 {
-	return mpt::String::Combine<int32>(ChannelToDeviceChannel, MPT_USTRING(","));
+	return mpt::join_format<mpt::ustring, int32>(ChannelToDeviceChannel, MPT_USTRING(","));
 }
 
 
 ChannelMapping ChannelMapping::FromString(const mpt::ustring &str)
 {
-	return SoundDevice::ChannelMapping(mpt::String::Split<int32>(str, MPT_USTRING(",")));
+	return SoundDevice::ChannelMapping(mpt::split_parse<int32>(str, MPT_USTRING(",")));
 }
 
 

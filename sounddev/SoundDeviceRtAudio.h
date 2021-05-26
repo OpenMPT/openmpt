@@ -1,11 +1,5 @@
-/*
- * SoundDeviceRtAudio.h
- * --------------------
- * Purpose: RtAudio sound device driver class.
- * Notes  : (currently none)
- * Authors: OpenMPT Devs
- * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
- */
+/* SPDX-License-Identifier: BSD-3-Clause */
+/* SPDX-FileCopyrightText: OpenMPT Project Developers and Contributors */
 
 
 #pragma once
@@ -13,6 +7,13 @@
 #include "openmpt/all/BuildSettings.hpp"
 
 #include "SoundDeviceBase.h"
+
+#include "openmpt/base/Types.hpp"
+#include "openmpt/logging/Logger.hpp"
+
+#include <atomic>
+#include <memory>
+#include <vector>
 
 #ifdef MPT_WITH_RTAUDIO
 #if MPT_COMPILER_MSVC

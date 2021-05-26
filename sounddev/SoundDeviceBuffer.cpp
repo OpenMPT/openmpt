@@ -1,28 +1,23 @@
-/*
- * SoundDeviceBuffer.cpp
- * ---------------------
- * Purpose: Sound device buffer utilities.
- * Notes  : (currently none)
- * Authors: OpenMPT Devs
- * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
- */
+/* SPDX-License-Identifier: BSD-3-Clause */
+/* SPDX-FileCopyrightText: OpenMPT Project Developers and Contributors */
 
 
-#include "stdafx.h"
+#include "openmpt/all/BuildSettings.hpp"
 
 #include "SoundDeviceBuffer.h"
 
+#if defined(MODPLUG_TRACKER)
+#include "mptBaseMacros.h"
+#endif // MODPLUG_TRACKER
 
 OPENMPT_NAMESPACE_BEGIN
 
-
 namespace SoundDevice {
 
-
+#if defined(MODPLUG_TRACKER)
 MPT_MSVC_WORKAROUND_LNK4221(SoundDeviceBuffer)
-
+#endif // MODPLUG_TRACKER
 
 } // namespace SoundDevice
-
 
 OPENMPT_NAMESPACE_END

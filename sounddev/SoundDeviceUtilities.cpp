@@ -1,32 +1,34 @@
-/*
- * SoundDeviceUtilities.cpp
- * ------------------------
- * Purpose: Sound device utilities.
- * Notes  : (currently none)
- * Authors: Olivier Lapicque
- *          OpenMPT Devs
- * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
- */
+/* SPDX-License-Identifier: BSD-3-Clause */
+/* SPDX-FileCopyrightText: Olivier Lapicque */
+/* SPDX-FileCopyrightText: OpenMPT Project Developers and Contributors */
 
 
-#include "stdafx.h"
+#include "openmpt/all/BuildSettings.hpp"
 
-#include "SoundDevice.h"
 #include "SoundDeviceUtilities.h"
 
-#include "../common/misc_util.h"
+#include "SoundDevice.h"
 
+#include "mpt/base/detect.hpp"
+#include "mpt/base/macros.hpp"
 #include "mpt/format/message_macros.hpp"
+#include "mpt/out_of_memory/out_of_memory.hpp"
 #include "mpt/string/types.hpp"
+#include "mpt/string_convert/convert.hpp"
 #include "openmpt/base/Types.hpp"
+#include "openmpt/logging/Logger.hpp"
 
-#include <algorithm>
+#include <thread>
+#include <utility>
+
+#include <cassert>
 
 #if MPT_OS_WINDOWS
 #if (_WIN32_WINNT >= 0x600)
 #include <avrt.h>
 #endif
 #include <mmsystem.h>
+#include <windows.h>
 #endif // MPT_OS_WINDOWS
 
 #if !MPT_OS_WINDOWS
@@ -97,7 +99,7 @@ CAudioThread::CAudioThread(CSoundDeviceWithThread &SoundDevice)
 	: m_SoundDevice(SoundDevice)
 {
 	MPT_SOUNDDEV_TRACE_SCOPE();
-	m_MMCSSClass = mpt::ToWin(m_SoundDevice.m_AppInfo.BoostedThreadMMCSSClassVista);
+	m_MMCSSClass = mpt::convert<mpt::winstring>(m_SoundDevice.m_AppInfo.BoostedThreadMMCSSClassVista);
 	m_WakeupInterval = 0.0;
 	m_hPlayThread = NULL;
 	m_dwPlayThreadId = 0;
@@ -160,11 +162,11 @@ CPriorityBooster::CPriorityBooster(SoundDevice::SysInfo sysInfo, bool boostPrior
 		{
 			hTask = AvSetMmThreadCharacteristics(priorityClass.c_str(), &task_idx);
 		}
-		MPT_UNREFERENCED_PARAMETER(priority);
+		MPT_UNUSED(priority);
 #else // < Vista
 		oldPriority = GetThreadPriority(GetCurrentThread());
 		SetThreadPriority(GetCurrentThread(), m_Priority);
-		MPT_UNREFERENCED_PARAMETER(priorityClass);
+		MPT_UNUSED(priorityClass);
 #endif
 	}
 }
@@ -380,7 +382,7 @@ void CAudioThread::Activate()
 	MPT_SOUNDDEV_TRACE_SCOPE();
 	if(InterlockedExchangeAdd(&m_AudioThreadActive, 0))
 	{
-		MPT_ASSERT_ALWAYS(false);
+		assert(false);
 		return;
 	}
 	ResetEvent(m_hAudioThreadGoneIdle);
@@ -394,7 +396,7 @@ void CAudioThread::Deactivate()
 	MPT_SOUNDDEV_TRACE_SCOPE();
 	if(!InterlockedExchangeAdd(&m_AudioThreadActive, 0))
 	{
-		MPT_ASSERT_ALWAYS(false);
+		assert(false);
 		return;
 	}
 	InterlockedExchange(&m_AudioThreadActive, 0);
@@ -537,7 +539,7 @@ public:
 					bus = dbus_bus_get(DBUS_BUS_SYSTEM, &error);
 					if(!bus)
 					{
-						MPT_LOG(GetLogger(), LogError, "sounddev", MPT_UFORMAT_MESSAGE("DBus: dbus_bus_get: {}")(mpt::ToUnicode(mpt::Charset::UTF8, error.message)));
+						MPT_LOG(GetLogger(), LogError, "sounddev", MPT_UFORMAT_MESSAGE("DBus: dbus_bus_get: {}")(mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, error.message)));
 					}
 					dbus_error_free(&error);
 					if(bus)

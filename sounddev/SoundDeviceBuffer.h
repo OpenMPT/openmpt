@@ -1,11 +1,5 @@
-/*
-* SoundDeviceBuffer.h
-* -------------------
-* Purpose: Sound device buffer utilities.
-* Notes  : (currently none)
-* Authors: OpenMPT Devs
-* The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
-*/
+/* SPDX-License-Identifier: BSD-3-Clause */
+/* SPDX-FileCopyrightText: OpenMPT Project Developers and Contributors */
 
 
 #pragma once
@@ -15,10 +9,14 @@
 #include "SoundDevice.h"
 
 #include "mpt/audio/span.hpp"
+#include "openmpt/base/Types.hpp"
 #include "openmpt/soundbase/Dither.hpp"
 #include "openmpt/soundbase/CopyMix.hpp"
 
 #include <variant>
+
+#include <cassert>
+#include <cstddef>
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -52,7 +50,7 @@ public:
 	template <typename audio_span_dst>
 	inline void Read(audio_span_dst dst)
 	{
-		MPT_ASSERT(m_countFramesReadProcessed + dst.size_frames() <= m_src.size_frames());
+		assert(m_countFramesReadProcessed + dst.size_frames() <= m_src.size_frames());
 		ConvertBufferToBufferMixInternal(dst, mpt::make_audio_span_with_offset(m_src, m_countFramesReadProcessed), m_bufferFormat.InputChannels, dst.size_frames());
 		m_countFramesReadProcessed += dst.size_frames();
 	}
@@ -60,7 +58,7 @@ public:
 	template <int fractionalBits, typename audio_span_dst>
 	inline void ReadFixedPoint(audio_span_dst dst)
 	{
-		MPT_ASSERT(m_countFramesReadProcessed + dst.size_frames() <= m_src.size_frames());
+		assert(m_countFramesReadProcessed + dst.size_frames() <= m_src.size_frames());
 		ConvertBufferToBufferMixInternalFixed<fractionalBits>(dst, mpt::make_audio_span_with_offset(m_src, m_countFramesReadProcessed), m_bufferFormat.InputChannels, dst.size_frames());
 		m_countFramesReadProcessed += dst.size_frames();
 	}
@@ -68,7 +66,7 @@ public:
 	template <typename audio_span_src, typename TDither>
 	inline void Write(audio_span_src src, TDither &dither)
 	{
-		MPT_ASSERT(m_countFramesWriteProcessed + src.size_frames() <= m_dst.size_frames());
+		assert(m_countFramesWriteProcessed + src.size_frames() <= m_dst.size_frames());
 		if(m_bufferFormat.WantsClippedOutput)
 		{
 			ConvertBufferMixInternalToBuffer<true>(mpt::make_audio_span_with_offset(m_dst, m_countFramesWriteProcessed), src, dither, m_bufferFormat.Channels, src.size_frames());
@@ -82,7 +80,7 @@ public:
 	template <int fractionalBits, typename audio_span_src, typename TDither>
 	inline void WriteFixedPoint(audio_span_src src, TDither &dither)
 	{
-		MPT_ASSERT(m_countFramesWriteProcessed + src.size_frames() <= m_dst.size_frames());
+		assert(m_countFramesWriteProcessed + src.size_frames() <= m_dst.size_frames());
 		if(m_bufferFormat.WantsClippedOutput)
 		{
 			ConvertBufferMixInternalFixedToBuffer<fractionalBits, true>(mpt::make_audio_span_with_offset(m_dst, m_countFramesWriteProcessed), src, dither, m_bufferFormat.Channels, src.size_frames());

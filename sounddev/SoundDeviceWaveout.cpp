@@ -1,30 +1,38 @@
-/*
- * SoundDeviceWaveout.cpp
- * ----------------------
- * Purpose: Waveout sound device driver class.
- * Notes  : (currently none)
- * Authors: Olivier Lapicque
- *          OpenMPT Devs
- * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
- */
+/* SPDX-License-Identifier: BSD-3-Clause */
+/* SPDX-FileCopyrightText: Olivier Lapicque */
+/* SPDX-FileCopyrightText: OpenMPT Project Developers and Contributors */
 
 
-#include "stdafx.h"
+#include "openmpt/all/BuildSettings.hpp"
+
+#include "SoundDeviceWaveout.h"
 
 #include "SoundDevice.h"
 #include "SoundDeviceUtilities.h"
 
-#include "SoundDeviceWaveout.h"
-
-#include "../common/misc_util.h"
-#include "../common/mptStringBuffer.h"
-
+#include "mpt/base/detect.hpp"
+#include "mpt/base/numeric.hpp"
+#include "mpt/base/saturate_round.hpp"
 #include "mpt/format/message_macros.hpp"
 #include "mpt/format/simple.hpp"
+#include "mpt/parse/parse.hpp"
+#include "mpt/string/buffer.hpp"
 #include "mpt/string/types.hpp"
+#include "mpt/string_convert/convert.hpp"
 #include "openmpt/base/Types.hpp"
+#include "openmpt/logging/Logger.hpp"
+#include "openmpt/soundbase/SampleFormat.hpp"
 
+#include <algorithm>
+#include <array>
 #include <set>
+#include <vector>
+
+#include <cstddef>
+
+#if MPT_OS_WINDOWS
+#include <windows.h>
+#endif // MPT_OS_WINDOWS
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -78,7 +86,7 @@ CWaveDevice::~CWaveDevice()
 
 int CWaveDevice::GetDeviceIndex() const
 {
-	return ConvertStrTo<int>(GetDeviceInternalID());
+	return mpt::ConvertStringTo<int>(GetDeviceInternalID());
 }
 
 
@@ -374,7 +382,7 @@ bool CWaveDevice::CheckResult(MMRESULT result)
 		waveOutGetErrorText(result, errortext, MAXERRORLENGTH);
 		SendDeviceMessage(LogError, MPT_UFORMAT_MESSAGE("WaveOut error: 0x{}: {}")
 			( mpt::format<mpt::ustring>::hex0<8>(result)
-			, mpt::ToUnicode(mpt::String::ReadWinBuf(errortext))
+			, mpt::convert<mpt::ustring>(static_cast<mpt::winstring>(mpt::ReadWinBuf(errortext)))
 			));
 	}
 	RequestClose();
@@ -396,7 +404,7 @@ bool CWaveDevice::CheckResult(MMRESULT result, DWORD param)
 		SendDeviceMessage(LogError, MPT_UFORMAT_MESSAGE("WaveOut error: 0x{} (param 0x{}): {}")
 			( mpt::format<mpt::ustring>::hex0<8>(result)
 			, mpt::format<mpt::ustring>::hex0<8>(param)
-			, mpt::ToUnicode(mpt::String::ReadWinBuf(errortext))
+			, mpt::convert<mpt::ustring>(static_cast<mpt::winstring>(mpt::ReadWinBuf(errortext)))
 			));
 	}
 	RequestClose();
@@ -654,7 +662,7 @@ std::vector<SoundDevice::Info> CWaveDevice::EnumerateDevices(ILogger &logger, So
 		WAVEOUTCAPS woc = {};
 		if(waveOutGetDevCaps((index == 0) ? WAVE_MAPPER : (index - 1), &woc, sizeof(woc)) == MMSYSERR_NOERROR)
 		{
-			info.name = mpt::ToUnicode(mpt::String::ReadWinBuf(woc.szPname));
+			info.name = mpt::convert<mpt::ustring>(static_cast<mpt::winstring>(mpt::ReadWinBuf(woc.szPname)));
 			info.extraData[MPT_USTRING("DriverID")] = MPT_UFORMAT_MESSAGE("{}:{}")(mpt::format<mpt::ustring>::hex0<4>(woc.wMid), mpt::format<mpt::ustring>::hex0<4>(woc.wPid));
 			info.extraData[MPT_USTRING("DriverVersion")] = MPT_UFORMAT_MESSAGE("{}.{}")(mpt::format<mpt::ustring>::dec((static_cast<uint32>(woc.vDriverVersion) >> 24) & 0xff), mpt::format<mpt::ustring>::dec((static_cast<uint32>(woc.vDriverVersion) >>  0) & 0xff));
 		}

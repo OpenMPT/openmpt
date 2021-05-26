@@ -1,26 +1,29 @@
-/*
- * SoundDevicePortAudio.cpp
- * ------------------------
- * Purpose: PortAudio sound device driver class.
- * Notes  : (currently none)
- * Authors: Olivier Lapicque
- *          OpenMPT Devs
- * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
- */
+/* SPDX-License-Identifier: BSD-3-Clause */
+/* SPDX-FileCopyrightText: OpenMPT Project Developers and Contributors */
 
 
-#include "stdafx.h"
-
-#include "SoundDevice.h"
+#include "openmpt/all/BuildSettings.hpp"
 
 #include "SoundDevicePortAudio.h"
+#include "SoundDevice.h"
 
-#include "../common/misc_util.h"
-
+#include "mpt/base/detect.hpp"
+#include "mpt/base/saturate_cast.hpp"
+#include "mpt/base/saturate_round.hpp"
 #include "mpt/format/message_macros.hpp"
 #include "mpt/format/simple.hpp"
+#include "mpt/parse/parse.hpp"
+#include "mpt/string/buffer.hpp"
 #include "mpt/string/types.hpp"
+#include "mpt/string_convert/convert.hpp"
 #include "openmpt/base/Types.hpp"
+#include "openmpt/logging/Logger.hpp"
+#include "openmpt/soundbase/SampleFormat.hpp"
+
+#include <array>
+#include <vector>
+
+#include <cstddef>
 
 #ifdef MPT_WITH_PORTAUDIO
 #if defined(MODPLUG_TRACKER) && MPT_COMPILER_MSVC
@@ -28,6 +31,7 @@
 #endif
 #if MPT_OS_WINDOWS
 #include <shellapi.h>
+#include <windows.h>
 #endif
 #endif
 
@@ -62,7 +66,7 @@ CPortaudioDevice::CPortaudioDevice(ILogger &logger, SoundDevice::Info info, Soun
 	} else
 	{
 		m_DeviceIsDefault = false;
-		m_DeviceIndex = ConvertStrTo<PaDeviceIndex>(internalID);
+		m_DeviceIndex = mpt::ConvertStringTo<PaDeviceIndex>(internalID);
 	}
 	m_HostApiType = Pa_GetHostApiInfo(Pa_GetDeviceInfo(m_DeviceIndex)->hostApi)->type;
 	m_StreamParameters = {};
@@ -651,15 +655,15 @@ bool CPortaudioDevice::OpenDriverSettings()
 		return false;
 	}
 	bool hasVista = GetSysInfo().WindowsVersion.IsAtLeast(mpt::osinfo::windows::Version::WinVista);
-	mpt::PathString controlEXE;
+	mpt::winstring controlEXE;
 	TCHAR systemDir[MAX_PATH] = {};
 	if(GetSystemDirectory(systemDir, mpt::saturate_cast<UINT>(std::size(systemDir))) > 0)
 	{
-		controlEXE += mpt::PathString::FromNative(systemDir);
-		controlEXE += P_("\\");
+		controlEXE += mpt::ReadWinBuf(systemDir);
+		controlEXE += TEXT("\\");
 	}
-	controlEXE += P_("control.exe");
-	return (reinterpret_cast<INT_PTR>(ShellExecute(NULL, TEXT("open"), controlEXE.AsNative().c_str(), (hasVista ? TEXT("/name Microsoft.Sound") : TEXT("mmsys.cpl")), NULL, SW_SHOW)) >= 32);
+	controlEXE += TEXT("control.exe");
+	return (reinterpret_cast<INT_PTR>(ShellExecute(NULL, TEXT("open"), controlEXE.c_str(), (hasVista ? TEXT("/name Microsoft.Sound") : TEXT("mmsys.cpl")), NULL, SW_SHOW)) >= 32);
 #else // !MPT_OS_WINDOWS
 	return false;
 #endif // MPT_OS_WINDOWS
@@ -780,9 +784,9 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(ILogger &logge
 				break;
 		}
 		result.internalID = mpt::format<mpt::ustring>::dec(dev);
-		result.name = mpt::ToUnicode(mpt::Charset::UTF8, Pa_GetDeviceInfo(dev)->name);
-		result.apiName = mpt::ToUnicode(mpt::Charset::UTF8, Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->name);
-		result.extraData[MPT_USTRING("PortAudio-HostAPI-name")] = mpt::ToUnicode(mpt::Charset::UTF8, Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->name);
+		result.name = mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, Pa_GetDeviceInfo(dev)->name);
+		result.apiName = mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->name);
+		result.extraData[MPT_USTRING("PortAudio-HostAPI-name")] = mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->name);
 		result.apiPath.push_back(MPT_USTRING("PortAudio"));
 		result.useNameAsIdentifier = true;
 		result.flags = {
@@ -998,7 +1002,7 @@ std::vector<std::pair<PaDeviceIndex, mpt::ustring> > CPortaudioDevice::Enumerate
 		{
 			continue;
 		}
-		result.push_back(std::make_pair(dev, mpt::ToUnicode(mpt::Charset::UTF8, Pa_GetDeviceInfo(dev)->name)));
+		result.push_back(std::make_pair(dev, mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, Pa_GetDeviceInfo(dev)->name)));
 	}
 	return result;
 }
@@ -1027,7 +1031,7 @@ static void PortaudioLog(const char *text)
 		return;
 	}
 #if PA_LOG_ENABLED
-	MPT_LOG(mpt::log::GlobalLogger(), LogDebug, "PortAudio", MPT_UFORMAT_MESSAGE("PortAudio: {}")(mpt::ToUnicode(mpt::Charset::UTF8, text)));
+	MPT_LOG(mpt::log::GlobalLogger(), LogDebug, "PortAudio", MPT_UFORMAT_MESSAGE("PortAudio: {}")(mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, text)));
 #endif
 }
 #endif // MPT_COMPILER_MSVC

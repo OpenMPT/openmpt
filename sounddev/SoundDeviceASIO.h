@@ -1,33 +1,38 @@
-/*
- * SoundDeviceASIO.h
- * -----------------
- * Purpose: ASIO sound device driver class.
- * Notes  : (currently none)
- * Authors: Olivier Lapicque
- *          OpenMPT Devs
- * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
- */
+/* SPDX-License-Identifier: BSD-3-Clause */
+/* SPDX-FileCopyrightText: Olivier Lapicque */
+/* SPDX-FileCopyrightText: OpenMPT Project Developers and Contributors */
 
 
 #pragma once
 
 #include "openmpt/all/BuildSettings.hpp"
 
+#ifdef MPT_WITH_ASIO
+
+#include "SoundDevice.h"
 #include "SoundDeviceBase.h"
 
-#include <atomic>
+#include "mpt/string/types.hpp"
+#include "openmpt/base/Types.hpp"
+#include "openmpt/logging/Logger.hpp"
 
-#ifdef MPT_WITH_ASIO
+#include <atomic>
+#include <memory>
+#include <stdexcept>
+#include <string>
+#include <vector>
+
+#include <cassert>
+
+#include <ASIOModern/ASIO.hpp>
+#include <ASIOModern/ASIOSystemWindows.hpp>
+
 #if defined(MODPLUG_TRACKER)
 #if !defined(MPT_BUILD_WINESUPPORT)
 #include "../mptrack/ExceptionHandler.h"
 #endif // !MPT_BUILD_WINESUPPORT
 #endif // MODPLUG_TRACKER
-#endif // MPT_WITH_ASIO
 
-#ifdef MPT_WITH_ASIO
-#include <ASIOModern/ASIO.hpp>
-#include <ASIOModern/ASIOSystemWindows.hpp>
 #endif // MPT_WITH_ASIO
 
 OPENMPT_NAMESPACE_BEGIN
@@ -91,8 +96,8 @@ protected:
 			: m_Driver(driver)
 			, m_Guard(ectx)
 		{
-			MPT_ASSERT(driver);
-			MPT_ASSERT(ectx);
+			assert(driver);
+			assert(ectx);
 		}
 		ASIODriverWithContext(const ASIODriverWithContext &) = delete;
 		ASIODriverWithContext &operator=(const ASIODriverWithContext &) = delete;
@@ -104,7 +109,7 @@ protected:
 
 	ASIODriverWithContext AsioDriver()
 	{
-		MPT_ASSERT(m_Driver);
+		assert(m_Driver);
 		return ASIODriverWithContext{m_Driver.get(), &m_Ectx};
 	}
 

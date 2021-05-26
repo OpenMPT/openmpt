@@ -1,19 +1,13 @@
-/*
- * SoundDeviceManager.cpp
- * ----------------------
- * Purpose: Sound device manager class.
- * Notes  : (currently none)
- * Authors: Olivier Lapicque
- *          OpenMPT Devs
- * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
- */
+/* SPDX-License-Identifier: BSD-3-Clause */
+/* SPDX-FileCopyrightText: Olivier Lapicque */
+/* SPDX-FileCopyrightText: OpenMPT Project Developers and Contributors */
 
 
-#include "stdafx.h"
+#include "openmpt/all/BuildSettings.hpp"
 
 #include "SoundDeviceManager.h"
-#include "SoundDevice.h"
 
+#include "SoundDevice.h"
 #include "SoundDeviceASIO.h"
 #include "SoundDeviceDirectSound.h"
 #include "SoundDevicePortAudio.h"
@@ -22,10 +16,20 @@
 #include "SoundDevicePulseaudio.h"
 #include "SoundDevicePulseSimple.h"
 
+#include "mpt/base/alloc.hpp"
+#include "mpt/base/detect.hpp"
 #include "mpt/format/message_macros.hpp"
 #include "mpt/format/simple.hpp"
 #include "mpt/string/types.hpp"
 #include "openmpt/base/Types.hpp"
+#include "openmpt/logging/Logger.hpp"
+
+#include <algorithm>
+#include <map>
+#include <memory>
+#include <vector>
+
+#include <cstddef>
 
 
 OPENMPT_NAMESPACE_BEGIN

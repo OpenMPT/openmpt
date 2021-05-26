@@ -1,31 +1,35 @@
-/*
- * SoundDeviceDirectSound.cpp
- * --------------------------
- * Purpose: DirectSound sound device driver class.
- * Notes  : (currently none)
- * Authors: Olivier Lapicque
- *          OpenMPT Devs
- * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
- */
+/* SPDX-License-Identifier: BSD-3-Clause */
+/* SPDX-FileCopyrightText: Olivier Lapicque */
+/* SPDX-FileCopyrightText: OpenMPT Project Developers and Contributors */
 
 
-#include "stdafx.h"
+#include "openmpt/all/BuildSettings.hpp"
+
+#include "SoundDeviceDirectSound.h"
 
 #include "SoundDevice.h"
 #include "SoundDeviceUtilities.h"
 
-#include "SoundDeviceDirectSound.h"
-
-#include "mpt/uuid/guid.hpp"
-#include "mpt/uuid/uuid.hpp"
-
+#include "mpt/base/detect.hpp"
+#include "mpt/base/numeric.hpp"
+#include "mpt/base/saturate_round.hpp"
 #include "mpt/format/message_macros.hpp"
 #include "mpt/format/simple.hpp"
 #include "mpt/string/types.hpp"
+#include "mpt/string_convert/convert.hpp"
+#include "mpt/uuid/guid.hpp"
+#include "mpt/uuid/uuid.hpp"
 #include "openmpt/base/Types.hpp"
+#include "openmpt/logging/Logger.hpp"
+#include "openmpt/soundbase/SampleFormat.hpp"
 
-#include "../common/misc_util.h"
-#include "../common/mptStringBuffer.h"
+#include <algorithm>
+#include <vector>
+
+#if MPT_OS_WINDOWS
+#include <windows.h>
+#endif // MPT_OS_WINDOWS
+
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -64,11 +68,11 @@ static BOOL WINAPI DSEnumCallback(GUID * lpGuid, LPCTSTR lpstrDescription, LPCTS
 	SoundDevice::Info info;
 	info.type = TypeDSOUND;
 	info.default_ = (!lpGuid ? Info::Default::Managed : Info::Default::None);
-	info.internalID = mpt::ToUnicode(mpt::GUIDToString(guid));
-	info.name = mpt::ToUnicode(mpt::winstring(lpstrDescription));
+	info.internalID = mpt::convert<mpt::ustring>(mpt::GUIDToString(guid));
+	info.name = mpt::convert<mpt::ustring>(mpt::winstring(lpstrDescription));
 	if(lpstrDriver)
 	{
-		info.extraData[MPT_USTRING("DriverName")] = mpt::ToUnicode(mpt::winstring(lpstrDriver));
+		info.extraData[MPT_USTRING("DriverName")] = mpt::convert<mpt::ustring>(mpt::winstring(lpstrDriver));
 	}
 	if(lpGuid)
 	{
@@ -141,7 +145,7 @@ SoundDevice::Caps CDSoundDevice::InternalGetDeviceCaps()
 		ds = m_piDS;
 	} else
 	{
-		GUID guid = mpt::StringToGUID(mpt::ToWin(GetDeviceInternalID()));
+		GUID guid = mpt::StringToGUID(mpt::convert<mpt::winstring>(GetDeviceInternalID()));
 		if(DirectSoundCreate(mpt::IsValid(guid) ? &guid : NULL, &dummy, NULL) != DS_OK)
 		{
 			return caps;
@@ -181,7 +185,7 @@ SoundDevice::DynamicCaps CDSoundDevice::GetDeviceDynamicCaps(const std::vector<u
 		ds = m_piDS;
 	} else
 	{
-		GUID guid = mpt::StringToGUID(mpt::ToWin(GetDeviceInternalID()));
+		GUID guid = mpt::StringToGUID(mpt::convert<mpt::winstring>(GetDeviceInternalID()));
 		if(DirectSoundCreate(mpt::IsValid(guid) ? &guid : NULL, &dummy, NULL) != DS_OK)
 		{
 			return caps;
@@ -264,7 +268,7 @@ bool CDSoundDevice::InternalOpen()
 	DSBCAPS dsc;
 
 	if(m_piDS) return true;
-	GUID guid = mpt::StringToGUID(mpt::ToWin(GetDeviceInternalID()));
+	GUID guid = mpt::StringToGUID(mpt::convert<mpt::winstring>(GetDeviceInternalID()));
 	if(DirectSoundCreate(mpt::IsValid(guid) ? &guid : NULL, &m_piDS, NULL) != DS_OK) return false;
 	if(!m_piDS) return false;
 	if(m_piDS->SetCooperativeLevel(m_AppInfo.GetHWND(), m_Settings.ExclusiveMode ? DSSCL_WRITEPRIMARY : DSSCL_PRIORITY) != DS_OK)

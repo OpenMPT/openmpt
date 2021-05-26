@@ -1,21 +1,24 @@
-/*
- * SoundDeviceBase.cpp
- * -------------------
- * Purpose: Sound device drivers base class.
- * Notes  : (currently none)
- * Authors: Olivier Lapicque
- *          OpenMPT Devs
- * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
- */
+/* SPDX-License-Identifier: BSD-3-Clause */
+/* SPDX-FileCopyrightText: Olivier Lapicque */
+/* SPDX-FileCopyrightText: OpenMPT Project Developers and Contributors */
 
 
-#include "stdafx.h"
+#include "openmpt/all/BuildSettings.hpp"
 
 #include "SoundDeviceBase.h"
 
+#include "mpt/base/saturate_round.hpp"
 #include "mpt/format/simple.hpp"
 #include "mpt/string/types.hpp"
 #include "openmpt/base/Types.hpp"
+#include "openmpt/logging/Logger.hpp"
+#include "openmpt/soundbase/SampleFormat.hpp"
+
+#include <algorithm>
+#include <vector>
+
+#include <cassert>
+#include <cstddef>
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -229,43 +232,43 @@ void Base::SourceLockedAudioReadImpl(Tsample *buffer, const Tsample *inputBuffer
 
 void Base::SourceLockedAudioRead(uint8 *buffer, const uint8 *inputBuffer, std::size_t numFrames)
 {
-	MPT_ASSERT(GetBufferFormat().sampleFormat == SampleFormat::Unsigned8);
+	assert(GetBufferFormat().sampleFormat == SampleFormat::Unsigned8);
 	SourceLockedAudioReadImpl(buffer, inputBuffer, numFrames);
 }
 
 void Base::SourceLockedAudioRead(int8 *buffer, const int8 *inputBuffer, std::size_t numFrames)
 {
-	MPT_ASSERT(GetBufferFormat().sampleFormat == SampleFormat::Int8);
+	assert(GetBufferFormat().sampleFormat == SampleFormat::Int8);
 	SourceLockedAudioReadImpl(buffer, inputBuffer, numFrames);
 }
 
 void Base::SourceLockedAudioRead(int16 *buffer, const int16 *inputBuffer, std::size_t numFrames)
 {
-	MPT_ASSERT(GetBufferFormat().sampleFormat == SampleFormat::Int16);
+	assert(GetBufferFormat().sampleFormat == SampleFormat::Int16);
 	SourceLockedAudioReadImpl(buffer, inputBuffer, numFrames);
 }
 
 void Base::SourceLockedAudioRead(int24 *buffer, const int24 *inputBuffer, std::size_t numFrames)
 {
-	MPT_ASSERT(GetBufferFormat().sampleFormat == SampleFormat::Int24);
+	assert(GetBufferFormat().sampleFormat == SampleFormat::Int24);
 	SourceLockedAudioReadImpl(buffer, inputBuffer, numFrames);
 }
 
 void Base::SourceLockedAudioRead(int32 *buffer, const int32 *inputBuffer, std::size_t numFrames)
 {
-	MPT_ASSERT(GetBufferFormat().sampleFormat == SampleFormat::Int32);
+	assert(GetBufferFormat().sampleFormat == SampleFormat::Int32);
 	SourceLockedAudioReadImpl(buffer, inputBuffer, numFrames);
 }
 
 void Base::SourceLockedAudioRead(float *buffer, const float *inputBuffer, std::size_t numFrames)
 {
-	MPT_ASSERT(GetBufferFormat().sampleFormat == SampleFormat::Float32);
+	assert(GetBufferFormat().sampleFormat == SampleFormat::Float32);
 	SourceLockedAudioReadImpl(buffer, inputBuffer, numFrames);
 }
 
 void Base::SourceLockedAudioRead(double *buffer, const double *inputBuffer, std::size_t numFrames)
 {
-	MPT_ASSERT(GetBufferFormat().sampleFormat == SampleFormat::Float64);
+	assert(GetBufferFormat().sampleFormat == SampleFormat::Float64);
 	SourceLockedAudioReadImpl(buffer, inputBuffer, numFrames);
 }
 

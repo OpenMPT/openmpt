@@ -1,18 +1,23 @@
-/*
- * SoundDevicePortAudio.h
- * ----------------------
- * Purpose: PortAudio sound device driver class.
- * Notes  : (currently none)
- * Authors: OpenMPT Devs
- * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
- */
+/* SPDX-License-Identifier: BSD-3-Clause */
+/* SPDX-FileCopyrightText: OpenMPT Project Developers and Contributors */
 
 
 #pragma once
 
 #include "openmpt/all/BuildSettings.hpp"
 
+#include "SoundDevice.h"
 #include "SoundDeviceBase.h"
+
+#include "mpt/base/detect.hpp"
+#include "mpt/string/types.hpp"
+#include "openmpt/base/Types.hpp"
+#include "openmpt/logging/Logger.hpp"
+
+#include <atomic>
+#include <memory>
+#include <utility>
+#include <vector>
 
 #ifdef MPT_WITH_PORTAUDIO
 #include <portaudio.h>

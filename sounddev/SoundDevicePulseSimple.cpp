@@ -1,27 +1,28 @@
-/*
- * SoundDevicePulseSimple.cpp
- * --------------------------
- * Purpose: PulseAudio-Simple sound device driver class.
- * Notes  : (currently none)
- * Authors: Olivier Lapicque
- *          OpenMPT Devs
- * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
- */
+/* SPDX-License-Identifier: BSD-3-Clause */
+/* SPDX-FileCopyrightText: OpenMPT Project Developers and Contributors */
 
 
-#include "stdafx.h"
+#include "openmpt/all/BuildSettings.hpp"
+
+#include "SoundDevicePulseSimple.h"
 
 #include "SoundDevice.h"
 #include "SoundDeviceUtilities.h"
 
-#include "SoundDevicePulseSimple.h"
-
-#include "../common/misc_util.h"
-
+#include "mpt/base/numeric.hpp"
+#include "mpt/base/saturate_round.hpp"
 #include "mpt/format/message_macros.hpp"
 #include "mpt/format/simple.hpp"
+#include "mpt/parse/split.hpp"
 #include "mpt/string/types.hpp"
+#include "mpt/string_convert/convert.hpp"
 #include "openmpt/base/Types.hpp"
+#include "openmpt/logging/Logger.hpp"
+
+#include <vector>
+
+#include <cstddef>
+#include <cstring>
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -51,7 +52,7 @@ mpt::ustring PulseaudioSimple::PulseErrorString(int error)
 	{
 		return MPT_UFORMAT_MESSAGE("error={}")(error);
 	}
-	return MPT_UFORMAT_MESSAGE("{} (error={})")(mpt::ToUnicode(mpt::Charset::UTF8, str), error);
+	return MPT_UFORMAT_MESSAGE("{} (error={})")(mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, str), error);
 }
 
 
@@ -103,8 +104,8 @@ static void PulseAudioSinkInfoListCallback(pa_context * /* c */ , const pa_sink_
 		#else // !MPT_ENABLE_PULSEAUDIO_FULL
 			info.type = MPT_USTRING("PulseAudio");
 		#endif // MPT_ENABLE_PULSEAUDIO_FULL
-		info.internalID = mpt::ToUnicode(mpt::Charset::UTF8, i->name);
-		info.name = mpt::ToUnicode(mpt::Charset::UTF8, i->description);
+		info.internalID = mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, i->name);
+		info.name = mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, i->description);
 		#if defined(MPT_ENABLE_PULSEAUDIO_FULL)
 			info.apiName = MPT_USTRING("PulseAudio Simple API");
 		#else
@@ -175,7 +176,7 @@ std::vector<SoundDevice::Info> PulseaudioSimple::EnumerateDevices(ILogger &logge
 			MPT_LOG(GetLogger(), LogError, "sounddev", MPT_USTRING("pa_mainloop_new"));
 			goto cleanup;
 		}
-		c = pa_context_new(pa_mainloop_get_api(m), mpt::ToCharset(mpt::Charset::UTF8, mpt::ustring()).c_str()); // TODO: get AppInfo
+		c = pa_context_new(pa_mainloop_get_api(m), mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, mpt::ustring()).c_str()); // TODO: get AppInfo
 		if(!c)
 		{
 			MPT_LOG(GetLogger(), LogError, "sounddev", MPT_USTRING("pa_context_new"));
@@ -339,10 +340,10 @@ bool PulseaudioSimple::InternalOpen()
 	m_OutputBuffer.resize(ba.minreq / m_Settings.sampleFormat.GetSampleSize());
 	m_PA_SimpleOutput = pa_simple_new(
 		NULL,
-		mpt::ToCharset(mpt::Charset::UTF8, m_AppInfo.GetName()).c_str(),
+		mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, m_AppInfo.GetName()).c_str(),
 		PA_STREAM_PLAYBACK,
-		((GetDeviceInternalID() == MPT_USTRING("0")) ? NULL : mpt::ToCharset(mpt::Charset::UTF8, GetDeviceInternalID()).c_str()),
-		mpt::ToCharset(mpt::Charset::UTF8, m_AppInfo.GetName()).c_str(),
+		((GetDeviceInternalID() == MPT_USTRING("0")) ? NULL : mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, GetDeviceInternalID()).c_str()),
+		mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, m_AppInfo.GetName()).c_str(),
 		&ss,
 		NULL,
 		(m_Settings.ExclusiveMode ? &ba : NULL),
@@ -431,7 +432,7 @@ void PulseaudioSimple::InternalStopFromSoundThread()
 {
 	int error = 0;
 	bool oldVersion = false;
-	std::vector<uint64> version = mpt::String::Split<uint64>(mpt::ToUnicode(mpt::Charset::UTF8, pa_get_library_version() ? pa_get_library_version() : ""));
+	std::vector<uint64> version = mpt::split_parse<uint64>(mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, pa_get_library_version() ? pa_get_library_version() : ""));
 	if(!version.empty())
 	{
 		if(version[0] <4)

@@ -1,33 +1,31 @@
-/*
- * SoundDeviceUtilities.h
- * ----------------------
- * Purpose: Sound device utilities.
- * Notes  : (currently none)
- * Authors: Olivier Lapicque
- *          OpenMPT Devs
- * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
- */
+/* SPDX-License-Identifier: BSD-3-Clause */
+/* SPDX-FileCopyrightText: Olivier Lapicque */
+/* SPDX-FileCopyrightText: OpenMPT Project Developers and Contributors */
 
 
 #pragma once
 
 #include "openmpt/all/BuildSettings.hpp"
 
+#include "SoundDevice.h"
 #include "SoundDeviceBase.h"
 
-#include "../common/misc_util.h"
-
-#if MPT_OS_WINDOWS
-#include <mmreg.h>
-#endif // MPT_OS_WINDOWS
+#include "mpt/base/detect.hpp"
+#include "openmpt/logging/Logger.hpp"
 
 #if MPT_OS_LINUX || MPT_OS_MACOSX_OR_IOS || MPT_OS_FREEBSD
-// we use c++11 in native support library
+ // we use c++11 in native support library
 #include <atomic>
 #include <condition_variable>
+#include <memory>
 #include <mutex>
 #include <thread>
 #endif // MPT_OS_LINUX || MPT_OS_MACOSX_OR_IOS || MPT_OS_FREEBSD
+
+#if MPT_OS_WINDOWS
+#include <mmreg.h>
+#include <windows.h>
+#endif // MPT_OS_WINDOWS
 
 
 OPENMPT_NAMESPACE_BEGIN

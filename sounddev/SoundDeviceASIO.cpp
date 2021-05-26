@@ -1,42 +1,55 @@
-/*
- * SoundDeviceASIO.cpp
- * -------------------
- * Purpose: ASIO sound device driver class.
- * Notes  : (currently none)
- * Authors: Olivier Lapicque
- *          OpenMPT Devs
- * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
- */
+/* SPDX-License-Identifier: BSD-3-Clause */
+/* SPDX-FileCopyrightText: Olivier Lapicque */
+/* SPDX-FileCopyrightText: OpenMPT Project Developers and Contributors */
 
 
-#include "stdafx.h"
-
-#include "SoundDevice.h"
-
-#include "SoundDeviceASIO.h"
+#include "openmpt/all/BuildSettings.hpp"
 
 #ifdef MPT_WITH_ASIO
 
-#include "mpt/base/bit.hpp"
-#include "mpt/uuid/guid.hpp"
-#include "mpt/uuid/uuid.hpp"
+#include "SoundDeviceASIO.h"
 
+#include "SoundDevice.h"
+#include "SoundDeviceBase.h"
+
+#include "mpt/base/bit.hpp"
+#include "mpt/base/macros.hpp"
+#include "mpt/base/saturate_round.hpp"
+#include "mpt/base/utility.hpp"
+#include "mpt/exception_text/exception_text.hpp"
 #include "mpt/format/message_macros.hpp"
 #include "mpt/format/simple.hpp"
+#include "mpt/out_of_memory/out_of_memory.hpp"
 #include "mpt/string/types.hpp"
+#include "mpt/string/utility.hpp"
+#include "mpt/string_convert/convert.hpp"
+#include "mpt/uuid/guid.hpp"
+#include "mpt/uuid/uuid.hpp"
 #include "openmpt/base/Types.hpp"
-
-#include "../common/misc_util.h"
+#include "openmpt/logging/Logger.hpp"
+#include "openmpt/soundbase/SampleFormat.hpp"
 
 #if defined(MODPLUG_TRACKER)
+#include "mptAssert.h"
 #if !defined(MPT_BUILD_WINESUPPORT)
 #include "../mptrack/ExceptionHandler.h"
 #endif // !MPT_BUILD_WINESUPPORT
 #endif // MODPLUG_TRACKER
 
 #include <algorithm>
+#include <atomic>
 #include <chrono>
+#include <exception>
+#include <memory>
+#include <new>
+#include <string>
 #include <thread>
+#include <utility>
+#include <vector>
+
+#include <cassert>
+#include <cstddef>
+#include <cstdint>
 
 #include <ASIOModern/ASIO.hpp>
 #include <ASIOModern/ASIOSystemWindows.hpp>
@@ -114,9 +127,9 @@ std::vector<SoundDevice::Info> CASIODevice::EnumerateDevices(ILogger &logger, So
 	{
 		SoundDevice::Info info;
 		info.type = TypeASIO;
-		info.internalID = mpt::ToUnicode(mpt::CLSIDToString(driver.Clsid));
+		info.internalID = mpt::convert<mpt::ustring>(mpt::CLSIDToString(driver.Clsid));
 		info.apiName = MPT_USTRING("ASIO");
-		info.name = mpt::ToUnicode(AsWinstring(driver.DisplayName()));
+		info.name = mpt::convert<mpt::ustring>(AsWinstring(driver.DisplayName()));
 		info.useNameAsIdentifier = false;
 		info.default_ = Info::Default::None;
 		info.flags = {
@@ -128,12 +141,12 @@ std::vector<SoundDevice::Info> CASIODevice::EnumerateDevices(ILogger &logger, So
 			Info::Mixing::Hardware,
 			Info::Implementor::OpenMPT
 		};
-		info.extraData[MPT_USTRING("Key")] = mpt::ToUnicode(AsWinstring(driver.Key));;
-		info.extraData[MPT_USTRING("Id")] = mpt::ToUnicode(AsWinstring(driver.Id));
-		info.extraData[MPT_USTRING("CLSID")] = mpt::ToUnicode(mpt::CLSIDToString(driver.Clsid));
-		info.extraData[MPT_USTRING("Name")] = mpt::ToUnicode(AsWinstring(driver.Name));;
-		info.extraData[MPT_USTRING("Description")] = mpt::ToUnicode(AsWinstring(driver.Description));;
-		info.extraData[MPT_USTRING("DisplayName")] = mpt::ToUnicode(AsWinstring(driver.DisplayName()));;
+		info.extraData[MPT_USTRING("Key")] = mpt::convert<mpt::ustring>(AsWinstring(driver.Key));;
+		info.extraData[MPT_USTRING("Id")] = mpt::convert<mpt::ustring>(AsWinstring(driver.Id));
+		info.extraData[MPT_USTRING("CLSID")] = mpt::convert<mpt::ustring>(mpt::CLSIDToString(driver.Clsid));
+		info.extraData[MPT_USTRING("Name")] = mpt::convert<mpt::ustring>(AsWinstring(driver.Name));;
+		info.extraData[MPT_USTRING("Description")] = mpt::convert<mpt::ustring>(AsWinstring(driver.Description));;
+		info.extraData[MPT_USTRING("DisplayName")] = mpt::convert<mpt::ustring>(AsWinstring(driver.DisplayName()));;
 		MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT_MESSAGE("ASIO: Found driver:")());
 		MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT_MESSAGE("ASIO:  Key         = '{}'")(info.extraData[MPT_USTRING("Key")]));
 		MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT_MESSAGE("ASIO:  Id          = '{}'")(info.extraData[MPT_USTRING("Id")]));
@@ -223,7 +236,7 @@ bool CASIODevice::InternalOpen()
 {
 	MPT_SOUNDDEV_TRACE_SCOPE();
 
-	MPT_ASSERT(!IsDriverOpen());
+	assert(!IsDriverOpen());
 
 	InitMembers();
 
@@ -336,7 +349,11 @@ bool CASIODevice::InternalOpen()
 			}
 		} else
 		{ // should not happen
+#if defined(MODPLUG_TRACKER)
 			MPT_ASSERT_NOTREACHED();
+#else // !MODPLUG_TRACKER
+			assert(false);
+#endif // MODPLUG_TRACKER
 		}
 	
 		m_BufferInfo.resize(m_Settings.GetTotalChannels());
@@ -374,14 +391,14 @@ bool CASIODevice::InternalOpen()
 			{
 				m_ChannelInfo[channel] = AsioDriver()->getChannelInfo(m_Settings.Channels.ToDevice(channel - m_Settings.InputChannels), false);
 			}
-			MPT_ASSERT(m_ChannelInfo[channel].isActive);
+			assert(m_ChannelInfo[channel].isActive);
 			MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT_MESSAGE("ASIO: getChannelInfo(isInput={} channel={}) => isActive={} channelGroup={} type={} name='{}'")
 				( (channel < m_Settings.InputChannels)
 				, m_Settings.Channels.ToDevice(channel)
 				, value_cast(m_ChannelInfo[channel].isActive)
 				, m_ChannelInfo[channel].channelGroup
 				, mpt::to_underlying(m_ChannelInfo[channel].type)
-				, mpt::ToUnicode(mpt::Charset::Locale, m_ChannelInfo[channel].name)
+				, mpt::convert<mpt::ustring>(mpt::logical_encoding::locale, static_cast<std::string>(m_ChannelInfo[channel].name))
 				));
 		}
 
@@ -502,6 +519,7 @@ void CASIODevice::SetRenderSilence(bool silence, bool wait)
 	{
 		if((std::chrono::steady_clock::now() - pollingstart) > std::chrono::microseconds(250))
 		{
+#if defined(MODPLUG_TRACKER)
 			if(silence)
 			{
 				if(SourceIsLockedByCurrentThread())
@@ -521,6 +539,9 @@ void CASIODevice::SetRenderSilence(bool silence, bool wait)
 					MPT_ASSERT_MSG(false, "waiting for asio failed in Start()");
 				}
 			}
+#else // !MODPLUG_TRACKER
+			assert(false);
+#endif // MODPLUG_TRACKER
 			break;
 		}
 		std::this_thread::sleep_for(std::chrono::milliseconds(1));
@@ -531,7 +552,11 @@ void CASIODevice::SetRenderSilence(bool silence, bool wait)
 bool CASIODevice::InternalStart()
 {
 	MPT_SOUNDDEV_TRACE_SCOPE();
+#if defined(MODPLUG_TRACKER)
 	MPT_ASSERT_ALWAYS_MSG(!SourceIsLockedByCurrentThread(), "AudioCriticalSection locked while starting ASIO");
+#else // !MODPLUG_TRACKER
+	assert(!SourceIsLockedByCurrentThread());
+#endif // MODPLUG_TRACKER
 
 	if(m_Settings.KeepDeviceRunning)
 	{
@@ -601,7 +626,11 @@ void CASIODevice::InternalStop()
 void CASIODevice::InternalStopImpl(bool force)
 {
 	MPT_SOUNDDEV_TRACE_SCOPE();
+#if defined(MODPLUG_TRACKER)
 	MPT_ASSERT_ALWAYS_MSG(!SourceIsLockedByCurrentThread(), "AudioCriticalSection locked while stopping ASIO");
+#else // !MODPLUG_TRACKER
+	assert(!SourceIsLockedByCurrentThread());
+#endif // MODPLUG_TRACKER
 
 	if(m_Settings.KeepDeviceRunning && !force)
 	{
@@ -680,7 +709,7 @@ void CASIODevice::OpenDriver()
 	{
 		return;
 	}
-	CLSID clsid = mpt::StringToCLSID(mpt::ToWin(GetDeviceInternalID()));
+	CLSID clsid = mpt::StringToCLSID(mpt::convert<mpt::winstring>(GetDeviceInternalID()));
 	try
 	{
 		if(GetAppInfo().AllowDeferredProcessing)
@@ -718,7 +747,7 @@ void CASIODevice::OpenDriver()
 		ExceptionHandler(__func__);
 		return;
 	}
-	MPT_LOG(GetLogger(), LogInformation, "sounddev", MPT_UFORMAT_MESSAGE("ASIO: Opened driver {} Version 0x{}: {}")(mpt::ToUnicode(mpt::Charset::Locale, driverName), mpt::format<mpt::ustring>::HEX0<8>(driverVersion), mpt::ToUnicode(mpt::Charset::Locale, driverErrorMessage)));
+	MPT_LOG(GetLogger(), LogInformation, "sounddev", MPT_UFORMAT_MESSAGE("ASIO: Opened driver {} Version 0x{}: {}")(mpt::convert<mpt::ustring>(mpt::logical_encoding::locale, driverName), mpt::format<mpt::ustring>::HEX0<8>(driverVersion), mpt::convert<mpt::ustring>(mpt::logical_encoding::locale, driverErrorMessage)));
 }
 
 
@@ -795,7 +824,7 @@ void CASIODevice::FillAsioBuffer(bool useSource)
 		} else if(m_Settings.sampleFormat == SampleFormat::Int24)
 		{
 			int24 *const dstInt24 = m_SampleInputBufferInt24.data();
-			MPT_ASSERT((mpt::endian_is_little() && sampleType == ASIO::SampleType::Int24LSB) || (mpt::endian_is_big() && sampleType == ASIO::SampleType::Int24MSB));
+			assert((mpt::endian_is_little() && sampleType == ASIO::SampleType::Int24LSB) || (mpt::endian_is_big() && sampleType == ASIO::SampleType::Int24MSB));
 			ASIO::Sample::CopyRawFromASIO(dstInt24 + inputChannel, inputChannels, src, countChunk);
 		} else if(m_Settings.sampleFormat == SampleFormat::Int32)
 		{
@@ -809,7 +838,11 @@ void CASIODevice::FillAsioBuffer(bool useSource)
 			}
 		} else
 		{
+#if defined(MODPLUG_TRACKER)
 			MPT_ASSERT_NOTREACHED();
+#else // !MODPLUG_TRACKER
+			assert(false);
+#endif // MODPLUG_TRACKER
 		}
 	}
 	if(rendersilence)
@@ -831,7 +864,11 @@ void CASIODevice::FillAsioBuffer(bool useSource)
 			std::fill(m_SampleBufferInt32.data(), m_SampleBufferInt32.data() + countChunk * outputChannels, int32(0));
 		} else
 		{
+#if defined(MODPLUG_TRACKER)
 			MPT_ASSERT_NOTREACHED();
+#else // !MODPLUG_TRACKER
+			assert(false);
+#endif // MODPLUG_TRACKER
 		}
 	} else
 	{
@@ -853,7 +890,11 @@ void CASIODevice::FillAsioBuffer(bool useSource)
 			SourceLockedAudioRead(m_SampleBufferInt32.data(), (m_SampleInputBufferInt32.size() > 0) ? m_SampleInputBufferInt32.data() : nullptr, countChunk);
 		} else
 		{
+#if defined(MODPLUG_TRACKER)
 			MPT_ASSERT_NOTREACHED();
+#else // !MODPLUG_TRACKER
+			assert(false);
+#endif // MODPLUG_TRACKER
 		}
 	}
 	for(std::size_t outputChannel = 0; outputChannel < outputChannels; ++outputChannel)
@@ -894,7 +935,7 @@ void CASIODevice::FillAsioBuffer(bool useSource)
 		} else if(m_Settings.sampleFormat == SampleFormat::Int24)
 		{
 			const int24 *const srcInt24 = m_SampleBufferInt24.data();
-			MPT_ASSERT((mpt::endian_is_little() && sampleType == ASIO::SampleType::Int24LSB) || (mpt::endian_is_big() && sampleType == ASIO::SampleType::Int24MSB));
+			assert((mpt::endian_is_little() && sampleType == ASIO::SampleType::Int24LSB) || (mpt::endian_is_big() && sampleType == ASIO::SampleType::Int24MSB));
 			ASIO::Sample::CopyRawToASIO(dst, srcInt24 + outputChannel, outputChannels, countChunk);
 		} else if(m_Settings.sampleFormat == SampleFormat::Int32)
 		{
@@ -908,7 +949,11 @@ void CASIODevice::FillAsioBuffer(bool useSource)
 			}
 		} else
 		{
+#if defined(MODPLUG_TRACKER)
 			MPT_ASSERT_NOTREACHED();
+#else // !MODPLUG_TRACKER
+			assert(false);
+#endif // MODPLUG_TRACKER
 		}
 	}
 	if(m_CanOutputReady)
@@ -1087,7 +1132,7 @@ mpt::ustring CASIODevice::AsioFeaturesToString(AsioFeatures features)
 	{
 		results.push_back(MPT_USTRING("deferred"));
 	}
-	return mpt::String::Combine(results, MPT_USTRING(","));
+	return mpt::join(results, MPT_USTRING(","));
 }
 
 
@@ -1137,7 +1182,7 @@ void CASIODevice::MessageResetRequest() noexcept
 bool CASIODevice::MessageBufferSizeChange(ASIO::Long newSize) noexcept
 {
 	MPT_SOUNDDEV_TRACE_SCOPE();
-	MPT_UNREFERENCED_PARAMETER(newSize);
+	MPT_UNUSED(newSize);
 	m_UsedFeatures.fetch_or(AsioFeature::BufferSizeChange);
 	// We do not support ASIO::MessageSelector::BufferSizeChange.
 	// This should cause a driver to send a ASIO::MessageSelector::ResetRequest.
@@ -1204,27 +1249,27 @@ void CASIODevice::ExceptionHandler(const char * func)
 #if !defined(MPT_BUILD_WINESUPPORT)
 		ExceptionHandler::TaintProcess(ExceptionHandler::TaintReason::Driver);
 #endif // !MPT_BUILD_WINESUPPORT
-		MPT_LOG(GetLogger(), LogError, "sounddev", MPT_UFORMAT_MESSAGE("ASIO: {}: Driver Crash: {}!")(mpt::ToUnicode(mpt::CharsetSource, func), mpt::ToUnicode(mpt::CharsetSource, std::string(e.func()))));
-		SendDeviceMessage(LogError, MPT_UFORMAT_MESSAGE("ASIO Driver Crash: {}")(mpt::ToUnicode(mpt::CharsetSource, std::string(e.func()))));
+		MPT_LOG(GetLogger(), LogError, "sounddev", MPT_UFORMAT_MESSAGE("ASIO: {}: Driver Crash: {}!")(mpt::convert<mpt::ustring>(mpt::source_encoding, func), mpt::convert<mpt::ustring>(mpt::source_encoding, std::string(e.func()))));
+		SendDeviceMessage(LogError, MPT_UFORMAT_MESSAGE("ASIO Driver Crash: {}")(mpt::convert<mpt::ustring>(mpt::source_encoding, std::string(e.func()))));
 #endif // MODPLUG_TRACKER
 	} catch(const std::bad_alloc &)
 	{
 		mpt::throw_out_of_memory();
 	} catch(const ASIO::Windows::DriverLoadFailed &e)
 	{
-		MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT_MESSAGE("ASIO: {}: Driver Load: {}")(mpt::ToUnicode(mpt::CharsetSource, func), mpt::get_exception_text<mpt::ustring>(e)));
+		MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT_MESSAGE("ASIO: {}: Driver Load: {}")(mpt::convert<mpt::ustring>(mpt::source_encoding, func), mpt::get_exception_text<mpt::ustring>(e)));
 	} catch(const ASIO::Windows::DriverInitFailed &e)
 	{
-		MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT_MESSAGE("ASIO: {}: Driver Init: {}")(mpt::ToUnicode(mpt::CharsetSource, func), mpt::get_exception_text<mpt::ustring>(e)));
+		MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT_MESSAGE("ASIO: {}: Driver Init: {}")(mpt::convert<mpt::ustring>(mpt::source_encoding, func), mpt::get_exception_text<mpt::ustring>(e)));
 	} catch(const ASIO::Error &e)
 	{
-		MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT_MESSAGE("ASIO: {}: Error: {}")(mpt::ToUnicode(mpt::CharsetSource, func), mpt::get_exception_text<mpt::ustring>(e)));
+		MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT_MESSAGE("ASIO: {}: Error: {}")(mpt::convert<mpt::ustring>(mpt::source_encoding, func), mpt::get_exception_text<mpt::ustring>(e)));
 	} catch(const std::exception &e)
 	{
-		MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT_MESSAGE("ASIO: {}: Exception: {}")(mpt::ToUnicode(mpt::CharsetSource, func), mpt::get_exception_text<mpt::ustring>(e)));
+		MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT_MESSAGE("ASIO: {}: Exception: {}")(mpt::convert<mpt::ustring>(mpt::source_encoding, func), mpt::get_exception_text<mpt::ustring>(e)));
 	} catch(...)
 	{
-		MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT_MESSAGE("ASIO: {}: Unknown Exception")(mpt::ToUnicode(mpt::CharsetSource, func)));
+		MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT_MESSAGE("ASIO: {}: Unknown Exception")(mpt::convert<mpt::ustring>(mpt::source_encoding, func)));
 	}
 }
 
@@ -1312,7 +1357,7 @@ SoundDevice::DynamicCaps CASIODevice::GetDeviceDynamicCaps(const std::vector<uin
 			try
 			{
 				ASIO::ChannelInfo channelInfo = AsioDriver()->getChannelInfo(i, false);
-				name = mpt::ToUnicode(mpt::Charset::Locale, channelInfo.name);
+				name = mpt::convert<mpt::ustring>(mpt::logical_encoding::locale, static_cast<std::string>(channelInfo.name));
 			} catch(...)
 			{
 				ExceptionHandler(__func__);
@@ -1326,7 +1371,7 @@ SoundDevice::DynamicCaps CASIODevice::GetDeviceDynamicCaps(const std::vector<uin
 			try
 			{
 				ASIO::ChannelInfo channelInfo = AsioDriver()->getChannelInfo(i, true);
-				name = mpt::ToUnicode(mpt::Charset::Locale, channelInfo.name);
+				name = mpt::convert<mpt::ustring>(mpt::logical_encoding::locale, static_cast<std::string>(channelInfo.name));
 			} catch(...)
 			{
 				ExceptionHandler(__func__);
