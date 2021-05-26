@@ -464,8 +464,8 @@ void CWaveDevice::InternalFillAudioBuffer()
 			}
 		}
 		nLatency += m_nWaveBufferSize;
-		SourceLockedAudioReadPrepare(m_nWaveBufferSize / bytesPerFrame, nLatency / bytesPerFrame);
-		SourceLockedAudioReadVoid(m_WaveBuffers[m_nWriteBuffer].lpData, nullptr, m_nWaveBufferSize / bytesPerFrame);
+		CallbackLockedAudioReadPrepare(m_nWaveBufferSize / bytesPerFrame, nLatency / bytesPerFrame);
+		CallbackLockedAudioProcessVoid(m_WaveBuffers[m_nWriteBuffer].lpData, nullptr, m_nWaveBufferSize / bytesPerFrame);
 		nBytesWritten += m_nWaveBufferSize;
 #if (_WIN32_WINNT >= 0x0600)
 		InterlockedAnd(interlocked_access(&m_WaveBuffers[m_nWriteBuffer].dwFlags), ~static_cast<DWORD>(WHDR_INQUEUE|WHDR_DONE));
@@ -478,7 +478,7 @@ void CWaveDevice::InternalFillAudioBuffer()
 		CheckResult(waveOutWrite(m_hWaveOut, &m_WaveBuffers[m_nWriteBuffer], sizeof(WAVEHDR)), oldFlags);
 		m_nWriteBuffer++;
 		m_nWriteBuffer %= m_nPreparedHeaders;
-		SourceLockedAudioReadDone();
+		CallbackLockedAudioProcessDone();
 	}
 
 	if(m_JustStarted && !m_Failed)

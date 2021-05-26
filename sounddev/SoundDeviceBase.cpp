@@ -29,7 +29,7 @@ namespace SoundDevice {
 
 Base::Base(ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
 	: m_Logger(logger)
-	, m_Source(nullptr)
+	, m_Callback(nullptr)
 	, m_MessageReceiver(nullptr)
 	, m_Info(info)
 	, m_SysInfo(sysInfo)
@@ -110,75 +110,75 @@ bool Base::Close()
 }
 
 
-uint64 Base::SourceGetReferenceClockNowNanoseconds() const
+uint64 Base::CallbackGetReferenceClockNowNanoseconds() const
 {
 	MPT_SOUNDDEV_TRACE_SCOPE();
-	if(!m_Source)
+	if(!m_Callback)
 	{
 		return 0;
 	}
-	uint64 result = m_Source->SoundSourceGetReferenceClockNowNanoseconds();
+	uint64 result = m_Callback->SoundCallbackGetReferenceClockNowNanoseconds();
 	//MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT_MESSAGE("clock: {}")(result));
 	return result;
 }
 
 
-uint64 Base::SourceLockedGetReferenceClockNowNanoseconds() const
+uint64 Base::CallbackLockedGetReferenceClockNowNanoseconds() const
 {
 	MPT_SOUNDDEV_TRACE_SCOPE();
-	if(!m_Source)
+	if(!m_Callback)
 	{
 		return 0;
 	}
-	uint64 result = m_Source->SoundSourceLockedGetReferenceClockNowNanoseconds();
+	uint64 result = m_Callback->SoundCallbackLockedGetReferenceClockNowNanoseconds();
 	//MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT_MESSAGE("clock-rt: {}")(result));
 	return result;
 }
 
 
-void Base::SourceNotifyPreStart()
+void Base::CallbackNotifyPreStart()
 {
 	MPT_SOUNDDEV_TRACE_SCOPE();
-	if(m_Source)
+	if(m_Callback)
 	{
-		m_Source->SoundSourcePreStartCallback();
+		m_Callback->SoundCallbackPreStart();
 	}
 }
 
 
-void Base::SourceNotifyPostStop()
+void Base::CallbackNotifyPostStop()
 {
 	MPT_SOUNDDEV_TRACE_SCOPE();
-	if(m_Source)
+	if(m_Callback)
 	{
-		m_Source->SoundSourcePostStopCallback();
+		m_Callback->SoundCallbackPostStop();
 	}
 }
 
 
-bool Base::SourceIsLockedByCurrentThread() const
+bool Base::CallbackIsLockedByCurrentThread() const
 {
 	MPT_SOUNDDEV_TRACE_SCOPE();
-	if(!m_Source)
+	if(!m_Callback)
 	{
 		return false;
 	}
-	return m_Source->SoundSourceIsLockedByCurrentThread();
+	return m_Callback->SoundCallbackIsLockedByCurrentThread();
 }
 
 
-void Base::SourceFillAudioBufferLocked()
+void Base::CallbackFillAudioBufferLocked()
 {
 	MPT_SOUNDDEV_TRACE_SCOPE();
-	if(m_Source)
+	if(m_Callback)
 	{
-		SourceLockedGuard lock(*m_Source);
+		CallbackLockedGuard lock(*m_Callback);
 		InternalFillAudioBuffer();
 	}
 }
 
 
-void Base::SourceLockedAudioReadPrepare(std::size_t numFrames, std::size_t framesLatency)
+void Base::CallbackLockedAudioReadPrepare(std::size_t numFrames, std::size_t framesLatency)
 {
 	MPT_SOUNDDEV_TRACE_SCOPE();
 	if(!InternalHasTimeInfo())
@@ -187,12 +187,12 @@ void Base::SourceLockedAudioReadPrepare(std::size_t numFrames, std::size_t frame
 		if(InternalHasGetStreamPosition())
 		{
 			timeInfo.SyncPointStreamFrames = InternalHasGetStreamPosition();
-			timeInfo.SyncPointSystemTimestamp = SourceLockedGetReferenceClockNowNanoseconds();
+			timeInfo.SyncPointSystemTimestamp = CallbackLockedGetReferenceClockNowNanoseconds();
 			timeInfo.Speed = 1.0;
 		} else
 		{
 			timeInfo.SyncPointStreamFrames = m_StreamPositionRenderFrames + numFrames;
-			timeInfo.SyncPointSystemTimestamp = SourceLockedGetReferenceClockNowNanoseconds() + mpt::saturate_round<int64>(GetEffectiveBufferAttributes().Latency * 1000000000.0);
+			timeInfo.SyncPointSystemTimestamp = CallbackLockedGetReferenceClockNowNanoseconds() + mpt::saturate_round<int64>(GetEffectiveBufferAttributes().Latency * 1000000000.0);
 			timeInfo.Speed = 1.0;
 		}
 		timeInfo.RenderStreamPositionBefore = StreamPositionFromFrames(m_StreamPositionRenderFrames);
@@ -209,100 +209,100 @@ void Base::SourceLockedAudioReadPrepare(std::size_t numFrames, std::size_t frame
 		// unused, no locking
 		m_StreamPositionOutputFrames = 0;
 	}
-	if(m_Source)
+	if(m_Callback)
 	{
-		m_Source->SoundSourceLockedReadPrepare(m_TimeInfo);
+		m_Callback->SoundCallbackLockedProcessPrepare(m_TimeInfo);
 	}
 }
 
 
 template <typename Tsample>
-void Base::SourceLockedAudioReadImpl(Tsample *buffer, const Tsample *inputBuffer, std::size_t numFrames)
+void Base::CallbackLockedAudioProcessImpl(Tsample *buffer, const Tsample *inputBuffer, std::size_t numFrames)
 {
 	MPT_SOUNDDEV_TRACE_SCOPE();
 	if(numFrames <= 0)
 	{
 		return;
 	}
-	if(m_Source)
+	if(m_Callback)
 	{
-		m_Source->SoundSourceLockedRead(GetBufferFormat(), numFrames, buffer, inputBuffer);
+		m_Callback->SoundCallbackLockedProcess(GetBufferFormat(), numFrames, buffer, inputBuffer);
 	}
 }
 
-void Base::SourceLockedAudioRead(uint8 *buffer, const uint8 *inputBuffer, std::size_t numFrames)
+void Base::CallbackLockedAudioProcess(uint8 *buffer, const uint8 *inputBuffer, std::size_t numFrames)
 {
 	// cppcheck-suppress assertWithSideEffect
 	assert(GetBufferFormat().sampleFormat == SampleFormat::Unsigned8);
-	SourceLockedAudioReadImpl(buffer, inputBuffer, numFrames);
+	CallbackLockedAudioProcessImpl(buffer, inputBuffer, numFrames);
 }
 
-void Base::SourceLockedAudioRead(int8 *buffer, const int8 *inputBuffer, std::size_t numFrames)
+void Base::CallbackLockedAudioProcess(int8 *buffer, const int8 *inputBuffer, std::size_t numFrames)
 {
 	// cppcheck-suppress assertWithSideEffect
 	assert(GetBufferFormat().sampleFormat == SampleFormat::Int8);
-	SourceLockedAudioReadImpl(buffer, inputBuffer, numFrames);
+	CallbackLockedAudioProcessImpl(buffer, inputBuffer, numFrames);
 }
 
-void Base::SourceLockedAudioRead(int16 *buffer, const int16 *inputBuffer, std::size_t numFrames)
+void Base::CallbackLockedAudioProcess(int16 *buffer, const int16 *inputBuffer, std::size_t numFrames)
 {
 	// cppcheck-suppress assertWithSideEffect
 	assert(GetBufferFormat().sampleFormat == SampleFormat::Int16);
-	SourceLockedAudioReadImpl(buffer, inputBuffer, numFrames);
+	CallbackLockedAudioProcessImpl(buffer, inputBuffer, numFrames);
 }
 
-void Base::SourceLockedAudioRead(int24 *buffer, const int24 *inputBuffer, std::size_t numFrames)
+void Base::CallbackLockedAudioProcess(int24 *buffer, const int24 *inputBuffer, std::size_t numFrames)
 {
 	// cppcheck-suppress assertWithSideEffect
 	assert(GetBufferFormat().sampleFormat == SampleFormat::Int24);
-	SourceLockedAudioReadImpl(buffer, inputBuffer, numFrames);
+	CallbackLockedAudioProcessImpl(buffer, inputBuffer, numFrames);
 }
 
-void Base::SourceLockedAudioRead(int32 *buffer, const int32 *inputBuffer, std::size_t numFrames)
+void Base::CallbackLockedAudioProcess(int32 *buffer, const int32 *inputBuffer, std::size_t numFrames)
 {
 	// cppcheck-suppress assertWithSideEffect
 	assert(GetBufferFormat().sampleFormat == SampleFormat::Int32);
-	SourceLockedAudioReadImpl(buffer, inputBuffer, numFrames);
+	CallbackLockedAudioProcessImpl(buffer, inputBuffer, numFrames);
 }
 
-void Base::SourceLockedAudioRead(float *buffer, const float *inputBuffer, std::size_t numFrames)
+void Base::CallbackLockedAudioProcess(float *buffer, const float *inputBuffer, std::size_t numFrames)
 {
 	// cppcheck-suppress assertWithSideEffect
 	assert(GetBufferFormat().sampleFormat == SampleFormat::Float32);
-	SourceLockedAudioReadImpl(buffer, inputBuffer, numFrames);
+	CallbackLockedAudioProcessImpl(buffer, inputBuffer, numFrames);
 }
 
-void Base::SourceLockedAudioRead(double *buffer, const double *inputBuffer, std::size_t numFrames)
+void Base::CallbackLockedAudioProcess(double *buffer, const double *inputBuffer, std::size_t numFrames)
 {
 	// cppcheck-suppress assertWithSideEffect
 	assert(GetBufferFormat().sampleFormat == SampleFormat::Float64);
-	SourceLockedAudioReadImpl(buffer, inputBuffer, numFrames);
+	CallbackLockedAudioProcessImpl(buffer, inputBuffer, numFrames);
 }
 
-void Base::SourceLockedAudioReadVoid(void *buffer, const void *inputBuffer, std::size_t numFrames)
+void Base::CallbackLockedAudioProcessVoid(void *buffer, const void *inputBuffer, std::size_t numFrames)
 {
 	switch(GetBufferFormat().sampleFormat)
 	{
 	case SampleFormat::Unsigned8:
-		SourceLockedAudioRead(static_cast<uint8*>(buffer), static_cast<const uint8*>(inputBuffer), numFrames);
+		CallbackLockedAudioProcess(static_cast<uint8*>(buffer), static_cast<const uint8*>(inputBuffer), numFrames);
 		break;
 	case SampleFormat::Int8:
-		SourceLockedAudioRead(static_cast<int8*>(buffer), static_cast<const int8*>(inputBuffer), numFrames);
+		CallbackLockedAudioProcess(static_cast<int8*>(buffer), static_cast<const int8*>(inputBuffer), numFrames);
 		break;
 	case SampleFormat::Int16:
-		SourceLockedAudioRead(static_cast<int16*>(buffer), static_cast<const int16*>(inputBuffer), numFrames);
+		CallbackLockedAudioProcess(static_cast<int16*>(buffer), static_cast<const int16*>(inputBuffer), numFrames);
 		break;
 	case SampleFormat::Int24:
-		SourceLockedAudioRead(static_cast<int24*>(buffer), static_cast<const int24*>(inputBuffer), numFrames);
+		CallbackLockedAudioProcess(static_cast<int24*>(buffer), static_cast<const int24*>(inputBuffer), numFrames);
 		break;
 	case SampleFormat::Int32:
-		SourceLockedAudioRead(static_cast<int32*>(buffer), static_cast<const int32*>(inputBuffer), numFrames);
+		CallbackLockedAudioProcess(static_cast<int32*>(buffer), static_cast<const int32*>(inputBuffer), numFrames);
 		break;
 	case SampleFormat::Float32:
-		SourceLockedAudioRead(static_cast<float*>(buffer), static_cast<const float*>(inputBuffer), numFrames);
+		CallbackLockedAudioProcess(static_cast<float*>(buffer), static_cast<const float*>(inputBuffer), numFrames);
 		break;
 	case SampleFormat::Float64:
-		SourceLockedAudioRead(static_cast<double*>(buffer), static_cast<const double*>(inputBuffer), numFrames);
+		CallbackLockedAudioProcess(static_cast<double*>(buffer), static_cast<const double*>(inputBuffer), numFrames);
 		break;
 	case SampleFormat::Invalid:
 		// nothing
@@ -311,12 +311,12 @@ void Base::SourceLockedAudioReadVoid(void *buffer, const void *inputBuffer, std:
 }
 
 
-void Base::SourceLockedAudioReadDone()
+void Base::CallbackLockedAudioProcessDone()
 {
 	MPT_SOUNDDEV_TRACE_SCOPE();
-	if(m_Source)
+	if(m_Callback)
 	{
-		m_Source->SoundSourceLockedReadDone(m_TimeInfo);
+		m_Callback->SoundCallbackLockedProcessDone(m_TimeInfo);
 	}
 }
 
@@ -345,11 +345,11 @@ bool Base::Start()
 		{
 			m_StreamPositionOutputFrames = 0;
 		}
-		SourceNotifyPreStart();
+		CallbackNotifyPreStart();
 		m_RequestFlags.fetch_and((~RequestFlagRestart).as_bits());
 		if(!InternalStart())
 		{
-			SourceNotifyPostStop();
+			CallbackNotifyPostStop();
 			return false;
 		}
 		m_IsPlaying = true;
@@ -369,7 +369,7 @@ void Base::Stop()
 	{
 		InternalStop();
 		m_RequestFlags.fetch_and((~RequestFlagRestart).as_bits());
-		SourceNotifyPostStop();
+		CallbackNotifyPostStop();
 		m_IsPlaying = false;
 		m_StreamPositionOutputFrames = 0;
 		m_StreamPositionRenderFrames = 0;
@@ -390,7 +390,7 @@ void Base::StopAndAvoidPlayingSilence()
 	}
 	InternalStopAndAvoidPlayingSilence();
 	m_RequestFlags.fetch_and((~RequestFlagRestart).as_bits());
-	SourceNotifyPostStop();
+	CallbackNotifyPostStop();
 	m_IsPlaying = false;
 	m_StreamPositionOutputFrames = 0;
 	m_StreamPositionRenderFrames = 0;
@@ -425,7 +425,7 @@ SoundDevice::StreamPosition Base::GetStreamPosition() const
 		frames = InternalGetStreamPositionFrames();
 	} else if(InternalHasTimeInfo())
 	{
-		const uint64 now = SourceGetReferenceClockNowNanoseconds();
+		const uint64 now = CallbackGetReferenceClockNowNanoseconds();
 		const SoundDevice::TimeInfo timeInfo = GetTimeInfo();
 		frames = mpt::saturate_round<int64>(
 				timeInfo.SyncPointStreamFrames + (

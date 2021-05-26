@@ -777,7 +777,7 @@ bool ComponentWineWrapper::DoInitialize()
 	MPT_COMPONENT_BIND("WineWrapper", OpenMPT_Wine_Wrapper_SoundDevice_Destruct);
 
 	MPT_COMPONENT_BIND("WineWrapper", OpenMPT_Wine_Wrapper_SoundDevice_SetMessageReceiver);
-	MPT_COMPONENT_BIND("WineWrapper", OpenMPT_Wine_Wrapper_SoundDevice_SetSource);
+	MPT_COMPONENT_BIND("WineWrapper", OpenMPT_Wine_Wrapper_SoundDevice_SetCallback);
 
 	MPT_COMPONENT_BIND("WineWrapper", OpenMPT_Wine_Wrapper_SoundDevice_GetDeviceInfo);
 	MPT_COMPONENT_BIND("WineWrapper", OpenMPT_Wine_Wrapper_SoundDevice_GetDeviceCaps);

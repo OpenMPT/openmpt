@@ -102,167 +102,167 @@ void SoundDeviceStub::SetMessageReceiver(SoundDevice::IMessageReceiver *receiver
 	return w->OpenMPT_Wine_Wrapper_SoundDevice_SetMessageReceiver(impl, &messageReceiver);
 }
 
-static void __cdecl SoundSourceGetReferenceClockNowNanosecondsFunc( void * inst, uint64_t * result ) {
-	SoundDevice::ISource * source = ((SoundDevice::ISource*)inst);
-	if(!source)
+static void __cdecl SoundCallbackGetReferenceClockNowNanosecondsFunc( void * inst, uint64_t * result ) {
+	SoundDevice::ICallback * callback = ((SoundDevice::ICallback*)inst);
+	if(!callback)
 	{
 		*result = 0;
 		return;
 	}
-	*result = source->SoundSourceGetReferenceClockNowNanoseconds();
+	*result = callback->SoundCallbackGetReferenceClockNowNanoseconds();
 }
-static void __cdecl SoundSourcePreStartCallbackFunc( void * inst ) {
-	SoundDevice::ISource * source = ((SoundDevice::ISource*)inst);
-	if(!source)
+static void __cdecl SoundCallbackPreStartFunc( void * inst ) {
+	SoundDevice::ICallback * callback = ((SoundDevice::ICallback*)inst);
+	if(!callback)
 	{
 		return;
 	}
-	source->SoundSourcePreStartCallback();
+	callback->SoundCallbackPreStart();
 }
-static void __cdecl SoundSourcePostStopCallbackFunc( void * inst ) {
-	SoundDevice::ISource * source = ((SoundDevice::ISource*)inst);
-	if(!source)
+static void __cdecl SoundCallbackPostStopFunc( void * inst ) {
+	SoundDevice::ICallback * callback = ((SoundDevice::ICallback*)inst);
+	if(!callback)
 	{
 		return;
 	}
-	source->SoundSourcePostStopCallback();
+	callback->SoundCallbackPostStop();
 }
-static void __cdecl SoundSourceIsLockedByCurrentThreadFunc( void * inst, uintptr_t * result ) {
-	SoundDevice::ISource * source = ((SoundDevice::ISource*)inst);
-	if(!source)
-	{
-		*result = 0;
-		return;
-	}
-	*result = source->SoundSourceIsLockedByCurrentThread();
-}
-static void __cdecl SoundSourceLockFunc( void * inst ) {
-	SoundDevice::ISource * source = ((SoundDevice::ISource*)inst);
-	if(!source)
-	{
-		return;
-	}
-	source->SoundSourceLock();
-}
-static void __cdecl SoundSourceLockedGetReferenceClockNowNanosecondsFunc( void * inst, uint64_t * result ) {
-	SoundDevice::ISource * source = ((SoundDevice::ISource*)inst);
-	if(!source)
+static void __cdecl SoundCallbackIsLockedByCurrentThreadFunc( void * inst, uintptr_t * result ) {
+	SoundDevice::ICallback * callback = ((SoundDevice::ICallback*)inst);
+	if(!callback)
 	{
 		*result = 0;
 		return;
 	}
-	*result = source->SoundSourceLockedGetReferenceClockNowNanoseconds();
+	*result = callback->SoundCallbackIsLockedByCurrentThread();
 }
-static void __cdecl SoundSourceLockedReadPrepareFunc( void * inst, const OpenMPT_SoundDevice_TimeInfo * timeInfo ) {
-	SoundDevice::ISource * source = ((SoundDevice::ISource*)inst);
+static void __cdecl SoundCallbackLockFunc( void * inst ) {
+	SoundDevice::ICallback * callback = ((SoundDevice::ICallback*)inst);
+	if(!callback)
+	{
+		return;
+	}
+	callback->SoundCallbackLock();
+}
+static void __cdecl SoundCallbackLockedGetReferenceClockNowNanosecondsFunc( void * inst, uint64_t * result ) {
+	SoundDevice::ICallback * callback = ((SoundDevice::ICallback*)inst);
+	if(!callback)
+	{
+		*result = 0;
+		return;
+	}
+	*result = callback->SoundCallbackLockedGetReferenceClockNowNanoseconds();
+}
+static void __cdecl SoundCallbackLockedProcessPrepareFunc( void * inst, const OpenMPT_SoundDevice_TimeInfo * timeInfo ) {
+	SoundDevice::ICallback * callback = ((SoundDevice::ICallback*)inst);
 	SoundDevice::TimeInfo ti = C::decode(*timeInfo);
-	if(!source)
+	if(!callback)
 	{
 		return;
 	}
-	source->SoundSourceLockedReadPrepare(ti);
+	callback->SoundCallbackLockedProcessPrepare(ti);
 }
-static void __cdecl SoundSourceLockedReadUint8Func( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, uintptr_t numFrames, uint8_t * buffer, const uint8_t * inputBuffer ) {
-	SoundDevice::ISource * source = ((SoundDevice::ISource*)inst);
+static void __cdecl SoundCallbackLockedProcessUint8Func( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, uintptr_t numFrames, uint8_t * buffer, const uint8_t * inputBuffer ) {
+	SoundDevice::ICallback * callback = ((SoundDevice::ICallback*)inst);
 	SoundDevice::BufferFormat bf = C::decode(*bufferFormat);
-	if(!source)
+	if(!callback)
 	{
 		return;
 	}
-	source->SoundSourceLockedRead(bf, numFrames, buffer, inputBuffer);
+	callback->SoundCallbackLockedProcess(bf, numFrames, buffer, inputBuffer);
 }
-static void __cdecl SoundSourceLockedReadInt8Func( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, uintptr_t numFrames, int8_t  * buffer, const int8_t * inputBuffer ) {
-	SoundDevice::ISource * source = ((SoundDevice::ISource*)inst);
+static void __cdecl SoundCallbackLockedProcessInt8Func( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, uintptr_t numFrames, int8_t  * buffer, const int8_t * inputBuffer ) {
+	SoundDevice::ICallback * callback = ((SoundDevice::ICallback*)inst);
 	SoundDevice::BufferFormat bf = C::decode(*bufferFormat);
-	if(!source)
+	if(!callback)
 	{
 		return;
 	}
-	source->SoundSourceLockedRead(bf, numFrames, buffer, inputBuffer);
+	callback->SoundCallbackLockedProcess(bf, numFrames, buffer, inputBuffer);
 }
-static void __cdecl SoundSourceLockedReadInt16Func( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, uintptr_t numFrames, int16_t * buffer, const int16_t * inputBuffer ) {
-	SoundDevice::ISource * source = ((SoundDevice::ISource*)inst);
+static void __cdecl SoundCallbackLockedProcessInt16Func( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, uintptr_t numFrames, int16_t * buffer, const int16_t * inputBuffer ) {
+	SoundDevice::ICallback * callback = ((SoundDevice::ICallback*)inst);
 	SoundDevice::BufferFormat bf = C::decode(*bufferFormat);
-	if(!source)
+	if(!callback)
 	{
 		return;
 	}
-	source->SoundSourceLockedRead(bf, numFrames, buffer, inputBuffer);
+	callback->SoundCallbackLockedProcess(bf, numFrames, buffer, inputBuffer);
 }
-static void __cdecl SoundSourceLockedReadInt24Func( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, uintptr_t numFrames, OpenMPT_int24 * buffer, const OpenMPT_int24 * inputBuffer ) {
-	SoundDevice::ISource * source = ((SoundDevice::ISource*)inst);
+static void __cdecl SoundCallbackLockedProcessInt24Func( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, uintptr_t numFrames, OpenMPT_int24 * buffer, const OpenMPT_int24 * inputBuffer ) {
+	SoundDevice::ICallback * callback = ((SoundDevice::ICallback*)inst);
 	SoundDevice::BufferFormat bf = C::decode(*bufferFormat);
-	if(!source)
+	if(!callback)
 	{
 		return;
 	}
-	source->SoundSourceLockedRead(bf, numFrames, static_cast<int24*>(buffer), static_cast<const int24*>(inputBuffer));
+	callback->SoundCallbackLockedProcess(bf, numFrames, static_cast<int24*>(buffer), static_cast<const int24*>(inputBuffer));
 }
-static void __cdecl SoundSourceLockedReadInt32Func( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, uintptr_t numFrames, int32_t * buffer, const int32_t * inputBuffer ) {
-	SoundDevice::ISource * source = ((SoundDevice::ISource*)inst);
+static void __cdecl SoundCallbackLockedProcessInt32Func( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, uintptr_t numFrames, int32_t * buffer, const int32_t * inputBuffer ) {
+	SoundDevice::ICallback * callback = ((SoundDevice::ICallback*)inst);
 	SoundDevice::BufferFormat bf = C::decode(*bufferFormat);
-	if(!source)
+	if(!callback)
 	{
 		return;
 	}
-	source->SoundSourceLockedRead(bf, numFrames, buffer, inputBuffer);
+	callback->SoundCallbackLockedProcess(bf, numFrames, buffer, inputBuffer);
 }
-static void __cdecl SoundSourceLockedReadFloatFunc( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, uintptr_t numFrames, float * buffer, const float * inputBuffer ) {
-	SoundDevice::ISource * source = ((SoundDevice::ISource*)inst);
+static void __cdecl SoundCallbackLockedProcessFloatFunc( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, uintptr_t numFrames, float * buffer, const float * inputBuffer ) {
+	SoundDevice::ICallback * callback = ((SoundDevice::ICallback*)inst);
 	SoundDevice::BufferFormat bf = C::decode(*bufferFormat);
-	if(!source)
+	if(!callback)
 	{
 		return;
 	}
-	source->SoundSourceLockedRead(bf, numFrames, buffer, inputBuffer);
+	callback->SoundCallbackLockedProcess(bf, numFrames, buffer, inputBuffer);
 }
-static void __cdecl SoundSourceLockedReadDoubleFunc( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, uintptr_t numFrames, double * buffer, const double * inputBuffer ) {
-	SoundDevice::ISource * source = ((SoundDevice::ISource*)inst);
+static void __cdecl SoundCallbackLockedProcessDoubleFunc( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, uintptr_t numFrames, double * buffer, const double * inputBuffer ) {
+	SoundDevice::ICallback * callback = ((SoundDevice::ICallback*)inst);
 	SoundDevice::BufferFormat bf = C::decode(*bufferFormat);
-	if(!source)
+	if(!callback)
 	{
 		return;
 	}
-	source->SoundSourceLockedRead(bf, numFrames, buffer, inputBuffer);
+	callback->SoundCallbackLockedProcess(bf, numFrames, buffer, inputBuffer);
 }
-static void __cdecl SoundSourceLockedReadDoneFunc( void * inst, const OpenMPT_SoundDevice_TimeInfo * timeInfo ) {
-	SoundDevice::ISource * source = ((SoundDevice::ISource*)inst);
+static void __cdecl SoundCallbackLockedProcessDoneFunc( void * inst, const OpenMPT_SoundDevice_TimeInfo * timeInfo ) {
+	SoundDevice::ICallback * callback = ((SoundDevice::ICallback*)inst);
 	SoundDevice::TimeInfo ti = C::decode(*timeInfo);
-	if(!source)
+	if(!callback)
 	{
 		return;
 	}
-	source->SoundSourceLockedReadDone(ti);
+	callback->SoundCallbackLockedProcessDone(ti);
 }
-static void __cdecl SoundSourceUnlockFunc( void * inst ) {
-	SoundDevice::ISource * source = ((SoundDevice::ISource*)inst);
-	if(!source)
+static void __cdecl SoundCallbackUnlockFunc( void * inst ) {
+	SoundDevice::ICallback * callback = ((SoundDevice::ICallback*)inst);
+	if(!callback)
 	{
 		return;
 	}
-	source->SoundSourceUnlock();
+	callback->SoundCallbackUnlock();
 }
 
-void SoundDeviceStub::SetSource(SoundDevice::ISource *isource) {
-	OpenMPT_Wine_Wrapper_SoundDevice_ISource source = {};
-	source.inst = isource;
-	source.SoundSourceGetReferenceClockNowNanosecondsFunc = &SoundSourceGetReferenceClockNowNanosecondsFunc;
-	source.SoundSourcePreStartCallbackFunc = &SoundSourcePreStartCallbackFunc;
-	source.SoundSourcePostStopCallbackFunc = &SoundSourcePostStopCallbackFunc;
-	source.SoundSourceIsLockedByCurrentThreadFunc = &SoundSourceIsLockedByCurrentThreadFunc;
-	source.SoundSourceLockFunc = &SoundSourceLockFunc;
-	source.SoundSourceLockedGetReferenceClockNowNanosecondsFunc = &SoundSourceLockedGetReferenceClockNowNanosecondsFunc;
-	source.SoundSourceLockedReadPrepareFunc = &SoundSourceLockedReadPrepareFunc;
-	source.SoundSourceLockedReadUint8Func = &SoundSourceLockedReadUint8Func;
-	source.SoundSourceLockedReadInt8Func = &SoundSourceLockedReadInt8Func;
-	source.SoundSourceLockedReadInt16Func = &SoundSourceLockedReadInt16Func;
-	source.SoundSourceLockedReadInt24Func = &SoundSourceLockedReadInt24Func;
-	source.SoundSourceLockedReadInt32Func = &SoundSourceLockedReadInt32Func;
-	source.SoundSourceLockedReadFloatFunc = &SoundSourceLockedReadFloatFunc;
-	source.SoundSourceLockedReadDoubleFunc = &SoundSourceLockedReadDoubleFunc;
-	source.SoundSourceLockedReadDoneFunc = &SoundSourceLockedReadDoneFunc;
-	source.SoundSourceUnlockFunc = &SoundSourceUnlockFunc;
-	return w->OpenMPT_Wine_Wrapper_SoundDevice_SetSource(impl, &source);
+void SoundDeviceStub::SetCallback(SoundDevice::ICallback *icallback) {
+	OpenMPT_Wine_Wrapper_SoundDevice_ICallback callback = {};
+	callback.inst = icallback;
+	callback.SoundCallbackGetReferenceClockNowNanosecondsFunc = &SoundCallbackGetReferenceClockNowNanosecondsFunc;
+	callback.SoundCallbackPreStartFunc = &SoundCallbackPreStartFunc;
+	callback.SoundCallbackPostStopFunc = &SoundCallbackPostStopFunc;
+	callback.SoundCallbackIsLockedByCurrentThreadFunc = &SoundCallbackIsLockedByCurrentThreadFunc;
+	callback.SoundCallbackLockFunc = &SoundCallbackLockFunc;
+	callback.SoundCallbackLockedGetReferenceClockNowNanosecondsFunc = &SoundCallbackLockedGetReferenceClockNowNanosecondsFunc;
+	callback.SoundCallbackLockedProcessPrepareFunc = &SoundCallbackLockedProcessPrepareFunc;
+	callback.SoundCallbackLockedProcessUint8Func = &SoundCallbackLockedProcessUint8Func;
+	callback.SoundCallbackLockedProcessInt8Func = &SoundCallbackLockedProcessInt8Func;
+	callback.SoundCallbackLockedProcessInt16Func = &SoundCallbackLockedProcessInt16Func;
+	callback.SoundCallbackLockedProcessInt24Func = &SoundCallbackLockedProcessInt24Func;
+	callback.SoundCallbackLockedProcessInt32Func = &SoundCallbackLockedProcessInt32Func;
+	callback.SoundCallbackLockedProcessFloatFunc = &SoundCallbackLockedProcessFloatFunc;
+	callback.SoundCallbackLockedProcessDoubleFunc = &SoundCallbackLockedProcessDoubleFunc;
+	callback.SoundCallbackLockedProcessDoneFunc = &SoundCallbackLockedProcessDoneFunc;
+	callback.SoundCallbackUnlockFunc = &SoundCallbackUnlockFunc;
+	return w->OpenMPT_Wine_Wrapper_SoundDevice_SetCallback(impl, &callback);
 }
 
 SoundDevice::Info SoundDeviceStub::GetDeviceInfo() const {

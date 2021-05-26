@@ -8,6 +8,7 @@
 #include "openmpt/all/BuildSettings.hpp"
 
 #include "SoundDevice.h"
+#include "SoundDeviceCallback.h"
 
 #include "mpt/mutex/mutex.hpp"
 #include "mpt/string/types.hpp"
@@ -33,19 +34,19 @@ class Base
 
 private:
 
-	class SourceLockedGuard
+	class CallbackLockedGuard
 	{
 	private:
-		ISource &m_Source;
+		ICallback &m_Callback;
 	public:
-		SourceLockedGuard(ISource &source)
-			: m_Source(source)
+		CallbackLockedGuard(ICallback &callback)
+			: m_Callback(callback)
 		{
-			m_Source.SoundSourceLock();
+			m_Callback.SoundCallbackLock();
 		}
-		~SourceLockedGuard()
+		~CallbackLockedGuard()
 		{
-			m_Source.SoundSourceUnlock();
+			m_Callback.SoundCallbackUnlock();
 		}
 	};
 
@@ -55,7 +56,7 @@ protected:
 
 private:
 
-	SoundDevice::ISource *m_Source;
+	SoundDevice::ICallback *m_Callback;
 	SoundDevice::IMessageReceiver *m_MessageReceiver;
 
 	const SoundDevice::Info m_Info;
@@ -98,24 +99,24 @@ protected:
 
 	virtual void InternalFillAudioBuffer() = 0;
 
-	uint64 SourceGetReferenceClockNowNanoseconds() const;
-	void SourceNotifyPreStart();
-	void SourceNotifyPostStop();
-	bool SourceIsLockedByCurrentThread() const;
-	void SourceFillAudioBufferLocked();
-	uint64 SourceLockedGetReferenceClockNowNanoseconds() const;
-	void SourceLockedAudioReadPrepare(std::size_t numFrames, std::size_t framesLatency);
+	uint64 CallbackGetReferenceClockNowNanoseconds() const;
+	void CallbackNotifyPreStart();
+	void CallbackNotifyPostStop();
+	bool CallbackIsLockedByCurrentThread() const;
+	void CallbackFillAudioBufferLocked();
+	uint64 CallbackLockedGetReferenceClockNowNanoseconds() const;
+	void CallbackLockedAudioReadPrepare(std::size_t numFrames, std::size_t framesLatency);
 	template <typename Tsample>
-	void SourceLockedAudioReadImpl(Tsample *buffer, const Tsample *inputBuffer, std::size_t numFrames);
-	void SourceLockedAudioRead(uint8 *buffer, const uint8 *inputBuffer, std::size_t numFrames);
-	void SourceLockedAudioRead(int8 *buffer, const int8 *inputBuffer, std::size_t numFrames);
-	void SourceLockedAudioRead(int16 *buffer, const int16 *inputBuffer, std::size_t numFrames);
-	void SourceLockedAudioRead(int24 *buffer, const int24 *inputBuffer, std::size_t numFrames);
-	void SourceLockedAudioRead(int32 *buffer, const int32 *inputBuffer, std::size_t numFrames);
-	void SourceLockedAudioRead(float *buffer, const float *inputBuffer, std::size_t numFrames);
-	void SourceLockedAudioRead(double *buffer, const double *inputBuffer, std::size_t numFrames);
-	void SourceLockedAudioReadVoid(void *buffer, const void *inputBuffer, std::size_t numFrames);
-	void SourceLockedAudioReadDone();
+	void CallbackLockedAudioProcessImpl(Tsample *buffer, const Tsample *inputBuffer, std::size_t numFrames);
+	void CallbackLockedAudioProcess(uint8 *buffer, const uint8 *inputBuffer, std::size_t numFrames);
+	void CallbackLockedAudioProcess(int8 *buffer, const int8 *inputBuffer, std::size_t numFrames);
+	void CallbackLockedAudioProcess(int16 *buffer, const int16 *inputBuffer, std::size_t numFrames);
+	void CallbackLockedAudioProcess(int24 *buffer, const int24 *inputBuffer, std::size_t numFrames);
+	void CallbackLockedAudioProcess(int32 *buffer, const int32 *inputBuffer, std::size_t numFrames);
+	void CallbackLockedAudioProcess(float *buffer, const float *inputBuffer, std::size_t numFrames);
+	void CallbackLockedAudioProcess(double *buffer, const double *inputBuffer, std::size_t numFrames);
+	void CallbackLockedAudioProcessVoid(void *buffer, const void *inputBuffer, std::size_t numFrames);
+	void CallbackLockedAudioProcessDone();
 
 	void RequestClose() { m_RequestFlags.fetch_or(RequestFlagClose); }
 	void RequestReset() { m_RequestFlags.fetch_or(RequestFlagReset); }
@@ -157,7 +158,7 @@ public:
 
 	virtual ~Base();
 
-	void SetSource(SoundDevice::ISource *source) { m_Source = source; }
+	void SetCallback(SoundDevice::ICallback *callback) { m_Callback = callback; }
 	void SetMessageReceiver(SoundDevice::IMessageReceiver *receiver) { m_MessageReceiver = receiver; }
 
 	SoundDevice::Info GetDeviceInfo() const { return m_Info; }

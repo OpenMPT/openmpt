@@ -32,7 +32,7 @@ class CModDoc;
 class CAutoSaver;
 namespace SoundDevice {
 class Base;
-class ISource;
+class ICallback;
 } // namerspace SoundDevice
 
 #define MAINFRAME_TITLE _T("Open ModPlug Tracker")
@@ -344,16 +344,16 @@ public:
 	static void UpdateAudioParameters(CSoundFile &sndFile, bool reset=false);
 
 	// from SoundDevice::IBufferHandler
-	uint64 SoundSourceGetReferenceClockNowNanoseconds() const override;
-	void SoundSourcePreStartCallback() override;
-	void SoundSourcePostStopCallback() override;
-	bool SoundSourceIsLockedByCurrentThread() const override;
-	void SoundSourceLock() override;
-	uint64 SoundSourceLockedGetReferenceClockNowNanoseconds() const override;
-	void SoundSourceLockedReadPrepare(SoundDevice::TimeInfo timeInfo) override;
-	void SoundSourceLockedCallback(SoundDevice::CallbackBuffer<DithersOpenMPT> &buffer) override;
-	void SoundSourceLockedReadDone(SoundDevice::TimeInfo timeInfo) override;
-	void SoundSourceUnlock() override;
+	uint64 SoundCallbackGetReferenceClockNowNanoseconds() const override;
+	void SoundCallbackPreStart() override;
+	void SoundCallbackPostStop() override;
+	bool SoundCallbackIsLockedByCurrentThread() const override;
+	void SoundCallbackLock() override;
+	uint64 SoundCallbackLockedGetReferenceClockNowNanoseconds() const override;
+	void SoundCallbackLockedProcessPrepare(SoundDevice::TimeInfo timeInfo) override;
+	void SoundCallbackLockedCallback(SoundDevice::CallbackBuffer<DithersOpenMPT> &buffer) override;
+	void SoundCallbackLockedProcessDone(SoundDevice::TimeInfo timeInfo) override;
+	void SoundCallbackUnlock() override;
 
 	// from SoundDevice::IMessageReceiver
 	void SoundDeviceMessage(LogLevel level, const mpt::ustring &str) override;

@@ -420,7 +420,7 @@ CSoundDeviceWithThread::~CSoundDeviceWithThread()
 void CSoundDeviceWithThread::FillAudioBufferLocked()
 {
 	MPT_SOUNDDEV_TRACE_SCOPE();
-	SourceFillAudioBufferLocked();
+	CallbackFillAudioBufferLocked();
 }
 
 
@@ -628,7 +628,7 @@ void ThreadBase::ThreadProc()
 	InternalStartFromSoundThread();
 	while(!m_ThreadStopRequest.load())
 	{
-		SourceFillAudioBufferLocked();
+		CallbackFillAudioBufferLocked();
 		InternalWaitFromSoundThread();
 	}
 	InternalStopFromSoundThread();

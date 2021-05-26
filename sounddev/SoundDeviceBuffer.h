@@ -6,7 +6,7 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
-#include "SoundDevice.h"
+#include "SoundDeviceCallback.h"
 
 #include "mpt/audio/span.hpp"
 #include "openmpt/base/Types.hpp"
@@ -202,7 +202,7 @@ public:
 
 template <typename TDithers>
 class BufferHandler
-	: public ISource
+	: public ICallback
 {
 private:
 	TDithers m_Dithers;
@@ -220,41 +220,41 @@ protected:
 	}
 private:
 	template <typename Tsample>
-	inline void SoundSourceLockedReadImpl(BufferFormat bufferFormat, std::size_t numFrames, Tsample *buffer, const Tsample *inputBuffer)
+	inline void SoundCallbackLockedProcessImpl(BufferFormat bufferFormat, std::size_t numFrames, Tsample *buffer, const Tsample *inputBuffer)
 	{
 		CallbackBuffer<TDithers> callbackBuffer{buffer, inputBuffer, numFrames, m_Dithers, bufferFormat};
-		SoundSourceLockedCallback(callbackBuffer);
+		SoundCallbackLockedCallback(callbackBuffer);
 	}
 public:
-	inline void SoundSourceLockedRead(BufferFormat bufferFormat, std::size_t numFrames, uint8 *buffer, const uint8 *inputBuffer) final
+	inline void SoundCallbackLockedProcess(BufferFormat bufferFormat, std::size_t numFrames, uint8 *buffer, const uint8 *inputBuffer) final
 	{
-		SoundSourceLockedReadImpl(bufferFormat, numFrames, buffer, inputBuffer);
+		SoundCallbackLockedProcessImpl(bufferFormat, numFrames, buffer, inputBuffer);
 	}
-	inline void SoundSourceLockedRead(BufferFormat bufferFormat, std::size_t numFrames, int8 *buffer, const int8 *inputBuffer) final
+	inline void SoundCallbackLockedProcess(BufferFormat bufferFormat, std::size_t numFrames, int8 *buffer, const int8 *inputBuffer) final
 	{
-		SoundSourceLockedReadImpl(bufferFormat, numFrames, buffer, inputBuffer);
+		SoundCallbackLockedProcessImpl(bufferFormat, numFrames, buffer, inputBuffer);
 	}
-	inline void SoundSourceLockedRead(BufferFormat bufferFormat, std::size_t numFrames, int16 *buffer, const int16 *inputBuffer) final
+	inline void SoundCallbackLockedProcess(BufferFormat bufferFormat, std::size_t numFrames, int16 *buffer, const int16 *inputBuffer) final
 	{
-		SoundSourceLockedReadImpl(bufferFormat, numFrames, buffer, inputBuffer);
+		SoundCallbackLockedProcessImpl(bufferFormat, numFrames, buffer, inputBuffer);
 	}
-	inline void SoundSourceLockedRead(BufferFormat bufferFormat, std::size_t numFrames, int24 *buffer, const int24 *inputBuffer) final
+	inline void SoundCallbackLockedProcess(BufferFormat bufferFormat, std::size_t numFrames, int24 *buffer, const int24 *inputBuffer) final
 	{
-		SoundSourceLockedReadImpl(bufferFormat, numFrames, buffer, inputBuffer);
+		SoundCallbackLockedProcessImpl(bufferFormat, numFrames, buffer, inputBuffer);
 	}
-	inline void SoundSourceLockedRead(BufferFormat bufferFormat, std::size_t numFrames, int32 *buffer, const int32 *inputBuffer) final
+	inline void SoundCallbackLockedProcess(BufferFormat bufferFormat, std::size_t numFrames, int32 *buffer, const int32 *inputBuffer) final
 	{
-		SoundSourceLockedReadImpl(bufferFormat, numFrames, buffer, inputBuffer);
+		SoundCallbackLockedProcessImpl(bufferFormat, numFrames, buffer, inputBuffer);
 	}
-	inline void SoundSourceLockedRead(BufferFormat bufferFormat, std::size_t numFrames, float *buffer, const float *inputBuffer) final
+	inline void SoundCallbackLockedProcess(BufferFormat bufferFormat, std::size_t numFrames, float *buffer, const float *inputBuffer) final
 	{
-		SoundSourceLockedReadImpl(bufferFormat, numFrames, buffer, inputBuffer);
+		SoundCallbackLockedProcessImpl(bufferFormat, numFrames, buffer, inputBuffer);
 	}
-	inline void SoundSourceLockedRead(BufferFormat bufferFormat, std::size_t numFrames, double *buffer, const double *inputBuffer) final
+	inline void SoundCallbackLockedProcess(BufferFormat bufferFormat, std::size_t numFrames, double *buffer, const double *inputBuffer) final
 	{
-		SoundSourceLockedReadImpl(bufferFormat, numFrames, buffer, inputBuffer);
+		SoundCallbackLockedProcessImpl(bufferFormat, numFrames, buffer, inputBuffer);
 	}
-	virtual void SoundSourceLockedCallback(CallbackBuffer<TDithers> &buffer) = 0;
+	virtual void SoundCallbackLockedCallback(CallbackBuffer<TDithers> &buffer) = 0;
 };
 
 

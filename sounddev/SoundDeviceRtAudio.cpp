@@ -187,11 +187,11 @@ void CRtAudioDevice::InternalFillAudioBuffer()
 	{
 		return;
 	}
-	SourceLockedAudioReadPrepare(m_CurrentFrameBufferCount, m_FramesPerChunk * m_StreamOptions.numberOfBuffers);
-	SourceLockedAudioReadVoid(m_CurrentFrameBufferOutput, m_CurrentFrameBufferInput, m_CurrentFrameBufferCount);
+	CallbackLockedAudioReadPrepare(m_CurrentFrameBufferCount, m_FramesPerChunk * m_StreamOptions.numberOfBuffers);
+	CallbackLockedAudioProcessVoid(m_CurrentFrameBufferOutput, m_CurrentFrameBufferInput, m_CurrentFrameBufferCount);
 	m_StatisticLatencyFrames.store(m_CurrentFrameBufferCount * m_StreamOptions.numberOfBuffers);
 	m_StatisticPeriodFrames.store(m_CurrentFrameBufferCount);
-	SourceLockedAudioReadDone();
+	CallbackLockedAudioProcessDone();
 }
 
 
@@ -224,7 +224,7 @@ void CRtAudioDevice::AudioCallback(void *outputBuffer, void *inputBuffer, unsign
 	m_CurrentFrameBufferInput = inputBuffer;
 	m_CurrentFrameBufferCount = nFrames;
 	m_CurrentStreamTime = streamTime;
-	SourceFillAudioBufferLocked();
+	CallbackFillAudioBufferLocked();
 	m_CurrentFrameBufferCount = 0;
 	m_CurrentFrameBufferOutput = 0;
 	m_CurrentFrameBufferInput = 0;

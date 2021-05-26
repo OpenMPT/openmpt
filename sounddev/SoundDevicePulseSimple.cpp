@@ -387,8 +387,8 @@ void PulseaudioSimple::InternalFillAudioBuffer()
 	std::size_t latencyFrames = 0;
 	latencyFrames += (latency_usec * m_Settings.Samplerate) / 1000000;
 	latencyFrames += 1 * (m_OutputBuffer.size() / m_Settings.Channels);
-	SourceLockedAudioReadPrepare(m_OutputBuffer.size() / m_Settings.Channels, latencyFrames);
-	SourceLockedAudioRead(m_OutputBuffer.data(), nullptr, m_OutputBuffer.size() / m_Settings.Channels);
+	CallbackLockedAudioReadPrepare(m_OutputBuffer.size() / m_Settings.Channels, latencyFrames);
+	CallbackLockedAudioProcess(m_OutputBuffer.data(), nullptr, m_OutputBuffer.size() / m_Settings.Channels);
 	error = 0;
 	if(pa_simple_write(m_PA_SimpleOutput, &(m_OutputBuffer[0]), m_OutputBuffer.size() * sizeof(float32), &error) < 0)
 	{
@@ -396,7 +396,7 @@ void PulseaudioSimple::InternalFillAudioBuffer()
 		needsClose = true;
 	}
 	m_StatisticLastLatencyFrames.store(latencyFrames);
-	SourceLockedAudioReadDone();
+	CallbackLockedAudioProcessDone();
 	if(needsClose)
 	{
 		RequestClose();

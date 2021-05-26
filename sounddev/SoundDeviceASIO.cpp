@@ -522,7 +522,7 @@ void CASIODevice::SetRenderSilence(bool silence, bool wait)
 #if defined(MODPLUG_TRACKER)
 			if(silence)
 			{
-				if(SourceIsLockedByCurrentThread())
+				if(CallbackIsLockedByCurrentThread())
 				{
 					MPT_ASSERT_MSG(false, "AudioCriticalSection locked while stopping ASIO");
 				} else
@@ -531,7 +531,7 @@ void CASIODevice::SetRenderSilence(bool silence, bool wait)
 				}
 			} else
 			{
-				if(SourceIsLockedByCurrentThread())
+				if(CallbackIsLockedByCurrentThread())
 				{
 					MPT_ASSERT_MSG(false, "AudioCriticalSection locked while starting ASIO");
 				} else
@@ -553,9 +553,9 @@ bool CASIODevice::InternalStart()
 {
 	MPT_SOUNDDEV_TRACE_SCOPE();
 #if defined(MODPLUG_TRACKER)
-	MPT_ASSERT_ALWAYS_MSG(!SourceIsLockedByCurrentThread(), "AudioCriticalSection locked while starting ASIO");
+	MPT_ASSERT_ALWAYS_MSG(!CallbackIsLockedByCurrentThread(), "AudioCriticalSection locked while starting ASIO");
 #else // !MODPLUG_TRACKER
-	assert(!SourceIsLockedByCurrentThread());
+	assert(!CallbackIsLockedByCurrentThread());
 #endif // MODPLUG_TRACKER
 
 	if(m_Settings.KeepDeviceRunning)
@@ -627,9 +627,9 @@ void CASIODevice::InternalStopImpl(bool force)
 {
 	MPT_SOUNDDEV_TRACE_SCOPE();
 #if defined(MODPLUG_TRACKER)
-	MPT_ASSERT_ALWAYS_MSG(!SourceIsLockedByCurrentThread(), "AudioCriticalSection locked while stopping ASIO");
+	MPT_ASSERT_ALWAYS_MSG(!CallbackIsLockedByCurrentThread(), "AudioCriticalSection locked while stopping ASIO");
 #else // !MODPLUG_TRACKER
-	assert(!SourceIsLockedByCurrentThread());
+	assert(!CallbackIsLockedByCurrentThread());
 #endif // MODPLUG_TRACKER
 
 	if(m_Settings.KeepDeviceRunning && !force)
@@ -872,22 +872,22 @@ void CASIODevice::FillAsioBuffer(bool useSource)
 		}
 	} else
 	{
-		SourceLockedAudioReadPrepare(countChunk, m_nAsioBufferLen * 2);
+		CallbackLockedAudioReadPrepare(countChunk, m_nAsioBufferLen * 2);
 		if(m_Settings.sampleFormat == SampleFormat::Float64)
 		{
-			SourceLockedAudioRead(m_SampleBufferDouble.data(), (m_SampleInputBufferDouble.size() > 0) ? m_SampleInputBufferDouble.data() : nullptr, countChunk);
+			CallbackLockedAudioProcess(m_SampleBufferDouble.data(), (m_SampleInputBufferDouble.size() > 0) ? m_SampleInputBufferDouble.data() : nullptr, countChunk);
 		} else if(m_Settings.sampleFormat == SampleFormat::Float32)
 		{
-			SourceLockedAudioRead(m_SampleBufferFloat.data(), (m_SampleInputBufferFloat.size() > 0) ? m_SampleInputBufferFloat.data() : nullptr, countChunk);
+			CallbackLockedAudioProcess(m_SampleBufferFloat.data(), (m_SampleInputBufferFloat.size() > 0) ? m_SampleInputBufferFloat.data() : nullptr, countChunk);
 		} else if(m_Settings.sampleFormat == SampleFormat::Int16)
 		{
-			SourceLockedAudioRead(m_SampleBufferInt16.data(), (m_SampleInputBufferInt16.size() > 0) ? m_SampleInputBufferInt16.data() : nullptr, countChunk);
+			CallbackLockedAudioProcess(m_SampleBufferInt16.data(), (m_SampleInputBufferInt16.size() > 0) ? m_SampleInputBufferInt16.data() : nullptr, countChunk);
 		} else if(m_Settings.sampleFormat == SampleFormat::Int24)
 		{
-			SourceLockedAudioRead(m_SampleBufferInt24.data(), (m_SampleInputBufferInt24.size() > 0) ? m_SampleInputBufferInt24.data() : nullptr, countChunk);
+			CallbackLockedAudioProcess(m_SampleBufferInt24.data(), (m_SampleInputBufferInt24.size() > 0) ? m_SampleInputBufferInt24.data() : nullptr, countChunk);
 		} else if(m_Settings.sampleFormat == SampleFormat::Int32)
 		{
-			SourceLockedAudioRead(m_SampleBufferInt32.data(), (m_SampleInputBufferInt32.size() > 0) ? m_SampleInputBufferInt32.data() : nullptr, countChunk);
+			CallbackLockedAudioProcess(m_SampleBufferInt32.data(), (m_SampleInputBufferInt32.size() > 0) ? m_SampleInputBufferInt32.data() : nullptr, countChunk);
 		} else
 		{
 #if defined(MODPLUG_TRACKER)
@@ -968,7 +968,7 @@ void CASIODevice::FillAsioBuffer(bool useSource)
 	}
 	if(!rendersilence)
 	{
-		SourceLockedAudioReadDone();
+		CallbackLockedAudioProcessDone();
 	}
 }
 
@@ -1060,7 +1060,7 @@ void CASIODevice::RealtimeTimeInfo(ASIO::Time asioTime) noexcept
 			timeInfo.Speed = speed;
 		} else
 		{ // spec violation or nothing provided at all, better to estimate this stuff ourselves
-			const uint64 asioNow = SourceLockedGetReferenceClockNowNanoseconds();
+			const uint64 asioNow = CallbackLockedGetReferenceClockNowNanoseconds();
 			timeInfo.SyncPointStreamFrames = m_TotalFramesWritten + m_nAsioBufferLen - m_StreamPositionOffset;
 			timeInfo.SyncPointSystemTimestamp = asioNow + mpt::saturate_round<int64>(m_BufferLatency * 1000.0 * 1000.0 * 1000.0);
 			timeInfo.Speed = 1.0;
@@ -1099,7 +1099,7 @@ void CASIODevice::RealtimeBufferSwitchImpl(ASIO::BufferIndex bufferIndex) noexce
 		FillAsioBuffer(false);
 	} else
 	{
-		SourceFillAudioBufferLocked();
+		CallbackFillAudioBufferLocked();
 	}
 	m_TotalFramesWritten += m_nAsioBufferLen;
 }

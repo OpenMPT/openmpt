@@ -48,7 +48,7 @@ public:
 
 public:
 
-	virtual void SetSource(SoundDevice::ISource *source);
+	virtual void SetCallback(SoundDevice::ICallback *callback);
 	virtual void SetMessageReceiver(SoundDevice::IMessageReceiver *receiver);
 
 	virtual SoundDevice::Info GetDeviceInfo() const;

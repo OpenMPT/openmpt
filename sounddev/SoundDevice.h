@@ -7,6 +7,8 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
+#include "SoundDeviceCallback.h"
+
 #include "mpt/base/detect.hpp"
 #include "mpt/base/saturate_round.hpp"
 #include "mpt/osinfo/class.hpp"
@@ -60,67 +62,6 @@ class IMessageReceiver
 {
 public:
 	virtual void SoundDeviceMessage(LogLevel level, const mpt::ustring &str) = 0;
-};
-
-
-struct StreamPosition
-{
-	int64 Frames; // relative to Start()
-	double Seconds; // relative to Start()
-	StreamPosition() : Frames(0), Seconds(0.0) { }
-	StreamPosition(int64 frames, double seconds) : Frames(frames), Seconds(seconds) { }
-};
-
-
-struct TimeInfo
-{
-	
-	int64 SyncPointStreamFrames;
-	uint64 SyncPointSystemTimestamp;
-	double Speed;
-
-	SoundDevice::StreamPosition RenderStreamPositionBefore;
-	SoundDevice::StreamPosition RenderStreamPositionAfter;
-	// int64 chunkSize = After - Before
-	
-	double Latency; // seconds
-
-	TimeInfo()
-		: SyncPointStreamFrames(0)
-		, SyncPointSystemTimestamp(0)
-		, Speed(1.0)
-		, Latency(0.0)
-	{
-		return;
-	}
-
-};
-
-
-struct BufferFormat;
-
-
-class ISource
-{
-public:
-	// main thread
-	virtual uint64 SoundSourceGetReferenceClockNowNanoseconds() const = 0; // timeGetTime()*1000000 on Windows
-	virtual void SoundSourcePreStartCallback() = 0;
-	virtual void SoundSourcePostStopCallback() = 0;
-	virtual bool SoundSourceIsLockedByCurrentThread() const = 0;
-	// audio thread
-	virtual void SoundSourceLock() = 0;
-	virtual uint64 SoundSourceLockedGetReferenceClockNowNanoseconds() const = 0; // timeGetTime()*1000000 on Windows
-	virtual void SoundSourceLockedReadPrepare(SoundDevice::TimeInfo timeInfo) = 0;
-	virtual void SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, std::size_t numFrames, uint8 *buffer, const uint8 *inputBuffer) = 0;
-	virtual void SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, std::size_t numFrames, int8 *buffer, const int8 *inputBuffer) = 0;
-	virtual void SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, std::size_t numFrames, int16 *buffer, const int16 *inputBuffer) = 0;
-	virtual void SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, std::size_t numFrames, int24 *buffer, const int24 *inputBuffer) = 0;
-	virtual void SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, std::size_t numFrames, int32 *buffer, const int32 *inputBuffer) = 0;
-	virtual void SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, std::size_t numFrames, float *buffer, const float *inputBuffer) = 0;
-	virtual void SoundSourceLockedRead(SoundDevice::BufferFormat bufferFormat, std::size_t numFrames, double *buffer, const double *inputBuffer) = 0;
-	virtual void SoundSourceLockedReadDone(SoundDevice::TimeInfo timeInfo) = 0;
-	virtual void SoundSourceUnlock() = 0;
 };
 
 
@@ -539,17 +480,6 @@ struct DynamicCaps
 };
 
 
-struct BufferFormat
-{
-	uint32 Samplerate;
-	uint32 Channels;
-	uint8 InputChannels;
-	SampleFormat sampleFormat;
-	bool WantsClippedOutput;
-	int32 DitherType;
-};
-
-
 struct BufferAttributes
 {
 	double Latency; // seconds
@@ -563,9 +493,6 @@ struct BufferAttributes
 		return;
 	}
 };
-
-
-
 
 
 enum RequestFlags : uint32
@@ -617,7 +544,7 @@ public:
 public:
 
 	virtual void SetMessageReceiver(SoundDevice::IMessageReceiver *receiver) = 0;
-	virtual void SetSource(SoundDevice::ISource *source) = 0;
+	virtual void SetCallback(SoundDevice::ICallback *callback) = 0;
 
 	virtual SoundDevice::Info GetDeviceInfo() const = 0;
 

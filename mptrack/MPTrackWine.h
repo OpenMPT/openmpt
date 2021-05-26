@@ -33,27 +33,27 @@ typedef struct OpenMPT_Wine_Wrapper_SoundDevice_IMessageReceiver {
 	void (__cdecl * SoundDeviceMessageFunc)( void * inst, uintptr_t level, const char * message );
 } OpenMPT_Wine_Wrapper_SoundDevice_IMessageReceiver;
 
-typedef struct OpenMPT_Wine_Wrapper_SoundDevice_ISource {
+typedef struct OpenMPT_Wine_Wrapper_SoundDevice_ICallback {
 	void * inst;
 	// main thread
-	void (__cdecl * SoundSourceGetReferenceClockNowNanosecondsFunc)( void * inst, uint64_t * result );
-	void (__cdecl * SoundSourcePreStartCallbackFunc)( void * inst );
-	void (__cdecl * SoundSourcePostStopCallbackFunc)( void * inst );
-	void (__cdecl * SoundSourceIsLockedByCurrentThreadFunc)( void * inst, uintptr_t * result );
+	void (__cdecl * SoundCallbackGetReferenceClockNowNanosecondsFunc)( void * inst, uint64_t * result );
+	void (__cdecl * SoundCallbackPreStartFunc)( void * inst );
+	void (__cdecl * SoundCallbackPostStopFunc)( void * inst );
+	void (__cdecl * SoundCallbackIsLockedByCurrentThreadFunc)( void * inst, uintptr_t * result );
 	// audio thread
-	void (__cdecl * SoundSourceLockFunc)( void * inst );
-	void (__cdecl * SoundSourceLockedGetReferenceClockNowNanosecondsFunc)( void * inst, uint64_t * result );
-	void (__cdecl * SoundSourceLockedReadPrepareFunc)( void * inst, const OpenMPT_SoundDevice_TimeInfo * timeInfo );
-	void (__cdecl * SoundSourceLockedReadUint8Func)( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, uintptr_t numFrames, uint8_t * buffer, const uint8_t * inputBuffer );
-	void (__cdecl * SoundSourceLockedReadInt8Func)( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, uintptr_t numFrames, int8_t * buffer, const int8_t * inputBuffer );
-	void (__cdecl * SoundSourceLockedReadInt16Func)( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, uintptr_t numFrames, int16_t * buffer, const int16_t * inputBuffer );
-	void (__cdecl * SoundSourceLockedReadInt24Func)( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, uintptr_t numFrames, OpenMPT_int24 * buffer, const OpenMPT_int24 * inputBuffer );
-	void (__cdecl * SoundSourceLockedReadInt32Func)( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, uintptr_t numFrames, int32_t * buffer, const int32_t * inputBuffer );
-	void (__cdecl * SoundSourceLockedReadFloatFunc)( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, uintptr_t numFrames, float * buffer, const float * inputBuffer );
-	void (__cdecl * SoundSourceLockedReadDoubleFunc)( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, uintptr_t numFrames, double * buffer, const double * inputBuffer );
-	void (__cdecl * SoundSourceLockedReadDoneFunc)( void * inst, const OpenMPT_SoundDevice_TimeInfo * timeInfo );
-	void (__cdecl * SoundSourceUnlockFunc)( void * inst );
-} OpenMPT_Wine_Wrapper_SoundDevice_ISource;
+	void (__cdecl * SoundCallbackLockFunc)( void * inst );
+	void (__cdecl * SoundCallbackLockedGetReferenceClockNowNanosecondsFunc)( void * inst, uint64_t * result );
+	void (__cdecl * SoundCallbackLockedProcessPrepareFunc)( void * inst, const OpenMPT_SoundDevice_TimeInfo * timeInfo );
+	void (__cdecl * SoundCallbackLockedProcessUint8Func)( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, uintptr_t numFrames, uint8_t * buffer, const uint8_t * inputBuffer );
+	void (__cdecl * SoundCallbackLockedProcessInt8Func)( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, uintptr_t numFrames, int8_t * buffer, const int8_t * inputBuffer );
+	void (__cdecl * SoundCallbackLockedProcessInt16Func)( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, uintptr_t numFrames, int16_t * buffer, const int16_t * inputBuffer );
+	void (__cdecl * SoundCallbackLockedProcessInt24Func)( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, uintptr_t numFrames, OpenMPT_int24 * buffer, const OpenMPT_int24 * inputBuffer );
+	void (__cdecl * SoundCallbackLockedProcessInt32Func)( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, uintptr_t numFrames, int32_t * buffer, const int32_t * inputBuffer );
+	void (__cdecl * SoundCallbackLockedProcessFloatFunc)( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, uintptr_t numFrames, float * buffer, const float * inputBuffer );
+	void (__cdecl * SoundCallbackLockedProcessDoubleFunc)( void * inst, const OpenMPT_SoundDevice_BufferFormat * bufferFormat, uintptr_t numFrames, double * buffer, const double * inputBuffer );
+	void (__cdecl * SoundCallbackLockedProcessDoneFunc)( void * inst, const OpenMPT_SoundDevice_TimeInfo * timeInfo );
+	void (__cdecl * SoundCallbackUnlockFunc)( void * inst );
+} OpenMPT_Wine_Wrapper_SoundDevice_ICallback;
 
 typedef struct OpenMPT_Wine_Wrapper_SoundDevice OpenMPT_Wine_Wrapper_SoundDevice;
 
@@ -94,7 +94,7 @@ public: OpenMPT_Wine_Wrapper_SoundDevice * (__cdecl * OpenMPT_Wine_Wrapper_Sound
 public: void (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_Destruct)( OpenMPT_Wine_Wrapper_SoundDevice * sd ) = nullptr;
 
 public: void (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_SetMessageReceiver)( OpenMPT_Wine_Wrapper_SoundDevice * sd, const OpenMPT_Wine_Wrapper_SoundDevice_IMessageReceiver * receiver ) = nullptr;
-public: void (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_SetSource)( OpenMPT_Wine_Wrapper_SoundDevice * sd, const OpenMPT_Wine_Wrapper_SoundDevice_ISource * source ) = nullptr;
+public: void (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_SetCallback)( OpenMPT_Wine_Wrapper_SoundDevice * sd, const OpenMPT_Wine_Wrapper_SoundDevice_ICallback * callback ) = nullptr;
 
 public: char * (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_GetDeviceInfo)( const OpenMPT_Wine_Wrapper_SoundDevice * sd ) = nullptr;
 public: char * (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_GetDeviceCaps)( const OpenMPT_Wine_Wrapper_SoundDevice * sd ) = nullptr;

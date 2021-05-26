@@ -638,21 +638,21 @@ void CMainFrame::SoundDeviceMessage(LogLevel level, const mpt::ustring &str)
 }
 
 
-void CMainFrame::SoundSourcePreStartCallback()
+void CMainFrame::SoundCallbackPreStart()
 {
 	MPT_TRACE();
 	m_SoundDeviceClock.SetResolution(1);
 }
 
 
-void CMainFrame::SoundSourcePostStopCallback()
+void CMainFrame::SoundCallbackPostStop()
 {
 	MPT_TRACE();
 	m_SoundDeviceClock.SetResolution(0);
 }
 
 
-uint64 CMainFrame::SoundSourceGetReferenceClockNowNanoseconds() const
+uint64 CMainFrame::SoundCallbackGetReferenceClockNowNanoseconds() const
 {
 	MPT_TRACE();
 	MPT_ASSERT(!InAudioThread());
@@ -660,7 +660,7 @@ uint64 CMainFrame::SoundSourceGetReferenceClockNowNanoseconds() const
 }
 
 
-uint64 CMainFrame::SoundSourceLockedGetReferenceClockNowNanoseconds() const
+uint64 CMainFrame::SoundCallbackLockedGetReferenceClockNowNanoseconds() const
 {
 	MPT_TRACE();
 	MPT_ASSERT(InAudioThread());
@@ -668,14 +668,14 @@ uint64 CMainFrame::SoundSourceLockedGetReferenceClockNowNanoseconds() const
 }
 
 
-bool CMainFrame::SoundSourceIsLockedByCurrentThread() const
+bool CMainFrame::SoundCallbackIsLockedByCurrentThread() const
 {
 	MPT_TRACE();
 	return theApp.GetGlobalMutexRef().IsLockedByCurrentThread();
 }
 
 
-void CMainFrame::SoundSourceLock()
+void CMainFrame::SoundCallbackLock()
 {
 	MPT_TRACE_SCOPE();
 	m_SoundDeviceFillBufferCriticalSection.Enter();
@@ -685,7 +685,7 @@ void CMainFrame::SoundSourceLock()
 }
 
 
-void CMainFrame::SoundSourceUnlock()
+void CMainFrame::SoundCallbackUnlock()
 {
 	MPT_TRACE_SCOPE();
 	MPT_ASSERT_ALWAYS(m_pSndFile != nullptr);
@@ -738,7 +738,7 @@ public:
 };
 
 
-void CMainFrame::SoundSourceLockedReadPrepare(SoundDevice::TimeInfo timeInfo)
+void CMainFrame::SoundCallbackLockedProcessPrepare(SoundDevice::TimeInfo timeInfo)
 {
 	MPT_TRACE_SCOPE();
 	MPT_ASSERT(InAudioThread());
@@ -751,7 +751,7 @@ void CMainFrame::SoundSourceLockedReadPrepare(SoundDevice::TimeInfo timeInfo)
 }
 
 
-void CMainFrame::SoundSourceLockedCallback(SoundDevice::CallbackBuffer<DithersOpenMPT> &buffer)
+void CMainFrame::SoundCallbackLockedCallback(SoundDevice::CallbackBuffer<DithersOpenMPT> &buffer)
 {
 	MPT_TRACE_SCOPE();
 	MPT_ASSERT(InAudioThread());
@@ -768,7 +768,7 @@ void CMainFrame::SoundSourceLockedCallback(SoundDevice::CallbackBuffer<DithersOp
 }
 
 
-void CMainFrame::SoundSourceLockedReadDone(SoundDevice::TimeInfo timeInfo)
+void CMainFrame::SoundCallbackLockedProcessDone(SoundDevice::TimeInfo timeInfo)
 {
 	MPT_TRACE_SCOPE();
 	MPT_ASSERT(InAudioThread());
@@ -818,7 +818,7 @@ bool CMainFrame::audioOpenDevice()
 		return false;
 	}
 	gpSoundDevice->SetMessageReceiver(this);
-	gpSoundDevice->SetSource(this);
+	gpSoundDevice->SetCallback(this);
 	SoundDevice::Settings deviceSettings = TrackerSettings::Instance().GetSoundDeviceSettings(deviceIdentifier);
 	if(!gpSoundDevice->Open(deviceSettings))
 	{
