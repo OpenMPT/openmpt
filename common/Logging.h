@@ -13,6 +13,9 @@
 
 #include "openmpt/logging/Logger.hpp"
 
+#include "mptPathString.h"
+#include "mptString.h"
+
 #if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
 #include <atomic>
 #endif
