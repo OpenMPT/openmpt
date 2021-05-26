@@ -29,7 +29,8 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-namespace SoundDevice {
+namespace SoundDevice
+{
 
 
 #if defined(MPT_ENABLE_PULSEAUDIO_FULL)
@@ -56,10 +57,10 @@ mpt::ustring Pulseaudio::PulseErrorString(int error)
 }
 
 
-static void PulseAudioSinkInfoListCallback(pa_context * /* c */ , const pa_sink_info *i, int /* eol */ , void *userdata)
+static void PulseAudioSinkInfoListCallback(pa_context * /* c */, const pa_sink_info *i, int /* eol */, void *userdata)
 {
 	MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_USTRING("PulseAudioSinkInfoListCallback"));
-	std::vector<SoundDevice::Info> *devices_ = reinterpret_cast<std::vector<SoundDevice::Info>*>(userdata);
+	std::vector<SoundDevice::Info> *devices_ = reinterpret_cast<std::vector<SoundDevice::Info> *>(userdata);
 	if(!devices_)
 	{
 		return;
@@ -122,7 +123,10 @@ static void PulseAudioSinkInfoListCallback(pa_context * /* c */ , const pa_sink_
 
 std::vector<SoundDevice::Info> Pulseaudio::EnumerateDevices(ILogger &logger, SoundDevice::SysInfo sysInfo)
 {
-	auto GetLogger = [&]() -> ILogger& { return logger; };
+	auto GetLogger = [&]() -> ILogger &
+	{
+		return logger;
+	};
 	std::vector<SoundDevice::Info> devices;
 	SoundDevice::Info info;
 	info.type = MPT_USTRING("PulseAudio");
@@ -138,8 +142,7 @@ std::vector<SoundDevice::Info> Pulseaudio::EnumerateDevices(ILogger &logger, Sou
 		sysInfo.SystemClass == mpt::osinfo::osclass::Linux ? Info::Api::Native : Info::Api::Emulated,
 		Info::Io::FullDuplex,
 		Info::Mixing::Server,
-		Info::Implementor::External
-	};
+		Info::Implementor::External};
 	devices.push_back(info);
 
 	int result = 0;
@@ -156,7 +159,7 @@ std::vector<SoundDevice::Info> Pulseaudio::EnumerateDevices(ILogger &logger, Sou
 		MPT_LOG(GetLogger(), LogError, "sounddev", MPT_USTRING("pa_mainloop_new"));
 		goto cleanup;
 	}
-	c = pa_context_new(pa_mainloop_get_api(m), mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, mpt::ustring()).c_str()); // TODO: get AppInfo
+	c = pa_context_new(pa_mainloop_get_api(m), mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, mpt::ustring()).c_str());  // TODO: get AppInfo
 	if(!c)
 	{
 		MPT_LOG(GetLogger(), LogError, "sounddev", MPT_USTRING("pa_context_new"));
@@ -178,22 +181,22 @@ std::vector<SoundDevice::Info> Pulseaudio::EnumerateDevices(ILogger &logger, Sou
 		cs = pa_context_get_state(c);
 		switch(cs)
 		{
-		case PA_CONTEXT_UNCONNECTED:
-		case PA_CONTEXT_CONNECTING:
-		case PA_CONTEXT_AUTHORIZING:
-		case PA_CONTEXT_SETTING_NAME:
-			break;
-		case PA_CONTEXT_READY:
-			doneConnect = true;
-			break;
-		case PA_CONTEXT_FAILED:
-		case PA_CONTEXT_TERMINATED:
-		default:
-			{
-				MPT_LOG(GetLogger(), LogError, "sounddev", MPT_USTRING("pa_context_connect"));
-				goto cleanup;
-			}
-			break;
+			case PA_CONTEXT_UNCONNECTED:
+			case PA_CONTEXT_CONNECTING:
+			case PA_CONTEXT_AUTHORIZING:
+			case PA_CONTEXT_SETTING_NAME:
+				break;
+			case PA_CONTEXT_READY:
+				doneConnect = true;
+				break;
+			case PA_CONTEXT_FAILED:
+			case PA_CONTEXT_TERMINATED:
+			default:
+				{
+					MPT_LOG(GetLogger(), LogError, "sounddev", MPT_USTRING("pa_context_connect"));
+					goto cleanup;
+				}
+				break;
 		}
 	}
 	o = pa_context_get_sink_info_list(c, &PulseAudioSinkInfoListCallback, &devices);
@@ -218,26 +221,26 @@ std::vector<SoundDevice::Info> Pulseaudio::EnumerateDevices(ILogger &logger, Sou
 	}
 	goto cleanup;
 
-	cleanup:
+cleanup:
 
-		if(o)
-		{
-			pa_operation_unref(o);
-			o = nullptr;
-		}
-		if(c)
-		{
-			pa_context_disconnect(c);
-			pa_context_unref(c);
-			c = nullptr;
-		}
-		if(m)
-		{
-			pa_mainloop_quit(m, 0);
-			pa_mainloop_run(m, &result);
-			pa_mainloop_free(m);
-			m = nullptr;
-		}
+	if(o)
+	{
+		pa_operation_unref(o);
+		o = nullptr;
+	}
+	if(c)
+	{
+		pa_context_disconnect(c);
+		pa_context_unref(c);
+		c = nullptr;
+	}
+	if(m)
+	{
+		pa_mainloop_quit(m, 0);
+		pa_mainloop_run(m, &result);
+		pa_mainloop_free(m);
+		m = nullptr;
+	}
 
 	return devices;
 }
@@ -255,7 +258,7 @@ Pulseaudio::Pulseaudio(ILogger &logger, SoundDevice::Info info, SoundDevice::Sys
 SoundDevice::Caps Pulseaudio::InternalGetDeviceCaps()
 {
 	SoundDevice::Caps caps;
-	caps.Available = true; // TODO: poll PulseAudio
+	caps.Available = true;  // TODO: poll PulseAudio
 	caps.CanUpdateInterval = true;
 	caps.CanSampleFormat = false;
 	caps.CanExclusiveMode = true;
@@ -281,8 +284,8 @@ SoundDevice::DynamicCaps Pulseaudio::GetDeviceDynamicCaps(const std::vector<uint
 	SoundDevice::DynamicCaps caps;
 	caps.supportedSampleRates = baseSampleRates;
 	caps.supportedExclusiveSampleRates = baseSampleRates;
-	caps.supportedSampleFormats = { SampleFormat::Float32 };
-	caps.supportedExclusiveModeSampleFormats = { SampleFormat::Float32 };
+	caps.supportedSampleFormats = {SampleFormat::Float32};
+	caps.supportedExclusiveModeSampleFormats = {SampleFormat::Float32};
 	return caps;
 }
 
@@ -413,7 +416,7 @@ void Pulseaudio::InternalStopFromSoundThread()
 	std::vector<uint64> version = mpt::split_parse<uint64>(mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, pa_get_library_version() ? pa_get_library_version() : ""));
 	if(!version.empty())
 	{
-		if(version[0] <4)
+		if(version[0] < 4)
 		{
 			oldVersion = true;
 		}
@@ -458,12 +461,12 @@ Pulseaudio::~Pulseaudio()
 }
 
 
-#endif // MPT_WITH_PULSEAUDIO
+#endif  // MPT_WITH_PULSEAUDIO
 
-#endif // MPT_ENABLE_PULSEAUDIO_FULL
+#endif  // MPT_ENABLE_PULSEAUDIO_FULL
 
 
-} // namespace SoundDevice
+}  // namespace SoundDevice
 
 
 OPENMPT_NAMESPACE_END

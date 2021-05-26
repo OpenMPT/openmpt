@@ -23,12 +23,13 @@
 #include <portaudio.h>
 #if MPT_OS_WINDOWS
 #include <pa_win_wasapi.h>
-#endif // MPT_OS_WINDOWS
+#endif  // MPT_OS_WINDOWS
 #endif
 
 OPENMPT_NAMESPACE_BEGIN
 
-namespace SoundDevice {
+namespace SoundDevice
+{
 
 #ifdef MPT_WITH_PORTAUDIO
 
@@ -37,6 +38,7 @@ class PortAudioInitializer
 {
 private:
 	bool m_initialized = false;
+
 public:
 	PortAudioInitializer();
 	PortAudioInitializer(const PortAudioInitializer &) = delete;
@@ -45,15 +47,13 @@ public:
 	~PortAudioInitializer() override;
 };
 
-class CPortaudioDevice: public SoundDevice::Base
+class CPortaudioDevice : public SoundDevice::Base
 {
 
 private:
-
 	PortAudioInitializer m_PortAudio;
 
 protected:
-
 	PaDeviceIndex m_DeviceIsDefault;
 	PaDeviceIndex m_DeviceIndex;
 	PaHostApiTypeId m_HostApiType;
@@ -61,23 +61,21 @@ protected:
 	PaStreamParameters m_InputStreamParameters;
 #if MPT_OS_WINDOWS
 	PaWasapiStreamInfo m_WasapiStreamInfo;
-#endif // MPT_OS_WINDOWS
-	PaStream * m_Stream;
-	const PaStreamInfo * m_StreamInfo;
-	void * m_CurrentFrameBuffer;
-	const void * m_CurrentFrameBufferInput;
+#endif  // MPT_OS_WINDOWS
+	PaStream *m_Stream;
+	const PaStreamInfo *m_StreamInfo;
+	void *m_CurrentFrameBuffer;
+	const void *m_CurrentFrameBufferInput;
 	unsigned long m_CurrentFrameCount;
 
-	double m_CurrentRealLatency; // seconds
+	double m_CurrentRealLatency;  // seconds
 	std::atomic<uint32> m_StatisticPeriodFrames;
 
 public:
-
 	CPortaudioDevice(ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo);
 	~CPortaudioDevice();
 
 public:
-
 	bool InternalOpen();
 	bool InternalClose();
 	void InternalFillAudioBuffer();
@@ -94,21 +92,11 @@ public:
 	bool OnIdle();
 
 	int StreamCallback(
-		const void *input, void *output,
-		unsigned long frameCount,
-		const PaStreamCallbackTimeInfo* timeInfo,
-		PaStreamCallbackFlags statusFlags
-		);
+		const void *input, void *output, unsigned long frameCount, const PaStreamCallbackTimeInfo *timeInfo, PaStreamCallbackFlags statusFlags);
 
 public:
-
 	static int StreamCallbackWrapper(
-		const void *input, void *output,
-		unsigned long frameCount,
-		const PaStreamCallbackTimeInfo* timeInfo,
-		PaStreamCallbackFlags statusFlags,
-		void *userData
-		);
+		const void *input, void *output, unsigned long frameCount, const PaStreamCallbackTimeInfo *timeInfo, PaStreamCallbackFlags statusFlags, void *userData);
 
 	static std::unique_ptr<SoundDevice::BackendInitializer> BackendInitializer()
 	{
@@ -118,18 +106,16 @@ public:
 	static std::vector<SoundDevice::Info> EnumerateDevices(ILogger &logger, SoundDevice::SysInfo sysInfo);
 
 private:
-
 	bool HasInputChannelsOnSameDevice() const;
 
-	static std::vector<std::pair<PaDeviceIndex, mpt::ustring> > EnumerateInputOnlyDevices(PaHostApiTypeId hostApiType);
-
+	static std::vector<std::pair<PaDeviceIndex, mpt::ustring>> EnumerateInputOnlyDevices(PaHostApiTypeId hostApiType);
 };
 
 
-#endif // MPT_WITH_PORTAUDIO
+#endif  // MPT_WITH_PORTAUDIO
 
 
-} // namespace SoundDevice
+}  // namespace SoundDevice
 
 
 OPENMPT_NAMESPACE_END

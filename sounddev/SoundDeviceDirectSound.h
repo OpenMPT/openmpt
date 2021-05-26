@@ -19,16 +19,17 @@
 
 #if defined(MPT_WITH_DIRECTSOUND)
 #include <dsound.h>
-#endif // MPT_WITH_DIRECTSOUND
+#endif  // MPT_WITH_DIRECTSOUND
 
 OPENMPT_NAMESPACE_BEGIN
 
-namespace SoundDevice {
+namespace SoundDevice
+{
 
 #if defined(MPT_WITH_DIRECTSOUND)
 
 
-class CDSoundDevice: public CSoundDeviceWithThread
+class CDSoundDevice : public CSoundDeviceWithThread
 {
 protected:
 	IDirectSound *m_piDS;
@@ -58,14 +59,14 @@ public:
 	SoundDevice::DynamicCaps GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates);
 
 public:
-	static std::unique_ptr<SoundDevice::BackendInitializer> BackendInitializer() { return std::make_unique< SoundDevice::BackendInitializer>(); }
+	static std::unique_ptr<SoundDevice::BackendInitializer> BackendInitializer() { return std::make_unique<SoundDevice::BackendInitializer>(); }
 	static std::vector<SoundDevice::Info> EnumerateDevices(ILogger &logger, SoundDevice::SysInfo sysInfo);
 };
 
-#endif // MPT_WITH_DIRECTSOUND
+#endif  // MPT_WITH_DIRECTSOUND
 
 
-} // namespace SoundDevice
+}  // namespace SoundDevice
 
 
 OPENMPT_NAMESPACE_END

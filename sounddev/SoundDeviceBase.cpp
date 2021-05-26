@@ -26,7 +26,8 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-namespace SoundDevice {
+namespace SoundDevice
+{
 
 
 Base::Base(ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
@@ -285,30 +286,30 @@ void Base::CallbackLockedAudioProcessVoid(void *buffer, const void *inputBuffer,
 {
 	switch(GetBufferFormat().sampleFormat)
 	{
-	case SampleFormat::Unsigned8:
-		CallbackLockedAudioProcess(static_cast<uint8*>(buffer), static_cast<const uint8*>(inputBuffer), numFrames);
-		break;
-	case SampleFormat::Int8:
-		CallbackLockedAudioProcess(static_cast<int8*>(buffer), static_cast<const int8*>(inputBuffer), numFrames);
-		break;
-	case SampleFormat::Int16:
-		CallbackLockedAudioProcess(static_cast<int16*>(buffer), static_cast<const int16*>(inputBuffer), numFrames);
-		break;
-	case SampleFormat::Int24:
-		CallbackLockedAudioProcess(static_cast<int24*>(buffer), static_cast<const int24*>(inputBuffer), numFrames);
-		break;
-	case SampleFormat::Int32:
-		CallbackLockedAudioProcess(static_cast<int32*>(buffer), static_cast<const int32*>(inputBuffer), numFrames);
-		break;
-	case SampleFormat::Float32:
-		CallbackLockedAudioProcess(static_cast<float*>(buffer), static_cast<const float*>(inputBuffer), numFrames);
-		break;
-	case SampleFormat::Float64:
-		CallbackLockedAudioProcess(static_cast<double*>(buffer), static_cast<const double*>(inputBuffer), numFrames);
-		break;
-	case SampleFormat::Invalid:
-		// nothing
-		break;
+		case SampleFormat::Unsigned8:
+			CallbackLockedAudioProcess(static_cast<uint8 *>(buffer), static_cast<const uint8 *>(inputBuffer), numFrames);
+			break;
+		case SampleFormat::Int8:
+			CallbackLockedAudioProcess(static_cast<int8 *>(buffer), static_cast<const int8 *>(inputBuffer), numFrames);
+			break;
+		case SampleFormat::Int16:
+			CallbackLockedAudioProcess(static_cast<int16 *>(buffer), static_cast<const int16 *>(inputBuffer), numFrames);
+			break;
+		case SampleFormat::Int24:
+			CallbackLockedAudioProcess(static_cast<int24 *>(buffer), static_cast<const int24 *>(inputBuffer), numFrames);
+			break;
+		case SampleFormat::Int32:
+			CallbackLockedAudioProcess(static_cast<int32 *>(buffer), static_cast<const int32 *>(inputBuffer), numFrames);
+			break;
+		case SampleFormat::Float32:
+			CallbackLockedAudioProcess(static_cast<float *>(buffer), static_cast<const float *>(inputBuffer), numFrames);
+			break;
+		case SampleFormat::Float64:
+			CallbackLockedAudioProcess(static_cast<double *>(buffer), static_cast<const double *>(inputBuffer), numFrames);
+			break;
+		case SampleFormat::Invalid:
+			// nothing
+			break;
 	}
 }
 
@@ -339,7 +340,7 @@ bool Base::Start()
 	MPT_SOUNDDEV_TRACE_SCOPE();
 	if(!IsOpen())
 	{
-		return false; 
+		return false;
 	}
 	if(!IsPlaying())
 	{
@@ -430,10 +431,7 @@ SoundDevice::StreamPosition Base::GetStreamPosition() const
 		const uint64 now = CallbackGetReferenceClockNowNanoseconds();
 		const SoundDevice::TimeInfo timeInfo = GetTimeInfo();
 		frames = mpt::saturate_round<int64>(
-				timeInfo.SyncPointStreamFrames + (
-					static_cast<double>(static_cast<int64>(now - timeInfo.SyncPointSystemTimestamp)) * timeInfo.Speed * m_Settings.Samplerate * (1.0 / (1000.0 * 1000.0))
-				)
-			);
+			timeInfo.SyncPointStreamFrames + (static_cast<double>(static_cast<int64>(now - timeInfo.SyncPointSystemTimestamp)) * timeInfo.Speed * m_Settings.Samplerate * (1.0 / (1000.0 * 1000.0))));
 	} else
 	{
 		frames = m_StreamPositionOutputFrames;
@@ -453,7 +451,7 @@ SoundDevice::Statistics Base::GetStatistics() const
 }
 
 
-} // namespace SoundDevice
+}  // namespace SoundDevice
 
 
 OPENMPT_NAMESPACE_END

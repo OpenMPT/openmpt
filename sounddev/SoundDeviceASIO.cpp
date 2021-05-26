@@ -34,8 +34,8 @@
 #include "mptAssert.h"
 #if !defined(MPT_BUILD_WINESUPPORT)
 #include "../mptrack/ExceptionHandler.h"
-#endif // !MPT_BUILD_WINESUPPORT
-#endif // MODPLUG_TRACKER
+#endif  // !MPT_BUILD_WINESUPPORT
+#endif  // MODPLUG_TRACKER
 
 #include <algorithm>
 #include <atomic>
@@ -56,24 +56,25 @@
 #include <ASIOModern/ASIOSystemWindows.hpp>
 #if defined(MODPLUG_TRACKER)
 #include <ASIOModern/ASIOSystemWindowsSEH.hpp>
-#endif // MODPLUG_TRACKER
+#endif  // MODPLUG_TRACKER
 #include <ASIOModern/ASIOSampleConvert.hpp>
 //#include <ASIOModern/ASIOVerifyABI.hpp>
 
-#endif // MPT_WITH_ASIO
+#endif  // MPT_WITH_ASIO
 
 
 OPENMPT_NAMESPACE_BEGIN
 
 
-namespace SoundDevice {
+namespace SoundDevice
+{
 
 
 #ifdef MPT_WITH_ASIO
 
 
-static constexpr uint64 AppID1 = 0x4f70656e4d50542dull; // "OpenMPT-"
-static constexpr uint64 AppID2 = 0x4153494f00000000ull; // "ASIO"
+static constexpr uint64 AppID1 = 0x4f70656e4d50542dull;  // "OpenMPT-"
+static constexpr uint64 AppID2 = 0x4153494f00000000ull;  // "ASIO"
 
 static constexpr double AsioSampleRateTolerance = 0.05;
 
@@ -112,7 +113,7 @@ public:
 };
 
 
-static mpt::winstring AsWinstring(const std::basic_string<TCHAR> & str)
+static mpt::winstring AsWinstring(const std::basic_string<TCHAR> &str)
 {
 	return mpt::winstring(str.data(), str.length());
 }
@@ -121,10 +122,13 @@ static mpt::winstring AsWinstring(const std::basic_string<TCHAR> & str)
 std::vector<SoundDevice::Info> CASIODevice::EnumerateDevices(ILogger &logger, SoundDevice::SysInfo sysInfo)
 {
 	MPT_SOUNDDEV_TRACE_SCOPE();
-	auto GetLogger = [&]() -> ILogger& { return logger; };
+	auto GetLogger = [&]() -> ILogger &
+	{
+		return logger;
+	};
 	std::vector<SoundDevice::Info> devices;
 	std::vector<ASIO::Windows::DriverInfo> drivers = ASIO::Windows::EnumerateDrivers();
-	for(const auto & driver : drivers)
+	for(const auto &driver : drivers)
 	{
 		SoundDevice::Info info;
 		info.type = TypeASIO;
@@ -144,12 +148,16 @@ std::vector<SoundDevice::Info> CASIODevice::EnumerateDevices(ILogger &logger, So
 			Info::Implementor::OpenMPT
 		};
 		// clang-format on
-		info.extraData[MPT_USTRING("Key")] = mpt::convert<mpt::ustring>(AsWinstring(driver.Key));;
+		info.extraData[MPT_USTRING("Key")] = mpt::convert<mpt::ustring>(AsWinstring(driver.Key));
+		;
 		info.extraData[MPT_USTRING("Id")] = mpt::convert<mpt::ustring>(AsWinstring(driver.Id));
 		info.extraData[MPT_USTRING("CLSID")] = mpt::convert<mpt::ustring>(mpt::CLSIDToString(driver.Clsid));
-		info.extraData[MPT_USTRING("Name")] = mpt::convert<mpt::ustring>(AsWinstring(driver.Name));;
-		info.extraData[MPT_USTRING("Description")] = mpt::convert<mpt::ustring>(AsWinstring(driver.Description));;
-		info.extraData[MPT_USTRING("DisplayName")] = mpt::convert<mpt::ustring>(AsWinstring(driver.DisplayName()));;
+		info.extraData[MPT_USTRING("Name")] = mpt::convert<mpt::ustring>(AsWinstring(driver.Name));
+		;
+		info.extraData[MPT_USTRING("Description")] = mpt::convert<mpt::ustring>(AsWinstring(driver.Description));
+		;
+		info.extraData[MPT_USTRING("DisplayName")] = mpt::convert<mpt::ustring>(AsWinstring(driver.DisplayName()));
+		;
 		MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT_MESSAGE("ASIO: Found driver:")());
 		MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT_MESSAGE("ASIO:  Key         = '{}'")(info.extraData[MPT_USTRING("Key")]));
 		MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT_MESSAGE("ASIO:  Id          = '{}'")(info.extraData[MPT_USTRING("Id")]));
@@ -210,7 +218,6 @@ void CASIODevice::InitMembers()
 	m_AsioRequest.store(0);
 
 	m_DebugRealtimeThreadID.store(0);
-
 }
 
 
@@ -243,14 +250,7 @@ bool CASIODevice::InternalOpen()
 
 	InitMembers();
 
-	MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT_MESSAGE("ASIO: Open('{}'): {}-bit, ({},{}) channels, {}Hz, hw-timing={}")
-		( GetDeviceInternalID()
-		, m_Settings.sampleFormat.GetBitsPerSample()
-		, m_Settings.InputChannels
-		, static_cast<int>(m_Settings.Channels)
-		, m_Settings.Samplerate
-		, m_Settings.UseHardwareTiming
-		));
+	MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT_MESSAGE("ASIO: Open('{}'): {}-bit, ({},{}) channels, {}Hz, hw-timing={}")(GetDeviceInternalID(), m_Settings.sampleFormat.GetBitsPerSample(), m_Settings.InputChannels, static_cast<int>(m_Settings.Channels), m_Settings.Samplerate, m_Settings.UseHardwareTiming));
 
 	SoundDevice::ChannelMapping inputChannelMapping = SoundDevice::ChannelMapping::BaseChannel(m_Settings.InputChannels, m_Settings.InputSourceID);
 
@@ -292,11 +292,10 @@ bool CASIODevice::InternalOpen()
 		AsioDriver()->setSampleRate(m_Settings.Samplerate);
 
 		ASIO::BufferSizes bufferSizes = AsioDriver()->getBufferSizes();
-		MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT_MESSAGE("ASIO: getBufferSize() => minSize={} maxSize={} preferredSize={} granularity={}")(
-			bufferSizes.Min, bufferSizes.Max, bufferSizes.Preferred, bufferSizes.Granularity));
+		MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT_MESSAGE("ASIO: getBufferSize() => minSize={} maxSize={} preferredSize={} granularity={}")(bufferSizes.Min, bufferSizes.Max, bufferSizes.Preferred, bufferSizes.Granularity));
 		m_nAsioBufferLen = mpt::saturate_round<int32>(m_Settings.Latency * m_Settings.Samplerate / 2.0);
 		if(bufferSizes.Min <= 0 || bufferSizes.Max <= 0 || bufferSizes.Min > bufferSizes.Max)
-		{ // limits make no sense
+		{  // limits make no sense
 			if(bufferSizes.Preferred > 0)
 			{
 				m_nAsioBufferLen = bufferSizes.Preferred;
@@ -305,10 +304,10 @@ bool CASIODevice::InternalOpen()
 				// just leave the user value, perhaps it works
 			}
 		} else if(bufferSizes.Granularity < -1)
-		{ // bufferSizes.Granularity value not allowed, just clamp value
+		{  // bufferSizes.Granularity value not allowed, just clamp value
 			m_nAsioBufferLen = std::clamp(m_nAsioBufferLen, bufferSizes.Min, bufferSizes.Max);
 		} else if(bufferSizes.Granularity == -1 && (mpt::popcount(static_cast<ASIO::ULong>(bufferSizes.Min)) != 1 || mpt::popcount(static_cast<ASIO::ULong>(bufferSizes.Max)) != 1))
-		{ // bufferSizes.Granularity tells us we need power-of-2 sizes, but min or max sizes are no power-of-2
+		{  // bufferSizes.Granularity tells us we need power-of-2 sizes, but min or max sizes are no power-of-2
 			m_nAsioBufferLen = std::clamp(m_nAsioBufferLen, bufferSizes.Min, bufferSizes.Max);
 			// just start at 1 and find a matching power-of-2 in range
 			const ASIO::Long bufTarget = m_nAsioBufferLen;
@@ -321,7 +320,7 @@ bool CASIODevice::InternalOpen()
 			}
 			// if no power-of-2 in range is found, just leave the clamped value alone, perhaps it works
 		} else if(bufferSizes.Granularity == -1)
-		{ // sane values, power-of-2 size required between min and max
+		{  // sane values, power-of-2 size required between min and max
 			m_nAsioBufferLen = std::clamp(m_nAsioBufferLen, bufferSizes.Min, bufferSizes.Max);
 			// get the largest allowed buffer size that is smaller or equal to the target size
 			const ASIO::Long bufTarget = m_nAsioBufferLen;
@@ -330,7 +329,7 @@ bool CASIODevice::InternalOpen()
 				m_nAsioBufferLen = bufSize;
 			}
 		} else if(bufferSizes.Granularity > 0)
-		{ // buffer size in bufferSizes.Granularity steps from min to max allowed
+		{  // buffer size in bufferSizes.Granularity steps from min to max allowed
 			m_nAsioBufferLen = std::clamp(m_nAsioBufferLen, bufferSizes.Min, bufferSizes.Max);
 			// get the largest allowed buffer size that is smaller or equal to the target size
 			const ASIO::Long bufTarget = m_nAsioBufferLen;
@@ -339,26 +338,26 @@ bool CASIODevice::InternalOpen()
 				m_nAsioBufferLen = bufSize;
 			}
 		} else if(bufferSizes.Granularity == 0)
-		{ // no bufferSizes.Granularity given, we should use bufferSizes.Preferred if possible
+		{  // no bufferSizes.Granularity given, we should use bufferSizes.Preferred if possible
 			if(bufferSizes.Preferred > 0)
 			{
 				m_nAsioBufferLen = bufferSizes.Preferred;
 			} else if(m_nAsioBufferLen >= bufferSizes.Max)
-			{ // a large latency was requested, use bufferSizes.Max
+			{  // a large latency was requested, use bufferSizes.Max
 				m_nAsioBufferLen = bufferSizes.Max;
 			} else
-			{ // use bufferSizes.Min otherwise
+			{  // use bufferSizes.Min otherwise
 				m_nAsioBufferLen = bufferSizes.Min;
 			}
 		} else
-		{ // should not happen
+		{  // should not happen
 #if defined(MODPLUG_TRACKER)
 			MPT_ASSERT_NOTREACHED();
-#else // !MODPLUG_TRACKER
+#else   // !MODPLUG_TRACKER
 			assert(false);
-#endif // MODPLUG_TRACKER
+#endif  // MODPLUG_TRACKER
 		}
-	
+
 		m_BufferInfo.resize(m_Settings.GetTotalChannels());
 		for(uint32 channel = 0; channel < m_Settings.GetTotalChannels(); ++channel)
 		{
@@ -395,14 +394,7 @@ bool CASIODevice::InternalOpen()
 				m_ChannelInfo[channel] = AsioDriver()->getChannelInfo(m_Settings.Channels.ToDevice(channel - m_Settings.InputChannels), false);
 			}
 			assert(m_ChannelInfo[channel].isActive);
-			MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT_MESSAGE("ASIO: getChannelInfo(isInput={} channel={}) => isActive={} channelGroup={} type={} name='{}'")
-				( (channel < m_Settings.InputChannels)
-				, m_Settings.Channels.ToDevice(channel)
-				, value_cast(m_ChannelInfo[channel].isActive)
-				, m_ChannelInfo[channel].channelGroup
-				, mpt::to_underlying(m_ChannelInfo[channel].type)
-				, mpt::convert<mpt::ustring>(mpt::logical_encoding::locale, static_cast<std::string>(m_ChannelInfo[channel].name))
-				));
+			MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT_MESSAGE("ASIO: getChannelInfo(isInput={} channel={}) => isActive={} channelGroup={} type={} name='{}'")((channel < m_Settings.InputChannels), m_Settings.Channels.ToDevice(channel), value_cast(m_ChannelInfo[channel].isActive), m_ChannelInfo[channel].channelGroup, mpt::to_underlying(m_ChannelInfo[channel].type), mpt::convert<mpt::ustring>(mpt::logical_encoding::locale, static_cast<std::string>(m_ChannelInfo[channel].name))));
 		}
 
 		bool allChannelsAreInt = true;
@@ -467,7 +459,8 @@ bool CASIODevice::InternalOpen()
 			ASIO::Sample::ClearBufferASIO(m_BufferInfo[channel].buffers[1], m_ChannelInfo[channel].type, m_nAsioBufferLen);
 		}
 
-		m_CanOutputReady = AsioDriver()->canOutputReady();;
+		m_CanOutputReady = AsioDriver()->canOutputReady();
+		;
 
 		m_StreamPositionOffset = m_nAsioBufferLen;
 
@@ -500,7 +493,7 @@ void CASIODevice::UpdateLatency()
 	}
 	if(latencies.Output >= m_nAsioBufferLen)
 	{
-		m_BufferLatency = static_cast<double>(latencies.Output + m_nAsioBufferLen) / static_cast<double>(m_Settings.Samplerate); // ASIO and OpenMPT semantics of 'latency' differ by one chunk/buffer
+		m_BufferLatency = static_cast<double>(latencies.Output + m_nAsioBufferLen) / static_cast<double>(m_Settings.Samplerate);  // ASIO and OpenMPT semantics of 'latency' differ by one chunk/buffer
 	} else
 	{
 		// pointless value returned from asio driver, use a sane estimate
@@ -542,9 +535,9 @@ void CASIODevice::SetRenderSilence(bool silence, bool wait)
 					MPT_ASSERT_MSG(false, "waiting for asio failed in Start()");
 				}
 			}
-#else // !MODPLUG_TRACKER
+#else   // !MODPLUG_TRACKER
 			assert(false);
-#endif // MODPLUG_TRACKER
+#endif  // MODPLUG_TRACKER
 			break;
 		}
 		std::this_thread::sleep_for(std::chrono::milliseconds(1));
@@ -557,9 +550,9 @@ bool CASIODevice::InternalStart()
 	MPT_SOUNDDEV_TRACE_SCOPE();
 #if defined(MODPLUG_TRACKER)
 	MPT_ASSERT_ALWAYS_MSG(!CallbackIsLockedByCurrentThread(), "AudioCriticalSection locked while starting ASIO");
-#else // !MODPLUG_TRACKER
+#else   // !MODPLUG_TRACKER
 	assert(!CallbackIsLockedByCurrentThread());
-#endif // MODPLUG_TRACKER
+#endif  // MODPLUG_TRACKER
 
 	if(m_Settings.KeepDeviceRunning)
 	{
@@ -631,9 +624,9 @@ void CASIODevice::InternalStopImpl(bool force)
 	MPT_SOUNDDEV_TRACE_SCOPE();
 #if defined(MODPLUG_TRACKER)
 	MPT_ASSERT_ALWAYS_MSG(!CallbackIsLockedByCurrentThread(), "AudioCriticalSection locked while stopping ASIO");
-#else // !MODPLUG_TRACKER
+#else   // !MODPLUG_TRACKER
 	assert(!CallbackIsLockedByCurrentThread());
-#endif // MODPLUG_TRACKER
+#endif  // MODPLUG_TRACKER
 
 	if(m_Settings.KeepDeviceRunning && !force)
 	{
@@ -717,16 +710,17 @@ void CASIODevice::OpenDriver()
 	{
 		if(GetAppInfo().AllowDeferredProcessing)
 		{
-			m_DeferredBufferSwitchDispatcher = ASIO::Windows::CreateBufferSwitchDispatcher([=](ASIO::BufferIndex bufferIndex) { this->RealtimeBufferSwitchImpl(bufferIndex); } );
+			m_DeferredBufferSwitchDispatcher = ASIO::Windows::CreateBufferSwitchDispatcher([=](ASIO::BufferIndex bufferIndex)
+																						   { this->RealtimeBufferSwitchImpl(bufferIndex); });
 		}
 		{
-			CrashContextGuard guard{ &m_Ectx };
+			CrashContextGuard guard{&m_Ectx};
 #if defined(MODPLUG_TRACKER)
 			if(GetAppInfo().MaskDriverCrashes)
 			{
 				m_Driver = std::make_unique<ASIO::Driver>(std::make_unique<ASIO::Windows::SEH::Driver>(clsid, GetAppInfo().GetHWND()));
 			} else
-#endif // MODPLUG_TRACKER
+#endif  // MODPLUG_TRACKER
 			{
 				m_Driver = std::make_unique<ASIO::Driver>(std::make_unique<ASIO::Windows::Driver>(clsid, GetAppInfo().GetHWND()));
 			}
@@ -764,7 +758,7 @@ void CASIODevice::CloseDriver()
 	try
 	{
 		{
-			CrashContextGuard guard{ &m_Ectx };
+			CrashContextGuard guard{&m_Ectx};
 			m_Driver = nullptr;
 		}
 		m_DeferredBufferSwitchDispatcher = nullptr;
@@ -843,9 +837,9 @@ void CASIODevice::FillAsioBuffer(bool useSource)
 		{
 #if defined(MODPLUG_TRACKER)
 			MPT_ASSERT_NOTREACHED();
-#else // !MODPLUG_TRACKER
+#else   // !MODPLUG_TRACKER
 			assert(false);
-#endif // MODPLUG_TRACKER
+#endif  // MODPLUG_TRACKER
 		}
 	}
 	if(rendersilence)
@@ -869,9 +863,9 @@ void CASIODevice::FillAsioBuffer(bool useSource)
 		{
 #if defined(MODPLUG_TRACKER)
 			MPT_ASSERT_NOTREACHED();
-#else // !MODPLUG_TRACKER
+#else   // !MODPLUG_TRACKER
 			assert(false);
-#endif // MODPLUG_TRACKER
+#endif  // MODPLUG_TRACKER
 		}
 	} else
 	{
@@ -895,9 +889,9 @@ void CASIODevice::FillAsioBuffer(bool useSource)
 		{
 #if defined(MODPLUG_TRACKER)
 			MPT_ASSERT_NOTREACHED();
-#else // !MODPLUG_TRACKER
+#else   // !MODPLUG_TRACKER
 			assert(false);
-#endif // MODPLUG_TRACKER
+#endif  // MODPLUG_TRACKER
 		}
 	}
 	for(std::size_t outputChannel = 0; outputChannel < outputChannels; ++outputChannel)
@@ -954,16 +948,16 @@ void CASIODevice::FillAsioBuffer(bool useSource)
 		{
 #if defined(MODPLUG_TRACKER)
 			MPT_ASSERT_NOTREACHED();
-#else // !MODPLUG_TRACKER
+#else   // !MODPLUG_TRACKER
 			assert(false);
-#endif // MODPLUG_TRACKER
+#endif  // MODPLUG_TRACKER
 		}
 	}
 	if(m_CanOutputReady)
 	{
 		try
 		{
-			AsioDriver()->outputReady(); // do not handle errors, there is nothing we could do about them
+			AsioDriver()->outputReady();  // do not handle errors, there is nothing we could do about them
 		} catch(...)
 		{
 			ExceptionHandler(__func__);
@@ -993,11 +987,12 @@ SoundDevice::BufferAttributes CASIODevice::InternalGetEffectiveBufferAttributes(
 }
 
 
-namespace {
+namespace
+{
 struct DebugRealtimeThreadIdGuard
 {
-	std::atomic<uint32> & ThreadID;
-	DebugRealtimeThreadIdGuard(std::atomic<uint32> & ThreadID)
+	std::atomic<uint32> &ThreadID;
+	DebugRealtimeThreadIdGuard(std::atomic<uint32> &ThreadID)
 		: ThreadID(ThreadID)
 	{
 		ThreadID.store(GetCurrentThreadId());
@@ -1007,7 +1002,7 @@ struct DebugRealtimeThreadIdGuard
 		ThreadID.store(0);
 	}
 };
-}
+}  // namespace
 
 
 void CASIODevice::RealtimeSampleRateDidChange(ASIO::SampleRate sRate) noexcept
@@ -1062,7 +1057,7 @@ void CASIODevice::RealtimeTimeInfo(ASIO::Time asioTime) noexcept
 			timeInfo.SyncPointSystemTimestamp = asioTime.timeInfo.systemTime;
 			timeInfo.Speed = speed;
 		} else
-		{ // spec violation or nothing provided at all, better to estimate this stuff ourselves
+		{  // spec violation or nothing provided at all, better to estimate this stuff ourselves
 			const uint64 asioNow = CallbackLockedGetReferenceClockNowNanoseconds();
 			timeInfo.SyncPointStreamFrames = m_TotalFramesWritten + m_nAsioBufferLen - m_StreamPositionOffset;
 			timeInfo.SyncPointSystemTimestamp = asioNow + mpt::saturate_round<int64>(m_BufferLatency * 1000.0 * 1000.0 * 1000.0);
@@ -1206,16 +1201,11 @@ void CASIODevice::MessageLatenciesChanged() noexcept
 	m_AsioRequest.fetch_or(AsioRequest::LatenciesChanged);
 }
 
-ASIO::Long CASIODevice::MessageMMCCommand(ASIO::Long value, const void * message, const ASIO::Double * opt) noexcept
+ASIO::Long CASIODevice::MessageMMCCommand(ASIO::Long value, const void *message, const ASIO::Double *opt) noexcept
 {
 	MPT_SOUNDDEV_TRACE_SCOPE();
 	ASIO::Long result = 0;
-	MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT_MESSAGE("ASIO: MMCCommand(value={}, message={}, opt={}) => result={}")
-		( value
-		, reinterpret_cast<std::uintptr_t>(message)
-		, opt ? mpt::format<mpt::ustring>::val(*opt) : MPT_USTRING("NULL")
-		, result
-		));
+	MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT_MESSAGE("ASIO: MMCCommand(value={}, message={}, opt={}) => result={}")(value, reinterpret_cast<std::uintptr_t>(message), opt ? mpt::format<mpt::ustring>::val(*opt) : MPT_USTRING("NULL"), result));
 	return result;
 }
 
@@ -1225,36 +1215,30 @@ void CASIODevice::MessageOverload() noexcept
 	m_UsedFeatures.fetch_or(AsioFeature::Overload);
 }
 
-ASIO::Long CASIODevice::MessageUnknown(ASIO::MessageSelector selector, ASIO::Long value, const void * message, const ASIO::Double * opt) noexcept
+ASIO::Long CASIODevice::MessageUnknown(ASIO::MessageSelector selector, ASIO::Long value, const void *message, const ASIO::Double *opt) noexcept
 {
 	MPT_SOUNDDEV_TRACE_SCOPE();
 	ASIO::Long result = 0;
-	MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT_MESSAGE("ASIO: AsioMessage(selector={}, value={}, message={}, opt={}) => result={}")
-		(mpt::to_underlying(selector)
-		, value
-		, reinterpret_cast<std::uintptr_t>(message)
-		, opt ? mpt::format<mpt::ustring>::val(*opt) : MPT_USTRING("NULL")
-		, result
-		));
+	MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT_MESSAGE("ASIO: AsioMessage(selector={}, value={}, message={}, opt={}) => result={}")(mpt::to_underlying(selector), value, reinterpret_cast<std::uintptr_t>(message), opt ? mpt::format<mpt::ustring>::val(*opt) : MPT_USTRING("NULL"), result));
 	return result;
 }
 
 
-void CASIODevice::ExceptionHandler(const char * func)
+void CASIODevice::ExceptionHandler(const char *func)
 {
 	MPT_SOUNDDEV_TRACE_SCOPE();
 	try
 	{
-		throw; // rethrow
+		throw;  // rethrow
 #if defined(MODPLUG_TRACKER)
 	} catch(const ASIO::Windows::SEH::DriverCrash &e)
 	{
 #if !defined(MPT_BUILD_WINESUPPORT)
 		ExceptionHandler::TaintProcess(ExceptionHandler::TaintReason::Driver);
-#endif // !MPT_BUILD_WINESUPPORT
+#endif  // !MPT_BUILD_WINESUPPORT
 		MPT_LOG(GetLogger(), LogError, "sounddev", MPT_UFORMAT_MESSAGE("ASIO: {}: Driver Crash: {}!")(mpt::convert<mpt::ustring>(mpt::source_encoding, func), mpt::convert<mpt::ustring>(mpt::source_encoding, std::string(e.func()))));
 		SendDeviceMessage(LogError, MPT_UFORMAT_MESSAGE("ASIO Driver Crash: {}")(mpt::convert<mpt::ustring>(mpt::source_encoding, std::string(e.func()))));
-#endif // MODPLUG_TRACKER
+#endif  // MODPLUG_TRACKER
 	} catch(const std::bad_alloc &)
 	{
 		mpt::throw_out_of_memory();
@@ -1294,10 +1278,10 @@ SoundDevice::Caps CASIODevice::InternalGetDeviceCaps()
 	caps.HasNamedInputSources = true;
 	caps.CanDriverPanel = true;
 
-	caps.LatencyMin = 0.000001; // 1 us
-	caps.LatencyMax = 0.5; // 500 ms
-	caps.UpdateIntervalMin = 0.0; // disabled
-	caps.UpdateIntervalMax = 0.0; // disabled
+	caps.LatencyMin = 0.000001;    // 1 us
+	caps.LatencyMax = 0.5;         // 500 ms
+	caps.UpdateIntervalMin = 0.0;  // disabled
+	caps.UpdateIntervalMax = 0.0;  // disabled
 
 	caps.DefaultSettings.sampleFormat = SampleFormat::Float32;
 
@@ -1412,10 +1396,10 @@ bool CASIODevice::OpenDriverSettings()
 }
 
 
-#endif // MPT_WITH_ASIO
+#endif  // MPT_WITH_ASIO
 
 
-} // namespace SoundDevice
+}  // namespace SoundDevice
 
 
 OPENMPT_NAMESPACE_END

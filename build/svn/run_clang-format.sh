@@ -13,6 +13,11 @@ cd ..
 #	clang-format-11 -i *.hpp *.cpp
 #cd ..
 
+cd sounddev
+	find . -type f -iname '*\.h'   | xargs clang-format-11 -i
+	find . -type f -iname '*\.cpp' | xargs clang-format-11 -i
+cd ..
+
 cd src/mpt
 	find . -type f -iname '*\.hpp' | xargs clang-format-11 -i
 cd ../..

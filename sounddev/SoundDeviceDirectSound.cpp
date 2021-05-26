@@ -28,14 +28,15 @@
 
 #if MPT_OS_WINDOWS
 #include <windows.h>
-#endif // MPT_OS_WINDOWS
+#endif  // MPT_OS_WINDOWS
 
 
 
 OPENMPT_NAMESPACE_BEGIN
 
 
-namespace SoundDevice {
+namespace SoundDevice
+{
 
 
 #if defined(MPT_WITH_DIRECTSOUND)
@@ -50,16 +51,19 @@ struct DevicesAndLoggerAndSysInfo
 	ILogger *logger;
 	SoundDevice::SysInfo sysInfo;
 };
-}
+}  // namespace
 
 
-static BOOL WINAPI DSEnumCallback(GUID * lpGuid, LPCTSTR lpstrDescription, LPCTSTR lpstrDriver, LPVOID lpContext)
+static BOOL WINAPI DSEnumCallback(GUID *lpGuid, LPCTSTR lpstrDescription, LPCTSTR lpstrDriver, LPVOID lpContext)
 {
-	DevicesAndLoggerAndSysInfo &devicesAndLoggerAndSysInfo = *(DevicesAndLoggerAndSysInfo*)lpContext;
+	DevicesAndLoggerAndSysInfo &devicesAndLoggerAndSysInfo = *(DevicesAndLoggerAndSysInfo *)lpContext;
 	std::vector<SoundDevice::Info> &devices = devicesAndLoggerAndSysInfo.devices;
 	ILogger &logger = *devicesAndLoggerAndSysInfo.logger;
 	SoundDevice::SysInfo &sysInfo = devicesAndLoggerAndSysInfo.sysInfo;
-	auto GetLogger = [&]() -> ILogger& { return logger; };
+	auto GetLogger = [&]() -> ILogger &
+	{
+		return logger;
+	};
 	if(!lpstrDescription)
 	{
 		return TRUE;
@@ -98,7 +102,7 @@ static BOOL WINAPI DSEnumCallback(GUID * lpGuid, LPCTSTR lpstrDescription, LPCTS
 
 std::vector<SoundDevice::Info> CDSoundDevice::EnumerateDevices(ILogger &logger, SoundDevice::SysInfo sysInfo)
 {
-	DevicesAndLoggerAndSysInfo devicesAndLoggerAndSysInfo = { std::vector<SoundDevice::Info>(), &logger, sysInfo };
+	DevicesAndLoggerAndSysInfo devicesAndLoggerAndSysInfo = {std::vector<SoundDevice::Info>(), &logger, sysInfo};
 	DirectSoundEnumerate(DSEnumCallback, &devicesAndLoggerAndSysInfo);
 	return devicesAndLoggerAndSysInfo.devices;
 }
@@ -219,12 +223,12 @@ SoundDevice::DynamicCaps CDSoundDevice::GetDeviceDynamicCaps(const std::vector<u
 		if(GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::osinfo::windows::Version::WinVista))
 		{
 			// Vista
-			caps.supportedSampleFormats = { SampleFormat::Float32 };
-			caps.supportedExclusiveModeSampleFormats = { SampleFormat::Float32 };
+			caps.supportedSampleFormats = {SampleFormat::Float32};
+			caps.supportedExclusiveModeSampleFormats = {SampleFormat::Float32};
 		} else if(!(dscaps.dwFlags & DSCAPS_EMULDRIVER))
 		{
 			// XP wdm
-			caps.supportedSampleFormats = { SampleFormat::Float32, SampleFormat::Int32, SampleFormat::Int24, SampleFormat::Int16, SampleFormat::Unsigned8 };
+			caps.supportedSampleFormats = {SampleFormat::Float32, SampleFormat::Int32, SampleFormat::Int24, SampleFormat::Int16, SampleFormat::Unsigned8};
 			caps.supportedExclusiveModeSampleFormats.clear();
 			if(dscaps.dwFlags & DSCAPS_PRIMARY8BIT)
 			{
@@ -236,14 +240,14 @@ SoundDevice::DynamicCaps CDSoundDevice::GetDeviceDynamicCaps(const std::vector<u
 			}
 			if(caps.supportedExclusiveModeSampleFormats.empty())
 			{
-				caps.supportedExclusiveModeSampleFormats = { SampleFormat::Float32, SampleFormat::Int32, SampleFormat::Int24, SampleFormat::Int16, SampleFormat::Unsigned8 };
+				caps.supportedExclusiveModeSampleFormats = {SampleFormat::Float32, SampleFormat::Int32, SampleFormat::Int24, SampleFormat::Int16, SampleFormat::Unsigned8};
 			}
 		} else
 		{
 			// XP vdx
 			// nothing, announce all, fail later
-			caps.supportedSampleFormats = { SampleFormat::Float32, SampleFormat::Int32, SampleFormat::Int24, SampleFormat::Int16, SampleFormat::Unsigned8 };
-			caps.supportedExclusiveModeSampleFormats = { SampleFormat::Float32, SampleFormat::Int32, SampleFormat::Int24, SampleFormat::Int16, SampleFormat::Unsigned8 };
+			caps.supportedSampleFormats = {SampleFormat::Float32, SampleFormat::Int32, SampleFormat::Int24, SampleFormat::Int16, SampleFormat::Unsigned8};
+			caps.supportedExclusiveModeSampleFormats = {SampleFormat::Float32, SampleFormat::Int32, SampleFormat::Int24, SampleFormat::Int16, SampleFormat::Unsigned8};
 		}
 	}
 	if(dummy)
@@ -290,7 +294,7 @@ bool CDSoundDevice::InternalOpen()
 		dsbd.dwBufferBytes = 0;
 		dsbd.dwReserved = 0;
 		dsbd.lpwfxFormat = NULL;
-		if (m_piDS->CreateSoundBuffer(&dsbd, &m_pPrimary, NULL) != DS_OK)
+		if(m_piDS->CreateSoundBuffer(&dsbd, &m_pPrimary, NULL) != DS_OK)
 		{
 			Close();
 			return false;
@@ -306,7 +310,7 @@ bool CDSoundDevice::InternalOpen()
 		dsbd.dwBufferBytes = m_nDSoundBufferSize;
 		dsbd.dwReserved = 0;
 		dsbd.lpwfxFormat = pwfx;
-		if (m_piDS->CreateSoundBuffer(&dsbd, &m_pMixBuffer, NULL) != DS_OK)
+		if(m_piDS->CreateSoundBuffer(&dsbd, &m_pMixBuffer, NULL) != DS_OK)
 		{
 			Close();
 			return false;
@@ -318,18 +322,18 @@ bool CDSoundDevice::InternalOpen()
 		dsbd.dwBufferBytes = 0;
 		dsbd.dwReserved = 0;
 		dsbd.lpwfxFormat = NULL;
-		if (m_piDS->CreateSoundBuffer(&dsbd, &m_pPrimary, NULL) != DS_OK)
+		if(m_piDS->CreateSoundBuffer(&dsbd, &m_pPrimary, NULL) != DS_OK)
 		{
 			Close();
 			return false;
 		}
-		if (m_pPrimary->SetFormat(pwfx) != DS_OK)
+		if(m_pPrimary->SetFormat(pwfx) != DS_OK)
 		{
 			Close();
 			return false;
 		}
 		dsc.dwSize = sizeof(dsc);
-		if (m_pPrimary->GetCaps(&dsc) != DS_OK)
+		if(m_pPrimary->GetCaps(&dsc) != DS_OK)
 		{
 			Close();
 			return false;
@@ -340,21 +344,21 @@ bool CDSoundDevice::InternalOpen()
 	}
 	if(m_Settings.sampleFormat == SampleFormat::Int8)
 	{
-		m_Settings.sampleFormat  = SampleFormat::Unsigned8;
+		m_Settings.sampleFormat = SampleFormat::Unsigned8;
 	}
 	LPVOID lpBuf1, lpBuf2;
 	DWORD dwSize1, dwSize2;
-	if (m_pMixBuffer->Lock(0, m_nDSoundBufferSize, &lpBuf1, &dwSize1, &lpBuf2, &dwSize2, 0) == DS_OK)
+	if(m_pMixBuffer->Lock(0, m_nDSoundBufferSize, &lpBuf1, &dwSize1, &lpBuf2, &dwSize2, 0) == DS_OK)
 	{
 		UINT zero = (pwfx->wBitsPerSample == 8) ? 0x80 : 0x00;
-		if ((lpBuf1) && (dwSize1)) memset(lpBuf1, zero, dwSize1);
-		if ((lpBuf2) && (dwSize2)) memset(lpBuf2, zero, dwSize2);
+		if((lpBuf1) && (dwSize1)) memset(lpBuf1, zero, dwSize1);
+		if((lpBuf2) && (dwSize2)) memset(lpBuf2, zero, dwSize2);
 		m_pMixBuffer->Unlock(lpBuf1, dwSize1, lpBuf2, dwSize2);
 	} else
 	{
 		DWORD dwStat = 0;
 		m_pMixBuffer->GetStatus(&dwStat);
-		if (dwStat & DSBSTATUS_BUFFERLOST) m_pMixBuffer->Restore();
+		if(dwStat & DSBSTATUS_BUFFERLOST) m_pMixBuffer->Restore();
 	}
 	m_dwWritePos = 0xFFFFFFFF;
 	SetWakeupInterval(std::min(m_Settings.UpdateInterval, m_nDSoundBufferSize / (2.0 * m_Settings.GetBytesPerSecond())));
@@ -365,17 +369,17 @@ bool CDSoundDevice::InternalOpen()
 
 bool CDSoundDevice::InternalClose()
 {
-	if (m_pMixBuffer)
+	if(m_pMixBuffer)
 	{
 		m_pMixBuffer->Release();
 		m_pMixBuffer = NULL;
 	}
-	if (m_pPrimary)
+	if(m_pPrimary)
 	{
 		m_pPrimary->Release();
 		m_pPrimary = NULL;
 	}
-	if (m_piDS)
+	if(m_piDS)
 	{
 		m_piDS->Release();
 		m_piDS = NULL;
@@ -419,7 +423,7 @@ void CDSoundDevice::InternalFillAudioBuffer()
 	for(int refillCount = 0; refillCount < 2; ++refillCount)
 	{
 		// Refill the buffer at most twice so we actually sleep some time when CPU is overloaded.
-		
+
 		const uint32 bytesPerFrame = static_cast<uint32>(m_Settings.GetBytesPerFrame());
 
 		DWORD dwPlay = 0;
@@ -430,7 +434,7 @@ void CDSoundDevice::InternalFillAudioBuffer()
 			return;
 		}
 
-		uint32 dwBytes = m_nDSoundBufferSize/2;
+		uint32 dwBytes = m_nDSoundBufferSize / 2;
 		if(!m_bMixRunning)
 		{
 			// startup
@@ -442,9 +446,9 @@ void CDSoundDevice::InternalFillAudioBuffer()
 			dwLatency = (m_dwWritePos - dwPlay + m_nDSoundBufferSize) % m_nDSoundBufferSize;
 			dwLatency = (dwLatency + m_nDSoundBufferSize - 1) % m_nDSoundBufferSize + 1;
 			dwBytes = (dwPlay - m_dwWritePos + m_nDSoundBufferSize) % m_nDSoundBufferSize;
-			dwBytes = std::clamp(dwBytes, uint32(0), m_nDSoundBufferSize/2); // limit refill amount to half the buffer size
+			dwBytes = std::clamp(dwBytes, uint32(0), m_nDSoundBufferSize / 2);  // limit refill amount to half the buffer size
 		}
-		dwBytes = dwBytes / bytesPerFrame * bytesPerFrame; // truncate to full frame
+		dwBytes = dwBytes / bytesPerFrame * bytesPerFrame;  // truncate to full frame
 		if(dwBytes < bytesPerFrame)
 		{
 			// ok, nothing to do
@@ -475,10 +479,10 @@ void CDSoundDevice::InternalFillAudioBuffer()
 			return;
 		}
 
-		CallbackLockedAudioReadPrepare(dwSize1/bytesPerFrame + dwSize2/bytesPerFrame, dwLatency/bytesPerFrame);
+		CallbackLockedAudioReadPrepare(dwSize1 / bytesPerFrame + dwSize2 / bytesPerFrame, dwLatency / bytesPerFrame);
 
-		CallbackLockedAudioProcessVoid(buf1, nullptr, dwSize1/bytesPerFrame);
-		CallbackLockedAudioProcessVoid(buf2, nullptr, dwSize2/bytesPerFrame);
+		CallbackLockedAudioProcessVoid(buf1, nullptr, dwSize1 / bytesPerFrame);
+		CallbackLockedAudioProcessVoid(buf2, nullptr, dwSize2 / bytesPerFrame);
 
 		m_StatisticLatencyFrames.store(dwLatency / bytesPerFrame);
 		m_StatisticPeriodFrames.store(dwSize1 / bytesPerFrame + dwSize2 / bytesPerFrame);
@@ -525,18 +529,16 @@ void CDSoundDevice::InternalFillAudioBuffer()
 				RequestClose();
 				return;
 			}
-			m_bMixRunning = TRUE; 
+			m_bMixRunning = TRUE;
 		}
 
-		if(dwBytes < m_nDSoundBufferSize/2)
+		if(dwBytes < m_nDSoundBufferSize / 2)
 		{
 			// Sleep again if we did fill less than half the buffer size.
 			// Otherwise it's a better idea to refill again right away.
 			break;
 		}
-
 	}
-
 }
 
 
@@ -561,10 +563,10 @@ SoundDevice::Statistics CDSoundDevice::GetStatistics() const
 }
 
 
-#endif // MPT_WITH_DIRECTSOUND
+#endif  // MPT_WITH_DIRECTSOUND
 
 
-} // namespace SoundDevice
+}  // namespace SoundDevice
 
 
 OPENMPT_NAMESPACE_END

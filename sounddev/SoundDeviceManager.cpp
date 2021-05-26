@@ -35,7 +35,8 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-namespace SoundDevice {
+namespace SoundDevice
+{
 
 
 
@@ -62,15 +63,14 @@ struct CompareInfo
 		score += static_cast<int8>(x.flags.implementor);
 		return score;
 	}
-	bool operator () (const SoundDevice::Info &x, const SoundDevice::Info &y)
+	bool operator()(const SoundDevice::Info &x, const SoundDevice::Info &y)
 	{
 		const auto scorex = score(x);
 		const auto scorey = score(y);
 		return (scorex > scorey)
 			|| ((scorex == scorey) && (x.type > y.type))
 			|| ((scorex == scorey) && (x.type == y.type) && (x.default_ > y.default_))
-			|| ((scorex == scorey) && (x.type == y.type) && (x.default_ == y.default_) && (x.name < y.name))
-			;
+			|| ((scorex == scorey) && (x.type == y.type) && (x.default_ == y.default_) && (x.name < y.name));
 	}
 };
 
@@ -90,22 +90,22 @@ std::vector<std::shared_ptr<IDevicesEnumerator>> Manager::GetEnabledEnumerators(
 	{
 		result.push_back(std::make_shared<DevicesEnumerator<Pulseaudio>>());
 	}
-#endif // MPT_WITH_PULSEAUDIO
-#endif // MPT_ENABLE_PULSEAUDIO_FULL
+#endif  // MPT_WITH_PULSEAUDIO
+#endif  // MPT_ENABLE_PULSEAUDIO_FULL
 
 #if defined(MPT_WITH_PULSEAUDIO) && defined(MPT_WITH_PULSEAUDIOSIMPLE)
 	if(enabledBackends.PulseaudioSimple)
 	{
 		result.push_back(std::make_shared<DevicesEnumerator<PulseaudioSimple>>());
 	}
-#endif // MPT_WITH_PULSEAUDIO && MPT_WITH_PULSEAUDIOSIMPLE
+#endif  // MPT_WITH_PULSEAUDIO && MPT_WITH_PULSEAUDIOSIMPLE
 
 #if MPT_OS_WINDOWS
 	if(enabledBackends.WaveOut)
 	{
 		result.push_back(std::make_shared<DevicesEnumerator<CWaveDevice>>());
 	}
-#endif // MPT_OS_WINDOWS
+#endif  // MPT_OS_WINDOWS
 
 #if defined(MPT_WITH_DIRECTSOUND)
 	// kind of deprecated by now
@@ -113,28 +113,28 @@ std::vector<std::shared_ptr<IDevicesEnumerator>> Manager::GetEnabledEnumerators(
 	{
 		result.push_back(std::make_shared<DevicesEnumerator<CDSoundDevice>>());
 	}
-#endif // MPT_WITH_DIRECTSOUND
+#endif  // MPT_WITH_DIRECTSOUND
 
 #ifdef MPT_WITH_ASIO
 	if(enabledBackends.ASIO)
 	{
 		result.push_back(std::make_shared<DevicesEnumerator<CASIODevice>>());
 	}
-#endif // MPT_WITH_ASIO
+#endif  // MPT_WITH_ASIO
 
 #ifdef MPT_WITH_PORTAUDIO
 	if(enabledBackends.PortAudio)
 	{
 		result.push_back(std::make_shared<DevicesEnumerator<CPortaudioDevice>>());
 	}
-#endif // MPT_WITH_PORTAUDIO
+#endif  // MPT_WITH_PORTAUDIO
 
 #ifdef MPT_WITH_RTAUDIO
 	if(enabledBackends.RtAudio)
 	{
 		result.push_back(std::make_shared<DevicesEnumerator<CRtAudioDevice>>());
 	}
-#endif // MPT_WITH_RTAUDIO
+#endif  // MPT_WITH_RTAUDIO
 	return result;
 }
 
@@ -166,7 +166,7 @@ void Manager::ReEnumerate(bool firstRun)
 		}
 	}
 
-	for(auto & enumerator : m_DeviceEnumerators)
+	for(auto &enumerator : m_DeviceEnumerators)
 	{
 		if(!enumerator)
 		{
@@ -241,32 +241,32 @@ void Manager::ReEnumerate(bool firstRun)
 		typeDefault[MPT_UFORMAT_MESSAGE("PortAudio-{}")(paBeOS)].value = Info::DefaultFor::System;
 #endif
 	} else if(GetSysInfo().SystemClass == mpt::osinfo::osclass::Windows && GetSysInfo().IsWindowsWine() && GetSysInfo().WineHostClass == mpt::osinfo::osclass::Linux)
-	{ // Wine on Linux
+	{  // Wine on Linux
 		typeDefault[SoundDevice::TypePORTAUDIO_WASAPI].value = Info::DefaultFor::System;
 	} else if(GetSysInfo().SystemClass == mpt::osinfo::osclass::Windows && GetSysInfo().IsWindowsWine())
-	{ // Wine
+	{  // Wine
 		typeDefault[SoundDevice::TypePORTAUDIO_WASAPI].value = Info::DefaultFor::System;
 		typeDefault[SoundDevice::TypeDSOUND].value = Info::DefaultFor::LowLevel;
 	} else if(GetSysInfo().SystemClass == mpt::osinfo::osclass::Windows && GetSysInfo().WindowsVersion.IsBefore(mpt::osinfo::windows::Version::WinVista))
-	{ // WinXP
+	{  // WinXP
 		typeDefault[SoundDevice::TypeWAVEOUT].value = Info::DefaultFor::System;
 		typeDefault[SoundDevice::TypeASIO].value = Info::DefaultFor::ProAudio;
 		typeDefault[SoundDevice::TypePORTAUDIO_WDMKS].value = Info::DefaultFor::LowLevel;
 	} else if(GetSysInfo().SystemClass == mpt::osinfo::osclass::Windows && GetSysInfo().WindowsVersion.IsBefore(mpt::osinfo::windows::Version::Win7))
-	{ // Vista
+	{  // Vista
 		typeDefault[SoundDevice::TypeWAVEOUT].value = Info::DefaultFor::System;
 		typeDefault[SoundDevice::TypeASIO].value = Info::DefaultFor::ProAudio;
 		typeDefault[SoundDevice::TypePORTAUDIO_WDMKS].value = Info::DefaultFor::LowLevel;
 	} else if(GetSysInfo().SystemClass == mpt::osinfo::osclass::Windows)
-	{ // >=Win7
+	{  // >=Win7
 		typeDefault[SoundDevice::TypePORTAUDIO_WASAPI].value = Info::DefaultFor::System;
 		typeDefault[SoundDevice::TypeASIO].value = Info::DefaultFor::ProAudio;
 		typeDefault[SoundDevice::TypePORTAUDIO_WDMKS].value = Info::DefaultFor::LowLevel;
 	} else
-	{ // unknown
+	{  // unknown
 		typeDefault[SoundDevice::TypePORTAUDIO_WASAPI].value = Info::DefaultFor::System;
 	}
-	for(auto & deviceInfo : m_SoundDevices)
+	for(auto &deviceInfo : m_SoundDevices)
 	{
 		if(typeDefault[deviceInfo.type].value != Info::DefaultFor::None)
 		{
@@ -288,7 +288,6 @@ void Manager::ReEnumerate(bool firstRun)
 			MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT_MESSAGE("  Extra Data: {} = {}")(extra.first, extra.second));
 		}
 	}
-	
 }
 
 
@@ -346,17 +345,17 @@ SoundDevice::Info Manager::FindDeviceInfoBestMatch(SoundDevice::Identifier ident
 		return SoundDevice::Info();
 	}
 	if(!identifier.empty())
-	{ // valid identifier
+	{  // valid identifier
 		for(const auto &info : *this)
 		{
 			if((info.GetIdentifier() == identifier) && !IsDeviceUnavailable(info.GetIdentifier()))
-			{ // exact match
+			{  // exact match
 				return info;
 			}
 		}
 	}
 	for(const auto &info : *this)
-	{ // find first available device
+	{  // find first available device
 		if(!IsDeviceUnavailable(info.GetIdentifier()))
 		{
 			return info;
@@ -447,7 +446,7 @@ SoundDevice::DynamicCaps Manager::GetDeviceDynamicCaps(SoundDevice::Identifier i
 }
 
 
-SoundDevice::IBase * Manager::CreateSoundDevice(SoundDevice::Identifier identifier)
+SoundDevice::IBase *Manager::CreateSoundDevice(SoundDevice::Identifier identifier)
 {
 	MPT_SOUNDDEV_TRACE_SCOPE();
 	const SoundDevice::Info info = FindDeviceInfo(identifier);
@@ -474,7 +473,7 @@ SoundDevice::IBase * Manager::CreateSoundDevice(SoundDevice::Identifier identifi
 		result = nullptr;
 		return nullptr;
 	}
-	m_DeviceCaps[identifier] = result->GetDeviceCaps(); // update cached caps
+	m_DeviceCaps[identifier] = result->GetDeviceCaps();  // update cached caps
 	return result;
 }
 
@@ -496,7 +495,7 @@ Manager::~Manager()
 }
 
 
-} // namespace SoundDevice
+}  // namespace SoundDevice
 
 
 OPENMPT_NAMESPACE_END

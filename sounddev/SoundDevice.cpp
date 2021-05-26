@@ -26,7 +26,8 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-namespace SoundDevice {
+namespace SoundDevice
+{
 
 
 SoundDevice::Type ParseType(const SoundDevice::Identifier &identifier)
@@ -45,21 +46,21 @@ mpt::ustring Info::GetDisplayName() const
 	mpt::ustring result = apiName + MPT_USTRING(" - ") + mpt::trim(name);
 	switch(flags.usability)
 	{
-	case SoundDevice::Info::Usability::Experimental:
-		result += MPT_USTRING(" [experimental]");
-		break;
-	case SoundDevice::Info::Usability::Deprecated:
-		result += MPT_USTRING(" [deprecated]");
-		break;
-	case SoundDevice::Info::Usability::Broken:
-		result += MPT_USTRING(" [broken]");
-		break;
-	case SoundDevice::Info::Usability::NotAvailable:
-		result += MPT_USTRING(" [alien]");
-		break;
-	default:
-		// nothing
-		break;
+		case SoundDevice::Info::Usability::Experimental:
+			result += MPT_USTRING(" [experimental]");
+			break;
+		case SoundDevice::Info::Usability::Deprecated:
+			result += MPT_USTRING(" [deprecated]");
+			break;
+		case SoundDevice::Info::Usability::Broken:
+			result += MPT_USTRING(" [broken]");
+			break;
+		case SoundDevice::Info::Usability::NotAvailable:
+			result += MPT_USTRING(" [alien]");
+			break;
+		default:
+			// nothing
+			break;
 	}
 	if(default_ == SoundDevice::Info::Default::Named)
 	{
@@ -91,7 +92,7 @@ SoundDevice::Identifier Info::GetIdentifier() const
 		result += hexString;
 	} else
 	{
-		result += internalID; // safe to not contain special characters
+		result += internalID;  // safe to not contain special characters
 	}
 	return result;
 }
@@ -168,7 +169,7 @@ ChannelMapping ChannelMapping::FromString(const mpt::ustring &str)
 }
 
 
-} // namespace SoundDevice
+}  // namespace SoundDevice
 
 
 OPENMPT_NAMESPACE_END

@@ -14,29 +14,30 @@
 #include "openmpt/logging/Logger.hpp"
 
 #if MPT_OS_LINUX || MPT_OS_MACOSX_OR_IOS || MPT_OS_FREEBSD
- // we use c++11 in native support library
+// we use c++11 in native support library
 #include <atomic>
 #include <condition_variable>
 #include <memory>
 #include <mutex>
 #include <thread>
-#endif // MPT_OS_LINUX || MPT_OS_MACOSX_OR_IOS || MPT_OS_FREEBSD
+#endif  // MPT_OS_LINUX || MPT_OS_MACOSX_OR_IOS || MPT_OS_FREEBSD
 
 #if MPT_OS_WINDOWS
 #include <mmreg.h>
 #include <windows.h>
-#endif // MPT_OS_WINDOWS
+#endif  // MPT_OS_WINDOWS
 
 
 OPENMPT_NAMESPACE_BEGIN
 
 
-namespace SoundDevice {
+namespace SoundDevice
+{
 
 
 #if MPT_OS_WINDOWS
 bool FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat, const SoundDevice::Settings &m_Settings);
-#endif // MPT_OS_WINDOWS
+#endif  // MPT_OS_WINDOWS
 
 
 #if MPT_OS_WINDOWS
@@ -54,8 +55,9 @@ private:
 	DWORD task_idx;
 	HANDLE hTask;
 	int oldPriority;
+
 public:
-	CPriorityBooster(SoundDevice::SysInfo sysInfo, bool boostPriority, const mpt::winstring & priorityClass, int priority);
+	CPriorityBooster(SoundDevice::SysInfo sysInfo, bool boostPriority, const mpt::winstring &priorityClass, int priority);
 	~CPriorityBooster();
 };
 
@@ -63,8 +65,9 @@ public:
 class CAudioThread
 {
 	friend class CPeriodicWaker;
+
 private:
-	CSoundDeviceWithThread & m_SoundDevice;
+	CSoundDeviceWithThread &m_SoundDevice;
 	mpt::winstring m_MMCSSClass;
 	double m_WakeupInterval;
 	HANDLE m_hAudioWakeUp;
@@ -77,10 +80,11 @@ private:
 	static DWORD WINAPI AudioThreadWrapper(LPVOID user);
 	DWORD AudioThread();
 	bool IsActive();
+
 public:
 	CAudioThread(CSoundDeviceWithThread &SoundDevice);
 	CAudioThread(const CAudioThread &) = delete;
-	CAudioThread& operator=(const CAudioThread &) = delete;
+	CAudioThread &operator=(const CAudioThread &) = delete;
 	~CAudioThread();
 	void Activate();
 	void Deactivate();
@@ -93,13 +97,17 @@ class CSoundDeviceWithThread
 	: public SoundDevice::Base
 {
 	friend class CAudioThread;
+
 protected:
 	CAudioThread m_AudioThread;
+
 private:
 	void FillAudioBufferLocked();
+
 protected:
 	void SetWakeupEvent(HANDLE ev);
 	void SetWakeupInterval(double seconds);
+
 public:
 	CSoundDeviceWithThread(ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo);
 	virtual ~CSoundDeviceWithThread();
@@ -110,48 +118,57 @@ public:
 };
 
 
-#endif // MPT_OS_WINDOWS
+#endif  // MPT_OS_WINDOWS
 
 
 #if MPT_OS_LINUX || MPT_OS_MACOSX_OR_IOS || MPT_OS_FREEBSD
 
 
-class semaphore {
+class semaphore
+{
 private:
 	unsigned int count;
 	unsigned int waiters_count;
 	std::mutex mutex;
 	std::condition_variable count_nonzero;
+
 public:
-	semaphore( unsigned int initial_count = 0 )
+	semaphore(unsigned int initial_count = 0)
 		: count(initial_count)
 		, waiters_count(0)
 	{
 		return;
 	}
-	~semaphore() {
+	~semaphore()
+	{
 		return;
 	}
-	void wait() {
+	void wait()
+	{
 		std::unique_lock<std::mutex> l(mutex);
 		waiters_count++;
-		while ( count == 0 ) {
-			count_nonzero.wait( l );
+		while(count == 0)
+		{
+			count_nonzero.wait(l);
 		}
 		waiters_count--;
 		count--;
 	}
-	void post() {
+	void post()
+	{
 		std::unique_lock<std::mutex> l(mutex);
-		if ( waiters_count > 0 ) {
+		if(waiters_count > 0)
+		{
 			count_nonzero.notify_one();
 		}
 		count++;
 	}
-	void lock() {
+	void lock()
+	{
 		wait();
 	}
-	void unlock() {
+	void unlock()
+	{
 		post();
 	}
 };
@@ -163,6 +180,7 @@ class ThreadPriorityGuard
 {
 private:
 	std::unique_ptr<ThreadPriorityGuardImpl> impl;
+
 public:
 	ThreadPriorityGuard(bool active, bool realtime, int niceness, int rt_priority);
 	~ThreadPriorityGuard();
@@ -176,9 +194,11 @@ private:
 	semaphore m_ThreadStarted;
 	std::atomic<bool> m_ThreadStopRequest;
 	std::thread m_Thread;
+
 private:
-	static void ThreadProcStatic(ThreadBase * this_);
+	static void ThreadProcStatic(ThreadBase *this_);
 	void ThreadProc();
+
 public:
 	ThreadBase(SoundDevice::Info info, SoundDevice::SysInfo sysInfo);
 	virtual ~ThreadBase();
@@ -190,10 +210,10 @@ public:
 };
 
 
-#endif // MPT_OS_LINUX || MPT_OS_MACOSX_OR_IOS || MPT_OS_FREEBSD
+#endif  // MPT_OS_LINUX || MPT_OS_MACOSX_OR_IOS || MPT_OS_FREEBSD
 
 
-} // namespace SoundDevice
+}  // namespace SoundDevice
 
 
 OPENMPT_NAMESPACE_END

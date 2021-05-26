@@ -22,7 +22,8 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-namespace SoundDevice {
+namespace SoundDevice
+{
 
 
 template <typename Tsample>
@@ -37,7 +38,7 @@ private:
 	const BufferFormat m_bufferFormat;
 
 public:
-	inline BufferIO(Tsample * dst, const Tsample * src, std::size_t numFrames, BufferFormat bufferFormat)
+	inline BufferIO(Tsample *dst, const Tsample *src, std::size_t numFrames, BufferFormat bufferFormat)
 		: m_src(src, bufferFormat.InputChannels, numFrames)
 		, m_dst(dst, bufferFormat.Channels, numFrames)
 		, m_countFramesReadProcessed(0)
@@ -103,7 +104,6 @@ public:
 			m_countFramesWriteProcessed += 1;
 		}
 	}
-
 };
 
 
@@ -118,13 +118,14 @@ private:
 		BufferIO<int24>,
 		BufferIO<int32>,
 		BufferIO<float>,
-		BufferIO<double>
-	> m_BufferIO;
+		BufferIO<double>>
+		m_BufferIO;
 	TDithers &m_Dithers;
 	std::size_t m_NumFrames;
+
 public:
 	template <typename Tsample>
-	explicit inline CallbackBuffer(Tsample * dst, const Tsample * src, std::size_t numFrames, TDithers &dithers, BufferFormat bufferFormat)
+	explicit inline CallbackBuffer(Tsample *dst, const Tsample *src, std::size_t numFrames, TDithers &dithers, BufferFormat bufferFormat)
 		: m_BufferIO(BufferIO<Tsample>{dst, src, numFrames, bufferFormat})
 		, m_Dithers(dithers)
 		, m_NumFrames(numFrames)
@@ -145,8 +146,7 @@ public:
 			{
 				bufferIO.Read(dst);
 			},
-			m_BufferIO
-		);
+			m_BufferIO);
 	}
 
 	template <int fractionalBits, typename audio_span_dst>
@@ -157,8 +157,7 @@ public:
 			{
 				bufferIO.template ReadFixedPoint<fractionalBits>(dst);
 			},
-			m_BufferIO
-		);
+			m_BufferIO);
 	}
 
 	template <typename audio_span_src>
@@ -172,11 +171,9 @@ public:
 					{
 						bufferIO.Write(src, ditherInstance);
 					},
-					m_Dithers.Variant()
-				);
+					m_Dithers.Variant());
 			},
-			m_BufferIO
-		);
+			m_BufferIO);
 	}
 
 	template <int fractionalBits, typename audio_span_src>
@@ -190,13 +187,10 @@ public:
 					{
 						bufferIO.template WriteFixedPoint<fractionalBits>(src, ditherInstance);
 					},
-					m_Dithers.Variant()
-				);
+					m_Dithers.Variant());
 			},
-			m_BufferIO
-		);
+			m_BufferIO);
 	}
-
 };
 
 
@@ -206,6 +200,7 @@ class BufferHandler
 {
 private:
 	TDithers m_Dithers;
+
 protected:
 	template <typename Trd>
 	explicit BufferHandler(Trd &rd)
@@ -213,11 +208,13 @@ protected:
 	{
 		return;
 	}
+
 protected:
 	inline TDithers &Dithers()
 	{
 		return m_Dithers;
 	}
+
 private:
 	template <typename Tsample>
 	inline void SoundCallbackLockedProcessImpl(BufferFormat bufferFormat, std::size_t numFrames, Tsample *buffer, const Tsample *inputBuffer)
@@ -225,6 +222,7 @@ private:
 		CallbackBuffer<TDithers> callbackBuffer{buffer, inputBuffer, numFrames, m_Dithers, bufferFormat};
 		SoundCallbackLockedCallback(callbackBuffer);
 	}
+
 public:
 	inline void SoundCallbackLockedProcess(BufferFormat bufferFormat, std::size_t numFrames, uint8 *buffer, const uint8 *inputBuffer) final
 	{
@@ -258,7 +256,7 @@ public:
 };
 
 
-} // namespace SoundDevice
+}  // namespace SoundDevice
 
 
 OPENMPT_NAMESPACE_END

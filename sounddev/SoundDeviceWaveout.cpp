@@ -32,29 +32,30 @@
 
 #if MPT_OS_WINDOWS
 #include <windows.h>
-#endif // MPT_OS_WINDOWS
+#endif  // MPT_OS_WINDOWS
 
 
 OPENMPT_NAMESPACE_BEGIN
 
 
-namespace SoundDevice {
+namespace SoundDevice
+{
 
 
 #if MPT_OS_WINDOWS
 
 
-	
+
 static constexpr std::size_t WAVEOUT_MINBUFFERS = 3;
 static constexpr std::size_t WAVEOUT_MAXBUFFERS = 4096;
 static constexpr std::size_t WAVEOUT_MINBUFFERFRAMECOUNT = 8;
-static constexpr std::size_t WAVEOUT_MAXBUFFERSIZE = 16384; // fits in int16
+static constexpr std::size_t WAVEOUT_MAXBUFFERSIZE = 16384;  // fits in int16
 
 
-static inline LONG* interlocked_access(DWORD* p)
+static inline LONG *interlocked_access(DWORD *p)
 {
 	static_assert(sizeof(LONG) == sizeof(DWORD));
-	return reinterpret_cast<LONG*>(p);
+	return reinterpret_cast<LONG *>(p);
 }
 
 
@@ -97,7 +98,7 @@ SoundDevice::Caps CWaveDevice::InternalGetDeviceCaps()
 	caps.Available = true;
 	caps.CanUpdateInterval = true;
 	caps.CanSampleFormat = true;
-	caps.CanExclusiveMode = (GetDeviceIndex() > 0); // no direct mode for WAVE_MAPPER, makes no sense there
+	caps.CanExclusiveMode = (GetDeviceIndex() > 0);  // no direct mode for WAVE_MAPPER, makes no sense there
 	caps.CanBoostThreadPriority = true;
 	caps.CanKeepDeviceRunning = false;
 	caps.CanUseHardwareTiming = false;
@@ -127,12 +128,12 @@ SoundDevice::DynamicCaps CWaveDevice::GetDeviceDynamicCaps(const std::vector<uin
 	SoundDevice::DynamicCaps caps;
 	if(GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::osinfo::windows::Version::WinVista))
 	{  // emulated on WASAPI
-		caps.supportedSampleFormats = { SampleFormat::Float32 };
-		caps.supportedExclusiveModeSampleFormats = { SampleFormat::Float32 };
+		caps.supportedSampleFormats = {SampleFormat::Float32};
+		caps.supportedExclusiveModeSampleFormats = {SampleFormat::Float32};
 	} else
 	{  // native WDM/VDX, or Wine
-		caps.supportedSampleFormats = { SampleFormat::Float32, SampleFormat::Int32, SampleFormat::Int24, SampleFormat::Int16, SampleFormat::Unsigned8 };
-		caps.supportedExclusiveModeSampleFormats = { SampleFormat::Float32, SampleFormat::Int32, SampleFormat::Int24, SampleFormat::Int16, SampleFormat::Unsigned8 };
+		caps.supportedSampleFormats = {SampleFormat::Float32, SampleFormat::Int32, SampleFormat::Int24, SampleFormat::Int16, SampleFormat::Unsigned8};
+		caps.supportedExclusiveModeSampleFormats = {SampleFormat::Float32, SampleFormat::Int32, SampleFormat::Int24, SampleFormat::Int16, SampleFormat::Unsigned8};
 	}
 	if(GetDeviceIndex() > 0)
 	{  // direct mode
@@ -142,23 +143,23 @@ SoundDevice::DynamicCaps CWaveDevice::GetDeviceDynamicCaps(const std::vector<uin
 			caps.supportedExclusiveModeSampleFormats.clear();
 			if(waveOutGetDevCaps(GetDeviceIndex() - 1, &woc, sizeof(woc)) == MMSYSERR_NOERROR)
 			{
-				if(woc.dwFormats & (WAVE_FORMAT_96M08 | WAVE_FORMAT_96M16	| WAVE_FORMAT_96S08 | WAVE_FORMAT_96S16))
+				if(woc.dwFormats & (WAVE_FORMAT_96M08 | WAVE_FORMAT_96M16 | WAVE_FORMAT_96S08 | WAVE_FORMAT_96S16))
 				{
 					caps.supportedExclusiveSampleRates.push_back(96000);
 				}
-				if(woc.dwFormats & (WAVE_FORMAT_48M08 | WAVE_FORMAT_48M16	| WAVE_FORMAT_48S08 | WAVE_FORMAT_48S16))
+				if(woc.dwFormats & (WAVE_FORMAT_48M08 | WAVE_FORMAT_48M16 | WAVE_FORMAT_48S08 | WAVE_FORMAT_48S16))
 				{
 					caps.supportedExclusiveSampleRates.push_back(48000);
 				}
-				if(woc.dwFormats & (WAVE_FORMAT_4M08 | WAVE_FORMAT_4M16	| WAVE_FORMAT_4S08 | WAVE_FORMAT_4S16))
+				if(woc.dwFormats & (WAVE_FORMAT_4M08 | WAVE_FORMAT_4M16 | WAVE_FORMAT_4S08 | WAVE_FORMAT_4S16))
 				{
 					caps.supportedExclusiveSampleRates.push_back(44100);
 				}
-				if(woc.dwFormats & (WAVE_FORMAT_2M08 | WAVE_FORMAT_2M16	| WAVE_FORMAT_2S08 | WAVE_FORMAT_2S16))
+				if(woc.dwFormats & (WAVE_FORMAT_2M08 | WAVE_FORMAT_2M16 | WAVE_FORMAT_2S08 | WAVE_FORMAT_2S16))
 				{
 					caps.supportedExclusiveSampleRates.push_back(22050);
 				}
-				if(woc.dwFormats & (WAVE_FORMAT_1M08 | WAVE_FORMAT_1M16	| WAVE_FORMAT_1S08 | WAVE_FORMAT_1S16))
+				if(woc.dwFormats & (WAVE_FORMAT_1M08 | WAVE_FORMAT_1M16 | WAVE_FORMAT_1S08 | WAVE_FORMAT_1S16))
 				{
 					caps.supportedExclusiveSampleRates.push_back(11025);
 				}
@@ -177,7 +178,7 @@ SoundDevice::DynamicCaps CWaveDevice::GetDeviceDynamicCaps(const std::vector<uin
 			caps.supportedExclusiveModeSampleFormats.clear();
 			std::set<uint32> supportedSampleRates;
 			std::set<SampleFormat> supportedSampleFormats;
-			std::array<SampleFormat, 5> baseSampleFormats = { SampleFormat::Float32, SampleFormat::Int32, SampleFormat::Int24, SampleFormat::Int16, SampleFormat::Unsigned8 };
+			std::array<SampleFormat, 5> baseSampleFormats = {SampleFormat::Float32, SampleFormat::Int32, SampleFormat::Int24, SampleFormat::Int16, SampleFormat::Unsigned8};
 			for(const uint32 sampleRate : baseSampleRates)
 			{
 				for(const SampleFormat sampleFormat : baseSampleFormats)
@@ -280,7 +281,7 @@ bool CWaveDevice::InternalOpen()
 	}
 	if(m_Settings.sampleFormat == SampleFormat::Int8)
 	{
-		m_Settings.sampleFormat  = SampleFormat::Unsigned8;
+		m_Settings.sampleFormat = SampleFormat::Unsigned8;
 	}
 	m_nBuffersPending = 0;
 	m_nWriteBuffer = 0;
@@ -315,12 +316,12 @@ bool CWaveDevice::InternalClose()
 		waveOutClose(m_hWaveOut);
 		m_hWaveOut = NULL;
 	}
-	#ifdef MPT_BUILD_DEBUG
-		if(m_DriverBugs.load())
-		{
-				SendDeviceMessage(LogError, MPT_USTRING("Errors were detected while playing sound:\n") + GetStatistics().text);
-		}
-	#endif
+#ifdef MPT_BUILD_DEBUG
+	if(m_DriverBugs.load())
+	{
+		SendDeviceMessage(LogError, MPT_USTRING("Errors were detected while playing sound:\n") + GetStatistics().text);
+	}
+#endif
 	m_DriverBugs = 0;
 	m_Failed = false;
 	if(m_ThreadWakeupEvent)
@@ -376,14 +377,11 @@ bool CWaveDevice::CheckResult(MMRESULT result)
 		return true;
 	}
 	if(!m_Failed)
-	{ // only show the first error
+	{  // only show the first error
 		m_Failed = true;
 		TCHAR errortext[MAXERRORLENGTH + 1] = {};
 		waveOutGetErrorText(result, errortext, MAXERRORLENGTH);
-		SendDeviceMessage(LogError, MPT_UFORMAT_MESSAGE("WaveOut error: 0x{}: {}")
-			( mpt::format<mpt::ustring>::hex0<8>(result)
-			, mpt::convert<mpt::ustring>(static_cast<mpt::winstring>(mpt::ReadWinBuf(errortext)))
-			));
+		SendDeviceMessage(LogError, MPT_UFORMAT_MESSAGE("WaveOut error: 0x{}: {}")(mpt::format<mpt::ustring>::hex0<8>(result), mpt::convert<mpt::ustring>(static_cast<mpt::winstring>(mpt::ReadWinBuf(errortext)))));
 	}
 	RequestClose();
 	return false;
@@ -397,15 +395,11 @@ bool CWaveDevice::CheckResult(MMRESULT result, DWORD param)
 		return true;
 	}
 	if(!m_Failed)
-	{ // only show the first error
+	{  // only show the first error
 		m_Failed = true;
 		TCHAR errortext[MAXERRORLENGTH + 1] = {};
 		waveOutGetErrorText(result, errortext, MAXERRORLENGTH);
-		SendDeviceMessage(LogError, MPT_UFORMAT_MESSAGE("WaveOut error: 0x{} (param 0x{}): {}")
-			( mpt::format<mpt::ustring>::hex0<8>(result)
-			, mpt::format<mpt::ustring>::hex0<8>(param)
-			, mpt::convert<mpt::ustring>(static_cast<mpt::winstring>(mpt::ReadWinBuf(errortext)))
-			));
+		SendDeviceMessage(LogError, MPT_UFORMAT_MESSAGE("WaveOut error: 0x{} (param 0x{}): {}")(mpt::format<mpt::ustring>::hex0<8>(result), mpt::format<mpt::ustring>::hex0<8>(param), mpt::convert<mpt::ustring>(static_cast<mpt::winstring>(mpt::ReadWinBuf(errortext)))));
 	}
 	RequestClose();
 	return false;
@@ -419,16 +413,16 @@ void CWaveDevice::InternalFillAudioBuffer()
 	{
 		return;
 	}
-	
+
 	const std::size_t bytesPerFrame = m_Settings.GetBytesPerFrame();
 
-	ULONG oldBuffersPending = InterlockedExchangeAdd(&m_nBuffersPending, 0); // read
+	ULONG oldBuffersPending = InterlockedExchangeAdd(&m_nBuffersPending, 0);  // read
 	ULONG nLatency = oldBuffersPending * m_nWaveBufferSize;
 
 	ULONG nBytesWritten = 0;
 	while((oldBuffersPending < m_nPreparedHeaders) && !m_Failed)
 	{
-#if (_WIN32_WINNT >= 0x0600)
+#if(_WIN32_WINNT >= 0x0600)
 		DWORD oldFlags = InterlockedOr(interlocked_access(&m_WaveBuffers[m_nWriteBuffer].dwFlags), 0);
 #else
 		DWORD oldFlags = _InterlockedOr(interlocked_access(&m_WaveBuffers[m_nWriteBuffer].dwFlags), 0);
@@ -467,14 +461,14 @@ void CWaveDevice::InternalFillAudioBuffer()
 		CallbackLockedAudioReadPrepare(m_nWaveBufferSize / bytesPerFrame, nLatency / bytesPerFrame);
 		CallbackLockedAudioProcessVoid(m_WaveBuffers[m_nWriteBuffer].lpData, nullptr, m_nWaveBufferSize / bytesPerFrame);
 		nBytesWritten += m_nWaveBufferSize;
-#if (_WIN32_WINNT >= 0x0600)
-		InterlockedAnd(interlocked_access(&m_WaveBuffers[m_nWriteBuffer].dwFlags), ~static_cast<DWORD>(WHDR_INQUEUE|WHDR_DONE));
+#if(_WIN32_WINNT >= 0x0600)
+		InterlockedAnd(interlocked_access(&m_WaveBuffers[m_nWriteBuffer].dwFlags), ~static_cast<DWORD>(WHDR_INQUEUE | WHDR_DONE));
 #else
-		_InterlockedAnd(interlocked_access(&m_WaveBuffers[m_nWriteBuffer].dwFlags), ~static_cast<DWORD>(WHDR_INQUEUE|WHDR_DONE));
+		_InterlockedAnd(interlocked_access(&m_WaveBuffers[m_nWriteBuffer].dwFlags), ~static_cast<DWORD>(WHDR_INQUEUE | WHDR_DONE));
 #endif
 		InterlockedExchange(interlocked_access(&m_WaveBuffers[m_nWriteBuffer].dwBufferLength), m_nWaveBufferSize);
 		InterlockedIncrement(&m_nBuffersPending);
-		oldBuffersPending++; // increment separately to avoid looping without leaving at all when rendering takes more than 100% CPU
+		oldBuffersPending++;  // increment separately to avoid looping without leaving at all when rendering takes more than 100% CPU
 		CheckResult(waveOutWrite(m_hWaveOut, &m_WaveBuffers[m_nWriteBuffer], sizeof(WAVEHDR)), oldFlags);
 		m_nWriteBuffer++;
 		m_nWriteBuffer %= m_nPreparedHeaders;
@@ -488,7 +482,6 @@ void CWaveDevice::InternalFillAudioBuffer()
 		m_JustStarted = false;
 		CheckResult(waveOutRestart(m_hWaveOut));
 	}
-
 }
 
 
@@ -501,12 +494,12 @@ int64 CWaveDevice::InternalGetStreamPositionFrames() const
 	// We could thereby try to avoid any potential wraparound inside the driver on older
 	// Windows versions, which would be, once converted into other units, really
 	// difficult to detect or handle.
-	static constexpr UINT timeType = TIME_SAMPLES; // should work for sane systems
+	static constexpr UINT timeType = TIME_SAMPLES;  // should work for sane systems
 	//static constexpr std::size_t valid_bits = 32; // should work for sane systems
 	//static constexpr UINT timeType = TIME_BYTES; // safest
-	static constexpr std::size_t valid_bits = 27; // safe for WinXP TIME_SAMPLES
+	static constexpr std::size_t valid_bits = 27;  // safe for WinXP TIME_SAMPLES
 	static constexpr uint32 valid_mask = static_cast<uint32>((uint64(1) << valid_bits) - 1u);
-	static constexpr uint32 valid_watermark = static_cast<uint32>(uint64(1) << (valid_bits - 1u)); // half the valid range in order to be able to catch backwards fluctuations
+	static constexpr uint32 valid_watermark = static_cast<uint32>(uint64(1) << (valid_bits - 1u));  // half the valid range in order to be able to catch backwards fluctuations
 
 	MMTIME mmtime = {};
 	mmtime.wType = timeType;
@@ -515,7 +508,7 @@ int64 CWaveDevice::InternalGetStreamPositionFrames() const
 		return 0;
 	}
 	if(mmtime.wType != TIME_MS && mmtime.wType != TIME_BYTES && mmtime.wType != TIME_SAMPLES)
-	{ // unsupported time format
+	{  // unsupported time format
 		return 0;
 	}
 	int64 offset = 0;
@@ -536,13 +529,22 @@ int64 CWaveDevice::InternalGetStreamPositionFrames() const
 			DWORD curval = 0;
 			switch(mmtime.wType)
 			{
-				case TIME_MS: oldval = m_PositionLast.u.ms; curval = mmtime.u.ms; break;
-				case TIME_BYTES: oldval = m_PositionLast.u.cb; curval = mmtime.u.cb; break;
-				case TIME_SAMPLES: oldval = m_PositionLast.u.sample; curval = mmtime.u.sample; break;
+				case TIME_MS:
+					oldval = m_PositionLast.u.ms;
+					curval = mmtime.u.ms;
+					break;
+				case TIME_BYTES:
+					oldval = m_PositionLast.u.cb;
+					curval = mmtime.u.cb;
+					break;
+				case TIME_SAMPLES:
+					oldval = m_PositionLast.u.sample;
+					curval = mmtime.u.sample;
+					break;
 			}
 			oldval &= valid_mask;
 			curval &= valid_mask;
-			if(((curval - oldval) & valid_mask) >= valid_watermark) // guard against driver problems resulting in time jumping backwards for short periods of time. BEWARE of integer wraparound when refactoring
+			if(((curval - oldval) & valid_mask) >= valid_watermark)  // guard against driver problems resulting in time jumping backwards for short periods of time. BEWARE of integer wraparound when refactoring
 			{
 				curval = oldval;
 			}
@@ -552,9 +554,9 @@ int64 CWaveDevice::InternalGetStreamPositionFrames() const
 				case TIME_BYTES: mmtime.u.cb = curval; break;
 				case TIME_SAMPLES: mmtime.u.sample = curval; break;
 			}
-			if((curval ^ oldval) & valid_watermark) // MSB flipped
+			if((curval ^ oldval) & valid_watermark)  // MSB flipped
 			{
-				if(!(curval & valid_watermark)) // actually wrapped
+				if(!(curval & valid_watermark))  // actually wrapped
 				{
 					m_PositionWrappedCount += 1;
 				}
@@ -577,7 +579,7 @@ int64 CWaveDevice::InternalGetStreamPositionFrames() const
 void CWaveDevice::HandleWaveoutDone(WAVEHDR *hdr)
 {
 	MPT_SOUNDDEV_TRACE_SCOPE();
-#if (_WIN32_WINNT >= 0x0600)
+#if(_WIN32_WINNT >= 0x0600)
 	DWORD flags = InterlockedOr(interlocked_access(&hdr->dwFlags), 0);
 #else
 	DWORD flags = _InterlockedOr(interlocked_access(&hdr->dwFlags), 0);
@@ -613,7 +615,7 @@ void CWaveDevice::WaveOutCallBack(HWAVEOUT, UINT uMsg, DWORD_PTR dwUser, DWORD_P
 	if((uMsg == WOM_DONE) && (dwUser))
 	{
 		CWaveDevice *that = (CWaveDevice *)dwUser;
-		that->HandleWaveoutDone((WAVEHDR*)param1);
+		that->HandleWaveoutDone((WAVEHDR *)param1);
 	}
 }
 
@@ -648,7 +650,10 @@ SoundDevice::Statistics CWaveDevice::GetStatistics() const
 
 std::vector<SoundDevice::Info> CWaveDevice::EnumerateDevices(ILogger &logger, SoundDevice::SysInfo sysInfo)
 {
-	auto GetLogger = [&]() -> ILogger& { return logger; };
+	auto GetLogger = [&]() -> ILogger &
+	{
+		return logger;
+	};
 	MPT_SOUNDDEV_TRACE_SCOPE();
 	std::vector<SoundDevice::Info> devices;
 	UINT numDevs = waveOutGetNumDevs();
@@ -664,7 +669,7 @@ std::vector<SoundDevice::Info> CWaveDevice::EnumerateDevices(ILogger &logger, So
 		{
 			info.name = mpt::convert<mpt::ustring>(static_cast<mpt::winstring>(mpt::ReadWinBuf(woc.szPname)));
 			info.extraData[MPT_USTRING("DriverID")] = MPT_UFORMAT_MESSAGE("{}:{}")(mpt::format<mpt::ustring>::hex0<4>(woc.wMid), mpt::format<mpt::ustring>::hex0<4>(woc.wPid));
-			info.extraData[MPT_USTRING("DriverVersion")] = MPT_UFORMAT_MESSAGE("{}.{}")(mpt::format<mpt::ustring>::dec((static_cast<uint32>(woc.vDriverVersion) >> 24) & 0xff), mpt::format<mpt::ustring>::dec((static_cast<uint32>(woc.vDriverVersion) >>  0) & 0xff));
+			info.extraData[MPT_USTRING("DriverVersion")] = MPT_UFORMAT_MESSAGE("{}.{}")(mpt::format<mpt::ustring>::dec((static_cast<uint32>(woc.vDriverVersion) >> 24) & 0xff), mpt::format<mpt::ustring>::dec((static_cast<uint32>(woc.vDriverVersion) >> 0) & 0xff));
 		}
 		if(info.name.empty())
 		{
@@ -693,10 +698,10 @@ std::vector<SoundDevice::Info> CWaveDevice::EnumerateDevices(ILogger &logger, So
 	return devices;
 }
 
-#endif // MPT_OS_WINDOWS
+#endif  // MPT_OS_WINDOWS
 
 
-} // namespace SoundDevice
+}  // namespace SoundDevice
 
 
 OPENMPT_NAMESPACE_END

@@ -31,7 +31,8 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-namespace SoundDevice {
+namespace SoundDevice
+{
 
 
 #ifdef MPT_WITH_RTAUDIO
@@ -44,17 +45,17 @@ static RtAudioFormat SampleFormatToRtAudioFormat(SampleFormat sampleFormat)
 	{
 		switch(sampleFormat.GetBitsPerSample())
 		{
-		case 32: result = RTAUDIO_FLOAT32; break;
-		case 64: result = RTAUDIO_FLOAT64; break;
+			case 32: result = RTAUDIO_FLOAT32; break;
+			case 64: result = RTAUDIO_FLOAT64; break;
 		}
 	} else if(sampleFormat.IsInt())
 	{
 		switch(sampleFormat.GetBitsPerSample())
 		{
-		case 8: result = RTAUDIO_SINT8; break;
-		case 16: result = RTAUDIO_SINT16; break;
-		case 24: result = RTAUDIO_SINT24; break;
-		case 32: result = RTAUDIO_SINT32; break;
+			case 8: result = RTAUDIO_SINT8; break;
+			case 16: result = RTAUDIO_SINT16; break;
+			case 24: result = RTAUDIO_SINT24; break;
+			case 32: result = RTAUDIO_SINT32; break;
 		}
 	}
 	return result;
@@ -75,7 +76,7 @@ CRtAudioDevice::CRtAudioDevice(ILogger &logger, SoundDevice::Info info, SoundDev
 	try
 	{
 		m_RtAudio = std::make_unique<RtAudio>(GetApi(info));
-	} catch (const RtAudioError &)
+	} catch(const RtAudioError &)
 	{
 		// nothing
 	}
@@ -97,7 +98,7 @@ bool CRtAudioDevice::InternalOpen()
 			return false;
 		}
 		if(ChannelMapping::BaseChannel(m_Settings.Channels, m_Settings.Channels.ToDevice(0)) != m_Settings.Channels)
-		{ // only simple base channel mappings are supported
+		{  // only simple base channel mappings are supported
 			return false;
 		}
 		m_OutputStreamParameters.deviceId = GetDevice(GetDeviceInfo());
@@ -130,7 +131,7 @@ bool CRtAudioDevice::InternalOpen()
 			m_Flags.WantsClippedOutput = (GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::osinfo::windows::Version::WinVista));
 		}
 		m_RtAudio->openStream((m_OutputStreamParameters.nChannels > 0) ? &m_OutputStreamParameters : nullptr, (m_InputStreamParameters.nChannels > 0) ? &m_InputStreamParameters : nullptr, SampleFormatToRtAudioFormat(m_Settings.sampleFormat), m_Settings.Samplerate, &m_FramesPerChunk, &RtAudioCallback, this, &m_StreamOptions, nullptr);
-	} catch (const RtAudioError &e)
+	} catch(const RtAudioError &e)
 	{
 		SendError(e);
 		return false;
@@ -144,7 +145,7 @@ bool CRtAudioDevice::InternalClose()
 	try
 	{
 		m_RtAudio->closeStream();
-	} catch (const RtAudioError &e)
+	} catch(const RtAudioError &e)
 	{
 		SendError(e);
 		return false;
@@ -158,7 +159,7 @@ bool CRtAudioDevice::InternalStart()
 	try
 	{
 		m_RtAudio->startStream();
-	} catch (const RtAudioError &e)
+	} catch(const RtAudioError &e)
 	{
 		SendError(e);
 		return false;
@@ -172,7 +173,7 @@ void CRtAudioDevice::InternalStop()
 	try
 	{
 		m_RtAudio->stopStream();
-	} catch (const RtAudioError &e)
+	} catch(const RtAudioError &e)
 	{
 		SendError(e);
 		return;
@@ -213,8 +214,8 @@ SoundDevice::BufferAttributes CRtAudioDevice::InternalGetEffectiveBufferAttribut
 
 int CRtAudioDevice::RtAudioCallback(void *outputBuffer, void *inputBuffer, unsigned int nFrames, double streamTime, RtAudioStreamStatus status, void *userData)
 {
-	reinterpret_cast<CRtAudioDevice*>(userData)->AudioCallback(outputBuffer, inputBuffer, nFrames, streamTime, status);
-	return 0; // continue
+	reinterpret_cast<CRtAudioDevice *>(userData)->AudioCallback(outputBuffer, inputBuffer, nFrames, streamTime, status);
+	return 0;  // continue
 }
 
 
@@ -291,7 +292,7 @@ SoundDevice::Caps CRtAudioDevice::InternalGetDeviceCaps()
 	caps.CanBoostThreadPriority = true;
 	caps.CanKeepDeviceRunning = false;
 	caps.CanUseHardwareTiming = false;
-	caps.CanChannelMapping = false; // only base channel is supported, and that does not make too much sense for non-ASIO backends
+	caps.CanChannelMapping = false;  // only base channel is supported, and that does not make too much sense for non-ASIO backends
 	caps.CanInput = (rtinfo.inputChannels > 0);
 	caps.HasNamedInputSources = true;
 	caps.CanDriverPanel = false;
@@ -301,7 +302,7 @@ SoundDevice::Caps CRtAudioDevice::InternalGetDeviceCaps()
 }
 
 
-SoundDevice::DynamicCaps CRtAudioDevice::GetDeviceDynamicCaps(const std::vector<uint32> & /* baseSampleRates */ )
+SoundDevice::DynamicCaps CRtAudioDevice::GetDeviceDynamicCaps(const std::vector<uint32> & /* baseSampleRates */)
 {
 	MPT_SOUNDDEV_TRACE_SCOPE();
 	SoundDevice::DynamicCaps caps;
@@ -326,7 +327,7 @@ SoundDevice::DynamicCaps CRtAudioDevice::GetDeviceDynamicCaps(const std::vector<
 	std::reverse(caps.supportedSampleRates.begin(), caps.supportedSampleRates.end());
 	mpt::append(caps.supportedExclusiveSampleRates, rtinfo.sampleRates);
 	std::reverse(caps.supportedExclusiveSampleRates.begin(), caps.supportedExclusiveSampleRates.end());
-	caps.supportedSampleFormats = { SampleFormat::Float32 };
+	caps.supportedSampleFormats = {SampleFormat::Float32};
 	caps.supportedExclusiveModeSampleFormats.clear();
 	if(rtinfo.nativeFormats & RTAUDIO_SINT8)
 	{
@@ -434,7 +435,10 @@ unsigned int CRtAudioDevice::GetDevice(SoundDevice::Info info)
 
 std::vector<SoundDevice::Info> CRtAudioDevice::EnumerateDevices(ILogger &logger, SoundDevice::SysInfo sysInfo)
 {
-	auto GetLogger = [&]() -> ILogger& { return logger; };
+	auto GetLogger = [&]() -> ILogger &
+	{
+		return logger;
+	};
 	std::vector<SoundDevice::Info> devices;
 	std::vector<RtAudio::Api> apis;
 	RtAudio::getCompiledApi(apis);
@@ -608,10 +612,10 @@ std::vector<SoundDevice::Info> CRtAudioDevice::EnumerateDevices(ILogger &logger,
 }
 
 
-#endif // MPT_WITH_RTAUDIO
+#endif  // MPT_WITH_RTAUDIO
 
 
-} // namespace SoundDevice
+}  // namespace SoundDevice
 
 
 OPENMPT_NAMESPACE_END

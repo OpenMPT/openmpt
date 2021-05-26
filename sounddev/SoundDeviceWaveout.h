@@ -23,19 +23,20 @@
 #if MPT_OS_WINDOWS
 #include <MMSystem.h>
 #include <windows.h>
-#endif // MPT_OS_WINDOWS
+#endif  // MPT_OS_WINDOWS
 
 
 OPENMPT_NAMESPACE_BEGIN
 
 
-namespace SoundDevice {
+namespace SoundDevice
+{
 
 
 #if MPT_OS_WINDOWS
 
 
-class CWaveDevice: public CSoundDeviceWithThread
+class CWaveDevice : public CSoundDeviceWithThread
 {
 protected:
 	HANDLE m_ThreadWakeupEvent;
@@ -48,17 +49,17 @@ protected:
 	ULONG m_nDoneBuffer;
 	mutable LONG m_nBuffersPending;
 	std::vector<WAVEHDR> m_WaveBuffers;
-	std::vector<std::vector<char> > m_WaveBuffersData;
+	std::vector<std::vector<char>> m_WaveBuffersData;
 
 	mutable mpt::mutex m_PositionWraparoundMutex;
 	mutable MMTIME m_PositionLast;
 	mutable std::size_t m_PositionWrappedCount;
 
-	static constexpr uint32 DriverBugDoneNotificationAndHeaderInQueue = (1u<<0u); //  1
-	static constexpr uint32 DriverBugDoneNotificationAndHeaderNotDone = (1u<<1u); //  2
-	static constexpr uint32 DriverBugBufferFillAndHeaderInQueue = (1u<<2u);       //  4
-	static constexpr uint32 DriverBugBufferFillAndHeaderNotDone = (1u<<3u);       //  8
-	static constexpr uint32 DriverBugDoneNotificationOutOfOrder = (1u<<4u);       // 10
+	static constexpr uint32 DriverBugDoneNotificationAndHeaderInQueue = (1u << 0u);  //  1
+	static constexpr uint32 DriverBugDoneNotificationAndHeaderNotDone = (1u << 1u);  //  2
+	static constexpr uint32 DriverBugBufferFillAndHeaderInQueue = (1u << 2u);        //  4
+	static constexpr uint32 DriverBugBufferFillAndHeaderNotDone = (1u << 3u);        //  8
+	static constexpr uint32 DriverBugDoneNotificationOutOfOrder = (1u << 4u);        // 10
 	std::atomic<uint32> m_DriverBugs;
 
 public:
@@ -82,24 +83,23 @@ public:
 	SoundDevice::DynamicCaps GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates);
 
 private:
-
 	bool CheckResult(MMRESULT result);
 	bool CheckResult(MMRESULT result, DWORD param);
 
 	void HandleWaveoutDone(WAVEHDR *hdr);
 
 	int GetDeviceIndex() const;
-	
+
 public:
 	static void CALLBACK WaveOutCallBack(HWAVEOUT, UINT uMsg, DWORD_PTR, DWORD_PTR dw1, DWORD_PTR dw2);
-	static std::unique_ptr<SoundDevice::BackendInitializer> BackendInitializer() { return std::make_unique< SoundDevice::BackendInitializer>(); }
+	static std::unique_ptr<SoundDevice::BackendInitializer> BackendInitializer() { return std::make_unique<SoundDevice::BackendInitializer>(); }
 	static std::vector<SoundDevice::Info> EnumerateDevices(ILogger &logger, SoundDevice::SysInfo sysInfo);
 };
 
-#endif // MPT_OS_WINDOWS
+#endif  // MPT_OS_WINDOWS
 
 
-} // namespace SoundDevice
+}  // namespace SoundDevice
 
 
 OPENMPT_NAMESPACE_END

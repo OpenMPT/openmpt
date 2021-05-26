@@ -25,7 +25,8 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-namespace SoundDevice {
+namespace SoundDevice
+{
 
 
 class Base
@@ -33,11 +34,11 @@ class Base
 {
 
 private:
-
 	class CallbackLockedGuard
 	{
 	private:
 		ICallback &m_Callback;
+
 	public:
 		CallbackLockedGuard(ICallback &callback)
 			: m_Callback(callback)
@@ -51,22 +52,18 @@ private:
 	};
 
 protected:
-
 	ILogger &m_Logger;
 
 private:
-
 	SoundDevice::ICallback *m_Callback;
 	SoundDevice::IMessageReceiver *m_MessageReceiver;
 
 	const SoundDevice::Info m_Info;
 
 private:
-
 	SoundDevice::Caps m_Caps;
 
 protected:
-
 	SoundDevice::SysInfo m_SysInfo;
 	SoundDevice::AppInfo m_AppInfo;
 	SoundDevice::Settings m_Settings;
@@ -74,25 +71,22 @@ protected:
 	bool m_DeviceUnavailableOnOpen;
 
 private:
-
 	bool m_IsPlaying;
 
 	SoundDevice::TimeInfo m_TimeInfo;
 
-	int64 m_StreamPositionRenderFrames; // only updated or read in audio CALLBACK or when device is stopped. requires no further locking
+	int64 m_StreamPositionRenderFrames;  // only updated or read in audio CALLBACK or when device is stopped. requires no further locking
 
 	std::atomic<int64> m_StreamPositionOutputFrames;
 
 	std::atomic<uint32> m_RequestFlags;
 
 public:
-
 	ILogger &GetLogger() const { return m_Logger; }
 	SoundDevice::SysInfo GetSysInfo() const { return m_SysInfo; }
 	SoundDevice::AppInfo GetAppInfo() const { return m_AppInfo; }
 
 protected:
-
 	SoundDevice::Type GetDeviceType() const { return m_Info.type; }
 	mpt::ustring GetDeviceInternalID() const { return m_Info.internalID; }
 	SoundDevice::Identifier GetDeviceIdentifier() const { return m_Info.GetIdentifier(); }
@@ -125,7 +119,6 @@ protected:
 	void SendDeviceMessage(LogLevel level, const mpt::ustring &str);
 
 protected:
-
 	void SetTimeInfo(SoundDevice::TimeInfo timeInfo) { m_TimeInfo = timeInfo; }
 
 	SoundDevice::StreamPosition StreamPositionFromFrames(int64 frames) const { return SoundDevice::StreamPosition{frames, static_cast<double>(frames) / static_cast<double>(m_Settings.Samplerate)}; }
@@ -151,11 +144,9 @@ protected:
 	virtual SoundDevice::BufferAttributes InternalGetEffectiveBufferAttributes() const = 0;
 
 protected:
-
 	Base(ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo);
 
 public:
-
 	virtual ~Base();
 
 	void SetCallback(SoundDevice::ICallback *callback) { m_Callback = callback; }
@@ -182,7 +173,7 @@ public:
 	virtual bool IsPlayingSilence() const { return IsOpen() && !IsPlaying() && InternalIsPlayingSilence(); }
 	virtual void StopAndAvoidPlayingSilence();
 	virtual void EndPlayingSilence();
-	
+
 	virtual bool OnIdle() { return false; }
 
 	SoundDevice::Settings GetSettings() const { return m_Settings; }
@@ -209,11 +200,10 @@ public:
 	virtual SoundDevice::Statistics GetStatistics() const;
 
 	virtual bool OpenDriverSettings() { return false; };
-
 };
 
 
-} // namespace SoundDevice
+}  // namespace SoundDevice
 
 
 OPENMPT_NAMESPACE_END

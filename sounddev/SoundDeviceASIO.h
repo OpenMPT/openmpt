@@ -30,14 +30,15 @@
 #if defined(MODPLUG_TRACKER)
 #if !defined(MPT_BUILD_WINESUPPORT)
 #include "../mptrack/ExceptionHandler.h"
-#endif // !MPT_BUILD_WINESUPPORT
-#endif // MODPLUG_TRACKER
+#endif  // !MPT_BUILD_WINESUPPORT
+#endif  // MODPLUG_TRACKER
 
-#endif // MPT_WITH_ASIO
+#endif  // MPT_WITH_ASIO
 
 OPENMPT_NAMESPACE_BEGIN
 
-namespace SoundDevice {
+namespace SoundDevice
+{
 
 #ifdef MPT_WITH_ASIO
 
@@ -61,29 +62,28 @@ class CASIODevice
 	friend class TemporaryASIODriverOpener;
 
 protected:
-
 	std::unique_ptr<ASIO::Windows::IBufferSwitchDispatcher> m_DeferredBufferSwitchDispatcher;
 	std::unique_ptr<ASIO::Driver> m_Driver;
 
-	#if defined(MODPLUG_TRACKER) && !defined(MPT_BUILD_WINESUPPORT)
-		using CrashContext = ExceptionHandler::Context;
-		using CrashContextGuard = ExceptionHandler::ContextSetter;
-	#else // !(MODPLUG_TRACKER && !MPT_BUILD_WINESUPPORT)
-		struct CrashContext
+#if defined(MODPLUG_TRACKER) && !defined(MPT_BUILD_WINESUPPORT)
+	using CrashContext = ExceptionHandler::Context;
+	using CrashContextGuard = ExceptionHandler::ContextSetter;
+#else   // !(MODPLUG_TRACKER && !MPT_BUILD_WINESUPPORT)
+	struct CrashContext
+	{
+		void SetDescription(mpt::ustring)
 		{
-			void SetDescription(mpt::ustring)
-			{
-				return;
-			}
-		};
-		struct CrashContextGuard
+			return;
+		}
+	};
+	struct CrashContextGuard
+	{
+		CrashContextGuard(CrashContext *)
 		{
-			CrashContextGuard(CrashContext *)
-			{
-				return;
-			}
-		};
-	#endif // MODPLUG_TRACKER && !MPT_BUILD_WINESUPPORT
+			return;
+		}
+	};
+#endif  // MODPLUG_TRACKER && !MPT_BUILD_WINESUPPORT
 	CrashContext m_Ectx;
 
 	class ASIODriverWithContext
@@ -91,8 +91,9 @@ protected:
 	private:
 		ASIO::Driver *m_Driver;
 		CrashContextGuard m_Guard;
+
 	public:
-		ASIODriverWithContext(ASIO::Driver *driver, CrashContext * ectx)
+		ASIODriverWithContext(ASIO::Driver *driver, CrashContext *ectx)
 			: m_Driver(driver)
 			, m_Guard(ectx)
 		{
@@ -144,7 +145,7 @@ protected:
 	{
 		enum AsioRequestEnum : AsioRequests
 		{
-			LatenciesChanged = 1<<0,
+			LatenciesChanged = 1 << 0,
 		};
 	};
 	std::atomic<AsioRequests> m_AsioRequest;
@@ -154,12 +155,12 @@ protected:
 	{
 		enum AsioFeatureEnum : AsioFeatures
 		{
-			ResetRequest     = 1<<0,
-			ResyncRequest    = 1<<1,
-			BufferSizeChange = 1<<2,
-			Overload         = 1<<3,
-			SampleRateChange = 1<<4,
-			DeferredProcess  = 1<<5,
+			ResetRequest = 1 << 0,
+			ResyncRequest = 1 << 1,
+			BufferSizeChange = 1 << 2,
+			Overload = 1 << 3,
+			SampleRateChange = 1 << 4,
+			DeferredProcess = 1 << 5,
 		};
 	};
 	mutable std::atomic<AsioFeatures> m_UsedFeatures;
@@ -167,23 +168,20 @@ protected:
 
 	mutable std::atomic<uint32> m_DebugRealtimeThreadID;
 
-	void SetRenderSilence(bool silence, bool wait=false);
+	void SetRenderSilence(bool silence, bool wait = false);
 
 public:
-
 	CASIODevice(ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo);
 	~CASIODevice();
 
 private:
-
 	void InitMembers();
-	bool HandleRequests(); // return true if any work has been done
+	bool HandleRequests();  // return true if any work has been done
 	void UpdateLatency();
 
 	void InternalStopImpl(bool force);
 
 public:
-
 	bool InternalOpen();
 	bool InternalClose();
 	void InternalFillAudioBuffer();
@@ -194,7 +192,7 @@ public:
 	bool InternalIsPlayingSilence() const;
 	void InternalStopAndAvoidPlayingSilence();
 	void InternalEndPlayingSilence();
-	
+
 	bool OnIdle() { return HandleRequests(); }
 
 	SoundDevice::Caps InternalGetDeviceCaps();
@@ -208,12 +206,10 @@ public:
 	SoundDevice::Statistics GetStatistics() const;
 
 public:
-
-	static std::unique_ptr<SoundDevice::BackendInitializer> BackendInitializer() { return std::make_unique< SoundDevice::BackendInitializer>(); }
+	static std::unique_ptr<SoundDevice::BackendInitializer> BackendInitializer() { return std::make_unique<SoundDevice::BackendInitializer>(); }
 	static std::vector<SoundDevice::Info> EnumerateDevices(ILogger &logger, SoundDevice::SysInfo sysInfo);
 
 protected:
-
 	void OpenDriver();
 	void CloseDriver();
 	bool IsDriverOpen() const { return (m_Driver != nullptr); }
@@ -223,21 +219,19 @@ protected:
 	SoundDevice::BufferAttributes InternalGetEffectiveBufferAttributes() const;
 
 protected:
-
 	void FillAsioBuffer(bool useSource = true);
 
 private:
-	
 	// CallbackHandler
 
 	void MessageResetRequest() noexcept override;
 	bool MessageBufferSizeChange(ASIO::Long newSize) noexcept override;
 	bool MessageResyncRequest() noexcept override;
 	void MessageLatenciesChanged() noexcept override;
-	ASIO::Long MessageMMCCommand(ASIO::Long value, const void * message, const ASIO::Double * opt) noexcept override;
+	ASIO::Long MessageMMCCommand(ASIO::Long value, const void *message, const ASIO::Double *opt) noexcept override;
 	void MessageOverload() noexcept override;
 
-	ASIO::Long MessageUnknown(ASIO::MessageSelector selector, ASIO::Long value, const void * message, const ASIO::Double * opt) noexcept override;
+	ASIO::Long MessageUnknown(ASIO::MessageSelector selector, ASIO::Long value, const void *message, const ASIO::Double *opt) noexcept override;
 
 	void RealtimeSampleRateDidChange(ASIO::SampleRate sRate) noexcept override;
 	void RealtimeRequestDeferredProcessing(bool value) noexcept override;
@@ -247,13 +241,11 @@ private:
 	void RealtimeBufferSwitchImpl(ASIO::BufferIndex bufferIndex) noexcept;
 
 private:
-
-	void ExceptionHandler(const char * func);
-
+	void ExceptionHandler(const char *func);
 };
 
-#endif // MPT_WITH_ASIO
+#endif  // MPT_WITH_ASIO
 
-} // namespace SoundDevice
+}  // namespace SoundDevice
 
 OPENMPT_NAMESPACE_END

@@ -39,16 +39,20 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-namespace SoundDevice {
+namespace SoundDevice
+{
 
 
 #ifdef MPT_WITH_PORTAUDIO
 
 #ifdef MPT_ALL_LOGGING
-#define PALOG(x) MPT_LOG(GetLogger(), LogDebug, "PortAudio", x)
+#define PALOG(x)       MPT_LOG(GetLogger(), LogDebug, "PortAudio", x)
 #define PA_LOG_ENABLED 1
 #else
-#define PALOG(x) do { } while(0)
+#define PALOG(x) \
+	do \
+	{ \
+	} while(0)
 #define PA_LOG_ENABLED 0
 #endif
 
@@ -73,7 +77,7 @@ CPortaudioDevice::CPortaudioDevice(ILogger &logger, SoundDevice::Info info, Soun
 	m_InputStreamParameters = {};
 #if MPT_OS_WINDOWS
 	m_WasapiStreamInfo = {};
-#endif // MPT_OS_WINDOWS
+#endif  // MPT_OS_WINDOWS
 	m_Stream = 0;
 	m_StreamInfo = 0;
 	m_CurrentFrameBuffer = nullptr;
@@ -115,11 +119,11 @@ bool CPortaudioDevice::InternalOpen()
 	{
 		switch(m_Settings.sampleFormat.GetBitsPerSample())
 		{
-		case 8: m_StreamParameters.sampleFormat = paInt8; break;
-		case 16: m_StreamParameters.sampleFormat = paInt16; break;
-		case 24: m_StreamParameters.sampleFormat = paInt24; break;
-		case 32: m_StreamParameters.sampleFormat = paInt32; break;
-		default: return false; break;
+			case 8: m_StreamParameters.sampleFormat = paInt8; break;
+			case 16: m_StreamParameters.sampleFormat = paInt16; break;
+			case 24: m_StreamParameters.sampleFormat = paInt24; break;
+			case 32: m_StreamParameters.sampleFormat = paInt32; break;
+			default: return false; break;
 		}
 	}
 	m_StreamParameters.suggestedLatency = m_Settings.Latency;
@@ -165,14 +169,14 @@ bool CPortaudioDevice::InternalOpen()
 			}
 			m_StreamParameters.hostApiSpecificStreamInfo = &m_WasapiStreamInfo;
 		}
-#endif // MPT_OS_WINDOWS
+#endif  // MPT_OS_WINDOWS
 		if(m_Settings.ExclusiveMode)
 		{
 			m_Flags.WantsClippedOutput = false;
 #if MPT_OS_WINDOWS
 			m_WasapiStreamInfo.flags |= paWinWasapiExclusive | paWinWasapiExplicitSampleFormat;
 			m_StreamParameters.hostApiSpecificStreamInfo = &m_WasapiStreamInfo;
-#endif // MPT_OS_WINDOWS
+#endif  // MPT_OS_WINDOWS
 		} else
 		{
 			m_Flags.WantsClippedOutput = GetSysInfo().IsOriginal();
@@ -180,7 +184,7 @@ bool CPortaudioDevice::InternalOpen()
 	} else if(m_HostApiType == paWDMKS)
 	{
 		m_Flags.WantsClippedOutput = false;
-		framesPerBuffer = paFramesPerBufferUnspecified; // let portaudio choose
+		framesPerBuffer = paFramesPerBufferUnspecified;  // let portaudio choose
 	} else if(m_HostApiType == paMME)
 	{
 		m_Flags.WantsClippedOutput = (GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::osinfo::windows::Version::WinVista));
@@ -206,7 +210,7 @@ bool CPortaudioDevice::InternalOpen()
 #if MPT_OS_WINDOWS
 				m_WasapiStreamInfo.flags &= ~paWinWasapiExplicitSampleFormat;
 				m_StreamParameters.hostApiSpecificStreamInfo = &m_WasapiStreamInfo;
-#endif // MPT_OS_WINDOWS
+#endif  // MPT_OS_WINDOWS
 				if(Pa_IsFormatSupported((m_Settings.InputChannels > 0) ? &m_InputStreamParameters : NULL, &m_StreamParameters, m_Settings.Samplerate) != paFormatIsSupported)
 				{
 					return false;
@@ -214,11 +218,11 @@ bool CPortaudioDevice::InternalOpen()
 			} else
 			{
 				if(!GetSysInfo().IsWine && GetSysInfo().WindowsVersion.IsAtLeast(mpt::osinfo::windows::Version::Win7))
-				{ // retry with automatic stream format conversion (i.e. resampling)
-	#if MPT_OS_WINDOWS
+				{  // retry with automatic stream format conversion (i.e. resampling)
+#if MPT_OS_WINDOWS
 					m_WasapiStreamInfo.flags |= paWinWasapiAutoConvert;
 					m_StreamParameters.hostApiSpecificStreamInfo = &m_WasapiStreamInfo;
-	#endif // MPT_OS_WINDOWS
+#endif  // MPT_OS_WINDOWS
 					if(Pa_IsFormatSupported((m_Settings.InputChannels > 0) ? &m_InputStreamParameters : NULL, &m_StreamParameters, m_Settings.Samplerate) != paFormatIsSupported)
 					{
 						return false;
@@ -238,7 +242,7 @@ bool CPortaudioDevice::InternalOpen()
 	{
 		flags |= paDitherOff;
 	}
-	if(Pa_OpenStream(&m_Stream, (m_Settings.InputChannels > 0) ? &m_InputStreamParameters : NULL, &m_StreamParameters, m_Settings.Samplerate, framesPerBuffer, flags, StreamCallbackWrapper, reinterpret_cast<void*>(this)) != paNoError)
+	if(Pa_OpenStream(&m_Stream, (m_Settings.InputChannels > 0) ? &m_InputStreamParameters : NULL, &m_StreamParameters, m_Settings.Samplerate, framesPerBuffer, flags, StreamCallbackWrapper, reinterpret_cast<void *>(this)) != paNoError)
 	{
 		return false;
 	}
@@ -262,7 +266,7 @@ bool CPortaudioDevice::InternalClose()
 		Pa_CloseStream(m_Stream);
 		if(Pa_GetDeviceInfo(m_StreamParameters.device)->hostApi == Pa_HostApiTypeIdToHostApiIndex(paWDMKS))
 		{
-			Pa_Sleep(mpt::saturate_round<long>(bufferAttributes.Latency * 2.0 * 1000.0 + 0.5)); // wait for broken wdm drivers not closing the stream immediatly
+			Pa_Sleep(mpt::saturate_round<long>(bufferAttributes.Latency * 2.0 * 1000.0 + 0.5));  // wait for broken wdm drivers not closing the stream immediatly
 		}
 		m_StreamParameters = {};
 		m_InputStreamParameters = {};
@@ -386,7 +390,7 @@ SoundDevice::Statistics CPortaudioDevice::GetStatistics() const
 			}
 		}
 	}
-#endif // MPT_OS_WINDOWS
+#endif  // MPT_OS_WINDOWS
 	return result;
 }
 
@@ -500,7 +504,7 @@ SoundDevice::DynamicCaps CPortaudioDevice::GetDeviceDynamicCaps(const std::vecto
 	{
 		return caps;
 	}
-	for(std::size_t n = 0; n<baseSampleRates.size(); n++)
+	for(std::size_t n = 0; n < baseSampleRates.size(); n++)
 	{
 		PaStreamParameters StreamParameters = {};
 		StreamParameters.device = device;
@@ -525,26 +529,26 @@ SoundDevice::DynamicCaps CPortaudioDevice::GetDeviceDynamicCaps(const std::vecto
 	{
 		if(GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::osinfo::windows::Version::WinVista))
 		{
-			caps.supportedSampleFormats = { SampleFormat::Float32 };
+			caps.supportedSampleFormats = {SampleFormat::Float32};
 		}
 	} else if(m_HostApiType == paMME)
 	{
 		if(GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::osinfo::windows::Version::WinVista))
 		{
-			caps.supportedSampleFormats = { SampleFormat::Float32 };
+			caps.supportedSampleFormats = {SampleFormat::Float32};
 		}
 	} else if(m_HostApiType == paJACK)
 	{
-		caps.supportedSampleFormats = { SampleFormat::Float32 };
+		caps.supportedSampleFormats = {SampleFormat::Float32};
 	} else if(m_HostApiType == paWASAPI)
 	{
-		caps.supportedSampleFormats = { SampleFormat::Float32 };
+		caps.supportedSampleFormats = {SampleFormat::Float32};
 	}
 #if MPT_OS_WINDOWS
 	if(m_HostApiType == paWASAPI && !m_DeviceIsDefault)
 	{
 		caps.supportedExclusiveModeSampleFormats.clear();
-		const std::array<SampleFormat, 5> sampleFormats { SampleFormat::Int8, SampleFormat::Int16, SampleFormat::Int24, SampleFormat::Int32, SampleFormat::Float32 };
+		const std::array<SampleFormat, 5> sampleFormats{SampleFormat::Int8, SampleFormat::Int16, SampleFormat::Int24, SampleFormat::Int32, SampleFormat::Float32};
 		for(const SampleFormat sampleFormat : sampleFormats)
 		{
 			for(const auto sampleRate : caps.supportedExclusiveSampleRates)
@@ -559,10 +563,10 @@ SoundDevice::DynamicCaps CPortaudioDevice::GetDeviceDynamicCaps(const std::vecto
 				{
 					switch(sampleFormat.GetBitsPerSample())
 					{
-					case 8: StreamParameters.sampleFormat = paInt8; break;
-					case 16: StreamParameters.sampleFormat = paInt16; break;
-					case 24: StreamParameters.sampleFormat = paInt24; break;
-					case 32: StreamParameters.sampleFormat = paInt32; break;
+						case 8: StreamParameters.sampleFormat = paInt8; break;
+						case 16: StreamParameters.sampleFormat = paInt16; break;
+						case 24: StreamParameters.sampleFormat = paInt24; break;
+						case 32: StreamParameters.sampleFormat = paInt32; break;
 					}
 				}
 				StreamParameters.suggestedLatency = 0.0;
@@ -585,7 +589,7 @@ SoundDevice::DynamicCaps CPortaudioDevice::GetDeviceDynamicCaps(const std::vecto
 	{
 		caps.supportedSampleFormats.clear();
 		caps.supportedExclusiveModeSampleFormats.clear();
-		const std::array<SampleFormat, 5> sampleFormats { SampleFormat::Int8, SampleFormat::Int16, SampleFormat::Int24, SampleFormat::Int32, SampleFormat::Float32 };
+		const std::array<SampleFormat, 5> sampleFormats{SampleFormat::Int8, SampleFormat::Int16, SampleFormat::Int24, SampleFormat::Int32, SampleFormat::Float32};
 		for(const SampleFormat sampleFormat : sampleFormats)
 		{
 			for(const auto sampleRate : caps.supportedSampleRates)
@@ -600,10 +604,10 @@ SoundDevice::DynamicCaps CPortaudioDevice::GetDeviceDynamicCaps(const std::vecto
 				{
 					switch(sampleFormat.GetBitsPerSample())
 					{
-					case 8: StreamParameters.sampleFormat = paInt8; break;
-					case 16: StreamParameters.sampleFormat = paInt16; break;
-					case 24: StreamParameters.sampleFormat = paInt24; break;
-					case 32: StreamParameters.sampleFormat = paInt32; break;
+						case 8: StreamParameters.sampleFormat = paInt8; break;
+						case 16: StreamParameters.sampleFormat = paInt16; break;
+						case 24: StreamParameters.sampleFormat = paInt24; break;
+						case 32: StreamParameters.sampleFormat = paInt32; break;
 					}
 				}
 				StreamParameters.suggestedLatency = 0.0;
@@ -625,13 +629,13 @@ SoundDevice::DynamicCaps CPortaudioDevice::GetDeviceDynamicCaps(const std::vecto
 			caps.supportedExclusiveModeSampleFormats = DefaultSampleFormats<std::vector<SampleFormat>>();
 		}
 	}
-#endif // MPT_OS_WINDOWS
+#endif  // MPT_OS_WINDOWS
 #if MPT_OS_WINDOWS
 	if((m_HostApiType == paWASAPI) && GetSysInfo().WindowsVersion.IsAtLeast(mpt::osinfo::windows::Version::Win7))
 	{
 		caps.supportedSampleRates = baseSampleRates;
 	}
-#endif // MPT_OS_WINDOWS
+#endif  // MPT_OS_WINDOWS
 
 	if(!HasInputChannelsOnSameDevice())
 	{
@@ -664,18 +668,14 @@ bool CPortaudioDevice::OpenDriverSettings()
 	}
 	controlEXE += TEXT("control.exe");
 	return (reinterpret_cast<INT_PTR>(ShellExecute(NULL, TEXT("open"), controlEXE.c_str(), (hasVista ? TEXT("/name Microsoft.Sound") : TEXT("mmsys.cpl")), NULL, SW_SHOW)) >= 32);
-#else // !MPT_OS_WINDOWS
+#else   // !MPT_OS_WINDOWS
 	return false;
-#endif // MPT_OS_WINDOWS
+#endif  // MPT_OS_WINDOWS
 }
 
 
 int CPortaudioDevice::StreamCallback(
-	const void *input, void *output,
-	unsigned long frameCount,
-	const PaStreamCallbackTimeInfo* timeInfo,
-	PaStreamCallbackFlags statusFlags
-	)
+	const void *input, void *output, unsigned long frameCount, const PaStreamCallbackTimeInfo *timeInfo, PaStreamCallbackFlags statusFlags)
 {
 	if(!input && !output)
 	{
@@ -723,20 +723,18 @@ int CPortaudioDevice::StreamCallback(
 
 
 int CPortaudioDevice::StreamCallbackWrapper(
-	const void *input, void *output,
-	unsigned long frameCount,
-	const PaStreamCallbackTimeInfo* timeInfo,
-	PaStreamCallbackFlags statusFlags,
-	void *userData
-	)
+	const void *input, void *output, unsigned long frameCount, const PaStreamCallbackTimeInfo *timeInfo, PaStreamCallbackFlags statusFlags, void *userData)
 {
-	return reinterpret_cast<CPortaudioDevice*>(userData)->StreamCallback(input, output, frameCount, timeInfo, statusFlags);
+	return reinterpret_cast<CPortaudioDevice *>(userData)->StreamCallback(input, output, frameCount, timeInfo, statusFlags);
 }
 
 
 std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(ILogger &logger, SoundDevice::SysInfo sysInfo)
 {
-	auto GetLogger = [&]() -> ILogger& { return logger; };
+	auto GetLogger = [&]() -> ILogger &
+	{
+		return logger;
+	};
 	std::vector<SoundDevice::Info> devices;
 	for(PaDeviceIndex dev = 0; dev < Pa_GetDeviceCount(); ++dev)
 	{
@@ -796,8 +794,7 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(ILogger &logge
 			Info::Api::Unknown,
 			Info::Io::Unknown,
 			Info::Mixing::Unknown,
-			Info::Implementor::External
-		};
+			Info::Implementor::External};
 		// clang-format off
 		switch(Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->type)
 		{
@@ -967,9 +964,9 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(ILogger &logge
 }
 
 
-std::vector<std::pair<PaDeviceIndex, mpt::ustring> > CPortaudioDevice::EnumerateInputOnlyDevices(PaHostApiTypeId hostApiType)
+std::vector<std::pair<PaDeviceIndex, mpt::ustring>> CPortaudioDevice::EnumerateInputOnlyDevices(PaHostApiTypeId hostApiType)
 {
-	std::vector<std::pair<PaDeviceIndex, mpt::ustring> > result;
+	std::vector<std::pair<PaDeviceIndex, mpt::ustring>> result;
 	for(PaDeviceIndex dev = 0; dev < Pa_GetDeviceCount(); ++dev)
 	{
 		if(!Pa_GetDeviceInfo(dev))
@@ -997,7 +994,7 @@ std::vector<std::pair<PaDeviceIndex, mpt::ustring> > CPortaudioDevice::Enumerate
 			continue;
 		}
 		if(Pa_GetDeviceInfo(dev)->maxOutputChannels > 0)
-		{ // only find devices with only input channels
+		{  // only find devices with only input channels
 			continue;
 		}
 		if(Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->type != hostApiType)
@@ -1036,7 +1033,7 @@ static void PortaudioLog(const char *text)
 	MPT_LOG(mpt::log::GlobalLogger(), LogDebug, "PortAudio", MPT_UFORMAT_MESSAGE("PortAudio: {}")(mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, text)));
 #endif
 }
-#endif // MPT_COMPILER_MSVC
+#endif  // MPT_COMPILER_MSVC
 
 
 PortAudioInitializer::PortAudioInitializer()
@@ -1069,10 +1066,10 @@ PortAudioInitializer::~PortAudioInitializer()
 }
 
 
-#endif // MPT_WITH_PORTAUDIO
+#endif  // MPT_WITH_PORTAUDIO
 
 
-} // namespace SoundDevice
+}  // namespace SoundDevice
 
 
 OPENMPT_NAMESPACE_END

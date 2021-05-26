@@ -16,19 +16,20 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-namespace SoundDevice {
+namespace SoundDevice
+{
 
 
 struct StreamPosition
 {
-	int64 Frames = 0; // relative to Start()
-	double Seconds = 0.0; // relative to Start()
+	int64 Frames = 0;      // relative to Start()
+	double Seconds = 0.0;  // relative to Start()
 };
 
 
 struct TimeInfo
 {
-	
+
 	int64 SyncPointStreamFrames = 0;
 	uint64 SyncPointSystemTimestamp = 0;
 	double Speed = 1.0;
@@ -36,9 +37,8 @@ struct TimeInfo
 	SoundDevice::StreamPosition RenderStreamPositionBefore;
 	SoundDevice::StreamPosition RenderStreamPositionAfter;
 	// int64 chunkSize = After - Before
-	
-	double Latency = 0.0; // seconds
 
+	double Latency = 0.0;  // seconds
 };
 
 
@@ -57,13 +57,13 @@ class ICallback
 {
 public:
 	// main thread
-	virtual uint64 SoundCallbackGetReferenceClockNowNanoseconds() const = 0; // timeGetTime()*1000000 on Windows
+	virtual uint64 SoundCallbackGetReferenceClockNowNanoseconds() const = 0;  // timeGetTime()*1000000 on Windows
 	virtual void SoundCallbackPreStart() = 0;
 	virtual void SoundCallbackPostStop() = 0;
 	virtual bool SoundCallbackIsLockedByCurrentThread() const = 0;
 	// audio thread
 	virtual void SoundCallbackLock() = 0;
-	virtual uint64 SoundCallbackLockedGetReferenceClockNowNanoseconds() const = 0; // timeGetTime()*1000000 on Windows
+	virtual uint64 SoundCallbackLockedGetReferenceClockNowNanoseconds() const = 0;  // timeGetTime()*1000000 on Windows
 	virtual void SoundCallbackLockedProcessPrepare(SoundDevice::TimeInfo timeInfo) = 0;
 	virtual void SoundCallbackLockedProcess(SoundDevice::BufferFormat bufferFormat, std::size_t numFrames, uint8 *buffer, const uint8 *inputBuffer) = 0;
 	virtual void SoundCallbackLockedProcess(SoundDevice::BufferFormat bufferFormat, std::size_t numFrames, int8 *buffer, const int8 *inputBuffer) = 0;
@@ -77,7 +77,7 @@ public:
 };
 
 
-} // namespace SoundDevice
+}  // namespace SoundDevice
 
 
 OPENMPT_NAMESPACE_END

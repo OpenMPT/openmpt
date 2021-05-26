@@ -29,32 +29,39 @@
 
 #if MPT_OS_WINDOWS
 #include <windows.h>
-#endif // MPT_OS_WINDOWS
+#endif  // MPT_OS_WINDOWS
 
 #if defined(MODPLUG_TRACKER)
 #include "Logging.h"
-#endif // MODPLUG_TRACKER
+#endif  // MODPLUG_TRACKER
 
 
 OPENMPT_NAMESPACE_BEGIN
 
 
-namespace SoundDevice {
+namespace SoundDevice
+{
 
 
 #ifndef MPT_SOUNDDEV_TRACE
 #if defined(MODPLUG_TRACKER)
 #define MPT_SOUNDDEV_TRACE() MPT_TRACE()
-#else // !MODPLUG_TRACKER
-#define MPT_SOUNDDEV_TRACE() do { } while(0)
-#endif // MODPLUG_TRACKER
+#else  // !MODPLUG_TRACKER
+#define MPT_SOUNDDEV_TRACE() \
+	do \
+	{ \
+	} while(0)
+#endif  // MODPLUG_TRACKER
 #endif
 #ifndef MPT_SOUNDDEV_TRACE_SCOPE
 #if defined(MODPLUG_TRACKER)
 #define MPT_SOUNDDEV_TRACE_SCOPE() MPT_TRACE_SCOPE()
-#else // !MODPLUG_TRACKER
-#define MPT_SOUNDDEV_TRACE_SCOPE() do { } while(0)
-#endif // MODPLUG_TRACKER
+#else  // !MODPLUG_TRACKER
+#define MPT_SOUNDDEV_TRACE_SCOPE() \
+	do \
+	{ \
+	} while(0)
+#endif  // MODPLUG_TRACKER
 #endif
 
 
@@ -65,13 +72,13 @@ public:
 };
 
 
-inline constexpr mpt::uchar TypeWAVEOUT          [] = MPT_ULITERAL("WaveOut");
-inline constexpr mpt::uchar TypeDSOUND           [] = MPT_ULITERAL("DirectSound");
-inline constexpr mpt::uchar TypeASIO             [] = MPT_ULITERAL("ASIO");
-inline constexpr mpt::uchar TypePORTAUDIO_WASAPI [] = MPT_ULITERAL("WASAPI");
-inline constexpr mpt::uchar TypePORTAUDIO_WDMKS  [] = MPT_ULITERAL("WDM-KS");
-inline constexpr mpt::uchar TypePORTAUDIO_WMME   [] = MPT_ULITERAL("MME");
-inline constexpr mpt::uchar TypePORTAUDIO_DS     [] = MPT_ULITERAL("DS");
+inline constexpr mpt::uchar TypeWAVEOUT[] = MPT_ULITERAL("WaveOut");
+inline constexpr mpt::uchar TypeDSOUND[] = MPT_ULITERAL("DirectSound");
+inline constexpr mpt::uchar TypeASIO[] = MPT_ULITERAL("ASIO");
+inline constexpr mpt::uchar TypePORTAUDIO_WASAPI[] = MPT_ULITERAL("WASAPI");
+inline constexpr mpt::uchar TypePORTAUDIO_WDMKS[] = MPT_ULITERAL("WDM-KS");
+inline constexpr mpt::uchar TypePORTAUDIO_WMME[] = MPT_ULITERAL("MME");
+inline constexpr mpt::uchar TypePORTAUDIO_DS[] = MPT_ULITERAL("DS");
 
 typedef mpt::ustring Type;
 
@@ -85,80 +92,91 @@ struct Info
 {
 	SoundDevice::Type type;
 	mpt::ustring internalID;
-	mpt::ustring name; // user visible (and configuration key if useNameAsIdentifier)
-	mpt::ustring apiName; // user visible
-	std::vector<mpt::ustring> apiPath; // i.e. Wine-support, PortAudio
-	enum class Default {
-		None    = 0,
-		Named   = 1,
+	mpt::ustring name;                  // user visible (and configuration key if useNameAsIdentifier)
+	mpt::ustring apiName;               // user visible
+	std::vector<mpt::ustring> apiPath;  // i.e. Wine-support, PortAudio
+	enum class Default
+	{
+		None = 0,
+		Named = 1,
 		Managed = 2,
 	};
 	Default default_;
 	bool useNameAsIdentifier;
 
-	enum class DefaultFor : int8 {
-		System   = 3,
+	enum class DefaultFor : int8
+	{
+		System = 3,
 		ProAudio = 2,
 		LowLevel = 1,
-		None     = 0,
+		None = 0,
 	};
-	struct ManagerFlags {
-		DefaultFor  defaultFor  = DefaultFor::None;
+	struct ManagerFlags
+	{
+		DefaultFor defaultFor = DefaultFor::None;
 	};
 	ManagerFlags managerFlags;
 
-	enum class Usability : int8 {
-		Usable                    =  3,
-		Experimental              =  2,
-		Legacy                    =  1,
-		Unknown                   =  0,
-		Deprecated                = -4,
-		Broken                    = -5,
-		NotAvailable              = -6,
+	enum class Usability : int8
+	{
+		Usable = 3,
+		Experimental = 2,
+		Legacy = 1,
+		Unknown = 0,
+		Deprecated = -4,
+		Broken = -5,
+		NotAvailable = -6,
 	};
-	enum class Level : int8 {
-		Primary   =  1,
-		Unknown   =  0,
+	enum class Level : int8
+	{
+		Primary = 1,
+		Unknown = 0,
 		Secondary = -1,
 	};
-	enum class Compatible : int8 {
-		Yes     =  1,
-		Unknown =  0,
-		No      = -1,
+	enum class Compatible : int8
+	{
+		Yes = 1,
+		Unknown = 0,
+		No = -1,
 	};
-	enum class Api : int8 {
-		Native   =  1,
-		Unknown  =  0,
+	enum class Api : int8
+	{
+		Native = 1,
+		Unknown = 0,
 		Emulated = -1,
 	};
-	enum class Io : int8 {
-		FullDuplex =  1,
-		Unknown    =  0,
+	enum class Io : int8
+	{
+		FullDuplex = 1,
+		Unknown = 0,
 		OutputOnly = -1,
 	};
-	enum class Mixing : int8 {
-		Server   =  2,
-		Software =  1,
-		Unknown  =  0,
+	enum class Mixing : int8
+	{
+		Server = 2,
+		Software = 1,
+		Unknown = 0,
 		Hardware = -1,
 	};
-	enum class Implementor : int8 {
-		OpenMPT  =  1,
-		Unknown  =  0,
+	enum class Implementor : int8
+	{
+		OpenMPT = 1,
+		Unknown = 0,
 		External = -1,
 	};
-	struct Flags {
-		Usability   usability   = Usability::Unknown;
-		Level       level       = Level::Unknown;
-		Compatible  compatible  = Compatible::Unknown;
-		Api         api         = Api::Unknown;
-		Io          io          = Io::Unknown;
-		Mixing      mixing      = Mixing::Unknown;
+	struct Flags
+	{
+		Usability usability = Usability::Unknown;
+		Level level = Level::Unknown;
+		Compatible compatible = Compatible::Unknown;
+		Api api = Api::Unknown;
+		Io io = Io::Unknown;
+		Mixing mixing = Mixing::Unknown;
 		Implementor implementor = Implementor::Unknown;
 	};
 	Flags flags;
 
-	std::map<mpt::ustring, mpt::ustring> extraData; // user visible (hidden by default)
+	std::map<mpt::ustring, mpt::ustring> extraData;  // user visible (hidden by default)
 
 	Info()
 		: default_(Default::None)
@@ -179,7 +197,6 @@ struct Info
 	SoundDevice::Identifier GetIdentifier() const;
 
 	mpt::ustring GetDisplayName() const;
-
 };
 
 
@@ -187,15 +204,12 @@ struct ChannelMapping
 {
 
 private:
-
 	std::vector<int32> ChannelToDeviceChannel;
 
 public:
-
 	static constexpr int32 MaxDeviceChannel = 32000;
 
 public:
-
 	// Construct default identity mapping
 	ChannelMapping(uint32 numHostChannels = 2);
 
@@ -207,32 +221,30 @@ public:
 	static ChannelMapping BaseChannel(uint32 channels, int32 baseChannel);
 
 private:
-
 	// check that the channel mapping is actually a 1:1 mapping
 	static bool IsValid(const std::vector<int32> &mapping);
 
 public:
-
-	operator int () const
+	operator int() const
 	{
 		return GetNumHostChannels();
 	}
 
-	ChannelMapping & operator = (int channels)
+	ChannelMapping &operator=(int channels)
 	{
 		return (*this = ChannelMapping(channels));
 	}
 
-	bool operator == (const SoundDevice::ChannelMapping &cmp) const
+	bool operator==(const SoundDevice::ChannelMapping &cmp) const
 	{
 		return (ChannelToDeviceChannel == cmp.ChannelToDeviceChannel);
 	}
-	
+
 	uint32 GetNumHostChannels() const
 	{
 		return static_cast<uint32>(ChannelToDeviceChannel.size());
 	}
-	
+
 	// Get the number of required device channels for this mapping. Derived from the maximum mapped-to channel number.
 	int32 GetRequiredDeviceChannels() const
 	{
@@ -250,7 +262,7 @@ public:
 		}
 		return maxChannel + 1;
 	}
-	
+
 	// Convert OpenMPT channel number to the mapped device channel number.
 	int32 ToDevice(uint32 channel) const
 	{
@@ -264,7 +276,6 @@ public:
 	mpt::ustring ToUString() const;
 
 	static SoundDevice::ChannelMapping FromString(const mpt::ustring &str);
-
 };
 
 
@@ -276,20 +287,24 @@ public:
 	bool IsWine = false;
 	mpt::osinfo::osclass WineHostClass = mpt::osinfo::osclass::Unknown;
 	mpt::osinfo::windows::wine::version WineVersion;
+
 public:
 	bool IsOriginal() const { return !IsWine; }
 	bool IsWindowsOriginal() const { return !IsWine; }
 	bool IsWindowsWine() const { return IsWine; }
+
 public:
 	SysInfo() = delete;
 	SysInfo(mpt::osinfo::osclass systemClass)
-		: SystemClass(systemClass) {
+		: SystemClass(systemClass)
+	{
 		assert(SystemClass != mpt::osinfo::osclass::Windows);
 		return;
 	}
 	SysInfo(mpt::osinfo::osclass systemClass, mpt::osinfo::windows::Version windowsVersion)
 		: SystemClass(systemClass)
-		, WindowsVersion(windowsVersion) {
+		, WindowsVersion(windowsVersion)
+	{
 		return;
 	}
 	SysInfo(mpt::osinfo::osclass systemClass, mpt::osinfo::windows::Version windowsVersion, bool isWine, mpt::osinfo::osclass wineHostClass, mpt::osinfo::windows::wine::version wineVersion)
@@ -297,7 +312,8 @@ public:
 		, WindowsVersion(windowsVersion)
 		, IsWine(isWine)
 		, WineHostClass(wineHostClass)
-		, WineVersion(wineVersion) {
+		, WineVersion(wineVersion)
+	{
 		return;
 	}
 };
@@ -306,7 +322,7 @@ public:
 struct AppInfo
 {
 	mpt::ustring Name;
-	std::uintptr_t UIHandle; // HWND on Windows
+	std::uintptr_t UIHandle;  // HWND on Windows
 	int BoostedThreadPriorityXP;
 	mpt::ustring BoostedThreadMMCSSClassVista;
 	bool BoostedThreadRealtimePosix;
@@ -314,41 +330,49 @@ struct AppInfo
 	int BoostedThreadRtprioPosix;
 #if defined(MODPLUG_TRACKER)
 	bool MaskDriverCrashes;
-#endif // MODPLUG_TRACKER
+#endif  // MODPLUG_TRACKER
 	bool AllowDeferredProcessing;
 	AppInfo()
 		: UIHandle(0)
-		, BoostedThreadPriorityXP(2)  // THREAD_PRIORITY_HIGHEST 
+		, BoostedThreadPriorityXP(2)  // THREAD_PRIORITY_HIGHEST
 		, BoostedThreadMMCSSClassVista(MPT_USTRING("Pro Audio"))
 		, BoostedThreadRealtimePosix(false)
 		, BoostedThreadNicenessPosix(-5)
 		, BoostedThreadRtprioPosix(10)
 #if defined(MODPLUG_TRACKER)
 		, MaskDriverCrashes(false)
-#endif // MODPLUG_TRACKER
+#endif  // MODPLUG_TRACKER
 		, AllowDeferredProcessing(true)
 	{
 		return;
 	}
-	AppInfo &SetName(const mpt::ustring &name) { Name = name; return *this; }
+	AppInfo &SetName(const mpt::ustring &name)
+	{
+		Name = name;
+		return *this;
+	}
 	mpt::ustring GetName() const { return Name; }
 #if MPT_OS_WINDOWS
-	AppInfo &SetHWND(HWND hwnd) { UIHandle = reinterpret_cast<uintptr_t>(hwnd); return *this; }
+	AppInfo &SetHWND(HWND hwnd)
+	{
+		UIHandle = reinterpret_cast<uintptr_t>(hwnd);
+		return *this;
+	}
 	HWND GetHWND() const { return reinterpret_cast<HWND>(UIHandle); }
-#endif // MPT_OS_WINDOWS
+#endif  // MPT_OS_WINDOWS
 };
 
 
 struct Settings
 {
-	double Latency; // seconds
-	double UpdateInterval; // seconds
+	double Latency;         // seconds
+	double UpdateInterval;  // seconds
 	uint32 Samplerate;
 	SoundDevice::ChannelMapping Channels;
 	uint8 InputChannels;
 	SampleFormat sampleFormat;
-	bool ExclusiveMode; // Use hardware buffers directly
-	bool BoostThreadPriority; // Boost thread priority for glitch-free audio rendering
+	bool ExclusiveMode;        // Use hardware buffers directly
+	bool BoostThreadPriority;  // Boost thread priority for glitch-free audio rendering
 	bool KeepDeviceRunning;
 	bool UseHardwareTiming;
 	int32 DitherType;
@@ -369,11 +393,11 @@ struct Settings
 	{
 		return;
 	}
-	bool operator == (const SoundDevice::Settings &cmp) const
+	bool operator==(const SoundDevice::Settings &cmp) const
 	{
 		return true
-			&& mpt::saturate_round<int64>(Latency * 1000000000.0) == mpt::saturate_round<int64>(cmp.Latency * 1000000000.0) // compare in nanoseconds
-			&& mpt::saturate_round<int64>(UpdateInterval * 1000000000.0) == mpt::saturate_round<int64>(cmp.UpdateInterval * 1000000000.0) // compare in nanoseconds
+			&& mpt::saturate_round<int64>(Latency * 1000000000.0) == mpt::saturate_round<int64>(cmp.Latency * 1000000000.0)                // compare in nanoseconds
+			&& mpt::saturate_round<int64>(UpdateInterval * 1000000000.0) == mpt::saturate_round<int64>(cmp.UpdateInterval * 1000000000.0)  // compare in nanoseconds
 			&& Samplerate == cmp.Samplerate
 			&& Channels == cmp.Channels
 			&& InputChannels == cmp.InputChannels
@@ -383,10 +407,9 @@ struct Settings
 			&& KeepDeviceRunning == cmp.KeepDeviceRunning
 			&& UseHardwareTiming == cmp.UseHardwareTiming
 			&& DitherType == cmp.DitherType
-			&& InputSourceID == cmp.InputSourceID
-			;
+			&& InputSourceID == cmp.InputSourceID;
 	}
-	bool operator != (const SoundDevice::Settings &cmp) const
+	bool operator!=(const SoundDevice::Settings &cmp) const
 	{
 		return !(*this == cmp);
 	}
@@ -458,10 +481,10 @@ struct Caps
 		, CanDriverPanel(false)
 		, HasInternalDither(false)
 		, ExclusiveModeDescription(MPT_USTRING("Use device exclusively"))
-		, LatencyMin(0.002) // 2ms
-		, LatencyMax(0.5) // 500ms
-		, UpdateIntervalMin(0.001) // 1ms
-		, UpdateIntervalMax(0.2) // 200ms
+		, LatencyMin(0.002)         // 2ms
+		, LatencyMax(0.5)           // 500ms
+		, UpdateIntervalMin(0.001)  // 1ms
+		, UpdateIntervalMax(0.2)    // 200ms
 	{
 		return;
 	}
@@ -476,14 +499,14 @@ struct DynamicCaps
 	std::vector<SampleFormat> supportedSampleFormats = DefaultSampleFormats<std::vector<SampleFormat>>();
 	std::vector<SampleFormat> supportedExclusiveModeSampleFormats = DefaultSampleFormats<std::vector<SampleFormat>>();
 	std::vector<mpt::ustring> channelNames;
-	std::vector<std::pair<uint32, mpt::ustring> > inputSourceNames;
+	std::vector<std::pair<uint32, mpt::ustring>> inputSourceNames;
 };
 
 
 struct BufferAttributes
 {
-	double Latency; // seconds
-	double UpdateInterval; // seconds
+	double Latency;         // seconds
+	double UpdateInterval;  // seconds
 	int NumBuffers;
 	BufferAttributes()
 		: Latency(0.0)
@@ -497,9 +520,9 @@ struct BufferAttributes
 
 enum RequestFlags : uint32
 {
-	RequestFlagClose   = 1<<0,
-	RequestFlagReset   = 1<<1,
-	RequestFlagRestart = 1<<2,
+	RequestFlagClose = 1 << 0,
+	RequestFlagReset = 1 << 1,
+	RequestFlagRestart = 1 << 2,
 };
 MPT_DECLARE_ENUM(RequestFlags)
 
@@ -534,15 +557,12 @@ class IBase
 {
 
 protected:
-
 	IBase() = default;
 
 public:
-
 	virtual ~IBase() = default;
 
 public:
-
 	virtual void SetMessageReceiver(SoundDevice::IMessageReceiver *receiver) = 0;
 	virtual void SetCallback(SoundDevice::ICallback *callback) = 0;
 
@@ -568,7 +588,7 @@ public:
 	virtual void StopAndAvoidPlayingSilence() = 0;
 	virtual void EndPlayingSilence() = 0;
 
-	virtual bool OnIdle() = 0; // return true if any work has been done
+	virtual bool OnIdle() = 0;  // return true if any work has been done
 
 	virtual SoundDevice::Settings GetSettings() const = 0;
 	virtual SampleFormat GetActualSampleFormat() const = 0;
@@ -586,11 +606,10 @@ public:
 	virtual SoundDevice::Statistics GetStatistics() const = 0;
 
 	virtual bool OpenDriverSettings() = 0;
-
 };
 
 
-} // namespace SoundDevice
+}  // namespace SoundDevice
 
 
 OPENMPT_NAMESPACE_END
