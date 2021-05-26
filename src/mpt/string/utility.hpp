@@ -313,7 +313,7 @@ inline std::vector<Tstring> split(const Tstring & str, const Tstring & sep = Tst
 
 
 template <typename Tstring>
-inline Tstring combine(const std::vector<Tstring> & vals, const Tstring & sep = Tstring(1, char_constants<typename Tstring::value_type>::comma)) {
+inline Tstring join(const std::vector<Tstring> & vals, const Tstring & sep = Tstring(1, char_constants<typename Tstring::value_type>::comma)) {
 	Tstring str;
 	for (std::size_t i = 0; i < vals.size(); ++i) {
 		if (i > 0) {
