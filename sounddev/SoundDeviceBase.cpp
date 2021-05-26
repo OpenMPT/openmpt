@@ -7,6 +7,8 @@
 
 #include "SoundDeviceBase.h"
 
+#include "SoundDeviceCallback.h"
+
 #include "mpt/base/saturate_round.hpp"
 #include "mpt/format/simple.hpp"
 #include "mpt/string/types.hpp"

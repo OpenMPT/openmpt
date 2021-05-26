@@ -11,6 +11,7 @@
 
 #include "SoundDevice.h"
 #include "SoundDeviceBase.h"
+#include "SoundDeviceCallback.h"
 
 #include "mpt/base/bit.hpp"
 #include "mpt/base/macros.hpp"
