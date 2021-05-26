@@ -18,6 +18,7 @@
 #include "mpt/string_convert/convert.hpp"
 #include "openmpt/base/Types.hpp"
 #include "openmpt/logging/Logger.hpp"
+#include "openmpt/soundbase/SampleFormat.hpp"
 
 #include <vector>
 
