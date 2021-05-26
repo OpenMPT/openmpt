@@ -472,6 +472,7 @@ std::vector<SoundDevice::Info> CRtAudioDevice::EnumerateDevices(ILogger &logger,
 				info.extraData[MPT_USTRING("RtAudio-ApiDisplayName")] = mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, RtAudio::getApiDisplayName(rtaudio.getCurrentApi()));
 				info.apiPath.push_back(MPT_USTRING("RtAudio"));
 				info.useNameAsIdentifier = true;
+				// clang-format off
 				switch(rtaudio.getCurrentApi())
 				{
 				case RtAudio::LINUX_ALSA:
@@ -594,6 +595,7 @@ std::vector<SoundDevice::Info> CRtAudioDevice::EnumerateDevices(ILogger &logger,
 					// nothing
 					break;
 				}
+				// clang-format on
 
 				devices.push_back(info);
 			}

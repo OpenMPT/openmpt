@@ -113,6 +113,7 @@ static void PulseAudioSinkInfoListCallback(pa_context * /* c */ , const pa_sink_
 		#endif
 		info.default_ = Info::Default::None;
 		info.useNameAsIdentifier = false;
+		// clang-format off
 		info.flags = {
 			sysInfo.SystemClass == mpt::osinfo::osclass::Linux ? Info::Usability::Usable : Info::Usability::Experimental,
 			Info::Level::Primary,
@@ -122,6 +123,7 @@ static void PulseAudioSinkInfoListCallback(pa_context * /* c */ , const pa_sink_
 			Info::Mixing::Server,
 			Info::Implementor::External
 		};
+		// clang-format on
 		devices.push_back(info);
 		break;
 	}

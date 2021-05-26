@@ -677,6 +677,7 @@ std::vector<SoundDevice::Info> CWaveDevice::EnumerateDevices(ILogger &logger, So
 			}
 		}
 		info.default_ = ((index == 0) ? Info::Default::Managed : Info::Default::None);
+		// clang-format off
 		info.flags = {
 			sysInfo.SystemClass == mpt::osinfo::osclass::Windows ? sysInfo.IsWindowsOriginal() && sysInfo.WindowsVersion.IsBefore(mpt::osinfo::windows::Version::Win7) ? Info::Usability::Usable : Info::Usability::Legacy : Info::Usability::NotAvailable,
 			Info::Level::Primary,
@@ -686,6 +687,7 @@ std::vector<SoundDevice::Info> CWaveDevice::EnumerateDevices(ILogger &logger, So
 			Info::Mixing::Software,
 			Info::Implementor::OpenMPT
 		};
+		// clang-format on
 		devices.push_back(info);
 	}
 	return devices;

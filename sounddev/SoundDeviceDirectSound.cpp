@@ -80,6 +80,7 @@ static BOOL WINAPI DSEnumCallback(GUID * lpGuid, LPCTSTR lpstrDescription, LPCTS
 	}
 	info.apiName = MPT_USTRING("DirectSound");
 	info.useNameAsIdentifier = false;
+	// clang-format off
 	info.flags = {
 		sysInfo.SystemClass == mpt::osinfo::osclass::Windows ? sysInfo.IsWindowsOriginal() && sysInfo.WindowsVersion.IsBefore(mpt::osinfo::windows::Version::Win7) ? Info::Usability::Usable : Info::Usability::Deprecated : Info::Usability::NotAvailable,
 		Info::Level::Primary,
@@ -89,6 +90,7 @@ static BOOL WINAPI DSEnumCallback(GUID * lpGuid, LPCTSTR lpstrDescription, LPCTS
 		Info::Mixing::Software,
 		Info::Implementor::OpenMPT
 	};
+	// clang-format on
 	devices.push_back(info);
 	return TRUE;
 }

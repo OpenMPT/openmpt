@@ -133,6 +133,7 @@ std::vector<SoundDevice::Info> CASIODevice::EnumerateDevices(ILogger &logger, So
 		info.name = mpt::convert<mpt::ustring>(AsWinstring(driver.DisplayName()));
 		info.useNameAsIdentifier = false;
 		info.default_ = Info::Default::None;
+		// clang-format off
 		info.flags = {
 			sysInfo.SystemClass == mpt::osinfo::osclass::Windows ? sysInfo.IsWindowsOriginal() ? Info::Usability::Usable : Info::Usability::Experimental : Info::Usability::NotAvailable,
 			Info::Level::Primary,
@@ -142,6 +143,7 @@ std::vector<SoundDevice::Info> CASIODevice::EnumerateDevices(ILogger &logger, So
 			Info::Mixing::Hardware,
 			Info::Implementor::OpenMPT
 		};
+		// clang-format on
 		info.extraData[MPT_USTRING("Key")] = mpt::convert<mpt::ustring>(AsWinstring(driver.Key));;
 		info.extraData[MPT_USTRING("Id")] = mpt::convert<mpt::ustring>(AsWinstring(driver.Id));
 		info.extraData[MPT_USTRING("CLSID")] = mpt::convert<mpt::ustring>(mpt::CLSIDToString(driver.Clsid));

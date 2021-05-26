@@ -798,6 +798,7 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(ILogger &logge
 			Info::Mixing::Unknown,
 			Info::Implementor::External
 		};
+		// clang-format off
 		switch(Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->type)
 		{
 		case paDirectSound:
@@ -946,6 +947,7 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(ILogger &logge
 			// nothing
 			break;
 		}
+		// clang-format on
 		PALOG(MPT_UFORMAT_MESSAGE("PortAudio: {}, {}, {}, {}")(result.internalID, result.name, result.apiName, static_cast<int>(result.default_)));
 		PALOG(MPT_UFORMAT_MESSAGE(" low  : {}")(Pa_GetDeviceInfo(dev)->defaultLowOutputLatency));
 		PALOG(MPT_UFORMAT_MESSAGE(" high : {}")(Pa_GetDeviceInfo(dev)->defaultHighOutputLatency));
