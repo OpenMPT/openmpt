@@ -195,7 +195,7 @@ public:
 
 
 template <typename TDithers>
-class BufferHandler
+class CallbackBufferHandler
 	: public ICallback
 {
 private:
@@ -203,7 +203,7 @@ private:
 
 protected:
 	template <typename Trd>
-	explicit BufferHandler(Trd &rd)
+	explicit CallbackBufferHandler(Trd &rd)
 		: m_Dithers(rd)
 	{
 		return;

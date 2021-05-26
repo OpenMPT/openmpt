@@ -169,7 +169,7 @@ static UINT indicators[] =
 /////////////////////////////////////////////////////////////////////////////
 // CMainFrame construction/destruction
 CMainFrame::CMainFrame()
-	: SoundDevice::BufferHandler<DithersOpenMPT>(theApp.PRNG())
+	: SoundDevice::CallbackBufferHandler<DithersOpenMPT>(theApp.PRNG())
 	, m_SoundDeviceFillBufferCriticalSection(CriticalSection::InitialState::Unlocked)
 {
 	m_szUserText[0] = 0;

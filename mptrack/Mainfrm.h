@@ -257,7 +257,7 @@ protected:
 
 class CMainFrame
 	: public CMDIFrameWnd
-	, public SoundDevice::BufferHandler<DithersOpenMPT>
+	, public SoundDevice::CallbackBufferHandler<DithersOpenMPT>
 	, public SoundDevice::IMessageReceiver
 	, public TfLanguageProfileNotifySink
 {
