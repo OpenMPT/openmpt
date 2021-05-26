@@ -97,11 +97,7 @@ struct TimeInfo
 };
 
 
-struct Settings;
-struct Flags;
 struct BufferFormat;
-struct BufferAttributes;
-
 
 
 class ISource
