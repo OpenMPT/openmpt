@@ -156,6 +156,7 @@ std::vector<SoundDevice::Info> PulseaudioSimple::EnumerateDevices(ILogger &logge
 #endif
 	info.default_ = Info::Default::Managed;
 	info.useNameAsIdentifier = false;
+	// clang-format off
 	info.flags = {
 		sysInfo.SystemClass == mpt::osinfo::osclass::Linux ? Info::Usability::Usable : Info::Usability::Experimental,
 		Info::Level::Primary,
@@ -163,7 +164,9 @@ std::vector<SoundDevice::Info> PulseaudioSimple::EnumerateDevices(ILogger &logge
 		sysInfo.SystemClass == mpt::osinfo::osclass::Linux ? Info::Api::Native : Info::Api::Emulated,
 		Info::Io::FullDuplex,
 		Info::Mixing::Server,
-		Info::Implementor::External};
+		Info::Implementor::External
+	};
+	// clang-format on
 	devices.push_back(info);
 
 #ifdef MPT_PULSEAUDIO_SIMPLE_ENUMERATE_DEVICES
