@@ -120,6 +120,4 @@ void LIN1Decompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 	}
 }
 
-XPKDecompressor::Registry<LIN1Decompressor> LIN1Decompressor::_XPKregistration;
-
 }

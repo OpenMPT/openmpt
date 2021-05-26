@@ -189,9 +189,6 @@ end
    "/DELAYLOAD:propsys.dll",
   }
 	end
-	linkoptions {
-		"/WHOLEARCHIVE:openmpt-ancient.lib",
-	}
   filter { "action:vs*" }
     files {
       "../../build/vs/debug/openmpt.natvis",

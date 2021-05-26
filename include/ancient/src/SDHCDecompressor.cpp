@@ -123,6 +123,4 @@ void SDHCDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 	}
 }
 
-XPKDecompressor::Registry<SDHCDecompressor> SDHCDecompressor::_XPKregistration;
-
 }

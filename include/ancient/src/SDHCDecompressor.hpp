@@ -26,8 +26,6 @@ private:
 	const Buffer	&_packedData;
 
 	uint16_t	_mode=0;
-
-	static XPKDecompressor::Registry<SDHCDecompressor> _XPKregistration;
 };
 
 }

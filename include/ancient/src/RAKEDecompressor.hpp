@@ -27,8 +27,6 @@ private:
 
 	bool		_isRAKE;
 	size_t		_midStreamOffset=0;
-
-	static XPKDecompressor::Registry<RAKEDecompressor> _XPKregistration;
 };
 
 }

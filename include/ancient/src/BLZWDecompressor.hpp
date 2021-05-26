@@ -27,8 +27,6 @@ private:
 
 	uint32_t	_maxBits=0;
 	size_t		_stackLength=0;
-
-	static XPKDecompressor::Registry<BLZWDecompressor> _XPKregistration;
 };
 
 }

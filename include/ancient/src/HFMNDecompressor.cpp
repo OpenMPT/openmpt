@@ -88,6 +88,4 @@ void HFMNDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 		outputStream.writeByte(decoder.decode(readBit));
 }
 
-XPKDecompressor::Registry<HFMNDecompressor> HFMNDecompressor::_XPKregistration;
-
 }

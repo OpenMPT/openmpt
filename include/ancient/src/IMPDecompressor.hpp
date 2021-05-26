@@ -37,9 +37,6 @@ private:
 	uint32_t	_rawSize=0;
 	uint32_t	_endOffset=0;
 	bool		_isXPK=false;
-
-	static Decompressor::Registry<IMPDecompressor> _registration;
-	static XPKDecompressor::Registry<IMPDecompressor> _XPKregistration;
 };
 
 }

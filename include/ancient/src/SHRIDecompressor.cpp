@@ -335,6 +335,4 @@ void SHRIDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 	for (uint32_t i=0;i<999;i++) state->ar[i]=ar[i];
 }
 
-XPKDecompressor::Registry<SHRIDecompressor> SHRIDecompressor::_XPKregistration;
-
 }

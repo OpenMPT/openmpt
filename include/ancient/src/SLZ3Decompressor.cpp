@@ -68,6 +68,4 @@ void SLZ3Decompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 	}
 }
 
-XPKDecompressor::Registry<SLZ3Decompressor> SLZ3Decompressor::_XPKregistration;
-
 }

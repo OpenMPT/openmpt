@@ -26,8 +26,6 @@ private:
 	const Buffer	&_packedData;
 
 	uint32_t	_ver=0;
-
-	static XPKDecompressor::Registry<LIN1Decompressor> _XPKregistration;
 };
 
 }

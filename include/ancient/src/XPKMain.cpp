@@ -11,6 +11,47 @@
 #include "XPKMain.hpp"
 #include "XPKDecompressor.hpp"
 
+#include "ACCADecompressor.hpp"
+#include "ARTMDecompressor.hpp"
+#include "BLZWDecompressor.hpp"
+#include "BZIP2Decompressor.hpp"
+#include "CBR0Decompressor.hpp"
+#include "CRMDecompressor.hpp"
+#include "CYB2Decoder.hpp"
+#include "DEFLATEDecompressor.hpp"
+#include "DLTADecode.hpp"
+#include "FASTDecompressor.hpp"
+#include "FBR2Decompressor.hpp"
+#include "FRLEDecompressor.hpp"
+#include "HFMNDecompressor.hpp"
+#include "HUFFDecompressor.hpp"
+#include "ILZRDecompressor.hpp"
+#include "IMPDecompressor.hpp"
+#include "LHLBDecompressor.hpp"
+#include "LIN1Decompressor.hpp"
+#include "LIN2Decompressor.hpp"
+#include "LZBSDecompressor.hpp"
+#include "LZCBDecompressor.hpp"
+#include "LZW2Decompressor.hpp"
+#include "LZW4Decompressor.hpp"
+#include "LZW5Decompressor.hpp"
+#include "LZXDecompressor.hpp"
+#include "MASHDecompressor.hpp"
+#include "NONEDecompressor.hpp"
+#include "NUKEDecompressor.hpp"
+#include "PPDecompressor.hpp"
+#include "RAKEDecompressor.hpp"
+#include "RDCNDecompressor.hpp"
+#include "RLENDecompressor.hpp"
+#include "SDHCDecompressor.hpp"
+#include "SHR3Decompressor.hpp"
+#include "SHRIDecompressor.hpp"
+#include "SLZ3Decompressor.hpp"
+#include "SMPLDecompressor.hpp"
+#include "SQSHDecompressor.hpp"
+#include "SXSCDecompressor.hpp"
+#include "TDCSDecompressor.hpp"
+#include "ZENODecompressor.hpp"
 
 namespace ancient::internal
 {
@@ -25,15 +66,48 @@ std::unique_ptr<Decompressor> XPKMain::create(const Buffer &packedData,bool veri
 	return std::make_unique<XPKMain>(packedData,verify,0);
 }
 
-std::vector<std::pair<bool(*)(uint32_t),std::unique_ptr<XPKDecompressor>(*)(uint32_t,uint32_t,const Buffer&,std::unique_ptr<XPKDecompressor::State>&,bool)>> *XPKMain::_XPKDecompressors=nullptr;
-
-void XPKMain::registerDecompressor(bool(*detect)(uint32_t),std::unique_ptr<XPKDecompressor>(*create)(uint32_t,uint32_t,const Buffer&,std::unique_ptr<XPKDecompressor::State>&,bool))
-{
-	static std::vector<std::pair<bool(*)(uint32_t),std::unique_ptr<XPKDecompressor>(*)(uint32_t,uint32_t,const Buffer&,std::unique_ptr<XPKDecompressor::State>&,bool)>> _list;
-	if (!_XPKDecompressors) _XPKDecompressors=&_list;
-	_XPKDecompressors->emplace_back(detect,create);
-}
-
+static std::vector<std::pair<bool(*)(uint32_t),std::unique_ptr<XPKDecompressor>(*)(uint32_t,uint32_t,const Buffer&,std::unique_ptr<XPKDecompressor::State>&,bool)>> XPKDecompressors={
+	{ACCADecompressor::detectHeaderXPK,ACCADecompressor::create},
+	{ARTMDecompressor::detectHeaderXPK,ARTMDecompressor::create},
+	{BLZWDecompressor::detectHeaderXPK,BLZWDecompressor::create},
+	{BZIP2Decompressor::detectHeaderXPK,BZIP2Decompressor::create},
+	{CBR0Decompressor::detectHeaderXPK,CBR0Decompressor::create},
+	{CRMDecompressor::detectHeaderXPK,CRMDecompressor::create},
+	{CYB2Decoder::detectHeaderXPK,CYB2Decoder::create},
+	{DEFLATEDecompressor::detectHeaderXPK,DEFLATEDecompressor::create},
+	{DLTADecode::detectHeaderXPK,DLTADecode::create},
+	{FASTDecompressor::detectHeaderXPK,FASTDecompressor::create},
+	{FBR2Decompressor::detectHeaderXPK,FBR2Decompressor::create},
+	{FRLEDecompressor::detectHeaderXPK,FRLEDecompressor::create},
+	{HFMNDecompressor::detectHeaderXPK,HFMNDecompressor::create},
+	{HUFFDecompressor::detectHeaderXPK,HUFFDecompressor::create},
+	{ILZRDecompressor::detectHeaderXPK,ILZRDecompressor::create},
+	{IMPDecompressor::detectHeaderXPK,IMPDecompressor::create},
+	{LHLBDecompressor::detectHeaderXPK,LHLBDecompressor::create},
+	{LIN1Decompressor::detectHeaderXPK,LIN1Decompressor::create},
+	{LIN2Decompressor::detectHeaderXPK,LIN2Decompressor::create},
+	{LZBSDecompressor::detectHeaderXPK,LZBSDecompressor::create},
+	{LZCBDecompressor::detectHeaderXPK,LZCBDecompressor::create},
+	{LZW2Decompressor::detectHeaderXPK,LZW2Decompressor::create},
+	{LZW4Decompressor::detectHeaderXPK,LZW4Decompressor::create},
+	{LZW5Decompressor::detectHeaderXPK,LZW5Decompressor::create},
+	{LZXDecompressor::detectHeaderXPK,LZXDecompressor::create},
+	{MASHDecompressor::detectHeaderXPK,MASHDecompressor::create},
+	{NONEDecompressor::detectHeaderXPK,NONEDecompressor::create},
+	{NUKEDecompressor::detectHeaderXPK,NUKEDecompressor::create},
+	{PPDecompressor::detectHeaderXPK,PPDecompressor::create},
+	{RAKEDecompressor::detectHeaderXPK,RAKEDecompressor::create},
+	{RDCNDecompressor::detectHeaderXPK,RDCNDecompressor::create},
+	{RLENDecompressor::detectHeaderXPK,RLENDecompressor::create},
+	{SDHCDecompressor::detectHeaderXPK,SDHCDecompressor::create},
+	{SHR3Decompressor::detectHeaderXPK,SHR3Decompressor::create},
+	{SHRIDecompressor::detectHeaderXPK,SHRIDecompressor::create},
+	{SLZ3Decompressor::detectHeaderXPK,SLZ3Decompressor::create},
+	{SMPLDecompressor::detectHeaderXPK,SMPLDecompressor::create},
+	{SQSHDecompressor::detectHeaderXPK,SQSHDecompressor::create},
+	{SXSCDecompressor::detectHeaderXPK,SXSCDecompressor::create},
+	{TDCSDecompressor::detectHeaderXPK,TDCSDecompressor::create},
+	{ZENODecompressor::detectHeaderXPK,ZENODecompressor::create}};
 
 XPKMain::XPKMain(const Buffer &packedData,bool verify,uint32_t recursionLevel) :
 	_packedData(packedData)
@@ -62,7 +136,7 @@ XPKMain::XPKMain(const Buffer &packedData,bool verify,uint32_t recursionLevel) :
 	if (OverflowCheck::sum(_packedSize,8U)>packedData.size()) throw InvalidFormatError();
 
 	bool found=false;
-	for (auto &it : *_XPKDecompressors)
+	for (auto &it : XPKDecompressors)
 	{
 		if (it.first(_type)) 
 		{
@@ -213,7 +287,7 @@ std::unique_ptr<XPKDecompressor> XPKMain::createDecompressor(uint32_t type,uint3
 {
 	// since this method is used externally, better check recursion level
 	if (recursionLevel>=getMaxRecursionLevel()) throw InvalidFormatError();
-	for (auto &it : *_XPKDecompressors)
+	for (auto &it : XPKDecompressors)
 	{
 		if (it.first(type)) return it.second(type,recursionLevel,buffer,state,verify);
 	}
@@ -264,7 +338,5 @@ void XPKMain::forEachChunk(F func) const
 	}
 	if (!isLast) throw InvalidFormatError();
 }
-
-Decompressor::Registry<XPKMain> XPKMain::_registration;
 
 }

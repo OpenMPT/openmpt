@@ -692,6 +692,4 @@ void StoneCrackerDecompressor::decompressImpl(Buffer &rawData,bool verify)
 	}
 }
 
-Decompressor::Registry<StoneCrackerDecompressor> StoneCrackerDecompressor::_registration;
-
 }

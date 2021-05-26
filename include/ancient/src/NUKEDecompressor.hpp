@@ -26,8 +26,6 @@ private:
 	const Buffer	&_packedData;
 
 	bool		_isDUKE=false;
-
-	static XPKDecompressor::Registry<NUKEDecompressor> _XPKregistration;
 };
 
 }

@@ -39,9 +39,6 @@ private:
 	bool		_isLZH=false;		// "normal" compression or LZH compression
 	bool		_isSampled=false;	// normal or "sampled" i.e. obsfuscated
 	bool		_isXPKDelta=false;	// If delta encoding defined in XPK
-
-	static Decompressor::Registry<CRMDecompressor> _registration;
-	static XPKDecompressor::Registry<CRMDecompressor> _XPKregistration;
 };
 
 }

@@ -75,6 +75,4 @@ void FASTDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 	}
 }
 
-XPKDecompressor::Registry<FASTDecompressor> FASTDecompressor::_XPKregistration;
-
 }

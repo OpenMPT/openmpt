@@ -26,8 +26,6 @@ private:
 	const Buffer	&_packedData;
 
 	uint32_t	_rawSize=0;
-
-	static XPKDecompressor::Registry<SQSHDecompressor> _XPKregistration;
 };
 
 }

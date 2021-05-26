@@ -28,8 +28,6 @@ private:
 	uint32_t	_ver=0;
 	size_t		_endStreamOffset=0;
 	size_t		_midStreamOffset=0;
-
-	static XPKDecompressor::Registry<LIN2Decompressor> _XPKregistration;
 };
 
 }

@@ -78,25 +78,7 @@ public:
 	static bool detect(const Buffer &packedData) noexcept;
 
 protected:
-	template<class T>
-	class Registry
-	{
-	public:
-		Registry()
-		{
-			Decompressor::registerDecompressor(T::detectHeader,T::create);
-		}
-
-		~Registry()
-		{
-			// TODO: no cleanup yet
-		}
-	};
-
 	virtual void decompressImpl(Buffer &rawData,bool verify)=0;
-
-private:
-	static void registerDecompressor(bool(*detect)(uint32_t),std::unique_ptr<Decompressor>(*create)(const Buffer&,bool,bool));
 };
 
 }

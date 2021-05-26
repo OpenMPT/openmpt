@@ -144,6 +144,4 @@ void RAKEDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 	}
 }
 
-XPKDecompressor::Registry<RAKEDecompressor> RAKEDecompressor::_XPKregistration;
-
 }

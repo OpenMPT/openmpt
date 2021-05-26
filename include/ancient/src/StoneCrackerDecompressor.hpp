@@ -45,8 +45,6 @@ private:
 	uint8_t		_rle[3];
 	uint32_t	_generation;
 	uint32_t	_dataOffset;
-
-	static Decompressor::Registry<StoneCrackerDecompressor> _registration;
 };
 
 }

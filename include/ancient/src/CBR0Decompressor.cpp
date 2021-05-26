@@ -61,6 +61,4 @@ void CBR0Decompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 	}
 }
 
-XPKDecompressor::Registry<CBR0Decompressor> CBR0Decompressor::_XPKregistration;
-
 }

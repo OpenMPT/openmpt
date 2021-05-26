@@ -26,8 +26,6 @@ private:
 	const Buffer	&_packedData;
 
 	size_t		_rawSize=0;
-
-	static XPKDecompressor::Registry<ILZRDecompressor> _XPKregistration;
 };
 
 }

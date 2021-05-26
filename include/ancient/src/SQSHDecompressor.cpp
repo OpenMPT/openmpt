@@ -215,6 +215,4 @@ void SQSHDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 	}
 }
 
-XPKDecompressor::Registry<SQSHDecompressor> SQSHDecompressor::_XPKregistration;
-
 }

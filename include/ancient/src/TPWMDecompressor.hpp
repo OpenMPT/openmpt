@@ -29,8 +29,6 @@ private:
 
 	uint32_t	_rawSize=0;
 	size_t		_decompressedPackedSize=0;
-
-	static Decompressor::Registry<TPWMDecompressor> _registration;
 };
 
 }

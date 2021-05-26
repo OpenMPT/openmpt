@@ -105,6 +105,4 @@ void LHLBDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 	}
 }
 
-XPKDecompressor::Registry<LHLBDecompressor> LHLBDecompressor::_XPKregistration;
-
 }

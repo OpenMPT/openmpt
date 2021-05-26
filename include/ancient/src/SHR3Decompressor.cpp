@@ -323,6 +323,4 @@ void SHR3Decompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 	for (uint32_t i=0;i<999;i++) state->ar[i]=ar[i];
 }
 
-XPKDecompressor::Registry<SHR3Decompressor> SHR3Decompressor::_XPKregistration;
-
 }

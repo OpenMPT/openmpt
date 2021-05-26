@@ -32,8 +32,6 @@ private:
 	uint32_t	_blocksOffset=0;
 	uint32_t	_blocks=0;
 	uint16_t	_version=0;
-
-	static Decompressor::Registry<MMCMPDecompressor> _registration;
 };
 
 }

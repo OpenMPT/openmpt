@@ -47,10 +47,6 @@ private:
 	uint32_t	_type=0;
 	bool		_longHeaders=false;
 	uint32_t	_recursionLevel=0;
-
-	static std::vector<std::pair<bool(*)(uint32_t),std::unique_ptr<XPKDecompressor>(*)(uint32_t,uint32_t,const Buffer&,std::unique_ptr<XPKDecompressor::State>&,bool)>> *_XPKDecompressors;
-
-	static Decompressor::Registry<XPKMain> _registration;
 };
 
 }

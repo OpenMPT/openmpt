@@ -291,7 +291,4 @@ void IMPDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData,
 	return decompressImpl(rawData,verify);
 }
 
-Decompressor::Registry<IMPDecompressor> IMPDecompressor::_registration;
-XPKDecompressor::Registry<IMPDecompressor> IMPDecompressor::_XPKregistration;
-
 }

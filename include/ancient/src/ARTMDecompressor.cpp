@@ -119,6 +119,4 @@ void ARTMDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 	}
 }
 
-XPKDecompressor::Registry<ARTMDecompressor> ARTMDecompressor::_XPKregistration;
-
 }

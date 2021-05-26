@@ -64,6 +64,4 @@ void FRLEDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 	}
 }
 
-XPKDecompressor::Registry<FRLEDecompressor> FRLEDecompressor::_XPKregistration;
-
 }

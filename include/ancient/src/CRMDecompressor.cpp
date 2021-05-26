@@ -242,7 +242,4 @@ void CRMDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData,
 	return decompressImpl(rawData,verify);
 }
 
-Decompressor::Registry<CRMDecompressor> CRMDecompressor::_registration;
-XPKDecompressor::Registry<CRMDecompressor> CRMDecompressor::_XPKregistration;
-
 }

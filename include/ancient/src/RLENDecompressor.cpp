@@ -59,6 +59,4 @@ void RLENDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 	}
 }
 
-XPKDecompressor::Registry<RLENDecompressor> RLENDecompressor::_XPKregistration;
-
 }

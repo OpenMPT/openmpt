@@ -118,6 +118,4 @@ void MASHDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 	}
 }
 
-XPKDecompressor::Registry<MASHDecompressor> MASHDecompressor::_XPKregistration;
-
 }

@@ -89,6 +89,4 @@ void TPWMDecompressor::decompressImpl(Buffer &rawData,bool verify)
 	_decompressedPackedSize=inputStream.getOffset();
 }
 
-Decompressor::Registry<TPWMDecompressor> TPWMDecompressor::_registration;
-
 }

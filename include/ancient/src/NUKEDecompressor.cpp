@@ -128,6 +128,4 @@ void NUKEDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 		DLTADecode::decode(rawData,rawData,0,rawData.size());
 }
 
-XPKDecompressor::Registry<NUKEDecompressor> NUKEDecompressor::_XPKregistration;
-
 }

@@ -396,7 +396,4 @@ void BZIP2Decompressor::decompressImpl(Buffer &rawData,const Buffer &previousDat
 	return decompressImpl(rawData,verify);
 }
 
-Decompressor::Registry<BZIP2Decompressor> BZIP2Decompressor::_registration;
-XPKDecompressor::Registry<BZIP2Decompressor> BZIP2Decompressor::_XPKregistration;
-
 }

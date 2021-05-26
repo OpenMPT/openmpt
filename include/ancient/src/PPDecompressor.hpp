@@ -49,9 +49,6 @@ private:
 	uint8_t		_startShift=0;
 	uint8_t		_modeTable[4];
 	bool		_isXPK=false;
-
-	static Decompressor::Registry<PPDecompressor> _registration;
-	static XPKDecompressor::Registry<PPDecompressor> _XPKregistration;
 };
 
 }

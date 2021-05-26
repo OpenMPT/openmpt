@@ -242,6 +242,4 @@ void LZXDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData,
 		DLTADecode::decode(rawData,rawData,0,_rawSize);
 }
 
-XPKDecompressor::Registry<LZXDecompressor> LZXDecompressor::_XPKregistration;
-
 }

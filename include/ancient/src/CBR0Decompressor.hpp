@@ -25,8 +25,6 @@ public:
 private:
 	const Buffer	&_packedData;
 	bool		_isCBR0;
-
-	static XPKDecompressor::Registry<CBR0Decompressor> _XPKregistration;
 };
 
 }

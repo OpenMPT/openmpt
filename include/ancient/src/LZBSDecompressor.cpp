@@ -72,6 +72,4 @@ void LZBSDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 	}
 }
 
-XPKDecompressor::Registry<LZBSDecompressor> LZBSDecompressor::_XPKregistration;
-
 }

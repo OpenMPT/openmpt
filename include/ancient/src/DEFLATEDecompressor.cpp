@@ -383,7 +383,4 @@ void DEFLATEDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousD
 	decompressImpl(rawData,verify);
 }
 
-Decompressor::Registry<DEFLATEDecompressor> DEFLATEDecompressor::_registration;
-XPKDecompressor::Registry<DEFLATEDecompressor> DEFLATEDecompressor::_XPKregistration;
-
 }

@@ -127,6 +127,4 @@ void ZENODecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 	}
 }
 
-XPKDecompressor::Registry<ZENODecompressor> ZENODecompressor::_XPKregistration;
-
 }

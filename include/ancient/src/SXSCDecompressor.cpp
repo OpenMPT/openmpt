@@ -826,6 +826,4 @@ void SXSCDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 	}
 }
 
-XPKDecompressor::Registry<SXSCDecompressor> SXSCDecompressor::_XPKregistration;
-
 }

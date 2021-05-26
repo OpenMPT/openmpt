@@ -44,8 +44,6 @@ private:
 
 	const Buffer					&_packedData;
 	bool						_isHSC;
-
-	static XPKDecompressor::Registry<SXSCDecompressor> _XPKregistration;
 };
 
 }

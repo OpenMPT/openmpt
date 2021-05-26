@@ -50,9 +50,6 @@ private:
 	Type		_type;
 	bool		_exactSizeKnown=true;
 	bool		_deflate64=false;
-
-	static Decompressor::Registry<DEFLATEDecompressor> _registration;
-	static XPKDecompressor::Registry<DEFLATEDecompressor> _XPKregistration;
 };
 
 }

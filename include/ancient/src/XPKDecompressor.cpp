@@ -22,9 +22,4 @@ XPKDecompressor::~XPKDecompressor()
 	// nothing needed
 }
 
-void XPKDecompressor::registerDecompressor(bool(*detect)(uint32_t),std::unique_ptr<XPKDecompressor>(*create)(uint32_t,uint32_t,const Buffer&,std::unique_ptr<XPKDecompressor::State>&,bool))
-{
-	XPKMain::registerDecompressor(detect,create);
-}
-
 }

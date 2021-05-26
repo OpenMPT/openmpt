@@ -26,8 +26,6 @@ private:
 	const Buffer	&_packedData;
 
 	uint32_t	_blockHeader;
-
-	static XPKDecompressor::Registry<CYB2Decoder> _XPKregistration;
 };
 
 }

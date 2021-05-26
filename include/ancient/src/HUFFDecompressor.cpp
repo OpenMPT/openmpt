@@ -81,6 +81,4 @@ void HUFFDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 		outputStream.writeByte(decoder.decode(readBit));
 }
 
-XPKDecompressor::Registry<HUFFDecompressor> HUFFDecompressor::_XPKregistration;
-
 }

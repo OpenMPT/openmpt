@@ -39,24 +39,6 @@ public:
 	// Actual decompression
 	virtual void decompressImpl(Buffer &rawData,const Buffer &previousData,bool verify)=0;
 
-	template<class T>
-	class Registry
-	{
-	public:
-		Registry()
-		{
-			XPKDecompressor::registerDecompressor(T::detectHeaderXPK,T::create);
-		}
-
-		~Registry()
-		{
-			// TODO: no cleanup yet
-		}
-	};
-
-private:
-	static void registerDecompressor(bool(*detect)(uint32_t),std::unique_ptr<XPKDecompressor>(*create)(uint32_t,uint32_t,const Buffer&,std::unique_ptr<XPKDecompressor::State>&,bool));
-
 protected:
 	uint32_t	_recursionLevel;
 };

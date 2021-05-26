@@ -59,6 +59,4 @@ void CYB2Decoder::decompressImpl(Buffer &rawData,const Buffer &previousData,bool
 	sub->decompressImpl(rawData,previousData,verify);
 }
 
-XPKDecompressor::Registry<CYB2Decoder> CYB2Decoder::_XPKregistration;
-
 }

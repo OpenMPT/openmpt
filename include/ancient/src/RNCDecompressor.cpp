@@ -446,6 +446,4 @@ void RNCDecompressor::RNC2Decompress(Buffer &rawData,bool verify)
 	if (verify && CRC16(rawData,0,_rawSize,0)!=_rawCRC) throw VerificationError();
 }
 
-Decompressor::Registry<RNCDecompressor> RNCDecompressor::_registration;
-
 }

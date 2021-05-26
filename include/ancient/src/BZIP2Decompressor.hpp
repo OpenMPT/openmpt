@@ -37,9 +37,6 @@ private:
 	size_t			_blockSize=0;
 	size_t			_packedSize=0;
 	size_t			_rawSize=0;
-
-	static Decompressor::Registry<BZIP2Decompressor> _registration;
-	static XPKDecompressor::Registry<BZIP2Decompressor> _XPKregistration;
 };
 
 }

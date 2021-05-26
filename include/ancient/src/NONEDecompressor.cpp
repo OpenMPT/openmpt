@@ -44,6 +44,4 @@ void NONEDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 	std::memcpy(rawData.data(),_packedData.data(),_packedData.size());
 }
 
-XPKDecompressor::Registry<NONEDecompressor> NONEDecompressor::_XPKregistration;
-
 }

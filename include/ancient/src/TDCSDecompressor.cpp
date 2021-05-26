@@ -93,6 +93,4 @@ void TDCSDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 	}
 }
 
-XPKDecompressor::Registry<TDCSDecompressor> TDCSDecompressor::_XPKregistration;
-
 }

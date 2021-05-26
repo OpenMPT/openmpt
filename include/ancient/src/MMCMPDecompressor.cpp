@@ -251,6 +251,4 @@ void MMCMPDecompressor::decompressImpl(Buffer &rawData,bool verify)
 	}
 }
 
-Decompressor::Registry<MMCMPDecompressor> MMCMPDecompressor::_registration;
-
 }

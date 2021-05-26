@@ -70,6 +70,4 @@ void ILZRDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 	}
 }
 
-XPKDecompressor::Registry<ILZRDecompressor> ILZRDecompressor::_XPKregistration;
-
 }

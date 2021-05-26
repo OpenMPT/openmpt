@@ -41,8 +41,6 @@ private:
 	uint32_t				_ver=0;
 
 	std::unique_ptr<XPKDecompressor::State>	&_state;	// reference!!!
-
-	static XPKDecompressor::Registry<SHR3Decompressor> _XPKregistration;
 };
 
 }

@@ -5,12 +5,35 @@
 #include <memory>
 #include <vector>
 
+#include "BZIP2Decompressor.hpp"
+#include "CRMDecompressor.hpp"
+#include "DEFLATEDecompressor.hpp"
+#include "DMSDecompressor.hpp"
+#include "IMPDecompressor.hpp"
+#include "MMCMPDecompressor.hpp"
+#include "PPDecompressor.hpp"
+#include "RNCDecompressor.hpp"
+#include "StoneCrackerDecompressor.hpp"
+#include "TPWMDecompressor.hpp"
+#include "XPKMain.hpp"
+
 namespace ancient::internal
 {
 
 // ---
 
-static std::vector<std::pair<bool(*)(uint32_t),std::unique_ptr<Decompressor>(*)(const Buffer&,bool,bool)>> *decompressors=nullptr;
+static std::vector<std::pair<bool(*)(uint32_t),std::unique_ptr<Decompressor>(*)(const Buffer&,bool,bool)>> decompressors={
+	{BZIP2Decompressor::detectHeader,BZIP2Decompressor::create},
+	{CRMDecompressor::detectHeader,CRMDecompressor::create},
+	{DEFLATEDecompressor::detectHeader,DEFLATEDecompressor::create},
+	{DMSDecompressor::detectHeader,DMSDecompressor::create},
+	{IMPDecompressor::detectHeader,IMPDecompressor::create},
+	{MMCMPDecompressor::detectHeader,MMCMPDecompressor::create},
+	{PPDecompressor::detectHeader,PPDecompressor::create},
+	{RNCDecompressor::detectHeader,RNCDecompressor::create},
+	{StoneCrackerDecompressor::detectHeader,StoneCrackerDecompressor::create},
+	{TPWMDecompressor::detectHeader,TPWMDecompressor::create},
+	{XPKMain::detectHeader,XPKMain::create}};
 
 Decompressor::Decompressor() noexcept
 {
@@ -27,7 +50,7 @@ std::unique_ptr<Decompressor> Decompressor::create(const Buffer &packedData,bool
 	try
 	{
 		uint32_t hdr=packedData.readBE32(0);
-		for (auto &it : *decompressors)
+		for (auto &it : decompressors)
 		{
 			if (it.first(hdr)) return it.second(packedData,exactSizeKnown,verify);
 		}
@@ -42,19 +65,12 @@ bool Decompressor::detect(const Buffer &packedData) noexcept
 	try
 	{
 		uint32_t hdr=packedData.readBE32(0);
-		for (auto &it : *decompressors)
+		for (auto &it : decompressors)
 			if (it.first(hdr)) return true;
 		return false;
 	} catch (const Buffer::Error&) {
 		return false;
 	}
-}
-
-void Decompressor::registerDecompressor(bool(*detect)(uint32_t),std::unique_ptr<Decompressor>(*create)(const Buffer&,bool,bool))
-{
-	static std::vector<std::pair<bool(*)(uint32_t),std::unique_ptr<Decompressor>(*)(const Buffer&,bool,bool)>> _list;
-	if (!decompressors) decompressors=&_list;
-	decompressors->emplace_back(detect,create);
 }
 
 void Decompressor::decompress(Buffer &rawData,bool verify)

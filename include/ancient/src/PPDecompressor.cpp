@@ -189,7 +189,4 @@ void PPDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData,b
 	decompressImpl(rawData,verify);
 }
 
-Decompressor::Registry<PPDecompressor> PPDecompressor::_registration;
-XPKDecompressor::Registry<PPDecompressor> PPDecompressor::_XPKregistration;
-
 }

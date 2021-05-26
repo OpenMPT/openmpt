@@ -49,8 +49,6 @@ private:
 	uint32_t	_minTrack;
 	bool		_isHD;
 	bool		_isObsfuscated;
-
-	static Decompressor::Registry<DMSDecompressor> _registration;
 };
 
 }

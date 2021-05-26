@@ -95,6 +95,4 @@ void FBR2Decompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 	}
 }
 
-XPKDecompressor::Registry<FBR2Decompressor> FBR2Decompressor::_XPKregistration;
-
 }

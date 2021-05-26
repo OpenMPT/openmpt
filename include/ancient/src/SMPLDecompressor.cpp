@@ -75,6 +75,4 @@ void SMPLDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 	}
 }
 
-XPKDecompressor::Registry<SMPLDecompressor> SMPLDecompressor::_XPKregistration;
-
 }

@@ -109,6 +109,4 @@ void ACCADecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 	}
 }
 
-XPKDecompressor::Registry<ACCADecompressor> ACCADecompressor::_XPKregistration;
-
 }

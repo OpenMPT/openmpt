@@ -97,6 +97,4 @@ void LZW5Decompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 	}
 }
 
-XPKDecompressor::Registry<LZW5Decompressor> LZW5Decompressor::_XPKregistration;
-
 }

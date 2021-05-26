@@ -44,8 +44,6 @@ private:
 	uint16_t	_rawCRC=0;
 	uint8_t		_chunks=0;
 	Version		_ver;
-
-	static Decompressor::Registry<RNCDecompressor> _registration;
 };
 
 }

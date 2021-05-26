@@ -24,8 +24,6 @@ public:
 
 private:
 	const Buffer	&_packedData;
-
-	static XPKDecompressor::Registry<LZW5Decompressor> _XPKregistration;
 };
 
 }
