@@ -1430,6 +1430,7 @@
     <ClInclude Include="..\..\src\mpt\format\default_integer.hpp" />
     <ClInclude Include="..\..\src\mpt\format\default_string.hpp" />
     <ClInclude Include="..\..\src\mpt\format\helpers.hpp" />
+    <ClInclude Include="..\..\src\mpt\format\join.hpp" />
     <ClInclude Include="..\..\src\mpt\format\message.hpp" />
     <ClInclude Include="..\..\src\mpt\format\message_macros.hpp" />
     <ClInclude Include="..\..\src\mpt\format\simple.hpp" />
@@ -1445,6 +1446,7 @@
     <ClInclude Include="..\..\src\mpt\osinfo\windows_version.hpp" />
     <ClInclude Include="..\..\src\mpt\out_of_memory\out_of_memory.hpp" />
     <ClInclude Include="..\..\src\mpt\parse\parse.hpp" />
+    <ClInclude Include="..\..\src\mpt\parse\split.hpp" />
     <ClInclude Include="..\..\src\mpt\parse\tests\tests_parse.hpp" />
     <ClInclude Include="..\..\src\mpt\random\crand.hpp" />
     <ClInclude Include="..\..\src\mpt\random\default_engines.hpp" />

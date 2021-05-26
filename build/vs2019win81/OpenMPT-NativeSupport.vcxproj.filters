@@ -558,6 +558,9 @@
     <ClInclude Include="..\..\src\mpt\format\helpers.hpp">
       <Filter>src\mpt\format</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\mpt\format\join.hpp">
+      <Filter>src\mpt\format</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\mpt\format\message.hpp">
       <Filter>src\mpt\format</Filter>
     </ClInclude>
@@ -601,6 +604,9 @@
       <Filter>src\mpt\out_of_memory</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\parse\parse.hpp">
+      <Filter>src\mpt\parse</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\parse\split.hpp">
       <Filter>src\mpt\parse</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\parse\tests\tests_parse.hpp">
