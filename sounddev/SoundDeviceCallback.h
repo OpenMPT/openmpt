@@ -21,34 +21,23 @@ namespace SoundDevice {
 
 struct StreamPosition
 {
-	int64 Frames; // relative to Start()
-	double Seconds; // relative to Start()
-	StreamPosition() : Frames(0), Seconds(0.0) { }
-	StreamPosition(int64 frames, double seconds) : Frames(frames), Seconds(seconds) { }
+	int64 Frames = 0; // relative to Start()
+	double Seconds = 0.0; // relative to Start()
 };
 
 
 struct TimeInfo
 {
 	
-	int64 SyncPointStreamFrames;
-	uint64 SyncPointSystemTimestamp;
-	double Speed;
+	int64 SyncPointStreamFrames = 0;
+	uint64 SyncPointSystemTimestamp = 0;
+	double Speed = 1.0;
 
 	SoundDevice::StreamPosition RenderStreamPositionBefore;
 	SoundDevice::StreamPosition RenderStreamPositionAfter;
 	// int64 chunkSize = After - Before
 	
-	double Latency; // seconds
-
-	TimeInfo()
-		: SyncPointStreamFrames(0)
-		, SyncPointSystemTimestamp(0)
-		, Speed(1.0)
-		, Latency(0.0)
-	{
-		return;
-	}
+	double Latency = 0.0; // seconds
 
 };
 

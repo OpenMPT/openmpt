@@ -535,11 +535,11 @@ class IBase
 
 protected:
 
-	IBase() { }
+	IBase() = default;
 
 public:
 
-	virtual ~IBase() { }
+	virtual ~IBase() = default;
 
 public:
 

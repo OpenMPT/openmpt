@@ -128,7 +128,7 @@ protected:
 
 	void SetTimeInfo(SoundDevice::TimeInfo timeInfo) { m_TimeInfo = timeInfo; }
 
-	SoundDevice::StreamPosition StreamPositionFromFrames(int64 frames) const { return SoundDevice::StreamPosition(frames, static_cast<double>(frames) / static_cast<double>(m_Settings.Samplerate)); }
+	SoundDevice::StreamPosition StreamPositionFromFrames(int64 frames) const { return SoundDevice::StreamPosition{frames, static_cast<double>(frames) / static_cast<double>(m_Settings.Samplerate)}; }
 
 	virtual bool InternalHasTimeInfo() const { return false; }
 
