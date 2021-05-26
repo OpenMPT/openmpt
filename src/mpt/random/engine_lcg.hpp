@@ -9,6 +9,7 @@
 #include "mpt/base/macros.hpp"
 #include "mpt/base/integer.hpp"
 #include "mpt/base/namespace.hpp"
+#include "mpt/base/numeric.hpp"
 #include "mpt/random/random.hpp"
 
 #include <random>
