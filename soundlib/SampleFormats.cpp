@@ -2170,7 +2170,7 @@ bool CSoundFile::ReadAUSample(SAMPLEINDEX nSample, FileReader &file, bool mayNor
 		{
 			if(AUIsAnnotationLineWithField(line))
 			{
-				lastField = mpt::ToLowerCaseAscii(mpt::String::Trim(AUGetAnnotationFieldFromLine(line)));
+				lastField = mpt::ToLowerCaseAscii(mpt::trim(AUGetAnnotationFieldFromLine(line)));
 			}
 			linesPerField[lastField].push_back(AUTrimFieldFromAnnotationLine(line));
 		}
@@ -2184,7 +2184,7 @@ bool CSoundFile::ReadAUSample(SAMPLEINDEX nSample, FileReader &file, bool mayNor
 	{
 		// Most applications tend to write their own name here,
 		// thus there is little use in interpreting the string as a title.
-		annotation = mpt::String::RTrim(annotation, std::string("\r\n"));
+		annotation = mpt::trim_right(annotation, std::string("\r\n"));
 		tags.comments = mpt::ToUnicode(charset, annotation);
 	}
 

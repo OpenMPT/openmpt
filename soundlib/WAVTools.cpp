@@ -162,7 +162,7 @@ uint16 WAVReader::GetFileCodePage(ChunkReader::ChunkList<RIFFChunk> &chunks)
 		{
 			std::string versionString;
 			iSFT.ReadString<mpt::String::maybeNullTerminated>(versionString, iSFT.BytesLeft());
-			versionString = mpt::String::Trim(versionString);
+			versionString = mpt::trim(versionString);
 			Version version = Version::Parse(mpt::ToUnicode(mpt::Charset::ISO8859_1, versionString));
 			if(version && version < MPT_V("1.28.00.02"))
 			{

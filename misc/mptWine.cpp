@@ -74,7 +74,7 @@ Context::Context(mpt::OS::Wine::VersionContext versionContext)
 			{
 				throw mpt::Wine::Exception("Wine 'uname -m' failed.");
 			}
-			out = mpt::String::Trim(out, std::string("\r\n"));
+			out = mpt::trim(out, std::string("\r\n"));
 			m_Uname_m = out;
 		} catch(const std::exception &)
 		{
@@ -189,7 +189,7 @@ std::string Context::PathToPosixCanonical(mpt::PathString windowsPath)
 	{
 		throw mpt::Wine::Exception("Wine readlink failed.");
 	}
-	std::string trimmedOutput = mpt::String::Trim(output, std::string("\r\n"));
+	std::string trimmedOutput = mpt::trim(output, std::string("\r\n"));
 	result = trimmedOutput;
 	return result;
 }
@@ -725,7 +725,7 @@ std::string Context::GetPosixEnvVar(std::string var, std::string def)
 	{
 		throw mpt::Wine::Exception("Wine echo $var failed.");
 	}
-	std::string result = mpt::String::RTrim(output, std::string("\r\n"));
+	std::string result = mpt::trim_right(output, std::string("\r\n"));
 	if(result.empty())
 	{
 		result = def;

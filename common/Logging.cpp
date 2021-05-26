@@ -106,7 +106,7 @@ void GlobalLogger::SendLogMessage(const mpt::source_location &loc, LogLevel leve
 		MPT_UNREFERENCED_PARAMETER(facility);
 	#endif // MODPLUG_TRACKER
 	// remove eol if already present and add log level prefix
-	const mpt::ustring message = LogLevelToString(level) + U_(": ") + mpt::String::RTrim(text, U_("\r\n"));
+	const mpt::ustring message = LogLevelToString(level) + U_(": ") + mpt::trim_right(text, U_("\r\n"));
 	const mpt::ustring file = mpt::ToUnicode(mpt::CharsetSource, loc.file_name() ? loc.file_name() : "");
 	const mpt::ustring function = mpt::ToUnicode(mpt::CharsetSource, loc.function_name() ? loc.function_name() : "");
 	const mpt::ustring line = mpt::ufmt::dec(loc.line());

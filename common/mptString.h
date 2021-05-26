@@ -57,28 +57,6 @@ template <> struct Traits<std::wstring> {
 #endif // !MPT_COMPILER_QUIRK_NO_WCHAR
 
 
-// Remove whitespace at start of string
-template <typename Tstring>
-inline Tstring LTrim(Tstring str, const Tstring & whitespace = mpt::default_whitespace<Tstring>())
-{
-	return mpt::trim_left(str, whitespace);
-}
-
-// Remove whitespace at end of string
-template <typename Tstring>
-inline Tstring RTrim(Tstring str, const Tstring& whitespace = mpt::default_whitespace<Tstring>())
-{
-	return mpt::trim_right(str, whitespace);
-}
-
-// Remove whitespace at start and end of string
-template <typename Tstring>
-inline Tstring Trim(Tstring str, const Tstring& whitespace = mpt::default_whitespace<Tstring>())
-{
-	return mpt::trim(str, whitespace);
-}
-
-
 template <typename Tstring, typename Tstring2, typename Tstring3>
 inline Tstring Replace(Tstring str, const Tstring2 &oldStr_, const Tstring3 &newStr_)
 {

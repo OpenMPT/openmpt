@@ -378,15 +378,15 @@ static MPT_NOINLINE void TestVersion()
 	std::string line;
 	while(std::getline(f, line))
 	{
-		line = mpt::String::Trim(line);
+		line = mpt::trim(line);
 		if(line.empty())
 		{
 			continue;
 		}
 		std::vector<std::string> line_fields = mpt::String::Split<std::string>(line, std::string("="));
 		VERIFY_EQUAL_NONCONT(line_fields.size(), 2u);
-		line_fields[0] = mpt::String::Trim(line_fields[0]);
-		line_fields[1] = mpt::String::Trim(line_fields[1]);
+		line_fields[0] = mpt::trim(line_fields[0]);
+		line_fields[1] = mpt::trim(line_fields[1]);
 		VERIFY_EQUAL_NONCONT(line_fields[0].length() > 0, true);
 		fields[line_fields[0]] = line_fields[1];
 	}
@@ -846,15 +846,6 @@ static MPT_NOINLINE void TestMisc1()
 
 static MPT_NOINLINE void TestMisc2()
 {
-
-	VERIFY_EQUAL( mpt::String::LTrim(std::string(" ")), "" );
-	VERIFY_EQUAL( mpt::String::RTrim(std::string(" ")), "" );
-	VERIFY_EQUAL( mpt::String::Trim(std::string(" ")), "" );
-
-	// weird things with std::string containing \0 in the middle and trimming \0
-	VERIFY_EQUAL( std::string("\0\ta\0b ",6).length(), (std::size_t)6 );
-	VERIFY_EQUAL( mpt::String::RTrim(std::string("\0\ta\0b ",6)), std::string("\0\ta\0b",5) );
-	VERIFY_EQUAL( mpt::String::Trim(std::string("\0\ta\0b\0",6),std::string("\0",1)), std::string("\ta\0b",4) );
 
 	// Check for completeness of supported effect list in mod specifications
 	for(const auto &spec : ModSpecs::Collection)

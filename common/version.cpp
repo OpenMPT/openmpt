@@ -513,7 +513,7 @@ mpt::ustring GetVersionString(FlagSet<Build::Strings> strings)
 	{
 		result.push_back(GetBuildFeaturesString());
 	}
-	return mpt::String::Trim(mpt::String::Combine<mpt::ustring>(result, U_("")));
+	return mpt::trim(mpt::String::Combine<mpt::ustring>(result, U_("")));
 }
 
 mpt::ustring GetVersionStringPure()

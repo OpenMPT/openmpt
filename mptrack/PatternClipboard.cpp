@@ -388,7 +388,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, PatternEditPos &pastePos
 	{
 		startPos += 16;
 		// Check paste format
-		const std::string format = mpt::ToUpperCaseAscii(mpt::String::Trim(data.substr(startPos, 3)));
+		const std::string format = mpt::ToUpperCaseAscii(mpt::trim(data.substr(startPos, 3)));
 
 		for(const auto &spec : ModSpecs::Collection)
 		{
@@ -622,7 +622,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, PatternEditPos &pastePos
 			} else if(data.substr(pos, 6) == "Name: ")
 			{
 				pos += 6;
-				auto name = mpt::String::RTrim(data.substr(pos, eol - pos - 1));
+				auto name = mpt::trim_right(data.substr(pos, eol - pos - 1));
 				sndFile.Patterns[pattern].SetName(name);
 			} else if(data.substr(pos, 11) == "Signature: ")
 			{

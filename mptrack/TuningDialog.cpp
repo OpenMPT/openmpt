@@ -1580,11 +1580,11 @@ CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, const m
 			break;
 		if(first)
 		{
-			filename = mpt::String::Trim(str.substr(start + 1), std::string(" \t\r\n"));
+			filename = mpt::trim(str.substr(start + 1), std::string(" \t\r\n"));
 		}
 		first = false;
 	}
-	std::string description = mpt::String::Trim(str, std::string(" \t\r\n"));
+	std::string description = mpt::trim(str, std::string(" \t\r\n"));
 
 	SkipCommentLines(iStrm, str);
 	// str should now contain number of notes.
@@ -1645,7 +1645,7 @@ CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, const m
 			fRatios.push_back(static_cast<Tuning::RATIOTYPE>(ConvertStrTo<int32>(psz)));
 
 		std::string remainder = psz;
-		remainder = mpt::String::Trim(remainder, std::string("\r\n"));
+		remainder = mpt::trim(remainder, std::string("\r\n"));
 		if(remainder.find_first_of(" \t") != std::string::npos)
 		{
 			remainder = remainder.substr(remainder.find_first_of(" \t"));
@@ -1653,13 +1653,13 @@ CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, const m
 		{
 			remainder = std::string();
 		}
-		remainder = mpt::String::Trim(remainder, std::string(" \t"));
+		remainder = mpt::trim(remainder, std::string(" \t"));
 		if(!remainder.empty())
 		{
 			if(remainder[0] == '!')
 			{
 				remainder = remainder.substr(1);
-				remainder = mpt::String::Trim(remainder, std::string(" \t"));
+				remainder = mpt::trim(remainder, std::string(" \t"));
 			}
 		}
 		if(mpt::ToLowerCaseAscii(remainder) == "cents" || mpt::ToLowerCaseAscii(remainder) == "cent")
