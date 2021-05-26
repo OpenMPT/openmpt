@@ -232,42 +232,49 @@ void Base::SourceLockedAudioReadImpl(Tsample *buffer, const Tsample *inputBuffer
 
 void Base::SourceLockedAudioRead(uint8 *buffer, const uint8 *inputBuffer, std::size_t numFrames)
 {
+	// cppcheck-suppress assertWithSideEffect
 	assert(GetBufferFormat().sampleFormat == SampleFormat::Unsigned8);
 	SourceLockedAudioReadImpl(buffer, inputBuffer, numFrames);
 }
 
 void Base::SourceLockedAudioRead(int8 *buffer, const int8 *inputBuffer, std::size_t numFrames)
 {
+	// cppcheck-suppress assertWithSideEffect
 	assert(GetBufferFormat().sampleFormat == SampleFormat::Int8);
 	SourceLockedAudioReadImpl(buffer, inputBuffer, numFrames);
 }
 
 void Base::SourceLockedAudioRead(int16 *buffer, const int16 *inputBuffer, std::size_t numFrames)
 {
+	// cppcheck-suppress assertWithSideEffect
 	assert(GetBufferFormat().sampleFormat == SampleFormat::Int16);
 	SourceLockedAudioReadImpl(buffer, inputBuffer, numFrames);
 }
 
 void Base::SourceLockedAudioRead(int24 *buffer, const int24 *inputBuffer, std::size_t numFrames)
 {
+	// cppcheck-suppress assertWithSideEffect
 	assert(GetBufferFormat().sampleFormat == SampleFormat::Int24);
 	SourceLockedAudioReadImpl(buffer, inputBuffer, numFrames);
 }
 
 void Base::SourceLockedAudioRead(int32 *buffer, const int32 *inputBuffer, std::size_t numFrames)
 {
+	// cppcheck-suppress assertWithSideEffect
 	assert(GetBufferFormat().sampleFormat == SampleFormat::Int32);
 	SourceLockedAudioReadImpl(buffer, inputBuffer, numFrames);
 }
 
 void Base::SourceLockedAudioRead(float *buffer, const float *inputBuffer, std::size_t numFrames)
 {
+	// cppcheck-suppress assertWithSideEffect
 	assert(GetBufferFormat().sampleFormat == SampleFormat::Float32);
 	SourceLockedAudioReadImpl(buffer, inputBuffer, numFrames);
 }
 
 void Base::SourceLockedAudioRead(double *buffer, const double *inputBuffer, std::size_t numFrames)
 {
+	// cppcheck-suppress assertWithSideEffect
 	assert(GetBufferFormat().sampleFormat == SampleFormat::Float64);
 	SourceLockedAudioReadImpl(buffer, inputBuffer, numFrames);
 }
