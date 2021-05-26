@@ -12,6 +12,8 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
+#include "mptString.h"
+
 #include "mpt/base/namespace.hpp"
 
 #include <vector>
