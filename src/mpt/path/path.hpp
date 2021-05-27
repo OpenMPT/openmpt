@@ -400,6 +400,29 @@ public:
 	bool is_relative() const {
 		return m_path.is_relative();
 	}
+	// comparison operators
+	friend bool operator==(const path & lhs, const path & rhs) noexcept {
+		return lhs.m_path == rhs.m_path;
+	}
+	friend bool operator!=(const path & lhs, const path & rhs) noexcept {
+		return lhs.m_path != rhs.m_path;
+	}
+	friend bool operator<(const path & lhs, const path & rhs) noexcept {
+		return lhs.m_path < rhs.m_path;
+	}
+	friend bool operator<=(const path & lhs, const path & rhs) noexcept {
+		return lhs.m_path <= rhs.m_path;
+	}
+	friend bool operator>(const path & lhs, const path & rhs) noexcept {
+		return lhs.m_path > rhs.m_path;
+	}
+	friend bool operator>=(const path & lhs, const path & rhs) noexcept {
+		return lhs.m_path >= rhs.m_path;
+	}
+	// copncatenation operator
+	friend path operator/(const path & lhs, const path & rhs) {
+		return path{lhs.m_path / rhs.m_path};
+	}
 };
 
 
