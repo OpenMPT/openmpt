@@ -32,7 +32,7 @@ inline namespace MPT_INLINE_NS {
 
 #if MPT_OS_WINDOWS
 using os_path = mpt::winstring;
-#else // !MPT_OS_WINDOWS
+#else  // !MPT_OS_WINDOWS
 using os_path = mpt::lstring;
 #endif // MPT_OS_WINDOWS
 
@@ -211,7 +211,7 @@ private:
 		: m_path(std::forward<path_type>(p)) {
 		return;
 	}
-	
+
 public:
 	struct internal {
 		static inline path make_path(std::filesystem::path && p) {
@@ -233,7 +233,7 @@ public:
 	static std::filesystem::path from_ospath(const os_path & s, std::filesystem::path::format fmt = std::filesystem::path::auto_format) {
 		return string_converter<std::filesystem::path>{}.encode(mpt::convert<mpt::widestring>(s), fmt);
 	}
-	
+
 public:
 	path() noexcept = default;
 	path(const path & p)
@@ -400,7 +400,6 @@ public:
 	bool is_relative() const {
 		return m_path.is_relative();
 	}
-
 };
 
 
