@@ -478,7 +478,7 @@ public:
 private:
 	void * handle = nullptr;
 
-	library(lt_dlhandle handle_)
+	library(void * handle_)
 		: handle(handle_) {
 		return;
 	}
@@ -489,13 +489,12 @@ public:
 
 	library(library && other) noexcept
 		: handle(other.handle) {
-		other.handle = NULL;
+		other.handle = nullptr;
 	}
 
 	library & operator=(library && other) noexcept {
-		dlclose(handle);
-		m_hModule = other.handle;
-		other.handle = NULL;
+		handle = other.handle;
+		other.handle = nullptr;
 		return *this;
 	}
 
