@@ -21,9 +21,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-//==================================
 class BitReader : private FileReader
-//==================================
 {
 protected:
 	off_t m_bufPos = 0, m_bufSize = 0;
