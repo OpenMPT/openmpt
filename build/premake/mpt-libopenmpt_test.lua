@@ -72,6 +72,8 @@
 		"../../src/mpt/uuid_namespace/**.hpp",
 		"../../test/mpt_tests_crypto.cpp",
 		"../../test/mpt_tests_uuid_namespace.cpp",
+		"../../src/openmpt/sounddevice/**.cpp",
+		"../../src/openmpt/sounddevice/**.hpp",
 	}
   characterset "Unicode"
   warnings "Extra"

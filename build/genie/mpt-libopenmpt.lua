@@ -65,6 +65,8 @@
 		"../../src/mpt/test/**.hpp",
 		"../../src/mpt/uuid_namespace/**.cpp",
 		"../../src/mpt/uuid_namespace/**.hpp",
+		"../../src/openmpt/sounddevice/**.cpp",
+		"../../src/openmpt/sounddevice/**.hpp",
 	}
 	resdefines {
 		"MPT_BUILD_VER_FILENAME=\"" .. mpt_projectname .. ".dll\"",

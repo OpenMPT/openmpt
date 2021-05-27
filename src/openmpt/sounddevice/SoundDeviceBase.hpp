@@ -7,8 +7,8 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
-#include "SoundDevice.h"
-#include "SoundDeviceCallback.h"
+#include "SoundDevice.hpp"
+#include "SoundDeviceCallback.hpp"
 
 #include "mpt/mutex/mutex.hpp"
 #include "mpt/string/types.hpp"

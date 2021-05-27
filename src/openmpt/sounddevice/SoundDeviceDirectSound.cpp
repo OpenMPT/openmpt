@@ -5,10 +5,10 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
-#include "SoundDeviceDirectSound.h"
+#include "SoundDeviceDirectSound.hpp"
 
-#include "SoundDevice.h"
-#include "SoundDeviceUtilities.h"
+#include "SoundDevice.hpp"
+#include "SoundDeviceUtilities.hpp"
 
 #include "mpt/base/detect.hpp"
 #include "mpt/base/numeric.hpp"

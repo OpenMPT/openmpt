@@ -4,10 +4,10 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
-#include "SoundDeviceRtAudio.h"
+#include "SoundDeviceRtAudio.hpp"
 
-#include "SoundDevice.h"
-#include "SoundDeviceBase.h"
+#include "SoundDevice.hpp"
+#include "SoundDeviceBase.hpp"
 
 #include "mpt/base/alloc.hpp"
 #include "mpt/base/saturate_round.hpp"

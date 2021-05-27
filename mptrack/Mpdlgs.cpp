@@ -17,8 +17,8 @@
 #include "Mpdlgs.h"
 #include "dlg_misc.h"
 #include "../common/mptStringBuffer.h"
-#include "../sounddev/SoundDevice.h"
-#include "../sounddev/SoundDeviceManager.h"
+#include "openmpt/sounddevice/SoundDevice.hpp"
+#include "openmpt/sounddevice/SoundDeviceManager.hpp"
 #include "../common/Dither.h"
 
 

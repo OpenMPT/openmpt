@@ -25,7 +25,7 @@
 #include "HTTP.h"
 #include "mpt/json/json.hpp"
 #include "dlg_misc.h"
-#include "../sounddev/SoundDeviceManager.h"
+#include "openmpt/sounddevice/SoundDeviceManager.hpp"
 #include "ProgressDialog.h"
 #include "Moddoc.h"
 

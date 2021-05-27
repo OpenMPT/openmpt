@@ -5,16 +5,16 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
-#include "SoundDeviceManager.h"
+#include "SoundDeviceManager.hpp"
 
-#include "SoundDevice.h"
-#include "SoundDeviceASIO.h"
-#include "SoundDeviceDirectSound.h"
-#include "SoundDevicePortAudio.h"
-#include "SoundDeviceRtAudio.h"
-#include "SoundDeviceWaveout.h"
-#include "SoundDevicePulseaudio.h"
-#include "SoundDevicePulseSimple.h"
+#include "SoundDevice.hpp"
+#include "SoundDeviceASIO.hpp"
+#include "SoundDeviceDirectSound.hpp"
+#include "SoundDevicePortAudio.hpp"
+#include "SoundDeviceRtAudio.hpp"
+#include "SoundDeviceWaveout.hpp"
+#include "SoundDevicePulseaudio.hpp"
+#include "SoundDevicePulseSimple.hpp"
 
 #include "mpt/base/alloc.hpp"
 #include "mpt/base/detect.hpp"

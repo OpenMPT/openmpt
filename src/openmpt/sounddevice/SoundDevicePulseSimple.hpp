@@ -6,8 +6,8 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
-#include "SoundDevice.h"
-#include "SoundDeviceUtilities.h"
+#include "SoundDevice.hpp"
+#include "SoundDeviceUtilities.hpp"
 
 #include "mpt/string/types.hpp"
 #include "openmpt/base/Types.hpp"

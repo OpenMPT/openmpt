@@ -5,7 +5,7 @@
 
 #include "NativeSoundDevice.h"
 
-#include "../../sounddev/SoundDevice.h"
+#include "openmpt/sounddevice/SoundDevice.hpp"
 
 #ifdef MPT_WITH_NLOHMANNJSON
 

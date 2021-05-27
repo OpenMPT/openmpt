@@ -16,7 +16,7 @@
 
 #include "WineSoundDeviceStub.h"
 
-#include "../sounddev/SoundDevice.h"
+#include "openmpt/sounddevice/SoundDevice.hpp"
 
 #include "../common/misc_util.h"
 

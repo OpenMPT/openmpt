@@ -8,11 +8,9 @@
 #include "NativeSoundDevice.h"
 #include "NativeUtils.h"
 
-#include "../../sounddev/SoundDevice.h"
-#include "../../sounddev/SoundDeviceManager.h"
-#include "../../sounddev/SoundDevicePortAudio.h"
-
-#include "../../sounddev/SoundDeviceUtilities.h"
+#include "openmpt/sounddevice/SoundDevice.hpp"
+#include "openmpt/sounddevice/SoundDeviceManager.hpp"
+#include "openmpt/sounddevice/SoundDeviceUtilities.hpp"
 
 #include "../../common/ComponentManager.h"
 

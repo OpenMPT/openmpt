@@ -12,7 +12,7 @@
 #include "Mainfrm.h"
 #include "Mptrack.h"
 #include "AboutDialog.h"
-#include "../sounddev/SoundDevice.h"
+#include "openmpt/sounddevice/SoundDevice.hpp"
 #include "Moddoc.h"
 #include <shlwapi.h>
 #include "ExceptionHandler.h"

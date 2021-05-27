@@ -36,6 +36,8 @@
 	excludes {
 		"../../src/openmpt/soundbase/**.cpp",
 		"../../src/openmpt/soundbase/**.hpp",
+		"../../src/openmpt/sounddevice/**.cpp",
+		"../../src/openmpt/sounddevice/**.hpp",
 	}
   files {
    "../../pluginBridge/PluginBridge.rc",
@@ -105,6 +107,8 @@
 	excludes {
 		"../../src/openmpt/soundbase/**.cpp",
 		"../../src/openmpt/soundbase/**.hpp",
+		"../../src/openmpt/sounddevice/**.cpp",
+		"../../src/openmpt/sounddevice/**.hpp",
 	}
   files {
    "../../pluginBridge/PluginBridge.rc",

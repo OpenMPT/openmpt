@@ -7,7 +7,7 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
-#include "SoundDeviceCallback.h"
+#include "SoundDeviceCallback.hpp"
 
 #include "mpt/base/detect.hpp"
 #include "mpt/base/saturate_round.hpp"

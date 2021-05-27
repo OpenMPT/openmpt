@@ -6,7 +6,7 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
-#include "SoundDeviceBase.h"
+#include "SoundDeviceBase.hpp"
 
 #include "openmpt/base/Types.hpp"
 #include "openmpt/logging/Logger.hpp"

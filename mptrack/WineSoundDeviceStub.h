@@ -12,7 +12,7 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
-#include "../sounddev/SoundDeviceBase.h"
+#include "openmpt/sounddevice/SoundDeviceBase.hpp"
 
 #include "../common/ComponentManager.h"
 

@@ -9,8 +9,8 @@
 
 #ifdef MPT_WITH_ASIO
 
-#include "SoundDevice.h"
-#include "SoundDeviceBase.h"
+#include "SoundDevice.hpp"
+#include "SoundDeviceBase.hpp"
 
 #include "mpt/string/types.hpp"
 #include "openmpt/base/Types.hpp"

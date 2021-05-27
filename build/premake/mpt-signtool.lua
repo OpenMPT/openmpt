@@ -27,6 +27,10 @@
    "../../installer/signtool/*.cpp",
    "../../installer/signtool/*.h",
   }
+	excludes {
+		"../../src/openmpt/sounddevice/**.cpp",
+		"../../src/openmpt/sounddevice/**.hpp",
+	}
   defines { "MODPLUG_TRACKER", "MPT_BUILD_SIGNTOOL" }
   largeaddressaware ( true )
   characterset "Unicode"

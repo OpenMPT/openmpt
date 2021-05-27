@@ -32,7 +32,7 @@
 #include "BuildVariants.h"
 #include "../common/ComponentManager.h"
 #include "WelcomeDialog.h"
-#include "../sounddev/SoundDeviceManager.h"
+#include "openmpt/sounddevice/SoundDeviceManager.hpp"
 #include "WineSoundDeviceStub.h"
 #include "../soundlib/plugins/PluginManager.h"
 #include "MPTrackWine.h"

@@ -5,9 +5,9 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
-#include "SoundDeviceUtilities.h"
+#include "SoundDeviceUtilities.hpp"
 
-#include "SoundDevice.h"
+#include "SoundDevice.hpp"
 
 #include "mpt/base/detect.hpp"
 #include "mpt/base/macros.hpp"

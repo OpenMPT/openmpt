@@ -118,6 +118,9 @@
     <Filter Include="src\openmpt">
       <UniqueIdentifier>{4C02B001-B8B7-28F7-41AC-22CEAD601FFB}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\openmpt\sounddevice">
+      <UniqueIdentifier>{81A03C5C-EDD7-84F3-F6E1-E8166298ABEC}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\openmpt\all">
       <UniqueIdentifier>{21667483-8DF1-E147-9602-653C020D3E48}</UniqueIdentifier>
     </Filter>
@@ -564,6 +567,45 @@
     <ClInclude Include="..\..\src\openmpt\soundbase\SampleFormat.hpp">
       <Filter>src\openmpt\soundbase</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\openmpt\sounddevice\SoundDevice.hpp">
+      <Filter>src\openmpt\sounddevice</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\openmpt\sounddevice\SoundDeviceASIO.hpp">
+      <Filter>src\openmpt\sounddevice</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\openmpt\sounddevice\SoundDeviceBase.hpp">
+      <Filter>src\openmpt\sounddevice</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\openmpt\sounddevice\SoundDeviceBuffer.hpp">
+      <Filter>src\openmpt\sounddevice</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\openmpt\sounddevice\SoundDeviceCallback.hpp">
+      <Filter>src\openmpt\sounddevice</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\openmpt\sounddevice\SoundDeviceDirectSound.hpp">
+      <Filter>src\openmpt\sounddevice</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\openmpt\sounddevice\SoundDeviceManager.hpp">
+      <Filter>src\openmpt\sounddevice</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\openmpt\sounddevice\SoundDevicePortAudio.hpp">
+      <Filter>src\openmpt\sounddevice</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\openmpt\sounddevice\SoundDevicePulseaudio.hpp">
+      <Filter>src\openmpt\sounddevice</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\openmpt\sounddevice\SoundDevicePulseSimple.hpp">
+      <Filter>src\openmpt\sounddevice</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\openmpt\sounddevice\SoundDeviceRtAudio.hpp">
+      <Filter>src\openmpt\sounddevice</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\openmpt\sounddevice\SoundDeviceUtilities.hpp">
+      <Filter>src\openmpt\sounddevice</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\openmpt\sounddevice\SoundDeviceWaveout.hpp">
+      <Filter>src\openmpt\sounddevice</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\common\BuildSettings.h">
       <Filter>common</Filter>
     </ClInclude>
@@ -905,6 +947,39 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\openmpt\sounddevice\SoundDevice.cpp">
+      <Filter>src\openmpt\sounddevice</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\openmpt\sounddevice\SoundDeviceASIO.cpp">
+      <Filter>src\openmpt\sounddevice</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\openmpt\sounddevice\SoundDeviceBase.cpp">
+      <Filter>src\openmpt\sounddevice</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\openmpt\sounddevice\SoundDeviceDirectSound.cpp">
+      <Filter>src\openmpt\sounddevice</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\openmpt\sounddevice\SoundDeviceManager.cpp">
+      <Filter>src\openmpt\sounddevice</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\openmpt\sounddevice\SoundDevicePortAudio.cpp">
+      <Filter>src\openmpt\sounddevice</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\openmpt\sounddevice\SoundDevicePulseaudio.cpp">
+      <Filter>src\openmpt\sounddevice</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\openmpt\sounddevice\SoundDevicePulseSimple.cpp">
+      <Filter>src\openmpt\sounddevice</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\openmpt\sounddevice\SoundDeviceRtAudio.cpp">
+      <Filter>src\openmpt\sounddevice</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\openmpt\sounddevice\SoundDeviceUtilities.cpp">
+      <Filter>src\openmpt\sounddevice</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\openmpt\sounddevice\SoundDeviceWaveout.cpp">
+      <Filter>src\openmpt\sounddevice</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\common\ComponentManager.cpp">
       <Filter>common</Filter>
     </ClCompile>

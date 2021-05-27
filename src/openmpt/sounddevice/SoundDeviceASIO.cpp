@@ -7,11 +7,11 @@
 
 #ifdef MPT_WITH_ASIO
 
-#include "SoundDeviceASIO.h"
+#include "SoundDeviceASIO.hpp"
 
-#include "SoundDevice.h"
-#include "SoundDeviceBase.h"
-#include "SoundDeviceCallback.h"
+#include "SoundDevice.hpp"
+#include "SoundDeviceBase.hpp"
+#include "SoundDeviceCallback.hpp"
 
 #include "mpt/base/bit.hpp"
 #include "mpt/base/macros.hpp"

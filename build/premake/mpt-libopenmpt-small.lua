@@ -64,6 +64,8 @@
 		"../../src/mpt/test/**.hpp",
 		"../../src/mpt/uuid_namespace/**.cpp",
 		"../../src/mpt/uuid_namespace/**.hpp",
+		"../../src/openmpt/sounddevice/**.cpp",
+		"../../src/openmpt/sounddevice/**.hpp",
 	}
 	filter { "action:vs*" }
 		resdefines {

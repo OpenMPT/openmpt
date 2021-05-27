@@ -4,8 +4,9 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
-#include "SoundDevicePortAudio.h"
-#include "SoundDevice.h"
+#include "SoundDevicePortAudio.hpp"
+
+#include "SoundDevice.hpp"
 
 #include "mpt/base/detect.hpp"
 #include "mpt/base/saturate_cast.hpp"

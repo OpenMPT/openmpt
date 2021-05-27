@@ -22,7 +22,7 @@
 #include "openmpt/soundbase/Dither.hpp"
 #include "../common/Dither.h"
 #include "mpt/audio/span.hpp"
-#include "../sounddev/SoundDeviceBuffer.h"
+#include "openmpt/sounddevice/SoundDeviceBuffer.hpp"
 
 OPENMPT_NAMESPACE_BEGIN
 

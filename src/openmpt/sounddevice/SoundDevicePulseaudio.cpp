@@ -4,10 +4,10 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
-#include "SoundDevicePulseSimple.h"
+#include "SoundDevicePulseaudio.hpp"
 
-#include "SoundDevice.h"
-#include "SoundDeviceUtilities.h"
+#include "SoundDevice.hpp"
+#include "SoundDeviceUtilities.hpp"
 
 #include "mpt/base/numeric.hpp"
 #include "mpt/base/saturate_round.hpp"
@@ -29,17 +29,16 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-//#define MPT_PULSEAUDIO_SIMPLE_ENUMERATE_DEVICES
-
-
 namespace SoundDevice
 {
 
 
-#if defined(MPT_WITH_PULSEAUDIO) && defined(MPT_WITH_PULSEAUDIOSIMPLE)
+#if defined(MPT_ENABLE_PULSEAUDIO_FULL)
+
+#if defined(MPT_WITH_PULSEAUDIO)
 
 
-mpt::ustring PulseaudioSimple::PulseErrorString(int error)
+mpt::ustring Pulseaudio::PulseErrorString(int error)
 {
 	if(error == 0)
 	{
@@ -57,8 +56,6 @@ mpt::ustring PulseaudioSimple::PulseErrorString(int error)
 	return MPT_UFORMAT_MESSAGE("{} (error={})")(mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, str), error);
 }
 
-
-#ifdef MPT_PULSEAUDIO_SIMPLE_ENUMERATE_DEVICES
 
 static void PulseAudioSinkInfoListCallback(pa_context * /* c */, const pa_sink_info *i, int /* eol */, void *userdata)
 {
@@ -101,18 +98,10 @@ static void PulseAudioSinkInfoListCallback(pa_context * /* c */, const pa_sink_i
 			continue;
 		}
 		SoundDevice::Info info;
-#if defined(MPT_ENABLE_PULSEAUDIO_FULL)
-		info.type = MPT_USTRING("PulseAudio-Simple");
-#else   // !MPT_ENABLE_PULSEAUDIO_FULL
 		info.type = MPT_USTRING("PulseAudio");
-#endif  // MPT_ENABLE_PULSEAUDIO_FULL
 		info.internalID = mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, i->name);
 		info.name = mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, i->description);
-#if defined(MPT_ENABLE_PULSEAUDIO_FULL)
-		info.apiName = MPT_USTRING("PulseAudio Simple API");
-#else
 		info.apiName = MPT_USTRING("PulseAudio");
-#endif
 		info.default_ = Info::Default::None;
 		info.useNameAsIdentifier = false;
 		// clang-format off
@@ -131,10 +120,8 @@ static void PulseAudioSinkInfoListCallback(pa_context * /* c */, const pa_sink_i
 	}
 }
 
-#endif  // MPT_PULSEAUDIO_SIMPLE_ENUMERATE_DEVICES
 
-
-std::vector<SoundDevice::Info> PulseaudioSimple::EnumerateDevices(ILogger &logger, SoundDevice::SysInfo sysInfo)
+std::vector<SoundDevice::Info> Pulseaudio::EnumerateDevices(ILogger &logger, SoundDevice::SysInfo sysInfo)
 {
 	auto GetLogger = [&]() -> ILogger &
 	{
@@ -142,18 +129,10 @@ std::vector<SoundDevice::Info> PulseaudioSimple::EnumerateDevices(ILogger &logge
 	};
 	std::vector<SoundDevice::Info> devices;
 	SoundDevice::Info info;
-#if defined(MPT_ENABLE_PULSEAUDIO_FULL)
-	info.type = MPT_USTRING("PulseAudio-Simple");
-#else   // !MPT_ENABLE_PULSEAUDIO_FULL
 	info.type = MPT_USTRING("PulseAudio");
-#endif  // MPT_ENABLE_PULSEAUDIO_FULL
 	info.internalID = MPT_USTRING("0");
 	info.name = MPT_USTRING("Default Device");
-#if defined(MPT_ENABLE_PULSEAUDIO_FULL)
-	info.apiName = MPT_USTRING("PulseAudio Simple API");
-#else
 	info.apiName = MPT_USTRING("PulseAudio");
-#endif
 	info.default_ = Info::Default::Managed;
 	info.useNameAsIdentifier = false;
 	// clang-format off
@@ -168,8 +147,6 @@ std::vector<SoundDevice::Info> PulseaudioSimple::EnumerateDevices(ILogger &logge
 	};
 	// clang-format on
 	devices.push_back(info);
-
-#ifdef MPT_PULSEAUDIO_SIMPLE_ENUMERATE_DEVICES
 
 	int result = 0;
 	pa_mainloop *m = nullptr;
@@ -268,13 +245,11 @@ cleanup:
 		m = nullptr;
 	}
 
-#endif  // MPT_PULSEAUDIO_SIMPLE_ENUMERATE_DEVICES
-
 	return devices;
 }
 
 
-PulseaudioSimple::PulseaudioSimple(ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
+Pulseaudio::Pulseaudio(ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
 	: ThreadBase(logger, info, sysInfo)
 	, m_PA_SimpleOutput(nullptr)
 	, m_StatisticLastLatencyFrames(0)
@@ -283,7 +258,7 @@ PulseaudioSimple::PulseaudioSimple(ILogger &logger, SoundDevice::Info info, Soun
 }
 
 
-SoundDevice::Caps PulseaudioSimple::InternalGetDeviceCaps()
+SoundDevice::Caps Pulseaudio::InternalGetDeviceCaps()
 {
 	SoundDevice::Caps caps;
 	caps.Available = true;  // TODO: poll PulseAudio
@@ -292,13 +267,13 @@ SoundDevice::Caps PulseaudioSimple::InternalGetDeviceCaps()
 	caps.CanExclusiveMode = true;
 	caps.CanBoostThreadPriority = true;
 	caps.CanKeepDeviceRunning = false;
-	caps.CanUseHardwareTiming = false;
+	caps.CanUseHardwareTiming = true;
 	caps.CanChannelMapping = false;
 	caps.CanInput = false;
 	caps.HasNamedInputSources = false;
 	caps.CanDriverPanel = false;
 	caps.HasInternalDither = false;
-	caps.ExclusiveModeDescription = MPT_USTRING("Adjust latency");
+	caps.ExclusiveModeDescription = MPT_USTRING("Use early requests");
 	caps.DefaultSettings.Latency = 0.030;
 	caps.DefaultSettings.UpdateInterval = 0.005;
 	caps.DefaultSettings.sampleFormat = SampleFormat::Float32;
@@ -307,7 +282,7 @@ SoundDevice::Caps PulseaudioSimple::InternalGetDeviceCaps()
 }
 
 
-SoundDevice::DynamicCaps PulseaudioSimple::GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates)
+SoundDevice::DynamicCaps Pulseaudio::GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates)
 {
 	SoundDevice::DynamicCaps caps;
 	caps.supportedSampleRates = baseSampleRates;
@@ -318,13 +293,13 @@ SoundDevice::DynamicCaps PulseaudioSimple::GetDeviceDynamicCaps(const std::vecto
 }
 
 
-bool PulseaudioSimple::InternalIsOpen() const
+bool Pulseaudio::InternalIsOpen() const
 {
 	return m_PA_SimpleOutput;
 }
 
 
-bool PulseaudioSimple::InternalOpen()
+bool Pulseaudio::InternalOpen()
 {
 	if(m_Settings.sampleFormat != SampleFormat::Float32)
 	{
@@ -367,13 +342,13 @@ bool PulseaudioSimple::InternalOpen()
 }
 
 
-void PulseaudioSimple::InternalStartFromSoundThread()
+void Pulseaudio::InternalStartFromSoundThread()
 {
 	return;
 }
 
 
-void PulseaudioSimple::InternalFillAudioBuffer()
+void Pulseaudio::InternalFillAudioBuffer()
 {
 	bool needsClose = false;
 	int error = 0;
@@ -414,20 +389,20 @@ void PulseaudioSimple::InternalFillAudioBuffer()
 }
 
 
-void PulseaudioSimple::InternalWaitFromSoundThread()
+void Pulseaudio::InternalWaitFromSoundThread()
 {
 	// We block in InternalFillAudioBuffer and thus have no need to wait further
 	return;
 }
 
 
-SoundDevice::BufferAttributes PulseaudioSimple::InternalGetEffectiveBufferAttributes() const
+SoundDevice::BufferAttributes Pulseaudio::InternalGetEffectiveBufferAttributes() const
 {
 	return m_EffectiveBufferAttributes;
 }
 
 
-SoundDevice::Statistics PulseaudioSimple::GetStatistics() const
+SoundDevice::Statistics Pulseaudio::GetStatistics() const
 {
 	SoundDevice::Statistics stats;
 	stats.InstantaneousLatency = static_cast<double>(m_StatisticLastLatencyFrames.load()) / static_cast<double>(m_Settings.Samplerate);
@@ -437,7 +412,7 @@ SoundDevice::Statistics PulseaudioSimple::GetStatistics() const
 }
 
 
-void PulseaudioSimple::InternalStopFromSoundThread()
+void Pulseaudio::InternalStopFromSoundThread()
 {
 	int error = 0;
 	bool oldVersion = false;
@@ -470,7 +445,7 @@ void PulseaudioSimple::InternalStopFromSoundThread()
 }
 
 
-bool PulseaudioSimple::InternalClose()
+bool Pulseaudio::InternalClose()
 {
 	if(m_PA_SimpleOutput)
 	{
@@ -483,13 +458,15 @@ bool PulseaudioSimple::InternalClose()
 }
 
 
-PulseaudioSimple::~PulseaudioSimple()
+Pulseaudio::~Pulseaudio()
 {
 	return;
 }
 
 
-#endif  // MPT_WITH_PULSEAUDIO && MPT_WITH_PULSEAUDIOSIMPLE
+#endif  // MPT_WITH_PULSEAUDIO
+
+#endif  // MPT_ENABLE_PULSEAUDIO_FULL
 
 
 }  // namespace SoundDevice

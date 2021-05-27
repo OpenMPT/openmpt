@@ -5,7 +5,7 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
-#include "SoundDevice.h"
+#include "SoundDevice.hpp"
 
 #include "mpt/base/alloc.hpp"
 #include "mpt/binary/hex.hpp"

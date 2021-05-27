@@ -31,9 +31,9 @@
 #include "MPTrackUtilWine.h"
 
 #include "wine/NativeSoundDevice.h"
-#include "../sounddev/SoundDevice.h"
+#include "openmpt/sounddevice/SoundDevice.hpp"
 #include "wine/NativeSoundDeviceMarshalling.h"
-#include "../sounddev/SoundDeviceManager.h"
+#include "openmpt/sounddevice/SoundDeviceManager.hpp"
 
 #include <ios>
 

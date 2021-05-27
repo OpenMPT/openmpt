@@ -652,19 +652,6 @@
     <ClInclude Include="..\..\mptrack\wine\NativeSoundDevice.h" />
     <ClInclude Include="..\..\mptrack\wine\NativeSoundDeviceMarshalling.h" />
     <ClInclude Include="..\..\mptrack\wine\NativeUtils.h" />
-    <ClInclude Include="..\..\sounddev\SoundDevice.h" />
-    <ClInclude Include="..\..\sounddev\SoundDeviceASIO.h" />
-    <ClInclude Include="..\..\sounddev\SoundDeviceBase.h" />
-    <ClInclude Include="..\..\sounddev\SoundDeviceBuffer.h" />
-    <ClInclude Include="..\..\sounddev\SoundDeviceCallback.h" />
-    <ClInclude Include="..\..\sounddev\SoundDeviceDirectSound.h" />
-    <ClInclude Include="..\..\sounddev\SoundDeviceManager.h" />
-    <ClInclude Include="..\..\sounddev\SoundDevicePortAudio.h" />
-    <ClInclude Include="..\..\sounddev\SoundDevicePulseSimple.h" />
-    <ClInclude Include="..\..\sounddev\SoundDevicePulseaudio.h" />
-    <ClInclude Include="..\..\sounddev\SoundDeviceRtAudio.h" />
-    <ClInclude Include="..\..\sounddev\SoundDeviceUtilities.h" />
-    <ClInclude Include="..\..\sounddev\SoundDeviceWaveout.h" />
     <ClInclude Include="..\..\src\mpt\audio\sample.hpp" />
     <ClInclude Include="..\..\src\mpt\audio\span.hpp" />
     <ClInclude Include="..\..\src\mpt\base\algorithm.hpp" />
@@ -802,6 +789,19 @@
     <ClInclude Include="..\..\src\openmpt\soundbase\SampleDecode.hpp" />
     <ClInclude Include="..\..\src\openmpt\soundbase\SampleEncode.hpp" />
     <ClInclude Include="..\..\src\openmpt\soundbase\SampleFormat.hpp" />
+    <ClInclude Include="..\..\src\openmpt\sounddevice\SoundDevice.hpp" />
+    <ClInclude Include="..\..\src\openmpt\sounddevice\SoundDeviceASIO.hpp" />
+    <ClInclude Include="..\..\src\openmpt\sounddevice\SoundDeviceBase.hpp" />
+    <ClInclude Include="..\..\src\openmpt\sounddevice\SoundDeviceBuffer.hpp" />
+    <ClInclude Include="..\..\src\openmpt\sounddevice\SoundDeviceCallback.hpp" />
+    <ClInclude Include="..\..\src\openmpt\sounddevice\SoundDeviceDirectSound.hpp" />
+    <ClInclude Include="..\..\src\openmpt\sounddevice\SoundDeviceManager.hpp" />
+    <ClInclude Include="..\..\src\openmpt\sounddevice\SoundDevicePortAudio.hpp" />
+    <ClInclude Include="..\..\src\openmpt\sounddevice\SoundDevicePulseSimple.hpp" />
+    <ClInclude Include="..\..\src\openmpt\sounddevice\SoundDevicePulseaudio.hpp" />
+    <ClInclude Include="..\..\src\openmpt\sounddevice\SoundDeviceRtAudio.hpp" />
+    <ClInclude Include="..\..\src\openmpt\sounddevice\SoundDeviceUtilities.hpp" />
+    <ClInclude Include="..\..\src\openmpt\sounddevice\SoundDeviceWaveout.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\common\ComponentManager.cpp" />
@@ -827,17 +827,17 @@
     <ClCompile Include="..\..\mptrack\wine\Native.cpp" />
     <ClCompile Include="..\..\mptrack\wine\NativeSoundDevice.cpp" />
     <ClCompile Include="..\..\mptrack\wine\NativeUtils.cpp" />
-    <ClCompile Include="..\..\sounddev\SoundDevice.cpp" />
-    <ClCompile Include="..\..\sounddev\SoundDeviceASIO.cpp" />
-    <ClCompile Include="..\..\sounddev\SoundDeviceBase.cpp" />
-    <ClCompile Include="..\..\sounddev\SoundDeviceDirectSound.cpp" />
-    <ClCompile Include="..\..\sounddev\SoundDeviceManager.cpp" />
-    <ClCompile Include="..\..\sounddev\SoundDevicePortAudio.cpp" />
-    <ClCompile Include="..\..\sounddev\SoundDevicePulseSimple.cpp" />
-    <ClCompile Include="..\..\sounddev\SoundDevicePulseaudio.cpp" />
-    <ClCompile Include="..\..\sounddev\SoundDeviceRtAudio.cpp" />
-    <ClCompile Include="..\..\sounddev\SoundDeviceUtilities.cpp" />
-    <ClCompile Include="..\..\sounddev\SoundDeviceWaveout.cpp" />
+    <ClCompile Include="..\..\src\openmpt\sounddevice\SoundDevice.cpp" />
+    <ClCompile Include="..\..\src\openmpt\sounddevice\SoundDeviceASIO.cpp" />
+    <ClCompile Include="..\..\src\openmpt\sounddevice\SoundDeviceBase.cpp" />
+    <ClCompile Include="..\..\src\openmpt\sounddevice\SoundDeviceDirectSound.cpp" />
+    <ClCompile Include="..\..\src\openmpt\sounddevice\SoundDeviceManager.cpp" />
+    <ClCompile Include="..\..\src\openmpt\sounddevice\SoundDevicePortAudio.cpp" />
+    <ClCompile Include="..\..\src\openmpt\sounddevice\SoundDevicePulseSimple.cpp" />
+    <ClCompile Include="..\..\src\openmpt\sounddevice\SoundDevicePulseaudio.cpp" />
+    <ClCompile Include="..\..\src\openmpt\sounddevice\SoundDeviceRtAudio.cpp" />
+    <ClCompile Include="..\..\src\openmpt\sounddevice\SoundDeviceUtilities.cpp" />
+    <ClCompile Include="..\..\src\openmpt\sounddevice\SoundDeviceWaveout.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="ext\portaudio.vcxproj">

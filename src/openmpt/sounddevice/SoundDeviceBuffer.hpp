@@ -6,7 +6,7 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
-#include "SoundDeviceCallback.h"
+#include "SoundDeviceCallback.hpp"
 
 #include "mpt/audio/span.hpp"
 #include "openmpt/base/Types.hpp"
