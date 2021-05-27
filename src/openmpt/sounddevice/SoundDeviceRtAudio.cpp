@@ -10,6 +10,7 @@
 #include "SoundDeviceBase.hpp"
 
 #include "mpt/base/alloc.hpp"
+#include "mpt/base/saturate_cast.hpp"
 #include "mpt/base/saturate_round.hpp"
 #include "mpt/format/message_macros.hpp"
 #include "mpt/format/simple.hpp"
@@ -22,6 +23,7 @@
 #include "openmpt/soundbase/SampleFormat.hpp"
 
 #include <algorithm>
+#include <array>
 #include <memory>
 #include <string>
 #include <utility>
@@ -36,6 +38,158 @@ namespace SoundDevice
 
 
 #ifdef MPT_WITH_RTAUDIO
+
+
+
+static constexpr uint8 ParseDigit(char c)
+{
+	return c - '0';
+}
+
+using RtAudioVersion = std::array<unsigned int, 3>;
+
+static constexpr RtAudioVersion ParseVersion(const char *str)
+{
+	RtAudioVersion version = {0, 0, 0};
+	std::size_t version_pos = 0;
+	while(*str)
+	{
+		const char c = *str;
+		if(c == '.')
+		{
+			version_pos += 1;
+		} else
+		{
+			version[version_pos] = (version[version_pos] * 10) + ParseDigit(c);
+		}
+		str++;
+	}
+	return version;
+}
+
+static constexpr bool RtAudioCheckVersion(const char *wanted_)
+{
+	RtAudioVersion actual = ParseVersion(RTAUDIO_VERSION);
+	RtAudioVersion wanted = ParseVersion(wanted_);
+	if(actual[0] > wanted[0])
+	{
+		return true;
+	} else if(actual[0] == wanted[0])
+	{
+		if(actual[1] > wanted[1])
+		{
+			return true;
+		} else if(actual[1] == wanted[1])
+		{
+			return (actual[2] >= wanted[2]);
+		} else
+		{
+			return false;
+		}
+	} else
+	{
+		return false;
+	}
+}
+
+template <typename RtAudio = ::RtAudio, bool is_v5_1_0 = RtAudioCheckVersion("5.1.0")>
+struct RtAudio_v5_1_0_Shim
+{
+};
+
+template <typename RtAudio>
+struct RtAudio_v5_1_0_Shim<RtAudio, true>
+{
+
+	static inline std::string getApiName(typename RtAudio::Api api)
+	{
+		return RtAudio::getApiName(api);
+	}
+
+	static inline std::string getApiDisplayName(typename RtAudio::Api api)
+	{
+		return RtAudio::getApiDisplayName(api);
+	}
+
+	static inline typename RtAudio::Api getCompiledApiByName(const std::string &name)
+	{
+		return RtAudio::getCompiledApiByName(name);
+	}
+};
+
+template <typename RtAudio>
+struct RtAudio_v5_1_0_Shim<RtAudio, false>
+{
+
+	static constexpr const char *rtaudio_api_names[][2] = {
+		{"unspecified", "Unknown"},
+		{"alsa", "ALSA"},
+		{"pulse", "Pulse"},
+		{"oss", "OpenSoundSystem"},
+		{"jack", "Jack"},
+		{"core", "CoreAudio"},
+		{"wasapi", "WASAPI"},
+		{"asio", "ASIO"},
+		{"ds", "DirectSound"},
+		{"dummy", "Dummy"},
+	};
+
+	static constexpr typename RtAudio::Api rtaudio_all_apis[] = {
+		RtAudio::UNIX_JACK,
+		RtAudio::LINUX_PULSE,
+		RtAudio::LINUX_ALSA,
+		RtAudio::LINUX_OSS,
+		RtAudio::WINDOWS_ASIO,
+		RtAudio::WINDOWS_WASAPI,
+		RtAudio::WINDOWS_DS,
+		RtAudio::MACOSX_CORE,
+		RtAudio::RTAUDIO_DUMMY,
+		RtAudio::UNSPECIFIED,
+	};
+
+	static inline std::string getApiName(typename RtAudio::Api api)
+	{
+		if(api < 0)
+		{
+			return std::string();
+		}
+		if(api >= mpt::saturate_cast<int>(std::size(rtaudio_api_names)))
+		{
+			return std::string();
+		}
+		return rtaudio_api_names[api][0];
+	}
+
+	static inline std::string getApiDisplayName(typename RtAudio::Api api)
+	{
+		if(api < 0)
+		{
+			return std::string();
+		}
+		if(api >= mpt::saturate_cast<int>(std::size(rtaudio_api_names)))
+		{
+			return std::string();
+		}
+		return rtaudio_api_names[api][1];
+	}
+
+	static inline typename RtAudio::Api getCompiledApiByName(const std::string &name)
+	{
+		for(std::size_t i = 0; i < std::size(rtaudio_api_names); ++i)
+		{
+			if(name == rtaudio_api_names[rtaudio_all_apis[i]][0])
+			{
+				return rtaudio_all_apis[i];
+			}
+		}
+		return RtAudio::UNSPECIFIED;
+	}
+};
+
+struct RtAudioShim
+	: RtAudio_v5_1_0_Shim<>
+{
+};
 
 
 static RtAudioFormat SampleFormatToRtAudioFormat(SampleFormat sampleFormat)
@@ -418,7 +572,7 @@ RtAudio::Api CRtAudioDevice::GetApi(SoundDevice::Info info)
 	{
 		return RtAudio::UNSPECIFIED;
 	}
-	return RtAudio::getCompiledApiByName(mpt::convert<std::string>(mpt::common_encoding::utf8, apidev[0]));
+	return RtAudioShim::getCompiledApiByName(mpt::convert<std::string>(mpt::common_encoding::utf8, apidev[0]));
 }
 
 
@@ -466,14 +620,14 @@ std::vector<SoundDevice::Info> CRtAudioDevice::EnumerateDevices(ILogger &logger,
 					continue;
 				}
 				SoundDevice::Info info = SoundDevice::Info();
-				info.type = MPT_USTRING("RtAudio") + MPT_USTRING("-") + mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, RtAudio::getApiName(rtaudio.getCurrentApi()));
+				info.type = MPT_USTRING("RtAudio") + MPT_USTRING("-") + mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, RtAudioShim::getApiName(rtaudio.getCurrentApi()));
 				std::vector<mpt::ustring> apidev;
-				apidev.push_back(mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, RtAudio::getApiName(rtaudio.getCurrentApi())));
+				apidev.push_back(mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, RtAudioShim::getApiName(rtaudio.getCurrentApi())));
 				apidev.push_back(mpt::format<mpt::ustring>::val(device));
 				info.internalID = mpt::join(apidev, MPT_USTRING(","));
 				info.name = mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, rtinfo.name);
-				info.apiName = mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, RtAudio::getApiDisplayName(rtaudio.getCurrentApi()));
-				info.extraData[MPT_USTRING("RtAudio-ApiDisplayName")] = mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, RtAudio::getApiDisplayName(rtaudio.getCurrentApi()));
+				info.apiName = mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, RtAudioShim::getApiDisplayName(rtaudio.getCurrentApi()));
+				info.extraData[MPT_USTRING("RtAudio-ApiDisplayName")] = mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, RtAudioShim::getApiDisplayName(rtaudio.getCurrentApi()));
 				info.apiPath.push_back(MPT_USTRING("RtAudio"));
 				info.useNameAsIdentifier = true;
 				// clang-format off
