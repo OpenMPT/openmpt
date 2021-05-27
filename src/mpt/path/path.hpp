@@ -409,31 +409,19 @@ public:
 #if MPT_OS_WINDOWS && !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
 #define MPT_PATH_CHAR(x)    L##x
 #define MPT_PATH_LITERAL(x) L##x
-#define MPT_PATH(x) \
-	mpt::path::internal::make_path { \
-		L##x \
-	}
+#define MPT_PATH(x) mpt::path::internal::make_path(L##x)
 #elif MPT_OS_WINDOWS
 #define MPT_PATH_CHAR(x)    x
 #define MPT_PATH_LITERAL(x) x
-#define MPT_PATH(x) \
-	mpt::path::internal::make_path { \
-		x \
-	}
+#define MPT_PATH(x) mpt::path::internal::make_path(x)
 #elif MPT_CXX_AT_LEAST(20)
 #define MPT_PATH_CHAR(x)    u8##x
 #define MPT_PATH_LITERAL(x) u8##x
-#define MPT_PATH(x) \
-	mpt::path::internal::make_path { \
-		u8##x \
-	}
+#define MPT_PATH(x) mpt::path::internal::make_path(u8##x)
 #else
 #define MPT_PATH_CHAR(x)    U##x
 #define MPT_PATH_LITERAL(x) U##x
-#define MPT_PATH(x) \
-	mpt::path::internal::make_path { \
-		U##x \
-	}
+#define MPT_PATH(x) mpt::path::internal::make_path(U##x)
 #endif
 
 
