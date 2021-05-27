@@ -70,98 +70,28 @@ public:
 	public:
 		path_search search = path_search::invalid;
 		path_prefix prefix = path_prefix::default_;
-		std::filesystem::path filename{};
+		mpt::path filename{};
 		path_suffix suffix = path_suffix::default_;
 
-		static std::filesystem::path default_prefix() {
+		static mpt::path default_prefix() {
 #if MPT_OS_WINDOWS
-			if constexpr (std::is_same<std::filesystem::path::value_type, wchar_t>::value) {
-				return std::filesystem::path{L""};
-			} else if constexpr (std::is_same<std::filesystem::path::value_type, char>::value) {
-				return std::filesystem::path{""};
-			} else if constexpr (std::is_same<std::filesystem::path::value_type, char32_t>::value) {
-				return std::filesystem::path{U""};
-			} else if constexpr (std::is_same<std::filesystem::path::value_type, char16_t>::value) {
-				return std::filesystem::path{u""};
-#if MPT_CXX_AT_LEAST(20)
-			} else if constexpr (std::is_same<std::filesystem::path::value_type, char8_t>::value) {
-				return std::filesystem::path{u8""};
-#endif
-			} else {
-				return std::filesystem::path{""};
-			}
+			return MPT_PATH("");
 #else
-			if constexpr (std::is_same<std::filesystem::path::value_type, wchar_t>::value) {
-				return std::filesystem::path{L"lib"};
-			} else if constexpr (std::is_same<std::filesystem::path::value_type, char>::value) {
-				return std::filesystem::path{"lib"};
-			} else if constexpr (std::is_same<std::filesystem::path::value_type, char32_t>::value) {
-				return std::filesystem::path{U"lib"};
-			} else if constexpr (std::is_same<std::filesystem::path::value_type, char16_t>::value) {
-				return std::filesystem::path{u"lib"};
-#if MPT_CXX_AT_LEAST(20)
-			} else if constexpr (std::is_same<std::filesystem::path::value_type, char8_t>::value) {
-				return std::filesystem::path{u8"lib"};
-#endif
-			} else {
-				return std::filesystem::path{"lib"};
-			}
+			return MPT_PATH("lib");
 #endif
 		}
 
-		static std::filesystem::path default_suffix() {
+		static mpt::path default_suffix() {
 #if MPT_OS_WINDOWS
-			if constexpr (std::is_same<std::filesystem::path::value_type, wchar_t>::value) {
-				return std::filesystem::path{L".dll"};
-			} else if constexpr (std::is_same<std::filesystem::path::value_type, char>::value) {
-				return std::filesystem::path{".dll"};
-			} else if constexpr (std::is_same<std::filesystem::path::value_type, char32_t>::value) {
-				return std::filesystem::path{U".dll"};
-			} else if constexpr (std::is_same<std::filesystem::path::value_type, char16_t>::value) {
-				return std::filesystem::path{u".dll"};
-#if MPT_CXX_AT_LEAST(20)
-			} else if constexpr (std::is_same<std::filesystem::path::value_type, char8_t>::value) {
-				return std::filesystem::path{u8".dll"};
-#endif
-			} else {
-				return std::filesystem::path{".dll"};
-			}
+			return MPT_PATH(".dll");
 #elif MPT_OS_ANDROID || defined(MPT_WITH_DL)
-			if constexpr (std::is_same<std::filesystem::path::value_type, wchar_t>::value) {
-				return std::filesystem::path{L".so"};
-			} else if constexpr (std::is_same<std::filesystem::path::value_type, char>::value) {
-				return std::filesystem::path{".so"};
-			} else if constexpr (std::is_same<std::filesystem::path::value_type, char32_t>::value) {
-				return std::filesystem::path{U".so"};
-			} else if constexpr (std::is_same<std::filesystem::path::value_type, char16_t>::value) {
-				return std::filesystem::path{u".so"};
-#if MPT_CXX_AT_LEAST(20)
-			} else if constexpr (std::is_same<std::filesystem::path::value_type, char8_t>::value) {
-				return std::filesystem::path{u8".so"};
-#endif
-			} else {
-				return std::filesystem::path{".so"};
-			}
+			return MPT_PATH(".so");
 #else
-			if constexpr (std::is_same<std::filesystem::path::value_type, wchar_t>::value) {
-				return std::filesystem::path{L""};
-			} else if constexpr (std::is_same<std::filesystem::path::value_type, char>::value) {
-				return std::filesystem::path{""};
-			} else if constexpr (std::is_same<std::filesystem::path::value_type, char32_t>::value) {
-				return std::filesystem::path{U""};
-			} else if constexpr (std::is_same<std::filesystem::path::value_type, char16_t>::value) {
-				return std::filesystem::path{u""};
-#if MPT_CXX_AT_LEAST(20)
-			} else if constexpr (std::is_same<std::filesystem::path::value_type, char8_t>::value) {
-				return std::filesystem::path{u8""};
-#endif
-			} else {
-				return std::filesystem::path{""};
-			}
+			return MPT_PATH("");
 #endif
 		}
 
-		std::optional<std::filesystem::path> get_effective_filename() const {
+		std::optional<mpt::path> get_effective_filename() const {
 			switch (search) {
 				case library::path_search::unsafe:
 					break;
@@ -186,11 +116,11 @@ public:
 					return std::nullopt;
 					break;
 			}
-			std::filesystem::path result{};
+			mpt::path result{};
 			result += filename.parent_path();
-			result += ((prefix == path_prefix::default_) ? default_prefix() : std::filesystem::path{});
+			result += ((prefix == path_prefix::default_) ? default_prefix() : mpt::path{});
 			result += filename.filename();
-			result += ((suffix == path_suffix::default_) ? default_suffix() : std::filesystem::path{});
+			result += ((suffix == path_suffix::default_) ? default_suffix() : mpt::path{});
 			return result;
 		}
 	};
@@ -225,24 +155,24 @@ private:
 #if !MPT_OS_WINDOWS_WINRT
 #if (_WIN32_WINNT < 0x0602)
 
-	static std::filesystem::path get_application_path() {
+	static mpt::path get_application_path() {
 		std::vector<TCHAR> path(MAX_PATH);
 		while (GetModuleFileName(0, path.data(), mpt::saturate_cast<DWORD>(path.size())) >= path.size()) {
 			if (GetLastError() != ERROR_INSUFFICIENT_BUFFER) {
-				return std::filesystem::path{};
+				return mpt::path{};
 			}
 			path.resize(mpt::exponential_grow(path.size()));
 		}
-		return std::filesystem::absolute(mpt::convert<std::filesystem::path>(mpt::winstring(path.data())));
+		return mpt::path::from_stdpath(std::filesystem::absolute(mpt::convert<mpt::path>(mpt::winstring(path.data())).stdpath()));
 	}
 
-	static std::filesystem::path get_system_path() {
+	static mpt::path get_system_path() {
 		DWORD size = GetSystemDirectory(nullptr, 0);
 		std::vector<TCHAR> path(size + 1);
 		if (!GetSystemDirectory(path.data(), size + 1)) {
-			return std::filesystem::path{};
+			return mpt::path{};
 		}
-		return mpt::convert<std::filesystem::path>(mpt::winstring(path.data()));
+		return mpt::convert<mpt::path>(mpt::winstring(path.data()));
 	}
 
 #endif
@@ -253,11 +183,11 @@ public:
 
 		HMODULE hModule = NULL;
 
-		std::optional<std::filesystem::path> optionalfilename = path.get_effective_filename();
+		std::optional<mpt::path> optionalfilename = path.get_effective_filename();
 		if (!optionalfilename) {
 			return std::nullopt;
 		}
-		std::filesystem::path & filename = optionalfilename.value();
+		mpt::path & filename = optionalfilename.value();
 		if (filename.empty()) {
 			return std::nullopt;
 		}
@@ -270,16 +200,16 @@ public:
 #else  // Windows 8
 		switch (path.search) {
 			case library::path_search::unsafe:
-				hModule = LoadPackagedLibrary(mpt::convert<mpt::winstring>(filename).c_str(), 0);
+				hModule = LoadPackagedLibrary(filename.ospath().c_str(), 0);
 				break;
 			case library::path_search::default_:
-				hModule = LoadPackagedLibrary(mpt::convert<mpt::winstring>(filename).c_str(), 0);
+				hModule = LoadPackagedLibrary(filename.ospath().c_str(), 0);
 				break;
 			case library::path_search::system:
 				hModule = NULL; // Only application packaged libraries can be loaded dynamically in WinRT
 				break;
 			case library::path_search::application:
-				hModule = LoadPackagedLibrary(mpt::convert<mpt::winstring>(filename).c_str(), 0);
+				hModule = LoadPackagedLibrary(filename.ospath().c_str(), 0);
 				break;
 			case library::path_search::none:
 				hModule = NULL; // Absolute path is not supported in WinRT
@@ -296,19 +226,19 @@ public:
 
 		switch (path.search) {
 			case library::path_search::unsafe:
-				hModule = LoadLibrary(mpt::convert<mpt::winstring>(filename).c_str());
+				hModule = LoadLibrary(filename.ospath().c_str());
 				break;
 			case library::path_search::default_:
-				hModule = LoadLibraryEx(mpt::convert<mpt::winstring>(filename).c_str(), NULL, LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
+				hModule = LoadLibraryEx(filename.ospath().c_str(), NULL, LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
 				break;
 			case library::path_search::system:
-				hModule = LoadLibraryEx(mpt::convert<mpt::winstring>(filename).c_str(), NULL, LOAD_LIBRARY_SEARCH_SYSTEM32);
+				hModule = LoadLibraryEx(filename.ospath().c_str(), NULL, LOAD_LIBRARY_SEARCH_SYSTEM32);
 				break;
 			case library::path_search::application:
-				hModule = LoadLibraryEx(mpt::convert<mpt::winstring>(filename).c_str(), NULL, LOAD_LIBRARY_SEARCH_APPLICATION_DIR);
+				hModule = LoadLibraryEx(filename.ospath().c_str(), NULL, LOAD_LIBRARY_SEARCH_APPLICATION_DIR);
 				break;
 			case library::path_search::none:
-				hModule = LoadLibraryEx(mpt::convert<mpt::winstring>(filename).c_str(), NULL, LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR);
+				hModule = LoadLibraryEx(filename.ospath().c_str(), NULL, LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR);
 				break;
 			case library::path_search::invalid:
 				hModule = NULL;
@@ -319,33 +249,33 @@ public:
 
 		switch (path.search) {
 			case library::path_search::unsafe:
-				hModule = LoadLibrary(mpt::convert<mpt::winstring>(filename).c_str());
+				hModule = LoadLibrary(filename.ospath().c_str());
 				break;
 			case library::path_search::default_:
-				hModule = LoadLibrary(mpt::convert<mpt::winstring>(filename).c_str());
+				hModule = LoadLibrary(filename.ospath().c_str());
 				break;
 			case library::path_search::system:
 				{
-					std::filesystem::path system_path = get_system_path();
+					mpt::path system_path = get_system_path();
 					if (system_path.empty()) {
 						hModule = NULL;
 					} else {
-						hModule = LoadLibrary(mpt::convert<mpt::winstring>(system_path / filename).c_str());
+						hModule = LoadLibrary((system_path / filename).ospath().c_str());
 					}
 				}
 				break;
 			case library::path_search::application:
 				{
-					std::filesystem::path application_path = get_application_path();
+					mpt::path application_path = get_application_path();
 					if (application_path.empty()) {
 						hModule = NULL;
 					} else {
-						hModule = LoadLibrary(mpt::convert<mpt::winstring>(application_path / filename).c_str());
+						hModule = LoadLibrary((application_path / filename).ospath().c_str());
 					}
 				}
 				break;
 			case library::path_search::none:
-				hModule = LoadLibrary(mpt::convert<mpt::winstring>(filename).c_str());
+				hModule = LoadLibrary(filename.ospath().c_str());
 				break;
 			case library::path_search::invalid:
 				hModule = NULL;
@@ -395,15 +325,15 @@ public:
 
 public:
 	static std::optional<library> load(mpt::library::path path) {
-		std::optional<std::filesystem::path> optionalfilename = path.get_effective_filename();
+		std::optional<mpt::path> optionalfilename = path.get_effective_filename();
 		if (!optionalfilename) {
 			return std::nullopt;
 		}
-		std::filesystem::path & filename = optionalfilename.value();
+		mpt::path & filename = optionalfilename.value();
 		if (filename.empty()) {
 			return std::nullopt;
 		}
-		void * handle = dlopen(filename.native().c_str(), RTLD_NOW);
+		void * handle = dlopen(filename.ospath().c_str(), RTLD_NOW);
 		if (!handle) {
 			return std::nullopt;
 		}
@@ -449,15 +379,15 @@ public:
 		if (lt_dlinit() != 0) {
 			return std::nullopt;
 		}
-		std::optional<std::filesystem::path> optionalfilename = path.get_effective_filename();
+		std::optional<mpt::path> optionalfilename = path.get_effective_filename();
 		if (!optionalfilename) {
 			return std::nullopt;
 		}
-		std::filesystem::path & filename = optionalfilename.value();
+		mpt::path & filename = optionalfilename.value();
 		if (filename.empty()) {
 			return std::nullopt;
 		}
-		lt_dlhandle handle = lt_dlopenext(filename.native().c_str());
+		lt_dlhandle handle = lt_dlopenext(filename.ospath().c_str());
 		if (!handle) {
 			return std::nullopt;
 		}

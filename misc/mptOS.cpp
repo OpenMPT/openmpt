@@ -625,7 +625,7 @@ VersionContext::VersionContext()
 		{
 			return;
 		}
-		m_NTDLL = std::make_shared<std::optional<mpt::library>>(mpt::library::load({mpt::library::path_search::system, mpt::library::path_prefix::none, MPT_STDPATH("ntdll.dll"), mpt::library::path_suffix::none}));
+		m_NTDLL = std::make_shared<std::optional<mpt::library>>(mpt::library::load({mpt::library::path_search::system, mpt::library::path_prefix::none, MPT_PATH("ntdll.dll"), mpt::library::path_suffix::none}));
 		if(m_NTDLL->has_value())
 		{
 			const char * (__cdecl * wine_get_version)(void) = nullptr;
