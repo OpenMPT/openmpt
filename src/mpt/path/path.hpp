@@ -28,7 +28,7 @@ inline namespace MPT_INLINE_NS {
 // mpt::os_path is an alias to a string type that represents native operating system path encoding.
 // Note that this differs from std::filesystem::path on both Windows and Posix.
 // On Windows, we actually honor UNICODE and thus allow os_path.c_str() to be usable with WinAPI functions.
-// On Posix, we use a type-safe string type in locale encoding, in contrast to the encodinf-confused supposedly UTF8 std::string in std::filesystem::path.
+// On Posix, we use a type-safe string type in locale encoding, in contrast to the encoding-confused supposedly UTF8 std::string in std::filesystem::path.
 
 #if MPT_OS_WINDOWS
 using os_path = mpt::winstring;
