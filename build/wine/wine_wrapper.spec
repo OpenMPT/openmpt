@@ -9,7 +9,7 @@
 @ cdecl OpenMPT_Wine_Wrapper_SoundDevice_Construct ( str )
 @ cdecl OpenMPT_Wine_Wrapper_SoundDevice_Destruct ( ptr )
 @ cdecl OpenMPT_Wine_Wrapper_SoundDevice_SetMessageReceiver ( ptr ptr )
-@ cdecl OpenMPT_Wine_Wrapper_SoundDevice_SetSource ( ptr ptr )
+@ cdecl OpenMPT_Wine_Wrapper_SoundDevice_SetCallback ( ptr ptr )
 @ cdecl OpenMPT_Wine_Wrapper_SoundDevice_GetDeviceInfo ( ptr )
 @ cdecl OpenMPT_Wine_Wrapper_SoundDevice_GetDeviceCaps ( ptr )
 @ cdecl OpenMPT_Wine_Wrapper_SoundDevice_GetDeviceDynamicCaps ( ptr str )
