@@ -135,7 +135,6 @@ OPENMPT_WINESUPPORT_API char * OPENMPT_WINESUPPORT_CALL OpenMPT_SoundDevice_GetS
 OPENMPT_WINESUPPORT_API uintptr_t OPENMPT_WINESUPPORT_CALL OpenMPT_SoundDevice_OpenDriverSettings( OpenMPT_SoundDevice * sd );
 
 typedef struct OpenMPT_PriorityBooster OpenMPT_PriorityBooster;
-OPENMPT_WINESUPPORT_API OpenMPT_PriorityBooster * OPENMPT_WINESUPPORT_CALL OpenMPT_PriorityBooster_Construct( uintptr_t active, uintptr_t realtime, uintptr_t niceness, uintptr_t rt_priority );
 OPENMPT_WINESUPPORT_API OpenMPT_PriorityBooster * OPENMPT_WINESUPPORT_CALL OpenMPT_PriorityBooster_Construct_From_SoundDevice( const OpenMPT_SoundDevice * sd );
 OPENMPT_WINESUPPORT_API void OPENMPT_WINESUPPORT_CALL OpenMPT_PriorityBooster_Destruct( OpenMPT_PriorityBooster * pb );
 

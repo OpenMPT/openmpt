@@ -458,6 +458,7 @@ class ThreadPriorityGuardImpl
 {
 
 private:
+	ILogger &m_Logger;
 	bool active;
 	bool successfull;
 	bool realtime;
@@ -467,9 +468,16 @@ private:
 	DBusConnection *bus;
 #endif  // MPT_WITH_DBUS && MPT_WITH_RTKIT
 
+private:
+	ILogger &GetLogger() const
+	{
+		return m_Logger;
+	}
+
 public:
-	ThreadPriorityGuardImpl(bool active, bool realtime, int niceness, int rt_priority)
-		: active(active)
+	ThreadPriorityGuardImpl(ILogger &logger, bool active, bool realtime, int niceness, int rt_priority)
+		: m_Logger(logger)
+		, active(active)
 		, successfull(false)
 		, realtime(realtime)
 		, niceness(niceness)
@@ -582,8 +590,8 @@ public:
 };
 
 
-ThreadPriorityGuard::ThreadPriorityGuard(bool active, bool realtime, int niceness, int rt_priority)
-	: impl(std::make_unique<ThreadPriorityGuardImpl>(active, realtime, niceness, rt_priority))
+ThreadPriorityGuard::ThreadPriorityGuard(ILogger &logger, bool active, bool realtime, int niceness, int rt_priority)
+	: impl(std::make_unique<ThreadPriorityGuardImpl>(logger, active, realtime, niceness, rt_priority))
 {
 	return;
 }
@@ -595,8 +603,8 @@ ThreadPriorityGuard::~ThreadPriorityGuard()
 }
 
 
-ThreadBase::ThreadBase(SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
-	: Base(info, sysInfo)
+ThreadBase::ThreadBase(ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
+	: Base(logger, info, sysInfo)
 	, m_ThreadStopRequest(false)
 {
 	return;
@@ -618,7 +626,7 @@ void ThreadBase::ThreadProcStatic(ThreadBase *this_)
 
 void ThreadBase::ThreadProc()
 {
-	ThreadPriorityGuard priorityGuard(m_Settings.BoostThreadPriority, m_AppInfo.BoostedThreadRealtimePosix, m_AppInfo.BoostedThreadNicenessPosix, m_AppInfo.BoostedThreadRealtimePosix);
+	ThreadPriorityGuard priorityGuard(GetLogger(), m_Settings.BoostThreadPriority, m_AppInfo.BoostedThreadRealtimePosix, m_AppInfo.BoostedThreadNicenessPosix, m_AppInfo.BoostedThreadRealtimePosix);
 	m_ThreadStarted.post();
 	InternalStartFromSoundThread();
 	while(!m_ThreadStopRequest.load())

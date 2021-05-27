@@ -9,6 +9,7 @@
 #include "SoundDevice.hpp"
 #include "SoundDeviceUtilities.hpp"
 
+#include "mpt/base/macros.hpp"
 #include "mpt/base/numeric.hpp"
 #include "mpt/base/saturate_round.hpp"
 #include "mpt/format/message_macros.hpp"
@@ -136,10 +137,14 @@ static void PulseAudioSinkInfoListCallback(pa_context * /* c */, const pa_sink_i
 
 std::vector<SoundDevice::Info> PulseaudioSimple::EnumerateDevices(ILogger &logger, SoundDevice::SysInfo sysInfo)
 {
+#if 0
 	auto GetLogger = [&]() -> ILogger &
 	{
 		return logger;
 	};
+#else
+	MPT_UNUSED(logger);
+#endif
 	std::vector<SoundDevice::Info> devices;
 	SoundDevice::Info info;
 #if defined(MPT_ENABLE_PULSEAUDIO_FULL)
@@ -185,7 +190,7 @@ std::vector<SoundDevice::Info> PulseaudioSimple::EnumerateDevices(ILogger &logge
 		MPT_LOG(GetLogger(), LogError, "sounddev", MPT_USTRING("pa_mainloop_new"));
 		goto cleanup;
 	}
-	c = pa_context_new(pa_mainloop_get_api(m), mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, mpt::ustring()).c_str());  // TODO: get AppInfo
+	c = pa_context_new(pa_mainloop_get_api(m), mpt::convert<std::string>(mpt::common_encoding::utf8, mpt::ustring()).c_str());  // TODO: get AppInfo
 	if(!c)
 	{
 		MPT_LOG(GetLogger(), LogError, "sounddev", MPT_USTRING("pa_context_new"));
@@ -349,10 +354,10 @@ bool PulseaudioSimple::InternalOpen()
 	m_OutputBuffer.resize(ba.minreq / m_Settings.sampleFormat.GetSampleSize());
 	m_PA_SimpleOutput = pa_simple_new(
 		NULL,
-		mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, m_AppInfo.GetName()).c_str(),
+		mpt::convert<std::string>(mpt::common_encoding::utf8, m_AppInfo.GetName()).c_str(),
 		PA_STREAM_PLAYBACK,
-		((GetDeviceInternalID() == MPT_USTRING("0")) ? NULL : mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, GetDeviceInternalID()).c_str()),
-		mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, m_AppInfo.GetName()).c_str(),
+		((GetDeviceInternalID() == MPT_USTRING("0")) ? NULL : mpt::convert<std::string>(mpt::common_encoding::utf8, GetDeviceInternalID()).c_str()),
+		mpt::convert<std::string>(mpt::common_encoding::utf8, m_AppInfo.GetName()).c_str(),
 		&ss,
 		NULL,
 		(m_Settings.ExclusiveMode ? &ba : NULL),

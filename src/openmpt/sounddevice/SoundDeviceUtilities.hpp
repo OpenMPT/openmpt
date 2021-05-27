@@ -182,7 +182,7 @@ private:
 	std::unique_ptr<ThreadPriorityGuardImpl> impl;
 
 public:
-	ThreadPriorityGuard(bool active, bool realtime, int niceness, int rt_priority);
+	ThreadPriorityGuard(ILogger &logger, bool active, bool realtime, int niceness, int rt_priority);
 	~ThreadPriorityGuard();
 };
 
@@ -200,7 +200,7 @@ private:
 	void ThreadProc();
 
 public:
-	ThreadBase(SoundDevice::Info info, SoundDevice::SysInfo sysInfo);
+	ThreadBase(ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo);
 	virtual ~ThreadBase();
 	bool InternalStart();
 	void InternalStop();

@@ -9,6 +9,7 @@
 #include "SoundDevice.hpp"
 
 #include "mpt/base/detect.hpp"
+#include "mpt/base/macros.hpp"
 #include "mpt/base/saturate_cast.hpp"
 #include "mpt/base/saturate_round.hpp"
 #include "mpt/format/message_macros.hpp"
@@ -732,10 +733,14 @@ int CPortaudioDevice::StreamCallbackWrapper(
 
 std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(ILogger &logger, SoundDevice::SysInfo sysInfo)
 {
+#if PA_LOG_ENABLED
 	auto GetLogger = [&]() -> ILogger &
 	{
 		return logger;
 	};
+#else
+	MPT_UNUSED(logger);
+#endif
 	std::vector<SoundDevice::Info> devices;
 	for(PaDeviceIndex dev = 0; dev < Pa_GetDeviceCount(); ++dev)
 	{

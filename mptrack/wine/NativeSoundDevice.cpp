@@ -495,25 +495,12 @@ typedef struct OpenMPT_PriorityBooster {
 #endif
 } OpenMPT_PriorityBooster;
 
-OPENMPT_WINESUPPORT_API OpenMPT_PriorityBooster * OPENMPT_WINESUPPORT_CALL OpenMPT_PriorityBooster_Construct( uintptr_t active, uintptr_t realtime, uintptr_t niceness, uintptr_t rt_priority ) {
-#if !MPT_OS_WINDOWS
-	OpenMPT_PriorityBooster * pb = (OpenMPT_PriorityBooster*)OpenMPT_Alloc( sizeof( OpenMPT_PriorityBooster ) );
-	pb->impl = new OPENMPT_NAMESPACE::SoundDevice::ThreadPriorityGuard(active, realtime, niceness, rt_priority);
-	return pb;
-#else
-	MPT_UNREFERENCED_PARAMETER(active);
-	MPT_UNREFERENCED_PARAMETER(realtime);
-	MPT_UNREFERENCED_PARAMETER(niceness);
-	MPT_UNREFERENCED_PARAMETER(rt_priority);
-	return nullptr;
-#endif
-}
-
 OPENMPT_WINESUPPORT_API OpenMPT_PriorityBooster * OPENMPT_WINESUPPORT_CALL OpenMPT_PriorityBooster_Construct_From_SoundDevice( const OpenMPT_SoundDevice * sd ) {
 #if !MPT_OS_WINDOWS
 	OpenMPT_PriorityBooster * pb = (OpenMPT_PriorityBooster*)OpenMPT_Alloc( sizeof( OpenMPT_PriorityBooster ) );
 	pb->impl = new OPENMPT_NAMESPACE::SoundDevice::ThreadPriorityGuard
-		( dynamic_cast<OPENMPT_NAMESPACE::SoundDevice::Base*>(sd->impl)->GetSettings().BoostThreadPriority
+		( dynamic_cast<OPENMPT_NAMESPACE::SoundDevice::Base*>(sd->impl)->GetLogger()
+		, dynamic_cast<OPENMPT_NAMESPACE::SoundDevice::Base*>(sd->impl)->GetSettings().BoostThreadPriority
 		, dynamic_cast<OPENMPT_NAMESPACE::SoundDevice::Base*>(sd->impl)->GetAppInfo().BoostedThreadRealtimePosix
 		, dynamic_cast<OPENMPT_NAMESPACE::SoundDevice::Base*>(sd->impl)->GetAppInfo().BoostedThreadNicenessPosix
 		, dynamic_cast<OPENMPT_NAMESPACE::SoundDevice::Base*>(sd->impl)->GetAppInfo().BoostedThreadRtprioPosix
