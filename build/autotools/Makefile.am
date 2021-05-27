@@ -268,7 +268,6 @@ MPT_FILES_COMMON += common/mptFileIO.cpp
 MPT_FILES_COMMON += common/mptFileIO.h
 MPT_FILES_COMMON += common/mptIO.cpp
 MPT_FILES_COMMON += common/mptIO.h
-MPT_FILES_COMMON += common/mptMemory.h
 MPT_FILES_COMMON += common/mptPathString.cpp
 MPT_FILES_COMMON += common/mptPathString.h
 MPT_FILES_COMMON += common/mptRandom.cpp

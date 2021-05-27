@@ -19,6 +19,7 @@
 #include "mpt/base/bit.hpp"
 #include "mpt/base/constexpr_throw.hpp"
 #include "mpt/base/math.hpp"
+#include "mpt/base/memory.hpp"
 #include "mpt/base/numeric.hpp"
 #include "mpt/base/saturate_cast.hpp"
 #include "mpt/base/saturate_round.hpp"
@@ -46,6 +47,24 @@
 
 
 OPENMPT_NAMESPACE_BEGIN
+
+
+
+template <typename T>
+inline void Clear(T& x)
+{
+	static_assert(!std::is_pointer<T>::value);
+	mpt::reset(x);
+}
+
+
+// Memset given object to zero.
+template <class T>
+inline void MemsetZero(T& a)
+{
+	static_assert(std::is_pointer<T>::value == false, "Won't memset pointers.");
+	mpt::memclear(a);
+}
 
 
 

@@ -41,7 +41,9 @@
 
 
 #include "mpt/base/aligned_array.hpp"
+#include "mpt/base/memory.hpp"
 #include "mpt/base/span.hpp"
+#include "mpt/base/utility.hpp"
 #include "mpt/crc/crc.hpp"
 #include "mpt/crypto/hash.hpp"
 #include "mpt/crypto/jwk.hpp"
@@ -62,7 +64,6 @@
 #include "../common/mptBaseTypes.h"
 #include "../common/mptAssert.h"
 #include "../common/mptBaseUtils.h"
-#include "../common/mptMemory.h"
 #include "../common/mptString.h"
 #include "../common/mptStringFormat.h"
 #include "../common/mptStringParse.h"

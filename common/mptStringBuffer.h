@@ -15,7 +15,6 @@
 
 #include "mpt/string/buffer.hpp"
 
-#include "mptMemory.h"
 #include "mptString.h"
 
 #include <algorithm>

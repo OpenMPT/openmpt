@@ -1233,7 +1233,6 @@
     <ClInclude Include="..\..\common\mptBaseUtils.h" />
     <ClInclude Include="..\..\common\mptFileIO.h" />
     <ClInclude Include="..\..\common\mptIO.h" />
-    <ClInclude Include="..\..\common\mptMemory.h" />
     <ClInclude Include="..\..\common\mptPathString.h" />
     <ClInclude Include="..\..\common\mptRandom.h" />
     <ClInclude Include="..\..\common\mptString.h" />

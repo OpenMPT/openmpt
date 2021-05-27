@@ -23,7 +23,6 @@
 
 // old
 #include "mptBaseUtils.h"
-#include "mptMemory.h"
 #include "mptStringFormat.h"
 #include "mptStringParse.h"
 #include "mptTime.h"

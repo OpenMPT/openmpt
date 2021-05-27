@@ -243,9 +243,6 @@
     <ClInclude Include="..\..\common\mptIO.h">
       <Filter>common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\common\mptMemory.h">
-      <Filter>common</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\common\mptPathString.h">
       <Filter>common</Filter>
     </ClInclude>
