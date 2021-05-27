@@ -48,6 +48,7 @@ del /f /q "%OUTDIR%\openmpt-wine-support.zip"
  src\mpt\osinfo\*.hpp ^
  src\mpt\parse\*.hpp ^
  src\mpt\parse\tests\*.hpp ^
+ src\mpt\path\*.hpp ^
  src\mpt\out_of_memory\*.hpp ^
  src\mpt\random\*.hpp ^
  src\mpt\random\tests\*.hpp ^
