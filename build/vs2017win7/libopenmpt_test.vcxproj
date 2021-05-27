@@ -495,6 +495,7 @@
     <ClInclude Include="..\..\src\mpt\parse\parse.hpp" />
     <ClInclude Include="..\..\src\mpt\parse\split.hpp" />
     <ClInclude Include="..\..\src\mpt\parse\tests\tests_parse.hpp" />
+    <ClInclude Include="..\..\src\mpt\path\path.hpp" />
     <ClInclude Include="..\..\src\mpt\random\crand.hpp" />
     <ClInclude Include="..\..\src\mpt\random\default_engines.hpp" />
     <ClInclude Include="..\..\src\mpt\random\device.hpp" />
@@ -507,10 +508,8 @@
     <ClInclude Include="..\..\src\mpt\string\tests\tests_string_buffer.hpp" />
     <ClInclude Include="..\..\src\mpt\string\tests\tests_string_utility.hpp" />
     <ClInclude Include="..\..\src\mpt\string\types.hpp" />
-    <ClInclude Include="..\..\src\mpt\string\types_path.hpp" />
     <ClInclude Include="..\..\src\mpt\string\utility.hpp" />
     <ClInclude Include="..\..\src\mpt\string_convert\convert.hpp" />
-    <ClInclude Include="..\..\src\mpt\string_convert\convert_path.hpp" />
     <ClInclude Include="..\..\src\mpt\string_convert\macros.hpp" />
     <ClInclude Include="..\..\src\mpt\string_convert\tests\tests_string_convert.hpp" />
     <ClInclude Include="..\..\src\mpt\system_error\system_error.hpp" />

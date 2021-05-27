@@ -133,6 +133,9 @@
     <Filter Include="src\mpt\parse\tests">
       <UniqueIdentifier>{D9DE24CF-4540-02DD-CEAD-488F3A0E399C}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\mpt\path">
+      <UniqueIdentifier>{4984D703-35E7-66A8-DE6C-9F5ECAAE322B}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\mpt\random">
       <UniqueIdentifier>{3DBF705C-298D-6462-1221-D588FE8D40C7}</UniqueIdentifier>
     </Filter>
@@ -1164,6 +1167,9 @@
     <ClInclude Include="..\..\src\mpt\parse\tests\tests_parse.hpp">
       <Filter>src\mpt\parse\tests</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\mpt\path\path.hpp">
+      <Filter>src\mpt\path</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\mpt\random\crand.hpp">
       <Filter>src\mpt\random</Filter>
     </ClInclude>
@@ -1200,16 +1206,10 @@
     <ClInclude Include="..\..\src\mpt\string\types.hpp">
       <Filter>src\mpt\string</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\mpt\string\types_path.hpp">
-      <Filter>src\mpt\string</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\mpt\string\utility.hpp">
       <Filter>src\mpt\string</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\string_convert\convert.hpp">
-      <Filter>src\mpt\string_convert</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\mpt\string_convert\convert_path.hpp">
       <Filter>src\mpt\string_convert</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\string_convert\macros.hpp">

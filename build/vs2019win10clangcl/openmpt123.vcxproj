@@ -1333,7 +1333,6 @@
     <ClInclude Include="..\..\src\mpt\detect\nlohmann_json.hpp" />
     <ClInclude Include="..\..\src\mpt\string\buffer.hpp" />
     <ClInclude Include="..\..\src\mpt\string\types.hpp" />
-    <ClInclude Include="..\..\src\mpt\string\types_path.hpp" />
     <ClInclude Include="..\..\src\mpt\string\utility.hpp" />
   </ItemGroup>
   <ItemGroup>

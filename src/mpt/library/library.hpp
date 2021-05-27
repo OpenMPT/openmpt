@@ -11,9 +11,9 @@
 #include "mpt/base/saturate_cast.hpp"
 #include "mpt/detect/dl.hpp"
 #include "mpt/detect/ltdl.hpp"
+#include "mpt/path/path.hpp"
 #include "mpt/string/types.hpp"
 #include "mpt/string_convert/convert.hpp"
-#include "mpt/string_convert/convert_path.hpp"
 
 #include <filesystem>
 #include <optional>

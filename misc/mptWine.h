@@ -13,9 +13,11 @@
 #include "openmpt/all/BuildSettings.hpp"
 
 #include "mptOS.h"
+#include "mpt/library/library.hpp"
 #include "openmpt/base/FlagSet.hpp"
 
 #include <map>
+#include <optional>
 #include <string>
 #include <vector>
 
