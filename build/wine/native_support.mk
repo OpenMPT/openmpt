@@ -215,11 +215,13 @@ all: libopenmpt_native_support.so
 	$(SILENT)$(CCACHE) $(MPT_TARGET)$(COMPILE.c) -DMODPLUG_TRACKER -DMPT_BUILD_WINESUPPORT -DMPT_WITH_NLOHMANNJSON $(OUTPUT_OPTION) $<
 
 COMMON_CXX_SOURCES += $(wildcard common/*.cpp)
+MISC_CXX_SOURCES += $(wildcard misc/*.cpp)
 SOUNDDEVICE_CXX_SOURCES += $(wildcard src/openmpt/sounddevice/*.cpp)
 WINESUPPORT_CXX_SOURCES += $(wildcard mptrack/wine/*.cpp)
 
 OPENMPT_WINESUPPORT_CXX_SOURCES += \
  $(COMMON_CXX_SOURCES) \
+ $(MISC_CXX_SOURCES) \
  $(SOUNDDEVICE_CXX_SOURCES) \
  $(WINESUPPORT_CXX_SOURCES) \
  
