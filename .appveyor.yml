@@ -14,6 +14,48 @@ version: 1.30-appveyor{build}
 
 
 
+matrix:
+  fast_finish: true
+ 
+ 
+ 
+environment:
+  matrix:
+    - job_name: VS2016 Win10 x86
+      job_group: Builds
+      MPT_APPVEYOR_VS: vs2019
+      MPT_APPVEYOR_TARGET: win10
+      MPT_APPVEYOR_ARCH: Win32
+    - job_name: VS2016 Win10 amd64
+      job_group: Builds
+      MPT_APPVEYOR_VS: vs2019
+      MPT_APPVEYOR_TARGET: win10
+      MPT_APPVEYOR_ARCH: x64
+    - job_name: VS2016 Win10 arm
+      job_group: Builds
+      MPT_APPVEYOR_VS: vs2019
+      MPT_APPVEYOR_TARGET: win10
+      MPT_APPVEYOR_ARCH: ARM
+    - job_name: VS2016 Win10 arm64
+      job_group: Builds
+      MPT_APPVEYOR_VS: vs2019
+      MPT_APPVEYOR_TARGET: win10
+      MPT_APPVEYOR_ARCH: ARM64
+    - job_name: VS2016 Win7 x86
+      job_group: Builds
+      MPT_APPVEYOR_VS: vs2019
+      MPT_APPVEYOR_TARGET: win7
+      MPT_APPVEYOR_ARCH: Win32
+    - job_name: VS2016 Win7 amd64
+      job_group: Builds
+      MPT_APPVEYOR_VS: vs2019
+      MPT_APPVEYOR_TARGET: win7
+      MPT_APPVEYOR_ARCH: x64
+    - job_name: Package
+      job_depends_on: Builds
+
+
+
 image: Visual Studio 2019
 
 clone_depth: 2500
@@ -29,19 +71,26 @@ install:
 before_build:
   - build\auto\appveyor_set_version.cmd
 
-build_script:
-  - build\auto\build_openmpt_args.cmd vs2019 win10 Win32 Release 7z default
-  - build\auto\build_openmpt_args.cmd vs2019 win10 x64   Release 7z default
-  - build\auto\build_openmpt_args.cmd vs2019 win10 ARM   Release 7z default
-  - build\auto\build_openmpt_args.cmd vs2019 win10 ARM64 Release 7z default
-  - build\auto\build_openmpt_args.cmd vs2019 win7  Win32 Release 7z default
-  - build\auto\build_openmpt_args.cmd vs2019 win7  x64   Release 7z default
+for:
+  -
+    matrix:
+      only:
+        - job_group: Builds
+    
+    build_script:
+      - build\auto\build_openmpt_args.cmd $(MPT_APPVEYOR_VS) $(MPT_APPVEYOR_TARGET) $(MPT_APPVEYOR_ARCH) Release 7z default
+  
+  -
+    matrix:
+      only:
+        - job_name: Package
+    
+    build_script:
+      - build\auto\build_openmpt_release_packages_multiarch.cmd auto
+      - build\auto\package_openmpt_installer_multiarch_args.cmd vs2019 win10 Win32 Release 7z default
 
-after_build:
-  - build\auto\build_openmpt_release_packages_multiarch.cmd auto
-  - build\auto\package_openmpt_installer_multiarch_args.cmd vs2019 win10 Win32 Release 7z default
-  - appveyor PushArtifact bin\openmpt-pkg.win-multi.tar
-
+    #after_build:
+    #  - appveyor PushArtifact bin\openmpt-pkg.win-multi.tar
 
 
 test: off
