@@ -1,7 +1,7 @@
 @echo off
 
 cd build\auto
-cl /I..\.. /I..\..\src /..\..\common /EHsc helper_get_openmpt_version.cpp
+cl /I..\.. /I..\..\src /I..\..\common /EHsc helper_get_openmpt_version.cpp
 cd ..\..
 
 build\auto\helper_get_openmpt_version.exe openmpt > openmpt_version.txt
