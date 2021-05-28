@@ -636,7 +636,6 @@ std::string CUpdateCheck::GetStatisticsDataV3(const Settings &settings)
 	j["OpenMPT"]["SoundDevice"]["Settings"]["UseHardwareTiming"] = deviceSettings.UseHardwareTiming;
 	j["OpenMPT"]["SoundDevice"]["Settings"]["KeepDeviceRunning"] = deviceSettings.KeepDeviceRunning;
 	#ifdef ENABLE_ASM
-		j["OpenMPT"]["cpuid"] = ((CPU::GetAvailableFeatures() & CPU::feature::cpuid) != 0);
 		j["System"]["Processor"]["Vendor"] = std::string(mpt::String::ReadAutoBuf(CPU::ProcVendorID));
 		j["System"]["Processor"]["Brand"] = std::string(mpt::String::ReadAutoBuf(CPU::ProcBrandID));
 		j["System"]["Processor"]["CpuidRaw"] = mpt::afmt::hex0<8>(CPU::ProcRawCPUID);

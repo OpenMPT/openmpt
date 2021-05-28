@@ -129,7 +129,6 @@ void Init()
 	ProcStepping = 0;
 
 	ProcSupport |= feature::asm_intrinsics;
-	ProcSupport |= feature::cpuid;
 
 	{
 
