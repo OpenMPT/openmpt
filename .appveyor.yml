@@ -176,6 +176,8 @@ for:
                     $localArtifactPath = Join-Path $path $localArtifactPath
                     $artifactUrl = "$apiUrl/buildjobs/$jobId/artifacts/$($_.fileName)"
                     Write-Verbose "Downloading $artifactUrl to $localArtifactPath"
+                    $localArtifactPathParent = Split-Path -Path $localArtifactPath -Parent
+                    New-Item -Path $localArtifactPathParent -ItemType Directory -Force
                     Invoke-RestMethod -Method Get -Uri $artifactUrl -OutFile $localArtifactPath -Headers $headers @proxyArgs
                     New-Object PSObject -Property @{
                         'Source' = $artifactUrl
