@@ -36,10 +36,10 @@ inline constexpr uint32 avx2           = 0x20000; // Processor supports AVX2 ins
 } // namespace feature
 
 namespace featureset {
-inline constexpr uint32 x86_i586 = 0u | feature::cpuid                                             ;
-inline constexpr uint32 x86_sse  = 0u | feature::cpuid | feature::sse                              ;
-inline constexpr uint32 x86_sse2 = 0u | feature::cpuid | feature::sse | feature::sse2              ;
-inline constexpr uint32 amd64    = 0u | feature::cpuid | feature::sse | feature::sse2 | feature::lm;
+inline constexpr uint32 x86_i586 = 0u | feature::cpuid;
+inline constexpr uint32 x86_sse = 0u | feature::cpuid | feature::sse;
+inline constexpr uint32 x86_sse2 = 0u | feature::cpuid | feature::sse | feature::sse2;
+inline constexpr uint32 amd64 = 0u | feature::cpuid | feature::lm | feature::sse | feature::sse2;
 } // namespace featureset
 
 
@@ -77,8 +77,6 @@ MPT_FORCEINLINE bool HasFeatureSet(uint32 features)
 
 
 uint32 GetMinimumFeatures();
-int GetMinimumSSEVersion();
-int GetMinimumAVXVersion();
 
 
 } // namespace CPU

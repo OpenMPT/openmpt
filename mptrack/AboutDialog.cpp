@@ -372,22 +372,20 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 				#if MPT_COMPILER_MSVC
 					#if defined(_M_X64)
 						features.push_back(U_("x86-64"));
-						if(CPU::GetMinimumAVXVersion() >= 1) features.push_back(U_("avx"));
-						if(CPU::GetMinimumAVXVersion() >= 2) features.push_back(U_("avx2"));
+						if(CPU::GetMinimumFeatures() & CPU::feature::avx) features.push_back(U_("avx"));
+						if(CPU::GetMinimumFeatures() & CPU::feature::avx2) features.push_back(U_("avx2"));
 					#elif defined(_M_IX86)
-						if(CPU::GetMinimumSSEVersion() <= 0 && CPU::GetMinimumAVXVersion() <= 0 ) features.push_back(U_("fpu"));
-						if(CPU::GetMinimumSSEVersion() >= 1) features.push_back(U_("cmov"));
-						if(CPU::GetMinimumSSEVersion() >= 1) features.push_back(U_("sse"));
-						if(CPU::GetMinimumSSEVersion() >= 2) features.push_back(U_("sse2"));
-						if(CPU::GetMinimumAVXVersion() >= 1) features.push_back(U_("avx"));
-						if(CPU::GetMinimumAVXVersion() >= 2) features.push_back(U_("avx2"));
+						if(CPU::GetMinimumFeatures() & CPU::feature::sse) features.push_back(U_("cmov"));
+						if(CPU::GetMinimumFeatures() & CPU::feature::sse) features.push_back(U_("sse"));
+						if(CPU::GetMinimumFeatures() & CPU::feature::sse2) features.push_back(U_("sse2"));
+						if(CPU::GetMinimumFeatures() & CPU::feature::avx) features.push_back(U_("avx"));
+						if(CPU::GetMinimumFeatures() & CPU::feature::avx2) features.push_back(U_("avx2"));
 					#else
-						if(CPU::GetMinimumSSEVersion() <= 0 && CPU::GetMinimumAVXVersion() <= 0 ) features.push_back(U_("fpu"));
-						if(CPU::GetMinimumSSEVersion() >= 1) features.push_back(U_("cmov"));
-						if(CPU::GetMinimumSSEVersion() >= 1) features.push_back(U_("sse"));
-						if(CPU::GetMinimumSSEVersion() >= 2) features.push_back(U_("sse2"));
-						if(CPU::GetMinimumAVXVersion() >= 1) features.push_back(U_("avx"));
-						if(CPU::GetMinimumAVXVersion() >= 2) features.push_back(U_("avx2"));
+						if(CPU::GetMinimumFeatures() & CPU::feature::sse) features.push_back(U_("cmov"));
+						if(CPU::GetMinimumFeatures() & CPU::feature::sse) features.push_back(U_("sse"));
+						if(CPU::GetMinimumFeatures() & CPU::feature::sse2) features.push_back(U_("sse2"));
+						if(CPU::GetMinimumFeatures() & CPU::feature::avx) features.push_back(U_("avx"));
+						if(CPU::GetMinimumFeatures() & CPU::feature::avx2) features.push_back(U_("avx2"));
 					#endif
 				#endif
 				text += mpt::String::Combine(features, U_(" "));

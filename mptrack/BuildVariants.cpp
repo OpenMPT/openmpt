@@ -123,34 +123,9 @@ mpt::ustring BuildVariants::GuessCurrentBuildName()
 bool BuildVariants::ProcessorCanRunCurrentBuild()
 {
 #ifdef ENABLE_ASM
-	if((CPU::GetAvailableFeatures() & CPU::GetMinimumFeatures()) != CPU::GetMinimumFeatures()) return false;
-	if(CPU::GetMinimumSSEVersion() >= 1)
+	if((CPU::GetAvailableFeatures() & CPU::GetMinimumFeatures()) != CPU::GetMinimumFeatures())
 	{
-		if(!(CPU::GetAvailableFeatures() & CPU::feature::sse))
-		{
-			return false;
-		}
-	}
-	if(CPU::GetMinimumSSEVersion() >= 2)
-	{
-		if(!(CPU::GetAvailableFeatures() & CPU::feature::sse2))
-		{
-			return false;
-		}
-	}
-	if(CPU::GetMinimumAVXVersion() >= 1)
-	{
-		if(!(CPU::GetAvailableFeatures() & CPU::feature::avx))
-		{
-			return false;
-		}
-	}
-	if(CPU::GetMinimumAVXVersion() >= 2)
-	{
-		if(!(CPU::GetAvailableFeatures() & CPU::feature::avx2))
-		{
-			return false;
-		}
+		return false;
 	}
 #endif
 	return true;
@@ -167,34 +142,6 @@ bool BuildVariants::SystemCanRunCurrentBuild()
 	if((CPU::GetAvailableFeatures() & CPU::GetMinimumFeatures()) != CPU::GetMinimumFeatures())
 	{
 		return false;
-	}
-	if(CPU::GetMinimumSSEVersion() >= 1)
-	{
-		if(!(CPU::GetAvailableFeatures() & CPU::feature::sse))
-		{
-			return false;
-		}
-	}
-	if(CPU::GetMinimumSSEVersion() >= 2)
-	{
-		if(!(CPU::GetAvailableFeatures() & CPU::feature::sse2))
-		{
-			return false;
-		}
-	}
-	if(CPU::GetMinimumAVXVersion() >= 1)
-	{
-		if(!(CPU::GetAvailableFeatures() & CPU::feature::avx))
-		{
-			return false;
-		}
-	}
-	if(CPU::GetMinimumAVXVersion() >= 2)
-	{
-		if(!(CPU::GetAvailableFeatures() & CPU::feature::avx2))
-		{
-			return false;
-		}
 	}
 #endif
 	if(IsKnownSystem())

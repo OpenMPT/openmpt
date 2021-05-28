@@ -245,57 +245,26 @@ uint32 GetMinimumFeatures()
 			#if defined(_M_X64)
 				flags |= featureset::amd64;
 			#elif defined(_M_IX86)
+				flags |= featureset::x86_i586;
 				#if defined(_M_IX86_FP)
 					#if (_M_IX86_FP >= 2)
 						flags |= featureset::x86_sse2;
 					#elif (_M_IX86_FP == 1)
 						flags |= featureset::x86_sse;
 					#endif
-				#else
-					flags |= featureset::x86_i586;
 				#endif
+			#endif
+			#if defined(__AVX__)
+				flags |= feature::avx;
+			#endif
+			#if defined(__AVX2__)
+				flags |= feature::avx2;
 			#endif
 		#endif	
 	#endif // ENABLE_ASM
 	return flags;
 }
 
-
-
-int GetMinimumSSEVersion()
-{
-	int minimumSSEVersion = 0;
-	#if MPT_COMPILER_MSVC
-		#if defined(_M_X64)
-			minimumSSEVersion = 2;
-		#elif defined(_M_IX86)
-			#if defined(_M_IX86_FP)
-				#if (_M_IX86_FP >= 2)
-					minimumSSEVersion = 2;
-				#elif (_M_IX86_FP == 1)
-					minimumSSEVersion = 1;
-				#endif
-			#endif
-		#endif
-	#endif
-	return minimumSSEVersion;
-}
-
-
-int GetMinimumAVXVersion()
-{
-	int minimumAVXVersion = 0;
-	#if MPT_COMPILER_MSVC
-		#if defined(_M_IX86_FP)
-			#if defined(__AVX2__)
-				minimumAVXVersion = 2;
-			#elif defined(__AVX__)
-				minimumAVXVersion = 1;
-			#endif
-		#endif
-	#endif
-	return minimumAVXVersion;
-}
 
 
 } // namespace CPU
