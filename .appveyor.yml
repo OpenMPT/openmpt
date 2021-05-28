@@ -16,41 +16,49 @@ version: 1.30-appveyor{build}
 
 matrix:
   fast_finish: true
- 
- 
- 
+
+
+
 environment:
+  OPENMPT_APPVEYOR_API_TOKEN:
+    secure: bxGFLD4QFin6OMSHsO5tYiKkuifNPMEsZNHvc2wfMYk=
   matrix:
     - job_name: VS2019 Win10 x86
       job_group: Builds
       MPT_APPVEYOR_VS: vs2019
       MPT_APPVEYOR_TARGET: win10
-      MPT_APPVEYOR_ARCH: Win32
+      MPT_APPVEYOR_ARCH: x86
+      MPT_APPVEYOR_ARCH_CONFIG: Win32
     - job_name: VS2019 Win10 amd64
       job_group: Builds
       MPT_APPVEYOR_VS: vs2019
       MPT_APPVEYOR_TARGET: win10
-      MPT_APPVEYOR_ARCH: x64
+      MPT_APPVEYOR_ARCH: amd64
+      MPT_APPVEYOR_ARCH_CONFIG: x64
     - job_name: VS2019 Win10 arm
       job_group: Builds
       MPT_APPVEYOR_VS: vs2019
       MPT_APPVEYOR_TARGET: win10
-      MPT_APPVEYOR_ARCH: ARM
+      MPT_APPVEYOR_ARCH: arm
+      MPT_APPVEYOR_ARCH_CONFIG: ARM
     - job_name: VS2019 Win10 arm64
       job_group: Builds
       MPT_APPVEYOR_VS: vs2019
       MPT_APPVEYOR_TARGET: win10
-      MPT_APPVEYOR_ARCH: ARM64
+      MPT_APPVEYOR_ARCH: arm64
+      MPT_APPVEYOR_ARCH_CONFIG: ARM64
     - job_name: VS2019 Win7 x86
       job_group: Builds
       MPT_APPVEYOR_VS: vs2019
       MPT_APPVEYOR_TARGET: win7
-      MPT_APPVEYOR_ARCH: Win32
+      MPT_APPVEYOR_ARCH: x86
+      MPT_APPVEYOR_ARCH_CONFIG: Win32
     - job_name: VS2019 Win7 amd64
       job_group: Builds
       MPT_APPVEYOR_VS: vs2019
       MPT_APPVEYOR_TARGET: win7
-      MPT_APPVEYOR_ARCH: x64
+      MPT_APPVEYOR_ARCH: amd64
+      MPT_APPVEYOR_ARCH_CONFIG: x64
     - job_name: Package
       job_depends_on: Builds
 
@@ -78,19 +86,117 @@ for:
         - job_group: Builds
     
     build_script:
-      - build\auto\build_openmpt_args.cmd %MPT_APPVEYOR_VS% %MPT_APPVEYOR_TARGET% %MPT_APPVEYOR_ARCH% Release 7z default
+      - build\auto\build_openmpt_args.cmd %MPT_APPVEYOR_VS% %MPT_APPVEYOR_TARGET% %MPT_APPVEYOR_ARCH_CONFIG% Release 7z default
+    
+    after_build:
+      - appveyor PushArtifact bin\release\%MPT_APPVEYOR_VS%-%MPT_APPVEYOR_TARGET%-static\%MPT_APPVEYOR_ARCH%\OpenMPT.exe
+      - appveyor PushArtifact bin\release\%MPT_APPVEYOR_VS%-%MPT_APPVEYOR_TARGET%-static\%MPT_APPVEYOR_ARCH%\OpenMPT.pdb
+      - appveyor PushArtifact bin\release\%MPT_APPVEYOR_VS%-%MPT_APPVEYOR_TARGET%-static\%MPT_APPVEYOR_ARCH%\openmpt-lame.dll
+      - appveyor PushArtifact bin\release\%MPT_APPVEYOR_VS%-%MPT_APPVEYOR_TARGET%-static\%MPT_APPVEYOR_ARCH%\openmpt-lame.pdb
+      - appveyor PushArtifact bin\release\%MPT_APPVEYOR_VS%-%MPT_APPVEYOR_TARGET%-static\%MPT_APPVEYOR_ARCH%\openmpt-mpg123.dll
+      - appveyor PushArtifact bin\release\%MPT_APPVEYOR_VS%-%MPT_APPVEYOR_TARGET%-static\%MPT_APPVEYOR_ARCH%\openmpt-mpg123.pdb
+      - appveyor PushArtifact bin\release\%MPT_APPVEYOR_VS%-%MPT_APPVEYOR_TARGET%-static\%MPT_APPVEYOR_ARCH%\openmpt-soundtouch.dll
+      - appveyor PushArtifact bin\release\%MPT_APPVEYOR_VS%-%MPT_APPVEYOR_TARGET%-static\%MPT_APPVEYOR_ARCH%\openmpt-soundtouch.pdb
+      - appveyor PushArtifact bin\release\%MPT_APPVEYOR_VS%-%MPT_APPVEYOR_TARGET%-static\%MPT_APPVEYOR_ARCH%\PluginBridge-%MPT_APPVEYOR_ARCH%.exe
+      - appveyor PushArtifact bin\release\%MPT_APPVEYOR_VS%-%MPT_APPVEYOR_TARGET%-static\%MPT_APPVEYOR_ARCH%\PluginBridge-%MPT_APPVEYOR_ARCH%.pdb
+      - appveyor PushArtifact bin\release\%MPT_APPVEYOR_VS%-%MPT_APPVEYOR_TARGET%-static\%MPT_APPVEYOR_ARCH%\PluginBridgeLegacy-%MPT_APPVEYOR_ARCH%.exe
+      - appveyor PushArtifact bin\release\%MPT_APPVEYOR_VS%-%MPT_APPVEYOR_TARGET%-static\%MPT_APPVEYOR_ARCH%\PluginBridgeLegacy-%MPT_APPVEYOR_ARCH%.pdb
+      - appveyor PushArtifact bin\release\%MPT_APPVEYOR_VS%-%MPT_APPVEYOR_TARGET%-static\%MPT_APPVEYOR_ARCH%\openmpt-wine-support.zip
   
   -
     matrix:
       only:
         - job_name: Package
     
+    before_build:
+      - ps: |
+            function Get-AppVeyorArtifacts
+            {
+                [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
+                param(
+                    #The name of the account you wish to download artifacts from
+                    [parameter(Mandatory = $true)]
+                    [string]$Account,
+                    #The name of the project you wish to download artifacts from
+                    [parameter(Mandatory = $true)]
+                    [string]$Project,
+                    #Where to save the downloaded artifacts. Defaults to current directory.
+                    [alias("DownloadDirectory")][string]$Path = '.',
+                    [string]$Token,
+                    #Filter to a specific branch or project directory. You can specify Branch as either branch name ("master") or build version ("0.1.29")
+                    [string]$Branch,
+                    #If you have multiple build jobs, specify which job you wish to retrieve the artifacts from
+                    [string]$JobName,
+                    #Download all files into a single directory, do not preserve any hierarchy that might exist in the artifacts
+                    [switch]$Flat,
+                    [string]$Proxy,
+                    [switch]$ProxyUseDefaultCredentials,
+                    #URL of Appveyor API. You normally shouldn't need to change this.
+                    $apiUrl = 'https://ci.appveyor.com/api'
+                )
+                $headers = @{
+                    'Content-type' = 'application/json'
+                }
+                if ($Token) {$headers.'Authorization' = "Bearer $token"}
+                # Prepare proxy args to splat to Invoke-RestMethod
+                $proxyArgs = @{}
+                if (-not [string]::IsNullOrEmpty($proxy)) {
+                    $proxyArgs.Add('Proxy', $proxy)
+                }
+                if ($proxyUseDefaultCredentials.IsPresent) {
+                    $proxyArgs.Add('ProxyUseDefaultCredentials', $proxyUseDefaultCredentials)
+                }
+                $errorActionPreference = 'Stop'
+                $projectURI = "$apiUrl/projects/$account/$project"
+                if ($Branch) {$projectURI = $projectURI + "/branch/$Branch"}
+                $projectObject = Invoke-RestMethod -Method Get -Uri $projectURI `
+                                                   -Headers $headers @proxyArgs
+                if (-not $projectObject.build.jobs) {throw "No jobs found for this project or the project and/or account name was incorrectly specified"}
+                if (($projectObject.build.jobs.count -gt 1) -and -not $jobName) {
+                    throw "Multiple Jobs found for the latest build. Please specify the -JobName paramter to select which job you want the artifacts for"
+                }
+                if ($JobName) {
+                    $jobid = ($projectObject.build.jobs | Where-Object name -eq "$JobName" | Select-Object -first 1).jobid
+                    if (-not $jobId) {throw "Unable to find a job named $JobName within the latest specified build. Did you spell it correctly?"}
+                } else {
+                    $jobid = $projectObject.build.jobs[0].jobid
+                }
+                $artifacts = Invoke-RestMethod -Method Get -Uri "$apiUrl/buildjobs/$jobId/artifacts" `
+                                               -Headers $headers @proxyArgs
+                $artifacts `
+                | ? { $psCmdlet.ShouldProcess($_.fileName) } `
+                | % {
+                    $type = $_.type
+                    $localArtifactPath = $_.fileName -split '/' | % { [Uri]::UnescapeDataString($_) }
+                    if ($flat.IsPresent) {
+                        $localArtifactPath = ($localArtifactPath | select -Last 1)
+                    } else {
+                        $localArtifactPath = $localArtifactPath -join [IO.Path]::DirectorySeparatorChar
+                    }
+                    $localArtifactPath = Join-Path $path $localArtifactPath
+                    $artifactUrl = "$apiUrl/buildjobs/$jobId/artifacts/$($_.fileName)"
+                    Write-Verbose "Downloading $artifactUrl to $localArtifactPath"
+                    Invoke-RestMethod -Method Get -Uri $artifactUrl -OutFile $localArtifactPath -Headers $headers @proxyArgs
+                    New-Object PSObject -Property @{
+                        'Source' = $artifactUrl
+                        'Type'   = $type
+                        'Target' = $localArtifactPath
+                    }
+                }
+            }
+            Get-AppVeyorArtifacts OpenMPT openmpt -Token $env:OPENMPT_APPVEYOR_API_TOKEN -JobName 'VS2019 Win10 x86'
+            Get-AppVeyorArtifacts OpenMPT openmpt -Token $env:OPENMPT_APPVEYOR_API_TOKEN -JobName 'VS2019 Win10 amd64'
+            Get-AppVeyorArtifacts OpenMPT openmpt -Token $env:OPENMPT_APPVEYOR_API_TOKEN -JobName 'VS2019 Win10 arm'
+            Get-AppVeyorArtifacts OpenMPT openmpt -Token $env:OPENMPT_APPVEYOR_API_TOKEN -JobName 'VS2019 Win10 arm64'
+            Get-AppVeyorArtifacts OpenMPT openmpt -Token $env:OPENMPT_APPVEYOR_API_TOKEN -JobName 'VS2019 Win7 x86'
+            Get-AppVeyorArtifacts OpenMPT openmpt -Token $env:OPENMPT_APPVEYOR_API_TOKEN -JobName 'VS2019 Win7 amd64'
+
     build_script:
       - build\auto\build_openmpt_release_packages_multiarch.cmd auto
       - build\auto\package_openmpt_installer_multiarch_args.cmd vs2019 win10 Win32 Release 7z default
 
-    #after_build:
-    #  - appveyor PushArtifact bin\openmpt-pkg.win-multi.tar
+    after_build:
+      - appveyor PushArtifact bin\openmpt-pkg.win-multi.tar
 
 
 test: off
