@@ -78,7 +78,7 @@ for:
         - job_group: Builds
     
     build_script:
-      - build\auto\build_openmpt_args.cmd {MPT_APPVEYOR_VS} {MPT_APPVEYOR_TARGET} {MPT_APPVEYOR_ARCH} Release 7z default
+      - build\auto\build_openmpt_args.cmd %MPT_APPVEYOR_VS% %MPT_APPVEYOR_TARGET% %MPT_APPVEYOR_ARCH% Release 7z default
   
   -
     matrix:
