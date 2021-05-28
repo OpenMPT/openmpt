@@ -88,20 +88,20 @@ for:
     build_script:
       - build\auto\build_openmpt_args.cmd %MPT_APPVEYOR_VS% %MPT_APPVEYOR_TARGET% %MPT_APPVEYOR_ARCH_CONFIG% Release 7z default
     
-    after_build:
-      - appveyor PushArtifact bin\release\%MPT_APPVEYOR_VS%-%MPT_APPVEYOR_TARGET%-static\%MPT_APPVEYOR_ARCH%\OpenMPT.exe
-      - appveyor PushArtifact bin\release\%MPT_APPVEYOR_VS%-%MPT_APPVEYOR_TARGET%-static\%MPT_APPVEYOR_ARCH%\OpenMPT.pdb
-      - appveyor PushArtifact bin\release\%MPT_APPVEYOR_VS%-%MPT_APPVEYOR_TARGET%-static\%MPT_APPVEYOR_ARCH%\openmpt-lame.dll
-      - appveyor PushArtifact bin\release\%MPT_APPVEYOR_VS%-%MPT_APPVEYOR_TARGET%-static\%MPT_APPVEYOR_ARCH%\openmpt-lame.pdb
-      - appveyor PushArtifact bin\release\%MPT_APPVEYOR_VS%-%MPT_APPVEYOR_TARGET%-static\%MPT_APPVEYOR_ARCH%\openmpt-mpg123.dll
-      - appveyor PushArtifact bin\release\%MPT_APPVEYOR_VS%-%MPT_APPVEYOR_TARGET%-static\%MPT_APPVEYOR_ARCH%\openmpt-mpg123.pdb
-      - appveyor PushArtifact bin\release\%MPT_APPVEYOR_VS%-%MPT_APPVEYOR_TARGET%-static\%MPT_APPVEYOR_ARCH%\openmpt-soundtouch.dll
-      - appveyor PushArtifact bin\release\%MPT_APPVEYOR_VS%-%MPT_APPVEYOR_TARGET%-static\%MPT_APPVEYOR_ARCH%\openmpt-soundtouch.pdb
-      - appveyor PushArtifact bin\release\%MPT_APPVEYOR_VS%-%MPT_APPVEYOR_TARGET%-static\%MPT_APPVEYOR_ARCH%\PluginBridge-%MPT_APPVEYOR_ARCH%.exe
-      - appveyor PushArtifact bin\release\%MPT_APPVEYOR_VS%-%MPT_APPVEYOR_TARGET%-static\%MPT_APPVEYOR_ARCH%\PluginBridge-%MPT_APPVEYOR_ARCH%.pdb
-      - appveyor PushArtifact bin\release\%MPT_APPVEYOR_VS%-%MPT_APPVEYOR_TARGET%-static\%MPT_APPVEYOR_ARCH%\PluginBridgeLegacy-%MPT_APPVEYOR_ARCH%.exe
-      - appveyor PushArtifact bin\release\%MPT_APPVEYOR_VS%-%MPT_APPVEYOR_TARGET%-static\%MPT_APPVEYOR_ARCH%\PluginBridgeLegacy-%MPT_APPVEYOR_ARCH%.pdb
-      - appveyor PushArtifact bin\release\%MPT_APPVEYOR_VS%-%MPT_APPVEYOR_TARGET%-static\%MPT_APPVEYOR_ARCH%\openmpt-wine-support.zip
+    artifacts:
+      - path: 'bin\release\$(MPT_APPVEYOR_VS)-$(MPT_APPVEYOR_TARGET)-static\$(MPT_APPVEYOR_ARCH)\OpenMPT.exe'
+      - path: 'bin\release\$(MPT_APPVEYOR_VS)-$(MPT_APPVEYOR_TARGET)-static\$(MPT_APPVEYOR_ARCH)\OpenMPT.pdb'
+      - path: 'bin\release\$(MPT_APPVEYOR_VS)-$(MPT_APPVEYOR_TARGET)-static\$(MPT_APPVEYOR_ARCH)\openmpt-lame.dll'
+      - path: 'bin\release\$(MPT_APPVEYOR_VS)-$(MPT_APPVEYOR_TARGET)-static\$(MPT_APPVEYOR_ARCH)\openmpt-lame.pdb'
+      - path: 'bin\release\$(MPT_APPVEYOR_VS)-$(MPT_APPVEYOR_TARGET)-static\$(MPT_APPVEYOR_ARCH)\openmpt-mpg123.dll'
+      - path: 'bin\release\$(MPT_APPVEYOR_VS)-$(MPT_APPVEYOR_TARGET)-static\$(MPT_APPVEYOR_ARCH)\openmpt-mpg123.pdb'
+      - path: 'bin\release\$(MPT_APPVEYOR_VS)-$(MPT_APPVEYOR_TARGET)-static\$(MPT_APPVEYOR_ARCH)\openmpt-soundtouch.dll'
+      - path: 'bin\release\$(MPT_APPVEYOR_VS)-$(MPT_APPVEYOR_TARGET)-static\$(MPT_APPVEYOR_ARCH)\openmpt-soundtouch.pdb'
+      - path: 'bin\release\$(MPT_APPVEYOR_VS)-$(MPT_APPVEYOR_TARGET)-static\$(MPT_APPVEYOR_ARCH)\PluginBridge-$(MPT_APPVEYOR_ARCH).exe'
+      - path: 'bin\release\$(MPT_APPVEYOR_VS)-$(MPT_APPVEYOR_TARGET)-static\$(MPT_APPVEYOR_ARCH)\PluginBridge-$(MPT_APPVEYOR_ARCH).pdb'
+      - path: 'bin\release\$(MPT_APPVEYOR_VS)-$(MPT_APPVEYOR_TARGET)-static\$(MPT_APPVEYOR_ARCH)\PluginBridgeLegacy-$(MPT_APPVEYOR_ARCH).exe'
+      - path: 'bin\release\$(MPT_APPVEYOR_VS)-$(MPT_APPVEYOR_TARGET)-static\$(MPT_APPVEYOR_ARCH)\PluginBridgeLegacy-$(MPT_APPVEYOR_ARCH).pdb'
+      - path: 'bin\release\$(MPT_APPVEYOR_VS)-$(MPT_APPVEYOR_TARGET)-static\$(MPT_APPVEYOR_ARCH)\openmpt-wine-support.zip'
   
   -
     matrix:
