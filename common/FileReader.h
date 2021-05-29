@@ -137,7 +137,7 @@ namespace FileReader
 			return true;
 		} else
 		{
-			Clear(destArray);
+			mpt::reset(destArray);
 			return false;
 		}
 	}
@@ -476,7 +476,7 @@ namespace FileReader
 			return true;
 		} else
 		{
-			Clear(target);
+			mpt::reset(target);
 			return false;
 		}
 	}
