@@ -68,7 +68,7 @@ void MidiInOut::SaveAllParameters()
 		return;
 
 	m_pMixStruct->defaultProgram = -1;
-	m_pMixStruct->pluginData.assign(chunk.cbegin(), chunk.cend());
+	m_pMixStruct->pluginData.assign(chunk.begin(), chunk.end());
 }
 
 
