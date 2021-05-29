@@ -968,9 +968,7 @@ public:
 				cache.resize(size_);
 				if(!cache.empty())
 				{
-					// cppcheck false-positive
-					// cppcheck-suppress containerOutOfBounds
-					file.GetRaw(mpt::span(&(cache[0]), size));
+					file.GetRaw(mpt::as_span(cache));
 				}
 			}
 		}
