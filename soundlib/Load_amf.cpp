@@ -363,15 +363,25 @@ static void AMFReadPattern(CPattern &pattern, CHANNELINDEX chn, FileReader &file
 
 			// 17: Panning
 			case 0x17:
-				param = (param + 64) & 0x7F;
-				if(m.command != CMD_NONE)
+				if(param == 100)
 				{
-					if(m.volcmd == VOLCMD_NONE || m.volcmd == VOLCMD_PANNING)
+					// History lesson intermission: According to Otto Chrons, he remembers that he added support
+					// for 8A4 / XA4 "surround" panning in DMP for MOD and S3M files before any other trackers did,
+					// So DSMI / DMP are most likely the original source of these 7-bit panning + surround commands!
+					param = 0xA4;
+				} else
+				{
+					param = static_cast<uint8>(std::clamp(static_cast<int8>(param) + 64, 0, 128));
+					if(m.command != CMD_NONE)
 					{
-						m.volcmd = VOLCMD_PANNING;
-						m.vol = param / 2;
+						// Move to volume column if required
+						if(m.volcmd == VOLCMD_NONE || m.volcmd == VOLCMD_PANNING)
+						{
+							m.volcmd = VOLCMD_PANNING;
+							m.vol = param / 2;
+						}
+						cmd = CMD_NONE;
 					}
-					cmd = CMD_NONE;
 				}
 				break;
 			}
@@ -389,9 +399,8 @@ static void AMFReadPattern(CPattern &pattern, CHANNELINDEX chn, FileReader &file
 static bool ValidateHeader(const AMFFileHeader &fileHeader)
 {
 	if(std::memcmp(fileHeader.amf, "AMF", 3)
-		|| fileHeader.version < 8 || fileHeader.version > 14
-		|| ((fileHeader.numChannels < 1 || fileHeader.numChannels > 32) && fileHeader.version >= 10)
-		)
+	   || (fileHeader.version < 8 && fileHeader.version != 1) || fileHeader.version > 14
+	   || ((fileHeader.numChannels < 1 || fileHeader.numChannels > 32) && fileHeader.version >= 9))
 	{
 		return false;
 	}
@@ -441,7 +450,7 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 
 	mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, fileHeader.title);
 
-	if(fileHeader.version < 10)
+	if(fileHeader.version < 9)
 	{
 		// Old format revisions are fixed to 4 channels
 		m_nChannels = 4;
@@ -464,7 +473,7 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 			}
 			ChnSettings[chn].nPan = static_cast<uint16>(pan);
 		}
-	} else if(fileHeader.version == 10)
+	} else if(fileHeader.version >= 9)
 	{
 		uint8 panPos[16];
 		file.ReadArray(panPos);
@@ -473,14 +482,13 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 			ChnSettings[chn].nPan = (panPos[chn] & 1) ? 0x40 : 0xC0;
 		}
 	}
-	// To check: Was the channel table introduced in revision 1.0 or 0.9? I only have 0.8 files, in which it is missing...
-	MPT_ASSERT(fileHeader.version != 9);
 
 	// Get Tempo/Speed
 	if(fileHeader.version >= 13)
 	{
 		uint8 tempo = file.ReadUint8();
-		if(tempo < 32) tempo = 125;
+		if(tempo < 32)
+			tempo = 125;
 		m_nDefaultTempo.Set(tempo);
 		m_nDefaultSpeed = file.ReadUint8();
 	} else
@@ -510,8 +518,7 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Read Sample Headers
-	std::vector<uint32> samplePos(GetNumSamples(), 0);
-	uint32 maxSamplePos = 0;
+	std::vector<uint32> sampleMap(GetNumSamples(), 0);
 
 	for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
 	{
@@ -521,7 +528,7 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 		uint8 type = file.ReadUint8();
 		file.ReadString<mpt::String::maybeNullTerminated>(m_szNames[smp], 32);
 		file.ReadString<mpt::String::nullTerminated>(sample.filename, 13);
-		samplePos[smp - 1] = file.ReadUint32LE();
+		sampleMap[smp - 1] = file.ReadUint32LE();
 		if(fileHeader.version < 10)
 		{
 			sample.nLength = file.ReadUint16LE();
@@ -535,15 +542,10 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 
 		if(fileHeader.version < 10)
 		{
-			// Various sources (Miodrag Vallat's amf.txt, old ModPlug code) suggest that the loop information
-			// format revision 1.0 should only consist of a 16-bit value for the loop start (loop end would
-			// automatically equal sample length), but the only v1.0 files I have ("the tribal zone" and
-			// "the way its gonna b" by Maelcum) do not confirm this - the sample headers are laid out exactly
-			// as in the newer revisions in these two files. Even in format revision 0.8 (output by MOD2AMF v1.02)
-			// There are loop start and loop end values (although they are 16-Bit). Maybe this only applies to
-			// even older revision of the format?
 			sample.nLoopStart = file.ReadUint16LE();
 			sample.nLoopEnd = file.ReadUint16LE();
+			if(sample.nLoopEnd == uint16_max)
+				sample.nLoopStart = sample.nLoopEnd = 0;
 		} else
 		{
 			sample.nLoopStart = file.ReadUint32LE();
@@ -562,8 +564,6 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				sample.nLoopStart = sample.nLoopEnd = 0;
 			}
-
-			maxSamplePos = std::max(maxSamplePos, samplePos[smp - 1]);
 		}
 	}
 	
@@ -581,10 +581,11 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 	std::vector<FileReader> trackData(trackCount);
 	for(uint16 i = 0; i < trackCount; i++)
 	{
-		// Track size is a 24-Bit value describing the number of byte triplets in this track.
-		uint8 trackSize[3];
-		file.ReadArray(trackSize);
-		trackData[i] = file.ReadChunk((trackSize[0] | (trackSize[1] << 8) | (trackSize[2] << 16)) * 3);
+		// Track size is a 16-Bit value describing the number of byte triplets in this track, followed by a track type byte.
+		uint16 numEvents = file.ReadUint16LE();
+		file.Skip(1);
+		if(numEvents)
+			trackData[i] = file.ReadChunk(numEvents * 3 + (fileHeader.version == 1 ? 3 : 0));
 	}
 
 	if(loadFlags & loadSampleData)
@@ -596,24 +597,18 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 			SampleIO::littleEndian,
 			SampleIO::unsignedPCM);
 
-		// Why is all of this sample loading business so weird in AMF?
-		// Surely there must be some great idea behind it which isn't handled here or used in the wild
-		// (re-using the same sample data for different sample slots maybe?)
-
-		// First, try compacting the sample indices so that the loop won't have 2^32 iterations in the worst case.
-		std::vector<uint32> samplePosCompact = samplePos;
-		std::sort(samplePosCompact.begin(), samplePosCompact.end());
-		auto end = std::unique(samplePosCompact.begin(), samplePosCompact.end());
-
-		for(auto pos = samplePosCompact.begin(); pos != end && file.CanRead(1); pos++)
+		// Note: in theory a sample can be reused by several instruments and appear in a different order in the file
+		// However, M2AMF doesn't take advantage of this and just writes instruments in the order they appear,
+		// without de-duplicating identical sample data.
+		for(SAMPLEINDEX smp = 1; smp <= GetNumSamples() && file.CanRead(1); smp++)
 		{
-			for(SAMPLEINDEX smp = 0; smp < GetNumSamples() && file.CanRead(1); smp++)
+			auto startPos = file.GetPosition();
+			for(SAMPLEINDEX target = 0; target < GetNumSamples(); target++)
 			{
-				if(*pos == samplePos[smp])
-				{
-					sampleIO.ReadSample(Samples[smp + 1], file);
-					break;
-				}
+				if(sampleMap[target] != smp)
+					continue;
+				file.Seek(startPos);
+				sampleIO.ReadSample(Samples[target + 1], file);
 			}
 		}
 	}
