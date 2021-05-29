@@ -179,7 +179,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 	for(auto &pat : m_SndFile.Patterns) if(pat.IsValid())
 	{
 		// This is used for -> MOD/XM conversion
-		std::vector<ModCommand::PARAM[MAX_EFFECTS]> effMemory(GetNumChannels());
+		std::vector<std::array<ModCommand::PARAM, MAX_EFFECTS>> effMemory(GetNumChannels());
 		std::vector<ModCommand::VOL> volMemory(GetNumChannels(), 0);
 		std::vector<ModCommand::INSTR> instrMemory(GetNumChannels(), 0);
 
