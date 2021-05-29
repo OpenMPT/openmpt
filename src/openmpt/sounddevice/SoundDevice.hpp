@@ -235,9 +235,34 @@ public:
 		return (*this = ChannelMapping(channels));
 	}
 
-	bool operator==(const SoundDevice::ChannelMapping &cmp) const
+	friend bool operator==(const SoundDevice::ChannelMapping &a, const SoundDevice::ChannelMapping &b)
 	{
-		return (ChannelToDeviceChannel == cmp.ChannelToDeviceChannel);
+		return (a.ChannelToDeviceChannel == b.ChannelToDeviceChannel);
+	}
+
+	friend bool operator!=(const SoundDevice::ChannelMapping &a, const SoundDevice::ChannelMapping &b)
+	{
+		return (a.ChannelToDeviceChannel != b.ChannelToDeviceChannel);
+	}
+
+	friend bool operator==(int a, const SoundDevice::ChannelMapping &b)
+	{
+		return (a == static_cast<int>(b));
+	}
+
+	friend bool operator==(const SoundDevice::ChannelMapping &a, int b)
+	{
+		return (static_cast<int>(a) == b);
+	}
+
+	friend bool operator!=(int a, const SoundDevice::ChannelMapping &b)
+	{
+		return (a != static_cast<int>(b));
+	}
+
+	friend bool operator!=(const SoundDevice::ChannelMapping &a, int b)
+	{
+		return (static_cast<int>(a) != b);
 	}
 
 	uint32 GetNumHostChannels() const
