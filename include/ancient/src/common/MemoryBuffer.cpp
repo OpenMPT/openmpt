@@ -55,13 +55,16 @@ bool MemoryBuffer::isResizable() const noexcept
 
 void MemoryBuffer::resize(size_t newSize) 
 {
-	_data=reinterpret_cast<uint8_t*>(std::realloc(_data,newSize));
-	_size=newSize;
-	if (!_data)
+	uint8_t *newData=reinterpret_cast<uint8_t*>(std::realloc(_data,newSize));
+	if (!newData)
 	{
+		std::free(_data);
+		_data=nullptr;
 		_size=0;
 		throw std::bad_alloc();
 	}
+	_data=newData;
+	_size=newSize;
 }
 
 }

@@ -1,3 +1,3 @@
  *  ancient <https://github.com/temisu/ancient>
-    commit 5cd0e9b55f9600c06c66d0f00fa9eff5526470ac (2021-05-25)
+    commit f4a7ad5955483bf095908c9bd1d511550b746229 (2021-05-26)
  *  Unnecssary files have been removed.
