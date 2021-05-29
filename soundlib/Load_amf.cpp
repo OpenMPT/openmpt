@@ -374,7 +374,7 @@ static void AMFReadPattern(CPattern &pattern, CHANNELINDEX chn, FileReader &file
 					param = 0xA4;
 				} else
 				{
-					param = static_cast<uint8>(std::clamp(static_cast<int8>(param) + 64, 0, 128));
+					param = static_cast<uint8>(Clamp(static_cast<int8>(param) + 64, 0, 128));
 					if(m.command != CMD_NONE)
 					{
 						// Move to volume column if required
