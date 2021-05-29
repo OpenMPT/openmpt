@@ -39,7 +39,7 @@ class FileReaderTraitsMemory
 
 public:
 
-	using off_t = FileDataContainerMemory::off_t;
+	using pos_type = FileDataContainerMemory::pos_type;
 
 	using data_type = FileDataContainerMemory;
 	using ref_data_type = const FileDataContainerMemory &;
@@ -58,7 +58,7 @@ public:
 	static value_data_type make_data() { return mpt::const_byte_span(); }
 	static value_data_type make_data(mpt::const_byte_span data) { return data; }
 
-	static value_data_type make_chunk(shared_data_type data, off_t position, off_t size)
+	static value_data_type make_chunk(shared_data_type data, pos_type position, pos_type size)
 	{
 		return mpt::as_span(data.GetRawData() + position, size);
 	}
@@ -70,7 +70,7 @@ class FileReaderTraitsStdStream
 
 public:
 
-	using off_t = IFileDataContainer::off_t;
+	using pos_type = IFileDataContainer::pos_type;
 
 	using data_type = std::shared_ptr<const IFileDataContainer>;
 	using ref_data_type = const IFileDataContainer &;
@@ -95,7 +95,7 @@ public:
 	static value_data_type make_data() { return std::make_shared<FileDataContainerDummy>(); }
 	static value_data_type make_data(mpt::const_byte_span data) { return std::make_shared<FileDataContainerMemory>(data); }
 
-	static value_data_type make_chunk(shared_data_type data, off_t position, off_t size)
+	static value_data_type make_chunk(shared_data_type data, pos_type position, pos_type size)
 	{
 		return std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerWindow>(data, position, size));
 	}
@@ -221,7 +221,7 @@ namespace FileReader
 	// Read a integer in little-endian format which has some of its higher bytes not stored in file.
 	// If successful, the file cursor is advanced by the given size.
 	template <typename T, typename TFileCursor>
-	T ReadTruncatedIntLE(TFileCursor &f, typename TFileCursor::off_t size)
+	T ReadTruncatedIntLE(TFileCursor &f, typename TFileCursor::pos_type size)
 	{
 		static_assert(std::numeric_limits<T>::is_integer == true, "Target type is a not an integer");
 		MPT_ASSERT(sizeof(T) >= size);
@@ -259,7 +259,7 @@ namespace FileReader
 	// If more bytes are stored, higher order bytes are silently ignored.
 	// If successful, the file cursor is advanced by the given size.
 	template <typename T, typename TFileCursor>
-	T ReadSizedIntLE(TFileCursor &f, typename TFileCursor::off_t size)
+	T ReadSizedIntLE(TFileCursor &f, typename TFileCursor::pos_type size)
 	{
 		static_assert(std::numeric_limits<T>::is_integer == true, "Target type is a not an integer");
 		if(size == 0)
@@ -484,10 +484,10 @@ namespace FileReader
 	// Allow to read a struct partially (if there's less memory available than the struct's size, fill it up with zeros).
 	// The file cursor is advanced by "partialSize" bytes.
 	template <typename T, typename TFileCursor>
-	typename TFileCursor::off_t ReadStructPartial(TFileCursor &f, T &target, typename TFileCursor::off_t partialSize = sizeof(T))
+	typename TFileCursor::pos_type ReadStructPartial(TFileCursor &f, T &target, typename TFileCursor::pos_type partialSize = sizeof(T))
 	{
 		static_assert(mpt::is_binary_safe<T>::value);
-		typename TFileCursor::off_t copyBytes = std::min(partialSize, sizeof(T));
+		typename TFileCursor::pos_type copyBytes = std::min(partialSize, sizeof(T));
 		if(!f.CanRead(copyBytes))
 		{
 			copyBytes = f.BytesLeft();
@@ -502,10 +502,10 @@ namespace FileReader
 	// The file cursor is advanced by "srcSize" bytes.
 	// Returns true if at least one byte could be read or 0 bytes were requested.
 	template<mpt::String::ReadWriteMode mode, size_t destSize, typename TFileCursor>
-	bool ReadString(TFileCursor &f, char (&destBuffer)[destSize], const typename TFileCursor::off_t srcSize)
+	bool ReadString(TFileCursor &f, char (&destBuffer)[destSize], const typename TFileCursor::pos_type srcSize)
 	{
 		typename TFileCursor::PinnedView source = f.ReadPinnedView(srcSize); // Make sure the string is cached properly.
-		typename TFileCursor::off_t realSrcSize = source.size();	// In case fewer bytes are available
+		typename TFileCursor::pos_type realSrcSize = source.size();	// In case fewer bytes are available
 		mpt::String::WriteAutoBuf(destBuffer) = mpt::String::ReadBuf(mode, mpt::byte_cast<const char*>(source.data()), realSrcSize);
 		return (realSrcSize > 0 || srcSize == 0);
 	}
@@ -514,11 +514,11 @@ namespace FileReader
 	// The file cursor is advanced by "srcSize" bytes.
 	// Returns true if at least one character could be read or 0 characters were requested.
 	template<mpt::String::ReadWriteMode mode, typename TFileCursor>
-	bool ReadString(TFileCursor &f, std::string &dest, const typename TFileCursor::off_t srcSize)
+	bool ReadString(TFileCursor &f, std::string &dest, const typename TFileCursor::pos_type srcSize)
 	{
 		dest.clear();
 		typename TFileCursor::PinnedView source = f.ReadPinnedView(srcSize);	// Make sure the string is cached properly.
-		typename TFileCursor::off_t realSrcSize = source.size();	// In case fewer bytes are available
+		typename TFileCursor::pos_type realSrcSize = source.size();	// In case fewer bytes are available
 		dest = mpt::String::ReadBuf(mode, mpt::byte_cast<const char*>(source.data()), realSrcSize);
 		return (realSrcSize > 0 || srcSize == 0);
 	}
@@ -527,10 +527,10 @@ namespace FileReader
 	// The file cursor is advanced by "srcSize" bytes.
 	// Returns true if at least one character could be read or 0 characters were requested.
 	template<mpt::String::ReadWriteMode mode, std::size_t len, typename TFileCursor>
-	bool ReadString(TFileCursor &f, mpt::charbuf<len> &dest, const typename TFileCursor::off_t srcSize)
+	bool ReadString(TFileCursor &f, mpt::charbuf<len> &dest, const typename TFileCursor::pos_type srcSize)
 	{
 		typename TFileCursor::PinnedView source = f.ReadPinnedView(srcSize);	// Make sure the string is cached properly.
-		typename TFileCursor::off_t realSrcSize = source.size();	// In case fewer bytes are available
+		typename TFileCursor::pos_type realSrcSize = source.size();	// In case fewer bytes are available
 		dest = mpt::String::ReadBuf(mode, mpt::byte_cast<const char*>(source.data()), realSrcSize);
 		return (realSrcSize > 0 || srcSize == 0);
 	}
@@ -539,11 +539,11 @@ namespace FileReader
 	// The file cursor is advanced by "srcSize" bytes.
 	// Returns true if at least one character could be read or 0 characters were requested.
 	template<mpt::String::ReadWriteMode mode, typename TFileCursor>
-	bool ReadString(TFileCursor &f, mpt::ustring &dest, mpt::Charset charset, const typename TFileCursor::off_t srcSize)
+	bool ReadString(TFileCursor &f, mpt::ustring &dest, mpt::Charset charset, const typename TFileCursor::pos_type srcSize)
 	{
 		dest.clear();
 		typename TFileCursor::PinnedView source = f.ReadPinnedView(srcSize);	// Make sure the string is cached properly.
-		typename TFileCursor::off_t realSrcSize = source.size();	// In case fewer bytes are available
+		typename TFileCursor::pos_type realSrcSize = source.size();	// In case fewer bytes are available
 		dest = mpt::ToUnicode(charset, mpt::String::ReadBuf(mode, mpt::byte_cast<const char*>(source.data()), realSrcSize));
 		return (realSrcSize > 0 || srcSize == 0);
 	}
@@ -552,41 +552,41 @@ namespace FileReader
 	// The file cursor is advanced by the string length.
 	// Returns true if the size field could be read and at least one character could be read or 0 characters were requested.
 	template<typename Tsize, mpt::String::ReadWriteMode mode, size_t destSize, typename TFileCursor>
-	bool ReadSizedString(TFileCursor &f, char (&destBuffer)[destSize], const typename TFileCursor::off_t maxLength = std::numeric_limits<typename TFileCursor::off_t>::max())
+	bool ReadSizedString(TFileCursor &f, char (&destBuffer)[destSize], const typename TFileCursor::pos_type maxLength = std::numeric_limits<typename TFileCursor::pos_type>::max())
 	{
 		mpt::packed<typename Tsize::base_type, typename Tsize::endian_type> srcSize;	// Enforce usage of a packed type by ensuring that the passed type has the required typedefs
 		if(!Read(f, srcSize))
 			return false;
-		return ReadString<mode>(f, destBuffer, std::min(static_cast<typename TFileCursor::off_t>(srcSize), maxLength));
+		return ReadString<mode>(f, destBuffer, std::min(static_cast<typename TFileCursor::pos_type>(srcSize), maxLength));
 	}
 
 	// Read a string with a preprended length field of type Tsize (must be a packed<*,*> type) into a std::string dest using a given read mode.
 	// The file cursor is advanced by the string length.
 	// Returns true if the size field could be read and at least one character could be read or 0 characters were requested.
 	template<typename Tsize, mpt::String::ReadWriteMode mode, typename TFileCursor>
-	bool ReadSizedString(TFileCursor &f, std::string &dest, const typename TFileCursor::off_t maxLength = std::numeric_limits<typename TFileCursor::off_t>::max())
+	bool ReadSizedString(TFileCursor &f, std::string &dest, const typename TFileCursor::pos_type maxLength = std::numeric_limits<typename TFileCursor::pos_type>::max())
 	{
 		mpt::packed<typename Tsize::base_type, typename Tsize::endian_type> srcSize;	// Enforce usage of a packed type by ensuring that the passed type has the required typedefs
 		if(!Read(f, srcSize))
 			return false;
-		return ReadString<mode>(f, dest, std::min(static_cast<typename TFileCursor::off_t>(srcSize), maxLength));
+		return ReadString<mode>(f, dest, std::min(static_cast<typename TFileCursor::pos_type>(srcSize), maxLength));
 	}
 
 	// Read a string with a preprended length field of type Tsize (must be a packed<*,*> type) into a mpt::charbuf dest using a given read mode.
 	// The file cursor is advanced by the string length.
 	// Returns true if the size field could be read and at least one character could be read or 0 characters were requested.
 	template<typename Tsize, mpt::String::ReadWriteMode mode, std::size_t len, typename TFileCursor>
-	bool ReadSizedString(TFileCursor &f, mpt::charbuf<len> &dest, const typename TFileCursor::off_t maxLength = std::numeric_limits<typename TFileCursor::off_t>::max())
+	bool ReadSizedString(TFileCursor &f, mpt::charbuf<len> &dest, const typename TFileCursor::pos_type maxLength = std::numeric_limits<typename TFileCursor::pos_type>::max())
 	{
 		mpt::packed<typename Tsize::base_type, typename Tsize::endian_type> srcSize;	// Enforce usage of a packed type by ensuring that the passed type has the required typedefs
 		if(!Read(f, srcSize))
 			return false;
-		return ReadString<mode>(f, dest, std::min(static_cast<typename TFileCursor::off_t>(srcSize), maxLength));
+		return ReadString<mode>(f, dest, std::min(static_cast<typename TFileCursor::pos_type>(srcSize), maxLength));
 	}
 
 	// Read a null-terminated string into a std::string
 	template <typename TFileCursor>
-	bool ReadNullString(TFileCursor &f, std::string &dest, const typename TFileCursor::off_t maxLength = std::numeric_limits<typename TFileCursor::off_t>::max())
+	bool ReadNullString(TFileCursor &f, std::string &dest, const typename TFileCursor::pos_type maxLength = std::numeric_limits<typename TFileCursor::pos_type>::max())
 	{
 		dest.clear();
 		if(!f.CanRead(1))
@@ -594,7 +594,7 @@ namespace FileReader
 			return false;
 		}
 		char buffer[mpt::IO::BUFFERSIZE_MINUSCULE];
-		typename TFileCursor::off_t avail = 0;
+		typename TFileCursor::pos_type avail = 0;
 		while((avail = std::min(f.GetRaw(mpt::as_span(buffer)).size(), maxLength - dest.length())) != 0)
 		{
 			auto end = std::find(buffer, buffer + avail, '\0');
@@ -612,7 +612,7 @@ namespace FileReader
 
 	// Read a string up to the next line terminator into a std::string
 	template <typename TFileCursor>
-	bool ReadLine(TFileCursor &f, std::string &dest, const typename TFileCursor::off_t maxLength = std::numeric_limits<typename TFileCursor::off_t>::max())
+	bool ReadLine(TFileCursor &f, std::string &dest, const typename TFileCursor::pos_type maxLength = std::numeric_limits<typename TFileCursor::pos_type>::max())
 	{
 		dest.clear();
 		if(!f.CanRead(1))
@@ -621,7 +621,7 @@ namespace FileReader
 		}
 		char buffer[mpt::IO::BUFFERSIZE_MINUSCULE];
 		char c = '\0';
-		typename TFileCursor::off_t avail = 0;
+		typename TFileCursor::pos_type avail = 0;
 		while((avail = std::min(f.GetRaw(mpt::as_span(buffer)).size(), maxLength - dest.length())) != 0)
 		{
 			auto end = std::find_if(buffer, buffer + avail, mpt::String::Traits<std::string>::IsLineEnding);
@@ -656,7 +656,7 @@ namespace FileReader
 		{
 			MPT_ASSERT(magic[i] != '\0');
 		}
-		constexpr typename TFileCursor::off_t magicLength = N - 1;
+		constexpr typename TFileCursor::pos_type magicLength = N - 1;
 		std::byte buffer[magicLength] = {};
 		if(f.GetRaw(mpt::span(buffer, magicLength)).size() != magicLength)
 		{
@@ -688,8 +688,8 @@ namespace FileReader
 		}
 
 		std::byte bytes[16];	// More than enough for any valid VarInt
-		typename TFileCursor::off_t avail = f.GetRaw(mpt::as_span(bytes)).size();
-		typename TFileCursor::off_t readPos = 1;
+		typename TFileCursor::pos_type avail = f.GetRaw(mpt::as_span(bytes)).size();
+		typename TFileCursor::pos_type readPos = 1;
 		
 		uint8 b = mpt::byte_cast<uint8>(bytes[0]);
 		target = (b & 0x7F);
@@ -735,7 +735,7 @@ private:
 	
 public:
 
-	using off_t = typename traits_type::off_t;
+	using pos_type = typename traits_type::pos_type;
 
 	using data_type        = typename traits_type::data_type;
 	using ref_data_type    = typename traits_type::ref_data_type;
@@ -752,13 +752,13 @@ protected:
 	static value_data_type DataInitializer() { return traits_type::make_data(); }
 	static value_data_type DataInitializer(mpt::const_byte_span data) { return traits_type::make_data(data); }
 
-	static value_data_type CreateChunkImpl(shared_data_type data, off_t position, off_t size) { return traits_type::make_chunk(data, position, size); }
+	static value_data_type CreateChunkImpl(shared_data_type data, pos_type position, pos_type size) { return traits_type::make_chunk(data, position, size); }
 
 private:
 
 	data_type m_data;
 
-	off_t streamPos;		// Cursor location in the file
+	pos_type streamPos;		// Cursor location in the file
 
 	shared_filename_type m_fileName;  // Filename that corresponds to this FileCursor. It is only set if this FileCursor represents the whole contents of fileName. May be nullopt.
 
@@ -818,7 +818,7 @@ public:
 
 	// Seek to a position in the mapped file.
 	// Returns false if position is invalid.
-	bool Seek(off_t position)
+	bool Seek(pos_type position)
 	{
 		if(position <= streamPos)
 		{
@@ -837,7 +837,7 @@ public:
 
 	// Increases position by skipBytes.
 	// Returns true if skipBytes could be skipped or false if the file end was reached earlier.
-	bool Skip(off_t skipBytes)
+	bool Skip(pos_type skipBytes)
 	{
 		if(CanRead(skipBytes))
 		{
@@ -852,7 +852,7 @@ public:
 
 	// Decreases position by skipBytes.
 	// Returns true if skipBytes could be skipped or false if the file start was reached earlier.
-	bool SkipBack(off_t skipBytes)
+	bool SkipBack(pos_type skipBytes)
 	{
 		if(streamPos >= skipBytes)
 		{
@@ -866,7 +866,7 @@ public:
 	}
 
 	// Returns cursor position in the mapped file.
-	off_t GetPosition() const
+	pos_type GetPosition() const
 	{
 		return streamPos;
 	}
@@ -880,14 +880,14 @@ public:
 	}
 
 	// Returns size of the mapped file in bytes.
-	FILEREADER_DEPRECATED off_t GetLength() const
+	FILEREADER_DEPRECATED pos_type GetLength() const
 	{
 		// deprecated because in case of an unseekable std::istream, this triggers caching of the whole file
 		return DataContainer().GetLength();
 	}
 
 	// Return byte count between cursor position and end of file, i.e. how many bytes can still be read.
-	FILEREADER_DEPRECATED off_t BytesLeft() const
+	FILEREADER_DEPRECATED pos_type BytesLeft() const
 	{
 		// deprecated because in case of an unseekable std::istream, this triggers caching of the whole file
 		return DataContainer().GetLength() - streamPos;
@@ -904,28 +904,28 @@ public:
 	}
 
 	// Check if "amount" bytes can be read from the current position in the stream.
-	bool CanRead(off_t amount) const
+	bool CanRead(pos_type amount) const
 	{
 		return DataContainer().CanRead(streamPos, amount);
 	}
 
 	// Check if file size is at least size, without potentially caching the whole file to query the exact file length.
-	bool LengthIsAtLeast(off_t size) const
+	bool LengthIsAtLeast(pos_type size) const
 	{
 		return DataContainer().CanRead(0, size);
 	}
 
 	// Check if file size is exactly size, without potentially caching the whole file if it is larger.
-	bool LengthIs(off_t size) const
+	bool LengthIs(pos_type size) const
 	{
 		return DataContainer().CanRead(0, size) && !DataContainer().CanRead(size, 1);
 	}
 
 protected:
 
-	FileCursor CreateChunk(off_t position, off_t length) const
+	FileCursor CreateChunk(pos_type position, pos_type length) const
 	{
-		off_t readableLength = DataContainer().GetReadableLength(position, length);
+		pos_type readableLength = DataContainer().GetReadableLength(position, length);
 		if(readableLength == 0)
 		{
 			return FileCursor();
@@ -937,22 +937,22 @@ public:
 
 	// Create a new FileCursor object for parsing a sub chunk at a given position with a given length.
 	// The file cursor is not modified.
-	FileCursor GetChunkAt(off_t position, off_t length) const
+	FileCursor GetChunkAt(pos_type position, pos_type length) const
 	{
 		return CreateChunk(position, length);
 	}
 
 	// Create a new FileCursor object for parsing a sub chunk at the current position with a given length.
 	// The file cursor is not advanced.
-	FileCursor GetChunk(off_t length)
+	FileCursor GetChunk(pos_type length)
 	{
 		return CreateChunk(streamPos, length);
 	}
 	// Create a new FileCursor object for parsing a sub chunk at the current position with a given length.
 	// The file cursor is advanced by "length" bytes.
-	FileCursor ReadChunk(off_t length)
+	FileCursor ReadChunk(pos_type length)
 	{
-		off_t position = streamPos;
+		pos_type position = streamPos;
 		Skip(length);
 		return CreateChunk(position, length);
 	}
@@ -1155,7 +1155,8 @@ private:
 
 public:
 
-	using off_t = typename traits_type::off_t;
+	using pos_type = typename traits_type::pos_type;
+	using off_t = pos_type;
 
 	using data_type = typename traits_type::data_type;
 	using ref_data_type = typename traits_type::ref_data_type;
@@ -1219,13 +1220,13 @@ public:
 	}
 
 	template <typename T>
-	T ReadTruncatedIntLE(off_t size)
+	T ReadTruncatedIntLE(pos_type size)
 	{
 		return mpt::FileReader::ReadTruncatedIntLE<T>(*this, size);
 	}
 
 	template <typename T>
-	T ReadSizedIntLE(off_t size)
+	T ReadSizedIntLE(pos_type size)
 	{
 		return mpt::FileReader::ReadSizedIntLE<T>(*this, size);
 	}
@@ -1328,53 +1329,53 @@ public:
 	}
 
 	template<mpt::String::ReadWriteMode mode, size_t destSize>
-	bool ReadString(char (&destBuffer)[destSize], const off_t srcSize)
+	bool ReadString(char (&destBuffer)[destSize], const pos_type srcSize)
 	{
 		return mpt::FileReader::ReadString<mode>(*this, destBuffer, srcSize);
 	}
 
 	template<mpt::String::ReadWriteMode mode>
-	bool ReadString(std::string &dest, const off_t srcSize)
+	bool ReadString(std::string &dest, const pos_type srcSize)
 	{
 		return mpt::FileReader::ReadString<mode>(*this, dest, srcSize);
 	}
 
 	template<mpt::String::ReadWriteMode mode, std::size_t len>
-	bool ReadString(mpt::charbuf<len> &dest, const off_t srcSize)
+	bool ReadString(mpt::charbuf<len> &dest, const pos_type srcSize)
 	{
 		return mpt::FileReader::ReadString<mode>(*this, dest, srcSize);
 	}
 
 	template<mpt::String::ReadWriteMode mode>
-	bool ReadString(mpt::ustring &dest, mpt::Charset charset, const off_t srcSize)
+	bool ReadString(mpt::ustring &dest, mpt::Charset charset, const pos_type srcSize)
 	{
 		return mpt::FileReader::ReadString<mode>(*this, dest, charset, srcSize);
 	}
 
 	template<typename Tsize, mpt::String::ReadWriteMode mode, size_t destSize>
-	bool ReadSizedString(char (&destBuffer)[destSize], const off_t maxLength = std::numeric_limits<off_t>::max())
+	bool ReadSizedString(char (&destBuffer)[destSize], const pos_type maxLength = std::numeric_limits<pos_type>::max())
 	{
 		return mpt::FileReader::ReadSizedString<Tsize, mode>(*this, destBuffer, maxLength);
 	}
 
 	template<typename Tsize, mpt::String::ReadWriteMode mode>
-	bool ReadSizedString(std::string &dest, const off_t maxLength = std::numeric_limits<off_t>::max())
+	bool ReadSizedString(std::string &dest, const pos_type maxLength = std::numeric_limits<pos_type>::max())
 	{
 		return mpt::FileReader::ReadSizedString<Tsize, mode>(*this, dest, maxLength);
 	}
 
 	template<typename Tsize, mpt::String::ReadWriteMode mode, std::size_t len>
-	bool ReadSizedString(mpt::charbuf<len> &dest, const off_t maxLength = std::numeric_limits<off_t>::max())
+	bool ReadSizedString(mpt::charbuf<len> &dest, const pos_type maxLength = std::numeric_limits<pos_type>::max())
 	{
 		return mpt::FileReader::ReadSizedString<Tsize, mode, len>(*this, dest, maxLength);
 	}
 
-	bool ReadNullString(std::string &dest, const off_t maxLength = std::numeric_limits<off_t>::max())
+	bool ReadNullString(std::string &dest, const pos_type maxLength = std::numeric_limits<pos_type>::max())
 	{
 		return mpt::FileReader::ReadNullString(*this, dest, maxLength);
 	}
 
-	bool ReadLine(std::string &dest, const off_t maxLength = std::numeric_limits<off_t>::max())
+	bool ReadLine(std::string &dest, const pos_type maxLength = std::numeric_limits<pos_type>::max())
 	{
 		return mpt::FileReader::ReadLine(*this, dest, maxLength);
 	}
