@@ -674,10 +674,10 @@ double module_impl::could_open_probability( callback_stream_wrapper stream, doub
 	fstream.read = stream.read;
 	fstream.seek = stream.seek;
 	fstream.tell = stream.tell;
-	return could_open_probability( OpenMPT::make_FileReader( fstream ), effort, std::move(log) );
+	return could_open_probability( OpenMPT::make_FileCursor( fstream ), effort, std::move(log) );
 }
 double module_impl::could_open_probability( std::istream & stream, double effort, std::unique_ptr<log_interface> log ) {
-	return could_open_probability( OpenMPT::make_FileReader( &stream ), effort, std::move(log) );
+	return could_open_probability( OpenMPT::make_FileCursor( &stream ), effort, std::move(log) );
 }
 
 std::size_t module_impl::probe_file_header_get_recommended_size() {
@@ -880,47 +880,47 @@ module_impl::module_impl( callback_stream_wrapper stream, std::unique_ptr<log_in
 	fstream.read = stream.read;
 	fstream.seek = stream.seek;
 	fstream.tell = stream.tell;
-	load( OpenMPT::make_FileReader( fstream ), ctls );
+	load( OpenMPT::make_FileCursor( fstream ), ctls );
 	apply_libopenmpt_defaults();
 }
 module_impl::module_impl( std::istream & stream, std::unique_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(std::move(log)) {
 	ctor( ctls );
-	load( OpenMPT::make_FileReader( &stream ), ctls );
+	load( OpenMPT::make_FileCursor( &stream ), ctls );
 	apply_libopenmpt_defaults();
 }
 module_impl::module_impl( const std::vector<std::byte> & data, std::unique_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(std::move(log)) {
 	ctor( ctls );
-	load( OpenMPT::make_FileReader( mpt::as_span( data ) ), ctls );
+	load( OpenMPT::make_FileCursor( mpt::as_span( data ) ), ctls );
 	apply_libopenmpt_defaults();
 }
 module_impl::module_impl( const std::vector<std::uint8_t> & data, std::unique_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(std::move(log)) {
 	ctor( ctls );
-	load( OpenMPT::make_FileReader( mpt::as_span( data ) ), ctls );
+	load( OpenMPT::make_FileCursor( mpt::as_span( data ) ), ctls );
 	apply_libopenmpt_defaults();
 }
 module_impl::module_impl( const std::vector<char> & data, std::unique_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(std::move(log)) {
 	ctor( ctls );
-	load( OpenMPT::make_FileReader( mpt::byte_cast< mpt::span< const std::byte > >( mpt::as_span( data ) ) ), ctls );
+	load( OpenMPT::make_FileCursor( mpt::byte_cast< mpt::span< const std::byte > >( mpt::as_span( data ) ) ), ctls );
 	apply_libopenmpt_defaults();
 }
 module_impl::module_impl( const std::byte * data, std::size_t size, std::unique_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(std::move(log)) {
 	ctor( ctls );
-	load( OpenMPT::make_FileReader( mpt::as_span( data, size ) ), ctls );
+	load( OpenMPT::make_FileCursor( mpt::as_span( data, size ) ), ctls );
 	apply_libopenmpt_defaults();
 }
 module_impl::module_impl( const std::uint8_t * data, std::size_t size, std::unique_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(std::move(log)) {
 	ctor( ctls );
-	load( OpenMPT::make_FileReader( mpt::as_span( data, size ) ), ctls );
+	load( OpenMPT::make_FileCursor( mpt::as_span( data, size ) ), ctls );
 	apply_libopenmpt_defaults();
 }
 module_impl::module_impl( const char * data, std::size_t size, std::unique_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(std::move(log)) {
 	ctor( ctls );
-	load( OpenMPT::make_FileReader( mpt::byte_cast< mpt::span< const std::byte > >( mpt::as_span( data, size ) ) ), ctls );
+	load( OpenMPT::make_FileCursor( mpt::byte_cast< mpt::span< const std::byte > >( mpt::as_span( data, size ) ) ), ctls );
 	apply_libopenmpt_defaults();
 }
 module_impl::module_impl( const void * data, std::size_t size, std::unique_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(std::move(log)) {
 	ctor( ctls );
-	load( OpenMPT::make_FileReader( mpt::as_span( mpt::void_cast< const std::byte * >( data ), size ) ), ctls );
+	load( OpenMPT::make_FileCursor( mpt::as_span( mpt::void_cast< const std::byte * >( data ), size ) ), ctls );
 	apply_libopenmpt_defaults();
 }
 module_impl::~module_impl() {

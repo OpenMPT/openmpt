@@ -724,14 +724,9 @@ namespace FileReader
 	}
 
 } // namespace FileReader
-} // namespace mpt
-
-namespace FR = mpt::FileReader;
-
-namespace detail {
 
 template <typename Ttraits>
-class FileReader
+class FileCursor
 {
 
 private:
@@ -765,18 +760,36 @@ private:
 
 	off_t streamPos;		// Cursor location in the file
 
-	shared_filename_type m_fileName;  // Filename that corresponds to this FileReader. It is only set if this FileReader represents the whole contents of fileName. May be nullopt.
+	shared_filename_type m_fileName;  // Filename that corresponds to this FileCursor. It is only set if this FileCursor represents the whole contents of fileName. May be nullopt.
 
 public:
 
 	// Initialize invalid file reader object.
-	FileReader() : m_data(DataInitializer()), streamPos(0), m_fileName(nullptr) { }
+	FileCursor()
+		: m_data(DataInitializer())
+		, streamPos(0)
+		, m_fileName(nullptr)
+	{
+		return;
+	}
 
 	// Initialize file reader object with pointer to data and data length.
-	template <typename Tbyte> explicit FileReader(mpt::span<Tbyte> bytedata, shared_filename_type filename = shared_filename_type{}) : m_data(DataInitializer(mpt::byte_cast<mpt::const_byte_span>(bytedata))), streamPos(0), m_fileName(filename) { }
+	template <typename Tbyte> explicit FileCursor(mpt::span<Tbyte> bytedata, shared_filename_type filename = shared_filename_type{})
+		: m_data(DataInitializer(mpt::byte_cast<mpt::const_byte_span>(bytedata)))
+		, streamPos(0)
+		, m_fileName(std::move(filename))
+	{
+		return;
+	}
 
 	// Initialize file reader object based on an existing file reader object window.
-	explicit FileReader(value_data_type other, shared_filename_type filename = shared_filename_type{}) : m_data(other), streamPos(0), m_fileName(filename) { }
+	explicit FileCursor(value_data_type other, shared_filename_type filename = shared_filename_type{})
+		: m_data(std::move(other))
+		, streamPos(0)
+		, m_fileName(std::move(filename))
+	{
+		return;
+	}
 
 public:
 
@@ -910,34 +923,34 @@ public:
 
 protected:
 
-	FileReader CreateChunk(off_t position, off_t length) const
+	FileCursor CreateChunk(off_t position, off_t length) const
 	{
 		off_t readableLength = DataContainer().GetReadableLength(position, length);
 		if(readableLength == 0)
 		{
-			return FileReader();
+			return FileCursor();
 		}
-		return FileReader(CreateChunkImpl(SharedDataContainer(), position, std::min(length, DataContainer().GetLength() - position)));
+		return FileCursor(CreateChunkImpl(SharedDataContainer(), position, std::min(length, DataContainer().GetLength() - position)));
 	}
 
 public:
 
-	// Create a new FileReader object for parsing a sub chunk at a given position with a given length.
+	// Create a new FileCursor object for parsing a sub chunk at a given position with a given length.
 	// The file cursor is not modified.
-	FileReader GetChunkAt(off_t position, off_t length) const
+	FileCursor GetChunkAt(off_t position, off_t length) const
 	{
 		return CreateChunk(position, length);
 	}
 
-	// Create a new FileReader object for parsing a sub chunk at the current position with a given length.
+	// Create a new FileCursor object for parsing a sub chunk at the current position with a given length.
 	// The file cursor is not advanced.
-	FileReader GetChunk(off_t length)
+	FileCursor GetChunk(off_t length)
 	{
 		return CreateChunk(streamPos, length);
 	}
-	// Create a new FileReader object for parsing a sub chunk at the current position with a given length.
+	// Create a new FileCursor object for parsing a sub chunk at the current position with a given length.
 	// The file cursor is advanced by "length" bytes.
-	FileReader ReadChunk(off_t length)
+	FileCursor ReadChunk(off_t length)
 	{
 		off_t position = streamPos;
 		Skip(length);
@@ -951,7 +964,7 @@ public:
 		const std::byte *pinnedData;
 		std::vector<std::byte> cache;
 	private:
-		void Init(const FileReader &file, std::size_t size)
+		void Init(const FileCursor &file, std::size_t size)
 		{
 			size_ = 0;
 			pinnedData = nullptr;
@@ -978,15 +991,15 @@ public:
 			, pinnedData(nullptr)
 		{
 		}
-		PinnedView(const FileReader &file)
+		PinnedView(const FileCursor &file)
 		{
 			Init(file, file.BytesLeft());
 		}
-		PinnedView(const FileReader &file, std::size_t size)
+		PinnedView(const FileCursor &file, std::size_t size)
 		{
 			Init(file, size);
 		}
-		PinnedView(FileReader &file, bool advance)
+		PinnedView(FileCursor &file, bool advance)
 		{
 			Init(file, file.BytesLeft());
 			if(advance)
@@ -994,7 +1007,7 @@ public:
 				file.Skip(size_);
 			}
 		}
-		PinnedView(FileReader &file, std::size_t size, bool advance)
+		PinnedView(FileCursor &file, std::size_t size, bool advance)
 		{
 			Init(file, size);
 			if(advance)
@@ -1119,6 +1132,73 @@ public:
 		PinnedView view = ReadPinnedView(size);
 		return mpt::make_vector(view.span());
 	}
+
+};
+
+} // namespace mpt
+
+namespace FR = mpt::FileReader;
+
+namespace detail {
+
+template <typename Ttraits>
+using FileCursor = mpt::FileCursor<Ttraits>;
+
+template <typename Ttraits>
+class FileReader
+	: public FileCursor<Ttraits>
+{
+
+private:
+
+	using traits_type = Ttraits;
+
+public:
+
+	using off_t = typename traits_type::off_t;
+
+	using data_type = typename traits_type::data_type;
+	using ref_data_type = typename traits_type::ref_data_type;
+	using shared_data_type = typename traits_type::shared_data_type;
+	using value_data_type = typename traits_type::value_data_type;
+
+	using shared_filename_type = typename traits_type::shared_filename_type;
+
+public:
+
+	// Initialize invalid file reader object.
+	FileReader()
+	{
+		return;
+	}
+
+	FileReader(const FileCursor<Ttraits> &other)
+		: FileCursor<Ttraits>(other)
+	{
+		return;
+	}
+	FileReader(FileCursor<Ttraits> &&other)
+		: FileCursor<Ttraits>(std::move(other))
+	{
+		return;
+	}
+
+	// Initialize file reader object with pointer to data and data length.
+	template <typename Tbyte>
+	explicit FileReader(mpt::span<Tbyte> bytedata, shared_filename_type filename = shared_filename_type{})
+		: FileCursor<Ttraits>(bytedata, std::move(filename))
+	{
+		return;
+	}
+
+	// Initialize file reader object based on an existing file reader object window.
+	explicit FileReader(value_data_type other, shared_filename_type filename = shared_filename_type{})
+		: FileCursor<Ttraits>(std::move(other), std::move(filename))
+	{
+		return;
+	}
+
+public:
 
 	template <typename T>
 	bool Read(T &target)
@@ -1339,20 +1419,21 @@ public:
 
 } // namespace detail
 
+using FileCursor = detail::FileCursor<FileReaderTraitsStdStream>;
 using FileReader = detail::FileReader<FileReaderTraitsStdStream>;
 
 using MemoryFileReader = detail::FileReader<FileReaderTraitsMemory>;
 
 
 // Initialize file reader object with pointer to data and data length.
-template <typename Tbyte> inline FileReader make_FileReader(mpt::span<Tbyte> bytedata, std::shared_ptr<mpt::PathString> filename = nullptr)
+template <typename Tbyte> inline FileReader make_FileCursor(mpt::span<Tbyte> bytedata, std::shared_ptr<mpt::PathString> filename = nullptr)
 {
 	return FileReader(mpt::byte_cast<mpt::const_byte_span>(bytedata), std::move(filename));
 }
 
 
 // Initialize file reader object with a CallbackStream.
-inline FileReader make_FileReader(CallbackStream s, std::shared_ptr<mpt::PathString> filename = nullptr)
+inline FileReader make_FileCursor(CallbackStream s, std::shared_ptr<mpt::PathString> filename = nullptr)
 {
 	return FileReader(
 				FileDataContainerCallbackStreamSeekable::IsSeekable(s) ?
@@ -1365,7 +1446,7 @@ inline FileReader make_FileReader(CallbackStream s, std::shared_ptr<mpt::PathStr
 
 
 // Initialize file reader object with a std::istream.
-inline FileReader make_FileReader(std::istream *s, std::shared_ptr<mpt::PathString> filename = nullptr)
+inline FileReader make_FileCursor(std::istream *s, std::shared_ptr<mpt::PathString> filename = nullptr)
 {
 	return FileReader(
 				FileDataContainerStdStreamSeekable::IsSeekable(s) ?
@@ -1389,10 +1470,10 @@ FileReader GetFileReader(TInputFile &file)
 	MPT_ASSERT(!file.GetFilename().empty());
 	if(file.IsCached())
 	{
-		return make_FileReader(file.GetCache(), std::make_shared<mpt::PathString>(file.GetFilename()));
+		return make_FileCursor(file.GetCache(), std::make_shared<mpt::PathString>(file.GetFilename()));
 	} else
 	{
-		return make_FileReader(file.GetStream(), std::make_shared<mpt::PathString>(file.GetFilename()));
+		return make_FileCursor(file.GetStream(), std::make_shared<mpt::PathString>(file.GetFilename()));
 	}
 }
 #endif // MPT_ENABLE_FILEIO

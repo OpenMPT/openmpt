@@ -25,8 +25,8 @@ class ChunkReader : public FileReader
 public:
 
 	template <typename Tbyte> ChunkReader(mpt::span<Tbyte> bytedata) : FileReader(bytedata) { }
-	ChunkReader(const FileReader &other) : FileReader(other) { }
-	ChunkReader(FileReader &&other) : FileReader(std::move(other)) { }
+	ChunkReader(const FileCursor &other) : FileReader(other) { }
+	ChunkReader(FileCursor &&other) : FileReader(std::move(other)) { }
 
 	template<typename T>
 	class Item

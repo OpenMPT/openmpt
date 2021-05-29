@@ -223,7 +223,7 @@ bool CSoundFile::ReadMUS_KM(FileReader &file, ModLoadingFlags loadFlags)
 		
 		Order().SetName(mpt::ToUnicode(mpt::Charset::CP437, songHeader.name));
 
-		auto musicData = (loadFlags & loadPatternData) ? chunk.ReadChunk(songHeader.musicSize) : FileReader{};
+		FileReader musicData = (loadFlags & loadPatternData) ? chunk.ReadChunk(songHeader.musicSize) : FileReader{};
 
 		// Map the samples for this subsong
 		std::array<SAMPLEINDEX, 32> sampleMap{};

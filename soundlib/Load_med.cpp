@@ -584,7 +584,7 @@ static void ConvertMEDEffect(ModCommand &m, bool is8ch, bool bpmMode, uint8 rows
 #ifndef NO_VST
 static std::wstring ReadMEDStringUTF16BE(FileReader &file)
 {
-	auto chunk = file.ReadChunk(file.ReadUint32BE());
+	FileReader chunk = file.ReadChunk(file.ReadUint32BE());
 	std::wstring s(chunk.GetLength() / 2u, L'\0');
 	for(auto &c : s)
 	{

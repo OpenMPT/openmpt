@@ -37,8 +37,10 @@ public:
 		eof() : std::range_error("Truncated bit buffer") { }
 	};
 
+	BitReader() : FileReader() { }
 	BitReader(mpt::span<const std::byte> bytedata) : FileReader(bytedata) { }
-	BitReader(const FileReader &other = FileReader()) : FileReader(other) { }
+	BitReader(const FileCursor &other) : FileReader(other) { }
+	BitReader(FileCursor &&other) : FileReader(std::move(other)) { }
 
 	off_t GetLength() const
 	{
