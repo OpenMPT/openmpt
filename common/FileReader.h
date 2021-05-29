@@ -773,7 +773,7 @@ public:
 	FileReader() : m_data(DataInitializer()), streamPos(0), m_fileName(nullptr) { }
 
 	// Initialize file reader object with pointer to data and data length.
-	template <typename Tbyte> FileReader(mpt::span<Tbyte> bytedata, shared_filename_type filename = shared_filename_type{}) : m_data(DataInitializer(mpt::byte_cast<mpt::const_byte_span>(bytedata))), streamPos(0), m_fileName(filename) { }
+	template <typename Tbyte> explicit FileReader(mpt::span<Tbyte> bytedata, shared_filename_type filename = shared_filename_type{}) : m_data(DataInitializer(mpt::byte_cast<mpt::const_byte_span>(bytedata))), streamPos(0), m_fileName(filename) { }
 
 	// Initialize file reader object based on an existing file reader object window.
 	explicit FileReader(value_data_type other, shared_filename_type filename = shared_filename_type{}) : m_data(other), streamPos(0), m_fileName(filename) { }

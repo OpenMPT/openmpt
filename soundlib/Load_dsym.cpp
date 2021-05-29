@@ -499,7 +499,7 @@ bool CSoundFile::ReadDSym(FileReader &file, ModLoadingFlags loadFlags)
 					b = mpt::byte_cast<std::byte>(v);
 				}
 
-				FileReader sampleDataFile = mpt::as_span(sampleData);
+				FileReader sampleDataFile = FileReader(mpt::as_span(sampleData));
 				SampleIO(
 					SampleIO::_16bit,
 					SampleIO::mono,
@@ -523,7 +523,7 @@ bool CSoundFile::ReadDSym(FileReader &file, ModLoadingFlags loadFlags)
 				}
 				if(!(loadFlags & loadSampleData))
 					break;
-				FileReader sampleDataFile = mpt::as_span(sampleData);
+				FileReader sampleDataFile = FileReader(mpt::as_span(sampleData));
 				SampleIO(
 					SampleIO::_8bit,
 					SampleIO::mono,
@@ -571,7 +571,7 @@ bool CSoundFile::ReadDSym(FileReader &file, ModLoadingFlags loadFlags)
 					}
 				}
 
-				FileReader sampleDataFile = mpt::as_span(sampleData);
+				FileReader sampleDataFile = FileReader(mpt::as_span(sampleData));
 				SampleIO(
 					(packingType == 5) ? SampleIO::_16bit : SampleIO::_8bit,
 					SampleIO::mono,
@@ -590,7 +590,7 @@ bool CSoundFile::ReadDSym(FileReader &file, ModLoadingFlags loadFlags)
 		std::vector<std::byte> infoData;
 		if(!ReadDSymChunk(file, infoData, infoLen))
 			return false;
-		FileReader infoChunk = mpt::as_span(infoData);
+		FileReader infoChunk = FileReader(mpt::as_span(infoData));
 		m_songMessage.Read(infoChunk, infoLen, SongMessage::leLF);
 	}
 

@@ -1123,11 +1123,11 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 				} else if(chunkType == ChunkType::SamplePacked)
 				{
 					unpackedSample = DecodeSample8(file);
-					chunk = mpt::as_span(unpackedSample);
+					chunk = FileReader(mpt::as_span(unpackedSample));
 				} else  // SamplePacked16
 				{
 					unpackedSample = DecodeSample16(file);
-					chunk = mpt::as_span(unpackedSample);
+					chunk = FileReader(mpt::as_span(unpackedSample));
 				}
 
 				if(!ReadIFFSample(sample, chunk)
