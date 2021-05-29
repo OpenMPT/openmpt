@@ -590,26 +590,22 @@ namespace FileReader
 	{
 		dest.clear();
 		if(!f.CanRead(1))
+		{
 			return false;
-		try
+		}
+		char buffer[mpt::IO::BUFFERSIZE_MINUSCULE];
+		typename TFileCursor::off_t avail = 0;
+		while((avail = std::min(f.GetRaw(mpt::as_span(buffer)).size(), maxLength - dest.length())) != 0)
 		{
-			char buffer[64];
-			typename TFileCursor::off_t avail = 0;
-			while((avail = std::min(f.GetRaw(mpt::as_span(buffer)).size(), maxLength - dest.length())) != 0)
+			auto end = std::find(buffer, buffer + avail, '\0');
+			dest.insert(dest.end(), buffer, end);
+			f.Skip(end - buffer);
+			if(end < buffer + avail)
 			{
-				auto end = std::find(buffer, buffer + avail, '\0');
-				dest.insert(dest.end(), buffer, end);
-				f.Skip(end - buffer);
-				if(end < buffer + avail)
-				{
-					// Found null char
-					f.Skip(1);
-					break;
-				}
+				// Found null char
+				f.Skip(1);
+				break;
 			}
-		} catch(mpt::out_of_memory e)
-		{
-			mpt::delete_out_of_memory(e);
 		}
 		return dest.length() != 0;
 	}
@@ -620,33 +616,31 @@ namespace FileReader
 	{
 		dest.clear();
 		if(!f.CanRead(1))
+		{
 			return false;
-		try
+		}
+		char buffer[mpt::IO::BUFFERSIZE_MINUSCULE];
+		char c = '\0';
+		typename TFileCursor::off_t avail = 0;
+		while((avail = std::min(f.GetRaw(mpt::as_span(buffer)).size(), maxLength - dest.length())) != 0)
 		{
-			char buffer[64];
-			char c = '\0';
-			typename TFileCursor::off_t avail = 0;
-			while((avail = std::min(f.GetRaw(mpt::as_span(buffer)).size(), maxLength - dest.length())) != 0)
+			auto end = std::find_if(buffer, buffer + avail, mpt::String::Traits<std::string>::IsLineEnding);
+			dest.insert(dest.end(), buffer, end);
+			f.Skip(end - buffer);
+			if(end < buffer + avail)
 			{
-				auto end = std::find_if(buffer, buffer + avail, mpt::String::Traits<std::string>::IsLineEnding);
-				dest.insert(dest.end(), buffer, end);
-				f.Skip(end - buffer);
-				if(end < buffer + avail)
+				// Found line ending
+				f.Skip(1);
+				// Handle CRLF line ending
+				if(*end == '\r')
 				{
-					// Found line ending
-					f.Skip(1);
-					// Handle CRLF line ending
-					if(*end == '\r')
+					if(Read(f, c) && c != '\n')
 					{
-						if(Read(f, c) && c != '\n')
-							f.SkipBack(1);
+						f.SkipBack(1);
 					}
-					break;
 				}
+				break;
 			}
-		} catch(mpt::out_of_memory e)
-		{
-			mpt::delete_out_of_memory(e);
 		}
 		return true;
 	}

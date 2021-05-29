@@ -31,10 +31,11 @@ namespace IO {
 
 typedef int64 Offset;
 
-inline constexpr std::size_t BUFFERSIZE_TINY   =    1 * 1024; // on stack usage
-inline constexpr std::size_t BUFFERSIZE_SMALL  =    4 * 1024; // on heap
-inline constexpr std::size_t BUFFERSIZE_NORMAL =   64 * 1024; // FILE I/O
-inline constexpr std::size_t BUFFERSIZE_LARGE  = 1024 * 1024;
+inline constexpr std::size_t BUFFERSIZE_MINUSCULE =    1 *  256; // on stack usage, tuned for single word/line buffers
+inline constexpr std::size_t BUFFERSIZE_TINY      =    1 * 1024; // on stack usage
+inline constexpr std::size_t BUFFERSIZE_SMALL     =    4 * 1024; // on heap
+inline constexpr std::size_t BUFFERSIZE_NORMAL    =   64 * 1024; // FILE I/O
+inline constexpr std::size_t BUFFERSIZE_LARGE     = 1024 * 1024;
 
 
 
