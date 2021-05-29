@@ -311,7 +311,7 @@ inline mpt::widestring decode_utf8(const Tsrcstring & str, mpt::widechar replace
 }
 
 template <typename Tdststring>
-inline Tdststring encode_utf8(const mpt::widestring & str, char replacement = '?') {
+inline Tdststring encode_utf8(const mpt::widestring & str, typename Tdststring::value_type replacement = static_cast<typename Tdststring::value_type>(mpt::char_value('?'))) {
 	const mpt::widestring & in = str;
 	Tdststring out;
 	for (std::size_t i = 0; i < in.length(); i++) {
@@ -532,7 +532,7 @@ inline UINT codepage_from_encoding(common_encoding encoding) {
 template <typename Tdststring>
 inline Tdststring encode_codepage(UINT codepage, const mpt::widestring & src) {
 	static_assert(sizeof(typename Tdststring::value_type) == sizeof(char));
-	static_assert((std::is_same<typename Tdststring::value_type, char>::value));
+	static_assert(std::is_same<typename Tdststring::value_type, char>::value);
 	Tdststring encoded_string;
 	int required_size = WideCharToMultiByte(codepage, 0, src.data(), mpt::saturate_cast<int>(src.size()), nullptr, 0, nullptr, nullptr);
 	if (required_size > 0) {
@@ -545,7 +545,7 @@ inline Tdststring encode_codepage(UINT codepage, const mpt::widestring & src) {
 template <typename Tsrcstring>
 inline mpt::widestring decode_codepage(UINT codepage, const Tsrcstring & src) {
 	static_assert(sizeof(typename Tsrcstring::value_type) == sizeof(char));
-	static_assert((std::is_same<typename Tsrcstring::value_type, char>::value));
+	static_assert(std::is_same<typename Tsrcstring::value_type, char>::value);
 	mpt::widestring decoded_string;
 	int required_size = MultiByteToWideChar(codepage, 0, reinterpret_cast<const CHAR *>(src.data()), mpt::saturate_cast<int>(src.size()), nullptr, 0);
 	if (required_size > 0) {
@@ -776,7 +776,7 @@ inline Tdststring encode_locale(const std::locale & locale, const mpt::widestrin
 template <typename Tdststring>
 inline Tdststring encode(UINT codepage, const mpt::widestring & src) {
 	static_assert(sizeof(typename Tdststring::value_type) == sizeof(char));
-	static_assert((std::is_same<typename Tdststring::value_type, char>::value));
+	static_assert(std::is_same<typename Tdststring::value_type, char>::value);
 	return encode_codepage<Tdststring>(codepage, src);
 }
 #endif // MPT_OS_WINDOWS
@@ -785,7 +785,7 @@ inline Tdststring encode(UINT codepage, const mpt::widestring & src) {
 template <typename Tdststring>
 inline Tdststring encode(const std::locale & locale, const mpt::widestring & src) {
 	static_assert(sizeof(typename Tdststring::value_type) == sizeof(char));
-	static_assert((std::is_same<typename Tdststring::value_type, char>::value));
+	static_assert(std::is_same<typename Tdststring::value_type, char>::value);
 	return encode_locale<Tdststring>(src, locale);
 }
 #endif // !MPT_COMPILER_QUIRK_NO_WCHAR
@@ -793,14 +793,14 @@ inline Tdststring encode(const std::locale & locale, const mpt::widestring & src
 template <typename Tdststring>
 inline Tdststring encode(const char32_t (&table)[256], const mpt::widestring & src) {
 	static_assert(sizeof(typename Tdststring::value_type) == sizeof(char));
-	static_assert((std::is_same<typename Tdststring::value_type, char>::value));
+	static_assert(std::is_same<typename Tdststring::value_type, char>::value);
 	return encode_8bit<Tdststring>(src, table);
 }
 
 template <typename Tdststring>
 inline Tdststring encode(common_encoding encoding, const mpt::widestring & src) {
 	static_assert(sizeof(typename Tdststring::value_type) == sizeof(char));
-	static_assert((std::is_same<typename Tdststring::value_type, char>::value));
+	static_assert(std::is_same<typename Tdststring::value_type, char>::value);
 #if MPT_OS_WINDOWS
 	if (windows_has_encoding(encoding)) {
 		return encode_codepage<Tdststring>(codepage_from_encoding(encoding), src);
@@ -835,7 +835,7 @@ inline Tdststring encode(common_encoding encoding, const mpt::widestring & src) 
 template <typename Tdststring>
 inline Tdststring encode(logical_encoding encoding, const mpt::widestring & src) {
 	static_assert(sizeof(typename Tdststring::value_type) == sizeof(char));
-	static_assert((std::is_same<typename Tdststring::value_type, char>::value));
+	static_assert(std::is_same<typename Tdststring::value_type, char>::value);
 #if MPT_OS_WINDOWS
 	if (windows_has_encoding(encoding)) {
 		return encode_codepage<Tdststring>(codepage_from_encoding(encoding), src);
@@ -870,7 +870,7 @@ inline Tdststring encode(logical_encoding encoding, const mpt::widestring & src)
 template <typename Tsrcstring>
 inline mpt::widestring decode(UINT codepage, const Tsrcstring & src) {
 	static_assert(sizeof(typename Tsrcstring::value_type) == sizeof(char));
-	static_assert((std::is_same<typename Tsrcstring::value_type, char>::value));
+	static_assert(std::is_same<typename Tsrcstring::value_type, char>::value);
 	return decode_codepage(codepage, src);
 }
 #endif // MPT_OS_WINDOWS
@@ -879,7 +879,7 @@ inline mpt::widestring decode(UINT codepage, const Tsrcstring & src) {
 template <typename Tsrcstring>
 inline mpt::widestring decode(const std::locale & locale, const Tsrcstring & src) {
 	static_assert(sizeof(typename Tsrcstring::value_type) == sizeof(char));
-	static_assert((std::is_same<typename Tsrcstring::value_type, char>::value));
+	static_assert(std::is_same<typename Tsrcstring::value_type, char>::value);
 	return decode_locale(src, locale);
 }
 #endif // !MPT_COMPILER_QUIRK_NO_WCHAR
@@ -887,14 +887,14 @@ inline mpt::widestring decode(const std::locale & locale, const Tsrcstring & src
 template <typename Tsrcstring>
 inline mpt::widestring decode(const char32_t (&table)[256], const Tsrcstring & src) {
 	static_assert(sizeof(typename Tsrcstring::value_type) == sizeof(char));
-	static_assert((std::is_same<typename Tsrcstring::value_type, char>::value));
+	static_assert(std::is_same<typename Tsrcstring::value_type, char>::value);
 	return decode_8bit(src, table);
 }
 
 template <typename Tsrcstring>
 inline mpt::widestring decode(common_encoding encoding, const Tsrcstring & src) {
 	static_assert(sizeof(typename Tsrcstring::value_type) == sizeof(char));
-	static_assert((std::is_same<typename Tsrcstring::value_type, char>::value));
+	static_assert(std::is_same<typename Tsrcstring::value_type, char>::value);
 #if MPT_OS_WINDOWS
 	if (windows_has_encoding(encoding)) {
 		return decode_codepage(codepage_from_encoding(encoding), src);
@@ -929,7 +929,7 @@ inline mpt::widestring decode(common_encoding encoding, const Tsrcstring & src) 
 template <typename Tsrcstring>
 inline mpt::widestring decode(logical_encoding encoding, const Tsrcstring & src) {
 	static_assert(sizeof(typename Tsrcstring::value_type) == sizeof(char));
-	static_assert((std::is_same<typename Tsrcstring::value_type, char>::value));
+	static_assert(std::is_same<typename Tsrcstring::value_type, char>::value);
 #if MPT_OS_WINDOWS
 	if (windows_has_encoding(encoding)) {
 		return decode_codepage(codepage_from_encoding(encoding), src);
@@ -1012,10 +1012,10 @@ template <>
 struct string_converter<std::u8string> {
 	using string_type = std::u8string;
 	static inline mpt::widestring decode(const string_type & src) {
-		return mpt::decode<string_type>(common_encoding::utf8, src);
+		return mpt::decode_utf8<string_type>(src);
 	}
 	static inline string_type encode(const mpt::widestring & src) {
-		return mpt::encode<string_type>(common_encoding::utf8, src);
+		return mpt::encode_utf8<string_type>(src);
 	}
 };
 #endif // C++10
