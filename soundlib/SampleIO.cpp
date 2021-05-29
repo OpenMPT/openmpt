@@ -42,7 +42,7 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 
 	FileReader::off_t filePosition = file.GetPosition();
 	const std::byte * sourceBuf = nullptr;
-	FileReader::PinnedRawDataView restrictedSampleDataView;
+	FileReader::PinnedView restrictedSampleDataView;
 	FileReader::off_t fileSize = 0;
 	if(UsesFileReaderForDecoding())
 	{
@@ -50,7 +50,7 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 		fileSize = file.BytesLeft();
 	} else if(!IsVariableLengthEncoded())
 	{
-		restrictedSampleDataView = file.GetPinnedRawDataView(CalculateEncodedSize(sample.nLength));
+		restrictedSampleDataView = file.GetPinnedView(CalculateEncodedSize(sample.nLength));
 		sourceBuf = restrictedSampleDataView.data();
 		fileSize = restrictedSampleDataView.size();
 	} else
@@ -170,7 +170,7 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 		int8 packCharacter = file.ReadUint8();
 		bytesRead += 9;
 
-		FileReader::PinnedRawDataView packedDataView = file.ReadPinnedRawDataView(sourceSize);
+		FileReader::PinnedView packedDataView = file.ReadPinnedView(sourceSize);
 		LimitMax(sourceSize, mpt::saturate_cast<uint32>(packedDataView.size()));
 		bytesRead += sourceSize;
 

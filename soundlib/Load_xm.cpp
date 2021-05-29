@@ -516,7 +516,7 @@ static bool ReadSampleData(ModSample &sample, SampleIO sampleFlags, FileReader &
 
 		int consumed = 0, error = 0;
 		stb_vorbis *vorb = nullptr;
-		FileReader::PinnedRawDataView sampleDataView = sampleData.GetPinnedRawDataView();
+		FileReader::PinnedView sampleDataView = sampleData.GetPinnedView();
 		const std::byte* data = sampleDataView.data();
 		std::size_t dataLeft = sampleDataView.size();
 		vorb = stb_vorbis_open_pushdata(mpt::byte_cast<const unsigned char*>(data), mpt::saturate_cast<int>(dataLeft), &consumed, &error, nullptr);

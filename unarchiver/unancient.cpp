@@ -27,7 +27,7 @@ CAncientArchive::CAncientArchive(FileReader &file)
 	inFile.Rewind();
 	try
 	{
-		auto dataView = inFile.GetPinnedRawDataView();
+		auto dataView = inFile.GetPinnedView();
 		if(!ancient::Decompressor::detect(mpt::byte_cast<const std::uint8_t*>(dataView.data()), dataView.size()))
 		{
 			return;
@@ -66,7 +66,7 @@ bool CAncientArchive::ExtractFile(std::size_t index)
 	inFile.Rewind();
 	try
 	{
-		auto dataView = inFile.GetPinnedRawDataView();
+		auto dataView = inFile.GetPinnedView();
 		ancient::Decompressor decompressor{mpt::byte_cast<const std::uint8_t*>(dataView.data()), dataView.size(), true, true};
 		data = mpt::buffer_cast<std::vector<char>>(decompressor.decompress(true));
 	} catch (const ancient::Error &)

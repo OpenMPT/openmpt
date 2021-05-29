@@ -268,7 +268,7 @@ bool CSoundFile::ReadVorbisSample(SAMPLEINDEX sample, FileReader &file)
 	// means that, for remuxed and re-aligned/cutted (at stream start) Vorbis
 	// files, stb_vorbis will include superfluous samples at the beginning.
 
-	FileReader::PinnedRawDataView fileView = file.GetPinnedRawDataView();
+	FileReader::PinnedView fileView = file.GetPinnedView();
 	const std::byte* data = fileView.data();
 	std::size_t dataLeft = fileView.size();
 

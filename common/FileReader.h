@@ -504,7 +504,7 @@ namespace FileReader
 	template<mpt::String::ReadWriteMode mode, size_t destSize, typename TFileCursor>
 	bool ReadString(TFileCursor &f, char (&destBuffer)[destSize], const typename TFileCursor::off_t srcSize)
 	{
-		typename TFileCursor::PinnedRawDataView source = f.ReadPinnedRawDataView(srcSize); // Make sure the string is cached properly.
+		typename TFileCursor::PinnedView source = f.ReadPinnedView(srcSize); // Make sure the string is cached properly.
 		typename TFileCursor::off_t realSrcSize = source.size();	// In case fewer bytes are available
 		mpt::String::WriteAutoBuf(destBuffer) = mpt::String::ReadBuf(mode, mpt::byte_cast<const char*>(source.data()), realSrcSize);
 		return (realSrcSize > 0 || srcSize == 0);
@@ -517,7 +517,7 @@ namespace FileReader
 	bool ReadString(TFileCursor &f, std::string &dest, const typename TFileCursor::off_t srcSize)
 	{
 		dest.clear();
-		typename TFileCursor::PinnedRawDataView source = f.ReadPinnedRawDataView(srcSize);	// Make sure the string is cached properly.
+		typename TFileCursor::PinnedView source = f.ReadPinnedView(srcSize);	// Make sure the string is cached properly.
 		typename TFileCursor::off_t realSrcSize = source.size();	// In case fewer bytes are available
 		dest = mpt::String::ReadBuf(mode, mpt::byte_cast<const char*>(source.data()), realSrcSize);
 		return (realSrcSize > 0 || srcSize == 0);
@@ -529,7 +529,7 @@ namespace FileReader
 	template<mpt::String::ReadWriteMode mode, std::size_t len, typename TFileCursor>
 	bool ReadString(TFileCursor &f, mpt::charbuf<len> &dest, const typename TFileCursor::off_t srcSize)
 	{
-		typename TFileCursor::PinnedRawDataView source = f.ReadPinnedRawDataView(srcSize);	// Make sure the string is cached properly.
+		typename TFileCursor::PinnedView source = f.ReadPinnedView(srcSize);	// Make sure the string is cached properly.
 		typename TFileCursor::off_t realSrcSize = source.size();	// In case fewer bytes are available
 		dest = mpt::String::ReadBuf(mode, mpt::byte_cast<const char*>(source.data()), realSrcSize);
 		return (realSrcSize > 0 || srcSize == 0);
@@ -542,7 +542,7 @@ namespace FileReader
 	bool ReadString(TFileCursor &f, mpt::ustring &dest, mpt::Charset charset, const typename TFileCursor::off_t srcSize)
 	{
 		dest.clear();
-		typename TFileCursor::PinnedRawDataView source = f.ReadPinnedRawDataView(srcSize);	// Make sure the string is cached properly.
+		typename TFileCursor::PinnedView source = f.ReadPinnedView(srcSize);	// Make sure the string is cached properly.
 		typename TFileCursor::off_t realSrcSize = source.size();	// In case fewer bytes are available
 		dest = mpt::ToUnicode(charset, mpt::String::ReadBuf(mode, mpt::byte_cast<const char*>(source.data()), realSrcSize));
 		return (realSrcSize > 0 || srcSize == 0);
@@ -944,7 +944,7 @@ public:
 		return CreateChunk(position, length);
 	}
 
-	class PinnedRawDataView
+	class PinnedView
 	{
 	private:
 		std::size_t size_;
@@ -975,20 +975,20 @@ public:
 			}
 		}
 	public:
-		PinnedRawDataView()
+		PinnedView()
 			: size_(0)
 			, pinnedData(nullptr)
 		{
 		}
-		PinnedRawDataView(const FileReader &file)
+		PinnedView(const FileReader &file)
 		{
 			Init(file, file.BytesLeft());
 		}
-		PinnedRawDataView(const FileReader &file, std::size_t size)
+		PinnedView(const FileReader &file, std::size_t size)
 		{
 			Init(file, size);
 		}
-		PinnedRawDataView(FileReader &file, bool advance)
+		PinnedView(FileReader &file, bool advance)
 		{
 			Init(file, file.BytesLeft());
 			if(advance)
@@ -996,7 +996,7 @@ public:
 				file.Skip(size_);
 			}
 		}
-		PinnedRawDataView(FileReader &file, std::size_t size, bool advance)
+		PinnedView(FileReader &file, std::size_t size, bool advance)
 		{
 			Init(file, size);
 			if(advance)
@@ -1029,32 +1029,32 @@ public:
 	};
 
 	// Returns a pinned view into the remaining raw data from cursor position.
-	PinnedRawDataView GetPinnedRawDataView() const
+	PinnedView GetPinnedView() const
 	{
-		return PinnedRawDataView(*this);
+		return PinnedView(*this);
 	}
 	// Returns a pinned view into the remeining raw data from cursor position, clamped at size.
-	PinnedRawDataView GetPinnedRawDataView(std::size_t size) const
+	PinnedView GetPinnedView(std::size_t size) const
 	{
-		return PinnedRawDataView(*this, size);
+		return PinnedView(*this, size);
 	}
 
 	// Returns a pinned view into the remeining raw data from cursor position.
 	// File cursor is advaned by the size of the returned pinned view.
-	PinnedRawDataView ReadPinnedRawDataView()
+	PinnedView ReadPinnedView()
 	{
-		return PinnedRawDataView(*this, true);
+		return PinnedView(*this, true);
 	}
 	// Returns a pinned view into the remeining raw data from cursor position, clamped at size.
 	// File cursor is advaned by the size of the returned pinned view.
-	PinnedRawDataView ReadPinnedRawDataView(std::size_t size)
+	PinnedView ReadPinnedView(std::size_t size)
 	{
-		return PinnedRawDataView(*this, size, true);
+		return PinnedView(*this, size, true);
 	}
 
 	// Returns raw stream data at cursor position.
 	// Should only be used if absolutely necessary, for example for sample reading, or when used with a small chunk of the file retrieved by ReadChunk().
-	// Use GetPinnedRawDataView(size) whenever possible.
+	// Use GetPinnedView(size) whenever possible.
 	FILEREADER_DEPRECATED mpt::const_byte_span GetRawData() const
 	{
 		// deprecated because in case of an unseekable std::istream, this triggers caching of the whole file
@@ -1103,22 +1103,22 @@ public:
 
 	std::vector<std::byte> GetRawDataAsByteVector() const
 	{
-		PinnedRawDataView view = GetPinnedRawDataView();
+		PinnedView view = GetPinnedView();
 		return mpt::make_vector(view.span());
 	}
 	std::vector<std::byte> ReadRawDataAsByteVector()
 	{
-		PinnedRawDataView view = ReadPinnedRawDataView();
+		PinnedView view = ReadPinnedView();
 		return mpt::make_vector(view.span());
 	}
 	std::vector<std::byte> GetRawDataAsByteVector(std::size_t size) const
 	{
-		PinnedRawDataView view = GetPinnedRawDataView(size);
+		PinnedView view = GetPinnedView(size);
 		return mpt::make_vector(view.span());
 	}
 	std::vector<std::byte> ReadRawDataAsByteVector(std::size_t size)
 	{
-		PinnedRawDataView view = ReadPinnedRawDataView(size);
+		PinnedView view = ReadPinnedView(size);
 		return mpt::make_vector(view.span());
 	}
 

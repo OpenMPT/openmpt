@@ -109,7 +109,7 @@ std::unique_ptr<Gdiplus::Bitmap> LoadPixelImage(mpt::const_byte_span file)
 
 std::unique_ptr<Gdiplus::Bitmap> LoadPixelImage(FileReader file)
 {
-	FileReader::PinnedRawDataView view = file.GetPinnedRawDataView();
+	FileReader::PinnedView view = file.GetPinnedView();
 	return LoadPixelImage(view.span());
 }
 
@@ -132,7 +132,7 @@ std::unique_ptr<Gdiplus::Metafile> LoadVectorImage(mpt::const_byte_span file)
 
 std::unique_ptr<Gdiplus::Metafile> LoadVectorImage(FileReader file)
 {
-	FileReader::PinnedRawDataView view = file.GetPinnedRawDataView();
+	FileReader::PinnedView view = file.GetPinnedView();
 	return LoadVectorImage(view.span());
 }
 

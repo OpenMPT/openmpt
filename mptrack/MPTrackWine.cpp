@@ -116,7 +116,7 @@ static mpt::crc64_jones WineHashFile(mpt::crc64_jones crc, mpt::PathString filen
 		return crc;
 	}
 	FileReader f = GetFileReader(file);
-	FileReader::PinnedRawDataView view = f.ReadPinnedRawDataView();
+	FileReader::PinnedView view = f.ReadPinnedView();
 	crc(view.begin(), view.end());
 	return crc;
 }

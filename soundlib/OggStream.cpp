@@ -134,7 +134,7 @@ bool ReadPage(FileReader &file, PageInfo &pageInfo, std::vector<uint8> *pageData
 		} else
 		{
 			FileReader pageDataReader = filePageReader.ReadChunk(pageDataSize);
-			auto pageDataView = pageDataReader.GetPinnedRawDataView();
+			auto pageDataView = pageDataReader.GetPinnedView();
 			calculatedCRC.process(pageDataView.GetSpan());
 		}
 		if(calculatedCRC != pageInfo.header.CRC_checksum)

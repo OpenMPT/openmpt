@@ -52,7 +52,7 @@ OnDiskFileWrapper::OnDiskFileWrapper(FileReader &file, const mpt::PathString &fi
 			}
 			while(!file.EndOfFile())
 			{
-				FileReader::PinnedRawDataView view = file.ReadPinnedRawDataView(mpt::IO::BUFFERSIZE_NORMAL);
+				FileReader::PinnedView view = file.ReadPinnedView(mpt::IO::BUFFERSIZE_NORMAL);
 				std::size_t towrite = view.size();
 				std::size_t written = 0;
 				do
@@ -80,7 +80,7 @@ OnDiskFileWrapper::OnDiskFileWrapper(FileReader &file, const mpt::PathString &fi
 			#endif
 			while(!file.EndOfFile())
 			{
-				FileReader::PinnedRawDataView view = file.ReadPinnedRawDataView(mpt::IO::BUFFERSIZE_NORMAL);
+				FileReader::PinnedView view = file.ReadPinnedView(mpt::IO::BUFFERSIZE_NORMAL);
 				std::size_t towrite = view.size();
 				std::size_t written = 0;
 				do

@@ -1593,7 +1593,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 				mergedData.insert(mergedData.end(), mergedStreamData.begin(), mergedStreamData.end());
 
 				sampleChunk.chunk.Rewind();
-				FileReader::PinnedRawDataView sampleChunkView = sampleChunk.chunk.GetPinnedRawDataView();
+				FileReader::PinnedView sampleChunkView = sampleChunk.chunk.GetPinnedView();
 				mpt::span<const char> sampleChunkViewSpan = mpt::byte_cast<mpt::span<const char>>(sampleChunkView.span());
 				mergedData.insert(mergedData.end(), sampleChunkViewSpan.begin(), sampleChunkViewSpan.end());
 
@@ -1697,11 +1697,11 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 			stb_vorbis *vorb = nullptr;
 			if(sharedHeader)
 			{
-				FileReader::PinnedRawDataView headChunkView = headerChunk.GetPinnedRawDataView(initialRead);
+				FileReader::PinnedView headChunkView = headerChunk.GetPinnedView(initialRead);
 				vorb = stb_vorbis_open_pushdata(mpt::byte_cast<const unsigned char *>(headChunkView.data()), mpt::saturate_cast<int>(headChunkView.size()), &consumed, &error, nullptr);
 				headerChunk.Skip(consumed);
 			}
-			FileReader::PinnedRawDataView sampleDataView = sampleData.GetPinnedRawDataView();
+			FileReader::PinnedView sampleDataView = sampleData.GetPinnedView();
 			const std::byte *data = sampleDataView.data();
 			std::size_t dataLeft = sampleDataView.size();
 			if(!sharedHeader)

@@ -188,7 +188,7 @@ public:
 		return GetEncodedBitsPerSample() == 0;
 	}
 
-	// Returns true if the decoder for a given format uses FileReader interface and thus do not need to call GetPinnedRawDataView()
+	// Returns true if the decoder for a given format uses FileReader interface and thus do not need to call GetPinnedView()
 	MPT_CONSTEXPRINLINE bool UsesFileReaderForDecoding() const
 	{
 		switch(GetEncoding())

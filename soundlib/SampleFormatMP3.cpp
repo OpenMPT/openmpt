@@ -576,7 +576,7 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool raw, b
 	MPT_UNREFERENCED_PARAMETER(raw);
 
 	file.Rewind();
-	FileReader::PinnedRawDataView rawDataView = file.GetPinnedRawDataView();
+	FileReader::PinnedView rawDataView = file.GetPinnedView();
 	int64 bytes_left = rawDataView.size();
 	const uint8 *stream_pos = mpt::byte_cast<const uint8 *>(rawDataView.data());
 

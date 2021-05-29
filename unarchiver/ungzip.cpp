@@ -105,7 +105,7 @@ bool CGzipArchive::ExtractFile(std::size_t index)
 		return false;
 	}
 
-	FileReader::PinnedRawDataView inFileView = inFile.GetPinnedRawDataView(inFile.BytesLeft() - sizeof(GZtrailer));
+	FileReader::PinnedView inFileView = inFile.GetPinnedView(inFile.BytesLeft() - sizeof(GZtrailer));
 
 	// Inflate!
 	z_stream strm;
