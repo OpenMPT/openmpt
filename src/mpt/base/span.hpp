@@ -55,7 +55,6 @@ public:
 	using const_reference = const T &;
 
 	using iterator = pointer;
-	using const_iterator = const_pointer;
 
 	using difference_type = typename std::iterator_traits<iterator>::difference_type;
 
@@ -113,14 +112,6 @@ public:
 
 	iterator end() const {
 		return iterator(m_end);
-	}
-
-	const_iterator cbegin() const {
-		return const_iterator(begin());
-	}
-
-	const_iterator cend() const {
-		return const_iterator(end());
 	}
 
 	reference operator[](index_type index) {
