@@ -1427,16 +1427,16 @@ using MemoryFileReader = detail::FileReader<FileReaderTraitsMemory>;
 
 
 // Initialize file reader object with pointer to data and data length.
-template <typename Tbyte> inline FileReader make_FileCursor(mpt::span<Tbyte> bytedata, std::shared_ptr<mpt::PathString> filename = nullptr)
+template <typename Tbyte> inline FileCursor make_FileCursor(mpt::span<Tbyte> bytedata, std::shared_ptr<mpt::PathString> filename = nullptr)
 {
-	return FileReader(mpt::byte_cast<mpt::const_byte_span>(bytedata), std::move(filename));
+	return FileCursor(mpt::byte_cast<mpt::const_byte_span>(bytedata), std::move(filename));
 }
 
 
 // Initialize file reader object with a CallbackStream.
-inline FileReader make_FileCursor(CallbackStream s, std::shared_ptr<mpt::PathString> filename = nullptr)
+inline FileCursor make_FileCursor(CallbackStream s, std::shared_ptr<mpt::PathString> filename = nullptr)
 {
-	return FileReader(
+	return FileCursor(
 				FileDataContainerCallbackStreamSeekable::IsSeekable(s) ?
 					std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerCallbackStreamSeekable>(s))
 				:
@@ -1447,9 +1447,9 @@ inline FileReader make_FileCursor(CallbackStream s, std::shared_ptr<mpt::PathStr
 
 
 // Initialize file reader object with a std::istream.
-inline FileReader make_FileCursor(std::istream *s, std::shared_ptr<mpt::PathString> filename = nullptr)
+inline FileCursor make_FileCursor(std::istream *s, std::shared_ptr<mpt::PathString> filename = nullptr)
 {
-	return FileReader(
+	return FileCursor(
 				FileDataContainerStdStreamSeekable::IsSeekable(s) ?
 					std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerStdStreamSeekable>(s))
 				:
