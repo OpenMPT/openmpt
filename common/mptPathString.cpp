@@ -46,7 +46,7 @@ namespace mpt
 
 RawPathString PathString::AsNativePrefixed() const
 {
-	if(path.length() <= MAX_PATH || path.substr(0, 4) == PL_("\\\\?\\"))
+	if(path.length() < MAX_PATH || path.substr(0, 4) == PL_("\\\\?\\"))
 	{
 		// Path is short enough or already in prefixed form
 		return path;
