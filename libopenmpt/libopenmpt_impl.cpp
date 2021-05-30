@@ -477,7 +477,7 @@ void module_impl::ctor( const std::map< std::string, std::string > & ctls ) {
 		ctl_set( ctl.first, ctl.second, false );
 	}
 }
-void module_impl::load( const OpenMPT::FileReader & file, const std::map< std::string, std::string > & ctls ) {
+void module_impl::load( const OpenMPT::FileCursor & file, const std::map< std::string, std::string > & ctls ) {
 	loader_log loaderlog;
 	m_sndFile->SetCustomLog( &loaderlog );
 	{
@@ -613,7 +613,7 @@ std::vector<std::string> module_impl::get_supported_extensions() {
 bool module_impl::is_extension_supported( std::string_view extension ) {
 	return OpenMPT::CSoundFile::IsExtensionSupported( extension );
 }
-double module_impl::could_open_probability( const OpenMPT::FileReader & file, double effort, std::unique_ptr<log_interface> log ) {
+double module_impl::could_open_probability( const OpenMPT::FileCursor & file, double effort, std::unique_ptr<log_interface> log ) {
 	try {
 		if ( effort >= 0.8 ) {
 			std::unique_ptr<OpenMPT::CSoundFile> sndFile = std::make_unique<OpenMPT::CSoundFile>();
@@ -643,7 +643,7 @@ double module_impl::could_open_probability( const OpenMPT::FileReader & file, do
 			sndFile->Destroy();
 			return 0.6;
 		} else if ( effort >= 0.1 ) {
-			OpenMPT::FileReader::PinnedView view = file.GetPinnedView( probe_file_header_get_recommended_size() );
+			OpenMPT::FileCursor::PinnedView view = file.GetPinnedView( probe_file_header_get_recommended_size() );
 			int probe_file_header_result = probe_file_header( probe_file_header_flags_default2, view.data(), view.size(), file.GetLength() );
 			double result = 0.0;
 			switch ( probe_file_header_result ) {

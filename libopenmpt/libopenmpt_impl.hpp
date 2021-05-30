@@ -25,12 +25,15 @@
 // forward declarations
 namespace OpenMPT {
 class FileCursorTraitsStdStream;
-typedef FileCursorTraitsStdStream FileCursorTraitsDefault;
+namespace mpt {
+template <typename Ttraits>
+class FileCursor;
+} // namespace mpt
 namespace detail {
-template <typename Tbase>
-class FileReader;
+template <typename Ttraits>
+using FileCursor = mpt::FileCursor<Ttraits>;
 } // namespace detail
-typedef detail::FileReader<FileCursorTraitsDefault> FileReader;
+using FileCursor = detail::FileCursor<FileCursorTraitsStdStream>;
 class CSoundFile;
 struct DithersWrapperOpenMPT;
 } // namespace OpenMPT
@@ -139,7 +142,7 @@ protected:
 	void init_subsongs( subsongs_type & subsongs ) const;
 	bool has_subsongs_inited() const;
 	void ctor( const std::map< std::string, std::string > & ctls );
-	void load( const OpenMPT::FileReader & file, const std::map< std::string, std::string > & ctls );
+	void load( const OpenMPT::FileCursor & file, const std::map< std::string, std::string > & ctls );
 	bool is_loaded() const;
 	std::size_t read_wrapper( std::size_t count, std::int16_t * left, std::int16_t * right, std::int16_t * rear_left, std::int16_t * rear_right );
 	std::size_t read_wrapper( std::size_t count, float * left, float * right, float * rear_left, float * rear_right );
@@ -149,7 +152,7 @@ protected:
 	std::string get_message_samples() const;
 	std::pair< std::string, std::string > format_and_highlight_pattern_row_channel_command( std::int32_t p, std::int32_t r, std::int32_t c, int command ) const;
 	std::pair< std::string, std::string > format_and_highlight_pattern_row_channel( std::int32_t p, std::int32_t r, std::int32_t c, std::size_t width, bool pad ) const;
-	static double could_open_probability( const OpenMPT::FileReader & file, double effort, std::unique_ptr<log_interface> log );
+	static double could_open_probability( const OpenMPT::FileCursor & file, double effort, std::unique_ptr<log_interface> log );
 public:
 	static std::vector<std::string> get_supported_extensions();
 	static bool is_extension_supported( std::string_view extension );
