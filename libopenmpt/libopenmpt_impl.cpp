@@ -92,12 +92,12 @@ MPT_NOINLINE void AssertHandler(const mpt::source_location &loc, const char *exp
 	if(msg)
 	{
 		mpt::log::GlobalLogger().SendLogMessage(loc, LogError, "ASSERT",
-			U_("ASSERTION FAILED: ") + mpt::ToUnicode(mpt::CharsetSource, msg) + U_(" (") + mpt::ToUnicode(mpt::CharsetSource, expr) + U_(")")
+			MPT_USTRING("ASSERTION FAILED: ") + mpt::ToUnicode(mpt::CharsetSource, msg) + MPT_USTRING(" (") + mpt::ToUnicode(mpt::CharsetSource, expr) + MPT_USTRING(")")
 			);
 	} else
 	{
 		mpt::log::GlobalLogger().SendLogMessage(loc, LogError, "ASSERT",
-			U_("ASSERTION FAILED: ") + mpt::ToUnicode(mpt::CharsetSource, expr)
+			MPT_USTRING("ASSERTION FAILED: ") + mpt::ToUnicode(mpt::CharsetSource, expr)
 			);
 	}
 	#if defined(MPT_BUILD_FATAL_ASSERTS)
@@ -187,7 +187,7 @@ static std::string get_credits_string() {
 }
 
 static std::string get_contact_string() {
-	return mpt::convert<std::string>( mpt::common_encoding::utf8, U_("Forum: ") + OpenMPT::Build::GetURL(OpenMPT::Build::Url::Forum));
+	return mpt::convert<std::string>( mpt::common_encoding::utf8, MPT_USTRING("Forum: ") + OpenMPT::Build::GetURL(OpenMPT::Build::Url::Forum));
 }
 
 static std::string get_license_string() {
@@ -288,7 +288,7 @@ public:
 	}
 private:
 	void AddToLog( OpenMPT::LogLevel level, const mpt::ustring & text ) const override {
-		destination.log( mpt::convert<std::string>( mpt::common_encoding::utf8, LogLevelToString( level ) + U_(": ") + text ) );
+		destination.log( mpt::convert<std::string>( mpt::common_encoding::utf8, LogLevelToString( level ) + MPT_USTRING(": ") + text ) );
 	}
 }; // class log_forwarder
 
