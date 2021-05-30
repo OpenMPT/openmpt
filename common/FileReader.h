@@ -88,7 +88,6 @@ public:
 		{
 			return std::nullopt;
 		}
-		MPT_ASSERT(!filename->empty());
 		return *filename;
 	}
 
@@ -1470,7 +1469,6 @@ inline FileCursor make_FileCursor(TInputFile &file)
 	{
 		return FileCursor();
 	}
-	MPT_ASSERT(!file.GetFilename().empty());
 	if(file.IsCached())
 	{
 		return make_FileCursor(file.GetCache(), std::make_shared<mpt::PathString>(file.GetFilename()));

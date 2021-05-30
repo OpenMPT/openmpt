@@ -372,6 +372,7 @@ InputFile::InputFile(const mpt::PathString &filename, bool allowWholeFileCaching
 	: m_IsValid(false)
 	, m_IsCached(false)
 {
+	MPT_ASSERT(!filename.empty());
 	Open(filename, allowWholeFileCaching);
 }
 
