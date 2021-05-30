@@ -34,7 +34,7 @@ OPENMPT_NAMESPACE_BEGIN
 #define FILEREADER_DEPRECATED
 
 
-class FileReaderTraitsMemory
+class FileCursorTraitsMemory
 {
 
 public:
@@ -65,7 +65,7 @@ public:
 
 };
 
-class FileReaderTraitsStdStream
+class FileCursorTraitsStdStream
 {
 
 public:
@@ -1419,11 +1419,11 @@ public:
 
 } // namespace detail
 
-using FileCursor = detail::FileCursor<FileReaderTraitsStdStream>;
-using FileReader = detail::FileReader<FileReaderTraitsStdStream>;
+using FileCursor = detail::FileCursor<FileCursorTraitsStdStream>;
+using FileReader = detail::FileReader<FileCursorTraitsStdStream>;
 
-using MemoryFileCursor = detail::FileCursor<FileReaderTraitsMemory>;
-using MemoryFileReader = detail::FileReader<FileReaderTraitsMemory>;
+using MemoryFileCursor = detail::FileCursor<FileCursorTraitsMemory>;
+using MemoryFileReader = detail::FileReader<FileCursorTraitsMemory>;
 
 
 // Initialize file reader object with pointer to data and data length.

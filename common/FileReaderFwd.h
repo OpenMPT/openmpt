@@ -14,20 +14,32 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-class FileReaderTraitsMemory;
+class FileCursorTraitsMemory;
 
-class FileReaderTraitsStdStream;
+class FileCursorTraitsStdStream;
+
+namespace mpt {
+
+template <typename Ttraits>
+class FileCursor;
+
+} // namespace mpt
 
 namespace detail {
+
+template <typename Ttraits>
+using FileCursor = mpt::FileCursor<Ttraits>;
 
 template <typename Ttraits>
 class FileReader;
 
 } // namespace detail
 
-using FileReader = detail::FileReader<FileReaderTraitsStdStream>;
+using FileCursor = detail::FileCursor<FileCursorTraitsStdStream>;
+using FileReader = detail::FileReader<FileCursorTraitsStdStream>;
 
-using MemoryFileReader = detail::FileReader<FileReaderTraitsMemory>;
+using MemoryFileCursor = detail::FileCursor<FileCursorTraitsMemory>;
+using MemoryFileReader = detail::FileReader<FileCursorTraitsMemory>;
 
 OPENMPT_NAMESPACE_END
 
