@@ -24,13 +24,13 @@
 
 // forward declarations
 namespace OpenMPT {
-class FileReaderTraitsStdStream;
-typedef FileReaderTraitsStdStream FileReaderTraitsDefault;
+class FileCursorTraitsStdStream;
+typedef FileCursorTraitsStdStream FileCursorTraitsDefault;
 namespace detail {
 template <typename Tbase>
 class FileReader;
 } // namespace detail
-typedef detail::FileReader<FileReaderTraitsDefault> FileReader;
+typedef detail::FileReader<FileCursorTraitsDefault> FileReader;
 class CSoundFile;
 struct DithersWrapperOpenMPT;
 } // namespace OpenMPT
