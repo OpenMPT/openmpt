@@ -447,10 +447,10 @@ mpt::PathString InputFile::GetFilename() const
 }
 
 
-std::istream* InputFile::GetStream()
+std::istream& InputFile::GetStream()
 {
 	MPT_ASSERT(!m_IsCached);
-	return &m_File;
+	return m_File;
 }
 
 

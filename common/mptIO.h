@@ -1215,14 +1215,14 @@ class FileDataContainerStdStreamSeekable : public FileDataContainerSeekable {
 
 private:
 
-	std::istream *stream;
+	std::istream &stream;
 
 public:
 
-	FileDataContainerStdStreamSeekable(std::istream *s);
+	FileDataContainerStdStreamSeekable(std::istream &s);
 
-	static bool IsSeekable(std::istream *stream);
-	static pos_type GetLength(std::istream *stream);
+	static bool IsSeekable(std::istream &stream);
+	static pos_type GetLength(std::istream &stream);
 
 private:
 
@@ -1281,11 +1281,11 @@ class FileDataContainerStdStream : public FileDataContainerUnseekable {
 
 private:
 
-	std::istream *stream;
+	std::istream &stream;
 
 public:
 
-	FileDataContainerStdStream(std::istream *s);
+	FileDataContainerStdStream(std::istream &s);
 
 private:
 

@@ -1448,7 +1448,7 @@ inline FileCursor make_FileCursor(CallbackStream s, std::shared_ptr<mpt::PathStr
 
 
 // Initialize file reader object with a std::istream.
-inline FileCursor make_FileCursor(std::istream *s, std::shared_ptr<mpt::PathString> filename = nullptr)
+inline FileCursor make_FileCursor(std::istream &s, std::shared_ptr<mpt::PathString> filename = nullptr)
 {
 	return FileCursor(
 				FileDataContainerStdStreamSeekable::IsSeekable(s) ?
@@ -1462,7 +1462,8 @@ inline FileCursor make_FileCursor(std::istream *s, std::shared_ptr<mpt::PathStri
 
 #if defined(MPT_ENABLE_FILEIO)
 // templated in order to reduce header inter-dependencies
-template <typename TInputFile>
+class InputFile;
+template <typename TInputFile, std::enable_if_t<std::is_same<TInputFile, InputFile>::value, bool> = true>
 inline FileCursor make_FileCursor(TInputFile &file)
 {
 	if(!file.IsValid())

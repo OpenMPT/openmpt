@@ -677,7 +677,7 @@ double module_impl::could_open_probability( callback_stream_wrapper stream, doub
 	return could_open_probability( OpenMPT::make_FileCursor( fstream ), effort, std::move(log) );
 }
 double module_impl::could_open_probability( std::istream & stream, double effort, std::unique_ptr<log_interface> log ) {
-	return could_open_probability( OpenMPT::make_FileCursor( &stream ), effort, std::move(log) );
+	return could_open_probability( OpenMPT::make_FileCursor( stream ), effort, std::move(log) );
 }
 
 std::size_t module_impl::probe_file_header_get_recommended_size() {
@@ -800,8 +800,8 @@ int module_impl::probe_file_header( std::uint64_t flags, std::istream & stream )
 	if ( stream.bad() ) {
 		throw exception("error reading stream");
 	}
-	const bool seekable = OpenMPT::FileDataContainerStdStreamSeekable::IsSeekable( &stream );
-	const std::uint64_t filesize = ( seekable ? OpenMPT::FileDataContainerStdStreamSeekable::GetLength( &stream ) : 0 );
+	const bool seekable = OpenMPT::FileDataContainerStdStreamSeekable::IsSeekable( stream );
+	const std::uint64_t filesize = ( seekable ? OpenMPT::FileDataContainerStdStreamSeekable::GetLength( stream ) : 0 );
 	while ( ( size_toread > 0 ) && stream ) {
 		stream.read( buffer + size_read, size_toread );
 		if ( stream.bad() ) {
@@ -885,7 +885,7 @@ module_impl::module_impl( callback_stream_wrapper stream, std::unique_ptr<log_in
 }
 module_impl::module_impl( std::istream & stream, std::unique_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(std::move(log)) {
 	ctor( ctls );
-	load( OpenMPT::make_FileCursor( &stream ), ctls );
+	load( OpenMPT::make_FileCursor( stream ), ctls );
 	apply_libopenmpt_defaults();
 }
 module_impl::module_impl( const std::vector<std::byte> & data, std::unique_ptr<log_interface> log, const std::map< std::string, std::string > & ctls ) : m_Log(std::move(log)) {

@@ -313,22 +313,22 @@ mpt::byte_span FileDataContainerSeekable::InternalReadBuffered(pos_type pos, mpt
 
 
 
-bool FileDataContainerStdStreamSeekable::IsSeekable(std::istream *stream)
+bool FileDataContainerStdStreamSeekable::IsSeekable(std::istream &stream)
 {
-	return mpt::IO::IsReadSeekable(*stream);
+	return mpt::IO::IsReadSeekable(stream);
 }
 
-IFileDataContainer::pos_type FileDataContainerStdStreamSeekable::GetLength(std::istream *stream)
+IFileDataContainer::pos_type FileDataContainerStdStreamSeekable::GetLength(std::istream &stream)
 {
-	stream->clear();
-	std::streampos oldpos = stream->tellg();
-	stream->seekg(0, std::ios::end);
-	std::streampos length = stream->tellg();
-	stream->seekg(oldpos);
+	stream.clear();
+	std::streampos oldpos = stream.tellg();
+	stream.seekg(0, std::ios::end);
+	std::streampos length = stream.tellg();
+	stream.seekg(oldpos);
 	return mpt::saturate_cast<IFileDataContainer::pos_type>(static_cast<int64>(length));
 }
 
-FileDataContainerStdStreamSeekable::FileDataContainerStdStreamSeekable(std::istream *s)
+FileDataContainerStdStreamSeekable::FileDataContainerStdStreamSeekable(std::istream &s)
 	: FileDataContainerSeekable(GetLength(s), true)
 	, stream(s)
 {
@@ -337,14 +337,14 @@ FileDataContainerStdStreamSeekable::FileDataContainerStdStreamSeekable(std::istr
 
 mpt::byte_span FileDataContainerStdStreamSeekable::InternalRead(pos_type pos, mpt::byte_span dst) const
 {
-	stream->clear(); // tellg needs eof and fail bits unset
-	std::streampos currentpos = stream->tellg();
+	stream.clear(); // tellg needs eof and fail bits unset
+	std::streampos currentpos = stream.tellg();
 	if(currentpos == std::streampos(-1) || static_cast<int64>(pos) != currentpos)
 	{ // inefficient istream implementations might invalidate their buffer when seeking, even when seeking to the current position
-		stream->seekg(pos);
+		stream.seekg(pos);
 	}
-	stream->read(mpt::byte_cast<char*>(dst.data()), dst.size());
-	return dst.first(static_cast<std::size_t>(stream->gcount()));
+	stream.read(mpt::byte_cast<char*>(dst.data()), dst.size());
+	return dst.first(static_cast<std::size_t>(stream.gcount()));
 }
 
 
@@ -485,7 +485,7 @@ IFileDataContainer::pos_type FileDataContainerUnseekable::GetReadableLength(IFil
 
 
 
-FileDataContainerStdStream::FileDataContainerStdStream(std::istream *s)
+FileDataContainerStdStream::FileDataContainerStdStream(std::istream &s)
 	: stream(s)
 {
 	return;
@@ -493,7 +493,7 @@ FileDataContainerStdStream::FileDataContainerStdStream(std::istream *s)
 
 bool FileDataContainerStdStream::InternalEof() const
 {
-	if(*stream)
+	if(stream)
 	{
 		return false;
 	} else
@@ -504,8 +504,8 @@ bool FileDataContainerStdStream::InternalEof() const
 
 mpt::byte_span FileDataContainerStdStream::InternalRead(mpt::byte_span dst) const
 {
-	stream->read(mpt::byte_cast<char*>(dst.data()), dst.size());
-	return dst.first(static_cast<std::size_t>(stream->gcount()));
+	stream.read(mpt::byte_cast<char*>(dst.data()), dst.size());
+	return dst.first(static_cast<std::size_t>(stream.gcount()));
 }
 
 
