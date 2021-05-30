@@ -1423,11 +1423,13 @@ public:
 using FileCursor = detail::FileCursor<FileReaderTraitsStdStream>;
 using FileReader = detail::FileReader<FileReaderTraitsStdStream>;
 
+using MemoryFileCursor = detail::FileCursor<FileReaderTraitsMemory>;
 using MemoryFileReader = detail::FileReader<FileReaderTraitsMemory>;
 
 
 // Initialize file reader object with pointer to data and data length.
-template <typename Tbyte> inline FileCursor make_FileCursor(mpt::span<Tbyte> bytedata, std::shared_ptr<mpt::PathString> filename = nullptr)
+template <typename Tbyte>
+inline FileCursor make_FileCursor(mpt::span<Tbyte> bytedata, std::shared_ptr<mpt::PathString> filename = nullptr)
 {
 	return FileCursor(mpt::byte_cast<mpt::const_byte_span>(bytedata), std::move(filename));
 }
@@ -1462,11 +1464,11 @@ inline FileCursor make_FileCursor(std::istream *s, std::shared_ptr<mpt::PathStri
 #if defined(MPT_ENABLE_FILEIO)
 // templated in order to reduce header inter-dependencies
 template <typename TInputFile>
-FileReader GetFileReader(TInputFile &file)
+inline FileCursor make_FileCursor(TInputFile &file)
 {
 	if(!file.IsValid())
 	{
-		return FileReader();
+		return FileCursor();
 	}
 	MPT_ASSERT(!file.GetFilename().empty());
 	if(file.IsCached())
@@ -1478,6 +1480,19 @@ FileReader GetFileReader(TInputFile &file)
 	}
 }
 #endif // MPT_ENABLE_FILEIO
+
+
+template <typename Targ1>
+inline FileReader GetFileReader(Targ1 &&arg1)
+{
+	return make_FileCursor(std::forward<Targ1>(arg1));
+}
+
+template <typename Targ1, typename Targ2>
+inline FileReader GetFileReader(Targ1 &&arg1, Targ2 &&arg2)
+{
+	return make_FileCursor(std::forward<Targ1>(arg1), std::forward<Targ2>(arg2));
+}
 
 
 #if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
