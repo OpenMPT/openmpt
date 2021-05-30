@@ -14,6 +14,7 @@
 #include "openmpt/all/BuildSettings.hpp"
 
 #include "mptAssert.h"
+#include "mpt/base/utility.hpp"
 #include "openmpt/base/Endian.hpp"
 #include <algorithm>
 #include <array>
@@ -36,15 +37,6 @@ inline constexpr std::size_t BUFFERSIZE_TINY      =    1 * 1024; // on stack usa
 inline constexpr std::size_t BUFFERSIZE_SMALL     =    4 * 1024; // on heap
 inline constexpr std::size_t BUFFERSIZE_NORMAL    =   64 * 1024; // FILE I/O
 inline constexpr std::size_t BUFFERSIZE_LARGE     = 1024 * 1024;
-
-
-
-// Returns true iff 'off' fits into 'Toff'.
-template < typename Toff >
-inline bool OffsetFits(IO::Offset off)
-{
-	return (static_cast<IO::Offset>(mpt::saturate_cast<Toff>(off)) == off);
-}
 
 
 

@@ -139,32 +139,32 @@ bool SeekEnd(std::iostream & f)
 }
 bool SeekAbsolute(std::ostream & f, IO::Offset pos)
 {
-	if(!OffsetFits<std::streamoff>(pos)) { return false; }
+	if(!mpt::in_range<std::streamoff>(pos)) { return false; }
 	f.seekp(static_cast<std::streamoff>(pos), std::ios::beg); return !f.fail();
 }
 bool SeekAbsolute(std::istream & f, IO::Offset pos)
 {
-	if(!OffsetFits<std::streamoff>(pos)) { return false; }
+	if(!mpt::in_range<std::streamoff>(pos)) { return false; }
 	f.seekg(static_cast<std::streamoff>(pos), std::ios::beg); return !f.fail();
 }
 bool SeekAbsolute(std::iostream & f, IO::Offset pos)
 {
-	if(!OffsetFits<std::streamoff>(pos)) { return false; }
+	if(!mpt::in_range<std::streamoff>(pos)) { return false; }
 	f.seekg(static_cast<std::streamoff>(pos), std::ios::beg); f.seekp(static_cast<std::streamoff>(pos), std::ios::beg); return !f.fail();
 }
 bool SeekRelative(std::ostream & f, IO::Offset off)
 {
-	if(!OffsetFits<std::streamoff>(off)) { return false; }
+	if(!mpt::in_range<std::streamoff>(off)) { return false; }
 	f.seekp(static_cast<std::streamoff>(off), std::ios::cur); return !f.fail();
 }
 bool SeekRelative(std::istream & f, IO::Offset off)
 {
-	if(!OffsetFits<std::streamoff>(off)) { return false; }
+	if(!mpt::in_range<std::streamoff>(off)) { return false; }
 	f.seekg(static_cast<std::streamoff>(off), std::ios::cur); return !f.fail();
 }
 bool SeekRelative(std::iostream & f, IO::Offset off)
 {
-	if(!OffsetFits<std::streamoff>(off)) { return false; }
+	if(!mpt::in_range<std::streamoff>(off)) { return false; }
 	f.seekg(static_cast<std::streamoff>(off), std::ios::cur); f.seekp(static_cast<std::streamoff>(off), std::ios::cur); return !f.fail();
 }
 mpt::byte_span ReadRawImpl(std::istream & f, mpt::byte_span data) { f.read(mpt::byte_cast<char *>(data.data()), data.size()); return data.first(mpt::saturate_cast<std::size_t>(f.gcount())); }

@@ -520,7 +520,7 @@ struct FLAC__StreamEncoder_RAII
 		{
 			return FLAC__STREAM_ENCODER_TELL_STATUS_ERROR;
 		}
-		if(!mpt::IO::OffsetFits<FLAC__uint64>(pos))
+		if(!mpt::in_range<FLAC__uint64>(pos))
 		{
 			return FLAC__STREAM_ENCODER_TELL_STATUS_ERROR;
 		}
