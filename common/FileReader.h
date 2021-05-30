@@ -845,7 +845,6 @@ public:
 		dest.clear();
 		if(!CanRead(1))
 			return false;
-		try
 		{
 			char buffer[64];
 			off_t avail = 0;
@@ -861,9 +860,6 @@ public:
 					break;
 				}
 			}
-		} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
-		{
-			MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
 		}
 		return dest.length() != 0;
 	}
@@ -877,7 +873,6 @@ public:
 		dest.clear();
 		if(!CanRead(1))
 			return false;
-		try
 		{
 			char buffer[64], c = '\0';
 			off_t avail = 0;
@@ -899,9 +894,6 @@ public:
 					break;
 				}
 			}
-		} MPT_EXCEPTION_CATCH_OUT_OF_MEMORY(e)
-		{
-			MPT_EXCEPTION_DELETE_OUT_OF_MEMORY(e);
 		}
 		return true;
 	}
