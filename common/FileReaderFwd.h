@@ -16,6 +16,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 class FileCursorTraitsMemory;
 
+template <typename Tpath>
 class FileCursorTraitsStdStream;
 
 namespace mpt {
@@ -35,8 +36,14 @@ class FileReader;
 
 } // namespace detail
 
-using FileCursor = detail::FileCursor<FileCursorTraitsStdStream>;
-using FileReader = detail::FileReader<FileCursorTraitsStdStream>;
+namespace mpt {
+
+class PathString;
+
+} // namespace mpt
+
+using FileCursor = detail::FileCursor<FileCursorTraitsStdStream<mpt::PathString>>;
+using FileReader = detail::FileReader<FileCursorTraitsStdStream<mpt::PathString>>;
 
 using MemoryFileCursor = detail::FileCursor<FileCursorTraitsMemory>;
 using MemoryFileReader = detail::FileReader<FileCursorTraitsMemory>;

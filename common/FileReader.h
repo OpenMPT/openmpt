@@ -48,12 +48,13 @@ public:
 
 	struct empty_type {};
 
+	using filename_type = empty_type;
 	using shared_filename_type = empty_type;
 
 	static shared_data_type get_shared(const data_type & data) { return data; }
 	static ref_data_type get_ref(const data_type & data) { return data; }
 
-	static std::optional<mpt::PathString> get_optional_filename(shared_filename_type /* filename */ ) { return std::nullopt; }
+	static std::optional<filename_type> get_optional_filename(shared_filename_type /* filename */ ) { return std::nullopt; }
 
 	static value_data_type make_data() { return mpt::const_byte_span(); }
 	static value_data_type make_data(mpt::const_byte_span data) { return data; }
@@ -65,6 +66,7 @@ public:
 
 };
 
+template <typename Tpath>
 class FileCursorTraitsStdStream
 {
 
@@ -77,12 +79,13 @@ public:
 	using shared_data_type = std::shared_ptr<const IFileDataContainer>;
 	using value_data_type = std::shared_ptr<const IFileDataContainer>;
 
+	using filename_type = Tpath;
 	using shared_filename_type = std::shared_ptr<mpt::PathString>;
 
 	static shared_data_type get_shared(const data_type & data) { return data; }
 	static ref_data_type get_ref(const data_type & data) { return *data; }
 
-	static std::optional<mpt::PathString> get_optional_filename(shared_filename_type filename)
+	static std::optional<filename_type> get_optional_filename(shared_filename_type filename)
 	{
 		if(!filename)
 		{
@@ -741,6 +744,7 @@ public:
 	using shared_data_type = typename traits_type::shared_data_type;
 	using value_data_type  = typename traits_type::value_data_type;
 
+	using filename_type = typename traits_type::filename_type;
 	using shared_filename_type = typename traits_type::shared_filename_type;
 
 protected:
@@ -792,7 +796,7 @@ public:
 
 public:
 
-	std::optional<mpt::PathString> GetOptionalFileName() const
+	std::optional<filename_type> GetOptionalFileName() const
 	{
 		return traits_type::get_optional_filename(m_fileName);
 	}
@@ -1419,8 +1423,8 @@ public:
 
 } // namespace detail
 
-using FileCursor = detail::FileCursor<FileCursorTraitsStdStream>;
-using FileReader = detail::FileReader<FileCursorTraitsStdStream>;
+using FileCursor = detail::FileCursor<FileCursorTraitsStdStream<mpt::PathString>>;
+using FileReader = detail::FileReader<FileCursorTraitsStdStream<mpt::PathString>>;
 
 using MemoryFileCursor = detail::FileCursor<FileCursorTraitsMemory>;
 using MemoryFileReader = detail::FileReader<FileCursorTraitsMemory>;
