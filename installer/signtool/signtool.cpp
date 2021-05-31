@@ -122,7 +122,7 @@ static void main(const std::vector<mpt::ustring> &args)
 			mpt::crypto::asymmetric::rsassa_pss<>::managed_private_key key(keystore, keyname);
 			std::vector<std::byte> data;
 			{
-				mpt::ifstream fi(mpt::PathString::FromUnicode(inputfilename));
+				mpt::ifstream fi(mpt::PathString::FromUnicode(inputfilename), std::ios::binary);
 				fi.imbue(std::locale::classic());
 				fi.exceptions(std::ios::badbit);
 				while(!mpt::IO::IsEof(fi))
