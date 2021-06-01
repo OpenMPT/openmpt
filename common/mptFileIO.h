@@ -83,8 +83,6 @@ inline void fstream_open(Tbase & base, const mpt::PathString & filename, std::io
 
 } // namespace detail
 
-class SafeOutputFile;
-
 // We cannot rely on implicit conversion of mpt::PathString to std::filesystem::path when constructing std::fstream
 // because of broken overload implementation in GCC libstdc++ 8, 9, 10.
 // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=95642
@@ -96,13 +94,19 @@ class fstream
 private:
 	typedef std::fstream Tbase;
 public:
-	friend SafeOutputFile;
-public:
 	fstream() {}
 	fstream(const mpt::PathString & filename, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out)
 	{
 		detail::fstream_open<Tbase>(*this, filename, mode);
 	}
+#if MPT_COMPILER_MSVC
+protected:
+	fstream(std::FILE * file)
+		: std::fstream(file)
+	{
+	}
+#endif // MPT_COMPILER_MSVC
+public:
 	void open(const mpt::PathString & filename, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out)
 	{
 		detail::fstream_open<Tbase>(*this, filename, mode);
@@ -121,13 +125,19 @@ class ifstream
 private:
 	typedef std::ifstream Tbase;
 public:
-	friend SafeOutputFile;
-public:
 	ifstream() {}
 	ifstream(const mpt::PathString & filename, std::ios_base::openmode mode = std::ios_base::in)
 	{
 		detail::fstream_open<Tbase>(*this, filename, mode);
 	}
+#if MPT_COMPILER_MSVC
+protected:
+	ifstream(std::FILE * file)
+		: std::ifstream(file)
+	{
+	}
+#endif // MPT_COMPILER_MSVC
+public:
 	void open(const mpt::PathString & filename, std::ios_base::openmode mode = std::ios_base::in)
 	{
 		detail::fstream_open<Tbase>(*this, filename, mode);
@@ -146,8 +156,6 @@ class ofstream
 private:
 	typedef std::ofstream Tbase;
 public:
-	friend SafeOutputFile;
-public:
 	ofstream() {}
 	ofstream(const mpt::PathString & filename, std::ios_base::openmode mode = std::ios_base::out)
 	{
@@ -155,11 +163,10 @@ public:
 	}
 #if MPT_COMPILER_MSVC
 protected:
-	ofstream(FILE * file)
+	ofstream(std::FILE * file)
 		: std::ofstream(file)
 	{
 	}
-
 #endif // MPT_COMPILER_MSVC
 public:
 	void open(const mpt::PathString & filename, std::ios_base::openmode mode = std::ios_base::out)
@@ -194,9 +201,21 @@ private:
 	FlushMode m_FlushMode;
 #if MPT_COMPILER_MSVC
 	std::FILE *m_f = nullptr;
-#endif // MPT_COMPILER_MSVC
+#else // !MPT_COMPILER_MSVC
 	mpt::ofstream m_s;
+#endif // MPT_COMPILER_MSVC
 #if MPT_COMPILER_MSVC
+	class FILEostream
+		: public mpt::ofstream
+	{
+	public:
+		FILEostream(std::FILE * file)
+			: mpt::ofstream(file)
+		{
+			return;
+		}
+	};
+	FILEostream m_s;
 	static mpt::tstring convert_mode(std::ios_base::openmode mode, FlushMode flushMode);
 	std::FILE * internal_fopen(const mpt::PathString &filename, std::ios_base::openmode mode, FlushMode flushMode);
 #endif // MPT_COMPILER_MSVC

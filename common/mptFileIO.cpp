@@ -151,6 +151,7 @@ mpt::tstring SafeOutputFile::convert_mode(std::ios_base::openmode mode, FlushMod
 
 std::FILE * SafeOutputFile::internal_fopen(const mpt::PathString &filename, std::ios_base::openmode mode, FlushMode flushMode)
 {
+	m_f = nullptr;
 	mpt::tstring fopen_mode = convert_mode(mode, flushMode);
 	if(fopen_mode.empty())
 	{
