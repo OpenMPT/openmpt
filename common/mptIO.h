@@ -1160,34 +1160,9 @@ private:
 	mutable bool cached;
 	mutable std::vector<std::byte> cache;
 
-private:
-
-	mutable bool m_Buffered;
-	enum : std::size_t {
-		CHUNK_SIZE = mpt::IO::BUFFERSIZE_SMALL,
-		BUFFER_SIZE = mpt::IO::BUFFERSIZE_NORMAL
-	};
-	enum : std::size_t {
-		NUM_CHUNKS = BUFFER_SIZE / CHUNK_SIZE
-	};
-	struct chunk_info {
-		pos_type ChunkOffset = 0;
-		pos_type ChunkLength = 0;
-		bool ChunkValid = false;
-	};
-	mutable std::vector<std::byte> m_Buffer;
-	mpt::byte_span chunk_data(std::size_t chunkIndex) const
-	{
-		return mpt::byte_span(m_Buffer.data() + (chunkIndex * CHUNK_SIZE), CHUNK_SIZE);
-	}
-	mutable std::array<chunk_info, NUM_CHUNKS> m_ChunkInfo;
-	mutable std::array<std::size_t, NUM_CHUNKS> m_ChunkIndexLRU;
-
-	std::size_t InternalFillPageAndReturnIndex(pos_type pos) const;
-
 protected:
 
-	FileDataContainerSeekable(pos_type length, bool buffered);
+	FileDataContainerSeekable(pos_type length);
 
 private:
 	
@@ -1204,14 +1179,51 @@ public:
 
 private:
 
-	mpt::byte_span InternalReadBuffered(pos_type pos, mpt::byte_span dst) const;
-
-	virtual mpt::byte_span InternalRead(pos_type pos, mpt::byte_span dst) const = 0;
+	virtual mpt::byte_span InternalReadSeekable(pos_type pos, mpt::byte_span dst) const = 0;
 
 };
 
 
-class FileDataContainerStdStreamSeekable : public FileDataContainerSeekable {
+class FileDataContainerSeekableBuffered : public FileDataContainerSeekable {
+
+private:
+
+	enum : std::size_t {
+		CHUNK_SIZE = mpt::IO::BUFFERSIZE_SMALL,
+		BUFFER_SIZE = mpt::IO::BUFFERSIZE_NORMAL
+	};
+	enum : std::size_t {
+		NUM_CHUNKS = BUFFER_SIZE / CHUNK_SIZE
+	};
+	struct chunk_info {
+		pos_type ChunkOffset = 0;
+		pos_type ChunkLength = 0;
+		bool ChunkValid = false;
+	};
+	mutable std::vector<std::byte> m_Buffer = std::vector<std::byte>(BUFFER_SIZE);
+	mpt::byte_span chunk_data(std::size_t chunkIndex) const
+	{
+		return mpt::byte_span(m_Buffer.data() + (chunkIndex * CHUNK_SIZE), CHUNK_SIZE);
+	}
+	mutable std::array<chunk_info, NUM_CHUNKS> m_ChunkInfo = {};
+	mutable std::array<std::size_t, NUM_CHUNKS> m_ChunkIndexLRU = {};
+
+	std::size_t InternalFillPageAndReturnIndex(pos_type pos) const;
+
+protected:
+
+	FileDataContainerSeekableBuffered(pos_type length);
+
+private:
+
+	mpt::byte_span InternalReadSeekable(pos_type pos, mpt::byte_span dst) const override;
+
+	virtual mpt::byte_span InternalReadBuffered(pos_type pos, mpt::byte_span dst) const = 0;
+
+};
+
+
+class FileDataContainerStdStreamSeekable : public FileDataContainerSeekableBuffered {
 
 private:
 
@@ -1226,7 +1238,7 @@ public:
 
 private:
 
-	mpt::byte_span InternalRead(pos_type pos, mpt::byte_span dst) const override;
+	mpt::byte_span InternalReadBuffered(pos_type pos, mpt::byte_span dst) const override;
 
 };
 
@@ -1272,7 +1284,7 @@ public:
 private:
 
 	virtual bool InternalEof() const = 0;
-	virtual mpt::byte_span InternalRead(mpt::byte_span dst) const = 0;
+	virtual mpt::byte_span InternalReadUnseekable(mpt::byte_span dst) const = 0;
 
 };
 
@@ -1290,7 +1302,7 @@ public:
 private:
 
 	bool InternalEof() const override;
-	mpt::byte_span InternalRead(mpt::byte_span dst) const override;
+	mpt::byte_span InternalReadUnseekable(mpt::byte_span dst) const override;
 
 };
 
@@ -1319,7 +1331,7 @@ public:
 	static pos_type GetLength(CallbackStream stream);
 	FileDataContainerCallbackStreamSeekable(CallbackStream s);
 private:
-	mpt::byte_span InternalRead(pos_type pos, mpt::byte_span dst) const override;
+	mpt::byte_span InternalReadSeekable(pos_type pos, mpt::byte_span dst) const override;
 };
 
 
@@ -1332,7 +1344,7 @@ public:
 	FileDataContainerCallbackStream(CallbackStream s);
 private:
 	bool InternalEof() const override;
-	mpt::byte_span InternalRead(mpt::byte_span dst) const override;
+	mpt::byte_span InternalReadUnseekable(mpt::byte_span dst) const override;
 };
 
 
