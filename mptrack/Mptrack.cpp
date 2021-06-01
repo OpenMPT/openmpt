@@ -37,7 +37,7 @@
 #include "../soundlib/plugins/PluginManager.h"
 #include "MPTrackWine.h"
 #include "MPTrackUtil.h"
-#include "afxdatarecovery.h"
+#include <afxdatarecovery.h>
 
 // GDI+
 #define max(a,b) (((a) > (b)) ? (a) : (b))
