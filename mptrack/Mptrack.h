@@ -162,6 +162,7 @@ protected:
 public:
 	CTrackApp();
 
+	CDataRecoveryHandler *GetDataRecoveryHandler() override;
 	void AddToRecentFileList(LPCTSTR lpszPathName) override;
 	void AddToRecentFileList(const mpt::PathString &path);
 	/// Removes item from MRU-list; most recent item has index zero.

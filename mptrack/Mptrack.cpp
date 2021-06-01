@@ -37,6 +37,7 @@
 #include "../soundlib/plugins/PluginManager.h"
 #include "MPTrackWine.h"
 #include "MPTrackUtil.h"
+#include "afxdatarecovery.h"
 
 // GDI+
 #define max(a,b) (((a) > (b)) ? (a) : (b))
@@ -546,6 +547,104 @@ END_MESSAGE_MAP()
 CTrackApp::CTrackApp()
 {
 	m_dwRestartManagerSupportFlags = AFX_RESTART_MANAGER_SUPPORT_RESTART | AFX_RESTART_MANAGER_REOPEN_PREVIOUS_FILES;
+}
+
+
+class OpenMPTDataRecoveryHandler
+	: public CDataRecoveryHandler
+{
+public:
+	OpenMPTDataRecoveryHandler(_In_ DWORD dwRestartManagerSupportFlags, _In_ int nAutosaveInterval)
+		: CDataRecoveryHandler(dwRestartManagerSupportFlags, nAutosaveInterval)
+	{
+		return;
+	}
+	~OpenMPTDataRecoveryHandler() override = default;
+
+	BOOL SaveOpenDocumentList() override
+	{
+		BOOL bRet = TRUE;  // return FALSE if document list non-empty and not saved
+
+		POSITION posAutosave = m_mapDocNameToAutosaveName.GetStartPosition();
+		if (posAutosave != NULL)
+		{
+			bRet = FALSE;
+
+			// Save the open document list and associated autosave info to the registry
+			IniFileSettingsBackend ini(theApp.GetConfigPath() + P_("restart.") + mpt::PathString::FromCString(GetRestartIdentifier()) + P_(".ini"));
+			ini.ConvertToUnicode();
+			int32 count = 0;
+			while (posAutosave != NULL)
+			{
+				CString strDocument, strAutosave;
+				m_mapDocNameToAutosaveName.GetNextAssoc(posAutosave, strDocument, strAutosave);
+
+				ini.WriteSetting({ U_("RestartDocument"), mpt::ufmt::val(count) }, SettingValue(mpt::ToUnicode(strDocument)));
+				ini.WriteSetting({ U_("RestartAutosave"), mpt::ufmt::val(count) }, SettingValue(mpt::ToUnicode(strAutosave)));
+				count++;
+			}
+			ini.WriteSetting({ U_("Restart"), U_("Count") }, SettingValue(count));
+
+			return TRUE;
+		}
+
+		return bRet;
+	}
+
+	BOOL ReadOpenDocumentList() override
+	{
+		BOOL bRet = FALSE;  // return TRUE only if at least one document was found
+
+		{
+			IniFileSettingsBackend ini(theApp.GetConfigPath() + P_("restart.") + mpt::PathString::FromCString(GetRestartIdentifier()) + P_(".ini"));
+			int32 count = ini.ReadSetting({ U_("Restart"), U_("Count") }, SettingValue(0));
+
+			for(int32 index = 0; index < count; ++index)
+			{
+				mpt::ustring document = ini.ReadSetting({ U_("RestartDocument"), mpt::ufmt::val(index) }, SettingValue(U_("")));
+				mpt::ustring autosave = ini.ReadSetting({ U_("RestartAutosave"), mpt::ufmt::val(index) }, SettingValue(U_("")));
+				if(!document.empty())
+				{
+					m_mapDocNameToAutosaveName[mpt::ToCString(document)] = mpt::ToCString(autosave);
+					bRet = TRUE;
+				}
+			}
+
+			ini.RemoveSection(U_("Restart"));
+			ini.RemoveSection(U_("RestartDocument"));
+			ini.RemoveSection(U_("RestartAutosave"));
+
+		}
+
+		DeleteFile((theApp.GetConfigPath() + P_("restart.") + mpt::PathString::FromCString(GetRestartIdentifier()) + P_(".ini")).AsNative().c_str());
+
+		return bRet;
+	}
+
+};
+
+
+CDataRecoveryHandler *CTrackApp::GetDataRecoveryHandler()
+{
+	static BOOL bTriedOnce = FALSE;
+
+	// Since the application restart and application recovery are supported only on Windows
+	// Vista and above, we don't need a recovery handler on Windows versions less than Vista.
+	if (SupportsRestartManager() || SupportsApplicationRecovery())
+	{
+		if (!bTriedOnce && m_pDataRecoveryHandler == NULL)
+		{
+			m_pDataRecoveryHandler = new OpenMPTDataRecoveryHandler(m_dwRestartManagerSupportFlags, m_nAutosaveInterval);
+			if (!m_pDataRecoveryHandler->Initialize())
+			{
+				delete m_pDataRecoveryHandler;
+				m_pDataRecoveryHandler = NULL;
+			}
+		}
+	}
+
+	bTriedOnce = TRUE;
+	return m_pDataRecoveryHandler;
 }
 
 
