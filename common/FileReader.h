@@ -1438,10 +1438,10 @@ inline FileCursor make_FileCursor(mpt::span<Tbyte> bytedata, std::shared_ptr<mpt
 inline FileCursor make_FileCursor(CallbackStream s, std::shared_ptr<mpt::PathString> filename = nullptr)
 {
 	return FileCursor(
-				FileDataContainerCallbackStreamSeekable::IsSeekable(s) ?
+				FileDataContainerCallbackStream::IsSeekable(s) ?
 					std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerCallbackStreamSeekable>(s))
 				:
-					std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerCallbackStream>(s))
+					std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerCallbackStreamUnseekable>(s))
 			, std::move(filename)
 		);
 }
@@ -1451,10 +1451,10 @@ inline FileCursor make_FileCursor(CallbackStream s, std::shared_ptr<mpt::PathStr
 inline FileCursor make_FileCursor(std::istream &s, std::shared_ptr<mpt::PathString> filename = nullptr)
 {
 	return FileCursor(
-				FileDataContainerStdStreamSeekable::IsSeekable(s) ?
+				FileDataContainerStdStream::IsSeekable(s) ?
 					std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerStdStreamSeekable>(s))
 				:
-					std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerStdStream>(s))
+					std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerStdStreamUnseekable>(s))
 			, std::move(filename)
 		);
 }

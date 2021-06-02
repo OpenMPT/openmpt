@@ -299,12 +299,12 @@ mpt::byte_span FileDataContainerSeekableBuffered::InternalReadSeekable(IFileData
 
 
 
-bool FileDataContainerStdStreamSeekable::IsSeekable(std::istream &stream)
+bool FileDataContainerStdStream::IsSeekable(std::istream &stream)
 {
 	return mpt::IO::IsReadSeekable(stream);
 }
 
-IFileDataContainer::pos_type FileDataContainerStdStreamSeekable::GetLength(std::istream &stream)
+IFileDataContainer::pos_type FileDataContainerStdStream::GetLength(std::istream &stream)
 {
 	stream.clear();
 	std::streampos oldpos = stream.tellg();
@@ -315,7 +315,7 @@ IFileDataContainer::pos_type FileDataContainerStdStreamSeekable::GetLength(std::
 }
 
 FileDataContainerStdStreamSeekable::FileDataContainerStdStreamSeekable(std::istream &s)
-	: FileDataContainerSeekableBuffered(GetLength(s))
+	: FileDataContainerSeekableBuffered(FileDataContainerStdStream::GetLength(s))
 	, stream(s)
 {
 	return;
@@ -471,13 +471,13 @@ IFileDataContainer::pos_type FileDataContainerUnseekable::GetReadableLength(IFil
 
 
 
-FileDataContainerStdStream::FileDataContainerStdStream(std::istream &s)
+FileDataContainerStdStreamUnseekable::FileDataContainerStdStreamUnseekable(std::istream &s)
 	: stream(s)
 {
 	return;
 }
 
-bool FileDataContainerStdStream::InternalEof() const
+bool FileDataContainerStdStreamUnseekable::InternalEof() const
 {
 	if(stream)
 	{
@@ -488,7 +488,7 @@ bool FileDataContainerStdStream::InternalEof() const
 	}
 }
 
-mpt::byte_span FileDataContainerStdStream::InternalReadUnseekable(mpt::byte_span dst) const
+mpt::byte_span FileDataContainerStdStreamUnseekable::InternalReadUnseekable(mpt::byte_span dst) const
 {
 	stream.read(mpt::byte_cast<char*>(dst.data()), dst.size());
 	return dst.first(static_cast<std::size_t>(stream.gcount()));
@@ -496,7 +496,7 @@ mpt::byte_span FileDataContainerStdStream::InternalReadUnseekable(mpt::byte_span
 
 
 
-bool FileDataContainerCallbackStreamSeekable::IsSeekable(CallbackStream stream)
+bool FileDataContainerCallbackStream::IsSeekable(CallbackStream stream)
 {
 	if(!stream.stream)
 	{
@@ -535,7 +535,7 @@ bool FileDataContainerCallbackStreamSeekable::IsSeekable(CallbackStream stream)
 	return true;
 }
 
-IFileDataContainer::pos_type FileDataContainerCallbackStreamSeekable::GetLength(CallbackStream stream)
+IFileDataContainer::pos_type FileDataContainerCallbackStream::GetLength(CallbackStream stream)
 {
 	if(!stream.stream)
 	{
@@ -575,7 +575,7 @@ IFileDataContainer::pos_type FileDataContainerCallbackStreamSeekable::GetLength(
 }
 
 FileDataContainerCallbackStreamSeekable::FileDataContainerCallbackStreamSeekable(CallbackStream s)
-	: FileDataContainerSeekable(GetLength(s))
+	: FileDataContainerSeekable(FileDataContainerCallbackStream::GetLength(s))
 	, stream(s)
 {
 	return;
@@ -610,7 +610,7 @@ mpt::byte_span FileDataContainerCallbackStreamSeekable::InternalReadSeekable(pos
 
 
 
-FileDataContainerCallbackStream::FileDataContainerCallbackStream(CallbackStream s)
+FileDataContainerCallbackStreamUnseekable::FileDataContainerCallbackStreamUnseekable(CallbackStream s)
 	: FileDataContainerUnseekable()
 	, stream(s)
 	, eof_reached(false)
@@ -618,12 +618,12 @@ FileDataContainerCallbackStream::FileDataContainerCallbackStream(CallbackStream 
 	return;
 }
 
-bool FileDataContainerCallbackStream::InternalEof() const
+bool FileDataContainerCallbackStreamUnseekable::InternalEof() const
 {
 	return eof_reached;
 }
 
-mpt::byte_span FileDataContainerCallbackStream::InternalReadUnseekable(mpt::byte_span dst) const
+mpt::byte_span FileDataContainerCallbackStreamUnseekable::InternalReadUnseekable(mpt::byte_span dst) const
 {
 	if(eof_reached)
 	{

@@ -1223,6 +1223,17 @@ private:
 };
 
 
+class FileDataContainerStdStream
+{
+
+public:
+
+	static bool IsSeekable(std::istream &stream);
+	static IFileDataContainer::pos_type GetLength(std::istream &stream);
+
+};
+
+
 class FileDataContainerStdStreamSeekable : public FileDataContainerSeekableBuffered {
 
 private:
@@ -1232,9 +1243,6 @@ private:
 public:
 
 	FileDataContainerStdStreamSeekable(std::istream &s);
-
-	static bool IsSeekable(std::istream &stream);
-	static pos_type GetLength(std::istream &stream);
 
 private:
 
@@ -1289,7 +1297,7 @@ private:
 };
 
 
-class FileDataContainerStdStream : public FileDataContainerUnseekable {
+class FileDataContainerStdStreamUnseekable : public FileDataContainerUnseekable {
 
 private:
 
@@ -1297,7 +1305,7 @@ private:
 
 public:
 
-	FileDataContainerStdStream(std::istream &s);
+	FileDataContainerStdStreamUnseekable(std::istream &s);
 
 private:
 
@@ -1327,26 +1335,31 @@ class FileDataContainerCallbackStreamSeekable : public FileDataContainerSeekable
 private:
 	CallbackStream stream;
 public:
-	static bool IsSeekable(CallbackStream stream);
-	static pos_type GetLength(CallbackStream stream);
 	FileDataContainerCallbackStreamSeekable(CallbackStream s);
 private:
 	mpt::byte_span InternalReadSeekable(pos_type pos, mpt::byte_span dst) const override;
 };
 
 
-class FileDataContainerCallbackStream : public FileDataContainerUnseekable
+class FileDataContainerCallbackStreamUnseekable : public FileDataContainerUnseekable
 {
 private:
 	CallbackStream stream;
 	mutable bool eof_reached;
 public:
-	FileDataContainerCallbackStream(CallbackStream s);
+	FileDataContainerCallbackStreamUnseekable(CallbackStream s);
 private:
 	bool InternalEof() const override;
 	mpt::byte_span InternalReadUnseekable(mpt::byte_span dst) const override;
 };
 
+
+class FileDataContainerCallbackStream
+{
+public:
+	static bool IsSeekable(CallbackStream stream);
+	static IFileDataContainer::pos_type GetLength(CallbackStream stream);
+};
 
 
 class FileDataContainerMemory
