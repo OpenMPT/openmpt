@@ -147,15 +147,13 @@ namespace FileReader
 	bool ReadArray(TFileCursor &f, T (&destArray)[destSize])
 	{
 		static_assert(mpt::is_binary_safe<T>::value);
-		if(f.CanRead(sizeof(destArray)))
-		{
-			f.ReadRaw(mpt::as_raw_memory(destArray));
-			return true;
-		} else
+		if(!f.CanRead(sizeof(destArray)))
 		{
 			mpt::reset(destArray);
 			return false;
 		}
+		f.ReadRaw(mpt::as_raw_memory(destArray));
+		return true;
 	}
 
 	// Read an array of binary-safe T values.
@@ -165,15 +163,13 @@ namespace FileReader
 	bool ReadArray(TFileCursor &f, std::array<T, destSize> &destArray)
 	{
 		static_assert(mpt::is_binary_safe<T>::value);
-		if(f.CanRead(sizeof(destArray)))
-		{
-			f.ReadRaw(mpt::as_raw_memory(destArray));
-			return true;
-		} else
+		if(!f.CanRead(sizeof(destArray)))
 		{
 			destArray.fill(T{});
 			return false;
 		}
+		f.ReadRaw(mpt::as_raw_memory(destArray));
+		return true;
 	}
 
 	// Read destSize elements of binary-safe type T into a vector.
@@ -184,14 +180,12 @@ namespace FileReader
 	{
 		static_assert(mpt::is_binary_safe<T>::value);
 		destVector.resize(destSize);
-		if(f.CanRead(sizeof(T) * destSize))
-		{
-			f.ReadRaw(mpt::as_raw_memory(destVector));
-			return true;
-		} else
+		if(!f.CanRead(sizeof(T) * destSize))
 		{
 			return false;
 		}
+		f.ReadRaw(mpt::as_raw_memory(destVector));
+		return true;
 	}
 
 	template <typename T, std::size_t destSize, typename TFileCursor>
@@ -209,13 +203,11 @@ namespace FileReader
 	{
 		static_assert(std::numeric_limits<T>::is_integer == true, "Target type is a not an integer");
 		typename mpt::make_le<T>::type target;
-		if(Read(f, target))
-		{
-			return target;
-		} else
+		if(!Read(f, target))
 		{
 			return 0;
 		}
+		return target;
 	}
 
 	// Read some kind of integer in big-endian format.
@@ -225,13 +217,11 @@ namespace FileReader
 	{
 		static_assert(std::numeric_limits<T>::is_integer == true, "Target type is a not an integer");
 		typename mpt::make_be<T>::type target;
-		if(Read(f, target))
-		{
-			return target;
-		} else
+		if(!Read(f, target))
 		{
 			return 0;
 		}
+		return target;
 	}
 
 	// Read a integer in little-endian format which has some of its higher bytes not stored in file.
@@ -383,13 +373,11 @@ namespace FileReader
 	char ReadChar(TFileCursor &f)
 	{
 		char target;
-		if(Read(f, target))
-		{
-			return target;
-		} else
+		if(!Read(f, target))
 		{
 			return 0;
 		}
+		return target;
 	}
 
 	// Read unsigned 8-Bit integer.
@@ -398,13 +386,11 @@ namespace FileReader
 	uint8 ReadUint8(TFileCursor &f)
 	{
 		uint8 target;
-		if(Read(f, target))
-		{
-			return target;
-		} else
+		if(!Read(f, target))
 		{
 			return 0;
 		}
+		return target;
 	}
 
 	// Read signed 8-Bit integer. If successful, the file cursor is advanced by the size of the integer.
@@ -412,13 +398,11 @@ namespace FileReader
 	int8 ReadInt8(TFileCursor &f)
 	{
 		int8 target;
-		if(Read(f, target))
-		{
-			return target;
-		} else
+		if(!Read(f, target))
 		{
 			return 0;
 		}
+		return target;
 	}
 
 	// Read 32-Bit float in little-endian format.
@@ -427,13 +411,11 @@ namespace FileReader
 	float ReadFloatLE(TFileCursor &f)
 	{
 		IEEE754binary32LE target;
-		if(Read(f, target))
-		{
-			return target;
-		} else
+		if(!Read(f, target))
 		{
 			return 0.0f;
 		}
+		return target;
 	}
 
 	// Read 32-Bit float in big-endian format.
@@ -442,13 +424,11 @@ namespace FileReader
 	float ReadFloatBE(TFileCursor &f)
 	{
 		IEEE754binary32BE target;
-		if(Read(f, target))
-		{
-			return target;
-		} else
+		if(!Read(f, target))
 		{
 			return 0.0f;
 		}
+		return target;
 	}
 
 	// Read 64-Bit float in little-endian format.
@@ -457,13 +437,11 @@ namespace FileReader
 	double ReadDoubleLE(TFileCursor &f)
 	{
 		IEEE754binary64LE target;
-		if(Read(f, target))
-		{
-			return target;
-		} else
+		if(!Read(f, target))
 		{
 			return 0.0;
 		}
+		return target;
 	}
 
 	// Read 64-Bit float in big-endian format.
@@ -472,13 +450,11 @@ namespace FileReader
 	double ReadDoubleBE(TFileCursor &f)
 	{
 		IEEE754binary64BE target;
-		if(Read(f, target))
-		{
-			return target;
-		} else
+		if(!Read(f, target))
 		{
 			return 0.0;
 		}
+		return target;
 	}
 
 	// Read a struct.
@@ -487,14 +463,12 @@ namespace FileReader
 	bool ReadStruct(TFileCursor &f, T &target)
 	{
 		static_assert(mpt::is_binary_safe<T>::value);
-		if(Read(f, target))
-		{
-			return true;
-		} else
+		if(!Read(f, target))
 		{
 			mpt::reset(target);
 			return false;
 		}
+		return true;
 	}
 
 	// Allow to read a struct partially (if there's less memory available than the struct's size, fill it up with zeros).
@@ -572,7 +546,9 @@ namespace FileReader
 	{
 		mpt::packed<typename Tsize::base_type, typename Tsize::endian_type> srcSize;	// Enforce usage of a packed type by ensuring that the passed type has the required typedefs
 		if(!Read(f, srcSize))
+		{
 			return false;
+		}
 		return ReadString<mode>(f, destBuffer, std::min(static_cast<typename TFileCursor::pos_type>(srcSize), maxLength));
 	}
 
@@ -584,7 +560,9 @@ namespace FileReader
 	{
 		mpt::packed<typename Tsize::base_type, typename Tsize::endian_type> srcSize;	// Enforce usage of a packed type by ensuring that the passed type has the required typedefs
 		if(!Read(f, srcSize))
+		{
 			return false;
+		}
 		return ReadString<mode>(f, dest, std::min(static_cast<typename TFileCursor::pos_type>(srcSize), maxLength));
 	}
 
@@ -596,7 +574,9 @@ namespace FileReader
 	{
 		mpt::packed<typename Tsize::base_type, typename Tsize::endian_type> srcSize;	// Enforce usage of a packed type by ensuring that the passed type has the required typedefs
 		if(!Read(f, srcSize))
+		{
 			return false;
+		}
 		return ReadString<mode>(f, dest, std::min(static_cast<typename TFileCursor::pos_type>(srcSize), maxLength));
 	}
 
