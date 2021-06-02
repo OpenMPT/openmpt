@@ -265,6 +265,9 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 			madeWithTracker = U_("Velvet Studio");
 		} else
 		{
+			// ST3.20 should only ever write ultra-click values 16, 24 and 32 (corresponding to 8, 12 and 16 in the GUI), ST3.01/3.03 should only write 0.
+			// However, we won't fingerprint these values here as it's unlikely that there is any other tracker out there disguising as ST3 and using a strange ultra-click value.
+			// Also, re-saving a file with a strange ultra-click value in ST3 doesn't fix this value unless the user manually changes it.
 			madeWithTracker = U_("Scream Tracker");
 			formatTrackerStr = true;
 			isST3 = true;
@@ -710,7 +713,7 @@ bool CSoundFile::SaveS3M(std::ostream &f) const
 	fileHeader.speed = static_cast<uint8>(Clamp(m_nDefaultSpeed, 1u, 254u));
 	fileHeader.tempo = static_cast<uint8>(Clamp(m_nDefaultTempo.GetInt(), 33u, 255u));
 	fileHeader.masterVolume = static_cast<uint8>(Clamp(m_nSamplePreAmp, 16u, 127u) | 0x80);
-	fileHeader.ultraClicks = 8;
+	fileHeader.ultraClicks = 16;
 	fileHeader.usePanningTable = S3MFileHeader::idPanning;
 
 	mpt::IO::Write(f, fileHeader);
