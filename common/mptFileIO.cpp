@@ -36,11 +36,11 @@ OPENMPT_NAMESPACE_BEGIN
 
 #if !defined(MPT_BUILD_SILENCE_LIBOPENMPT_CONFIGURATION_WARNINGS)
 
-#if defined(MPT_FSTREAM_NO_WCHAR)
+#if defined(MPT_COMPILER_QUIRK_WINDOWS_FSTREAM_NO_WCHAR)
 #if MPT_GCC_BEFORE(9,1,0)
 MPT_WARNING("Warning: MinGW with GCC earlier than 9.1 detected. Standard library does neither provide std::fstream wchar_t overloads nor std::filesystem with wchar_t support. Unicode filename support is thus unavailable.")
 #endif // MPT_GCC_AT_LEAST(9,1,0)
-#endif // MPT_FSTREAM_NO_WCHAR
+#endif // MPT_COMPILER_QUIRK_WINDOWS_FSTREAM_NO_WCHAR
 
 #endif // !MPT_BUILD_SILENCE_LIBOPENMPT_CONFIGURATION_WARNINGS
 

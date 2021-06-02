@@ -57,6 +57,13 @@
 
 
 
+#if MPT_OS_WINDOWS && MPT_GCC_BEFORE(9,1,0)
+// GCC C++ library has no wchar_t overloads
+#define MPT_COMPILER_QUIRK_WINDOWS_FSTREAM_NO_WCHAR
+#endif
+
+
+
 #if defined(__arm__)
 
 #if defined(__SOFTFP__)

@@ -472,11 +472,6 @@
 #define NO_VST
 #endif
 
-#if MPT_OS_WINDOWS && MPT_GCC_BEFORE(9,1,0)
-// GCC C++ library has no wchar_t overloads
-#define MPT_FSTREAM_NO_WCHAR
-#endif
-
 
 
 #if defined(MODPLUG_TRACKER) && !defined(MPT_BUILD_WINESUPPORT) && !defined(MPT_BUILD_WINESUPPORT_WRAPPER)
