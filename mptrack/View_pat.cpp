@@ -1778,12 +1778,15 @@ void CViewPattern::ResetChannel(CHANNELINDEX chn)
 		return;
 	CSoundFile &sndFile = pModDoc->GetSoundFile();
 
-	const bool isMuted = pModDoc->IsChannelMuted(chn);
-	if(!isMuted)
-		pModDoc->MuteChannel(chn, true);
+	CriticalSection cs;
+	if(!pModDoc->IsChannelMuted(chn))
+	{
+		// Cut playing notes
+		sndFile.ChnSettings[chn].dwFlags.set(CHN_MUTE);
+		pModDoc->UpdateChannelMuteStatus(chn);
+		sndFile.ChnSettings[chn].dwFlags.reset(CHN_MUTE);
+	}
 	sndFile.m_PlayState.Chn[chn].Reset(ModChannel::resetTotal, sndFile, chn, CSoundFile::GetChannelMuteFlag());
-	if(!isMuted)
-		pModDoc->MuteChannel(chn, false);
 }
 
 
