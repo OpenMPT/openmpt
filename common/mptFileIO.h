@@ -303,9 +303,7 @@ private:
 	bool m_IsCached;
 	std::vector<std::byte> m_Cache;
 public:
-	static bool DefaultToLargeAddressSpaceUsage();
-public:
-	InputFile(const mpt::PathString &filename, bool allowWholeFileCaching = DefaultToLargeAddressSpaceUsage());
+	InputFile(const mpt::PathString &filename, bool allowWholeFileCaching = false);
 	~InputFile();
 	bool IsValid() const;
 	bool IsCached() const;
@@ -313,7 +311,7 @@ public:
 	std::istream& GetStream();
 	mpt::const_byte_span GetCache();
 private:
-	bool Open(const mpt::PathString &filename, bool allowWholeFileCaching = DefaultToLargeAddressSpaceUsage());
+	bool Open(const mpt::PathString &filename, bool allowWholeFileCaching = false);
 };
 
 

@@ -363,12 +363,6 @@ LazyFileRef::operator std::string () const
 #endif // MODPLUG_TRACKER
 
 
-bool InputFile::DefaultToLargeAddressSpaceUsage()
-{
-	return false;
-}
-
-
 InputFile::InputFile(const mpt::PathString &filename, bool allowWholeFileCaching)
 	: m_IsValid(false)
 	, m_IsCached(false)
