@@ -67,7 +67,7 @@ public:
 };
 
 template <typename Tpath>
-class FileCursorTraitsStdStream
+class FileCursorTraitsFileData
 {
 
 public:
@@ -1423,8 +1423,8 @@ public:
 
 } // namespace detail
 
-using FileCursor = detail::FileCursor<FileCursorTraitsStdStream<mpt::PathString>>;
-using FileReader = detail::FileReader<FileCursorTraitsStdStream<mpt::PathString>>;
+using FileCursor = detail::FileCursor<FileCursorTraitsFileData<mpt::PathString>>;
+using FileReader = detail::FileReader<FileCursorTraitsFileData<mpt::PathString>>;
 
 using MemoryFileCursor = detail::FileCursor<FileCursorTraitsMemory>;
 using MemoryFileReader = detail::FileReader<FileCursorTraitsMemory>;

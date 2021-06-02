@@ -25,7 +25,7 @@
 // forward declarations
 namespace OpenMPT {
 template <typename Tpath>
-class FileCursorTraitsStdStream;
+class FileCursorTraitsFileData;
 namespace mpt {
 template <typename Ttraits>
 class FileCursor;
@@ -37,7 +37,7 @@ using FileCursor = mpt::FileCursor<Ttraits>;
 namespace mpt {
 class PathString;
 } // namespace mpt
-using FileCursor = detail::FileCursor<FileCursorTraitsStdStream<mpt::PathString>>;
+using FileCursor = detail::FileCursor<FileCursorTraitsFileData<mpt::PathString>>;
 class CSoundFile;
 struct DithersWrapperOpenMPT;
 } // namespace OpenMPT
