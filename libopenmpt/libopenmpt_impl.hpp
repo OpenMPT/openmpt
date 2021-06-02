@@ -24,20 +24,21 @@
 
 // forward declarations
 namespace OpenMPT {
-template <typename Tpath>
 class FileCursorTraitsFileData;
+template <typename Tpath>
+class FileCursorFilenameTraits;
 namespace mpt {
-template <typename Ttraits>
+template <typename Ttraits, typename Tfilenametraits>
 class FileCursor;
 } // namespace mpt
 namespace detail {
-template <typename Ttraits>
-using FileCursor = mpt::FileCursor<Ttraits>;
+template <typename Ttraits, typename Tfilenametraits>
+using FileCursor = mpt::FileCursor<Ttraits, Tfilenametraits>;
 } // namespace detail
 namespace mpt {
 class PathString;
 } // namespace mpt
-using FileCursor = detail::FileCursor<FileCursorTraitsFileData<mpt::PathString>>;
+using FileCursor = detail::FileCursor<FileCursorTraitsFileData, FileCursorFilenameTraits<mpt::PathString>>;
 class CSoundFile;
 struct DithersWrapperOpenMPT;
 } // namespace OpenMPT

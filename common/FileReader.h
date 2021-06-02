@@ -46,15 +46,8 @@ public:
 	using shared_data_type = const FileDataContainerMemory &;
 	using value_data_type = FileDataContainerMemory;
 
-	struct empty_type {};
-
-	using filename_type = empty_type;
-	using shared_filename_type = empty_type;
-
 	static shared_data_type get_shared(const data_type & data) { return data; }
 	static ref_data_type get_ref(const data_type & data) { return data; }
-
-	static std::optional<filename_type> get_optional_filename(shared_filename_type /* filename */ ) { return std::nullopt; }
 
 	static value_data_type make_data() { return mpt::const_byte_span(); }
 	static value_data_type make_data(mpt::const_byte_span data) { return data; }
@@ -66,7 +59,6 @@ public:
 
 };
 
-template <typename Tpath>
 class FileCursorTraitsFileData
 {
 
@@ -79,20 +71,8 @@ public:
 	using shared_data_type = std::shared_ptr<const IFileDataContainer>;
 	using value_data_type = std::shared_ptr<const IFileDataContainer>;
 
-	using filename_type = Tpath;
-	using shared_filename_type = std::shared_ptr<mpt::PathString>;
-
 	static shared_data_type get_shared(const data_type & data) { return data; }
 	static ref_data_type get_ref(const data_type & data) { return *data; }
-
-	static std::optional<filename_type> get_optional_filename(shared_filename_type filename)
-	{
-		if(!filename)
-		{
-			return std::nullopt;
-		}
-		return *filename;
-	}
 
 	static value_data_type make_data() { return std::make_shared<FileDataContainerDummy>(); }
 	static value_data_type make_data(mpt::const_byte_span data) { return std::make_shared<FileDataContainerMemory>(data); }
@@ -100,6 +80,40 @@ public:
 	static value_data_type make_chunk(shared_data_type data, pos_type position, pos_type size)
 	{
 		return std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerWindow>(data, position, size));
+	}
+
+};
+
+class FileCursorFilenameTraitsNone
+{
+
+public:
+
+	struct empty_type {};
+
+	using filename_type = empty_type;
+	using shared_filename_type = empty_type;
+
+	static std::optional<filename_type> get_optional_filename(shared_filename_type /* filename */) { return std::nullopt; }
+
+};
+
+template <typename Tpath>
+class FileCursorFilenameTraits
+{
+
+public:
+
+	using filename_type = Tpath;
+	using shared_filename_type = std::shared_ptr<Tpath>;
+
+	static std::optional<filename_type> get_optional_filename(shared_filename_type filename)
+	{
+		if (!filename)
+		{
+			return std::nullopt;
+		}
+		return *filename;
 	}
 
 };
@@ -727,13 +741,14 @@ namespace FileReader
 
 } // namespace FileReader
 
-template <typename Ttraits>
+template <typename Ttraits, typename Tfilenametraits>
 class FileCursor
 {
 
 private:
 
 	using traits_type = Ttraits;
+	using filename_traits_type = Tfilenametraits;
 	
 public:
 
@@ -744,8 +759,8 @@ public:
 	using shared_data_type = typename traits_type::shared_data_type;
 	using value_data_type  = typename traits_type::value_data_type;
 
-	using filename_type = typename traits_type::filename_type;
-	using shared_filename_type = typename traits_type::shared_filename_type;
+	using filename_type = typename filename_traits_type::filename_type;
+	using shared_filename_type = typename filename_traits_type::shared_filename_type;
 
 protected:
 
@@ -798,7 +813,7 @@ public:
 
 	std::optional<filename_type> GetOptionalFileName() const
 	{
-		return traits_type::get_optional_filename(m_fileName);
+		return filename_traits_type::get_optional_filename(m_fileName);
 	}
 
 	// Returns true if the object points to a valid (non-empty) stream.
@@ -1144,17 +1159,18 @@ namespace FR = mpt::FileReader;
 
 namespace detail {
 
-template <typename Ttraits>
-using FileCursor = mpt::FileCursor<Ttraits>;
+template <typename Ttraits, typename Tfilenametraits>
+using FileCursor = mpt::FileCursor<Ttraits, Tfilenametraits>;
 
-template <typename Ttraits>
+template <typename Ttraits, typename Tfilenametraits>
 class FileReader
-	: public FileCursor<Ttraits>
+	: public FileCursor<Ttraits, Tfilenametraits>
 {
 
 private:
 
 	using traits_type = Ttraits;
+	using filename_traits_type = Tfilenametraits;
 
 public:
 
@@ -1166,7 +1182,7 @@ public:
 	using shared_data_type = typename traits_type::shared_data_type;
 	using value_data_type = typename traits_type::value_data_type;
 
-	using shared_filename_type = typename traits_type::shared_filename_type;
+	using shared_filename_type = typename filename_traits_type::shared_filename_type;
 
 public:
 
@@ -1176,13 +1192,13 @@ public:
 		return;
 	}
 
-	FileReader(const FileCursor<Ttraits> &other)
-		: FileCursor<Ttraits>(other)
+	FileReader(const FileCursor<Ttraits, Tfilenametraits> &other)
+		: FileCursor<Ttraits, Tfilenametraits>(other)
 	{
 		return;
 	}
-	FileReader(FileCursor<Ttraits> &&other)
-		: FileCursor<Ttraits>(std::move(other))
+	FileReader(FileCursor<Ttraits, Tfilenametraits> &&other)
+		: FileCursor<Ttraits, Tfilenametraits>(std::move(other))
 	{
 		return;
 	}
@@ -1190,14 +1206,14 @@ public:
 	// Initialize file reader object with pointer to data and data length.
 	template <typename Tbyte>
 	explicit FileReader(mpt::span<Tbyte> bytedata, shared_filename_type filename = shared_filename_type{})
-		: FileCursor<Ttraits>(bytedata, std::move(filename))
+		: FileCursor<Ttraits, Tfilenametraits>(bytedata, std::move(filename))
 	{
 		return;
 	}
 
 	// Initialize file reader object based on an existing file reader object window.
 	explicit FileReader(value_data_type other, shared_filename_type filename = shared_filename_type{})
-		: FileCursor<Ttraits>(std::move(other), std::move(filename))
+		: FileCursor<Ttraits, Tfilenametraits>(std::move(other), std::move(filename))
 	{
 		return;
 	}
@@ -1423,11 +1439,11 @@ public:
 
 } // namespace detail
 
-using FileCursor = detail::FileCursor<FileCursorTraitsFileData<mpt::PathString>>;
-using FileReader = detail::FileReader<FileCursorTraitsFileData<mpt::PathString>>;
+using FileCursor = detail::FileCursor<FileCursorTraitsFileData, FileCursorFilenameTraits<mpt::PathString>>;
+using FileReader = detail::FileReader<FileCursorTraitsFileData, FileCursorFilenameTraits<mpt::PathString>>;
 
-using MemoryFileCursor = detail::FileCursor<FileCursorTraitsMemory>;
-using MemoryFileReader = detail::FileReader<FileCursorTraitsMemory>;
+using MemoryFileCursor = detail::FileCursor<FileCursorTraitsMemory, FileCursorFilenameTraitsNone>;
+using MemoryFileReader = detail::FileReader<FileCursorTraitsMemory, FileCursorFilenameTraitsNone>;
 
 
 // Initialize file reader object with pointer to data and data length.

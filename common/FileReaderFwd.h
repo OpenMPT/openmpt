@@ -16,22 +16,26 @@ OPENMPT_NAMESPACE_BEGIN
 
 class FileCursorTraitsMemory;
 
-template <typename Tpath>
 class FileCursorTraitsFileData;
+
+class FileCursorFilenameTraitsNone;
+
+template <typename Tpath>
+class FileCursorFilenameTraits;
 
 namespace mpt {
 
-template <typename Ttraits>
+template <typename Ttraits, typename Tfilenametraits>
 class FileCursor;
 
 } // namespace mpt
 
 namespace detail {
 
-template <typename Ttraits>
-using FileCursor = mpt::FileCursor<Ttraits>;
+template <typename Ttraits, typename Tfilenametraits>
+using FileCursor = mpt::FileCursor<Ttraits, Tfilenametraits>;
 
-template <typename Ttraits>
+template <typename Ttraits, typename Tfilenametraits>
 class FileReader;
 
 } // namespace detail
@@ -42,11 +46,11 @@ class PathString;
 
 } // namespace mpt
 
-using FileCursor = detail::FileCursor<FileCursorTraitsFileData<mpt::PathString>>;
-using FileReader = detail::FileReader<FileCursorTraitsFileData<mpt::PathString>>;
+using FileCursor = detail::FileCursor<FileCursorTraitsFileData, FileCursorFilenameTraits<mpt::PathString>>;
+using FileReader = detail::FileReader<FileCursorTraitsFileData, FileCursorFilenameTraits<mpt::PathString>>;
 
-using MemoryFileCursor = detail::FileCursor<FileCursorTraitsMemory>;
-using MemoryFileReader = detail::FileReader<FileCursorTraitsMemory>;
+using MemoryFileCursor = detail::FileCursor<FileCursorTraitsMemory, FileCursorFilenameTraitsNone>;
+using MemoryFileReader = detail::FileReader<FileCursorTraitsMemory, FileCursorFilenameTraitsNone>;
 
 OPENMPT_NAMESPACE_END
 
