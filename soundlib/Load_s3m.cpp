@@ -256,7 +256,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			// MPT 1.16 and older versions of OpenMPT - Simply keep default (filter) MIDI macros
 			m_dwLastSavedWithVersion = MPT_V("1.16.00.00");
-			madeWithTracker = U_("ModPlug Tracker / OpenMPT");
+			madeWithTracker = U_("ModPlug Tracker / OpenMPT 1.17");
 			keepMidiMacros = true;
 			nonCompatTracker = true;
 			m_playBehaviour.set(kST3LimitPeriod);
@@ -286,7 +286,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		}
 		if(fileHeader.cwtv >= S3MFileHeader::trkIT2_07 && fileHeader.reserved3 != 0)
 		{
-			// Starting from  version 2.07, IT stores the total edit time of a module in the "reserved" field
+			// Starting from version 2.07, IT stores the total edit time of a module in the "reserved" field
 			uint32 editTime = DecodeITEditTimer(fileHeader.cwtv, fileHeader.reserved3);
 
 			FileHistory hist;
@@ -415,6 +415,8 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	// However, this version check is missing in ST3, so any mono file with a master volume of 18 will be converted to a stereo file with master volume 32.
 	else if(fileHeader.masterVolume == 2 || fileHeader.masterVolume == (2 | 0x10))
 		m_nSamplePreAmp = 0x20;
+	else if(!(fileHeader.masterVolume & 0x7F))
+		m_nSamplePreAmp = 48;
 	else
 		m_nSamplePreAmp = std::max(fileHeader.masterVolume & 0x7F, 0x10);  // Bit 7 = Stereo (we always use stereo)
 
