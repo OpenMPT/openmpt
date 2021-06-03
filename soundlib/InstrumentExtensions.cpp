@@ -14,6 +14,12 @@
 #include "stdafx.h"
 #include "Loaders.h"
 
+#ifndef MODPLUG_NO_FILESAVE
+#include "mpt/io/base.hpp"
+#include "mpt/io/io.hpp"
+#include "mpt/io/io_stdstream.hpp"
+#endif
+
 OPENMPT_NAMESPACE_BEGIN
 
 /*---------------------------------------------------------------------------------------------

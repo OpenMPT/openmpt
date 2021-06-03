@@ -12,9 +12,11 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
+#include "mpt/io/io_stdstream.hpp"
+#include "openmpt/base/Endian.hpp"
+
 #include "../common/mptBaseTypes.h"
 #include "../common/mptIO.h"
-#include "openmpt/base/Endian.hpp"
 
 #include <algorithm>
 #include <bitset>

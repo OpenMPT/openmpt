@@ -15,6 +15,9 @@
 #include "XMTools.h"
 #include "mod_specifications.h"
 #ifndef MODPLUG_NO_FILESAVE
+#include "mpt/io/base.hpp"
+#include "mpt/io/io.hpp"
+#include "mpt/io/io_stdstream.hpp"
 #include "../common/mptFileIO.h"
 #endif
 #include "OggStream.h"

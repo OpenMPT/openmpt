@@ -6,6 +6,8 @@
 #include "mpt/crypto/jwk.hpp"
 #include "mpt/environment/environment.hpp"
 #include "mpt/exception_text/exception_text.hpp"
+#include "mpt/io/base.hpp"
+#include "mpt/io/io_stdstream.hpp"
 #include "mpt/out_of_memory/out_of_memory.hpp"
 #include "mpt/string/types.hpp"
 #include "mpt/string_convert/convert.hpp"

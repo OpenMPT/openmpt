@@ -11,6 +11,11 @@
 #include "stdafx.h"
 #include "mptFileIO.h"
 
+#if defined(MPT_ENABLE_FILEIO)
+#include "mpt/io/io.hpp"
+#include "mpt/io/io_stdstream.hpp"
+#endif // MPT_ENABLE_FILEIO
+
 #ifdef MODPLUG_TRACKER
 #if MPT_OS_WINDOWS
 #include <WinIoCtl.h>

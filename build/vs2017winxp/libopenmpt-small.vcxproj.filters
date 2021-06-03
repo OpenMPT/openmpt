@@ -70,6 +70,12 @@
     <Filter Include="src\mpt\format\tests">
       <UniqueIdentifier>{672FE5C8-53BE-6E92-FCDC-828DE84A7F38}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\mpt\io">
+      <UniqueIdentifier>{D454AB6B-C00C-EDB8-2914-C61415EB87A9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\mpt\io_write">
+      <UniqueIdentifier>{BE6C5801-AA65-7753-D397-5CD8BFEF565F}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\mpt\library">
       <UniqueIdentifier>{31CC822E-9D57-F0F2-A668-73E712734CF3}</UniqueIdentifier>
     </Filter>
@@ -704,6 +710,24 @@
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\format\tests\tests_format_simple.hpp">
       <Filter>src\mpt\format\tests</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\io\base.hpp">
+      <Filter>src\mpt\io</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\io\io.hpp">
+      <Filter>src\mpt\io</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\io\io_span.hpp">
+      <Filter>src\mpt\io</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\io\io_stdstream.hpp">
+      <Filter>src\mpt\io</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\io\io_virtual_wrapper.hpp">
+      <Filter>src\mpt\io</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\io_write\buffer.hpp">
+      <Filter>src\mpt\io_write</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\library\library.hpp">
       <Filter>src\mpt\library</Filter>

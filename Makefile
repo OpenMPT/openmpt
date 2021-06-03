@@ -1409,6 +1409,8 @@ bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION).makefile.tar: bin/dist.mk bin
 	svn export ./src/mpt/environment    bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/environment
 	svn export ./src/mpt/exception_text bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/exception_text
 	svn export ./src/mpt/format         bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/format
+	svn export ./src/mpt/io             bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/io
+	svn export ./src/mpt/io_write             bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/io_write
 	#svn export ./src/mpt/json           bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/json
 	#svn export ./src/mpt/library        bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/library
 	svn export ./src/mpt/mutex          bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/mutex
@@ -1498,6 +1500,8 @@ bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION).msvc.zip: bin/dist.mk bin/svn
 	svn export ./src/mpt/environment    bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/environment    --native-eol CRLF
 	svn export ./src/mpt/exception_text bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/exception_text --native-eol CRLF
 	svn export ./src/mpt/format         bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/format         --native-eol CRLF
+	svn export ./src/mpt/io             bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/io             --native-eol CRLF
+	svn export ./src/mpt/io_write       bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/io_write       --native-eol CRLF
 	#svn export ./src/mpt/json           bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/json           --native-eol CRLF
 	#svn export ./src/mpt/library        bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/library        --native-eol CRLF
 	svn export ./src/mpt/mutex          bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/mutex          --native-eol CRLF

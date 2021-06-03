@@ -21,6 +21,10 @@
 #include "../common/mptIO.h"
 #ifndef MODPLUG_NO_FILESAVE
 #include "../common/mptFileIO.h"
+#include "mpt/io/base.hpp"
+#include "mpt/io/io.hpp"
+#include "mpt/io/io_stdstream.hpp"
+#include "mpt/io_write/buffer.hpp"
 #endif
 #include "BitReader.h"
 

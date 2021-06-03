@@ -42,6 +42,8 @@ del /f /q "%OUTDIR%\openmpt-wine-support.zip"
  src\mpt\exception_text\*.hpp ^
  src\mpt\format\*.hpp ^
  src\mpt\format\test\*.hpp ^
+ src\mpt\io\*.hpp ^
+ src\mpt\io_write\*.hpp ^
  src\mpt\json\*.hpp ^
  src\mpt\library\*.hpp ^
  src\mpt\mutex\*.hpp ^

@@ -17,6 +17,9 @@
 #endif // MODPLUG_TRACKER
 #include "../soundlib/AudioCriticalSection.h"
 #ifndef MODPLUG_NO_FILESAVE
+#include "mpt/io/base.hpp"
+#include "mpt/io/io.hpp"
+#include "mpt/io/io_stdstream.hpp"
 #include "../common/mptFileIO.h"
 #endif // !MODPLUG_NO_FILESAVE
 #include "../common/misc_util.h"

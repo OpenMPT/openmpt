@@ -12,6 +12,11 @@
 
 #include "StreamEncoder.h"
 
+#include "mpt/io/base.hpp"
+#include "mpt/io/io.hpp"
+#include "mpt/io/io_stdstream.hpp"
+#include "mpt/io_write/buffer.hpp"
+
 #include "openmpt/soundbase/SampleEncode.hpp"
 #include "openmpt/soundbase/SampleFormat.hpp"
 

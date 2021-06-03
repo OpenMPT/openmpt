@@ -1408,6 +1408,12 @@
     <ClInclude Include="..\..\src\mpt\format\simple_spec.hpp" />
     <ClInclude Include="..\..\src\mpt\format\tests\tests_format_message.hpp" />
     <ClInclude Include="..\..\src\mpt\format\tests\tests_format_simple.hpp" />
+    <ClInclude Include="..\..\src\mpt\io\base.hpp" />
+    <ClInclude Include="..\..\src\mpt\io\io.hpp" />
+    <ClInclude Include="..\..\src\mpt\io\io_span.hpp" />
+    <ClInclude Include="..\..\src\mpt\io\io_stdstream.hpp" />
+    <ClInclude Include="..\..\src\mpt\io\io_virtual_wrapper.hpp" />
+    <ClInclude Include="..\..\src\mpt\io_write\buffer.hpp" />
     <ClInclude Include="..\..\src\mpt\library\library.hpp" />
     <ClInclude Include="..\..\src\mpt\mutex\mutex.hpp" />
     <ClInclude Include="..\..\src\mpt\osinfo\class.hpp" />

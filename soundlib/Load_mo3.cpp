@@ -16,6 +16,10 @@
 #include "Loaders.h"
 #include "../common/ComponentManager.h"
 
+#include "mpt/io/base.hpp"
+#include "mpt/io/io.hpp"
+#include "mpt/io/io_stdstream.hpp"
+
 #include "Tables.h"
 #include "../common/version.h"
 #include "mpt/audio/span.hpp"

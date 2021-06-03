@@ -13,6 +13,9 @@
 #include "S3MTools.h"
 #include "ITTools.h"
 #ifndef MODPLUG_NO_FILESAVE
+#include "mpt/io/base.hpp"
+#include "mpt/io/io.hpp"
+#include "mpt/io/io_stdstream.hpp"
 #include "../common/mptFileIO.h"
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/TrackerSettings.h"

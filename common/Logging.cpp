@@ -11,6 +11,10 @@
 #include "stdafx.h"
 
 #include "Logging.h"
+
+#include "mpt/io/base.hpp"
+#include "mpt/io/io_stdstream.hpp"
+
 #include "mptFileIO.h"
 #if defined(MODPLUG_TRACKER)
 #include <atomic>
