@@ -44,7 +44,7 @@
   </Type>
 
   <!-- Contents of memory-mapped files -->
-  <Type Name="FileDataContainerMemory">
+  <Type Name="FileDataMemory">
     <Expand>
       <ArrayItems>
         <Size>streamLength</Size>

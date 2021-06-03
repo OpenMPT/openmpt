@@ -800,8 +800,8 @@ int module_impl::probe_file_header( std::uint64_t flags, std::istream & stream )
 	if ( stream.bad() ) {
 		throw exception("error reading stream");
 	}
-	const bool seekable = OpenMPT::FileDataContainerStdStream::IsSeekable( stream );
-	const std::uint64_t filesize = ( seekable ? OpenMPT::FileDataContainerStdStream::GetLength( stream ) : 0 );
+	const bool seekable = OpenMPT::FileDataStdStream::IsSeekable( stream );
+	const std::uint64_t filesize = ( seekable ? OpenMPT::FileDataStdStream::GetLength( stream ) : 0 );
 	while ( ( size_toread > 0 ) && stream ) {
 		stream.read( buffer + size_read, size_toread );
 		if ( stream.bad() ) {
@@ -847,8 +847,8 @@ int module_impl::probe_file_header( std::uint64_t flags, callback_stream_wrapper
 	fstream.read = stream.read;
 	fstream.seek = stream.seek;
 	fstream.tell = stream.tell;
-	const bool seekable = OpenMPT::FileDataContainerCallbackStream::IsSeekable( fstream );
-	const std::uint64_t filesize = ( seekable ? OpenMPT::FileDataContainerCallbackStream::GetLength( fstream ) : 0 );
+	const bool seekable = OpenMPT::FileDataCallbackStream::IsSeekable( fstream );
+	const std::uint64_t filesize = ( seekable ? OpenMPT::FileDataCallbackStream::GetLength( fstream ) : 0 );
 	while ( size_toread > 0 ) {
 		std::size_t read_count = stream.read( stream.stream, buffer + size_read, size_toread );
 		size_read += read_count;

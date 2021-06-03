@@ -39,12 +39,12 @@ class FileCursorTraitsMemory
 
 public:
 
-	using pos_type = FileDataContainerMemory::pos_type;
+	using pos_type = FileDataMemory::pos_type;
 
-	using data_type = FileDataContainerMemory;
-	using ref_data_type = const FileDataContainerMemory &;
-	using shared_data_type = const FileDataContainerMemory &;
-	using value_data_type = FileDataContainerMemory;
+	using data_type = FileDataMemory;
+	using ref_data_type = const FileDataMemory &;
+	using shared_data_type = const FileDataMemory &;
+	using value_data_type = FileDataMemory;
 
 	static shared_data_type get_shared(const data_type & data) { return data; }
 	static ref_data_type get_ref(const data_type & data) { return data; }
@@ -64,22 +64,22 @@ class FileCursorTraitsFileData
 
 public:
 
-	using pos_type = IFileDataContainer::pos_type;
+	using pos_type = IFileData::pos_type;
 
-	using data_type = std::shared_ptr<const IFileDataContainer>;
-	using ref_data_type = const IFileDataContainer &;
-	using shared_data_type = std::shared_ptr<const IFileDataContainer>;
-	using value_data_type = std::shared_ptr<const IFileDataContainer>;
+	using data_type = std::shared_ptr<const IFileData>;
+	using ref_data_type = const IFileData &;
+	using shared_data_type = std::shared_ptr<const IFileData>;
+	using value_data_type = std::shared_ptr<const IFileData>;
 
 	static shared_data_type get_shared(const data_type & data) { return data; }
 	static ref_data_type get_ref(const data_type & data) { return *data; }
 
-	static value_data_type make_data() { return std::make_shared<FileDataContainerDummy>(); }
-	static value_data_type make_data(mpt::const_byte_span data) { return std::make_shared<FileDataContainerMemory>(data); }
+	static value_data_type make_data() { return std::make_shared<FileDataDummy>(); }
+	static value_data_type make_data(mpt::const_byte_span data) { return std::make_shared<FileDataMemory>(data); }
 
 	static value_data_type make_chunk(shared_data_type data, pos_type position, pos_type size)
 	{
-		return std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerWindow>(data, position, size));
+		return std::static_pointer_cast<IFileData>(std::make_shared<FileDataWindow>(data, position, size));
 	}
 
 };
@@ -1438,10 +1438,10 @@ inline FileCursor make_FileCursor(mpt::span<Tbyte> bytedata, std::shared_ptr<mpt
 inline FileCursor make_FileCursor(CallbackStream s, std::shared_ptr<mpt::PathString> filename = nullptr)
 {
 	return FileCursor(
-				FileDataContainerCallbackStream::IsSeekable(s) ?
-					std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerCallbackStreamSeekable>(s))
+				FileDataCallbackStream::IsSeekable(s) ?
+					std::static_pointer_cast<IFileData>(std::make_shared<FileDataCallbackStreamSeekable>(s))
 				:
-					std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerCallbackStreamUnseekable>(s))
+					std::static_pointer_cast<IFileData>(std::make_shared<FileDataCallbackStreamUnseekable>(s))
 			, std::move(filename)
 		);
 }
@@ -1451,10 +1451,10 @@ inline FileCursor make_FileCursor(CallbackStream s, std::shared_ptr<mpt::PathStr
 inline FileCursor make_FileCursor(std::istream &s, std::shared_ptr<mpt::PathString> filename = nullptr)
 {
 	return FileCursor(
-				FileDataContainerStdStream::IsSeekable(s) ?
-					std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerStdStreamSeekable>(s))
+				FileDataStdStream::IsSeekable(s) ?
+					std::static_pointer_cast<IFileData>(std::make_shared<FileDataStdStreamSeekable>(s))
 				:
-					std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerStdStreamUnseekable>(s))
+					std::static_pointer_cast<IFileData>(std::make_shared<FileDataStdStreamUnseekable>(s))
 			, std::move(filename)
 		);
 }
