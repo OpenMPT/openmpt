@@ -34,6 +34,9 @@ protected:
 public:
 	std::unique_ptr<CCommandSet> m_activeCommandSet;
 
+	std::array<CommandID, 10> m_lastCommands;
+	size_t m_lastCommandPos = 0;
+
 public:
 	CInputHandler(CWnd *mainframe);
 	CommandID GeneralKeyEvent(InputTargetContext context, int code, WPARAM wParam , LPARAM lParam);
@@ -49,6 +52,7 @@ protected:
 	bool CatchModifierChange(WPARAM wParam, KeyEventType keyEventType, int scancode);
 	bool InterceptSpecialKeys(UINT nChar, UINT nFlags, bool generateMsg);
 	void SetupSpecialKeyInterception();
+	CommandID SendCommands(CWnd *wnd, const KeyMapRange &cmd);
 
 public:
 	bool ShiftPressed() const;

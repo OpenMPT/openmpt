@@ -12,6 +12,7 @@
 #include "Mainfrm.h"
 #include "Mptrack.h"
 #include "AboutDialog.h"
+#include "InputHandler.h"
 #include "openmpt/sounddevice/SoundDevice.hpp"
 #include "Moddoc.h"
 #include <shlwapi.h>
@@ -318,6 +319,26 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 		mpt::ofstream& f = sf;
 		f.imbue(std::locale::classic());
 		f << mpt::String::Replace(mpt::ToCharset(mpt::Charset::UTF8, errorMessage), "\n", "\r\n");
+	}
+
+	if(auto ih = CMainFrame::GetInputHandler(); ih != nullptr)
+	{
+		mpt::SafeOutputFile sf(crashDirectory.path + P_("last-commands.txt"), std::ios::binary, mpt::FlushMode::Full);
+		mpt::ofstream &f = sf;
+		f.imbue(std::locale::classic());
+
+		const auto commandSet = ih->m_activeCommandSet.get();
+		f << "Last commands:\n";
+		for(size_t i = 0; i < ih->m_lastCommands.size(); i++)
+		{
+			CommandID id = ih->m_lastCommands[(ih->m_lastCommandPos + i) % ih->m_lastCommands.size()];
+			if(id == kcNull)
+				continue;
+			f << mpt::afmt::val(id);
+			if(commandSet)
+				f << " (" << mpt::ToCharset(mpt::Charset::UTF8, commandSet->GetCommandText(id)) << ")";
+			f << "\n";
+		}
 	}
 
 	{

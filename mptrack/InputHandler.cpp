@@ -28,6 +28,7 @@ CInputHandler::CInputHandler(CWnd *mainframe)
 
 	//Init CommandSet and Load defaults
 	m_activeCommandSet = std::make_unique<CCommandSet>();
+	m_lastCommands.fill(kcNull);
 
 	mpt::PathString sDefaultPath = theApp.GetConfigPath() + P_("Keybindings.mkb");
 
@@ -68,7 +69,7 @@ CInputHandler::CInputHandler(CWnd *mainframe)
 }
 
 
-static CommandID SendCommands(CWnd *wnd, const KeyMapRange &cmd)
+CommandID CInputHandler::SendCommands(CWnd *wnd, const KeyMapRange &cmd)
 {
 	CommandID executeCommand = kcNull;
 	if(wnd != nullptr)
@@ -83,6 +84,8 @@ static CommandID SendCommands(CWnd *wnd, const KeyMapRange &cmd)
 		}
 		for(const auto &i : commands)
 		{
+			m_lastCommands[m_lastCommandPos] = i.second;
+			m_lastCommandPos = (m_lastCommandPos + 1) % m_lastCommands.size();
 			if(wnd->SendMessage(WM_MOD_KEYCOMMAND, i.second, i.first.AsLPARAM()) != kcNull)
 			{
 				// Command was handled, no need to let the OS handle the key
@@ -299,10 +302,10 @@ int CInputHandler::GetKeyListSize(CommandID cmd) const
 void CInputHandler::LogModifiers()
 {
 	MPT_LOG_GLOBAL(LogDebug, "InputHandler", U_("----------------------------------\n"));
-	if (m_modifierMask[ModCtrl])  MPT_LOG_GLOBAL(LogDebug, "InputHandler", U_("Ctrl On")); else MPT_LOG_GLOBAL(LogDebug, "InputHandler", U_("Ctrl --"));
-	if (m_modifierMask[ModShift]) MPT_LOG_GLOBAL(LogDebug, "InputHandler", U_("\tShft On")); else MPT_LOG_GLOBAL(LogDebug, "InputHandler", U_("\tShft --"));
-	if (m_modifierMask[ModAlt])   MPT_LOG_GLOBAL(LogDebug, "InputHandler", U_("\tAlt  On")); else MPT_LOG_GLOBAL(LogDebug, "InputHandler", U_("\tAlt  --"));
-	if (m_modifierMask[ModWin])   MPT_LOG_GLOBAL(LogDebug, "InputHandler", U_("\tWin  On\n")); else MPT_LOG_GLOBAL(LogDebug, "InputHandler", U_("\tWin  --\n")); // Feature: use Windows keys as modifier keys
+	MPT_LOG_GLOBAL(LogDebug, "InputHandler", m_modifierMask[ModCtrl] ? U_("Ctrl On") : U_("Ctrl --"));
+	MPT_LOG_GLOBAL(LogDebug, "InputHandler", m_modifierMask[ModShift] ? U_("\tShft On") : U_("\tShft --"));
+	MPT_LOG_GLOBAL(LogDebug, "InputHandler", m_modifierMask[ModAlt] ? U_("\tAlt  On") : U_("\tAlt  --"));
+	MPT_LOG_GLOBAL(LogDebug, "InputHandler", m_modifierMask[ModWin] ? U_("\tWin  On\n") : U_("\tWin  --\n"));
 }
 
 
