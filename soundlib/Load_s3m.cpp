@@ -486,6 +486,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Reading sample headers
 	m_nSamples = std::min(static_cast<SAMPLEINDEX>(fileHeader.smpNum), static_cast<SAMPLEINDEX>(MAX_SAMPLES - 1));
+	bool useGUS = false;
 	for(SAMPLEINDEX smp = 0; smp < m_nSamples; smp++)
 	{
 		S3MSampleHeader sampleHeader;
@@ -505,7 +506,20 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				sampleHeader.GetSampleFormat((fileHeader.formatVersion == S3MFileHeader::oldVersion)).ReadSample(Samples[smp + 1], file);
 			}
+
+			if(isST3 && sampleHeader.gusAddress > 1)
+			{
+				// Re-saving an S3M file in ST3 with the SoundBlaster driver loaded will reset the GUS address for all samples.
+				// So this is a safe way of telling if the file was last saved with the GUS driver loaded or not.
+				useGUS = true;
+			}
 		}
+	}
+
+	if(isST3)
+	{
+		m_playBehaviour.set(kST3PortaSampleChange, useGUS);
+		m_playBehaviour.set(kST3SampleSwap, !useGUS);
 	}
 
 	// Try to find out if Zxx commands are supposed to be panning commands (PixPlay).

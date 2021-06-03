@@ -129,7 +129,10 @@ struct S3MSampleHeader
 	uint8le  pack;            // Packing algorithm, SamplePacking
 	uint8le  flags;           // Sample flags
 	uint32le c5speed;         // Middle-C frequency
-	char     reserved2[12];   // Reserved + Internal ST3 stuff
+	char     reserved2[4];    // Reserved
+	uint16le gusAddress;      // Sample address in GUS memory (used for fingerprinting)
+	uint16le sb512;           // SoundBlaster loop expansion stuff
+	uint32le lastUsedPos;     // More SoundBlaster stuff
 	char     name[28];        // Sample name
 	char     magic[4];        // "SCRS" magic bytes ("SCRI" for Adlib instruments)
 
