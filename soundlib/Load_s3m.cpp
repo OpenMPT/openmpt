@@ -528,6 +528,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		m_playBehaviour.set(kST3PortaSampleChange, useGUS);
 		m_playBehaviour.set(kST3SampleSwap, !useGUS);
 		m_playBehaviour.set(kApplyUpperPeriodLimit, !useGUS);
+		m_modFormat.madeWithTracker += useGUS ? UL_(" (GUS)") : UL_(" (SB)");
 	}
 
 	// Try to find out if Zxx commands are supposed to be panning commands (PixPlay).
