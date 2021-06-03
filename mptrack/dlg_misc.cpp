@@ -684,6 +684,7 @@ void CLegacyPlaybackSettingsDlg::OnFilterStringChanged()
 		case kOPLNoteStopWith0Hz: desc = _T("OPL key-off sets note frequency to 0 Hz"); break;
 		case kOPLNoteOffOnNoteChange: desc = _T("Send OPL key-off when triggering notes"); break;
 		case kFT2PortaResetDirection: desc = _T("Tone Portamento direction resets after reaching portamento target from below"); break;
+		case kApplyUpperPeriodLimit: desc = _T("Apply lower frequency limit (SoundBlaster driver)"); break;
 
 		default: MPT_ASSERT_NOTREACHED();
 		}

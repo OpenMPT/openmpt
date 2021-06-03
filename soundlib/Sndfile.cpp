@@ -1118,6 +1118,7 @@ PlayBehaviourSet CSoundFile::GetSupportedPlaybackBehaviour(MODTYPE type)
 		playBehaviour.set(kST3RetrigAfterNoteCut);
 		playBehaviour.set(kST3SampleSwap);
 		playBehaviour.set(kOPLNoteOffOnNoteChange);
+		playBehaviour.set(kApplyUpperPeriodLimit);
 		break;
 
 	case MOD_TYPE_MOD:
@@ -1185,6 +1186,7 @@ PlayBehaviourSet CSoundFile::GetDefaultPlaybackBehaviour(MODTYPE type)
 		// Default behaviour was chosen to follow GUS, so kST3PortaSampleChange is enabled and kST3SampleSwap is disabled.
 		// For SoundBlaster behaviour, those two flags would need to be swapped.
 		playBehaviour.reset(kST3SampleSwap);
+		playBehaviour.reset(kApplyUpperPeriodLimit);
 		break;
 
 	case MOD_TYPE_XM:

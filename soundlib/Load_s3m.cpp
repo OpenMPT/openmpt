@@ -527,6 +527,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		const bool useGUS = gusAddresses > 1;
 		m_playBehaviour.set(kST3PortaSampleChange, useGUS);
 		m_playBehaviour.set(kST3SampleSwap, !useGUS);
+		m_playBehaviour.set(kApplyUpperPeriodLimit, !useGUS);
 	}
 
 	// Try to find out if Zxx commands are supposed to be panning commands (PixPlay).

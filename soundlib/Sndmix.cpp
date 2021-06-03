@@ -2175,6 +2175,11 @@ bool CSoundFile::ReadNote()
 				&& !PeriodsAreFrequencies())
 			{
 				chn.nPeriod = m_nMinPeriod;
+			} else if(chn.nPeriod >= m_nMaxPeriod && m_playBehaviour[kApplyUpperPeriodLimit])
+			{
+				// ...but on the other hand, ST3's SoundBlaster driver clamps the maximum channel period.
+				// Test case: PeriodLimitUpper.s3m
+				chn.nPeriod = m_nMaxPeriod;
 			}
 			if(m_playBehaviour[kFT2Periods]) Clamp(chn.nPeriod, 1, 31999);
 			period = chn.nPeriod;
