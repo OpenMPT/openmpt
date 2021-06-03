@@ -27,8 +27,7 @@ namespace IO {
 
 // Initialize file reader object with pointer to data and data length.
 template <typename Tpath, typename Tbyte>
-inline FileCursor<FileCursorTraitsFileData, FileCursorFilenameTraits<Tpath>> make_FileCursor(mpt::span<Tbyte> bytedata, std::shared_ptr<Tpath> filename = nullptr)
-{
+inline FileCursor<FileCursorTraitsFileData, FileCursorFilenameTraits<Tpath>> make_FileCursor(mpt::span<Tbyte> bytedata, std::shared_ptr<Tpath> filename = nullptr) {
 	return FileCursor<FileCursorTraitsFileData, FileCursorFilenameTraits<Tpath>>(mpt::byte_cast<mpt::const_byte_span>(bytedata), std::move(filename));
 }
 

@@ -135,7 +135,7 @@ private:
 	}
 };
 
-using FileDataCallbackStreamSeekable = FileDataCallbackStreamSeekableTemplate<void*>;
+using FileDataCallbackStreamSeekable = FileDataCallbackStreamSeekableTemplate<void *>;
 
 
 
@@ -183,7 +183,7 @@ private:
 	}
 };
 
-using FileDataCallbackStreamUnseekable = FileDataCallbackStreamUnseekableTemplate<void*>;
+using FileDataCallbackStreamUnseekable = FileDataCallbackStreamUnseekableTemplate<void *>;
 
 
 
