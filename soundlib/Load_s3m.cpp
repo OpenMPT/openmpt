@@ -362,6 +362,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		m_playBehaviour.reset(kST3VibratoMemory);
 		m_playBehaviour.reset(KST3PortaAfterArpeggio);
 		m_playBehaviour.reset(kST3OffsetWithoutInstrument);
+		m_playBehaviour.reset(kApplyUpperPeriodLimit);
 	}
 
 	if((fileHeader.cwtv & S3MFileHeader::trackerMask) > S3MFileHeader::trkScreamTracker)
@@ -527,7 +528,6 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		const bool useGUS = gusAddresses > 1;
 		m_playBehaviour.set(kST3PortaSampleChange, useGUS);
 		m_playBehaviour.set(kST3SampleSwap, !useGUS);
-		m_playBehaviour.set(kApplyUpperPeriodLimit, !useGUS);
 		m_modFormat.madeWithTracker += useGUS ? UL_(" (GUS)") : UL_(" (SB)");
 	}
 
