@@ -65,21 +65,6 @@ struct AsylumSampleHeader
 MPT_BINARY_STRUCT(AsylumSampleHeader, 37)
 
 
-// DSMI AMF File Header
-struct AMFFileHeader
-{
-	char     amf[3];
-	uint8le  version;
-	char     title[32];
-	uint8le  numSamples;
-	uint8le  numOrders;
-	uint16le numTracks;
-	uint8le  numChannels;
-};
-
-MPT_BINARY_STRUCT(AMFFileHeader, 41)
-
-
 static bool ValidateHeader(const AsylumFileHeader &fileHeader)
 {
 	if(std::memcmp(fileHeader.signature, "ASYLUM Music Format V1.0\0", 25)
@@ -215,11 +200,95 @@ bool CSoundFile::ReadAMF_Asylum(FileReader &file, ModLoadingFlags loadFlags)
 }
 
 
+// DSMI AMF File Header
+struct AMFFileHeader
+{
+	char     amf[3];
+	uint8le  version;
+	char     title[32];
+	uint8le  numSamples;
+	uint8le  numOrders;
+	uint16le numTracks;
+	uint8le  numChannels;
+};
+
+MPT_BINARY_STRUCT(AMFFileHeader, 41)
+
+
+// DSMI AMF Sample Header (v1-v9)
+struct AMFSampleHeaderOld
+{
+	uint8le  type;
+	char     name[32];
+	char     filename[13];
+	uint32le index;
+	uint16le length;
+	uint16le sampleRate;
+	uint8le  volume;
+	uint16le loopStart;
+	uint16le loopEnd;
+
+	void ConvertToMPT(ModSample &mptSmp) const
+	{
+		mptSmp.Initialize();
+		mptSmp.filename = mpt::String::ReadBuf(mpt::String::nullTerminated, filename);
+		mptSmp.nLength = length;
+		mptSmp.nC5Speed = sampleRate;
+		mptSmp.nVolume = std::min(volume.get(), uint8(64)) * 4u;
+		mptSmp.nLoopStart = loopStart;
+		mptSmp.nLoopEnd = loopEnd;
+		if(mptSmp.nLoopEnd == uint16_max)
+			mptSmp.nLoopStart = mptSmp.nLoopEnd = 0;
+		else if(type != 0 && mptSmp.nLoopEnd > mptSmp.nLoopStart + 2 && mptSmp.nLoopEnd <= mptSmp.nLength)
+			mptSmp.uFlags.set(CHN_LOOP);
+	}
+};
+
+MPT_BINARY_STRUCT(AMFSampleHeaderOld, 59)
+
+
+// DSMI AMF Sample Header (v10+)
+struct AMFSampleHeaderNew
+{
+	uint8le  type;
+	char     name[32];
+	char     filename[13];
+	uint32le index;
+	uint32le length;
+	uint16le sampleRate;
+	uint8le  volume;
+	uint32le loopStart;
+	uint32le loopEnd;
+
+	void ConvertToMPT(ModSample &mptSmp, bool truncated) const
+	{
+		mptSmp.Initialize();
+		mptSmp.filename = mpt::String::ReadBuf(mpt::String::nullTerminated, filename);
+		mptSmp.nLength = length;
+		mptSmp.nC5Speed = sampleRate;
+		mptSmp.nVolume = std::min(volume.get(), uint8(64)) * 4u;
+		mptSmp.nLoopStart = loopStart;
+		mptSmp.nLoopEnd = loopEnd;
+		if(truncated && mptSmp.nLoopStart > 0)
+			mptSmp.nLoopEnd = mptSmp.nLength;
+		if(type != 0 && mptSmp.nLoopEnd > mptSmp.nLoopStart + 2 && mptSmp.nLoopEnd <= mptSmp.nLength)
+			mptSmp.uFlags.set(CHN_LOOP);
+	}
+
+	// Check if sample headers might be truncated
+	bool IsValid(uint8 numSamples) const
+	{
+		return type <= 1 && index <= numSamples && length <= 0x100000 && volume <= 64 && loopStart <= length && loopEnd <= length;
+	}
+};
+
+MPT_BINARY_STRUCT(AMFSampleHeaderNew, 65)
+
+
 // Read a single AMF track (channel) into a pattern.
 static void AMFReadPattern(CPattern &pattern, CHANNELINDEX chn, FileReader &fileChunk)
 {
 	fileChunk.Rewind();
-	ModCommand::INSTR lastInstr = 0;
 	while(fileChunk.CanRead(3))
 	{
 		const uint8 row = fileChunk.ReadUint8();
@@ -242,25 +311,17 @@ static void AMFReadPattern(CPattern &pattern, CHANNELINDEX chn, FileReader &file
 				m.note = command + NOTE_MIN;
 				if(value != 0xFF)
 				{
-					if(!m.instr) m.instr = lastInstr;
 					m.volcmd = VOLCMD_VOLUME;
 					m.vol = value;
 				}
 			}
 		} else if(command == 0x7F)
 		{
-			// Duplicate row
-			int8 rowDelta = static_cast<int8>(value);
-			int16 copyRow = static_cast<int16>(row) + rowDelta;
-			if(copyRow >= 0 && copyRow < static_cast<int16>(pattern.GetNumRows()))
-			{
-				m = *pattern.GetpModCommand(copyRow, chn);
-			}
+			// Instrument without note retrigger in MOD (no need to do anything here, should be preceded by 0x80 command)
 		} else if(command == 0x80)
 		{
 			// Instrument
 			m.instr = value + 1;
-			lastInstr = m.instr;
 		} else
 		{
 			// Effect
@@ -278,12 +339,9 @@ static void AMFReadPattern(CPattern &pattern, CHANNELINDEX chn, FileReader &file
 			uint8 param = value;
 
 			if(cmd < CountOf(effTrans))
-			{
 				cmd = effTrans[cmd];
-			} else
-			{
+			else
 				cmd = CMD_NONE;
-			}
 
 			// Fix some commands...
 			switch(command & 0x7F)
@@ -464,14 +522,11 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 		const CHANNELINDEX readChannels = fileHeader.version >= 12 ? 32 : 16;
 		for(CHANNELINDEX chn = 0; chn < readChannels; chn++)
 		{
-			int16 pan = (file.ReadInt8() + 64) * 2;
-			if(pan < 0) pan = 0;
-			if(pan > 256)
-			{
-				pan = 128;
+			int8 pan = file.ReadInt8();
+			if(pan == 100)
 				ChnSettings[chn].dwFlags = CHN_SURROUND;
-			}
-			ChnSettings[chn].nPan = static_cast<uint16>(pan);
+			else
+				ChnSettings[chn].nPan = static_cast<uint16>(Clamp((pan + 64) * 2, 0, 256));
 		}
 	} else if(fileHeader.version >= 9)
 	{
@@ -518,52 +573,40 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Read Sample Headers
-	std::vector<uint32> sampleMap(GetNumSamples(), 0);
+	bool truncatedSampleHeaders = false;
+	if(fileHeader.version == 10)
+	{
+		// M2AMF 1.3 included with DMP 2.32 wrote new (v10+) sample headers, but using the old struct length.
+		const auto startPos = file.GetPosition();
+		for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
+		{
+			AMFSampleHeaderNew sample;
+			if(file.ReadStruct(sample) && !sample.IsValid(fileHeader.numSamples))
+			{
+				truncatedSampleHeaders = true;
+				break;
+			}
+		}
+		file.Seek(startPos);
+	}
 
+	std::vector<uint32> sampleMap(GetNumSamples(), 0);
 	for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
 	{
-		ModSample &sample = Samples[smp];
-		sample.Initialize();
-
-		uint8 type = file.ReadUint8();
-		file.ReadString<mpt::String::maybeNullTerminated>(m_szNames[smp], 32);
-		file.ReadString<mpt::String::nullTerminated>(sample.filename, 13);
-		sampleMap[smp - 1] = file.ReadUint32LE();
 		if(fileHeader.version < 10)
 		{
-			sample.nLength = file.ReadUint16LE();
+			AMFSampleHeaderOld sample;
+			file.ReadStruct(sample);
+			sample.ConvertToMPT(Samples[smp]);
+			m_szNames[smp] = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, sample.name);
+			sampleMap[smp - 1] = sample.index;
 		} else
 		{
-			sample.nLength = file.ReadUint32LE();
-		}
-
-		sample.nC5Speed = file.ReadUint16LE();
-		sample.nVolume = std::min(file.ReadUint8(), uint8(64)) * 4u;
-
-		if(fileHeader.version < 10)
-		{
-			sample.nLoopStart = file.ReadUint16LE();
-			sample.nLoopEnd = file.ReadUint16LE();
-			if(sample.nLoopEnd == uint16_max)
-				sample.nLoopStart = sample.nLoopEnd = 0;
-		} else
-		{
-			sample.nLoopStart = file.ReadUint32LE();
-			sample.nLoopEnd = file.ReadUint32LE();
-		}
-
-		// Length of v1.0+ sample header: 65 bytes
-		// Length of old sample header: 59 bytes
-
-		if(type != 0)
-		{
-			if(sample.nLoopEnd > sample.nLoopStart + 2 && sample.nLoopEnd <= sample.nLength)
-			{
-				sample.uFlags.set(CHN_LOOP);
-			} else
-			{
-				sample.nLoopStart = sample.nLoopEnd = 0;
-			}
+			AMFSampleHeaderNew sample;
+			file.ReadStructPartial(sample, truncatedSampleHeaders ? sizeof(AMFSampleHeaderOld) : sizeof(AMFSampleHeaderNew));
+			sample.ConvertToMPT(Samples[smp], truncatedSampleHeaders);
+			m_szNames[smp] = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, sample.name);
+			sampleMap[smp - 1] = sample.index;
 		}
 	}
 	
