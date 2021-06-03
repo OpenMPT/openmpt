@@ -224,6 +224,12 @@ struct char_constants<char32_t> {
 };
 
 
+template <typename Tchar>
+constexpr bool is_any_line_ending(Tchar c) noexcept {
+	return (c == char_constants<Tchar>::cr) || (c == char_constants<Tchar>::lf);
+}
+
+
 template <typename Tstring>
 inline Tstring default_whitespace() {
 	Tstring result;

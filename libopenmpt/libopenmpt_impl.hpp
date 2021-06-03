@@ -23,22 +23,26 @@
 #endif
 
 // forward declarations
-namespace OpenMPT {
+namespace mpt {
+inline namespace mpt_libopenmpt {
+namespace IO {
 class FileCursorTraitsFileData;
 template <typename Tpath>
 class FileCursorFilenameTraits;
-namespace mpt {
 template <typename Ttraits, typename Tfilenametraits>
 class FileCursor;
+} // namespace IO
+} // namespace mpt_libopenmpt
 } // namespace mpt
+namespace OpenMPT {
 namespace detail {
 template <typename Ttraits, typename Tfilenametraits>
-using FileCursor = mpt::FileCursor<Ttraits, Tfilenametraits>;
+using FileCursor = mpt::IO::FileCursor<Ttraits, Tfilenametraits>;
 } // namespace detail
 namespace mpt {
 class PathString;
 } // namespace mpt
-using FileCursor = detail::FileCursor<FileCursorTraitsFileData, FileCursorFilenameTraits<mpt::PathString>>;
+using FileCursor = detail::FileCursor<mpt::IO::FileCursorTraitsFileData, mpt::IO::FileCursorFilenameTraits<mpt::PathString>>;
 class CSoundFile;
 struct DithersWrapperOpenMPT;
 } // namespace OpenMPT

@@ -5,9 +5,9 @@
 
 
 
+#include "mpt/base/integer.hpp"
 #include "mpt/base/memory.hpp"
 #include "mpt/base/namespace.hpp"
-#include "mpt/base/integer.hpp"
 #include "mpt/base/span.hpp"
 #include "mpt/endian/integer.hpp"
 #include "mpt/io/base.hpp"

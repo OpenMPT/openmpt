@@ -73,6 +73,9 @@
     <Filter Include="src\mpt\io">
       <UniqueIdentifier>{D454AB6B-C00C-EDB8-2914-C61415EB87A9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\mpt\io_read">
+      <UniqueIdentifier>{EFCE5C55-5B5A-CA19-646B-4D0ED075261A}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\mpt\io_write">
       <UniqueIdentifier>{BE6C5801-AA65-7753-D397-5CD8BFEF565F}</UniqueIdentifier>
     </Filter>
@@ -509,6 +512,57 @@
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\io\io_virtual_wrapper.hpp">
       <Filter>src\mpt\io</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\io_read\callbackstream.hpp">
+      <Filter>src\mpt\io_read</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\io_read\filecursor.hpp">
+      <Filter>src\mpt\io_read</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\io_read\filecursor_callbackstream.hpp">
+      <Filter>src\mpt\io_read</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\io_read\filecursor_filename_traits.hpp">
+      <Filter>src\mpt\io_read</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\io_read\filecursor_memory.hpp">
+      <Filter>src\mpt\io_read</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\io_read\filecursor_stdstream.hpp">
+      <Filter>src\mpt\io_read</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\io_read\filecursor_traits_filedata.hpp">
+      <Filter>src\mpt\io_read</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\io_read\filecursor_traits_memory.hpp">
+      <Filter>src\mpt\io_read</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\io_read\filedata.hpp">
+      <Filter>src\mpt\io_read</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\io_read\filedata_base.hpp">
+      <Filter>src\mpt\io_read</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\io_read\filedata_base_buffered.hpp">
+      <Filter>src\mpt\io_read</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\io_read\filedata_base_seekable.hpp">
+      <Filter>src\mpt\io_read</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\io_read\filedata_base_unseekable.hpp">
+      <Filter>src\mpt\io_read</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\io_read\filedata_callbackstream.hpp">
+      <Filter>src\mpt\io_read</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\io_read\filedata_memory.hpp">
+      <Filter>src\mpt\io_read</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\io_read\filedata_stdstream.hpp">
+      <Filter>src\mpt\io_read</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\io_read\filereader.hpp">
+      <Filter>src\mpt\io_read</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\io_write\buffer.hpp">
       <Filter>src\mpt\io_write</Filter>
