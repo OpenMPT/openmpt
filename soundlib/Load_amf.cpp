@@ -598,14 +598,14 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 			AMFSampleHeaderOld sample;
 			file.ReadStruct(sample);
 			sample.ConvertToMPT(Samples[smp]);
-			m_szNames[smp] = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, sample.name);
+			mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[smp], sample.name);
 			sampleMap[smp - 1] = sample.index;
 		} else
 		{
 			AMFSampleHeaderNew sample;
 			file.ReadStructPartial(sample, truncatedSampleHeaders ? sizeof(AMFSampleHeaderOld) : sizeof(AMFSampleHeaderNew));
 			sample.ConvertToMPT(Samples[smp], truncatedSampleHeaders);
-			m_szNames[smp] = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, sample.name);
+			mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[smp], sample.name);
 			sampleMap[smp - 1] = sample.index;
 		}
 	}
