@@ -234,7 +234,7 @@ struct AMFSampleHeaderOld
 	void ConvertToMPT(ModSample &mptSmp) const
 	{
 		mptSmp.Initialize();
-		mptSmp.filename = mpt::String::ReadBuf(mpt::String::nullTerminated, filename);
+		mpt::String::Read<mpt::String::nullTerminated>(mptSmp.filename, filename);
 		mptSmp.nLength = length;
 		mptSmp.nC5Speed = sampleRate;
 		mptSmp.nVolume = std::min(volume.get(), uint8(64)) * 4u;
@@ -266,7 +266,7 @@ struct AMFSampleHeaderNew
 	void ConvertToMPT(ModSample &mptSmp, bool truncated) const
 	{
 		mptSmp.Initialize();
-		mptSmp.filename = mpt::String::ReadBuf(mpt::String::nullTerminated, filename);
+		mpt::String::Read<mpt::String::nullTerminated>(mptSmp.filename, filename);
 		mptSmp.nLength = length;
 		mptSmp.nC5Speed = sampleRate;
 		mptSmp.nVolume = std::min(volume.get(), uint8(64)) * 4u;
