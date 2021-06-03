@@ -431,25 +431,16 @@ using MemoryFileReader = detail::FileReader<mpt::IO::FileCursorTraitsMemory, mpt
 #if defined(MPT_ENABLE_FILEIO)
 
 
-// Initialize file reader object with pointer to data and data length.
-template <typename Tbyte>
-inline FileCursor make_FileCursor(mpt::span<Tbyte> bytedata, std::shared_ptr<mpt::PathString> filename = nullptr)
+template <typename Targ1>
+inline FileCursor make_FileCursor(Targ1 &&arg1)
 {
-	return mpt::IO::make_FileCursor<mpt::PathString>(bytedata, std::move(filename));
+	return mpt::IO::make_FileCursor<mpt::PathString>(std::forward<Targ1>(arg1));
 }
 
-
-// Initialize file reader object with a CallbackStream.
-inline FileCursor make_FileCursor(mpt::IO::CallbackStream s, std::shared_ptr<mpt::PathString> filename = nullptr)
+template <typename Targ1, typename Targ2>
+inline FileCursor make_FileCursor(Targ1 &&arg1, Targ2 &&arg2)
 {
-	return mpt::IO::make_FileCursor<mpt::PathString>(s, std::move(filename));
-}
-
-
-// Initialize file reader object with a std::istream.
-inline FileCursor make_FileCursor(std::istream &s, std::shared_ptr<mpt::PathString> filename = nullptr)
-{
-	return mpt::IO::make_FileCursor<mpt::PathString>(s, std::move(filename));
+	return mpt::IO::make_FileCursor<mpt::PathString>(std::forward<Targ1>(arg1), std::forward<Targ2>(arg2));
 }
 
 
@@ -464,10 +455,10 @@ inline FileCursor make_FileCursor(TInputFile &file)
 	}
 	if(file.IsCached())
 	{
-		return make_FileCursor(file.GetCache(), std::make_shared<mpt::PathString>(file.GetFilename()));
+		return mpt::IO::make_FileCursor<mpt::PathString>(file.GetCache(), std::make_shared<mpt::PathString>(file.GetFilename()));
 	} else
 	{
-		return make_FileCursor(file.GetStream(), std::make_shared<mpt::PathString>(file.GetFilename()));
+		return mpt::IO::make_FileCursor<mpt::PathString>(file.GetStream(), std::make_shared<mpt::PathString>(file.GetFilename()));
 	}
 }
 

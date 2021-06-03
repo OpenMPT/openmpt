@@ -17,6 +17,7 @@
 #include "mpt/base/numbers.hpp"
 #include "mpt/crc/crc.hpp"
 #include "mpt/environment/environment.hpp"
+#include "mpt/io_read/filecursor_stdstream.hpp"
 #include "mpt/test/test.hpp"
 #include "mpt/test/test_macros.hpp"
 #include "mpt/uuid/uuid.hpp"
@@ -2947,7 +2948,7 @@ static CSoundFile &GetSoundFile(TSoundFileContainer &sndFile)
 static TSoundFileContainer CreateSoundFileContainer(const mpt::PathString &filename)
 {
 	mpt::ifstream stream(filename, std::ios::binary);
-	FileReader file = make_FileCursor(stream);
+	FileReader file = mpt::IO::make_FileCursor<mpt::PathString>(stream);
 	std::shared_ptr<CSoundFile> pSndFile = std::make_shared<CSoundFile>();
 	pSndFile->Create(file, CSoundFile::loadCompleteModule);
 	return pSndFile;
