@@ -486,7 +486,8 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Reading sample headers
 	m_nSamples = std::min(static_cast<SAMPLEINDEX>(fileHeader.smpNum), static_cast<SAMPLEINDEX>(MAX_SAMPLES - 1));
-	bool useGUS = false;
+	bool anySamples = false;
+	uint16 gusAddresses = 0;
 	for(SAMPLEINDEX smp = 0; smp < m_nSamples; smp++)
 	{
 		S3MSampleHeader sampleHeader;
@@ -505,19 +506,25 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 			if((loadFlags & loadSampleData) && sampleHeader.length != 0 && file.Seek(sampleOffset))
 			{
 				sampleHeader.GetSampleFormat((fileHeader.formatVersion == S3MFileHeader::oldVersion)).ReadSample(Samples[smp + 1], file);
+				anySamples = true;
 			}
-
-			if(isST3 && sampleHeader.gusAddress > 1)
-			{
-				// Re-saving an S3M file in ST3 with the SoundBlaster driver loaded will reset the GUS address for all samples.
-				// So this is a safe way of telling if the file was last saved with the GUS driver loaded or not.
-				useGUS = true;
-			}
+			gusAddresses |= sampleHeader.gusAddress;
 		}
 	}
 
-	if(isST3)
+	if(isST3 && anySamples && !gusAddresses && fileHeader.cwtv != S3MFileHeader::trkST3_00)
 	{
+		// All Scream Tracker versions except for some probably early revisions of Scream Tracker 3.00 write GUS addresses. GUS support might not have existed at that point (1992).
+		// Hence if a file claims to be written with ST3 (but not ST3.00), but has no GUS addresses, we deduce that it must be written by some other software (e.g. some PSM -> S3M conversions)
+		isST3 = false;
+		m_modFormat.madeWithTracker = U_("Unknown");
+	} else if(isST3)
+	{
+		// Saving an S3M file in ST3 with the Gravis Ultrasound driver loaded will write a unique GUS memory address for each non-empty sample slot (and 0 for unused slots).
+		// Re-saving that file in ST3 with the SoundBlaster driver loaded will reset the GUS address for all samples to 0 (unused) or 1 (used).
+		// The first used sample will also have an address of 1 with the GUS driver.
+		// So this is a safe way of telling if the file was last saved with the GUS driver loaded or not if there's more than one sample.
+		const bool useGUS = gusAddresses > 1;
 		m_playBehaviour.set(kST3PortaSampleChange, useGUS);
 		m_playBehaviour.set(kST3SampleSwap, !useGUS);
 	}
