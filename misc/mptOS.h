@@ -24,21 +24,6 @@ namespace mpt
 {
 namespace OS
 {
-
-using Class = mpt::osinfo::osclass;
-
-mpt::OS::Class GetClassFromSysname(mpt::ustring sysname);
-
-mpt::OS::Class GetClass();
-
-}  // namespace OS
-}  // namespace mpt
-
-
-namespace mpt
-{
-namespace OS
-{
 namespace Windows
 {
 
@@ -174,7 +159,7 @@ protected:
 	std::string m_RawHostSysName;
 	std::string m_RawHostRelease;
 	mpt::OS::Wine::Version m_Version;
-	mpt::OS::Class m_HostClass;
+	mpt::osinfo::osclass m_HostClass;
 public:
 	VersionContext();
 public:
@@ -185,7 +170,7 @@ public:
 	std::string RawHostSysName() const { return m_RawHostSysName; }
 	std::string RawHostRelease() const { return m_RawHostRelease; }
 	mpt::OS::Wine::Version Version() const { return m_Version; }
-	mpt::OS::Class HostClass() const { return m_HostClass; }
+	mpt::osinfo::osclass HostClass() const { return m_HostClass; }
 };
 
 } // namespace Wine
