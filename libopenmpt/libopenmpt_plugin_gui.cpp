@@ -489,11 +489,6 @@ void gui_show_file_info( HWND /* parent */ , std::basic_string<TCHAR> title, std
 }
 
 
-#pragma comment(lib, "advapi32.lib")
-#pragma comment(lib, "gdi32.lib")
-#pragma comment(lib, "user32.lib")
-
-
 #endif // MPT_WITH_MFC
 
 
