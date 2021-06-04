@@ -464,9 +464,6 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 								// All other effects are implemented neither in 2GDM nor in BWSB.
 								m.command = CMD_NONE;
 							}
-
-						case 0x1F:
-							m.command = CMD_TEMPO;
 							break;
 						}
 
