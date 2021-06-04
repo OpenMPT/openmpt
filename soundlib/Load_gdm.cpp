@@ -474,7 +474,7 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 							{
 								// Surround (implemented in 2GDM but not in BWSB itself)
 								m.param = 0x91;
-							} else if ((m.param & 0xF0) == 0x80)
+							} else if((m.param & 0xF0) == 0x80)
 							{
 								// 4-Bit Panning
 								if (!modSpecs.HasCommand(CMD_S3MCMDEX))
@@ -484,9 +484,6 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 								// All other effects are implemented neither in 2GDM nor in BWSB.
 								m.command = CMD_NONE;
 							}
-
-						case 0x1F:
-							m.command = CMD_TEMPO;
 							break;
 						}
 
