@@ -128,8 +128,6 @@ void Init()
 	ProcModel = 0;
 	ProcStepping = 0;
 
-	ProcSupport |= feature::asm_intrinsics;
-
 	{
 
 		cpuid_result VendorString = cpuid(0x00000000u);
