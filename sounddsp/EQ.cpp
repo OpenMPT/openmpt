@@ -52,70 +52,12 @@ static constexpr std::array<EQBANDSTRUCT, MAX_EQ_BANDS*2> gEQDefaults =
 	{0,0,0,0,0, 0,0,0,0, 1, 10000, false}
 }};
 
-#ifdef ENABLE_X86
+#if defined(ENABLE_X86) && defined(ENABLE_SSE)
 
 #if MPT_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable:4100)
 #endif // MPT_COMPILER_MSVC
-
-#define PBS_A0	DWORD PTR [eax + EQBANDSTRUCT.a0]
-#define PBS_A1	DWORD PTR [eax + EQBANDSTRUCT.a1]
-#define PBS_A2	DWORD PTR [eax + EQBANDSTRUCT.a2]
-#define PBS_B1	DWORD PTR [eax + EQBANDSTRUCT.b1]
-#define PBS_B2	DWORD PTR [eax + EQBANDSTRUCT.b2]
-#define PBS_X1	DWORD PTR [eax + EQBANDSTRUCT.x1]
-#define PBS_X2	DWORD PTR [eax + EQBANDSTRUCT.x2]
-#define PBS_Y1	DWORD PTR [eax + EQBANDSTRUCT.y1]
-#define PBS_Y2	DWORD PTR [eax + EQBANDSTRUCT.y2]
-
-static void X86_EQFilter(EQBANDSTRUCT *pbs, float32 *pbuffer, UINT nCount)
-{
-	_asm {
-	mov eax, pbs		// eax = pbs
-	mov edx, nCount		// edx = nCount
-	mov ecx, pbuffer	// ecx = pbuffer
-	fld		PBS_Y2		// ST(3)=y2
-	fld		PBS_Y1		// ST(2)=y1
-	fld		PBS_X2		// ST(1)=x2
-	fld		PBS_X1		// ST(0)=x1
-EQ_Loop:
-	fld		DWORD PTR [ecx]		// ST(0):x ST(1):x1 ST(2):x2 ST(3):y1 ST(4):y2
-	fld		PBS_A0				// ST(0):a0 ST(1):x ST(2):x1 ST(3):x2 ST(4):y1 ST(5):y2
-	fmul	ST(0), ST(1)		// ST(0):a0*x
-	fld		PBS_A1				// ST(0):a1 ST(1):a0*x ST(2):x ST(3):x1 ST(4):x2 ST(5):y1 ST(6):y2
-	fmul	ST(0), ST(3)		// ST(0):a1*x1
-	add		ecx, 4
-
-	faddp	ST(1), ST(0)
-	fld		PBS_A2
-	fmul	ST(0), ST(4)
-	faddp	ST(1), ST(0)
-	fld		PBS_B1
-	fmul	ST(0), ST(5)
-	faddp	ST(1), ST(0)
-	fld		PBS_B2
-	fmul	ST(0), ST(6)
-	sub     edx, 1
-	faddp	ST(1), ST(0)
-	fst		DWORD PTR [ecx-4]		// *pbuffer = a0*x+a1*x1+a2*x2+b1*y1+b2*y2
-	// Here, ST(0)=y ST(1)=x ST(2)=x1 ST(3)=x2 ST(4)=y1 ST(5)=y2
-	fxch	ST(4)	// y1=y
-	fstp	ST(5)	// y2=y1
-	// Here, ST(0)=x ST(1)=x1 ST(2)=x2 ST(3)=y1 ST(4)=y2
-	fxch	ST(1)	// x1=x
-	fstp	ST(2)	// x2=x1
-	jnz		EQ_Loop
-	// Store x1,y1,x2,y2 and pop FPU stack
-	fstp	PBS_X1
-	fstp	PBS_X2
-	fstp	PBS_Y1
-	fstp	PBS_Y2
-	}
-}
-
-
-#if defined(ENABLE_X86) && defined(ENABLE_SSE)
 
 static void SSE_StereoEQ(EQBANDSTRUCT *pbl, EQBANDSTRUCT *pbr, float32 *pbuffer, UINT nCount)
 {
@@ -208,13 +150,11 @@ done:;
 	}
 }
 
-#endif // ENABLE_X86 && ENABLE_SSE
-
 #if MPT_COMPILER_MSVC
 #pragma warning(pop)
 #endif // MPT_COMPILER_MSVC
 
-#endif
+#endif // ENABLE_X86 && ENABLE_SSE
 
 static void EQFilter(EQBANDSTRUCT *pbs, float32 *pbuffer, UINT nCount)
 {
@@ -236,12 +176,6 @@ void CEQ::ProcessMono(int *pbuffer, float *MixFloatBuffer, UINT nCount)
 	MonoMixToFloat(pbuffer, MixFloatBuffer, nCount, 1.0f/MIXING_SCALEF);
 	for (UINT b=0; b<MAX_EQ_BANDS; b++)
 	{
-		#ifdef ENABLE_X86
-			if(CPU::HasFeatureSet(CPU::feature::asm_intrinsics))
-			{
-				if ((gEQ[b].bEnable) && (gEQ[b].Gain != 1.0f)) X86_EQFilter(&gEQ[b], MixFloatBuffer, nCount);
-			} else
-		#endif // ENABLE_X86
 			{
 				if ((gEQ[b].bEnable) && (gEQ[b].Gain != 1.0f)) EQFilter(&gEQ[b], MixFloatBuffer, nCount);
 			}
@@ -275,26 +209,6 @@ void CEQ::ProcessStereo(int *pbuffer, float *MixFloatBuffer, UINT nCount)
 	} else
 
 #endif // ENABLE_X86 && ENABLE_SSE
-
-#ifdef ENABLE_X86
-	if(CPU::HasFeatureSet(CPU::feature::asm_intrinsics))
-	{
-
-		StereoMixToFloat(pbuffer, MixFloatBuffer, MixFloatBuffer+MIXBUFFERSIZE, nCount, 1.0f/MIXING_SCALEF);
-		
-		for (UINT bl=0; bl<MAX_EQ_BANDS; bl++)
-		{
-			if ((gEQ[bl].bEnable) && (gEQ[bl].Gain != 1.0f)) X86_EQFilter(&gEQ[bl], MixFloatBuffer, nCount);
-		}
-		for (UINT br=MAX_EQ_BANDS; br<MAX_EQ_BANDS*2; br++)
-		{
-			if ((gEQ[br].bEnable) && (gEQ[br].Gain != 1.0f)) X86_EQFilter(&gEQ[br], MixFloatBuffer+MIXBUFFERSIZE, nCount);
-		}
-
-		FloatToStereoMix(MixFloatBuffer, MixFloatBuffer+MIXBUFFERSIZE, pbuffer, nCount, MIXING_SCALEF);
-
-	} else
-#endif // ENABLE_X86
 
 	{
 
