@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.5.10-pre
 
+ *  ogg: Update to v1.3.5 (2021-06-04).
+
 ### libopenmpt 0.5.9 (2021-05-16)
 
  *  `Makefile` `CONFIG=emscripten` does not pass linker options to the compiler
