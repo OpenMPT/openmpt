@@ -1107,12 +1107,18 @@ void CModDoc::CheckNNA(ModCommand::NOTE note, INSTRUMENTINDEX ins, std::bitset<1
 			&& (channel.nLength || pIns->HasValidMIDIChannel()) && !playingNotes[channel.nLastNote])
 		{
 			CHANNELINDEX nnaChn = m_SndFile.CheckNNA(chn, ins, note, false);
-			if(nnaChn != CHANNELINDEX_INVALID && nnaChn != chn)
+			if(nnaChn != CHANNELINDEX_INVALID)
 			{
 				// Keep the new NNA channel playing in the same channel slot.
 				// That way, we do not need to touch the ChnMix array, and we avoid the same channel being checked twice.
-				m_SndFile.m_PlayState.Chn[chn] = std::move(m_SndFile.m_PlayState.Chn[nnaChn]);
-				m_SndFile.m_PlayState.Chn[nnaChn] = ModChannel();
+				if(nnaChn != chn)
+				{
+					m_SndFile.m_PlayState.Chn[chn] = std::move(m_SndFile.m_PlayState.Chn[nnaChn]);
+					m_SndFile.m_PlayState.Chn[nnaChn] = {};
+				}
+				// Avoid clicks if the channel wasn't ramping before.
+				m_SndFile.m_PlayState.Chn[chn].dwFlags.set(CHN_FASTVOLRAMP);
+				m_SndFile.ProcessRamping(m_SndFile.m_PlayState.Chn[chn]);
 			}
 		}
 	}
@@ -3184,8 +3190,10 @@ void CModDoc::DeserializeViews()
 				pChildFrm->DeserializeView(data);
 				pChildFrm = nullptr;
 			}
-		} else if(windowType == 1 && file.ReadUint8() == 0)
+		} else if(windowType == 1)
 		{
+			if(file.ReadUint8() != 0)
+				break;
 			// Plugin window positions
 			PLUGINDEX plug = 0;
 			if(file.ReadVarInt(plug) && plug < MAX_MIXPLUGINS)
@@ -3198,6 +3206,10 @@ void CModDoc::DeserializeViews()
 					m_SndFile.m_MixPlugins[plug].editorY = Util::muldivr(editorY, cyScreen, 1 << 30);
 				}
 			}
+		} else
+		{
+			// Unknown type
+			break;
 		}
 	}
 }
