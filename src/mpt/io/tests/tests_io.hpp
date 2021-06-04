@@ -267,7 +267,7 @@ MPT_TEST_GROUP_INLINE("mpt/io")
 		MPT_TEST_EXPECT_EQUAL(mpt::IO::IsValid(s), true);
 		MPT_TEST_EXPECT_EQUAL(mpt::IO::TellRead(s), 0);
 		MPT_TEST_EXPECT_EQUAL(mpt::IO::IsValid(s), true);
-		MPT_TEST_EXPECT_EQUAL(mpt::IO::ReadRaw(s, &a, 1).size(), 1);
+		MPT_TEST_EXPECT_EQUAL(mpt::IO::ReadRaw(s, &a, 1).size(), 1u);
 		MPT_TEST_EXPECT_EQUAL(mpt::IO::IsValid(s), true);
 		MPT_TEST_EXPECT_EQUAL(mpt::IO::TellRead(s), 1);
 		MPT_TEST_EXPECT_EQUAL(mpt::IO::IsValid(s), true);
@@ -332,7 +332,7 @@ MPT_TEST_GROUP_INLINE("mpt/io")
 		MPT_TEST_EXPECT_EQUAL(mpt::IO::IsValid(s), true);
 		MPT_TEST_EXPECT_EQUAL(mpt::IO::TellRead(s), 0);
 		MPT_TEST_EXPECT_EQUAL(mpt::IO::IsValid(s), true);
-		MPT_TEST_EXPECT_EQUAL(mpt::IO::ReadRaw(s, &a, 1).size(), 1);
+		MPT_TEST_EXPECT_EQUAL(mpt::IO::ReadRaw(s, &a, 1).size(), 1u);
 		MPT_TEST_EXPECT_EQUAL(mpt::IO::IsValid(s), true);
 		MPT_TEST_EXPECT_EQUAL(mpt::IO::TellRead(s), 1);
 		MPT_TEST_EXPECT_EQUAL(mpt::IO::IsValid(s), true);
