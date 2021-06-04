@@ -60,7 +60,7 @@ inline mpt::osinfo::osclass get_class_from_sysname(const std::string & sysname) 
 inline mpt::osinfo::osclass get_class() {
 #if MPT_OS_WINDOWS
 	return mpt::osinfo::osclass::Windows;
-#else // !MPT_OS_WINDOWS
+#else  // !MPT_OS_WINDOWS
 	utsname uname_result;
 	if (uname(&uname_result) != 0) {
 		return mpt::osinfo::osclass::Unknown;
