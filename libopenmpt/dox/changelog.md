@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.3.31-pre
 
+ *  ogg: Update to v1.3.5 (2021-06-04).
+
 ### libopenmpt 0.3.30 (2021-05-16)
 
  *  MPTM: In some MPTM files with OPL instruments, specifically if sample
