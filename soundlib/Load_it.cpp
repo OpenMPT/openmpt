@@ -20,7 +20,6 @@
 #ifdef MPT_EXTERNAL_SAMPLES
 #include "../common/mptPathString.h"
 #endif // MPT_EXTERNAL_SAMPLES
-#include "../common/mptIO.h"
 #include "../common/serialization_utils.h"
 #ifndef MODPLUG_NO_FILESAVE
 #include "../common/mptFileIO.h"
@@ -29,6 +28,9 @@
 #include <sstream>
 #include "../common/version.h"
 #include "ITTools.h"
+#include "mpt/io/base.hpp"
+#include "mpt/io/io.hpp"
+#include "mpt/io/io_stdstream.hpp"
 
 
 OPENMPT_NAMESPACE_BEGIN

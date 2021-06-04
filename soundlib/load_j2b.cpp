@@ -15,6 +15,8 @@
 #include "Loaders.h"
 #include "ChunkReader.h"
 
+#include "mpt/io/base.hpp"
+
 #if defined(MPT_WITH_ZLIB)
 #include <zlib.h>
 #elif defined(MPT_WITH_MINIZ)

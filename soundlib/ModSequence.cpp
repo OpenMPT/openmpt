@@ -14,6 +14,8 @@
 #include "mod_specifications.h"
 #include "../common/version.h"
 #include "../common/serialization_utils.h"
+#include "mpt/io/io.hpp"
+#include "mpt/io/io_stdstream.hpp"
 
 OPENMPT_NAMESPACE_BEGIN
 

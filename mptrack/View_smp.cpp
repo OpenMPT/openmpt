@@ -33,6 +33,11 @@
 #include "../soundlib/SampleCopy.h"
 #include "../soundlib/mod_specifications.h"
 #include "../soundlib/S3MTools.h"
+#include "mpt/io/base.hpp"
+#include "mpt/io/io.hpp"
+#include "mpt/io/io_span.hpp"
+#include "mpt/io/io_stdstream.hpp"
+#include "mpt/io/io_virtual_wrapper.hpp"
 
 
 OPENMPT_NAMESPACE_BEGIN

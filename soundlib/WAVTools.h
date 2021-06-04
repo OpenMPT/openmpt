@@ -17,6 +17,11 @@
 #include "ChunkReader.h"
 #include "Loaders.h"
 
+#ifndef MODPLUG_NO_FILESAVE
+#include "mpt/io/io.hpp"
+#include "mpt/io/io_virtual_wrapper.hpp"
+#endif
+
 OPENMPT_NAMESPACE_BEGIN
 
 struct FileTags;

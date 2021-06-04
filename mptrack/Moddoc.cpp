@@ -49,6 +49,8 @@
 #endif
 #include "mpt/binary/hex.hpp"
 #include "mpt/base/numbers.hpp"
+#include "mpt/io/io.hpp"
+#include "mpt/io/io_stdstream.hpp"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

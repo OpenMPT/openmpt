@@ -10,7 +10,8 @@
 
 #include "stdafx.h"
 #include "tuningcollection.h"
-#include "../common/mptIO.h"
+#include "mpt/io/io.hpp"
+#include "mpt/io/io_stdstream.hpp"
 #include "../common/serialization_utils.h"
 #include <algorithm>
 #include "../common/mptFileIO.h"

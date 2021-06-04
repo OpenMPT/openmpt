@@ -26,6 +26,8 @@
 #include "../common/mptFileIO.h"
 #include "mpt/audio/span.hpp"
 #include <variant>
+#include "mpt/io/io.hpp"
+#include "mpt/io/io_stdstream.hpp"
 
 
 OPENMPT_NAMESPACE_BEGIN

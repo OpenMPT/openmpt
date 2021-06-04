@@ -18,7 +18,6 @@
 #include "SampleNormalize.h"
 #include "ModSampleCopy.h"
 #include "ITCompression.h"
-#include "../common/mptIO.h"
 #ifndef MODPLUG_NO_FILESAVE
 #include "../common/mptFileIO.h"
 #include "mpt/io/base.hpp"

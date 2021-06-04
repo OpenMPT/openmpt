@@ -26,8 +26,10 @@
 #include "Childfrm.h"
 #include "ChannelManagerDlg.h"
 
+#include "mpt/io/io.hpp"
+#include "mpt/io/io_stdstream.hpp"
+
 #include "../common/FileReader.h"
-#include "../common/mptIO.h"
 #include <sstream>
 
 #ifdef _DEBUG

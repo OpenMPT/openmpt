@@ -16,7 +16,6 @@
 #include "mpt/io/io.hpp"
 #include "mpt/io/io_stdstream.hpp"
 #include "../common/misc_util.h"
-#include "../common/mptIO.h"
 #include "ModSample.h"
 #include "SampleCopy.h"
 

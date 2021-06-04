@@ -18,6 +18,8 @@
 #ifdef MODPLUG_TRACKER
 #include "../Mptrack.h"
 #endif
+#include "mpt/io/io.hpp"
+#include "mpt/io/io_stdstream.hpp"
 
 
 OPENMPT_NAMESPACE_BEGIN

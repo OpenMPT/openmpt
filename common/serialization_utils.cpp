@@ -12,6 +12,9 @@
 
 #include "serialization_utils.h"
 
+#include "mpt/io/io.hpp"
+#include "mpt/io/io_stdstream.hpp"
+
 #include <array>
 #include <istream>
 #include <ostream>

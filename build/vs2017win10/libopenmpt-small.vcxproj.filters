@@ -186,9 +186,6 @@
     <ClInclude Include="..\..\common\mptFileIO.h">
       <Filter>common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\common\mptIO.h">
-      <Filter>common</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\common\mptPathString.h">
       <Filter>common</Filter>
     </ClInclude>
@@ -951,9 +948,6 @@
       <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\common\mptFileIO.cpp">
-      <Filter>common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\common\mptIO.cpp">
       <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\common\mptPathString.cpp">

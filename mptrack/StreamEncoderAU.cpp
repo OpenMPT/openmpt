@@ -13,6 +13,9 @@
 #include "StreamEncoder.h"
 #include "StreamEncoderAU.h"
 
+#include "mpt/io/io.hpp"
+#include "mpt/io/io_stdstream.hpp"
+
 #include "Mptrack.h"
 #include "TrackerSettings.h"
 

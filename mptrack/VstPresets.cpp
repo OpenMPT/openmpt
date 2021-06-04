@@ -19,6 +19,9 @@
 #include "VstPresets.h"
 #include "../common/FileReader.h"
 #include <ostream>
+#include "mpt/io/base.hpp"
+#include "mpt/io/io.hpp"
+#include "mpt/io/io_stdstream.hpp"
 
 
 OPENMPT_NAMESPACE_BEGIN

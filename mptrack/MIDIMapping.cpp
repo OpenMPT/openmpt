@@ -12,9 +12,10 @@
 #include "Moddoc.h"
 #include "MIDIMapping.h"
 #include "../common/FileReader.h"
-#include "../common/mptIO.h"
 #include "../soundlib/MIDIEvents.h"
 #include "../soundlib/plugins/PlugInterface.h"
+#include "mpt/io/io.hpp"
+#include "mpt/io/io_stdstream.hpp"
 
 
 OPENMPT_NAMESPACE_BEGIN

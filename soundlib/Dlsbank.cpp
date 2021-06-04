@@ -21,6 +21,9 @@
 #include "openmpt/base/Endian.hpp"
 #include "SampleIO.h"
 #include "modsmp_ctrl.h"
+#include "mpt/io/base.hpp"
+#include "mpt/io/io.hpp"
+#include "mpt/io/io_stdstream.hpp"
 
 OPENMPT_NAMESPACE_BEGIN
 

@@ -13,7 +13,6 @@
 #include "StreamEncoder.h"
 #include "StreamEncoderOpus.h"
 
-#include "../common/mptIO.h"
 #include <sstream>
 
 #include "Mptrack.h"

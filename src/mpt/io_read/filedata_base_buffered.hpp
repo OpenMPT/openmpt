@@ -7,6 +7,7 @@
 
 #include "mpt/base/memory.hpp"
 #include "mpt/base/namespace.hpp"
+#include "mpt/base/numeric.hpp"
 #include "mpt/io/base.hpp"
 #include "mpt/io_read/filedata.hpp"
 #include "mpt/io_read/filedata_base_seekable.hpp"

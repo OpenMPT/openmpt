@@ -13,7 +13,7 @@
 #include "openmpt/all/BuildSettings.hpp"
 
 #include "openmpt/base/Endian.hpp"
-#include "../common/mptIO.h"
+#include "mpt/io/io.hpp"
 
 #include "../common/FileReaderFwd.h"
 

@@ -20,7 +20,6 @@
 
 #include "mptStringBuffer.h"
 #include "misc_util.h"
-#include "mptIO.h"
 #include <algorithm>
 #include <limits>
 #include <optional>

@@ -11,7 +11,8 @@
 #include "stdafx.h"
 
 #include "tuning.h"
-#include "../common/mptIO.h"
+#include "mpt/io/io.hpp"
+#include "mpt/io/io_stdstream.hpp"
 #include "../common/serialization_utils.h"
 #include "../common/misc_util.h"
 #include <string>

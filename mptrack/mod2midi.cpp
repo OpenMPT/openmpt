@@ -18,6 +18,8 @@
 #include "../soundlib/plugins/PlugInterface.h"
 #include "../soundlib/plugins/PluginManager.h"
 #include <sstream>
+#include "mpt/io/io.hpp"
+#include "mpt/io/io_stdstream.hpp"
 
 #ifndef NO_PLUGINS
 

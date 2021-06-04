@@ -22,7 +22,6 @@
 #endif // MPT_EXTERNAL_SAMPLES
 #include "../common/version.h"
 #include "../soundlib/AudioCriticalSection.h"
-#include "../common/mptIO.h"
 #include "../common/serialization_utils.h"
 #include "Sndfile.h"
 #include "Tables.h"
@@ -34,6 +33,8 @@
 #include "../common/FileReader.h"
 #include "Container.h"
 #include "OPL.h"
+#include "mpt/io/io.hpp"
+#include "mpt/io/io_stdstream.hpp"
 
 #ifndef NO_ARCHIVE_SUPPORT
 #include "../unarchiver/unarchiver.h"

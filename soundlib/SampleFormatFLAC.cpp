@@ -27,6 +27,9 @@
 #include "openmpt/soundbase/SampleDecode.hpp"
 #include "../soundlib/SampleCopy.h"
 #include "../soundlib/ModSampleCopy.h"
+#include "mpt/io/base.hpp"
+#include "mpt/io/io.hpp"
+#include "mpt/io/io_stdstream.hpp"
 //#include "mpt/crc/crc.hpp"
 #include "OggStream.h"
 #ifdef MPT_WITH_OGG

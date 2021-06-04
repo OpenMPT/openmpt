@@ -18,7 +18,6 @@
 
 #include "../common/mptString.h"
 #include "../common/mptPathString.h"
-#include "../common/mptIO.h"
 #include "../common/FileReaderFwd.h"
 
 #if defined(MPT_COMPILER_QUIRK_WINDOWS_FSTREAM_NO_WCHAR)

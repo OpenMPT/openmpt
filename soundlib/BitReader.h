@@ -16,6 +16,7 @@
 
 #include "../common/FileReader.h"
 #include <stdexcept>
+#include "mpt/io/base.hpp"
 
 
 OPENMPT_NAMESPACE_BEGIN

@@ -10,9 +10,10 @@
 
 #include "stdafx.h"
 #include "HTTP.h"
-#include "../common/mptIO.h"
 #include "mpt/system_error/system_error.hpp"
 #include <WinInet.h>
+#include "mpt/io/io.hpp"
+#include "mpt/io/io_stdstream.hpp"
 
 
 OPENMPT_NAMESPACE_BEGIN

@@ -14,6 +14,8 @@
 #include "Tagging.h"
 #include "../common/version.h"
 #ifndef MODPLUG_NO_FILESAVE
+#include "mpt/io/io.hpp"
+#include "mpt/io/io_virtual_wrapper.hpp"
 #include "../common/mptFileIO.h"
 #endif
 

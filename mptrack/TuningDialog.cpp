@@ -11,6 +11,9 @@
 #include "stdafx.h"
 #include "Mptrack.h"
 #include "TuningDialog.h"
+#include "mpt/io/base.hpp"
+#include "mpt/io/io.hpp"
+#include "mpt/io/io_stdstream.hpp"
 #include "TrackerSettings.h"
 #include <algorithm>
 #include "../common/mptFileIO.h"
