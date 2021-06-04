@@ -1,4 +1,4 @@
-libogg library version 1.3.4.
+libogg library version 1.3.5 (2021-06-04).
 The following changes have been made:
 - Obviously, unnecessary folders and files (documentation, makefiles, etc.) have
   been removed.
