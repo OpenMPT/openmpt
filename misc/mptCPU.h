@@ -22,7 +22,6 @@ namespace CPU
 
 namespace feature {
 inline constexpr uint32 asm_intrinsics = 0x00001; // assembly and intrinsics are enabled at runtime
-inline constexpr uint32 cpuid          = 0x00002; // Processor supports modern cpuid
 inline constexpr uint32 lm             = 0x00004; // Processor supports long mode (amd64)
 inline constexpr uint32 mmx            = 0x00010; // Processor supports MMX instructions
 inline constexpr uint32 sse            = 0x00100; // Processor supports SSE instructions
