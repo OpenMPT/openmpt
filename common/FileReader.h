@@ -13,16 +13,7 @@
 #include "openmpt/all/BuildSettings.hpp"
 
 #include "mpt/io_read/filecursor.hpp"
-#if defined(MPT_ENABLE_FILEIO)
-#include "mpt/io_read/filecursor_callbackstream.hpp"
-#endif // MPT_ENABLE_FILEIO
 #include "mpt/io_read/filecursor_filename_traits.hpp"
-#if defined(MPT_ENABLE_FILEIO)
-#include "mpt/io_read/filecursor_memory.hpp"
-#endif // MPT_ENABLE_FILEIO
-#if defined(MPT_ENABLE_FILEIO)
-#include "mpt/io_read/filecursor_stdstream.hpp"
-#endif // MPT_ENABLE_FILEIO
 #include "mpt/io_read/filecursor_traits_filedata.hpp"
 #include "mpt/io_read/filecursor_traits_memory.hpp"
 #include "mpt/io_read/filereader.hpp"
@@ -426,58 +417,6 @@ using FileReader = detail::FileReader<mpt::IO::FileCursorTraitsFileData, mpt::IO
 
 using MemoryFileCursor = detail::FileCursor<mpt::IO::FileCursorTraitsMemory, mpt::IO::FileCursorFilenameTraitsNone>;
 using MemoryFileReader = detail::FileReader<mpt::IO::FileCursorTraitsMemory, mpt::IO::FileCursorFilenameTraitsNone>;
-
-
-#if defined(MPT_ENABLE_FILEIO)
-
-
-template <typename Targ1>
-inline FileCursor make_FileCursor(Targ1 &&arg1)
-{
-	return mpt::IO::make_FileCursor<mpt::PathString>(std::forward<Targ1>(arg1));
-}
-
-template <typename Targ1, typename Targ2>
-inline FileCursor make_FileCursor(Targ1 &&arg1, Targ2 &&arg2)
-{
-	return mpt::IO::make_FileCursor<mpt::PathString>(std::forward<Targ1>(arg1), std::forward<Targ2>(arg2));
-}
-
-
-// templated in order to reduce header inter-dependencies
-class InputFile;
-template <typename TInputFile, std::enable_if_t<std::is_same<TInputFile, InputFile>::value, bool> = true>
-inline FileCursor make_FileCursor(TInputFile &file)
-{
-	if(!file.IsValid())
-	{
-		return FileCursor();
-	}
-	if(file.IsCached())
-	{
-		return mpt::IO::make_FileCursor<mpt::PathString>(file.GetCache(), std::make_shared<mpt::PathString>(file.GetFilename()));
-	} else
-	{
-		return mpt::IO::make_FileCursor<mpt::PathString>(file.GetStream(), std::make_shared<mpt::PathString>(file.GetFilename()));
-	}
-}
-
-
-template <typename Targ1>
-inline FileReader GetFileReader(Targ1 &&arg1)
-{
-	return make_FileCursor(std::forward<Targ1>(arg1));
-}
-
-
-template <typename Targ1, typename Targ2>
-inline FileReader GetFileReader(Targ1 &&arg1, Targ2 &&arg2)
-{
-	return make_FileCursor(std::forward<Targ1>(arg1), std::forward<Targ2>(arg2));
-}
-
-
-#endif // MPT_ENABLE_FILEIO
 
 
 #if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
