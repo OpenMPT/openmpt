@@ -21,9 +21,12 @@
 namespace libopenmpt {
 namespace plugin {
 
+#if defined(MPT_WITH_MFC)
 
 void DllMainAttach();
 void DllMainDetach();
+
+#endif // MPT_WITH_MFC
 
 void gui_edit_settings( libopenmpt_settings * s, HWND parent, std::wstring title );
 

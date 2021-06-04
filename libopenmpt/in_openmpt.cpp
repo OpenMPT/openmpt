@@ -59,9 +59,7 @@
 
 #include "libopenmpt_plugin_settings.hpp"
 
-#if defined(MPT_WITH_MFC)
 #include "libopenmpt_plugin_gui.hpp"
-#endif // MPT_WITH_MFC
 
 #include "svn_version.h"
 #if defined(OPENMPT_VERSION_REVISION)
@@ -251,11 +249,11 @@ static std::basic_string<TCHAR> generate_infotext( const std::basic_string<TCHAR
 }
 
 static void config( HWND hwndParent ) {
-#if defined(MPT_WITH_MFC)
+#if 1
 	libopenmpt::plugin::gui_edit_settings( &self->settings, hwndParent, TEXT(SHORT_TITLE) );
-#else // !MPT_WITH_MFC
+#else
 	static_cast<void>(hwndParent);
-#endif // MPT_WITH_MFC
+#endif
 	apply_options();
 }
 
@@ -273,8 +271,8 @@ static void about( HWND hwndParent ) {
 	}
 	std::ostringstream credits;
 	credits << openmpt::string::get( "credits" );
-#if defined(MPT_WITH_MFC)
-	libopenmpt::plugin::gui_show_file_info( hwndParent, TEXT(SHORT_TITLE), StringReplace( StringDecode( credits.str(), CP_UTF8 ), L"\n", L"\r\n" ) );
+#if 1
+	libopenmpt::plugin::gui_show_file_info( hwndParent, TEXT(SHORT_TITLE), StringToWINAPI( StringReplace( StringDecode( credits.str(), CP_UTF8 ), L"\n", L"\r\n" ) ) );
 #else
 	MessageBox( hwndParent, StringToWINAPI( StringReplace(StringDecode(credits.str(), CP_UTF8 ), L"\n", L"\r\n" ) ).c_str(), TEXT(SHORT_TITLE), MB_OK );
 #endif
@@ -388,16 +386,16 @@ static int infobox( const in_char * fn, HWND hWndParent ) {
 		try {
 			std::ifstream s( fn, std::ios::binary );
 			openmpt::module mod( s );
-#if defined(MPT_WITH_MFC)
-			libopenmpt::plugin::gui_show_file_info( hWndParent, TEXT(SHORT_TITLE), StringReplace( generate_infotext( fn, mod ), TEXT("\n"), TEXT("\r\n") ) );
+#if 1
+			libopenmpt::plugin::gui_show_file_info( hWndParent, TEXT(SHORT_TITLE), StringToWINAPI( StringReplace( generate_infotext( fn, mod ), TEXT("\n"), TEXT("\r\n") ) ) );
 #else
 			MessageBox( hWndParent, StringReplace( generate_infotext( fn, mod ), TEXT("\n"), TEXT("\r\n") ).c_str(), TEXT(SHORT_TITLE), MB_OK );
 #endif
 		} catch ( ... ) {
 		}
 	} else {
-#if defined(MPT_WITH_MFC)
-		libopenmpt::plugin::gui_show_file_info( hWndParent, TEXT(SHORT_TITLE), StringReplace( self->cached_infotext, L"\n", L"\r\n" ) );
+#if 1
+		libopenmpt::plugin::gui_show_file_info( hWndParent, TEXT(SHORT_TITLE), StringToWINAPI( StringReplace( self->cached_infotext, L"\n", L"\r\n" ) ) );
 #else
 		MessageBox( hWndParent, StringReplace( self->cached_infotext, TEXT("\n"), TEXT("\r\n") ).c_str(), TEXT(SHORT_TITLE), MB_OK );
 #endif

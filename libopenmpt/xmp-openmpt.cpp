@@ -66,9 +66,7 @@
 
 #include "libopenmpt_plugin_settings.hpp"
 
-#if defined(MPT_WITH_MFC)
 #include "libopenmpt_plugin_gui.hpp"
-#endif // MPT_WITH_MFC
 
 #include "svn_version.h"
 #if defined(OPENMPT_VERSION_REVISION)
@@ -535,19 +533,19 @@ static void WINAPI openmpt_About( HWND win ) {
 	credits << std::endl;
 	credits << "Arseny Kapoulkine for pugixml" << std::endl;
 	credits << "https://pugixml.org/" << std::endl;
-#if defined(MPT_WITH_MFC)
-	libopenmpt::plugin::gui_show_file_info( win, TEXT(SHORT_TITLE), StringReplace( StringDecode( credits.str(), CP_UTF8 ), L"\n", L"\r\n" ) );
+#if 1
+	libopenmpt::plugin::gui_show_file_info( win, TEXT(SHORT_TITLE), StringToWINAPI( StringReplace( StringDecode( credits.str(), CP_UTF8 ), L"\n", L"\r\n" ) ) );
 #else
 	MessageBox( win, StringToWINAPI( StringReplace( StringDecode( credits.str(), CP_UTF8 ), L"\n", L"\r\n" ) ).c_str(), TEXT(SHORT_TITLE), MB_OK );
 #endif
 }
 
 static void WINAPI openmpt_Config( HWND win ) {
-#if defined(MPT_WITH_MFC)
+#if 1
 	libopenmpt::plugin::gui_edit_settings( &self->settings, win, TEXT(SHORT_TITLE) );
-#else // !MPT_WITH_MFC
+#else
 	static_cast<void>(win);
-#endif // MPT_WITH_MFC
+#endif
 	apply_and_save_options();
 }
 

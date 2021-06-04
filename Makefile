@@ -961,6 +961,7 @@ endif
 
 
 INOPENMPT_CXX_SOURCES += \
+ libopenmpt/libopenmpt_plugin_gui.cpp \
  libopenmpt/in_openmpt.cpp \
  
 
@@ -972,6 +973,7 @@ ALL_DEPENDS += $(INOPENMPT_DEPENDS)
 
 XMPOPENMPT_CXX_SOURCES += \
  include/pugixml/src/pugixml.cpp \
+ libopenmpt/libopenmpt_plugin_gui.cpp \
  libopenmpt/xmp-openmpt.cpp \
  
 
