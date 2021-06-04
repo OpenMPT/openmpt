@@ -36,25 +36,8 @@ namespace mpt
 
 
 
-
-
 namespace String
 {
-
-
-template <typename Tstring> struct Traits {
-	static MPT_FORCEINLINE bool IsLineEnding(char c) noexcept { return c == '\r' || c == '\n'; }
-};
-
-template <> struct Traits<std::string> {
-	static MPT_FORCEINLINE bool IsLineEnding(char c) noexcept { return c == '\r' || c == '\n'; }
-};
-
-#if !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
-template <> struct Traits<std::wstring> {
-	static MPT_FORCEINLINE bool IsLineEnding(wchar_t c) noexcept { return c == L'\r' || c == L'\n'; }
-};
-#endif // !MPT_COMPILER_QUIRK_NO_WCHAR
 
 
 template <typename Tstring, typename Tstring2, typename Tstring3>
