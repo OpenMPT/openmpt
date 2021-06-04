@@ -383,16 +383,13 @@ MPT_TEST_GROUP_INLINE("mpt/io")
 	}
 
 	{
-		auto TestAdaptive16 = [&](uint16 value, mpt::IO::Offset expected_size, std::size_t fixedSize, const char * bytes)
-		{
+		auto TestAdaptive16 = [&](uint16 value, mpt::IO::Offset expected_size, std::size_t fixedSize, const char * bytes) {
 			std::stringstream f;
 			MPT_TEST_EXPECT_EQUAL(mpt::IO::WriteAdaptiveInt16LE(f, value, fixedSize), true);
 			MPT_TEST_EXPECT_EQUAL(mpt::IO::TellWrite(f), expected_size);
-			if(bytes)
-			{
+			if (bytes) {
 				mpt::IO::SeekBegin(f);
-				for(mpt::IO::Offset i = 0; i < expected_size; ++i)
-				{
+				for (mpt::IO::Offset i = 0; i < expected_size; ++i) {
 					uint8 val = 0;
 					mpt::IO::ReadIntLE<uint8>(f, val);
 					MPT_TEST_EXPECT_EQUAL(val, static_cast<uint8>(bytes[i]));
@@ -403,16 +400,13 @@ MPT_TEST_GROUP_INLINE("mpt/io")
 			MPT_TEST_EXPECT_EQUAL(mpt::IO::ReadAdaptiveInt16LE(f, result), true);
 			MPT_TEST_EXPECT_EQUAL(result, value);
 		};
-		auto TestAdaptive32 = [&](uint32 value, mpt::IO::Offset expected_size, std::size_t fixedSize, const char * bytes)
-		{
+		auto TestAdaptive32 = [&](uint32 value, mpt::IO::Offset expected_size, std::size_t fixedSize, const char * bytes) {
 			std::stringstream f;
 			MPT_TEST_EXPECT_EQUAL(mpt::IO::WriteAdaptiveInt32LE(f, value, fixedSize), true);
 			MPT_TEST_EXPECT_EQUAL(mpt::IO::TellWrite(f), expected_size);
-			if(bytes)
-			{
+			if (bytes) {
 				mpt::IO::SeekBegin(f);
-				for(mpt::IO::Offset i = 0; i < expected_size; ++i)
-				{
+				for (mpt::IO::Offset i = 0; i < expected_size; ++i) {
 					uint8 val = 0;
 					mpt::IO::ReadIntLE<uint8>(f, val);
 					MPT_TEST_EXPECT_EQUAL(val, static_cast<uint8>(bytes[i]));
@@ -423,16 +417,13 @@ MPT_TEST_GROUP_INLINE("mpt/io")
 			MPT_TEST_EXPECT_EQUAL(mpt::IO::ReadAdaptiveInt32LE(f, result), true);
 			MPT_TEST_EXPECT_EQUAL(result, value);
 		};
-		auto TestAdaptive64 = [&](uint64 value, mpt::IO::Offset expected_size, std::size_t fixedSize, const char * bytes)
-		{
+		auto TestAdaptive64 = [&](uint64 value, mpt::IO::Offset expected_size, std::size_t fixedSize, const char * bytes) {
 			std::stringstream f;
 			MPT_TEST_EXPECT_EQUAL(mpt::IO::WriteAdaptiveInt64LE(f, value, fixedSize), true);
 			MPT_TEST_EXPECT_EQUAL(mpt::IO::TellWrite(f), expected_size);
-			if(bytes)
-			{
+			if (bytes) {
 				mpt::IO::SeekBegin(f);
-				for(mpt::IO::Offset i = 0; i < expected_size; ++i)
-				{
+				for (mpt::IO::Offset i = 0; i < expected_size; ++i) {
 					uint8 val = 0;
 					mpt::IO::ReadIntLE<uint8>(f, val);
 					MPT_TEST_EXPECT_EQUAL(val, static_cast<uint8>(bytes[i]));
@@ -452,7 +443,7 @@ MPT_TEST_GROUP_INLINE("mpt/io")
 		TestAdaptive16(0x7fff, 2, 0, "\xff\xff");
 		TestAdaptive16(0, 1, 1, nullptr);
 		TestAdaptive16(1, 1, 1, nullptr);
-		TestAdaptive16(2, 1, 1,  nullptr);
+		TestAdaptive16(2, 1, 1, nullptr);
 		TestAdaptive16(0x7f, 1, 1, nullptr);
 		TestAdaptive16(0x80, 2, 0, nullptr);
 		TestAdaptive16(0x81, 2, 0, nullptr);
@@ -566,9 +557,7 @@ MPT_TEST_GROUP_INLINE("mpt/io")
 		TestAdaptive64(0x40000000, 8, 8, nullptr);
 		TestAdaptive64(0x40000001, 8, 8, nullptr);
 		TestAdaptive64(0x3fffffffffffffffull, 8, 8, nullptr);
-	
 	}
-
 }
 
 } // namespace io
