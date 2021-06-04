@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.4.22-pre
 
+ *  ogg: Update to v1.3.5 (2021-06-04).
+
 ### libopenmpt 0.4.21 (2021-05-16)
 
  *  The retrigger effect didn't work correctly for OPL instruments in some cases
