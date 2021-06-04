@@ -61,6 +61,9 @@
     <Filter Include="src\mpt\io">
       <UniqueIdentifier>{2EC2A8F3-1A7A-EA40-8381-C39C6F588531}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\mpt\io\tests">
+      <UniqueIdentifier>{DD3BB067-C934-CFB9-F266-B43EDEBEAEC5}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\mpt\io_read">
       <UniqueIdentifier>{89A4B677-F52F-243C-FE40-A7306A4B803C}</UniqueIdentifier>
     </Filter>
@@ -422,6 +425,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\io\io_virtual_wrapper.hpp">
       <Filter>src\mpt\io</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\io\tests\tests_io.hpp">
+      <Filter>src\mpt\io\tests</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\io_read\callbackstream.hpp">
       <Filter>src\mpt\io_read</Filter>

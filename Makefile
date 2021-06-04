@@ -998,6 +998,7 @@ LIBOPENMPTTEST_CXX_SOURCES += \
  test/mpt_tests_crc.cpp \
  test/mpt_tests_endian.cpp \
  test/mpt_tests_format.cpp \
+ test/mpt_tests_io.cpp \
  test/mpt_tests_parse.cpp \
  test/mpt_tests_random.cpp \
  test/mpt_tests_string.cpp \

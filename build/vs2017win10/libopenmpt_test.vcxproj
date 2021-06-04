@@ -788,6 +788,7 @@
     <ClInclude Include="..\..\src\mpt\io\io_span.hpp" />
     <ClInclude Include="..\..\src\mpt\io\io_stdstream.hpp" />
     <ClInclude Include="..\..\src\mpt\io\io_virtual_wrapper.hpp" />
+    <ClInclude Include="..\..\src\mpt\io\tests\tests_io.hpp" />
     <ClInclude Include="..\..\src\mpt\io_read\callbackstream.hpp" />
     <ClInclude Include="..\..\src\mpt\io_read\filecursor.hpp" />
     <ClInclude Include="..\..\src\mpt\io_read\filecursor_callbackstream.hpp" />
@@ -1003,6 +1004,7 @@
     <ClCompile Include="..\..\test\mpt_tests_crc.cpp" />
     <ClCompile Include="..\..\test\mpt_tests_endian.cpp" />
     <ClCompile Include="..\..\test\mpt_tests_format.cpp" />
+    <ClCompile Include="..\..\test\mpt_tests_io.cpp" />
     <ClCompile Include="..\..\test\mpt_tests_parse.cpp" />
     <ClCompile Include="..\..\test\mpt_tests_random.cpp" />
     <ClCompile Include="..\..\test\mpt_tests_string.cpp" />
