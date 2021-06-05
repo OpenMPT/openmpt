@@ -277,7 +277,6 @@ MPT_FILES_COMMON += common/BuildSettings.h
 MPT_FILES_COMMON += common/ComponentManager.cpp
 MPT_FILES_COMMON += common/ComponentManager.h
 MPT_FILES_COMMON += common/Dither.h
-MPT_FILES_COMMON += common/FileReader.cpp
 MPT_FILES_COMMON += common/FileReader.h
 MPT_FILES_COMMON += common/FileReaderFwd.h
 MPT_FILES_COMMON += common/Logging.cpp

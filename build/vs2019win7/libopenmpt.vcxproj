@@ -879,7 +879,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\common\ComponentManager.cpp" />
-    <ClCompile Include="..\..\common\FileReader.cpp" />
     <ClCompile Include="..\..\common\Logging.cpp" />
     <ClCompile Include="..\..\common\Profiler.cpp" />
     <ClCompile Include="..\..\common\mptFileIO.cpp" />

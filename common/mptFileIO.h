@@ -364,8 +364,34 @@ inline FileCursor GetFileReader(Targ1 &&arg1, Targ2 &&arg2)
 }
 
 
-#endif // MPT_ENABLE_FILEIO
+#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
 
+class OnDiskFileWrapper
+{
+
+private:
+
+	mpt::PathString m_Filename;
+	bool m_IsTempFile;
+
+public:
+
+	OnDiskFileWrapper(FileCursor& file, const mpt::PathString& fileNameExtension = P_("tmp"));
+
+	~OnDiskFileWrapper();
+
+public:
+
+	bool IsValid() const;
+
+	mpt::PathString GetFilename() const;
+
+}; // class OnDiskFileWrapper
+
+#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
+
+
+#endif // MPT_ENABLE_FILEIO
 
 
 OPENMPT_NAMESPACE_END

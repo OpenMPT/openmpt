@@ -18,12 +18,18 @@
 #include "mpt/io_read/filecursor_traits_memory.hpp"
 #include "mpt/io_read/filereader.hpp"
 
+#include "openmpt/base/Types.hpp"
+
+#include "mptPathString.h"
 #include "mptStringBuffer.h"
-#include "misc_util.h"
+
 #include <algorithm>
+#include <array>
 #include <limits>
 #include <optional>
+#include <string>
 #include <vector>
+
 #include <cstring>
 
 #include "FileReaderFwd.h"
@@ -416,33 +422,6 @@ using FileReader = detail::FileReader<mpt::IO::FileCursorTraitsFileData, mpt::IO
 
 using MemoryFileCursor = detail::FileCursor<mpt::IO::FileCursorTraitsMemory, mpt::IO::FileCursorFilenameTraitsNone>;
 using MemoryFileReader = detail::FileReader<mpt::IO::FileCursorTraitsMemory, mpt::IO::FileCursorFilenameTraitsNone>;
-
-
-#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
-
-class OnDiskFileWrapper
-{
-
-private:
-
-	mpt::PathString m_Filename;
-	bool m_IsTempFile;
-
-public:
-
-	OnDiskFileWrapper(FileReader &file, const mpt::PathString &fileNameExtension = P_("tmp"));
-
-	~OnDiskFileWrapper();
-
-public:
-
-	bool IsValid() const;
-
-	mpt::PathString GetFilename() const;
-
-}; // class OnDiskFileWrapper
-
-#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
 
 
 OPENMPT_NAMESPACE_END

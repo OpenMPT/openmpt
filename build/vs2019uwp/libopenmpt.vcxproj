@@ -1494,8 +1494,6 @@
     </ClCompile>
     <ClCompile Include="..\..\common\ComponentManager.cpp">
     </ClCompile>
-    <ClCompile Include="..\..\common\FileReader.cpp">
-    </ClCompile>
     <ClCompile Include="..\..\common\Logging.cpp">
     </ClCompile>
     <ClCompile Include="..\..\common\mptFileIO.cpp">
