@@ -27,12 +27,12 @@ public:
 
 private:
 	SampleType * const * m_buffers;
-	std::size_t m_frame_stride;
+	std::ptrdiff_t m_frame_stride;
 	std::size_t m_channels;
 	std::size_t m_frames;
 
 public:
-	constexpr audio_span_planar_strided(SampleType * const * buffers, std::size_t channels, std::size_t frames, std::size_t frame_stride) noexcept
+	constexpr audio_span_planar_strided(SampleType * const * buffers, std::size_t channels, std::size_t frames, std::ptrdiff_t frame_stride) noexcept
 		: m_buffers(buffers)
 		, m_frame_stride(frame_stride)
 		, m_channels(channels)
@@ -46,7 +46,7 @@ public:
 		return nullptr;
 	}
 	SampleType & operator()(std::size_t channel, std::size_t frame) const {
-		return m_buffers[channel][frame * m_frame_stride];
+		return m_buffers[channel][static_cast<std::ptrdiff_t>(frame) * m_frame_stride];
 	}
 	bool is_contiguous() const noexcept {
 		return false;
@@ -66,7 +66,7 @@ public:
 	std::size_t size_samples() const noexcept {
 		return m_channels * m_frames;
 	}
-	std::size_t frame_stride() const noexcept {
+	std::ptrdiff_t frame_stride() const noexcept {
 		return m_frame_stride;
 	}
 };
@@ -250,21 +250,21 @@ private:
 		SampleType * const contiguous;
 		SampleType * const * const planes;
 	} m_buffer;
-	std::size_t m_frame_stride;
-	std::size_t m_channel_stride;
+	std::ptrdiff_t m_frame_stride;
+	std::ptrdiff_t m_channel_stride;
 	std::size_t m_channels;
 	std::size_t m_frames;
 
 public:
 	constexpr audio_span(audio_span_interleaved<SampleType> buffer) noexcept
-		: m_frame_stride(buffer.size_channels())
+		: m_frame_stride(static_cast<std::ptrdiff_t>(buffer.size_channels()))
 		, m_channel_stride(1)
 		, m_channels(buffer.size_channels())
 		, m_frames(buffer.size_frames()) {
 		m_buffer.contiguous = buffer.data();
 	}
 	constexpr audio_span(SampleType * buffer, std::size_t channels, std::size_t frames, audio_span_frames_are_contiguous_t) noexcept
-		: m_frame_stride(channels)
+		: m_frame_stride(static_cast<std::ptrdiff_t>(channels))
 		, m_channel_stride(1)
 		, m_channels(channels)
 		, m_frames(frames) {
@@ -279,7 +279,7 @@ public:
 	}
 	constexpr audio_span(SampleType * buffer, std::size_t channels, std::size_t frames, audio_span_channels_are_contiguous_t) noexcept
 		: m_frame_stride(1)
-		, m_channel_stride(frames)
+		, m_channel_stride(static_cast<std::ptrdiff_t>(frames))
 		, m_channels(channels)
 		, m_frames(frames) {
 		m_buffer.contiguous = buffer;
@@ -299,13 +299,13 @@ public:
 		m_buffer.planes = planes;
 	}
 	constexpr audio_span(audio_span_planar_strided<SampleType> buffer) noexcept
-		: m_frame_stride(buffer.frame_stride())
+		: m_frame_stride(static_cast<std::ptrdiff_t>(buffer.frame_stride()))
 		, m_channel_stride(0)
 		, m_channels(buffer.size_channels())
 		, m_frames(buffer.size_frames()) {
 		m_buffer.planes = buffer.data_planar();
 	}
-	constexpr audio_span(SampleType * const * planes, std::size_t channels, std::size_t frames, std::size_t frame_stride, audio_span_channels_are_planar_and_strided_t) noexcept
+	constexpr audio_span(SampleType * const * planes, std::size_t channels, std::size_t frames, std::ptrdiff_t frame_stride, audio_span_channels_are_planar_and_strided_t) noexcept
 		: m_frame_stride(frame_stride)
 		, m_channel_stride(0)
 		, m_channels(channels)
@@ -322,13 +322,13 @@ public:
 		return is_contiguous() ? m_buffer.contiguous : nullptr;
 	}
 	SampleType & operator()(std::size_t channel, std::size_t frame) const {
-		return is_contiguous() ? m_buffer.contiguous[(m_channel_stride * channel) + (m_frame_stride * frame)] : m_buffer.planes[channel][frame * m_frame_stride];
+		return is_contiguous() ? m_buffer.contiguous[(m_channel_stride * static_cast<std::ptrdiff_t>(channel)) + (m_frame_stride * static_cast<std::ptrdiff_t>(frame))] : m_buffer.planes[channel][frame * static_cast<std::ptrdiff_t>(m_frame_stride)];
 	}
 	bool channels_are_contiguous() const noexcept {
-		return (m_channel_stride == m_frames);
+		return (m_channel_stride == static_cast<std::ptrdiff_t>(m_frames));
 	}
 	bool frames_are_contiguous() const noexcept {
-		return (m_frame_stride == m_channels);
+		return (m_frame_stride == static_cast<std::ptrdiff_t>(m_channels));
 	}
 	std::size_t size_channels() const noexcept {
 		return m_channels;
