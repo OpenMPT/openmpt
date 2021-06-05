@@ -11,7 +11,7 @@
 #include "stdafx.h"
 #include "mptLibrary.h"
 
-#include "mptOS.h"
+#include "mpt/osinfo/windows_version.hpp"
 
 #if MPT_OS_WINDOWS
 #include <windows.h>
@@ -95,11 +95,11 @@ public:
 #else
 		// Check for KB2533623:
 		bool hasKB2533623 = false;
-		mpt::OS::Windows::Version WindowsVersion = mpt::OS::Windows::Version::Current();
-		if(WindowsVersion.IsAtLeast(mpt::OS::Windows::Version::Win8))
+		mpt::osinfo::windows::Version WindowsVersion = mpt::osinfo::windows::Version::Current();
+		if(WindowsVersion.IsAtLeast(mpt::osinfo::windows::Version::Win8))
 		{
 			hasKB2533623 = true;
-		} else if(WindowsVersion.IsAtLeast(mpt::OS::Windows::Version::WinVista))
+		} else if(WindowsVersion.IsAtLeast(mpt::osinfo::windows::Version::WinVista))
 		{
 			HMODULE hKernel32DLL = LoadLibrary(TEXT("kernel32.dll"));
 			if(hKernel32DLL)
