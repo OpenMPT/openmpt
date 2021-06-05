@@ -529,6 +529,9 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		m_playBehaviour.set(kST3PortaSampleChange, useGUS);
 		m_playBehaviour.set(kST3SampleSwap, !useGUS);
 		m_modFormat.madeWithTracker += useGUS ? UL_(" (GUS)") : UL_(" (SB)");
+		// ST3's GUS driver doesn't use this value. Ignoring it fixes the balance between FM and PCM samples (e.g. in Rotagilla by Manwe)
+		if(useGUS)
+			m_nSamplePreAmp = 48;
 	}
 
 	// Try to find out if Zxx commands are supposed to be panning commands (PixPlay).
