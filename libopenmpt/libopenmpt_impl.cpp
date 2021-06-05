@@ -1531,6 +1531,7 @@ std::pair< std::string, std::string > module_impl::format_and_highlight_pattern_
 		return std::make_pair( std::string(), std::string() );
 	}
 	const OpenMPT::ModCommand & cell = *pattern.GetpModCommand( static_cast<OpenMPT::ROWINDEX>( r ), static_cast<OpenMPT::CHANNELINDEX>( c ) );
+	// clang-format off
 	switch ( cmd ) {
 		case module::command_note:
 			return std::make_pair(
@@ -1575,6 +1576,7 @@ std::pair< std::string, std::string > module_impl::format_and_highlight_pattern_
 				);
 			break;
 	}
+	// clang-format on
 	return std::make_pair( std::string(), std::string() );
 }
 std::string module_impl::format_pattern_row_channel_command( std::int32_t p, std::int32_t r, std::int32_t c, int cmd ) const {
@@ -1603,6 +1605,7 @@ std::pair< std::string, std::string > module_impl::format_and_highlight_pattern_
 	const OpenMPT::ModCommand & cell = *pattern.GetpModCommand( static_cast<OpenMPT::ROWINDEX>( r ), static_cast<OpenMPT::CHANNELINDEX>( c ) );
 	text.clear();
 	high.clear();
+	// clang-format off
 	text += ( cell.IsNote() || cell.IsSpecialNote() ) ? mpt::convert<std::string>( mpt::common_encoding::utf8, m_sndFile->GetNoteName( cell.note, cell.instr ) ) : std::string("...");
 	high += ( cell.IsNote() ) ? std::string("nnn") : cell.IsSpecialNote() ? std::string("mmm") : std::string("...");
 	if ( ( width == 0 ) || ( width >= 6 ) ) {
@@ -1631,6 +1634,7 @@ std::pair< std::string, std::string > module_impl::format_and_highlight_pattern_
 	} else if ( ( width != 0 ) && pad ) {
 		high += std::string( width - high.length(), ' ' );
 	}
+	// clang-format on
 	return std::make_pair( text, high );
 }
 std::string module_impl::format_pattern_row_channel( std::int32_t p, std::int32_t r, std::int32_t c, std::size_t width, bool pad ) const {
