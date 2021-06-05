@@ -51,6 +51,8 @@
  */
 #define LIBOPENMPT_STREAM_CALLBACKS_FILE
 
+/* clang-format off */
+
 #if defined(__DOXYGEN__)
 
 #define LIBOPENMPT_API_HELPER_EXPORT
@@ -102,6 +104,8 @@
 
 #endif
 
+/* clang-format on */
+
 #if defined(LIBOPENMPT_BUILD_DLL)
 #define LIBOPENMPT_API     LIBOPENMPT_API_HELPER_EXPORT
 #elif defined(LIBOPENMPT_USE_DLL)
@@ -138,6 +142,7 @@
 
 /* C */
 
+/* clang-format off */
 #if !defined(LIBOPENMPT_NO_DEPRECATE)
 #if defined(__clang__)
 #define LIBOPENMPT_DEPRECATED __attribute__((deprecated))
@@ -151,6 +156,7 @@
 #else
 #define LIBOPENMPT_DEPRECATED
 #endif
+/* clang-format on */
 
 #ifndef __cplusplus
 #if !defined(LIBOPENMPT_NO_DEPRECATE)

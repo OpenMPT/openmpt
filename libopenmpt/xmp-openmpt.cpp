@@ -1824,7 +1824,9 @@ XMPIN * WINAPI XMPIN_GetInterface_( DWORD face, InterfaceProc faceproc ) {
 }
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wattribute-alias"
+// clang-format off
 __declspec(dllexport) void XMPIN_GetInterface() __attribute__((alias("XMPIN_GetInterface_@8")));
+// clang-format on
 #pragma GCC diagnostic pop
 #else
 XMPIN * WINAPI XMPIN_GetInterface( DWORD face, InterfaceProc faceproc ) {
