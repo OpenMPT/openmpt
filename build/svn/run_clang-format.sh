@@ -1,9 +1,9 @@
 #!/bin/bash
 set -e
 
-cd libopenmpt
-	clang-format-11 -i *.hpp *.cpp *.h
-cd ..
+#cd libopenmpt
+#	clang-format-11 -i *.hpp *.cpp *.h
+#cd ..
 
 cd examples
 	clang-format-11 -i *.cpp *.c
