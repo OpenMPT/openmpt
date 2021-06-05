@@ -3826,7 +3826,7 @@ int CViewSample::GetZoomLevel(SmpLength length) const
 	zoom = 1 + (std::log10(zoom) / std::log10(2.0));
 	if(zoom <= 0) zoom -= 2;
 
-	return static_cast<int>(zoom + sgn(zoom));
+	return static_cast<int>(zoom + mpt::signum(zoom));
 }
 
 

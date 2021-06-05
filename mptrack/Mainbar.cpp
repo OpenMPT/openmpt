@@ -541,7 +541,7 @@ void CMainToolBar::OnVScroll(UINT nCode, UINT nPos, CScrollBar *pScrollBar)
 		{
 			const CModSpecifications &specs = pSndFile->GetModSpecifications();
 			int n;
-			if((n = sgn(m_SpinTempo.GetPos32())) != 0)
+			if((n = mpt::signum(m_SpinTempo.GetPos32())) != 0)
 			{
 				TEMPO newTempo;
 				if(specs.hasFractionalTempo)
@@ -560,7 +560,7 @@ void CMainToolBar::OnVScroll(UINT nCode, UINT nPos, CScrollBar *pScrollBar)
 				pSndFile->SetTempo(Clamp(newTempo, specs.GetTempoMin(), specs.GetTempoMax()), true);
 				m_SpinTempo.SetPos(0);
 			}
-			if((n = sgn(m_SpinSpeed.GetPos32())) != 0)
+			if((n = mpt::signum(m_SpinSpeed.GetPos32())) != 0)
 			{
 				pSndFile->m_PlayState.m_nMusicSpeed = Clamp(uint32(nCurrentSpeed + n), specs.speedMin, specs.speedMax);
 				m_SpinSpeed.SetPos(0);

@@ -98,14 +98,6 @@ inline void LimitMax(T& val, const C upperLimit)
 }
 
 
-// Returns sign of a number (-1 for negative numbers, 1 for positive numbers, 0 for 0)
-template <class T>
-constexpr int sgn(T value)
-{
-	return (value > T(0)) - (value < T(0));
-}
-
-
 
 namespace Util
 {

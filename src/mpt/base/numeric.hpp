@@ -80,6 +80,12 @@ constexpr T align_down(T x, T target) {
 	return (x / target) * target;
 }
 
+// Returns sign of a number (-1 for negative numbers, 1 for positive numbers, 0 for 0)
+template <class T>
+constexpr int signum(T value) {
+	return (value > T(0)) - (value < T(0));
+}
+
 
 } // namespace MPT_INLINE_NS
 } // namespace mpt

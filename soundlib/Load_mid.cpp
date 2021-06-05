@@ -1186,7 +1186,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 				m.param = static_cast<uint8>(absDiff);
 				realDiff = absDiff * 4 * (ticksPerRow - 1);
 			}
-			chnState.porta += realDiff * sgn(diff);
+			chnState.porta += realDiff * mpt::signum(diff);
 		}
 
 		tick_t delta = 0;

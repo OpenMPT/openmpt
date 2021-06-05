@@ -366,7 +366,7 @@ void CNoteMapWnd::OnRButtonDown(UINT, CPoint pt)
 
 BOOL CNoteMapWnd::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 {
-	SetCurrentNote(m_nNote - sgn(zDelta));
+	SetCurrentNote(m_nNote - mpt::signum(zDelta));
 	return CStatic::OnMouseWheel(nFlags, zDelta, pt);
 }
 
@@ -495,7 +495,7 @@ void CNoteMapWnd::MapTranspose(int nAmount)
 	if((nAmount == 12 || nAmount == -12))
 	{
 		// Special case for instrument-specific tunings
-		nAmount = m_modDoc.GetInstrumentGroupSize(m_nInstrument) * sgn(nAmount);
+		nAmount = m_modDoc.GetInstrumentGroupSize(m_nInstrument) * mpt::signum(nAmount);
 	}
 
 	m_undo = true;

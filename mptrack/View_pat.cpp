@@ -1558,7 +1558,7 @@ BOOL CViewPattern::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 	if(IsLiveRecord() && !m_Status[psDragActive])
 	{
 		// During live playback with "follow song" enabled, the mouse wheel can be used to jump forwards and backwards.
-		CursorJump(-sgn(zDelta), false);
+		CursorJump(-mpt::signum(zDelta), false);
 		return TRUE;
 	}
 	return CModScrollView::OnMouseWheel(nFlags, zDelta, pt);
@@ -2776,7 +2776,7 @@ bool CViewPattern::TransposeSelection(int transp)
 			if(transpose == 12000 || transpose == -12000)
 			{
 				// Transpose one octave
-				transpose = lastGroupSize[chn] * sgn(transpose);
+				transpose = lastGroupSize[chn] * mpt::signum(transpose);
 			}
 			int note = m.note + transpose;
 			Limit(note, noteMin, noteMax);

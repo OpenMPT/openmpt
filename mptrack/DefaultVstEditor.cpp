@@ -393,7 +393,7 @@ BOOL CDefaultVstEditor::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 	paramScroller.GetScrollRange(&minpos, &maxpos);
 	if(minpos != maxpos)
 	{
-		paramOffset -= sgn(zDelta);
+		paramOffset -= mpt::signum(zDelta);
 		Limit(paramOffset, PlugParamIndex(minpos), PlugParamIndex(maxpos));
 		paramScroller.SetScrollPos(paramOffset);
 

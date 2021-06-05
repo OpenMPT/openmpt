@@ -127,7 +127,7 @@ void CTuningRatioMapWnd::OnKillFocus(CWnd *pNewWnd)
 
 BOOL CTuningRatioMapWnd::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 {
-	NOTEINDEXTYPE note = static_cast<NOTEINDEXTYPE>(m_nNote - sgn(zDelta));
+	NOTEINDEXTYPE note = static_cast<NOTEINDEXTYPE>(m_nNote - mpt::signum(zDelta));
 	if(m_pTuning->IsValidNote(note - m_nNoteCentre))
 	{
 		m_nNote = note;

@@ -349,7 +349,7 @@ void CViewPattern::OnEditFindNext()
 						{
 							if(noteReplace == FindReplace::ReplaceOctaveUp || noteReplace == FindReplace::ReplaceOctaveDown)
 							{
-								noteReplace = GetDocument()->GetInstrumentGroupSize(lastInstr[chn]) * sgn(noteReplace);
+								noteReplace = GetDocument()->GetInstrumentGroupSize(lastInstr[chn]) * mpt::signum(noteReplace);
 							}
 							int note = Clamp(m->note + noteReplace, specs.noteMin, specs.noteMax);
 							m->note = static_cast<ModCommand::NOTE>(note);

@@ -3789,7 +3789,7 @@ void CSoundFile::MidiPortamento(CHANNELINDEX nChn, int param, bool doFineSlides)
 		if(m_PlayState.Chn[nChn].isFirstTick)
 		{
 			// Extra fine slide...
-			pitchBend = (actualParam & 0x0F) * sgn(param);
+			pitchBend = (actualParam & 0x0F) * mpt::signum(param);
 			if(actualParam >= 0xF0)
 			{
 				// ... or just a fine slide!
