@@ -19,7 +19,9 @@
 #include "openmpt/soundbase/MixSample.hpp"
 #include "openmpt/soundbase/MixSampleConvert.hpp"
 
+#ifndef NO_EQ
 #include "../misc/mptCPU.h"
+#endif
 
 #include <algorithm>
 #include <array>
