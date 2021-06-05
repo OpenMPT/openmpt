@@ -257,8 +257,9 @@ namespace openmpt {
 
 		// Find a free channel
 		OpenMPT::CHANNELINDEX free_channel = m_sndFile->GetNNAChannel( OpenMPT::CHANNELINDEX_INVALID );
-		if ( free_channel == OpenMPT::CHANNELINDEX_INVALID )
+		if ( free_channel == OpenMPT::CHANNELINDEX_INVALID ) {
 			free_channel = OpenMPT::MAX_CHANNELS - 1;
+		}
 
 		OpenMPT::ModChannel &chn = m_sndFile->m_PlayState.Chn[free_channel];
 		chn.Reset( OpenMPT::ModChannel::resetTotal, *m_sndFile, OpenMPT::CHANNELINDEX_INVALID, OpenMPT::CHN_MUTE );
