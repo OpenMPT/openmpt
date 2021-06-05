@@ -8,6 +8,7 @@
 #define pnts INT123_pnts
 #define catchsignal INT123_catchsignal
 #define safe_realloc INT123_safe_realloc
+#define safer_realloc INT123_safer_realloc
 #define compat_strdup INT123_compat_strdup
 #define compat_getenv INT123_compat_getenv
 #define compat_open INT123_compat_open
