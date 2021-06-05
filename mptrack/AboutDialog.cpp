@@ -303,7 +303,7 @@ static mpt::ustring ProcSupportToString(uint32 procSupport)
 #if defined(ENABLE_X86)
 	features.push_back(U_("x86"));
 #endif
-#if defined(ENABLE_X64)
+#if defined(ENABLE_AMD64)
 	features.push_back(U_("amd64"));
 #endif
 	struct ProcFlag

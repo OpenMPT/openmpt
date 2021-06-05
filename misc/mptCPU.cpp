@@ -34,7 +34,7 @@ uint8 ProcModel = 0;
 uint8 ProcStepping = 0;
 
 
-#if MPT_COMPILER_MSVC && (defined(ENABLE_X86) || defined(ENABLE_X64)) && defined(ENABLE_CPUID)
+#if MPT_COMPILER_MSVC && (defined(ENABLE_X86) || defined(ENABLE_AMD64)) && defined(ENABLE_CPUID)
 
 
 #include <intrin.h>
@@ -189,7 +189,7 @@ void Init()
 }
 
 
-#elif MPT_COMPILER_MSVC && (defined(ENABLE_X86) || defined(ENABLE_X64))
+#elif MPT_COMPILER_MSVC && (defined(ENABLE_X86) || defined(ENABLE_AMD64))
 
 
 void Init()

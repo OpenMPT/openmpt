@@ -396,8 +396,10 @@
 #if MPT_COMPILER_MSVC && defined(_M_IX86)
 
 #define ENABLE_CPUID
+
 // Generate general x86 inline assembly and intrinsics.
 #define ENABLE_X86
+
 // Generate MMX instructions (only used when the CPU supports it).
 #define ENABLE_MMX
 // Generate SSE instructions (only used when the CPU supports it).
@@ -416,8 +418,10 @@
 #elif MPT_COMPILER_MSVC && defined(_M_X64)
 
 #define ENABLE_CPUID
-// Generate general x64 intrinsics.
-#define ENABLE_X64
+
+// Generate general amd64 intrinsics.
+#define ENABLE_AMD64
+
 // Generate SSE instructions (only used when the CPU supports it).
 #define ENABLE_SSE
 // Generate SSE2 instructions (only used when the CPU supports it).
