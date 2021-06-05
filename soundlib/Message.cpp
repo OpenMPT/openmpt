@@ -206,13 +206,13 @@ bool SongMessage::SetFormatted(std::string message, LineEnding lineEnding)
 	switch(lineEnding)
 	{
 	case leLF:
-		message = mpt::String::Replace(message, "\n", std::string(1, InternalLineEnding));
+		message = mpt::replace(message, std::string("\n"), std::string(1, InternalLineEnding));
 		break;
 	case leCR:
-		message = mpt::String::Replace(message, "\r", std::string(1, InternalLineEnding));
+		message = mpt::replace(message, std::string("\r"), std::string(1, InternalLineEnding));
 		break;
 	case leCRLF:
-		message = mpt::String::Replace(message, "\r\n", std::string(1, InternalLineEnding));
+		message = mpt::replace(message, std::string("\r\n"), std::string(1, InternalLineEnding));
 		break;
 	default:
 		MPT_ASSERT_NOTREACHED();

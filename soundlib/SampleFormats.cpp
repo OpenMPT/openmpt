@@ -641,8 +641,8 @@ static void Wave64TagFromLISTINFO(mpt::ustring & dst, uint16 codePage, const Chu
 	}
 	std::string str;
 	textChunk.ReadString<mpt::String::maybeNullTerminated>(str, textChunk.GetLength());
-	str = mpt::String::Replace(str, std::string("\r\n"), std::string("\n"));
-	str = mpt::String::Replace(str, std::string("\r"), std::string("\n"));
+	str = mpt::replace(str, std::string("\r\n"), std::string("\n"));
+	str = mpt::replace(str, std::string("\r"), std::string("\n"));
 	dst = mpt::ToUnicode(codePage, mpt::Charset::Windows1252, str);
 }
 
@@ -2152,8 +2152,8 @@ bool CSoundFile::ReadAUSample(SAMPLEINDEX nSample, FileReader &file, bool mayNor
 	file.Seek(24);
 	std::string annotation;
 	file.ReadString<mpt::String::maybeNullTerminated>(annotation, dataOffset - 24);
-	annotation = mpt::String::Replace(annotation, "\r\n", "\n");
-	annotation = mpt::String::Replace(annotation, "\r", "\n");
+	annotation = mpt::replace(annotation, std::string("\r\n"), std::string("\n"));
+	annotation = mpt::replace(annotation, std::string("\r"), std::string("\n"));
 	mpt::Charset charset = mpt::IsUTF8(annotation) ? mpt::Charset::UTF8 : mpt::Charset::ISO8859_1;
 	const auto lines = mpt::String::Split<std::string>(annotation, "\n");
 	bool hasFields = false;

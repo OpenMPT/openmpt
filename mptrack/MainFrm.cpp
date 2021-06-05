@@ -3006,7 +3006,7 @@ void CMainFrame::UpdateMRUList()
 					path = path.substr(0, start + 1) + _T("...") + path.substr(end);
 				}
 			}
-			path = mpt::String::Replace(path, _T("&"), _T("&&"));
+			path = mpt::String::Replace(path, mpt::winstring(_T("&")), mpt::winstring(_T("&&")));
 			s += path;
 			pMenu->InsertMenu(firstMenu + i, MF_STRING | MF_BYPOSITION, ID_MRU_LIST_FIRST + i, mpt::ToCString(s));
 		}

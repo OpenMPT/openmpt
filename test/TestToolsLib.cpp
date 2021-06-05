@@ -122,7 +122,7 @@ int fail_count = 0;
 
 static std::string remove_newlines(std::string str)
 {
-	return mpt::String::Replace(mpt::String::Replace(str, "\n", " "), "\r", " ");
+	return mpt::replace(mpt::replace(str, std::string("\n"), std::string(" ")), std::string("\r"), std::string(" "));
 }
 
 

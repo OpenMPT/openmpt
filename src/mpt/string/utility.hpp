@@ -284,6 +284,26 @@ inline bool ends_with(const Tstring & str, const Tmatch & match) {
 }
 
 
+template <typename Tstring, typename Treplace>
+inline Tstring replace(Tstring str, const Treplace & old_str, const Treplace & new_str) {
+	std::size_t pos = 0;
+	while ((pos = str.find(typename mpt::make_string_type<Treplace>::type{old_str}, pos)) != Tstring::npos) {
+		str.replace(pos, typename mpt::make_string_type<Treplace>::type{old_str}.length(), typename mpt::make_string_type<Treplace>::type{new_str});
+		pos += typename mpt::make_string_type<Treplace>::type{new_str}.length();
+	}
+	return str;
+}
+
+
+template <typename Tstring>
+inline Tstring truncate(Tstring str, std::size_t max_len) {
+	if (str.length() > max_len) {
+		str.resize(max_len);
+	}
+	return str;
+}
+
+
 template <typename Tchar>
 inline constexpr Tchar to_lower_ascii(Tchar c) noexcept {
 	if (char_constants<Tchar>::A <= c && c <= char_constants<Tchar>::Z) {
@@ -301,7 +321,6 @@ inline constexpr Tchar to_upper_ascii(Tchar c) noexcept {
 }
 
 
-
 template <typename Tstring>
 inline std::vector<Tstring> split(const Tstring & str, const Tstring & sep = Tstring(1, char_constants<typename Tstring::value_type>::comma)) {
 	std::vector<Tstring> vals;
@@ -315,7 +334,6 @@ inline std::vector<Tstring> split(const Tstring & str, const Tstring & sep = Tst
 	}
 	return vals;
 }
-
 
 
 template <typename Tstring>

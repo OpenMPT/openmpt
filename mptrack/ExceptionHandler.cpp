@@ -318,7 +318,7 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 		mpt::SafeOutputFile sf(crashDirectory.path + P_("error.txt"), std::ios::binary, mpt::FlushMode::Full);
 		mpt::ofstream& f = sf;
 		f.imbue(std::locale::classic());
-		f << mpt::String::Replace(mpt::ToCharset(mpt::Charset::UTF8, errorMessage), "\n", "\r\n");
+		f << mpt::replace(mpt::ToCharset(mpt::Charset::UTF8, errorMessage), std::string("\n"), std::string("\r\n"));
 	}
 
 	if(auto ih = CMainFrame::GetInputHandler(); ih != nullptr)

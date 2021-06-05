@@ -212,14 +212,14 @@ std::string Context::EscapePosixShell(std::string line)
 {
 	const char escape_chars [] = { '|', '&', ';', '<', '>', '(', ')', '$', '`', '"', '\'', ' ', '\t' };
 	const char maybe_escape_chars [] = { '*', '?', '[', '#', '~', '=', '%' };
-	line = mpt::String::Replace(line, "\\", "\\\\");
+	line = mpt::replace(line, std::string("\\"), std::string("\\\\"));
 	for(char c : escape_chars)
 	{
-		line = mpt::String::Replace(line, std::string(1, c), "\\" + std::string(1, c));
+		line = mpt::replace(line, std::string(1, c), std::string("\\") + std::string(1, c));
 	}
 	for(char c : maybe_escape_chars)
 	{
-		line = mpt::String::Replace(line, std::string(1, c), "\\" + std::string(1, c));
+		line = mpt::replace(line, std::string(1, c), std::string("\\") + std::string(1, c));
 	}
 	return line;
 }
@@ -374,7 +374,7 @@ ExecResult Context::ExecutePosixShellScript(std::string script, FlagSet<ExecFlag
 		}
 		try
 		{
-			mpt::LazyFileRef out(dirWindows + P_("filetree") + P_("\\") + mpt::PathString::FromUTF8(mpt::String::Replace(file.first, "/", "\\")));
+			mpt::LazyFileRef out(dirWindows + P_("filetree") + P_("\\") + mpt::PathString::FromUTF8(mpt::replace(file.first, std::string("/"), std::string("\\"))));
 			out = file.second;
 		} catch(std::exception &)
 		{

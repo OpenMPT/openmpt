@@ -41,31 +41,13 @@ namespace String
 
 
 template <typename Tstring, typename Tstring2, typename Tstring3>
-inline Tstring Replace(Tstring str, const Tstring2 &oldStr_, const Tstring3 &newStr_)
+inline Tstring Replace(Tstring str, const Tstring2 &oldStr, const Tstring3 &newStr)
 {
-	std::size_t pos = 0;
-	const Tstring oldStr = oldStr_;
-	const Tstring newStr = newStr_;
-	while((pos = str.find(oldStr, pos)) != Tstring::npos)
-	{
-		str.replace(pos, oldStr.length(), newStr);
-		pos += newStr.length();
-	}
-	return str;
+	return mpt::replace(str, oldStr, newStr);
 }
 
 
 } // namespace String
-
-
-inline std::string truncate(std::string str, std::size_t maxLen)
-{
-	if(str.length() > maxLen)
-	{
-		str.resize(maxLen);
-	}
-	return str;
-}
 
 
 enum class Charset {
