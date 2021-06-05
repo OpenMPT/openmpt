@@ -178,9 +178,9 @@ void attribute_align_arg mpg123_delete_pars(mpg123_pars* mp)
 
 int attribute_align_arg mpg123_reset_eq(mpg123_handle *mh)
 {
-	int i;
 	if(mh == NULL) return MPG123_BAD_HANDLE;
 #ifndef NO_EQUALIZER
+	int i;
 	mh->have_eq_settings = 0;
 	for(i=0; i < 32; ++i) mh->equalizer[0][i] = mh->equalizer[1][i] = DOUBLE_TO_REAL(1.0);
 #endif
