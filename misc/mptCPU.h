@@ -43,33 +43,50 @@ inline constexpr uint32 amd64 = 0u | feature::lm | feature::sse | feature::sse2;
 
 #ifdef ENABLE_ASM
 
-extern uint32 RealProcSupport;
-extern uint32 ProcSupport;
-extern char ProcVendorID[16+1];
-extern char ProcBrandID[4*4*3+1];
-extern uint32 ProcRawCPUID;
-extern uint16 ProcFamily;
-extern uint8 ProcModel;
-extern uint8 ProcStepping;
 
-void Init();
+inline uint32 EnabledFeatures = 0;
+
+
+struct Info
+{
+public:
+	uint32 AvailableFeatures = 0;
+	uint32 CPUID = 0;
+	char VendorID[16+1] = {};
+	char BrandID[4*4*3+1] = {};
+	uint16 Family = 0;
+	uint8 Model = 0;
+	uint8 Stepping = 0;
+private:
+	Info();
+public:
+	static const Info & Get();
+};
+
+
+void EnableAvailableFeatures();
+
+
+struct AvailableFeaturesEnabler
+{
+	AvailableFeaturesEnabler()
+	{
+		EnableAvailableFeatures();
+	}
+};
+
 
 // enabled processor features for inline asm and intrinsics
 MPT_FORCEINLINE uint32 GetEnabledFeatures()
 {
-	return ProcSupport;
-}
-
-// available processor features
-MPT_FORCEINLINE uint32 GetAvailableFeatures()
-{
-	return RealProcSupport;
+	return EnabledFeatures;
 }
 
 MPT_FORCEINLINE bool HasFeatureSet(uint32 features)
 {
 	return features == (GetEnabledFeatures() & features);
 }
+
 
 #endif // ENABLE_ASM
 

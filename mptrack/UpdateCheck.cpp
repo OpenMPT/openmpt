@@ -168,17 +168,18 @@ static bool IsArchitectureFeatureSupported(const mpt::ustring &architecture, con
 {
 	MPT_UNUSED_VARIABLE(architecture);
 	#ifdef ENABLE_ASM
+		const CPU::Info CPUInfo = CPU::Info::Get();
 		if(feature == U_("")) return true;
-		else if(feature == U_("lm")) return (CPU::GetAvailableFeatures() & CPU::feature::lm) != 0;
-		else if(feature == U_("mmx")) return (CPU::GetAvailableFeatures() & CPU::feature::mmx) != 0;
-		else if(feature == U_("sse")) return (CPU::GetAvailableFeatures() & CPU::feature::sse) != 0;
-		else if(feature == U_("sse2")) return (CPU::GetAvailableFeatures() & CPU::feature::sse2) != 0;
-		else if(feature == U_("sse3")) return (CPU::GetAvailableFeatures() & CPU::feature::sse3) != 0;
-		else if(feature == U_("ssse3")) return (CPU::GetAvailableFeatures() & CPU::feature::ssse3) != 0;
-		else if(feature == U_("sse4.1")) return (CPU::GetAvailableFeatures() & CPU::feature::sse4_1) != 0;
-		else if(feature == U_("sse4.2")) return (CPU::GetAvailableFeatures() & CPU::feature::sse4_2) != 0;
-		else if(feature == U_("avx")) return (CPU::GetAvailableFeatures() & CPU::feature::avx) != 0;
-		else if(feature == U_("avx2")) return (CPU::GetAvailableFeatures() & CPU::feature::avx2) != 0;
+		else if(feature == U_("lm")) return (CPUInfo.AvailableFeatures & CPU::feature::lm) != 0;
+		else if(feature == U_("mmx")) return (CPUInfo.AvailableFeatures & CPU::feature::mmx) != 0;
+		else if(feature == U_("sse")) return (CPUInfo.AvailableFeatures & CPU::feature::sse) != 0;
+		else if(feature == U_("sse2")) return (CPUInfo.AvailableFeatures & CPU::feature::sse2) != 0;
+		else if(feature == U_("sse3")) return (CPUInfo.AvailableFeatures & CPU::feature::sse3) != 0;
+		else if(feature == U_("ssse3")) return (CPUInfo.AvailableFeatures & CPU::feature::ssse3) != 0;
+		else if(feature == U_("sse4.1")) return (CPUInfo.AvailableFeatures & CPU::feature::sse4_1) != 0;
+		else if(feature == U_("sse4.2")) return (CPUInfo.AvailableFeatures & CPU::feature::sse4_2) != 0;
+		else if(feature == U_("avx")) return (CPUInfo.AvailableFeatures & CPU::feature::avx) != 0;
+		else if(feature == U_("avx2")) return (CPUInfo.AvailableFeatures & CPU::feature::avx2) != 0;
 		else return false;
 	#else
 		return true;
@@ -638,22 +639,23 @@ std::string CUpdateCheck::GetStatisticsDataV3(const Settings &settings)
 	j["OpenMPT"]["SoundDevice"]["Settings"]["UseHardwareTiming"] = deviceSettings.UseHardwareTiming;
 	j["OpenMPT"]["SoundDevice"]["Settings"]["KeepDeviceRunning"] = deviceSettings.KeepDeviceRunning;
 	#ifdef ENABLE_ASM
-		j["System"]["Processor"]["Vendor"] = std::string(mpt::String::ReadAutoBuf(CPU::ProcVendorID));
-		j["System"]["Processor"]["Brand"] = std::string(mpt::String::ReadAutoBuf(CPU::ProcBrandID));
-		j["System"]["Processor"]["CpuidRaw"] = mpt::afmt::hex0<8>(CPU::ProcRawCPUID);
-		j["System"]["Processor"]["Id"]["Family"] = CPU::ProcFamily;
-		j["System"]["Processor"]["Id"]["Model"] = CPU::ProcModel;
-		j["System"]["Processor"]["Id"]["Stepping"] = CPU::ProcStepping;
-		j["System"]["Processor"]["Features"]["lm"] = ((CPU::GetAvailableFeatures() & CPU::feature::lm) != 0);
-		j["System"]["Processor"]["Features"]["mmx"] = ((CPU::GetAvailableFeatures() & CPU::feature::mmx) != 0);
-		j["System"]["Processor"]["Features"]["sse"] = ((CPU::GetAvailableFeatures() & CPU::feature::sse) != 0);
-		j["System"]["Processor"]["Features"]["sse2"] = ((CPU::GetAvailableFeatures() & CPU::feature::sse2) != 0);
-		j["System"]["Processor"]["Features"]["sse3"] = ((CPU::GetAvailableFeatures() & CPU::feature::sse3) != 0);
-		j["System"]["Processor"]["Features"]["ssse3"] = ((CPU::GetAvailableFeatures() & CPU::feature::ssse3) != 0);
-		j["System"]["Processor"]["Features"]["sse4.1"] = ((CPU::GetAvailableFeatures() & CPU::feature::sse4_1) != 0);
-		j["System"]["Processor"]["Features"]["sse4.2"] = ((CPU::GetAvailableFeatures() & CPU::feature::sse4_2) != 0);
-		j["System"]["Processor"]["Features"]["avx"] = ((CPU::GetAvailableFeatures() & CPU::feature::avx) != 0);
-		j["System"]["Processor"]["Features"]["avx2"] = ((CPU::GetAvailableFeatures() & CPU::feature::avx2) != 0);
+		const CPU::Info CPUInfo = CPU::Info::Get();
+		j["System"]["Processor"]["Vendor"] = std::string(mpt::String::ReadAutoBuf(CPUInfo.VendorID));
+		j["System"]["Processor"]["Brand"] = std::string(mpt::String::ReadAutoBuf(CPUInfo.BrandID));
+		j["System"]["Processor"]["CpuidRaw"] = mpt::afmt::hex0<8>(CPUInfo.CPUID);
+		j["System"]["Processor"]["Id"]["Family"] = CPUInfo.Family;
+		j["System"]["Processor"]["Id"]["Model"] = CPUInfo.Model;
+		j["System"]["Processor"]["Id"]["Stepping"] = CPUInfo.Stepping;
+		j["System"]["Processor"]["Features"]["lm"] = ((CPUInfo.AvailableFeatures & CPU::feature::lm) != 0);
+		j["System"]["Processor"]["Features"]["mmx"] = ((CPUInfo.AvailableFeatures & CPU::feature::mmx) != 0);
+		j["System"]["Processor"]["Features"]["sse"] = ((CPUInfo.AvailableFeatures & CPU::feature::sse) != 0);
+		j["System"]["Processor"]["Features"]["sse2"] = ((CPUInfo.AvailableFeatures & CPU::feature::sse2) != 0);
+		j["System"]["Processor"]["Features"]["sse3"] = ((CPUInfo.AvailableFeatures & CPU::feature::sse3) != 0);
+		j["System"]["Processor"]["Features"]["ssse3"] = ((CPUInfo.AvailableFeatures & CPU::feature::ssse3) != 0);
+		j["System"]["Processor"]["Features"]["sse4.1"] = ((CPUInfo.AvailableFeatures & CPU::feature::sse4_1) != 0);
+		j["System"]["Processor"]["Features"]["sse4.2"] = ((CPUInfo.AvailableFeatures & CPU::feature::sse4_2) != 0);
+		j["System"]["Processor"]["Features"]["avx"] = ((CPUInfo.AvailableFeatures & CPU::feature::avx) != 0);
+		j["System"]["Processor"]["Features"]["avx2"] = ((CPUInfo.AvailableFeatures & CPU::feature::avx2) != 0);
 	#endif
 	return j.dump(1, '\t');
 }

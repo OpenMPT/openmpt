@@ -123,7 +123,7 @@ mpt::ustring BuildVariants::GuessCurrentBuildName()
 bool BuildVariants::ProcessorCanRunCurrentBuild()
 {
 #ifdef ENABLE_ASM
-	if((CPU::GetAvailableFeatures() & CPU::GetMinimumFeatures()) != CPU::GetMinimumFeatures())
+	if((CPU::Info::Get().AvailableFeatures & CPU::GetMinimumFeatures()) != CPU::GetMinimumFeatures())
 	{
 		return false;
 	}
@@ -139,7 +139,7 @@ bool BuildVariants::SystemCanRunCurrentBuild()
 		return false;
 	}
 #ifdef ENABLE_ASM
-	if((CPU::GetAvailableFeatures() & CPU::GetMinimumFeatures()) != CPU::GetMinimumFeatures())
+	if((CPU::Info::Get().AvailableFeatures & CPU::GetMinimumFeatures()) != CPU::GetMinimumFeatures())
 	{
 		return false;
 	}

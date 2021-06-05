@@ -354,6 +354,7 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 	const mpt::ustring lf = U_("\n");
 	const mpt::ustring yes = U_("yes");
 	const mpt::ustring no = U_("no");
+	const CPU::Info CPUInfo = CPU::Info::Get();
 	mpt::ustring text;
 	switch(tab)
 	{
@@ -375,13 +376,11 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 						if(CPU::GetMinimumFeatures() & CPU::feature::avx) features.push_back(U_("avx"));
 						if(CPU::GetMinimumFeatures() & CPU::feature::avx2) features.push_back(U_("avx2"));
 					#elif defined(_M_IX86)
-						if(CPU::GetMinimumFeatures() & CPU::feature::sse) features.push_back(U_("cmov"));
 						if(CPU::GetMinimumFeatures() & CPU::feature::sse) features.push_back(U_("sse"));
 						if(CPU::GetMinimumFeatures() & CPU::feature::sse2) features.push_back(U_("sse2"));
 						if(CPU::GetMinimumFeatures() & CPU::feature::avx) features.push_back(U_("avx"));
 						if(CPU::GetMinimumFeatures() & CPU::feature::avx2) features.push_back(U_("avx2"));
 					#else
-						if(CPU::GetMinimumFeatures() & CPU::feature::sse) features.push_back(U_("cmov"));
 						if(CPU::GetMinimumFeatures() & CPU::feature::sse) features.push_back(U_("sse"));
 						if(CPU::GetMinimumFeatures() & CPU::feature::sse2) features.push_back(U_("sse2"));
 						if(CPU::GetMinimumFeatures() & CPU::feature::avx) features.push_back(U_("avx"));
@@ -398,13 +397,13 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 			text += MPT_UFORMAT("System Architecture: {}\n")(mpt::OS::Windows::Name(mpt::OS::Windows::GetHostArchitecture()));
 #ifdef ENABLE_ASM
 			text += MPT_UFORMAT("CPU: {}, Family {}, Model {}, Stepping {}\n")
-				( mpt::ToUnicode(mpt::Charset::ASCII, (std::strlen(CPU::ProcVendorID) > 0) ? std::string(CPU::ProcVendorID) : std::string("Generic"))
-				, CPU::ProcFamily
-				, CPU::ProcModel
-				, CPU::ProcStepping
+				( mpt::ToUnicode(mpt::Charset::ASCII, (std::strlen(CPUInfo.VendorID) > 0) ? std::string(CPUInfo.VendorID) : std::string("Generic"))
+				, CPUInfo.Family
+				, CPUInfo.Model
+				, CPUInfo.Stepping
 				);
-			text += MPT_UFORMAT("CPU Name: {}\n")(mpt::ToUnicode(mpt::Charset::ASCII, (std::strlen(CPU::ProcBrandID) > 0) ? std::string(CPU::ProcBrandID) : std::string("")));
-			text += MPT_UFORMAT("Available CPU features: {}\n")(ProcSupportToString(CPU::GetAvailableFeatures()));
+			text += MPT_UFORMAT("CPU Name: {}\n")(mpt::ToUnicode(mpt::Charset::ASCII, (std::strlen(CPUInfo.BrandID) > 0) ? std::string(CPUInfo.BrandID) : std::string("")));
+			text += MPT_UFORMAT("Available CPU features: {}\n")(ProcSupportToString(CPUInfo.AvailableFeatures));
 #endif // ENABLE_ASM
 			text += MPT_UFORMAT("Operating System: {}\n\n")(mpt::OS::Windows::Version::Current().GetName());
 			text += MPT_UFORMAT("OpenMPT Install Path{1}: {0}\n")(theApp.GetInstallPath(), theApp.IsPortableMode() ? U_(" (portable)") : U_(""));
