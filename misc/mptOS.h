@@ -137,7 +137,6 @@ namespace Wine
 
 class Version
 	: public mpt::osinfo::windows::wine::version
-
 {
 public:
 	Version();
@@ -153,7 +152,6 @@ class VersionContext
 {
 protected:
 	bool m_IsWine;
-	std::shared_ptr<std::optional<mpt::library>> m_NTDLL;
 	std::string m_RawVersion;
 	std::string m_RawBuildID;
 	std::string m_RawHostSysName;
@@ -164,7 +162,6 @@ public:
 	VersionContext();
 public:
 	bool IsWine() const { return m_IsWine; }
-	std::shared_ptr<std::optional<mpt::library>> NTDLL() const { return m_NTDLL; }
 	std::string RawVersion() const { return m_RawVersion; }
 	std::string RawBuildID() const { return m_RawBuildID; }
 	std::string RawHostSysName() const { return m_RawHostSysName; }

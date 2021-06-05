@@ -424,12 +424,10 @@ uint64 GetSystemMemorySize()
 static bool GatherSystemIsWine()
 {
 	bool SystemIsWine = false;
-	HMODULE hNTDLL = LoadLibrary(TEXT("ntdll.dll"));
-	if(hNTDLL)
+	std::optional<mpt::library> NTDLL = mpt::library::load({ mpt::library::path_search::system, mpt::library::path_prefix::none, MPT_PATH("ntdll.dll"), mpt::library::path_suffix::none });
+	if(NTDLL)
 	{
-		SystemIsWine = (GetProcAddress(hNTDLL, "wine_get_version") != NULL);
-		FreeLibrary(hNTDLL);
-		hNTDLL = NULL;
+		SystemIsWine = (NTDLL->get_address("wine_get_version") != nullptr);
 	}
 	return SystemIsWine;
 }
@@ -570,15 +568,15 @@ VersionContext::VersionContext()
 		{
 			return;
 		}
-		m_NTDLL = std::make_shared<std::optional<mpt::library>>(mpt::library::load({mpt::library::path_search::system, mpt::library::path_prefix::none, MPT_PATH("ntdll.dll"), mpt::library::path_suffix::none}));
-		if(m_NTDLL->has_value())
+		std::optional<mpt::library> NTDLL = mpt::library::load({mpt::library::path_search::system, mpt::library::path_prefix::none, MPT_PATH("ntdll.dll"), mpt::library::path_suffix::none});
+		if(NTDLL)
 		{
 			const char * (__cdecl * wine_get_version)(void) = nullptr;
 			const char * (__cdecl * wine_get_build_id)(void) = nullptr;
 			void (__cdecl * wine_get_host_version)(const char * *, const char * *) = nullptr;
-			(*m_NTDLL)->bind(wine_get_version, "wine_get_version");
-			(*m_NTDLL)->bind(wine_get_build_id, "wine_get_build_id");
-			(*m_NTDLL)->bind(wine_get_host_version, "wine_get_host_version");
+			NTDLL->bind(wine_get_version, "wine_get_version");
+			NTDLL->bind(wine_get_build_id, "wine_get_build_id");
+			NTDLL->bind(wine_get_host_version, "wine_get_host_version");
 			const char * wine_version = nullptr;
 			const char * wine_build_id = nullptr;
 			const char * wine_host_sysname = nullptr;
