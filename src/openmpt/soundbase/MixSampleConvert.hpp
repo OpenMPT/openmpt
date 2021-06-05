@@ -18,6 +18,24 @@ OPENMPT_NAMESPACE_BEGIN
 template <typename Tdst, typename Tsrc>
 struct ConvertMixSample;
 
+template <>
+struct ConvertMixSample<MixSampleInt, MixSampleInt>
+{
+	MPT_FORCEINLINE MixSampleInt conv(MixSampleInt src)
+	{
+		return src;
+	}
+};
+
+template <>
+struct ConvertMixSample<MixSampleFloat, MixSampleFloat>
+{
+	MPT_FORCEINLINE MixSampleFloat conv(MixSampleFloat src)
+	{
+		return src;
+	}
+};
+
 template <typename Tsrc>
 struct ConvertMixSample<MixSampleInt, Tsrc>
 {

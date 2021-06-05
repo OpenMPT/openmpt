@@ -1577,7 +1577,7 @@ void COptionsPlayer::UpdateEQ(bool bReset)
 {
 	CriticalSection cs;
 	if(CMainFrame::GetMainFrame()->GetSoundFilePlaying())
-		CMainFrame::GetMainFrame()->GetSoundFilePlaying()->SetEQGains(m_EQPreset.Gains, MAX_EQ_BANDS, m_EQPreset.Freqs, bReset);
+		CMainFrame::GetMainFrame()->GetSoundFilePlaying()->SetEQGains(m_EQPreset.Gains, m_EQPreset.Freqs, bReset);
 }
 
 

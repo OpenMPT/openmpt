@@ -427,7 +427,7 @@ public:
 	CMegaBass m_MegaBass;
 #endif
 #ifndef NO_EQ
-	CQuadEQ m_EQ;
+	CEQ m_EQ;
 #endif
 #ifndef NO_AGC
 	CAGC m_AGC;
@@ -985,7 +985,7 @@ public:
 	void SetDspEffects(uint32 DSPMask);
 	uint32 GetSampleRate() const { return m_MixerSettings.gdwMixingFreq; }
 #ifndef NO_EQ
-	void SetEQGains(const uint32 *pGains, uint32 nBands, const uint32 *pFreqs=NULL, bool bReset=false)	{ m_EQ.SetEQGains(pGains, nBands, pFreqs, bReset, m_MixerSettings.gdwMixingFreq); } // 0=-12dB, 32=+12dB
+	void SetEQGains(const uint32 *pGains, const uint32 *pFreqs, bool bReset = false){ m_EQ.SetEQGains(pGains, pFreqs, bReset, m_MixerSettings.gdwMixingFreq); } // 0=-12dB, 32=+12dB
 #endif // NO_EQ
 public:
 	bool ReadNote();
