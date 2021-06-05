@@ -21,15 +21,6 @@
 #endif
 #endif
 
-#if MPT_OS_WINDOWS && MPT_OS_WINDOWS_WINRT
-#if defined(__MINGW32__) || defined(__MINGW64__)
-// MinGW-w64 headers do not declare this for WinRT, which is wrong.
-extern "C" {
-WINBASEAPI DWORD WINAPI GetFullPathNameW(LPCWSTR lpFileName, DWORD nBufferLength, LPWSTR lpBuffer, LPWSTR *lpFilePart);
-}
-#endif
-#endif
-
 OPENMPT_NAMESPACE_BEGIN
 
 #if MPT_OS_WINDOWS
@@ -46,6 +37,10 @@ namespace mpt
 
 RawPathString PathString::AsNativePrefixed() const
 {
+#if MPT_OS_WINDOWS_WINRT && (_WIN32_WINNT < 0x0a00)
+	// For WinRT on Windows 8, there is no official wy to determine an absolute path.
+	return path;
+#else
 	if(path.length() < MAX_PATH || path.substr(0, 4) == MPT_PATHSTRING_LITERAL("\\\\?\\"))
 	{
 		// Path is short enough or already in prefixed form
@@ -61,6 +56,7 @@ RawPathString PathString::AsNativePrefixed() const
 		// Regular file: C:\foo.bar -> \\?\C:\foo.bar
 		return MPT_PATHSTRING_LITERAL("\\\\?\\") + absPath;
 	}
+#endif
 }
 
 
@@ -461,6 +457,8 @@ bool PathIsAbsolute(const mpt::PathString &path) {
 
 #if MPT_OS_WINDOWS
 
+#if !(MPT_OS_WINDOWS_WINRT && (_WIN32_WINNT < 0x0a00))
+
 mpt::PathString GetAbsolutePath(const mpt::PathString &path)
 {
 	DWORD size = GetFullPathNameW(path.AsNative().c_str(), 0, nullptr, nullptr);
@@ -475,6 +473,8 @@ mpt::PathString GetAbsolutePath(const mpt::PathString &path)
 	}
 	return mpt::PathString::FromNative(fullPathName.data());
 }
+
+#endif
 
 #ifdef MODPLUG_TRACKER
 
