@@ -10,6 +10,8 @@
 #ifndef LIBOPENMPT_VERSION_H
 #define LIBOPENMPT_VERSION_H
 
+/* clang-format off */
+
 /*! \addtogroup libopenmpt
   @{
 */
@@ -71,5 +73,7 @@
 /*!
   @}
 */
+
+/* clang-format on */
 
 #endif /* LIBOPENMPT_VERSION_H */
