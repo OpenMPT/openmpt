@@ -387,7 +387,7 @@ static int infobox( const in_char * fn, HWND hWndParent ) {
 			std::ifstream s( fn, std::ios::binary );
 			openmpt::module mod( s );
 #if 1
-			libopenmpt::plugin::gui_show_file_info( hWndParent, TEXT(SHORT_TITLE), StringToWINAPI( StringReplace( generate_infotext( fn, mod ), TEXT("\n"), TEXT("\r\n") ) ) );
+			libopenmpt::plugin::gui_show_file_info( hWndParent, TEXT(SHORT_TITLE), StringReplace( generate_infotext( fn, mod ), TEXT("\n"), TEXT("\r\n") ) );
 #else
 			MessageBox( hWndParent, StringReplace( generate_infotext( fn, mod ), TEXT("\n"), TEXT("\r\n") ).c_str(), TEXT(SHORT_TITLE), MB_OK );
 #endif
@@ -395,7 +395,7 @@ static int infobox( const in_char * fn, HWND hWndParent ) {
 		}
 	} else {
 #if 1
-		libopenmpt::plugin::gui_show_file_info( hWndParent, TEXT(SHORT_TITLE), StringToWINAPI( StringReplace( self->cached_infotext, L"\n", L"\r\n" ) ) );
+		libopenmpt::plugin::gui_show_file_info( hWndParent, TEXT(SHORT_TITLE), StringReplace( self->cached_infotext, TEXT("\n"), TEXT("\r\n") ) );
 #else
 		MessageBox( hWndParent, StringReplace( self->cached_infotext, TEXT("\n"), TEXT("\r\n") ).c_str(), TEXT(SHORT_TITLE), MB_OK );
 #endif
