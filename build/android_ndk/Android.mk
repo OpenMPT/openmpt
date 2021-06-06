@@ -86,7 +86,6 @@ endif
 
 LOCAL_SRC_FILES += \
 	common/ComponentManager.cpp \
-	common/FileReader.cpp \
 	common/Logging.cpp \
 	common/mptFileIO.cpp \
 	common/mptPathString.cpp \
