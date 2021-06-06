@@ -2,7 +2,7 @@ libmpg123 library version 1.28.0 (2021-06-05).
 The following changes have been made:
 - ports/MSVC++/config.h and ports/MSVC++/mpg123.h have been retained from older
   versions.
-- #ifndef MPG123_NO_CONFIGURE hsa been kept in mpg123.h.in. See
+- #ifndef MPG123_NO_CONFIGURE has been kept in mpg123.h.in. See
   <https://sourceforge.net/p/mpg123/bugs/313/>.
 - Modifications are marked by // OpenMPT.
 - Obviously, unnecessary folders and files have been removed.
