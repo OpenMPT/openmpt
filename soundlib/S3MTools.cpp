@@ -45,9 +45,9 @@ void S3MSampleHeader::ConvertToMPT(ModSample &mptSmp, bool isST3) const
 
 		// C-5 frequency
 		mptSmp.nC5Speed = c5speed;
-		// ST3 ignores the high 16 bits
+		// ST3 clamps samples to 65536 Hz
 		if(isST3)
-			mptSmp.nC5Speed &= 0xFFFF;
+			LimitMax(mptSmp.nC5Speed, uint16_max);
 
 		if(mptSmp.nC5Speed == 0)
 			mptSmp.nC5Speed = 8363;
