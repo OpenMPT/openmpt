@@ -115,8 +115,6 @@ std::string get( const std::string & key ) {
 
 } // namespace openmpt
 
-#ifndef NO_LIBOPENMPT_CXX
-
 namespace openmpt {
 
 std::vector<std::string> get_supported_extensions() {
@@ -500,5 +498,3 @@ void * module_ext::get_interface( const std::string & interface_id ) {
 }
 
 } // namespace openmpt
-
-#endif // NO_LIBOPENMPT_CXX

@@ -29,8 +29,6 @@
 #pragma warning(disable:4702) /* unreachable code */
 #endif
 
-#ifndef NO_LIBOPENMPT_C
-
 namespace openmpt {
 
 static const char * strdup( const char * src ) {
@@ -1784,5 +1782,3 @@ int openmpt_module_ext_get_interface( openmpt_module_ext * mod_ext, const char *
 }
 
 } // extern "C"
-
-#endif // NO_LIBOPENMPT_C

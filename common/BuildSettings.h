@@ -268,12 +268,6 @@
 // (HACK) Define to build without any plugin support
 //#define NO_PLUGINS
 
-// Do not build libopenmpt C api
-#define NO_LIBOPENMPT_C
-
-// Do not build libopenmpt C++ api
-#define NO_LIBOPENMPT_CXX
-
 #endif // MODPLUG_TRACKER
 
 
@@ -315,8 +309,6 @@
 #define NO_AGC
 #define NO_VST
 //#define NO_PLUGINS
-//#define NO_LIBOPENMPT_C
-//#define NO_LIBOPENMPT_CXX
 
 #endif // LIBOPENMPT_BUILD
 
