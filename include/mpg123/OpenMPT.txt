@@ -1,9 +1,10 @@
 libmpg123 library version 1.28.0 (2021-06-05).
 The following changes have been made:
+- Upstream r4942 and r4944 have bee applied.
 - ports/MSVC++/config.h and ports/MSVC++/mpg123.h have been retained from older
   versions.
-- #ifndef MPG123_NO_CONFIGURE has been kept in mpg123.h.in. See
-  <https://sourceforge.net/p/mpg123/bugs/313/>.
+- ports/MSVC++/mpg123.h has been adjusted to provide mpg123_ssize_t and define
+  MPG123_NO_LARGENAME.
 - Modifications are marked by // OpenMPT.
 - Obviously, unnecessary folders and files have been removed.
 - For building, premake is used to generate Visual Studio project files.
