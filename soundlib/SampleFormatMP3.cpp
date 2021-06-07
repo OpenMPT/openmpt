@@ -59,7 +59,11 @@ typedef off_t mpg123_off_t;
 
 typedef size_t mpg123_size_t;
 
+#if MPT_COMPILER_MSVC
+typedef ptrdiff_t mpg123_ssize_t;
+#else
 typedef ssize_t mpg123_ssize_t;
+#endif
 
 class ComponentMPG123
 #if defined(MPT_ENABLE_MPG123_DELAYLOAD)
