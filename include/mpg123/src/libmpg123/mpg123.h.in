@@ -17,7 +17,9 @@
  * This should be incremented at least each time a new symbol is added
  * to the header.
  */
+#ifndef MPG123_API_VERSION
 #define MPG123_API_VERSION @API_VERSION@
+#endif
 
 #ifndef MPG123_EXPORT
 /** Defines needed for MS Visual Studio(tm) DLL builds.
@@ -39,13 +41,6 @@
 #define MPG123_EXPORT
 #endif
 #endif
-#endif
-
-/* This is for Visual Studio, so this header works as distributed in the binary downloads */
-#if defined(_MSC_VER) && !defined(MPG123_DEF_SSIZE_T)
-#define MPG123_DEF_SSIZE_T
-#include <stddef.h>
-typedef ptrdiff_t ssize_t;
 #endif
 
 /** Earlier versions of libmpg123 put enums into public API calls,
@@ -76,9 +71,21 @@ typedef ptrdiff_t ssize_t;
 
 #endif
 
-#ifndef MPG123_NO_CONFIGURE /* Enable use of this file without configure. */  // OpenMPT
+/* You can use this file directly, avoiding the autoconf replacements.
+   Might have to set MPG123_NO_LARGENAME, too, in case you have
+   _FILE_OFFSET_BITS defined where it does not make sense. */
+#ifndef MPG123_NO_CONFIGURE
+
 @INCLUDE_STDLIB_H@
 @INCLUDE_SYS_TYPE_H@
+
+/* A little hack to help MSVC not having ssize_t. */
+#ifdef _MSC_VER
+#include <stddef.h>
+typedef ptrdiff_t mpg123_ssize_t;
+#else
+typedef ssize_t mpg123_ssize_t;
+#endif
 
 /* You can always enforce largefile hackery by setting MPG123_LARGESUFFIX. */
 /* Otherwise, this header disables it if the build system decided so. */
@@ -87,6 +94,8 @@ typedef ptrdiff_t ssize_t;
 #define MPG123_NO_LARGENAME
 #endif
 #endif
+
+#endif /* MPG123_NO_CONFIGURE */
 
 /* Simplified large file handling.
 	I used to have a check here that prevents building for a library with conflicting large file setup
@@ -144,8 +153,6 @@ typedef ptrdiff_t ssize_t;
 
 #endif /* largefile hackery */
 
-#endif /* MPG123_NO_CONFIGURE */  // OpenMPT
-  // OpenMPT
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -1962,7 +1969,7 @@ MPG123_EXPORT size_t mpg123_outblock(mpg123_handle *mh);
  * \return MPG123_OK on success
  */
 MPG123_EXPORT int mpg123_replace_reader( mpg123_handle *mh
-,	ssize_t (*r_read) (int, void *, size_t)
+,	mpg123_ssize_t (*r_read) (int, void *, size_t)
 ,	off_t (*r_lseek)(int, off_t, int)
 );
 
@@ -1981,7 +1988,7 @@ MPG123_EXPORT int mpg123_replace_reader( mpg123_handle *mh
  * \return MPG123_OK on success
  */
 MPG123_EXPORT int mpg123_replace_reader_handle( mpg123_handle *mh
-,	ssize_t (*r_read) (void *, void *, size_t)
+,	mpg123_ssize_t (*r_read) (void *, void *, size_t)
 ,	off_t (*r_lseek)(void *, off_t, int)
 ,	void (*cleanup)(void*) );
 
