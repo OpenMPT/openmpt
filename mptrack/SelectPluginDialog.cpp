@@ -143,10 +143,13 @@ void CSelectPluginDlg::OnOK()
 			CriticalSection cs;
 
 			// Destroy old plugin, if there was one.
+			const auto oldOutput = m_pPlugin->GetOutputPlugin();
 			m_pPlugin->Destroy();
 
 			// Initialize plugin info
 			MemsetZero(m_pPlugin->Info);
+			if(oldOutput != PLUGINDEX_INVALID)
+				m_pPlugin->SetOutputPlugin(oldOutput);
 			m_pPlugin->Info.dwPluginId1 = pFactory->pluginId1;
 			m_pPlugin->Info.dwPluginId2 = pFactory->pluginId2;
 			m_pPlugin->editorX = m_pPlugin->editorY = int32_min;
@@ -613,7 +616,7 @@ constexpr struct
 	{Vst::kEffectMagic, Vst::FourCC("MMID"), "MIDI Input Output", "* The MIDI Input / Output plugin is now built right into OpenMPT and should not be loaded from an external file."},
 };
 
-// Plugins that should always be bridged.
+// Plugins that should always be bridged or require a specific bridge mode.
 constexpr struct
 {
 	int32 id1;
