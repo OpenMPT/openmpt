@@ -60,6 +60,8 @@ typedef off_t mpg123_off_t;
 typedef size_t mpg123_size_t;
 
 #if MPT_COMPILER_MSVC
+// ssize_t definition in libmpg123.h.in should never have existed at all.
+// It got removed from libmpg23.h.in after 1.28.0 and before 1.28.1.
 typedef ptrdiff_t mpg123_ssize_t;
 #else
 typedef ssize_t mpg123_ssize_t;
