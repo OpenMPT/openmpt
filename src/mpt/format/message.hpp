@@ -51,7 +51,7 @@ private:
 		const size_type len = traits::length(format);
 		traits::reserve(result, len);
 		std::size_t max_arg = 0;
-		std::size_t args = 0;
+		//std::size_t args = 0;
 		bool success = true;
 		enum class state : int
 		{
@@ -98,7 +98,7 @@ private:
 						if (this_arg > max_arg) {
 							max_arg = this_arg;
 						}
-						args += 1;
+						//args += 1;
 					} else if (char_type('0') <= c && c <= char_type('9')) {
 						state = state::number_seen;
 						numbered_args = true;
@@ -122,7 +122,7 @@ private:
 						if (this_arg > max_arg) {
 							max_arg = this_arg;
 						}
-						args += 1;
+						//args += 1;
 					} else if (char_type('0') <= c && c <= char_type('9')) {
 						state = state::number_seen;
 						numbered_args = true;
