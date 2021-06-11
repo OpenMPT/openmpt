@@ -232,7 +232,7 @@ bool CSoundFile::ReadVorbisSample(SAMPLEINDEX sample, FileReader &file)
 						if(decodedSamples > 0 && (channels == 1 || channels == 2))
 						{
 							raw_sample_data.resize(raw_sample_data.size() + (channels * decodedSamples));
-							CopyAudio(mpt::audio_span_interleaved(raw_sample_data.data() + offset, channels, decodedSamples), mpt::audio_span_planar(output, channels, decodedSamples));
+							CopyAudio(mpt::audio_span_interleaved(raw_sample_data.data() + (offset * channels), channels, decodedSamples), mpt::audio_span_planar(output, channels, decodedSamples));
 							offset += decodedSamples;
 							if((raw_sample_data.size() / channels) > MAX_SAMPLE_LENGTH)
 							{
