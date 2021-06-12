@@ -126,6 +126,18 @@ MPT_TEST_GROUP_INLINE("mpt/string_convert")
 	MPT_TEST_EXPECT_EQUAL(mpt::convert<std::string>(mpt::common_encoding::utf8, MPT_UTF8_STRING("abc\xE5\xAE\xB6xyz")), "abc\xE5\xAE\xB6xyz");
 	MPT_TEST_EXPECT_EQUAL(MPT_UTF8_STRING("abc\xE5\xAE\xB6xyz"), mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, "abc\xE5\xAE\xB6xyz"));
 
+	// utf16
+	MPT_TEST_EXPECT_EQUAL(mpt::convert<std::string>(mpt::common_encoding::utf8, std::u16string(1, char16_t{0xe4})), "\xC3\xA4");
+	MPT_TEST_EXPECT_EQUAL(std::u16string(1, char16_t{0xe4}), mpt::convert<std::u16string>(mpt::common_encoding::utf8, "\xC3\xA4"));
+	MPT_TEST_EXPECT_EQUAL(mpt::convert<std::string>(mpt::common_encoding::utf8, std::u16string(1, char16_t{0x5BB6})), "\xE5\xAE\xB6");
+	MPT_TEST_EXPECT_EQUAL(std::u16string(1, char16_t{0x5BB6}), mpt::convert<std::u16string>(mpt::common_encoding::utf8, "\xE5\xAE\xB6"));
+
+	// utf32
+	MPT_TEST_EXPECT_EQUAL(mpt::convert<std::string>(mpt::common_encoding::utf8, std::u32string(1, char32_t{0xe4})), "\xC3\xA4");
+	MPT_TEST_EXPECT_EQUAL(std::u32string(1, char32_t{0xe4}), mpt::convert<std::u32string>(mpt::common_encoding::utf8, "\xC3\xA4"));
+	MPT_TEST_EXPECT_EQUAL(mpt::convert<std::string>(mpt::common_encoding::utf8, std::u32string(1, char32_t{0x5BB6})), "\xE5\xAE\xB6");
+	MPT_TEST_EXPECT_EQUAL(std::u32string(1, char32_t{0x5BB6}), mpt::convert<std::u32string>(mpt::common_encoding::utf8, "\xE5\xAE\xB6"));
+
 #if !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
 
 	// wide L"" version
