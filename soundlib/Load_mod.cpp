@@ -811,6 +811,8 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 	bool isInconexia = IsMagic(magic, "M\0\0\0") || IsMagic(magic, "8\0\0\0");
 	// A loop length of zero will freeze ProTracker, so assume that modules having such a value were not meant to be played on Amiga. Fixes LHS_MI.MOD
 	bool hasRepLen0 = false;
+	// Empty sample slots typically should have a default volume of 0 in ProTracker
+	bool hasEmptySampleWithVolume = false;
 	if(modMagicResult.setMODVBlankTiming)
 	{
 		m_playBehaviour.set(kMODVBlankTiming);
@@ -845,9 +847,9 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 			isNoiseTracker = false;
 		}
 		if(sampleHeader.length && !sampleHeader.loopLength)
-		{
 			hasRepLen0 = true;
-		}
+		else if(!sampleHeader.length && sampleHeader.volume == 64)
+			hasEmptySampleWithVolume = true;
 	}
 	// If there is too much binary garbage in the sample headers, reject the file.
 	if(invalidBytes > modMagicResult.invalidByteThreshold)
@@ -1151,8 +1153,11 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 				// Fix sample 6 in MOD.shorttune2, which has a replen longer than the sample itself.
 				// ProTracker reads beyond the end of the sample when playing. Normally samples are
 				// adjacent in PT's memory, so we simply read into the next sample in the file.
+				// On the other hand, the loop points in Purple Motions's SOUL-O-M.MOD are completely broken and shouldn't be treated like this.
+				// As it was most likely written in Scream Tracker, it has empty sample slots with a default volume of 64, which we use for
+				// rejecting this quirk for that file.
 				FileReader::off_t nextSample = file.GetPosition() + sampleIO.CalculateEncodedSize(sample.nLength);
-				if(isMdKd && onlyAmigaNotes)
+				if(isMdKd && onlyAmigaNotes && !hasEmptySampleWithVolume)
 					sample.nLength = std::max(sample.nLength, sample.nLoopEnd);
 
 				sampleIO.ReadSample(sample, file);
