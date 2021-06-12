@@ -249,7 +249,7 @@ static void I3dl2_to_Generic(
 
 void CReverb::Shutdown()
 {
-	gnReverbSend = 0;
+	gnReverbSend = false;
 
 	gnRvbLOfsVol = 0;
 	gnRvbROfsVol = 0;
@@ -388,7 +388,7 @@ mixsample_t *CReverb::GetReverbSendBuffer(uint32 nSamples)
 	{ // and we did not clear the buffer yet, do it now because we will get new data
 		StereoFill(MixReverbBuffer, nSamples, gnRvbROfsVol, gnRvbLOfsVol);
 	}
-	gnReverbSend = 1; // we will have to process reverb
+	gnReverbSend = true; // we will have to process reverb
 	return MixReverbBuffer;
 }
 
@@ -467,7 +467,7 @@ void CReverb::Process(MixSampleInt *MixSoundBuffer, uint32 nSamples)
 		Shutdown();
 		gnReverbSamples = 0;
 	}
-	gnReverbSend = 0; // no input data in MixReverbBuffer
+	gnReverbSend = false; // no input data in MixReverbBuffer
 }
 
 

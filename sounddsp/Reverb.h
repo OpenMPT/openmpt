@@ -145,7 +145,7 @@ public:
 private:
 	const SNDMIX_REVERB_PROPERTIES *m_currentPreset = nullptr;
 
-	uint32 gnReverbSend = 0;
+	bool gnReverbSend = false;
 
 	uint32 gnReverbSamples = 0;
 	uint32 gnReverbDecaySamples = 0;
