@@ -223,14 +223,13 @@ uint32 GetMinimumFeatures()
 	#ifdef ENABLE_ASM
 		#if MPT_COMPILER_MSVC
 			#if defined(_M_X64)
-				flags |= featureset::amd64;
+				flags |= feature::lm | feature::sse | feature::sse2;
 			#elif defined(_M_IX86)
-				flags |= featureset::x86_i586;
 				#if defined(_M_IX86_FP)
 					#if (_M_IX86_FP >= 2)
-						flags |= featureset::x86_sse2;
+						flags |= feature::sse | feature::sse2;
 					#elif (_M_IX86_FP == 1)
-						flags |= featureset::x86_sse;
+						flags |= feature::sse;
 					#endif
 				#endif
 			#endif
