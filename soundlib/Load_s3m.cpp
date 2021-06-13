@@ -244,9 +244,17 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	case S3MFileHeader::trkScreamTracker:
 		if(fileHeader.cwtv == S3MFileHeader::trkST3_20 && fileHeader.special == 0 && (fileHeader.ordNum & 0x0F) == 0 && fileHeader.ultraClicks == 0 && (fileHeader.flags & ~0x50) == 0)
 		{
-			// MPT 1.16 and older versions of OpenMPT - Simply keep default (filter) MIDI macros
-			m_dwLastSavedWithVersion = MPT_V("1.16.00.00");
-			madeWithTracker = U_("ModPlug Tracker / OpenMPT 1.17");
+			// MPT and OpenMPT before 1.17.03.02 - Simply keep default (filter) MIDI macros
+			if((fileHeader.masterVolume & 0x80) != 0)
+			{
+				m_dwLastSavedWithVersion = MPT_V("1.16.00.00");
+				madeWithTracker = U_("ModPlug Tracker / OpenMPT 1.17");
+			} else
+			{
+				// MPT 1.0 alpha5 doesn't set the stereo flag, but MPT 1.0 beta1 does.
+				m_dwLastSavedWithVersion = MPT_V("1.00.00.00");
+				madeWithTracker = U_("ModPlug Tracker 1.0 alpha");
+			}
 			keepMidiMacros = true;
 			nonCompatTracker = true;
 			m_playBehaviour.set(kST3LimitPeriod);
@@ -257,7 +265,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			// ST3.20 should only ever write ultra-click values 16, 24 and 32 (corresponding to 8, 12 and 16 in the GUI), ST3.01/3.03 should only write 0.
 			// However, we won't fingerprint these values here as it's unlikely that there is any other tracker out there disguising as ST3 and using a strange ultra-click value.
-			// Also, re-saving a file with a strange ultra-click value in ST3 doesn't fix this value unless the user manually changes it.
+			// Also, re-saving a file with a strange ultra-click value in ST3 doesn't fix this value unless the user manually changes it, or if it's below 16.
 			madeWithTracker = U_("Scream Tracker");
 			formatTrackerStr = true;
 			isST3 = true;
@@ -410,6 +418,10 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	else
 		m_nSamplePreAmp = std::max(fileHeader.masterVolume & 0x7F, 0x10);  // Bit 7 = Stereo (we always use stereo)
 
+	const bool isStereo = (fileHeader.masterVolume & 0x80) != 0 || m_dwLastSavedWithVersion;
+	if(!isStereo)
+		m_nSamplePreAmp = Util::muldivr_unsigned(m_nSamplePreAmp, 8, 11);
+
 	// Approximately as loud as in DOSBox and a real SoundBlaster 16
 	m_nVSTiVolume = 36;
 	if(isSchism && fileHeader.cwtv < SchismVersionFromDate<2018, 11, 12>::Version(S3MFileHeader::trkSchismTracker))
@@ -426,7 +438,8 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		if(fileHeader.channels[i] != 0xFF)
 		{
 			m_nChannels = i + 1;
-			ChnSettings[i].nPan = (ctype & 8) ? 0xCC : 0x33;	// 200 : 56
+			if(isStereo)
+				ChnSettings[i].nPan = (ctype & 8) ? 0xCC : 0x33;	// 200 : 56
 		}
 		if(fileHeader.channels[i] & 0x80)
 		{
