@@ -115,6 +115,11 @@ BOOL OPLInstrDlg::PreTranslateMessage(MSG *pMsg)
 			{
 				return TRUE;
 			}
+		} else if(pMsg->message == WM_CHAR)
+		{
+			// Avoid Windows sounds on note key repeats
+			if(HIWORD(pMsg->lParam) & 0x4000)
+				return TRUE;
 		}
 	}
 	return CDialog::PreTranslateMessage(pMsg);
