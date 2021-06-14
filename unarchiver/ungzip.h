@@ -10,6 +10,7 @@
 #pragma once
 
 #include "openmpt/all/BuildSettings.hpp"
+#include "openmpt/base/Endian.hpp"
 
 #include "archive.h"
 
