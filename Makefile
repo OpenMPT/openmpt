@@ -314,7 +314,7 @@ INSTALL_LIB = $(INSTALL) -m 0644
 INSTALL_DATA_DIR = $(INSTALL_DIR)
 INSTALL_MAKE_DIR += -m 0755
 
-CPPFLAGS += -Isrc -Icommon -I. -Iinclude
+CPPFLAGS += -Isrc -Icommon -I.
 
 ifeq ($(XMP_OPENMPT),1)
 CPPFLAGS += -Iinclude/pugixml/src
@@ -890,6 +890,7 @@ ifeq ($(NO_ZLIB),1)
 LIBOPENMPT_C_SOURCES += include/miniz/miniz.c
 LIBOPENMPTTEST_C_SOURCES += include/miniz/miniz.c
 CPPFLAGS += -DMPT_WITH_MINIZ
+CPPFLAGS += -Iinclude
 endif
 endif
 
@@ -905,6 +906,7 @@ else
 LIBOPENMPT_C_SOURCES += include/minimp3/minimp3.c
 LIBOPENMPTTEST_C_SOURCES += include/minimp3/minimp3.c
 CPPFLAGS += -DMPT_WITH_MINIMP3
+CPPFLAGS += -Iinclude
 endif
 endif
 endif
@@ -925,6 +927,7 @@ else
 LIBOPENMPT_C_SOURCES += include/stb_vorbis/stb_vorbis.c
 LIBOPENMPTTEST_C_SOURCES += include/stb_vorbis/stb_vorbis.c
 CPPFLAGS += -DMPT_WITH_STBVORBIS -DSTB_VORBIS_NO_PULLDATA_API -DSTB_VORBIS_NO_STDIO
+CPPFLAGS += -Iinclude
 endif
 else
 ifeq ($(NO_VORBIS),1)
@@ -933,6 +936,7 @@ else
 LIBOPENMPT_C_SOURCES += include/stb_vorbis/stb_vorbis.c
 LIBOPENMPTTEST_C_SOURCES += include/stb_vorbis/stb_vorbis.c
 CPPFLAGS += -DMPT_WITH_STBVORBIS -DSTB_VORBIS_NO_PULLDATA_API -DSTB_VORBIS_NO_STDIO
+CPPFLAGS += -Iinclude
 endif
 else
 ifeq ($(NO_VORBISFILE),1)
@@ -941,6 +945,7 @@ else
 LIBOPENMPT_C_SOURCES += include/stb_vorbis/stb_vorbis.c
 LIBOPENMPTTEST_C_SOURCES += include/stb_vorbis/stb_vorbis.c
 CPPFLAGS += -DMPT_WITH_STBVORBIS -DSTB_VORBIS_NO_PULLDATA_API -DSTB_VORBIS_NO_STDIO
+CPPFLAGS += -Iinclude
 endif
 else
 endif
