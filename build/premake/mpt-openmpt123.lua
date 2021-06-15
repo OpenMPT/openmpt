@@ -10,7 +10,6 @@
   warnings "Extra"
   local extincludedirs = {
    "../..",
-   "../../src",
    "../../include/flac/include",
    "../../include/portaudio/include",
   }
@@ -21,6 +20,7 @@
 	filter {}
   includedirs {
    "../..",
+   "../../src",
    "../../openmpt123",
    "$(IntDir)/svn_version",
    "../../build/svn_version",

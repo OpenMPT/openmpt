@@ -19,7 +19,6 @@
    "../..",
    "../../src",
    "../../common",
-   "../../soundlib",
    "$(IntDir)/svn_version",
    "../../build/svn_version",
   }

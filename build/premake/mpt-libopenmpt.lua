@@ -8,7 +8,6 @@
   dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
   dofile "../../build/premake/premake-defaults.lua"
   local extincludedirs = {
-   "../../include",
    "../../include/mpg123/ports/MSVC++",
    "../../include/mpg123/src/libmpg123",
    "../../include/ogg/include",
@@ -24,7 +23,6 @@
    "../..",
    "../../src",
    "../../common",
-   "../../soundlib",
    "$(IntDir)/svn_version",
    "../../build/svn_version",
   }
