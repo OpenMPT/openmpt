@@ -89,8 +89,6 @@ mkdir bin/dist-autotools/m4
 touch bin/dist-autotools/m4/emptydir
 svn export ./build/autotools/configure.ac bin/dist-autotools/configure.ac
 svn export ./build/autotools/Makefile.am bin/dist-autotools/Makefile.am
-svn export ./build/autotools/ax_cxx_compile_stdcxx.m4 bin/dist-autotools/m4/ax_cxx_compile_stdcxx.m4
-svn export ./build/autotools/ax_prog_doxygen.m4 bin/dist-autotools/m4/ax_prog_doxygen.m4
 else
 echo "Exporting git ..."
 cp -r ./LICENSE         bin/dist-autotools/LICENSE
@@ -153,8 +151,6 @@ mkdir bin/dist-autotools/m4
 touch bin/dist-autotools/m4/emptydir
 cp -r ./build/autotools/configure.ac bin/dist-autotools/configure.ac
 cp -r ./build/autotools/Makefile.am bin/dist-autotools/Makefile.am
-cp -r ./build/autotools/ax_cxx_compile_stdcxx.m4 bin/dist-autotools/m4/ax_cxx_compile_stdcxx.m4
-cp -r ./build/autotools/ax_prog_doxygen.m4 bin/dist-autotools/m4/ax_prog_doxygen.m4
 fi
 
 echo "Querying svn version ..."
