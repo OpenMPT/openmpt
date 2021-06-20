@@ -296,6 +296,7 @@ void CAboutDlg::OnTabChange(NMHDR * /*pNMHDR*/ , LRESULT * /*pResult*/ )
 }
 
 
+#ifdef ENABLE_ASM
 static mpt::ustring ProcSupportToString(uint32 procSupport)
 {
 	std::vector<mpt::ustring> features;
@@ -347,6 +348,7 @@ static mpt::ustring ProcSupportToString(uint32 procSupport)
 #endif
 	return mpt::String::Combine(features, U_(" "));
 }
+#endif
 
 
 mpt::ustring CAboutDlg::GetTabText(int tab)
@@ -354,7 +356,9 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 	const mpt::ustring lf = U_("\n");
 	const mpt::ustring yes = U_("yes");
 	const mpt::ustring no = U_("no");
+#ifdef ENABLE_ASM
 	const CPU::Info CPUInfo = CPU::Info::Get();
+#endif
 	mpt::ustring text;
 	switch(tab)
 	{
