@@ -69,7 +69,7 @@ public:
 inline void CheckNTSTATUS(NTSTATUS status) {
 	if (status >= 0) {
 		return;
-	} else if (status == STATUS_NO_MEMORY) {
+	} else if (static_cast<DWORD>(status) == STATUS_NO_MEMORY) {
 		mpt::throw_out_of_memory();
 	} else {
 		throw exception(status);
