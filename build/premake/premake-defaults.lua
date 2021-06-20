@@ -234,7 +234,9 @@
 
 
 	filter {}
-		flags { "MultiProcessorCompile" }
+		if not _OPTIONS["clang"] then
+			flags { "MultiProcessorCompile" }
+		end
 
 	if _OPTIONS["winxp"] then
 
