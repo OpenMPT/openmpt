@@ -14,11 +14,13 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-#define PLUGMAGIC(a, b, c, d) \
-	((((int32)a) << 24) | (((int32)b) << 16) | (((int32)c) << 8) | (((int32)d) << 0))
+constexpr int32 PLUGMAGIC(char a, char b, char c, char d) noexcept
+{
+	return static_cast<int32>((static_cast<uint32>(a) << 24) | (static_cast<uint32>(b) << 16) | (static_cast<uint32>(c) << 8) | (static_cast<uint32>(d) << 0));
+}
 
 //#define kBuzzMagic	PLUGMAGIC('B', 'u', 'z', 'z')
-#define kDmoMagic	PLUGMAGIC('D', 'X', 'M', 'O')
+inline constexpr int32 kDmoMagic = PLUGMAGIC('D', 'X', 'M', 'O');
 
 class CSoundFile;
 class IMixPlugin;
@@ -32,25 +34,26 @@ public:
 	{
 		// Same plugin categories as defined in VST SDK
 		catUnknown = 0,
-		catEffect,         // Simple Effect
-		catSynth,          // VST Instrument (Synths, samplers,...)
-		catAnalysis,       // Scope, Tuner, ...
-		catMastering,      // Dynamics, ...
-		catSpacializer,    // Panners, ...
-		catRoomFx,         // Delays and Reverbs
-		catSurroundFx,     // Dedicated surround processor
-		catRestoration,    // Denoiser, ...
-		catOfflineProcess, // Offline Process
-		catShell,          // Plug-in is container of other plug-ins
-		catGenerator,      // Tone Generator, ...
+		catEffect,          // Simple Effect
+		catSynth,           // VST Instrument (Synths, samplers,...)
+		catAnalysis,        // Scope, Tuner, ...
+		catMastering,       // Dynamics, ...
+		catSpacializer,     // Panners, ...
+		catRoomFx,          // Delays and Reverbs
+		catSurroundFx,      // Dedicated surround processor
+		catRestoration,     // Denoiser, ...
+		catOfflineProcess,  // Offline Process
+		catShell,           // Plug-in is container of other plug-ins
+		catGenerator,       // Tone Generator, ...
 		// Custom categories
-		catDMO,            // DirectX media object plugin
+		catDMO,     // DirectX media object plugin
+		catHidden,  // For internal plugins that should not be visible to the user (e.g. because they only exist for legacy reasons)
 
-		numCategories,
+		numCategories
 	};
 
 public:
-	typedef IMixPlugin* (*CreateProc)(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct);
+	using CreateProc = IMixPlugin *(*)(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct);
 
 	IMixPlugin *pPluginsList = nullptr; // Pointer to first plugin instance (this instance carries pointers to other instances)
 	CreateProc Create;                  // Factory to call for this plugin

@@ -583,6 +583,22 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 		}
 	}
 
+	// Set up mix levels
+	SetMixLevels(m_nMixLevels);
+
+	if(GetType() == MOD_TYPE_NONE)
+	{
+		return false;
+	}
+
+	SetModSpecsPointer(m_pModSpecs, GetBestSaveFormat());
+
+	// When reading a file made with an older version of MPT, it might be necessary to upgrade some settings automatically.
+	if(m_dwLastSavedWithVersion)
+	{
+		UpgradeModule();
+	}
+
 #ifndef NO_PLUGINS
 	// Load plugins
 #ifdef MODPLUG_TRACKER
@@ -660,21 +676,6 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 #endif // MODPLUG_TRACKER
 #endif // NO_PLUGINS
 
-	// Set up mix levels
-	SetMixLevels(m_nMixLevels);
-
-	if(GetType() == MOD_TYPE_NONE)
-	{
-		return false;
-	}
-
-	SetModSpecsPointer(m_pModSpecs, GetBestSaveFormat());
-
-	// When reading a file made with an older version of MPT, it might be necessary to upgrade some settings automatically.
-	if(m_dwLastSavedWithVersion)
-	{
-		UpgradeModule();
-	}
 	return true;
 }
 

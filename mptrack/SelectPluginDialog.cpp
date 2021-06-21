@@ -334,6 +334,7 @@ void CSelectPluginDlg::UpdatePluginsList(const VSTPluginLib *forceSelect)
 		{ VSTPluginLib::catUnknown,        _T("Unsorted") },
 		{ VSTPluginLib::catDMO,            _T("DirectX Media Audio Effects") },
 		{ VSTPluginLib::catSynth,          _T("Instrument Plugins") },
+		{ VSTPluginLib::catHidden,         _T("Legacy Plugins") },
 	};
 
 	const HTREEITEM noPlug = AddTreeItem(_T("No plugin (empty slot)"), IMAGE_NOPLUGIN, false);
@@ -368,6 +369,9 @@ void CSelectPluginDlg::UpdatePluginsList(const VSTPluginLib *forceSelect)
 		{
 			MPT_ASSERT(p);
 			const VSTPluginLib &plug = *p;
+			if(plug.category == VSTPluginLib::catHidden && (m_pPlugin == nullptr || m_pPlugin->pMixPlugin == nullptr || &m_pPlugin->pMixPlugin->GetPluginFactory() != p))
+				continue;
+
 			if(nameFilterActive)
 			{
 				// Apply name filter

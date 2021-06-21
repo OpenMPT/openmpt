@@ -10,6 +10,7 @@
 
 #include "stdafx.h"
 #include "Sndfile.h"
+#include "plugins/PluginManager.h"
 #include "../common/mptStringBuffer.h"
 #include "../common/version.h"
 
@@ -692,6 +693,18 @@ void CSoundFile::UpgradeModule()
 					m_playBehaviour.reset(kOPLRealRetrig);
 				break;
 			}
+		}
+	}
+
+	if(m_dwLastSavedWithVersion >= MPT_V("1.27.00.42") && m_dwLastSavedWithVersion < MPT_V("1.30.00.46") && (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM)))
+	{
+		// The Flanger DMO plugin is almost identical to the Chorus... but only almost.
+		// The effect implementation was the same in OpenMPT 1.27-1.29, now it isn't anymore.
+		// As the old implementation continues to exist for the Chorus plugin, there is a legacy wrapper for the Flanger plugin.
+		for(auto &plugin : m_MixPlugins)
+		{
+			if(plugin.Info.dwPluginId1 == kDmoMagic && plugin.Info.dwPluginId2 == 0xEFCA3D92 && plugin.pluginData.size() == 32)
+				plugin.Info.szLibraryName = "Flanger (Legacy)";
 		}
 	}
 }

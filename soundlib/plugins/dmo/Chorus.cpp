@@ -29,8 +29,9 @@ IMixPlugin* Chorus::Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLU
 }
 
 
-Chorus::Chorus(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct)
+Chorus::Chorus(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct, bool isFlanger)
 	: IMixPlugin(factory, sndFile, mixStruct)
+	, m_isFlanger(isFlanger)
 {
 	m_param[kChorusWetDryMix] = 0.5f;
 	m_param[kChorusDepth] = 0.1f;
@@ -64,18 +65,28 @@ void Chorus::Process(float *pOutL, float *pOutR, uint32 numFrames)
 	float *out[2] = { m_mixBuffer.GetOutputBuffer(0), m_mixBuffer.GetOutputBuffer(1) };
 
 	const bool isTriangle = IsTriangle();
-
 	const float feedback = Feedback() / 100.0f;
 	const float wetDryMix = WetDryMix();
 	const uint32 phase = Phase();
+	const auto &bufferR = m_isFlanger ? m_bufferR : m_bufferL;
+
 	for(uint32 i = numFrames; i != 0; i--)
 	{
 		const float leftIn = *(in[0])++;
 		const float rightIn = *(in[1])++;
 
-		int32 readOffset = GetBufferIntOffset(m_bufPos + m_delayOffset);
-		int32 writeOffset = GetBufferIntOffset(m_bufPos);
-		m_buffer[writeOffset] = (m_buffer[readOffset] * feedback) + (rightIn + leftIn) * 0.5f;
+		const int32 readOffset = GetBufferIntOffset(m_bufPos + m_delayOffset);
+		const int32 writeOffset = GetBufferIntOffset(m_bufPos);
+		if(m_isFlanger)
+		{
+			m_DryBufferL[m_dryWritePos] = leftIn;
+			m_DryBufferR[m_dryWritePos] = rightIn;
+			m_bufferL[writeOffset] = (m_bufferL[readOffset] * feedback) + leftIn;
+			m_bufferR[writeOffset] = (m_bufferR[readOffset] * feedback) + rightIn;
+		} else
+		{
+			m_bufferL[writeOffset] = (m_bufferL[readOffset] * feedback) + (leftIn + rightIn) * 0.5f;
+		}
 
 		float waveMin;
 		float waveMax;
@@ -97,24 +108,28 @@ void Chorus::Process(float *pOutL, float *pOutR, uint32 numFrames)
 			waveMax = m_waveShapeMax;
 		}
 
-		float left1 = m_buffer[GetBufferIntOffset(m_bufPos + m_delayL1)];
-		float left2 = m_buffer[GetBufferIntOffset(m_bufPos + m_delayL2)];
-		float fracPos = (m_delayL1 & 0xFFF) * (1.0f / 4096.0f);
-		float leftOut = (left2 - left1) * fracPos + left1;
-		*(out[0])++ = leftIn + (leftOut - leftIn) * wetDryMix;
+		const float leftDelayIn = m_isFlanger ? m_DryBufferL[(m_dryWritePos + 2) % 3] : leftIn;
+		const float rightDelayIn = m_isFlanger ? m_DryBufferR[(m_dryWritePos + 2) % 3] : rightIn;
 
-		float right1 = m_buffer[GetBufferIntOffset(m_bufPos + m_delayR1)];
-		float right2 = m_buffer[GetBufferIntOffset(m_bufPos + m_delayR2)];
-		fracPos = (m_delayR1 & 0xFFF) * (1.0f / 4096.0f);
+		float left1 = m_bufferL[GetBufferIntOffset(m_bufPos + m_delayL)];
+		float left2 = m_bufferL[GetBufferIntOffset(m_bufPos + m_delayL + 4096)];
+		float fracPos = (m_delayL & 0xFFF) * (1.0f / 4096.0f);
+		float leftOut = (left2 - left1) * fracPos + left1;
+		*(out[0])++ = leftDelayIn + (leftOut - leftDelayIn) * wetDryMix;
+
+		float right1 = bufferR[GetBufferIntOffset(m_bufPos + m_delayR)];
+		float right2 = bufferR[GetBufferIntOffset(m_bufPos + m_delayR + 4096)];
+		fracPos = (m_delayR & 0xFFF) * (1.0f / 4096.0f);
 		float rightOut = (right2 - right1) * fracPos + right1;
-		*(out[1])++ = rightIn + (rightOut - rightIn) * wetDryMix;
+		*(out[1])++ = rightDelayIn + (rightOut - rightDelayIn) * wetDryMix;
 
 		// Increment delay positions
-		m_delayL1 = m_delayOffset + (phase < 4 ? 1 : -1) * static_cast<int32>(waveMin * m_depthDelay);
-		m_delayL2 = m_delayL1 + 4096;
+		if(m_dryWritePos <= 0)
+			m_dryWritePos += 3;
+		m_dryWritePos--;
 
-		m_delayR1 = m_delayOffset + (phase < 2 ? -1 : 1) * static_cast<int32>(((phase % 2u) ? waveMax : waveMin) * m_depthDelay);
-		m_delayR2 = m_delayR1 + 4096;
+		m_delayL = m_delayOffset + (phase < 4 ? 1 : -1) * static_cast<int32>(waveMin * m_depthDelay);
+		m_delayR = m_delayOffset + (phase < 2 ? -1 : 1) * static_cast<int32>(((phase % 2u) ? waveMax : waveMin) * m_depthDelay);
 
 		if(m_bufPos <= 0)
 			m_bufPos += m_bufSize * 4096;
@@ -140,10 +155,18 @@ void Chorus::SetParameter(PlugParamIndex index, PlugParamValue value)
 	if(index < kChorusNumParameters)
 	{
 		Limit(value, 0.0f, 1.0f);
-		if(index == kChorusWaveShape && value < 1.0f)
-			value = 0.0f;
-		else if(index == kChorusPhase)
+		if(index == kChorusWaveShape)
+		{
+			value = mpt::round(value);
+			if(m_param[index] != value)
+			{
+				m_waveShapeMin = 0.0f;
+				m_waveShapeMax = 0.5f + value * 0.5f;
+			}
+		} else if(index == kChorusPhase)
+		{
 			value = mpt::round(value * 4.0f) / 4.0f;
+		}
 		m_param[index] = value;
 		RecalculateChorusParams();
 	}
@@ -158,8 +181,9 @@ void Chorus::Resume()
 	m_isResumed = true;
 	m_waveShapeMin = 0.0f;
 	m_waveShapeMax = IsTriangle() ? 0.5f : 1.0f;
-	m_delayL1 = m_delayL2 = m_delayR1 = m_delayR2 = m_delayOffset;
+	m_delayL = m_delayR = m_delayOffset;
 	m_bufPos = 0;
+	m_dryWritePos = 0;
 }
 
 
@@ -168,7 +192,11 @@ void Chorus::PositionChanged()
 	m_bufSize = Util::muldiv(m_SndFile.GetSampleRate(), 3840, 1000);
 	try
 	{
-		m_buffer.assign(m_bufSize, 0.0f);
+		m_bufferL.assign(m_bufSize, 0.0f);
+		if(m_isFlanger)
+			m_bufferR.assign(m_bufSize, 0.0f);
+		m_DryBufferL.fill(0.0f);
+		m_DryBufferR.fill(0.0f);
 	} catch(mpt::out_of_memory e)
 	{
 		mpt::delete_out_of_memory(e);
@@ -228,7 +256,7 @@ CString Chorus::GetParamDisplay(PlugParamIndex param)
 		value = FrequencyInHertz();
 		break;
 	case kChorusWaveShape:
-		return (value < 0.5f) ? _T("Triangle") : _T("Sine");
+		return (value < 1) ? _T("Triangle") : _T("Sine");
 		break;
 	case kChorusPhase:
 		switch(Phase())
