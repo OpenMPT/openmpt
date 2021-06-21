@@ -24,8 +24,6 @@ IMixPlugin* DigiBoosterEcho::Create(VSTPluginLib &factory, CSoundFile &sndFile, 
 
 DigiBoosterEcho::DigiBoosterEcho(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct)
 	: IMixPlugin(factory, sndFile, mixStruct)
-	, m_bufferSize(0)
-	, m_writePos(0)
 	, m_sampleRate(sndFile.GetSampleRate())
 	, m_chunk(PluginChunk::Default())
 {
