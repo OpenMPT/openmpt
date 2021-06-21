@@ -703,7 +703,7 @@ void CSoundFile::UpgradeModule()
 		// As the old implementation continues to exist for the Chorus plugin, there is a legacy wrapper for the Flanger plugin.
 		for(auto &plugin : m_MixPlugins)
 		{
-			if(plugin.Info.dwPluginId1 == kDmoMagic && plugin.Info.dwPluginId2 == 0xEFCA3D92 && plugin.pluginData.size() == 32)
+			if(plugin.Info.dwPluginId1 == kDmoMagic && plugin.Info.dwPluginId2 == int32(0xEFCA3D92) && plugin.pluginData.size() == 32)
 				plugin.Info.szLibraryName = "Flanger (Legacy)";
 		}
 	}
