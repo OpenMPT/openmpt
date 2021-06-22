@@ -605,13 +605,13 @@ BOOL CCtrlSamples::GetToolTipText(UINT uId, LPTSTR pszText)
 				if(sample.uFlags[CHN_ADLIB])
 				{
 					// Translate to actual note frequency
-					_tcscpy(pszText, MPT_UFORMAT("{}Hz")(mpt::tfmt::flt(freqHz * (261.625 / 8363.0), 6)).c_str());
+					_tcscpy(pszText, mpt::tformat(_T("%1Hz"))(mpt::tfmt::flt(freqHz * (261.625 / 8363.0), 6)).c_str());
 					return TRUE;
 				}
 				if(m_sndFile.UseFinetuneAndTranspose())
 				{
 					// Transpose + Finetune to Frequency
-					_tcscpy(pszText, MPT_UFORMAT("{}Hz")(freqHz).c_str());
+					_tcscpy(pszText, mpt::tformat(_T("%1Hz"))(freqHz).c_str());
 					return TRUE;
 				}
 			}
