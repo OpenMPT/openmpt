@@ -598,12 +598,22 @@ BOOL CCtrlSamples::GetToolTipText(UINT uId, LPTSTR pszText)
 		case IDC_EDIT5:
 		case IDC_SPIN5:
 		case IDC_COMBO_BASENOTE:
-			// Transpose + Finetune to Frequency
-			if ((m_sndFile.UseFinetuneAndTranspose()) && (m_nSample))
+			if(m_nSample)
 			{
-				uint32 freqHz = m_sndFile.GetSample(m_nSample).GetSampleRate(m_sndFile.GetType());
-				wsprintf(pszText, _T("%uHz"), static_cast<unsigned int>(freqHz));
-				return TRUE;
+				const ModSample &sample = m_sndFile.GetSample(m_nSample);
+				const auto freqHz = sample.GetSampleRate(m_sndFile.GetType());
+				if(sample.uFlags[CHN_ADLIB])
+				{
+					// Translate to actual note frequency
+					_tcscpy(pszText, MPT_UFORMAT("{}Hz")(mpt::tfmt::flt(freqHz * (261.625 / 8363.0), 6)).c_str());
+					return TRUE;
+				}
+				if(m_sndFile.UseFinetuneAndTranspose())
+				{
+					// Transpose + Finetune to Frequency
+					_tcscpy(pszText, MPT_UFORMAT("{}Hz")(freqHz).c_str());
+					return TRUE;
+				}
 			}
 			break;
 
@@ -2119,9 +2129,9 @@ void CCtrlSamples::OnEnableStretchToSize()
 
 void CCtrlSamples::OnEstimateSampleSize()
 {
-	if(!m_sndFile.GetSample(m_nSample).HasSampleData()) return;
+	if(!m_sndFile.GetSample(m_nSample).HasSampleData())
+		return;
 
-	//rewbs.timeStretchMods
 	//Ensure m_dTimeStretchRatio is up-to-date with textbox content
 	UpdateData(TRUE);
 
@@ -2132,7 +2142,6 @@ void CCtrlSamples::OnEstimateSampleSize()
 	//Update ratio value&textbox
 	m_dTimeStretchRatio = dlg.m_dRatio;
 	UpdateData(FALSE);
-	//end rewbs.timeStretchMods
 }
 
 
