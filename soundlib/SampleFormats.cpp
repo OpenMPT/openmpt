@@ -421,7 +421,7 @@ bool CSoundFile::ReadWAVSample(SAMPLEINDEX nSample, FileReader &file, bool mayNo
 {
 	WAVReader wavFile(file);
 
-	static constexpr std::array<WAVFormatChunk::SampleFormats, 6> SupportedFormats = {WAVFormatChunk::fmtPCM, WAVFormatChunk::fmtFloat, WAVFormatChunk::fmtIMA_ADPCM, WAVFormatChunk::fmtMP3, WAVFormatChunk::fmtALaw, WAVFormatChunk::fmtULaw};
+	static constexpr WAVFormatChunk::SampleFormats SupportedFormats[] = {WAVFormatChunk::fmtPCM, WAVFormatChunk::fmtFloat, WAVFormatChunk::fmtIMA_ADPCM, WAVFormatChunk::fmtMP3, WAVFormatChunk::fmtALaw, WAVFormatChunk::fmtULaw};
 	if(!wavFile.IsValid()
 	   || wavFile.GetNumChannels() == 0
 	   || wavFile.GetNumChannels() > 2
@@ -1930,8 +1930,7 @@ bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file, bool mayN
 	// Read SSND chunk
 	FileReader soundChunk(chunks.GetChunk(AIFFChunk::idSSND));
 	AIFFSoundChunk sampleHeader;
-	if(!soundChunk.ReadStruct(sampleHeader)
-		|| !soundChunk.CanRead(sampleHeader.offset))
+	if(!soundChunk.ReadStruct(sampleHeader))
 	{
 		return false;
 	}
@@ -1973,7 +1972,10 @@ bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file, bool mayN
 		sampleIO.MayNormalize();
 	}
 
-	soundChunk.Skip(sampleHeader.offset);
+	if(soundChunk.CanRead(sampleHeader.offset))
+	{
+		soundChunk.Skip(sampleHeader.offset);
+	}
 
 	ModSample &mptSample = Samples[nSample];
 	DestroySampleThreadsafe(nSample);
