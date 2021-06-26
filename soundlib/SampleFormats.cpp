@@ -1928,8 +1928,7 @@ bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file, bool mayN
 	// Read SSND chunk
 	FileReader soundChunk(chunks.GetChunk(AIFFChunk::idSSND));
 	AIFFSoundChunk sampleHeader;
-	if(!soundChunk.ReadStruct(sampleHeader)
-		|| !soundChunk.CanRead(sampleHeader.offset))
+	if(!soundChunk.ReadStruct(sampleHeader))
 	{
 		return false;
 	}
@@ -1971,7 +1970,10 @@ bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file, bool mayN
 		sampleIO.MayNormalize();
 	}
 
-	soundChunk.Skip(sampleHeader.offset);
+	if(soundChunk.CanRead(sampleHeader.offset))
+	{
+		soundChunk.Skip(sampleHeader.offset);
+	}
 
 	ModSample &mptSample = Samples[nSample];
 	DestroySampleThreadsafe(nSample);
