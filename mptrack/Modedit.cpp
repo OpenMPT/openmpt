@@ -32,13 +32,6 @@
 #include "mpt/io/io_stdstream.hpp"
 
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-
-
 OPENMPT_NAMESPACE_BEGIN
 
 

@@ -41,10 +41,6 @@
 #include "../soundlib/MixFuncTable.h"
 #include "mpt/audio/span.hpp"
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#endif
-
 
 OPENMPT_NAMESPACE_BEGIN
 

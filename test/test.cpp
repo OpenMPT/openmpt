@@ -93,10 +93,6 @@
 #define MPT_TEST_HAS_FILESYSTEM 0
 #endif
 
-#if MPT_COMPILER_MSVC && defined(MPT_WITH_MFC) && defined(_DEBUG)
-	#define new DEBUG_NEW
-#endif
-
 #include "TestTools.h"
 
 

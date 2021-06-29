@@ -47,16 +47,10 @@
 #include <gdiplus.h>
 #pragma warning(pop)
 
-// rewbs.memLeak
+#if MPT_COMPILER_MSVC
 #define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>
 #include <crtdbg.h>
-//end  rewbs.memLeak
-
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
 #endif
 
 

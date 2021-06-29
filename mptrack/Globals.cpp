@@ -22,12 +22,6 @@
 #include "ImageLists.h"
 #include "../soundlib/mod_specifications.h"
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-
 
 OPENMPT_NAMESPACE_BEGIN
 

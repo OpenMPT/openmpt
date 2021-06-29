@@ -52,13 +52,6 @@
 #include "mpt/audio/span.hpp"
 
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-
-
 OPENMPT_NAMESPACE_BEGIN
 
 #define TIMERID_GUI 1
