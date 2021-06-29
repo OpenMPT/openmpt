@@ -36,14 +36,8 @@ cd libopenmpt-retro-winxp || goto error
 mkdir openmpt123
 mkdir openmpt123\x86
 mkdir openmpt123\amd64
-mkdir openmpt123\x86-legacy
-mkdir openmpt123\amd64-legacy
-mkdir openmpt123\arm
-mkdir openmpt123\arm64
 mkdir XMPlay
 mkdir Winamp
-mkdir XMPlay-legacy
-mkdir Winamp-legacy
 rmdir /s /q Licenses
 mkdir Licenses
 copy /y ..\..\src\mpt\LICENSE.BSD-3-Clause.txt               .\Licenses\License.mpt.BSD-3-Clause.txt || goto error
@@ -80,8 +74,6 @@ copy /y ..\..\LICENSE .\LICENSE.txt || goto error
 copy /y ..\..\libopenmpt\dox\changelog.md .\ || goto error
 copy /y ..\..\libopenmpt\doc\xmp-openmpt.txt .\XMPlay\ || goto error
 copy /y ..\..\libopenmpt\doc\in_openmpt.txt .\Winamp\ || goto error
-copy /y ..\..\libopenmpt\doc\xmp-openmpt.txt .\XMPlay-legacy\ || goto error
-copy /y ..\..\libopenmpt\doc\in_openmpt.txt .\Winamp-legacy\ || goto error
 copy /y ..\..\bin\release\vs2017-winxp-static\x86\openmpt123.exe .\openmpt123\x86\ || goto error
 copy /y ..\..\bin\release\vs2017-winxp-static\x86\openmpt-mpg123.dll .\openmpt123\x86\ || goto error
 copy /y ..\..\bin\release\vs2017-winxp-static\amd64\openmpt123.exe .\openmpt123\amd64\ || goto error
