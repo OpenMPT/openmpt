@@ -9,6 +9,8 @@ is just a high-level summary.
 
  *  mpg123: Update to v1.28.0 (2021-06-05).
  *  ogg: Update to v1.3.5 (2021-06-04).
+ *  stb_vorbis: Update v1.21 commit 8e51be04dc7dcee462e1f09e410faceab52cc6d2
+    (2021-07-02).
 
 ### libopenmpt 0.5.9 (2021-05-16)
 
