@@ -224,7 +224,8 @@ static mpt::mutex & ComponentListMutex()
 
 static ComponentListEntry * & ComponentListHead()
 {
-	static ComponentListEntry *g_ComponentListHead = nullptr;
+	static ComponentListEntry g_ComponentListHeadEmpty = {nullptr, nullptr};
+	static ComponentListEntry *g_ComponentListHead = &g_ComponentListHeadEmpty;
 	return g_ComponentListHead;
 }
 
@@ -275,7 +276,10 @@ ComponentManager::ComponentManager(const IComponentManagerSettings &settings)
 	mpt::lock_guard<mpt::mutex> guard(ComponentListMutex());
 	for(ComponentListEntry *entry = ComponentListHead(); entry; entry = entry->next)
 	{
-		entry->reg(*this);
+		if(entry->reg)
+		{
+			entry->reg(*this);
+		}
 	}
 }
 
