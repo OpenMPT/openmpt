@@ -231,6 +231,14 @@ static ComponentListEntry * & ComponentListHead()
 bool ComponentListPush(ComponentListEntry *entry)
 {
 	mpt::lock_guard<mpt::mutex> guard(ComponentListMutex());
+#if MPT_MSVC_BEFORE(2019,0)
+	// Guard against VS2017 compiler bug causing repeated initialization of inline variables.
+	// See <https://developercommunity.visualstudio.com/t/static-inline-variable-gets-destroyed-multiple-tim/297876>.
+	if(entry->next)
+	{
+		return false;
+	}
+#endif
 	entry->next = ComponentListHead();
 	ComponentListHead() = entry;
 	return true;
