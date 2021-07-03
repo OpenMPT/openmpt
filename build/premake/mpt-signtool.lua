@@ -35,9 +35,5 @@
   largeaddressaware ( true )
   characterset "Unicode"
   warnings "Extra"
-  links {
-   "portaudio",
-   "rtaudio",
-  }
   filter {}
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }
