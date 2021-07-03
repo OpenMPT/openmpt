@@ -85,7 +85,9 @@
 
 // OpenMPT-only dependencies
 #define MPT_WITH_ANCIENT
-#if !defined(MPT_BUILD_RETRO) && !MPT_COMPILER_CLANG
+#if !defined(MPT_BUILD_RETRO) && !MPT_COMPILER_CLANG && !MPT_MSVC_BEFORE(2019,0)
+// disabled for VS2017 because of multiple initialization of inline variables
+// https://developercommunity.visualstudio.com/t/static-inline-variable-gets-destroyed-multiple-tim/297876
 #define MPT_WITH_ASIO
 #endif
 #if defined(MPT_BUILD_RETRO)
