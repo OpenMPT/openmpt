@@ -896,6 +896,8 @@ void CmdExtract::ExtrPrepareName(Archive &Arc,const wchar *ArcFileName,wchar *De
      wchar LastChar=*PointToLastChar(Cmd->ExtrPath);
     // We need IsPathDiv check here to correctly handle Unix forward slash
     // in the end of destination path in Windows: rar x arc dest/
+    // so we call IsPathDiv first instead of just calling AddEndSlash,
+    // which checks for only one type of path separator.
     // IsDriveDiv is needed for current drive dir: rar x arc d:
     if (!IsPathDiv(LastChar) && !IsDriveDiv(LastChar))
     {

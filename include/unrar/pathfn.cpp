@@ -185,7 +185,9 @@ void MakeName(const wchar *Path,const wchar *Name,wchar *Pathname,size_t MaxSize
   // the temporary buffer instead of constructing the name in 'Pathname'.
   wchar OutName[NM];
   wcsncpyz(OutName,Path,ASIZE(OutName));
-  AddEndSlash(OutName,ASIZE(OutName));
+  // Do not add slash to d:, we want to allow relative paths like d:filename.
+  if (!IsDriveLetter(Path) || Path[2]!=0)
+    AddEndSlash(OutName,ASIZE(OutName));
   wcsncatz(OutName,Name,ASIZE(OutName));
   wcsncpyz(Pathname,OutName,MaxSize);
 }
