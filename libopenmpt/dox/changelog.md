@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.4.23-pre
+
 ### libopenmpt 0.4.22 (2021-07-04)
 
  *  S3M: Only for OPL instruments the high sample rate bits should be ignored;
