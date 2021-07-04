@@ -367,7 +367,7 @@ bool ErrorHandler::GetSysErrMsg(wchar *Msg,size_t Size)
 
 void ErrorHandler::SysErrMsg()
 {
-#if !defined(SFX_MODULE) && !defined(SILENT)
+#ifndef SILENT
   wchar Msg[1024];
   if (!GetSysErrMsg(Msg,ASIZE(Msg)))
     return;
