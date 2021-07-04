@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.5.10-pre
+### libopenmpt 0.5.10 (2021-07-04)
 
  *  S3M: Honor the Stereo flag not being set. This improves the sound of some
     tunes like Turbulence by Purple Motion.
