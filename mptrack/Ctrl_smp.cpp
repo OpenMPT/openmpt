@@ -3543,6 +3543,7 @@ void CCtrlSamples::OnXFade()
 		SwitchToView();
 		return;
 	}
+	bool resetLoopOnCancel = false;
 	if((sample.nLoopEnd <= sample.nLoopStart || sample.nLoopEnd > sample.nLength)
 		&& (sample.nSustainEnd <= sample.nSustainStart || sample.nSustainEnd > sample.nLength))
 	{
@@ -3550,6 +3551,7 @@ void CCtrlSamples::OnXFade()
 		if(selection.nStart > 0 && selection.nEnd > selection.nStart)
 		{
 			sample.SetLoop(selection.nStart, selection.nEnd, true, false, m_sndFile);
+			resetLoopOnCancel = true;
 		} else
 		{
 			Reporting::Error("Crossfade requires a sample loop to work.", this);
@@ -3585,6 +3587,9 @@ void CCtrlSamples::OnXFade()
 		{
 			m_modDoc.GetSampleUndo().RemoveLastUndoStep(m_nSample);
 		}
+	} else if(resetLoopOnCancel)
+	{
+		sample.SetLoop(0, 0, false, false, m_sndFile);
 	}
 	SwitchToView();
 }
