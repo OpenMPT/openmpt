@@ -86,25 +86,10 @@ struct is_character<char32_t> : public std::true_type { };
 
 
 
-template <typename T>
-MPT_CONSTEXPRINLINE unsigned char char_value(T x) noexcept = delete;
-
-template <>
-MPT_CONSTEXPRINLINE unsigned char char_value<char>(char x) noexcept {
-	return static_cast<unsigned char>(x);
+template <typename T, typename std::enable_if<mpt::is_character<T>::value, bool>::type = true>
+MPT_CONSTEXPRINLINE typename std::make_unsigned<T>::type char_value(T x) noexcept {
+	return static_cast<typename std::make_unsigned<T>::type>(x);
 }
-
-template <>
-MPT_CONSTEXPRINLINE unsigned char char_value<unsigned char>(unsigned char x) noexcept {
-	return static_cast<unsigned char>(x);
-}
-
-#if MPT_CXX_AT_LEAST(20)
-template <>
-MPT_CONSTEXPRINLINE unsigned char char_value<char8_t>(char8_t x) noexcept {
-	return static_cast<unsigned char>(x);
-}
-#endif // C++20
 
 
 
@@ -127,10 +112,10 @@ struct unsafe_char_converter<char> {
 template <>
 struct unsafe_char_converter<wchar_t> {
 	static constexpr char32_t decode(wchar_t c) noexcept {
-		return static_cast<char32_t>(static_cast<uint32>(static_cast<unsigned char>(c)));
+		return static_cast<char32_t>(static_cast<uint32>(static_cast<std::make_unsigned<wchar_t>::type>(c)));
 	}
 	static constexpr wchar_t encode(char32_t c) noexcept {
-		return static_cast<wchar_t>(static_cast<unsigned char>(static_cast<uint32>(c)));
+		return static_cast<wchar_t>(static_cast<std::make_unsigned<wchar_t>::type>(static_cast<uint32>(c)));
 	}
 };
 #endif // !MPT_COMPILER_QUIRK_NO_WCHAR
@@ -139,10 +124,10 @@ struct unsafe_char_converter<wchar_t> {
 template <>
 struct unsafe_char_converter<char8_t> {
 	static constexpr char32_t decode(char8_t c) noexcept {
-		return static_cast<char32_t>(static_cast<uint32>(static_cast<unsigned char>(c)));
+		return static_cast<char32_t>(static_cast<uint32>(static_cast<uint8>(c)));
 	}
 	static constexpr char8_t encode(char32_t c) noexcept {
-		return static_cast<char8_t>(static_cast<unsigned char>(static_cast<uint32>(c)));
+		return static_cast<char8_t>(static_cast<uint8>(static_cast<uint32>(c)));
 	}
 };
 #endif // C++20
@@ -150,20 +135,20 @@ struct unsafe_char_converter<char8_t> {
 template <>
 struct unsafe_char_converter<char16_t> {
 	static constexpr char32_t decode(char16_t c) noexcept {
-		return static_cast<char32_t>(static_cast<uint32>(static_cast<unsigned char>(c)));
+		return static_cast<char32_t>(static_cast<uint32>(static_cast<uint16>(c)));
 	}
 	static constexpr char16_t encode(char32_t c) noexcept {
-		return static_cast<char16_t>(static_cast<unsigned char>(static_cast<uint32>(c)));
+		return static_cast<char16_t>(static_cast<uint16>(static_cast<uint32>(c)));
 	}
 };
 
 template <>
 struct unsafe_char_converter<char32_t> {
 	static constexpr char32_t decode(char32_t c) noexcept {
-		return static_cast<char32_t>(static_cast<uint32>(static_cast<unsigned char>(c)));
+		return c;
 	}
 	static constexpr char32_t encode(char32_t c) noexcept {
-		return static_cast<char32_t>(static_cast<unsigned char>(static_cast<uint32>(c)));
+		return c;
 	}
 };
 
