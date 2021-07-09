@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.3.32-pre
 
+ *  mpg123: Update to v1.28.1 (2021-07-09).
+
 ### libopenmpt 0.3.31 (2021-07-04)
 
  *  S3M: Only for OPL instruments the high sample rate bits should be ignored;
