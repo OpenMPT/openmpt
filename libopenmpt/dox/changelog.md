@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.5.11-pre
 
+ *  mpg123: Update to v1.28.1 (2021-07-09).
+
 ### libopenmpt 0.5.10 (2021-07-04)
 
  *  S3M: Honor the Stereo flag not being set. This improves the sound of some
