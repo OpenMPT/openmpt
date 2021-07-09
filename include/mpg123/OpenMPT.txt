@@ -1,6 +1,5 @@
-libmpg123 library version 1.28.0 (2021-06-05).
+libmpg123 library version 1.28.1 (2021-07-09).
 The following changes have been made:
-- Upstream r4942 and r4944 have bee applied.
 - ports/MSVC++/config.h and ports/MSVC++/mpg123.h have been retained from older
   versions.
 - ports/MSVC++/mpg123.h has been adjusted to provide mpg123_ssize_t and define

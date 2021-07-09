@@ -15,7 +15,6 @@
 #define MPG123_COMPAT_H
 
 #include "config.h"
-#include "intsym.h"
 
 /* Disable inline for non-C99 compilers. */
 #if !defined(__STDC_VERSION__) || __STDC_VERSION__ < 199901L
@@ -115,6 +114,9 @@ typedef ptrdiff_t ssize_t;
 #endif
 
 #endif
+
+// Not too early, leave system headers alone (strerror).
+#include "intsym.h"
 
 /* A safe realloc also for very old systems where realloc(NULL, size) returns NULL. */
 void *safe_realloc(void *ptr, size_t size);
