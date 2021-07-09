@@ -155,7 +155,7 @@ static inline int16_t ftoi16(float x)
 #define CONV_SU32(s) \
 ( (s >= 0) \
 	?	((uint32_t)s + (uint32_t)2147483648UL) \
-	:	(s == -2147483647-1 /* Work around to prevent a non-conformant MSVC warning/error */ \
+	:	(s == -2147483647L-1L /* Work around to prevent a non-conformant MSVC warning/error */ \
 		?	0 /* Separate because negation would overflow. */  \
 		:	(uint32_t)2147483648UL - (uint32_t)(-s) ) \
 )
@@ -171,7 +171,7 @@ static inline int16_t ftoi16(float x)
 ( (u >= 2147483648UL) \
 	?	(int32_t)((uint32_t)u - (uint32_t)2147483648UL) \
 	:	((u == 0) \
-		?	(int32_t)-2147483648UL \
+		?	(int32_t)(-2147483647L-1L) \
 		:	-(int32_t)((uint32_t)2147483648UL - u) ) \
 )
 
