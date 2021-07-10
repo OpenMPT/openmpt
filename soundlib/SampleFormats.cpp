@@ -31,7 +31,7 @@
 #include "WAVTools.h"
 #include "../common/version.h"
 #include "Loaders.h"
-#include "ChunkReader.h"
+#include "../common/FileReader.h"
 #include "../soundlib/ModSampleCopy.h"
 #include <functional>
 #include <map>
@@ -628,7 +628,7 @@ struct Wave64Chunk
 MPT_BINARY_STRUCT(Wave64Chunk, 24)
 
 
-static void Wave64TagFromLISTINFO(mpt::ustring & dst, uint16 codePage, const ChunkReader::ChunkList<RIFFChunk> & infoChunk, RIFFChunk::ChunkIdentifiers id)
+static void Wave64TagFromLISTINFO(mpt::ustring & dst, uint16 codePage, const FileReader::ChunkList<RIFFChunk> & infoChunk, RIFFChunk::ChunkIdentifiers id)
 {
 	if(!infoChunk.ChunkExists(id))
 	{
@@ -684,7 +684,7 @@ bool CSoundFile::ReadW64Sample(SAMPLEINDEX nSample, FileReader &file, bool mayNo
 		return false;
 	}
 
-	ChunkReader chunkFile = file;
+	FileReader chunkFile = file;
 	auto chunkList = chunkFile.ReadChunks<Wave64Chunk>(8);
 
 	if(!chunkList.ChunkExists(guidFMT))
@@ -770,7 +770,7 @@ bool CSoundFile::ReadW64Sample(SAMPLEINDEX nSample, FileReader &file, bool mayNo
 
 	if(chunkList.ChunkExists(guidLIST))
 	{
-		ChunkReader listChunk = chunkList.GetChunk(guidLIST);
+		FileReader listChunk = chunkList.GetChunk(guidLIST);
 		if(listChunk.ReadMagic("INFO"))
 		{
 			auto infoChunk = listChunk.ReadChunks<RIFFChunk>(2);
@@ -1567,8 +1567,7 @@ bool CSoundFile::ReadCAFSample(SAMPLEINDEX nSample, FileReader &file, bool mayNo
 		return false;
 	}
 
-	ChunkReader chunkFile = file;
-	auto chunkList = chunkFile.ReadChunks<CAFChunk>(0);
+	auto chunkList = file.ReadChunks<CAFChunk>(0);
 
 	CAFAudioFormat audioFormat;
 	if(!chunkList.GetChunk(CAFChunk::iddesc).ReadStruct(audioFormat))
@@ -1883,18 +1882,17 @@ MPT_BINARY_STRUCT(AIFFInstrumentChunk, 20)
 bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file, bool mayNormalize)
 {
 	file.Rewind();
-	ChunkReader chunkFile(file);
 
 	// Verify header
 	AIFFHeader fileHeader;
-	if(!chunkFile.ReadStruct(fileHeader)
+	if(!file.ReadStruct(fileHeader)
 		|| memcmp(fileHeader.magic, "FORM", 4)
 		|| (memcmp(fileHeader.type, "AIFF", 4) && memcmp(fileHeader.type, "AIFC", 4)))
 	{
 		return false;
 	}
 
-	auto chunks = chunkFile.ReadChunks<AIFFChunk>(2);
+	auto chunks = file.ReadChunks<AIFFChunk>(2);
 
 	// Read COMM chunk
 	FileReader commChunk(chunks.GetChunk(AIFFChunk::idCOMM));
@@ -2549,8 +2547,7 @@ bool CSoundFile::ReadIFFSample(SAMPLEINDEX nSample, FileReader &file)
 		return false;
 	}
 
-	ChunkReader chunkFile(file);
-	const auto chunks = chunkFile.ReadChunks<IFFChunk>(2);
+	const auto chunks = file.ReadChunks<IFFChunk>(2);
 	FileReader sampleData;
 
 	SampleIO sampleIO(SampleIO::_8bit, SampleIO::mono, SampleIO::bigEndian, SampleIO::signedPCM);

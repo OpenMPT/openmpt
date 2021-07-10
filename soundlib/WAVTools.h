@@ -14,7 +14,7 @@
 
 #include "mpt/uuid/uuid.hpp"
 
-#include "ChunkReader.h"
+#include "../common/FileReader.h"
 #include "Loaders.h"
 
 #ifndef MODPLUG_NO_FILESAVE
@@ -290,9 +290,9 @@ MPT_BINARY_STRUCT(WAVCuePoint, 24)
 class WAVReader
 {
 protected:
-	ChunkReader file;
+	FileReader file;
 	FileReader sampleData, smplChunk, instChunk, xtraChunk, wsmpChunk, cueChunk;
-	ChunkReader::ChunkList<RIFFChunk> infoChunk;
+	FileReader::ChunkList<RIFFChunk> infoChunk;
 
 	FileReader::off_t sampleLength;
 	WAVFormatChunk formatInfo;
@@ -301,14 +301,14 @@ protected:
 	bool isDLS;
 	bool mayBeCoolEdit16_8;
 
-	uint16 GetFileCodePage(ChunkReader::ChunkList<RIFFChunk> &chunks);
+	uint16 GetFileCodePage(FileReader::ChunkList<RIFFChunk> &chunks);
 
 public:
 	WAVReader(FileReader &inputFile);
 
 	bool IsValid() const { return sampleData.IsValid(); }
 
-	void FindMetadataChunks(ChunkReader::ChunkList<RIFFChunk> &chunks);
+	void FindMetadataChunks(FileReader::ChunkList<RIFFChunk> &chunks);
 
 	// Self-explanatory getters.
 	WAVFormatChunk::SampleFormats GetSampleFormat() const { return IsExtensibleFormat() ? static_cast<WAVFormatChunk::SampleFormats>(subFormat) : static_cast<WAVFormatChunk::SampleFormats>(formatInfo.format.get()); }

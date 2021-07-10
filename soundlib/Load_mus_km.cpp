@@ -13,7 +13,6 @@
 
 #include "stdafx.h"
 #include "Loaders.h"
-#include "ChunkReader.h"
 
 OPENMPT_NAMESPACE_BEGIN
 

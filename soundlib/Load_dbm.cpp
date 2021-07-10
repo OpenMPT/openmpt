@@ -10,7 +10,6 @@
 
 #include "stdafx.h"
 #include "Loaders.h"
-#include "ChunkReader.h"
 #include "../common/mptStringBuffer.h"
 #ifndef NO_PLUGINS
 #include "plugins/DigiBoosterEcho.h"

@@ -20,7 +20,7 @@
 #include "Tagging.h"
 #include "Loaders.h"
 #include "WAVTools.h"
-#include "ChunkReader.h"
+#include "../common/FileReader.h"
 #include "modsmp_ctrl.h"
 #include "openmpt/soundbase/Copy.hpp"
 #include "openmpt/soundbase/SampleConvert.hpp"
@@ -197,8 +197,8 @@ struct FLACDecoder
 		} else if(metadata->type == FLAC__METADATA_TYPE_APPLICATION && !memcmp(metadata->data.application.id, "riff", 4) && client.ready)
 		{
 			// Try reading RIFF loop points and other sample information
-			ChunkReader data(mpt::as_span(metadata->data.application.data, metadata->length));
-			ChunkReader::ChunkList<RIFFChunk> chunks = data.ReadChunks<RIFFChunk>(2);
+			FileReader data(mpt::as_span(metadata->data.application.data, metadata->length));
+			FileReader::ChunkList<RIFFChunk> chunks = data.ReadChunks<RIFFChunk>(2);
 
 			// We're not really going to read a WAV file here because there will be only one RIFF chunk per metadata event, but we can still re-use the code for parsing RIFF metadata...
 			WAVReader riffReader(data);

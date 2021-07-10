@@ -16,7 +16,7 @@
 #include "../common/misc_util.h"
 #include "Tagging.h"
 #include "Loaders.h"
-#include "ChunkReader.h"
+#include "../common/FileReader.h"
 #include "modsmp_ctrl.h"
 #include "openmpt/soundbase/Copy.hpp"
 #include "mpt/audio/span.hpp"

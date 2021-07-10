@@ -645,7 +645,6 @@
     <ClInclude Include="..\..\soundlib\AudioCriticalSection.h" />
     <ClInclude Include="..\..\soundlib\AudioReadTarget.h" />
     <ClInclude Include="..\..\soundlib\BitReader.h" />
-    <ClInclude Include="..\..\soundlib\ChunkReader.h" />
     <ClInclude Include="..\..\soundlib\Container.h" />
     <ClInclude Include="..\..\soundlib\Dlsbank.h" />
     <ClInclude Include="..\..\soundlib\FloatMixer.h" />

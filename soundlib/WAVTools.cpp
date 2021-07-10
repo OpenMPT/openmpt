@@ -47,11 +47,11 @@ WAVReader::WAVReader(FileReader &inputFile) : file(inputFile)
 
 	auto chunks = file.ReadChunks<RIFFChunk>(2);
 
-	if(chunks.size() >= 4
-		&& chunks[1].GetHeader().GetID() == RIFFChunk::iddata
-		&& chunks[1].GetHeader().GetLength() % 2u != 0
-		&& chunks[2].GetHeader().GetLength() == 0
-		&& chunks[3].GetHeader().GetID() == RIFFChunk::id____)
+	if(chunks.chunks.size() >= 4
+		&& chunks.chunks[1].GetHeader().GetID() == RIFFChunk::iddata
+		&& chunks.chunks[1].GetHeader().GetLength() % 2u != 0
+		&& chunks.chunks[2].GetHeader().GetLength() == 0
+		&& chunks.chunks[3].GetHeader().GetID() == RIFFChunk::id____)
 	{
 		// Houston, we have a problem: Old versions of (Open)MPT didn't write RIFF padding bytes. -_-
 		// Luckily, the only RIFF chunk with an odd size those versions would ever write would be the "data" chunk
@@ -133,7 +133,7 @@ WAVReader::WAVReader(FileReader &inputFile) : file(inputFile)
 }
 
 
-void WAVReader::FindMetadataChunks(ChunkReader::ChunkList<RIFFChunk> &chunks)
+void WAVReader::FindMetadataChunks(FileReader::ChunkList<RIFFChunk> &chunks)
 {
 	// Read sample loop points and other sampler information
 	smplChunk = chunks.GetChunk(RIFFChunk::idsmpl);
@@ -143,7 +143,7 @@ void WAVReader::FindMetadataChunks(ChunkReader::ChunkList<RIFFChunk> &chunks)
 	cueChunk = chunks.GetChunk(RIFFChunk::idcue_);
 
 	// Read text chunks
-	ChunkReader listChunk = chunks.GetChunk(RIFFChunk::idLIST);
+	FileReader listChunk = chunks.GetChunk(RIFFChunk::idLIST);
 	if(listChunk.ReadMagic("INFO"))
 	{
 		infoChunk = listChunk.ReadChunks<RIFFChunk>(2);
@@ -154,7 +154,7 @@ void WAVReader::FindMetadataChunks(ChunkReader::ChunkList<RIFFChunk> &chunks)
 }
 
 
-uint16 WAVReader::GetFileCodePage(ChunkReader::ChunkList<RIFFChunk> &chunks)
+uint16 WAVReader::GetFileCodePage(FileReader::ChunkList<RIFFChunk> &chunks)
 {
 	FileReader csetChunk = chunks.GetChunk(RIFFChunk::idCSET);
 	if(!csetChunk.IsValid())

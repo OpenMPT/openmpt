@@ -13,7 +13,6 @@
 
 #include "stdafx.h"
 #include "Loaders.h"
-#include "ChunkReader.h"
 
 #include "mpt/io/base.hpp"
 

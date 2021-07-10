@@ -371,6 +371,30 @@ public:
 		return mpt::IO::FileReader::ReadVarInt(*this, target);
 	}
 
+	template <typename T>
+	using Item = mpt::IO::FileReader::Chunk<T, FileReader>;
+
+	template <typename T>
+	using ChunkList = mpt::IO::FileReader::ChunkList<T, FileReader>;
+
+	template<typename T>
+	Item<T> ReadNextChunk(off_t alignment)
+	{
+		return mpt::IO::FileReader::ReadNextChunk<T, FileReader>(*this, alignment);
+	}
+
+	template<typename T>
+	ChunkList<T> ReadChunks(off_t alignment)
+	{
+		return mpt::IO::FileReader::ReadChunks<T, FileReader>(*this, alignment);
+	}
+
+	template<typename T>
+	ChunkList<T> ReadChunksUntil(off_t alignment, decltype(T().GetID()) stopAtID)
+	{
+		return mpt::IO::FileReader::ReadChunksUntil<T, FileReader>(*this, alignment, stopAtID);
+	}
+
 	template<mpt::String::ReadWriteMode mode, size_t destSize>
 	bool ReadString(char (&destBuffer)[destSize], const pos_type srcSize)
 	{
@@ -419,6 +443,8 @@ public:
 
 using FileCursor = detail::FileCursor<mpt::IO::FileCursorTraitsFileData, mpt::IO::FileCursorFilenameTraits<mpt::PathString>>;
 using FileReader = detail::FileReader<mpt::IO::FileCursorTraitsFileData, mpt::IO::FileCursorFilenameTraits<mpt::PathString>>;
+
+using ChunkReader = FileReader;
 
 using MemoryFileCursor = detail::FileCursor<mpt::IO::FileCursorTraitsMemory, mpt::IO::FileCursorFilenameTraitsNone>;
 using MemoryFileReader = detail::FileReader<mpt::IO::FileCursorTraitsMemory, mpt::IO::FileCursorFilenameTraitsNone>;

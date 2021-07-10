@@ -315,7 +315,6 @@ MPT_FILES_SOUNDLIB += soundlib/AudioCriticalSection.cpp
 MPT_FILES_SOUNDLIB += soundlib/AudioCriticalSection.h
 MPT_FILES_SOUNDLIB += soundlib/AudioReadTarget.h
 MPT_FILES_SOUNDLIB += soundlib/BitReader.h
-MPT_FILES_SOUNDLIB += soundlib/ChunkReader.h
 MPT_FILES_SOUNDLIB += soundlib/ContainerMMCMP.cpp
 MPT_FILES_SOUNDLIB += soundlib/ContainerPP20.cpp
 MPT_FILES_SOUNDLIB += soundlib/ContainerUMX.cpp

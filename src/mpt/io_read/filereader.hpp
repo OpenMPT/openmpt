@@ -471,6 +471,116 @@ bool ReadVarInt(TFileCursor & f, T & target) {
 	return true;
 }
 
+template <typename Tid, typename Tsize>
+struct ChunkHeader {
+	using id_type = Tid;
+	using size_type = Tsize;
+	friend constexpr bool declare_binary_safe(const ChunkHeader &) noexcept {
+		return true;
+	}
+	id_type id{};
+	size_type size{};
+	id_type GetID() const {
+		return id;
+	}
+	size_type GetLength() const {
+		return size;
+	}
+};
+
+template <typename TChunkHeader, typename TFileCursor>
+struct Chunk {
+	TChunkHeader header;
+	TFileCursor data;
+	TChunkHeader GetHeader() const {
+		return header;
+	}
+	TFileCursor GetData() const {
+		return data;
+	}
+};
+
+template <typename TChunkHeader, typename TFileCursor>
+struct ChunkList {
+
+	using id_type = decltype(TChunkHeader().GetID());
+	using size_type = decltype(TChunkHeader().GetLength());
+	
+	std::vector<Chunk<TChunkHeader, TFileCursor>> chunks;
+	
+	// Check if the list contains a given chunk.
+	bool ChunkExists(id_type id) const {
+		return std::find_if(chunks.begin(), chunks.end(), [id](const Chunk<TChunkHeader, TFileCursor> & chunk) { return chunk.GetHeader().GetID() == id; }) != chunks.end();
+	}
+
+	// Retrieve the first chunk with a given ID.
+	TFileCursor GetChunk(id_type id) const {
+		auto chunk = std::find_if(chunks.begin(), chunks.end(), [id](const Chunk<TChunkHeader, TFileCursor>& chunk) { return chunk.GetHeader().GetID() == id; });
+		if (chunk == chunks.end()) {
+			return TFileCursor();
+		}
+		return chunk->GetData();
+	}
+
+	// Retrieve all chunks with a given ID.
+	std::vector<TFileCursor> GetAllChunks(id_type id) const {
+		std::vector<TFileCursor> result;
+		for (const auto & chunk : chunks) {
+			if (chunk.GetHeader().GetID() == id) {
+				result.push_back(chunk.GetData());
+			}
+		}
+		return result;
+	}
+
+};
+
+// Read a single "TChunkHeader" chunk.
+// T is required to have the methods GetID() and GetLength().
+// GetLength() must return the chunk size in bytes, and GetID() the chunk ID.
+template <typename TChunkHeader, typename TFileCursor>
+Chunk<TChunkHeader, TFileCursor> ReadNextChunk(TFileCursor & f, typename TFileCursor::pos_type alignment) {
+	Chunk<TChunkHeader, TFileCursor> result;
+	if (!FileReader::Read(f, result.header)) {
+		return Chunk<TChunkHeader, TFileCursor>();
+	}
+	typename TFileCursor::pos_type dataSize = result.header.GetLength();
+	result.data = f.ReadChunk(dataSize);
+	if (alignment != 0) {
+		if ((dataSize % alignment) != 0) {
+			f.Skip(alignment - (dataSize % alignment));
+		}
+	}
+	return result;
+}
+
+// Read a series of "TChunkHeader" chunks until the end of file is reached.
+// T is required to have the methods GetID() and GetLength().
+// GetLength() must return the chunk size in bytes, and GetID() the chunk ID.
+template <typename TChunkHeader, typename TFileCursor>
+ChunkList<TChunkHeader, TFileCursor> ReadChunks(TFileCursor & f, typename TFileCursor::pos_type alignment) {
+	ChunkList<TChunkHeader, TFileCursor> result;
+	while (f.CanRead(sizeof(TChunkHeader))) {
+		result.chunks.push_back(FileReader::ReadNextChunk<TChunkHeader, TFileCursor>(f, alignment));
+	}
+	return result;
+}
+
+// Read a series of "TChunkHeader" chunks until a given chunk ID is found.
+// T is required to have the methods GetID() and GetLength().
+// GetLength() must return the chunk size in bytes, and GetID() the chunk ID.
+template <typename TChunkHeader, typename TFileCursor>
+ChunkList<TChunkHeader, TFileCursor> ReadChunksUntil(TFileCursor & f, typename TFileCursor::pos_type alignment, decltype(TChunkHeader().GetID()) lastID) {
+	ChunkList<TChunkHeader, TFileCursor> result;
+	while (f.CanRead(sizeof(TChunkHeader))) {
+		result.chunks.push_back(FileReader::ReadNextChunk<TChunkHeader, TFileCursor>(f, alignment));
+		if (result.chunks.back().GetHeader().GetID() == lastID) {
+			break;
+		}
+	}
+	return result;
+}
+
 } // namespace FileReader
 
 

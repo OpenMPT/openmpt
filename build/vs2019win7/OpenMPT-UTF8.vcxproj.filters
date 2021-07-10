@@ -702,9 +702,6 @@
     <ClInclude Include="..\..\soundlib\BitReader.h">
       <Filter>soundlib</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\soundlib\ChunkReader.h">
-      <Filter>soundlib</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\soundlib\Container.h">
       <Filter>soundlib</Filter>
     </ClInclude>
