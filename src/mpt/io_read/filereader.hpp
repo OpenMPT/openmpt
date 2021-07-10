@@ -505,9 +505,9 @@ struct ChunkList {
 
 	using id_type = decltype(TChunkHeader().GetID());
 	using size_type = decltype(TChunkHeader().GetLength());
-	
+
 	std::vector<Chunk<TChunkHeader, TFileCursor>> chunks;
-	
+
 	// Check if the list contains a given chunk.
 	bool ChunkExists(id_type id) const {
 		return std::find_if(chunks.begin(), chunks.end(), [id](const Chunk<TChunkHeader, TFileCursor> & chunk) { return chunk.GetHeader().GetID() == id; }) != chunks.end();
@@ -515,7 +515,7 @@ struct ChunkList {
 
 	// Retrieve the first chunk with a given ID.
 	TFileCursor GetChunk(id_type id) const {
-		auto chunk = std::find_if(chunks.begin(), chunks.end(), [id](const Chunk<TChunkHeader, TFileCursor>& chunk) { return chunk.GetHeader().GetID() == id; });
+		auto chunk = std::find_if(chunks.begin(), chunks.end(), [id](const Chunk<TChunkHeader, TFileCursor> & chunk) { return chunk.GetHeader().GetID() == id; });
 		if (chunk == chunks.end()) {
 			return TFileCursor();
 		}
@@ -532,7 +532,6 @@ struct ChunkList {
 		}
 		return result;
 	}
-
 };
 
 // Read a single "TChunkHeader" chunk.
