@@ -42,13 +42,9 @@ static MPT_FORCEINLINE void Store64SSE(LR16 (&dst)[2], __m128i src) { return _mm
 
 CReverb::CReverb()
 {
-	// Shared reverb state
-	InitMixBuffer(MixReverbBuffer, static_cast<uint32>(std::size(MixReverbBuffer)));
-
 	// Reverb mix buffers
 	MemsetZero(g_RefDelay);
 	MemsetZero(g_LateReverb);
-
 }
 
 
@@ -247,7 +243,7 @@ static void I3dl2_to_Generic(
 }
 
 
-void CReverb::Shutdown()
+void CReverb::Shutdown(MixSampleInt &gnRvbROfsVol, MixSampleInt &gnRvbLOfsVol)
 {
 	gnReverbSend = false;
 
@@ -274,7 +270,7 @@ void CReverb::Shutdown()
 }
 
 
-void CReverb::Initialize(bool bReset, uint32 MixingFreq)
+void CReverb::Initialize(bool bReset, MixSampleInt &gnRvbROfsVol, MixSampleInt &gnRvbLOfsVol, uint32 MixingFreq)
 {
 	if (m_Settings.m_nReverbType >= NUM_REVERBTYPES) m_Settings.m_nReverbType = 0;
 	const SNDMIX_REVERB_PROPERTIES *rvbPreset = &ReverbPresets[m_Settings.m_nReverbType].first;
@@ -372,7 +368,7 @@ void CReverb::Initialize(bool bReset, uint32 MixingFreq)
 	if (bReset)
 	{
 		gnReverbSamples = 0;
-		Shutdown();
+		Shutdown(gnRvbROfsVol, gnRvbLOfsVol);
 	}
 	// Wait at least 5 seconds before shutting down the reverb
 	if (gnReverbDecaySamples < MixingFreq*5)
@@ -382,26 +378,25 @@ void CReverb::Initialize(bool bReset, uint32 MixingFreq)
 }
 
 
-mixsample_t *CReverb::GetReverbSendBuffer(uint32 nSamples)
+void CReverb::TouchReverbSendBuffer(MixSampleInt *MixReverbBuffer, MixSampleInt &gnRvbROfsVol, MixSampleInt &gnRvbLOfsVol, uint32 nSamples)
 {
 	if(!gnReverbSend)
 	{ // and we did not clear the buffer yet, do it now because we will get new data
 		StereoFill(MixReverbBuffer, nSamples, gnRvbROfsVol, gnRvbLOfsVol);
 	}
 	gnReverbSend = true; // we will have to process reverb
-	return MixReverbBuffer;
 }
 
 
 // Reverb
-void CReverb::Process(MixSampleInt *MixSoundBuffer, uint32 nSamples)
+void CReverb::Process(MixSampleInt *MixSoundBuffer, MixSampleInt *MixReverbBuffer, MixSampleInt &gnRvbROfsVol, MixSampleInt &gnRvbLOfsVol, uint32 nSamples)
 {
 	if((!gnReverbSend) && (!gnReverbSamples))
 	{ // no data is sent to reverb and reverb decayed completely
 		return;
 	}
 	if(!gnReverbSend)
-	{ // no input data in MixReverbBuffer, so the buffer got not cleared in GetReverbSendBuffer(), do it now for decay
+	{ // no input data in MixReverbBuffer, so the buffer got not cleared in TouchReverbSendBuffer(), do it now for decay
 		StereoFill(MixReverbBuffer, nSamples, gnRvbROfsVol, gnRvbLOfsVol);
 	}
 
@@ -464,7 +459,7 @@ void CReverb::Process(MixSampleInt *MixSoundBuffer, uint32 nSamples)
 	else if(gnReverbSamples > nSamples) gnReverbSamples -= nSamples; // decay
 	else // decayed
 	{
-		Shutdown();
+		Shutdown(gnRvbROfsVol, gnRvbLOfsVol);
 		gnReverbSamples = 0;
 	}
 	gnReverbSend = false; // no input data in MixReverbBuffer

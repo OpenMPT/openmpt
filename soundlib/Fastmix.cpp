@@ -316,9 +316,10 @@ void CSoundFile::CreateStereoMix(int count)
 #ifndef NO_REVERB
 		if(((m_MixerSettings.DSPMask & SNDDSP_REVERB) && !chn.dwFlags[CHN_NOREVERB]) || chn.dwFlags[CHN_REVERB])
 		{
-			pbuffer = m_Reverb.GetReverbSendBuffer(count);
-			pOfsR = &m_Reverb.gnRvbROfsVol;
-			pOfsL = &m_Reverb.gnRvbLOfsVol;
+			m_Reverb.TouchReverbSendBuffer(ReverbSendBuffer, m_RvbROfsVol, m_RvbLOfsVol, count);
+			pbuffer = ReverbSendBuffer;
+			pOfsR = &m_RvbROfsVol;
+			pOfsL = &m_RvbLOfsVol;
 		}
 #endif
 		if(chn.dwFlags[CHN_SURROUND] && m_MixerSettings.gnChannels > 2)

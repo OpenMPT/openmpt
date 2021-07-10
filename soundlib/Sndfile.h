@@ -420,6 +420,8 @@ public:
 	MixerSettings m_MixerSettings;
 	CResampler m_Resampler;
 #ifndef NO_REVERB
+	mixsample_t ReverbSendBuffer[MIXBUFFERSIZE * 2];
+	mixsample_t m_RvbROfsVol = 0, m_RvbLOfsVol = 0;
 	CReverb m_Reverb;
 #endif
 #ifndef NO_DSP

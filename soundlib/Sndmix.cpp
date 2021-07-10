@@ -82,7 +82,7 @@ void CSoundFile::InitPlayer(bool bReset)
 	}
 	m_Resampler.UpdateTables();
 #ifndef NO_REVERB
-	m_Reverb.Initialize(bReset, m_MixerSettings.gdwMixingFreq);
+	m_Reverb.Initialize(bReset, m_RvbROfsVol, m_RvbLOfsVol, m_MixerSettings.gdwMixingFreq);
 #endif
 #ifndef NO_DSP
 	m_Surround.Initialize(bReset, m_MixerSettings.gdwMixingFreq);
@@ -295,7 +295,7 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioTarget &ta
 		}
 
 #ifndef NO_REVERB
-		m_Reverb.Process(MixSoundBuffer, countChunk);
+		m_Reverb.Process(MixSoundBuffer, ReverbSendBuffer, m_RvbROfsVol, m_RvbLOfsVol, countChunk);
 #endif  // NO_REVERB
 
 #ifndef NO_PLUGINS
