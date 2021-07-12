@@ -8,6 +8,8 @@ is just a high-level summary.
 ### libopenmpt 0.5.11-pre
 
  *  mpg123: Update to v1.28.1 (2021-07-09).
+ *  stb_vorbis: Update v1.22 commit 5a0bb8b1c1b1ca3f4e2485f4114c1c8ea021b781
+    (2021-07-12).
 
 ### libopenmpt 0.5.10 (2021-07-04)
 
