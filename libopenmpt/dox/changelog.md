@@ -7,7 +7,7 @@ is just a high-level summary.
 
 ### libopenmpt 0.4.23-pre
 
- *  mpg123: Update to v1.28.1 (2021-07-09).
+ *  mpg123: Update to v1.28.2 (2021-07-12).
  *  stb_vorbis: Update v1.22 commit 5a0bb8b1c1b1ca3f4e2485f4114c1c8ea021b781
     (2021-07-12).
 
