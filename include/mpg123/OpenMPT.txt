@@ -1,4 +1,4 @@
-libmpg123 library version 1.28.1 (2021-07-09).
+libmpg123 library version 1.28.2 (2021-07-12).
 The following changes have been made:
 - ports/makefile/config.h and ports/makefile/mpg123.h have been added for plain
   Makefile builds.
