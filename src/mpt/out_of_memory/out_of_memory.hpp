@@ -39,6 +39,8 @@ using out_of_memory = CMemoryException *;
 
 [[noreturn]] inline void rethrow_out_of_memory(out_of_memory e) {
 	MPT_UNUSED(e);
+	// cppcheck false-positive
+	// cppcheck-suppress rethrowNoCurrentException
 	throw;
 }
 
@@ -59,6 +61,8 @@ using out_of_memory = const std::bad_alloc &;
 
 [[noreturn]] inline void rethrow_out_of_memory(out_of_memory e) {
 	MPT_UNUSED(e);
+	// cppcheck false-positive
+	// cppcheck-suppress rethrowNoCurrentException
 	throw;
 }
 

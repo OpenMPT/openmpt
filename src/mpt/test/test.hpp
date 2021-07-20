@@ -54,6 +54,8 @@ inline auto format(const T & x) -> typename std::enable_if<!mpt::test::is_to_str
 inline std::string get_exception_text() {
 	std::string result;
 	try {
+		// cppcheck false-positive
+		// cppcheck-suppress rethrowNoCurrentException
 		throw;
 	} catch (const std::exception & e) {
 		result = e.what();
