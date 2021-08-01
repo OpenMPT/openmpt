@@ -344,7 +344,7 @@ bool CModTypeDlg::VerifyData()
 		GetDlgItem(IDC_ROWSPERMEASURE)->SetFocus();
 		return false;
 	}
-	if(newRPB == 0 && static_cast<TempoMode>(m_TempoModeBox.GetItemData(m_TempoModeBox.GetCurSel())) == TempoMode::Modern)
+	if(newRPB == 0 && static_cast<TempoMode>(m_TempoModeBox.GetItemData(m_TempoModeBox.GetCurSel())) == tempoModeModern)
 	{
 		Reporting::Warning("Error: Rows per beat must be greater than 0 in modern tempo mode.");
 		GetDlgItem(IDC_ROWSPERBEAT)->SetFocus();
