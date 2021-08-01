@@ -336,13 +336,18 @@ void CModTypeDlg::OnDefaultBehaviour()
 
 bool CModTypeDlg::VerifyData()
 {
-
-	int temp_nRPB = GetDlgItemInt(IDC_ROWSPERBEAT);
-	int temp_nRPM = GetDlgItemInt(IDC_ROWSPERMEASURE);
-	if(temp_nRPB > temp_nRPM)
+	const int newRPB = GetDlgItemInt(IDC_ROWSPERBEAT);
+	const int newRPM = GetDlgItemInt(IDC_ROWSPERMEASURE);
+	if(newRPB > newRPM)
 	{
 		Reporting::Warning("Error: Rows per measure must be greater than or equal to rows per beat.");
 		GetDlgItem(IDC_ROWSPERMEASURE)->SetFocus();
+		return false;
+	}
+	if(newRPB == 0 && static_cast<TempoMode>(m_TempoModeBox.GetItemData(m_TempoModeBox.GetCurSel())) == TempoMode::Modern)
+	{
+		Reporting::Warning("Error: Rows per beat must be greater than 0 in modern tempo mode.");
+		GetDlgItem(IDC_ROWSPERBEAT)->SetFocus();
 		return false;
 	}
 
