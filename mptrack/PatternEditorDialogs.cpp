@@ -212,8 +212,8 @@ void CPatternPropertiesDlg::OnTempoSwing()
 	const ROWINDEX oldRPM = pat.GetRowsPerMeasure();
 
 	// Temporarily apply new tempo signature for preview
-	ROWINDEX newRPB = std::max(1u, GetDlgItemInt(IDC_ROWSPERBEAT));
-	ROWINDEX newRPM = std::max(newRPB, GetDlgItemInt(IDC_ROWSPERMEASURE));
+	const ROWINDEX newRPB = Clamp(static_cast<ROWINDEX>(GetDlgItemInt(IDC_ROWSPERBEAT)), ROWINDEX(1), MAX_ROWS_PER_BEAT);
+	const ROWINDEX newRPM = Clamp(static_cast<ROWINDEX>(GetDlgItemInt(IDC_ROWSPERMEASURE)), newRPB, MAX_ROWS_PER_BEAT);
 	pat.SetSignature(newRPB, newRPM);
 
 	m_tempoSwing.resize(newRPB, TempoSwing::Unity);
@@ -236,16 +236,18 @@ void CPatternPropertiesDlg::OnOK()
 		if(IsDlgButtonChecked(IDC_CHECK1))
 		{
 			// Enable signature
-			ROWINDEX nNewBeat = (ROWINDEX)GetDlgItemInt(IDC_ROWSPERBEAT, NULL, FALSE), nNewMeasure = (ROWINDEX)GetDlgItemInt(IDC_ROWSPERMEASURE, NULL, FALSE);
-			if(nNewBeat != pattern.GetRowsPerBeat() || nNewMeasure != pattern.GetRowsPerMeasure() || m_tempoSwing != pattern.GetTempoSwing())
+			const ROWINDEX newRPB = std::min(static_cast<ROWINDEX>(GetDlgItemInt(IDC_ROWSPERBEAT, NULL, FALSE)), MAX_ROWS_PER_BEAT);
+			const ROWINDEX newRPM = std::min(static_cast<ROWINDEX>(GetDlgItemInt(IDC_ROWSPERMEASURE, NULL, FALSE)), MAX_ROWS_PER_BEAT);
+
+			if(newRPB != pattern.GetRowsPerBeat() || newRPM != pattern.GetRowsPerMeasure() || m_tempoSwing != pattern.GetTempoSwing())
 			{
-				if(!pattern.SetSignature(nNewBeat, nNewMeasure))
+				if(!pattern.SetSignature(newRPB, newRPM))
 				{
 					Reporting::Error("Invalid time signature!", "Pattern Properties");
 					GetDlgItem(IDC_ROWSPERBEAT)->SetFocus();
 					return;
 				}
-				m_tempoSwing.resize(nNewBeat, TempoSwing::Unity);
+				m_tempoSwing.resize(newRPB, TempoSwing::Unity);
 				pattern.SetTempoSwing(m_tempoSwing);
 				modDoc.SetModified();
 			}

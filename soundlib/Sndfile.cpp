@@ -535,8 +535,14 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 		LimitMax(m_nDefaultTempo, TEMPO(uint16_max, 0));
 	if(!m_nDefaultSpeed)
 		m_nDefaultSpeed = 6;
+
 	if(m_nDefaultRowsPerMeasure < m_nDefaultRowsPerBeat)
 		m_nDefaultRowsPerMeasure = m_nDefaultRowsPerBeat;
+	LimitMax(m_nDefaultRowsPerBeat, MAX_ROWS_PER_BEAT);
+	LimitMax(m_nDefaultRowsPerMeasure, MAX_ROWS_PER_BEAT);
+	if(!m_tempoSwing.empty())
+		m_tempoSwing.resize(m_nDefaultRowsPerBeat);
+
 	m_PlayState.m_nMusicSpeed = m_nDefaultSpeed;
 	m_PlayState.m_nMusicTempo = m_nDefaultTempo;
 	m_PlayState.m_nCurrentRowsPerBeat = m_nDefaultRowsPerBeat;
