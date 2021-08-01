@@ -304,7 +304,7 @@ void CModTypeDlg::OnTempoSwing()
 	sndFile.m_nDefaultRowsPerMeasure = newRPM;
 	sndFile.m_nTempoMode = TempoMode::Modern;
 
-	m_tempoSwing.resize(GetDlgItemInt(IDC_ROWSPERBEAT), TempoSwing::Unity);
+	m_tempoSwing.resize(newRPB, TempoSwing::Unity);
 	CTempoSwingDlg dlg(this, m_tempoSwing, sndFile);
 	if(dlg.DoModal() == IDOK)
 	{
