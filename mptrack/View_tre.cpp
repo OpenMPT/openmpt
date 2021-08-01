@@ -672,7 +672,7 @@ void CModTree::RefreshDlsBanks()
 						{
 							HTREEITEM hKit = InsertItem(TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE|TVIF_PARAM,
 								szName, IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, pDlsIns->ulInstrument & 0x7F, hDrums, TVI_LAST);
-							for (UINT iRgn=0; iRgn<pDlsIns->nRegions; iRgn++)
+							for(uint32 iRgn = 0; iRgn < static_cast<uint32>(pDlsIns->Regions.size()); iRgn++)
 							{
 								UINT keymin = pDlsIns->Regions[iRgn].uKeyMin;
 								UINT keymax = pDlsIns->Regions[iRgn].uKeyMax;
@@ -2302,7 +2302,7 @@ int CALLBACK CModTree::ModTreeDrumCompareProc(LPARAM lParam1, LPARAM lParam2, LP
 			const DLSINSTRUMENT *pDlsIns = reinterpret_cast<CDLSBank *>(pDLSBank)->GetInstrument(lParam1 & 0xFFFF);
 			lParam1 = (lParam1 >> 16) & 0xFF;
 			lParam2 = (lParam2 >> 16) & 0xFF;
-			if((pDlsIns) && (lParam1 < (LONG)pDlsIns->nRegions) && (lParam2 < (LONG)pDlsIns->nRegions))
+			if(pDlsIns && (lParam1 < static_cast<LPARAM>(pDlsIns->Regions.size())) && (lParam2 < static_cast<LPARAM>(pDlsIns->Regions.size())))
 			{
 				lParam1 = pDlsIns->Regions[lParam1].uKeyMin;
 				lParam2 = pDlsIns->Regions[lParam2].uKeyMin;
@@ -3256,10 +3256,10 @@ void CModTree::OnEndDrag(DWORD dwMask)
 		{
 			ReleaseCapture();
 			SetCursor(CMainFrame::curArrow);
-			SelectDropTarget(NULL);
-			if(m_hItemDrop != NULL)
+			SelectDropTarget(nullptr);
+			if(m_hItemDrop != nullptr)
 			{
-				CanDrop(m_hItemDrop, TRUE);
+				CanDrop(m_hItemDrop, true);
 			} else if(m_hDropWnd)
 			{
 				DRAGONDROP dropinfo;
@@ -3492,7 +3492,7 @@ void CModTree::OnMuteTreeItem()
 				return;
 			pPlugin->ToggleBypass();
 			modDoc.SetModified();
-			//UpdateView(GetDocumentIDFromModDoc(pModDoc), HINT_MIXPLUGINS);
+			//UpdateView(*info, PluginHint(static_cast<PLUGINDEX>(modItemID + 1)));
 		}
 	}
 }
