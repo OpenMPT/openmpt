@@ -406,6 +406,9 @@ bool CSoundFile::ReadSTP(FileReader &file, ModLoadingFlags loadFlags)
 			channels = file.ReadUint16BE();
 		}
 
+		if(!file.CanRead(channels * patternLength * 4u))
+			break;
+
 		if(!(loadFlags & loadPatternData) || !Patterns.Insert(actualPat, patternLength))
 		{
 			file.Skip(channels * patternLength * 4u);
