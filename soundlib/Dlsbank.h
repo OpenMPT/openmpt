@@ -23,8 +23,6 @@ OPENMPT_NAMESPACE_BEGIN
 #ifdef MODPLUG_TRACKER
 
 
-#define DLSMAXREGIONS		128
-
 struct DLSREGION
 {
 	uint32 ulLoopStart;
@@ -55,12 +53,12 @@ struct DLSENVELOPE
 
 struct DLSINSTRUMENT
 {
-	uint32 ulBank, ulInstrument;
-	uint32 nRegions, nMelodicEnv;
-	DLSREGION Regions[DLSMAXREGIONS];
+	uint32 ulBank = 0, ulInstrument = 0;
+	uint32 nMelodicEnv = 0;
+	std::vector<DLSREGION> Regions;
 	char szName[32];
 	// SF2 stuff (DO NOT USE! -> used internally by the SF2 loader)
-	uint16 wPresetBagNdx, wPresetBagNum;
+	uint16 wPresetBagNdx = 0, wPresetBagNum = 0;
 };
 
 struct DLSSAMPLEEX
