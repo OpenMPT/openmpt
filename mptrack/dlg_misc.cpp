@@ -298,8 +298,8 @@ void CModTypeDlg::OnTempoSwing()
 	const TempoMode oldMode = sndFile.m_nTempoMode;
 
 	// Temporarily apply new tempo signature for preview
-	ROWINDEX newRPB = std::max(1u, GetDlgItemInt(IDC_ROWSPERBEAT));
-	ROWINDEX newRPM = std::max(newRPB, GetDlgItemInt(IDC_ROWSPERMEASURE));
+	const ROWINDEX newRPB = std::clamp(static_cast<ROWINDEX>(GetDlgItemInt(IDC_ROWSPERBEAT)), ROWINDEX(1), MAX_ROWS_PER_BEAT);
+	const ROWINDEX newRPM = std::clamp(static_cast<ROWINDEX>(GetDlgItemInt(IDC_ROWSPERMEASURE)), newRPB, MAX_ROWS_PER_BEAT);
 	sndFile.m_nDefaultRowsPerBeat = newRPB;
 	sndFile.m_nDefaultRowsPerMeasure = newRPM;
 	sndFile.m_nTempoMode = TempoMode::Modern;
@@ -400,8 +400,8 @@ void CModTypeDlg::OnOK()
 		m_nChannels = static_cast<CHANNELINDEX>(m_ChannelsBox.GetItemData(sel));
 	}
 	
-	sndFile.m_nDefaultRowsPerBeat    = GetDlgItemInt(IDC_ROWSPERBEAT);
-	sndFile.m_nDefaultRowsPerMeasure = GetDlgItemInt(IDC_ROWSPERMEASURE);
+	sndFile.m_nDefaultRowsPerBeat    = std::min(static_cast<ROWINDEX>(GetDlgItemInt(IDC_ROWSPERBEAT)), MAX_ROWS_PER_BEAT);
+	sndFile.m_nDefaultRowsPerMeasure = std::min(static_cast<ROWINDEX>(GetDlgItemInt(IDC_ROWSPERMEASURE)), MAX_ROWS_PER_BEAT);
 
 	sel = m_TempoModeBox.GetCurSel();
 	if(sel >= 0)
