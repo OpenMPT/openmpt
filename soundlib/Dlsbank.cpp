@@ -2075,7 +2075,7 @@ const char *CDLSBank::GetRegionName(uint32 nIns, uint32 nRgn) const
 uint8 CDLSBank::GetPanning(uint32 ins, uint32 region) const
 {
 	const DLSINSTRUMENT &dlsIns = m_Instruments[ins];
-	if(region >= CountOf(dlsIns.Regions))
+	if(region >= dlsIns.Regions.size())
 		return 128;
 	const DLSREGION &rgn = dlsIns.Regions[region];
 	if(dlsIns.ulBank & F_INSTRUMENT_DRUMS)
