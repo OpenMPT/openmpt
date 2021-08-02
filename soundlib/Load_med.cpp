@@ -670,7 +670,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 		for (uint32 iSection=0; iSection<nSections; iSection++)
 		{
 			uint32 nplayseq = 0;
-			if (sectiontable && sectiontable < dwMemLength && 2 >= dwMemLength - sectiontable)
+			if (sectiontable && sectiontable < dwMemLength && 0 > (dwMemLength - sectiontable) / 2u)
 			{
 				nplayseq = *const_unaligned_ptr_be<uint16>(lpStream + sectiontable);
 				sectiontable += 2;
@@ -680,7 +680,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 			}
 			uint32 pseq = 0;
 
-			if ((playseqtable) && (playseqtable < dwMemLength) && (nplayseq * 4 <= dwMemLength - playseqtable))
+			if ((playseqtable) && (playseqtable < dwMemLength) && (nplayseq < (dwMemLength - playseqtable) / 4u))
 			{
 				pseq = (const_unaligned_ptr_be<uint32>(lpStream+playseqtable))[nplayseq];
 			}
