@@ -244,7 +244,7 @@ struct MixLoopState
 			{
 				if (nPosDest < nLoopStart)
 				{
-					nSmpCount = DistanceToBufferLength(SamplePosition(chn.nLoopStart, 0), nPos, nInv);
+					nSmpCount = DistanceToBufferLength(SamplePosition(nLoopStart, 0), nPos, nInv);
 				}
 			} else
 			{
