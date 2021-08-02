@@ -133,6 +133,7 @@ T ReadIntBE(TFileCursor & f) {
 template <typename T, typename TFileCursor>
 T ReadTruncatedIntLE(TFileCursor & f, typename TFileCursor::pos_type size) {
 	static_assert(std::numeric_limits<T>::is_integer == true, "Target type is a not an integer");
+	assert(sizeof(T) >= size);
 	if (size == 0) {
 		return 0;
 	}
@@ -154,9 +155,6 @@ T ReadTruncatedIntLE(TFileCursor & f, typename TFileCursor::pos_type size) {
 	}
 	typename mpt::make_le<T>::type target;
 	std::memcpy(&target, buf, sizeof(T));
-	if (size > sizeof(T)) {
-		f.Skip(size - sizeof(T));
-	}
 	return target;
 }
 
