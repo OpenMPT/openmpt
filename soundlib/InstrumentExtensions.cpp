@@ -549,27 +549,27 @@ bool ReadInstrumentHeaderField(ModInstrument *input, uint32 fcode, uint16 fsize,
 	case MAGIC4BE('P','T','T','L'):
 	{
 		// Integer part of pitch/tempo lock
-		uint16 tmp = file.ReadTruncatedIntLE<uint16>(fsize);
+		uint16 tmp = file.ReadSizedIntLE<uint16>(fsize);
 		input->pitchToTempoLock.Set(tmp, input->pitchToTempoLock.GetFract());
 		result = true;
 	} break;
 	case MAGIC4LE('P','T','T','F'):
 	{
 		// Fractional part of pitch/tempo lock
-		uint16 tmp = file.ReadTruncatedIntLE<uint16>(fsize);
+		uint16 tmp = file.ReadSizedIntLE<uint16>(fsize);
 		input->pitchToTempoLock.Set(input->pitchToTempoLock.GetInt(), tmp);
 		result = true;
 	} break;
 	case MAGIC4BE('V','E','.','.'):
-		input->VolEnv.resize(std::min<uint32>(MAX_ENVPOINTS, file.ReadTruncatedIntLE<uint32>(fsize)));
+		input->VolEnv.resize(std::min<uint32>(MAX_ENVPOINTS, file.ReadSizedIntLE<uint32>(fsize)));
 		result = true;
 		break;
 	case MAGIC4BE('P','E','.','.'):
-		input->PanEnv.resize(std::min<uint32>(MAX_ENVPOINTS, file.ReadTruncatedIntLE<uint32>(fsize)));
+		input->PanEnv.resize(std::min<uint32>(MAX_ENVPOINTS, file.ReadSizedIntLE<uint32>(fsize)));
 		result = true;
 		break;
 	case MAGIC4BE('P','i','E','.'):
-		input->PitchEnv.resize(std::min<uint32>(MAX_ENVPOINTS, file.ReadTruncatedIntLE<uint32>(fsize)));
+		input->PitchEnv.resize(std::min<uint32>(MAX_ENVPOINTS, file.ReadSizedIntLE<uint32>(fsize)));
 		result = true;
 		break;
 	}
