@@ -5,6 +5,8 @@
 
 
 
+#include "mpt/base/array.hpp"
+#include "mpt/base/bit.hpp"
 #include "mpt/base/integer.hpp"
 #include "mpt/base/memory.hpp"
 #include "mpt/base/namespace.hpp"
@@ -19,7 +21,6 @@
 
 #include <cassert>
 #include <cstddef>
-#include <cstring>
 
 
 
@@ -88,13 +89,10 @@ template <typename T, typename Tfile>
 inline bool ReadBinaryTruncatedLE(Tfile & f, T & v, std::size_t size) {
 	bool result = false;
 	static_assert(std::numeric_limits<T>::is_integer);
-	uint8 bytes[sizeof(T)];
-	std::memset(bytes, 0, sizeof(T));
-	const std::size_t readResult = mpt::IO::ReadRaw(f, bytes, std::min(size, sizeof(T))).size();
+	std::array<uint8, sizeof(T)> bytes = mpt::init_array<uint8, sizeof(T)>(uint8{0});
+	const std::size_t readResult = mpt::IO::ReadRaw(f, bytes.data(), std::min(size, sizeof(T))).size();
 	result = (readResult == std::min(size, sizeof(T)));
-	typename mpt::make_le<T>::type val;
-	std::memcpy(&val, bytes, sizeof(T));
-	v = val;
+	v = mpt::bit_cast<typename mpt::make_le<T>::type>(bytes);
 	return result;
 }
 
@@ -102,13 +100,10 @@ template <typename T, typename Tfile>
 inline bool ReadIntLE(Tfile & f, T & v) {
 	bool result = false;
 	static_assert(std::numeric_limits<T>::is_integer);
-	uint8 bytes[sizeof(T)];
-	std::memset(bytes, 0, sizeof(T));
-	const std::size_t readResult = mpt::IO::ReadRaw(f, bytes, sizeof(T)).size();
+	std::array<uint8, sizeof(T)> bytes = mpt::init_array<uint8, sizeof(T)>(uint8{0});
+	const std::size_t readResult = mpt::IO::ReadRaw(f, mpt::as_span(bytes)).size();
 	result = (readResult == sizeof(T));
-	typename mpt::make_le<T>::type val;
-	std::memcpy(&val, bytes, sizeof(T));
-	v = val;
+	v = mpt::bit_cast<typename mpt::make_le<T>::type>(bytes);
 	return result;
 }
 
@@ -116,13 +111,10 @@ template <typename T, typename Tfile>
 inline bool ReadIntBE(Tfile & f, T & v) {
 	bool result = false;
 	static_assert(std::numeric_limits<T>::is_integer);
-	uint8 bytes[sizeof(T)];
-	std::memset(bytes, 0, sizeof(T));
-	const std::size_t readResult = mpt::IO::ReadRaw(f, bytes, sizeof(T)).size();
+	std::array<uint8, sizeof(T)> bytes = mpt::init_array<uint8, sizeof(T)>(uint8{0});
+	const std::size_t readResult = mpt::IO::ReadRaw(f, mpt::as_span(bytes)).size();
 	result = (readResult == sizeof(T));
-	typename mpt::make_be<T>::type val;
-	std::memcpy(&val, bytes, sizeof(T));
-	v = val;
+	v = mpt::bit_cast<typename mpt::make_be<T>::type>(bytes);
 	return result;
 }
 

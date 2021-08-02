@@ -153,9 +153,7 @@ T ReadTruncatedIntLE(TFileCursor & f, typename TFileCursor::pos_type size) {
 		}
 		buf[i] = byte;
 	}
-	typename mpt::make_le<T>::type target;
-	std::memcpy(&target, buf, sizeof(T));
-	return target;
+	return mpt::bit_cast<typename mpt::make_le<T>::type>(buf);
 }
 
 // Read a supplied-size little endian integer to a fixed size variable.
