@@ -133,17 +133,14 @@ inline bool ReadAdaptiveInt16LE(Tfile & f, uint16 & v) {
 	std::size_t additionalBytes = 0;
 	v = 0;
 	byte = 0;
-	if (!mpt::IO::ReadIntLE<uint8>(f, byte))
-	{
+	if (!mpt::IO::ReadIntLE<uint8>(f, byte)) {
 		result = false;
 	}
 	additionalBytes = (byte & 0x01);
 	v = byte >> 1;
-	for (std::size_t i = 0; i < additionalBytes; ++i)
-	{
+	for (std::size_t i = 0; i < additionalBytes; ++i) {
 		byte = 0;
-		if (!mpt::IO::ReadIntLE<uint8>(f, byte))
-		{
+		if (!mpt::IO::ReadIntLE<uint8>(f, byte)) {
 			result = false;
 		}
 		v |= (static_cast<uint16>(byte) << (((i + 1) * 8) - 1));
@@ -158,17 +155,14 @@ inline bool ReadAdaptiveInt32LE(Tfile & f, uint32 & v) {
 	std::size_t additionalBytes = 0;
 	v = 0;
 	byte = 0;
-	if (!mpt::IO::ReadIntLE<uint8>(f, byte))
-	{
+	if (!mpt::IO::ReadIntLE<uint8>(f, byte)) {
 		result = false;
 	}
 	additionalBytes = (byte & 0x03);
 	v = byte >> 2;
-	for (std::size_t i = 0; i < additionalBytes; ++i)
-	{
+	for (std::size_t i = 0; i < additionalBytes; ++i) {
 		byte = 0;
-		if (!mpt::IO::ReadIntLE<uint8>(f, byte))
-		{
+		if (!mpt::IO::ReadIntLE<uint8>(f, byte)) {
 			result = false;
 		}
 		v |= (static_cast<uint32>(byte) << (((i + 1) * 8) - 2));
@@ -183,17 +177,14 @@ inline bool ReadAdaptiveInt64LE(Tfile & f, uint64 & v) {
 	std::size_t additionalBytes = 0;
 	v = 0;
 	byte = 0;
-	if (!mpt::IO::ReadIntLE<uint8>(f, byte))
-	{
+	if (!mpt::IO::ReadIntLE<uint8>(f, byte)) {
 		result = false;
 	}
 	additionalBytes = (1 << (byte & 0x03)) - 1;
 	v = byte >> 2;
-	for (std::size_t i = 0; i < additionalBytes; ++i)
-	{
+	for (std::size_t i = 0; i < additionalBytes; ++i) {
 		byte = 0;
-		if (!mpt::IO::ReadIntLE<uint8>(f, byte))
-		{
+		if (!mpt::IO::ReadIntLE<uint8>(f, byte)) {
 			result = false;
 		}
 		v |= (static_cast<uint64>(byte) << (((i + 1) * 8) - 2));
@@ -206,19 +197,15 @@ inline bool ReadSizedStringLE(Tfile & f, std::string & str, Tsize maxSize = std:
 	static_assert(std::numeric_limits<Tsize>::is_integer);
 	str.clear();
 	Tsize size = 0;
-	if (!mpt::IO::ReadIntLE(f, size))
-	{
+	if (!mpt::IO::ReadIntLE(f, size)) {
 		return false;
 	}
-	if (size > maxSize)
-	{
+	if (size > maxSize) {
 		return false;
 	}
-	for (Tsize i = 0; i != size; ++i)
-	{
+	for (Tsize i = 0; i != size; ++i) {
 		char c = '\0';
-		if (!mpt::IO::ReadIntLE(f, c))
-		{
+		if (!mpt::IO::ReadIntLE(f, c)) {
 			return false;
 		}
 		str.push_back(c);
@@ -247,18 +234,14 @@ inline bool WriteAdaptiveInt16LE(Tfile & f, const uint16 v, std::size_t fixedSiz
 	assert(minSize == 0 || minSize == 1 || minSize == 2);
 	assert(maxSize == 0 || maxSize == 1 || maxSize == 2);
 	assert(maxSize == 0 || maxSize >= minSize);
-	if (maxSize == 0)
-	{
+	if (maxSize == 0) {
 		maxSize = 2;
 	}
-	if (v < 0x80 && minSize <= 1 && 1 <= maxSize)
-	{
+	if (v < 0x80 && minSize <= 1 && 1 <= maxSize) {
 		return mpt::IO::WriteIntLE<uint8>(f, static_cast<uint8>(v << 1) | 0x00);
-	} else if (v < 0x8000 && minSize <= 2 && 2 <= maxSize)
-	{
+	} else if (v < 0x8000 && minSize <= 2 && 2 <= maxSize) {
 		return mpt::IO::WriteIntLE<uint16>(f, static_cast<uint16>(v << 1) | 0x01);
-	} else
-	{
+	} else {
 		assert(false);
 		return false;
 	}
@@ -271,29 +254,23 @@ inline bool WriteAdaptiveInt32LE(Tfile & f, const uint32 v, std::size_t fixedSiz
 	assert(minSize == 0 || minSize == 1 || minSize == 2 || minSize == 3 || minSize == 4);
 	assert(maxSize == 0 || maxSize == 1 || maxSize == 2 || maxSize == 3 || maxSize == 4);
 	assert(maxSize == 0 || maxSize >= minSize);
-	if (maxSize == 0)
-	{
+	if (maxSize == 0) {
 		maxSize = 4;
 	}
-	if (v < 0x40 && minSize <= 1 && 1 <= maxSize)
-	{
+	if (v < 0x40 && minSize <= 1 && 1 <= maxSize) {
 		return mpt::IO::WriteIntLE<uint8>(f, static_cast<uint8>(v << 2) | 0x00);
-	} else if (v < 0x4000 && minSize <= 2 && 2 <= maxSize)
-	{
+	} else if (v < 0x4000 && minSize <= 2 && 2 <= maxSize) {
 		return mpt::IO::WriteIntLE<uint16>(f, static_cast<uint16>(v << 2) | 0x01);
-	} else if (v < 0x400000 && minSize <= 3 && 3 <= maxSize)
-	{
+	} else if (v < 0x400000 && minSize <= 3 && 3 <= maxSize) {
 		uint32 value = static_cast<uint32>(v << 2) | 0x02;
 		std::byte bytes[3];
 		bytes[0] = static_cast<std::byte>(value >> 0);
 		bytes[1] = static_cast<std::byte>(value >> 8);
 		bytes[2] = static_cast<std::byte>(value >> 16);
 		return mpt::IO::WriteRaw(f, bytes, 3);
-	} else if (v < 0x40000000 && minSize <= 4 && 4 <= maxSize)
-	{
+	} else if (v < 0x40000000 && minSize <= 4 && 4 <= maxSize) {
 		return mpt::IO::WriteIntLE<uint32>(f, static_cast<uint32>(v << 2) | 0x03);
-	} else
-	{
+	} else {
 		assert(false);
 		return false;
 	}
@@ -306,24 +283,18 @@ inline bool WriteAdaptiveInt64LE(Tfile & f, const uint64 v, std::size_t fixedSiz
 	assert(minSize == 0 || minSize == 1 || minSize == 2 || minSize == 4 || minSize == 8);
 	assert(maxSize == 0 || maxSize == 1 || maxSize == 2 || maxSize == 4 || maxSize == 8);
 	assert(maxSize == 0 || maxSize >= minSize);
-	if (maxSize == 0)
-	{
+	if (maxSize == 0) {
 		maxSize = 8;
 	}
-	if (v < 0x40 && minSize <= 1 && 1 <= maxSize)
-	{
+	if (v < 0x40 && minSize <= 1 && 1 <= maxSize) {
 		return mpt::IO::WriteIntLE<uint8>(f, static_cast<uint8>(v << 2) | 0x00);
-	} else if (v < 0x4000 && minSize <= 2 && 2 <= maxSize)
-	{
+	} else if (v < 0x4000 && minSize <= 2 && 2 <= maxSize) {
 		return mpt::IO::WriteIntLE<uint16>(f, static_cast<uint16>(v << 2) | 0x01);
-	} else if (v < 0x40000000 && minSize <= 4 && 4 <= maxSize)
-	{
+	} else if (v < 0x40000000 && minSize <= 4 && 4 <= maxSize) {
 		return mpt::IO::WriteIntLE<uint32>(f, static_cast<uint32>(v << 2) | 0x02);
-	} else if (v < 0x4000000000000000ull && minSize <= 8 && 8 <= maxSize)
-	{
+	} else if (v < 0x4000000000000000ull && minSize <= 8 && 8 <= maxSize) {
 		return mpt::IO::WriteIntLE<uint64>(f, static_cast<uint64>(v << 2) | 0x03);
-	} else
-	{
+	} else {
 		assert(false);
 		return false;
 	}
@@ -336,17 +307,14 @@ bool WriteVarInt(Tfile & f, const T v, std::size_t * bytesWritten = nullptr) {
 	static_assert(!std::numeric_limits<T>::is_signed);
 	std::byte out[(sizeof(T) * 8 + 6) / 7];
 	std::size_t numBytes = 0;
-	for (uint32 n = (sizeof(T) * 8) / 7; n > 0; n--)
-	{
-		if (v >= (static_cast<T>(1) << (n * 7u)))
-		{
+	for (uint32 n = (sizeof(T) * 8) / 7; n > 0; n--) {
+		if (v >= (static_cast<T>(1) << (n * 7u))) {
 			out[numBytes++] = static_cast<std::byte>(((v >> (n * 7u)) & 0x7F) | 0x80);
 		}
 	}
 	out[numBytes++] = static_cast<std::byte>(v & 0x7F);
 	assert(numBytes <= std::size(out));
-	if (bytesWritten != nullptr)
-	{
+	if (bytesWritten != nullptr) {
 		*bytesWritten = numBytes;
 	}
 	return mpt::IO::WriteRaw(f, out, numBytes);
@@ -355,17 +323,14 @@ bool WriteVarInt(Tfile & f, const T v, std::size_t * bytesWritten = nullptr) {
 template <typename Tsize, typename Tfile>
 inline bool WriteSizedStringLE(Tfile & f, const std::string & str) {
 	static_assert(std::numeric_limits<Tsize>::is_integer);
-	if (str.size() > std::numeric_limits<Tsize>::max())
-	{
+	if (str.size() > std::numeric_limits<Tsize>::max()) {
 		return false;
 	}
 	Tsize size = static_cast<Tsize>(str.size());
-	if (!mpt::IO::WriteIntLE(f, size))
-	{
+	if (!mpt::IO::WriteIntLE(f, size)) {
 		return false;
 	}
-	if (!mpt::IO::WriteRaw(f, str.data(), str.size()))
-	{
+	if (!mpt::IO::WriteRaw(f, str.data(), str.size())) {
 		return false;
 	}
 	return true;
