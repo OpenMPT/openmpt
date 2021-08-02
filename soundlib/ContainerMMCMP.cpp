@@ -85,6 +85,8 @@ struct MMCMPSubBlock
 			return false;
 		if(size > unpackedSize - position)
 			return false;
+		if(size == 0)
+			return false;
 		if(unpackedData.size() < position + size)
 			unpackedData.resize(position + size);
 		return true;
