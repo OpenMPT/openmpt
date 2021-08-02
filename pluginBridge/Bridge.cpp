@@ -26,6 +26,7 @@
 #include <CommDlg.h>
 #include <tchar.h>
 #include <algorithm>
+#include <string>
 
 
 #ifdef _DEBUG

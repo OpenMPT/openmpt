@@ -24,6 +24,7 @@
 #include "../common/StringFixer.h"
 
 #include <deque>
+#include <ostream>
 
 // For ACM debugging purposes
 #define ACMLOG(x, ...)
