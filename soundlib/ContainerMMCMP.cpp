@@ -102,6 +102,7 @@ static bool MMCMP_IsDstBlockValid(const std::vector<char> &unpackedData, uint32 
 	if(pos >= unpackedData.size()) return false;
 	if(len > unpackedData.size()) return false;
 	if(len > unpackedData.size() - pos) return false;
+	if(!len) return false;
 	return true;
 }
 
