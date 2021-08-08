@@ -329,6 +329,9 @@ void ModInstrument::Sanitize(MODTYPE modType)
 		if(NoteMap[i] < NOTE_MIN || NoteMap[i] > NOTE_MAX)
 			NoteMap[i] = static_cast<uint8>(i + NOTE_MIN);
 	}
+
+	if(nMixPlug > MAX_MIXPLUGINS)
+		nMixPlug = 0;
 }
 
 

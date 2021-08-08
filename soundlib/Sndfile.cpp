@@ -467,6 +467,8 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 	{
 		LimitMax(ChnSettings[ich].nVolume, uint16(64));
 		if (ChnSettings[ich].nPan > 256) ChnSettings[ich].nPan = 128;
+		if(ChnSettings[chn].nMixPlugin > MAX_MIXPLUGINS)
+			ChnSettings[chn].nMixPlugin = 0;
 		m_PlayState.Chn[ich].Reset(ModChannel::resetTotal, *this, ich);
 	}
 
