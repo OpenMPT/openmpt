@@ -299,6 +299,9 @@ void ModInstrument::Sanitize(MODTYPE modType)
 
 	if(!Resampling::IsKnownMode(resampling))
 		resampling = SRCMODE_DEFAULT;
+
+	if(nMixPlug > MAX_MIXPLUGINS)
+		nMixPlug = 0;
 }
 
 
