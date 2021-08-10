@@ -78,6 +78,99 @@ inline void reset(T & x) {
 
 
 
+#if MPT_CXX_AT_LEAST(20)
+
+using std::cmp_equal;
+using std::cmp_not_equal;
+using std::cmp_less;
+using std::cmp_greater;
+using std::cmp_less_equal;
+using std::cmp_greater_equal;
+
+#else
+
+template <typename Ta, typename Tb>
+constexpr bool cmp_equal(Ta a, Tb b) noexcept {
+	using UTa = typename std::make_unsigned<Ta>::type;
+	using UTb = typename std::make_unsigned<Tb>::type;
+	if constexpr (std::is_signed<Ta>::value == std::is_signed<Tb>::value) {
+		return a == b;
+	} else if constexpr (std::is_signed<Ta>::value) {
+		return (a < 0) ? false : static_cast<UTa>(a) == b;
+	} else {
+		return (b < 0) ? false : a == static_cast<UTb>(b);
+	}
+}
+
+template <typename Ta, typename Tb>
+constexpr bool cmp_not_equal(Ta a, Tb b) noexcept {
+	using UTa = typename std::make_unsigned<Ta>::type;
+	using UTb = typename std::make_unsigned<Tb>::type;
+	if constexpr (std::is_signed<Ta>::value == std::is_signed<Tb>::value) {
+		return a != b;
+	} else if constexpr (std::is_signed<Ta>::value) {
+		return (a < 0) ? true : static_cast<UTa>(a) != b;
+	} else {
+		return (b < 0) ? true : a != static_cast<UTb>(b);
+	}
+}
+
+template <typename Ta, typename Tb>
+constexpr bool cmp_less(Ta a, Tb b) noexcept {
+	using UTa = typename std::make_unsigned<Ta>::type;
+	using UTb = typename std::make_unsigned<Tb>::type;
+	if constexpr (std::is_signed<Ta>::value == std::is_signed<Tb>::value) {
+		return a < b;
+	} else if constexpr (std::is_signed<Ta>::value) {
+		return (a < 0) ? true : static_cast<UTa>(a) < b;
+	} else {
+		return (b < 0) ? false : a < static_cast<UTb>(b);
+	}
+}
+
+template <typename Ta, typename Tb>
+constexpr bool cmp_greater(Ta a, Tb b) noexcept {
+	using UTa = typename std::make_unsigned<Ta>::type;
+	using UTb = typename std::make_unsigned<Tb>::type;
+	if constexpr (std::is_signed<Ta>::value == std::is_signed<Tb>::value) {
+		return a > b;
+	} else if constexpr (std::is_signed<Ta>::value) {
+		return (a < 0) ? false : static_cast<UTa>(a) > b;
+	} else {
+		return (b < 0) ? true : a > static_cast<UTb>(b);
+	}
+}
+
+template <typename Ta, typename Tb>
+constexpr bool cmp_less_equal(Ta a, Tb b) noexcept {
+	using UTa = typename std::make_unsigned<Ta>::type;
+	using UTb = typename std::make_unsigned<Tb>::type;
+	if constexpr (std::is_signed<Ta>::value == std::is_signed<Tb>::value) {
+		return a <= b;
+	} else if constexpr (std::is_signed<Ta>::value) {
+		return (a < 0) ? true : static_cast<UTa>(a) <= b;
+	} else {
+		return (b < 0) ? false : a <= static_cast<UTb>(b);
+	}
+}
+
+template <typename Ta, typename Tb>
+constexpr bool cmp_greater_equal(Ta a, Tb b) noexcept {
+	using UTa = typename std::make_unsigned<Ta>::type;
+	using UTb = typename std::make_unsigned<Tb>::type;
+	if constexpr (std::is_signed<Ta>::value == std::is_signed<Tb>::value) {
+		return a >= b;
+	} else if constexpr (std::is_signed<Ta>::value) {
+		return (a < 0) ? false : static_cast<UTa>(a) >= b;
+	} else {
+		return (b < 0) ? true : a >= static_cast<UTb>(b);
+	}
+}
+
+#endif
+
+
+
 } // namespace MPT_INLINE_NS
 } // namespace mpt
 
