@@ -81,11 +81,11 @@ inline void reset(T & x) {
 #if MPT_CXX_AT_LEAST(20)
 
 using std::cmp_equal;
-using std::cmp_not_equal;
-using std::cmp_less;
 using std::cmp_greater;
-using std::cmp_less_equal;
 using std::cmp_greater_equal;
+using std::cmp_less;
+using std::cmp_less_equal;
+using std::cmp_not_equal;
 
 #else
 
