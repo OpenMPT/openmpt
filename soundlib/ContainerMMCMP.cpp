@@ -252,6 +252,8 @@ bool UnpackMMCMP(std::vector<ContainerItem> &containerItems, FileReader &file, C
 			if(!MMCMP_IsDstBlockValid(unpackedData, psubblk[subblk])) return false;
 			char *pDest = &(unpackedData[psubblk[subblk].unpk_pos]);
 			uint32 dwSize = psubblk[subblk].unpk_size & ~1u;
+			if(!dwSize)
+				return false;
 			uint32 dwPos = 0;
 			uint32 numbits = blk.num_bits;
 			uint32 oldval = 0;
@@ -319,6 +321,8 @@ bool UnpackMMCMP(std::vector<ContainerItem> &containerItems, FileReader &file, C
 						if(!(subblk < blk.sub_blk)) break;
 						if(!MMCMP_IsDstBlockValid(unpackedData, psubblk[subblk])) return false;
 						dwSize = psubblk[subblk].unpk_size & ~1u;
+						if(!dwSize)
+							return false;
 						pDest = &(unpackedData[psubblk[subblk].unpk_pos]);
 					}
 				}
