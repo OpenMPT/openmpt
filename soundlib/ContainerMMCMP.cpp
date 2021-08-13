@@ -222,6 +222,8 @@ bool UnpackMMCMP(std::vector<ContainerItem> &containerItems, FileReader &file, C
 				return false;
 			char *pDest = &(unpackedData[psubblk[subblk].position]);
 			uint32 dwSize = psubblk[subblk].size & ~1u;
+			if(!dwSize)
+				return false;
 			uint32 dwPos = 0;
 			uint32 numbits = blk.num_bits;
 			uint32 oldval = 0;
@@ -292,6 +294,8 @@ bool UnpackMMCMP(std::vector<ContainerItem> &containerItems, FileReader &file, C
 						if(!psubblk[subblk].Validate(unpackedData, unpackedSize))
 							return false;
 						dwSize = psubblk[subblk].size & ~1u;
+						if(!dwSize)
+							return false;
 						pDest = &(unpackedData[psubblk[subblk].position]);
 					}
 				}
