@@ -181,6 +181,7 @@ public:
 
 struct self_xmplay_t {
 	std::vector<float> subsong_lengths;
+	std::vector<std::string> subsong_names;
 	std::size_t samplerate = 48000;
 	std::size_t num_channels = 2;
 	xmp_openmpt_settings settings;
@@ -731,17 +732,31 @@ static void append_xmplay_tag( std::string & tags, const std::string & tag, cons
 	tags.append( 1, '\0' );
 }
 
-static char * build_xmplay_tags( const openmpt::module & mod ) {
+static char * build_xmplay_tags( const openmpt::module & mod, int32_t subsong = -1 ) {
 	std::string tags;
-	append_xmplay_tag( tags, "filetype", convert_to_native( StringUpperCase( mod.get_metadata("type") ) ) );
-	append_xmplay_tag( tags, "title", convert_to_native( mod.get_metadata("title") ) );
-	append_xmplay_tag( tags, "artist", convert_to_native( mod.get_metadata("artist") ) );
-	append_xmplay_tag( tags, "album", convert_to_native( mod.get_metadata("xmplay-album") ) ); // todo, libopenmpt does not support that
-	append_xmplay_tag( tags, "date", convert_to_native( extract_date( mod ) ) );
-	append_xmplay_tag( tags, "track", convert_to_native( mod.get_metadata("xmplay-tracknumber") ) ); // todo, libopenmpt does not support that
-	append_xmplay_tag( tags, "genre", convert_to_native( mod.get_metadata("xmplay-genre") ) ); // todo, libopenmpt does not support that
-	append_xmplay_tag( tags, "comment", convert_to_native( mod.get_metadata("message") ) );
-	tags.append( 1, '\0' );
+	const std::string title = mod.get_metadata("title");
+
+	const auto subsong_names = mod.get_subsong_names();
+	auto first_subsong = subsong_names.cbegin(), last_subsong = subsong_names.cend();
+	if ( subsong >= 0 && static_cast<size_t>( subsong ) < subsong_names.size() ) {
+		first_subsong += subsong;
+		last_subsong = first_subsong + 1;
+	} else
+	{
+		last_subsong = first_subsong + 1;
+	}
+
+	for ( auto subsong_name = first_subsong; subsong_name != last_subsong; subsong_name++ ) {
+		append_xmplay_tag( tags, "filetype", convert_to_native( StringUpperCase( mod.get_metadata( "type" ) ) ) );
+		append_xmplay_tag( tags, "title", convert_to_native( ( subsong_name->empty() || subsong == -1 ) ? title : *subsong_name ) );
+		append_xmplay_tag( tags, "artist", convert_to_native( mod.get_metadata( "artist" ) ) );
+		append_xmplay_tag( tags, "album", convert_to_native( mod.get_metadata( "xmplay-album" ) ) );  // todo, libopenmpt does not support that
+		append_xmplay_tag( tags, "date", convert_to_native( extract_date( mod ) ) );
+		append_xmplay_tag( tags, "track", convert_to_native( mod.get_metadata( "xmplay-tracknumber" ) ) );  // todo, libopenmpt does not support that
+		append_xmplay_tag( tags, "genre", convert_to_native( mod.get_metadata( "xmplay-genre" ) ) );        // todo, libopenmpt does not support that
+		append_xmplay_tag( tags, "comment", convert_to_native( mod.get_metadata( "message" ) ) );
+		tags.append( 1, '\0' );
+	}
 	char * result = static_cast<char*>( xmpfmisc->Alloc( tags.size() ) );
 	if ( !result ) {
 		return nullptr;
@@ -993,6 +1008,7 @@ static DWORD WINAPI openmpt_Open( const char * filename, XMPFILE file ) {
 			self->mod->select_subsong( i );
 			self->subsong_lengths[i] = static_cast<float>( self->mod->get_duration_seconds() );
 		}
+		self->subsong_names = self->mod->get_subsong_names();
 		self->mod->select_subsong( 0 );
 		self->tempo_factor = 0;
 		self->pitch_factor = 0;
@@ -1061,7 +1077,7 @@ static char * WINAPI openmpt_GetTags() {
 		tags[0] = '\0';
 		return tags;
 	}
-	return build_xmplay_tags( *self->mod );
+	return build_xmplay_tags( *self->mod, std::max( 0, self->mod->get_selected_subsong() ) );
 }
 
 // get the main panel info text
@@ -1132,10 +1148,8 @@ static void WINAPI openmpt_GetGeneralInfo( char * buf ) {
 	str << "Samples" << "\t" << self->mod->get_num_samples() << "\r";
 
 	if( !self->single_subsong_mode && self->subsong_lengths.size() > 1 ) {
-		std::vector<std::string> names = self->mod->get_subsong_names();
-
 		for ( std::size_t i = 0; i < self->subsong_lengths.size(); ++i ) {
-			str << ( i == 0 ? "Subsongs\t" : "\t" ) << (i + 1) << ". " << seconds_to_string( self->subsong_lengths[i]) << " " << names[i] << "\r";
+			str << ( i == 0 ? "Subsongs\t" : "\t" ) << (i + 1) << ". " << seconds_to_string( self->subsong_lengths[i]) << " " << self->subsong_names[i] << "\r";
 		}
 	}
 
@@ -1180,13 +1194,15 @@ static double WINAPI openmpt_SetPosition( DWORD pos ) {
 	}
 	if ( pos & XMPIN_POS_SUBSONG ) {
 		self->single_subsong_mode = ( pos & XMPIN_POS_SUBSONG1 ) != 0;
+		const int32_t subsong = pos & 0xffff;
 		try {
-			self->mod->select_subsong( pos & 0xffff );
+			self->mod->select_subsong( subsong );
 		} catch ( ... ) {
 			return 0.0;
 		}
 		openmpt::ext::interactive *interactive = static_cast<openmpt::ext::interactive *>( self->mod->get_interface( openmpt::ext::interactive_id ) );
-		xmpfin->SetLength( static_cast<float> ( self->subsong_lengths[pos & 0xffff] / interactive->get_tempo_factor() ), TRUE );
+		xmpfin->SetLength( static_cast<float>( self->subsong_lengths[ subsong ] / interactive->get_tempo_factor() ), TRUE );
+		xmpfin->UpdateTitle( nullptr );
 		reset_timeinfos( 0 );
 		return 0.0;
 	}

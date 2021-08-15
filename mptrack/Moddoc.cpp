@@ -3139,6 +3139,8 @@ void CModDoc::SerializeViews() const
 		if(pView)
 		{
 			CChildFrame *pChildFrm = (CChildFrame *)pView->GetParentFrame();
+			if(!pChildFrm)
+				continue;
 			WINDOWPLACEMENT wnd;
 			wnd.length = sizeof(WINDOWPLACEMENT);
 			pChildFrm->GetWindowPlacement(&wnd);

@@ -2588,15 +2588,15 @@ bool CSoundFile::ProcessEffects()
 			// Test cases: keyoff+instr.xm, delay.xm
 			bool reloadSampleSettings = (m_playBehaviour[kFT2ReloadSampleSettings] && instr != 0);
 			// ProTracker Compatibility: If a sample was stopped before, lone instrument numbers can retrigger it
-			// Test case: PTSwapEmpty.mod, PTInstrVolume.mod, SampleSwap.s3m
+			// FT2 / ScreamTracker compatibility: Allow instrument (and volume) to be set before first note is triggered on a channel
+			// Test cases: PTSwapEmpty.mod, PTInstrVolume.mod, InstrVolume.s3m, InstrVolume.xm, SampleSwap.s3m
 			bool keepInstr = (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))
 				|| m_playBehaviour[kST3SampleSwap]
-				|| (m_playBehaviour[kMODSampleSwap] && !chn.IsSamplePlaying() && (chn.pModSample == nullptr || !chn.pModSample->HasSampleData()));
+				|| ((m_playBehaviour[kMODSampleSwap] || m_playBehaviour[kFT2ST3InstrWithoutNote]) && !chn.IsSamplePlaying() && (chn.pModSample == nullptr || !chn.pModSample->HasSampleData()));
 
 			// Now it's time for some FT2 crap...
 			if (GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2))
 			{
-
 				// XM: Key-Off + Sample == Note Cut (BUT: Only if no instr number or volume effect is present!)
 				// Test case: NoteOffVolume.xm
 				if(note == NOTE_KEYOFF

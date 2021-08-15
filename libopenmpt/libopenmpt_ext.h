@@ -287,17 +287,59 @@ typedef struct openmpt_module_ext_interface_interactive {
 	 * \param panning The panning position at which the note should be triggered, in range [-1.0, 1.0], 0.0 is center.
 	 * \return The channel on which the note is played. This can pe be passed to openmpt_module_ext_interface_interactive::stop_note to stop the note. -1 means that no channel could be allocated and the note is not played.
 	 * \sa openmpt_module_ext_interface_interactive::stop_note
+	 * \sa openmpt_module_ext_interface_interactive::note_off
+	 * \sa openmpt_module_ext_interface_interactive::note_fade
 	 */
 	int32_t ( * play_note ) ( openmpt_module_ext * mod_ext, int32_t instrument, int32_t note, double volume, double panning );
 
 	/*! Stop the note playing on the specified channel
 	 *
 	 * \param mod_ext The module handle to work on.
-	 * \param channel The channel on which the note should be stopped.
+	 * \param channel The channel on which the note should be stopped. This is the value returned by a previous play_note call.
 	 * \return 1 on success, 0 on failure (channel out of range).
 	 * \sa openmpt_module_ext_interface_interactive::play_note
+	 * \sa openmpt_module_ext_interface_interactive::note_off
+	 * \sa openmpt_module_ext_interface_interactive::note_fade
 	 */
 	int ( * stop_note ) ( openmpt_module_ext * mod_ext, int32_t channel );
+
+	//! Sends a key-off command for the note playing on the specified channel
+	/*!
+	 * \param channel The channel on which the key-off event should be triggered. This is the value returned by a previous play_note call.
+	 * \return 1 on success, 0 on failure (channel out of range).
+	 * \sa openmpt_module_ext_interface_interactive::play_note
+	 * \sa openmpt_module_ext_interface_interactive::stop_note
+	 * \sa openmpt_module_ext_interface_interactive::note_fade
+	 */
+	int ( *note_off ) ( openmpt_module_ext * mod_ext, int32_t channel );
+
+	//! Sends a note fade command for the note playing on the specified channel
+	/*!
+	 * \param channel The channel on which the note should be faded. This is the value returned by a previous play_note call.
+	 * \return 1 on success, 0 on failure (channel out of range).
+	 * \sa openmpt_module_ext_interface_interactive::play_note
+	 * \sa openmpt_module_ext_interface_interactive::stop_note
+	 * \sa openmpt_module_ext_interface_interactive::note_fade
+	 */
+	int ( *note_fade ) ( openmpt_module_ext * mod_ext, int32_t channel );
+
+	//! Set the current panning for a channel
+	/*!
+	 * \param channel The channel that should be panned. This is the value returned by a previous play_note call.
+	 * \param panning The panning position to set on the channel, in range [-1.0, 1.0], 0.0 is center.
+	 * \return 1 on success, 0 on failure (channel out of range).
+	 * \sa openmpt_module_ext_interface_interactive::set_channel_panning
+	 */
+	int ( *set_channel_panning) ( openmpt_module_ext * mod_ext, int32_t channel, double panning );
+
+	//! Get the current panning position for a channel
+	/*!
+	 * \param channel The channel whose panning should be retrieved. This is the value returned by a previous play_note call.
+	 * \return The current channel panning, in range [-1.0, 1.0], 0.0 is center.
+	 * \sa openmpt_module_ext_interface_interactive::get_channel_panning
+	 */
+	double (*get_channel_panning) ( openmpt_module_ext * mod_ext, int32_t channel );
+
 } openmpt_module_ext_interface_interactive;
 
 
