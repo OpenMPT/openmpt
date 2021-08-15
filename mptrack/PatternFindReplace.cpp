@@ -415,6 +415,9 @@ void CViewPattern::OnEditFindNext()
 						int param = m->param;
 						if(FindReplace::instance.replaceParamAction == FindReplace::ReplaceRelative || FindReplace::instance.replaceParamAction == FindReplace::ReplaceMultiply)
 						{
+							if(isExtendedEffect)
+								param &= 0x0F;
+
 							if(!hadVolume && m->command == CMD_VOLUME)
 								param = GetDefaultVolume(*m, lastInstr[chn]);
 
@@ -422,13 +425,16 @@ void CViewPattern::OnEditFindNext()
 								param += paramReplace;
 							else
 								param = Util::muldivr(param, paramReplace, 100);
+
+							if(isExtendedEffect)
+								param = Clamp(param, 0, 15) | (m->param & 0xF0);
 						} else if(FindReplace::instance.replaceParamAction == FindReplace::ReplaceValue)
 						{
 							param = paramReplace;
 						}
 						
 						if(isExtendedEffect && !FindReplace::instance.replaceFlags[FindReplace::Command])
-							m->param = static_cast<ModCommand::PARAM>((m->param & 0xF0) | Clamp(param, 0, 15));
+							m->param = static_cast<ModCommand::PARAM>((m->param & 0xF0) | (param & 0x0F));
 						else
 							m->param = mpt::saturate_cast<ModCommand::PARAM>(param);
 					}
