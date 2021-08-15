@@ -690,7 +690,6 @@ void CLegacyPlaybackSettingsDlg::OnFilterStringChanged()
 		case kOPLNoteOffOnNoteChange: desc = _T("Send OPL key-off when triggering notes"); break;
 		case kFT2PortaResetDirection: desc = _T("Tone Portamento direction resets after reaching portamento target from below"); break;
 		case kApplyUpperPeriodLimit: desc = _T("Apply lower frequency limit"); break;
-		case kFT2ST3InstrWithoutNote: desc = _T("Allow volume / panning updates with instrument number before playing first note on channel"); break;
 
 		default: MPT_ASSERT_NOTREACHED();
 		}

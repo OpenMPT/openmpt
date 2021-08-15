@@ -541,7 +541,6 @@ enum PlayBehaviour
 	kOPLNoteOffOnNoteChange,        // Send note-off events for old note on every note change
 	kFT2PortaResetDirection,        // Reset portamento direction when reaching portamento target from below
 	kApplyUpperPeriodLimit,         // Enforce m_nMaxPeriod
-	kFT2ST3InstrWithoutNote,        // Allow instrument and volume change when no note is playing yet
 
 	// Add new play behaviours here.
 

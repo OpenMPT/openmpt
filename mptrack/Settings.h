@@ -20,7 +20,6 @@
 #include <map>
 #include <set>
 #include <variant>
-#include <shared_mutex>
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -162,27 +161,27 @@ public:
 	operator bool () const
 	{
 		MPT_ASSERT(std::holds_alternative<bool>(value));
-		return std::get<bool>(value);
+		return std::get<bool>(value);			
 	}
 	operator int32 () const
 	{
 		MPT_ASSERT(std::holds_alternative<int32>(value));
-		return std::get<int32>(value);
+		return std::get<int32>(value);			
 	}
 	operator double () const
 	{
 		MPT_ASSERT(std::holds_alternative<double>(value));
-		return std::get<double>(value);
+		return std::get<double>(value);			
 	}
 	operator mpt::ustring () const
 	{
 		MPT_ASSERT(std::holds_alternative<mpt::ustring>(value));
-		return std::get<mpt::ustring>(value);
+		return std::get<mpt::ustring>(value);			
 	}
 	operator std::vector<std::byte> () const
 	{
 		MPT_ASSERT(std::holds_alternative<std::vector<std::byte>>(value));
-		return std::get<std::vector<std::byte>>(value);
+		return std::get<std::vector<std::byte>>(value);			
 	}
 	mpt::ustring FormatTypeAsString() const;
 	mpt::ustring FormatValueAsString() const;
@@ -272,13 +271,19 @@ class SettingState
 private:
 	SettingValue value;
 	const SettingValue defaultValue;
-	bool dirty = false;
+	bool dirty;
 public:
-	SettingState() = default;
+	SettingState()
+		: dirty(false)
+	{
+		return;
+	}
 	SettingState(const SettingValue &def)
 		: value(def)
 		, defaultValue(def)
+		, dirty(false)
 	{
+		return;
 	}
 	SettingState & assign(const SettingValue &other, bool setDirty = true)
 	{
@@ -593,11 +598,10 @@ class CachedSetting
 	: public ISettingChanged
 {
 private:
-	mutable std::shared_mutex valueMutex;
+	mutable mpt::mutex valueMutex;
+	T value;
 	SettingsContainer &conf;
 	const SettingPath path;
-	T value;
-
 public:
 	CachedSetting(const CachedSetting &other) = delete;
 	CachedSetting & operator = (const CachedSetting &other) = delete;
@@ -608,7 +612,7 @@ public:
 		, path(std::move(section), std::move(key))
 	{
 		{
-			std::shared_lock l(valueMutex);
+			mpt::lock_guard<mpt::mutex> l(valueMutex);
 			value = conf.Read(path, def);
 		}
 		conf.Register(this, path);
@@ -619,7 +623,7 @@ public:
 		, path(path_)
 	{
 		{
-			std::shared_lock l(valueMutex);
+			mpt::lock_guard<mpt::mutex> l(valueMutex);
 			value = conf.Read(path, def);
 		}
 		conf.Register(this, path);
@@ -635,7 +639,7 @@ public:
 	CachedSetting & operator = (const T &val)
 	{
 		{
-			std::unique_lock l(valueMutex);
+			mpt::lock_guard<mpt::mutex> l(valueMutex);
 			value = val;
 		}
 		conf.Write(path, val);
@@ -643,12 +647,12 @@ public:
 	}
 	operator T () const
 	{
-		std::shared_lock l(valueMutex);
+		mpt::lock_guard<mpt::mutex> l(valueMutex);
 		return value;
 	}
 	T Get() const
 	{
-		std::shared_lock l(valueMutex);
+		mpt::lock_guard<mpt::mutex> l(valueMutex);
 		return value;
 	}
 	bool IsDefault() const
@@ -658,7 +662,7 @@ public:
 	CachedSetting & Update()
 	{
 		{
-			std::unique_lock l(valueMutex);
+			mpt::lock_guard<mpt::mutex> l(valueMutex);
 			value = conf.Read<T>(path);
 		}
 		return *this;
@@ -702,10 +706,10 @@ public:
 	IniFileSettingsBackend(const mpt::PathString &filename);
 	~IniFileSettingsBackend() override;
 	void ConvertToUnicode(const mpt::ustring &backupTag = mpt::ustring());
-	SettingValue ReadSetting(const SettingPath &path, const SettingValue &def) const override;
-	void WriteSetting(const SettingPath &path, const SettingValue &val) override;
-	void RemoveSetting(const SettingPath &path) override;
-	void RemoveSection(const mpt::ustring &section) override;
+	virtual SettingValue ReadSetting(const SettingPath &path, const SettingValue &def) const override;
+	virtual void WriteSetting(const SettingPath &path, const SettingValue &val) override;
+	virtual void RemoveSetting(const SettingPath &path) override;
+	virtual void RemoveSection(const mpt::ustring &section) override;
 	const mpt::PathString& GetFilename() const { return filename; }
 };
 
@@ -729,25 +733,34 @@ class SettingChangedNotifyGuard
 private:
 	SettingsContainer &conf;
 	SettingPath m_Path;
-	ISettingChanged *m_Handler = nullptr;
-
+	bool m_Registered;
+	ISettingChanged *m_Handler;
 public:
 	SettingChangedNotifyGuard(SettingsContainer &conf, const SettingPath &path)
 		: conf(conf)
 		, m_Path(path)
+		, m_Registered(false)
+		, m_Handler(nullptr)
 	{
+		return;
 	}
 	void Register(ISettingChanged *handler)
 	{
-		if(m_Handler)
+		if(m_Registered)
+		{
 			return;
+		}
 		m_Handler = handler;
 		conf.Register(m_Handler, m_Path);
+		m_Registered = true;
 	}
 	~SettingChangedNotifyGuard()
 	{
-		if(m_Handler)
+		if(m_Registered)
+		{
 			conf.UnRegister(m_Handler, m_Path);
+			m_Registered = false;
+		}
 	}
 };
 

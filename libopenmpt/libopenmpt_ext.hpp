@@ -279,8 +279,6 @@ class interactive {
 	  \return The channel on which the note is played. This can pe be passed to openmpt::ext::interactive::stop_note to stop the note.
 	  \throws openmpt::exception Throws an exception derived from openmpt::exception if the instrument or note is outside the specified range.
 	  \sa openmpt::ext::interactive::stop_note
-	  \sa openmpt::ext::interactive::note_off
-	  \sa openmpt::ext::interactive::note_fade
 	*/
 	virtual std::int32_t play_note( std::int32_t instrument, std::int32_t note, double volume, double panning ) = 0;
 
@@ -289,48 +287,8 @@ class interactive {
 	  \param channel The channel on which the note should be stopped. This is the value returned by a previous play_note call.
 	  \throws openmpt::exception Throws an exception derived from openmpt::exception if the channel index is invalid.
 	  \sa openmpt::ext::interactive::play_note
-	  \sa openmpt::ext::interactive::note_off
-	  \sa openmpt::ext::interactive::note_fade
 	*/
 	virtual void stop_note( std::int32_t channel ) = 0;
-
-	//! Sends a key-off command for the note playing on the specified channel
-	/*!
-	  \param channel The channel on which the key-off event should be triggered. This is the value returned by a previous play_note call.
-	  \throws openmpt::exception Throws an exception derived from openmpt::exception if the channel index is invalid.
-	  \sa openmpt::ext::interactive::play_note
-	  \sa openmpt::ext::interactive::stop_note
-	  \sa openmpt::ext::interactive::note_fade
-	*/
-	virtual void note_off(int32_t channel ) = 0;
-
-	//! Sends a note fade command for the note playing on the specified channel
-	/*!
-	  \param channel The channel on which the note should be faded. This is the value returned by a previous play_note call.
-	  \throws openmpt::exception Throws an exception derived from openmpt::exception if the channel index is invalid.
-	  \sa openmpt::ext::interactive::play_note
-	  \sa openmpt::ext::interactive::stop_note
-	  \sa openmpt::ext::interactive::note_off
-	*/
-	virtual void note_fade(int32_t channel) = 0;
-
-	//! Set the current panning for a channel
-	/*!
-	  \param channel The channel whose panning will be changed, in range [0, openmpt::module::get_num_channels()[
-	  \param panning The panning position to set on the channel, in range [-1.0, 1.0], 0.0 is center.
-	  \throws openmpt::exception Throws an exception derived from openmpt::exception if the channel index is invalid.
-	  \sa openmpt::ext::interactive::set_channel_panning
-	*/
-	virtual void set_channel_panning(int32_t channel, double panning ) = 0;
-
-	//! Get the current panning position for a channel
-	/*!
-	  \param channel The channel whose panning should be retrieved, in range [0, openmpt::module::get_num_channels()[
-	  \return The current channel panning, in range [-1.0, 1.0], 0.0 is center.
-	  \throws openmpt::exception Throws an exception derived from openmpt::exception if the channel is outside the specified range.
-	  \sa openmpt::ext::interactive::get_channel_panning
-	*/
-	virtual double get_channel_panning( int32_t channel ) = 0;
 
 }; // class interactive
 

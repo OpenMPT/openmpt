@@ -101,12 +101,6 @@ public:
 		Set(row, *this);
 	};
 
-	// Only update the channel position of a cursor, keeping the same column inside the channel as before.
-	void SetChannel(CHANNELINDEX chn)
-	{
-		Set(GetRow(), chn, GetColumnType());
-	};
-
 	// Only update the horizontal position of a cursor.
 	void SetColumn(CHANNELINDEX chn, Columns col)
 	{
