@@ -1506,7 +1506,6 @@ uint32 CDLSBank::GetRegionFromKey(uint32 nIns, uint32 nKey) const
 			continue;
 		region = rgn;
 		smallestRegion = regionSize;
-
 	}
 	return region;
 }
@@ -1749,7 +1748,7 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, ui
 		nEnv = pDlsIns->Regions[nDrumRgn].uPercEnv;
 	} else
 	{
-		if(!pDlsIns->Regions.empty())
+		if(pDlsIns->Regions.empty())
 			return false;
 		nRgnMin = 0;
 		nRgnMax = static_cast<uint32>(pDlsIns->Regions.size());
