@@ -706,6 +706,17 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 	bool isEMIDILoop = false;
 	const bool isType2 = (fileHeader.format == 2);
 
+	const auto ModPositionFromTick = [&](const tick_t tick, const tick_t offset = 0)
+	{
+		tick_t modTicks = Util::muldivr_unsigned(tick, quantize * ticksPerRow, ppqn * 4u) - offset;
+
+		ORDERINDEX ord = static_cast<ORDERINDEX>((modTicks / ticksPerRow) / patternLen);
+		ROWINDEX row = (modTicks / ticksPerRow) % patternLen;
+		uint8 delay = static_cast<uint8>(modTicks % ticksPerRow);
+
+		return std::make_tuple(ord, row, delay);
+	};
+
 	while(finishedTracks < numTracks)
 	{
 		uint16 t = 0;
@@ -722,11 +733,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 		}
 		FileReader &track = tracks[t].track;
 
-		tick_t modTicks = Util::muldivr_unsigned(tick, quantize * ticksPerRow, ppqn * 4u);
-
-		ORDERINDEX ord = static_cast<ORDERINDEX>((modTicks / ticksPerRow) / patternLen);
-		ROWINDEX row = (modTicks / ticksPerRow) % patternLen;
-		uint8 delay = static_cast<uint8>(modTicks % ticksPerRow);
+		const auto [ord, row, delay] = ModPositionFromTick(tick);
 
 		if(ord >= Order().GetLength())
 		{
@@ -803,8 +810,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 						restartRow = row;
 					} else if(!mpt::CompareNoCaseAscii(s, "loopEnd"))
 					{
-						loopEndRow = row;
-						loopEndOrd = ord;
+						std::tie(loopEndOrd, loopEndRow, std::ignore) = ModPositionFromTick(tick, 1);
 					}
 				}
 				break;
@@ -1027,8 +1033,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 						{
 							isEMIDILoop = true;
 							isEMIDI = true;
-							loopEndOrd = ord;
-							loopEndRow = row;
+							std::tie(loopEndOrd, loopEndRow, std::ignore) = ModPositionFromTick(tick, 1);
 						}
 						break;
 
@@ -1253,6 +1258,8 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 		if(restartRow != ROWINDEX_INVALID && !isEMIDI)
 		{
 			Patterns[lastPat].WriteEffect(EffectWriter(CMD_PATTERNBREAK, mpt::saturate_cast<ModCommand::PARAM>(restartRow)).Row(loopEndRow));
+			if(ORDERINDEX restartPos = Order().GetRestartPos(); loopEndOrd != lastOrd || restartPos <= std::numeric_limits<ModCommand::PARAM>::max())
+				Patterns[lastPat].WriteEffect(EffectWriter(CMD_POSITIONJUMP, mpt::saturate_cast<ModCommand::PARAM>(restartPos)).Row(loopEndRow));
 		}
 	}
 	Order.SetSequence(0);
