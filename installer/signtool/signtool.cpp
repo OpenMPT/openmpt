@@ -11,7 +11,7 @@
 #include "mpt/io/io_stdstream.hpp"
 #include "mpt/out_of_memory/out_of_memory.hpp"
 #include "mpt/string/types.hpp"
-#include "mpt/string_convert/convert.hpp"
+#include "mpt/string_transcode/transcode.hpp"
 #include "mpt/uuid/uuid.hpp"
 #include "mpt/uuid_namespace/uuid_namespace.hpp"
 
@@ -57,12 +57,12 @@ MPT_NOINLINE void AssertHandler(const mpt::source_location &loc, const char *exp
 	if(msg)
 	{
 		mpt::log::GlobalLogger().SendLogMessage(loc, LogError, "ASSERT",
-			MPT_USTRING("ASSERTION FAILED: ") + mpt::convert<mpt::ustring>(mpt::common_encoding::ascii, msg) + MPT_USTRING(" (") + mpt::convert<mpt::ustring>(mpt::common_encoding::ascii, expr) + MPT_USTRING(")")
+			MPT_USTRING("ASSERTION FAILED: ") + mpt::transcode<mpt::ustring>(mpt::common_encoding::ascii, msg) + MPT_USTRING(" (") + mpt::transcode<mpt::ustring>(mpt::common_encoding::ascii, expr) + MPT_USTRING(")")
 		);
 	} else
 	{
 		mpt::log::GlobalLogger().SendLogMessage(loc, LogError, "ASSERT",
-			MPT_USTRING("ASSERTION FAILED: ") + mpt::convert<mpt::ustring>(mpt::common_encoding::ascii, expr)
+			MPT_USTRING("ASSERTION FAILED: ") + mpt::transcode<mpt::ustring>(mpt::common_encoding::ascii, expr)
 		);
 	}
 }
@@ -109,7 +109,7 @@ static void main(const std::vector<mpt::ustring> &args)
 			mpt::crypto::asymmetric::rsassa_pss<>::managed_private_key key(keystore, keyname);
 			mpt::SafeOutputFile sfo(mpt::PathString::FromUnicode(filename));
 			mpt::ofstream & fo = sfo.stream();
-			mpt::IO::WriteText(fo, mpt::convert<std::string>(mpt::common_encoding::utf8, key.get_public_key_data().as_jwk()));
+			mpt::IO::WriteText(fo, mpt::transcode<std::string>(mpt::common_encoding::utf8, key.get_public_key_data().as_jwk()));
 			fo.flush();
 		} else if(args[1] == MPT_USTRING("sign"))
 		{
@@ -149,14 +149,14 @@ static void main(const std::vector<mpt::ustring> &args)
 				mpt::ustring signature = key.jws_compact_sign(mpt::as_span(data));
 				mpt::SafeOutputFile sfo(mpt::PathString::FromUnicode(outputfilename));
 				mpt::ofstream & fo = sfo.stream();
-				mpt::IO::WriteText(fo, mpt::convert<std::string>(mpt::common_encoding::utf8, signature));
+				mpt::IO::WriteText(fo, mpt::transcode<std::string>(mpt::common_encoding::utf8, signature));
 				fo.flush();
 			} else if(mode == MPT_USTRING("jws"))
 			{
 				mpt::ustring signature = key.jws_sign(mpt::as_span(data));
 				mpt::SafeOutputFile sfo(mpt::PathString::FromUnicode(outputfilename));
 				mpt::ofstream & fo = sfo.stream();
-				mpt::IO::WriteText(fo, mpt::convert<std::string>(mpt::common_encoding::utf8, signature));
+				mpt::IO::WriteText(fo, mpt::transcode<std::string>(mpt::common_encoding::utf8, signature));
 				fo.flush();
 			} else
 			{
@@ -190,9 +190,9 @@ int main(int argc, char *argv[])
 	for(int arg = 0; arg < argc; ++arg)
 	{
 	#if defined(WIN32) && defined(UNICODE)
-		args.push_back(mpt::convert<mpt::ustring>(argv[arg]));
+		args.push_back(mpt::transcode<mpt::ustring>(argv[arg]));
 	#else
-		args.push_back(mpt::convert<mpt::ustring>(mpt::logical_encoding::locale, argv[arg]));
+		args.push_back(mpt::transcode<mpt::ustring>(mpt::logical_encoding::locale, argv[arg]));
 	#endif
 	}
 	try

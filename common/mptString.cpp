@@ -12,7 +12,7 @@
 
 #include "mpt/string/types.hpp"
 #include "mpt/string/utility.hpp"
-#include "mpt/string_convert/convert.hpp"
+#include "mpt/string_transcode/transcode.hpp"
 
 #include <locale>
 #include <string>

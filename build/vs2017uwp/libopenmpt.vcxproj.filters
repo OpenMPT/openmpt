@@ -106,11 +106,11 @@
     <Filter Include="src\mpt\string\tests">
       <UniqueIdentifier>{5CF7BA51-4886-441B-F1A4-5816DD1255C1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\mpt\string_convert">
-      <UniqueIdentifier>{4DBC776B-39B6-A0BD-2223-37CE0EBC062A}</UniqueIdentifier>
+    <Filter Include="src\mpt\string_transcode">
+      <UniqueIdentifier>{CFBDF7AE-BBE2-462F-E42D-2CBFD0B1454D}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\mpt\string_convert\tests">
-      <UniqueIdentifier>{3C11A0B3-28CC-8F5F-D183-08AABD1DDAEF}</UniqueIdentifier>
+    <Filter Include="src\mpt\string_transcode\tests">
+      <UniqueIdentifier>{3EAC6FA8-2AD2-390F-1318-BFDAFFDC5EDB}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\mpt\system_error">
       <UniqueIdentifier>{C4047277-B093-FB40-59B2-0F3C45200CE7}</UniqueIdentifier>
@@ -552,14 +552,14 @@
     <ClInclude Include="..\..\src\mpt\string\tests\tests_string_utility.hpp">
       <Filter>src\mpt\string\tests</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\mpt\string_convert\convert.hpp">
-      <Filter>src\mpt\string_convert</Filter>
+    <ClInclude Include="..\..\src\mpt\string_transcode\macros.hpp">
+      <Filter>src\mpt\string_transcode</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\mpt\string_convert\macros.hpp">
-      <Filter>src\mpt\string_convert</Filter>
+    <ClInclude Include="..\..\src\mpt\string_transcode\transcode.hpp">
+      <Filter>src\mpt\string_transcode</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\mpt\string_convert\tests\tests_string_convert.hpp">
-      <Filter>src\mpt\string_convert\tests</Filter>
+    <ClInclude Include="..\..\src\mpt\string_transcode\tests\tests_string_transcode.hpp">
+      <Filter>src\mpt\string_transcode\tests</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\system_error\system_error.hpp">
       <Filter>src\mpt\system_error</Filter>

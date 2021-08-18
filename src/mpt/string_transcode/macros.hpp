@@ -1,12 +1,12 @@
 /* SPDX-License-Identifier: BSL-1.0 OR BSD-3-Clause */
 
-#ifndef MPT_STRING_CONVERT_MACROS_HPP
-#define MPT_STRING_CONVERT_MACROS_HPP
+#ifndef MPT_STRING_TRANSCODE_MACROS_HPP
+#define MPT_STRING_TRANSCODE_MACROS_HPP
 
 
 
 #include "mpt/string/types.hpp"
-#include "mpt/string_convert/convert.hpp"
+#include "mpt/string_transcode/transcode.hpp"
 
 #include <string>
 
@@ -17,8 +17,8 @@
 // i.e. it is NOT generally available at compile time.
 // Use explicit UTF8 encoding,
 // i.e. U+00FC (LATIN SMALL LETTER U WITH DIAERESIS) would be written as "\xC3\xBC".
-#define MPT_UTF8_STRING(x) mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, std::string{x})
+#define MPT_UTF8_STRING(x) mpt::transcode<mpt::ustring>(mpt::common_encoding::utf8, std::string{x})
 
 
 
-#endif // MPT_STRING_CONVERT_MACROS_HPP
+#endif // MPT_STRING_TRANSCODE_MACROS_HPP

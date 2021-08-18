@@ -14,7 +14,7 @@
 #include "mpt/format/message_macros.hpp"
 #include "mpt/out_of_memory/out_of_memory.hpp"
 #include "mpt/string/types.hpp"
-#include "mpt/string_convert/convert.hpp"
+#include "mpt/string_transcode/transcode.hpp"
 #include "openmpt/base/Types.hpp"
 #include "openmpt/logging/Logger.hpp"
 
@@ -103,7 +103,7 @@ CAudioThread::CAudioThread(CSoundDeviceWithThread &SoundDevice)
 	: m_SoundDevice(SoundDevice)
 {
 	MPT_SOUNDDEV_TRACE_SCOPE();
-	m_MMCSSClass = mpt::convert<mpt::winstring>(m_SoundDevice.m_AppInfo.BoostedThreadMMCSSClassVista);
+	m_MMCSSClass = mpt::transcode<mpt::winstring>(m_SoundDevice.m_AppInfo.BoostedThreadMMCSSClassVista);
 	m_WakeupInterval = 0.0;
 	m_hPlayThread = NULL;
 	m_dwPlayThreadId = 0;
@@ -541,7 +541,7 @@ public:
 				bus = dbus_bus_get(DBUS_BUS_SYSTEM, &error);
 				if(!bus)
 				{
-					MPT_LOG(GetLogger(), LogError, "sounddev", MPT_UFORMAT_MESSAGE("DBus: dbus_bus_get: {}")(mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, error.message)));
+					MPT_LOG(GetLogger(), LogError, "sounddev", MPT_UFORMAT_MESSAGE("DBus: dbus_bus_get: {}")(mpt::transcode<mpt::ustring>(mpt::common_encoding::utf8, error.message)));
 				}
 				dbus_error_free(&error);
 				if(bus)

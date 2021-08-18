@@ -1010,7 +1010,7 @@ LIBOPENMPTTEST_CXX_SOURCES += \
  test/mpt_tests_parse.cpp \
  test/mpt_tests_random.cpp \
  test/mpt_tests_string.cpp \
- test/mpt_tests_string_convert.cpp \
+ test/mpt_tests_string_transcode.cpp \
  test/mpt_tests_uuid.cpp \
  test/test.cpp \
  test/TestToolsLib.cpp \
@@ -1430,7 +1430,7 @@ bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION).makefile.tar: bin/dist.mk bin
 	#svn export ./src/mpt/path           bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/path
 	svn export ./src/mpt/random         bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/random
 	svn export ./src/mpt/string         bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/string
-	svn export ./src/mpt/string_convert bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/string_convert
+	svn export ./src/mpt/string_transcode bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/string_transcode
 	svn export ./src/mpt/system_error   bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/system_error
 	svn export ./src/mpt/test           bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/test
 	svn export ./src/mpt/uuid           bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/uuid
@@ -1522,7 +1522,7 @@ bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION).msvc.zip: bin/dist.mk bin/svn
 	#svn export ./src/mpt/path           bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/path           --native-eol CRLF
 	svn export ./src/mpt/random         bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/random         --native-eol CRLF
 	svn export ./src/mpt/string         bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/string         --native-eol CRLF
-	svn export ./src/mpt/string_convert bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/string_convert --native-eol CRLF
+	svn export ./src/mpt/string_transcode bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/string_transcode --native-eol CRLF
 	svn export ./src/mpt/system_error   bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/system_error   --native-eol CRLF
 	svn export ./src/mpt/test           bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/test           --native-eol CRLF
 	svn export ./src/mpt/uuid           bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/uuid           --native-eol CRLF

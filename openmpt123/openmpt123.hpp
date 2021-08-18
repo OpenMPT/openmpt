@@ -15,7 +15,7 @@
 #include "mpt/base/compiletime_warning.hpp"
 #include "mpt/base/floatingpoint.hpp"
 #include "mpt/base/preprocessor.hpp"
-#include "mpt/string_convert/convert.hpp"
+#include "mpt/string_transcode/transcode.hpp"
 
 #include <string>
 
@@ -115,11 +115,11 @@ private:
 		std::string text = pop();
 		if ( text.length() > 0 ) {
 			#if defined(__DJGPP__)
-				s << mpt::convert<std::string>( codepage, mpt::common_encoding::utf8, text );
+				s << mpt::transcode<std::string>( codepage, mpt::common_encoding::utf8, text );
 			#elif defined(__EMSCRIPTEN__)
 				s << text;
 			#else
-				s << mpt::convert<std::string>( mpt::logical_encoding::locale, mpt::common_encoding::utf8, text );
+				s << mpt::transcode<std::string>( mpt::logical_encoding::locale, mpt::common_encoding::utf8, text );
 		#endif
 			s.flush();
 		}	
@@ -168,17 +168,17 @@ private:
 		if ( text.length() > 0 ) {
 			if ( console ) {
 				#if defined(UNICODE)
-					std::wstring wtext = mpt::convert<std::wstring>( mpt::common_encoding::utf8, text );
+					std::wstring wtext = mpt::transcode<std::wstring>( mpt::common_encoding::utf8, text );
 					WriteConsole( handle, wtext.data(), static_cast<DWORD>( wtext.size() ), NULL, NULL );
 				#else
-					std::string ltext = mpt::convert<std::string>( mpt::logical_encoding::locale, mpt::common_encoding::utf8, text );
+					std::string ltext = mpt::transcode<std::string>( mpt::logical_encoding::locale, mpt::common_encoding::utf8, text );
 					WriteConsole( handle, ltext.data(), static_cast<DWORD>( ltext.size() ), NULL, NULL );
 				#endif
 			} else {
 				#if defined(UNICODE)
-					s << mpt::convert<std::wstring>( mpt::common_encoding::utf8, text );
+					s << mpt::transcode<std::wstring>( mpt::common_encoding::utf8, text );
 				#else
-					s << mpt::convert<std::string>( mpt::logical_encoding::locale, mpt::common_encoding::utf8, text );
+					s << mpt::transcode<std::string>( mpt::logical_encoding::locale, mpt::common_encoding::utf8, text );
 				#endif
 				s.flush();
 			}

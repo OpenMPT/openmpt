@@ -15,7 +15,7 @@
 #include "mpt/format/simple.hpp"
 #include "mpt/parse/split.hpp"
 #include "mpt/string/types.hpp"
-#include "mpt/string_convert/convert.hpp"
+#include "mpt/string_transcode/transcode.hpp"
 #include "openmpt/base/Types.hpp"
 #include "openmpt/logging/Logger.hpp"
 #include "openmpt/soundbase/SampleFormat.hpp"
@@ -53,7 +53,7 @@ mpt::ustring Pulseaudio::PulseErrorString(int error)
 	{
 		return MPT_UFORMAT_MESSAGE("error={}")(error);
 	}
-	return MPT_UFORMAT_MESSAGE("{} (error={})")(mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, str), error);
+	return MPT_UFORMAT_MESSAGE("{} (error={})")(mpt::transcode<mpt::ustring>(mpt::common_encoding::utf8, str), error);
 }
 
 
@@ -99,8 +99,8 @@ static void PulseAudioSinkInfoListCallback(pa_context * /* c */, const pa_sink_i
 		}
 		SoundDevice::Info info;
 		info.type = MPT_USTRING("PulseAudio");
-		info.internalID = mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, i->name);
-		info.name = mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, i->description);
+		info.internalID = mpt::transcode<mpt::ustring>(mpt::common_encoding::utf8, i->name);
+		info.name = mpt::transcode<mpt::ustring>(mpt::common_encoding::utf8, i->description);
 		info.apiName = MPT_USTRING("PulseAudio");
 		info.default_ = Info::Default::None;
 		info.useNameAsIdentifier = false;
@@ -162,7 +162,7 @@ std::vector<SoundDevice::Info> Pulseaudio::EnumerateDevices(ILogger &logger, Sou
 		MPT_LOG(GetLogger(), LogError, "sounddev", MPT_USTRING("pa_mainloop_new"));
 		goto cleanup;
 	}
-	c = pa_context_new(pa_mainloop_get_api(m), mpt::convert<std::string>(mpt::common_encoding::utf8, mpt::ustring()).c_str());  // TODO: get AppInfo
+	c = pa_context_new(pa_mainloop_get_api(m), mpt::transcode<std::string>(mpt::common_encoding::utf8, mpt::ustring()).c_str());  // TODO: get AppInfo
 	if(!c)
 	{
 		MPT_LOG(GetLogger(), LogError, "sounddev", MPT_USTRING("pa_context_new"));
@@ -324,10 +324,10 @@ bool Pulseaudio::InternalOpen()
 	m_OutputBuffer.resize(ba.minreq / m_Settings.sampleFormat.GetSampleSize());
 	m_PA_SimpleOutput = pa_simple_new(
 		NULL,
-		mpt::convert<std::string>(mpt::common_encoding::utf8, m_AppInfo.GetName()).c_str(),
+		mpt::transcode<std::string>(mpt::common_encoding::utf8, m_AppInfo.GetName()).c_str(),
 		PA_STREAM_PLAYBACK,
-		((GetDeviceInternalID() == MPT_USTRING("0")) ? NULL : mpt::convert<std::string>(mpt::common_encoding::utf8, GetDeviceInternalID()).c_str()),
-		mpt::convert<std::string>(mpt::common_encoding::utf8, m_AppInfo.GetName()).c_str(),
+		((GetDeviceInternalID() == MPT_USTRING("0")) ? NULL : mpt::transcode<std::string>(mpt::common_encoding::utf8, GetDeviceInternalID()).c_str()),
+		mpt::transcode<std::string>(mpt::common_encoding::utf8, m_AppInfo.GetName()).c_str(),
 		&ss,
 		NULL,
 		(m_Settings.ExclusiveMode ? &ba : NULL),
@@ -416,7 +416,7 @@ void Pulseaudio::InternalStopFromSoundThread()
 {
 	int error = 0;
 	bool oldVersion = false;
-	std::vector<uint64> version = mpt::split_parse<uint64>(mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, pa_get_library_version() ? pa_get_library_version() : ""));
+	std::vector<uint64> version = mpt::split_parse<uint64>(mpt::transcode<mpt::ustring>(mpt::common_encoding::utf8, pa_get_library_version() ? pa_get_library_version() : ""));
 	if(!version.empty())
 	{
 		if(version[0] < 4)

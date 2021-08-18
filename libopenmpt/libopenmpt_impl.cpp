@@ -40,7 +40,7 @@
 #include "mpt/parse/parse.hpp"
 #include "mpt/string/types.hpp"
 #include "mpt/string/utility.hpp"
-#include "mpt/string_convert/convert.hpp"
+#include "mpt/string_transcode/transcode.hpp"
 
 #include "common/version.h"
 #include "common/misc_util.h"
@@ -156,19 +156,19 @@ static std::string get_library_version_string() {
 }
 
 static std::string get_library_features_string() {
-	return mpt::convert<std::string>( mpt::common_encoding::utf8, mpt::trim(OpenMPT::Build::GetBuildFeaturesString()));
+	return mpt::transcode<std::string>( mpt::common_encoding::utf8, mpt::trim(OpenMPT::Build::GetBuildFeaturesString()));
 }
 
 static std::string get_core_version_string() {
-	return mpt::convert<std::string>( mpt::common_encoding::utf8, OpenMPT::Build::GetVersionStringExtended());
+	return mpt::transcode<std::string>( mpt::common_encoding::utf8, OpenMPT::Build::GetVersionStringExtended());
 }
 
 static std::string get_source_url_string() {
-	return mpt::convert<std::string>( mpt::common_encoding::utf8, OpenMPT::SourceInfo::Current().GetUrlWithRevision());
+	return mpt::transcode<std::string>( mpt::common_encoding::utf8, OpenMPT::SourceInfo::Current().GetUrlWithRevision());
 }
 
 static std::string get_source_date_string() {
-	return mpt::convert<std::string>( mpt::common_encoding::utf8, OpenMPT::SourceInfo::Current().Date());
+	return mpt::transcode<std::string>( mpt::common_encoding::utf8, OpenMPT::SourceInfo::Current().Date());
 }
 
 static std::string get_source_revision_string() {
@@ -177,35 +177,35 @@ static std::string get_source_revision_string() {
 }
 
 static std::string get_build_string() {
-	return mpt::convert<std::string>( mpt::common_encoding::utf8, OpenMPT::Build::GetBuildDateString());
+	return mpt::transcode<std::string>( mpt::common_encoding::utf8, OpenMPT::Build::GetBuildDateString());
 }
 
 static std::string get_build_compiler_string() {
-	return mpt::convert<std::string>( mpt::common_encoding::utf8, OpenMPT::Build::GetBuildCompilerString());
+	return mpt::transcode<std::string>( mpt::common_encoding::utf8, OpenMPT::Build::GetBuildCompilerString());
 }
 
 static std::string get_credits_string() {
-	return mpt::convert<std::string>( mpt::common_encoding::utf8, OpenMPT::Build::GetFullCreditsString());
+	return mpt::transcode<std::string>( mpt::common_encoding::utf8, OpenMPT::Build::GetFullCreditsString());
 }
 
 static std::string get_contact_string() {
-	return mpt::convert<std::string>( mpt::common_encoding::utf8, MPT_USTRING("Forum: ") + OpenMPT::Build::GetURL(OpenMPT::Build::Url::Forum));
+	return mpt::transcode<std::string>( mpt::common_encoding::utf8, MPT_USTRING("Forum: ") + OpenMPT::Build::GetURL(OpenMPT::Build::Url::Forum));
 }
 
 static std::string get_license_string() {
-	return mpt::convert<std::string>( mpt::common_encoding::utf8, OpenMPT::Build::GetLicenseString());
+	return mpt::transcode<std::string>( mpt::common_encoding::utf8, OpenMPT::Build::GetLicenseString());
 }
 
 static std::string get_url_string() {
-	return mpt::convert<std::string>( mpt::common_encoding::utf8, OpenMPT::Build::GetURL(OpenMPT::Build::Url::Website));
+	return mpt::transcode<std::string>( mpt::common_encoding::utf8, OpenMPT::Build::GetURL(OpenMPT::Build::Url::Website));
 }
 
 static std::string get_support_forum_url_string() {
-	return mpt::convert<std::string>( mpt::common_encoding::utf8, OpenMPT::Build::GetURL(OpenMPT::Build::Url::Forum));
+	return mpt::transcode<std::string>( mpt::common_encoding::utf8, OpenMPT::Build::GetURL(OpenMPT::Build::Url::Forum));
 }
 
 static std::string get_bugtracker_url_string() {
-	return mpt::convert<std::string>( mpt::common_encoding::utf8, OpenMPT::Build::GetURL(OpenMPT::Build::Url::Bugtracker));
+	return mpt::transcode<std::string>( mpt::common_encoding::utf8, OpenMPT::Build::GetURL(OpenMPT::Build::Url::Bugtracker));
 }
 
 std::string get_string( const std::string & key ) {
@@ -290,7 +290,7 @@ public:
 	}
 private:
 	void AddToLog( OpenMPT::LogLevel level, const mpt::ustring & text ) const override {
-		destination.log( mpt::convert<std::string>( mpt::common_encoding::utf8, LogLevelToString( level ) + MPT_USTRING(": ") + text ) );
+		destination.log( mpt::transcode<std::string>( mpt::common_encoding::utf8, LogLevelToString( level ) + MPT_USTRING(": ") + text ) );
 	}
 }; // class log_forwarder
 
@@ -307,14 +307,14 @@ std::vector<std::pair<OpenMPT::LogLevel,std::string> > loader_log::GetMessages()
 	return m_Messages;
 }
 void loader_log::AddToLog( OpenMPT::LogLevel level, const mpt::ustring & text ) const {
-	m_Messages.push_back( std::make_pair( level, mpt::convert<std::string>( mpt::common_encoding::utf8, text ) ) );
+	m_Messages.push_back( std::make_pair( level, mpt::transcode<std::string>( mpt::common_encoding::utf8, text ) ) );
 }
 
 void module_impl::PushToCSoundFileLog( const std::string & text ) const {
-	m_sndFile->AddToLog( OpenMPT::LogError, mpt::convert<mpt::ustring>( mpt::common_encoding::utf8, text ) );
+	m_sndFile->AddToLog( OpenMPT::LogError, mpt::transcode<mpt::ustring>( mpt::common_encoding::utf8, text ) );
 }
 void module_impl::PushToCSoundFileLog( int loglevel, const std::string & text ) const {
-	m_sndFile->AddToLog( static_cast<OpenMPT::LogLevel>( loglevel ), mpt::convert<mpt::ustring>( mpt::common_encoding::utf8, text ) );
+	m_sndFile->AddToLog( static_cast<OpenMPT::LogLevel>( loglevel ), mpt::transcode<mpt::ustring>( mpt::common_encoding::utf8, text ) );
 }
 
 module_impl::subsong_data::subsong_data( double duration, std::int32_t start_row, std::int32_t start_order, std::int32_t sequence )
@@ -505,7 +505,7 @@ void module_impl::load( const OpenMPT::FileCursor & file, const std::map< std::s
 	std::vector<std::pair<OpenMPT::LogLevel,std::string> > loaderMessages = loaderlog.GetMessages();
 	for ( const auto & msg : loaderMessages ) {
 		PushToCSoundFileLog( msg.first, msg.second );
-		m_loaderMessages.push_back( mpt::convert<std::string>( mpt::common_encoding::utf8, LogLevelToString( msg.first ) ) + std::string(": ") + msg.second );
+		m_loaderMessages.push_back( mpt::transcode<std::string>( mpt::common_encoding::utf8, LogLevelToString( msg.first ) ) + std::string(": ") + msg.second );
 	}
 	// init CSoundFile state that corresponds to ctls
 	for ( const auto & ctl : ctls ) {
@@ -1213,28 +1213,28 @@ std::string module_impl::get_message_samples() const {
 }
 std::string module_impl::get_metadata( const std::string & key ) const {
 	if ( key == std::string("type") ) {
-		return mpt::convert<std::string>( mpt::common_encoding::utf8, m_sndFile->m_modFormat.type );
+		return mpt::transcode<std::string>( mpt::common_encoding::utf8, m_sndFile->m_modFormat.type );
 	} else if ( key == std::string("type_long") ) {
-		return mpt::convert<std::string>( mpt::common_encoding::utf8, m_sndFile->m_modFormat.formatName );
+		return mpt::transcode<std::string>( mpt::common_encoding::utf8, m_sndFile->m_modFormat.formatName );
 	} else if ( key == std::string("originaltype") ) {
-		return mpt::convert<std::string>( mpt::common_encoding::utf8, m_sndFile->m_modFormat.originalType );
+		return mpt::transcode<std::string>( mpt::common_encoding::utf8, m_sndFile->m_modFormat.originalType );
 	} else if ( key == std::string("originaltype_long") ) {
-		return mpt::convert<std::string>( mpt::common_encoding::utf8, m_sndFile->m_modFormat.originalFormatName );
+		return mpt::transcode<std::string>( mpt::common_encoding::utf8, m_sndFile->m_modFormat.originalFormatName );
 	} else if ( key == std::string("container") ) {
-		return mpt::convert<std::string>( mpt::common_encoding::utf8, OpenMPT::CSoundFile::ModContainerTypeToString( m_sndFile->GetContainerType() ) );
+		return mpt::transcode<std::string>( mpt::common_encoding::utf8, OpenMPT::CSoundFile::ModContainerTypeToString( m_sndFile->GetContainerType() ) );
 	} else if ( key == std::string("container_long") ) {
-		return mpt::convert<std::string>( mpt::common_encoding::utf8, OpenMPT::CSoundFile::ModContainerTypeToTracker( m_sndFile->GetContainerType() ) );
+		return mpt::transcode<std::string>( mpt::common_encoding::utf8, OpenMPT::CSoundFile::ModContainerTypeToTracker( m_sndFile->GetContainerType() ) );
 	} else if ( key == std::string("tracker") ) {
-		return mpt::convert<std::string>( mpt::common_encoding::utf8, m_sndFile->m_modFormat.madeWithTracker );
+		return mpt::transcode<std::string>( mpt::common_encoding::utf8, m_sndFile->m_modFormat.madeWithTracker );
 	} else if ( key == std::string("artist") ) {
-		return mpt::convert<std::string>( mpt::common_encoding::utf8, m_sndFile->m_songArtist );
+		return mpt::transcode<std::string>( mpt::common_encoding::utf8, m_sndFile->m_songArtist );
 	} else if ( key == std::string("title") ) {
 		return mod_string_to_utf8( m_sndFile->GetTitle() );
 	} else if ( key == std::string("date") ) {
 		if ( m_sndFile->GetFileHistory().empty() || !m_sndFile->GetFileHistory().back().HasValidDate() ) {
 			return std::string();
 		}
-		return mpt::convert<std::string>( mpt::common_encoding::utf8, m_sndFile->GetFileHistory().back().AsISO8601() );
+		return mpt::transcode<std::string>( mpt::common_encoding::utf8, m_sndFile->GetFileHistory().back().AsISO8601() );
 	} else if ( key == std::string("message") ) {
 		std::string retval = m_sndFile->m_songMessage.GetFormatted( OpenMPT::SongMessage::leLF );
 		if ( retval.empty() ) {
@@ -1398,7 +1398,7 @@ std::vector<std::string> module_impl::get_subsong_names() const {
 	retval.reserve( subsongs.size() );
 	for ( const auto & subsong : subsongs ) {
 		const auto & order = m_sndFile->Order( static_cast<OpenMPT::SEQUENCEINDEX>( subsong.sequence ) );
-		retval.push_back( mpt::convert<std::string>( mpt::common_encoding::utf8, order.GetName() ) );
+		retval.push_back( mpt::transcode<std::string>( mpt::common_encoding::utf8, order.GetName() ) );
 		if ( retval.back().empty() ) {
 			// use first pattern name instead
 			if ( order.IsValidPat( static_cast<OpenMPT::SEQUENCEINDEX>( subsong.start_order ) ) )
@@ -1533,7 +1533,7 @@ std::pair< std::string, std::string > module_impl::format_and_highlight_pattern_
 	switch ( cmd ) {
 		case module::command_note:
 			return std::make_pair(
-					( cell.IsNote() || cell.IsSpecialNote() ) ? mpt::convert<std::string>( mpt::common_encoding::utf8, m_sndFile->GetNoteName( cell.note, cell.instr ) ) : std::string("...")
+					( cell.IsNote() || cell.IsSpecialNote() ) ? mpt::transcode<std::string>( mpt::common_encoding::utf8, m_sndFile->GetNoteName( cell.note, cell.instr ) ) : std::string("...")
 				,
 					( cell.IsNote() ) ? std::string("nnn") : cell.IsSpecialNote() ? std::string("mmm") : std::string("...")
 				);
@@ -1604,7 +1604,7 @@ std::pair< std::string, std::string > module_impl::format_and_highlight_pattern_
 	text.clear();
 	high.clear();
 	// clang-format off
-	text += ( cell.IsNote() || cell.IsSpecialNote() ) ? mpt::convert<std::string>( mpt::common_encoding::utf8, m_sndFile->GetNoteName( cell.note, cell.instr ) ) : std::string("...");
+	text += ( cell.IsNote() || cell.IsSpecialNote() ) ? mpt::transcode<std::string>( mpt::common_encoding::utf8, m_sndFile->GetNoteName( cell.note, cell.instr ) ) : std::string("...");
 	high += ( cell.IsNote() ) ? std::string("nnn") : cell.IsSpecialNote() ? std::string("mmm") : std::string("...");
 	if ( ( width == 0 ) || ( width >= 6 ) ) {
 		text += std::string(" ");

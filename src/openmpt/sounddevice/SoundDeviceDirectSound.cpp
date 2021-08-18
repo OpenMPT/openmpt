@@ -16,7 +16,7 @@
 #include "mpt/format/message_macros.hpp"
 #include "mpt/format/simple.hpp"
 #include "mpt/string/types.hpp"
-#include "mpt/string_convert/convert.hpp"
+#include "mpt/string_transcode/transcode.hpp"
 #include "mpt/uuid/guid.hpp"
 #include "mpt/uuid/uuid.hpp"
 #include "openmpt/base/Types.hpp"
@@ -72,11 +72,11 @@ static BOOL WINAPI DSEnumCallback(GUID *lpGuid, LPCTSTR lpstrDescription, LPCTST
 	SoundDevice::Info info;
 	info.type = TypeDSOUND;
 	info.default_ = (!lpGuid ? Info::Default::Managed : Info::Default::None);
-	info.internalID = mpt::convert<mpt::ustring>(mpt::GUIDToString(guid));
-	info.name = mpt::convert<mpt::ustring>(mpt::winstring(lpstrDescription));
+	info.internalID = mpt::transcode<mpt::ustring>(mpt::GUIDToString(guid));
+	info.name = mpt::transcode<mpt::ustring>(mpt::winstring(lpstrDescription));
 	if(lpstrDriver)
 	{
-		info.extraData[MPT_USTRING("DriverName")] = mpt::convert<mpt::ustring>(mpt::winstring(lpstrDriver));
+		info.extraData[MPT_USTRING("DriverName")] = mpt::transcode<mpt::ustring>(mpt::winstring(lpstrDriver));
 	}
 	if(lpGuid)
 	{
@@ -151,7 +151,7 @@ SoundDevice::Caps CDSoundDevice::InternalGetDeviceCaps()
 		ds = m_piDS;
 	} else
 	{
-		GUID guid = mpt::StringToGUID(mpt::convert<mpt::winstring>(GetDeviceInternalID()));
+		GUID guid = mpt::StringToGUID(mpt::transcode<mpt::winstring>(GetDeviceInternalID()));
 		if(DirectSoundCreate(mpt::IsValid(guid) ? &guid : NULL, &dummy, NULL) != DS_OK)
 		{
 			return caps;
@@ -191,7 +191,7 @@ SoundDevice::DynamicCaps CDSoundDevice::GetDeviceDynamicCaps(const std::vector<u
 		ds = m_piDS;
 	} else
 	{
-		GUID guid = mpt::StringToGUID(mpt::convert<mpt::winstring>(GetDeviceInternalID()));
+		GUID guid = mpt::StringToGUID(mpt::transcode<mpt::winstring>(GetDeviceInternalID()));
 		if(DirectSoundCreate(mpt::IsValid(guid) ? &guid : NULL, &dummy, NULL) != DS_OK)
 		{
 			return caps;
@@ -274,7 +274,7 @@ bool CDSoundDevice::InternalOpen()
 	DSBCAPS dsc;
 
 	if(m_piDS) return true;
-	GUID guid = mpt::StringToGUID(mpt::convert<mpt::winstring>(GetDeviceInternalID()));
+	GUID guid = mpt::StringToGUID(mpt::transcode<mpt::winstring>(GetDeviceInternalID()));
 	if(DirectSoundCreate(mpt::IsValid(guid) ? &guid : NULL, &m_piDS, NULL) != DS_OK) return false;
 	if(!m_piDS) return false;
 	if(m_piDS->SetCooperativeLevel(m_AppInfo.GetHWND(), m_Settings.ExclusiveMode ? DSSCL_WRITEPRIMARY : DSSCL_PRIORITY) != DS_OK)

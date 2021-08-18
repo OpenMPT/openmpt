@@ -12,7 +12,7 @@
 #include "mpt/format/default_floatingpoint.hpp"
 #include "mpt/format/helpers.hpp"
 #include "mpt/format/simple_spec.hpp"
-#include "mpt/string_convert/convert.hpp"
+#include "mpt/string_transcode/transcode.hpp"
 
 #if MPT_FORMAT_CXX17_FLOAT
 #include <charconv>
@@ -110,19 +110,19 @@ inline Tstring format_simple(const T & x, const format_simple_spec & f) {
 	using format_string_type = typename mpt::select_format_string_type<Tstring>::type;
 	if (f.GetPrecision() != -1) {
 		if (f.GetFlags() & format_simple_base::NotaSci) {
-			return mpt::convert<Tstring>(mpt::format_simple_floatingpoint_postprocess_width(format_simple_floatingpoint_to_chars<format_string_type>(x, std::chars_format::scientific, f.GetPrecision()), f));
+			return mpt::transcode<Tstring>(mpt::format_simple_floatingpoint_postprocess_width(format_simple_floatingpoint_to_chars<format_string_type>(x, std::chars_format::scientific, f.GetPrecision()), f));
 		} else if (f.GetFlags() & format_simple_base::NotaFix) {
-			return mpt::convert<Tstring>(mpt::format_simple_floatingpoint_postprocess_width(format_simple_floatingpoint_to_chars<format_string_type>(x, std::chars_format::fixed, f.GetPrecision()), f));
+			return mpt::transcode<Tstring>(mpt::format_simple_floatingpoint_postprocess_width(format_simple_floatingpoint_to_chars<format_string_type>(x, std::chars_format::fixed, f.GetPrecision()), f));
 		} else {
-			return mpt::convert<Tstring>(mpt::format_simple_floatingpoint_postprocess_width(format_simple_floatingpoint_to_chars<format_string_type>(x, std::chars_format::general, f.GetPrecision()), f));
+			return mpt::transcode<Tstring>(mpt::format_simple_floatingpoint_postprocess_width(format_simple_floatingpoint_to_chars<format_string_type>(x, std::chars_format::general, f.GetPrecision()), f));
 		}
 	} else {
 		if (f.GetFlags() & format_simple_base::NotaSci) {
-			return mpt::convert<Tstring>(mpt::format_simple_floatingpoint_postprocess_width(format_simple_floatingpoint_to_chars<format_string_type>(x, std::chars_format::scientific), f));
+			return mpt::transcode<Tstring>(mpt::format_simple_floatingpoint_postprocess_width(format_simple_floatingpoint_to_chars<format_string_type>(x, std::chars_format::scientific), f));
 		} else if (f.GetFlags() & format_simple_base::NotaFix) {
-			return mpt::convert<Tstring>(mpt::format_simple_floatingpoint_postprocess_width(format_simple_floatingpoint_to_chars<format_string_type>(x, std::chars_format::fixed), f));
+			return mpt::transcode<Tstring>(mpt::format_simple_floatingpoint_postprocess_width(format_simple_floatingpoint_to_chars<format_string_type>(x, std::chars_format::fixed), f));
 		} else {
-			return mpt::convert<Tstring>(mpt::format_simple_floatingpoint_postprocess_width(format_simple_floatingpoint_to_chars<format_string_type>(x, std::chars_format::general), f));
+			return mpt::transcode<Tstring>(mpt::format_simple_floatingpoint_postprocess_width(format_simple_floatingpoint_to_chars<format_string_type>(x, std::chars_format::general), f));
 		}
 	}
 }
@@ -224,7 +224,7 @@ inline Tstring format_simple_floatingpoint_stream(const T & x, const format_simp
 
 template <typename Tstring, typename T, std::enable_if_t<std::is_floating_point<T>::value, bool> = true>
 inline Tstring format_simple(const T & x, const format_simple_spec & format) {
-	return mpt::convert<Tstring>(mpt::format_simple_floatingpoint_stream<typename mpt::select_format_string_type<Tstring>::type>(x, format));
+	return mpt::transcode<Tstring>(mpt::format_simple_floatingpoint_stream<typename mpt::select_format_string_type<Tstring>::type>(x, format));
 }
 
 

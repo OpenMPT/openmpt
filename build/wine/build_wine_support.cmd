@@ -58,8 +58,8 @@ del /f /q "%OUTDIR%\openmpt-wine-support.zip"
  src\mpt\random\tests\*.hpp ^
  src\mpt\string\*.hpp ^
  src\mpt\string\tests\*.hpp ^
- src\mpt\string_convert\*.hpp ^
- src\mpt\string_convert\tests\*.hpp ^
+ src\mpt\string_transcode\*.hpp ^
+ src\mpt\string_transcode\tests\*.hpp ^
  src\mpt\system_error\*.hpp ^
  src\mpt\test\*.hpp ^
  src\mpt\uuid\*.hpp ^

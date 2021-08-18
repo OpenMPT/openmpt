@@ -18,7 +18,7 @@
 #include "mpt/out_of_memory/out_of_memory.hpp"
 #include "mpt/string/types.hpp"
 #include "mpt/string/utility.hpp"
-#include "mpt/string_convert/convert.hpp"
+#include "mpt/string_transcode/transcode.hpp"
 
 #include <algorithm>
 #include <stdexcept>
@@ -111,7 +111,7 @@ public:
 
 inline std::vector<mpt::ustring> jws_get_keynames(const mpt::ustring & jws_) {
 	std::vector<mpt::ustring> result;
-	nlohmann::json jws = nlohmann::json::parse(mpt::convert<std::string>(mpt::common_encoding::utf8, jws_));
+	nlohmann::json jws = nlohmann::json::parse(mpt::transcode<std::string>(mpt::common_encoding::utf8, jws_));
 	for (const auto & s : jws["signatures"]) {
 		result.push_back(s["header"]["kid"]);
 	}
@@ -162,13 +162,13 @@ public:
 			json["use"] = "sig";
 			json["e"] = mpt::encode_base64url(mpt::as_span(public_exp));
 			json["n"] = mpt::encode_base64url(mpt::as_span(modulus));
-			return mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, json.dump());
+			return mpt::transcode<mpt::ustring>(mpt::common_encoding::utf8, json.dump());
 		}
 
 		static public_key_data from_jwk(const mpt::ustring & jwk) {
 			public_key_data result;
 			try {
-				nlohmann::json json = nlohmann::json::parse(mpt::convert<std::string>(mpt::common_encoding::utf8, jwk));
+				nlohmann::json json = nlohmann::json::parse(mpt::transcode<std::string>(mpt::common_encoding::utf8, jwk));
 				if (json["kty"] != "RSA") {
 					throw std::runtime_error("Cannot parse RSA public key JWK.");
 				}
@@ -215,10 +215,10 @@ public:
 
 	static std::vector<public_key_data> parse_jwk_set(const mpt::ustring & jwk_set_) {
 		std::vector<public_key_data> result;
-		nlohmann::json jwk_set = nlohmann::json::parse(mpt::convert<std::string>(mpt::common_encoding::utf8, jwk_set_));
+		nlohmann::json jwk_set = nlohmann::json::parse(mpt::transcode<std::string>(mpt::common_encoding::utf8, jwk_set_));
 		for (const auto & k : jwk_set["keys"]) {
 			try {
-				result.push_back(public_key_data::from_jwk(mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, k.dump())));
+				result.push_back(public_key_data::from_jwk(mpt::transcode<mpt::ustring>(mpt::common_encoding::utf8, k.dump())));
 			} catch (...) {
 				// nothing
 			}
@@ -315,12 +315,12 @@ public:
 		}
 
 		std::vector<std::byte> jws_verify(const mpt::ustring & jws_) {
-			nlohmann::json jws = nlohmann::json::parse(mpt::convert<std::string>(mpt::common_encoding::utf8, jws_));
+			nlohmann::json jws = nlohmann::json::parse(mpt::transcode<std::string>(mpt::common_encoding::utf8, jws_));
 			std::vector<std::byte> payload = mpt::decode_base64url(jws["payload"]);
 			nlohmann::json jsignature = nlohmann::json::object();
 			bool sigfound = false;
 			for (const auto & s : jws["signatures"]) {
-				if (s["header"]["kid"] == mpt::convert<std::string>(mpt::common_encoding::utf8, name)) {
+				if (s["header"]["kid"] == mpt::transcode<std::string>(mpt::common_encoding::utf8, name)) {
 					jsignature = s;
 					sigfound = true;
 				}
@@ -337,7 +337,7 @@ public:
 			if (header["alg"] != jwk_alg) {
 				throw signature_verification_failed();
 			}
-			verify_hash(hash_type().process(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(mpt::convert<std::string>(mpt::common_encoding::utf8, mpt::encode_base64url(mpt::as_span(protectedheaderraw)) + MPT_USTRING(".") + mpt::encode_base64url(mpt::as_span(payload)))))).result(), signature);
+			verify_hash(hash_type().process(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(mpt::transcode<std::string>(mpt::common_encoding::utf8, mpt::encode_base64url(mpt::as_span(protectedheaderraw)) + MPT_USTRING(".") + mpt::encode_base64url(mpt::as_span(payload)))))).result(), signature);
 			return payload;
 		}
 
@@ -356,7 +356,7 @@ public:
 			if (header["alg"] != jwk_alg) {
 				throw signature_verification_failed();
 			}
-			verify_hash(hash_type().process(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(mpt::convert<std::string>(mpt::common_encoding::utf8, mpt::encode_base64url(mpt::as_span(protectedheaderraw)) + MPT_USTRING(".") + mpt::encode_base64url(mpt::as_span(payload)))))).result(), signature);
+			verify_hash(hash_type().process(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(mpt::transcode<std::string>(mpt::common_encoding::utf8, mpt::encode_base64url(mpt::as_span(protectedheaderraw)) + MPT_USTRING(".") + mpt::encode_base64url(mpt::as_span(payload)))))).result(), signature);
 			return payload;
 		}
 	};
@@ -430,9 +430,9 @@ public:
 		managed_private_key(keystore & keystore, const mpt::ustring & name_)
 			: name(name_) {
 			try {
-				SECURITY_STATUS openKeyStatus = NCryptOpenKey(keystore, &hKey, mpt::convert<std::wstring>(name).c_str(), 0, (keystore.store_domain() == keystore::domain::system ? NCRYPT_MACHINE_KEY_FLAG : 0));
+				SECURITY_STATUS openKeyStatus = NCryptOpenKey(keystore, &hKey, mpt::transcode<std::wstring>(name).c_str(), 0, (keystore.store_domain() == keystore::domain::system ? NCRYPT_MACHINE_KEY_FLAG : 0));
 				if (openKeyStatus == NTE_BAD_KEYSET) {
-					CheckSECURITY_STATUS(NCryptCreatePersistedKey(keystore, &hKey, BCRYPT_RSA_ALGORITHM, mpt::convert<std::wstring>(name).c_str(), 0, (keystore.store_domain() == keystore::domain::system ? NCRYPT_MACHINE_KEY_FLAG : 0)));
+					CheckSECURITY_STATUS(NCryptCreatePersistedKey(keystore, &hKey, BCRYPT_RSA_ALGORITHM, mpt::transcode<std::wstring>(name).c_str(), 0, (keystore.store_domain() == keystore::domain::system ? NCRYPT_MACHINE_KEY_FLAG : 0)));
 					DWORD length = mpt::saturate_cast<DWORD>(keysize);
 					CheckSECURITY_STATUS(NCryptSetProperty(hKey, NCRYPT_LENGTH_PROPERTY, (PBYTE)&length, mpt::saturate_cast<DWORD>(sizeof(DWORD)), 0));
 					CheckSECURITY_STATUS(NCryptFinalizeKey(hKey, 0));
@@ -484,7 +484,7 @@ public:
 			protectedheader["typ"] = "JWT";
 			protectedheader["alg"] = jwk_alg;
 			std::string protectedheaderstring = protectedheader.dump();
-			std::vector<std::byte> signature = sign_hash(hash_type().process(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(mpt::convert<std::string>(mpt::common_encoding::utf8, mpt::encode_base64url(mpt::as_span(protectedheaderstring)) + MPT_USTRING(".") + mpt::encode_base64url(payload))))).result());
+			std::vector<std::byte> signature = sign_hash(hash_type().process(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(mpt::transcode<std::string>(mpt::common_encoding::utf8, mpt::encode_base64url(mpt::as_span(protectedheaderstring)) + MPT_USTRING(".") + mpt::encode_base64url(payload))))).result());
 			return mpt::encode_base64url(mpt::as_span(protectedheaderstring)) + MPT_USTRING(".") + mpt::encode_base64url(payload) + MPT_USTRING(".") + mpt::encode_base64url(mpt::as_span(signature));
 		}
 
@@ -495,7 +495,7 @@ public:
 			std::string protectedheaderstring = protectedheader.dump();
 			nlohmann::json header = nlohmann::json::object();
 			header["kid"] = name;
-			std::vector<std::byte> signature = sign_hash(hash_type().process(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(mpt::convert<std::string>(mpt::common_encoding::utf8, mpt::encode_base64url(mpt::as_span(protectedheaderstring)) + MPT_USTRING(".") + mpt::encode_base64url(payload))))).result());
+			std::vector<std::byte> signature = sign_hash(hash_type().process(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(mpt::transcode<std::string>(mpt::common_encoding::utf8, mpt::encode_base64url(mpt::as_span(protectedheaderstring)) + MPT_USTRING(".") + mpt::encode_base64url(payload))))).result());
 			nlohmann::json jws = nlohmann::json::object();
 			jws["payload"] = mpt::encode_base64url(payload);
 			jws["signatures"] = nlohmann::json::array();
@@ -504,7 +504,7 @@ public:
 			jsignature["protected"] = mpt::encode_base64url(mpt::as_span(protectedheaderstring));
 			jsignature["signature"] = mpt::encode_base64url(mpt::as_span(signature));
 			jws["signatures"].push_back(jsignature);
-			return mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, jws.dump());
+			return mpt::transcode<mpt::ustring>(mpt::common_encoding::utf8, jws.dump());
 		}
 	};
 

@@ -830,9 +830,9 @@
     <ClInclude Include="..\..\src\mpt\string\tests\tests_string_utility.hpp" />
     <ClInclude Include="..\..\src\mpt\string\types.hpp" />
     <ClInclude Include="..\..\src\mpt\string\utility.hpp" />
-    <ClInclude Include="..\..\src\mpt\string_convert\convert.hpp" />
-    <ClInclude Include="..\..\src\mpt\string_convert\macros.hpp" />
-    <ClInclude Include="..\..\src\mpt\string_convert\tests\tests_string_convert.hpp" />
+    <ClInclude Include="..\..\src\mpt\string_transcode\macros.hpp" />
+    <ClInclude Include="..\..\src\mpt\string_transcode\tests\tests_string_transcode.hpp" />
+    <ClInclude Include="..\..\src\mpt\string_transcode\transcode.hpp" />
     <ClInclude Include="..\..\src\mpt\system_error\system_error.hpp" />
     <ClInclude Include="..\..\src\mpt\test\test.hpp" />
     <ClInclude Include="..\..\src\mpt\test\test_macros.hpp" />

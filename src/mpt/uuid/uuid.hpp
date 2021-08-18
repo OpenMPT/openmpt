@@ -397,7 +397,7 @@ MPT_CONSTEXPRINLINE mpt::UUID operator"" _uuid(const char * str, std::size_t len
 
 template <typename Tstring>
 inline Tstring uuid_to_string(mpt::UUID uuid) {
-	return mpt::convert<Tstring>(uuid.ToUString());
+	return mpt::transcode<Tstring>(uuid.ToUString());
 }
 
 template <>
@@ -407,7 +407,7 @@ inline std::string uuid_to_string<std::string>(mpt::UUID uuid) {
 
 template <typename Tstring, typename T, std::enable_if_t<std::is_same<T, mpt::UUID>::value, bool> = true>
 inline Tstring format_value_default(const T & x) {
-	return mpt::convert<Tstring>(mpt::uuid_to_string<typename mpt::select_format_string_type<Tstring>::type>(x));
+	return mpt::transcode<Tstring>(mpt::uuid_to_string<typename mpt::select_format_string_type<Tstring>::type>(x));
 }
 
 

@@ -8,7 +8,7 @@
 #include "mpt/base/detect.hpp"
 #include "mpt/base/namespace.hpp"
 #include "mpt/string/types.hpp"
-#include "mpt/string_convert/convert.hpp"
+#include "mpt/string_transcode/transcode.hpp"
 
 #include <ios>
 #include <locale>
@@ -36,12 +36,12 @@ inline std::wstring parse_as_internal_string_type(const std::wstring & s) {
 #if MPT_USTRING_MODE_WIDE
 template <typename Tstring>
 inline std::wstring parse_as_internal_string_type(const Tstring & s) {
-	return mpt::convert<std::wstring>(s);
+	return mpt::transcode<std::wstring>(s);
 }
 #else  // !MPT_USTRING_MODE_WIDE
 template <typename Tstring>
 inline std::string parse_as_internal_string_type(const Tstring & s) {
-	return mpt::convert<std::string>(mpt::common_encoding::utf8, s);
+	return mpt::transcode<std::string>(mpt::common_encoding::utf8, s);
 }
 #endif // MPT_USTRING_MODE_WIDE
 

@@ -9,7 +9,7 @@
 #include "mpt/base/namespace.hpp"
 #include "mpt/out_of_memory/out_of_memory.hpp"
 #include "mpt/string/types.hpp"
-#include "mpt/string_convert/convert.hpp"
+#include "mpt/string_transcode/transcode.hpp"
 #include "mpt/uuid/uuid.hpp"
 
 #include <stdexcept>
@@ -72,11 +72,11 @@ inline mpt::winstring CLSIDToString(CLSID clsid) {
 	}
 	::CoTaskMemFree(tmp);
 	tmp = nullptr;
-	return mpt::convert<mpt::winstring>(str);
+	return mpt::transcode<mpt::winstring>(str);
 }
 
 inline CLSID StringToCLSID(const mpt::winstring & str_) {
-	const std::wstring str = mpt::convert<std::wstring>(str_);
+	const std::wstring str = mpt::transcode<std::wstring>(str_);
 	CLSID clsid = CLSID();
 	std::vector<OLECHAR> tmp(str.c_str(), str.c_str() + str.length() + 1);
 	switch (::CLSIDFromString(tmp.data(), &clsid)) {
@@ -105,7 +105,7 @@ inline CLSID StringToCLSID(const mpt::winstring & str_) {
 }
 
 inline bool VerifyStringToCLSID(const mpt::winstring & str_, CLSID & clsid) {
-	const std::wstring str = mpt::convert<std::wstring>(str_);
+	const std::wstring str = mpt::transcode<std::wstring>(str_);
 	bool result = false;
 	clsid = CLSID();
 	std::vector<OLECHAR> tmp(str.c_str(), str.c_str() + str.length() + 1);
@@ -133,7 +133,7 @@ inline bool VerifyStringToCLSID(const mpt::winstring & str_, CLSID & clsid) {
 }
 
 inline bool IsCLSID(const mpt::winstring & str_) {
-	const std::wstring str = mpt::convert<std::wstring>(str_);
+	const std::wstring str = mpt::transcode<std::wstring>(str_);
 	bool result = false;
 	CLSID clsid = CLSID();
 	std::vector<OLECHAR> tmp(str.c_str(), str.c_str() + str.length() + 1);
@@ -166,7 +166,7 @@ inline bool IsCLSID(const mpt::winstring & str_) {
 // COM IID<->string conversion
 
 inline IID StringToIID(const mpt::winstring & str_) {
-	const std::wstring str = mpt::convert<std::wstring>(str_);
+	const std::wstring str = mpt::transcode<std::wstring>(str_);
 	IID iid = IID();
 	std::vector<OLECHAR> tmp(str.c_str(), str.c_str() + str.length() + 1);
 	switch (::IIDFromString(tmp.data(), &iid)) {
@@ -219,7 +219,7 @@ inline mpt::winstring IIDToString(IID iid) {
 		tmp = nullptr;
 		mpt::rethrow_out_of_memory(e);
 	}
-	return mpt::convert<mpt::winstring>(str);
+	return mpt::transcode<mpt::winstring>(str);
 }
 
 
@@ -235,7 +235,7 @@ inline mpt::winstring GUIDToString(GUID guid) {
 	if (::StringFromGUID2(guid, tmp.data(), static_cast<int>(tmp.size())) <= 0) {
 		throw std::logic_error("StringFromGUID2() failed.");
 	}
-	return mpt::convert<mpt::winstring>(tmp.data());
+	return mpt::transcode<mpt::winstring>(tmp.data());
 }
 
 

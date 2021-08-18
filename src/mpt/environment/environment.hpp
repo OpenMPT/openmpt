@@ -7,7 +7,7 @@
 #include "mpt/base/macros.hpp"
 #include "mpt/base/namespace.hpp"
 #include "mpt/string/types.hpp"
-#include "mpt/string_convert/convert.hpp"
+#include "mpt/string_transcode/transcode.hpp"
 #include "mpt/system_error/system_error.hpp"
 
 #include <optional>
@@ -36,18 +36,18 @@ inline std::optional<mpt::ustring> getenv(const mpt::ustring & env_var) {
 	return std::nullopt;
 #elif MPT_OS_WINDOWS && defined(UNICODE)
 	std::vector<WCHAR> buf(32767);
-	DWORD size = GetEnvironmentVariable(mpt::convert<std::wstring>(env_var).c_str(), buf.data(), 32767);
+	DWORD size = GetEnvironmentVariable(mpt::transcode<std::wstring>(env_var).c_str(), buf.data(), 32767);
 	if (size == 0) {
 		mpt::windows::ExpectError(ERROR_ENVVAR_NOT_FOUND);
 		return std::nullopt;
 	}
-	return mpt::convert<mpt::ustring>(buf.data());
+	return mpt::transcode<mpt::ustring>(buf.data());
 #else
-	const char * val = std::getenv(mpt::convert<std::string>(mpt::environment_encoding, env_var).c_str());
+	const char * val = std::getenv(mpt::transcode<std::string>(mpt::environment_encoding, env_var).c_str());
 	if (!val) {
 		return std::nullopt;
 	}
-	return mpt::convert<mpt::ustring>(mpt::environment_encoding, val);
+	return mpt::transcode<mpt::ustring>(mpt::environment_encoding, val);
 #endif
 }
 

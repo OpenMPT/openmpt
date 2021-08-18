@@ -65,7 +65,7 @@ svn export ./src/mpt/osinfo         bin/dist-autotools/src/mpt/osinfo
 svn export ./src/mpt/parse          bin/dist-autotools/src/mpt/parse
 svn export ./src/mpt/random         bin/dist-autotools/src/mpt/random
 svn export ./src/mpt/string         bin/dist-autotools/src/mpt/string
-svn export ./src/mpt/string_convert bin/dist-autotools/src/mpt/string_convert
+svn export ./src/mpt/string_transcode bin/dist-autotools/src/mpt/string_transcode
 svn export ./src/mpt/system_error   bin/dist-autotools/src/mpt/system_error
 svn export ./src/mpt/test           bin/dist-autotools/src/mpt/test
 svn export ./src/mpt/uuid           bin/dist-autotools/src/mpt/uuid
@@ -127,7 +127,7 @@ cp -r ./src/mpt/osinfo         bin/dist-autotools/src/mpt/osinfo
 cp -r ./src/mpt/parse          bin/dist-autotools/src/mpt/parse
 cp -r ./src/mpt/random         bin/dist-autotools/src/mpt/random
 cp -r ./src/mpt/string         bin/dist-autotools/src/mpt/string
-cp -r ./src/mpt/string_convert bin/dist-autotools/src/mpt/string_convert
+cp -r ./src/mpt/string_transcode bin/dist-autotools/src/mpt/string_transcode
 cp -r ./src/mpt/system_error   bin/dist-autotools/src/mpt/system_error
 cp -r ./src/mpt/test           bin/dist-autotools/src/mpt/test
 cp -r ./src/mpt/uuid           bin/dist-autotools/src/mpt/uuid

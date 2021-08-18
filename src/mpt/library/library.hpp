@@ -13,7 +13,7 @@
 #include "mpt/detect/ltdl.hpp"
 #include "mpt/path/path.hpp"
 #include "mpt/string/types.hpp"
-#include "mpt/string_convert/convert.hpp"
+#include "mpt/string_transcode/transcode.hpp"
 
 #include <filesystem>
 #include <optional>
@@ -163,7 +163,7 @@ private:
 			}
 			path.resize(mpt::exponential_grow(path.size()));
 		}
-		return mpt::path::from_stdpath(std::filesystem::absolute(mpt::convert<mpt::path>(mpt::winstring(path.data())).stdpath()));
+		return mpt::path::from_stdpath(std::filesystem::absolute(mpt::transcode<mpt::path>(mpt::winstring(path.data())).stdpath()));
 	}
 
 	static mpt::path get_system_path() {
@@ -172,7 +172,7 @@ private:
 		if (!GetSystemDirectory(path.data(), size + 1)) {
 			return mpt::path{};
 		}
-		return mpt::convert<mpt::path>(mpt::winstring(path.data()));
+		return mpt::transcode<mpt::path>(mpt::winstring(path.data()));
 	}
 
 #endif

@@ -8,7 +8,7 @@
 
 #if MPT_DETECTED_NLOHMANN_JSON
 #include "mpt/string/types.hpp"
-#include "mpt/string_convert/convert.hpp"
+#include "mpt/string_transcode/transcode.hpp"
 #endif // MPT_DETECTED_NLOHMANN_JSON
 
 #if MPT_DETECTED_NLOHMANN_JSON
@@ -32,10 +32,10 @@ namespace nlohmann {
 template <>
 struct adl_serializer<mpt::ustring> {
 	static void to_json(json & j, const mpt::ustring & val) {
-		j = mpt::convert<std::string>(mpt::common_encoding::utf8, val);
+		j = mpt::transcode<std::string>(mpt::common_encoding::utf8, val);
 	}
 	static void from_json(const json & j, mpt::ustring & val) {
-		val = mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, j.get<std::string>());
+		val = mpt::transcode<mpt::ustring>(mpt::common_encoding::utf8, j.get<std::string>());
 	}
 };
 template <typename Tvalue>
@@ -44,7 +44,7 @@ struct adl_serializer<std::map<mpt::ustring, Tvalue>> {
 		std::map<std::string, Tvalue> utf8map;
 		for (const auto & value : val)
 		{
-			utf8map[mpt::convert<std::string>(mpt::common_encoding::utf8, value.first)] = value.second;
+			utf8map[mpt::transcode<std::string>(mpt::common_encoding::utf8, value.first)] = value.second;
 		}
 		j = std::move(utf8map);
 	}
@@ -53,7 +53,7 @@ struct adl_serializer<std::map<mpt::ustring, Tvalue>> {
 		std::map<mpt::ustring, Tvalue> result;
 		for (const auto & value : utf8map)
 		{
-			result[mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, value.first)] = value.second;
+			result[mpt::transcode<mpt::ustring>(mpt::common_encoding::utf8, value.first)] = value.second;
 		}
 		val = std::move(result);
 	}

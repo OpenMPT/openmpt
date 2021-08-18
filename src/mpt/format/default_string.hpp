@@ -6,7 +6,7 @@
 
 
 #include "mpt/base/namespace.hpp"
-#include "mpt/string_convert/convert.hpp"
+#include "mpt/string_transcode/transcode.hpp"
 
 
 
@@ -15,8 +15,8 @@ inline namespace MPT_INLINE_NS {
 
 
 template <typename Tstring, typename T>
-inline auto format_value_default(const T & x) -> decltype(mpt::convert<Tstring>(x)) {
-	return mpt::convert<Tstring>(x);
+inline auto format_value_default(const T & x) -> decltype(mpt::transcode<Tstring>(x)) {
+	return mpt::transcode<Tstring>(x);
 }
 
 

@@ -17,7 +17,7 @@
 #include "mpt/parse/parse.hpp"
 #include "mpt/string/buffer.hpp"
 #include "mpt/string/types.hpp"
-#include "mpt/string_convert/convert.hpp"
+#include "mpt/string_transcode/transcode.hpp"
 #include "openmpt/base/Types.hpp"
 #include "openmpt/logging/Logger.hpp"
 #include "openmpt/soundbase/SampleFormat.hpp"
@@ -788,9 +788,9 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(ILogger &logge
 				break;
 		}
 		result.internalID = mpt::format<mpt::ustring>::dec(dev);
-		result.name = mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, Pa_GetDeviceInfo(dev)->name);
-		result.apiName = mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->name);
-		result.extraData[MPT_USTRING("PortAudio-HostAPI-name")] = mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->name);
+		result.name = mpt::transcode<mpt::ustring>(mpt::common_encoding::utf8, Pa_GetDeviceInfo(dev)->name);
+		result.apiName = mpt::transcode<mpt::ustring>(mpt::common_encoding::utf8, Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->name);
+		result.extraData[MPT_USTRING("PortAudio-HostAPI-name")] = mpt::transcode<mpt::ustring>(mpt::common_encoding::utf8, Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->name);
 		result.apiPath.push_back(MPT_USTRING("PortAudio"));
 		result.useNameAsIdentifier = true;
 		result.flags = {
@@ -1007,7 +1007,7 @@ std::vector<std::pair<PaDeviceIndex, mpt::ustring>> CPortaudioDevice::EnumerateI
 		{
 			continue;
 		}
-		result.push_back(std::make_pair(dev, mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, Pa_GetDeviceInfo(dev)->name)));
+		result.push_back(std::make_pair(dev, mpt::transcode<mpt::ustring>(mpt::common_encoding::utf8, Pa_GetDeviceInfo(dev)->name)));
 	}
 	return result;
 }
@@ -1036,7 +1036,7 @@ static void PortaudioLog(const char *text)
 		return;
 	}
 #if PA_LOG_ENABLED
-	MPT_LOG(mpt::log::GlobalLogger(), LogDebug, "PortAudio", MPT_UFORMAT_MESSAGE("PortAudio: {}")(mpt::convert<mpt::ustring>(mpt::common_encoding::utf8, text)));
+	MPT_LOG(mpt::log::GlobalLogger(), LogDebug, "PortAudio", MPT_UFORMAT_MESSAGE("PortAudio: {}")(mpt::transcode<mpt::ustring>(mpt::common_encoding::utf8, text)));
 #endif
 }
 #endif  // MPT_COMPILER_MSVC

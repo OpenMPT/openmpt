@@ -122,7 +122,7 @@ inline Tstring format_simple(const T & x, const format_simple_spec & format) {
 		base = 16;
 	}
 	using format_string_type = typename mpt::select_format_string_type<Tstring>::type;
-	return mpt::convert<Tstring>(mpt::format_simple_integer_postprocess_group(mpt::format_simple_integer_postprocess_digits(mpt::format_simple_integer_postprocess_case(mpt::format_simple_integer_to_chars<format_string_type>(x, base), format), format), format));
+	return mpt::transcode<Tstring>(mpt::format_simple_integer_postprocess_group(mpt::format_simple_integer_postprocess_digits(mpt::format_simple_integer_postprocess_case(mpt::format_simple_integer_to_chars<format_string_type>(x, base), format), format), format));
 }
 
 

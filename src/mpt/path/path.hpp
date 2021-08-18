@@ -8,7 +8,7 @@
 #include "mpt/base/detect.hpp"
 #include "mpt/base/namespace.hpp"
 #include "mpt/string/types.hpp"
-#include "mpt/string_convert/convert.hpp"
+#include "mpt/string_transcode/transcode.hpp"
 
 #include <filesystem>
 #include <type_traits>
@@ -70,7 +70,7 @@ struct is_string_type<std::filesystem::path> : public std::true_type { };
 
 
 template <>
-struct string_converter<std::filesystem::path> {
+struct string_transcoder<std::filesystem::path> {
 	using string_type = std::filesystem::path;
 	static inline mpt::widestring decode(const string_type & src) {
 		if constexpr (std::is_same<std::filesystem::path::value_type, char>::value) {
@@ -79,30 +79,30 @@ struct string_converter<std::filesystem::path> {
 			// but instead the conventional std::locale::locale("") encoding (which happens to be UTF8 on all modern systems, but this is not guaranteed).
 			// Note: libstdc++ and libc++ however assume that their internal representation is UTF8,
 			// which implies that wstring/u32string/u16string/u8string conversions are actually broken and MUST NOT be used, ever.
-			return mpt::convert<mpt::widestring>(mpt::logical_encoding::locale, src.string());
+			return mpt::transcode<mpt::widestring>(mpt::logical_encoding::locale, src.string());
 #if !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
 		} else if constexpr (std::is_same<std::filesystem::path::value_type, wchar_t>::value) {
-			return mpt::convert<mpt::widestring>(src.wstring());
+			return mpt::transcode<mpt::widestring>(src.wstring());
 #endif // !MPT_COMPILER_QUIRK_NO_WCHAR
 		} else if constexpr (std::is_same<std::filesystem::path::value_type, char32_t>::value) {
-			return mpt::convert<mpt::widestring>(src.u32string());
+			return mpt::transcode<mpt::widestring>(src.u32string());
 		} else if constexpr (std::is_same<std::filesystem::path::value_type, char16_t>::value) {
-			return mpt::convert<mpt::widestring>(src.u16string());
+			return mpt::transcode<mpt::widestring>(src.u16string());
 #if MPT_CXX_AT_LEAST(20)
 		} else if constexpr (std::is_same<std::filesystem::path::value_type, char8_t>::value) {
-			return mpt::convert<mpt::widestring>(src.u8string());
+			return mpt::transcode<mpt::widestring>(src.u8string());
 #endif
 		} else {
 #if MPT_OS_WINDOWS && !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
-			return mpt::convert<mpt::widestring>(src.wstring());
+			return mpt::transcode<mpt::widestring>(src.wstring());
 #elif MPT_OS_WINDOWS
-			return mpt::convert<mpt::widestring>(mpt::logical_encoding::locale, src.string());
+			return mpt::transcode<mpt::widestring>(mpt::logical_encoding::locale, src.string());
 #else
 			// completely unknown implementation, assume it can sanely convert to/from UTF16/UTF32
 			if constexpr (sizeof(mpt::widechar) == sizeof(char32_t)) {
-				return mpt::convert<mpt::widestring>(src.u32string());
+				return mpt::transcode<mpt::widestring>(src.u32string());
 			} else {
-				return mpt::convert<mpt::widestring>(src.u16string());
+				return mpt::transcode<mpt::widestring>(src.u16string());
 			}
 #endif
 		}
@@ -114,30 +114,30 @@ struct string_converter<std::filesystem::path> {
 			// but instead the conventional std::locale::locale("") encoding (which happens to be UTF8 on all modern systems, but this is not guaranteed).
 			// Note: libstdc++ and libc++ however assume that their internal representation is UTF8,
 			// which implies that wstring/u32string/u16string/u8string conversions are actually broken and MUST NOT be used, ever.
-			return std::filesystem::path{mpt::convert<std::string>(mpt::logical_encoding::locale, src), fmt};
+			return std::filesystem::path{mpt::transcode<std::string>(mpt::logical_encoding::locale, src), fmt};
 #if !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
 		} else if constexpr (std::is_same<std::filesystem::path::value_type, wchar_t>::value) {
-			return std::filesystem::path{mpt::convert<std::wstring>(src), fmt};
+			return std::filesystem::path{mpt::transcode<std::wstring>(src), fmt};
 #endif // !MPT_COMPILER_QUIRK_NO_WCHAR
 		} else if constexpr (std::is_same<std::filesystem::path::value_type, char32_t>::value) {
-			return std::filesystem::path{mpt::convert<std::u32string>(src), fmt};
+			return std::filesystem::path{mpt::transcode<std::u32string>(src), fmt};
 		} else if constexpr (std::is_same<std::filesystem::path::value_type, char16_t>::value) {
-			return std::filesystem::path{mpt::convert<std::u16string>(src), fmt};
+			return std::filesystem::path{mpt::transcode<std::u16string>(src), fmt};
 #if MPT_CXX_AT_LEAST(20)
 		} else if constexpr (std::is_same<std::filesystem::path::value_type, char8_t>::value) {
-			return std::filesystem::path{mpt::convert<std::u8string>(src), fmt};
+			return std::filesystem::path{mpt::transcode<std::u8string>(src), fmt};
 #endif
 		} else {
 #if MPT_OS_WINDOWS && !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
-			return std::filesystem::path{mpt::convert<std::wstring>(src), fmt};
+			return std::filesystem::path{mpt::transcode<std::wstring>(src), fmt};
 #elif MPT_OS_WINDOWS
-			return std::filesystem::path{mpt::convert<std::string>(mpt::logical_encoding::locale, src), fmt};
+			return std::filesystem::path{mpt::transcode<std::string>(mpt::logical_encoding::locale, src), fmt};
 #else
 			// completely unknown implementation, assume it can sanely convert to/from UTF16/UTF32
 			if constexpr (sizeof(mpt::widechar) == sizeof(char32_t)) {
-				return std::filesystem::path{mpt::convert<std::u32string>(src), fmt};
+				return std::filesystem::path{mpt::transcode<std::u32string>(src), fmt};
 			} else {
-				return std::filesystem::path{mpt::convert<std::u16string>(src), fmt};
+				return std::filesystem::path{mpt::transcode<std::u16string>(src), fmt};
 			}
 #endif
 		}
@@ -228,10 +228,10 @@ public:
 		return p.m_path;
 	}
 	static os_path to_ospath(const path & p) {
-		return mpt::convert<os_path>(p.m_path);
+		return mpt::transcode<os_path>(p.m_path);
 	}
 	static std::filesystem::path from_ospath(const os_path & s, std::filesystem::path::format fmt = std::filesystem::path::auto_format) {
-		return string_converter<std::filesystem::path>{}.encode(mpt::convert<mpt::widestring>(s), fmt);
+		return string_transcoder<std::filesystem::path>{}.encode(mpt::transcode<mpt::widestring>(s), fmt);
 	}
 
 public:
@@ -461,13 +461,13 @@ struct is_string_type<mpt::path> : public std::true_type { };
 
 
 template <>
-struct string_converter<mpt::path> {
+struct string_transcoder<mpt::path> {
 	using string_type = mpt::path;
 	static inline mpt::widestring decode(const string_type & src) {
-		return mpt::convert<mpt::widestring>(src.ospath());
+		return mpt::transcode<mpt::widestring>(src.ospath());
 	}
 	static inline string_type encode(const mpt::widestring & src) {
-		return mpt::path{mpt::convert<mpt::os_path>(src)};
+		return mpt::path{mpt::transcode<mpt::os_path>(src)};
 	}
 };
 
@@ -483,7 +483,7 @@ inline mpt::os_path support_long_path(const mpt::os_path & path) {
 		// path is already in prefixed form
 		return path;
 	}
-	const mpt::os_path absolute_path = mpt::convert<mpt::os_path>(std::filesystem::absolute(mpt::convert<std::filesystem::path>(path)));
+	const mpt::os_path absolute_path = mpt::transcode<mpt::os_path>(std::filesystem::absolute(mpt::transcode<std::filesystem::path>(path)));
 	if (absolute_path.substr(0, 2) == MPT_OSPATH_LITERAL("\\\\")) {
 		// Path is a network share: \\server\foo.bar -> \\?\UNC\server\foo.bar
 		return MPT_OSPATH_LITERAL("\\\\?\\UNC") + absolute_path.substr(1);

@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: BSL-1.0 OR BSD-3-Clause */
 
-#ifndef MPT_STRING_CONVERT_CONVERT_HPP
-#define MPT_STRING_CONVERT_CONVERT_HPP
+#ifndef MPT_STRING_TRANSCODE_TRANSCODE_HPP
+#define MPT_STRING_TRANSCODE_TRANSCODE_HPP
 
 
 
@@ -969,11 +969,11 @@ inline bool is_utf8(const std::string & str) {
 
 
 template <typename Tstring>
-struct string_converter {
+struct string_transcoder {
 };
 
 template <logical_encoding encoding>
-struct string_converter<std::basic_string<char, logical_encoding_char_traits<encoding>>> {
+struct string_transcoder<std::basic_string<char, logical_encoding_char_traits<encoding>>> {
 	using string_type = std::basic_string<char, logical_encoding_char_traits<encoding>>;
 	static inline mpt::widestring decode(const string_type & src) {
 		return mpt::decode<string_type>(encoding, src);
@@ -984,7 +984,7 @@ struct string_converter<std::basic_string<char, logical_encoding_char_traits<enc
 };
 
 template <common_encoding encoding>
-struct string_converter<std::basic_string<char, common_encoding_char_traits<encoding>>> {
+struct string_transcoder<std::basic_string<char, common_encoding_char_traits<encoding>>> {
 	using string_type = std::basic_string<char, common_encoding_char_traits<encoding>>;
 	static inline mpt::widestring decode(const string_type & src) {
 		return mpt::decode<string_type>(encoding, src);
@@ -996,7 +996,7 @@ struct string_converter<std::basic_string<char, common_encoding_char_traits<enco
 
 #if !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
 template <>
-struct string_converter<std::wstring> {
+struct string_transcoder<std::wstring> {
 	using string_type = std::wstring;
 	static inline mpt::widestring decode(const string_type & src) {
 		return src;
@@ -1009,7 +1009,7 @@ struct string_converter<std::wstring> {
 
 #if MPT_CXX_AT_LEAST(20)
 template <>
-struct string_converter<std::u8string> {
+struct string_transcoder<std::u8string> {
 	using string_type = std::u8string;
 	static inline mpt::widestring decode(const string_type & src) {
 		return mpt::decode_utf8<string_type>(src);
@@ -1021,7 +1021,7 @@ struct string_converter<std::u8string> {
 #endif // C++10
 
 template <>
-struct string_converter<std::u16string> {
+struct string_transcoder<std::u16string> {
 	using string_type = std::u16string;
 	static inline mpt::widestring decode(const string_type & src) {
 		if constexpr (sizeof(mpt::widechar) == sizeof(char16_t)) {
@@ -1041,7 +1041,7 @@ struct string_converter<std::u16string> {
 
 #if defined(MPT_COMPILER_QUIRK_NO_WCHAR)
 template <>
-struct string_converter<std::u32string> {
+struct string_transcoder<std::u32string> {
 	using string_type = std::u32string;
 	static inline mpt::widestring decode(const string_type & src) {
 		return src;
@@ -1052,7 +1052,7 @@ struct string_converter<std::u32string> {
 };
 #else  // !MPT_COMPILER_QUIRK_NO_WCHAR
 template <>
-struct string_converter<std::u32string> {
+struct string_transcoder<std::u32string> {
 	using string_type = std::u32string;
 	static inline mpt::widestring decode(const string_type & src) {
 		if constexpr (sizeof(mpt::widechar) == sizeof(char32_t)) {
@@ -1074,7 +1074,7 @@ struct string_converter<std::u32string> {
 #if MPT_DETECTED_MFC
 
 template <>
-struct string_converter<CStringW> {
+struct string_transcoder<CStringW> {
 	using string_type = CStringW;
 	static inline mpt::widestring decode(const string_type & src) {
 		return mpt::widestring(src.GetString());
@@ -1085,7 +1085,7 @@ struct string_converter<CStringW> {
 };
 
 template <>
-struct string_converter<CStringA> {
+struct string_transcoder<CStringA> {
 	using string_type = CStringA;
 	static inline mpt::widestring decode(const string_type & src) {
 		return mpt::decode<std::string>(mpt::logical_encoding::locale, std::string(src.GetString()));
@@ -1098,26 +1098,26 @@ struct string_converter<CStringA> {
 #endif // MPT_DETECTED_MFC
 
 template <typename Tdststring, typename Tsrcstring, std::enable_if_t<mpt::is_string_type<typename mpt::make_string_type<Tsrcstring>::type>::value, bool> = true>
-inline Tdststring convert(const Tsrcstring & src) {
+inline Tdststring transcode(const Tsrcstring & src) {
 	if constexpr (std::is_same<Tdststring, typename mpt::make_string_type<Tsrcstring>::type>::value) {
 		return mpt::as_string(src);
 	} else {
-		return string_converter<Tdststring>::encode(string_converter<decltype(mpt::as_string(src))>::decode(mpt::as_string(src)));
+		return string_transcoder<Tdststring>::encode(string_transcoder<decltype(mpt::as_string(src))>::decode(mpt::as_string(src)));
 	}
 }
 
 template <typename Tdststring, typename Tsrcstring, typename Tencoding, std::enable_if_t<std::is_same<Tdststring, std::string>::value, bool> = true, std::enable_if_t<mpt::is_string_type<typename mpt::make_string_type<Tsrcstring>::type>::value, bool> = true>
-inline Tdststring convert(Tencoding to, const Tsrcstring & src) {
-	return mpt::encode<Tdststring>(to, string_converter<decltype(mpt::as_string(src))>::decode(mpt::as_string(src)));
+inline Tdststring transcode(Tencoding to, const Tsrcstring & src) {
+	return mpt::encode<Tdststring>(to, string_transcoder<decltype(mpt::as_string(src))>::decode(mpt::as_string(src)));
 }
 
 template <typename Tdststring, typename Tsrcstring, typename Tencoding, std::enable_if_t<std::is_same<typename mpt::make_string_type<Tsrcstring>::type, std::string>::value, bool> = true, std::enable_if_t<mpt::is_string_type<typename mpt::make_string_type<Tsrcstring>::type>::value, bool> = true>
-inline Tdststring convert(Tencoding from, const Tsrcstring & src) {
-	return string_converter<Tdststring>::encode(mpt::decode<decltype(mpt::as_string(src))>(from, mpt::as_string(src)));
+inline Tdststring transcode(Tencoding from, const Tsrcstring & src) {
+	return string_transcoder<Tdststring>::encode(mpt::decode<decltype(mpt::as_string(src))>(from, mpt::as_string(src)));
 }
 
 template <typename Tdststring, typename Tsrcstring, typename Tto, typename Tfrom, std::enable_if_t<mpt::is_string_type<typename mpt::make_string_type<Tsrcstring>::type>::value, bool> = true>
-inline Tdststring convert(Tto to, Tfrom from, const Tsrcstring & src) {
+inline Tdststring transcode(Tto to, Tfrom from, const Tsrcstring & src) {
 	return mpt::encode<Tdststring>(to, mpt::decode<decltype(mpt::as_string(src))>(from, mpt::as_string(src)));
 }
 
@@ -1128,4 +1128,4 @@ inline Tdststring convert(Tto to, Tfrom from, const Tsrcstring & src) {
 
 
 
-#endif // MPT_STRING_CONVERT_CONVERT_HPP
+#endif // MPT_STRING_TRANSCODE_TRANSCODE_HPP

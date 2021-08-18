@@ -11,7 +11,7 @@
 #include "mpt/format/message_macros.hpp"
 #include "mpt/format/simple.hpp"
 #include "mpt/string/types.hpp"
-#include "mpt/string_convert/convert.hpp"
+#include "mpt/string_transcode/transcode.hpp"
 #include "mpt/out_of_memory/out_of_memory.hpp"
 
 #if MPT_OS_WINDOWS
@@ -59,7 +59,7 @@ inline mpt::ustring GetErrorMessage(DWORD errorCode, HANDLE hModule = NULL) {
 		}
 		return {};
 	}
-	return mpt::convert<mpt::ustring>(mpt::winstring{msgbuf.data()});
+	return mpt::transcode<mpt::ustring>(mpt::winstring{msgbuf.data()});
 #else
 	mpt::ustring message;
 	void * lpMsgBuf = nullptr;
@@ -86,7 +86,7 @@ inline mpt::ustring GetErrorMessage(DWORD errorCode, HANDLE hModule = NULL) {
 		return {};
 	}
 	try {
-		message = mpt::convert<mpt::ustring>(mpt::winstring{static_cast<LPTSTR>(lpMsgBuf)});
+		message = mpt::transcode<mpt::ustring>(mpt::winstring{static_cast<LPTSTR>(lpMsgBuf)});
 	} catch (mpt::out_of_memory e) {
 		LocalFree(lpMsgBuf);
 		mpt::rethrow_out_of_memory(e);
@@ -101,7 +101,7 @@ class error
 	: public std::runtime_error {
 public:
 	error(DWORD errorCode, HANDLE hModule = NULL)
-		: std::runtime_error(mpt::convert<std::string>(mpt::exception_encoding, MPT_UFORMAT_MESSAGE("Windows Error: 0x{}: {}")(mpt::format<mpt::ustring>::hex0<8>(errorCode), GetErrorMessage(errorCode, hModule)))) {
+		: std::runtime_error(mpt::transcode<std::string>(mpt::exception_encoding, MPT_UFORMAT_MESSAGE("Windows Error: 0x{}: {}")(mpt::format<mpt::ustring>::hex0<8>(errorCode), GetErrorMessage(errorCode, hModule)))) {
 		return;
 	}
 };

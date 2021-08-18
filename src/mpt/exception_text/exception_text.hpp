@@ -7,7 +7,7 @@
 
 #include "mpt/base/namespace.hpp"
 #include "mpt/string/types.hpp"
-#include "mpt/string_convert/convert.hpp"
+#include "mpt/string_transcode/transcode.hpp"
 
 #include <exception>
 
@@ -23,11 +23,11 @@ inline namespace MPT_INLINE_NS {
 template <typename Tstring>
 inline Tstring get_exception_text(const std::exception & e) {
 	if (e.what() && (std::strlen(e.what()) > 0)) {
-		return mpt::convert<Tstring>(mpt::exception_string{e.what()});
+		return mpt::transcode<Tstring>(mpt::exception_string{e.what()});
 	} else if (typeid(e).name() && (std::strlen(typeid(e).name()) > 0)) {
-		return mpt::convert<Tstring>(mpt::source_string{typeid(e).name()});
+		return mpt::transcode<Tstring>(mpt::source_string{typeid(e).name()});
 	} else {
-		return mpt::convert<Tstring>(mpt::source_string{"unknown exception name"});
+		return mpt::transcode<Tstring>(mpt::source_string{"unknown exception name"});
 	}
 }
 
@@ -50,7 +50,7 @@ inline Tstring get_current_exception_text() {
 	} catch (const std::exception & e) {
 		return mpt::get_exception_text<Tstring>(e);
 	} catch (...) {
-		return mpt::convert<Tstring>(mpt::source_string{"unknown exception"});
+		return mpt::transcode<Tstring>(mpt::source_string{"unknown exception"});
 	}
 }
 

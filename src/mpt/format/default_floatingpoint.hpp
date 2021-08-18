@@ -18,7 +18,7 @@
 #endif
 #include "mpt/base/namespace.hpp"
 #include "mpt/format/helpers.hpp"
-#include "mpt/string_convert/convert.hpp"
+#include "mpt/string_transcode/transcode.hpp"
 
 #if MPT_FORMAT_CXX17_FLOAT
 #include <charconv>
@@ -61,7 +61,7 @@ inline Tstring to_chars_string(const T & x) {
 
 template <typename Tstring, typename T, std::enable_if_t<std::is_floating_point<T>::value, bool> = true>
 inline Tstring format_value_default(const T & x) {
-	return mpt::convert<Tstring>(mpt::to_chars_string<typename mpt::select_format_string_type<Tstring>::type>(x));
+	return mpt::transcode<Tstring>(mpt::to_chars_string<typename mpt::select_format_string_type<Tstring>::type>(x));
 }
 #endif
 
@@ -78,7 +78,7 @@ inline Tstring to_stream_string(const T & x) {
 
 template <typename Tstring, typename T, std::enable_if_t<std::is_floating_point<T>::value, bool> = true>
 inline Tstring format_value_default(const T & x) {
-	return mpt::convert<Tstring>(mpt::to_stream_string<typename mpt::select_format_string_type<Tstring>::type>(x));
+	return mpt::transcode<Tstring>(mpt::to_stream_string<typename mpt::select_format_string_type<Tstring>::type>(x));
 }
 #endif
 

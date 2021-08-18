@@ -18,7 +18,7 @@
 #include "mpt/parse/parse.hpp"
 #include "mpt/string/buffer.hpp"
 #include "mpt/string/types.hpp"
-#include "mpt/string_convert/convert.hpp"
+#include "mpt/string_transcode/transcode.hpp"
 #include "openmpt/base/Types.hpp"
 #include "openmpt/logging/Logger.hpp"
 #include "openmpt/soundbase/SampleFormat.hpp"
@@ -381,7 +381,7 @@ bool CWaveDevice::CheckResult(MMRESULT result)
 		m_Failed = true;
 		TCHAR errortext[MAXERRORLENGTH + 1] = {};
 		waveOutGetErrorText(result, errortext, MAXERRORLENGTH);
-		SendDeviceMessage(LogError, MPT_UFORMAT_MESSAGE("WaveOut error: 0x{}: {}")(mpt::format<mpt::ustring>::hex0<8>(result), mpt::convert<mpt::ustring>(static_cast<mpt::winstring>(mpt::ReadWinBuf(errortext)))));
+		SendDeviceMessage(LogError, MPT_UFORMAT_MESSAGE("WaveOut error: 0x{}: {}")(mpt::format<mpt::ustring>::hex0<8>(result), mpt::transcode<mpt::ustring>(static_cast<mpt::winstring>(mpt::ReadWinBuf(errortext)))));
 	}
 	RequestClose();
 	return false;
@@ -399,7 +399,7 @@ bool CWaveDevice::CheckResult(MMRESULT result, DWORD param)
 		m_Failed = true;
 		TCHAR errortext[MAXERRORLENGTH + 1] = {};
 		waveOutGetErrorText(result, errortext, MAXERRORLENGTH);
-		SendDeviceMessage(LogError, MPT_UFORMAT_MESSAGE("WaveOut error: 0x{} (param 0x{}): {}")(mpt::format<mpt::ustring>::hex0<8>(result), mpt::format<mpt::ustring>::hex0<8>(param), mpt::convert<mpt::ustring>(static_cast<mpt::winstring>(mpt::ReadWinBuf(errortext)))));
+		SendDeviceMessage(LogError, MPT_UFORMAT_MESSAGE("WaveOut error: 0x{} (param 0x{}): {}")(mpt::format<mpt::ustring>::hex0<8>(result), mpt::format<mpt::ustring>::hex0<8>(param), mpt::transcode<mpt::ustring>(static_cast<mpt::winstring>(mpt::ReadWinBuf(errortext)))));
 	}
 	RequestClose();
 	return false;
@@ -667,7 +667,7 @@ std::vector<SoundDevice::Info> CWaveDevice::EnumerateDevices(ILogger &logger, So
 		WAVEOUTCAPS woc = {};
 		if(waveOutGetDevCaps((index == 0) ? WAVE_MAPPER : (index - 1), &woc, sizeof(woc)) == MMSYSERR_NOERROR)
 		{
-			info.name = mpt::convert<mpt::ustring>(static_cast<mpt::winstring>(mpt::ReadWinBuf(woc.szPname)));
+			info.name = mpt::transcode<mpt::ustring>(static_cast<mpt::winstring>(mpt::ReadWinBuf(woc.szPname)));
 			info.extraData[MPT_USTRING("DriverID")] = MPT_UFORMAT_MESSAGE("{}:{}")(mpt::format<mpt::ustring>::hex0<4>(woc.wMid), mpt::format<mpt::ustring>::hex0<4>(woc.wPid));
 			info.extraData[MPT_USTRING("DriverVersion")] = MPT_UFORMAT_MESSAGE("{}.{}")(mpt::format<mpt::ustring>::dec((static_cast<uint32>(woc.vDriverVersion) >> 24) & 0xff), mpt::format<mpt::ustring>::dec((static_cast<uint32>(woc.vDriverVersion) >> 0) & 0xff));
 		}

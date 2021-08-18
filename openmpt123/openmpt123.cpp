@@ -1601,7 +1601,7 @@ static void probe_file( commandlineflags & flags, const std::string & filename, 
 				// Only MSVC has std::ifstream::ifstream(std::wstring).
 				// Fake it for other compilers using _wfopen().
 				std::string data;
-				FILE * f = _wfopen( mpt::convert<std::wstring>( mpt::common_encoding::utf8, filename ).c_str(), L"rb" );
+				FILE * f = _wfopen( mpt::transcode<std::wstring>( mpt::common_encoding::utf8, filename ).c_str(), L"rb" );
 				if ( f ) {
 					while ( !feof( f ) ) {
 						static const std::size_t BUFFER_SIZE = 4096;
@@ -1615,7 +1615,7 @@ static void probe_file( commandlineflags & flags, const std::string & filename, 
 				file_stream.str( data );
 				filesize = data.length();
 			#elif defined(_MSC_VER) && defined(UNICODE)
-				file_stream.open( mpt::convert<std::wstring>( mpt::common_encoding::utf8, filename ), std::ios::binary );
+				file_stream.open( mpt::transcode<std::wstring>( mpt::common_encoding::utf8, filename ), std::ios::binary );
 				file_stream.seekg( 0, std::ios::end );
 				filesize = file_stream.tellg();
 				file_stream.seekg( 0, std::ios::beg );
@@ -1677,7 +1677,7 @@ static void render_file( commandlineflags & flags, const std::string & filename,
 				// Only MSVC has std::ifstream::ifstream(std::wstring).
 				// Fake it for other compilers using _wfopen().
 				std::string data;
-				FILE * f = _wfopen( mpt::convert<std::wstring>( mpt::common_encoding::utf8, filename ).c_str(), L"rb" );
+				FILE * f = _wfopen( mpt::transcode<std::wstring>( mpt::common_encoding::utf8, filename ).c_str(), L"rb" );
 				if ( f ) {
 					while ( !feof( f ) ) {
 						static const std::size_t BUFFER_SIZE = 4096;
@@ -1691,7 +1691,7 @@ static void render_file( commandlineflags & flags, const std::string & filename,
 				file_stream.str( data );
 				filesize = data.length();
 			#elif defined(_MSC_VER) && defined(UNICODE)
-				file_stream.open( mpt::convert<std::wstring>( mpt::common_encoding::utf8, filename ), std::ios::binary );
+				file_stream.open( mpt::transcode<std::wstring>( mpt::common_encoding::utf8, filename ), std::ios::binary );
 				file_stream.seekg( 0, std::ios::end );
 				filesize = file_stream.tellg();
 				file_stream.seekg( 0, std::ios::beg );
@@ -1844,7 +1844,7 @@ static bool parse_playlist( commandlineflags & flags, std::string filename, std:
 			// Only MSVC has std::ifstream::ifstream(std::wstring).
 			// Fake it for other compilers using _wfopen().
 			std::string data;
-			FILE * f = _wfopen( mpt::convert<std::wstring>( mpt::common_encoding::utf8, filename ).c_str(), L"rb" );
+			FILE * f = _wfopen( mpt::transcode<std::wstring>( mpt::common_encoding::utf8, filename ).c_str(), L"rb" );
 			if ( f ) {
 				while ( !feof( f ) ) {
 					static const std::size_t BUFFER_SIZE = 4096;
@@ -1857,7 +1857,7 @@ static bool parse_playlist( commandlineflags & flags, std::string filename, std:
 			}
 			file_stream.str( data );
 		#elif defined(_MSC_VER) && defined(UNICODE)
-			file_stream.open( mpt::convert<std::wstring>( mpt::common_encoding::utf8, filename ), std::ios::binary );
+			file_stream.open( mpt::transcode<std::wstring>( mpt::common_encoding::utf8, filename ), std::ios::binary );
 		#else
 			file_stream.open( filename, std::ios::binary );
 		#endif
@@ -1906,7 +1906,7 @@ static bool parse_playlist( commandlineflags & flags, std::string filename, std:
 					newfile = line;
 				} else {
 #if defined(WIN32)
-					newfile = mpt::convert<std::string>( mpt::common_encoding::utf8, mpt::logical_encoding::locale, line );
+					newfile = mpt::transcode<std::string>( mpt::common_encoding::utf8, mpt::logical_encoding::locale, line );
 #else
 					newfile = line;
 #endif
@@ -1916,7 +1916,7 @@ static bool parse_playlist( commandlineflags & flags, std::string filename, std:
 					newfile = line;
 				} else {
 #if defined(WIN32)
-					newfile = mpt::convert<std::string>( mpt::common_encoding::utf8, mpt::logical_encoding::locale, line );
+					newfile = mpt::transcode<std::string>( mpt::common_encoding::utf8, mpt::logical_encoding::locale, line );
 #else
 					newfile = line;
 #endif
@@ -2279,7 +2279,7 @@ static int main( int argc, char * argv [] ) {
 	std::vector<std::string> args;
 	#if defined(WIN32) && defined(UNICODE)
 		for ( int arg = 0; arg < wargc; ++arg ) {
-			args.push_back( mpt::convert<std::string>( mpt::common_encoding::utf8, wargv[arg] ) );
+			args.push_back( mpt::transcode<std::string>( mpt::common_encoding::utf8, wargv[arg] ) );
 		}
 	#else
 		args = std::vector<std::string>( argv, argv + argc );
