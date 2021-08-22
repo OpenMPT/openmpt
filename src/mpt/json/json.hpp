@@ -16,14 +16,7 @@
 #endif // MPT_DETECTED_NLOHMANN_JSON
 
 #if MPT_DETECTED_NLOHMANN_JSON
-#if MPT_COMPILER_CLANG
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wmismatched-tags"
-#endif // MPT_COMPILER_CLANG
 #include <nlohmann/json.hpp>
-#if MPT_COMPILER_CLANG
-#pragma clang diagnostic pop
-#endif // MPT_COMPILER_CLANG
 #endif // MPT_DETECTED_NLOHMANN_JSON
 
 
