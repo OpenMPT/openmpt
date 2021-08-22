@@ -677,13 +677,13 @@ void CModTree::RefreshDlsBanks()
 								UINT keymin = pDlsIns->Regions[iRgn].uKeyMin;
 								UINT keymax = pDlsIns->Regions[iRgn].uKeyMax;
 
-								const CHAR *regionName = pDlsBank->GetRegionName(iIns, iRgn);
-								if(regionName == nullptr && (keymin >= 24) && (keymin <= 84))
+								const char *regionName = pDlsBank->GetRegionName(iIns, iRgn);
+								if(regionName == nullptr || !regionName[0])
 								{
-									regionName = szMidiPercussionNames[keymin - 24];
-								} else
-								{
-									regionName = "";
+									if(keymin >= 24 && keymin <= 84)
+										regionName = szMidiPercussionNames[keymin - 24];
+									else
+										regionName = "";
 								}
 
 								if(keymin >= keymax)
