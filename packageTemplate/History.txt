@@ -31,6 +31,37 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.29.12.00 (22 August 2021, revision 15545)
+--------------------------------------------
+Tree view
+- [Fix] <js> Drum key names were not displayed for SF2 soundfonts.
+
+Pattern tab
+- [Fix] <js> Find & Replace: Fixed various issues with replacing extended commands Sxy / Exy (http://bugs.openmpt.org/view.php?id=1486).
+
+Playback
+- [Fix] <js> Possible crash with malformed modules containing an invalid plugin chain or instruments pointing to invalid plugins.
+- [Fix] <js> Possible crash after swapping to a sample with loop points set but not loop enabled.
+
+MPTM
+- [Fix] <js> Fixed excessive memory usage with files claiming to have an extremely high rows per beat count while also using tempo swing. Maximum rows per beat are now limited to 65536.
+
+Other formats
+- [Imp] <js> MIDI Export: Write loopStart and loopEnd cue markers (http://forum.openmpt.org/index.php?topic=6660.0).
+- [Imp] <js> MIDI Import: Support loopEnd marker and EMIDI loop start / end CCs. 
+- [Fix] <js> STP: Avoid creating thousands of patterns when loading malformed files even though no more pattern data can be read.
+- [Fix] <js> MMCMP: Fixed various possible crashes with malformed files.
+
+Misc
+- [Mod] <js> Song Properties: Reject 0 rows per beat in modern tempo mode.
+- [Imp] <js> DLS / SF2: Support more than 128 regions per instrument (some complex drum programs can exceed the previous limit).
+- [Fix] <js> SF2: Extracting drums from drum instruments with a global region didn't work since OpenMPT 1.29.01.00 (http://bugs.openmpt.org/view.php?id=1457).
+- [Fix] <js> Avoid crash when attempting to open the Tempo Swing Settings dialog with rows per beat being set to 0.
+
+Third-Party Libraries
+- [Imp] Update mpg123 (v1.28.2), UnRAR (v6.0.7)
+
+
 v1.29.11.00 (4 July 2021, revision 15407)
 -----------------------------------------
 General tab
