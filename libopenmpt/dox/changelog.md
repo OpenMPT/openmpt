@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.3.32-pre
+### libopenmpt 0.3.32 (2021-08-22)
 
  *  [**Sec**] Possible crash with malformed modules when trying to access
     non-existent plugin slots FX251-FX255. (r15481, r15520, r15522)
