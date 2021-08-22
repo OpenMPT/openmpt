@@ -7,6 +7,21 @@ is just a high-level summary.
 
 ### libopenmpt 0.3.32-pre
 
+ *  [**Sec**] Possible crash with malformed modules when trying to access
+    non-existent plugin slots FX251-FX255. (r15481, r15520, r15522)
+ *  [**Sec**] Possible read beyond sample start after swapping to a sample with
+    loop points set but not loop enabled. (r15501)
+ *  [**Sec**] Fixed various possible crashes with malformed MMCMP files.
+    (r15506, 15530)
+ *  [**Sec**] Possible read past end of file buffer by up to 3 bytes
+    (r15508, 15510)
+
+ *  Fixed excessive memory usage with files claiming to have an extremely high
+    rows per beat count while also using tempo swing. Maximum rows per beat are
+    now limited to 65536.
+ *  STP: Avoid creating thousands of patterns when loading malformed files even
+    though no more pattern data can be read.
+
  *  mpg123: Update to v1.28.2 (2021-07-12).
  *  stb_vorbis: Update v1.22 commit 5a0bb8b1c1b1ca3f4e2485f4114c1c8ea021b781
     (2021-07-12).
