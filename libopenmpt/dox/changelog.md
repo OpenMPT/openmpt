@@ -13,7 +13,7 @@ is just a high-level summary.
     loop points set but not loop enabled. (r15501)
  *  [**Sec**] Fixed various possible crashes with malformed MMCMP files.
     (r15506, 15530)
- *  [**Sec**] Possible read past end of file buffer by up to 3 bytes
+ *  [**Sec**] MED: Possible read past end of file buffer by up to 3 bytes
     (r15508, 15510)
 
  *  Fixed excessive memory usage with files claiming to have an extremely high
