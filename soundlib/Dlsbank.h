@@ -29,9 +29,10 @@ struct DLSREGION
 	uint32 ulLoopEnd;
 	uint16 nWaveLink;
 	uint16 uPercEnv;
-	uint16 usVolume;	// 0..256
-	uint16 fuOptions;	// flags + key group
-	int16  sFineTune;	// +128 = +1 semitone
+	uint16 usVolume;     // 0..256
+	uint16 fuOptions;    // flags + key group
+	int16 sFineTune;     // +128 = +1 semitone
+	int16 panning = -1;  // -1= unset (DLS), otherwise 0...256
 	uint8  uKeyMin;
 	uint8  uKeyMax;
 	uint8  uUnityNote;
@@ -41,11 +42,11 @@ struct DLSREGION
 struct DLSENVELOPE
 {
 	// Volume Envelope
-	uint16 wVolAttack;		// Attack Time: 0-1000, 1 = 20ms (1/50s) -> [0-20s]
-	uint16 wVolDecay;		// Decay Time: 0-1000, 1 = 20ms (1/50s) -> [0-20s]
-	uint16 wVolRelease;		// Release Time: 0-1000, 1 = 20ms (1/50s) -> [0-20s]
-	uint8 nVolSustainLevel;	// Sustain Level: 0-128, 128=100%	
-	uint8 nDefPan;			// Default Pan
+	uint16 wVolAttack;       // Attack Time: 0-1000, 1 = 20ms (1/50s) -> [0-20s]
+	uint16 wVolDecay;        // Decay Time: 0-1000, 1 = 20ms (1/50s) -> [0-20s]
+	uint16 wVolRelease;      // Release Time: 0-1000, 1 = 20ms (1/50s) -> [0-20s]
+	uint8 nVolSustainLevel;  // Sustain Level: 0-128, 128=100%
+	uint8 nDefPan;           // Default Pan
 };
 
 // Special Bank bits
@@ -128,7 +129,7 @@ public:
 	bool ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, uint32 nIns, uint32 nRgn, int transpose = 0) const;
 	bool ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, uint32 nIns, uint32 nDrumRgn) const;
 	const char *GetRegionName(uint32 nIns, uint32 nRgn) const;
-	uint8 GetPanning(uint32 ins, uint32 region) const;
+	uint16 GetPanning(uint32 ins, uint32 region) const;
 
 // Internal Loader Functions
 protected:

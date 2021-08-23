@@ -795,9 +795,7 @@ bool CDLSBank::UpdateInstrumentDefinition(DLSINSTRUMENT *pDlsIns, FileReader chu
 					case ART_DEFAULTPAN:
 						{
 							int32 pan = 128 + blk.lScale / (65536000/128);
-							if (pan < 0) pan = 0;
-							if (pan > 255) pan = 255;
-							dlsEnv.nDefPan = (uint8)pan;
+							dlsEnv.nDefPan = mpt::saturate_cast<uint8>(pan);
 						}
 						break;
 
@@ -1168,7 +1166,8 @@ bool CDLSBank::ConvertSF2ToDLS(SF2LoaderInfo &sf2info)
 					case SF2_GEN_PAN:
 						{
 							int32 pan = static_cast<int16>(value);
-							pan = (((pan + 500) * 127) / 500) + 128;
+							pan = std::clamp(Util::muldivr(pan + 500, 256, 1000), 0, 256);
+							pRgn->panning = static_cast<int16>(pan);
 							pDlsEnv->nDefPan = mpt::saturate_cast<uint8>(pan);
 						}
 						break;
@@ -1862,7 +1861,7 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, ui
 			uint32 nmaxsmp = (m_nType & MOD_TYPE_XM) ? 16 : 32;
 			if (nLoadedSmp >= nmaxsmp)
 			{
-				nSmp = RgnToSmp[nRgn-1];
+				nSmp = RgnToSmp[nRgn - 1];
 			} else
 			{
 				nextSample = sndFile.GetNextFreeSample(nInstr, nextSample + 1);
@@ -1891,7 +1890,7 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, ui
 			} else if(sndFile.GetSample(nSmp).GetNumChannels() == 1)
 			{
 				// Try to combine stereo samples
-				uint8 pan1 = GetPanning(nIns, nRgn), pan2 = GetPanning(nIns, iDup);
+				const uint16 pan1 = GetPanning(nIns, nRgn), pan2 = GetPanning(nIns, iDup);
 				if((pan1 < 16 && pan2 >= 240) || (pan2 < 16 && pan1 >= 240))
 				{
 					ModSample &sample = sndFile.GetSample(nSmp);
@@ -2071,12 +2070,15 @@ const char *CDLSBank::GetRegionName(uint32 nIns, uint32 nRgn) const
 }
 
 
-uint8 CDLSBank::GetPanning(uint32 ins, uint32 region) const
+uint16 CDLSBank::GetPanning(uint32 ins, uint32 region) const
 {
 	const DLSINSTRUMENT &dlsIns = m_Instruments[ins];
 	if(region >= dlsIns.Regions.size())
 		return 128;
 	const DLSREGION &rgn = dlsIns.Regions[region];
+	if(rgn.panning >= 0)
+		return static_cast<uint16>(rgn.panning);
+
 	if(dlsIns.ulBank & F_INSTRUMENT_DRUMS)
 	{
 		if(rgn.uPercEnv > 0 && rgn.uPercEnv <= m_Envelopes.size())
