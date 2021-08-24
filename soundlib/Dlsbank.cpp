@@ -2,7 +2,7 @@
  * DLSBank.cpp
  * -----------
  * Purpose: Sound bank loading.
- * Notes  : Supported sound bank types: DLS (including embedded DLS in MSS & RMI), SF2
+ * Notes  : Supported sound bank types: DLS (including embedded DLS in MSS & RMI), SF2, SF3 / SF4 (modified SF2 with compressed samples)
  * Authors: Olivier Lapicque
  *          OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
@@ -17,11 +17,11 @@
 #endif
 #include "Dlsbank.h"
 #include "Loaders.h"
+#include "SampleCopy.h"
 #include "../common/mptStringBuffer.h"
 #include "../common/FileReader.h"
 #include "openmpt/base/Endian.hpp"
 #include "SampleIO.h"
-#include "modsmp_ctrl.h"
 #include "mpt/io/base.hpp"
 #include "mpt/io/io.hpp"
 #include "mpt/io/io_stdstream.hpp"
@@ -335,6 +335,7 @@ MPT_BINARY_STRUCT(WSMPSampleLoop, 16)
 
 enum SF2ChunkID : uint32
 {
+	IFFID_ifil = MagicLE("ifil"),
 	IFFID_sfbk = MagicLE("sfbk"),
 	IFFID_sfpk = MagicLE("sfpk"),  // SF2Pack compressed soundfont
 	IFFID_sdta = MagicLE("sdta"),
@@ -972,16 +973,35 @@ bool CDLSBank::UpdateSF2PresetData(SF2LoaderInfo &sf2info, const IFFCHUNK &heade
 				dlsSmp.dwSampleRate = p.dwSampleRate;
 				dlsSmp.byOriginalPitch = p.byOriginalPitch;
 				dlsSmp.chPitchCorrection = static_cast<int8>(Util::muldivr(p.chPitchCorrection, 128, 100));
-				if (((p.sfSampleType & 0x7FFF) <= 4) && (p.dwEnd >= p.dwStart + 4))
+				// cognitone's sf2convert tool doesn't set the correct sample flags (0x01 / 0x02 instead of 0x10/ 0x20).
+				// For SF3, we ignore this and go by https://github.com/FluidSynth/fluidsynth/wiki/SoundFont3Format instead
+				// As cognitone's tool is the only tool writing SF4 files, we always assume compressed samples with SF4 files if bits 0/1 are set.
+				uint16 sampleType = p.sfSampleType;
+				if(m_sf2version >= 0x4'0000 && m_sf2version <= 0x4'FFFF && (sampleType & 0x03))
+					sampleType = (sampleType & 0xFFFC) | 0x10;
+
+				dlsSmp.compressed = (sampleType & 0x10);
+				if(((sampleType & 0x7FCF) <= 4) && (p.dwEnd >= p.dwStart + 4))
 				{
-					dlsSmp.dwLen = (p.dwEnd - p.dwStart) * 2;
-					if ((p.dwEndloop > p.dwStartloop + 7) && (p.dwStartloop >= p.dwStart))
+					m_WaveForms[i] = p.dwStart;
+					dlsSmp.dwLen = (p.dwEnd - p.dwStart);
+					if(!dlsSmp.compressed)
 					{
-						dlsSmp.dwStartloop = p.dwStartloop - p.dwStart;
-						dlsSmp.dwEndloop = p.dwEndloop - p.dwStart;
+						m_WaveForms[i] *= 2;
+						dlsSmp.dwLen *= 2;
+						if((p.dwEndloop > p.dwStartloop + 7) && (p.dwStartloop >= p.dwStart))
+						{
+							dlsSmp.dwStartloop = p.dwStartloop - p.dwStart;
+							dlsSmp.dwEndloop = p.dwEndloop - p.dwStart;
+						}
+					} else
+					{
+						if(p.dwEndloop > p.dwStartloop + 7)
+						{
+							dlsSmp.dwStartloop = p.dwStartloop;
+							dlsSmp.dwEndloop = p.dwEndloop;
+						}
 					}
-					m_WaveForms[i] = p.dwStart * 2;
-					//Log("  offset[%d]=%d len=%d\n", i, p.dwStart*2, psmp->dwLen);
 				}
 			}
 		}
@@ -1317,19 +1337,21 @@ bool CDLSBank::Open(FileReader file)
 	SF2LoaderInfo sf2info;
 	m_nType = (riff.id_DLS == IFFID_sfbk) ? SOUNDBANK_TYPE_SF2 : SOUNDBANK_TYPE_DLS;
 	m_dwWavePoolOffset = 0;
+	m_sf2version = 0;
 	m_Instruments.clear();
 	m_WaveForms.clear();
 	m_Envelopes.clear();
 	nInsDef = 0;
 	if (dwMemLength > 8 + riff.riff_len + dwMemPos) dwMemLength = 8 + riff.riff_len + dwMemPos;
+	bool applyPaddingToSampleChunk = true;
 	while(file.CanRead(sizeof(IFFCHUNK)))
 	{
 		IFFCHUNK chunkHeader;
 		file.ReadStruct(chunkHeader);
 		dwMemPos = file.GetPosition();
 		FileReader chunk = file.ReadChunk(chunkHeader.len);
-		if(chunkHeader.len % 2u)
-			file.Skip(1);
+		
+		bool applyPadding = (chunkHeader.len % 2u) != 0;
 
 		if(!chunk.LengthIsAtLeast(chunkHeader.len))
 			break;
@@ -1386,6 +1408,8 @@ bool CDLSBank::Open(FileReader file)
 				#ifdef DLSBANK_LOG
 					MPT_LOG_GLOBAL(LogDebug, "DLSBANK", MPT_UFORMAT("Wave Pool offset: {}")(m_dwWavePoolOffset));
 				#endif
+					if(!applyPaddingToSampleChunk)
+						applyPadding = false;
 					break;
 				}
 
@@ -1418,6 +1442,16 @@ bool CDLSBank::Open(FileReader file)
 					{
 						switch(listHeader.id)
 						{
+						case IFFID_ifil:
+							m_sf2version = listChunk.ReadUint16LE() << 16;
+							m_sf2version |= listChunk.ReadUint16LE();
+							if(m_sf2version >= 0x3'0000 && m_sf2version <= 0x4'FFFF)
+							{
+								// "SF3" / "SF4" with compressed samples. The padding of the sample chunk is now optional (probably because it was simply forgotten to be added)
+								applyPaddingToSampleChunk = false;
+							}
+							listChunk.Skip(2);
+							break;
 						case IFFID_INAM:
 							listChunk.ReadString<mpt::String::maybeNullTerminated>(m_BankInfo.szBankName, listChunk.BytesLeft());
 							break;
@@ -1457,6 +1491,9 @@ bool CDLSBank::Open(FileReader file)
 			break;
 		#endif
 		}
+
+		if(applyPadding)
+			file.Skip(1);
 	}
 	// Build the ptbl is not present in file
 	if ((m_WaveForms.empty()) && (m_dwWavePoolOffset) && (m_nType & SOUNDBANK_TYPE_DLS) && (m_nMaxWaveLink > 0))
@@ -1624,7 +1661,18 @@ bool CDLSBank::ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, uint32 nI
 			MPT_LOG_GLOBAL(LogDebug, "DLSINSTR", MPT_UFORMAT("  SF2 WaveLink #{}: {}Hz")(nWaveLink, p.dwSampleRate));
 		#endif
 			sample.Initialize();
-			sample.nLength = dwLen / 2;
+
+			FileReader chunk{mpt::as_span(pWaveForm.data(), dwLen)};
+			if(!p.compressed || !sndFile.ReadSampleFromFile(nSample, chunk, false, false))
+			{
+				sample.nLength = dwLen / 2;
+				SampleIO(
+					SampleIO::_16bit,
+					SampleIO::mono,
+					SampleIO::littleEndian,
+					SampleIO::signedPCM)
+					.ReadSample(sample, chunk);
+			}
 			sample.nLoopStart = pDlsIns->Regions[nRgn].ulLoopStart;
 			sample.nLoopEnd = pDlsIns->Regions[nRgn].ulLoopEnd;
 			sample.nC5Speed = p.dwSampleRate;
@@ -1634,14 +1682,6 @@ bool CDLSBank::ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, uint32 nI
 				sndFile.m_szNames[nSample] = mpt::String::ReadAutoBuf(p.szName);
 			else if(pDlsIns->szName[0])
 				sndFile.m_szNames[nSample] = mpt::String::ReadAutoBuf(pDlsIns->szName);
-
-			FileReader chunk(mpt::as_span(pWaveForm.data(), dwLen));
-			SampleIO(
-				SampleIO::_16bit,
-				SampleIO::mono,
-				SampleIO::littleEndian,
-				SampleIO::signedPCM)
-				.ReadSample(sample, chunk);
 		}
 		hasWaveform = sample.HasSampleData();
 	} else
@@ -1897,21 +1937,50 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, ui
 				if((pan1 < 16 && pan2 >= 240) || (pan2 < 16 && pan1 >= 240))
 				{
 					ModSample &sample = sndFile.GetSample(nSmp);
-					ctrlSmp::ConvertToStereo(sample, sndFile);
+					ModSample sampleCopy = sample;
+					sampleCopy.pData.pSample = nullptr;
+					sampleCopy.uFlags.set(CHN_16BIT | CHN_STEREO);
+					if(!sampleCopy.AllocateSample())
+						continue;
+
+					const uint8 offsetOrig = (pan1 < pan2) ? 1 : 0;
+					const uint8 offsetNew = (pan1 < pan2) ? 0 : 1;
+
 					std::vector<uint8> pWaveForm;
 					uint32 dwLen = 0;
-					if(ExtractWaveForm(nIns, nRgn, pWaveForm, dwLen) && dwLen >= sample.GetSampleSizeInBytes() / 2)
+					if(!ExtractWaveForm(nIns, nRgn, pWaveForm, dwLen))
+						continue;
+
+					// First copy over original channel
+					auto pDest = sampleCopy.sample16() + offsetOrig;
+					if(sample.uFlags[CHN_16BIT])
+						CopySample<SC::ConversionChain<SC::Convert<int16, int16>, SC::DecodeIdentity<int16>>>(pDest, sample.nLength, 2, sample.sample16(), sample.GetSampleSizeInBytes(), 1);
+					else
+						CopySample<SC::ConversionChain<SC::Convert<int16, int8>, SC::DecodeIdentity<int8>>>(pDest, sample.nLength, 2, sample.sample8(), sample.GetSampleSizeInBytes(), 1);
+					sample.FreeSample();
+
+					// Now read the other channel
+					if(m_SamplesEx[m_Instruments[nIns].Regions[nRgn].nWaveLink].compressed)
 					{
-						SmpLength len = sample.nLength;
-						const int16 *src = reinterpret_cast<int16 *>(pWaveForm.data());
-						int16 *dst = sample.sample16() + ((pan1 == 0) ? 0 : 1);
-						while(len--)
+						FileReader file{mpt::as_span(pWaveForm)};
+						if(sndFile.ReadSampleFromFile(nSmp, file, false, false))
 						{
-							*dst = *src;
-							src++;
-							dst += 2;
+							pDest = sampleCopy.sample16() + offsetNew;
+							const SmpLength copyLength = std::min(sample.nLength, sampleCopy.nLength);
+							if(sample.uFlags[CHN_16BIT])
+								CopySample<SC::ConversionChain<SC::Convert<int16, int16>, SC::DecodeIdentity<int16>>>(pDest, copyLength, 2, sample.sample16(), sample.GetSampleSizeInBytes(), sample.GetNumChannels());
+							else
+								CopySample<SC::ConversionChain<SC::Convert<int16, int8>, SC::DecodeIdentity<int8>>>(pDest, copyLength, 2, sample.sample8(), sample.GetSampleSizeInBytes(), sample.GetNumChannels());
 						}
+					} else if(dwLen >= sampleCopy.nLength * 2u)
+					{
+						SmpLength len = sampleCopy.nLength;
+						const int16 *src = reinterpret_cast<int16 *>(pWaveForm.data());
+						int16 *dst = sampleCopy.sample16() + offsetNew;
+						CopySample<SC::ConversionChain<SC::Convert<int16, int16>, SC::DecodeIdentity<int16>>>(dst, len, 2, src, pWaveForm.size(), 1);
 					}
+					sample.FreeSample();
+					sample = sampleCopy;
 				}
 			}
 		}

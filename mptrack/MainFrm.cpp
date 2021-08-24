@@ -1987,9 +1987,9 @@ void CMainFrame::OnAddDlsBank()
 {
 	FileDialog dlg = OpenFileDialog()
 		.AllowMultiSelect()
-		.ExtensionFilter("All Sound Banks|*.dls;*.sbk;*.sf2;*.mss|"
+		.ExtensionFilter("All Sound Banks|*.dls;*.sbk;*.sf2;*.sf3;*.sf4;*.mss|"
 			"Downloadable Sounds Banks (*.dls)|*.dls;*.mss|"
-			"SoundFont 2.0 Banks (*.sf2)|*.sbk;*.sf2|"
+			"SoundFont 2.0 Banks (*.sf2)|*.sbk;*.sf2;*.sf3;*.sf4|"
 			"All Files (*.*)|*.*||");
 	if(!dlg.Show()) return;
 
@@ -2011,9 +2011,9 @@ void CMainFrame::OnAddDlsBank()
 void CMainFrame::OnImportMidiLib()
 {
 	FileDialog dlg = OpenFileDialog()
-		.ExtensionFilter("Text and INI files (*.txt,*.ini)|*.txt;*.ini;*.dls;*.sf2;*.sbk|"
+		.ExtensionFilter("Text and INI files (*.txt,*.ini)|*.txt;*.ini;*.dls;*.sf2;*.sf3;*.sf4;*.sbk|"
 			"Downloadable Sound Banks (*.dls)|*.dls;*.mss|"
-			"SoundFont 2.0 banks (*.sf2)|*.sbk;*.sf2|"
+			"SoundFont 2.0 banks (*.sf2)|*.sbk;*.sf2;*.sf3;*.sf4|"
 			"Gravis UltraSound (ultrasnd.ini)|ultrasnd.ini|"
 			"All Files (*.*)|*.*||");
 	if(!dlg.Show()) return;

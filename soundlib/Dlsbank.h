@@ -71,6 +71,7 @@ struct DLSSAMPLEEX
 	uint32 dwSampleRate;
 	uint8  byOriginalPitch;
 	int8   chPitchCorrection;
+	bool   compressed = false;
 };
 
 
@@ -100,6 +101,7 @@ protected:
 	uint32 m_nType;
 	// DLS Information
 	uint32 m_nMaxWaveLink;
+	uint32 m_sf2version = 0;
 	std::vector<size_t> m_WaveForms;
 	std::vector<DLSINSTRUMENT> m_Instruments;
 	std::vector<DLSSAMPLEEX> m_SamplesEx;

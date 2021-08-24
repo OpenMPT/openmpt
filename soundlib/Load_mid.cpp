@@ -1310,7 +1310,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 	} else
 	{
 		// Soundfont with same name as MIDI file
-		for(const auto &ext : { P_(".sf2"), P_(".sbk"), P_(".dls") })
+		for(const auto &ext : { P_(".sf2"), P_(".sf3"), P_(".sf4"), P_(".sbk"), P_(".dls") })
 		{
 			mpt::PathString filename = file.GetOptionalFileName().value_or(P_("")).ReplaceExt(ext);
 			if(filename.IsFile())
