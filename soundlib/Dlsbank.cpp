@@ -16,6 +16,7 @@
 #include "../common/mptFileIO.h"
 #endif
 #include "Dlsbank.h"
+#include "Loaders.h"
 #include "../common/mptStringBuffer.h"
 #include "../common/FileReader.h"
 #include "openmpt/base/Endian.hpp"
@@ -169,38 +170,38 @@ enum DLSArt : uint32
 enum IFFChunkID : uint32
 {
 	// Standard IFF chunks IDs
-	IFFID_FORM = 0x4d524f46,
-	IFFID_RIFF = 0x46464952,
-	IFFID_LIST = 0x5453494C,
-	IFFID_INFO = 0x4F464E49,
+	IFFID_FORM = MagicLE("FORM"),
+	IFFID_RIFF = MagicLE("RIFF"),
+	IFFID_LIST = MagicLE("LIST"),
+	IFFID_INFO = MagicLE("INFO"),
 
 	// IFF Info fields
-	IFFID_ICOP = 0x504F4349,
-	IFFID_INAM = 0x4D414E49,
-	IFFID_ICMT = 0x544D4349,
-	IFFID_IENG = 0x474E4549,
-	IFFID_ISFT = 0x54465349,
-	IFFID_ISBJ = 0x4A425349,
+	IFFID_ICOP = MagicLE("ICOP"),
+	IFFID_INAM = MagicLE("INAM"),
+	IFFID_ICMT = MagicLE("ICMT"),
+	IFFID_IENG = MagicLE("IENG"),
+	IFFID_ISFT = MagicLE("ISFT"),
+	IFFID_ISBJ = MagicLE("ISBJ"),
 
 	// Wave IFF chunks IDs
-	IFFID_wave = 0x65766177,
-	IFFID_wsmp = 0x706D7377,
+	IFFID_wave = MagicLE("wave"),
+	IFFID_wsmp = MagicLE("wsmp"),
 
-	IFFID_XDLS = 0x534c4458,
-	IFFID_DLS  = 0x20534C44,
-	IFFID_MLS  = 0x20534C4D,
-	IFFID_RMID = 0x44494D52,
-	IFFID_colh = 0x686C6F63,
-	IFFID_ins  = 0x20736E69,
-	IFFID_insh = 0x68736E69,
-	IFFID_ptbl = 0x6C627470,
-	IFFID_wvpl = 0x6C707677,
-	IFFID_rgn  = 0x206E6772,
-	IFFID_rgn2 = 0x326E6772,
-	IFFID_rgnh = 0x686E6772,
-	IFFID_wlnk = 0x6B6E6C77,
-	IFFID_art1 = 0x31747261,
-	IFFID_art2 = 0x32747261,
+	IFFID_XDLS = MagicLE("XDLS"),
+	IFFID_DLS  = MagicLE("DLS "),
+	IFFID_MLS  = MagicLE("MLS "),
+	IFFID_RMID = MagicLE("RMID"),
+	IFFID_colh = MagicLE("colh"),
+	IFFID_ins  = MagicLE("ins "),
+	IFFID_insh = MagicLE("insh"),
+	IFFID_ptbl = MagicLE("ptbl"),
+	IFFID_wvpl = MagicLE("wvpl"),
+	IFFID_rgn  = MagicLE("rgn "),
+	IFFID_rgn2 = MagicLE("rgn2"),
+	IFFID_rgnh = MagicLE("rgnh"),
+	IFFID_wlnk = MagicLE("wlnk"),
+	IFFID_art1 = MagicLE("art1"),
+	IFFID_art2 = MagicLE("art2"),
 };
 
 //////////////////////////////////////////////////////////
@@ -214,14 +215,14 @@ struct IFFCHUNK
 
 MPT_BINARY_STRUCT(IFFCHUNK, 8)
 
-struct RIFFCHUNKID
+struct RIFFChunkID
 {
 	uint32le id_RIFF;
 	uint32le riff_len;
 	uint32le id_DLS;
 };
 
-MPT_BINARY_STRUCT(RIFFCHUNKID, 12)
+MPT_BINARY_STRUCT(RIFFChunkID, 12)
 
 struct LISTChunk
 {
@@ -232,30 +233,30 @@ struct LISTChunk
 
 MPT_BINARY_STRUCT(LISTChunk, 12)
 
-struct DLSRGNRANGE
+struct DLSRgnRange
 {
 	uint16le usLow;
 	uint16le usHigh;
 };
 
-MPT_BINARY_STRUCT(DLSRGNRANGE, 4)
+MPT_BINARY_STRUCT(DLSRgnRange, 4)
 
-struct VERSCHUNK
+struct VERSChunk
 {
 	uint32le id;
 	uint32le len;
 	uint16le version[4];
 };
 
-MPT_BINARY_STRUCT(VERSCHUNK, 16)
+MPT_BINARY_STRUCT(VERSChunk, 16)
 
-struct PTBLCHUNK
+struct PTBLChunk
 {
 	uint32le cbSize;
 	uint32le cCues;
 };
 
-MPT_BINARY_STRUCT(PTBLCHUNK, 8)
+MPT_BINARY_STRUCT(PTBLChunk, 8)
 
 struct INSHChunk
 {
@@ -268,8 +269,8 @@ MPT_BINARY_STRUCT(INSHChunk, 12)
 
 struct RGNHChunk
 {
-	DLSRGNRANGE RangeKey;
-	DLSRGNRANGE RangeVelocity;
+	DLSRgnRange RangeKey;
+	DLSRgnRange RangeVelocity;
 	uint16le fusOptions;
 	uint16le usKeyGroup;
 };
@@ -294,7 +295,7 @@ struct ART1Chunk
 
 MPT_BINARY_STRUCT(ART1Chunk, 8)
 
-struct CONNECTIONBLOCK
+struct ConnectionBlock
 {
 	uint16le usSource;
 	uint16le usControl;
@@ -303,9 +304,9 @@ struct CONNECTIONBLOCK
 	int32le  lScale;
 };
 
-MPT_BINARY_STRUCT(CONNECTIONBLOCK, 12)
+MPT_BINARY_STRUCT(ConnectionBlock, 12)
 
-struct WSMPCHUNK
+struct WSMPChunk
 {
 	uint32le cbSize;
 	uint16le usUnityNote;
@@ -315,9 +316,9 @@ struct WSMPCHUNK
 	uint32le cSampleLoops;
 };
 
-MPT_BINARY_STRUCT(WSMPCHUNK, 20)
+MPT_BINARY_STRUCT(WSMPChunk, 20)
 
-struct WSMPSAMPLELOOP
+struct WSMPSampleLoop
 {
 	uint32le cbSize;
 	uint32le ulLoopType;
@@ -326,7 +327,7 @@ struct WSMPSAMPLELOOP
 
 };
 
-MPT_BINARY_STRUCT(WSMPSAMPLELOOP, 16)
+MPT_BINARY_STRUCT(WSMPSampleLoop, 16)
 
 
 /////////////////////////////////////////////////////////////////////
@@ -334,17 +335,17 @@ MPT_BINARY_STRUCT(WSMPSAMPLELOOP, 16)
 
 enum SF2ChunkID : uint32
 {
-	IFFID_sfbk = 0x6b626673,
-	IFFID_sfpk = 0x6b706673,
-	IFFID_sdta = 0x61746473,
-	IFFID_pdta = 0x61746470,
-	IFFID_phdr = 0x72646870,
-	IFFID_pbag = 0x67616270,
-	IFFID_pgen = 0x6E656770,
-	IFFID_inst = 0x74736E69,
-	IFFID_ibag = 0x67616269,
-	IFFID_igen = 0x6E656769,
-	IFFID_shdr = 0x72646873,
+	IFFID_sfbk = MagicLE("sfbk"),
+	IFFID_sfpk = MagicLE("sfpk"),  // SF2Pack compressed soundfont
+	IFFID_sdta = MagicLE("sdta"),
+	IFFID_pdta = MagicLE("pdta"),
+	IFFID_phdr = MagicLE("phdr"),
+	IFFID_pbag = MagicLE("pbag"),
+	IFFID_pgen = MagicLE("pgen"),
+	IFFID_inst = MagicLE("inst"),
+	IFFID_ibag = MagicLE("ibag"),
+	IFFID_igen = MagicLE("igen"),
+	IFFID_shdr = MagicLE("shdr"),
 };
 
 ///////////////////////////////////////////
@@ -379,7 +380,7 @@ enum SF2Generators : uint16
 /////////////////////////////////////////////////////////////////////
 // SF2 Structures Definitions
 
-struct SFPRESETHEADER
+struct SFPresetHeader
 {
 	char     achPresetName[20];
 	uint16le wPreset;
@@ -390,49 +391,49 @@ struct SFPRESETHEADER
 	uint32le dwMorphology;
 };
 
-MPT_BINARY_STRUCT(SFPRESETHEADER, 38)
+MPT_BINARY_STRUCT(SFPresetHeader, 38)
 
-struct SFPRESETBAG
+struct SFPresetBag
 {
 	uint16le wGenNdx;
 	uint16le wModNdx;
 };
 
-MPT_BINARY_STRUCT(SFPRESETBAG, 4)
+MPT_BINARY_STRUCT(SFPresetBag, 4)
 
-struct SFGENLIST
+struct SFGenList
 {
 	uint16le sfGenOper;
 	uint16le genAmount;
 };
 
-MPT_BINARY_STRUCT(SFGENLIST, 4)
+MPT_BINARY_STRUCT(SFGenList, 4)
 
-struct SFINST
+struct SFInst
 {
 	char     achInstName[20];
 	uint16le wInstBagNdx;
 };
 
-MPT_BINARY_STRUCT(SFINST, 22)
+MPT_BINARY_STRUCT(SFInst, 22)
 
-struct SFINSTBAG
+struct SFInstBag
 {
 	uint16le wGenNdx;
 	uint16le wModNdx;
 };
 
-MPT_BINARY_STRUCT(SFINSTBAG, 4)
+MPT_BINARY_STRUCT(SFInstBag, 4)
 
-struct SFINSTGENLIST
+struct SFInstGenList
 {
 	uint16le sfGenOper;
 	uint16le genAmount;
 };
 
-MPT_BINARY_STRUCT(SFINSTGENLIST, 4)
+MPT_BINARY_STRUCT(SFInstGenList, 4)
 
-struct SFSAMPLE
+struct SFSample
 {
 	char     achSampleName[20];
 	uint32le dwStart;
@@ -446,7 +447,7 @@ struct SFSAMPLE
 	uint16le sfSampleType;
 };
 
-MPT_BINARY_STRUCT(SFSAMPLE, 46)
+MPT_BINARY_STRUCT(SFSample, 46)
 
 // End of structures definitions
 /////////////////////////////////////////////////////////////////////
@@ -532,7 +533,7 @@ CDLSBank::CDLSBank()
 
 bool CDLSBank::IsDLSBank(const mpt::PathString &filename)
 {
-	RIFFCHUNKID riff;
+	RIFFChunkID riff;
 	if(filename.empty()) return false;
 	mpt::ifstream f(filename, std::ios::binary);
 	if(!f)
@@ -542,7 +543,7 @@ bool CDLSBank::IsDLSBank(const mpt::PathString &filename)
 	MemsetZero(riff);
 	mpt::IO::Read(f, riff);
 	// Check for embedded DLS sections
-	if (riff.id_RIFF == IFFID_FORM)
+	if(riff.id_RIFF == IFFID_FORM)
 	{
 		// Miles Sound System
 		do
@@ -558,8 +559,7 @@ bool CDLSBank::IsDLSBank(const mpt::PathString &filename)
 				len++;
 			if (!mpt::IO::SeekRelative(f, len-4)) break;
 		} while (mpt::IO::Read(f, riff));
-	} else
-	if ((riff.id_RIFF == IFFID_RIFF) && (riff.id_DLS == IFFID_RMID))
+	} else if(riff.id_RIFF == IFFID_RIFF && riff.id_DLS == IFFID_RMID)
 	{
 		for (;;)
 		{
@@ -739,7 +739,7 @@ bool CDLSBank::UpdateInstrumentDefinition(DLSINSTRUMENT *pDlsIns, FileReader chu
 			if(!pDlsIns->Regions.empty())
 			{
 				DLSREGION &region = pDlsIns->Regions.back();
-				WSMPCHUNK wsmp;
+				WSMPChunk wsmp;
 				chunk.ReadStruct(wsmp);
 				region.fuOptions |= DLSREGION_OVERRIDEWSMP;
 				region.uUnityNote = (uint8)wsmp.usUnityNote;
@@ -750,9 +750,9 @@ bool CDLSBank::UpdateInstrumentDefinition(DLSINSTRUMENT *pDlsIns, FileReader chu
 				region.usVolume = (uint16)lVolume;
 				//Log("  WaveSample %d: usUnityNote=%2d sFineTune=%3d ", pDlsEnv->nRegions, p->usUnityNote, p->sFineTune);
 				//Log("fulOptions=0x%04X loops=%d\n", p->fulOptions, p->cSampleLoops);
-				if((wsmp.cSampleLoops) && (wsmp.cbSize + sizeof(WSMPSAMPLELOOP) <= header.len))
+				if((wsmp.cSampleLoops) && (wsmp.cbSize + sizeof(WSMPSampleLoop) <= header.len))
 				{
-					WSMPSAMPLELOOP loop;
+					WSMPSampleLoop loop;
 					chunk.Seek(sizeof(IFFCHUNK) + wsmp.cbSize);
 					chunk.ReadStruct(loop);
 					//Log("looptype=%2d loopstart=%5d loopend=%5d\n", ploop->ulLoopType, ploop->ulLoopStart, ploop->ulLoopLength);
@@ -776,7 +776,7 @@ bool CDLSBank::UpdateInstrumentDefinition(DLSINSTRUMENT *pDlsIns, FileReader chu
 				{
 					pDlsIns->nMelodicEnv = static_cast<uint32>(m_Envelopes.size() + 1);
 				}
-				if(art1.cbSize + art1.cConnectionBlocks * sizeof(CONNECTIONBLOCK) > header.len)
+				if(art1.cbSize + art1.cConnectionBlocks * sizeof(ConnectionBlock) > header.len)
 					break;
 				DLSENVELOPE dlsEnv;
 				MemsetZero(dlsEnv);
@@ -786,7 +786,7 @@ bool CDLSBank::UpdateInstrumentDefinition(DLSINSTRUMENT *pDlsIns, FileReader chu
 				chunk.Seek(sizeof(IFFCHUNK) + art1.cbSize);
 				for (uint32 iblk = 0; iblk < art1.cConnectionBlocks; iblk++)
 				{
-					CONNECTIONBLOCK blk;
+					ConnectionBlock blk;
 					chunk.ReadStruct(blk);
 					// [4-bit transform][12-bit dest][8-bit control][8-bit source] = 32-bit ID
 					uint32 dwArticulation = blk.usTransform;
@@ -885,7 +885,7 @@ bool CDLSBank::UpdateSF2PresetData(SF2LoaderInfo &sf2info, const IFFCHUNK &heade
 	case IFFID_phdr:
 		if(m_Instruments.empty())
 		{
-			uint32 numIns = static_cast<uint32>(chunk.GetLength() / sizeof(SFPRESETHEADER));
+			uint32 numIns = static_cast<uint32>(chunk.GetLength() / sizeof(SFPresetHeader));
 			if(numIns <= 1)
 				break;
 			// The terminal sfPresetHeader record should never be accessed, and exists only to provide a terminal wPresetBagNdx with which to determine the number of zones in the last preset.
@@ -895,7 +895,7 @@ bool CDLSBank::UpdateSF2PresetData(SF2LoaderInfo &sf2info, const IFFCHUNK &heade
 		#ifdef DLSBANK_LOG
 			MPT_LOG_GLOBAL(LogDebug, "DLSBank", MPT_UFORMAT("phdr: {} instruments")(m_Instruments.size()));
 		#endif
-			SFPRESETHEADER psfh;
+			SFPresetHeader psfh;
 			chunk.ReadStruct(psfh);
 			for (auto &dlsIns : m_Instruments)
 			{
@@ -911,7 +911,7 @@ bool CDLSBank::UpdateSF2PresetData(SF2LoaderInfo &sf2info, const IFFCHUNK &heade
 		break;
 
 	case IFFID_pbag:
-		if(!m_Instruments.empty() && chunk.CanRead(sizeof(SFPRESETBAG)))
+		if(!m_Instruments.empty() && chunk.CanRead(sizeof(SFPresetBag)))
 		{
 			sf2info.presetBags = chunk.GetChunk(chunk.BytesLeft());
 		}
@@ -921,7 +921,7 @@ bool CDLSBank::UpdateSF2PresetData(SF2LoaderInfo &sf2info, const IFFCHUNK &heade
 		break;
 
 	case IFFID_pgen:
-		if(!m_Instruments.empty() && chunk.CanRead(sizeof(SFGENLIST)))
+		if(!m_Instruments.empty() && chunk.CanRead(sizeof(SFGenList)))
 		{
 			sf2info.presetGens = chunk.GetChunk(chunk.BytesLeft());
 		}
@@ -931,21 +931,21 @@ bool CDLSBank::UpdateSF2PresetData(SF2LoaderInfo &sf2info, const IFFCHUNK &heade
 		break;
 
 	case IFFID_inst:
-		if(!m_Instruments.empty() && chunk.CanRead(sizeof(SFINST)))
+		if(!m_Instruments.empty() && chunk.CanRead(sizeof(SFInst)))
 		{
 			sf2info.insts = chunk.GetChunk(chunk.BytesLeft());
 		}
 		break;
 
 	case IFFID_ibag:
-		if(!m_Instruments.empty() && chunk.CanRead(sizeof(SFINSTBAG)))
+		if(!m_Instruments.empty() && chunk.CanRead(sizeof(SFInstBag)))
 		{
 			sf2info.instBags = chunk.GetChunk(chunk.BytesLeft());
 		}
 		break;
 
 	case IFFID_igen:
-		if(!m_Instruments.empty() && chunk.CanRead(sizeof(SFINSTGENLIST)))
+		if(!m_Instruments.empty() && chunk.CanRead(sizeof(SFInstGenList)))
 		{
 			sf2info.instGens = chunk.GetChunk(chunk.BytesLeft());
 		}
@@ -954,7 +954,7 @@ bool CDLSBank::UpdateSF2PresetData(SF2LoaderInfo &sf2info, const IFFCHUNK &heade
 	case IFFID_shdr:
 		if (m_SamplesEx.empty())
 		{
-			uint32 numSmp = static_cast<uint32>(chunk.GetLength() / sizeof(SFSAMPLE));
+			uint32 numSmp = static_cast<uint32>(chunk.GetLength() / sizeof(SFSample));
 			if (numSmp < 1) break;
 			m_SamplesEx.resize(numSmp);
 			m_WaveForms.resize(numSmp);
@@ -964,7 +964,7 @@ bool CDLSBank::UpdateSF2PresetData(SF2LoaderInfo &sf2info, const IFFCHUNK &heade
 
 			for (uint32 i = 0; i < numSmp; i++)
 			{
-				SFSAMPLE p;
+				SFSample p;
 				chunk.ReadStruct(p);
 				DLSSAMPLEEX &dlsSmp = m_SamplesEx[i];
 				mpt::String::WriteAutoBuf(dlsSmp.szName) = mpt::String::ReadAutoBuf(p.achSampleName);
@@ -1014,11 +1014,11 @@ bool CDLSBank::ConvertSF2ToDLS(SF2LoaderInfo &sf2info)
 	if (m_Instruments.empty() || m_SamplesEx.empty())
 		return false;
 
-	const uint32 numPresetBags = static_cast<uint32>(sf2info.presetBags.GetLength() / sizeof(SFPRESETBAG));
-	const uint32 numPresetGens = static_cast<uint32>(sf2info.presetGens.GetLength() / sizeof(SFGENLIST));
-	const uint32 numInsts = static_cast<uint32>(sf2info.insts.GetLength() / sizeof(SFINST));
-	const uint32 numInstBags = static_cast<uint32>(sf2info.instBags.GetLength() / sizeof(SFINSTBAG));
-	const uint32 numInstGens = static_cast<uint32>(sf2info.instGens.GetLength() / sizeof(SFINSTGENLIST));
+	const uint32 numPresetBags = static_cast<uint32>(sf2info.presetBags.GetLength() / sizeof(SFPresetBag));
+	const uint32 numPresetGens = static_cast<uint32>(sf2info.presetGens.GetLength() / sizeof(SFGenList));
+	const uint32 numInsts = static_cast<uint32>(sf2info.insts.GetLength() / sizeof(SFInst));
+	const uint32 numInstBags = static_cast<uint32>(sf2info.instBags.GetLength() / sizeof(SFInstBag));
+	const uint32 numInstGens = static_cast<uint32>(sf2info.instGens.GetLength() / sizeof(SFInstGenList));
 
 	for (auto &dlsIns : m_Instruments)
 	{
@@ -1032,19 +1032,19 @@ bool CDLSBank::ConvertSF2ToDLS(SF2LoaderInfo &sf2info)
 		dlsEnv.nVolSustainLevel = 128;
 		dlsEnv.nDefPan = 128;
 		// Load Preset Bags
-		sf2info.presetBags.Seek(dlsIns.wPresetBagNdx * sizeof(SFPRESETBAG));
+		sf2info.presetBags.Seek(dlsIns.wPresetBagNdx * sizeof(SFPresetBag));
 		for (uint32 ipbagcnt=0; ipbagcnt<(uint32)dlsIns.wPresetBagNum; ipbagcnt++)
 		{
 			// Load generators for each preset bag
-			SFPRESETBAG bag[2];
+			SFPresetBag bag[2];
 			if(!sf2info.presetBags.ReadArray(bag))
 				break;
-			sf2info.presetBags.SkipBack(sizeof(SFPRESETBAG));
+			sf2info.presetBags.SkipBack(sizeof(SFPresetBag));
 
-			sf2info.presetGens.Seek(bag[0].wGenNdx * sizeof(SFGENLIST));
+			sf2info.presetGens.Seek(bag[0].wGenNdx * sizeof(SFGenList));
 			for (uint32 ipgenndx = bag[0].wGenNdx; ipgenndx < bag[1].wGenNdx; ipgenndx++)
 			{
-				SFGENLIST gen;
+				SFGenList gen;
 				if(!sf2info.presetGens.ReadStruct(gen))
 					break;
 				switch(gen.sfGenOper)
@@ -1093,8 +1093,8 @@ bool CDLSBank::ConvertSF2ToDLS(SF2LoaderInfo &sf2info)
 		{
 			if(nInstrNdx >= numInsts)
 				continue;
-			sf2info.insts.Seek(nInstrNdx * sizeof(SFINST));
-			SFINST insts[2];
+			sf2info.insts.Seek(nInstrNdx * sizeof(SFInst));
+			SFInst insts[2];
 			sf2info.insts.ReadArray(insts);
 			const auto startRegion = static_cast<uint32>(dlsIns.Regions.size());
 			const auto endRegion = startRegion + insts[1].wInstBagNdx - insts[0].wInstBagNdx;
@@ -1124,17 +1124,17 @@ bool CDLSBank::ConvertSF2ToDLS(SF2LoaderInfo &sf2info)
 				if(hasGlobalZone)
 					*pRgn = dlsIns.Regions[startRegion];
 				// Load Generators
-				sf2info.instBags.Seek(ibagcnt * sizeof(SFINSTBAG));
-				SFINSTBAG bags[2];
+				sf2info.instBags.Seek(ibagcnt * sizeof(SFInstBag));
+				SFInstBag bags[2];
 				sf2info.instBags.ReadArray(bags);
-				sf2info.instGens.Seek(bags[0].wGenNdx * sizeof(SFINSTGENLIST));
+				sf2info.instGens.Seek(bags[0].wGenNdx * sizeof(SFInstGenList));
 				uint16 lastOp = SF2_GEN_SAMPLEID;
 				int32 loopStart = 0, loopEnd = 0;
 				for(uint32 igenndx = bags[0].wGenNdx; igenndx < bags[1].wGenNdx; igenndx++)
 				{
 					if(igenndx >= numInstGens)
 						break;
-					SFINSTGENLIST gen;
+					SFInstGenList gen;
 					sf2info.instGens.ReadStruct(gen);
 					uint16 value = gen.genAmount;
 					lastOp = gen.sfGenOper;
@@ -1268,7 +1268,7 @@ bool CDLSBank::Open(FileReader file)
 		return false;
 	}
 
-	RIFFCHUNKID riff;
+	RIFFChunkID riff;
 	file.ReadStruct(riff);
 	// Check DLS sections embedded in RMI midi files
 	if(riff.id_RIFF == IFFID_RIFF && riff.id_DLS == IFFID_RMID)
@@ -1357,7 +1357,7 @@ bool CDLSBank::Open(FileReader file)
 		#endif
 			if (m_WaveForms.empty())
 			{
-				PTBLCHUNK ptbl;
+				PTBLChunk ptbl;
 				chunk.ReadStruct(ptbl);
 				chunk.Skip(ptbl.cbSize - 8);
 				uint32 cues = std::min(ptbl.cCues.get(), mpt::saturate_cast<uint32>(chunk.BytesLeft() / sizeof(uint32)));
@@ -1630,7 +1630,7 @@ bool CDLSBank::ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, uint32 nI
 			sample.nC5Speed = p.dwSampleRate;
 			sample.RelativeTone = p.byOriginalPitch;
 			sample.nFineTune = p.chPitchCorrection;
-			if (p.szName[0])
+			if(p.szName[0])
 				sndFile.m_szNames[nSample] = mpt::String::ReadAutoBuf(p.szName);
 			else if(pDlsIns->szName[0])
 				sndFile.m_szNames[nSample] = mpt::String::ReadAutoBuf(pDlsIns->szName);
@@ -1683,7 +1683,7 @@ bool CDLSBank::ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, uint32 nI
 			int sFineTune = rgn.sFineTune;
 			int lVolume = rgn.usVolume;
 
-			WSMPCHUNK wsmp;
+			WSMPChunk wsmp;
 			if(!(rgn.fuOptions & DLSREGION_OVERRIDEWSMP) && wsmpChunk.IsValid() && wsmpChunk.Skip(sizeof(IFFCHUNK)) && wsmpChunk.ReadStructPartial(wsmp))
 			{
 				usUnityNote = wsmp.usUnityNote;
@@ -1691,7 +1691,7 @@ bool CDLSBank::ExtractSample(CSoundFile &sndFile, SAMPLEINDEX nSample, uint32 nI
 				lVolume = DLS32BitRelativeGainToLinear(wsmp.lAttenuation) / 256;
 				if(wsmp.cSampleLoops)
 				{
-					WSMPSAMPLELOOP loop;
+					WSMPSampleLoop loop;
 					wsmpChunk.Seek(sizeof(IFFCHUNK) + wsmp.cbSize);
 					wsmpChunk.ReadStruct(loop);
 					if(loop.ulLoopLength > 3)
