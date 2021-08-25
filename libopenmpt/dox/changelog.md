@@ -29,6 +29,8 @@ is just a high-level summary.
     JavaScript in a single build.
  *  [**Change**] openmpt123: DOS builds now use the Mercury fork of
     `liballegro 4.2` for improved hardware compatibility.
+ *  [**Change**] libopenmpt no longer generates internal interpolation tables on
+    library load time, but instead only first module load time.
 
  *  [**Regression**] `Makefile` `CONFIG=emscripten` does not support
     `EMSCRIPTEN_TARGET=asmjs` or `EMSCRIPTEN_TARGET=asmjs128m` any more because
