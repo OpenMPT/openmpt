@@ -591,9 +591,6 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 		}
 	}
 
-	// Set up mix levels
-	SetMixLevels(m_nMixLevels);
-
 	if(GetType() == MOD_TYPE_NONE)
 	{
 		return false;
@@ -656,6 +653,9 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 			}
 		}
 	}
+
+	// Set up mix levels (also recalculates plugin mix levels - must be done after plugins were loaded)
+	SetMixLevels(m_nMixLevels);
 
 #ifdef MODPLUG_TRACKER
 	// Display a nice message so the user sees which plugins are missing
