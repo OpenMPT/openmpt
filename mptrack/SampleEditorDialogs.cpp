@@ -740,8 +740,9 @@ BOOL CSampleXFadeDlg::OnToolTipText(UINT, NMHDR *pNMHDR, LRESULT *pResult)
 /////////////////////////////////////////////////////////////////////////
 // Resampling dialog
 
-CResamplingDlg::ResamplingOption CResamplingDlg::lastChoice = CResamplingDlg::Upsample;
-uint32 CResamplingDlg::lastFrequency = 0;
+CResamplingDlg::ResamplingOption CResamplingDlg::m_lastChoice = CResamplingDlg::Upsample;
+uint32 CResamplingDlg::m_lastFrequency = 0;
+bool CResamplingDlg::m_updatePatterns = false;
 
 BEGIN_MESSAGE_MAP(CResamplingDlg, CDialog)
 	ON_EN_SETFOCUS(IDC_EDIT1, &CResamplingDlg::OnFocusEdit)
@@ -752,7 +753,7 @@ BOOL CResamplingDlg::OnInitDialog()
 	CDialog::OnInitDialog();
 	SetWindowText(m_resampleAll ? _T("Resample All") : _T("Resample"));
 
-	CheckRadioButton(IDC_RADIO1, IDC_RADIO3, IDC_RADIO1 + lastChoice);
+	CheckRadioButton(IDC_RADIO1, IDC_RADIO3, IDC_RADIO1 + m_lastChoice);
 	if(m_frequency > 0)
 	{
 		TCHAR s[32];
@@ -761,17 +762,17 @@ BOOL CResamplingDlg::OnInitDialog()
 		wsprintf(s, _T("&Downsample (%u Hz)"), m_frequency / 2);
 		SetDlgItemText(IDC_RADIO2, s);
 
-		if(!lastFrequency)
-			lastFrequency = m_frequency;
+		if(!m_lastFrequency)
+			m_lastFrequency = m_frequency;
 	}
-	if(!lastFrequency)
-		lastFrequency = 48000;
+	if(!m_lastFrequency)
+		m_lastFrequency = 48000;
 
 
-	SetDlgItemInt(IDC_EDIT1, lastFrequency, FALSE);
+	SetDlgItemInt(IDC_EDIT1, m_lastFrequency, FALSE);
 	CSpinButtonCtrl *spin = static_cast<CSpinButtonCtrl *>(GetDlgItem(IDC_SPIN1));
 	spin->SetRange32(1, 999999);
-	spin->SetPos32(lastFrequency);
+	spin->SetPos32(m_lastFrequency);
 
 	CComboBox *cbnResampling = static_cast<CComboBox *>(GetDlgItem(IDC_COMBO_FILTER));
 	cbnResampling->SetRedraw(FALSE);
@@ -789,6 +790,8 @@ BOOL CResamplingDlg::OnInitDialog()
 	}
 	cbnResampling->SetRedraw(TRUE);
 
+	CheckDlgButton(IDC_CHECK1, m_updatePatterns ? BST_CHECKED : BST_UNCHECKED);
+
 	return TRUE;
 }
 
@@ -797,19 +800,19 @@ void CResamplingDlg::OnOK()
 {
 	if(IsDlgButtonChecked(IDC_RADIO1))
 	{
-		lastChoice = Upsample;
+		m_lastChoice = Upsample;
 		m_frequency *= 2;
 	} else if(IsDlgButtonChecked(IDC_RADIO2))
 	{
-		lastChoice = Downsample;
+		m_lastChoice = Downsample;
 		m_frequency /= 2;
 	} else
 	{
-		lastChoice = Custom;
+		m_lastChoice = Custom;
 		uint32 newFrequency = GetDlgItemInt(IDC_EDIT1, NULL, FALSE);
 		if(newFrequency > 0)
 		{
-			lastFrequency = m_frequency = newFrequency;
+			m_lastFrequency = m_frequency = newFrequency;
 		} else
 		{
 			MessageBeep(MB_ICONWARNING);
@@ -820,6 +823,8 @@ void CResamplingDlg::OnOK()
 
 	CComboBox *cbnResampling = static_cast<CComboBox *>(GetDlgItem(IDC_COMBO_FILTER));
 	m_srcMode = static_cast<ResamplingMode>(cbnResampling->GetItemData(cbnResampling->GetCurSel()));
+
+	m_updatePatterns = IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED;
 
 	CDialog::OnOK();
 }

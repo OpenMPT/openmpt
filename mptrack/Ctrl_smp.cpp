@@ -1879,12 +1879,12 @@ void CCtrlSamples::OnResample()
 			newFreq = sampleFreq / 2;
 		else if(newFreq == sampleFreq)
 			continue;
-		ApplyResample(smp, newFreq, dlg.GetFilter(), first != last);
+		ApplyResample(smp, newFreq, dlg.GetFilter(), first != last, dlg.UpdatePatternCommands());
 	}
 }
 
 
-void CCtrlSamples::ApplyResample(SAMPLEINDEX smp, uint32 newRate, ResamplingMode mode, bool ignoreSelection)
+void CCtrlSamples::ApplyResample(SAMPLEINDEX smp, uint32 newRate, ResamplingMode mode, bool ignoreSelection, bool updatePatternCommands)
 {
 	BeginWaitCursor();
 
@@ -2070,6 +2070,7 @@ void CCtrlSamples::ApplyResample(SAMPLEINDEX smp, uint32 newRate, ResamplingMode
 		m_modDoc.GetSampleUndo().PrepareUndo(smp, sundo_replace, (newRate > oldRate) ? "Upsample" : "Downsample");
 
 		// Adjust loops and cues
+		const auto oldCues = sample.cues;
 		for(SmpLength &point : SampleEdit::GetCuesAndLoops(sample))
 		{
 			if(point >= oldLength)
@@ -2079,6 +2080,43 @@ void CCtrlSamples::ApplyResample(SAMPLEINDEX smp, uint32 newRate, ResamplingMode
 			else if(point > selection.nStart)
 				point = selection.nStart + Util::muldivr_unsigned(point - selection.nStart, newRate, oldRate);
 			LimitMax(point, newTotalLength);
+		}
+
+		if(updatePatternCommands)
+		{
+			bool patternUndoCreated = false;
+			m_sndFile.Patterns.ForEachModCommand([&](ModCommand &m)
+			{
+				if(m.command != CMD_OFFSET && m.command != CMD_REVERSEOFFSET && m.command != CMD_OFFSETPERCENTAGE)
+					return;
+				if(m_sndFile.GetSampleIndex(m.note, m.instr) != smp)
+					return;
+				SmpLength point = m.param * 256u;
+			
+				if(m.command == CMD_OFFSETPERCENTAGE || (m.volcmd == VOLCMD_OFFSET && m.vol == 0))
+					point = Util::muldivr_unsigned(point, oldLength, 65536);
+				else if(m.volcmd == VOLCMD_OFFSET && m.vol <= std::size(oldCues))
+					point += oldCues[m.vol - 1];
+
+				if(point >= oldLength)
+					point = newTotalLength;
+				else if (point >= selection.nEnd)
+					point += newSelLength - selLength;
+				else if (point > selection.nStart)
+					point = selection.nStart + Util::muldivr_unsigned(point - selection.nStart, newRate, oldRate);
+				LimitMax(point, newTotalLength);
+
+				if(m.command == CMD_OFFSETPERCENTAGE || (m.volcmd == VOLCMD_OFFSET && m.vol == 0))
+					point = Util::muldivr_unsigned(point, 65536, newTotalLength);
+				else if(m.volcmd == VOLCMD_OFFSET && m.vol <= std::size(sample.cues))
+					point -= sample.cues[m.vol - 1];
+				if(!patternUndoCreated)
+				{
+					patternUndoCreated = true;
+					m_modDoc.PrepareUndoForAllPatterns(false, "Resample (Adjust Offsets)");
+				}
+				m.param = mpt::saturate_cast<ModCommand::PARAM>(point / 256u);
+			});
 		}
 
 		if(!selection.selectionActive)
@@ -2134,7 +2172,7 @@ void CCtrlSamples::OnEnableStretchToSize()
 	if(!timeStretch) ReadTimeStretchParameters();
 	((CComboBox *)GetDlgItem(IDC_COMBO4))->EnableWindow(timeStretch ? FALSE : TRUE);
 	((CEdit *)GetDlgItem(IDC_EDIT6))->EnableWindow(timeStretch ? TRUE : FALSE);
-	((CButton *)GetDlgItem(IDC_BUTTON2))->EnableWindow(timeStretch ? TRUE : FALSE); //rewbs.timeStretchMods
+	((CButton *)GetDlgItem(IDC_BUTTON2))->EnableWindow(timeStretch ? TRUE : FALSE);
 
 	GetDlgItem(IDC_TEXT_PITCH)->SetWindowText(timeStretch ? _T("Sequence") : _T("Pitch"));
 	GetDlgItem(IDC_TEXT_QUALITY)->SetWindowText(timeStretch ? _T("Seek Window") : _T("Quality"));

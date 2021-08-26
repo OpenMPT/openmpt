@@ -47,7 +47,7 @@ struct ModSample
 
 	union
 	{
-		SmpLength cues[9];
+		std::array<SmpLength, 9> cues;
 		OPLPatch adlib;
 	};
 
