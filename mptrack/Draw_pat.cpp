@@ -682,17 +682,18 @@ void CViewPattern::OnDraw(CDC *pDC)
 			rect.SetRect(xpaint, ypaint, xpaint + nColumnWidth, ypaint + m_szHeader.cy);
 			if (ncolhdr < ncols)
 			{
+				const auto &channel = sndFile.ChnSettings[ncolhdr];
 				const auto recordGroup = pModDoc->GetChannelRecordGroup(static_cast<CHANNELINDEX>(ncolhdr));
 				const char *pszfmt = sndFile.m_bChannelMuteTogglePending[ncolhdr]? "[Channel %u]" : "Channel %u";
-				if (sndFile.ChnSettings[ncolhdr].szName[0] != 0)
+				if(channel.szName[0] != 0)
 					pszfmt = sndFile.m_bChannelMuteTogglePending[ncolhdr] ? "%u: [%s]" : "%u: %s";
-				else if (m_nDetailLevel < PatternCursor::volumeColumn)
+				else if(m_nDetailLevel < PatternCursor::volumeColumn)
 					pszfmt = sndFile.m_bChannelMuteTogglePending[ncolhdr] ? "[Ch%u]" : "Ch%u";
-				else if (m_nDetailLevel < PatternCursor::effectColumn)
+				else if(m_nDetailLevel < PatternCursor::effectColumn)
 					pszfmt = sndFile.m_bChannelMuteTogglePending[ncolhdr] ? "[Chn %u]" : "Chn %u";
-				sprintf(s, pszfmt, ncolhdr + 1, sndFile.ChnSettings[ncolhdr].szName.buf);
+				sprintf(s, pszfmt, ncolhdr + 1, channel.szName.buf);
 				DrawButtonRect(hdc, &rect, s,
-					sndFile.ChnSettings[ncolhdr].dwFlags[CHN_MUTE] ? TRUE : FALSE,
+					channel.dwFlags[CHN_MUTE] ? TRUE : FALSE,
 					(m_bInItemRect && m_nDragItem.Type() == DragItem::ChannelHeader && m_nDragItem.Value() == ncolhdr) ? TRUE : FALSE,
 					recordGroup != RecordGroup::NoGroup ? DT_RIGHT : DT_CENTER);
 
@@ -737,12 +738,12 @@ void CViewPattern::OnDraw(CDC *pDC)
 				{
 					rect.top += m_szPluginHeader.cy;
 					rect.bottom += m_szPluginHeader.cy;
-					PLUGINDEX mixPlug = sndFile.ChnSettings[ncolhdr].nMixPlugin;
+					PLUGINDEX mixPlug = channel.nMixPlugin;
 					if (mixPlug)
 						sprintf(s, "%u: %s", mixPlug, (sndFile.m_MixPlugins[mixPlug - 1]).pMixPlugin ? (sndFile.m_MixPlugins[mixPlug - 1]).GetName() : "[empty]");
 					else
 						sprintf(s, "---");
-					DrawButtonRect(hdc, &rect, s, FALSE,
+					DrawButtonRect(hdc, &rect, s, channel.dwFlags[CHN_NOFX] ? TRUE : FALSE,
 						((m_bInItemRect) && (m_nDragItem.Type() == DragItem::PluginName) && (m_nDragItem.Value() == ncolhdr)) ? TRUE : FALSE, DT_CENTER);
 				}
 
