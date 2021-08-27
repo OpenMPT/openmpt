@@ -144,7 +144,7 @@ CommandID CInputHandler::GeneralKeyEvent(InputTargetContext context, int code, W
 CommandID CInputHandler::KeyEvent(InputTargetContext context, UINT &nChar, UINT &/*nRepCnt*/, UINT &nFlags, KeyEventType keyEventType, CWnd *pSourceWnd)
 {
 	if(InterceptSpecialKeys(nChar, nFlags, false))
-		return kcNull;
+		return kcDummyShortcut;
 	KeyMapRange cmd = m_keyMap.equal_range(KeyCombination(context, m_modifierMask, nChar, keyEventType));
 
 	if(pSourceWnd == nullptr)
