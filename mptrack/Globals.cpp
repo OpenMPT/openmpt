@@ -525,6 +525,27 @@ LRESULT CModControlView::OnGetToolTipText(WPARAM uId, LPARAM pszText)
 }
 
 
+void CModControlView::SampleChanged(SAMPLEINDEX smp)
+{
+	const CModDoc *modDoc = GetDocument();
+	if(modDoc && modDoc->GetNumInstruments())
+	{
+		INSTRUMENTINDEX k = static_cast<INSTRUMENTINDEX>(GetInstrumentChange());
+		if(!modDoc->IsChildSample(k, smp))
+		{
+			INSTRUMENTINDEX nins = modDoc->FindSampleParent(smp);
+			if(nins != INSTRUMENTINDEX_INVALID)
+			{
+				InstrumentChanged(nins);
+			}
+		}
+	} else
+	{
+		InstrumentChanged(smp);
+	}
+}
+
+
 //////////////////////////////////////////////////////////////////
 // CModScrollView
 

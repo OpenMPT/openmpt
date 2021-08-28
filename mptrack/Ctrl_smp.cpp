@@ -348,6 +348,7 @@ bool CCtrlSamples::SetCurrentSample(SAMPLEINDEX nSmp, LONG lZoom, bool bUpdNum)
 	{
 		m_nSample = nSmp;
 		UpdateView(SampleHint(m_nSample).Info());
+		m_parent.SampleChanged(m_nSample);
 	}
 	if(bUpdNum)
 	{
@@ -1152,21 +1153,7 @@ void CCtrlSamples::OnSampleChanged()
 		if ((n > 0) && (n <= m_sndFile.GetNumSamples()) && (n != m_nSample))
 		{
 			SetCurrentSample(n, -1, FALSE);
-			if (m_sndFile.GetNumInstruments())
-			{
-				INSTRUMENTINDEX k = static_cast<INSTRUMENTINDEX>(m_parent.GetInstrumentChange());
-				if(!m_modDoc.IsChildSample(k, m_nSample))
-				{
-					INSTRUMENTINDEX nins = m_modDoc.FindSampleParent(m_nSample);
-					if(nins != INSTRUMENTINDEX_INVALID)
-					{
-						m_parent.InstrumentChanged(nins);
-					}
-				}
-			} else
-			{
-				m_parent.InstrumentChanged(m_nSample);
-			}
+			m_parent.SampleChanged(m_nSample);
 		}
 	}
 }
