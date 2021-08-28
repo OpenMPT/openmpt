@@ -1565,25 +1565,29 @@ void CTrackApp::OpenModulesDialog(std::vector<mpt::PathString> &files, const mpt
 {
 	files.clear();
 
-	std::string exts;
+	static constexpr std::string_view commonExts[] = {"mod", "s3m", "xm", "it", "mptm", "mo3", "oxm", "nst", "stk", "m15", "pt36", "mid", "rmi", "smf", "wav", "mdz", "s3z", "xmz", "itz", "mdr"};
+	std::string exts, extsWithoutCommon;
 	for(const auto &ext : CSoundFile::GetSupportedExtensions(true))
 	{
-		exts += std::string("*.") + ext + std::string(";");
+		const auto filter = std::string("*.") + ext + std::string(";");
+		exts += filter;
+		if(!mpt::contains(commonExts, ext))
+			extsWithoutCommon += filter;
 	}
 
 	static int nFilterIndex = 0;
 	FileDialog dlg = OpenFileDialog()
 		.AllowMultiSelect()
-		.ExtensionFilter("All Modules|" + exts + ";mod.*"
+		.ExtensionFilter("All Modules (*.mptm,*.mod,*.xm,*.s3m,*.it,...)|" + exts + ";mod.*"
 		"|"
-		"Compressed Modules (*.mdz;*.s3z;*.xmz;*.itz;*.mo3)|*.mdz;*.s3z;*.xmz;*.itz;*.mdr;*.zip;*.rar;*.lha;*.pma;*.lzs;*.gz;*.mo3;*.oxm"
+		"Compressed Modules (*.mdz,*.s3z,*.xmz,*.itz,*.mo3,*.oxm,...)|*.mdz;*.s3z;*.xmz;*.itz;*.mdr;*.zip;*.rar;*.lha;*.pma;*.lzs;*.gz;*.mo3;*.oxm"
 		"|"
 		"ProTracker Modules (*.mod,*.nst)|*.mod;mod.*;*.mdz;*.nst;*.m15;*.stk;*.pt36|"
 		"ScreamTracker Modules (*.s3m,*.stm)|*.s3m;*.stm;*.s3z|"
 		"FastTracker Modules (*.xm)|*.xm;*.xmz|"
 		"Impulse Tracker Modules (*.it)|*.it;*.itz|"
 		"OpenMPT Modules (*.mptm)|*.mptm;*.mptmz|"
-		"Other Modules (mtm,okt,mdl,669,far,...)|*.mtm;*.669;*.ult;*.wow;*.far;*.mdl;*.okt;*.dmf;*.ptm;*.med;*.ams;*.dbm;*.digi;*.dsm;*.dsym;*.dtm;*.umx;*.amf;*.psm;*.mt2;*.gdm;*.imf;*.itp;*.j2b;*.ice;*.st26;*.plm;*.stp;*.sfx;*.sfx2;*.symmod;*.mms;*.c67;*.mus;*.fmt|"
+		"Other Modules (*.mtm,*.okt,*.mdl,*.669,*.far,...)|" + extsWithoutCommon + "|"
 		"Wave Files (*.wav)|*.wav|"
 		"MIDI Files (*.mid,*.rmi)|*.mid;*.rmi;*.smf|"
 		"All Files (*.*)|*.*||")
