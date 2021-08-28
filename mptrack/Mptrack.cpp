@@ -1398,7 +1398,7 @@ void CTrackApp::OpenModulesDialog(std::vector<mpt::PathString> &files, const mpt
 	{
 		const auto filter = std::string("*.") + ext + std::string(";");
 		exts += filter;
-		if(!mpt::contains(commonExts, ext))
+		if(std::find(std::begin(commonExts), std::end(commonExts), ext) == std::end(commonExts))
 			extsWithoutCommon += filter;
 	}
 
