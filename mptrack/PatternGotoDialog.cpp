@@ -49,6 +49,10 @@ END_MESSAGE_MAP()
 BOOL CPatternGotoDialog::OnInitDialog()
 {
 	CDialog::OnInitDialog();
+	HICON icon = ::LoadIcon(AfxGetResourceHandle(), MAKEINTRESOURCE(IDR_MODULETYPE));
+	SetIcon(icon, FALSE);
+	SetIcon(icon, TRUE);
+
 	m_SpinRow.SetRange32(0, MAX_PATTERN_ROWS - 1);
 	m_SpinChannel.SetRange32(1, MAX_BASECHANNELS);
 	m_SpinPattern.SetRange32(0, std::max(m_SndFile.Patterns.GetNumPatterns(), PATTERNINDEX(1)) - 1);
