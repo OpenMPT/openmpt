@@ -104,6 +104,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_MESSAGE(WM_MOD_MIDIMAPPING,			&CMainFrame::OnViewMIDIMapping)
 	ON_MESSAGE(WM_MOD_UPDATEVIEWS,			&CMainFrame::OnUpdateViews)
 	ON_MESSAGE(WM_MOD_SETMODIFIED,			&CMainFrame::OnSetModified)
+	ON_MESSAGE(WM_MOD_UPDATENOTIFY,			&CMainFrame::OnToolbarUpdateIndicatorClick)
 	ON_COMMAND(ID_INTERNETUPDATE,			&CMainFrame::OnInternetUpdate)
 	ON_COMMAND(ID_HELP_SHOWSETTINGSFOLDER,	&CMainFrame::OnShowSettingsFolder)
 #if defined(MPT_ENABLE_UPDATE)
@@ -2605,9 +2606,20 @@ static std::unique_ptr<CUpdateCheckProgressDialog> g_UpdateCheckProgressDialog =
 #if defined(MPT_ENABLE_UPDATE)
 
 
+bool CMainFrame::ShowUpdateIndicator(const CString &releaseVersion, const CString &releaseDate, const CString &releaseURL)
+{
+	// TODO
+	MPT_UNREFERENCED_PARAMETER(releaseVersion);
+	MPT_UNREFERENCED_PARAMETER(releaseDate);
+	MPT_UNREFERENCED_PARAMETER(releaseURL);
+	return false;
+	//return m_wndToolBar.ShowUpdateInfo(releaseVersion);
+}
+
+
 LRESULT CMainFrame::OnUpdateCheckStart(WPARAM wparam, LPARAM lparam)
 {
-	bool isAutoUpdate = CUpdateCheck::IsAutoUpdateFromMessage(wparam, lparam);
+	const bool isAutoUpdate = CUpdateCheck::IsAutoUpdateFromMessage(wparam, lparam);
 	CString updateText = _T("Checking for updates...");
 	if(isAutoUpdate)
 	{
@@ -2696,8 +2708,9 @@ LRESULT CMainFrame::OnUpdateCheckCanceled(WPARAM wparam, LPARAM lparam)
 
 LRESULT CMainFrame::OnUpdateCheckFailure(WPARAM wparam, LPARAM lparam)
 {
-	bool isAutoUpdate = CUpdateCheck::IsAutoUpdateFromMessage(wparam, lparam);
-	CString updateText = MPT_CFORMAT("Checking for updates failed: {}")(CUpdateCheck::GetFailureMessage(wparam, lparam));
+	const bool isAutoUpdate = CUpdateCheck::IsAutoUpdateFromMessage(wparam, lparam);
+	const CUpdateCheck::Error &error = CUpdateCheck::MessageAsError(wparam, lparam);
+	CString updateText = MPT_CFORMAT("Checking for updates failed: {}")(mpt::get_exception_text<mpt::ustring>(error));
 	if(isAutoUpdate)
 	{
 		SetHelpText(updateText);
@@ -2713,7 +2726,7 @@ LRESULT CMainFrame::OnUpdateCheckFailure(WPARAM wparam, LPARAM lparam)
 			g_UpdateCheckProgressDialog = nullptr;
 		}
 	}
-	CUpdateCheck::ShowFailureGUI(wparam, lparam);
+	CUpdateCheck::ShowFailureGUI(isAutoUpdate, error);
 	if(isAutoUpdate)
 	{
 		SetHelpText(_T(""));
@@ -2730,11 +2743,10 @@ LRESULT CMainFrame::OnUpdateCheckFailure(WPARAM wparam, LPARAM lparam)
 
 LRESULT CMainFrame::OnUpdateCheckSuccess(WPARAM wparam, LPARAM lparam)
 {
-	CUpdateCheck::AcknowledgeSuccess(wparam, lparam);
-	bool isAutoUpdate = CUpdateCheck::IsAutoUpdateFromMessage(wparam, lparam);
+	const bool isAutoUpdate = CUpdateCheck::IsAutoUpdateFromMessage(wparam, lparam);
+	const CUpdateCheck::Result & result = CUpdateCheck::MessageAsResult(wparam, lparam);
+	CUpdateCheck::AcknowledgeSuccess(result);
 	CString updateText = _T("Checking for updates... Done.");
-	// TODO:
-	// UpdateToolbarUpdateIndicator(CUpdateCheck::ResultFromMessage(wparam, lparam));
 	if(isAutoUpdate)
 	{
 		SetHelpText(updateText);
@@ -2750,7 +2762,7 @@ LRESULT CMainFrame::OnUpdateCheckSuccess(WPARAM wparam, LPARAM lparam)
 			g_UpdateCheckProgressDialog = nullptr;
 		}
 	}
-	CUpdateCheck::ShowSuccessGUI(wparam, lparam);
+	CUpdateCheck::ShowSuccessGUI(isAutoUpdate, result);
 	if(isAutoUpdate)
 	{
 		SetHelpText(_T(""));
@@ -2759,16 +2771,16 @@ LRESULT CMainFrame::OnUpdateCheckSuccess(WPARAM wparam, LPARAM lparam)
 		// nothing
 	} else
 	{
-		// nothing
+		SetHelpText(_T(""));
 	}
 	return TRUE;
 }
 
 
-void CMainFrame::OnToolbarUpdateIndicatorClick()
+LPARAM CMainFrame::OnToolbarUpdateIndicatorClick(WPARAM, LPARAM)
 {
-	// TODO
 	CUpdateCheck::DoManualUpdateCheck();
+	return 0;
 }
 
 

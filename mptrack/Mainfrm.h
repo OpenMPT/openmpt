@@ -61,6 +61,7 @@ enum
 	WM_MOD_SETMODIFIED,
 	WM_MOD_MDIACTIVATE,
 	WM_MOD_MDIDEACTIVATE,
+	WM_MOD_UPDATENOTIFY,
 };
 
 enum
@@ -402,6 +403,11 @@ public:
 	static CInputHandler* GetInputHandler() { return m_InputHandler; }
 	void SetElapsedTime(double t) { m_dwTimeSec = static_cast<CSoundFile::samplecount_t>(t); }
 
+#if defined(MPT_ENABLE_UPDATE)
+	bool CanShowUpdateIndicator() const { return m_wndToolBar.IsVisible(); }
+	bool ShowUpdateIndicator(const CString &releaseVersion, const CString &releaseDate, const CString &releaseURL);
+#endif // MPT_ENABLE_UPDATE
+
 	CModTree *GetUpperTreeview() { return m_wndTree.m_pModTree; }
 	CModTree *GetLowerTreeview() { return m_wndTree.m_pModTreeData; }
 	bool SetTreeSoundfile(FileReader &file) { return m_wndTree.SetTreeSoundfile(file); }
@@ -546,7 +552,7 @@ protected:
 	afx_msg LRESULT OnUpdateCheckCanceled(WPARAM wparam, LPARAM lparam);
 	afx_msg LRESULT OnUpdateCheckFailure(WPARAM wparam, LPARAM lparam);
 	afx_msg LRESULT OnUpdateCheckSuccess(WPARAM wparam, LPARAM lparam);
-	afx_msg void OnToolbarUpdateIndicatorClick();
+	afx_msg LRESULT OnToolbarUpdateIndicatorClick(WPARAM wparam, LPARAM lparam);
 #endif // MPT_ENABLE_UPDATE
 	afx_msg void OnHelp();
 	afx_msg BOOL OnDeviceChange(UINT nEventType, DWORD_PTR dwData);

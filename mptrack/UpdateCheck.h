@@ -128,15 +128,13 @@ public:
 
 	static bool IsAutoUpdateFromMessage(WPARAM wparam, LPARAM lparam);
 
-	static CUpdateCheck::Result ResultFromMessage(WPARAM wparam, LPARAM lparam);
-	static CUpdateCheck::Error ErrorFromMessage(WPARAM wparam, LPARAM lparam);
+	static const CUpdateCheck::Result &MessageAsResult(WPARAM wparam, LPARAM lparam);
+	static const CUpdateCheck::Error &MessageAsError(WPARAM wparam, LPARAM lparam);
 
-	static void AcknowledgeSuccess(WPARAM wparam, LPARAM lparam);
+	static void AcknowledgeSuccess(const CUpdateCheck::Result &result);
 
-	static void ShowSuccessGUI(WPARAM wparam, LPARAM lparam);
-	static void ShowFailureGUI(WPARAM wparam, LPARAM lparam);
-
-	static mpt::ustring GetFailureMessage(WPARAM wparam, LPARAM lparam);
+	static void ShowSuccessGUI(const bool &autoUpdate, const CUpdateCheck::Result &result);
+	static void ShowFailureGUI(const bool &autoUpdate, const CUpdateCheck::Error &error);
 
 public:
 

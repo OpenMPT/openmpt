@@ -1000,17 +1000,15 @@ bool CUpdateCheck::IsAutoUpdateFromMessage(WPARAM wparam, LPARAM /* lparam */ )
 }
 
 
-CUpdateCheck::Result CUpdateCheck::ResultFromMessage(WPARAM /*wparam*/ , LPARAM lparam)
+const CUpdateCheck::Result &CUpdateCheck::MessageAsResult(WPARAM /* wparam */ , LPARAM lparam)
 {
-	const CUpdateCheck::Result &result = *reinterpret_cast<CUpdateCheck::Result*>(lparam);
-	return result;
+	return *reinterpret_cast<CUpdateCheck::Result*>(lparam);
 }
 
 
-CUpdateCheck::Error CUpdateCheck::ErrorFromMessage(WPARAM /*wparam*/ , LPARAM lparam)
+const CUpdateCheck::Error &CUpdateCheck::MessageAsError(WPARAM /* wparam */ , LPARAM lparam)
 {
-	const CUpdateCheck::Error &error = *reinterpret_cast<CUpdateCheck::Error*>(lparam);
-	return error;
+	return *reinterpret_cast<CUpdateCheck::Error*>(lparam);
 }
 
 
@@ -1471,10 +1469,8 @@ public:
 };
 
 
-void CUpdateCheck::AcknowledgeSuccess(WPARAM wparam, LPARAM lparam)
+void CUpdateCheck::AcknowledgeSuccess(const CUpdateCheck::Result &result)
 {
-	MPT_UNREFERENCED_PARAMETER(wparam);
-	const CUpdateCheck::Result& result = *reinterpret_cast<CUpdateCheck::Result*>(lparam);
 	if(result.CheckTime != time_t{})
 	{
 		TrackerSettings::Instance().UpdateLastUpdateCheck = mpt::Date::Unix(result.CheckTime);
@@ -1482,11 +1478,10 @@ void CUpdateCheck::AcknowledgeSuccess(WPARAM wparam, LPARAM lparam)
 }
 
 
-void CUpdateCheck::ShowSuccessGUI(WPARAM wparam, LPARAM lparam)
+void CUpdateCheck::ShowSuccessGUI(const bool &autoUpdate, const CUpdateCheck::Result &result)
 {
 
-	const CUpdateCheck::Result &result = *reinterpret_cast<CUpdateCheck::Result*>(lparam);
-	bool autoUpdate = wparam != 0;
+	bool modal = !autoUpdate || !CMainFrame::GetMainFrame()->CanShowUpdateIndicator();
 
 #if MPT_UPDATE_LEGACY
 
@@ -1494,14 +1489,24 @@ void CUpdateCheck::ShowSuccessGUI(WPARAM wparam, LPARAM lparam)
 	{
 		if(result.UpdateAvailable && (!autoUpdate || result.Version != TrackerSettings::Instance().UpdateIgnoreVersion))
 		{
-			UpdateDialog dlg(result.Version, result.Date, result.URL);
-			if(dlg.DoModal() == IDOK)
+			if(!CMainFrame::GetMainFrame()->ShowUpdateIndicator(result.Version, result.Date, result.URL))
 			{
-				CTrackApp::OpenURL(result.URL);
+				modal = true;
+			}
+			if(modal)
+			{
+				UpdateDialog dlg(result.Version, result.Date, result.URL);
+				if(dlg.DoModal() == IDOK)
+				{
+					CTrackApp::OpenURL(result.URL);
+				}
 			}
 		} else if(!result.UpdateAvailable && !autoUpdate)
 		{
-			Reporting::Information(U_("You already have the latest version of OpenMPT installed."), U_("OpenMPT Internet Update"));
+			if(modal)
+			{
+				Reporting::Information(U_("You already have the latest version of OpenMPT installed."), U_("OpenMPT Internet Update"));
+			}
 		}
 		return;
 	}
@@ -1515,7 +1520,10 @@ void CUpdateCheck::ShowSuccessGUI(WPARAM wparam, LPARAM lparam)
 	{
 		if(!autoUpdate)
 		{
-			Reporting::Information(U_("You already have the latest version of OpenMPT installed."), U_("OpenMPT Update"));
+			if(modal)
+			{
+				Reporting::Information(U_("You already have the latest version of OpenMPT installed."), U_("OpenMPT Update"));
+			}
 		}
 		return;
 	}
@@ -1537,6 +1545,7 @@ void CUpdateCheck::ShowSuccessGUI(WPARAM wparam, LPARAM lparam)
 
 	} else
 	{
+
 		const TCHAR *action = _T("&View Announcement");
 		const bool canInstall = !updateInfo.download.empty() && versionInfo.downloads[updateInfo.download].can_autoupdate && (Version::Current() >= Version::Parse(versionInfo.downloads[updateInfo.download].autoupdate_minversion));
 		const bool canDownload = !canInstall && !updateInfo.download.empty() && !versionInfo.downloads[updateInfo.download].download_url.empty();
@@ -1546,6 +1555,20 @@ void CUpdateCheck::ShowSuccessGUI(WPARAM wparam, LPARAM lparam)
 		} else if(canDownload)
 		{
 			action = _T("&Download Now");
+		}
+
+		if(!CMainFrame::GetMainFrame()->ShowUpdateIndicator(
+			mpt::ToCString(versionInfo.version),
+			mpt::ToCString(versionInfo.date),
+			mpt::ToCString(versionInfo.changelog_url)))
+		{
+			// on failure to show tooltip, continue and show modal dialog
+			modal = true;
+		}
+
+		if(!modal)
+		{
+			return;
 		}
 
 		UpdateDialog dlg(
@@ -1576,19 +1599,8 @@ void CUpdateCheck::ShowSuccessGUI(WPARAM wparam, LPARAM lparam)
 }
 
 
-mpt::ustring CUpdateCheck::GetFailureMessage(WPARAM wparam, LPARAM lparam)
+void CUpdateCheck::ShowFailureGUI(const bool &autoUpdate, const CUpdateCheck::Error &error)
 {
-	MPT_UNREFERENCED_PARAMETER(wparam);
-	const CUpdateCheck::Error &error = *reinterpret_cast<CUpdateCheck::Error*>(lparam);
-	return mpt::get_exception_text<mpt::ustring>(error);
-}
-
-
-
-void CUpdateCheck::ShowFailureGUI(WPARAM wparam, LPARAM lparam)
-{
-	const CUpdateCheck::Error &error = *reinterpret_cast<CUpdateCheck::Error*>(lparam);
-	bool autoUpdate = wparam != 0;
 	if(!autoUpdate)
 	{
 		Reporting::Error(mpt::get_exception_text<mpt::ustring>(error), U_("OpenMPT Update Error"));
