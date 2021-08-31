@@ -43,14 +43,16 @@ LRESULT CCustEdit::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 		if(byte2 != 0)
 		{
 			SetKey(ModMidi, byte1);
-			m_pOptKeyDlg->OnSetKeyChoice();
+			if(!m_isDummy)
+				m_pOptKeyDlg->OnSetKeyChoice();
 		}
 		break;
 
 	case MIDIEvents::evNoteOn:
 	case MIDIEvents::evNoteOff:
 		SetKey(ModMidi, byte1 | 0x80);
-		m_pOptKeyDlg->OnSetKeyChoice();
+		if(!m_isDummy)
+			m_pOptKeyDlg->OnSetKeyChoice();
 		break;
 	}
 
