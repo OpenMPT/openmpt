@@ -134,7 +134,7 @@ CommandID CInputHandler::GeneralKeyEvent(InputTargetContext context, int code, W
 	}
 	if(code == HC_MIDI)
 	{
-		cmd = m_keyMap.equal_range(KeyCombination(context, ModMidi, static_cast<UINT>(wParam), kKeyEventDown));
+		cmd = m_keyMap.equal_range(KeyCombination(context, ModMidi, static_cast<UINT>(wParam), static_cast<KeyEventType>(lParam)));
 	}
 
 	return SendCommands(m_pMainFrm, cmd);
@@ -269,7 +269,7 @@ bool CInputHandler::CatchModifierChange(WPARAM wParam, KeyEventType keyEventType
 // Translate MIDI messages to shortcut commands
 CommandID CInputHandler::HandleMIDIMessage(InputTargetContext context, uint32 message)
 {
-	const auto byte1 = MIDIEvents::GetDataByte1FromEvent(message), byte2 = MIDIEvents::GetDataByte2FromEvent(message);
+	auto byte1 = MIDIEvents::GetDataByte1FromEvent(message), byte2 = MIDIEvents::GetDataByte2FromEvent(message);
 	switch(MIDIEvents::GetTypeFromEvent(message))
 	{
 	case MIDIEvents::evControllerChange:
@@ -277,13 +277,23 @@ CommandID CInputHandler::HandleMIDIMessage(InputTargetContext context, uint32 me
 		{
 			// Only capture MIDI CCs for now. Some controllers constantly send some MIDI CCs with value 0
 			// (e.g. the Roland D-50 sends CC123 whenenver all notes have been released), so we will ignore those.
-			return GeneralKeyEvent(context, HC_MIDI, byte1, 0);
+			return GeneralKeyEvent(context, HC_MIDI, byte1, kKeyEventDown);
 		}
 		break;
 
-	case MIDIEvents::evNoteOn:
 	case MIDIEvents::evNoteOff:
-		return GeneralKeyEvent(context, HC_MIDI, byte1 | 0x80, 0);
+		byte2 = 0;
+		[[fallthrough]];
+	case MIDIEvents::evNoteOn:
+		if(byte2 != 0)
+		{
+			return GeneralKeyEvent(context, HC_MIDI, byte1 | 0x80, kKeyEventDown);
+		} else
+		{
+			// If the key-down triggered a note, we still want that note to be stopped. So we always pretend that no key was assigned to this event
+			GeneralKeyEvent(context, HC_MIDI, byte1 | 0x80, kKeyEventUp);
+		}
+		break;
 	}
 
 	return kcNull;

@@ -3703,13 +3703,11 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 	if((event == MIDIEvents::evNoteOn) && !vol)
 		event = MIDIEvents::evNoteOff;  //Convert event to note-off if req'd
 
-
 	// Handle MIDI mapping.
 	PLUGINDEX mappedIndex = uint8_max;
 	PlugParamIndex paramIndex = 0;
 	uint16 paramValue = uint16_max;
 	bool captured = sndFile.GetMIDIMapper().OnMIDImsg(midiData, mappedIndex, paramIndex, paramValue);
-
 
 	// Handle MIDI messages assigned to shortcuts
 	CInputHandler *ih = CMainFrame::GetInputHandler();
@@ -4928,9 +4926,7 @@ void CViewPattern::TempStopNote(ModCommand::NOTE note, const bool fromMidi, bool
 		}
 	}
 
-	// Create undo-point.
-	pModDoc->GetPatternUndo().PrepareUndo(editPos.pattern, nChn, editPos.row, noteChannels[numNotes - 1] - nChn + 1, 1, "Note Stop Entry");
-
+	bool modified = false;
 	for(int i = 0; i < numNotes; i++)
 	{
 		if(m_previousNote[noteChannels[i]] != notes[i])
@@ -4938,6 +4934,13 @@ void CViewPattern::TempStopNote(ModCommand::NOTE note, const bool fromMidi, bool
 			// This might be a note-off from a past note, but since we already hit a new note on this channel, we ignore it.
 			continue;
 		}
+
+		if(!modified)
+		{
+			pModDoc->GetPatternUndo().PrepareUndo(editPos.pattern, nChn, editPos.row, noteChannels[numNotes - 1] - nChn + 1, 1, "Note Stop Entry");
+			modified = true;
+		}
+
 		pTarget = sndFile.Patterns[editPos.pattern].GetpModCommand(editPos.row, noteChannels[i]);
 
 		// -- write sdx if playing live
@@ -4979,6 +4982,8 @@ void CViewPattern::TempStopNote(ModCommand::NOTE note, const bool fromMidi, bool
 		pTarget->volcmd = VOLCMD_NONE;
 		pTarget->vol = 0;
 	}
+	if(!modified)
+		return;
 
 	SetModified(false);
 
