@@ -36,7 +36,8 @@ LRESULT CCustEdit::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 	if(MIDIEvents::GetTypeFromEvent(midiData) == MIDIEvents::evControllerChange && MIDIEvents::GetDataByte2FromEvent(midiData) != 0 && m_isFocussed)
 	{
 		SetKey(ModMidi, MIDIEvents::GetDataByte1FromEvent(midiData));
-		m_pOptKeyDlg->OnSetKeyChoice();
+		if(!m_isDummy)
+			m_pOptKeyDlg->OnSetKeyChoice();
 	}
 	return 1;
 }
