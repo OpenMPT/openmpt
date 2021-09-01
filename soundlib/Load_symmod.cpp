@@ -1768,32 +1768,32 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 						if(chnState.curVolSlide != 0)
 						{
 							chnState.curVolSlideAmt += chnState.curVolSlide * patternSpeed;
-							if(!m.command)
+							if(m.command == CMD_NONE)
 							{
 								if(patternSpeed > 1 && chnState.curVolSlideAmt >= (patternSpeed - 1))
 								{
-									uint8 slideAmt = std::min<uint8>(15, static_cast<uint8>(chnState.curVolSlideAmt / (patternSpeed - 1)));
+									uint8 slideAmt = std::min<uint8>(15, mpt::saturate_round<uint8>(chnState.curVolSlideAmt / (patternSpeed - 1)));
 									chnState.curVolSlideAmt -= slideAmt * (patternSpeed - 1);
 									// normal slide up
 									m.command = CMD_CHANNELVOLSLIDE;
 									m.param = slideAmt << 4;
 								} else if(chnState.curVolSlideAmt >= 1.0f)
 								{
-									uint8 slideAmt = std::min<uint8>(15, static_cast<uint8>(chnState.curVolSlideAmt));
+									uint8 slideAmt = std::min<uint8>(15, mpt::saturate_round<uint8>(chnState.curVolSlideAmt));
 									chnState.curVolSlideAmt -= slideAmt;
 									// fine slide up
 									m.command = CMD_CHANNELVOLSLIDE;
 									m.param = (slideAmt << 4) | 0x0F;
 								} else if(patternSpeed > 1 && chnState.curVolSlideAmt <= -(patternSpeed - 1))
 								{
-									uint8 slideAmt = std::min<uint8>(15, static_cast<uint8>(-chnState.curVolSlideAmt / (patternSpeed - 1)));
+									uint8 slideAmt = std::min<uint8>(15, mpt::saturate_round<uint8>(-chnState.curVolSlideAmt / (patternSpeed - 1)));
 									chnState.curVolSlideAmt += slideAmt * (patternSpeed - 1);
 									// normal slide down
 									m.command = CMD_CHANNELVOLSLIDE;
 									m.param = slideAmt;
 								} else if(chnState.curVolSlideAmt <= -1.0f)
 								{
-									uint8 slideAmt = std::min<uint8>(14, static_cast<uint8>(-chnState.curVolSlideAmt));
+									uint8 slideAmt = std::min<uint8>(14, mpt::saturate_round<uint8>(-chnState.curVolSlideAmt));
 									chnState.curVolSlideAmt += slideAmt;
 									// fine slide down
 									m.command = CMD_CHANNELVOLSLIDE;
@@ -1809,28 +1809,28 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 							{
 								if(patternSpeed > 1 && chnState.curPitchSlideAmt >= (patternSpeed - 1))
 								{
-									uint8 slideAmt = std::min<uint8>(0xDF, static_cast<uint8>(chnState.curPitchSlideAmt / (patternSpeed - 1)));
+									uint8 slideAmt = std::min<uint8>(0xDF, mpt::saturate_round<uint8>(chnState.curPitchSlideAmt / (patternSpeed - 1)));
 									chnState.curPitchSlideAmt -= slideAmt * (patternSpeed - 1);
 									// normal slide up
 									m.command = CMD_PORTAMENTOUP;
 									m.param = slideAmt;
 								} else if(chnState.curPitchSlideAmt >= 1.0f)
 								{
-									uint8 slideAmt = std::min<uint8>(15, static_cast<uint8>(chnState.curPitchSlideAmt));
+									uint8 slideAmt = std::min<uint8>(15, mpt::saturate_round<uint8>(chnState.curPitchSlideAmt));
 									chnState.curPitchSlideAmt -= slideAmt;
 									// fine slide up
 									m.command = CMD_PORTAMENTOUP;
 									m.param = slideAmt | 0xF0;
 								} else if(patternSpeed > 1 && chnState.curPitchSlideAmt <= -(patternSpeed - 1))
 								{
-									uint8 slideAmt = std::min<uint8>(0xDF, static_cast<uint8>(-chnState.curPitchSlideAmt / (patternSpeed - 1)));
+									uint8 slideAmt = std::min<uint8>(0xDF, mpt::saturate_round<uint8>(-chnState.curPitchSlideAmt / (patternSpeed - 1)));
 									chnState.curPitchSlideAmt += slideAmt * (patternSpeed - 1);
 									// normal slide down
 									m.command = CMD_PORTAMENTODOWN;
 									m.param = slideAmt;
 								} else if(chnState.curPitchSlideAmt <= -1.0f)
 								{
-									uint8 slideAmt = std::min<uint8>(14, static_cast<uint8>(-chnState.curPitchSlideAmt));
+									uint8 slideAmt = std::min<uint8>(14, mpt::saturate_round<uint8>(-chnState.curPitchSlideAmt));
 									chnState.curPitchSlideAmt += slideAmt;
 									// fine slide down
 									m.command = CMD_PORTAMENTODOWN;
@@ -1842,13 +1842,13 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 							{
 								if(patternSpeed > 1 && chnState.curPitchSlideAmt / 4 >= (patternSpeed - 1))
 								{
-									uint8 slideAmt = std::min<uint8>(9, static_cast<uint8>(chnState.curPitchSlideAmt / (patternSpeed - 1)) / 4);
+									uint8 slideAmt = std::min<uint8>(9, mpt::saturate_round<uint8>(chnState.curPitchSlideAmt / (patternSpeed - 1)) / 4);
 									chnState.curPitchSlideAmt -= slideAmt * (patternSpeed - 1) * 4;
 									m.volcmd = VOLCMD_PORTAUP;
 									m.vol = slideAmt;
 								} else if(patternSpeed > 1 && chnState.curPitchSlideAmt / 4 <= -(patternSpeed - 1))
 								{
-									uint8 slideAmt = std::min<uint8>(9, static_cast<uint8>(-chnState.curPitchSlideAmt / (patternSpeed - 1)) / 4);
+									uint8 slideAmt = std::min<uint8>(9, mpt::saturate_round<uint8>(-chnState.curPitchSlideAmt / (patternSpeed - 1)) / 4);
 									chnState.curPitchSlideAmt += slideAmt * (patternSpeed - 1) * 4;
 									m.volcmd = VOLCMD_PORTADOWN;
 									m.vol = slideAmt;
