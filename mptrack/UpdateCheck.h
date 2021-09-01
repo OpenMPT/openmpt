@@ -100,9 +100,12 @@ public:
 	class Error
 		: public std::runtime_error
 	{
+	private:
+		CString m_Message;
 	public:
 		Error(CString errorMessage);
 		Error(CString errorMessage, DWORD errorCode);
+		CString GetMessage() const;
 	protected:
 		static CString FormatErrorCode(CString errorMessage, DWORD errorCode);
 	};
