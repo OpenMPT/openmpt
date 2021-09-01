@@ -514,22 +514,30 @@ void CUpdateCheck::ShowFailureGUI(WPARAM wparam, LPARAM lparam)
 	bool autoUpdate = wparam != 0;
 	if(!autoUpdate)
 	{
-		Reporting::Error(mpt::get_exception_text<mpt::ustring>(error), U_("OpenMPT Internet Update Error"));
+		Reporting::Error(error.GetMessage(), U_("OpenMPT Internet Update Error"));
 	}
 }
 
 
 CUpdateCheck::Error::Error(CString errorMessage)
-	: std::runtime_error(mpt::ToCharset(mpt::Charset::UTF8, errorMessage))
+	: std::runtime_error(mpt::ToCharset(mpt::CharsetException, errorMessage))
+	, m_Message(errorMessage)
 {
 	return;
 }
 
 
 CUpdateCheck::Error::Error(CString errorMessage, DWORD errorCode)
-	: std::runtime_error(mpt::ToCharset(mpt::Charset::UTF8, FormatErrorCode(errorMessage, errorCode)))
+	: std::runtime_error(mpt::ToCharset(mpt::CharsetException, FormatErrorCode(errorMessage, errorCode)))
+	, m_Message(errorMessage)
 {
 	return;
+}
+
+
+CString CUpdateCheck::Error::GetMessage() const
+{
+	return m_Message;
 }
 
 
