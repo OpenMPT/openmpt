@@ -1134,10 +1134,7 @@ void CViewGlobals::UpdateDryWetDisplay()
 		dryRatio = -wetRatio;
 	}
 	int wetInt = mpt::saturate_round<int>(wetRatio * 100), dryInt = mpt::saturate_round<int>(dryRatio * 100);
-	TCHAR s[32];
-	wsprintf(s, _T("%d%% wet, %d%% dry"), wetInt, dryInt);
-	SetDlgItemText(IDC_STATIC8, s);
-
+	SetDlgItemText(IDC_STATIC8, mpt::tformat(_T("%1%% wet, %2%% dry"))(wetInt, dryInt).c_str());
 }
 
 
