@@ -136,6 +136,7 @@ protected: // create from serialization only
 public:
 	virtual ~CModControlView() {}
 	CModDoc* GetDocument() const { return (CModDoc *)m_pDocument; }
+	void SampleChanged(SAMPLEINDEX smp);
 	void InstrumentChanged(int nInstr=-1) { m_nInstrumentChanged = nInstr; }
 	int GetInstrumentChange() const { return m_nInstrumentChanged; }
 	void SetMDIParentFrame(HWND hwnd) { m_hWndMDI = hwnd; }
