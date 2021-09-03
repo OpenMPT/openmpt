@@ -5441,9 +5441,9 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, int offset)
 			if(!m_playBehaviour[kFT2Retrigger] || !(chn.rowCommand.volcmd == VOLCMD_VOLUME))
 			{
 				if(retrigTable1[dv])
-					vol = (vol * retrigTable1[dv]) >> 4;
+					vol = (vol * retrigTable1[dv]) / 16;
 				else
-					vol += ((int)retrigTable2[dv]) << 2;
+					vol += ((int)retrigTable2[dv]) * 4;
 			}
 			Limit(vol, 0, 256);
 
