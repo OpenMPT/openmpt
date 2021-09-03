@@ -394,6 +394,7 @@ version:1
 //----( Comments Context [bottom] )------------
 10:2000:0:9:1		//Toggle between lists: TAB (KeyDown)
 10:2001:0:13:1		//Open item in editor: ENTER (KeyDown)
+10:2026:2:13:1		//Rename Item: Ctrl+ENTER (KeyDown)
 
 //----( Unknown Context )------------
 
