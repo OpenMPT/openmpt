@@ -5675,7 +5675,7 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, int offset)
 		if(m_playBehaviour[kITRetrigger]) chn.position.Set(0);
 
 		offset--;
-		if(offset >= 0 && offset <= static_cast<int>(CountOf(chn.pModSample->cues)) && chn.pModSample != nullptr)
+		if(chn.pModSample != nullptr && offset >= 0 && offset <= static_cast<int>(CountOf(chn.pModSample->cues)))
 		{
 			if(offset == 0)
 				offset = chn.oldOffset;
