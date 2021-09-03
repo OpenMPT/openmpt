@@ -743,6 +743,7 @@ static constexpr struct
 	{2023, kcTempoDecreaseFine, _T("Decrease Tempo (Fine)")},
 	{2024, kcSpeedIncrease, _T("Increase Ticks per Row")},
 	{2025, kcSpeedDecrease, _T("Decrease Ticks per Row")},
+	{2026, kcRenameSmpInsListItem, _T("Rename Item")},
 };
 
 // Get command descriptions etc.. loaded up.

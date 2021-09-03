@@ -873,7 +873,8 @@ enum CommandID
 	kcStartCommentsCommands,
 	kcToggleSmpInsList = kcStartCommentsCommands,
 	kcExecuteSmpInsListItem,
-	kcEndCommentsCommands = kcExecuteSmpInsListItem,
+	kcRenameSmpInsListItem,
+	kcEndCommentsCommands = kcRenameSmpInsListItem,
 
 	kcNumCommands,
 };
