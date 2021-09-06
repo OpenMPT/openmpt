@@ -1,6 +1,22 @@
+// cos MPEG decoding tables
 // output of:
 // src/libmpg123/calctables cos
 
+#if defined(RUNTIME_TABLES)
+
+#ifdef REAL_IS_FLOAT
+
+// aligned to 16 bytes for vector instructions, e.g. AltiVec
+
+static ALIGNED(16) real cos64[16];
+static ALIGNED(16) real cos32[8];
+static ALIGNED(16) real cos16[4];
+static ALIGNED(16) real cos8[2];
+static ALIGNED(16) real cos4[1];
+
+#endif
+
+#else
 
 #ifdef REAL_IS_FLOAT
 
@@ -59,5 +75,7 @@ static const real cos4[1] =
 {
 	   11863283
 };
+
+#endif
 
 #endif

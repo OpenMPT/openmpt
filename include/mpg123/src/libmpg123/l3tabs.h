@@ -1,6 +1,45 @@
+// l3 MPEG decoding tables
 // output of:
 // src/libmpg123/calctables l3
 
+#if defined(RUNTIME_TABLES)
+
+#ifdef REAL_IS_FLOAT
+
+// aligned to 16 bytes for vector instructions, e.g. AltiVec
+
+static ALIGNED(16) real ispow[8207];
+static ALIGNED(16) real aa_ca[8];
+static ALIGNED(16) real aa_cs[8];
+static ALIGNED(16) real win[4][36];
+static ALIGNED(16) real win1[4][36];
+ALIGNED(16) real COS9[9];
+static real COS6_1;
+static real COS6_2;
+ALIGNED(16) real tfcos36[9];
+static ALIGNED(16) real tfcos12[3];
+static ALIGNED(16) real cos9[3];
+static ALIGNED(16) real cos18[3];
+static ALIGNED(16) real tan1_1[16];
+static ALIGNED(16) real tan2_1[16];
+static ALIGNED(16) real tan1_2[16];
+static ALIGNED(16) real tan2_2[16];
+static ALIGNED(16) real pow1_1[2][32];
+static ALIGNED(16) real pow2_1[2][32];
+static ALIGNED(16) real pow1_2[2][32];
+static ALIGNED(16) real pow2_2[2][32];
+
+#endif
+
+static short mapbuf0[9][152];
+static short mapbuf1[9][156];
+static short mapbuf2[9][44];
+static short *map[9][3];
+static short *mapend[9][3];
+static unsigned short n_slen2[512];
+static unsigned short i_slen2[256];
+
+#else
 
 #ifdef REAL_IS_FLOAT
 
@@ -5242,3 +5281,5 @@ static const unsigned short i_slen2[256] =
 ,	   16603,    20480,    20488,    20496,    20481,    20489,    20497,    20482,    20490
 ,	   20498,    20483,    20491,    20499
 };
+
+#endif
