@@ -1,8 +1,10 @@
-libmpg123 library version 1.28.2 (2021-07-12).
+libmpg123 library version 1.29.0 (2021-09-06).
 The following changes have been made:
 - ports/makefile/config.h and ports/makefile/mpg123.h have been added for plain
   Makefile builds.
 - ports/MSVC++/config.h and ports/MSVC++/mpg123.h have been retained from older
+  versions.
+- ports/Xcode/config.h and ports/MSVC++/mpg123.h have been retained from older
   versions.
 - ports/MSVC++/mpg123.h has been adjusted to provide mpg123_ssize_t and define
   MPG123_NO_LARGENAME.

@@ -232,19 +232,26 @@ off_t ntom_frameoff(mpg123_handle *fr, off_t soff);
 /* Initialization of any static data that majy be needed at runtime.
    Make sure you call these once before it is too late. */
 #ifndef NO_LAYER3
+#ifdef RUNTIME_TABLES
 void init_layer3(void);
+#endif
 real init_layer3_gainpow2(mpg123_handle *fr, int i);
 void init_layer3_stuff(mpg123_handle *fr, real (*gainpow2)(mpg123_handle *fr, int i));
 #endif
 #ifndef NO_LAYER12
+#ifdef RUNTIME_TABLES
 void  init_layer12(void);
+#endif
 real* init_layer12_table(mpg123_handle *fr, real *table, int m);
 void  init_layer12_stuff(mpg123_handle *fr, real* (*init_table)(mpg123_handle *fr, real *table, int m));
 #endif
 
-void prepare_decode_tables(void);
-
-extern const real *pnts[5]; /* tabinit provides, dct64 needs */
+#ifdef RUNTIME_TABLES
+void init_costabs(void);
+#else
+const
+#endif
+extern real *pnts[5]; /* costab.h provides, dct64 needs */
 
 /* Runtime (re)init functions; needed more often. */
 void make_decode_tables(mpg123_handle *fr); /* For every volume change. */

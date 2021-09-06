@@ -1,7 +1,7 @@
 /*
 	mpg123lib_intern: Common non-public stuff for libmpg123
 
-	copyright 1995-2008 by the mpg123 project - free software under the terms of the LGPL 2.1
+	copyright 1995-2021 by the mpg123 project - free software under the terms of the LGPL 2.1
 	see COPYING and AUTHORS files in distribution or http://mpg123.org
 
 	derived from the old mpg123.h
@@ -39,12 +39,37 @@
 #define memmove(dst,src,size) bcopy(src,dst,size)
 #endif
 
-/* We don't really do long double... there are 3 options for REAL:
-   float, long and double. */
+// The real type is either 32 bit float or integer. We do not attempt
+// double precision for MPEG audio decoding (or any audio storage/compression
+// format, even).
+// The calctables tool works in double precision float, but converts to fixed
+// point 'real' on output in addition to floating point.
 
-#if defined(REAL_IS_FLOAT) && !defined(FORCE_FIXED)
-#  define real float
-#elif defined(REAL_IS_FIXED) || defined(FORCE_FIXED)
+// The base type used in the computation code.
+// With C11 we  could rely on tgmath for sin() to use the right precision.
+#ifdef CALCTABLES
+#	define clreal double
+#	define COS    cos
+#	define SIN    sin
+#	define TAN    tan
+#	define POW    pow
+#else
+#	define clreal float
+#	define COS    cosf
+#	define SIN    sinf
+#	define TAN    tanf
+#	define POW    powf
+#endif
+
+#if defined(REAL_IS_FLOAT) && !defined(CALCTABLES)
+
+#define real float
+
+#elif defined(REAL_IS_FIXED) || defined(CALCTABLES)
+
+#ifdef RUNTIME_TABLES
+#error "Runtime tables are only for floating point decoders."
+#endif
 
 # define real  int32_t
 # define dreal int64_t
@@ -53,7 +78,6 @@
   for fixed-point decoders, use pre-calculated tables to avoid expensive floating-point maths
   undef this macro for run-time calculation
 */
-#define PRECALC_TABLES
 
 # define REAL_RADIX				24
 # define REAL_FACTOR			16777216.0

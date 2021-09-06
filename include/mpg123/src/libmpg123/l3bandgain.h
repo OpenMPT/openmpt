@@ -75,7 +75,7 @@ static const struct bandInfoStruct bandInfo[9] =
 	}
 };
 
-#if defined(REAL_IS_FIXED) || defined(FORCE_FIXED)
+#if defined(REAL_IS_FIXED) || defined(CALCTABLES)
 static const char gainpow2_scale[256+118+4+1] = 
 {
 	19,19,19,20,20,20,20,21,21,21,21,22,22,22,22,23,23,23,23,24,24,24,24,25,25,25,25,26,26,26,26,27,
