@@ -38,18 +38,14 @@ int attribute_align_arg mpg123_feature(const enum mpg123_feature_set key)
 #endif /* mpg123_output_32bit */
 
 		case MPG123_FEATURE_OUTPUT_FLOAT32:
-#if defined(NO_REAL) || defined(REAL_IS_DOUBLE)
+#if defined(NO_REAL)
 		return 0;
 #else
 		return 1;
 #endif
 
 		case MPG123_FEATURE_OUTPUT_FLOAT64:
-#if defined(NO_REAL) || !defined(REAL_IS_DOUBLE)
 		return 0;
-#else
-		return 1;
-#endif
 
 		case MPG123_FEATURE_PARSE_ID3V2:
 #ifdef NO_ID3V2

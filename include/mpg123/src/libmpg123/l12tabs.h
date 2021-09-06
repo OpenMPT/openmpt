@@ -1,6 +1,24 @@
+// l12 MPEG decoding tables
 // output of:
 // src/libmpg123/calctables l12
 
+#if defined(RUNTIME_TABLES)
+
+#ifdef REAL_IS_FLOAT
+
+// aligned to 16 bytes for vector instructions, e.g. AltiVec
+
+static ALIGNED(16) real layer12_table[27][64];
+
+#endif
+
+static unsigned char grp_3tab[96];
+
+static unsigned char grp_5tab[384];
+
+static unsigned char grp_9tab[3072];
+
+#else
 
 #ifdef REAL_IS_FLOAT
 
@@ -1202,3 +1220,5 @@ static const unsigned char grp_9tab[3072] =
 ,	  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0
 ,	  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0
 };
+
+#endif

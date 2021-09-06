@@ -1,7 +1,7 @@
 /*
 	layer3.c: the layer 3 decoder
 
-	copyright 1995-2017 by the mpg123 project - free software under the terms of the LGPL 2.1
+	copyright 1995-2021 by the mpg123 project - free software under the terms of the LGPL 2.1
 	see COPYING and AUTHORS files in distribution or http://mpg123.org
 	initially written by Michael Hipp
 
@@ -31,6 +31,11 @@
 #endif
 
 #include "l3tabs.h"
+#include "l3bandgain.h"
+
+#ifdef RUNTIME_TABLES
+#include "init_layer3.h"
+#endif
 
 /* Decoder state data, living on the stack of do_layer3. */
 
@@ -68,8 +73,6 @@ struct III_sideinfo
 	/* Hm, funny... struct inside struct... */
 	struct { struct gr_info_s gr[2]; } ch[2];
 };
-
-#include "l3bandgain.h"
 
 #ifdef OPT_MMXORSSE
 real init_layer3_gainpow2_mmx(mpg123_handle *fr, int i)

@@ -1345,28 +1345,23 @@ static void convert_latin1(mpg123_string *sb, const unsigned char* s, size_t l, 
 */
 static int check_bom(const unsigned char** source, size_t *len)
 {
-	int this_bom    = 0;
-	int further_bom = 0;
+	int last_bom = 0;
 
-	if(*len < 2) return 0;
-
-	if((*source)[0] == 0xff && (*source)[1] == 0xfe)
-	this_bom = -1;
-
-	if((*source)[0] == 0xfe && (*source)[1] == 0xff)
-	this_bom = 1;
-
-	/* Skip the detected BOM. */
-	if(this_bom != 0)
+	while(*len >= 2)
 	{
+		int this_bom = 0;
+		if((*source)[0] == 0xff && (*source)[1] == 0xfe)
+			this_bom = -1;
+		if((*source)[0] == 0xfe && (*source)[1] == 0xff)
+			this_bom = 1;
+		if(this_bom == 0)
+			break;
+		/* Skip the detected BOM. */
+		last_bom = this_bom;
 		*source += 2;
 		*len    -= 2;
-		/* Check for following BOMs. The last one wins! */
-		further_bom = check_bom(source, len);
-		if(further_bom == 0) return this_bom; /* End of the recursion. */
-		else                 return further_bom;
 	}
-	else return 0;
+	return last_bom;
 }
 
 #define FULLPOINT(f,s) ( (((f)&0x3ff)<<10) + ((s)&0x3ff) + 0x10000 )

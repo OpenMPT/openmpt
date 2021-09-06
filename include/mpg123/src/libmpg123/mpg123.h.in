@@ -398,7 +398,7 @@ enum mpg123_feature_set
 	,MPG123_FEATURE_EQUALIZER            /**< tunable equalizer */
 	,MPG123_FEATURE_MOREINFO             /**< more info extraction (for frame analyzer) */
 	,MPG123_FEATURE_OUTPUT_FLOAT32      /**< 32 bit float output */
-	,MPG123_FEATURE_OUTPUT_FLOAT64      /**< 64 bit float output (usually never) */
+	,MPG123_FEATURE_OUTPUT_FLOAT64      /**< 64 bit float output (as of now: never!) */
 };
 
 #ifdef MPG123_ENUM_API

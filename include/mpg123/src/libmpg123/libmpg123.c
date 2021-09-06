@@ -36,11 +36,31 @@ mpg123_handle attribute_align_arg *mpg123_new(const char* decoder, int *error)
 	return mpg123_parnew(NULL, decoder, error);
 }
 
+// Runtime table calculation is back for specific uses that want minimal
+// binary size. It's hidden in handle initialization, not in mpg123_init(),
+// any user of such a minimal build should ensure that there is no trouble
+// from concurrency or just call mpg123_new() once in single-threaded context.
+
 /* ...the full routine with optional initial parameters to override defaults. */
 mpg123_handle attribute_align_arg *mpg123_parnew(mpg123_pars *mp, const char* decoder, int *error)
 {
 	mpg123_handle *fr = NULL;
 	int err = MPG123_OK;
+
+#ifdef RUNTIME_TABLES
+	static char tables_initialized = 0;
+	if(!tables_initialized)
+	{
+#ifndef NO_LAYER12
+		init_layer12(); /* inits also shared tables with layer1 */
+#endif
+#ifndef NO_LAYER3
+		init_layer3();
+#endif
+		init_costabs();
+		tables_initialized = 1;
+	}
+#endif
 
 	// Silly paranoia checks. Really silly, but libmpg123 has been ported to strange
 	// platforms in the past.
