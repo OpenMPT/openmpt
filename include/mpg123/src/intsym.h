@@ -164,7 +164,7 @@
 #define init_layer12 INT123_init_layer12
 #define init_layer12_table INT123_init_layer12_table
 #define init_layer12_stuff INT123_init_layer12_stuff
-#define prepare_decode_tables INT123_prepare_decode_tables
+#define init_costabs INT123_init_costabs
 #define make_decode_tables INT123_make_decode_tables
 #define make_decode_tables_mmx INT123_make_decode_tables_mmx
 #define init_layer3_gainpow2_mmx INT123_init_layer3_gainpow2_mmx

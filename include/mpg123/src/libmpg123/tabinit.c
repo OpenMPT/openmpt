@@ -9,9 +9,14 @@
 #include "mpg123lib_intern.h"
 #include "debug.h"
 
-// The precomputed cos tables.
+// The (normally precomputed) cos tables.
 #include "costabs.h"
-const real *pnts[] = { cos64,cos32,cos16,cos8,cos4 };
+#ifdef RUNTIME_TABLES
+#include "init_costabs.h"
+#else
+const
+#endif
+real *pnts[] = { cos64,cos32,cos16,cos8,cos4 };
 
 static const long intwinbase[] = {
      0,    -1,    -1,    -1,    -1,    -1,    -1,    -2,    -2,    -2,

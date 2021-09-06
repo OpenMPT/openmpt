@@ -7,6 +7,9 @@
 
 	most other tables are calculated on program start (which is (of course)	not ISO-conform)
 	Layer-3 huffman table is in huffman.h
+
+	Note: runtime computation of those other tables is optional now, and only for
+	floating point decoding.
 */
 
 
