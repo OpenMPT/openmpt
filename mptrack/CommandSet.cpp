@@ -751,6 +751,8 @@ static constexpr struct
 	{2024, kcSpeedIncrease, _T("Increase Ticks per Row")},
 	{2025, kcSpeedDecrease, _T("Decrease Ticks per Row")},
 	{2026, kcRenameSmpInsListItem, _T("Rename Item")},
+	{2027, kcShowChannelCtxMenu, _T("Show Channel Context (Right-Click) Menu")},
+	{2028, kcShowChannelPluginCtxMenu, _T("Show Channel Plugin Context (Right-Click) Menu")},
 };
 
 // Get command descriptions etc.. loaded up.

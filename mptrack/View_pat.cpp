@@ -4332,11 +4332,30 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcShowNoteProperties: ShowEditWindow(); return wParam;
 		case kcShowPatternProperties: OnPatternProperties(); return wParam;
 		case kcShowSplitKeyboardSettings:	SetSplitKeyboardSettings(); return wParam;
-		case kcShowEditMenu:	{
-									CPoint pt = GetPointFromPosition(m_Cursor);
-									OnRButtonDown(0, pt);
-								}
-								return wParam;
+		case kcShowEditMenu:
+			{
+				CPoint pt = GetPointFromPosition(m_Cursor);
+				pt.x += GetChannelWidth() / 2;
+				pt.y += GetRowHeight() / 2;
+				OnRButtonDown(0, pt);
+			}
+			return wParam;
+		case kcShowChannelCtxMenu:
+			{
+				CPoint pt = GetPointFromPosition(m_Cursor);
+				pt.x += GetChannelWidth() / 2;
+				pt.y = (m_szHeader.cy - m_szPluginHeader.cy) / 2;
+				OnRButtonDown(0, pt);
+			}
+			return wParam;
+		case kcShowChannelPluginCtxMenu:
+			{
+				CPoint pt = GetPointFromPosition(m_Cursor);
+				pt.x += GetChannelWidth() / 2;
+				pt.y = m_szHeader.cy - m_szPluginHeader.cy / 2;
+				OnRButtonDown(0, pt);
+			}
+			return wParam;
 		case kcPatternGoto:		OnEditGoto(); return wParam;
 
 		case kcNoteCut:			TempEnterNote(NOTE_NOTECUT); return wParam;
