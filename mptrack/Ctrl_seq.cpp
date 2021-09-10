@@ -201,11 +201,17 @@ bool COrderList::IsPlaying() const
 }
 
 
-ORDERINDEX COrderList::GetOrderFromPoint(const CRect &rect, const CPoint &pt) const
+ORDERINDEX COrderList::GetOrderFromPoint(const CPoint &pt) const
 {
 	if(m_cxFont)
-		return mpt::saturate_cast<ORDERINDEX>(m_nXScroll + (pt.x - rect.left) / m_cxFont);
+		return mpt::saturate_cast<ORDERINDEX>(m_nXScroll + pt.x / m_cxFont);
 	return 0;
+}
+
+
+CRect COrderList::GetRectFromOrder(ORDERINDEX ord) const
+{
+	return CRect{CPoint{(ord - m_nXScroll) * m_cxFont, 0}, CSize{m_cxFont, m_cyFont}};
 }
 
 
@@ -464,6 +470,18 @@ BOOL COrderList::PreTranslateMessage(MSG *pMsg)
 
 		if(ih->KeyEvent(kCtxViewPatternsNote, nChar, nRepCnt, nFlags, kT) != kcNull)
 			return true;  // Mapped to a command, no need to pass message on.
+
+		// Handle Application (menu) key
+		if(pMsg->message == WM_KEYDOWN && nChar == VK_APPS)
+		{
+			const auto selection = GetCurSel();
+			auto pt = (GetRectFromOrder(selection.firstOrd) | GetRectFromOrder(selection.lastOrd)).CenterPoint();
+			CRect clientRect;
+			GetClientRect(clientRect);
+			if(!clientRect.PtInRect(pt))
+				pt = clientRect.CenterPoint();
+			OnRButtonDown(0, pt);
+		}
 	}
 
 	return CWnd::PreTranslateMessage(pMsg);
@@ -906,7 +924,7 @@ void COrderList::OnLButtonDown(UINT nFlags, CPoint pt)
 			// mark pattern (+skip to)
 			const int oldXScroll = m_nXScroll;
 
-			ORDERINDEX ord = GetOrderFromPoint(rect, pt);
+			ORDERINDEX ord = GetOrderFromPoint(pt);
 			OrdSelection selection = GetCurSel();
 
 			// check if cursor is in selection - if it is, only react on MouseUp as the user might want to drag those orders
@@ -945,7 +963,7 @@ void COrderList::OnLButtonUp(UINT nFlags, CPoint pt)
 		ReleaseCapture();
 		if(rect.PtInRect(pt))
 		{
-			ORDERINDEX n = GetOrderFromPoint(rect, pt);
+			ORDERINDEX n = GetOrderFromPoint(pt);
 			const OrdSelection selection = GetCurSel();
 			if(n != ORDERINDEX_INVALID && n == m_nDropPos && (n < selection.firstOrd || n > selection.lastOrd))
 			{
@@ -1017,7 +1035,7 @@ void COrderList::OnMouseMove(UINT nFlags, CPoint pt)
 		if(rect.PtInRect(pt))
 		{
 			CSoundFile &sndFile = m_modDoc.GetSoundFile();
-			n = GetOrderFromPoint(rect, pt);
+			n = GetOrderFromPoint(pt);
 			if(n >= Order().size() && n >= sndFile.GetModSpecifications().ordersMax)
 				n = ORDERINDEX_INVALID;
 		}
@@ -1063,7 +1081,7 @@ void COrderList::OnRButtonDown(UINT nFlags, CPoint pt)
 	bool multiSelection = (m_nScrollPos2nd != ORDERINDEX_INVALID);
 
 	if(!multiSelection)
-		SetCurSel(GetOrderFromPoint(rect, pt), false, false, false);
+		SetCurSel(GetOrderFromPoint(pt), false, false, false);
 	SetFocus();
 	HMENU hMenu = ::CreatePopupMenu();
 	if(!hMenu)
@@ -1535,7 +1553,7 @@ void COrderList::QueuePattern(CPoint pt)
 	const PATTERNINDEX ignoreIndex = sndFile.Order.GetIgnoreIndex();
 	const PATTERNINDEX stopIndex = sndFile.Order.GetInvalidPatIndex();
 	const ORDERINDEX length = Order().GetLength();
-	ORDERINDEX order = GetOrderFromPoint(rect, pt);
+	ORDERINDEX order = GetOrderFromPoint(pt);
 
 	// If this is not a playable order item, find the next valid item.
 	while(order < length && (Order()[order] == ignoreIndex || Order()[order] == stopIndex))
@@ -1619,7 +1637,7 @@ INT_PTR COrderList::OnToolHitTest(CPoint point, TOOLINFO *pTI) const
 	GetClientRect(&rect);
 
 	pTI->hwnd = m_hWnd;
-	pTI->uId = GetOrderFromPoint(rect, point);
+	pTI->uId = GetOrderFromPoint(point);
 	pTI->rect = rect;
 	pTI->lpszText = LPSTR_TEXTCALLBACK;
 	return pTI->uId;

@@ -103,8 +103,17 @@ BOOL CNoteMapWnd::PreTranslateMessage(MSG* pMsg)
 	}
 	else if (pMsg->message == WM_KEYDOWN) //key is not a character
 	{
-		if (HandleNav(wParam))
+		if(HandleNav(wParam))
 			return true;
+
+		// Handle Application (menu) key
+		if(wParam == VK_APPS)
+		{
+			CRect clientRect;
+			GetClientRect(clientRect);
+			clientRect.bottom = clientRect.top + mpt::align_up(clientRect.Height(), m_cyFont);
+			OnRButtonDown(0, clientRect.CenterPoint());
+		}
 	}
 	else if (pMsg->message == WM_KEYUP) //stop notes on key release
 	{
