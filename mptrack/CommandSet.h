@@ -296,6 +296,8 @@ enum CommandID
 	kcChordEditor,
 	kcChangeLoopStatus,
 	kcShowEditMenu,
+	kcShowChannelCtxMenu,
+	kcShowChannelPluginCtxMenu,
 	kcTimeAtRow,
 	kcLockPlaybackToRows,
 	kcQuantizeSettings,
