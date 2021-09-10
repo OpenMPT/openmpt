@@ -111,7 +111,7 @@ BOOL CNoteMapWnd::PreTranslateMessage(MSG* pMsg)
 		{
 			CRect clientRect;
 			GetClientRect(clientRect);
-			clientRect.bottom = clientRect.top + mpt::align_up(clientRect.Height(), m_cyFont);
+			clientRect.bottom = clientRect.top + Util::AlignUp<int>(clientRect.Height(), m_cyFont);
 			OnRButtonDown(0, clientRect.CenterPoint());
 		}
 	}
