@@ -1150,6 +1150,8 @@ uintptr_t DMFUnpack(uint8 *psample, const uint8 *ibuf, const uint8 *ibufmax, uin
 
 	try
 	{
+		if(tree.nodes[0].left < 0 || tree.nodes[0].right < 0)
+			return tree.file.GetPosition();
 		for(uint32 i = 0; i < maxlen; i++)
 		{
 			int actnode = 0;
