@@ -2120,7 +2120,9 @@ void CSoundFile::ReadMixPluginChunk(FileReader &file, SNDMIXPLUGIN &plugin)
 
 			if(!memcmp(code, "DWRT", 4))
 			{
-				plugin.fDryRatio = dataChunk.ReadFloatLE();
+				plugin.fDryRatio = mpt::clamp(dataChunk.ReadFloatLE(), 0.0f, 1.0f);
+				if(!std::isnormal(plugin.fDryRatio))
+					plugin.fDryRatio = 0.0f;
 			} else if(!memcmp(code, "PROG", 4))
 			{
 				plugin.defaultProgram = dataChunk.ReadUint32LE();
