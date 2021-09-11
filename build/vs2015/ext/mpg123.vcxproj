@@ -264,7 +264,7 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4334 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -282,7 +282,7 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4334 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -307,7 +307,7 @@
       <FloatingPointModel>Fast</FloatingPointModel>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4334 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -333,7 +333,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FloatingPointModel>Fast</FloatingPointModel>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4334 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -352,7 +352,7 @@
       <AdditionalIncludeDirectories>..\..\..\include\mpg123\ports\MSVC++;..\..\..\include\mpg123\src\libmpg123;..\..\..\include\mpg123\src\compat;..\..\..\include\mpg123\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
-      <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4334 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -370,7 +370,7 @@
       <AdditionalIncludeDirectories>..\..\..\include\mpg123\ports\MSVC++;..\..\..\include\mpg123\src\libmpg123;..\..\..\include\mpg123\src\compat;..\..\..\include\mpg123\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
-      <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4334 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -396,7 +396,7 @@
       <FloatingPointModel>Fast</FloatingPointModel>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4334 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -422,7 +422,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FloatingPointModel>Fast</FloatingPointModel>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4334 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -443,7 +443,7 @@
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4334 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -462,7 +462,7 @@
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4334 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -486,7 +486,7 @@
       <FloatingPointModel>Fast</FloatingPointModel>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4334 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -511,7 +511,7 @@
       <StringPooling>true</StringPooling>
       <FloatingPointModel>Fast</FloatingPointModel>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4334 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
