@@ -57,6 +57,8 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 		restrictedSampleDataView = file.GetPinnedRawDataView(CalculateEncodedSize(sample.nLength));
 		sourceBuf = restrictedSampleDataView.data();
 		fileSize = restrictedSampleDataView.size();
+		if(sourceBuf == nullptr)
+			return 0;
 	} else
 	{
 		// Only DMF sample compression encoding should fall in this case,
