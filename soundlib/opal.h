@@ -634,6 +634,8 @@ Opal::Channel::Channel() {
     ModulationType = 0;
     ChannelPair = 0;
     Enable = true;
+    LeftEnable = true;
+    RightEnable = true;
 }
 
 
