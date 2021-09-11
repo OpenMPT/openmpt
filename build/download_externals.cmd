@@ -73,7 +73,7 @@ call :download_and_unpack "winamp"    "http://download.nullsoft.com/winamp/plugi
 
 call :download_and_unpack "xmplay"    "https://www.un4seen.com/files/xmp-sdk.zip"                                  "xmp-sdk.zip"                        "."                "-" || goto error
 
-call :download_and_unpack "ASIOSDK2"  "https://www.steinberg.net/sdk_downloads/asiosdk2.3.zip"                     "asiosdk2.3.zip"                     "ASIOSDK2.3"       "-" || goto error
+call :download_and_unpack "ASIOSDK2"  "https://web.archive.org/web/20191011060157if_/https://www.steinberg.net/sdk_downloads/asiosdk2.3.zip"                     "asiosdk2.3.zip"                     "ASIOSDK2.3"       "-" || goto error
 
 call :download_and_unpack "vstsdk2.4" "https://www.steinberg.net/sdk_downloads/vstsdk367_03_03_2017_build_352.zip" "vstsdk367_03_03_2017_build_352.zip" "VST_SDK\VST2_SDK" "-" || goto error
 rmdir /s /q include\VST_SDK || goto error
