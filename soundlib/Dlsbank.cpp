@@ -587,8 +587,6 @@ const DLSINSTRUMENT *CDLSBank::FindInstrument(bool isDrum, uint32 bank, uint32 p
 {
 	if(m_Instruments.empty())
 		return nullptr;
-	uint8 smallestRegion = uint8_max;
-	uint32 bestMatch = uint32_max;
 	for (uint32 iIns = 0; iIns < m_Instruments.size(); iIns++)
 	{
 		const DLSINSTRUMENT &dlsIns = m_Instruments[iIns];
@@ -603,16 +601,15 @@ const DLSINSTRUMENT *CDLSBank::FindInstrument(bool isDrum, uint32 bank, uint32 p
 					{
 						if(region.nWaveLink == Util::MaxValueOfType(region.nWaveLink))
 							continue;
-						const uint8 regionSize = region.uKeyMax - region.uKeyMin;
-						if(regionSize > smallestRegion)
+						if(region.fuOptions & DLSREGION_ISGLOBAL)
 							continue;
 
-						if((!key) || (key >= 0x80)
-						   || ((key >= region.uKeyMin)
-							   && (key <= region.uKeyMax)))
+						if((!key || key >= 0x80)
+						   || (key >= region.uKeyMin && key <= region.uKeyMax))
 						{
-							smallestRegion = regionSize;
-							bestMatch = iIns;
+							if(pInsNo)
+								*pInsNo = iIns;
+							return &dlsIns;
 						}
 					}
 				}
@@ -628,9 +625,7 @@ const DLSINSTRUMENT *CDLSBank::FindInstrument(bool isDrum, uint32 bank, uint32 p
 		}
 	}
 
-	if(pInsNo && bestMatch != uint32_max)
-		*pInsNo = bestMatch;
-	return bestMatch != uint32_max ? &m_Instruments[bestMatch] : nullptr;
+	return nullptr;
 }
 
 
@@ -1433,6 +1428,7 @@ bool CDLSBank::Open(FileReader file)
 						{
 							DLSINSTRUMENT *pDlsIns = &m_Instruments[nInsDef];
 							//Log("Instrument %d:\n", nInsDef);
+							pDlsIns->Regions.push_back({});
 							UpdateInstrumentDefinition(pDlsIns, subData);
 							nInsDef++;
 						}
@@ -1534,19 +1530,15 @@ uint32 CDLSBank::GetRegionFromKey(uint32 nIns, uint32 nKey) const
 	if(nIns >= m_Instruments.size())
 		return 0;
 	const DLSINSTRUMENT &dlsIns = m_Instruments[nIns];
-	uint8 smallestRegion = uint8_max;
-	uint32 region = 0;
 	for(uint32 rgn = 0; rgn < static_cast<uint32>(dlsIns.Regions.size()); rgn++)
 	{
 		if(nKey < dlsIns.Regions[rgn].uKeyMin || nKey > dlsIns.Regions[rgn].uKeyMax)
 			continue;
-		const uint8 regionSize = dlsIns.Regions[rgn].uKeyMax - dlsIns.Regions[rgn].uKeyMin;
-		if(regionSize > smallestRegion)
+		if(dlsIns.Regions[rgn].fuOptions & DLSREGION_ISGLOBAL)
 			continue;
-		region = rgn;
-		smallestRegion = regionSize;
+		return rgn;
 	}
-	return region;
+	return 0;
 }
 
 
@@ -2117,6 +2109,7 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, ui
 			pIns->VolEnv[3] = EnvelopeNode(pIns->VolEnv[2].tick * 2u, ENVELOPE_MIN);	// 1 second max. for drums
 		}
 	}
+	pIns->Sanitize(MOD_TYPE_MPT);
 	pIns->Convert(MOD_TYPE_MPT, sndFile.GetType());
 	return true;
 }
