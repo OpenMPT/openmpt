@@ -72,6 +72,7 @@ BEGIN_MESSAGE_MAP(COptionsColors, CPropertyPage)
 	ON_COMMAND(IDC_RADIO2,				&COptionsColors::OnSettingsChanged)
 	ON_COMMAND(IDC_RADIO3,				&COptionsColors::OnSettingsChanged)
 	ON_COMMAND(IDC_RADIO4,				&COptionsColors::OnSettingsChanged)
+	ON_COMMAND(IDC_RADIO5,				&COptionsColors::OnSettingsChanged)
 END_MESSAGE_MAP()
 
 
