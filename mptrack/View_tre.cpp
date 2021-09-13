@@ -347,7 +347,7 @@ BOOL CModTree::PreTranslateMessage(MSG *pMsg)
 			// Backspace: Go up one directory
 			if(GetParentRootItem(GetSelectedItem()) == m_hInsLib || IsSampleBrowser())
 			{
-				InstrumentLibraryChDir(P_(".."), false);
+				InstrumentLibraryChDir(m_SongFileName.empty() ? P_("..") : m_InstrLibPath, false);
 				return TRUE;
 			}
 			break;
@@ -3158,6 +3158,8 @@ void CModTree::OnItemRightClick(HTREEITEM hItem, CPoint pt)
 			case MODITEM_HDR_INSTRUMENTLIB:
 				if(!IsSampleBrowser())
 					break;
+				if(!m_SongFileName.empty())
+					AppendMenu(hMenu, MF_STRING, ID_MODTREE_CLOSE, _T("&Close Song"));
 				[[fallthrough]];
 			case MODITEM_INSLIB_FOLDER:
 				nDefault = ID_MODTREE_EXECUTE;
@@ -4077,6 +4079,11 @@ bool CModTree::IsItemExpanded(HTREEITEM hItem)
 void CModTree::OnCloseItem()
 {
 	HTREEITEM hItem = GetSelectedItem();
+	if(hItem == m_hInsLib && !m_SongFileName.empty())
+	{
+		InstrumentLibraryChDir(m_InstrLibPath, false);
+		return;
+	}
 	CModDoc *pModDoc = GetDocumentFromItem(hItem);
 	if(pModDoc == nullptr)
 		return;
