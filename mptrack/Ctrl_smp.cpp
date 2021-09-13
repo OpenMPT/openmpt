@@ -1261,7 +1261,7 @@ static constexpr std::pair<const mpt::uchar *, const mpt::uchar *> SampleFormats
 
 static mpt::ustring ConstructFileFilter(bool includeRaw)
 {
-	mpt::ustring s = U_("All Samples|");
+	mpt::ustring s = U_("All Samples (*.wav,*.flac,*.xi,*.its,*.s3i,*.sbi,...)|");
 	bool first = true;
 	for(const auto &[name, exts] : SampleFormats)
 	{
