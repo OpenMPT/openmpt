@@ -347,7 +347,7 @@ BOOL CModTree::PreTranslateMessage(MSG *pMsg)
 			// Backspace: Go up one directory
 			if(GetParentRootItem(GetSelectedItem()) == m_hInsLib || IsSampleBrowser())
 			{
-				InstrumentLibraryChDir(m_SongFileName.empty() ? P_("..") : m_InstrLibPath, false);
+				InstrumentLibraryChDir(P_(".."), !m_SongFileName.empty());
 				return TRUE;
 			}
 			break;
@@ -791,11 +791,11 @@ void CModTree::RefreshInstrumentLibrary()
 	{
 		selectedName = GetItemText(GetSelectedItem());
 	}
-	if(!m_InstrLibHighlightPath.empty() && (!IsSampleBrowser() || TrackerSettings::Instance().showDirsInSampleBrowser))
+	if(!m_InstrLibHighlightPath.empty())
 	{
 		selectedName = m_InstrLibHighlightPath.ToCString();
 	}
-	m_InstrLibHighlightPath = mpt::PathString();
+	m_InstrLibHighlightPath = {};
 	EmptyInstrumentLibrary();
 	FillInstrumentLibrary(selectedName);
 	auto selectedItem = GetSelectedItem();
@@ -2049,7 +2049,7 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 					return IMAGE_SAMPLES;
 			} else if(mpt::contains(m_modExtensions, ext))
 			{
-				if(showDirs)
+				if(showDirs || m_showAllFiles)
 					return IMAGE_FOLDERSONG;
 			} else if(!extPS.empty() && mpt::contains(m_MediaFoundationExtensions, extPS))
 			{
@@ -2369,8 +2369,9 @@ void CModTree::InstrumentLibraryChDir(mpt::PathString dir, bool isSong)
 	BeginWaitCursor();
 
 	bool ok = false;
+	const bool goUp = (dir == P_(".."));
 	m_previousPath = {};
-	if(isSong)
+	if(isSong && !goUp)
 	{
 		ok = m_pDataTree->InsLibSetFullPath(m_InstrLibPath, dir);
 		if(ok)
@@ -2380,18 +2381,26 @@ void CModTree::InstrumentLibraryChDir(mpt::PathString dir, bool isSong)
 		}
 	} else
 	{
-		if(dir == P_(".."))
+		if(goUp)
 		{
-			// Go one dir up.
-			mpt::winstring prevDir = m_InstrLibPath.GetPath().AsNative();
-			mpt::winstring::size_type pos = prevDir.find_last_of(_T("\\/"), prevDir.length() - 2);
-			if(pos != mpt::winstring::npos)
+			if(isSong)
 			{
-				m_InstrLibHighlightPath = mpt::PathString::FromNative(prevDir.substr(pos + 1, prevDir.length() - pos - 2));  // Highlight previously accessed directory
-				prevDir = prevDir.substr(0, pos + 1);
+				// Leave song
+				m_InstrLibHighlightPath = std::move(m_pDataTree->m_SongFileName);
+				dir = m_InstrLibPath;
+			} else
+			{
+				// Go one dir up.
+				mpt::winstring prevDir = m_InstrLibPath.GetPath().AsNative();
+				mpt::winstring::size_type pos = prevDir.find_last_of(_T("\\/"), prevDir.length() - 2);
+				if(pos != mpt::winstring::npos)
+				{
+					m_InstrLibHighlightPath = mpt::PathString::FromNative(prevDir.substr(pos + 1, prevDir.length() - pos - 2));  // Highlight previously accessed directory
+					prevDir = prevDir.substr(0, pos + 1);
+				}
+				m_previousPath = m_InstrLibHighlightPath;
+				dir = mpt::PathString::FromNative(prevDir);
 			}
-			m_previousPath = m_InstrLibHighlightPath;
-			dir = mpt::PathString::FromNative(prevDir);
 		} else
 		{
 			// Drives are formatted like "E:\", folders are just folder name without slash.
@@ -2484,7 +2493,7 @@ bool CModTree::GetDropInfo(DRAGONDROP &dropInfo, mpt::PathString &fullPath)
 		{
 			fullPath = InsLibGetFullPath(m_hItemDrag);
 			dropInfo.dropType = DRAGONDROP_SOUNDFILE;
-			dropInfo.dropParam = (LPARAM)&fullPath;
+			dropInfo.dropParam = reinterpret_cast<uintptr_t>(&fullPath);
 		}
 		break;
 
@@ -2498,7 +2507,7 @@ bool CModTree::GetDropInfo(DRAGONDROP &dropInfo, mpt::PathString &fullPath)
 			{
 				fullPath = midiLib[dropInfo.dropItem & 0xFF];
 				dropInfo.dropType = DRAGONDROP_MIDIINSTR;
-				dropInfo.dropParam = (LPARAM)&fullPath;
+				dropInfo.dropParam = reinterpret_cast<uintptr_t>(&fullPath);
 			}
 		}
 		break;
@@ -2508,7 +2517,7 @@ bool CModTree::GetDropInfo(DRAGONDROP &dropInfo, mpt::PathString &fullPath)
 		dropInfo.sndFile = nullptr;
 		dropInfo.dropType = DRAGONDROP_SONG;
 		dropInfo.dropItem = 0;
-		dropInfo.dropParam = (LPARAM)&fullPath;
+		dropInfo.dropParam = reinterpret_cast<uintptr_t>(&fullPath);
 		break;
 
 	case MODITEM_DLSBANK_INSTRUMENT:
@@ -2519,7 +2528,7 @@ bool CModTree::GetDropInfo(DRAGONDROP &dropInfo, mpt::PathString &fullPath)
 			dropInfo.dropItem = item.GetBankIndex();  // bank #
 			// Melodic: (Instrument)
 			// Drums:   (0x80000000) | (Region << 16) | (Instrument)
-			dropInfo.dropParam = (LPARAM)((m_itemDrag.val1 & (DLS_TYPEPERC | DLS_REGIONMASK | DLS_INSTRMASK)));
+			dropInfo.dropParam = (m_itemDrag.val1 & (DLS_TYPEPERC | DLS_REGIONMASK | DLS_INSTRMASK));
 		}
 		break;
 	}
@@ -4081,7 +4090,7 @@ void CModTree::OnCloseItem()
 	HTREEITEM hItem = GetSelectedItem();
 	if(hItem == m_hInsLib && !m_SongFileName.empty())
 	{
-		InstrumentLibraryChDir(m_InstrLibPath, false);
+		InstrumentLibraryChDir(P_(".."), true);
 		return;
 	}
 	CModDoc *pModDoc = GetDocumentFromItem(hItem);
