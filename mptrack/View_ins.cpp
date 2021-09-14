@@ -2069,7 +2069,8 @@ void CViewInstrument::OnDropFiles(HDROP hDropInfo)
 				if(SendCtrlMessage(CTRLMSG_INS_OPENFILE, (LPARAM)&file) && f < nFiles - 1)
 				{
 					// Insert more instrument slots
-					SendCtrlMessage(IDC_INSTRUMENT_NEW);
+					if(!SendCtrlMessage(CTRLMSG_INS_NEWINSTRUMENT))
+						break;
 				}
 			}
 		}
@@ -2111,24 +2112,35 @@ BOOL CViewInstrument::OnDragonDrop(BOOL doDrop, const DRAGONDROP *dropInfo)
 		canDrop = !dropInfo->GetPath().empty();
 		break;
 	}
-	if((!canDrop) || (!doDrop))
+	
+	const bool insertNew = CMainFrame::GetInputHandler()->ShiftPressed() && sndFile.GetNumInstruments() > 0;
+	if(insertNew && !sndFile.CanAddMoreInstruments())
+		canDrop = false;
+
+	if(!canDrop || !doDrop)
 		return canDrop;
-	if((!sndFile.GetNumInstruments()) && sndFile.GetModSpecifications().instrumentsMax > 0)
-	{
+
+	if(!sndFile.GetNumInstruments() && sndFile.GetModSpecifications().instrumentsMax > 0)
 		SendCtrlMessage(CTRLMSG_INS_NEWINSTRUMENT);
-	}
-	if((!m_nInstrument) || (m_nInstrument > sndFile.GetNumInstruments()))
+	if(!m_nInstrument || m_nInstrument > sndFile.GetNumInstruments())
 		return FALSE;
+
 	// Do the drop
-	bool update = false;
+	bool modified = false;
 	BeginWaitCursor();
 	switch(dropInfo->dropType)
 	{
 	case DRAGONDROP_INSTRUMENT:
 		if(dropInfo->sndFile == &sndFile)
+		{
 			SendCtrlMessage(CTRLMSG_SETCURRENTINSTRUMENT, dropInfo->dropItem);
-		else
-			SendCtrlMessage(CTRLMSG_INS_SONGDROP, (LPARAM)dropInfo);
+		} else
+		{
+			if(insertNew && !SendCtrlMessage(CTRLMSG_INS_NEWINSTRUMENT))
+				canDrop = false;
+			else
+				SendCtrlMessage(CTRLMSG_INS_SONGDROP, reinterpret_cast<LPARAM>(dropInfo));
+		}
 		break;
 
 	case DRAGONDROP_MIDIINSTR:
@@ -2156,18 +2168,21 @@ BOOL CViewInstrument::OnDragonDrop(BOOL doDrop, const DRAGONDROP *dropInfo)
 				canDrop = false;
 				if(pDlsIns)
 				{
-					CriticalSection cs;
-					modDoc->GetInstrumentUndo().PrepareUndo(m_nInstrument, "Replace Instrument");
-					canDrop = dlsbank.ExtractInstrument(sndFile, m_nInstrument, nIns, nRgn);
+					if(!insertNew || SendCtrlMessage(CTRLMSG_INS_NEWINSTRUMENT))
+					{
+						CriticalSection cs;
+						modDoc->GetInstrumentUndo().PrepareUndo(m_nInstrument, "Replace Instrument");
+						canDrop = modified = dlsbank.ExtractInstrument(sndFile, m_nInstrument, nIns, nRgn);
+					}
 				}
-				update = true;
 				break;
 			}
 		}
 		// Instrument file -> fall through
 		[[fallthrough]];
 	case DRAGONDROP_SOUNDFILE:
-		SendCtrlMessage(CTRLMSG_INS_OPENFILE, dropInfo->dropParam);
+		if(!insertNew || SendCtrlMessage(CTRLMSG_INS_NEWINSTRUMENT))
+			SendCtrlMessage(CTRLMSG_INS_OPENFILE, dropInfo->dropParam);
 		break;
 
 	case DRAGONDROP_DLS:
@@ -2185,15 +2200,16 @@ BOOL CViewInstrument::OnDragonDrop(BOOL doDrop, const DRAGONDROP *dropInfo)
 				nRgn = pDLSBank->GetRegionFromKey(nIns, 60);
 			}
 
-			CriticalSection cs;
-
-			modDoc->GetInstrumentUndo().PrepareUndo(m_nInstrument, "Replace Instrument");
-			canDrop = pDLSBank->ExtractInstrument(sndFile, m_nInstrument, nIns, nRgn);
-			update = true;
+			if(!insertNew || SendCtrlMessage(CTRLMSG_INS_NEWINSTRUMENT))
+			{
+				CriticalSection cs;
+				modDoc->GetInstrumentUndo().PrepareUndo(m_nInstrument, "Replace Instrument");
+				canDrop = modified = pDLSBank->ExtractInstrument(sndFile, m_nInstrument, nIns, nRgn);
+			}
 		}
 		break;
 	}
-	if(update)
+	if(modified)
 	{
 		SetModified(InstrumentHint().Info().Envelope().Names(), true);
 		GetDocument()->UpdateAllViews(nullptr, SampleHint().Info().Names().Data(), this);

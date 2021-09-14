@@ -369,7 +369,8 @@ bool CCtrlSamples::SetCurrentSample(SAMPLEINDEX nSmp, LONG lZoom, bool bUpdNum)
 			}
 		}
 	}
-	PostViewMessage(VIEWMSG_SETCURRENTSAMPLE, (lZoom << 16) | m_nSample);
+	static_assert(MAX_SAMPLES < uint16_max);
+	SendViewMessage(VIEWMSG_SETCURRENTSAMPLE, (lZoom << 16) | m_nSample);
 	UnlockControls();
 	return true;
 }
@@ -455,19 +456,11 @@ LRESULT CCtrlSamples::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		OnNextInstrument();
 		break;
 
-	case CTRLMSG_SMP_OPENFILE_NEW:
-		if(!InsertSample(false))
-			break;
-		[[fallthrough]];
 	case CTRLMSG_SMP_OPENFILE:
 		if(lParam)
 			return OpenSample(*reinterpret_cast<const mpt::PathString *>(lParam));
 		break;
 
-	case CTRLMSG_SMP_SONGDROP_NEW:
-		if(!InsertSample(false))
-			break;
-		[[fallthrough]];
 	case CTRLMSG_SMP_SONGDROP:
 		if(lParam)
 		{
@@ -488,6 +481,9 @@ LRESULT CCtrlSamples::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 	case CTRLMSG_SMP_INITOPL:
 		OnInitOPLInstrument();
 		break;
+
+	case CTRLMSG_SMP_NEWSAMPLE:
+		return InsertSample(false) ? 1 : 0;
 
 	case IDC_SAMPLE_REVERSE:
 		OnReverse();

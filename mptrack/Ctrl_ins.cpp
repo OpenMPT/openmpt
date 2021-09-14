@@ -1149,7 +1149,7 @@ BOOL CCtrlInstruments::SetCurrentInstrument(UINT nIns, BOOL bUpdNum)
 		// Volume ramping (attack)
 		m_SliderAttack.Invalidate(FALSE);
 	}
-	PostViewMessage(VIEWMSG_SETCURRENTINSTRUMENT, m_nInstrument);
+	SendViewMessage(VIEWMSG_SETCURRENTINSTRUMENT, m_nInstrument);
 	UnlockControls();
 
 	return TRUE;
@@ -1217,19 +1217,11 @@ LRESULT CCtrlInstruments::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		OnNextInstrument();
 		break;
 
-	case CTRLMSG_INS_OPENFILE_NEW:
-		if(!InsertInstrument(false))
-			break;
-		[[fallthrough]];
 	case CTRLMSG_INS_OPENFILE:
 		if(lParam)
 			return OpenInstrument(*reinterpret_cast<const mpt::PathString *>(lParam));
 		break;
 
-	case CTRLMSG_INS_SONGDROP_NEW:
-		if(!InsertInstrument(false))
-			break;
-		[[fallthrough]];
 	case CTRLMSG_INS_SONGDROP:
 		if(lParam)
 		{
@@ -1240,8 +1232,7 @@ LRESULT CCtrlInstruments::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		break;
 
 	case CTRLMSG_INS_NEWINSTRUMENT:
-		OnInstrumentNew();
-		break;
+		return InsertInstrument(false) ? 1 : 0;
 
 	case CTRLMSG_SETCURRENTINSTRUMENT:
 		SetCurrentInstrument(static_cast<INSTRUMENTINDEX>(lParam));

@@ -3085,7 +3085,8 @@ void CViewSample::OnDropFiles(HDROP hDropInfo)
 			if(SendCtrlMessage(CTRLMSG_SMP_OPENFILE, (LPARAM)&file) && f < nFiles - 1)
 			{
 				// Insert more sample slots
-				SendCtrlMessage(IDC_SAMPLE_NEW);
+				if(!SendCtrlMessage(CTRLMSG_SMP_NEWSAMPLE))
+					break;
 			}
 		}
 	}
@@ -3124,17 +3125,30 @@ BOOL CViewSample::OnDragonDrop(BOOL doDrop, const DRAGONDROP *dropInfo)
 		canDrop = !dropInfo->GetPath().empty();
 		break;
 	}
-	if (!canDrop || !doDrop) return canDrop;
+	
+	const bool insertNew = CMainFrame::GetInputHandler()->ShiftPressed();
+	if(insertNew && !sndFile.CanAddMoreSamples())
+		canDrop = false;
+	
+	if(!canDrop || !doDrop)
+		return canDrop;
+
 	// Do the drop
 	BeginWaitCursor();
-	bool update = false;
+	bool modified = false;
 	switch(dropInfo->dropType)
 	{
 	case DRAGONDROP_SAMPLE:
-		if (dropInfo->sndFile == &sndFile)
+		if(dropInfo->sndFile == &sndFile)
+		{
 			SendCtrlMessage(CTRLMSG_SETCURRENTINSTRUMENT, dropInfo->dropItem);
-		else
-			SendCtrlMessage(CTRLMSG_SMP_SONGDROP, (LPARAM)dropInfo);
+		} else
+		{
+			if(insertNew && !SendCtrlMessage(CTRLMSG_SMP_NEWSAMPLE))
+				canDrop = false;
+			else
+				SendCtrlMessage(CTRLMSG_SMP_SONGDROP, (LPARAM)dropInfo);
+		}
 		break;
 
 	case DRAGONDROP_MIDIINSTR:
@@ -3160,18 +3174,20 @@ BOOL CViewSample::OnDragonDrop(BOOL doDrop, const DRAGONDROP *dropInfo)
 				canDrop = FALSE;
 				if (pDlsIns)
 				{
-					CriticalSection cs;
-
-					modDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Replace");
-					canDrop = dlsbank.ExtractSample(sndFile, m_nSample, nIns, nRgn);
+					if(!insertNew || SendCtrlMessage(CTRLMSG_SMP_NEWSAMPLE))
+					{
+						CriticalSection cs;
+						modDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Replace");
+						canDrop = modified = dlsbank.ExtractSample(sndFile, m_nSample, nIns, nRgn);
+					}
 				}
-				update = true;
 				break;
 			}
 		}
 		[[fallthrough]];
 	case DRAGONDROP_SOUNDFILE:
-		SendCtrlMessage(CTRLMSG_SMP_OPENFILE, dropInfo->dropParam);
+		if(!insertNew || SendCtrlMessage(CTRLMSG_SMP_NEWSAMPLE))
+			SendCtrlMessage(CTRLMSG_SMP_OPENFILE, dropInfo->dropParam);
 		break;
 
 	case DRAGONDROP_DLS:
@@ -3188,16 +3204,16 @@ BOOL CViewSample::OnDragonDrop(BOOL doDrop, const DRAGONDROP *dropInfo)
 			{
 				nRgn = pDLSBank->GetRegionFromKey(nIns, 60);
 			}
-			CriticalSection cs;
-
-			modDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Replace");
-			canDrop = pDLSBank->ExtractSample(sndFile, m_nSample, nIns, nRgn);
-
-			update = true;
+			if(!insertNew || SendCtrlMessage(CTRLMSG_SMP_NEWSAMPLE))
+			{
+				CriticalSection cs;
+				modDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Replace");
+				canDrop = modified = pDLSBank->ExtractSample(sndFile, m_nSample, nIns, nRgn);
+			}
 		}
 		break;
 	}
-	if(update)
+	if(modified)
 	{
 		SetModified(SampleHint().Info().Data().Names(), true, false);
 	}
@@ -3233,11 +3249,11 @@ void CViewSample::OnZoomOnSel()
 		}
 	}
 
-	SendCtrlMessage(CTRLMSG_SMP_SETZOOM, zoom);
-	if (zoom)
+	if(zoom)
 	{
 		SetZoom(zoom, m_dwBeginSel + selLength / 2);
 	}
+	SendCtrlMessage(CTRLMSG_SMP_SETZOOM, zoom);
 }
 
 

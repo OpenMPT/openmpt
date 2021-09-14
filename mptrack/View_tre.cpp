@@ -273,50 +273,30 @@ BOOL CModTree::PreTranslateMessage(MSG *pMsg)
 				{
 					if(CMainFrame::GetInputHandler()->CtrlPressed())
 					{
-						if(IsSampleBrowser())
+						const ModItem modItem = GetModItem(hItem);
+						static constexpr ModItemType instrumentTypes[] = {MODITEM_INSLIB_SAMPLE, MODITEM_INSLIB_INSTRUMENT, MODITEM_MIDIINSTRUMENT, MODITEM_MIDIPERCUSSION, MODITEM_DLSBANK_INSTRUMENT};
+						if(mpt::contains(instrumentTypes, modItem.type))
 						{
 							// Ctrl+Enter: Load sample into currently selected sample or instrument slot
+							// Additionally pressing Shift creates a new sample or instrument slot. Shift key is handled in the Drag&drop handler
 							CModScrollView *view = static_cast<CModScrollView *>(CMainFrame::GetMainFrame()->GetActiveView());
-							const ModItem modItem = GetModItem(hItem);
-							if(view && (modItem.type == MODITEM_INSLIB_SAMPLE || modItem.type == MODITEM_INSLIB_INSTRUMENT))
+							if(view)
 							{
 								const char *className = view->GetRuntimeClass()->m_lpszClassName;
 								const bool isSampleView = !strcmp("CViewSample", className);
 								const bool isInstrumentView = !strcmp("CViewInstrument", className);
-								const bool createNew = CMainFrame::GetInputHandler()->ShiftPressed();
-								auto msg = CTRLMSG_BASE;
-								const void *lparam = nullptr;
 								mpt::PathString fullPath = InsLibGetFullPath(hItem);
 								DRAGONDROP dropInfo;
-
-								if(!m_SongFileName.empty())
+								m_hItemDrag = hItem;
+								m_itemDrag = modItem;
+								if((isSampleView || isInstrumentView) && GetDropInfo(dropInfo, fullPath))
 								{
-									m_hItemDrag = hItem;
-									m_itemDrag = modItem;
-									if(GetDropInfo(dropInfo, fullPath))
-									{
-										lparam = &dropInfo;
-										if(isSampleView)
-											msg = createNew ? CTRLMSG_SMP_SONGDROP_NEW : CTRLMSG_SMP_SONGDROP;
-										else if(isInstrumentView)
-											msg = createNew ? CTRLMSG_INS_SONGDROP_NEW : CTRLMSG_INS_SONGDROP;
-									}
-								} else
-								{
-									lparam = &fullPath;
-									if(isSampleView)
-										msg = createNew ? CTRLMSG_SMP_OPENFILE_NEW : CTRLMSG_SMP_OPENFILE;
-									else if(isInstrumentView)
-										msg = createNew ? CTRLMSG_INS_OPENFILE_NEW : CTRLMSG_INS_OPENFILE;
-								}
-								if(msg != CTRLMSG_BASE)
-								{
-									view->SendCtrlMessage(msg, reinterpret_cast<LPARAM>(lparam));
+									view->SendMessage(WM_MOD_DRAGONDROPPING, TRUE, reinterpret_cast<LPARAM>(&dropInfo));
 									// In case a message box like "create instrument for sample?" showed up
 									SetFocus();
 								}
 							}
-						} else
+						} else if(!IsSampleBrowser())
 						{
 							// Ctrl+Enter: Edit item
 							EditLabel(hItem);
