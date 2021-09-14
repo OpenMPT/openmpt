@@ -1900,9 +1900,18 @@ void CViewSample::OnMouseMove(UINT flags, CPoint point)
 				else
 					s = _T("Beyond offset range");
 				pMainFrm->SetInfoText(s);
+
+				double linear;
+				SmpLength offset = x * sample.GetNumChannels() + (point.y - m_timelineHeight) * sample.GetNumChannels() / (m_rcClient.Height() - m_timelineHeight);
+				if(sample.uFlags[CHN_16BIT])
+					linear = sample.sample16()[offset] / 32768.0;
+				else
+					linear = sample.sample8()[offset] / 128.0;
+				pMainFrm->SetXInfoText(MPT_TFORMAT("Value At Cursor: {}% / {}")(mpt::tfmt::fix(linear, 3), CModDoc::LinearToDecibels(std::abs(linear), 1.0)).c_str());
 			} else
 			{
 				pMainFrm->SetInfoText(_T(""));
+				pMainFrm->SetXInfoText(_T(""));
 			}
 		}
 	} else
