@@ -960,7 +960,7 @@ static bool ConvertDSP(const SymEvent event, MIDIMacroConfigData::Macro &macro, 
 		return true;
 	} else if(event.command == SymEvent::DSPEcho)
 	{
-		const uint8 type = ((event.note < 5) ? event.note : 0);
+		const uint8 type = (event.note < 5) ? event.note : 0;
 		const uint8 length = (event.param < 128) ? event.param : 127;
 		const uint8 feedback = (event.inst < 128) ? event.inst : 127;
 		mpt::String::WriteAutoBuf(macro) = MPT_AFORMAT("F0F080{} F0F081{} F0F082{}")(mpt::afmt::HEX0<2>(type), mpt::afmt::HEX0<2>(length), mpt::afmt::HEX0<2>(feedback));
@@ -1088,7 +1088,7 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 		case ChunkType::StereoDetune:
 		case ChunkType::StereoPhase:
 			isSymphoniePro = true;
-			if(uint32 val = file.ReadUint32BE(); (chunkType == ChunkType::StereoDetune || chunkType == ChunkType::StereoPhase) && val)
+			if(uint32 val = file.ReadUint32BE(); val != 0)
 				AddToLog(LogWarning, U_("Stereo Detune / Stereo Phase is not supported"));
 			break;
 
