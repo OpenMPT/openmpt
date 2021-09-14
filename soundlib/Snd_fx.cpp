@@ -1664,7 +1664,7 @@ void CSoundFile::NoteChange(ModChannel &chn, int note, bool bPorta, bool bResetE
 			}
 		}
 
-		// IT compatibility tentative fix: Clear channel note memory.
+		// IT compatibility tentative fix: Clear channel note memory (TRANCE_N.IT by A3F).
 		if(m_playBehaviour[kITClearOldNoteAfterCut])
 		{
 			chn.nNote = chn.nNewNote = NOTE_NONE;
@@ -3406,13 +3406,13 @@ bool CSoundFile::ProcessEffects()
 		case CMD_DBMECHO:
 			if(m_PlayState.m_nTickCount == 0)
 			{
-				uint32 chns = (param >> 4), enable = (param & 0x0F);
-				if(chns > 1 || enable > 2)
+				uint32 echoType = (param >> 4), enable = (param & 0x0F);
+				if(echoType > 2 || enable > 1)
 				{
 					break;
 				}
 				CHANNELINDEX firstChn = nChn, lastChn = nChn;
-				if(chns == 1)
+				if(echoType == 1)
 				{
 					firstChn = 0;
 					lastChn = m_nChannels - 1;
