@@ -2464,6 +2464,7 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcTempoDecreaseFine:
 		case kcSpeedIncrease:
 		case kcSpeedDecrease:
+		case kcViewToggle:
 			{
 				CModDoc *modDoc = GetActiveDoc();
 				if (modDoc)

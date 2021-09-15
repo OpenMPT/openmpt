@@ -307,9 +307,18 @@ int CChildFrame::GetSplitterHeight()
 };
 
 
+LRESULT CChildFrame::SendCtrlMessage(UINT uMsg, LPARAM lParam) const
+{
+	if(m_hWndCtrl)
+		return ::SendMessage(m_hWndCtrl, WM_MOD_CTRLMSG, uMsg, lParam);
+	return 0;
+}
+
+
 LRESULT CChildFrame::SendViewMessage(UINT uMsg, LPARAM lParam) const
 {
-	if (m_hWndView)	return ::SendMessage(m_hWndView, WM_MOD_VIEWMSG, uMsg, lParam);
+	if(m_hWndView)
+		return ::SendMessage(m_hWndView, WM_MOD_VIEWMSG, uMsg, lParam);
 	return 0;
 }
 
@@ -459,7 +468,16 @@ void CChildFrame::DeserializeView(FileReader &file)
 		}
 		GetModControlView()->PostMessage(WM_MOD_ACTIVATEVIEW, pageDlg, (LPARAM)-1);
 	}
+}
 
+
+void CChildFrame::ToggleViews()
+{
+	auto focus = ::GetFocus();
+	if(focus == GetHwndView() || ::IsChild(GetHwndView(), focus))
+		SendCtrlMessage(CTRLMSG_SETFOCUS);
+	else if(focus == GetHwndCtrl() || ::IsChild(GetHwndCtrl(), focus))
+		SendViewMessage(VIEWMSG_SETFOCUS);
 }
 
 OPENMPT_NAMESPACE_END

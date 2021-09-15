@@ -2699,6 +2699,11 @@ LRESULT CModDoc::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 				m_SndFile.m_PlayState.m_nMusicSpeed = speed -  1;
 			break;
 
+		case kcViewToggle:
+			if(auto *lastActiveFrame = CChildFrame::LastActiveFrame(); lastActiveFrame != nullptr)
+				lastActiveFrame->ToggleViews();
+			break;
+
 		default: return kcNull;
 	}
 

@@ -151,6 +151,7 @@ enum CommandID
 	kcShowMacroConfig,
 	kcViewMIDImapping,
 	kcViewEditHistory,
+	kcViewToggle,
 	kcSwitchToInstrLibrary,
 	kcHelp,
 	kcEndView = kcHelp,

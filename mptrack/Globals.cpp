@@ -99,6 +99,11 @@ LRESULT CModControlDlg::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 	case CTRLMSG_DEACTIVATEPAGE:
 		OnDeactivatePage();
 		break;
+
+	case CTRLMSG_SETFOCUS:
+		GetParentFrame()->SetActiveView(&m_parent);
+		SetFocus();
+		break;
 	}
 	return 0;
 }

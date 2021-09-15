@@ -156,6 +156,21 @@ void CViewComments::OnDestroy()
 }
 
 
+LRESULT CViewComments::OnModViewMsg(WPARAM wParam, LPARAM lParam)
+{
+	switch(wParam)
+	{
+		case VIEWMSG_SETFOCUS:
+		case VIEWMSG_SETACTIVE:
+			GetParentFrame()->SetActiveView(this);
+			m_ItemList.SetFocus();
+			return 0;
+		default:
+			return CModScrollView::OnModViewMsg(wParam, lParam);
+	}
+}
+
+
 LRESULT CViewComments::OnMidiMsg(WPARAM midiData_, LPARAM)
 {
 	uint32 midiData = static_cast<uint32>(midiData_);
