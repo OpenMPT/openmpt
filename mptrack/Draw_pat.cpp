@@ -81,40 +81,31 @@ static_assert(std::size(effectColors) == MAX_EFFECT_TYPE);
 /////////////////////////////////////////////////////////////////////////////
 // CViewPattern Drawing Implementation
 
-static BYTE hilightcolor(int c0, int c1)
+static uint8 HighlightColor(int c0, int c1)
 {
-	int cf0, cf1;
+	int cf0 = 0xC0 - (c1 >> 2) - (c0 >> 3);
+	Limit(cf0, 0x40, 0xC0);
+	int cf1 = 0x100 - cf0;
+	return static_cast<uint8>((c0 * cf0 + c1 * cf1) >> 8);
+}
 
-	cf0 = 0xC0 - (c1>>2) - (c0>>3);
-	if (cf0 < 0x40) cf0 = 0x40;
-	if (cf0 > 0xC0) cf0 = 0xC0;
-	cf1 = 0x100 - cf0;
-	return (BYTE)((c0*cf0+c1*cf1)>>8);
+
+static void MixColors(CFastBitmap &dib, ModColor target, ModColor src1, ModColor src2)
+{
+	const auto c1 = TrackerSettings::Instance().rgbCustomColors[src1], c2 = TrackerSettings::Instance().rgbCustomColors[src2];
+	auto r = HighlightColor(GetRValue(c1), GetRValue(c2));
+	auto g = HighlightColor(GetGValue(c1), GetGValue(c2));
+	auto b = HighlightColor(GetBValue(c1), GetBValue(c2));
+	dib.SetColor(target, RGB(r, g, b));
 }
 
 
 void CViewPattern::UpdateColors()
 {
-	BYTE r,g,b;
-
 	m_Dib.SetAllColors(0, MAX_MODCOLORS, TrackerSettings::Instance().rgbCustomColors.data());
-
-	r = hilightcolor(GetRValue(TrackerSettings::Instance().rgbCustomColors[MODCOLOR_BACKHILIGHT]),
-		GetRValue(TrackerSettings::Instance().rgbCustomColors[MODCOLOR_BACKNORMAL]));
-	g = hilightcolor(GetGValue(TrackerSettings::Instance().rgbCustomColors[MODCOLOR_BACKHILIGHT]),
-		GetGValue(TrackerSettings::Instance().rgbCustomColors[MODCOLOR_BACKNORMAL]));
-	b = hilightcolor(GetBValue(TrackerSettings::Instance().rgbCustomColors[MODCOLOR_BACKHILIGHT]),
-		GetBValue(TrackerSettings::Instance().rgbCustomColors[MODCOLOR_BACKNORMAL]));
-	m_Dib.SetColor(MODCOLOR_2NDHIGHLIGHT, RGB(r,g,b));
-
-	r = hilightcolor(GetRValue(TrackerSettings::Instance().rgbCustomColors[MODCOLOR_VOLUME]),
-					GetRValue(TrackerSettings::Instance().rgbCustomColors[MODCOLOR_BACKNORMAL]));
-	g = hilightcolor(GetGValue(TrackerSettings::Instance().rgbCustomColors[MODCOLOR_VOLUME]),
-					GetGValue(TrackerSettings::Instance().rgbCustomColors[MODCOLOR_BACKNORMAL]));
-	b = hilightcolor(GetBValue(TrackerSettings::Instance().rgbCustomColors[MODCOLOR_VOLUME]),
-					GetBValue(TrackerSettings::Instance().rgbCustomColors[MODCOLOR_BACKNORMAL]));
-	m_Dib.SetColor(MODCOLOR_DEFAULTVOLUME, RGB(r,g,b));
-
+	MixColors(m_Dib, MODCOLOR_2NDHIGHLIGHT, MODCOLOR_BACKHILIGHT, MODCOLOR_BACKNORMAL);
+	MixColors(m_Dib, MODCOLOR_DEFAULTVOLUME, MODCOLOR_VOLUME, MODCOLOR_BACKNORMAL);
+	MixColors(m_Dib, MODCOLOR_DUMMYCOMMAND, MODCOLOR_TEXTNORMAL, MODCOLOR_BACKNORMAL);
 	m_Dib.SetBlendColor(TrackerSettings::Instance().rgbCustomColors[MODCOLOR_BLENDCOLOR]);
 }
 
@@ -769,8 +760,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 				{
 					rect.top = rect.bottom;
 					rect.bottom = rect.top + m_szPluginHeader.cy;
-					PLUGINDEX mixPlug = channel.nMixPlugin;
-					if (mixPlug)
+					if(PLUGINDEX mixPlug = channel.nMixPlugin; mixPlug != 0)
 						sprintf(s, "%u: %s", mixPlug, (sndFile.m_MixPlugins[mixPlug - 1]).pMixPlugin ? sndFile.m_MixPlugins[mixPlug - 1].GetNameLocale() : "[empty]");
 					else
 						sprintf(s, "---");
@@ -1100,6 +1090,8 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 				{
 					if(effectColors[m->GetEffectType()] != 0)
 						fx_col = effectColors[m->GetEffectType()];
+					else if(m->command == CMD_DUMMY)
+						fx_col = MODCOLOR_DUMMYCOMMAND;
 				}
 				if (!(dwSpeedUpMask & COLUMN_BITS_FXCMD))
 				{
