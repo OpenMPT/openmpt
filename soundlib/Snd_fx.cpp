@@ -113,7 +113,8 @@ public:
 			return;
 		}
 
-		const SmpLength sampleEnd = chn.dwFlags[CHN_LOOP] ? chn.nLoopEnd : chn.nLength;
+		const SamplePosition loopStart(chn.dwFlags[CHN_LOOP] ? chn.nLoopStart : 0u, 0);
+		const SamplePosition sampleEnd(chn.dwFlags[CHN_LOOP] ? chn.nLoopEnd : chn.nLength, 0);
 		const SmpLength loopLength = chn.nLoopEnd - chn.nLoopStart;
 		const bool itEnvMode = sndFile.m_playBehaviour[kITEnvelopePositionHandling];
 		const bool updatePitchEnv = (chn.PitchEnv.flags & (ENV_ENABLED | ENV_FILTER)) == ENV_ENABLED;
@@ -176,52 +177,50 @@ public:
 
 			chn.position += inc;
 
-			if(chn.position.GetUInt() >= sampleEnd)
+			if(chn.position >= sampleEnd || (chn.position < loopStart && inc.IsNegative()))
 			{
-				if(chn.dwFlags[CHN_LOOP])
-				{
-					// We exceeded the sample loop, go back to loop start.
-					if(chn.dwFlags[CHN_PINGPONGLOOP])
-					{
-						if(chn.position < SamplePosition(chn.nLoopStart, 0))
-						{
-							chn.position = SamplePosition(chn.nLoopStart + chn.nLoopStart, 0) - chn.position;
-							chn.dwFlags.flip(CHN_PINGPONGFLAG);
-							inc.Negate();
-						}
-						SmpLength posInt = chn.position.GetUInt() - chn.nLoopStart;
-						SmpLength pingpongLength = loopLength * 2;
-						if(sndFile.m_playBehaviour[kITPingPongMode]) pingpongLength--;
-						posInt %= pingpongLength;
-						bool forward = (posInt < loopLength);
-						if(forward)
-							chn.position.SetInt(chn.nLoopStart + posInt);
-						else
-							chn.position.SetInt(chn.nLoopEnd - (posInt - loopLength));
-						if(forward == chn.dwFlags[CHN_PINGPONGFLAG])
-						{
-							chn.dwFlags.flip(CHN_PINGPONGFLAG);
-							inc.Negate();
-						}
-					} else
-					{
-						SmpLength posInt = chn.position.GetUInt();
-						if(posInt >= chn.nLoopEnd + loopLength)
-						{
-							const SmpLength overshoot = posInt - chn.nLoopEnd;
-							posInt -= (overshoot / loopLength) * loopLength;
-						}
-						while(posInt >= chn.nLoopEnd)
-						{
-							posInt -= loopLength;
-						}
-						chn.position.SetInt(posInt);
-					}
-				} else
+				if(!chn.dwFlags[CHN_LOOP])
 				{
 					// Past sample end.
 					stopNote = true;
 					break;
+				}
+				// We exceeded the sample loop, go back to loop start.
+				if(chn.dwFlags[CHN_PINGPONGLOOP])
+				{
+					if(chn.position < loopStart)
+					{
+						chn.position = SamplePosition(chn.nLoopStart + chn.nLoopStart, 0) - chn.position;
+						chn.dwFlags.flip(CHN_PINGPONGFLAG);
+						inc.Negate();
+					}
+					SmpLength posInt = chn.position.GetUInt() - chn.nLoopStart;
+					SmpLength pingpongLength = loopLength * 2;
+					if(sndFile.m_playBehaviour[kITPingPongMode]) pingpongLength--;
+					posInt %= pingpongLength;
+					bool forward = (posInt < loopLength);
+					if(forward)
+						chn.position.SetInt(chn.nLoopStart + posInt);
+					else
+						chn.position.SetInt(chn.nLoopEnd - (posInt - loopLength));
+					if(forward == chn.dwFlags[CHN_PINGPONGFLAG])
+					{
+						chn.dwFlags.flip(CHN_PINGPONGFLAG);
+						inc.Negate();
+					}
+				} else
+				{
+					SmpLength posInt = chn.position.GetUInt();
+					if(posInt >= chn.nLoopEnd + loopLength)
+					{
+						const SmpLength overshoot = posInt - chn.nLoopEnd;
+						posInt -= (overshoot / loopLength) * loopLength;
+					}
+					while(posInt >= chn.nLoopEnd)
+					{
+						posInt -= loopLength;
+					}
+					chn.position.SetInt(posInt);
 				}
 			}
 		}
