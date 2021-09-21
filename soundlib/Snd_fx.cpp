@@ -3916,8 +3916,9 @@ void CSoundFile::SetFinetune(CHANNELINDEX channel, PlayState &playState, bool is
 }
 
 
-// Implemented for IMF / PTM compatibility, can't actually save this in any formats
+// Implemented for IMF / PTM / OKT compatibility, can't actually save this in any formats
 // Slide up / down every x ticks by y semitones
+// Oktalyzer: Slide down on first tick only, or on every tick
 void CSoundFile::NoteSlide(ModChannel &chn, uint32 param, bool slideUp, bool retrig) const
 {
 	if(m_SongFlags[SONG_FIRSTTICK])
@@ -3927,24 +3928,27 @@ void CSoundFile::NoteSlide(ModChannel &chn, uint32 param, bool slideUp, bool ret
 		if(param & 0x0F)
 			chn.noteSlideParam = (chn.noteSlideParam & 0xF0) | static_cast<uint8>(param & 0x0F);
 		chn.noteSlideCounter = (chn.noteSlideParam >> 4);
-	} else
-	{
-		if(--chn.noteSlideCounter == 0)
-		{
-			const uint8 speed = (chn.noteSlideParam >> 4), steps = (chn.noteSlideParam & 0x0F);
-			chn.noteSlideCounter = speed;
-			// update it
-			const int32 delta = (slideUp ? steps : -steps);
-			if(chn.HasCustomTuning())
-				chn.m_PortamentoFineSteps += delta * chn.pModInstrument->pTuning->GetFineStepCount();
-			else
-				chn.nPeriod = GetPeriodFromNote(delta + GetNoteFromPeriod(chn.nPeriod, 0, chn.nC5Speed), 0, chn.nC5Speed);
+	}
 
-			if(retrig)
-			{
-				chn.position.Set(0);
-			}
-		}
+	bool doTrigger = false;
+	if(GetType() == MOD_TYPE_OKT)
+		doTrigger = ((chn.noteSlideParam & 0xF0) == 0x10) || m_SongFlags[SONG_FIRSTTICK];
+	else
+		doTrigger = !m_SongFlags[SONG_FIRSTTICK] && (--chn.noteSlideCounter == 0);
+
+	if(doTrigger)
+	{
+		const uint8 speed = (chn.noteSlideParam >> 4), steps = (chn.noteSlideParam & 0x0F);
+		chn.noteSlideCounter = speed;
+		// update it
+		const int32 delta = (slideUp ? steps : -steps);
+		if(chn.HasCustomTuning())
+			chn.m_PortamentoFineSteps += delta * chn.pModInstrument->pTuning->GetFineStepCount();
+		else
+			chn.nPeriod = GetPeriodFromNote(delta + GetNoteFromPeriod(chn.nPeriod, 0, chn.nC5Speed), 0, chn.nC5Speed);
+
+		if(retrig)
+			chn.position.Set(0);
 	}
 }
 
