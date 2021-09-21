@@ -11,6 +11,7 @@
 #pragma once
 
 #include "openmpt/all/BuildSettings.hpp"
+#include "UpdateToolTip.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -74,6 +75,7 @@ public:
 class CMainToolBar: public CToolBarEx
 {
 protected:
+	UpdateToolTip m_tooltip;
 	CImageListEx m_ImageList, m_ImageListDisabled;
 	CStatic m_EditTempo, m_EditSpeed, m_EditOctave, m_EditRowsPerBeat;
 	CStatic m_StaticTempo, m_StaticSpeed, m_StaticRowsPerBeat;
@@ -109,6 +111,8 @@ public:
 	UINT GetBaseOctave() const;
 	BOOL SetBaseOctave(UINT nOctave);
 	BOOL SetCurrentSong(CSoundFile *pModDoc);
+
+	bool ShowUpdateInfo(const CString &newVersion, const CString &infoURL, bool fromCache);
 
 protected:
 	//{{AFX_MSG(CMainToolBar)

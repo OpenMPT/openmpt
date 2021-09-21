@@ -711,9 +711,33 @@ mpt::ustring CUpdateCheck::GetUpdateURLV2(const CUpdateCheck::Settings &settings
 
 
 // Run update check (independent thread)
-CUpdateCheck::Result CUpdateCheck::SearchUpdate(const CUpdateCheck::Context &context, const CUpdateCheck::Settings &settings, const std::string &statistics)
+UpdateCheckResult CUpdateCheck::SearchUpdate(const CUpdateCheck::Context &context, const CUpdateCheck::Settings &settings, const std::string &statistics)
 {
-	CUpdateCheck::Result result;
+	UpdateCheckResult result;
+
+	// Try to load cached results before establishing any connection
+	if(context.loadPersisted)
+	{
+		try
+		{
+			InputFile f(settings.persistencePath + P_("update-") + mpt::PathString::FromUnicode(GetChannelName(settings.channel)) + P_(".json"));
+			if(f.IsValid())
+			{
+				std::vector<std::byte> data = GetFileReader(f).ReadRawDataAsByteVector();
+				nlohmann::json::parse(mpt::buffer_cast<std::string>(data)).get<Update::versions>();
+				result.CheckTime = time_t{};
+				result.json = data;
+				return result;
+			}
+		} catch(mpt::out_of_memory e)
+		{
+			mpt::delete_out_of_memory(e);
+		} catch(const std::exception &)
+		{
+			// ignore
+		}
+	}
+
 	if(!context.window->SendMessage(context.msgProgress, context.autoUpdate ? 1 : 0, 0))
 	{
 		throw CUpdateCheck::Cancel();
@@ -734,40 +758,13 @@ CUpdateCheck::Result CUpdateCheck::SearchUpdate(const CUpdateCheck::Context &con
 	} else
 #endif // MPT_UPDATE_LEGACY
 	{
-		bool loaded = false;
-		if(context.loadPersisted)
-		{
-			try
-			{
-				InputFile f(settings.persistencePath + P_("update-") + mpt::PathString::FromUnicode(GetChannelName(settings.channel)) + P_(".json"));
-				if(f.IsValid())
-				{
-					std::vector<std::byte> data = GetFileReader(f).ReadRawDataAsByteVector();
-					nlohmann::json::parse(mpt::buffer_cast<std::string>(data)).get<Update::versions>();
-					result.CheckTime = time_t{};
-					result.json = data;
-					loaded = true;
-				}
-			} catch(mpt::out_of_memory e)
-			{
-				mpt::delete_out_of_memory(e);
-			}	catch(const std::exception &)
-			{
-				// ignore
-			}
-		}
-		if(!loaded)
-		{
-			result = SearchUpdateModern(internet, settings);
-		}
+		result = SearchUpdateModern(internet, settings);
 		try
 		{
-			{
-				mpt::SafeOutputFile f(settings.persistencePath + P_("update-") + mpt::PathString::FromUnicode(GetChannelName(settings.channel)) + P_(".json"), std::ios::binary);
-				f.stream().imbue(std::locale::classic());
-				mpt::IO::WriteRaw(f.stream(), mpt::as_span(result.json));
-				f.stream().flush();
-			}
+			mpt::SafeOutputFile f(settings.persistencePath + P_("update-") + mpt::PathString::FromUnicode(GetChannelName(settings.channel)) + P_(".json"), std::ios::binary);
+			f.stream().imbue(std::locale::classic());
+			mpt::IO::WriteRaw(f.stream(), mpt::as_span(result.json));
+			f.stream().flush();
 		} catch(mpt::out_of_memory e)
 		{
 			mpt::delete_out_of_memory(e);
@@ -854,7 +851,7 @@ void CUpdateCheck::SendStatistics(HTTP::InternetSession &internet, const CUpdate
 
 
 #if MPT_UPDATE_LEGACY
-CUpdateCheck::Result CUpdateCheck::SearchUpdateLegacy(HTTP::InternetSession &internet, const CUpdateCheck::Settings &settings)
+UpdateCheckResult CUpdateCheck::SearchUpdateLegacy(HTTP::InternetSession &internet, const CUpdateCheck::Settings &settings)
 {
 
 	HTTP::Request request;
@@ -874,7 +871,7 @@ CUpdateCheck::Result CUpdateCheck::SearchUpdateLegacy(HTTP::InternetSession &int
 	}
 
 	// Now, evaluate the downloaded data.
-	CUpdateCheck::Result result;
+	UpdateCheckResult result;
 	result.UpdateAvailable = false;
 	result.CheckTime = time(nullptr);
 	CString resultData = mpt::ToCString(mpt::Charset::UTF8, mpt::buffer_cast<std::string>(resultHTTP.Data));
@@ -917,7 +914,7 @@ CUpdateCheck::Result CUpdateCheck::SearchUpdateLegacy(HTTP::InternetSession &int
 #endif // MPT_UPDATE_LEGACY
 
 
-CUpdateCheck::Result CUpdateCheck::SearchUpdateModern(HTTP::InternetSession &internet, const CUpdateCheck::Settings &settings)
+UpdateCheckResult CUpdateCheck::SearchUpdateModern(HTTP::InternetSession &internet, const CUpdateCheck::Settings &settings)
 {
 
 	HTTP::Request request;
@@ -938,7 +935,7 @@ CUpdateCheck::Result CUpdateCheck::SearchUpdateModern(HTTP::InternetSession &int
 	}
 
 	// Now, evaluate the downloaded data.
-	CUpdateCheck::Result result;
+	UpdateCheckResult result;
 	result.CheckTime = time(nullptr);
 	try
 	{
@@ -961,7 +958,7 @@ void CUpdateCheck::CheckForUpdate(const CUpdateCheck::Settings &settings, const 
 {
 	// incremented before starting the thread
 	MPT_ASSERT(s_InstanceCount.load() >= 1);
-	CUpdateCheck::Result result;
+	UpdateCheckResult result;
 	try
 	{
 		context.window->SendMessage(context.msgStart, context.autoUpdate ? 1 : 0, 0);
@@ -1000,9 +997,9 @@ bool CUpdateCheck::IsAutoUpdateFromMessage(WPARAM wparam, LPARAM /* lparam */ )
 }
 
 
-const CUpdateCheck::Result &CUpdateCheck::MessageAsResult(WPARAM /* wparam */ , LPARAM lparam)
+const UpdateCheckResult &CUpdateCheck::MessageAsResult(WPARAM /* wparam */ , LPARAM lparam)
 {
-	return *reinterpret_cast<CUpdateCheck::Result*>(lparam);
+	return *reinterpret_cast<UpdateCheckResult *>(lparam);
 }
 
 
@@ -1469,19 +1466,19 @@ public:
 };
 
 
-void CUpdateCheck::AcknowledgeSuccess(const CUpdateCheck::Result &result)
+void CUpdateCheck::AcknowledgeSuccess(const UpdateCheckResult &result)
 {
-	if(result.CheckTime != time_t{})
+	if(!result.IsFromCache())
 	{
 		TrackerSettings::Instance().UpdateLastUpdateCheck = mpt::Date::Unix(result.CheckTime);
 	}
 }
 
 
-void CUpdateCheck::ShowSuccessGUI(const bool &autoUpdate, const CUpdateCheck::Result &result)
+void CUpdateCheck::ShowSuccessGUI(const bool autoUpdate, const UpdateCheckResult &result)
 {
-
-	bool modal = !autoUpdate || !CMainFrame::GetMainFrame()->CanShowUpdateIndicator();
+	const bool cachedAutoupdate = autoUpdate && result.IsFromCache();
+	bool modal = !cachedAutoupdate || !CMainFrame::GetMainFrame()->CanShowUpdateIndicator();
 
 #if MPT_UPDATE_LEGACY
 
@@ -1489,7 +1486,7 @@ void CUpdateCheck::ShowSuccessGUI(const bool &autoUpdate, const CUpdateCheck::Re
 	{
 		if(result.UpdateAvailable && (!autoUpdate || result.Version != TrackerSettings::Instance().UpdateIgnoreVersion))
 		{
-			if(!CMainFrame::GetMainFrame()->ShowUpdateIndicator(result.Version, result.Date, result.URL))
+			if(!CMainFrame::GetMainFrame()->ShowUpdateIndicator(result, result.Version, result.URL))
 			{
 				modal = true;
 			}
@@ -1528,7 +1525,7 @@ void CUpdateCheck::ShowSuccessGUI(const bool &autoUpdate, const CUpdateCheck::Re
 		return;
 	}
 
-	auto & versionInfo = updateData[updateInfo.version];
+	auto &versionInfo = updateData[updateInfo.version];
 	if(autoUpdate && (mpt::ToCString(versionInfo.version) == TrackerSettings::Instance().UpdateIgnoreVersion))
 	{
 		return;
@@ -1536,16 +1533,13 @@ void CUpdateCheck::ShowSuccessGUI(const bool &autoUpdate, const CUpdateCheck::Re
 
 	if(autoUpdate && TrackerSettings::Instance().UpdateInstallAutomatically && !updateInfo.download.empty() && versionInfo.downloads[updateInfo.download].can_autoupdate && (Version::Current() >= Version::Parse(versionInfo.downloads[updateInfo.download].autoupdate_minversion)))
 	{
-
 		CDoUpdate updateDlg(versionInfo.downloads[updateInfo.download], theApp.GetMainWnd());
 		if(updateDlg.DoModal() != IDOK)
 		{
 			return;
 		}
-
 	} else
 	{
-
 		const TCHAR *action = _T("&View Announcement");
 		const bool canInstall = !updateInfo.download.empty() && versionInfo.downloads[updateInfo.download].can_autoupdate && (Version::Current() >= Version::Parse(versionInfo.downloads[updateInfo.download].autoupdate_minversion));
 		const bool canDownload = !canInstall && !updateInfo.download.empty() && !versionInfo.downloads[updateInfo.download].download_url.empty();
@@ -1557,19 +1551,12 @@ void CUpdateCheck::ShowSuccessGUI(const bool &autoUpdate, const CUpdateCheck::Re
 			action = _T("&Download Now");
 		}
 
-		if(!CMainFrame::GetMainFrame()->ShowUpdateIndicator(
-			mpt::ToCString(versionInfo.version),
-			mpt::ToCString(versionInfo.date),
-			mpt::ToCString(versionInfo.changelog_url)))
-		{
-			// on failure to show tooltip, continue and show modal dialog
-			modal = true;
-		}
-
-		if(!modal)
-		{
+		if(autoUpdate && CMainFrame::GetMainFrame()->ShowUpdateIndicator(result, mpt::ToCString(versionInfo.version), mpt::ToCString(versionInfo.changelog_url)))
 			return;
-		}
+
+		// On failure to show tooltip, continue and show modal dialog - unless this is a cached auto-update result, which we only use to show a persistent indicator in the toolbar
+		if(!modal || cachedAutoupdate)
+			return;
 
 		UpdateDialog dlg(
 			mpt::ToCString(versionInfo.version),
@@ -1599,7 +1586,7 @@ void CUpdateCheck::ShowSuccessGUI(const bool &autoUpdate, const CUpdateCheck::Re
 }
 
 
-void CUpdateCheck::ShowFailureGUI(const bool &autoUpdate, const CUpdateCheck::Error &error)
+void CUpdateCheck::ShowFailureGUI(const bool autoUpdate, const CUpdateCheck::Error &error)
 {
 	if(!autoUpdate)
 	{

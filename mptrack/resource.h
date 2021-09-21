@@ -1235,6 +1235,7 @@
 #define ID_ORDERLIST_EDIT_COPY_ORDERS   43237
 #define ID_FILE_SAVE_COPY               43238
 #define ID_MODTREE_RENAME               43239
+#define ID_UPDATE_AVAILABLE             43240
 #define ID_CHANGE_PCNOTE_PARAM          43242
 // From here: Command range [ID_CHANGE_PCNOTE_PARAM, ID_CHANGE_PCNOTE_PARAM + ModCommand::maxColumnValue]
 #define ID_MODTREE_CLOSE                44243

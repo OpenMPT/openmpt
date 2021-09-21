@@ -612,6 +612,9 @@
     <ClInclude Include="..\..\mptrack\UpdateHints.h">
       <Filter>mptrack</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\mptrack\UpdateToolTip.h">
+      <Filter>mptrack</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\mptrack\VSTEditor.h">
       <Filter>mptrack</Filter>
     </ClInclude>
@@ -1797,6 +1800,9 @@
       <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\UpdateCheck.cpp">
+      <Filter>mptrack</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mptrack\UpdateToolTip.cpp">
       <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\VSTEditor.cpp">

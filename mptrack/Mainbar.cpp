@@ -132,7 +132,7 @@ void CToolBarEx::EnableFlatButtons(BOOL bFlat)
 // Play Command
 #define PLAYCMD_INDEX		10
 #define TOOLBAR_IMAGE_PAUSE	8
-#define TOOLBAR_IMAGE_PLAY	12
+#define TOOLBAR_IMAGE_PLAY	13
 // Base octave
 #define EDITOCTAVE_INDEX	13
 #define EDITOCTAVE_WIDTH	SCALEWIDTH(55)
@@ -177,7 +177,7 @@ void CToolBarEx::EnableFlatButtons(BOOL bFlat)
 #define SPINRPB_WIDTH		SCALEWIDTH(16)
 #define SPINRPB_HEIGHT		(EDITRPB_HEIGHT)
 // VU Meters
-#define VUMETER_INDEX		(SPINRPB_INDEX+5)
+#define VUMETER_INDEX		(SPINRPB_INDEX+6)
 #define VUMETER_WIDTH		SCALEWIDTH(255)
 #define VUMETER_HEIGHT		SCALEHEIGHT(19)
 
@@ -215,6 +215,7 @@ static UINT MainButtons[] =
 		ID_SEPARATOR,
 	ID_VIEW_OPTIONS,
 	ID_PANIC,
+	ID_UPDATE_AVAILABLE,
 	ID_SEPARATOR,
 		ID_SEPARATOR,	// VU Meter
 };
@@ -339,6 +340,9 @@ BOOL CMainToolBar::Create(CWnd *parent)
 	SetBaseOctave(4);
 	SetCurrentSong(nullptr);
 	EnableDocking(CBRS_ALIGN_ANY);
+
+	GetToolBarCtrl().SetState(ID_UPDATE_AVAILABLE, TBSTATE_HIDDEN);
+
 	return TRUE;
 }
 
@@ -454,8 +458,37 @@ BOOL CMainToolBar::SetBaseOctave(UINT nOctave)
 }
 
 
+bool CMainToolBar::ShowUpdateInfo(const CString &newVersion, const CString &infoURL, bool fromCache)
+{
+	GetToolBarCtrl().SetState(ID_UPDATE_AVAILABLE, TBSTATE_ENABLED);
+	if(m_bVertical)
+		SetVertical();
+	else
+		SetHorizontal();
+
+	CRect rect;
+	GetToolBarCtrl().GetRect(ID_UPDATE_AVAILABLE, &rect);
+	CPoint pt = rect.CenterPoint();
+	ClientToScreen(&pt);
+	CMainFrame::GetMainFrame()->GetWindowRect(rect);
+	LimitMax(pt.x, rect.right);
+
+	// Just show the icon if this information is from a previous run
+	if(fromCache)
+		return true;
+
+	return m_tooltip.ShowUpdate(*this, newVersion, infoURL, rect, pt, ID_UPDATE_AVAILABLE);
+}
+
+
 BOOL CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 {
+	static CSoundFile *sndFile = nullptr;
+	if(pSndFile != sndFile)
+	{
+		sndFile = pSndFile;
+	}
+
 	// Update Info
 	if(pSndFile)
 	{
@@ -698,7 +731,8 @@ BOOL CMainToolBar::OnToolTipText(UINT, NMHDR* pNMHDR, LRESULT* pResult)
 	case ID_PLAYER_PAUSE: s = _T("Pause"); cmd = kcPlayPauseSong; break;
 	case ID_PLAYER_PLAYFROMSTART: s = _T("Play From Start"); cmd = kcPlaySongFromStart; break;
 	case ID_VIEW_OPTIONS: s = _T("Setup"); cmd = kcViewOptions; break;
-	case ID_PANIC: s = _T("Stop all hanging VSTi and sample voices"); cmd = kcPanic; break;
+	case ID_PANIC: s = _T("Stop all hanging plugin and sample voices"); cmd = kcPanic; break;
+	case ID_UPDATE_AVAILABLE: s = _T("A new update is available."); break;
 	}
 
 	if(s == nullptr)

@@ -3185,10 +3185,11 @@ STRINGTABLE
 BEGIN
     ID_ENVELOPE_ZOOM_IN     "Zoom In"
     ID_ENVELOPE_ZOOM_OUT    "Zoom Out"
-    ID_PANIC                "Kill all VSTi and sample voices\nStop all hanging VSTi and sample voices"
+    ID_PANIC                "Stop all plugin and sample voices\nStop all hanging plugin and sample voices"
     ID_VIEW_EDITHISTORY     "View the edit history of this module"
     ID_SAMPLE_GRID          "Configure Sample Grid"
     ID_FILE_SAVEASTEMPLATE  "Save the active document as template module\nSave as Template"
+    ID_UPDATE_AVAILABLE     "A new OpenMPT version is available. Click the icon for details and installation.\nA new update is available."
 END
 
 STRINGTABLE

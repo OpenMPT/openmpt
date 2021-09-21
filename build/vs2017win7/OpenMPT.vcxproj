@@ -866,6 +866,7 @@
     <ClInclude Include="..\..\mptrack\Undo.h" />
     <ClInclude Include="..\..\mptrack\UpdateCheck.h" />
     <ClInclude Include="..\..\mptrack\UpdateHints.h" />
+    <ClInclude Include="..\..\mptrack\UpdateToolTip.h" />
     <ClInclude Include="..\..\mptrack\VSTEditor.h" />
     <ClInclude Include="..\..\mptrack\View_gen.h" />
     <ClInclude Include="..\..\mptrack\View_ins.h" />
@@ -1263,6 +1264,7 @@
     <ClCompile Include="..\..\mptrack\TuningDialog.cpp" />
     <ClCompile Include="..\..\mptrack\Undo.cpp" />
     <ClCompile Include="..\..\mptrack\UpdateCheck.cpp" />
+    <ClCompile Include="..\..\mptrack\UpdateToolTip.cpp" />
     <ClCompile Include="..\..\mptrack\VSTEditor.cpp" />
     <ClCompile Include="..\..\mptrack\View_gen.cpp" />
     <ClCompile Include="..\..\mptrack\View_ins.cpp" />

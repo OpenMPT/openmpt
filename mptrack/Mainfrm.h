@@ -30,6 +30,7 @@ class CDLSBank;
 class CInputHandler;
 class CModDoc;
 class CAutoSaver;
+struct UpdateCheckResult;
 namespace SoundDevice {
 class Base;
 class ICallback;
@@ -311,6 +312,7 @@ protected:
 	class COptionsSoundcard *m_SoundCardOptionsDialog = nullptr;
 #if defined(MPT_ENABLE_UPDATE)
 	class CUpdateSetupDlg *m_UpdateOptionsDialog = nullptr;
+	std::unique_ptr<UpdateCheckResult> m_updateCheckResult;
 #endif // MPT_ENABLE_UPDATE
 	DWORD helpCookie = 0;
 	bool m_bOptionsLocked = false;
@@ -402,7 +404,7 @@ public:
 
 #if defined(MPT_ENABLE_UPDATE)
 	bool CanShowUpdateIndicator() const { return m_wndToolBar.IsVisible(); }
-	bool ShowUpdateIndicator(const CString &releaseVersion, const CString &releaseDate, const CString &releaseURL);
+	bool ShowUpdateIndicator(const UpdateCheckResult &result, const CString &releaseVersion, const CString &infoURL);
 #endif // MPT_ENABLE_UPDATE
 
 	CModTree *GetUpperTreeview() { return m_wndTree.m_pModTree; }
@@ -542,6 +544,7 @@ protected:
 	afx_msg LRESULT OnInvalidatePatterns(WPARAM, LPARAM);
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
 	afx_msg void OnInternetUpdate();
+	afx_msg void OnUpdateAvailable();
 	afx_msg void OnShowSettingsFolder();
 #if defined(MPT_ENABLE_UPDATE)
 	afx_msg LRESULT OnUpdateCheckStart(WPARAM wparam, LPARAM lparam);

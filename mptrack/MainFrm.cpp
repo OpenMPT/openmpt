@@ -108,6 +108,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_MESSAGE(WM_MOD_UPDATENOTIFY,			&CMainFrame::OnToolbarUpdateIndicatorClick)
 #endif // MPT_ENABLE_UPDATE
 	ON_COMMAND(ID_INTERNETUPDATE,			&CMainFrame::OnInternetUpdate)
+	ON_COMMAND(ID_UPDATE_AVAILABLE,			&CMainFrame::OnUpdateAvailable)
 	ON_COMMAND(ID_HELP_SHOWSETTINGSFOLDER,	&CMainFrame::OnShowSettingsFolder)
 #if defined(MPT_ENABLE_UPDATE)
 	ON_MESSAGE(MPT_WM_APP_UPDATECHECK_START, &CMainFrame::OnUpdateCheckStart)
@@ -2515,7 +2516,6 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 void CMainFrame::OnInitMenu(CMenu* pMenu)
 {
 	m_InputHandler->SetModifierMask(ModNone);
-	// This used to not be called to prevent Alt key from activating the menu... but that never worked as imagined, I guess.
 	CMDIFrameWnd::OnInitMenu(pMenu);
 
 }
@@ -2540,7 +2540,7 @@ BOOL CMainFrame::StopRenderer(CSoundFile* pSndFile)
 }
 
 
-// We have swicthed focus to a new module - might need to update effect keys to reflect module type
+// We have switched focus to a new module - might need to update effect keys to reflect module type
 bool CMainFrame::UpdateEffectKeys(const CModDoc *modDoc)
 {
 	if(modDoc != nullptr)
@@ -2582,6 +2582,17 @@ void CMainFrame::OnInternetUpdate()
 }
 
 
+void CMainFrame::OnUpdateAvailable()
+{
+#if defined(MPT_ENABLE_UPDATE)
+	if(m_updateCheckResult)
+		CUpdateCheck::ShowSuccessGUI(false, *m_updateCheckResult);
+	else
+		CUpdateCheck::DoManualUpdateCheck();
+#endif  // MPT_ENABLE_UPDATE
+}
+
+
 void CMainFrame::OnShowSettingsFolder()
 {
 	theApp.OpenDirectory(theApp.GetConfigPath());
@@ -2609,14 +2620,12 @@ static std::unique_ptr<CUpdateCheckProgressDialog> g_UpdateCheckProgressDialog =
 #if defined(MPT_ENABLE_UPDATE)
 
 
-bool CMainFrame::ShowUpdateIndicator(const CString &releaseVersion, const CString &releaseDate, const CString &releaseURL)
+bool CMainFrame::ShowUpdateIndicator(const UpdateCheckResult &result, const CString &releaseVersion, const CString &infoURL)
 {
-	// TODO
-	MPT_UNREFERENCED_PARAMETER(releaseVersion);
-	MPT_UNREFERENCED_PARAMETER(releaseDate);
-	MPT_UNREFERENCED_PARAMETER(releaseURL);
-	return false;
-	//return m_wndToolBar.ShowUpdateInfo(releaseVersion);
+	if(!CanShowUpdateIndicator())
+		return false;
+	m_updateCheckResult = std::make_unique<UpdateCheckResult>(result);
+	return m_wndToolBar.ShowUpdateInfo(releaseVersion, infoURL, result.IsFromCache());
 }
 
 
@@ -2653,7 +2662,7 @@ LRESULT CMainFrame::OnUpdateCheckStart(WPARAM wparam, LPARAM lparam)
 
 LRESULT CMainFrame::OnUpdateCheckProgress(WPARAM wparam, LPARAM lparam)
 {
-	bool isAutoUpdate = wparam ? true : false;
+	bool isAutoUpdate = wparam != 0;
 	CString updateText = MPT_CFORMAT("Checking for updates... {}%")(lparam);
 	if(isAutoUpdate)
 	{
@@ -2678,6 +2687,7 @@ LRESULT CMainFrame::OnUpdateCheckProgress(WPARAM wparam, LPARAM lparam)
 
 LRESULT CMainFrame::OnUpdateCheckCanceled(WPARAM wparam, LPARAM lparam)
 {
+	m_updateCheckResult.reset();
 	bool isAutoUpdate = CUpdateCheck::IsAutoUpdateFromMessage(wparam, lparam);
 	CString updateText = _T("Checking for updates... Canceled.");
 	if(isAutoUpdate)
@@ -2711,6 +2721,7 @@ LRESULT CMainFrame::OnUpdateCheckCanceled(WPARAM wparam, LPARAM lparam)
 
 LRESULT CMainFrame::OnUpdateCheckFailure(WPARAM wparam, LPARAM lparam)
 {
+	m_updateCheckResult.reset();
 	const bool isAutoUpdate = CUpdateCheck::IsAutoUpdateFromMessage(wparam, lparam);
 	const CUpdateCheck::Error &error = CUpdateCheck::MessageAsError(wparam, lparam);
 	CString updateText = MPT_CFORMAT("Checking for updates failed: {}")(mpt::get_exception_text<mpt::ustring>(error));
@@ -2746,43 +2757,42 @@ LRESULT CMainFrame::OnUpdateCheckFailure(WPARAM wparam, LPARAM lparam)
 
 LRESULT CMainFrame::OnUpdateCheckSuccess(WPARAM wparam, LPARAM lparam)
 {
+	m_updateCheckResult.reset();
 	const bool isAutoUpdate = CUpdateCheck::IsAutoUpdateFromMessage(wparam, lparam);
-	const CUpdateCheck::Result & result = CUpdateCheck::MessageAsResult(wparam, lparam);
+	const UpdateCheckResult &result = CUpdateCheck::MessageAsResult(wparam, lparam);
 	CUpdateCheck::AcknowledgeSuccess(result);
-	CString updateText = _T("Checking for updates... Done.");
-	if(isAutoUpdate)
+	if(result.CheckTime != time_t{})
+		TrackerSettings::Instance().UpdateLastUpdateCheck = mpt::Date::Unix(result.CheckTime);
+	if(!isAutoUpdate)
 	{
-		SetHelpText(updateText);
-	} else if(m_UpdateOptionsDialog)
-	{
-		m_UpdateOptionsDialog->SetDlgItemText(IDC_LASTUPDATE, updateText);
-	} else
-	{
-		SetHelpText(updateText);
-		if(g_UpdateCheckProgressDialog)
+		if(m_UpdateOptionsDialog)
 		{
-			g_UpdateCheckProgressDialog->DestroyWindow();
-			g_UpdateCheckProgressDialog = nullptr;
+			m_UpdateOptionsDialog->SetDlgItemText(IDC_LASTUPDATE, _T("Checking for updates... Done."));
+		} else
+		{
+			if(g_UpdateCheckProgressDialog)
+			{
+				g_UpdateCheckProgressDialog->DestroyWindow();
+				g_UpdateCheckProgressDialog = nullptr;
+			}
+			SetHelpText(_T(""));
 		}
 	}
 	CUpdateCheck::ShowSuccessGUI(isAutoUpdate, result);
-	if(isAutoUpdate)
-	{
-		SetHelpText(_T(""));
-	} else if(m_UpdateOptionsDialog)
-	{
-		// nothing
-	} else
-	{
-		SetHelpText(_T(""));
-	}
 	return TRUE;
 }
 
 
-LPARAM CMainFrame::OnToolbarUpdateIndicatorClick(WPARAM, LPARAM)
+LPARAM CMainFrame::OnToolbarUpdateIndicatorClick(WPARAM action, LPARAM)
 {
-	CUpdateCheck::DoManualUpdateCheck();
+	const auto popAction = static_cast<UpdateToolTip::PopAction>(action);
+	if(popAction != UpdateToolTip::PopAction::ClickBubble)
+		return 0;
+
+	if(m_updateCheckResult)
+		CUpdateCheck::ShowSuccessGUI(false, *m_updateCheckResult);
+	else
+		CUpdateCheck::DoManualUpdateCheck();
 	return 0;
 }
 
