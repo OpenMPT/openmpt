@@ -2757,7 +2757,6 @@ bool CSoundFile::ProcessEffects()
 			// Now it's time for some FT2 crap...
 			if (GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2))
 			{
-
 				// XM: Key-Off + Sample == Note Cut (BUT: Only if no instr number or volume effect is present!)
 				// Test case: NoteOffVolume.xm
 				if(note == NOTE_KEYOFF
@@ -4114,8 +4113,10 @@ void CSoundFile::ExtraFinePortamentoDown(ModChannel &chn, ModCommand::PARAM para
 	}
 }
 
-// Implemented for IMF compatibility, can't actually save this in any formats
+
+// Implemented for IMF / PTM / OKT compatibility, can't actually save this in any formats
 // Slide up / down every x ticks by y semitones
+// Oktalyzer: Slide down on first tick only, or on every tick
 void CSoundFile::NoteSlide(ModChannel &chn, uint32 param, bool slideUp, bool retrig) const
 {
 	uint8 x, y;
@@ -4128,23 +4129,26 @@ void CSoundFile::NoteSlide(ModChannel &chn, uint32 param, bool slideUp, bool ret
 		if (y)
 			chn.nNoteSlideStep = y;
 		chn.nNoteSlideCounter = chn.nNoteSlideSpeed;
-	} else
-	{
-		if (--chn.nNoteSlideCounter == 0)
-		{
-			chn.nNoteSlideCounter = chn.nNoteSlideSpeed;
-			// update it
-			const int32 delta = (slideUp ? 1 : -1) * chn.nNoteSlideStep;
-			if(chn.HasCustomTuning())
-				chn.m_PortamentoFineSteps += delta * chn.pModInstrument->pTuning->GetFineStepCount();
-			else
-				chn.nPeriod = GetPeriodFromNote(delta + GetNoteFromPeriod(chn.nPeriod), 8363, 0);
+	}
 
-			if(retrig)
-			{
-				chn.position.Set(0);
-			}
-		}
+	bool doTrigger = false;
+	if(GetType() == MOD_TYPE_OKT)
+		doTrigger = (chn.nNoteSlideSpeed == 0x10) || m_SongFlags[SONG_FIRSTTICK];
+	else
+		doTrigger = !m_SongFlags[SONG_FIRSTTICK] && (--chn.nNoteSlideCounter == 0);
+
+	if(doTrigger)
+	{
+		chn.nNoteSlideCounter = chn.nNoteSlideSpeed;
+		// update it
+		const int32 delta = (slideUp ? 1 : -1) * chn.nNoteSlideStep;
+		if(chn.HasCustomTuning())
+			chn.m_PortamentoFineSteps += delta * chn.pModInstrument->pTuning->GetFineStepCount();
+		else
+			chn.nPeriod = GetPeriodFromNote(delta + GetNoteFromPeriod(chn.nPeriod, 0, chn.nC5Speed), 0, chn.nC5Speed);
+
+		if(retrig)
+			chn.position.Set(0);
 	}
 }
 
@@ -6033,6 +6037,8 @@ uint32 CSoundFile::GetPeriodFromNote(uint32 note, int32 nFineTune, uint32 nC5Spe
 			// MDL uses non-linear slides, but their effectiveness does not depend on the middle-C frequency.
 			return (FreqS3MTable[note % 12u] << 4) >> (note / 12);
 		}
+		if(!nC5Speed)
+			nC5Speed = 8363;
 		if(m_SongFlags[SONG_LINEARSLIDES] || GetType() == MOD_TYPE_669)
 		{
 			// In IT linear slide mode, directly use frequency in Hertz rather than periods.
@@ -6042,8 +6048,6 @@ uint32 CSoundFile::GetPeriodFromNote(uint32 note, int32 nFineTune, uint32 nC5Spe
 				return (FreqS3MTable[note % 12u] << 5) >> (note / 12);
 		} else
 		{
-			if (!nC5Speed)
-				nC5Speed = 8363;
 			LimitMax(nC5Speed, uint32_max >> (note / 12u));
 			//(a*b)/c
 			return Util::muldiv_unsigned(8363, (FreqS3MTable[note % 12u] << 5), nC5Speed << (note / 12u));
