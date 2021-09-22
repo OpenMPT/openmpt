@@ -2622,15 +2622,20 @@ static std::unique_ptr<CUpdateCheckProgressDialog> g_UpdateCheckProgressDialog =
 
 bool CMainFrame::ShowUpdateIndicator(const UpdateCheckResult &result, const CString &releaseVersion, const CString &infoURL)
 {
-	if(!CanShowUpdateIndicator())
-		return false;
 	m_updateCheckResult = std::make_unique<UpdateCheckResult>(result);
-	return m_wndToolBar.ShowUpdateInfo(releaseVersion, infoURL, result.IsFromCache());
+	if(CanShowUpdateIndicator())
+		return m_wndToolBar.ShowUpdateInfo(releaseVersion, infoURL, result.IsFromCache());
+	
+	GetMenu()->AppendMenu(MF_STRING, ID_UPDATE_AVAILABLE, _T("[Update Available]"));
+	return true;
 }
 
 
 LRESULT CMainFrame::OnUpdateCheckStart(WPARAM wparam, LPARAM lparam)
 {
+	GetMenu()->RemoveMenu(ID_UPDATE_AVAILABLE, MF_BYCOMMAND);
+	m_wndToolBar.RemoveUpdateInfo();
+
 	const bool isAutoUpdate = CUpdateCheck::IsAutoUpdateFromMessage(wparam, lparam);
 	CString updateText = _T("Checking for updates...");
 	if(isAutoUpdate)
