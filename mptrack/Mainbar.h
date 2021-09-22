@@ -113,6 +113,7 @@ public:
 	BOOL SetCurrentSong(CSoundFile *pModDoc);
 
 	bool ShowUpdateInfo(const CString &newVersion, const CString &infoURL, bool fromCache);
+	void RemoveUpdateInfo();
 
 protected:
 	//{{AFX_MSG(CMainToolBar)

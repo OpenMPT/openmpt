@@ -481,6 +481,14 @@ bool CMainToolBar::ShowUpdateInfo(const CString &newVersion, const CString &info
 }
 
 
+void CMainToolBar::RemoveUpdateInfo()
+{
+	if(m_tooltip)
+		m_tooltip.Pop();
+	GetToolBarCtrl().SetState(ID_UPDATE_AVAILABLE, TBSTATE_HIDDEN);
+}
+
+
 BOOL CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 {
 	static CSoundFile *sndFile = nullptr;
@@ -572,7 +580,7 @@ void CMainToolBar::OnVScroll(UINT nCode, UINT nPos, CScrollBar *pScrollBar)
 		CSoundFile *pSndFile = pMainFrm->GetSoundFilePlaying();
 		if(pSndFile)
 		{
-			const CModSpecifications &specs = pSndFile->GetModSpecifications();
+			const auto &specs = pSndFile->GetModSpecifications();
 			int n;
 			if((n = mpt::signum(m_SpinTempo.GetPos32())) != 0)
 			{
