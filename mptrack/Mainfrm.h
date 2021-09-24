@@ -403,8 +403,7 @@ public:
 	void SetElapsedTime(double t) { m_dwTimeSec = static_cast<CSoundFile::samplecount_t>(t); }
 
 #if defined(MPT_ENABLE_UPDATE)
-	bool CanShowUpdateIndicator() const { return m_wndToolBar.IsVisible(); }
-	bool ShowUpdateIndicator(const UpdateCheckResult &result, const CString &releaseVersion, const CString &infoURL);
+	bool ShowUpdateIndicator(const UpdateCheckResult &result, const CString &releaseVersion, const CString &infoURL, bool showHighlight);
 #endif // MPT_ENABLE_UPDATE
 
 	CModTree *GetUpperTreeview() { return m_wndTree.m_pModTree; }

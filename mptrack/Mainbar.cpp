@@ -458,7 +458,7 @@ BOOL CMainToolBar::SetBaseOctave(UINT nOctave)
 }
 
 
-bool CMainToolBar::ShowUpdateInfo(const CString &newVersion, const CString &infoURL, bool fromCache)
+bool CMainToolBar::ShowUpdateInfo(const CString &newVersion, const CString &infoURL, bool showHighLight)
 {
 	GetToolBarCtrl().SetState(ID_UPDATE_AVAILABLE, TBSTATE_ENABLED);
 	if(m_bVertical)
@@ -473,11 +473,13 @@ bool CMainToolBar::ShowUpdateInfo(const CString &newVersion, const CString &info
 	CMainFrame::GetMainFrame()->GetWindowRect(rect);
 	LimitMax(pt.x, rect.right);
 
-	// Just show the icon if this information is from a previous run
-	if(fromCache)
+	if(showHighLight)
+	{
+		return m_tooltip.ShowUpdate(*this, newVersion, infoURL, rect, pt, ID_UPDATE_AVAILABLE);
+	} else
+	{
 		return true;
-
-	return m_tooltip.ShowUpdate(*this, newVersion, infoURL, rect, pt, ID_UPDATE_AVAILABLE);
+	}
 }
 
 

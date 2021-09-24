@@ -112,7 +112,7 @@ public:
 	BOOL SetBaseOctave(UINT nOctave);
 	BOOL SetCurrentSong(CSoundFile *pModDoc);
 
-	bool ShowUpdateInfo(const CString &newVersion, const CString &infoURL, bool fromCache);
+	bool ShowUpdateInfo(const CString &newVersion, const CString &infoURL, bool showHighLight);
 	void RemoveUpdateInfo();
 
 protected:

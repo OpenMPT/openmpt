@@ -715,77 +715,121 @@ UpdateCheckResult CUpdateCheck::SearchUpdate(const CUpdateCheck::Context &contex
 {
 	UpdateCheckResult result;
 
-	// Try to load cached results before establishing any connection
-	if(context.loadPersisted)
-	{
-		try
-		{
-			InputFile f(settings.persistencePath + P_("update-") + mpt::PathString::FromUnicode(GetChannelName(settings.channel)) + P_(".json"));
-			if(f.IsValid())
-			{
-				std::vector<std::byte> data = GetFileReader(f).ReadRawDataAsByteVector();
-				nlohmann::json::parse(mpt::buffer_cast<std::string>(data)).get<Update::versions>();
-				result.CheckTime = time_t{};
-				result.json = data;
-				return result;
-			}
-		} catch(mpt::out_of_memory e)
-		{
-			mpt::delete_out_of_memory(e);
-		} catch(const std::exception &)
-		{
-			// ignore
-		}
-	}
-
-	if(!context.window->SendMessage(context.msgProgress, context.autoUpdate ? 1 : 0, 0))
-	{
-		throw CUpdateCheck::Cancel();
-	}
-	if(!context.window->SendMessage(context.msgProgress, context.autoUpdate ? 1 : 0, 20))
-	{
-		throw CUpdateCheck::Cancel();
-	}
-	HTTP::InternetSession internet(Version::Current().GetOpenMPTVersionString());
-	if(!context.window->SendMessage(context.msgProgress, context.autoUpdate ? 1 : 0, 40))
-	{
-		throw CUpdateCheck::Cancel();
-	}
 #if MPT_UPDATE_LEGACY
 	if(settings.modeLegacy)
 	{
-		result = SearchUpdateLegacy(internet, settings);
+		if(!context.window->SendMessage(context.msgProgress, context.autoUpdate ? 1 : 0, 0))
+		{
+			throw CUpdateCheck::Cancel();
+		}
+		if(!context.window->SendMessage(context.msgProgress, context.autoUpdate ? 1 : 0, 10))
+		{
+			throw CUpdateCheck::Cancel();
+		}
+		{
+			HTTP::InternetSession internet(Version::Current().GetOpenMPTVersionString());
+			if(!context.window->SendMessage(context.msgProgress, context.autoUpdate ? 1 : 0, 30))
+			{
+				throw CUpdateCheck::Cancel();
+			}
+			result = SearchUpdateLegacy(internet, settings);
+			if(!context.window->SendMessage(context.msgProgress, context.autoUpdate ? 1 : 0, 50))
+			{
+				throw CUpdateCheck::Cancel();
+			}
+			SendStatistics(internet, settings, statistics);
+			if(!context.window->SendMessage(context.msgProgress, context.autoUpdate ? 1 : 0, 70))
+			{
+				throw CUpdateCheck::Cancel();
+			}
+		}
+		if(!context.window->SendMessage(context.msgProgress, context.autoUpdate ? 1 : 0, 90))
+		{
+			throw CUpdateCheck::Cancel();
+		}
+		CleanOldUpdates(settings, context);
+		if(!context.window->SendMessage(context.msgProgress, context.autoUpdate ? 1 : 0, 100))
+		{
+			throw CUpdateCheck::Cancel();
+		}
 	} else
 #endif // MPT_UPDATE_LEGACY
 	{
-		result = SearchUpdateModern(internet, settings);
-		try
+		if(!context.window->SendMessage(context.msgProgress, context.autoUpdate ? 1 : 0, 0))
 		{
-			mpt::SafeOutputFile f(settings.persistencePath + P_("update-") + mpt::PathString::FromUnicode(GetChannelName(settings.channel)) + P_(".json"), std::ios::binary);
-			f.stream().imbue(std::locale::classic());
-			mpt::IO::WriteRaw(f.stream(), mpt::as_span(result.json));
-			f.stream().flush();
-		} catch(mpt::out_of_memory e)
-		{
-			mpt::delete_out_of_memory(e);
-		} catch(const std::exception &)
-		{
-			// ignore
+			throw CUpdateCheck::Cancel();
 		}
-	}
-	if(!context.window->SendMessage(context.msgProgress, context.autoUpdate ? 1 : 0, 60))
-	{
-		throw CUpdateCheck::Cancel();
-	}
-	SendStatistics(internet, settings, statistics);
-	if(!context.window->SendMessage(context.msgProgress, context.autoUpdate ? 1 : 0, 80))
-	{
-		throw CUpdateCheck::Cancel();
-	}
-	CleanOldUpdates(settings, context);
-	if(!context.window->SendMessage(context.msgProgress, context.autoUpdate ? 1 : 0, 100))
-	{
-		throw CUpdateCheck::Cancel();
+		if(!context.window->SendMessage(context.msgProgress, context.autoUpdate ? 1 : 0, 10))
+		{
+			throw CUpdateCheck::Cancel();
+		}
+		bool loaded = false;
+		// try to load cached results before establishing any connection
+		if(context.loadPersisted)
+		{
+			try
+			{
+				InputFile f(settings.persistencePath + P_("update-") + mpt::PathString::FromUnicode(GetChannelName(settings.channel)) + P_(".json"));
+				if(f.IsValid())
+				{
+					std::vector<std::byte> data = GetFileReader(f).ReadRawDataAsByteVector();
+					nlohmann::json::parse(mpt::buffer_cast<std::string>(data)).get<Update::versions>();
+					result.CheckTime = time_t{};
+					result.json = data;
+					loaded = true;
+				}
+			} catch(mpt::out_of_memory e)
+			{
+				mpt::delete_out_of_memory(e);
+			} catch(const std::exception &)
+			{
+				// ignore
+			}
+		}
+		if(!context.window->SendMessage(context.msgProgress, context.autoUpdate ? 1 : 0, 20))
+		{
+			throw CUpdateCheck::Cancel();
+		}
+		if(!loaded)
+		{
+			HTTP::InternetSession internet(Version::Current().GetOpenMPTVersionString());
+			if(!context.window->SendMessage(context.msgProgress, context.autoUpdate ? 1 : 0, 30))
+			{
+				throw CUpdateCheck::Cancel();
+			}
+			result = SearchUpdateModern(internet, settings);
+			try
+			{
+				mpt::SafeOutputFile f(settings.persistencePath + P_("update-") + mpt::PathString::FromUnicode(GetChannelName(settings.channel)) + P_(".json"), std::ios::binary);
+				f.stream().imbue(std::locale::classic());
+				mpt::IO::WriteRaw(f.stream(), mpt::as_span(result.json));
+				f.stream().flush();
+			} catch(mpt::out_of_memory e)
+			{
+				mpt::delete_out_of_memory(e);
+			} catch(const std::exception &)
+			{
+				// ignore
+			}
+			if(!context.window->SendMessage(context.msgProgress, context.autoUpdate ? 1 : 0, 50))
+			{
+				throw CUpdateCheck::Cancel();
+			}
+			SendStatistics(internet, settings, statistics);
+			if(!context.window->SendMessage(context.msgProgress, context.autoUpdate ? 1 : 0, 70))
+			{
+				throw CUpdateCheck::Cancel();
+			}
+		}
+		if(!context.window->SendMessage(context.msgProgress, context.autoUpdate ? 1 : 0, 90))
+		{
+			throw CUpdateCheck::Cancel();
+		}
+		CleanOldUpdates(settings, context);
+		if(!context.window->SendMessage(context.msgProgress, context.autoUpdate ? 1 : 0, 100))
+		{
+			throw CUpdateCheck::Cancel();
+		}
 	}
 	return result;
 }
@@ -1477,34 +1521,38 @@ void CUpdateCheck::AcknowledgeSuccess(const UpdateCheckResult &result)
 
 void CUpdateCheck::ShowSuccessGUI(const bool autoUpdate, const UpdateCheckResult &result)
 {
-	const bool cachedAutoupdate = autoUpdate && result.IsFromCache();
-	bool modal = !cachedAutoupdate || !CMainFrame::GetMainFrame()->CanShowUpdateIndicator();
+	bool modal = !autoUpdate;
 
 #if MPT_UPDATE_LEGACY
 
 	if(TrackerSettings::Instance().UpdateLegacyMethod)
 	{
-		if(result.UpdateAvailable && (!autoUpdate || result.Version != TrackerSettings::Instance().UpdateIgnoreVersion))
-		{
-			if(!CMainFrame::GetMainFrame()->ShowUpdateIndicator(result, result.Version, result.URL))
-			{
-				modal = true;
-			}
-			if(modal)
-			{
-				UpdateDialog dlg(result.Version, result.Date, result.URL);
-				if(dlg.DoModal() == IDOK)
-				{
-					CTrackApp::OpenURL(result.URL);
-				}
-			}
-		} else if(!result.UpdateAvailable && !autoUpdate)
+		if(!result.UpdateAvailable)
 		{
 			if(modal)
 			{
-				Reporting::Information(U_("You already have the latest version of OpenMPT installed."), U_("OpenMPT Internet Update"));
+				Reporting::Information(U_("You already have the latest version of OpenMPT installed."), U_("OpenMPT Update"));
 			}
+			return;
 		}
+
+		// always show indicator, do not highlight it with a tooltip if we show a modal window later
+		if(!CMainFrame::GetMainFrame()->ShowUpdateIndicator(result, result.Version, result.URL, !modal))
+		{
+			// on failure to show indicator, continue and show modal dialog
+			modal = true;
+		}
+
+		if(!modal)
+		{
+			return;
+		}
+		UpdateDialog dlg(result.Version, result.Date, result.URL);
+		if(dlg.DoModal() != IDOK)
+		{
+			return;
+		}
+		CTrackApp::OpenURL(result.URL);
 		return;
 	}
 
@@ -1515,12 +1563,9 @@ void CUpdateCheck::ShowSuccessGUI(const bool autoUpdate, const UpdateCheckResult
 
 	if(!updateInfo.IsAvailable())
 	{
-		if(!autoUpdate)
+		if(modal)
 		{
-			if(modal)
-			{
-				Reporting::Information(U_("You already have the latest version of OpenMPT installed."), U_("OpenMPT Update"));
-			}
+			Reporting::Information(U_("You already have the latest version of OpenMPT installed."), U_("OpenMPT Update"));
 		}
 		return;
 	}
@@ -1551,12 +1596,17 @@ void CUpdateCheck::ShowSuccessGUI(const bool autoUpdate, const UpdateCheckResult
 			action = _T("&Download Now");
 		}
 
-		if(autoUpdate && CMainFrame::GetMainFrame()->ShowUpdateIndicator(result, mpt::ToCString(versionInfo.version), mpt::ToCString(versionInfo.changelog_url)))
-			return;
+		// always show indicator, do not highlight it with a tooltip if we show a modal window later or when it is a cached result
+		if(!CMainFrame::GetMainFrame()->ShowUpdateIndicator(result, mpt::ToCString(versionInfo.version), mpt::ToCString(versionInfo.changelog_url), !modal && !result.IsFromCache()))
+		{
+			// on failure to show indicator, continue and show modal dialog
+			modal = true;
+		}
 
-		// On failure to show tooltip, continue and show modal dialog - unless this is a cached auto-update result, which we only use to show a persistent indicator in the toolbar
-		if(!modal || cachedAutoupdate)
+		if(!modal)
+		{
 			return;
+		}
 
 		UpdateDialog dlg(
 			mpt::ToCString(versionInfo.version),

@@ -2620,14 +2620,19 @@ static std::unique_ptr<CUpdateCheckProgressDialog> g_UpdateCheckProgressDialog =
 #if defined(MPT_ENABLE_UPDATE)
 
 
-bool CMainFrame::ShowUpdateIndicator(const UpdateCheckResult &result, const CString &releaseVersion, const CString &infoURL)
+bool CMainFrame::ShowUpdateIndicator(const UpdateCheckResult &result, const CString &releaseVersion, const CString &infoURL, bool showHighlight)
 {
 	m_updateCheckResult = std::make_unique<UpdateCheckResult>(result);
-	if(CanShowUpdateIndicator())
-		return m_wndToolBar.ShowUpdateInfo(releaseVersion, infoURL, result.IsFromCache());
-	
-	GetMenu()->AppendMenu(MF_STRING, ID_UPDATE_AVAILABLE, _T("[Update Available]"));
-	return true;
+	if(m_wndToolBar.IsVisible())
+	{
+		return m_wndToolBar.ShowUpdateInfo(releaseVersion, infoURL, showHighlight);
+	} else
+	{
+		GetMenu()->RemoveMenu(ID_UPDATE_AVAILABLE, MF_BYCOMMAND);
+		GetMenu()->AppendMenu(MF_STRING, ID_UPDATE_AVAILABLE, _T("[Update Available]"));
+		DrawMenuBar();
+		return true;
+	}
 }
 
 
