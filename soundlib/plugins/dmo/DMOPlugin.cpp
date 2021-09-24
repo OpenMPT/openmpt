@@ -12,6 +12,7 @@
 
 #include "stdafx.h"
 
+#include "mpt/base/aligned_array.hpp"
 #if defined(MPT_WITH_DMO)
 #include "mpt/uuid/guid.hpp"
 #include "../../Sndfile.h"
@@ -82,8 +83,7 @@ DMOPlugin::DMOPlugin(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *m
 		m_pParamInfo = nullptr;
 	if (FAILED(m_pMediaObject->QueryInterface(IID_IMediaParams, (void **)&m_pMediaParams)))
 		m_pMediaParams = nullptr;
-	m_alignedBuffer.f32 = (float *)((((intptr_t)m_interleavedBuffer.f32) + 15) & ~15);
-
+	m_alignedBuffer.f32 = mpt::align_bytes<16, MIXBUFFERSIZE * 2>(m_interleavedBuffer.f32);
 	m_mixBuffer.Initialize(2, 2);
 	InsertIntoFactoryList();
 }
