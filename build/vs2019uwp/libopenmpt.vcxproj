@@ -538,7 +538,6 @@
       <PrecompiledHeader></PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <FloatingPointModel>Fast</FloatingPointModel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ProgramDataBaseFileName>$(OutDir)libopenmpt.pdb</ProgramDataBaseFileName>
       <DiagnosticsFormat>Caret</DiagnosticsFormat>
@@ -576,7 +575,6 @@
       <PrecompiledHeader></PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <FloatingPointModel>Fast</FloatingPointModel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ProgramDataBaseFileName>$(OutDir)libopenmpt.pdb</ProgramDataBaseFileName>
       <DiagnosticsFormat>Caret</DiagnosticsFormat>
@@ -614,7 +612,6 @@
       <PrecompiledHeader></PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <FloatingPointModel>Fast</FloatingPointModel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ProgramDataBaseFileName>$(OutDir)libopenmpt.pdb</ProgramDataBaseFileName>
       <DiagnosticsFormat>Caret</DiagnosticsFormat>
@@ -651,7 +648,6 @@
       <PrecompiledHeader></PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <FloatingPointModel>Fast</FloatingPointModel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ProgramDataBaseFileName>$(OutDir)libopenmpt.pdb</ProgramDataBaseFileName>
       <DiagnosticsFormat>Caret</DiagnosticsFormat>
@@ -826,7 +822,6 @@
       <PrecompiledHeader></PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <FloatingPointModel>Fast</FloatingPointModel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ProgramDataBaseFileName>$(IntDir)libopenmpt.compile.pdb</ProgramDataBaseFileName>
       <DiagnosticsFormat>Caret</DiagnosticsFormat>
@@ -864,7 +859,6 @@
       <PrecompiledHeader></PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <FloatingPointModel>Fast</FloatingPointModel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ProgramDataBaseFileName>$(IntDir)libopenmpt.compile.pdb</ProgramDataBaseFileName>
       <DiagnosticsFormat>Caret</DiagnosticsFormat>
@@ -902,7 +896,6 @@
       <PrecompiledHeader></PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <FloatingPointModel>Fast</FloatingPointModel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ProgramDataBaseFileName>$(IntDir)libopenmpt.compile.pdb</ProgramDataBaseFileName>
       <DiagnosticsFormat>Caret</DiagnosticsFormat>
@@ -939,7 +932,6 @@
       <PrecompiledHeader></PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <FloatingPointModel>Fast</FloatingPointModel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ProgramDataBaseFileName>$(IntDir)libopenmpt.compile.pdb</ProgramDataBaseFileName>
       <DiagnosticsFormat>Caret</DiagnosticsFormat>

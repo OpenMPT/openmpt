@@ -12,8 +12,8 @@ CXXFLAGS += $(CXXFLAGS_STDCXX)
 CFLAGS += $(CFLAGS_STDC)
 
 CPPFLAGS += 
-CXXFLAGS += -march=i386 -m80387 -mtune=pentium
-CFLAGS   += -march=i386 -m80387 -mtune=pentium
+CXXFLAGS += -march=i386 -m80387 -mtune=pentium -ffast-math
+CFLAGS   += -march=i386 -m80387 -mtune=pentium -ffast-math
 LDFLAGS  +=
 LDLIBS   += -lm
 ARFLAGS  := rcs

@@ -58,14 +58,12 @@
    defines { "MPT_BUILD_MSVC_STATIC" }
    flags { "Symbols" }
    flags { "OptimizeSpeed" }
-   flags { "FloatFast" }
 
   configuration "ReleaseShared"
    defines { "NDEBUG" }
    defines { "MPT_BUILD_MSVC_SHARED" }
    flags { "Symbols" }
    flags { "OptimizeSpeed" }
-   flags { "FloatFast" }
 
   configuration {}
    defines { "MPT_BUILD_MSVC" }

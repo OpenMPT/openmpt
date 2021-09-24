@@ -367,8 +367,8 @@ CXXFLAGS += -O0 -g -fno-omit-frame-pointer
 CFLAGS   += -O0 -g -fno-omit-frame-pointer
 else
 ifeq ($(OPTIMIZE_SIZE),1)
-CXXFLAGS += -Os -ffast-math
-CFLAGS   += -Os -ffast-math -fno-strict-aliasing
+CXXFLAGS += -Os
+CFLAGS   += -Os -fno-strict-aliasing
 LDFLAGS  += 
 ifeq ($(MPT_COMPILER_NOGCSECTIONS),1)
 else
@@ -378,8 +378,8 @@ LDFLAGS  += -Wl,--gc-sections
 endif
 else
 ifeq ($(OPTIMIZE),1)
-CXXFLAGS += -O3 -ffast-math
-CFLAGS   += -O3 -ffast-math -fno-strict-aliasing
+CXXFLAGS += -O3
+CFLAGS   += -O3 -fno-strict-aliasing
 endif
 endif
 endif

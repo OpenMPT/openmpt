@@ -188,7 +188,6 @@
 	 runtime "Release"
    optimize "On"
 	 omitframepointer "Off"
-   floatingpoint "Default"
 
   filter { "configurations:CheckedShared" }
    defines { "DEBUG" }
@@ -198,7 +197,6 @@
 	 runtime "Release"
    optimize "On"
 	 omitframepointer "Off"
-   floatingpoint "Default"
 
 	 
   filter { "configurations:Release" }
@@ -211,11 +209,6 @@
    staticruntime "On"
 	 runtime "Release"
    optimize "Speed"
---		if _OPTIONS["clang"] then
---			floatingpoint "Default"
---		else
-			floatingpoint "Fast"
---		end
 
   filter { "configurations:ReleaseShared" }
    defines { "NDEBUG" }
@@ -226,11 +219,6 @@
 		end
 	 runtime "Release"
    optimize "Speed"
---		if _OPTIONS["clang"] then
---			floatingpoint "Default"
---		else
-			floatingpoint "Fast"
---		end
 
 
 	filter {}
@@ -242,6 +230,12 @@
 
 		filter { "architecture:x86" }
 			vectorextensions "IA32"
+		filter {}
+		filter { "architecture:x86", "configurations:Release" }
+			floatingpoint "Fast"
+		filter {}
+		filter { "architecture:x86", "configurations:ReleaseShared" }
+			floatingpoint "Fast"
 		filter {}
 
 	else

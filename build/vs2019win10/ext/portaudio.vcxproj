@@ -617,7 +617,6 @@
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <FloatingPointModel>Fast</FloatingPointModel>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 /wd6001 /wd6011 /wd6053 /wd6216 /wd6217 /wd6255 /wd6258 /wd6385 /wd6386 /wd6387 /wd28159 %(AdditionalOptions)</AdditionalOptions>
@@ -643,7 +642,6 @@
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <FloatingPointModel>Fast</FloatingPointModel>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 /wd6001 /wd6011 /wd6053 /wd6216 /wd6217 /wd6255 /wd6258 /wd6385 /wd6386 /wd6387 /wd28159 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
@@ -668,7 +666,6 @@
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <FloatingPointModel>Fast</FloatingPointModel>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 /wd6001 /wd6011 /wd6053 /wd6216 /wd6217 /wd6255 /wd6258 /wd6385 /wd6386 /wd6387 /wd28159 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
@@ -693,7 +690,6 @@
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <FloatingPointModel>Fast</FloatingPointModel>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 /wd6001 /wd6011 /wd6053 /wd6216 /wd6217 /wd6255 /wd6258 /wd6385 /wd6386 /wd6387 /wd28159 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
@@ -903,7 +899,6 @@
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <FloatingPointModel>Fast</FloatingPointModel>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 /wd6001 /wd6011 /wd6053 /wd6216 /wd6217 /wd6255 /wd6258 /wd6385 /wd6386 /wd6387 /wd28159 %(AdditionalOptions)</AdditionalOptions>
@@ -931,7 +926,6 @@
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <FloatingPointModel>Fast</FloatingPointModel>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 /wd6001 /wd6011 /wd6053 /wd6216 /wd6217 /wd6255 /wd6258 /wd6385 /wd6386 /wd6387 /wd28159 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
@@ -958,7 +952,6 @@
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <FloatingPointModel>Fast</FloatingPointModel>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 /wd6001 /wd6011 /wd6053 /wd6216 /wd6217 /wd6255 /wd6258 /wd6385 /wd6386 /wd6387 /wd28159 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
@@ -985,7 +978,6 @@
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <FloatingPointModel>Fast</FloatingPointModel>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 /wd6001 /wd6011 /wd6053 /wd6216 /wd6217 /wd6255 /wd6258 /wd6385 /wd6386 /wd6387 /wd28159 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>

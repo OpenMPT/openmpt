@@ -530,7 +530,6 @@
       <PrecompiledHeader></PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <FloatingPointModel>Fast</FloatingPointModel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ProgramDataBaseFileName>$(OutDir)openmpt-ogg.pdb</ProgramDataBaseFileName>
       <CompileAs>CompileAsC</CompileAs>
@@ -566,7 +565,6 @@
       <PrecompiledHeader></PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <FloatingPointModel>Fast</FloatingPointModel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ProgramDataBaseFileName>$(OutDir)openmpt-ogg.pdb</ProgramDataBaseFileName>
       <CompileAs>CompileAsC</CompileAs>
@@ -602,7 +600,6 @@
       <PrecompiledHeader></PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <FloatingPointModel>Fast</FloatingPointModel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ProgramDataBaseFileName>$(OutDir)openmpt-ogg.pdb</ProgramDataBaseFileName>
       <CompileAs>CompileAsC</CompileAs>
@@ -637,7 +634,6 @@
       <PrecompiledHeader></PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <FloatingPointModel>Fast</FloatingPointModel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ProgramDataBaseFileName>$(OutDir)openmpt-ogg.pdb</ProgramDataBaseFileName>
       <CompileAs>CompileAsC</CompileAs>
@@ -806,7 +802,6 @@
       <PrecompiledHeader></PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <FloatingPointModel>Fast</FloatingPointModel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ProgramDataBaseFileName>$(IntDir)openmpt-ogg.compile.pdb</ProgramDataBaseFileName>
       <CompileAs>CompileAsC</CompileAs>
@@ -843,7 +838,6 @@
       <PrecompiledHeader></PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <FloatingPointModel>Fast</FloatingPointModel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ProgramDataBaseFileName>$(IntDir)openmpt-ogg.compile.pdb</ProgramDataBaseFileName>
       <CompileAs>CompileAsC</CompileAs>
@@ -880,7 +874,6 @@
       <PrecompiledHeader></PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <FloatingPointModel>Fast</FloatingPointModel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ProgramDataBaseFileName>$(IntDir)openmpt-ogg.compile.pdb</ProgramDataBaseFileName>
       <CompileAs>CompileAsC</CompileAs>
@@ -916,7 +909,6 @@
       <PrecompiledHeader></PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <FloatingPointModel>Fast</FloatingPointModel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ProgramDataBaseFileName>$(IntDir)openmpt-ogg.compile.pdb</ProgramDataBaseFileName>
       <CompileAs>CompileAsC</CompileAs>
