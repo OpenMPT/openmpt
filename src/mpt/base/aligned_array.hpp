@@ -43,7 +43,7 @@ T * align_elements(std::array<T, N> & a) {
 	std::size_t size = N * sizeof(T);
 	void * result = std::align(alignment_elements * sizeof(T), expected_elements * sizeof(T), buf, size);
 	assert(result);
-	return reinterpret_cast<T*>(result);
+	return reinterpret_cast<T *>(result);
 }
 
 template <std::size_t alignment_elements, std::size_t expected_elements, typename T, std::size_t N>
@@ -56,7 +56,7 @@ T * align_elements(T (&a)[N]) {
 	std::size_t size = N * sizeof(T);
 	void * result = std::align(alignment_elements * sizeof(T), expected_elements * sizeof(T), buf, size);
 	assert(result);
-	return reinterpret_cast<T*>(result);
+	return reinterpret_cast<T *>(result);
 }
 
 
@@ -72,7 +72,7 @@ T * align_bytes(std::array<T, N> & a) {
 	std::size_t size = N * sizeof(T);
 	void * result = std::align(alignment_bytes, expected_elements * sizeof(T), buf, size);
 	assert(result);
-	return reinterpret_cast<T*>(result);
+	return reinterpret_cast<T *>(result);
 }
 
 template <std::size_t alignment_bytes, std::size_t expected_elements, typename T, std::size_t N>
@@ -86,7 +86,7 @@ T * align_bytes(T (&a)[N]) {
 	std::size_t size = N * sizeof(T);
 	void * result = std::align(alignment_bytes, expected_elements * sizeof(T), buf, size);
 	assert(result);
-	return reinterpret_cast<T*>(result);
+	return reinterpret_cast<T *>(result);
 }
 
 
