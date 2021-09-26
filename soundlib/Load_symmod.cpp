@@ -493,7 +493,8 @@ struct SymInstrument
 			ctrlSmp::InvertSample(mptSmp, 0, 0, sndFile);
 
 		// Always use 16-bit data to help with heavily filtered 8-bit samples (like in Future_Dream.SymMOD)
-		if(!mptSmp.uFlags[CHN_16BIT] && (filterFlags || (volFadeFlag == 2) || filter))
+		const bool doVolFade = (volFadeFlag == 2) && (volFadeFrom <= 100) && (volFadeTo <= 100);
+		if(!mptSmp.uFlags[CHN_16BIT] && (filterFlags || doVolFade || filter))
 		{
 			int16 *newSample = static_cast<int16 *>(ModSample::AllocateSample(mptSmp.nLength, 2 * mptSmp.GetNumChannels()));
 			if(!newSample)
@@ -519,7 +520,7 @@ struct SymInstrument
 		}
 
 		// Volume Fade
-		if(volFadeFlag == 2)
+		if(doVolFade)
 		{
 			auto sampleData = mpt::as_span(mptSmp.sample16(), mptSmp.nLength * mptSmp.GetNumChannels());
 			int32 amp = volFadeFrom << 24, inc = Util::muldivr(volFadeTo - volFadeFrom, 1 << 24, static_cast<SmpLength>(sampleData.size()));
