@@ -663,11 +663,12 @@ void Opal::Channel::Output(int16_t &left, int16_t &right) {
     else {
         if (clk & 1)
             vibrato >>= 1;          // Odd positions are half the magnitude
+
+        vibrato <<= Octave;
+
         if (clk & 4)
             vibrato = -vibrato;     // The second half positions are negative
     }
-
-    vibrato <<= Octave;
 
     // Combine individual operator outputs
     int16_t out, acc;
