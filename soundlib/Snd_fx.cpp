@@ -3945,7 +3945,7 @@ void CSoundFile::NoteSlide(ModChannel &chn, uint32 param, bool slideUp, bool ret
 		if(chn.HasCustomTuning())
 			chn.m_PortamentoFineSteps += delta * chn.pModInstrument->pTuning->GetFineStepCount();
 		else
-			chn.nPeriod = GetPeriodFromNote(delta + GetNoteFromPeriod(chn.nPeriod, 0, chn.nC5Speed), 0, chn.nC5Speed);
+			chn.nPeriod = GetPeriodFromNote(delta + GetNoteFromPeriod(chn.nPeriod, chn.nFineTune, chn.nC5Speed), chn.nFineTune, chn.nC5Speed);
 
 		if(retrig)
 			chn.position.Set(0);
