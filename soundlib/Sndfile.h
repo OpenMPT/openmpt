@@ -1114,7 +1114,7 @@ public:
 	// Returns true if periods are actually plain frequency values in Hz.
 	bool PeriodsAreFrequencies() const noexcept
 	{
-		return m_playBehaviour[kPeriodsAreHertz] && GetType() != MOD_TYPE_XM;
+		return m_playBehaviour[kPeriodsAreHertz] && !UseFinetuneAndTranspose();
 	}
 	
 	// Returns true if the current format uses transpose+finetune rather than frequency in Hz to specify middle-C.

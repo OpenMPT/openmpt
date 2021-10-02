@@ -297,9 +297,6 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 		case MT2:
 			bytesRead = CopyMonoSample<SC::DecodeInt8Delta>(sample, sourceBuf, fileSize);
 			break;
-		case PCM7to8:		// 7 Bit stored as 8-Bit with highest bit unused / Mono / Signed / PCM
-			bytesRead = CopyMonoSample<SC::DecodeInt7>(sample, sourceBuf, fileSize);
-			break;
 		default:
 			MPT_ASSERT_NOTREACHED();
 			break;

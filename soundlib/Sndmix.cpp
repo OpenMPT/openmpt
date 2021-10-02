@@ -1580,7 +1580,7 @@ void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int32 &period, Tuning::NOTEI
 					}
 					period = GetPeriodFromNote(note, chn.nFineTune, chn.nC5Speed);
 
-					if(GetType() & (MOD_TYPE_DBM | MOD_TYPE_DIGI | MOD_TYPE_PSM | MOD_TYPE_STM))
+					if(GetType() & (MOD_TYPE_DBM | MOD_TYPE_DIGI | MOD_TYPE_PSM | MOD_TYPE_STM | MOD_TYPE_OKT))
 					{
 						// The arpeggio note offset remains effective after the end of the current row in ScreamTracker 2.
 						// This fixes the flute lead in MORPH.STM by Skaven, pattern 27.

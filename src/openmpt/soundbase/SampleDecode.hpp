@@ -43,18 +43,6 @@ namespace SC
 // from multiple std::byte values.
 
 
-// decodes signed 7bit values stored as signed int8
-struct DecodeInt7
-{
-	typedef std::byte input_t;
-	typedef int8 output_t;
-	static constexpr std::size_t input_inc = 1;
-	MPT_FORCEINLINE output_t operator()(const input_t *inBuf)
-	{
-		return std::clamp(mpt::byte_cast<int8>(*inBuf), static_cast<int8>(-64), static_cast<int8>(63)) * 2;
-	}
-};
-
 struct DecodeInt8
 {
 	typedef std::byte input_t;
