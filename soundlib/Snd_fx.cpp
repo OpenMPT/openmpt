@@ -3129,8 +3129,11 @@ bool CSoundFile::ProcessEffects()
 				if(param && !m_SongFlags[SONG_ITOLDEFFECTS])
 				{
 					// Old effects have different length interpretation (+1 for both on and off)
-					if(param & 0xF0) param -= 0x10;
-					if(param & 0x0F) param -= 0x01;
+					if(param & 0xF0)
+						param -= 0x10;
+					if(param & 0x0F)
+						param -= 0x01;
+					pChn->nTremorParam = static_cast<ModCommand::PARAM>(param);
 				}
 				pChn->nTremorCount |= 0x80; // set on/off flag
 			} else if(m_playBehaviour[kFT2Tremor])
@@ -3140,7 +3143,8 @@ bool CSoundFile::ProcessEffects()
 			}
 
 			pChn->nCommand = CMD_TREMOR;
-			if (param) pChn->nTremorParam = static_cast<ModCommand::PARAM>(param);
+			if(param)
+				pChn->nTremorParam = static_cast<ModCommand::PARAM>(param);
 
 			break;
 
