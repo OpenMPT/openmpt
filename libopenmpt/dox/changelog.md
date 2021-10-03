@@ -7,6 +7,17 @@ is just a high-level summary.
 
 ### libopenmpt 0.3.33-pre
 
+ *  [**Sec**] Possible crash when loading malformed MDL files. (r15658)
+
+ *  [**Bug**] Fixed various undefined behaviour found with ubsan.
+
+ *  IT: Tremor command I11 erroneously behaved like I00 (use previous parameter)
+    unless IT Old Effects were enabled.
+ *  PTM: Panning was translated wrong in some edge cases.
+ *  DBM: Echo enable effect parameter range checks were incorrect.
+
+ *  in_openmpt: Song metadata is no longer reverted when viewing file info.
+
 ### libopenmpt 0.3.32 (2021-08-22)
 
  *  [**Sec**] Possible crash with malformed modules when trying to access
