@@ -7,6 +7,19 @@ is just a high-level summary.
 
 ### libopenmpt 0.4.24-pre
 
+ *  [**Sec**] Possible crash when loading malformed MDL files. (r15643)
+
+ *  [**Bug**] Fixed various undefined behaviour found with ubsan.
+
+ *  IT: Tremor command I11 erroneously behaved like I00 (use previous parameter)
+    unless IT Old Effects were enabled.
+ *  PTM: Panning was translated wrong in some edge cases.
+ *  DBM: Echo enable effect parameter range checks were incorrect.
+ *  XM: Sample texts in XMs made with MadTracker are now also decoded using
+    Windows-1252 encoding.
+
+ *  in_openmpt: Song metadata is no longer reverted when viewing file info.
+
 ### libopenmpt 0.4.23 (2021-08-22)
 
  *  [**Sec**] Possible crash with malformed modules when trying to access
