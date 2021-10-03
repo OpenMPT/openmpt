@@ -400,7 +400,7 @@ static int infobox( const in_char * fn, HWND hWndParent ) {
 		MessageBox( hWndParent, StringReplace( self->cached_infotext, TEXT("\n"), TEXT("\r\n") ).c_str(), TEXT(SHORT_TITLE), MB_OK );
 #endif
 	}
-	return 0;
+	return INFOBOX_UNCHANGED;
 }
 
 
