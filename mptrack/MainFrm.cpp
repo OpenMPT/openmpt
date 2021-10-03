@@ -2718,12 +2718,6 @@ LRESULT CMainFrame::OnUpdateCheckCanceled(WPARAM wparam, LPARAM lparam)
 	if(isAutoUpdate)
 	{
 		SetHelpText(_T(""));
-	} else if(m_UpdateOptionsDialog)
-	{
-		// nothing
-	} else
-	{
-		// nothing
 	}
 	return TRUE;
 }
@@ -2754,12 +2748,6 @@ LRESULT CMainFrame::OnUpdateCheckFailure(WPARAM wparam, LPARAM lparam)
 	if(isAutoUpdate)
 	{
 		SetHelpText(_T(""));
-	} else if(m_UpdateOptionsDialog)
-	{
-		// nothing
-	} else
-	{
-		// nothing
 	}
 	return TRUE;
 }
@@ -2789,6 +2777,10 @@ LRESULT CMainFrame::OnUpdateCheckSuccess(WPARAM wparam, LPARAM lparam)
 		}
 	}
 	CUpdateCheck::ShowSuccessGUI(isAutoUpdate, result);
+	if(isAutoUpdate)
+	{
+		SetHelpText(_T(""));
+	}
 	return TRUE;
 }
 
