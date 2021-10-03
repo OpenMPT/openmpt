@@ -114,7 +114,7 @@ struct UpgradePatternData
 			}
 
 			// Command I11 accidentally behaved the same as command I00 with compatible IT tremor and old effects disabled
-			if(m.command == CMD_TREMOR && m.param == 0x11 && version < MAKE_VERSION_NUMERIC(1, 29, 12, 02") && sndFile.m_playBehaviour[kITTremor] && !sndFile.m_SongFlags[SONG_ITOLDEFFECTS])
+			if(m.command == CMD_TREMOR && m.param == 0x11 && version < MAKE_VERSION_NUMERIC(1, 29, 12, 02) && sndFile.m_playBehaviour[kITTremor] && !sndFile.m_SongFlags[SONG_ITOLDEFFECTS])
 			{
 				m.param = 0;
 			}
