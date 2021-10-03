@@ -31,6 +31,54 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.29.13.00 (3 October 2021, revision 15754)
+--------------------------------------------
+Tree view
+- [Imp] <js> When browsing song contents, Backspace now goes back to the folder containing the song when in the lower half of the tree view. There is now also a context menu option to close the song (http://bugs.openmpt.org/view.php?id=1498).
+- [Fix] <js> Module files are now also shown as directories in lower half of tree view when "Show All Files" is checked.
+
+Pattern tab
+- [Imp] <js> Grey out plugin names in channel headers if plugins are disabled on this channel.
+- [Imp] <js> Pressing the Application key on the order list now opens the context menu (http://bugs.openmpt.org/view.php?id=1501).
+- [Imp] <js> Added shortcuts for opening the channel context menu and channel plugin context menu (http://bugs.openmpt.org/view.php?id=1501).
+- [Fix] <js> Seeking with sample sync sometimes didn't compute the correct sample position with pingpong-looped samples.
+- [Fix] <js> In the instrument and effect columns, commands assigned to special keys (Num / Caps / Scroll Lock) were executed twice, so e.g. using scroll lock to toggle song follow mode didn't work in these columns.
+
+Sample tab
+- [Fix] <js> Switching from the pattern or instrument tab using a keyboard shortcut now updates the current instrument the same way as when clicking on the sample tab (http://forum.openmpt.org/index.php?topic=6675.0).
+- [Fix] <js> Switching between samples using keyboard shortcuts now updates the last used sample to use in the pattern and instrument editor just like when using the spin buttons or manually entering a sample number.
+
+Instrument tab
+- [Imp] <js> Pressing the Application key on the sample map now opens the context menu (http://bugs.openmpt.org/view.php?id=1501).
+- [Fix] <js> Switching from the pattern or sample tab using a keyboard shortcut now updates the current instrument the same way as when clicking on the instrument tab.  
+- [Fix] <js> Possible crash when releasing a note key that translates to a note above B-9.
+
+Comments tab
+- [Imp] <js> Added shortcut to start renaming samples / instruments (default: Ctrl+Enter).
+- [Fix] <js> Since OpenMPT 1.29.01.00, it was pretty much impossible to rename instruments due to auditioning (tx Gargaj).
+
+IT
+- [Fix] <js> Tremor: Command I11 erroneously behaved like I00 (use previous parameter), unless IT Old Effects were enabled.
+
+Other formats
+- [Fix] <js> PTM: Panning was translated wrong in some edge cases.
+- [Fix] <js> IMF / PTM: Note Slide commands were sometimes slightly off. 
+- [Fix] <js> DBM: Echo enable effect parameter range checks were incorrect.
+- [Fix] <js> Possible crash when loading malformed MDL files.
+
+Misc
+- [Imp] <js> SFZ: Added support for reading various other *_label opcodes. They are not used for import but if their value contains spaces, it should no longer confuse the parser.
+- [Fix] <js> When switching between tabs using keyboard shortcuts, and when switching between samples in the sample editor using keyboard shortcuts, the currently chosen instrument / sample is now updated correctly between pattern / samples / instrument editors (http://forum.openmpt.org/index.php?topic=6675.0).
+- [Fix] <js> SF2: Region panning was not calculated correctly.
+- [Fix] <js> SF2: Stereo sample merging didn't work for many soundfonts because panning values were stored for each envelope (of which there was one per instrument) rather than for each region.
+- [Fix] <js> DLS: The first region of every instrument was not imported in OpenMPT 1.29.12.00 (http://bugs.openmpt.org/view.php?id=1504).
+- [Fix] <js> When enabling the Display.HighResUI option, some file selector dialogs could hang (presumably due to a Windows bug) when hovering the file type dropdown on a mixed-DPI monitor setup. (http://bugs.openmpt.org/view.php?id=1490).
+- [Fix] <js> Key Config Dialog: Avoid bogus "Invalid Slot" message box when receiving MIDI CCs while the "Find Hotkey" input field is focussed.
+
+Third-Party Libraries
+- [Imp] Update nlohmann json (v3.10.2), mpg123 (v1.29.0)
+
+
 v1.29.12.00 (22 August 2021, revision 15545)
 --------------------------------------------
 Tree view
