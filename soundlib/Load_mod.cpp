@@ -762,9 +762,9 @@ static bool CheckMODMagic(const char magic[4], MODMagicResult &result)
 		result.madeWithTracker = UL_("Generic MOD-compatible Tracker");
 		result.isGenericMultiChannel = true;
 		result.numChannels = (magic[0] - '0') * 10 + magic[1] - '0';
-	} else if(!memcmp(magic, "TDZ", 3) && magic[3] >= '4' && magic[3] <= '9')
+	} else if(!memcmp(magic, "TDZ", 3) && magic[3] >= '1' && magic[3] <= '9')
 	{
-		// TDZx - TakeTracker
+		// TDZx - TakeTracker (only TDZ1-TDZ3 should exist, but historically this code only supported 4-9 channels, so we keep those for the unlikely case that they were actually used for something)
 		result.madeWithTracker = UL_("TakeTracker");
 		result.numChannels = magic[3] - '0';
 	} else
