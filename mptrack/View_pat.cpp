@@ -2895,10 +2895,15 @@ bool CViewPattern::DataEntry(bool up, bool coarse)
 			} else
 			{
 				int param = m.param + offset * (coarse ? 16 : 1);
-				ModCommand::PARAM minValue = 0, maxValue = 0xFF;
-				effectInfo.GetEffectInfo(effectInfo.GetIndexFromEffect(m.command, m.param), nullptr, false, &minValue, &maxValue);
-				Limit(param, (int)minValue, (int)maxValue);
-				m.param = (ModCommand::PARAM)param;
+				ModCommand::PARAM minValue = 0x00, maxValue = 0xFF;
+				if(!m.IsSlideUpDownCommand())
+				{
+					const auto effectIndex = effectInfo.GetIndexFromEffect(m.command, m.param);
+					effectInfo.GetEffectInfo(effectIndex, nullptr, false, &minValue, &maxValue);
+					minValue = static_cast<ModCommand::PARAM>(effectInfo.MapPosToValue(effectIndex, minValue));
+					maxValue = static_cast<ModCommand::PARAM>(effectInfo.MapPosToValue(effectIndex, maxValue));
+				}
+				m.param = static_cast<ModCommand::PARAM>(Clamp(param, minValue, maxValue));
 			}
 		}
 	});
