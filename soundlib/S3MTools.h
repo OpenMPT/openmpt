@@ -43,6 +43,7 @@ struct S3MFileHeader
 		trkBeRoTracker    = 0x6000,
 		trkCreamTracker   = 0x7000,
 
+		trkAkord          = 0x0208,
 		trkST3_00         = 0x1300,
 		trkST3_20         = 0x1320,
 		trkIT2_07         = 0x3207,
