@@ -691,6 +691,7 @@ struct MODMagicResult
 {
 	const mpt::uchar *madeWithTracker = nullptr;
 	uint32 invalidByteThreshold = MODSampleHeader::INVALID_BYTE_THRESHOLD;
+	uint16 patternDataOffset    = 1084;
 	CHANNELINDEX numChannels    = 0;
 	bool isNoiseTracker         = false;
 	bool isStartrekker          = false;
@@ -739,6 +740,8 @@ static bool CheckMODMagic(const char magic[4], MODMagicResult &result)
 		// Digital Tracker on Atari Falcon
 		result.madeWithTracker = UL_("Digital Tracker");
 		result.numChannels = magic[3] - '0';
+		// Digital Tracker MODs contain four bytes (00 40 00 00) right after the magic bytes which don't seem to do anything special.
+		result.patternDataOffset = 1088;
 	} else if((!memcmp(magic, "FLT", 3) || !memcmp(magic, "EXO", 3)) && magic[3] >= '4' && magic[3] <= '9')
 	{
 		// FLTx / EXOx - Startrekker by Exolon / Fairlight
@@ -895,7 +898,8 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 	// Read order information
 	MODFileHeader fileHeader;
 	file.ReadStruct(fileHeader);
-	file.Skip(4);  // Magic bytes (we already parsed these)
+
+	file.Seek(modMagicResult.patternDataOffset);
 
 	if(fileHeader.restartPos > 0)
 		maybeWOW = false;
@@ -1013,7 +1017,7 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 		}
 		fix7BitPanning = leftPanning && !extendedPanning && maxPanning >= ENABLE_MOD_PANNING_THRESHOLD;
 	}
-	file.Seek(1084);
+	file.Seek(modMagicResult.patternDataOffset);
 
 	const CHANNELINDEX readChannels = (isFLT8 ? 4 : m_nChannels); // 4 channels per pattern in FLT8 format.
 	if(isFLT8) numPatterns++; // as one logical pattern consists of two real patterns in FLT8 format, the highest pattern number has to be increased by one.
@@ -1179,7 +1183,7 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 	// Reading samples
 	if(loadFlags & loadSampleData)
 	{
-		file.Seek(1084 + (readChannels * 64 * 4) * numPatterns);
+		file.Seek(modMagicResult.patternDataOffset + (readChannels * 64 * 4) * numPatterns);
 		for(SAMPLEINDEX smp = 1; smp <= 31; smp++)
 		{
 			ModSample &sample = Samples[smp];
