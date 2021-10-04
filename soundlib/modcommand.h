@@ -187,6 +187,11 @@ public:
 	static bool IsNoteOrEmpty(NOTE note) { return note == NOTE_NONE || IsNote(note); }
 	// Returns true if any of the commands in this cell trigger a tone portamento.
 	bool IsPortamento() const { return command == CMD_TONEPORTAMENTO || command == CMD_TONEPORTAVOL || volcmd == VOLCMD_TONEPORTAMENTO; }
+	// Returns true if the cell contains a sliding or otherwise continuous effect command.
+	bool IsContinousCommand() const;
+	bool IsContinousVolColCommand() const;
+	// Returns true if the cell contains a sliding command with separate up/down nibbles.
+	bool IsSlideUpDownCommand() const;
 	// Returns true if the cell contains an effect command that may affect the global state of the module.
 	bool IsGlobalCommand() const { return IsGlobalCommand(command, param); }
 	static bool IsGlobalCommand(COMMAND command, PARAM param);

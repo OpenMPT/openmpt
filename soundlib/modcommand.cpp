@@ -870,6 +870,77 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 }
 
 
+bool ModCommand::IsContinousCommand() const
+{
+	switch(command)
+	{
+	case CMD_ARPEGGIO:
+	case CMD_PORTAMENTOUP:
+	case CMD_PORTAMENTODOWN:
+	case CMD_TONEPORTAMENTO:
+	case CMD_VIBRATO:
+	case CMD_TONEPORTAVOL:
+	case CMD_VIBRATOVOL:
+	case CMD_TREMOLO:
+	case CMD_VOLUMESLIDE:
+	case CMD_RETRIG:
+	case CMD_TREMOR:
+	case CMD_CHANNELVOLSLIDE:
+	case CMD_GLOBALVOLSLIDE:
+	case CMD_FINEVIBRATO:
+	case CMD_PANBRELLO:
+	case CMD_PANNINGSLIDE:
+	case CMD_SMOOTHMIDI:
+	case CMD_NOTESLIDEUP:
+	case CMD_NOTESLIDEDOWN:
+	case CMD_NOTESLIDEUPRETRIG:
+	case CMD_NOTESLIDEDOWNRETRIG:
+		return true;
+	case CMD_TEMPO:
+		return (param < 0x20);
+	default:
+		return false;
+	}
+}
+
+
+bool ModCommand::IsContinousVolColCommand() const
+{
+	switch(volcmd)
+	{
+	case VOLCMD_VOLSLIDEUP:
+	case VOLCMD_VOLSLIDEDOWN:
+	case VOLCMD_VIBRATOSPEED:
+	case VOLCMD_VIBRATODEPTH:
+	case VOLCMD_PANSLIDELEFT:
+	case VOLCMD_PANSLIDERIGHT:
+	case VOLCMD_TONEPORTAMENTO:
+	case VOLCMD_PORTAUP:
+	case VOLCMD_PORTADOWN:
+		return true;
+	default:
+		return false;
+	}
+}
+
+
+bool ModCommand::IsSlideUpDownCommand() const
+{
+	switch(command)
+	{
+		case CMD_VOLUMESLIDE:
+		case CMD_TONEPORTAVOL:
+		case CMD_VIBRATOVOL:
+		case CMD_GLOBALVOLSLIDE:
+		case CMD_CHANNELVOLSLIDE:
+		case CMD_PANNINGSLIDE:
+			return true;
+		default:
+			return false;
+	}
+}
+
+
 bool ModCommand::IsGlobalCommand(COMMAND command, PARAM param)
 {
 	switch(command)
@@ -989,6 +1060,7 @@ bool ModCommand::ConvertVolEffect(uint8 &effect, uint8 &param, bool force)
 	switch(effect)
 	{
 	case CMD_NONE:
+		effect = VOLCMD_NONE;
 		return true;
 	case CMD_VOLUME:
 		effect = VOLCMD_VOLUME;
