@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.3.34-pre
+
 ### libopenmpt 0.3.33 (2021-10-04)
 
  *  [**Sec**] Possible crash when loading malformed MDL files. (r15658)
