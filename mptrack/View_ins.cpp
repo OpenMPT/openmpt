@@ -326,7 +326,7 @@ bool CViewInstrument::EnvSetValue(int nPoint, int32 nTick, int32 nValue, bool mo
 			int mintick = (nPoint > 0) ? envelope->at(nPoint - 1).tick : 0;
 			int maxtick;
 			if(nPoint + 1 >= (int)envelope->size() || moveTail)
-				maxtick = Util::MaxValueOfType(maxtick);
+				maxtick = std::numeric_limits<decltype(maxtick)>::max();
 			else
 				maxtick = envelope->at(nPoint + 1).tick;
 
