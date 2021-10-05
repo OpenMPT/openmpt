@@ -102,10 +102,9 @@ BOOL CMidiMacroSetup::OnInitDialog()
 
 	UpdateDialog();
 
-#define ScalePixels(x) Util::ScalePixels(x, m_hWnd)
+	auto ScalePixels = [&](auto x) { return Util::ScalePixels(x, m_hWnd); };
 	int offsetx = ScalePixels(19), offsety = ScalePixels(30), separatorx = ScalePixels(4), separatory = ScalePixels(2);
 	int height = ScalePixels(18), widthMacro = ScalePixels(30), widthVal = ScalePixels(179), widthType = ScalePixels(135), widthBtn = ScalePixels(70);
-#undef ScalePixels
 
 	for(UINT m = 0; m < NUM_MACROS; m++)
 	{
