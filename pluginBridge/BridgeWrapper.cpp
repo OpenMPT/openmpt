@@ -941,6 +941,8 @@ intptr_t BridgeWrapper::DispatchToPlugin(VstOpcodeToPlugin opcode, int32 index, 
 
 	const DispatchMsg &resultMsg = msg.dispatch;
 
+	// cppcheck false-positive
+	// cppcheck-suppress nullPointerRedundantCheck
 	const void *extraData = useAuxMem ? auxMem->memory.Data<const char>() : reinterpret_cast<const char *>(&resultMsg + 1);
 	// Post-fix some opcodes
 	switch(opcode)
