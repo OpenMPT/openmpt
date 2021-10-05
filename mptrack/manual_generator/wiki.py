@@ -9,7 +9,7 @@
 from urllib.request import urlopen, urlretrieve
 import re, os, shutil, subprocess
 
-base_url = 'http://wiki.openmpt.org'
+base_url = 'https://wiki.openmpt.org'
 base_url_regex = 'https?://wiki.openmpt.org'
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
