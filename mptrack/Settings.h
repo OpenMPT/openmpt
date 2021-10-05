@@ -657,7 +657,7 @@ public:
 	}
 	bool IsDefault() const
 	{
-		conf.IsDefault(path);
+		return conf.IsDefault(path);
 	}
 	CachedSetting & Update()
 	{
