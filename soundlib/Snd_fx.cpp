@@ -999,7 +999,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 						startTick = playState.m_nMusicSpeed - 1;
 					} else if(m.volcmd == VOLCMD_OFFSET)
 					{
-						if(m.vol <= CountOf(pChn->pModSample->cues) && pChn->pModSample != nullptr)
+						if(pChn->pModSample != nullptr && m.vol <= CountOf(pChn->pModSample->cues))
 						{
 							SmpLength offset;
 							if(m.vol == 0)
