@@ -188,7 +188,7 @@ public:
 	// Returns true if any of the commands in this cell trigger a tone portamento.
 	bool IsPortamento() const { return command == CMD_TONEPORTAMENTO || command == CMD_TONEPORTAVOL || volcmd == VOLCMD_TONEPORTAMENTO; }
 	// Returns true if the cell contains a sliding or otherwise continuous effect command.
-	bool IsContinousCommand() const;
+	bool IsContinousCommand(const CSoundFile &sndFile) const;
 	bool IsContinousVolColCommand() const;
 	// Returns true if the cell contains a sliding command with separate up/down nibbles.
 	bool IsSlideUpDownCommand() const;
