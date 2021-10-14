@@ -2388,13 +2388,11 @@ bool CSoundFile::ReadNote()
 #endif // MODPLUG_TRACKER
 
 			// Adjusting volumes
-			if (m_MixerSettings.gnChannels >= 2)
 			{
-				int32 pan = chn.nRealPan;
-				Limit(pan, 0, 256);
+				int32 pan = (m_MixerSettings.gnChannels >= 2) ? Clamp(chn.nRealPan, 0, 256) : 128;
 
 				int32 realvol;
-				if (m_PlayConfig.getUseGlobalPreAmp())
+				if(m_PlayConfig.getUseGlobalPreAmp())
 				{
 					realvol = (chn.nRealVolume * kChnMasterVol) / 128;
 				} else
@@ -2406,7 +2404,7 @@ bool CSoundFile::ReadNote()
 				const PanningMode panningMode = m_PlayConfig.getPanningMode();
 				if(panningMode == PanningMode::SoftPanning || (panningMode == PanningMode::Undetermined && (m_MixerSettings.MixerFlags & SNDMIX_SOFTPANNING)))
 				{
-					if (pan < 128)
+					if(pan < 128)
 					{
 						chn.newLeftVol = (realvol * 128) / 256;
 						chn.newRightVol = (realvol * pan) / 256;
@@ -2431,11 +2429,6 @@ bool CSoundFile::ReadNote()
 					chn.newLeftVol = (realvol * (256 - pan)) / 256;
 					chn.newRightVol = (realvol * pan) / 256;
 				}
-
-			} else
-			{
-				chn.newLeftVol = (chn.nRealVolume * kChnMasterVol) / 256;
-				chn.newRightVol = chn.newLeftVol;
 			}
 			// Clipping volumes
 			//if (chn.nNewRightVol > 0xFFFF) chn.nNewRightVol = 0xFFFF;
@@ -2472,7 +2465,7 @@ bool CSoundFile::ReadNote()
 			chn.newRightVol /= (1 << extraAttenuation);
 
 			// Dolby Pro-Logic Surround
-			if(chn.dwFlags[CHN_SURROUND] && m_MixerSettings.gnChannels == 2) chn.newRightVol = - chn.newRightVol;
+			if(chn.dwFlags[CHN_SURROUND] && m_MixerSettings.gnChannels == 2) chn.newRightVol = -chn.newRightVol;
 
 			// Checking Ping-Pong Loops
 			if(chn.dwFlags[CHN_PINGPONGFLAG]) chn.increment.Negate();
