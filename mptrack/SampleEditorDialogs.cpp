@@ -533,7 +533,11 @@ void AddSilenceDlg::OnEditModeChanged()
 
 void AddSilenceDlg::OnUnitChanged()
 {
-	m_unit = static_cast<Unit>(static_cast<CComboBox *>(GetDlgItem(IDC_COMBO1))->GetCurSel());
+	const auto unit = static_cast<Unit>(static_cast<CComboBox*>(GetDlgItem(IDC_COMBO1))->GetCurSel());
+	if(m_unit == unit)
+		return;
+
+	m_unit = unit;
 	SmpLength duration = GetDlgItemInt(IDC_EDIT_ADDSILENCE);
 	if(m_unit == kSamples)
 	{
