@@ -677,7 +677,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	if(storedVersion < MPT_V("1.30.00.38"))
 	{
 		{
-			conf.Write<mpt::ustring>(U_("Export"), U_("FLAC_Mode"), U_("Lossless"));
+			conf.Write<Encoder::Mode>(U_("Export"), U_("FLAC_Mode"), Encoder::ModeLossless);
 			const int oldformat = conf.Read<int>(U_("Export"), U_("FLAC_Format"), 1);
 			Encoder::Format newformat = { Encoder::Format::Encoding::Integer, 24, mpt::get_endian() };
 			if (oldformat >= 0)
@@ -695,11 +695,11 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 					break;
 				}
 			}
-			conf.Write<int32>(U_("Export"), U_("FLAC_Format2"), newformat.AsInt());
+			conf.Write<Encoder::Format>(U_("Export"), U_("FLAC_Format2"), newformat);
 			conf.Forget(U_("Export"), U_("FLAC_Format"));
 		}
 		{
-			conf.Write<mpt::ustring>(U_("Export"), U_("Wave_Mode"), U_("Lossless"));
+			conf.Write<Encoder::Mode>(U_("Export"), U_("Wave_Mode"), Encoder::ModeLossless);
 			const int oldformat = conf.Read<int>(U_("Export"), U_("Wave_Format"), 1);
 			Encoder::Format newformat = { Encoder::Format::Encoding::Float, 32, mpt::endian::little };
 			if (oldformat >= 0)
@@ -726,11 +726,11 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 					break;
 				}
 			}
-			conf.Write<int32>(U_("Export"), U_("Wave_Format2"), newformat.AsInt());
+			conf.Write<Encoder::Format>(U_("Export"), U_("Wave_Format2"), newformat);
 			conf.Forget(U_("Export"), U_("Wave_Format"));
 		}
 		{
-			conf.Write<mpt::ustring>(U_("Export"), U_("AU_Mode"), U_("Lossless"));
+			conf.Write<Encoder::Mode>(U_("Export"), U_("AU_Mode"), Encoder::ModeLossless);
 			const int oldformat = conf.Read<int>(U_("Export"), U_("AU_Format"), 1);
 			Encoder::Format newformat = { Encoder::Format::Encoding::Float, 32, mpt::endian::big };
 			if(oldformat >= 0)
@@ -757,11 +757,11 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 					break;
 				}
 			}
-			conf.Write<int32>(U_("Export"), U_("AU_Format2"), newformat.AsInt());
+			conf.Write<Encoder::Format>(U_("Export"), U_("AU_Format2"), newformat);
 			conf.Forget(U_("Export"), U_("AU_Format"));
 		}
 		{
-			conf.Write<mpt::ustring>(U_("Export"), U_("RAW_Mode"), U_("Lossless"));
+			conf.Write<Encoder::Mode>(U_("Export"), U_("RAW_Mode"), Encoder::ModeLossless);
 			const int oldformat = conf.Read<int>(U_("Export"), U_("RAW_Format"), 1);
 			Encoder::Format newformat = { Encoder::Format::Encoding::Float, 32, mpt::get_endian() };
 			if(oldformat >= 0)
@@ -791,7 +791,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 					break;
 				}
 			}
-			conf.Write<int32>(U_("Export"), U_("RAW_Format2"), newformat.AsInt());
+			conf.Write<Encoder::Format>(U_("Export"), U_("RAW_Format2"), newformat);
 			conf.Forget(U_("Export"), U_("RAW_Format"));
 		}
 	}
