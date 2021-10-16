@@ -52,6 +52,8 @@
 				"CCACHE_CPP2": "1"
 			},
 			"buildcmd": [
+				"sudo apt update",
+				"sudo apt -y upgrade",
 				"sudo bash -c \" echo 'deb http://archive.ubuntu.com/ubuntu/ xenial-updates main restricted universe multiverse' >> /etc/apt/sources.list \" ",
 				"sudo add-apt-repository ppa:ubuntu-toolchain-r/test",
 				"sudo apt update",
@@ -112,6 +114,8 @@
 				"CCACHE_CPP2": "1"
 			},
 			"buildcmd": [
+				"sudo apt update",
+				"sudo apt -y upgrade",
 				"sudo bash -c \" echo 'deb http://archive.ubuntu.com/ubuntu/ xenial-updates main restricted universe multiverse' >> /etc/apt/sources.list \" ",
 				"sudo add-apt-repository ppa:ubuntu-toolchain-r/test",
 				"sudo apt update",
@@ -171,6 +175,8 @@
 				"CCACHE_CPP2": "1"
 			},
 			"buildcmd": [
+				"sudo apt update",
+				"sudo apt -y upgrade",
 				"sudo bash -c \" echo 'deb http://ports.ubuntu.com/ xenial-updates main restricted universe multiverse' >> /etc/apt/sources.list \" ",
 				"sudo add-apt-repository ppa:ubuntu-toolchain-r/test",
 				"sudo apt update",
@@ -230,6 +236,8 @@
 				"CCACHE_CPP2": "1"
 			},
 			"buildcmd": [
+				"sudo apt update",
+				"sudo apt -y upgrade",
 				"sudo bash -c \" echo 'deb http://ports.ubuntu.com/ xenial-updates main restricted universe multiverse' >> /etc/apt/sources.list \" ",
 				"sudo add-apt-repository ppa:ubuntu-toolchain-r/test",
 				"sudo apt update",
