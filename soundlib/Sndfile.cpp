@@ -579,6 +579,9 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 	m_PlayState.m_nextPatStartRow = 0;
 	m_PlayState.m_nSeqOverride = ORDERINDEX_INVALID;
 
+	if(UseFinetuneAndTranspose())
+		m_playBehaviour.reset(kPeriodsAreHertz);
+
 	m_nMaxOrderPosition = 0;
 
 	RecalculateSamplesPerTick();
