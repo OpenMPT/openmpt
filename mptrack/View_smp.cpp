@@ -439,9 +439,9 @@ void CViewSample::OnSetFocus(CWnd *pOldWnd)
 void CViewSample::SetZoom(int nZoom, SmpLength centeredSample)
 {
 
-	if (nZoom == m_nZoom)
+	if(nZoom == m_nZoom && centeredSample == SmpLength(-1))
 		return;
-	if (nZoom > MAX_ZOOM)
+	if(nZoom > MAX_ZOOM)
 		return;
 
 	UpdateScrollSize(nZoom, true, centeredSample);
@@ -3636,13 +3636,8 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 				case kcSampleCenterSustainEnd:		point = sample.nSustainEnd; break;
 				}
 				if(!m_nZoom)
-				{
 					SendCtrlMessage(CTRLMSG_SMP_SETZOOM, 1);
-					SetZoom(1, point);
-				} else
-				{
-					ScrollToSample(point);
-				}
+				ScrollToSample(point);
 			}
 			return wParam;
 		case kcPrevInstrument:	OnPrevInstrument(); return wParam;
