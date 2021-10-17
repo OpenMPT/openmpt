@@ -274,6 +274,19 @@
 
 	if _OPTIONS["win10"] then
 		defines { "_WIN32_WINNT=0x0A00" }
+		filter {}
+		filter { "architecture:x86" }
+			defines { "NTDDI_VERSION=0x0A000000" }
+		filter {}
+		filter { "architecture:x86_64" }
+			defines { "NTDDI_VERSION=0x0A000000" }
+		filter {}
+		filter { "architecture:ARM" }
+			defines { "NTDDI_VERSION=0x0A000004" } -- Windows 10 1709 Build 16299
+		filter {}
+		filter { "architecture:ARM64" }
+			defines { "NTDDI_VERSION=0x0A000004" } -- Windows 10 1709 Build 16299
+		filter {}
 	elseif _OPTIONS["win81"] then
 		defines { "_WIN32_WINNT=0x0603" }
 	elseif _OPTIONS["win7"] then

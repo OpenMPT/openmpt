@@ -108,7 +108,19 @@
 		elseif _OPTIONS["target"] == "winstore10" then
 			defines { "_WIN32_WINNT=0x0A00" }
 			premake.vstudio.storeapp = "10.0"
-
+			configuration {}
+			configuration { "x32" }
+				defines { "NTDDI_VERSION=0x0A000000" }
+			configuration {}
+			configuration { "x64" }
+				defines { "NTDDI_VERSION=0x0A000000" }
+			configuration {}
+			configuration { "ARM" }
+				defines { "NTDDI_VERSION=0x0A000000" }
+			configuration {}
+			configuration { "ARM64" }
+				defines { "NTDDI_VERSION=0x0A000004" }
+			configuration {}
 		end
 
 	end
