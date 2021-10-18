@@ -232,7 +232,7 @@ int frame_output_format(mpg123_handle *fr)
 	int try_float = (p->flags & MPG123_FLOAT_FALLBACK) ? 0 : 1;
 	/* initialize new format, encoding comes later */
 	nf.channels = fr->stereo;
-
+	mdebug("native frame format: %d ch @ %ld Hz", fr->stereo, frame_freq(fr));
 	// I intended the forcing stuff to be weaved into the format support table,
 	// but this probably will never happen, as this would change library behaviour.
 	// One could introduce an additional effective format table that takes for
@@ -352,7 +352,9 @@ int frame_output_format(mpg123_handle *fr)
 			(p->flags & MPG123_FORCE_MONO ? "mono, " : "") )
 	,	( p->flags & MPG123_FORCE_FLOAT ? "float, " :
 			(p->flags & MPG123_FORCE_8BIT ? "8bit, " : "") )
-	,	frame_freq(fr),  frame_freq(fr)>>1, frame_freq(fr)>>2 );
+	,	frame_freq(fr)>>p->down_sample
+	,	frame_freq(fr)>>(p->down_sample ? p->down_sample : 1)
+	,	frame_freq(fr)>>2 );
 /*	if(NOQUIET && p->verbose <= 1) print_capabilities(fr); */
 
 	fr->err = MPG123_BAD_OUTFORMAT;
