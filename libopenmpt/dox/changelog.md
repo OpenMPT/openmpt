@@ -26,6 +26,8 @@ is just a high-level summary.
 
  *  in_openmpt: Song metadata is no longer reverted when viewing file info.
 
+ *  mpg123: Update to v1.29.0 (2021-09-06).
+
 ### libopenmpt 0.5.11 (2021-08-22)
 
  *  [**Sec**] Possible crash with malformed modules when trying to access
