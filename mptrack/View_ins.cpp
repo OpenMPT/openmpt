@@ -256,6 +256,7 @@ LRESULT CViewInstrument::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 			INSTRUMENTVIEWSTATE *pState = (INSTRUMENTVIEWSTATE *)lParam;
 			if(pState->initialized)
 			{
+				m_zoom = pState->zoom;
 				SetCurrentInstrument(m_nInstrument, pState->nEnv);
 				m_bGrid = pState->bGrid;
 			}
@@ -267,6 +268,7 @@ LRESULT CViewInstrument::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 		{
 			INSTRUMENTVIEWSTATE *pState = (INSTRUMENTVIEWSTATE *)lParam;
 			pState->initialized = true;
+			pState->zoom = m_zoom;
 			pState->nEnv = m_nEnv;
 			pState->bGrid = m_bGrid;
 		}

@@ -53,6 +53,7 @@ struct SAMPLEVIEWSTATE
 
 struct INSTRUMENTVIEWSTATE
 {
+	float zoom = 4;
 	EnvelopeType nEnv = ENV_VOLUME;
 	INSTRUMENTINDEX initialInstrument = 0;
 	bool bGrid = false;
