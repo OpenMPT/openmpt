@@ -543,7 +543,7 @@ Chunk<TChunkHeader, TFileCursor> ReadNextChunk(TFileCursor & f, typename TFileCu
 	}
 	typename TFileCursor::pos_type dataSize = result.header.GetLength();
 	result.data = f.ReadChunk(dataSize);
-	if (alignment != 0) {
+	if (alignment > 1) {
 		if ((dataSize % alignment) != 0) {
 			f.Skip(alignment - (dataSize % alignment));
 		}
