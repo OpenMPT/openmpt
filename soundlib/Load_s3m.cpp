@@ -579,7 +579,9 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 
 		// Skip pattern length indication.
 		// Some modules, for example http://aminet.net/mods/8voic/s3m_hunt.lha seem to have a wrong pattern length -
-		// If you strictly adhere the pattern length, you won't read the patterns correctly in that module.
+		// If you strictly adhere the pattern length, you won't read some patterns (e.g. 17) correctly in that module.
+		// It's most likely a broken copy because there are other versions of the track which don't have this issue.
+		// Still, we don't really need this information, so we just ignore it.
 		file.Skip(2);
 
 		// Read pattern data
@@ -873,7 +875,6 @@ bool CSoundFile::SaveS3M(std::ostream &f) const
 
 						if(note == NOTE_NONE)
 						{
-							// No Note, or note is too low
 							note = s3mNoteNone;
 						} else if(ModCommand::IsSpecialNote(note))
 						{
