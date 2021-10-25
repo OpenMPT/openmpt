@@ -202,6 +202,8 @@ struct SymVirtualInst
 
 			const ModSample &sourceSmp = sndFile.GetSample(event.inst + 1);
 			const double increment = std::pow(2.0, (event.note - events[0].note) / 12.0 + finetune / 96.0) * sourceSmp.nC5Speed * rateFactor;
+			if(increment <= 0)
+				continue;
 
 			chn.increment = SamplePosition::FromDouble(increment);
 			chn.pCurrentSample = sourceSmp.samplev();
