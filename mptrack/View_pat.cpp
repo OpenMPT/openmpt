@@ -2908,7 +2908,7 @@ int CViewPattern::GetDefaultVolume(const ModCommand &m, ModCommand::INSTR lastIn
 	const CSoundFile &sndFile = *GetSoundFile();
 	SAMPLEINDEX sample = GetDocument()->GetSampleIndex(m, lastInstr);
 	if(sample)
-		return std::min(sndFile.GetSample(sample).nVolume, uint16(64)) / 4u;
+		return std::min(sndFile.GetSample(sample).nVolume, uint16(256)) / 4u;
 	else if(m.instr > 0 && m.instr <= sndFile.GetNumInstruments() && sndFile.Instruments[m.instr] != nullptr && sndFile.Instruments[m.instr]->HasValidMIDIChannel())
 		return std::min(sndFile.Instruments[m.instr]->nGlobalVol, uint32(64));  // For instrument plugins
 	else
