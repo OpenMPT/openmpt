@@ -476,7 +476,7 @@ bool CSoundFile::ReadDSym(FileReader &file, ModLoadingFlags loadFlags)
 			mptSmp.nSustainEnd = mptSmp.nSustainStart + loopLen;
 			mptSmp.uFlags.set(CHN_SUSTAINLOOP);
 		}
-		mptSmp.nVolume = file.ReadUint8() * 4u;
+		mptSmp.nVolume = std::min(file.ReadUint8(), uint8(64)) * 4u;
 		mptSmp.nFineTune = MOD2XMFineTune(file.ReadUint8());
 
 		if(!mptSmp.nLength)
