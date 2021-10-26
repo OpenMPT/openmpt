@@ -5143,7 +5143,7 @@ void CSoundFile::SampleOffset(ModChannel &chn, SmpLength param) const
 // 
 void CSoundFile::ReverseSampleOffset(ModChannel &chn, ModCommand::PARAM param) const
 {
-	if(chn.pModSample != nullptr)
+	if(chn.pModSample != nullptr && chn.nLength > 0)
 	{
 		chn.dwFlags.set(CHN_PINGPONGFLAG);
 		chn.dwFlags.reset(CHN_LOOP);
