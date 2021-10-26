@@ -1851,7 +1851,7 @@ void CSoundFile::NoteChange(ModChannel *pChn, int note, bool bPorta, bool bReset
 			// ProTracker "oneshot" loops (if loop start is 0, play the whole sample once and then repeat until loop end)
 			if(m_playBehaviour[kMODOneShotLoops] && pChn->nLoopStart == 0) pChn->nLoopEnd = pChn->nLength = pSmp->nLength;
 
-			if(pChn->dwFlags[CHN_REVERSE])
+			if(pChn->dwFlags[CHN_REVERSE] && pChn->nLength > 0)
 			{
 				pChn->dwFlags.set(CHN_PINGPONGFLAG);
 				pChn->position.SetInt(pChn->nLength - 1);
