@@ -5210,7 +5210,7 @@ void CSoundFile::ProcessSampleOffset(ModChannel& chn, CHANNELINDEX nChn, const P
 {
 	const ModCommand &m = chn.rowCommand;
 	uint32 extendedRows = 0;
-	SmpLength offset = CalculateXParam(playState.m_nPattern, playState.m_nRow, nChn, &extendedRows);
+	SmpLength offset = CalculateXParam(playState.m_nPattern, playState.m_nRow, nChn, &extendedRows), highOffset = 0;
 	if(!extendedRows)
 	{
 		// No X-param (normal behaviour)
@@ -5218,11 +5218,11 @@ void CSoundFile::ProcessSampleOffset(ModChannel& chn, CHANNELINDEX nChn, const P
 		offset <<= 8;
 		if(offset)
 			chn.oldOffset = offset;
-		else if(!isPercentageOffset)
+		else if(m.volcmd != VOLCMD_OFFSET)
 			offset = chn.oldOffset;
 
 		if(!isPercentageOffset)
-			offset += static_cast<SmpLength>(chn.nOldHiOffset) << 16;
+			highOffset = static_cast<SmpLength>(chn.nOldHiOffset) << 16;
 	}
 	if(m.volcmd == VOLCMD_OFFSET)
 	{
@@ -5230,8 +5230,9 @@ void CSoundFile::ProcessSampleOffset(ModChannel& chn, CHANNELINDEX nChn, const P
 			offset = Util::muldivr_unsigned(chn.nLength, offset, 256u << (8u * std::max(uint32(1), extendedRows)));  // o00 + Oxx = Percentage Offset
 		else if(m.vol <= std::size(ModSample().cues) && chn.pModSample != nullptr)
 			offset += chn.pModSample->cues[m.vol - 1];  // Offset relative to cue point
+		chn.oldOffset = offset;
 	}
-	SampleOffset(chn, offset);
+	SampleOffset(chn, offset + highOffset);
 }
 
 
