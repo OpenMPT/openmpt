@@ -947,7 +947,10 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					{
 						chn.nPan = setPan;
 					}
+				}
 
+				if(m.IsNote() || m_playBehaviour[kApplyOffsetWithoutNote])
+				{
 					if(m.command == CMD_OFFSET)
 					{
 						ProcessSampleOffset(chn, nChn, playState);
@@ -3009,7 +3012,7 @@ bool CSoundFile::ProcessEffects()
 					break;
 
 				case VOLCMD_OFFSET:
-					if (triggerNote && chn.pModSample && vol <= std::size(chn.pModSample->cues))
+					if(triggerNote && chn.pModSample && vol <= std::size(chn.pModSample->cues))
 					{
 						SmpLength offset;
 						if(vol == 0)
@@ -3107,7 +3110,7 @@ bool CSoundFile::ProcessEffects()
 
 		// Set Offset
 		case CMD_OFFSET:
-			if (triggerNote)
+			if(triggerNote)
 			{
 				// FT2 compatibility: Portamento + Offset = Ignore offset
 				// Test case: porta-offset.xm
@@ -5259,11 +5262,11 @@ void CSoundFile::SampleOffset(ModChannel &chn, SmpLength param) const
 		param /= 2u;
 	}
 
-	if(chn.rowCommand.IsNote())
+	if(chn.rowCommand.IsNote() || m_playBehaviour[kApplyOffsetWithoutNote])
 	{
 		// IT compatibility: If this note is not mapped to a sample, ignore it.
 		// Test case: empty_sample_offset.it
-		if(chn.pModInstrument != nullptr)
+		if(chn.pModInstrument != nullptr && chn.rowCommand.IsNote())
 		{
 			SAMPLEINDEX smp = chn.pModInstrument->Keyboard[chn.rowCommand.note - NOTE_MIN];
 			if(smp == 0 || smp > GetNumSamples())
@@ -5323,7 +5326,7 @@ void CSoundFile::SampleOffset(ModChannel &chn, SmpLength param) const
 
 void CSoundFile::ReverseSampleOffset(ModChannel &chn, ModCommand::PARAM param) const
 {
-	if(chn.pModSample != nullptr && chn.nLength > 0)
+	if(chn.pModSample != nullptr && chn.pModSample->nLength > 0)
 	{
 		chn.dwFlags.set(CHN_PINGPONGFLAG);
 		chn.dwFlags.reset(CHN_LOOP);

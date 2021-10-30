@@ -1048,6 +1048,7 @@ bool CSoundFile::ReadDMF(FileReader &file, ModLoadingFlags loadFlags)
 	m_nDefaultTempo.Set(120);
 	m_nDefaultGlobalVolume = 256;
 	m_nSamplePreAmp = m_nVSTiVolume = 48;
+	m_playBehaviour.set(kApplyOffsetWithoutNote);
 
 	return true;
 }

@@ -541,6 +541,7 @@ enum PlayBehaviour
 	kOPLNoteOffOnNoteChange,        // Send note-off events for old note on every note change
 	kFT2PortaResetDirection,        // Reset portamento direction when reaching portamento target from below
 	kApplyUpperPeriodLimit,         // Enforce m_nMaxPeriod
+	kApplyOffsetWithoutNote,        // Offset commands even work when there's no note next to them (e.g. DMF, MDL, PLM formats)
 
 	// Add new play behaviours here.
 

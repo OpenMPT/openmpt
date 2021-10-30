@@ -148,6 +148,7 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 	InitializeGlobals(MOD_TYPE_PLM);
 	InitializeChannels();
 	m_SongFlags = SONG_ITOLDEFFECTS;
+	m_playBehaviour.set(kApplyOffsetWithoutNote);
 
 	m_modFormat.formatName = U_("Disorder Tracker 2");
 	m_modFormat.type = U_("plm");
