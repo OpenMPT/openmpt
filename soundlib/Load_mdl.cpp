@@ -324,16 +324,32 @@ static bool ImportMDLCommands(ModCommand &m, uint8 vol, uint8 e1, uint8 e2, uint
 
 	What's more is, if there's another effect in the second column, it's ALSO processed in addition to the
 	offset, and the second data byte is shared between the two effects. */
+	uint32 offset = uint32_max;
+	uint8 otherCmd = CMD_NONE;
 	if(e1 == CMD_OFFSET)
 	{
 		// EFy -xx => offset yxx00
+		offset = ((p1 & 0x0F) << 8) | p2;
 		p1 = (p1 & 0x0F) ? 0xFF : p2;
 		if(e2 == CMD_OFFSET)
 			e2 = CMD_NONE;
+		else
+			otherCmd = e2;
 	} else if (e2 == CMD_OFFSET)
 	{
-		// --- EFy => offset y0000 (best we can do without doing a ton of extra work is 0xff00)
+		// --- EFy => offset y0000
+		offset = (p2 & 0x0F) << 8;
 		p2 = (p2 & 0x0F) ? 0xFF : 0;
+		otherCmd = e1;
+	}
+
+	if(offset != uint32_max && offset > 0xFF && ModCommand::GetEffectWeight(otherCmd) < ModCommand::GetEffectWeight(CMD_OFFSET))
+	{
+		m.command = CMD_OFFSET;
+		m.param = static_cast<ModCommand::PARAM>(offset & 0xFF);
+		m.volcmd = VOLCMD_OFFSET;
+		m.vol = static_cast<ModCommand::VOL>(offset >> 8);
+		return otherCmd != CMD_NONE || vol != 0;
 	}
 
 	if(vol)
@@ -523,6 +539,7 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 
 			ModSample &sample = Samples[sampleIndex];
 			sample.Initialize();
+			sample.Set16BitCuePoints();
 
 			chunk.ReadString<mpt::String::spacePadded>(m_szNames[sampleIndex], 32);
 			chunk.ReadString<mpt::String::spacePadded>(sample.filename, 8);

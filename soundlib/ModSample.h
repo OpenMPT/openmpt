@@ -163,6 +163,8 @@ struct ModSample
 	// Check if the sample's cue points are the default cue point set.
 	bool HasCustomCuePoints() const;
 	void SetDefaultCuePoints();
+	// Set cue points so that they are suitable for regular offset command extension
+	void Set16BitCuePoints();
 
 	void SetAdlib(bool enable, OPLPatch patch = OPLPatch{{}});
 };

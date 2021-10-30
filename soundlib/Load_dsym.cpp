@@ -341,7 +341,12 @@ bool CSoundFile::ReadDSym(FileReader &file, ModLoadingFlags loadFlags)
 						break;
 					case 0x09:  // 09 xxx Set Sample Offset
 						m->command = CMD_OFFSET;
-						m->param = mpt::saturate_cast<ModCommand::PARAM>(param >> 1);
+						m->param = static_cast<ModCommand::PARAM>(param >> 1);
+						if(param >= 0x200)
+						{
+							m->volcmd = VOLCMD_OFFSET;
+							m->vol >>= 1;
+						}
 						break;
 					case 0x0A:  // 0A xyz Volume Slide + Fine Slide Up
 					case 0x2A:  // 2A xyz Volume Slide + Fine Slide Down
@@ -478,6 +483,7 @@ bool CSoundFile::ReadDSym(FileReader &file, ModLoadingFlags loadFlags)
 		}
 		mptSmp.nVolume = std::min(file.ReadUint8(), uint8(64)) * 4u;
 		mptSmp.nFineTune = MOD2XMFineTune(file.ReadUint8());
+		mptSmp.Set16BitCuePoints();
 
 		if(!mptSmp.nLength)
 			continue;

@@ -479,7 +479,7 @@ void ModSample::TransposeToFrequency()
 }
 
 
-// Return a pair of {tranpose, finetune}
+// Return a pair of {transpose, finetune}
 std::pair<int8, int8> ModSample::FrequencyToTranspose(uint32 freq)
 {
 	if(!freq)
@@ -527,6 +527,17 @@ void ModSample::SetDefaultCuePoints()
 		cues[i] = (i + 1) << 11;
 	}
 }
+
+
+void ModSample::Set16BitCuePoints()
+{
+	// Cue points that are useful for extending regular offset command
+	for(int i = 0; i < 9; i++)
+	{
+		cues[i] = (i + 1) << 16;
+	}
+}
+
 
 void ModSample::SetAdlib(bool enable, OPLPatch patch)
 {
