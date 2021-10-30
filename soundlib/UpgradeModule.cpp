@@ -563,6 +563,7 @@ void CSoundFile::UpgradeModule()
 			{ kITDoNotOverrideChannelPan,     MPT_V("1.29.00.22") },
 			{ kITPatternLoopWithJumps,        MPT_V("1.29.00.32") },
 			{ kITDCTBehaviour,                MPT_V("1.29.00.57") },
+			{ kITPitchPanSeparation,          MPT_V("1.30.00.53") },
 		};
 
 		for(const auto &b : behaviours)

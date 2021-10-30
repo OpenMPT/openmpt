@@ -1607,7 +1607,9 @@ void CSoundFile::InstrumentChange(ModChannel &chn, uint32 instr, bool bPorta, bo
 
 void CSoundFile::NoteChange(ModChannel &chn, int note, bool bPorta, bool bResetEnv, bool bManual, CHANNELINDEX channelHint) const
 {
-	if (note < NOTE_MIN) return;
+	if(note < NOTE_MIN)
+		return;
+	const int origNote = note;
 	const ModSample *pSmp = chn.pModSample;
 	const ModInstrument *pIns = chn.pModInstrument;
 
@@ -1743,7 +1745,17 @@ void CSoundFile::NoteChange(ModChannel &chn, int note, bool bPorta, bool bResetE
 
 	// IT compatibility: Sample and instrument panning is only applied on note change, not instrument change
 	// Test case: PanReset.it
-	if(m_playBehaviour[kITPanningReset]) ApplyInstrumentPanning(chn, pIns, pSmp);
+	if(m_playBehaviour[kITPanningReset])
+		ApplyInstrumentPanning(chn, pIns, pSmp);
+
+	// IT compatibility: Pitch/Pan Separation can be overriden by panning commands, and shouldn't be affected by note-off commands
+	// Test case: PitchPanReset.it
+	if(m_playBehaviour[kITPitchPanSeparation] && pIns && pIns->nPPS)
+	{
+		if(!chn.nRestorePanOnNewNote)
+			chn.nRestorePanOnNewNote = static_cast<uint16>(chn.nPan + 1);
+		ProcessPitchPanSeparation(chn.nPan, origNote, *pIns);
+	}
 
 	if(bResetEnv && !bPorta)
 	{
@@ -1984,7 +1996,7 @@ void CSoundFile::NoteChange(ModChannel &chn, int note, bool bPorta, bool bResetE
 }
 
 
-// Apply sample or instrumernt panning
+// Apply sample or instrument panning
 void CSoundFile::ApplyInstrumentPanning(ModChannel &chn, const ModInstrument *instr, const ModSample *smp) const
 {
 	int32 newPan = int32_min;

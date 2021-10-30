@@ -987,7 +987,7 @@ public:
 	void SetDspEffects(uint32 DSPMask);
 	uint32 GetSampleRate() const { return m_MixerSettings.gdwMixingFreq; }
 #ifndef NO_EQ
-	void SetEQGains(const uint32 *pGains, const uint32 *pFreqs, bool bReset = false){ m_EQ.SetEQGains(pGains, pFreqs, bReset, m_MixerSettings.gdwMixingFreq); } // 0=-12dB, 32=+12dB
+	void SetEQGains(const uint32 *pGains, const uint32 *pFreqs, bool bReset = false) { m_EQ.SetEQGains(pGains, pFreqs, bReset, m_MixerSettings.gdwMixingFreq); } // 0=-12dB, 32=+12dB
 #endif // NO_EQ
 public:
 	bool ReadNote();
@@ -1035,7 +1035,7 @@ protected:
 
 	void ProcessInstrumentFade(ModChannel &chn, int &vol) const;
 
-	void ProcessPitchPanSeparation(ModChannel &chn) const;
+	static void ProcessPitchPanSeparation(int32 &pan, int note, const ModInstrument &instr);
 	void ProcessPanbrello(ModChannel &chn) const;
 
 	void ProcessArpeggio(CHANNELINDEX nChn, int32 &period, Tuning::NOTEINDEXTYPE &arpeggioSteps);
@@ -1118,11 +1118,11 @@ public:
 	}
 	
 	// Returns true if the current format uses transpose+finetune rather than frequency in Hz to specify middle-C.
-	static constexpr bool UseFinetuneAndTranspose(MODTYPE type)
+	static constexpr bool UseFinetuneAndTranspose(MODTYPE type) noexcept
 	{
 		return (type & (MOD_TYPE_AMF0 | MOD_TYPE_DIGI | MOD_TYPE_MED | MOD_TYPE_MOD | MOD_TYPE_MTM | MOD_TYPE_OKT | MOD_TYPE_SFX | MOD_TYPE_STP | MOD_TYPE_XM));
 	}
-	bool UseFinetuneAndTranspose() const
+	bool UseFinetuneAndTranspose() const noexcept
 	{
 		return UseFinetuneAndTranspose(GetType());
 	}

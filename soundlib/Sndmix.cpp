@@ -1355,16 +1355,13 @@ void CSoundFile::ProcessInstrumentFade(ModChannel &chn, int &vol) const
 }
 
 
-void CSoundFile::ProcessPitchPanSeparation(ModChannel &chn) const
+void CSoundFile::ProcessPitchPanSeparation(int32 &pan, int note, const ModInstrument &instr)
 {
-	const ModInstrument *pIns = chn.pModInstrument;
-
-	if ((pIns->nPPS) && (chn.nNote != NOTE_NONE))
-	{
-		// with PPS = 16 / PPC = C-5, E-6 will pan hard right (and D#6 will not)
-		int pandelta = (int)chn.nRealPan + (int)((int)(chn.nNote - pIns->nPPC - NOTE_MIN) * (int)pIns->nPPS) / 2;
-		chn.nRealPan = Clamp(pandelta, 0, 256);
-	}
+	if(!instr.nPPS || note == NOTE_NONE)
+		return;
+	// with PPS = 16 / PPC = C-5, E-6 will pan hard right (and D#6 will not)
+	int32 delta = (note - instr.nPPC - NOTE_MIN) * instr.nPPS / 2;
+	pan = Clamp(pan + delta, 0, 256);
 }
 
 
@@ -2132,7 +2129,9 @@ bool CSoundFile::ReadNote()
 				ProcessVolumeEnvelope(chn, vol);
 				ProcessInstrumentFade(chn, vol);
 				ProcessPanningEnvelope(chn);
-				ProcessPitchPanSeparation(chn);
+
+				if(!m_playBehaviour[kITPitchPanSeparation] && chn.nNote != NOTE_NONE && chn.pModInstrument && chn.pModInstrument->nPPS != 0)
+					ProcessPitchPanSeparation(chn.nRealPan, chn.nNote, *chn.pModInstrument);
 			} else
 			{
 				// No Envelope: key off => note cut
