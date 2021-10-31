@@ -255,11 +255,11 @@ protected:
 	struct PlugInstrChannel
 	{
 		int32 midiPitchBendPos = 0;  // Current Pitch Wheel position, in 16.11 fixed point format. Lowest bit is used for indicating that vibrato was applied. Vibrato offset itself is not stored in this value.
-		uint16 currentProgram = 0;
-		uint16 currentBank = 0;
+		uint16 currentProgram = uint16_max;
+		uint16 currentBank = uint16_max;
 		uint8  noteOnMap[128][MAX_CHANNELS];
 
-		void ResetProgram() { currentProgram = 0; currentBank = 0; }
+		void ResetProgram() { currentProgram = uint16_max; currentBank = uint16_max; }
 	};
 
 	std::array<PlugInstrChannel, 16> m_MidiCh;  // MIDI channel state
