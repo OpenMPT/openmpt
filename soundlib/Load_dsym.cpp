@@ -130,7 +130,7 @@ static std::vector<std::byte> DecompressDSymLZW(FileReader &file, uint32 size)
 
 static std::vector<std::byte> DecompressDSymSigmaDelta(FileReader &file, uint32 size)
 {
-	const uint8 maxRunLength = file.ReadUint8();
+	const uint8 maxRunLength = std::max(file.ReadUint8(), uint8(1));
 
 	BitReader bitFile(file);
 	const auto startPos = bitFile.GetPosition();
@@ -141,7 +141,7 @@ static std::vector<std::byte> DecompressDSymSigmaDelta(FileReader &file, uint32 
 	std::vector<std::byte> output(size);
 
 	uint32 pos = 0;
-	uint8 runLength = 0;
+	uint8 runLength = maxRunLength;
 	uint8 numBits = 8;
 	uint8 accum = static_cast<uint8>(bitFile.ReadBits(numBits));
 	output[pos++] = mpt::byte_cast<std::byte>(accum);
@@ -155,7 +155,7 @@ static std::vector<std::byte> DecompressDSymSigmaDelta(FileReader &file, uint32 
 			if(numBits >= 9)
 				break;
 			numBits++;
-			runLength = 0;
+			runLength = maxRunLength;
 			continue;
 		}
 
@@ -165,17 +165,18 @@ static std::vector<std::byte> DecompressDSymSigmaDelta(FileReader &file, uint32 
 			accum += static_cast<uint8>(value >> 1);
 		output[pos++] = mpt::byte_cast<std::byte>(accum);
 
-		if((value << 1) >= (1u << numBits))
+		// Reset run length if high bit is set
+		if((value >> (numBits - 1u)) != 0)
 		{
-			runLength = 0;
+			runLength = maxRunLength;
 			continue;
 		}
 		// Decrease bit width
-		if(++runLength >= maxRunLength)
+		if(--runLength == 0)
 		{
 			if(numBits > 1)
 				numBits--;
-			runLength = 0;
+			runLength = maxRunLength;
 		}
 	}
 
@@ -267,18 +268,15 @@ bool CSoundFile::ReadDSym(FileReader &file, ModLoadingFlags loadFlags)
 	const auto sequence = mpt::as_span(reinterpret_cast<uint16le *>(sequenceData.data()), sequenceData.size() / 2u);
 
 	std::vector<std::byte> trackData;
-	if(fileHeader.numTracks)
+	trackData.reserve(fileHeader.numTracks * 256u);
+	// For some reason, patterns are stored in 512K chunks
+	for(uint16 offset = 0; offset < fileHeader.numTracks; offset += 2000)
 	{
-		trackData.reserve(fileHeader.numTracks * 256u);
-		// For some reason, patterns are stored in 512K chunks
-		for(uint16 offset = 0; offset < fileHeader.numTracks; offset += 2000)
-		{
-			const uint32 chunkSize = std::min(fileHeader.numTracks - offset, 2000) * 256;
-			std::vector<std::byte> chunk;
-			if(!ReadDSymChunk(file, chunk, chunkSize))
-				return false;
-			trackData.insert(trackData.end(), chunk.begin(), chunk.end());
-		}
+		const uint32 chunkSize = std::min(fileHeader.numTracks - offset, 2000) * 256;
+		std::vector<std::byte> chunk;
+		if(!ReadDSymChunk(file, chunk, chunkSize))
+			return false;
+		trackData.insert(trackData.end(), chunk.begin(), chunk.end());
 	}
 	const auto tracks = mpt::byte_cast<mpt::span<uint8>>(mpt::as_span(trackData));
 
