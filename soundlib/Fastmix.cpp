@@ -307,8 +307,6 @@ void CSoundFile::CreateStereoMix(int count)
 
 	CHANNELINDEX nchmixed = 0;
 
-	const bool ITPingPongMode = m_playBehaviour[kITPingPongMode];
-
 	for(uint32 nChn = 0; nChn < m_nMixChannels; nChn++)
 	{
 		ModChannel &chn = m_PlayState.Chn[m_PlayState.ChnMix[nChn]];
