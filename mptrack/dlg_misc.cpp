@@ -693,6 +693,7 @@ void CLegacyPlaybackSettingsDlg::OnFilterStringChanged()
 		case kApplyUpperPeriodLimit: desc = _T("Apply lower frequency limit"); break;
 		case kApplyOffsetWithoutNote: desc = _T("Offset commands work without a note next to them"); break;
 		case kITPitchPanSeparation: desc = _T("Pitch / Pan Separation can be overridden by panning commands"); break;
+		case kImprecisePingPongLoops: desc = _T("Use old imprecise ping-pong loop end calculation"); break;
 
 		default: MPT_ASSERT_NOTREACHED();
 		}

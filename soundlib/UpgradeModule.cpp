@@ -443,6 +443,18 @@ void CSoundFile::UpgradeModule()
 		}
 	}
 
+	if(m_dwLastSavedWithVersion < MPT_V("1.30.00.54"))
+	{
+		for(SAMPLEINDEX i = 1; i <= GetNumSamples(); i++)
+		{
+			if(Samples[i].HasSampleData() && Samples[i].uFlags[CHN_PINGPONGLOOP | CHN_PINGPONGSUSTAIN])
+			{
+				m_playBehaviour.set(kImprecisePingPongLoops);
+				break;
+			}
+		}
+	}
+
 	Patterns.ForEachModCommand(UpgradePatternData(*this));
 
 	// Convert compatibility flags
