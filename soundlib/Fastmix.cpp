@@ -36,11 +36,11 @@ struct MixLoopState
 	const int8 * lookaheadPointer = nullptr;
 	SmpLength lookaheadStart = 0;
 	uint32 maxSamples = 0;
-	const bool ITPingPongMode;
+	const uint8 ITPingPongDiff;
 	const bool precisePingPongLoops;
 
 	MixLoopState(const CSoundFile &sndFile, const ModChannel &chn)
-		: ITPingPongMode{sndFile.m_playBehaviour[kITPingPongMode]}
+		: ITPingPongDiff{sndFile.m_playBehaviour[kITPingPongMode] ? uint8(1) : uint8(0)}
 		, precisePingPongLoops{!sndFile.m_playBehaviour[kImprecisePingPongLoops]}
 	{
 		if(chn.pCurrentSample == nullptr)
@@ -117,16 +117,14 @@ struct MixLoopState
 				{
 					chn.position.Set(nLoopStart, 0);
 				}
-				nInc.Negate();
-				chn.increment = nInc;
 				if(chn.dwFlags[CHN_PINGPONGLOOP])
 				{
 					chn.dwFlags.reset(CHN_PINGPONGFLAG); // go forward
+					nInc.Negate();
+					chn.increment = nInc;
 				} else
 				{
-					chn.dwFlags.set(CHN_PINGPONGFLAG);
 					chn.position.SetInt(chn.nLength - 1);
-					chn.increment.Negate();
 				}
 				if(!chn.dwFlags[CHN_LOOP] || chn.position.GetUInt() >= chn.nLength)
 				{
@@ -159,7 +157,11 @@ struct MixLoopState
 					// More accurate loop end overshoot calculation.
 					// Test cases: BidiPrecision.it, BidiPrecision.xm
 					const auto overshoot = chn.position - SamplePosition(chn.nLength, 0);
-					chn.position = SamplePosition(chn.nLength - (ITPingPongMode ? 1 : 0), 0) - overshoot;
+					const auto loopLength = chn.nLoopEnd - chn.nLoopStart - ITPingPongDiff;
+					if(overshoot.GetUInt() < loopLength)
+						chn.position = SamplePosition(chn.nLength - ITPingPongDiff, 0) - overshoot;
+					else
+						chn.position = SamplePosition(chn.nLoopStart, 0);
 				} else
 				{
 					SamplePosition invFract = chn.position.GetInvertedFract();
@@ -167,7 +169,7 @@ struct MixLoopState
 					if(chn.position.GetUInt() <= chn.nLoopStart || chn.position.GetUInt() >= chn.nLength)
 					{
 						// Impulse Tracker's software mixer would put a -2 (instead of -1) in the following line (doesn't happen on a GUS)
-						chn.position.SetInt(chn.nLength - std::min(chn.nLength, ITPingPongMode ? SmpLength(2) : SmpLength(1)));
+						chn.position.SetInt(chn.nLength - std::min(chn.nLength, static_cast<SmpLength>(ITPingPongDiff + 1)));
 					}
 				}
 			} else
