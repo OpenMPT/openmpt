@@ -4773,19 +4773,20 @@ void CSoundFile::InvertLoop(ModChannel &chn)
 
 // Process a MIDI Macro.
 // Parameters:
-// [in] nChn: Mod channel to apply macro on
-// [in] isSmooth: If true, internal macros are interpolated between two rows
-// [in] macro: Actual MIDI Macro string
-// [in] param: Parameter for parametric macros (Z00 - Z7F)
-// [in] plugin: Plugin to send MIDI message to (if not specified but needed, it is autodetected)
+// nChn: Mod channel to apply macro on
+// isSmooth: If true, internal macros are interpolated between two rows
+// macro: Actual MIDI Macro string
+// param: Parameter for parametric macros (Z00 - Z7F)
+// plugin: Plugin to send MIDI message to (if not specified but needed, it is autodetected)
 void CSoundFile::ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, const char *macro, uint8 param, PLUGINDEX plugin)
 {
 	ModChannel &chn = m_PlayState.Chn[nChn];
 	const ModInstrument *pIns = GetNumInstruments() ? chn.pModInstrument : nullptr;
 
 	uint8 out[MACRO_LENGTH];
-	uint32 outPos = 0;	// output buffer position, which also equals the number of complete bytes
-	const uint8 lastZxxParam = chn.lastZxxParam;
+	uint32 outPos = 0;  // output buffer position, which also equals the number of complete bytes
+	const uint8 lastZxxParam = chn.lastZxxParam;  // always interpolate based on original value in case z appears multiple times in macro string
+	uint8 updateZxxParam = 0xFF;                  // avoid updating lastZxxParam immediately if macro contains both internal and external MIDI message
 	bool firstNibble = true;
 
 	for(uint32 pos = 0; pos < (MACRO_LENGTH - 1) && macro[pos]; pos++)
@@ -4898,8 +4899,12 @@ void CSoundFile::ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, const char *
 				// Interpolation for external MIDI messages - interpolation for internal messages
 				// is handled separately to allow for more than 7-bit granularity where it's possible
 				data = static_cast<uint8>(CalculateSmoothParamChange(lastZxxParam, data));
+				chn.lastZxxParam = data;
+				updateZxxParam = 0x80;
+			} else if(updateZxxParam == 0xFF)
+			{
+				updateZxxParam = data;
 			}
-			chn.lastZxxParam = data;
 		} else if(macro[pos] == 's')
 		{
 			// SysEx Checksum (not an original Impulse Tracker macro variable, but added for convenience)
@@ -4947,6 +4952,8 @@ void CSoundFile::ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, const char *
 		// Finish current byte
 		outPos++;
 	}
+	if(updateZxxParam < 0x80)
+		chn.lastZxxParam = updateZxxParam;
 
 	// Macro string has been parsed and translated, now send the message(s)...
 	uint32 sendPos = 0;
@@ -5189,11 +5196,9 @@ uint32 CSoundFile::SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned
 #endif // NO_PLUGINS
 
 		return macroLen;
-
 	}
 
 	return 0;
-
 }
 
 
