@@ -1235,9 +1235,12 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			// Notes set instrument panning, not instrument numbers: Added 2021-05-02, https://github.com/schismtracker/schismtracker/commit/648f5116f984815c69e11d018b32dfec53c6b97a
 			if(schismDateVersion < SchismVersionFromDate<2021, 05, 02>::date)
 				m_playBehaviour.reset(kITPanningReset);
-			// Imprecise calculation of ping-pong loop wraparound: Added 2021-11-01, https://github.com/schismtracker/schismtracker/commit/def918a38db2eaa25ffc6e40fd63b9b8ef7ab8a5
+			// Imprecise calculation of ping-pong loop wraparound: Added 2021-11-01, https://github.com/schismtracker/schismtracker/commit/22cbb9b676e9c2c9feb7a6a17deca7a17ac138cc
 			if(schismDateVersion < SchismVersionFromDate<2021, 11, 01>::date)
 				m_playBehaviour.set(kImprecisePingPongLoops);
+			// Pitch/Pan Separation can be overridden by panning commands: Added 2021-11-01, https://github.com/schismtracker/schismtracker/commit/6e9f1207015cae0fe1b829fff7bb867e02ec6dea
+			if(schismDateVersion < SchismVersionFromDate<2021, 11, 01>::date)
+				m_playBehaviour.reset(kITPitchPanSeparation);
 			break;
 		case 4:
 			madeWithTracker = MPT_UFORMAT("pyIT {}.{}")((fileHeader.cwtv & 0x0F00) >> 8, mpt::ufmt::hex0<2>(fileHeader.cwtv & 0xFF));
