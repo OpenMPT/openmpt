@@ -662,7 +662,8 @@ bool CSelectPluginDlg::VerifyPlugin(VSTPluginLib *plug, CWnd *parent)
 		{
 			plug->useBridge = p.useBridge;
 			plug->shareBridgeInstance = p.shareInstance;
-			plug->modernBridge = p.modernBridge;
+			if(!p.modernBridge)
+				plug->modernBridge = false;
 			plug->WriteToCache();
 			break;
 		}

@@ -94,7 +94,7 @@ DWORD CVstPlugin::SETryOrError(Tfn fn)
 }
 
 
-AEffect *CVstPlugin::LoadPlugin(bool maskCrashes, VSTPluginLib &plugin, HMODULE &library, bool forceBridge, bool forceLegacy)
+AEffect *CVstPlugin::LoadPlugin(bool maskCrashes, VSTPluginLib &plugin, HMODULE &library, BridgeMode bridgeMode)
 {
 	const mpt::PathString &pluginPath = plugin.dllPath;
 
@@ -102,11 +102,32 @@ AEffect *CVstPlugin::LoadPlugin(bool maskCrashes, VSTPluginLib &plugin, HMODULE 
 	library = nullptr;
 
 	const bool isNative = plugin.IsNative(false);
-	if(forceBridge || plugin.useBridge || !isNative)
+	if(bridgeMode != BridgeMode::Automatic || plugin.useBridge || !isNative)
 	{
+		if(bridgeMode == BridgeMode::DetectRequiredBridgeMode)
+		{
+			// First try modern bridge, then legacy bridge
+			plugin.modernBridge = true;
+			try
+			{
+				effect = BridgeWrapper::Create(plugin, false);
+				if(effect != nullptr)
+				{
+					return effect;
+				}
+			} catch(BridgeWrapper::BridgeNotFoundException &)
+			{
+			} catch(BridgeWrapper::BridgeException &)
+			{
+			}
+			// Retry with legacy bridge
+			plugin.useBridge = true;
+			plugin.modernBridge = false;
+		}
+
 		try
 		{
-			effect = BridgeWrapper::Create(plugin, forceLegacy);
+			effect = BridgeWrapper::Create(plugin, bridgeMode == BridgeMode::DetectRequiredBridgeMode);
 			if(effect != nullptr)
 			{
 				return effect;
@@ -140,6 +161,7 @@ AEffect *CVstPlugin::LoadPlugin(bool maskCrashes, VSTPluginLib &plugin, HMODULE 
 		// If plugin was marked to use the plugin bridge but this somehow doesn't work (e.g. because the bridge is missing),
 		// disable the plugin bridge for this plugin.
 		plugin.useBridge = false;
+		plugin.modernBridge = true;
 	}
 
 	{
