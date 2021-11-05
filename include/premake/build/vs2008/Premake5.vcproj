@@ -43,7 +43,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/MP /Ox /MT /W4 /EHsc"
+				AdditionalOptions="/MP /GL /Ox /MT /W4 /EHsc"
 				AdditionalIncludeDirectories="..\..\contrib\lua\src;..\..\contrib\luashim;..\..\contrib\zlib;..\..\contrib\libzip;..\..\contrib\curl\include"
 				PreprocessorDefinitions="PREMAKE_COMPRESSION;CURL_STATICLIB;PREMAKE_CURL;NDEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
 				UsePrecompiledHeader="0"
@@ -64,7 +64,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalOptions="/NOLOGO /INCREMENTAL:NO /GL"
+				AdditionalOptions="/NOLOGO /INCREMENTAL:NO /LTCG"
 				AdditionalDependencies="ole32.lib ws2_32.lib advapi32.lib version.lib"
 				OutputFile="$(OutDir)\premake5.exe"
 				LinkIncremental="0"
@@ -118,7 +118,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/MP /Ox /MT /W4 /EHsc"
+				AdditionalOptions="/MP /GL /Ox /MT /W4 /EHsc"
 				AdditionalIncludeDirectories="..\..\contrib\lua\src;..\..\contrib\luashim;..\..\contrib\zlib;..\..\contrib\libzip;..\..\contrib\curl\include"
 				PreprocessorDefinitions="PREMAKE_COMPRESSION;CURL_STATICLIB;PREMAKE_CURL;NDEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
 				UsePrecompiledHeader="0"
@@ -139,7 +139,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalOptions="/NOLOGO /INCREMENTAL:NO /GL"
+				AdditionalOptions="/NOLOGO /INCREMENTAL:NO /LTCG"
 				AdditionalDependencies="ole32.lib ws2_32.lib advapi32.lib version.lib"
 				OutputFile="$(OutDir)\premake5.exe"
 				LinkIncremental="0"
@@ -1302,6 +1302,22 @@
 							>
 						</File>
 					</Filter>
+					<Filter
+						Name="vc2019"
+						>
+						<File
+							RelativePath="..\..\modules\vstudio\tests\vc2019\test_compile_settings.lua"
+							>
+						</File>
+						<File
+							RelativePath="..\..\modules\vstudio\tests\vc2019\test_link.lua"
+							>
+						</File>
+						<File
+							RelativePath="..\..\modules\vstudio\tests\vc2019\test_toolset_settings.lua"
+							>
+						</File>
+					</Filter>
 				</Filter>
 			</Filter>
 			<Filter
@@ -1497,10 +1513,6 @@
 				</File>
 				<File
 					RelativePath="..\..\src\base\languages.lua"
-					>
-				</File>
-				<File
-					RelativePath="..\..\src\base\moduledownloader.lua"
 					>
 				</File>
 				<File
@@ -1761,6 +1773,14 @@
 				</File>
 				<File
 					RelativePath="..\..\src\host\premake_main.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\host\resource.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\host\resource.rc"
 					>
 				</File>
 				<File
@@ -2039,6 +2059,10 @@
 			<Filter
 				Name="tools"
 				>
+				<File
+					RelativePath="..\..\tests\tools\test_clang.lua"
+					>
+				</File>
 				<File
 					RelativePath="..\..\tests\tools\test_dotnet.lua"
 					>

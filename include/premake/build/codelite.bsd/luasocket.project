@@ -78,7 +78,7 @@
         <Preprocessor Value="CURL_STATICLIB"/>
         <Preprocessor Value="PREMAKE_CURL"/>
         <Preprocessor Value="NDEBUG"/>
-        <Preprocessor Value="LUASOCKET_API=__attribute__((visibility(\&quot;default\&quot;)))"/>
+        <Preprocessor Value="LUASOCKET_API=__attribute__((visibility(&quot;default&quot;)))"/>
       </Compiler>
       <Linker Required="yes" Options="-shared;bin/Release/libluashim-lib.a">
       </Linker>
@@ -112,7 +112,7 @@
         <Preprocessor Value="CURL_STATICLIB"/>
         <Preprocessor Value="PREMAKE_CURL"/>
         <Preprocessor Value="_DEBUG"/>
-        <Preprocessor Value="LUASOCKET_API=__attribute__((visibility(\&quot;default\&quot;)))"/>
+        <Preprocessor Value="LUASOCKET_API=__attribute__((visibility(&quot;default&quot;)))"/>
       </Compiler>
       <Linker Required="yes" Options="-shared;bin/Debug/libluashim-lib.a">
       </Linker>

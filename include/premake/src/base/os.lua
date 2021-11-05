@@ -456,11 +456,29 @@
 --
 -- Run a shell command and return the output.
 --
+-- @param cmd Command to execute
+-- @param streams Standard stream(s) to output
+-- 		Must be one of 
+--		- "both" (default)
+--		- "output" Return standard output stream content only
+--		- "error" Return standard error stream content only
+--
 
-	function os.outputof(cmd)
+	function os.outputof(cmd, streams)
 		cmd = path.normalize(cmd)
+		streams = streams or "both"
+		local redirection
+		if streams == "both" then
+			redirection = " 2>&1"
+		elseif streams == "output" then
+			redirection = " 2>/dev/null"
+		elseif streams == "error" then
+			redirection = " 2>&1 1>/dev/null"
+		else
+			error ('Invalid stream(s) selection. "output", "error", or "both" expected.')
+		end
 
-		local pipe = io.popen(cmd .. " 2>&1")
+		local pipe = io.popen(cmd .. redirection)
 		local result = pipe:read('*a')
 		local success, what, code = pipe:close()
 		if success then
@@ -572,6 +590,12 @@
 			copy = function(v)
 				return "cp -rf " .. path.normalize(v)
 			end,
+			copyfile = function(v)
+				return "cp -f " .. path.normalize(v)
+			end,
+			copydir = function(v)
+				return "cp -rf " .. path.normalize(v)
+			end,
 			delete = function(v)
 				return "rm -f " .. path.normalize(v)
 			end,
@@ -605,6 +629,17 @@
 				src = string.match(src, '^.*%S')
 
 				return "IF EXIST " .. src .. "\\ (xcopy /Q /E /Y /I " .. v .. " > nul) ELSE (xcopy /Q /Y /I " .. v .. " > nul)"
+			end,
+			copyfile = function(v)
+				v = path.translate(path.normalize(v))
+				-- XCOPY doesn't have a switch to assume destination is a file when it doesn't exist.
+				-- A trailing * will suppress the prompt but requires the file extensions be the same length.
+				-- Just use COPY instead, it actually works.
+				return "copy /B /Y " .. v
+			end,
+			copydir = function(v)
+				v = path.translate(path.normalize(v))
+				return "xcopy /Q /E /Y /I " .. v
 			end,
 			delete = function(v)
 				return "del " .. path.translate(path.normalize(v))

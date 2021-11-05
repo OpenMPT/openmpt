@@ -43,7 +43,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/MP /Ox /MT /W4 /EHsc"
+				AdditionalOptions="/MP /GL /Ox /MT /W4 /EHsc"
 				AdditionalIncludeDirectories="..\..\contrib\lua\src;..\..\contrib\luashim"
 				PreprocessorDefinitions="PREMAKE_COMPRESSION;CURL_STATICLIB;PREMAKE_CURL;NDEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;LUASOCKET_API=__declspec(dllexport)"
 				UsePrecompiledHeader="0"
@@ -64,7 +64,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalOptions="/NOLOGO /INCREMENTAL:NO /GL /DLL"
+				AdditionalOptions="/NOLOGO /INCREMENTAL:NO /LTCG /DLL"
 				AdditionalDependencies="ws2_32.lib"
 				OutputFile="$(OutDir)\luasocket.dll"
 				LinkIncremental="0"
@@ -118,7 +118,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/MP /Ox /MT /W4 /EHsc"
+				AdditionalOptions="/MP /GL /Ox /MT /W4 /EHsc"
 				AdditionalIncludeDirectories="..\..\contrib\lua\src;..\..\contrib\luashim"
 				PreprocessorDefinitions="PREMAKE_COMPRESSION;CURL_STATICLIB;PREMAKE_CURL;NDEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;LUASOCKET_API=__declspec(dllexport)"
 				UsePrecompiledHeader="0"
@@ -139,7 +139,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalOptions="/NOLOGO /INCREMENTAL:NO /GL /DLL"
+				AdditionalOptions="/NOLOGO /INCREMENTAL:NO /LTCG /DLL"
 				AdditionalDependencies="ws2_32.lib"
 				OutputFile="$(OutDir)\luasocket.dll"
 				LinkIncremental="0"

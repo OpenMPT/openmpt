@@ -43,7 +43,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/MP /Ox /MT /W0 /EHsc"
+				AdditionalOptions="/MP /GL /Ox /MT /W0 /EHsc"
 				PreprocessorDefinitions="PREMAKE_COMPRESSION;CURL_STATICLIB;PREMAKE_CURL;NDEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;N_FSEEKO;_WINDOWS"
 				UsePrecompiledHeader="0"
 				ProgramDataBaseFileName=""
@@ -106,7 +106,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/MP /Ox /MT /W0 /EHsc"
+				AdditionalOptions="/MP /GL /Ox /MT /W0 /EHsc"
 				PreprocessorDefinitions="PREMAKE_COMPRESSION;CURL_STATICLIB;PREMAKE_CURL;NDEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;N_FSEEKO;_WINDOWS"
 				UsePrecompiledHeader="0"
 				ProgramDataBaseFileName=""

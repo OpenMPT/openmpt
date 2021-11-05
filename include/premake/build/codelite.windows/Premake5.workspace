@@ -25,7 +25,7 @@
       <Project Name="zip-lib" ConfigName="x86-Release"/>
       <Project Name="zlib-lib" ConfigName="x86-Release"/>
     </WorkspaceConfiguration>
-    <WorkspaceConfiguration Name="x64-Release" Selected="yes">
+    <WorkspaceConfiguration Name="x64-Release" Selected="no">
       <Project Name="example" ConfigName="x64-Release"/>
       <Project Name="luasocket" ConfigName="x64-Release"/>
       <Project Name="Premake5" ConfigName="x64-Release"/>
@@ -36,7 +36,7 @@
       <Project Name="zip-lib" ConfigName="x64-Release"/>
       <Project Name="zlib-lib" ConfigName="x64-Release"/>
     </WorkspaceConfiguration>
-    <WorkspaceConfiguration Name="x86-Debug" Selected="yes">
+    <WorkspaceConfiguration Name="x86-Debug" Selected="no">
       <Project Name="example" ConfigName="x86-Debug"/>
       <Project Name="luasocket" ConfigName="x86-Debug"/>
       <Project Name="Premake5" ConfigName="x86-Debug"/>
@@ -47,7 +47,7 @@
       <Project Name="zip-lib" ConfigName="x86-Debug"/>
       <Project Name="zlib-lib" ConfigName="x86-Debug"/>
     </WorkspaceConfiguration>
-    <WorkspaceConfiguration Name="x64-Debug" Selected="yes">
+    <WorkspaceConfiguration Name="x64-Debug" Selected="no">
       <Project Name="example" ConfigName="x64-Debug"/>
       <Project Name="luasocket" ConfigName="x64-Debug"/>
       <Project Name="Premake5" ConfigName="x64-Debug"/>

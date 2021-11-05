@@ -79,7 +79,7 @@
         <Preprocessor Value="NDEBUG"/>
         <Preprocessor Value="LUASOCKET_API=__declspec(dllexport)"/>
       </Compiler>
-      <Linker Required="yes" Options="-m32;-flto;-shared;-Wl,--out-implib=\&quot;../../bin/release/luasocket.lib\&quot;;bin/x86/Release/luashim-lib.lib;-lws2_32">
+      <Linker Required="yes" Options="-m32;-flto;-shared;-Wl,--out-implib=&quot;../../bin/release/luasocket.lib&quot;;bin/x86/Release/luashim-lib.lib;-lws2_32">
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../bin/release/luasocket.dll" IntermediateDirectory="obj/x86/Release/luasocket" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no" IsGUIProgram="no" IsEnabled="yes"/>
@@ -113,7 +113,7 @@
         <Preprocessor Value="NDEBUG"/>
         <Preprocessor Value="LUASOCKET_API=__declspec(dllexport)"/>
       </Compiler>
-      <Linker Required="yes" Options="-m64;-flto;-shared;-Wl,--out-implib=\&quot;../../bin/release/luasocket.lib\&quot;;bin/x64/Release/luashim-lib.lib;-lws2_32">
+      <Linker Required="yes" Options="-m64;-flto;-shared;-Wl,--out-implib=&quot;../../bin/release/luasocket.lib&quot;;bin/x64/Release/luashim-lib.lib;-lws2_32">
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../bin/release/luasocket.dll" IntermediateDirectory="obj/x64/Release/luasocket" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no" IsGUIProgram="no" IsEnabled="yes"/>
@@ -147,7 +147,7 @@
         <Preprocessor Value="_DEBUG"/>
         <Preprocessor Value="LUASOCKET_API=__declspec(dllexport)"/>
       </Compiler>
-      <Linker Required="yes" Options="-m32;-shared;-Wl,--out-implib=\&quot;../../bin/debug/luasocket.lib\&quot;;bin/x86/Debug/luashim-lib.lib;-lws2_32">
+      <Linker Required="yes" Options="-m32;-shared;-Wl,--out-implib=&quot;../../bin/debug/luasocket.lib&quot;;bin/x86/Debug/luashim-lib.lib;-lws2_32">
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../bin/debug/luasocket.dll" IntermediateDirectory="obj/x86/Debug/luasocket" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no" IsGUIProgram="no" IsEnabled="yes"/>
@@ -181,7 +181,7 @@
         <Preprocessor Value="_DEBUG"/>
         <Preprocessor Value="LUASOCKET_API=__declspec(dllexport)"/>
       </Compiler>
-      <Linker Required="yes" Options="-m64;-shared;-Wl,--out-implib=\&quot;../../bin/debug/luasocket.lib\&quot;;bin/x64/Debug/luashim-lib.lib;-lws2_32">
+      <Linker Required="yes" Options="-m64;-shared;-Wl,--out-implib=&quot;../../bin/debug/luasocket.lib&quot;;bin/x64/Debug/luashim-lib.lib;-lws2_32">
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../bin/debug/luasocket.dll" IntermediateDirectory="obj/x64/Debug/luasocket" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no" IsGUIProgram="no" IsEnabled="yes"/>

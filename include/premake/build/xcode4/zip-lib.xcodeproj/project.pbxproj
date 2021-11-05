@@ -496,6 +496,7 @@
 				USER_HEADER_SEARCH_PATHS = (
 					../../contrib/libzip/include,
 				);
+				WARNING_CFLAGS = "-w";
 			};
 			name = Release;
 		};
@@ -526,6 +527,7 @@
 				USER_HEADER_SEARCH_PATHS = (
 					../../contrib/libzip/include,
 				);
+				WARNING_CFLAGS = "-w";
 			};
 			name = Debug;
 		};

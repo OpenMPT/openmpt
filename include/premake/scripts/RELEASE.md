@@ -18,9 +18,9 @@
 
  * Update version in `src/host/premake.h`
 
- * Commit `CHANGES.txt`, `README.txt`, `src/host/premake.h`
+ * Update version in `website/src/pages/download.js`
 
- * Push release branch to GitHub; wait for CI to pass
+ * Commit changes and push release branch; wait for CI to pass
 
  * Prep release announcement from change log
 
@@ -29,6 +29,8 @@
  * Run `premake5 package <release branch name> source` (from Posix ideally)
 
  * On each platform, run `premake5 package <release branch name> binary`
+
+ * Submit Windows binary to [Microsoft malware analysis](https://www.microsoft.com/en-us/wdsi/filesubmission/)
 
  * Merge working branch to release and tag; push with tags
 

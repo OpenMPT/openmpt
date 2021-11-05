@@ -112,6 +112,10 @@
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>PREMAKE_COMPRESSION;CURL_STATICLIB;PREMAKE_CURL;NDEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\contrib\lua\src;..\..\contrib\luashim;..\..\contrib\zlib;..\..\contrib\libzip;..\..\contrib\curl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -135,6 +139,10 @@
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>PREMAKE_COMPRESSION;CURL_STATICLIB;PREMAKE_CURL;NDEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\contrib\lua\src;..\..\contrib\luashim;..\..\contrib\zlib;..\..\contrib\libzip;..\..\contrib\curl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -154,6 +162,10 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>PREMAKE_COMPRESSION;CURL_STATICLIB;PREMAKE_CURL;_DEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\contrib\lua\src;..\..\contrib\luashim;..\..\contrib\zlib;..\..\contrib\libzip;..\..\contrib\curl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -172,6 +184,10 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>PREMAKE_COMPRESSION;CURL_STATICLIB;PREMAKE_CURL;_DEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\contrib\lua\src;..\..\contrib\luashim;..\..\contrib\zlib;..\..\contrib\libzip;..\..\contrib\curl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -184,6 +200,7 @@
     <ClInclude Include="..\..\src\host\lua_shimtable.h" />
     <ClInclude Include="..\..\src\host\path_isabsolute.h" />
     <ClInclude Include="..\..\src\host\premake.h" />
+    <ClInclude Include="..\..\src\host\resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\host\buffered_io.c" />
@@ -434,6 +451,9 @@
     <None Include="..\..\modules\vstudio\tests\vc2010\test_user_file.lua" />
     <None Include="..\..\modules\vstudio\tests\vc2010\test_vectorextensions.lua" />
     <None Include="..\..\modules\vstudio\tests\vc2013\test_vcxitems.lua" />
+    <None Include="..\..\modules\vstudio\tests\vc2019\test_compile_settings.lua" />
+    <None Include="..\..\modules\vstudio\tests\vc2019\test_link.lua" />
+    <None Include="..\..\modules\vstudio\tests\vc2019\test_toolset_settings.lua" />
     <None Include="..\..\modules\vstudio\vs2005.lua" />
     <None Include="..\..\modules\vstudio\vs2005_csproj.lua" />
     <None Include="..\..\modules\vstudio\vs2005_csproj_user.lua" />
@@ -502,7 +522,6 @@
     <None Include="..\..\src\base\json.lua" />
     <None Include="..\..\src\base\jsonwrapper.lua" />
     <None Include="..\..\src\base\languages.lua" />
-    <None Include="..\..\src\base\moduledownloader.lua" />
     <None Include="..\..\src\base\option.lua" />
     <None Include="..\..\src\base\os.lua" />
     <None Include="..\..\src\base\oven.lua" />
@@ -572,6 +591,7 @@
     <None Include="..\..\tests\test_premake.lua" />
     <None Include="..\..\tests\test_stress.lua" />
     <None Include="..\..\tests\test_string.lua" />
+    <None Include="..\..\tests\tools\test_clang.lua" />
     <None Include="..\..\tests\tools\test_dotnet.lua" />
     <None Include="..\..\tests\tools\test_gcc.lua" />
     <None Include="..\..\tests\tools\test_msc.lua" />
@@ -579,6 +599,9 @@
     <None Include="..\..\tests\workspace\test_eachconfig.lua" />
     <None Include="..\..\tests\workspace\test_location.lua" />
     <None Include="..\..\tests\workspace\test_objdirs.lua" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\src\host\resource.rc" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="lua-lib.vcxproj">

@@ -1,16 +1,14 @@
 --
 -- tests/base/test_http.lua
 -- Tests the http API
--- Copyright (c) 2016 Jason Perkins and the Premake project
+-- Copyright (c) 2016, 2020 Jason Perkins and the Premake project
 --
 
+if http.get ~= nil and _OPTIONS["test-all"] then
 	local p = premake
 
-	-- only declare the suite as a test if http.get is an existing method.
-	local suite = {}
-	if http.get ~= nil then
-		suite = test.declare("premake_http")
-	end
+	local suite = test.declare("premake_http")
+
 
 	function suite.http_get()
 		local result, err = http.get("http://httpbin.org/user-agent")
@@ -55,6 +53,10 @@
 		test.isequal(responseCode, 418)
 	end
 
+	-- Disable as httpbin.org returns 404 on this endpoint
+	-- See: https://github.com/postmanlabs/httpbin/issues/617
+
+	--[[
 	function suite.http_redirect()
 		local result, err, responseCode = http.get("http://httpbin.org/redirect/3")
 		if result then
@@ -63,6 +65,7 @@
 			test.fail(err);
 		end
 	end
+	]]
 
 	function suite.http_headers()
 		local result, err, responseCode = http.get("http://httpbin.org/headers", {
@@ -78,3 +81,5 @@
 			test.fail(err);
 		end
 	end
+
+end

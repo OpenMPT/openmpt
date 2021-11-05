@@ -74,16 +74,28 @@
 -- Check the translation of CFLAGS.
 --
 
+	function suite.cflags_onNoWarnings()
+		warnings "Off"
+		prepare()
+		test.contains({ "-w" }, gcc.getcflags(cfg))
+	end
+
+	function suite.cflags_onHighWarnings()
+		warnings "High"
+		prepare()
+		test.contains({ "-Wall" }, gcc.getcflags(cfg))
+	end
+
 	function suite.cflags_onExtraWarnings()
-		warnings "extra"
+		warnings "Extra"
 		prepare()
 		test.contains({ "-Wall", "-Wextra" }, gcc.getcflags(cfg))
 	end
 
-	function suite.cflags_onHighWarnings()
-		warnings "high"
+	function suite.cflags_onEverythingWarnings()
+		warnings "Everything"
 		prepare()
-		test.contains({ "-Wall" }, gcc.getcflags(cfg))
+		test.contains({ "-Weverything" }, gcc.getcflags(cfg))
 	end
 
 	function suite.cflags_onFatalWarnings()
@@ -110,12 +122,6 @@
 		floatingpoint "Strict"
 		prepare()
 		test.contains({ "-ffloat-store" }, gcc.getcflags(cfg))
-	end
-
-	function suite.cflags_onNoWarnings()
-		warnings "Off"
-		prepare()
-		test.contains({ "-w" }, gcc.getcflags(cfg))
 	end
 
 	function suite.cflags_onSSE()
@@ -380,6 +386,30 @@
 		kind "SharedLib"
 		prepare()
 		test.contains({ "-dynamiclib" }, gcc.getldflags(cfg))
+	end
+	
+--
+-- Check Mac OS X deployment target flags
+--
+
+	function suite.cflags_macosx_systemversion()
+		system "MacOSX"
+		systemversion "10.9"
+		prepare()
+		test.contains({ "-mmacosx-version-min=10.9" }, gcc.getcflags(cfg))
+	end
+	
+	function suite.cxxflags_macosx_systemversion()
+		system "MacOSX"
+		systemversion "10.9:10.15"
+		prepare()
+		test.contains({ "-mmacosx-version-min=10.9" }, gcc.getcxxflags(cfg))
+	end
+	
+	function suite.cxxflags_macosx_systemversion_unspecified()
+		system "MacOSX"
+		prepare()
+		test.excludes({ "-mmacosx-version-min=10.9" }, gcc.getcxxflags(cfg))
 	end
 
 
@@ -786,6 +816,27 @@
 		test.contains({ }, gcc.getcflags(cfg))
 	end
 
+	function suite.cxxflags_onCpp2a()
+		cppdialect "C++2a"
+		prepare()
+		test.contains({ "-std=c++2a" }, gcc.getcxxflags(cfg))
+		test.contains({ }, gcc.getcflags(cfg))
+	end
+
+	function suite.cxxflags_onCpp20()
+		cppdialect "C++20"
+		prepare()
+		test.contains({ "-std=c++20" }, gcc.getcxxflags(cfg))
+		test.contains({ }, gcc.getcflags(cfg))
+	end
+
+	function suite.cxxflags_onCppLatest()
+		cppdialect "C++latest"
+		prepare()
+		test.contains({ "-std=c++20" }, gcc.getcxxflags(cfg))
+		test.contains({ }, gcc.getcflags(cfg))
+	end
+
 	function suite.cxxflags_onCppGnu98()
 		cppdialect "gnu++98"
 		prepare()
@@ -811,6 +862,20 @@
 		cppdialect "gnu++17"
 		prepare()
 		test.contains({ "-std=gnu++17" }, gcc.getcxxflags(cfg))
+		test.contains({ }, gcc.getcflags(cfg))
+	end
+
+	function suite.cxxflags_onCppGnu2a()
+		cppdialect "gnu++2a"
+		prepare()
+		test.contains({ "-std=gnu++2a" }, gcc.getcxxflags(cfg))
+		test.contains({ }, gcc.getcflags(cfg))
+	end
+
+	function suite.cxxflags_onCppGnu20()
+		cppdialect "gnu++20"
+		prepare()
+		test.contains({ "-std=gnu++20" }, gcc.getcxxflags(cfg))
 		test.contains({ }, gcc.getcflags(cfg))
 	end
 

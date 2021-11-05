@@ -1,7 +1,5 @@
-Premake version 5.0-alpha15
+Premake version 5.0-alpha16
 The following changes have been made:
  *  Modifications have been marked with --OpenMPT
- *  standardconformance option added
  *  spectremitigations option added
  *  dataexecutionprevention option added
- *  toolset "ClangCL" option added

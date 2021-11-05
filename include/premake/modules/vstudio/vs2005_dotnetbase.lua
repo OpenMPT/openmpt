@@ -156,7 +156,7 @@
 
 			if #contents > 0 or external then
 				_p(2,'<%s%s Include="%s">', info.action, condition, fname)
-				if external then
+				if external and info.action ~= "EmbeddedResource" then
 					_p(3,'<Link>%s</Link>', path.translate(link))
 				end
 				if #contents > 0 then
@@ -252,8 +252,8 @@
 		_p(2,'<ErrorReport>prompt</ErrorReport>')
 		_p(2,'<WarningLevel>4</WarningLevel>')
 
-		if cfg.clr == "Unsafe" then
-			_p(2,'<AllowUnsafeBlocks>true</AllowUnsafeBlocks>')
+		if not dotnetbase.isNewFormatProject(cfg) then
+			dotnetbase.allowUnsafeBlocks(cfg)
 		end
 
 		if cfg.flags.FatalCompileWarnings then
@@ -745,11 +745,7 @@
 			return false
 		end
 
-		if framework:find('^netcoreapp') ~= nil then
-			return true
-		end
-		
-		if framework:find('^netstandard') ~= nil then
+		if framework:find('^net') ~= nil then
 			return true
 		end
 
@@ -771,5 +767,11 @@
 	function dotnetbase.netcore.useWpf(cfg)
 		if cfg.flags.WPF then
 			_p(2,'<UseWpf>true</UseWpf>')
+		end
+	end
+
+	function dotnetbase.allowUnsafeBlocks(cfg)
+		if cfg.clr == "Unsafe" then
+			_p(2,'<AllowUnsafeBlocks>true</AllowUnsafeBlocks>')
 		end
 	end

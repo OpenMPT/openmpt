@@ -249,6 +249,11 @@
         <VirtualDirectory Name="vc2013">
           <File Name="../../modules/vstudio/tests/vc2013/test_vcxitems.lua"/>
         </VirtualDirectory>
+        <VirtualDirectory Name="vc2019">
+          <File Name="../../modules/vstudio/tests/vc2019/test_compile_settings.lua"/>
+          <File Name="../../modules/vstudio/tests/vc2019/test_link.lua"/>
+          <File Name="../../modules/vstudio/tests/vc2019/test_toolset_settings.lua"/>
+        </VirtualDirectory>
       </VirtualDirectory>
       <File Name="../../modules/vstudio/vs2005.lua"/>
       <File Name="../../modules/vstudio/vs2005_csproj.lua"/>
@@ -332,7 +337,6 @@
       <File Name="../../src/base/json.lua"/>
       <File Name="../../src/base/jsonwrapper.lua"/>
       <File Name="../../src/base/languages.lua"/>
-      <File Name="../../src/base/moduledownloader.lua"/>
       <File Name="../../src/base/option.lua"/>
       <File Name="../../src/base/os.lua"/>
       <File Name="../../src/base/oven.lua"/>
@@ -399,6 +403,8 @@
       <File Name="../../src/host/premake.c"/>
       <File Name="../../src/host/premake.h"/>
       <File Name="../../src/host/premake_main.c"/>
+      <File Name="../../src/host/resource.h"/>
+      <File Name="../../src/host/resource.rc"/>
       <File Name="../../src/host/string_endswith.c"/>
       <File Name="../../src/host/string_hash.c"/>
       <File Name="../../src/host/string_sha1.c"/>
@@ -478,6 +484,7 @@
     <File Name="../../tests/test_stress.lua"/>
     <File Name="../../tests/test_string.lua"/>
     <VirtualDirectory Name="tools">
+      <File Name="../../tests/tools/test_clang.lua"/>
       <File Name="../../tests/tools/test_dotnet.lua"/>
       <File Name="../../tests/tools/test_gcc.lua"/>
       <File Name="../../tests/tools/test_msc.lua"/>
@@ -538,7 +545,13 @@
       </Compiler>
       <Linker Required="yes" Options="-m32;-flto;bin/x86/Release/lua-lib.lib;bin/x86/Release/zip-lib.lib;bin/x86/Release/zlib-lib.lib;bin/x86/Release/curl-lib.lib;-lole32;-lws2_32;-ladvapi32;-lversion">
       </Linker>
-      <ResourceCompiler Options="" Required="no"/>
+      <ResourceCompiler Options="-DPREMAKE_COMPRESSION;-DCURL_STATICLIB;-DPREMAKE_CURL;-DNDEBUG;" Required="yes">
+        <IncludePath Value="../../contrib/lua/src"/>
+        <IncludePath Value="../../contrib/luashim"/>
+        <IncludePath Value="../../contrib/zlib"/>
+        <IncludePath Value="../../contrib/libzip"/>
+        <IncludePath Value="../../contrib/curl/include"/>
+      </ResourceCompiler>
       <General OutputFile="../../bin/release/premake5.exe" IntermediateDirectory="obj/x86/Release/Premake5" Command="../../bin/release/premake5.exe" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
@@ -574,7 +587,13 @@
       </Compiler>
       <Linker Required="yes" Options="-m64;-flto;bin/x64/Release/lua-lib.lib;bin/x64/Release/zip-lib.lib;bin/x64/Release/zlib-lib.lib;bin/x64/Release/curl-lib.lib;-lole32;-lws2_32;-ladvapi32;-lversion">
       </Linker>
-      <ResourceCompiler Options="" Required="no"/>
+      <ResourceCompiler Options="-DPREMAKE_COMPRESSION;-DCURL_STATICLIB;-DPREMAKE_CURL;-DNDEBUG;" Required="yes">
+        <IncludePath Value="../../contrib/lua/src"/>
+        <IncludePath Value="../../contrib/luashim"/>
+        <IncludePath Value="../../contrib/zlib"/>
+        <IncludePath Value="../../contrib/libzip"/>
+        <IncludePath Value="../../contrib/curl/include"/>
+      </ResourceCompiler>
       <General OutputFile="../../bin/release/premake5.exe" IntermediateDirectory="obj/x64/Release/Premake5" Command="../../bin/release/premake5.exe" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
@@ -610,7 +629,13 @@
       </Compiler>
       <Linker Required="yes" Options="-m32;bin/x86/Debug/lua-lib.lib;bin/x86/Debug/zip-lib.lib;bin/x86/Debug/zlib-lib.lib;bin/x86/Debug/curl-lib.lib;-lole32;-lws2_32;-ladvapi32;-lversion">
       </Linker>
-      <ResourceCompiler Options="" Required="no"/>
+      <ResourceCompiler Options="-DPREMAKE_COMPRESSION;-DCURL_STATICLIB;-DPREMAKE_CURL;-D_DEBUG;" Required="yes">
+        <IncludePath Value="../../contrib/lua/src"/>
+        <IncludePath Value="../../contrib/luashim"/>
+        <IncludePath Value="../../contrib/zlib"/>
+        <IncludePath Value="../../contrib/libzip"/>
+        <IncludePath Value="../../contrib/curl/include"/>
+      </ResourceCompiler>
       <General OutputFile="../../bin/debug/premake5.exe" IntermediateDirectory="obj/x86/Debug/Premake5" Command="bin/debug/premake5.exe" CommandArguments="--scripts=./../.. test" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="../.." PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
@@ -646,7 +671,13 @@
       </Compiler>
       <Linker Required="yes" Options="-m64;bin/x64/Debug/lua-lib.lib;bin/x64/Debug/zip-lib.lib;bin/x64/Debug/zlib-lib.lib;bin/x64/Debug/curl-lib.lib;-lole32;-lws2_32;-ladvapi32;-lversion">
       </Linker>
-      <ResourceCompiler Options="" Required="no"/>
+      <ResourceCompiler Options="-DPREMAKE_COMPRESSION;-DCURL_STATICLIB;-DPREMAKE_CURL;-D_DEBUG;" Required="yes">
+        <IncludePath Value="../../contrib/lua/src"/>
+        <IncludePath Value="../../contrib/luashim"/>
+        <IncludePath Value="../../contrib/zlib"/>
+        <IncludePath Value="../../contrib/libzip"/>
+        <IncludePath Value="../../contrib/curl/include"/>
+      </ResourceCompiler>
       <General OutputFile="../../bin/debug/premake5.exe" IntermediateDirectory="obj/x64/Debug/Premake5" Command="bin/debug/premake5.exe" CommandArguments="--scripts=./../.. test" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="../.." PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>

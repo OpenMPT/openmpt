@@ -43,7 +43,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/MP /Ox /MT /W0 /EHsc"
+				AdditionalOptions="/MP /GL /Ox /MT /W0 /EHsc"
 				AdditionalIncludeDirectories="..\..\contrib\curl\include;..\..\contrib\curl\lib;..\..\contrib\mbedtls\include;..\..\contrib\zlib"
 				PreprocessorDefinitions="PREMAKE_COMPRESSION;PREMAKE_CURL;NDEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;BUILDING_LIBCURL;CURL_STATICLIB;HTTP_ONLY;USE_ZLIB;USE_SCHANNEL;USE_WINDOWS_SSPI"
 				UsePrecompiledHeader="0"
@@ -109,7 +109,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/MP /Ox /MT /W0 /EHsc"
+				AdditionalOptions="/MP /GL /Ox /MT /W0 /EHsc"
 				AdditionalIncludeDirectories="..\..\contrib\curl\include;..\..\contrib\curl\lib;..\..\contrib\mbedtls\include;..\..\contrib\zlib"
 				PreprocessorDefinitions="PREMAKE_COMPRESSION;PREMAKE_CURL;NDEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;BUILDING_LIBCURL;CURL_STATICLIB;HTTP_ONLY;USE_ZLIB;USE_SCHANNEL;USE_WINDOWS_SSPI"
 				UsePrecompiledHeader="0"

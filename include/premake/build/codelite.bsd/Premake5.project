@@ -249,6 +249,11 @@
         <VirtualDirectory Name="vc2013">
           <File Name="../../modules/vstudio/tests/vc2013/test_vcxitems.lua"/>
         </VirtualDirectory>
+        <VirtualDirectory Name="vc2019">
+          <File Name="../../modules/vstudio/tests/vc2019/test_compile_settings.lua"/>
+          <File Name="../../modules/vstudio/tests/vc2019/test_link.lua"/>
+          <File Name="../../modules/vstudio/tests/vc2019/test_toolset_settings.lua"/>
+        </VirtualDirectory>
       </VirtualDirectory>
       <File Name="../../modules/vstudio/vs2005.lua"/>
       <File Name="../../modules/vstudio/vs2005_csproj.lua"/>
@@ -332,7 +337,6 @@
       <File Name="../../src/base/json.lua"/>
       <File Name="../../src/base/jsonwrapper.lua"/>
       <File Name="../../src/base/languages.lua"/>
-      <File Name="../../src/base/moduledownloader.lua"/>
       <File Name="../../src/base/option.lua"/>
       <File Name="../../src/base/os.lua"/>
       <File Name="../../src/base/oven.lua"/>
@@ -399,6 +403,7 @@
       <File Name="../../src/host/premake.c"/>
       <File Name="../../src/host/premake.h"/>
       <File Name="../../src/host/premake_main.c"/>
+      <File Name="../../src/host/resource.h"/>
       <File Name="../../src/host/string_endswith.c"/>
       <File Name="../../src/host/string_hash.c"/>
       <File Name="../../src/host/string_sha1.c"/>
@@ -478,6 +483,7 @@
     <File Name="../../tests/test_stress.lua"/>
     <File Name="../../tests/test_string.lua"/>
     <VirtualDirectory Name="tools">
+      <File Name="../../tests/tools/test_clang.lua"/>
       <File Name="../../tests/tools/test_dotnet.lua"/>
       <File Name="../../tests/tools/test_gcc.lua"/>
       <File Name="../../tests/tools/test_msc.lua"/>

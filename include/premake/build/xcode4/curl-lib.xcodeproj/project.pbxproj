@@ -953,6 +953,7 @@
 					../../contrib/mbedtls/include,
 					../../contrib/zlib,
 				);
+				WARNING_CFLAGS = "-w";
 			};
 			name = Debug;
 		};
@@ -1010,6 +1011,7 @@
 					../../contrib/mbedtls/include,
 					../../contrib/zlib,
 				);
+				WARNING_CFLAGS = "-w";
 			};
 			name = Release;
 		};

@@ -82,6 +82,9 @@
     <Filter Include="modules\vstudio\tests\vc2013">
       <UniqueIdentifier>{6B45E192-5700-D13E-00B8-4989EC511BCF}</UniqueIdentifier>
     </Filter>
+    <Filter Include="modules\vstudio\tests\vc2019">
+      <UniqueIdentifier>{7145E192-5D00-D13E-06B8-4989F2511BCF}</UniqueIdentifier>
+    </Filter>
     <Filter Include="modules\xcode">
       <UniqueIdentifier>{80143BC8-ECD4-B6FE-B50F-007C218FFBDA}</UniqueIdentifier>
     </Filter>
@@ -151,6 +154,9 @@
       <Filter>src\host</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\host\premake.h">
+      <Filter>src\host</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\host\resource.h">
       <Filter>src\host</Filter>
     </ClInclude>
   </ItemGroup>
@@ -885,6 +891,15 @@
     <None Include="..\..\modules\vstudio\tests\vc2013\test_vcxitems.lua">
       <Filter>modules\vstudio\tests\vc2013</Filter>
     </None>
+    <None Include="..\..\modules\vstudio\tests\vc2019\test_compile_settings.lua">
+      <Filter>modules\vstudio\tests\vc2019</Filter>
+    </None>
+    <None Include="..\..\modules\vstudio\tests\vc2019\test_link.lua">
+      <Filter>modules\vstudio\tests\vc2019</Filter>
+    </None>
+    <None Include="..\..\modules\vstudio\tests\vc2019\test_toolset_settings.lua">
+      <Filter>modules\vstudio\tests\vc2019</Filter>
+    </None>
     <None Include="..\..\modules\vstudio\vs2005.lua">
       <Filter>modules\vstudio</Filter>
     </None>
@@ -1083,9 +1098,6 @@
       <Filter>src\base</Filter>
     </None>
     <None Include="..\..\src\base\languages.lua">
-      <Filter>src\base</Filter>
-    </None>
-    <None Include="..\..\src\base\moduledownloader.lua">
       <Filter>src\base</Filter>
     </None>
     <None Include="..\..\src\base\option.lua">
@@ -1295,6 +1307,9 @@
     <None Include="..\..\tests\test_string.lua">
       <Filter>tests</Filter>
     </None>
+    <None Include="..\..\tests\tools\test_clang.lua">
+      <Filter>tests\tools</Filter>
+    </None>
     <None Include="..\..\tests\tools\test_dotnet.lua">
       <Filter>tests\tools</Filter>
     </None>
@@ -1316,5 +1331,10 @@
     <None Include="..\..\tests\workspace\test_objdirs.lua">
       <Filter>tests\workspace</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\src\host\resource.rc">
+      <Filter>src\host</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

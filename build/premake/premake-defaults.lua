@@ -5,7 +5,7 @@
 
 	filter {}
 		if _OPTIONS["clang"] then
-			toolset "msc-ClangCL"
+			toolset "clang"
 		end
 	filter {}
 
@@ -28,10 +28,10 @@
 		cppdialect "C++17"
 	filter { "action:vs*", "action:vs2017" }
 		if _OPTIONS["win10"] then
-			standardconformance "On"
+			conformancemode "On"
 		end
 	filter { "action:vs*", "not action:vs2017" }
-		standardconformance "On"
+		conformancemode "On"
 	filter { "not action:vs*", "language:C++" }
 		buildoptions { "-std=c++17" }
 	filter { "not action:vs*", "language:C" }

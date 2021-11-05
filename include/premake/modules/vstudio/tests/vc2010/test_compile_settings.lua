@@ -76,6 +76,18 @@
 		]]
 	end
 
+--
+-- Ensure that high warnings lead to the level 4 debug option
+--
+	function suite.warningLevel_onHighWarnings()
+		warnings "High"
+		prepare()
+		test.capture [[
+<ClCompile>
+	<PrecompiledHeader>NotUsing</PrecompiledHeader>
+	<WarningLevel>Level4</WarningLevel>
+		]]
+	end
 
 --
 -- If extra warnings is specified, pump up the volume.
@@ -92,6 +104,20 @@
 	end
 
 --
+-- If Everything is wanted, turn it ALL on
+--
+
+	function suite.warningLevel_onEverythingWarnings()
+		warnings "Everything"
+		prepare()
+		test.capture [[
+<ClCompile>
+	<PrecompiledHeader>NotUsing</PrecompiledHeader>
+	<WarningLevel>EnableAllWarnings</WarningLevel>
+		]]
+	end
+
+--
 -- If the warnings are disabled, mute all warnings.
 --
 
@@ -102,6 +128,20 @@
 <ClCompile>
 	<PrecompiledHeader>NotUsing</PrecompiledHeader>
 	<WarningLevel>TurnOffAllWarnings</WarningLevel>
+		]]
+	end
+
+--
+-- Check default warning level.
+--
+
+	function suite.warningLevel_onDefaultWarnings()
+		warnings "Default"
+		prepare()
+		test.capture [[
+<ClCompile>
+	<PrecompiledHeader>NotUsing</PrecompiledHeader>
+	<WarningLevel>Level3</WarningLevel>
 		]]
 	end
 
@@ -388,6 +428,60 @@
 		]]
 	end
 
+--
+-- If ConformanceMode flag is set, add <ConformanceMode> element (supported from VS2017)
+--
+
+	function suite.onConformanceModeOn_VS2015()
+		conformancemode "On"
+		p.action.set("vs2015")
+		prepare()
+		test.capture [[
+<ClCompile>
+	<PrecompiledHeader>NotUsing</PrecompiledHeader>
+	<WarningLevel>Level3</WarningLevel>
+	<Optimization>Disabled</Optimization>
+</ClCompile>
+		]]
+	end
+
+	function suite.onConformanceModeOff_VS2017()
+		conformancemode "Off"
+		p.action.set("vs2017")
+		prepare()
+		test.capture [[
+<ClCompile>
+	<PrecompiledHeader>NotUsing</PrecompiledHeader>
+	<WarningLevel>Level3</WarningLevel>
+	<Optimization>Disabled</Optimization>
+	<ConformanceMode>false</ConformanceMode>
+		]]
+	end
+
+	function suite.onConformanceModeOn_VS2017()
+		conformancemode "On"
+		p.action.set("vs2017")
+		prepare()
+		test.capture [[
+<ClCompile>
+	<PrecompiledHeader>NotUsing</PrecompiledHeader>
+	<WarningLevel>Level3</WarningLevel>
+	<Optimization>Disabled</Optimization>
+	<ConformanceMode>true</ConformanceMode>
+		]]
+	end
+
+	function suite.onConformanceModeNotSpecified_VS2017()
+		p.action.set("vs2017")
+		prepare()
+		test.capture [[
+<ClCompile>
+	<PrecompiledHeader>NotUsing</PrecompiledHeader>
+	<WarningLevel>Level3</WarningLevel>
+	<Optimization>Disabled</Optimization>
+</ClCompile>
+		]]
+	end
 
 --
 -- If staticruntime is specified, add the <RuntimeLibrary> element.
@@ -1170,7 +1264,7 @@
 	<PrecompiledHeader>NotUsing</PrecompiledHeader>
 	<WarningLevel>Level3</WarningLevel>
 	<Optimization>Disabled</Optimization>
-	<AdditionalOptions>/std:c++latest %(AdditionalOptions)</AdditionalOptions>
+	<AdditionalOptions>/std:c++17 %(AdditionalOptions)</AdditionalOptions>
 </ClCompile>
 		]]
 	end
@@ -1201,6 +1295,21 @@
 	<WarningLevel>Level3</WarningLevel>
 	<Optimization>Disabled</Optimization>
 	<LanguageStandard>stdcpp17</LanguageStandard>
+</ClCompile>
+		]]
+	end
+
+	function suite.onLanguage_Cpp20_VS2019()
+		p.action.set("vs2019")
+
+		cppdialect 'C++20'
+		prepare()
+		test.capture [[
+<ClCompile>
+	<PrecompiledHeader>NotUsing</PrecompiledHeader>
+	<WarningLevel>Level3</WarningLevel>
+	<Optimization>Disabled</Optimization>
+	<LanguageStandard>stdcpplatest</LanguageStandard>
 </ClCompile>
 		]]
 	end
@@ -1398,6 +1507,84 @@
 	<WarningLevel>Level3</WarningLevel>
 	<Optimization>Disabled</Optimization>
 	<OmitFramePointers>true</OmitFramePointers>
+</ClCompile>
+		]]
+	end
+
+--
+-- If useFullPaths flag is set, add <UseFullPaths> element
+--
+
+	function suite.onUseFullPathsOff()
+		usefullpaths "Off"
+		prepare()
+		test.capture [[
+<ClCompile>
+	<PrecompiledHeader>NotUsing</PrecompiledHeader>
+	<WarningLevel>Level3</WarningLevel>
+	<Optimization>Disabled</Optimization>
+	<UseFullPaths>false</UseFullPaths>
+		]]
+	end
+
+	function suite.onUseFullPathsOn()
+		usefullpaths "On"
+		prepare()
+		test.capture [[
+<ClCompile>
+	<PrecompiledHeader>NotUsing</PrecompiledHeader>
+	<WarningLevel>Level3</WarningLevel>
+	<Optimization>Disabled</Optimization>
+	<UseFullPaths>true</UseFullPaths>
+		]]
+	end
+
+	function suite.onUseFullPathsNotSpecified()
+		prepare()
+		test.capture [[
+<ClCompile>
+	<PrecompiledHeader>NotUsing</PrecompiledHeader>
+	<WarningLevel>Level3</WarningLevel>
+	<Optimization>Disabled</Optimization>
+</ClCompile>
+		]]
+	end
+
+--
+-- If removeUnreferencedCodeData flag is set, add <RemoveUnreferencedCodeData> element
+--
+
+	function suite.onRemoveUnreferencedCodeDataOff()
+		removeunreferencedcodedata "Off"
+		prepare()
+		test.capture [[
+<ClCompile>
+	<PrecompiledHeader>NotUsing</PrecompiledHeader>
+	<WarningLevel>Level3</WarningLevel>
+	<Optimization>Disabled</Optimization>
+	<RemoveUnreferencedCodeData>false</RemoveUnreferencedCodeData>
+		]]
+	end
+
+	function suite.onRemoveUnreferencedCodeDataOn()
+		removeunreferencedcodedata "On"
+		prepare()
+		test.capture [[
+<ClCompile>
+	<PrecompiledHeader>NotUsing</PrecompiledHeader>
+	<WarningLevel>Level3</WarningLevel>
+	<Optimization>Disabled</Optimization>
+	<RemoveUnreferencedCodeData>true</RemoveUnreferencedCodeData>
+		]]
+	end
+
+	function suite.onRemoveUnreferencedCodeDataNotSpecified()
+		prepare()
+		test.capture [[
+<ClCompile>
+	<PrecompiledHeader>NotUsing</PrecompiledHeader>
+	<WarningLevel>Level3</WarningLevel>
+	<Optimization>Disabled</Optimization>
 </ClCompile>
 		]]
 	end

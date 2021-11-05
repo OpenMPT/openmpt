@@ -317,6 +317,7 @@
 				USER_HEADER_SEARCH_PATHS = (
 					../../contrib/lua/src,
 				);
+				WARNING_CFLAGS = "-w";
 			};
 			name = Debug;
 		};
@@ -356,6 +357,7 @@
 				USER_HEADER_SEARCH_PATHS = (
 					../../contrib/lua/src,
 				);
+				WARNING_CFLAGS = "-w";
 			};
 			name = Release;
 		};

@@ -37,7 +37,7 @@
         <Preprocessor Value="PREMAKE_CURL"/>
         <Preprocessor Value="NDEBUG"/>
       </Compiler>
-      <Linker Required="yes" Options="-m32;-flto;-shared;-Wl,--out-implib=\&quot;../../bin/release/example.lib\&quot;;bin/x86/Release/luashim-lib.lib">
+      <Linker Required="yes" Options="-m32;-flto;-shared;-Wl,--out-implib=&quot;../../bin/release/example.lib&quot;;bin/x86/Release/luashim-lib.lib">
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../bin/release/example.dll" IntermediateDirectory="obj/x86/Release/example" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no" IsGUIProgram="no" IsEnabled="yes"/>
@@ -70,7 +70,7 @@
         <Preprocessor Value="PREMAKE_CURL"/>
         <Preprocessor Value="NDEBUG"/>
       </Compiler>
-      <Linker Required="yes" Options="-m64;-flto;-shared;-Wl,--out-implib=\&quot;../../bin/release/example.lib\&quot;;bin/x64/Release/luashim-lib.lib">
+      <Linker Required="yes" Options="-m64;-flto;-shared;-Wl,--out-implib=&quot;../../bin/release/example.lib&quot;;bin/x64/Release/luashim-lib.lib">
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../bin/release/example.dll" IntermediateDirectory="obj/x64/Release/example" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no" IsGUIProgram="no" IsEnabled="yes"/>
@@ -103,7 +103,7 @@
         <Preprocessor Value="PREMAKE_CURL"/>
         <Preprocessor Value="_DEBUG"/>
       </Compiler>
-      <Linker Required="yes" Options="-m32;-shared;-Wl,--out-implib=\&quot;../../bin/debug/example.lib\&quot;;bin/x86/Debug/luashim-lib.lib">
+      <Linker Required="yes" Options="-m32;-shared;-Wl,--out-implib=&quot;../../bin/debug/example.lib&quot;;bin/x86/Debug/luashim-lib.lib">
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../bin/debug/example.dll" IntermediateDirectory="obj/x86/Debug/example" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no" IsGUIProgram="no" IsEnabled="yes"/>
@@ -136,7 +136,7 @@
         <Preprocessor Value="PREMAKE_CURL"/>
         <Preprocessor Value="_DEBUG"/>
       </Compiler>
-      <Linker Required="yes" Options="-m64;-shared;-Wl,--out-implib=\&quot;../../bin/debug/example.lib\&quot;;bin/x64/Debug/luashim-lib.lib">
+      <Linker Required="yes" Options="-m64;-shared;-Wl,--out-implib=&quot;../../bin/debug/example.lib&quot;;bin/x64/Debug/luashim-lib.lib">
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../bin/debug/example.dll" IntermediateDirectory="obj/x64/Debug/example" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no" IsGUIProgram="no" IsEnabled="yes"/>

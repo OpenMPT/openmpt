@@ -84,9 +84,11 @@ endif
 # File sets
 # #############################################
 
+CUSTOM :=
 GENERATED :=
 OBJECTS :=
 
+CUSTOM += $(OBJDIR)/resource.res
 GENERATED += $(OBJDIR)/buffered_io.o
 GENERATED += $(OBJDIR)/criteria_matches.o
 GENERATED += $(OBJDIR)/curl_utils.o
@@ -131,6 +133,7 @@ GENERATED += $(OBJDIR)/path_translate.o
 GENERATED += $(OBJDIR)/path_wildcards.o
 GENERATED += $(OBJDIR)/premake.o
 GENERATED += $(OBJDIR)/premake_main.o
+GENERATED += $(OBJDIR)/resource.res
 GENERATED += $(OBJDIR)/scripts.o
 GENERATED += $(OBJDIR)/string_endswith.o
 GENERATED += $(OBJDIR)/string_hash.o
@@ -196,7 +199,7 @@ OBJECTS += $(OBJDIR)/zip_extract.o
 all: $(TARGET)
 	@:
 
-$(TARGET): $(GENERATED) $(OBJECTS) $(LDDEPS) | $(TARGETDIR)
+$(TARGET): $(CUSTOM) $(GENERATED) $(OBJECTS) $(LDDEPS) | $(TARGETDIR)
 	$(PRELINKCMDS)
 	@echo Linking Premake5
 	$(SILENT) $(LINKCMD)
@@ -233,6 +236,7 @@ endif
 prebuild: | $(OBJDIR)
 	$(PREBUILDCMDS)
 
+$(CUSTOM): | prebuild
 ifneq (,$(PCH))
 $(OBJECTS): $(GCH) | $(PCH_PLACEHOLDER)
 $(GCH): $(PCH) | prebuild
@@ -384,6 +388,9 @@ $(OBJDIR)/premake.o: ../../src/host/premake.c
 $(OBJDIR)/premake_main.o: ../../src/host/premake_main.c
 	@echo $(notdir $<)
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/resource.res: ../../src/host/resource.rc
+	@echo $(notdir $<)
+	$(SILENT) $(RESCOMP) $< -O coff -o "$@" $(ALL_RESFLAGS)
 $(OBJDIR)/string_endswith.o: ../../src/host/string_endswith.c
 	@echo $(notdir $<)
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"

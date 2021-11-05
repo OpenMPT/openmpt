@@ -25,7 +25,7 @@
       <Project Name="zip-lib" ConfigName="Release"/>
       <Project Name="zlib-lib" ConfigName="Release"/>
     </WorkspaceConfiguration>
-    <WorkspaceConfiguration Name="Debug" Selected="yes">
+    <WorkspaceConfiguration Name="Debug" Selected="no">
       <Project Name="example" ConfigName="Debug"/>
       <Project Name="luasocket" ConfigName="Debug"/>
       <Project Name="Premake5" ConfigName="Debug"/>

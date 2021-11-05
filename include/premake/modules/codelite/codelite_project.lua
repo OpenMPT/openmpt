@@ -196,9 +196,10 @@
 		end
 
 		local toolset = m.getcompiler(cfg)
+		local sysincludedirs = toolset.getincludedirs(cfg, {}, cfg.sysincludedirs)
 		local forceincludes = toolset.getforceincludes(cfg)
-		local cxxflags = table.concat(table.join(toolset.getcxxflags(cfg), forceincludes, cfg.buildoptions), ";")
-		local cflags   = table.concat(table.join(toolset.getcflags(cfg), forceincludes, cfg.buildoptions), ";")
+		local cxxflags = table.concat(table.join(sysincludedirs, toolset.getcxxflags(cfg), forceincludes, cfg.buildoptions), ";")
+		local cflags   = table.concat(table.join(sysincludedirs, toolset.getcflags(cfg), forceincludes, cfg.buildoptions), ";")
 		local asmflags = ""
 		local pch      = ""
 
@@ -241,7 +242,7 @@
 		local options = table.concat(cfg.resoptions, ";")
 
 		_x(3, '<ResourceCompiler Options="%s%s" Required="yes">', defines, options)
-		for _, includepath in ipairs(table.join(cfg.includedirs, cfg.resincludedirs)) do
+		for _, includepath in ipairs(table.join(cfg.sysincludedirs, cfg.includedirs, cfg.resincludedirs)) do
 			_x(4, '<IncludePath Value="%s"/>', project.getrelative(cfg.project, includepath))
 		end
 		_p(3, '</ResourceCompiler>')
@@ -268,20 +269,9 @@
 		local pauseexec  = iif(prj.kind == "ConsoleApp", "yes", "no")
 		local isguiprogram = iif(prj.kind == "WindowedApp", "yes", "no")
 		local isenabled  = iif(cfg.flags.ExcludeFromBuild, "no", "yes")
-		local ldPath = ''
 
-		for _, libdir in ipairs(cfg.libdirs) do
-			ldPath = ldPath .. ":" .. project.getrelative(cfg.project, libdir)
-		end
-
-		if ldPath == nil or ldPath == '' then
-			_x(3, '<General OutputFile="%s" IntermediateDirectory="%s" Command="%s" CommandArguments="%s" UseSeparateDebugArgs="%s" DebugArguments="%s" WorkingDirectory="%s" PauseExecWhenProcTerminates="%s" IsGUIProgram="%s" IsEnabled="%s"/>',
-				targetname, objdir, command, cmdargs, useseparatedebugargs, debugargs, workingdir, pauseexec, isguiprogram, isenabled)
-		else
-			ldPath = string.sub(ldPath, 2)
-			_x(3, '<General OutputFile="%s" IntermediateDirectory="%s" Command="LD_LIBRARY_PATH=%s %s" CommandArguments="%s" UseSeparateDebugArgs="%s" DebugArguments="%s" WorkingDirectory="%s" PauseExecWhenProcTerminates="%s" IsGUIProgram="%s" IsEnabled="%s"/>',
- 				targetname, objdir, ldPath, command, cmdargs, useseparatedebugargs, debugargs, workingdir, pauseexec, isguiprogram, isenabled)
-		end
+		_x(3, '<General OutputFile="%s" IntermediateDirectory="%s" Command="%s" CommandArguments="%s" UseSeparateDebugArgs="%s" DebugArguments="%s" WorkingDirectory="%s" PauseExecWhenProcTerminates="%s" IsGUIProgram="%s" IsEnabled="%s"/>',
+			targetname, objdir, command, cmdargs, useseparatedebugargs, debugargs, workingdir, pauseexec, isguiprogram, isenabled)
 	end
 
 	function m.environment(cfg)

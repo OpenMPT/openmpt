@@ -28,6 +28,15 @@
 -- Returns list of C compiler flags for a configuration.
 --
 
+	local function getRuntimeFlag(cfg, isstatic)
+		local rt = cfg.runtime
+		local flag = iif(isstatic, "/MT", "/MD")
+		if (rt == "Debug") or (rt == nil and config.isDebugBuild(cfg))  then
+			flag = flag .. "d"
+		end
+		return flag
+	end
+
 	msc.shared = {
 		clr = {
 			On = "/clr",
@@ -37,6 +46,7 @@
 		},
 		flags = {
 			FatalCompileWarnings = "/WX",
+			LinkTimeOptimization = "/GL",
 			MultiProcessorCompile = "/MP",
 			NoMinimalRebuild = "/Gm-",
 			OmitDefaultLibrary = "/Zl"
@@ -80,17 +90,18 @@
 			["SSE4.1"] = "/arch:SSE2",
 		},
 		warnings = {
-			Extra = "/W4",
-			High = "/W4",
 			Off = "/W0",
+			High = "/W4",
+			Extra = "/W4",
+			Everything = "/Wall",
 		},
 		staticruntime = {
 			-- this option must always be emit (does it??)
-			_ = function(cfg) return iif(config.isDebugBuild(cfg), "/MDd", "/MD") end,
+			_ = function(cfg) return getRuntimeFlag(cfg, false) end,
 			-- runtime defaults to dynamic in VS
-			Default = function(cfg) return iif(config.isDebugBuild(cfg), "/MDd", "/MD") end,
-			On = function(cfg) return iif(config.isDebugBuild(cfg), "/MTd", "/MT") end,
-			Off = function(cfg) return iif(config.isDebugBuild(cfg), "/MDd", "/MD") end,
+			Default = function(cfg) return getRuntimeFlag(cfg, false) end,
+			On = function(cfg) return getRuntimeFlag(cfg, true) end,
+			Off = function(cfg) return getRuntimeFlag(cfg, false) end,
 		},
 		stringpooling = {
 			On = "/GF",
@@ -104,6 +115,9 @@
 		},
 		omitframepointer = {
 			On = "/Oy"
+		},
+		justmycode = {
+			Off = "false"
 		}
 
 	}
@@ -235,13 +249,14 @@
 	msc.linkerFlags = {
 		flags = {
 			FatalLinkWarnings = "/WX",
-			LinkTimeOptimization = "/GL",
+			LinkTimeOptimization = "/LTCG",
 			NoIncrementalLink = "/INCREMENTAL:NO",
 			NoManifest = "/MANIFEST:NO",
 			OmitDefaultLibrary = "/NODEFAULTLIB",
 		},
 		kind = {
 			SharedLib = "/DLL",
+			WindowedApp = "/SUBSYSTEM:WINDOWS"
 		},
 		symbols = {
 			On = "/DEBUG"

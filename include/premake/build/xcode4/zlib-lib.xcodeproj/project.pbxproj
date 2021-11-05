@@ -205,6 +205,7 @@
 				ONLY_ACTIVE_ARCH = NO;
 				STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = static;
 				SYMROOT = bin/Release;
+				WARNING_CFLAGS = "-w";
 			};
 			name = Release;
 		};
@@ -256,6 +257,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = static;
 				SYMROOT = bin/Debug;
+				WARNING_CFLAGS = "-w";
 			};
 			name = Debug;
 		};

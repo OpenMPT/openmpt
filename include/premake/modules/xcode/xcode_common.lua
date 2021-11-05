@@ -41,6 +41,8 @@
 			[".icns"] = "Resources",
 			[".s"] = "Sources",
 			[".S"] = "Sources",
+			[".swift"] = "Sources",
+			[".metal"] = "Resources",
 		}
 		if node.isResource then
 			return "Resources"
@@ -140,105 +142,76 @@
 			[".bmp"]       = "image.bmp",
 			[".wav"]       = "audio.wav",
 			[".xcassets"]  = "folder.assetcatalog",
-
+			[".swift"]     = "sourcecode.swift",
+			[".metal"]     = "sourcecode.metal",
 		}
 		return types[path.getextension(node.path)] or "text"
 	end
 
---
--- Print user configuration references contained in xcodeconfigreferences
--- @param offset
---    offset used by function _p
--- @param cfg
---    configuration
---
-
-	local function xcodePrintUserConfigReferences(offset, cfg, tr, kind)
-		local referenceName
-		if kind == "project" then
-			referenceName = cfg.xcodeconfigreferenceproject
-		elseif kind == "target" then
-			referenceName = cfg.xcodeconfigreferencetarget
-		end
-		tree.traverse(tr, {
-			onleaf = function(node)
-				filename = node.name
-				if node.id and path.getextension(filename) == ".xcconfig" then
-					if filename == referenceName then
-						_p(offset, 'baseConfigurationReference = %s /* %s */;', node.id, filename)
-						return
-					end
-				end
-			end
-		}, false)
-	end
-
-
-
-	local escapeSpecialChars = {
+	xcode.escapeSpecialChars = {
 		['\n'] = '\\n',
 		['\r'] = '\\r',
 		['\t'] = '\\t',
 	}
 
-	local function escapeChar(c)
-		return escapeSpecialChars[c] or '\\'..c
+	function xcode.escapeChar(c)
+		return xcode.escapeSpecialChars[c] or '\\'..c
 	end
 
-	local function escapeArg(value)
-		value = value:gsub('[\'"\\\n\r\t ]', escapeChar)
+	function xcode.escapeArg(value)
+		value = value:gsub('[\'"\\\n\r\t ]', xcode.escapeChar)
 		return value
 	end
 
-	local function escapeSetting(value)
-		value = value:gsub('["\\\n\r\t]', escapeChar)
+	function xcode.escapeSetting(value)
+		value = value:gsub('["\\\n\r\t]', xcode.escapeChar)
 		return value
 	end
 
-	local function stringifySetting(value)
+	function xcode.stringifySetting(value)
 		value = value..''
 		if not value:match('^[%a%d_./]+$') then
-			value = '"'..escapeSetting(value)..'"'
+			value = '"'..xcode.escapeSetting(value)..'"'
 		end
 		return value
 	end
 
-	local function customStringifySetting(value)
+	function xcode.customStringifySetting(value)
 		value = value..''
 
 		local test = value:match('^[%a%d_./%+]+$')
 		if test then
-			value = '"'..escapeSetting(value)..'"'
+			value = '"'..xcode.escapeSetting(value)..'"'
 		end
 		return value
 	end
 
-	local function printSetting(level, name, value)
+	function xcode.printSetting(level, name, value)
 		if type(value) == 'function' then
 			value(level, name)
 		elseif type(value) ~= 'table' then
-			_p(level, '%s = %s;', stringifySetting(name), stringifySetting(value))
+			_p(level, '%s = %s;', xcode.stringifySetting(name), xcode.stringifySetting(value))
 		--elseif #value == 1 then
-			--_p(level, '%s = %s;', stringifySetting(name), stringifySetting(value[1]))
+			--_p(level, '%s = %s;', xcode.stringifySetting(name), xcode.stringifySetting(value[1]))
 		elseif #value >= 1 then
-			_p(level, '%s = (', stringifySetting(name))
+			_p(level, '%s = (', xcode.stringifySetting(name))
 			for _, item in ipairs(value) do
-				_p(level + 1, '%s,', stringifySetting(item))
+				_p(level + 1, '%s,', xcode.stringifySetting(item))
 			end
 			_p(level, ');')
 		end
 	end
 
-	local function printSettingsTable(level, settings)
+	function xcode.printSettingsTable(level, settings)
 		-- Maintain alphabetic order to be consistent
 		local keys = table.keys(settings)
 		table.sort(keys)
 		for _, k in ipairs(keys) do
-			printSetting(level, k, settings[k])
+			xcode.printSetting(level, k, settings[k])
 		end
 	end
 
-	local function overrideSettings(settings, overrides)
+	function xcode.overrideSettings(settings, overrides)
 		if type(overrides) == 'table' then
 			for name, value in pairs(overrides) do
 				-- Allow an override to remove a value by using false
@@ -420,7 +393,7 @@
 
 		if not table.isempty(settings) then
 			_p('/* Begin PBXBuildFile section */')
-			printSettingsTable(2, settings);
+			xcode.printSettingsTable(2, settings);
 			_p('/* End PBXBuildFile section */')
 			_p('')
 		end
@@ -436,7 +409,7 @@
 				_p(3,'containerPortal = %s /* %s */;', node.id, path.getrelative(node.parent.parent.project.location, node.path))
 				_p(3,'proxyType = 2;')
 				_p(3,'remoteGlobalIDString = %s;', node.project.xcode.projectnode.id)
-				_p(3,'remoteInfo = %s;', stringifySetting(node.project.xcode.projectnode.name))
+				_p(3,'remoteInfo = %s;', xcode.stringifySetting(node.project.xcode.projectnode.name))
 				_p(2,'};')
 			end
 			settings[node.targetproxyid] = function()
@@ -445,14 +418,14 @@
 				_p(3,'containerPortal = %s /* %s */;', node.id, path.getrelative(node.parent.parent.project.location, node.path))
 				_p(3,'proxyType = 1;')
 				_p(3,'remoteGlobalIDString = %s;', node.project.xcode.projectnode.targetid)
-				_p(3,'remoteInfo = %s;', stringifySetting(node.project.xcode.projectnode.name))
+				_p(3,'remoteInfo = %s;', xcode.stringifySetting(node.project.xcode.projectnode.name))
 				_p(2,'};')
 			end
 		end
 
 		if not table.isempty(settings) then
 			_p('/* Begin PBXContainerItemProxy section */')
-			printSettingsTable(2, settings);
+			xcode.printSettingsTable(2, settings);
 			_p('/* End PBXContainerItemProxy section */')
 			_p('')
 		end
@@ -474,7 +447,7 @@
 				if node.kind == "product" then
 					settings[node.id] = function(level)
 						_p(level,'%s /* %s */ = {isa = PBXFileReference; explicitFileType = %s; includeInIndex = 0; name = %s; path = %s; sourceTree = BUILT_PRODUCTS_DIR; };',
-							node.id, node.name, xcode.gettargettype(node), stringifySetting(node.name), stringifySetting(path.getname(node.cfg.buildtarget.bundlename ~= "" and node.cfg.buildtarget.bundlename or node.cfg.buildtarget.relpath)))
+							node.id, node.name, xcode.gettargettype(node), xcode.stringifySetting(node.name), xcode.stringifySetting(path.getname(node.cfg.buildtarget.bundlename ~= "" and node.cfg.buildtarget.bundlename or node.cfg.buildtarget.relpath)))
 					end
 				-- is this a project dependency?
 				elseif node.parent.parent == tr.projects then
@@ -484,7 +457,7 @@
 						-- this works if we put it like below
 						local relpath = path.getrelative(path.getabsolute(tr.project.location), path.getabsolute(node.parent.project.location))
 						_p(level,'%s /* %s */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = %s; path = %s; sourceTree = SOURCE_ROOT; };',
-							node.parent.id, node.name, customStringifySetting(node.parent.name), stringifySetting(path.join(relpath, node.parent.name)))
+							node.parent.id, node.name, xcode.customStringifySetting(node.parent.name), xcode.stringifySetting(path.join(relpath, node.parent.name)))
 					end
 				-- something else
 				else
@@ -536,7 +509,7 @@
 						--end
 						end
 						_p(level,'%s /* %s */ = {isa = PBXFileReference; %s = %s; name = %s; path = %s; sourceTree = %s; };',
-							node.id, node.name, xcode.getfiletypekey(node, cfg), xcode.getfiletype(node, cfg), stringifySetting(node.name), stringifySetting(pth), stringifySetting(src))
+							node.id, node.name, xcode.getfiletypekey(node, cfg), xcode.getfiletype(node, cfg), xcode.stringifySetting(node.name), xcode.stringifySetting(pth), xcode.stringifySetting(src))
 					end
 				end
 			end
@@ -544,7 +517,7 @@
 
 		if not table.isempty(settings) then
 			_p('/* Begin PBXFileReference section */')
-			printSettingsTable(2, settings)
+			xcode.printSettingsTable(2, settings)
 			_p('/* End PBXFileReference section */')
 			_p('')
 		end
@@ -622,7 +595,7 @@
 					if node.parent == tr.projects then
 						_p(3,'name = Products;')
 					else
-						_p(3,'name = %s;', stringifySetting(node.name))
+						_p(3,'name = %s;', xcode.stringifySetting(node.name))
 
 						local vpath = project.getvpath(tr.project, node.name)
 
@@ -631,7 +604,7 @@
 							if node.parent.path then
 								p = path.getrelative(node.parent.path, node.path)
 							end
-							_p(3,'path = %s;', stringifySetting(p))
+							_p(3,'path = %s;', xcode.stringifySetting(p))
 						end
 					end
 
@@ -643,13 +616,13 @@
 
 		if not table.isempty(settings) then
 			_p('/* Begin PBXGroup section */')
-			printSettingsTable(2, settings)
+			xcode.printSettingsTable(2, settings)
 			_p('/* End PBXGroup section */')
 			_p('')
 		end
 	end
 
-	local function xcode_GetBuildCommands(tr)
+	function xcode.GetBuildCommands(tr)
 		local buildCommandInfos = {}
 		tree.traverse(tr, {
 			onnode = function(node)
@@ -715,7 +688,7 @@
 		return buildCommands
 	end
 
-	local function xcode_PBXAggregateOrNativeTarget(tr, pbxTargetName)
+	function xcode.PBXAggregateOrNativeTarget(tr, pbxTargetName)
 		local kinds = {
 			Aggregate = {
 				"Utility",
@@ -740,7 +713,7 @@
 
 		_p('/* Begin PBX%sTarget section */', pbxTargetName)
 
-		local buildCommands = xcode_GetBuildCommands(tr)
+		local buildCommands = xcode.GetBuildCommands(tr)
 
 		for _, node in ipairs(tr.products.children) do
 			local name = tr.project.name
@@ -755,7 +728,7 @@
 
 			_p(2,'%s /* %s */ = {', node.targetid, name)
 			_p(3,'isa = PBX%sTarget;', pbxTargetName)
-			_p(3,'buildConfigurationList = %s /* Build configuration list for PBX%sTarget "%s" */;', node.cfgsection, pbxTargetName, escapeSetting(name))
+			_p(3,'buildConfigurationList = %s /* Build configuration list for PBX%sTarget "%s" */;', node.cfgsection, pbxTargetName, xcode.escapeSetting(name))
 			_p(3,'buildPhases = (')
 			if hasBuildCommands('prebuildcommands') then
 				_p(4,'9607AE1010C857E500CD1376 /* Prebuild */,')
@@ -786,7 +759,7 @@
 			end
 			_p(3,');')
 
-			_p(3,'name = %s;', stringifySetting(name))
+			_p(3,'name = %s;', xcode.stringifySetting(name))
 
 			if pbxTargetName == "Native" then
 				local p
@@ -796,14 +769,14 @@
 					p = "$(HOME)/Applications"
 				end
 				if p then
-					_p(3,'productInstallPath = %s;', stringifySetting(p))
+					_p(3,'productInstallPath = %s;', xcode.stringifySetting(p))
 				end
 			end
 
-			_p(3,'productName = %s;', stringifySetting(name))
+			_p(3,'productName = %s;', xcode.stringifySetting(name))
 			if pbxTargetName == "Native" then
 				_p(3,'productReference = %s /* %s */;', node.id, node.name)
-				_p(3,'productType = %s;', stringifySetting(xcode.getproducttype(node)))
+				_p(3,'productType = %s;', xcode.stringifySetting(xcode.getproducttype(node)))
 			end
 			_p(2,'};')
 		end
@@ -813,12 +786,12 @@
 
 
 	function xcode.PBXAggregateTarget(tr)
-		xcode_PBXAggregateOrNativeTarget(tr, "Aggregate")
+		xcode.PBXAggregateOrNativeTarget(tr, "Aggregate")
 	end
 
 
 	function xcode.PBXNativeTarget(tr)
-		xcode_PBXAggregateOrNativeTarget(tr, "Native")
+		xcode.PBXAggregateOrNativeTarget(tr, "Native")
 	end
 
 
@@ -883,7 +856,7 @@
 					_p(2,'%s /* %s */ = {', node.id, node.name)
 					_p(3,'isa = PBXReferenceProxy;')
 					_p(3,'fileType = %s;', xcode.gettargettype(node))
-					_p(3,'path = %s;', stringifySetting(node.name))
+					_p(3,'path = %s;', xcode.stringifySetting(node.name))
 					_p(3,'remoteRef = %s /* PBXContainerItemProxy */;', node.parent.productproxyid)
 					_p(3,'sourceTree = BUILT_PRODUCTS_DIR;')
 					_p(2,'};')
@@ -893,7 +866,7 @@
 
 		if not table.isempty(settings) then
 			_p('/* Begin PBXReferenceProxy section */')
-			printSettingsTable(2, settings)
+			xcode.printSettingsTable(2, settings)
 			_p('/* End PBXReferenceProxy section */')
 			_p('')
 		end
@@ -958,7 +931,7 @@
 				_p(3,');');
 				_p(3,'runOnlyForDeploymentPostprocessing = 0;');
 				_p(3,'shellPath = /bin/sh;');
-				_p(3,'shellScript = %s;', stringifySetting(table.concat(commands, '\n')))
+				_p(3,'shellScript = %s;', xcode.stringifySetting(table.concat(commands, '\n')))
 				_p(2,'};')
 			end
 		end
@@ -1004,20 +977,20 @@
 						_p(level+1,'files = (')
 						_p(level+1,');')
 						_p(level+1,'inputPaths = (');
-						_p(level+2,'"%s",', escapeSetting(node.relpath))
+						_p(level+2,'"%s",', xcode.escapeSetting(node.relpath))
 						for v, _ in pairs(inputs) do
-							_p(level+2,'"%s",', escapeSetting(project.getrelative(tr.project, v)))
+							_p(level+2,'"%s",', xcode.escapeSetting(project.getrelative(tr.project, v)))
 						end
 						_p(level+1,');')
-						_p(level+1,'name = %s;', stringifySetting('Build "' .. node.name .. '"'))
+						_p(level+1,'name = %s;', xcode.stringifySetting('Build "' .. node.name .. '"'))
 						_p(level+1,'outputPaths = (')
 						for v, _ in pairs(outputs) do
-							_p(level+2,'"%s",', escapeSetting(project.getrelative (tr.project, v)))
+							_p(level+2,'"%s",', xcode.escapeSetting(project.getrelative (tr.project, v)))
 						end
 						_p(level+1,');')
 						_p(level+1,'runOnlyForDeploymentPostprocessing = 0;');
 						_p(level+1,'shellPath = /bin/sh;');
-						_p(level+1,'shellScript = %s;', stringifySetting(table.concat(commands, '\n')))
+						_p(level+1,'shellScript = %s;', xcode.stringifySetting(table.concat(commands, '\n')))
 						_p(level,'};')
 					end
 				end
@@ -1029,7 +1002,7 @@
 				_p('/* Begin PBXShellScriptBuildPhase section */')
 				wrapperWritten = true
 			end
-			printSettingsTable(2, settings)
+			xcode.printSettingsTable(2, settings)
 		end
 
 		doblock("9607AE3510C85E7E00CD1376", "Prelink", "prelinkcommands")
@@ -1088,7 +1061,7 @@
 
 		if not table.isempty(settings) then
 			_p('/* Begin PBXVariantGroup section */')
-			printSettingsTable(2, settings)
+			xcode.printSettingsTable(2, settings)
 			_p('/* End PBXVariantGroup section */')
 			_p('')
 		end
@@ -1102,7 +1075,7 @@
 				settings[node.parent.targetdependid] = function()
 					_p(2,'%s /* PBXTargetDependency */ = {', node.parent.targetdependid)
 					_p(3,'isa = PBXTargetDependency;')
-					_p(3,'name = %s;', stringifySetting(node.name))
+					_p(3,'name = %s;', xcode.stringifySetting(node.name))
 					_p(3,'targetProxy = %s /* PBXContainerItemProxy */;', node.parent.targetproxyid)
 					_p(2,'};')
 				end
@@ -1111,7 +1084,7 @@
 
 		if not table.isempty(settings) then
 			_p('/* Begin PBXTargetDependency section */')
-			printSettingsTable(2, settings)
+			xcode.printSettingsTable(2, settings)
 			_p('/* End PBXTargetDependency section */')
 			_p('')
 		end
@@ -1181,13 +1154,13 @@
 						local filecfg = fileconfig.getconfig(node, cfg)
 						if filecfg and filecfg.flags.ExcludeFromBuild then
 						--fileNameList = fileNameList .. " " ..filecfg.name
-							table.insert(fileNameList, escapeArg(node.name))
+							table.insert(fileNameList, xcode.escapeArg(node.name))
 						end
 
 						--ms new way
 						-- if the file is not in this config file list excluded it from build !!!
 						--if not cfg.files[node.abspath] then
-						--	table.insert(fileNameList, escapeArg(node.name))
+						--	table.insert(fileNameList, xcode.escapeArg(node.name))
 						--end
 					end
 				end
@@ -1227,14 +1200,14 @@
 		--ms not by default ...add it manually if you need it
 		--settings['COMBINE_HIDPI_IMAGES'] = 'YES'
 
-		overrideSettings(settings, cfg.xcodebuildsettings)
+		xcode.overrideSettings(settings, cfg.xcodebuildsettings)
 
 		_p(2,'%s /* %s */ = {', cfg.xcode.targetid, cfg.buildcfg)
 		_p(3,'isa = XCBuildConfiguration;')
 		_p(3,'buildSettings = {')
-		printSettingsTable(4, settings)
+		xcode.printSettingsTable(4, settings)
 		_p(3,'};')
-		printSetting(3, 'name', cfg.buildcfg);
+		xcode.printSetting(3, 'name', cfg.buildcfg);
 		_p(2,'};')
 	end
 
@@ -1268,13 +1241,23 @@
 	xcode.cppLanguageStandards = {
 		["Default"] = "compiler-default",  -- explicit compiler default
 		["C++98"] = "c++98",
+		["C++0x"] = "c++11",
 		["C++11"] = "c++11",
+		["C++1y"] = "c++14",
 		["C++14"] = "c++14",
+		["C++1z"] = "c++1z",
 		["C++17"] = "c++1z",
+		["C++2a"] = "c++2a",
+		["C++20"] = "c++2a",
 		["gnu++98"] = "gnu++98",
+		["gnu++0x"] = "gnu++0x",
 		["gnu++11"] = "gnu++0x",  -- Xcode project GUI uses gnu++0x, but gnu++11 also works
+		["gnu++1y"] = "gnu++14",
 		["gnu++14"] = "gnu++14",
-		["gnu++17"] = "gnu++1z"
+		["gnu++1z"] = "gnu++1z",
+		["gnu++17"] = "gnu++1z",
+		["gnu++2a"] = "gnu++2a",
+		["gnu++20"] = "gnu++2a",
 	}
 
 	function xcode.XCBuildConfiguration_CppLanguageStandard(settings, cfg)
@@ -1290,7 +1273,16 @@
 		end
 	end
 
-
+	function xcode.XCBuildConfiguration_SwiftLanguageVersion(settings, cfg)
+		-- if no swiftversion is provided, don't set swift version
+		-- Projects with swift files but without swift version will refuse 
+		-- to build on Xcode but setting a default SWIFT_VERSION may have 
+		-- unexpected interactions with other systems like cocoapods
+		if cfg.swiftversion then
+			settings['SWIFT_VERSION'] = cfg.swiftversion
+		end
+	end
+	
 	function xcode.XCBuildConfiguration_Project(tr, cfg)
 		local settings = {}
 
@@ -1348,7 +1340,7 @@
 
 		local escapedDefines = { }
 		for i,v in ipairs(cfg.defines) do
-			escapedDefines[i] = escapeArg(v)
+			escapedDefines[i] = xcode.escapeArg(v)
 		end
 		settings['GCC_PREPROCESSOR_DEFINITIONS'] = escapedDefines
 
@@ -1378,12 +1370,15 @@
 		if not table.isempty(cfg.sysincludedirs) then
 			table.insert(cfg.sysincludedirs, "$(inherited)")
 		end
-		settings['HEADER_SEARCH_PATHS'] = cfg.sysincludedirs
+		settings['SYSTEM_HEADER_SEARCH_PATHS'] = cfg.sysincludedirs
 
 		for i,v in ipairs(cfg.libdirs) do
 			cfg.libdirs[i] = p.project.getrelative(cfg.project, cfg.libdirs[i])
 		end
-		settings['LIBRARY_SEARCH_PATHS'] = cfg.libdirs
+		for i,v in ipairs(cfg.syslibdirs) do
+			cfg.syslibdirs[i] = p.project.getrelative(cfg.project, cfg.syslibdirs[i])
+		end
+		settings['LIBRARY_SEARCH_PATHS'] = table.join (cfg.libdirs, cfg.syslibdirs) 
 
 		for i,v in ipairs(cfg.frameworkdirs) do
 			cfg.frameworkdirs[i] = p.project.getrelative(cfg.project, cfg.frameworkdirs[i])
@@ -1433,7 +1428,7 @@
 		for _, lib in ipairs(config.getlinks(cfg, "dependencies", "object")) do
 			if (lib.external) then
 				if not xcode.isframework(lib.linktarget.basename) then
-					table.insert(flags, "-l" .. escapeArg(lib.linktarget.basename))
+					table.insert(flags, "-l" .. xcode.escapeArg(lib.linktarget.basename))
 				end
 			end
 		end
@@ -1448,18 +1443,26 @@
 			settings['SYMROOT'] = path.getrelative(tr.project.location, targetdir)
 		end
 
-		if cfg.warnings == "Extra" then
+		if cfg.warnings == "Off" then
+			settings['WARNING_CFLAGS'] = '-w'
+		elseif cfg.warnings == "High" then
+			settings['WARNING_CFLAGS'] = '-Wall'
+		elseif cfg.warnings == "Extra" then
 			settings['WARNING_CFLAGS'] = '-Wall -Wextra'
+		elseif cfg.warnings == "Everything" then
+			settings['WARNING_CFLAGS'] = '-Weverything'
 		end
 
-		overrideSettings(settings, cfg.xcodebuildsettings)
+		xcode.XCBuildConfiguration_SwiftLanguageVersion(settings, cfg)
+
+		xcode.overrideSettings(settings, cfg.xcodebuildsettings)
 
 		_p(2,'%s /* %s */ = {', cfg.xcode.projectid, cfg.buildcfg)
 		_p(3,'isa = XCBuildConfiguration;')
 		_p(3,'buildSettings = {')
-		printSettingsTable(4, settings)
+		xcode.printSettingsTable(4, settings)
 		_p(3,'};')
-		printSetting(3, 'name', cfg.buildcfg);
+		xcode.printSetting(3, 'name', cfg.buildcfg);
 		_p(2,'};')
 	end
 
@@ -1482,7 +1485,7 @@
 
 		if not table.isempty(settings) then
 			_p('/* Begin XCBuildConfiguration section */')
-			printSettingsTable(0, settings)
+			xcode.printSettingsTable(0, settings)
 			_p('/* End XCBuildConfiguration section */')
 			_p('')
 		end
@@ -1491,7 +1494,7 @@
 
 	function xcode.XCBuildConfigurationList(tr)
 		local wks = tr.project.workspace
-		local defaultCfgName = stringifySetting(tr.configs[1].buildcfg)
+		local defaultCfgName = xcode.stringifySetting(tr.configs[1].buildcfg)
 		local settings = {}
 
 		for _, target in ipairs(tr.products.children) do
@@ -1522,6 +1525,6 @@
 		end
 
 		_p('/* Begin XCConfigurationList section */')
-		printSettingsTable(2, settings)
+		xcode.printSettingsTable(2, settings)
 		_p('/* End XCConfigurationList section */')
 	end

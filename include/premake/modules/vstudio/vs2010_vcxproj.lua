@@ -139,6 +139,7 @@
 	m.elements.globalsCondition = function(prj, cfg)
 		return {
 			m.windowsTargetPlatformVersion,
+			m.xpDeprecationWarning,
 		}
 	end
 
@@ -267,7 +268,8 @@
 			m.nmakeRebuildCommands,
 			m.nmakeCleanCommands,
 			m.nmakePreprocessorDefinitions,
-			m.nmakeIncludeDirs
+			m.nmakeIncludeDirs,
+			m.additionalCompileOptions
 		}
 	end
 
@@ -364,6 +366,7 @@
 			m.optimization,
 			m.functionLevelLinking,
 			m.intrinsicFunctions,
+			m.justMyCodeDebugging,
 			m.minimalRebuild,
 			m.omitFramePointers,
 			m.stringPooling,
@@ -382,8 +385,10 @@
 			m.compileAs,
 			m.callingConvention,
 			m.languageStandard,
-			m.standardConformance,  --OpenMPT
+			m.conformanceMode,
 			m.structMemberAlignment,
+			m.useFullPaths,
+			m.removeUnreferencedCodeData
 		}
 
 		if cfg.kind == p.STATICLIB then
@@ -1399,7 +1404,7 @@
 		-- check to see if this project uses an external toolset. If so, let the
 		-- toolset define the format of the links
 		local toolset = config.toolset(cfg)
-		if toolset then
+		if cfg.system ~= premake.WINDOWS and toolset then
 			links = toolset.getlinks(cfg, not explicit)
 		else
 			links = vstudio.getLinks(cfg, explicit)
@@ -1475,19 +1480,25 @@
 				m.element("LanguageStandard", nil, 'stdcpp14')
 			elseif (cfg.cppdialect == "C++17") then
 				m.element("LanguageStandard", nil, 'stdcpp17')
+			elseif (cfg.cppdialect == "C++20") then
+				m.element("LanguageStandard", nil, 'stdcpplatest')
 			elseif (cfg.cppdialect == "C++latest") then
 				m.element("LanguageStandard", nil, 'stdcpplatest')
 			end
 		end
 	end
 
-	function m.standardConformance(cfg)  --OpenMPT
-		if _ACTION >= "vs2017" then  --OpenMPT
-			if (cfg.standardconformance == "On") then  --OpenMPT
-				m.element("ConformanceMode", nil, 'true')  --OpenMPT
-			end  --OpenMPT
-		end  --OpenMPT
-	end  --OpenMPT
+	function m.conformanceMode(cfg)
+		if _ACTION >= "vs2017" then
+			if cfg.conformancemode ~= nil then
+				if cfg.conformancemode then
+					m.element("ConformanceMode", nil, "true")
+				else
+					m.element("ConformanceMode", nil, "false")
+				end
+			end
+		end
+	end
 
 	function m.structMemberAlignment(cfg)
 		local map = {
@@ -1504,12 +1515,34 @@
 		end
 	end
 
+	function m.useFullPaths(cfg)
+		if cfg.useFullPaths ~= nil then
+			if cfg.useFullPaths then
+				m.element("UseFullPaths", nil, "true")
+			else
+				m.element("UseFullPaths", nil, "false")
+			end
+		end
+	end
+
+	function m.removeUnreferencedCodeData(cfg)
+		if cfg.removeUnreferencedCodeData ~= nil then
+			if cfg.removeUnreferencedCodeData then
+				m.element("RemoveUnreferencedCodeData", nil, "true")
+			else
+				m.element("RemoveUnreferencedCodeData", nil, "false")
+			end
+		end
+	end
+
 	function m.additionalCompileOptions(cfg, condition)
 		local opts = cfg.buildoptions
-		if _ACTION == "vs2015" then
+		if _ACTION == "vs2015" or vstudio.isMakefile(cfg) then
 			if (cfg.cppdialect == "C++14") then
 				table.insert(opts, "/std:c++14")
 			elseif (cfg.cppdialect == "C++17") then
+				table.insert(opts, "/std:c++17")
+			elseif (cfg.cppdialect == "C++20") then
 				table.insert(opts, "/std:c++latest")
 			elseif (cfg.cppdialect == "C++latest") then
 				table.insert(opts, "/std:c++latest")
@@ -1517,6 +1550,9 @@
 		end
 
 		if cfg.toolset and cfg.toolset:startswith("msc") then
+			local value = iif(cfg.unsignedchar, "On", "Off")
+			table.insert(opts, p.tools.msc.shared.unsignedchar[value])
+		elseif _ACTION >= "vs2019" and cfg.toolset and cfg.toolset == "clang" then
 			local value = iif(cfg.unsignedchar, "On", "Off")
 			table.insert(opts, p.tools.msc.shared.unsignedchar[value])
 		end
@@ -2126,6 +2162,13 @@
 		end
 	end
 
+	function m.justMyCodeDebugging(cfg)
+		local jmc = cfg.justmycode
+
+		if _ACTION >= "vs2017" and jmc == "Off" then
+			m.element("SupportJustMyCode", nil, "false")
+		end
+	end
 
 	function m.keyword(prj)
 		-- try to determine what kind of targets we're building here
@@ -2352,10 +2395,16 @@
 
 	function m.platformToolset(cfg)
 		local tool, version = p.config.toolset(cfg)
+
+		if not version and _ACTION >= "vs2019" and cfg.toolset == "clang" then
+			version = "ClangCL"
+		end
+
 		if not version then
 			local value = p.action.current().toolset
 			tool, version = p.tools.canonical(value)
 		end
+
 		if version then
 			if cfg.kind == p.NONE or cfg.kind == p.MAKEFILE then
 				if p.config.hasFile(cfg, path.iscppfile) or _ACTION >= "vs2015" then
@@ -2436,6 +2485,7 @@
 			m.element("ProgramDataBaseFileName", nil, value)
 		end
 	end
+
 
 	function m.projectGuid(prj)
 		m.element("ProjectGuid", nil, "{%s}", prj.uuid)
@@ -2648,6 +2698,13 @@
 	end
 
 
+	function m.xpDeprecationWarning(prj, cfg)
+		if cfg.toolset == "msc-v141_xp" then
+			m.element("XPDeprecationWarning", nil, "false")
+		end
+	end
+
+
 	function m.preferredToolArchitecture(prj)
 		if _ACTION >= "vs2013" then
 			if prj.preferredtoolarchitecture == p.X86_64 then
@@ -2731,13 +2788,13 @@
 
 
 	function m.warningLevel(cfg)
-		local map = { Off = "TurnOffAllWarnings", Extra = "Level4" }
+		local map = { Off = "TurnOffAllWarnings", High = "Level4", Extra = "Level4", Everything = "EnableAllWarnings" }
 		m.element("WarningLevel", nil, map[cfg.warnings] or "Level3")
 	end
 
 
 	function m.warningLevelFile(cfg, condition)
-		local map = { Off = "TurnOffAllWarnings", Extra = "Level4" }
+		local map = { Off = "TurnOffAllWarnings", High = "Level4", Extra = "Level4", Everything = "EnableAllWarnings" }
 		if cfg.warnings then
 			m.element("WarningLevel", condition, map[cfg.warnings] or "Level3")
 		end
@@ -2849,20 +2906,6 @@
 
 	function m.condition(cfg)
 		return m.conditionFromConfigText(vstudio.projectConfig(cfg))
-	end
-
---
--- Get the latest installed SDK 10 version from the registry.
---
-
-	function m.latestSDK10Version()
-		local arch = iif(os.is64bit(), "\\WOW6432Node\\", "\\")
-		local version = os.getWindowsRegistry("HKLM:SOFTWARE" .. arch .."Microsoft\\Microsoft SDKs\\Windows\\v10.0\\ProductVersion")
-		if version ~= nil then
-			return version .. ".0"
-		else
-			return nil
-		end
 	end
 
 
