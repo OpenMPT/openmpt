@@ -136,6 +136,12 @@
 		test.contains({ "-msse2" }, gcc.getcflags(cfg))
 	end
 
+	function suite.cflags_onSSE4_2()
+		vectorextensions "SSE4.2"
+		prepare()
+		test.contains({ "-msse4.2" }, gcc.getcflags(cfg))
+	end
+
 	function suite.cflags_onAVX()
 		vectorextensions "AVX"
 		prepare()
@@ -672,6 +678,54 @@
 		syslibdirs { "/usr/local/lib" }
 		prepare()
 		test.contains("-L/usr/local/lib", gcc.getLibraryDirectories(cfg))
+	end
+
+--
+-- Check handling of Apple frameworks search paths
+--
+	function suite.includeDirs_notDarwin_onFrameworkDirs()
+		system "Linux"
+		frameworkdirs { "/Library/Frameworks" }
+		prepare()
+		test.excludes("-F/Library/Frameworks", gcc.getincludedirs(cfg, {}, {}, cfg.frameworkdirs))
+	end
+
+	function suite.libDirs_notDarwin_onFrameworkDirs()
+		system "Windows"
+		frameworkdirs { "/Library/Frameworks" }
+		prepare()
+		test.excludes("-F/Library/Frameworks", gcc.getLibraryDirectories(cfg))
+	end
+
+	function suite.includeDirs_macosx_onFrameworkDirs()
+		system "MacOSX"
+		location "subdir"
+		frameworkdirs { 
+			"/Library/Frameworks",
+			"subdir/Relative/Frameworks" 
+		}
+		prepare()
+		test.contains("-F/Library/Frameworks", gcc.getincludedirs(cfg, {}, {}, cfg.frameworkdirs))
+		test.contains("-FRelative/Frameworks", gcc.getincludedirs(cfg, {}, {}, cfg.frameworkdirs))
+	end
+
+	function suite.libDirs_macosx_onFrameworkDirs()
+		system "MacOSX"
+		location "subdir"
+		frameworkdirs { 
+			"/Library/Frameworks",
+			"subdir/Relative/Frameworks"
+		}
+		prepare()
+		test.contains("-F/Library/Frameworks", gcc.getLibraryDirectories(cfg))
+		test.contains("-FRelative/Frameworks", gcc.getLibraryDirectories(cfg))
+	end
+
+	function suite.includeDirs_ios_onFrameworkDirs()
+		system "iOS"
+		frameworkdirs { "/Library/Frameworks" }
+		prepare()
+		test.contains("-F/Library/Frameworks", gcc.getincludedirs(cfg, {}, {}, cfg.frameworkdirs))
 	end
 
 

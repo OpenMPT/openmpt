@@ -112,6 +112,19 @@
 		};
 /* End PBXFrameworksBuildPhase section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		51A84151C33359C372347F91 /* Embed Libraries */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+			);
+			name = "Embed Libraries";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXGroup section */
 		04ED39A697F89298E02D87E6 /* lua-lib */ = {
 			isa = PBXGroup;
@@ -196,6 +209,7 @@
 				B998F445E83F48374180A285 /* Resources */,
 				23460D9C51EC618EAB2DBBDC /* Sources */,
 				49B173A57857C797D19921E5 /* Frameworks */,
+				51A84151C33359C372347F91 /* Embed Libraries */,
 			);
 			buildRules = (
 			);
@@ -312,6 +326,12 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				OBJROOT = "obj/Debug/lua-lib";
 				ONLY_ACTIVE_ARCH = YES;
+				OTHER_CFLAGS = (
+					"-arch x86_64",
+				);
+				OTHER_LDFLAGS = (
+					"-arch x86_64",
+				);
 				STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = static;
 				SYMROOT = bin/Debug;
 				USER_HEADER_SEARCH_PATHS = (
@@ -352,6 +372,12 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				OBJROOT = "obj/Release/lua-lib";
 				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CFLAGS = (
+					"-arch x86_64",
+				);
+				OTHER_LDFLAGS = (
+					"-arch x86_64",
+				);
 				STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = static;
 				SYMROOT = bin/Release;
 				USER_HEADER_SEARCH_PATHS = (

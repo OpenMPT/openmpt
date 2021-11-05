@@ -33,7 +33,7 @@ ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
 ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
 LIBS +=
 LDDEPS +=
-ALL_LDFLAGS += $(LDFLAGS)
+ALL_LDFLAGS += $(LDFLAGS) -arch x86_64
 LINKCMD = $(AR) -rcs "$@" $(OBJECTS)
 define PREBUILDCMDS
 endef
@@ -47,16 +47,16 @@ TARGETDIR = bin/Release
 TARGET = $(TARGETDIR)/libluashim-lib.a
 OBJDIR = obj/Release/luashim-lib
 DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -DNDEBUG -DLUA_USE_MACOSX
-ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -O3 -fPIC -Wall -Wextra
-ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -O3 -fPIC -Wall -Wextra -fno-stack-protector
+ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -O3 -fPIC -Wall -Wextra -arch x86_64
+ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -O3 -fPIC -Wall -Wextra -fno-stack-protector -arch x86_64
 
 else ifeq ($(config),debug)
 TARGETDIR = bin/Debug
 TARGET = $(TARGETDIR)/libluashim-lib.a
 OBJDIR = obj/Debug/luashim-lib
 DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -D_DEBUG -DLUA_USE_MACOSX
-ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -fPIC -g -Wall -Wextra
-ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -fPIC -g -Wall -Wextra
+ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -fPIC -g -Wall -Wextra -arch x86_64
+ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -fPIC -g -Wall -Wextra -arch x86_64
 
 endif
 

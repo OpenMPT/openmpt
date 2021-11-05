@@ -47,16 +47,10 @@
     <File Name="../../binmodules/luasocket/src/wsocket.h"/>
   </VirtualDirectory>
 </VirtualDirectory>
-  <Dependencies Name="x86-Release">
+  <Dependencies Name="Release">
     <Project Name="luashim-lib"/>
   </Dependencies>
-  <Dependencies Name="x64-Release">
-    <Project Name="luashim-lib"/>
-  </Dependencies>
-  <Dependencies Name="x86-Debug">
-    <Project Name="luashim-lib"/>
-  </Dependencies>
-  <Dependencies Name="x64-Debug">
+  <Dependencies Name="Debug">
     <Project Name="luashim-lib"/>
   </Dependencies>
   <Settings Type="Dynamic Library">
@@ -69,8 +63,8 @@
       </Linker>
       <ResourceCompiler Options=""/>
     </GlobalSettings>
-    <Configuration Name="x86-Release" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-m32;-flto;-O3;-Wall;-Wextra;-fno-stack-protector" C_Options="-m32;-flto;-O3;-Wall;-Wextra" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
+    <Configuration Name="Release" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-flto;-O3;-Wall;-Wextra;-fno-stack-protector" C_Options="-flto;-O3;-Wall;-Wextra" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
         <IncludePath Value="../../contrib/lua/src"/>
         <IncludePath Value="../../contrib/luashim"/>
         <Preprocessor Value="PREMAKE_COMPRESSION"/>
@@ -79,10 +73,10 @@
         <Preprocessor Value="NDEBUG"/>
         <Preprocessor Value="LUASOCKET_API=__declspec(dllexport)"/>
       </Compiler>
-      <Linker Required="yes" Options="-m32;-flto;-shared;-Wl,--out-implib=&quot;../../bin/release/luasocket.lib&quot;;bin/x86/Release/luashim-lib.lib;-lws2_32">
+      <Linker Required="yes" Options="-flto;-shared;-Wl,--out-implib=&quot;../../bin/release/luasocket.lib&quot;;bin/Win32/Release/luashim-lib.lib;-lws2_32">
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../bin/release/luasocket.dll" IntermediateDirectory="obj/x86/Release/luasocket" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no" IsGUIProgram="no" IsEnabled="yes"/>
+      <General OutputFile="../../bin/release/luasocket.dll" IntermediateDirectory="obj/Win32/Release/luasocket" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no" IsGUIProgram="no" IsEnabled="yes"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
       </Environment>
@@ -103,42 +97,8 @@
         <SearchPaths/>
       </Completion>
     </Configuration>
-    <Configuration Name="x64-Release" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-m64;-flto;-O3;-Wall;-Wextra;-fno-stack-protector" C_Options="-m64;-flto;-O3;-Wall;-Wextra" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
-        <IncludePath Value="../../contrib/lua/src"/>
-        <IncludePath Value="../../contrib/luashim"/>
-        <Preprocessor Value="PREMAKE_COMPRESSION"/>
-        <Preprocessor Value="CURL_STATICLIB"/>
-        <Preprocessor Value="PREMAKE_CURL"/>
-        <Preprocessor Value="NDEBUG"/>
-        <Preprocessor Value="LUASOCKET_API=__declspec(dllexport)"/>
-      </Compiler>
-      <Linker Required="yes" Options="-m64;-flto;-shared;-Wl,--out-implib=&quot;../../bin/release/luasocket.lib&quot;;bin/x64/Release/luashim-lib.lib;-lws2_32">
-      </Linker>
-      <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../bin/release/luasocket.dll" IntermediateDirectory="obj/x64/Release/luasocket" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no" IsGUIProgram="no" IsEnabled="yes"/>
-      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
-        <![CDATA[]]>
-      </Environment>
-      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
-        <DebuggerSearchPaths/>
-        <PostConnectCommands/>
-        <StartupCommands/>
-      </Debugger>
-      <CustomBuild Enabled="no"/>
-      <AdditionalRules>
-        <CustomPostBuild/>
-        <CustomPreBuild/>
-      </AdditionalRules>
-      <Completion EnableCpp11="no" EnableCpp14="no">
-        <ClangCmpFlagsC/>
-        <ClangCmpFlags/>
-        <ClangPP/>
-        <SearchPaths/>
-      </Completion>
-    </Configuration>
-    <Configuration Name="x86-Debug" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-m32;-g;-Wall;-Wextra" C_Options="-m32;-g;-Wall;-Wextra" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
+    <Configuration Name="Debug" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-g;-Wall;-Wextra" C_Options="-g;-Wall;-Wextra" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
         <IncludePath Value="../../contrib/lua/src"/>
         <IncludePath Value="../../contrib/luashim"/>
         <Preprocessor Value="PREMAKE_COMPRESSION"/>
@@ -147,44 +107,10 @@
         <Preprocessor Value="_DEBUG"/>
         <Preprocessor Value="LUASOCKET_API=__declspec(dllexport)"/>
       </Compiler>
-      <Linker Required="yes" Options="-m32;-shared;-Wl,--out-implib=&quot;../../bin/debug/luasocket.lib&quot;;bin/x86/Debug/luashim-lib.lib;-lws2_32">
+      <Linker Required="yes" Options="-shared;-Wl,--out-implib=&quot;../../bin/debug/luasocket.lib&quot;;bin/Win32/Debug/luashim-lib.lib;-lws2_32">
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../bin/debug/luasocket.dll" IntermediateDirectory="obj/x86/Debug/luasocket" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no" IsGUIProgram="no" IsEnabled="yes"/>
-      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
-        <![CDATA[]]>
-      </Environment>
-      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
-        <DebuggerSearchPaths/>
-        <PostConnectCommands/>
-        <StartupCommands/>
-      </Debugger>
-      <CustomBuild Enabled="no"/>
-      <AdditionalRules>
-        <CustomPostBuild/>
-        <CustomPreBuild/>
-      </AdditionalRules>
-      <Completion EnableCpp11="no" EnableCpp14="no">
-        <ClangCmpFlagsC/>
-        <ClangCmpFlags/>
-        <ClangPP/>
-        <SearchPaths/>
-      </Completion>
-    </Configuration>
-    <Configuration Name="x64-Debug" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-m64;-g;-Wall;-Wextra" C_Options="-m64;-g;-Wall;-Wextra" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
-        <IncludePath Value="../../contrib/lua/src"/>
-        <IncludePath Value="../../contrib/luashim"/>
-        <Preprocessor Value="PREMAKE_COMPRESSION"/>
-        <Preprocessor Value="CURL_STATICLIB"/>
-        <Preprocessor Value="PREMAKE_CURL"/>
-        <Preprocessor Value="_DEBUG"/>
-        <Preprocessor Value="LUASOCKET_API=__declspec(dllexport)"/>
-      </Compiler>
-      <Linker Required="yes" Options="-m64;-shared;-Wl,--out-implib=&quot;../../bin/debug/luasocket.lib&quot;;bin/x64/Debug/luashim-lib.lib;-lws2_32">
-      </Linker>
-      <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="../../bin/debug/luasocket.dll" IntermediateDirectory="obj/x64/Debug/luasocket" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no" IsGUIProgram="no" IsEnabled="yes"/>
+      <General OutputFile="../../bin/debug/luasocket.dll" IntermediateDirectory="obj/Win32/Debug/luasocket" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no" IsGUIProgram="no" IsEnabled="yes"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
       </Environment>

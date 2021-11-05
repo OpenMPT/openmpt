@@ -31,7 +31,7 @@ INCLUDES += -I../../contrib/lua/src -I../../contrib/luashim -I../../contrib/zlib
 FORCE_INCLUDE +=
 ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
 ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
-ALL_LDFLAGS += $(LDFLAGS)
+ALL_LDFLAGS += $(LDFLAGS) -arch x86_64
 LINKCMD = $(CC) -o "$@" $(OBJECTS) $(RESOURCES) $(ALL_LDFLAGS) $(LIBS)
 define PREBUILDCMDS
 endef
@@ -45,8 +45,8 @@ TARGETDIR = ../../bin/release
 TARGET = $(TARGETDIR)/premake5
 OBJDIR = obj/Release/Premake5
 DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -DNDEBUG -DLUA_USE_MACOSX
-ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -O3 -Wall -Wextra
-ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -O3 -Wall -Wextra -fno-stack-protector
+ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -O3 -Wall -Wextra -arch x86_64
+ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -O3 -Wall -Wextra -fno-stack-protector -arch x86_64
 LIBS += bin/Release/liblua-lib.a bin/Release/libzip-lib.a bin/Release/libzlib-lib.a bin/Release/libcurl-lib.a -framework CoreServices -framework Foundation -framework Security -lreadline
 LDDEPS += bin/Release/liblua-lib.a bin/Release/libzip-lib.a bin/Release/libzlib-lib.a bin/Release/libcurl-lib.a
 
@@ -55,8 +55,8 @@ TARGETDIR = ../../bin/debug
 TARGET = $(TARGETDIR)/premake5
 OBJDIR = obj/Debug/Premake5
 DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -D_DEBUG -DLUA_USE_MACOSX
-ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -g -Wall -Wextra
-ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -g -Wall -Wextra
+ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -g -Wall -Wextra -arch x86_64
+ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -g -Wall -Wextra -arch x86_64
 LIBS += bin/Debug/liblua-lib.a bin/Debug/libzip-lib.a bin/Debug/libzlib-lib.a bin/Debug/libcurl-lib.a -framework CoreServices -framework Foundation -framework Security -lreadline
 LDDEPS += bin/Debug/liblua-lib.a bin/Debug/libzip-lib.a bin/Debug/libzlib-lib.a bin/Debug/libcurl-lib.a
 

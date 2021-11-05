@@ -12,9 +12,6 @@
 		<Platform
 			Name="Win32"
 		/>
-		<Platform
-			Name="x64"
-		/>
 	</Platforms>
 	<ToolFiles>
 	</ToolFiles>
@@ -22,7 +19,7 @@
 		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="..\..\bin\release"
-			IntermediateDirectory="obj\x86\Release\Premake5"
+			IntermediateDirectory="obj\Win32\Release\Premake5"
 			ConfigurationType="1"
 			CharacterSet="1"
 			>
@@ -40,81 +37,6 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				AdditionalOptions="/MP /GL /Ox /MT /W4 /EHsc"
-				AdditionalIncludeDirectories="..\..\contrib\lua\src;..\..\contrib\luashim;..\..\contrib\zlib;..\..\contrib\libzip;..\..\contrib\curl\include"
-				PreprocessorDefinitions="PREMAKE_COMPRESSION;CURL_STATICLIB;PREMAKE_CURL;NDEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
-				UsePrecompiledHeader="0"
-				ProgramDataBaseFileName=""
-				DebugInformationFormat="0"
-				CompileAs="0"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="PREMAKE_COMPRESSION;CURL_STATICLIB;PREMAKE_CURL;NDEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\..\contrib\lua\src;..\..\contrib\luashim;..\..\contrib\zlib;..\..\contrib\libzip;..\..\contrib\curl\include"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalOptions="/NOLOGO /INCREMENTAL:NO /LTCG"
-				AdditionalDependencies="ole32.lib ws2_32.lib advapi32.lib version.lib"
-				OutputFile="$(OutDir)\premake5.exe"
-				LinkIncremental="0"
-				GenerateManifest="false"
-				ProgramDatabaseFile=""
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-		</Configuration>
-		<Configuration
-			Name="Release|x64"
-			OutputDirectory="..\..\bin\release"
-			IntermediateDirectory="obj\x64\Release\Premake5"
-			ConfigurationType="1"
-			CharacterSet="1"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				TargetEnvironment="3"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
@@ -171,7 +93,7 @@
 		<Configuration
 			Name="Debug|Win32"
 			OutputDirectory="..\..\bin\debug"
-			IntermediateDirectory="obj\x86\Debug\Premake5"
+			IntermediateDirectory="obj\Win32\Debug\Premake5"
 			ConfigurationType="1"
 			CharacterSet="1"
 			>
@@ -189,81 +111,6 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				AdditionalOptions="/MP /MTd /Z7 /W4 /EHsc"
-				AdditionalIncludeDirectories="..\..\contrib\lua\src;..\..\contrib\luashim;..\..\contrib\zlib;..\..\contrib\libzip;..\..\contrib\curl\include"
-				PreprocessorDefinitions="PREMAKE_COMPRESSION;CURL_STATICLIB;PREMAKE_CURL;_DEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
-				UsePrecompiledHeader="0"
-				ProgramDataBaseFileName=""
-				DebugInformationFormat="0"
-				CompileAs="0"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="PREMAKE_COMPRESSION;CURL_STATICLIB;PREMAKE_CURL;_DEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
-				AdditionalIncludeDirectories="..\..\contrib\lua\src;..\..\contrib\luashim;..\..\contrib\zlib;..\..\contrib\libzip;..\..\contrib\curl\include"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalOptions="/NOLOGO /DEBUG"
-				AdditionalDependencies="ole32.lib ws2_32.lib advapi32.lib version.lib"
-				OutputFile="$(OutDir)\premake5.exe"
-				LinkIncremental="0"
-				GenerateManifest="false"
-				ProgramDatabaseFile=""
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-		</Configuration>
-		<Configuration
-			Name="Debug|x64"
-			OutputDirectory="..\..\bin\debug"
-			IntermediateDirectory="obj\x64\Debug\Premake5"
-			ConfigurationType="1"
-			CharacterSet="1"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				TargetEnvironment="3"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
@@ -428,6 +275,10 @@
 					>
 					<File
 						RelativePath="..\..\modules\codelite\tests\_tests.lua"
+						>
+					</File>
+					<File
+						RelativePath="..\..\modules\codelite\tests\test_codelite_additional_rules.lua"
 						>
 					</File>
 					<File
@@ -924,6 +775,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\modules\vstudio\vs2022.lua"
+					>
+				</File>
+				<File
 					RelativePath="..\..\modules\vstudio\vstudio.lua"
 					>
 				</File>
@@ -959,6 +814,10 @@
 						</File>
 						<File
 							RelativePath="..\..\modules\vstudio\tests\cs2005\test_debug_props.lua"
+							>
+						</File>
+						<File
+							RelativePath="..\..\modules\vstudio\tests\cs2005\test_debug_props_2019.lua"
 							>
 						</File>
 						<File
@@ -1318,6 +1177,14 @@
 							>
 						</File>
 					</Filter>
+					<Filter
+						Name="vc2022"
+						>
+						<File
+							RelativePath="..\..\modules\vstudio\tests\vc2022\test_toolset_settings.lua"
+							>
+						</File>
+					</Filter>
 				</Filter>
 			</Filter>
 			<Filter
@@ -1386,6 +1253,10 @@
 			>
 			<File
 				RelativePath="..\..\scripts\changes.lua"
+				>
+			</File>
+			<File
+				RelativePath="..\..\scripts\docscheck.lua"
 				>
 			</File>
 			<File
@@ -1965,6 +1836,10 @@
 				</File>
 				<File
 					RelativePath="..\..\tests\base\test_premake_command.lua"
+					>
+				</File>
+				<File
+					RelativePath="..\..\tests\base\test_rule.lua"
 					>
 				</File>
 				<File

@@ -34,6 +34,7 @@
       <File Name="../../modules/codelite/codelite_workspace.lua"/>
       <VirtualDirectory Name="tests">
         <File Name="../../modules/codelite/tests/_tests.lua"/>
+        <File Name="../../modules/codelite/tests/test_codelite_additional_rules.lua"/>
         <File Name="../../modules/codelite/tests/test_codelite_config.lua"/>
         <File Name="../../modules/codelite/tests/test_codelite_project.lua"/>
         <File Name="../../modules/codelite/tests/test_codelite_workspace.lua"/>
@@ -157,6 +158,7 @@
           <File Name="../../modules/vstudio/tests/cs2005/test_common_props.lua"/>
           <File Name="../../modules/vstudio/tests/cs2005/test_compiler_props.lua"/>
           <File Name="../../modules/vstudio/tests/cs2005/test_debug_props.lua"/>
+          <File Name="../../modules/vstudio/tests/cs2005/test_debug_props_2019.lua"/>
           <File Name="../../modules/vstudio/tests/cs2005/test_files.lua"/>
           <File Name="../../modules/vstudio/tests/cs2005/test_icon.lua"/>
           <File Name="../../modules/vstudio/tests/cs2005/test_netcore.lua"/>
@@ -254,6 +256,9 @@
           <File Name="../../modules/vstudio/tests/vc2019/test_link.lua"/>
           <File Name="../../modules/vstudio/tests/vc2019/test_toolset_settings.lua"/>
         </VirtualDirectory>
+        <VirtualDirectory Name="vc2022">
+          <File Name="../../modules/vstudio/tests/vc2022/test_toolset_settings.lua"/>
+        </VirtualDirectory>
       </VirtualDirectory>
       <File Name="../../modules/vstudio/vs2005.lua"/>
       <File Name="../../modules/vstudio/vs2005_csproj.lua"/>
@@ -279,6 +284,7 @@
       <File Name="../../modules/vstudio/vs2015.lua"/>
       <File Name="../../modules/vstudio/vs2017.lua"/>
       <File Name="../../modules/vstudio/vs2019.lua"/>
+      <File Name="../../modules/vstudio/vs2022.lua"/>
       <File Name="../../modules/vstudio/vstudio.lua"/>
     </VirtualDirectory>
     <VirtualDirectory Name="xcode">
@@ -303,6 +309,7 @@
   <File Name="../../premake5.lua"/>
   <VirtualDirectory Name="scripts">
     <File Name="../../scripts/changes.lua"/>
+    <File Name="../../scripts/docscheck.lua"/>
     <File Name="../../scripts/embed.lua"/>
     <File Name="../../scripts/package.lua"/>
   </VirtualDirectory>
@@ -451,6 +458,7 @@
       <File Name="../../tests/base/test_override.lua"/>
       <File Name="../../tests/base/test_path.lua"/>
       <File Name="../../tests/base/test_premake_command.lua"/>
+      <File Name="../../tests/base/test_rule.lua"/>
       <File Name="../../tests/base/test_table.lua"/>
       <File Name="../../tests/base/test_tree.lua"/>
       <File Name="../../tests/base/test_uuid.lua"/>
@@ -519,7 +527,7 @@
       <ResourceCompiler Options=""/>
     </GlobalSettings>
     <Configuration Name="Release" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-O3;-Wall;-Wextra;-fno-stack-protector" C_Options="-O3;-Wall;-Wextra" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
+      <Compiler Options="-O3;-Wall;-Wextra;-fno-stack-protector;-arch x86_64" C_Options="-O3;-Wall;-Wextra;-arch x86_64" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
         <IncludePath Value="../../contrib/lua/src"/>
         <IncludePath Value="../../contrib/luashim"/>
         <IncludePath Value="../../contrib/zlib"/>
@@ -531,7 +539,7 @@
         <Preprocessor Value="NDEBUG"/>
         <Preprocessor Value="LUA_USE_MACOSX"/>
       </Compiler>
-      <Linker Required="yes" Options="bin/Release/liblua-lib.a;bin/Release/libzip-lib.a;bin/Release/libzlib-lib.a;bin/Release/libcurl-lib.a;-framework;CoreServices;-framework;Foundation;-framework;Security;-lreadline">
+      <Linker Required="yes" Options="-arch x86_64;bin/Release/liblua-lib.a;bin/Release/libzip-lib.a;bin/Release/libzlib-lib.a;bin/Release/libcurl-lib.a;-framework;CoreServices;-framework;Foundation;-framework;Security;-lreadline">
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../bin/release/premake5" IntermediateDirectory="obj/Release/Premake5" Command="../../bin/release/premake5" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
@@ -556,7 +564,7 @@
       </Completion>
     </Configuration>
     <Configuration Name="Debug" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-g;-Wall;-Wextra" C_Options="-g;-Wall;-Wextra" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
+      <Compiler Options="-g;-Wall;-Wextra;-arch x86_64" C_Options="-g;-Wall;-Wextra;-arch x86_64" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
         <IncludePath Value="../../contrib/lua/src"/>
         <IncludePath Value="../../contrib/luashim"/>
         <IncludePath Value="../../contrib/zlib"/>
@@ -568,7 +576,7 @@
         <Preprocessor Value="_DEBUG"/>
         <Preprocessor Value="LUA_USE_MACOSX"/>
       </Compiler>
-      <Linker Required="yes" Options="bin/Debug/liblua-lib.a;bin/Debug/libzip-lib.a;bin/Debug/libzlib-lib.a;bin/Debug/libcurl-lib.a;-framework;CoreServices;-framework;Foundation;-framework;Security;-lreadline">
+      <Linker Required="yes" Options="-arch x86_64;bin/Debug/liblua-lib.a;bin/Debug/libzip-lib.a;bin/Debug/libzlib-lib.a;bin/Debug/libcurl-lib.a;-framework;CoreServices;-framework;Foundation;-framework;Security;-lreadline">
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../bin/debug/premake5" IntermediateDirectory="obj/Debug/Premake5" Command="bin/debug/premake5" CommandArguments="--scripts=./../.. test" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="../.." PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>

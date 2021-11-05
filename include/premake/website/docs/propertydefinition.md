@@ -22,14 +22,12 @@ Required; a name for the rule that will be unique in the projects where it is us
 #### kind ####
 The expected data type of the values assigned to this property. Allowed values are:
 
-|         |                                   |
-|---------|-----------------------------------|
-| boolean | A yes or no value.                |
-| integer | An integer number.                |
-| list    | A list of string values.          |
-| number  | A floating point number.          |
-| path    | A single file system path value.  |
-| string  | A single string value.            |
+* `boolean` - a yes or no value.
+* `integer` - an integer number.
+* `list` - a list of string values.
+* `number` - a floating point number.
+* `path` - a single file system path value.
+* `string` - a single string value.
 
 For enum properties, this field is ignored and can be omitted. Otherwise it is required.
 
@@ -49,9 +47,8 @@ For enum properties, a key-value table of the possible values of the property, a
 The value to be placed into the command line for this property. See the examples below for more information.
 
 #### separator ####
-For list properties, this sets the value of the list item separator in the command line.\
-gmake2: Default value is ' '. If a switch is set, the separator is ignored and instead the switch is duplicated.\
-VS201x: If set, the list is concatenated by the separator and placed behind a single switch. If not set, the switch is duplicated.
+For list properties, this sets the value of the list item separator in the command line.
+If set, the list is concatenated by the separator and placed behind a single switch. If not set, the switch is duplicated.
 
 #### category ####
 Visual Studio only.

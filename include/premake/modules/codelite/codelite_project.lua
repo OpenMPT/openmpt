@@ -188,7 +188,6 @@
 		}
 	end
 
-
 	function m.compiler(cfg)
 		if configuration_iscustombuild(cfg) or configuration_isfilelist(cfg) then
 			_p(3, '<Compiler Required="no"/>')
@@ -196,14 +195,19 @@
 		end
 
 		local toolset = m.getcompiler(cfg)
-		local sysincludedirs = toolset.getincludedirs(cfg, {}, cfg.sysincludedirs)
+		local sysincludedirs = toolset.getincludedirs(cfg, {}, cfg.sysincludedirs, cfg.frameworkdirs)
 		local forceincludes = toolset.getforceincludes(cfg)
 		local cxxflags = table.concat(table.join(sysincludedirs, toolset.getcxxflags(cfg), forceincludes, cfg.buildoptions), ";")
 		local cflags   = table.concat(table.join(sysincludedirs, toolset.getcflags(cfg), forceincludes, cfg.buildoptions), ";")
 		local asmflags = ""
-		local pch      = ""
+		local pch      = p.tools.gcc.getpch(cfg)
+		local usepch   = "yes"
+		if pch == nil then
+			pch = "";
+			usepch = "no"
+		end
 
-		_x(3, '<Compiler Options="%s" C_Options="%s" Assembler="%s" Required="yes" PreCompiledHeader="%s" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">', cxxflags, cflags, asmflags, pch)
+		_x(3, '<Compiler Options="%s" C_Options="%s" Assembler="%s" Required="yes" PreCompiledHeader="%s" PCHInCommandLine="%s" UseDifferentPCHFlags="no" PCHFlags="">', cxxflags, cflags, asmflags, pch, usepch)
 
 		for _, includedir in ipairs(cfg.includedirs) do
 			_x(4, '<IncludePath Value="%s"/>', project.getrelative(cfg.project, includedir))
@@ -221,7 +225,7 @@
 		end
 
 		local toolset = m.getcompiler(cfg)
-		local flags   = table.join(toolset.getldflags(cfg), cfg.linkoptions, toolset.getlinks(cfg))
+		local flags   = table.join(toolset.getldflags(cfg), toolset.getincludedirs(cfg, {}, nil, cfg.frameworkdirs), toolset.getrunpathdirs(cfg, table.join(cfg.runpathdirs, config.getsiblingtargetdirs(cfg))), cfg.linkoptions, toolset.getlinks(cfg))
 
 		_x(3, '<Linker Required="yes" Options="%s">', table.concat(flags, ";"))
 
@@ -310,10 +314,14 @@
 	end
 
 	function m.preBuild(cfg)
-		if #cfg.prebuildcommands > 0 then
+		if #cfg.prebuildcommands > 0 or cfg.prebuildmessage then
 			_p(3, '<PreBuild>')
-			local commands = os.translateCommandsAndPaths(cfg.prebuildcommands, cfg.project.basedir, cfg.project.location)
 			p.escaper(codelite.escElementText)
+			if cfg.prebuildmessage then
+				local command = os.translateCommandsAndPaths("@{ECHO} " .. cfg.prebuildmessage, cfg.project.basedir, cfg.project.location)
+				_x(4, '<Command Enabled="yes">%s</Command>', command)
+			end
+			local commands = os.translateCommandsAndPaths(cfg.prebuildcommands, cfg.project.basedir, cfg.project.location)
 			for _, command in ipairs(commands) do
 				_x(4, '<Command Enabled="yes">%s</Command>', command)
 			end
@@ -323,10 +331,14 @@
 	end
 
 	function m.postBuild(cfg)
-		if #cfg.postbuildcommands > 0 then
+		if #cfg.postbuildcommands > 0  or cfg.postbuildmessage then
 			_p(3, '<PostBuild>')
-			local commands = os.translateCommandsAndPaths(cfg.postbuildcommands, cfg.project.basedir, cfg.project.location)
 			p.escaper(codelite.escElementText)
+			if cfg.postbuildmessage then
+				local command = os.translateCommandsAndPaths("@{ECHO} " .. cfg.postbuildmessage, cfg.project.basedir, cfg.project.location)
+				_x(4, '<Command Enabled="yes">%s</Command>', command)
+			end
+			local commands = os.translateCommandsAndPaths(cfg.postbuildcommands, cfg.project.basedir, cfg.project.location)
 			for _, command in ipairs(commands) do
 				_x(4, '<Command Enabled="yes">%s</Command>', command)
 			end
@@ -365,7 +377,54 @@
 
 		_p(3, '<AdditionalRules>')
 		_p(4, '<CustomPostBuild/>')
-		_p(4, '<CustomPreBuild/>')
+
+		local dependencies = {}
+		local makefilerules = {}
+		local function addrule(dependencies, makefilerules, config, filename)
+			if #config.buildcommands == 0 or #config.buildOutputs == 0 then
+				return false
+			end
+			local inputs = table.implode(project.getrelative(cfg.project, config.buildInputs), "", "", " ")
+			if filename ~= "" and inputs ~= "" then
+				filename = filename .. " "
+			end
+			local outputs = project.getrelative(cfg.project, config.buildOutputs[1])
+			local buildmessage = ""
+			if config.buildmessage then
+				buildmessage = "\t@{ECHO} " .. config.buildmessage .. "\n"
+			end
+			local commands = table.implode(config.buildCommands,"\t","\n","")
+			table.insert(makefilerules, os.translateCommandsAndPaths(outputs .. ": " .. filename .. inputs .. "\n" .. buildmessage .. commands, cfg.project.basedir, cfg.project.location))
+			table.insertflat(dependencies, outputs)
+			return true
+		end
+		local tr = project.getsourcetree(cfg.project)
+		p.tree.traverse(tr, {
+			onleaf = function(node, depth)
+				local filecfg = p.fileconfig.getconfig(node, cfg)
+				local prj = cfg.project
+				local rule = p.global.getRuleForFile(node.name, prj.rules)
+
+				if not addrule(dependencies, makefilerules, filecfg, node.relpath) and rule then
+					local environ = table.shallowcopy(filecfg.environ)
+
+					if rule.propertydefinition then
+						p.rule.prepareEnvironment(rule, environ, cfg)
+						p.rule.prepareEnvironment(rule, environ, filecfg)
+					end
+					local rulecfg = p.context.extent(rule, environ)
+					addrule(dependencies, makefilerules, rulecfg, node.relpath)
+				end
+			end
+		})
+		addrule(dependencies, makefilerules, cfg, "")
+
+		if #makefilerules == 0 and #dependencies == 0 then
+			_p(4, '<CustomPreBuild/>')
+		else
+			_p(4, '<CustomPreBuild>' .. table.implode(dependencies,"",""," "))
+			_p(0, table.implode(makefilerules,"","","\n") .. '</CustomPreBuild>')
+		end
 		_p(3, '</AdditionalRules>')
 	end
 

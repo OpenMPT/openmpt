@@ -413,6 +413,19 @@
 		};
 /* End PBXFrameworksBuildPhase section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		C725AE256A13D4D7F939B465 /* Embed Libraries */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+			);
+			name = "Embed Libraries";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXGroup section */
 		4AAE213EEF00BEF00139077E /* vauth */ = {
 			isa = PBXGroup;
@@ -743,6 +756,7 @@
 				E96D1C19ECDDEE4B6E4A9259 /* Resources */,
 				531A3570568B07A2D7F7ABB0 /* Sources */,
 				79859B797CF66DABFE6311B9 /* Frameworks */,
+				C725AE256A13D4D7F939B465 /* Embed Libraries */,
 			);
 			buildRules = (
 			);
@@ -945,10 +959,19 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				OBJROOT = "obj/Debug/curl-lib";
 				ONLY_ACTIVE_ARCH = YES;
+				OTHER_CFLAGS = (
+					"-arch x86_64",
+				);
+				OTHER_LDFLAGS = (
+					"-arch x86_64",
+				);
 				STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = static;
 				SYMROOT = bin/Debug;
-				USER_HEADER_SEARCH_PATHS = (
+				SYSTEM_HEADER_SEARCH_PATHS = (
 					../../contrib/curl/include,
+					"$(inherited)",
+				);
+				USER_HEADER_SEARCH_PATHS = (
 					../../contrib/curl/lib,
 					../../contrib/mbedtls/include,
 					../../contrib/zlib,
@@ -1003,10 +1026,19 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				OBJROOT = "obj/Release/curl-lib";
 				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CFLAGS = (
+					"-arch x86_64",
+				);
+				OTHER_LDFLAGS = (
+					"-arch x86_64",
+				);
 				STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = static;
 				SYMROOT = bin/Release;
-				USER_HEADER_SEARCH_PATHS = (
+				SYSTEM_HEADER_SEARCH_PATHS = (
 					../../contrib/curl/include,
+					"$(inherited)",
+				);
+				USER_HEADER_SEARCH_PATHS = (
 					../../contrib/curl/lib,
 					../../contrib/mbedtls/include,
 					../../contrib/zlib,

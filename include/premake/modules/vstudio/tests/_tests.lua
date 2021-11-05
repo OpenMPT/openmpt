@@ -12,6 +12,7 @@ return {
 	"cs2005/test_compiler_props.lua",
 	"cs2005/test_no_warn.lua",
 	"cs2005/test_debug_props.lua",
+	"cs2005/test_debug_props_2019.lua",
 	"cs2005/test_files.lua",
 	"cs2005/test_icon.lua",
 	"cs2005/test_netcore.lua",
@@ -100,5 +101,8 @@ return {
 	-- Visual Studio 2019+ C/C++ Projects
 	"vc2019/test_compile_settings.lua",
 	"vc2019/test_link.lua",
-	"vc2019/test_toolset_settings.lua"
+	"vc2019/test_toolset_settings.lua",
+
+	-- Visual Studio 2022+ C/C++ Projects
+	"vc2022/test_toolset_settings.lua"
 }

@@ -46,6 +46,19 @@
 		};
 /* End PBXFrameworksBuildPhase section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		E2CCC80111731BF36AB47641 /* Embed Libraries */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+			);
+			name = "Embed Libraries";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXGroup section */
 		9536FFD9B702AD0BF3B7D619 /* Products */ = {
 			isa = PBXGroup;
@@ -92,6 +105,7 @@
 				818C0EF58E48BE6703332D35 /* Resources */,
 				EB39284CF7F5D7BE6CE0468C /* Sources */,
 				11A48E551E613DC7934BAC95 /* Frameworks */,
+				E2CCC80111731BF36AB47641 /* Embed Libraries */,
 			);
 			buildRules = (
 			);
@@ -200,6 +214,12 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				OBJROOT = obj/Release/example;
 				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CFLAGS = (
+					"-arch x86_64",
+				);
+				OTHER_LDFLAGS = (
+					"-arch x86_64",
+				);
 				STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = static;
 				SYMROOT = ../../bin/release;
 				USER_HEADER_SEARCH_PATHS = (
@@ -230,6 +250,12 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				OBJROOT = obj/Debug/example;
 				ONLY_ACTIVE_ARCH = YES;
+				OTHER_CFLAGS = (
+					"-arch x86_64",
+				);
+				OTHER_LDFLAGS = (
+					"-arch x86_64",
+				);
 				STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = static;
 				SYMROOT = ../../bin/debug;
 				USER_HEADER_SEARCH_PATHS = (

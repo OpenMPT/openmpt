@@ -521,7 +521,7 @@ end
 
 
 	function make.includes(cfg, toolset)
-		local includes = toolset.getincludedirs(cfg, cfg.includedirs, cfg.sysincludedirs)
+		local includes = toolset.getincludedirs(cfg, cfg.includedirs, cfg.sysincludedirs, cfg.frameworkdirs)
 		_p('  INCLUDES +=%s', make.list(includes))
 	end
 
@@ -533,7 +533,7 @@ end
 
 
 	function make.ldFlags(cfg, toolset)
-		local flags = table.join(toolset.getLibraryDirectories(cfg), toolset.getrunpathdirs(cfg, cfg.runpathdirs), toolset.getldflags(cfg), cfg.linkoptions)
+		local flags = table.join(toolset.getLibraryDirectories(cfg), toolset.getrunpathdirs(cfg, table.join(cfg.runpathdirs, config.getsiblingtargetdirs(cfg))), toolset.getldflags(cfg), cfg.linkoptions)
 		_p('  ALL_LDFLAGS += $(LDFLAGS)%s', make.list(flags))
 	end
 
@@ -567,50 +567,15 @@ end
 
 
 	function make.pch(cfg, toolset)
+		local pch = p.tools.gcc.getpch(cfg)
 		-- If there is no header, or if PCH has been disabled, I can early out
-		if not cfg.pchheader or cfg.flags.NoPCH then
+		if pch == nil then
 			return
-		end
-
-		-- Visual Studio requires the PCH header to be specified in the same way
-		-- it appears in the #include statements used in the source code; the PCH
-		-- source actual handles the compilation of the header. GCC compiles the
-		-- header file directly, and needs the file's actual file system path in
-		-- order to locate it.
-
-		-- To maximize the compatibility between the two approaches, see if I can
-		-- locate the specified PCH header on one of the include file search paths
-		-- and, if so, adjust the path automatically so the user doesn't have
-		-- add a conditional configuration to the project script.
-
-		local pch = cfg.pchheader
-		local found = false
-
-		-- test locally in the project folder first (this is the most likely location)
-		local testname = path.join(cfg.project.basedir, pch)
-		if os.isfile(testname) then
-			pch = project.getrelative(cfg.project, testname)
-			found = true
-		else
-			-- else scan in all include dirs.
-			for _, incdir in ipairs(cfg.includedirs) do
-				testname = path.join(incdir, pch)
-				if os.isfile(testname) then
-					pch = project.getrelative(cfg.project, testname)
-					found = true
-					break
-				end
-			end
-		end
-
-		if not found then
-			pch = project.getrelative(cfg.project, path.getabsolute(pch))
 		end
 
 		_x('  PCH = %s', pch)
 		_p('  GCH = $(OBJDIR)/$(notdir $(PCH)).gch')
 	end
-
 
 	function make.pchRules(prj)
 		_p('ifneq (,$(PCH))')

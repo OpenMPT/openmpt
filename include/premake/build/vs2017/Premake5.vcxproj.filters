@@ -85,6 +85,9 @@
     <Filter Include="modules\vstudio\tests\vc2019">
       <UniqueIdentifier>{7145E192-5D00-D13E-06B8-4989F2511BCF}</UniqueIdentifier>
     </Filter>
+    <Filter Include="modules\vstudio\tests\vc2022">
+      <UniqueIdentifier>{8B45E192-7700-D13E-20B8-49890C521BCF}</UniqueIdentifier>
+    </Filter>
     <Filter Include="modules\xcode">
       <UniqueIdentifier>{80143BC8-ECD4-B6FE-B50F-007C218FFBDA}</UniqueIdentifier>
     </Filter>
@@ -378,6 +381,9 @@
     <None Include="..\..\modules\codelite\tests\_tests.lua">
       <Filter>modules\codelite\tests</Filter>
     </None>
+    <None Include="..\..\modules\codelite\tests\test_codelite_additional_rules.lua">
+      <Filter>modules\codelite\tests</Filter>
+    </None>
     <None Include="..\..\modules\codelite\tests\test_codelite_config.lua">
       <Filter>modules\codelite\tests</Filter>
     </None>
@@ -654,6 +660,9 @@
     <None Include="..\..\modules\vstudio\tests\cs2005\test_debug_props.lua">
       <Filter>modules\vstudio\tests\cs2005</Filter>
     </None>
+    <None Include="..\..\modules\vstudio\tests\cs2005\test_debug_props_2019.lua">
+      <Filter>modules\vstudio\tests\cs2005</Filter>
+    </None>
     <None Include="..\..\modules\vstudio\tests\cs2005\test_files.lua">
       <Filter>modules\vstudio\tests\cs2005</Filter>
     </None>
@@ -900,6 +909,9 @@
     <None Include="..\..\modules\vstudio\tests\vc2019\test_toolset_settings.lua">
       <Filter>modules\vstudio\tests\vc2019</Filter>
     </None>
+    <None Include="..\..\modules\vstudio\tests\vc2022\test_toolset_settings.lua">
+      <Filter>modules\vstudio\tests\vc2022</Filter>
+    </None>
     <None Include="..\..\modules\vstudio\vs2005.lua">
       <Filter>modules\vstudio</Filter>
     </None>
@@ -972,6 +984,9 @@
     <None Include="..\..\modules\vstudio\vs2019.lua">
       <Filter>modules\vstudio</Filter>
     </None>
+    <None Include="..\..\modules\vstudio\vs2022.lua">
+      <Filter>modules\vstudio</Filter>
+    </None>
     <None Include="..\..\modules\vstudio\vstudio.lua">
       <Filter>modules\vstudio</Filter>
     </None>
@@ -1017,6 +1032,9 @@
     <None Include="..\..\premake4.lua" />
     <None Include="..\..\premake5.lua" />
     <None Include="..\..\scripts\changes.lua">
+      <Filter>scripts</Filter>
+    </None>
+    <None Include="..\..\scripts\docscheck.lua">
       <Filter>scripts</Filter>
     </None>
     <None Include="..\..\scripts\embed.lua">
@@ -1239,6 +1257,9 @@
       <Filter>tests\base</Filter>
     </None>
     <None Include="..\..\tests\base\test_premake_command.lua">
+      <Filter>tests\base</Filter>
+    </None>
+    <None Include="..\..\tests\base\test_rule.lua">
       <Filter>tests\base</Filter>
     </None>
     <None Include="..\..\tests\base\test_table.lua">

@@ -88,6 +88,7 @@
 			SSE3 = "/arch:SSE2",
 			SSSE3 = "/arch:SSE2",
 			["SSE4.1"] = "/arch:SSE2",
+			["SSE4.2"] = "/arch:SSE2",
 		},
 		warnings = {
 			Off = "/W0",
@@ -117,7 +118,12 @@
 			On = "/Oy"
 		},
 		justmycode = {
-			Off = "false"
+			On = "/JMC",
+			Off = "/JMC-"
+		},
+		openmp = {
+			On = "/openmp",
+			Off = "/openmp-"
 		}
 
 	}
@@ -231,7 +237,7 @@
 -- Decorate include file search paths for the MSVC command line.
 --
 
-	function msc.getincludedirs(cfg, dirs, sysdirs)
+	function msc.getincludedirs(cfg, dirs, sysdirs, frameworkdirs)
 		local result = {}
 		dirs = table.join(dirs, sysdirs)
 		for _, dir in ipairs(dirs) do

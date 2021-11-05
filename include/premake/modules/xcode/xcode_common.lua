@@ -46,6 +46,8 @@
 		}
 		if node.isResource then
 			return "Resources"
+		elseif node.cfg and (node.cfg.kind == p.SHAREDLIB or node.cfg.kind == p.STATICLIB) then
+			return "Frameworks"
 		end
 		return categories[path.getextension(node.name)]
 	end
@@ -144,6 +146,7 @@
 			[".xcassets"]  = "folder.assetcatalog",
 			[".swift"]     = "sourcecode.swift",
 			[".metal"]     = "sourcecode.metal",
+			[".dylib"]     = "compiled.mach-o.dylib",
 		}
 		return types[path.getextension(node.path)] or "text"
 	end
@@ -274,6 +277,23 @@
 --    The corresponding value of DEBUG_INFORMATION_FORMAT, or 'dwarf-with-dsym' if invalid
 --
 
+	function xcode.getToolSet(cfg)
+		local default = "clang"
+		local minOSVersion = project.systemversion(cfg)
+		if minOSVersion ~= nil
+			and cfg.system == p.MACOSX
+			and p.checkVersion(minOSVersion, "<10.7")
+		then
+			default = "gcc"
+		end
+
+		local toolset = p.tools[_OPTIONS.cc or cfg.toolset or default]
+		if not toolset then
+			error("Invalid toolset '" .. cfg.toolset .. "'")
+		end
+		return toolset
+	end
+
 	function xcode.getdebugformat(cfg)
 		local formats = {
 			["Dwarf"]      = "dwarf",
@@ -317,6 +337,29 @@
 		return (path.getextension(fname) == ".framework")
 	end
 
+
+--
+-- Returns true if the file name represents a dylib.
+--
+-- @param fname
+--    The name of the file to test.
+--
+
+	function xcode.isdylib(fname)
+		return (path.getextension(fname) == ".dylib")
+	end
+
+
+--
+-- Returns true if the file name represents a framework or dylib.
+--
+-- @param fname
+--    The name of the file to test.
+--
+
+	function xcode.isframeworkordylib(fname)
+		return xcode.isframework(fname) or xcode.isdylib(fname)
+	end
 
 --
 -- Retrieves a unique 12 byte ID for an object.
@@ -386,6 +429,25 @@
 					settings[node.buildid] = function(level)
 						_p(level,'%s /* %s in %s */ = {isa = PBXBuildFile; fileRef = %s /* %s */; };',
 							node.buildid, node.name, xcode.getbuildcategory(node), node.id, node.name)
+
+						if node.embedid then
+							local attrs = ""
+
+							if xcode.shouldembedandsign(tr, node) then
+								attrs = attrs .. "CodeSignOnCopy, "
+							end
+
+							if xcode.isframework(node.name) then
+								attrs = attrs .. "RemoveHeadersOnCopy, "
+							end
+
+							if attrs ~= "" then
+								attrs = " settings = {ATTRIBUTES = (" .. attrs .. "); };"
+							end
+
+							_p(level,'%s /* %s in Embed Libraries */ = {isa = PBXBuildFile; fileRef = %s /* %s */;%s };',
+								node.embedid, node.name, node.id, node.name, attrs)
+						end
 					end
 				end
 			end
@@ -497,6 +559,23 @@
 							pth = "System/Library/Frameworks/" .. node.path
 							src = "SDKROOT"
 						end
+					elseif xcode.isdylib(node.path) then
+						--respect user supplied paths
+						-- look for special variable-starting paths for different sources
+						local nodePath = node.path
+						local _, matchEnd, variable = string.find(nodePath, "^%$%((.+)%)/")
+						if variable then
+							-- by skipping the last '/' we support the same absolute/relative
+							-- paths as before
+							nodePath = string.sub(nodePath, matchEnd + 1)
+						end
+						if string.find(nodePath,'^%/') then
+							pth = nodePath
+							src = "<absolute>"
+						else
+							pth = path.getrelative(tr.project.location, node.path)
+							src = "SOURCE_ROOT"
+						end
 					else
 						-- something else; probably a source code file
 						src = "<group>"
@@ -553,6 +632,79 @@
 		_p(3,'runOnlyForDeploymentPostprocessing = 0;')
 		_p(2,'};')
 		_p('/* End PBXFrameworksBuildPhase section */')
+		_p('')
+	end
+
+
+	function xcode.embedListContains(list, node)
+		-- Frameworks and dylibs referenced by path are expected
+		-- to provide the file name (but not path). Project
+		-- references are expected to provide the project name.
+		local entryname = node.name
+		if node.parent.project then
+			entryname = node.parent.project.name
+		end
+		return table.contains(list, entryname)
+	end
+
+	function xcode.shouldembed(tr, node)
+		if not xcode.isframeworkordylib(node.name) then
+			return false
+		end
+
+		for _, cfg in ipairs(tr.configs) do
+			if xcode.embedListContains(cfg.embed, node) or xcode.embedListContains(cfg.embedAndSign, node) then
+				return true
+			end
+		end
+	end
+
+
+	function xcode.shouldembedandsign(tr, node)
+		if not xcode.isframeworkordylib(node.name) then
+			return false
+		end
+
+		for _, cfg in ipairs(tr.configs) do
+			if xcode.embedListContains(cfg.embedAndSign, node) then
+				return true
+			end
+		end
+	end
+
+
+	function xcode.PBXCopyFilesBuildPhaseForEmbedFrameworks(tr)
+		_p('/* Begin PBXCopyFilesBuildPhase section */')
+		_p(2,'%s /* Embed Libraries */ = {', tr.products.children[1].embedstageid)
+		_p(3,'isa = PBXCopyFilesBuildPhase;')
+		_p(3,'buildActionMask = 2147483647;')
+		_p(3,'dstPath = "";')
+		_p(3,'dstSubfolderSpec = 10;')
+		_p(3,'files = (')
+
+		-- write out library dependencies
+		tree.traverse(tr.frameworks, {
+			onleaf = function(node)
+				if node.embedid then
+					_p(4,'%s /* %s in Frameworks */,', node.embedid, node.name)
+				end
+			end
+		})
+
+		-- write out project dependencies
+		tree.traverse(tr.projects, {
+			onleaf = function(node)
+				if node.embedid then
+					_p(4,'%s /* %s in Projects */,', node.embedid, node.parent.project.name)
+				end
+			end
+		})
+
+		_p(3,');')
+		_p(3,'name = "Embed Libraries";')
+		_p(3,'runOnlyForDeploymentPostprocessing = 0;')
+		_p(2,'};')
+		_p('/* End PBXCopyFilesBuildPhase section */')
 		_p('')
 	end
 
@@ -745,6 +897,7 @@
 			end
 			if pbxTargetName == "Native" then
 				_p(4,'%s /* Frameworks */,', node.fxstageid)
+				_p(4,'%s /* Embed Libraries */,', node.embedstageid)
 			end
 			if hasBuildCommands('postbuildcommands') then
 				_p(4,'9607AE3710C85E8F00CD1376 /* Postbuild */,')
@@ -959,10 +1112,14 @@
 								end
 								table.insert(commands, 'fi')
 								for _, v in ipairs(filecfg.buildinputs) do
-									inputs[v] = true
+									if not table.indexof(inputs, v) then
+										table.insert(inputs, v)
+									end
 								end
 								for _, v in ipairs(filecfg.buildoutputs) do
-									outputs[v] = true
+									if not table.indexof(outputs, v) then
+										table.insert(outputs, v)
+									end
 								end
 							end
 						end
@@ -978,13 +1135,13 @@
 						_p(level+1,');')
 						_p(level+1,'inputPaths = (');
 						_p(level+2,'"%s",', xcode.escapeSetting(node.relpath))
-						for v, _ in pairs(inputs) do
+						for _, v in ipairs(inputs) do
 							_p(level+2,'"%s",', xcode.escapeSetting(project.getrelative(tr.project, v)))
 						end
 						_p(level+1,');')
 						_p(level+1,'name = %s;', xcode.stringifySetting('Build "' .. node.name .. '"'))
 						_p(level+1,'outputPaths = (')
-						for v, _ in pairs(outputs) do
+						for _, v in ipairs(outputs) do
 							_p(level+2,'"%s",', xcode.escapeSetting(project.getrelative (tr.project, v)))
 						end
 						_p(level+1,');')
@@ -1275,16 +1432,17 @@
 
 	function xcode.XCBuildConfiguration_SwiftLanguageVersion(settings, cfg)
 		-- if no swiftversion is provided, don't set swift version
-		-- Projects with swift files but without swift version will refuse 
-		-- to build on Xcode but setting a default SWIFT_VERSION may have 
+		-- Projects with swift files but without swift version will refuse
+		-- to build on Xcode but setting a default SWIFT_VERSION may have
 		-- unexpected interactions with other systems like cocoapods
 		if cfg.swiftversion then
 			settings['SWIFT_VERSION'] = cfg.swiftversion
 		end
 	end
-	
+
 	function xcode.XCBuildConfiguration_Project(tr, cfg)
 		local settings = {}
+		local toolset = xcode.getToolSet(cfg)
 
 		local archs = {
 			Native = "$(NATIVE_ARCH_ACTUAL)",
@@ -1385,6 +1543,9 @@
 		end
 		settings['FRAMEWORK_SEARCH_PATHS'] = cfg.frameworkdirs
 
+		local runpathdirs = table.join (cfg.runpathdirs, config.getsiblingtargetdirs (cfg))
+		settings['LD_RUNPATH_SEARCH_PATHS'] = toolset.getrunpathdirs(cfg, runpathdirs, "path")
+
 		local objDir = path.getrelative(tr.project.location, cfg.objdir)
 		settings['OBJROOT'] = objDir
 
@@ -1414,12 +1575,10 @@
 
 		settings['OTHER_CFLAGS'] = table.join(flags, cfg.buildoptions)
 
-		-- build list of "other" linked flags. All libraries that aren't frameworks
-		-- are listed here, so I don't have to try and figure out if they are ".a"
-		-- or ".dylib", which Xcode requires to list in the Frameworks section
+		-- build list of "other" linked flags.
 		flags = { }
 		for _, lib in ipairs(config.getlinks(cfg, "system")) do
-			if not xcode.isframework(lib) then
+			if not xcode.isframeworkordylib(lib) then
 				table.insert(flags, "-l" .. lib)
 			end
 		end
@@ -1427,7 +1586,7 @@
 		--ms this step is for reference projects only
 		for _, lib in ipairs(config.getlinks(cfg, "dependencies", "object")) do
 			if (lib.external) then
-				if not xcode.isframework(lib.linktarget.basename) then
+				if not xcode.isframeworkordylib(lib.linktarget.basename) then
 					table.insert(flags, "-l" .. xcode.escapeArg(lib.linktarget.basename))
 				end
 			end

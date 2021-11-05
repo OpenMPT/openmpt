@@ -288,6 +288,19 @@
 		};
 /* End PBXFrameworksBuildPhase section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		5D75CFBA56DBD12C4A772DFA /* Embed Libraries */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+			);
+			name = "Embed Libraries";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXGroup section */
 		0AEE73713114A323981B99B1 /* mbedtls */ = {
 			isa = PBXGroup;
@@ -526,6 +539,7 @@
 				ACADD46EAD60D1602142A2AE /* Resources */,
 				165AEDC5170DEAB78AEFBC05 /* Sources */,
 				3CC653CE3D7950C0B15B220E /* Frameworks */,
+				5D75CFBA56DBD12C4A772DFA /* Embed Libraries */,
 			);
 			buildRules = (
 			);
@@ -684,6 +698,12 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				OBJROOT = "obj/Debug/mbedtls-lib";
 				ONLY_ACTIVE_ARCH = YES;
+				OTHER_CFLAGS = (
+					"-arch x86_64",
+				);
+				OTHER_LDFLAGS = (
+					"-arch x86_64",
+				);
 				STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = static;
 				SYMROOT = bin/Debug;
 				USER_HEADER_SEARCH_PATHS = (
@@ -725,6 +745,12 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				OBJROOT = "obj/Release/mbedtls-lib";
 				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CFLAGS = (
+					"-arch x86_64",
+				);
+				OTHER_LDFLAGS = (
+					"-arch x86_64",
+				);
 				STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = static;
 				SYMROOT = bin/Release;
 				USER_HEADER_SEARCH_PATHS = (

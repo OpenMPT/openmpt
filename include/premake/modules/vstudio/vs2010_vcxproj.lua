@@ -133,6 +133,8 @@
 			m.preferredToolArchitecture,
 			m.latestTargetPlatformVersion,
 			m.windowsTargetPlatformVersion,
+			m.fastUpToDateCheck,
+			m.toolsVersion,
 		}
 	end
 
@@ -182,6 +184,7 @@
 			return {
 				m.configurationType,
 				m.platformToolset,
+				m.toolsVersion,
 			}
 		else
 			return {
@@ -192,6 +195,7 @@
 				m.clrSupport,
 				m.characterSet,
 				m.platformToolset,
+				m.toolsVersion,
 				m.wholeProgramOptimization,
 				m.spectreMitigations,  --OpenMPT
 				m.nmakeOutDirs,
@@ -367,6 +371,7 @@
 			m.functionLevelLinking,
 			m.intrinsicFunctions,
 			m.justMyCodeDebugging,
+			m.supportOpenMP,
 			m.minimalRebuild,
 			m.omitFramePointers,
 			m.stringPooling,
@@ -1715,6 +1720,12 @@
 			m.element("CompileAs", condition, "CompileAsC")
 		elseif p.languages.iscpp(cfg.compileas) then
 			m.element("CompileAs", condition, "CompileAsCpp")
+		elseif cfg.compileas == "Module" then
+			m.element("CompileAs", condition, "CompileAsCppModule")
+		elseif cfg.compileas == "ModulePartition" then
+			m.element("CompileAs", condition, "CompileAsCppModuleInternalPartition")
+		elseif cfg.compileas == "HeaderUnit" then
+			m.element("CompileAs", condition, "CompileAsHeaderUnit")
 		end
 	end
 
@@ -1794,7 +1805,7 @@
 		elseif x == "AVX2" and _ACTION > "vs2012" then
 			v = "AdvancedVectorExtensions2"
 		elseif cfg.architecture ~= "x86_64" then
-			if x == "SSE2" or x == "SSE3" or x == "SSSE3" or x == "SSE4.1" then
+			if x == "SSE2" or x == "SSE3" or x == "SSSE3" or x == "SSE4.1" or x == "SSE4.2" then
 				v = "StreamingSIMDExtensions2"
 			elseif x == "SSE" then
 				v = "StreamingSIMDExtensions"
@@ -2163,10 +2174,22 @@
 	end
 
 	function m.justMyCodeDebugging(cfg)
-		local jmc = cfg.justmycode
+		if _ACTION >= "vs2017" then
+			local jmc = cfg.justmycode
 
-		if _ACTION >= "vs2017" and jmc == "Off" then
-			m.element("SupportJustMyCode", nil, "false")
+			if jmc == "On" then
+				m.element("SupportJustMyCode", nil, "true")
+			elseif jmc == "Off" then
+				m.element("SupportJustMyCode", nil, "false")
+			end
+		end
+	end
+
+	function m.supportOpenMP(cfg)
+		if cfg.openmp == "On" then
+			m.element("OpenMPSupport", nil, "true")
+		elseif cfg.openmp == "Off" then
+			m.element("OpenMPSupport", nil, "false")
 		end
 	end
 
@@ -2389,6 +2412,14 @@
 				return "$(ProjectDir)" .. dir
 			end)
 			m.element("ExecutablePath", nil, "%s;$(ExecutablePath)", table.concat(dirs, ";"))
+		end
+	end
+
+
+	function m.toolsVersion(cfg)
+		local version = cfg.toolsversion
+		if _ACTION >= "vs2017" and version then
+			m.element("VCToolsVersion", nil, version)
 		end
 	end
 
@@ -2701,6 +2732,13 @@
 	function m.xpDeprecationWarning(prj, cfg)
 		if cfg.toolset == "msc-v141_xp" then
 			m.element("XPDeprecationWarning", nil, "false")
+		end
+	end
+
+
+	function m.fastUpToDateCheck(prj)
+		if prj.fastuptodate ~= nil then
+			m.element("DisableFastUpToDateCheck", nil, iif(prj.fastuptodate, "false", "true"))
 		end
 	end
 

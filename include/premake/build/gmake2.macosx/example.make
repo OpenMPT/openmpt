@@ -31,7 +31,7 @@ INCLUDES += -I../../contrib/lua/src -I../../contrib/luashim
 FORCE_INCLUDE +=
 ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
 ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
-ALL_LDFLAGS += $(LDFLAGS) -dynamiclib -Wl,-install_name,@rpath/example.so
+ALL_LDFLAGS += $(LDFLAGS) -dynamiclib -Wl,-install_name,@rpath/example.so -arch x86_64
 LINKCMD = $(CC) -o "$@" $(OBJECTS) $(RESOURCES) $(ALL_LDFLAGS) $(LIBS)
 define PREBUILDCMDS
 endef
@@ -45,8 +45,8 @@ TARGETDIR = ../../bin/release
 TARGET = $(TARGETDIR)/example.so
 OBJDIR = obj/Release/example
 DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -DNDEBUG
-ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -O3 -fPIC -Wall -Wextra
-ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -O3 -fPIC -Wall -Wextra -fno-stack-protector
+ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -O3 -fPIC -Wall -Wextra -arch x86_64
+ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -O3 -fPIC -Wall -Wextra -fno-stack-protector -arch x86_64
 LIBS += bin/Release/libluashim-lib.a
 LDDEPS += bin/Release/libluashim-lib.a
 
@@ -55,8 +55,8 @@ TARGETDIR = ../../bin/debug
 TARGET = $(TARGETDIR)/example.so
 OBJDIR = obj/Debug/example
 DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -D_DEBUG
-ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -fPIC -g -Wall -Wextra
-ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -fPIC -g -Wall -Wextra
+ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -fPIC -g -Wall -Wextra -arch x86_64
+ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -fPIC -g -Wall -Wextra -arch x86_64
 LIBS += bin/Debug/libluashim-lib.a
 LDDEPS += bin/Debug/libluashim-lib.a
 

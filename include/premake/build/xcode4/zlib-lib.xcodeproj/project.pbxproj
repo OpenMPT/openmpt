@@ -64,6 +64,19 @@
 		};
 /* End PBXFrameworksBuildPhase section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		E8EBB3808BD9DA321AFFB9C0 /* Embed Libraries */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+			);
+			name = "Embed Libraries";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXGroup section */
 		A6C936B49B3FADE6EA134CF4 /* Products */ = {
 			isa = PBXGroup;
@@ -117,6 +130,7 @@
 				7FAC0EB4831CE0E6048984F4 /* Resources */,
 				E959280BECC9FA3D6E369E4B /* Sources */,
 				0FC48E141335604694A20454 /* Frameworks */,
+				E8EBB3808BD9DA321AFFB9C0 /* Embed Libraries */,
 			);
 			buildRules = (
 			);
@@ -203,6 +217,12 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				OBJROOT = "obj/Release/zlib-lib";
 				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CFLAGS = (
+					"-arch x86_64",
+				);
+				OTHER_LDFLAGS = (
+					"-arch x86_64",
+				);
 				STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = static;
 				SYMROOT = bin/Release;
 				WARNING_CFLAGS = "-w";
@@ -255,6 +275,12 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				OBJROOT = "obj/Debug/zlib-lib";
 				ONLY_ACTIVE_ARCH = YES;
+				OTHER_CFLAGS = (
+					"-arch x86_64",
+				);
+				OTHER_LDFLAGS = (
+					"-arch x86_64",
+				);
 				STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = static;
 				SYMROOT = bin/Debug;
 				WARNING_CFLAGS = "-w";

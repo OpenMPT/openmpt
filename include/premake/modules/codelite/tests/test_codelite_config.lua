@@ -93,6 +93,16 @@
 		]]
 	end
 
+	function suite.OnProjectCfg_Pch()
+		  pchheader "pch.h"
+		prepare()
+		codelite.project.compiler(cfg)
+		test.capture [[
+      <Compiler Options="" C_Options="" Assembler="" Required="yes" PreCompiledHeader="pch.h" PCHInCommandLine="yes" UseDifferentPCHFlags="no" PCHFlags="">
+      </Compiler>
+		]]
+	end
+
 	function suite.OnProjectCfg_Linker()
 		prepare()
 		codelite.project.linker(cfg)
@@ -168,6 +178,28 @@
       <ResourceCompiler Options="" Required="yes">
         <IncludePath Value="sysdir"/>
       </ResourceCompiler>
+		]]
+	end
+
+	function suite.OnProjectCfg_PreBuildMessage()
+		prebuildmessage "test"
+		prepare()
+		codelite.project.preBuild(cfg)
+		test.capture [[
+      <PreBuild>
+        <Command Enabled="yes">@echo test</Command>
+      </PreBuild>
+		]]
+	end
+
+	function suite.OnProjectCfg_PostBuildMessage()
+		postbuildmessage "test"
+		prepare()
+		codelite.project.postBuild(cfg)
+		test.capture [[
+      <PostBuild>
+        <Command Enabled="yes">@echo test</Command>
+      </PostBuild>
 		]]
 	end
 
@@ -305,20 +337,6 @@ cmd2</StartupCommands>
         <Command Enabled="yes">touch "./build/copyright" &amp;&amp; echo OK</Command>
         <Command Enabled="yes">cat "./lib/copyright" &gt;&gt; "./build/copyright"</Command>
       </PostBuild>
-		]]
-	end
-
-	-- TODO: test custom build
-
-
-	function suite.OnProjectCfg_AdditionalRules()
-		prepare()
-		codelite.project.additionalRules(prj)
-		test.capture [[
-      <AdditionalRules>
-        <CustomPostBuild/>
-        <CustomPreBuild/>
-      </AdditionalRules>
 		]]
 	end
 

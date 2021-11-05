@@ -278,11 +278,27 @@
 --
 
 	function dotnetbase.debugProps(cfg)
-		if cfg.symbols == p.ON then
-			_p(2,'<DebugSymbols>true</DebugSymbols>')
-			_p(2,'<DebugType>full</DebugType>')
+		if _ACTION >= "vs2019" then
+			if cfg.symbols == "Full" then
+				_p(2,'<DebugType>full</DebugType>')
+				_p(2,'<DebugSymbols>true</DebugSymbols>')
+			elseif cfg.symbols == p.OFF then
+				_p(2,'<DebugType>none</DebugType>')
+				_p(2,'<DebugSymbols>false</DebugSymbols>')
+			elseif cfg.symbols == p.ON or cfg.symbols == "FastLink" then
+				_p(2,'<DebugType>pdbonly</DebugType>')
+				_p(2,'<DebugSymbols>true</DebugSymbols>')
+			else
+				_p(2,'<DebugType>portable</DebugType>')
+				_p(2,'<DebugSymbols>true</DebugSymbols>')
+			end
 		else
-			_p(2,'<DebugType>pdbonly</DebugType>')
+			if cfg.symbols == p.ON then
+				_p(2,'<DebugSymbols>true</DebugSymbols>')
+				_p(2,'<DebugType>full</DebugType>')
+			else
+				_p(2,'<DebugType>pdbonly</DebugType>')
+			end
 		end
 		_p(2,'<Optimize>%s</Optimize>', iif(config.isOptimizedBuild(cfg), "true", "false"))
 	end
@@ -312,7 +328,7 @@
 -- Write out the references item group.
 --
 
-	dotnetbase.elements.references = function(prj)
+	dotnetbase.elements.references = function(cfg)
 		return {
 			dotnetbase.assemblyReferences,
 			dotnetbase.nuGetReferences,
@@ -320,9 +336,11 @@
 	end
 
 	function dotnetbase.references(prj)
-		_p(1,'<ItemGroup>')
-		p.callArray(dotnetbase.elements.references, prj)
-		_p(1,'</ItemGroup>')
+		for cfg in project.eachconfig(prj) do
+			_p(1,'<ItemGroup %s>', dotnetbase.condition(cfg))
+			p.callArray(dotnetbase.elements.references, cfg)
+			_p(1,'</ItemGroup>')
+		end
 	end
 
 
@@ -330,11 +348,8 @@
 -- Write the list of assembly (system, or non-sibling) references.
 --
 
-	function dotnetbase.assemblyReferences(prj)
-		-- C# doesn't support per-configuration links (does it?) so just use
-		-- the settings from the first available config instead
-		local cfg = project.getfirstconfig(prj)
-
+	function dotnetbase.assemblyReferences(cfg)
+		local prj = cfg.project
 		config.getlinks(cfg, "system", function(original, decorated)
 			local name = path.getname(decorated)
 			if path.getextension(name) == ".dll" then
@@ -405,13 +420,13 @@
 -- Write the list of NuGet references.
 --
 
-	function dotnetbase.nuGetReferences(prj)
+	function dotnetbase.nuGetReferences(cfg)
+		local prj = cfg.project
 		if _ACTION >= "vs2010" and not vstudio.nuget2010.supportsPackageReferences(prj) then
 			for _, package in ipairs(prj.nuget) do
 				local id = vstudio.nuget2010.packageId(package)
 				local packageAPIInfo = vstudio.nuget2010.packageAPIInfo(prj, package)
 
-				local cfg = p.project.getfirstconfig(prj)
 				local action = p.action.current()
 				local targetFramework = cfg.dotnetframework or action.vstudio.targetFramework
 

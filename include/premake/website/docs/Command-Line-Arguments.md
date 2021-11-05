@@ -2,7 +2,7 @@
 title: Command Line Arguments
 ---
 
-Premake provides the ability to define and handle new command-line arguments from within your project script using the [newaction](newaction) and [newoption](newoption) functions.
+Premake provides the ability to define and handle new command-line arguments from within your project script using the [newaction](newaction.md) and [newoption](newoption.md) functions.
 
 ## Actions and Options
 
@@ -12,7 +12,7 @@ An _action_ indicates what Premake should do on any given run. For instance, the
 
 An _option_ modifies the behavior of the action. For instance, the `dotnet` option is used to change which .NET compiler set is used in the generated files. Options can accept a value, such as `--dotnet=mono` or act as a flag, like `--with-opengl`.
 
-From within your script, you can identify the current action with the [`_ACTION`](_ACTION) global variable, a string value. You can check for an option using the [`_OPTIONS`](_OPTIONS) table, which contains a list of key-value pairs. The key is the option identifier ("dotnet"), which references the command line value ("mono") or an empty string for valueless options.
+From within your script, you can identify the current action with the [`_ACTION`](premake_ACTION.md) global variable, a string value. You can check for an option using the [`_OPTIONS`](premake_OPTIONS.md) table, which contains a list of key-value pairs. The key is the option identifier ("dotnet"), which references the command line value ("mono") or an empty string for valueless options.
 
 ```lua
 -- delete a file if the clean action is running
@@ -26,7 +26,7 @@ targetdir ( _OPTIONS["outdir"] or "out" )
 
 ## Creating New Options
 
-New command-line options are created using the [`newoption`](newoption) function, passing a table which fully describes the option. This is best illustrated with some examples.
+New command-line options are created using the [`newoption`](newoption.md) function, passing a table which fully describes the option. This is best illustrated with some examples.
 
 Here is an option intended to force the use of OpenGL in a 3D application. It serves as a simple flag, and does not take any value.
 
@@ -40,10 +40,10 @@ newoption {
 Note the commas after each key-value pair; this is required Lua syntax for a table. Once added to your script, the option will appear in the help text, and you may use the trigger as a keyword in your configuration blocks.
 
 ```lua
-configuration "with-opengl"
+filter { "options:with-opengl" }
    links { "opengldrv" }
 
-configuration "not with-opengl"
+filter { "not options:with-opengl" }
    links { "direct3ddrv" }
 ```
 
@@ -58,7 +58,8 @@ newoption {
       { "opengl",    "OpenGL" },
       { "direct3d",  "Direct3D (Windows only)" },
       { "software",  "Software Renderer" }
-   }
+   },
+   default = "opengl"
 }
 ```
 
@@ -74,28 +75,14 @@ As before, this new option will be integrated into the help text, along with a d
 Unlike the example above, you now use the _value_ as a keyword in your configuration blocks.
 
 ```lua
-configuration "opengl"
+filter { "options:gfxapi=opengl" }
    links { "opengldrv" }
 
-configuration "direct3d"
+filter { "options:gfxapi=direct3d" }
     links { "direct3ddrv" }
 
-configuration "software"
+filter { "options:gfxapi=software" }
     links { "softwaredrv" }
-```
-
-Or you could be more clever.
-
-```lua
-links { _OPTIONS["gfxapi"] .. "drv" }
-```
-
-In this example, you would also want to provide a default behavior for the case where no option is specified. You could place a bit of code like this anywhere in your script.
-
-```lua
-if not _OPTIONS["gfxapi"] then
-   _OPTIONS["gfxapi"] = "opengl"
-end
 ```
 
 As a last example of options, you may want to specify an option that accepts an unconstrained value, such as an output path. Just leave off the list of allowed values.
@@ -125,4 +112,4 @@ newaction {
 
 The actual code to be executed when the action is fired should be placed in the `execute()` function.
 
-That's the simple version, which is great for one-off operations that don't need to access to the specific project information. For a tutorial for writing a more complete action, see [Adding a New Action](adding-new-Action).
+That's the simple version, which is great for one-off operations that don't need to access to the specific project information. For a tutorial for writing a more complete action, see [Adding a New Action](Adding-New-Action.md).

@@ -185,6 +185,9 @@
 			"C++",
 			"Objective-C",
 			"Objective-C++",
+			"Module",
+			"ModulePartition",
+			"HeaderUnit"
 		}
 	}
 
@@ -428,6 +431,12 @@
 		name = "entrypoint",
 		scope = "config",
 		kind = "string",
+	}
+
+	api.register {
+		name = "fastuptodate",
+		scope = "project",
+		kind = "boolean",
 	}
 
 	api.register {
@@ -1245,6 +1254,13 @@
 	}
 
 	api.register {
+		name = "toolsversion",
+		scope = "project",
+		kind = "string",
+		tokens = true,
+	}
+
+	api.register {
 		name = "customtoolnamespace",
 		scope = "config",
 		kind = "string",
@@ -1300,6 +1316,7 @@
 			"SSE3",
 			"SSSE3",
 			"SSE4.1",
+			"SSE4.2",
 		}
 	}
 
@@ -1451,6 +1468,17 @@
 		scope = "project",
 		kind = "string",
 		allowed = {
+			"On",
+			"Off"
+		}
+	}
+
+	api.register {
+		name = "openmp",
+		scope = "project",
+		kind = "string",
+		allowed = {
+			"On",
 			"Off"
 		}
 	}

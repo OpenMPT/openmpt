@@ -191,10 +191,8 @@
     <File Name="../../contrib/mbedtls/library/xtea.c"/>
   </VirtualDirectory>
 </VirtualDirectory>
-  <Dependencies Name="x86-Release"/>
-  <Dependencies Name="x64-Release"/>
-  <Dependencies Name="x86-Debug"/>
-  <Dependencies Name="x64-Debug"/>
+  <Dependencies Name="Release"/>
+  <Dependencies Name="Debug"/>
   <Settings Type="Static Library">
     <GlobalSettings>
       <Compiler Options="" C_Options="" Assembler="">
@@ -205,8 +203,8 @@
       </Linker>
       <ResourceCompiler Options=""/>
     </GlobalSettings>
-    <Configuration Name="x86-Release" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Static Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-m32;-flto;-O3;-w;-fno-stack-protector" C_Options="-m32;-flto;-O3;-w" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
+    <Configuration Name="Release" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Static Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-flto;-O3;-w;-fno-stack-protector" C_Options="-flto;-O3;-w" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
         <IncludePath Value="../../contrib/mbedtls/include"/>
         <IncludePath Value="../../contrib/zlib"/>
         <Preprocessor Value="PREMAKE_COMPRESSION"/>
@@ -215,10 +213,10 @@
         <Preprocessor Value="NDEBUG"/>
         <Preprocessor Value="MBEDTLS_ZLIB_SUPPORT"/>
       </Compiler>
-      <Linker Required="yes" Options="-m32;-flto">
+      <Linker Required="yes" Options="-flto">
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="bin/x86/Release/mbedtls-lib.lib" IntermediateDirectory="obj/x86/Release/mbedtls-lib" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no" IsGUIProgram="no" IsEnabled="yes"/>
+      <General OutputFile="bin/Win32/Release/mbedtls-lib.lib" IntermediateDirectory="obj/Win32/Release/mbedtls-lib" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no" IsGUIProgram="no" IsEnabled="yes"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
       </Environment>
@@ -239,42 +237,8 @@
         <SearchPaths/>
       </Completion>
     </Configuration>
-    <Configuration Name="x64-Release" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Static Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-m64;-flto;-O3;-w;-fno-stack-protector" C_Options="-m64;-flto;-O3;-w" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
-        <IncludePath Value="../../contrib/mbedtls/include"/>
-        <IncludePath Value="../../contrib/zlib"/>
-        <Preprocessor Value="PREMAKE_COMPRESSION"/>
-        <Preprocessor Value="CURL_STATICLIB"/>
-        <Preprocessor Value="PREMAKE_CURL"/>
-        <Preprocessor Value="NDEBUG"/>
-        <Preprocessor Value="MBEDTLS_ZLIB_SUPPORT"/>
-      </Compiler>
-      <Linker Required="yes" Options="-m64;-flto">
-      </Linker>
-      <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="bin/x64/Release/mbedtls-lib.lib" IntermediateDirectory="obj/x64/Release/mbedtls-lib" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no" IsGUIProgram="no" IsEnabled="yes"/>
-      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
-        <![CDATA[]]>
-      </Environment>
-      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
-        <DebuggerSearchPaths/>
-        <PostConnectCommands/>
-        <StartupCommands/>
-      </Debugger>
-      <CustomBuild Enabled="no"/>
-      <AdditionalRules>
-        <CustomPostBuild/>
-        <CustomPreBuild/>
-      </AdditionalRules>
-      <Completion EnableCpp11="no" EnableCpp14="no">
-        <ClangCmpFlagsC/>
-        <ClangCmpFlags/>
-        <ClangPP/>
-        <SearchPaths/>
-      </Completion>
-    </Configuration>
-    <Configuration Name="x86-Debug" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Static Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-m32;-g;-w" C_Options="-m32;-g;-w" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
+    <Configuration Name="Debug" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Static Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-g;-w" C_Options="-g;-w" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
         <IncludePath Value="../../contrib/mbedtls/include"/>
         <IncludePath Value="../../contrib/zlib"/>
         <Preprocessor Value="PREMAKE_COMPRESSION"/>
@@ -283,44 +247,10 @@
         <Preprocessor Value="_DEBUG"/>
         <Preprocessor Value="MBEDTLS_ZLIB_SUPPORT"/>
       </Compiler>
-      <Linker Required="yes" Options="-m32">
+      <Linker Required="yes" Options="">
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="bin/x86/Debug/mbedtls-lib.lib" IntermediateDirectory="obj/x86/Debug/mbedtls-lib" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no" IsGUIProgram="no" IsEnabled="yes"/>
-      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
-        <![CDATA[]]>
-      </Environment>
-      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
-        <DebuggerSearchPaths/>
-        <PostConnectCommands/>
-        <StartupCommands/>
-      </Debugger>
-      <CustomBuild Enabled="no"/>
-      <AdditionalRules>
-        <CustomPostBuild/>
-        <CustomPreBuild/>
-      </AdditionalRules>
-      <Completion EnableCpp11="no" EnableCpp14="no">
-        <ClangCmpFlagsC/>
-        <ClangCmpFlags/>
-        <ClangPP/>
-        <SearchPaths/>
-      </Completion>
-    </Configuration>
-    <Configuration Name="x64-Debug" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Static Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-m64;-g;-w" C_Options="-m64;-g;-w" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
-        <IncludePath Value="../../contrib/mbedtls/include"/>
-        <IncludePath Value="../../contrib/zlib"/>
-        <Preprocessor Value="PREMAKE_COMPRESSION"/>
-        <Preprocessor Value="CURL_STATICLIB"/>
-        <Preprocessor Value="PREMAKE_CURL"/>
-        <Preprocessor Value="_DEBUG"/>
-        <Preprocessor Value="MBEDTLS_ZLIB_SUPPORT"/>
-      </Compiler>
-      <Linker Required="yes" Options="-m64">
-      </Linker>
-      <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="bin/x64/Debug/mbedtls-lib.lib" IntermediateDirectory="obj/x64/Debug/mbedtls-lib" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no" IsGUIProgram="no" IsEnabled="yes"/>
+      <General OutputFile="bin/Win32/Debug/mbedtls-lib.lib" IntermediateDirectory="obj/Win32/Debug/mbedtls-lib" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no" IsGUIProgram="no" IsEnabled="yes"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
       </Environment>

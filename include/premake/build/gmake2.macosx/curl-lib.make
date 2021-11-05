@@ -27,13 +27,13 @@ endif
 ifeq ($(origin AR), default)
   AR = ar
 endif
-INCLUDES += -I../../contrib/curl/include -I../../contrib/curl/lib -I../../contrib/mbedtls/include -I../../contrib/zlib
+INCLUDES += -I../../contrib/curl/lib -I../../contrib/mbedtls/include -I../../contrib/zlib -isystem ../../contrib/curl/include
 FORCE_INCLUDE +=
 ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
 ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
 LIBS +=
 LDDEPS +=
-ALL_LDFLAGS += $(LDFLAGS)
+ALL_LDFLAGS += $(LDFLAGS) -arch x86_64
 LINKCMD = $(AR) -rcs "$@" $(OBJECTS)
 define PREBUILDCMDS
 endef
@@ -47,16 +47,16 @@ TARGETDIR = bin/Release
 TARGET = $(TARGETDIR)/libcurl-lib.a
 OBJDIR = obj/Release/curl-lib
 DEFINES += -DPREMAKE_COMPRESSION -DPREMAKE_CURL -DNDEBUG -DBUILDING_LIBCURL -DCURL_STATICLIB -DHTTP_ONLY -DUSE_ZLIB -DUSE_DARWINSSL
-ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -O3 -w
-ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -O3 -w -fno-stack-protector
+ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -O3 -w -arch x86_64
+ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -O3 -w -fno-stack-protector -arch x86_64
 
 else ifeq ($(config),debug)
 TARGETDIR = bin/Debug
 TARGET = $(TARGETDIR)/libcurl-lib.a
 OBJDIR = obj/Debug/curl-lib
 DEFINES += -DPREMAKE_COMPRESSION -DPREMAKE_CURL -D_DEBUG -DBUILDING_LIBCURL -DCURL_STATICLIB -DHTTP_ONLY -DUSE_ZLIB -DUSE_DARWINSSL
-ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -g -w
-ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -g -w
+ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -g -w -arch x86_64
+ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -g -w -arch x86_64
 
 endif
 

@@ -19,7 +19,7 @@ endif
 # #############################################
 
 RESCOMP = windres
-INCLUDES += -I../../contrib/curl/include -I../../contrib/curl/lib -I../../contrib/mbedtls/include -I../../contrib/zlib
+INCLUDES += -I../../contrib/curl/lib -I../../contrib/mbedtls/include -I../../contrib/zlib -isystem ../../contrib/curl/include
 FORCE_INCLUDE +=
 ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
 ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)

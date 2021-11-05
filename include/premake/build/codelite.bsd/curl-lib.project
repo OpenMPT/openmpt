@@ -290,8 +290,7 @@
       <ResourceCompiler Options=""/>
     </GlobalSettings>
     <Configuration Name="Release" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Static Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-O3;-w;-fno-stack-protector" C_Options="-O3;-w" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
-        <IncludePath Value="../../contrib/curl/include"/>
+      <Compiler Options="-isystem ../../contrib/curl/include;-O3;-w;-fno-stack-protector" C_Options="-isystem ../../contrib/curl/include;-O3;-w" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
         <IncludePath Value="../../contrib/curl/lib"/>
         <IncludePath Value="../../contrib/mbedtls/include"/>
         <IncludePath Value="../../contrib/zlib"/>
@@ -331,8 +330,7 @@
       </Completion>
     </Configuration>
     <Configuration Name="Debug" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Static Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-g;-w" C_Options="-g;-w" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
-        <IncludePath Value="../../contrib/curl/include"/>
+      <Compiler Options="-isystem ../../contrib/curl/include;-g;-w" C_Options="-isystem ../../contrib/curl/include;-g;-w" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
         <IncludePath Value="../../contrib/curl/lib"/>
         <IncludePath Value="../../contrib/mbedtls/include"/>
         <IncludePath Value="../../contrib/zlib"/>

@@ -350,6 +350,13 @@
 			end
 		else
 			field.allowed = field.allowed or {}
+
+			-- If we are trying to add where the current value is a function,
+			-- put the function in a table
+			if type(field.allowed) == "function" then
+				field.allowed = { field.allowed }
+			end
+
 			if field.allowed[value:lower()] == nil then
 				table.insert(field.allowed, value)
 				field.allowed[value:lower()] = value
@@ -644,6 +651,23 @@
 				canonical = field.allowed(value, kind or "string")
 			else
 				canonical = field.allowed[lowerValue]
+			end
+		end
+
+
+		-- If a tool was not found, check to see if there is a function in the
+		-- table to check against.  For each function in the table, check if
+		-- the value is allowed (break early if so).
+		if not canonical then
+			for _, allow in ipairs(field.allowed)
+			do
+				if type(allow) == "function" then
+					canonical = allow(value, kind or "string")
+				end
+
+				if canonical then
+					break
+				end
 			end
 		end
 
@@ -1125,6 +1149,8 @@
 ---
 
 	function configuration(terms)
+		-- Sep 16 2021
+		premake.warnOnce("configuration", "`configuration` has been deprecated; use `filter` instead (https://premake.github.io/docs/Filters/)")
 		if terms then
 			if (type(terms) == "table" and #terms == 1 and terms[1] == "*") or (terms == "*") then
 				terms = nil

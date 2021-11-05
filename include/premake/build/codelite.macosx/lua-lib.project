@@ -74,7 +74,7 @@
       <ResourceCompiler Options=""/>
     </GlobalSettings>
     <Configuration Name="Release" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Static Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-O3;-w;-fno-stack-protector" C_Options="-O3;-w" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
+      <Compiler Options="-O3;-w;-fno-stack-protector;-arch x86_64" C_Options="-O3;-w;-arch x86_64" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
         <IncludePath Value="../../contrib/lua/src"/>
         <Preprocessor Value="PREMAKE_COMPRESSION"/>
         <Preprocessor Value="CURL_STATICLIB"/>
@@ -82,7 +82,7 @@
         <Preprocessor Value="NDEBUG"/>
         <Preprocessor Value="LUA_USE_MACOSX"/>
       </Compiler>
-      <Linker Required="yes" Options="">
+      <Linker Required="yes" Options="-arch x86_64">
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="bin/Release/liblua-lib.a" IntermediateDirectory="obj/Release/lua-lib" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no" IsGUIProgram="no" IsEnabled="yes"/>
@@ -107,7 +107,7 @@
       </Completion>
     </Configuration>
     <Configuration Name="Debug" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Static Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-g;-w" C_Options="-g;-w" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
+      <Compiler Options="-g;-w;-arch x86_64" C_Options="-g;-w;-arch x86_64" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
         <IncludePath Value="../../contrib/lua/src"/>
         <Preprocessor Value="PREMAKE_COMPRESSION"/>
         <Preprocessor Value="CURL_STATICLIB"/>
@@ -115,7 +115,7 @@
         <Preprocessor Value="_DEBUG"/>
         <Preprocessor Value="LUA_USE_MACOSX"/>
       </Compiler>
-      <Linker Required="yes" Options="">
+      <Linker Required="yes" Options="-arch x86_64">
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="bin/Debug/liblua-lib.a" IntermediateDirectory="obj/Debug/lua-lib" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no" IsGUIProgram="no" IsEnabled="yes"/>

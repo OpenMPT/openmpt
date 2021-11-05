@@ -269,8 +269,8 @@
 			local environ = table.shallowcopy(filecfg.environ)
 
 			if rule.propertydefinition then
-				gmake2.prepareEnvironment(rule, environ, cfg)
-				gmake2.prepareEnvironment(rule, environ, filecfg)
+				p.rule.prepareEnvironment(rule, environ, cfg)
+				p.rule.prepareEnvironment(rule, environ, filecfg)
 			end
 
 			local shadowContext = p.context.extent(rule, environ)
@@ -368,44 +368,10 @@
 
 
 	function cpp.pch(cfg, toolset)
+		local pch = p.tools.gcc.getpch(cfg)
 		-- If there is no header, or if PCH has been disabled, I can early out
-		if not cfg.pchheader or cfg.flags.NoPCH then
+		if pch == nil then
 			return
-		end
-
-		-- Visual Studio requires the PCH header to be specified in the same way
-		-- it appears in the #include statements used in the source code; the PCH
-		-- source actual handles the compilation of the header. GCC compiles the
-		-- header file directly, and needs the file's actual file system path in
-		-- order to locate it.
-
-		-- To maximize the compatibility between the two approaches, see if I can
-		-- locate the specified PCH header on one of the include file search paths
-		-- and, if so, adjust the path automatically so the user doesn't have
-		-- add a conditional configuration to the project script.
-
-		local pch = cfg.pchheader
-		local found = false
-
-		-- test locally in the project folder first (this is the most likely location)
-		local testname = path.join(cfg.project.basedir, pch)
-		if os.isfile(testname) then
-			pch = project.getrelative(cfg.project, testname)
-			found = true
-		else
-			-- else scan in all include dirs.
-			for _, incdir in ipairs(cfg.includedirs) do
-				testname = path.join(incdir, pch)
-				if os.isfile(testname) then
-					pch = project.getrelative(cfg.project, testname)
-					found = true
-					break
-				end
-			end
-		end
-
-		if not found then
-			pch = project.getrelative(cfg.project, path.getabsolute(pch))
 		end
 
 		p.outln('PCH = ' .. pch)
@@ -420,7 +386,7 @@
 
 
 	function cpp.includes(cfg, toolset)
-		local includes = toolset.getincludedirs(cfg, cfg.includedirs, cfg.sysincludedirs)
+		local includes = toolset.getincludedirs(cfg, cfg.includedirs, cfg.sysincludedirs, cfg.frameworkdirs)
 		p.outln('INCLUDES +=' .. gmake2.list(includes))
 	end
 
@@ -468,7 +434,7 @@
 
 
 	function cpp.ldFlags(cfg, toolset)
-		local flags = table.join(toolset.getLibraryDirectories(cfg), toolset.getrunpathdirs(cfg, cfg.runpathdirs), toolset.getldflags(cfg), cfg.linkoptions)
+		local flags = table.join(toolset.getLibraryDirectories(cfg), toolset.getrunpathdirs(cfg, table.join(cfg.runpathdirs, config.getsiblingtargetdirs(cfg))), toolset.getldflags(cfg), cfg.linkoptions)
 		p.outln('ALL_LDFLAGS += $(LDFLAGS)' .. gmake2.list(flags))
 	end
 
@@ -565,8 +531,8 @@
 			end
 		end
 
-		if fcfg.includedirs or fcfg.sysincludedirs then
-			local includes = toolset.getincludedirs(cfg, fcfg.includedirs, fcfg.sysincludedirs)
+		if fcfg.includedirs or fcfg.sysincludedirs or fcfg.frameworkdirs then
+			local includes = toolset.getincludedirs(cfg, fcfg.includedirs, fcfg.sysincludedirs, fcfg.frameworkdirs)
 			if #includes > 0 then
 				value = value ..  gmake2.list(includes)
 			end

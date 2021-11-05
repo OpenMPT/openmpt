@@ -71,7 +71,7 @@
       <ResourceCompiler Options=""/>
     </GlobalSettings>
     <Configuration Name="Release" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-O3;-fPIC;-Wall;-Wextra;-fno-stack-protector" C_Options="-O3;-fPIC;-Wall;-Wextra" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
+      <Compiler Options="-O3;-fPIC;-Wall;-Wextra;-fno-stack-protector;-arch x86_64" C_Options="-O3;-fPIC;-Wall;-Wextra;-arch x86_64" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
         <IncludePath Value="../../contrib/lua/src"/>
         <IncludePath Value="../../contrib/luashim"/>
         <Preprocessor Value="PREMAKE_COMPRESSION"/>
@@ -80,7 +80,7 @@
         <Preprocessor Value="NDEBUG"/>
         <Preprocessor Value="LUASOCKET_API=__attribute__((visibility(&quot;default&quot;)))"/>
       </Compiler>
-      <Linker Required="yes" Options="-dynamiclib;-Wl,-install_name,@rpath/libluasocket.dylib;bin/Release/libluashim-lib.a">
+      <Linker Required="yes" Options="-dynamiclib;-Wl,-install_name,@rpath/libluasocket.dylib;-arch x86_64;bin/Release/libluashim-lib.a">
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../bin/release/libluasocket.dylib" IntermediateDirectory="obj/Release/luasocket" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no" IsGUIProgram="no" IsEnabled="yes"/>
@@ -105,7 +105,7 @@
       </Completion>
     </Configuration>
     <Configuration Name="Debug" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-fPIC;-g;-Wall;-Wextra" C_Options="-fPIC;-g;-Wall;-Wextra" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
+      <Compiler Options="-fPIC;-g;-Wall;-Wextra;-arch x86_64" C_Options="-fPIC;-g;-Wall;-Wextra;-arch x86_64" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
         <IncludePath Value="../../contrib/lua/src"/>
         <IncludePath Value="../../contrib/luashim"/>
         <Preprocessor Value="PREMAKE_COMPRESSION"/>
@@ -114,7 +114,7 @@
         <Preprocessor Value="_DEBUG"/>
         <Preprocessor Value="LUASOCKET_API=__attribute__((visibility(&quot;default&quot;)))"/>
       </Compiler>
-      <Linker Required="yes" Options="-dynamiclib;-Wl,-install_name,@rpath/libluasocket.dylib;bin/Debug/libluashim-lib.a">
+      <Linker Required="yes" Options="-dynamiclib;-Wl,-install_name,@rpath/libluasocket.dylib;-arch x86_64;bin/Debug/libluashim-lib.a">
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../bin/debug/libluasocket.dylib" IntermediateDirectory="obj/Debug/luasocket" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no" IsGUIProgram="no" IsEnabled="yes"/>

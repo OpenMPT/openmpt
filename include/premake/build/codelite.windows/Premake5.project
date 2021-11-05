@@ -34,6 +34,7 @@
       <File Name="../../modules/codelite/codelite_workspace.lua"/>
       <VirtualDirectory Name="tests">
         <File Name="../../modules/codelite/tests/_tests.lua"/>
+        <File Name="../../modules/codelite/tests/test_codelite_additional_rules.lua"/>
         <File Name="../../modules/codelite/tests/test_codelite_config.lua"/>
         <File Name="../../modules/codelite/tests/test_codelite_project.lua"/>
         <File Name="../../modules/codelite/tests/test_codelite_workspace.lua"/>
@@ -157,6 +158,7 @@
           <File Name="../../modules/vstudio/tests/cs2005/test_common_props.lua"/>
           <File Name="../../modules/vstudio/tests/cs2005/test_compiler_props.lua"/>
           <File Name="../../modules/vstudio/tests/cs2005/test_debug_props.lua"/>
+          <File Name="../../modules/vstudio/tests/cs2005/test_debug_props_2019.lua"/>
           <File Name="../../modules/vstudio/tests/cs2005/test_files.lua"/>
           <File Name="../../modules/vstudio/tests/cs2005/test_icon.lua"/>
           <File Name="../../modules/vstudio/tests/cs2005/test_netcore.lua"/>
@@ -254,6 +256,9 @@
           <File Name="../../modules/vstudio/tests/vc2019/test_link.lua"/>
           <File Name="../../modules/vstudio/tests/vc2019/test_toolset_settings.lua"/>
         </VirtualDirectory>
+        <VirtualDirectory Name="vc2022">
+          <File Name="../../modules/vstudio/tests/vc2022/test_toolset_settings.lua"/>
+        </VirtualDirectory>
       </VirtualDirectory>
       <File Name="../../modules/vstudio/vs2005.lua"/>
       <File Name="../../modules/vstudio/vs2005_csproj.lua"/>
@@ -279,6 +284,7 @@
       <File Name="../../modules/vstudio/vs2015.lua"/>
       <File Name="../../modules/vstudio/vs2017.lua"/>
       <File Name="../../modules/vstudio/vs2019.lua"/>
+      <File Name="../../modules/vstudio/vs2022.lua"/>
       <File Name="../../modules/vstudio/vstudio.lua"/>
     </VirtualDirectory>
     <VirtualDirectory Name="xcode">
@@ -303,6 +309,7 @@
   <File Name="../../premake5.lua"/>
   <VirtualDirectory Name="scripts">
     <File Name="../../scripts/changes.lua"/>
+    <File Name="../../scripts/docscheck.lua"/>
     <File Name="../../scripts/embed.lua"/>
     <File Name="../../scripts/package.lua"/>
   </VirtualDirectory>
@@ -452,6 +459,7 @@
       <File Name="../../tests/base/test_override.lua"/>
       <File Name="../../tests/base/test_path.lua"/>
       <File Name="../../tests/base/test_premake_command.lua"/>
+      <File Name="../../tests/base/test_rule.lua"/>
       <File Name="../../tests/base/test_table.lua"/>
       <File Name="../../tests/base/test_tree.lua"/>
       <File Name="../../tests/base/test_uuid.lua"/>
@@ -497,25 +505,13 @@
     </VirtualDirectory>
   </VirtualDirectory>
 </VirtualDirectory>
-  <Dependencies Name="x86-Release">
+  <Dependencies Name="Release">
     <Project Name="lua-lib"/>
     <Project Name="zip-lib"/>
     <Project Name="zlib-lib"/>
     <Project Name="curl-lib"/>
   </Dependencies>
-  <Dependencies Name="x64-Release">
-    <Project Name="lua-lib"/>
-    <Project Name="zip-lib"/>
-    <Project Name="zlib-lib"/>
-    <Project Name="curl-lib"/>
-  </Dependencies>
-  <Dependencies Name="x86-Debug">
-    <Project Name="lua-lib"/>
-    <Project Name="zip-lib"/>
-    <Project Name="zlib-lib"/>
-    <Project Name="curl-lib"/>
-  </Dependencies>
-  <Dependencies Name="x64-Debug">
+  <Dependencies Name="Debug">
     <Project Name="lua-lib"/>
     <Project Name="zip-lib"/>
     <Project Name="zlib-lib"/>
@@ -531,8 +527,8 @@
       </Linker>
       <ResourceCompiler Options=""/>
     </GlobalSettings>
-    <Configuration Name="x86-Release" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-m32;-flto;-O3;-Wall;-Wextra;-fno-stack-protector" C_Options="-m32;-flto;-O3;-Wall;-Wextra" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
+    <Configuration Name="Release" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-flto;-O3;-Wall;-Wextra;-fno-stack-protector" C_Options="-flto;-O3;-Wall;-Wextra" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
         <IncludePath Value="../../contrib/lua/src"/>
         <IncludePath Value="../../contrib/luashim"/>
         <IncludePath Value="../../contrib/zlib"/>
@@ -543,7 +539,7 @@
         <Preprocessor Value="PREMAKE_CURL"/>
         <Preprocessor Value="NDEBUG"/>
       </Compiler>
-      <Linker Required="yes" Options="-m32;-flto;bin/x86/Release/lua-lib.lib;bin/x86/Release/zip-lib.lib;bin/x86/Release/zlib-lib.lib;bin/x86/Release/curl-lib.lib;-lole32;-lws2_32;-ladvapi32;-lversion">
+      <Linker Required="yes" Options="-flto;bin/Win32/Release/lua-lib.lib;bin/Win32/Release/zip-lib.lib;bin/Win32/Release/zlib-lib.lib;bin/Win32/Release/curl-lib.lib;-lole32;-lws2_32;-ladvapi32;-lversion">
       </Linker>
       <ResourceCompiler Options="-DPREMAKE_COMPRESSION;-DCURL_STATICLIB;-DPREMAKE_CURL;-DNDEBUG;" Required="yes">
         <IncludePath Value="../../contrib/lua/src"/>
@@ -552,7 +548,7 @@
         <IncludePath Value="../../contrib/libzip"/>
         <IncludePath Value="../../contrib/curl/include"/>
       </ResourceCompiler>
-      <General OutputFile="../../bin/release/premake5.exe" IntermediateDirectory="obj/x86/Release/Premake5" Command="../../bin/release/premake5.exe" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <General OutputFile="../../bin/release/premake5.exe" IntermediateDirectory="obj/Win32/Release/Premake5" Command="../../bin/release/premake5.exe" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
       </Environment>
@@ -573,50 +569,8 @@
         <SearchPaths/>
       </Completion>
     </Configuration>
-    <Configuration Name="x64-Release" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-m64;-flto;-O3;-Wall;-Wextra;-fno-stack-protector" C_Options="-m64;-flto;-O3;-Wall;-Wextra" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
-        <IncludePath Value="../../contrib/lua/src"/>
-        <IncludePath Value="../../contrib/luashim"/>
-        <IncludePath Value="../../contrib/zlib"/>
-        <IncludePath Value="../../contrib/libzip"/>
-        <IncludePath Value="../../contrib/curl/include"/>
-        <Preprocessor Value="PREMAKE_COMPRESSION"/>
-        <Preprocessor Value="CURL_STATICLIB"/>
-        <Preprocessor Value="PREMAKE_CURL"/>
-        <Preprocessor Value="NDEBUG"/>
-      </Compiler>
-      <Linker Required="yes" Options="-m64;-flto;bin/x64/Release/lua-lib.lib;bin/x64/Release/zip-lib.lib;bin/x64/Release/zlib-lib.lib;bin/x64/Release/curl-lib.lib;-lole32;-lws2_32;-ladvapi32;-lversion">
-      </Linker>
-      <ResourceCompiler Options="-DPREMAKE_COMPRESSION;-DCURL_STATICLIB;-DPREMAKE_CURL;-DNDEBUG;" Required="yes">
-        <IncludePath Value="../../contrib/lua/src"/>
-        <IncludePath Value="../../contrib/luashim"/>
-        <IncludePath Value="../../contrib/zlib"/>
-        <IncludePath Value="../../contrib/libzip"/>
-        <IncludePath Value="../../contrib/curl/include"/>
-      </ResourceCompiler>
-      <General OutputFile="../../bin/release/premake5.exe" IntermediateDirectory="obj/x64/Release/Premake5" Command="../../bin/release/premake5.exe" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
-      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
-        <![CDATA[]]>
-      </Environment>
-      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
-        <DebuggerSearchPaths/>
-        <PostConnectCommands/>
-        <StartupCommands/>
-      </Debugger>
-      <CustomBuild Enabled="no"/>
-      <AdditionalRules>
-        <CustomPostBuild/>
-        <CustomPreBuild/>
-      </AdditionalRules>
-      <Completion EnableCpp11="no" EnableCpp14="no">
-        <ClangCmpFlagsC/>
-        <ClangCmpFlags/>
-        <ClangPP/>
-        <SearchPaths/>
-      </Completion>
-    </Configuration>
-    <Configuration Name="x86-Debug" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-m32;-g;-Wall;-Wextra" C_Options="-m32;-g;-Wall;-Wextra" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
+    <Configuration Name="Debug" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-g;-Wall;-Wextra" C_Options="-g;-Wall;-Wextra" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
         <IncludePath Value="../../contrib/lua/src"/>
         <IncludePath Value="../../contrib/luashim"/>
         <IncludePath Value="../../contrib/zlib"/>
@@ -627,7 +581,7 @@
         <Preprocessor Value="PREMAKE_CURL"/>
         <Preprocessor Value="_DEBUG"/>
       </Compiler>
-      <Linker Required="yes" Options="-m32;bin/x86/Debug/lua-lib.lib;bin/x86/Debug/zip-lib.lib;bin/x86/Debug/zlib-lib.lib;bin/x86/Debug/curl-lib.lib;-lole32;-lws2_32;-ladvapi32;-lversion">
+      <Linker Required="yes" Options="bin/Win32/Debug/lua-lib.lib;bin/Win32/Debug/zip-lib.lib;bin/Win32/Debug/zlib-lib.lib;bin/Win32/Debug/curl-lib.lib;-lole32;-lws2_32;-ladvapi32;-lversion">
       </Linker>
       <ResourceCompiler Options="-DPREMAKE_COMPRESSION;-DCURL_STATICLIB;-DPREMAKE_CURL;-D_DEBUG;" Required="yes">
         <IncludePath Value="../../contrib/lua/src"/>
@@ -636,49 +590,7 @@
         <IncludePath Value="../../contrib/libzip"/>
         <IncludePath Value="../../contrib/curl/include"/>
       </ResourceCompiler>
-      <General OutputFile="../../bin/debug/premake5.exe" IntermediateDirectory="obj/x86/Debug/Premake5" Command="bin/debug/premake5.exe" CommandArguments="--scripts=./../.. test" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="../.." PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
-      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
-        <![CDATA[]]>
-      </Environment>
-      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
-        <DebuggerSearchPaths/>
-        <PostConnectCommands/>
-        <StartupCommands/>
-      </Debugger>
-      <CustomBuild Enabled="no"/>
-      <AdditionalRules>
-        <CustomPostBuild/>
-        <CustomPreBuild/>
-      </AdditionalRules>
-      <Completion EnableCpp11="no" EnableCpp14="no">
-        <ClangCmpFlagsC/>
-        <ClangCmpFlags/>
-        <ClangPP/>
-        <SearchPaths/>
-      </Completion>
-    </Configuration>
-    <Configuration Name="x64-Debug" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-m64;-g;-Wall;-Wextra" C_Options="-m64;-g;-Wall;-Wextra" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
-        <IncludePath Value="../../contrib/lua/src"/>
-        <IncludePath Value="../../contrib/luashim"/>
-        <IncludePath Value="../../contrib/zlib"/>
-        <IncludePath Value="../../contrib/libzip"/>
-        <IncludePath Value="../../contrib/curl/include"/>
-        <Preprocessor Value="PREMAKE_COMPRESSION"/>
-        <Preprocessor Value="CURL_STATICLIB"/>
-        <Preprocessor Value="PREMAKE_CURL"/>
-        <Preprocessor Value="_DEBUG"/>
-      </Compiler>
-      <Linker Required="yes" Options="-m64;bin/x64/Debug/lua-lib.lib;bin/x64/Debug/zip-lib.lib;bin/x64/Debug/zlib-lib.lib;bin/x64/Debug/curl-lib.lib;-lole32;-lws2_32;-ladvapi32;-lversion">
-      </Linker>
-      <ResourceCompiler Options="-DPREMAKE_COMPRESSION;-DCURL_STATICLIB;-DPREMAKE_CURL;-D_DEBUG;" Required="yes">
-        <IncludePath Value="../../contrib/lua/src"/>
-        <IncludePath Value="../../contrib/luashim"/>
-        <IncludePath Value="../../contrib/zlib"/>
-        <IncludePath Value="../../contrib/libzip"/>
-        <IncludePath Value="../../contrib/curl/include"/>
-      </ResourceCompiler>
-      <General OutputFile="../../bin/debug/premake5.exe" IntermediateDirectory="obj/x64/Debug/Premake5" Command="bin/debug/premake5.exe" CommandArguments="--scripts=./../.. test" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="../.." PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <General OutputFile="../../bin/debug/premake5.exe" IntermediateDirectory="obj/Win32/Debug/Premake5" Command="bin/debug/premake5.exe" CommandArguments="--scripts=./../.. test" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="../.." PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
       </Environment>

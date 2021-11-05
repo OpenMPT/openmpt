@@ -114,7 +114,7 @@
       <ResourceCompiler Options=""/>
     </GlobalSettings>
     <Configuration Name="Release" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Static Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-O3;-w;-fno-stack-protector" C_Options="-O3;-w" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
+      <Compiler Options="-O3;-w;-fno-stack-protector;-arch x86_64" C_Options="-O3;-w;-arch x86_64" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
         <IncludePath Value="../../contrib/libzip/include"/>
         <Preprocessor Value="PREMAKE_COMPRESSION"/>
         <Preprocessor Value="CURL_STATICLIB"/>
@@ -123,7 +123,7 @@
         <Preprocessor Value="N_FSEEKO"/>
         <Preprocessor Value="HAVE_SSIZE_T_LIBZIP"/>
       </Compiler>
-      <Linker Required="yes" Options="">
+      <Linker Required="yes" Options="-arch x86_64">
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="bin/Release/libzip-lib.a" IntermediateDirectory="obj/Release/zip-lib" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no" IsGUIProgram="no" IsEnabled="yes"/>
@@ -148,7 +148,7 @@
       </Completion>
     </Configuration>
     <Configuration Name="Debug" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Static Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-g;-w" C_Options="-g;-w" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
+      <Compiler Options="-g;-w;-arch x86_64" C_Options="-g;-w;-arch x86_64" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
         <IncludePath Value="../../contrib/libzip/include"/>
         <Preprocessor Value="PREMAKE_COMPRESSION"/>
         <Preprocessor Value="CURL_STATICLIB"/>
@@ -157,7 +157,7 @@
         <Preprocessor Value="N_FSEEKO"/>
         <Preprocessor Value="HAVE_SSIZE_T_LIBZIP"/>
       </Compiler>
-      <Linker Required="yes" Options="">
+      <Linker Required="yes" Options="-arch x86_64">
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="bin/Debug/libzip-lib.a" IntermediateDirectory="obj/Debug/zip-lib" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no" IsGUIProgram="no" IsEnabled="yes"/>
