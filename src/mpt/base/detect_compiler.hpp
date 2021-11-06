@@ -50,7 +50,9 @@
 #elif defined(_MSC_VER)
 
 #define MPT_COMPILER_MSVC 1
-#if (_MSC_VER >= 1929)
+#if (_MSC_VER >= 1930)
+#define MPT_COMPILER_MSVC_VERSION MPT_COMPILER_MAKE_VERSION2(2022, 0)
+#elif (_MSC_VER >= 1929)
 #define MPT_COMPILER_MSVC_VERSION MPT_COMPILER_MAKE_VERSION2(2019, 10)
 #elif (_MSC_VER >= 1928)
 #define MPT_COMPILER_MSVC_VERSION MPT_COMPILER_MAKE_VERSION2(2019, 8)
@@ -143,7 +145,9 @@
 
 #if MPT_COMPILER_GENERIC || MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 
-#if (__cplusplus >= 201703)
+#if (__cplusplus >= 202002)
+#define MPT_CXX 20
+#elif (__cplusplus >= 201703)
 #define MPT_CXX 17
 #else
 #define MPT_CXX 17

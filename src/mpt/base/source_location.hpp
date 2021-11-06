@@ -19,7 +19,7 @@ namespace mpt {
 inline namespace MPT_INLINE_NS {
 
 
-#if MPT_CXX_AT_LEAST(20) && !MPT_COMPILER_MSVC
+#if MPT_CXX_AT_LEAST(20) && !MPT_COMPILER_BEFORE(2022, 0)
 
 using std::source_location;
 
