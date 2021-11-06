@@ -84,10 +84,10 @@ elseif _OPTIONS["winxp"] then
 end
 
 if _OPTIONS["clang"] then
-	mpt_projectpathname = mpt_projectpathname .. "clangcl"
-	mpt_bindirsuffix = mpt_bindirsuffix .. "clangcl"
-	mpt_bindirsuffix32 = mpt_bindirsuffix32 .. "clangcl"
-	mpt_bindirsuffix64 = mpt_bindirsuffix64 .. "clangcl"
+	mpt_projectpathname = mpt_projectpathname .. "clang"
+	mpt_bindirsuffix = mpt_bindirsuffix .. "clang"
+	mpt_bindirsuffix32 = mpt_bindirsuffix32 .. "clang"
+	mpt_bindirsuffix64 = mpt_bindirsuffix64 .. "clang"
 end
 
 if _OPTIONS["group"] == "libopenmpt_test" then
