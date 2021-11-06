@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="include">
+      <UniqueIdentifier>{89AF369E-F58E-B539-FEA6-40106A051C9B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\miniz">
+      <UniqueIdentifier>{7FCCBAA5-EB8C-36DC-B4C7-7F5920477BB8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="premake">
+      <UniqueIdentifier>{8A6487C2-F643-065E-FF5B-91346BBA6CBF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="premake\def">
+      <UniqueIdentifier>{281676C9-94CB-EEBE-1DC0-E8958974E5C2}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\include\miniz\miniz.h">
+      <Filter>include\miniz</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\include\miniz\miniz.c">
+      <Filter>include\miniz</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\premake\def\ext-miniz.def">
+      <Filter>premake\def</Filter>
+    </None>
+  </ItemGroup>
+</Project>
