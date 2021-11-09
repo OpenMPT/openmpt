@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
+# Visual Studio Version 17
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libopenmpt-small", "libopenmpt-small.vcxproj", "{25560ABD-41FC-444C-9E71-F8502BC7EE96}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "minimp3", "ext\minimp3.vcxproj", "{E88C4285-EFB1-4226-BCAC-E904BA792A48}"

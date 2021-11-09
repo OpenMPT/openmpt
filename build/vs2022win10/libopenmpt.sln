@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
+# Visual Studio Version 17
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libopenmpt", "libopenmpt.vcxproj", "{9C5101EF-3E20-4558-809B-277FDD50E878}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libopenmpt_example_c", "libopenmpt_example_c.vcxproj", "{3F39804D-01C0-479C-AB8B-025683529C57}"

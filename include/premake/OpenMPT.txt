@@ -4,3 +4,4 @@ The following changes have been made:
  *  spectremitigations option added
  *  dataexecutionprevention option added
  *  C++20 mode for VS2022 has been added
+ *  set sln version number to 17 for VS2022
