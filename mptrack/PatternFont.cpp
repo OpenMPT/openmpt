@@ -98,6 +98,15 @@ static void DrawChar(HDC hDC, CHAR ch, int x, int y, int w, int h)
 	::DrawTextA(hDC, &ch, 1, &rect, DT_CENTER | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX);
 }
 
+#if MPT_CXX_AT_LEAST(20)
+static void DrawChar(HDC hDC, char8_t ch8, int x, int y, int w, int h)
+{
+	CRect rect(x, y, x + w, y + h);
+	CHAR ch = mpt::unsafe_char_convert<char>(ch8);
+	::DrawTextA(hDC, &ch, 1, &rect, DT_CENTER | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX);
+}
+#endif
+
 template<typename char_t>
 static void DrawString(HDC hDC, const char_t *text, int len, int x, int y, int w, int h)
 {

@@ -353,7 +353,7 @@ template<typename Tdststring>
 static Tdststring EncodeImpl(Charset charset, const mpt::widestring &src)
 {
 	static_assert(sizeof(typename Tdststring::value_type) == sizeof(char));
-	static_assert((std::is_same<typename Tdststring::value_type, char>::value));
+	static_assert(mpt::is_character<typename Tdststring::value_type>::value);
 	switch(charset)
 	{
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
@@ -378,7 +378,7 @@ template<typename Tsrcstring>
 static mpt::widestring DecodeImpl(Charset charset, const Tsrcstring &src)
 {
 	static_assert(sizeof(typename Tsrcstring::value_type) == sizeof(char));
-	static_assert((std::is_same<typename Tsrcstring::value_type, char>::value));
+	static_assert(mpt::is_character<typename Tsrcstring::value_type>::value);
 	switch(charset)
 	{
 #if defined(MPT_ENABLE_CHARSET_LOCALE)

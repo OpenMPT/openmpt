@@ -363,9 +363,15 @@ void CViewPattern::DrawLetter(int x, int y, char letter, int sizex, int ofsx)
 
 void CViewPattern::DrawLetter(int x, int y, wchar_t letter, int sizex, int ofsx)
 {
-	DrawLetter(x, y, static_cast<char>(letter), sizex, ofsx);
+	DrawLetter(x, y, mpt::unsafe_char_convert<char>(letter), sizex, ofsx);
 }
 
+#if MPT_CXX_AT_LEAST(20)
+void CViewPattern::DrawLetter(int x, int y, char8_t letter, int sizex, int ofsx)
+{
+	DrawLetter(x, y, mpt::unsafe_char_convert<char>(letter), sizex, ofsx);
+}
+#endif
 
 static MPT_FORCEINLINE void DrawPadding(CFastBitmap &dib, const PATTERNFONT *pfnt, int x, int y, int col)
 {

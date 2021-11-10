@@ -666,6 +666,25 @@ static inline wchar_t SanitizeFilenameChar(wchar_t c)
 	return c;
 }
 
+#if MPT_CXX_AT_LEAST(20)
+static inline wchar_t SanitizeFilenameChar(char8_t c)
+{
+	if(	c == u8'\\' ||
+		c == u8'\"' ||
+		c == u8'/'  ||
+		c == u8':'  ||
+		c == u8'?'  ||
+		c == u8'<'  ||
+		c == u8'>'  ||
+		c == u8'|'  ||
+		c == u8'*')
+	{
+		c = u8'_';
+	}
+	return c;
+}
+#endif
+
 void SanitizeFilename(mpt::PathString &filename)
 {
 	mpt::RawPathString tmp = filename.AsNative();
