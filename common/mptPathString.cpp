@@ -667,7 +667,7 @@ static inline wchar_t SanitizeFilenameChar(wchar_t c)
 }
 
 #if MPT_CXX_AT_LEAST(20)
-static inline wchar_t SanitizeFilenameChar(char8_t c)
+static inline char8_t SanitizeFilenameChar(char8_t c)
 {
 	if(	c == u8'\\' ||
 		c == u8'\"' ||
