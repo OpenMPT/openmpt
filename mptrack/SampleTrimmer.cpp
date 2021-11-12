@@ -70,7 +70,7 @@ public:
 			m_SndFile.Order.SetSequence(seq);
 			m_SndFile.ResetPlayPos();
 			const auto subSongs = m_SndFile.GetLength(eNoAdjust, GetLengthTarget(true));
-			SetRange(0, mpt::saturate_round<uint32>(std::accumulate(subSongs.begin(), subSongs.end(), 0.0, [](double acc, const GetLengthType &glt) { return acc + glt.duration; }) * m_SndFile.GetSampleRate()));
+			SetRange(0, mpt::saturate_round<uint64>(std::accumulate(subSongs.begin(), subSongs.end(), 0.0, [](double acc, const GetLengthType &glt) { return acc + glt.duration; }) * m_SndFile.GetSampleRate()));
 
 			size_t totalSamples = 0;
 			DummyAudioTarget target;
@@ -93,7 +93,7 @@ public:
 						prevTime = currentTime;
 						auto timeSec = totalSamples / m_SndFile.GetSampleRate();
 						SetText(MPT_CFORMAT("Analyzing... {}:{}:{}")(timeSec / 3600, mpt::cfmt::dec0<2>((timeSec / 60) % 60), mpt::cfmt::dec0<2>(timeSec % 60)));
-						SetProgress(mpt::saturate_cast<uint32>(totalSamples));
+						SetProgress(totalSamples);
 						ProcessMessages();
 					}
 				}
