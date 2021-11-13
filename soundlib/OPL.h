@@ -67,7 +67,14 @@ public:
 		STEREO_BITS      = VOICE_TO_LEFT | VOICE_TO_RIGHT,
 	};
 
+	class IRegisterLogger
+	{
+	public:
+		virtual void Port(CHANNELINDEX c, uint16 reg, uint8 value) = 0;
+	};
+
 	OPL(uint32 samplerate);
+	OPL(IRegisterLogger &logger);
 	~OPL();
 
 	void Initialize(uint32 samplerate);
@@ -89,6 +96,7 @@ protected:
 	static uint8 CalcVolume(uint8 trackerVol, uint8 kslVolume);
 	uint8 GetVoice(CHANNELINDEX c) const;
 	uint8 AllocateVoice(CHANNELINDEX c);
+	void Port(CHANNELINDEX c, uint16 reg, uint8 value);
 
 	enum
 	{
@@ -100,6 +108,7 @@ protected:
 	};
 
 	std::unique_ptr<Opal> m_opl;
+	IRegisterLogger *m_logger = nullptr;
 
 	std::array<uint8, OPL_CHANNELS> m_KeyOnBlock;
 	std::array<CHANNELINDEX, OPL_CHANNELS> m_OPLtoChan;

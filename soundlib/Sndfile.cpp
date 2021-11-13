@@ -1679,6 +1679,22 @@ double CSoundFile::GetPlaybackTimeAt(ORDERINDEX ord, ROWINDEX row, bool updateVa
 }
 
 
+std::vector<SubSong> CSoundFile::GetAllSubSongs()
+{
+	std::vector<SubSong> subSongs;
+	for(SEQUENCEINDEX seq = 0; seq < Order.GetNumSequences(); seq++)
+	{
+		const auto subSongsSeq = GetLength(eNoAdjust, GetLengthTarget(true).StartPos(seq, 0, 0));
+		subSongs.reserve(subSongs.size() + subSongsSeq.size());
+		for(const auto &song : subSongsSeq)
+		{
+			subSongs.push_back({song.duration, song.startRow, song.endRow, song.lastRow, song.startOrder, song.endOrder, song.lastOrder, seq});
+		}
+	}
+	return subSongs;
+}
+
+
 // Calculate the length of a tick, depending on the tempo mode.
 // This differs from GetTickDuration() by not accumulating errors
 // because this is not called once per tick but in unrelated

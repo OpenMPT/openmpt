@@ -117,6 +117,15 @@ struct GetLengthType
 };
 
 
+struct SubSong
+{
+	double duration;
+	ROWINDEX startRow, endRow, loopStartRow;
+	ORDERINDEX startOrder, endOrder, loopStartOrder;
+	SEQUENCEINDEX sequence;
+};
+
+
 // Target seek mode for GetLength()
 struct GetLengthTarget
 {
@@ -361,6 +370,8 @@ public:
 	// If updateVars is true, the state of various playback variables will be updated according to the playback position.
 	// If updateSamplePos is also true, the sample positions of samples still playing from previous patterns will be kept in sync.
 	double GetPlaybackTimeAt(ORDERINDEX ord, ROWINDEX row, bool updateVars, bool updateSamplePos);
+
+	std::vector<SubSong> GetAllSubSongs();
 
 	//Tuning-->
 public:
@@ -964,6 +975,7 @@ public:
 		std::optional<std::reference_wrapper<IMonitorOutput>> outputMonitor = std::nullopt,
 		std::optional<std::reference_wrapper<IMonitorInput>> inputMonitor = std::nullopt
 		);
+	samplecount_t ReadOneTick();
 private:
 	void CreateStereoMix(int count);
 public:

@@ -195,6 +195,26 @@ void CSoundFile::ProcessInputChannels(IAudioSource &source, std::size_t countChu
 }
 
 
+// Read one tick but skip all expensive rendering options
+CSoundFile::samplecount_t CSoundFile::ReadOneTick()
+{
+	const auto origMaxMixChannels = m_MixerSettings.m_nMaxMixChannels;
+	m_MixerSettings.m_nMaxMixChannels = 0;
+	while(m_PlayState.m_nBufferCount)
+	{
+		auto framesToRender = std::min(m_PlayState.m_nBufferCount, samplecount_t(MIXBUFFERSIZE));
+		CreateStereoMix(framesToRender);
+		m_PlayState.m_nBufferCount -= framesToRender;
+		m_PlayState.m_lTotalSampleCount += framesToRender;
+	}
+	m_MixerSettings.m_nMaxMixChannels = origMaxMixChannels;
+	if(ReadNote())
+		return m_PlayState.m_nBufferCount;
+	else
+		return 0;
+}
+
+
 CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioTarget &target, IAudioSource &source, std::optional<std::reference_wrapper<IMonitorOutput>> outputMonitor, std::optional<std::reference_wrapper<IMonitorInput>> inputMonitor)
 {
 	MPT_ASSERT_ALWAYS(m_MixerSettings.IsValid());
@@ -341,7 +361,7 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioTarget &ta
 		countRendered += countChunk;
 		countToRender -= countChunk;
 		m_PlayState.m_nBufferCount -= countChunk;
-		m_PlayState.m_lTotalSampleCount += countChunk;		// increase sample count for VSTTimeInfo.
+		m_PlayState.m_lTotalSampleCount += countChunk;
 
 #ifdef MODPLUG_TRACKER
 		if(IsRenderingToDisc())

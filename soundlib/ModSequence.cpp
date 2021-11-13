@@ -205,6 +205,14 @@ bool ModSequence::IsValidPat(ORDERINDEX ord) const
 }
 
 
+CPattern *ModSequence::PatternAt(ORDERINDEX ord) const
+{
+	if(!IsValidPat(ord))
+		return nullptr;
+	return &m_sndFile.Patterns[at(ord)];
+}
+
+
 ORDERINDEX ModSequence::FindOrder(PATTERNINDEX pat, ORDERINDEX startSearchAt, bool searchForward) const
 {
 	const ORDERINDEX length = GetLength();

@@ -12,12 +12,14 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
+#include "Snd_defs.h"
+
 #include <algorithm>
 #include <vector>
-#include "Snd_defs.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
+class CPattern;
 class CSoundFile;
 class ModSequenceSet;
 
@@ -77,6 +79,8 @@ public:
 	// Check if pattern at sequence position ord is valid.
 	bool IsValidPat(ORDERINDEX ord) const;
 
+	CPattern *PatternAt(ORDERINDEX ord) const;
+
 	void AdjustToNewModType(const MODTYPE oldtype);
 
 	// Returns the internal representation of a stop '---' index
@@ -117,8 +121,8 @@ public:
 	inline mpt::ustring GetName() const { return m_name; }
 
 	// Restart position setter / getter
-	inline void SetRestartPos(ORDERINDEX restartPos) { m_restartPos = restartPos; }
-	inline ORDERINDEX GetRestartPos() const { return m_restartPos; }
+	inline void SetRestartPos(ORDERINDEX restartPos) noexcept { m_restartPos = restartPos; }
+	inline ORDERINDEX GetRestartPos() const noexcept { return m_restartPos; }
 };
 
 
