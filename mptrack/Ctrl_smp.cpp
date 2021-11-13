@@ -2785,7 +2785,6 @@ void CCtrlSamples::OnNameChanged()
 	const std::string s = mpt::ToCharset(m_sndFile.GetCharsetInternal(), tmp);
 	if(s != m_sndFile.m_szNames[m_nSample])
 	{
-		const bool startedEdit = m_startedEdit;
 		if(!m_startedEdit)
 		{
 			PrepareUndo("Set Name");
