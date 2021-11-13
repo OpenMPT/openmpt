@@ -71,6 +71,7 @@ public:
 	{
 	public:
 		virtual void Port(CHANNELINDEX c, uint16 reg, uint8 value) = 0;
+		virtual ~IRegisterLogger() {}
 	};
 
 	OPL(uint32 samplerate);
