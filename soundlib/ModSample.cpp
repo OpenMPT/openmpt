@@ -216,7 +216,7 @@ void *ModSample::AllocateSample(SmpLength numFrames, size_t bytesPerSample)
 		if(p != nullptr)
 		{
 			memset(p, 0, allocSize);
-			return p + (InterpolationMaxLookahead * MaxSamplingPointSize);
+			return p + (InterpolationLookaheadBufferSize * MaxSamplingPointSize);
 		}
 	}
 	return nullptr;
@@ -234,7 +234,7 @@ size_t ModSample::GetRealSampleBufferSize(SmpLength numSamples, size_t bytesPerS
 	// * 4x InterpolationMaxLookahead for the sustain loop (same as the two points above)
 
 	const SmpLength maxSize = Util::MaxValueOfType(numSamples);
-	const SmpLength lookaheadBufferSize = (MaxSamplingPointSize + 1 + 4 + 4) * InterpolationMaxLookahead;
+	const SmpLength lookaheadBufferSize = (MaxSamplingPointSize + 1 + 4 + 4) * InterpolationLookaheadBufferSize;
 
 	if(numSamples == 0 || numSamples > MAX_SAMPLE_LENGTH || lookaheadBufferSize > maxSize - numSamples)
 	{
@@ -262,7 +262,7 @@ void ModSample::FreeSample(void *samplePtr)
 {
 	if(samplePtr)
 	{
-		delete[](((char *)samplePtr) - (InterpolationMaxLookahead * MaxSamplingPointSize));
+		delete[](((char *)samplePtr) - (InterpolationLookaheadBufferSize * MaxSamplingPointSize));
 	}
 }
 
@@ -333,8 +333,8 @@ public:
 	void CopyLoop(bool direction) const
 	{
 		// Direction: true = start reading and writing forward, false = start reading and writing backward (write direction never changes)
-		const int numSamples = 2 * InterpolationMaxLookahead + (direction ? 1 : 0);  // Loop point is included in forward loop expansion
-		T *dest = target + numChannels * (2 * InterpolationMaxLookahead - 1);        // Write buffer offset
+		const int numSamples = 2 * InterpolationLookaheadBufferSize + (direction ? 1 : 0);  // Loop point is included in forward loop expansion
+		T *dest = target + numChannels * (2 * InterpolationLookaheadBufferSize - 1);        // Write buffer offset
 		SmpLength readPosition = loopEnd - 1;
 		const int writeIncrement = direction ? 1 : -1;
 		int readIncrement = writeIncrement;
@@ -385,7 +385,7 @@ template <typename T>
 void PrecomputeLoopsImpl(ModSample &smp, const CSoundFile &sndFile)
 {
 	const int numChannels = smp.GetNumChannels();
-	const int copySamples = numChannels * InterpolationMaxLookahead;
+	const int copySamples = numChannels * InterpolationLookaheadBufferSize;
 
 	T *sampleData = static_cast<T *>(smp.samplev());
 	T *afterSampleStart = sampleData + smp.nLength * numChannels;
@@ -394,7 +394,7 @@ void PrecomputeLoopsImpl(ModSample &smp, const CSoundFile &sndFile)
 
 	// Hold sample on the same level as the last sampling point at the end to prevent extra pops with interpolation.
 	// Do the same at the sample start, too.
-	for(int i = 0; i < (int)InterpolationMaxLookahead; i++)
+	for(int i = 0; i < (int)InterpolationLookaheadBufferSize; i++)
 	{
 		for(int c = 0; c < numChannels; c++)
 		{

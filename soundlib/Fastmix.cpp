@@ -65,10 +65,10 @@ struct MixLoopState
 		lookaheadPointer = nullptr;
 		if(!samplePointer)
 			return;
-		if(chn.nLoopEnd < InterpolationMaxLookahead)
+		if(chn.nLoopEnd < InterpolationLookaheadBufferSize)
 			lookaheadStart = chn.nLoopStart;
 		else
-			lookaheadStart = std::max(chn.nLoopStart, chn.nLoopEnd - InterpolationMaxLookahead);
+			lookaheadStart = std::max(chn.nLoopStart, chn.nLoopEnd - InterpolationLookaheadBufferSize);
 		// We only need to apply the loop wrap-around logic if the sample is actually looping and if interpolation is applied.
 		// If there is no interpolation happening, there is no lookahead happening the sample read-out is exact.
 		if(chn.dwFlags[CHN_LOOP] && chn.resamplingMode != SRCMODE_NEAREST)
@@ -78,10 +78,10 @@ struct MixLoopState
 			// Do not enable wraparound magic if we're previewing a custom loop!
 			if(inSustainLoop || chn.nLoopEnd == chn.pModSample->nLoopEnd)
 			{
-				SmpLength lookaheadOffset = 3 * InterpolationMaxLookahead + chn.pModSample->nLength - chn.nLoopEnd;
+				SmpLength lookaheadOffset = 3 * InterpolationLookaheadBufferSize + chn.pModSample->nLength - chn.nLoopEnd;
 				if(inSustainLoop)
 				{
-					lookaheadOffset += 4 * InterpolationMaxLookahead;
+					lookaheadOffset += 4 * InterpolationLookaheadBufferSize;
 				}
 				lookaheadPointer = samplePointer + lookaheadOffset * chn.pModSample->GetBytesPerSample();
 			}
@@ -207,7 +207,7 @@ struct MixLoopState
 		int32 nPosDest = (nPos + incSamples).GetInt();
 
 		const SmpLength nPosInt = nPos.GetUInt();
-		const bool isAtLoopStart = (nPosInt >= chn.nLoopStart && nPosInt < chn.nLoopStart + InterpolationMaxLookahead);
+		const bool isAtLoopStart = (nPosInt >= chn.nLoopStart && nPosInt < chn.nLoopStart + InterpolationLookaheadBufferSize);
 		if(!isAtLoopStart)
 		{
 			chn.dwFlags.reset(CHN_WRAPPED_LOOP);
@@ -246,7 +246,7 @@ struct MixLoopState
 			} else if(chn.dwFlags[CHN_WRAPPED_LOOP] && isAtLoopStart)
 			{
 				// We just restarted the loop, so interpolate correctly after wrapping around
-				nSmpCount = DistanceToBufferLength(nPos, SamplePosition(nLoopStart + InterpolationMaxLookahead, 0), nInv);
+				nSmpCount = DistanceToBufferLength(nPos, SamplePosition(nLoopStart + InterpolationLookaheadBufferSize, 0), nInv);
 				chn.pCurrentSample = lookaheadPointer + (chn.nLoopEnd - nLoopStart) * chn.pModSample->GetBytesPerSample();
 				checkDest = false;
 			} else if(nInc.IsPositive() && static_cast<SmpLength>(nPosDest) >= lookaheadStart && nSmpCount > 1)
