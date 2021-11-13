@@ -284,41 +284,6 @@ namespace String
 
 #endif // !MPT_COMPILER_QUIRK_NO_WCHAR
 
-
-	// Remove any chars after the first null char
-	template <size_t size>
-	void FixNullString(char (&buffer)[size])
-	{
-		static_assert(size > 0);
-		SetNullTerminator(buffer);
-		size_t pos = 0;
-		// Find the first null char.
-		while(pos < size && buffer[pos] != '\0')
-		{
-			pos++;
-		}
-		// Remove everything after the null char.
-		while(pos < size)
-		{
-			buffer[pos++] = '\0';
-		}
-	}
-
-	inline void FixNullString(std::string & str)
-	{
-		for(std::size_t i = 0; i < str.length(); ++i)
-		{
-			if(str[i] == '\0')
-			{
-				// if we copied \0 in the middle of the buffer, terminate std::string here
-				str.resize(i);
-				break;
-			}
-		}
-	}
-
-
-
 #if MPT_COMPILER_MSVC
 #pragma warning(pop)
 #endif // MPT_COMPILER_MSVC

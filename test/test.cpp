@@ -3322,14 +3322,6 @@ static MPT_NOINLINE void TestStringIO()
 
 	}
 
-	// Test FixNullString()
-	mpt::String::FixNullString(src1);
-	mpt::String::FixNullString(src2);
-	mpt::String::FixNullString(src3);
-	VERIFY_EQUAL_NONCONT(strncmp(src1, "X ", std::size(src1)), 0);
-	VERIFY_EQUAL_NONCONT(strncmp(src2, "XYZ", std::size(src2)), 0);
-	VERIFY_EQUAL_NONCONT(strncmp(src3, "XYZ", std::size(src3)), 0);
-
 	{
 	
 		char s0[4] = {'\0', 'X', ' ', 'X' };

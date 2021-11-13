@@ -369,7 +369,8 @@ void MIDIMacroConfig::Sanitize()
 {
 	for(auto &macro : *this)
 	{
-		mpt::String::FixNullString(macro);
+		macro[MACRO_LENGTH - 1] = '\0';
+		std::fill(std::find(std::begin(macro), std::end(macro), '\0'), std::end(macro), '\0');
 	}
 }
 
