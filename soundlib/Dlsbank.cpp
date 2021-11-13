@@ -608,6 +608,8 @@ const DLSINSTRUMENT *CDLSBank::FindInstrument(bool isDrum, uint32 bank, uint32 p
 						{
 							if(pInsNo)
 								*pInsNo = static_cast<uint32>(std::distance(m_Instruments.data(), &dlsIns));
+							// cppcheck false-positive
+							// cppcheck-suppress returnDanglingLifetime
 							return &dlsIns;
 						}
 					}
@@ -618,6 +620,8 @@ const DLSINSTRUMENT *CDLSBank::FindInstrument(bool isDrum, uint32 bank, uint32 p
 				{
 					if(pInsNo)
 						*pInsNo = static_cast<uint32>(std::distance(m_Instruments.data(), &dlsIns));
+					// cppcheck false-positive
+					// cppcheck-suppress returnDanglingLifetime
 					return &dlsIns;
 				}
 			}
