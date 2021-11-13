@@ -2190,12 +2190,12 @@ BOOL CViewInstrument::OnDragonDrop(BOOL doDrop, const DRAGONDROP *dropInfo)
 	case DRAGONDROP_DLS:
 		{
 			const CDLSBank *pDLSBank = CTrackApp::gpDLSBanks[dropInfo->dropItem];
-			UINT nIns = dropInfo->dropParam & 0x7FFF;
+			UINT nIns = dropInfo->dropParam & 0xFFFF;
 			UINT nRgn;
 			// Drums: (0x80000000) | (Region << 16) | (Instrument)
 			if (dropInfo->dropParam & 0x80000000)
 			{
-				nRgn = (dropInfo->dropParam & 0xFF0000) >> 16;
+				nRgn = (dropInfo->dropParam & 0x7FFF0000) >> 16;
 			} else
 			// Melodic: (Instrument)
 			{

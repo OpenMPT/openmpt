@@ -69,7 +69,7 @@ protected:
 		TREESTATUS_DRAGGING     = (TREESTATUS_RDRAG | TREESTATUS_LDRAG)
 	};
 
-	enum ModItemType : uint16
+	enum ModItemType : uint8
 	{
 		MODITEM_NULL = 0,
 
@@ -112,15 +112,11 @@ protected:
 		SEQU_MASK      = (1 << SEQU_SHIFT) - 1,
 		SEQU_INDICATOR = 0x80000000,
 
-		// Soundbank instrument identification
-		DLS_TYPEINST    = 0x40000000,
+		// Soundbank instrument identification (must be consistent with CViewInstrument::OnDragonDrop / CViewSample::OnDragonDrop)
 		DLS_TYPEPERC    = 0x80000000,
-		DLS_TYPEMASK    = DLS_TYPEINST | DLS_TYPEPERC,
-		DLS_INSTRMASK   = 0x00007FFF,
-		DLS_REGIONMASK  = 0x007F0000,  // DLS region
+		DLS_INSTRMASK   = 0x0000FFFF,
+		DLS_REGIONMASK  = 0x7FFF0000,  // Drum region
 		DLS_REGIONSHIFT = 16,
-		DLS_HIBANKMASK  = 0x3F000000,  // High bits of bank index
-		DLS_HIBANKSHIFT = 24,
 	};
 	static_assert((ORDERINDEX_INVALID & SEQU_MASK) == ORDERINDEX_INVALID, "ORDERINDEX doesn't fit in GetItemData() parameter");
 	static_assert((ORDERINDEX_MAX & SEQU_MASK) == ORDERINDEX_MAX, "ORDERINDEX doesn't fit in GetItemData() parameter");
@@ -133,23 +129,23 @@ protected:
 		ModItemType type;
 
 		ModItem(ModItemType t = MODITEM_NULL, uint32 v1 = 0, uint16 v2 = 0) : val1(v1), val2(v2), type(t) { }
-		bool IsSongItem() const { return type >= MODITEM_BEGIN_SONGITEMS && type <= MODITEM_END_SONGITEMS; }
-		bool operator==(const ModItem &other) const { return val1 == other.val1 && val2 == other.val2 && type == other.type; }
-		bool operator!=(const ModItem &other) const { return !(*this == other); }
+		bool IsSongItem() const noexcept { return type >= MODITEM_BEGIN_SONGITEMS && type <= MODITEM_END_SONGITEMS; }
+		bool operator==(const ModItem &other) const noexcept { return val1 == other.val1 && val2 == other.val2 && type == other.type; }
+		bool operator!=(const ModItem &other) const noexcept { return !(*this == other); }
 	};
 
 	struct DlsItem : public ModItem
 	{
-		DlsItem(uint32 bank, uint32 itemData) : ModItem(MODITEM_DLSBANK_INSTRUMENT, itemData | ((bank << (DLS_HIBANKSHIFT - 16)) & DLS_HIBANKMASK), (uint16)bank) { }
+		explicit DlsItem(uint16 instr) : ModItem(MODITEM_DLSBANK_INSTRUMENT, instr, 0) { }
+		DlsItem(uint16 instr, uint16 region) : ModItem(MODITEM_DLSBANK_INSTRUMENT, (instr & DLS_INSTRMASK) | ((region << DLS_REGIONSHIFT) & DLS_REGIONMASK) | DLS_TYPEPERC, 0) { }
 
-		uint32 GetBankIndex() const { return val2 | ((val1 & DLS_HIBANKMASK) >> (DLS_HIBANKSHIFT - 16)); }
-		uint32 GetRegion() const { return (val1 & DLS_REGIONMASK) >> DLS_REGIONSHIFT; }
-		uint32 GetInstr() const { return (val1 & DLS_INSTRMASK); }
-		bool IsPercussion() const { return ((val1 & DLS_TYPEMASK) == DLS_TYPEPERC); }
-		bool IsInstr() const { return ((val1 & DLS_TYPEMASK) == DLS_TYPEINST); }
+		uint32 GetRegion() const noexcept { return (val1 & DLS_REGIONMASK) >> DLS_REGIONSHIFT; }
+		uint32 GetInstr() const noexcept { return (val1 & DLS_INSTRMASK); }
+		bool IsPercussion() const noexcept { return ((val1 & DLS_TYPEPERC) == DLS_TYPEPERC); }
+		bool IsMelodic() const noexcept { return !IsPercussion(); }
 
-		static uint32 EncodeValuePerc(uint8 region, uint16 instr) { return DLS_TYPEPERC | (region << DLS_REGIONSHIFT) | instr; }
-		static uint32 EncodeValueInstr(uint8 region, uint16 instr) { return DLS_TYPEINST | (region << DLS_REGIONSHIFT) | instr; }
+		static ModItem FromLPARAM(uint32 lparam) { return ModItem{MODITEM_DLSBANK_INSTRUMENT, lparam, 0}; }
+		static LPARAM ToLPARAM(uint16 instr, uint16 region, bool isPerc) { return (instr & DLS_INSTRMASK) | ((region << DLS_REGIONSHIFT) & DLS_REGIONMASK) | (isPerc ? DLS_TYPEPERC : 0); }
 	};
 
 	static CSoundFile *m_SongFile;  // For browsing samples and instruments inside modules on disk
@@ -213,7 +209,7 @@ public:
 	BOOL SetMidiPercussion(UINT nPerc, const mpt::PathString &fileName);
 	bool ExecuteItem(HTREEITEM hItem);
 	void DeleteTreeItem(HTREEITEM hItem);
-	static void PlayDLSItem(CDLSBank &dlsBank, const DlsItem &item, ModCommand::NOTE note);
+	static void PlayDLSItem(const CDLSBank &dlsBank, const DlsItem &item, ModCommand::NOTE note);
 	BOOL PlayItem(HTREEITEM hItem, ModCommand::NOTE nParam, int volume = -1);
 	BOOL OpenTreeItem(HTREEITEM hItem);
 	BOOL OpenMidiInstrument(DWORD dwItem);
@@ -257,6 +253,9 @@ protected:
 	ModTreeDocInfo *GetDocumentInfoFromItem(HTREEITEM hItem);
 	CModDoc *GetDocumentFromItem(HTREEITEM hItem) { ModTreeDocInfo *info = GetDocumentInfoFromItem(hItem); return info ? &info->modDoc : nullptr; }
 	ModTreeDocInfo *GetDocumentInfoFromModDoc(CModDoc &modDoc);
+
+	size_t GetDLSBankIndexFromItem(HTREEITEM hItem) const;
+	CDLSBank *GetDLSBankFromItem(HTREEITEM hItem) const;
 
 	void InsertOrDupItem(bool insert);
 	void OnItemRightClick(HTREEITEM hItem, CPoint pt);
