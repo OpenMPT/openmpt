@@ -19,11 +19,12 @@ class CProgressDialog : public CDialog
 private:
 	ITaskbarList3 *m_taskBarList = nullptr;
 	uint64 m_min = 0, m_max = 0, m_shift = 0;
+	const bool m_customDialog;
 
 public:
 	bool m_abort = false;
 
-	CProgressDialog(CWnd *parent = nullptr);
+	CProgressDialog(CWnd *parent = nullptr, int resourceID = 0);
 	~CProgressDialog();
 
 	// Set the window title
@@ -40,7 +41,8 @@ public:
 	void EnableTaskbarProgress();
 	// Process all queued Windows messages
 	void ProcessMessages();
-	// Run method for this dialog that must implement the action to be carried out.
+	// Run method for this dialog that must implement the action to be carried out - unless a custom resourceID was provided,
+	// in which case the user is responsible for running the dialog and the implementation of this function may be a no-op.
 	virtual void Run() = 0;
 
 protected:
