@@ -34,8 +34,8 @@ public:
 	std::vector<SmpLength> m_SamplePlayLengths;
 
 	CRenderProgressDlg(CWnd *parent, CSoundFile &sndFile)
-		: CProgressDialog(parent)
-		, m_SndFile(sndFile)
+		: CProgressDialog{parent}
+		, m_SndFile{sndFile}
 	{
 		m_SndFile.m_SamplePlayLengths = &m_SamplePlayLengths;
 	}
@@ -57,52 +57,51 @@ public:
 
 		m_SamplePlayLengths.assign(m_SndFile.GetNumSamples() + 1, 0);
 
-		auto prevTime = timeGetTime();
-		auto currentSeq = m_SndFile.Order.GetCurrentSequenceIndex();
-		auto currentRepeatCount = m_SndFile.GetRepeatCount();
+		const auto origSequence = m_SndFile.Order.GetCurrentSequenceIndex();
+		const auto origRepeatCount = m_SndFile.GetRepeatCount();
 		auto opl = std::move(m_SndFile.m_opl);
 		m_SndFile.SetRepeatCount(0);
 		m_SndFile.m_bIsRendering = true;
-		for(SEQUENCEINDEX seq = 0; seq < m_SndFile.Order.GetNumSequences() && !m_abort; seq++)
+
+		auto prevTime = timeGetTime();
+		const auto subSongs = m_SndFile.GetAllSubSongs();
+		SetRange(0, mpt::saturate_round<uint64>(std::accumulate(subSongs.begin(), subSongs.end(), 0.0, [](double acc, const auto& song) { return acc + song.duration; }) * m_SndFile.GetSampleRate()));
+		size_t totalSamples = 0;
+		for(size_t i = 0; i < subSongs.size() && !m_abort; i++)
 		{
-			SetWindowText(MPT_CFORMAT("Automatic Sample Trimmer - Sequence {} / {}")(seq + 1, m_SndFile.Order.GetNumSequences()));
+			SetWindowText(MPT_CFORMAT("Automatic Sample Trimmer - Song {} / {}")(i + 1, subSongs.size()));
 
-			m_SndFile.Order.SetSequence(seq);
+			const auto &song = subSongs[i];
 			m_SndFile.ResetPlayPos();
-			const auto subSongs = m_SndFile.GetLength(eNoAdjust, GetLengthTarget(true));
-			SetRange(0, mpt::saturate_round<uint64>(std::accumulate(subSongs.begin(), subSongs.end(), 0.0, [](double acc, const GetLengthType &glt) { return acc + glt.duration; }) * m_SndFile.GetSampleRate()));
+			m_SndFile.GetLength(eAdjust, GetLengthTarget(song.startOrder, song.startRow).StartPos(song.sequence, 0, 0));
+			m_SndFile.m_SongFlags.reset(SONG_PLAY_FLAGS);
 
-			size_t totalSamples = 0;
+			size_t subsongSamples = 0;
 			DummyAudioTarget target;
-			for(const auto &subSong : subSongs)
+			while(!m_abort)
 			{
-				m_SndFile.GetLength(eAdjust, GetLengthTarget(subSong.startOrder, subSong.startRow));
-				m_SndFile.m_SongFlags.reset(SONG_PLAY_FLAGS);
-				while(!m_abort)
-				{
-					size_t count = m_SndFile.Read(MIXBUFFERSIZE, target);
-					if(count == 0)
-					{
-						break;
-					}
-					totalSamples += count;
+				auto count = m_SndFile.Read(MIXBUFFERSIZE, target);
+				if(count == 0)
+					break;
 
-					auto currentTime = timeGetTime();
-					if(currentTime - prevTime >= 16)
-					{
-						prevTime = currentTime;
-						auto timeSec = totalSamples / m_SndFile.GetSampleRate();
-						SetText(MPT_CFORMAT("Analyzing... {}:{}:{}")(timeSec / 3600, mpt::cfmt::dec0<2>((timeSec / 60) % 60), mpt::cfmt::dec0<2>(timeSec % 60)));
-						SetProgress(totalSamples);
-						ProcessMessages();
-					}
+				totalSamples += count;
+				subsongSamples += count;
+
+				auto currentTime = timeGetTime();
+				if(currentTime - prevTime >= 16)
+				{
+					prevTime = currentTime;
+					auto timeSec = subsongSamples / m_SndFile.GetSampleRate();
+					SetText(MPT_CFORMAT("Analyzing... {}:{}:{}")(timeSec / 3600, mpt::cfmt::dec0<2>((timeSec / 60) % 60), mpt::cfmt::dec0<2>(timeSec % 60)));
+					SetProgress(totalSamples);
+					ProcessMessages();
 				}
 			}
 		}
 
 		// Reset globals to previous values
-		m_SndFile.Order.SetSequence(currentSeq);
-		m_SndFile.SetRepeatCount(currentRepeatCount);
+		m_SndFile.Order.SetSequence(origSequence);
+		m_SndFile.SetRepeatCount(origRepeatCount);
 		m_SndFile.ResetPlayPos();
 		m_SndFile.StopAllVsti();
 		m_SndFile.m_bIsRendering = false;
