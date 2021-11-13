@@ -1013,7 +1013,6 @@ bool CDLSBank::ConvertSF2ToDLS(SF2LoaderInfo &sf2info)
 	if (m_Instruments.empty() || m_SamplesEx.empty())
 		return false;
 
-	const uint32 numPresetBags = static_cast<uint32>(sf2info.presetBags.GetLength() / sizeof(SFPresetBag));
 	const uint32 numInsts = static_cast<uint32>(sf2info.insts.GetLength() / sizeof(SFInst));
 	const uint32 numInstBags = static_cast<uint32>(sf2info.instBags.GetLength() / sizeof(SFInstBag));
 
@@ -1102,7 +1101,6 @@ bool CDLSBank::ConvertSF2ToDLS(SF2LoaderInfo &sf2info)
 			sf2info.insts.ReadArray(insts);
 			const uint32 numRegions = insts[1].wInstBagNdx - insts[0].wInstBagNdx;
 			dlsIns.Regions.reserve(dlsIns.Regions.size() + numRegions);
-			const auto startRegion = dlsIns.Regions.size();
 			//Log("\nIns %3d, %2d regions:\n", nIns, pSmp->nRegions);
 			DLSREGION globalZone{};
 			globalZone.uUnityNote = 0xFF;  // 0xFF means undefined -> use sample root note

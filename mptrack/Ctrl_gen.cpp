@@ -286,7 +286,6 @@ void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
 		m_EditTempo.AllowFractions(specs.hasFractionalTempo);
 
 		const BOOL bIsNotMOD = (m_sndFile.GetType() != MOD_TYPE_MOD);
-		const BOOL bIsNotMOD_S3M = ((bIsNotMOD) && (m_sndFile.GetType() != MOD_TYPE_S3M));
 		const BOOL bIsNotMOD_XM = ((bIsNotMOD) && (m_sndFile.GetType() != MOD_TYPE_XM));
 		m_EditArtist.EnableWindow(specs.hasArtistName);
 		m_EditTempo.EnableWindow(bIsNotMOD);
@@ -301,7 +300,6 @@ void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
 		m_SpinGlobalVol.EnableWindow(globalVol);
 		m_EditSamplePA.EnableWindow(bIsNotMOD);
 		m_SpinSamplePA.EnableWindow(bIsNotMOD);
-		//m_SliderSamplePreAmp.EnableWindow(bIsNotMOD);
 		m_SliderVSTiVol.EnableWindow(bIsNotMOD);
 		m_EditVSTiVol.EnableWindow(bIsNotMOD);
 		m_SpinVSTiVol.EnableWindow(bIsNotMOD);
@@ -309,7 +307,7 @@ void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
 		m_SpinRestartPos.EnableWindow(m_EditRestartPos.IsWindowEnabled());
 
 		//Note: Sample volume slider is not disabled for MOD
-		//on purpose(can be used to control play volume)
+		//on purpose (can be used to control play volume)
 	}
 
 	if(updateAll || (hint.GetCategory() == HINTCAT_GLOBAL && hintType[HINT_MODCHANNELS]))
