@@ -32,6 +32,7 @@ public:
 	enum EditAction
 	{
 		kAction_OverwriteFX,
+		kAction_OverwriteFXWithNote,
 		kAction_FillFX,
 		kAction_OverwritePC,
 		kAction_FillPC,
@@ -76,7 +77,7 @@ protected:
 	CHANNELINDEX m_nChan;
 	PATTERNINDEX m_nPattern;
 	int m_nFillEffect;
-	EditAction m_nAction = kAction_OverwriteFX;
+	static EditAction m_nAction;
 
 	int m_nDragItem = -1;
 	UINT m_nBtnMouseOver;

@@ -20,8 +20,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-
-// EffectVis dialog
+CEffectVis::EditAction CEffectVis::m_nAction = CEffectVis::kAction_OverwriteFX;
 
 IMPLEMENT_DYNAMIC(CEffectVis, CDialog)
 CEffectVis::CEffectVis(CViewPattern *pViewPattern, ROWINDEX startRow, ROWINDEX endRow, CHANNELINDEX nchn, CModDoc &modDoc, PATTERNINDEX pat)
@@ -510,8 +509,8 @@ void CEffectVis::OnSize(UINT nType, int cx, int cy)
 	m_rcDraw.SetRect( m_rcFullWin.left,  m_rcFullWin.top,
 				      m_rcFullWin.right, m_rcFullWin.bottom - m_marginBottom);
 
-	const int actionListWidth = Util::ScalePixels(150, m_hWnd);
-	const int commandListWidth = Util::ScalePixels(150, m_hWnd);
+	const int actionListWidth = Util::ScalePixels(170, m_hWnd);
+	const int commandListWidth = Util::ScalePixels(160, m_hWnd);
 
 	if (IsWindow(m_edVisStatus.m_hWnd))
 		m_edVisStatus.SetWindowPos(this, m_rcFullWin.left, m_rcDraw.bottom, m_rcFullWin.right-commandListWidth-actionListWidth, m_rcFullWin.bottom-m_rcDraw.bottom, SWP_NOACTIVATE|SWP_NOCOPYBITS|SWP_SHOWWINDOW|SWP_NOZORDER);
@@ -743,6 +742,7 @@ BOOL CEffectVis::OnInitDialog()
 
 	m_cmbActionList.ResetContent();
 	m_cmbActionList.SetItemData(m_cmbActionList.AddString(_T("Overwrite with effect:")), kAction_OverwriteFX);
+	m_cmbActionList.SetItemData(m_cmbActionList.AddString(_T("Overwrite effect next to note:")), kAction_OverwriteFXWithNote);
 	m_cmbActionList.SetItemData(m_cmbActionList.AddString(_T("Fill blanks with effect:")), kAction_FillFX);
 	if (m_ModDoc.GetModType() == MOD_TYPE_MPT)
 	{
@@ -774,6 +774,12 @@ void CEffectVis::MakeChange(ROWINDEX row, int y)
 			SetParamFromY(row, y);
 			break;
 
+		case kAction_OverwriteFXWithNote:
+			if(!m_SndFile.Patterns.IsValidPat(m_nPattern))
+				break;
+			if(!m_SndFile.Patterns[m_nPattern].GetpModCommand(row, m_nChan)->IsNote())
+				break;
+			[[fallthrough]];
 		case kAction_OverwriteFX:
 			// Always set command and param. Blows away any PC notes.
 			SetCommand(row, effectInfo.GetEffectFromIndex(m_nFillEffect));
