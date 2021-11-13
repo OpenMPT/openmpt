@@ -120,7 +120,7 @@ bool CGzipArchive::ExtractFile(std::size_t index)
 	do
 	{
 		std::array<char, mpt::IO::BUFFERSIZE_SMALL> inBuffer, outBuffer;
-		strm.avail_in = static_cast<uInt>(std::min(static_cast<FileReader::pos_type>(inBuffer.size()), bytesLeft));
+		strm.avail_in = static_cast<uInt>(std::min(static_cast<FileReader::off_t>(inBuffer.size()), bytesLeft));
 		inFile.ReadStructPartial(inBuffer, strm.avail_in);
 		strm.next_in = reinterpret_cast<Bytef *>(inBuffer.data());
 		bytesLeft -= strm.avail_in;
