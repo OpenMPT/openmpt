@@ -2685,12 +2685,19 @@ BOOL CViewSample::OnDragonDrop(BOOL doDrop, const DRAGONDROP *dropInfo)
 			{
 				const DLSINSTRUMENT *pDlsIns;
 				UINT nIns = 0, nRgn = 0xFF;
+				int transpose = 0;
 				// Drums
 				if (dropInfo->dropItem & 0x80)
 				{
 					UINT key = dropInfo->dropItem & 0x7F;
 					pDlsIns = dlsbank.FindInstrument(TRUE, 0xFFFF, 0xFF, key, &nIns);
-					if (pDlsIns) nRgn = dlsbank.GetRegionFromKey(nIns, key);
+					if(pDlsIns)
+					{
+						nRgn = dlsbank.GetRegionFromKey(nIns, key);
+						const auto &region = pDlsIns->Regions[nRgn];
+						if(region.tuning != 0)
+							transpose = (region.uKeyMin + (region.uKeyMax - region.uKeyMin) / 2) - 60;
+					}
 				} else
 				// Melodic
 				{
@@ -2703,7 +2710,7 @@ BOOL CViewSample::OnDragonDrop(BOOL doDrop, const DRAGONDROP *dropInfo)
 					CriticalSection cs;
 
 					modDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Replace");
-					canDrop = dlsbank.ExtractSample(sndFile, m_nSample, nIns, nRgn);
+					canDrop = dlsbank.ExtractSample(sndFile, m_nSample, nIns, nRgn, transpose);
 				}
 				update = true;
 				break;
@@ -2717,21 +2724,25 @@ BOOL CViewSample::OnDragonDrop(BOOL doDrop, const DRAGONDROP *dropInfo)
 	case DRAGONDROP_DLS:
 		{
 			const CDLSBank *pDLSBank = CTrackApp::gpDLSBanks[dropInfo->dropItem];
-			UINT nIns = dropInfo->dropParam & 0x7FFF;
+			UINT nIns = dropInfo->dropParam & 0xFFFF;
 			UINT nRgn;
+			int transpose = 0;
 			// Drums: (0x80000000) | (Region << 16) | (Instrument)
 			if (dropInfo->dropParam & 0x80000000)
 			{
-				nRgn = (dropInfo->dropParam & 0xFF0000) >> 16;
+				nRgn = (dropInfo->dropParam & 0x7FFF0000) >> 16;
+				const auto &region = pDLSBank->GetInstrument(nIns)->Regions[nRgn];
+				if(region.tuning != 0)
+					transpose = (region.uKeyMin + (region.uKeyMax - region.uKeyMin) / 2) - 60;
 			} else
-			// Melodic: (MidiBank << 16) | (Instrument)
+			// Melodic: (Instrument)
 			{
 				nRgn = pDLSBank->GetRegionFromKey(nIns, 60);
 			}
 			CriticalSection cs;
 
 			modDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Replace");
-			canDrop = pDLSBank->ExtractSample(sndFile, m_nSample, nIns, nRgn);
+			canDrop = pDLSBank->ExtractSample(sndFile, m_nSample, nIns, nRgn, transpose);
 
 			update = true;
 		}
