@@ -1793,9 +1793,10 @@ void CUpdateSetupDlg::OnShowStatisticsData(NMHDR * /*pNMHDR*/, LRESULT * /*pResu
 	CUpdateCheck::Settings settings;
 
 	uint32 updateChannel = TrackerSettings::Instance().UpdateChannel;
-	if(IsDlgButtonChecked(IDC_RADIO1)) updateChannel = UpdateChannelRelease;
-	if(IsDlgButtonChecked(IDC_RADIO2)) updateChannel = UpdateChannelNext;
-	if(IsDlgButtonChecked(IDC_RADIO3)) updateChannel = UpdateChannelDevelopment;
+	const int channelRadio = GetCheckedRadioButton(IDC_RADIO1, IDC_RADIO3);
+	if(channelRadio == IDC_RADIO1) updateChannel = UpdateChannelRelease;
+	if(channelRadio == IDC_RADIO2) updateChannel = UpdateChannelNext;
+	if(channelRadio == IDC_RADIO3) updateChannel = UpdateChannelDevelopment;
 
 	int updateCheckPeriod = (m_CbnUpdateFrequency.GetItemData(m_CbnUpdateFrequency.GetCurSel()) == ~(DWORD_PTR)0) ? -1 : static_cast<int>(m_CbnUpdateFrequency.GetItemData(m_CbnUpdateFrequency.GetCurSel()));
 
@@ -1908,9 +1909,10 @@ void CUpdateSetupDlg::OnSettingsChanged()
 void CUpdateSetupDlg::OnOK()
 {
 	uint32 updateChannel = TrackerSettings::Instance().UpdateChannel;
-	if(IsDlgButtonChecked(IDC_RADIO1)) updateChannel = UpdateChannelRelease;
-	if(IsDlgButtonChecked(IDC_RADIO2)) updateChannel = UpdateChannelNext;
-	if(IsDlgButtonChecked(IDC_RADIO3)) updateChannel = UpdateChannelDevelopment;
+	const int channelRadio = GetCheckedRadioButton(IDC_RADIO1, IDC_RADIO3);
+	if(channelRadio == IDC_RADIO1) updateChannel = UpdateChannelRelease;
+	if(channelRadio == IDC_RADIO2) updateChannel = UpdateChannelNext;
+	if(channelRadio == IDC_RADIO3) updateChannel = UpdateChannelDevelopment;
 
 	int updateCheckPeriod = (m_CbnUpdateFrequency.GetItemData(m_CbnUpdateFrequency.GetCurSel()) == ~(DWORD_PTR)0) ? -1 : static_cast<int>(m_CbnUpdateFrequency.GetItemData(m_CbnUpdateFrequency.GetCurSel()));
 	

@@ -557,9 +557,7 @@ void CWaveConvert::UpdateDialog()
 	GetDlgItem(IDC_EDIT2)->EnableWindow(m_dwSongLimit ? TRUE : FALSE);
 
 	// Repeat / selection play
-	int sel = IDC_RADIO1;
-	if(IsDlgButtonChecked(IDC_RADIO2) != BST_UNCHECKED) sel = IDC_RADIO2;
-	if(IsDlgButtonChecked(IDC_RADIO3) != BST_UNCHECKED) sel = IDC_RADIO3;
+	int sel = GetCheckedRadioButton(IDC_RADIO1, IDC_RADIO3);
 
 	GetDlgItem(IDC_EDIT3)->EnableWindow(sel == IDC_RADIO2);
 	GetDlgItem(IDC_EDIT4)->EnableWindow(sel == IDC_RADIO2);

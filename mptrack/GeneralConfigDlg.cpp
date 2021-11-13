@@ -149,8 +149,9 @@ void COptionsGeneral::OnOK()
 	TrackerSettings::Instance().defaultTemplateFile = mpt::PathString::FromCString(GetWindowTextString(m_defaultTemplate));
 
 	NewFileAction action = nfDefaultFormat;
-	if(IsDlgButtonChecked(IDC_RADIO2)) action = nfSameAsCurrent;
-	if(IsDlgButtonChecked(IDC_RADIO3)) action = nfDefaultTemplate;
+	int newActionRadio = GetCheckedRadioButton(IDC_RADIO1, IDC_RADIO3);
+	if(newActionRadio == IDC_RADIO2) action = nfSameAsCurrent;
+	if(newActionRadio == IDC_RADIO3) action = nfDefaultTemplate;
 	if(action == nfDefaultTemplate && TrackerSettings::Instance().defaultTemplateFile.Get().empty())
 	{
 		action = nfDefaultFormat;
