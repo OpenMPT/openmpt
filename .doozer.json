@@ -52,59 +52,6 @@
 				"PATH=/usr/lib/ccache:$PATH make -j${PARALLEL} STRICT=1",
 				"PATH=/usr/lib/ccache:$PATH make -j${PARALLEL} STRICT=1 check"
 			]
-		},
-
-		"focal-i386/gcc": {
-			"buildenv": "docker:i386/ubuntu:focal",
-			"builddeps": [
-				"autoconf",
-				"autoconf-archive",
-				"automake",
-				"binutils",
-				"ccache",
-				"clang",
-				"clang-format",
-				"doxygen",
-				"g++",
-				"gawk",
-				"gcc",
-				"git",
-				"git-svn",
-				"gzip",
-				"help2man",
-				"libc++-dev",
-				"libc++abi-dev",
-				"libflac-dev",
-				"libltdl-dev",
-				"libmpg123-dev",
-				"libogg-dev",
-				"libpulse-dev",
-				"libsdl1.2-dev",
-				"libsdl2-dev",
-				"libsndfile1-dev",
-				"libtool",
-				"libtool-bin",
-				"libvorbis-dev",
-				"libxml-xpath-perl",
-				"make",
-				"mscompress",
-				"p7zip",
-				"p7zip-full",
-				"pkg-config",
-				"portaudio19-dev",
-				"subversion",
-				"subversion-tools",
-				"tar",
-				"tcc",
-				"unzip",
-				"zip",
-				"zlib1g-dev",
-				"build-essential"
-			],
-			"buildcmd": [
-				"PATH=/usr/lib/ccache:$PATH make -j${PARALLEL} STRICT=1",
-				"PATH=/usr/lib/ccache:$PATH make -j${PARALLEL} STRICT=1 check"
-			]
 		}
 
 	}
