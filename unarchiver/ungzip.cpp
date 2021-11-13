@@ -29,7 +29,7 @@ OPENMPT_NAMESPACE_BEGIN
 #if defined(MPT_WITH_ZLIB) || defined(MPT_WITH_MINIZ)
 
 
-CGzipArchive::CGzipArchive(FileReader &file) : ArchiveBase(file)
+CGzipArchive::CGzipArchive(const FileReader &file) : ArchiveBase(file)
 {
 	inFile.Rewind();
 	inFile.ReadStruct(header);
@@ -91,41 +91,53 @@ bool CGzipArchive::ExtractFile(std::size_t index)
 		inFile.Skip(2);
 	}
 
-	// Well, this is a bit small when inflated / deflated.
-	if(trailer.isize == 0 || !inFile.CanRead(sizeof(GZtrailer)))
+	// Well, this is a bit small when deflated.
+	if(!inFile.CanRead(sizeof(GZtrailer)))
 	{
 		return false;
 	}
 
 	try
 	{
-		data.resize(trailer.isize);
+		data.reserve(inFile.BytesLeft());
 	} catch(...)
 	{
 		return false;
 	}
 
-	FileReader::PinnedRawDataView inFileView = inFile.GetPinnedRawDataView(inFile.BytesLeft() - sizeof(GZtrailer));
-
 	// Inflate!
-	z_stream strm;
+	z_stream strm{};
 	strm.zalloc = Z_NULL;
 	strm.zfree = Z_NULL;
 	strm.opaque = Z_NULL;
-	strm.avail_in = trailer.isize;
-	strm.next_in = const_cast<Bytef*>(mpt::byte_cast<const Bytef*>(inFileView.data()));
+	strm.avail_in = 0;
+	strm.next_in = Z_NULL;
 	if(inflateInit2(&strm, -15) != Z_OK)
-	{
 		return false;
-	}
-	strm.avail_out = trailer.isize;
-	strm.next_out = (Bytef *)data.data();
-
-	int retVal = inflate(&strm, Z_NO_FLUSH);
+	int retVal = Z_OK;
+	uint32 crc = 0;
+	auto bytesLeft = inFile.BytesLeft() - sizeof(GZtrailer);
+	do
+	{
+		std::array<char, mpt::IO::BUFFERSIZE_SMALL> inBuffer, outBuffer;
+		strm.avail_in = static_cast<uInt>(std::min(static_cast<FileReader::pos_type>(inBuffer.size()), bytesLeft));
+		inFile.ReadStructPartial(inBuffer, strm.avail_in);
+		strm.next_in = reinterpret_cast<Bytef *>(inBuffer.data());
+		bytesLeft -= strm.avail_in;
+		do
+		{
+			strm.avail_out = static_cast<uInt>(outBuffer.size());
+			strm.next_out = reinterpret_cast<Bytef *>(outBuffer.data());
+			retVal = inflate(&strm, Z_NO_FLUSH);
+			const auto output = mpt::as_span(outBuffer.data(), outBuffer.data() + outBuffer.size() - strm.avail_out);
+			crc = crc32(crc, reinterpret_cast<Bytef *>(output.data()), static_cast<uInt>(output.size()));
+			data.insert(data.end(), output.begin(), output.end());
+		} while(strm.avail_out == 0);
+	} while(retVal == Z_OK && bytesLeft);
 	inflateEnd(&strm);
 
 	// Everything went OK? Check return code, number of written bytes and CRC32.
-	return (retVal == Z_STREAM_END && trailer.isize == strm.total_out && trailer.crc32_ == crc32(0, (Bytef *)data.data(), trailer.isize));
+	return retVal == Z_STREAM_END && trailer.isize == static_cast<uint32>(strm.total_out) && trailer.crc32_ == crc;
 }
 
 
