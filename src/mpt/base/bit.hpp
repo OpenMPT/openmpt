@@ -182,7 +182,12 @@ MPT_FORCEINLINE bool endian_is_weird() noexcept {
 
 
 
-#if MPT_CXX_AT_LEAST(20)
+#if MPT_CXX_AT_LEAST(20) && !MPT_COMPILER_MSVC
+
+// Disabled for VS2022 for now because of
+// <https://developercommunity.visualstudio.com/t/vs2022-cl-193030705-generates-non-universally-avai/1578571>
+// / <https://github.com/microsoft/STL/issues/2330> with fix already queued
+// (<https://github.com/microsoft/STL/pull/2333>).
 
 using std::bit_ceil;
 using std::bit_floor;
