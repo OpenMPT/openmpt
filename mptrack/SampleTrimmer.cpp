@@ -129,10 +129,19 @@ void CModDoc::OnShowSampleTrimmer()
 	for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
 	{
 		ModSample &sample = m_SndFile.GetSample(smp);
-		if(dlg.m_SamplePlayLengths[smp] != 0 && sample.nLength > dlg.m_SamplePlayLengths[smp])
+		auto &newLength = dlg.m_SamplePlayLengths[smp];
+		if(newLength == 0)
+			continue;
+		// Take interpolation look-ahead into account
+		if((!sample.uFlags[CHN_LOOP] || newLength != sample.nLoopEnd)
+		   && (!sample.uFlags[CHN_SUSTAINLOOP] || newLength != sample.nSustainEnd))
+		{
+			newLength = std::min(newLength + InterpolationMaxLookahead, sample.nLength);
+		}
+		if(sample.nLength > newLength)
 		{
 			numTrimmed++;
-			numBytes += (sample.nLength - dlg.m_SamplePlayLengths[smp]) * sample.GetBytesPerSample();
+			numBytes += (sample.nLength - newLength) * sample.GetBytesPerSample();
 		}
 	}
 	if(numTrimmed == 0)
@@ -141,7 +150,7 @@ void CModDoc::OnShowSampleTrimmer()
 		return;
 	}
 
-	mpt::ustring s = MPT_UFORMAT("{} sample{} can be trimmed, saving {} bytes.")(numTrimmed, (numTrimmed == 1) ? U_("") : U_("s"), mpt::ufmt::dec(3, ',', numBytes));
+	mpt::ustring s = MPT_UFORMAT("{} sample{} can be trimmed, saving {} byte{}.")(numTrimmed, (numTrimmed == 1) ? U_("") : U_("s"), mpt::ufmt::dec(3, ',', numBytes), numBytes != 1 ? U_("s") : U_(""));
 	if(dlg.m_abort)
 	{
 		s += U_("\n\nWARNING: Only partial results are available, possibly causing used sample parts to be trimmed.\nContinue anyway?");
