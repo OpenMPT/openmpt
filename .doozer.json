@@ -49,8 +49,6 @@
 				"build-essential"
 			],
 			"buildcmd": [
-				"sudo apt update",
-				"sudo apt -y upgrade",
 				"PATH=/usr/lib/ccache:$PATH make -j${PARALLEL} STRICT=1",
 				"PATH=/usr/lib/ccache:$PATH make -j${PARALLEL} STRICT=1 check"
 			]
@@ -104,8 +102,6 @@
 				"build-essential"
 			],
 			"buildcmd": [
-				"sudo apt update",
-				"sudo apt -y upgrade",
 				"PATH=/usr/lib/ccache:$PATH make -j${PARALLEL} STRICT=1",
 				"PATH=/usr/lib/ccache:$PATH make -j${PARALLEL} STRICT=1 check"
 			]
