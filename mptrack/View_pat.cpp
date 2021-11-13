@@ -4878,7 +4878,6 @@ void CViewPattern::TempStopNote(ModCommand::NOTE note, const bool fromMidi, bool
 		if(!ins)
 			ins = m_fallbackInstrument;
 
-		const bool playWholeRow = ((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_PLAYEDITROW) && !liveRecord);
 		if(chordMode)
 		{
 			m_Status.reset(psChordPlaying);
