@@ -164,7 +164,10 @@ void OPL::NoteCut(CHANNELINDEX c, bool unassign)
 	NoteOff(c);
 	Volume(c, 0, false);  // Note that a volume of 0 is not complete silence; the release portion of the sound will still be heard at -48dB
 	if(unassign)
+	{
+		m_OPLtoChan[oplCh] = CHANNELINDEX_INVALID;
 		m_ChanToOPL[c] |= OPL_CHANNEL_CUT;
+	}
 }
 
 
@@ -297,8 +300,8 @@ void OPL::Reset()
 	m_OPLtoChan.fill(CHANNELINDEX_INVALID);
 	m_ChanToOPL.fill(OPL_CHANNEL_INVALID);
 
-	Port(0, 0x105, 1);  // Enable OPL3
-	Port(0, 0x104, 0);  // No 4-op voices
+	Port(CHANNELINDEX_INVALID, 0x105, 1);  // Enable OPL3
+	Port(CHANNELINDEX_INVALID, 0x104, 0);  // No 4-op voices
 }
 
 
