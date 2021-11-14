@@ -754,6 +754,7 @@ static constexpr struct
 	{2027, kcShowChannelCtxMenu, _T("Show Channel Context (Right-Click) Menu")},
 	{2028, kcShowChannelPluginCtxMenu, _T("Show Channel Plugin Context (Right-Click) Menu")},
 	{2029, kcViewToggle, _T("Toggle Between Upper / Lower View") },
+	{2030, kcFileSaveOPL, _T("File/Export OPL Register Dump") },
 };
 
 // Get command descriptions etc.. loaded up.

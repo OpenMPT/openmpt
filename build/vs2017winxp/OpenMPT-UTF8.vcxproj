@@ -1244,6 +1244,7 @@
     <ClCompile Include="..\..\mptrack\Mpdlgs.cpp" />
     <ClCompile Include="..\..\mptrack\Mpt_midi.cpp" />
     <ClCompile Include="..\..\mptrack\Mptrack.cpp" />
+    <ClCompile Include="..\..\mptrack\OPLExport.cpp" />
     <ClCompile Include="..\..\mptrack\OPLInstrDlg.cpp" />
     <ClCompile Include="..\..\mptrack\PSRatioCalc.cpp" />
     <ClCompile Include="..\..\mptrack\PathConfigDlg.cpp" />

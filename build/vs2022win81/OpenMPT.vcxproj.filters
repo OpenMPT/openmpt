@@ -1700,6 +1700,9 @@
     <ClCompile Include="..\..\mptrack\Mptrack.cpp">
       <Filter>mptrack</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\mptrack\OPLExport.cpp">
+      <Filter>mptrack</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\mptrack\OPLInstrDlg.cpp">
       <Filter>mptrack</Filter>
     </ClCompile>

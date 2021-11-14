@@ -429,6 +429,7 @@ CString CInputHandler::GetMenuText(UINT id) const
 		{ ID_FILE_SAVEASTEMPLATE, kcFileSaveTemplate,  _T("Sa&ve as Template") },
 		{ ID_FILE_SAVEASWAVE,     kcFileSaveAsWave,    _T("Stream Export (&WAV, FLAC, MP3, etc.)...") },
 		{ ID_FILE_SAVEMIDI,       kcFileSaveMidi,      _T("Export as M&IDI...") },
+		{ ID_FILE_SAVEOPL,        kcFileSaveOPL,       _T("Export O&PL Register Dump...") },
 		{ ID_FILE_SAVECOMPAT,     kcFileExportCompat,  _T("Compatibility &Export...") },
 		{ ID_IMPORT_MIDILIB,      kcFileImportMidiLib, _T("Import &MIDI Library...") },
 		{ ID_ADD_SOUNDBANK,       kcFileAddSoundBank,  _T("Add Sound &Bank...") },

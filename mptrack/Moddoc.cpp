@@ -88,6 +88,7 @@ BEGIN_MESSAGE_MAP(CModDoc, CDocument)
 	ON_COMMAND(ID_FILE_SAVEASTEMPLATE,	&CModDoc::OnSaveTemplateModule)
 	ON_COMMAND(ID_FILE_SAVEASWAVE,		&CModDoc::OnFileWaveConvert)
 	ON_COMMAND(ID_FILE_SAVEMIDI,		&CModDoc::OnFileMidiConvert)
+	ON_COMMAND(ID_FILE_SAVEOPL,			&CModDoc::OnFileOPLExport)
 	ON_COMMAND(ID_FILE_SAVECOMPAT,		&CModDoc::OnFileCompatibilitySave)
 	ON_COMMAND(ID_FILE_APPENDMODULE,	&CModDoc::OnAppendModule)
 	ON_COMMAND(ID_PLAYER_PLAY,			&CModDoc::OnPlayerPlay)
@@ -2675,6 +2676,7 @@ LRESULT CModDoc::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 
 		case kcFileSaveAsWave:	OnFileWaveConvert(); break;
 		case kcFileSaveMidi:	OnFileMidiConvert(); break;
+		case kcFileSaveOPL:		OnFileOPLExport(); break;
 		case kcFileExportCompat:  OnFileCompatibilitySave(); break;
 		case kcEstimateSongLength: OnEstimateSongLength(); break;
 		case kcApproxRealBPM:	OnApproximateBPM(); break;

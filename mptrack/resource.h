@@ -100,6 +100,7 @@
 #define IDD_MIDIPARAMCONTROL            515
 #define IDD_MSGBOX_HIDABLE              516
 #define IDD_ADDSILENCE                  517
+#define IDD_OPLEXPORT                   518
 #define IDR_DEFAULT_KEYBINDINGS         519
 #define IDD_OPL_PARAMS                  520
 #define IDD_CLEANUP_SONG                521
@@ -985,6 +986,7 @@
 #define IDC_COMBO_RECORDING_CHANNELS    2514
 #define IDC_COMBO_RECORDING_SOURCE      2515
 #define IDC_CHECK_UPDATEINSTALLAUTOMATICALLY 2516
+#define IDC_SUBSONG                     2517
 #define ID_FILE_NEWMOD                  32771
 #define ID_FILE_NEWXM                   32772
 #define ID_FILE_NEWS3M                  32773
@@ -1292,6 +1294,7 @@
 #define ID_CONVERT_PINGPONG_LOOP        44650
 #define ID_CONVERT_PINGPONG_SUSTAIN     44651
 #define ID_RENAME_PLUGIN                44652
+#define ID_FILE_SAVEOPL                 44653
 
 // Next default values for new objects
 // 
@@ -1299,8 +1302,8 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        543
-#define _APS_NEXT_COMMAND_VALUE         44653
-#define _APS_NEXT_CONTROL_VALUE         2517
+#define _APS_NEXT_COMMAND_VALUE         44654
+#define _APS_NEXT_CONTROL_VALUE         2518
 #define _APS_NEXT_SYMED_VALUE           901
 #endif
 #endif
