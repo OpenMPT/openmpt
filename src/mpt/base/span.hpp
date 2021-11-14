@@ -59,71 +59,71 @@ public:
 	using difference_type = typename std::iterator_traits<iterator>::difference_type;
 
 private:
-	T * m_beg;
-	T * m_end;
+	T * m_data;
+	std::size_t m_size;
 
 public:
 	span() noexcept
-		: m_beg(nullptr)
-		, m_end(nullptr) {
+		: m_data(nullptr)
+		, m_size(0) {
 	}
 
 	span(pointer beg, pointer end)
-		: m_beg(beg)
-		, m_end(end) {
+		: m_data(beg)
+		, m_size(end - beg) {
 	}
 
 	span(pointer data, index_type size)
-		: m_beg(data)
-		, m_end(data + size) {
+		: m_data(data)
+		, m_size(size) {
 	}
 
 	template <std::size_t N>
 	span(element_type (&arr)[N])
-		: m_beg(arr)
-		, m_end(arr + N) {
+		: m_data(arr)
+		, m_size(N) {
 	}
 
 	template <std::size_t N>
 	span(std::array<value_type, N> & arr)
-		: m_beg(arr.data())
-		, m_end(arr.data() + arr.size()) {
+		: m_data(arr.data())
+		, m_size(arr.size()) {
 	}
 
 	template <std::size_t N>
 	span(const std::array<value_type, N> & arr)
-		: m_beg(arr.data())
-		, m_end(arr.data() + arr.size()) {
+		: m_data(arr.data())
+		, m_size(arr.size()) {
 	}
 
 	span(const span & other) noexcept = default;
 
 	template <typename U>
 	span(const span<U> & other)
-		: m_beg(other.begin())
-		, m_end(other.end()) {
+		: m_data(other.data())
+		, m_size(other.size()) {
 	}
 
 	span & operator=(const span & other) noexcept = default;
 
 	iterator begin() const {
-		return iterator(m_beg);
+		return iterator(m_data);
 	}
 
 	iterator end() const {
-		return iterator(m_end);
+		return iterator(m_data + m_size);
 	}
 
 	reference operator[](index_type index) {
-		return m_beg[index];
+		return m_data[index];
 	}
 
 	const_reference operator[](index_type index) const {
-		return m_beg[index];
+		return m_data[index];
 	}
 
 	bool operator==(span const & other) const noexcept {
-		return size() == other.size() && (m_beg == other.m_beg || std::equal(begin(), end(), other.begin()));
+		return size() == other.size() && (m_data == other.m_data || std::equal(begin(), end(), other.begin()));
 	}
 
 	bool operator!=(span const & other) const noexcept {
@@ -131,7 +131,7 @@ public:
 	}
 
 	pointer data() const noexcept {
-		return m_beg;
+		return m_data;
 	}
 
 	bool empty() const noexcept {
@@ -139,7 +139,7 @@ public:
 	}
 
 	index_type size() const noexcept {
-		return static_cast<index_type>(std::distance(m_beg, m_end));
+		return m_size;
 	}
 
 	index_type length() const noexcept {
