@@ -24,6 +24,13 @@ building signed updates
     `openmpt/pkg.win/${BRANCHVERSION}/OpenMPT-${VERSION}-update-publickey.jwk.json`
     .
 
+ *  `openmpt/pkg.win/${BRANCHVERSION}/OpenMPT-${VERSION}-update.json` contains
+    the update information that needs to be copied verbatim to the respective
+    update channel on update.openmpt.org. This file is not signed as it itself
+    is considered only informational and may be augmented with additional
+    information. The files it links that contain actual code and automated
+    update instructions are all signed.
+
  *  If the current user did not yet have a signing key on the local computer, a
     new key will be automatically generated and stored for future re-use in the
     encrypted Windows Key Store. Any such new key should be added to the set of
