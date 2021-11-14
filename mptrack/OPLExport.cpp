@@ -138,7 +138,7 @@ public:
 		if(header.lengthMs > prevOffsetMs)
 			header.lengthBytes += WriteDRODelay(f, header.lengthMs - prevOffsetMs);
 		
-		MPT_ASSERT(mpt::IO::TellWrite(f) == header.lengthBytes + sizeof(header));
+		MPT_ASSERT(mpt::IO::TellWrite(f) == static_cast<mpt::IO::Offset>(header.lengthBytes + sizeof(header)));
 		// AdPlug can read some metadata following the register dump, but DroTrimmer panics if it see that data.
 		// As the metadata is very limited (40 characters per field, unknown 8-bit encoding) we'll leave that feature to the VGM export.
 #if 0
@@ -181,7 +181,7 @@ public:
 		do
 		{
 			std::array<Bytef, mpt::IO::BUFFERSIZE_TINY> buffer;
-			strm.avail_out = buffer.size();
+			strm.avail_out = static_cast<uInt>(buffer.size());
 			strm.next_out = buffer.data();
 			deflate(&strm, Z_FINISH);
 			mpt::IO::WritePartial(f, buffer, buffer.size() - strm.avail_out);
@@ -403,7 +403,7 @@ public:
 			return;
 		CheckRadioButton(IDC_RADIO4, IDC_RADIO5, IDC_RADIO5);
 		BOOL ok = FALSE;
-		const auto newSubSong = std::clamp(GetDlgItemInt(IDC_EDIT1, &ok, FALSE), size_t(1), m_subSongs.size()) - 1;
+		const auto newSubSong = std::clamp(static_cast<size_t>(GetDlgItemInt(IDC_EDIT1, &ok, FALSE)), size_t(1), m_subSongs.size()) - 1;
 		if(m_selectedSong == newSubSong || !ok)
 			return;
 		m_selectedSong = newSubSong;
@@ -471,8 +471,7 @@ public:
 			m_sndFile.m_opl = std::make_unique<OPL>(m_oplLogger);
 
 			auto prevTime = timeGetTime();
-			size_t subsongSamples = 0;
-			CSoundFile::samplecount_t loopStart = 0;
+			CSoundFile::samplecount_t loopStart = 0, subsongSamples = 0;
 			while(!m_abort)
 			{
 				auto count = m_sndFile.ReadOneTick();
