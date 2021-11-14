@@ -16,6 +16,7 @@
 #include "ProgressDialog.h"
 #include "../tracklib/SampleEdit.h"
 #include "../soundlib/OPL.h"
+#include "../soundlib/Tagging.h"
 
 #include <zlib/zlib.h>
 
@@ -162,10 +163,10 @@ public:
 		mpt::IO::Write(f, header);
 	}
 
-	void WriteVGZ(std::ostream &f, const CSoundFile::samplecount_t loopStart, const mpt::ustring &filename) const
+	void WriteVGZ(std::ostream &f, const CSoundFile::samplecount_t loopStart, const FileTags &fileTags, const mpt::ustring &filename) const
 	{
 		std::ostringstream outStream;
-		WriteVGM(outStream, loopStart);
+		WriteVGM(outStream, loopStart, fileTags);
 
 		std::string outData = std::move(outStream.str());
 		z_stream strm{};
@@ -189,7 +190,7 @@ public:
 		deflateEnd(&strm);
 	}
 	
-	void WriteVGM(std::ostream &f, const CSoundFile::samplecount_t loopStart) const
+	void WriteVGM(std::ostream &f, const CSoundFile::samplecount_t loopStart, const FileTags &fileTags) const
 	{
 		VGMHeader header{};
 		memcpy(header.magic, VGMHeader::VgmMagic, 4);
@@ -224,22 +225,26 @@ public:
 
 		header.gd3Offset = static_cast<uint32>(mpt::IO::TellWrite(f) - 0x14);
 
-		std::ostringstream tags;
-		WriteVGMString(tags, mpt::ToWide(m_sndFile.GetCharsetInternal(), m_sndFile.m_songName));
-		WriteVGMString(tags, {});  // Song name JP
-		WriteVGMString(tags, {});  // Game name EN
-		WriteVGMString(tags, {});  // Game name JP
-		WriteVGMString(tags, mpt::ToWide(Version::Current().GetOpenMPTVersionString()));
-		WriteVGMString(tags, {});  // System name JP
-		WriteVGMString(tags, mpt::ToWide(m_sndFile.m_songArtist));
-		WriteVGMString(tags, {});  // Author name JP
-		if(m_sndFile.GetFileHistory().empty())
-			WriteVGMString(tags, {});
-		else
-			WriteVGMString(tags, mpt::ToWide(mpt::String::Replace(m_sndFile.GetFileHistory().back().AsISO8601().substr(0, 10), U_("-"), U_("/"))));
-		WriteVGMString(tags, {});  // Person who created the VGM file
-		WriteVGMString(tags, mpt::ToWide(m_sndFile.GetCharsetInternal(), m_sndFile.m_songMessage.GetFormatted(SongMessage::leLF)));
-		const auto tagsData = std::move(tags.str());
+		const mpt::ustring tags[] =
+		{
+			fileTags.title,
+			{},  // Song name JP
+			{},  // Game name EN
+			{},  // Game name JP
+			Version::Current().GetOpenMPTVersionString(),
+			{},  // System name JP
+			fileTags.artist,
+			{},  // Author name JP
+			fileTags.year,
+			{},  // Person who created the VGM file
+			mpt::String::Replace(fileTags.comments, U_("\r\n"), U_("\n")),
+		};
+		std::ostringstream tagStream;
+		for(const auto &tag : tags)
+		{
+			WriteVGMString(tagStream, mpt::ToWide(tag));
+		}
+		const auto tagsData = std::move(tagStream.str());
 
 		Gd3Header gd3Header{};
 		memcpy(gd3Header.magic, Gd3Header::Gd3Magic, 4);
@@ -357,6 +362,14 @@ public:
 				GetDlgItem(control)->EnableWindow(FALSE);
 		}
 		UpdateSubsongName();
+		OnFormatChanged();
+
+		SetDlgItemText(IDC_EDIT2, mpt::ToWin(m_sndFile.GetCharsetFile(), m_sndFile.GetTitle()).c_str());
+		SetDlgItemText(IDC_EDIT3, mpt::ToWin(m_sndFile.m_songArtist).c_str());
+		if(!m_sndFile.GetFileHistory().empty())
+			SetDlgItemText(IDC_EDIT4, mpt::ToWin(mpt::String::Replace(m_sndFile.GetFileHistory().back().AsISO8601().substr(0, 10), U_("-"), U_("/"))).c_str());
+		SetDlgItemText(IDC_EDIT5, mpt::ToWin(m_sndFile.GetCharsetFile(), m_sndFile.m_songMessage.GetFormatted(SongMessage::leCRLF)).c_str());
+
 		m_locked = false;
 		return TRUE;
 	}
@@ -397,6 +410,13 @@ public:
 
 	void Run() override {}
 
+	afx_msg void OnFormatChanged()
+	{
+		const int controls[] = {IDC_EDIT2, IDC_EDIT3, IDC_EDIT4, IDC_EDIT5};
+		for(int control : controls)
+			GetDlgItem(control)->EnableWindow(GetCheckedRadioButton(IDC_RADIO1, IDC_RADIO3) == static_cast<int>(ExportFormat::DRO) ? FALSE : TRUE);
+	}
+
 	afx_msg void OnSubsongChanged()
 	{
 		if(m_locked)
@@ -430,12 +450,23 @@ public:
 
 	void DoConversion(const mpt::PathString &fileName)
 	{
-		const int controls[] = {IDC_RADIO1, IDC_RADIO2, IDC_RADIO3, IDC_RADIO4, IDC_RADIO5, IDC_EDIT1, IDC_SPIN1, IDOK};
+		const int controls[] = {IDC_RADIO1, IDC_RADIO2, IDC_RADIO3, IDC_RADIO4, IDC_RADIO5, IDC_EDIT1, IDC_EDIT2, IDC_EDIT3, IDC_EDIT4, IDC_EDIT5, IDC_SPIN1, IDOK};
 		for(int control : controls)
 			GetDlgItem(control)->EnableWindow(FALSE);
 
 		BypassInputHandler bih;
 		CMainFrame::GetMainFrame()->StopMod(&m_modDoc);
+
+		CString title, artist, date, notes;
+		GetDlgItemText(IDC_EDIT2, title);
+		GetDlgItemText(IDC_EDIT3, artist);
+		GetDlgItemText(IDC_EDIT4, date);
+		GetDlgItemText(IDC_EDIT5, notes);
+		FileTags fileTags;
+		fileTags.title = mpt::ToUnicode(title);
+		fileTags.artist = mpt::ToUnicode(artist);
+		fileTags.year = mpt::ToUnicode(date);
+		fileTags.comments = mpt::ToUnicode(notes);
 
 		if(IsDlgButtonChecked(IDC_RADIO5))
 			m_subSongs = {m_subSongs[m_selectedSong]};
@@ -512,9 +543,9 @@ public:
 				if(s_format == ExportFormat::DRO)
 					m_oplLogger.WriteDRO(f);
 				else if(s_format == ExportFormat::VGM)
-					m_oplLogger.WriteVGM(f, loopStart);
+					m_oplLogger.WriteVGM(f, loopStart, fileTags);
 				else
-					m_oplLogger.WriteVGZ(f, loopStart, currentFileName.ReplaceExt(P_(".vgm")).GetFullFileName().ToUnicode());
+					m_oplLogger.WriteVGZ(f, loopStart, fileTags, currentFileName.ReplaceExt(P_(".vgm")).GetFullFileName().ToUnicode());
 			} catch(const std::exception &)
 			{
 				Reporting::Error(MPT_UFORMAT("Unable to write to file {}!")(currentFileName));
@@ -539,6 +570,9 @@ OPLExportDlg::ExportFormat OPLExportDlg::s_format = OPLExportDlg::ExportFormat::
 
 BEGIN_MESSAGE_MAP(OPLExportDlg, CDialog)
 	//{{AFX_MSG_MAP(OPLExportDlg)
+	ON_COMMAND(IDC_RADIO1,  &OPLExportDlg::OnFormatChanged)
+	ON_COMMAND(IDC_RADIO2,  &OPLExportDlg::OnFormatChanged)
+	ON_COMMAND(IDC_RADIO3,  &OPLExportDlg::OnFormatChanged)
 	ON_EN_CHANGE(IDC_EDIT1, &OPLExportDlg::OnSubsongChanged)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
