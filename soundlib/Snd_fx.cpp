@@ -3838,7 +3838,7 @@ void CSoundFile::PortamentoUp(CHANNELINDEX nChn, ModCommand::PARAM param, const 
 	// Regular Slide
 	if(!chn.isFirstTick
 	   || (m_PlayState.m_nMusicSpeed == 1 && m_playBehaviour[kSlidesAtSpeed1])
-	   || GetType() == MOD_TYPE_669
+	   || (GetType() & (MOD_TYPE_669 | MOD_TYPE_OKT))
 	   || (GetType() == MOD_TYPE_MED && m_SongFlags[SONG_FASTVOLSLIDES]))
 	{
 		DoFreqSlide(chn, -int(param) * 4);
@@ -3906,7 +3906,7 @@ void CSoundFile::PortamentoDown(CHANNELINDEX nChn, ModCommand::PARAM param, cons
 
 	if(!chn.isFirstTick
 	   || (m_PlayState.m_nMusicSpeed == 1 && m_playBehaviour[kSlidesAtSpeed1])
-	   || GetType() == MOD_TYPE_669
+	   || (GetType() & (MOD_TYPE_669 | MOD_TYPE_OKT))
 	   || (GetType() == MOD_TYPE_MED && m_SongFlags[SONG_FASTVOLSLIDES]))
 	{
 		DoFreqSlide(chn, int(param) * 4);
