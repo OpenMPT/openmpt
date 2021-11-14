@@ -235,7 +235,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 		break;
 	default:
 		m_SndFile.ChangeModTypeTo(m_SndFile.GetBestSaveFormat());
-		m_SndFile.m_SongFlags.set(SONG_IMPORTED);
+		m_ShowSavedialog = true;
 		break;
 	}
 	// If the file was packed in some kind of container (e.g. ZIP, or simply a format like MO3), prompt for new file extension as well
@@ -300,26 +300,6 @@ bool CModDoc::OnSaveDocument(const mpt::PathString &filename, const bool setPath
 		mpt::ofstream &f = sf;
 		if(f)
 		{
-			if(m_SndFile.m_SongFlags[SONG_IMPORTED] && !(GetModType() & (MOD_TYPE_MOD | MOD_TYPE_S3M)))
-			{
-				// Check if any non-supported playback behaviours are enabled due to being imported from a different format
-				const auto supportedBehaviours = m_SndFile.GetSupportedPlaybackBehaviour(GetModType());
-				bool showWarning = true;
-				for(size_t i = 0; i < kMaxPlayBehaviours; i++)
-				{
-					if(m_SndFile.m_playBehaviour[i] && !supportedBehaviours[i])
-					{
-						if(showWarning)
-						{
-							AddToLog(LogWarning, mpt::ToUnicode(mpt::Charset::ASCII, MPT_AFORMAT("Some imported Compatibility Settings that are not supported by the {} format have been disabled. Verify that the module still sounds as intended.")
-								(mpt::ToUpperCaseAscii(m_SndFile.GetModSpecifications().fileExtension))));
-							showWarning = false;
-						}
-						m_SndFile.m_playBehaviour.reset(i);
-					}
-				}
-			}
-
 			f.exceptions(f.exceptions() | std::ios::badbit | std::ios::failbit);
 			FixNullStrings();
 			switch(m_SndFile.GetType())
@@ -338,16 +318,15 @@ bool CModDoc::OnSaveDocument(const mpt::PathString &filename, const bool setPath
 	}
 	EndWaitCursor();
 
-	if(ok)
+	if (ok)
 	{
-		if(setPath)
+		if (setPath)
 		{
 			// Set new path for this file, unless we are saving a template or a copy, in which case we want to keep the old file path.
 			SetPathName(filename);
 		}
 		logcapturer.ShowLog(true);
-		if(TrackerSettings::Instance().rememberSongWindows)
-			SerializeViews();
+		if(TrackerSettings::Instance().rememberSongWindows) SerializeViews();
 	} else
 	{
 		ErrorBox(IDS_ERR_SAVESONG, CMainFrame::GetMainFrame());
