@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.3.35-pre
+
 ### libopenmpt 0.3.34 (2021-11-14)
 
  *  [**Bug**] Fixed various undefined behaviour found with ubsan.
