@@ -9,7 +9,8 @@ is just a high-level summary.
 
  *  [**Bug**] Fixed various undefined behaviour found with ubsan.
 
- *  IMF: Change envelope interpretation to be more like in XM instead of IT
+ *  IMF: Change envelope interpretation to be more like in XM instead of IT and
+    tighten header validation.
  *  MED: Some samples had a ping-pong loop when there should be no loop at all.
  *  MT2: Ignore incorrect drums chunk size in early MT2 files
     (fixes e.g. "A little Rock" by Csumi).
