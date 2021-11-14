@@ -31,6 +31,36 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.29.14.00 (14 November 2021, revision 15948)
+----------------------------------------------
+Tree view
+- [Fix] <js> Soundfonts used in the MIDI library sometimes caused unexpected instruments to be loaded due to the ordering of instruments in the soundfont file (e.g. GeneralUser GS). Now OpenMPT always loads the instrument with the lowest bank number (http://forum.openmpt.org/index.php?topic=6727.0).
+- [Fix] <js> Soundfont drum instruments with more than 128 regions didn't work correctly (http://forum.openmpt.org/index.php?topic=6727.0).
+
+Pattern tab
+- [New] <js> Parameter Editor: Add a new fill option to only change parameters next to notes.
+- [Mod] <js> Parameter Editor: Remember last fill action when reopening the editor.
+
+Sample tab
+- [Imp] <js> Loading drum samples from soundfonts now translates them to be usable at middle-C rather than at their original mapped key.
+
+Playback
+- [Fix] <js> MIDI Macros: When mixing internal and external MIDI messages in the same macro and using a smooth MIDI macro command, the external macros were no longer interpolated correctly.
+
+Other formats
+- [Fix] <js> IMF: Change envelope interpretation to be more like in XM instead of IT (sustain point has no precedence over normal loop, and loops are shortened by one tick).
+- [Fix] <js> MED: Some samples had a ping-pong loop when there should be no loop at all.
+- [Fix] <js> MT2: Ignore incorrect drums chunk size in early MT2 files (fixes e.g. "A little Rock" by Csumi).
+- [Fix] <js> MT2: Work around initial master volume of 0 used in some files that apply a fade-in a the song start using track automation that would stay silent forever otherwise (track automation is currently not supported).
+- [Fix] <js> Gzip archives: Correctly decode files larger than 4 GB (even though it's unlikely that there's anything in there that OpenMPT could read), and reduce memory consumption during decompression.
+
+Misc
+- [Fix] SF2: Fix various issues with complex soundfonts such as GeneralUser GS, e.g. missing support for key ranges in presets.
+
+Third-Party Libraries
+- [Imp] Update mpg123 (v1.29.2)
+
+
 v1.29.13.00 (3 October 2021, revision 15754)
 --------------------------------------------
 Tree view
@@ -45,12 +75,10 @@ Pattern tab
 - [Fix] <js> In the instrument and effect columns, commands assigned to special keys (Num / Caps / Scroll Lock) were executed twice, so e.g. using scroll lock to toggle song follow mode didn't work in these columns.
 
 Sample tab
-- [Fix] <js> Switching from the pattern or instrument tab using a keyboard shortcut now updates the current instrument the same way as when clicking on the sample tab (http://forum.openmpt.org/index.php?topic=6675.0).
 - [Fix] <js> Switching between samples using keyboard shortcuts now updates the last used sample to use in the pattern and instrument editor just like when using the spin buttons or manually entering a sample number.
 
 Instrument tab
 - [Imp] <js> Pressing the Application key on the sample map now opens the context menu (http://bugs.openmpt.org/view.php?id=1501).
-- [Fix] <js> Switching from the pattern or sample tab using a keyboard shortcut now updates the current instrument the same way as when clicking on the instrument tab.  
 - [Fix] <js> Possible crash when releasing a note key that translates to a note above B-9.
 
 Comments tab
@@ -72,7 +100,7 @@ Misc
 - [Fix] <js> SF2: Region panning was not calculated correctly.
 - [Fix] <js> SF2: Stereo sample merging didn't work for many soundfonts because panning values were stored for each envelope (of which there was one per instrument) rather than for each region.
 - [Fix] <js> DLS: The first region of every instrument was not imported in OpenMPT 1.29.12.00 (http://bugs.openmpt.org/view.php?id=1504).
-- [Fix] <js> When enabling the Display.HighResUI option, some file selector dialogs could hang (presumably due to a Windows bug) when hovering the file type dropdown on a mixed-DPI monitor setup. (http://bugs.openmpt.org/view.php?id=1490).
+- [Fix] <js> When enabling the Display.HighResUI option, some file selector dialogs could hang (presumably due to a Windows bug) when hovering the file type dropdown on a mixed-DPI monitor setup (http://bugs.openmpt.org/view.php?id=1490).
 - [Fix] <js> Key Config Dialog: Avoid bogus "Invalid Slot" message box when receiving MIDI CCs while the "Find Hotkey" input field is focussed.
 
 Third-Party Libraries

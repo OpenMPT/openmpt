@@ -7,6 +7,17 @@ is just a high-level summary.
 
 ### libopenmpt 0.5.13-pre
 
+ *  [**Bug**] Fixed various undefined behaviour found with ubsan.
+
+ *  IMF: Change envelope interpretation to be more like in XM instead of IT
+ *  MED: Some samples had a ping-pong loop when there should be no loop at all.
+ *  MT2: Ignore incorrect drums chunk size in early MT2 files
+    (fixes e.g. "A little Rock" by Csumi).
+ *  MT2: Work around initial master volume of 0 used in some files that apply a
+    fade-in a the song start using track automation that would stay silent
+    forever otherwise (track automation is currently not supported).
+ *  OKT: Apply portamento on every tick.
+
  *  mpg123: Update to v1.29.2 (2021-10-23).
 
 ### libopenmpt 0.5.12 (2021-10-04)
