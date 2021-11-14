@@ -2321,15 +2321,46 @@ static CString FormatSongLength(double length)
 void CModDoc::OnEstimateSongLength()
 {
 	CString s = _T("Approximate song length: ");
-	std::vector<GetLengthType> lengths = m_SndFile.GetLength(eNoAdjust, GetLengthTarget(true));
-	double totalLength = 0.0;
-	for(size_t i = 0; i < lengths.size(); i++)
+	const auto subSongs = m_SndFile.GetAllSubSongs();
+	if (subSongs.empty())
 	{
-		double songLength = lengths[i].duration;
-		if(lengths.size() > 1)
+		Reporting::Information(_T("No patterns found!"));
+		return;
+	}
+
+	std::vector<uint32> songsPerSequence(m_SndFile.Order.GetNumSequences(), 0);
+	SEQUENCEINDEX prevSeq = subSongs[0].sequence;
+	for(const auto &song : subSongs)
+	{
+		songsPerSequence[song.sequence]++;
+		if(prevSeq != song.sequence)
+			prevSeq = SEQUENCEINDEX_INVALID;
+	}
+
+	double totalLength = 0.0;
+	uint32 songCount = 0;
+	// If there are multiple sequences, indent their subsongs
+	const TCHAR *indent = (prevSeq == SEQUENCEINDEX_INVALID) ? _T("\t") : _T("");
+	for(const auto &song : subSongs)
+	{
+		double songLength = song.duration;
+		if(subSongs.size() > 1)
 		{
 			totalLength += songLength;
-			s.AppendFormat(_T("\nSong %u, starting at order %u:\t"), i + 1, lengths[i].startOrder);
+			if(prevSeq != song.sequence)
+			{
+				songCount = 0;
+				prevSeq = song.sequence;
+				if(m_SndFile.Order(prevSeq).GetName().empty())
+					s.AppendFormat(_T("\nSequence %u:"), prevSeq + 1u);
+				else
+					s.AppendFormat(_T("\nSequence %u (%s):"), prevSeq + 1u, mpt::ToWin(m_SndFile.Order(prevSeq).GetName()).c_str());
+			}
+			songCount++;
+			if(songsPerSequence[song.sequence] > 1)
+				s.AppendFormat(_T("\n%sSong %u, starting at order %u:\t"), indent, songCount, song.startOrder);
+			else
+				s.AppendChar(_T('\t'));
 		}
 		if(songLength != std::numeric_limits<double>::infinity())
 		{
@@ -2340,7 +2371,7 @@ void CModDoc::OnEstimateSongLength()
 			s += _T("Song too long!");
 		}
 	}
-	if(lengths.size() > 1 && totalLength != std::numeric_limits<double>::infinity())
+	if(subSongs.size() > 1 && totalLength != std::numeric_limits<double>::infinity())
 	{
 		s += _T("\n\nTotal length:\t") + FormatSongLength(totalLength);
 	}
