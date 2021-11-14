@@ -1096,7 +1096,7 @@ protected:
 	void ReverseSampleOffset(ModChannel &chn, ModCommand::PARAM param) const;
 	void NoteCut(CHANNELINDEX nChn, uint32 nTick, bool cutSample);
 	void PatternLoop(PlayState &state, ModChannel &chn, ModCommand::PARAM param) const;
-	bool HandleNextRow(PlayState &state, ModSequence &order, bool honorPatternLoop) const;
+	bool HandleNextRow(PlayState &state, const ModSequence &order, bool honorPatternLoop) const;
 	void ExtendedMODCommands(CHANNELINDEX nChn, ModCommand::PARAM param);
 	void ExtendedS3MCommands(CHANNELINDEX nChn, ModCommand::PARAM param);
 	void ExtendedChannelEffect(ModChannel &chn, uint32 param);

@@ -3467,7 +3467,7 @@ bool CSoundFile::ProcessEffects()
 }
 
 
-bool CSoundFile::HandleNextRow(PlayState &state, ModSequence &order, bool honorPatternLoop) const
+bool CSoundFile::HandleNextRow(PlayState &state, const ModSequence &order, bool honorPatternLoop) const
 {
 	const bool doPatternLoop = (state.m_patLoopRow != ROWINDEX_INVALID);
 	const bool doBreakRow = (state.m_breakRow != ROWINDEX_INVALID);
