@@ -1133,7 +1133,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 		}
 		oldTickDuration = tickDuration;
 
-		breakToRow = HandleNextRow(playState, false);
+		breakToRow = HandleNextRow(playState, orderList, false);
 	}
 
 	// Now advance the sample positions for sample seeking on channels that are still playing
@@ -3460,14 +3460,14 @@ bool CSoundFile::ProcessEffects()
 	// Navigation Effects
 	if(m_SongFlags[SONG_FIRSTTICK])
 	{
-		if(HandleNextRow(m_PlayState, true))
+		if(HandleNextRow(m_PlayState, Order(), true))
 			m_SongFlags.set(SONG_BREAKTOROW);
 	}
 	return true;
 }
 
 
-bool CSoundFile::HandleNextRow(PlayState &state, bool honorPatternLoop) const
+bool CSoundFile::HandleNextRow(PlayState &state, ModSequence &order, bool honorPatternLoop) const
 {
 	const bool doPatternLoop = (state.m_patLoopRow != ROWINDEX_INVALID);
 	const bool doBreakRow = (state.m_breakRow != ROWINDEX_INVALID);
@@ -3490,8 +3490,8 @@ bool CSoundFile::HandleNextRow(PlayState &state, bool honorPatternLoop) const
 			state.m_breakRow = 0;
 		breakToRow = true;
 
-		if(state.m_posJump >= Order().size())
-			state.m_posJump = Order().GetRestartPos();
+		if(state.m_posJump >= order.size())
+			state.m_posJump = order.GetRestartPos();
 
 		// IT / FT2 compatibility: don't reset loop count on pattern break.
 		// Test case: gm-trippy01.it, PatLoop-Break.xm, PatLoop-Weird.xm, PatLoop-Break.mod
@@ -4181,7 +4181,7 @@ void CSoundFile::Panning(ModChannel &chn, uint32 param, PanningType panBits) con
 }
 
 
-void CSoundFile::VolumeSlide(ModChannel &chn, ModCommand::PARAM param)
+void CSoundFile::VolumeSlide(ModChannel &chn, ModCommand::PARAM param) const
 {
 	if (param)
 		chn.nOldVolumeSlide = param;
@@ -4252,7 +4252,7 @@ void CSoundFile::VolumeSlide(ModChannel &chn, ModCommand::PARAM param)
 }
 
 
-void CSoundFile::PanningSlide(ModChannel &chn, ModCommand::PARAM param, bool memory)
+void CSoundFile::PanningSlide(ModChannel &chn, ModCommand::PARAM param, bool memory) const
 {
 	if(memory)
 	{

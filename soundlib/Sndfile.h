@@ -1082,8 +1082,8 @@ protected:
 	void TonePortamento(ModChannel &chn, uint16 param) const;
 	void Vibrato(ModChannel &chn, uint32 param) const;
 	void FineVibrato(ModChannel &chn, uint32 param) const;
-	void VolumeSlide(ModChannel &chn, ModCommand::PARAM param);
-	void PanningSlide(ModChannel &chn, ModCommand::PARAM param, bool memory = true);
+	void VolumeSlide(ModChannel &chn, ModCommand::PARAM param) const;
+	void PanningSlide(ModChannel &chn, ModCommand::PARAM param, bool memory = true) const;
 	void ChannelVolSlide(ModChannel &chn, ModCommand::PARAM param) const;
 	void FineVolumeUp(ModChannel &chn, ModCommand::PARAM param, bool volCol) const;
 	void FineVolumeDown(ModChannel &chn, ModCommand::PARAM param, bool volCol) const;
@@ -1096,7 +1096,7 @@ protected:
 	void ReverseSampleOffset(ModChannel &chn, ModCommand::PARAM param) const;
 	void NoteCut(CHANNELINDEX nChn, uint32 nTick, bool cutSample);
 	void PatternLoop(PlayState &state, ModChannel &chn, ModCommand::PARAM param) const;
-	bool HandleNextRow(PlayState &state, bool honorPatternLoop) const;
+	bool HandleNextRow(PlayState &state, ModSequence &order, bool honorPatternLoop) const;
 	void ExtendedMODCommands(CHANNELINDEX nChn, ModCommand::PARAM param);
 	void ExtendedS3MCommands(CHANNELINDEX nChn, ModCommand::PARAM param);
 	void ExtendedChannelEffect(ModChannel &chn, uint32 param);
