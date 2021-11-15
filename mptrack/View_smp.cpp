@@ -372,18 +372,23 @@ BOOL CViewSample::OnScrollBy(CSize sizeScroll, BOOL bDoScroll)
 void CViewSample::SetCurrentSample(SAMPLEINDEX nSmp)
 {
 	CModDoc *pModDoc = GetDocument();
-
-	if (!pModDoc) return;
-	if ((nSmp < 1) || (nSmp > pModDoc->GetNumSamples())) return;
+	if(!pModDoc)
+		return;
+	if(nSmp < 1 || nSmp > pModDoc->GetNumSamples())
+		return;
 	pModDoc->SetNotifications(Notification::Sample, nSmp);
 	pModDoc->SetFollowWnd(m_hWnd);
-	if (nSmp == m_nSample) return;
+	if(nSmp == m_nSample)
+		return;
 	m_dwBeginSel = m_dwEndSel = 0;
 	m_dwStatus.reset(SMPSTATUS_DRAWING);
-	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	if (pMainFrm) pMainFrm->SetInfoText(_T(""));
+	if(CMainFrame* pMainFrm = CMainFrame::GetMainFrame(); pMainFrm)
+		pMainFrm->SetInfoText(_T(""));
+	const bool wasOPL = IsOPLInstrument();
 	m_nSample = nSmp;
 	m_dwNotifyPos.fill(Notification::PosInvalid);
+	if(!wasOPL && IsOPLInstrument())
+		SetScrollPos(SB_HORZ, 0);
 	UpdateOPLEditor();
 	UpdateScrollSize();
 	UpdateNcButtonState();
