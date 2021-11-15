@@ -576,7 +576,10 @@ BOOL CCtrlSamples::GetToolTipText(UINT uId, LPTSTR pszText)
 		case IDC_EDIT7:
 		case IDC_EDIT8:
 			// Volume to dB
-			_tcscpy(pszText, CModDoc::LinearToDecibels(val, 64.0));
+			if(IsOPLInstrument())
+				_tcscpy(pszText, (mpt::tfmt::fix((static_cast<int32>(val) - 64) * 0.75, 2) + _T(" dB")).c_str());
+			else
+				_tcscpy(pszText, CModDoc::LinearToDecibels(val, 64.0));
 			return TRUE;
 
 		case IDC_EDIT9:
