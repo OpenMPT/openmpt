@@ -241,6 +241,6 @@ cd bin/dist-autotools
 rm -rf libopenmpt
 mkdir -p libopenmpt/src.autotools/$MPT_LIBOPENMPT_VERSION/
 cp *.tar.gz libopenmpt/src.autotools/$MPT_LIBOPENMPT_VERSION/
-tar -cvf ../dist-autotools.tar libopenmpt
+tar -cv --numeric-owner --owner=0 --group=0 -f ../dist-autotools.tar libopenmpt
 cd ../..
 
