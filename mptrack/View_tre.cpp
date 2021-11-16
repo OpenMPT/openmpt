@@ -754,11 +754,18 @@ void CModTree::RefreshDlsBanks()
 					}
 				}
 				// Sort items
-				if(hDrums != NULL)
+				for(auto &b : banks)
+				{
+					tvs.hParent = b.second;
+					tvs.lpfnCompare = ModTreeInsLibCompareProc;
+					tvs.lParam = reinterpret_cast<LPARAM>(this);
+					SortChildrenCB(&tvs);
+				}
+				if(hDrums)
 				{
 					tvs.hParent = hDrums;
 					tvs.lpfnCompare = ModTreeInsLibCompareProc;
-					tvs.lParam = (LPARAM)this;
+					tvs.lParam = reinterpret_cast<LPARAM>(this);
 					SortChildrenCB(&tvs);
 				}
 			}
