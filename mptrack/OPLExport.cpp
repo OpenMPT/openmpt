@@ -1,7 +1,7 @@
 /*
  * OPLExport.cpp
  * -------------
- * Purpose: Export of OPL register dumps as VGM or DRO files
+ * Purpose: Export of OPL register dumps as VGM/VGZ or DRO files
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
@@ -14,7 +14,6 @@
 #include "Mainfrm.h"
 #include "Moddoc.h"
 #include "ProgressDialog.h"
-#include "../tracklib/SampleEdit.h"
 #include "../soundlib/OPL.h"
 #include "../soundlib/Tagging.h"
 
@@ -57,7 +56,7 @@ struct VGMHeader
 	uint32le vgmDataOffset;
 	uint32le variousChipClocks[9];
 	uint32le ymf262clock;  // 14318180
-	uint32le evenMoreChipCLocks[7];
+	uint32le evenMoreChipClocks[7];
 	uint8    volumeModifier;
 	uint8    reserved[131];  // Various other fields we're not interested in
 };
@@ -195,7 +194,7 @@ public:
 		VGMHeader header{};
 		memcpy(header.magic, VGMHeader::VgmMagic, 4);
 		header.version = 0x160;
-		header.vgmDataOffset = sizeof(header) - 0x34;
+		header.vgmDataOffset = sizeof(header) - offsetof(VGMHeader, vgmDataOffset);
 		header.ymf262clock = 14318180;
 		header.totalNumSamples = static_cast<uint32>(m_sndFile.GetTotalSampleCount());
 		if(loopStart > 0)
@@ -223,7 +222,7 @@ public:
 		WriteVGMDelay(f, m_sndFile.GetTotalSampleCount() - prevOffset);
 		mpt::IO::Write(f, mpt::as_byte(0x66));
 
-		header.gd3Offset = static_cast<uint32>(mpt::IO::TellWrite(f) - 0x14);
+		header.gd3Offset = static_cast<uint32>(mpt::IO::TellWrite(f) - offsetof(VGMHeader, gd3Offset));
 
 		const mpt::ustring tags[] =
 		{
@@ -253,7 +252,7 @@ public:
 		mpt::IO::Write(f, gd3Header);
 		mpt::IO::WriteRaw(f, mpt::as_span(tagsData));
 
-		header.eofOffset = static_cast<uint32>(mpt::IO::TellWrite(f) - 4);
+		header.eofOffset = static_cast<uint32>(mpt::IO::TellWrite(f) - offsetof(VGMHeader, eofOffset));
 
 		mpt::IO::SeekAbsolute(f, 0);
 		mpt::IO::Write(f, header);
@@ -284,9 +283,21 @@ private:
 	{
 		while(delay)
 		{
-			uint32 subDelay = std::min(delay, CSoundFile::samplecount_t(65535));
-			mpt::IO::Write(f, mpt::as_byte(0x61));
-			mpt::IO::WriteIntLE(f, static_cast<uint16>(subDelay));
+			uint16 subDelay = mpt::saturate_cast<uint16>(delay);
+			if(subDelay <= 16)
+			{
+				mpt::IO::Write(f, mpt::as_byte(0x6F + subDelay));
+			} else if(subDelay == 735)
+			{
+				mpt::IO::Write(f, mpt::as_byte(0x62));  // 1/60th of a second
+			} else if(subDelay == 882)
+			{
+				mpt::IO::Write(f, mpt::as_byte(0x63));  // 1/50th of a second
+			} else
+			{
+				mpt::IO::Write(f, mpt::as_byte(0x61));
+				mpt::IO::WriteIntLE(f, subDelay);
+			}
 			delay -= subDelay;
 		}
 	}
