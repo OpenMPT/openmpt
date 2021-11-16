@@ -62,14 +62,28 @@ public:
 	{
 		return;
 	}
+	PathString(PathString && other) noexcept
+		: path(std::move(other.path))
+	{
+		return;
+	}
 	PathString & assign(const PathString & other)
 	{
 		path = other.path;
 		return *this;
 	}
+	PathString & assign(PathString && other) noexcept
+	{
+		path = std::move(other.path);
+		return *this;
+	}
 	PathString & operator = (const PathString & other)
 	{
 		return assign(other);
+	}
+	PathString &operator = (PathString && other) noexcept
+	{
+		return assign(std::move(other));
 	}
 	PathString & append(const PathString & other)
 	{
