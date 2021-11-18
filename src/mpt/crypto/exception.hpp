@@ -7,9 +7,11 @@
 
 #include "mpt/base/detect.hpp"
 #include "mpt/base/namespace.hpp"
+#include "mpt/format/simple.hpp"
 #include "mpt/out_of_memory/out_of_memory.hpp"
 
 #include <stdexcept>
+#include <string>
 
 #if MPT_OS_WINDOWS
 #include <windows.h>  // must be before wincrypt.h for clang-cl
@@ -35,7 +37,7 @@ private:
 
 public:
 	exception(NTSTATUS status)
-		: std::runtime_error("crypto error")
+		: std::runtime_error(std::string("crypto error: NTSTATUS ") + mpt::format<std::string>::hex0<8>(static_cast<DWORD>(status)))
 		, m_Status(status) {
 		return;
 	}
@@ -54,7 +56,7 @@ private:
 
 public:
 	security_exception(SECURITY_STATUS status)
-		: std::runtime_error("crypto error")
+		: std::runtime_error(std::string("crypto error: SECURITY_STATUS ") + mpt::format<std::string>::hex0<8>(static_cast<DWORD>(status)))
 		, m_Status(status) {
 		return;
 	}
