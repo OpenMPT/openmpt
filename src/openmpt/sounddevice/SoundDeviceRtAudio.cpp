@@ -589,10 +589,12 @@ unsigned int CRtAudioDevice::GetDevice(SoundDevice::Info info)
 
 std::vector<SoundDevice::Info> CRtAudioDevice::EnumerateDevices(ILogger &logger, SoundDevice::SysInfo sysInfo)
 {
+#if 0
 	auto GetLogger = [&]() -> ILogger &
 	{
 		return logger;
 	};
+#endif
 	std::vector<SoundDevice::Info> devices;
 	std::vector<RtAudio::Api> apis;
 	RtAudio::getCompiledApi(apis);

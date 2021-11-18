@@ -20,7 +20,14 @@
 #pragma warning(push)
 #pragma warning(disable : 4244)  // conversion from 'int' to 'unsigned char', possible loss of data
 #endif
+#if MPT_COMPILER_GCC
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-copy"
+#endif
 #include <RtAudio.h>
+#if MPT_COMPILER_GCC
+#pragma GCC diagnostic pop
+#endif
 #if MPT_COMPILER_MSVC
 #pragma warning(pop)
 #endif
