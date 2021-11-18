@@ -594,6 +594,8 @@ std::vector<SoundDevice::Info> CRtAudioDevice::EnumerateDevices(ILogger &logger,
 	{
 		return logger;
 	};
+#else
+	MPT_UNUSED(logger);
 #endif
 	std::vector<SoundDevice::Info> devices;
 	std::vector<RtAudio::Api> apis;
