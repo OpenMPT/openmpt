@@ -65,7 +65,7 @@ inline mpt::osinfo::osclass get_class() {
 	if (uname(&uname_result) != 0) {
 		return mpt::osinfo::osclass::Unknown;
 	}
-	return mpt::osinfo::get_class_from_sysname(mpt::String::ReadAutoBuf(uname_result.sysname));
+	return mpt::osinfo::get_class_from_sysname(mpt::ReadAutoBuf(uname_result.sysname));
 #endif // MPT_OS_WINDOWS
 }
 
