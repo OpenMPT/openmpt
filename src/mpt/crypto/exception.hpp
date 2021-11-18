@@ -42,6 +42,12 @@ public:
 		return;
 	}
 
+	exception(NTSTATUS status, const std::string & function)
+		: std::runtime_error(std::string("crypto error: ") + function + std::string(" NTSTATUS ") + mpt::format<std::string>::hex0<8>(static_cast<DWORD>(status)))
+		, m_Status(status) {
+		return;
+	}
+
 public:
 	NTSTATUS code() const noexcept {
 		return m_Status;
@@ -57,6 +63,12 @@ private:
 public:
 	security_exception(SECURITY_STATUS status)
 		: std::runtime_error(std::string("crypto error: SECURITY_STATUS ") + mpt::format<std::string>::hex0<8>(static_cast<DWORD>(status)))
+		, m_Status(status) {
+		return;
+	}
+
+	security_exception(SECURITY_STATUS status, const std::string & function)
+		: std::runtime_error(std::string("crypto error: ") + function + std::string(" SECURITY_STATUS ") + mpt::format<std::string>::hex0<8>(static_cast<DWORD>(status)))
 		, m_Status(status) {
 		return;
 	}
@@ -79,6 +91,17 @@ inline void CheckNTSTATUS(NTSTATUS status) {
 }
 
 
+inline void CheckNTSTATUS(NTSTATUS status, const std::string & function) {
+	if (status >= 0) {
+		return;
+	} else if (static_cast<DWORD>(status) == STATUS_NO_MEMORY) {
+		mpt::throw_out_of_memory();
+	} else {
+		throw exception(status, function);
+	}
+}
+
+
 inline void CheckSECURITY_STATUS(SECURITY_STATUS status) {
 	if (status == ERROR_SUCCESS) {
 		return;
@@ -88,6 +111,18 @@ inline void CheckSECURITY_STATUS(SECURITY_STATUS status) {
 		throw security_exception(status);
 	}
 }
+
+
+inline void CheckSECURITY_STATUS(SECURITY_STATUS status, const std::string & function) {
+	if (status == ERROR_SUCCESS) {
+		return;
+	} else if (status == NTE_NO_MEMORY) {
+		mpt::throw_out_of_memory();
+	} else {
+		throw security_exception(status, function);
+	}
+}
+
 
 #endif // MPT_OS_WINDOWS
 

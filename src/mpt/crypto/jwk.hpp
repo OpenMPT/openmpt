@@ -75,7 +75,7 @@ public:
 	keystore(domain d)
 		: ProvDomain(d) {
 		try {
-			CheckSECURITY_STATUS(NCryptOpenStorageProvider(&hProv, MS_KEY_STORAGE_PROVIDER, 0));
+			CheckSECURITY_STATUS(NCryptOpenStorageProvider(&hProv, MS_KEY_STORAGE_PROVIDER, 0), "NCryptOpenStorageProvider");
 		} catch (...) {
 			cleanup();
 			throw;
@@ -251,9 +251,9 @@ public:
 		public_key(const public_key_data & data) {
 			try {
 				name = data.name;
-				CheckNTSTATUS(BCryptOpenAlgorithmProvider(&hSignAlg, BCRYPT_RSA_ALGORITHM, NULL, 0));
+				CheckNTSTATUS(BCryptOpenAlgorithmProvider(&hSignAlg, BCRYPT_RSA_ALGORITHM, NULL, 0), "BCryptOpenAlgorithmProvider");
 				std::vector<std::byte> blob = data.as_cng_blob();
-				CheckNTSTATUS(BCryptImportKeyPair(hSignAlg, NULL, BCRYPT_RSAPUBLIC_BLOB, &hKey, mpt::byte_cast<UCHAR *>(blob.data()), mpt::saturate_cast<ULONG>(blob.size()), 0));
+				CheckNTSTATUS(BCryptImportKeyPair(hSignAlg, NULL, BCRYPT_RSAPUBLIC_BLOB, &hKey, mpt::byte_cast<UCHAR *>(blob.data()), mpt::saturate_cast<ULONG>(blob.size()), 0), "BCryptImportKeyPair");
 			} catch (...) {
 				cleanup();
 				throw;
@@ -289,9 +289,9 @@ public:
 
 		public_key_data get_public_key_data() const {
 			DWORD bytes = 0;
-			CheckNTSTATUS(BCryptExportKey(hKey, NULL, BCRYPT_RSAPUBLIC_BLOB, NULL, 0, &bytes, 0));
+			CheckNTSTATUS(BCryptExportKey(hKey, NULL, BCRYPT_RSAPUBLIC_BLOB, NULL, 0, &bytes, 0), "BCryptExportKey");
 			std::vector<std::byte> blob(bytes);
-			CheckNTSTATUS(BCryptExportKey(hKey, NULL, BCRYPT_RSAPUBLIC_BLOB, mpt::byte_cast<BYTE *>(blob.data()), mpt::saturate_cast<DWORD>(blob.size()), &bytes, 0));
+			CheckNTSTATUS(BCryptExportKey(hKey, NULL, BCRYPT_RSAPUBLIC_BLOB, mpt::byte_cast<BYTE *>(blob.data()), mpt::saturate_cast<DWORD>(blob.size()), &bytes, 0), "BCryptExportKey");
 			return public_key_data::from_cng_blob(name, blob);
 		}
 
@@ -306,7 +306,7 @@ public:
 			if (result == 0xC000A000 /*STATUS_INVALID_SIGNATURE*/) {
 				throw signature_verification_failed();
 			}
-			CheckNTSTATUS(result);
+			CheckNTSTATUS(result, "BCryptVerifySignature");
 			throw signature_verification_failed();
 		}
 
@@ -420,7 +420,7 @@ public:
 
 		managed_private_key(keystore & keystore) {
 			try {
-				CheckSECURITY_STATUS(NCryptCreatePersistedKey(keystore, &hKey, BCRYPT_RSA_ALGORITHM, NULL, 0, 0));
+				CheckSECURITY_STATUS(NCryptCreatePersistedKey(keystore, &hKey, BCRYPT_RSA_ALGORITHM, NULL, 0, 0), "NCryptCreatePersistedKey");
 			} catch (...) {
 				cleanup();
 				throw;
@@ -432,12 +432,12 @@ public:
 			try {
 				SECURITY_STATUS openKeyStatus = NCryptOpenKey(keystore, &hKey, mpt::transcode<std::wstring>(name).c_str(), 0, (keystore.store_domain() == keystore::domain::system ? NCRYPT_MACHINE_KEY_FLAG : 0));
 				if (openKeyStatus == NTE_BAD_KEYSET) {
-					CheckSECURITY_STATUS(NCryptCreatePersistedKey(keystore, &hKey, BCRYPT_RSA_ALGORITHM, mpt::transcode<std::wstring>(name).c_str(), 0, (keystore.store_domain() == keystore::domain::system ? NCRYPT_MACHINE_KEY_FLAG : 0)));
+					CheckSECURITY_STATUS(NCryptCreatePersistedKey(keystore, &hKey, BCRYPT_RSA_ALGORITHM, mpt::transcode<std::wstring>(name).c_str(), 0, (keystore.store_domain() == keystore::domain::system ? NCRYPT_MACHINE_KEY_FLAG : 0)), "NCryptCreatePersistedKey");
 					DWORD length = mpt::saturate_cast<DWORD>(keysize);
-					CheckSECURITY_STATUS(NCryptSetProperty(hKey, NCRYPT_LENGTH_PROPERTY, (PBYTE)&length, mpt::saturate_cast<DWORD>(sizeof(DWORD)), 0));
-					CheckSECURITY_STATUS(NCryptFinalizeKey(hKey, 0));
+					CheckSECURITY_STATUS(NCryptSetProperty(hKey, NCRYPT_LENGTH_PROPERTY, (PBYTE)&length, mpt::saturate_cast<DWORD>(sizeof(DWORD)), 0), "NCryptSetProperty");
+					CheckSECURITY_STATUS(NCryptFinalizeKey(hKey, 0), "NCryptFinalizeKey");
 				} else {
-					CheckSECURITY_STATUS(openKeyStatus);
+					CheckSECURITY_STATUS(openKeyStatus, "NCryptOpenKey");
 				}
 			} catch (...) {
 				cleanup();
@@ -450,7 +450,7 @@ public:
 		}
 
 		void destroy() {
-			CheckSECURITY_STATUS(NCryptDeleteKey(hKey, 0));
+			CheckSECURITY_STATUS(NCryptDeleteKey(hKey, 0), "NCryptDeleteKey");
 			name = mpt::ustring();
 			hKey = NULL;
 		}
@@ -458,9 +458,9 @@ public:
 	public:
 		public_key_data get_public_key_data() const {
 			DWORD bytes = 0;
-			CheckSECURITY_STATUS(NCryptExportKey(hKey, NULL, BCRYPT_RSAPUBLIC_BLOB, NULL, NULL, 0, &bytes, 0));
+			CheckSECURITY_STATUS(NCryptExportKey(hKey, NULL, BCRYPT_RSAPUBLIC_BLOB, NULL, NULL, 0, &bytes, 0), "NCryptExportKey");
 			std::vector<std::byte> blob(bytes);
-			CheckSECURITY_STATUS(NCryptExportKey(hKey, NULL, BCRYPT_RSAPUBLIC_BLOB, NULL, mpt::byte_cast<BYTE *>(blob.data()), mpt::saturate_cast<DWORD>(blob.size()), &bytes, 0));
+			CheckSECURITY_STATUS(NCryptExportKey(hKey, NULL, BCRYPT_RSAPUBLIC_BLOB, NULL, mpt::byte_cast<BYTE *>(blob.data()), mpt::saturate_cast<DWORD>(blob.size()), &bytes, 0), "NCryptExportKey");
 			return public_key_data::from_cng_blob(name, blob);
 		}
 
@@ -469,9 +469,9 @@ public:
 			paddinginfo.pszAlgId = hash_type::traits::bcrypt_name;
 			paddinginfo.cbSalt = mpt::saturate_cast<ULONG>(hash_type::traits::output_bytes);
 			DWORD bytes = 0;
-			CheckSECURITY_STATUS(NCryptSignHash(hKey, &paddinginfo, mpt::byte_cast<BYTE *>(hash.data()), mpt::saturate_cast<DWORD>(hash.size()), NULL, 0, &bytes, BCRYPT_PAD_PSS));
+			CheckSECURITY_STATUS(NCryptSignHash(hKey, &paddinginfo, mpt::byte_cast<BYTE *>(hash.data()), mpt::saturate_cast<DWORD>(hash.size()), NULL, 0, &bytes, BCRYPT_PAD_PSS), "NCryptSignHash");
 			std::vector<std::byte> result(bytes);
-			CheckSECURITY_STATUS(NCryptSignHash(hKey, &paddinginfo, mpt::byte_cast<BYTE *>(hash.data()), mpt::saturate_cast<DWORD>(hash.size()), mpt::byte_cast<BYTE *>(result.data()), mpt::saturate_cast<DWORD>(result.size()), &bytes, BCRYPT_PAD_PSS));
+			CheckSECURITY_STATUS(NCryptSignHash(hKey, &paddinginfo, mpt::byte_cast<BYTE *>(hash.data()), mpt::saturate_cast<DWORD>(hash.size()), mpt::byte_cast<BYTE *>(result.data()), mpt::saturate_cast<DWORD>(result.size()), &bytes, BCRYPT_PAD_PSS), "NCryptSignHash");
 			return result;
 		}
 

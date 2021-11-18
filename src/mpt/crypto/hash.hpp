@@ -78,13 +78,13 @@ private:
 
 private:
 	void init() {
-		CheckNTSTATUS(BCryptOpenAlgorithmProvider(&hAlg, traits::bcrypt_name, NULL, 0));
+		CheckNTSTATUS(BCryptOpenAlgorithmProvider(&hAlg, traits::bcrypt_name, NULL, 0), "BCryptOpenAlgorithmProvider");
 		if (!hAlg) {
 			throw exception(0);
 		}
 		DWORD hashStateSize = 0;
 		DWORD hashStateSizeSize = 0;
-		CheckNTSTATUS(BCryptGetProperty(hAlg, BCRYPT_OBJECT_LENGTH, (PBYTE)&hashStateSize, sizeof(DWORD), &hashStateSizeSize, 0));
+		CheckNTSTATUS(BCryptGetProperty(hAlg, BCRYPT_OBJECT_LENGTH, (PBYTE)&hashStateSize, sizeof(DWORD), &hashStateSizeSize, 0), "BCryptGetProperty");
 		if (hashStateSizeSize != sizeof(DWORD)) {
 			throw exception(0);
 		}
@@ -94,7 +94,7 @@ private:
 		hashState.resize(hashStateSize);
 		DWORD hashResultSize = 0;
 		DWORD hashResultSizeSize = 0;
-		CheckNTSTATUS(BCryptGetProperty(hAlg, BCRYPT_HASH_LENGTH, (PBYTE)&hashResultSize, sizeof(DWORD), &hashResultSizeSize, 0));
+		CheckNTSTATUS(BCryptGetProperty(hAlg, BCRYPT_HASH_LENGTH, (PBYTE)&hashResultSize, sizeof(DWORD), &hashResultSizeSize, 0), "BCryptGetProperty");
 		if (hashResultSizeSize != sizeof(DWORD)) {
 			throw exception(0);
 		}
@@ -105,7 +105,7 @@ private:
 			throw exception(0);
 		}
 		hashResult.resize(hashResultSize);
-		CheckNTSTATUS(BCryptCreateHash(hAlg, &hHash, hashState.data(), hashStateSize, NULL, 0, 0));
+		CheckNTSTATUS(BCryptCreateHash(hAlg, &hHash, hashState.data(), hashStateSize, NULL, 0, 0), "BCryptCreateHash");
 		if (!hHash) {
 			throw exception(0);
 		}
@@ -143,13 +143,13 @@ public:
 
 public:
 	hash_impl & process(mpt::const_byte_span data) {
-		CheckNTSTATUS(BCryptHashData(hHash, const_cast<UCHAR *>(mpt::byte_cast<const UCHAR *>(data.data())), mpt::saturate_cast<ULONG>(data.size()), 0));
+		CheckNTSTATUS(BCryptHashData(hHash, const_cast<UCHAR *>(mpt::byte_cast<const UCHAR *>(data.data())), mpt::saturate_cast<ULONG>(data.size()), 0), "BCryptHashData");
 		return *this;
 	}
 
 	result_type result() {
 		result_type res = mpt::init_array<std::byte, traits::output_bytes>(std::byte{0});
-		CheckNTSTATUS(BCryptFinishHash(hHash, hashResult.data(), mpt::saturate_cast<ULONG>(hashResult.size()), 0));
+		CheckNTSTATUS(BCryptFinishHash(hHash, hashResult.data(), mpt::saturate_cast<ULONG>(hashResult.size()), 0), "BCryptFinishHash");
 		assert(hashResult.size() == mpt::extent<result_type>());
 		std::transform(hashResult.begin(), hashResult.end(), res.begin(), [](BYTE b) { return mpt::as_byte(b); });
 		return res;
