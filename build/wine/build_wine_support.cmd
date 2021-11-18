@@ -21,6 +21,7 @@ del /f /q "%OUTDIR%\openmpt-wine-support.zip"
  include\nlohmann-json\include\nlohmann\detail\input\*.hpp ^
  include\nlohmann-json\include\nlohmann\detail\iterators\*.hpp ^
  include\nlohmann-json\include\nlohmann\detail\meta\*.hpp ^
+ include\nlohmann-json\include\nlohmann\detail\meta\call_std\*.hpp ^
  include\nlohmann-json\include\nlohmann\detail\output\*.hpp ^
  include\nlohmann-json\include\nlohmann\thirdparty\hedley\*.hpp ^
  include\rtkit\rtkit.c ^
