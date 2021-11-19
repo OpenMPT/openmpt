@@ -371,9 +371,11 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 			m_playBehaviour.reset(kFT2PortaNoNote);
 			// Fix arpeggios in kragle_-_happy_day.xm
 			m_playBehaviour.reset(kFT2Arpeggio);
-		} else if(!memcmp(fileHeader.trackerName, "Skale Tracker\0", 14))
+		} else if(!memcmp(fileHeader.trackerName, "Skale Tracker\0", 14) || !memcmp(fileHeader.trackerName, "Sk@le Tracker\0", 14))
 		{
 			m_playBehaviour.reset(kFT2OffsetOutOfRange);
+			// Fix arpeggios in KAPTENFL.XM
+			m_playBehaviour.reset(kFT2Arpeggio);
 		} else if(!memcmp(fileHeader.trackerName, "*Converted ", 11))
 		{
 			madeWith = verDigiTrakker;
