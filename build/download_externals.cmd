@@ -76,7 +76,7 @@ call build\scriptlib\unpack.cmd "build\tools\python3" "build\externals\python-3.
 call :killdir "build\tools\innounp"   || goto error
 call :killdir "build\tools\innosetup" || goto error
 call build\scriptlib\unpack.cmd "build\tools\innounp" "build\externals\innounp050.rar" "." || goto error
-build\tools\innounp\innounp.exe -x -dbuild\tools\innosetup "build\externals\innosetup-6.1.2.exe" || goto error
+build\tools\innounp\innounp.exe -x -dbuild\tools\innosetup "build\externals\innosetup-6.2.0.exe" || goto error
 
 call build\scriptlib\unpack.cmd "packageTemplate\ExampleSongs" "build\externals\example_songs_ompt_1_29.7z" "." || goto error
 
