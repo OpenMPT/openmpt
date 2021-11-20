@@ -1955,13 +1955,13 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, ui
 				ExtractSample(sndFile, nSmp, nIns, nRgn, transpose);
 				extractedSamples.insert(rgn.nWaveLink);
 			}
-		} else if(duplicateRegion && sndFile.GetSample(nSmp).GetNumChannels() == 1)
+		} else if(duplicateRegion && sndFile.GetSample(RgnToSmp[dupRegion]).GetNumChannels() == 1)
 		{
 			// Try to combine stereo samples
 			const uint16 pan1 = GetPanning(nIns, nRgn), pan2 = GetPanning(nIns, dupRegion);
 			if((pan1 < 16 && pan2 >= 240) || (pan2 < 16 && pan1 >= 240))
 			{
-				ModSample &sample = sndFile.GetSample(nSmp);
+				ModSample &sample = sndFile.GetSample(RgnToSmp[dupRegion]);
 				ModSample sampleCopy = sample;
 				sampleCopy.pData.pSample = nullptr;
 				sampleCopy.uFlags.set(CHN_16BIT | CHN_STEREO);
@@ -1998,9 +1998,9 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, ui
 						else
 							CopySample<SC::ConversionChain<SC::Convert<int16, int8>, SC::DecodeIdentity<int8>>>(pDest, copyLength, 2, sample.sample8(), sample.GetSampleSizeInBytes(), sample.GetNumChannels());
 					}
-				} else if(dwLen >= sampleCopy.nLength * 2u)
+				} else
 				{
-					SmpLength len = sampleCopy.nLength;
+					SmpLength len = std::min(dwLen / 2u, sampleCopy.nLength);
 					const int16 *src = reinterpret_cast<int16 *>(pWaveForm.data());
 					int16 *dst = sampleCopy.sample16() + offsetNew;
 					CopySample<SC::ConversionChain<SC::Convert<int16, int16>, SC::DecodeIdentity<int16>>>(dst, len, 2, src, pWaveForm.size(), 1);
