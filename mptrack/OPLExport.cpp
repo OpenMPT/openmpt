@@ -97,6 +97,15 @@ public:
 		m_prevRegisters.clear();
 	}
 
+	void DumpRegisterState()
+	{
+		for(const auto [reg, value] : m_prevRegisters)
+		{
+			if((reg & 0xFF) >= 0x20)
+				m_registerDump.push_back({m_sndFile.GetTotalSampleCount(), static_cast<uint8>(reg & 0xFF), static_cast<uint8>(reg >> 8), value});
+		}
+	}
+
 	void WriteDRO(std::ostream &f) const
 	{
 		DROHeaderV1 header{};
@@ -526,6 +535,7 @@ public:
 				   && (m_sndFile.m_PlayState.m_nCurrentOrder != 0 || m_sndFile.m_PlayState.m_nRow != 0))
 				{
 					loopStart = subsongSamples;
+					m_oplLogger.DumpRegisterState();  // Make sure all registers are in the correct state when looping back
 				}
 
 				totalSamples += count;
