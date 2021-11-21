@@ -197,7 +197,7 @@ public:
 		header.vgmDataOffset = sizeof(header) - offsetof(VGMHeader, vgmDataOffset);
 		header.ymf262clock = 14318180;
 		header.totalNumSamples = static_cast<uint32>(m_sndFile.GetTotalSampleCount());
-		if(loopStart > 0)
+		if(loopStart != Util::MaxValueOfType(loopStart))
 			header.loopNumSamples = static_cast<uint32>(m_sndFile.GetTotalSampleCount() - loopStart);
 
 		mpt::IO::Write(f, header);
@@ -468,16 +468,18 @@ public:
 		BypassInputHandler bih;
 		CMainFrame::GetMainFrame()->StopMod(&m_modDoc);
 
-		CString title, artist, date, notes;
-		GetDlgItemText(IDC_EDIT2, title);
-		GetDlgItemText(IDC_EDIT3, artist);
-		GetDlgItemText(IDC_EDIT4, date);
-		GetDlgItemText(IDC_EDIT5, notes);
 		FileTags fileTags;
-		fileTags.title = mpt::ToUnicode(title);
-		fileTags.artist = mpt::ToUnicode(artist);
-		fileTags.year = mpt::ToUnicode(date);
-		fileTags.comments = mpt::ToUnicode(notes);
+		{
+			CString title, artist, date, notes;
+			GetDlgItemText(IDC_EDIT2, title);
+			GetDlgItemText(IDC_EDIT3, artist);
+			GetDlgItemText(IDC_EDIT4, date);
+			GetDlgItemText(IDC_EDIT5, notes);
+			fileTags.title = mpt::ToUnicode(title);
+			fileTags.artist = mpt::ToUnicode(artist);
+			fileTags.year = mpt::ToUnicode(date);
+			fileTags.comments = mpt::ToUnicode(notes);
+		}
 
 		if(IsDlgButtonChecked(IDC_RADIO5))
 			m_subSongs = {m_subSongs[m_selectedSong]};
@@ -513,7 +515,7 @@ public:
 			m_sndFile.m_opl = std::make_unique<OPL>(m_oplLogger);
 
 			auto prevTime = timeGetTime();
-			CSoundFile::samplecount_t loopStart = 0, subsongSamples = 0;
+			CSoundFile::samplecount_t loopStart = std::numeric_limits<CSoundFile::samplecount_t>::max(), subsongSamples = 0;
 			while(!m_abort)
 			{
 				auto count = m_sndFile.ReadOneTick();
@@ -540,6 +542,9 @@ public:
 					ProcessMessages();
 				}
 			}
+
+			if(m_sndFile.m_SongFlags[SONG_BREAKTOROW] && loopStart == Util::MaxValueOfType(loopStart))
+				loopStart = 0;
 
 			mpt::PathString currentFileName = fileName;
 			if(m_subSongs.size() > 1)
