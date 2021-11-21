@@ -91,6 +91,9 @@ public:
 	void MoveChannel(CHANNELINDEX from, CHANNELINDEX to);
 	void Reset();
 
+	// A list of all registers for channels and operators
+	static std::vector<uint16> AllVoiceRegisters();
+
 protected:
 	static uint16 ChannelToRegister(uint8 oplCh);
 	static uint16 OperatorToRegister(uint8 oplCh);

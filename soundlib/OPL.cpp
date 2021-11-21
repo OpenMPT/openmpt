@@ -314,4 +314,32 @@ void OPL::Port(CHANNELINDEX c, uint16 reg, uint8 value)
 }
 
 
+std::vector<uint16> OPL::AllVoiceRegisters()
+{
+	static constexpr uint8 opRegisters[] = {OPL::AM_VIB, OPL::KSL_LEVEL, OPL::ATTACK_DECAY, OPL::SUSTAIN_RELEASE, OPL::WAVE_SELECT};
+	static constexpr uint8 chnRegisters[] = {OPL::FNUM_LOW, OPL::KEYON_BLOCK, OPL::FEEDBACK_CONNECTION};
+	std::vector<uint16> result;
+	result.reserve(234);
+	for(uint16 chip = 0; chip < 2; chip++)
+	{
+		for(uint8 opReg : opRegisters)
+		{
+			for(uint8 op = 0; op < 22; op++)
+			{
+				if((op & 7) < 6)
+					result.push_back((chip << 8) | opReg | op);
+			}
+		}
+		for(uint8 chnReg : chnRegisters)
+		{
+			for(uint8 chn = 0; chn < 9; chn++)
+			{
+				result.push_back((chip << 8) | chnReg | chn);
+			}
+		}
+	}
+	return result;
+}
+
+
 OPENMPT_NAMESPACE_END

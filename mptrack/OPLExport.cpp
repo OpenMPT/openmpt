@@ -97,12 +97,14 @@ public:
 		m_prevRegisters.clear();
 	}
 
-	void DumpRegisterState()
+	void CaptureAllVoiceRegisters()
 	{
-		for(const auto [reg, value] : m_prevRegisters)
+		for(const auto reg : OPL::AllVoiceRegisters())
 		{
-			if((reg & 0xFF) >= 0x20)
-				m_registerDump.push_back({m_sndFile.GetTotalSampleCount(), static_cast<uint8>(reg & 0xFF), static_cast<uint8>(reg >> 8), value});
+			uint8 value = 0;
+			if(const auto prevValue = m_prevRegisters.find(reg); prevValue != m_prevRegisters.end())
+				value = prevValue->second;
+			m_registerDumpAtLoopStart[reg] = value;
 		}
 	}
 
@@ -221,6 +223,14 @@ public:
 				prevOffset = loopStart;
 				header.loopOffset = static_cast<uint32>(mpt::IO::TellWrite(f) - 0x1C);
 				wroteLoopStart = true;
+				for(const auto [loopReg, value] : m_registerDumpAtLoopStart)
+				{
+					if(m_prevRegisters.count(loopReg))
+					{
+						const uint8 data[] = {static_cast<uint8>(0x5E + (loopReg >> 8)), static_cast<uint8>(loopReg & 0xFF), value};
+						mpt::IO::Write(f, data);
+					}
+				}
 			}
 
 			WriteVGMDelay(f, reg.sampleOffset - prevOffset);
@@ -330,7 +340,7 @@ private:
 	}
 
 	std::vector<RegisterDump> m_registerDump;
-	std::map<uint16, uint8> m_prevRegisters;
+	std::map<uint16, uint8> m_prevRegisters, m_registerDumpAtLoopStart;
 	CSoundFile &m_sndFile;
 };
 
@@ -534,7 +544,7 @@ public:
 				if(loopStart == Util::MaxValueOfType(loopStart) && m_sndFile.m_PlayState.m_nCurrentOrder == song.loopStartOrder && m_sndFile.m_PlayState.m_nRow == song.loopStartRow)
 				{
 					loopStart = subsongSamples;
-					m_oplLogger.DumpRegisterState();  // Make sure all registers are in the correct state when looping back
+					m_oplLogger.CaptureAllVoiceRegisters();  // Make sure all registers are in the correct state when looping back
 				}
 
 				totalSamples += count;
