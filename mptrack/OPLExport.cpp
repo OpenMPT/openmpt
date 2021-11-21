@@ -531,8 +531,7 @@ public:
 				if(count == 0)
 					break;
 
-				if(m_sndFile.m_PlayState.m_nCurrentOrder == song.loopStartOrder && m_sndFile.m_PlayState.m_nRow == song.loopStartRow && m_sndFile.m_PlayState.m_nTickCount == 0
-				   && (m_sndFile.m_PlayState.m_nCurrentOrder != 0 || m_sndFile.m_PlayState.m_nRow != 0))
+				if(loopStart == Util::MaxValueOfType(loopStart) && m_sndFile.m_PlayState.m_nCurrentOrder == song.loopStartOrder && m_sndFile.m_PlayState.m_nRow == song.loopStartRow)
 				{
 					loopStart = subsongSamples;
 					m_oplLogger.DumpRegisterState();  // Make sure all registers are in the correct state when looping back
