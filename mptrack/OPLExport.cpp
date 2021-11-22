@@ -541,7 +541,9 @@ public:
 				if(count == 0)
 					break;
 
-				if(loopStart == Util::MaxValueOfType(loopStart) && m_sndFile.m_PlayState.m_nCurrentOrder == song.loopStartOrder && m_sndFile.m_PlayState.m_nRow == song.loopStartRow)
+				if(loopStart == Util::MaxValueOfType(loopStart)
+				   && m_sndFile.m_PlayState.m_nCurrentOrder == song.loopStartOrder && m_sndFile.m_PlayState.m_nRow == song.loopStartRow
+				   && (song.loopStartOrder != song.startOrder || song.loopStartRow != song.startRow))
 				{
 					loopStart = subsongSamples;
 					m_oplLogger.CaptureAllVoiceRegisters();  // Make sure all registers are in the correct state when looping back
@@ -562,7 +564,7 @@ public:
 				}
 			}
 
-			if(m_sndFile.m_SongFlags[SONG_BREAKTOROW] && loopStart == Util::MaxValueOfType(loopStart))
+			if(m_sndFile.m_SongFlags[SONG_BREAKTOROW] && loopStart == Util::MaxValueOfType(loopStart) && song.loopStartOrder == song.startOrder && song.loopStartRow == song.startRow)
 				loopStart = 0;
 
 			mpt::PathString currentFileName = fileName;
