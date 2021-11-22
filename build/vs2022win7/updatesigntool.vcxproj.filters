@@ -7,8 +7,8 @@
     <Filter Include="installer">
       <UniqueIdentifier>{136B88E7-7FD5-3C5E-C813-EE0334BD1AB3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="installer\signtool">
-      <UniqueIdentifier>{F13E53A7-DD22-14FD-4683-0E503286FE7E}</UniqueIdentifier>
+    <Filter Include="installer\updatesigntool">
+      <UniqueIdentifier>{54EFEE2A-4014-3EAB-695F-233B55E33CC9}</UniqueIdentifier>
     </Filter>
     <Filter Include="misc">
       <UniqueIdentifier>{B1A29A7C-9DD9-9B0D-46C6-811032DC170F}</UniqueIdentifier>
@@ -779,8 +779,8 @@
     <ClCompile Include="..\..\common\version.cpp">
       <Filter>common</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\installer\signtool\signtool.cpp">
-      <Filter>installer\signtool</Filter>
+    <ClCompile Include="..\..\installer\updatesigntool\updatesigntool.cpp">
+      <Filter>installer\updatesigntool</Filter>
     </ClCompile>
     <ClCompile Include="..\..\misc\mptCPU.cpp">
       <Filter>misc</Filter>

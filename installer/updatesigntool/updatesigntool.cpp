@@ -51,7 +51,7 @@ OPENMPT_NAMESPACE_BEGIN
 using namespace mpt::uuid_literals;
 
 
-#if defined(MPT_ASSERT_HANDLER_NEEDED) && defined(MPT_BUILD_SIGNTOOL)
+#if defined(MPT_ASSERT_HANDLER_NEEDED) && defined(MPT_BUILD_UPDATESIGNTOOL)
 MPT_NOINLINE void AssertHandler(const mpt::source_location &loc, const char *expr, const char *msg)
 {
 	if(msg)
@@ -69,7 +69,7 @@ MPT_NOINLINE void AssertHandler(const mpt::source_location &loc, const char *exp
 #endif
 
 
-namespace signtool {
+namespace updatesigntool {
 
 
 static mpt::ustring get_keyname(mpt::ustring keyname)
@@ -92,16 +92,16 @@ static void main(const std::vector<mpt::ustring> &args)
 	{
 		if(args.size() < 2)
 		{
-			throw std::invalid_argument("Usage: signtool [dumpkey|sign] ...");
+			throw std::invalid_argument("Usage: updatesigntool [dumpkey|sign] ...");
 		}
 		if(args[1] == MPT_USTRING(""))
 		{
-			throw std::invalid_argument("Usage: signtool [dumpkey|sign] ...");
+			throw std::invalid_argument("Usage: updatesigntool [dumpkey|sign] ...");
 		} else	if(args[1] == MPT_USTRING("dumpkey"))
 		{
 			if(args.size() != 4)
 			{
-				throw std::invalid_argument("Usage: signtool dumpkey KEYNAME FILENAME");
+				throw std::invalid_argument("Usage: updatesigntool dumpkey KEYNAME FILENAME");
 			}
 			mpt::ustring keyname = get_keyname(args[2]);
 			mpt::ustring filename = args[3];
@@ -115,7 +115,7 @@ static void main(const std::vector<mpt::ustring> &args)
 		{
 			if(args.size() != 6)
 			{
-				throw std::invalid_argument("Usage: signtool sign [raw|jws_compact|jws] KEYNAME INPUTFILENAME OUTPUTFILENAME");
+				throw std::invalid_argument("Usage: updatesigntool sign [raw|jws_compact|jws] KEYNAME INPUTFILENAME OUTPUTFILENAME");
 			}
 			mpt::ustring mode = args[2];
 			mpt::ustring keyname = get_keyname(args[3]);
@@ -136,7 +136,7 @@ static void main(const std::vector<mpt::ustring> &args)
 			}
 			if(mode == MPT_USTRING(""))
 			{
-				throw std::invalid_argument("Usage: signtool sign [raw|jws_compact|jws] KEYNAME INPUTFILENAME OUTPUTFILENAME");
+				throw std::invalid_argument("Usage: updatesigntool sign [raw|jws_compact|jws] KEYNAME INPUTFILENAME OUTPUTFILENAME");
 			} else if(mode == MPT_USTRING("raw"))
 			{
 				std::vector<std::byte> signature = key.sign(mpt::as_span(data));
@@ -160,11 +160,11 @@ static void main(const std::vector<mpt::ustring> &args)
 				fo.flush();
 			} else
 			{
-				throw std::invalid_argument("Usage: signtool sign [raw|jws_compact|jws] KEYNAME INPUTFILENAME OUTPUTFILENAME");
+				throw std::invalid_argument("Usage: updatesigntool sign [raw|jws_compact|jws] KEYNAME INPUTFILENAME OUTPUTFILENAME");
 			}
 		} else
 		{
-			throw std::invalid_argument("Usage: signtool [dumpkey|sign] ...");
+			throw std::invalid_argument("Usage: updatesigntool [dumpkey|sign] ...");
 		}
 	} catch(const std::exception &e)
 	{
@@ -173,7 +173,7 @@ static void main(const std::vector<mpt::ustring> &args)
 	}
 }
 
-} // namespace signtool
+} // namespace updatesigntool
 
 
 OPENMPT_NAMESPACE_END
@@ -197,7 +197,7 @@ int main(int argc, char *argv[])
 	}
 	try
 	{
-		OPENMPT_NAMESPACE::signtool::main(args);
+		OPENMPT_NAMESPACE::updatesigntool::main(args);
 	} catch(...)
 	{
 		return 1;
