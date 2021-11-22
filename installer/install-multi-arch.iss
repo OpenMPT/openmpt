@@ -1,4 +1,4 @@
-; OpenMPT Install script
+﻿; OpenMPT Install script
 ; https://openmpt.org/
 
 
