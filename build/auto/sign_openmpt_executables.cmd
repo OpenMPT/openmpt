@@ -50,5 +50,4 @@ exit 1
 :noerror
 cd "%MY_DIR%"
 echo "Signing successful."
-pause
 exit 0
