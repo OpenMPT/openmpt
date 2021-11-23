@@ -190,6 +190,8 @@ static void ConvertSTMCommand(ModCommand &m, const ROWINDEX row, const uint8 fil
 		// on the ticks per row and a scaling factor. Try to write the tempo into a separate command.
 		newTempo = m.param;
 		m.param >>= 4;
+#else
+		MPT_UNUSED_VARIABLE(newTempo);
 #endif // MODPLUG_TRACKER
 		break;
 
