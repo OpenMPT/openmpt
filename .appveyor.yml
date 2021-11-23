@@ -102,7 +102,7 @@ for:
       - path: 'bin\release\$(MPT_APPVEYOR_VS)-$(MPT_APPVEYOR_TARGET)-static\$(MPT_APPVEYOR_ARCH)\PluginBridgeLegacy-$(MPT_APPVEYOR_ARCH).exe'
       - path: 'bin\release\$(MPT_APPVEYOR_VS)-$(MPT_APPVEYOR_TARGET)-static\$(MPT_APPVEYOR_ARCH)\PluginBridgeLegacy-$(MPT_APPVEYOR_ARCH).pdb'
       - path: 'bin\release\$(MPT_APPVEYOR_VS)-$(MPT_APPVEYOR_TARGET)-static\$(MPT_APPVEYOR_ARCH)\openmpt-wine-support.zip'
-      - path: 'bin\release\$(MPT_APPVEYOR_VS)-$(MPT_APPVEYOR_TARGET)-static\$(MPT_APPVEYOR_ARCH)\signtool.exe'
+      - path: 'bin\release\$(MPT_APPVEYOR_VS)-$(MPT_APPVEYOR_TARGET)-static\$(MPT_APPVEYOR_ARCH)\updatesigntool.exe'
   
   -
     matrix:
