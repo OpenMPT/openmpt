@@ -167,21 +167,6 @@ void CSoundFile::S3MSaveConvert(uint8 &command, uint8 &param, bool toIT, bool co
 
 #endif // MODPLUG_NO_FILESAVE
 
-// Pattern decoding flags
-enum S3MPattern
-{
-	s3mEndOfRow			= 0x00,
-	s3mChannelMask		= 0x1F,
-	s3mNotePresent		= 0x20,
-	s3mVolumePresent	= 0x40,
-	s3mEffectPresent	= 0x80,
-	s3mAnyPresent		= 0xE0,
-
-	s3mNoteOff			= 0xFE,
-	s3mNoteNone			= 0xFF,
-};
-
-
 static bool ValidateHeader(const S3MFileHeader &fileHeader)
 {
 	if(std::memcmp(fileHeader.magic, "SCRM", 4)
@@ -362,7 +347,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		madeWithTracker = MPT_UFORMAT("{} {}.{}")(madeWithTracker, (fileHeader.cwtv & 0xF00) >> 8, mpt::ufmt::hex0<2>(fileHeader.cwtv & 0xFF));
 	}
 
-	m_modFormat.formatName = U_("ScreamTracker 3");
+	m_modFormat.formatName = U_("Scream Tracker 3");
 	m_modFormat.type = U_("s3m");
 	m_modFormat.madeWithTracker = std::move(madeWithTracker);
 	m_modFormat.charset = m_dwLastSavedWithVersion ? mpt::Charset::Windows1252 : mpt::Charset::CP437;
@@ -521,7 +506,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 
 		if(sampleHeader.sampleType < S3MSampleHeader::typeAdMel)
 		{
-			const uint32 sampleOffset = (sampleHeader.dataPointer[1] << 4) | (sampleHeader.dataPointer[2] << 12) | (sampleHeader.dataPointer[0] << 20);
+			const uint32 sampleOffset = sampleHeader.GetSampleOffset();
 			if((loadFlags & loadSampleData) && sampleHeader.length != 0 && file.Seek(sampleOffset))
 			{
 				sampleHeader.GetSampleFormat((fileHeader.formatVersion == S3MFileHeader::oldVersion)).ReadSample(Samples[smp + 1], file);

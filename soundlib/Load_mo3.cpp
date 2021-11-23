@@ -1943,7 +1943,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		break;
 	case MOD_TYPE_S3M:
 		m_modFormat.originalType = U_("s3m");
-		m_modFormat.originalFormatName = U_("ScreamTracker 3");
+		m_modFormat.originalFormatName = U_("Scream Tracker 3");
 		break;
 	case MOD_TYPE_IT:
 		m_modFormat.originalType = U_("it");

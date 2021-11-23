@@ -1135,7 +1135,7 @@ bool CSoundFile::ReadS3ISample(SAMPLEINDEX nSample, FileReader &file)
 	if(!file.ReadStruct(sampleHeader)
 		|| (sampleHeader.sampleType != S3MSampleHeader::typePCM && sampleHeader.sampleType != S3MSampleHeader::typeAdMel)
 		|| (memcmp(sampleHeader.magic, "SCRS", 4) && memcmp(sampleHeader.magic, "SCRI", 4))
-		|| !file.Seek((sampleHeader.dataPointer[1] << 4) | (sampleHeader.dataPointer[2] << 12) | (sampleHeader.dataPointer[0] << 20)))
+		|| !file.Seek(sampleHeader.GetSampleOffset()))
 	{
 		return false;
 	}

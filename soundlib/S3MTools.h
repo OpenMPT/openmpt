@@ -143,9 +143,26 @@ struct S3MSampleHeader
 	SmpLength ConvertToS3M(const ModSample &mptSmp);
 	// Retrieve the internal sample format flags for this sample.
 	SampleIO GetSampleFormat(bool signedSamples) const;
+	// Calculate the sample position in file
+	uint32 GetSampleOffset() const;
 };
 
 MPT_BINARY_STRUCT(S3MSampleHeader, 80)
+
+
+// Pattern decoding flags
+enum S3MPattern
+{
+	s3mEndOfRow      = 0x00,
+	s3mChannelMask   = 0x1F,
+	s3mNotePresent   = 0x20,
+	s3mVolumePresent = 0x40,
+	s3mEffectPresent = 0x80,
+	s3mAnyPresent    = 0xE0,
+
+	s3mNoteOff  = 0xFE,
+	s3mNoteNone = 0xFF,
+};
 
 
 OPENMPT_NAMESPACE_END

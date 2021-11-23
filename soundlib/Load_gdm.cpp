@@ -103,11 +103,11 @@ static constexpr const mpt::uchar * gdmFormatOriginFormat[] =
 	UL_(""),
 	UL_("Generic MOD"),
 	UL_("MultiTracker"),
-	UL_("ScreamTracker 3"),
+	UL_("Scream Tracker 3"),
 	UL_("Composer 669 / UNIS 669"),
 	UL_("Farandole Composer"),
 	UL_("UltraTracker"),
-	UL_("ScreamTracker 2"),
+	UL_("Scream Tracker 2"),
 	UL_("OctaMED"),
 	UL_("Epic Megagames MASI")
 };

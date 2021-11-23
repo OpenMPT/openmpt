@@ -1583,7 +1583,7 @@ void CTrackApp::OpenModulesDialog(std::vector<mpt::PathString> &files, const mpt
 		"Compressed Modules (*.mdz,*.s3z,*.xmz,*.itz,*.mo3,*.oxm,...)|*.mdz;*.s3z;*.xmz;*.itz;*.mdr;*.zip;*.rar;*.lha;*.pma;*.lzs;*.gz;*.mo3;*.oxm"
 		"|"
 		"ProTracker Modules (*.mod,*.nst)|*.mod;mod.*;*.mdz;*.nst;*.m15;*.stk;*.pt36|"
-		"ScreamTracker Modules (*.s3m,*.stm)|*.s3m;*.stm;*.s3z|"
+		"Scream Tracker Modules (*.s3m,*.stm)|*.s3m;*.stm;*.s3z;*.stx|"
 		"FastTracker Modules (*.xm)|*.xm;*.xmz|"
 		"Impulse Tracker Modules (*.it)|*.it;*.itz|"
 		"OpenMPT Modules (*.mptm)|*.mptm;*.mptmz|"

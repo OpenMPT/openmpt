@@ -317,7 +317,7 @@ void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
 		switch(m_sndFile.GetType())
 		{
 		case MOD_TYPE_MOD:	modType = U_("MOD (ProTracker)"); break;
-		case MOD_TYPE_S3M:	modType = U_("S3M (ScreamTracker)"); break;
+		case MOD_TYPE_S3M:	modType = U_("S3M (Scream Tracker)"); break;
 		case MOD_TYPE_XM:	modType = U_("XM (FastTracker 2)"); break;
 		case MOD_TYPE_IT:	modType = U_("IT (Impulse Tracker)"); break;
 		case MOD_TYPE_MPT:	modType = U_("MPTM (OpenMPT)"); break;

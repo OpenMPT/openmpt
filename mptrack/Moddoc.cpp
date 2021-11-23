@@ -58,7 +58,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 const TCHAR FileFilterMOD[]	= _T("ProTracker Modules (*.mod)|*.mod||");
 const TCHAR FileFilterXM[]	= _T("FastTracker Modules (*.xm)|*.xm||");
-const TCHAR FileFilterS3M[] = _T("ScreamTracker Modules (*.s3m)|*.s3m||");
+const TCHAR FileFilterS3M[] = _T("Scream Tracker Modules (*.s3m)|*.s3m||");
 const TCHAR FileFilterIT[]	= _T("Impulse Tracker Modules (*.it)|*.it||");
 const TCHAR FileFilterMPT[] = _T("OpenMPT Modules (*.mptm)|*.mptm||");
 const TCHAR FileFilterNone[] = _T("");

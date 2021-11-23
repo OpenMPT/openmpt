@@ -79,7 +79,7 @@ BOOL CModTypeDlg::OnInitDialog()
 	// Mod types
 
 	m_TypeBox.SetItemData(m_TypeBox.AddString(_T("ProTracker MOD")), MOD_TYPE_MOD);
-	m_TypeBox.SetItemData(m_TypeBox.AddString(_T("ScreamTracker S3M")), MOD_TYPE_S3M);
+	m_TypeBox.SetItemData(m_TypeBox.AddString(_T("Scream Tracker S3M")), MOD_TYPE_S3M);
 	m_TypeBox.SetItemData(m_TypeBox.AddString(_T("FastTracker XM")), MOD_TYPE_XM);
 	m_TypeBox.SetItemData(m_TypeBox.AddString(_T("Impulse Tracker IT")), MOD_TYPE_IT);
 	m_TypeBox.SetItemData(m_TypeBox.AddString(_T("OpenMPT MPTM")), MOD_TYPE_MPT);
@@ -461,7 +461,7 @@ BOOL CModTypeDlg::OnToolTipNotify(UINT, NMHDR *pNMHDR, LRESULT *)
 		text = _T("Note slides always slide the same amount, not depending on the sample frequency.");
 		break;
 	case IDC_CHECK2:
-		text = _T("Old ScreamTracker 3 volume slide behaviour (not recommended).");
+		text = _T("Old Scream Tracker 3 volume slide behaviour (not recommended).");
 		break;
 	case IDC_CHECK3:
 		text = _T("Play some effects like in early versions of Impulse Tracker (not recommended).");

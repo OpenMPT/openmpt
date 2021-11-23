@@ -3049,7 +3049,7 @@ STRINGTABLE
 BEGIN
     ID_FILE_NEWMOD          "Create a new ProTracker (MOD) music module\nNew MOD"
     ID_FILE_NEWXM           "Create a new FastTracker II (XM) music module\nNew XM"
-    ID_FILE_NEWS3M          "Create a new ScreamTracker (S3M) music module\nNew S3M"
+    ID_FILE_NEWS3M          "Create a new Scream Tracker (S3M) music module\nNew S3M"
     ID_FILE_NEWIT           "Create a new Impulse Tracker (IT) music module\nNew IT"
     ID_FILE_SAVEASWAVE      "Records the current file as a high-quality lossless or lossy file"
     ID_PLAYER_PLAY          "Resume playing, or play the song from the selected position\nPlay"

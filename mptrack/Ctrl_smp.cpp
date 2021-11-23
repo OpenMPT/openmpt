@@ -1269,7 +1269,7 @@ static constexpr std::pair<const mpt::uchar *, const mpt::uchar *> SampleFormats
 #endif // MPT_ENABLE_MP3_SAMPLES
 	{ UL_("XI Samples (*.xi)"), UL_("*.xi") },
 	{ UL_("Impulse Tracker Samples (*.its)"), UL_("*.its") },
-	{ UL_("ScreamTracker Samples (*.s3i,*.smp)"), UL_("*.s3i;*.smp") },
+	{ UL_("Scream Tracker Samples (*.s3i,*.smp)"), UL_("*.s3i;*.smp") },
 	{ UL_("OPL Instruments (*.sb0,*.sb2,*.sbi)"), UL_("*.sb0;*.sb2;*.sbi") },
 	{ UL_("GF1 Patches (*.pat)"), UL_("*.pat") },
 	{ UL_("Wave64 Files (*.w64)"), UL_("*.w64") },
@@ -1468,7 +1468,7 @@ void CCtrlSamples::SaveSample(bool doBatchSave)
 		.DefaultFilename(fileName)
 		.ExtensionFilter("Wave File (*.wav)|*.wav|"
 			"FLAC File (*.flac)|*.flac|"
-			"S3I ScreamTracker 3 Instrument (*.s3i)|*.s3i|"
+			"S3I Scream Tracker 3 Instrument (*.s3i)|*.s3i|"
 			"RAW Audio (*.raw)|*.raw||")
 			.WorkingDirectory(defaultPath)
 			.FilterIndex(&filter);

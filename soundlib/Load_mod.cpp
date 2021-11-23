@@ -1166,7 +1166,7 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	} else if(!onlyAmigaNotes && fileHeader.restartPos == 0x7F && isMdKd && fileHeader.restartPos + 1u >= realOrders)
 	{
-		modMagicResult.madeWithTracker = UL_("ScreamTracker");
+		modMagicResult.madeWithTracker = UL_("Scream Tracker");
 	}
 
 	if(onlyAmigaNotes && !isGenericMultiChannel && filterTransitions < 7)
