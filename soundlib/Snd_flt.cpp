@@ -1,5 +1,5 @@
 /*
- * snd_flt.cpp
+ * Snd_flt.cpp
  * -----------
  * Purpose: Calculation of resonant filter coefficients.
  * Notes  : Extended filter range was introduced in MPT 1.12 and went up to 8652 Hz.
@@ -81,11 +81,10 @@ void CSoundFile::SetupChannelFilter(ModChannel *pChn, bool bReset, int flt_modif
 	// Filtering is only ever done in IT if either cutoff is not full or if resonance is set.
 	if(m_playBehaviour[kITFilterBehaviour] && resonance == 0 && computedCutoff >= 254)
 	{
-		if(pChn->rowCommand.IsNote() && !pChn->rowCommand.IsPortamento() && !pChn->nMasterChn
-		   && pChn->position.IsZero() && !pChn->dwFlags[CHN_WRAPPED_LOOP])
+		if(pChn->rowCommand.IsNote() && !pChn->rowCommand.IsPortamento() && !pChn->nMasterChn && pChn->isFirstTick)
 		{
 			// Z7F next to a note disables the filter, however in other cases this should not happen.
-			// Test cases: filter-reset.it, filter-reset-carry.it, filter-nna.it
+			// Test cases: filter-reset.it, filter-reset-carry.it, filter-reset-envelope.it, filter-nna.it
 			pChn->dwFlags.reset(CHN_FILTER);
 		}
 		return;
@@ -118,17 +117,17 @@ void CSoundFile::SetupChannelFilter(ModChannel *pChn, bool bReset, int flt_modif
 	float fb1 = -e / (1.0f + d + e);
 
 #if defined(MPT_INTMIXER)
-#define FILTER_CONVERT(x) Util::Round<mixsample_t>((x) * (1 << MIXING_FILTER_PRECISION))
+#define MPT_FILTER_CONVERT(x) Util::Round<mixsample_t>((x) * (1 << MIXING_FILTER_PRECISION))
 #else
-#define FILTER_CONVERT(x) (x)
+#define MPT_FILTER_CONVERT(x) (x)
 #endif
 
 	switch(pChn->nFilterMode)
 	{
 	case FLTMODE_HIGHPASS:
-		pChn->nFilter_A0 = FILTER_CONVERT(1.0f - fg);
-		pChn->nFilter_B0 = FILTER_CONVERT(fb0);
-		pChn->nFilter_B1 = FILTER_CONVERT(fb1);
+		pChn->nFilter_A0 = MPT_FILTER_CONVERT(1.0f - fg);
+		pChn->nFilter_B0 = MPT_FILTER_CONVERT(fb0);
+		pChn->nFilter_B1 = MPT_FILTER_CONVERT(fb1);
 #ifdef MPT_INTMIXER
 		pChn->nFilter_HP = -1;
 #else
@@ -137,9 +136,9 @@ void CSoundFile::SetupChannelFilter(ModChannel *pChn, bool bReset, int flt_modif
 		break;
 
 	default:
-		pChn->nFilter_A0 = FILTER_CONVERT(fg);
-		pChn->nFilter_B0 = FILTER_CONVERT(fb0);
-		pChn->nFilter_B1 = FILTER_CONVERT(fb1);
+		pChn->nFilter_A0 = MPT_FILTER_CONVERT(fg);
+		pChn->nFilter_B0 = MPT_FILTER_CONVERT(fb0);
+		pChn->nFilter_B1 = MPT_FILTER_CONVERT(fb1);
 #ifdef MPT_INTMIXER
 		if(pChn->nFilter_A0 == 0)
 			pChn->nFilter_A0 = 1;	// Prevent silence at low filter cutoff and very high sampling rate
@@ -149,7 +148,7 @@ void CSoundFile::SetupChannelFilter(ModChannel *pChn, bool bReset, int flt_modif
 #endif // MPT_INTMIXER
 		break;
 	}
-#undef FILTER_CONVERT
+#undef MPT_FILTER_CONVERT
 
 	if (bReset)
 	{
