@@ -414,6 +414,7 @@ struct STXFileHeader
 	bool Validate() const
 	{
 		if(std::memcmp(magic, "SCRM", 4)
+		   || (patternSize < 64 && patternSize != 0x1A)
 		   || patternSize > 0x840
 		   || (globalVolume > 64 && globalVolume != 0x58)  // 0x58 may be a placeholder value in earlier ST2 versions.
 		   || numPatterns > 64
@@ -575,7 +576,7 @@ bool CSoundFile::ReadSTX(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				const auto [note, instr] = file.ReadArray<uint8, 2>();
 				if(note < 0xF0)
-					m.note = (note & 0x0F) + 12 * (note >> 4) + 36 + NOTE_MIN;
+					m.note = static_cast<ModCommand::NOTE>(Clamp((note & 0x0F) + 12 * (note >> 4) + 36 + NOTE_MIN, NOTE_MIN, NOTE_MAX));
 				else if(note == s3mNoteOff)
 					m.note = NOTE_NOTECUT;
 				else if(note == s3mNoteNone)
