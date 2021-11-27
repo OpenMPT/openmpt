@@ -12,6 +12,7 @@ building signed updates
     build\auto\build_openmpt_args.cmd vs2019 win7  Win32 Release 7z default
     build\auto\build_openmpt_args.cmd vs2019 win7  x64   Release 7z default
     build\auto\build_openmpt_release_packages_multiarch.cmd
+    build\auto\build_openmpt_update_information.cmd
     build\auto\package_openmpt_installer_multiarch_args.cmd vs2019 win10 Win32 Release 7z default
     ```
     or just `build\auto\build_openmpt_release_manual.cmd`, which does all of the

@@ -196,6 +196,7 @@ for:
 
     build_script:
       - build\auto\build_openmpt_release_packages_multiarch.cmd auto
+      - build\auto\build_openmpt_update_information.cmd auto
       - build\auto\package_openmpt_installer_multiarch_args.cmd vs2019 win10 Win32 Release 7z default
 
     after_build:
