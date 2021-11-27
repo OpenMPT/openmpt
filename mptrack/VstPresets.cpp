@@ -88,7 +88,8 @@ VSTPresets::ErrorCode VSTPresets::LoadFile(FileReader &file, IMixPlugin &plugin)
 			}
 			for(PlugParamIndex p = 0; p < numParams; p++)
 			{
-				plugin.SetParameter(p, file.ReadFloatBE());
+				const auto value = file.ReadFloatBE();
+				plugin.SetParameter(p, std::isfinite(value) ? value : 0.0f);
 			}
 		} else
 		{
