@@ -426,7 +426,7 @@ std::vector<mpt::ustring> CUpdateCheck::GetDefaultUpdateSigningKeysRootAnchors()
 	// because otherwise, a single compromised server could allow for rogue updates.
 	return {
 		U_("https://update.openmpt.de/update/"),
-		U_("https://manx.datengang.de/openmpt/update/")
+		U_("https://demo-scene.de/openmpt/update/")
 	};
 }
 
