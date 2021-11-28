@@ -70,14 +70,6 @@ Dependencies
 
 ### openmpt123
 
- *  Supported compilers for building openmpt123:
-     *  **Microsoft Visual Studio 2017** or higher, running on a amd64 build
-        system (other target systems are supported)
-     *  **GCC 8.1** or higher
-     *  **Clang 7** or higher
-     *  **MinGW-W64 8.1** or higher
-     *  **DJGPP GCC 8.1** or higher
-     *  any **C++17 compliant** compiler
  *  Live sound output requires one of:
      *  **PulseAudio**
      *  **SDL 2**
