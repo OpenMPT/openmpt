@@ -149,7 +149,7 @@ How to compile
 
         or
 
-            ./build/download_externals.sh    # download liballegro binaries
+            ./build/download_externals.sh    # download liballegro source
             make CONFIG=djgpp USE_ALLEGRO42=1 BUNDLED_ALLEGRO42=1
 
      -  American Fuzzy Lop:
