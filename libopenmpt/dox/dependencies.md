@@ -9,7 +9,7 @@ Dependencies
 ### libopenmpt
 
  *  Supported compilers for building libopenmpt:
-     *  **Microsoft Visual Studio 2017** or higher, running on a x86-64 build
+     *  **Microsoft Visual Studio 2017** or higher, running on a amd64 build
         system (other target systems are supported)
      *  **GCC 8.1** or higher
      *  **Clang 7** or higher
@@ -71,7 +71,7 @@ Dependencies
 ### openmpt123
 
  *  Supported compilers for building openmpt123:
-     *  **Microsoft Visual Studio 2017** or higher, running on a x86-64 build
+     *  **Microsoft Visual Studio 2017** or higher, running on a amd64 build
         system (other target systems are supported)
      *  **GCC 8.1** or higher
      *  **Clang 7** or higher

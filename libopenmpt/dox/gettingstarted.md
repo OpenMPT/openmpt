@@ -45,7 +45,7 @@ How to compile
 
          -  xmp-openmpt: Requires Visual Studio with MFC.
 
-     -  libopenmpt requires the compile host system to be 64bit x86-64 when
+     -  libopenmpt requires the compile host system to be amd64 or ARM64 when
         building with Visual Studio.
 
      -  You will need the Winamp 5 SDK and the XMPlay SDK if you want to
