@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.3.35-pre
 
+ *  miniz: Update to v2.2.0 (2021-06-27).
+
 ### libopenmpt 0.3.34 (2021-11-14)
 
  *  [**Bug**] Fixed various undefined behaviour found with ubsan.
