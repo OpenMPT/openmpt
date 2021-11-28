@@ -18,6 +18,7 @@
   filter { "action:vs*" }
     buildoptions { "/wd4244" }
 	filter {}
-  filter { "kind:SharedLib" }
-   files { "../../build/premake/def/ext-miniz.def" }
+
+	filter { "kind:SharedLib" }
+		defines { "MINIZ_EXPORT=__declspec(dllexport)" }
 	filter {}
