@@ -1378,30 +1378,27 @@ SAMPLEINDEX CSoundFile::DetectUnusedSamples(std::vector<bool> &sampleUsed) const
 				if(p->IsNote())
 				{
 					ModCommand::INSTR instr = p->instr;
-					if(!p->instr) instr = lastIns[c];
-					if (instr)
+					if(!p->instr)
+						instr = lastIns[c];
+					INSTRUMENTINDEX minInstr = 1, maxInstr = GetNumInstruments();
+					if(instr > 0)
 					{
-						if(mpt::is_in_range(instr, (INSTRUMENTINDEX)0, MAX_INSTRUMENTS))
+						if(instr <= GetNumInstruments())
 						{
-							ModInstrument *pIns = Instruments[p->instr];
-							if (pIns)
-							{
-								SAMPLEINDEX n = pIns->Keyboard[p->note - NOTE_MIN];
-								if (n <= GetNumSamples()) sampleUsed[n] = true;
-							}
+							minInstr = maxInstr = instr;
 						}
 						lastIns[c] = instr;
 					} else
 					{
 						// No idea which instrument this note belongs to, so mark it used in any instruments.
-						for (INSTRUMENTINDEX k = GetNumInstruments(); k >= 1; k--)
+					}
+					for(INSTRUMENTINDEX i = minInstr; i <= maxInstr; i++)
+					{
+						if(const auto *pIns = Instruments[i]; pIns != nullptr)
 						{
-							ModInstrument *pIns = Instruments[k];
-							if (pIns)
-							{
-								SAMPLEINDEX n = pIns->Keyboard[p->note - NOTE_MIN];
-								if (n <= GetNumSamples()) sampleUsed[n] = true;
-							}
+							SAMPLEINDEX n = pIns->Keyboard[p->note - NOTE_MIN];
+							if(n <= GetNumSamples())
+								sampleUsed[n] = true;
 						}
 					}
 				}
