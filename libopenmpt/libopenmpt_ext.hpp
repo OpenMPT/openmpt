@@ -279,8 +279,8 @@ class interactive {
 	  \return The channel on which the note is played. This can pe be passed to openmpt::ext::interactive::stop_note to stop the note.
 	  \throws openmpt::exception Throws an exception derived from openmpt::exception if the instrument or note is outside the specified range.
 	  \sa openmpt::ext::interactive::stop_note
-	  \sa openmpt::ext::interactive::note_off
-	  \sa openmpt::ext::interactive::note_fade
+	  \sa openmpt::ext::interactive2::note_off
+	  \sa openmpt::ext::interactive2::note_fade
 	*/
 	virtual std::int32_t play_note( std::int32_t instrument, std::int32_t note, double volume, double panning ) = 0;
 
@@ -289,10 +289,23 @@ class interactive {
 	  \param channel The channel on which the note should be stopped. This is the value returned by a previous play_note call.
 	  \throws openmpt::exception Throws an exception derived from openmpt::exception if the channel index is invalid.
 	  \sa openmpt::ext::interactive::play_note
-	  \sa openmpt::ext::interactive::note_off
-	  \sa openmpt::ext::interactive::note_fade
+	  \sa openmpt::ext::interactive2::note_off
+	  \sa openmpt::ext::interactive2::note_fade
 	*/
 	virtual void stop_note( std::int32_t channel ) = 0;
+
+}; // class interactive
+
+
+#ifndef LIBOPENMPT_EXT_INTERFACE_INTERACTIVE2
+#define LIBOPENMPT_EXT_INTERFACE_INTERACTIVE2
+#endif
+
+LIBOPENMPT_DECLARE_EXT_CXX_INTERFACE(interactive2)
+
+class interactive2 {
+
+	LIBOPENMPT_EXT_CXX_INTERFACE(interactive2)
 
 	//! Sends a key-off command for the note playing on the specified channel
 	/*!
@@ -301,7 +314,7 @@ class interactive {
 	  \remarks This method releases envelopes and sample sustain loops. If the sample has no sustain loop, or if the module does not use instruments, it does nothing.
 	  \sa openmpt::ext::interactive::play_note
 	  \sa openmpt::ext::interactive::stop_note
-	  \sa openmpt::ext::interactive::note_fade
+	  \sa openmpt::ext::interactive2::note_fade
 	*/
 	virtual void note_off(int32_t channel ) = 0;
 
@@ -312,7 +325,7 @@ class interactive {
 	  \remarks This method uses the instrument's fade-out value. If the module does not use instruments, or the instrument's fade-out value is 0, it does nothing.
 	  \sa openmpt::ext::interactive::play_note
 	  \sa openmpt::ext::interactive::stop_note
-	  \sa openmpt::ext::interactive::note_off
+	  \sa openmpt::ext::interactive2::note_off
 	*/
 	virtual void note_fade(int32_t channel) = 0;
 

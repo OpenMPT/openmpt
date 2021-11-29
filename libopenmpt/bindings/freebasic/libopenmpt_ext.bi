@@ -274,6 +274,11 @@ Type openmpt_module_ext_interface_interactive
 	  \sa note_fade
 	'/
 	stop_note As Function(ByVal mod_ext As openmpt_module_ext Ptr, ByVal channel As Long) As Long
+End Type
+
+#define LIBOPENMPT_EXT_C_INTERFACE_INTERACTIVE2 "interactive2"
+
+Type openmpt_module_ext_interface_interactive2
 
 	/'* Sends a key-off command for the note playing on the specified channel
 

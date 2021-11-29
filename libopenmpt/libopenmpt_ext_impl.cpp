@@ -83,6 +83,8 @@ namespace openmpt {
 			return dynamic_cast< ext::pattern_vis * >( this );
 		} else if ( interface_id == ext::interactive_id ) {
 			return dynamic_cast< ext::interactive * >( this );
+		} else if ( interface_id == ext::interactive2_id ) {
+			return dynamic_cast< ext::interactive2 * >( this );
 
 
 

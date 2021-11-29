@@ -287,8 +287,8 @@ typedef struct openmpt_module_ext_interface_interactive {
 	 * \param panning The panning position at which the note should be triggered, in range [-1.0, 1.0], 0.0 is center.
 	 * \return The channel on which the note is played. This can pe be passed to openmpt_module_ext_interface_interactive::stop_note to stop the note. -1 means that no channel could be allocated and the note is not played.
 	 * \sa openmpt_module_ext_interface_interactive::stop_note
-	 * \sa openmpt_module_ext_interface_interactive::note_off
-	 * \sa openmpt_module_ext_interface_interactive::note_fade
+	 * \sa openmpt_module_ext_interface_interactive2::note_off
+	 * \sa openmpt_module_ext_interface_interactive2::note_fade
 	 */
 	int32_t ( * play_note ) ( openmpt_module_ext * mod_ext, int32_t instrument, int32_t note, double volume, double panning );
 
@@ -298,11 +298,20 @@ typedef struct openmpt_module_ext_interface_interactive {
 	 * \param channel The channel on which the note should be stopped. This is the value returned by a previous play_note call.
 	 * \return 1 on success, 0 on failure (channel out of range).
 	 * \sa openmpt_module_ext_interface_interactive::play_note
-	 * \sa openmpt_module_ext_interface_interactive::note_off
-	 * \sa openmpt_module_ext_interface_interactive::note_fade
+	 * \sa openmpt_module_ext_interface_interactive2::note_off
+	 * \sa openmpt_module_ext_interface_interactive2::note_fade
 	 */
 	int ( * stop_note ) ( openmpt_module_ext * mod_ext, int32_t channel );
 
+} openmpt_module_ext_interface_interactive;
+
+
+
+#ifndef LIBOPENMPT_EXT_C_INTERFACE_INTERACTIVE2
+#define LIBOPENMPT_EXT_C_INTERFACE_INTERACTIVE2 "interactive2"
+#endif
+
+typedef struct openmpt_module_ext_interface_interactive2 {
 	//! Sends a key-off command for the note playing on the specified channel
 	/*!
 	 * \param channel The channel on which the key-off event should be triggered. This is the value returned by a previous play_note call.
@@ -310,7 +319,7 @@ typedef struct openmpt_module_ext_interface_interactive {
 	 * \remarks This method releases envelopes and sample sustain loops. If the sample has no sustain loop, or if the module does not use instruments, it does nothing.
 	 * \sa openmpt_module_ext_interface_interactive::play_note
 	 * \sa openmpt_module_ext_interface_interactive::stop_note
-	 * \sa openmpt_module_ext_interface_interactive::note_fade
+	 * \sa openmpt_module_ext_interface_interactive2::note_fade
 	 */
 	int ( *note_off ) ( openmpt_module_ext * mod_ext, int32_t channel );
 
@@ -321,7 +330,7 @@ typedef struct openmpt_module_ext_interface_interactive {
 	 * \remarks This method uses the instrument's fade-out value. If the module does not use instruments, or the instrument's fade-out value is 0, it does nothing.
 	 * \sa openmpt_module_ext_interface_interactive::play_note
 	 * \sa openmpt_module_ext_interface_interactive::stop_note
-	 * \sa openmpt_module_ext_interface_interactive::note_fade
+	 * \sa openmpt_module_ext_interface_interactive2::note_fade
 	 */
 	int ( *note_fade ) ( openmpt_module_ext * mod_ext, int32_t channel );
 
@@ -343,7 +352,7 @@ typedef struct openmpt_module_ext_interface_interactive {
 	 */
 	double (*get_channel_panning) ( openmpt_module_ext * mod_ext, int32_t channel );
 
-} openmpt_module_ext_interface_interactive;
+} openmpt_module_ext_interface_interactive2;
 
 
 

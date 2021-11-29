@@ -1812,6 +1812,12 @@ int openmpt_module_ext_get_interface( openmpt_module_ext * mod_ext, const char *
 			i->get_instrument_mute_status = &get_instrument_mute_status;
 			i->play_note = &play_note;
 			i->stop_note = &stop_note;
+			result = 1;
+
+
+
+		} else if ( !std::strcmp( interface_id, LIBOPENMPT_EXT_C_INTERFACE_INTERACTIVE2 ) && ( interface_size == sizeof( openmpt_module_ext_interface_interactive2 ) ) ) {
+			openmpt_module_ext_interface_interactive2 * i = static_cast< openmpt_module_ext_interface_interactive2 * >( interface );
 			i->note_off = &note_off;
 			i->note_fade = &note_fade;
 			i->set_channel_panning = &set_channel_panning;

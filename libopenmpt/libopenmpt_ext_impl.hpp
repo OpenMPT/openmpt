@@ -20,6 +20,7 @@ class module_ext_impl
 	: public module_impl
 	, public ext::pattern_vis
 	, public ext::interactive
+	, public ext::interactive2
 
 
 
