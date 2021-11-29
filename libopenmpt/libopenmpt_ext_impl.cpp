@@ -328,6 +328,22 @@ namespace openmpt {
 		return ( chn.nPan - 128 ) / 128.0;
 	}
 
+	void module_ext_impl::set_note_finetune( int32_t channel, double finetune ) {
+		if ( channel < 0 || channel >= OpenMPT::MAX_CHANNELS ) {
+			throw openmpt::exception( "invalid channel" );
+		}
+		auto & chn = m_sndFile->m_PlayState.Chn[channel];
+		chn.microTuning = mpt::saturate_round<int16_t>( finetune * 32768.0 );
+	}
+
+	double module_ext_impl::get_note_finetune( int32_t channel ) {
+		if ( channel < 0 || channel >= OpenMPT::MAX_CHANNELS ) {
+			throw openmpt::exception( "invalid channel" );
+		}
+		auto & chn = m_sndFile->m_PlayState.Chn[channel];
+		return chn.microTuning / 32768.0;
+	}
+
 	/* add stuff here */
 
 

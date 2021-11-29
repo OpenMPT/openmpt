@@ -314,6 +314,7 @@ typedef struct openmpt_module_ext_interface_interactive {
 typedef struct openmpt_module_ext_interface_interactive2 {
 	//! Sends a key-off command for the note playing on the specified channel
 	/*!
+	 * \param mod_ext The module handle to work on.
 	 * \param channel The channel on which the key-off event should be triggered. This is the value returned by a previous play_note call.
 	 * \return 1 on success, 0 on failure (channel out of range).
 	 * \remarks This method releases envelopes and sample sustain loops. If the sample has no sustain loop, or if the module does not use instruments, it does nothing.
@@ -325,6 +326,7 @@ typedef struct openmpt_module_ext_interface_interactive2 {
 
 	//! Sends a note fade command for the note playing on the specified channel
 	/*!
+	 * \param mod_ext The module handle to work on.
 	 * \param channel The channel on which the note should be faded. This is the value returned by a previous play_note call.
 	 * \return 1 on success, 0 on failure (channel out of range).
 	 * \remarks This method uses the instrument's fade-out value. If the module does not use instruments, or the instrument's fade-out value is 0, it does nothing.
@@ -336,21 +338,46 @@ typedef struct openmpt_module_ext_interface_interactive2 {
 
 	//! Set the current panning for a channel
 	/*!
+	 * \param mod_ext The module handle to work on.
 	 * \param channel The channel that should be panned. This is the value returned by a previous play_note call.
 	 * \param panning The panning position to set on the channel, in range [-1.0, 1.0], 0.0 is center.
 	 * \return 1 on success, 0 on failure (channel out of range).
 	 * \remarks This command affects subsequent notes played on the same channel, and may itself be overridden by subsequent panning commands encountered in the module itself.
-	 * \sa openmpt_module_ext_interface_interactive::get_channel_panning
+	 * \sa openmpt_module_ext_interface_interactive2::get_channel_panning
 	 */
 	int ( *set_channel_panning) ( openmpt_module_ext * mod_ext, int32_t channel, double panning );
 
 	//! Get the current panning position for a channel
 	/*!
+	 * \param mod_ext The module handle to work on.
 	 * \param channel The channel whose panning should be retrieved. This is the value returned by a previous play_note call.
 	 * \return The current channel panning, in range [-1.0, 1.0], 0.0 is center.
-	 * \sa openmpt_module_ext_interface_interactive::set_channel_panning
+	 * \sa openmpt_module_ext_interface_interactive2::set_channel_panning
 	 */
 	double (*get_channel_panning) ( openmpt_module_ext * mod_ext, int32_t channel );
+	
+	//! Set the finetune for the currently playing note on a channel
+	/*!
+	 * \param mod_ext The module handle to work on.
+	 * \param channel The channel whose finetune will be changed, in range [0, openmpt::module::get_num_channels()[
+	 * \param finetune The finetune to set on the channel, in range [-1.0, 1.0], 0.0 is center.
+	 * \throws openmpt::exception Throws an exception derived from openmpt::exception if the channel index is invalid.
+	 * \remarks The finetune range depends on the pitch wheel depth of the instrument playing on the current channel; for sample-based modules, the depth of this command is fixed to +/-1 semitone.
+	 * \remarks This command does not affect subsequent notes played on the same channel, but may itself be overridden by subsequent finetune commands encountered in the module itself.
+	 * \sa openmpt_module_ext_interface_interactive2::get_note_finetune
+	 */
+	int ( *set_note_finetune) ( openmpt_module_ext * mod_ext, int32_t channel, double finetune );
+
+	//! Get the finetune for the currently playing note on a channel
+	/*!
+	 * \param mod_ext The module handle to work on.
+	 * \param channel The channel whose finetune should be retrieved, in range [0, openmpt::module::get_num_channels()[
+	 * \return The current channel finetune, in range [-1.0, 1.0], 0.0 is center.
+	 * \remarks The finetune range depends on the pitch wheel depth of the instrument playing on the current channel; for sample-based modules, the depth of this command is fixed to +/-1 semitone.
+	 * \throws openmpt::exception Throws an exception derived from openmpt::exception if the channel is outside the specified range.
+	 * \sa openmpt_module_ext_interface_interactive2::set_note_finetune
+	 */
+	double (*get_note_finetune) ( openmpt_module_ext * mod_ext, int32_t channel );
 
 } openmpt_module_ext_interface_interactive2;
 

@@ -108,6 +108,10 @@ public:
 
 	double get_channel_panning( std::int32_t channel ) override;
 
+	void set_note_finetune( std::int32_t channel, double finetune ) override;
+
+	double get_note_finetune( std::int32_t channel ) override;
+
 	/* add stuff here */
 
 }; // class module_ext_impl

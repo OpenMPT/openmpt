@@ -329,13 +329,13 @@ class interactive2 {
 	*/
 	virtual void note_fade(int32_t channel) = 0;
 
-	//! Set the current panning for a channel
+	//! Set the current panning position for a channel
 	/*!
 	  \param channel The channel whose panning will be changed, in range [0, openmpt::module::get_num_channels()[
 	  \param panning The panning position to set on the channel, in range [-1.0, 1.0], 0.0 is center.
 	  \throws openmpt::exception Throws an exception derived from openmpt::exception if the channel index is invalid.
 	  \remarks This command affects subsequent notes played on the same channel, and may itself be overridden by subsequent panning commands encountered in the module itself.
-	  \sa openmpt::ext::interactive::get_channel_panning
+	  \sa openmpt::ext::interactive2::get_channel_panning
 	*/
 	virtual void set_channel_panning(int32_t channel, double panning ) = 0;
 
@@ -344,9 +344,30 @@ class interactive2 {
 	  \param channel The channel whose panning should be retrieved, in range [0, openmpt::module::get_num_channels()[
 	  \return The current channel panning, in range [-1.0, 1.0], 0.0 is center.
 	  \throws openmpt::exception Throws an exception derived from openmpt::exception if the channel is outside the specified range.
-	  \sa openmpt::ext::interactive::set_channel_panning
+	  \sa openmpt::ext::interactive2::set_channel_panning
 	*/
 	virtual double get_channel_panning( int32_t channel ) = 0;
+	
+	//! Set the finetune for the currently playing note on a channel
+	/*!
+	  \param channel The channel whose finetune will be changed, in range [0, openmpt::module::get_num_channels()[
+	  \param finetune The finetune to set on the channel, in range [-1.0, 1.0], 0.0 is center.
+	  \throws openmpt::exception Throws an exception derived from openmpt::exception if the channel index is invalid.
+	  \remarks The finetune range depends on the pitch wheel depth of the instrument playing on the current channel; for sample-based modules, the depth of this command is fixed to +/-1 semitone.
+	  \remarks This command does not affect subsequent notes played on the same channel, but may itself be overridden by subsequent finetune commands encountered in the module itself.
+	  \sa openmpt::ext::interactive2::get_note_finetune
+	*/
+	virtual void set_note_finetune(int32_t channel, double finetune ) = 0;
+
+	//! Get the finetune for the currently playing note on a channel
+	/*!
+	  \param channel The channel whose finetune should be retrieved, in range [0, openmpt::module::get_num_channels()[
+	  \return The current channel finetune, in range [-1.0, 1.0], 0.0 is center.
+	  \throws openmpt::exception Throws an exception derived from openmpt::exception if the channel is outside the specified range.
+	  \remarks The finetune range depends on the pitch wheel depth of the instrument playing on the current channel; for sample-based modules, the depth of this command is fixed to +/-1 semitone.
+	  \sa openmpt::ext::interactive2::set_note_finetune
+	*/
+	virtual double get_note_finetune( int32_t channel ) = 0;
 
 }; // class interactive
 
