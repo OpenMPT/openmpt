@@ -24,7 +24,7 @@ private:
 public:
 	bool m_abort = false;
 
-	CProgressDialog(CWnd *parent = nullptr, int resourceID = 0);
+	CProgressDialog(CWnd *parent = nullptr, UINT resourceID = 0);
 	~CProgressDialog();
 
 	// Set the window title
