@@ -29,7 +29,11 @@
 	filter { "action:vs*", "language:C++", "action:vs2019" }
 		cppdialect "C++17"
 	filter { "action:vs*", "language:C++", "not action:vs2017", "not action:vs2019" }
-		cppdialect "C++20"
+		if _OPTIONS["clang"] then
+			cppdialect "C++17"
+		else
+			cppdialect "C++20"
+		end
 	filter { "action:vs*", "action:vs2017" }
 		if _OPTIONS["win10"] then
 			conformancemode "On"
