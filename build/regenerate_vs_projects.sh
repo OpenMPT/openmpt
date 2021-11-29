@@ -96,17 +96,6 @@ ${PREMAKE} --group=OpenMPT vs2019 --win10 && \
 ${PREMAKE} --group=all-externals vs2019 --win10 && \
 echo ok &
 
-${PREMAKE} --group=libopenmpt_test vs2019 --clang --win10 && \
-${PREMAKE} --group=in_openmpt vs2019 --clang --win10 && \
-${PREMAKE} --group=xmp-openmpt vs2019 --clang --win10 && \
-${PREMAKE} --group=libopenmpt-small vs2019 --clang --win10 && \
-${PREMAKE} --group=libopenmpt vs2019 --clang --win10 && \
-${PREMAKE} --group=openmpt123 vs2019 --clang --win10 && \
-${PREMAKE} --group=PluginBridge vs2019 --clang --win10 && \
-${PREMAKE} --group=OpenMPT vs2019 --clang --win10 && \
-${PREMAKE} --group=all-externals vs2019 --clang --win10 && \
-echo ok &
-
 ${PREMAKE} --group=libopenmpt_test vs2022 --win7 && \
 ${PREMAKE} --group=in_openmpt vs2022 --win7 && \
 ${PREMAKE} --group=xmp-openmpt vs2022 --win7 && \
