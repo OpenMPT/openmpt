@@ -259,17 +259,61 @@ Type openmpt_module_ext_interface_interactive
 	  \param panning The panning position at which the note should be triggered, in range [-1.0, 1.0], 0.0 is center.
 	  \return The channel on which the note is played. This can pe be passed to stop_note to stop the note. -1 means that no channel could be allocated and the note is not played.
 	  \sa stop_note
+	  \sa note_off
+	  \sa note_fade
 	'/
 	play_note As Function(ByVal mod_ext As openmpt_module_ext Ptr, ByVal instrument As Long, ByVal note As Long, ByVal volume As Double, ByVal panning As Double) As Long
 
 	/'* Stop the note playing on the specified channel
 
 	  \param mod_ext The module handle to work on.
-	  \param channel The channel on which the note should be stopped.
+	  \param channel The channel on which the note should be stopped. This is the value returned by a previous play_note call.
 	  \return 1 on success, 0 on failure (channel out of range).
 	  \sa play_note
+	  \sa note_off
+	  \sa note_fade
 	'/
 	stop_note As Function(ByVal mod_ext As openmpt_module_ext Ptr, ByVal channel As Long) As Long
+
+	/'* Sends a key-off command for the note playing on the specified channel
+
+	  \param channel The channel on which the key-off event should be triggered. This is the value returned by a previous play_note call.
+	  \return 1 on success, 0 on failure (channel out of range).
+	  \remarks This method releases envelopes and sample sustain loops. If the sample has no sustain loop, or if the module does not use instruments, it does nothing.
+	  \sa play_note
+	  \sa stop_note
+	  \sa note_fade
+	 '/
+	note_off As Function(ByVal mod_ext As openmpt_module_ext Ptr, ByVal channel As Long) As Long
+
+	/'* Sends a note fade command for the note playing on the specified channel
+
+	  \param channel The channel on which the note should be faded. This is the value returned by a previous play_note call.
+	  \return 1 on success, 0 on failure (channel out of range).
+	  \remarks This method uses the instrument's fade-out value. If the module does not use instruments, or the instrument's fade-out value is 0, it does nothing.
+	  \sa play_note
+	  \sa stop_note
+	  \sa note_fade
+	 '/
+	note_fade As Function(ByVal mod_ext As openmpt_module_ext Ptr, ByVal channel As Long) As Long
+
+	/'* Set the current panning for a channel
+
+	  \param channel The channel that should be panned. This is the value returned by a previous play_note call.
+	  \param panning The panning position to set on the channel, in range [-1.0, 1.0], 0.0 is center.
+	  \return 1 on success, 0 on failure (channel out of range).
+	  \remarks This command affects subsequent notes played on the same channel, and may itself be overridden by subsequent panning commands encountered in the module itself.
+	  \sa get_channel_panning
+	 '/
+	set_channel_panning As Function(ByVal mod_ext As openmpt_module_ext Ptr, ByVal channel As Long, ByVal panning As Double) As Long
+
+	/'* Get the current panning position for a channel
+
+	  \param channel The channel whose panning should be retrieved. This is the value returned by a previous play_note call.
+	  \return The current channel panning, in range [-1.0, 1.0], 0.0 is center.
+	  \sa set_channel_panning
+	 '/
+	get_channel_panning As Function(ByVal mod_ext As openmpt_module_ext Ptr, ByVal channel As Long) As Double
 End Type
 
 End Extern
