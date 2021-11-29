@@ -703,10 +703,26 @@ BOOL CEffectVis::OnInitDialog()
 	m_marginBottom = MulDiv(20, dpi, 96);
 	m_innerBorder = MulDiv(4, dpi, 96);
 
-	if(m_ModDoc.GetModType() == MOD_TYPE_MPT && IsPcNote(m_startRow))
+	// If first selected row is a PC event (or some other row but there aren't any other effects), default to PC note overwrite mode
+	// and use it as a template for new PC notes that will be created via the visualiser.
+	bool isPCevent = IsPcNote(m_startRow);
+	if(!isPCevent)
 	{
-		// If first selected row is a PC Note, default to PC note overwrite mode
-		// and use it as a template for new PC notes that will be created via the visualiser.
+		for(ROWINDEX row = m_startRow; row <= m_endRow; row++)
+		{
+			if(IsPcNote(row))
+			{
+				isPCevent = true;
+			} else if(GetCommand(row) != CMD_NONE)
+			{
+				isPCevent = false;
+				break;
+			}
+		}
+	}
+
+	if(m_ModDoc.GetModType() == MOD_TYPE_MPT && isPCevent)
+	{
 		m_nAction = kAction_OverwritePC;
 		if(m_SndFile.Patterns.IsValidPat(m_nPattern))
 		{
