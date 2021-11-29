@@ -44,6 +44,11 @@ newoption {
 }
 
 newoption {
+	trigger = "uwp",
+	description = "Generate Windows UWP targetting projects",
+}
+
+newoption {
 	trigger = "clang",
 	description = "ClangCL projects",
 }
@@ -53,7 +58,14 @@ mpt_bindirsuffix = ""
 mpt_bindirsuffix32 = ""
 mpt_bindirsuffix64 = ""
 
-if _OPTIONS["win10"] then
+if _OPTIONS["uwp"] then
+	allplatforms = { "x86", "x86_64", "arm", "arm64" }
+	trkplatforms = { "x86", "x86_64", "arm", "arm64" }
+	mpt_projectpathname = mpt_projectpathname .. "uwp"
+	mpt_bindirsuffix = mpt_bindirsuffix .. "uwp"
+	mpt_bindirsuffix32 = mpt_bindirsuffix32 .. "uwp"
+	mpt_bindirsuffix64 = mpt_bindirsuffix64 .. "uwp"
+elseif _OPTIONS["win10"] then
 	allplatforms = { "x86", "x86_64", "arm", "arm64" }
 	trkplatforms = { "x86", "x86_64", "arm", "arm64" }
 	mpt_projectpathname = mpt_projectpathname .. "win10"
@@ -346,5 +358,69 @@ solution "all-externals"
  dofile "../../build/premake/ext-UnRAR.lua"
  dofile "../../build/premake/ext-vorbis.lua"
  dofile "../../build/premake/ext-zlib.lua"
+
+end
+
+
+
+if _OPTIONS["uwp"] then
+
+	require('vstudio')
+
+	local function mptGlobalsUWP(prj)
+		if _ACTION == 'vs2022' then
+			premake.w('<DefaultLanguage>en-US</DefaultLanguage>')
+			premake.w('<MinimumVisualStudioVersion>15.0</MinimumVisualStudioVersion>')
+			premake.w('<AppContainerApplication>true</AppContainerApplication>')
+			premake.w('<ApplicationType>Windows Store</ApplicationType>')
+			premake.w('<ApplicationTypeRevision>10.0</ApplicationTypeRevision>')
+			premake.w('<WindowsTargetPlatformVersion Condition=" \'$(WindowsTargetPlatformVersion)\' == \'\' ">10.0.22000.0</WindowsTargetPlatformVersion>')
+			premake.w('<WindowsTargetPlatformMinVersion>10.0.17134.0</WindowsTargetPlatformMinVersion>')
+		elseif _ACTION == 'vs2019' then
+			premake.w('<DefaultLanguage>en-US</DefaultLanguage>')
+			premake.w('<MinimumVisualStudioVersion>15.0</MinimumVisualStudioVersion>')
+			premake.w('<AppContainerApplication>true</AppContainerApplication>')
+			premake.w('<ApplicationType>Windows Store</ApplicationType>')
+			premake.w('<ApplicationTypeRevision>10.0</ApplicationTypeRevision>')
+			premake.w('<WindowsTargetPlatformVersion>10.0.20348.0</WindowsTargetPlatformVersion>')
+			premake.w('<WindowsTargetPlatformMinVersion>10.0.10240.0</WindowsTargetPlatformMinVersion>')
+		end
+	end
+
+	local function mptClCompileUWP(prj)
+		premake.w('<CompileAsWinRT>false</CompileAsWinRT>')
+	end
+	
+	local function mptOutputPropertiesUWP(prj)
+		premake.w('<IgnoreImportLibrary>false</IgnoreImportLibrary>')
+	end
+		
+	local function mptProjectReferencesUWP(prj)
+		premake.w('<ReferenceOutputAssembly>false</ReferenceOutputAssembly>')
+	end
+
+	premake.override(premake.vstudio.vc2010.elements, "globals", function(base, prj)
+		local calls = base(prj)
+		table.insert(calls, mptGlobalsUWP)
+		return calls
+	end)
+
+	premake.override(premake.vstudio.vc2010.elements, "clCompile", function(base, prj)
+		local calls = base(prj)
+		table.insert(calls, mptClCompileUWP)
+		return calls
+	end)
+
+	premake.override(premake.vstudio.vc2010.elements, "outputProperties", function(base, prj)
+		local calls = base(prj)
+		table.insert(calls, mptOutputPropertiesUWP)
+		return calls
+	end)
+
+	premake.override(premake.vstudio.vc2010.elements, "projectReferences", function(base, prj)
+		local calls = base(prj)
+		table.insert(calls, mptProjectReferencesUWP)
+		return calls
+	end)
 
 end

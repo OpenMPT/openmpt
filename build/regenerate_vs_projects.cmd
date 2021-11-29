@@ -147,12 +147,27 @@ start cmd /c ^( ^
 %PREMAKE% --group=all-externals vs2022 --clang --win10 ^&^& ^
 echo Done ^) ^|^| pause"
 
+start cmd /c ^( ^
+%PREMAKE% --group=libopenmpt_test vs2019 --win10 --uwp ^&^& ^
+%PREMAKE% --group=libopenmpt-small vs2019 --win10 --uwp ^&^& ^
+%PREMAKE% --group=libopenmpt vs2019 --win10 --uwp ^&^& ^
+%PREMAKE% --group=openmpt123 vs2019 --win10 --uwp ^&^& ^
+%PREMAKE% --group=all-externals vs2019 --win10 --uwp ^&^& ^
+echo Done ^) ^|^| pause"
+
+start cmd /c ^( ^
+%PREMAKE% --group=libopenmpt_test vs2022 --win10 --uwp ^&^& ^
+%PREMAKE% --group=libopenmpt-small vs2022 --win10 --uwp ^&^& ^
+%PREMAKE% --group=libopenmpt vs2022 --win10 --uwp ^&^& ^
+%PREMAKE% --group=openmpt123 vs2022 --win10 --uwp ^&^& ^
+%PREMAKE% --group=all-externals vs2022 --win10 --uwp ^&^& ^
+echo Done ^) ^|^| pause"
+
 
 
 echo dofile "build/genie/genie.lua" > genie.lua || goto err
 
 %GENIE% --target="winstore82"   vs2017 || goto err
-%GENIE% --target="winstore10"   vs2019 || goto err
 
 
 

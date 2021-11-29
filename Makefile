@@ -1492,6 +1492,7 @@ bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION).msvc.zip: bin/dist.mk bin/svn
 	svn export ./build/vs2022win7             bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/vs2022win7             --native-eol CRLF
 	svn export ./build/vs2022win81            bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/vs2022win81            --native-eol CRLF
 	svn export ./build/vs2022win10            bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/vs2022win10            --native-eol CRLF
+	svn export ./build/vs2022uwp              bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/vs2022uwp              --native-eol CRLF
 	svn export ./build/vs2022win10clang       bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/vs2022win10clang       --native-eol CRLF
 	svn export ./build/download_externals.cmd bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/download_externals.cmd --native-eol CRLF
 	svn export ./common                bin/dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/common                --native-eol CRLF

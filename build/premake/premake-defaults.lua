@@ -48,7 +48,7 @@
 
 	filter {}
 	filter { "action:vs*" }
-		if not _OPTIONS["clang"] and not _OPTIONS["winxp"] then
+		if not _OPTIONS["clang"] and not _OPTIONS["winxp"] and not _OPTIONS["uwp"] then
 			spectremitigations "On"
 		end
 	filter {}
@@ -174,7 +174,9 @@
 	filter { "configurations:Debug", "architecture:not ARM", "architecture:not ARM64" }
 		symbols "FastLink"
 	filter { "configurations:Debug" }
-   staticruntime "On"
+		if not _OPTIONS["uwp"] then
+			staticruntime "On"
+		end
 	 runtime "Debug"
    optimize "Debug"
 
@@ -192,7 +194,9 @@
    defines { "MPT_BUILD_MSVC_STATIC" }
    defines { "MPT_BUILD_CHECKED" }
    symbols "On"
-   staticruntime "On"
+		if not _OPTIONS["uwp"] then
+			staticruntime "On"
+		end
 	 runtime "Release"
    optimize "On"
 	 omitframepointer "Off"
@@ -214,7 +218,9 @@
 		if not _OPTIONS["clang"] then
 			flags { "LinkTimeOptimization" }
 		end
-   staticruntime "On"
+		if not _OPTIONS["uwp"] then
+			staticruntime "On"
+		end
 	 runtime "Release"
    optimize "Speed"
 
