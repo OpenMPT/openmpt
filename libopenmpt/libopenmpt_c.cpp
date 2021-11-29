@@ -1723,8 +1723,9 @@ static int stop_note( openmpt_module_ext * mod_ext, int32_t channel ) {
 	return 0;
 }
 
-static int note_off( openmpt_module_ext * mod_ext, int32_t channel )
-{
+
+
+static int note_off( openmpt_module_ext * mod_ext, int32_t channel ) {
 	try {
 		openmpt::interface::check_soundfile( mod_ext );
 		mod_ext->impl->note_off(channel );
@@ -1734,9 +1735,7 @@ static int note_off( openmpt_module_ext * mod_ext, int32_t channel )
 	}
 	return 0;
 }
-
-static int note_fade( openmpt_module_ext * mod_ext, int32_t channel )
-{
+static int note_fade( openmpt_module_ext * mod_ext, int32_t channel ) {
 	try {
 		openmpt::interface::check_soundfile( mod_ext );
 		mod_ext->impl->note_fade(channel );
@@ -1746,9 +1745,7 @@ static int note_fade( openmpt_module_ext * mod_ext, int32_t channel )
 	}
 	return 0;
 }
-
-static int set_channel_panning( openmpt_module_ext * mod_ext, int32_t channel, double panning )
-{
+static int set_channel_panning( openmpt_module_ext * mod_ext, int32_t channel, double panning ) {
 	try {
 		openmpt::interface::check_soundfile( mod_ext );
 		mod_ext->impl->set_channel_panning( channel, panning );
@@ -1758,9 +1755,7 @@ static int set_channel_panning( openmpt_module_ext * mod_ext, int32_t channel, d
 	}
 	return 0;
 }
-
-static double get_channel_panning( openmpt_module_ext * mod_ext, int32_t channel )
-{
+static double get_channel_panning( openmpt_module_ext * mod_ext, int32_t channel ) {
 	try {
 		openmpt::interface::check_soundfile( mod_ext );
 		return mod_ext->impl->get_channel_panning( channel );
@@ -1769,6 +1764,8 @@ static double get_channel_panning( openmpt_module_ext * mod_ext, int32_t channel
 	}
 	return 0.0;
 }
+
+
 
 /* add stuff here */
 
