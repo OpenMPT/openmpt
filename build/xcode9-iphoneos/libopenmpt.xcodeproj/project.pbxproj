@@ -2019,6 +2019,30 @@
 					"*/src/mpt/test/test_macros.hpp",
 					"*/src/mpt/uuid_namespace/tests/tests_uuid_namespace.hpp",
 					"*/src/mpt/uuid_namespace/uuid_namespace.hpp",
+					"*/src/openmpt/sounddevice/SoundDevice.cpp",
+					"*/src/openmpt/sounddevice/SoundDevice.hpp",
+					"*/src/openmpt/sounddevice/SoundDeviceASIO.cpp",
+					"*/src/openmpt/sounddevice/SoundDeviceASIO.hpp",
+					"*/src/openmpt/sounddevice/SoundDeviceBase.cpp",
+					"*/src/openmpt/sounddevice/SoundDeviceBase.hpp",
+					"*/src/openmpt/sounddevice/SoundDeviceBuffer.hpp",
+					"*/src/openmpt/sounddevice/SoundDeviceCallback.hpp",
+					"*/src/openmpt/sounddevice/SoundDeviceDirectSound.cpp",
+					"*/src/openmpt/sounddevice/SoundDeviceDirectSound.hpp",
+					"*/src/openmpt/sounddevice/SoundDeviceManager.cpp",
+					"*/src/openmpt/sounddevice/SoundDeviceManager.hpp",
+					"*/src/openmpt/sounddevice/SoundDevicePortAudio.cpp",
+					"*/src/openmpt/sounddevice/SoundDevicePortAudio.hpp",
+					"*/src/openmpt/sounddevice/SoundDevicePulseSimple.cpp",
+					"*/src/openmpt/sounddevice/SoundDevicePulseSimple.hpp",
+					"*/src/openmpt/sounddevice/SoundDevicePulseaudio.cpp",
+					"*/src/openmpt/sounddevice/SoundDevicePulseaudio.hpp",
+					"*/src/openmpt/sounddevice/SoundDeviceRtAudio.cpp",
+					"*/src/openmpt/sounddevice/SoundDeviceRtAudio.hpp",
+					"*/src/openmpt/sounddevice/SoundDeviceUtilities.cpp",
+					"*/src/openmpt/sounddevice/SoundDeviceUtilities.hpp",
+					"*/src/openmpt/sounddevice/SoundDeviceWaveout.cpp",
+					"*/src/openmpt/sounddevice/SoundDeviceWaveout.hpp",
 				);
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
@@ -2038,7 +2062,6 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
-					../../include,
 					../../include/mpg123/ports/Xcode,
 					../../include/mpg123/src/libmpg123,
 					../../include/ogg/include,
@@ -2092,6 +2115,30 @@
 					"*/src/mpt/test/test_macros.hpp",
 					"*/src/mpt/uuid_namespace/tests/tests_uuid_namespace.hpp",
 					"*/src/mpt/uuid_namespace/uuid_namespace.hpp",
+					"*/src/openmpt/sounddevice/SoundDevice.cpp",
+					"*/src/openmpt/sounddevice/SoundDevice.hpp",
+					"*/src/openmpt/sounddevice/SoundDeviceASIO.cpp",
+					"*/src/openmpt/sounddevice/SoundDeviceASIO.hpp",
+					"*/src/openmpt/sounddevice/SoundDeviceBase.cpp",
+					"*/src/openmpt/sounddevice/SoundDeviceBase.hpp",
+					"*/src/openmpt/sounddevice/SoundDeviceBuffer.hpp",
+					"*/src/openmpt/sounddevice/SoundDeviceCallback.hpp",
+					"*/src/openmpt/sounddevice/SoundDeviceDirectSound.cpp",
+					"*/src/openmpt/sounddevice/SoundDeviceDirectSound.hpp",
+					"*/src/openmpt/sounddevice/SoundDeviceManager.cpp",
+					"*/src/openmpt/sounddevice/SoundDeviceManager.hpp",
+					"*/src/openmpt/sounddevice/SoundDevicePortAudio.cpp",
+					"*/src/openmpt/sounddevice/SoundDevicePortAudio.hpp",
+					"*/src/openmpt/sounddevice/SoundDevicePulseSimple.cpp",
+					"*/src/openmpt/sounddevice/SoundDevicePulseSimple.hpp",
+					"*/src/openmpt/sounddevice/SoundDevicePulseaudio.cpp",
+					"*/src/openmpt/sounddevice/SoundDevicePulseaudio.hpp",
+					"*/src/openmpt/sounddevice/SoundDeviceRtAudio.cpp",
+					"*/src/openmpt/sounddevice/SoundDeviceRtAudio.hpp",
+					"*/src/openmpt/sounddevice/SoundDeviceUtilities.cpp",
+					"*/src/openmpt/sounddevice/SoundDeviceUtilities.hpp",
+					"*/src/openmpt/sounddevice/SoundDeviceWaveout.cpp",
+					"*/src/openmpt/sounddevice/SoundDeviceWaveout.hpp",
 				);
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -2109,7 +2156,6 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
-					../../include,
 					../../include/mpg123/ports/Xcode,
 					../../include/mpg123/src/libmpg123,
 					../../include/ogg/include,

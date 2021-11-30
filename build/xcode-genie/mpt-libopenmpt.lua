@@ -8,7 +8,6 @@
   dofile "../../build/xcode-genie/genie-defaults-LIBorDLL.lua"
   dofile "../../build/xcode-genie/genie-defaults.lua"
   local extincludedirs = {
-   "../../include",
    "../../include/mpg123/ports/Xcode",
    "../../include/mpg123/src/libmpg123",
    "../../include/ogg/include",
@@ -65,6 +64,8 @@
 		"../../src/mpt/test/**.hpp",
 		"../../src/mpt/uuid_namespace/**.cpp",
 		"../../src/mpt/uuid_namespace/**.hpp",
+		"../../src/openmpt/sounddevice/**.cpp",
+		"../../src/openmpt/sounddevice/**.hpp",
 	}
 	configuration {}
 
