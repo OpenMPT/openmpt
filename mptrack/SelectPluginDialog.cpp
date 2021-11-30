@@ -154,7 +154,7 @@ void CSelectPluginDlg::OnOK()
 			m_pPlugin->Info.dwPluginId2 = pFactory->pluginId2;
 			m_pPlugin->editorX = m_pPlugin->editorY = int32_min;
 
-#ifndef NO_VST
+#ifdef MPT_WITH_VST
 			if(m_pPlugin->Info.dwPluginId1 == Vst::kEffectMagic)
 			{
 				switch(m_pPlugin->Info.dwPluginId2)
@@ -165,7 +165,7 @@ void CSelectPluginDlg::OnOK()
 					break;
 				}
 			}
-#endif // NO_VST
+#endif // MPT_WITH_VST
 
 			m_pPlugin->Info.szName = pFactory->libraryName.ToLocale();
 			m_pPlugin->Info.szLibraryName = pFactory->libraryName.ToUTF8();
@@ -410,12 +410,12 @@ void CSelectPluginDlg::UpdatePluginsList(const VSTPluginLib *forceSelect)
 			}
 
 			CString title = plug.libraryName.ToCString();
-#ifndef NO_VST
+#ifdef MPT_WITH_VST
 			if(!plug.IsNativeFromCache())
 			{
 				title += MPT_CFORMAT(" ({})")(plug.GetDllArchNameUser());
 			}
-#endif // !NO_VST
+#endif // MPT_WITH_VST
 			HTREEITEM h = AddTreeItem(title, plug.isInstrument ? IMAGE_PLUGININSTRUMENT : IMAGE_EFFECTPLUGIN, true, categoryFolders[plug.category], reinterpret_cast<LPARAM>(&plug));
 			categoryUsed[plug.category] = true;
 
@@ -461,11 +461,11 @@ void CSelectPluginDlg::UpdatePluginsList(const VSTPluginLib *forceSelect)
 				} else if(plug.pluginId2 == lastPluginID && foundPlugin < kSameIdAsLastWithPlatformMatch)
 				{
 					// Previously selected plugin
-#ifndef NO_VST
+#ifdef MPT_WITH_VST
 					foundPlugin = plug.IsNativeFromCache() ? kSameIdAsLastWithPlatformMatch : kSameIdAsLast;
-#else // NO_VST
+#else // !MPT_WITH_VST
 					foundPlugin = kSameIdAsLastWithPlatformMatch;
-#endif // !NO_VST
+#endif // MPT_WITH_VST
 					currentPlug = h;
 				}
 			}
@@ -537,7 +537,7 @@ void CSelectPluginDlg::OnSelChanged(NMHDR *, LRESULT *result)
 			SetDlgItemText(IDC_TEXT_CURRENT_VSTPLUG, pPlug->dllPath.ToCString());
 		SetDlgItemText(IDC_PLUGINTAGS, mpt::ToCString(pPlug->tags));
 		enableRemoveButton = pPlug->isBuiltIn ? FALSE : TRUE;
-#ifndef NO_VST
+#ifdef MPT_WITH_VST
 		if(pPlug->pluginId1 == Vst::kEffectMagic && !pPlug->isBuiltIn)
 		{
 			bool isBridgeAvailable =
@@ -580,7 +580,7 @@ void CSelectPluginDlg::OnSelChanged(NMHDR *, LRESULT *result)
 			showBoxes = true;
 		}
 		enableTagsTextBox = TRUE;
-#endif
+#endif // MPT_WITH_VST
 	} else
 	{
 		SetDlgItemText(IDC_VENDOR, _T(""));
@@ -602,7 +602,7 @@ void CSelectPluginDlg::OnSelChanged(NMHDR *, LRESULT *result)
 }
 
 
-#ifndef NO_VST
+#ifdef MPT_WITH_VST
 namespace
 {
 // TODO: Keep these lists up-to-date.
@@ -637,12 +637,12 @@ constexpr struct
 	{Vst::kEffectMagic, Vst::FourCC("S1Vs"), mpt::arch_bits == 64, true, false},  // Synth1 64-bit has an issue with pointers using the high 32 bits, hence must use the legacy bridge without high-entropy heap
 };
 }  // namespace
-#endif
+#endif // MPT_WITH_VST
 
 
 bool CSelectPluginDlg::VerifyPlugin(VSTPluginLib *plug, CWnd *parent)
 {
-#ifndef NO_VST
+#ifdef MPT_WITH_VST
 	for(const auto &p : ProblematicPlugins)
 	{
 		if(p.id2 == plug->pluginId2 && p.id1 == plug->pluginId1)
@@ -668,10 +668,10 @@ bool CSelectPluginDlg::VerifyPlugin(VSTPluginLib *plug, CWnd *parent)
 			break;
 		}
 	}
-#else // NO_VST
+#else // !MPT_WITH_VST
 	MPT_UNREFERENCED_PARAMETER(plug);
 	MPT_UNREFERENCED_PARAMETER(parent);
-#endif // NO_VST
+#endif // MPT_WITH_VST
 	return true;
 }
 

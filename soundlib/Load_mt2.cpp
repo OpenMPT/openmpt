@@ -15,9 +15,9 @@
 // For loading external samples
 #include "../common/mptPathString.h"
 #endif // MPT_EXTERNAL_SAMPLES
-#ifndef NO_VST
+#ifdef MPT_WITH_VST
 #include "../mptrack/Vstplug.h"
-#endif // NO_VST
+#endif // MPT_WITH_VST
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -670,7 +670,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 
 		case MagicLE("VST2"):
 			numVST = chunk.ReadUint32LE();
-#ifndef NO_VST
+#ifdef MPT_WITH_VST
 			if(!(loadFlags & loadPluginData))
 			{
 				break;
@@ -753,7 +753,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 					break;
 				}
 			}
-#endif // NO_VST
+#endif // MPT_WITH_VST
 			break;
 		}
 	}

@@ -17,7 +17,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-#ifndef NO_VST
+#ifdef MPT_WITH_VST
 
 BEGIN_MESSAGE_MAP(COwnerVstEditor, CAbstractVstEditor)
 	ON_WM_ERASEBKGND()
@@ -140,7 +140,7 @@ bool COwnerVstEditor::SetSize(int contentWidth, int contentHeight)
 }
 
 
-#endif // NO_VST
+#endif // MPT_WITH_VST
 
 
 OPENMPT_NAMESPACE_END

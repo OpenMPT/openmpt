@@ -403,7 +403,7 @@ mpt::ustring GetBuildFeaturesString()
 		#else
 			UL_(" ANSI")
 		#endif
-		#ifdef NO_VST
+		#ifndef MPT_WITH_VST
 			UL_(" NO_VST")
 		#endif
 		#ifndef MPT_WITH_DMO
@@ -628,7 +628,7 @@ mpt::ustring GetFullCreditsString()
 		"https://www.surina.net/soundtouch/\n"
 		"\n"
 #endif
-#ifndef NO_VST
+#ifdef MPT_WITH_VST
 		"Hermann Seib for his example VST Host implementation\n"
 		"http://www.hermannseib.com/english/vsthost.htm\n"
 		"\n"
@@ -778,7 +778,7 @@ mpt::ustring GetFullCreditsString()
 		"Harbinger, jmkz, KrazyKatz, LPChip, Nofold, Rakib, Sam Zen\n"
 		"Skaven, Skilletaudio, Snu, Squirrel Havoc, Teimoso, Waxhead\n"
 		"\n"
-#ifndef NO_VST
+#ifdef MPT_WITH_VST
 		"VST PlugIn Technology by Steinberg Media Technologies GmbH\n"
 		"\n"
 #endif

@@ -41,10 +41,10 @@
 #include "../Sndfile.h"
 #include "../Loaders.h"
 
-#ifndef NO_VST
+#ifdef MPT_WITH_VST
 #include "../../mptrack/Vstplug.h"
 #include "../../pluginBridge/BridgeWrapper.h"
-#endif // NO_VST
+#endif // MPT_WITH_VST
 
 #if defined(MPT_WITH_DMO)
 #include <winreg.h>
@@ -78,7 +78,7 @@ static constexpr const mpt::uchar *cacheSection = UL_("PluginCache");
 #endif // MODPLUG_TRACKER
 
 
-#ifndef NO_VST
+#ifdef MPT_WITH_VST
 
 
 uint8 VSTPluginLib::GetNativePluginArch()
@@ -182,14 +182,14 @@ uint8 VSTPluginLib::GetDllArch(bool fromCache) const
 	// Built-in plugins are always native.
 	if(dllPath.empty())
 		return GetNativePluginArch();
-#ifndef NO_VST
+#ifdef MPT_WITH_VST
 	if(!dllArch || !fromCache)
 	{
 		dllArch = static_cast<uint8>(BridgeWrapper::GetPluginBinaryType(dllPath));
 	}
-#else
+#else // !MPT_WITH_VST
 	MPT_UNREFERENCED_PARAMETER(fromCache);
-#endif // NO_VST
+#endif // MPT_WITH_VST
 	return dllArch;
 }
 
@@ -218,7 +218,7 @@ bool VSTPluginLib::IsNativeFromCache() const
 }
 
 
-#endif // !NO_VST
+#endif // MPT_WITH_VST
 
 
 // PluginCache format:
@@ -436,7 +436,7 @@ void CVstPluginManager::EnumerateDirectXDMOs()
 
 
 // Extract instrument and category information from plugin.
-#ifndef NO_VST
+#ifdef MPT_WITH_VST
 static void GetPluginInformation(bool maskCrashes, Vst::AEffect *effect, VSTPluginLib &library)
 {
 	unsigned long exception = 0;
@@ -457,10 +457,10 @@ static void GetPluginInformation(bool maskCrashes, Vst::AEffect *effect, VSTPlug
 	library.vendor = mpt::ToCString(mpt::Charset::Locale, s.data());
 #endif // MODPLUG_TRACKER
 }
-#endif // NO_VST
+#endif // MPT_WITH_VST
 
 
-#ifndef NO_VST
+#ifdef MPT_WITH_VST
 static bool TryLoadPlugin(bool maskCrashes, VSTPluginLib *plug, HINSTANCE hLib, unsigned long &exception)
 {
 	Vst::AEffect *pEffect = CVstPlugin::LoadPlugin(maskCrashes, *plug, hLib, CVstPlugin::BridgeMode::DetectRequiredBridgeMode);
@@ -574,7 +574,7 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 		return nullptr;
 	}
 
-#ifndef NO_VST
+#ifdef MPT_WITH_VST
 	unsigned long exception = 0;
 	// Always scan plugins in a separate process
 	HINSTANCE hLib = NULL;
@@ -592,7 +592,7 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 		CVstPluginManager::ReportPlugException(MPT_UFORMAT("Exception {} while trying to load plugin \"{}\"!\n")(mpt::ufmt::HEX0<8>(exception), plug->libraryName));
 	}
 
-#endif // NO_VST
+#endif // MPT_WITH_VST
 
 	// Now it should be safe to assume that this plugin loaded properly. :)
 	theApp.GetSettings().Remove(U_("VST Plugins"), U_("FailedPlugin"));
@@ -672,12 +672,12 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 		if(matchID && matchName)
 		{
 			pFound = plug;
-#ifndef NO_VST
+#ifdef MPT_WITH_VST
 			if(plug->IsNative(false))
 			{
 				break;
 			}
-#endif //!NO_VST
+#endif // MPT_WITH_VST
 			// If the plugin isn't native, first check if a native version can be found.
 			match = kMatchNameAndId;
 		} else if(matchID && match < kMatchId)
@@ -731,7 +731,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 		}
 	}
 
-#ifndef NO_VST
+#ifdef MPT_WITH_VST
 	if(pFound && mixPlugin.Info.dwPluginId1 == Vst::kEffectMagic)
 	{
 		Vst::AEffect *pEffect = nullptr;
@@ -769,7 +769,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 		MPT_LOG_GLOBAL(LogDebug, "VST", U_("Unknown plugin"));
 #endif
 	}
-#endif // NO_VST
+#endif // MPT_WITH_VST
 
 #endif // MODPLUG_TRACKER
 	return false;

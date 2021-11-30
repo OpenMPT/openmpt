@@ -108,6 +108,7 @@
 #define MPT_WITH_SMBPITCHSHIFT
 #define MPT_WITH_UNRAR
 #define MPT_WITH_VORBISENC
+#define MPT_WITH_VST
 
 // OpenMPT and libopenmpt dependencies (not for openmp123, player plugins or examples)
 //#define MPT_WITH_DL
@@ -264,9 +265,6 @@
 // Disable the built-in automatic gain control
 //#define NO_AGC
 
-// Define to build without VST plugin support; makes build possible without VST SDK.
-//#define NO_VST
-
 // (HACK) Define to build without any plugin support
 //#define NO_PLUGINS
 
@@ -309,7 +307,6 @@
 #define NO_DSP
 #define NO_EQ
 #define NO_AGC
-#define NO_VST
 //#define NO_PLUGINS
 
 #endif // LIBOPENMPT_BUILD
@@ -467,7 +464,9 @@
 
 #if defined(NO_PLUGINS)
 // Any plugin type requires NO_PLUGINS to not be defined.
-#define NO_VST
+#if defined(MPT_WITH_VST)
+#undef MPT_WITH_VST
+#endif
 #endif
 
 

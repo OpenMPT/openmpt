@@ -10,7 +10,7 @@
 
 #include "stdafx.h"
 
-#ifndef NO_VST
+#ifdef MPT_WITH_VST
 #include "BridgeWrapper.h"
 #include "../soundlib/plugins/PluginManager.h"
 #include "../mptrack/Mainfrm.h"
@@ -1279,7 +1279,7 @@ LRESULT CALLBACK BridgeWrapper::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, 
 	return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
 
-#endif  // NO_VST
+#endif  // MPT_WITH_VST
 
 
 OPENMPT_NAMESPACE_END

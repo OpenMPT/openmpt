@@ -502,11 +502,11 @@ void CAbstractVstEditor::SetTitle()
 		if(hasCustomName)
 			title += _T(")");
 
-#ifndef NO_VST
+#ifdef MPT_WITH_VST
 		const CVstPlugin *vstPlugin = dynamic_cast<CVstPlugin *>(&m_VstPlugin);
 		if(vstPlugin != nullptr && vstPlugin->isBridged)
 			title += MPT_CFORMAT(" ({} Bridged)")(m_VstPlugin.GetPluginFactory().GetDllArchNameUser());
-#endif // NO_VST
+#endif // MPT_WITH_VST
 
 		if(m_VstPlugin.IsBypassed())
 			title += _T(" - Bypass");

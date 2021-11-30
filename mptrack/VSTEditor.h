@@ -16,7 +16,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-#ifndef NO_VST
+#ifdef MPT_WITH_VST
 
 class COwnerVstEditor : public CAbstractVstEditor
 {
@@ -54,6 +54,6 @@ protected:
 	DECLARE_MESSAGE_MAP()
 };
 
-#endif // NO_VST
+#endif // MPT_WITH_VST
 
 OPENMPT_NAMESPACE_END

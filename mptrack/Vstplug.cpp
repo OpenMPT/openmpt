@@ -10,7 +10,7 @@
 
 #include "stdafx.h"
 
-#ifndef NO_VST
+#ifdef MPT_WITH_VST
 
 #include "Vstplug.h"
 #ifdef MODPLUG_TRACKER
@@ -1759,4 +1759,4 @@ void CVstPlugin::SetChunk(const ChunkData &chunk, bool isBank)
 
 OPENMPT_NAMESPACE_END
 
-#endif // NO_VST
+#endif // MPT_WITH_VST

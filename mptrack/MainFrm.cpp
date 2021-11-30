@@ -192,7 +192,7 @@ void CMainFrame::Initialize()
 	{
 		title += _T(" DEBUG");
 	}
-	#ifdef NO_VST
+	#ifndef MPT_WITH_VST
 		title += _T(" NO_VST");
 	#endif
 	#ifndef MPT_WITH_DMO
@@ -3186,14 +3186,14 @@ void AddPluginNamesToCombobox(CComboBox &CBox, const SNDMIXPLUGIN *plugarray, co
 			str += _T(" (") + mpt::ToWin(libName) + _T(")");
 		else if(plugName.empty() && (!libraryName || libName.empty()))
 			str += _T("--");
-#ifndef NO_VST
+#ifdef MPT_WITH_VST
 		auto *vstPlug = dynamic_cast<const CVstPlugin *>(plugin.pMixPlugin);
 		if(vstPlug != nullptr && vstPlug->isBridged)
 		{
 			VSTPluginLib &lib = vstPlug->GetPluginFactory();
 			str += MPT_TFORMAT(" ({} Bridged)")(lib.GetDllArchNameUser());
 		}
-#endif // NO_VST
+#endif // MPT_WITH_VST
 
 		insertAt = CBox.InsertString(insertAt, str.c_str());
 		CBox.SetItemData(insertAt, plug + 1);

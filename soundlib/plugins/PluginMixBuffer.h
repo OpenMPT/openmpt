@@ -15,7 +15,7 @@
 #include <algorithm>
 #include <array>
 
-#if defined(ENABLE_ASM) || !defined(NO_VST)
+#if defined(ENABLE_ASM) || defined(MPT_WITH_VST)
 #include "mpt/base/aligned_array.hpp"
 #endif
 
@@ -32,7 +32,7 @@ class PluginMixBuffer
 
 private:
 
-#if defined(ENABLE_ASM) || !defined(NO_VST)
+#if defined(ENABLE_ASM) || defined(MPT_WITH_VST)
 	static constexpr std::align_val_t alignment = std::align_val_t{16};
 	static_assert(sizeof(mpt::aligned_array<buffer_t, bufferSize, alignment>) == sizeof(std::array<buffer_t, bufferSize>));
 	static_assert(alignof(mpt::aligned_array<buffer_t, bufferSize, alignment>) == static_cast<std::size_t>(alignment));
@@ -40,7 +40,7 @@ private:
 
 protected:
 
-#if defined(ENABLE_ASM) || !defined(NO_VST)
+#if defined(ENABLE_ASM) || defined(MPT_WITH_VST)
 	std::vector<mpt::aligned_array<buffer_t, bufferSize, alignment>> inputs;
 	std::vector<mpt::aligned_array<buffer_t, bufferSize, alignment>> outputs;
 #else

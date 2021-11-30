@@ -90,7 +90,7 @@ public:
 	{
 	}
 
-#ifndef NO_VST
+#ifdef MPT_WITH_VST
 
 	// Get native phost process arch encoded as plugin arch
 	static uint8 GetNativePluginArch();
@@ -106,7 +106,7 @@ public:
 	// (e.g. if tons of unscanned plugins would slow down generation of the plugin selection dialog)
 	bool IsNativeFromCache() const;
 
-#endif // !NO_VST
+#endif // MPT_WITH_VST
 
 	void WriteToCache() const;
 

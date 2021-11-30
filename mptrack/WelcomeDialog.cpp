@@ -44,7 +44,7 @@ BOOL WelcomeDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
-#ifndef NO_VST
+#ifdef MPT_WITH_VST
 	HKEY hkEnum = NULL;
 	TCHAR str[MAX_PATH];
 	DWORD datasize = sizeof(str);
@@ -69,7 +69,7 @@ BOOL WelcomeDlg::OnInitDialog()
 			TrackerSettings::Instance().PathPlugins.SetDefaultDir(m_vstPath);
 		}
 	} else
-#endif
+#endif // MPT_WITH_VST
 	{
 		SetDlgItemText(IDC_EDIT1, _T("No plugin path found!"));
 		GetDlgItem(IDC_BUTTON2)->EnableWindow(FALSE);
@@ -143,9 +143,9 @@ void WelcomeDlg::OnOptions()
 
 void WelcomeDlg::OnScanPlugins()
 {
-#ifndef NO_VST
+#ifdef MPT_WITH_VST
 	CSelectPluginDlg::ScanPlugins(m_vstPath, this);
-#endif
+#endif // MPT_WITH_VST
 }
 
 

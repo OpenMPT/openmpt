@@ -10,10 +10,10 @@
 #include "stdafx.h"
 #include "Loaders.h"
 
-#ifndef NO_VST
+#ifdef MPT_WITH_VST
 #include "../mptrack/Vstplug.h"
 #include "plugins/PluginManager.h"
-#endif
+#endif  // MPT_WITH_VST
 #include "mpt/io/base.hpp"
 #include "mpt/io/io.hpp"
 #include "mpt/io/io_span.hpp"
@@ -585,7 +585,7 @@ static void ConvertMEDEffect(ModCommand &m, bool is8ch, bool bpmMode, uint8 rows
 	}
 }
 
-#ifndef NO_VST
+#ifdef MPT_WITH_VST
 static std::wstring ReadMEDStringUTF16BE(FileReader &file)
 {
 	FileReader chunk = file.ReadChunk(file.ReadUint32BE());
@@ -596,7 +596,7 @@ static std::wstring ReadMEDStringUTF16BE(FileReader &file)
 	}
 	return s;
 }
-#endif
+#endif  // MPT_WITH_VST
 
 
 static void MEDReadNextSong(FileReader &file, MMD0FileHeader &fileHeader, MMD0Exp &expData, MMDSong &songHeader)
@@ -747,9 +747,9 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 
 	bool needInstruments = false;
 	bool anySynthInstrs = false;
-#ifndef NO_VST
+#ifdef MPT_WITH_VST
 	PLUGINDEX numPlugins = 0;
-#endif
+#endif  // MPT_WITH_VST
 	for(SAMPLEINDEX ins = 1, smp = 1; ins <= m_nInstruments; ins++)
 	{
 		if(!AllocateInstrument(ins, smp))
@@ -766,7 +766,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 		const bool isSynth = instrHeader.type < 0;
 		const size_t maskedType = static_cast<size_t>(instrHeader.type & MMDInstrHeader::TYPEMASK);
 
-#ifndef NO_VST
+#ifdef MPT_WITH_VST
 		if(instrHeader.type == MMDInstrHeader::VSTI)
 		{
 			needInstruments = true;
@@ -790,7 +790,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 				numPlugins++;
 			}
 		} else
-#endif  // NO_VST
+#endif  // MPT_WITH_VST
 		if(isSynth)
 		{
 			// TODO: Figure out synth instruments
@@ -860,7 +860,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 			instr.nMidiChannel = sampleHeader.midiChannel - 1 + MidiFirstChannel;
 			needInstruments = true;
 
-#ifndef NO_VST
+#ifdef MPT_WITH_VST
 			if(!isSynth)
 			{
 				auto &mixPlug = m_MixPlugins[numPlugins];
@@ -876,7 +876,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 
 				numPlugins++;
 			}
-#endif  // NO_VST
+#endif  // MPT_WITH_VST
 		}
 		if(sampleHeader.midiPreset > 0 && sampleHeader.midiPreset <= 128)
 		{
@@ -975,7 +975,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 				ins.nGlobalVol = (instrExt.volume + 1u) / 2u;
 			if(size > offsetof(MMDInstrExt, midiBank))
 				ins.wMidiBank = instrExt.midiBank;
-#ifndef NO_VST
+#ifdef MPT_WITH_VST
 			if(ins.nMixPlug > 0)
 			{
 				PLUGINDEX plug = ins.nMixPlug - 1;
@@ -1004,7 +1004,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 					}
 				}
 			}
-#endif  // NO_VST
+#endif  // MPT_WITH_VST
 
 			ModSample &sample = Samples[ins.Keyboard[NOTE_MIDDLEC]];
 			sample.nFineTune = MOD2XMFineTune(instrExt.finetune);
@@ -1197,7 +1197,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 			m_songMessage.Read(file, expData.annoLength - 1, SongMessage::leAutodetect);
 		}
 
-#ifndef NO_VST
+#ifdef MPT_WITH_VST
 		// Read MIDI messages
 		if(expData.midiDumpOffset && file.Seek(expData.midiDumpOffset) && file.CanRead(8))
 		{
@@ -1226,7 +1226,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 				}
 			}
 		}
-#endif
+#endif  // MPT_WITH_VST
 
 		if(expData.mmdInfoOffset && file.Seek(expData.mmdInfoOffset) && file.CanRead(12))
 		{

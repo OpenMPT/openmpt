@@ -14,7 +14,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-#ifndef NO_VST
+#ifdef MPT_WITH_VST
 inline constexpr const char *VstOpCodes[] =
 {
 	"effOpen",

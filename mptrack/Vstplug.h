@@ -12,7 +12,7 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
-#ifndef NO_VST
+#ifdef MPT_WITH_VST
 
 #include "../soundlib/Snd_defs.h"
 #include "../soundlib/plugins/PlugInterface.h"
@@ -182,4 +182,4 @@ protected:
 
 OPENMPT_NAMESPACE_END
 
-#endif // NO_VST
+#endif // MPT_WITH_VST
