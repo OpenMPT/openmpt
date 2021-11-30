@@ -8,6 +8,8 @@ is just a high-level summary.
 ### libopenmpt 0.5.14-pre
 
  *  miniz: Update to v2.2.0 (2021-06-27).
+ *  minimp3: Update to commit 50d2aaf360a53653b718fead8e258d654c3a7e41
+    (2021-11-27).
 
 ### libopenmpt 0.5.13 (2021-11-14)
 
