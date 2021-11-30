@@ -599,7 +599,6 @@
     <ClInclude Include="..\..\..\include\portaudio\src\common\pa_util.h" />
     <ClInclude Include="..\..\..\include\portaudio\src\hostapi\dsound\pa_win_ds_dynlink.h" />
     <ClInclude Include="..\..\..\include\portaudio\src\os\win\pa_win_coinitialize.h" />
-    <ClInclude Include="..\..\..\include\portaudio\src\os\win\pa_win_wdmks_utils.h" />
     <ClInclude Include="..\..\..\include\portaudio\src\os\win\pa_x86_plain_converters.h" />
   </ItemGroup>
   <ItemGroup>
@@ -621,7 +620,6 @@
     <ClCompile Include="..\..\..\include\portaudio\src\os\win\pa_win_hostapis.c" />
     <ClCompile Include="..\..\..\include\portaudio\src\os\win\pa_win_util.c" />
     <ClCompile Include="..\..\..\include\portaudio\src\os\win\pa_win_waveformat.c" />
-    <ClCompile Include="..\..\..\include\portaudio\src\os\win\pa_win_wdmks_utils.c" />
     <ClCompile Include="..\..\..\include\portaudio\src\os\win\pa_x86_plain_converters.c" />
     <ClCompile Include="..\..\premake\lnk\ext-portaudio.c" />
   </ItemGroup>

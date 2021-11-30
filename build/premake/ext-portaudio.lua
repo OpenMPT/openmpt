@@ -20,6 +20,14 @@
 				"PA_USE_WASAPI=0",
 				"PA_USE_WDMKS=0",
 			}
+		elseif _OPTIONS["uwp"] then
+			defines {
+				"PA_USE_ASIO=0",
+				"PA_USE_DS=0",
+				"PA_USE_WMME=0",
+				"PA_USE_WASAPI=1",
+				"PA_USE_WDMKS=0",
+			}
 		else
 			defines {
 				"PAWIN_USE_WDMKS_DEVICE_INFO",
@@ -59,28 +67,33 @@
    "../../include/portaudio/src/common/pa_types.h",
    "../../include/portaudio/src/common/pa_util.h",
    "../../include/portaudio/src/hostapi/skeleton/pa_hostapi_skeleton.c",
-   "../../include/portaudio/src/hostapi/wmme/pa_win_wmme.c",
    "../../include/portaudio/src/os/win/pa_win_coinitialize.c",
    "../../include/portaudio/src/os/win/pa_win_coinitialize.h",
    "../../include/portaudio/src/os/win/pa_win_hostapis.c",
    "../../include/portaudio/src/os/win/pa_win_util.c",
    "../../include/portaudio/src/os/win/pa_win_waveformat.c",
-   "../../include/portaudio/src/os/win/pa_win_wdmks_utils.c",
-   "../../include/portaudio/src/os/win/pa_win_wdmks_utils.h",
    "../../include/portaudio/src/os/win/pa_x86_plain_converters.c",
    "../../include/portaudio/src/os/win/pa_x86_plain_converters.h",
   }
 	filter {}
 		if _OPTIONS["winxp"] then
 			files {
-			   "../../include/portaudio/src/hostapi/dsound/pa_win_ds.c",
-			   "../../include/portaudio/src/hostapi/dsound/pa_win_ds_dynlink.c",
-			   "../../include/portaudio/src/hostapi/dsound/pa_win_ds_dynlink.h",
+				"../../include/portaudio/src/hostapi/wmme/pa_win_wmme.c",
+				"../../include/portaudio/src/hostapi/dsound/pa_win_ds.c",
+				"../../include/portaudio/src/hostapi/dsound/pa_win_ds_dynlink.c",
+				"../../include/portaudio/src/hostapi/dsound/pa_win_ds_dynlink.h",
+			}
+		elseif _OPTIONS["uwp"] then
+			files {
+				"../../include/portaudio/src/hostapi/wasapi/pa_win_wasapi.c",
 			}
 		else
 			files {
+				"../../include/portaudio/src/hostapi/wmme/pa_win_wmme.c",
 				"../../include/portaudio/src/hostapi/wasapi/pa_win_wasapi.c",
 				"../../include/portaudio/src/hostapi/wdmks/pa_win_wdmks.c",
+				"../../include/portaudio/src/os/win/pa_win_wdmks_utils.c",
+				"../../include/portaudio/src/os/win/pa_win_wdmks_utils.h",
 			}
 		end
 	filter {}
