@@ -1764,6 +1764,25 @@ static double get_channel_panning( openmpt_module_ext * mod_ext, int32_t channel
 	}
 	return 0.0;
 }
+static int set_note_finetune( openmpt_module_ext * mod_ext, int32_t channel, double finetune ) {
+	try {
+		openmpt::interface::check_soundfile( mod_ext );
+		mod_ext->impl->set_note_finetune( channel, finetune );
+		return 1;
+	} catch ( ... ) {
+		openmpt::report_exception( __func__, mod_ext ? &mod_ext->mod : NULL );
+	}
+	return 0;
+}
+static double get_note_finetune( openmpt_module_ext * mod_ext, int32_t channel ) {
+	try {
+		openmpt::interface::check_soundfile( mod_ext );
+		return mod_ext->impl->get_note_finetune( channel );
+	} catch ( ... ) {
+		openmpt::report_exception( __func__, mod_ext ? &mod_ext->mod : NULL );
+	}
+	return 0.0;
+}
 
 
 
@@ -1819,6 +1838,8 @@ int openmpt_module_ext_get_interface( openmpt_module_ext * mod_ext, const char *
 			i->note_fade = &note_fade;
 			i->set_channel_panning = &set_channel_panning;
 			i->get_channel_panning = &get_channel_panning;
+			i->set_note_finetune = &set_note_finetune;
+			i->get_note_finetune = &get_note_finetune;
 			result = 1;
 
 
