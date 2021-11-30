@@ -183,11 +183,15 @@ solution "libopenmpt"
 	dofile "../../build/premake/premake-defaults-solution.lua"
 
  dofile "../../build/premake/mpt-libopenmpt.lua"
- dofile "../../build/premake/mpt-libopenmpt_examples.lua"
+ if not _OPTIONS["uwp"] then
+  dofile "../../build/premake/mpt-libopenmpt_examples.lua"
+ end
  dofile "../../build/premake/ext-mpg123.lua"
  dofile "../../build/premake/ext-ogg.lua"
- dofile "../../build/premake/ext-portaudio.lua"
- dofile "../../build/premake/ext-portaudiocpp.lua"
+ if not _OPTIONS["uwp"] then
+  dofile "../../build/premake/ext-portaudio.lua"
+  dofile "../../build/premake/ext-portaudiocpp.lua"
+ end
  dofile "../../build/premake/ext-vorbis.lua"
  dofile "../../build/premake/ext-zlib.lua"
 

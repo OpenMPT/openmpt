@@ -148,18 +148,14 @@ start cmd /c ^( ^
 echo Done ^) ^|^| pause"
 
 start cmd /c ^( ^
-%PREMAKE% --group=libopenmpt_test vs2019 --win10 --uwp ^&^& ^
 %PREMAKE% --group=libopenmpt-small vs2019 --win10 --uwp ^&^& ^
 %PREMAKE% --group=libopenmpt vs2019 --win10 --uwp ^&^& ^
-%PREMAKE% --group=openmpt123 vs2019 --win10 --uwp ^&^& ^
 %PREMAKE% --group=all-externals vs2019 --win10 --uwp ^&^& ^
 echo Done ^) ^|^| pause"
 
 start cmd /c ^( ^
-%PREMAKE% --group=libopenmpt_test vs2022 --win10 --uwp ^&^& ^
 %PREMAKE% --group=libopenmpt-small vs2022 --win10 --uwp ^&^& ^
 %PREMAKE% --group=libopenmpt vs2022 --win10 --uwp ^&^& ^
-%PREMAKE% --group=openmpt123 vs2022 --win10 --uwp ^&^& ^
 %PREMAKE% --group=all-externals vs2022 --win10 --uwp ^&^& ^
 echo Done ^) ^|^| pause"
 
