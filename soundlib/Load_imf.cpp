@@ -229,8 +229,8 @@ static constexpr EffectCommand imfEffects[] =
 	CMD_PORTAMENTODOWN,  // 0x13 Jxx Slide Down
 	CMD_PORTAMENTOUP,    // 0x14 Kxx Fine Slide Up
 	CMD_PORTAMENTODOWN,  // 0x15 Lxx Fine Slide Down
-	CMD_MIDI,            // 0x16 Mxx Set Filter Cutoff - XXX
-	CMD_NONE,            // 0x17 Nxy Filter Slide + Resonance - XXX
+	CMD_MIDI,            // 0x16 Mxx Set Filter Cutoff
+	CMD_MIDI,            // 0x17 Nxy Filter Slide + Resonance
 	CMD_OFFSET,          // 0x18 Oxx Set Sample Offset
 	CMD_NONE,            // 0x19 Pxx Set Fine Sample Offset - XXX
 	CMD_KEYOFF,          // 0x1A Qxx Key Off
@@ -287,6 +287,9 @@ static void ImportIMFEffect(ModCommand &m)
 		break;
 	case 0x16: // cutoff
 		m.param = (0xFF - m.param) / 2u;
+		break;
+	case 0x17: // cutoff slide + resonance (TODO: cutoff slide is currently not handled)
+		m.param = 0x80 | (m.param & 0x0F);
 		break;
 	case 0x1F: // set global volume
 		m.param = mpt::saturate_cast<uint8>(m.param * 2);
