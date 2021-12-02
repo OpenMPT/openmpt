@@ -99,7 +99,7 @@
    "../../include/vorbis/lib/modes/setup_X.h",
   }
   filter { "action:vs*" }
-    buildoptions { "/wd4101", "/wd4244", "/wd4267", "/wd4305" }
+    buildoptions { "/wd4101", "/wd4244", "/wd4267", "/wd4305", "/wd4703" }
   filter {}
   filter { "action:vs*" }
     buildoptions { "/wd6001", "/wd6011", "/wd6255", "/wd6262", "/wd6263", "/wd6297", "/wd6308", "/wd6385", "/wd6386", "/wd6387", "/wd28182" } -- /analyze
