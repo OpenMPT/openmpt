@@ -586,7 +586,10 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 
 		validPlug = TryLoadPlugin(maskCrashes, plug, hLib, exception);
 	}
-	FreeLibrary(hLib);
+	if(hLib)
+	{
+		FreeLibrary(hLib);
+	}
 	if(exception != 0)
 	{
 		CVstPluginManager::ReportPlugException(MPT_UFORMAT("Exception {} while trying to load plugin \"{}\"!\n")(mpt::ufmt::HEX0<8>(exception), plug->libraryName));
