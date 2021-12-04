@@ -756,14 +756,14 @@ void CModTree::RefreshDlsBanks()
 				{
 					tvs.hParent = b.second;
 					tvs.lpfnCompare = ModTreeInsLibCompareProc;
-					tvs.lParam = (LPARAM)this;
+					tvs.lParam = reinterpret_cast<LPARAM>(this);
 					SortChildrenCB(&tvs);
 				}
-				if(hDrums != NULL)
+				if(hDrums)
 				{
 					tvs.hParent = hDrums;
 					tvs.lpfnCompare = ModTreeInsLibCompareProc;
-					tvs.lParam = (LPARAM)this;
+					tvs.lParam = reinterpret_cast<LPARAM>(this);
 					SortChildrenCB(&tvs);
 				}
 			}
@@ -1417,7 +1417,7 @@ CModTree::ModItem CModTree::GetModItem(HTREEITEM hItem)
 		if(rootItemData < m_tiDLS.size() && m_tiDLS[rootItemData] == hRootParent)
 		{
 			int image = 0, selImage = 0;
-			if(itemData != 0 || !GetItemImage(hItem, image, selImage) || image != IMAGE_FOLDER)
+			if(!GetItemImage(hItem, image, selImage) || (image != IMAGE_FOLDER && image != IMAGE_OPENFOLDER))
 				return DlsItem::FromLPARAM(itemData);
 		}
 	}
