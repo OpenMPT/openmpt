@@ -148,13 +148,6 @@ int ComprDataIO::UnpRead(byte *Addr,size_t Count)
 }
 
 
-#if defined(RARDLL) && defined(_MSC_VER) && !defined(_WIN_64)
-// Disable the run time stack check for unrar.dll, so we can manipulate
-// with ProcessDataProc call type below. Run time check would intercept
-// a wrong ESP before we restore it.
-#pragma runtime_checks( "s", off )
-#endif
-
 void ComprDataIO::UnpWrite(byte *Addr,size_t Count)
 {
 
@@ -168,28 +161,7 @@ void ComprDataIO::UnpWrite(byte *Addr,size_t Count)
     /*	// OPENMPT ADDITION
     if (Cmd->ProcessDataProc!=NULL)
     {
-      // Here we preserve ESP value. It is necessary for those developers,
-      // who still define ProcessDataProc callback as "C" type function,
-      // even though in year 2001 we announced in unrar.dll whatsnew.txt
-      // that it will be PASCAL type (for compatibility with Visual Basic).
-#if defined(_MSC_VER)
-#ifndef _WIN_64
-      __asm mov ebx,esp
-#endif
-#elif defined(_WIN_ALL) && defined(__BORLANDC__)
-      _EBX=_ESP;
-#endif
       int RetCode=Cmd->ProcessDataProc(Addr,(int)Count);
-
-      // Restore ESP after ProcessDataProc with wrongly defined calling
-      // convention broken it.
-#if defined(_MSC_VER)
-#ifndef _WIN_64
-      __asm mov esp,ebx
-#endif
-#elif defined(_WIN_ALL) && defined(__BORLANDC__)
-      _ESP=_EBX;
-#endif
       if (RetCode==0)
         ErrHandler.Exit(RARX_USERBREAK);
     }
@@ -217,11 +189,6 @@ void ComprDataIO::UnpWrite(byte *Addr,size_t Count)
   ShowUnpWrite();
   Wait();
 }
-
-#if defined(RARDLL) && defined(_MSC_VER) && !defined(_WIN_64)
-// Restore the run time stack check for unrar.dll.
-#pragma runtime_checks( "s", restore )
-#endif
 
 
 

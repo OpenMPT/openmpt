@@ -82,7 +82,7 @@ void CmdExtract::DoExtract()
 
 void CmdExtract::ExtractArchiveInit(Archive &Arc)
 {
-  DataIO.UnpArcSize=Arc.FileLength();
+  DataIO.UnpArcSize=Arc.IsSeekable() ? Arc.FileLength() : 0;
 
   FileCount=0;
   MatchedArgs=0;
@@ -105,8 +105,22 @@ void CmdExtract::ExtractArchiveInit(Archive &Arc)
 EXTRACT_ARC_CODE CmdExtract::ExtractArchive()
 {
   Archive Arc(Cmd);
-  if (!Arc.WOpen(ArcName))
-    return EXTRACT_ARC_NEXT;
+  if (*Cmd->UseStdin!=0)
+  {
+    Arc.SetHandleType(FILE_HANDLESTD);
+#ifdef USE_QOPEN
+    Arc.SetProhibitQOpen(true);
+#endif
+  }
+  else
+  {
+#if defined(_WIN_ALL) && !defined(SFX_MODULE) // WinRAR GUI code also resets the cache.
+    if (*Cmd->Command=='T' || Cmd->Test)
+      ResetFileCache(ArcName); // Reset the file cache when testing an archive.
+#endif
+    if (!Arc.WOpen(ArcName))
+      return EXTRACT_ARC_NEXT;
+  }
 
   if (!Arc.IsArchive(true))
   {
@@ -403,6 +417,12 @@ bool CmdExtract::ExtractCurrentFile(Archive &Arc,size_t HeaderSize,bool &Repeat)
   FirstFile=false;
 #endif
 
+  if (Arc.FileHead.Encrypted && Cmd->SkipEncrypted)
+    if (Arc.Solid)
+      return false; // Abort the entire extraction for solid archive.
+    else
+      MatchFound=false; // Skip only the current file for non-solid archive.
+  
   if (MatchFound || (SkipSolid=Arc.Solid)!=0)
   {
     // First common call of uiStartFileExtract. It is done before overwrite
@@ -929,19 +949,13 @@ void CmdExtract::ExtrPrepareName(Archive &Arc,const wchar *ArcFileName,wchar *De
 #endif
 
 #ifndef SFX_MODULE
-  size_t ArcPathLength=wcslen(Cmd->ArcPath);
+  wchar *ArcPath=*Cmd->ExclArcPath!=0 ? Cmd->ExclArcPath:Cmd->ArcPath;
+  size_t ArcPathLength=wcslen(ArcPath);
   if (ArcPathLength>0)
   {
     size_t NameLength=wcslen(ArcFileName);
-
-    // Earlier we compared lengths only here, but then noticed a cosmetic bug
-    // in WinRAR. When extracting a file reference from subfolder with
-    // "Extract relative paths", so WinRAR sets ArcPath, if reference target
-    // is missing, error message removed ArcPath both from reference and target
-    // names. If target was stored in another folder, its name looked wrong.
-    if (NameLength>=ArcPathLength && 
-        wcsnicompc(Cmd->ArcPath,ArcFileName,ArcPathLength)==0 &&
-        (IsPathDiv(Cmd->ArcPath[ArcPathLength-1]) || 
+    if (NameLength>=ArcPathLength &&  wcsnicompc(ArcPath,ArcFileName,ArcPathLength)==0 &&
+        (IsPathDiv(ArcPath[ArcPathLength-1]) || 
          IsPathDiv(ArcFileName[ArcPathLength]) || ArcFileName[ArcPathLength]==0))
     {
       ArcFileName+=Min(ArcPathLength,NameLength);
@@ -974,7 +988,7 @@ void CmdExtract::ExtrPrepareName(Archive &Arc,const wchar *ArcFileName,wchar *De
   // Must do after Cmd->ArcPath processing above, so file name and arc path
   // trailing spaces are in sync.
   if (!Cmd->AllowIncompatNames)
-    MakeNameCompatible(DestName);
+    MakeNameCompatible(DestName,DestSize);
 #endif
 
   wchar DiskLetter=toupperw(DestName[0]);
@@ -1036,11 +1050,7 @@ bool CmdExtract::ExtrGetPassword(Archive &Arc,const wchar *ArcFileName)
     if (!uiGetPassword(UIPASSWORD_FILE,ArcFileName,&Cmd->Password)/* || !Cmd->Password.IsSet()*/)
     {
       // Suppress "test is ok" message if user cancelled the password prompt.
-// 2019.03.23: If some archives are tested ok and prompt is cancelled for others,
-// do we really need to suppress "test is ok"? Also if we set an empty password
-// and "Use for all archives" in WinRAR Ctrl+P and skip some encrypted archives.
-// We commented out this UIERROR_INCERRCOUNT for now.
-//      uiMsg(UIERROR_INCERRCOUNT);
+      uiMsg(UIERROR_INCERRCOUNT);
       return false;
     }
     Cmd->ManualPassword=true;

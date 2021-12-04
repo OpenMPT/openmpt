@@ -40,14 +40,19 @@ bool MergeArchive(Archive &Arc,ComprDataIO *DataIO,bool ShowFileName,wchar Comma
 #if !defined(SFX_MODULE) && !defined(RARDLL)
   bool RecoveryDone=false;
 #endif
-  bool FailedOpen=false,OldSchemeTested=false;
+  bool OldSchemeTested=false;
 
+  bool FailedOpen=false; // No more next volume open attempts if true.
 #if !defined(SILENT)
-  // In -vp mode we force the pause before next volume even if it is present
-  // and even if we are on the hard disk. It is important when user does not
-  // want to process partially downloaded volumes preliminary.
-  if (Cmd->VolumePause && !uiAskNextVolume(NextName,ASIZE(NextName)))
-    FailedOpen=true;
+  if (Cmd->VolumePause)
+  {
+    // If next volume can't be opened exclusively, it might be still
+    // downloading, so in -vp mode user may prefer to pause until completion
+    // even if volume is exist. FMF_OPENEXCLUSIVE works in Windows only.
+    File TestOpen;
+    if (!TestOpen.Open(NextName,FMF_OPENEXCLUSIVE) && !uiAskNextVolume(NextName,ASIZE(NextName)))
+      FailedOpen=true;
+  }
 #endif
 
   uint OpenMode = Cmd->OpenShared ? FMF_OPENSHARED : 0;
@@ -171,13 +176,6 @@ bool MergeArchive(Archive &Arc,ComprDataIO *DataIO,bool ShowFileName,wchar Comma
 
 
 #ifdef RARDLL
-#if defined(RARDLL) && defined(_MSC_VER) && !defined(_WIN_64)
-// Disable the run time stack check for unrar.dll, so we can manipulate
-// with ChangeVolProc call type below. Run time check would intercept
-// a wrong ESP before we restore it.
-#pragma runtime_checks( "s", off )
-#endif
-
 bool DllVolChange(RAROptions *Cmd,wchar *NextName,size_t NameSize)
 {
   bool DllVolChanged=false,DllVolAborted=false;
@@ -212,32 +210,7 @@ bool DllVolChange(RAROptions *Cmd,wchar *NextName,size_t NameSize)
   {
     char NextNameA[NM];
     WideToChar(NextName,NextNameA,ASIZE(NextNameA));
-    /*	// OPENMPT ADDITION
-    // Here we preserve ESP value. It is necessary for those developers,
-    // who still define ChangeVolProc callback as "C" type function,
-    // even though in year 2001 we announced in unrar.dll whatsnew.txt
-    // that it will be PASCAL type (for compatibility with Visual Basic).
-#if defined(_MSC_VER)
-#ifndef _WIN_64
-    __asm mov ebx,esp
-#endif
-#elif defined(_WIN_ALL) && defined(__BORLANDC__)
-    _EBX=_ESP;
-#endif
-    */	// OPENMPT ADDITION
     int RetCode=Cmd->ChangeVolProc(NextNameA,RAR_VOL_ASK);
-
-    /*	// OPENMPT ADDITION
-    // Restore ESP after ChangeVolProc with wrongly defined calling
-    // convention broken it.
-#if defined(_MSC_VER)
-#ifndef _WIN_64
-    __asm mov esp,ebx
-#endif
-#elif defined(_WIN_ALL) && defined(__BORLANDC__)
-    _ESP=_EBX;
-#endif
-    */	// OPENMPT ADDITION
     if (RetCode==0)
       DllVolAborted=true;
     else
@@ -272,21 +245,10 @@ bool DllVolNotify(RAROptions *Cmd,wchar *NextName)
   }
   if (Cmd->ChangeVolProc!=NULL)
   {
-#if defined(_WIN_ALL) && !defined(_MSC_VER) && !defined(__MINGW32__)
-    _EBX=_ESP;
-#endif
     int RetCode=Cmd->ChangeVolProc(NextNameA,RAR_VOL_NOTIFY);
-#if defined(_WIN_ALL) && !defined(_MSC_VER) && !defined(__MINGW32__)
-    _ESP=_EBX;
-#endif
     if (RetCode==0)
       return false;
   }
   return true;
 }
-
-#if defined(RARDLL) && defined(_MSC_VER) && !defined(_WIN_64)
-// Restore the run time stack check for unrar.dll.
-#pragma runtime_checks( "s", restore )
-#endif
 #endif

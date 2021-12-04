@@ -70,6 +70,8 @@ class File
 #endif
     bool PreserveAtime;
     bool TruncatedAfterReadError;
+
+    int64 CurFilePos; // Used for forward seeks in stdin files.
   protected:
     bool OpenShared; // Set by 'Archive' class.
   public:
@@ -111,6 +113,7 @@ class File
     int64 FileLength();
     void SetHandleType(FILE_HANDLETYPE Type) {HandleType=Type;}
     FILE_HANDLETYPE GetHandleType() {return HandleType;}
+    bool IsSeekable() {return HandleType!=FILE_HANDLESTD;}
     bool IsDevice();
     static bool RemoveCreated();
     FileHandle GetHandle() {return hFile;}
@@ -119,9 +122,6 @@ class File
     int64 Copy(File &Dest,int64 Length=INT64NDF);
     void SetAllowDelete(bool Allow) {AllowDelete=Allow;}
     void SetExceptions(bool Allow) {AllowExceptions=Allow;}
-#ifdef _WIN_ALL
-    void RemoveSequentialFlag() {NoSequentialRead=true;}
-#endif
     void SetPreserveAtime(bool Preserve) {PreserveAtime=Preserve;}
     bool IsTruncatedAfterReadError() {return TruncatedAfterReadError;}
 #ifdef _UNIX

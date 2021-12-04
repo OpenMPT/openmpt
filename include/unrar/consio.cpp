@@ -3,6 +3,7 @@
 
 static MESSAGE_TYPE MsgStream=MSG_STDOUT;
 static RAR_CHARSET RedirectCharset=RCH_DEFAULT;
+static bool ProhibitInput=false;
 
 const int MaxMsgSize=2*NM+2048;
 
@@ -58,6 +59,12 @@ void SetConsoleMsgStream(MESSAGE_TYPE MsgStream)
 void SetConsoleRedirectCharset(RAR_CHARSET RedirectCharset)
 {
   ::RedirectCharset=RedirectCharset;
+}
+
+
+void ProhibitConsoleInput()
+{
+  ProhibitInput=true;
 }
 
 
@@ -141,10 +148,23 @@ void eprintf(const wchar *fmt,...)
 
 
 #ifndef SILENT
+static void QuitIfInputProhibited()
+{
+  // We cannot handle user prompts if -si is used to read file or archive data
+  // from stdin.
+  if (ProhibitInput)
+  {
+    mprintf(St(MStdinNoInput));
+    ErrHandler.Exit(RARX_FATAL);
+  }
+}
+
+
 static void GetPasswordText(wchar *Str,uint MaxLength)
 {
   if (MaxLength==0)
     return;
+  QuitIfInputProhibited();
   if (StdinRedirected)
     getwstr(Str,MaxLength); // Read from pipe or redirected file.
   else
@@ -190,16 +210,21 @@ bool GetConsolePassword(UIPASSWORD_TYPE Type,const wchar *FileName,SecPassword *
   
   while (true)
   {
-    if (!StdinRedirected)
+//    if (!StdinRedirected)
       if (Type==UIPASSWORD_GLOBAL)
         eprintf(L"\n%s: ",St(MAskPsw));
       else
         eprintf(St(MAskPswFor),FileName);
 
-    wchar PlainPsw[MAXPASSWORD];
+    wchar PlainPsw[MAXPASSWORD+1];
     GetPasswordText(PlainPsw,ASIZE(PlainPsw));
     if (*PlainPsw==0 && Type==UIPASSWORD_GLOBAL)
       return false;
+    if (wcslen(PlainPsw)>=MAXPASSWORD)
+    {
+      PlainPsw[MAXPASSWORD-1]=0;
+      uiMsg(UIERROR_TRUNCPSW,MAXPASSWORD-1);
+    }
     if (!StdinRedirected && Type==UIPASSWORD_GLOBAL)
     {
       eprintf(St(MReAskPsw));
@@ -228,6 +253,8 @@ bool getwstr(wchar *str,size_t n)
 {
   // Print buffered prompt title function before waiting for input.
   fflush(stderr);
+
+  QuitIfInputProhibited();
 
   *str=0;
 #if defined(_WIN_ALL)

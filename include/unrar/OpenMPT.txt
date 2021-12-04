@@ -1,9 +1,8 @@
-This folder is based on https://rarlab.com/rar/unrarsrc-6.0.7.tar.gz
+This folder is based on https://rarlab.com/rar/unrarsrc-6.1.2.tar.gz
 
 All modifications to existing files have been done in a manner so that no
 existing lines were edited; only new lines were added.
 os.hpp has been modified to support Clang/LLVM for Windows.
-Work-arounds for ARM64 have been implemented.
 Work-arounds for tiny problems with Clang/C2 have been implemented.
 Added lines can be found by looking for "// OPENMPT ADDITION" comments.
 

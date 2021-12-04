@@ -1204,7 +1204,6 @@
     <ClInclude Include="..\..\..\include\unrar\rijndael.hpp" />
     <ClInclude Include="..\..\..\include\unrar\rs.hpp" />
     <ClInclude Include="..\..\..\include\unrar\rs16.hpp" />
-    <ClInclude Include="..\..\..\include\unrar\savepos.hpp" />
     <ClInclude Include="..\..\..\include\unrar\scantree.hpp" />
     <ClInclude Include="..\..\..\include\unrar\secpassword.hpp" />
     <ClInclude Include="..\..\..\include\unrar\sha1.hpp" />
@@ -1217,7 +1216,6 @@
     <ClInclude Include="..\..\..\include\unrar\threadpool.hpp" />
     <ClInclude Include="..\..\..\include\unrar\timefn.hpp" />
     <ClInclude Include="..\..\..\include\unrar\ui.hpp" />
-    <ClInclude Include="..\..\..\include\unrar\ulinks.hpp" />
     <ClInclude Include="..\..\..\include\unrar\unicode.hpp" />
     <ClInclude Include="..\..\..\include\unrar\unpack.hpp" />
     <ClInclude Include="..\..\..\include\unrar\version.hpp" />
