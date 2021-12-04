@@ -32,9 +32,9 @@ CFLAGS   += -pthread
 LDFLAGS  += -pthread
 endif
 
-CXXFLAGS += -Os
-CFLAGS   += -Os
-LDFLAGS  += -Os
+CXXFLAGS += -Oz
+CFLAGS   += -Oz
+LDFLAGS  += -Oz
 
 # Enable LTO as recommended by Emscripten
 #CXXFLAGS += -flto=thin
