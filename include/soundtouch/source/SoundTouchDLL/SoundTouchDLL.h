@@ -48,7 +48,7 @@
 #else
     // GNU version
 
-    #ifdef DLL_EXPORTS
+    #if defined(DLL_EXPORTS) || defined(SoundTouchDLL_EXPORTS)
         // GCC declaration for exporting functions
         #define SOUNDTOUCHDLL_API extern "C" __attribute__((__visibility__("default")))
     #else
