@@ -1306,15 +1306,20 @@ BOOL CEditHistoryDlg::OnInitDialog()
 		totalTime += entry.openTime;
 
 		// Date
-		TCHAR szDate[32];
+		CString sDate;
 		if(entry.HasValidDate())
+		{
+			TCHAR szDate[32];
 			_tcsftime(szDate, std::size(szDate), _T("%d %b %Y, %H:%M:%S"), &entry.loadDate);
-		else
-			_tcscpy(szDate, _T("<unknown date>"));
+			sDate = szDate;
+		} else
+		{
+			sDate = _T("<unknown date>");
+		}
 		// Time + stuff
 		uint32 duration = mpt::saturate_round<uint32>(entry.openTime / HISTORY_TIMER_PRECISION);
 		s += MPT_CFORMAT("Loaded {}, open for {}h {}m {}s\r\n")(
-			CString(szDate), mpt::cfmt::dec(duration / 3600), mpt::cfmt::dec0<2>((duration / 60) % 60), mpt::cfmt::dec0<2>(duration % 60));
+			sDate, mpt::cfmt::dec(duration / 3600), mpt::cfmt::dec0<2>((duration / 60) % 60), mpt::cfmt::dec0<2>(duration % 60));
 	}
 	if(isEmpty)
 	{
