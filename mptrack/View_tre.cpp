@@ -1774,29 +1774,35 @@ void CModTree::DeleteTreeItem(HTREEITEM hItem)
 		break;
 
 	case MODITEM_SAMPLE:
-		if(!sndFile->GetSample(static_cast<SAMPLEINDEX>(modItemID)).HasSampleData()
-		   || Reporting::Confirm(TreeDeletionString(UL_("sample"), modItemID, mpt::ToUnicode(sndFile->GetCharsetInternal(), sndFile->m_szNames[modItemID])), false, true) == cnfYes)
+		if(modDoc && sndFile)
 		{
-			const SAMPLEINDEX smp = static_cast<SAMPLEINDEX>(modItemID);
-			modDoc->GetSampleUndo().PrepareUndo(smp, sundo_replace, "Delete");
-			const SAMPLEINDEX oldNumSamples = modDoc->GetNumSamples();
-			if(modDoc->RemoveSample(smp))
+			if(!sndFile->GetSample(static_cast<SAMPLEINDEX>(modItemID)).HasSampleData()
+				 || Reporting::Confirm(TreeDeletionString(UL_("sample"), modItemID, mpt::ToUnicode(sndFile->GetCharsetInternal(), sndFile->m_szNames[modItemID])), false, true) == cnfYes)
 			{
-				modDoc->UpdateAllViews(nullptr, SampleHint(modDoc->GetNumSamples() != oldNumSamples ? 0 : smp).Info().Data().Names());
+				const SAMPLEINDEX smp = static_cast<SAMPLEINDEX>(modItemID);
+				modDoc->GetSampleUndo().PrepareUndo(smp, sundo_replace, "Delete");
+				const SAMPLEINDEX oldNumSamples = modDoc->GetNumSamples();
+				if(modDoc->RemoveSample(smp))
+				{
+					modDoc->UpdateAllViews(nullptr, SampleHint(modDoc->GetNumSamples() != oldNumSamples ? 0 : smp).Info().Data().Names());
+				}
 			}
 		}
 		break;
 
 	case MODITEM_INSTRUMENT:
-		if(sndFile->Instruments[modItemID] == nullptr
-		   || Reporting::Confirm(TreeDeletionString(UL_("instrument"), modItemID, mpt::ToUnicode(sndFile->GetCharsetInternal(), sndFile->Instruments[modItemID]->name)), false, true) == cnfYes)
+		if(modDoc && sndFile)
 		{
-			const INSTRUMENTINDEX ins = static_cast<INSTRUMENTINDEX>(modItemID);
-			modDoc->GetInstrumentUndo().PrepareUndo(ins, "Delete");
-			const INSTRUMENTINDEX oldNumInstrs = modDoc->GetNumInstruments();
-			if(modDoc->RemoveInstrument(ins))
+			if(sndFile->Instruments[modItemID] == nullptr
+				 || Reporting::Confirm(TreeDeletionString(UL_("instrument"), modItemID, mpt::ToUnicode(sndFile->GetCharsetInternal(), sndFile->Instruments[modItemID]->name)), false, true) == cnfYes)
 			{
-				modDoc->UpdateAllViews(nullptr, InstrumentHint(modDoc->GetNumInstruments() != oldNumInstrs ? 0 : ins).Info().Envelope().ModType());
+				const INSTRUMENTINDEX ins = static_cast<INSTRUMENTINDEX>(modItemID);
+				modDoc->GetInstrumentUndo().PrepareUndo(ins, "Delete");
+				const INSTRUMENTINDEX oldNumInstrs = modDoc->GetNumInstruments();
+				if(modDoc->RemoveInstrument(ins))
+				{
+					modDoc->UpdateAllViews(nullptr, InstrumentHint(modDoc->GetNumInstruments() != oldNumInstrs ? 0 : ins).Info().Envelope().ModType());
+				}
 			}
 		}
 		break;
