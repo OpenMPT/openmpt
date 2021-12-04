@@ -598,6 +598,10 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 						else if(m.param > 0x08)
 							zxxCountRight++;
 					}
+				} else if(m.command == CMD_OFFSET && m.param == 0 && fileHeader.cwtv <= S3MFileHeader::trkST3_01)
+				{
+					// Offset command didn't have effect memory in ST3.01; fixed in ST3.03
+					m.command = CMD_DUMMY;
 				}
 			}
 		}
