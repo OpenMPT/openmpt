@@ -350,11 +350,11 @@ void LFOPlugin::SetChunk(const ChunkData &chunk, bool)
 		&& data.version == 0)
 	{
 		const float amplitude = IEEE754binary32LE().SetInt32(data.amplitude);
-		m_amplitude = std::isfinite(amplitude) ? std::clamp(amplitude, 0.0f, 1.0f) : 0.5f;
+		m_amplitude = std::isfinite(amplitude) ? Clamp(amplitude, 0.0f, 1.0f) : 0.5f;
 		const float offset = IEEE754binary32LE().SetInt32(data.offset);
-		m_offset = std::isfinite(offset) ? std::clamp(offset, 0.0f, 1.0f) : 0.5f;
+		m_offset = std::isfinite(offset) ? Clamp(offset, 0.0f, 1.0f) : 0.5f;
 		const float frequency = IEEE754binary32LE().SetInt32(data.frequency);
-		m_frequency = std::isfinite(frequency) ? std::clamp(frequency, 0.0f, 1.0f) : 0.290241f;
+		m_frequency = std::isfinite(frequency) ? Clamp(frequency, 0.0f, 1.0f) : 0.290241f;
 		if(data.waveForm < kNumWaveforms)
 			m_waveForm = static_cast<LFOWaveform>(data.waveForm.get());
 		m_outputParam = data.outputParam;
