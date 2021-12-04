@@ -505,6 +505,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 			{
 				filename = filename.RelativePathToAbsolute(GetpModDoc()->GetPathNameMpt().GetPath());
 			}
+			filename = filename.Simplify();
 			if(!LoadExternalSample(nSmp, filename))
 			{
 #ifndef MODPLUG_TRACKER
