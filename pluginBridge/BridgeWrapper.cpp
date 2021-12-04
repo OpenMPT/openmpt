@@ -218,10 +218,6 @@ uint64 BridgeWrapper::GetFileVersion(const WCHAR *exePath)
 	{
 		return result;
 	}
-	if(!verHandle)
-	{
-		return result;
-	}
 
 	char *verData = new(std::nothrow) char[verSize];
 	if(verData && GetFileVersionInfoW(exePath, verHandle, verSize, verData))
