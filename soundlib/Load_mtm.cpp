@@ -170,13 +170,12 @@ bool CSoundFile::ReadMTM(FileReader &file, ModLoadingFlags loadFlags)
 
 	if(loadFlags & loadPatternData)
 		Patterns.ResizeArray(fileHeader.lastPattern + 1);
-	else
-		file.Skip(64 * (fileHeader.lastPattern + 1));
 	for(PATTERNINDEX pat = 0; pat <= fileHeader.lastPattern; pat++)
 	{
 		if(!(loadFlags & loadPatternData) || !Patterns.Insert(pat, rowsPerPat))
 		{
-			break;
+			file.Skip(64);
+			continue;
 		}
 
 		for(CHANNELINDEX chn = 0; chn < 32; chn++)
