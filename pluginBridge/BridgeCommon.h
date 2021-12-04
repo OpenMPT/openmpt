@@ -108,9 +108,10 @@ public:
 	// Create signal from name (for inter-process communication)
 	bool Create(const wchar_t *name, const wchar_t *addendum)
 	{
-		wchar_t fullName[64];
+		wchar_t fullName[64 + 1];
 		wcscpy(fullName, name);
 		wcscat(fullName, addendum);
+		fullName[std::size(fullName) - 1] = L'\0';
 		size_t nameLen = wcslen(fullName);
 		wcscpy(fullName + nameLen, L"-s");
 
@@ -160,7 +161,15 @@ public:
 		Close();
 
 		mapFile = CreateFileMappingW(INVALID_HANDLE_VALUE, nullptr, PAGE_READWRITE, 0, size + sizeof(Header), name);
+		if(!mapFile)
+		{
+			return false;
+		}
 		view = static_cast<Header *>(MapViewOfFile(mapFile, FILE_MAP_ALL_ACCESS, 0, 0, 0));
+		if(!view)
+		{
+			return false;
+		}
 		view->size = size;
 		return Good();
 	}
@@ -171,7 +180,15 @@ public:
 		Close();
 
 		mapFile = OpenFileMappingW(FILE_MAP_ALL_ACCESS, FALSE, name);
+		if(!mapFile)
+		{
+			return false;
+		}
 		view = static_cast<Header *>(MapViewOfFile(mapFile, FILE_MAP_ALL_ACCESS, 0, 0, 0));
+		if(!view)
+		{
+			return false;
+		}
 		return Good();
 	}
 
