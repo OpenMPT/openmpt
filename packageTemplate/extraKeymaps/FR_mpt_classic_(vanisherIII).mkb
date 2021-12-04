@@ -200,7 +200,6 @@ version:1
 5:1242:0:71:1		//Vol command - Portamento: G (KeyDown)
 5:1243:0:70:1		//Vol command - Portamento Up: F (KeyDown)
 5:1244:0:69:1		//Vol command - Portamento Down: E (KeyDown)
-5:1245:1:186:1		//Vol command - Velocity: Shift+$ (KeyDown)
 5:1246:0:79:1		//Vol command - Offset: O (KeyDown)
 
 //----( Pattern Context [bottom] - FX Col (6) )------------
