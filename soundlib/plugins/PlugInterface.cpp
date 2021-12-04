@@ -514,7 +514,8 @@ void IMixPlugin::RestoreAllParameters(int32 /*program*/)
 				BeginSetProgram(-1);
 				for(uint32 i = 0; i < numParams; i++)
 				{
-					SetParameter(i, memFile.ReadFloatLE());
+					const auto value = memFile.ReadFloatLE();
+					SetParameter(i, std::isfinite(value) ? value : 0.0f);
 				}
 				EndSetProgram();
 			}
