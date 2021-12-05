@@ -306,6 +306,8 @@ version:1
 7:1262:0:70:1		//Effect Parameter Digit F: F (KeyDown)
 
 //----( Sample Context [bottom] )------------
+8:1673:0:13:1		//Load Sample: ENTER (KeyDown)
+8:2031:1:13:1		//Load Raw Sample: Shift+ENTER (KeyDown)
 8:1907:2:81:1		//Transpose +1: Ctrl+Q (KeyDown)
 8:1908:2:65:1		//Transpose -1: Ctrl+A (KeyDown)
 8:1909:3:81:1		//Transpose +1 Octave: Shift+Ctrl+Q (KeyDown)
