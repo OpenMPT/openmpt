@@ -7,6 +7,23 @@ is just a high-level summary.
 
 ### libopenmpt 0.3.35-pre
 
+ *  [**Sec**] Possible out-of-bounds read in Chorus plugin with NaN plugin
+    parameters. Most implementations of the "fast math" compiler optimizations
+    will prevent this crash but it is not guaranteed. (r16109, r16111)
+
+ *  The logic when to turn off the resonant filter was broken in some edge cases
+    since libopenmpt 0.3.23.
+ *  IMF: Implemented XE1-XE3 commands, which disable individual envelopes.
+    Command Nxy (cutoff slide + resonance) is now also partially supported
+    (only resonance for now).
+ *  IMF: Filter envelopes were upside down.
+ *  MTM: Omitting pattern loading through the load.skip_patterns ctl caused
+    sample data to be corrupted.
+ *  S3M: Ignore O00 commands in files created with Scream Tracker 3.00 and 3.01,
+    as this command only gained effect memory in version 3.03.
+ *  XM: Disable arpeggio quirk for XMs made with Skale Tracker.
+    Fixes KAPTENFL.XM.
+
  *  miniz: Update to v2.2.0 (2021-06-27).
 
 ### libopenmpt 0.3.34 (2021-11-14)
