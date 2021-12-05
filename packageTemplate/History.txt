@@ -31,6 +31,50 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.29.15.00 (5 December 2021, revision 16116)
+---------------------------------------------
+Tree view
+- [Fix] <js> Samples extracted from MTM files through the tree view were corrupted (http://bugs.openmpt.org/view.php?id=1522).
+- [Fix] <js> Clicking on folders under soundfont items caused some instrument of that soundfont to be played since OpenMPT 1.29.14.00 (http://bugs.openmpt.org/view.php?id=1516).
+
+Pattern tab
+- [Mod] <js> Effect visualizer: Enable PC event mode if the only command in the whole selection is a PC event, even if it is not on the first row (http://forum.openmpt.org/index.php?topic=6738.0).
+
+Sample tab
+- [Fix] <js> Switching to an OPL instrument after a zoomed-in sample was shown and not scrolled entirely to the left didn't display the OPL editor correctly.
+- [Fix] <js> Show correct dB values for OPL instruments in Default Volume and Global Volume tooltips.
+
+Playback
+- [Fix] <js> The logic when to turn off the resonant filter was broken in some edge cases since OpenMPT 1.29.02.00 (http://bugs.openmpt.org/view.php?id=1520).
+- [Imp] <js> OPL: Improved channel allocation strategy when there are lots of faded-out notes.
+
+XM
+- [Imp] <js> Disable FT2 arpeggio quirks for XMs made with Skale Tracker (fixes KAPTENFL.XM).
+
+S3M
+- [Mod] <js> Ignore O00 commands in files created with Scream Tracker 3.00 and 3.01, as this command only gained effect memory in version 3.03.
+
+MOD
+- [Fix] <js> Digital Tracker MODs have four unknown bytes right after the magic bytes which seem to be ignored even by Digital Tracker itself. Just skip over them (tx AliceLR).
+
+Other formats
+- [Imp] <js> IMF: Implemented XE1-XE3 commands, which disable individual envelopes. Command Nxy (cutoff slide + resonance) is now also partially supported (only resonance for now).
+- [Fix] <js> IMF: Filter envelopes were upside down.
+- [Fix] <js> MT2: External samples with relative paths pointing to the parent directory (like some MadTracker 2 example songs) didn't load correctly.
+- [Fix] <js> STM: Use S3M-like sample swap behaviour.
+
+Module cleanup
+- [Fix] <js> Removing unused samples may have removed samples only played by instrument-less notes (tx melcom).
+
+Misc
+- [Fix] <js> SF2: Fix stereo samples once again.
+- [Fix] <jh> Wine Integration: Some files were missing.
+
+Installer/release package
+- [New] <js> All executables and libraries are now signed with a code signing certificate.
+- [Fix] <js> Remove legacy key commands from some keymaps, as they showed a warning when loading the keymap (tx melcom).
+
+
 v1.29.14.00 (14 November 2021, revision 15948)
 ----------------------------------------------
 Tree view
