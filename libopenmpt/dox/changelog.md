@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.5.15-pre
+
 ### libopenmpt 0.5.14 (2021-12-05)
 
  *  [**Sec**] Possible out-of-bounds read in Chorus plugin with NaN plugin
