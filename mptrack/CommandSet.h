@@ -664,7 +664,6 @@ enum CommandID
 	kcSetFXEnd = kcSetFXFinetuneSmooth,
 
 	kcStartInstrumentMisc,
-	// Note: Order must be the same as kcStartSampleMisc because commands are propagated!
 	kcInstrumentLoad = kcStartInstrumentMisc,
 	kcInstrumentSave,
 	kcInstrumentNew,
@@ -725,6 +724,7 @@ enum CommandID
 
 	kcStartSampleMisc,
 	kcSampleLoad = kcStartSampleMisc,
+	kcSampleLoadRaw,
 	kcSampleSave,
 	kcSampleNew,
 	kcSampleDuplicate,

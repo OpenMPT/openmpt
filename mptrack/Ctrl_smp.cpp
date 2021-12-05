@@ -1187,8 +1187,8 @@ void CCtrlSamples::OnTbnDropDownToolBar(NMHDR *pNMHDR, LRESULT *pResult)
 	case IDC_SAMPLE_OPEN:
 		{
 			menu.CreatePopupMenu();
-			menu.AppendMenu(MF_STRING, IDC_SAMPLE_OPENKNOWN, _T("Import &Sample..."));
-			menu.AppendMenu(MF_STRING, IDC_SAMPLE_OPENRAW, _T("Import &RAW Sample..."));
+			menu.AppendMenu(MF_STRING, IDC_SAMPLE_OPENKNOWN, ih->GetKeyTextFromCommand(kcSampleLoad, _T("Import &Sample...")));
+			menu.AppendMenu(MF_STRING, IDC_SAMPLE_OPENRAW, ih->GetKeyTextFromCommand(kcSampleLoadRaw, _T("Import &Raw Sample...")));
 			menu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, x, y, this);
 			menu.DestroyMenu();
 		}
@@ -3466,6 +3466,7 @@ LRESULT CCtrlSamples::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 	switch(wParam)
 	{
 	case kcSampleLoad:		OnSampleOpen(); return wParam;
+	case kcSampleLoadRaw:	OnSampleOpenRaw(); return wParam;
 	case kcSampleSave:		OnSampleSaveOne(); return wParam;
 	case kcSampleNew:		InsertSample(false); return wParam;
 	case kcSampleDuplicate:	InsertSample(true); return wParam;
