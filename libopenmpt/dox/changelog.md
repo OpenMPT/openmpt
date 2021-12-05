@@ -16,6 +16,19 @@ is just a high-level summary.
  *  [**New**] `DSYM` files created with Digital Symphony are now supported.
  *  [**New**] openmpt123: openmpt123 will now expand file wildcards passed on
     the command line in Windows when built with MSVC.
+ *  [**New**] libopenmpt_ext: New interface `interactive2` adding
+    `openmpt::ext::interactive2::note_off()`,
+    `openmpt::ext::interactive2::note_fade()`,
+    `openmpt::ext::interactive2::set_channel_panning()`,
+    `openmpt::ext::interactive2::get_channel_panning()`,
+    `openmpt::ext::interactive2::set_note_finetune()`, and
+    `openmpt::ext::interactive2::get_note_finetune()` (C++) and
+    `openmpt_module_ext_interface_interactive2.note_off()`,
+    `openmpt_module_ext_interface_interactive2.note_fade()`,
+    `openmpt_module_ext_interface_interactive2.set_channel_panning()`,
+    `openmpt_module_ext_interface_interactive2.get_channel_panning()`,
+    `openmpt_module_ext_interface_interactive2.set_note_finetune()`, and
+    `openmpt_module_ext_interface_interactive2.get_note_finetune()` (C). 
  *  [**New**] `Makefile` `CONFIG=emscripten` now supports
     `EMSCRIPTEN_TARGET=audioworkletprocessor` which builds an ES6 module in
     a single file with reduced dependencies suitable to be used in an
