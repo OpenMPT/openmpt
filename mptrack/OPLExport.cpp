@@ -504,6 +504,7 @@ public:
 			m_subSongs = {m_subSongs[m_selectedSong]};
 
 		SetRange(0, mpt::saturate_round<uint64>(std::accumulate(m_subSongs.begin(), m_subSongs.end(), 0.0, [](double acc, const auto &song) { return acc + song.duration; }) * m_sndFile.GetSampleRate()));
+		GetDlgItem(IDC_PROGRESS1)->ShowWindow(SW_SHOW);
 
 		m_sndFile.m_bIsRendering = true;
 
