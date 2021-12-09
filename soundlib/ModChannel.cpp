@@ -42,6 +42,7 @@ void ModChannel::Reset(ResetFlags resetMask, const CSoundFile &sndFile, CHANNELI
 		prevNoteOffset = 0;
 		lastZxxParam = 0xFF;
 		isFirstTick = false;
+		triggerNote = false;
 		isPreviewNote = false;
 		isPaused = false;
 		portaTargetReached = false;
