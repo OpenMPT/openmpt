@@ -322,7 +322,7 @@ public:
 	bool MayBeCoolEdit16_8() const { return mayBeCoolEdit16_8; }
 
 	// Get size of a single sample point, in bytes.
-	uint16 GetSampleSize() const { return ((GetNumChannels() * GetBitsPerSample()) + 7) / 8; }
+	uint16 GetSampleSize() const { return static_cast<uint16>(((static_cast<uint32>(GetNumChannels()) * static_cast<uint32>(GetBitsPerSample())) + 7) / 8); }
 
 	// Get sample length (in samples)
 	SmpLength GetSampleLength() const { return mpt::saturate_cast<SmpLength>(sampleLength); }
