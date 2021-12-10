@@ -620,7 +620,8 @@ float I3DL2Reverb::CalcDecayCoeffs(int32 index)
 	if(c21 != 0)
 	{
 		float c22 = -2.0f * c21 - 2.0f;
-		float c23 = std::sqrt(c22 * c22 - c21 * c21 * 4.0f);
+		float c23sq = c22 * c22 - c21 * c21 * 4.0f;
+		float c23 = c23sq > 0.0f ? std::sqrt(c23sq) : 0.0f;
 		c2 = (c23 - c22) / (c21 + c21);
 		if(std::abs(c2) > 1.0f)
 			c2 = (-c22 - c23) / (c21 + c21);
