@@ -52,7 +52,7 @@ call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://netcologne.dl.sour
 call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://files.jrsoftware.org/is/6/innosetup-6.2.0.exe"                                            "build\externals\innosetup-6.2.0.exe"  09799b39effeaa7b9ea3cd5757e2a202d5653a109d6748f902fc88f7bd3ec7072fccfe1ef2140274164e19a1727f1f19ec6679285b1c8a5569ff4a649e1e3a6b 4699720 || goto error
 
 
-call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://download.openmpt.org/resources/modules/example_songs_ompt_1_29.7z"                       "build\externals\example_songs_ompt_1_29.7z"  9cbe510b547ea52d8104dd4deddfadc698e8ef1e5aa4d089c867a879a021fceedeebf50acc2d996cbc23448c0b34c8f919256b100991ccd9325465952cb246ed 4882594 || goto error
+call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://download.openmpt.org/resources/modules/example_songs_ompt_1_30.7z"                       "build\externals\example_songs_ompt_1_30.7z"  bfecf7f97fd71bd52bcfb38307ccb98c751e6a0fa0c1f31208b22b9392f03ea3da8f9271327df2de4fc2e463e0c13c6a24107fbe18caf8f446b7e7cf93073fa5 4881392 || goto error
 
 
 call :killdir "build\tools\7zipold" || goto error
@@ -78,7 +78,7 @@ call :killdir "build\tools\innosetup" || goto error
 call build\scriptlib\unpack.cmd "build\tools\innounp" "build\externals\innounp050.rar" "." || goto error
 build\tools\innounp\innounp.exe -x -dbuild\tools\innosetup "build\externals\innosetup-6.2.0.exe" || goto error
 
-call build\scriptlib\unpack.cmd "packageTemplate\ExampleSongs" "build\externals\example_songs_ompt_1_29.7z" "." || goto error
+call build\scriptlib\unpack.cmd "packageTemplate\ExampleSongs" "build\externals\example_songs_ompt_1_30.7z" "." || goto error
 
 
 goto ok
