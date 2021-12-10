@@ -306,6 +306,7 @@
 	elseif _OPTIONS["win7"] then
 		defines { "_WIN32_WINNT=0x0601" }
 	elseif _OPTIONS["winxp"] then
+		systemversion "8.1"
 		filter { "architecture:x86" }
 			defines { "_WIN32_WINNT=0x0501" }
 		filter { "architecture:x86_64" }

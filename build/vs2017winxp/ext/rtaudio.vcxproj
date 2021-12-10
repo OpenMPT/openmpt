@@ -57,6 +57,7 @@
     <RootNamespace>rtaudio</RootNamespace>
     <PreferredToolArchitecture>x64</PreferredToolArchitecture>
     <LatestTargetPlatformVersion>$([Microsoft.Build.Utilities.ToolLocationHelper]::GetLatestSDKTargetPlatformVersion('Windows', '10.0'))</LatestTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Globals">
     <XPDeprecationWarning>false</XPDeprecationWarning>

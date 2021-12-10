@@ -48,6 +48,17 @@ How to compile
      -  libopenmpt requires the compile host system to be amd64 or ARM64 when
         building with Visual Studio.
 
+     -  In order to build libopenmpt for Windows XP, the Visual Studio 2017 XP 
+        targetting toolset as well as the Windows 8.1 SDK need to be installed.
+        The SDK is optionally included with Visual Studio 2017, but must be
+        separately installed with later Visual Studio versions.
+
+        The Windows 8.1 SDK is available from
+        <https://developer.microsoft.com/en-us/windows/downloads/sdk-archive/>
+        or directly from
+        <https://download.microsoft.com/download/B/0/C/B0C80BA3-8AD6-4958-810B-6882485230B5/standalonesdk/sdksetup.exe>
+        .
+
      -  You will need the Winamp 5 SDK and the XMPlay SDK if you want to
         compile the plugins for these 2 players. They can be downloaded
         automatically on Windows 7 or later by just running the
