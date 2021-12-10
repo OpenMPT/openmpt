@@ -396,7 +396,7 @@ struct MO3SampleChunk
 		do \
 		{ \
 			READ_CTRL_BIT; \
-			strLen = (strLen << 1) + carry; \
+			strLen = mpt::lshift_signed(strLen, 1) + carry; \
 			READ_CTRL_BIT; \
 		} while(carry); \
 	}
@@ -443,7 +443,7 @@ static bool UnpackMO3Data(FileReader &file, std::vector<uint8> &uncompressed, co
 			{
 				// LZ ptr in ctrl stream
 				if(uint8 b; file.Read(b))
-					strOffset = (strLen << 8) | b;  // read less significant offset byte from stream
+					strOffset = mpt::lshift_signed(strLen, 8) | b;  // read less significant offset byte from stream
 				else
 					break;
 				strLen = 0;
@@ -458,9 +458,9 @@ static bool UnpackMO3Data(FileReader &file, std::vector<uint8> &uncompressed, co
 
 			// read the next 2 bits as part of strLen
 			READ_CTRL_BIT;
-			strLen = (strLen << 1) + carry;
+			strLen = mpt::lshift_signed(strLen, 1) + carry;
 			READ_CTRL_BIT;
-			strLen = (strLen << 1) + carry;
+			strLen = mpt::lshift_signed(strLen, 1) + carry;
 			if(strLen == 0)
 			{
 				// length does not fit in 2 bits
