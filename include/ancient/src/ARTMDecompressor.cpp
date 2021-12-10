@@ -15,12 +15,12 @@ bool ARTMDecompressor::detectHeaderXPK(uint32_t hdr) noexcept
 	return hdr==FourCC("ARTM");
 }
 
-std::unique_ptr<XPKDecompressor> ARTMDecompressor::create(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::unique_ptr<XPKDecompressor::State> &state,bool verify)
+std::shared_ptr<XPKDecompressor> ARTMDecompressor::create(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify)
 {
-	return std::make_unique<ARTMDecompressor>(hdr,recursionLevel,packedData,state,verify);
+	return std::make_shared<ARTMDecompressor>(hdr,recursionLevel,packedData,state,verify);
 }
 
-ARTMDecompressor::ARTMDecompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::unique_ptr<XPKDecompressor::State> &state,bool verify) :
+ARTMDecompressor::ARTMDecompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify) :
 	XPKDecompressor(recursionLevel),
 	_packedData(packedData)
 {

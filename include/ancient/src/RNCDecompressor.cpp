@@ -19,9 +19,9 @@ bool RNCDecompressor::detectHeader(uint32_t hdr) noexcept
 	return hdr==FourCC("RNC\001") || hdr==FourCC("RNC\002");
 }
 
-std::unique_ptr<Decompressor> RNCDecompressor::create(const Buffer &packedData,bool exactSizeKnown,bool verify)
+std::shared_ptr<Decompressor> RNCDecompressor::create(const Buffer &packedData,bool exactSizeKnown,bool verify)
 {
-	return std::make_unique<RNCDecompressor>(packedData,verify);
+	return std::make_shared<RNCDecompressor>(packedData,verify);
 }
 
 RNCDecompressor::RNCDecompressor(const Buffer &packedData,bool verify) :

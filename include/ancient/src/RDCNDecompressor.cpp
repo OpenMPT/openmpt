@@ -14,12 +14,12 @@ bool RDCNDecompressor::detectHeaderXPK(uint32_t hdr) noexcept
 	return hdr==FourCC("RDCN");
 }
 
-std::unique_ptr<XPKDecompressor> RDCNDecompressor::create(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::unique_ptr<XPKDecompressor::State> &state,bool verify)
+std::shared_ptr<XPKDecompressor> RDCNDecompressor::create(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify)
 {
-	return std::make_unique<RDCNDecompressor>(hdr,recursionLevel,packedData,state,verify);
+	return std::make_shared<RDCNDecompressor>(hdr,recursionLevel,packedData,state,verify);
 }
 
-RDCNDecompressor::RDCNDecompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::unique_ptr<XPKDecompressor::State> &state,bool verify) :
+RDCNDecompressor::RDCNDecompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify) :
 	XPKDecompressor(recursionLevel),
 	_packedData(packedData)
 {

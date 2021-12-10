@@ -28,7 +28,7 @@ public:
 	virtual void decompressImpl(Buffer &rawData,bool verify) override final;
 
 	static bool detectHeader(uint32_t hdr) noexcept;
-	static std::unique_ptr<Decompressor> create(const Buffer &packedData,bool exactSizeKnown,bool verify);
+	static std::shared_ptr<Decompressor> create(const Buffer &packedData,bool exactSizeKnown,bool verify);
 
 private:
 	void decompressImpl(Buffer &rawData,bool verify,uint32_t &restartPosition);

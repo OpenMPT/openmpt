@@ -24,7 +24,7 @@ public:
 
 	static bool detectHeader(uint32_t hdr) noexcept;
 
-	static std::unique_ptr<Decompressor> create(const Buffer &packedData,bool exactSizeKnown,bool verify);
+	static std::shared_ptr<Decompressor> create(const Buffer &packedData,bool exactSizeKnown,bool verify);
 
 private:
 	static bool detectHeaderAndGeneration(uint32_t hdr,uint32_t &generation) noexcept;

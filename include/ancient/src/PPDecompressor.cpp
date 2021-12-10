@@ -30,14 +30,14 @@ bool PPDecompressor::detectHeaderXPK(uint32_t hdr) noexcept
 	return hdr==FourCC("PWPK");
 }
 
-std::unique_ptr<Decompressor> PPDecompressor::create(const Buffer &packedData,bool exactSizeKnown,bool verify)
+std::shared_ptr<Decompressor> PPDecompressor::create(const Buffer &packedData,bool exactSizeKnown,bool verify)
 {
-	return std::make_unique<PPDecompressor>(packedData,exactSizeKnown,verify);
+	return std::make_shared<PPDecompressor>(packedData,exactSizeKnown,verify);
 }
 
-std::unique_ptr<XPKDecompressor> PPDecompressor::create(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::unique_ptr<XPKDecompressor::State> &state,bool verify)
+std::shared_ptr<XPKDecompressor> PPDecompressor::create(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify)
 {
-	return std::make_unique<PPDecompressor>(hdr,recursionLevel,packedData,state,verify);
+	return std::make_shared<PPDecompressor>(hdr,recursionLevel,packedData,state,verify);
 }
 
 PPDecompressor::PPDecompressor(const Buffer &packedData,bool exactSizeKnown,bool verify) :
@@ -65,7 +65,7 @@ PPDecompressor::PPDecompressor(const Buffer &packedData,bool exactSizeKnown,bool
 		_rawSize>getMaxRawSize()) throw InvalidFormatError();
 }
 
-PPDecompressor::PPDecompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::unique_ptr<XPKDecompressor::State> &state,bool verify) :
+PPDecompressor::PPDecompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify) :
 	XPKDecompressor(recursionLevel),
 	_packedData(packedData)
 {

@@ -61,12 +61,12 @@ bool XPKMain::detectHeader(uint32_t hdr) noexcept
 	return hdr==FourCC("XPKF");
 }
 
-std::unique_ptr<Decompressor> XPKMain::create(const Buffer &packedData,bool verify,bool exactSizeKnown)
+std::shared_ptr<Decompressor> XPKMain::create(const Buffer &packedData,bool verify,bool exactSizeKnown)
 {
-	return std::make_unique<XPKMain>(packedData,verify,0);
+	return std::make_shared<XPKMain>(packedData,verify,0);
 }
 
-static std::vector<std::pair<bool(*)(uint32_t),std::unique_ptr<XPKDecompressor>(*)(uint32_t,uint32_t,const Buffer&,std::unique_ptr<XPKDecompressor::State>&,bool)>> XPKDecompressors={
+static std::vector<std::pair<bool(*)(uint32_t),std::shared_ptr<XPKDecompressor>(*)(uint32_t,uint32_t,const Buffer&,std::shared_ptr<XPKDecompressor::State>&,bool)>> XPKDecompressors={
 	{ACCADecompressor::detectHeaderXPK,ACCADecompressor::create},
 	{ARTMDecompressor::detectHeaderXPK,ARTMDecompressor::create},
 	{BLZWDecompressor::detectHeaderXPK,BLZWDecompressor::create},
@@ -175,7 +175,7 @@ XPKMain::XPKMain(const Buffer &packedData,bool verify,uint32_t recursionLevel) :
 	{
 		if (!headerChecksum(_packedData,0,36)) throw VerificationError();
 
-		std::unique_ptr<XPKDecompressor::State> state;
+		std::shared_ptr<XPKDecompressor::State> state;
 		forEachChunk([&](const Buffer &header,const Buffer &chunk,uint32_t rawChunkSize,uint8_t chunkType)->bool
 		{
 			if (!headerChecksum(header,0,header.size())) throw VerificationError();
@@ -199,8 +199,8 @@ XPKMain::~XPKMain()
 
 const std::string &XPKMain::getName() const noexcept
 {
-	std::unique_ptr<XPKDecompressor> sub;
-	std::unique_ptr<XPKDecompressor::State> state;
+	std::shared_ptr<XPKDecompressor> sub;
+	std::shared_ptr<XPKDecompressor::State> state;
 	try
 	{
 		forEachChunk([&](const Buffer &header,const Buffer &chunk,uint32_t rawChunkSize,uint8_t chunkType)->bool
@@ -236,7 +236,7 @@ void XPKMain::decompressImpl(Buffer &rawData,bool verify)
 	if (rawData.size()<_rawSize) throw DecompressionError();
 
 	uint32_t destOffset=0;
-	std::unique_ptr<XPKDecompressor::State> state;
+	std::shared_ptr<XPKDecompressor::State> state;
 	forEachChunk([&](const Buffer &header,const Buffer &chunk,uint32_t rawChunkSize,uint8_t chunkType)->bool
 	{
 		if (OverflowCheck::sum(destOffset,rawChunkSize)>rawData.size()) throw DecompressionError();
@@ -283,7 +283,7 @@ void XPKMain::decompressImpl(Buffer &rawData,bool verify)
 	}
 }
 
-std::unique_ptr<XPKDecompressor> XPKMain::createDecompressor(uint32_t type,uint32_t recursionLevel,const Buffer &buffer,std::unique_ptr<XPKDecompressor::State> &state,bool verify)
+std::shared_ptr<XPKDecompressor> XPKMain::createDecompressor(uint32_t type,uint32_t recursionLevel,const Buffer &buffer,std::shared_ptr<XPKDecompressor::State> &state,bool verify)
 {
 	// since this method is used externally, better check recursion level
 	if (recursionLevel>=getMaxRecursionLevel()) throw InvalidFormatError();

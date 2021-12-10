@@ -16,12 +16,12 @@ bool CYB2Decoder::detectHeaderXPK(uint32_t hdr) noexcept
 	return hdr==FourCC("CYB2");
 }
 
-std::unique_ptr<XPKDecompressor> CYB2Decoder::create(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::unique_ptr<XPKDecompressor::State> &state,bool verify)
+std::shared_ptr<XPKDecompressor> CYB2Decoder::create(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify)
 {
-	return std::make_unique<CYB2Decoder>(hdr,recursionLevel,packedData,state,verify);
+	return std::make_shared<CYB2Decoder>(hdr,recursionLevel,packedData,state,verify);
 }
 
-CYB2Decoder::CYB2Decoder(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::unique_ptr<XPKDecompressor::State> &state,bool verify) :
+CYB2Decoder::CYB2Decoder(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify) :
 	XPKDecompressor(recursionLevel),
 	_packedData(packedData)
 {
@@ -35,7 +35,7 @@ CYB2Decoder::CYB2Decoder(uint32_t hdr,uint32_t recursionLevel,const Buffer &pack
 	{
 		// trigger child checks...
 		ConstSubBuffer blockData(_packedData,10,_packedData.size()-10);
-		std::unique_ptr<XPKDecompressor::State> state;
+		std::shared_ptr<XPKDecompressor::State> state;
 		auto sub=XPKMain::createDecompressor(_blockHeader,_recursionLevel+1,blockData,state,true);
 	}
 }
@@ -54,7 +54,7 @@ const std::string &CYB2Decoder::getSubName() const noexcept
 void CYB2Decoder::decompressImpl(Buffer &rawData,const Buffer &previousData,bool verify)
 {
 	ConstSubBuffer blockData(_packedData,10,_packedData.size()-10);
-	std::unique_ptr<XPKDecompressor::State> state;
+	std::shared_ptr<XPKDecompressor::State> state;
 	auto sub=XPKMain::createDecompressor(_blockHeader,_recursionLevel+1,blockData,state,verify);
 	sub->decompressImpl(rawData,previousData,verify);
 }

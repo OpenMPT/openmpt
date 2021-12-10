@@ -15,12 +15,12 @@ bool MASHDecompressor::detectHeaderXPK(uint32_t hdr) noexcept
 	return hdr==FourCC("MASH");
 }
 
-std::unique_ptr<XPKDecompressor> MASHDecompressor::create(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::unique_ptr<XPKDecompressor::State> &state,bool verify)
+std::shared_ptr<XPKDecompressor> MASHDecompressor::create(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify)
 {
-	return std::make_unique<MASHDecompressor>(hdr,recursionLevel,packedData,state,verify);
+	return std::make_shared<MASHDecompressor>(hdr,recursionLevel,packedData,state,verify);
 }
 
-MASHDecompressor::MASHDecompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::unique_ptr<XPKDecompressor::State> &state,bool verify) :
+MASHDecompressor::MASHDecompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify) :
 	XPKDecompressor(recursionLevel),
 	_packedData(packedData)
 {

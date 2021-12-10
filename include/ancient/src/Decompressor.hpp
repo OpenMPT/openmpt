@@ -71,7 +71,7 @@ public:
 	// check exactSizeKnown from size documentation
 	// can throw InvalidFormatError if stream is not recognized or it is invalid
 	// can throw VerificationError if verify enabled and checksum does not match
-	static std::unique_ptr<Decompressor> create(const Buffer &packedData,bool exactSizeKnown,bool verify);
+	static std::shared_ptr<Decompressor> create(const Buffer &packedData,bool exactSizeKnown,bool verify);
 
 	// Detect signature whether it matches to any known compressor
 	// This does not guarantee the data is decompressable though, only signature is read

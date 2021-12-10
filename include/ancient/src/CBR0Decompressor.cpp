@@ -15,12 +15,12 @@ bool CBR0Decompressor::detectHeaderXPK(uint32_t hdr) noexcept
 	return hdr==FourCC("CBR0") || hdr==FourCC("CBR1");
 }
 
-std::unique_ptr<XPKDecompressor> CBR0Decompressor::create(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::unique_ptr<XPKDecompressor::State> &state,bool verify)
+std::shared_ptr<XPKDecompressor> CBR0Decompressor::create(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify)
 {
-	return std::make_unique<CBR0Decompressor>(hdr,recursionLevel,packedData,state,verify);
+	return std::make_shared<CBR0Decompressor>(hdr,recursionLevel,packedData,state,verify);
 }
 
-CBR0Decompressor::CBR0Decompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::unique_ptr<XPKDecompressor::State> &state,bool verify) :
+CBR0Decompressor::CBR0Decompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify) :
 	XPKDecompressor(recursionLevel),
 	_packedData(packedData),
 	_isCBR0(hdr==FourCC("CBR0"))

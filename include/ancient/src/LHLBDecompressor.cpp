@@ -16,12 +16,12 @@ bool LHLBDecompressor::detectHeaderXPK(uint32_t hdr) noexcept
 	return hdr==FourCC("LHLB");
 }
 
-std::unique_ptr<XPKDecompressor> LHLBDecompressor::create(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::unique_ptr<XPKDecompressor::State> &state,bool verify)
+std::shared_ptr<XPKDecompressor> LHLBDecompressor::create(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify)
 {
-	return std::make_unique<LHLBDecompressor>(hdr,recursionLevel,packedData,state,verify);
+	return std::make_shared<LHLBDecompressor>(hdr,recursionLevel,packedData,state,verify);
 }
 
-LHLBDecompressor::LHLBDecompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::unique_ptr<XPKDecompressor::State> &state,bool verify) :
+LHLBDecompressor::LHLBDecompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify) :
 	XPKDecompressor(recursionLevel),
 	_packedData(packedData)
 {

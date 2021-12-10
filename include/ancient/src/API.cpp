@@ -21,7 +21,7 @@ class DecompressorImpl
 {
 public:
 	ConstStaticBuffer _buffer;
-	std::unique_ptr<Decompressor> _decompressor;
+	std::shared_ptr<Decompressor> _decompressor;
 public:
 	DecompressorImpl(const std::vector<uint8_t> &packedData,bool exactSizeKnown,bool verify) :
 		_buffer(packedData.data(), packedData.size()),

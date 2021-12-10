@@ -32,14 +32,14 @@ bool CRMDecompressor::detectHeaderXPK(uint32_t hdr) noexcept
 	return hdr==FourCC("CRM2") || hdr==FourCC("CRMS");
 }
 
-std::unique_ptr<Decompressor> CRMDecompressor::create(const Buffer &packedData,bool exactSizeKnown,bool verify)
+std::shared_ptr<Decompressor> CRMDecompressor::create(const Buffer &packedData,bool exactSizeKnown,bool verify)
 {
-	return std::make_unique<CRMDecompressor>(packedData,0,verify);
+	return std::make_shared<CRMDecompressor>(packedData,0,verify);
 }
 
-std::unique_ptr<XPKDecompressor> CRMDecompressor::create(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::unique_ptr<XPKDecompressor::State> &state,bool verify)
+std::shared_ptr<XPKDecompressor> CRMDecompressor::create(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify)
 {
-	return std::make_unique<CRMDecompressor>(hdr,recursionLevel,packedData,state,verify);
+	return std::make_shared<CRMDecompressor>(hdr,recursionLevel,packedData,state,verify);
 }
 
 CRMDecompressor::CRMDecompressor(const Buffer &packedData,uint32_t recursionLevel,bool verify) :
@@ -59,7 +59,7 @@ CRMDecompressor::CRMDecompressor(const Buffer &packedData,uint32_t recursionLeve
 	if ((hdr&0xff)=='2') _isLZH=true;
 }
 
-CRMDecompressor::CRMDecompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::unique_ptr<XPKDecompressor::State> &state,bool verify) :
+CRMDecompressor::CRMDecompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify) :
 	CRMDecompressor(packedData,recursionLevel,verify)
 {
 	_isXPKDelta=(hdr==FourCC("CRMS"));

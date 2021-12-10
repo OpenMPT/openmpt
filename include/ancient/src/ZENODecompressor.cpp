@@ -14,12 +14,12 @@ bool ZENODecompressor::detectHeaderXPK(uint32_t hdr) noexcept
 	return hdr==FourCC("ZENO");
 }
 
-std::unique_ptr<XPKDecompressor> ZENODecompressor::create(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::unique_ptr<XPKDecompressor::State> &state,bool verify)
+std::shared_ptr<XPKDecompressor> ZENODecompressor::create(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify)
 {
-	return std::make_unique<ZENODecompressor>(hdr,recursionLevel,packedData,state,verify);
+	return std::make_shared<ZENODecompressor>(hdr,recursionLevel,packedData,state,verify);
 }
 
-ZENODecompressor::ZENODecompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::unique_ptr<XPKDecompressor::State> &state,bool verify) :
+ZENODecompressor::ZENODecompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify) :
 	XPKDecompressor(recursionLevel),
 	_packedData(packedData)
 {

@@ -80,9 +80,9 @@ bool StoneCrackerDecompressor::detectHeader(uint32_t hdr) noexcept
 	return detectHeaderAndGeneration(hdr,dummy);
 }
 
-std::unique_ptr<Decompressor> StoneCrackerDecompressor::create(const Buffer &packedData,bool exactSizeKnown,bool verify)
+std::shared_ptr<Decompressor> StoneCrackerDecompressor::create(const Buffer &packedData,bool exactSizeKnown,bool verify)
 {
-	return std::make_unique<StoneCrackerDecompressor>(packedData,exactSizeKnown,verify);
+	return std::make_shared<StoneCrackerDecompressor>(packedData,exactSizeKnown,verify);
 }
 
 void StoneCrackerDecompressor::initialize(const Buffer &packedData,uint32_t hdr)

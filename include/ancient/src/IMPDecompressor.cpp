@@ -55,14 +55,14 @@ bool IMPDecompressor::detectHeaderXPK(uint32_t hdr) noexcept
 	return hdr==FourCC("IMPL");
 }
 
-std::unique_ptr<Decompressor> IMPDecompressor::create(const Buffer &packedData,bool exactSizeKnown,bool verify)
+std::shared_ptr<Decompressor> IMPDecompressor::create(const Buffer &packedData,bool exactSizeKnown,bool verify)
 {
-	return std::make_unique<IMPDecompressor>(packedData,verify);
+	return std::make_shared<IMPDecompressor>(packedData,verify);
 }
 
-std::unique_ptr<XPKDecompressor> IMPDecompressor::create(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::unique_ptr<XPKDecompressor::State> &state,bool verify)
+std::shared_ptr<XPKDecompressor> IMPDecompressor::create(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify)
 {
-	return std::make_unique<IMPDecompressor>(hdr,recursionLevel,packedData,state,verify);
+	return std::make_shared<IMPDecompressor>(hdr,recursionLevel,packedData,state,verify);
 }
 
 IMPDecompressor::IMPDecompressor(const Buffer &packedData,bool verify) :
@@ -92,7 +92,7 @@ IMPDecompressor::IMPDecompressor(const Buffer &packedData,bool verify) :
 	}
 }
 
-IMPDecompressor::IMPDecompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::unique_ptr<XPKDecompressor::State> &state,bool verify) :
+IMPDecompressor::IMPDecompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify) :
 	XPKDecompressor(recursionLevel),
 	_packedData(packedData)
 {

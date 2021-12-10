@@ -34,12 +34,12 @@ bool SXSCDecompressor::detectHeaderXPK(uint32_t hdr) noexcept
 	return hdr==FourCC("SASC")||hdr==FourCC("SHSC");
 }
 
-std::unique_ptr<XPKDecompressor> SXSCDecompressor::create(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::unique_ptr<XPKDecompressor::State> &state,bool verify)
+std::shared_ptr<XPKDecompressor> SXSCDecompressor::create(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify)
 {
-	return std::make_unique<SXSCDecompressor>(hdr,recursionLevel,packedData,state,verify);
+	return std::make_shared<SXSCDecompressor>(hdr,recursionLevel,packedData,state,verify);
 }
 
-SXSCDecompressor::SXSCDecompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::unique_ptr<XPKDecompressor::State> &state,bool verify) :
+SXSCDecompressor::SXSCDecompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify) :
 	XPKDecompressor(recursionLevel),
 	_packedData(packedData),
 	_isHSC(hdr==FourCC("SHSC"))

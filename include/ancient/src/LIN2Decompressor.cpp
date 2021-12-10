@@ -16,12 +16,12 @@ bool LIN2Decompressor::detectHeaderXPK(uint32_t hdr) noexcept
 	return hdr==FourCC("LIN2") || hdr==FourCC("LIN4");
 }
 
-std::unique_ptr<XPKDecompressor> LIN2Decompressor::create(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::unique_ptr<XPKDecompressor::State> &state,bool verify)
+std::shared_ptr<XPKDecompressor> LIN2Decompressor::create(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify)
 {
-	return std::make_unique<LIN2Decompressor>(hdr,recursionLevel,packedData,state,verify);
+	return std::make_shared<LIN2Decompressor>(hdr,recursionLevel,packedData,state,verify);
 }
 
-LIN2Decompressor::LIN2Decompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::unique_ptr<XPKDecompressor::State> &state,bool verify) :
+LIN2Decompressor::LIN2Decompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify) :
 	XPKDecompressor(recursionLevel),
 	_packedData(packedData)
 {

@@ -22,7 +22,7 @@ namespace ancient::internal
 
 // ---
 
-static std::vector<std::pair<bool(*)(uint32_t),std::unique_ptr<Decompressor>(*)(const Buffer&,bool,bool)>> decompressors={
+static std::vector<std::pair<bool(*)(uint32_t),std::shared_ptr<Decompressor>(*)(const Buffer&,bool,bool)>> decompressors={
 	{BZIP2Decompressor::detectHeader,BZIP2Decompressor::create},
 	{CRMDecompressor::detectHeader,CRMDecompressor::create},
 	{DEFLATEDecompressor::detectHeader,DEFLATEDecompressor::create},
@@ -45,7 +45,7 @@ Decompressor::~Decompressor()
 	// nothing needed
 }
 
-std::unique_ptr<Decompressor> Decompressor::create(const Buffer &packedData,bool exactSizeKnown,bool verify)
+std::shared_ptr<Decompressor> Decompressor::create(const Buffer &packedData,bool exactSizeKnown,bool verify)
 {
 	try
 	{

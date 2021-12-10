@@ -13,7 +13,7 @@ class DEFLATEDecompressor : public Decompressor, public XPKDecompressor
 {
 public:
 	DEFLATEDecompressor(const Buffer &packedData,bool exactSizeKnown,bool verify);
-	DEFLATEDecompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::unique_ptr<XPKDecompressor::State> &state,bool verify);
+	DEFLATEDecompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify);
 	DEFLATEDecompressor(const Buffer &packedData,size_t packedSize,size_t rawSize,bool isZlib,bool verify,bool deflate64);		// zlib or completely raw stream
 	virtual ~DEFLATEDecompressor();
 
@@ -29,8 +29,8 @@ public:
 	static bool detectHeader(uint32_t hdr) noexcept;
 	static bool detectHeaderXPK(uint32_t hdr) noexcept;
 
-	static std::unique_ptr<Decompressor> create(const Buffer &packedData,bool exactSizeKnown,bool verify);
-	static std::unique_ptr<XPKDecompressor> create(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::unique_ptr<XPKDecompressor::State> &state,bool verify);
+	static std::shared_ptr<Decompressor> create(const Buffer &packedData,bool exactSizeKnown,bool verify);
+	static std::shared_ptr<XPKDecompressor> create(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify);
 
 private:
 	bool detectZLib();

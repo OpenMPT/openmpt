@@ -11,7 +11,7 @@ namespace ancient::internal
 class ACCADecompressor : public XPKDecompressor
 {
 public:
-	ACCADecompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::unique_ptr<XPKDecompressor::State> &state,bool verify);
+	ACCADecompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify);
 
 	virtual ~ACCADecompressor();
 
@@ -20,7 +20,7 @@ public:
 	virtual void decompressImpl(Buffer &rawData,const Buffer &previousData,bool verify) override final;
 
 	static bool detectHeaderXPK(uint32_t hdr) noexcept;
-	static std::unique_ptr<XPKDecompressor> create(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::unique_ptr<XPKDecompressor::State> &state,bool verify);
+	static std::shared_ptr<XPKDecompressor> create(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify);
 
 private:
 	const Buffer	&_packedData;

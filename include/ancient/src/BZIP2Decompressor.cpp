@@ -25,14 +25,14 @@ bool BZIP2Decompressor::detectHeaderXPK(uint32_t hdr) noexcept
 	return (hdr==FourCC("BZP2"));
 }
 
-std::unique_ptr<Decompressor> BZIP2Decompressor::create(const Buffer &packedData,bool exactSizeKnown,bool verify)
+std::shared_ptr<Decompressor> BZIP2Decompressor::create(const Buffer &packedData,bool exactSizeKnown,bool verify)
 {
-	return std::make_unique<BZIP2Decompressor>(packedData,exactSizeKnown,verify);
+	return std::make_shared<BZIP2Decompressor>(packedData,exactSizeKnown,verify);
 }
 
-std::unique_ptr<XPKDecompressor> BZIP2Decompressor::create(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::unique_ptr<XPKDecompressor::State> &state,bool verify)
+std::shared_ptr<XPKDecompressor> BZIP2Decompressor::create(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify)
 {
-	return std::make_unique<BZIP2Decompressor>(hdr,recursionLevel,packedData,state,verify);
+	return std::make_shared<BZIP2Decompressor>(hdr,recursionLevel,packedData,state,verify);
 }
 
 BZIP2Decompressor::BZIP2Decompressor(const Buffer &packedData,bool exactSizeKnown,bool verify) :
@@ -44,7 +44,7 @@ BZIP2Decompressor::BZIP2Decompressor(const Buffer &packedData,bool exactSizeKnow
 	_blockSize=((hdr&0xffU)-'0')*100'000;
 }
 
-BZIP2Decompressor::BZIP2Decompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::unique_ptr<XPKDecompressor::State> &state,bool verify) :
+BZIP2Decompressor::BZIP2Decompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify) :
 	XPKDecompressor(recursionLevel),
 	_packedData(packedData),
 	_packedSize(_packedData.size())

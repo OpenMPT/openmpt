@@ -17,9 +17,9 @@ bool MMCMPDecompressor::detectHeader(uint32_t hdr) noexcept
 	return hdr==FourCC("ziRC");
 }
 
-std::unique_ptr<Decompressor> MMCMPDecompressor::create(const Buffer &packedData,bool exactSizeKnown,bool verify)
+std::shared_ptr<Decompressor> MMCMPDecompressor::create(const Buffer &packedData,bool exactSizeKnown,bool verify)
 {
-	return std::make_unique<MMCMPDecompressor>(packedData,exactSizeKnown,verify);
+	return std::make_shared<MMCMPDecompressor>(packedData,exactSizeKnown,verify);
 }
 
 MMCMPDecompressor::MMCMPDecompressor(const Buffer &packedData,bool exactSizeKnown,bool verify) :

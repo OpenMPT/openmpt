@@ -14,12 +14,12 @@ bool FBR2Decompressor::detectHeaderXPK(uint32_t hdr) noexcept
 	return hdr==FourCC("FBR2");
 }
 
-std::unique_ptr<XPKDecompressor> FBR2Decompressor::create(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::unique_ptr<XPKDecompressor::State> &state,bool verify)
+std::shared_ptr<XPKDecompressor> FBR2Decompressor::create(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify)
 {
-	return std::make_unique<FBR2Decompressor>(hdr,recursionLevel,packedData,state,verify);
+	return std::make_shared<FBR2Decompressor>(hdr,recursionLevel,packedData,state,verify);
 }
 
-FBR2Decompressor::FBR2Decompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::unique_ptr<XPKDecompressor::State> &state,bool verify) :
+FBR2Decompressor::FBR2Decompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify) :
 	XPKDecompressor(recursionLevel),
 	_packedData(packedData)
 {

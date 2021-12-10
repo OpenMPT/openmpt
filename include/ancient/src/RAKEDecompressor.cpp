@@ -15,12 +15,12 @@ bool RAKEDecompressor::detectHeaderXPK(uint32_t hdr) noexcept
 	return (hdr==FourCC("FRHT") || hdr==FourCC("RAKE"));
 }
 
-std::unique_ptr<XPKDecompressor> RAKEDecompressor::create(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::unique_ptr<XPKDecompressor::State> &state,bool verify)
+std::shared_ptr<XPKDecompressor> RAKEDecompressor::create(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify)
 {
-	return std::make_unique<RAKEDecompressor>(hdr,recursionLevel,packedData,state,verify);
+	return std::make_shared<RAKEDecompressor>(hdr,recursionLevel,packedData,state,verify);
 }
 
-RAKEDecompressor::RAKEDecompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::unique_ptr<XPKDecompressor::State> &state,bool verify) :
+RAKEDecompressor::RAKEDecompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify) :
 	XPKDecompressor(recursionLevel),
 	_packedData(packedData),
 	_isRAKE(hdr==FourCC("RAKE"))

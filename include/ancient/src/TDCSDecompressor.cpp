@@ -14,12 +14,12 @@ bool TDCSDecompressor::detectHeaderXPK(uint32_t hdr) noexcept
 	return hdr==FourCC("TDCS");
 }
 
-std::unique_ptr<XPKDecompressor> TDCSDecompressor::create(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::unique_ptr<XPKDecompressor::State> &state,bool verify)
+std::shared_ptr<XPKDecompressor> TDCSDecompressor::create(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify)
 {
-	return std::make_unique<TDCSDecompressor>(hdr,recursionLevel,packedData,state,verify);
+	return std::make_shared<TDCSDecompressor>(hdr,recursionLevel,packedData,state,verify);
 }
 
-TDCSDecompressor::TDCSDecompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::unique_ptr<XPKDecompressor::State> &state,bool verify) :
+TDCSDecompressor::TDCSDecompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify) :
 	XPKDecompressor(recursionLevel),
 	_packedData(packedData)
 {

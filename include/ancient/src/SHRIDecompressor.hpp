@@ -24,7 +24,7 @@ private:
 	};
 
 public:
-	SHRIDecompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::unique_ptr<XPKDecompressor::State> &state,bool verify);
+	SHRIDecompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify);
 
 	virtual ~SHRIDecompressor();
 
@@ -33,7 +33,7 @@ public:
 	virtual void decompressImpl(Buffer &rawData,const Buffer &previousData,bool verify) override final;
 
 	static bool detectHeaderXPK(uint32_t hdr) noexcept;
-	static std::unique_ptr<XPKDecompressor> create(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::unique_ptr<XPKDecompressor::State> &state,bool verify);
+	static std::shared_ptr<XPKDecompressor> create(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify);
 
 private:
 	const Buffer				&_packedData;
@@ -42,7 +42,7 @@ private:
 	size_t					_startOffset=0;
 	size_t					_rawSize=0;
 
-	std::unique_ptr<XPKDecompressor::State>	&_state;	// reference!!!
+	std::shared_ptr<XPKDecompressor::State>	&_state;	// reference!!!
 };
 
 }

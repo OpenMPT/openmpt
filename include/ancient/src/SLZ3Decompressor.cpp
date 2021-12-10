@@ -14,12 +14,12 @@ bool SLZ3Decompressor::detectHeaderXPK(uint32_t hdr) noexcept
 	return hdr==FourCC("SLZ3");
 }
 
-std::unique_ptr<XPKDecompressor> SLZ3Decompressor::create(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::unique_ptr<XPKDecompressor::State> &state,bool verify)
+std::shared_ptr<XPKDecompressor> SLZ3Decompressor::create(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify)
 {
-	return std::make_unique<SLZ3Decompressor>(hdr,recursionLevel,packedData,state,verify);
+	return std::make_shared<SLZ3Decompressor>(hdr,recursionLevel,packedData,state,verify);
 }
 
-SLZ3Decompressor::SLZ3Decompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::unique_ptr<XPKDecompressor::State> &state,bool verify) :
+SLZ3Decompressor::SLZ3Decompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify) :
 	XPKDecompressor(recursionLevel),
 	_packedData(packedData)
 {

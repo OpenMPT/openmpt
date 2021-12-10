@@ -13,7 +13,7 @@ class BZIP2Decompressor : public Decompressor, public XPKDecompressor
 {
 public:
 	BZIP2Decompressor(const Buffer &packedData,bool exactSizeKnown,bool verify);
-	BZIP2Decompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::unique_ptr<XPKDecompressor::State> &state,bool verify);
+	BZIP2Decompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify);
 	virtual ~BZIP2Decompressor();
 
 	virtual size_t getRawSize() const noexcept override final;
@@ -28,8 +28,8 @@ public:
 	static bool detectHeader(uint32_t hdr) noexcept;
 	static bool detectHeaderXPK(uint32_t hdr) noexcept;
 
-	static std::unique_ptr<Decompressor> create(const Buffer &packedData,bool exactSizeKnown,bool verify);
-	static std::unique_ptr<XPKDecompressor> create(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::unique_ptr<XPKDecompressor::State> &state,bool verify);
+	static std::shared_ptr<Decompressor> create(const Buffer &packedData,bool exactSizeKnown,bool verify);
+	static std::shared_ptr<XPKDecompressor> create(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify);
 
 private:
 	const Buffer		&_packedData;

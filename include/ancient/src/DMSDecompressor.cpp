@@ -24,9 +24,9 @@ bool DMSDecompressor::detectHeader(uint32_t hdr) noexcept
 	return hdr==FourCC("DMS!");
 }
 
-std::unique_ptr<Decompressor> DMSDecompressor::create(const Buffer &packedData,bool exactSizeKnown,bool verify)
+std::shared_ptr<Decompressor> DMSDecompressor::create(const Buffer &packedData,bool exactSizeKnown,bool verify)
 {
-	return std::make_unique<DMSDecompressor>(packedData,verify);
+	return std::make_shared<DMSDecompressor>(packedData,verify);
 }
 
 DMSDecompressor::DMSDecompressor(const Buffer &packedData,bool verify) :

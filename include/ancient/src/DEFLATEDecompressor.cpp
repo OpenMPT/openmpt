@@ -41,14 +41,14 @@ bool DEFLATEDecompressor::detectHeaderXPK(uint32_t hdr) noexcept
 	return (hdr==FourCC("GZIP"));
 }
 
-std::unique_ptr<Decompressor> DEFLATEDecompressor::create(const Buffer &packedData,bool exactSizeKnown,bool verify)
+std::shared_ptr<Decompressor> DEFLATEDecompressor::create(const Buffer &packedData,bool exactSizeKnown,bool verify)
 {
-	return std::make_unique<DEFLATEDecompressor>(packedData,exactSizeKnown,verify);
+	return std::make_shared<DEFLATEDecompressor>(packedData,exactSizeKnown,verify);
 }
 
-std::unique_ptr<XPKDecompressor> DEFLATEDecompressor::create(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::unique_ptr<XPKDecompressor::State> &state,bool verify)
+std::shared_ptr<XPKDecompressor> DEFLATEDecompressor::create(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify)
 {
-	return std::make_unique<DEFLATEDecompressor>(hdr,recursionLevel,packedData,state,verify);
+	return std::make_shared<DEFLATEDecompressor>(hdr,recursionLevel,packedData,state,verify);
 }
 
 bool DEFLATEDecompressor::detectZLib()
@@ -126,7 +126,7 @@ DEFLATEDecompressor::DEFLATEDecompressor(const Buffer &packedData,bool exactSize
 	_type=Type::GZIP;
 }
 
-DEFLATEDecompressor::DEFLATEDecompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::unique_ptr<XPKDecompressor::State> &state,bool verify) :
+DEFLATEDecompressor::DEFLATEDecompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify) :
 	XPKDecompressor(recursionLevel),
 	_packedData(packedData)
 {

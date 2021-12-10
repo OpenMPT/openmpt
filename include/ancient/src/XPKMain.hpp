@@ -27,13 +27,13 @@ public:
 
 	static bool detectHeader(uint32_t hdr) noexcept;
 
-	static std::unique_ptr<Decompressor> create(const Buffer &packedData,bool exactSizeKnown,bool verify);
+	static std::shared_ptr<Decompressor> create(const Buffer &packedData,bool exactSizeKnown,bool verify);
 
 	// Can be used to create directly decoder for chunk (needed by CYB2)
-	static std::unique_ptr<XPKDecompressor> createDecompressor(uint32_t type,uint32_t recursionLevel,const Buffer &buffer,std::unique_ptr<XPKDecompressor::State> &state,bool verify);
+	static std::shared_ptr<XPKDecompressor> createDecompressor(uint32_t type,uint32_t recursionLevel,const Buffer &buffer,std::shared_ptr<XPKDecompressor::State> &state,bool verify);
 
 private:
-	static void registerDecompressor(bool(*detect)(uint32_t),std::unique_ptr<XPKDecompressor>(*create)(uint32_t,uint32_t,const Buffer&,std::unique_ptr<XPKDecompressor::State>&,bool));
+	static void registerDecompressor(bool(*detect)(uint32_t),std::shared_ptr<XPKDecompressor>(*create)(uint32_t,uint32_t,const Buffer&,std::shared_ptr<XPKDecompressor::State>&,bool));
 	static constexpr uint32_t getMaxRecursionLevel() noexcept { return 4; }
 
 	template <typename F>
