@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.4.27-pre
 
+ *  mpg123: Update to v1.29.3 (2021-12-11).
+
 ### libopenmpt 0.4.26 (2021-12-05)
 
  *  [**Sec**] Possible out-of-bounds read in Chorus plugin with NaN plugin
