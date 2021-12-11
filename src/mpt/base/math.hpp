@@ -9,6 +9,7 @@
 #include "mpt/base/namespace.hpp"
 
 #include <algorithm>
+#include <type_traits>
 
 #include <cmath>
 
