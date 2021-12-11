@@ -452,7 +452,7 @@ template <typename T>
 inline T safe_clamp(T v, T lo, T hi)
 {
 	MPT_STATIC_ASSERT(std::is_floating_point<T>::value);
-	return std::clamp(mpt::sanitize_nan(v), lo, hi);
+	return mpt::clamp(mpt::sanitize_nan(v), lo, hi);
 }
 
 } // namespace mpt
