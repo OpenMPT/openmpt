@@ -293,6 +293,11 @@ long attribute_align_arg mpg123_feedseek(mpg123_handle *mh, long sampleoff, int 
 	long val;
 	off_t largeioff;
 	off_t largeval;
+	if(input_offset == NULL)
+	{
+		mh->err = MPG123_NULL_POINTER;
+		return MPG123_ERR;
+	}
 
 	largeval = MPG123_LARGENAME(mpg123_feedseek)(mh, sampleoff, whence, &largeioff);
 	/* Error/message codes are small... */
@@ -355,6 +360,12 @@ int attribute_align_arg mpg123_index(mpg123_handle *mh, long **offsets, long *st
 	off_t largestep;
 	off_t *largeoffsets;
 	struct wrap_data *whd;
+	if(mh == NULL) return MPG123_BAD_HANDLE;
+	if(offsets == NULL || step == NULL || fill == NULL)
+	{
+		mh->err = MPG123_BAD_INDEX_PAR;
+		return MPG123_ERR;
+	}
 
 	whd = wrap_get(mh);
 	if(whd == NULL) return MPG123_ERR;
@@ -409,6 +420,7 @@ int attribute_align_arg mpg123_set_index(mpg123_handle *mh, long *offsets, long 
 	size_t i;
 	struct wrap_data *whd;
 	off_t *indextmp;
+	if(mh == NULL) return MPG123_BAD_HANDLE;
 
 	whd = wrap_get(mh);
 	if(whd == NULL) return MPG123_ERR;
