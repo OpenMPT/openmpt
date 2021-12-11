@@ -16,6 +16,9 @@
 #include <algorithm>
 #include <limits>
 
+#include <cmath>
+
+
 
 OPENMPT_NAMESPACE_BEGIN
 
