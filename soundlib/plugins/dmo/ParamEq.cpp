@@ -91,7 +91,7 @@ void ParamEq::SetParameter(PlugParamIndex index, PlugParamValue value)
 {
 	if(index < kEqNumParameters)
 	{
-		Limit(value, 0.0f, 1.0f);
+		value = mpt::safe_clamp(value, 0.0f, 1.0f);
 		m_param[index] = value;
 		RecalculateEqParams();
 	}

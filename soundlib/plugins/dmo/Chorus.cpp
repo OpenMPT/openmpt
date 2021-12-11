@@ -154,7 +154,7 @@ void Chorus::SetParameter(PlugParamIndex index, PlugParamValue value)
 {
 	if(index < kChorusNumParameters)
 	{
-		Limit(value, 0.0f, 1.0f);
+		value = mpt::safe_clamp(value, 0.0f, 1.0f);
 		if(index == kChorusWaveShape)
 		{
 			value = mpt::round(value);

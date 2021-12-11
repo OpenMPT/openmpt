@@ -218,6 +218,7 @@ void MidiInOut::SetChunk(const ChunkData &chunk, bool /*isBank*/)
 
 void MidiInOut::SetParameter(PlugParamIndex index, PlugParamValue value)
 {
+	value = mpt::safe_clamp(value, 0.0f, 1.0f);
 	MidiDevice::ID newDevice = ParameterToDeviceID(value);
 	OpenDevice(newDevice, (index == kInputParameter));
 

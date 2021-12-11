@@ -119,7 +119,7 @@ void Compressor::SetParameter(PlugParamIndex index, PlugParamValue value)
 {
 	if(index < kCompNumParameters)
 	{
-		Limit(value, 0.0f, 1.0f);
+		value = mpt::safe_clamp(value, 0.0f, 1.0f);
 		m_param[index] = value;
 		RecalculateCompressorParams();
 	}
