@@ -242,8 +242,19 @@ struct DecodeFloat32
 	static MPT_CONSTEXPR11_VAR std::size_t input_inc = 4;
 	MPT_FORCEINLINE output_t operator() (const input_t *inBuf)
 	{
-		return IEEE754binary32LE(static_cast<uint8>(inBuf[loLoByteIndex]), static_cast<uint8>(inBuf[loHiByteIndex]), static_cast<uint8>(inBuf[hiLoByteIndex]), static_cast<uint8>(inBuf[hiHiByteIndex]));
-	}
+		float32 val= IEEE754binary32LE(static_cast<uint8>(inBuf[loLoByteIndex]), static_cast<uint8>(inBuf[loHiByteIndex]), static_cast<uint8>(inBuf[hiLoByteIndex]), static_cast<uint8>(inBuf[hiHiByteIndex]));
+		val = mpt::sanitize_nan(val);
+		if(std::isinf(val))
+		{
+			if(val >= 0.0f)
+			{
+				val = 1.0f;
+			} else
+			{
+				val = -1.0f;
+			}
+		}
+		return val;	}
 };
 
 template <size_t loLoByteIndex, size_t loHiByteIndex, size_t hiLoByteIndex, size_t hiHiByteIndex>
@@ -255,8 +266,19 @@ struct DecodeScaledFloat32
 	float factor;
 	MPT_FORCEINLINE output_t operator() (const input_t *inBuf)
 	{
-		return factor * IEEE754binary32LE(static_cast<uint8>(inBuf[loLoByteIndex]), static_cast<uint8>(inBuf[loHiByteIndex]), static_cast<uint8>(inBuf[hiLoByteIndex]), static_cast<uint8>(inBuf[hiHiByteIndex]));
-	}
+		float32 val = IEEE754binary32LE(static_cast<uint8>(inBuf[loLoByteIndex]), static_cast<uint8>(inBuf[loHiByteIndex]), static_cast<uint8>(inBuf[hiLoByteIndex]), static_cast<uint8>(inBuf[hiHiByteIndex]));
+		val = mpt::sanitize_nan(val);
+		if(std::isinf(val))
+		{
+			if(val >= 0.0f)
+			{
+				val = 1.0f;
+			} else
+			{
+				val = -1.0f;
+			}
+		}
+		return factor * val;	}
 	MPT_FORCEINLINE DecodeScaledFloat32(float scaleFactor)
 		: factor(scaleFactor)
 	{
@@ -272,7 +294,19 @@ struct DecodeFloat64
 	static MPT_CONSTEXPR11_VAR std::size_t input_inc = 8;
 	MPT_FORCEINLINE output_t operator() (const input_t *inBuf)
 	{
-		return IEEE754binary64LE(uint8(inBuf[b0]), uint8(inBuf[b1]), uint8(inBuf[b2]), uint8(inBuf[b3]), uint8(inBuf[b4]), uint8(inBuf[b5]), uint8(inBuf[b6]), uint8(inBuf[b7]));
+		float64 val = IEEE754binary64LE(uint8(inBuf[b0]), uint8(inBuf[b1]), uint8(inBuf[b2]), uint8(inBuf[b3]), uint8(inBuf[b4]), uint8(inBuf[b5]), uint8(inBuf[b6]), uint8(inBuf[b7]));
+		val = mpt::sanitize_nan(val);
+		if(std::isinf(val))
+		{
+			if(val >= 0.0)
+			{
+				val = 1.0;
+			} else
+			{
+				val = -1.0;
+			}
+		}
+		return val;
 	}
 };
 
@@ -389,7 +423,7 @@ struct Convert<int8, float32>
 	typedef int8 output_t;
 	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
-		Limit(val, -1.0f, 1.0f);
+		val = mpt::safe_clamp(val, -1.0f, 1.0f);
 		val *= 128.0f;
 #if MPT_SC_AVOID_FLOOR
 		// MSVC with x87 floating point math calls floor for the more intuitive version
@@ -451,7 +485,7 @@ struct Convert<int16, float32>
 	typedef int16 output_t;
 	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
-		Limit(val, -1.0f, 1.0f);
+		val = mpt::safe_clamp(val, -1.0f, 1.0f);
 		val *= 32768.0f;
 #if MPT_SC_AVOID_FLOOR
 		// MSVC with x87 floating point math calls floor for the more intuitive version
@@ -469,7 +503,7 @@ struct Convert<int8, double>
 	typedef int8 output_t;
 	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
-		Limit(val, -1.0, 1.0);
+		val = mpt::safe_clamp(val, -1.0, 1.0);
 		val *= 128.0;
 #if MPT_SC_AVOID_FLOOR
 		// MSVC with x87 floating point math calls floor for the more intuitive version
@@ -487,7 +521,7 @@ struct Convert<int16, double>
 	typedef int16 output_t;
 	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
-		Limit(val, -1.0, 1.0);
+		val = mpt::safe_clamp(val, -1.0, 1.0);
 		val *= 32768.0;
 #if MPT_SC_AVOID_FLOOR
 		// MSVC with x87 floating point math calls floor for the more intuitive version
@@ -593,7 +627,7 @@ struct Convert<int32, float32>
 	typedef int32 output_t;
 	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
-		Limit(val, -1.0f, 1.0f);
+		val = mpt::safe_clamp(val, -1.0f, 1.0f);
 		val *= 2147483648.0f;
 #if MPT_SC_AVOID_FLOOR
 		// MSVC with x87 floating point math calls floor for the more intuitive version
@@ -611,7 +645,7 @@ struct Convert<int32, double>
 	typedef int32 output_t;
 	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
-		Limit(val, -1.0, 1.0);
+		val = mpt::safe_clamp(val, -1.0, 1.0);
 		val *= 2147483648.0;
 #if MPT_SC_AVOID_FLOOR
 		// MSVC with x87 floating point math calls floor for the more intuitive version
@@ -673,7 +707,7 @@ struct Convert<int64, float32>
 	typedef int64 output_t;
 	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
-		Limit(val, -1.0f, 1.0f);
+		val = mpt::safe_clamp(val, -1.0f, 1.0f);
 		val *= static_cast<float>(uint64(1)<<63);
 		return mpt::saturate_cast<int64>(std::floor(val + 0.5f));
 	}
@@ -686,7 +720,7 @@ struct Convert<int64, double>
 	typedef int64 output_t;
 	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
-		Limit(val, -1.0, 1.0);
+		val = mpt::safe_clamp(val, -1.0, 1.0);
 		val *= static_cast<double>(uint64(1)<<63);
 		return mpt::saturate_cast<int64>(std::floor(val + 0.5));
 	}
@@ -985,6 +1019,7 @@ struct ConvertToFixedPoint<int32, float32, fractionalBits>
 	MPT_FORCEINLINE output_t operator() (input_t val)
 	{
 		STATIC_ASSERT(fractionalBits >= 0 && fractionalBits <= sizeof(input_t)*8-1);
+		val = mpt::sanitize_nan(val);
 		return mpt::saturate_cast<output_t>(std::floor(val * factor + 0.5f));
 	}
 };
