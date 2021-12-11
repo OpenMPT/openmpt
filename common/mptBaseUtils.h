@@ -434,6 +434,30 @@ MPT_CONSTEXPR11_FUN const T & clamp(const T & v, const T & lo, const T & hi)
 } // namespace mpt
 
 
+namespace mpt
+{
+
+template <typename T>
+inline T sanitize_nan(T val)
+{
+	MPT_STATIC_ASSERT(std::is_floating_point<T>::value);
+	if(std::isnan(val))
+	{
+		return T(0.0);
+	}
+	return val;
+}
+
+template <typename T>
+inline T safe_clamp(T v, T lo, T hi)
+{
+	MPT_STATIC_ASSERT(std::is_floating_point<T>::value);
+	return std::clamp(mpt::sanitize_nan(v), lo, hi);
+}
+
+} // namespace mpt
+
+
 // Limits 'val' to given range. If 'val' is less than 'lowerLimit', 'val' is set to value 'lowerLimit'.
 // Similarly if 'val' is greater than 'upperLimit', 'val' is set to value 'upperLimit'.
 // If 'lowerLimit' > 'upperLimit', 'val' won't be modified.
