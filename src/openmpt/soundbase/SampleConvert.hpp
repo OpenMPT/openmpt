@@ -159,6 +159,10 @@ struct Convert<uint8, float32>
 	using output_t = uint8;
 	MPT_FORCEINLINE output_t operator()(input_t val)
 	{
+		if(std::isnan(val))
+		{
+			val = 0.0f;
+		}
 		val = std::clamp(val, -1.0f, 1.0f);
 		val *= 128.0f;
 		return static_cast<uint8>(mpt::saturate_cast<int8>(static_cast<int>(SC::fastround(val))) + 0x80);
@@ -240,6 +244,10 @@ struct Convert<int8, float32>
 	using output_t = int8;
 	MPT_FORCEINLINE output_t operator()(input_t val)
 	{
+		if(std::isnan(val))
+		{
+			val = 0.0f;
+		}
 		val = std::clamp(val, -1.0f, 1.0f);
 		val *= 128.0f;
 		return mpt::saturate_cast<int8>(static_cast<int>(SC::fastround(val)));
@@ -321,6 +329,10 @@ struct Convert<int16, float32>
 	using output_t = int16;
 	MPT_FORCEINLINE output_t operator()(input_t val)
 	{
+		if(std::isnan(val))
+		{
+			val = 0.0f;
+		}
 		val = std::clamp(val, -1.0f, 1.0f);
 		val *= 32768.0f;
 		return mpt::saturate_cast<int16>(static_cast<int>(SC::fastround(val)));
@@ -402,6 +414,10 @@ struct Convert<int24, float32>
 	using output_t = int24;
 	MPT_FORCEINLINE output_t operator()(input_t val)
 	{
+		if(std::isnan(val))
+		{
+			val = 0.0f;
+		}
 		val = std::clamp(val, -1.0f, 1.0f);
 		val *= 2147483648.0f;
 		return static_cast<int24>(mpt::rshift_signed(mpt::saturate_cast<int32>(static_cast<int64>(SC::fastround(val))), 8));
@@ -483,6 +499,10 @@ struct Convert<int32, float32>
 	using output_t = int32;
 	MPT_FORCEINLINE output_t operator()(input_t val)
 	{
+		if(std::isnan(val))
+		{
+			val = 0.0f;
+		}
 		val = std::clamp(val, -1.0f, 1.0f);
 		val *= 2147483648.0f;
 		return mpt::saturate_cast<int32>(static_cast<int64>(SC::fastround(val)));
@@ -564,6 +584,10 @@ struct Convert<int64, float32>
 	using output_t = int64;
 	MPT_FORCEINLINE output_t operator()(input_t val)
 	{
+		if(std::isnan(val))
+		{
+			val = 0.0f;
+		}
 		val = std::clamp(val, -1.0f, 1.0f);
 		val *= static_cast<float>(uint64(1) << 63);
 		return mpt::saturate_cast<int64>(SC::fastround(val));

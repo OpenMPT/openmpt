@@ -229,6 +229,10 @@ struct ConvertToFixedPoint<int32, float32, fractionalBits>
 	MPT_FORCEINLINE output_t operator()(input_t val)
 	{
 		static_assert(fractionalBits >= 0 && fractionalBits <= sizeof(input_t) * 8 - 1);
+		if(std::isnan(val))
+		{
+			val = 0.0f;
+		}
 		return mpt::saturate_cast<output_t>(SC::fastround(val * factor));
 	}
 };
@@ -247,6 +251,10 @@ struct ConvertToFixedPoint<int32, float64, fractionalBits>
 	MPT_FORCEINLINE output_t operator()(input_t val)
 	{
 		static_assert(fractionalBits >= 0 && fractionalBits <= sizeof(input_t) * 8 - 1);
+		if(std::isnan(val))
+		{
+			val = 0.0;
+		}
 		return mpt::saturate_cast<output_t>(SC::fastround(val * factor));
 	}
 };
