@@ -277,10 +277,7 @@ struct DecodeFloat32
 	MPT_FORCEINLINE output_t operator()(const input_t *inBuf)
 	{
 		float32 val = IEEE754binary32LE(inBuf[loLoByteIndex], inBuf[loHiByteIndex], inBuf[hiLoByteIndex], inBuf[hiHiByteIndex]);
-		if(std::isnan(val))
-		{
-			val = 0.0f;
-		}
+		val = mpt::sanitize_nan(val);
 		if(std::isinf(val))
 		{
 			if(val >= 0.0f)
@@ -305,10 +302,7 @@ struct DecodeScaledFloat32
 	MPT_FORCEINLINE output_t operator()(const input_t *inBuf)
 	{
 		float32 val = IEEE754binary32LE(inBuf[loLoByteIndex], inBuf[loHiByteIndex], inBuf[hiLoByteIndex], inBuf[hiHiByteIndex]);
-		if(std::isnan(val))
-		{
-			val = 0.0f;
-		}
+		val = mpt::sanitize_nan(val);
 		if(std::isinf(val))
 		{
 			if(val >= 0.0f)
@@ -337,10 +331,7 @@ struct DecodeFloat64
 	MPT_FORCEINLINE output_t operator()(const input_t *inBuf)
 	{
 		float64 val = IEEE754binary64LE(inBuf[b0], inBuf[b1], inBuf[b2], inBuf[b3], inBuf[b4], inBuf[b5], inBuf[b6], inBuf[b7]);
-		if(std::isnan(val))
-		{
-			val = 0.0;
-		}
+		val = mpt::sanitize_nan(val);
 		if(std::isinf(val))
 		{
 			if(val >= 0.0)
