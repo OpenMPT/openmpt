@@ -13,6 +13,12 @@
 
 #include "../common/mptStringBuffer.h"
 
+#if defined(ENABLE_ASM)
+#if MPT_COMPILER_MSVC && (defined(ENABLE_X86) || defined(ENABLE_AMD64)) && defined(ENABLE_CPUID)
+#include <intrin.h>
+#endif
+#endif
+
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -25,9 +31,6 @@ namespace CPU
 
 
 #if MPT_COMPILER_MSVC && (defined(ENABLE_X86) || defined(ENABLE_AMD64)) && defined(ENABLE_CPUID)
-
-
-#include <intrin.h>
 
 
 typedef char cpuid_result_string[12];
