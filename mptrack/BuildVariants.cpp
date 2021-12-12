@@ -122,12 +122,12 @@ mpt::ustring BuildVariants::GuessCurrentBuildName()
 
 bool BuildVariants::ProcessorCanRunCurrentBuild()
 {
-#ifdef ENABLE_ASM
+#ifdef MPT_ENABLE_ARCH_INTRINSICS
 	if((CPU::Info::Get().AvailableFeatures & CPU::GetMinimumFeatures()) != CPU::GetMinimumFeatures())
 	{
 		return false;
 	}
-#endif
+#endif // MPT_ENABLE_ARCH_INTRINSICS
 	return true;
 }
 
@@ -138,12 +138,12 @@ bool BuildVariants::SystemCanRunCurrentBuild()
 	{
 		return false;
 	}
-#ifdef ENABLE_ASM
+#ifdef MPT_ENABLE_ARCH_INTRINSICS
 	if((CPU::Info::Get().AvailableFeatures & CPU::GetMinimumFeatures()) != CPU::GetMinimumFeatures())
 	{
 		return false;
 	}
-#endif
+#endif // MPT_ENABLE_ARCH_INTRINSICS
 	if(IsKnownSystem())
 	{
 		if(mpt::OS::Windows::IsOriginal())

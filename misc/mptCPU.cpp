@@ -13,11 +13,11 @@
 
 #include "../common/mptStringBuffer.h"
 
-#if defined(ENABLE_ASM)
-#if MPT_COMPILER_MSVC && (defined(ENABLE_X86) || defined(ENABLE_AMD64)) && defined(ENABLE_CPUID)
+#if defined(MPT_ENABLE_ARCH_INTRINSICS)
+#if MPT_COMPILER_MSVC && (defined(MPT_ENABLE_ARCH_X86) || defined(MPT_ENABLE_ARCH_AMD64))
 #include <intrin.h>
-#endif
-#endif
+#endif // MPT_COMPILER_MSVC && (MPT_ENABLE_ARCH_X86 || MPT_ENABLE_ARCH_AMD64)
+#endif // MPT_ENABLE_ARCH_INTRINSICS
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -27,10 +27,10 @@ namespace CPU
 {
 
 
-#if defined(ENABLE_ASM)
+#if defined(MPT_ENABLE_ARCH_INTRINSICS)
 
 
-#if MPT_COMPILER_MSVC && (defined(ENABLE_X86) || defined(ENABLE_AMD64)) && defined(ENABLE_CPUID)
+#if MPT_COMPILER_MSVC && (defined(MPT_ENABLE_ARCH_X86) || defined(MPT_ENABLE_ARCH_AMD64))
 
 
 typedef char cpuid_result_string[12];
@@ -166,7 +166,7 @@ Info::Info()
 }
 
 
-#elif MPT_COMPILER_MSVC && (defined(ENABLE_X86) || defined(ENABLE_AMD64))
+#elif MPT_COMPILER_MSVC && (defined(MPT_ENABLE_ARCH_X86) || defined(MPT_ENABLE_ARCH_AMD64))
 
 
 Info::Info()
@@ -180,7 +180,7 @@ Info::Info()
 }
 
 
-#else // !( MPT_COMPILER_MSVC && ENABLE_X86 )
+#else // !(MPT_COMPILER_MSVC && (MPT_ENABLE_ARCH_X86 || MPT_ENABLE_ARCH_AMD64))
 
 
 Info::Info()
@@ -189,7 +189,7 @@ Info::Info()
 }
 
 
-#endif // MPT_COMPILER_MSVC && ENABLE_X86
+#endif // MPT_COMPILER_MSVC && (MPT_ENABLE_ARCH_X86 || MPT_ENABLE_ARCH_AMD64)
 
 
 const Info & Info::Get()
@@ -217,13 +217,13 @@ void EnableAvailableFeatures()
 }
 
 
-#endif // ENABLE_ASM
+#endif // MPT_ENABLE_ARCH_INTRINSICS
 
 
 uint32 GetMinimumFeatures()
 {
 	uint32 flags = 0;
-	#ifdef ENABLE_ASM
+	#ifdef MPT_ENABLE_ARCH_INTRINSICS
 		#if MPT_COMPILER_MSVC
 			#if defined(_M_X64)
 				flags |= feature::lm | feature::sse | feature::sse2;
@@ -243,7 +243,7 @@ uint32 GetMinimumFeatures()
 				flags |= feature::avx2;
 			#endif
 		#endif	
-	#endif // ENABLE_ASM
+	#endif // MPT_ENABLE_ARCH_INTRINSICS
 	return flags;
 }
 

@@ -167,7 +167,7 @@ static bool IsArchitectureSupported(const mpt::ustring &architecture)
 static bool IsArchitectureFeatureSupported(const mpt::ustring &architecture, const mpt::ustring &feature)
 {
 	MPT_UNUSED_VARIABLE(architecture);
-	#ifdef ENABLE_ASM
+	#ifdef MPT_ENABLE_ARCH_INTRINSICS
 		const CPU::Info CPUInfo = CPU::Info::Get();
 		if(feature == U_("")) return true;
 		else if(feature == U_("lm")) return (CPUInfo.AvailableFeatures & CPU::feature::lm) != 0;
@@ -181,9 +181,9 @@ static bool IsArchitectureFeatureSupported(const mpt::ustring &architecture, con
 		else if(feature == U_("avx")) return (CPUInfo.AvailableFeatures & CPU::feature::avx) != 0;
 		else if(feature == U_("avx2")) return (CPUInfo.AvailableFeatures & CPU::feature::avx2) != 0;
 		else return false;
-	#else
+	#else // !MPT_ENABLE_ARCH_INTRINSICS
 		return true;
-	#endif
+	#endif // MPT_ENABLE_ARCH_INTRINSICS
 }
 
 
@@ -638,7 +638,7 @@ std::string CUpdateCheck::GetStatisticsDataV3(const Settings &settings)
 	j["OpenMPT"]["SoundDevice"]["Settings"]["ExclusiveMode"] = deviceSettings.ExclusiveMode;
 	j["OpenMPT"]["SoundDevice"]["Settings"]["UseHardwareTiming"] = deviceSettings.UseHardwareTiming;
 	j["OpenMPT"]["SoundDevice"]["Settings"]["KeepDeviceRunning"] = deviceSettings.KeepDeviceRunning;
-	#ifdef ENABLE_ASM
+	#ifdef MPT_ENABLE_ARCH_INTRINSICS
 		const CPU::Info CPUInfo = CPU::Info::Get();
 		j["System"]["Processor"]["Vendor"] = std::string(mpt::String::ReadAutoBuf(CPUInfo.VendorID));
 		j["System"]["Processor"]["Brand"] = std::string(mpt::String::ReadAutoBuf(CPUInfo.BrandID));
@@ -656,7 +656,7 @@ std::string CUpdateCheck::GetStatisticsDataV3(const Settings &settings)
 		j["System"]["Processor"]["Features"]["sse4.2"] = ((CPUInfo.AvailableFeatures & CPU::feature::sse4_2) != 0);
 		j["System"]["Processor"]["Features"]["avx"] = ((CPUInfo.AvailableFeatures & CPU::feature::avx) != 0);
 		j["System"]["Processor"]["Features"]["avx2"] = ((CPUInfo.AvailableFeatures & CPU::feature::avx2) != 0);
-	#endif
+	#endif // MPT_ENABLE_ARCH_INTRINSICS
 	return j.dump(1, '\t');
 }
 

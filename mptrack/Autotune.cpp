@@ -16,7 +16,7 @@
 #include <algorithm>
 #include <execution>
 #include <numeric>
-#ifdef ENABLE_SSE2
+#if defined(MPT_ENABLE_ARCH_INTRINSICS_SSE2)
 #include <emmintrin.h>
 #endif
 
@@ -170,7 +170,7 @@ struct AutotuneContext
 	uint32 sampleFreq;
 };
 
-#if defined(ENABLE_SSE2)
+#if defined(MPT_ENABLE_ARCH_INTRINSICS_SSE2)
 
 static inline AutotuneHistogramEntry CalculateNoteHistogramSSE2(int note, AutotuneContext ctx)
 {
@@ -196,7 +196,7 @@ static inline AutotuneHistogramEntry CalculateNoteHistogramSSE2(int note, Autotu
 	return {note % HISTORY_BINS, autocorrSum};
 }
 
-#endif // ENABLE_SSE2
+#endif
 
 static inline AutotuneHistogramEntry CalculateNoteHistogram(int note, AutotuneContext ctx)
 {
@@ -301,7 +301,7 @@ bool Autotune::Apply(double pitchReference, int targetNote)
 	std::iota(notes.begin(), notes.end(), START_NOTE);
 
 	AutotuneHistogram autocorr =
-#ifdef ENABLE_SSE2
+#if defined(MPT_ENABLE_ARCH_INTRINSICS_SSE2)
 		(CPU::HasFeatureSet(CPU::feature::sse2)) ? std::transform_reduce(std::execution::par_unseq, std::begin(notes), std::end(notes), AutotuneHistogram{}, AutotuneHistogramReduce{}, [ctx](int note) { return CalculateNoteHistogramSSE2(note, ctx); } ) :
 #endif
 		std::transform_reduce(std::execution::par_unseq, std::begin(notes), std::end(notes), AutotuneHistogram{}, AutotuneHistogramReduce{}, [ctx](int note) { return CalculateNoteHistogram(note, ctx); } );

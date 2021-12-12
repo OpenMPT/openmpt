@@ -34,7 +34,7 @@ inline constexpr uint32 avx2           = 0x20000; // Processor supports AVX2 ins
 } // namespace feature
 
 
-#ifdef ENABLE_ASM
+#ifdef MPT_ENABLE_ARCH_INTRINSICS
 
 
 inline uint32 EnabledFeatures = 0;
@@ -81,7 +81,7 @@ MPT_FORCEINLINE bool HasFeatureSet(uint32 features)
 }
 
 
-#endif // ENABLE_ASM
+#endif // MPT_ENABLE_ARCH_INTRINSICS
 
 
 uint32 GetMinimumFeatures();

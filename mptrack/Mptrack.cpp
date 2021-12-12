@@ -1064,12 +1064,12 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 		mpt::OS::Windows::PreventWineDetection();
 	}
 
-	#ifdef ENABLE_ASM
+	#ifdef MPT_ENABLE_ARCH_INTRINSICS
 		if(!cmdInfo.m_noAssembly)
 		{
 			CPU::EnableAvailableFeatures();
 		}
-	#endif
+	#endif // MPT_ENABLE_ARCH_INTRINSICS
 
 	if(mpt::OS::Windows::IsWine())
 	{

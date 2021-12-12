@@ -16,7 +16,7 @@
 #include "../soundlib/MixerLoops.h"
 #include "mpt/base/numbers.hpp"
 
-#ifdef ENABLE_SSE2
+#if defined(MPT_ENABLE_ARCH_INTRINSICS_SSE2)
 #include <emmintrin.h>
 #endif
 
@@ -29,7 +29,7 @@ OPENMPT_NAMESPACE_BEGIN
 #ifndef NO_REVERB
 
 
-#ifdef ENABLE_SSE2
+#if defined(MPT_ENABLE_ARCH_INTRINSICS_SSE2)
 // Load two 32-bit values
 static MPT_FORCEINLINE __m128i Load64SSE(const int32 *x) { return _mm_loadl_epi64(reinterpret_cast<const __m128i *>(x)); }
 // Load four 16-bit values
@@ -588,7 +588,7 @@ void CReverb::ReverbProcessPostFiltering2x(const int32 * MPT_RESTRICT pRvb, int3
 // Stereo Add + DC removal
 void CReverb::ReverbProcessPostFiltering1x(const int32 * MPT_RESTRICT pRvb, int32 * MPT_RESTRICT pDry, uint32 nSamples)
 {
-#ifdef ENABLE_SSE2
+#if defined(MPT_ENABLE_ARCH_INTRINSICS_SSE2)
 	if(CPU::HasFeatureSet(CPU::feature::sse2))
 	{
 		__m128i nDCRRvb_Y1 = Load64SSE(gnDCRRvb_Y1);
@@ -650,7 +650,7 @@ void CReverb::ReverbProcessPostFiltering1x(const int32 * MPT_RESTRICT pRvb, int3
 
 void CReverb::ReverbDCRemoval(int32 * MPT_RESTRICT pBuffer, uint32 nSamples)
 {
-#ifdef ENABLE_SSE2
+#if defined(MPT_ENABLE_ARCH_INTRINSICS_SSE2)
 	if(CPU::HasFeatureSet(CPU::feature::sse2))
 	{
 		__m128i nDCRRvb_Y1 = Load64SSE(gnDCRRvb_Y1);
@@ -715,7 +715,7 @@ void CReverb::ProcessPreDelay(SWRvbRefDelay * MPT_RESTRICT pPreDelay, const int3
 {
 	uint32 preDifPos = pPreDelay->nPreDifPos;
 	uint32 delayPos = pPreDelay->nDelayPos - 1;
-#ifdef ENABLE_SSE2
+#if defined(MPT_ENABLE_ARCH_INTRINSICS_SSE2)
 	if(CPU::HasFeatureSet(CPU::feature::sse2))
 	{
 		__m128i coeffs = _mm_cvtsi32_si128(pPreDelay->nCoeffs.lr);
@@ -787,7 +787,7 @@ void CReverb::ProcessPreDelay(SWRvbRefDelay * MPT_RESTRICT pPreDelay, const int3
 
 void CReverb::ProcessReflections(SWRvbRefDelay * MPT_RESTRICT pPreDelay, LR16 * MPT_RESTRICT pRefOut, int32 * MPT_RESTRICT pOut, uint32 nSamples)
 {
-#ifdef ENABLE_SSE2
+#if defined(MPT_ENABLE_ARCH_INTRINSICS_SSE2)
 	if(CPU::HasFeatureSet(CPU::feature::sse2))
 	{
 		union
@@ -882,7 +882,7 @@ void CReverb::ProcessLateReverb(SWLateReverb * MPT_RESTRICT pReverb, LR16 * MPT_
 	// Calculate delay line offset from current delay position
 	#define DELAY_OFFSET(x) ((delayPos - (x)) & RVBDLY_MASK)
 
-#ifdef ENABLE_SSE2
+#if defined(MPT_ENABLE_ARCH_INTRINSICS_SSE2)
 	if(CPU::HasFeatureSet(CPU::feature::sse2))
 	{
 		int delayPos = pReverb->nDelayPos & RVBDLY_MASK;

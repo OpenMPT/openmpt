@@ -28,7 +28,7 @@
 
 #include <cstddef>
 
-#if defined(ENABLE_SSE)
+#if defined(MPT_ENABLE_ARCH_INTRINSICS_SSE)
 #include <xmmintrin.h>
 #endif
 
@@ -95,14 +95,14 @@ static void EQFilter(Tbuf & buf, const std::array<EQBANDSETTINGS, MAX_EQ_BANDS> 
 template <typename TMixSample>
 void CEQ::ProcessTemplate(TMixSample *frontBuffer, TMixSample *rearBuffer, std::size_t countFrames, std::size_t numChannels)
 {
-#if defined(ENABLE_SSE)
+#if defined(MPT_ENABLE_ARCH_INTRINSICS_SSE)
 	unsigned int old_csr = 0;
 	if(CPU::HasFeatureSet(CPU::feature::sse))
 	{
 		old_csr = _mm_getcsr();
 		_mm_setcsr((old_csr & ~(_MM_DENORMALS_ZERO_MASK | _MM_FLUSH_ZERO_MASK)) | _MM_DENORMALS_ZERO_ON | _MM_FLUSH_ZERO_ON);
 	}
-#endif // ENABLE_SSE
+#endif
 	if(numChannels == 1)
 	{
 		mpt::audio_span_interleaved<TMixSample> buf{ frontBuffer, 1, countFrames };
@@ -117,12 +117,12 @@ void CEQ::ProcessTemplate(TMixSample *frontBuffer, TMixSample *rearBuffer, std::
 		mpt::audio_span_planar_strided<TMixSample> buf{ buffers.data(), 4, countFrames, 2 };
 		EQFilter<4>(buf, m_Bands, m_ChannelState);
 	}
-#if defined(ENABLE_SSE)
+#if defined(MPT_ENABLE_ARCH_INTRINSICS_SSE)
 	if(CPU::HasFeatureSet(CPU::feature::sse))
 	{
 		_mm_setcsr(old_csr);
 	}
-#endif // ENABLE_SSE
+#endif
 }
 
 

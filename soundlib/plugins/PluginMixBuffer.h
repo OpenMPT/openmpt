@@ -15,9 +15,9 @@
 #include <algorithm>
 #include <array>
 
-#if defined(ENABLE_ASM) || defined(MPT_WITH_VST)
+#if defined(MPT_ENABLE_ARCH_INTRINSICS) || defined(MPT_WITH_VST)
 #include "mpt/base/aligned_array.hpp"
-#endif
+#endif // MPT_ENABLE_ARCH_INTRINSICS || MPT_WITH_VST
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -32,21 +32,21 @@ class PluginMixBuffer
 
 private:
 
-#if defined(ENABLE_ASM) || defined(MPT_WITH_VST)
+#if defined(MPT_ENABLE_ARCH_INTRINSICS) || defined(MPT_WITH_VST)
 	static constexpr std::align_val_t alignment = std::align_val_t{16};
 	static_assert(sizeof(mpt::aligned_array<buffer_t, bufferSize, alignment>) == sizeof(std::array<buffer_t, bufferSize>));
 	static_assert(alignof(mpt::aligned_array<buffer_t, bufferSize, alignment>) == static_cast<std::size_t>(alignment));
-#endif
+#endif // MPT_ENABLE_ARCH_INTRINSICS || MPT_WITH_VST
 
 protected:
 
-#if defined(ENABLE_ASM) || defined(MPT_WITH_VST)
+#if defined(MPT_ENABLE_ARCH_INTRINSICS) || defined(MPT_WITH_VST)
 	std::vector<mpt::aligned_array<buffer_t, bufferSize, alignment>> inputs;
 	std::vector<mpt::aligned_array<buffer_t, bufferSize, alignment>> outputs;
-#else
+#else // !(MPT_ENABLE_ARCH_INTRINSICS || MPT_WITH_VST)
 	std::vector<std::array<buffer_t, bufferSize>> inputs;
 	std::vector<std::array<buffer_t, bufferSize>> outputs;
-#endif
+#endif // MPT_ENABLE_ARCH_INTRINSICS || MPT_WITH_VST
 	std::vector<buffer_t*> inputsarray;
 	std::vector<buffer_t*> outputsarray;
 
