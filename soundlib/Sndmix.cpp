@@ -1920,6 +1920,8 @@ void CSoundFile::ProcessSampleAutoVibrato(ModChannel &chn, int32 &period, Tuning
 void CSoundFile::ProcessRamping(ModChannel &chn) const
 {
 	chn.leftRamp = chn.rightRamp = 0;
+	LimitMax(chn.newLeftVol, int32_max >> VOLUMERAMPPRECISION);
+	LimitMax(chn.newRightVol, int32_max >> VOLUMERAMPPRECISION);
 	if(chn.dwFlags[CHN_VOLUMERAMP] && (chn.leftVol != chn.newLeftVol || chn.rightVol != chn.newRightVol))
 	{
 		const bool rampUp = (chn.newLeftVol > chn.leftVol) || (chn.newRightVol > chn.rightVol);
