@@ -37,9 +37,9 @@ is just a high-level summary.
     which uses dependencies (zlib, mp123, ogg, and vorbis) from Emscripten Ports
     instead of using miniz, minimp3, and stb_vorbis locally or building zlib,
     mp123, ogg, and vorbis locally.
- *  [**New**] `Makefile` `CONFIG=djgpp` now builds zlib, mpg123, and vorbis
-    locally instead of only supporting miniz, minimp3, and stb_vorbis via
-    `ALLOW_LGPL=1`.
+ *  [**New**] `Makefile` `CONFIG=emscripten` and `CONFIG=djgpp` can now build
+    zlib, mpg123, and vorbis locally instead of only supporting miniz, minimp3,
+    and stb_vorbis via `ALLOW_LGPL=1`.
 
  *  [**Change**] `Makefile` `CONFIG=emscripten` now supports
     `EMSCRIPTEN_TARGET=all` which provides WebAssembly as well as fallback to
