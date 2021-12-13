@@ -33,6 +33,10 @@ is just a high-level summary.
     `EMSCRIPTEN_TARGET=audioworkletprocessor` which builds an ES6 module in
     a single file with reduced dependencies suitable to be used in an
     AudioWorkletProcessor.
+ *  [**New**] `Makefile` `CONFIG=emscripten` now supports `EMSCRIPTEN_PORTS=1`
+    which uses dependencies (zlib, mp123, ogg, and vorbis) from Emscripten Ports
+    instead of using miniz, minimp3, and stb_vorbis locally or building zlib,
+    mp123, ogg, and vorbis locally.
  *  [**New**] `Makefile` `CONFIG=djgpp` now builds zlib, mpg123, and vorbis
     locally instead of only supporting miniz, minimp3, and stb_vorbis via
     `ALLOW_LGPL=1`.
