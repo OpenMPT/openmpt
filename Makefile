@@ -70,6 +70,7 @@
 #  NO_VORBIS=1      Avoid using libvorbis, even if found
 #  NO_VORBISFILE=1  Avoid using libvorbisfile, even if found
 #
+#  NO_MINIZ=1       Do not fallback to miniz
 #  NO_MINIMP3=1     Do not fallback to minimp3
 #  NO_STBVORBIS=1   Do not fallback to stb_vorbis
 #
@@ -767,9 +768,12 @@ LIBOPENMPT_CXX_SOURCES += \
 include/miniz/miniz.o : CFLAGS+=$(CFLAGS_SILENT)
 include/miniz/miniz.test.o : CFLAGS+=$(CFLAGS_SILENT)
 ifeq ($(NO_ZLIB),1)
+ifeq ($(NO_MINIZ),1)
+else
 LIBOPENMPT_C_SOURCES += include/miniz/miniz.c
 LIBOPENMPTTEST_C_SOURCES += include/miniz/miniz.c
 CPPFLAGS += -DMPT_WITH_MINIZ
+endif
 endif
 
 include/minimp3/minimp3.o : CFLAGS+=$(CFLAGS_SILENT)
