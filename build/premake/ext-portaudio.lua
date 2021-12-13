@@ -17,7 +17,7 @@
 				"PA_USE_ASIO=0",
 				"PA_USE_DS=1",
 				"PA_USE_WMME=1",
-				"PA_USE_WASAPI=0",
+				"PA_USE_WASAPI=1",
 				"PA_USE_WDMKS=0",
 			}
 		elseif _OPTIONS["uwp"] then
@@ -82,6 +82,7 @@
 				"../../include/portaudio/src/hostapi/dsound/pa_win_ds.c",
 				"../../include/portaudio/src/hostapi/dsound/pa_win_ds_dynlink.c",
 				"../../include/portaudio/src/hostapi/dsound/pa_win_ds_dynlink.h",
+				"../../include/portaudio/src/hostapi/wasapi/pa_win_wasapi.c",
 			}
 		elseif _OPTIONS["uwp"] then
 			files {
