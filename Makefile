@@ -891,6 +891,7 @@ LIBOPENMPTTEST_C_SOURCES += $(LOCAL_ZLIB_SOURCES)
 else
 ifeq ($(NO_ZLIB),1)
 ifeq ($(NO_MINIZ),1)
+else
 LIBOPENMPT_C_SOURCES += include/miniz/miniz.c
 LIBOPENMPTTEST_C_SOURCES += include/miniz/miniz.c
 CPPFLAGS += -DMPT_WITH_MINIZ
