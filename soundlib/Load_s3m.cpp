@@ -64,6 +64,9 @@ void CSoundFile::S3MConvert(ModCommand &m, bool fromIT)
 	case '[': m.command = fromIT ? CMD_XPARAM : CMD_NONE; break;
 	case '^': m.command = fromIT ? CMD_FINETUNE : CMD_NONE; break;
 	case '_': m.command = fromIT ? CMD_FINETUNE_SMOOTH : CMD_NONE; break;
+	// BeRoTracker extensions
+	case '1' + 0x41: m.command = fromIT ? CMD_KEYOFF : CMD_NONE; break;
+	case '2' + 0x41: m.command = fromIT ? CMD_SETENVPOSITION : CMD_NONE; break;
 	default: m.command = CMD_NONE;
 	}
 }
