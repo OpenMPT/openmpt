@@ -303,14 +303,18 @@
 		filter {}
 	elseif _OPTIONS["win81"] then
 		defines { "_WIN32_WINNT=0x0603" }
+		defines { "NTDDI_VERSION=0x06030000" }
 	elseif _OPTIONS["win7"] then
 		defines { "_WIN32_WINNT=0x0601" }
+		defines { "NTDDI_VERSION=0x06010000" }
 	elseif _OPTIONS["winxp"] then
-		systemversion "8.1"
+		systemversion "7.0"
 		filter { "architecture:x86" }
 			defines { "_WIN32_WINNT=0x0501" }
+			defines { "NTDDI_VERSION=0x05010100" } -- Windows XP SP1
 		filter { "architecture:x86_64" }
 			defines { "_WIN32_WINNT=0x0502" }
+			defines { "NTDDI_VERSION=0x05020000" } -- Windows XP x64
 	end
 
   filter {}
