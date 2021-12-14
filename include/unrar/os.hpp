@@ -39,10 +39,12 @@
 #define _UNICODE // Set _T() macro to convert from narrow to wide strings.
 #endif
 
-#undef WINVER // OPENMPT ADDITION
-#undef _WIN32_WINNT // OPENMPT ADDITION
+#if 0 // OPENMPT ADDITION
 #define WINVER _WIN32_WINNT_WINXP
+#endif // OPENMPT ADDITION
+#if 0 // OPENMPT ADDITION
 #define _WIN32_WINNT _WIN32_WINNT_WINXP
+#endif // OPENMPT ADDITION
 
 #if !defined(ZIPSFX)
 #define RAR_SMP
