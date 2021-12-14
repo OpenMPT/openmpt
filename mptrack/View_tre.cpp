@@ -674,8 +674,8 @@ void CModTree::RefreshDlsBanks()
 				// Memorize Banks
 				std::map<uint16, HTREEITEM> banks;
 				// Add Drum Kits folder
-				HTREEITEM hDrums = InsertItem(TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE,
-						_T("Drum Kits"), IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, 0, m_tiDLS[iDls], TVI_LAST);
+				HTREEITEM hDrums = InsertItem(TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE | TVIF_PARAM,
+						_T("Drum Kits"), IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, DLS_DRUM_FOLDER_LPARAM, m_tiDLS[iDls], TVI_LAST);
 				// Add Instruments
 				UINT nInstr = pDlsBank->GetNumInstruments();
 				MPT_ASSERT(nInstr <= 0x10000);
@@ -686,11 +686,12 @@ void CModTree::RefreshDlsBanks()
 					{
 						TCHAR szName[256];
 						wsprintf(szName, _T("%u: %s"), pDlsIns->ulInstrument & 0x7F, mpt::ToCString(charset, pDlsIns->szName).GetString());
+						const LPARAM lParamInstr = DlsItem::ToLPARAM(static_cast<uint16>(iIns), (pDlsIns->ulInstrument & 0x7F), false);
 						// Drum Kit
 						if(pDlsIns->ulBank & F_INSTRUMENT_DRUMS)
 						{
-							HTREEITEM hKit = InsertItem(TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE|TVIF_PARAM,
-								szName, IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, pDlsIns->ulInstrument & 0x7F, hDrums, TVI_LAST);
+							HTREEITEM hKit = InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM,
+								szName, IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, lParamInstr, hDrums, TVI_LAST);
 							MPT_ASSERT(pDlsIns->Regions.size() <= 0x8000);
 							for(uint32 iRgn = 0; iRgn < static_cast<uint32>(pDlsIns->Regions.size()); iRgn++)
 							{
@@ -725,7 +726,7 @@ void CModTree::RefreshDlsBanks()
 										mpt::ToCString(charset, regionName).GetString());
 								}
 								LPARAM lParam = DlsItem::ToLPARAM(static_cast<uint16>(iIns), static_cast<uint16>(iRgn), true);
-								InsertItem(TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE|TVIF_PARAM,
+								InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM,
 										szName, IMAGE_INSTRUMENTS, IMAGE_INSTRUMENTS, 0, 0, lParam, hKit, TVI_LAST);
 							}
 							tvs.hParent = hKit;
@@ -743,13 +744,12 @@ void CModTree::RefreshDlsBanks()
 								// Find out where to insert this bank in the tree
 								hbank = banks.insert(std::make_pair(mbank, nullptr)).first;
 								HTREEITEM insertAfter = (hbank == banks.begin()) ? TVI_FIRST : std::prev(hbank)->second;
-								hbank->second = InsertItem(TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE,
+								hbank->second = InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE,
 									s, IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, 0,
 									m_tiDLS[iDls], insertAfter);
 							}
-							LPARAM lParam = DlsItem::ToLPARAM(static_cast<uint16>(iIns), (pDlsIns->ulInstrument & 0x7F), false);
-							InsertItem(TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE|TVIF_PARAM,
-								szName, IMAGE_INSTRUMENTS, IMAGE_INSTRUMENTS, 0, 0, lParam, hbank->second, TVI_LAST);
+							InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM,
+								szName, IMAGE_INSTRUMENTS, IMAGE_INSTRUMENTS, 0, 0, lParamInstr, hbank->second, TVI_LAST);
 						}
 					}
 				}
@@ -1419,7 +1419,8 @@ CModTree::ModItem CModTree::GetModItem(HTREEITEM hItem)
 		if(rootItemData < m_tiDLS.size() && m_tiDLS[rootItemData] == hRootParent)
 		{
 			int image = 0, selImage = 0;
-			if(!GetItemImage(hItem, image, selImage) || (image != IMAGE_FOLDER && image != IMAGE_OPENFOLDER))
+			const bool isFolder = GetItemImage(hItem, image, selImage) && (image == IMAGE_FOLDER || image == IMAGE_OPENFOLDER);
+			if(!isFolder || GetItemData(hItemParent) == DLS_DRUM_FOLDER_LPARAM)
 				return DlsItem::FromLPARAM(itemData);
 		}
 	}

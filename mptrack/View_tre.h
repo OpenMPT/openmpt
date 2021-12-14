@@ -117,6 +117,8 @@ protected:
 		DLS_INSTRMASK   = 0x0000FFFF,
 		DLS_REGIONMASK  = 0x7FFF0000,  // Drum region
 		DLS_REGIONSHIFT = 16,
+
+		DLS_DRUM_FOLDER_LPARAM = 0x12345678,
 	};
 	static_assert((ORDERINDEX_INVALID & SEQU_MASK) == ORDERINDEX_INVALID, "ORDERINDEX doesn't fit in GetItemData() parameter");
 	static_assert((ORDERINDEX_MAX & SEQU_MASK) == ORDERINDEX_MAX, "ORDERINDEX doesn't fit in GetItemData() parameter");

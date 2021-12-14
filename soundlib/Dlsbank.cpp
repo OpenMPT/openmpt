@@ -1798,7 +1798,7 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, ui
 	if (nIns >= m_Instruments.size())
 		return false;
 	const DLSINSTRUMENT &dlsIns = m_Instruments[nIns];
-	const bool isDrum = (dlsIns.ulBank & F_INSTRUMENT_DRUMS);
+	const bool isDrum = (dlsIns.ulBank & F_INSTRUMENT_DRUMS) && nDrumRgn != uint32_max;
 	if(isDrum)
 	{
 		if(nDrumRgn >= dlsIns.Regions.size())

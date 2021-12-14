@@ -2191,22 +2191,16 @@ BOOL CViewInstrument::OnDragonDrop(BOOL doDrop, const DRAGONDROP *dropInfo)
 		{
 			const CDLSBank *pDLSBank = CTrackApp::gpDLSBanks[dropInfo->dropItem];
 			UINT nIns = dropInfo->dropParam & 0xFFFF;
-			UINT nRgn;
+			uint32 drumRgn = uint32_max;
 			// Drums: (0x80000000) | (Region << 16) | (Instrument)
-			if (dropInfo->dropParam & 0x80000000)
-			{
-				nRgn = (dropInfo->dropParam & 0x7FFF0000) >> 16;
-			} else
-			// Melodic: (Instrument)
-			{
-				nRgn = pDLSBank->GetRegionFromKey(nIns, 60);
-			}
+			if(dropInfo->dropParam & 0x80000000)
+				drumRgn = (dropInfo->dropParam & 0x7FFF0000) >> 16;
 
 			if(!insertNew || SendCtrlMessage(CTRLMSG_INS_NEWINSTRUMENT))
 			{
 				CriticalSection cs;
 				modDoc->GetInstrumentUndo().PrepareUndo(m_nInstrument, "Replace Instrument");
-				canDrop = modified = pDLSBank->ExtractInstrument(sndFile, m_nInstrument, nIns, nRgn);
+				canDrop = modified = pDLSBank->ExtractInstrument(sndFile, m_nInstrument, nIns, drumRgn);
 			}
 		}
 		break;
