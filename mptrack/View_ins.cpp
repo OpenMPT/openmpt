@@ -2003,9 +2003,6 @@ void CViewInstrument::OnEditPaste()
 	}
 }
 
-static DWORD nLastNotePlayed = 0;
-static DWORD nLastScanCode = 0;
-
 
 void CViewInstrument::PlayNote(ModCommand::NOTE note)
 {
