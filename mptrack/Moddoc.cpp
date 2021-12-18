@@ -948,9 +948,8 @@ void CModDoc::ProcessMIDI(uint32 midiData, INSTRUMENTINDEX ins, IMixPlugin *plug
 		if(ins > 0 && ins <= GetNumInstruments())
 		{
 			LimitMax(note, NOTE_MAX);
-			CheckNNA(note, ins, m_midiPlayingNotes[channel]);
 			vol = CMainFrame::ApplyVolumeRelatedSettings(midiData, midiVolume);
-			PlayNote(PlayNoteParam(note).Instrument(ins).Volume(vol), &m_noteChannel);
+			PlayNote(PlayNoteParam(note).Instrument(ins).Volume(vol).CheckNNA(m_midiPlayingNotes[channel]), &m_noteChannel);
 			return;
 		} else if(plugin != nullptr)
 		{
@@ -1014,6 +1013,9 @@ CHANNELINDEX CModDoc::PlayNote(PlayNoteParam &params, NoteToChannelMap *noteChan
 		}
 
 		CriticalSection cs;
+
+		if(params.m_notesPlaying)
+			CheckNNA(note, params.m_instr, *params.m_notesPlaying);
 
 		// Find a channel to play on
 		channel = FindAvailableChannel();

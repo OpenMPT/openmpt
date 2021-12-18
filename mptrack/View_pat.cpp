@@ -5431,8 +5431,7 @@ void CViewPattern::TempEnterNote(ModCommand::NOTE note, int vol, bool fromMidi)
 void CViewPattern::PlayNote(ModCommand::NOTE note, ModCommand::INSTR instr, int volume, CHANNELINDEX channel)
 {
 	CModDoc *modDoc = GetDocument();
-	modDoc->CheckNNA(note, instr, m_baPlayingNote);
-	modDoc->PlayNote(PlayNoteParam(note).Instrument(instr).Volume(volume).Channel(channel), &m_noteChannel);
+	modDoc->PlayNote(PlayNoteParam(note).Instrument(instr).Volume(volume).Channel(channel).CheckNNA(m_baPlayingNote), &m_noteChannel);
 }
 
 
@@ -5665,8 +5664,7 @@ void CViewPattern::TempEnterChord(ModCommand::NOTE note)
 			}
 			for(int i = 0; i < numNotes; i++)
 			{
-				pModDoc->CheckNNA(chordNotes[i], playIns, m_baPlayingNote);
-				pModDoc->PlayNote(PlayNoteParam(chordNotes[i]).Instrument(playIns).Channel(chn), &m_noteChannel);
+				pModDoc->PlayNote(PlayNoteParam(chordNotes[i]).Instrument(playIns).Channel(chn).CheckNNA(m_baPlayingNote), &m_noteChannel);
 			}
 		}
 	}  // end play note

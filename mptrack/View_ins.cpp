@@ -2031,9 +2031,7 @@ void CViewInstrument::PlayNote(ModCommand::NOTE note)
 					if(!pMainFrm->PlayMod(pModDoc))
 						return;
 				}
-				CriticalSection cs;
-				pModDoc->CheckNNA(note, m_nInstrument, m_baPlayingNote);
-				pModDoc->PlayNote(PlayNoteParam(note).Instrument(m_nInstrument), &m_noteChannel);
+				pModDoc->PlayNote(PlayNoteParam(note).Instrument(m_nInstrument).CheckNNA(m_baPlayingNote), &m_noteChannel);
 			}
 			CString noteName;
 			if(ModCommand::IsNote(note))

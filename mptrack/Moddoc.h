@@ -82,6 +82,7 @@ public:
 
 struct PlayNoteParam
 {
+	std::bitset<128> *m_notesPlaying = nullptr;
 	SmpLength m_loopStart = 0, m_loopEnd = 0, m_sampleOffset = 0;
 	int32 m_volume = -1;
 	SAMPLEINDEX m_sample = 0;
@@ -99,6 +100,8 @@ struct PlayNoteParam
 	PlayNoteParam& Sample(SAMPLEINDEX sample) { m_sample = sample; return *this; }
 	PlayNoteParam& Instrument(INSTRUMENTINDEX instr) { m_instr = instr; return *this; }
 	PlayNoteParam& Channel(CHANNELINDEX channel) { m_currentChannel = channel; return *this; }
+
+	PlayNoteParam& CheckNNA(std::bitset<128> &notesPlaying) { m_notesPlaying = &notesPlaying; return *this; }
 };
 
 
