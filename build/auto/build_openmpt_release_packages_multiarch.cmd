@@ -14,11 +14,21 @@ call build\auto\helper_get_openmpt_version.cmd
 
 cd build\auto || goto error
 
+set BUILD_PARAMS=--localtools --singlethreaded
 if "x%1" == "xauto" (
-	..\..\build\tools\python3\python.exe ..\..\build\auto\build_openmpt_release_packages_multiarch.py --localtools --singlethreaded --noninteractive || goto error
+	set BUILD_PARAMS=%BUILD_PARAMS% --noninteractive
+	if "x%2" == "xsign" (
+		set BUILD_PARAMS=%BUILD_PARAMS% --sign-binaries --sign-installer
+	)
 ) else (
-	..\..\build\tools\python3\python.exe ..\..\build\auto\build_openmpt_release_packages_multiarch.py --localtools --singlethreaded || goto error
+	if "x%1" == "xsign" (
+		set BUILD_PARAMS=%BUILD_PARAMS% --sign-binaries --sign-installer
+	)
 )
+
+..\..\build\tools\python3\python.exe ..\..\build\auto\build_openmpt_release_packages_multiarch.py %BUILD_PARAMS% || goto error
+
+set BUILD_PARAMS=
 
 cd "%MY_DIR%"
 

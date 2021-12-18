@@ -11,23 +11,22 @@ OpenMPT release process
      `readme.txt`
    * If year changed, see `doc/year_changed.md`
 2. Download latest pinned externals via build/download_externals.cmd.
-3. Compile OpenMPT.
-4. Run `build/auto/build_openmpt_release_packages.cmd` to build the manual and
+3. Run `build/auto/build_openmpt_release_manual.cmd` to build OpenMPT and the
    release packages.
-5. Upload release packages (openmpt.org, ftp.untergrund.net, SourceForge)
-6. Upload `OMPT_X.YY_ReleaseNotes.html` and `History.txt` to
+4. Upload release packages (openmpt.org, ftp.untergrund.net, SourceForge)
+5. Upload `OMPT_X.YY_ReleaseNotes.html` and `History.txt` to
    https://openmpt.org/release_notes/ (update DirectoryIndex!)
-7. Update https://openmpt.org/download
-8. Write news entry for front page
-9. Update stable.php version information for update checker
-10. Create SVN tag
-11. Update forum pre-announcement post, if there was one
-12. Update release status on issue tracker, add new test version and upcoming
+6. Update https://openmpt.org/download
+7. Write news entry for front page
+8. Update stable.php version information for update checker
+9. Create SVN tag
+10. Update forum pre-announcement post, if there was one
+11. Update release status on issue tracker, add new test version and upcoming
     stable version.
-13. Update IRC topic
-14. Write BitFellas news article
-15. Clear https://wiki.openmpt.org/Special:WhatLinksHere/Template:NewVersion
-16. Backup PDB files
+12. Update IRC topic
+13. Write BitFellas news article
+14. Clear https://wiki.openmpt.org/Special:WhatLinksHere/Template:NewVersion
+15. Backup PDB files
 
 Order of sections in History.txt
 --------------------------------
