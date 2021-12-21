@@ -276,11 +276,11 @@ public:
 	 * object.
 	 *
 	 * @param aip Input data block 1, "zero-phase" response. This block should
-	 * be first transformed via the convertToZ() function.
+	 * be first transformed via the convertToZP() function.
 	 * @param[in,out] aop Output/input data block 2.
 	 */
 
-	void multiplyBlocksZ( const double* const aip, double* const aop ) const
+	void multiplyBlocksZP( const double* const aip, double* const aop ) const
 	{
 	#if R8B_FLOATFFT
 
@@ -317,7 +317,7 @@ public:
 	 * @param[in,out] ap Block to transform.
 	 */
 
-	void convertToZ( double* const ap ) const
+	void convertToZP( double* const ap ) const
 	{
 	#if R8B_FLOATFFT
 

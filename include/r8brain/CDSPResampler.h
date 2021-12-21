@@ -498,7 +498,7 @@ public:
 	 * @tparam Tout Output buffer type.
 	 */
 
-	template< class Tin, class Tout >
+	template< typename Tin, typename Tout >
 	void oneshot( const Tin* ip, int iplen, Tout* op, int oplen )
 	{
 		CFixedBuffer< double > Buf( MaxInLen );

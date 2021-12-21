@@ -140,6 +140,10 @@ public:
 
 					p += ElementSize;
 				}
+
+				#if defined( R8B_SSE2 ) || defined( R8B_NEON )
+					shuffle2_3( Table, TableEnd );
+				#endif // SIMD
 			}
 			else
 			if( ElementSize == 4 )
@@ -155,6 +159,10 @@ public:
 
 					p += ElementSize;
 				}
+
+				#if defined( R8B_SSE2 ) || defined( R8B_NEON )
+					shuffle2_4( Table, TableEnd );
+				#endif // SIMD
 			}
 		}
 		else
@@ -168,6 +176,10 @@ public:
 					p[ 1 ] = p[ TablePos2 ] - p[ 0 ];
 					p += ElementSize;
 				}
+
+				#if defined( R8B_SSE2 ) || defined( R8B_NEON )
+					shuffle2_2( Table, TableEnd );
+				#endif // SIMD
 			}
 		}
 
@@ -197,7 +209,8 @@ public:
 	}
 
 	/**
-	 * Function returns the length of the filter.
+	 * Function returns the length of the filter. Always an even number, not
+	 * less than 6.
 	 */
 
 	int getFilterLen() const
@@ -235,7 +248,7 @@ public:
 	void unref();
 
 private:
-	int FilterLen; ///< Filter length.
+	int FilterLen; ///< Filter length. Always an even number, not less than 6.
 		///<
 	int FilterFracs; ///< Fractional position count.
 		///<
@@ -335,6 +348,77 @@ private:
 		}
 
 		return( Params );
+	}
+
+	/**
+	 * Function shuffles 2 order-2 filter points for SIMD operation.
+	 *
+	 * @param p Filter table start pointer.
+	 * @param pe Filter table end pointer.
+	 */
+
+	static void shuffle2_2( double* p, double* const pe )
+	{
+		while( p != pe )
+		{
+			const double t = p[ 2 ];
+			p[ 2 ] = p[ 1 ];
+			p[ 1 ] = t;
+
+			p += 4;
+		}
+	}
+
+	/**
+	 * Function shuffles 2 order-3 filter points for SIMD operation.
+	 *
+	 * @param p Filter table start pointer.
+	 * @param pe Filter table end pointer.
+	 */
+
+	static void shuffle2_3( double* p, double* const pe )
+	{
+		while( p != pe )
+		{
+			const double t1 = p[ 1 ];
+			const double t2 = p[ 2 ];
+			const double t3 = p[ 3 ];
+			const double t4 = p[ 4 ];
+			p[ 1 ] = t3;
+			p[ 2 ] = t1;
+			p[ 3 ] = t4;
+			p[ 4 ] = t2;
+
+			p += 6;
+		}
+	}
+
+	/**
+	 * Function shuffles 2 order-4 filter points for SIMD operation.
+	 *
+	 * @param p Filter table start pointer.
+	 * @param pe Filter table end pointer.
+	 */
+
+	static void shuffle2_4( double* p, double* const pe )
+	{
+		while( p != pe )
+		{
+			const double t1 = p[ 1 ];
+			const double t2 = p[ 2 ];
+			const double t3 = p[ 3 ];
+			const double t4 = p[ 4 ];
+			const double t5 = p[ 5 ];
+			const double t6 = p[ 6 ];
+			p[ 1 ] = t4;
+			p[ 2 ] = t1;
+			p[ 3 ] = t5;
+			p[ 4 ] = t2;
+			p[ 5 ] = t6;
+			p[ 6 ] = t3;
+
+			p += 8;
+		}
 	}
 };
 
@@ -918,8 +1002,39 @@ private:
 		{
 			const double* const ftp = &(*FilterBank)[ InPosFracW ];
 			const double* const rp = Buf + ReadPos;
-			double s = 0.0;
 			int i;
+
+		#if defined( R8B_SSE2 )
+
+			__m128d s = _mm_setzero_pd();
+
+			for( i = 0; i < fltlen; i += 2 )
+			{
+				const __m128d m = _mm_mul_pd( _mm_load_pd( ftp + i ),
+					_mm_loadu_pd( rp + i ));
+
+				s = _mm_add_pd( s, m );
+			}
+
+			_mm_storel_pd( op, _mm_add_pd( s, _mm_shuffle_pd( s, s, 1 )));
+
+		#elif defined( R8B_NEON )
+
+			float64x2_t s = vdupq_n_f64( 0.0 );
+
+			for( i = 0; i < fltlen; i += 2 )
+			{
+				const float64x2_t m = vmulq_f64( vld1q_f64( ftp + i ),
+					vld1q_f64( rp + i ));
+
+				s = vaddq_f64( s, m );
+			}
+
+			*op = vaddvq_f64( s );
+
+		#else // defined( R8B_NEON )
+
+			double s = 0.0;
 
 			for( i = 0; i < fltlen; i++ )
 			{
@@ -927,6 +1042,9 @@ private:
 			}
 
 			*op = s;
+
+		#endif // defined( R8B_NEON )
+
 			op++;
 
 			InPosFracW += InStep;
@@ -949,28 +1067,72 @@ private:
 
 	double* convolve2( double* op )
 	{
+		const CDSPFracDelayFilterBank& fb = *FilterBank;
+		const int fltlen = FilterLen;
+
 		while( BufLeft > fl2 )
 		{
-			double x = InPosFrac * FilterBank -> getFilterFracs();
+			double x = InPosFrac * fb.getFilterFracs();
 			const int fti = (int) x; // Function table index.
 			x -= fti; // Coefficient for interpolation between
 				// adjacent fractional delay filters.
-			const double x2 = x * x;
-			const double* const ftp = &(*FilterBank)[ fti ];
+			const double x2d = x * x;
+			const double* ftp = &fb[ fti ];
 			const double* const rp = Buf + ReadPos;
-			double s = 0.0;
-			int ii = 0;
 			int i;
 
-			for( i = 0; i < FilterLen; i++ )
-			{
-				s += ( ftp[ ii ] + ftp[ ii + 1 ] * x +
-					ftp[ ii + 2 ] * x2 ) * rp[ i ];
+		#if defined( R8B_SSE2 )
 
-				ii += 3;
+			const __m128d x1 = _mm_set1_pd( x );
+			const __m128d x2 = _mm_set1_pd( x2d );
+			__m128d s = _mm_setzero_pd();
+
+			for( i = 0; i < fltlen; i += 2 )
+			{
+				const __m128d xx1 = _mm_mul_pd( _mm_load_pd( ftp + 2 ), x1 );
+				const __m128d xx2 = _mm_mul_pd( _mm_load_pd( ftp + 4 ), x2 );
+				const __m128d xxs1 = _mm_add_pd( xx1, xx2 );
+				const __m128d xxs2 = _mm_add_pd( _mm_load_pd( ftp ), xxs1 );
+
+				s = _mm_add_pd( s, _mm_mul_pd( xxs2, _mm_loadu_pd( rp + i )));
+				ftp += 6;
+			}
+
+			_mm_storel_pd( op, _mm_add_pd( s, _mm_shuffle_pd( s, s, 1 )));
+
+		#elif defined( R8B_NEON )
+
+			const float64x2_t x1 = vdupq_n_f64( x );
+			const float64x2_t x2 = vdupq_n_f64( x2d );
+			float64x2_t s = vdupq_n_f64( 0.0 );
+
+			for( i = 0; i < fltlen; i += 2 )
+			{
+				const float64x2_t xx1 = vmulq_f64( vld1q_f64( ftp + 2 ), x1 );
+				const float64x2_t xx2 = vmulq_f64( vld1q_f64( ftp + 4 ), x2 );
+				const float64x2_t xxs1 = vaddq_f64( xx1, xx2 );
+				const float64x2_t xxs2 = vaddq_f64( vld1q_f64( ftp ), xxs1 );
+
+				s = vaddq_f64( s, vmulq_f64( xxs2, vld1q_f64( rp + i )));
+				ftp += 6;
+			}
+
+			*op = vaddvq_f64( s );
+
+		#else // defined( R8B_NEON )
+
+			double s = 0.0;
+
+			for( i = 0; i < fltlen; i++ )
+			{
+				s += ( ftp[ 0 ] + ftp[ 1 ] * x + ftp[ 2 ] * x2d ) * rp[ i ];
+				ftp += 3;
 			}
 
 			*op = s;
+
+		#endif // defined( R8B_NEON )
+
 			op++;
 
 			#if R8B_FASTTIMING

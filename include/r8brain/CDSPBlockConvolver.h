@@ -307,7 +307,7 @@ public:
 
 			if( Filter -> isZeroPhase() )
 			{
-				(*fftout) -> multiplyBlocksZ( Filter -> getKernelBlock(),
+				(*fftout) -> multiplyBlocksZP( Filter -> getKernelBlock(),
 					CurInput );
 			}
 			else
@@ -615,7 +615,7 @@ private:
 	 * @param p Spectrum data block to mirror.
 	 */
 
-	template< class T >
+	template< typename T >
 	void mirrorInputSpectrum( T* const p )
 	{
 		const int bl1 = BlockLen2 >> UpShift;

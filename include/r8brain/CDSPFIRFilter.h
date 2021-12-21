@@ -461,7 +461,7 @@ private:
 		CDSPSincFilterGen sinc;
 		sinc.Len2 = 0.25 * hl / ReqNormFreq;
 		sinc.Freq1 = 0.0;
-		sinc.Freq2 = M_PI * ( 1.0 - fo1 ) * ReqNormFreq;
+		sinc.Freq2 = R8B_PI * ( 1.0 - fo1 ) * ReqNormFreq;
 		sinc.initBand( CDSPSincFilterGen :: wftKaiser, WinParams, true );
 
 		KernelLen = sinc.KernelLen;
@@ -521,6 +521,9 @@ private:
 
 			memset( &KernelBlock[ sinc.fl2 + 1 ], 0,
 				( BlockLen * 2 - KernelLen ) * sizeof( double ));
+
+			ffto -> forward( KernelBlock );
+			ffto -> convertToZP( KernelBlock );
 		}
 		else
 		{
@@ -529,13 +532,8 @@ private:
 
 			memset( &KernelBlock[ KernelLen ], 0,
 				( BlockLen * 2 - KernelLen ) * sizeof( double ));
-		}
 
-		ffto -> forward( KernelBlock );
-
-		if( IsZeroPhase )
-		{
-			ffto -> convertToZ( KernelBlock );
+			ffto -> forward( KernelBlock );
 		}
 
 		R8BCONSOLE( "CDSPFIRFilter: flt_len=%i latency=%i nfreq=%.4f "

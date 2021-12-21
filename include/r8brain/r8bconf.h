@@ -16,14 +16,6 @@
 #ifndef R8BCONF_INCLUDED
 #define R8BCONF_INCLUDED
 
-#if defined( _WIN32 ) || defined( _WIN64 )
-	#define R8B_WIN 1
-#elif defined( __APPLE__ )
-	#define R8B_MAC 1
-#else // defined( __APPLE__ )
-	#define R8B_LNX 1 // Assume Linux (Unix) platform by default.
-#endif // defined( __APPLE__ )
-
 #if !defined( R8B_IPP )
 	/**
 	 * Set the R8B_IPP macro definition to 1 to enable the use of Intel IPP's

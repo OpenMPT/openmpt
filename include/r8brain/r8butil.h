@@ -88,7 +88,7 @@ inline void findFIRFilterResponseMinLtoR( const double* const flt,
 	double curth = minth;
 	double re;
 	double im;
-	calcFIRFilterResponse( flt, fltlen, M_PI * curth, re, im );
+	calcFIRFilterResponse( flt, fltlen, R8B_PI * curth, re, im );
 	double prevg_log = convertResponseToLog( re, im );
 	double step = 1e-11;
 
@@ -101,7 +101,7 @@ inline void findFIRFilterResponseMinLtoR( const double* const flt,
 			break;
 		}
 
-		calcFIRFilterResponse( flt, fltlen, M_PI * curth, re, im );
+		calcFIRFilterResponse( flt, fltlen, R8B_PI * curth, re, im );
 		const double curg = re * re + im * im;
 
 		if( curg > ming )
@@ -151,7 +151,7 @@ inline void findFIRFilterResponseMaxLtoR( const double* const flt,
 	double curth = maxth;
 	double re;
 	double im;
-	calcFIRFilterResponse( flt, fltlen, M_PI * curth, re, im );
+	calcFIRFilterResponse( flt, fltlen, R8B_PI * curth, re, im );
 	double prevg_log = convertResponseToLog( re, im );
 	double step = 1e-11;
 
@@ -167,7 +167,7 @@ inline void findFIRFilterResponseMaxLtoR( const double* const flt,
 			break;
 		}
 
-		calcFIRFilterResponse( flt, fltlen, M_PI * curth, re, im );
+		calcFIRFilterResponse( flt, fltlen, R8B_PI * curth, re, im );
 		const double curg = re * re + im * im;
 
 		if( curg > maxg )
@@ -204,7 +204,7 @@ inline void findFIRFilterResponseMaxLtoR( const double* const flt,
 					while( true )
 					{
 						const double c = ( l + r ) * 0.5;
-						calcFIRFilterResponse( flt, fltlen, M_PI * c,
+						calcFIRFilterResponse( flt, fltlen, R8B_PI * c,
 							re, im );
 
 						const double curg = re * re + im * im;
@@ -287,7 +287,7 @@ inline void findFIRFilterResponseLevelRtoL( const double* const flt,
 
 		double re;
 		double im;
-		calcFIRFilterResponse( flt, fltlen, M_PI * c, re, im );
+		calcFIRFilterResponse( flt, fltlen, R8B_PI * c, re, im );
 		const double curg = re * re + im * im;
 
 		if( curg > maxg )

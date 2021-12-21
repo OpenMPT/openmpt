@@ -275,9 +275,10 @@ public:
 	 *
 	 * @param[out] op Output buffer, length = KernelLen.
 	 * @param wfunc Window calculation function to use.
+	 * @tparam Buffer element's type.
 	 */
 
-	template< class T >
+	template< typename T >
 	void generateWindow( T* op,
 		CWindowFunc wfunc = &CDSPSincFilterGen :: calcWindowBlackman )
 	{
@@ -324,9 +325,10 @@ public:
 	 *
 	 * @param[out] op Output buffer, length = KernelLen.
 	 * @param wfunc Window calculation function to use.
+	 * @tparam Buffer element's type.
 	 */
 
-	template< class T >
+	template< typename T >
 	void generateBand( T* op,
 		CWindowFunc wfunc = &CDSPSincFilterGen :: calcWindowBlackman )
 	{
@@ -338,12 +340,12 @@ public:
 
 		if( Power < 0.0 )
 		{
-			*op = ( Freq2 - Freq1 ) * ( *this.*wfunc )() / M_PI;
+			*op = ( Freq2 - Freq1 ) * ( *this.*wfunc )() / R8B_PI;
 
 			while( t <= fl2 )
 			{
 				const double v = ( f2.generate() - f1.generate() ) *
-					( *this.*wfunc )() / t / M_PI;
+					( *this.*wfunc )() / ( t * R8B_PI );
 
 				op++;
 				op2--;
@@ -354,12 +356,13 @@ public:
 		}
 		else
 		{
-			*op = ( Freq2 - Freq1 ) * pows(( *this.*wfunc )(), Power ) / M_PI;
+			*op = ( Freq2 - Freq1 ) * pows(( *this.*wfunc )(), Power ) /
+				R8B_PI;
 
 			while( t <= fl2 )
 			{
 				const double v = ( f2.generate() - f1.generate() ) *
-					pows(( *this.*wfunc )(), Power ) / t / M_PI;
+					pows(( *this.*wfunc )(), Power ) / ( t * R8B_PI );
 
 				op++;
 				op2--;
@@ -375,9 +378,10 @@ public:
 	 *
 	 * @param[out] op Output buffer, length = KernelLen.
 	 * @param wfunc Window calculation function to use.
+	 * @tparam Buffer element's type.
 	 */
 
-	template< class T >
+	template< typename T >
 	void generateHilbert( T* op,
 		CWindowFunc wfunc = &CDSPSincFilterGen :: calcWindowBlackman )
 	{
@@ -395,7 +399,7 @@ public:
 			while( t <= fl2 )
 			{
 				const double v = fvalues[ t & 1 ] *
-					( *this.*wfunc )() / t / M_PI;
+					( *this.*wfunc )() / ( t * R8B_PI );
 
 				op++;
 				op2--;
@@ -409,7 +413,7 @@ public:
 			while( t <= fl2 )
 			{
 				const double v = fvalues[ t & 1 ] *
-					pows( ( *this.*wfunc )(), Power ) / t / M_PI;
+					pows( ( *this.*wfunc )(), Power ) / ( t * R8B_PI );
 
 				op++;
 				op2--;
@@ -426,9 +430,10 @@ public:
 	 * @param[out] op Output buffer, length = KernelLen.
 	 * @param wfunc Window calculation function to use.
 	 * @param opinc Output buffer increment, in "op" elements.
+	 * @tparam Buffer element's type.
 	 */
 
-	template< class T >
+	template< typename T >
 	void generateFrac( T* op,
 		CWindowFunc wfunc = &CDSPSincFilterGen :: calcWindowBlackman,
 		const int opinc = 1 )
@@ -436,7 +441,7 @@ public:
 		R8BASSERT( opinc != 0 );
 
 		double f[ 2 ];
-		f[ 0 ] = sin( FracDelay * M_PI );
+		f[ 0 ] = sin( FracDelay * R8B_PI );
 		f[ 1 ] = -f[ 0 ];
 
 		int t = -fl2;
@@ -456,8 +461,8 @@ public:
 		{
 			while( t < mt )
 			{
-				*op = f[ t & 1 ] * ( *this.*wfunc )() / ( t + FracDelay ) /
-					M_PI;
+				*op = f[ t & 1 ] * ( *this.*wfunc )() /
+					(( t + FracDelay ) * R8B_PI );
 
 				op += opinc;
 				t++;
@@ -465,7 +470,7 @@ public:
 
 			double ut = t + FracDelay;
 			*op = ( fabs( ut ) <= 1e-13 ? ( *this.*wfunc )() :
-				f[ t & 1 ] * ( *this.*wfunc )() / ut / M_PI );
+				f[ t & 1 ] * ( *this.*wfunc )() / ( ut * R8B_PI ));
 
 			mt = fl2 - 2;
 
@@ -473,22 +478,22 @@ public:
 			{
 				op += opinc;
 				t++;
-				*op = f[ t & 1 ] * ( *this.*wfunc )() / ( t + FracDelay ) /
-					M_PI;
+				*op = f[ t & 1 ] * ( *this.*wfunc )() /
+					(( t + FracDelay ) * R8B_PI );
 			}
 
 			op += opinc;
 			t++;
 			ut = t + FracDelay;
 			*op = ( ut > Len2 ? 0.0 :
-				f[ t & 1 ] * ( *this.*wfunc )() / ut / M_PI );
+				f[ t & 1 ] * ( *this.*wfunc )() / ( ut * R8B_PI ));
 		}
 		else
 		{
 			while( t < mt )
 			{
 				*op = f[ t & 1 ] * pows( ( *this.*wfunc )(), Power ) /
-					( t + FracDelay ) / M_PI;
+					(( t + FracDelay ) * R8B_PI );
 
 				op += opinc;
 				t++;
@@ -496,7 +501,8 @@ public:
 
 			double ut = t + FracDelay;
 			*op = ( fabs( ut ) <= 1e-13 ? pows( ( *this.*wfunc )(), Power ) :
-				f[ t & 1 ] * pows( ( *this.*wfunc )(), Power ) / ut / M_PI );
+				f[ t & 1 ] * pows( ( *this.*wfunc )(), Power ) /
+				( ut * R8B_PI ));
 
 			mt = fl2 - 2;
 
@@ -505,14 +511,15 @@ public:
 				op += opinc;
 				t++;
 				*op = f[ t & 1 ] * pows( ( *this.*wfunc )(), Power ) /
-					( t + FracDelay ) / M_PI;
+					(( t + FracDelay ) * R8B_PI );
 			}
 
 			op += opinc;
 			t++;
 			ut = t + FracDelay;
 			*op = ( ut > Len2 ? 0.0 :
-				f[ t & 1 ] * pows( ( *this.*wfunc )(), Power ) / ut / M_PI );
+				f[ t & 1 ] * pows( ( *this.*wfunc )(), Power ) /
+				( ut * R8B_PI ));
 		}
 	}
 
@@ -648,23 +655,20 @@ private:
 		{
 			if( IsCentered )
 			{
-				w1.init( M_PI / Len2, M_PI * 0.5 );
-				w2.init( M_2PI / Len2, M_PI * 0.5 );
-				w3.init( M_3PI / Len2, M_PI * 0.5 );
+				w1.init( R8B_PI / Len2, R8B_PId2 );
+				w2.init( R8B_2PI / Len2, R8B_PId2 );
+				w3.init( R8B_3PI / Len2, R8B_PId2 );
 			}
 			else
 			{
-				const double step1 = M_PI / Len2;
-				w1.init( step1, M_PI * 0.5 - step1 * fl2 +
-					step1 * FracDelay );
+				const double step1 = R8B_PI / Len2;
+				w1.init( step1, R8B_PId2 - step1 * fl2 + step1 * FracDelay );
 
-				const double step2 = M_2PI / Len2;
-				w2.init( step2, M_PI * 0.5 - step2 * fl2 +
-					step2 * FracDelay );
+				const double step2 = R8B_2PI / Len2;
+				w2.init( step2, R8B_PId2 - step2 * fl2 + step2 * FracDelay );
 
-				const double step3 = M_3PI / Len2;
-				w3.init( step3, M_PI * 0.5 - step3 * fl2 +
-					step3 * FracDelay );
+				const double step3 = R8B_3PI / Len2;
+				w3.init( step3, R8B_PId2 - step3 * fl2 + step3 * FracDelay );
 			}
 
 			Power = ( UsePower && Params != NULL ? Params[ 0 ] : -1.0 );
