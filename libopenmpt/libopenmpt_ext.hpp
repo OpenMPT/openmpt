@@ -315,6 +315,7 @@ class interactive2 {
 	  \sa openmpt::ext::interactive::play_note
 	  \sa openmpt::ext::interactive::stop_note
 	  \sa openmpt::ext::interactive2::note_fade
+	  \since 0.6.0
 	*/
 	virtual void note_off(int32_t channel ) = 0;
 
@@ -326,6 +327,7 @@ class interactive2 {
 	  \sa openmpt::ext::interactive::play_note
 	  \sa openmpt::ext::interactive::stop_note
 	  \sa openmpt::ext::interactive2::note_off
+	  \since 0.6.0
 	*/
 	virtual void note_fade(int32_t channel) = 0;
 
@@ -336,6 +338,7 @@ class interactive2 {
 	  \throws openmpt::exception Throws an exception derived from openmpt::exception if the channel index is invalid.
 	  \remarks This command affects subsequent notes played on the same channel, and may itself be overridden by subsequent panning commands encountered in the module itself.
 	  \sa openmpt::ext::interactive2::get_channel_panning
+	  \since 0.6.0
 	*/
 	virtual void set_channel_panning(int32_t channel, double panning ) = 0;
 
@@ -345,6 +348,7 @@ class interactive2 {
 	  \return The current channel panning, in range [-1.0, 1.0], 0.0 is center.
 	  \throws openmpt::exception Throws an exception derived from openmpt::exception if the channel is outside the specified range.
 	  \sa openmpt::ext::interactive2::set_channel_panning
+	  \since 0.6.0
 	*/
 	virtual double get_channel_panning( int32_t channel ) = 0;
 	
@@ -356,6 +360,7 @@ class interactive2 {
 	  \remarks The finetune range depends on the pitch wheel depth of the instrument playing on the current channel; for sample-based modules, the depth of this command is fixed to +/-1 semitone.
 	  \remarks This command does not affect subsequent notes played on the same channel, but may itself be overridden by subsequent finetune commands encountered in the module itself.
 	  \sa openmpt::ext::interactive2::get_note_finetune
+	  \since 0.6.0
 	*/
 	virtual void set_note_finetune(int32_t channel, double finetune ) = 0;
 
@@ -366,6 +371,7 @@ class interactive2 {
 	  \throws openmpt::exception Throws an exception derived from openmpt::exception if the channel is outside the specified range.
 	  \remarks The finetune range depends on the pitch wheel depth of the instrument playing on the current channel; for sample-based modules, the depth of this command is fixed to +/-1 semitone.
 	  \sa openmpt::ext::interactive2::set_note_finetune
+	  \since 0.6.0
 	*/
 	virtual double get_note_finetune( int32_t channel ) = 0;
 

@@ -321,6 +321,7 @@ typedef struct openmpt_module_ext_interface_interactive2 {
 	 * \sa openmpt_module_ext_interface_interactive::play_note
 	 * \sa openmpt_module_ext_interface_interactive::stop_note
 	 * \sa openmpt_module_ext_interface_interactive2::note_fade
+	 * \since 0.6.0
 	 */
 	int ( *note_off ) ( openmpt_module_ext * mod_ext, int32_t channel );
 
@@ -333,6 +334,7 @@ typedef struct openmpt_module_ext_interface_interactive2 {
 	 * \sa openmpt_module_ext_interface_interactive::play_note
 	 * \sa openmpt_module_ext_interface_interactive::stop_note
 	 * \sa openmpt_module_ext_interface_interactive2::note_fade
+	 * \since 0.6.0
 	 */
 	int ( *note_fade ) ( openmpt_module_ext * mod_ext, int32_t channel );
 
@@ -344,6 +346,7 @@ typedef struct openmpt_module_ext_interface_interactive2 {
 	 * \return 1 on success, 0 on failure (channel out of range).
 	 * \remarks This command affects subsequent notes played on the same channel, and may itself be overridden by subsequent panning commands encountered in the module itself.
 	 * \sa openmpt_module_ext_interface_interactive2::get_channel_panning
+	 * \since 0.6.0
 	 */
 	int ( *set_channel_panning) ( openmpt_module_ext * mod_ext, int32_t channel, double panning );
 
@@ -353,6 +356,7 @@ typedef struct openmpt_module_ext_interface_interactive2 {
 	 * \param channel The channel whose panning should be retrieved. This is the value returned by a previous play_note call.
 	 * \return The current channel panning, in range [-1.0, 1.0], 0.0 is center.
 	 * \sa openmpt_module_ext_interface_interactive2::set_channel_panning
+	 * \since 0.6.0
 	 */
 	double (*get_channel_panning) ( openmpt_module_ext * mod_ext, int32_t channel );
 	
@@ -365,6 +369,7 @@ typedef struct openmpt_module_ext_interface_interactive2 {
 	 * \remarks The finetune range depends on the pitch wheel depth of the instrument playing on the current channel; for sample-based modules, the depth of this command is fixed to +/-1 semitone.
 	 * \remarks This command does not affect subsequent notes played on the same channel, but may itself be overridden by subsequent finetune commands encountered in the module itself.
 	 * \sa openmpt_module_ext_interface_interactive2::get_note_finetune
+	 * \since 0.6.0
 	 */
 	int ( *set_note_finetune) ( openmpt_module_ext * mod_ext, int32_t channel, double finetune );
 
@@ -376,6 +381,7 @@ typedef struct openmpt_module_ext_interface_interactive2 {
 	 * \remarks The finetune range depends on the pitch wheel depth of the instrument playing on the current channel; for sample-based modules, the depth of this command is fixed to +/-1 semitone.
 	 * \throws openmpt::exception Throws an exception derived from openmpt::exception if the channel is outside the specified range.
 	 * \sa openmpt_module_ext_interface_interactive2::set_note_finetune
+	 * \since 0.6.0
 	 */
 	double (*get_note_finetune) ( openmpt_module_ext * mod_ext, int32_t channel );
 
