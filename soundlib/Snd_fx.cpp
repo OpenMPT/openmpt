@@ -2470,6 +2470,7 @@ bool CSoundFile::ProcessEffects()
 		{
 			pChn->isFirstTick = tickCount == nStartTick;
 		}
+		pChn->triggerNote = triggerNote;
 
 		// FT2 compatibility: Note + portamento + note delay = no portamento
 		// Test case: PortaDelay.xm
