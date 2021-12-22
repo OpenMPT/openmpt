@@ -39,3 +39,9 @@ https://source.openmpt.org/svn/openmpt/branches/OpenMPT-1.29/doc/libopenmpt_rele
     releases are done on the svn side (either libopenmpt only, or both
     libopenmpt and OpenMPT)
 
+release candidate
+-----------------
+
+ 1. `./build/update_libopenmpt_version.sh release-rc 1`
+ 2. `./build/svn/do_libopenmpt_release_rc.sh`
+ 3. `./build/update_libopenmpt_version.sh release-rc 2`
