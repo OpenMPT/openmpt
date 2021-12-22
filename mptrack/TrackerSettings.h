@@ -144,6 +144,8 @@ enum ModColor : uint8
 #define MIDISETUP_MIDIMACROPITCHBEND		0x400	// Record MIDI pitch bend messages a MIDI macro changes in pattern
 
 
+#ifndef NO_EQ
+
 // EQ
 
 struct EQPresetPacked
@@ -180,6 +182,8 @@ template<> inline EQPreset FromSettingValue(const SettingValue &val)
 	std::copy(valpacked.Freqs, valpacked.Freqs + MAX_EQ_BANDS, valresult.Freqs);
 	return valresult;
 }
+
+#endif // !NO_EQ
 
 
 template<> inline SettingValue ToSettingValue(const mpt::UUID &val) { return SettingValue(val.ToUString()); }
@@ -963,7 +967,11 @@ protected:
 
 	static std::vector<uint32> GetDefaultSampleRates();
 
+#ifndef NO_EQ
+
 	void FixupEQ(EQPreset &eqSettings);
+
+#endif // !NO_EQ
 
 	void LoadChords(MPTChords &chords);
 	void SaveChords(MPTChords &chords);

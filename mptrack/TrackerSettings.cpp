@@ -43,7 +43,11 @@ OPENMPT_NAMESPACE_BEGIN
 #define OLD_SOUNDSETUP_SECONDARY             0x40
 #define OLD_SOUNDSETUP_NOBOOSTTHREADPRIORITY 0x80
 
+#ifndef NO_EQ
+
 constexpr EQPreset FlatEQPreset = {"Flat", {16, 16, 16, 16, 16, 16}, {125, 300, 600, 1250, 4000, 8000}};
+
+#endif // !NO_EQ
 
 
 TrackerSettings &TrackerSettings::Instance()
@@ -1270,6 +1274,8 @@ void TrackerSettings::GetDefaultColourScheme(std::array<COLORREF, MAX_MODCOLORS>
 }
 
 
+#ifndef NO_EQ
+
 void TrackerSettings::FixupEQ(EQPreset &eqSettings)
 {
 	for(UINT i = 0; i < MAX_EQ_BANDS; i++)
@@ -1281,6 +1287,8 @@ void TrackerSettings::FixupEQ(EQPreset &eqSettings)
 	}
 	mpt::String::SetNullTerminator(eqSettings.szName);
 }
+
+#endif // !NO_EQ
 
 
 void TrackerSettings::SaveSettings()
