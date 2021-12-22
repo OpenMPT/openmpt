@@ -8,8 +8,6 @@
 #include "ASIOConfig.hpp"
 #include "ASIOCore.hpp"
 
-#include "ASIOConfig.hpp"
-
 #if __has_include(<iasiodrv.h>)
 #define ASIO_ABI_VERIFIED 1
 #include <iasiodrv.h>
