@@ -1,5 +1,5 @@
-branching release braches
-=========================
+branching release branches
+==========================
 
  1. adjust buildbot configuration by copying current trunk configuration to a
     new branch configuration and replace `trunk` with the branch version (i.e.
