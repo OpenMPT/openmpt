@@ -24,4 +24,6 @@ branching release branches
      1. set OpenMPT version in `common/versionNumber.h` to
         `1.$VER.00.$MINORMINOR+1`
      2. run `build/update_libopenmpt_version.sh bumpprerel`
-
+ 7. add versioned libopenmpt release script for new branch which copies release
+    packages into place
+ 8. update buildbot scripts that copy OpenMPT update information into place
