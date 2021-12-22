@@ -71,6 +71,17 @@ is just a high-level summary.
  *  IT: Portamentos in files with Linear Slides disabled are now more accurate.
  *  FAR: Correct portamento depth is now used.
 
+ *  zlib: v1.2.11 (2017-01-15).
+ *  mpg123: v1.29.3 (2021-12-11).
+ *  ogg: v1.3.5 (2021-06-04).
+ *  vorbis: v1.3.7 (2020-07-04).
+ *  miniz: v2.2.0 (2021-06-27).
+ *  minimp3: commit 50d2aaf360a53653b718fead8e258d654c3a7e41 (2021-11-27).
+ *  stb_vorbis: v1.22 commit 5a0bb8b1c1b1ca3f4e2485f4114c1c8ea021b781
+    (2021-07-12).
+ *  FLAC: v1.3.3 (2019-08-04).
+ *  PortAudio: v19.7.0 (2021-04-06).
+
 ### libopenmpt 0.5.0 (2020-05-24)
 
  *  [**New**] OggMod compressed FastTracker 2 XM (OXM) modules are now
