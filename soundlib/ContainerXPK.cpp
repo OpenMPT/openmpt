@@ -56,7 +56,7 @@ struct XPK_BufferBounds
 
 static int32 bfextu(std::size_t p, int32 bo, int32 bc, XPK_BufferBounds &bufs)
 {
-	int32 r;
+	uint32 r;
 
 	p += bo / 8;
 	r = bufs.SrcRead(p); p++;
@@ -73,7 +73,7 @@ static int32 bfextu(std::size_t p, int32 bo, int32 bc, XPK_BufferBounds &bufs)
 
 static int32 bfexts(std::size_t p, int32 bo, int32 bc, XPK_BufferBounds &bufs)
 {
-	int32 r;
+	uint32 r;
 
 	p += bo / 8;
 	r = bufs.SrcRead(p); p++;
@@ -82,9 +82,7 @@ static int32 bfexts(std::size_t p, int32 bo, int32 bc, XPK_BufferBounds &bufs)
 	r <<= 8;
 	r |= bufs.SrcRead(p);
 	r <<= (bo % 8) + 8;
-	r >>= 32 - bc;
-
-	return r;
+	return mpt::rshift_signed(static_cast<int32>(r), 32 - bc);
 }
 
 
