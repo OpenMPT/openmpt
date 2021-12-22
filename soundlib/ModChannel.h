@@ -113,9 +113,10 @@ struct ModChannel
 	uint8 nActiveMacro, nFilterMode;
 	uint8 nEFxSpeed, nEFxDelay;		// memory for Invert Loop (EFx, .MOD only)
 	uint8 nNoteSlideCounter, nNoteSlideSpeed, nNoteSlideStep;	// IMF / PTM Note Slide
-	uint8 lastZxxParam;	// Memory for \xx slides
-	bool isFirstTick : 1;
-	bool isPreviewNote : 1;
+	uint8 lastZxxParam;      // Memory for \xx slides
+	bool isFirstTick : 1;    // Execute tick-0 effects on this channel? (condition differs between formats due to Pattern Delay commands)
+	bool triggerNote : 1;    // Trigger note on this tick on this channel if there is one?
+	bool isPreviewNote : 1;  // Notes preview in editor
 
 	//-->Variables used to make user-definable tuning modes work with pattern effects.
 	//If true, freq should be recalculated in ReadNote() on first tick.
