@@ -54,7 +54,7 @@ void CSoundFile::ConvertModCommand(ModCommand &m)
 		break;
 
 	// Extension for XM extended effects
-	case 'G' - 55:	m.command = CMD_GLOBALVOLUME; break;		//16
+	case 'G' - 55:	m.command = CMD_GLOBALVOLUME; break;  //16
 	case 'H' - 55:	m.command = CMD_GLOBALVOLSLIDE; break;
 	case 'K' - 55:	m.command = CMD_KEYOFF; break;
 	case 'L' - 55:	m.command = CMD_SETENVPOSITION; break;
@@ -63,11 +63,11 @@ void CSoundFile::ConvertModCommand(ModCommand &m)
 	case 'T' - 55:	m.command = CMD_TREMOR; break;
 	case 'W' - 55:	m.command = CMD_DUMMY; break;
 	case 'X' - 55:	m.command = CMD_XFINEPORTAUPDOWN;	break;
-	case 'Y' - 55:	m.command = CMD_PANBRELLO; break;			//34
-	case 'Z' - 55:	m.command = CMD_MIDI;	break;				//35
-	case '\\' - 56:	m.command = CMD_SMOOTHMIDI;	break;		//rewbs.smoothVST: 36 - note: this is actually displayed as "-" in FT2, but seems to be doing nothing.
-	//case ':' - 21:	m.command = CMD_DELAYCUT;	break;		//37
-	case '#' + 3:	m.command = CMD_XPARAM;	break;			//rewbs.XMfixes - Xm.param is 38
+	case 'Y' - 55:	m.command = CMD_PANBRELLO; break;   // 34
+	case 'Z' - 55:	m.command = CMD_MIDI; break;        // 35
+	case '\\' - 56:	m.command = CMD_SMOOTHMIDI; break;  // 36 - note: this is actually displayed as "-" in FT2, but seems to be doing nothing.
+	case 37:		m.command = CMD_SMOOTHMIDI; break;  // BeRoTracker uses this for smooth MIDI macros for some reason; in old OpenMPT versions this was reserved for the unimplemented "velocity" command
+	case '#' + 3:	m.command = CMD_XPARAM; break;      // 38
 	default:		m.command = CMD_NONE;
 	}
 }
