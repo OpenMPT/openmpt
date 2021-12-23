@@ -47,15 +47,13 @@ begin
 	if UninstallCommand <> '' then
 	begin
 		ResultCode := 0;
-		SuppressibleMsgBox(UninstallCommand, mbInformation, MB_OK, IDOK);
 		if Exec(RemoveQuotes(UninstallCommand), '/SILENT /NORESTART /SUPPRESSMSGBOXES', '', SW_SHOW, ewWaitUntilTerminated, ResultCode) then
 		begin
-			SuppressibleMsgBox('Success', mbInformation, MB_OK, IDOK);
 			Result := True;
 		end
 		else
 		begin
-			SuppressibleMsgBox('Failure', mbInformation, MB_OK, IDOK);
+			SuppressibleMsgBox('There was a problem removing the previous OpenMPT installation.', mbInformation, MB_OK, IDOK);
 			Result := False;
 		end;
 	end
