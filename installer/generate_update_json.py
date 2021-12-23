@@ -16,7 +16,7 @@ IS_RELEASE = True if OPENMPT_VERSION_MINORMINOR == "00" else False
 
 if IS_RELEASE:
 	download_base_url = "https://download.openmpt.org/archive/openmpt/"
-	announcement_url = "https://openmpt.org/openmpt-" + OPENMPT_VERSION_MAJORMAJOR + "-" + OPENMPT_VERSION_MAJOR + "-" + OPENMPT_VERSION_MINOR + "-released"
+	announcement_url = "https://openmpt.org/openmpt-" + OPENMPT_VERSION_MAJORMAJOR + "-" + OPENMPT_VERSION_MAJOR + "-" + OPENMPT_VERSION_MINOR + "-" + OPENMPT_VERSION_MINORMINOR + "-released"
 	changelog_url = "https://openmpt.org/release_notes/History.txt"
 else:
 	download_base_url = "https://builds.openmpt.org/builds/auto/openmpt/pkg.win/"
