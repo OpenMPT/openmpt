@@ -40,7 +40,6 @@ LDFLAGS += -s ALLOW_MEMORY_GROWTH=1
 
 else ifeq ($(EMSCRIPTEN_TARGET),all)
 # emits native wasm AND javascript with full wasm optimizations.
-# as of emscripten 1.38, this is equivalent to default.
 CPPFLAGS += -DMPT_BUILD_WASM
 CXXFLAGS += 
 CFLAGS   += 
