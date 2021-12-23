@@ -16,7 +16,7 @@ OpenMPT release process
    https://openmpt.org/release_notes/ (update DirectoryIndex on major version change!)
 6. Update https://openmpt.org/download
 7. Write news entry for front page
-8. Update stable.php version information and api/v3/update/release for update checker
+8. Update api/v3/update/release for update checker
 9. Create SVN tag
 10. Update forum pre-announcement post, if there was one
 11. Update release status on issue tracker, add new test version and upcoming
