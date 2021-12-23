@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.6.1-pre
+
 ### libopenmpt 0.6.0 (2021-12-23)
 
  *  [**New**] `MUS` files from Psycho Pinball and Micro Machines 2 are now
