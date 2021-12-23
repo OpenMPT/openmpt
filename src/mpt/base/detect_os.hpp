@@ -106,4 +106,4 @@
 
 
 
-#endif // MPT_BASE_DETECT_OS.hpp
+#endif // MPT_BASE_DETECT_OS_HPP
