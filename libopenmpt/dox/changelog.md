@@ -73,6 +73,10 @@ is just a high-level summary.
  *  IT: Portamentos in files with Linear Slides disabled are now more accurate.
  *  IT: Pitch/Pan Separation was affected by note-off commands, and wasn't reset
     by panning commands like in Impulse Tracker.
+ *  IT: Even after libopenmpt 0.5.14 the filter reset logic was still not 100%
+    identical to Impulse Tracker: A note triggered on tick 0 of a row with a
+    Pattern Delay effect still caused the filter to be reset on repetitions of
+    that row even though the note wasn't retriggered.
  *  IT: Added read-only support for BeRoTracker commands 1 and 2 (equivalent to
     XM commands K and L).
  *  XM: BeRoTracker saves smooth MIDI macros in a different way from OpenMPT.
