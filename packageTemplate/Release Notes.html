@@ -99,7 +99,7 @@
 
     <p>
         It's been a while since the last major feature update, and we have been working on a bunch of great new features for this new version.
-        This document should give a rough overview about the greatest changes in OpenMPT 1.30.
+        This document should give a rough overview about the biggest changes in OpenMPT 1.30.
     </p>
 
     <h2>What's new?</h2>
@@ -110,9 +110,8 @@
     <li>OpenMPT now uses a <strong>unified installer</strong> for all supported platforms. There is just one installer that automatically installs all versions that run on the current machine (e.g. x86 and x86-64 on a 64-Bit Intel processor). If you are upgrading from a pre-1.30 installation, do not forget to <strong>change any custom shortcuts</strong> or file associations to point to the new executable locations!</li>
     <li>OpenMPT can now be <strong>updated automatically</strong>.</li> 
     <li>Keyboard <strong>shortcuts</strong> can now also be bound to MIDI notes in addition to MIDI CCs.</li>
-    <li>OpenMPT now reports if loading a module fails due to being out of memory.</li>
     <li>DirectSound support was removed.</li>
-    <li>There are now experimental OpenMPT builds again for Windows XP (with reduced functionality); they can be obtained via our <a href="https://builds.openmpt.org/builds-archive/auto-release/openmpt/">nightly test builds</a>. The amd64 XP builds should also work on recent macOS versions in Wine. Our official OpenMPT builds for amd64 are currently not supported on macOS due to a bug in the Visual Studio runtime libraries.</li>
+    <li>There are now experimental OpenMPT builds again for <strong>Windows XP</strong> (with reduced functionality); they can be obtained via our <a href="https://builds.openmpt.org/builds-archive/auto-release/openmpt/">nightly test builds</a>. The amd64 XP builds should also work on recent macOS versions in Wine. Our official OpenMPT builds for amd64 are currently not supported on <strong>macOS</strong> due to a bug in the Visual Studio runtime libraries.</li>
     </ul>
 
     <h3>Pattern Editor</h3>
@@ -121,6 +120,8 @@
     </div>
     <ul>
     <li>Channels can now be <strong>color-coded</strong> for easier navigation and visual grouping.</li>
+    <li>The <strong>Go To dialog</strong> can now also directly jump to a timestamp.</li>
+    <li>Selecting a non-existing pattern in the order list now no longer keeps displaying the previously edited pattern, to avoid giving the impression that the recently-selected pattern is actually being edited.</li>
     </ul>
     
     <h3>Plugins</h3>
@@ -165,7 +166,7 @@
         <a href="ReleaseNotesImages/1.30/opl_export.png"><img src="ReleaseNotesImages/1.30/opl_export.png" width="376" height="233" alt="OPL Export Dialog" title="OPL Export Dialog"></a>
     </div>
     <ul>
-    <li>OPL register dumps can now be exported as VGZ / VGM / DRO files.</li>
+    <li><strong>OPL register dumps</strong> can now be exported as VGZ / VGM / DRO files.</li>
     <li>OpenMPT 1.30 adds support for the following module formats: <strong>Symphonie / Symphonie Pro</strong> (SymMOD), <strong>Digital Symphony</strong> (DSym), <strong>FM Tracker</strong> (FMT), <strong>Scream Tracker Music Interface Kit</strong> (STX) and music from <strong>Psycho Pinball</strong> and <strong>Micro Machines 2</strong> (MUS).</li>
     <li>OpenMPT can now detect whether an S3M file was made in Scream Tracker 3 with a SoundBlaster or Gravis Ultrasound and will apply playback compatibility settings accordingly.
     <li>IFF <strong>MAUD</strong> samples can now be imported.</li>
