@@ -7,6 +7,18 @@ is just a high-level summary.
 
 ### libopenmpt 0.5.15-pre
 
+ *  [**Sec**] Possible out-of-bounds read of stack-allocated array in malformed
+    AMS files. (r16243)
+
+ *  [**Bug**] Fixed various undefined behaviour found with ubsan.
+
+ *  IT: Even after libopenmpt 0.5.14 the filter reset logic was still not 100%
+    identical to Impulse Tracker: A note triggered on tick 0 of a row with a
+    Pattern Delay effect still caused the filter to be reset on repetitions of
+    that row even though the note wasn't retriggered.
+ *  MOD: Loosened VBlank timing heuristics so that the original copy of
+    Guitar Slinger from Dizzy Tunes II plays correctly.
+
  *  mpg123: Update to v1.29.3 (2021-12-11).
 
 ### libopenmpt 0.5.14 (2021-12-05)
