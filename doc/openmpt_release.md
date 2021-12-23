@@ -4,21 +4,19 @@ OpenMPT release process
 0. A day or so before the release, restart all fuzzers with the latest binaries
    and check if any unexpected crashes occur. Module loaders should not be
    touched in this phase to prevent the introduction of unexpected crashes.
-1. Update `OMPT_X.YY_ReleaseNotes.html`, `History.txt`, `readme.txt` and
+1. Update `Release Notes.html`, `History.txt`, `readme.txt` and
    `versionNumber.h`
    * Update version number in all files
-   * Check if any files have to be added to or removed from the listing in
-     `readme.txt`
    * If year changed, see `doc/year_changed.md`
 2. Download latest pinned externals via build/download_externals.cmd.
 3. Run `build/auto/build_openmpt_release_manual.cmd` to build OpenMPT and the
    release packages.
 4. Upload release packages (openmpt.org, ftp.untergrund.net, SourceForge)
 5. Upload `OMPT_X.YY_ReleaseNotes.html` and `History.txt` to
-   https://openmpt.org/release_notes/ (update DirectoryIndex!)
+   https://openmpt.org/release_notes/ (update DirectoryIndex on major version change!)
 6. Update https://openmpt.org/download
 7. Write news entry for front page
-8. Update stable.php version information for update checker
+8. Update stable.php version information and api/v3/update/release for update checker
 9. Create SVN tag
 10. Update forum pre-announcement post, if there was one
 11. Update release status on issue tracker, add new test version and upcoming
