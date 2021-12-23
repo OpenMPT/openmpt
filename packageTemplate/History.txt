@@ -31,7 +31,7 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.30.01.00 (** December 2021, revision 16229)
+v1.30.01.00 (23 December 2021, revision 16290)
 ----------------------------------------------
 Tree view
 - [Imp] <js> It is now possible to also load instruments from the MIDI library or soundfonts into the sample / instrument tab using Ctrl + (Shift +) Enter (http://bugs.openmpt.org/view.php?id=1491).
@@ -137,7 +137,7 @@ Audio I/O
 - [Reg] <jh> Support for DirectSound output was removed.
 
 Misc
-- [New] <jh & js> OpenMPT updates can now be downloaded and installed automatically (http://bugs.openmpt.org/view.php?id=1011).
+- [New] <jh & js> OpenMPT updates can now be downloaded and installed automatically. This is currently not supported on Wine (http://bugs.openmpt.org/view.php?id=1011).
 - [New] <jh> OpenMPT is now also available for Windows on ARM.
 - [New] <js> Can now export OPL register dump as VGZ/VGM/DRO files (http://bugs.openmpt.org/view.php?id=1488).
 - [New] <js> Can now open SF2 soundfonts with compressed samples (commonly referred to as SF3, see https://github.com/FluidSynth/fluidsynth/wiki/SoundFont3Format).
