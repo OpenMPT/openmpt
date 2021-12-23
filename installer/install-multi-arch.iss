@@ -19,7 +19,7 @@
 
 AlwaysShowComponentsList=no
 AppId={{40c97d3e-7763-4b88-8c6a-0901befee4af}
-AppVerName=OpenMPT {#GetAppVersionMedium}
+AppVerName=OpenMPT {#GetAppVersion}
 AppVersion={#GetAppVersion}
 AppName=OpenMPT
 AppPublisher=OpenMPT
@@ -33,9 +33,10 @@ Compression=lzma2/ultra64
 DefaultDirName={code:CodeGetDefaultDirName|}
 DefaultGroupName=OpenMPT
 DirExistsWarning=auto
-DisableDirPage=no
+DisableDirPage=auto
+AlwaysShowDirOnReadyPage=yes
 DisableProgramGroupPage=yes
-DisableReadyMemo=yes
+DisableReadyMemo=no
 DisableWelcomePage=no
 MinVersion=6.1sp1
 OutputDir=.\
