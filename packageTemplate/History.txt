@@ -123,6 +123,7 @@ Other formats
 - [New] <js> Can now read FMT modules made with Davey W Taylor's FM Tracker.
 - [New] <js> Can now read STX modules, a transitional format between STM and S3M (http://bugs.openmpt.org/view.php?id=1521).
 - [New] <jh> Modules packed with various legacy compression formats (in particular many more XPK variants) can now be read. All formats supported by the ancient library (https://github.com/temisu/ancient) are supported.
+- [Imp] <js> DMF / IMF: Improved accuracy of finetune commands.
 - [Imp] <js> MDL: Implemented finetune command.
 - [Imp] <js> OKT: Various accuracy improvements such as: Sharing volume between mixed channels, volume commands on mixed channels are permanent (not reset with new notes), mixed channels do not support default sample volume, 7-bit samples are actually supposed to be played as-is (not amplified to full 8-bit range), reject speed command parameters >= 20.
 - [Mod] <js> Warn during saving of an imported file when any playback compatibility settings are enabled that are not supported by the current editing format. These settings are disabled automatically.
