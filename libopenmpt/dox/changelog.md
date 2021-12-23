@@ -16,6 +16,8 @@ is just a high-level summary.
  *  [**New**] `FMT` files created with Davey W Taylor's FM Tracker are now
     supported.
  *  [**New**] `DSYM` files created with Digital Symphony are now supported.
+ *  [**New**] TakeTracker MODs with `TDZ1` to `TDZ3` magic bytes are now
+    supported.
  *  [**New**] openmpt123: openmpt123 will now expand file wildcards passed on
     the command line in Windows when built with MSVC.
  *  [**New**] libopenmpt_ext: New interface `interactive2` adding
@@ -69,7 +71,32 @@ is just a high-level summary.
  *  `openmpt::module::set_position_seconds()` accuracy has been improved for
     modules with pattern loops.
  *  IT: Portamentos in files with Linear Slides disabled are now more accurate.
+ *  IT: Pitch/Pan Separation was affected by note-off commands, and wasn't reset
+    by panning commands like in Impulse Tracker.
+ *  IT: Added read-only support for BeRoTracker commands 1 and 2 (equivalent to
+    XM commands K and L).
+ *  XM: BeRoTracker saves smooth MIDI macros in a different way from OpenMPT.
+    This command is now imported correctly.
+ *  XM: Emulate FT2 Tone Portamento quirk that inverts portamento direction
+    after the target was reached (if target note was higher than previous note).
+ *  S3M files saved with Impulse Tracker and latest Schism Tracker now also
+    compute sample playback speed in Hertz.
+ *  Depending on whether an S3M file was last saved in Scream Tracker with the
+    Sound Blaster or Gravis Ultrasound drivers loaded, different compatibility
+    flags are now applied. For files saved with the GUS, the sample volume
+    factor is now also ignored (fixes volume levels in S3Ms made on the GUS, in
+    particular if they use both samples and OPL instruments).
+ *  S3M: Enforce the lower frequency bound.
+ *  MOD: Loosened VBlank timing heuristics so that the original copy of
+    Guitar Slinger from Dizzy Tunes II plays correctly.
  *  FAR: Correct portamento depth is now used.
+ *  DMF / IMF: Improved accuracy of finetune commands.
+ *  MDL: Implemented finetune command.
+ *  OKT: Various accuracy improvements such as: Sharing volume between mixed
+    channels, volume commands on mixed channels are permanent (not reset with
+    new notes), mixed channels do not support default sample volume, 7-bit
+    samples are actually supposed to be played as-is (not amplified to full
+    8-bit range), reject speed command parameters >= 20.
 
  *  zlib: v1.2.11 (2017-01-15).
  *  mpg123: v1.29.3 (2021-12-11).
