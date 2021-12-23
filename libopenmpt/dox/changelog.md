@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.5.15-pre
+### libopenmpt 0.5.15 (2021-12-23)
 
  *  [**Sec**] Possible out-of-bounds read of stack-allocated array in malformed
     AMS files. (r16243)
