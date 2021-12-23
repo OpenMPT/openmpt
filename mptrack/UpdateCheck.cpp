@@ -1597,7 +1597,7 @@ void CUpdateCheck::ShowSuccessGUI(const bool autoUpdate, const UpdateCheckResult
 		}
 
 		// always show indicator, do not highlight it with a tooltip if we show a modal window later or when it is a cached result
-		if(!CMainFrame::GetMainFrame()->ShowUpdateIndicator(result, mpt::ToCString(versionInfo.version), mpt::ToCString(versionInfo.changelog_url), !modal && !result.IsFromCache()))
+		if(!CMainFrame::GetMainFrame()->ShowUpdateIndicator(result, mpt::ToCString(versionInfo.version), mpt::ToCString(versionInfo.announcement_url), !modal && !result.IsFromCache()))
 		{
 			// on failure to show indicator, continue and show modal dialog
 			modal = true;
@@ -1611,7 +1611,7 @@ void CUpdateCheck::ShowSuccessGUI(const bool autoUpdate, const UpdateCheckResult
 		UpdateDialog dlg(
 			mpt::ToCString(versionInfo.version),
 			mpt::ToCString(versionInfo.date),
-			mpt::ToCString(versionInfo.changelog_url),
+			mpt::ToCString(versionInfo.announcement_url),
 			action);
 		if(dlg.DoModal() != IDOK)
 		{

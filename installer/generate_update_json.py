@@ -20,8 +20,8 @@ if IS_RELEASE:
 	changelog_url = "https://openmpt.org/release_notes/History.txt"
 else:
 	download_base_url = "https://builds.openmpt.org/builds/auto/openmpt/pkg.win/"
-	announcement_url = "https://builds.openmpt.org/"
-	changelog_url = "https://source.openmpt.org/browse/openmpt/trunk/OpenMPT/?op=log&isdir=1&"
+	announcement_url = "https://source.openmpt.org/browse/openmpt/?op=revision&rev=" + SVNVERSION
+	changelog_url = "https://source.openmpt.org/browse/openmpt/?op=revision&rev=" + SVNVERSION
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 os.chdir("..")
