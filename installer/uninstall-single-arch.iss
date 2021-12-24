@@ -53,7 +53,6 @@ begin
 		end
 		else
 		begin
-			SuppressibleMsgBox('There was a problem removing the previous OpenMPT installation.', mbInformation, MB_OK, IDOK);
 			Result := False;
 		end;
 	end
