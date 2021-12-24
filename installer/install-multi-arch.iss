@@ -42,7 +42,7 @@ MinVersion=6.1sp1
 OutputDir=.\
 OutputBaseFilename=OpenMPT-{#GetAppVersion}-Setup
 PrivilegesRequired=admin
-PrivilegesRequiredOverridesAllowed={code:CodeGetPrivilegesRequiredOverridesAllowed|}
+PrivilegesRequiredOverridesAllowed=commandline dialog
 SetupIconFile=..\mptrack\res\MPTRACK.ICO
 SolidCompression=yes
 TimeStampsInUTC=yes
@@ -354,15 +354,4 @@ begin
 	end;
 end;
 
-function CodeGetPrivilegesRequiredOverridesAllowed(Param: String): String;
-begin
-	if HasPreviousSingleArchInstallPath() then
-	begin
-		Result := '';
-	end
-	else
-	begin
-		Result := 'commandline dialog';
-	end;
-end;
 
