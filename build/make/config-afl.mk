@@ -6,10 +6,13 @@ AR  = ar
 
 ifneq ($(STDCXX),)
 CXXFLAGS_STDCXX = -std=$(STDCXX)
-else
-ifeq ($(shell printf '\n' > bin/empty.cpp ; if $(CXX) -std=c++17 -c bin/empty.cpp -o bin/empty.out > /dev/null 2>&1 ; then echo 'c++17' ; fi ), c++17)
+# We do not enable C++20 for fuzzer builds, because it prevents detecting
+# shifting of signed values which changed from undefined to defined behaviour
+# in C++20. As we still support C+ü+17, we need to catch these problem cases.
+#else ifeq ($(shell printf '\n' > bin/empty.cpp ; if $(CXX) -std=c++20 -c bin/empty.cpp -o bin/empty.out > /dev/null 2>&1 ; then echo 'c++20' ; fi ), c++20)
+#CXXFLAGS_STDCXX = -std=c++20
+else ifeq ($(shell printf '\n' > bin/empty.cpp ; if $(CXX) -std=c++17 -c bin/empty.cpp -o bin/empty.out > /dev/null 2>&1 ; then echo 'c++17' ; fi ), c++17)
 CXXFLAGS_STDCXX = -std=c++17
-endif
 endif
 CFLAGS_STDC = -std=c99
 CXXFLAGS += $(CXXFLAGS_STDCXX)
