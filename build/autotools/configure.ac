@@ -275,6 +275,7 @@ AC_PROG_CC_STDC
 #AC_PROG_CC_C99
 
 # We need C++17 support, Autoconf does not yet support C++20. Yay.
+# See <https://github.com/autoconf-archive/autoconf-archive/pull/244>.
 #AX_CXX_COMPILE_STDCXX(20, [noext], [optional])
 #AS_IF([test "x$HAVE_CXX20" != "x1"],
 # [
