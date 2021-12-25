@@ -413,13 +413,16 @@ UINT EffectInfo::MapPosToValue(UINT ndx, UINT pos) const
 }
 
 
-bool EffectInfo::GetEffectNameEx(CString &pszName, UINT ndx, UINT param, CHANNELINDEX chn) const
+bool EffectInfo::GetEffectNameEx(CString &pszName, const ModCommand &m, uint32 param, CHANNELINDEX chn) const
 {
 	CString s;
 	const TCHAR *continueOrIgnore;
 
-	if (ndx >= std::size(gFXInfo) || !gFXInfo[ndx].name) return false;
-	pszName = CString(gFXInfo[ndx].name) + _T(": ");
+	auto ndx = GetIndexFromEffect(m.command, static_cast<ModCommand::PARAM>(param));
+
+	if(ndx >= std::size(gFXInfo) || !gFXInfo[ndx].name)
+		return false;
+	pszName = CString{gFXInfo[ndx].name} + _T(": ");
 
 	// for effects that don't have effect memory in MOD format.
 	if(sndFile.GetType() == MOD_TYPE_MOD)
@@ -435,7 +438,7 @@ bool EffectInfo::GetEffectNameEx(CString &pszName, UINT ndx, UINT param, CHANNEL
 		if(sndFile.GetType() == MOD_TYPE_XM)	// XM also ignores this!
 			continueOrIgnore = _T("ignore");
 
-		if (param)
+		if(param)
 			s.Format(_T("note+%d note+%d"), param >> 4, param & 0x0F);
 		else
 			s = continueOrIgnore;
@@ -651,7 +654,9 @@ bool EffectInfo::GetEffectNameEx(CString &pszName, UINT ndx, UINT param, CHANNEL
 	case CMD_FINETUNE_SMOOTH:
 		{
 			int8 pwd = 1;
-			if(chn != CHANNELINDEX_INVALID && sndFile.m_PlayState.Chn[chn].pModInstrument != nullptr)
+			if(m.instr > 0 && m.instr <= sndFile.GetNumInstruments() && sndFile.Instruments[m.instr] != nullptr)
+				pwd = sndFile.Instruments[m.instr]->midiPWD;
+			else if(chn != CHANNELINDEX_INVALID && sndFile.m_PlayState.Chn[chn].pModInstrument != nullptr)
 				pwd = sndFile.m_PlayState.Chn[chn].pModInstrument->midiPWD;
 
 			pszName = MPT_CFORMAT("Finetune{}: {}{} cents")(

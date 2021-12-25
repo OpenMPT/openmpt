@@ -1754,13 +1754,12 @@ CString CViewPattern::GetCursorDescription() const
 		{
 			EffectInfo effectInfo(sndFile);
 			CString sztmp;
-			LONG fxndx = effectInfo.GetIndexFromEffect(m->command, m->param);
-			if(fxndx >= 0)
+			if(effectInfo.GetIndexFromEffect(m->command, m->param) >= 0)
 			{
 				UINT xParam = 0, xMultiplier = 1;
 				getXParam(m->command, m_nPattern, row, channel, sndFile, xParam, xMultiplier);
 
-				effectInfo.GetEffectNameEx(sztmp, fxndx, m->param * xMultiplier + xParam, channel);
+				effectInfo.GetEffectNameEx(sztmp, *m, m->param * xMultiplier + xParam, channel);
 			}
 			//effectInfo.GetEffectName(sztmp, m->command, m->param, false, nChn);
 			if(!sztmp.IsEmpty())
@@ -1791,7 +1790,7 @@ void CViewPattern::UpdateXInfoText()
 	                channel.nGlobalVol,
 	                channel.nActiveMacro,
 	                channel.nCutOff,
-	                (channel.nFilterMode == FilterMode::HighPass) ? _T("-Hi") : _T(""),
+	                (channel.nFilterMode == FilterMode::HighPass) ? _T("-HP") : _T(""),
 	                channel.nResonance,
 	                channel.nPan,
 	                channel.dwFlags[CHN_SURROUND] ? _T("-S") : _T(""));
