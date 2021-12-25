@@ -10,8 +10,9 @@
 
 
 
-#if MPT_COMPILER_MSVC
+#if MPT_CXX_BEFORE(20) && MPT_COMPILER_MSVC
 // Compiler has multiplication/division semantics when shifting signed integers.
+// In C++20, this behaviour is required by the standard.
 #define MPT_COMPILER_SHIFT_SIGNED 1
 #endif
 
