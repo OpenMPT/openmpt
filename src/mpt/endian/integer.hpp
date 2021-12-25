@@ -20,10 +20,6 @@
 #include <cstdint>
 #include <cstring>
 
-#if MPT_COMPILER_MSVC
-#include <intrin.h>
-#endif
-
 
 
 namespace mpt {
@@ -31,77 +27,17 @@ inline namespace MPT_INLINE_NS {
 
 
 
-struct BigEndian_tag {
-	static constexpr mpt::endian endian = mpt::endian::big;
-};
-
-struct LittleEndian_tag {
-	static constexpr mpt::endian endian = mpt::endian::little;
-};
-
-
-
-constexpr inline uint16 constexpr_bswap16(uint16 x) noexcept {
-	return uint16(0)
-		| ((x >> 8) & 0x00FFu)
-		| ((x << 8) & 0xFF00u);
-}
-
-constexpr inline uint32 constexpr_bswap32(uint32 x) noexcept {
-	return uint32(0)
-		| ((x & 0x000000FFu) << 24)
-		| ((x & 0x0000FF00u) << 8)
-		| ((x & 0x00FF0000u) >> 8)
-		| ((x & 0xFF000000u) >> 24);
-}
-
-constexpr inline uint64 constexpr_bswap64(uint64 x) noexcept {
-	return uint64(0)
-		| (((x >> 0) & 0xffull) << 56)
-		| (((x >> 8) & 0xffull) << 48)
-		| (((x >> 16) & 0xffull) << 40)
-		| (((x >> 24) & 0xffull) << 32)
-		| (((x >> 32) & 0xffull) << 24)
-		| (((x >> 40) & 0xffull) << 16)
-		| (((x >> 48) & 0xffull) << 8)
-		| (((x >> 56) & 0xffull) << 0);
-}
-
-#if MPT_COMPILER_GCC
-#define MPT_bswap16 __builtin_bswap16
-#define MPT_bswap32 __builtin_bswap32
-#define MPT_bswap64 __builtin_bswap64
-#elif MPT_COMPILER_MSVC
-#define MPT_bswap16 _byteswap_ushort
-#define MPT_bswap32 _byteswap_ulong
-#define MPT_bswap64 _byteswap_uint64
-#endif
-
-// No intrinsics available
-#ifndef MPT_bswap16
-#define MPT_bswap16(x) mpt::constexpr_bswap16(x)
-#endif
-#ifndef MPT_bswap32
-#define MPT_bswap32(x) mpt::constexpr_bswap32(x)
-#endif
-#ifndef MPT_bswap64
-#define MPT_bswap64(x) mpt::constexpr_bswap64(x)
-#endif
-
-
-
-template <typename T, typename Tendian, std::size_t size>
+template <typename T, mpt::endian endian, std::size_t size>
 MPT_CONSTEXPRINLINE std::array<std::byte, size> EndianEncode(T val) noexcept {
-	static_assert(Tendian::endian == mpt::endian::little || Tendian::endian == mpt::endian::big);
+	static_assert(endian == mpt::endian::little || endian == mpt::endian::big);
 	static_assert(std::numeric_limits<T>::is_integer);
 	static_assert(!std::numeric_limits<T>::is_signed);
 	static_assert(sizeof(T) == size);
 	using base_type = T;
 	using unsigned_base_type = typename std::make_unsigned<base_type>::type;
-	using endian_type = Tendian;
 	unsigned_base_type uval = static_cast<unsigned_base_type>(val);
 	std::array<std::byte, size> data{};
-	if constexpr (endian_type::endian == mpt::endian::little) {
+	if constexpr (endian == mpt::endian::little) {
 		for (std::size_t i = 0; i < sizeof(base_type); ++i) {
 			data[i] = static_cast<std::byte>(static_cast<uint8>((uval >> (i * 8)) & 0xffu));
 		}
@@ -113,18 +49,17 @@ MPT_CONSTEXPRINLINE std::array<std::byte, size> EndianEncode(T val) noexcept {
 	return data;
 }
 
-template <typename T, typename Tendian, std::size_t size>
+template <typename T, mpt::endian endian, std::size_t size>
 MPT_CONSTEXPRINLINE T EndianDecode(std::array<std::byte, size> data) noexcept {
-	static_assert(Tendian::endian == mpt::endian::little || Tendian::endian == mpt::endian::big);
+	static_assert(endian == mpt::endian::little || endian == mpt::endian::big);
 	static_assert(std::numeric_limits<T>::is_integer);
 	static_assert(!std::numeric_limits<T>::is_signed);
 	static_assert(sizeof(T) == size);
 	using base_type = T;
 	using unsigned_base_type = typename std::make_unsigned<base_type>::type;
-	using endian_type = Tendian;
 	base_type val = base_type();
 	unsigned_base_type uval = unsigned_base_type();
-	if constexpr (endian_type::endian == mpt::endian::little) {
+	if constexpr (endian == mpt::endian::little) {
 		for (std::size_t i = 0; i < sizeof(base_type); ++i) {
 			uval |= static_cast<unsigned_base_type>(static_cast<uint8>(data[i])) << (i * 8);
 		}
@@ -138,93 +73,16 @@ MPT_CONSTEXPRINLINE T EndianDecode(std::array<std::byte, size> data) noexcept {
 }
 
 
-MPT_CONSTEXPR20_FUN uint64 SwapBytesImpl(uint64 value) noexcept {
-	MPT_MAYBE_CONSTANT_IF(MPT_IS_CONSTANT_EVALUATED20()) {
-		return mpt::constexpr_bswap64(value);
-	}
-	else {
-		return MPT_bswap64(value);
-	}
-}
-
-MPT_CONSTEXPR20_FUN uint32 SwapBytesImpl(uint32 value) noexcept {
-	MPT_MAYBE_CONSTANT_IF(MPT_IS_CONSTANT_EVALUATED20()) {
-		return mpt::constexpr_bswap32(value);
-	}
-	else {
-		return MPT_bswap32(value);
-	}
-}
-
-MPT_CONSTEXPR20_FUN uint16 SwapBytesImpl(uint16 value) noexcept {
-	MPT_MAYBE_CONSTANT_IF(MPT_IS_CONSTANT_EVALUATED20()) {
-		return mpt::constexpr_bswap16(value);
-	}
-	else {
-		return MPT_bswap16(value);
-	}
-}
-
-MPT_CONSTEXPR20_FUN int64 SwapBytesImpl(int64 value) noexcept {
-	MPT_MAYBE_CONSTANT_IF(MPT_IS_CONSTANT_EVALUATED20()) {
-		return mpt::constexpr_bswap64(value);
-	}
-	else {
-		return MPT_bswap64(value);
-	}
-}
-
-MPT_CONSTEXPR20_FUN int32 SwapBytesImpl(int32 value) noexcept {
-	MPT_MAYBE_CONSTANT_IF(MPT_IS_CONSTANT_EVALUATED20()) {
-		return mpt::constexpr_bswap32(value);
-	}
-	else {
-		return MPT_bswap32(value);
-	}
-}
-
-MPT_CONSTEXPR20_FUN int16 SwapBytesImpl(int16 value) noexcept {
-	MPT_MAYBE_CONSTANT_IF(MPT_IS_CONSTANT_EVALUATED20()) {
-		return mpt::constexpr_bswap16(value);
-	}
-	else {
-		return MPT_bswap16(value);
-	}
-}
-
-// Do NOT remove these overloads, even if they seem useless.
-// We do not want risking to extend 8bit integers to int and then
-// endian-converting and casting back to int.
-// Thus these overloads.
-
-MPT_CONSTEXPR20_FUN uint8 SwapBytesImpl(uint8 value) noexcept {
-	return value;
-}
-
-MPT_CONSTEXPR20_FUN int8 SwapBytesImpl(int8 value) noexcept {
-	return value;
-}
-
-MPT_CONSTEXPR20_FUN char SwapBytesImpl(char value) noexcept {
-	return value;
-}
-
-#undef MPT_bswap16
-#undef MPT_bswap32
-#undef MPT_bswap64
-
-
 
 // On-disk integer types with defined endianness and no alignemnt requirements
 // Note: To easily debug module loaders (and anything else that uses this
 // wrapper struct), you can use the Debugger Visualizers available in
 // build/vs/debug/ to conveniently view the wrapped contents.
 
-template <typename T, typename Tendian>
+template <typename T, mpt::endian endian>
 struct packed {
 public:
 	using base_type = T;
-	using endian_type = Tendian;
 
 public:
 	std::array<std::byte, sizeof(base_type)> data;
@@ -233,7 +91,7 @@ public:
 	MPT_CONSTEXPR20_FUN void set(base_type val) noexcept {
 		static_assert(std::numeric_limits<T>::is_integer);
 		MPT_MAYBE_CONSTANT_IF(MPT_IS_CONSTANT_EVALUATED20()) {
-			if constexpr (endian_type::endian == mpt::endian::big) {
+			if constexpr (endian == mpt::endian::big) {
 				typename std::make_unsigned<base_type>::type uval = val;
 				for (std::size_t i = 0; i < sizeof(base_type); ++i) {
 					data[i] = static_cast<std::byte>((uval >> (8 * (sizeof(base_type) - 1 - i))) & 0xffu);
@@ -247,20 +105,20 @@ public:
 		}
 		else {
 			if constexpr (mpt::endian::native == mpt::endian::little || mpt::endian::native == mpt::endian::big) {
-				if constexpr (mpt::endian::native != endian_type::endian) {
-					val = mpt::SwapBytesImpl(val);
+				if constexpr (mpt::endian::native != endian) {
+					val = mpt::byteswap(val);
 				}
 				std::memcpy(data.data(), &val, sizeof(val));
 			} else {
 				using unsigned_base_type = typename std::make_unsigned<base_type>::type;
-				data = EndianEncode<unsigned_base_type, Tendian, sizeof(T)>(val);
+				data = EndianEncode<unsigned_base_type, endian, sizeof(T)>(val);
 			}
 		}
 	}
 	MPT_CONSTEXPR20_FUN base_type get() const noexcept {
 		static_assert(std::numeric_limits<T>::is_integer);
 		MPT_MAYBE_CONSTANT_IF(MPT_IS_CONSTANT_EVALUATED20()) {
-			if constexpr (endian_type::endian == mpt::endian::big) {
+			if constexpr (endian == mpt::endian::big) {
 				typename std::make_unsigned<base_type>::type uval = 0;
 				for (std::size_t i = 0; i < sizeof(base_type); ++i) {
 					uval |= static_cast<typename std::make_unsigned<base_type>::type>(data[i]) << (8 * (sizeof(base_type) - 1 - i));
@@ -278,13 +136,13 @@ public:
 			if constexpr (mpt::endian::native == mpt::endian::little || mpt::endian::native == mpt::endian::big) {
 				base_type val = base_type();
 				std::memcpy(&val, data.data(), sizeof(val));
-				if constexpr (mpt::endian::native != endian_type::endian) {
-					val = mpt::SwapBytesImpl(val);
+				if constexpr (mpt::endian::native != endian) {
+					val = mpt::byteswap(val);
 				}
 				return val;
 			} else {
 				using unsigned_base_type = typename std::make_unsigned<base_type>::type;
-				return EndianDecode<unsigned_base_type, Tendian, sizeof(T)>(data);
+				return EndianDecode<unsigned_base_type, endian, sizeof(T)>(data);
 			}
 		}
 	}
@@ -349,23 +207,23 @@ public:
 	}
 };
 
-using int64le = packed<int64, LittleEndian_tag>;
-using int32le = packed<int32, LittleEndian_tag>;
-using int16le = packed<int16, LittleEndian_tag>;
-using int8le = packed<int8, LittleEndian_tag>;
-using uint64le = packed<uint64, LittleEndian_tag>;
-using uint32le = packed<uint32, LittleEndian_tag>;
-using uint16le = packed<uint16, LittleEndian_tag>;
-using uint8le = packed<uint8, LittleEndian_tag>;
+using int64le = packed<int64, mpt::endian::little>;
+using int32le = packed<int32, mpt::endian::little>;
+using int16le = packed<int16, mpt::endian::little>;
+using int8le = packed<int8, mpt::endian::little>;
+using uint64le = packed<uint64, mpt::endian::little>;
+using uint32le = packed<uint32, mpt::endian::little>;
+using uint16le = packed<uint16, mpt::endian::little>;
+using uint8le = packed<uint8, mpt::endian::little>;
 
-using int64be = packed<int64, BigEndian_tag>;
-using int32be = packed<int32, BigEndian_tag>;
-using int16be = packed<int16, BigEndian_tag>;
-using int8be = packed<int8, BigEndian_tag>;
-using uint64be = packed<uint64, BigEndian_tag>;
-using uint32be = packed<uint32, BigEndian_tag>;
-using uint16be = packed<uint16, BigEndian_tag>;
-using uint8be = packed<uint8, BigEndian_tag>;
+using int64be = packed<int64, mpt::endian::big>;
+using int32be = packed<int32, mpt::endian::big>;
+using int16be = packed<int16, mpt::endian::big>;
+using int8be = packed<int8, mpt::endian::big>;
+using uint64be = packed<uint64, mpt::endian::big>;
+using uint32be = packed<uint32, mpt::endian::big>;
+using uint16be = packed<uint16, mpt::endian::big>;
+using uint8be = packed<uint8, mpt::endian::big>;
 
 constexpr bool declare_binary_safe(const int64le &) {
 	return true;
@@ -439,12 +297,12 @@ static_assert(mpt::check_binary_size<uint8be>(1));
 
 template <typename T>
 struct make_le {
-	using type = packed<typename std::remove_const<T>::type, LittleEndian_tag>;
+	using type = packed<typename std::remove_const<T>::type, mpt::endian::little>;
 };
 
 template <typename T>
 struct make_be {
-	using type = packed<typename std::remove_const<T>::type, BigEndian_tag>;
+	using type = packed<typename std::remove_const<T>::type, mpt::endian::big>;
 };
 
 template <mpt::endian endian, typename T>
@@ -453,12 +311,12 @@ struct make_endian {
 
 template <typename T>
 struct make_endian<mpt::endian::little, T> {
-	using type = packed<typename std::remove_const<T>::type, LittleEndian_tag>;
+	using type = packed<typename std::remove_const<T>::type, mpt::endian::little>;
 };
 
 template <typename T>
 struct make_endian<mpt::endian::big, T> {
-	using type = packed<typename std::remove_const<T>::type, BigEndian_tag>;
+	using type = packed<typename std::remove_const<T>::type, mpt::endian::big>;
 };
 
 template <typename T>
@@ -490,10 +348,10 @@ MPT_CONSTEXPR20_FUN Tpacked as_endian(typename Tpacked::base_type v) noexcept {
 
 
 namespace std {
-template <typename T, typename Tendian>
-class numeric_limits<mpt::packed<T, Tendian>> : public std::numeric_limits<T> { };
-template <typename T, typename Tendian>
-class numeric_limits<const mpt::packed<T, Tendian>> : public std::numeric_limits<const T> { };
+template <typename T, mpt::endian endian>
+class numeric_limits<mpt::packed<T, endian>> : public std::numeric_limits<T> { };
+template <typename T, mpt::endian endian>
+class numeric_limits<const mpt::packed<T, endian>> : public std::numeric_limits<const T> { };
 } // namespace std
 
 

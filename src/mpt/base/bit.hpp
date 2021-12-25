@@ -10,7 +10,11 @@
 #include "mpt/base/namespace.hpp"
 #include "mpt/base/macros.hpp"
 
-#if MPT_CXX_AT_LEAST(20)
+#if MPT_CXX_AT_LEAST(23)
+#include <bit>
+#elif MPT_CXX_AT_LEAST(20)
+#include <algorithm>
+#include <array>
 #include <bit>
 #else // !C++20
 #include <array>
@@ -19,9 +23,13 @@
 #include <type_traits>
 
 #include <cstddef>
-#if MPT_CXX_BEFORE(20)
+#if MPT_CXX_BEFORE(23)
 #include <cstring>
 #endif // !C++20
+
+#if MPT_CXX_BEFORE(23) && MPT_COMPILER_MSVC
+#include <intrin.h>
+#endif
 
 
 
@@ -363,6 +371,144 @@ constexpr T rotr(T x, int s) noexcept {
 }
 
 #endif // C++20
+
+
+
+#if MPT_CXX_AT_LEAST(23) && !MPT_COMPILER_MSVC
+
+using std::byteswap;
+
+#else // !C++23
+
+constexpr inline uint16 byteswap_impl_constexpr16(uint16 x) noexcept {
+	return uint16(0)
+		| ((x >> 8) & 0x00FFu)
+		| ((x << 8) & 0xFF00u);
+}
+
+constexpr inline uint32 byteswap_impl_constexpr32(uint32 x) noexcept {
+	return uint32(0)
+		| ((x & 0x000000FFu) << 24)
+		| ((x & 0x0000FF00u) << 8)
+		| ((x & 0x00FF0000u) >> 8)
+		| ((x & 0xFF000000u) >> 24);
+}
+
+constexpr inline uint64 byteswap_impl_constexpr64(uint64 x) noexcept {
+	return uint64(0)
+		| (((x >> 0) & 0xffull) << 56)
+		| (((x >> 8) & 0xffull) << 48)
+		| (((x >> 16) & 0xffull) << 40)
+		| (((x >> 24) & 0xffull) << 32)
+		| (((x >> 32) & 0xffull) << 24)
+		| (((x >> 40) & 0xffull) << 16)
+		| (((x >> 48) & 0xffull) << 8)
+		| (((x >> 56) & 0xffull) << 0);
+}
+
+#if MPT_COMPILER_GCC
+#define MPT_byteswap_impl16 __builtin_bswap16
+#define MPT_byteswap_impl32 __builtin_bswap32
+#define MPT_byteswap_impl64 __builtin_bswap64
+#elif MPT_COMPILER_MSVC
+#define MPT_byteswap_impl16 _byteswap_ushort
+#define MPT_byteswap_impl32 _byteswap_ulong
+#define MPT_byteswap_impl64 _byteswap_uint64
+#endif
+
+// No intrinsics available
+#ifndef MPT_byteswap_impl16
+#define MPT_byteswap_impl16(x) byteswap_impl_constexpr16(x)
+#endif
+#ifndef MPT_byteswap_impl32
+#define MPT_byteswap_impl32(x) byteswap_impl_constexpr32(x)
+#endif
+#ifndef MPT_byteswap_impl64
+#define MPT_byteswap_impl64(x) byteswap_impl_constexpr64(x)
+#endif
+
+constexpr inline uint64 byteswap_impl(uint64 value) noexcept {
+	MPT_MAYBE_CONSTANT_IF(MPT_IS_CONSTANT_EVALUATED20()) {
+		return byteswap_impl_constexpr64(value);
+	}
+	else {
+		return MPT_byteswap_impl64(value);
+	}
+}
+
+constexpr inline uint32 byteswap_impl(uint32 value) noexcept {
+	MPT_MAYBE_CONSTANT_IF(MPT_IS_CONSTANT_EVALUATED20()) {
+		return byteswap_impl_constexpr32(value);
+	}
+	else {
+		return MPT_byteswap_impl32(value);
+	}
+}
+
+constexpr inline uint16 byteswap_impl(uint16 value) noexcept {
+	MPT_MAYBE_CONSTANT_IF(MPT_IS_CONSTANT_EVALUATED20()) {
+		return byteswap_impl_constexpr16(value);
+	}
+	else {
+		return MPT_byteswap_impl16(value);
+	}
+}
+
+constexpr inline int64 byteswap_impl(int64 value) noexcept {
+	MPT_MAYBE_CONSTANT_IF(MPT_IS_CONSTANT_EVALUATED20()) {
+		return byteswap_impl_constexpr64(value);
+	}
+	else {
+		return MPT_byteswap_impl64(value);
+	}
+}
+
+constexpr inline int32 byteswap_impl(int32 value) noexcept {
+	MPT_MAYBE_CONSTANT_IF(MPT_IS_CONSTANT_EVALUATED20()) {
+		return byteswap_impl_constexpr32(value);
+	}
+	else {
+		return MPT_byteswap_impl32(value);
+	}
+}
+
+constexpr inline int16 byteswap_impl(int16 value) noexcept {
+	MPT_MAYBE_CONSTANT_IF(MPT_IS_CONSTANT_EVALUATED20()) {
+		return byteswap_impl_constexpr16(value);
+	}
+	else {
+		return MPT_byteswap_impl16(value);
+	}
+}
+
+// Do NOT remove these overloads, even if they seem useless.
+// We do not want risking to extend 8bit integers to int and then
+// endian-converting and casting back to int.
+// Thus these overloads.
+
+constexpr inline uint8 byteswap_impl(uint8 value) noexcept {
+	return value;
+}
+
+constexpr inline int8 byteswap_impl(int8 value) noexcept {
+	return value;
+}
+
+constexpr inline char byteswap_impl(char value) noexcept {
+	return value;
+}
+
+#undef MPT_byteswap_impl16
+#undef MPT_byteswap_impl32
+#undef MPT_byteswap_impl64
+
+template <typename T>
+constexpr T byteswap(T x) noexcept {
+	static_assert(std::numeric_limits<T>::is_integer);
+	return byteswap_impl(x);
+}
+
+#endif // C++23
 
 
 
