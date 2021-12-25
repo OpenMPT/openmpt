@@ -97,6 +97,12 @@ MPT_TEST_GROUP_INLINE("mpt/base/arithmetic_shift")
 
 #if MPT_CXX_AT_LEAST(20) || MPT_COMPILER_SHIFT_SIGNED
 
+#if MPT_COMPILER_GCC
+	// <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=103826>
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wshift-negative-value"
+#endif // MPT_COMPILER_GCC
+
 	MPT_TEST_EXPECT_EQUAL(mpt::rshift_signed<int16>(-32768, 1), (-32768) >> 1);
 	MPT_TEST_EXPECT_EQUAL(mpt::rshift_signed<int16>(-32767, 1), (-32767) >> 1);
 	MPT_TEST_EXPECT_EQUAL(mpt::rshift_signed<int16>(-32766, 1), (-32766) >> 1);
@@ -159,6 +165,10 @@ MPT_TEST_GROUP_INLINE("mpt/base/arithmetic_shift")
 	MPT_TEST_EXPECT_EQUAL(mpt::lshift_signed<int16>(32766, 15), (32766) << 15);
 	MPT_TEST_EXPECT_EQUAL(mpt::lshift_signed<int16>(32767, 15), (32767) << 15);
 
+#if MPT_COMPILER_GCC
+#pragma GCC diagnostic pop
+#endif // MPT_COMPILER_GCC
+
 #endif
 
 	MPT_TEST_EXPECT_EQUAL(mpt::rshift_signed<int32>(0 - 0x80000000, 1), mpt::rshift_signed_portable<int32>(0 - 0x80000000, 1));
@@ -199,6 +209,12 @@ MPT_TEST_GROUP_INLINE("mpt/base/arithmetic_shift")
 
 #if MPT_CXX_AT_LEAST(20) || MPT_COMPILER_SHIFT_SIGNED
 
+#if MPT_COMPILER_GCC
+	// <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=103826>
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wshift-negative-value"
+#endif // MPT_COMPILER_GCC
+
 	MPT_TEST_EXPECT_EQUAL(mpt::rshift_signed<int32>(0 - 0x80000000, 1), mpt::rshift_signed_cxx20<int32>(0 - 0x80000000, 1));
 	MPT_TEST_EXPECT_EQUAL(mpt::rshift_signed<int32>(-0x7fffffff, 1), mpt::rshift_signed_cxx20<int32>(-0x7fffffff, 1));
 	MPT_TEST_EXPECT_EQUAL(mpt::rshift_signed<int32>(-0x7ffffffe, 1), mpt::rshift_signed_cxx20<int32>(-0x7ffffffe, 1));
@@ -234,6 +250,10 @@ MPT_TEST_GROUP_INLINE("mpt/base/arithmetic_shift")
 	MPT_TEST_EXPECT_EQUAL(mpt::lshift_signed<int32>(1, 31), mpt::lshift_signed_cxx20<int32>(1, 31));
 	MPT_TEST_EXPECT_EQUAL(mpt::lshift_signed<int32>(0x7ffffffe, 31), mpt::lshift_signed_cxx20<int32>(0x7ffffffe, 31));
 	MPT_TEST_EXPECT_EQUAL(mpt::lshift_signed<int32>(0x7fffffff, 31), mpt::lshift_signed_cxx20<int32>(0x7fffffff, 31));
+
+#if MPT_COMPILER_GCC
+#pragma GCC diagnostic pop
+#endif // MPT_COMPILER_GCC
 
 #endif
 
@@ -275,6 +295,12 @@ MPT_TEST_GROUP_INLINE("mpt/base/arithmetic_shift")
 
 #if MPT_CXX_AT_LEAST(20) || MPT_COMPILER_SHIFT_SIGNED
 
+#if MPT_COMPILER_GCC
+	// <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=103826>
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wshift-negative-value"
+#endif // MPT_COMPILER_GCC
+
 	MPT_TEST_EXPECT_EQUAL(mpt::rshift_signed<int64>(0ull - 0x8000000000000000ull, 1), mpt::rshift_signed_cxx20<int64>(0ull - 0x8000000000000000ull, 1));
 	MPT_TEST_EXPECT_EQUAL(mpt::rshift_signed<int64>(-0x7fffffffffffffffll, 1), mpt::rshift_signed_cxx20<int64>(-0x7fffffffffffffffll, 1));
 	MPT_TEST_EXPECT_EQUAL(mpt::rshift_signed<int64>(-0x7ffffffffffffffell, 1), mpt::rshift_signed_cxx20<int64>(-0x7ffffffffffffffell, 1));
@@ -310,6 +336,10 @@ MPT_TEST_GROUP_INLINE("mpt/base/arithmetic_shift")
 	MPT_TEST_EXPECT_EQUAL(mpt::lshift_signed<int64>(1ll, 63), mpt::lshift_signed_cxx20<int64>(1ll, 63));
 	MPT_TEST_EXPECT_EQUAL(mpt::lshift_signed<int64>(0x7ffffffffffffffell, 63), mpt::lshift_signed_cxx20<int64>(0x7ffffffffffffffell, 63));
 	MPT_TEST_EXPECT_EQUAL(mpt::lshift_signed<int64>(0x7fffffffffffffffll, 63), mpt::lshift_signed_cxx20<int64>(0x7fffffffffffffffll, 63));
+
+#if MPT_COMPILER_GCC
+#pragma GCC diagnostic pop
+#endif // MPT_COMPILER_GCC
 
 #endif
 }
