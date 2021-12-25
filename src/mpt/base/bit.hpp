@@ -32,7 +32,7 @@ inline namespace MPT_INLINE_NS {
 
 #if MPT_CXX_AT_LEAST(20) && !MPT_CLANG_BEFORE(14, 0, 0)
 using std::bit_cast;
-#else // !C++20
+#else  // !C++20
 // C++2a compatible bit_cast.
 // Not implementing constexpr because this is not easily possible pre C++20.
 template <typename Tdst, typename Tsrc>
