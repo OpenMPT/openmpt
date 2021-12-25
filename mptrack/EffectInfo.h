@@ -42,7 +42,7 @@ public:
 	// Get parameter mask from effect (for extended effects)
 	UINT GetEffectMaskFromIndex(UINT ndx) const;
 	// Get precise effect name, also with explanation of effect parameter
-	bool GetEffectNameEx(CString &pszName, UINT ndx, UINT param, CHANNELINDEX chn = CHANNELINDEX_INVALID) const;
+	bool GetEffectNameEx(CString &pszName, const ModCommand &m, uint32 param, CHANNELINDEX chn) const;
 	// Check whether an effect is extended (with parameter nibbles)
 	bool IsExtendedEffect(UINT ndx) const;
 	// Map an effect value to slider position

@@ -817,7 +817,7 @@ void CEditCommand::UpdateEffectValue(bool set)
 		if(fxndx >= 0)
 		{
 			newParam = static_cast<ModCommand::PARAM>(effectInfo.MapPosToValue(fxndx, sldParam.GetPos()));
-			effectInfo.GetEffectNameEx(s, fxndx, newParam * xMultiplier + xParam, editChannel);
+			effectInfo.GetEffectNameEx(s, *m, newParam * xMultiplier + xParam, editChannel);
 		}
 	}
 	SetDlgItemText(IDC_TEXT1, s);
