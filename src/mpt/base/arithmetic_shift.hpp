@@ -56,14 +56,30 @@ template <typename T>
 constexpr auto rshift_signed_cxx20(T x, int y) noexcept -> decltype(x >> y) {
 	static_assert(std::numeric_limits<T>::is_integer);
 	static_assert(std::numeric_limits<T>::is_signed);
+#if MPT_COMPILER_GCC
+// <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=103826>
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wshift-negative-value"
+#endif // MPT_COMPILER_GCC
 	return x >> y;
+#if MPT_COMPILER_GCC
+#pragma GCC diagnostic pop
+#endif // MPT_COMPILER_GCC
 }
 
 template <typename T>
 constexpr auto lshift_signed_cxx20(T x, int y) noexcept -> decltype(x << y) {
 	static_assert(std::numeric_limits<T>::is_integer);
 	static_assert(std::numeric_limits<T>::is_signed);
+#if MPT_COMPILER_GCC
+// <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=103826>
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wshift-negative-value"
+#endif // MPT_COMPILER_GCC
 	return x << y;
+#if MPT_COMPILER_GCC
+#pragma GCC diagnostic pop
+#endif // MPT_COMPILER_GCC
 }
 
 template <typename T>
