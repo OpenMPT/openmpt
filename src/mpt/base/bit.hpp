@@ -182,7 +182,7 @@ MPT_FORCEINLINE bool endian_is_weird() noexcept {
 
 
 
-#if MPT_CXX_AT_LEAST(20) && !MPT_COMPILER_MSVC
+#if MPT_CXX_AT_LEAST(20) && !MPT_COMPILER_MSVC && !MPT_CLANG_BEFORE(12, 0, 0)
 
 // Disabled for VS2022 for now because of
 // <https://developercommunity.visualstudio.com/t/vs2022-cl-193030705-generates-non-universally-avai/1578571>
