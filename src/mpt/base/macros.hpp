@@ -41,10 +41,24 @@
 
 
 
-#define MPT_FORCE_CONSTEXPR(expr) [&]() { \
+#if MPT_CXX_AT_LEAST(20)
+#define MPT_CONSTEVAL consteval
+#else // !C++20
+// fallback to constexpr
+#define MPT_CONSTEVAL MPT_CONSTEXPRINLINE
+#endif // C++20
+
+
+
+#if MPT_CXX_AT_LEAST(20)
+// this assumes that for C++20, a consteval function will be used
+#define MPT_FORCE_CONSTEVAL(expr) (expr)
+#else // !C++20
+#define MPT_FORCE_CONSTEVAL(expr) [&]() { \
 	constexpr auto x = (expr); \
 	return x; \
 }()
+#endif // C++20
 
 
 
