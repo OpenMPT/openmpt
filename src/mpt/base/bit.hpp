@@ -427,7 +427,7 @@ constexpr inline uint64 byteswap_impl_constexpr64(uint64 x) noexcept {
 #define MPT_byteswap_impl64(x) byteswap_impl_constexpr64(x)
 #endif
 
-constexpr inline uint64 byteswap_impl(uint64 value) noexcept {
+MPT_CONSTEXPR20_FUN uint64 byteswap_impl(uint64 value) noexcept {
 	MPT_MAYBE_CONSTANT_IF(MPT_IS_CONSTANT_EVALUATED20()) {
 		return byteswap_impl_constexpr64(value);
 	}
@@ -436,7 +436,7 @@ constexpr inline uint64 byteswap_impl(uint64 value) noexcept {
 	}
 }
 
-constexpr inline uint32 byteswap_impl(uint32 value) noexcept {
+MPT_CONSTEXPR20_FUN uint32 byteswap_impl(uint32 value) noexcept {
 	MPT_MAYBE_CONSTANT_IF(MPT_IS_CONSTANT_EVALUATED20()) {
 		return byteswap_impl_constexpr32(value);
 	}
@@ -445,7 +445,7 @@ constexpr inline uint32 byteswap_impl(uint32 value) noexcept {
 	}
 }
 
-constexpr inline uint16 byteswap_impl(uint16 value) noexcept {
+MPT_CONSTEXPR20_FUN uint16 byteswap_impl(uint16 value) noexcept {
 	MPT_MAYBE_CONSTANT_IF(MPT_IS_CONSTANT_EVALUATED20()) {
 		return byteswap_impl_constexpr16(value);
 	}
@@ -454,7 +454,7 @@ constexpr inline uint16 byteswap_impl(uint16 value) noexcept {
 	}
 }
 
-constexpr inline int64 byteswap_impl(int64 value) noexcept {
+MPT_CONSTEXPR20_FUN int64 byteswap_impl(int64 value) noexcept {
 	MPT_MAYBE_CONSTANT_IF(MPT_IS_CONSTANT_EVALUATED20()) {
 		return byteswap_impl_constexpr64(value);
 	}
@@ -463,7 +463,7 @@ constexpr inline int64 byteswap_impl(int64 value) noexcept {
 	}
 }
 
-constexpr inline int32 byteswap_impl(int32 value) noexcept {
+MPT_CONSTEXPR20_FUN int32 byteswap_impl(int32 value) noexcept {
 	MPT_MAYBE_CONSTANT_IF(MPT_IS_CONSTANT_EVALUATED20()) {
 		return byteswap_impl_constexpr32(value);
 	}
@@ -472,7 +472,7 @@ constexpr inline int32 byteswap_impl(int32 value) noexcept {
 	}
 }
 
-constexpr inline int16 byteswap_impl(int16 value) noexcept {
+MPT_CONSTEXPR20_FUN int16 byteswap_impl(int16 value) noexcept {
 	MPT_MAYBE_CONSTANT_IF(MPT_IS_CONSTANT_EVALUATED20()) {
 		return byteswap_impl_constexpr16(value);
 	}
