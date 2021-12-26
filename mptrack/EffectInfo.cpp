@@ -420,7 +420,7 @@ bool EffectInfo::GetEffectNameEx(CString &pszName, const ModCommand &m, uint32 p
 
 	auto ndx = GetIndexFromEffect(m.command, static_cast<ModCommand::PARAM>(param));
 
-	if(ndx >= std::size(gFXInfo) || !gFXInfo[ndx].name)
+	if(ndx < 0 || static_cast<std::size_t>(ndx) >= std::size(gFXInfo) || !gFXInfo[ndx].name)
 		return false;
 	pszName = CString{gFXInfo[ndx].name} + _T(": ");
 
