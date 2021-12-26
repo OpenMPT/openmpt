@@ -860,6 +860,7 @@ void CUpdateCheck::SendStatistics(HTTP::InternetSession &internet, const CUpdate
 {
 	if(settings.sendStatistics)
 	{
+#if MPT_UPDATE_LEGACY
 		if(!settings.modeLegacy)
 		{
 			HTTP::Request requestLegacyUpdate;
@@ -871,6 +872,7 @@ void CUpdateCheck::SendStatistics(HTTP::InternetSession &internet, const CUpdate
 #endif // MPT_BUILD_RETRO
 			HTTP::Result resultLegacyUpdateHTTP = internet(requestLegacyUpdate);
 		}
+#endif // MPT_UPDATE_LEGACY
 		HTTP::Request requestStatistics;
 		if(settings.statisticsUUID.IsValid())
 		{
@@ -1833,11 +1835,11 @@ void CUpdateSetupDlg::OnShowStatisticsData(NMHDR * /*pNMHDR*/, LRESULT * /*pResu
 		statistics += UL_("\n");
 #if MPT_UPDATE_LEGACY
 		if(!settings.modeLegacy)
-#endif // MPT_UPDATE_LEGACY
 		{
 			statistics += U_("GET ") + CUpdateCheck::GetUpdateURLV2(settings) + UL_("\n");
 			statistics += UL_("\n");
 		}
+#endif // MPT_UPDATE_LEGACY
 		if(settings.statisticsUUID.IsValid())
 		{
 			statistics += U_("PUT ") + settings.apiURL + MPT_UFORMAT("statistics/{}")(settings.statisticsUUID) + UL_("\n");
