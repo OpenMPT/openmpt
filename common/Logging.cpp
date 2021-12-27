@@ -12,6 +12,7 @@
 
 #include "Logging.h"
 
+#include "mpt/base/macros.hpp"
 #include "mpt/io/base.hpp"
 #include "mpt/io/io.hpp"
 #include "mpt/io/io_stdstream.hpp"
@@ -42,9 +43,9 @@ namespace log
 
 #if !defined(MPT_LOG_GLOBAL_LEVEL_STATIC)
 #if defined(MPT_LOG_GLOBAL_LEVEL)
-int GlobalLogLevel = static_cast<int>(MPT_LOG_GLOBAL_LEVEL);
+MPT_CONSTINIT int GlobalLogLevel = static_cast<int>(MPT_LOG_GLOBAL_LEVEL);
 #else
-int GlobalLogLevel = static_cast<int>(LogDebug);
+MPT_CONSTINIT int GlobalLogLevel = static_cast<int>(LogDebug);
 #endif
 #endif
 
@@ -52,12 +53,12 @@ int GlobalLogLevel = static_cast<int>(LogDebug);
 
 #if defined(MODPLUG_TRACKER) && !defined(MPT_LOG_IS_DISABLED)
 
-bool FileEnabled = false;
-bool DebuggerEnabled = true;
-bool ConsoleEnabled = false;
+MPT_CONSTINIT bool FileEnabled = false;
+MPT_CONSTINIT bool DebuggerEnabled = true;
+MPT_CONSTINIT bool ConsoleEnabled = false;
 
-static char g_FacilitySolo[1024] = {0};
-static char g_FacilityBlocked[1024] = {0};
+static MPT_CONSTINIT char g_FacilitySolo[1024] = {0};
+static MPT_CONSTINIT char g_FacilityBlocked[1024] = {0};
 
 void SetFacilities(const std::string &solo, const std::string &blocked)
 {
@@ -195,9 +196,9 @@ namespace Trace {
 
 // Debugging functionality will use simple globals.
 
-std::atomic<bool> g_Enabled{false};
+MPT_CONSTINIT std::atomic<bool> g_Enabled{false};
 
-static bool g_Sealed = false;
+static MPT_CONSTINIT bool g_Sealed = false;
 
 struct Entry {
 	uint32       Index;
@@ -225,14 +226,19 @@ static MPT_FORCEINLINE bool operator < (const Entry &a, const Entry &b) noexcept
 		;
 }
 
-static std::vector<mpt::log::Trace::Entry> Entries;
+#if MPT_COMPILER_MSVC
+// VS2022 still does nto have constexpr vector default ctor
+static /*MPT_CONSTINIT*/ std::vector<mpt::log::Trace::Entry> Entries;
+#else
+static MPT_CONSTINIT std::vector<mpt::log::Trace::Entry> Entries;
+#endif
 
-static std::atomic<uint32> NextIndex(0);
+static MPT_CONSTINIT std::atomic<uint32> NextIndex(0);
 
-static uint32 ThreadIdGUI = 0;
-static uint32 ThreadIdAudio = 0;
-static uint32 ThreadIdNotify = 0;
-static uint32 ThreadIdWatchdir = 0;
+static MPT_CONSTINIT uint32 ThreadIdGUI = 0;
+static MPT_CONSTINIT uint32 ThreadIdAudio = 0;
+static MPT_CONSTINIT uint32 ThreadIdNotify = 0;
+static MPT_CONSTINIT uint32 ThreadIdWatchdir = 0;
 
 void Enable(std::size_t numEntries)
 {
