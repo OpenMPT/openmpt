@@ -11,6 +11,8 @@
 #include "stdafx.h"
 #include "mptCPU.h"
 
+#include "mpt/base/macros.hpp"
+
 #include "../common/mptStringBuffer.h"
 
 #if defined(MPT_ENABLE_ARCH_INTRINSICS)
@@ -30,7 +32,7 @@ namespace CPU
 #if defined(MPT_ENABLE_ARCH_INTRINSICS)
 
 
-uint32 EnabledFeatures = 0;
+MPT_CONSTINIT uint32 EnabledFeatures = 0;
 
 
 #if MPT_COMPILER_MSVC && (defined(MPT_ENABLE_ARCH_X86) || defined(MPT_ENABLE_ARCH_AMD64))
