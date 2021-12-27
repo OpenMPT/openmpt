@@ -285,8 +285,22 @@
 		}
 
   filter {}
+  
+	if not _OPTIONS["winxp"] and not _OPTIONS["uwp"] then
+		filter {}
+		filter { "action:vs2017" }
+			systemversion "10.0.17763.0"
+		filter {}
+		filter { "action:vs2019" }
+			systemversion "10.0.20348.0"
+		filter {}
+		filter { "action:vs2022" }
+			systemversion "10.0.20348.0"
+		filter {}
+	end
 
 	if _OPTIONS["win10"] then
+		filter {}
 		defines { "_WIN32_WINNT=0x0A00" }
 		filter {}
 		filter { "architecture:x86" }
@@ -302,19 +316,24 @@
 			defines { "NTDDI_VERSION=0x0A000004" } -- Windows 10 1709 Build 16299
 		filter {}
 	elseif _OPTIONS["win81"] then
+		filter {}
 		defines { "_WIN32_WINNT=0x0603" }
 		defines { "NTDDI_VERSION=0x06030000" }
 	elseif _OPTIONS["win7"] then
+		filter {}
 		defines { "_WIN32_WINNT=0x0601" }
 		defines { "NTDDI_VERSION=0x06010000" }
 	elseif _OPTIONS["winxp"] then
+		filter {}
 		systemversion "7.0"
+		filter {}
 		filter { "architecture:x86" }
 			defines { "_WIN32_WINNT=0x0501" }
 			defines { "NTDDI_VERSION=0x05010100" } -- Windows XP SP1
 		filter { "architecture:x86_64" }
 			defines { "_WIN32_WINNT=0x0502" }
 			defines { "NTDDI_VERSION=0x05020000" } -- Windows XP x64
+		filter {}
 	end
 
   filter {}
