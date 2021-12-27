@@ -37,7 +37,7 @@ inline constexpr uint32 avx2           = 0x20000; // Processor supports AVX2 ins
 #ifdef MPT_ENABLE_ARCH_INTRINSICS
 
 
-inline uint32 EnabledFeatures = 0;
+extern uint32 EnabledFeatures;
 
 
 struct Info
