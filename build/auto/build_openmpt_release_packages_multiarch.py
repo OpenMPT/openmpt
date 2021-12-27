@@ -166,8 +166,8 @@ if singleThreaded:
 		raise Exception("Something went wrong during manual creation!")
 
 
-sourcePathModern = "bin/release/vs2019-win10-static/"
-sourcePathLegacy = "bin/release/vs2019-win7-static/"
+sourcePathModern = "bin/release/vs2022-win10-static/"
+sourcePathLegacy = "bin/release/vs2022-win7-static/"
 
 signToolCmdLine = ["signtool", "sign", "/fd", "sha256", "/a", "/tr", "http://time.certum.pl", "/td", "sha256"]
 

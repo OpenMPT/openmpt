@@ -3,9 +3,9 @@
 
 
 
-#define BuildFolder "release\vs2019-win10-static"
-#define BuildFolderLegacyx86 "release\vs2019-win7-static"
-#define BuildFolderLegacyamd64 "release\vs2019-win7-static"
+#define BuildFolder "release\vs2022-win10-static"
+#define BuildFolderLegacyx86 "release\vs2022-win7-static"
+#define BuildFolderLegacyamd64 "release\vs2022-win7-static"
 
 #define DefaultArchName "x86"
 

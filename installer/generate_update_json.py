@@ -260,7 +260,7 @@ with open("installer/" + "OpenMPT-" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT
 	f.close()
 
 def sign_file(filename):
-	p = Popen(["bin/release/vs2019-win7-static/amd64/updatesigntool.exe", "sign", "jws", "auto", filename, filename + ".jws.json"])
+	p = Popen(["bin/release/vs2022-win7-static/amd64/updatesigntool.exe", "sign", "jws", "auto", filename, filename + ".jws.json"])
 	p.communicate()
 
 sign_file("installer/" + "OpenMPT-" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "." + OPENMPT_VERSION_MINOR + "." + OPENMPT_VERSION_MINORMINOR + "-Setup.update.json")
@@ -271,5 +271,5 @@ sign_file("installer/" + "OpenMPT-" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT
 sign_file("installer/" + "OpenMPT-" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "." + OPENMPT_VERSION_MINOR + "." + OPENMPT_VERSION_MINORMINOR + "-portable-arm.update.json")
 sign_file("installer/" + "OpenMPT-" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "." + OPENMPT_VERSION_MINOR + "." + OPENMPT_VERSION_MINORMINOR + "-portable-arm64.update.json")
 
-pdumpkey = Popen(["bin/release/vs2019-win7-static/amd64/updatesigntool.exe", "dumpkey", "auto", "installer/" + "OpenMPT-" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "." + OPENMPT_VERSION_MINOR + "." + OPENMPT_VERSION_MINORMINOR + "-update-publickey.jwk.json"])
+pdumpkey = Popen(["bin/release/vs2022-win7-static/amd64/updatesigntool.exe", "dumpkey", "auto", "installer/" + "OpenMPT-" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "." + OPENMPT_VERSION_MINOR + "." + OPENMPT_VERSION_MINORMINOR + "-update-publickey.jwk.json"])
 pdumpkey.communicate()
