@@ -10,7 +10,7 @@ skip_branch_with_pr: true
 
 
 
-version: 1.30-appveyor{build}
+version: 1.31-appveyor{build}
 
 
 
