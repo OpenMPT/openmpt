@@ -63,6 +63,15 @@
 
 
 #if MPT_CXX_AT_LEAST(20)
+#define MPT_CONSTINIT constinit
+#else // !C++20
+// fallback to nothing
+#define MPT_CONSTINIT
+#endif // C++20
+
+
+
+#if MPT_CXX_AT_LEAST(20)
 #define MPT_IS_CONSTANT_EVALUATED20() std::is_constant_evaluated()
 #define MPT_IS_CONSTANT_EVALUATED()   std::is_constant_evaluated()
 #else // !C++20
