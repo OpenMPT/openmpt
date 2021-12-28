@@ -233,4 +233,12 @@
   filter {}
    defines { "WIN32", "_CRT_SECURE_NO_WARNINGS", "_CRT_NONSTDC_NO_DEPRECATE", "_CRT_SECURE_NO_DEPRECATE", "_CRT_NONSTDC_NO_WARNINGS" }
 
+	filter {}
+	filter { "action:vs2017" }
+		systemversion "10.0.17763.0"
+	filter {}
+	filter { "action:vs2019" }
+		systemversion "10.0.20348.0"
+	filter {}
+
   filter {}
