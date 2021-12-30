@@ -654,15 +654,19 @@ bool EffectInfo::GetEffectNameEx(CString &pszName, const ModCommand &m, uint32 p
 	case CMD_FINETUNE_SMOOTH:
 		{
 			int8 pwd = 1;
+			const TCHAR *unit = _T(" cents");
 			if(m.instr > 0 && m.instr <= sndFile.GetNumInstruments() && sndFile.Instruments[m.instr] != nullptr)
 				pwd = sndFile.Instruments[m.instr]->midiPWD;
 			else if(chn != CHANNELINDEX_INVALID && sndFile.m_PlayState.Chn[chn].pModInstrument != nullptr)
 				pwd = sndFile.m_PlayState.Chn[chn].pModInstrument->midiPWD;
+			else
+				unit = _T("");
 
-			pszName = MPT_CFORMAT("Finetune{}: {}{} cents")(
+			pszName = MPT_CFORMAT("Finetune{}: {}{}{}")(
 				CString(gFXInfo[ndx].effect == CMD_FINETUNE ? _T("") : _T(" (Smooth)")),
 				CString(param >= 0x8000 ? _T("+") : _T("")),
-				mpt::cfmt::val((static_cast<int32>(param) - 0x8000) * pwd / 256.0));
+				mpt::cfmt::val((static_cast<int32>(param) - 0x8000) * pwd / 256.0),
+				CString(unit));
 		}
 		break;
 
