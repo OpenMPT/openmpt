@@ -686,7 +686,7 @@ XM
 
 S3M
 - [Imp] <js> Support old-style sample pre-amp value in very early S3M files.
-- [Fix] <js> Only force-enable fast slides for files ST 3.00. Previously, any S3M file made with an ST3 version older than 3.20 enabled them.
+- [Fix] <js> Only force-enable fast slides for files saved with Scream Tracker 3.00. Previously, any S3M file made with a Scream Tracker version older than 3.20 enabled them.
 - [Fix] <js> Only apply volume and middle-C speed on instrument change if the new sample slot has sample data.
 
 MOD
