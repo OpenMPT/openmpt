@@ -1096,6 +1096,8 @@ protected:
 	void ProcessSampleOffset(ModChannel &chn, CHANNELINDEX nChn, const PlayState &playState) const;
 	void SampleOffset(ModChannel &chn, SmpLength param) const;
 	void ReverseSampleOffset(ModChannel &chn, ModCommand::PARAM param) const;
+	void DigiBoosterSampleReverse(ModChannel &chn, ModCommand::PARAM param) const;
+	void HandleDigiSamplePlayDirection(PlayState &state, CHANNELINDEX chn) const;
 	void NoteCut(CHANNELINDEX nChn, uint32 nTick, bool cutSample);
 	void PatternLoop(PlayState &state, ModChannel &chn, ModCommand::PARAM param) const;
 	bool HandleNextRow(PlayState &state, const ModSequence &order, bool honorPatternLoop) const;

@@ -30,7 +30,7 @@ const EffectType effectTypes[] =
 	EFFECT_TYPE_NORMAL, EFFECT_TYPE_NORMAL,  EFFECT_TYPE_NORMAL, EFFECT_TYPE_PITCH,
 	EFFECT_TYPE_PITCH,  EFFECT_TYPE_NORMAL,  EFFECT_TYPE_PITCH,  EFFECT_TYPE_PITCH,
 	EFFECT_TYPE_PITCH,  EFFECT_TYPE_PITCH,   EFFECT_TYPE_NORMAL, EFFECT_TYPE_NORMAL,
-	EFFECT_TYPE_NORMAL,
+	EFFECT_TYPE_NORMAL, EFFECT_TYPE_NORMAL,
 };
 
 static_assert(std::size(effectTypes) == MAX_EFFECTS);
@@ -141,6 +141,11 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 		}
 		// Apart from these special fixups, do a regular conversion from MOD.
 		fromType = MOD_TYPE_MOD;
+	}
+	if(command == CMD_DIGIREVERSESAMPLE && toType != MOD_TYPE_DIGI)
+	{
+		command = CMD_S3MCMDEX;
+		param = 0x9F;
 	}
 
 	// helper variables
@@ -870,7 +875,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 }
 
 
-bool ModCommand::IsContinousCommand(const CSoundFile& sndFile) const
+bool ModCommand::IsContinousCommand(const CSoundFile &sndFile) const
 {
 	switch(command)
 	{
@@ -1036,6 +1041,7 @@ size_t ModCommand::GetEffectWeight(COMMAND cmd)
 		CMD_VOLUMESLIDE,
 		CMD_VIBRATOVOL,
 		CMD_VOLUME,
+		CMD_DIGIREVERSESAMPLE,
 		CMD_REVERSEOFFSET,
 		CMD_OFFSETPERCENTAGE,
 		CMD_OFFSET,
