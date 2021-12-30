@@ -18,7 +18,7 @@
 #define MPT_LIBC_GENERIC 1
 #elif MPT_COMPILER_GCC && (defined(__MINGW32__) || defined(__MINGW64__))
 #define MPT_LIBC_MS 1
-#elif defined(__GNU_LIBRARY__)
+#elif defined(__GLIBC__)
 #define MPT_LIBC_GLIBC 1
 #elif MPT_COMPILER_MSVC
 #define MPT_LIBC_MS 1
