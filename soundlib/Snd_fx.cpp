@@ -925,6 +925,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					chn.nNewNote = chn.nLastNote;
 					if(chn.nNewIns != 0) InstrumentChange(chn, chn.nNewIns, porta);
 					NoteChange(chn, m.note, porta);
+					HandleDigiSamplePlayDirection(playState, nChn);
 					memory.chnSettings[nChn].incChanged = true;
 
 					if((m.command == CMD_MODCMDEX || m.command == CMD_S3MCMDEX) && (m.param & 0xF0) == 0xD0 && paramLo < numTicks)
@@ -1076,6 +1077,10 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 							if(m.param >= 0x73)
 								chn.InstrumentControl(m.param, *this);
 						}
+						break;
+
+					case CMD_DIGIREVERSESAMPLE:
+						DigiBoosterSampleReverse(chn, m.param);
 						break;
 
 					case CMD_FINETUNE:
@@ -2860,6 +2865,7 @@ bool CSoundFile::ProcessEffects()
 				}
 
 				NoteChange(chn, note, bPorta, !(GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2)), false, nChn);
+				HandleDigiSamplePlayDirection(m_PlayState, nChn);
 				if ((bPorta) && (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2)) && (instr))
 				{
 					chn.dwFlags.set(CHN_FASTVOLRAMP);
@@ -3443,6 +3449,11 @@ bool CSoundFile::ProcessEffects()
 			}
 			break;
 #endif // NO_PLUGINS
+
+		// Digi Booster sample reverse
+		case CMD_DIGIREVERSESAMPLE:
+			DigiBoosterSampleReverse(chn, static_cast<ModCommand::PARAM>(param));
+			break;
 		}
 
 		if(m_playBehaviour[kST3EffectMemory] && param != 0)
@@ -5348,8 +5359,39 @@ void CSoundFile::ReverseSampleOffset(ModChannel &chn, ModCommand::PARAM param) c
 	{
 		chn.dwFlags.set(CHN_PINGPONGFLAG);
 		chn.dwFlags.reset(CHN_LOOP);
-		chn.nLength = chn.pModSample->nLength;	// If there was a loop, extend sample to whole length.
+		chn.nLength = chn.pModSample->nLength;  // If there was a loop, extend sample to whole length.
 		chn.position.Set((chn.nLength - 1) - std::min(SmpLength(param) << 8, chn.nLength - SmpLength(1)), 0);
+	}
+}
+
+
+void CSoundFile::DigiBoosterSampleReverse(ModChannel &chn, ModCommand::PARAM param) const
+{
+	if(chn.isFirstTick && chn.pModSample != nullptr && chn.pModSample->nLength > 0)
+	{
+		chn.dwFlags.set(CHN_PINGPONGFLAG);
+		chn.nLength = chn.pModSample->nLength;  // If there was a loop, extend sample to whole length.
+		chn.position.Set(chn.nLength - 1, 0);
+		chn.dwFlags.set(CHN_LOOP | CHN_PINGPONGLOOP, param > 0);
+		if(param > 0)
+		{
+			chn.nLoopStart = 0;
+			chn.nLoopEnd = chn.nLength;
+			// TODO: When the sample starts playing in forward direction again, the loop should be updated to the normal sample loop.
+		}
+	}
+}
+
+
+void CSoundFile::HandleDigiSamplePlayDirection(PlayState &state, CHANNELINDEX chn) const
+{
+	// Digi Booster mixes two channels into one Paula channel, and when a note is triggered on one of them it resets the reverse play flag on the other.
+	if(GetType() == MOD_TYPE_DIGI)
+	{
+		state.Chn[chn].dwFlags.reset(CHN_PINGPONGFLAG);
+		const CHANNELINDEX otherChn = chn ^ 1;
+		if(otherChn < GetNumChannels())
+			state.Chn[otherChn].dwFlags.reset(CHN_PINGPONGFLAG);
 	}
 }
 
