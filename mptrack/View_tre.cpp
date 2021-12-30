@@ -2015,9 +2015,14 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 		const bool showDirs = !IsSampleBrowser() || TrackerSettings::Instance().showDirsInSampleBrowser;
 		const bool showInstrs = IsSampleBrowser();
 
-		constexpr int FILTER_REJECT_FILE = -1;
+		enum
+		{
+			FILTER_FIRST_VALID = 0,
+			FILTER_REJECT_FILE = -1,
+			FILTER_UNKNOWN_FILE = -2,
+		};
 
-		const auto FilterFile = [this, showInstrs, showDirs, FILTER_REJECT_FILE](const mpt::PathString &fileName) -> int
+		const auto FilterFile = [this, showInstrs, showDirs](const mpt::PathString &fileName) -> int
 		{
 
 			static constexpr auto instrExts = {"xi", "iti", "sfz", "sf2", "sf3", "sf4", "sbk", "dls", "mss", "pat"};
@@ -2034,6 +2039,7 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 				extPS = mpt::PathString::FromUTF8(ext);
 			}
 
+			bool knownExtension = true;
 			if(mpt::contains(instrExts, ext))
 			{
 				if(showInstrs)
@@ -2050,19 +2056,23 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 			{
 				if(showInstrs)
 					return IMAGE_SAMPLES;
-			} else if(showDirs)
+			} else
 			{
-				// Amiga-style prefix (i.e. mod.songname)
-				std::string prefixExt = fileName.ToUTF8();
-				const auto dotPos = prefixExt.find('.');
-				if(dotPos != std::string::npos && mpt::contains(m_modExtensions, prefixExt.erase(dotPos)))
-					return IMAGE_FOLDERSONG;
+				if(showDirs)
+				{
+					// Amiga-style prefix (i.e. mod.songname)
+					std::string prefixExt = fileName.ToUTF8();
+					const auto dotPos = prefixExt.find('.');
+					if(dotPos != std::string::npos && mpt::contains(m_modExtensions, prefixExt.erase(dotPos)))
+						return IMAGE_FOLDERSONG;
+				}
+				knownExtension = false;
 			}
-				
+
 			if(m_showAllFiles && !mpt::contains(allExtsBlacklist, ext))
 				return IMAGE_SAMPLES;
 				
-			return FILTER_REJECT_FILE;
+			return knownExtension ? FILTER_REJECT_FILE : FILTER_UNKNOWN_FILE;
 		};
 
 		HKEY hkey = nullptr;
@@ -2107,7 +2117,7 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 				} else if(wfd.nFileSizeHigh > 0 || wfd.nFileSizeLow >= 9)
 				{
 					type = FilterFile(mpt::PathString::FromNative(wfd.cFileName));
-					if(type == FILTER_REJECT_FILE)
+					if(type == FILTER_UNKNOWN_FILE)
 					{
 						// Try resolving file as link if it wasn't a module or instrument
 						const auto nativePath = (m_InstrLibPath.AsNative() + wfd.cFileName);
@@ -2120,7 +2130,7 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 						}
 					}
 				}
-				if(type != FILTER_REJECT_FILE)
+				if(type >= FILTER_FIRST_VALID)
 				{
 					auto item = InsertInsLibItem(wfd.cFileName, type, selectedItem);
 					// Apparently TVIS_CUT cannot be set during insertion
