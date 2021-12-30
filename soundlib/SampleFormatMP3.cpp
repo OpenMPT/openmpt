@@ -35,6 +35,11 @@
 #include <stdlib.h>
 #include <sys/types.h>
 
+#if MPT_OS_OPENBSD
+// This is kind-of a hack.
+// See <https://sourceforge.net/p/mpg123/bugs/330/>.
+#undef _FILE_OFFSET_BITS
+#endif
 #include <mpg123.h>
 
 #endif
