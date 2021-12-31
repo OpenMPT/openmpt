@@ -650,7 +650,6 @@
 /include/r8brain/DLL
 /include/r8brain/bench
 /include/r8brain/example.cpp
-/include/r8brain/other/icon.png
 /include/rtaudio/.DS_Store
 /include/rtaudio/._.DS_Store
 /include/rtaudio/._.gitignore
