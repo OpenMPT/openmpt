@@ -257,7 +257,12 @@ RATIOTYPE CTuning::GetRatio(const NOTEINDEXTYPE note) const
 	{
 		return s_DefaultFallbackRatio;
 	}
-	return m_RatioTable[note - m_NoteMin];
+	const auto ratio = m_RatioTable[note - m_NoteMin];
+	if(ratio <= 1e-15f)
+	{
+		return s_DefaultFallbackRatio;
+	}
+	return ratio;
 }
 
 
