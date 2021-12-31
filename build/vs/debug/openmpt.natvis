@@ -64,58 +64,58 @@
   </Type>
 
   <!-- Signed Little-Endian -->
-  <Type Name="mpt::mptx::packed&lt;__int64,2018915346&gt;">
+  <Type Name="mpt::mptx::packed&lt;__int64,0&gt;">
     <DisplayString>{(int64)data[0] | ((int64)data[1] &lt;&lt; 0x08) | ((int64)data[2] &lt;&lt; 0x10) | ((int64)data[3] &lt;&lt; 0x18) | ((int64)data[4] &lt;&lt; 0x20) | ((int64)data[5] &lt;&lt; 0x28) | ((int64)data[6] &lt;&lt; 0x30) | ((int64)data[7] &lt;&lt; 0x38)}</DisplayString>
   </Type>
-  <Type Name="mpt::mptx::packed&lt;int,2018915346&gt;">
+  <Type Name="mpt::mptx::packed&lt;int,0&gt;">
     <DisplayString>{(int32)data[0] | ((int32)data[1] &lt;&lt; 0x08) | ((int32)data[2] &lt;&lt; 0x10) | ((int32)data[3] &lt;&lt; 0x18)}</DisplayString>
   </Type>
-  <Type Name="mpt::mptx::packed&lt;short,2018915346&gt;">
+  <Type Name="mpt::mptx::packed&lt;short,0&gt;">
     <DisplayString>{(int16)data[0] | ((int16)data[1] &lt;&lt; 0x08)}</DisplayString>
   </Type>
-  <Type Name="mpt::mptx::packed&lt;signed char,2018915346&gt;">
+  <Type Name="mpt::mptx::packed&lt;signed char,0&gt;">
     <DisplayString>{(int8)data[0]}</DisplayString>
   </Type>
 
   <!--  Unsigned Little-Endian -->
-  <Type Name="mpt::mptx::packed&lt;unsigned __int64,2018915346&gt;">
+  <Type Name="mpt::mptx::packed&lt;unsigned __int64,0&gt;">
     <DisplayString>{((uint64)data[0]) | (((uint64)data[1]) &lt;&lt; 0x08) | (((uint64)data[2]) &lt;&lt; 0x10) | (((uint64)data[3]) &lt;&lt; 0x18) | (((uint64)data[4]) &lt;&lt; 0x20) | (((uint64)data[5]) &lt;&lt; 0x28) | (((uint64)data[6]) &lt;&lt; 0x30) | (((uint64)data[7]) &lt;&lt; 0x38)}</DisplayString>
   </Type>
-  <Type Name="mpt::mptx::packed&lt;unsigned int,2018915346&gt;">
+  <Type Name="mpt::mptx::packed&lt;unsigned int,0&gt;">
     <DisplayString>{((uint32)data[0]) | (((uint32)data[1]) &lt;&lt; 0x08) | (((uint32)data[2]) &lt;&lt; 0x10) | (((uint32)data[3]) &lt;&lt; 0x18)}</DisplayString>
   </Type>
-  <Type Name="mpt::mptx::packed&lt;unsigned short,2018915346&gt;">
+  <Type Name="mpt::mptx::packed&lt;unsigned short,0&gt;">
     <DisplayString>{(uint16)data[0] | ((uint16)data[1] &lt;&lt; 0x08)}</DisplayString>
   </Type>
-  <Type Name="mpt::mptx::packed&lt;unsigned char,2018915346&gt;">
+  <Type Name="mpt::mptx::packed&lt;unsigned char,0&gt;">
     <DisplayString>{(uint8)data[0]}</DisplayString>
   </Type>
 
   <!--  Signed Big-Endian -->
-  <Type Name="mpt::mptx::packed&lt;__int64,305419896&gt;">
+  <Type Name="mpt::mptx::packed&lt;__int64,1&gt;">
     <DisplayString>{(int64)data[7] | ((int64)data[6] &lt;&lt; 0x08) | ((int64)data[5] &lt;&lt; 0x10) | ((int64)data[4] &lt;&lt; 0x18) | ((int64)data[3] &lt;&lt; 0x20) | ((int64)data[2] &lt;&lt; 0x28) | ((int64)data[1] &lt;&lt; 0x30) | ((int64)data[0] &lt;&lt; 0x38)}</DisplayString>
   </Type>
-  <Type Name="mpt::mptx::packed&lt;int,305419896&gt;">
+  <Type Name="mpt::mptx::packed&lt;int,1&gt;">
     <DisplayString>{(int32)data[3] | ((int32)data[2] &lt;&lt; 0x08) | ((int32)data[1] &lt;&lt; 0x10) | ((int32)data[0] &lt;&lt; 0x18)}</DisplayString>
   </Type>
-  <Type Name="mpt::mptx::packed&lt;short,305419896&gt;">
+  <Type Name="mpt::mptx::packed&lt;short,1&gt;">
     <DisplayString>{(int16)data[1] | ((int16)data[0] &lt;&lt; 0x08)}</DisplayString>
   </Type>
-  <Type Name="mpt::mptx::packed&lt;signed char,305419896&gt;">
+  <Type Name="mpt::mptx::packed&lt;signed char,1&gt;">
     <DisplayString>{(int8)data[0]}</DisplayString>
   </Type>
 
   <!--  Unsigned Big-Endian -->
-  <Type Name="mpt::mptx::packed&lt;unsigned __int64,305419896&gt;">
+  <Type Name="mpt::mptx::packed&lt;unsigned __int64,1&gt;">
     <DisplayString>{(uint64)data[7] | ((uint64)data[6] &lt;&lt; 0x08) | ((uint64)data[5] &lt;&lt; 0x10) | ((uint64)data[4] &lt;&lt; 0x18) | ((uint64)data[3] &lt;&lt; 0x20) | ((uint64)data[2] &lt;&lt; 0x28) | ((uint64)data[1] &lt;&lt; 0x30) | ((uint64)data[0] &lt;&lt; 0x38)}</DisplayString>
   </Type>
-  <Type Name="mpt::mptx::packed&lt;unsigned int,305419896&gt;">
+  <Type Name="mpt::mptx::packed&lt;unsigned int,1&gt;">
     <DisplayString>{(uint32)data[3] | ((uint32)data[2] &lt;&lt; 0x08) | ((uint32)data[1] &lt;&lt; 0x10) | ((uint32)data[0] &lt;&lt; 0x18)}</DisplayString>
   </Type>
-  <Type Name="mpt::mptx::packed&lt;unsigned short,305419896&gt;">
+  <Type Name="mpt::mptx::packed&lt;unsigned short,1&gt;">
     <DisplayString>{(uint16)data[1] | ((uint16)data[0] &lt;&lt; 0x08)}</DisplayString>
   </Type>
-  <Type Name="mpt::mptx::packed&lt;unsigned char,305419896&gt;">
+  <Type Name="mpt::mptx::packed&lt;unsigned char,1&gt;">
     <DisplayString>{(uint8)data[0]}</DisplayString>
   </Type>
 </AutoVisualizer>

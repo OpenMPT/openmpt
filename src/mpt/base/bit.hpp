@@ -120,6 +120,16 @@ constexpr bool endian_is_weird() noexcept {
 
 #endif // !MPT_COMPILER_GENERIC
 
+#if MPT_COMPILER_MSVC
+// same definition as VS2022 C++20 in order to be compatible with debugvis
+enum class endian
+{
+	little = 0,
+	big = 1,
+	weird = -1,
+	native = little,
+};
+#else // !MPT_COMPILER_MSVC
 enum class endian
 {
 	little = 0x78563412u,
@@ -135,6 +145,7 @@ enum class endian
 	native = 0u,
 #endif
 };
+#endif // MPT_COMPILER_MSVC
 
 static_assert(mpt::endian::big != mpt::endian::little, "platform with all scalar types having size 1 is not supported");
 
