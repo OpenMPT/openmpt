@@ -16,6 +16,8 @@ is just a high-level summary.
  *  [**New**] `FMT` files created with Davey W Taylor's FM Tracker are now
     supported.
  *  [**New**] `DSYM` files created with Digital Symphony are now supported.
+ *  [**New**] `STX` files (transitional format between Scream Tracker 2 and 3)
+    are now supported.
  *  [**New**] TakeTracker MODs with `TDZ1` to `TDZ3` magic bytes are now
     supported.
  *  [**New**] openmpt123: openmpt123 will now expand file wildcards passed on
@@ -70,6 +72,7 @@ is just a high-level summary.
     song does not restart from the beginning even if the repeat count is not 0.
  *  `openmpt::module::set_position_seconds()` accuracy has been improved for
     modules with pattern loops.
+ *  Samples played at the wrong volume when rendering modules in mono.
  *  IT: Portamentos in files with Linear Slides disabled are now more accurate.
  *  IT: Pitch/Pan Separation was affected by note-off commands, and wasn't reset
     by panning commands like in Impulse Tracker.
