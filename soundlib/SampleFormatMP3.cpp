@@ -42,7 +42,9 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wreserved-id-macro"
 #endif
+#ifdef _FILE_OFFSET_BITS
 #undef _FILE_OFFSET_BITS
+#undef
 #if MPT_COMPILER_CLANG
 #pragma clang diagnostic pop
 #endif
