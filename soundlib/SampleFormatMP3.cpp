@@ -44,7 +44,7 @@
 #endif
 #ifdef _FILE_OFFSET_BITS
 #undef _FILE_OFFSET_BITS
-#undef
+#endif
 #if MPT_COMPILER_CLANG
 #pragma clang diagnostic pop
 #endif
