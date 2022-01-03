@@ -12,6 +12,7 @@
 #include "mpt/format/default_floatingpoint.hpp"
 #include "mpt/format/helpers.hpp"
 #include "mpt/format/simple_spec.hpp"
+#include "mpt/string/types.hpp"
 #include "mpt/string_transcode/transcode.hpp"
 
 #if MPT_FORMAT_CXX17_FLOAT
