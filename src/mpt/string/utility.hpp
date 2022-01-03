@@ -148,10 +148,15 @@ struct char_constants {
 	static inline constexpr Tchar z = 'z';
 	static inline constexpr Tchar A = 'A';
 	static inline constexpr Tchar Z = 'Z';
+	static inline constexpr Tchar number0 = '0';
+	static inline constexpr Tchar number1 = '1';
+	static inline constexpr Tchar number9 = '9';
 	static inline constexpr Tchar lf = '\n';
 	static inline constexpr Tchar cr = '\r';
 	static inline constexpr Tchar tab = '\t';
 	static inline constexpr Tchar comma = ',';
+	static inline constexpr Tchar plus = '+';
+	static inline constexpr Tchar minus = '-';
 };
 
 template <>
@@ -161,10 +166,15 @@ struct char_constants<char> {
 	static inline constexpr char z = 'z';
 	static inline constexpr char A = 'A';
 	static inline constexpr char Z = 'Z';
+	static inline constexpr char number0 = '0';
+	static inline constexpr char number1 = '1';
+	static inline constexpr char number9 = '9';
 	static inline constexpr char lf = '\n';
 	static inline constexpr char cr = '\r';
 	static inline constexpr char tab = '\t';
 	static inline constexpr char comma = ',';
+	static inline constexpr char plus = '+';
+	static inline constexpr char minus = '-';
 };
 
 #if !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
@@ -175,10 +185,15 @@ struct char_constants<wchar_t> {
 	static inline constexpr wchar_t z = L'z';
 	static inline constexpr wchar_t A = L'A';
 	static inline constexpr wchar_t Z = L'Z';
+	static inline constexpr wchar_t number0 = L'0';
+	static inline constexpr wchar_t number1 = L'1';
+	static inline constexpr wchar_t number9 = L'9';
 	static inline constexpr wchar_t lf = L'\n';
 	static inline constexpr wchar_t cr = L'\r';
 	static inline constexpr wchar_t tab = L'\t';
 	static inline constexpr wchar_t comma = L',';
+	static inline constexpr wchar_t plus = L'+';
+	static inline constexpr wchar_t minus = L'-';
 };
 #endif // !MPT_COMPILER_QUIRK_NO_WCHAR
 
@@ -190,10 +205,15 @@ struct char_constants<char8_t> {
 	static inline constexpr char8_t z = u8'z';
 	static inline constexpr char8_t A = u8'A';
 	static inline constexpr char8_t Z = u8'Z';
+	static inline constexpr char8_t number0 = u8'0';
+	static inline constexpr char8_t number1 = u8'1';
+	static inline constexpr char8_t number9 = u8'9';
 	static inline constexpr char8_t lf = u8'\n';
 	static inline constexpr char8_t cr = u8'\r';
 	static inline constexpr char8_t tab = u8'\t';
 	static inline constexpr char8_t comma = u8',';
+	static inline constexpr char8_t plus = u8'+';
+	static inline constexpr char8_t minus = u8'-';
 };
 #endif
 
@@ -204,10 +224,15 @@ struct char_constants<char16_t> {
 	static inline constexpr char16_t z = u'z';
 	static inline constexpr char16_t A = u'A';
 	static inline constexpr char16_t Z = u'Z';
+	static inline constexpr char16_t number0 = u'0';
+	static inline constexpr char16_t number1 = u'1';
+	static inline constexpr char16_t number9 = u'9';
 	static inline constexpr char16_t lf = u'\n';
 	static inline constexpr char16_t cr = u'\r';
 	static inline constexpr char16_t tab = u'\t';
 	static inline constexpr char16_t comma = u',';
+	static inline constexpr char16_t plus = u'+';
+	static inline constexpr char16_t minus = u'-';
 };
 
 template <>
@@ -217,10 +242,15 @@ struct char_constants<char32_t> {
 	static inline constexpr char32_t z = U'z';
 	static inline constexpr char32_t A = U'A';
 	static inline constexpr char32_t Z = U'Z';
+	static inline constexpr char32_t number0 = U'0';
+	static inline constexpr char32_t number1 = U'1';
+	static inline constexpr char32_t number9 = U'9';
 	static inline constexpr char32_t lf = U'\n';
 	static inline constexpr char32_t cr = U'\r';
 	static inline constexpr char32_t tab = U'\t';
 	static inline constexpr char32_t comma = U',';
+	static inline constexpr char32_t plus = U'+';
+	static inline constexpr char32_t minus = U'-';
 };
 
 

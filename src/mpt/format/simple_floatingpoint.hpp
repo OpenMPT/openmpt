@@ -12,7 +12,7 @@
 #include "mpt/format/default_floatingpoint.hpp"
 #include "mpt/format/helpers.hpp"
 #include "mpt/format/simple_spec.hpp"
-#include "mpt/string/types.hpp"
+#include "mpt/string/utility.hpp"
 #include "mpt/string_transcode/transcode.hpp"
 
 #if MPT_FORMAT_CXX17_FLOAT
@@ -86,10 +86,10 @@ inline Tstring format_simple_floatingpoint_postprocess_width(Tstring str, const 
 	if (f & format_simple_base::FillNul) {
 		auto pos = str.begin();
 		if (str.length() > 0) {
-			if (str[0] == mpt::unsafe_char_convert<typename Tstring::value_type>('+')) {
+			if (str[0] == mpt::char_constants<typename Tstring::value_type>::plus) {
 				pos++;
 				width++;
-			} else if (str[0] == mpt::unsafe_char_convert<typename Tstring::value_type>('-')) {
+			} else if (str[0] == mpt::char_constants<typename Tstring::value_type>::minus) {
 				pos++;
 				width++;
 			}

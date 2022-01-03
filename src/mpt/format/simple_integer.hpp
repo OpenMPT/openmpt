@@ -56,8 +56,8 @@ inline Tstring format_simple_integer_postprocess_case(Tstring str, const format_
 	format_simple_flags f = format.GetFlags();
 	if (f & format_simple_base::CaseUpp) {
 		for (auto & c : str) {
-			if (mpt::unsafe_char_convert<typename Tstring::value_type>('a') <= c && c <= mpt::unsafe_char_convert<typename Tstring::value_type>('z')) {
-				c -= mpt::unsafe_char_convert<typename Tstring::value_type>('a') - mpt::unsafe_char_convert<typename Tstring::value_type>('A');
+			if (mpt::char_constants<typename Tstring::value_type>::a <= c && c <= mpt::char_constants<typename Tstring::value_type>::z) {
+				c -= mpt::char_constants<typename Tstring::value_type>::a - mpt::char_constants<typename Tstring::value_type>::A;
 			}
 		}
 	}
@@ -72,16 +72,16 @@ inline Tstring format_simple_integer_postprocess_digits(Tstring str, const forma
 	if (f & format_simple_base::FillNul) {
 		auto pos = str.begin();
 		if (str.length() > 0) {
-			if (str[0] == mpt::unsafe_char_convert<typename Tstring::value_type>('+')) {
+			if (str[0] == mpt::char_constants<typename Tstring::value_type>::plus) {
 				pos++;
 				width++;
-			} else if (str[0] == mpt::unsafe_char_convert<typename Tstring::value_type>('-')) {
+			} else if (str[0] == mpt::char_constants<typename Tstring::value_type>::minus) {
 				pos++;
 				width++;
 			}
 		}
 		if (str.length() < width) {
-			str.insert(pos, width - str.length(), mpt::unsafe_char_convert<typename Tstring::value_type>('0'));
+			str.insert(pos, width - str.length(), mpt::char_constants<typename Tstring::value_type>::number0);
 		}
 	}
 	return str;
@@ -100,7 +100,7 @@ inline Tstring format_simple_integer_postprocess_group(Tstring str, const format
 		std::size_t len = str.length();
 		for (std::size_t n = 0; n < len; ++n) {
 			if (n > 0 && (n % groupSize) == 0) {
-				if (!(n == (len - 1) && (str[0] == mpt::unsafe_char_convert<typename Tstring::value_type>('+') || str[0] == mpt::unsafe_char_convert<typename Tstring::value_type>('-')))) {
+				if (!(n == (len - 1) && (str[0] == mpt::char_constants<typename Tstring::value_type>::plus || str[0] == mpt::char_constants<typename Tstring::value_type>::minus))) {
 					str.insert(str.begin() + (len - n), 1, mpt::unsafe_char_convert<typename Tstring::value_type>(groupSep));
 				}
 			}
