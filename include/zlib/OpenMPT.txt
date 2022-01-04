@@ -4,6 +4,8 @@ OpenMPT specific changes:
  *  iowin32.c has been modified to only use Windows 8 WinRT API when actually
     compiling for Windows 8 or later.
  *  All custom modifications are marked with // OpenMPT
+ *  minizip has been modified to check for allocation failure. A similar fix
+    has been proposed upstream: <https://github.com/madler/zlib/pull/566>
  *  For building, premake is used to generate Visual Studio project files.
     See ../build/premake/ for details.
 No further changes have been made.
