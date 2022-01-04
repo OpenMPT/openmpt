@@ -1290,11 +1290,12 @@
 #define ID_SAMPLE_TIMELINE_SECONDS      44646
 #define ID_SAMPLE_TIMELINE_SAMPLES      44647
 #define ID_SAMPLE_TIMELINE_SAMPLES_POW2 44648
-#define ID_SAMPLE_DELETE_CUEPOINT       44649
-#define ID_CONVERT_PINGPONG_LOOP        44650
-#define ID_CONVERT_PINGPONG_SUSTAIN     44651
-#define ID_RENAME_PLUGIN                44652
-#define ID_FILE_SAVEOPL                 44653
+#define ID_SAMPLE_INSERT_CUEPOINT       44649
+#define ID_SAMPLE_DELETE_CUEPOINT       44650
+#define ID_CONVERT_PINGPONG_LOOP        44651
+#define ID_CONVERT_PINGPONG_SUSTAIN     44652
+#define ID_RENAME_PLUGIN                44653
+#define ID_FILE_SAVEOPL                 44654
 
 // Next default values for new objects
 // 
@@ -1302,7 +1303,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        543
-#define _APS_NEXT_COMMAND_VALUE         44654
+#define _APS_NEXT_COMMAND_VALUE         44655
 #define _APS_NEXT_CONTROL_VALUE         2518
 #define _APS_NEXT_SYMED_VALUE           901
 #endif

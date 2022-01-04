@@ -140,6 +140,7 @@ BEGIN_MESSAGE_MAP(CViewSample, CModScrollView)
 	ON_COMMAND(ID_SAMPLE_GRID,				&CViewSample::OnChangeGridSize)
 	ON_COMMAND(ID_SAMPLE_QUICKFADE,			&CViewSample::OnQuickFade)
 	ON_COMMAND(ID_SAMPLE_SLICE,				&CViewSample::OnSampleSlice)
+	ON_COMMAND(ID_SAMPLE_INSERT_CUEPOINT,	&CViewSample::OnSampleInsertCuePoint)
 	ON_COMMAND(ID_SAMPLE_DELETE_CUEPOINT,	&CViewSample::OnSampleDeleteCuePoint)
 	ON_COMMAND(ID_SAMPLE_TIMELINE_SECONDS,	&CViewSample::OnTimelineFormatSeconds)
 	ON_COMMAND(ID_SAMPLE_TIMELINE_SAMPLES,	&CViewSample::OnTimelineFormatSamples)
@@ -382,7 +383,7 @@ void CViewSample::SetCurrentSample(SAMPLEINDEX nSmp)
 		return;
 	m_dwBeginSel = m_dwEndSel = 0;
 	m_dwStatus.reset(SMPSTATUS_DRAWING);
-	if(CMainFrame* pMainFrm = CMainFrame::GetMainFrame(); pMainFrm)
+	if(CMainFrame *pMainFrm = CMainFrame::GetMainFrame(); pMainFrm)
 		pMainFrm->SetInfoText(_T(""));
 	const bool wasOPL = IsOPLInstrument();
 	m_nSample = nSmp;
@@ -1032,7 +1033,7 @@ std::pair<int, int> CViewSample::FindMinMax(const int8 *p, SmpLength numSamples,
 	int minVal = 127;
 	int maxVal = -128;
 #if defined(MPT_ENABLE_ARCH_INTRINSICS_SSE2)
-	if(CPU::HasFeatureSet(CPU::feature::sse2))
+	if(CPU::HasFeatureSet(CPU::feature::sse2) && numSamples >= 16)
 	{
 		sse2_findminmax8(p, numSamples, numChannels, minVal, maxVal);
 	} else
@@ -1056,7 +1057,7 @@ std::pair<int, int> CViewSample::FindMinMax(const int16 *p, SmpLength numSamples
 	int minVal = 32767;
 	int maxVal = -32768;
 #if defined(MPT_ENABLE_ARCH_INTRINSICS_SSE2)
-	if(CPU::HasFeatureSet(CPU::feature::sse2))
+	if(CPU::HasFeatureSet(CPU::feature::sse2) && numSamples >= 8)
 	{
 		sse2_findminmax16(p, numSamples, numChannels, minVal, maxVal);
 	} else
@@ -2216,6 +2217,15 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 				wsprintf(s, _T("&Delete Cue Point %d"), 1 + static_cast<int>(m_dwMenuParam));
 				::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_DELETE_CUEPOINT, s);
 				::AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
+			} else
+			{
+				if(*std::max_element(sample.cues.begin(), sample.cues.end()) >= sample.nLength)
+				{
+					m_dwMenuParam = ScreenToSample(pt.x);
+					wsprintf(s, _T("&Insert Cue Point at %s"), mpt::cfmt::dec(3, ',', m_dwMenuParam).GetString());
+					::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_INSERT_CUEPOINT, s);
+					::AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
+				}
 			}
 
 			auto fmt = TrackerSettings::Instance().sampleEditorTimelineFormat.Get();
@@ -3822,6 +3832,29 @@ void CViewSample::OnSampleSlice()
 	SetModified(SampleHint().Info().Data().Names(), true, true);
 	modDoc->UpdateAllViews(this, SampleHint().Info().Data().Names(), this);
 	modDoc->UpdateAllViews(this, InstrumentHint().Info().Envelope().Names(), this);
+}
+
+
+void CViewSample::OnSampleInsertCuePoint()
+{
+	CModDoc *modDoc = GetDocument();
+	if(modDoc == nullptr || m_nSample > modDoc->GetNumSamples())
+		return;
+	CSoundFile &sndFile = modDoc->GetSoundFile();
+	ModSample &sample = sndFile.GetSample(m_nSample);
+	if(!sample.HasSampleData() || sample.uFlags[CHN_ADLIB] || m_dwMenuParam >= sample.nLength)
+		return;
+
+	for(auto &pt : sample.cues)
+	{
+		if(pt >= sample.nLength)
+		{
+			modDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_none, "Insert Cue Point");
+			pt = m_dwMenuParam;
+			SetModified(SampleHint().Info().Data(), true, true);
+			break;
+		}
+	}
 }
 
 
