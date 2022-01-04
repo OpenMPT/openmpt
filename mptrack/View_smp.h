@@ -225,6 +225,7 @@ protected:
 	afx_msg void OnUpdateUndo(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateRedo(CCmdUI *pCmdUI);
 	afx_msg void OnSampleSlice();
+	afx_msg void OnSampleInsertCuePoint();
 	afx_msg void OnSampleDeleteCuePoint();
 	afx_msg void OnTimelineFormatSeconds() { SetTimelineFormat(TimelineFormat::Seconds); }
 	afx_msg void OnTimelineFormatSamples() { SetTimelineFormat(TimelineFormat::Samples); }
