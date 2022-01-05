@@ -1889,7 +1889,7 @@ void CViewSample::OnMouseMove(UINT flags, CPoint point)
 		if(pMainFrm && m_dwEndSel <= m_dwBeginSel)
 		{
 			// Show cursor position as offset effect if no selection is made.
-			if(m_nSample > 0 && m_nSample <= sndFile.GetNumSamples() && x < sample.nLength)
+			if(m_nSample > 0 && sample.HasSampleData() && x < sample.nLength)
 			{
 				const SmpLength xLow = (x / 0x100) % 0x100;
 				const SmpLength xHigh = x / 0x10000;
