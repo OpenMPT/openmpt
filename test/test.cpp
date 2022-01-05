@@ -1431,6 +1431,9 @@ static MPT_NOINLINE void TestCharsets()
 	VERIFY_EQUAL(P_("C:\\foo").AbsolutePathToRelative(exePath), P_("\\foo"));
 	VERIFY_EQUAL(P_(".\\").RelativePathToAbsolute(exePath), P_("C:\\OpenMPT\\"));
 	VERIFY_EQUAL(P_(".\\foo").RelativePathToAbsolute(exePath), P_("C:\\OpenMPT\\foo"));
+	VERIFY_EQUAL(P_("..\\foo").RelativePathToAbsolute(exePath).Simplify(), P_("C:\\foo"));
+	VERIFY_EQUAL(P_("..\\..\\foo").RelativePathToAbsolute(exePath).Simplify(), P_("C:\\foo"));
+	VERIFY_EQUAL(P_("file").RelativePathToAbsolute(exePath), P_("C:\\OpenMPT\\file"));
 	VERIFY_EQUAL(P_("\\foo").RelativePathToAbsolute(exePath), P_("C:\\foo"));
 	VERIFY_EQUAL(P_("\\\\server\\path\\file").AbsolutePathToRelative(exePath), P_("\\\\server\\path\\file"));
 	VERIFY_EQUAL(P_("\\\\server\\path\\file").RelativePathToAbsolute(exePath), P_("\\\\server\\path\\file"));

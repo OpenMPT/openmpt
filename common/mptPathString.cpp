@@ -364,9 +364,13 @@ PathString PathString::RelativePathToAbsolute(const PathString &relativeTo) cons
 	{
 		return result;
 	}
-	if(path.length() >= 2 && path[0] == PC_('\\') && path[1] != PC_('\\'))
+	if(path.length() >= 2 && path[0] == PC_('\\') && path[1] == PC_('\\'))
 	{
-		// Path is on the same drive as relativeTo ("\Somepath\" => "C:\Somepath\"), but ignore network paths starting with "\\"
+		// Network / UNC paths
+		return result;
+	} if(path.length() >= 1 && path[0] == PC_('\\'))
+	{
+		// Path is on the same drive as relativeTo ("\Somepath\" => "C:\Somepath\")
 		result = mpt::PathString::FromNative(relativeTo.AsNative().substr(0, 2));
 		result += mpt::PathString(path);
 	} else if(path.length() >= 2 && path.substr(0, 2) == PL_(".\\"))
