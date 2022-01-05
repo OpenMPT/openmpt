@@ -2184,7 +2184,6 @@ BOOL CViewInstrument::OnDragonDrop(BOOL doDrop, const DRAGONDROP *dropInfo)
 
 	case DRAGONDROP_DLS:
 		{
-			const CDLSBank *pDLSBank = CTrackApp::gpDLSBanks[dropInfo->dropItem];
 			UINT nIns = dropInfo->dropParam & 0xFFFF;
 			uint32 drumRgn = uint32_max;
 			// Drums: (0x80000000) | (Region << 16) | (Instrument)
@@ -2195,7 +2194,7 @@ BOOL CViewInstrument::OnDragonDrop(BOOL doDrop, const DRAGONDROP *dropInfo)
 			{
 				CriticalSection cs;
 				modDoc->GetInstrumentUndo().PrepareUndo(m_nInstrument, "Replace Instrument");
-				canDrop = modified = pDLSBank->ExtractInstrument(sndFile, m_nInstrument, nIns, drumRgn);
+				canDrop = modified = CTrackApp::gpDLSBanks[dropInfo->dropItem]->ExtractInstrument(sndFile, m_nInstrument, nIns, drumRgn);
 			}
 		}
 		break;

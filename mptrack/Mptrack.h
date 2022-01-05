@@ -112,7 +112,7 @@ protected:
 	static MidiLibrary midiLibrary;
 
 public:
-	static std::vector<CDLSBank *> gpDLSBanks;
+	static std::vector<std::unique_ptr<CDLSBank>> gpDLSBanks;
 
 protected:
 	mpt::recursive_mutex_with_lock_count m_GlobalMutex;

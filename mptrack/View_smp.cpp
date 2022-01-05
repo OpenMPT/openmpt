@@ -3214,7 +3214,7 @@ BOOL CViewSample::OnDragonDrop(BOOL doDrop, const DRAGONDROP *dropInfo)
 
 	case DRAGONDROP_DLS:
 		{
-			const CDLSBank *pDLSBank = CTrackApp::gpDLSBanks[dropInfo->dropItem];
+			const CDLSBank dlsBank = *CTrackApp::gpDLSBanks[dropInfo->dropItem];
 			UINT nIns = dropInfo->dropParam & 0xFFFF;
 			UINT nRgn;
 			int transpose = 0;
@@ -3222,19 +3222,19 @@ BOOL CViewSample::OnDragonDrop(BOOL doDrop, const DRAGONDROP *dropInfo)
 			if (dropInfo->dropParam & 0x80000000)
 			{
 				nRgn = (dropInfo->dropParam & 0x7FFF0000) >> 16;
-				const auto &region = pDLSBank->GetInstrument(nIns)->Regions[nRgn];
+				const auto &region = dlsBank.GetInstrument(nIns)->Regions[nRgn];
 				if(region.tuning != 0)
 					transpose = (region.uKeyMin + (region.uKeyMax - region.uKeyMin) / 2) - 60;
 			} else
 			// Melodic: (Instrument)
 			{
-				nRgn = pDLSBank->GetRegionFromKey(nIns, 60);
+				nRgn = dlsBank.GetRegionFromKey(nIns, 60);
 			}
 			if(!insertNew || SendCtrlMessage(CTRLMSG_SMP_NEWSAMPLE))
 			{
 				CriticalSection cs;
 				modDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Replace");
-				canDrop = modified = pDLSBank->ExtractSample(sndFile, m_nSample, nIns, nRgn, transpose);
+				canDrop = modified = dlsBank.ExtractSample(sndFile, m_nSample, nIns, nRgn, transpose);
 			}
 		}
 		break;

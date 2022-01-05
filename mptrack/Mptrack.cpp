@@ -418,7 +418,7 @@ void CTrackApp::ExportMidiConfig(SettingsContainer &file)
 /////////////////////////////////////////////////////////////////////////////
 // DLS Banks support
 
-std::vector<CDLSBank *> CTrackApp::gpDLSBanks;
+std::vector<std::unique_ptr<CDLSBank>> CTrackApp::gpDLSBanks;
 
 
 void CTrackApp::LoadDefaultDLSBanks()
@@ -480,8 +480,8 @@ void CTrackApp::SaveDefaultDLSBanks()
 
 void CTrackApp::RemoveDLSBank(UINT nBank)
 {
-	if(nBank >= gpDLSBanks.size() || !gpDLSBanks[nBank]) return;
-	delete gpDLSBanks[nBank];
+	if(nBank >= gpDLSBanks.size())
+		return;
 	gpDLSBanks[nBank] = nullptr;
 	//gpDLSBanks.erase(gpDLSBanks.begin() + nBank);
 }
@@ -495,13 +495,12 @@ bool CTrackApp::AddDLSBank(const mpt::PathString &filename)
 	{
 		if(bank && !mpt::PathString::CompareNoCase(filename, bank->GetFileName())) return true;
 	}
-	CDLSBank *bank = nullptr;
 	try
 	{
-		bank = new CDLSBank;
+		auto bank = std::make_unique<CDLSBank>();
 		if(bank->Open(filename))
 		{
-			gpDLSBanks.push_back(bank);
+			gpDLSBanks.push_back(std::move(bank));
 			return true;
 		}
 	} catch(mpt::out_of_memory e)
@@ -510,7 +509,6 @@ bool CTrackApp::AddDLSBank(const mpt::PathString &filename)
 	} catch(const std::exception &)
 	{
 	}
-	delete bank;
 	return false;
 }
 
@@ -1468,10 +1466,6 @@ int CTrackApp::ExitInstanceImpl()
 	m_pAllSoundDeviceComponents = nullptr;
 	ExportMidiConfig(theApp.GetSettings());
 	SaveDefaultDLSBanks();
-	for(auto &bank : gpDLSBanks)
-	{
-		delete bank;
-	}
 	gpDLSBanks.clear();
 
 	// Uninitialize Plugins
