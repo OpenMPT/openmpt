@@ -53,20 +53,10 @@ private:
 
 public:
 
-	PathString()
-	{
-		return;
-	}
-	PathString(const PathString & other)
-		: path(other.path)
-	{
-		return;
-	}
-	PathString(PathString && other) noexcept
-		: path(std::move(other.path))
-	{
-		return;
-	}
+	PathString() = default;
+	PathString(const PathString &) = default;
+	PathString(PathString &&) noexcept = default;
+
 	PathString & assign(const PathString & other)
 	{
 		path = other.path;

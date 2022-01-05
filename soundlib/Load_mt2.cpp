@@ -1152,13 +1152,6 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 			mptSmp.filename = filename;
 
 #if defined(MPT_EXTERNAL_SAMPLES)
-			if(filename.length() >= 2
-				&& filename[0] != '\\'	// Relative path on same drive
-				&& filename[1] != ':')	// Absolute path
-			{
-				// Relative path in same folder or sub folder
-				filename = ".\\" + filename;
-			}
 			SetSamplePath(i + 1, mpt::PathString::FromLocaleSilent(filename));
 #elif !defined(LIBOPENMPT_BUILD_TEST)
 			AddToLog(LogWarning, MPT_UFORMAT("Loading external sample {} ('{}') failed: External samples are not supported.")(i + 1, mpt::ToUnicode(GetCharsetFile(), filename)));

@@ -366,14 +366,19 @@ PathString PathString::RelativePathToAbsolute(const PathString &relativeTo) cons
 	}
 	if(path.length() >= 2 && path[0] == PC_('\\') && path[1] != PC_('\\'))
 	{
-		// Path is on the same drive as OpenMPT ("\Somepath\" => "C:\Somepath\"), but ignore network paths starting with "\\"
+		// Path is on the same drive as relativeTo ("\Somepath\" => "C:\Somepath\"), but ignore network paths starting with "\\"
 		result = mpt::PathString::FromNative(relativeTo.AsNative().substr(0, 2));
 		result += mpt::PathString(path);
 	} else if(path.length() >= 2 && path.substr(0, 2) == PL_(".\\"))
 	{
-		// Path is OpenMPT's directory or a sub directory (".\Somepath\" => "C:\OpenMPT\Somepath\")
+		// Path is in relativeTo or a sub directory (".\Somepath\" => "C:\OpenMPT\Somepath\")
 		result = relativeTo; // "C:\OpenMPT\"
 		result += mpt::PathString::FromNative(AsNative().substr(2));
+	} else if(path.length() < 3 || path[1] != PC_(':') || path[2] != PC_('\\'))
+	{
+		// Any other path not starting with drive letter
+		result = relativeTo;  // "C:\OpenMPT\"
+		result += mpt::PathString(path);
 	}
 	return result;
 }
