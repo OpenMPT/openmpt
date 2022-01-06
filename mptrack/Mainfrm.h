@@ -48,7 +48,6 @@ enum
 	WM_MOD_UNLOCKCONTROLS,
 	WM_MOD_CTRLMSG,
 	WM_MOD_VIEWMSG,
-	WM_MOD_TREEMSG,
 	WM_MOD_MIDIMSG,
 	WM_MOD_GETTOOLTIPTEXT,
 	WM_MOD_DRAGONDROPPING,
@@ -399,6 +398,7 @@ public:
 	void OnDocumentCreated(CModDoc *pModDoc);
 	void OnDocumentClosed(CModDoc *pModDoc);
 	void UpdateTree(CModDoc *pModDoc, UpdateHint hint, CObject *pHint = nullptr);
+	void RefreshDlsBanks();
 	static CInputHandler* GetInputHandler() { return m_InputHandler; }
 	void SetElapsedTime(double t) { m_dwTimeSec = static_cast<CSoundFile::samplecount_t>(t); }
 
@@ -570,6 +570,7 @@ public:
 	static constexpr size_t nMaxItemsInExampleModulesMenu = 50;
 	static constexpr size_t nMaxItemsInTemplateModulesMenu = 50;
 
+private:
 	/// Array of paths of example modules that are available from help menu.
 	std::vector<mpt::PathString> m_ExampleModulePaths;
 	/// Array of paths of template modules that are available from file menu.

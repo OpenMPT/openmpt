@@ -700,8 +700,8 @@ public:
 	CachedSetting<bool> MiscAllowMultipleCommandsPerKey;
 	CachedSetting<bool> MiscDistinguishModifiers;
 	Setting<ProcessPriorityClass> MiscProcessPriorityClass;
-	Setting<bool> MiscFlushFileBuffersOnSave;
-	Setting<bool> MiscCacheCompleteFileBeforeLoading;
+	CachedSetting<bool> MiscFlushFileBuffersOnSave;
+	CachedSetting<bool> MiscCacheCompleteFileBeforeLoading;
 	Setting<bool> MiscUseSingleInstance;
 
 	// Sound Settings
