@@ -327,7 +327,7 @@ static void ImportIMFEffect(ModCommand &m)
 		case 0xD: // note delay
 			// Apparently, Imago Orpheus doesn't cut samples on tick 0.
 			if(!m.param)
-				m.command = CMD_NONE;
+				m.command = 0;
 			break;
 		case 0xE: // ignore envelope
 			switch(m.param & 0x0F)
@@ -346,7 +346,7 @@ static void ImportIMFEffect(ModCommand &m)
 		case 0x18: // sample offset
 			// O00 doesn't pick up the previous value
 			if(!m.param)
-				m.command = CMD_NONE;
+				m.command = 0;
 			break;
 		}
 		if(n)

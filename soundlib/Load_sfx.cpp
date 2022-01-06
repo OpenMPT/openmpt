@@ -350,7 +350,7 @@ bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)
 							m.param &= 0x0F;
 						} else
 						{
-							m.command = m.param = 0;
+							m.command = CMD_NONE;
 						}
 						break;
 
@@ -358,7 +358,7 @@ bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)
 						// Give precedence to 7xy/8xy slides
 						if(slideRate[chn])
 						{
-							m.command = m.param = 0;
+							m.command = CMD_NONE;
 							break;
 						}
 						m.command = CMD_MODCMDEX;
@@ -369,7 +369,7 @@ bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)
 						// Give precedence to 7xy/8xy slides
 						if(slideRate[chn])
 						{
-							m.command = m.param = 0;
+							m.command = CMD_NONE;
 							break;
 						}
 						m.command = CMD_MODCMDEX;
@@ -387,12 +387,12 @@ bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)
 							{
 								m.volcmd = VOLCMD_VOLUME;
 								m.vol = m.param;
-								m.command = m.param = 0;
+								m.command = CMD_NONE;
 								break;
 							}
 						} else
 						{
-							m.command = m.param = 0;
+							m.command = CMD_NONE;
 						}
 						break;
 
@@ -410,12 +410,12 @@ bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)
 							{
 								m.volcmd = VOLCMD_VOLUME;
 								m.vol = m.param;
-								m.command = m.param = 0;
+								m.command = CMD_NONE;
 								break;
 							}
 						} else
 						{
-							m.command = m.param = 0;
+							m.command = CMD_NONE;
 						}
 						break;
 

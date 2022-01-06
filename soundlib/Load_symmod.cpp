@@ -1573,7 +1573,7 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 							break;
 
 						case SymEvent::AddVolume:
-							m.command = m.param = 0;
+							m.command = CMD_NONE;
 							break;
 						case SymEvent::Tremolo:
 						{
@@ -1613,7 +1613,7 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 							break;
 						case SymEvent::AddPitch:
 							// "The range (-128...127) is about 4 half notes."
-							m.command = m.param = 0;
+							m.command = CMD_NONE;
 							break;
 						case SymEvent::Vibrato:
 						{
