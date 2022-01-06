@@ -1182,6 +1182,7 @@ bool CSoundFile::SaveXM(std::ostream &f, bool compatibilityExport)
 				case VOLCMD_PANSLIDELEFT:	vol = 0xD0 + (p->vol & 0x0F); break;
 				case VOLCMD_PANSLIDERIGHT:	vol = 0xE0 + (p->vol & 0x0F); break;
 				case VOLCMD_TONEPORTAMENTO:	vol = 0xF0 + (p->vol & 0x0F); break;
+				default: break;
 				}
 				// Those values are ignored in FT2. Don't save them, also to avoid possible problems with other trackers (or MPT itself)
 				if(compatibilityExport && p->vol == 0)

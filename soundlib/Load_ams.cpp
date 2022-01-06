@@ -155,6 +155,9 @@ static void ReadAMSPattern(CPattern &pattern, bool newVersion, FileReader &patte
 								m.ExtendedMODtoS3MEffect();
 							}
 							break;
+
+						default:
+							break;
 						}
 					} else if(effect < 0x10 + mpt::array_size<decltype(effTrans)>::size)
 					{

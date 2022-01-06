@@ -516,6 +516,9 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					playState.m_nPatternDelay = 1 + (p->param & 0x0F);
 				}
 				break;
+
+			default:
+				break;
 			}
 		}
 		const uint32 numTicks = playState.TicksOnRow();
@@ -580,6 +583,8 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 						if(clearEffectCommand)
 							command = CMD_NONE;
 					}
+					break;
+				default:
 					break;
 				}
 			}
@@ -820,6 +825,8 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			case CMD_PANBRELLO:
 				Panbrello(chn, param);
 				break;
+			default:
+				break;
 			}
 
 			switch(chn.rowCommand.volcmd)
@@ -837,6 +844,9 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				break;
 			case VOLCMD_VIBRATODEPTH:
 				Vibrato(chn, chn.rowCommand.vol);
+				break;
+
+			default:
 				break;
 			}
 
@@ -874,6 +884,9 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					chn.nPanbrelloPos += static_cast<uint8>(chn.nPanbrelloSpeed * (numTicks - 1));
 					ProcessPanbrello(chn);
 				}
+				break;
+
+			default:
 				break;
 			}
 		}
@@ -1088,6 +1101,8 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 						memory.RenderChannel(nChn, oldTickDuration);  // Re-sync what we've got so far
 						SetFinetune(nChn, playState, false);  // TODO should render each tick individually for CMD_FINETUNE_SMOOTH for higher sync accuracy
 						break;
+					default:
+						break;
 					}
 					chn.isFirstTick = true;
 					switch(m.volcmd)
@@ -1118,6 +1133,8 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					case VOLCMD_PLAYCONTROL:
 						if(m.vol <= 1)
 							chn.isPaused = (m.vol == 0);
+						break;
+					default:
 						break;
 					}
 
@@ -3046,6 +3063,9 @@ bool CSoundFile::ProcessEffects()
 					if(vol <= 1)
 						chn.isPaused = (vol == 0);
 					break;
+
+				default:
+					break;
 				}
 			}
 		}
@@ -3453,6 +3473,9 @@ bool CSoundFile::ProcessEffects()
 		// Digi Booster sample reverse
 		case CMD_DIGIREVERSESAMPLE:
 			DigiBoosterSampleReverse(chn, static_cast<ModCommand::PARAM>(param));
+			break;
+		
+		default:
 			break;
 		}
 

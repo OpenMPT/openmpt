@@ -273,6 +273,8 @@ bool CSoundFile::ReadPTM(FileReader &file, ModLoadingFlags loadFlags)
 				case CMD_GLOBALVOLUME:
 					m.param = std::min(m.param, uint8(0x40)) * 2u;
 					break;
+				default:
+					break;
 				}
 			}
 			if(b & 0x80)

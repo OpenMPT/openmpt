@@ -516,6 +516,8 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 		case CMD_GLOBALVOLUME:
 			param = (std::min(PARAM(0x80), param) + 1) / 2u;
 			break;
+		default:
+			break;
 		}
 	} // End if(oldTypeIsIT_MPT && newTypeIsXM)
 
@@ -532,6 +534,8 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 		case CMD_GLOBALVOLUME:
 			param = std::min(PARAM(0x40), param) * 2u;
 			break;
+		default:
+			break;
 		}
 	} // End if(oldTypeIsIT_MPT && newTypeIsXM)
 
@@ -547,6 +551,8 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 			break;
 		case CMD_TEMPO:
 			param = std::max(param, PARAM(0x20));
+			break;
+		default:
 			break;
 		}
 	}
@@ -568,6 +574,8 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 		case CMD_MODCMDEX: // This would turn into "Set Active Macro", so let's better remove it
 		case CMD_S3MCMDEX:
 			if((param & 0xF0) == 0xF0) command = CMD_NONE;
+			break;
+		default:
 			break;
 		}
 	} // End if(oldTypeIsMOD && newTypeIsXM)
@@ -601,6 +609,9 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 
 			case CMD_MODCMDEX: // This would turn into "Invert Loop", so let's better remove it
 				if((param & 0xF0) == 0xF0) command = CMD_NONE;
+				break;
+
+			default:
 				break;
 		}
 
@@ -659,6 +670,9 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 			case VOLCMD_VIBRATOSPEED:
 				command = CMD_VIBRATO;
 				param = vol << 4;
+				break;
+
+			default:
 				break;
 		}
 		volcmd = VOLCMD_NONE;
@@ -735,6 +749,9 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 				param = vol;
 				volcmd = VOLCMD_NONE;
 				break;
+
+			default:
+				break;
 		}
 	} // End if(newTypeIsS3M)
 
@@ -783,6 +800,9 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 				param = ImpulseTrackerPortaVolCmd[vol & 0x0F];
 				volcmd = VOLCMD_NONE;
 				break;
+
+			default:
+				break;
 		}
 	} // End if(newTypeIsXM)
 
@@ -816,6 +836,9 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 				param = vol << 4;
 				volcmd = VOLCMD_NONE;
 				break;
+
+			default:
+				break;
 		}
 
 		switch(volcmd)
@@ -831,6 +854,8 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 			// OpenMPT-specific commands
 		case VOLCMD_OFFSET:
 			vol = std::min(vol, VOL(9));
+			break;
+		default:
 			break;
 		}
 	} // End if(newTypeIsIT_MPT)

@@ -885,10 +885,8 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, PatternEditPos &pastePos
 					// Speed / tempo command conversion
 					if (sndFile.GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM))
 					{
-						switch(m.command)
+						if(m.command == CMD_SPEED || m.command == CMD_TEMPO)
 						{
-						case CMD_SPEED:
-						case CMD_TEMPO:
 							if(!clipboardHasS3MCommands)
 							{
 								if(m.param < 32)
@@ -902,14 +900,11 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, PatternEditPos &pastePos
 								else if(m.command == CMD_TEMPO && m.param < 32)
 									m.param = CMD_SPEED;
 							}
-							break;
 						}
 					} else
 					{
-						switch(m.command)
+						if(m.command == CMD_SPEED || m.command == CMD_TEMPO)
 						{
-						case CMD_SPEED:
-						case CMD_TEMPO:
 							if(!clipboardHasS3MCommands)
 							{
 								if(m.param  < 32)

@@ -310,6 +310,8 @@ bool EffectInfo::GetEffectInfo(UINT ndx, CString *s, bool bXX, ModCommand::PARAM
 			if(sndFile.GetType() & (MOD_TYPE_MOD | MOD_TYPE_S3M | MOD_TYPE_XM))
 				nmax = 63;
 			break;
+		default:
+			break;
 		}
 		*prangeMin = nmin;
 		*prangeMax = nmax;
@@ -365,6 +367,8 @@ UINT EffectInfo::MapValueToPos(UINT ndx, UINT param) const
 				pos = 0x81;
 		}
 		break;
+	default:
+		break;
 	}
 	return pos;
 }
@@ -408,6 +412,8 @@ UINT EffectInfo::MapPosToValue(UINT ndx, UINT pos) const
 	case CMD_PANNING8:
 		if(sndFile.GetType() == MOD_TYPE_S3M)
 			param = (pos <= 0x80) ? pos : 0xA4;
+		break;
+	default:
 		break;
 	}
 	return param;

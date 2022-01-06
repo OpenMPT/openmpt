@@ -474,6 +474,9 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 								m.command = CMD_NONE;
 							}
 							break;
+
+						default:
+							break;
 						}
 
 						// Move pannings to volume column - should never happen

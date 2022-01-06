@@ -213,6 +213,8 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 					else
 						volMemory[chn] = m->vol;
 					break;
+				default:
+					break;
 				}
 			}
 
@@ -235,6 +237,8 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 					else
 						effMemory[chn][m->command] = m->param;
 					break;
+				default:
+					break;
 				}
 			}
 
@@ -255,6 +259,8 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 						effMemory[chn][m->command] = m->param;
 					break;
 
+				default:
+					break;
 				}
 
 				// Compensate for loss of transpose information
