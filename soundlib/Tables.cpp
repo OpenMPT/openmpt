@@ -42,7 +42,6 @@ const mpt::uchar NoteNamesFlat[12][4] =
 
 struct ModFormatInfo
 {
-	MODTYPE format;          // MOD_TYPE_XXXX
 	const mpt::uchar *name;  // "ProTracker"
 	const char *extension;   // "mod"
 };
@@ -50,69 +49,69 @@ struct ModFormatInfo
 // Note: Formats with identical extensions must be grouped together.
 static constexpr ModFormatInfo modFormatInfo[] =
 {
-	{ MOD_TYPE_MPT,  UL_("OpenMPT"),                            "mptm" },
-	{ MOD_TYPE_MOD,  UL_("ProTracker"),                         "mod" },
-	{ MOD_TYPE_S3M,  UL_("Scream Tracker 3"),                   "s3m" },
-	{ MOD_TYPE_XM,   UL_("FastTracker 2"),                      "xm" },
-	{ MOD_TYPE_IT,   UL_("Impulse Tracker"),                    "it" },
+	{ UL_("OpenMPT"),                            "mptm" },
+	{ UL_("ProTracker"),                         "mod" },
+	{ UL_("Scream Tracker 3"),                   "s3m" },
+	{ UL_("FastTracker 2"),                      "xm" },
+	{ UL_("Impulse Tracker"),                    "it" },
 
-	{ MOD_TYPE_669,  UL_("Composer 669 / UNIS 669"),            "669" },
-	{ MOD_TYPE_AMF0, UL_("ASYLUM Music Format"),                "amf" },
-	{ MOD_TYPE_AMF,  UL_("DSMI Advanced Music Format"),         "amf" },
-	{ MOD_TYPE_AMS,  UL_("Extreme's Tracker"),                  "ams" },
-	{ MOD_TYPE_AMS,  UL_("Velvet Studio"),                      "ams" },
-	{ MOD_TYPE_S3M,  UL_("CDFM / Composer 670"),                "c67" },
-	{ MOD_TYPE_DBM,  UL_("DigiBooster Pro"),                    "dbm" },
-	{ MOD_TYPE_DIGI, UL_("DigiBooster"),                        "digi" },
-	{ MOD_TYPE_DMF,  UL_("X-Tracker"),                          "dmf" },
-	{ MOD_TYPE_DSM,  UL_("DSIK Format"),                        "dsm" },
-	{ MOD_TYPE_MOD,  UL_("Digital Symphony"),                   "dsym" },
-	{ MOD_TYPE_DTM,  UL_("Digital Tracker"),                    "dtm" },
-	{ MOD_TYPE_FAR,  UL_("Farandole Composer"),                 "far" },
-	{ MOD_TYPE_S3M,  UL_("FM Tracker"),                         "fmt" },
-	{ MOD_TYPE_IMF,  UL_("Imago Orpheus"),                      "imf" },
-	{ MOD_TYPE_MOD,  UL_("Ice Tracker"),                        "ice" },
+	{ UL_("Composer 669 / UNIS 669"),            "669" },
+	{ UL_("ASYLUM Music Format"),                "amf" },
+	{ UL_("DSMI Advanced Music Format"),         "amf" },
+	{ UL_("Extreme's Tracker"),                  "ams" },
+	{ UL_("Velvet Studio"),                      "ams" },
+	{ UL_("CDFM / Composer 670"),                "c67" },
+	{ UL_("DigiBooster Pro"),                    "dbm" },
+	{ UL_("DigiBooster"),                        "digi" },
+	{ UL_("X-Tracker"),                          "dmf" },
+	{ UL_("DSIK Format"),                        "dsm" },
+	{ UL_("Digital Symphony"),                   "dsym" },
+	{ UL_("Digital Tracker"),                    "dtm" },
+	{ UL_("Farandole Composer"),                 "far" },
+	{ UL_("FM Tracker"),                         "fmt" },
+	{ UL_("Imago Orpheus"),                      "imf" },
+	{ UL_("Ice Tracker"),                        "ice" },
 #ifdef MPT_EXTERNAL_SAMPLES
-	{ MOD_TYPE_IT,   UL_("Impulse Tracker Project"),            "itp" },
+	{ UL_("Impulse Tracker Project"),            "itp" },
 #endif
-	{ MOD_TYPE_J2B,  UL_("Galaxy Sound System"),                "j2b" },
-	{ MOD_TYPE_MOD,  UL_("Soundtracker"),                       "m15" },
-	{ MOD_TYPE_MDL,  UL_("Digitrakker"),                        "mdl" },
-	{ MOD_TYPE_MED,  UL_("OctaMED"),                            "med" },
-	{ MOD_TYPE_SFX,  UL_("MultiMedia Sound"),                   "mms" },
-	{ MOD_TYPE_MT2,  UL_("MadTracker 2"),                       "mt2" },
-	{ MOD_TYPE_MTM,  UL_("MultiTracker"),                       "mtm" },
-	{ MOD_TYPE_MOD,  UL_("Karl Morton Music Format"),           "mus" },
-	{ MOD_TYPE_MOD,  UL_("NoiseTracker"),                       "nst" },
-	{ MOD_TYPE_OKT,  UL_("Oktalyzer"),                          "okt" },
-	{ MOD_TYPE_PLM,  UL_("Disorder Tracker 2"),                 "plm" },
-	{ MOD_TYPE_PSM,  UL_("Epic Megagames MASI"),                "psm" },
-	{ MOD_TYPE_MOD,  UL_("ProTracker"),                         "pt36" },
-	{ MOD_TYPE_PTM,  UL_("PolyTracker"),                        "ptm" },
-	{ MOD_TYPE_SFX,  UL_("SoundFX"),                            "sfx" },
-	{ MOD_TYPE_SFX,  UL_("SoundFX"),                            "sfx2" },
-	{ MOD_TYPE_MOD,  UL_("SoundTracker 2.6"),                   "st26" },
-	{ MOD_TYPE_MOD,  UL_("Soundtracker"),                       "stk" },
-	{ MOD_TYPE_STM,  UL_("Scream Tracker 2"),                   "stm" },
-	{ MOD_TYPE_STM,  UL_("Scream Tracker Music Interface Kit"), "stx" },
-	{ MOD_TYPE_STP,  UL_("Soundtracker Pro II"),                "stp" },
-	{ MOD_TYPE_MPT,  UL_("Symphonie"),                          "symmod"},
-	{ MOD_TYPE_MPT,  UL_("Graoumf Tracker"),                    "gtk"},
-	{ MOD_TYPE_MPT,  UL_("Graoumf Tracker 1 / 2"),              "gt2"},
-	{ MOD_TYPE_ULT,  UL_("UltraTracker"),                       "ult" },
-	{ MOD_TYPE_MOD,  UL_("Mod's Grave"),                        "wow" },
+	{ UL_("Galaxy Sound System"),                "j2b" },
+	{ UL_("Soundtracker"),                       "m15" },
+	{ UL_("Digitrakker"),                        "mdl" },
+	{ UL_("OctaMED"),                            "med" },
+	{ UL_("MultiMedia Sound"),                   "mms" },
+	{ UL_("MadTracker 2"),                       "mt2" },
+	{ UL_("MultiTracker"),                       "mtm" },
+	{ UL_("Karl Morton Music Format"),           "mus" },
+	{ UL_("NoiseTracker"),                       "nst" },
+	{ UL_("Oktalyzer"),                          "okt" },
+	{ UL_("Disorder Tracker 2"),                 "plm" },
+	{ UL_("Epic Megagames MASI"),                "psm" },
+	{ UL_("ProTracker"),                         "pt36" },
+	{ UL_("PolyTracker"),                        "ptm" },
+	{ UL_("SoundFX"),                            "sfx" },
+	{ UL_("SoundFX"),                            "sfx2" },
+	{ UL_("SoundTracker 2.6"),                   "st26" },
+	{ UL_("Soundtracker"),                       "stk" },
+	{ UL_("Scream Tracker 2"),                   "stm" },
+	{ UL_("Scream Tracker Music Interface Kit"), "stx" },
+	{ UL_("Soundtracker Pro II"),                "stp" },
+	{ UL_("Symphonie"),                          "symmod"},
+	{ UL_("Graoumf Tracker"),                    "gtk"},
+	{ UL_("Graoumf Tracker 1 / 2"),              "gt2"},
+	{ UL_("UltraTracker"),                       "ult" },
+	{ UL_("Mod's Grave"),                        "wow" },
 	// converted formats (no MODTYPE)
-	{ MOD_TYPE_NONE, UL_("General Digital Music"),              "gdm" },
-	{ MOD_TYPE_NONE, UL_("Un4seen MO3"),                        "mo3" },
-	{ MOD_TYPE_NONE, UL_("OggMod FastTracker 2"),               "oxm" },
+	{ UL_("General Digital Music"),              "gdm" },
+	{ UL_("Un4seen MO3"),                        "mo3" },
+	{ UL_("OggMod FastTracker 2"),               "oxm" },
 #ifndef NO_ARCHIVE_SUPPORT
 	// Compressed modules
-	{ MOD_TYPE_MOD,  UL_("Compressed ProTracker"),              "mdz" },
-	{ MOD_TYPE_MOD,  UL_("Compressed Module"),                  "mdr" },
-	{ MOD_TYPE_S3M,  UL_("Compressed Scream Tracker 3"),        "s3z" },
-	{ MOD_TYPE_XM,   UL_("Compressed FastTracker 2"),           "xmz" },
-	{ MOD_TYPE_IT,   UL_("Compressed Impulse Tracker"),         "itz" },
-	{ MOD_TYPE_MPT,  UL_("Compressed OpenMPT"),                 "mptmz" },
+	{ UL_("Compressed ProTracker"),              "mdz" },
+	{ UL_("Compressed Module"),                  "mdr" },
+	{ UL_("Compressed Scream Tracker 3"),        "s3z" },
+	{ UL_("Compressed FastTracker 2"),           "xmz" },
+	{ UL_("Compressed Impulse Tracker"),         "itz" },
+	{ UL_("Compressed OpenMPT"),                 "mptmz" },
 #endif
 };
 
@@ -141,9 +140,9 @@ static constexpr ModContainerInfo modContainerInfo[] =
 #ifdef MODPLUG_TRACKER
 static constexpr ModFormatInfo otherFormatInfo[] =
 {
-	{ MOD_TYPE_MID,  UL_("MIDI"), "mid" },
-	{ MOD_TYPE_MID,  UL_("MIDI"), "rmi" },
-	{ MOD_TYPE_MID,  UL_("MIDI"), "smf" }
+	{ UL_("MIDI"), "mid" },
+	{ UL_("MIDI"), "rmi" },
+	{ UL_("MIDI"), "smf" }
 };
 #endif
 
