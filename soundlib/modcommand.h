@@ -151,6 +151,13 @@ public:
 	}
 	bool operator!=(const ModCommand& mc) const { return !(*this == mc); }
 
+	MPT_FORCEINLINE void SetVolumeCommand(const VolumeCommand c, const VOL v) { volcmd = c; vol = v; }
+	MPT_FORCEINLINE void SetVolumeCommand(const std::pair<VolumeCommand, VOL> cmd) { volcmd = cmd.first; vol = cmd.second; }
+	MPT_FORCEINLINE void SetVolumeCommand(const ModCommand &other) { volcmd = other.volcmd; vol = other. vol; }
+	MPT_FORCEINLINE void SetEffectCommand(const EffectCommand c, const PARAM p) { command = c; param = p; }
+	MPT_FORCEINLINE void SetEffectCommand(const std::pair<EffectCommand, PARAM> cmd) { command = cmd.first; param = cmd.second; }
+	MPT_FORCEINLINE void SetEffectCommand(const ModCommand &other) { command = other.command; param = other.param; }
+
 	void Set(NOTE n, INSTR ins, uint16 volcol, uint16 effectcol) { note = n; instr = ins; SetValueVolCol(volcol); SetValueEffectCol(effectcol); }
 
 	uint16 GetValueVolCol() const { return GetValueVolCol(volcmd, vol); }

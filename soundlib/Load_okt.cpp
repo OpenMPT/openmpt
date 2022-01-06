@@ -275,8 +275,7 @@ static void ReadOKTPattern(FileReader &chunk, PATTERNINDEX pat, CSoundFile &sndF
 						other.volcmd = other.command;
 						other.vol = other.param;
 					}
-					other.command = m.command;
-					other.param = m.param;
+					other.SetEffectCommand(m);
 				}
 				break;
 

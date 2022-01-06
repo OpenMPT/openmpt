@@ -227,13 +227,9 @@ static int ReadULTEvent(ModCommand &m, FileReader &file, uint8 version)
 	if(cmd1 == CMD_OFFSET && cmd2 == CMD_OFFSET)
 	{
 		uint32 offset = ((param2 << 8) | param1) >> 6;
-		m.command = CMD_OFFSET;
-		m.param = static_cast<ModCommand::PARAM>(offset);
+		m.SetEffectCommand(CMD_OFFSET, static_cast<ModCommand::PARAM>(offset));
 		if(offset > 0xFF)
-		{
-			m.volcmd = VOLCMD_OFFSET;
-			m.vol = static_cast<ModCommand::VOL>(offset >> 8);
-		}
+			m.SetVolumeCommand(VOLCMD_OFFSET, static_cast<ModCommand::VOL>(offset >> 8));
 		return repeat;
 	} else if(cmd1 == CMD_OFFSET)
 	{
@@ -241,10 +237,8 @@ static int ReadULTEvent(ModCommand &m, FileReader &file, uint8 version)
 		param1 = mpt::saturate_cast<uint8>(offset);
 		if(offset > 0xFF && ModCommand::GetEffectWeight(cmd2) < ModCommand::GetEffectType(CMD_OFFSET))
 		{
-			m.command = CMD_OFFSET;
-			m.param = static_cast<ModCommand::PARAM>(offset);
-			m.volcmd = VOLCMD_OFFSET;
-			m.vol = static_cast<ModCommand::VOL>(offset >> 8);
+			m.SetEffectCommand(CMD_OFFSET, static_cast<ModCommand::PARAM>(offset));
+			m.SetVolumeCommand(VOLCMD_OFFSET, static_cast<ModCommand::VOL>(offset >> 8));
 			return repeat;
 		}
 	} else if(cmd2 == CMD_OFFSET)
@@ -253,10 +247,8 @@ static int ReadULTEvent(ModCommand &m, FileReader &file, uint8 version)
 		param2 = mpt::saturate_cast<uint8>(offset);
 		if(offset > 0xFF && ModCommand::GetEffectWeight(cmd1) < ModCommand::GetEffectType(CMD_OFFSET))
 		{
-			m.command = CMD_OFFSET;
-			m.param = static_cast<ModCommand::PARAM>(offset);
-			m.volcmd = VOLCMD_OFFSET;
-			m.vol = static_cast<ModCommand::VOL>(offset >> 8);
+			m.SetEffectCommand(CMD_OFFSET, static_cast<ModCommand::PARAM>(offset));
+			m.SetVolumeCommand(VOLCMD_OFFSET, static_cast<ModCommand::VOL>(offset >> 8));
 			return repeat;
 		}
 	} else if(cmd1 == cmd2)

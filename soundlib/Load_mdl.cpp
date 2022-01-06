@@ -345,10 +345,8 @@ static bool ImportMDLCommands(ModCommand &m, uint8 vol, uint8 e1, uint8 e2, uint
 
 	if(offset != uint32_max && offset > 0xFF && ModCommand::GetEffectWeight(otherCmd) < ModCommand::GetEffectWeight(CMD_OFFSET))
 	{
-		m.command = CMD_OFFSET;
-		m.param = static_cast<ModCommand::PARAM>(offset & 0xFF);
-		m.volcmd = VOLCMD_OFFSET;
-		m.vol = static_cast<ModCommand::VOL>(offset >> 8);
+		m.SetEffectCommand(CMD_OFFSET, static_cast<ModCommand::PARAM>(offset & 0xFF));
+		m.SetVolumeCommand(VOLCMD_OFFSET, static_cast<ModCommand::VOL>(offset >> 8));
 		return otherCmd != CMD_NONE || vol != 0;
 	}
 
