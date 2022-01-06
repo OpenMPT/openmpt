@@ -182,8 +182,8 @@ protected:
 
 	static EnvelopeNode::value_t ToValue(double value, double scale, double minVal, double maxVal, const std::function<double(double)> &conversionFunc)
 	{
-		value = conversionFunc((value * scale - minVal) / (maxVal - minVal)) * ENVELOPE_MAX + ENVELOPE_MIN;
-		Limit<double, double>(value, ENVELOPE_MIN, ENVELOPE_MAX);
+		value = conversionFunc((value * scale - minVal) / (maxVal - minVal)) * double(ENVELOPE_MAX) + double(ENVELOPE_MIN);
+		Limit(value, double(ENVELOPE_MIN), double(ENVELOPE_MAX));
 		return mpt::saturate_round<EnvelopeNode::value_t>(value);
 	}
 
