@@ -233,6 +233,7 @@ static std::pair<EffectCommand, uint8> ConvertDBMEffect(const uint8 cmd, uint8 p
 	case CMD_MIDI:
 		// Encode echo parameters into fixed MIDI macros
 		param = 128 + (cmd - 32) * 32 + param / 8;
+		break;
 
 	default:
 		break;

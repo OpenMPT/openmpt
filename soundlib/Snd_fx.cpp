@@ -678,6 +678,9 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				if(((param & 0xF0) == 0xA0) && !m_playBehaviour[kFT2RestrictXCommand])
 					chn.nOldHiOffset = param & 0x0F;
 				break;
+
+			default:
+				break;
 			}
 
 			// The following calculations are not interesting if we just want to get the song length.
