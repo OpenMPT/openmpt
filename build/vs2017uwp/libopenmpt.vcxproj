@@ -1267,6 +1267,8 @@
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_gdm.cpp">
     </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_gt2.cpp">
+    </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_imf.cpp">
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_it.cpp">

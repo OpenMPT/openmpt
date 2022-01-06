@@ -97,6 +97,8 @@ static constexpr ModFormatInfo modFormatInfo[] =
 	{ MOD_TYPE_STM,  UL_("Scream Tracker Music Interface Kit"), "stx" },
 	{ MOD_TYPE_STP,  UL_("Soundtracker Pro II"),                "stp" },
 	{ MOD_TYPE_MPT,  UL_("Symphonie"),                          "symmod"},
+	{ MOD_TYPE_MPT,  UL_("Graoumf Tracker"),                    "gtk"},
+	{ MOD_TYPE_MPT,  UL_("Graoumf Tracker 1 / 2"),              "gt2"},
 	{ MOD_TYPE_ULT,  UL_("UltraTracker"),                       "ult" },
 	{ MOD_TYPE_MOD,  UL_("Mod's Grave"),                        "wow" },
 	// converted formats (no MODTYPE)

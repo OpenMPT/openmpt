@@ -125,6 +125,8 @@ LOCAL_SRC_FILES += \
 	soundlib/Load_far.cpp \
 	soundlib/Load_fmt.cpp \
 	soundlib/Load_gdm.cpp \
+	soundlib/Load_gtk.cpp \
+	soundlib/Load_gt2.cpp \
 	soundlib/Load_imf.cpp \
 	soundlib/Load_it.cpp \
 	soundlib/Load_itp.cpp \

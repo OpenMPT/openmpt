@@ -180,9 +180,12 @@ DECLARE_FLAGSET(EnvelopeFlags)
 
 
 // Envelope value boundaries
-#define ENVELOPE_MIN   0   // Vertical min value of a point
-#define ENVELOPE_MID   32  // Vertical middle line
-#define ENVELOPE_MAX   64  // Vertical max value of a point
+enum : uint8
+{
+	ENVELOPE_MIN = 0,   // Vertical min value of a point
+	ENVELOPE_MID = 32,  // Vertical middle line
+	ENVELOPE_MAX = 64,  // Vertical max value of a point
+};
 #define MAX_ENVPOINTS  240 // Maximum length of each instrument envelope
 
 
