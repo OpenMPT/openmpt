@@ -289,7 +289,7 @@ static void ReadXMPatterns(FileReader &file, const XMFileHeader &fileHeader, CSo
 		{
 			uint8 info = patternChunk.ReadUint8();
 
-			uint8 vol = 0;
+			uint8 vol = 0, command = 0;
 			if(info & isPackByte)
 			{
 				// Interpret byte as flag set.
@@ -303,7 +303,7 @@ static void ReadXMPatterns(FileReader &file, const XMFileHeader &fileHeader, CSo
 
 			if(info & instrPresent) m.instr = patternChunk.ReadUint8();
 			if(info & volPresent) vol = patternChunk.ReadUint8();
-			if(info & commandPresent) m.command = patternChunk.ReadUint8();
+			if(info & commandPresent) command = patternChunk.ReadUint8();
 			if(info & paramPresent) m.param = patternChunk.ReadUint8();
 
 			if(m.note == 97)
@@ -317,9 +317,9 @@ static void ReadXMPatterns(FileReader &file, const XMFileHeader &fileHeader, CSo
 				m.note = NOTE_NONE;
 			}
 
-			if(m.command | m.param)
+			if(command | m.param)
 			{
-				CSoundFile::ConvertModCommand(m);
+				CSoundFile::ConvertModCommand(m, command, m.param);
 			} else
 			{
 				m.command = CMD_NONE;
@@ -1160,9 +1160,8 @@ bool CSoundFile::SaveXM(std::ostream &f, bool compatibilityExport)
 			// Don't write more than 32 channels
 			if(compatibilityExport && m_nChannels - ((j - 1) % m_nChannels) > 32) continue;
 
-			uint8 note = p->note;
-			uint8 command = p->command, param = p->param;
-			ModSaveCommand(command, param, true, compatibilityExport);
+			uint8 note = p->note, command = 0, param = 0;
+			ModSaveCommand(*p, command, param, true, compatibilityExport);
 
 			if (note >= NOTE_MIN_SPECIAL) note = 97; else
 			if ((note <= 12) || (note > 96+12)) note = 0; else

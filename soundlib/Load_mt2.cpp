@@ -240,9 +240,7 @@ static bool ConvertMT2Command(CSoundFile *that, ModCommand &m, MT2Command &p)
 		switch(p.fxcmd)
 		{
 		case 0x00:	// FastTracker effect
-			m.command = p.fxparam2;
-			m.param = p.fxparam1;
-			CSoundFile::ConvertModCommand(m);
+			CSoundFile::ConvertModCommand(m, p.fxparam2, p.fxparam1);
 #ifdef MODPLUG_TRACKER
 			m.Convert(MOD_TYPE_XM, MOD_TYPE_IT, *that);
 #else
@@ -303,9 +301,7 @@ static bool ConvertMT2Command(CSoundFile *that, ModCommand &m, MT2Command &p)
 			break;
 
 		case 0x10:	// Impulse Tracker effect
-			m.command = p.fxparam2;
-			m.param = p.fxparam1;
-			CSoundFile::S3MConvert(m, true);
+			CSoundFile::S3MConvert(m, p.fxparam2, p.fxparam1, true);
 			if(m.command == CMD_TEMPO || m.command == CMD_SPEED)
 				hasLegacyTempo = true;
 			break;

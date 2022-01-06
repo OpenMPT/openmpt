@@ -320,7 +320,7 @@ bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)
 					}
 				}
 
-				ReadMODPatternEntry(data, m);
+				const auto [command, param] = ReadMODPatternEntry(data, m);
 				if(m.note != NOTE_NONE)
 				{
 					lastNote[chn] = m.note;
@@ -331,9 +331,10 @@ bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)
 					}
 				}
 
-				if(m.command || m.param)
+				if(command || param)
 				{
-					switch(m.command)
+					m.param = param;
+					switch(command)
 					{
 					case 0x1: // Arpeggio
 						m.command = CMD_ARPEGGIO;
@@ -361,8 +362,7 @@ bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)
 							m.command = CMD_NONE;
 							break;
 						}
-						m.command = CMD_MODCMDEX;
-						m.param = 0;
+						m.SetEffectCommand(CMD_MODCMDEX, 0x00);
 						break;
 
 					case 0x4: // Disable LED filter
@@ -372,21 +372,18 @@ bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)
 							m.command = CMD_NONE;
 							break;
 						}
-						m.command = CMD_MODCMDEX;
-						m.param = 1;
+						m.SetEffectCommand(CMD_MODCMDEX, 0x01);
 						break;
 
 					case 0x5: // Increase volume
 						if(m.instr)
 						{
-							m.command = CMD_VOLUME;
-							m.param = std::min(ModCommand::PARAM(0x3F), static_cast<ModCommand::PARAM>((Samples[m.instr].nVolume / 4u) + m.param));
+							m.SetEffectCommand(CMD_VOLUME, std::min(ModCommand::PARAM(0x3F), static_cast<ModCommand::PARAM>((Samples[m.instr].nVolume / 4u) + m.param)));
 
 							// Give precedence to 7xy/8xy slides (and move this to the volume column)
 							if(slideRate[chn])
 							{
-								m.volcmd = VOLCMD_VOLUME;
-								m.vol = m.param;
+								m.SetVolumeCommand(VOLCMD_VOLUME, m.param);
 								m.command = CMD_NONE;
 								break;
 							}
@@ -408,8 +405,7 @@ bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)
 							// Give precedence to 7xy/8xy slides (and move this to the volume column)
 							if(slideRate[chn])
 							{
-								m.volcmd = VOLCMD_VOLUME;
-								m.vol = m.param;
+								m.SetVolumeCommand(VOLCMD_VOLUME, m.param);
 								m.command = CMD_NONE;
 								break;
 							}
@@ -422,17 +418,15 @@ bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)
 					case 0x7: // 7xy: Slide down x semitones at speed y
 						slideTo[chn] = lastNote[chn] - (m.param >> 4);
 
-						m.command = CMD_PORTAMENTODOWN;
 						slideRate[chn] = m.param & 0xF;
-						m.param = ClampSlideParam(slideRate[chn], slideTo[chn], lastNote[chn]);
+						m.SetEffectCommand(CMD_PORTAMENTODOWN, ClampSlideParam(slideRate[chn], slideTo[chn], lastNote[chn]));
 						break;
 
 					case 0x8: // 8xy: Slide up x semitones at speed y
 						slideTo[chn] = lastNote[chn] + (m.param >> 4);
 
-						m.command = CMD_PORTAMENTOUP;
 						slideRate[chn] = m.param & 0xF;
-						m.param = ClampSlideParam(slideRate[chn], lastNote[chn], slideTo[chn]);
+						m.SetEffectCommand(CMD_PORTAMENTOUP, ClampSlideParam(slideRate[chn], lastNote[chn], slideTo[chn]));
 						break;
 
 					case 0x9: // 9xy: Auto slide

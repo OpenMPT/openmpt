@@ -222,9 +222,7 @@ bool CSoundFile::ReadMTM(FileReader &file, ModLoadingFlags loadFlags)
 				}
 				if(cmd != 0 || param != 0)
 				{
-					m->command = cmd;
-					m->param = param;
-					ConvertModCommand(*m);
+					ConvertModCommand(*m, cmd, param);
 #ifdef MODPLUG_TRACKER
 					m->Convert(MOD_TYPE_MTM, MOD_TYPE_S3M, *this);
 #endif

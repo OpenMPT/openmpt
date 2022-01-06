@@ -1128,9 +1128,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			if(chnMask[ch] & 8)
 			{
 				const auto [command, param] = patternData.ReadArray<uint8, 2>();
-				m.command = command;
-				m.param = param;
-				S3MConvert(m, true);
+				S3MConvert(m, command, param, true);
 				// In some IT-compatible trackers, it is possible to input a parameter without a command.
 				// In this case, we still need to update the last value memory. OpenMPT didn't do this until v1.25.01.07.
 				// Example: ckbounce.it
@@ -1650,7 +1648,7 @@ bool CSoundFile::SaveIT(std::ostream &f, const mpt::PathString &filename, bool c
 		mpt::IO::Write(f, patinfo);
 		dwPos += 8;
 
-		struct ChnState { ModCommand lastCmd; uint8 mask = 0xFF; };
+		struct ChnState { uint8 note = 0, instr = 0, vol = 0, command = 0, param = 0, valid = 0, mask = 0xFF; };
 		const CHANNELINDEX maxChannels = std::min(specs.channelsMax, GetNumChannels());
 		std::vector<ChnState> chnStates(maxChannels);
 		// Maximum 7 bytes per cell, plus end of row marker, so this buffer is always large enough to cover one row.
@@ -1672,8 +1670,6 @@ bool CSoundFile::SaveIT(std::ostream &f, const mpt::PathString &filename, bool c
 
 				auto &chnState = chnStates[ch];
 				uint8 b = 0;
-				uint8 command = m->command;
-				uint8 param = m->param;
 				uint8 vol = 0xFF;
 				uint8 note = m->note;
 				if (note != NOTE_NONE) b |= 1;
@@ -1695,18 +1691,7 @@ bool CSoundFile::SaveIT(std::ostream &f, const mpt::PathString &filename, bool c
 					case VOLCMD_TONEPORTAMENTO: vol += 193; break;
 					case VOLCMD_PORTADOWN:      vol += 105; break;
 					case VOLCMD_PORTAUP:        vol += 115; break;
-					case VOLCMD_VIBRATOSPEED:
-						if(command == CMD_NONE)
-						{
-							// Move unsupported command if possible
-							command = CMD_VIBRATO;
-							param = std::min(m->vol, uint8(15)) << 4;
-							vol = 0xFF;
-						} else
-						{
-							vol = 203;
-						}
-						break;
+					case VOLCMD_VIBRATOSPEED:   vol = 203; break;
 					case VOLCMD_OFFSET:
 						if(!compatibilityExport)
 							vol += 223;
@@ -1717,9 +1702,14 @@ bool CSoundFile::SaveIT(std::ostream &f, const mpt::PathString &filename, bool c
 					}
 				}
 				if (vol != 0xFF) b |= 4;
-				if (command != CMD_NONE)
+				uint8 command = 0, param = 0;
+				if(m->command == CMD_VOLUME && vol == 0xFF)
 				{
-					S3MSaveConvert(command, param, true, compatibilityExport);
+					vol = std::min(m->param, ModCommand::PARAM(64));
+					b |= 4;
+				} else if(m->command != CMD_NONE)
+				{
+					S3MSaveConvert(*m, command, param, true, compatibilityExport);
 					if (command) b |= 8;
 				}
 				// Packing information
@@ -1728,54 +1718,54 @@ bool CSoundFile::SaveIT(std::ostream &f, const mpt::PathString &filename, bool c
 					// Same note ?
 					if (b & 1)
 					{
-						if ((note == chnState.lastCmd.note) && (chnState.lastCmd.volcmd & 1))
+						if ((note == chnState.note) && (chnState.valid & 1))
 						{
 							b &= ~1;
 							b |= 0x10;
 						} else
 						{
-							chnState.lastCmd.note = note;
-							chnState.lastCmd.volcmd |= 1;
+							chnState.note = note;
+							chnState.valid |= 1;
 						}
 					}
 					// Same instrument ?
 					if (b & 2)
 					{
-						if ((m->instr == chnState.lastCmd.instr) && (chnState.lastCmd.volcmd & 2))
+						if ((m->instr == chnState.instr) && (chnState.valid & 2))
 						{
 							b &= ~2;
 							b |= 0x20;
 						} else
 						{
-							chnState.lastCmd.instr = m->instr;
-							chnState.lastCmd.volcmd |= 2;
+							chnState.instr = m->instr;
+							chnState.valid |= 2;
 						}
 					}
 					// Same volume column byte ?
 					if (b & 4)
 					{
-						if ((vol == chnState.lastCmd.vol) && (chnState.lastCmd.volcmd & 4))
+						if ((vol == chnState.vol) && (chnState.valid & 4))
 						{
 							b &= ~4;
 							b |= 0x40;
 						} else
 						{
-							chnState.lastCmd.vol = vol;
-							chnState.lastCmd.volcmd |= 4;
+							chnState.vol = vol;
+							chnState.valid |= 4;
 						}
 					}
 					// Same command / param ?
 					if (b & 8)
 					{
-						if ((command == chnState.lastCmd.command) && (param == chnState.lastCmd.param) && (chnState.lastCmd.volcmd & 8))
+						if ((command == chnState.command) && (param == chnState.param) && (chnState.valid & 8))
 						{
 							b &= ~8;
 							b |= 0x80;
 						} else
 						{
-							chnState.lastCmd.command = command;
-							chnState.lastCmd.param = param;
-							chnState.lastCmd.volcmd |= 8;
+							chnState.command = command;
+							chnState.param = param;
+							chnState.valid |= 8;
 						}
 					}
 					if (b != chnState.mask)

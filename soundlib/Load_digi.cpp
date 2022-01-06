@@ -37,8 +37,8 @@ MPT_BINARY_STRUCT(DIGIFileHeader, 610)
 
 static void ReadDIGIPatternEntry(FileReader &file, ModCommand &m)
 {
-	CSoundFile::ReadMODPatternEntry(file, m);
-	CSoundFile::ConvertModCommand(m);
+	const auto [command, param] = CSoundFile::ReadMODPatternEntry(file, m);
+	CSoundFile::ConvertModCommand(m, command, param);
 	if(m.command == CMD_MODCMDEX)
 	{
 		switch(m.param & 0xF0)

@@ -392,9 +392,10 @@ static TEMPO MMDTempoToBPM(uint32 tempo, bool is8Ch, bool bpmMode, uint8 rowsPer
 }
 
 
-static void ConvertMEDEffect(ModCommand &m, bool is8ch, bool bpmMode, uint8 rowsPerBeat, bool volHex)
+static void ConvertMEDEffect(ModCommand &m, const uint8 command, const bool is8ch, const bool bpmMode, const uint8 rowsPerBeat, const bool volHex)
 {
-	switch(m.command)
+	m.command = CMD_NONE;
+	switch(command)
 	{
 	case 0x04:  // Vibrato (twice as deep as in ProTracker)
 		m.command = CMD_VIBRATO;
@@ -439,7 +440,7 @@ static void ConvertMEDEffect(ModCommand &m, bool is8ch, bool bpmMode, uint8 rows
 			if(m.param < 0x20)
 				m.param = 0x20;
 #endif  // MODPLUG_TRACKER
-		} else switch(m.command)
+		} else switch(command)
 		{
 			case 0xF1:  // Play note twice
 				m.command = CMD_MODCMDEX;
@@ -577,8 +578,8 @@ static void ConvertMEDEffect(ModCommand &m, bool is8ch, bool bpmMode, uint8 rows
 		}
 		break;
 	default:
-		if(m.command < 0x10)
-			CSoundFile::ConvertModCommand(m);
+		if(command < 0x10)
+			CSoundFile::ConvertModCommand(m, command, m.param);
 		else
 			m.command = CMD_NONE;
 		break;
@@ -1339,6 +1340,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 				for(CHANNELINDEX chn = 0; chn < numTracks; chn++, m++)
 				{
 					int note = NOTE_NONE;
+					uint8 cmd = 0;
 					if(version < 1)
 					{
 						const auto [noteInstr, instrCmd, param] = file.ReadArray<uint8, 3>();
@@ -1348,7 +1350,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 
 						m->instr = (instrCmd >> 4) | ((noteInstr & 0x80) >> 3) | ((noteInstr & 0x40) >> 1);
 
-						m->command = instrCmd & 0x0F;
+						cmd = instrCmd & 0x0F;
 						m->param = param;
 					} else
 					{
@@ -1361,7 +1363,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 							m->note = NOTE_NOTECUT;
 
 						m->instr = instr & 0x3F;
-						m->command = command;
+						cmd = command;
 						m->param = param1;
 					}
 					// Octave wrapping for 4-channel modules (TODO: this should not be set because of synth instruments)
@@ -1370,7 +1372,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 
 					if(note >= NOTE_MIN && note <= NOTE_MAX)
 						m->note = static_cast<ModCommand::NOTE>(note);
-					ConvertMEDEffect(*m, is8Ch, bpmMode, rowsPerBeat, volHex);
+					ConvertMEDEffect(*m, cmd, is8Ch, bpmMode, rowsPerBeat, volHex);
 				}
 			}
 		}

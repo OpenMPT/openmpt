@@ -463,9 +463,7 @@ bool CSoundFile::ReadDTM(FileReader &file, ModLoadingFlags loadFlags)
 					}
 					if(command || param)
 					{
-						m->command = command;
-						m->param = param;
-						ConvertModCommand(*m);
+						ConvertModCommand(*m, command, param);
 #ifdef MODPLUG_TRACKER
 						m->Convert(MOD_TYPE_MOD, MOD_TYPE_IT, *this);
 #endif
@@ -487,6 +485,7 @@ bool CSoundFile::ReadDTM(FileReader &file, ModLoadingFlags loadFlags)
 				for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++, m++)
 				{
 					const auto data = chunk.ReadArray<uint8, 4>();
+					uint8 command = 0;
 					if(patternFormat == DTM_204_PATTERN_FORMAT)
 					{
 						const auto [note, instrVol, instrCmd, param] = data;
@@ -501,14 +500,14 @@ bool CSoundFile::ReadDTM(FileReader &file, ModLoadingFlags loadFlags)
 							m->vol = vol - 1u;
 						}
 						m->instr = ((instrVol & 0x03) << 4) | (instrCmd >> 4);
-						m->command = instrCmd & 0x0F;
+						command = instrCmd & 0x0F;
 						m->param = param;
 					} else
 					{
-						ReadMODPatternEntry(data, *m);
+						std::tie(command, m->param) = ReadMODPatternEntry(data, *m);
 						m->instr |= data[0] & 0x30;	// Allow more than 31 instruments
 					}
-					ConvertModCommand(*m);
+					ConvertModCommand(*m, command, m->param);
 					// Fix commands without memory and slide nibble precedence
 					switch(m->command)
 					{

@@ -307,9 +307,7 @@ bool CSoundFile::ReadDSM(FileReader &file, ModLoadingFlags loadFlags)
 						if(command > 0x10)
 							command = ((command & 0xF0) == 0x20) ? 0x09 : 0xFF;
 					}
-					m.command = command;
-					m.param = param;
-					ConvertModCommand(m);
+					ConvertModCommand(m, command, param);
 				}
 			}
 			patNum++;

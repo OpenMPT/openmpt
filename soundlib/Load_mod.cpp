@@ -26,9 +26,10 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-void CSoundFile::ConvertModCommand(ModCommand &m)
+void CSoundFile::ConvertModCommand(ModCommand &m, const uint8 command, const uint8 param)
 {
-	switch(m.command)
+	m.param = param;
+	switch(command)
 	{
 	case 0x00:	if(m.param) m.command = CMD_ARPEGGIO; break;
 	case 0x01:	m.command = CMD_PORTAMENTOUP; break;
@@ -77,9 +78,11 @@ void CSoundFile::ConvertModCommand(ModCommand &m)
 
 #ifndef MODPLUG_NO_FILESAVE
 
-void CSoundFile::ModSaveCommand(uint8 &command, uint8 &param, bool toXM, bool compatibilityExport) const
+void CSoundFile::ModSaveCommand(const ModCommand &source, uint8 &command, uint8 &param, const bool toXM, const bool compatibilityExport) const
 {
-	switch(command)
+	command = 0;
+	param = source.param;
+	switch(source.command)
 	{
 	case CMD_NONE:		command = param = 0; break;
 	case CMD_ARPEGGIO:	command = 0; break;
@@ -171,26 +174,14 @@ void CSoundFile::ModSaveCommand(uint8 &command, uint8 &param, bool toXM, bool co
 			command = '#' + 3;
 		break;
 	case CMD_S3MCMDEX:
-		switch(param & 0xF0)
 		{
-		case 0x10:	command = 0x0E; param = (param & 0x0F) | 0x30; break;
-		case 0x20:	command = 0x0E; param = (param & 0x0F) | 0x50; break;
-		case 0x30:	command = 0x0E; param = (param & 0x0F) | 0x40; break;
-		case 0x40:	command = 0x0E; param = (param & 0x0F) | 0x70; break;
-		case 0x90:
-			if(compatibilityExport)
-				command = param = 0;
-			else
-				command = 'X' - 55;
-			break;
-		case 0xB0:	command = 0x0E; param = (param & 0x0F) | 0x60; break;
-		case 0xA0:
-		case 0x50:
-		case 0x70:
-		case 0x60:	command = param = 0; break;
-		default:	command = 0x0E; break;
+			ModCommand mConv;
+			mConv.command = CMD_S3MCMDEX;
+			mConv.param = param;
+			mConv.ExtendedS3MtoMODEffect();
+			ModSaveCommand(mConv, command, param, toXM, compatibilityExport);
 		}
-		break;
+		return;
 	default:
 		command = param = 0;
 	}
@@ -647,13 +638,13 @@ static PATTERNINDEX GetNumPatterns(FileReader &file, ModSequence &Order, ORDERIN
 }
 
 
-void CSoundFile::ReadMODPatternEntry(FileReader &file, ModCommand &m)
+std::pair<uint8, uint8> CSoundFile::ReadMODPatternEntry(FileReader &file, ModCommand &m)
 {
-	ReadMODPatternEntry(file.ReadArray<uint8, 4>(), m);
+	return ReadMODPatternEntry(file.ReadArray<uint8, 4>(), m);
 }
 
 
-void CSoundFile::ReadMODPatternEntry(const std::array<uint8, 4> data, ModCommand &m)
+std::pair<uint8, uint8> CSoundFile::ReadMODPatternEntry(const std::array<uint8, 4> data, ModCommand &m)
 {
 	// Read Period
 	uint16 period = (((static_cast<uint16>(data[0]) & 0x0F) << 8) | data[1]);
@@ -684,8 +675,9 @@ void CSoundFile::ReadMODPatternEntry(const std::array<uint8, 4> data, ModCommand
 	// Read Instrument
 	m.instr = (data[2] >> 4) | (data[0] & 0x10);
 	// Read Effect
-	m.command = data[2] & 0x0F;
-	m.param = data[3];
+	m.command = CMD_NONE;
+	uint8 command = data[2] & 0x0F, param = data[3];
+	return {command, param};
 }
 
 
@@ -992,28 +984,28 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 			for(uint32 i = 0; i < 256; i++)
 			{
 				ModCommand m;
-				ReadMODPatternEntry(file, m);
+				const auto [command, param]= ReadMODPatternEntry(file, m);
 				if(!m.IsAmigaNote())
 				{
 					isNoiseTracker = onlyAmigaNotes = false;
 				}
-				if((m.command > 0x06 && m.command < 0x0A)
-					|| (m.command == 0x0E && m.param > 0x01)
-					|| (m.command == 0x0F && m.param > 0x1F)
-					|| (m.command == 0x0D && ++patternBreaks > 1))
+				if((command > 0x06 && command < 0x0A)
+					|| (command == 0x0E && param > 0x01)
+					|| (command == 0x0F && param > 0x1F)
+					|| (command == 0x0D && ++patternBreaks > 1))
 				{
 					isNoiseTracker = false;
 				}
-				if(m.command == 0x08)
+				if(command == 0x08)
 				{
-					maxPanning = std::max(maxPanning, m.param);
-					if(m.param < 0x80)
+					maxPanning = std::max(maxPanning, param);
+					if(param < 0x80)
 						leftPanning = true;
-					else if(m.param > 0x8F && m.param != 0xA4)
+					else if(param > 0x8F && param != 0xA4)
 						extendedPanning = true;
-				} else if(m.command == 0x0E && (m.param & 0xF0) == 0x80)
+				} else if(command == 0x0E && (param & 0xF0) == 0x80)
 				{
-					maxPanning = std::max(maxPanning, static_cast<uint8>((m.param & 0x0F) << 4));
+					maxPanning = std::max(maxPanning, static_cast<uint8>((param & 0x0F) << 4));
 				}
 			}
 		}
@@ -1070,21 +1062,20 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 			for(CHANNELINDEX chn = 0; chn < readChannels; chn++)
 			{
 				ModCommand &m = rowBase[chn];
-				ReadMODPatternEntry(file, m);
+				auto [command, param] = ReadMODPatternEntry(file, m);
 
-				if(m.command || m.param)
+				if(command || param)
 				{
-					if(isStartrekker && m.command == 0x0E)
+					if(isStartrekker && command == 0x0E)
 					{
 						// No support for Startrekker assembly macros
-						m.command = CMD_NONE;
-						m.param = 0;
-					} else if(isStartrekker && m.command == 0x0F && m.param > 0x1F)
+						command = param = 0;
+					} else if(isStartrekker && command == 0x0F && param > 0x1F)
 					{
 						// Startrekker caps speed at 31 ticks per row
-						m.param = 0x1F;
+						param = 0x1F;
 					}
-					ConvertModCommand(m);
+					ConvertModCommand(m, command, param);
 				}
 
 				// Perform some checks for our heuristics...
@@ -1705,13 +1696,13 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 			for(CHANNELINDEX chn = 0; chn < 4; chn++)
 			{
 				ModCommand &m = rowBase[chn];
-				ReadMODPatternEntry(patternData[row][chn], m);
+				auto [command, param] = ReadMODPatternEntry(patternData[row][chn], m);
 
-				if(!m.param || m.command == 0x0E)
+				if(!param || command == 0x0E)
 				{
 					autoSlide[chn] = 0;
 				}
-				if(m.command || m.param)
+				if(command || param)
 				{
 					if(autoSlide[chn] != 0)
 					{
@@ -1725,39 +1716,40 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 							m.vol = autoSlide[chn] & 0x0F;
 						}
 					}
-					if(m.command == 0x0D)
+					if(command == 0x0D)
 					{
 						if(minVersion != ST2_00)
 						{
 							// Dxy is volume slide in some Soundtracker versions, D00 is a pattern break in the latest versions.
-							m.command = 0x0A;
+							command = 0x0A;
 						} else
 						{
-							m.param = 0;
+							param = 0;
 						}
-					} else if(m.command == 0x0C)
+					} else if(command == 0x0C)
 					{
 						// Volume is sent as-is to the chip, which ignores the highest bit.
-						m.param &= 0x7F;
-					} else if(m.command == 0x0E && (m.param > 0x01 || minVersion < ST_IX))
+						param &= 0x7F;
+					} else if(command == 0x0E && (param > 0x01 || minVersion < ST_IX))
 					{
 						// Import auto-slides as normal slides and fake them using volume column slides.
-						m.command = 0x0A;
-						autoSlide[chn] = m.param;
-					} else if(m.command == 0x0F)
+						command = 0x0A;
+						autoSlide[chn] = param;
+					} else if(command == 0x0F)
 					{
 						// Only the low nibble is evaluated in Soundtracker.
-						m.param &= 0x0F;
+						param &= 0x0F;
 					}
 
 					if(minVersion <= UST1_80)
 					{
 						// UST effects
-						switch(m.command)
+						m.param = param;
+						switch(command)
 						{
 						case 0:
 							// jackdance.mod by Karsten Obarski has 0xy arpeggios...
-							if(m.param < 0x03)
+							if(param < 0x03)
 							{
 								m.command = CMD_NONE;
 							} else
@@ -1785,7 +1777,7 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 						}
 					} else
 					{
-						ConvertModCommand(m);
+						ConvertModCommand(m, command, param);
 					}
 				} else
 				{
@@ -1993,13 +1985,13 @@ bool CSoundFile::ReadICE(FileReader &file, ModLoadingFlags loadFlags)
 
 			for(ROWINDEX row = 0; row < 64; row++, m += 4)
 			{
-				ReadMODPatternEntry(file, *m);
+				const auto [command, param] = ReadMODPatternEntry(file, *m);
 
-				if((m->command || m->param)
-				   && !(m->command == 0x0E && m->param >= 0x10)     // Exx only sets filter
-				   && !(m->command >= 0x05 && m->command <= 0x09))  // These don't exist in ST2.6
+				if((command || param)
+				   && !(command == 0x0E && param >= 0x10)     // Exx only sets filter
+				   && !(command >= 0x05 && command <= 0x09))  // These don't exist in ST2.6
 				{
-					ConvertModCommand(*m);
+					ConvertModCommand(*m, command, param);
 				} else
 				{
 					m->command = CMD_NONE;
@@ -2354,8 +2346,8 @@ bool CSoundFile::SaveMod(std::ostream &f) const
 			for(CHANNELINDEX chn = 0; chn < writeChannels; chn++, eventByte += 4)
 			{
 				const ModCommand &m = rowBase[chn];
-				uint8 command = m.command, param = m.param;
-				ModSaveCommand(command, param, false, true);
+				uint8 command = 0, param = 0;
+				ModSaveCommand(m, command, param, false, true);
 
 				if(m.volcmd == VOLCMD_VOLUME && !command && !param)
 				{

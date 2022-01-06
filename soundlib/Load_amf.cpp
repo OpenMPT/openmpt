@@ -169,9 +169,7 @@ bool CSoundFile::ReadAMF_Asylum(FileReader &file, ModLoadingFlags loadFlags)
 				m.note = note + 12 + NOTE_MIN;
 			}
 			m.instr = instr;
-			m.command = command;
-			m.param = param;
-			ConvertModCommand(m);
+			ConvertModCommand(m, command, param);
 #ifdef MODPLUG_TRACKER
 			if(m.command == CMD_PANNING8)
 			{
@@ -324,7 +322,7 @@ static void AMFReadPattern(CPattern &pattern, CHANNELINDEX chn, FileReader &file
 		} else
 		{
 			// Effect
-			static constexpr ModCommand::COMMAND effTrans[] =
+			static constexpr EffectCommand effTrans[] =
 			{
 				CMD_NONE,			CMD_SPEED,			CMD_VOLUMESLIDE,		CMD_VOLUME,
 				CMD_PORTAMENTOUP,	CMD_NONE,			CMD_TONEPORTAMENTO,		CMD_TREMOR,
@@ -334,13 +332,10 @@ static void AMFReadPattern(CPattern &pattern, CHANNELINDEX chn, FileReader &file
 				CMD_S3MCMDEX,		CMD_TEMPO,			CMD_PORTAMENTOUP,		CMD_PANNING8,
 			};
 
-			uint8 cmd = (command & 0x7F);
 			uint8 param = value;
-
-			if(cmd < std::size(effTrans))
-				cmd = effTrans[cmd];
-			else
-				cmd = CMD_NONE;
+			EffectCommand cmd = CMD_NONE;
+			if(uint8 maskedCmd = command & 0x7F; maskedCmd < std::size(effTrans))
+				cmd = effTrans[maskedCmd];
 
 			// Fix some commands...
 			switch(command & 0x7F)
@@ -396,7 +391,7 @@ static void AMFReadPattern(CPattern &pattern, CHANNELINDEX chn, FileReader &file
 			case 0x16:
 				if(param)
 				{
-					cmd = static_cast<uint8>((param & 0x80) ? CMD_PORTAMENTOUP : CMD_PORTAMENTODOWN);
+					cmd = (param & 0x80) ? CMD_PORTAMENTOUP : CMD_PORTAMENTODOWN;
 					if(param & 0x80)
 					{
 						param = ((-static_cast<int8>(param)) & 0x0F);

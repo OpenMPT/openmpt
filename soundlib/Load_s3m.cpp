@@ -27,9 +27,10 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-void CSoundFile::S3MConvert(ModCommand &m, bool fromIT)
+void CSoundFile::S3MConvert(ModCommand &m, const uint8 command, const uint8 param, const bool fromIT)
 {
-	switch(m.command | 0x40)
+	m.param = param;
+	switch(command | 0x40)
 	{
 	case '@': m.command = (m.param ? CMD_DUMMY : CMD_NONE); break;
 	case 'A': m.command = CMD_SPEED; break;
@@ -73,10 +74,12 @@ void CSoundFile::S3MConvert(ModCommand &m, bool fromIT)
 
 #ifndef MODPLUG_NO_FILESAVE
 
-void CSoundFile::S3MSaveConvert(uint8 &command, uint8 &param, bool toIT, bool compatibilityExport) const
+void CSoundFile::S3MSaveConvert(const ModCommand &source, uint8 &command, uint8 &param, const bool toIT, const bool compatibilityExport) const
 {
+	command = 0;
+	param = source.param;
 	const bool extendedIT = !compatibilityExport && toIT;
-	switch(command)
+	switch(source.command)
 	{
 	case CMD_DUMMY:           command = (param ? '@' : 0); break;
 	case CMD_SPEED:           command = 'A'; break;
@@ -135,13 +138,11 @@ void CSoundFile::S3MSaveConvert(uint8 &command, uint8 &param, bool toIT, bool co
 		break;
 	case CMD_MODCMDEX:
 		{
-			ModCommand m;
-			m.command = CMD_MODCMDEX;
-			m.param = param;
-			m.ExtendedMODtoS3MEffect();
-			command = m.command;
-			param = m.param;
-			S3MSaveConvert(command, param, toIT, compatibilityExport);
+			ModCommand mConv;
+			mConv.command = CMD_MODCMDEX;
+			mConv.param = param;
+			mConv.ExtendedMODtoS3MEffect();
+			S3MSaveConvert(mConv, command, param, toIT, compatibilityExport);
 		}
 		return;
 	// Chars under 0x40 don't save properly, so map : to ] and # to [.
@@ -623,9 +624,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 			if(info & s3mEffectPresent)
 			{
 				const auto [command, param] = file.ReadArray<uint8, 2>();
-				m.command = command;
-				m.param = param;
-				S3MConvert(m, false);
+				S3MConvert(m, command, param, false);
 
 				if(m.command == CMD_S3MCMDEX && (m.param & 0xF0) == 0xA0 && fileHeader.cwtv < S3MFileHeader::trkST3_20)
 				{
@@ -856,10 +855,6 @@ bool CSoundFile::SaveS3M(std::ostream &f) const
 
 					uint8 info = static_cast<uint8>(chn);
 					uint8 note = m.note;
-					ModCommand::VOLCMD volcmd = m.volcmd;
-					uint8 vol = m.vol;
-					uint8 command = m.command;
-					uint8 param = m.param;
 
 					if(note != NOTE_NONE || m.instr != 0)
 					{
@@ -892,25 +887,24 @@ bool CSoundFile::SaveS3M(std::ostream &f) const
 						}
 					}
 
-					if(command == CMD_VOLUME)
-					{
-						command = CMD_NONE;
-						volcmd = VOLCMD_VOLUME;
-						vol = std::min(param, uint8(64));
-					}
-
-					if(volcmd == VOLCMD_VOLUME)
+					uint8 vol = std::min(m.vol, ModCommand::VOL(64));
+					if(m.volcmd == VOLCMD_VOLUME)
 					{
 						info |= s3mVolumePresent;
-					} else if(volcmd == VOLCMD_PANNING)
+					} else if(m.volcmd == VOLCMD_PANNING)
 					{
 						info |= s3mVolumePresent;
 						vol |= 0x80;
+					} else if(m.command == CMD_VOLUME)
+					{
+						info |= s3mVolumePresent;
+						vol = std::min(m.param, ModCommand::PARAM(64));
 					}
 
-					if(command != CMD_NONE)
+					uint8 command = 0, param = 0;
+					if(m.command != CMD_NONE && m.command != CMD_VOLUME)
 					{
-						S3MSaveConvert(command, param, false, true);
+						S3MSaveConvert(m, command, param, false, true);
 						if(command || param)
 						{
 							info |= s3mEffectPresent;

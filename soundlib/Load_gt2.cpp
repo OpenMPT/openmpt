@@ -176,8 +176,7 @@ static void TranslateGraoumfEffect(CSoundFile &sndFile, ModCommand &m, const uin
 	case 0x07:
 	case 0x0B:
 	case 0x0F:
-		m.command = effect;
-		CSoundFile::ConvertModCommand(m);
+		CSoundFile::ConvertModCommand(m, effect, param);
 		if(m.command == CMD_TEMPO)
 			currentTempo.Set(m.param, 0);
 		else if(m.command == CMD_SPEED && m.param > 0)

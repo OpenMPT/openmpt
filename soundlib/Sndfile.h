@@ -957,12 +957,14 @@ public:
 
 	// MOD Convert function
 	MODTYPE GetBestSaveFormat() const;
-	static void ConvertModCommand(ModCommand &m);
-	static void S3MConvert(ModCommand &m, bool fromIT);
-	void S3MSaveConvert(uint8 &command, uint8 &param, bool toIT, bool compatibilityExport = false) const;
-	void ModSaveCommand(uint8 &command, uint8 &param, const bool toXM, const bool compatibilityExport = false) const;
-	static void ReadMODPatternEntry(FileReader &file, ModCommand &m);
-	static void ReadMODPatternEntry(const std::array<uint8, 4> data, ModCommand &m);
+	static void ConvertModCommand(ModCommand &m, const uint8 command, const uint8 param);
+	static void S3MConvert(ModCommand &m, const uint8 command, const uint8 param, const bool fromIT);
+	void S3MSaveConvert(const ModCommand &source, uint8 &command, uint8 &param, const bool toIT, const bool compatibilityExport = false) const;
+	void ModSaveCommand(const ModCommand &source, uint8 &command, uint8 &param, const bool toXM, const bool compatibilityExport = false) const;
+	// Reads 4 bytes formatted like SoundTracker/NoiseTracker/ProTracker pattern data, converts the period to a note, fills the instrument number and returns the effect command and parameter bytes.
+	static std::pair<uint8, uint8> ReadMODPatternEntry(FileReader &file, ModCommand &m);
+	// Converts 4 bytes formatted like SoundTracker/NoiseTracker/ProTracker pattern data by converting the period to a note and filling the instrument number, and returns the effect command and parameter bytes.
+	static std::pair<uint8, uint8> ReadMODPatternEntry(const std::array<uint8, 4> data, ModCommand &m);
 
 	void SetupMODPanning(bool bForceSetup = false); // Setup LRRL panning, max channel volume
 
