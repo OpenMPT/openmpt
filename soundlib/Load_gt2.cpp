@@ -46,7 +46,7 @@ struct GTKFileHeader
 	}
 };
 
-MPT_BINARY_STRUCT(GTKFileHeader, 206);
+MPT_BINARY_STRUCT(GTKFileHeader, 206)
 
 
 static uint16 GT2LogToLinearVolume(uint16 logVolume)
@@ -233,6 +233,7 @@ static void TranslateGraoumfEffect(CSoundFile &sndFile, ModCommand &m, const uin
 			m.command = CMD_MODCMDEX;
 			m.param = 0x40 | param;
 		}
+		break;
 	case 0x0D:  // 0Dxx: Pattern break
 		m.command = CMD_PATTERNBREAK;
 		break;
@@ -242,6 +243,7 @@ static void TranslateGraoumfEffect(CSoundFile &sndFile, ModCommand &m, const uin
 			m.command = CMD_MODCMDEX;
 			m.param = 0x70 | param;
 		}
+		break;
 	case 0x10:  // 10xy: Arpeggio
 		m.command = CMD_ARPEGGIO;
 		break;
