@@ -422,7 +422,7 @@ static void TranslateGraoumfEffect(CSoundFile &sndFile, ModCommand &m, const uin
 				break;
 
 			int32 transpose = 0, finetune = 0;
-			if(!isFalcon && lastInstr <= sndFile.GetNumInstruments() && sndFile.Instruments[lastInstr] != nullptr)
+			if(lastInstr <= sndFile.GetNumInstruments() && sndFile.Instruments[lastInstr] != nullptr)
 				transpose = static_cast<int32>(sndFile.Instruments[lastInstr]->NoteMap[lastNote - NOTE_MIN]) - lastNote;
 			if(isFalcon && effect == 0xBE)
 				finetune = smp.nFineTune;
