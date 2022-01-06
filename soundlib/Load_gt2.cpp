@@ -442,10 +442,10 @@ static void TranslateGraoumfEffect(CSoundFile &sndFile, ModCommand &m, const uin
 				const double sampleDurationMiddleC = length / sampleRate;
 				const double wantedDuration = (param * currentSpeed * 2.5) / currentTempo.ToDouble();
 				const double ratio = sampleDurationMiddleC / wantedDuration;
-				const double note = mpt::log2(ratio) * 12.0, frac = note - std::floor(note);
+				const double note = Clamp(double(NOTE_MIDDLEC) + mpt::log2(ratio) * 12.0, NOTE_MIN, NOTE_MAX), frac = note - std::floor(note);
 
 				const bool hadNote = m.IsNote();
-				m.note = static_cast<ModCommand::NOTE>(NOTE_MIDDLEC + note);
+				m.note = static_cast<ModCommand::NOTE>(note);
 				m.param = static_cast<ModCommand::PARAM>(0x80 + (frac * 64.0));
 				if(m.param != 0x80)
 					m.command = CMD_FINETUNE;
