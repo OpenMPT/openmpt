@@ -442,7 +442,7 @@ static void TranslateGraoumfEffect(CSoundFile &sndFile, ModCommand &m, const uin
 				const double sampleDurationMiddleC = length / sampleRate;
 				const double wantedDuration = (param * currentSpeed * 2.5) / currentTempo.ToDouble();
 				const double ratio = sampleDurationMiddleC / wantedDuration;
-				const double note = std::log2(ratio) * 12.0, frac = note - std::floor(note);
+				const double note = mpt::log2(ratio) * 12.0, frac = note - std::floor(note);
 
 				const bool hadNote = m.IsNote();
 				m.note = static_cast<ModCommand::NOTE>(NOTE_MIDDLEC + note);
@@ -1039,7 +1039,7 @@ static EnvelopeNode::value_t ConvertGT2EnvelopeValue(const EnvelopeType envType,
 	else if(envType == ENV_PANNING)
 		value = Util::muldivr(value, ENVELOPE_MAX, 4096);
 	else
-		value = mpt::saturate_round<int32>(std::log2(8192.0 / std::max(value, int32(1))) * 24.0 + (ENVELOPE_MID - 24));
+		value = mpt::saturate_round<int32>(mpt::log2(8192.0 / std::max(value, int32(1))) * 24.0 + (ENVELOPE_MID - 24));
 	return static_cast<EnvelopeNode::value_t>(Clamp(value, ENVELOPE_MIN, ENVELOPE_MAX));
 }
 
