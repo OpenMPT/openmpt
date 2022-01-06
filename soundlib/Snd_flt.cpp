@@ -13,7 +13,6 @@
 
 #include "stdafx.h"
 #include "Sndfile.h"
-#include "Tables.h"
 #include "../common/misc_util.h"
 #include "mpt/base/numbers.hpp"
 

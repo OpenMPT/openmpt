@@ -809,10 +809,10 @@ struct GT2Envelope
 {
 	enum EnvelopeFlags
 	{
-		envFadeOut	= 0x01,
-		envLFO		= 0x02,
-		envLoop		= 0x10,
-		envSustain	= 0x20,
+		envFadeOut = 0x01,
+		envLFO     = 0x02,
+		envLoop    = 0x10,
+		envSustain = 0x20,
 	};
 
 	struct EnvPoint
