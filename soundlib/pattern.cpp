@@ -399,8 +399,8 @@ bool CPattern::WriteEffect(EffectWriter &settings)
 		} else
 		{
 			// Convert normal effect to volume effect
-			ModCommand::VOLCMD newVolCmd = VOLCMD_NONE;
-			ModCommand::VOL newVol = settings.m_param;
+			VolumeCommand newVolCmd = VOLCMD_NONE;
+			ModCommand::VOL newVol = 0;
 			if(settings.m_command == CMD_PANNING8 && isS3M)
 			{
 				// This needs some manual fixing.
@@ -408,21 +408,16 @@ bool CPattern::WriteEffect(EffectWriter &settings)
 				{
 					// Can't have surround in volume column, only normal panning
 					newVolCmd = VOLCMD_PANNING;
-					newVol /= 2u;
+					newVol = settings.m_param / 2u;
 				}
 			} else
 			{
-				newVolCmd = settings.m_command;
-				if(!ModCommand::ConvertVolEffect(newVolCmd, newVol, true))
-				{
-					// No Success :(
-					newVolCmd = VOLCMD_NONE;
-				}
+				std::tie(newVolCmd, newVol) = ModCommand::ConvertToVolCommand(settings.m_command, settings.m_param, true);
 			}
 
-			if(newVolCmd != CMD_NONE)
+			if(newVolCmd != VOLCMD_NONE)
 			{
-				settings.m_volcmd = static_cast<VolumeCommand>(newVolCmd);
+				settings.m_volcmd = newVolCmd;
 				settings.m_vol = newVol;
 				settings.m_retry = false;
 			}
@@ -577,12 +572,12 @@ void WriteData(std::ostream& oStrm, const CPattern& pat)
 }
 
 
-#define READITEM(itembit,id)		\
+#define READITEM(itembit,id, type)	\
 if(diffmask & itembit)				\
 {									\
 	mpt::IO::ReadIntLE<uint8>(iStrm, temp);	\
 	if(ch < chns)					\
-		lastChnMC[ch].id = temp;	\
+		lastChnMC[ch].id = static_cast<type>(temp);	\
 }									\
 if(ch < chns)						\
 	m.id = lastChnMC[ch].id;
@@ -619,14 +614,14 @@ void ReadData(std::istream& iStrm, CPattern& pat, const size_t)
 		uint8 temp = 0;
 
 		ModCommand dummy = ModCommand::Empty();
-		ModCommand& m = (ch < chns) ? *pat.GetpModCommand(row, ch) : dummy;
+		ModCommand &m = (ch < chns) ? *pat.GetpModCommand(row, ch) : dummy;
 
-		READITEM(noteBit, note);
-		READITEM(instrBit, instr);
-		READITEM(volcmdBit, volcmd);
-		READITEM(volBit, vol);
-		READITEM(commandBit, command);
-		READITEM(effectParamBit, param);
+		READITEM(noteBit, note, ModCommand::NOTE);
+		READITEM(instrBit, instr, ModCommand::INSTR);
+		READITEM(volcmdBit, volcmd, ModCommand::VOLCMD);
+		READITEM(volBit, vol, ModCommand::VOL);
+		READITEM(commandBit, command, ModCommand::COMMAND);
+		READITEM(effectParamBit, param, ModCommand::PARAM);
 		if(diffmask & extraData)
 		{
 			//Ignore additional data.

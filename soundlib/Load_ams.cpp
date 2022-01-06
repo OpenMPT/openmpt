@@ -229,11 +229,10 @@ static void ReadAMSPattern(CPattern &pattern, bool newVersion, FileReader &patte
 
 					if(ModCommand::GetEffectWeight(origCmd.command) > ModCommand::GetEffectWeight(m.command))
 					{
-						if(m.volcmd == VOLCMD_NONE && ModCommand::ConvertVolEffect(m.command, m.param, true))
+						if(m.volcmd == VOLCMD_NONE)
 						{
 							// Volume column to the rescue!
-							m.volcmd = m.command;
-							m.vol = m.param;
+							m.SetVolumeCommand(ModCommand::ConvertToVolCommand(m.command, m.param, true));
 						}
 
 						m.command = origCmd.command;

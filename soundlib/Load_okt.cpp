@@ -270,10 +270,9 @@ static void ReadOKTPattern(FileReader &chunk, PATTERNINDEX pat, CSoundFile &sndF
 				{
 					ModCommand &other = rowCmd[chn + pairedChn[chn]];
 					// Try to preserve effect if there already was one
-					if(other.ConvertVolEffect(other.command, other.param, true))
+					if(auto volCmd = other.ConvertToVolCommand(other.command, other.param, true); volCmd.first != VOLCMD_NONE)
 					{
-						other.volcmd = other.command;
-						other.vol = other.param;
+						other.SetVolumeCommand(volCmd);
 					}
 					other.SetEffectCommand(m);
 				}

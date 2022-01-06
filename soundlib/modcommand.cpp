@@ -1074,43 +1074,34 @@ size_t ModCommand::GetEffectWeight(COMMAND cmd)
 }
 
 
-// Try to convert a fx column command (&effect) into a volume column command.
-// Returns true if successful.
+// Try to convert a fx column command into a volume column command.
+// Returns the translated command if successful.
 // Some commands can only be converted by losing some precision.
 // If moving the command into the volume column is more important than accuracy, use force = true.
 // (Code translated from SchismTracker and mainly supposed to be used with loaders ported from this tracker)
-bool ModCommand::ConvertVolEffect(uint8 &effect, uint8 &param, bool force)
+std::pair<VolumeCommand, ModCommand::VOL> ModCommand::ConvertToVolCommand(const EffectCommand effect, ModCommand::PARAM param, bool force)
 {
 	switch(effect)
 	{
 	case CMD_NONE:
-		effect = VOLCMD_NONE;
-		return true;
-	case CMD_VOLUME:
-		effect = VOLCMD_VOLUME;
-		param = std::min(param, PARAM(64));
 		break;
+	case CMD_VOLUME:
+		return {VOLCMD_VOLUME, std::min(param, PARAM(64))};
 	case CMD_PORTAMENTOUP:
 		// if not force, reject when dividing causes loss of data in LSB, or if the final value is too
 		// large to fit. (volume column Ex/Fx are four times stronger than effect column)
 		if(!force && ((param & 3) || param >= 0xE0))
-			return false;
-		param /= 4;
-		effect = VOLCMD_PORTAUP;
-		break;
+			break;
+		return {VOLCMD_PORTAUP, static_cast<VOL>(param / 4u)};
 	case CMD_PORTAMENTODOWN:
 		if(!force && ((param & 3) || param >= 0xE0))
-			return false;
-		param /= 4;
-		effect = VOLCMD_PORTADOWN;
-		break;
+			break;
+		return {VOLCMD_PORTADOWN, static_cast<VOL>(param / 4u)};
 	case CMD_TONEPORTAMENTO:
 		if(param >= 0xF0)
 		{
 			// hack for people who can't type F twice :)
-			effect = VOLCMD_TONEPORTAMENTO;
-			param = 9;
-			return true;
+			return {VOLCMD_TONEPORTAMENTO, VOL(9)};
 		}
 		for(uint8 n = 0; n < 10; n++)
 		{
@@ -1118,83 +1109,70 @@ bool ModCommand::ConvertVolEffect(uint8 &effect, uint8 &param, bool force)
 				? (param <= ImpulseTrackerPortaVolCmd[n])
 				: (param == ImpulseTrackerPortaVolCmd[n]))
 			{
-				effect = VOLCMD_TONEPORTAMENTO;
-				param = n;
-				return true;
+				return {VOLCMD_TONEPORTAMENTO, n};
 			}
 		}
-		return false;
+		break;
 	case CMD_VIBRATO:
 		if(force)
 			param = std::min(static_cast<PARAM>(param & 0x0F), PARAM(9));
 		else if((param & 0x0F) > 9 || (param & 0xF0) != 0)
-			return false;
-		param &= 0x0F;
-		effect = VOLCMD_VIBRATODEPTH;
-		break;
+			break;
+		return {VOLCMD_VIBRATODEPTH, static_cast<VOL>(param & 0x0F)};
 	case CMD_FINEVIBRATO:
 		if(force)
 			param = 0;
 		else if(param)
-			return false;
-		effect = VOLCMD_VIBRATODEPTH;
-		break;
+			break;
+		return {VOLCMD_VIBRATODEPTH, param};
 	case CMD_PANNING8:
 		if(param == 255)
 			param = 64;
 		else
 			param /= 4;
-		effect = VOLCMD_PANNING;
-		break;
+		return {VOLCMD_PANNING, param};
 	case CMD_VOLUMESLIDE:
 		if(param == 0)
-			return false;
-		if((param & 0xF) == 0)	// Dx0 / Cx
-		{
-			param >>= 4;
-			effect = VOLCMD_VOLSLIDEUP;
-		} else if((param & 0xF0) == 0)	// D0x / Dx
-		{
-			effect = VOLCMD_VOLSLIDEDOWN;
-		} else if((param & 0xF) == 0xF)	// DxF / Ax
-		{
-			param >>= 4;
-			effect = VOLCMD_FINEVOLUP;
-		} else if((param & 0xF0) == 0xF0)	// DFx / Bx
-		{
-			param &= 0xF;
-			effect = VOLCMD_FINEVOLDOWN;
-		} else // ???
-		{
-			return false;
-		}
+			break;
+		if((param & 0x0F) == 0)  // Dx0 / Cx
+			return {VOLCMD_VOLSLIDEUP, static_cast<VOL>(param >> 4)};
+		else if((param & 0xF0) == 0)  // D0x / Dx
+			return {VOLCMD_VOLSLIDEDOWN, param};
+		else if((param & 0x0F) == 0x0F)  // DxF / Ax
+			return {VOLCMD_FINEVOLUP, static_cast<VOL>(param >> 4)};
+		else if((param & 0xF0) == 0xF0)  // DFx / Bx
+			return {VOLCMD_FINEVOLDOWN, static_cast<VOL>(param & 0x0F)};
 		break;
 	case CMD_S3MCMDEX:
-		switch (param >> 4)
+		switch(param >> 4)
 		{
-		case 8:
-			effect = VOLCMD_PANNING;
-			param = ((param & 0xF) << 2) + 2;
-			return true;
-		case 0: case 1: case 2: case 0xF:
-			if(force)
-			{
-				effect = param = 0;
-				return true;
-			}
-			break;
+		case 0x08:
+			return {VOLCMD_PANNING, static_cast<VOL>(((param & 0x0F) << 2) + 2)};
 		default:
 			break;
 		}
-		return false;
+		break;
+	case CMD_MODCMDEX:
+		switch(param >> 4)
+		{
+			case 0x08:
+				return {VOLCMD_PANNING, static_cast<VOL>(((param & 0x0F) << 2) + 2)};
+			case 0x0A:
+				return {VOLCMD_FINEVOLUP, static_cast<VOL>(param & 0x0F)};
+			case 0x0B:
+				return {VOLCMD_FINEVOLDOWN, static_cast<VOL>(param & 0x0F)};
+			default:
+				break;
+		}
+		break;
 	default:
-		return false;
+		break;
 	}
-	return true;
+	return {VOLCMD_NONE, VOL(0)};
 }
 
 // Try to combine two commands into one. Returns true on success and the combined command is placed in eff1 / param1.
-bool ModCommand::CombineEffects(uint8 &eff1, uint8 &param1, uint8 &eff2, uint8 &param2)
+bool ModCommand::CombineEffects(EffectCommand &eff1, uint8 &param1, EffectCommand &eff2, uint8 &param2)
 {
 	if(eff1 == CMD_VOLUMESLIDE && (eff2 == CMD_VIBRATO || eff2 == CMD_TONEPORTAVOL) && param2 == 0)
 	{
@@ -1241,12 +1219,14 @@ bool ModCommand::CombineEffects(uint8 &eff1, uint8 &param1, uint8 &eff2, uint8 &
 }
 
 
-std::pair<EffectCommand, ModCommand::PARAM> ModCommand::TwoRegularCommandsToMPT(uint8 &effect1, uint8 &param1, uint8 &effect2, uint8 &param2)
+std::pair<EffectCommand, ModCommand::PARAM> ModCommand::FillInTwoCommands(EffectCommand effect1, uint8 param1, EffectCommand effect2, uint8 param2)
 {
 	for(uint8 n = 0; n < 4; n++)
 	{
-		if(ModCommand::ConvertVolEffect(effect1, param1, (n > 1)))
+		if(auto volCmd = ModCommand::ConvertToVolCommand(effect1, param1, (n > 1)); effect1 == CMD_NONE || volCmd.first != VOLCMD_NONE)
 		{
+			SetVolumeCommand(volCmd);
+			SetEffectCommand(effect2, param2);
 			return {CMD_NONE, ModCommand::PARAM(0)};
 		}
 		std::swap(effect1, effect2);
@@ -1259,10 +1239,9 @@ std::pair<EffectCommand, ModCommand::PARAM> ModCommand::TwoRegularCommandsToMPT(
 		std::swap(effect1, effect2);
 		std::swap(param1, param2);
 	}
-	std::pair<EffectCommand, PARAM> lostCommand = {static_cast<EffectCommand>(effect1), param1};
-	effect1 = VOLCMD_NONE;
-	param1 = 0;
-	return lostCommand;
+	SetVolumeCommand(VOLCMD_NONE, 0);
+	SetEffectCommand(effect2, param2);
+	return {effect1, param1};
 }
 
 

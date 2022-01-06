@@ -155,7 +155,7 @@ enum
 
 static constexpr VibratoType MDLVibratoType[] = { VIB_SINE, VIB_RAMP_DOWN, VIB_SQUARE, VIB_SINE };
 
-static constexpr ModCommand::COMMAND MDLEffTrans[] =
+static constexpr EffectCommand MDLEffTrans[] =
 {
 	/* 0 */ CMD_NONE,
 	/* 1st column only */
@@ -186,15 +186,13 @@ static constexpr ModCommand::COMMAND MDLEffTrans[] =
 
 
 // receive an MDL effect, give back a 'normal' one.
-static void ConvertMDLCommand(uint8 &cmd, uint8 &param)
+static std::pair<EffectCommand, uint8> ConvertMDLCommand(const uint8 command, uint8 param)
 {
-	if(cmd >= std::size(MDLEffTrans))
-		return;
+	if(command >= std::size(MDLEffTrans))
+		return {CMD_NONE, uint8(0)};
 
-	uint8 origCmd = cmd;
-	cmd = MDLEffTrans[cmd];
-
-	switch(origCmd)
+	EffectCommand cmd = MDLEffTrans[command];
+	switch(command)
 	{
 #ifdef MODPLUG_TRACKER
 	case 0x07: // Tempo
@@ -298,18 +296,19 @@ static void ConvertMDLCommand(uint8 &cmd, uint8 &param)
 		}
 		break;
 	}
+	return {cmd, param};
 }
 
 
 // Returns true if command was lost
-static bool ImportMDLCommands(ModCommand &m, uint8 vol, uint8 e1, uint8 e2, uint8 p1, uint8 p2)
+static bool ImportMDLCommands(ModCommand &m, uint8 vol, uint8 cmd1, uint8 cmd2, uint8 param1, uint8 param2)
 {
 	// Map second effect values 1-6 to effects G-L
-	if(e2 >= 1 && e2 <= 6)
-		e2 += 15;
+	if(cmd2 >= 1 && cmd2 <= 6)
+		cmd2 += 15;
 
-	ConvertMDLCommand(e1, p1);
-	ConvertMDLCommand(e2, p2);
+	auto [e1, p1] = ConvertMDLCommand(cmd1, param1);
+	auto [e2, p2] = ConvertMDLCommand(cmd2, param2);
 	/* From the Digitrakker documentation:
 		* EFx -xx - Set Sample Offset
 		This  is a  double-command.  It starts the
@@ -325,7 +324,7 @@ static bool ImportMDLCommands(ModCommand &m, uint8 vol, uint8 e1, uint8 e2, uint
 	What's more is, if there's another effect in the second column, it's ALSO processed in addition to the
 	offset, and the second data byte is shared between the two effects. */
 	uint32 offset = uint32_max;
-	uint8 otherCmd = CMD_NONE;
+	EffectCommand otherCmd = CMD_NONE;
 	if(e1 == CMD_OFFSET)
 	{
 		// EFy -xx => offset yxx00
@@ -377,20 +376,18 @@ static bool ImportMDLCommands(ModCommand &m, uint8 vol, uint8 e1, uint8 e2, uint
 		e1 = CMD_NONE;
 	} else if(!vol)
 	{
-		lostCommand |= (ModCommand::TwoRegularCommandsToMPT(e1, p1, e2, p2).first != CMD_NONE);
-		m.volcmd = e1;
-		m.vol = p1;
+		return m.FillInTwoCommands(e1, p1, e2, p2).first != CMD_NONE;
 	} else
 	{
-		if(ModCommand::GetEffectWeight((ModCommand::COMMAND)e1) > ModCommand::GetEffectWeight((ModCommand::COMMAND)e2))
+		if(ModCommand::GetEffectWeight(e1) > ModCommand::GetEffectWeight(e2))
 		{
 			std::swap(e1, e2);
 			std::swap(p1, p2);
+			lostCommand = true;
 		}
 	}
 
-	m.command = e2;
-	m.param = p2;
+	m.SetEffectCommand(e2, p2);
 	return lostCommand;
 }
 

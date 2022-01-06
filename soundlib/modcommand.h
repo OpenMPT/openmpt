@@ -129,8 +129,8 @@ public:
 	using NOTE = uint8;
 	using INSTR = uint8;
 	using VOL = uint8;
-	using VOLCMD = uint8;
-	using COMMAND = uint8;
+	using VOLCMD = VolumeCommand;
+	using COMMAND = EffectCommand;
 	using PARAM = uint8;
 
 	// Defines the maximum value for column data when interpreted as 2-byte value
@@ -223,18 +223,18 @@ public:
 	// "Importance" of every FX command. Table is used for importing from formats with multiple effect columns
 	// and is approximately the same as in SchismTracker.
 	static size_t GetEffectWeight(COMMAND cmd);
-	// Try to convert a an effect into a volume column effect. Returns true on success.
-	static bool ConvertVolEffect(uint8 &effect, uint8 &param, bool force);
+	// Try to convert a an effect into a volume column effect. Returns converted effect on success.
+	static [[nodiscard]] std::pair<VolumeCommand, VOL> ConvertToVolCommand(const EffectCommand effect, PARAM param, bool force);
 	// Takes two "normal" effect commands and converts them to volume column + effect column commands. Returns the dropped command + param (CMD_NONE if nothing had to be dropped).
-	static std::pair<EffectCommand, PARAM> TwoRegularCommandsToMPT(uint8 &effect1, uint8 &param1, uint8 &effect2, uint8 &param2);
+	std::pair<EffectCommand, PARAM> FillInTwoCommands(EffectCommand effect1, uint8 param1, EffectCommand effect2, uint8 param2);
 	// Try to combine two commands into one. Returns true on success and the combined command is placed in eff1 / param1.
-	static bool CombineEffects(uint8 &eff1, uint8 &param1, uint8 &eff2, uint8 &param2);
+	static bool CombineEffects(EffectCommand &eff1, uint8 &param1, EffectCommand &eff2, uint8 &param2);
 
 public:
 	uint8 note = NOTE_NONE;
 	uint8 instr = 0;
-	uint8 volcmd = VOLCMD_NONE;
-	uint8 command = CMD_NONE;
+	VolumeCommand volcmd = VOLCMD_NONE;
+	EffectCommand command = CMD_NONE;
 	uint8 vol = 0;
 	uint8 param = 0;
 };
