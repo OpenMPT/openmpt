@@ -27,8 +27,6 @@ namespace IO {
 
 
 
-//static_assert(sizeof(std::streamoff) == 8); // Assert 64bit file support.
-
 struct FileOperationsStdIos {
 
 private:
