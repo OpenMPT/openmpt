@@ -72,28 +72,48 @@ static int openmpt_stream_file_seek_func( void * stream, int64_t offset, int whe
 			break;
 	}
 	#if defined(_MSC_VER)
+		if ((__int64)offset != offset) {
+			return -1;
+		}
 		return _fseeki64( f, offset, fwhence ) ? -1 : 0;
 	#elif defined(_POSIX_SOURCE) && (_POSIX_SOURCE == 1) 
+		if ((off_t)offset != offset) {
+			return -1;
+		}
 		return fseeko( f, offset, fwhence ) ? -1 : 0;
 	#else
+		if ((long)offset != offset) {
+			return -1;
+		}
 		return fseek( f, offset, fwhence ) ? -1 : 0;
 	#endif
 }
 
 static int64_t openmpt_stream_file_tell_func( void * stream ) {
 	FILE * f = 0;
+	#if defined(_MSC_VER)
+		__int64 result = 0;
+	#elif defined(_POSIX_SOURCE) && (_POSIX_SOURCE == 1)
+		off_t result = 0;
+	#else
+		long result = 0;
+	#endif
 	int64_t retval = 0;
 	f = (FILE*)stream;
 	if ( !f ) {
 		return -1;
 	}
 	#if defined(_MSC_VER)
-		retval = _ftelli64( f );
+		result = _ftelli64( f );
 	#elif defined(_POSIX_SOURCE) && (_POSIX_SOURCE == 1) 
-		retval = ftello( f );
+		result = ftello( f );
 	#else
-		retval = ftell( f );
+		result = ftell( f );
 	#endif
+	if ((int64_t)result != result) {
+		return -1;
+	}
+	retval = (int64_t)result;
 	if ( retval < 0 ) {
 		return -1;
 	}
