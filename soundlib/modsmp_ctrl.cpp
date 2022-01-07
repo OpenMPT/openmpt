@@ -178,10 +178,10 @@ bool XFadeSample(ModSample &smp, SmpLength fadeLength, int fadeLaw, bool afterlo
 {
 	if(!smp.HasSampleData()) return false;
 	const SmpLength loopStart = useSustainLoop ? smp.nSustainStart : smp.nLoopStart;
-	const SmpLength loopEnd = std::min(useSustainLoop ? smp.nSustainEnd : smp.nLoopEnd, smp.nLength);
+	const SmpLength loopEnd = useSustainLoop ? smp.nSustainEnd : smp.nLoopEnd;
 	
-	if(loopStart < fadeLength || loopEnd <= loopStart)
-		return false;
+	if(loopEnd <= loopStart || loopEnd > smp.nLength) return false;
+	if(loopStart < fadeLength) return false;
 
 	const SmpLength start = (loopStart - fadeLength) * smp.GetNumChannels();
 	const SmpLength end = (loopEnd - fadeLength) * smp.GetNumChannels();

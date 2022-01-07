@@ -679,10 +679,6 @@ BOOL CCtrlGeneral::GetToolTipText(UINT uId, LPTSTR pszText)
 	if ((pszText) && (uId))
 	{
 		const bool displayDBValues = m_sndFile.GetPlayConfig().getDisplayDBValues();
-		const bool isEnabled = GetDlgItem(uId)->IsWindowEnabled();
-		mpt::tstring notAvailable;
-		if(!isEnabled)
-			notAvailable = MPT_TFORMAT("Feature is not available in the {} format.")(mpt::ToWin(mpt::Charset::ASCII, mpt::ToUpperCaseAscii(m_sndFile.GetModSpecifications().fileExtension)));
 
 		switch(uId)
 		{
@@ -695,36 +691,16 @@ BOOL CCtrlGeneral::GetToolTipText(UINT uId, LPTSTR pszText)
 			}
 			return TRUE;
 		case IDC_BUTTON1:
-			if(isEnabled)
-				_tcscpy(pszText, _T("Click button multiple times to tap in the desired tempo."));
-			else
-				_tcscpy(pszText, notAvailable.c_str());
+			_tcscpy(pszText, _T("Click button multiple times to tap in the desired tempo."));
 			return TRUE;
 		case IDC_SLIDER_SAMPLEPREAMP:
 			_tcscpy(pszText, displayDBValues ? CModDoc::LinearToDecibels(m_sndFile.m_nSamplePreAmp, m_sndFile.GetPlayConfig().getNormalSamplePreAmp()).GetString() : moreRecentMixModeNote);
 			return TRUE;
 		case IDC_SLIDER_VSTIVOL:
-			if(isEnabled)
-				_tcscpy(pszText, displayDBValues ? CModDoc::LinearToDecibels(m_sndFile.m_nVSTiVolume, m_sndFile.GetPlayConfig().getNormalVSTiVol()).GetString() : moreRecentMixModeNote);
-			else
-				_tcscpy(pszText, notAvailable.c_str());
+			_tcscpy(pszText, displayDBValues ? CModDoc::LinearToDecibels(m_sndFile.m_nVSTiVolume, m_sndFile.GetPlayConfig().getNormalVSTiVol()).GetString() : moreRecentMixModeNote);
 			return TRUE;
 		case IDC_SLIDER_GLOBALVOL:
-			if(isEnabled)
-				_tcscpy(pszText, displayDBValues ? CModDoc::LinearToDecibels(m_sndFile.m_PlayState.m_nGlobalVolume, m_sndFile.GetPlayConfig().getNormalGlobalVol()).GetString() : moreRecentMixModeNote);
-			else
-				_tcscpy(pszText, notAvailable.c_str());
-			return TRUE;
-		case IDC_SLIDER_SONGTEMPO:
-		case IDC_EDIT_ARTIST:
-		case IDC_EDIT_TEMPO:
-		case IDC_EDIT_SPEED:
-		case IDC_EDIT_RESTARTPOS:
-		case IDC_EDIT_GLOBALVOL:
-		case IDC_EDIT_VSTIVOL:
-			if(isEnabled)
-				break;
-			_tcscpy(pszText, notAvailable.c_str());
+			_tcscpy(pszText, displayDBValues ? CModDoc::LinearToDecibels(m_sndFile.m_PlayState.m_nGlobalVolume, m_sndFile.GetPlayConfig().getNormalGlobalVol()).GetString() : moreRecentMixModeNote);
 			return TRUE;
 		}
 	}

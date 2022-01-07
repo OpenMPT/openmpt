@@ -239,7 +239,7 @@ static bool CreateTextWnd(TWnd &wnd, const TCHAR *text, DWORD style, CWnd *paren
 	const auto size = dc->GetTextExtent(text);
 	dc->SelectObject(oldFont);
 	parent->ReleaseDC(dc);
-	CRect rect{0, 0, size.cx + Util::ScalePixels(10, *parent), std::max(static_cast<int>(size.cy) + Util::ScalePixels(4, *parent), Util::ScalePixels(22, *parent))};
+	CRect rect{0, 0, size.cx + Util::ScalePixels(10, *parent), std::max(static_cast<int>(size.cy) + Util::ScalePixels(4, *parent), Util::ScalePixels(20, *parent))};
 	return wnd.Create(text, style, rect, parent, id) != FALSE;
 }
 
@@ -252,10 +252,9 @@ BOOL CMainToolBar::Create(CWnd *parent)
 		return FALSE;
 
 	CDC *dc = GetDC();
-	const auto hFont = reinterpret_cast<WPARAM>(CMainFrame::GetGUIFont());
-	const int fontHeight = 0;//dc->GetTextExtent(_T("My")).cy;
+	const auto hFont     = reinterpret_cast<WPARAM>(CMainFrame::GetGUIFont());
 	const double scaling = Util::GetDPIx(m_hWnd) / 96.0;
-	const int imgSize = mpt::saturate_round<int>(16 * scaling), btnSizeX = mpt::saturate_round<int>(23 * scaling), btnSizeY = std::max(fontHeight, mpt::saturate_round<int>(22 * scaling));
+	const int imgSize = mpt::saturate_round<int>(16 * scaling), btnSizeX = mpt::saturate_round<int>(23 * scaling), btnSizeY = mpt::saturate_round<int>(22 * scaling);
 	m_ImageList.Create(IDB_MAINBAR, 16, 16, IMGLIST_NUMIMAGES, 1, dc, scaling, false);
 	m_ImageListDisabled.Create(IDB_MAINBAR, 16, 16, IMGLIST_NUMIMAGES, 1, dc, scaling, true);
 	ReleaseDC(dc);
@@ -267,9 +266,9 @@ BOOL CMainToolBar::Create(CWnd *parent)
 
 	if(!SetButtons(MainButtons, mpt::saturate_cast<int>(std::size(MainButtons)))) return FALSE;
 
-	//CRect temp;
-	//GetItemRect(0, temp);
-	//SetSizes(CSize(temp.Width(), temp.Height()), CSize(imgSize, imgSize));
+	CRect temp;
+	GetItemRect(0, temp);
+	SetSizes(CSize(temp.Width(), temp.Height()), CSize(imgSize, imgSize));
 
 	// Dropdown menus for New and MIDI buttons
 	LPARAM dwExStyle = GetToolBarCtrl().SendMessage(TB_GETEXTENDEDSTYLE) | TBSTYLE_EX_DRAWDDARROWS;

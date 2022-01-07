@@ -100,16 +100,6 @@ struct ModSample
 		return pData.pSample16;
 	}
 
-	MPT_FORCEINLINE auto GetSampleDataAsByteSpan() const noexcept
-	{
-		return mpt::as_span(sampleb(), GetSampleSizeInBytes());
-	}
-
-	MPT_FORCEINLINE auto GetSampleDataAsByteSpan() noexcept
-	{
-		return mpt::as_span(sampleb(), GetSampleSizeInBytes());
-	}
-
 	// Return the size of one (elementary) sample in bytes.
 	uint8 GetElementarySampleSize() const noexcept { return (uFlags & CHN_16BIT) ? 2 : 1; }
 

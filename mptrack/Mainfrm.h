@@ -558,11 +558,6 @@ protected:
 	afx_msg void OnDropFiles(HDROP hDropInfo);
 	afx_msg BOOL OnQueryEndSession();
 	afx_msg void OnActivateApp(BOOL active, DWORD threadID);
-
-	afx_msg void OnCreateMixerDump();
-	afx_msg void OnVerifyMixerDump();
-	afx_msg void OnConvertMixerDumpToText();
-
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 public:
