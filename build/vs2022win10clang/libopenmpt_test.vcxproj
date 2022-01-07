@@ -1256,7 +1256,6 @@
     <ClInclude Include="..\..\src\mpt\binary\hex.hpp" />
     <ClInclude Include="..\..\src\mpt\binary\tests\tests_binary.hpp" />
     <ClInclude Include="..\..\src\mpt\check\libc.hpp" />
-    <ClInclude Include="..\..\src\mpt\check\libc_stdio.hpp" />
     <ClInclude Include="..\..\src\mpt\check\mfc.hpp" />
     <ClInclude Include="..\..\src\mpt\check\windows.hpp" />
     <ClInclude Include="..\..\src\mpt\crc\crc.hpp" />
