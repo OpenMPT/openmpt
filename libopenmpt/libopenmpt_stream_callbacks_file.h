@@ -75,17 +75,17 @@ static int openmpt_stream_file_seek_func( void * stream, int64_t offset, int whe
 		if ((__int64)offset != offset) {
 			return -1;
 		}
-		return _fseeki64( f, offset, fwhence ) ? -1 : 0;
+		return _fseeki64( f, (__int64)offset, fwhence ) ? -1 : 0;
 	#elif defined(_POSIX_SOURCE) && (_POSIX_SOURCE == 1) 
 		if ((off_t)offset != offset) {
 			return -1;
 		}
-		return fseeko( f, offset, fwhence ) ? -1 : 0;
+		return fseeko( f, (off_t)offset, fwhence ) ? -1 : 0;
 	#else
 		if ((long)offset != offset) {
 			return -1;
 		}
-		return fseek( f, offset, fwhence ) ? -1 : 0;
+		return fseek( f, (long)offset, fwhence ) ? -1 : 0;
 	#endif
 }
 
