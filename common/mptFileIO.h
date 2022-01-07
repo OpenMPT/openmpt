@@ -13,6 +13,9 @@
 
 #if defined(MPT_ENABLE_FILEIO)
 
+#if MPT_COMPILER_MSVC
+#include "mpt/check/libc_stdio.hpp"
+#endif // MPT_COMPILER_MSVC
 #include "mpt/io_read/filecursor_memory.hpp"
 #include "mpt/io_read/filecursor_stdstream.hpp"
 
@@ -33,7 +36,7 @@
 
 #if MPT_COMPILER_MSVC
 #include <cstdio>
-#endif // !MPT_COMPILER_MSVC
+#endif // MPT_COMPILER_MSVC
 
 #ifdef MODPLUG_TRACKER
 #if MPT_OS_WINDOWS
