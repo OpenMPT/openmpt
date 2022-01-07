@@ -280,10 +280,11 @@ using u8char = char;
 //  these are used on mpt::ustring objects. However, compiling in the
 //  respectively other mpt::ustring mode will catch most of these anyway.
 
-#if MPT_USTRING_MODE_WIDE
-#if MPT_USTRING_MODE_UTF8
+#if MPT_USTRING_MODE_WIDE && MPT_USTRING_MODE_UTF8
 #error "MPT_USTRING_MODE_WIDE and MPT_USTRING_MODE_UTF8 are mutually exclusive."
 #endif
+
+#if MPT_USTRING_MODE_WIDE
 
 using ustring = std::wstring;
 using uchar = wchar_t;
@@ -294,9 +295,6 @@ using uchar = wchar_t;
 #endif // MPT_USTRING_MODE_WIDE
 
 #if MPT_USTRING_MODE_UTF8
-#if MPT_USTRING_MODE_WIDE
-#error "MPT_USTRING_MODE_WIDE and MPT_USTRING_MODE_UTF8 are mutually exclusive."
-#endif
 
 using ustring = mpt::u8string;
 using uchar = mpt::u8char;
