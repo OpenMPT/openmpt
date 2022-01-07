@@ -547,10 +547,6 @@
 
 #define _USE_MATH_DEFINES
 
-#ifndef _FILE_OFFSET_BITS
-#define _FILE_OFFSET_BITS 64
-#endif
-
 #if MPT_COMPILER_CLANG
 #pragma clang diagnostic pop
 #endif
