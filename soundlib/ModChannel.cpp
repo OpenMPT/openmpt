@@ -46,6 +46,7 @@ void ModChannel::Reset(ResetFlags resetMask, const CSoundFile &sndFile, CHANNELI
 		isPreviewNote = false;
 		isPaused = false;
 		portaTargetReached = false;
+		nnaMapped = false;
 		rowCommand.Clear();
 	}
 

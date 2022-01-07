@@ -59,6 +59,9 @@ OPENMPT_NAMESPACE_BEGIN
 
 #define MPTTIMER_PERIOD		200
 
+#if defined(MPT_BUILD_DEBUG)
+#define ENABLE_PLAYBACK_TEST_MENU
+#endif
 
 /////////////////////////////////////////////////////////////////////////////
 // CMainFrame
@@ -118,6 +121,12 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_MESSAGE(MPT_WM_APP_UPDATECHECK_SUCCESS, &CMainFrame::OnUpdateCheckSuccess)
 #endif // MPT_ENABLE_UPDATE
 	ON_COMMAND(ID_HELPSHOW,					&CMainFrame::OnHelp)
+
+#if defined(ENABLE_PLAYBACK_TEST_MENU)
+	ON_COMMAND(ID_CREATE_MIXERDUMP, &CMainFrame::OnCreateMixerDump)
+	ON_COMMAND(ID_VERIFY_MIXERDUMP, &CMainFrame::OnVerifyMixerDump)
+	ON_COMMAND(ID_CONVERT_MIXERDUMP, &CMainFrame::OnConvertMixerDumpToText)
+#endif // ENABLE_PLAYBACK_TEST_MENU
 
 	ON_COMMAND_RANGE(ID_MRU_LIST_FIRST, ID_MRU_LIST_LAST, &CMainFrame::OnOpenMRUItem)
 	ON_UPDATE_COMMAND_UI(ID_MRU_LIST_FIRST,	&CMainFrame::OnUpdateMRUItem)
@@ -225,6 +234,16 @@ void CMainFrame::Initialize()
 	CreateExampleModulesMenu();
 	CreateTemplateModulesMenu();
 	UpdateMRUList();
+
+#if defined(ENABLE_PLAYBACK_TEST_MENU)
+	CMenu debugMenu;
+	debugMenu.CreatePopupMenu();
+	debugMenu.AppendMenu(MF_STRING, ID_CREATE_MIXERDUMP, _T("Create Mixer Dump for &File(s)..."));
+	debugMenu.AppendMenu(MF_STRING, ID_VERIFY_MIXERDUMP, _T("&Verify File(s)..."));
+	debugMenu.AppendMenu(MF_STRING, ID_CONVERT_MIXERDUMP, _T("Convert Mixer Dump to &TSV..."));
+	GetMenu()->AppendMenu(MF_STRING | MF_POPUP, reinterpret_cast<UINT_PTR>(debugMenu.m_hMenu), _T("Debug"));
+	debugMenu.Detach();
+#endif  // ENABLE_PLAYBACK_TEST_MENU
 }
 
 
@@ -3073,6 +3092,116 @@ BOOL CMainFrame::OnQueryEndSession()
 #endif
 	return modifiedCount ? FALSE : TRUE;
 }
+
+
+#if defined(ENABLE_PLAYBACK_TEST_MENU)
+void CMainFrame::OnCreateMixerDump()
+{
+	std::string exts;
+	for(const auto &ext : CSoundFile::GetSupportedExtensions(true))
+	{
+		exts += std::string("*.") + ext + std::string(";");
+	}
+
+	FileDialog dlg = OpenFileDialog()
+		.AllowMultiSelect()
+		.ExtensionFilter("Module Files (*.it,*.xm,...)|" + exts + "|All files(*.*)|*.*||");
+	if(!dlg.Show(this))
+		return;
+	for(const auto &fileName : dlg.GetFilenames())
+	{
+		MPT_LOG_GLOBAL(LogDebug, "info", U_("Loading ") + fileName.ToUnicode());
+		auto sndFile = std::make_unique<CSoundFile>();
+		InputFile f(fileName);
+		if(!f.IsValid())
+			continue;
+		if(!sndFile->Create(GetFileReader(f)))
+			continue;
+		auto playTest = sndFile->CreatePlaybackTest();
+		mpt::ofstream outFile(fileName + P_(".testdata.gz"), std::ios::binary | std::ios::trunc);
+		if(outFile)
+			playTest.Serialize(outFile, fileName.GetFullFileName().ToUnicode() + U_(".testdata"));
+	}
+}
+
+
+void CMainFrame::OnVerifyMixerDump()
+{
+	FileDialog dlg = OpenFileDialog()
+		.AllowMultiSelect()
+		.ExtensionFilter("Test Data|*.testdata;*.testdata.gz|All files(*.*)|*.*||");
+	if(!dlg.Show(this))
+		return;
+	for(const auto &fileName : dlg.GetFilenames())
+	{
+		MPT_LOG_GLOBAL(LogDebug, "info", U_("Loading ") + fileName.ToUnicode());
+		try
+		{
+			auto modFileName = fileName;
+			if(!mpt::PathString::CompareNoCase(modFileName.GetFileExt(), P_(".gz")))
+				modFileName = modFileName.ReplaceExt({});
+			if(!mpt::PathString::CompareNoCase(modFileName.GetFileExt(), P_(".testdata")))
+				modFileName = modFileName.ReplaceExt({});
+
+			InputFile testFile{fileName};
+			if(!testFile.IsValid())
+				throw std::runtime_error{"Cannot open test data file: " + fileName.ToUTF8()};
+
+			InputFile modFile{modFileName};
+			if(!modFile.IsValid())
+				throw std::runtime_error{"Cannot open module data file: " + modFileName.ToUTF8()};
+
+			PlaybackTest playTest{GetFileReader(testFile)};
+			auto sndFile = std::make_unique<CSoundFile>();
+			sndFile->Create(GetFileReader(modFile));
+
+			const auto result = playTest.Compare(*sndFile);
+			if(!result.empty())
+			{
+				InfoDialog infoDlg{this};
+				infoDlg.SetCaption(_T("Test results for ") + fileName.AsNative());
+				mpt::winstring content;
+				for(const auto &line : result)
+				{
+					content += mpt::ToWin(line) + _T("\r\n");
+				}
+				infoDlg.SetContent(content);
+				infoDlg.DoModal();
+			}
+		} catch(const std::exception &e)
+		{
+			Reporting::Error(MPT_UFORMAT("Cannot convert {}: {}")(fileName.ToUnicode(), mpt::ToUnicode(mpt::Charset::UTF8, e.what())), this);
+		}
+	}
+}
+
+
+void CMainFrame::OnConvertMixerDumpToText()
+{
+	FileDialog dlg = OpenFileDialog()
+		.AllowMultiSelect()
+		.ExtensionFilter("Test Data|*.testdata;*.testdata.gz|All files(*.*)|*.*||");
+	if(!dlg.Show(this))
+		return;
+	for(const auto &fileName : dlg.GetFilenames())
+	{
+		MPT_LOG_GLOBAL(LogDebug, "info", U_("Loading ") + fileName.ToUnicode());
+		try
+		{
+			InputFile f(fileName);
+			if(!f.IsValid())
+				throw std::runtime_error{"Cannot open test data file!"};
+			PlaybackTest playTest{GetFileReader(f)};
+			mpt::ofstream output(fileName.ReplaceExt(P_(".tsv")), std::ios::binary);
+			playTest.ToTSV(output);
+		} catch(const std::exception &e)
+		{
+			Reporting::Error(MPT_UFORMAT("Cannot convert {}: {}")(fileName.ToUnicode(), mpt::ToUnicode(mpt::Charset::UTF8, e.what())), this);
+		}
+	}
+}
+
+#endif  // ENABLE_PLAYBACK_TEST_MENU
 
 
 void CMainFrame::NotifyAccessibilityUpdate(CWnd &source)

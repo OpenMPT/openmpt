@@ -221,7 +221,7 @@ namespace MidiExport
 			HardAllNotesOff();
 			UpdateTicksSinceLastEvent();
 
-			if(!m_tempoTrack)
+			if(!m_tempoTrack && m_wroteLoopStart)
 				WriteString(kCue, U_("loopEnd"));
 
 			WriteTicks();

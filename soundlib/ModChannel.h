@@ -125,6 +125,7 @@ struct ModChannel
 	bool isPreviewNote : 1;                  // Notes preview in editor
 	bool isPaused : 1;                       // Don't mix or increment channel position, but keep the note alive
 	bool portaTargetReached : 1;             // Tone portamento is finished
+	bool nnaMapped : 1;  // For PlaybackTest implementation
 
 	//-->Variables used to make user-definable tuning modes work with pattern effects.
 	//If true, freq should be recalculated in ReadNote() on first tick.
