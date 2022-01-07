@@ -10,10 +10,10 @@
 #include <cstdio>
 
 #if !MPT_LIBC_MS
-#include <unistd.h>  // _POSIX_VERSION
-#else // MPT_LIBC_MS
-#include <sys/types.h>  // off_t
-#endif // !MPT_LIBC_MS
+#include <unistd.h>    // _POSIX_VERSION
+#else                  // MPT_LIBC_MS
+#include <sys/types.h> // off_t
+#endif                 // !MPT_LIBC_MS
 
 #ifndef MPT_CHECK_LIBC_IGNORE_SIZEOF_OFF_T
 #if MPT_OS_DJGPP
