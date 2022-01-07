@@ -16,10 +16,8 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-#if defined(_MSC_VER) && !(defined(__MINGW32__) || defined(__MINGW64__))
-#include <sys/types.h> /* off_t */
-#else
-#include <unistd.h> /* _POSIX_VERSION */
+#ifdef _MSC_VER
+#include <wchar.h> /* off_t */
 #endif
 
 /*! \addtogroup libopenmpt_c
@@ -73,22 +71,12 @@ static int openmpt_stream_file_seek_func( void * stream, int64_t offset, int whe
 			return -1;
 			break;
 	}
-	#if defined(__MINGW32__) || defined(__MINGW64__)
-		if ( (_off64_t)offset != offset ) {
-			return -1;
-		}
-		return fseeko64( f, (_off64_t)offset, fwhence ) ? -1 : 0;
-	#elif defined(_MSC_VER)
+	#if defined(_MSC_VER)
 		if ( (__int64)offset != offset ) {
 			return -1;
 		}
 		return _fseeki64( f, (__int64)offset, fwhence ) ? -1 : 0;
-	#elif defined(_POSIX_VERSION) && (_POSIX_VERSION > 0) && defined(_LFS_LARGEFILE) && (_LFS_LARGEFILE == 1) && defined(_LFS64_STDIO) && (_LFS64_STDIO == 1)
-		if ( (off64_t)offset != offset ) {
-			return -1;
-		}
-		return fseeko64( f, (off64_t)offset, fwhence ) ? -1 : 0;
-	#elif defined(_POSIX_VERSION) && (_POSIX_VERSION > 0) && ((_POSIX_VERSION > 200112L) || (defined(_LFS_LARGEFILE) && (_LFS_LARGEFILE == 1)))
+	#elif defined(_POSIX_SOURCE) && (_POSIX_SOURCE == 1) 
 		if ( (off_t)offset != offset ) {
 			return -1;
 		}
@@ -103,13 +91,9 @@ static int openmpt_stream_file_seek_func( void * stream, int64_t offset, int whe
 
 static int64_t openmpt_stream_file_tell_func( void * stream ) {
 	FILE * f = 0;
-	#if defined(__MINGW32__) || defined(__MINGW64__)
-		_off64_t result = 0;
-	#elif defined(_MSC_VER)
+	#if defined(_MSC_VER)
 		__int64 result = 0;
-	#elif defined(_POSIX_VERSION) && (_POSIX_VERSION > 0) && defined(_LFS_LARGEFILE) && (_LFS_LARGEFILE == 1) && defined(_LFS64_STDIO) && (_LFS64_STDIO == 1)
-		off64_t result = 0;
-	#elif defined(_POSIX_VERSION) && (_POSIX_VERSION > 0) && ((_POSIX_VERSION > 200112L) || (defined(_LFS_LARGEFILE) && (_LFS_LARGEFILE == 1)))
+	#elif defined(_POSIX_SOURCE) && (_POSIX_SOURCE == 1)
 		off_t result = 0;
 	#else
 		long result = 0;
@@ -119,13 +103,9 @@ static int64_t openmpt_stream_file_tell_func( void * stream ) {
 	if ( !f ) {
 		return -1;
 	}
-	#if defined(__MINGW32__) || defined(__MINGW64__)
-		result = ftello64( f );
-	#elif defined(_MSC_VER)
+	#if defined(_MSC_VER)
 		result = _ftelli64( f );
-	#elif defined(_POSIX_VERSION) && (_POSIX_VERSION > 0) && defined(_LFS_LARGEFILE) && (_LFS_LARGEFILE == 1) && defined(_LFS64_STDIO) && (_LFS64_STDIO == 1)
-		result = ftello64( f );
-	#elif defined(_POSIX_VERSION) && (_POSIX_VERSION > 0) && ((_POSIX_VERSION > 200112L) || (defined(_LFS_LARGEFILE) && (_LFS_LARGEFILE == 1)))
+	#elif defined(_POSIX_SOURCE) && (_POSIX_SOURCE == 1) 
 		result = ftello( f );
 	#else
 		result = ftell( f );
@@ -169,3 +149,4 @@ static openmpt_stream_callbacks openmpt_stream_get_file_callbacks(void) {
  */
 
 #endif /* LIBOPENMPT_STREAM_CALLBACKS_FILE_H */
+
