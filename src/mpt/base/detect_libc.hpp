@@ -16,8 +16,8 @@
 // order of checks is important!
 #if MPT_COMPILER_GENERIC
 #define MPT_LIBC_GENERIC 1
-#elif MPT_COMPILER_GCC && (defined(__MINGW32__) || defined(__MINGW64__))
-#define MPT_LIBC_MS 1
+#elif (defined(__MINGW32__) || defined(__MINGW64__))
+#define MPT_LIBC_MINGW 1
 #elif defined(__GLIBC__)
 #define MPT_LIBC_GLIBC 1
 #elif MPT_COMPILER_MSVC
@@ -33,6 +33,9 @@
 #endif
 #ifndef MPT_LIBC_GLIBC
 #define MPT_LIBC_GLIBC 0
+#endif
+#ifndef MPT_LIBC_MINGW
+#define MPT_LIBC_MINGW 0
 #endif
 #ifndef MPT_LIBC_MS
 #define MPT_LIBC_MS 0
