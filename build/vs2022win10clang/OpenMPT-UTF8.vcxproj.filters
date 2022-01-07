@@ -1050,6 +1050,9 @@
     <ClInclude Include="..\..\src\mpt\check\libc.hpp">
       <Filter>src\mpt\check</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\mpt\check\libc_stdio.hpp">
+      <Filter>src\mpt\check</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\mpt\check\mfc.hpp">
       <Filter>src\mpt\check</Filter>
     </ClInclude>

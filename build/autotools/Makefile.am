@@ -153,6 +153,7 @@ MPT_FILES_SRC_MPT += src/mpt/binary/base64.hpp
 MPT_FILES_SRC_MPT += src/mpt/binary/base64url.hpp
 MPT_FILES_SRC_MPT += src/mpt/binary/hex.hpp
 MPT_FILES_SRC_MPT += src/mpt/check/libc.hpp
+MPT_FILES_SRC_MPT += src/mpt/check/libc_stdio.hpp
 MPT_FILES_SRC_MPT += src/mpt/check/mfc.hpp
 MPT_FILES_SRC_MPT += src/mpt/check/windows.hpp
 MPT_FILES_SRC_MPT += src/mpt/crc/crc.hpp
