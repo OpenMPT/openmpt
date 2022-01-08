@@ -158,6 +158,9 @@ enum DLSArt : uint32
 	ART_PITCH_EG_RELEASETIME  = DLSArt(CONN_SRC_NONE, CONN_SRC_NONE, CONN_DST_EG2_RELEASETIME),
 	ART_PITCH_EG_VELTOATTACK  = DLSArt(CONN_SRC_KEYONVELOCITY, CONN_SRC_NONE, CONN_DST_EG2_ATTACKTIME),
 	ART_PITCH_EG_KEYTODECAY   = DLSArt(CONN_SRC_KEYNUMBER,     CONN_SRC_NONE, CONN_DST_EG2_DECAYTIME),
+	ART_PITCH_EG_DELAYTIME    = DLSArt(CONN_SRC_NONE, CONN_SRC_NONE, CONN_DST_EG2_DELAYTIME),
+	ART_PITCH_EG_HOLDTIME     = DLSArt(CONN_SRC_NONE, CONN_SRC_NONE, CONN_DST_EG2_HOLDTIME),
+	ART_PITCH_EG_DEPTH        = DLSArt(CONN_SRC_EG2,  CONN_SRC_NONE, CONN_DST_PITCH),
 
 	// Default Pan
 	ART_DEFAULTPAN = DLSArt(CONN_SRC_NONE, CONN_SRC_NONE, CONN_DST_PAN),
@@ -355,11 +358,18 @@ enum SF2Generators : uint16
 {
 	SF2_GEN_START_LOOP_FINE		= 2,
 	SF2_GEN_END_LOOP_FINE		= 3,
+	SF2_GEN_MODENVTOPITCH		= 7,
 	SF2_GEN_MODENVTOFILTERFC	= 11,
 	SF2_GEN_PAN					= 17,
+	SF2_GEN_DELAYMODENV			= 25,
+	SF2_GEN_ATTACKMODENV		= 26,
+	SF2_GEN_HOLDMODENV			= 27,
 	SF2_GEN_DECAYMODENV			= 28,
+	SF2_GEN_SUSTAINMODENV		= 29,
+	SF2_GEN_RELEASEMODENV		= 30,
+	SF2_GEN_DELAYVOLENV			= 33,
 	SF2_GEN_ATTACKVOLENV		= 34,
-	SF2_GEN_HOLDVOLENV			= 34,
+	SF2_GEN_HOLDVOLENV			= 35,
 	SF2_GEN_DECAYVOLENV			= 36,
 	SF2_GEN_SUSTAINVOLENV		= 37,
 	SF2_GEN_RELEASEVOLENV		= 38,
@@ -405,6 +415,8 @@ struct SFGenList
 {
 	uint16le sfGenOper;
 	uint16le genAmount;
+
+	bool ApplyToEnvelope(DLSENVELOPE &env) const;
 };
 
 MPT_BINARY_STRUCT(SFGenList, 4)
@@ -425,13 +437,7 @@ struct SFInstBag
 
 MPT_BINARY_STRUCT(SFInstBag, 4)
 
-struct SFInstGenList
-{
-	uint16le sfGenOper;
-	uint16le genAmount;
-};
-
-MPT_BINARY_STRUCT(SFInstGenList, 4)
+using SFInstGenList = SFGenList;
 
 struct SFSample
 {
@@ -479,11 +485,72 @@ static uint8 DLSSustainLevelToLinear(int32 sustain)
 }
 
 
+static int16 SF2TimeToDLS(int16 amount)
+{
+	int32 time = CDLSBank::DLS32BitTimeCentsToMilliseconds(static_cast<int32>(amount) << 16);
+	return static_cast<int16>(Clamp(time, 20, 20000) / 20);
+}
+
+
 static uint8 SF2SustainLevelToLinear(int32 sustain)
 {
 	// 0.1% units
 	int32 l = 128 * (1000 - Clamp(sustain, 0, 1000)) / 1000;
 	return static_cast<uint8>(l);
+}
+
+
+bool SFGenList::ApplyToEnvelope(DLSENVELOPE &env) const
+{
+	switch(sfGenOper)
+	{
+	case SF2_GEN_DELAYVOLENV:
+		env.volumeEnv.delay = SF2TimeToDLS(genAmount);
+		break;
+	case SF2_GEN_ATTACKVOLENV:
+		env.volumeEnv.attack = SF2TimeToDLS(genAmount);
+		break;
+	case SF2_GEN_HOLDVOLENV:
+		env.volumeEnv.hold = SF2TimeToDLS(genAmount);
+		break;
+	case SF2_GEN_DECAYVOLENV:
+		env.volumeEnv.decay = SF2TimeToDLS(genAmount);
+		break;
+	case SF2_GEN_SUSTAINVOLENV:
+		// 0.1% units
+		if(genAmount >= 0)
+		{
+			env.volumeEnv.sustainLevel = SF2SustainLevelToLinear(genAmount);
+		}
+		break;
+	case SF2_GEN_RELEASEVOLENV:
+		env.volumeEnv.release = SF2TimeToDLS(genAmount);
+		break;
+	case SF2_GEN_DELAYMODENV:
+		env.pitchEnv.delay = SF2TimeToDLS(genAmount);
+		break;
+	case SF2_GEN_ATTACKMODENV:
+		env.pitchEnv.attack = SF2TimeToDLS(genAmount);
+		break;
+	case SF2_GEN_HOLDMODENV:
+		env.pitchEnv.hold = SF2TimeToDLS(genAmount);
+		break;
+	case SF2_GEN_DECAYMODENV:
+		env.pitchEnv.decay = SF2TimeToDLS(genAmount);
+		break;
+	case SF2_GEN_SUSTAINMODENV:
+		env.pitchEnv.sustainLevel = SF2SustainLevelToLinear(genAmount);
+		break;
+	case SF2_GEN_RELEASEMODENV:
+		env.pitchEnv.release = SF2TimeToDLS(genAmount);
+		break;
+	case SF2_GEN_MODENVTOPITCH:
+		env.pitchEnvDepth = static_cast<int16>(genAmount);
+		break;
+
+	default: return false;
+	}
+	return true;
 }
 
 
@@ -496,6 +563,20 @@ int32 CDLSBank::DLS32BitTimeCentsToMilliseconds(int32 lTimeCents)
 	if (fmsecs < -32767) return -32767;
 	if (fmsecs > 32767) return 32767;
 	return (int32)fmsecs;
+}
+
+
+uint16 CDLSBank::DLSEnvelopeTimeCentsToMilliseconds(int32 value)
+{
+	if(value <= -0x40000000)
+		return 0;
+	
+	int32 decaytime = DLS32BitTimeCentsToMilliseconds(value);
+	if(decaytime > 20000)
+		decaytime = 20000;
+	if(decaytime >= 20)
+		return static_cast<uint16>(decaytime / 20);
+	return 0;
 }
 
 
@@ -782,9 +863,6 @@ bool CDLSBank::UpdateInstrumentDefinition(DLSINSTRUMENT *pDlsIns, FileReader chu
 				if(art1.cbSize + art1.cConnectionBlocks * sizeof(ConnectionBlock) > header.len)
 					break;
 				DLSENVELOPE dlsEnv;
-				MemsetZero(dlsEnv);
-				dlsEnv.nDefPan = 128;
-				dlsEnv.nVolSustainLevel = 128;
 				//Log("  art1 (%3d bytes): cbSize=%d cConnectionBlocks=%d\n", p->len, p->cbSize, p->cConnectionBlocks);
 				chunk.Seek(sizeof(IFFCHUNK) + art1.cbSize);
 				for (uint32 iblk = 0; iblk < art1.cConnectionBlocks; iblk++)
@@ -801,55 +879,83 @@ bool CDLSBank::UpdateInstrumentDefinition(DLSINSTRUMENT *pDlsIns, FileReader chu
 					case ART_DEFAULTPAN:
 						{
 							int32 pan = 128 + blk.lScale / (65536000/128);
-							dlsEnv.nDefPan = mpt::saturate_cast<uint8>(pan);
+							dlsEnv.defaultPan = mpt::saturate_cast<uint8>(pan);
 						}
+						break;
+
+					case ART_VOL_EG_DELAYTIME:
+						// 32-bit time cents units. range = [0s, 20s]
+						dlsEnv.volumeEnv.delay = DLSEnvelopeTimeCentsToMilliseconds(blk.lScale);
 						break;
 
 					case ART_VOL_EG_ATTACKTIME:
 						// 32-bit time cents units. range = [0s, 20s]
-						dlsEnv.wVolAttack = 0;
 						if(blk.lScale > -0x40000000)
 						{
-							int32 l = blk.lScale - 78743200; // maximum velocity
-							if (l > 0) l = 0;
-							int32 attacktime = DLS32BitTimeCentsToMilliseconds(l);
-							if (attacktime < 0) attacktime = 0;
-							if (attacktime > 20000) attacktime = 20000;
-							if (attacktime >= 20) dlsEnv.wVolAttack = (uint16)(attacktime / 20);
-							//Log("%3d: Envelope Attack Time set to %d (%d time cents)\n", (uint32)(dlsEnv.ulInstrument & 0x7F)|((dlsEnv.ulBank >> 16) & 0x8000), attacktime, pblk->lScale);
+							int32 l = std::min(0, blk.lScale - 78743200); // maximum velocity
+							dlsEnv.volumeEnv.attack = DLSEnvelopeTimeCentsToMilliseconds(l);
 						}
+						break;
+
+					case ART_VOL_EG_HOLDTIME:
+						// 32-bit time cents units. range = [0s, 20s]
+						dlsEnv.volumeEnv.hold = DLSEnvelopeTimeCentsToMilliseconds(blk.lScale);
 						break;
 
 					case ART_VOL_EG_DECAYTIME:
 						// 32-bit time cents units. range = [0s, 20s]
-						dlsEnv.wVolDecay = 0;
-						if(blk.lScale > -0x40000000)
-						{
-							int32 decaytime = DLS32BitTimeCentsToMilliseconds(blk.lScale);
-							if (decaytime > 20000) decaytime = 20000;
-							if (decaytime >= 20) dlsEnv.wVolDecay = (uint16)(decaytime / 20);
-							//Log("%3d: Envelope Decay Time set to %d (%d time cents)\n", (uint32)(dlsEnv.ulInstrument & 0x7F)|((dlsEnv.ulBank >> 16) & 0x8000), decaytime, pblk->lScale);
-						}
+						dlsEnv.volumeEnv.decay = DLSEnvelopeTimeCentsToMilliseconds(blk.lScale);
 						break;
 
 					case ART_VOL_EG_RELEASETIME:
 						// 32-bit time cents units. range = [0s, 20s]
-						dlsEnv.wVolRelease = 0;
-						if(blk.lScale > -0x40000000)
-						{
-							int32 releasetime = DLS32BitTimeCentsToMilliseconds(blk.lScale);
-							if (releasetime > 20000) releasetime = 20000;
-							if (releasetime >= 20) dlsEnv.wVolRelease = (uint16)(releasetime / 20);
-							//Log("%3d: Envelope Release Time set to %d (%d time cents)\n", (uint32)(dlsEnv.ulInstrument & 0x7F)|((dlsEnv.ulBank >> 16) & 0x8000), dlsEnv.wVolRelease, pblk->lScale);
-						}
+						dlsEnv.volumeEnv.release = DLSEnvelopeTimeCentsToMilliseconds(blk.lScale);
 						break;
 
 					case ART_VOL_EG_SUSTAINLEVEL:
 						// 0.1% units
 						if(blk.lScale >= 0)
 						{
-							dlsEnv.nVolSustainLevel = DLSSustainLevelToLinear(blk.lScale);
+							dlsEnv.volumeEnv.sustainLevel = DLSSustainLevelToLinear(blk.lScale);
 						}
+						break;
+
+					case ART_PITCH_EG_DELAYTIME:
+						// 32-bit time cents units. range = [0s, 20s]
+						dlsEnv.pitchEnv.delay = DLSEnvelopeTimeCentsToMilliseconds(blk.lScale);
+						break;
+
+					case ART_PITCH_EG_ATTACKTIME:
+						// 32-bit time cents units. range = [0s, 20s]
+						if(blk.lScale > -0x40000000)
+						{
+							int32 l = std::min(0, blk.lScale - 78743200);  // maximum velocity
+							dlsEnv.pitchEnv.attack = DLSEnvelopeTimeCentsToMilliseconds(l);
+						}
+						break;
+
+					case ART_PITCH_EG_HOLDTIME:
+						// 32-bit time cents units. range = [0s, 20s]
+						dlsEnv.pitchEnv.hold = DLSEnvelopeTimeCentsToMilliseconds(blk.lScale);
+						break;
+
+					case ART_PITCH_EG_DECAYTIME:
+						// 32-bit time cents units. range = [0s, 20s]
+						dlsEnv.pitchEnv.decay = DLSEnvelopeTimeCentsToMilliseconds(blk.lScale);
+						break;
+
+					case ART_PITCH_EG_RELEASETIME:
+						// 32-bit time cents units. range = [0s, 20s]
+						dlsEnv.pitchEnv.release = DLSEnvelopeTimeCentsToMilliseconds(blk.lScale);
+						break;
+
+					case ART_PITCH_EG_SUSTAINLEVEL:
+						// 0.1% units
+						dlsEnv.pitchEnv.sustainLevel = DLSSustainLevelToLinear(blk.lScale);
+						break;
+
+					case ART_PITCH_EG_DEPTH:
+						dlsEnv.pitchEnvDepth = mpt::saturate_cast<int16>(blk.lScale / 65536);
 						break;
 
 					//default:
@@ -863,15 +969,15 @@ bool CDLSBank::UpdateInstrumentDefinition(DLSINSTRUMENT *pDlsIns, FileReader chu
 		case IFFID_INAM:
 			chunk.ReadString<mpt::String::spacePadded>(pDlsIns->szName, header.len);
 			break;
-	#if 0
 		default:
-			{
-				char sid[5];
+#ifdef DLSINSTR_LOG
+		{
+				char sid[5]{};
 				memcpy(sid, &header.id, 4);
-				sid[4] = 0;
-				Log("    \"%s\": %d bytes\n", (uint32)sid, header.len.get());
+				MPT_LOG_GLOBAL(LogDebug, "DLSINSTR", MPT_UFORMAT("Unsupported DLS chunk: {} ({} bytes)")(mpt::ToUnicode(mpt::Charset::ASCII, mpt::String::ReadAutoBuf(sid)), header.len.get()));
 			}
-	#endif
+#endif
+			break;
 		}
 	}
 	return true;
@@ -1009,24 +1115,17 @@ bool CDLSBank::UpdateSF2PresetData(SF2LoaderInfo &sf2info, const IFFCHUNK &heade
 		}
 		break;
 
-	#ifdef DLSINSTR_LOG
 	default:
+#ifdef DLSINSTR_LOG
 		{
-			char sdbg[5];
+			char sdbg[5]{};
 			memcpy(sdbg, &header.id, 4);
-			sdbg[4] = 0;
 			MPT_LOG_GLOBAL(LogDebug, "DLSINSTR", MPT_UFORMAT("Unsupported SF2 chunk: {} ({} bytes)")(mpt::ToUnicode(mpt::Charset::ASCII, mpt::String::ReadAutoBuf(sdbg)), header.len.get()));
 		}
-	#endif
+#endif
+		break;
 	}
 	return true;
-}
-
-
-static int16 SF2TimeToDLS(int16 amount)
-{
-	int32 time = CDLSBank::DLS32BitTimeCentsToMilliseconds(static_cast<int32>(amount) << 16);
-	return static_cast<int16>(Clamp(time, 20, 20000) / 20);
 }
 
 
@@ -1048,12 +1147,6 @@ bool CDLSBank::ConvertSF2ToDLS(SF2LoaderInfo &sf2info)
 		DLSENVELOPE dlsEnv;
 		int32 instrAttenuation = 0;
 		int16 instrFinetune = 0;
-		// Default Envelope Values
-		dlsEnv.wVolAttack = 0;
-		dlsEnv.wVolDecay = 0;
-		dlsEnv.wVolRelease = 0;
-		dlsEnv.nVolSustainLevel = 128;
-		dlsEnv.nDefPan = 128;
 		// Load Preset Bags
 		sf2info.presetBags.Seek(dlsIns.wPresetBagNdx * sizeof(SFPresetBag));
 		for(uint32 ipbagcnt = 0; ipbagcnt < dlsIns.wPresetBagNum; ipbagcnt++)
@@ -1073,22 +1166,6 @@ bool CDLSBank::ConvertSF2ToDLS(SF2LoaderInfo &sf2info)
 				const int16 value = static_cast<int16>(gen.genAmount);
 				switch(gen.sfGenOper)
 				{
-				case SF2_GEN_ATTACKVOLENV:
-					dlsEnv.wVolAttack = SF2TimeToDLS(gen.genAmount);
-					break;
-				case SF2_GEN_DECAYVOLENV:
-					dlsEnv.wVolDecay = SF2TimeToDLS(gen.genAmount);
-					break;
-				case SF2_GEN_SUSTAINVOLENV:
-					// 0.1% units
-					if(gen.genAmount >= 0)
-					{
-						dlsEnv.nVolSustainLevel = SF2SustainLevelToLinear(gen.genAmount);
-					}
-					break;
-				case SF2_GEN_RELEASEVOLENV:
-					dlsEnv.wVolRelease = SF2TimeToDLS(gen.genAmount);
-					break;
 				case SF2_GEN_INSTRUMENT:
 					if(const auto instr = std::make_pair(gen.genAmount.get(), keyRange); !mpt::contains(instruments, instr))
 						instruments.push_back(instr);
@@ -1106,12 +1183,15 @@ bool CDLSBank::ConvertSF2ToDLS(SF2LoaderInfo &sf2info)
 				case SF2_GEN_FINETUNE:
 					instrFinetune += static_cast<int16>(Util::muldiv(static_cast<int8>(value), 128, 100));
 					break;
-#if 0
 				default:
-					Log("Ins %3d: bag %3d gen %3d: ", nIns, ipbagndx, ipgenndx);
-					Log("genoper=%d amount=0x%04X ", gen.sfGenOper, gen.genAmount);
-					Log((pSmp->ulBank & F_INSTRUMENT_DRUMS) ? "(drum)\n" : "\n");
+					if(!gen.ApplyToEnvelope(dlsEnv))
+					{
+#ifdef DLSINSTR_LOG
+						MPT_LOG_GLOBAL(LogDebug, "DLSINSTR", MPT_UFORMAT("Preset {} bag {} gen {}: genoper={} amount={}{}")
+							(static_cast<int>(&dlsIns - m_Instruments.data()), ipbagcnt, static_cast<int>(&gen - generators.data()), gen.sfGenOper, gen.genAmount, (dlsIns.ulBank & F_INSTRUMENT_DRUMS) ? U_(" (drum)") : U_("")));
 #endif
+					}
+					break;
 				}
 			}
 		}
@@ -1197,28 +1277,12 @@ bool CDLSBank::ConvertSF2ToDLS(SF2LoaderInfo &sf2info)
 					case SF2_GEN_UNITYNOTE:
 						if (value < 128) rgn.uUnityNote = static_cast<uint8>(value);
 						break;
-					case SF2_GEN_ATTACKVOLENV:
-						pDlsEnv->wVolAttack = SF2TimeToDLS(gen.genAmount);
-						break;
-					case SF2_GEN_DECAYVOLENV:
-						pDlsEnv->wVolDecay = SF2TimeToDLS(gen.genAmount);
-						break;
-					case SF2_GEN_SUSTAINVOLENV:
-						// 0.1% units
-						if(gen.genAmount >= 0)
-						{
-							pDlsEnv->nVolSustainLevel = SF2SustainLevelToLinear(gen.genAmount);
-						}
-						break;
-					case SF2_GEN_RELEASEVOLENV:
-						pDlsEnv->wVolRelease = SF2TimeToDLS(gen.genAmount);
-						break;
 					case SF2_GEN_PAN:
 						{
 							int32 pan = static_cast<int16>(value);
 							pan = std::clamp(Util::muldivr(pan + 500, 256, 1000), 0, 256);
 							rgn.panning = static_cast<int16>(pan);
-							pDlsEnv->nDefPan = mpt::saturate_cast<uint8>(pan);
+							pDlsEnv->defaultPan = mpt::saturate_cast<uint8>(pan);
 						}
 						break;
 					case SF2_GEN_ATTENUATION:
@@ -1267,8 +1331,15 @@ bool CDLSBank::ConvertSF2ToDLS(SF2LoaderInfo &sf2info)
 					case SF2_GEN_END_LOOP_COARSE:
 						loopEnd += static_cast<int16>(value) * 32768;
 						break;
-					//default:
-					//	Log("    gen=%d value=%04X\n", pgen->sfGenOper, pgen->genAmount);
+					default:
+						if(!gen.ApplyToEnvelope(*pDlsEnv))
+						{
+#ifdef DLSINSTR_LOG
+							MPT_LOG_GLOBAL(LogDebug, "DLSINSTR", MPT_UFORMAT("Instr {} region {} gen {}: genoper={} amount={}{}")
+								(nInstrNdx, nRgn, static_cast<int>(&gen - instrGenerators.data()), gen.sfGenOper, gen.genAmount, (dlsIns.ulBank & F_INSTRUMENT_DRUMS) ? U_(" (drum)") : U_("")));
+#endif
+						}
+						break;
 					}
 				}
 				int32 linearVol = DLS32BitRelativeGainToLinear(((instrAttenuation + regionAttn) * 65536) / 10) / 256;
@@ -1279,7 +1350,6 @@ bool CDLSBank::ConvertSF2ToDLS(SF2LoaderInfo &sf2info)
 					globalZone = rgn;
 				else if(!rgn.IsDummy())
 					dlsIns.Regions.push_back(rgn);
-				//Log("\n");
 			}
 		}
 	}
@@ -1799,6 +1869,127 @@ static uint16 ScaleEnvelope(uint32 time, float tempoScale)
 }
 
 
+uint32 DLSENVELOPE::Envelope::ConvertToMPT(InstrumentEnvelope &mptEnv, const EnvelopeType envType, const float tempoScale, const int16 valueScale) const
+{
+	if(!attack && decay >= 20 * 50 && (!sustainLevel && envType != ENV_PITCH) && release >= 20 * 50)
+		return uint32_max;
+
+	const EnvelopeNode::value_t neutralValue = (envType == ENV_VOLUME) ? 0 : ENVELOPE_MID;
+	
+	mptEnv.dwFlags.set(ENV_ENABLED);
+	mptEnv.clear();
+	// Delay section
+	uint16 attackStart = 0;
+	if(delay)
+	{
+		mptEnv.push_back(0, neutralValue);
+		attackStart = ScaleEnvelope(delay, tempoScale);
+	}
+	// Attack section
+	const auto attackValue = mpt::saturate_cast<EnvelopeNode::value_t>(neutralValue + Util::muldivr(ENVELOPE_MAX, valueScale, 3200));
+	if(attack)
+	{
+		mptEnv.push_back(attackStart, static_cast<EnvelopeNode::value_t>(attackValue / (attack / 2 + 2) + 8));  // /-----
+		mptEnv.push_back(attackStart + ScaleEnvelope(attack, tempoScale), attackValue);                         // |
+	} else
+	{
+		mptEnv.push_back(attackStart, attackValue);
+	}
+	// Hold section
+	if(EnvelopeNode::tick_t holdTick = attackStart + ScaleEnvelope(attack + hold, tempoScale); hold > 0 && holdTick > mptEnv.back().tick)
+		mptEnv.push_back(holdTick, attackValue);
+	// Sustain Level
+	if(sustainLevel > 0 || envType == ENV_PITCH)
+	{
+		if(sustainLevel < 128)
+		{
+			uint16 lStartTime = mptEnv.back().tick;
+			int32 lSusLevel = -CDLSBank::DLS32BitRelativeLinearToGain(sustainLevel << 9) / 65536;
+			int32 lDecayTime = 1;
+			if(lSusLevel > 0)
+			{
+				lDecayTime = (lSusLevel * (int32)decay) / 960;
+				for(uint32 i = 0; i < 7; i++)
+				{
+					int32 lFactor = 128 - (1 << i);
+					if(lFactor <= sustainLevel) break;
+					int32 lev = -CDLSBank::DLS32BitRelativeLinearToGain(lFactor << 9) / 65536;
+					if(lev > 0)
+					{
+						int32 ltime = (lev * (int32)decay) / 960;
+						if((ltime > 1) && (ltime < lDecayTime))
+						{
+							uint16 tick = lStartTime + ScaleEnvelope(ltime, tempoScale);
+							if(tick > mptEnv.back().tick)
+							{
+								mptEnv.push_back(tick, mpt::saturate_cast<EnvelopeNode::value_t>(neutralValue + Util::muldivr(lFactor, valueScale, 6400)));
+							}
+						}
+					}
+				}
+			}
+
+			uint16 decayEnd = lStartTime + ScaleEnvelope(lDecayTime, tempoScale);
+			if(decayEnd > mptEnv.back().tick)
+			{
+				mptEnv.push_back(decayEnd, mpt::saturate_cast<EnvelopeNode::value_t>(neutralValue + Util::muldivr(sustainLevel + 1, valueScale, 6400)));
+			}
+		}
+		mptEnv.dwFlags.set(ENV_SUSTAIN);
+	} else
+	{
+		mptEnv.dwFlags.set(ENV_SUSTAIN);
+		mptEnv.push_back(mptEnv.back().tick + 1u, mptEnv.back().value);
+	}
+	mptEnv.nSustainStart = mptEnv.nSustainEnd = (uint8)(mptEnv.size() - 1);
+	if(mptEnv.nSustainEnd > 0 && envType == ENV_VOLUME)
+		mptEnv.nReleaseNode = mptEnv.nSustainEnd;
+	// Release section
+	const bool lastIsNeutral = mptEnv.back().value > 1 && mptEnv.back().value == neutralValue;
+	if(release && mptEnv.back().value > 1 && !lastIsNeutral)
+	{
+		int32 lReleaseTime = release;
+		uint16 lStartTime = mptEnv.back().tick;
+		int32 lStartFactor = mptEnv.back().value;
+		int32 lSusLevel = -CDLSBank::DLS32BitRelativeLinearToGain(lStartFactor << 10) / 65536;
+		int32 lDecayEndTime = (lReleaseTime * lSusLevel) / 960;
+		lReleaseTime -= lDecayEndTime;
+		for(uint32 i = 0; i < 5; i++)
+		{
+			int32 lFactor = 1 + ((lStartFactor * 3) >> (i + 2));
+			if((lFactor <= 1) || (lFactor >= lStartFactor))
+				continue;
+			int32 lev = -CDLSBank::DLS32BitRelativeLinearToGain(lFactor << 10) / 65536;
+			if(lev > 0)
+			{
+				int32 ltime = (((int32)release * lev) / 960) - lDecayEndTime;
+				if((ltime > 1) && (ltime < lReleaseTime))
+				{
+					uint16 tick = lStartTime + ScaleEnvelope(ltime, tempoScale);
+					if(tick > mptEnv.back().tick)
+					{
+						mptEnv.push_back(tick, mpt::saturate_cast<EnvelopeNode::value_t>(neutralValue + Util::muldivr(lFactor, valueScale, 3200)));
+						if(mptEnv.back().value ==  neutralValue)
+							break;
+					}
+				}
+			}
+		}
+		if(lReleaseTime < 1) lReleaseTime = 1;
+		auto releaseTicks = ScaleEnvelope(lReleaseTime, tempoScale);
+		mptEnv.push_back(lStartTime + releaseTicks, neutralValue);
+		if(releaseTicks > 0)
+		{
+			return 32768 / releaseTicks;
+		}
+	} else if(!lastIsNeutral)
+	{
+		mptEnv.push_back(mptEnv.back().tick + 1u, neutralValue);
+	}
+	return uint32_max;
+}
+
+
 bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, uint32 nIns, uint32 nDrumRgn) const
 {
 	uint32 minRegion, maxRegion, nEnv;
@@ -2031,109 +2222,10 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, ui
 	if ((nEnv) && (nEnv <= m_Envelopes.size()))
 	{
 		const DLSENVELOPE &part = m_Envelopes[nEnv - 1];
-		// Volume Envelope
-		if ((part.wVolAttack) || (part.wVolDecay < 20*50) || (part.nVolSustainLevel) || (part.wVolRelease < 20*50))
-		{
-			pIns->VolEnv.dwFlags.set(ENV_ENABLED);
-			// Delay section
-			// -> DLS level 2
-			// Attack section
-			pIns->VolEnv.clear();
-			if (part.wVolAttack)
-			{
-				pIns->VolEnv.push_back(0, (uint8)(ENVELOPE_MAX / (part.wVolAttack / 2 + 2) + 8)); // /-----
-				pIns->VolEnv.push_back(ScaleEnvelope(part.wVolAttack, tempoScale), ENVELOPE_MAX); // |
-			} else
-			{
-				pIns->VolEnv.push_back(0, ENVELOPE_MAX);
-			}
-			// Hold section
-			// -> DLS Level 2
-			// Sustain Level
-			if (part.nVolSustainLevel > 0)
-			{
-				if (part.nVolSustainLevel < 128)
-				{
-					uint16 lStartTime = pIns->VolEnv.back().tick;
-					int32 lSusLevel = - DLS32BitRelativeLinearToGain(part.nVolSustainLevel << 9) / 65536;
-					int32 lDecayTime = 1;
-					if (lSusLevel > 0)
-					{
-						lDecayTime = (lSusLevel * (int32)part.wVolDecay) / 960;
-						for (uint32 i=0; i<7; i++)
-						{
-							int32 lFactor = 128 - (1 << i);
-							if (lFactor <= part.nVolSustainLevel) break;
-							int32 lev = - DLS32BitRelativeLinearToGain(lFactor << 9) / 65536;
-							if (lev > 0)
-							{
-								int32 ltime = (lev * (int32)part.wVolDecay) / 960;
-								if ((ltime > 1) && (ltime < lDecayTime))
-								{
-									uint16 tick = lStartTime + ScaleEnvelope(ltime, tempoScale);
-									if(tick > pIns->VolEnv.back().tick)
-									{
-										pIns->VolEnv.push_back(tick, (uint8)(lFactor / 2));
-									}
-								}
-							}
-						}
-					}
-
-					uint16 decayEnd = lStartTime + ScaleEnvelope(lDecayTime, tempoScale);
-					if (decayEnd > pIns->VolEnv.back().tick)
-					{
-						pIns->VolEnv.push_back(decayEnd, (uint8)((part.nVolSustainLevel+1) / 2));
-					}
-				}
-				pIns->VolEnv.dwFlags.set(ENV_SUSTAIN);
-			} else
-			{
-				pIns->VolEnv.dwFlags.set(ENV_SUSTAIN);
-				pIns->VolEnv.push_back(pIns->VolEnv.back().tick + 1u, pIns->VolEnv.back().value);
-			}
-			pIns->VolEnv.nSustainStart = pIns->VolEnv.nSustainEnd = (uint8)(pIns->VolEnv.size() - 1);
-			// Release section
-			if ((part.wVolRelease) && (pIns->VolEnv.back().value > 1))
-			{
-				int32 lReleaseTime = part.wVolRelease;
-				uint16 lStartTime = pIns->VolEnv.back().tick;
-				int32 lStartFactor = pIns->VolEnv.back().value;
-				int32 lSusLevel = - DLS32BitRelativeLinearToGain(lStartFactor << 10) / 65536;
-				int32 lDecayEndTime = (lReleaseTime * lSusLevel) / 960;
-				lReleaseTime -= lDecayEndTime;
-				if(pIns->VolEnv.nSustainEnd > 0)
-					pIns->VolEnv.nReleaseNode = pIns->VolEnv.nSustainEnd;
-				for (uint32 i=0; i<5; i++)
-				{
-					int32 lFactor = 1 + ((lStartFactor * 3) >> (i+2));
-					if ((lFactor <= 1) || (lFactor >= lStartFactor)) continue;
-					int32 lev = - DLS32BitRelativeLinearToGain(lFactor << 10) / 65536;
-					if (lev > 0)
-					{
-						int32 ltime = (((int32)part.wVolRelease * lev) / 960) - lDecayEndTime;
-						if ((ltime > 1) && (ltime < lReleaseTime))
-						{
-							uint16 tick = lStartTime + ScaleEnvelope(ltime, tempoScale);
-							if(tick > pIns->VolEnv.back().tick)
-							{
-								pIns->VolEnv.push_back(tick, (uint8)lFactor);
-							}
-						}
-					}
-				}
-				if (lReleaseTime < 1) lReleaseTime = 1;
-				auto releaseTicks = ScaleEnvelope(lReleaseTime, tempoScale);
-				pIns->VolEnv.push_back(lStartTime + releaseTicks, ENVELOPE_MIN);
-				if(releaseTicks > 0)
-				{
-					pIns->nFadeOut = 32768 / releaseTicks;
-				}
-			} else
-			{
-				pIns->VolEnv.push_back(pIns->VolEnv.back().tick + 1u, ENVELOPE_MIN);
-			}
-		}
+		if(const auto fadeout = part.volumeEnv.ConvertToMPT(pIns->VolEnv, ENV_VOLUME, tempoScale, 3200); fadeout != uint32_max)
+			pIns->nFadeOut = fadeout;
+		if(std::abs(part.pitchEnvDepth) >= 50)
+			part.pitchEnv.ConvertToMPT(pIns->PitchEnv, ENV_PITCH, tempoScale, part.pitchEnvDepth);
 	}
 	if(isDrum)
 	{
@@ -2188,13 +2280,13 @@ uint16 CDLSBank::GetPanning(uint32 ins, uint32 region) const
 	{
 		if(rgn.uPercEnv > 0 && rgn.uPercEnv <= m_Envelopes.size())
 		{
-			return m_Envelopes[rgn.uPercEnv - 1].nDefPan;
+			return m_Envelopes[rgn.uPercEnv - 1].defaultPan;
 		}
 	} else
 	{
 		if(dlsIns.nMelodicEnv > 0 && dlsIns.nMelodicEnv <= m_Envelopes.size())
 		{
-			return m_Envelopes[dlsIns.nMelodicEnv - 1].nDefPan;
+			return m_Envelopes[dlsIns.nMelodicEnv - 1].defaultPan;
 		}
 	}
 	return 128;
