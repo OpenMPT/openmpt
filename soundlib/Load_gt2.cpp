@@ -666,17 +666,16 @@ struct GT2FileHeader
 
 	bool Validate() const
 	{
-		return !std::memcmp(signature, "GT2", 3)
-			&& fileVersion <= 9
-			&& year >= 1980
-			&& speed > 0
-			&& tempo > 0
-			&& masterVol <= 0xFFF;
+		if(std::memcmp(signature, "GT2", 3) || fileVersion > 9 || year < 1980)
+			return false;
+		if(fileVersion > 5)
+			return true;
+		return speed > 0 && tempo > 0 && masterVol <= 0xFFF && numPannedTracks <= 99;
 	}
 
 	uint64 GetHeaderMinimumAdditionalSize() const
 	{
-		return std::max(static_cast<size_t>(headerSize), sizeof(GT2FileHeader)) - sizeof(GT2FileHeader);
+		return std::max(static_cast<size_t>(headerSize), sizeof(GT2FileHeader)) - sizeof(GT2FileHeader) + 20u;  // 10 bytes each for required PATS and SONG chunks
 	}
 };
 
@@ -1226,6 +1225,9 @@ bool CSoundFile::ReadGT2(FileReader &file, ModLoadingFlags loadFlags)
 
 	m_songName = mpt::String::ReadBuf(mpt::String::spacePadded, fileHeader.songName);
 
+	m_nSamplePreAmp = 256;
+	m_nDefaultGlobalVolume = 384 / (3 + m_nChannels);  // See documentation on command 5xxx
+
 	if(fileHeader.fileVersion <= 5)
 	{
 		m_nDefaultSpeed = std::max(fileHeader.speed.get(), uint16(1));
@@ -1243,8 +1245,29 @@ bool CSoundFile::ReadGT2(FileReader &file, ModLoadingFlags loadFlags)
 	ChunkReader chunkFile(file);
 	auto chunks = chunkFile.ReadChunksUntil<GT2Chunk>(1, GT2Chunk::idENDC);
 
-	FileReader chunk = chunks.GetChunk(GT2Chunk::idXCOM);
-	if(chunk.CanRead(3))
+	if(auto chunk = chunks.GetChunk(GT2Chunk::idPATS); chunk.CanRead(2))
+	{
+		if(uint16 channels = chunk.ReadUint16BE(); channels >= 1 && channels <= MAX_BASECHANNELS)
+			m_nChannels = channels;
+		else
+			return false;
+	} else
+	{
+		return false;
+	}
+
+	if(auto chunk = chunks.GetChunk(GT2Chunk::idSONG); chunk.CanRead(2))
+	{
+		ORDERINDEX numOrders = chunk.ReadUint16BE();
+		Order().SetRestartPos(chunk.ReadUint16BE());
+		LimitMax(numOrders, mpt::saturate_cast<uint16>(chunk.BytesLeft() / 2u));
+		ReadOrderFromFile<uint16be>(Order(), chunk, numOrders);
+	} else
+	{
+		return false;
+	}
+
+	if(auto chunk = chunks.GetChunk(GT2Chunk::idXCOM); chunk.CanRead(3))
 	{
 		const uint16 length = chunk.ReadUint16BE();
 		m_songMessage.Read(chunk, length, SongMessage::leAutodetect);
@@ -1256,8 +1279,7 @@ bool CSoundFile::ReadGT2(FileReader &file, ModLoadingFlags loadFlags)
 		m_songMessage.Read(mpt::byte_cast<const std::byte *>(fileHeader.smallComment), msgLength, SongMessage::leAutodetect);
 	}
 
-	chunk = chunks.GetChunk(GT2Chunk::idTCN1);
-	if(chunk.ReadUint8() == 0 && chunk.Seek(2648))
+	if(auto chunk = chunks.GetChunk(GT2Chunk::idTCN1); chunk.ReadUint8() == 0 && chunk.Seek(2648))
 	{
 		// Only channel mute status is of interest here
 		uint32 muteStatus = chunk.ReadUint32BE();
@@ -1267,8 +1289,7 @@ bool CSoundFile::ReadGT2(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 
-	chunk = chunks.GetChunk(GT2Chunk::idTCN2);
-	if(chunk.CanRead(12))
+	if(auto chunk = chunks.GetChunk(GT2Chunk::idTCN2); chunk.CanRead(12))
 	{
 		const auto [chunkVersion, bpmInt, bpmFract, speed, timeSigNum, timeSigDenum] = chunk.ReadArray<uint16be, 6>();
 		m_nDefaultTempo = TEMPO(Clamp<uint16, uint16>(bpmInt, 32, 999), Util::muldivr_unsigned(bpmFract, TEMPO::fractFact, 65536));
@@ -1282,26 +1303,7 @@ bool CSoundFile::ReadGT2(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 
-	chunk = chunks.GetChunk(GT2Chunk::idSONG);
-	if(!chunk.IsValid())
-		return false;
-	ORDERINDEX numOrders = chunk.ReadUint16BE();
-	Order().SetRestartPos(chunk.ReadUint16BE());
-	LimitMax(numOrders, mpt::saturate_cast<uint16>(chunk.BytesLeft() / 2u));
-	ReadOrderFromFile<uint16be>(Order(), chunk, numOrders);
-
-	chunk = chunks.GetChunk(GT2Chunk::idPATS);
-
-	if(auto channels = chunk.ReadUint16BE(); channels >= 1 && channels <= MAX_BASECHANNELS)
-		m_nChannels = channels;
-	else
-		return false;
-
-	m_nSamplePreAmp = 256;
-	m_nDefaultGlobalVolume = 384 / (3 + m_nChannels);  // See documentation on command 5xxx
-
-	chunk = chunks.GetChunk(GT2Chunk::idTVOL);
-	if(chunk.CanRead(2))
+	if(auto chunk = chunks.GetChunk(GT2Chunk::idTVOL); chunk.CanRead(2))
 	{
 		CHANNELINDEX numChannels = std::min(static_cast<CHANNELINDEX>(chunk.ReadUint16BE()), GetNumChannels());
 		for(CHANNELINDEX chn = 0; chn < numChannels; chn++)
@@ -1311,8 +1313,7 @@ bool CSoundFile::ReadGT2(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// There can be more than one mix preset, but we only care about the first one (which appears to be the one that's always active when loading a file)
-	chunk = chunks.GetChunk(GT2Chunk::idMIXP);
-	if(chunk.CanRead(sizeof(GT2MixPreset)))
+	if(auto chunk = chunks.GetChunk(GT2Chunk::idMIXP); chunk.CanRead(sizeof(GT2MixPreset)))
 	{
 		GT2MixPreset mixPreset;
 		chunk.ReadStruct(mixPreset);
@@ -1554,8 +1555,7 @@ bool CSoundFile::ReadGT2(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 
-	chunk = chunks.GetChunk(GT2Chunk::idTNAM);
-	if(chunk.CanRead(2 + sizeof(GT2TrackName)))
+	if(auto chunk = chunks.GetChunk(GT2Chunk::idTNAM); chunk.CanRead(2 + sizeof(GT2TrackName)))
 	{
 		uint16 numNames = chunk.ReadUint16BE();
 		for (uint16 i = 0; i < numNames && chunk.CanRead(sizeof(GT2TrackName)); i++)
