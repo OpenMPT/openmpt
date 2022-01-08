@@ -321,7 +321,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, vstHostVendorVersion(conf, U_("VST Plugins"), U_("HostVendorVersion"), Version::Current().GetRawVersion())
 	// Broken Plugins Workarounds
 	, BrokenPluginsWorkaroundVSTMaskAllCrashes(conf, U_("Broken Plugins Workarounds"), U_("VSTMaskAllCrashes"), true)  // TODO: really should be false
-	, BrokenPluginsWorkaroundVSTNeverUnloadAnyPlugin(conf, U_("BrokenPluginsWorkarounds"), U_("VSTNeverUnloadAnyPlugin"), false)
+	, BrokenPluginsWorkaroundVSTNeverUnloadAnyPlugin(conf, U_("Broken Plugins Workarounds"), U_("VSTNeverUnloadAnyPlugin"), false)
 #if defined(MPT_ENABLE_UPDATE)
 	// Update
 	, UpdateEnabled(conf, U_("Update"), U_("Enabled"), true)
