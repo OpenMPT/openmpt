@@ -718,7 +718,6 @@ void CCtrlSamples::UpdateView(UpdateHint hint, CObject *pObj)
 
 	const CModSpecifications &specs = m_sndFile.GetModSpecifications();
 	const bool isOPL = IsOPLInstrument();
-	const bool hasSustainLoop = !isOPL && (m_sndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT));
 
 	LockControls();
 	// Updating Ranges
@@ -762,16 +761,8 @@ void CCtrlSamples::UpdateView(UpdateHint hint, CObject *pObj)
 		m_SpinSustainEnd.SetRange(-1, 1);
 		m_SpinSustainEnd.SetPos(0);
 
-		// Sustain Loops only available in IT
-		BOOL b = hasSustainLoop ? TRUE : FALSE;
-		m_ComboSustainType.EnableWindow(b);
-		m_SpinSustainStart.EnableWindow(b);
-		m_SpinSustainEnd.EnableWindow(b);
-		m_EditSustainStart.EnableWindow(b);
-		m_EditSustainEnd.EnableWindow(b);
-
 		// Finetune / C-5 Speed / BaseNote
-		b = m_sndFile.UseFinetuneAndTranspose() ? FALSE : TRUE;
+		BOOL b = m_sndFile.UseFinetuneAndTranspose() ? FALSE : TRUE;
 		SetDlgItemText(IDC_TEXT7, (b) ? _T("Freq. (Hz)") : _T("Finetune"));
 		m_SpinFineTune.SetRange(-1, 1);
 		m_EditFileName.EnableWindow(b);
@@ -911,19 +902,8 @@ void CCtrlSamples::UpdateView(UpdateHint hint, CObject *pObj)
 		m_EditSustainStart.SetWindowText(s);
 		s = mpt::cfmt::val(sample.nSustainEnd);
 		m_EditSustainEnd.SetWindowText(s);
-	}
-	if(hintType[HINT_MODTYPE | HINT_SAMPLEINFO | HINT_SMPNAMES])
-	{
-		// Name
-		SetDlgItemText(IDC_SAMPLE_NAME, mpt::ToWin(m_sndFile.GetCharsetInternal(), m_sndFile.m_szNames[m_nSample]).c_str());
 
-		CheckDlgButton(IDC_CHECK2, m_sndFile.GetSample(m_nSample).uFlags[SMP_KEEPONDISK] ? BST_CHECKED : BST_UNCHECKED);
-		GetDlgItem(IDC_CHECK2)->EnableWindow((m_sndFile.SampleHasPath(m_nSample) && m_sndFile.GetType() == MOD_TYPE_MPT) ? TRUE : FALSE);
-	}
-
-	// Update OPL instrument status
-	if(hintType[HINT_MODTYPE | HINT_SAMPLEINFO])
-	{
+		// Disable certain buttons for OPL instruments
 		BOOL b = isOPL ? FALSE : TRUE;
 		static constexpr int sampleButtons[] =
 		{
@@ -943,12 +923,22 @@ void CCtrlSamples::UpdateView(UpdateHint hint, CObject *pObj)
 		m_EditLoopStart.EnableWindow(b);
 		m_EditLoopEnd.EnableWindow(b);
 
+		const bool hasSustainLoop = !isOPL && ((m_sndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) || (m_nSample <= m_sndFile.GetNumSamples() && m_sndFile.GetSample(m_nSample).uFlags[CHN_SUSTAINLOOP]));
 		b = hasSustainLoop ? TRUE : FALSE;
 		m_ComboSustainType.EnableWindow(b);
 		m_SpinSustainStart.EnableWindow(b);
 		m_SpinSustainEnd.EnableWindow(b);
 		m_EditSustainStart.EnableWindow(b);
 		m_EditSustainEnd.EnableWindow(b);
+
+	}
+	if(hintType[HINT_MODTYPE | HINT_SAMPLEINFO | HINT_SMPNAMES])
+	{
+		// Name
+		SetDlgItemText(IDC_SAMPLE_NAME, mpt::ToWin(m_sndFile.GetCharsetInternal(), m_sndFile.m_szNames[m_nSample]).c_str());
+
+		CheckDlgButton(IDC_CHECK2, m_sndFile.GetSample(m_nSample).uFlags[SMP_KEEPONDISK] ? BST_CHECKED : BST_UNCHECKED);
+		GetDlgItem(IDC_CHECK2)->EnableWindow((m_sndFile.SampleHasPath(m_nSample) && m_sndFile.GetType() == MOD_TYPE_MPT) ? TRUE : FALSE);
 	}
 
 	if (!m_bInitialized)
