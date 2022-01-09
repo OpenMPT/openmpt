@@ -22,6 +22,8 @@
 #include "../misc/mptMutex.h"
 #include "../common/mptRandom.h"
 
+#include <future>
+
 OPENMPT_NAMESPACE_BEGIN
 
 class CModDoc;
@@ -112,12 +114,15 @@ protected:
 	static MidiLibrary midiLibrary;
 
 public:
-	static std::vector<CDLSBank *> gpDLSBanks;
+	static std::vector<std::unique_ptr<CDLSBank>> gpDLSBanks;
 
 protected:
 	mpt::recursive_mutex_with_lock_count m_GlobalMutex;
 
 	DWORD m_GuiThreadId = 0;
+
+	std::future<std::vector<std::unique_ptr<CDLSBank>>> m_scannedDlsBanks;
+	std::atomic<bool> m_scannedDlsBanksAvailable = false;
 
 	std::unique_ptr<mpt::random_device> m_RD;
 	std::unique_ptr<mpt::thread_safe_prng<mpt::default_prng>> m_PRNG;
@@ -183,7 +188,7 @@ public:
 	static void ExportMidiConfig(const mpt::PathString &filename);
 	static void ImportMidiConfig(SettingsContainer &file, const mpt::PathString &path, bool forgetSettings = false);
 	static void ExportMidiConfig(SettingsContainer &file);
-	static void LoadDefaultDLSBanks();
+	static std::future<std::vector<std::unique_ptr<CDLSBank>>> LoadDefaultDLSBanks();
 	static void SaveDefaultDLSBanks();
 	static void RemoveDLSBank(UINT nBank);
 	static bool AddDLSBank(const mpt::PathString &filename);
@@ -345,6 +350,8 @@ public:
 	DECLARE_MESSAGE_MAP()
 
 protected:
+	size_t AddScannedDLSBanks();
+
 	void InitializeDXPlugins();
 	void UninitializeDXPlugins();
 

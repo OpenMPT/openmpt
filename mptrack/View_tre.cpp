@@ -557,7 +557,7 @@ CDLSBank *CModTree::GetDLSBankFromItem(HTREEITEM hItem) const
 {
 	const auto bank = GetDLSBankIndexFromItem(hItem);
 	if(bank < CTrackApp::gpDLSBanks.size())
-		return CTrackApp::gpDLSBanks[bank];
+		return CTrackApp::gpDLSBanks[bank].get();
 	else
 		return nullptr;
 }
@@ -667,21 +667,21 @@ void CModTree::RefreshDlsBanks()
 			if(!m_tiDLS[iDls])
 			{
 				TVSORTCB tvs;
-				CDLSBank *pDlsBank = CTrackApp::gpDLSBanks[iDls];
+				CDLSBank dlsBank = *CTrackApp::gpDLSBanks[iDls];
 				// Add DLS file folder
 				m_tiDLS[iDls] = InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM,
-					pDlsBank->GetFileName().GetFullFileName().AsNative().c_str(), IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, iDls, TVI_ROOT, hDlsRoot);
+					dlsBank.GetFileName().GetFullFileName().AsNative().c_str(), IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, iDls, TVI_ROOT, hDlsRoot);
 				// Memorize Banks
 				std::map<uint16, HTREEITEM> banks;
 				// Add Drum Kits folder
 				HTREEITEM hDrums = InsertItem(TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE | TVIF_PARAM,
 						_T("Drum Kits"), IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, DLS_DRUM_FOLDER_LPARAM, m_tiDLS[iDls], TVI_LAST);
 				// Add Instruments
-				UINT nInstr = pDlsBank->GetNumInstruments();
+				UINT nInstr = dlsBank.GetNumInstruments();
 				MPT_ASSERT(nInstr <= 0x10000);
 				for(UINT iIns = 0; iIns < nInstr; iIns++)
 				{
-					const DLSINSTRUMENT *pDlsIns = pDlsBank->GetInstrument(iIns);
+					const DLSINSTRUMENT *pDlsIns = dlsBank.GetInstrument(iIns);
 					if(pDlsIns)
 					{
 						TCHAR szName[256];
@@ -701,7 +701,7 @@ void CModTree::RefreshDlsBanks()
 								UINT keymin = pDlsIns->Regions[iRgn].uKeyMin;
 								UINT keymax = pDlsIns->Regions[iRgn].uKeyMax;
 
-								const char *regionName = pDlsBank->GetRegionName(iIns, iRgn);
+								const char *regionName = dlsBank.GetRegionName(iIns, iRgn);
 								if(regionName == nullptr || !regionName[0])
 								{
 									if(keymin >= 24 && keymin <= 84)
@@ -731,7 +731,7 @@ void CModTree::RefreshDlsBanks()
 							}
 							tvs.hParent = hKit;
 							tvs.lpfnCompare = ModTreeDrumCompareProc;
-							tvs.lParam = reinterpret_cast<LPARAM>(CTrackApp::gpDLSBanks[iDls]);
+							tvs.lParam = reinterpret_cast<LPARAM>(CTrackApp::gpDLSBanks[iDls].get());
 							SortChildrenCB(&tvs);
 						} else
 						// Melodic

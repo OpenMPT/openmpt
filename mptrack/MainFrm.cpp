@@ -1906,6 +1906,12 @@ void CMainFrame::UpdateTree(CModDoc *pModDoc, UpdateHint hint, CObject *pHint)
 }
 
 
+void CMainFrame::RefreshDlsBanks()
+{
+	m_wndTree.RefreshDlsBanks();
+}
+
+
 /////////////////////////////////////////////////////////////////////////////
 // CMainFrame message handlers
 

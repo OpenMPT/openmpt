@@ -418,18 +418,19 @@ void CTrackApp::ExportMidiConfig(SettingsContainer &file)
 /////////////////////////////////////////////////////////////////////////////
 // DLS Banks support
 
-std::vector<CDLSBank *> CTrackApp::gpDLSBanks;
+std::vector<std::unique_ptr<CDLSBank>> CTrackApp::gpDLSBanks;
 
 
-void CTrackApp::LoadDefaultDLSBanks()
+std::future<std::vector<std::unique_ptr<CDLSBank>>> CTrackApp::LoadDefaultDLSBanks()
 {
+	const auto comp = [](const auto &l, const auto &r) { return mpt::PathString::CompareNoCase(l, r) < 0; };
+	std::set<mpt::PathString, decltype(comp)> paths{comp};
+
 	uint32 numBanks = theApp.GetSettings().Read<uint32>(U_("DLS Banks"), U_("NumBanks"), 0);
-	gpDLSBanks.reserve(numBanks);
 	for(uint32 i = 0; i < numBanks; i++)
 	{
 		mpt::PathString path = theApp.GetSettings().Read<mpt::PathString>(U_("DLS Banks"), MPT_UFORMAT("Bank{}")(i + 1), mpt::PathString());
-		path = theApp.PathInstallRelativeToAbsolute(path);
-		AddDLSBank(path);
+		paths.insert(theApp.PathInstallRelativeToAbsolute(path));
 	}
 
 	HKEY key;
@@ -440,18 +441,49 @@ void CTrackApp::LoadDefaultDLSBanks()
 		if(RegQueryValueEx(key, _T("GMFilePath"), NULL, &dwRegType, nullptr, &dwSize) == ERROR_SUCCESS && dwSize > 0)
 		{
 			std::vector<TCHAR> filenameT(dwSize / sizeof(TCHAR));
-			if (RegQueryValueEx(key, _T("GMFilePath"), NULL, &dwRegType, reinterpret_cast<LPBYTE>(filenameT.data()), &dwSize) == ERROR_SUCCESS)
+			if(RegQueryValueEx(key, _T("GMFilePath"), NULL, &dwRegType, reinterpret_cast<LPBYTE>(filenameT.data()), &dwSize) == ERROR_SUCCESS)
 			{
 				mpt::winstring filenamestr = ParseMaybeNullTerminatedStringFromBufferWithSizeInBytes<mpt::winstring>(filenameT.data(), dwSize);
 				std::vector<TCHAR> filenameExpanded(::ExpandEnvironmentStrings(filenamestr.c_str(), nullptr, 0));
 				::ExpandEnvironmentStrings(filenamestr.c_str(), filenameExpanded.data(), static_cast<DWORD>(filenameExpanded.size()));
 				auto filename = mpt::PathString::FromNative(filenameExpanded.data());
-				AddDLSBank(filename);
 				ImportMidiConfig(filename, true);
+				paths.insert(std::move(filename));
 			}
 		}
 		RegCloseKey(key);
 	}
+
+	if(paths.empty())
+		return {};
+
+	return std::async(std::launch::async, [paths = std::move(paths)]()
+	{
+		std::vector<std::unique_ptr<CDLSBank>> banks;
+		banks.reserve(paths.size());
+		for(const auto &filename : paths)
+		{
+			if(filename.empty() || !CDLSBank::IsDLSBank(filename))
+				continue;
+			try
+			{
+				auto bank = std::make_unique<CDLSBank>();
+				if(bank->Open(filename))
+				{
+					banks.push_back(std::move(bank));
+					continue;
+				}
+			} catch(mpt::out_of_memory e)
+			{
+				mpt::delete_out_of_memory(e);
+			} catch(const std::exception &)
+			{
+			}
+		}
+		// Avoid the overhead of future::wait_for(0) until future::is_ready is finally non-experimental
+		theApp.m_scannedDlsBanksAvailable = true;
+		return banks;
+	});
 }
 
 
@@ -480,10 +512,8 @@ void CTrackApp::SaveDefaultDLSBanks()
 
 void CTrackApp::RemoveDLSBank(UINT nBank)
 {
-	if(nBank >= gpDLSBanks.size() || !gpDLSBanks[nBank]) return;
-	delete gpDLSBanks[nBank];
-	gpDLSBanks[nBank] = nullptr;
-	//gpDLSBanks.erase(gpDLSBanks.begin() + nBank);
+	if(nBank < gpDLSBanks.size())
+		gpDLSBanks[nBank] = nullptr;
 }
 
 
@@ -493,15 +523,15 @@ bool CTrackApp::AddDLSBank(const mpt::PathString &filename)
 	// Check for dupes
 	for(const auto &bank : gpDLSBanks)
 	{
-		if(bank && !mpt::PathString::CompareNoCase(filename, bank->GetFileName())) return true;
+		if(bank && !mpt::PathString::CompareNoCase(filename, bank->GetFileName()))
+			return true;
 	}
-	CDLSBank *bank = nullptr;
 	try
 	{
-		bank = new CDLSBank;
+		auto bank = std::make_unique<CDLSBank>();
 		if(bank->Open(filename))
 		{
-			gpDLSBanks.push_back(bank);
+			gpDLSBanks.push_back(std::move(bank));
 			return true;
 		}
 	} catch(mpt::out_of_memory e)
@@ -510,8 +540,28 @@ bool CTrackApp::AddDLSBank(const mpt::PathString &filename)
 	} catch(const std::exception &)
 	{
 	}
-	delete bank;
 	return false;
+}
+
+
+size_t CTrackApp::AddScannedDLSBanks()
+{
+	if(!m_scannedDlsBanks.valid())
+		return 0;
+
+	size_t numAdded = 0;
+	auto scannedBanks = m_scannedDlsBanks.get();
+	gpDLSBanks.reserve(gpDLSBanks.size() + scannedBanks.size());
+	const size_t existingBanks = gpDLSBanks.size();
+	for(auto &bank : scannedBanks)
+	{
+		if(std::find_if(gpDLSBanks.begin(), gpDLSBanks.begin() + existingBanks, [&bank](const auto &other) { return other && *bank == *other; }) == gpDLSBanks.begin() + existingBanks)
+		{
+			gpDLSBanks.push_back(std::move(bank));
+			numAdded++;
+		}
+	}
+	return numAdded;
 }
 
 
@@ -1250,7 +1300,8 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 	CSoundFile::SetDefaultNoteNames();
 
 	// Load DLS Banks
-	if (!cmdInfo.m_noDls) LoadDefaultDLSBanks();
+	if (!cmdInfo.m_noDls)
+		m_scannedDlsBanks = LoadDefaultDLSBanks();
 
 	// Initialize Plugins
 	if (!cmdInfo.m_noPlugins) InitializeDXPlugins();
@@ -1467,11 +1518,8 @@ int CTrackApp::ExitInstanceImpl()
 	m_pSoundDevicesManager = nullptr;
 	m_pAllSoundDeviceComponents = nullptr;
 	ExportMidiConfig(theApp.GetSettings());
+	AddScannedDLSBanks();
 	SaveDefaultDLSBanks();
-	for(auto &bank : gpDLSBanks)
-	{
-		delete bank;
-	}
 	gpDLSBanks.clear();
 
 	// Uninitialize Plugins
@@ -1755,6 +1803,12 @@ BOOL CTrackApp::OnIdle(LONG lCount)
 	if(CMainFrame::GetMainFrame())
 	{
 		CMainFrame::GetMainFrame()->IdleHandlerSounddevice();
+
+		if(m_scannedDlsBanksAvailable)
+		{
+			if(AddScannedDLSBanks())
+				CMainFrame::GetMainFrame()->RefreshDlsBanks();
+		}
 	}
 
 	// Call plugins idle routine for open editor
