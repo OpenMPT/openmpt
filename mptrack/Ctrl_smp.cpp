@@ -1298,7 +1298,7 @@ static mpt::ustring ConstructFileFilter(bool includeRaw)
 #endif
 	if(includeRaw)
 	{
-		s += U_(";*.raw;*.snd;*.pcm");
+		s += U_(";*.raw;*.snd;*.pcm;*.sam");
 	}
 	s += U_("|");
 	for(const auto &[name, exts] : SampleFormats)
@@ -1311,7 +1311,7 @@ static mpt::ustring ConstructFileFilter(bool includeRaw)
 #endif
 	if(includeRaw)
 	{
-		s += U_("Raw Samples (*.raw,*.snd,*.pcm)|*.raw;*.snd;*.pcm|");
+		s += U_("Raw Samples (*.raw,*.snd,*.pcm,*.sam)|*.raw;*.snd;*.pcm;*.sam|");
 	}
 	s += U_("All Files (*.*)|*.*||");
 	return s;
@@ -1361,7 +1361,7 @@ void CCtrlSamples::OnSampleOpenRaw()
 	FileDialog dlg = OpenFileDialog()
 		.AllowMultiSelect()
 		.EnableAudioPreview()
-		.ExtensionFilter("Raw Samples (*.raw,*.snd,*.pcm)|*.raw;*.snd;*.pcm|"
+		.ExtensionFilter("Raw Samples (*.raw,*.snd,*.pcm,*.sam)|*.raw;*.snd;*.pcm;*.sam|"
 		"All Files (*.*)|*.*||")
 		.WorkingDirectory(TrackerSettings::Instance().PathSamples.GetWorkingDir())
 		.FilterIndex(&nLastIndex);
@@ -1430,6 +1430,7 @@ void CCtrlSamples::SaveSample(bool doBatchSave)
 		const mpt::PathString ext = fileName.GetFileExt();
 		if(!mpt::PathString::CompareNoCase(ext, P_(".flac"))) defaultFormat = dfFLAC;
 		else if(!mpt::PathString::CompareNoCase(ext, P_(".wav"))) defaultFormat = dfWAV;
+		else if(!mpt::PathString::CompareNoCase(ext, P_(".s3i"))) defaultFormat = dfS3I;
 
 		hasAdlib = sample.uFlags[CHN_ADLIB];
 	} else
@@ -1456,8 +1457,12 @@ void CCtrlSamples::SaveSample(bool doBatchSave)
 	default:
 		filter = 2;
 		break;
+	case dfS3I:
+		filter = 3;
+		break;
 	case dfRAW:
 		filter = 4;
+		break;
 	}
 	// Do we have to use a format that can save OPL instruments?
 	if(hasAdlib)
