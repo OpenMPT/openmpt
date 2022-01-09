@@ -5825,7 +5825,7 @@ void CSoundFile::SetTempo(TEMPO param, bool setFromUI)
 	const CModSpecifications &specs = GetModSpecifications();
 
 	// Anything lower than the minimum tempo is considered to be a tempo slide
-	const TEMPO minTempo = (GetType() & (MOD_TYPE_MDL | MOD_TYPE_MED)) ? TEMPO(1, 0) : TEMPO(32, 0);
+	const TEMPO minTempo = (GetType() & (MOD_TYPE_MDL | MOD_TYPE_MED | MOD_TYPE_MOD)) ? TEMPO(1, 0) : TEMPO(32, 0);
 
 	if(setFromUI)
 	{
