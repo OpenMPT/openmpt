@@ -31,6 +31,29 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.30.02.00 (xx January 2022, revision 16432)
+---------------------------------------------
+Tree view
+- [Fix] <js> Display of large directories could be rather slow due to trying to resolve links for pretty much any file.
+
+Pattern tab
+- [Imp] <js> Better display of finetune command semantics when there's an instrument number next to the command (http://bugs.openmpt.org/view.php?id=1536).
+- [Fix] <js> Note Properties: Switching to / from an extended command broke effect parameter display (http://bugs.openmpt.org/view.php?id=1535).
+
+Sample tab
+- [Imp] <js> Added timeline context menu entry to quickly add a cue point if there are any unused cue points (http://forum.openmpt.org/index.php?topic=6767.0).
+- [Fix] <js> Fixed a crash when hovering sample display of a sample slot that failed to load an external sample.
+
+MPTM
+- [Fix] <js> Avoid using NaN values for tuning when reading corrupted custom tunings.
+
+Other formats
+- [Fix] <js> DIGI: Improve compatibility with E3x reverse sample command.
+
+Bundled plugins
+- [Fix] <js> I3DL2Reverb: Fix possible output of NaN values with some extremely impractical set of reverb parameters.
+
+
 v1.30.01.00 (23 December 2021, revision 16290)
 ----------------------------------------------
 Tree view
