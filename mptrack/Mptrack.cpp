@@ -421,10 +421,17 @@ void CTrackApp::ExportMidiConfig(SettingsContainer &file)
 std::vector<std::unique_ptr<CDLSBank>> CTrackApp::gpDLSBanks;
 
 
+struct CompareLessPathStringNoCase
+{
+	inline bool operator()(const mpt::PathString &l, const mpt::PathString &r) const
+	{
+		return mpt::PathString::CompareNoCase(l, r) < 0;
+	}
+};
+
 std::future<std::vector<std::unique_ptr<CDLSBank>>> CTrackApp::LoadDefaultDLSBanks()
 {
-	const auto comp = [](const auto &l, const auto &r) { return mpt::PathString::CompareNoCase(l, r) < 0; };
-	std::set<mpt::PathString, decltype(comp)> paths{comp};
+	std::set<mpt::PathString, CompareLessPathStringNoCase> paths;
 
 	uint32 numBanks = theApp.GetSettings().Read<uint32>(U_("DLS Banks"), U_("NumBanks"), 0);
 	for(uint32 i = 0; i < numBanks; i++)
