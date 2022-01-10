@@ -417,11 +417,16 @@ void CSoundFile::CreateStereoMix(int count)
 			else if(m_SamplePlayLengths != nullptr)
 			{
 				// Detecting the longest play time for each sample for optimization
+				SmpLength pos = chn.position.GetUInt();
 				chn.position += chn.increment * nSmpCount;
+				if(!chn.increment.IsNegative())
+				{
+					pos = chn.position.GetUInt();
+				}
 				size_t smp = std::distance(static_cast<const ModSample*>(static_cast<std::decay<decltype(Samples)>::type>(Samples)), chn.pModSample);
 				if(smp < m_SamplePlayLengths->size())
 				{
-					(*m_SamplePlayLengths)[smp] = std::max((*m_SamplePlayLengths)[smp], chn.position.GetUInt());
+					(*m_SamplePlayLengths)[smp] = std::max((*m_SamplePlayLengths)[smp], pos);
 				}
 			}
 #endif
