@@ -556,6 +556,8 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 	if(!m_nDefaultSpeed)
 		m_nDefaultSpeed = 6;
 
+	if(!m_nDefaultRowsPerBeat && m_nTempoMode == TempoMode::Modern)
+		m_nDefaultRowsPerBeat = 1;
 	if(m_nDefaultRowsPerMeasure < m_nDefaultRowsPerBeat)
 		m_nDefaultRowsPerMeasure = m_nDefaultRowsPerBeat;
 	LimitMax(m_nDefaultRowsPerBeat, MAX_ROWS_PER_BEAT);
