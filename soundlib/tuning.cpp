@@ -752,7 +752,7 @@ SerializationResult CTuning::InitDeserializeOLD(std::istream &inStrm, mpt::Chars
 	IEEE754binary32LE groupratio = IEEE754binary32LE(0.0f);
 	mpt::IO::Read(inStrm, groupratio);
 	m_GroupRatio = SanitizeGroupRatio(groupratio);
-	if(!std::isfinite(groupratio))
+	if(!std::isfinite(m_GroupRatio))
 	{
 		return SerializationResult::Failure;
 	}
