@@ -601,7 +601,7 @@ bool CSoundFile::ReadGTK(FileReader &file, ModLoadingFlags loadFlags)
 	uint32 currentSpeed = m_nDefaultSpeed;
 	for(PATTERNINDEX pat = 0; pat < numPatterns; pat++)
 	{
-		if(!Patterns.Insert(pat, fileHeader.numRows) || !file.CanRead(fileHeader.numRows * GetNumChannels() * eventSize))
+		if(!(loadFlags & loadPatternData) || !file.CanRead(fileHeader.numRows * GetNumChannels() * eventSize) || !Patterns.Insert(pat, fileHeader.numRows))
 			continue;
 
 		std::vector<std::pair<ModCommand::NOTE, ModCommand::INSTR>> lastNoteInstr(GetNumChannels(), {NOTE_NONE, {}});
@@ -633,6 +633,8 @@ bool CSoundFile::ReadGTK(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 
+	if(!(loadFlags & loadSampleData))
+		return true;
 	for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
 	{
 		SampleIO(
@@ -1351,7 +1353,7 @@ bool CSoundFile::ReadGT2(FileReader &file, ModLoadingFlags loadFlags)
 		sample.ConvertToMPT(mptSmp);
 		m_szNames[sample.smpNum] = mpt::String::ReadBuf(mpt::String::spacePadded, sample.name);
 
-		if(smpChunk.Seek(sample.dataOffset - 8))
+		if((loadFlags & loadSampleData) && smpChunk.Seek(sample.dataOffset - 8))
 		{
 			if(sample.type == 0)
 				sample.GetSampleFormat().ReadSample(mptSmp, smpChunk);
@@ -1377,6 +1379,12 @@ bool CSoundFile::ReadGT2(FileReader &file, ModLoadingFlags loadFlags)
 #if 0
 		if(fileHeader.fileVersion >= 9)
 		{
+			if(!(loadFlags & loadSampleData))
+			{
+				smpChunk.Seek(sample.dataOffset - 8 + sample.filenameLen);
+				if(sample.type == 0)
+					smpChunk.Skip(sample.GetSampleFormat().CalculateEncodedSize(mptSmp.nLength));
+			}
 			if(smpChunk.Seek((smpChunk.GetPosition() + 3u) & ~3u))
 			{
 				const uint16 version = smpChunk.ReadUint16BE();
@@ -1404,7 +1412,8 @@ bool CSoundFile::ReadGT2(FileReader &file, ModLoadingFlags loadFlags)
 		ModSample &mptSmp = Samples[sample.smpNum];
 		sample.ConvertToMPT(mptSmp);
 		m_szNames[sample.smpNum] = mpt::String::ReadBuf(mpt::String::spacePadded, sample.name);
-		sample.GetSampleFormat().ReadSample(mptSmp, smpChunk);
+		if(loadFlags & loadSampleData)
+			sample.GetSampleFormat().ReadSample(mptSmp, smpChunk);
 	}
 
 	auto volEnvChunks = chunks.GetAllChunks(GT2Chunk::idVENV), pitchEnvChunks = chunks.GetAllChunks(GT2Chunk::idTENV), panEnvChunks = chunks.GetAllChunks(GT2Chunk::idPENV);
@@ -1513,6 +1522,9 @@ bool CSoundFile::ReadGT2(FileReader &file, ModLoadingFlags loadFlags)
 	uint32 currentSpeed = m_nDefaultSpeed;
 	for(auto &patChunk : patterns)
 	{
+		if(!(loadFlags & loadPatternData) || !patChunk.CanRead(24))
+			continue;
+
 		const uint16 patNum = patChunk.ReadUint16BE();
 		char name[17]{};
 		patChunk.ReadString<mpt::String::spacePadded>(name, 16);
@@ -1520,7 +1532,9 @@ bool CSoundFile::ReadGT2(FileReader &file, ModLoadingFlags loadFlags)
 		const ROWINDEX numRows = patChunk.ReadUint16BE();
 		const CHANNELINDEX numTracks = patChunk.ReadUint16BE();
 
-		if(!(loadFlags & loadPatternData) || codingVersion > 1 || !Patterns.Insert(patNum, numRows))
+		if(!patChunk.CanRead(sizeof(GT2PatternCell) * numRows * numTracks))
+			continue;
+		if(codingVersion > 1 || !Patterns.Insert(patNum, numRows))
 			continue;
 
 		Patterns[patNum].SetName(name);
