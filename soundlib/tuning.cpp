@@ -24,6 +24,10 @@ OPENMPT_NAMESPACE_BEGIN
 
 namespace Tuning {
 
+static RATIOTYPE SanitizeGroupRatio(RATIOTYPE ratio)
+{
+	return std::clamp(std::abs(ratio), 1e-15f, 1e+07f);
+}
 
 namespace CTuningS11n
 {
@@ -485,13 +489,14 @@ SerializationResult CTuning::InitDeserialize(std::istream &iStrm, mpt::Charset d
 	UNOTEINDEXTYPE ratiotableSize = 0;
 	ssb.ReadItem(ratiotableSize, "RTI4");
 
-	if(std::isnan(m_GroupRatio))
+	m_GroupRatio = SanitizeGroupRatio(m_GroupRatio);
+	if(!std::isfinite(m_GroupRatio))
 	{
 		return SerializationResult::Failure;
 	}
 	for(auto ratio : m_RatioTable)
 	{
-		if(std::isnan(ratio))
+		if(!std::isfinite(ratio))
 			return SerializationResult::Failure;
 	}
 
@@ -700,7 +705,7 @@ SerializationResult CTuning::InitDeserializeOLD(std::istream &inStrm, mpt::Chars
 	}
 	for(auto ratio : m_RatioTable)
 	{
-		if(std::isnan(ratio))
+		if(!std::isfinite(ratio))
 			return SerializationResult::Failure;
 	}
 
@@ -720,7 +725,7 @@ SerializationResult CTuning::InitDeserializeOLD(std::istream &inStrm, mpt::Chars
 	}
 	for(auto ratio : m_RatioTableFine)
 	{
-		if(std::isnan(ratio))
+		if(!std::isfinite(ratio))
 			return SerializationResult::Failure;
 	}
 	m_FineStepCount = mpt::saturate_cast<USTEPINDEXTYPE>(m_RatioTableFine.size());
@@ -746,8 +751,8 @@ SerializationResult CTuning::InitDeserializeOLD(std::istream &inStrm, mpt::Chars
 	//m_GroupRatio
 	IEEE754binary32LE groupratio = IEEE754binary32LE(0.0f);
 	mpt::IO::Read(inStrm, groupratio);
-	m_GroupRatio = groupratio;
-	if(m_GroupRatio < 0 || std::isnan(groupratio))
+	m_GroupRatio = SanitizeGroupRatio(groupratio);
+	if(!std::isfinite(groupratio))
 	{
 		return SerializationResult::Failure;
 	}
