@@ -10,26 +10,24 @@
 #include "mpt/base/namespace.hpp"
 #include "mpt/base/macros.hpp"
 
-#if MPT_CXX_AT_LEAST(23)
-#include <bit>
-#elif MPT_CXX_AT_LEAST(20)
-#include <algorithm>
+#if MPT_CXX_BEFORE(20)
 #include <array>
+#endif // !C++20
+#if MPT_CXX_AT_LEAST(20)
 #include <bit>
-#else // !C++20
-#include <array>
-#include <limits>
 #endif // C++20
+#if MPT_CXX_BEFORE(23) || MPT_COMPILER_MSVC || MPT_LIBCXX_LLVM_BEFORE(12000)
+#include <limits>
+#endif // !C++23
 #include <type_traits>
 
-#include <cstddef>
-#if MPT_CXX_BEFORE(23)
+#if MPT_CXX_BEFORE(20) || MPT_LIBCXX_LLVM_BEFORE(14000)
 #include <cstring>
 #endif // !C++20
 
 #if MPT_CXX_BEFORE(23) && MPT_COMPILER_MSVC
 #include <intrin.h>
-#endif
+#endif // !C++23
 
 
 
@@ -38,7 +36,7 @@ inline namespace MPT_INLINE_NS {
 
 
 
-#if MPT_CXX_AT_LEAST(20) && !MPT_CLANG_BEFORE(14, 0, 0)
+#if MPT_CXX_AT_LEAST(20) && !MPT_LIBCXX_LLVM_BEFORE(14000)
 using std::bit_cast;
 #else  // !C++20
 // C++2a compatible bit_cast.
@@ -202,7 +200,7 @@ MPT_FORCEINLINE bool endian_is_weird() noexcept {
 
 
 
-#if MPT_CXX_AT_LEAST(20) && !MPT_COMPILER_MSVC && !MPT_CLANG_BEFORE(12, 0, 0)
+#if MPT_CXX_AT_LEAST(20) && !MPT_COMPILER_MSVC && !MPT_LIBCXX_LLVM_BEFORE(12000)
 
 // Disabled for VS2022 for now because of
 // <https://developercommunity.visualstudio.com/t/vs2022-cl-193030705-generates-non-universally-avai/1578571>
