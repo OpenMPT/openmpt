@@ -36,7 +36,7 @@ inline namespace MPT_INLINE_NS {
 
 
 
-#if MPT_CXX_AT_LEAST(20) && !MPT_LIBCXX_LLVM_BEFORE(14000)
+#if MPT_CXX_AT_LEAST(20) && !MPT_LIBCXX_GNU_BEFORE(11) && !MPT_LIBCXX_LLVM_BEFORE(14000)
 using std::bit_cast;
 #else  // !C++20
 // C++2a compatible bit_cast.
@@ -200,7 +200,7 @@ MPT_FORCEINLINE bool endian_is_weird() noexcept {
 
 
 
-#if MPT_CXX_AT_LEAST(20) && !MPT_COMPILER_MSVC && !MPT_LIBCXX_LLVM_BEFORE(12000)
+#if MPT_CXX_AT_LEAST(20) && !MPT_COMPILER_MSVC && !MPT_LIBCXX_GNU_BEFORE(10) && !MPT_LIBCXX_LLVM_BEFORE(12000)
 
 // Disabled for VS2022 for now because of
 // <https://developercommunity.visualstudio.com/t/vs2022-cl-193030705-generates-non-universally-avai/1578571>
