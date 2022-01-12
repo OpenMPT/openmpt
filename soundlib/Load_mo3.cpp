@@ -1138,7 +1138,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 						break;
 					case 0x12:
 						// Combined Tempo / Speed command
-						m.SetEffectCommand((m.param < 0x20) ? CMD_SPEED : CMD_TEMPO, cmd[1]);
+						m.SetEffectCommand((cmd[1] < 0x20) ? CMD_SPEED : CMD_TEMPO, cmd[1]);
 						break;
 					case 0x14:
 					case 0x15:
