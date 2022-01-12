@@ -16,12 +16,12 @@
 #if MPT_CXX_AT_LEAST(20)
 #include <bit>
 #endif // C++20
-#if MPT_CXX_BEFORE(23) || MPT_COMPILER_MSVC || MPT_LIBCXX_LLVM_BEFORE(12000)
+#if MPT_CXX_BEFORE(23) || MPT_COMPILER_MSVC || MPT_LIBCXX_GNU_BEFORE(10) || MPT_LIBCXX_LLVM_BEFORE(12000)
 #include <limits>
 #endif // !C++23
 #include <type_traits>
 
-#if MPT_CXX_BEFORE(20) || MPT_LIBCXX_LLVM_BEFORE(14000)
+#if MPT_CXX_BEFORE(20) || MPT_LIBCXX_GNU_BEFORE(11) || MPT_LIBCXX_LLVM_BEFORE(14000)
 #include <cstring>
 #endif // !C++20
 
