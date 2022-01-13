@@ -155,6 +155,7 @@
 /include/ancient/fuzzing
 /include/ancient/libancient.pc.in
 /include/ancient/main.cpp
+/include/ancient/test.sh
 /include/asiomodern/changelog.txt
 /include/asiomodern/package.cmd
 /include/asiomodern/package_helper_getversion.cmd
