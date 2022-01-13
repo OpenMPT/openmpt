@@ -45,7 +45,7 @@ SHRIDecompressor::SHRIDecompressor(uint32_t hdr,uint32_t recursionLevel,const Bu
 		_rawSize=_packedData.readBE16(2);
 		_startOffset=4;
 	} else {
-		_rawSize=-_packedData.readBE32(2);
+		_rawSize=~_packedData.readBE32(2)+1U;
 		_startOffset=6;
 	}
 

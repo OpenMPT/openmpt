@@ -276,7 +276,7 @@ void LZCBDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 
 	std::unique_ptr<FrequencyDecoder<256>> literalDecoders[256];
 
-	uint8_t ch=baseLiteralDecoder.decode(readByte);
+	uint8_t ch=uint8_t(baseLiteralDecoder.decode(readByte));
 	outputStream.writeByte(ch);
 	bool lastIsLiteral=true;
 	while (!outputStream.eof())
@@ -311,10 +311,10 @@ void LZCBDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 				{
 					auto &literalDecoder=literalDecoders[ch];
 					if (!literalDecoder) literalDecoder=std::make_unique<FrequencyDecoder<256>>(rangeDecoder);
-					ch=literalDecoder->decode([&]()
+					ch=uint8_t(literalDecoder->decode([&]()
 					{
 						return baseLiteralDecoder.decode(readByte);
-					});
+					}));
 					outputStream.writeByte(ch);
 				}
 			} while (literalCount==0x100U);
