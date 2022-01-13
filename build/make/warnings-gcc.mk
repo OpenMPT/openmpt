@@ -7,8 +7,9 @@ CXXFLAGS_WARNINGS += -Wno-psabi
 ifeq ($(MODERN),1)
 LDFLAGS  += -fuse-ld=gold
 CXXFLAGS_WARNINGS += 
-CFLAGS_WARNINGS   += -Wframe-larger-than=4000
-#CXXFLAGS_WARNINGS += -Wstrict-aliasing -Wpointer-arith -Winit-self -Wshadow -Wswitch-enum -Wstrict-prototypes
+CFLAGS_WARNINGS   += -Wframe-larger-than=4000 -Wstrict-prototypes
+CXXFLAGS_WARNINGS += 
+#CXXFLAGS_WARNINGS += -Wshadow -Wswitch-enum 
 LDFLAGS_WARNINGS  += -Wl,-no-undefined -Wl,--detect-odr-violations
 # re-renable after 1.29 branch
 #CXXFLAGS_WARNINGS += -Wdouble-promotion
