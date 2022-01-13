@@ -232,9 +232,7 @@ class CTuningCollection;
 using CTuningCollection = Tuning::CTuningCollection;
 struct CModSpecifications;
 class OPL;
-#ifdef MODPLUG_TRACKER
 class CModDoc;
-#endif // MODPLUG_TRACKER
 
 
 /////////////////////////////////////////////////////////////////////////
@@ -720,12 +718,13 @@ public:
 #ifdef MODPLUG_TRACKER
 	// Get parent CModDoc. Can be nullptr if previewing from tree view, and is always nullptr if we're not actually compiling OpenMPT.
 	CModDoc *GetpModDoc() const noexcept { return m_pModDoc; }
+#endif  // MODPLUG_TRACKER
 
 	bool Create(FileReader file, ModLoadingFlags loadFlags = loadCompleteModule, CModDoc *pModDoc = nullptr);
-#else
-	bool Create(FileReader file, ModLoadingFlags loadFlags);
-#endif // MODPLUG_TRACKER
+private:
+	bool CreateInternal(FileReader file, ModLoadingFlags loadFlags);
 
+public:
 	bool Destroy();
 	Enum<MODTYPE> GetType() const noexcept { return m_nType; }
 
