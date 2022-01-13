@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.7.0-pre
 
+ *  [**Change**] ctl `seek.sync_samples` now defaults to 1.
+
 ### libopenmpt 0.6.0 (2021-12-23)
 
  *  [**New**] `MUS` files from Psycho Pinball and Micro Machines 2 are now

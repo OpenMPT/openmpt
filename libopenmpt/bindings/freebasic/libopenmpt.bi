@@ -1357,7 +1357,7 @@ Declare Function openmpt_module_highlight_pattern_row_channel_ Alias "openmpt_mo
            - load.skip_patterns: Set to "1" to avoid loading patterns into memory
            - load.skip_plugins: Set to "1" to avoid loading plugins
            - load.skip_subsongs_init: Set to "1" to avoid pre-initializing sub-songs. Skipping results in faster module loading but slower seeking.
-           - seek.sync_samples: Set to "1" to sync sample playback when using openmpt_module_set_position_seconds or openmpt_module_set_position_order_row.
+           - seek.sync_samples: Set to "0" to not sync sample playback when using openmpt_module_set_position_seconds or openmpt_module_set_position_order_row.
            - subsong: The current subsong. Setting it has identical semantics as openmpt_module_select_subsong(), getting it returns the currently selected subsong.
            - play.at_end: Chooses the behaviour when the end of song is reached:
                           - "fadeout": Fades the module out for a short while. Subsequent reads after the fadeout will return 0 rendered frames.

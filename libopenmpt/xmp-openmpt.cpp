@@ -967,7 +967,6 @@ static DWORD WINAPI openmpt_Open( const char * filename, XMPFILE file ) {
 	try {
 		std::map< std::string, std::string > ctls
 		{
-			{ "seek.sync_samples", "1" },
 			{ "play.at_end", "continue" },
 		};
 		self->delete_mod();

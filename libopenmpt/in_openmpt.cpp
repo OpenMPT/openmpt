@@ -304,7 +304,6 @@ static int play( const in_char * fn ) {
 	try {
 		std::ifstream s( fn, std::ios::binary );
 		std::map< std::string, std::string > ctls;
-		ctls["seek.sync_samples"] = "1";
 		self->mod = new openmpt::module( s, std::clog, ctls );
 		self->cached_filename = fn;
 		self->cached_title = StringToWINAPI( StringDecode( self->mod->get_metadata( "title" ), CP_UTF8 ) );

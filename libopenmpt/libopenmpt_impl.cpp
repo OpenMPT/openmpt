@@ -473,7 +473,7 @@ void module_impl::ctor( const std::map< std::string, std::string > & ctls ) {
 	m_ctl_load_skip_patterns = false;
 	m_ctl_load_skip_plugins = false;
 	m_ctl_load_skip_subsongs_init = false;
-	m_ctl_seek_sync_samples = false;
+	m_ctl_seek_sync_samples = true;
 	// init member variables that correspond to ctls
 	for ( const auto & ctl : ctls ) {
 		ctl_set( ctl.first, ctl.second, false );
