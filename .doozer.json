@@ -37,6 +37,7 @@
 				"mscompress",
 				"p7zip",
 				"p7zip-full",
+				"pcc",
 				"pkg-config",
 				"portaudio19-dev",
 				"subversion",
