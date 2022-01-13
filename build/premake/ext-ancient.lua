@@ -25,10 +25,6 @@ project "ancient"
 	}
 	filter { "action:vs*" }
 		buildoptions {
-			"/wd4146",
-			"/wd4244",
-		}
-		buildoptions {
 			"/wd4251",
 			"/wd4275",
 		}
