@@ -12,11 +12,13 @@ CXXFLAGS += $(CXXFLAGS_STDCXX)
 CFLAGS += $(CFLAGS_STDC)
 
 CPPFLAGS += 
-CXXFLAGS += -march=i386 -m80387 -mtune=pentium -ffast-math
-CFLAGS   += -march=i386 -m80387 -mtune=pentium -ffast-math
+CXXFLAGS += -march=i386 -m80387 -mtune=pentium
+CFLAGS   += -march=i386 -m80387 -mtune=pentium
 LDFLAGS  +=
 LDLIBS   += -lm
 ARFLAGS  := rcs
+
+OPTIMIZE_FASTMATH=1
 
 include build/make/warnings-gcc.mk
 
