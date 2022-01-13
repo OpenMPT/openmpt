@@ -375,6 +375,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags, CModDoc *pMo
 #ifdef MODPLUG_TRACKER
 	m_pModDoc = pModDoc;
 #else
+	MPT_UNUSED(pModDoc);
 	m_nFreqFactor = m_nTempoFactor = 65536;
 #endif  // MODPLUG_TRACKER
 
