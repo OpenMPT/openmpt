@@ -197,7 +197,7 @@ void SXSCDecompressor::decompressASC(Buffer &rawData,ForwardInputStream &inputSt
 		if (bit)
 		{
 			// literal
-			outputStream.writeByte(twoStepArithDecoder(litInitial,litDynamic,litThreshold,1000,1,8));
+			outputStream.writeByte(uint8_t(twoStepArithDecoder(litInitial,litDynamic,litThreshold,1000,1,8)));
 		} else {
 			// copy
 			while (outputStream.getOffset()>(1ULL<<distanceIndex) && distanceIndex<15U)
@@ -647,7 +647,7 @@ void SXSCDecompressor::decompressHSC(Buffer &rawData,ForwardInputStream &inputSt
 				auto &frequencyFI=frequencies[freqIndex];
 				frequencyFI.frequency=1U;
 				frequencyFI.next=0xffffU;
-				frequencyFI.character=ch;
+				frequencyFI.character=uint8_t(ch);
 				model.escapeFrequency++;
 				model.characterCount++;
 			} else if (++frequencies[freqIndex].frequency==3) {
@@ -731,7 +731,7 @@ void SXSCDecompressor::decompressHSC(Buffer &rawData,ForwardInputStream &inputSt
 			}
 			frequency.next=0xffffU;
 			frequency.frequency=1;
-			frequency.character=ch;
+			frequency.character=uint8_t(ch);
 			model.escapeFrequency=1;
 			model.frequencyTotal=1;
 			model.contextLength=maxLength;
@@ -743,12 +743,12 @@ void SXSCDecompressor::decompressHSC(Buffer &rawData,ForwardInputStream &inputSt
 			hashes[hashValue].data=le;
 		}
 
-		outputStream.writeByte(ch);
+		outputStream.writeByte(uint8_t(ch));
 		for (uint16_t i=3;i!=0;i--)
 		{
 			currentContext[i]=currentContext[i-1];
 		}
-		currentContext[0]=ch;
+		currentContext[0]=uint8_t(ch);
 	}
 	if (!outputStream.eof()) throw Decompressor::DecompressionError();
 }

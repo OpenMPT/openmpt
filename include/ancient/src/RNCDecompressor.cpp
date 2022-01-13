@@ -10,6 +10,10 @@
 #include "common/OverflowCheck.hpp"
 #include "common/Common.hpp"
 
+// This allows decompression of pc compressed files from unonfficial (and unpatched) compressor
+// PC games do not need chunk count, and are happy to read these files.
+// Official tools put it and amiga decompressors require it
+#define ALLOW_MISSING_CHUNKS 1
 
 namespace ancient::internal
 {
@@ -285,7 +289,11 @@ void RNCDecompressor::RNC1DecompressNew(Buffer &rawData,bool verify)
 	};
 
 	readBits(2);
+#ifdef ALLOW_MISSING_CHUNKS
+	while (!outputStream.eof())
+#else
 	for (uint8_t chunks=0;chunks<_chunks;chunks++)
+#endif
 	{
 		RNC1HuffmanDecoder litDecoder,distanceDecoder,lengthDecoder;
 		readHuffmanTable(litDecoder);
