@@ -50,9 +50,11 @@
 #  XMP_OPENMPT=0    Build xmp-openmpt (XMPlay plugin)
 #  SHARED_SONAME=1  Set SONAME of shared library
 #  DEBUG=0          Build debug binaries without optimization and with symbols
-#  OPTIMIZE=1       Build optimized binaries
-#  OPTIMIZE_SIZE=0  Build size-optimized binaries
+#  OPTIMIZE=1       Build optimized binaries (-O3)
+#  OPTIMIZE_MEDIUM=0 Build optimized binaries (-O2)
+#  OPTIMIZE_SIZE=0  Build size-optimized binaries (-Os)
 #  OPTIMIZE_LTO=0   Build with link-time-optimizations
+#  OPTIMIZE_FASTMATH=0 Use non-standard-compliant fastmath optimizations (-ffast-math)
 #  TEST=1           Include test suite in default target.
 #  ONLY_TEST=0      Only build the test suite.
 #  STRICT=0         Treat warnings as errors.
@@ -165,7 +167,9 @@ SHARED_SONAME=1
 DEBUG=0
 OPTIMIZE=1
 OPTIMIZE_SIZE=0
+OPTIMIZE_MEDIUM=0
 OPTIMIZE_LTO=0
+OPTIMIZE_FASTMATH=0
 TEST=1
 ONLY_TEST=0
 SOSUFFIX=.so
@@ -370,8 +374,7 @@ ifeq ($(DEBUG),1)
 CPPFLAGS += -DMPT_BUILD_DEBUG
 CXXFLAGS += -O0 -g -fno-omit-frame-pointer
 CFLAGS   += -O0 -g -fno-omit-frame-pointer
-else
-ifeq ($(OPTIMIZE_SIZE),1)
+else ifeq ($(OPTIMIZE_SIZE),1)
 CXXFLAGS += -Os
 CFLAGS   += -Os -fno-strict-aliasing
 LDFLAGS  += 
@@ -381,12 +384,17 @@ CXXFLAGS += -ffunction-sections -fdata-sections
 CFLAGS   += -ffunction-sections -fdata-sections
 LDFLAGS  += -Wl,--gc-sections
 endif
-else
-ifeq ($(OPTIMIZE),1)
+else ifeq ($(OPTIMIZE_MEDIUM),1)
+CXXFLAGS += -O2
+CFLAGS   += -O2 -fno-strict-aliasing
+else ifeq ($(OPTIMIZE),1)
 CXXFLAGS += -O3
 CFLAGS   += -O3 -fno-strict-aliasing
 endif
-endif
+
+ifeq ($(OPTIMIZE_FASTMATH),1)
+CXXFLAGS += -ffast-math
+CFLAGS   += -ffast-math
 endif
 
 ifeq ($(CHECKED),1)
