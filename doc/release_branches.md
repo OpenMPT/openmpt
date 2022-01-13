@@ -27,3 +27,4 @@ branching release branches
  7. add versioned libopenmpt release script for new branch which copies release
     packages into place
  8. update buildbot scripts that copy OpenMPT update information into place
+ 9. update branch release date on libopenmpt trunk changelog
