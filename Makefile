@@ -59,6 +59,7 @@
 #  ONLY_TEST=0      Only build the test suite.
 #  STRICT=0         Treat warnings as errors.
 #  MODERN=0         Pass more modern compiler options.
+#  NATIVE=0         Optimize for system CPU.
 #  STDCXX=c++17     C++ standard version (only for GCC and clang)
 #  CHECKED=0        Enable run-time assertions.
 #  CHECKED_ADDRESS=0   Enable address sanitizer
@@ -179,6 +180,7 @@ OPENMPT123=1
 IN_OPENMPT=0
 XMP_OPENMPT=0
 MODERN=0
+NATIVE=0
 STRICT=0
 
 FORCE_UNIX_STYLE_COMMANDS=0

@@ -22,6 +22,11 @@ LDFLAGS  +=
 LDLIBS   += -lm
 ARFLAGS  := rcs
 
+ifeq ($(NATIVE),1)
+CXXFLAGS += -march=native
+CFLAGS   += -march=native
+endif
+
 ifeq ($(OPTIMIZE_LTO),1)
 CXXFLAGS += -flto=thin
 CFLAGS   += -flto=thin
