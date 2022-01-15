@@ -3,7 +3,6 @@
 #ifndef MPT_CHECK_LIBC_HPP
 #define MPT_CHECK_LIBC_HPP
 
-#include "mpt/base/detect_os.hpp"
 #include "mpt/base/compiletime_warning.hpp"
 
 #ifndef __STDC_CONSTANT_MACROS
