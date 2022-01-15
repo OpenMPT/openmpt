@@ -49,6 +49,8 @@ namespace MidiExport
 		const GetLengthType &m_songLength;
 		MidiTrack *const m_tempoTrack;  // Pointer to tempo track, nullptr if this is the tempo track
 		decltype(m_MidiCh) *m_lastMidiCh = nullptr;
+		std::array<CHANNELINDEX, 16> m_lastModChannel;
+		std::array<uint8, 16> m_panning;
 		std::array<decltype(m_instr.midiPWD), 16> m_pitchWheelDepth = { 0 };
 
 		std::vector<std::array<char, 4>> m_queuedEvents;
@@ -113,6 +115,8 @@ namespace MidiExport
 			// Write instrument / song name
 			WriteString(kTrackName, name);
 			m_pMixStruct->pMixPlugin = this;
+			m_lastModChannel.fill(CHANNELINDEX_INVALID);
+			m_panning.fill(64);
 		}
 
 		void WritePitchWheelDepth(MidiChannel midiChOverride = MidiNoChannel)
@@ -199,6 +203,18 @@ namespace MidiExport
 			if(m_tempoTrack != nullptr)
 				m_tempoTrack->UpdateGlobals();
 
+			for(uint8 midiCh = 0; midiCh < 16; midiCh++)
+			{
+				if(m_lastModChannel[midiCh] == CHANNELINDEX_INVALID)
+					continue;
+				char newPanning = static_cast<char>(std::clamp(m_sndFile.m_PlayState.Chn[m_lastModChannel[midiCh]].nRealPan / 2, 0, 127));
+				if(m_panning[midiCh] == newPanning)
+					continue;
+				m_panning[midiCh] = newPanning;
+				std::array<char, 4> midiData = {0xB0 | midiCh, 0x0A, newPanning, 0};
+				m_queuedEvents.push_back(midiData);
+			}
+
 			for(const auto &midiData : m_queuedEvents)
 			{
 				WriteTicks();
@@ -207,7 +223,7 @@ namespace MidiExport
 			m_queuedEvents.clear();
 
 			m_samplePos += numFrames;
-			if (m_tempoTrack != nullptr)
+			if(m_tempoTrack != nullptr)
 			{
 				m_tempoTrack->m_samplePos = std::max(m_tempoTrack->m_samplePos, m_samplePos);
 				m_tempoTrack->UpdateTicksSinceLastEvent();
@@ -221,7 +237,7 @@ namespace MidiExport
 			HardAllNotesOff();
 			UpdateTicksSinceLastEvent();
 
-			if(!m_tempoTrack)
+			if(!m_tempoTrack && m_wroteLoopStart)
 				WriteString(kCue, U_("loopEnd"));
 
 			WriteTicks();
@@ -311,6 +327,8 @@ namespace MidiExport
 				note = NOTE_KEYOFF;
 			}
 			SynchronizeMidiChannelState();
+			if(trackChannel < MAX_CHANNELS)
+				m_lastModChannel[GetMidiChannel(trackChannel)] = trackChannel;
 			IMidiPlugin::MidiCommand(instr, note, vol, trackChannel);
 		}
 
