@@ -4092,7 +4092,7 @@ void CViewPattern::CursorJump(int distance, bool snap)
 	const bool upwards = distance < 0;
 	const int distanceAbs = std::abs(distance);
 
-	if(snap)
+	if(snap && distanceAbs)
 		// cppcheck false-positive
 		// cppcheck-suppress signConversion
 		row = (((row + (upwards ? -1 : 0)) / distanceAbs) + (upwards ? 0 : 1)) * distanceAbs;
@@ -7082,6 +7082,10 @@ void CViewPattern::JumpToPrevOrNextEntry(bool nextEntry)
 			{
 				SetCurrentOrder(ord);
 				SetCurrentPattern(pat, row);
+				if(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_PLAYNAVIGATEROW)
+				{
+					PatternStep(row);
+				}
 				return;
 			}
 			row += direction;
