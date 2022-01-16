@@ -1,6 +1,6 @@
 AC_INIT([libopenmpt], [!!MPT_LIBOPENMPT_VERSION_MAJOR!!.!!MPT_LIBOPENMPT_VERSION_MINOR!!.!!MPT_LIBOPENMPT_VERSION_PATCH!!!!MPT_LIBOPENMPT_VERSION_PREREL!!+!!MPT_SEMVER_METADATA_PREFIX!!.autotools], [https://bugs.openmpt.org/], [libopenmpt], [https://lib.openmpt.org/])
 AC_PREREQ([2.69])
-# we do want 2.70, but distributiosn are not ready yet
+# we do want 2.70, but distributions are not ready yet
 #AC_PREREQ([2.70])
 
 AC_CONFIG_MACRO_DIR([m4])
