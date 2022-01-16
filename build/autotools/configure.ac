@@ -1,5 +1,5 @@
 AC_INIT([libopenmpt], [!!MPT_LIBOPENMPT_VERSION_MAJOR!!.!!MPT_LIBOPENMPT_VERSION_MINOR!!.!!MPT_LIBOPENMPT_VERSION_PATCH!!!!MPT_LIBOPENMPT_VERSION_PREREL!!+!!MPT_SEMVER_METADATA_PREFIX!!.autotools], [https://bugs.openmpt.org/], [libopenmpt], [https://lib.openmpt.org/])
-AC_PREREQ([2.68])
+AC_PREREQ([2.70])
 
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_AUX_DIR([build-aux])
@@ -269,10 +269,6 @@ AS_IF([test "x$with_flac" != "xno"],
  ]
 )
 ])
-
-# We want a modern C compiler 
-AC_PROG_CC_STDC
-#AC_PROG_CC_C99
 
 # We need C++17 support, Autoconf does not yet support C++20. Yay.
 # See <https://github.com/autoconf-archive/autoconf-archive/pull/244>.
