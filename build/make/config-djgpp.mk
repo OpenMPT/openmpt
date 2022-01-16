@@ -8,7 +8,7 @@ AR  = i386-pc-msdosdjgpp-ar
 # mode, because otherwise DJGPP-specific headers/functions are unavailable.
 CXXFLAGS_STDCXX = -std=gnu++17
 CFLAGS_STDC = -std=gnu99
-CXXFLAGS += $(CXXFLAGS_STDCXX)
+CXXFLAGS += $(CXXFLAGS_STDCXX) -fno-threadsafe-statics
 CFLAGS += $(CFLAGS_STDC)
 
 CPPFLAGS += 
