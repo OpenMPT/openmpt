@@ -9,6 +9,9 @@ is just a high-level summary.
 
  *  [**Change**] ctl `seek.sync_samples` now defaults to 1.
 
+ *  [**Regression**] Support for Emscripten versions older than 3.1.1 has been
+    removed.
+
 ### libopenmpt 0.6.0 (2021-12-23)
 
  *  [**New**] `MUS` files from Psycho Pinball and Micro Machines 2 are now
