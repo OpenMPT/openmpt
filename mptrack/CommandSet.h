@@ -303,6 +303,7 @@ enum CommandID
 	kcTimeAtRow,
 	kcLockPlaybackToRows,
 	kcQuantizeSettings,
+	kcTogglePatternPlayRow,
 	kcToggleOverflowPaste,
 	kcToggleNoteOffRecordPC,
 	kcToggleNoteOffRecordMIDI,
