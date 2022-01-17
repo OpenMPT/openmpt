@@ -10,10 +10,6 @@ CXXFLAGS_WARNINGS += -Wdeprecated -Wextra-semi -Wframe-larger-than=16000 -Wgloba
 #CXXFLAGS_WARNINGS += -Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-c++98-c++11-c++14-compat -Wno-padded -Wno-weak-vtables -Wno-sign-conversion -Wno-shadow-field-in-constructor -Wno-conversion -Wno-switch-enum -Wno-old-style-cast
 
 ifeq ($(MODERN),1)
-LDFLAGS  += -fuse-ld=lld
-ifeq ($(OPTIMIZE_LTO),1)
-LDFLAGS  += -Wl,--thinlto-jobs=all
-endif
 CXXFLAGS_WARNINGS += 
 CFLAGS_WARNINGS   += -Wframe-larger-than=4000
 LDFLAGS_WARNINGS  += -Wl,-no-undefined -Wl,--detect-odr-violations

@@ -27,9 +27,14 @@ CXXFLAGS += -march=native
 CFLAGS   += -march=native
 endif
 
+ifeq ($(MODERN),1)
+LDFLAGS  += -fuse-ld=lld
+endif
+
 ifeq ($(OPTIMIZE_LTO),1)
 CXXFLAGS += -flto=thin
 CFLAGS   += -flto=thin
+LDFLAGS  += -Wl,--thinlto-jobs=all
 endif
 
 ifeq ($(CHECKED_ADDRESS),1)

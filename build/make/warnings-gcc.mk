@@ -5,7 +5,6 @@ CFLAGS_WARNINGS   += -Wcast-align -Wcast-qual -Wfloat-conversion                
 CXXFLAGS_WARNINGS += -Wno-psabi
 
 ifeq ($(MODERN),1)
-LDFLAGS  += -fuse-ld=gold
 CXXFLAGS_WARNINGS += 
 CFLAGS_WARNINGS   += -Wframe-larger-than=4000 -Wstrict-prototypes
 CXXFLAGS_WARNINGS += 

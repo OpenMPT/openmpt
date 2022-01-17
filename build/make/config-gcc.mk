@@ -27,6 +27,10 @@ CXXFLAGS += -march=native
 CFLAGS   += -march=native
 endif
 
+ifeq ($(MODERN),1)
+LDFLAGS  += -fuse-ld=gold
+endif
+
 ifeq ($(OPTIMIZE_LTO),1)
 CXXFLAGS += -flto
 CFLAGS   += -flto
