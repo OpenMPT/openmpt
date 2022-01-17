@@ -1493,7 +1493,7 @@ UINT TrackerSettings::GetCurrentMIDIDevice()
 			else
 				break;
 		}
-		if(mic.szPname == deviceName)
+		if(CString(mic.szPname) == deviceName)
 		{
 			candidate = i;
 			numDevs = m_nMidiDevice + 1;
