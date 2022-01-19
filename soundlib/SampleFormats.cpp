@@ -3394,7 +3394,11 @@ public:
 	void (*mpg123_exit )(void);
 	mpg123_handle* (*mpg123_new )(const char*,int*);
 	void (*mpg123_delete )(mpg123_handle*);
+#if (MPG123_API_VERSION < 46)
 	int (*mpg123_param )(mpg123_handle*, enum mpg123_parms, long, double);
+#else
+	int (*mpg123_param2 )(mpg123_handle*, int, long, double);
+#endif
 	int (*mpg123_open_handle )(mpg123_handle*, void*);
 #if !defined(MPT_WITH_MPG123) && defined(MPT_ENABLE_MPG123_DYNBIND)
 	int (*mpg123_open_handle_64 )(mpg123_handle*, void*);
@@ -3433,7 +3437,11 @@ public:
 		void(*cleanup)(void *));
 #endif // !MPT_WITH_MPG123 && MPT_ENABLE_MPG123_DYNBIND
 #endif // MPT_COMPILER_MSVC
+#if (MPG123_API_VERSION < 45)
 	int (*mpg123_read )(mpg123_handle*, unsigned char*, size_t, size_t*);
+#else
+	int (*mpg123_read )(mpg123_handle*, void*, size_t, size_t*);
+#endif
 	int (*mpg123_getformat )(mpg123_handle*, long*, int*, int*);
 	int (*mpg123_scan )(mpg123_handle*);
 #if MPT_COMPILER_MSVCCLANGC2
@@ -3491,7 +3499,11 @@ public:
 		MPT_GLOBAL_BIND("mpg123", mpg123_exit);
 		MPT_GLOBAL_BIND("mpg123", mpg123_new);
 		MPT_GLOBAL_BIND("mpg123", mpg123_delete);
+#if (MPG123_API_VERSION < 46)
 		MPT_GLOBAL_BIND("mpg123", mpg123_param);
+#else
+		MPT_GLOBAL_BIND("mpg123", mpg123_param2);
+#endif
 		MPT_GLOBAL_BIND("mpg123", mpg123_open_handle);
 		MPT_GLOBAL_BIND("mpg123", mpg123_replace_reader_handle);
 		MPT_GLOBAL_BIND("mpg123", mpg123_read);
@@ -3537,7 +3549,11 @@ public:
 		MPT_COMPONENT_BIND("mpg123", mpg123_exit);
 		MPT_COMPONENT_BIND("mpg123", mpg123_new);
 		MPT_COMPONENT_BIND("mpg123", mpg123_delete);
+#if (MPG123_API_VERSION < 46)
 		MPT_COMPONENT_BIND("mpg123", mpg123_param);
+#else
+		MPT_COMPONENT_BIND("mpg123", mpg123_param2);
+#endif
 		MPT_COMPONENT_BIND_OPTIONAL("mpg123", mpg123_open_handle);
 		MPT_COMPONENT_BIND_OPTIONAL("mpg123", mpg123_open_handle_64);
 		if(!mpg123_open_handle && !mpg123_open_handle_64)
@@ -3737,11 +3753,19 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 	long rate; int nchannels, encoding;
 	SmpLength length;
 	// Set up decoder...
+#if (MPG123_API_VERSION < 46)
 	if(mpg123->mpg123_param(mh, MPG123_ADD_FLAGS, MPG123_QUIET, 0.0))
 	{
 		mpg123->mpg123_delete(mh);
 		return false;
 	}
+#else
+	if(mpg123->mpg123_param2(mh, MPG123_ADD_FLAGS, MPG123_QUIET, 0.0))
+	{
+		mpg123->mpg123_delete(mh);
+		return false;
+	}
+#endif
 #if !defined(MPT_WITH_MPG123) && defined(MPT_ENABLE_MPG123_DYNBIND) && !MPT_COMPILER_MSVC
 	if(mpg123->mpg123_replace_reader_handle_64 && mpg123->mpg123_replace_reader_handle_64(mh, ComponentMPG123::FileReaderRead, ComponentMPG123::FileReaderLSeek, 0))
 	{
@@ -3820,7 +3844,11 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool mo3Dec
 	if(Samples[sample].pSample != nullptr)
 	{
 		size_t ndecoded;
+#if (MPG123_API_VERSION < 45)
 		mpg123->mpg123_read(mh, static_cast<unsigned char *>(Samples[sample].pSample), Samples[sample].GetSampleSizeInBytes(), &ndecoded);
+#else
+		mpg123->mpg123_read(mh, Samples[sample].pSample, Samples[sample].GetSampleSizeInBytes(), &ndecoded);
+#endif
 	}
 	mpg123->mpg123_delete(mh);
 
