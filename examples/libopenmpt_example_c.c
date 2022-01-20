@@ -134,7 +134,7 @@ int main( int argc, char * argv[] ) {
 	mod = openmpt_module_create2( openmpt_stream_get_file_callbacks2(), file, &libopenmpt_example_logfunc, NULL, &libopenmpt_example_errfunc, NULL, &mod_err, &mod_err_str, NULL );
 #endif
 #else
-	mod = openmpt_module_create2( openmpt_stream_get_file_callbacks2(), file, &libopenmpt_example_logfunc, NULL, &libopenmpt_example_errfunc, NULL, &mod_err, &mod_err_str, NULL );
+	mod = openmpt_module_create2( openmpt_stream_get_file_callbacks(), file, &libopenmpt_example_logfunc, NULL, &libopenmpt_example_errfunc, NULL, &mod_err, &mod_err_str, NULL );
 #endif
 
 	if ( !mod ) {
