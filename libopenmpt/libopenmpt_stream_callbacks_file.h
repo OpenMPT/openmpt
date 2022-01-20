@@ -106,7 +106,7 @@ static int64_t openmpt_stream_file_tell_func( void * stream ) {
  * \sa openmpt_stream_get_file_posix_lfs64_callbacks()
  * \deprecated Please use openmpt_stream_get_file_callbacks2().
  */
-LIBOPENMPT_DEPRECATED static openmpt_stream_callbacks openmpt_stream_get_file_callbacks(void) {
+LIBOPENMPT_DEPRECATED static LIBOPENMPT_C_INLINE openmpt_stream_callbacks openmpt_stream_get_file_callbacks(void) {
 	openmpt_stream_callbacks retval;
 	memset( &retval, 0, sizeof( openmpt_stream_callbacks ) );
 	retval.read = openmpt_stream_file_read_func;

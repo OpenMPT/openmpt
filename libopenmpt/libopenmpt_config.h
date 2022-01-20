@@ -234,6 +234,16 @@ LIBOPENMPT_DEPRECATED static const int LIBOPENMPT_DEPRECATED_STRING_CONSTANT = 0
 #define LIBOPENMPT_DEPRECATED_STRING( str ) str
 #endif
 
+#if defined(__STDC__) && (__STDC__ == 1)
+#if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
+#define LIBOPENMPT_C_INLINE inline
+#else
+#define LIBOPENMPT_C_INLINE
+#endif
+#else
+#define LIBOPENMPT_C_INLINE
+#endif
+
 
 /* C++ */
 
