@@ -41,28 +41,6 @@ ${PREMAKE} --group=OpenMPT vs2017 --winxp && \
 ${PREMAKE} --group=all-externals vs2017 --winxp && \
 echo ok &
 
-${PREMAKE} --group=libopenmpt_test vs2017 --win7 && \
-${PREMAKE} --group=in_openmpt vs2017 --win7 && \
-${PREMAKE} --group=xmp-openmpt vs2017 --win7 && \
-${PREMAKE} --group=libopenmpt-small vs2017 --win7 && \
-${PREMAKE} --group=libopenmpt vs2017 --win7 && \
-${PREMAKE} --group=openmpt123 vs2017 --win7 && \
-${PREMAKE} --group=PluginBridge vs2017 --win7 && \
-${PREMAKE} --group=OpenMPT vs2017 --win7 && \
-${PREMAKE} --group=all-externals vs2017 --win7 && \
-echo ok &
-
-${PREMAKE} --group=libopenmpt_test vs2017 --win10 && \
-${PREMAKE} --group=in_openmpt vs2017 --win10 && \
-${PREMAKE} --group=xmp-openmpt vs2017 --win10 && \
-${PREMAKE} --group=libopenmpt-small vs2017 --win10 && \
-${PREMAKE} --group=libopenmpt vs2017 --win10 && \
-${PREMAKE} --group=openmpt123 vs2017 --win10 && \
-${PREMAKE} --group=PluginBridge vs2017 --win10 && \
-${PREMAKE} --group=OpenMPT vs2017 --win10 && \
-${PREMAKE} --group=all-externals vs2017 --win10 && \
-echo ok &
-
 ${PREMAKE} --group=libopenmpt_test vs2019 --win7 && \
 ${PREMAKE} --group=in_openmpt vs2019 --win7 && \
 ${PREMAKE} --group=xmp-openmpt vs2019 --win7 && \
@@ -149,12 +127,6 @@ ${PREMAKE} --group=libopenmpt-small vs2022 --win10 --uwp && \
 ${PREMAKE} --group=libopenmpt vs2022 --win10 --uwp && \
 ${PREMAKE} --group=all-externals vs2022 --win10 --uwp && \
 echo ok &
-
-
-
-echo dofile \"build/genie/genie.lua\" > genie.lua
-
-${GENIE} --target="winstore82"   vs2017
 
 
 

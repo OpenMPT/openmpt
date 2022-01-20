@@ -9,7 +9,7 @@ Dependencies
 ### libopenmpt
 
  *  Supported compilers for building libopenmpt:
-     *  **Microsoft Visual Studio 2017** or higher, running on a amd64 build
+     *  **Microsoft Visual Studio 2019** or higher, running on a amd64 build
         system (other target systems are supported)
         
         Please note that we do not support building with a later Visual Studio
@@ -20,6 +20,7 @@ Dependencies
         headers and implementation, which significantly increases the matrix of
         possible configurations to test.
         
+     *  **Microsoft Visual Studio 2017 XP targeting toolset**
      *  **GCC 8.1** or higher
      *  **Clang 7** or higher
      *  **MinGW-W64 8.1** or higher (it is recommended to preferably use

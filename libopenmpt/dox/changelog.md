@@ -30,9 +30,11 @@ is just a high-level summary.
 
  *  [**Change**] ctl `seek.sync_samples` now defaults to 1.
 
+ *  [**Regression**] Full support for Visual Studio 2017 has been removed. We
+    still support targeting Windows XP with Visual Studio 2017.
  *  [**Regression**] Support for Emscripten versions older than 3.1.1 has been
     removed.
-    [**Regression**] C API: `openmpt_stream_get_file_callbacks()` used to
+ *  [**Regression**] C API: `openmpt_stream_get_file_callbacks()` used to
     provide 64bit file access on some platforms where long is 32bit. This never
     worked reliably for all platforms though. The behaviour is now changed to
     always stick to what standard C supports with fseek and ftell, where the

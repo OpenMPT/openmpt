@@ -40,30 +40,6 @@ start cmd /c ^( ^
 echo Done ^) ^|^| pause
 
 start cmd /c ^( ^
-%PREMAKE% --group=libopenmpt_test vs2017 --win7 ^&^& ^
-%PREMAKE% --group=in_openmpt vs2017 --win7 ^&^& ^
-%PREMAKE% --group=xmp-openmpt vs2017 --win7 ^&^& ^
-%PREMAKE% --group=libopenmpt-small vs2017 --win7 ^&^& ^
-%PREMAKE% --group=libopenmpt vs2017 --win7 ^&^& ^
-%PREMAKE% --group=openmpt123 vs2017 --win7 ^&^& ^
-%PREMAKE% --group=PluginBridge vs2017 --win7 ^&^& ^
-%PREMAKE% --group=OpenMPT vs2017 --win7 ^&^& ^
-%PREMAKE% --group=all-externals vs2017 --win7 ^&^& ^
-echo Done ^) ^|^| pause"
-
-start cmd /c ^( ^
-%PREMAKE% --group=libopenmpt_test vs2017 --win10 ^&^& ^
-%PREMAKE% --group=in_openmpt vs2017 --win10 ^&^& ^
-%PREMAKE% --group=xmp-openmpt vs2017 --win10 ^&^& ^
-%PREMAKE% --group=libopenmpt-small vs2017 --win10 ^&^& ^
-%PREMAKE% --group=libopenmpt vs2017 --win10 ^&^& ^
-%PREMAKE% --group=openmpt123 vs2017 --win10 ^&^& ^
-%PREMAKE% --group=PluginBridge vs2017 --win10 ^&^& ^
-%PREMAKE% --group=OpenMPT vs2017 --win10 ^&^& ^
-%PREMAKE% --group=all-externals vs2017 --win10 ^&^& ^
-echo Done ^) ^|^| pause"
-
-start cmd /c ^( ^
 %PREMAKE% --group=libopenmpt_test vs2019 --win7 ^&^& ^
 %PREMAKE% --group=in_openmpt vs2019 --win7 ^&^& ^
 %PREMAKE% --group=xmp-openmpt vs2019 --win7 ^&^& ^
@@ -158,12 +134,6 @@ start cmd /c ^( ^
 %PREMAKE% --group=libopenmpt vs2022 --win10 --uwp ^&^& ^
 %PREMAKE% --group=all-externals vs2022 --win10 --uwp ^&^& ^
 echo Done ^) ^|^| pause"
-
-
-
-echo dofile "build/genie/genie.lua" > genie.lua || goto err
-
-%GENIE% --target="winstore82"   vs2017 || goto err
 
 
 

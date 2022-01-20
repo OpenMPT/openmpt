@@ -49,7 +49,7 @@ How to compile
         building with Visual Studio.
 
      -  In order to build libopenmpt for Windows XP, the Visual Studio 2017 XP 
-        targetting toolset as well as the Windows 8.1 SDK need to be installed.
+        targeting toolset as well as the Windows 8.1 SDK need to be installed.
         The SDK is optionally included with Visual Studio 2017, but must be
         separately installed with later Visual Studio versions.
 
