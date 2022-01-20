@@ -24,11 +24,20 @@
 #define LIBOPENMPT_CXX_API
 #undef LIBOPENMPT_CXX_API
 
-/*! \brief Defined if libopenmpt/libopenmpt_stream_callbacks_buffer.h exists. */
+/*! \brief Defined if libopenmpt/libopenmpt_stream_callbacks_buffer.h exists.
+ * \remarks
+ *   Use the following to check for availability:
+ *   \code
+ *   #include <libopenmpt/libopenmpt.h>
+ *   #if defined(LIBOPENMPT_STREAM_CALLBACKS_BUFFER)
+ *   #include <libopenmpt/libopenmpt_stream_callbacks_buffer.h>
+ *   #endif
+ *   \endcode
+ */
 #define LIBOPENMPT_STREAM_CALLBACKS_BUFFER
 
 /*! \brief Defined if libopenmpt/libopenmpt_stream_callbacks_fd.h exists.
- * \since 0.3
+ * \since 0.3.0
  * \remarks
  *   Use the following to check for availability:
  *   \code
@@ -41,7 +50,7 @@
 #define LIBOPENMPT_STREAM_CALLBACKS_FD
 
 /*! \brief Defined if libopenmpt/libopenmpt_stream_callbacks_file.h exists.
- * \since 0.3
+ * \since 0.3.0
  * \remarks
  *   Use the following to check for availability:
  *   \code
@@ -52,6 +61,66 @@
  *   \endcode
  */
 #define LIBOPENMPT_STREAM_CALLBACKS_FILE
+
+ /*! \brief Defined if libopenmpt/libopenmpt_stream_callbacks_file_mingw.h exists.
+  * \since 0.7.0
+  * \remarks
+  *   This macro does not determine if the interfaces required to use libopenmpt/libopenmpt_stream_callbacks_file_posix_lfs64.h are available.
+  *   It is the libopenmpt user's responsibility to check for availability of the _off64_t, _ftelli64(), and _fseeki64().
+  *   Use the following to check for availability:
+  *   \code
+  *   #include <libopenmpt/libopenmpt.h>
+  *   #if defined(LIBOPENMPT_STREAM_CALLBACKS_FILE_MINGW)
+  *   #include <libopenmpt/libopenmpt_stream_callbacks_file_mingw.h>
+  *   #endif
+  *   \endcode
+  */
+#define LIBOPENMPT_STREAM_CALLBACKS_FILE_MINGW
+
+ /*! \brief Defined if libopenmpt/libopenmpt_stream_callbacks_file_msvcrt.h exists.
+  * \since 0.7.0
+  * \remarks
+  *   This macro does not determine if the interfaces required to use libopenmpt/libopenmpt_stream_callbacks_file_posix_lfs64.h are available.
+  *   It is the libopenmpt user's responsibility to check for availability of the __int64, _ftelli64(), and _fseeki64().
+  *   Use the following to check for availability:
+  *   \code
+  *   #include <libopenmpt/libopenmpt.h>
+  *   #if defined(LIBOPENMPT_STREAM_CALLBACKS_FILE_MSVCRT)
+  *   #include <libopenmpt/libopenmpt_stream_callbacks_file_msvcrt.h>
+  *   #endif
+  *   \endcode
+  */
+#define LIBOPENMPT_STREAM_CALLBACKS_FILE_MSVCRT
+
+ /*! \brief Defined if libopenmpt/libopenmpt_stream_callbacks_file_posix.h exists.
+  * \since 0.7.0
+  * \remarks
+  *   This macro does not determine if the interfaces required to use libopenmpt/libopenmpt_stream_callbacks_file_posix_lfs64.h are available.
+  *   It is the libopenmpt user's responsibility to check for availability of the _off_t, ftello(), and fseeko().
+  *   Use the following to check for availability:
+  *   \code
+  *   #include <libopenmpt/libopenmpt.h>
+  *   #if defined(LIBOPENMPT_STREAM_CALLBACKS_FILE_MINGW)
+  *   #include <libopenmpt/libopenmpt_stream_callbacks_file_mingw.h>
+  *   #endif
+  *   \endcode
+  */
+#define LIBOPENMPT_STREAM_CALLBACKS_FILE_POSIX
+
+/*! \brief Defined if libopenmpt/libopenmpt_stream_callbacks_file_posix_lfs64.h exists.
+ * \since 0.7.0
+ * \remarks
+ *   This macro does not determine if the interfaces required to use libopenmpt/libopenmpt_stream_callbacks_file_posix_lfs64.h are available.
+ *   It is the libopenmpt user's responsibility to check for availability of the off64_t, ftello64(), and fseeko64().
+ *   Use the following to check for availability:
+ *   \code
+ *   #include <libopenmpt/libopenmpt.h>
+ *   #if defined(LIBOPENMPT_STREAM_CALLBACKS_FILE_POSIX_LFS64)
+ *   #include <libopenmpt/libopenmpt_stream_callbacks_file_posix_lfs64.h>
+ *   #endif
+ *   \endcode
+ */
+#define LIBOPENMPT_STREAM_CALLBACKS_FILE_POSIX_LFS64
 
 #if defined(__DOXYGEN__)
 

@@ -98,4 +98,3 @@ static openmpt_stream_callbacks openmpt_stream_get_fd_callbacks(void) {
  */
 
 #endif /* LIBOPENMPT_STREAM_CALLBACKS_FD_H */
-

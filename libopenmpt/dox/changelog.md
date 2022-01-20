@@ -7,10 +7,38 @@ is just a high-level summary.
 
 ### libopenmpt 0.7.0-pre
 
+ *  [**New**] C API: New stream callbacks for various platform extensions to the
+    C stdio interface: `openmpt_stream_get_file_posix_lfs64_callbacks()` in
+    `libopenmpt/libopenmpt_stream_callbacks_file_posix_lfs64.h` for explicit
+    `off64_t` on Posix systems, `openmpt_stream_get_file_posix_callbacks()` in
+    `libopenmpt/libopenmpt_stream_callbacks_file_posix.h` for `off_t` on Posix
+    systems, `openmpt_stream_get_file_msvcrt_callbacks()` in
+    `libopenmpt/libopenmpt_stream_callbacks_file_msvcrt.h` for 64bit file
+    support on Windows systems with the Microsoft C runtime, and
+    `openmpt_stream_get_file_mingw_callbacks()` in
+    `libopenmpt/libopenmpt_stream_callbacks_file_mingw.h` for 64bit file support
+    when targetting MinGW. The old `openmpt_stream_get_file_callbacks()` has
+    been deprecated in favour of a stricly standard conforming
+    `openmpt_stream_get_file_callbacks2()` in the same
+    `libopenmpt/libopenmpt_stream_callbacks_file.h` header.
+    `libopenmpt/libopenmpt.h` defines
+    `LIBOPENMPT_STREAM_CALLBACKS_FILE_POSIX_LFS64`,
+    `LIBOPENMPT_STREAM_CALLBACKS_FILE_POSIX`,
+    `LIBOPENMPT_STREAM_CALLBACKS_FILE_MSVCRT`, and
+    `LIBOPENMPT_STREAM_CALLBACKS_FILE_MINGW` respectively in order to allow for
+    checking header availability.
+
  *  [**Change**] ctl `seek.sync_samples` now defaults to 1.
 
  *  [**Regression**] Support for Emscripten versions older than 3.1.1 has been
     removed.
+    [**Regression**] C API: `openmpt_stream_get_file_callbacks()` used to
+    provide 64bit file access on some platforms where long is 32bit. This never
+    worked reliably for all platforms though. The behaviour is now changed to
+    always stick to what standard C supports with fseek and ftell, where the
+    offset type is long. `openmpt_stream_get_file_callbacks()` is deprecated now
+    due to behavioral change. Please migrate to
+    `openmpt_stream_get_file_callbacks2()`.
 
 ### libopenmpt 0.6.0 (2021-12-23)
 

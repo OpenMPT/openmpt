@@ -207,6 +207,10 @@ copy /y ..\..\libopenmpt\libopenmpt_ext.hpp inc\libopenmpt\ || goto error
 copy /y ..\..\libopenmpt\libopenmpt_stream_callbacks_buffer.h inc\libopenmpt\ || goto error
 copy /y ..\..\libopenmpt\libopenmpt_stream_callbacks_fd.h inc\libopenmpt\ || goto error
 copy /y ..\..\libopenmpt\libopenmpt_stream_callbacks_file.h inc\libopenmpt\ || goto error
+copy /y ..\..\libopenmpt\libopenmpt_stream_callbacks_file_mingw.h inc\libopenmpt\ || goto error
+copy /y ..\..\libopenmpt\libopenmpt_stream_callbacks_file_msvcrt.h inc\libopenmpt\ || goto error
+copy /y ..\..\libopenmpt\libopenmpt_stream_callbacks_file_posix.h inc\libopenmpt\ || goto error
+copy /y ..\..\libopenmpt\libopenmpt_stream_callbacks_file_posix_lfs64.h inc\libopenmpt\ || goto error
 copy /y ..\..\bin\release\%MPT_VS_VER%-win81-shared\x86\libopenmpt.lib lib\x86\ || goto error
 copy /y ..\..\bin\release\%MPT_VS_VER%-win81-shared\x86\libopenmpt.dll bin\x86\ || goto error
 copy /y ..\..\bin\release\%MPT_VS_VER%-win81-shared\x86\openmpt-mpg123.dll bin\x86\ || goto error
@@ -256,6 +260,10 @@ copy /y ..\..\bin\release\%MPT_VS_VER%-win7-shared\amd64\openmpt-zlib.dll bin\am
  inc\libopenmpt\libopenmpt_stream_callbacks_buffer.h ^
  inc\libopenmpt\libopenmpt_stream_callbacks_fd.h ^
  inc\libopenmpt\libopenmpt_stream_callbacks_file.h ^
+ inc\libopenmpt\libopenmpt_stream_callbacks_file_mingw.h ^
+ inc\libopenmpt\libopenmpt_stream_callbacks_file_msvcrt.h ^
+ inc\libopenmpt\libopenmpt_stream_callbacks_file_posix.h ^
+ inc\libopenmpt\libopenmpt_stream_callbacks_file_posix_lfs64.h ^
  lib\x86\libopenmpt.lib ^
  lib\amd64\libopenmpt.lib ^
  lib\arm\libopenmpt.lib ^

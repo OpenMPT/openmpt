@@ -78,7 +78,7 @@ static int probe_file( const char * filename ) {
 	}
 
 #if ( LIBOPENMPT_EXAMPLE_PROBE_RESULT == LIBOPENMPT_EXAMPLE_PROBE_RESULT_BINARY )
-	probe_file_header_result = openmpt_probe_file_header_from_stream( OPENMPT_PROBE_FILE_HEADER_FLAGS_DEFAULT, openmpt_stream_get_file_callbacks(), file, &libopenmpt_example_logfunc, NULL, &openmpt_error_func_default, NULL, &mod_err, NULL );
+	probe_file_header_result = openmpt_probe_file_header_from_stream( OPENMPT_PROBE_FILE_HEADER_FLAGS_DEFAULT, openmpt_stream_get_file_callbacks2(), file, &libopenmpt_example_logfunc, NULL, &openmpt_error_func_default, NULL, &mod_err, NULL );
 	probe_file_header_result_str = NULL;
 	result_binary = 0;
 	switch ( probe_file_header_result ) {
@@ -116,7 +116,7 @@ static int probe_file( const char * filename ) {
 		result = 1;
 	}
 #elif ( LIBOPENMPT_EXAMPLE_PROBE_RESULT == LIBOPENMPT_EXAMPLE_PROBE_RESULT_FLOAT )
-	probability = openmpt_could_open_probability2( openmpt_stream_get_file_callbacks(), file, 0.25, &libopenmpt_example_logfunc, NULL, &openmpt_error_func_default, NULL, &mod_err, NULL );
+	probability = openmpt_could_open_probability2( openmpt_stream_get_file_callbacks2(), file, 0.25, &libopenmpt_example_logfunc, NULL, &openmpt_error_func_default, NULL, &mod_err, NULL );
 #if ( defined( _WIN32 ) || defined( WIN32 ) ) && ( defined( _UNICODE ) || defined( UNICODE ) )
 	fprintf( stdout, "%s: %f - %ls\n", "Result", probability, filename );
 #else

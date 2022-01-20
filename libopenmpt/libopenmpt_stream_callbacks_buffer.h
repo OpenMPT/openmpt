@@ -12,17 +12,6 @@
 
 #include "libopenmpt.h"
 
-/* The use of this header requires:
-
-#include <libopenmpt/libopenmpt.h>
-#if defined( LIBOPENMPT_STREAM_CALLBACKS_BUFFER )
-#include <libopenmpt/libopenmpt_stream_callbacks_buffer.h>
-#else
-#error "libopenmpt too old."
-#endif
-
-*/
-
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -195,4 +184,3 @@ static openmpt_stream_callbacks openmpt_stream_get_buffer_callbacks(void) {
  */
 
 #endif /* LIBOPENMPT_STREAM_CALLBACKS_BUFFER_H */
-

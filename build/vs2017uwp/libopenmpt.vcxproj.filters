@@ -1020,6 +1020,18 @@
     <ClInclude Include="..\..\libopenmpt\libopenmpt_stream_callbacks_file.h">
       <Filter>libopenmpt</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\libopenmpt\libopenmpt_stream_callbacks_file_mingw.h">
+      <Filter>libopenmpt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libopenmpt\libopenmpt_stream_callbacks_file_msvcrt.h">
+      <Filter>libopenmpt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libopenmpt\libopenmpt_stream_callbacks_file_posix.h">
+      <Filter>libopenmpt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libopenmpt\libopenmpt_stream_callbacks_file_posix_lfs64.h">
+      <Filter>libopenmpt</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\libopenmpt\libopenmpt_version.h">
       <Filter>libopenmpt</Filter>
     </ClInclude>

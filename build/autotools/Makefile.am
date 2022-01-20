@@ -511,6 +511,10 @@ nobase_include_HEADERS += libopenmpt/libopenmpt_config.h
 nobase_include_HEADERS += libopenmpt/libopenmpt_stream_callbacks_buffer.h
 nobase_include_HEADERS += libopenmpt/libopenmpt_stream_callbacks_fd.h
 nobase_include_HEADERS += libopenmpt/libopenmpt_stream_callbacks_file.h
+nobase_include_HEADERS += libopenmpt/libopenmpt_stream_callbacks_file_mingw.h
+nobase_include_HEADERS += libopenmpt/libopenmpt_stream_callbacks_file_msvcrt.h
+nobase_include_HEADERS += libopenmpt/libopenmpt_stream_callbacks_file_posix.h
+nobase_include_HEADERS += libopenmpt/libopenmpt_stream_callbacks_file_posix_lfs64.h
 nobase_include_HEADERS += libopenmpt/libopenmpt_ext.h
 nobase_include_HEADERS += libopenmpt/libopenmpt_ext.hpp
 libopenmpt_la_CPPFLAGS = $(MINGWSTDTHREADS_CPPFLAGS) -DLIBOPENMPT_BUILD -I$(srcdir)/build/svn_version -I$(srcdir)/ -I$(srcdir)/src -I$(srcdir)/common $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS)
@@ -540,6 +544,10 @@ libopenmpt_la_SOURCES += libopenmpt/libopenmpt_internal.h
 libopenmpt_la_SOURCES += libopenmpt/libopenmpt_stream_callbacks_buffer.h
 libopenmpt_la_SOURCES += libopenmpt/libopenmpt_stream_callbacks_fd.h
 libopenmpt_la_SOURCES += libopenmpt/libopenmpt_stream_callbacks_file.h
+libopenmpt_la_SOURCES += libopenmpt/libopenmpt_stream_callbacks_file_mingw.h
+libopenmpt_la_SOURCES += libopenmpt/libopenmpt_stream_callbacks_file_msvcrt.h
+libopenmpt_la_SOURCES += libopenmpt/libopenmpt_stream_callbacks_file_posix.h
+libopenmpt_la_SOURCES += libopenmpt/libopenmpt_stream_callbacks_file_posix_lfs64.h
 libopenmpt_la_SOURCES += libopenmpt/libopenmpt_version.h
 
 if ENABLE_TESTS
@@ -591,6 +599,10 @@ libopenmpttest_SOURCES += libopenmpt/libopenmpt_internal.h
 libopenmpttest_SOURCES += libopenmpt/libopenmpt_stream_callbacks_buffer.h
 libopenmpttest_SOURCES += libopenmpt/libopenmpt_stream_callbacks_fd.h
 libopenmpttest_SOURCES += libopenmpt/libopenmpt_stream_callbacks_file.h
+libopenmpttest_SOURCES += libopenmpt/libopenmpt_stream_callbacks_file_mingw.h
+libopenmpttest_SOURCES += libopenmpt/libopenmpt_stream_callbacks_file_msvcrt.h
+libopenmpttest_SOURCES += libopenmpt/libopenmpt_stream_callbacks_file_posix.h
+libopenmpttest_SOURCES += libopenmpt/libopenmpt_stream_callbacks_file_posix_lfs64.h
 libopenmpttest_SOURCES += libopenmpt/libopenmpt_version.h
 endif
 

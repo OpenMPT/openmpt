@@ -645,6 +645,10 @@
     <ClInclude Include="..\..\libopenmpt\libopenmpt_stream_callbacks_buffer.h" />
     <ClInclude Include="..\..\libopenmpt\libopenmpt_stream_callbacks_fd.h" />
     <ClInclude Include="..\..\libopenmpt\libopenmpt_stream_callbacks_file.h" />
+    <ClInclude Include="..\..\libopenmpt\libopenmpt_stream_callbacks_file_mingw.h" />
+    <ClInclude Include="..\..\libopenmpt\libopenmpt_stream_callbacks_file_msvcrt.h" />
+    <ClInclude Include="..\..\libopenmpt\libopenmpt_stream_callbacks_file_posix.h" />
+    <ClInclude Include="..\..\libopenmpt\libopenmpt_stream_callbacks_file_posix_lfs64.h" />
     <ClInclude Include="..\..\libopenmpt\libopenmpt_version.h" />
     <ClInclude Include="..\..\sounddsp\AGC.h" />
     <ClInclude Include="..\..\sounddsp\DSP.h" />
