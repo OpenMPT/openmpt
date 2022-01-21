@@ -22,7 +22,7 @@ if ! diff include/genie/OpenMPT-expected.txt include/genie/OpenMPT-version.txt >
 fi
 echo "5.0.0-alpha13" > include/premake/OpenMPT-expected.txt
 if ! diff include/premake/OpenMPT-expected.txt include/premake/OpenMPT-version.txt >/dev/null ; then
-	echo "Genie version mismatch"
+	echo "Premake version mismatch"
 	exit 1
 fi
 
