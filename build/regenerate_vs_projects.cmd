@@ -135,6 +135,11 @@ start cmd /c ^( ^
 %PREMAKE% --group=all-externals vs2022 --win10 --uwp ^&^& ^
 echo Done ^) ^|^| pause"
 
+start cmd /c ^( ^
+%PREMAKE% --file=build/premake-xcode/premake.lua --target=macosx xcode4 ^&^& ^
+%PREMAKE% --file=build/premake-xcode/premake.lua --target=ios    xcode4 ^&^& ^
+echo Done ^) ^|^| pause"
+
 
 
 echo dofile "build/xcode-genie/genie.lua" > genie.lua || goto err

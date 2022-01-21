@@ -128,6 +128,10 @@ ${PREMAKE} --group=libopenmpt vs2022 --win10 --uwp && \
 ${PREMAKE} --group=all-externals vs2022 --win10 --uwp && \
 echo ok &
 
+${PREMAKE} --file=build/premake-xcode/premake.lua --target=macosx xcode4 && \
+${PREMAKE} --file=build/premake-xcode/premake.lua --target=ios    xcode4 && \
+echo ok &
+
 
 
 echo dofile \"build/xcode-genie/genie.lua\" > genie.lua
