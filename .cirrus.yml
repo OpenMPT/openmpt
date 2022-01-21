@@ -47,9 +47,17 @@ task:
     test_script: gmake STRICT=1 VERBOSE=1 FORCE_DEPS=1 CONFIG= NO_ZLIB=1 NO_MPG123=1 NO_OGG=1 NO_VORBIS=1 NO_VORBISFILE=1 NO_STBVORBIS=0 NO_MINIMP3=0 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 OPENMPT123=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_SNDFILE=1 NO_FLAC=1 check
 
 task:
+    name: macos-xcode13
+    macos_instance:
+        image: monterey-xcode-13.2
+    install_script: brew update && brew install p7zip help2man doxygen autoconf-archive mpg123 libogg libvorbis portaudio flac libsndfile
+    build_script: make STRICT=1 FORCE_DEPS=1 NO_SDL2=1 NO_PULSEAUDIO=1
+    test_script: make STRICT=1 FORCE_DEPS=1 NO_SDL2=1 NO_PULSEAUDIO=1 check
+
+task:
     name: macos-xcode12
     macos_instance:
-        image: big-sur-xcode-12.4
+        image: big-sur-xcode-12.5
     install_script: brew update && brew install p7zip help2man doxygen autoconf-archive mpg123 libogg libvorbis portaudio flac libsndfile
     build_script: make STRICT=1 FORCE_DEPS=1 NO_SDL2=1 NO_PULSEAUDIO=1
     test_script: make STRICT=1 FORCE_DEPS=1 NO_SDL2=1 NO_PULSEAUDIO=1 check
