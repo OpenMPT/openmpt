@@ -576,6 +576,7 @@ static PATTERNINDEX GetNumPatterns(FileReader &file, ModSequence &Order, ORDERIN
 
 	const size_t patternStartOffset = file.GetPosition();
 	const size_t sizeWithoutPatterns = totalSampleLen + patternStartOffset;
+	const size_t sizeWithOfficialPatterns = sizeWithoutPatterns + officialPatterns * numChannels * 256;
 
 	if(wowSampleLen && (wowSampleLen + patternStartOffset) + numPatterns * 8 * 256 == (file.GetLength() & ~1))
 	{
@@ -586,8 +587,9 @@ static PATTERNINDEX GetNumPatterns(FileReader &file, ModSequence &Order, ORDERIN
 		if(ValidateMODPatternData(file, 16, true))
 			numChannels = 8;
 		file.Seek(patternStartOffset);
-	} else if(numPatterns != officialPatterns && validateHiddenPatterns)
+	} else if(numPatterns != officialPatterns && (validateHiddenPatterns || sizeWithOfficialPatterns == file.GetLength()))
 	{
+		// 15-sample SoundTracker specifics:
 		// Fix SoundTracker modules where "hidden" patterns should be ignored.
 		// razor-1911.mod (MD5 b75f0f471b0ae400185585ca05bf7fe8, SHA1 4de31af234229faec00f1e85e1e8f78f405d454b)
 		// and captain_fizz.mod (MD5 55bd89fe5a8e345df65438dbfc2df94e, SHA1 9e0e8b7dc67939885435ea8d3ff4be7704207a43)
@@ -600,28 +602,21 @@ static PATTERNINDEX GetNumPatterns(FileReader &file, ModSequence &Order, ORDERIN
 		// only play correctly if we ignore the hidden patterns.
 		// Hence, we have a peek at the first hidden pattern and check if it contains a lot of illegal data.
 		// If that is the case, we assume it's part of the sample data and only consider the "official" patterns.
-		file.Seek(patternStartOffset + officialPatterns * 1024);
+
+		// 31-sample NoiseTracker / ProTracker specifics:
+		// Interestingly, (broken) variants of the ProTracker modules
+		// "killing butterfly" (MD5 bd676358b1dbb40d40f25435e845cf6b, SHA1 9df4ae21214ff753802756b616a0cafaeced8021),
+		// "quartex" by Reflex (MD5 35526bef0fb21cb96394838d94c14bab, SHA1 116756c68c7b6598dcfbad75a043477fcc54c96c),
+		// seem to have the "correct" file size when only taking the "official" patterns into account, but they only play
+		// correctly when also loading the inofficial patterns.
+		// On the other hand, "Shofixti Ditty.mod" from Star Control 2 (MD5 62b7b0819123400e4d5a7813eef7fc7d, SHA1 8330cd595c61f51c37a3b6f2a8559cf3fcaaa6e8)
+		// doesn't sound correct when taking the second "inofficial" pattern into account.
+		file.Seek(patternStartOffset + officialPatterns * numChannels * 256);
 		if(!ValidateMODPatternData(file, 64, true))
 			numPatterns = officialPatterns;
 		file.Seek(patternStartOffset);
 	}
 
-#ifdef MPT_BUILD_DEBUG
-	// Check if the "hidden" patterns in the order list are actually real, i.e. if they are saved in the file.
-	// OpenMPT did this check in the past, but no other tracker appears to do this.
-	// Interestingly, (broken) variants of the ProTracker modules
-	// "killing butterfly" (MD5 bd676358b1dbb40d40f25435e845cf6b, SHA1 9df4ae21214ff753802756b616a0cafaeced8021),
-	// "quartex" by Reflex (MD5 35526bef0fb21cb96394838d94c14bab, SHA1 116756c68c7b6598dcfbad75a043477fcc54c96c),
-	// seem to have the "correct" file size when only taking the "official" patterns into account, but they only play
-	// correctly when also loading the inofficial patterns.
-	// See also the above check for ambiguities with SoundTracker modules.
-	// Keep this assertion in the code to find potential other broken MODs.
-	if(numPatterns != officialPatterns && sizeWithoutPatterns + officialPatterns * numChannels * 256 == file.GetLength())
-	{
-		MPT_ASSERT(false);
-		//numPatterns = officialPatterns;
-	} else
-#endif
 	if(numPatternsIllegal > numPatterns && sizeWithoutPatterns + numPatternsIllegal * numChannels * 256 == file.GetLength())
 	{
 		// Even those illegal pattern indexes (> 128) appear to be valid... What a weird file!
