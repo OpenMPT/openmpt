@@ -5,7 +5,6 @@
 /auto-props.log
 /genie.lua
 /obj
-/premake5.lua
 /bin/*
 /build/externals
 /build/lib
@@ -39,24 +38,6 @@
 /build/android_ndk/jni
 /build/android_ndk/libs
 /build/android_ndk/obj
-/build/vs2017uwp/*.db
-/build/vs2017uwp/*.sdf
-/build/vs2017uwp/*.suo
-/build/vs2017uwp/.vs
-/build/vs2017uwp/Generated Files
-/build/vs2017uwp/obj
-/build/vs2017uwp/ext/Generated Files
-/build/vs2017uwp/ext/obj
-/build/vs2017win10/*.user
-/build/vs2017win10/.vs
-/build/vs2017win10/Debug
-/build/vs2017win10/OpenMPT-custom.*
-/build/vs2017win10/Release
-/build/vs2017win7/*.user
-/build/vs2017win7/.vs
-/build/vs2017win7/Debug
-/build/vs2017win7/OpenMPT-custom.*
-/build/vs2017win7/Release
 /build/vs2017winxp/*.user
 /build/vs2017winxp/.vs
 /build/vs2017winxp/Debug
