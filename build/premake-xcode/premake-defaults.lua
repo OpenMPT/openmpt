@@ -1,5 +1,6 @@
 
 	filter {}
+		cppdialect "C++17"
 
 	filter { "configurations:Debug" }
 		targetdir ( "../../bin/debug/" .. _ACTION .. "-" .. _OPTIONS["target"] .. "/all" )
