@@ -7,7 +7,6 @@
 
 #include "mpt/base/detect_compiler.hpp"
 #include "mpt/base/detect_os.hpp"
-#include "mpt/base/detect_quirks.hpp"
 
 #include <cstddef>
 
