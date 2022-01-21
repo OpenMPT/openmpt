@@ -668,7 +668,7 @@ struct GT2FileHeader
 
 	bool Validate() const
 	{
-		if(std::memcmp(signature, "GT2", 3) || fileVersion > 9 || year < 1980)
+		if(std::memcmp(signature, "GT2", 3) || fileVersion > 9 || year < 1980 || year > 9999)
 			return false;
 		if(fileVersion > 5)
 			return true;
@@ -688,7 +688,7 @@ MPT_BINARY_STRUCT(GT2FileHeader, 236)
 struct GT2Chunk
 {
 	// 32-Bit chunk identifiers
-	enum ChunkIdentifiers
+	enum ChunkIdentifiers : uint32
 	{
 		idXCOM = MagicBE("XCOM"),
 		idTCN1 = MagicBE("TCN1"),
@@ -778,7 +778,7 @@ MPT_BINARY_STRUCT(GT2Instrument, 308)
 
 struct GT2InstrumentExt
 {
-	enum FilterFlags
+	enum FilterFlags : uint16
 	{
 		fltEnabled     = 0x01,
 		fltVelToCutoff = 0x02,
@@ -791,7 +791,7 @@ struct GT2InstrumentExt
 		fltTypeNotch    = 0x18,
 	};
 
-	uint16be filterFlags;
+	uint16be filterFlags;     // See FilterFlags
 	char     maxVelFreq[24];  // Cutoff frequency for the minimum velocity (256); <= 20: Multiple of the note frequency, > 20: Fixed frequency in Hz
 	char     minVelFreq[24];  // Cutoff frequency for the maximum velocity (0); ditto
 	char     maxVelReso[24];  // Q (resonance) value for the minimum velocity (256)
@@ -807,7 +807,7 @@ MPT_BINARY_STRUCT(GT2InstrumentExt, 102)
 
 struct GT2Envelope
 {
-	enum EnvelopeFlags
+	enum EnvelopeFlags : uint16
 	{
 		envFadeOut = 0x01,
 		envLFO     = 0x02,
@@ -827,7 +827,7 @@ struct GT2Envelope
 	uint16be lfoSweep;
 	uint16be lfoWaveform;
 	uint16be fadeOut;
-	uint16be flags;
+	uint16be flags;  // See EnvelopeFlags
 	uint16be loopStart;
 	uint16be loopEnd;
 	uint16be loopRepCount;
@@ -941,7 +941,7 @@ MPT_BINARY_STRUCT(GT2SampleV2, 78)
 
 struct GT2SampleV1
 {
-	enum SampleFlags
+	enum SampleFlags : uint16
 	{
 		smpStereo   = 0x01,
 		smpPingPong = 0x02,
@@ -949,7 +949,7 @@ struct GT2SampleV1
 
 	uint16be smpNum;
 	char     name[28];
-	uint16be flags;
+	uint16be flags;       // See SampleFlags
 	int16be  defaultPan;  // -1 = use track panning, 0...4095 otherwise
 	uint16be bits;
 	uint16be sampleFreq;
