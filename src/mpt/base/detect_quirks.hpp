@@ -6,7 +6,14 @@
 
 
 #include "mpt/base/detect_compiler.hpp"
+#include "mpt/base/detect_libcxx.hpp"
 #include "mpt/base/detect_os.hpp"
+
+#if MPT_CXX_AT_LEAST(20)
+#include <version>
+#else // !C++20
+#include <array>
+#endif // C++20
 
 
 
@@ -60,8 +67,10 @@
 
 
 
-#if MPT_OS_DJGPP
+#if MPT_LIBCXX_GNU
+#if !defined(_GLIBCXX_USE_WCHAR_T)
 #define MPT_COMPILER_QUIRK_NO_WCHAR
+#endif
 #endif
 
 
