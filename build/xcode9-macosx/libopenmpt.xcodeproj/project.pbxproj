@@ -2169,12 +2169,6 @@
 				);
 				OBJROOT = obj/Release;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_CFLAGS = (
-					"-ffast-math",
-				);
-				OTHER_CPLUSPLUSFLAGS = (
-					"-ffast-math",
-				);
 				OTHER_LDFLAGS = (
 					"-lz",
 				);

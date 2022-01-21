@@ -372,12 +372,6 @@
 				);
 				OBJROOT = obj/Release/mpg123;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_CFLAGS = (
-					"-ffast-math",
-				);
-				OTHER_CPLUSPLUSFLAGS = (
-					"-ffast-math",
-				);
 				SDKROOT = iphoneos;
 				SYMROOT = "../../../bin/release/xcode9-iphoneos/all";
 			};

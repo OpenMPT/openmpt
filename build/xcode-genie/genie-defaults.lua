@@ -14,7 +14,6 @@
 	configuration "Release"
 		defines { "NDEBUG" }
 		flags { "OptimizeSpeed" }
-		flags { "FloatFast" }
 
 	configuration {}
 		defines { "MPT_BUILD_XCODE" }

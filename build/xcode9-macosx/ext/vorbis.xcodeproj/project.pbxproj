@@ -599,12 +599,6 @@
 				);
 				OBJROOT = obj/Release/vorbis;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_CFLAGS = (
-					"-ffast-math",
-				);
-				OTHER_CPLUSPLUSFLAGS = (
-					"-ffast-math",
-				);
 				SDKROOT = macosx;
 				SYMROOT = "../../../bin/release/xcode9-macosx/all";
 			};
