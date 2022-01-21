@@ -200,7 +200,7 @@ void CSoundFile::ModSaveCommand(const ModCommand &source, uint8 &command, uint8 
 struct MODFileHeader
 {
 	uint8be numOrders;
-	uint8be restartPos;
+	uint8be restartPos;  // Tempo (early SoundTracker) or restart position (only PC trackers?)
 	uint8be orderList[128];
 };
 
@@ -771,7 +771,7 @@ static bool CheckMODMagic(const char magic[4], MODMagicResult &result)
 
 CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderMOD(MemoryFileReader file, const uint64 *pfilesize)
 {
-	if(!file.CanRead(1080 + 4))
+	if(!file.LengthIsAtLeast(1080 + 4))
 	{
 		return ProbeWantMoreData;
 	}
@@ -1281,7 +1281,7 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 	}
 #endif  // MPT_EXTERNAL_SAMPLES || MPT_BUILD_FUZZER
 
-	// Fix VBlank MODs. Arbitrary threshold: 9 minutes (enough for Guitar Slinger...).
+	// Fix VBlank MODs. Arbitrary threshold: 8 minutes (enough for "frame of mind" by Dascon...).
 	// Basically, this just converts all tempo commands into speed commands
 	// for MODs which are supposed to have VBlank timing (instead of CIA timing).
 	// There is no perfect way to do this, since both MOD types look the same,
@@ -1294,12 +1294,12 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 	if(isMdKd && hasTempoCommands && !definitelyCIA)
 	{
 		const double songTime = GetLength(eNoAdjust).front().duration;
-		if(songTime >= 540.0)
+		if(songTime >= 480.0)
 		{
 			m_playBehaviour.set(kMODVBlankTiming);
 			if(GetLength(eNoAdjust, GetLengthTarget(songTime)).front().targetReached)
 			{
-				// This just makes things worse, song is at least as long as in CIA mode (e.g. in "Stary Hallway" by Neurodancer)
+				// This just makes things worse, song is at least as long as in CIA mode
 				// Obviously we should keep using CIA timing then...
 				m_playBehaviour.reset(kMODVBlankTiming);
 			} else
