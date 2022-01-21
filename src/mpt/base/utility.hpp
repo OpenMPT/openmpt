@@ -6,6 +6,7 @@
 
 
 #include "mpt/base/detect_compiler.hpp"
+#include "mpt/base/detect_libcxx.hpp"
 #include "mpt/base/namespace.hpp"
 
 #if MPT_CXX_BEFORE(20)
@@ -23,7 +24,7 @@ namespace mpt {
 inline namespace MPT_INLINE_NS {
 
 
-#if MPT_CXX_AT_LEAST(20) && !MPT_CLANG_BEFORE(13, 0, 0)
+#if MPT_CXX_AT_LEAST(20) && !MPT_LIBCXX_LLVM_BEFORE(13000)
 
 using std::in_range;
 
@@ -78,7 +79,7 @@ inline void reset(T & x) {
 
 
 
-#if MPT_CXX_AT_LEAST(20) && !MPT_CLANG_BEFORE(13, 0, 0)
+#if MPT_CXX_AT_LEAST(20) && !MPT_LIBCXX_LLVM_BEFORE(13000)
 
 using std::cmp_equal;
 using std::cmp_greater;
