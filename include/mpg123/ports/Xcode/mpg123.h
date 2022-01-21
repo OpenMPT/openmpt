@@ -11,7 +11,11 @@
 #include <stdlib.h>
 #include <sys/types.h>
 
+#define MPG123_API_VERSION 46 /* OpenMPT */
 #define MPG123_NO_CONFIGURE
+#define MPG123_NO_LARGENAME /* OpenMPT */
+#include <stddef.h> /* OpenMPT */
+typedef ssize_t mpg123_ssize_t; /* OpenMPT */
 #include "../../src/libmpg123/mpg123.h.in" /* Yes, .h.in; we include the configure template! */
 
 #endif
