@@ -6,7 +6,11 @@ The following changes have been made:
   versions.
 - ports/MSVC++/mpg123.h has been adjusted to provide mpg123_ssize_t and define
   MPG123_NO_LARGENAME.
-- Modifications are marked by // OpenMPT.
+- ports/Xcode/mpg123.h has been adjusted to provide mpg123_ssize_t and define
+  MPG123_API_VERSION
+- src/libmpg123/mpg123.h.in has been modified to #include <fmt123.h> as
+  #include "fmt123.h"
+- Modifications are marked by // OpenMPT or /* OpenMPT */.
 - Obviously, unnecessary folders and files have been removed.
 - For building, premake is used to generate Visual Studio project files.
   See ../build/premake/ for details.
