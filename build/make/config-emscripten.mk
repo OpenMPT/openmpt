@@ -131,8 +131,7 @@ NO_SHARED_LINKER_FLAG=1
 # Disable the generic compiler optimization flags as emscripten is sufficiently different.
 # Optimization flags are hard-coded for emscripten in this file.
 DEBUG=0
-OPTIMIZE=0
-OPTIMIZE_SIZE=0
+OPTIMIZE=none
 
 IS_CROSS=1
 

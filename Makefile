@@ -41,27 +41,30 @@
 #
 # Build flags (provide on each `make` invocation) (defaults are shown):
 #
-#  DYNLINK=1        Dynamically link examples and openmpt123 against libopenmpt
-#  SHARED_LIB=1     Build shared library
-#  STATIC_LIB=1     Build static library
-#  EXAMPLES=1       Build examples
-#  OPENMPT123=1     Build openmpt123
-#  IN_OPENMPT=0     Build in_openmpt (WinAMP 2.x plugin)
-#  XMP_OPENMPT=0    Build xmp-openmpt (XMPlay plugin)
-#  SHARED_SONAME=1  Set SONAME of shared library
-#  DEBUG=0          Build debug binaries without optimization and with symbols
-#  OPTIMIZE=1       Build optimized binaries (-O3)
-#  OPTIMIZE_MEDIUM=0 Build optimized binaries (-O2)
-#  OPTIMIZE_SIZE=0  Build size-optimized binaries (-Os)
-#  OPTIMIZE_LTO=0   Build with link-time-optimizations
+#  DYNLINK=1           Dynamically link examples and openmpt123 against libopenmpt
+#  SHARED_LIB=1        Build shared library
+#  STATIC_LIB=1        Build static library
+#  EXAMPLES=1          Build examples
+#  OPENMPT123=1        Build openmpt123
+#  IN_OPENMPT=0        Build in_openmpt (WinAMP 2.x plugin)
+#  XMP_OPENMPT=0       Build xmp-openmpt (XMPlay plugin)
+#  SHARED_SONAME=1     Set SONAME of shared library
+#  DEBUG=0             Build debug binaries without optimization and with symbols
+#  OPTIMIZE=vectorize  -O3
+#           speed      -O2
+#           size       -Os/-Oz
+#           test       -Og
+#           debug      -O0
+#           none
+#  OPTIMIZE_LTO=0      Build with link-time-optimizations
 #  OPTIMIZE_FASTMATH=0 Use non-standard-compliant fastmath optimizations (-ffast-math)
-#  TEST=1           Include test suite in default target.
-#  ONLY_TEST=0      Only build the test suite.
-#  STRICT=0         Treat warnings as errors.
-#  MODERN=0         Pass more modern compiler options.
-#  NATIVE=0         Optimize for system CPU.
-#  STDCXX=c++17     C++ standard version (only for GCC and clang)
-#  CHECKED=0        Enable run-time assertions.
+#  TEST=1              Include test suite in default target.
+#  ONLY_TEST=0         Only build the test suite.
+#  STRICT=0            Treat warnings as errors.
+#  MODERN=0            Pass more modern compiler options.
+#  NATIVE=0            Optimize for system CPU.
+#  STDCXX=c++17        C++ standard version (only for GCC and clang)
+#  CHECKED=0           Enable run-time assertions.
 #  CHECKED_ADDRESS=0   Enable address sanitizer
 #  CHECKED_UNDEFINED=0 Enable undefined behaviour sanitizer
 #
@@ -166,9 +169,7 @@ EXAMPLES=1
 FUZZ=0
 SHARED_SONAME=1
 DEBUG=0
-OPTIMIZE=1
-OPTIMIZE_SIZE=0
-OPTIMIZE_MEDIUM=0
+OPTIMIZE=vectorize
 OPTIMIZE_LTO=0
 OPTIMIZE_FASTMATH=0
 TEST=1
@@ -344,7 +345,7 @@ CPPFLAGS += -DMPT_BUILD_DEBUG
 CXXFLAGS += -g
 CFLAGS   += -g
 else
-ifeq ($(OPTIMIZE),1)
+ifneq ($(OPTIMIZE),none)
 CXXFLAGS += -O
 CFLAGS   += -O
 endif
@@ -374,22 +375,29 @@ ARFLAGS  +=
 
 ifeq ($(DEBUG),1)
 CPPFLAGS += -DMPT_BUILD_DEBUG
-CXXFLAGS += -O0 -g -fno-omit-frame-pointer
-CFLAGS   += -O0 -g -fno-omit-frame-pointer
-else ifeq ($(OPTIMIZE_SIZE),1)
+CXXFLAGS += -g
+CFLAGS   += -g
+else ifeq ($(OPTIMIZE),debug)
+CPPFLAGS += 
+CXXFLAGS += -O0 -fno-omit-frame-pointer
+CFLAGS   += -O0 -fno-omit-frame-pointer
+else ifeq ($(OPTIMIZE),test)
+CPPFLAGS += 
+CXXFLAGS += -Og -fno-omit-frame-pointer
+CFLAGS   += -Og -fno-omit-frame-pointer
+else ifeq ($(OPTIMIZE),size)
 CXXFLAGS += -Os
 CFLAGS   += -Os -fno-strict-aliasing
 LDFLAGS  += 
-ifeq ($(MPT_COMPILER_NOGCSECTIONS),1)
-else
+ifneq ($(MPT_COMPILER_NOGCSECTIONS),1)
 CXXFLAGS += -ffunction-sections -fdata-sections
 CFLAGS   += -ffunction-sections -fdata-sections
 LDFLAGS  += -Wl,--gc-sections
 endif
-else ifeq ($(OPTIMIZE_MEDIUM),1)
+else ifeq ($(OPTIMIZE),speed)
 CXXFLAGS += -O2
 CFLAGS   += -O2 -fno-strict-aliasing
-else ifeq ($(OPTIMIZE),1)
+else ifeq ($(OPTIMIZE),vectorize)
 CXXFLAGS += -O3
 CFLAGS   += -O3 -fno-strict-aliasing
 endif
