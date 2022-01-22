@@ -29,8 +29,8 @@
 
 
 
-// This should really be based on __STDCPP_THREADS__, but that is not defined by
-// GCC or clang. Stupid.
+// This should really be based on __STDCPP_THREADS__,
+// but that is not defined consistently by GCC or clang. Stupid.
 // Just assume multithreaded and disable for platforms we know are
 // singlethreaded later on.
 #define MPT_PLATFORM_MULTITHREADED 1
@@ -43,6 +43,12 @@
 #if (MPT_OS_EMSCRIPTEN && !defined(__EMSCRIPTEN_PTHREADS__))
 #undef MPT_PLATFORM_MULTITHREADED
 #define MPT_PLATFORM_MULTITHREADED 0
+#endif
+
+
+
+#if (defined(__MINGW32__) || defined(__MINGW64__)) && MPT_LIBCXX_GNU && defined(_GLIBCXX_HAS_GTHREADS) && !defined(__STDCPP_THREADS__)
+#define MPT_COMPILER_QUIRK_NO_STDCPP_THREADS
 #endif
 
 
