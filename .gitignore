@@ -3,7 +3,6 @@
 /Android.mk
 /Application.mk
 /auto-props.log
-/genie.lua
 /obj
 /bin/*
 /build/externals
@@ -237,12 +236,6 @@
 /include/flac/src/share/win_utf8_io/win_utf8_io_static.vcproj
 /include/flac/src/share/win_utf8_io/win_utf8_io_static.vcxproj
 /include/flac/src/share/win_utf8_io/win_utf8_io_static.vcxproj.filters
-/include/genie/OpenMPT-expected.txt
-/include/genie/OpenMPT-version.txt
-/include/genie/bin
-/include/genie/build/gmake.linux/obj
-/include/genie/build/vs2017/obj
-/include/genie/build/vs2019/obj
 /include/lame/ACM
 /include/lame/API
 /include/lame/ChangeLog
