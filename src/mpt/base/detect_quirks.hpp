@@ -47,7 +47,11 @@
 
 
 
-#if (defined(__MINGW32__) || defined(__MINGW64__)) && MPT_LIBCXX_GNU && defined(_GLIBCXX_HAS_GTHREADS) && !defined(__STDCPP_THREADS__)
+#if MPT_GCC_BEFORE(11, 1, 0)
+#define MPT_COMPILER_QUIRK_NO_STDCPP_THREADS
+#elif MPT_CLANG_BEFORE(12, 0, 0)
+#define MPT_COMPILER_QUIRK_NO_STDCPP_THREADS
+#elif (defined(__MINGW32__) || defined(__MINGW64__)) && MPT_LIBCXX_GNU && defined(_GLIBCXX_HAS_GTHREADS) && !defined(__STDCPP_THREADS__)
 #define MPT_COMPILER_QUIRK_NO_STDCPP_THREADS
 #endif
 
