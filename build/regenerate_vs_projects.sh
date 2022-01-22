@@ -10,16 +10,10 @@ echo $MY_DIR
 cd "${MY_DIR}"
 cd ..
 
-GENIE=include/genie/bin/linux/genie
 PREMAKE=include/premake/bin/release/premake5
 
 
 
-cp include/genie/OpenMPT.txt include/genie/OpenMPT-expected.txt
-if ! diff include/genie/OpenMPT-expected.txt include/genie/OpenMPT-version.txt >/dev/null ; then
-	echo "Genie version mismatch"
-	exit 1
-fi
 cp include/premake/OpenMPT.txt include/premake/OpenMPT-expected.txt
 if ! diff include/premake/OpenMPT-expected.txt include/premake/OpenMPT-version.txt >/dev/null ; then
 	echo "Premake version mismatch"
@@ -129,13 +123,6 @@ echo ok &
 ${PREMAKE} --file=build/premake-xcode/premake.lua --target=macosx xcode4 && \
 ${PREMAKE} --file=build/premake-xcode/premake.lua --target=ios    xcode4 && \
 echo ok &
-
-
-
-echo dofile \"build/xcode-genie/genie.lua\" > genie.lua
-
-${GENIE} --target="macosx"   --os=macosx xcode9
-${GENIE} --target="iphoneos" --os=macosx xcode9
 
 
 

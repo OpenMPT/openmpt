@@ -11,14 +11,8 @@ set PREMAKE=
 if exist "include\premake\premake5.exe" set PREMAKE=include\premake\premake5.exe
 if exist "include\premake\bin\release\premake5.exe" set PREMAKE=include\premake\bin\release\premake5.exe
 
-set GENIE=
-set GENIE=include\genie\bin\windows\genie.exe
 
 
-
-copy /y include\genie\OpenMPT.txt include\genie\OpenMPT-expected.txt
-fc include\genie\OpenMPT-expected.txt include\genie\OpenMPT-version.txt
-if errorlevel 1 goto errversion
 copy /y include\premake\OpenMPT.txt include\premake\OpenMPT-expected.txt
 fc include\premake\OpenMPT-expected.txt include\premake\OpenMPT-version.txt
 if errorlevel 1 goto errversion
@@ -140,19 +134,12 @@ echo Done ^) ^|^| pause"
 
 
 
-echo dofile "build/xcode-genie/genie.lua" > genie.lua || goto err
-
-%GENIE% --target="macosx"   --os=macosx xcode9 || goto err
-%GENIE% --target="iphoneos" --os=macosx xcode9 || goto err
-
-
-
 cd %MY_DIR% || goto err
 
 goto end
 
 :errversion
-echo Genie or Premake version mismatch
+echo Premake version mismatch
 goto err
 
 :err

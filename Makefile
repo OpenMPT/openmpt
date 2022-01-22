@@ -1422,8 +1422,6 @@ bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION).makefile.tar: bin/dist.mk bin
 	svn export ./build/svn_version  bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/svn_version
 	svn export ./build/xcode-ios    bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/xcode-ios
 	svn export ./build/xcode-macosx bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/xcode-macosx
-	svn export ./build/xcode9-iphoneos bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/xcode9-iphoneos
-	svn export ./build/xcode9-macosx   bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/xcode9-macosx
 	svn export ./common             bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/common
 	svn export ./doc/contributing.md          bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/doc/contributing.md
 	svn export ./doc/libopenmpt_styleguide.md bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/doc/libopenmpt_styleguide.md
