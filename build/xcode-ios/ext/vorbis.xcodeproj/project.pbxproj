@@ -440,8 +440,11 @@
 				OBJROOT = obj/Debug/vorbis;
 				ONLY_ACTIVE_ARCH = YES;
 				SYMROOT = "../../../bin/debug/xcode4-ios/all";
-				USER_HEADER_SEARCH_PATHS = (
+				SYSTEM_HEADER_SEARCH_PATHS = (
 					../../../include/ogg/include,
+					"$(inherited)",
+				);
+				USER_HEADER_SEARCH_PATHS = (
 					../../../include/vorbis/include,
 					../../../include/vorbis/lib,
 				);
@@ -466,8 +469,11 @@
 				OBJROOT = obj/Release/vorbis;
 				ONLY_ACTIVE_ARCH = NO;
 				SYMROOT = "../../../bin/release/xcode4-ios/all";
-				USER_HEADER_SEARCH_PATHS = (
+				SYSTEM_HEADER_SEARCH_PATHS = (
 					../../../include/ogg/include,
+					"$(inherited)",
+				);
+				USER_HEADER_SEARCH_PATHS = (
 					../../../include/vorbis/include,
 					../../../include/vorbis/lib,
 				);

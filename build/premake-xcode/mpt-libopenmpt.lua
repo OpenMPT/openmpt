@@ -14,7 +14,7 @@
    "../../include/vorbis/include",
 --   "../../include/zlib",
   }
-  externalincludedirs ( extincludedirs )
+  sysincludedirs ( extincludedirs )
   includedirs {
    "../..",
    "../../src",

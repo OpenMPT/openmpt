@@ -7,7 +7,7 @@
   dofile "../../build/premake-xcode/premake-defaults-LIBorDLL.lua"
   dofile "../../build/premake-xcode/premake-defaults.lua"
   targetname "openmpt-ogg"
-  externalincludedirs { "../../include/ogg/include" }
+  sysincludedirs { "../../include/ogg/include" }
   files {
    "../../include/ogg/include/ogg/ogg.h",
    "../../include/ogg/include/ogg/os_types.h",

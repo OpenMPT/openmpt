@@ -11,7 +11,7 @@
   local extincludedirs = {
    "../../include/ogg/include",
 	}
-		externalincludedirs ( extincludedirs )
+		sysincludedirs ( extincludedirs )
   includedirs {
    "../../include/vorbis/include",
    "../../include/vorbis/lib",

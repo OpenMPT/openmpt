@@ -1646,11 +1646,14 @@
 					"-lz",
 				);
 				SYMROOT = "../../bin/release/xcode4-ios/all";
-				USER_HEADER_SEARCH_PATHS = (
+				SYSTEM_HEADER_SEARCH_PATHS = (
 					../../include/mpg123/ports/Xcode,
 					../../include/mpg123/src/libmpg123,
 					../../include/ogg/include,
 					../../include/vorbis/include,
+					"$(inherited)",
+				);
+				USER_HEADER_SEARCH_PATHS = (
 					../..,
 					../../src,
 					../../common,
@@ -1686,11 +1689,14 @@
 					"-lz",
 				);
 				SYMROOT = "../../bin/debug/xcode4-ios/all";
-				USER_HEADER_SEARCH_PATHS = (
+				SYSTEM_HEADER_SEARCH_PATHS = (
 					../../include/mpg123/ports/Xcode,
 					../../include/mpg123/src/libmpg123,
 					../../include/ogg/include,
 					../../include/vorbis/include,
+					"$(inherited)",
+				);
+				USER_HEADER_SEARCH_PATHS = (
 					../..,
 					../../src,
 					../../common,

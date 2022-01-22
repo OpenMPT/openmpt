@@ -169,8 +169,9 @@
 				OBJROOT = obj/Release/ogg;
 				ONLY_ACTIVE_ARCH = NO;
 				SYMROOT = "../../../bin/release/xcode4-ios/all";
-				USER_HEADER_SEARCH_PATHS = (
+				SYSTEM_HEADER_SEARCH_PATHS = (
 					../../../include/ogg/include,
+					"$(inherited)",
 				);
 			};
 			name = Release;
@@ -209,8 +210,9 @@
 				OBJROOT = obj/Debug/ogg;
 				ONLY_ACTIVE_ARCH = YES;
 				SYMROOT = "../../../bin/debug/xcode4-ios/all";
-				USER_HEADER_SEARCH_PATHS = (
+				SYSTEM_HEADER_SEARCH_PATHS = (
 					../../../include/ogg/include,
+					"$(inherited)",
 				);
 			};
 			name = Debug;
