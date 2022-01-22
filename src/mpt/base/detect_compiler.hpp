@@ -146,7 +146,12 @@
 #if MPT_COMPILER_GENERIC || MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 
 #if (__cplusplus >= 202002)
+#if defined(__APPLE__) && MPT_CLANG_BEFORE(13, 0, 0)
+// XCode 12.5 has a really weird mix of Clang and libc++. Just black-list C++20 support for XCode <= 12.
+#define MPT_CXX 17
+#else
 #define MPT_CXX 20
+#endif
 #elif (__cplusplus >= 201703)
 #define MPT_CXX 17
 #else
