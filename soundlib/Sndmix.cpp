@@ -1507,7 +1507,8 @@ void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int32 &period, Tuning::NOTEI
 			{
 				//IT playback compatibility 01 & 02
 
-				// Pattern delay restarts tick counting. Not quite correct yet!
+				// Pattern delay restarts tick counting.
+				// Test case: JxxTicks.it
 				const uint32 tick = m_PlayState.m_nTickCount % (m_PlayState.m_nMusicSpeed + m_PlayState.m_nFrameDelay);
 				if(chn.nArpeggio != 0)
 				{
