@@ -21,15 +21,67 @@ AM_PROG_CC_C_O
 AC_PROG_CXX
 AC_PROG_INSTALL
 
+# We need C++17 support, Autoconf does not yet support C++20. Yay.
+# See <https://github.com/autoconf-archive/autoconf-archive/pull/244>.
+#AX_CXX_COMPILE_STDCXX(20, [noext], [optional])
+#AS_IF([test "x$HAVE_CXX20" != "x1"],
+# [
+#  AX_CXX_COMPILE_STDCXX(17, [noext], [mandatory])
+# ],[]
+#)
+AX_CXX_COMPILE_STDCXX(17, [noext], [mandatory])
+
+AC_LANG_PUSH([C])
+AX_CHECK_COMPILE_FLAG([-fvisibility=hidden], [CFLAGS="$CFLAGS -fvisibility=hidden"])
+AX_CFLAGS_WARN_ALL
+AC_LANG_POP([C])
+
+AC_LANG_PUSH([C++])
+AX_CHECK_COMPILE_FLAG([-fvisibility=hidden], [CXXFLAGS="$CXXFLAGS -fvisibility=hidden"])
+AX_CXXFLAGS_WARN_ALL
+AC_LANG_POP([C++])
+
+AX_CXX_EXCEPTIONS
+AX_CXX_RTTI
+
 AX_PTHREAD([
  LIBS="$PTHREAD_LIBS $LIBS"
  CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
  CXXFLAGS="$CXXFLAGS $PTHREAD_CFLAGS"
- CC="$PTHREAD_CC"
- CXX="$PTHREAD_CXX"
+ #CC="$PTHREAD_CC"
+ #CXX="$PTHREAD_CXX"
  ],
  []
 )
+
+# mingw c++ thread
+AC_LANG_PUSH([C++])
+case $host_os in
+ mingw32*)
+  AC_CHECK_HEADER([mingw.thread.h],
+   [
+    have_mingwstdtthreads=1
+   ],
+   [
+    have_mingwstdtthreads=0
+   ]
+  )
+  ;;
+ *)
+  have_mingwstdtthreads=0
+  ;;
+esac
+AC_LANG_POP([C++])
+AS_IF([test "x$have_mingwstdtthreads" = "x1"],
+ [
+  MINGWSTDTHREADS_CPPFLAGS=-DMPT_WITH_MINGWSTDTHREADS
+ ],
+ [
+  MINGWSTDTHREADS_CPPFLAGS=
+ ]
+)
+AC_SUBST([MINGWSTDTHREADS_CPPFLAGS])
+
 
 LIBOPENMPT_LTVER_CURRENT=!!MPT_LIBOPENMPT_LTVER_CURRENT!!
 LIBOPENMPT_LTVER_REVISION=!!MPT_LIBOPENMPT_LTVER_REVISION!!
@@ -282,57 +334,6 @@ AS_IF([test "x$with_flac" != "xno"],
  ]
 )
 ])
-
-# We need C++17 support, Autoconf does not yet support C++20. Yay.
-# See <https://github.com/autoconf-archive/autoconf-archive/pull/244>.
-#AX_CXX_COMPILE_STDCXX(20, [noext], [optional])
-#AS_IF([test "x$HAVE_CXX20" != "x1"],
-# [
-#  AX_CXX_COMPILE_STDCXX(17, [noext], [mandatory])
-# ],[]
-#)
-AX_CXX_COMPILE_STDCXX(17, [noext], [mandatory])
-
-AX_CXX_EXCEPTIONS
-AX_CXX_RTTI
-
-AC_LANG_PUSH([C])
-AX_CHECK_COMPILE_FLAG([-fvisibility=hidden], [CFLAGS="$CFLAGS -fvisibility=hidden"])
-AX_CFLAGS_WARN_ALL
-AC_LANG_POP([C])
-
-AC_LANG_PUSH([C++])
-AX_CHECK_COMPILE_FLAG([-fvisibility=hidden], [CXXFLAGS="$CXXFLAGS -fvisibility=hidden"])
-AX_CXXFLAGS_WARN_ALL
-AC_LANG_POP([C++])
-
-# mingw c++ thread
-AC_LANG_PUSH([C++])
-case $host_os in
- mingw32*)
-  AC_CHECK_HEADER([mingw.thread.h],
-   [
-    have_mingwstdtthreads=1
-   ],
-   [
-    have_mingwstdtthreads=0
-   ]
-  )
-  ;;
- *)
-  have_mingwstdtthreads=0
-  ;;
-esac
-AC_LANG_POP([C++])
-AS_IF([test "x$have_mingwstdtthreads" = "x1"],
- [
-  MINGWSTDTHREADS_CPPFLAGS=-DMPT_WITH_MINGWSTDTHREADS
- ],
- [
-  MINGWSTDTHREADS_CPPFLAGS=
- ]
-)
-AC_SUBST([MINGWSTDTHREADS_CPPFLAGS])
 
 DX_DOXYGEN_FEATURE(ON)
 DX_DOT_FEATURE(OFF)
