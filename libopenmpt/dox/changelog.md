@@ -31,7 +31,7 @@ is just a high-level summary.
  *  [**Change**] ctl `seek.sync_samples` now defaults to 1.
  *  [**Change**] `Makefile` `CONFIG=generic` is gone. Please use
     `CONFIG=standard` instead.
- *  [**Change**] `Makefile` `CONFIG=macosx` and `CONFIG=macosx` have been
+ *  [**Change**] `Makefile` `CONFIG=macosx` and `CONFIG=haiku` have been
     removed. The OS is auto-detected.
 
  *  [**Regression**] Full support for Visual Studio 2017 has been removed. We
