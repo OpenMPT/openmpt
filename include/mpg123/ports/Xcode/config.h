@@ -201,3 +201,6 @@
 /* #undef uintptr_t */
 
 #define REAL_IS_FLOAT
+
+#define HAVE_DIRENT_H /* OpenMPT */
+
