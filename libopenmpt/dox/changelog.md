@@ -29,6 +29,10 @@ is just a high-level summary.
     checking header availability.
 
  *  [**Change**] ctl `seek.sync_samples` now defaults to 1.
+ *  [**Change**] `Makefile` `CONFIG=generic` is gone. Please use
+    `CONFIG=standard` instead.
+ *  [**Change**] `Makefile` `CONFIG=macosx` and `CONFIG=macosx` have been
+    removed. The OS is auto-detected.
 
  *  [**Regression**] Full support for Visual Studio 2017 has been removed. We
     still support targeting Windows XP with Visual Studio 2017.
