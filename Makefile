@@ -395,6 +395,7 @@ CFLAGS   += -O3 -fno-strict-aliasing
 endif
 
 ifeq ($(OPTIMIZE_FASTMATH),1)
+CPPFLAGS += -DMPT_CHECK_CXX_IGNORE_WARNING_FASTMATH -DMPT_CHECK_CXX_IGNORE_WARNING_FINITEMATH
 CXXFLAGS += -ffast-math
 CFLAGS   += -ffast-math
 endif

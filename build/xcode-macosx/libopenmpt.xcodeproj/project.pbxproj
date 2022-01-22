@@ -343,6 +343,7 @@
 		6303157093E70D62A6FF43B0 /* Logging.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Logging.h; path = ../../common/Logging.h; sourceTree = "<group>"; };
 		632A109AF5B7DA8C5E907EDA /* io_span.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = io_span.hpp; path = ../../src/mpt/io/io_span.hpp; sourceTree = "<group>"; };
 		63FDD8AF94E1D0A1A7FA06EF /* Tables.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Tables.h; path = ../../soundlib/Tables.h; sourceTree = "<group>"; };
+		64377F84A84B50B69C1CD5C4 /* compiler.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = compiler.hpp; path = ../../src/mpt/check/compiler.hpp; sourceTree = "<group>"; };
 		664DAA91DAA7EF83588B78D1 /* DMOUtils.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = DMOUtils.cpp; path = ../../soundlib/plugins/dmo/DMOUtils.cpp; sourceTree = "<group>"; };
 		666A8F1BF8F8590D61D0FD5B /* Load_stp.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Load_stp.cpp; path = ../../soundlib/Load_stp.cpp; sourceTree = "<group>"; };
 		6687823BDAE1C72D58C5507B /* tuningcollection.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = tuningcollection.h; path = ../../soundlib/tuningcollection.h; sourceTree = "<group>"; };
@@ -836,6 +837,7 @@
 		63D3103B06C136ED95E7167B /* check */ = {
 			isa = PBXGroup;
 			children = (
+				64377F84A84B50B69C1CD5C4 /* compiler.hpp */,
 				417FE082D6F69FB44592F6C2 /* libc.hpp */,
 				788395FAAA7CE0AC245C1C3A /* mfc.hpp */,
 				B9B7FE84CBE1DB36FFD2C4C4 /* windows.hpp */,
