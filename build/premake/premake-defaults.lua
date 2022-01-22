@@ -245,12 +245,6 @@
 		filter { "architecture:x86" }
 			vectorextensions "IA32"
 		filter {}
-		filter { "architecture:x86", "configurations:Release" }
-			floatingpoint "Fast"
-		filter {}
-		filter { "architecture:x86", "configurations:ReleaseShared" }
-			floatingpoint "Fast"
-		filter {}
 
 	else
 
