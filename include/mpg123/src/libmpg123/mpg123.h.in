@@ -9,10 +9,7 @@
 #ifndef MPG123_LIB_H
 #define MPG123_LIB_H
 
-#if 0 /* OpenMPT */
 #include <fmt123.h>
-#endif /* OpenMPT */
-#include "fmt123.h" /* OpenMPT */
 
 /** \file mpg123.h The header file for the libmpg123 MPEG Audio decoder */
 

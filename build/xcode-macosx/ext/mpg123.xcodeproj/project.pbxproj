@@ -34,19 +34,6 @@
 		F155B58DD59CBDBF5989EBCD /* compat_str.c in Sources */ = {isa = PBXBuildFile; fileRef = CDD5DB15FEB9D30711D20955 /* compat_str.c */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXCopyFilesBuildPhase section */
-		E2ED1E19CDD9440B15BF0C59 /* Embed Libraries */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-			);
-			name = "Embed Libraries";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
-
 /* Begin PBXFileReference section */
 		0BDCDC32593FD264CF5ED272 /* stringbuf.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = stringbuf.c; path = ../../../include/mpg123/src/libmpg123/stringbuf.c; sourceTree = "<group>"; };
 		0F54AFAE5CB7A5E0D2D6A5EE /* equalizer.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = equalizer.c; path = ../../../include/mpg123/src/libmpg123/equalizer.c; sourceTree = "<group>"; };
@@ -69,7 +56,7 @@
 		BAACDA4AE2E792FCCA83208A /* layer3.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = layer3.c; path = ../../../include/mpg123/src/libmpg123/layer3.c; sourceTree = "<group>"; };
 		C3752BE686E0ED98C5849226 /* icy2utf8.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = icy2utf8.c; path = ../../../include/mpg123/src/libmpg123/icy2utf8.c; sourceTree = "<group>"; };
 		C3CD341CF5C67ECE6FA5BA5C /* synth_real.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = synth_real.c; path = ../../../include/mpg123/src/libmpg123/synth_real.c; sourceTree = "<group>"; };
-		C6BCBF7D1D4A29EFF5C33DBD /* openmpt-mpg123.dll */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = "openmpt-mpg123.dll"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C6BCBF7D1D4A29EFF5C33DBD /* openmpt-mpg123.dll */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; name = "openmpt-mpg123.dll"; path = "openmpt-mpg123.dll"; sourceTree = BUILT_PRODUCTS_DIR; };
 		CDD5DB15FEB9D30711D20955 /* compat_str.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = compat_str.c; path = ../../../include/mpg123/src/compat/compat_str.c; sourceTree = "<group>"; };
 		E598BBB4FCAB56E6ECC751F4 /* icy.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = icy.c; path = ../../../include/mpg123/src/libmpg123/icy.c; sourceTree = "<group>"; };
 		F4F6A4743D6788A682065AB4 /* dct64.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = dct64.c; path = ../../../include/mpg123/src/libmpg123/dct64.c; sourceTree = "<group>"; };
@@ -85,6 +72,19 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		E2ED1E19CDD9440B15BF0C59 /* Embed Libraries */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+			);
+			name = "Embed Libraries";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXGroup section */
 		0F03317AECAE342CC052B7BA /* mpg123 */ = {
@@ -170,22 +170,14 @@
 /* Begin PBXProject section */
 		08FB7793FE84155DC02AAC07 /* Project object */ = {
 			isa = PBXProject;
-			attributes = {
-				LastUpgradeCheck = 1320;
-			};
 			buildConfigurationList = 1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "mpg123" */;
 			compatibilityVersion = "Xcode 3.2";
-			developmentRegion = en;
 			hasScannedForEncodings = 1;
-			knownRegions = (
-				en,
-				Base,
-			);
 			mainGroup = 0F03317AECAE342CC052B7BA /* mpg123 */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				6CFC1BC3B56CFFF5FA0BD203 /* mpg123 */,
+				6CFC1BC3B56CFFF5FA0BD203 /* openmpt-mpg123.dll */,
 			);
 		};
 /* End PBXProject section */
@@ -235,35 +227,19 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXVariantGroup section */
+/* End PBXVariantGroup section */
+
 /* Begin XCBuildConfiguration section */
 		4C50EB499ED7163B711B7989 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
 				CLANG_CXX_LANGUAGE_STANDARD = "c++1z";
-				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
-				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_COMMA = YES;
-				CLANG_WARN_CONSTANT_CONVERSION = YES;
-				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
-				CLANG_WARN_EMPTY_BODY = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
-				CLANG_WARN_INFINITE_RECURSION = YES;
-				CLANG_WARN_INT_CONVERSION = YES;
-				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
-				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
-				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
-				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_SUSPICIOUS_MOVE = YES;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CONFIGURATION_BUILD_DIR = "$(SYMROOT)";
 				CONFIGURATION_TEMP_DIR = "$(OBJROOT)";
 				COPY_PHASE_STRIP = NO;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_TESTABILITY = YES;
-				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					DEBUG,
@@ -272,16 +248,17 @@
 					OPT_GENERIC,
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
-				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES;
-				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				OBJROOT = obj/Debug/mpg123;
 				ONLY_ACTIVE_ARCH = YES;
 				SYMROOT = "../../../bin/debug/xcode4-macosx/all";
-				USER_HEADER_SEARCH_PATHS = "../../../include/mpg123/ports/Xcode ../../../include/mpg123/src/libmpg123 ../../../include/mpg123/src/compat ../../../include/mpg123/src";
+				USER_HEADER_SEARCH_PATHS = (
+					../../../include/mpg123/ports/Xcode,
+					../../../include/mpg123/src/libmpg123,
+					../../../include/mpg123/src/compat,
+					../../../include/mpg123/src,
+				);
 			};
 			name = Debug;
 		};
@@ -289,7 +266,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CLANG_ENABLE_OBJC_WEAK = YES;
 				CONFIGURATION_BUILD_DIR = "../../../bin/release/xcode4-macosx/all";
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				EXECUTABLE_EXTENSION = dll;
@@ -302,29 +278,10 @@
 		98A0BBC3A55D6B351A47DA03 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
 				CLANG_CXX_LANGUAGE_STANDARD = "c++1z";
-				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
-				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_COMMA = YES;
-				CLANG_WARN_CONSTANT_CONVERSION = YES;
-				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
-				CLANG_WARN_EMPTY_BODY = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
-				CLANG_WARN_INFINITE_RECURSION = YES;
-				CLANG_WARN_INT_CONVERSION = YES;
-				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
-				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
-				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
-				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_SUSPICIOUS_MOVE = YES;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CONFIGURATION_BUILD_DIR = "$(SYMROOT)";
 				CONFIGURATION_TEMP_DIR = "$(OBJROOT)";
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					NDEBUG,
@@ -332,16 +289,17 @@
 					OPT_GENERIC,
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
-				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES;
-				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				OBJROOT = obj/Release/mpg123;
 				ONLY_ACTIVE_ARCH = NO;
 				SYMROOT = "../../../bin/release/xcode4-macosx/all";
-				USER_HEADER_SEARCH_PATHS = "../../../include/mpg123/ports/Xcode ../../../include/mpg123/src/libmpg123 ../../../include/mpg123/src/compat ../../../include/mpg123/src";
+				USER_HEADER_SEARCH_PATHS = (
+					../../../include/mpg123/ports/Xcode,
+					../../../include/mpg123/src/libmpg123,
+					../../../include/mpg123/src/compat,
+					../../../include/mpg123/src,
+				);
 			};
 			name = Release;
 		};
@@ -349,7 +307,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CLANG_ENABLE_OBJC_WEAK = YES;
 				CONFIGURATION_BUILD_DIR = "../../../bin/debug/xcode4-macosx/all";
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				EXECUTABLE_EXTENSION = dll;
@@ -371,7 +328,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
-		9743C6CC90A9C83E8445250C /* Build configuration list for PBXNativeTarget "mpg123" */ = {
+		9743C6CC90A9C83E8445250C /* Build configuration list for PBXNativeTarget "openmpt-mpg123.dll" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				9C9C6D92965E2A04D05D2BD2 /* Debug */,
@@ -381,6 +338,6 @@
 			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
-	};
-	rootObject = 08FB7793FE84155DC02AAC07 /* Project object */;
+};
+rootObject = 08FB7793FE84155DC02AAC07 /* Project object */;
 }
