@@ -18,7 +18,9 @@
 	#define SIZEOF_OFF_T 8
 	#define SIZEOF_SIZE_T 4
 	#define SIZEOF_SSIZE_T 4
+#if 0 /* OpenMPT */
     #define OPT_GENERIC
+#endif /* OpenMPT */
 #elif TARGET_OS_IPHONE
 	#define DEFAULT_OUTPUT_MODULE "dummy"
 	/* #undef HAVE_AUDIOTOOLBOX_AUDIOTOOLBOX_H */
@@ -37,7 +39,9 @@
 	#define SIZEOF_OFF_T 8
 	#define SIZEOF_SIZE_T 4
 	#define SIZEOF_SSIZE_T 4
+#if 0 /* OpenMPT */
     #define OPT_NEON
+#endif /* OpenMPT */
 #elif TARGET_OS_MAC
 	#define DEFAULT_OUTPUT_MODULE "coreaudio"
 	#define HAVE_AUDIOTOOLBOX_AUDIOTOOLBOX_H 1
@@ -57,7 +61,9 @@
 	#define SIZEOF_SIZE_T 8
 	#define SIZEOF_SIZE_T 8
 	#define SIZEOF_SSIZE_T 8
+#if 0 /* OpenMPT */
     #define OPT_GENERIC
+#endif /* OpenMPT */
 #else
     #error "Unknown target."
 #endif

@@ -12,6 +12,7 @@ The following changes have been made:
   MPG123_API_VERSION
 - src/libmpg123/mpg123.h.in has been modified to #include <fmt123.h> as
   #include "fmt123.h"
+- ports/Xcode/config.h has been modified to let the build system set OPT_*
 - Modifications are marked by // OpenMPT or /* OpenMPT */.
 - Obviously, unnecessary folders and files have been removed.
 - For building, premake is used to generate Visual Studio project files.
