@@ -174,13 +174,13 @@ void SsbRead::AddReadNote(const SsbStatus s)
 }
 
 #ifdef SSB_LOGGING
-void SsbRead::LogReadEntry(const ReadEntry* const pRe, const std::size_t nNum)
+void SsbRead::LogReadEntry(const ReadEntry &pRe, const std::size_t nNum)
 {
 	SSB_LOG(MPT_UFORMAT("Read entry: {{num, id, rpos, size, desc}} = {{{}, {}, {}, {}, {}}}")(
 				 nNum,
-				 (pRe && pRe->nIdLength < 30 && m_Idarray.size() > 0) ?  ID(&m_Idarray[pRe->nIdpos], pRe->nIdLength).AsString() : U_(""),
-				 (pRe) ? pRe->rposStart : 0,
-				 (pRe && pRe->nSize != invalidDatasize) ? mpt::ufmt::val(pRe->nSize) : U_(""),
+				 (pRe.nIdLength < 30 && m_Idarray.size() > 0) ?  ID(&m_Idarray[pRe.nIdpos], pRe.nIdLength).AsString() : U_(""),
+				 pRe.rposStart,
+				 (pRe.nSize != invalidDatasize) ? mpt::ufmt::val(pRe.nSize) : U_(""),
 				 U_("")));
 }
 #endif
@@ -333,7 +333,7 @@ SsbRead::ReadRv SsbRead::OnReadEntry(const ReadEntry* pE, const ID &id, const Po
 	if(pE)
 	{
 #ifdef SSB_LOGGING
-		LogReadEntry(pE, m_nCounter);
+		LogReadEntry(*pE, m_nCounter);
 #endif
 	} else if(!GetFlag(RwfRMapHasId)) // Not ID's in map.
 	{
@@ -341,7 +341,7 @@ SsbRead::ReadRv SsbRead::OnReadEntry(const ReadEntry* pE, const ID &id, const Po
 		ReadEntry e;
 		e.rposStart = posReadBegin - m_posStart;
 		e.nSize = mpt::saturate_cast<std::size_t>(static_cast<std::streamoff>(iStrm.tellg() - posReadBegin));
-		LogReadEntry(&e, m_nCounter);
+		LogReadEntry(e, m_nCounter);
 #endif
 	} else // Entry not found.
 	{

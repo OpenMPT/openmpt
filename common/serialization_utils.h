@@ -373,7 +373,7 @@ private:
 
 #ifdef SSB_LOGGING
 	// Called after reading entry. pRe is a pointer to associated map entry if exists.
-	void LogReadEntry(const ReadEntry* const pRe, const std::size_t nNum);
+	void LogReadEntry(const ReadEntry &pRe, const std::size_t nNum);
 #endif
 
 	void ResetReadstatus();
