@@ -5522,7 +5522,9 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, int offset)
 		uint32 note = chn.nNewNote;
 		int32 oldPeriod = chn.nPeriod;
 		// ST3 doesn't retrigger OPL notes
-		if(note >= NOTE_MIN && note <= NOTE_MAX && chn.nLength && (!chn.dwFlags[CHN_ADLIB] || GetType() != MOD_TYPE_S3M || m_playBehaviour[kOPLRealRetrig]))
+		// Test case: RetrigSlide.s3m
+		const bool oplRealRetrig = chn.dwFlags[CHN_ADLIB] && m_playBehaviour[kOPLRealRetrig];
+		if(note >= NOTE_MIN && note <= NOTE_MAX && chn.nLength && (GetType() != MOD_TYPE_S3M || oplRealRetrig))
 			CheckNNA(nChn, 0, note, true);
 		bool resetEnv = false;
 		if(GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2))
@@ -5540,8 +5542,9 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, int offset)
 		const auto oldPrevNoteOffset = chn.prevNoteOffset;
 		chn.prevNoteOffset = 0;  // Retriggered notes should not use previous offset (test case: OxxMemoryWithRetrig.s3m)
 		// IT compatibility: Really weird combination of envelopes and retrigger (see Storlek's q.it testcase)
-		// Test case: retrig.it
-		NoteChange(chn, note, m_playBehaviour[kITRetrigger], resetEnv, false, nChn);
+		// Test cases: retrig.it, RetrigSlide.s3m
+		const bool itS3Mstyle = m_playBehaviour[kITRetrigger] || (GetType() == MOD_TYPE_S3M && chn.nLength && !oplRealRetrig);
+		NoteChange(chn, note, itS3Mstyle, resetEnv, false, nChn);
 		if(!chn.rowCommand.instr)
 			chn.prevNoteOffset = oldPrevNoteOffset;
 		// XM compatibility: Prevent NoteChange from resetting the fade flag in case an instrument number + note-off is present.
@@ -5561,7 +5564,8 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, int offset)
 		if(!(GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)))
 			retrigCount = 0;
 		// IT compatibility: see previous IT compatibility comment =)
-		if(m_playBehaviour[kITRetrigger]) chn.position.Set(0);
+		if(itS3Mstyle)
+			chn.position.Set(0);
 
 		offset--;
 		if(chn.pModSample != nullptr && offset >= 0 && offset <= static_cast<int>(std::size(chn.pModSample->cues)))
