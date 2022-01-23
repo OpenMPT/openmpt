@@ -476,11 +476,14 @@ bool CMidiMacroSetup::ValidateMacroString(CEdit &wnd, char *lastMacro, bool isPa
 	if(!allowed)
 	{
 		// Replace text and keep cursor position if we just typed in an invalid character
-		int start, end;
-		wnd.GetSel(start, end);
-		wnd.SetWindowText(mpt::ToCString(mpt::Charset::ASCII, lastMacro));
-		wnd.SetSel(start - 1, end - 1, true);
-		MessageBeep(MB_OK);
+		if(lastMacro != macroStr)
+		{
+			int start, end;
+			wnd.GetSel(start, end);
+			wnd.SetWindowText(mpt::ToCString(mpt::Charset::ASCII, lastMacro));
+			wnd.SetSel(start - 1, end - 1, true);
+			MessageBeep(MB_OK);
+		}
 		return false;
 	} else
 	{
