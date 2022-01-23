@@ -162,14 +162,14 @@ SsbRead::SsbRead(std::istream& is)
 }
 
 
-void SsbWrite::AddWriteNote(const SsbStatus s)
+void SsbWrite::AddWriteNote(const Status s)
 {
 	m_Status.level = static_cast<StatusLevel>(mpt::to_underlying(m_Status.level) | mpt::to_underlying(s.level));
 	m_Status.messages = static_cast<StatusMessages>(mpt::to_underlying(m_Status.messages) | mpt::to_underlying(s.messages));
 	SSB_LOG(MPT_UFORMAT("{}: 0x{} 0x{}")(U_("Write note: "), mpt::ufmt::hex(mpt::to_underlying(s.level)), mpt::ufmt::hex(mpt::to_underlying(s.messages))));
 }
 
-void SsbRead::AddReadNote(const SsbStatus s)
+void SsbRead::AddReadNote(const Status s)
 {
 	m_Status.level = static_cast<StatusLevel>(mpt::to_underlying(m_Status.level) | mpt::to_underlying(s.level));
 	m_Status.messages = static_cast<StatusMessages>(mpt::to_underlying(m_Status.messages) | mpt::to_underlying(s.messages));

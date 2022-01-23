@@ -119,9 +119,6 @@ constexpr inline Status SNW_INSUFFICIENT_DATASIZETYPE = {StatusLevel::Failure, S
 constexpr inline Status SNRW_BADGIVEN_STREAM = {StatusLevel::Failure, StatusMessages::SNRW_BADGIVEN_STREAM};
 
 
-using SsbStatus = Status;
-
-
 enum : uint16
 {
 	IdSizeVariable = std::numeric_limits<uint16>::max(),
@@ -313,7 +310,7 @@ protected:
 
 protected:
 
-	SsbStatus m_Status;
+	Status m_Status;
 
 	uint32 m_nFixedEntrySize;			// Read/write: If > 0, data entries have given fixed size.
 
@@ -392,7 +389,7 @@ private:
 	// Called after reading an object.
 	void OnReadEntry(const ReadEntry* pE, const ID &id, const std::streamoff& posReadBegin);
 
-	void AddReadNote(const SsbStatus s);
+	void AddReadNote(const Status s);
 
 #ifdef SSB_LOGGING
 	// Called after reading entry. pRe is a pointer to associated map entry if exists.
@@ -456,7 +453,7 @@ private:
 	// Called after writing an item.
 	void OnWroteItem(const ID &id, const std::streamoff& posBeforeWrite);
 
-	void AddWriteNote(const SsbStatus s);
+	void AddWriteNote(const Status s);
 
 #ifdef SSB_LOGGING
 	void LogWriteEntry(const ID &id,
