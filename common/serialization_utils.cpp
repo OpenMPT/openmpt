@@ -324,7 +324,7 @@ void SsbWrite::BeginWrite(const ID &id, const uint64& nVersion)
 }
 
 
-SsbRead::ReadRv SsbRead::OnReadEntry(const ReadEntry* pE, const ID &id, const Postype& posReadBegin)
+void SsbRead::OnReadEntry(const ReadEntry* pE, const ID &id, const Postype& posReadBegin)
 {
 #ifndef SSB_LOGGING
 	MPT_UNREFERENCED_PARAMETER(id);
@@ -346,10 +346,9 @@ SsbRead::ReadRv SsbRead::OnReadEntry(const ReadEntry* pE, const ID &id, const Po
 	} else // Entry not found.
 	{
 		SSB_LOG(MPT_UFORMAT("No entry with id {} found.")(id.AsString()));
-		return EntryNotFound;
+		return;
 	}
 	m_nCounter++;
-	return EntryRead;
 }
 
 

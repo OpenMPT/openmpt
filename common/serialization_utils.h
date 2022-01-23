@@ -367,7 +367,7 @@ private:
 	const ReadEntry* Find(const ID &id);
 
 	// Called after reading an object.
-	ReadRv OnReadEntry(const ReadEntry* pE, const ID &id, const Postype& posReadBegin);
+	void OnReadEntry(const ReadEntry* pE, const ID &id, const Postype& posReadBegin);
 
 	void AddReadNote(const SsbStatus s);
 
@@ -476,9 +476,13 @@ SsbRead::ReadRv SsbRead::ReadItem(T& obj, const ID &id, FuncObj Func)
 {
 	const ReadEntry* pE = Find(id);
 	const Postype pos = iStrm.tellg();
-	if (pE != nullptr || GetFlag(RwfRMapHasId) == false)
+	const bool entryFound = (pE || !GetFlag(RwfRMapHasId));
+	if(entryFound)
+	{
 		Func(iStrm, obj, (pE) ? (pE->nSize) : invalidDatasize);
-	return OnReadEntry(pE, id, pos);
+	}
+	OnReadEntry(pE, id, pos);
+	return entryFound ? EntryRead : EntryNotFound;
 }
 
 
@@ -490,7 +494,8 @@ SsbRead::ReadRv SsbRead::ReadIterItem(const ReadIterator& iter, T& obj, FuncObj 
 		iStrm.seekg(m_posStart + iter->rposStart);
 	const Postype pos = iStrm.tellg();
 	func(iStrm, obj, iter->nSize);
-	return OnReadEntry(&(*iter), ID(&m_Idarray[iter->nIdpos], iter->nIdLength), pos);
+	OnReadEntry(&(*iter), ID(&m_Idarray[iter->nIdpos], iter->nIdLength), pos);
+	return EntryRead;
 }
 
 
