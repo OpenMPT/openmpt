@@ -41,6 +41,10 @@ MPT_COMPILER_NOVISIBILITY=1
 # makes memory locking difficult
 MPT_COMPILER_NOGCSECTIONS=1
 
+ifneq ($(DEBUG),1)
+LDFLAGS  += -s
+endif
+
 ifeq ($(ALLOW_LGPL),1)
 LOCAL_ZLIB=1
 LOCAL_MPG123=1
