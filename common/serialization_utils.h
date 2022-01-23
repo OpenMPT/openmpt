@@ -358,8 +358,10 @@ private:
 
 	void AddReadNote(const SsbStatus s);
 
+#ifdef SSB_LOGGING
 	// Called after reading entry. pRe is a pointer to associated map entry if exists.
-	void AddReadNote(const ReadEntry* const pRe, const std::size_t nNum);
+	void LogReadEntry(const ReadEntry* const pRe, const std::size_t nNum);
+#endif
 
 	void ResetReadstatus();
 
@@ -419,10 +421,13 @@ private:
 	void OnWroteItem(const ID &id, const Postype& posBeforeWrite);
 
 	void AddWriteNote(const SsbStatus s);
-	void AddWriteNote(const ID &id,
+
+#ifdef SSB_LOGGING
+	void LogWriteEntry(const ID &id,
 		const std::size_t nEntryNum,
 		const std::size_t nBytecount,
 		const RposType rposStart);
+#endif
 
 	// Writes mapping item to mapstream.
 	void WriteMapItem(const ID &id,

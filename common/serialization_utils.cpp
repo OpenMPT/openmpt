@@ -185,7 +185,8 @@ void SsbRead::AddReadNote(const SsbStatus s)
 	SSB_LOG(MPT_UFORMAT("{}: 0x{}")(U_("Read note: "), mpt::ufmt::hex(s)));
 }
 
-void SsbRead::AddReadNote(const ReadEntry* const pRe, const std::size_t nNum)
+#ifdef SSB_LOGGING
+void SsbRead::LogReadEntry(const ReadEntry* const pRe, const std::size_t nNum)
 {
 	SSB_LOG(MPT_UFORMAT("Read entry: {{num, id, rpos, size, desc}} = {{{}, {}, {}, {}, {}}}")(
 				 nNum,
@@ -193,23 +194,16 @@ void SsbRead::AddReadNote(const ReadEntry* const pRe, const std::size_t nNum)
 				 (pRe) ? pRe->rposStart : 0,
 				 (pRe && pRe->nSize != invalidDatasize) ? mpt::ufmt::val(pRe->nSize) : U_(""),
 				 U_("")));
-#ifndef SSB_LOGGING
-	MPT_UNREFERENCED_PARAMETER(pRe);
-	MPT_UNREFERENCED_PARAMETER(nNum);
-#endif
 }
+#endif
 
+#ifdef SSB_LOGGING
 // Called after writing an entry.
-void SsbWrite::AddWriteNote(const ID &id, const std::size_t nEntryNum, const std::size_t nBytecount, const RposType rposStart)
+void SsbWrite::LogWriteEntry(const ID &id, const std::size_t nEntryNum, const std::size_t nBytecount, const RposType rposStart)
 {
 	SSB_LOG(MPT_UFORMAT("Wrote entry: {{num, id, rpos, size}} = {{{}, {}, {}, {}}}")(nEntryNum, id.AsString(), rposStart, nBytecount));
-#ifndef SSB_LOGGING
-	MPT_UNREFERENCED_PARAMETER(id);
-	MPT_UNREFERENCED_PARAMETER(nEntryNum);
-	MPT_UNREFERENCED_PARAMETER(nBytecount);
-	MPT_UNREFERENCED_PARAMETER(rposStart);
-#endif
 }
+#endif
 
 
 void SsbRead::ResetReadstatus()
@@ -344,21 +338,26 @@ void SsbWrite::BeginWrite(const ID &id, const uint64& nVersion)
 
 SsbRead::ReadRv SsbRead::OnReadEntry(const ReadEntry* pE, const ID &id, const Postype& posReadBegin)
 {
-	if (pE != nullptr)
-		AddReadNote(pE, m_nCounter);
-	else if (GetFlag(RwfRMapHasId) == false) // Not ID's in map.
+#ifndef SSB_LOGGING
+	MPT_UNREFERENCED_PARAMETER(id);
+	MPT_UNREFERENCED_PARAMETER(posReadBegin);
+#endif
+	if(pE)
 	{
+#ifdef SSB_LOGGING
+		LogReadEntry(pE, m_nCounter);
+#endif
+	} else if(!GetFlag(RwfRMapHasId)) // Not ID's in map.
+	{
+#ifdef SSB_LOGGING
 		ReadEntry e;
 		e.rposStart = posReadBegin - m_posStart;
 		e.nSize = mpt::saturate_cast<std::size_t>(static_cast<std::streamoff>(iStrm.tellg() - posReadBegin));
-		AddReadNote(&e, m_nCounter);
-	}
-	else // Entry not found.
+		LogReadEntry(&e, m_nCounter);
+#endif
+	} else // Entry not found.
 	{
 		SSB_LOG(MPT_UFORMAT("No entry with id {} found.")(id.AsString()));
-#ifndef SSB_LOGGING
-		MPT_UNREFERENCED_PARAMETER(id);
-#endif
 		return EntryNotFound;
 	}
 	m_nCounter++;
@@ -396,7 +395,9 @@ void SsbWrite::OnWroteItem(const ID &id, const Postype& posBeforeWrite)
 	if (GetFlag(RwfRwHasMap))
 		WriteMapItem(id, posBeforeWrite - m_posStart, nEntrySize, "");
 
-	AddWriteNote(id, m_nCounter, nEntrySize, posBeforeWrite - m_posStart);
+#ifdef SSB_LOGGING
+	LogWriteEntry(id, m_nCounter, nEntrySize, posBeforeWrite - m_posStart);
+#endif
 	IncrementWriteCounter();
 }
 
