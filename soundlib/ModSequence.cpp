@@ -606,8 +606,10 @@ void ReadModSequence(std::istream& iStrm, ModSequence& seq, const size_t, mpt::C
 {
 	srlztn::SsbRead ssb(iStrm);
 	ssb.BeginRead(FileIdSequence, Version::Current().GetRawVersion());
-	if ((ssb.GetStatus() & srlztn::SNT_FAILURE) != 0)
+	if(ssb.HasFailed())
+	{
 		return;
+	}
 	int8 useUTF8 = 0;
 	ssb.ReadItem(useUTF8, "u");
 	std::string str;
@@ -646,8 +648,10 @@ void ReadModSequences(std::istream& iStrm, ModSequenceSet& seq, const size_t, mp
 {
 	srlztn::SsbRead ssb(iStrm);
 	ssb.BeginRead(FileIdSequences, Version::Current().GetRawVersion());
-	if ((ssb.GetStatus() & srlztn::SNT_FAILURE) != 0)
+	if(ssb.HasFailed())
+	{
 		return;
+	}
 	SEQUENCEINDEX seqs = 0;
 	uint8 currentSeq = 0;
 	ssb.ReadItem(seqs, "n");

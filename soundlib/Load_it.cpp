@@ -1294,7 +1294,7 @@ void CSoundFile::LoadMPTMProperties(FileReader &file, uint16 cwtv)
 		mpt::Charset sequenceDefaultCharset = GetCharsetInternal();
 		ssb.ReadItem(Order, FileIdSequences, [sequenceDefaultCharset](std::istream &iStrm, ModSequenceSet &seq, std::size_t nSize){ return ReadModSequences(iStrm, seq, nSize, sequenceDefaultCharset); });
 
-		if(ssb.GetStatus() & srlztn::SNT_FAILURE)
+		if(ssb.HasFailed())
 		{
 			AddToLog(LogError, U_("Unknown error occurred while deserializing file."));
 		}
@@ -1912,7 +1912,7 @@ bool CSoundFile::SaveIT(std::ostream &f, const mpt::PathString &filename, bool c
 
 	ssb.FinishWrite();
 
-	if(ssb.GetStatus() & srlztn::SNT_FAILURE)
+	if(ssb.HasFailed())
 	{
 		AddToLog(LogError, U_("Error occurred in writing MPTM extensions."));
 	}

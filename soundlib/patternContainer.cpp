@@ -182,8 +182,10 @@ void ReadModPatterns(std::istream& iStrm, CPatternContainer& patc, const size_t)
 {
 	srlztn::SsbRead ssb(iStrm);
 	ssb.BeginRead(FileIdPatterns, Version::Current().GetRawVersion());
-	if ((ssb.GetStatus() & srlztn::SNT_FAILURE) != 0)
+	if(ssb.HasFailed())
+	{
 		return;
+	}
 	PATTERNINDEX nPatterns = patc.Size();
 	uint16 nCount = uint16_max;
 	if (ssb.ReadItem(nCount, "num") != srlztn::SsbRead::EntryNotFound)

@@ -257,9 +257,9 @@ protected:
 
 public:
 
-	SsbStatus GetStatus() const
+	bool HasFailed() const
 	{
-		return m_Status;
+		return (m_Status & SNT_FAILURE) ? true : false;
 	}
 
 protected:

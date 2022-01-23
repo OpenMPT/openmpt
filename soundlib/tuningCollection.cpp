@@ -95,7 +95,7 @@ Tuning::SerializationResult CTuningCollection::Serialize(std::ostream& oStrm, co
 		ssb.WriteItem(*m_Tunings[i], "2", &WriteTuning);
 	ssb.FinishWrite();
 		
-	if(ssb.GetStatus() & srlztn::SNT_FAILURE)
+	if(ssb.HasFailed())
 		return Tuning::SerializationResult::Failure;
 	else
 		return Tuning::SerializationResult::Success;
@@ -131,7 +131,7 @@ Tuning::SerializationResult CTuningCollection::Deserialize(std::istream &iStrm, 
 				ssb.ReadIterItem(iter, *this, [charset](std::istream &iStrm, CTuningCollection &Tc, const std::size_t dummy){ return ReadTuning(iStrm, Tc, dummy, charset); });
 		}
 
-		if(ssb.GetStatus() & srlztn::SNT_FAILURE)
+		if(ssb.HasFailed())
 			return Tuning::SerializationResult::Failure;
 		else
 			return Tuning::SerializationResult::Success;

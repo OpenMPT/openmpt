@@ -501,7 +501,7 @@ SerializationResult CTuning::InitDeserialize(std::istream &iStrm, mpt::Charset d
 	}
 
 	// If reader status is ok and m_NoteMin is somewhat reasonable, process data.
-	if(!((ssb.GetStatus() & srlztn::SNT_FAILURE) == 0 && m_NoteMin >= -300 && m_NoteMin <= 300))
+	if(ssb.HasFailed() || (m_NoteMin < -300) || (m_NoteMin > 300))
 	{
 		return SerializationResult::Failure;
 	}
@@ -848,7 +848,7 @@ Tuning::SerializationResult CTuning::Serialize(std::ostream& outStrm) const
 
 	ssb.FinishWrite();
 
-	return ((ssb.GetStatus() & srlztn::SNT_FAILURE) != 0) ? Tuning::SerializationResult::Failure : Tuning::SerializationResult::Success;
+	return ssb.HasFailed() ? Tuning::SerializationResult::Failure : Tuning::SerializationResult::Success;
 }
 
 
