@@ -104,7 +104,7 @@ enum ModColor : uint8
 #define PATTERN_EFFECTHILIGHT		0x40		// effect syntax highlighting
 #define PATTERN_HEXDISPLAY			0x80		// display row number in hex
 #define PATTERN_FLATBUTTONS			0x100		// flat toolbar buttons
-//#define PATTERN_CREATEBACKUP		0x200		// create .bak files when saving
+#define PATTERN_PLAYNAVIGATEROW		0x200		// play whole row when navigating
 #define PATTERN_SINGLEEXPAND		0x400		// single click to expand tree
 #define PATTERN_PLAYEDITROW			0x800		// play all notes on the current row while entering notes
 #define PATTERN_NOEXTRALOUD			0x1000		// no loud samples in sample editor

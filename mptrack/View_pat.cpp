@@ -4092,7 +4092,7 @@ void CViewPattern::CursorJump(int distance, bool snap)
 	const bool upwards = distance < 0;
 	const int distanceAbs = std::abs(distance);
 
-	if(snap)
+	if(snap && distanceAbs)
 		// cppcheck false-positive
 		// cppcheck-suppress signConversion
 		row = (((row + (upwards ? -1 : 0)) / distanceAbs) + (upwards ? 0 : 1)) * distanceAbs;
@@ -4121,6 +4121,12 @@ void CViewPattern::CursorJump(int distance, bool snap)
 			sndFile.m_PlayState.m_nNextOrder++;
 		}
 		CMainFrame::GetMainFrame()->ResetNotificationBuffer();
+	} else
+	{
+		if(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_PLAYNAVIGATEROW)
+		{
+			PatternStep(row);
+		}
 	}
 }
 
@@ -4475,6 +4481,11 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 				InvalidatePattern();
 				GetDocument()->UpdateAllViews(this, PatternHint(GetCurrentPattern()).Data(), this);
 			}
+			return wParam;
+		case kcTogglePatternPlayRow:
+			TrackerSettings::Instance().m_dwPatternSetup ^= PATTERN_PLAYNAVIGATEROW;
+			CMainFrame::GetMainFrame()->SetHelpText((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_PLAYNAVIGATEROW)
+				? _T("Play whole row when navigatin was turned is now enabled.") : _T("Play whole row when navigatin was turned is now disabled."));
 			return wParam;
 	}
 
@@ -7071,6 +7082,10 @@ void CViewPattern::JumpToPrevOrNextEntry(bool nextEntry)
 			{
 				SetCurrentOrder(ord);
 				SetCurrentPattern(pat, row);
+				if(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_PLAYNAVIGATEROW)
+				{
+					PatternStep(row);
+				}
 				return;
 			}
 			row += direction;

@@ -756,6 +756,7 @@ static constexpr struct
 	{2029, kcViewToggle, _T("Toggle Between Upper / Lower View") },
 	{2030, kcFileSaveOPL, _T("File/Export OPL Register Dump") },
 	{2031, kcSampleLoadRaw, _T("Load Raw Sample")},
+	{2032, kcTogglePatternPlayRow, _T("Toggle row playback when navigating")},
 };
 
 // Get command descriptions etc.. loaded up.
