@@ -88,7 +88,6 @@
 #  NO_STBVORBIS=1   Do not fallback to stb_vorbis
 #
 #  USE_ALLEGRO42=1  Use liballegro 4.2 (DJGPP only)
-#  BUNDLED_ALLEGRO42=1 Use liballegro 4.2 in libopenmpt source tree (DJGPP only)
 #
 # Build flags for libopenmpt examples and openmpt123
 #  (provide on each `make` invocation)
@@ -763,11 +762,20 @@ endif
 endif
 
 ifeq ($(USE_ALLEGRO42),1)
-CPPFLAGS_ALLEGRO42 ?= 
-LDFLAGS_ALLEGRO42 ?= 
-LDLIBS_ALLEGRO42 ?= liballeg.a
-CPPFLAGS_ALLEGRO42 += -DMPT_WITH_ALLEGRO42
+
+CPPFLAGS_ALLEGRO42 := -Iinclude/allegro42/include -DALLEGRO_HAVE_STDINT_H -DLONG_LONG="long long" -DMPT_WITH_ALLEGRO42
+LDFLAGS_ALLEGRO42 :=
+LDLIBS_ALLEGRO42 := include/allegro42/lib/djgpp/liballeg.a
+DEPS_ALLEGRO42 := include/allegro42/lib/djgpp/liballeg.a
+
+include/allegro42/lib/djgpp/liballeg.a:
+	+cd include/allegro42 && ./xmake.sh clean
+	+cd include/allegro42 && ./xmake.sh lib
+
+MISC_OUTPUTS += include/allegro42/lib/djgpp/liballeg.a
+
 endif
+
 
 ifeq ($(HACK_ARCHIVE_SUPPORT),1)
 CPPFLAGS += -DMPT_BUILD_HACK_ARCHIVE_SUPPORT
@@ -1426,6 +1434,7 @@ bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION).makefile.tar: bin/dist.mk bin
 	svn export ./Makefile           bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Makefile
 	svn export ./.clang-format      bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/.clang-format
 	svn export ./bin                bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/bin
+	svn export ./build/download_externals.sh bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/download_externals.sh
 	svn export ./build/android_ndk  bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/android_ndk
 	svn export ./build/make         bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/make
 	svn export ./build/svn_version  bin/dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/svn_version
@@ -1726,14 +1735,14 @@ openmpt123/openmpt123.o: openmpt123/openmpt123.cpp
 	$(INFO) [CXX] $<
 	$(VERYSILENT)$(CXX) $(CXXFLAGS) $(CXXFLAGS_OPENMPT123) $(CPPFLAGS) $(CPPFLAGS_OPENMPT123) $(TARGET_ARCH) -M -MT$@ $< > $*.d
 	$(SILENT)$(COMPILE.cc) $(CXXFLAGS_OPENMPT123) $(CPPFLAGS_OPENMPT123) $(OUTPUT_OPTION) $<
-bin/openmpt123$(EXESUFFIX): $(OPENMPT123_OBJECTS) $(OBJECTS_ALLEGRO42) $(OBJECTS_LIBOPENMPT) $(OUTPUT_LIBOPENMPT)
+bin/openmpt123$(EXESUFFIX): $(OPENMPT123_OBJECTS) $(DEPS_ALLEGRO42) $(OBJECTS_LIBOPENMPT) $(OUTPUT_LIBOPENMPT)
 	$(INFO) [LD] $@
-	$(SILENT)$(LINK.cc) $(BIN_LDFLAGS) $(LDFLAGS_LIBOPENMPT) $(LDFLAGS_OPENMPT123) $(OPENMPT123_OBJECTS) $(OBJECTS_ALLEGRO42) $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) $(LDLIBS_OPENMPT123) -o $@
+	$(SILENT)$(LINK.cc) $(BIN_LDFLAGS) $(LDFLAGS_LIBOPENMPT) $(LDFLAGS_OPENMPT123) $(OPENMPT123_OBJECTS) $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) $(LDLIBS_OPENMPT123) -o $@
 ifeq ($(HOST),unix)
 ifeq ($(SHARED_LIB),1)
 	$(SILENT)mv $@ $@.norpath
 	$(INFO) [LD] $@
-	$(SILENT)$(LINK.cc) $(BIN_LDFLAGS) $(LDFLAGS_RPATH) $(LDFLAGS_LIBOPENMPT) $(LDFLAGS_OPENMPT123) $(OPENMPT123_OBJECTS) $(OBJECTS_ALLEGRO42) $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) $(LDLIBS_OPENMPT123) -o $@
+	$(SILENT)$(LINK.cc) $(BIN_LDFLAGS) $(LDFLAGS_RPATH) $(LDFLAGS_LIBOPENMPT) $(LDFLAGS_OPENMPT123) $(OPENMPT123_OBJECTS) $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) $(LDLIBS_OPENMPT123) -o $@
 endif
 endif
 

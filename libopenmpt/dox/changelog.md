@@ -43,6 +43,10 @@ is just a high-level summary.
     `CONFIG=standard` instead.
  *  [**Change**] `Makefile` `CONFIG=macosx` and `CONFIG=haiku` have been
     removed. The OS is auto-detected.
+ *  [**Change**] `Makefile` `CONFIG=djgpp` option `USE_ALLEGRO42` now
+    defaults to `1` and implies building a liballegro42 locally. This requires
+    executing `build/download_externals.sh` before building to download the
+    liballegro42 sources.
 
  *  [**Regression**] Full support for Visual Studio 2017 has been removed. We
     still support targeting Windows XP with Visual Studio 2017.
@@ -55,6 +59,8 @@ is just a high-level summary.
     offset type is long. `openmpt_stream_get_file_callbacks()` is deprecated now
     due to behavioral change. Please migrate to
     `openmpt_stream_get_file_callbacks2()`.
+ *  [**Regression**] Using the system-provided liballegro42 is no longer
+    supported. The option `BUNDLED_ALLEGRO42=1` does not exist any more.
 
 ### libopenmpt 0.6.0 (2021-12-23)
 
