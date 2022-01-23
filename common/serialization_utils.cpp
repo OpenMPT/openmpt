@@ -351,7 +351,7 @@ SsbRead::ReadRv SsbRead::OnReadEntry(const ReadEntry* pE, const ID &id, const Po
 	else if (GetFlag(RwfRMapHasId) == false) // Not ID's in map.
 	{
 		ReadEntry e;
-		e.rposStart = static_cast<RposType>(posReadBegin - m_posStart);
+		e.rposStart = posReadBegin - m_posStart;
 		e.nSize = static_cast<DataSize>(iStrm.tellg() - posReadBegin);
 		AddReadNote(&e, m_nCounter);
 	}
@@ -396,9 +396,9 @@ void SsbWrite::OnWroteItem(const ID &id, const Postype& posBeforeWrite)
 			{ AddWriteNote(SNW_INSUFFICIENT_FIXEDSIZE); return; }
 	}
 	if (GetFlag(RwfRwHasMap))
-		WriteMapItem(id, static_cast<RposType>(posBeforeWrite - m_posStart), nEntrySize, "");
+		WriteMapItem(id, posBeforeWrite - m_posStart, nEntrySize, "");
 
-	AddWriteNote(id, m_nCounter, nEntrySize, static_cast<RposType>(posBeforeWrite - m_posStart));
+	AddWriteNote(id, m_nCounter, nEntrySize, posBeforeWrite - m_posStart);
 	IncrementWriteCounter();
 }
 
@@ -544,13 +544,13 @@ void SsbRead::BeginRead(const ID &id, const uint64& nVersion)
 
 	const Offtype rawEndOfHdrData = iStrm.tellg() - m_posStart;
 
-	MPT_MAYBE_CONSTANT_IF(rawEndOfHdrData < 0 || static_cast<uint64>(rawEndOfHdrData) > std::numeric_limits<RposType>::max())
+	MPT_MAYBE_CONSTANT_IF(rawEndOfHdrData < 0 || static_cast<uint64>(rawEndOfHdrData) > mpt::saturate_cast<uint64>(std::numeric_limits<RposType>::max()))
 	{
 		AddReadNote(SNR_INSUFFICIENT_RPOSTYPE);
 		return;
 	}
 
-	m_rposEndofHdrData = static_cast<RposType>(rawEndOfHdrData);
+	m_rposEndofHdrData = rawEndOfHdrData;
 	m_rposMapBegin = (GetFlag(RwfRwHasMap)) ? static_cast<RposType>(tempU64) : m_rposEndofHdrData;
 
 	if (GetFlag(RwfRwHasMap) == false)
@@ -635,7 +635,7 @@ void SsbRead::CacheMap()
 	}
 
 	SetFlag(RwfRMapCached, true);
-	m_posDataBegin = (m_rposMapBegin == m_rposEndofHdrData) ? m_posMapEnd : m_posStart + Postype(m_rposEndofHdrData);
+	m_posDataBegin = (m_rposMapBegin == m_rposEndofHdrData) ? m_posMapEnd : m_posStart + m_rposEndofHdrData;
 	iStrm.seekg(m_posDataBegin);
 
 	// If there are no positions in the map but there are entry sizes, rposStart will
@@ -643,7 +643,7 @@ void SsbRead::CacheMap()
 	// startpos.
 	if (GetFlag(RwfRMapHasStartpos) == false && (GetFlag(RwfRMapHasSize) || m_nFixedEntrySize > 0))
 	{
-		const RposType offset = static_cast<RposType>(m_posDataBegin - m_posStart);
+		const RposType offset = m_posDataBegin - m_posStart;
 		for(size_t i = 0; i < m_nReadEntrycount; i++)
 			mapData[i].rposStart += offset;
 	}
@@ -669,7 +669,7 @@ const ReadEntry* SsbRead::Find(const ID &id)
 			{
 				m_nNextReadHint = (i + 1) % nEntries;
 				if (mapData[i].rposStart != 0)
-					iStrm.seekg(m_posStart + Postype(mapData[i].rposStart));
+					iStrm.seekg(m_posStart + mapData[i].rposStart);
 				return &mapData[i];
 			}
 		}

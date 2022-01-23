@@ -39,9 +39,9 @@ namespace srlztn //SeRiaLiZaTioN
 
 using Offtype = std::streamoff;
 using Postype = std::streamoff;
+using RposType = std::streamoff;	// Relative position type.
 
 using DataSize = std::uintptr_t;	// Data size type.
-using RposType = std::uintptr_t;	// Relative position type.
 using NumType  = std::uintptr_t;	// Entry count type.
 
 constexpr inline DataSize invalidDatasize = static_cast<DataSize>(0) - 1;
@@ -473,7 +473,7 @@ SsbRead::ReadRv SsbRead::ReadIterItem(const ReadIterator& iter, T& obj, FuncObj 
 {
 	iStrm.clear();
 	if (iter->rposStart != 0)
-		iStrm.seekg(m_posStart + Postype(iter->rposStart));
+		iStrm.seekg(m_posStart + iter->rposStart);
 	const Postype pos = iStrm.tellg();
 	func(iStrm, obj, iter->nSize);
 	return OnReadEntry(&(*iter), ID(&m_Idarray[iter->nIdpos], iter->nIdLength), pos);
