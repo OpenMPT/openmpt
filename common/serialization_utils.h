@@ -29,7 +29,7 @@
 #include <istream>
 #include <ostream>
 
-#include <cstdint>
+#include <cstddef>
 #include <cstring>
 
 OPENMPT_NAMESPACE_BEGIN
@@ -41,10 +41,7 @@ using Offtype = std::streamoff;
 using Postype = std::streamoff;
 using RposType = std::streamoff;	// Relative position type.
 
-using DataSize = std::uintptr_t;	// Data size type.
-using NumType  = std::uintptr_t;	// Entry count type.
-
-constexpr inline DataSize invalidDatasize = static_cast<DataSize>(0) - 1;
+constexpr inline std::size_t invalidDatasize = static_cast<std::size_t>(0) - 1;
 
 enum 
 {
@@ -91,9 +88,9 @@ struct ReadEntry
 {
 	ReadEntry() : nIdpos(0), rposStart(0), nSize(invalidDatasize), nIdLength(0) {}
 
-	uintptr_t nIdpos;	// Index of id start in ID array.
+	std::size_t nIdpos;	// Index of id start in ID array.
 	RposType rposStart;	// Entry start position.
-	DataSize nSize;		// Entry size.
+	std::size_t nSize;		// Entry size.
 	uint16 nIdLength;	// Length of id.
 };
 
@@ -204,7 +201,7 @@ inline void Binaryread<double>(std::istream& iStrm, double& data, const Offtype 
 
 
 template <class T>
-inline void ReadItem(std::istream& iStrm, T& data, const DataSize nSize)
+inline void ReadItem(std::istream& iStrm, T& data, const std::size_t nSize)
 {
 	static_assert(std::is_trivial<T>::value == true, "");
 	if (nSize == sizeof(T) || nSize == invalidDatasize)
@@ -213,10 +210,10 @@ inline void ReadItem(std::istream& iStrm, T& data, const DataSize nSize)
 		Binaryread(iStrm, data, nSize);
 }
 
-void ReadItemString(std::istream& iStrm, std::string& str, const DataSize);
+void ReadItemString(std::istream& iStrm, std::string& str, const std::size_t);
 
 template <>
-inline void ReadItem<std::string>(std::istream& iStrm, std::string& str, const DataSize nSize)
+inline void ReadItem<std::string>(std::istream& iStrm, std::string& str, const std::size_t nSize)
 {
 	ReadItemString(iStrm, str, nSize);
 }
@@ -269,7 +266,7 @@ protected:
 
 	// When writing, returns the number of entries written.
 	// When reading, returns the number of entries read not including unrecognized entries.
-	NumType GetCounter() const {return m_nCounter;}
+	std::size_t GetCounter() const {return m_nCounter;}
 
 	void SetFlag(Rwf flag, bool val) {m_Flags.set(flag, val);}
 	bool GetFlag(Rwf flag) const {return m_Flags[flag];}
@@ -283,7 +280,7 @@ protected:
 	Postype m_posStart;					// Read/write: Stream position at the beginning of object.
 
 	uint16 m_nIdbytes;					// Read/Write: Tells map ID entry size in bytes. If size is variable, value is IdSizeVariable.
-	NumType m_nCounter;					// Read/write: Keeps count of entries written/read.
+	std::size_t m_nCounter;					// Read/write: Keeps count of entries written/read.
 
 	std::bitset<RwfNumFlags> m_Flags;	// Read/write: Various flags.
 
@@ -319,7 +316,7 @@ public:
 	void BeginRead(const ID &id, const uint64& nVersion);
 
 	// After calling BeginRead(), this returns number of entries in the file.
-	NumType GetNumEntries() const {return m_nReadEntrycount;}
+	std::size_t GetNumEntries() const {return m_nReadEntrycount;}
 
 	// Returns read iterator to the beginning of entries.
 	// The behaviour of read iterators is undefined if map doesn't
@@ -363,7 +360,7 @@ private:
 	void AddReadNote(const SsbStatus s);
 
 	// Called after reading entry. pRe is a pointer to associated map entry if exists.
-	void AddReadNote(const ReadEntry* const pRe, const NumType nNum);
+	void AddReadNote(const ReadEntry* const pRe, const std::size_t nNum);
 
 	void ResetReadstatus();
 
@@ -387,9 +384,9 @@ private:
 	Postype m_posMapEnd;				// Read: If map exists, map end position, else pos of end of hdrData.
 	Postype m_posDataBegin;				// Read: Data begin position.
 	RposType m_rposEndofHdrData;		// Read: rpos of end of header data.
-	NumType m_nReadEntrycount;			// Read: Number of entries.
+	std::size_t m_nReadEntrycount;			// Read: Number of entries.
 
-	NumType m_nNextReadHint;			// Read: Hint where to start looking for the next read entry.
+	std::size_t m_nNextReadHint;			// Read: Hint where to start looking for the next read entry.
 
 };
 
@@ -424,14 +421,14 @@ private:
 
 	void AddWriteNote(const SsbStatus s);
 	void AddWriteNote(const ID &id,
-		const NumType nEntryNum,
-		const DataSize nBytecount,
+		const std::size_t nEntryNum,
+		const std::size_t nBytecount,
 		const RposType rposStart);
 
 	// Writes mapping item to mapstream.
 	void WriteMapItem(const ID &id,
 		const RposType& rposDataStart,
-		const DataSize& nDatasize,
+		const std::size_t& nDatasize,
 		const char* pszDesc);
 
 	void ResetWritestatus() {m_Status = SNT_NONE;}

@@ -88,7 +88,7 @@ void WriteItemString(std::ostream& oStrm, const std::string &str)
 }
 
 
-void ReadItemString(std::istream& iStrm, std::string& str, const DataSize)
+void ReadItemString(std::istream& iStrm, std::string& str, const std::size_t)
 {
 	// bits 0,1: Bytes per char type: 1,2,3,4.
 	// bits 2,3: Bytes in size indicator, 1,2,3,4
@@ -185,7 +185,7 @@ void SsbRead::AddReadNote(const SsbStatus s)
 	SSB_LOG(MPT_UFORMAT("{}: 0x{}")(U_("Read note: "), mpt::ufmt::hex(s)));
 }
 
-void SsbRead::AddReadNote(const ReadEntry* const pRe, const NumType nNum)
+void SsbRead::AddReadNote(const ReadEntry* const pRe, const std::size_t nNum)
 {
 	m_Status |= SNT_PROGRESS;
 	SSB_LOG(MPT_UFORMAT("Read entry: {{num, id, rpos, size, desc}} = {{{}, {}, {}, {}, {}}}")(
@@ -201,7 +201,7 @@ void SsbRead::AddReadNote(const ReadEntry* const pRe, const NumType nNum)
 }
 
 // Called after writing an entry.
-void SsbWrite::AddWriteNote(const ID &id, const NumType nEntryNum, const DataSize nBytecount, const RposType rposStart)
+void SsbWrite::AddWriteNote(const ID &id, const std::size_t nEntryNum, const std::size_t nBytecount, const RposType rposStart)
 {
 	m_Status |= SNT_PROGRESS;
 	SSB_LOG(MPT_UFORMAT("Wrote entry: {{num, id, rpos, size}} = {{{}, {}, {}, {}}}")(nEntryNum, id.AsString(), rposStart, nBytecount));
@@ -224,7 +224,7 @@ void SsbRead::ResetReadstatus()
 
 void SsbWrite::WriteMapItem(const ID &id,
 						const RposType& rposDataStart,
-						const DataSize& nDatasize,
+						const std::size_t& nDatasize,
 						const char* pszDesc)
 {
 	SSB_LOG(MPT_UFORMAT("Writing map entry: id={}, rpos={}, size={}")(
@@ -352,7 +352,7 @@ SsbRead::ReadRv SsbRead::OnReadEntry(const ReadEntry* pE, const ID &id, const Po
 	{
 		ReadEntry e;
 		e.rposStart = posReadBegin - m_posStart;
-		e.nSize = static_cast<DataSize>(iStrm.tellg() - posReadBegin);
+		e.nSize = mpt::saturate_cast<std::size_t>(static_cast<std::streamoff>(iStrm.tellg() - posReadBegin));
 		AddReadNote(&e, m_nCounter);
 	}
 	else // Entry not found.
@@ -372,16 +372,16 @@ void SsbWrite::OnWroteItem(const ID &id, const Postype& posBeforeWrite)
 {
 	const Offtype nRawEntrySize = oStrm.tellp() - posBeforeWrite;
 
-	MPT_MAYBE_CONSTANT_IF(nRawEntrySize < 0 || static_cast<uint64>(nRawEntrySize) > std::numeric_limits<DataSize>::max())
+	MPT_MAYBE_CONSTANT_IF(nRawEntrySize < 0 || static_cast<uint64>(nRawEntrySize) > std::numeric_limits<std::size_t>::max())
 	{
 		AddWriteNote(SNW_INSUFFICIENT_DATASIZETYPE);
 		return;
 	}
 
-	if(GetFlag(RwfRMapHasSize) && (nRawEntrySize < 0 || static_cast<uint64>(nRawEntrySize) > (std::numeric_limits<DataSize>::max() >> 2)))
+	if(GetFlag(RwfRMapHasSize) && (nRawEntrySize < 0 || static_cast<uint64>(nRawEntrySize) > (std::numeric_limits<std::size_t>::max() >> 2)))
 		{ AddWriteNote(SNW_DATASIZETYPE_OVERFLOW); return; }
 
-	DataSize nEntrySize = static_cast<DataSize>(nRawEntrySize);
+	std::size_t nEntrySize = static_cast<std::size_t>(nRawEntrySize);
 
 	// Handle fixed size entries:
 	if (m_nFixedEntrySize > 0)
@@ -530,7 +530,7 @@ void SsbRead::BeginRead(const ID &id, const uint64& nVersion)
 		// Additionally, 16000 is an arbitrary limit to avoid an out-of-memory DoS when caching the map.
 		{ AddReadNote(SNR_TOO_MANY_ENTRIES_TO_READ); return; }
 
-	m_nReadEntrycount = static_cast<NumType>(tempU64);
+	m_nReadEntrycount = static_cast<std::size_t>(tempU64);
 	if(m_nReadEntrycount == 0)
 		AddReadNote(SNR_ZEROENTRYCOUNT);
 
@@ -575,7 +575,7 @@ void SsbRead::CacheMap()
 		m_Idarray.reserve(m_nReadEntrycount * 4);
 
 		//Read map
-		for(NumType i = 0; i<m_nReadEntrycount; i++)
+		for(std::size_t i = 0; i<m_nReadEntrycount; i++)
 		{
 			if(iStrm.fail())
 				{ AddReadNote(SNR_BADSTREAM_AT_MAP_READ); return; }
@@ -612,7 +612,7 @@ void SsbRead::CacheMap()
 				mpt::IO::ReadAdaptiveInt64LE(iStrm, tempU64);
 				if(tempU64 > static_cast<uint64>(std::numeric_limits<Offtype>::max()))
 					{ AddReadNote(SNR_INSUFFICIENT_STREAM_OFFTYPE); return; }
-				mapData[i].nSize = static_cast<DataSize>(tempU64);
+				mapData[i].nSize = static_cast<std::size_t>(tempU64);
 			}
 
 			// If there's no entry startpos in map, count start pos from datasizes.
