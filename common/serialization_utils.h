@@ -57,7 +57,6 @@ enum
 {
 	SNT_FAILURE =		0x40000000, // = 1 << 30
 	SNT_NOTE =			0x20000000, // = 1 << 29
-	SNT_WARNING =		0x10000000, // = 1 << 28
 	SNT_NONE = 0,
 
 	SNRW_BADGIVEN_STREAM =								1	| SNT_FAILURE,
