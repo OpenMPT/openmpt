@@ -311,11 +311,6 @@ class SsbRead
 
 public:
 
-	enum ReadRv // Read return value.
-	{
-		EntryRead,
-		EntryNotFound
-	};
 	enum IdMatchStatus
 	{
 		IdMatch, IdMismatch
@@ -345,17 +340,17 @@ public:
 
 	// Read item using default read implementation.
 	template <class T>
-	ReadRv ReadItem(T& obj, const ID &id) {return ReadItem(obj, id, srlztn::ReadItem<T>);}
+	bool ReadItem(T& obj, const ID &id) {return ReadItem(obj, id, srlztn::ReadItem<T>);}
 
 	// Read item using given function.
 	template <class T, class FuncObj>
-	ReadRv ReadItem(T& obj, const ID &id, FuncObj);
+	bool ReadItem(T& obj, const ID &id, FuncObj);
 
 	// Read item using read iterator.
 	template <class T>
-	ReadRv ReadIterItem(const ReadIterator& iter, T& obj) {return ReadIterItem(iter, obj, srlztn::ReadItem<T>);}
+	bool ReadIterItem(const ReadIterator& iter, T& obj) {return ReadIterItem(iter, obj, srlztn::ReadItem<T>);}
 	template <class T, class FuncObj>
-	ReadRv ReadIterItem(const ReadIterator& iter, T& obj, FuncObj func);
+	bool ReadIterItem(const ReadIterator& iter, T& obj, FuncObj func);
 
 private:
 
@@ -472,7 +467,7 @@ void SsbWrite::WriteItem(const T& obj, const ID &id, FuncObj Func)
 }
 
 template <class T, class FuncObj>
-SsbRead::ReadRv SsbRead::ReadItem(T& obj, const ID &id, FuncObj Func)
+bool SsbRead::ReadItem(T& obj, const ID &id, FuncObj Func)
 {
 	const ReadEntry* pE = Find(id);
 	const Postype pos = iStrm.tellg();
@@ -482,12 +477,12 @@ SsbRead::ReadRv SsbRead::ReadItem(T& obj, const ID &id, FuncObj Func)
 		Func(iStrm, obj, (pE) ? (pE->nSize) : invalidDatasize);
 	}
 	OnReadEntry(pE, id, pos);
-	return entryFound ? EntryRead : EntryNotFound;
+	return entryFound;
 }
 
 
 template <class T, class FuncObj>
-SsbRead::ReadRv SsbRead::ReadIterItem(const ReadIterator& iter, T& obj, FuncObj func)
+bool SsbRead::ReadIterItem(const ReadIterator& iter, T& obj, FuncObj func)
 {
 	iStrm.clear();
 	if (iter->rposStart != 0)
@@ -495,7 +490,7 @@ SsbRead::ReadRv SsbRead::ReadIterItem(const ReadIterator& iter, T& obj, FuncObj 
 	const Postype pos = iStrm.tellg();
 	func(iStrm, obj, iter->nSize);
 	OnReadEntry(&(*iter), ID(&m_Idarray[iter->nIdpos], iter->nIdLength), pos);
-	return EntryRead;
+	return true;
 }
 
 

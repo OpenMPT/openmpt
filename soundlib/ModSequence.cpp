@@ -621,8 +621,10 @@ void ReadModSequence(std::istream& iStrm, ModSequence& seq, const size_t, mpt::C
 	ssb.ReadItem(seq, "a", srlztn::VectorReader<uint16>(nSize));
 
 	ORDERINDEX restartPos = ORDERINDEX_INVALID;
-	if(ssb.ReadItem(restartPos, "r") != srlztn::SsbRead::EntryNotFound && restartPos < nSize)
+	if(ssb.ReadItem(restartPos, "r") && restartPos < nSize)
+	{
 		seq.SetRestartPos(restartPos);
+	}
 }
 
 
