@@ -27,6 +27,16 @@ is just a high-level summary.
     `LIBOPENMPT_STREAM_CALLBACKS_FILE_MSVCRT`, and
     `LIBOPENMPT_STREAM_CALLBACKS_FILE_MINGW` respectively in order to allow for
     checking header availability.
+ *  [**New**] C API: New stream callbacks for memory buffers.
+    `openmpt_stream_get_buffer_callbacks()` and `openmpt_stream_buffer_init()`
+    are deprecated. Use `openmpt_stream_get_buffer_callbacks2()` and
+    `openmpt_stream_buffer_init2()` instead. The new variants do not support
+    loading only a file prefix and checking for overflow any more. This was only
+    useful when using the old `openmpt_could_open_probability2()` style
+    interface from the libopenmpt 0.2 API, which has been superseded by
+    `openmpt_probe_file_header()`,
+    `openmpt_probe_file_header_without_filesize()`, and
+    `openmpt_probe_file_header_from_stream()` in libopenmpt 0.3.0.
 
  *  [**Change**] ctl `seek.sync_samples` now defaults to 1.
  *  [**Change**] `Makefile` `CONFIG=generic` is gone. Please use
