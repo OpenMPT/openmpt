@@ -128,7 +128,7 @@ const char Ssb::s_EntryID[3] = {'2','2','8'};
 
 
 Ssb::Ssb()
-	: m_Status(SNT_NONE)
+	: m_Status(Status{})
 	, m_nFixedEntrySize(0)
 	, m_posStart(0)
 	, m_nIdbytes(IdSizeVariable)
@@ -164,14 +164,16 @@ SsbRead::SsbRead(std::istream& is)
 
 void SsbWrite::AddWriteNote(const SsbStatus s)
 {
-	m_Status |= s;
-	SSB_LOG(MPT_UFORMAT("{}: 0x{}")(U_("Write note: "), mpt::ufmt::hex(s)));
+	m_Status.level = static_cast<StatusLevel>(mpt::to_underlying(m_Status.level) | mpt::to_underlying(s.level));
+	m_Status.messages = static_cast<StatusMessages>(mpt::to_underlying(m_Status.messages) | mpt::to_underlying(s.messages));
+	SSB_LOG(MPT_UFORMAT("{}: 0x{} 0x{}")(U_("Write note: "), mpt::ufmt::hex(mpt::to_underlying(s.level)), mpt::ufmt::hex(mpt::to_underlying(s.messages))));
 }
 
 void SsbRead::AddReadNote(const SsbStatus s)
 {
-	m_Status |= s;
-	SSB_LOG(MPT_UFORMAT("{}: 0x{}")(U_("Read note: "), mpt::ufmt::hex(s)));
+	m_Status.level = static_cast<StatusLevel>(mpt::to_underlying(m_Status.level) | mpt::to_underlying(s.level));
+	m_Status.messages = static_cast<StatusMessages>(mpt::to_underlying(m_Status.messages) | mpt::to_underlying(s.messages));
+	SSB_LOG(MPT_UFORMAT("{}: 0x{} 0x{}")(U_("Read note: "), mpt::ufmt::hex(mpt::to_underlying(s.level)), mpt::ufmt::hex(mpt::to_underlying(s.messages))));
 }
 
 #ifdef SSB_LOGGING
@@ -197,7 +199,7 @@ void SsbWrite::LogWriteEntry(const ID &id, const std::size_t nEntryNum, const st
 
 void SsbRead::ResetReadstatus()
 {
-	m_Status = SNT_NONE;
+	m_Status = Status{};
 	m_Idarray.reserve(32);
 	m_Idarray.push_back(0);
 }
@@ -420,7 +422,7 @@ void SsbRead::BeginRead(const ID &id, const uint64& nVersion)
 	{
 		AddReadNote(SNR_OBJECTCLASS_IDMISMATCH);
 	}
-	if ((m_Status & SNT_FAILURE) != 0)
+	if(HasFailed())
 	{
 		SSB_LOG(U_("ID mismatch, terminating read."));
 		return;

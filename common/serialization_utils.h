@@ -53,37 +53,77 @@ namespace srlztn //SeRiaLiZaTioN
 
 constexpr inline std::size_t invalidDatasize = static_cast<std::size_t>(0) - 1;
 
-enum 
+
+enum class StatusLevel : uint8
 {
-	SNT_FAILURE =		0x40000000, // = 1 << 30
-	SNT_NOTE =			0x20000000, // = 1 << 29
-	SNT_NONE = 0,
-
-	SNRW_BADGIVEN_STREAM =								1	| SNT_FAILURE,
-
-	// Read failures.
-	SNR_BADSTREAM_AFTER_MAPHEADERSEEK =					2	| SNT_FAILURE,
-	SNR_STARTBYTE_MISMATCH =							3	| SNT_FAILURE,
-	SNR_BADSTREAM_AT_MAP_READ =							4	| SNT_FAILURE,
-	SNR_INSUFFICIENT_STREAM_OFFTYPE =					5	| SNT_FAILURE,
-	SNR_OBJECTCLASS_IDMISMATCH =						6	| SNT_FAILURE,
-	SNR_TOO_MANY_ENTRIES_TO_READ =						7	| SNT_FAILURE,
-	SNR_INSUFFICIENT_RPOSTYPE =							8	| SNT_FAILURE,
-
-	// Read notes and warnings.
-	SNR_ZEROENTRYCOUNT =								0x80	| SNT_NOTE, // 0x80 == 1 << 7
-	SNR_NO_ENTRYIDS_WITH_CUSTOMID_DEFINED =				0x100	| SNT_NOTE,
-	SNR_LOADING_OBJECT_WITH_LARGER_VERSION =			0x200	| SNT_NOTE,
-	
-	// Write failures.
-	SNW_INSUFFICIENT_FIXEDSIZE =						(0x10)	| SNT_FAILURE,
-	SNW_CHANGING_IDSIZE_WITH_FIXED_IDSIZESETTING =		(0x11)	| SNT_FAILURE,
-	SNW_DATASIZETYPE_OVERFLOW =							(0x13)	| SNT_FAILURE,
-	SNW_MAX_WRITE_COUNT_REACHED =						(0x14)	| SNT_FAILURE,
-	SNW_INSUFFICIENT_DATASIZETYPE =						(0x16)	| SNT_FAILURE
+	Failure = 0x2,
+	Note    = 0x1,
+	None    = 0x0,
+	Max = 0xff,
 };
 
-using SsbStatus = int32;
+constexpr inline StatusLevel SNT_FAILURE = StatusLevel::Failure;
+constexpr inline StatusLevel SNT_NOTE = StatusLevel::Note;
+constexpr inline StatusLevel SNT_NONE = StatusLevel::None;
+
+enum class StatusMessages : uint32
+{
+	None = 0,
+
+	// Read notes and warnings.
+	SNR_ZEROENTRYCOUNT                           = 0x00'00'00'01,
+	SNR_NO_ENTRYIDS_WITH_CUSTOMID_DEFINED        = 0x00'00'00'02,
+	SNR_LOADING_OBJECT_WITH_LARGER_VERSION       = 0x00'00'00'04,
+
+	// Read failures.
+	SNR_BADSTREAM_AFTER_MAPHEADERSEEK            = 0x00'00'01'00,
+	SNR_STARTBYTE_MISMATCH                       = 0x00'00'02'00,
+	SNR_BADSTREAM_AT_MAP_READ                    = 0x00'00'04'00,
+	SNR_INSUFFICIENT_STREAM_OFFTYPE              = 0x00'00'08'00,
+	SNR_OBJECTCLASS_IDMISMATCH                   = 0x00'00'10'00,
+	SNR_TOO_MANY_ENTRIES_TO_READ                 = 0x00'00'20'00,
+	SNR_INSUFFICIENT_RPOSTYPE                    = 0x00'00'40'00,
+
+	// Write failures.
+	SNW_INSUFFICIENT_FIXEDSIZE                   = 0x00'01'00'00,
+	SNW_CHANGING_IDSIZE_WITH_FIXED_IDSIZESETTING = 0x00'02'00'00,
+	SNW_DATASIZETYPE_OVERFLOW                    = 0x00'04'00'00,
+	SNW_MAX_WRITE_COUNT_REACHED                  = 0x00'08'00'00,
+	SNW_INSUFFICIENT_DATASIZETYPE                = 0x00'10'00'00,
+
+	SNRW_BADGIVEN_STREAM                         = 0x01'00'00'00,
+
+	Max = 0xffffffff,
+};
+
+struct Status
+{
+	StatusLevel level = StatusLevel::None;
+	StatusMessages messages = StatusMessages::None;
+};
+
+constexpr inline Status SNR_ZEROENTRYCOUNT = {StatusLevel::Note, StatusMessages::SNR_ZEROENTRYCOUNT};
+constexpr inline Status SNR_NO_ENTRYIDS_WITH_CUSTOMID_DEFINED = {StatusLevel::Note, StatusMessages::SNR_NO_ENTRYIDS_WITH_CUSTOMID_DEFINED};
+constexpr inline Status SNR_LOADING_OBJECT_WITH_LARGER_VERSION = {StatusLevel::Note, StatusMessages::SNR_LOADING_OBJECT_WITH_LARGER_VERSION};
+
+constexpr inline Status SNR_BADSTREAM_AFTER_MAPHEADERSEEK = {StatusLevel::Failure, StatusMessages::SNR_BADSTREAM_AFTER_MAPHEADERSEEK};
+constexpr inline Status SNR_STARTBYTE_MISMATCH = {StatusLevel::Failure, StatusMessages::SNR_STARTBYTE_MISMATCH};
+constexpr inline Status SNR_BADSTREAM_AT_MAP_READ = {StatusLevel::Failure, StatusMessages::SNR_BADSTREAM_AT_MAP_READ};
+constexpr inline Status SNR_INSUFFICIENT_STREAM_OFFTYPE = {StatusLevel::Failure, StatusMessages::SNR_INSUFFICIENT_STREAM_OFFTYPE};
+constexpr inline Status SNR_OBJECTCLASS_IDMISMATCH = {StatusLevel::Failure, StatusMessages::SNR_OBJECTCLASS_IDMISMATCH};
+constexpr inline Status SNR_TOO_MANY_ENTRIES_TO_READ = {StatusLevel::Failure, StatusMessages::SNR_TOO_MANY_ENTRIES_TO_READ};
+constexpr inline Status SNR_INSUFFICIENT_RPOSTYPE = {StatusLevel::Failure, StatusMessages::SNR_INSUFFICIENT_RPOSTYPE};
+
+constexpr inline Status SNW_INSUFFICIENT_FIXEDSIZE = {StatusLevel::Failure, StatusMessages::SNW_INSUFFICIENT_FIXEDSIZE};
+constexpr inline Status SNW_CHANGING_IDSIZE_WITH_FIXED_IDSIZESETTING = {StatusLevel::Failure, StatusMessages::SNW_CHANGING_IDSIZE_WITH_FIXED_IDSIZESETTING};
+constexpr inline Status SNW_DATASIZETYPE_OVERFLOW = {StatusLevel::Failure, StatusMessages::SNW_DATASIZETYPE_OVERFLOW};
+constexpr inline Status SNW_MAX_WRITE_COUNT_REACHED = {StatusLevel::Failure, StatusMessages::SNW_MAX_WRITE_COUNT_REACHED};
+constexpr inline Status SNW_INSUFFICIENT_DATASIZETYPE = {StatusLevel::Failure, StatusMessages::SNW_INSUFFICIENT_DATASIZETYPE};
+
+constexpr inline Status SNRW_BADGIVEN_STREAM = {StatusLevel::Failure, StatusMessages::SNRW_BADGIVEN_STREAM};
+
+
+using SsbStatus = Status;
 
 
 enum : uint16
@@ -267,7 +307,7 @@ public:
 
 	bool HasFailed() const
 	{
-		return (m_Status & SNT_FAILURE) ? true : false;
+		return (m_Status.level >= SNT_FAILURE) ? true : false;
 	}
 
 protected:
@@ -435,7 +475,10 @@ private:
 		const std::size_t& nDatasize,
 		const char* pszDesc);
 
-	void ResetWritestatus() {m_Status = SNT_NONE;}
+	void ResetWritestatus()
+	{
+		m_Status = Status{};
+	}
 
 private:
 
