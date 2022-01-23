@@ -78,7 +78,7 @@ include/allegro42/lib/djgpp/liballeg.a:
 	+cd include/allegro42 && ./xmake.sh clean
 	+cd include/allegro42 && ./xmake.sh lib
 
-bin/openmpt123$(EXESUFFIX): include/allegro42/lib/djgpp/liballeg.a
+OBJECTS_ALLEGRO42 += include/allegro42/lib/djgpp/liballeg.a
 
 MISC_OUTPUTS += include/allegro42/lib/djgpp/liballeg.a
 
