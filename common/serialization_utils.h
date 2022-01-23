@@ -50,9 +50,6 @@ OPENMPT_NAMESPACE_BEGIN
 namespace srlztn //SeRiaLiZaTioN
 {
 
-using Offtype = std::streamoff;
-using Postype = std::streamoff;
-using RposType = std::streamoff;	// Relative position type.
 
 constexpr inline std::size_t invalidDatasize = static_cast<std::size_t>(0) - 1;
 
@@ -101,7 +98,7 @@ struct ReadEntry
 	ReadEntry() : nIdpos(0), rposStart(0), nSize(invalidDatasize), nIdLength(0) {}
 
 	std::size_t nIdpos;	// Index of id start in ID array.
-	RposType rposStart;	// Entry start position.
+	std::streamoff rposStart;	// Entry start position.
 	std::size_t nSize;		// Entry size.
 	uint16 nIdLength;	// Length of id.
 };
@@ -182,13 +179,13 @@ inline void Binaryread(std::istream& iStrm, double& data)
 
 //Read only given number of bytes to the beginning of data; data bytes are memset to 0 before reading.
 template <class T>
-inline void Binaryread(std::istream& iStrm, T& data, const Offtype bytecount)
+inline void Binaryread(std::istream& iStrm, T& data, const std::streamoff bytecount)
 {
 	mpt::IO::ReadBinaryTruncatedLE(iStrm, data, static_cast<std::size_t>(bytecount));
 }
 
 template <>
-inline void Binaryread<float>(std::istream& iStrm, float& data, const Offtype bytecount)
+inline void Binaryread<float>(std::istream& iStrm, float& data, const std::streamoff bytecount)
 {
 	typedef IEEE754binary32LE T;
 	std::byte bytes[sizeof(T)];
@@ -200,7 +197,7 @@ inline void Binaryread<float>(std::istream& iStrm, float& data, const Offtype by
 }
 
 template <>
-inline void Binaryread<double>(std::istream& iStrm, double& data, const Offtype bytecount)
+inline void Binaryread<double>(std::istream& iStrm, double& data, const std::streamoff bytecount)
 {
 	typedef IEEE754binary64LE T;
 	std::byte bytes[sizeof(T)];
@@ -289,7 +286,7 @@ protected:
 
 	uint32 m_nFixedEntrySize;			// Read/write: If > 0, data entries have given fixed size.
 
-	Postype m_posStart;					// Read/write: Stream position at the beginning of object.
+	std::streamoff m_posStart;					// Read/write: Stream position at the beginning of object.
 
 	uint16 m_nIdbytes;					// Read/Write: Tells map ID entry size in bytes. If size is variable, value is IdSizeVariable.
 	std::size_t m_nCounter;					// Read/write: Keeps count of entries written/read.
@@ -362,7 +359,7 @@ private:
 	const ReadEntry* Find(const ID &id);
 
 	// Called after reading an object.
-	void OnReadEntry(const ReadEntry* pE, const ID &id, const Postype& posReadBegin);
+	void OnReadEntry(const ReadEntry* pE, const ID &id, const std::streamoff& posReadBegin);
 
 	void AddReadNote(const SsbStatus s);
 
@@ -389,10 +386,10 @@ private:
 
 	std::vector<ReadEntry> mapData;		// Read: Contains map information.
 	uint64 m_nReadVersion;				// Read: Version is placed here when reading.
-	RposType m_rposMapBegin;			// Read: If map exists, rpos of map begin, else m_rposEndofHdrData.
-	Postype m_posMapEnd;				// Read: If map exists, map end position, else pos of end of hdrData.
-	Postype m_posDataBegin;				// Read: Data begin position.
-	RposType m_rposEndofHdrData;		// Read: rpos of end of header data.
+	std::streamoff m_rposMapBegin;			// Read: If map exists, rpos of map begin, else m_rposEndofHdrData.
+	std::streamoff m_posMapEnd;				// Read: If map exists, map end position, else pos of end of hdrData.
+	std::streamoff m_posDataBegin;				// Read: Data begin position.
+	std::streamoff m_rposEndofHdrData;		// Read: rpos of end of header data.
 	std::size_t m_nReadEntrycount;			// Read: Number of entries.
 
 	std::size_t m_nNextReadHint;			// Read: Hint where to start looking for the next read entry.
@@ -426,7 +423,7 @@ public:
 private:
 
 	// Called after writing an item.
-	void OnWroteItem(const ID &id, const Postype& posBeforeWrite);
+	void OnWroteItem(const ID &id, const std::streamoff& posBeforeWrite);
 
 	void AddWriteNote(const SsbStatus s);
 
@@ -434,12 +431,12 @@ private:
 	void LogWriteEntry(const ID &id,
 		const std::size_t nEntryNum,
 		const std::size_t nBytecount,
-		const RposType rposStart);
+		const std::streamoff rposStart);
 #endif
 
 	// Writes mapping item to mapstream.
 	void WriteMapItem(const ID &id,
-		const RposType& rposDataStart,
+		const std::streamoff& rposDataStart,
 		const std::size_t& nDatasize,
 		const char* pszDesc);
 
@@ -451,8 +448,8 @@ private:
 
 	std::ostream& oStrm;
 
-	Postype m_posEntrycount;			// Write: Pos of entrycount field. 
-	Postype m_posMapPosField;			// Write: Pos of map position field.
+	std::streamoff m_posEntrycount;			// Write: Pos of entrycount field. 
+	std::streamoff m_posMapPosField;			// Write: Pos of map position field.
 	std::string m_MapStreamString;				// Write: Map stream string.
 
 };
@@ -461,7 +458,7 @@ private:
 template <class T, class FuncObj>
 void SsbWrite::WriteItem(const T& obj, const ID &id, FuncObj Func)
 {
-	const Postype pos = oStrm.tellp();
+	const std::streamoff pos = oStrm.tellp();
 	Func(oStrm, obj);
 	OnWroteItem(id, pos);
 }
@@ -470,7 +467,7 @@ template <class T, class FuncObj>
 bool SsbRead::ReadItem(T& obj, const ID &id, FuncObj Func)
 {
 	const ReadEntry* pE = Find(id);
-	const Postype pos = iStrm.tellg();
+	const std::streamoff pos = iStrm.tellg();
 	const bool entryFound = (pE || !GetFlag(RwfRMapHasId));
 	if(entryFound)
 	{
@@ -487,7 +484,7 @@ bool SsbRead::ReadIterItem(const ReadIterator& iter, T& obj, FuncObj func)
 	iStrm.clear();
 	if (iter->rposStart != 0)
 		iStrm.seekg(m_posStart + iter->rposStart);
-	const Postype pos = iStrm.tellg();
+	const std::streamoff pos = iStrm.tellg();
 	func(iStrm, obj, iter->nSize);
 	OnReadEntry(&(*iter), ID(&m_Idarray[iter->nIdpos], iter->nIdLength), pos);
 	return true;

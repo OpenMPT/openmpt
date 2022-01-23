@@ -12,6 +12,7 @@
 
 #include "serialization_utils.h"
 
+#include "mpt/base/utility.hpp"
 #include "mpt/io/io.hpp"
 #include "mpt/io/io_stdstream.hpp"
 
@@ -187,7 +188,7 @@ void SsbRead::LogReadEntry(const ReadEntry &pRe, const std::size_t nNum)
 
 #ifdef SSB_LOGGING
 // Called after writing an entry.
-void SsbWrite::LogWriteEntry(const ID &id, const std::size_t nEntryNum, const std::size_t nBytecount, const RposType rposStart)
+void SsbWrite::LogWriteEntry(const ID &id, const std::size_t nEntryNum, const std::size_t nBytecount, const std::streamoff rposStart)
 {
 	SSB_LOG(MPT_UFORMAT("Wrote entry: {{num, id, rpos, size}} = {{{}, {}, {}, {}}}")(nEntryNum, id.AsString(), rposStart, nBytecount));
 }
@@ -203,7 +204,7 @@ void SsbRead::ResetReadstatus()
 
 
 void SsbWrite::WriteMapItem(const ID &id,
-						const RposType& rposDataStart,
+						const std::streamoff& rposDataStart,
 						const std::size_t& nDatasize,
 						const char* pszDesc)
 {
@@ -261,7 +262,7 @@ void SsbWrite::BeginWrite(const ID &id, const uint64& nVersion)
 	// Start bytes.
 	oStrm.write(s_EntryID, sizeof(s_EntryID));
 
-	m_posStart = oStrm.tellp() - Offtype(sizeof(s_EntryID));
+	m_posStart = oStrm.tellp() - static_cast<std::streamoff>(sizeof(s_EntryID));
 	
 	// Object ID.
 	{
@@ -324,7 +325,7 @@ void SsbWrite::BeginWrite(const ID &id, const uint64& nVersion)
 }
 
 
-void SsbRead::OnReadEntry(const ReadEntry* pE, const ID &id, const Postype& posReadBegin)
+void SsbRead::OnReadEntry(const ReadEntry* pE, const ID &id, const std::streamoff& posReadBegin)
 {
 #ifndef SSB_LOGGING
 	MPT_UNREFERENCED_PARAMETER(id);
@@ -352,9 +353,9 @@ void SsbRead::OnReadEntry(const ReadEntry* pE, const ID &id, const Postype& posR
 }
 
 
-void SsbWrite::OnWroteItem(const ID &id, const Postype& posBeforeWrite)
+void SsbWrite::OnWroteItem(const ID &id, const std::streamoff& posBeforeWrite)
 {
-	const Offtype nRawEntrySize = oStrm.tellp() - posBeforeWrite;
+	const std::streamoff nRawEntrySize = oStrm.tellp() - posBeforeWrite;
 
 	MPT_MAYBE_CONSTANT_IF(!mpt::in_range<std::size_t>(nRawEntrySize))
 	{
@@ -524,11 +525,11 @@ void SsbRead::BeginRead(const ID &id, const uint64& nVersion)
 	if (GetFlag(RwfRwHasMap))
 	{
 		mpt::IO::ReadAdaptiveInt64LE(iStrm, tempU64);
-		if(tempU64 > static_cast<uint64>(std::numeric_limits<Offtype>::max()))
+		if(!mpt::in_range<std::streamoff>(tempU64))
 			{ AddReadNote(SNR_INSUFFICIENT_STREAM_OFFTYPE); return; }
 	}
 
-	const Offtype rawEndOfHdrData = iStrm.tellg() - m_posStart;
+	const std::streamoff rawEndOfHdrData = iStrm.tellg() - m_posStart;
 
 	if(rawEndOfHdrData < 0)
 	{
@@ -537,7 +538,7 @@ void SsbRead::BeginRead(const ID &id, const uint64& nVersion)
 	}
 
 	m_rposEndofHdrData = rawEndOfHdrData;
-	m_rposMapBegin = (GetFlag(RwfRwHasMap)) ? static_cast<RposType>(tempU64) : m_rposEndofHdrData;
+	m_rposMapBegin = (GetFlag(RwfRwHasMap)) ? static_cast<std::streamoff>(tempU64) : m_rposEndofHdrData;
 
 	if (GetFlag(RwfRwHasMap) == false)
 		m_posMapEnd = m_posStart + m_rposEndofHdrData;
@@ -584,9 +585,9 @@ void SsbRead::CacheMap()
 			{
 				uint64 tempU64;
 				mpt::IO::ReadAdaptiveInt64LE(iStrm, tempU64);
-				if(tempU64 > static_cast<uint64>(std::numeric_limits<Offtype>::max()))
+				if(!mpt::in_range<std::streamoff>(tempU64))
 					{ AddReadNote(SNR_INSUFFICIENT_STREAM_OFFTYPE); return; }
-				mapData[i].rposStart = static_cast<RposType>(tempU64);
+				mapData[i].rposStart = static_cast<std::streamoff>(tempU64);
 			}
 
 			// Read entry size.
@@ -596,7 +597,7 @@ void SsbRead::CacheMap()
 			{
 				uint64 tempU64;
 				mpt::IO::ReadAdaptiveInt64LE(iStrm, tempU64);
-				if(tempU64 > static_cast<uint64>(std::numeric_limits<Offtype>::max()))
+				if(!mpt::in_range<std::streamoff>(tempU64))
 					{ AddReadNote(SNR_INSUFFICIENT_STREAM_OFFTYPE); return; }
 				mapData[i].nSize = static_cast<std::size_t>(tempU64);
 			}
@@ -629,7 +630,7 @@ void SsbRead::CacheMap()
 	// startpos.
 	if (GetFlag(RwfRMapHasStartpos) == false && (GetFlag(RwfRMapHasSize) || m_nFixedEntrySize > 0))
 	{
-		const RposType offset = m_posDataBegin - m_posStart;
+		const std::streamoff offset = m_posDataBegin - m_posStart;
 		for(size_t i = 0; i < m_nReadEntrycount; i++)
 			mapData[i].rposStart += offset;
 	}
@@ -643,7 +644,7 @@ const ReadEntry* SsbRead::Find(const ID &id)
 		CacheMap();
 	
 	if (m_nFixedEntrySize > 0 && GetFlag(RwfRMapHasStartpos) == false && GetFlag(RwfRMapHasSize) == false)
-		iStrm.seekg(m_posDataBegin + Postype(m_nFixedEntrySize * m_nCounter));
+		iStrm.seekg(m_posDataBegin + static_cast<std::streamoff>(m_nFixedEntrySize * m_nCounter));
 
 	if (GetFlag(RwfRMapHasId) == true)
 	{
@@ -666,9 +667,9 @@ const ReadEntry* SsbRead::Find(const ID &id)
 
 void SsbWrite::FinishWrite()
 {
-	const Postype posDataEnd = oStrm.tellp();
+	const std::streamoff posDataEnd = oStrm.tellp();
 		
-	Postype posMapStart = oStrm.tellp();
+	std::streamoff posMapStart = oStrm.tellp();
 
 	SSB_LOG(MPT_UFORMAT("Writing map to rpos: {}")(posMapStart - m_posStart));
 
@@ -677,7 +678,7 @@ void SsbWrite::FinishWrite()
 		oStrm.write(m_MapStreamString.c_str(), m_MapStreamString.length());
 	}
 
-	const Postype posMapEnd = oStrm.tellp();
+	const std::streamoff posMapEnd = oStrm.tellp();
 	
 	// Write entry count.
 	oStrm.seekp(m_posEntrycount);
