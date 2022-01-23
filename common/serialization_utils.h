@@ -29,6 +29,7 @@
 #include <istream>
 #include <ostream>
 
+#include <cstdint>
 #include <cstring>
 
 OPENMPT_NAMESPACE_BEGIN
@@ -36,14 +37,14 @@ OPENMPT_NAMESPACE_BEGIN
 namespace srlztn //SeRiaLiZaTioN
 {
 
-typedef std::ios::off_type Offtype;
-typedef Offtype Postype;
+using Offtype = std::streamoff;
+using Postype = std::streamoff;
 
-typedef uintptr_t	DataSize;	// Data size type.
-typedef uintptr_t	RposType;	// Relative position type.
-typedef uintptr_t	NumType;	// Entry count type.
+using DataSize = std::uintptr_t;	// Data size type.
+using RposType = std::uintptr_t;	// Relative position type.
+using NumType  = std::uintptr_t;	// Entry count type.
 
-const DataSize invalidDatasize = DataSize(-1);
+constexpr inline DataSize invalidDatasize = static_cast<DataSize>(0) - 1;
 
 enum 
 {
@@ -77,15 +78,14 @@ enum
 	SNW_INSUFFICIENT_DATASIZETYPE =						(0x16)	| SNT_FAILURE
 };
 
+using SsbStatus = int32;
 
-enum
+
+enum : uint16
 {
 	IdSizeVariable = std::numeric_limits<uint16>::max(),
 	IdSizeMaxFixedSize = (std::numeric_limits<uint8>::max() >> 1)
 };
-
-typedef int32 SsbStatus;
-
 
 struct ReadEntry
 {
