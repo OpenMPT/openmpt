@@ -37,6 +37,10 @@ is just a high-level summary.
     `openmpt_probe_file_header()`,
     `openmpt_probe_file_header_without_filesize()`, and
     `openmpt_probe_file_header_from_stream()` in libopenmpt 0.3.0.
+ *  [**New**] `Makefile` `CONFIG=djgpp` now supports `CPU=` option to build
+    optimized for a particular CPU. See `build/make/config-djgpp.mk` for all
+    available options. `FLAVOURED_DIR=1` places the CPU-specific optimized
+    builds in separate folders below `bin/`.
 
  *  [**Change**] ctl `seek.sync_samples` now defaults to 1.
  *  [**Change**] `Makefile` `CONFIG=generic` is gone. Please use
