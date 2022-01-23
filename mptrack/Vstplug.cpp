@@ -1108,7 +1108,7 @@ intptr_t CVstPlugin::Dispatch(VstOpcodeToPlugin opCode, int32 index, intptr_t va
 #ifdef VST_LOG
 	{
 		mpt::ustring codeStr;
-		if(opCode < std::size(VstOpCodes))
+		if(opCode >= 0 && static_cast<std::size_t>(opCode) < std::size(VstOpCodes))
 		{
 			codeStr = mpt::ToUnicode(mpt::Charset::ASCII, VstOpCodes[opCode]);
 		} else
