@@ -36,7 +36,7 @@ namespace IPCWindow
 					std::size_t count = copyData.cbData / sizeof(WCHAR);
 					const WCHAR* data = static_cast<const WCHAR *>(copyData.lpData);
 					const std::wstring name = std::wstring(data, data + count);
-					result = theApp.OpenDocumentFile(mpt::PathString::FromWide(name).AsNative().c_str()) ? 1 : 0;
+					result = theApp.OpenDocumentFile(mpt::PathString::FromWide(name).AsNative().c_str()) ? 1 : 2;
 				}
 				break;
 			case Function::SetWindowForeground:
@@ -216,19 +216,18 @@ namespace IPCWindow
 		{
 			return false;
 		}
-		bool result = true;
-		for(const auto &filename : filenames)
-		{
-			if(SendIPC(ipcWnd, Function::Open, mpt::as_span(filename.ToWide())) == 0)
-			{
-				result = false;
-			}
-		}
 		DWORD processID = 0;
 		GetWindowThreadProcessId(ipcWnd, &processID);
 		AllowSetForegroundWindow(processID);
 		SendIPC(ipcWnd, Function::SetWindowForeground);
-		return result;
+		for(const auto &filename : filenames)
+		{
+			if(SendIPC(ipcWnd, Function::Open, mpt::as_span(filename.ToWide())) == 0)
+			{
+				return false;
+			}
+		}
+		return true;
 	}
 
 }
