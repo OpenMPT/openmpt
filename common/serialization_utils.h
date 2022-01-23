@@ -442,8 +442,6 @@ private:
 
 	void ResetWritestatus() {m_Status = SNT_NONE;}
 
-	void IncrementWriteCounter();
-
 private:
 
 	std::ostream& oStrm;

@@ -239,17 +239,6 @@ void SsbWrite::WriteMapItem(const ID &id,
 }
 
 
-void SsbWrite::IncrementWriteCounter()
-{
-	m_nCounter++;
-	if(m_nCounter >= static_cast<uint16>(std::numeric_limits<uint16>::max() >> 2))
-	{
-		FinishWrite();
-		AddWriteNote(SNW_MAX_WRITE_COUNT_REACHED);
-	}
-}
-
-
 void SsbWrite::BeginWrite(const ID &id, const uint64& nVersion)
 {
 	SSB_LOG(MPT_UFORMAT("Write header with ID = {}")(id.AsString()));
@@ -386,7 +375,13 @@ void SsbWrite::OnWroteItem(const ID &id, const std::streamoff& posBeforeWrite)
 #ifdef SSB_LOGGING
 	LogWriteEntry(id, m_nCounter, nEntrySize, posBeforeWrite - m_posStart);
 #endif
-	IncrementWriteCounter();
+
+	m_nCounter++;
+	if(m_nCounter >= static_cast<uint16>(std::numeric_limits<uint16>::max() >> 2))
+	{
+		FinishWrite();
+		AddWriteNote(SNW_MAX_WRITE_COUNT_REACHED);
+	}
 }
 
 
