@@ -62,10 +62,6 @@ enum class StatusLevel : uint8
 	Max = 0xff,
 };
 
-constexpr inline StatusLevel SNT_FAILURE = StatusLevel::Failure;
-constexpr inline StatusLevel SNT_NOTE = StatusLevel::Note;
-constexpr inline StatusLevel SNT_NONE = StatusLevel::None;
-
 enum class StatusMessages : uint32
 {
 	None = 0,
@@ -307,7 +303,7 @@ public:
 
 	bool HasFailed() const
 	{
-		return (m_Status.level >= SNT_FAILURE) ? true : false;
+		return (m_Status.level >= StatusLevel::Failure) ? true : false;
 	}
 
 protected:
