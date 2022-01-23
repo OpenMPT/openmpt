@@ -1661,7 +1661,7 @@ bool CDLSBank::ExtractWaveForm(uint32 nIns, uint32 nRgn, std::vector<uint8> &wav
 	if(nRgn >= dlsIns.Regions.size())
 	{
 	#ifdef DLSBANK_LOG
-		MPT_LOG_GLOBAL(LogDebug, "DLSBANK", MPT_UFORMAT("invalid waveform region: nIns={} nRgn={} pSmp->nRegions={}")(nIns, nRgn, dlsIns.nRegions));
+		MPT_LOG_GLOBAL(LogDebug, "DLSBANK", MPT_UFORMAT("invalid waveform region: nIns={} nRgn={} pSmp->nRegions={}")(nIns, nRgn, dlsIns.Regions.size()));
 	#endif
 		return false;
 	}
