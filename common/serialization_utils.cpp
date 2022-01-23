@@ -316,29 +316,29 @@ void SsbWrite::BeginWrite(const ID &id, const uint64& nVersion)
 
 void SsbRead::OnReadEntry(const ReadEntry* pE, const ID &id, const std::streamoff& posReadBegin)
 {
-#ifndef SSB_LOGGING
-	MPT_UNREFERENCED_PARAMETER(id);
-	MPT_UNREFERENCED_PARAMETER(posReadBegin);
-#endif
+#ifdef SSB_LOGGING
 	if(pE)
 	{
-#ifdef SSB_LOGGING
 		LogReadEntry(*pE, m_nCounter);
-#endif
 	} else if(!GetFlag(RwfRMapHasId)) // Not ID's in map.
 	{
-#ifdef SSB_LOGGING
 		ReadEntry e;
 		e.rposStart = posReadBegin - m_posStart;
 		e.nSize = mpt::saturate_cast<std::size_t>(static_cast<std::streamoff>(iStrm.tellg() - posReadBegin));
 		LogReadEntry(e, m_nCounter);
-#endif
 	} else // Entry not found.
 	{
 		SSB_LOG(MPT_UFORMAT("No entry with id {} found.")(id.AsString()));
-		return;
 	}
-	m_nCounter++;
+#else
+	MPT_UNREFERENCED_PARAMETER(id);
+	MPT_UNREFERENCED_PARAMETER(posReadBegin);
+#endif
+	const bool entryFound = (pE || !GetFlag(RwfRMapHasId));
+	if(entryFound)
+	{
+		m_nCounter++;
+	}
 }
 
 
