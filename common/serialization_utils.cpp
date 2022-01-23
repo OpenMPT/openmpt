@@ -187,7 +187,6 @@ void SsbRead::AddReadNote(const SsbStatus s)
 
 void SsbRead::AddReadNote(const ReadEntry* const pRe, const std::size_t nNum)
 {
-	m_Status |= SNT_PROGRESS;
 	SSB_LOG(MPT_UFORMAT("Read entry: {{num, id, rpos, size, desc}} = {{{}, {}, {}, {}, {}}}")(
 				 nNum,
 				 (pRe && pRe->nIdLength < 30 && m_Idarray.size() > 0) ?  ID(&m_Idarray[pRe->nIdpos], pRe->nIdLength).AsString() : U_(""),
@@ -203,7 +202,6 @@ void SsbRead::AddReadNote(const ReadEntry* const pRe, const std::size_t nNum)
 // Called after writing an entry.
 void SsbWrite::AddWriteNote(const ID &id, const std::size_t nEntryNum, const std::size_t nBytecount, const RposType rposStart)
 {
-	m_Status |= SNT_PROGRESS;
 	SSB_LOG(MPT_UFORMAT("Wrote entry: {{num, id, rpos, size}} = {{{}, {}, {}, {}}}")(nEntryNum, id.AsString(), rposStart, nBytecount));
 #ifndef SSB_LOGGING
 	MPT_UNREFERENCED_PARAMETER(id);

@@ -45,7 +45,6 @@ constexpr inline std::size_t invalidDatasize = static_cast<std::size_t>(0) - 1;
 
 enum 
 {
-	SNT_PROGRESS =		0x08000000, // = 1 << 27
 	SNT_FAILURE =		0x40000000, // = 1 << 30
 	SNT_NOTE =			0x20000000, // = 1 << 29
 	SNT_WARNING =		0x10000000, // = 1 << 28
