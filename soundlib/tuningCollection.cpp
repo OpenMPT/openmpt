@@ -123,11 +123,11 @@ Tuning::SerializationResult CTuningCollection::Deserialize(std::istream &iStrm, 
 		for(srlztn::SsbRead::ReadIterator iter = iterBeg; iter != iterEnd; iter++)
 		{
 			uint16 dummyEditMask = 0xffff;
-			if (ssb.CompareId(iter, "0") == srlztn::SsbRead::IdMatch)
+			if(ssb.MatchesId(iter, "0"))
 				ssb.ReadIterItem(iter, name, [charset](std::istream &iStrm, mpt::ustring &ustr, const std::size_t dummy){ return ReadStr(iStrm, ustr, dummy, charset); });
-			else if (ssb.CompareId(iter, "1") == srlztn::SsbRead::IdMatch)
+			else if(ssb.MatchesId(iter, "1"))
 				ssb.ReadIterItem(iter, dummyEditMask);
-			else if (ssb.CompareId(iter, "2") == srlztn::SsbRead::IdMatch)
+			else if(ssb.MatchesId(iter, "2"))
 				ssb.ReadIterItem(iter, *this, [charset](std::istream &iStrm, CTuningCollection &Tc, const std::size_t dummy){ return ReadTuning(iStrm, Tc, dummy, charset); });
 		}
 

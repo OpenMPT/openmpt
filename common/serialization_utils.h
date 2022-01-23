@@ -334,10 +334,6 @@ class SsbRead
 
 public:
 
-	enum IdMatchStatus
-	{
-		IdMatch, IdMismatch
-	};
 	typedef std::vector<ReadEntry>::const_iterator ReadIterator;
 
 	SsbRead(std::istream& iStrm);
@@ -357,7 +353,7 @@ public:
 	ReadIterator GetReadEnd();
 
 	// Compares given id with read entry id 
-	IdMatchStatus CompareId(const ReadIterator& iter, const ID &id);
+	bool MatchesId(const ReadIterator& iter, const ID &id);
 
 	uint64 GetReadVersion() {return m_nReadVersion;}
 
@@ -518,10 +514,13 @@ bool SsbRead::ReadIterItem(const ReadIterator& iter, T& obj, FuncObj func)
 }
 
 
-inline SsbRead::IdMatchStatus SsbRead::CompareId(const ReadIterator& iter, const ID &id)
+inline bool SsbRead::MatchesId(const ReadIterator& iter, const ID &id)
 {
-	if(iter->nIdpos >= m_Idarray.size()) return IdMismatch;
-	return (id == ID(&m_Idarray[iter->nIdpos], iter->nIdLength)) ? IdMatch : IdMismatch;
+	if(iter->nIdpos >= m_Idarray.size())
+	{
+		return false;
+	}
+	return (id == ID(&m_Idarray[iter->nIdpos], iter->nIdLength));
 }
 
 
