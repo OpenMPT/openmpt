@@ -127,12 +127,10 @@ enum : uint16
 
 struct ReadEntry
 {
-	ReadEntry() : nIdpos(0), rposStart(0), nSize(invalidDatasize), nIdLength(0) {}
-
-	std::size_t nIdpos;	// Index of id start in ID array.
-	std::streamoff rposStart;	// Entry start position.
-	std::size_t nSize;		// Entry size.
-	uint16 nIdLength;	// Length of id.
+	std::size_t nIdpos = 0;               // Index of id start in ID array.
+	std::streamoff rposStart = 0;         // Entry start position.
+	std::size_t nSize = invalidDatasize;  // Entry size.
+	uint16 nIdLength = 0;                 // Length of id.
 };
 
 
@@ -266,7 +264,7 @@ class ID
 private:
 	std::string m_ID; // NOTE: can contain null characters ('\0')
 public:
-	ID() { }
+	ID() = default;
 	ID(const std::string &id) : m_ID(id) { }
 	ID(const char *beg, const char *end) : m_ID(beg, end) { }
 	ID(const char *id) : m_ID(id?id:"") { }
