@@ -273,10 +273,6 @@ public:
 
 protected:
 
-	// When writing, returns the number of entries written.
-	// When reading, returns the number of entries read not including unrecognized entries.
-	std::size_t GetCounter() const {return m_nCounter;}
-
 	void SetFlag(Rwf flag, bool val) {m_Flags.set(flag, val);}
 	bool GetFlag(Rwf flag) const {return m_Flags[flag];}
 
