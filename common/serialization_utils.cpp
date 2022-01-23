@@ -30,18 +30,6 @@ namespace srlztn
 {
 
 
-#ifdef MPT_ALL_LOGGING
-#define SSB_LOGGING
-#endif
-
-
-#ifdef SSB_LOGGING
-#define SSB_LOG(x) MPT_LOG_GLOBAL(LogDebug, "serialization", x)
-#else
-#define SSB_LOG(x) do { } while(0)
-#endif
-
-
 static const uint8 HeaderId_FlagByte = 0;
 
 // Indexing starts from 0.

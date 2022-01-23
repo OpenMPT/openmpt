@@ -34,6 +34,19 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+
+#ifdef MPT_ALL_LOGGING
+#define SSB_LOGGING
+#endif
+
+
+#ifdef SSB_LOGGING
+#define SSB_LOG(x) MPT_LOG_GLOBAL(LogDebug, "serialization", x)
+#else
+#define SSB_LOG(x) do { } while(0)
+#endif
+
+
 namespace srlztn //SeRiaLiZaTioN
 {
 
