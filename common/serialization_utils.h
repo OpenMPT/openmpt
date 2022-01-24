@@ -294,7 +294,7 @@ public:
 
 	bool HasFailed() const
 	{
-		return (m_Status.level >= StatusLevel::Failure) ? true : false;
+		return (m_Status.level >= StatusLevel::Failure);
 	}
 
 protected:
