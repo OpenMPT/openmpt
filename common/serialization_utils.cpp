@@ -229,11 +229,11 @@ void SsbWrite::WriteMapItem(const ID &id,
 			mapStream.write(id.GetBytes(), id.GetSize());
 	}
 
-	if (GetFlag(RwfWMapStartPosEntry)) //Startpos
+	if(m_Flags[RwfWMapStartPosEntry]) // Startpos
 		mpt::IO::WriteAdaptiveInt64LE(mapStream, rposDataStart);
-	if (GetFlag(RwfWMapSizeEntry)) //Entrysize
+	if(m_Flags[RwfWMapSizeEntry]) // Entrysize
 		mpt::IO::WriteAdaptiveInt64LE(mapStream, nDatasize);
-	if (GetFlag(RwfWMapDescEntry)) //Entry descriptions
+	if(m_Flags[RwfWMapDescEntry]) // Entry descriptions
 		WriteAdaptive12String(mapStream, std::string(pszDesc));
 
 	m_MapStreamString.append(mapStream.str());
@@ -265,14 +265,14 @@ void SsbWrite::BeginWrite(const ID &id, const uint64& nVersion)
 	// Form header.
 	uint8 header = 0;
 
-	SetFlag(RwfWMapStartPosEntry, GetFlag(RwfWMapStartPosEntry) && m_nFixedEntrySize == 0);
-	SetFlag(RwfWMapSizeEntry, GetFlag(RwfWMapSizeEntry) && m_nFixedEntrySize == 0);
+	m_Flags[RwfWMapStartPosEntry] = m_Flags[RwfWMapStartPosEntry] && m_nFixedEntrySize == 0;
+	m_Flags[RwfWMapSizeEntry] = m_Flags[RwfWMapSizeEntry] && m_nFixedEntrySize == 0;
 
 	header = (m_nIdbytes != 4) ? (m_nIdbytes & 3) : 3;	//0,1 : Bytes per IDtype, 0,1,2,4
-	Setbit(header, 2, GetFlag(RwfWMapStartPosEntry));	//2   : Startpos in map?
-	Setbit(header, 3, GetFlag(RwfWMapSizeEntry));		//3   : Datasize in map?
-	Setbit(header, 4, GetFlag(RwfWVersionNum));			//4   : Version numeric field?
-	Setbit(header, 7, GetFlag(RwfWMapDescEntry));		//7   : Entrydescriptions in map?
+	Setbit(header, 2, m_Flags[RwfWMapStartPosEntry]);	//2   : Startpos in map?
+	Setbit(header, 3, m_Flags[RwfWMapSizeEntry]);		//3   : Datasize in map?
+	Setbit(header, 4, m_Flags[RwfWVersionNum]);			//4   : Version numeric field?
+	Setbit(header, 7, m_Flags[RwfWMapDescEntry]);		//7   : Entrydescriptions in map?
 
 	// Write header
 	Binarywrite<uint8>(oStrm, header);
@@ -308,10 +308,10 @@ void SsbWrite::BeginWrite(const ID &id, const uint64& nVersion)
 	m_posEntrycount = oStrm.tellp();
 	Binarywrite<uint16>(oStrm, 0);
 
-	SetFlag(RwfRwHasMap, (m_nIdbytes != 0 || GetFlag(RwfWMapStartPosEntry) || GetFlag(RwfWMapSizeEntry) || GetFlag(RwfWMapDescEntry)));
+	m_Flags[RwfRwHasMap] = (m_nIdbytes != 0 || m_Flags[RwfWMapStartPosEntry] || m_Flags[RwfWMapSizeEntry] || m_Flags[RwfWMapDescEntry]);
 
 	m_posMapPosField = oStrm.tellp();
-	if (GetFlag(RwfRwHasMap)) //Mapping begin pos(reserve space - actual value is written after writing data)
+	if(m_Flags[RwfRwHasMap]) // Mapping begin pos(reserve space - actual value is written after writing data)
 		Binarywrite<uint64>(oStrm, 0);
 }
 
@@ -322,7 +322,7 @@ void SsbRead::OnReadEntry(const ReadEntry* pE, const ID &id, const std::streamof
 	if(pE)
 	{
 		LogReadEntry(*pE, m_nCounter);
-	} else if(!GetFlag(RwfRMapHasId)) // Not ID's in map.
+	} else if(!m_Flags[RwfRMapHasId]) // Not ID's in map.
 	{
 		ReadEntry e;
 		e.rposStart = posReadBegin - m_posStart;
@@ -336,7 +336,7 @@ void SsbRead::OnReadEntry(const ReadEntry* pE, const ID &id, const std::streamof
 	MPT_UNREFERENCED_PARAMETER(id);
 	MPT_UNREFERENCED_PARAMETER(posReadBegin);
 #endif
-	const bool entryFound = (pE || !GetFlag(RwfRMapHasId));
+	const bool entryFound = (pE || !m_Flags[RwfRMapHasId]);
 	if(entryFound)
 	{
 		m_nCounter++;
@@ -354,7 +354,7 @@ void SsbWrite::OnWroteItem(const ID &id, const std::streamoff& posBeforeWrite)
 		return;
 	}
 
-	if(GetFlag(RwfRMapHasSize) && (static_cast<uint64>(nRawEntrySize) > (std::numeric_limits<std::size_t>::max() >> 2)))
+	if(m_Flags[RwfRMapHasSize] && (static_cast<uint64>(nRawEntrySize) > (std::numeric_limits<std::size_t>::max() >> 2)))
 		{ AddWriteNote(SNW_DATASIZETYPE_OVERFLOW); return; }
 
 	std::size_t nEntrySize = static_cast<std::size_t>(nRawEntrySize);
@@ -371,7 +371,7 @@ void SsbWrite::OnWroteItem(const ID &id, const std::streamoff& posBeforeWrite)
 		else
 			{ AddWriteNote(SNW_INSUFFICIENT_FIXEDSIZE); return; }
 	}
-	if (GetFlag(RwfRwHasMap))
+	if(m_Flags[RwfRwHasMap])
 		WriteMapItem(id, posBeforeWrite - m_posStart, nEntrySize, "");
 
 #ifdef SSB_LOGGING
@@ -436,7 +436,7 @@ void SsbRead::BeginRead(const ID &id, const uint64& nVersion)
 	const uint8 header = tempU8;
 	m_nIdbytes = ((header & 3) == 3) ? 4 : (header & 3);
 	if (Testbit(header, 6))
-		SetFlag(RwfRTwoBytesDescChar, true);
+		m_Flags[RwfRTwoBytesDescChar] = true;
 
 	// Read headerdata size
 	uint32 tempU32 = 0;
@@ -486,13 +486,13 @@ void SsbRead::BeginRead(const ID &id, const uint64& nVersion)
 	if(Testbit(flagbyte, 1)) // Fixedsize entries?
 		mpt::IO::ReadAdaptiveInt32LE(iStrm, m_nFixedEntrySize);
 
-	SetFlag(RwfRMapHasStartpos, Testbit(header, 2));
-	SetFlag(RwfRMapHasSize, Testbit(header, 3));
-	SetFlag(RwfRMapHasId, (m_nIdbytes > 0));
-	SetFlag(RwfRMapHasDesc, Testbit(header, 7));
-	SetFlag(RwfRwHasMap, GetFlag(RwfRMapHasId) || GetFlag(RwfRMapHasStartpos) || GetFlag(RwfRMapHasSize) || GetFlag(RwfRMapHasDesc));
+	m_Flags[RwfRMapHasStartpos] = Testbit(header, 2);
+	m_Flags[RwfRMapHasSize] = Testbit(header, 3);
+	m_Flags[RwfRMapHasId] = (m_nIdbytes > 0);
+	m_Flags[RwfRMapHasDesc] = Testbit(header, 7);
+	m_Flags[RwfRwHasMap] = m_Flags[RwfRMapHasId] || m_Flags[RwfRMapHasStartpos] || m_Flags[RwfRMapHasSize] || m_Flags[RwfRMapHasDesc];
 	
-	if (GetFlag(RwfRwHasMap) == false)
+	if(!m_Flags[RwfRwHasMap])
 	{
 		SSB_LOG(U_("No map in the file."));
 	}
@@ -501,7 +501,7 @@ void SsbRead::BeginRead(const ID &id, const uint64& nVersion)
 	{
 		uint16 size = 0;
 		mpt::IO::ReadAdaptiveInt16LE(iStrm, size);
-		iStrm.ignore(size * (GetFlag(RwfRTwoBytesDescChar) ? 2 : 1));
+		iStrm.ignore(size * (m_Flags[RwfRTwoBytesDescChar] ? 2 : 1));
 	}
 
 	if(Testbit(flagbyte, 3))
@@ -519,7 +519,7 @@ void SsbRead::BeginRead(const ID &id, const uint64& nVersion)
 		AddReadNote(SNR_ZEROENTRYCOUNT);
 
 	// Read map rpos if map exists.
-	if (GetFlag(RwfRwHasMap))
+	if(m_Flags[RwfRwHasMap])
 	{
 		mpt::IO::ReadAdaptiveInt64LE(iStrm, tempU64);
 		if(!mpt::in_range<std::streamoff>(tempU64))
@@ -535,18 +535,18 @@ void SsbRead::BeginRead(const ID &id, const uint64& nVersion)
 	}
 
 	m_rposEndofHdrData = rawEndOfHdrData;
-	m_rposMapBegin = (GetFlag(RwfRwHasMap)) ? static_cast<std::streamoff>(tempU64) : m_rposEndofHdrData;
+	m_rposMapBegin = (m_Flags[RwfRwHasMap]) ? static_cast<std::streamoff>(tempU64) : m_rposEndofHdrData;
 
-	if (GetFlag(RwfRwHasMap) == false)
+	if(!m_Flags[RwfRwHasMap])
 		m_posMapEnd = m_posStart + m_rposEndofHdrData;
 
-	SetFlag(RwfRHeaderIsRead, true);
+	m_Flags[RwfRHeaderIsRead] = true;
 }
 
 
 void SsbRead::CacheMap()
 {
-	if(GetFlag(RwfRwHasMap) || m_nFixedEntrySize > 0)
+	if(m_Flags[RwfRwHasMap] || m_nFixedEntrySize > 0)
 	{
 		iStrm.seekg(m_posStart + m_rposMapBegin);
 
@@ -578,7 +578,7 @@ void SsbRead::CacheMap()
 			mapData[i].nIdpos = nOldEnd;
 
 			// Read position.
-			if(GetFlag(RwfRMapHasStartpos))
+			if(m_Flags[RwfRMapHasStartpos])
 			{
 				uint64 tempU64;
 				mpt::IO::ReadAdaptiveInt64LE(iStrm, tempU64);
@@ -590,7 +590,7 @@ void SsbRead::CacheMap()
 			// Read entry size.
 			if (m_nFixedEntrySize > 0)
 				mapData[i].nSize = m_nFixedEntrySize;
-			else if(GetFlag(RwfRMapHasSize)) // Map has datasize field.
+			else if(m_Flags[RwfRMapHasSize]) // Map has datasize field.
 			{
 				uint64 tempU64;
 				mpt::IO::ReadAdaptiveInt64LE(iStrm, tempU64);
@@ -601,14 +601,14 @@ void SsbRead::CacheMap()
 
 			// If there's no entry startpos in map, count start pos from datasizes.
 			// Here readentry.rposStart is set to relative position from databegin.
-			if (mapData[i].nSize != invalidDatasize && GetFlag(RwfRMapHasStartpos) == false)
+			if(mapData[i].nSize != invalidDatasize && !m_Flags[RwfRMapHasStartpos])
 				mapData[i].rposStart = (i > 0) ? mapData[i-1].rposStart + mapData[i-1].nSize : 0;
 
-			if(GetFlag(RwfRMapHasDesc)) //Map has entrydescriptions?
+			if(m_Flags[RwfRMapHasDesc]) // Map has entrydescriptions?
 			{
 				uint16 size = 0;
 				mpt::IO::ReadAdaptiveInt16LE(iStrm, size);
-				if(GetFlag(RwfRTwoBytesDescChar))
+				if(m_Flags[RwfRTwoBytesDescChar])
 					iStrm.ignore(size * 2);
 				else
 					iStrm.ignore(size);
@@ -618,14 +618,14 @@ void SsbRead::CacheMap()
 		SSB_LOG(MPT_UFORMAT("End of map(rpos): {}")(m_posMapEnd - m_posStart));
 	}
 
-	SetFlag(RwfRMapCached, true);
+	m_Flags[RwfRMapCached] = true;
 	m_posDataBegin = (m_rposMapBegin == m_rposEndofHdrData) ? m_posMapEnd : m_posStart + m_rposEndofHdrData;
 	iStrm.seekg(m_posDataBegin);
 
 	// If there are no positions in the map but there are entry sizes, rposStart will
 	// be relative to data start. Now that posDataBegin is known, make them relative to 
 	// startpos.
-	if (GetFlag(RwfRMapHasStartpos) == false && (GetFlag(RwfRMapHasSize) || m_nFixedEntrySize > 0))
+	if(!m_Flags[RwfRMapHasStartpos] && (m_Flags[RwfRMapHasSize] || m_nFixedEntrySize > 0))
 	{
 		const std::streamoff offset = m_posDataBegin - m_posStart;
 		for(size_t i = 0; i < m_nReadEntrycount; i++)
@@ -637,13 +637,13 @@ void SsbRead::CacheMap()
 const ReadEntry* SsbRead::Find(const ID &id)
 {
 	iStrm.clear();
-	if (GetFlag(RwfRMapCached) == false)
+	if(!m_Flags[RwfRMapCached])
 		CacheMap();
 	
-	if (m_nFixedEntrySize > 0 && GetFlag(RwfRMapHasStartpos) == false && GetFlag(RwfRMapHasSize) == false)
+	if(m_nFixedEntrySize > 0 && !m_Flags[RwfRMapHasStartpos] && !m_Flags[RwfRMapHasSize])
 		iStrm.seekg(m_posDataBegin + static_cast<std::streamoff>(m_nFixedEntrySize * m_nCounter));
 
-	if (GetFlag(RwfRMapHasId) == true)
+	if(m_Flags[RwfRMapHasId])
 	{
 		const size_t nEntries = mapData.size();
 		for(size_t i0 = 0; i0 < nEntries; i0++)
@@ -670,7 +670,7 @@ void SsbWrite::FinishWrite()
 
 	SSB_LOG(MPT_UFORMAT("Writing map to rpos: {}")(posMapStart - m_posStart));
 
-	if (GetFlag(RwfRwHasMap)) //Write map
+	if(m_Flags[RwfRwHasMap]) // Write map
 	{
 		oStrm.write(m_MapStreamString.c_str(), m_MapStreamString.length());
 	}
@@ -683,7 +683,7 @@ void SsbWrite::FinishWrite()
 	// Write a fixed size=2 Adaptive64LE because space for this value has already been reserved berforehand.
 	mpt::IO::WriteAdaptiveInt64LE(oStrm, m_nCounter, 2);
 
-	if (GetFlag(RwfRwHasMap))
+	if(m_Flags[RwfRwHasMap])
 	{	// Write map start position.
 		oStrm.seekp(m_posMapPosField);
 		const uint64 rposMap = posMapStart - m_posStart;

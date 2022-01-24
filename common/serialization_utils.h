@@ -299,11 +299,6 @@ public:
 
 protected:
 
-	void SetFlag(Rwf flag, bool val) {m_Flags.set(flag, val);}
-	bool GetFlag(Rwf flag) const {return m_Flags[flag];}
-
-protected:
-
 	Status m_Status;
 
 	uint32 m_nFixedEntrySize;			// Read/write: If > 0, data entries have given fixed size.
@@ -487,7 +482,7 @@ bool SsbRead::ReadItem(T& obj, const ID &id, FuncObj Func)
 {
 	const ReadEntry* pE = Find(id);
 	const std::streamoff pos = iStrm.tellg();
-	const bool entryFound = (pE || !GetFlag(RwfRMapHasId));
+	const bool entryFound = (pE || !m_Flags[RwfRMapHasId]);
 	if(entryFound)
 	{
 		Func(iStrm, obj, (pE) ? (pE->nSize) : invalidDatasize);
@@ -522,8 +517,8 @@ inline bool SsbRead::MatchesId(const ReadIterator& iter, const ID &id)
 
 inline SsbRead::ReadIterator SsbRead::GetReadBegin()
 {
-	MPT_ASSERT(GetFlag(RwfRMapHasId) && (GetFlag(RwfRMapHasStartpos) || GetFlag(RwfRMapHasSize) || m_nFixedEntrySize > 0));
-	if (GetFlag(RwfRMapCached) == false)
+	MPT_ASSERT(m_Flags[RwfRMapHasId] && (m_Flags[RwfRMapHasStartpos] || m_Flags[RwfRMapHasSize] || m_nFixedEntrySize > 0));
+	if(!m_Flags[RwfRMapCached])
 		CacheMap();
 	return mapData.begin();
 }
@@ -531,7 +526,7 @@ inline SsbRead::ReadIterator SsbRead::GetReadBegin()
 
 inline SsbRead::ReadIterator SsbRead::GetReadEnd()
 {
-	if (GetFlag(RwfRMapCached) == false)
+	if(!m_Flags[RwfRMapCached])
 		CacheMap();
 	return mapData.end();
 }
