@@ -263,9 +263,8 @@ private:
 public:
 	ID() = default;
 	ID(const std::string &id) : m_ID(id) { }
-	ID(const char *beg, const char *end) : m_ID(beg, end) { }
-	ID(const char *id) : m_ID(id?id:"") { }
-	ID(const char * str, std::size_t len) : m_ID(str, str + len) { }
+	ID(const char *id) : m_ID(id ? id : "") { }
+	ID(const char * str, std::size_t len) : m_ID(str, len) { }
 	template <typename T>
 	static ID FromInt(const T &val)
 	{
