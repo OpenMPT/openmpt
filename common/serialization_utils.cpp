@@ -226,7 +226,7 @@ void SsbWrite::WriteMapItem(const ID &id,
 			mpt::IO::WriteAdaptiveInt16LE(mapStream, static_cast<uint16>(id.GetSize()));
 
 		if(id.GetSize() > 0)
-			mapStream.write(id.GetBytes(), id.GetSize());
+			mapStream.write(id.AsSpan().data(), id.AsSpan().size());
 	}
 
 	if(m_Flags[RwfWMapStartPosEntry]) // Startpos
@@ -259,7 +259,7 @@ void SsbWrite::BeginWrite(const ID &id, const uint64& nVersion)
 	{
 		uint8 idsize = static_cast<uint8>(id.GetSize());
 		Binarywrite<uint8>(oStrm, idsize);
-		if(idsize > 0) oStrm.write(id.GetBytes(), id.GetSize());
+		if(idsize > 0) oStrm.write(id.AsSpan().data(), id.AsSpan().size());
 	}
 
 	// Form header.

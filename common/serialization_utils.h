@@ -12,6 +12,7 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
+#include "mpt/base/alloc.hpp"
 #include "mpt/io/io.hpp"
 #include "mpt/io/io_stdstream.hpp"
 #include "openmpt/base/Endian.hpp"
@@ -275,8 +276,14 @@ public:
 	}
 	bool IsPrintable() const;
 	mpt::ustring AsString() const;
-	const char *GetBytes() const { return m_ID.c_str(); }
-	std::size_t GetSize() const { return m_ID.length(); }
+	std::size_t GetSize() const
+	{
+		return m_ID.size();
+	}
+	mpt::span<const char> AsSpan() const
+	{
+		return mpt::as_span(m_ID);
+	}
 	bool operator == (const ID &other) const { return m_ID == other.m_ID; }
 	bool operator != (const ID &other) const { return m_ID != other.m_ID; }
 };
