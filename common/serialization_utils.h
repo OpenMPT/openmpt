@@ -451,7 +451,7 @@ private:
 	void WriteMapItem(const ID &id,
 		const std::streamoff& rposDataStart,
 		const std::size_t& nDatasize,
-		const char* pszDesc);
+		const std::string &pszDesc);
 
 	void ResetWritestatus()
 	{

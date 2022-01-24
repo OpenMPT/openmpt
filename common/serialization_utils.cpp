@@ -208,7 +208,7 @@ void SsbRead::ResetReadstatus()
 void SsbWrite::WriteMapItem(const ID &id,
 						const std::streamoff& rposDataStart,
 						const std::size_t& nDatasize,
-						const char* pszDesc)
+						const std::string &pszDesc)
 {
 	SSB_LOG(MPT_UFORMAT("Writing map entry: id={}, rpos={}, size={}")(
 					(id.GetSize() > 0) ? id.AsString() : U_(""),
@@ -234,7 +234,7 @@ void SsbWrite::WriteMapItem(const ID &id,
 	if(m_Flags[RwfWMapSizeEntry]) // Entrysize
 		mpt::IO::WriteAdaptiveInt64LE(mapStream, nDatasize);
 	if(m_Flags[RwfWMapDescEntry]) // Entry descriptions
-		WriteAdaptive12String(mapStream, std::string(pszDesc));
+		WriteAdaptive12String(mapStream, pszDesc);
 
 	m_MapStreamString.append(mapStream.str());
 
