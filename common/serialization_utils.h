@@ -209,32 +209,28 @@ inline void Binaryread(std::istream& iStrm, double& data)
 
 //Read only given number of bytes to the beginning of data; data bytes are memset to 0 before reading.
 template <class T>
-inline void Binaryread(std::istream& iStrm, T& data, const std::streamoff bytecount)
+inline void Binaryread(std::istream& iStrm, T& data, const std::size_t bytecount)
 {
-	mpt::IO::ReadBinaryTruncatedLE(iStrm, data, static_cast<std::size_t>(bytecount));
+	mpt::IO::ReadBinaryTruncatedLE(iStrm, data, bytecount);
 }
 
 template <>
-inline void Binaryread<float>(std::istream& iStrm, float& data, const std::streamoff bytecount)
+inline void Binaryread<float>(std::istream& iStrm, float& data, const std::size_t bytecount)
 {
-	typedef IEEE754binary32LE T;
-	std::byte bytes[sizeof(T)];
-	std::memset(bytes, 0, sizeof(T));
-	mpt::IO::ReadRaw(iStrm, bytes, std::min(static_cast<std::size_t>(bytecount), sizeof(T)));
+	using T = IEEE754binary32LE;
+	mpt::IO::SeekRelative(iStrm, std::min(bytecount, sizeof(T)));
 	// There is not much we can sanely do for truncated floats,
-	// thus we ignore what we just read and return 0.
+	// thus we ignore what we could read and return 0.
 	data = 0.0f;
 }
 
 template <>
-inline void Binaryread<double>(std::istream& iStrm, double& data, const std::streamoff bytecount)
+inline void Binaryread<double>(std::istream& iStrm, double& data, const std::size_t bytecount)
 {
-	typedef IEEE754binary64LE T;
-	std::byte bytes[sizeof(T)];
-	std::memset(bytes, 0, sizeof(T));
-	mpt::IO::ReadRaw(iStrm, bytes, std::min(static_cast<std::size_t>(bytecount), sizeof(T)));
+	using T = IEEE754binary64LE;
+	mpt::IO::SeekRelative(iStrm, std::min(bytecount, sizeof(T)));
 	// There is not much we can sanely do for truncated floats,
-	// thus we ignore what we just read and return 0.
+	// thus we ignore what we could read and return 0.
 	data = 0.0;
 }
 
