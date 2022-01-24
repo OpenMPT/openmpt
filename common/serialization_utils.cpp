@@ -43,6 +43,7 @@ static inline void Setbit(uint8& val, uint8 bitindex, bool newval)
 }
 
 
+#ifdef SSB_LOGGING
 bool ID::IsPrintable() const
 {
 	for(std::size_t i = 0; i < m_ID.length(); ++i)
@@ -54,6 +55,7 @@ bool ID::IsPrintable() const
 	}
 	return true;
 }
+#endif
 
 
 //Format: First bit tells whether the size indicator is 1 or 2 bytes.
@@ -107,6 +109,7 @@ void ReadItemString(std::istream& iStrm, std::string& str, const std::size_t)
 }
 
 
+#ifdef SSB_LOGGING
 mpt::ustring ID::AsString() const
 {
 	if(IsPrintable())
@@ -122,6 +125,7 @@ mpt::ustring ID::AsString() const
 	std::memcpy(&val, m_ID.data(), m_ID.length());
 	return mpt::ufmt::val(val);
 }
+#endif
 
 
 const char Ssb::s_EntryID[3] = {'2','2','8'};

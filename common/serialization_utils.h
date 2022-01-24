@@ -273,8 +273,10 @@ public:
 		valle = val;
 		return ID(std::string(mpt::byte_cast<const char*>(mpt::as_raw_memory(valle).data()), mpt::as_raw_memory(valle).size()));
 	}
+#ifdef SSB_LOGGING
 	bool IsPrintable() const;
 	mpt::ustring AsString() const;
+#endif
 	std::size_t GetSize() const
 	{
 		return m_ID.size();
