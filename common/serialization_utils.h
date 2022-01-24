@@ -271,7 +271,7 @@ public:
 		static_assert(std::numeric_limits<T>::is_integer);
 		typename mpt::make_le<T>::type valle;
 		valle = val;
-		return ID(std::string(mpt::byte_cast<const char*>(mpt::as_raw_memory(valle).data()), mpt::byte_cast<const char*>(mpt::as_raw_memory(valle).data() + sizeof(valle))));
+		return ID(std::string(mpt::byte_cast<const char*>(mpt::as_raw_memory(valle).data()), mpt::as_raw_memory(valle).size()));
 	}
 	bool IsPrintable() const;
 	mpt::ustring AsString() const;
