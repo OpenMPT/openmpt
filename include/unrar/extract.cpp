@@ -49,8 +49,7 @@ void CmdExtract::DoExtract()
       if (Code!=EXTRACT_ARC_REPEAT)
         break;
     }
-    if (FindFile::FastFind(ArcName,&FD))
-      DataIO.ProcessedArcSize+=FD.Size;
+    DataIO.ProcessedArcSize+=DataIO.LastArcSize;
   }
 
   // Clean user entered password. Not really required, just for extra safety.
@@ -82,7 +81,7 @@ void CmdExtract::DoExtract()
 
 void CmdExtract::ExtractArchiveInit(Archive &Arc)
 {
-  DataIO.UnpArcSize=Arc.IsSeekable() ? Arc.FileLength() : 0;
+  DataIO.AdjustTotalArcSize(&Arc);
 
   FileCount=0;
   MatchedArgs=0;
@@ -230,14 +229,11 @@ EXTRACT_ARC_CODE CmdExtract::ExtractArchive()
       if (Repeat)
       {
         // If we started extraction from not first volume and need to
-        // restart it from first, we must correct DataIO.TotalArcSize
-        // for correct total progress display. We subtract the size
-        // of current volume and all volumes after it and add the size
-        // of new (first) volume.
-        FindData OldArc,NewArc;
-        if (FindFile::FastFind(Arc.FileName,&OldArc) &&
-            FindFile::FastFind(ArcName,&NewArc))
-          DataIO.TotalArcSize-=VolumeSetSize+OldArc.Size-NewArc.Size;
+        // restart it from first, we must set DataIO.TotalArcSize to size
+        // of new first volume to display the total progress correctly.
+        FindData NewArc;
+        if (FindFile::FastFind(ArcName,&NewArc))
+          DataIO.TotalArcSize=NewArc.Size;
         return EXTRACT_ARC_REPEAT;
       }
       else
@@ -654,7 +650,7 @@ bool CmdExtract::ExtractCurrentFile(Archive &Arc,size_t HeaderSize,bool &Repeat)
 
       uint64 Preallocated=0;
       if (!TestMode && !Arc.BrokenHeader && Arc.FileHead.UnpSize>1000000 &&
-          Arc.FileHead.PackSize*1024>Arc.FileHead.UnpSize &&
+          Arc.FileHead.PackSize*1024>Arc.FileHead.UnpSize && Arc.IsSeekable() &&
           (Arc.FileHead.UnpSize<100000000 || Arc.FileLength()>Arc.FileHead.PackSize))
       {
         CurFile.Prealloc(Arc.FileHead.UnpSize);

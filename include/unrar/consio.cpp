@@ -267,6 +267,7 @@ bool getwstr(wchar *str,size_t n)
     Array<char> StrA(n*4); // Up to 4 UTF-8 characters per wchar_t.
     File SrcFile;
     SrcFile.SetHandleType(FILE_HANDLESTD);
+    SrcFile.SetLineInputMode(true);
     int ReadSize=SrcFile.Read(&StrA[0],StrA.Size()-1);
     if (ReadSize<=0)
     {

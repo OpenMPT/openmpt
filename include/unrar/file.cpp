@@ -7,6 +7,7 @@ File::File()
   NewFile=false;
   LastWrite=false;
   HandleType=FILE_HANDLENORMAL;
+  LineInput=false;
   SkipClose=false;
   ErrorType=FILE_SUCCESS;
   OpenShared=false;
@@ -424,13 +425,17 @@ int File::Read(void *Data,size_t Size)
     }
     TotalRead+=ReadSize; // If ReadSize is -1, TotalRead is also set to -1 here.
 
-    if (HandleType==FILE_HANDLESTD && ReadSize>0 && (uint)ReadSize<Size)
+    if (HandleType==FILE_HANDLESTD && !LineInput && ReadSize>0 && (uint)ReadSize<Size)
     {
       // Unlike regular files, for pipe we can read only as much as was
       // written at the other end of pipe. We had seen data coming in small
       // ~80 byte chunks when piping from 'type arc.rar'. Extraction code
       // would fail if we read an incomplete archive header from stdin.
       // So here we ensure that requested size is completely read.
+      // But we return the available data immediately in "line input" mode,
+      // when processing user's input in console prompts. Otherwise apps
+      // piping user responses to multiple Ask() prompts can hang if no more
+      // data is available yet and pipe isn't closed.
       Data=(byte*)Data+ReadSize;
       Size-=ReadSize;
       continue;
