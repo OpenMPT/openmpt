@@ -377,15 +377,16 @@ void ListFileHeader(Archive &Arc,FileHeader &hd,bool &TitleShown,bool Verbose,bo
     {
       mprintf(L"\n%12ls: ",L"Unix owner");
       if (*hd.UnixOwnerName!=0)
-        mprintf(L"%ls:",GetWide(hd.UnixOwnerName));
+        mprintf(L"%ls",GetWide(hd.UnixOwnerName));
+      else
+        if (hd.UnixOwnerNumeric)
+          mprintf(L"#%d",hd.UnixOwnerID);
+      mprintf(L":");
       if (*hd.UnixGroupName!=0)
         mprintf(L"%ls",GetWide(hd.UnixGroupName));
-      if ((*hd.UnixOwnerName!=0 || *hd.UnixGroupName!=0) && (hd.UnixOwnerNumeric || hd.UnixGroupNumeric))
-        mprintf(L"  ");
-      if (hd.UnixOwnerNumeric)
-        mprintf(L"#%d:",hd.UnixOwnerID);
-      if (hd.UnixGroupNumeric)
-        mprintf(L"#%d:",hd.UnixGroupID);
+      else
+        if (hd.UnixGroupNumeric)
+          mprintf(L"#%d",hd.UnixGroupID);
     }
 
     mprintf(L"\n");

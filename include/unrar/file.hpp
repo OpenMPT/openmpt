@@ -59,6 +59,16 @@ class File
     FileHandle hFile;
     bool LastWrite;
     FILE_HANDLETYPE HandleType;
+    
+    // If we read the user input in console prompts from stdin, we shall
+    // process the available line immediately, not waiting for rest of data.
+    // Otherwise apps piping user responses to multiple Ask() prompts can
+    // hang if no more data is available yet and pipe isn't closed.
+    // If we read RAR archive or other file data from stdin, we shall collect
+    // the entire requested block as long as pipe isn't closed, so we get
+    // complete archive headers, not split between different reads.
+    bool LineInput;
+
     bool SkipClose;
     FILE_READ_ERROR_MODE ReadErrorMode;
     bool NewFile;
@@ -112,6 +122,7 @@ class File
     virtual bool IsOpened() {return hFile!=FILE_BAD_HANDLE;} // 'virtual' for MultiFile class.
     int64 FileLength();
     void SetHandleType(FILE_HANDLETYPE Type) {HandleType=Type;}
+    void SetLineInputMode(bool Mode) {LineInput=Mode;}
     FILE_HANDLETYPE GetHandleType() {return HandleType;}
     bool IsSeekable() {return HandleType!=FILE_HANDLESTD;}
     bool IsDevice();
