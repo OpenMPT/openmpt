@@ -48,6 +48,7 @@ static void ReadDIGIPatternEntry(FileReader &file, ModCommand &m)
 			// The play direction is also reset if a new note is played on the other channel linked to this channel.
 			// The behaviour is rather broken when there is no note next to the ommand.
 			m.command = CMD_DIGIREVERSESAMPLE;
+			m.param &= 0x0F;
 			break;
 		case 0x40:
 			// E40: Stop playing sample
