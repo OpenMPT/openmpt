@@ -680,7 +680,7 @@ BOOL CCtrlGeneral::GetToolTipText(UINT uId, LPTSTR pszText)
 	{
 		const bool displayDBValues = m_sndFile.GetPlayConfig().getDisplayDBValues();
 		const CWnd *wnd = GetDlgItem(uId);
-		const bool isEnabled = wnd != nullptr || wnd->IsWindowEnabled();  // nullptr check is for a Wine bug workaround (https://bugs.openmpt.org/view.php?id=1553)
+		const bool isEnabled = wnd ? wnd->IsWindowEnabled() : true;  // nullptr check is for a Wine bug workaround (https://bugs.openmpt.org/view.php?id=1553)
 		mpt::tstring notAvailable;
 		if(!isEnabled)
 			notAvailable = MPT_TFORMAT("Feature is not available in the {} format.")(mpt::ToWin(mpt::Charset::ASCII, mpt::ToUpperCaseAscii(m_sndFile.GetModSpecifications().fileExtension)));
