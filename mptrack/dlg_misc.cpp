@@ -559,6 +559,7 @@ void CLegacyPlaybackSettingsDlg::OnFilterStringChanged()
 	CString s;
 	GetDlgItemText(IDC_EDIT1, s);
 	const bool filterActive = !s.IsEmpty();
+	s.MakeLower();
 
 	m_CheckList.SetRedraw(FALSE);
 	m_CheckList.ResetContent();
@@ -698,7 +699,7 @@ void CLegacyPlaybackSettingsDlg::OnFilterStringChanged()
 		default: MPT_ASSERT_NOTREACHED();
 		}
 
-		if(filterActive && _tcsstr(desc, s) == nullptr)
+		if(filterActive && CString{desc}.MakeLower().Find(s) < 0)
 			continue;
 
 		if(m_playBehaviour[i] || allowedFlags[i])
