@@ -45,6 +45,9 @@ public:
 		if (!filename) {
 			return std::nullopt;
 		}
+		if ((*filename) == Tpath{}) {
+			return std::nullopt;
+		}
 		return *filename;
 	}
 };
