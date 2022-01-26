@@ -73,12 +73,12 @@ static Version GetPreviousSettingsVersion(const mpt::ustring &iniVersion)
 
 mpt::ustring SettingsModTypeToString(MODTYPE modtype)
 {
-	return mpt::ToUnicode(mpt::Charset::UTF8, CSoundFile::GetModSpecifications(modtype).fileExtension);
+	return CSoundFile::GetModSpecifications(modtype).GetFileExtension();
 }
 
 MODTYPE SettingsStringToModType(const mpt::ustring &str)
 {
-	return CModSpecifications::ExtensionToType(mpt::ToCharset(mpt::Charset::UTF8, str));
+	return CModSpecifications::ExtensionToType(str);
 }
 
 

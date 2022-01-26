@@ -1628,7 +1628,7 @@ void CSoundFile::ChangeModTypeTo(const MODTYPE newType, bool adjust)
 	Order.OnModTypeChanged(oldType);
 	Patterns.OnModTypeChanged(oldType);
 
-	m_modFormat.type = mpt::ToUnicode(mpt::Charset::UTF8, GetModSpecifications().fileExtension);
+	m_modFormat.type = GetModSpecifications().GetFileExtension();
 }
 
 #endif // MODPLUG_TRACKER

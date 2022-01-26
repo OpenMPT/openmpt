@@ -331,8 +331,8 @@ bool CModDoc::OnSaveDocument(const mpt::PathString &filename, const bool setPath
 					{
 						if(showWarning)
 						{
-							AddToLog(LogWarning, mpt::ToUnicode(mpt::Charset::ASCII, MPT_AFORMAT("Some imported Compatibility Settings that are not supported by the {} format have been disabled. Verify that the module still sounds as intended.")
-								(mpt::ToUpperCaseAscii(m_SndFile.GetModSpecifications().fileExtension))));
+							AddToLog(LogWarning, MPT_UFORMAT("Some imported Compatibility Settings that are not supported by the {} format have been disabled. Verify that the module still sounds as intended.")
+								(m_SndFile.GetModSpecifications().GetFileExtensionUpper()));
 							showWarning = false;
 						}
 						m_SndFile.m_playBehaviour.reset(i);
@@ -464,7 +464,7 @@ void CModDoc::DeleteContents()
 BOOL CModDoc::DoSave(const mpt::PathString &filename, bool setPath)
 {
 	const mpt::PathString docFileName = GetPathNameMpt();
-	const std::string defaultExtension = m_SndFile.GetModSpecifications().fileExtension;
+	const mpt::ustring defaultExtension = m_SndFile.GetModSpecifications().GetFileExtension();
 
 	switch(m_SndFile.GetBestSaveFormat())
 	{
@@ -486,7 +486,7 @@ BOOL CModDoc::DoSave(const mpt::PathString &filename, bool setPath)
 		return FALSE;
 	}
 
-	mpt::PathString ext = P_(".") + mpt::PathString::FromUTF8(defaultExtension);
+	mpt::PathString ext = P_(".") + mpt::PathString::FromUnicode(defaultExtension);
 
 	mpt::PathString saveFileName;
 
@@ -2045,7 +2045,7 @@ void CModDoc::OnFileCompatibilitySave()
 			return;
 	}
 
-	const std::string ext = m_SndFile.GetModSpecifications().fileExtension;
+	const mpt::ustring ext = m_SndFile.GetModSpecifications().GetFileExtension();
 
 	mpt::PathString filename;
 
@@ -2062,7 +2062,7 @@ void CModDoc::OnFileCompatibilitySave()
 			filename += P_(".compat.");
 		else
 			filename += P_(".");
-		filename += mpt::PathString::FromUTF8(ext);
+		filename += mpt::PathString::FromUnicode(ext);
 	}
 
 	FileDialog dlg = SaveFileDialog()
@@ -2834,7 +2834,7 @@ void CModDoc::ChangeFileExtension(MODTYPE nNewType)
 			newPath += fname;
 		}
 
-		newPath += P_(".") + mpt::PathString::FromUTF8(CSoundFile::GetModSpecifications(nNewType).fileExtension);
+		newPath += P_(".") + mpt::PathString::FromUnicode(CSoundFile::GetModSpecifications(nNewType).GetFileExtension());
 
 		// Forcing save dialog to appear after extension change - otherwise unnotified file overwriting may occur.
 		m_ShowSavedialog = true;
@@ -3087,14 +3087,14 @@ void CModDoc::OnSaveTemplateModule()
 	for(size_t i = 0; i < 1000; ++i)
 	{
 		sName += P_("newTemplate") + mpt::PathString::FromUnicode(mpt::ufmt::val(i));
-		sName += P_(".") + mpt::PathString::FromUTF8(m_SndFile.GetModSpecifications().fileExtension);
+		sName += P_(".") + mpt::PathString::FromUnicode(m_SndFile.GetModSpecifications().GetFileExtension());
 		if (!(templateFolder + sName).FileOrDirectoryExists())
 			break;
 	}
 
 	// Ask file name from user.
 	FileDialog dlg = SaveFileDialog()
-		.DefaultExtension(m_SndFile.GetModSpecifications().fileExtension)
+		.DefaultExtension(m_SndFile.GetModSpecifications().GetFileExtension())
 		.DefaultFilename(sName)
 		.ExtensionFilter(ModTypeToFilter(m_SndFile))
 		.WorkingDirectory(templateFolder);

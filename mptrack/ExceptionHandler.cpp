@@ -251,7 +251,7 @@ int DebugReporter::RescueFiles()
 			filename += P_("_");
 			filename += mpt::PathString::FromCString(modDoc->GetTitle()).SanitizeComponent();
 			filename += P_(".");
-			filename += mpt::PathString::FromUTF8(modDoc->GetSoundFile().GetModSpecifications().fileExtension);
+			filename += mpt::PathString::FromUnicode(modDoc->GetSoundFile().GetModSpecifications().GetFileExtension());
 
 			try
 			{

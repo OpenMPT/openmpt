@@ -441,6 +441,12 @@ MODTYPE CModSpecifications::ExtensionToType(std::string ext)
 }
 
 
+MODTYPE CModSpecifications::ExtensionToType(mpt::ustring ext)
+{
+	return ExtensionToType(mpt::ToCharset(mpt::Charset::ASCII, ext));
+}
+
+
 bool CModSpecifications::HasNote(ModCommand::NOTE note) const
 {
 	if(note >= noteMin && note <= noteMax)

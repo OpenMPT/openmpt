@@ -134,7 +134,7 @@ mpt::PathString CAutoSaver::BuildFileName(const CModDoc &modDoc) const
 	mpt::PathString name = GetBasePath(modDoc, true) + GetBaseName(modDoc);
 	const CString timeStamp = CTime::GetCurrentTime().Format(_T(".AutoSave.%Y%m%d.%H%M%S."));
 	name += mpt::PathString::FromCString(timeStamp);  //append backtup tag + timestamp
-	name += mpt::PathString::FromUTF8(modDoc.GetSoundFile().GetModSpecifications().fileExtension);
+	name += mpt::PathString::FromUnicode(modDoc.GetSoundFile().GetModSpecifications().GetFileExtension());
 	return name;
 }
 
