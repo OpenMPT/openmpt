@@ -371,6 +371,11 @@ void MIDIMacroConfig::Sanitize()
 	{
 		macro[MACRO_LENGTH - 1] = '\0';
 		std::fill(std::find(std::begin(macro), std::end(macro), '\0'), std::end(macro), '\0');
+		for(auto &c : macro)
+		{
+			if(c && (c < 32 || c >= 127))
+				c = ' ';
+		}
 	}
 }
 
