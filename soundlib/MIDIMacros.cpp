@@ -160,18 +160,13 @@ void MIDIMacroConfig::CreateFixedMacro(std::array<Macro, kZxxMacros> fixedMacros
 }
 
 
-#ifdef MODPLUG_TRACKER
-
 bool MIDIMacroConfig::operator== (const MIDIMacroConfig &other) const
 {
-	for(auto left = begin(), right = other.begin(); left != end(); left++, right++)
-	{
-		if(*left != *right)
-			return false;
-	}
-	return true;
+	return std::equal(begin(), end(), other.begin());
 }
 
+
+#ifdef MODPLUG_TRACKER
 
 // Returns macro description including plugin parameter / MIDI CC information
 CString MIDIMacroConfig::GetParameteredMacroName(uint32 macroIndex, IMixPlugin *plugin) const
