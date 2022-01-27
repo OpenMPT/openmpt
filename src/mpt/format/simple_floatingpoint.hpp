@@ -183,7 +183,7 @@ inline void format_simple_floatingpoint_apply_stream_format(Tostream & o, const 
 	}
 	if (f & format_simple_base::FillOff) { /* nothing */
 	} else if (f & format_simple_base::FillNul) {
-		o << std::setw(width) << std::setfill(typename Tostream::char_type('0'));
+		o << std::setw(width) << std::setfill(mpt::char_constants<typename Tostream::char_type>::number0);
 	}
 	if (precision != -1) {
 		o << std::setprecision(precision);
