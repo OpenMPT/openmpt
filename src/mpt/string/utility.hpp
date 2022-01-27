@@ -30,6 +30,7 @@ struct char_constants { };
 
 template <>
 struct char_constants<char> {
+	static inline constexpr char null = '\0';
 	static inline constexpr char tab = '\t';
 	static inline constexpr char lf = '\n';
 	static inline constexpr char cr = '\r';
@@ -49,6 +50,7 @@ struct char_constants<char> {
 #if !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
 template <>
 struct char_constants<wchar_t> {
+	static inline constexpr wchar_t null = L'\0';
 	static inline constexpr wchar_t tab = L'\t';
 	static inline constexpr wchar_t lf = L'\n';
 	static inline constexpr wchar_t cr = L'\r';
@@ -69,6 +71,7 @@ struct char_constants<wchar_t> {
 #if MPT_CXX_AT_LEAST(20)
 template <>
 struct char_constants<char8_t> {
+	static inline constexpr char8_t null = u8'\0';
 	static inline constexpr char8_t tab = u8'\t';
 	static inline constexpr char8_t lf = u8'\n';
 	static inline constexpr char8_t cr = u8'\r';
@@ -88,6 +91,7 @@ struct char_constants<char8_t> {
 
 template <>
 struct char_constants<char16_t> {
+	static inline constexpr char16_t null = u'\0';
 	static inline constexpr char16_t tab = u'\t';
 	static inline constexpr char16_t lf = u'\n';
 	static inline constexpr char16_t cr = u'\r';
@@ -106,6 +110,7 @@ struct char_constants<char16_t> {
 
 template <>
 struct char_constants<char32_t> {
+	static inline constexpr char32_t null = U'\0';
 	static inline constexpr char32_t tab = U'\t';
 	static inline constexpr char32_t lf = U'\n';
 	static inline constexpr char32_t cr = U'\r';
