@@ -1224,7 +1224,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 #ifndef NO_PLUGINS
 			// If there were any PC events or MIDI macros updating plugin parameters, update plugin parameters to their latest value.
 			std::bitset<MAX_MIXPLUGINS> plugSetProgram;
-			for(const auto [plugParam, value] : midiMacroEvaluationResults->pluginParameter)
+			for(const auto &[plugParam, value] : midiMacroEvaluationResults->pluginParameter)
 			{
 				PLUGINDEX plug = plugParam.first;
 				IMixPlugin *plugin = m_MixPlugins[plug].pMixPlugin;
@@ -1250,7 +1250,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				}
 			}
 			// Do the same for dry/wet ratios
-			for(const auto [plug, dryWetRatio] : midiMacroEvaluationResults->pluginDryWetRatio)
+			for(const auto &[plug, dryWetRatio] : midiMacroEvaluationResults->pluginDryWetRatio)
 			{
 				m_MixPlugins[plug].fDryRatio = dryWetRatio;
 			}
