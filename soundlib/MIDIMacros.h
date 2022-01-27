@@ -180,7 +180,7 @@ public:
 	std::string CreateParameteredMacro(ParameteredMacro macroType, int subType = 0) const;
 
 protected:
-	void CreateFixedMacro(std::array<Macro, kZxxMacros> fixedMacros, FixedMacro macroType) const;
+	void CreateFixedMacro(std::array<Macro, kZxxMacros> &fixedMacros, FixedMacro macroType) const;
 public:
 	void CreateFixedMacro(FixedMacro macroType)
 	{

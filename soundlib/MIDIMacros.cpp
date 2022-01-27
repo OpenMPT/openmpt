@@ -53,19 +53,10 @@ FixedMacro MIDIMacroConfig::GetFixedMacroType() const
 		if(zxx != kZxxCustom)
 		{
 			// Prepare macro pattern to compare
-			decltype(Zxx) fixedMacros;
+			decltype(Zxx) fixedMacros{};
 			CreateFixedMacro(fixedMacros, zxx);
-
-			bool found = true;
-			for(uint32 j = 0; j < kZxxMacros; j++)
-			{
-				if(fixedMacros[j] != Zxx[j])
-				{
-					found = false;
-					break;
-				}
-			}
-			if(found) return zxx;
+			if(fixedMacros == Zxx)
+				return zxx;
 		}
 	}
 	return kZxxCustom; // Custom setup
@@ -104,7 +95,7 @@ std::string MIDIMacroConfig::CreateParameteredMacro(ParameteredMacro macroType, 
 
 
 // Create Zxx (Z80 - ZFF) from preset
-void MIDIMacroConfig::CreateFixedMacro(std::array<Macro, kZxxMacros> fixedMacros, FixedMacro macroType) const
+void MIDIMacroConfig::CreateFixedMacro(std::array<Macro, kZxxMacros> &fixedMacros, FixedMacro macroType) const
 {
 	for(uint32 i = 0; i < kZxxMacros; i++)
 	{
