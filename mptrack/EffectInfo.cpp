@@ -592,7 +592,7 @@ bool EffectInfo::GetEffectNameEx(CString &pszName, const ModCommand &m, uint32 p
 
 	case CMD_OFFSET:
 		if (param)
-			pszName.Format(_T("Set Offset to %s"), mpt::cfmt::dec(3, ',', param).GetString());
+			pszName.Format(_T("Set Offset to %s"), mpt::cfmt::dec(3, _T(","), param).GetString());
 		else
 			s = _T("continue");
 		break;

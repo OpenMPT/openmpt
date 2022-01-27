@@ -111,32 +111,32 @@ MPT_TEST_GROUP_INLINE("mpt/format/simple")
 	MPT_TEST_EXPECT_EQUAL(mpt::format<std::string>::fix(234.2, 1), "234.2");
 	MPT_TEST_EXPECT_EQUAL(mpt::format<std::string>::fix(2342.0, 1), "2342.0");
 
-	MPT_TEST_EXPECT_EQUAL(mpt::format<std::string>::dec(2, ';', 2345678), std::string("2;34;56;78"));
-	MPT_TEST_EXPECT_EQUAL(mpt::format<std::string>::dec(2, ';', 12345678), std::string("12;34;56;78"));
-	MPT_TEST_EXPECT_EQUAL(mpt::format<std::string>::hex(3, ':', 0xa2345678), std::string("a2:345:678"));
+	MPT_TEST_EXPECT_EQUAL(mpt::format<std::string>::dec(2, ";", 2345678), std::string("2;34;56;78"));
+	MPT_TEST_EXPECT_EQUAL(mpt::format<std::string>::dec(2, ";", 12345678), std::string("12;34;56;78"));
+	MPT_TEST_EXPECT_EQUAL(mpt::format<std::string>::hex(3, ":", 0xa2345678), std::string("a2:345:678"));
 
-	MPT_TEST_EXPECT_EQUAL(mpt::format<mpt::ustring>::dec(2, ';', 12345678), MPT_USTRING("12;34;56;78"));
-	MPT_TEST_EXPECT_EQUAL(mpt::format<mpt::ustring>::hex(3, ':', 0xa2345678), MPT_USTRING("a2:345:678"));
+	MPT_TEST_EXPECT_EQUAL(mpt::format<mpt::ustring>::dec(2, MPT_USTRING(";"), 12345678), MPT_USTRING("12;34;56;78"));
+	MPT_TEST_EXPECT_EQUAL(mpt::format<mpt::ustring>::hex(3, MPT_USTRING(":"), 0xa2345678), MPT_USTRING("a2:345:678"));
 
-	MPT_TEST_EXPECT_EQUAL(mpt::format<mpt::ustring>::HEX0<7>(3, ':', 0xa2345678), MPT_USTRING("A2:345:678"));
-	MPT_TEST_EXPECT_EQUAL(mpt::format<mpt::ustring>::HEX0<8>(3, ':', 0xa2345678), MPT_USTRING("A2:345:678"));
-	MPT_TEST_EXPECT_EQUAL(mpt::format<mpt::ustring>::HEX0<9>(3, ':', 0xa2345678), MPT_USTRING("0A2:345:678"));
-	MPT_TEST_EXPECT_EQUAL(mpt::format<mpt::ustring>::HEX0<10>(3, ':', 0xa2345678), MPT_USTRING("0:0A2:345:678"));
-	MPT_TEST_EXPECT_EQUAL(mpt::format<mpt::ustring>::HEX0<11>(3, ':', 0xa2345678), MPT_USTRING("00:0A2:345:678"));
-	MPT_TEST_EXPECT_EQUAL(mpt::format<mpt::ustring>::HEX0<12>(3, ':', 0xa2345678), MPT_USTRING("000:0A2:345:678"));
-	MPT_TEST_EXPECT_EQUAL(mpt::format<mpt::ustring>::HEX0<7>(3, ':', -0x12345678), MPT_USTRING("-12:345:678"));
-	MPT_TEST_EXPECT_EQUAL(mpt::format<mpt::ustring>::HEX0<8>(3, ':', -0x12345678), MPT_USTRING("-12:345:678"));
-	MPT_TEST_EXPECT_EQUAL(mpt::format<mpt::ustring>::HEX0<9>(3, ':', -0x12345678), MPT_USTRING("-012:345:678"));
-	MPT_TEST_EXPECT_EQUAL(mpt::format<mpt::ustring>::HEX0<10>(3, ':', -0x12345678), MPT_USTRING("-0:012:345:678"));
-	MPT_TEST_EXPECT_EQUAL(mpt::format<mpt::ustring>::HEX0<11>(3, ':', -0x12345678), MPT_USTRING("-00:012:345:678"));
-	MPT_TEST_EXPECT_EQUAL(mpt::format<mpt::ustring>::HEX0<12>(3, ':', -0x12345678), MPT_USTRING("-000:012:345:678"));
+	MPT_TEST_EXPECT_EQUAL(mpt::format<mpt::ustring>::HEX0<7>(3, MPT_USTRING(":"), 0xa2345678), MPT_USTRING("A2:345:678"));
+	MPT_TEST_EXPECT_EQUAL(mpt::format<mpt::ustring>::HEX0<8>(3, MPT_USTRING(":"), 0xa2345678), MPT_USTRING("A2:345:678"));
+	MPT_TEST_EXPECT_EQUAL(mpt::format<mpt::ustring>::HEX0<9>(3, MPT_USTRING(":"), 0xa2345678), MPT_USTRING("0A2:345:678"));
+	MPT_TEST_EXPECT_EQUAL(mpt::format<mpt::ustring>::HEX0<10>(3, MPT_USTRING(":"), 0xa2345678), MPT_USTRING("0:0A2:345:678"));
+	MPT_TEST_EXPECT_EQUAL(mpt::format<mpt::ustring>::HEX0<11>(3, MPT_USTRING(":"), 0xa2345678), MPT_USTRING("00:0A2:345:678"));
+	MPT_TEST_EXPECT_EQUAL(mpt::format<mpt::ustring>::HEX0<12>(3, MPT_USTRING(":"), 0xa2345678), MPT_USTRING("000:0A2:345:678"));
+	MPT_TEST_EXPECT_EQUAL(mpt::format<mpt::ustring>::HEX0<7>(3, MPT_USTRING(":"), -0x12345678), MPT_USTRING("-12:345:678"));
+	MPT_TEST_EXPECT_EQUAL(mpt::format<mpt::ustring>::HEX0<8>(3, MPT_USTRING(":"), -0x12345678), MPT_USTRING("-12:345:678"));
+	MPT_TEST_EXPECT_EQUAL(mpt::format<mpt::ustring>::HEX0<9>(3, MPT_USTRING(":"), -0x12345678), MPT_USTRING("-012:345:678"));
+	MPT_TEST_EXPECT_EQUAL(mpt::format<mpt::ustring>::HEX0<10>(3, MPT_USTRING(":"), -0x12345678), MPT_USTRING("-0:012:345:678"));
+	MPT_TEST_EXPECT_EQUAL(mpt::format<mpt::ustring>::HEX0<11>(3, MPT_USTRING(":"), -0x12345678), MPT_USTRING("-00:012:345:678"));
+	MPT_TEST_EXPECT_EQUAL(mpt::format<mpt::ustring>::HEX0<12>(3, MPT_USTRING(":"), -0x12345678), MPT_USTRING("-000:012:345:678"));
 
-	MPT_TEST_EXPECT_EQUAL(mpt::format<mpt::ustring>::HEX0<5>(3, ':', 0x345678), MPT_USTRING("345:678"));
-	MPT_TEST_EXPECT_EQUAL(mpt::format<mpt::ustring>::HEX0<6>(3, ':', 0x345678), MPT_USTRING("345:678"));
-	MPT_TEST_EXPECT_EQUAL(mpt::format<mpt::ustring>::HEX0<7>(3, ':', 0x345678), MPT_USTRING("0:345:678"));
-	MPT_TEST_EXPECT_EQUAL(mpt::format<mpt::ustring>::HEX0<5>(3, ':', -0x345678), MPT_USTRING("-345:678"));
-	MPT_TEST_EXPECT_EQUAL(mpt::format<mpt::ustring>::HEX0<6>(3, ':', -0x345678), MPT_USTRING("-345:678"));
-	MPT_TEST_EXPECT_EQUAL(mpt::format<mpt::ustring>::HEX0<7>(3, ':', -0x345678), MPT_USTRING("-0:345:678"));
+	MPT_TEST_EXPECT_EQUAL(mpt::format<mpt::ustring>::HEX0<5>(3, MPT_USTRING(":"), 0x345678), MPT_USTRING("345:678"));
+	MPT_TEST_EXPECT_EQUAL(mpt::format<mpt::ustring>::HEX0<6>(3, MPT_USTRING(":"), 0x345678), MPT_USTRING("345:678"));
+	MPT_TEST_EXPECT_EQUAL(mpt::format<mpt::ustring>::HEX0<7>(3, MPT_USTRING(":"), 0x345678), MPT_USTRING("0:345:678"));
+	MPT_TEST_EXPECT_EQUAL(mpt::format<mpt::ustring>::HEX0<5>(3, MPT_USTRING(":"), -0x345678), MPT_USTRING("-345:678"));
+	MPT_TEST_EXPECT_EQUAL(mpt::format<mpt::ustring>::HEX0<6>(3, MPT_USTRING(":"), -0x345678), MPT_USTRING("-345:678"));
+	MPT_TEST_EXPECT_EQUAL(mpt::format<mpt::ustring>::HEX0<7>(3, MPT_USTRING(":"), -0x345678), MPT_USTRING("-0:345:678"));
 
 	MPT_TEST_EXPECT_EQUAL(mpt::format<std::string>::left(3, "a"), "a  ");
 	MPT_TEST_EXPECT_EQUAL(mpt::format<std::string>::right(3, "a"), "  a");
@@ -155,32 +155,32 @@ MPT_TEST_GROUP_INLINE("mpt/format/simple")
 	MPT_TEST_EXPECT_EQUAL(mpt::format<CString>::fix(234.2, 1), TEXT("234.2"));
 	MPT_TEST_EXPECT_EQUAL(mpt::format<CString>::fix(2342.0, 1), TEXT("2342.0"));
 
-	MPT_TEST_EXPECT_EQUAL(mpt::format<CString>::dec(2, TEXT(';'), 2345678), CString(TEXT("2;34;56;78")));
-	MPT_TEST_EXPECT_EQUAL(mpt::format<CString>::dec(2, TEXT(';'), 12345678), CString(TEXT("12;34;56;78")));
-	MPT_TEST_EXPECT_EQUAL(mpt::format<CString>::hex(3, TEXT(':'), 0xa2345678), CString(TEXT("a2:345:678")));
+	MPT_TEST_EXPECT_EQUAL(mpt::format<CString>::dec(2, TEXT(";"), 2345678), CString(TEXT("2;34;56;78")));
+	MPT_TEST_EXPECT_EQUAL(mpt::format<CString>::dec(2, TEXT(";"), 12345678), CString(TEXT("12;34;56;78")));
+	MPT_TEST_EXPECT_EQUAL(mpt::format<CString>::hex(3, TEXT(":"), 0xa2345678), CString(TEXT("a2:345:678")));
 
-	MPT_TEST_EXPECT_EQUAL(mpt::format<CString>::dec(2, TEXT(';'), 12345678), CString(TEXT("12;34;56;78")));
-	MPT_TEST_EXPECT_EQUAL(mpt::format<CString>::hex(3, TEXT(':'), 0xa2345678), CString(TEXT("a2:345:678")));
+	MPT_TEST_EXPECT_EQUAL(mpt::format<CString>::dec(2, TEXT(";"), 12345678), CString(TEXT("12;34;56;78")));
+	MPT_TEST_EXPECT_EQUAL(mpt::format<CString>::hex(3, TEXT(":"), 0xa2345678), CString(TEXT("a2:345:678")));
 
-	MPT_TEST_EXPECT_EQUAL(mpt::format<CString>::HEX0<7>(3, TEXT(':'), 0xa2345678), CString(TEXT("A2:345:678")));
-	MPT_TEST_EXPECT_EQUAL(mpt::format<CString>::HEX0<8>(3, TEXT(':'), 0xa2345678), CString(TEXT("A2:345:678")));
-	MPT_TEST_EXPECT_EQUAL(mpt::format<CString>::HEX0<9>(3, TEXT(':'), 0xa2345678), CString(TEXT("0A2:345:678")));
-	MPT_TEST_EXPECT_EQUAL(mpt::format<CString>::HEX0<10>(3, TEXT(':'), 0xa2345678), CString(TEXT("0:0A2:345:678")));
-	MPT_TEST_EXPECT_EQUAL(mpt::format<CString>::HEX0<11>(3, TEXT(':'), 0xa2345678), CString(TEXT("00:0A2:345:678")));
-	MPT_TEST_EXPECT_EQUAL(mpt::format<CString>::HEX0<12>(3, TEXT(':'), 0xa2345678), CString(TEXT("000:0A2:345:678")));
-	MPT_TEST_EXPECT_EQUAL(mpt::format<CString>::HEX0<7>(3, TEXT(':'), -0x12345678), CString(TEXT("-12:345:678")));
-	MPT_TEST_EXPECT_EQUAL(mpt::format<CString>::HEX0<8>(3, TEXT(':'), -0x12345678), CString(TEXT("-12:345:678")));
-	MPT_TEST_EXPECT_EQUAL(mpt::format<CString>::HEX0<9>(3, TEXT(':'), -0x12345678), CString(TEXT("-012:345:678")));
-	MPT_TEST_EXPECT_EQUAL(mpt::format<CString>::HEX0<10>(3, TEXT(':'), -0x12345678), CString(TEXT("-0:012:345:678")));
-	MPT_TEST_EXPECT_EQUAL(mpt::format<CString>::HEX0<11>(3, TEXT(':'), -0x12345678), CString(TEXT("-00:012:345:678")));
-	MPT_TEST_EXPECT_EQUAL(mpt::format<CString>::HEX0<12>(3, TEXT(':'), -0x12345678), CString(TEXT("-000:012:345:678")));
+	MPT_TEST_EXPECT_EQUAL(mpt::format<CString>::HEX0<7>(3, TEXT(":"), 0xa2345678), CString(TEXT("A2:345:678")));
+	MPT_TEST_EXPECT_EQUAL(mpt::format<CString>::HEX0<8>(3, TEXT(":"), 0xa2345678), CString(TEXT("A2:345:678")));
+	MPT_TEST_EXPECT_EQUAL(mpt::format<CString>::HEX0<9>(3, TEXT(":"), 0xa2345678), CString(TEXT("0A2:345:678")));
+	MPT_TEST_EXPECT_EQUAL(mpt::format<CString>::HEX0<10>(3, TEXT(":"), 0xa2345678), CString(TEXT("0:0A2:345:678")));
+	MPT_TEST_EXPECT_EQUAL(mpt::format<CString>::HEX0<11>(3, TEXT(":"), 0xa2345678), CString(TEXT("00:0A2:345:678")));
+	MPT_TEST_EXPECT_EQUAL(mpt::format<CString>::HEX0<12>(3, TEXT(":"), 0xa2345678), CString(TEXT("000:0A2:345:678")));
+	MPT_TEST_EXPECT_EQUAL(mpt::format<CString>::HEX0<7>(3, TEXT(":"), -0x12345678), CString(TEXT("-12:345:678")));
+	MPT_TEST_EXPECT_EQUAL(mpt::format<CString>::HEX0<8>(3, TEXT(":"), -0x12345678), CString(TEXT("-12:345:678")));
+	MPT_TEST_EXPECT_EQUAL(mpt::format<CString>::HEX0<9>(3, TEXT(":"), -0x12345678), CString(TEXT("-012:345:678")));
+	MPT_TEST_EXPECT_EQUAL(mpt::format<CString>::HEX0<10>(3, TEXT(":"), -0x12345678), CString(TEXT("-0:012:345:678")));
+	MPT_TEST_EXPECT_EQUAL(mpt::format<CString>::HEX0<11>(3, TEXT(":"), -0x12345678), CString(TEXT("-00:012:345:678")));
+	MPT_TEST_EXPECT_EQUAL(mpt::format<CString>::HEX0<12>(3, TEXT(":"), -0x12345678), CString(TEXT("-000:012:345:678")));
 
-	MPT_TEST_EXPECT_EQUAL(mpt::format<CString>::HEX0<5>(3, TEXT(':'), 0x345678), CString(TEXT("345:678")));
-	MPT_TEST_EXPECT_EQUAL(mpt::format<CString>::HEX0<6>(3, TEXT(':'), 0x345678), CString(TEXT("345:678")));
-	MPT_TEST_EXPECT_EQUAL(mpt::format<CString>::HEX0<7>(3, TEXT(':'), 0x345678), CString(TEXT("0:345:678")));
-	MPT_TEST_EXPECT_EQUAL(mpt::format<CString>::HEX0<5>(3, TEXT(':'), -0x345678), CString(TEXT("-345:678")));
-	MPT_TEST_EXPECT_EQUAL(mpt::format<CString>::HEX0<6>(3, TEXT(':'), -0x345678), CString(TEXT("-345:678")));
-	MPT_TEST_EXPECT_EQUAL(mpt::format<CString>::HEX0<7>(3, TEXT(':'), -0x345678), CString(TEXT("-0:345:678")));
+	MPT_TEST_EXPECT_EQUAL(mpt::format<CString>::HEX0<5>(3, TEXT(":"), 0x345678), CString(TEXT("345:678")));
+	MPT_TEST_EXPECT_EQUAL(mpt::format<CString>::HEX0<6>(3, TEXT(":"), 0x345678), CString(TEXT("345:678")));
+	MPT_TEST_EXPECT_EQUAL(mpt::format<CString>::HEX0<7>(3, TEXT(":"), 0x345678), CString(TEXT("0:345:678")));
+	MPT_TEST_EXPECT_EQUAL(mpt::format<CString>::HEX0<5>(3, TEXT(":"), -0x345678), CString(TEXT("-345:678")));
+	MPT_TEST_EXPECT_EQUAL(mpt::format<CString>::HEX0<6>(3, TEXT(":"), -0x345678), CString(TEXT("-345:678")));
+	MPT_TEST_EXPECT_EQUAL(mpt::format<CString>::HEX0<7>(3, TEXT(":"), -0x345678), CString(TEXT("-0:345:678")));
 
 	MPT_TEST_EXPECT_EQUAL(mpt::format<CString>::left(3, TEXT("a")), TEXT("a  "));
 	MPT_TEST_EXPECT_EQUAL(mpt::format<CString>::right(3, TEXT("a")), TEXT("  a"));

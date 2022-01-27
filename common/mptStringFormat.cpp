@@ -89,51 +89,51 @@ std::wstring ToWString(const long double & x) { return mpt::format_value_default
 
 
 
-std::string FormatValA(const bool & x, const FormatSpec & f) { return mpt::format_simple<std::string>(x, f); }
-std::string FormatValA(const signed char & x, const FormatSpec & f) { return mpt::format_simple<std::string>(x, f); }
-std::string FormatValA(const unsigned char & x, const FormatSpec & f) { return mpt::format_simple<std::string>(x, f); }
-std::string FormatValA(const signed short & x, const FormatSpec & f) { return mpt::format_simple<std::string>(x, f); }
-std::string FormatValA(const unsigned short & x, const FormatSpec & f) { return mpt::format_simple<std::string>(x, f); }
-std::string FormatValA(const signed int & x, const FormatSpec & f) { return mpt::format_simple<std::string>(x, f); }
-std::string FormatValA(const unsigned int & x, const FormatSpec & f) { return mpt::format_simple<std::string>(x, f); }
-std::string FormatValA(const signed long & x, const FormatSpec & f) { return mpt::format_simple<std::string>(x, f); }
-std::string FormatValA(const unsigned long & x, const FormatSpec & f) { return mpt::format_simple<std::string>(x, f); }
-std::string FormatValA(const signed long long & x, const FormatSpec & f) { return mpt::format_simple<std::string>(x, f); }
-std::string FormatValA(const unsigned long long & x, const FormatSpec & f) { return mpt::format_simple<std::string>(x, f); }
-std::string FormatValA(const float & x, const FormatSpec & f) { return mpt::format_simple<std::string>(x, f); }
-std::string FormatValA(const double & x, const FormatSpec & f) { return mpt::format_simple<std::string>(x, f); }
-std::string FormatValA(const long double & x, const FormatSpec & f) { return mpt::format_simple<std::string>(x, f); }
+std::string FormatValA(const bool & x, const FormatSpec<std::string> & f) { return mpt::format_simple<std::string>(x, f); }
+std::string FormatValA(const signed char & x, const FormatSpec<std::string> & f) { return mpt::format_simple<std::string>(x, f); }
+std::string FormatValA(const unsigned char & x, const FormatSpec<std::string> & f) { return mpt::format_simple<std::string>(x, f); }
+std::string FormatValA(const signed short & x, const FormatSpec<std::string> & f) { return mpt::format_simple<std::string>(x, f); }
+std::string FormatValA(const unsigned short & x, const FormatSpec<std::string> & f) { return mpt::format_simple<std::string>(x, f); }
+std::string FormatValA(const signed int & x, const FormatSpec<std::string> & f) { return mpt::format_simple<std::string>(x, f); }
+std::string FormatValA(const unsigned int & x, const FormatSpec<std::string> & f) { return mpt::format_simple<std::string>(x, f); }
+std::string FormatValA(const signed long & x, const FormatSpec<std::string> & f) { return mpt::format_simple<std::string>(x, f); }
+std::string FormatValA(const unsigned long & x, const FormatSpec<std::string> & f) { return mpt::format_simple<std::string>(x, f); }
+std::string FormatValA(const signed long long & x, const FormatSpec<std::string> & f) { return mpt::format_simple<std::string>(x, f); }
+std::string FormatValA(const unsigned long long & x, const FormatSpec<std::string> & f) { return mpt::format_simple<std::string>(x, f); }
+std::string FormatValA(const float & x, const FormatSpec<std::string> & f) { return mpt::format_simple<std::string>(x, f); }
+std::string FormatValA(const double & x, const FormatSpec<std::string> & f) { return mpt::format_simple<std::string>(x, f); }
+std::string FormatValA(const long double & x, const FormatSpec<std::string> & f) { return mpt::format_simple<std::string>(x, f); }
 
-mpt::ustring FormatValU(const bool & x, const FormatSpec & f) { return mpt::format_simple<mpt::ustring>(x, f); }
-mpt::ustring FormatValU(const signed char & x, const FormatSpec & f) { return mpt::format_simple<mpt::ustring>(x, f); }
-mpt::ustring FormatValU(const unsigned char & x, const FormatSpec & f) { return mpt::format_simple<mpt::ustring>(x, f); }
-mpt::ustring FormatValU(const signed short & x, const FormatSpec & f) { return mpt::format_simple<mpt::ustring>(x, f); }
-mpt::ustring FormatValU(const unsigned short & x, const FormatSpec & f) { return mpt::format_simple<mpt::ustring>(x, f); }
-mpt::ustring FormatValU(const signed int & x, const FormatSpec & f) { return mpt::format_simple<mpt::ustring>(x, f); }
-mpt::ustring FormatValU(const unsigned int & x, const FormatSpec & f) { return mpt::format_simple<mpt::ustring>(x, f); }
-mpt::ustring FormatValU(const signed long & x, const FormatSpec & f) { return mpt::format_simple<mpt::ustring>(x, f); }
-mpt::ustring FormatValU(const unsigned long & x, const FormatSpec & f) { return mpt::format_simple<mpt::ustring>(x, f); }
-mpt::ustring FormatValU(const signed long long & x, const FormatSpec & f) { return mpt::format_simple<mpt::ustring>(x, f); }
-mpt::ustring FormatValU(const unsigned long long & x, const FormatSpec & f) { return mpt::format_simple<mpt::ustring>(x, f); }
-mpt::ustring FormatValU(const float & x, const FormatSpec & f) { return mpt::format_simple<mpt::ustring>(x, f); }
-mpt::ustring FormatValU(const double & x, const FormatSpec & f) { return mpt::format_simple<mpt::ustring>(x, f); }
-mpt::ustring FormatValU(const long double & x, const FormatSpec & f) { return mpt::format_simple<mpt::ustring>(x, f); }
+mpt::ustring FormatValU(const bool & x, const FormatSpec<mpt::ustring> & f) { return mpt::format_simple<mpt::ustring>(x, f); }
+mpt::ustring FormatValU(const signed char & x, const FormatSpec<mpt::ustring> & f) { return mpt::format_simple<mpt::ustring>(x, f); }
+mpt::ustring FormatValU(const unsigned char & x, const FormatSpec<mpt::ustring> & f) { return mpt::format_simple<mpt::ustring>(x, f); }
+mpt::ustring FormatValU(const signed short & x, const FormatSpec<mpt::ustring> & f) { return mpt::format_simple<mpt::ustring>(x, f); }
+mpt::ustring FormatValU(const unsigned short & x, const FormatSpec<mpt::ustring> & f) { return mpt::format_simple<mpt::ustring>(x, f); }
+mpt::ustring FormatValU(const signed int & x, const FormatSpec<mpt::ustring> & f) { return mpt::format_simple<mpt::ustring>(x, f); }
+mpt::ustring FormatValU(const unsigned int & x, const FormatSpec<mpt::ustring> & f) { return mpt::format_simple<mpt::ustring>(x, f); }
+mpt::ustring FormatValU(const signed long & x, const FormatSpec<mpt::ustring> & f) { return mpt::format_simple<mpt::ustring>(x, f); }
+mpt::ustring FormatValU(const unsigned long & x, const FormatSpec<mpt::ustring> & f) { return mpt::format_simple<mpt::ustring>(x, f); }
+mpt::ustring FormatValU(const signed long long & x, const FormatSpec<mpt::ustring> & f) { return mpt::format_simple<mpt::ustring>(x, f); }
+mpt::ustring FormatValU(const unsigned long long & x, const FormatSpec<mpt::ustring> & f) { return mpt::format_simple<mpt::ustring>(x, f); }
+mpt::ustring FormatValU(const float & x, const FormatSpec<mpt::ustring> & f) { return mpt::format_simple<mpt::ustring>(x, f); }
+mpt::ustring FormatValU(const double & x, const FormatSpec<mpt::ustring> & f) { return mpt::format_simple<mpt::ustring>(x, f); }
+mpt::ustring FormatValU(const long double & x, const FormatSpec<mpt::ustring> & f) { return mpt::format_simple<mpt::ustring>(x, f); }
 
 #if MPT_WSTRING_FORMAT
-std::wstring FormatValW(const bool & x, const FormatSpec & f) { return mpt::format_simple<std::wstring>(x, f); }
-std::wstring FormatValW(const signed char & x, const FormatSpec & f) { return mpt::format_simple<std::wstring>(x, f); }
-std::wstring FormatValW(const unsigned char & x, const FormatSpec & f) { return mpt::format_simple<std::wstring>(x, f); }
-std::wstring FormatValW(const signed short & x, const FormatSpec & f) { return mpt::format_simple<std::wstring>(x, f); }
-std::wstring FormatValW(const unsigned short & x, const FormatSpec & f) { return mpt::format_simple<std::wstring>(x, f); }
-std::wstring FormatValW(const signed int & x, const FormatSpec & f) { return mpt::format_simple<std::wstring>(x, f); }
-std::wstring FormatValW(const unsigned int & x, const FormatSpec & f) { return mpt::format_simple<std::wstring>(x, f); }
-std::wstring FormatValW(const signed long & x, const FormatSpec & f) { return mpt::format_simple<std::wstring>(x, f); }
-std::wstring FormatValW(const unsigned long & x, const FormatSpec & f) { return mpt::format_simple<std::wstring>(x, f); }
-std::wstring FormatValW(const signed long long & x, const FormatSpec & f) { return mpt::format_simple<std::wstring>(x, f); }
-std::wstring FormatValW(const unsigned long long & x, const FormatSpec & f) { return mpt::format_simple<std::wstring>(x, f); }
-std::wstring FormatValW(const float & x, const FormatSpec & f) { return mpt::format_simple<std::wstring>(x, f); }
-std::wstring FormatValW(const double & x, const FormatSpec & f) { return mpt::format_simple<std::wstring>(x, f); }
-std::wstring FormatValW(const long double & x, const FormatSpec & f) { return mpt::format_simple<std::wstring>(x, f); }
+std::wstring FormatValW(const bool & x, const FormatSpec<std::wstring> & f) { return mpt::format_simple<std::wstring>(x, f); }
+std::wstring FormatValW(const signed char & x, const FormatSpec<std::wstring> & f) { return mpt::format_simple<std::wstring>(x, f); }
+std::wstring FormatValW(const unsigned char & x, const FormatSpec<std::wstring> & f) { return mpt::format_simple<std::wstring>(x, f); }
+std::wstring FormatValW(const signed short & x, const FormatSpec<std::wstring> & f) { return mpt::format_simple<std::wstring>(x, f); }
+std::wstring FormatValW(const unsigned short & x, const FormatSpec<std::wstring> & f) { return mpt::format_simple<std::wstring>(x, f); }
+std::wstring FormatValW(const signed int & x, const FormatSpec<std::wstring> & f) { return mpt::format_simple<std::wstring>(x, f); }
+std::wstring FormatValW(const unsigned int & x, const FormatSpec<std::wstring> & f) { return mpt::format_simple<std::wstring>(x, f); }
+std::wstring FormatValW(const signed long & x, const FormatSpec<std::wstring> & f) { return mpt::format_simple<std::wstring>(x, f); }
+std::wstring FormatValW(const unsigned long & x, const FormatSpec<std::wstring> & f) { return mpt::format_simple<std::wstring>(x, f); }
+std::wstring FormatValW(const signed long long & x, const FormatSpec<std::wstring> & f) { return mpt::format_simple<std::wstring>(x, f); }
+std::wstring FormatValW(const unsigned long long & x, const FormatSpec<std::wstring> & f) { return mpt::format_simple<std::wstring>(x, f); }
+std::wstring FormatValW(const float & x, const FormatSpec<std::wstring> & f) { return mpt::format_simple<std::wstring>(x, f); }
+std::wstring FormatValW(const double & x, const FormatSpec<std::wstring> & f) { return mpt::format_simple<std::wstring>(x, f); }
+std::wstring FormatValW(const long double & x, const FormatSpec<std::wstring> & f) { return mpt::format_simple<std::wstring>(x, f); }
 #endif
 
 

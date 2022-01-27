@@ -676,7 +676,7 @@ void CTuningDialog::OnBnClickedButtonExport()
 
 		failure = false;
 
-		auto numberFmt = mpt::FormatSpec().Dec().FillNul().Width(1 + static_cast<int>(std::log10(pTC->GetNumTunings())));
+		auto numberFmt = mpt::FormatSpec<mpt::ustring>().Dec().FillNul().Width(1 + static_cast<int>(std::log10(pTC->GetNumTunings())));
 
 		for(std::size_t i = 0; i < pTC->GetNumTunings(); ++i)
 		{

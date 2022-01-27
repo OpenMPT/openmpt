@@ -525,10 +525,10 @@ void CViewSample::SetCurSel(SmpLength nBegin, SmpLength nEnd)
 			{
 				const SmpLength selLength = m_dwEndSel - m_dwBeginSel;
 
-				mpt::ustring (*fmt)(unsigned int, char, const SmpLength &) = &mpt::ufmt::dec<SmpLength>;
+				mpt::ustring (*fmt)(unsigned int, mpt::ustring, const SmpLength &) = &mpt::ufmt::dec<SmpLength>;
 				if(TrackerSettings::Instance().cursorPositionInHex)
 					fmt = &mpt::ufmt::HEX<SmpLength>;
-				s = MPT_UFORMAT("[{}-{}] ({} sample{}, ")(fmt(3, ',', m_dwBeginSel), fmt(3, ',', m_dwEndSel), fmt(3, ',', selLength), (selLength == 1) ? U_("") : U_("s"));
+				s = MPT_UFORMAT("[{}-{}] ({} sample{}, ")(fmt(3, U_(","), m_dwBeginSel), fmt(3, U_(","), m_dwEndSel), fmt(3, U_(","), selLength), (selLength == 1) ? U_("") : U_("s"));
 
 				// Length in seconds
 				auto sampleRate = sample.GetSampleRate(sndFile.GetType());
@@ -1270,9 +1270,9 @@ void CViewSample::OnDraw(CDC *pDC)
 						const auto minSec = std::div(secMs.quot, int64(60));
 						const bool showMinutes = minSec.quot != 0 || (time == 0 && m_timelineUnit >= 60000);
 						if(showMinutes)
-							text += mpt::tfmt::dec(3, _T(','), minSec.quot) + _T("mn");
+							text += mpt::tfmt::dec(3, _T(","), minSec.quot) + _T("mn");
 						if(minSec.rem || !showMinutes)
-							text += mpt::tfmt::dec(3, _T(','), minSec.rem) + _T("s");
+							text += mpt::tfmt::dec(3, _T(","), minSec.rem) + _T("s");
 					}
 					if(secMs.rem || !showSeconds)
 					{
@@ -1286,7 +1286,7 @@ void CViewSample::OnDraw(CDC *pDC)
 					if(rc.left >= m_rcClient.right)
 						break;
 
-					text += mpt::tfmt::dec(3, _T(','), smp) + _T(" smp");
+					text += mpt::tfmt::dec(3, _T(","), smp) + _T(" smp");
 				}
 
 				rc.bottom = timelineHeight;
@@ -1880,10 +1880,10 @@ void CViewSample::OnMouseMove(UINT flags, CPoint point)
 	if (m_rcClient.PtInRect(point))
 	{
 		const SmpLength x = ScreenToSample(point.x);
-		CString(*fmt)(unsigned int, char, const SmpLength &) = &mpt::cfmt::dec<SmpLength>;
+		CString(*fmt)(unsigned int, CString, const SmpLength &) = &mpt::cfmt::dec<SmpLength>;
 		if(TrackerSettings::Instance().cursorPositionInHex)
 			fmt = &mpt::cfmt::HEX<SmpLength>;
-		UpdateIndicator(MPT_CFORMAT("Cursor: {}")(fmt(3, ',', x)));
+		UpdateIndicator(MPT_CFORMAT("Cursor: {}")(fmt(3, _T(","), x)));
 
 		CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 		if(pMainFrm && m_dwEndSel <= m_dwBeginSel)
@@ -2222,7 +2222,7 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 				if(*std::max_element(sample.cues.begin(), sample.cues.end()) >= sample.nLength)
 				{
 					m_dwMenuParam = ScreenToSample(pt.x);
-					wsprintf(s, _T("&Insert Cue Point at %s"), mpt::cfmt::dec(3, ',', m_dwMenuParam).GetString());
+					wsprintf(s, _T("&Insert Cue Point at %s"), mpt::cfmt::dec(3, _T(","), m_dwMenuParam).GetString());
 					::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_INSERT_CUEPOINT, s);
 					::AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
 				}
@@ -2250,7 +2250,7 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 			} else
 			{
 				SmpLength dwPos = ScreenToSample(pt.x);
-				CString pos = mpt::cfmt::dec(3, ',', dwPos);
+				CString pos = mpt::cfmt::dec(3, _T(","), dwPos);
 				if (dwPos <= sample.nLength)
 				{
 					//Set loop points
@@ -2289,7 +2289,7 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 						{
 							const SmpLength cue = sample.cues[i];
 							wsprintf(s, _T("Cue &%d: %s"), 1 + static_cast<int>(i),
-								cue < sample.nLength ? mpt::cfmt::dec(3, ',', cue).GetString() : _T("unused"));
+								cue < sample.nLength ? mpt::cfmt::dec(3, _T(","), cue).GetString() : _T("unused"));
 							::AppendMenu(hCueMenu, MF_STRING, ID_SAMPLE_CUE_1 + i, s);
 							if(cue > 0 && cue < sample.nLength) hasValidCues = true;
 						}
@@ -4071,7 +4071,7 @@ INT_PTR CViewSample::OnToolHitTest(CPoint point, TOOLINFO *pTI) const
 			text = MPT_CFORMAT("Cue Point {}")(cue + 1);
 		}
 		if(pos <= sample.nLength)
-			text += _T(": ") + mpt::cfmt::dec(3, ',', pos);
+			text += _T(": ") + mpt::cfmt::dec(3, _T(","), pos);
 		buttonID = static_cast<int>(item) + 1;
 	}
 

@@ -281,7 +281,7 @@ CTuning* CTuningCollection::AddTuning(std::istream &inStrm, mpt::Charset default
 bool UnpackTuningCollection(const CTuningCollection &tc, const mpt::PathString &prefix)
 {
 	bool error = false;
-	auto numberFmt = mpt::FormatSpec().Dec().FillNul().Width(1 + static_cast<int>(std::log10(tc.GetNumTunings())));
+	auto numberFmt = mpt::FormatSpec<mpt::ustring>().Dec().FillNul().Width(1 + static_cast<int>(std::log10(tc.GetNumTunings())));
 	for(std::size_t i = 0; i < tc.GetNumTunings(); ++i)
 	{
 		const CTuning & tuning = *(tc.GetTuning(i));

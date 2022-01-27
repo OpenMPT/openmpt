@@ -489,7 +489,7 @@ static void TestFloatFormat(Tfloat x, std::string format, mpt::FormatFlags f, st
 #ifdef MODPLUG_TRACKER
 	std::string str_sprintf = StringFormat(format, x);
 #endif
-	std::string str_iostreams = mpt::afmt::fmt(x, mpt::FormatSpec().SetFlags(f).SetWidth(width).SetPrecision(precision));
+	std::string str_iostreams = mpt::afmt::fmt(x, mpt::FormatSpec<std::string>().SetFlags(f).SetWidth(width).SetPrecision(precision));
 #ifdef MODPLUG_TRACKER
 	//MPT_LOG_GLOBAL(LogDebug, "test", mpt::ToUnicode(mpt::Charset::ASCII, str_sprintf));
 #endif
@@ -613,32 +613,32 @@ static MPT_NOINLINE void TestStringFormatting()
 	VERIFY_EQUAL(mpt::afmt::fix(234.2, 1), "234.2");
 	VERIFY_EQUAL(mpt::afmt::fix(2342.0, 1), "2342.0");
 	
-	VERIFY_EQUAL(mpt::afmt::dec(2, ';', 2345678), std::string("2;34;56;78"));
-	VERIFY_EQUAL(mpt::afmt::dec(2, ';', 12345678), std::string("12;34;56;78"));
-	VERIFY_EQUAL(mpt::afmt::hex(3, ':', 0xa2345678), std::string("a2:345:678"));
+	VERIFY_EQUAL(mpt::afmt::dec(2, ";", 2345678), std::string("2;34;56;78"));
+	VERIFY_EQUAL(mpt::afmt::dec(2, ";", 12345678), std::string("12;34;56;78"));
+	VERIFY_EQUAL(mpt::afmt::hex(3, ":", 0xa2345678), std::string("a2:345:678"));
 
-	VERIFY_EQUAL(mpt::ufmt::dec(2, ';', 12345678), U_("12;34;56;78"));
-	VERIFY_EQUAL(mpt::ufmt::hex(3, ':', 0xa2345678), U_("a2:345:678"));
+	VERIFY_EQUAL(mpt::ufmt::dec(2, U_(";"), 12345678), U_("12;34;56;78"));
+	VERIFY_EQUAL(mpt::ufmt::hex(3, U_(":"), 0xa2345678), U_("a2:345:678"));
 
-	VERIFY_EQUAL(mpt::ufmt::HEX0<7>(3, ':', 0xa2345678), U_("A2:345:678"));
-	VERIFY_EQUAL(mpt::ufmt::HEX0<8>(3, ':', 0xa2345678), U_("A2:345:678"));
-	VERIFY_EQUAL(mpt::ufmt::HEX0<9>(3, ':', 0xa2345678), U_("0A2:345:678"));
-	VERIFY_EQUAL(mpt::ufmt::HEX0<10>(3, ':', 0xa2345678), U_("0:0A2:345:678"));
-	VERIFY_EQUAL(mpt::ufmt::HEX0<11>(3, ':', 0xa2345678), U_("00:0A2:345:678"));
-	VERIFY_EQUAL(mpt::ufmt::HEX0<12>(3, ':', 0xa2345678), U_("000:0A2:345:678"));
-	VERIFY_EQUAL(mpt::ufmt::HEX0<7>(3, ':', -0x12345678), U_("-12:345:678"));
-	VERIFY_EQUAL(mpt::ufmt::HEX0<8>(3, ':', -0x12345678), U_("-12:345:678"));
-	VERIFY_EQUAL(mpt::ufmt::HEX0<9>(3, ':', -0x12345678), U_("-012:345:678"));
-	VERIFY_EQUAL(mpt::ufmt::HEX0<10>(3, ':', -0x12345678), U_("-0:012:345:678"));
-	VERIFY_EQUAL(mpt::ufmt::HEX0<11>(3, ':', -0x12345678), U_("-00:012:345:678"));
-	VERIFY_EQUAL(mpt::ufmt::HEX0<12>(3, ':', -0x12345678), U_("-000:012:345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<7>(3, U_(":"), 0xa2345678), U_("A2:345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<8>(3, U_(":"), 0xa2345678), U_("A2:345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<9>(3, U_(":"), 0xa2345678), U_("0A2:345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<10>(3, U_(":"), 0xa2345678), U_("0:0A2:345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<11>(3, U_(":"), 0xa2345678), U_("00:0A2:345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<12>(3, U_(":"), 0xa2345678), U_("000:0A2:345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<7>(3, U_(":"), -0x12345678), U_("-12:345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<8>(3, U_(":"), -0x12345678), U_("-12:345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<9>(3, U_(":"), -0x12345678), U_("-012:345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<10>(3, U_(":"), -0x12345678), U_("-0:012:345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<11>(3, U_(":"), -0x12345678), U_("-00:012:345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<12>(3, U_(":"), -0x12345678), U_("-000:012:345:678"));
 
-	VERIFY_EQUAL(mpt::ufmt::HEX0<5>(3, ':', 0x345678), U_("345:678"));
-	VERIFY_EQUAL(mpt::ufmt::HEX0<6>(3, ':', 0x345678), U_("345:678"));
-	VERIFY_EQUAL(mpt::ufmt::HEX0<7>(3, ':', 0x345678), U_("0:345:678"));
-	VERIFY_EQUAL(mpt::ufmt::HEX0<5>(3, ':', -0x345678), U_("-345:678"));
-	VERIFY_EQUAL(mpt::ufmt::HEX0<6>(3, ':', -0x345678), U_("-345:678"));
-	VERIFY_EQUAL(mpt::ufmt::HEX0<7>(3, ':', -0x345678), U_("-0:345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<5>(3, U_(":"), 0x345678), U_("345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<6>(3, U_(":"), 0x345678), U_("345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<7>(3, U_(":"), 0x345678), U_("0:345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<5>(3, U_(":"), -0x345678), U_("-345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<6>(3, U_(":"), -0x345678), U_("-345:678"));
+	VERIFY_EQUAL(mpt::ufmt::HEX0<7>(3, U_(":"), -0x345678), U_("-0:345:678"));
 
 	VERIFY_EQUAL(mpt::afmt::left(3, "a"), "a  ");
 	VERIFY_EQUAL(mpt::afmt::right(3, "a"), "  a");

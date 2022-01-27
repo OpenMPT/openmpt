@@ -52,7 +52,7 @@ inline Tstring format_simple_integer_to_chars(const T & x, int base) {
 
 
 template <typename Tstring>
-inline Tstring format_simple_integer_postprocess_case(Tstring str, const format_simple_spec & format) {
+inline Tstring format_simple_integer_postprocess_case(Tstring str, const format_simple_spec<Tstring> & format) {
 	format_simple_flags f = format.GetFlags();
 	if (f & format_simple_base::CaseUpp) {
 		for (auto & c : str) {
@@ -66,7 +66,7 @@ inline Tstring format_simple_integer_postprocess_case(Tstring str, const format_
 
 
 template <typename Tstring>
-inline Tstring format_simple_integer_postprocess_digits(Tstring str, const format_simple_spec & format) {
+inline Tstring format_simple_integer_postprocess_digits(Tstring str, const format_simple_spec<Tstring> & format) {
 	format_simple_flags f = format.GetFlags();
 	std::size_t width = format.GetWidth();
 	if (f & format_simple_base::FillNul) {
@@ -93,15 +93,15 @@ inline Tstring format_simple_integer_postprocess_digits(Tstring str, const forma
 #pragma warning(disable : 4723) // potential divide by 0
 #endif                          // MPT_COMPILER_MSVC
 template <typename Tstring>
-inline Tstring format_simple_integer_postprocess_group(Tstring str, const format_simple_spec & format) {
+inline Tstring format_simple_integer_postprocess_group(Tstring str, const format_simple_spec<Tstring> & format) {
 	if (format.GetGroup() > 0) {
 		const unsigned int groupSize = format.GetGroup();
-		const char groupSep = format.GetGroupSep();
+		const Tstring groupSep = format.GetGroupSep();
 		std::size_t len = str.length();
 		for (std::size_t n = 0; n < len; ++n) {
 			if (n > 0 && (n % groupSize) == 0) {
 				if (!(n == (len - 1) && (str[0] == mpt::char_constants<typename Tstring::value_type>::plus || str[0] == mpt::char_constants<typename Tstring::value_type>::minus))) {
-					str.insert(str.begin() + (len - n), 1, mpt::unsafe_char_convert<typename Tstring::value_type>(groupSep));
+					str.insert(len - n, groupSep);
 				}
 			}
 		}
@@ -114,7 +114,7 @@ inline Tstring format_simple_integer_postprocess_group(Tstring str, const format
 
 
 template <typename Tstring, typename T, std::enable_if_t<std::is_integral<T>::value, bool> = true>
-inline Tstring format_simple(const T & x, const format_simple_spec & format) {
+inline Tstring format_simple(const T & x, const format_simple_spec<Tstring> & format) {
 	int base = 10;
 	if (format.GetFlags() & format_simple_base::BaseDec) {
 		base = 10;
@@ -123,7 +123,8 @@ inline Tstring format_simple(const T & x, const format_simple_spec & format) {
 		base = 16;
 	}
 	using format_string_type = typename mpt::select_format_string_type<Tstring>::type;
-	return mpt::transcode<Tstring>(mpt::format_simple_integer_postprocess_group(mpt::format_simple_integer_postprocess_digits(mpt::format_simple_integer_postprocess_case(mpt::format_simple_integer_to_chars<format_string_type>(x, base), format), format), format));
+	const format_simple_spec<format_string_type> f = mpt::transcode_format_simple_spec<format_string_type>(format);
+	return mpt::transcode<Tstring>(mpt::format_simple_integer_postprocess_group(mpt::format_simple_integer_postprocess_digits(mpt::format_simple_integer_postprocess_case(mpt::format_simple_integer_to_chars<format_string_type>(x, base), f), f), f));
 }
 
 

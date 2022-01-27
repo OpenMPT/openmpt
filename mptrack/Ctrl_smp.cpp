@@ -820,7 +820,7 @@ void CCtrlSamples::UpdateView(UpdateHint hint, CObject *pObj)
 		if(isOPL)
 			s = _T("OPL instrument");
 		else
-			s = MPT_CFORMAT("{}-bit {}, len: {}")(sample.GetElementarySampleSize() * 8, CString(sample.uFlags[CHN_STEREO] ? _T("stereo") : _T("mono")), mpt::cfmt::dec(3, ',', sample.nLength));
+			s = MPT_CFORMAT("{}-bit {}, len: {}")(sample.GetElementarySampleSize() * 8, CString(sample.uFlags[CHN_STEREO] ? _T("stereo") : _T("mono")), mpt::cfmt::dec(3, _T(","), sample.nLength));
 		SetDlgItemText(IDC_TEXT5, s);
 		// File Name
 		s = mpt::ToCString(m_sndFile.GetCharsetInternal(), sample.filename);
@@ -1479,7 +1479,7 @@ void CCtrlSamples::SaveSample(bool doBatchSave)
 		minSmp = 1;
 		maxSmp = m_sndFile.GetNumSamples();
 	}
-	const auto numberFmt = mpt::FormatSpec().Dec().FillNul().Width(1 + static_cast<int>(std::log10(maxSmp)));
+	const auto numberFmt = mpt::FormatSpec<mpt::ustring>().Dec().FillNul().Width(1 + static_cast<int>(std::log10(maxSmp)));
 
 	bool ok = false;
 	CString sampleName, sampleFilename;

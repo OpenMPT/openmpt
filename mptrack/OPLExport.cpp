@@ -520,7 +520,7 @@ public:
 
 		auto opl = std::move(m_sndFile.m_opl);
 
-		const auto songIndexFmt = mpt::FormatSpec{}.Dec().FillNul().Width(1 + static_cast<int>(std::log10(m_subSongs.size())));
+		const auto songIndexFmt = mpt::FormatSpec<mpt::ustring>{}.Dec().FillNul().Width(1 + static_cast<int>(std::log10(m_subSongs.size())));
 
 		size_t totalSamples = 0;
 		for(size_t i = 0; i < m_subSongs.size() && !m_abort; i++)

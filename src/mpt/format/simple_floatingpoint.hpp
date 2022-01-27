@@ -88,7 +88,7 @@ inline Tstring format_simple_floatingpoint_to_chars(const T & x, std::chars_form
 }
 
 template <typename Tstring>
-inline Tstring format_simple_floatingpoint_postprocess_width(Tstring str, const format_simple_spec & format) {
+inline Tstring format_simple_floatingpoint_postprocess_width(Tstring str, const format_simple_spec<Tstring> & format) {
 	format_simple_flags f = format.GetFlags();
 	std::size_t width = format.GetWidth();
 	if (f & format_simple_base::FillNul) {
@@ -115,8 +115,9 @@ inline Tstring format_simple_floatingpoint_postprocess_width(Tstring str, const 
 
 
 template <typename Tstring, typename T, std::enable_if_t<std::is_floating_point<T>::value, bool> = true>
-inline Tstring format_simple(const T & x, const format_simple_spec & f) {
+inline Tstring format_simple(const T & x, const format_simple_spec<Tstring> & format) {
 	using format_string_type = typename mpt::select_format_string_type<Tstring>::type;
+	const format_simple_spec<format_string_type> f = mpt::transcode_format_simple_spec<format_string_type>(format);
 	if (f.GetPrecision() != -1) {
 		if (f.GetFlags() & format_simple_base::NotaSci) {
 			return mpt::transcode<Tstring>(mpt::format_simple_floatingpoint_postprocess_width(format_simple_floatingpoint_to_chars<format_string_type>(x, std::chars_format::scientific, f.GetPrecision()), f));
@@ -144,24 +145,26 @@ template <typename Tchar>
 struct NumPunct : std::numpunct<Tchar> {
 private:
 	unsigned int group;
-	char sep;
+	Tchar sep;
 
 public:
-	NumPunct(unsigned int g, char s)
+	NumPunct(unsigned int g, Tchar s)
 		: group(g)
 		, sep(s) { }
 	std::string do_grouping() const override {
 		return std::string(1, static_cast<char>(group));
 	}
 	Tchar do_thousands_sep() const override {
-		return static_cast<Tchar>(sep);
+		return sep;
 	}
 };
 
-template <typename Tostream, typename T>
-inline void format_simple_floatingpoint_apply_stream_format(Tostream & o, const format_simple_spec & format, const T &) {
+template <typename Tostream, typename Tstring, typename T>
+inline void format_simple_floatingpoint_apply_stream_format(Tostream & o, const format_simple_spec<Tstring> & format, const T &) {
 	if (format.GetGroup() > 0) {
-		o.imbue(std::locale(o.getloc(), new NumPunct<typename Tostream::char_type>(format.GetGroup(), format.GetGroupSep())));
+		if (mpt::string_traits<Tstring>::length(format.GetGroupSep()) >= 1) {
+			o.imbue(std::locale(o.getloc(), new NumPunct<typename Tostream::char_type>(format.GetGroup(), format.GetGroupSep()[0])));
+		}
 	}
 	format_simple_flags f = format.GetFlags();
 	std::size_t width = format.GetWidth();
@@ -212,7 +215,7 @@ inline void format_simple_floatingpoint_apply_stream_format(Tostream & o, const 
 
 
 template <typename Tstring, typename T>
-inline Tstring format_simple_floatingpoint_stream(const T & x, const format_simple_spec & f) {
+inline Tstring format_simple_floatingpoint_stream(const T & x, const format_simple_spec<Tstring> & f) {
 	using stream_char_type = typename mpt::select_format_char_type<typename Tstring::value_type>::type;
 	std::basic_ostringstream<stream_char_type> s;
 	s.imbue(std::locale::classic());
@@ -223,8 +226,10 @@ inline Tstring format_simple_floatingpoint_stream(const T & x, const format_simp
 
 
 template <typename Tstring, typename T, std::enable_if_t<std::is_floating_point<T>::value, bool> = true>
-inline Tstring format_simple(const T & x, const format_simple_spec & format) {
-	return mpt::transcode<Tstring>(mpt::format_simple_floatingpoint_stream<typename mpt::select_format_string_type<Tstring>::type>(x, format));
+inline Tstring format_simple(const T & x, const format_simple_spec<Tstring> & format) {
+	using format_string_type = typename mpt::select_format_string_type<Tstring>::type;
+	const format_simple_spec<format_string_type> f = mpt::transcode_format_spec_simple< format_string_type>(format);
+	return mpt::transcode<Tstring>(mpt::format_simple_floatingpoint_stream<format_string_type>(x, f));
 }
 
 

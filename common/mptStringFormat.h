@@ -211,86 +211,87 @@ struct ToStringFormatter {
 };
 
 
-using FormatSpec = mpt::format_simple_spec;
+template <typename Tstring>
+using FormatSpec = mpt::format_simple_spec<Tstring>;
 
 using FormatFlags = mpt::format_simple_flags;
 
 using fmt_base = mpt::format_simple_base;
 
 
-std::string FormatValA(const char & x, const FormatSpec & f) = delete; // deprecated to catch potential API mis-use, use std::string(1, x) instead
+std::string FormatValA(const char & x, const FormatSpec<std::string> & f) = delete; // deprecated to catch potential API mis-use, use std::string(1, x) instead
 #if !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
-std::string FormatValA(const wchar_t & x, const FormatSpec & f) = delete; // deprecated to catch potential API mis-use, use std::wstring(1, x) instead
+std::string FormatValA(const wchar_t & x, const FormatSpec<std::string> & f) = delete; // deprecated to catch potential API mis-use, use std::wstring(1, x) instead
 #endif // !MPT_COMPILER_QUIRK_NO_WCHAR
-std::string FormatValA(const bool & x, const FormatSpec & f);
-std::string FormatValA(const signed char & x, const FormatSpec & f);
-std::string FormatValA(const unsigned char & x, const FormatSpec & f);
-std::string FormatValA(const signed short & x, const FormatSpec & f);
-std::string FormatValA(const unsigned short & x, const FormatSpec & f);
-std::string FormatValA(const signed int & x, const FormatSpec & f);
-std::string FormatValA(const unsigned int & x, const FormatSpec & f);
-std::string FormatValA(const signed long & x, const FormatSpec & f);
-std::string FormatValA(const unsigned long & x, const FormatSpec & f);
-std::string FormatValA(const signed long long & x, const FormatSpec & f);
-std::string FormatValA(const unsigned long long & x, const FormatSpec & f);
-std::string FormatValA(const float & x, const FormatSpec & f);
-std::string FormatValA(const double & x, const FormatSpec & f);
-std::string FormatValA(const long double & x, const FormatSpec & f);
+std::string FormatValA(const bool & x, const FormatSpec<std::string> & f);
+std::string FormatValA(const signed char & x, const FormatSpec<std::string> & f);
+std::string FormatValA(const unsigned char & x, const FormatSpec<std::string> & f);
+std::string FormatValA(const signed short & x, const FormatSpec<std::string> & f);
+std::string FormatValA(const unsigned short & x, const FormatSpec<std::string> & f);
+std::string FormatValA(const signed int & x, const FormatSpec<std::string> & f);
+std::string FormatValA(const unsigned int & x, const FormatSpec<std::string> & f);
+std::string FormatValA(const signed long & x, const FormatSpec<std::string> & f);
+std::string FormatValA(const unsigned long & x, const FormatSpec<std::string> & f);
+std::string FormatValA(const signed long long & x, const FormatSpec<std::string> & f);
+std::string FormatValA(const unsigned long long & x, const FormatSpec<std::string> & f);
+std::string FormatValA(const float & x, const FormatSpec<std::string> & f);
+std::string FormatValA(const double & x, const FormatSpec<std::string> & f);
+std::string FormatValA(const long double & x, const FormatSpec<std::string> & f);
 
-mpt::ustring FormatValU(const char & x, const FormatSpec & f) = delete; // deprecated to catch potential API mis-use, use std::string(1, x) instead
+mpt::ustring FormatValU(const char & x, const FormatSpec<mpt::ustring> & f) = delete; // deprecated to catch potential API mis-use, use std::string(1, x) instead
 #if !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
-mpt::ustring FormatValU(const wchar_t & x, const FormatSpec & f) = delete; // deprecated to catch potential API mis-use, use std::wstring(1, x) instead
+mpt::ustring FormatValU(const wchar_t & x, const FormatSpec<mpt::ustring> & f) = delete; // deprecated to catch potential API mis-use, use std::wstring(1, x) instead
 #endif // !MPT_COMPILER_QUIRK_NO_WCHAR
-mpt::ustring FormatValU(const bool & x, const FormatSpec & f);
-mpt::ustring FormatValU(const signed char & x, const FormatSpec & f);
-mpt::ustring FormatValU(const unsigned char & x, const FormatSpec & f);
-mpt::ustring FormatValU(const signed short & x, const FormatSpec & f);
-mpt::ustring FormatValU(const unsigned short & x, const FormatSpec & f);
-mpt::ustring FormatValU(const signed int & x, const FormatSpec & f);
-mpt::ustring FormatValU(const unsigned int & x, const FormatSpec & f);
-mpt::ustring FormatValU(const signed long & x, const FormatSpec & f);
-mpt::ustring FormatValU(const unsigned long & x, const FormatSpec & f);
-mpt::ustring FormatValU(const signed long long & x, const FormatSpec & f);
-mpt::ustring FormatValU(const unsigned long long & x, const FormatSpec & f);
-mpt::ustring FormatValU(const float & x, const FormatSpec & f);
-mpt::ustring FormatValU(const double & x, const FormatSpec & f);
-mpt::ustring FormatValU(const long double & x, const FormatSpec & f);
+mpt::ustring FormatValU(const bool & x, const FormatSpec<mpt::ustring> & f);
+mpt::ustring FormatValU(const signed char & x, const FormatSpec<mpt::ustring> & f);
+mpt::ustring FormatValU(const unsigned char & x, const FormatSpec<mpt::ustring> & f);
+mpt::ustring FormatValU(const signed short & x, const FormatSpec<mpt::ustring> & f);
+mpt::ustring FormatValU(const unsigned short & x, const FormatSpec<mpt::ustring> & f);
+mpt::ustring FormatValU(const signed int & x, const FormatSpec<mpt::ustring> & f);
+mpt::ustring FormatValU(const unsigned int & x, const FormatSpec<mpt::ustring> & f);
+mpt::ustring FormatValU(const signed long & x, const FormatSpec<mpt::ustring> & f);
+mpt::ustring FormatValU(const unsigned long & x, const FormatSpec<mpt::ustring> & f);
+mpt::ustring FormatValU(const signed long long & x, const FormatSpec<mpt::ustring> & f);
+mpt::ustring FormatValU(const unsigned long long & x, const FormatSpec<mpt::ustring> & f);
+mpt::ustring FormatValU(const float & x, const FormatSpec<mpt::ustring> & f);
+mpt::ustring FormatValU(const double & x, const FormatSpec<mpt::ustring> & f);
+mpt::ustring FormatValU(const long double & x, const FormatSpec<mpt::ustring> & f);
 
 #if MPT_WSTRING_FORMAT
-std::wstring FormatValW(const char & x, const FormatSpec & f) = delete; // deprecated to catch potential API mis-use, use std::string(1, x) instead
+std::wstring FormatValW(const char & x, const FormatSpec<std::wstring> & f) = delete; // deprecated to catch potential API mis-use, use std::string(1, x) instead
 #if !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
-std::wstring FormatValW(const wchar_t & x, const FormatSpec & f) = delete; // deprecated to catch potential API mis-use, use std::wstring(1, x) instead
+std::wstring FormatValW(const wchar_t & x, const FormatSpec<std::wstring> & f) = delete; // deprecated to catch potential API mis-use, use std::wstring(1, x) instead
 #endif // !MPT_COMPILER_QUIRK_NO_WCHAR
-std::wstring FormatValW(const bool & x, const FormatSpec & f);
-std::wstring FormatValW(const signed char & x, const FormatSpec & f);
-std::wstring FormatValW(const unsigned char & x, const FormatSpec & f);
-std::wstring FormatValW(const signed short & x, const FormatSpec & f);
-std::wstring FormatValW(const unsigned short & x, const FormatSpec & f);
-std::wstring FormatValW(const signed int & x, const FormatSpec & f);
-std::wstring FormatValW(const unsigned int & x, const FormatSpec & f);
-std::wstring FormatValW(const signed long & x, const FormatSpec & f);
-std::wstring FormatValW(const unsigned long & x, const FormatSpec & f);
-std::wstring FormatValW(const signed long long & x, const FormatSpec & f);
-std::wstring FormatValW(const unsigned long long & x, const FormatSpec & f);
-std::wstring FormatValW(const float & x, const FormatSpec & f);
-std::wstring FormatValW(const double & x, const FormatSpec & f);
-std::wstring FormatValW(const long double & x, const FormatSpec & f);
+std::wstring FormatValW(const bool & x, const FormatSpec<std::wstring> & f);
+std::wstring FormatValW(const signed char & x, const FormatSpec<std::wstring> & f);
+std::wstring FormatValW(const unsigned char & x, const FormatSpec<std::wstring> & f);
+std::wstring FormatValW(const signed short & x, const FormatSpec<std::wstring> & f);
+std::wstring FormatValW(const unsigned short & x, const FormatSpec<std::wstring> & f);
+std::wstring FormatValW(const signed int & x, const FormatSpec<std::wstring> & f);
+std::wstring FormatValW(const unsigned int & x, const FormatSpec<std::wstring> & f);
+std::wstring FormatValW(const signed long & x, const FormatSpec<std::wstring> & f);
+std::wstring FormatValW(const unsigned long & x, const FormatSpec<std::wstring> & f);
+std::wstring FormatValW(const signed long long & x, const FormatSpec<std::wstring> & f);
+std::wstring FormatValW(const unsigned long long & x, const FormatSpec<std::wstring> & f);
+std::wstring FormatValW(const float & x, const FormatSpec<std::wstring> & f);
+std::wstring FormatValW(const double & x, const FormatSpec<std::wstring> & f);
+std::wstring FormatValW(const long double & x, const FormatSpec<std::wstring> & f);
 #endif
 
 template <typename Tstring> struct FormatValTFunctor {};
-template <> struct FormatValTFunctor<std::string> { template <typename T> inline std::string operator() (const T & x, const FormatSpec & f) { return FormatValA(x, f); } };
-template <> struct FormatValTFunctor<mpt::ustring> { template <typename T> inline mpt::ustring operator() (const T & x, const FormatSpec & f) { return FormatValU(x, f); } };
+template <> struct FormatValTFunctor<std::string> { template <typename T> inline std::string operator() (const T & x, const FormatSpec<std::string> & f) { return FormatValA(x, f); } };
+template <> struct FormatValTFunctor<mpt::ustring> { template <typename T> inline mpt::ustring operator() (const T & x, const FormatSpec<mpt::ustring> & f) { return FormatValU(x, f); } };
 #if MPT_USTRING_MODE_UTF8 && MPT_WSTRING_FORMAT
-template <> struct FormatValTFunctor<std::wstring> { template <typename T> inline std::wstring operator() (const T & x, const FormatSpec & f) { return FormatValW(x, f); } };
+template <> struct FormatValTFunctor<std::wstring> { template <typename T> inline std::wstring operator() (const T & x, const FormatSpec<std::wstring> & f) { return FormatValW(x, f); } };
 #endif
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
-template <> struct FormatValTFunctor<mpt::lstring> { template <typename T> inline mpt::lstring operator() (const T & x, const FormatSpec & f) { return mpt::ToLocale(mpt::Charset::Locale, FormatValA(x, f)); } };
+template <> struct FormatValTFunctor<mpt::lstring> { template <typename T> inline mpt::lstring operator() (const T & x, const FormatSpec<mpt::lstring> & f) { return mpt::ToLocale(mpt::Charset::Locale, FormatValA(x, mpt::transcode_format_simple_spec<std::string>(mpt::logical_encoding::locale, f))); } };
 #endif // MPT_ENABLE_CHARSET_LOCALE
 #if defined(MPT_WITH_MFC)
 #ifdef UNICODE
-template <> struct FormatValTFunctor<CString> { template <typename T> inline CString operator() (const T & x, const FormatSpec & f) { return mpt::ToCString(FormatValW(x, f)); } };
+template <> struct FormatValTFunctor<CString> { template <typename T> inline CString operator() (const T & x, const FormatSpec<CString> & f) { return mpt::ToCString(FormatValW(x, mpt::transcode_format_simple_spec<std::wstring>(f))); } };
 #else // !UNICODE
-template <> struct FormatValTFunctor<CString> { template <typename T> inline CString operator() (const T & x, const FormatSpec & f) { return mpt::ToCString(mpt::Charset::Locale, FormatValA(x, f)); } };
+template <> struct FormatValTFunctor<CString> { template <typename T> inline CString operator() (const T & x, const FormatSpec<CString>& f) { return mpt::ToCString(mpt::Charset::Locale, FormatValA(x, mpt::transcode_format_simple_spec<std::string>(mpt::logical_encoding::locale, f))); } };
 #endif // UNICODE
 #endif // MPT_WITH_MFC
 
@@ -306,7 +307,7 @@ static inline Tstring val(const T& x)
 }
 
 template<typename T>
-static inline Tstring fmt(const T& x, const FormatSpec& f)
+static inline Tstring fmt(const T& x, const FormatSpec<Tstring>& f)
 {
 	return FormatValTFunctor<Tstring>()(x, f);
 }
@@ -315,95 +316,95 @@ template<typename T>
 static inline Tstring dec(const T& x)
 {
 	static_assert(std::numeric_limits<T>::is_integer);
-	return FormatValTFunctor<Tstring>()(x, FormatSpec().BaseDec().FillOff());
+	return FormatValTFunctor<Tstring>()(x, FormatSpec<Tstring>().BaseDec().FillOff());
 }
 template<int width, typename T>
 static inline Tstring dec0(const T& x)
 {
 	static_assert(std::numeric_limits<T>::is_integer);
-	return FormatValTFunctor<Tstring>()(x, FormatSpec().BaseDec().FillNul().Width(width));
+	return FormatValTFunctor<Tstring>()(x, FormatSpec<Tstring>().BaseDec().FillNul().Width(width));
 }
 
 template<typename T>
-static inline Tstring dec(unsigned int g, char s, const T& x)
+static inline Tstring dec(unsigned int g, Tstring s, const T& x)
 {
 	static_assert(std::numeric_limits<T>::is_integer);
-	return FormatValTFunctor<Tstring>()(x, FormatSpec().BaseDec().FillOff().Group(g).GroupSep(s));
+	return FormatValTFunctor<Tstring>()(x, FormatSpec<Tstring>().BaseDec().FillOff().Group(g).GroupSep(std::move(s)));
 }
 template<int width, typename T>
-static inline Tstring dec0(unsigned int g, char s, const T& x)
+static inline Tstring dec0(unsigned int g, Tstring s, const T& x)
 {
 	static_assert(std::numeric_limits<T>::is_integer);
-	return FormatValTFunctor<Tstring>()(x, FormatSpec().BaseDec().FillNul().Width(width).Group(g).GroupSep(s));
+	return FormatValTFunctor<Tstring>()(x, FormatSpec<Tstring>().BaseDec().FillNul().Width(width).Group(g).GroupSep(std::move(s)));
 }
 
 template<typename T>
 static inline Tstring hex(const T& x)
 {
 	static_assert(std::numeric_limits<T>::is_integer);
-	return FormatValTFunctor<Tstring>()(x, FormatSpec().BaseHex().CaseLow().FillOff());
+	return FormatValTFunctor<Tstring>()(x, FormatSpec<Tstring>().BaseHex().CaseLow().FillOff());
 }
 template<typename T>
 static inline Tstring HEX(const T& x)
 {
 	static_assert(std::numeric_limits<T>::is_integer);
-	return FormatValTFunctor<Tstring>()(x, FormatSpec().BaseHex().CaseUpp().FillOff());
+	return FormatValTFunctor<Tstring>()(x, FormatSpec<Tstring>().BaseHex().CaseUpp().FillOff());
 }
 template<int width, typename T>
 static inline Tstring hex0(const T& x)
 {
 	static_assert(std::numeric_limits<T>::is_integer);
-	return FormatValTFunctor<Tstring>()(x, FormatSpec().BaseHex().CaseLow().FillNul().Width(width));
+	return FormatValTFunctor<Tstring>()(x, FormatSpec<Tstring>().BaseHex().CaseLow().FillNul().Width(width));
 }
 template<int width, typename T>
 static inline Tstring HEX0(const T& x)
 {
 	static_assert(std::numeric_limits<T>::is_integer);
-	return FormatValTFunctor<Tstring>()(x, FormatSpec().BaseHex().CaseUpp().FillNul().Width(width));
+	return FormatValTFunctor<Tstring>()(x, FormatSpec<Tstring>().BaseHex().CaseUpp().FillNul().Width(width));
 }
 
 template<typename T>
-static inline Tstring hex(unsigned int g, char s, const T& x)
+static inline Tstring hex(unsigned int g, Tstring s, const T& x)
 {
 	static_assert(std::numeric_limits<T>::is_integer);
-	return FormatValTFunctor<Tstring>()(x, FormatSpec().BaseHex().CaseLow().FillOff().Group(g).GroupSep(s));
+	return FormatValTFunctor<Tstring>()(x, FormatSpec<Tstring>().BaseHex().CaseLow().FillOff().Group(g).GroupSep(std::move(s)));
 }
 template<typename T>
-static inline Tstring HEX(unsigned int g, char s, const T& x)
+static inline Tstring HEX(unsigned int g, Tstring s, const T& x)
 {
 	static_assert(std::numeric_limits<T>::is_integer);
-	return FormatValTFunctor<Tstring>()(x, FormatSpec().BaseHex().CaseUpp().FillOff().Group(g).GroupSep(s));
+	return FormatValTFunctor<Tstring>()(x, FormatSpec<Tstring>().BaseHex().CaseUpp().FillOff().Group(g).GroupSep(std::move(s)));
 }
 template<int width, typename T>
-static inline Tstring hex0(unsigned int g, char s, const T& x)
+static inline Tstring hex0(unsigned int g, Tstring s, const T& x)
 {
 	static_assert(std::numeric_limits<T>::is_integer);
-	return FormatValTFunctor<Tstring>()(x, FormatSpec().BaseHex().CaseLow().FillNul().Width(width).Group(g).GroupSep(s));
+	return FormatValTFunctor<Tstring>()(x, FormatSpec<Tstring>().BaseHex().CaseLow().FillNul().Width(width).Group(g).GroupSep(std::move(s)));
 }
 template<int width, typename T>
-static inline Tstring HEX0(unsigned int g, char s, const T& x)
+static inline Tstring HEX0(unsigned int g, Tstring s, const T& x)
 {
 	static_assert(std::numeric_limits<T>::is_integer);
-	return FormatValTFunctor<Tstring>()(x, FormatSpec().BaseHex().CaseUpp().FillNul().Width(width).Group(g).GroupSep(s));
+	return FormatValTFunctor<Tstring>()(x, FormatSpec<Tstring>().BaseHex().CaseUpp().FillNul().Width(width).Group(g).GroupSep(std::move(s)));
 }
 
 template<typename T>
 static inline Tstring flt(const T& x, int precision = -1)
 {
 	static_assert(std::is_floating_point<T>::value);
-	return FormatValTFunctor<Tstring>()(x, FormatSpec().NotaNrm().FillOff().Precision(precision));
+	return FormatValTFunctor<Tstring>()(x, FormatSpec<Tstring>().NotaNrm().FillOff().Precision(precision));
 }
 template<typename T>
 static inline Tstring fix(const T& x, int precision = -1)
 {
 	static_assert(std::is_floating_point<T>::value);
-	return FormatValTFunctor<Tstring>()(x, FormatSpec().NotaFix().FillOff().Precision(precision));
+	return FormatValTFunctor<Tstring>()(x, FormatSpec<Tstring>().NotaFix().FillOff().Precision(precision));
 }
 template<typename T>
 static inline Tstring sci(const T& x, int precision = -1)
 {
 	static_assert(std::is_floating_point<T>::value);
-	return FormatValTFunctor<Tstring>()(x, FormatSpec().NotaSci().FillOff().Precision(precision));
+	return FormatValTFunctor<Tstring>()(x, FormatSpec<Tstring>().NotaSci().FillOff().Precision(precision));
 }
 
 template<typename T>
