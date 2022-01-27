@@ -26,22 +26,7 @@ inline namespace MPT_INLINE_NS {
 
 
 template <typename Tchar>
-struct char_constants {
-	static inline constexpr Tchar tab = '\t';
-	static inline constexpr Tchar lf = '\n';
-	static inline constexpr Tchar cr = '\r';
-	static inline constexpr Tchar space = ' ';
-	static inline constexpr Tchar plus = '+';
-	static inline constexpr Tchar comma = ',';
-	static inline constexpr Tchar minus = '-';
-	static inline constexpr Tchar number0 = '0';
-	static inline constexpr Tchar number1 = '1';
-	static inline constexpr Tchar number9 = '9';
-	static inline constexpr Tchar A = 'A';
-	static inline constexpr Tchar Z = 'Z';
-	static inline constexpr Tchar a = 'a';
-	static inline constexpr Tchar z = 'z';
-};
+struct char_constants { };
 
 template <>
 struct char_constants<char> {
