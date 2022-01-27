@@ -1290,7 +1290,7 @@ bool CModDoc::UpdateChannelMuteStatus(CHANNELINDEX nChn)
 		m_SndFile.m_PlayState.Chn[nChn].dwFlags.set(muteType);
 		if(m_SndFile.m_opl) m_SndFile.m_opl->NoteCut(nChn);
 		// Kill VSTi notes on muted channel.
-		PLUGINDEX nPlug = m_SndFile.GetBestPlugin(nChn, PrioritiseInstrument, EvenIfMuted);
+		PLUGINDEX nPlug = m_SndFile.GetBestPlugin(m_SndFile.m_PlayState, nChn, PrioritiseInstrument, EvenIfMuted);
 		if ((nPlug) && (nPlug<=MAX_MIXPLUGINS))
 		{
 			IMixPlugin *pPlug = m_SndFile.m_MixPlugins[nPlug - 1].pMixPlugin;
@@ -2864,22 +2864,18 @@ void CModDoc::RecordParamChange(PLUGINDEX plugSlot, PlugParamIndex paramIndex)
 
 void CModDoc::LearnMacro(int macroToSet, PlugParamIndex paramToUse)
 {
-	if (macroToSet < 0 || macroToSet > NUM_MACROS)
+	if(macroToSet < 0 || macroToSet > kSFxMacros)
 	{
 		return;
 	}
 
 	// If macro already exists for this param, inform user and return
-	for (int checkMacro = 0; checkMacro < NUM_MACROS; checkMacro++)
+	if(auto macro = m_SndFile.m_MidiCfg.FindMacroForParam(paramToUse); macro >= 0)
 	{
-		if (m_SndFile.m_MidiCfg.GetParameteredMacroType(checkMacro) == kSFxPlugParam
-			&& m_SndFile.m_MidiCfg.MacroToPlugParam(checkMacro) == paramToUse)
-		{
-			CString message;
-			message.Format(_T("Parameter %i can already be controlled with macro %X."), static_cast<int>(paramToUse), checkMacro);
-			Reporting::Information(message, _T("Macro exists for this parameter"));
-			return;
-		}
+		CString message;
+		message.Format(_T("Parameter %i can already be controlled with macro %X."), static_cast<int>(paramToUse), macro);
+		Reporting::Information(message, _T("Macro exists for this parameter"));
+		return;
 	}
 
 	// Set new macro

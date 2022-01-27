@@ -91,7 +91,7 @@ BEGIN_MESSAGE_MAP(CAbstractVstEditor, CDialog)
 	ON_MESSAGE(WM_MOD_KEYCOMMAND,	&CAbstractVstEditor::OnCustomKeyMsg) //rewbs.customKeys
 	ON_COMMAND_RANGE(ID_PLUGSELECT, ID_PLUGSELECT + MAX_MIXPLUGINS, &CAbstractVstEditor::OnToggleEditor) //rewbs.patPlugName
 	ON_COMMAND_RANGE(ID_SELECTINST, ID_SELECTINST + MAX_INSTRUMENTS, &CAbstractVstEditor::OnSetInputInstrument) //rewbs.patPlugName
-	ON_COMMAND_RANGE(ID_LEARN_MACRO_FROM_PLUGGUI, ID_LEARN_MACRO_FROM_PLUGGUI + NUM_MACROS, &CAbstractVstEditor::PrepareToLearnMacro)
+	ON_COMMAND_RANGE(ID_LEARN_MACRO_FROM_PLUGGUI, ID_LEARN_MACRO_FROM_PLUGGUI + kSFxMacros, &CAbstractVstEditor::PrepareToLearnMacro)
 END_MESSAGE_MAP()
 
 
@@ -829,7 +829,7 @@ void CAbstractVstEditor::UpdateMacroMenu()
 	}
 
 	CString label, macroName;
-	for(int nMacro = 0; nMacro < NUM_MACROS; nMacro++)
+	for(int nMacro = 0; nMacro < kSFxMacros; nMacro++)
 	{
 		int action = 0;
 		UINT greyed = MF_GRAYED;
@@ -965,7 +965,7 @@ void CAbstractVstEditor::PrepareToLearnMacro(UINT nID)
 
 void CAbstractVstEditor::SetLearnMacro(int inMacro)
 {
-	if (inMacro < NUM_MACROS)
+	if (inMacro < kSFxMacros)
 	{
 		m_nLearnMacro=inMacro;
 	}

@@ -24,8 +24,8 @@ class CMidiMacroSetup: public CDialog
 protected:
 	CComboBox m_CbnSFx, m_CbnSFxPreset, m_CbnZxx, m_CbnZxxPreset, m_CbnMacroPlug, m_CbnMacroParam, m_CbnMacroCC;
 	CEdit m_EditSFx, m_EditZxx;
-	CColourEdit m_EditMacroValue[NUM_MACROS], m_EditMacroType[NUM_MACROS];
-	CButton m_EditMacro[NUM_MACROS], m_BtnMacroShowAll[NUM_MACROS];
+	CColourEdit m_EditMacroValue[kSFxMacros], m_EditMacroType[kSFxMacros];
+	CButton m_EditMacro[kSFxMacros], m_BtnMacroShowAll[kSFxMacros];
 
 	CSoundFile &m_SndFile;
 
@@ -40,7 +40,7 @@ protected:
 	BOOL OnInitDialog() override;
 	void DoDataExchange(CDataExchange* pDX) override;
 
-	bool ValidateMacroString(CEdit &wnd, char *lastMacro, bool isParametric);
+	bool ValidateMacroString(CEdit &wnd, const MIDIMacroConfig::Macro &prevMacro, bool isParametric);
 
 	void UpdateMacroList(int macro=-1);
 	void ToggleBoxes(UINT preset, UINT sfx);

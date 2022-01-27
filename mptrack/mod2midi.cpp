@@ -94,7 +94,9 @@ namespace MidiExport
 
 		void SynchronizeMidiPitchWheelDepth(CHANNELINDEX trackerChn)
 		{
-			const auto midiCh = GetMidiChannel(trackerChn);
+			if(trackerChn >= std::size(m_sndFile.m_PlayState.Chn))
+				return;
+			const auto midiCh = GetMidiChannel(m_sndFile.m_PlayState.Chn[trackerChn], trackerChn);
 			if(!m_overlappingInstruments && m_tempoTrack && m_tempoTrack->m_pitchWheelDepth[midiCh] != m_instr.midiPWD)
 				WritePitchWheelDepth(static_cast<MidiChannel>(midiCh + MidiFirstChannel));
 		}
@@ -306,7 +308,7 @@ namespace MidiExport
 			return true;
 		}
 
-		uint8 GetMidiChannel(CHANNELINDEX trackChannel) const override
+		uint8 GetMidiChannel(const ModChannel &chn, CHANNELINDEX trackChannel) const override
 		{
 			if(m_instr.nMidiChannel == MidiMappedChannel && trackChannel < std::size(m_sndFile.m_PlayState.Chn))
 			{
@@ -316,7 +318,7 @@ namespace MidiExport
 					midiCh++;
 				return midiCh;
 			}
-			return IMidiPlugin::GetMidiChannel(trackChannel);
+			return IMidiPlugin::GetMidiChannel(chn, trackChannel);
 		}
 
 		void MidiCommand(const ModInstrument &instr, uint16 note, uint16 vol, CHANNELINDEX trackChannel) override
@@ -327,8 +329,8 @@ namespace MidiExport
 				note = NOTE_KEYOFF;
 			}
 			SynchronizeMidiChannelState();
-			if(trackChannel < MAX_CHANNELS)
-				m_lastModChannel[GetMidiChannel(trackChannel)] = trackChannel;
+			if(trackChannel < std::size(m_sndFile.m_PlayState.Chn))
+				m_lastModChannel[GetMidiChannel(m_sndFile.m_PlayState.Chn[trackChannel], trackChannel)] = trackChannel;
 			IMidiPlugin::MidiCommand(instr, note, vol, trackChannel);
 		}
 

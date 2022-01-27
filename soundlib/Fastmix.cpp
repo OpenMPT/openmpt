@@ -345,7 +345,7 @@ void CSoundFile::CreateStereoMix(int count)
 
 		//Look for plugins associated with this implicit tracker channel.
 #ifndef NO_PLUGINS
-		PLUGINDEX nMixPlugin = GetBestPlugin(m_PlayState.ChnMix[nChn], PrioritiseInstrument, RespectMutes);
+		PLUGINDEX nMixPlugin = GetBestPlugin(m_PlayState, m_PlayState.ChnMix[nChn], PrioritiseInstrument, RespectMutes);
 
 		if ((nMixPlugin > 0) && (nMixPlugin <= MAX_MIXPLUGINS) && m_MixPlugins[nMixPlugin - 1].pMixPlugin != nullptr)
 		{

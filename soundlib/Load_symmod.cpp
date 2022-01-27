@@ -955,18 +955,18 @@ static bool ConvertDSP(const SymEvent event, MIDIMacroConfigData::Macro &macro, 
 		const uint8 reso = static_cast<uint8>(std::min(127, event.inst * 127 / 185));
 
 		if(type == 1)  // lowpass filter
-			mpt::String::WriteAutoBuf(macro) = MPT_AFORMAT("F0F000{} F0F001{} F0F00200")(mpt::afmt::HEX0<2>(cutoff), mpt::afmt::HEX0<2>(reso));
+			macro = MPT_AFORMAT("F0F000{} F0F001{} F0F00200")(mpt::afmt::HEX0<2>(cutoff), mpt::afmt::HEX0<2>(reso));
 		else if(type == 2)  // highpass filter
-			mpt::String::WriteAutoBuf(macro) = MPT_AFORMAT("F0F000{} F0F001{} F0F00210")(mpt::afmt::HEX0<2>(cutoff), mpt::afmt::HEX0<2>(reso));
+			macro = MPT_AFORMAT("F0F000{} F0F001{} F0F00210")(mpt::afmt::HEX0<2>(cutoff), mpt::afmt::HEX0<2>(reso));
 		else  // no filter or unsupported filter type
-			mpt::String::WriteAutoBuf(macro) = "F0F0007F F0F00100";
+			macro = "F0F0007F F0F00100";
 		return true;
 	} else if(event.command == SymEvent::DSPEcho)
 	{
 		const uint8 type = (event.note < 5) ? event.note : 0;
 		const uint8 length = (event.param < 128) ? event.param : 127;
 		const uint8 feedback = (event.inst < 128) ? event.inst : 127;
-		mpt::String::WriteAutoBuf(macro) = MPT_AFORMAT("F0F080{} F0F081{} F0F082{}")(mpt::afmt::HEX0<2>(type), mpt::afmt::HEX0<2>(length), mpt::afmt::HEX0<2>(feedback));
+		macro = MPT_AFORMAT("F0F080{} F0F081{} F0F082{}")(mpt::afmt::HEX0<2>(type), mpt::afmt::HEX0<2>(length), mpt::afmt::HEX0<2>(feedback));
 		return true;
 	} else if(event.command == SymEvent::DSPDelay)
 	{
@@ -1642,10 +1642,10 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 							{
 								m.command = CMD_MIDI;
 								m.param = macroMap[event];
-							} else if(macroMap.size() < std::size(m_MidiCfg.szMidiZXXExt))
+							} else if(macroMap.size() < m_MidiCfg.Zxx.size())
 							{
 								uint8 param = static_cast<uint8>(macroMap.size());
-								if(ConvertDSP(event, m_MidiCfg.szMidiZXXExt[param], *this))
+								if(ConvertDSP(event, m_MidiCfg.Zxx[param], *this))
 								{
 									m.command = CMD_MIDI;
 									m.param = macroMap[event] = 0x80 | param;

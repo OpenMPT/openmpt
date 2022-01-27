@@ -441,13 +441,13 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	// Zxx Macros
 	MIDIMacroConfig macros;
 	theApp.GetDefaultMidiMacro(macros);
-	for(int isfx = 0; isfx < 16; isfx++)
+	for(int i = 0; i < kSFxMacros; i++)
 	{
-		mpt::String::WriteAutoBuf(macros.szMidiSFXExt[isfx]) = conf.Read<std::string>(U_("Zxx Macros"), MPT_UFORMAT("SF{}")(mpt::ufmt::HEX(isfx)), macros.szMidiSFXExt[isfx]);
+		macros.SFx[i] = conf.Read<std::string>(U_("Zxx Macros"), MPT_UFORMAT("SF{}")(mpt::ufmt::HEX(i)), macros.SFx[i]);
 	}
-	for(int izxx = 0; izxx < 128; izxx++)
+	for(int i = 0; i < kZxxMacros; i++)
 	{
-		mpt::String::WriteAutoBuf(macros.szMidiZXXExt[izxx]) = conf.Read<std::string>(U_("Zxx Macros"), MPT_UFORMAT("Z{}")(mpt::ufmt::HEX0<2>(izxx | 0x80)), macros.szMidiZXXExt[izxx]);
+		macros.Zxx[i] = conf.Read<std::string>(U_("Zxx Macros"), MPT_UFORMAT("Z{}")(mpt::ufmt::HEX0<2>(i | 0x80)), macros.Zxx[i]);
 	}
 
 
@@ -1342,13 +1342,13 @@ void TrackerSettings::SaveSettings()
 	// Save default macro configuration
 	MIDIMacroConfig macros;
 	theApp.GetDefaultMidiMacro(macros);
-	for(int isfx = 0; isfx < 16; isfx++)
+	for(int isfx = 0; isfx < kSFxMacros; isfx++)
 	{
-		conf.Write<std::string>(U_("Zxx Macros"), MPT_UFORMAT("SF{}")(mpt::ufmt::HEX(isfx)), macros.szMidiSFXExt[isfx]);
+		conf.Write<std::string>(U_("Zxx Macros"), MPT_UFORMAT("SF{}")(mpt::ufmt::HEX(isfx)), macros.SFx[isfx]);
 	}
-	for(int izxx = 0; izxx < 128; izxx++)
+	for(int izxx = 0; izxx < kZxxMacros; izxx++)
 	{
-		conf.Write<std::string>(U_("Zxx Macros"), MPT_UFORMAT("Z{}")(mpt::ufmt::HEX0<2>(izxx | 0x80)), macros.szMidiZXXExt[izxx]);
+		conf.Write<std::string>(U_("Zxx Macros"), MPT_UFORMAT("Z{}")(mpt::ufmt::HEX0<2>(izxx | 0x80)), macros.Zxx[izxx]);
 	}
 
 	// MRU list
