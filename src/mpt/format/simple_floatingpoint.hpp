@@ -228,7 +228,7 @@ inline Tstring format_simple_floatingpoint_stream(const T & x, const format_simp
 template <typename Tstring, typename T, std::enable_if_t<std::is_floating_point<T>::value, bool> = true>
 inline Tstring format_simple(const T & x, const format_simple_spec<Tstring> & format) {
 	using format_string_type = typename mpt::select_format_string_type<Tstring>::type;
-	const format_simple_spec<format_string_type> f = mpt::transcode_format_spec_simple< format_string_type>(format);
+	const format_simple_spec<format_string_type> f = mpt::transcode_format_spec_simple<format_string_type>(format);
 	return mpt::transcode<Tstring>(mpt::format_simple_floatingpoint_stream<format_string_type>(x, f));
 }
 
