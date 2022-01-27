@@ -166,8 +166,8 @@ struct string_traits {
 	}
 
 	static inline string_type pad(string_type str, std::size_t left, std::size_t right) {
-		str.insert(str.begin(), left, char_type(' '));
-		str.insert(str.end(), right, char_type(' '));
+		str.insert(str.begin(), left, char_constants<char_type>::space);
+		str.insert(str.end(), right, char_constants<char_type>::space);
 		return str;
 	}
 };
@@ -203,11 +203,11 @@ struct string_traits<CStringA> {
 	static inline string_type pad(const string_type & str, size_type left, size_type right) {
 		string_type tmp;
 		while (left--) {
-			tmp.AppendChar(char_type(' '));
+			tmp.AppendChar(char_constants<char_type>::space);
 		}
 		tmp += str;
 		while (right--) {
-			tmp.AppendChar(char_type(' '));
+			tmp.AppendChar(char_constants<char_type>::space);
 		}
 		return tmp;
 	}
@@ -242,11 +242,11 @@ struct string_traits<CStringW> {
 	static inline string_type pad(const string_type & str, size_type left, size_type right) {
 		string_type tmp;
 		while (left--) {
-			tmp.AppendChar(char_type(' '));
+			tmp.AppendChar(char_constants<char_type>::space);
 		}
 		tmp += str;
 		while (right--) {
-			tmp.AppendChar(char_type(' '));
+			tmp.AppendChar(char_constants<char_type>::space);
 		}
 		return tmp;
 	}
