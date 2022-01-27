@@ -152,15 +152,13 @@ public:
 
 template <typename Tostream, typename T>
 inline void format_simple_floatingpoint_apply_stream_format(Tostream & o, const format_simple_spec & format, const T &) {
-	if (format.GetGroup() > 0)
-	{
+	if (format.GetGroup() > 0) {
 		o.imbue(std::locale(o.getloc(), new NumPunct<typename Tostream::char_type>(format.GetGroup(), format.GetGroupSep())));
 	}
 	format_simple_flags f = format.GetFlags();
 	std::size_t width = format.GetWidth();
 	int precision = format.GetPrecision();
-	if (precision != -1 && width != 0 && !(f & format_simple_base::NotaFix) && !(f & format_simple_base::NotaSci))
-	{
+	if (precision != -1 && width != 0 && !(f & format_simple_base::NotaFix) && !(f & format_simple_base::NotaSci)) {
 		// fixup:
 		// precision behaves differently from .#
 		// avoid default format when precision and width are set
@@ -187,24 +185,17 @@ inline void format_simple_floatingpoint_apply_stream_format(Tostream & o, const 
 	} else if (f & format_simple_base::FillNul) {
 		o << std::setw(width) << std::setfill(typename Tostream::char_type('0'));
 	}
-	if (precision != -1)
-	{
+	if (precision != -1) {
 		o << std::setprecision(precision);
-	} else
-	{
-		if constexpr (std::is_floating_point<T>::value)
-		{
-			if (f & format_simple_base::NotaNrm)
-			{
+	} else {
+		if constexpr (std::is_floating_point<T>::value) {
+			if (f & format_simple_base::NotaNrm) {
 				o << std::setprecision(std::numeric_limits<T>::max_digits10);
-			} else if (f & format_simple_base::NotaFix)
-			{
+			} else if (f & format_simple_base::NotaFix) {
 				o << std::setprecision(std::numeric_limits<T>::digits10);
-			} else if (f & format_simple_base::NotaSci)
-			{
+			} else if (f & format_simple_base::NotaSci) {
 				o << std::setprecision(std::numeric_limits<T>::max_digits10 - 1);
-			} else
-			{
+			} else {
 				o << std::setprecision(std::numeric_limits<T>::max_digits10);
 			}
 		}
