@@ -95,11 +95,11 @@ inline Tstring format_simple_floatingpoint_postprocess_width(Tstring str, const 
 			}
 		}
 		if (str.length() - std::distance(str.begin(), pos) < width) {
-			str.insert(pos, width - str.length() - std::distance(str.begin(), pos), '0');
+			str.insert(pos, width - str.length() - std::distance(str.begin(), pos), mpt::char_constants<typename Tstring::value_type>::number0);
 		}
 	} else {
 		if (str.length() < width) {
-			str.insert(0, width - str.length(), ' ');
+			str.insert(0, width - str.length(), mpt::char_constants<typename Tstring::value_type>::space);
 		}
 	}
 	return str;
