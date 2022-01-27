@@ -833,6 +833,8 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					ProcessMIDIMacro(playState, nChn, false, m_MidiCfg.SFx[chn.nActiveMacro], chn.rowCommand.param, 0);
 				else
 					ProcessMIDIMacro(playState, nChn, false, m_MidiCfg.Zxx[param & 0x7F], chn.rowCommand.param, 0);
+				break;
+
 			default:
 				break;
 			}
