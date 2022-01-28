@@ -2536,7 +2536,7 @@ void CSoundFile::ProcessMacroOnChannel(CHANNELINDEX nChn)
 			if(chn.rowCommand.param < 0x80)
 				ProcessMIDIMacro(m_PlayState, nChn, (chn.rowCommand.command == CMD_SMOOTHMIDI), m_MidiCfg.SFx[chn.nActiveMacro], chn.rowCommand.param);
 			else
-				ProcessMIDIMacro(m_PlayState, nChn, (chn.rowCommand.command == CMD_SMOOTHMIDI), m_MidiCfg.Zxx[chn.rowCommand.param & 0x7F], 0);
+				ProcessMIDIMacro(m_PlayState, nChn, (chn.rowCommand.command == CMD_SMOOTHMIDI), m_MidiCfg.Zxx[chn.rowCommand.param & 0x7F], chn.rowCommand.param);
 		}
 	}
 }
