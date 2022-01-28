@@ -70,6 +70,13 @@ mpt::ustring FileHistory::AsISO8601() const
 }
 
 
+CSoundFile::PlayState::PlayState()
+{
+	std::fill(std::begin(Chn), std::end(Chn), ModChannel{});
+	m_midiMacroScratchSpace.reserve(kMacroLength);  // Note: If macros ever become variable-length, the scratch space needs to be at least one byte longer than the longest macro in the file for end-of-SysEx insertion to stay allocation-free in the mixer!
+}
+
+
 //////////////////////////////////////////////////////////
 // CSoundFile
 

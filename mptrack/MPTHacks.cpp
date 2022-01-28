@@ -460,7 +460,7 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 	{
 		for(const auto &macro : m_SndFile.m_MidiCfg)
 		{
-			for(const auto c : macro)
+			for(const auto c : std::string_view{macro})
 			{
 				if(c == 's')
 				{

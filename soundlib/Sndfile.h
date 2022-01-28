@@ -583,11 +583,17 @@ public:
 		CHANNELINDEX ChnMix[MAX_CHANNELS]; // Index of channels in Chn to be actually mixed
 		ModChannel Chn[MAX_CHANNELS];      // Mixing channels... First m_nChannels channels are master channels (i.e. they are never NNA channels)!
 
-	public:
-		PlayState()
+		struct MIDIMacroEvaluationResults
 		{
-			std::fill(std::begin(Chn), std::end(Chn), ModChannel());
-		}
+			std::map<PLUGINDEX, float> pluginDryWetRatio;
+			std::map<std::pair<PLUGINDEX, PlugParamIndex>, PlugParamValue> pluginParameter;
+		};
+
+		std::vector<uint8> m_midiMacroScratchSpace;
+		std::optional<MIDIMacroEvaluationResults> m_midiMacroEvaluationResults;
+
+	public:
+		PlayState();
 
 		void ResetGlobalVolumeRamping()
 		{
@@ -1109,9 +1115,10 @@ protected:
 	void GlobalVolSlide(ModCommand::PARAM param, uint8 &nOldGlobalVolSlide);
 
 	void ProcessMacroOnChannel(CHANNELINDEX nChn);
-	void ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, const char *macro, uint8 param = 0, PLUGINDEX plugin = 0);
-	float CalculateSmoothParamChange(float currentValue, float param) const;
-	uint32 SendMIDIData(CHANNELINDEX nChn, bool isSmooth, const unsigned char *macro, uint32 macroLen, PLUGINDEX plugin);
+	void ProcessMIDIMacro(PlayState &playState, CHANNELINDEX nChn, bool isSmooth, const MIDIMacroConfigData::Macro &macro, uint8 param = 0, PLUGINDEX plugin = 0);
+	void ParseMIDIMacro(PlayState &playState, CHANNELINDEX nChn, bool isSmooth, const mpt::span<const char> macro, mpt::span<uint8> &out, uint8 param = 0, PLUGINDEX plugin = 0) const;
+	static float CalculateSmoothParamChange(const PlayState &playState, float currentValue, float param);
+	void SendMIDIData(PlayState &playState, CHANNELINDEX nChn, bool isSmooth, const mpt::span<const uint8> macro, PLUGINDEX plugin);
 	void SendMIDINote(CHANNELINDEX chn, uint16 note, uint16 volume);
 
 	int SetupChannelFilter(ModChannel &chn, bool bReset, int envModifier = 256) const;
@@ -1237,12 +1244,12 @@ public:
 	void ProcessStereoSeparation(long countChunk);
 
 private:
-	PLUGINDEX GetChannelPlugin(CHANNELINDEX nChn, PluginMutePriority respectMutes) const;
-	PLUGINDEX GetActiveInstrumentPlugin(CHANNELINDEX, PluginMutePriority respectMutes) const;
-	IMixPlugin *GetChannelInstrumentPlugin(CHANNELINDEX chn) const;
+	PLUGINDEX GetChannelPlugin(const PlayState &playState, CHANNELINDEX nChn, PluginMutePriority respectMutes) const;
+	static PLUGINDEX GetActiveInstrumentPlugin(const ModChannel &chn, PluginMutePriority respectMutes);
+	IMixPlugin *GetChannelInstrumentPlugin(const ModChannel &chn) const;
 
 public:
-	PLUGINDEX GetBestPlugin(CHANNELINDEX nChn, PluginPriority priority, PluginMutePriority respectMutes) const;
+	PLUGINDEX GetBestPlugin(const PlayState &playState, CHANNELINDEX nChn, PluginPriority priority, PluginMutePriority respectMutes) const;
 
 };
 
