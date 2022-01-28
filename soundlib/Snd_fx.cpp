@@ -4904,7 +4904,7 @@ void CSoundFile::ProcessMIDIMacro(CHANNELINDEX nChn, bool isSmooth, const char *
 		} else if(macro[pos] == 'z')
 		{
 			// Zxx parameter
-			data = param & 0x7F;
+			data = param;
 			if(isSmooth && chn.lastZxxParam < 0x80
 				&& (outPos < 3 || out[outPos - 3] != 0xF0 || out[outPos - 2] < 0xF0))
 			{
