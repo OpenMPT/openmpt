@@ -3355,7 +3355,7 @@ void CModTree::OnXButtonUp(UINT nFlags, UINT nButton, CPoint point)
 	{
 		if(nButton == XBUTTON1)
 		{
-			InstrumentLibraryChDir(P_(".."), false);
+			InstrumentLibraryChDir(P_(".."), !m_SongFileName.empty());
 		} else if(nButton == XBUTTON2)
 		{
 			const auto &previousPath = CMainFrame::GetMainFrame()->GetUpperTreeview()->m_previousPath;
