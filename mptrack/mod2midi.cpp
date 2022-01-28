@@ -43,14 +43,25 @@ namespace MidiExport
 
 	class MidiTrack final : public IMidiPlugin
 	{
+		struct MidiChannelState
+		{
+			MidiChannelState()
+			{
+				lastModChannel.fill(CHANNELINDEX_INVALID);
+				panning.fill(64);
+			}
+
+			std::array<CHANNELINDEX, 16> lastModChannel;
+			std::array<uint8, 16> panning;
+		};
+
 		ModInstrument m_instr;
 		const ModInstrument *const m_oldInstr;
 		const CSoundFile &m_sndFile;
 		const GetLengthType &m_songLength;
 		MidiTrack *const m_tempoTrack;  // Pointer to tempo track, nullptr if this is the tempo track
 		decltype(m_MidiCh) *m_lastMidiCh = nullptr;
-		std::array<CHANNELINDEX, 16> m_lastModChannel;
-		std::array<uint8, 16> m_panning;
+		std::shared_ptr<MidiChannelState> m_channelState;
 		std::array<decltype(m_instr.midiPWD), 16> m_pitchWheelDepth = { 0 };
 
 		std::vector<std::array<char, 4>> m_queuedEvents;
@@ -117,8 +128,10 @@ namespace MidiExport
 			// Write instrument / song name
 			WriteString(kTrackName, name);
 			m_pMixStruct->pMixPlugin = this;
-			m_lastModChannel.fill(CHANNELINDEX_INVALID);
-			m_panning.fill(64);
+			if(m_tempoTrack == nullptr || m_overlappingInstruments)
+				m_channelState = std::make_shared<MidiChannelState>();
+			else
+				m_channelState = m_tempoTrack->m_channelState;
 		}
 
 		void WritePitchWheelDepth(MidiChannel midiChOverride = MidiNoChannel)
@@ -207,12 +220,12 @@ namespace MidiExport
 
 			for(uint8 midiCh = 0; midiCh < 16; midiCh++)
 			{
-				if(m_lastModChannel[midiCh] == CHANNELINDEX_INVALID)
+				if(m_channelState->lastModChannel[midiCh] == CHANNELINDEX_INVALID)
 					continue;
-				char newPanning = static_cast<char>(std::clamp(m_sndFile.m_PlayState.Chn[m_lastModChannel[midiCh]].nRealPan / 2, 0, 127));
-				if(m_panning[midiCh] == newPanning)
+				char newPanning = static_cast<char>(std::clamp(m_sndFile.m_PlayState.Chn[m_channelState->lastModChannel[midiCh]].nRealPan / 2, 0, 127));
+				if(m_channelState->panning[midiCh] == newPanning)
 					continue;
-				m_panning[midiCh] = newPanning;
+				m_channelState->panning[midiCh] = newPanning;
 				std::array<char, 4> midiData = {0xB0 | midiCh, 0x0A, newPanning, 0};
 				m_queuedEvents.push_back(midiData);
 			}
@@ -330,7 +343,7 @@ namespace MidiExport
 			}
 			SynchronizeMidiChannelState();
 			if(trackChannel < std::size(m_sndFile.m_PlayState.Chn))
-				m_lastModChannel[GetMidiChannel(m_sndFile.m_PlayState.Chn[trackChannel], trackChannel)] = trackChannel;
+				m_channelState->lastModChannel[GetMidiChannel(m_sndFile.m_PlayState.Chn[trackChannel], trackChannel)] = trackChannel;
 			IMidiPlugin::MidiCommand(instr, note, vol, trackChannel);
 		}
 
