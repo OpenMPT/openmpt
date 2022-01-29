@@ -134,10 +134,7 @@ private:
 		} else if(!unique_size(val))
 		{
 			// order of size check matters
-			if(!val)
-			{
-				val = mpt::to_underlying(Enum::Int16);
-			} else if((val & 0b0'0011'00'0) == 0b0'0011'00'0)
+			if((val & 0b0'0011'00'0) == 0b0'0011'00'0)
 			{
 				val = mpt::to_underlying(Enum::Int24);
 			} else if(val & 0b0'0010'00'0)
@@ -164,9 +161,6 @@ private:
 				{
 					val = mpt::to_underlying(Enum::Int8);
 				}
-			} else
-			{
-				val = mpt::to_underlying(Enum::Int16);
 			}
 		} else
 		{
