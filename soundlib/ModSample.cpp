@@ -148,7 +148,7 @@ void ModSample::Initialize(MODTYPE type)
 	rootNote = 0;
 	filename = "";
 
-	SetDefaultCuePoints();
+	RemoveAllCuePoints();
 }
 
 
