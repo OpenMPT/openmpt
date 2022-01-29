@@ -621,8 +621,10 @@ struct SymInstrument
 		}
 
 		// This must be applied last because some sample processors are time-dependent and Symphonie would be doing this during playback instead
+		mptSmp.RemoveAllCuePoints();
 		if(type == Sustain && numRepetitions > 0 && loopLen > 0)
 		{
+			mptSmp.cues[0] = loopStart + loopLen * (numRepetitions + 1u);
 			mptSmp.nSustainStart = loopStart;  // This is of purely informative value and not used for playback
 			mptSmp.nSustainEnd   = loopStart + loopLen;
 
@@ -1218,7 +1220,7 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 	static_assert(MAX_SAMPLES >= MAX_INSTRUMENTS);
 	m_nSamples = std::max(m_nSamples, m_nInstruments);
 
-	// Supporting this is probably rather useless, as the paths will always be Amiga paths. We just take the filename without path for now.
+	// Supporting this is probably rather useless, as the paths will always be full Amiga paths. We just take the filename without path for now.
 	if(externalSamples)
 	{
 #ifdef MPT_EXTERNAL_SAMPLES
@@ -1452,7 +1454,8 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 									break;
 
 								case SymEvent::KeyOff:
-									// TODO needs note
+									if(m.note == NOTE_NONE)
+										m.note = chnState.lastNote;
 									m.volcmd = VOLCMD_OFFSET;
 									m.vol = 1;
 									break;
@@ -1925,8 +1928,7 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		InitChannel(chn);
 		ChnSettings[chn].nPan = (chn & 1) ? 256 : 0;
-		if(useDSP)
-			ChnSettings[chn].nMixPlugin = 1;  // For MIDI macros controlling the echo DSP
+		ChnSettings[chn].nMixPlugin = useDSP ? 1 : 0;  // For MIDI macros controlling the echo DSP
 	}
 
 	m_modFormat.formatName = U_("Symphonie");
