@@ -400,14 +400,14 @@ BEGIN
     LTEXT           "Static",IDC_STATIC_WELCOME_STATISTICS,30,54,216,78
     CONTROL         "&Use a big font in the pattern editor",IDC_CHECK2,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,138,246,10
+    LTEXT           "Use the following artist &name in modules by default (can be changed individually per module, not supported by all formats):",IDC_STATIC,6,156,240,18
+    EDITTEXT        IDC_EDIT2,6,174,240,12,ES_AUTOHSCROLL
     LTEXT           "&Default keyboard scheme:",IDC_STATIC,6,194,108,8
     COMBOBOX        IDC_COMBO1,114,192,132,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     LTEXT           "Scan for existing VST plugins in the following location:",IDC_STATIC,6,214,172,8
     PUSHBUTTON      "&Scan",IDC_BUTTON2,198,210,50,14
     EDITTEXT        IDC_EDIT1,6,226,240,12,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
     PUSHBUTTON      "&More Settings",IDC_BUTTON1,6,248,60,14
-    LTEXT           "Use the following artist &name  in modules by default (can be changed individually per module, not supported by all formats):",IDC_STATIC,6,156,240,18
-    EDITTEXT        IDC_EDIT2,6,174,240,12,ES_AUTOHSCROLL
 END
 
 IDD_UPDATE DIALOGEX 0, 0, 196, 138
