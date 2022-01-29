@@ -38,6 +38,7 @@
 #include "openmpt/soundbase/SampleConvert.hpp"
 #include "openmpt/soundbase/SampleDecode.hpp"
 #include "openmpt/soundbase/SampleEncode.hpp"
+#include "openmpt/soundbase/SampleFormat.hpp"
 #include "../soundlib/SampleCopy.h"
 #include "../soundlib/SampleNormalize.h"
 #include "../soundlib/ModSampleCopy.h"
