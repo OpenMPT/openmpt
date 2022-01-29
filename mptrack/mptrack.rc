@@ -386,12 +386,12 @@ BEGIN
     CONTROL         "&Adjust Offset Commands in Patterns",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,90,133,10
 END
 
-IDD_WECLOME DIALOGEX 0, 0, 257, 231
+IDD_WECLOME DIALOGEX 0, 0, 257, 266
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Welcome to OpenMPT!"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    DEFPUSHBUTTON   "&OK",IDOK,198,212,50,14
+    DEFPUSHBUTTON   "&OK",IDOK,198,248,50,14
     LTEXT           "Please review the following settings before using this software:",IDC_STATIC,6,6,246,8
     CONTROL         "&Automatically check for new versions of OpenMPT",IDC_CHECK1,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,24,246,10
@@ -400,12 +400,14 @@ BEGIN
     LTEXT           "Static",IDC_STATIC_WELCOME_STATISTICS,30,54,216,78
     CONTROL         "&Use a big font in the pattern editor",IDC_CHECK2,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,138,246,10
-    LTEXT           "&Default keyboard scheme:",IDC_STATIC,6,159,108,8
-    COMBOBOX        IDC_COMBO1,114,156,132,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Scan for existing VST plugins in the following location:",IDC_STATIC,6,178,172,8
-    PUSHBUTTON      "&Scan",IDC_BUTTON2,198,175,50,14
-    EDITTEXT        IDC_EDIT1,6,191,240,12,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
-    PUSHBUTTON      "&More Settings",IDC_BUTTON1,6,212,60,14
+    LTEXT           "&Default keyboard scheme:",IDC_STATIC,6,194,108,8
+    COMBOBOX        IDC_COMBO1,114,192,132,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Scan for existing VST plugins in the following location:",IDC_STATIC,6,214,172,8
+    PUSHBUTTON      "&Scan",IDC_BUTTON2,198,210,50,14
+    EDITTEXT        IDC_EDIT1,6,226,240,12,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
+    PUSHBUTTON      "&More Settings",IDC_BUTTON1,6,248,60,14
+    LTEXT           "Use the following artist &name  in modules by default (can be changed individually per module, not supported by all formats):",IDC_STATIC,6,156,240,18
+    EDITTEXT        IDC_EDIT2,6,174,240,12,ES_AUTOHSCROLL
 END
 
 IDD_UPDATE DIALOGEX 0, 0, 196, 138
@@ -811,7 +813,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 250
         TOPMARGIN, 7
-        BOTTOMMARGIN, 224
+        BOTTOMMARGIN, 259
     END
 
     IDD_UPDATE, DIALOG
