@@ -1913,7 +1913,7 @@ void CViewSample::OnMouseMove(UINT flags, CPoint point)
 					linear = sample.sample16()[offset] / 32768.0;
 				else
 					linear = sample.sample8()[offset] / 128.0;
-				pMainFrm->SetXInfoText(MPT_TFORMAT("Value At Cursor: {}% / {}")(mpt::tfmt::fix(linear, 3), CModDoc::LinearToDecibels(std::abs(linear), 1.0)).c_str());
+				pMainFrm->SetXInfoText(MPT_TFORMAT("Value At Cursor: {}% / {}")(mpt::tfmt::fix(linear * 100.0, 3), CModDoc::LinearToDecibels(std::abs(linear), 1.0)).c_str());
 			} else
 			{
 				pMainFrm->SetInfoText(_T(""));
