@@ -15,6 +15,7 @@ is just a high-level summary.
  *  [**Bug**] Avoid NaNs and infinite values with custom tunings and in the
     I3DL2Reverb plugin.
 
+ *  MIDI macros are now evaluated when seeking.
  *  The letter "z" is now evaluated in fixed MIDI macros (Z80...ZFF) the same
     way as in Impulse Tracker.
  *  MOD: Loosened VBlank timing heuristics so that "frame of mind" by Dascon
