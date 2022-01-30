@@ -7,6 +7,21 @@ is just a high-level summary.
 
 ### libopenmpt 0.5.16-pre
 
+ *  [**Bug**] Possible hang with malformed DMF, DSM, MED and OKT files
+    containing 65536 or more patterns when destroying the module.
+ *  [**Bug**] Avoid NaNs and infinite values with custom tunings.
+
+ *  The letter "z" is now evaluated in fixed MIDI macros (Z80...ZFF) the same
+    way as in Impulse Tracker.
+ *  MOD: Loosened VBlank timing heuristics so that "frame of mind" by Dascon
+    plays correctly.
+ *  MOD: Validate the contents of "hidden" patterns beyond the end of the order
+    list when the file size matches the expected size when only taken "official"
+    patterns into account. This fixes Shofixti Ditty.mod from Star Control 2
+    while keeping other (partly broken) modules working.
+ *  MED: Command 20 (reverse sample) is now only applied when it's next to a
+    note.
+
 ### libopenmpt 0.5.15 (2021-12-23)
 
  *  [**Sec**] Possible out-of-bounds read of stack-allocated array in malformed
