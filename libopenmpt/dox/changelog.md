@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.4.29-pre
+### libopenmpt 0.4.29 (2022-01-30)
 
 ### libopenmpt 0.4.28 (2022-01-30)
 
