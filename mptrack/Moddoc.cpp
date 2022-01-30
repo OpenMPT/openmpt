@@ -672,8 +672,12 @@ void CModDoc::InitializeMod()
 }
 
 
-bool CModDoc::SetDefaultChannelColors()
+bool CModDoc::SetDefaultChannelColors(CHANNELINDEX minChannel, CHANNELINDEX maxChannel)
 {
+	LimitMax(minChannel, GetNumChannels());
+	LimitMax(maxChannel, GetNumChannels());
+	if(maxChannel < minChannel)
+		std::swap(minChannel, maxChannel);
 	bool modified = false;
 	if(TrackerSettings::Instance().defaultRainbowChannelColors != DefaultChannelColors::NoColors)
 	{
@@ -681,16 +685,16 @@ bool CModDoc::SetDefaultChannelColors()
 		CHANNELINDEX numGroups = 0;
 		if(rainbow)
 		{
-			for(CHANNELINDEX i = 1; i < GetNumChannels(); i++)
+			for(CHANNELINDEX i = minChannel + 1u; i < maxChannel; i++)
 			{
 				if(m_SndFile.ChnSettings[i].szName.empty() || m_SndFile.ChnSettings[i].szName != m_SndFile.ChnSettings[i - 1].szName)
 					numGroups++;
 			}
 		}
 		const double hueFactor = rainbow ? (1.5 * mpt::numbers::pi) / std::max(1, numGroups - 1) : 1000.0;  // Three quarters of the color wheel, red to purple
-		for(CHANNELINDEX i = 0, group = 0; i < GetNumChannels(); i++)
+		for(CHANNELINDEX i = minChannel, group = minChannel; i < maxChannel; i++)
 		{
-			if(i > 0 && (m_SndFile.ChnSettings[i].szName.empty() || m_SndFile.ChnSettings[i].szName != m_SndFile.ChnSettings[i - 1].szName))
+			if(i > minChannel && (m_SndFile.ChnSettings[i].szName.empty() || m_SndFile.ChnSettings[i].szName != m_SndFile.ChnSettings[i - 1].szName))
 				group++;
 			const double hue = group * hueFactor;  // 0...2pi
 			const double saturation = 0.3;         // 0...2/3
@@ -707,7 +711,7 @@ bool CModDoc::SetDefaultChannelColors()
 		}
 	} else
 	{
-		for(CHANNELINDEX i = 0; i < GetNumChannels(); i++)
+		for(CHANNELINDEX i = minChannel; i < maxChannel; i++)
 		{
 			if(m_SndFile.ChnSettings[i].color != ModChannelSettings::INVALID_COLOR)
 			{
