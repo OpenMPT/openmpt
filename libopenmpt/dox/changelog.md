@@ -7,6 +7,14 @@ is just a high-level summary.
 
 ### libopenmpt 0.3.37-pre
 
+ *  [**Bug**] Possible hang with malformed DMF, DSM and OKT files containing
+    65536 or more patterns when destroying the module.
+
+ *  The letter "z" is now evaluated in fixed MIDI macros (Z80...ZFF) the same
+    way as in Impulse Tracker.
+ *  MOD: Loosened VBlank timing heuristics so that "frame of mind" by Dascon
+    plays correctly.
+
 ### libopenmpt 0.3.36 (2021-12-23)
 
  *  [**Bug**] Fixed various undefined behaviour found with ubsan.
