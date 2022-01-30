@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.3.38-pre
+
 ### libopenmpt 0.3.37 (2022-01-30)
 
  *  [**Bug**] Possible hang with malformed DMF, DSM and OKT files containing
