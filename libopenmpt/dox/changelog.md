@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.6.2-pre
+
 ### libopenmpt 0.6.1 (2022-01-30)
 
  *  [**Bug**] Linking libmpg123 no longer fails on OpenBSD.
