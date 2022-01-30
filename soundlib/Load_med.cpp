@@ -549,8 +549,11 @@ static void ConvertMEDEffect(ModCommand &m, const uint8 command, const bool is8c
 	case 0x20:  // Reverse sample + skip samples
 		if(m.param == 0 && m.vol == 0)
 		{
-			m.command = CMD_S3MCMDEX;
-			m.param = 0x9F;
+			if(m.IsNote())
+			{
+				m.command = CMD_S3MCMDEX;
+				m.param = 0x9F;
+			}
 		} else
 		{
 			// Skip given number of samples
