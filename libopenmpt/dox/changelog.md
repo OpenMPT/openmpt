@@ -10,7 +10,7 @@ is just a high-level summary.
 ### libopenmpt 0.4.29 (2022-01-30)
 
  *  [**Bug**] This release is identical to 0.4.28. It happened due to running
-    the release script twice. Sorry for the confusion.
+    the release script twice. We are sorry for the confusion.
 
 ### libopenmpt 0.4.28 (2022-01-30)
 
