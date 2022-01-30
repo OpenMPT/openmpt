@@ -273,6 +273,7 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const std::vector<CHANNELINDEX> &newOrde
 		} else
 		{
 			m_SndFile.InitChannel(chn);
+			SetDefaultChannelColors(chn);
 		}
 	}
 	// Reset MOD panning (won't affect other module formats)
@@ -1001,8 +1002,8 @@ BOOL CModDoc::ShrinkPattern(PATTERNINDEX nPattern)
 /////////////////////////////////////////////////////////////////////////////////////////
 // Copy/Paste envelope
 
-static constexpr const CHAR *pszEnvHdr = "ModPlug Tracker Envelope\r\n";
-static constexpr const CHAR *pszEnvFmt = "%d,%d,%d,%d,%d,%d,%d,%d\r\n";
+static constexpr const char pszEnvHdr[] = "ModPlug Tracker Envelope\r\n";
+static constexpr const char pszEnvFmt[] = "%d,%d,%d,%d,%d,%d,%d,%d\r\n";
 
 static bool EnvelopeToString(CStringA &s, const InstrumentEnvelope &env)
 {
@@ -1029,7 +1030,7 @@ static bool EnvelopeToString(CStringA &s, const InstrumentEnvelope &env)
 static bool StringToEnvelope(const std::string_view &s, InstrumentEnvelope &env, const CModSpecifications &specs)
 {
 	uint32 susBegin = 0, susEnd = 0, loopBegin = 0, loopEnd = 0, bSus = 0, bLoop = 0, bCarry = 0, nPoints = 0, releaseNode = ENV_RELEASE_NODE_UNSET;
-	size_t length = s.size(), pos = strlen(pszEnvHdr);
+	size_t length = s.size(), pos = std::size(pszEnvHdr) - 1;
 	if(length <= pos || mpt::CompareNoCaseAscii(s.data(), pszEnvHdr, pos - 2))
 	{
 		return false;

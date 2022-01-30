@@ -296,7 +296,9 @@ public:
 	BOOL ExpandPattern(PATTERNINDEX nPattern);
 	BOOL ShrinkPattern(PATTERNINDEX nPattern);
 
-	bool SetDefaultChannelColors();
+	bool SetDefaultChannelColors() { return SetDefaultChannelColors(0, GetNumChannels()); }
+	bool SetDefaultChannelColors(CHANNELINDEX channel) { return SetDefaultChannelColors(channel, channel + 1u); }
+	bool SetDefaultChannelColors(CHANNELINDEX minChannel, CHANNELINDEX maxChannel);
 	bool SupportsChannelColors() const { return GetModType() & (MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT); }
 
 	bool CopyEnvelope(INSTRUMENTINDEX nIns, EnvelopeType nEnv);
