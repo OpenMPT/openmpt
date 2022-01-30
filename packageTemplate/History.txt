@@ -31,27 +31,76 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.30.02.00 (xx January 2022, revision 16432)
+v1.30.02.00 (30 January 2022, revision 16761)
 ---------------------------------------------
 Tree view
 - [Fix] <js> Display of large directories could be rather slow due to trying to resolve links for pretty much any file.
+- [Fix] <js> When browsing the contents of a module, the "back" mouse button now behaves the same as the backspace key (it goes back to the directory containing the module).
+
+General tab
+- [Imp] <js> Added tooltips to disabled controls explaining why they are disabled.
 
 Pattern tab
+- [New] <js> New option "Play whole row when navigating" can be found in the general settings to play the current row when navigating vertically.
+- [New] <js> New keyboard shortcut "Toggle row playback when navigating" to toggle aforementioned option without having to visit general settings.
+- [Imp] <js> Seeking in the module now updates filter state, plugin dry / wet ratio and plugin parameter changes from MIDI macros (http://bugs.openmpt.org/view.php?id=1497).
 - [Imp] <js> Better display of finetune command semantics when there's an instrument number next to the command (http://bugs.openmpt.org/view.php?id=1536).
 - [Fix] <js> Note Properties: Switching to / from an extended command broke effect parameter display (http://bugs.openmpt.org/view.php?id=1535).
 
 Sample tab
 - [Imp] <js> Added timeline context menu entry to quickly add a cue point if there are any unused cue points (http://forum.openmpt.org/index.php?topic=6767.0).
+- [Imp] <js> Added .sam to recognized raw sample extensions (http://bugs.openmpt.org/view.php?id=1546).
+- [Imp] <js> When an exising sample already uses the .s3i extension, offer it as the default format to save the sample (http://bugs.openmpt.org/view.php?id=1546).
+- [Mod] <js> Allow sustain loops to be edited even if the current format doesn't support them, in case they were imported from another format (http://bugs.openmpt.org/view.php?id=1544).
+- [Mod] <js> Newly created samples no longer set the default cue points to multiplies of 2048 samples (http://bugs.openmpt.org/view.php?id=1540).
 - [Fix] <js> Fixed a crash when hovering sample display of a sample slot that failed to load an external sample.
+- [Fix] <js> The sample value shown as percentage in the status bar was displayed as a value between 0 and 1 instead of 0 and 100 as intended.
+
+Mod Conversion
+- [Fix] <js> MOD / XM command EBF is now converted to MPTM / IT /S3M command DFE instead of DFF, as the latter slides up, not down.
+
+Playback
+- [Mod] <js> The letter "z" is now evaluated in fixed MIDI macros (Z80...ZFF) the same way as in Impulse Tracker.
 
 MPTM
-- [Fix] <js> Avoid using NaN values for tuning when reading corrupted custom tunings.
+- [Fix] <js> Avoid using NaN or infinite values for tuning when reading corrupted custom tunings.
+
+S3M
+- [Fix] <js> Introducing the "Send OPL key-off when triggering notes" compatibility setting broke retrigger for OPL notes again (they retriggered rather than not retriggering).
+- [Fix] <js> Retriggering a note no longer resets its pitch after a portamento, just like in IT.
+- [Fix] <js> Partially implement retrigger behaviour for stopped notes in SoundBlaster mode: Like in IT, it is not possible to retrigger a sample that has already stopped playing.
+
+MOD
+- [Imp] <js> Validate the contents of "hidden" patterns beyond the end of the order list when the file size matches the expected size when only taken "official" patterns into account. This fixes Shofixti Ditty.mod from Star Control 2 while keeping other (partly broken) modules working.
+- [Fix] <js> Loosened VBlank timing heuristics so that "frame of mind" by Dascon plays correctly.
 
 Other formats
 - [Fix] <js> DIGI: Improve compatibility with E3x reverse sample command.
+- [Fix] <js> DSym: Tempos < 32 were treated as tempo slides (http://bugs.openmpt.org/view.php?id=1545).
+- [Fix] <js> MED: Command 20 (reverse sample) should only be applied when it's next to a note.
+- [Fix] <js> SymMOD: Key-off command was not implemented properly.
+- [Fix] <js> Fixed a possible hang when closing a module containing 65536 or more patterns.
+
+Module cleanup
+- [Fix] <js> The automatic sample trimmer sometimes calculated incorrect sizes for samples played in reverse and bidi-looped samples (http://bugs.openmpt.org/view.php?id=1547).
+
+Misc
+- [Imp] <js> Improved startup time for OpenMPT configurations with many / large soundfonts. 
+- [Imp] <js> SF2: Support tuning on the preset level.
+- [Imp] <js> Added S3I to default format dropdown in sample editor settings.
+- [Imp] <js> The default artist name can now be set in the Welcome dialog.
+- [Mod] <js> When opening files, they are now first tried to be loaded files as modules, and only when that fails they are tried again as an archive. This fixes loading songs using plugins that store their plugin data chunk as a ZIP file (e.g. RetroPlug, http://bugs.openmpt.org/view.php?id=1548).
+- [Mod] <js> The VSTNeverUnloadAnyPlugin hidden setting introduced in OpenMPT 1.30.01.00 was moved from the INI category "BrokenPluginWorkarounds" to category "Broken Plugin Workarounds" (same as VSTMaskAllCrashes setting).
+- [Fix] <js> When trying to open a malformed file in a new OpenMPT instance and sending this file to an already running OpenMPT instance, the newly launched instance tried to open the file a second time after the other instance gave up, so two error messages were shown.
+- [Fix] <js> When passing files to an already running OpenMPT instance, this instance is now moved to the foreground before sending files over, not after. This makes it possible to instantly see error messages in that other instance before it has given control back to the newly launched instance.
+- [Fix] <js> The search filter in the compatibility settings dialog was case sensitive.
+- [Fix] <js> Fixed a crash when there's an invalid character in a MIDI macro string that wasn't entered by the user in the MIDI macro dialog but was already present in the file.
 
 Bundled plugins
 - [Fix] <js> I3DL2Reverb: Fix possible output of NaN values with some extremely impractical set of reverb parameters.
+
+Third-Party Libraries
+- [Imp] Update ancient (v2.0.0), nlohmann json (v3.10.5) and UnRAR (v6.1.4)
 
 
 v1.30.01.00 (23 December 2021, revision 16290)
@@ -177,7 +226,7 @@ Misc
 - [Reg] <jh> Remove hidden setting "Misc.ShowSettingsOnNewVersion".
 
 Bundled plugins
-- [Fix] <js> I3DL2Reverb: Fix possible output of NaN values with some extremely impractical set of reverb parameters.
+- [Fix] <js> I3DL2Reverb: Fix possible output of NaN values with some extremely impractical sets of reverb parameters.
 
 Third-Party Libraries
 - [Imp] Update PortAudio (v19.7.0), r8brain (v5.3), SoundTouch (v2.3.1) and UnRAR (v6.1.2)
