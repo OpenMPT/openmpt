@@ -93,7 +93,7 @@ protected:
 	TypeId m_Type;
 
 protected:
-	Version() noexcept
+	constexpr Version() noexcept
 		: m_SystemIsWindows(false)
 		, m_System()
 		, m_ServicePack()
@@ -102,11 +102,11 @@ protected:
 	}
 
 public:
-	static Version NoWindows() noexcept {
+	static constexpr Version NoWindows() noexcept {
 		return Version();
 	}
 
-	Version(mpt::osinfo::windows::Version::System system, mpt::osinfo::windows::Version::ServicePack servicePack, mpt::osinfo::windows::Version::Build build, mpt::osinfo::windows::Version::TypeId type) noexcept
+	constexpr Version(mpt::osinfo::windows::Version::System system, mpt::osinfo::windows::Version::ServicePack servicePack, mpt::osinfo::windows::Version::Build build, mpt::osinfo::windows::Version::TypeId type) noexcept
 		: m_SystemIsWindows(true)
 		, m_System(system)
 		, m_ServicePack(servicePack)
@@ -284,6 +284,10 @@ public:
 		return m_Build < build;
 	}
 
+	bool IsBefore(mpt::osinfo::windows::Version version) const noexcept {
+		return IsBefore(version.GetSystem(), version.GetServicePack(), version.GetBuild());
+	}
+
 	bool IsAtLeast(mpt::osinfo::windows::Version::System version) const noexcept {
 		if (!m_SystemIsWindows) {
 			return false;
@@ -334,6 +338,10 @@ public:
 			return true;
 		}
 		return m_Build >= build;
+	}
+
+	bool IsAtLeast(mpt::osinfo::windows::Version version) const noexcept {
+		return IsAtLeast(version.GetSystem(), version.GetServicePack(), version.GetBuild());
 	}
 
 	mpt::osinfo::windows::Version::System GetSystem() const noexcept {
