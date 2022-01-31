@@ -27,42 +27,29 @@ namespace OS
 namespace Windows
 {
 
-
-class Version
-	: public mpt::osinfo::windows::Version
+namespace Version
 {
 
-private:
+	inline constexpr auto WinNT4 = mpt::osinfo::windows::Version::WinNT4;
+	inline constexpr auto Win2000 = mpt::osinfo::windows::Version::Win2000;
+	inline constexpr auto WinXP = mpt::osinfo::windows::Version::WinXP;
+	inline constexpr auto WinXP64 = mpt::osinfo::windows::Version::WinXP64;
+	inline constexpr auto WinVista = mpt::osinfo::windows::Version::WinVista;
+	inline constexpr auto Win7 = mpt::osinfo::windows::Version::Win7;
+	inline constexpr auto Win8 = mpt::osinfo::windows::Version::Win8;
+	inline constexpr auto Win81 = mpt::osinfo::windows::Version::Win81;
+	inline constexpr auto Win10 = mpt::osinfo::windows::Version::Win10;
+	inline constexpr auto WinNewer = mpt::osinfo::windows::Version::WinNewer;
 
-	Version() noexcept;
+	mpt::osinfo::windows::Version Current() noexcept;
 
-public:
+	mpt::ustring GetName(mpt::osinfo::windows::Version version);
+	mpt::ustring GetNameShort(mpt::osinfo::windows::Version version);
 
-	static Version NoWindows() noexcept;
+	mpt::osinfo::windows::Version GetMinimumKernelLevel() noexcept;
+	mpt::osinfo::windows::Version GetMinimumAPILevel() noexcept;
 
-public:
-
-	Version(mpt::osinfo::windows::Version v) noexcept;
-
-public:
-
-	Version(mpt::OS::Windows::Version::System system, mpt::OS::Windows::Version::ServicePack servicePack, mpt::OS::Windows::Version::Build build, mpt::OS::Windows::Version::TypeId type) noexcept;
-
-public:
-
-	static mpt::OS::Windows::Version Current() noexcept;
-
-public:
-
-	mpt::ustring GetName() const;
-	mpt::ustring GetNameShort() const;
-
-public:
-
-	static mpt::OS::Windows::Version GetMinimumKernelLevel() noexcept;
-	static mpt::OS::Windows::Version GetMinimumAPILevel() noexcept;
-
-}; // class Version
+} // namespace Version
 
 #if MPT_OS_WINDOWS
 

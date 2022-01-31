@@ -84,7 +84,7 @@ public:
 
 	typedef uint32 TypeId;
 
-protected:
+private:
 	bool m_SystemIsWindows;
 
 	System m_System;
@@ -92,7 +92,7 @@ protected:
 	Build m_Build;
 	TypeId m_Type;
 
-protected:
+private:
 	constexpr Version() noexcept
 		: m_SystemIsWindows(false)
 		, m_System()
@@ -114,7 +114,7 @@ public:
 		, m_Type(type) {
 	}
 
-protected:
+public:
 #if MPT_OS_WINDOWS
 
 	static mpt::osinfo::windows::Version VersionFromNTDDI_VERSION() noexcept {
