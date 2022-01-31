@@ -44,7 +44,7 @@ private:
 	static SoundDevice::SysInfo GetSysInfo()
 	{
 		mpt::OS::Wine::VersionContext wineVersionContext;
-		return SoundDevice::SysInfo(mpt::osinfo::get_class(), mpt::OS::Windows::Version::Current(), mpt::OS::Windows::IsWine(), wineVersionContext.HostClass(), wineVersionContext.Version());
+		return SoundDevice::SysInfo(mpt::osinfo::get_class(), mpt::osinfo::windows::Version::Current(), mpt::OS::Windows::IsWine(), wineVersionContext.HostClass(), wineVersionContext.Version());
 	}
 
 public:

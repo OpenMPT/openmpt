@@ -29,12 +29,6 @@ namespace Windows
 {
 
 
-mpt::osinfo::windows::Version Version::Current() noexcept
-{
-	return mpt::osinfo::windows::Version::Current();
-}
-
-
 static constexpr struct { mpt::osinfo::windows::Version version; const mpt::uchar * name; bool showDetails; } versionMap[] =
 {
 	{ mpt::osinfo::windows::Version{ mpt::osinfo::windows::Version::WinNewer, mpt::osinfo::windows::Version::ServicePack{ 0, 0 }, 22000, 0 }, UL_("Windows 11 (or newer)"), false },
@@ -413,12 +407,12 @@ void PreventWineDetection()
 
 bool IsOriginal()
 {
-	return mpt::OS::Windows::Version::Current().IsWindows() && !SystemIsWine();
+	return mpt::osinfo::windows::Version::Current().IsWindows() && !SystemIsWine();
 }
 
 bool IsWine()
 {
-	return mpt::OS::Windows::Version::Current().IsWindows() && SystemIsWine();
+	return mpt::osinfo::windows::Version::Current().IsWindows() && SystemIsWine();
 }
 
 

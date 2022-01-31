@@ -30,19 +30,6 @@ namespace Windows
 namespace Version
 {
 
-	inline constexpr auto WinNT4 = mpt::osinfo::windows::Version::WinNT4;
-	inline constexpr auto Win2000 = mpt::osinfo::windows::Version::Win2000;
-	inline constexpr auto WinXP = mpt::osinfo::windows::Version::WinXP;
-	inline constexpr auto WinXP64 = mpt::osinfo::windows::Version::WinXP64;
-	inline constexpr auto WinVista = mpt::osinfo::windows::Version::WinVista;
-	inline constexpr auto Win7 = mpt::osinfo::windows::Version::Win7;
-	inline constexpr auto Win8 = mpt::osinfo::windows::Version::Win8;
-	inline constexpr auto Win81 = mpt::osinfo::windows::Version::Win81;
-	inline constexpr auto Win10 = mpt::osinfo::windows::Version::Win10;
-	inline constexpr auto WinNewer = mpt::osinfo::windows::Version::WinNewer;
-
-	mpt::osinfo::windows::Version Current() noexcept;
-
 	mpt::ustring GetName(mpt::osinfo::windows::Version version);
 	mpt::ustring GetNameShort(mpt::osinfo::windows::Version version);
 

@@ -148,11 +148,11 @@ bool BuildVariants::SystemCanRunCurrentBuild()
 	{
 		if(mpt::OS::Windows::IsOriginal())
 		{
-			if(mpt::OS::Windows::Version::Current().IsBefore(mpt::OS::Windows::Version::GetMinimumKernelLevel()))
+			if(mpt::osinfo::windows::Version::Current().IsBefore(mpt::OS::Windows::Version::GetMinimumKernelLevel()))
 			{
 				return false;
 			}
-			if(mpt::OS::Windows::Version::Current().IsBefore(mpt::OS::Windows::Version::GetMinimumAPILevel()))
+			if(mpt::osinfo::windows::Version::Current().IsBefore(mpt::OS::Windows::Version::GetMinimumAPILevel()))
 			{
 				return false;
 			}

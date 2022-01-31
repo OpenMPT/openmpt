@@ -275,7 +275,7 @@ static UpdateInfo GetBestDownload(const Update::versions &versions)
 				}
 			}
 
-			if(mpt::OS::Windows::Version::Current().IsBefore(
+			if(mpt::osinfo::windows::Version::Current().IsBefore(
 					mpt::osinfo::windows::Version::System(mpt::saturate_cast<uint32>(download.required_windows_version->version_major), mpt::saturate_cast<uint32>(download.required_windows_version->version_minor)),
 					mpt::osinfo::windows::Version::ServicePack(mpt::saturate_cast<uint16>(download.required_windows_version->servicepack_major), mpt::saturate_cast<uint16>(download.required_windows_version->servicepack_minor)),
 					mpt::osinfo::windows::Version::Build(mpt::saturate_cast<uint32>(download.required_windows_version->build))
@@ -597,15 +597,15 @@ std::string CUpdateCheck::GetStatisticsDataV3(const Settings &settings)
 	j["OpenMPT"]["Architecture"] = mpt::OS::Windows::Name(mpt::OS::Windows::GetProcessArchitecture());
 	j["Update"]["PeriodDays"] = settings.periodDays;
 	j["Update"]["Channel"] = ((settings.channel == UpdateChannelRelease) ? U_("Release") : (settings.channel == UpdateChannelNext) ? U_("Next") : (settings.channel == UpdateChannelDevelopment) ? U_("Development") : U_(""));
-	j["System"]["Windows"]["Version"]["Name"] = mpt::OS::Windows::Version::GetName(mpt::OS::Windows::Version::Current());
-	j["System"]["Windows"]["Version"]["Major"] = mpt::OS::Windows::Version::Current().GetSystem().Major;
-	j["System"]["Windows"]["Version"]["Minor"] = mpt::OS::Windows::Version::Current().GetSystem().Minor;
-	j["System"]["Windows"]["ServicePack"]["Major"] = mpt::OS::Windows::Version::Current().GetServicePack().Major;
-	j["System"]["Windows"]["ServicePack"]["Minor"] = mpt::OS::Windows::Version::Current().GetServicePack().Minor;
-	j["System"]["Windows"]["Build"] = mpt::OS::Windows::Version::Current().GetBuild();
+	j["System"]["Windows"]["Version"]["Name"] = mpt::OS::Windows::Version::GetName(mpt::osinfo::windows::Version::Current());
+	j["System"]["Windows"]["Version"]["Major"] = mpt::osinfo::windows::Version::Current().GetSystem().Major;
+	j["System"]["Windows"]["Version"]["Minor"] = mpt::osinfo::windows::Version::Current().GetSystem().Minor;
+	j["System"]["Windows"]["ServicePack"]["Major"] = mpt::osinfo::windows::Version::Current().GetServicePack().Major;
+	j["System"]["Windows"]["ServicePack"]["Minor"] = mpt::osinfo::windows::Version::Current().GetServicePack().Minor;
+	j["System"]["Windows"]["Build"] = mpt::osinfo::windows::Version::Current().GetBuild();
 	j["System"]["Windows"]["Architecture"] = mpt::OS::Windows::Name(mpt::OS::Windows::GetHostArchitecture());
 	j["System"]["Windows"]["IsWine"] = mpt::OS::Windows::IsWine();
-	j["System"]["Windows"]["TypeRaw"] = MPT_AFORMAT("0x{}")(mpt::afmt::HEX0<8>(mpt::OS::Windows::Version::Current().GetTypeId()));
+	j["System"]["Windows"]["TypeRaw"] = MPT_AFORMAT("0x{}")(mpt::afmt::HEX0<8>(mpt::osinfo::windows::Version::Current().GetTypeId()));
 	std::vector<mpt::OS::Windows::Architecture> architectures = mpt::OS::Windows::GetSupportedProcessArchitectures(mpt::OS::Windows::GetHostArchitecture());
 	for(const auto & arch : architectures)
 	{
@@ -702,7 +702,7 @@ mpt::ustring CUpdateCheck::GetUpdateURLV2(const CUpdateCheck::Settings &settings
 	updateURL = mpt::String::Replace(updateURL, U_("$VERSION"), MPT_UFORMAT("{}-{}-{}")
 		( Version::Current()
 		, BuildVariants().GuessCurrentBuildName()
-		, settings.sendStatistics ? mpt::OS::Windows::Version::GetNameShort(mpt::OS::Windows::Version::Current()) : U_("unknown")
+		, settings.sendStatistics ? mpt::OS::Windows::Version::GetNameShort(mpt::osinfo::windows::Version::Current()) : U_("unknown")
 		));
 	updateURL = mpt::String::Replace(updateURL, U_("$GUID"), settings.sendStatistics ? mpt::ufmt::val(settings.statisticsUUID) : U_("anonymous"));
 	return updateURL;
