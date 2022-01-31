@@ -491,7 +491,6 @@
 		C6F2110A1E5783FCD0659F4A /* FileReaderFwd.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = FileReaderFwd.h; path = ../../common/FileReaderFwd.h; sourceTree = "<group>"; };
 		C7851FA55A12E997C2EB8DE5 /* UMXTools.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = UMXTools.cpp; path = ../../soundlib/UMXTools.cpp; sourceTree = "<group>"; };
 		C875E7BBB96D55AD2570D5FB /* floatingpoint.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = floatingpoint.hpp; path = ../../src/mpt/endian/floatingpoint.hpp; sourceTree = "<group>"; };
-		C885A07E2286B770E9CDAEBE /* windows_version.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = windows_version.hpp; path = ../../src/mpt/osinfo/windows_version.hpp; sourceTree = "<group>"; };
 		C950084F5BDDD241C4B6768F /* Load_sfx.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Load_sfx.cpp; path = ../../soundlib/Load_sfx.cpp; sourceTree = "<group>"; };
 		C9545B192355720BEA9C6959 /* arithmetic_shift.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = arithmetic_shift.hpp; path = ../../src/mpt/base/arithmetic_shift.hpp; sourceTree = "<group>"; };
 		C9DD180C21428AFED350A64C /* mptPathString.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = mptPathString.h; path = ../../common/mptPathString.h; sourceTree = "<group>"; };
@@ -537,7 +536,6 @@
 		E59C6F4DDF5E2BBF195D2D8D /* Loaders.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Loaders.h; path = ../../soundlib/Loaders.h; sourceTree = "<group>"; };
 		E64FF33AA9BBB4ECE85F597A /* openmpt-ogg.lib */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "ogg.xcodeproj"; path = ext/ogg.xcodeproj; sourceTree = SOURCE_ROOT; };
 		E6905433791E1E25E1F6C273 /* SampleCopy.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SampleCopy.h; path = ../../soundlib/SampleCopy.h; sourceTree = "<group>"; };
-		E7811C8A7A0EE67CE2E78ACA /* class.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = class.hpp; path = ../../src/mpt/osinfo/class.hpp; sourceTree = "<group>"; };
 		E898D5ABAF26CD1D1D28F3EB /* ModInstrument.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ModInstrument.h; path = ../../soundlib/ModInstrument.h; sourceTree = "<group>"; };
 		EABA2F1F4147999119C0AD5F /* AGC.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AGC.h; path = ../../sounddsp/AGC.h; sourceTree = "<group>"; };
 		EC1456C17EA220B3E77AC501 /* Load_mid.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Load_mid.cpp; path = ../../soundlib/Load_mid.cpp; sourceTree = "<group>"; };
@@ -814,15 +812,6 @@
 			name = src;
 			sourceTree = "<group>";
 		};
-		59D7B3BB70EA4EED610649FB /* osinfo */ = {
-			isa = PBXGroup;
-			children = (
-				E7811C8A7A0EE67CE2E78ACA /* class.hpp */,
-				C885A07E2286B770E9CDAEBE /* windows_version.hpp */,
-			);
-			name = osinfo;
-			sourceTree = "<group>";
-		};
 		5D4AB94D745D547F64794F8D /* string */ = {
 			isa = PBXGroup;
 			children = (
@@ -902,7 +891,6 @@
 				54C514A39D35F8D5E1D4CAE3 /* io_write */,
 				BFD52C89E5FB5C3B4D0252C9 /* library */,
 				8FB69E0532A4C4B7C1CAA445 /* mutex */,
-				59D7B3BB70EA4EED610649FB /* osinfo */,
 				CF94F547018E3FF97B6D7B87 /* out_of_memory */,
 				EB3711558E2538071D4B1795 /* parse */,
 				5288703955F9426BD765E679 /* path */,
