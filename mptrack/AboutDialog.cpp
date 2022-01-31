@@ -357,8 +357,8 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 				+ MPT_UFORMAT("Build Date: {}\n")(Build::GetBuildDateString())
 				+ MPT_UFORMAT("Compiler: {}\n")(Build::GetBuildCompilerString())
 				+ MPT_UFORMAT("Architecture: {}\n")(mpt::OS::Windows::Name(mpt::OS::Windows::GetProcessArchitecture()))
-				+ MPT_UFORMAT("Required Windows Kernel Level: {}\n")(mpt::OS::Windows::Version::VersionToString(mpt::OS::Windows::Version::GetMinimumKernelLevel()))
-				+ MPT_UFORMAT("Required Windows API Level: {}\n")(mpt::OS::Windows::Version::VersionToString(mpt::OS::Windows::Version::GetMinimumAPILevel()));
+				+ MPT_UFORMAT("Required Windows Kernel Level: {}\n")(mpt::OS::Windows::Version::GetMinimumKernelLevel().GetName())
+				+ MPT_UFORMAT("Required Windows API Level: {}\n")(mpt::OS::Windows::Version::GetMinimumAPILevel().GetName());
 			{
 				text += U_("Required CPU features: ");
 				std::vector<mpt::ustring> features;

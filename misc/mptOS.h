@@ -32,10 +32,6 @@ class Version
 	: public mpt::osinfo::windows::Version
 {
 
-public:
-
-	static mpt::ustring VersionToString(mpt::OS::Windows::Version::System version);
-
 private:
 
 	Version() noexcept;
@@ -63,8 +59,8 @@ public:
 
 public:
 
-	static mpt::OS::Windows::Version::System GetMinimumKernelLevel() noexcept;
-	static mpt::OS::Windows::Version::System GetMinimumAPILevel() noexcept;
+	static mpt::OS::Windows::Version GetMinimumKernelLevel() noexcept;
+	static mpt::OS::Windows::Version GetMinimumAPILevel() noexcept;
 
 }; // class Version
 

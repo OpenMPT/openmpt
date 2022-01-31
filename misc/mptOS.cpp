@@ -89,42 +89,32 @@ Version::Version(mpt::OS::Windows::Version::System system, mpt::OS::Windows::Ver
 }
 
 
-static constexpr struct { Version::System version; const mpt::uchar * name; bool showDetails; } versionMap[] =
+static constexpr struct { mpt::osinfo::windows::Version version; const mpt::uchar * name; bool showDetails; } versionMap[] =
 {
-	{ mpt::OS::Windows::Version::WinNewer, UL_("Windows 10 (or newer)"), false },
-	{ mpt::OS::Windows::Version::Win10, UL_("Windows 10"), true },
-	{ mpt::OS::Windows::Version::Win81, UL_("Windows 8.1"), true },
-	{ mpt::OS::Windows::Version::Win8, UL_("Windows 8"), true },
-	{ mpt::OS::Windows::Version::Win7, UL_("Windows 7"), true },
-	{ mpt::OS::Windows::Version::WinVista, UL_("Windows Vista"), true },
-	{ mpt::OS::Windows::Version::WinXP64, UL_("Windows XP x64 / Windows Server 2003"), true },
-	{ mpt::OS::Windows::Version::WinXP, UL_("Windows XP"), true },
-	{ mpt::OS::Windows::Version::Win2000, UL_("Windows 2000"), true },
-	{ mpt::OS::Windows::Version::WinNT4, UL_("Windows NT4"), true }
+	{ mpt::osinfo::windows::Version{ mpt::OS::Windows::Version::WinNewer, mpt::OS::Windows::Version::ServicePack{ 0, 0 }, 22000, 0 }, UL_("Windows 11 (or newer)"), false },
+	{ mpt::osinfo::windows::Version{ mpt::OS::Windows::Version::Win10, mpt::OS::Windows::Version::ServicePack{ 0, 0 }, 22000, 0 }, UL_("Windows 11"), true },
+	{ mpt::osinfo::windows::Version{ mpt::OS::Windows::Version::Win10, mpt::OS::Windows::Version::ServicePack{ 0, 0 }, 19044, 0 }, UL_("Windows 10 21H2"), true },
+	{ mpt::osinfo::windows::Version{ mpt::OS::Windows::Version::Win10, mpt::OS::Windows::Version::ServicePack{ 0, 0 }, 19043, 0 }, UL_("Windows 10 21H1"), true },
+	{ mpt::osinfo::windows::Version{ mpt::OS::Windows::Version::Win10, mpt::OS::Windows::Version::ServicePack{ 0, 0 }, 19042, 0 }, UL_("Windows 10 20H2"), true },
+	{ mpt::osinfo::windows::Version{ mpt::OS::Windows::Version::Win10, mpt::OS::Windows::Version::ServicePack{ 0, 0 }, 19041, 0 }, UL_("Windows 10 20H1"), true },
+	{ mpt::osinfo::windows::Version{ mpt::OS::Windows::Version::Win10, mpt::OS::Windows::Version::ServicePack{ 0, 0 }, 18363, 0 }, UL_("Windows 10 19H2"), true },
+	{ mpt::osinfo::windows::Version{ mpt::OS::Windows::Version::Win10, mpt::OS::Windows::Version::ServicePack{ 0, 0 }, 18362, 0 }, UL_("Windows 10 19H1"), true },
+	{ mpt::osinfo::windows::Version{ mpt::OS::Windows::Version::Win10, mpt::OS::Windows::Version::ServicePack{ 0, 0 }, 17763, 0 }, UL_("Windows 10 1809"), true },
+	{ mpt::osinfo::windows::Version{ mpt::OS::Windows::Version::Win10, mpt::OS::Windows::Version::ServicePack{ 0, 0 }, 17134, 0 }, UL_("Windows 10 1803"), true },
+	{ mpt::osinfo::windows::Version{ mpt::OS::Windows::Version::Win10, mpt::OS::Windows::Version::ServicePack{ 0, 0 }, 16299, 0 }, UL_("Windows 10 1709"), true },
+	{ mpt::osinfo::windows::Version{ mpt::OS::Windows::Version::Win10, mpt::OS::Windows::Version::ServicePack{ 0, 0 }, 15063, 0 }, UL_("Windows 10 1703"), true },
+	{ mpt::osinfo::windows::Version{ mpt::OS::Windows::Version::Win10, mpt::OS::Windows::Version::ServicePack{ 0, 0 }, 14393, 0 }, UL_("Windows 10 1607"), true },
+	{ mpt::osinfo::windows::Version{ mpt::OS::Windows::Version::Win10, mpt::OS::Windows::Version::ServicePack{ 0, 0 }, 10586, 0 }, UL_("Windows 10 1511"), true },
+	{ mpt::osinfo::windows::Version{ mpt::OS::Windows::Version::Win10, mpt::OS::Windows::Version::ServicePack{ 0, 0 }, 10240, 0 }, UL_("Windows 10 1507"), true },
+	{ mpt::osinfo::windows::Version{ mpt::OS::Windows::Version::Win81, mpt::OS::Windows::Version::ServicePack{ 0, 0 }, 0, 0 }, UL_("Windows 8.1"), true },
+	{ mpt::osinfo::windows::Version{ mpt::OS::Windows::Version::Win8, mpt::OS::Windows::Version::ServicePack{ 0, 0 }, 0, 0 }, UL_("Windows 8"), true },
+	{ mpt::osinfo::windows::Version{ mpt::OS::Windows::Version::Win7, mpt::OS::Windows::Version::ServicePack{ 0, 0 }, 0, 0 }, UL_("Windows 7"), true },
+	{ mpt::osinfo::windows::Version{ mpt::OS::Windows::Version::WinVista, mpt::OS::Windows::Version::ServicePack{ 0, 0 }, 0, 0 }, UL_("Windows Vista"), true },
+	{ mpt::osinfo::windows::Version{ mpt::OS::Windows::Version::WinXP64, mpt::OS::Windows::Version::ServicePack{ 0, 0 }, 0, 0 }, UL_("Windows XP x64 / Windows Server 2003"), true },
+	{ mpt::osinfo::windows::Version{ mpt::OS::Windows::Version::WinXP, mpt::OS::Windows::Version::ServicePack{ 0, 0 }, 0, 0 }, UL_("Windows XP"), true },
+	{ mpt::osinfo::windows::Version{ mpt::OS::Windows::Version::Win2000, mpt::OS::Windows::Version::ServicePack{ 0, 0 }, 0, 0 }, UL_("Windows 2000"), true },
+	{ mpt::osinfo::windows::Version{ mpt::OS::Windows::Version::WinNT4, mpt::OS::Windows::Version::ServicePack{ 0, 0 }, 0, 0 }, UL_("Windows NT4"), true }
 };
-
-
-mpt::ustring Version::VersionToString(mpt::OS::Windows::Version::System version)
-{
-	mpt::ustring result;
-	for(const auto &v : versionMap)
-	{
-		if(version > v.version)
-		{
-			result = U_("> ") + v.name;
-			break;
-		} else if(version == v.version)
-		{
-			result = v.name;
-			break;
-		}
-	}
-	if(result.empty())
-	{
-		result = MPT_UFORMAT("0x{}")(mpt::ufmt::hex0<16>(static_cast<uint64>(version)));
-	}
-	return result;
-}
 
 
 mpt::ustring Version::GetName() const
@@ -209,7 +199,7 @@ mpt::ustring Version::GetNameShort() const
 }
 
 
-mpt::OS::Windows::Version::System Version::GetMinimumKernelLevel() noexcept
+mpt::OS::Windows::Version Version::GetMinimumKernelLevel() noexcept
 {
 	uint64 minimumKernelVersion = 0;
 	#if MPT_OS_WINDOWS && MPT_COMPILER_MSVC
@@ -219,16 +209,16 @@ mpt::OS::Windows::Version::System Version::GetMinimumKernelLevel() noexcept
 			minimumKernelVersion = std::max(minimumKernelVersion, static_cast<uint64>(mpt::OS::Windows::Version::WinVista));
 		#endif
 	#endif
-	return mpt::OS::Windows::Version::System(minimumKernelVersion);
+	return mpt::OS::Windows::Version(mpt::osinfo::windows::Version::System(minimumKernelVersion), mpt::osinfo::windows::Version::ServicePack(0, 0), 0, 0);
 }
 
 
-mpt::OS::Windows::Version::System Version::GetMinimumAPILevel() noexcept
+mpt::OS::Windows::Version Version::GetMinimumAPILevel() noexcept
 {
 	#if MPT_OS_WINDOWS
-		return SystemVersionFrom_WIN32_WINNT();
+		return mpt::OS::Windows::Version::VersionFromNTDDI_VERSION();
 	#else // !MPT_OS_WINDOWS
-		return mpt::OS::Windows::Version::System();
+		return mpt::OS::Windows::Version();
 	#endif // MPT_OS_WINDOWS
 }
 
