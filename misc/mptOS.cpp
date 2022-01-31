@@ -29,39 +29,9 @@ namespace Windows
 {
 
 
-#if MPT_OS_WINDOWS
-
-namespace {
-struct WindowsVersionCache
-{
-	mpt::osinfo::windows::Version version;
-	WindowsVersionCache() noexcept
-		: version(mpt::osinfo::windows::Version::Current())
-	{
-	}
-};
-}
-
-static mpt::osinfo::windows::Version GatherWindowsVersionFromCache() noexcept
-{
-	static WindowsVersionCache gs_WindowsVersionCache;
-	return gs_WindowsVersionCache.version;
-}
-
-#endif // MPT_OS_WINDOWS
-
-
 mpt::osinfo::windows::Version Version::Current() noexcept
 {
-	#if MPT_OS_WINDOWS
-		#ifdef MODPLUG_TRACKER
-			return GatherWindowsVersionFromCache();
-		#else // !MODPLUG_TRACKER
-			return mpt::osinfo::windows::Version::Current();
-		#endif // MODPLUG_TRACKER
-	#else // !MPT_OS_WINDOWS
-		return mpt::osinfo::windows::Version::NoWindows();
-	#endif // MPT_OS_WINDOWS
+	return mpt::osinfo::windows::Version::Current();
 }
 
 
