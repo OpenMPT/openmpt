@@ -217,9 +217,10 @@ public:
 #endif // MPT_OS_WINDOWS
 
 public:
-	static mpt::osinfo::windows::Version Current() noexcept {
+	static inline mpt::osinfo::windows::Version Current() noexcept {
 #if MPT_OS_WINDOWS
-		return GatherWindowsVersion();
+		static mpt::osinfo::windows::Version s_cachedVersion = GatherWindowsVersion();
+		return s_cachedVersion;
 #else  // !MPT_OS_WINDOWS
 		return mpt::osinfo::windows::Version::NoWindows();
 #endif // MPT_OS_WINDOWS
