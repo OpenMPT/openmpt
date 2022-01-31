@@ -192,7 +192,7 @@ mpt::osinfo::windows::Version Version::GetMinimumKernelLevel() noexcept
 mpt::osinfo::windows::Version Version::GetMinimumAPILevel() noexcept
 {
 	#if MPT_OS_WINDOWS
-		return mpt::osinfo::windows::Version::VersionFromNTDDI_VERSION();
+		return mpt::osinfo::windows::Version::FromSDK();
 	#else // !MPT_OS_WINDOWS
 		return mpt::osinfo::windows::Version();
 	#endif // MPT_OS_WINDOWS

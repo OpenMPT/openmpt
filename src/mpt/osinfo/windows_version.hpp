@@ -117,8 +117,9 @@ public:
 public:
 #if MPT_OS_WINDOWS
 
-	static mpt::osinfo::windows::Version VersionFromNTDDI_VERSION() noexcept {
+	static mpt::osinfo::windows::Version FromSDK() noexcept {
 		// Initialize to used SDK version
+#if defined(NTDDI_VERSION)
 #if NTDDI_VERSION >= 0x0A00000B // NTDDI_WIN10_CO Win11
 		return mpt::osinfo::windows::Version(mpt::osinfo::windows::Version::Win10, mpt::osinfo::windows::Version::ServicePack(0, 0), 22000, 0);
 #elif NTDDI_VERSION >= 0x0A00000A // NTDDI_WIN10_FE 21H2
@@ -164,19 +165,16 @@ public:
 #else
 		return mpt::osinfo::windows::Version(mpt::osinfo::windows::Version::WinNT4, mpt::osinfo::windows::Version::ServicePack(((NTDDI_VERSION & 0xffffu) >> 8) & 0xffu, ((NTDDI_VERSION & 0xffffu) >> 0) & 0xffu), 0, 0);
 #endif
-	}
-
-	static mpt::osinfo::windows::Version::System SystemVersionFrom_WIN32_WINNT() noexcept {
-#if defined(_WIN32_WINNT)
-		return mpt::osinfo::windows::Version::System((static_cast<uint64>(_WIN32_WINNT) & 0xff00u) >> 8, (static_cast<uint64>(_WIN32_WINNT) & 0x00ffu) >> 0);
+#elif defined(_WIN32_WINNT)
+		return mpt::osinfo::windows::Version(mpt::osinfo::windows::Version::System((static_cast<uint64>(_WIN32_WINNT) & 0xff00u) >> 8, (static_cast<uint64>(_WIN32_WINNT) & 0x00ffu) >> 0), mpt::osinfo::windows::Version::ServicePack(0, 0), 0, 0);
 #else
-		return mpt::osinfo::windows::Version::System();
+		return mpt::osinfo::windows::Version(mpt::osinfo::windows::Version::System(0, 0), mpt::osinfo::windows::Version::ServicePack(0, 0), 0, 0);
 #endif
 	}
 
 	static mpt::osinfo::windows::Version GatherWindowsVersion() noexcept {
 #if MPT_OS_WINDOWS_WINRT
-		return VersionFromNTDDI_VERSION();
+		return mpt::osinfo::windows::Version::FromSDK();
 #else // !MPT_OS_WINDOWS_WINRT
 		OSVERSIONINFOEXW versioninfoex{};
 		versioninfoex.dwOSVersionInfoSize = sizeof(versioninfoex);
@@ -190,7 +188,7 @@ public:
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #endif // MPT_COMPILER_CLANG
 		if (GetVersionExW((LPOSVERSIONINFOW)&versioninfoex) == FALSE) {
-			return VersionFromNTDDI_VERSION();
+			return mpt::osinfo::windows::Version::FromSDK();
 		}
 #if MPT_COMPILER_MSVC
 #pragma warning(pop)
@@ -199,7 +197,7 @@ public:
 #pragma clang diagnostic pop
 #endif                       // MPT_COMPILER_CLANG
 		if (versioninfoex.dwPlatformId != VER_PLATFORM_WIN32_NT) {
-			return VersionFromNTDDI_VERSION();
+			return mpt::osinfo::windows::Version::FromSDK();
 		}
 		DWORD dwProductType = 0;
 #if (_WIN32_WINNT >= 0x0600) // _WIN32_WINNT_VISTA
