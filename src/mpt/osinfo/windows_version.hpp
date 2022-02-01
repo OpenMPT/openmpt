@@ -46,7 +46,10 @@ public:
 	struct System {
 		uint32 Major = 0;
 		uint32 Minor = 0;
-		System() = default;
+		constexpr System() noexcept
+			: Major(0)
+			, Minor(0) {
+		}
 		constexpr System(Number number) noexcept
 			: Major(static_cast<uint32>((static_cast<uint64>(number) >> 32) & 0xffffffffu))
 			, Minor(static_cast<uint32>((static_cast<uint64>(number) >> 0) & 0xffffffffu)) {
@@ -67,7 +70,10 @@ public:
 	struct ServicePack {
 		uint16 Major = 0;
 		uint16 Minor = 0;
-		ServicePack() = default;
+		constexpr ServicePack() noexcept
+			: Major(0)
+			, Minor(0) {
+		}
 		explicit constexpr ServicePack(uint16 major, uint16 minor) noexcept
 			: Major(major)
 			, Minor(minor) {
