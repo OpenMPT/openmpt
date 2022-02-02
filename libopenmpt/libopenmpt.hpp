@@ -125,11 +125,11 @@
 
 /*! \defgroup libopenmpt_cpp libopenmpt C++ */
 
+namespace openmpt {
+
 /*! \addtogroup libopenmpt_cpp
   @{
 */
-
-namespace openmpt {
 
 #if defined(_MSC_VER)
 #pragma warning(push)
@@ -1006,10 +1006,10 @@ public:
 
 }; // class module
 
-} // namespace openmpt
-
 /*!
   @}
 */
+
+} // namespace openmpt
 
 #endif // LIBOPENMPT_HPP
