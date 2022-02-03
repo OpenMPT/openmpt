@@ -1501,7 +1501,8 @@ bool CModTree::ExecuteItem(HTREEITEM hItem)
 			return true;
 
 		case MODITEM_DLSBANK_INSTRUMENT:
-			PlayItem(hItem, NOTE_MIDDLEC);
+			if(GetItemData(GetParentItem(hItem)) != DLS_DRUM_FOLDER_LPARAM)
+				PlayItem(hItem, NOTE_MIDDLEC);
 			return true;
 
 		case MODITEM_HDR_INSTRUMENTLIB:
