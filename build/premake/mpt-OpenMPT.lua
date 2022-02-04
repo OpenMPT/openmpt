@@ -159,6 +159,10 @@ end
 	if _OPTIONS["clang"] then
 		filter {}
 		filter { "configurations:Debug" }
+			if true then -- _AFX_NO_MFC_CONTROLS_IN_DIALOGS
+				ignoredefaultlibraries { "afxnmcdd.lib" }
+				links { "afxnmcdd.lib" }
+			end
 			if charset == "Unicode" then
 				ignoredefaultlibraries { "uafxcwd.lib", "libcmtd.lib" }
 				links { "uafxcwd.lib", "libcmtd.lib" }
@@ -175,9 +179,13 @@ end
 				links { "mfc140d.lib", "msvcrtd.lib" }
 			end
 		filter { "configurations:Checked" }
+			if true then -- _AFX_NO_MFC_CONTROLS_IN_DIALOGS
+				ignoredefaultlibraries { "afxnmcd.lib" }
+				links { "afxnmcd.lib" }
+			end
 			if charset == "Unicode" then
 				ignoredefaultlibraries { "uafxcw.lib", "libcmt.lib" }
-				links { "uafxcwd.lib", "libcmt.lib" }
+				links { "uafxcw.lib", "libcmt.lib" }
 			else
 				ignoredefaultlibraries { "nafxcw.lib", "libcmt.lib" }
 				links { "nafxcw.lib", "libcmt.lib" }
@@ -191,9 +199,13 @@ end
 				links { "mfc140.lib", "msvcrt.lib" }
 			end
 		filter { "configurations:Release" }
+			if true then -- _AFX_NO_MFC_CONTROLS_IN_DIALOGS
+				ignoredefaultlibraries { "afxnmcd.lib" }
+				links { "afxnmcd.lib" }
+			end
 			if charset == "Unicode" then
 				ignoredefaultlibraries { "uafxcw.lib", "libcmt.lib" }
-				links { "uafxcwd.lib", "libcmt.lib" }
+				links { "uafxcw.lib", "libcmt.lib" }
 			else
 				ignoredefaultlibraries { "nafxcw.lib", "libcmt.lib" }
 				links { "nafxcw.lib", "libcmt.lib" }
