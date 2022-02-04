@@ -58,34 +58,31 @@
 		filter {}
 		filter { "configurations:Debug" }
 			if true then -- _AFX_NO_MFC_CONTROLS_IN_DIALOGS
-				ignoredefaultlibraries { "afxnmcdd.lib", "libcmtd.lib" }
-				links { "afxnmcdd.lib", "libcmtd.lib" }
-			else
-				ignoredefaultlibraries { "uafxcwd.lib", "libcmtd.lib" }
-				links { "uafxcwd.lib", "libcmtd.lib" }
+				ignoredefaultlibraries { "afxnmcdd.lib"}
+				links { "afxnmcdd.lib" }
 			end
+			ignoredefaultlibraries { "uafxcwd.lib", "libcmtd.lib" }
+			links { "uafxcwd.lib", "libcmtd.lib" }
 		filter { "configurations:DebugShared" }
 			ignoredefaultlibraries { "mfc140ud.lib", "msvcrtd.lib" }
 			links { "mfc140ud.lib", "msvcrtd.lib" }
 		filter { "configurations:Checked" }
 			if true then -- _AFX_NO_MFC_CONTROLS_IN_DIALOGS
-				ignoredefaultlibraries { "afxnmcd.lib", "libcmt.lib" }
-				links { "afxnmcd.lib", "libcmt.lib" }
-			else
-				ignoredefaultlibraries { "uafxcw.lib", "libcmt.lib" }
-				links { "uafxcw.lib", "libcmt.lib" }
+				ignoredefaultlibraries { "afxnmcd.lib" }
+				links { "afxnmcd.lib" }
 			end
+			ignoredefaultlibraries { "uafxcw.lib", "libcmt.lib" }
+			links { "uafxcw.lib", "libcmt.lib" }
 		filter { "configurations:CheckedShared" }
 			ignoredefaultlibraries { "mfc140u.lib", "msvcrt.lib" }
 			links { "mfc140u.lib", "msvcrt.lib" }
 		filter { "configurations:Release" }
 			if true then -- _AFX_NO_MFC_CONTROLS_IN_DIALOGS
-				ignoredefaultlibraries { "afxnmcd.lib", "libcmt.lib" }
-				links { "afxnmcd.lib", "libcmt.lib" }
-			else
-				ignoredefaultlibraries { "uafxcw.lib", "libcmt.lib" }
-				links { "uafxcw.lib", "libcmt.lib" }
+				ignoredefaultlibraries { "afxnmcd.lib" }
+				links { "afxnmcd.lib" }
 			end
+			ignoredefaultlibraries { "uafxcw.lib", "libcmt.lib" }
+			links { "uafxcw.lib", "libcmt.lib" }
 		filter { "configurations:ReleaseShared" }
 			ignoredefaultlibraries { "mfc140u.lib", "msvcrt.lib" }
 			links { "mfc140u.lib", "msvcrt.lib" }

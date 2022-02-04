@@ -160,16 +160,15 @@ end
 		filter {}
 		filter { "configurations:Debug" }
 			if true then -- _AFX_NO_MFC_CONTROLS_IN_DIALOGS
-				ignoredefaultlibraries { "afxnmcdd.lib", "libcmtd.lib" }
-				links { "afxnmcdd.lib", "libcmtd.lib" }
+				ignoredefaultlibraries { "afxnmcdd.lib" }
+				links { "afxnmcdd.lib" }
+			end
+			if charset == "Unicode" then
+				ignoredefaultlibraries { "uafxcwd.lib", "libcmtd.lib" }
+				links { "uafxcwd.lib", "libcmtd.lib" }
 			else
-				if charset == "Unicode" then
-					ignoredefaultlibraries { "uafxcwd.lib", "libcmtd.lib" }
-					links { "uafxcwd.lib", "libcmtd.lib" }
-				else
-					ignoredefaultlibraries { "nafxcwd.lib", "libcmtd.lib" }
-					links { "nafxcwd.lib", "libcmtd.lib" }
-				end
+				ignoredefaultlibraries { "nafxcwd.lib", "libcmtd.lib" }
+				links { "nafxcwd.lib", "libcmtd.lib" }
 			end
 		filter { "configurations:DebugShared" }
 			if charset == "Unicode" then
@@ -181,16 +180,15 @@ end
 			end
 		filter { "configurations:Checked" }
 			if true then -- _AFX_NO_MFC_CONTROLS_IN_DIALOGS
-				ignoredefaultlibraries { "afxnmcd.lib", "libcmt.lib" }
-				links { "afxnmcd.lib", "libcmt.lib" }
+				ignoredefaultlibraries { "afxnmcd.lib" }
+				links { "afxnmcd.lib" }
+			end
+			if charset == "Unicode" then
+				ignoredefaultlibraries { "uafxcw.lib", "libcmt.lib" }
+				links { "uafxcw.lib", "libcmt.lib" }
 			else
-				if charset == "Unicode" then
-					ignoredefaultlibraries { "uafxcw.lib", "libcmt.lib" }
-					links { "uafxcw.lib", "libcmt.lib" }
-				else
-					ignoredefaultlibraries { "nafxcw.lib", "libcmt.lib" }
-					links { "nafxcw.lib", "libcmt.lib" }
-				end
+				ignoredefaultlibraries { "nafxcw.lib", "libcmt.lib" }
+				links { "nafxcw.lib", "libcmt.lib" }
 			end
 		filter { "configurations:CheckedShared" }
 			if charset == "Unicode" then
@@ -202,16 +200,15 @@ end
 			end
 		filter { "configurations:Release" }
 			if true then -- _AFX_NO_MFC_CONTROLS_IN_DIALOGS
-				ignoredefaultlibraries { "afxnmcd.lib", "libcmt.lib" }
-				links { "afxnmcd.lib", "libcmt.lib" }
+				ignoredefaultlibraries { "afxnmcd.lib" }
+				links { "afxnmcd.lib" }
+			end
+			if charset == "Unicode" then
+				ignoredefaultlibraries { "uafxcw.lib", "libcmt.lib" }
+				links { "uafxcw.lib", "libcmt.lib" }
 			else
-				if charset == "Unicode" then
-					ignoredefaultlibraries { "uafxcw.lib", "libcmt.lib" }
-					links { "uafxcw.lib", "libcmt.lib" }
-				else
-					ignoredefaultlibraries { "nafxcw.lib", "libcmt.lib" }
-					links { "nafxcw.lib", "libcmt.lib" }
-				end
+				ignoredefaultlibraries { "nafxcw.lib", "libcmt.lib" }
+				links { "nafxcw.lib", "libcmt.lib" }
 			end
 		filter { "configurations:ReleaseShared" }
 			if charset == "Unicode" then
