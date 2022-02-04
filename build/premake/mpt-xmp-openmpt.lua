@@ -54,6 +54,59 @@
 
   characterset "Unicode"
   flags { "MFC" }
+	-- work-around https://developercommunity.visualstudio.com/t/link-errors-when-building-mfc-application-with-cla/1617786
+	if _OPTIONS["clang"] then
+		filter {}
+		filter { "configurations:Debug" }
+			if charset == "Unicode" then
+				ignoredefaultlibraries { "uafxcwd.lib", "libcmtd.lib" }
+				links { "uafxcwd.lib", "libcmtd.lib" }
+			else
+				ignoredefaultlibraries { "nafxcwd.lib", "libcmtd.lib" }
+				links { "nafxcwd.lib", "libcmtd.lib" }
+			end
+		filter { "configurations:DebugShared" }
+			if charset == "Unicode" then
+				ignoredefaultlibraries { "mfc140ud.lib", "msvcrtd.lib" }
+				links { "mfc140ud.lib", "msvcrtd.lib" }
+			else
+				ignoredefaultlibraries { "mfc140d.lib", "msvcrtd.lib" }
+				links { "mfc140d.lib", "msvcrtd.lib" }
+			end
+		filter { "configurations:Checked" }
+			if charset == "Unicode" then
+				ignoredefaultlibraries { "uafxcw.lib", "libcmt.lib" }
+				links { "uafxcwd.lib", "libcmt.lib" }
+			else
+				ignoredefaultlibraries { "nafxcw.lib", "libcmt.lib" }
+				links { "nafxcw.lib", "libcmt.lib" }
+			end
+		filter { "configurations:CheckedShared" }
+			if charset == "Unicode" then
+				ignoredefaultlibraries { "mfc140u.lib", "msvcrt.lib" }
+				links { "mfc140u.lib", "msvcrt.lib" }
+			else
+				ignoredefaultlibraries { "mfc140.lib", "msvcrt.lib" }
+				links { "mfc140.lib", "msvcrt.lib" }
+			end
+		filter { "configurations:Release" }
+			if charset == "Unicode" then
+				ignoredefaultlibraries { "uafxcw.lib", "libcmt.lib" }
+				links { "uafxcwd.lib", "libcmt.lib" }
+			else
+				ignoredefaultlibraries { "nafxcw.lib", "libcmt.lib" }
+				links { "nafxcw.lib", "libcmt.lib" }
+			end
+		filter { "configurations:ReleaseShared" }
+			if charset == "Unicode" then
+				ignoredefaultlibraries { "mfc140u.lib", "msvcrt.lib" }
+				links { "mfc140u.lib", "msvcrt.lib" }
+			else
+				ignoredefaultlibraries { "mfc140.lib", "msvcrt.lib" }
+				links { "mfc140.lib", "msvcrt.lib" }
+			end
+		filter {}
+	end
   links { "libopenmpt", "zlib", "vorbis", "ogg", "mpg123", "pugixml" }
   filter {}
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }
