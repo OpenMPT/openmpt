@@ -24,6 +24,14 @@
 #define LIBOPENMPT_CXX_API
 #undef LIBOPENMPT_CXX_API
 
+/*!
+  @}
+*/
+
+/*! \addtogroup libopenmpt_c
+  @{
+*/
+
 /*! \brief Defined if libopenmpt/libopenmpt_stream_callbacks_buffer.h exists.
  * \remarks
  *   Use the following to check for availability:
@@ -121,6 +129,14 @@
  *   \endcode
  */
 #define LIBOPENMPT_STREAM_CALLBACKS_FILE_POSIX_LFS64
+
+/*!
+  @}
+*/
+
+/*! \addtogroup libopenmpt
+  @{
+*/
 
 #if defined(__DOXYGEN__)
 
