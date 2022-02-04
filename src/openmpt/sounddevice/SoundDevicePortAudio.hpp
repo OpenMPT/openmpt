@@ -43,7 +43,7 @@ public:
 	PortAudioInitializer();
 	PortAudioInitializer(const PortAudioInitializer &) = delete;
 	PortAudioInitializer &operator=(const PortAudioInitializer &) = delete;
-	void Reload();
+	void Reload() override;
 	~PortAudioInitializer() override;
 };
 

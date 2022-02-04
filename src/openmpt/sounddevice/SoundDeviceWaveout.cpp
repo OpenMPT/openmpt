@@ -650,10 +650,14 @@ SoundDevice::Statistics CWaveDevice::GetStatistics() const
 
 std::vector<SoundDevice::Info> CWaveDevice::EnumerateDevices(ILogger &logger, SoundDevice::SysInfo sysInfo)
 {
+#if 0
 	auto GetLogger = [&]() -> ILogger &
 	{
 		return logger;
 	};
+#else
+	MPT_UNREFERENCED_PARAMETER(logger);
+#endif
 	MPT_SOUNDDEV_TRACE_SCOPE();
 	std::vector<SoundDevice::Info> devices;
 	UINT numDevs = waveOutGetNumDevs();

@@ -51,10 +51,13 @@ class CPriorityBooster
 private:
 	SoundDevice::SysInfo m_SysInfo;
 	bool m_BoostPriority;
-	int m_Priority;
+#if(_WIN32_WINNT >= 0x600)
 	DWORD task_idx;
 	HANDLE hTask;
+#else  // < Vista
+	int m_Priority;
 	int oldPriority;
+#endif
 
 public:
 	CPriorityBooster(SoundDevice::SysInfo sysInfo, bool boostPriority, const mpt::winstring &priorityClass, int priority);
