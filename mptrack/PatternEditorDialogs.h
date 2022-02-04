@@ -214,7 +214,7 @@ protected:
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
 	afx_msg BOOL OnToolTipText(UINT, NMHDR *pNMHDR, LRESULT *pResult);
 
-	BOOL PreTranslateMessage(MSG *pMsg);
+	BOOL PreTranslateMessage(MSG *pMsg) override;
 
 	DECLARE_MESSAGE_MAP();
 };
