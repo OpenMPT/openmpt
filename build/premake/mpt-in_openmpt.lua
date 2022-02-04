@@ -57,53 +57,23 @@
 	if _OPTIONS["clang"] then
 		filter {}
 		filter { "configurations:Debug" }
-			if charset == "Unicode" then
-				ignoredefaultlibraries { "uafxcwd.lib", "libcmtd.lib" }
-				links { "uafxcwd.lib", "libcmtd.lib" }
-			else
-				ignoredefaultlibraries { "nafxcwd.lib", "libcmtd.lib" }
-				links { "nafxcwd.lib", "libcmtd.lib" }
-			end
+			ignoredefaultlibraries { "uafxcwd.lib", "libcmtd.lib" }
+			links { "uafxcwd.lib", "libcmtd.lib" }
 		filter { "configurations:DebugShared" }
-			if charset == "Unicode" then
-				ignoredefaultlibraries { "mfc140ud.lib", "msvcrtd.lib" }
-				links { "mfc140ud.lib", "msvcrtd.lib" }
-			else
-				ignoredefaultlibraries { "mfc140d.lib", "msvcrtd.lib" }
-				links { "mfc140d.lib", "msvcrtd.lib" }
-			end
+			ignoredefaultlibraries { "mfc140ud.lib", "msvcrtd.lib" }
+			links { "mfc140ud.lib", "msvcrtd.lib" }
 		filter { "configurations:Checked" }
-			if charset == "Unicode" then
-				ignoredefaultlibraries { "uafxcw.lib", "libcmt.lib" }
-				links { "uafxcw.lib", "libcmt.lib" }
-			else
-				ignoredefaultlibraries { "nafxcw.lib", "libcmt.lib" }
-				links { "nafxcw.lib", "libcmt.lib" }
-			end
+			ignoredefaultlibraries { "uafxcw.lib", "libcmt.lib" }
+			links { "uafxcw.lib", "libcmt.lib" }
 		filter { "configurations:CheckedShared" }
-			if charset == "Unicode" then
-				ignoredefaultlibraries { "mfc140u.lib", "msvcrt.lib" }
-				links { "mfc140u.lib", "msvcrt.lib" }
-			else
-				ignoredefaultlibraries { "mfc140.lib", "msvcrt.lib" }
-				links { "mfc140.lib", "msvcrt.lib" }
-			end
+			ignoredefaultlibraries { "mfc140u.lib", "msvcrt.lib" }
+			links { "mfc140u.lib", "msvcrt.lib" }
 		filter { "configurations:Release" }
-			if charset == "Unicode" then
-				ignoredefaultlibraries { "uafxcw.lib", "libcmt.lib" }
-				links { "uafxcw.lib", "libcmt.lib" }
-			else
-				ignoredefaultlibraries { "nafxcw.lib", "libcmt.lib" }
-				links { "nafxcw.lib", "libcmt.lib" }
-			end
+			ignoredefaultlibraries { "uafxcw.lib", "libcmt.lib" }
+			links { "uafxcw.lib", "libcmt.lib" }
 		filter { "configurations:ReleaseShared" }
-			if charset == "Unicode" then
-				ignoredefaultlibraries { "mfc140u.lib", "msvcrt.lib" }
-				links { "mfc140u.lib", "msvcrt.lib" }
-			else
-				ignoredefaultlibraries { "mfc140.lib", "msvcrt.lib" }
-				links { "mfc140.lib", "msvcrt.lib" }
-			end
+			ignoredefaultlibraries { "mfc140u.lib", "msvcrt.lib" }
+			links { "mfc140u.lib", "msvcrt.lib" }
 		filter {}
 	end
   links { "libopenmpt", "zlib", "vorbis", "ogg", "mpg123" }
