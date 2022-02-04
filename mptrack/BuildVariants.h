@@ -28,8 +28,6 @@ public:
 		Unknown,
 	};
 
-	static bool IsKnownSystem();
-
 	static BuildVariants::Variants GetBuildVariant();
 	static mpt::ustring GetBuildVariantName(BuildVariants::Variants variant);
 	static mpt::ustring GetBuildVariantDescription(BuildVariants::Variants variant);

@@ -978,21 +978,21 @@ bool CTrackApp::CheckSystemSupport()
 		Reporting::Error(text, "OpenMPT");
 		return false;
 	}
-	if(BuildVariants::IsKnownSystem() && !BuildVariants::SystemCanRunCurrentBuild())
+	if(!BuildVariants::SystemCanRunCurrentBuild())
 	{
-		mpt::ustring text;
-		text += U_("Your system does not meet the minimum requirements for this variant of OpenMPT.") + lf;
 		if(mpt::OS::Windows::IsOriginal())
 		{
+			mpt::ustring text;
+			text += U_("Your system does not meet the minimum requirements for this variant of OpenMPT.") + lf;
 			text += U_("OpenMPT will exit now.") + lf;
-		}
-		Reporting::Error(text, "OpenMPT");
-		if(mpt::OS::Windows::IsOriginal())
-		{
+			Reporting::Error(text, "OpenMPT");
 			return false;
 		} else
 		{
-			return true; // may work though
+			mpt::ustring text;
+			text += U_("Your system does not meet the minimum requirements for this variant of OpenMPT.") + lf;
+			Reporting::Error(text, "OpenMPT");
+			// may work though
 		}
 	}
 	return true;
