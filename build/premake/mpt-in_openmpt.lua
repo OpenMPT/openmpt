@@ -75,7 +75,7 @@
 		filter { "configurations:Checked" }
 			if charset == "Unicode" then
 				ignoredefaultlibraries { "uafxcw.lib", "libcmt.lib" }
-				links { "uafxcwd.lib", "libcmt.lib" }
+				links { "uafxcw.lib", "libcmt.lib" }
 			else
 				ignoredefaultlibraries { "nafxcw.lib", "libcmt.lib" }
 				links { "nafxcw.lib", "libcmt.lib" }
@@ -91,7 +91,7 @@
 		filter { "configurations:Release" }
 			if charset == "Unicode" then
 				ignoredefaultlibraries { "uafxcw.lib", "libcmt.lib" }
-				links { "uafxcwd.lib", "libcmt.lib" }
+				links { "uafxcw.lib", "libcmt.lib" }
 			else
 				ignoredefaultlibraries { "nafxcw.lib", "libcmt.lib" }
 				links { "nafxcw.lib", "libcmt.lib" }
