@@ -24,7 +24,7 @@ BuildVariants::Variants BuildVariants::GetBuildVariant()
 	return Retro;
 #else
 #if defined(_WIN32_WINNT)
-#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
+#if (_WIN32_WINNT >= 0x0A00) // Windows 10
 	return Standard;
 #else
 	return Legacy;
