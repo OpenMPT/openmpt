@@ -32,10 +32,12 @@ MPT_WARNING("C++ compiler assumes finite math only. This is not standard-conform
 #endif
 
 #ifndef MPT_CHECK_CXX_IGNORE_WARNING_NO_EXCEPTIONS
-#if MPT_COMPILER_GCC || MPT_COMPILER_CLANG
+#if MPT_COMPILER_GCC
 #if (!defined(__EXCEPTIONS) || (__EXCEPTIONS != 1))
 MPT_WARNING("C++ compiler has no exception support.")
 #endif
+#elif MPT_COMPILER_CLANG && !defined(_MSC_VER)
+MPT_WARNING("C++ compiler has no exception support.")
 #endif
 #endif
 
@@ -44,7 +46,11 @@ MPT_WARNING("C++ compiler has no exception support.")
 #if (!defined(_CPPRTTI) || (_CPPRTTI != 1))
 MPT_WARNING("C++ compiler has no RTTI support.")
 #endif
-#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
+#elif MPT_COMPILER_GCC
+#if (!defined(__GXX_RTTI) || (__GXX_RTTI != 1))
+MPT_WARNING("C++ compiler has no RTTI support.")
+#endif
+#elif MPT_COMPILER_CLANG && !defined(_MSC_VER)
 #if (!defined(__GXX_RTTI) || (__GXX_RTTI != 1))
 MPT_WARNING("C++ compiler has no RTTI support.")
 #endif
