@@ -226,7 +226,7 @@ namespace MidiExport
 				if(m_channelState->panning[midiCh] == newPanning)
 					continue;
 				m_channelState->panning[midiCh] = newPanning;
-				std::array<char, 4> midiData = {0xB0 | midiCh, 0x0A, newPanning, 0};
+				std::array<char, 4> midiData = {static_cast<char>(0xB0 | midiCh), 0x0A, newPanning, 0};
 				m_queuedEvents.push_back(midiData);
 			}
 
