@@ -59,7 +59,6 @@ public:
 public:
 
 	mpt::ustring GetName() const;
-	mpt::ustring GetNameShort() const;
 
 public:
 
