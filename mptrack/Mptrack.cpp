@@ -41,12 +41,19 @@
 #include <afxdatarecovery.h>
 
 // GDI+
-#define max(a,b) (((a) > (b)) ? (a) : (b))
-#define min(a,b) (((a) < (b)) ? (a) : (b))
+#include <atlbase.h>
+#define max(a, b) (((a) > (b)) ? (a) : (b))
+#define min(a, b) (((a) < (b)) ? (a) : (b))
+#if MPT_COMPILER_MSVC
 #pragma warning(push)
-#pragma warning(disable:4458) // declaration of 'x' hides class member
+#pragma warning(disable : 4458)  // declaration of 'x' hides class member
+#endif
 #include <gdiplus.h>
+#if MPT_COMPILER_MSVC
 #pragma warning(pop)
+#endif
+#undef min
+#undef max
 
 #if MPT_COMPILER_MSVC
 #define _CRTDBG_MAP_ALLOC
