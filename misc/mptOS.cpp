@@ -114,31 +114,6 @@ mpt::ustring Version::GetName(mpt::osinfo::windows::Version version)
 }
 
 
-mpt::ustring Version::GetNameShort(mpt::osinfo::windows::Version version)
-{
-	mpt::ustring name;
-	if(mpt::OS::Windows::IsWine())
-	{
-		mpt::OS::Wine::VersionContext v;
-		if(v.Version().IsValid())
-		{
-			name = MPT_UFORMAT("wine-{}")(v.Version().AsString());
-		} else if(v.RawVersion().length() > 0)
-		{
-			name = U_("wine-") + mpt::encode_hex(mpt::as_span(v.RawVersion()));
-		} else
-		{
-			name = U_("wine-");
-		}
-		name += U_("-") + mpt::encode_hex(mpt::as_span(v.RawHostSysName()));
-	} else
-	{
-		name = MPT_UFORMAT("{}.{}")(mpt::ufmt::dec(version.GetSystem().Major), mpt::ufmt::dec0<2>(version.GetSystem().Minor));
-	}
-	return name;
-}
-
-
 mpt::osinfo::windows::Version Version::GetMinimumKernelLevel() noexcept
 {
 	uint64 minimumKernelVersion = 0;

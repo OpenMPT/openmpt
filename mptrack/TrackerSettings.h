@@ -905,20 +905,12 @@ public:
 	Setting<int32> UpdateIntervalDays;
 	Setting<uint32> UpdateChannel;
 	Setting<mpt::ustring> UpdateUpdateURL_DEPRECATED;
-#if MPT_UPDATE_LEGACY
-	Setting<mpt::ustring> UpdateChannelReleaseURL;
-	Setting<mpt::ustring> UpdateChannelNextURL;
-	Setting<mpt::ustring> UpdateChannelDevelopmentURL;
-#endif // MPT_UPDATE_LEGACY
 	Setting<mpt::ustring> UpdateAPIURL;
 	Setting<bool> UpdateStatisticsConsentAsked;
 	Setting<bool> UpdateStatistics;
 	Setting<bool> UpdateSendGUID_DEPRECATED;
 	Setting<bool> UpdateShowUpdateHint;
 	Setting<CString> UpdateIgnoreVersion;
-#if MPT_UPDATE_LEGACY
-	Setting<bool> UpdateLegacyMethod;
-#endif // MPT_UPDATE_LEGACY
 	Setting<bool> UpdateSkipSignatureVerificationUNSECURE;
 	Setting<std::vector<mpt::ustring>> UpdateSigningKeysRootAnchors;
 

@@ -398,26 +398,6 @@ mpt::ustring CUpdateCheck::GetStatisticsUserInformation(bool shortText)
 }
 
 
-#if MPT_UPDATE_LEGACY
-
-mpt::ustring CUpdateCheck::GetDefaultChannelReleaseURL()
-{
-	return U_("https://update.openmpt.org/check/$VERSION/$GUID");
-}
-
-mpt::ustring CUpdateCheck::GetDefaultChannelNextURL()
-{
-	return U_("https://update.openmpt.org/check/next/$VERSION/$GUID");
-}
-
-mpt::ustring CUpdateCheck::GetDefaultChannelDevelopmentURL()
-{
-	return U_("https://update.openmpt.org/check/testing/$VERSION/$GUID");
-}
-
-#endif // MPT_UPDATE_LEGACY
-
-
 std::vector<mpt::ustring> CUpdateCheck::GetDefaultUpdateSigningKeysRootAnchors()
 {
 	// IMPORTANT:
@@ -479,15 +459,7 @@ void CUpdateCheck::StartUpdateCheckAsync(bool isAutoUpdate)
 		const double secsSinceLastCheck = difftime(now, lastCheck);
 		if(secsSinceLastCheck > 0.0 && secsSinceLastCheck < updateCheckPeriod * 86400.0)
 		{
-#if MPT_UPDATE_LEGACY
-			if(TrackerSettings::Instance().UpdateLegacyMethod)
-			{
-				return;
-			} else
-#endif // MPT_UPDATE_LEGACY
-			{
-				loadPersisted = true;
-			}
+			loadPersisted = true;
 		}
 
 		// Never ran update checks before, so we notify the user of automatic update checks.
@@ -560,12 +532,6 @@ CUpdateCheck::Settings::Settings()
 	: periodDays(TrackerSettings::Instance().UpdateIntervalDays)
 	, channel(static_cast<UpdateChannel>(TrackerSettings::Instance().UpdateChannel.Get()))
 	, persistencePath(theApp.GetConfigPath())
-#if MPT_UPDATE_LEGACY
-	, modeLegacy(TrackerSettings::Instance().UpdateLegacyMethod)
-	, channelReleaseURL(TrackerSettings::Instance().UpdateChannelReleaseURL)
-	, channelNextURL(TrackerSettings::Instance().UpdateChannelNextURL)
-	, channelDevelopmentURL(TrackerSettings::Instance().UpdateChannelDevelopmentURL)
-#endif // MPT_UPDATE_LEGACY
 	, apiURL(TrackerSettings::Instance().UpdateAPIURL)
 	, sendStatistics(TrackerSettings::Instance().UpdateStatistics)
 	, statisticsUUID(TrackerSettings::Instance().VersionInstallGUID)
@@ -660,114 +626,10 @@ std::string CUpdateCheck::GetStatisticsDataV3(const Settings &settings)
 }
 
 
-#if MPT_UPDATE_LEGACY
-mpt::ustring CUpdateCheck::GetUpdateURLV2(const CUpdateCheck::Settings &settings)
-{
-	mpt::ustring updateURL;
-	if(settings.channel == UpdateChannelRelease)
-	{
-		updateURL = settings.channelReleaseURL;
-		if(updateURL.empty())
-		{
-			updateURL = GetDefaultChannelReleaseURL();
-		}
-	}	else if(settings.channel == UpdateChannelNext)
-	{
-		updateURL = settings.channelNextURL;
-		if(updateURL.empty())
-		{
-			updateURL = GetDefaultChannelNextURL();
-		}
-	}	else if(settings.channel == UpdateChannelDevelopment)
-	{
-		updateURL = settings.channelDevelopmentURL;
-		if(updateURL.empty())
-		{
-			updateURL = GetDefaultChannelDevelopmentURL();
-		}
-	}	else
-	{
-		updateURL = settings.channelReleaseURL;
-		if(updateURL.empty())
-		{
-			updateURL = GetDefaultChannelReleaseURL();
-		}
-	}
-	if(updateURL.find(U_("://")) == mpt::ustring::npos)
-	{
-		updateURL = U_("https://") + updateURL;
-	}
-	mpt::ustring variant = []() {
-		if(std::string_view(OPENMPT_BUILD_VARIANT) == std::string_view("Standard"))
-		{
-			return MPT_UFORMAT("win{}")(mpt::arch_bits);
-		} else if(std::string_view(OPENMPT_BUILD_VARIANT) == std::string_view("Legacy"))
-		{
-			return MPT_UFORMAT("win{}old")(mpt::arch_bits);
-		} else if(std::string_view(OPENMPT_BUILD_VARIANT) == std::string_view("Retro"))
-		{
-			return MPT_UFORMAT("win{}old")(mpt::arch_bits);
-		} else
-		{
-			return U_("");
-		}
-	}();
-	// Build update URL
-	updateURL = mpt::String::Replace(updateURL, U_("$VERSION"), MPT_UFORMAT("{}-{}-{}")
-		( Version::Current()
-		, variant
-		, settings.sendStatistics ? mpt::OS::Windows::Version::GetNameShort(mpt::osinfo::windows::Version::Current()) : U_("unknown")
-		));
-	updateURL = mpt::String::Replace(updateURL, U_("$GUID"), settings.sendStatistics ? mpt::ufmt::val(settings.statisticsUUID) : U_("anonymous"));
-	return updateURL;
-}
-#endif // MPT_UPDATE_LEGACY
-
-
 // Run update check (independent thread)
 UpdateCheckResult CUpdateCheck::SearchUpdate(const CUpdateCheck::Context &context, const CUpdateCheck::Settings &settings, const std::string &statistics)
 {
 	UpdateCheckResult result;
-
-#if MPT_UPDATE_LEGACY
-	if(settings.modeLegacy)
-	{
-		if(!context.window->SendMessage(context.msgProgress, context.autoUpdate ? 1 : 0, 0))
-		{
-			throw CUpdateCheck::Cancel();
-		}
-		if(!context.window->SendMessage(context.msgProgress, context.autoUpdate ? 1 : 0, 10))
-		{
-			throw CUpdateCheck::Cancel();
-		}
-		{
-			HTTP::InternetSession internet(Version::Current().GetOpenMPTVersionString());
-			if(!context.window->SendMessage(context.msgProgress, context.autoUpdate ? 1 : 0, 30))
-			{
-				throw CUpdateCheck::Cancel();
-			}
-			result = SearchUpdateLegacy(internet, settings);
-			if(!context.window->SendMessage(context.msgProgress, context.autoUpdate ? 1 : 0, 50))
-			{
-				throw CUpdateCheck::Cancel();
-			}
-			SendStatistics(internet, settings, statistics);
-			if(!context.window->SendMessage(context.msgProgress, context.autoUpdate ? 1 : 0, 70))
-			{
-				throw CUpdateCheck::Cancel();
-			}
-		}
-		if(!context.window->SendMessage(context.msgProgress, context.autoUpdate ? 1 : 0, 90))
-		{
-			throw CUpdateCheck::Cancel();
-		}
-		CleanOldUpdates(settings, context);
-		if(!context.window->SendMessage(context.msgProgress, context.autoUpdate ? 1 : 0, 100))
-		{
-			throw CUpdateCheck::Cancel();
-		}
-	} else
-#endif // MPT_UPDATE_LEGACY
 	{
 		if(!context.window->SendMessage(context.msgProgress, context.autoUpdate ? 1 : 0, 0))
 		{
@@ -874,19 +736,6 @@ void CUpdateCheck::SendStatistics(HTTP::InternetSession &internet, const CUpdate
 {
 	if(settings.sendStatistics)
 	{
-#if MPT_UPDATE_LEGACY
-		if(!settings.modeLegacy)
-		{
-			HTTP::Request requestLegacyUpdate;
-			requestLegacyUpdate.SetURI(ParseURI(GetUpdateURLV2(settings)));
-			requestLegacyUpdate.method = HTTP::Method::Get;
-			requestLegacyUpdate.flags = HTTP::NoCache;
-#if defined(MPT_BUILD_RETRO)
-			requestLegacyUpdate.InsecureTLSDowngradeWindowsXP();
-#endif // MPT_BUILD_RETRO
-			HTTP::Result resultLegacyUpdateHTTP = internet(requestLegacyUpdate);
-		}
-#endif // MPT_UPDATE_LEGACY
 		HTTP::Request requestStatistics;
 		if(settings.statisticsUUID.IsValid())
 		{
@@ -908,70 +757,6 @@ void CUpdateCheck::SendStatistics(HTTP::InternetSession &internet, const CUpdate
 		internet(requestStatistics);
 	}
 }
-
-
-#if MPT_UPDATE_LEGACY
-UpdateCheckResult CUpdateCheck::SearchUpdateLegacy(HTTP::InternetSession &internet, const CUpdateCheck::Settings &settings)
-{
-
-	HTTP::Request request;
-	request.SetURI(ParseURI(GetUpdateURLV2(settings)));
-	request.method = HTTP::Method::Get;
-	request.flags = HTTP::NoCache;
-
-#if defined(MPT_BUILD_RETRO)
-	request.InsecureTLSDowngradeWindowsXP();
-#endif // MPT_BUILD_RETRO
-	HTTP::Result resultHTTP = internet(request);
-
-	// Retrieve HTTP status code.
-	if(resultHTTP.Status >= 400)
-	{
-		throw CUpdateCheck::Error(MPT_CFORMAT("Version information could not be found on the server (HTTP status code {}). Maybe your version of OpenMPT is too old!")(resultHTTP.Status));
-	}
-
-	// Now, evaluate the downloaded data.
-	UpdateCheckResult result;
-	result.UpdateAvailable = false;
-	result.CheckTime = time(nullptr);
-	CString resultData = mpt::ToCString(mpt::Charset::UTF8, mpt::buffer_cast<std::string>(resultHTTP.Data));
-	if(resultData.CompareNoCase(_T("noupdate")) != 0)
-	{
-		CString token;
-		int parseStep = 0, parsePos = 0;
-		while(!(token = resultData.Tokenize(_T("\n"), parsePos)).IsEmpty())
-		{
-			token.Trim();
-			switch(parseStep++)
-			{
-			case 0:
-				if(token.CompareNoCase(_T("update")) != 0)
-				{
-					throw CUpdateCheck::Error(_T("Could not understand server response. Maybe your version of OpenMPT is too old!"));
-				}
-				break;
-			case 1:
-				result.Version = token;
-				break;
-			case 2:
-				result.Date = token;
-				break;
-			case 3:
-				result.URL = token;
-				break;
-			}
-		}
-		if(parseStep < 4)
-		{
-			throw CUpdateCheck::Error(_T("Could not understand server response. Maybe your version of OpenMPT is too old!"));
-		}
-		result.UpdateAvailable = true;
-	}
-
-	return result;
-
-}
-#endif // MPT_UPDATE_LEGACY
 
 
 UpdateCheckResult CUpdateCheck::SearchUpdateModern(HTTP::InternetSession &internet, const CUpdateCheck::Settings &settings)
@@ -1539,41 +1324,6 @@ void CUpdateCheck::ShowSuccessGUI(const bool autoUpdate, const UpdateCheckResult
 {
 	bool modal = !autoUpdate;
 
-#if MPT_UPDATE_LEGACY
-
-	if(TrackerSettings::Instance().UpdateLegacyMethod)
-	{
-		if(!result.UpdateAvailable)
-		{
-			if(modal)
-			{
-				Reporting::Information(U_("You already have the latest version of OpenMPT installed."), U_("OpenMPT Update"));
-			}
-			return;
-		}
-
-		// always show indicator, do not highlight it with a tooltip if we show a modal window later
-		if(!CMainFrame::GetMainFrame()->ShowUpdateIndicator(result, result.Version, result.URL, !modal))
-		{
-			// on failure to show indicator, continue and show modal dialog
-			modal = true;
-		}
-
-		if(!modal)
-		{
-			return;
-		}
-		UpdateDialog dlg(result.Version, result.Date, result.URL);
-		if(dlg.DoModal() != IDOK)
-		{
-			return;
-		}
-		CTrackApp::OpenURL(result.URL);
-		return;
-	}
-
-#endif // MPT_UPDATE_LEGACY
-
 	Update::versions updateData = nlohmann::json::parse(mpt::buffer_cast<std::string>(result.json)).get<Update::versions>();
 	UpdateInfo updateInfo = GetBestDownload(updateData);
 
@@ -1825,13 +1575,6 @@ void CUpdateSetupDlg::OnShowStatisticsData(NMHDR * /*pNMHDR*/, LRESULT * /*pResu
 	statistics += U_("Update:") + UL_("\n");
 	statistics += UL_("\n");
 
-#if MPT_UPDATE_LEGACY
-	if(settings.modeLegacy)
-	{
-		statistics += U_("GET ") + CUpdateCheck::GetUpdateURLV2(settings) + UL_("\n");
-		statistics += UL_("\n");
-	} else
-#endif // MPT_UPDATE_LEGACY
 	{
 		statistics += U_("GET ") + settings.apiURL + MPT_UFORMAT("update/{}")(GetChannelName(static_cast<UpdateChannel>(settings.channel))) + UL_("\n");
 		statistics += UL_("\n");
@@ -1847,13 +1590,6 @@ void CUpdateSetupDlg::OnShowStatisticsData(NMHDR * /*pNMHDR*/, LRESULT * /*pResu
 	{
 		statistics += U_("Statistics:") + UL_("\n");
 		statistics += UL_("\n");
-#if MPT_UPDATE_LEGACY
-		if(!settings.modeLegacy)
-		{
-			statistics += U_("GET ") + CUpdateCheck::GetUpdateURLV2(settings) + UL_("\n");
-			statistics += UL_("\n");
-		}
-#endif // MPT_UPDATE_LEGACY
 		if(settings.statisticsUUID.IsValid())
 		{
 			statistics += U_("PUT ") + settings.apiURL + MPT_UFORMAT("statistics/{}")(settings.statisticsUUID) + UL_("\n");

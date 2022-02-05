@@ -42,13 +42,6 @@ struct UpdateCheckResult
 {
 	time_t CheckTime = time_t{};
 	std::vector<std::byte> json;
-#if MPT_UPDATE_LEGACY
-	bool UpdateAvailable = false;
-	CString Version;
-	CString Date;
-	CString URL;
-#endif  // MPT_UPDATE_LEGACY
-
 	bool IsFromCache() const noexcept { return CheckTime == time_t{}; }
 };
 
@@ -62,12 +55,6 @@ private:
 public:
 
 	static mpt::ustring GetStatisticsUserInformation(bool shortText);
-
-#if MPT_UPDATE_LEGACY
-	static mpt::ustring GetDefaultChannelReleaseURL();
-	static mpt::ustring GetDefaultChannelNextURL();
-	static mpt::ustring GetDefaultChannelDevelopmentURL();
-#endif // MPT_UPDATE_LEGACY
 
 	static std::vector<mpt::ustring> GetDefaultUpdateSigningKeysRootAnchors();
 	static mpt::ustring GetDefaultAPIURL();
@@ -99,12 +86,6 @@ public:
 		int32 periodDays;
 		UpdateChannel channel;
 		mpt::PathString persistencePath;
-#if MPT_UPDATE_LEGACY
-		bool modeLegacy;
-		mpt::ustring channelReleaseURL;
-		mpt::ustring channelNextURL;
-		mpt::ustring channelDevelopmentURL;
-#endif // MPT_UPDATE_LEGACY
 		mpt::ustring apiURL;
 		bool sendStatistics;
 		mpt::UUID statisticsUUID;
@@ -143,11 +124,6 @@ public:
 
 public:
 
-#if MPT_UPDATE_LEGACY
-	// v2
-	static mpt::ustring GetUpdateURLV2(const Settings &settings);
-#endif // MPT_UPDATE_LEGACY
-
 	// v3
 	static std::string GetStatisticsDataV3(const Settings &settings);  // UTF8
 
@@ -171,9 +147,6 @@ protected:
 
 	static void SendStatistics(HTTP::InternetSession &internet, const CUpdateCheck::Settings &settings, const std::string &statistics); // may throw
 
-#if MPT_UPDATE_LEGACY
-	static UpdateCheckResult SearchUpdateLegacy(HTTP::InternetSession &internet, const CUpdateCheck::Settings &settings); // may throw
-#endif // MPT_UPDATE_LEGACY
 	static UpdateCheckResult SearchUpdateModern(HTTP::InternetSession &internet, const CUpdateCheck::Settings &settings); // may throw
 
 };
