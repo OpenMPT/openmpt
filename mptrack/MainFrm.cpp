@@ -774,7 +774,7 @@ void CMainFrame::SoundCallbackLockedCallback(SoundDevice::CallbackBuffer<Dithers
 	MPT_ASSERT(framesToRender > 0);
 	CSoundFile::samplecount_t renderedFrames = m_pSndFile->Read(framesToRender, target, source, std::ref(m_VUMeterOutput), std::ref(m_VUMeterInput));
 	MPT_ASSERT(renderedFrames <= framesToRender);
-	CSoundFile::samplecount_t remainingFrames = framesToRender - renderedFrames;
+	[[maybe_unused]] CSoundFile::samplecount_t remainingFrames = framesToRender - renderedFrames;
 	MPT_ASSERT(remainingFrames >= 0); // remaining buffer is filled with silence automatically
 }
 
