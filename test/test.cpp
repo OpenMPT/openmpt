@@ -843,8 +843,8 @@ static MPT_NOINLINE void TestMisc1()
 	VERIFY_EQUAL(CModSpecifications::ExtensionToType(U_("")), MOD_TYPE_NONE);
 
 	// invalid
-	VERIFY_EQUAL(SampleFormat::FromInt(0), SampleFormat::Invalid);
-	VERIFY_EQUAL(SampleFormat::FromInt(0b0'0000'11'0), SampleFormat::Invalid);
+	VERIFY_EQUAL(SampleFormat::FromInt(0), SampleFormat::Default);
+	VERIFY_EQUAL(SampleFormat::FromInt(0b0'0000'11'0), SampleFormat::Default);
 
 	// correct
 	VERIFY_EQUAL(SampleFormat::FromInt(0b0'0001'00'1), SampleFormat::Unsigned8);
@@ -856,10 +856,10 @@ static MPT_NOINLINE void TestMisc1()
 	VERIFY_EQUAL(SampleFormat::FromInt(0b1'1000'00'0), SampleFormat::Float64);
 
 	// no size
-	VERIFY_EQUAL(SampleFormat::FromInt(0b0'0000'00'0), SampleFormat::Invalid);
+	VERIFY_EQUAL(SampleFormat::FromInt(0b0'0000'00'0), SampleFormat::Default);
 	VERIFY_EQUAL(SampleFormat::FromInt(0b0'0000'00'1), SampleFormat::Unsigned8);
 	VERIFY_EQUAL(SampleFormat::FromInt(0b1'0000'00'0), SampleFormat::Float32);
-	VERIFY_EQUAL(SampleFormat::FromInt(0b1'0000'00'1), SampleFormat::Invalid);
+	VERIFY_EQUAL(SampleFormat::FromInt(0b1'0000'00'1), SampleFormat::Default);
 
 	// invalid unsigned
 	VERIFY_EQUAL(SampleFormat::FromInt(0b0'0010'00'1), SampleFormat::Int16);

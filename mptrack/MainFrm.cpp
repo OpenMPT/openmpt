@@ -843,11 +843,6 @@ bool CMainFrame::audioOpenDevice()
 		return false;
 	}
 	SampleFormat actualSampleFormat = gpSoundDevice->GetActualSampleFormat();
-	if(!actualSampleFormat.IsValid())
-	{
-		Reporting::Error(MPT_UFORMAT("Unable to open sound device '{}': Unknown sample format.")(gpSoundDevice->GetDeviceInfo().GetDisplayName()));
-		return false;
-	}
 	deviceSettings.sampleFormat = actualSampleFormat;
 	Dithers().SetMode(deviceSettings.DitherType, deviceSettings.Channels);
 	TrackerSettings::Instance().MixerSamplerate = gpSoundDevice->GetSettings().Samplerate;

@@ -486,7 +486,7 @@ void CWaveConvert::FillDither()
 	EncoderSettingsConf &encSettings = m_Settings.GetEncoderSettings();
 	m_CbnDither.CComboBox::ResetContent();
 	int format = m_CbnSampleFormat.GetItemData(m_CbnSampleFormat.GetCurSel()) & 0xffffff;
-	if((encTraits->modes & Encoder::ModeLossless) && Encoder::Format::FromInt(format).GetSampleFormat() != SampleFormat::Invalid && !Encoder::Format::FromInt(format).GetSampleFormat().IsFloat())
+	if((encTraits->modes & Encoder::ModeLossless) && !Encoder::Format::FromInt(format).GetSampleFormat().IsFloat())
 	{
 		m_CbnDither.EnableWindow(TRUE);
 		for(std::size_t dither = 0; dither < DithersOpenMPT::GetNumDithers(); ++dither)

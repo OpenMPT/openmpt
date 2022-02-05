@@ -60,10 +60,6 @@ namespace SoundDevice
 bool FillWaveFormatExtensible(WAVEFORMATEXTENSIBLE &WaveFormat, const SoundDevice::Settings &m_Settings)
 {
 	WaveFormat = {};
-	if(!m_Settings.sampleFormat.IsValid())
-	{
-		return false;
-	}
 	WaveFormat.Format.wFormatTag = m_Settings.sampleFormat.IsFloat() ? WAVE_FORMAT_IEEE_FLOAT : WAVE_FORMAT_PCM;
 	WaveFormat.Format.nChannels = (WORD)m_Settings.Channels;
 	WaveFormat.Format.nSamplesPerSec = m_Settings.Samplerate;

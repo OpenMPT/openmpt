@@ -36,7 +36,6 @@ public:
 		, f(file)
 		, settings(settings_)
 	{
-		MPT_ASSERT(settings.Format.GetSampleFormat().IsValid());
 		MPT_ASSERT(settings.Samplerate > 0);
 		MPT_ASSERT(settings.Channels > 0);
 		MPT_UNREFERENCED_PARAMETER(tags);

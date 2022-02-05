@@ -109,7 +109,7 @@ namespace Encoder
 		}
 		SampleFormat GetSampleFormat() const
 		{
-			SampleFormat result = SampleFormat::Invalid;
+			SampleFormat result = SampleFormat::Default;
 			switch(encoding)
 			{
 			case Encoding::Float:

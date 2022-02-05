@@ -307,9 +307,6 @@ void Base::CallbackLockedAudioProcessVoid(void *buffer, const void *inputBuffer,
 		case SampleFormat::Float64:
 			CallbackLockedAudioProcess(static_cast<double *>(buffer), static_cast<const double *>(inputBuffer), numFrames);
 			break;
-		case SampleFormat::Invalid:
-			// nothing
-			break;
 	}
 }
 
