@@ -14,7 +14,6 @@
 #include "Image.h"
 #include "Mptrack.h"
 #include "TrackerSettings.h"
-#include "BuildVariants.h"
 #include "../common/version.h"
 #include "../misc/mptWine.h"
 
@@ -250,7 +249,7 @@ BOOL CAboutDlg::OnInitDialog()
 
 	mpt::ustring app;
 	app += MPT_UFORMAT("OpenMPT{} ({} ({} bit))")(
-			BuildVariants().GetBuildVariantDescription(BuildVariants().GetBuildVariant()),
+			mpt::ToUnicode(mpt::Charset::ASCII, OPENMPT_BUILD_VARIANT_MONIKER),
 			mpt::OS::Windows::Name(mpt::OS::Windows::GetProcessArchitecture()),
 			mpt::arch_bits)
 		+ U_("\n");

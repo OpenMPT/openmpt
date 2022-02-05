@@ -77,6 +77,24 @@
 
 #if defined(MODPLUG_TRACKER)
 
+#if defined(MPT_BUILD_RETRO)
+#define OPENMPT_BUILD_VARIANT "Retro"
+#define OPENMPT_BUILD_VARIANT_MONIKER " RETRO"
+#else
+#if MPT_OS_WINDOWS
+#if (_WIN32_WINNT >= 0x0603)
+#define OPENMPT_BUILD_VARIANT "Standard"
+#define OPENMPT_BUILD_VARIANT_MONIKER ""
+#else
+#define OPENMPT_BUILD_VARIANT "Legacy"
+#define OPENMPT_BUILD_VARIANT_MONIKER ""
+#endif
+#else
+#define OPENMPT_BUILD_VARIANT "Unknown"
+#define OPENMPT_BUILD_VARIANT_MONIKER ""
+#endif
+#endif
+
 #if MPT_OS_WINDOWS
 #if !defined(MPT_BUILD_WINESUPPORT) && !defined(MPT_BUILD_UPDATESIGNTOOL)
 #define MPT_WITH_MFC

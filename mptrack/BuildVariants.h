@@ -21,19 +21,6 @@ class BuildVariants
 
 public:
 
-	enum Variants {
-		Standard,
-		Legacy,
-		Retro,
-		Unknown,
-	};
-
-	static BuildVariants::Variants GetBuildVariant();
-	static mpt::ustring GetBuildVariantName(BuildVariants::Variants variant);
-	static mpt::ustring GetBuildVariantDescription(BuildVariants::Variants variant);
-
-	static mpt::ustring GuessCurrentBuildName();
-
 	static bool ProcessorCanRunCurrentBuild();
 	static bool SystemCanRunCurrentBuild();
 

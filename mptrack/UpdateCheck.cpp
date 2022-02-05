@@ -593,7 +593,7 @@ std::string CUpdateCheck::GetStatisticsDataV3(const Settings &settings)
 {
 	nlohmann::json j;
 	j["OpenMPT"]["Version"] = mpt::ufmt::val(Version::Current());
-	j["OpenMPT"]["BuildVariant"] = BuildVariants().GetBuildVariantName(BuildVariants().GetBuildVariant());
+	j["OpenMPT"]["BuildVariant"] = mpt::ToUnicode(mpt::Charset::ASCII, OPENMPT_BUILD_VARIANT);
 	j["OpenMPT"]["Architecture"] = mpt::OS::Windows::Name(mpt::OS::Windows::GetProcessArchitecture());
 	j["Update"]["PeriodDays"] = settings.periodDays;
 	j["Update"]["Channel"] = ((settings.channel == UpdateChannelRelease) ? U_("Release") : (settings.channel == UpdateChannelNext) ? U_("Next") : (settings.channel == UpdateChannelDevelopment) ? U_("Development") : U_(""));
@@ -698,10 +698,25 @@ mpt::ustring CUpdateCheck::GetUpdateURLV2(const CUpdateCheck::Settings &settings
 	{
 		updateURL = U_("https://") + updateURL;
 	}
+	mpt::ustring variant = []() {
+		if(std::string_view(OPENMPT_BUILD_VARIANT) == std::string_view("Standard"))
+		{
+			return MPT_UFORMAT("win{}")(mpt::arch_bits);
+		} else if(std::string_view(OPENMPT_BUILD_VARIANT) == std::string_view("Legacy"))
+		{
+			return MPT_UFORMAT("win{}old")(mpt::arch_bits);
+		} else if(std::string_view(OPENMPT_BUILD_VARIANT) == std::string_view("Retro"))
+		{
+			return MPT_UFORMAT("win{}old")(mpt::arch_bits);
+		} else
+		{
+			return U_("");
+		}
+	}();
 	// Build update URL
 	updateURL = mpt::String::Replace(updateURL, U_("$VERSION"), MPT_UFORMAT("{}-{}-{}")
 		( Version::Current()
-		, BuildVariants().GuessCurrentBuildName()
+		, variant
 		, settings.sendStatistics ? mpt::OS::Windows::Version::GetNameShort(mpt::osinfo::windows::Version::Current()) : U_("unknown")
 		));
 	updateURL = mpt::String::Replace(updateURL, U_("$GUID"), settings.sendStatistics ? mpt::ufmt::val(settings.statisticsUUID) : U_("anonymous"));

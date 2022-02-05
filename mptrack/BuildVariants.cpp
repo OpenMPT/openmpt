@@ -12,103 +12,11 @@
 #include "../common/version.h"
 #include "../misc/mptOS.h"
 #include "../misc/mptCPU.h"
+#include "../common/mptStringFormat.h"
 #include "Mptrack.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
-
-
-BuildVariants::Variants BuildVariants::GetBuildVariant()
-{
-#if defined(MPT_BUILD_RETRO)
-	return Retro;
-#else
-#if defined(_WIN32_WINNT)
-#if (_WIN32_WINNT >= 0x0A00) // Windows 10
-	return Standard;
-#else
-	return Legacy;
-#endif
-#else
-	return Unknown;
-#endif
-#endif
-}
-
-
-mpt::ustring BuildVariants::GetBuildVariantName(BuildVariants::Variants variant)
-{
-	mpt::ustring result;
-	switch(variant)
-	{
-	case Standard:
-		result = U_("Standard");
-		break;
-	case Legacy:
-		result = U_("Legacy");
-		break;
-	case Retro:
-		result = U_("Retro");
-		break;
-	case Unknown:
-		result = U_("Unknown");
-		break;
-	}
-	return result;
-}
-
-
-mpt::ustring BuildVariants::GetBuildVariantDescription(BuildVariants::Variants variant)
-{
-	mpt::ustring result;
-	switch(variant)
-	{
-	case Standard:
-		result = U_("");
-		break;
-	case Legacy:
-		result = U_("");
-		break;
-	case Retro:
-		result = U_(" RETRO");
-		break;
-	case Unknown:
-		result = U_("");
-		break;
-	}
-	return result;
-}
-
-
-mpt::ustring BuildVariants::GuessCurrentBuildName()
-{
-	if(GetBuildVariant() == Unknown)
-	{
-		return mpt::ustring();
-	}
-	if(mpt::arch_bits == 64)
-	{
-		if(GetBuildVariant() == Standard)
-		{
-			return U_("win64");
-		} else
-		{
-			return U_("win64old");
-		}
-	} else if(mpt::arch_bits == 32)
-	{
-		if(GetBuildVariant() == Standard)
-		{
-			return U_("win32");
-		} else
-		{
-			return U_("win32old");
-		}
-	} else
-	{
-		return mpt::ustring();
-	}
-}
 
 
 bool BuildVariants::ProcessorCanRunCurrentBuild()
