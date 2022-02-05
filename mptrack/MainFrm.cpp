@@ -958,7 +958,7 @@ const float VUMeter::dynamicRange = 48.0f; // corresponds to the current impleme
 void VUMeter::SetDecaySpeedDecibelPerSecond(float decibelPerSecond)
 {
 	float linearDecayRate = decibelPerSecond / dynamicRange;
-	decayParam = mpt::saturate_round<int32>(linearDecayRate * MixSampleIntTraits::mix_clip_max);
+	decayParam = mpt::saturate_round<int32>(linearDecayRate * static_cast<float>(MixSampleIntTraits::mix_clip_max));
 }
 
 
