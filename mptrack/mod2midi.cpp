@@ -488,11 +488,11 @@ namespace MidiExport
 					// Drums
 					if(oldInstr != nullptr && oldInstr->nMidiChannel != MidiFirstChannel + 9)
 						instr.nMidiProgram = 0;
-					if(instrMap[i].program != 128)
+					if(instrMap[i].program > 0)
 					{
 						for(auto &key : instr.NoteMap)
 						{
-							key = instrMap[i].program + NOTE_MIN;
+							key = instrMap[i].program + NOTE_MIN - 1;
 						}
 					}
 				}
@@ -599,13 +599,7 @@ CModToMidi::CModToMidi(CSoundFile &sndFile, CWnd *pWndParent)
 		if(pIns != nullptr)
 		{
 			m_instrMap[i].channel = pIns->nMidiChannel;
-			if(m_instrMap[i].channel == MidiFirstChannel + 9)
-			{
-				if ((pIns->nMidiProgram > 20) && (pIns->nMidiProgram < 120))
-					m_instrMap[i].program = pIns->nMidiProgram;
-				else
-					m_instrMap[i].program = (pIns->NoteMap[60] - NOTE_MIN) & 0x7F;
-			} else
+			if(m_instrMap[i].channel != MidiFirstChannel + 9)
 			{
 				if(!pIns->HasValidMIDIChannel())
 					m_instrMap[i].channel = MidiMappedChannel;
@@ -686,6 +680,7 @@ void CModToMidi::FillProgramBox(bool percussion)
 	m_CbnProgram.ResetContent();
 	if(percussion)
 	{
+		m_CbnProgram.SetItemData(m_CbnProgram.AddString(_T("Mapped")), 0);
 		for(ModCommand::NOTE i = 0; i < 61; i++)
 		{
 			ModCommand::NOTE note = i + 24;
@@ -695,7 +690,6 @@ void CModToMidi::FillProgramBox(bool percussion)
 				mpt::ToCString(mpt::Charset::ASCII, szMidiPercussionNames[i]));
 			m_CbnProgram.SetItemData(m_CbnProgram.AddString(s), note);
 		}
-		m_CbnProgram.SetItemData(m_CbnProgram.AddString(_T("Mapped")), 128);
 	} else
 	{
 		m_CbnProgram.SetItemData(m_CbnProgram.AddString(_T("No Program Change")), 0);
@@ -752,9 +746,10 @@ void CModToMidi::UpdateDialog()
 	UINT nMidiProgram = m_instrMap[m_currentInstr].program;
 	if(m_percussion)
 	{
-		nMidiProgram -= 24;
-		if(nMidiProgram > 60)
-			nMidiProgram = 24;
+		if(nMidiProgram >= 24 && nMidiProgram <= 84)
+			nMidiProgram -= 23;
+		else
+			nMidiProgram = 0;
 	} else
 	{
 		if(nMidiProgram > 127)
