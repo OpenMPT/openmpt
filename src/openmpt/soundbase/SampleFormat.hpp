@@ -238,7 +238,7 @@ public:
 	}
 	MPT_CONSTEXPRINLINE uint8 GetSampleSize() const noexcept
 	{
-		return false                        ? 0
+		return false                             ? 0
 			: (value == SampleFormat::Unsigned8) ? 1
 			: (value == SampleFormat::Int8)      ? 1
 			: (value == SampleFormat::Int16)     ? 2
@@ -250,7 +250,7 @@ public:
 	}
 	MPT_CONSTEXPRINLINE uint8 GetBitsPerSample() const noexcept
 	{
-		return false                        ? 0
+		return false                             ? 0
 			: (value == SampleFormat::Unsigned8) ? 8
 			: (value == SampleFormat::Int8)      ? 8
 			: (value == SampleFormat::Int16)     ? 16
