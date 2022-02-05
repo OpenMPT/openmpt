@@ -398,15 +398,6 @@ private:
 private:
 	CTuningCollection* m_pTuningsTuneSpecific = nullptr;
 
-#ifdef MODPLUG_TRACKER
-public:
-	CMIDIMapper& GetMIDIMapper() {return m_MIDIMapper;}
-	const CMIDIMapper& GetMIDIMapper() const {return m_MIDIMapper;}
-private:
-	CMIDIMapper m_MIDIMapper;
-
-#endif // MODPLUG_TRACKER
-
 private: //Misc private methods.
 	static void SetModSpecsPointer(const CModSpecifications* &pModSpecs, const MODTYPE type);
 
@@ -624,6 +615,14 @@ public:
 #endif // MODPLUG_TRACKER
 
 	std::unique_ptr<OPL> m_opl;
+
+#ifdef MODPLUG_TRACKER
+public:
+	CMIDIMapper& GetMIDIMapper() { return m_MIDIMapper; }
+	const CMIDIMapper& GetMIDIMapper() const { return m_MIDIMapper; }
+private:
+	CMIDIMapper m_MIDIMapper;
+#endif // MODPLUG_TRACKER
 
 public:
 #ifdef LIBOPENMPT_BUILD
