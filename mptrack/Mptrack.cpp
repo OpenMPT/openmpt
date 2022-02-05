@@ -29,7 +29,6 @@
 #include "AutoSaver.h"
 #include "FileDialog.h"
 #include "Image.h"
-#include "BuildVariants.h"
 #include "../common/ComponentManager.h"
 #include "WelcomeDialog.h"
 #include "openmpt/sounddevice/SoundDeviceManager.hpp"
@@ -37,6 +36,8 @@
 #include "../soundlib/plugins/PluginManager.h"
 #include "MPTrackWine.h"
 #include "MPTrackUtil.h"
+#include "../misc/mptOS.h"
+#include "../misc/mptCPU.h"
 #include <afxdatarecovery.h>
 
 // GDI+
@@ -966,11 +967,44 @@ void CTrackApp::CreatePaths()
 
 #if !defined(MPT_BUILD_RETRO)
 
+static bool ProcessorCanRunCurrentBuild()
+{
+#ifdef MPT_ENABLE_ARCH_INTRINSICS
+	if((CPU::Info::Get().AvailableFeatures & CPU::GetMinimumFeatures()) != CPU::GetMinimumFeatures())
+	{
+		return false;
+	}
+#endif // MPT_ENABLE_ARCH_INTRINSICS
+	return true;
+}
+
+static bool SystemCanRunCurrentBuild() 
+{
+	if(mpt::OS::Windows::IsOriginal())
+	{
+		if(mpt::osinfo::windows::Version::Current().IsBefore(mpt::OS::Windows::Version::GetMinimumKernelLevel()))
+		{
+			return false;
+		}
+		if(mpt::osinfo::windows::Version::Current().IsBefore(mpt::OS::Windows::Version::GetMinimumAPILevel()))
+		{
+			return false;
+		}
+	} else if(mpt::OS::Windows::IsWine() && theApp.GetWineVersion()->Version().IsValid())
+	{
+		if(theApp.GetWineVersion()->Version().IsBefore(mpt::OS::Wine::GetMinimumWineVersion()))
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
 bool CTrackApp::CheckSystemSupport()
 {
 	const mpt::ustring lf = U_("\n");
 	const mpt::ustring url = Build::GetURL(Build::Url::Download);
-	if(!BuildVariants::ProcessorCanRunCurrentBuild())
+	if(!ProcessorCanRunCurrentBuild())
 	{
 		mpt::ustring text;
 		text += U_("Your CPU is too old to run this variant of OpenMPT.") + lf;
@@ -978,7 +1012,7 @@ bool CTrackApp::CheckSystemSupport()
 		Reporting::Error(text, "OpenMPT");
 		return false;
 	}
-	if(!BuildVariants::SystemCanRunCurrentBuild())
+	if(!SystemCanRunCurrentBuild())
 	{
 		if(mpt::OS::Windows::IsOriginal())
 		{
