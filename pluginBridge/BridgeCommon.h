@@ -23,14 +23,14 @@ OPENMPT_NAMESPACE_BEGIN
 
 // Insert some object at the end of a char vector.
 template <typename T>
-static void PushToVector(std::vector<char> &data, const T &obj, size_t writeSize = sizeof(T))
+inline void PushToVector(std::vector<char> &data, const T &obj, size_t writeSize = sizeof(T))
 {
 	static_assert(!std::is_pointer<T>::value, "Won't push pointers to data vectors.");
 	const char *objC = reinterpret_cast<const char *>(&obj);
 	data.insert(data.end(), objC, objC + writeSize);
 }
 
-static void PushZStringToVector(std::vector<char> &data, const char *str)
+inline void PushZStringToVector(std::vector<char> &data, const char *str)
 {
 	if(str != nullptr)
 		data.insert(data.end(), str, str + strlen(str));

@@ -90,7 +90,7 @@ using AEffect64 = AEffectProto<int64>;
 
 
 // Translate a VSTEvents struct to bridge format (placed in data vector)
-static void TranslateVstEventsToBridge(std::vector<char> &outData, const Vst::VstEvents &events, int32 targetPtrSize)
+inline void TranslateVstEventsToBridge(std::vector<char> &outData, const Vst::VstEvents &events, int32 targetPtrSize)
 {
 	outData.reserve(outData.size() + sizeof(int32) + sizeof(Vst::VstMidiEvent) * events.numEvents);
 	// Write number of events
@@ -127,7 +127,7 @@ static void TranslateVstEventsToBridge(std::vector<char> &outData, const Vst::Vs
 
 
 // Translate bridge format (void *ptr) back to VSTEvents struct (placed in data vector)
-static void TranslateBridgeToVstEvents(std::vector<char> &outData, const void *inData)
+inline void TranslateBridgeToVstEvents(std::vector<char> &outData, const void *inData)
 {
 	const int32 numEvents = *static_cast<const int32 *>(inData);
 
@@ -174,7 +174,7 @@ static void TranslateBridgeToVstEvents(std::vector<char> &outData, const void *i
 
 
 // Calculate the size total of the VSTEvents (without header) in bridge format
-static size_t BridgeVstEventsSize(const void *ptr)
+inline size_t BridgeVstEventsSize(const void *ptr)
 {
 	const int32 numEvents = *static_cast<const int32 *>(ptr);
 	size_t size = 0;
@@ -191,7 +191,7 @@ static size_t BridgeVstEventsSize(const void *ptr)
 }
 
 
-static void TranslateVstFileSelectToBridge(std::vector<char> &outData, const Vst::VstFileSelect &fileSelect, int32 targetPtrSize)
+inline void TranslateVstFileSelectToBridge(std::vector<char> &outData, const Vst::VstFileSelect &fileSelect, int32 targetPtrSize)
 {
 	outData.reserve(outData.size() + sizeof(Vst::VstFileSelect) + fileSelect.numFileTypes * sizeof(Vst::VstFileType));
 	PushToVector(outData, fileSelect.command);
@@ -231,7 +231,7 @@ static void TranslateVstFileSelectToBridge(std::vector<char> &outData, const Vst
 }
 
 
-static void TranslateBridgeToVstFileSelect(std::vector<char> &outData, const void *inData, size_t srcSize)
+inline void TranslateBridgeToVstFileSelect(std::vector<char> &outData, const void *inData, size_t srcSize)
 {
 	outData.assign(static_cast<const char *>(inData), static_cast<const char *>(inData) + srcSize);
 
