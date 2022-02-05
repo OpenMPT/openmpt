@@ -178,7 +178,7 @@ public:
 		std::ostringstream outStream;
 		WriteVGM(outStream, loopStart, fileTags);
 
-		std::string outData = std::move(outStream.str());
+		std::string outData = std::move(outStream).str();
 		z_stream strm{};
 		strm.avail_in = static_cast<uInt>(outData.size());
 		strm.next_in = reinterpret_cast<Bytef *>(outData.data());
@@ -262,7 +262,7 @@ public:
 		{
 			WriteVGMString(tagStream, mpt::ToWide(tag));
 		}
-		const auto tagsData = std::move(tagStream.str());
+		const auto tagsData = std::move(tagStream).str();
 
 		Gd3Header gd3Header{};
 		memcpy(gd3Header.magic, Gd3Header::Gd3Magic, 4);
