@@ -105,7 +105,7 @@ static void TranslateVstEventsToBridge(std::vector<char> &outData, const Vst::Vs
 			auto sysExEvent = *static_cast<const Vst::VstMidiSysexEvent *>(event);
 			sysExEvent.byteSize = 4 * sizeof(int32) + 4 * targetPtrSize;  // It's 5 int32s and 3 pointers but that means that on 64-bit platforms, the fifth int32 is padded for alignment.
 			PushToVector(outData, sysExEvent, 5 * sizeof(int32));         // Exclude the three pointers at the end for now
-			if(targetPtrSize > sizeof(int32))                             // Padding for 64-bit required?
+			if(targetPtrSize > static_cast<int32>(sizeof(int32)))                             // Padding for 64-bit required?
 				outData.insert(outData.end(), targetPtrSize - sizeof(int32), 0);
 			outData.insert(outData.end(), 3 * targetPtrSize, 0);  // Make space for pointer + two reserved intptr_ts
 			// Embed SysEx dump as well...
@@ -202,7 +202,7 @@ static void TranslateVstFileSelectToBridge(std::vector<char> &outData, const Vst
 	PushToVector(outData, fileSelect.title);
 	outData.insert(outData.end(), 2 * targetPtrSize, 0);  // initialPath, returnPath
 	PushToVector(outData, fileSelect.sizeReturnPath);
-	if(targetPtrSize > sizeof(int32))
+	if(targetPtrSize > static_cast<int32>(sizeof(int32)))
 		outData.insert(outData.end(), targetPtrSize - sizeof(int32), 0);  // padding
 	outData.insert(outData.end(), targetPtrSize, 0);                      // returnMultiplePaths
 	PushToVector(outData, fileSelect.numReturnPaths);
