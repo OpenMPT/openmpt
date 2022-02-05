@@ -21,6 +21,7 @@ static inline UINT LogLevelToFlags(LogLevel level)
 {
 	switch(level)
 	{
+	case LogDebug: return MB_OK; break;
 	case LogNotification: return MB_OK; break;
 	case LogInformation: return MB_OK | MB_ICONINFORMATION; break;
 	case LogWarning: return MB_OK | MB_ICONWARNING; break;
