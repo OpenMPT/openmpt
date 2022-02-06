@@ -3169,7 +3169,7 @@ ULONG TfLanguageProfileNotifySink::Release()
 //Misc helper functions
 /////////////////////////////////////////////
 
-void AddPluginNamesToCombobox(CComboBox &CBox, const SNDMIXPLUGIN *plugarray, const bool libraryName, const PLUGINDEX updatePlug)
+void AddPluginNamesToCombobox(CComboBox &CBox, const std::array<SNDMIXPLUGIN, MAX_MIXPLUGINS> &plugins, const bool libraryName, const PLUGINDEX updatePlug)
 {
 #ifndef NO_PLUGINS
 	int insertAt = CBox.GetCount();
@@ -3192,7 +3192,7 @@ void AddPluginNamesToCombobox(CComboBox &CBox, const SNDMIXPLUGIN *plugarray, co
 	{
 		if(updatePlug != PLUGINDEX_INVALID && plug != updatePlug)
 			continue;
-		const SNDMIXPLUGIN &plugin = plugarray[plug];
+		const SNDMIXPLUGIN &plugin = plugins[plug];
 		str.clear();
 		str += MPT_TFORMAT("FX{}: ")(plug + 1);
 		const auto plugName = plugin.GetName(), libName = plugin.GetLibraryName();

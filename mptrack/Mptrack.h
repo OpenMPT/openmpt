@@ -427,7 +427,7 @@ void ErrorBox(UINT nStringID, CWnd *p = nullptr);
 // Helper function declarations.
 struct SNDMIXPLUGIN;
 class IMixPlugin;
-void AddPluginNamesToCombobox(CComboBox &CBox, const SNDMIXPLUGIN *plugarray, const bool libraryName = false, const PLUGINDEX updatePlug = PLUGINDEX_INVALID);
+void AddPluginNamesToCombobox(CComboBox &CBox, const std::array<SNDMIXPLUGIN, MAX_MIXPLUGINS> &plugins, const bool libraryName = false, const PLUGINDEX updatePlug = PLUGINDEX_INVALID);
 void AddPluginParameternamesToCombobox(CComboBox &CBox, SNDMIXPLUGIN &plugarray);
 void AddPluginParameternamesToCombobox(CComboBox &CBox, IMixPlugin &plug);
 
