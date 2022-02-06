@@ -5259,13 +5259,16 @@ void CSoundFile::SendMIDIData(PlayState &playState, CHANNELINDEX nChn, bool isSm
 			if(plug > 0 && plug <= MAX_MIXPLUGINS && param < 0x80)
 			{
 				plug--;
-				const float newRatio = (127 - param) / 127.0f;
-				if(localOnly)
-					playState.m_midiMacroEvaluationResults->pluginDryWetRatio[plug] = newRatio;
-				else if(!isSmooth)
-					m_MixPlugins[plug].fDryRatio = newRatio;
-				else
-					m_MixPlugins[plug].fDryRatio = CalculateSmoothParamChange(playState, m_MixPlugins[plug].fDryRatio, newRatio);
+				if(IMixPlugin* pPlugin = m_MixPlugins[plug].pMixPlugin; pPlugin)
+				{
+					const float newRatio = (127 - param) / 127.0f;
+					if(localOnly)
+						playState.m_midiMacroEvaluationResults->pluginDryWetRatio[plug] = newRatio;
+					else if(!isSmooth)
+						pPlugin->SetDryRatio(newRatio);
+					else
+						pPlugin->SetDryRatio(CalculateSmoothParamChange(playState, m_MixPlugins[plug].fDryRatio, newRatio));
+				}
 			}
 		} else if((macroCode & 0x80) || isExtended)
 		{
@@ -5274,8 +5277,7 @@ void CSoundFile::SendMIDIData(PlayState &playState, CHANNELINDEX nChn, bool isSm
 			if(plug > 0 && plug <= MAX_MIXPLUGINS && param < 0x80)
 			{
 				plug--;
-				IMixPlugin *pPlugin = m_MixPlugins[plug].pMixPlugin;
-				if(pPlugin)
+				if(IMixPlugin *pPlugin = m_MixPlugins[plug].pMixPlugin; pPlugin)
 				{
 					const PlugParamIndex plugParam = isExtended ? (0x80 + macroCode) : (macroCode & 0x7F);
 					const PlugParamValue value = param / 127.0f;
@@ -5304,8 +5306,7 @@ void CSoundFile::SendMIDIData(PlayState &playState, CHANNELINDEX nChn, bool isSm
 
 			if(plug > 0 && plug <= MAX_MIXPLUGINS)
 			{
-				IMixPlugin *pPlugin = m_MixPlugins[plug - 1].pMixPlugin;
-				if (pPlugin != nullptr)
+				if(IMixPlugin *pPlugin = m_MixPlugins[plug - 1].pMixPlugin; pPlugin != nullptr)
 				{
 					if(macro[0] == 0xF0)
 					{
@@ -5351,7 +5352,7 @@ void CSoundFile::SendMIDINote(CHANNELINDEX chn, uint16 note, uint16 volume)
 }
 
 
-void CSoundFile::ProcessSampleOffset(ModChannel& chn, CHANNELINDEX nChn, const PlayState& playState) const
+void CSoundFile::ProcessSampleOffset(ModChannel &chn, CHANNELINDEX nChn, const PlayState &playState) const
 {
 	const ModCommand &m = chn.rowCommand;
 	uint32 extendedRows = 0;
