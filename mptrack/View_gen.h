@@ -147,6 +147,7 @@ protected:
 	LRESULT OnDryWetRatioChangedFromPlayer(WPARAM plugin, LPARAM);
 
 	afx_msg void OnWetDryExpandChanged();
+	afx_msg void OnAutoSuspendChanged();
 	afx_msg void OnSpecialMixProcessingChanged();
 
 	afx_msg void OnOutputRoutingChanged();

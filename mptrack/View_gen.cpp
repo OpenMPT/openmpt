@@ -108,7 +108,8 @@ BEGIN_MESSAGE_MAP(CViewGlobals, CFormView)
 	ON_CBN_SELCHANGE(IDC_COMBO8, &CViewGlobals::OnProgramChanged)
 	ON_CBN_SETFOCUS(IDC_COMBO8, &CViewGlobals::OnFillProgramCombo)
 
-	ON_COMMAND(IDC_CHECK12,		 &CViewGlobals::OnWetDryExpandChanged)
+	ON_COMMAND(IDC_CHECK12, &CViewGlobals::OnWetDryExpandChanged)
+	ON_COMMAND(IDC_CHECK13, &CViewGlobals::OnAutoSuspendChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO9, &CViewGlobals::OnSpecialMixProcessingChanged)
 
 	ON_NOTIFY(TCN_SELCHANGE, IDC_TABCTRL1,	&CViewGlobals::OnTabSelchange)
@@ -444,6 +445,7 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 		CheckDlgButton(IDC_CHECK9, plugin.IsMasterEffect() ? BST_CHECKED : BST_UNCHECKED);
 		CheckDlgButton(IDC_CHECK10, plugin.IsBypassed() ? BST_CHECKED : BST_UNCHECKED);
 		CheckDlgButton(IDC_CHECK11, plugin.IsWetMix() ? BST_CHECKED : BST_UNCHECKED);
+		CheckDlgButton(IDC_CHECK13, plugin.IsAutoSuspendable() ? BST_CHECKED : BST_UNCHECKED);
 		IMixPlugin *pPlugin = plugin.pMixPlugin;
 		m_BtnEdit.EnableWindow((pPlugin != nullptr && (pPlugin->HasEditor() || pPlugin->GetNumParameters())) ? TRUE : FALSE);
 		GetDlgItem(IDC_MOVEFXSLOT)->EnableWindow((pPlugin) ? TRUE : FALSE);
@@ -1302,6 +1304,17 @@ void CViewGlobals::OnWetDryExpandChanged()
 
 	pModDoc->GetSoundFile().m_MixPlugins[m_nCurrentPlugin].SetExpandedMix(IsDlgButtonChecked(IDC_CHECK12) != BST_UNCHECKED);
 	UpdateDryWetDisplay();
+	SetPluginModified();
+}
+
+
+void CViewGlobals::OnAutoSuspendChanged()
+{
+	CModDoc *pModDoc = GetDocument();
+	if(m_nCurrentPlugin >= MAX_MIXPLUGINS || !pModDoc)
+		return;
+
+	pModDoc->GetSoundFile().m_MixPlugins[m_nCurrentPlugin].SetAutoSuspend(IsDlgButtonChecked(IDC_CHECK13) != BST_UNCHECKED);
 	SetPluginModified();
 }
 
