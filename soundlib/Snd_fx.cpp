@@ -1782,7 +1782,7 @@ void CSoundFile::NoteChange(ModChannel &chn, int note, bool bPorta, bool bResetE
 
 	if(bPorta && !chn.IsSamplePlaying())
 	{
-		if(m_playBehaviour[kFT2PortaNoNote])
+		if(m_playBehaviour[kFT2PortaNoNote] && (!chn.HasMIDIOutput() || m_playBehaviour[kPluginIgnoreTonePortamento]))
 		{
 			// FT2 Compatibility: Ignore notes with portamento if there was no note playing.
 			// Test case: 3xx-no-old-samp.xm
@@ -3002,7 +3002,7 @@ bool CSoundFile::ProcessEffects()
 				if(clearEffectCommand)
 					cmd = CMD_NONE;
 
-				TonePortamento(m_PlayState, nChn, porta);
+				TonePortamento(nChn, porta);
 			} else
 			{
 				// FT2 Compatibility: FT2 ignores some volume commands with parameter = 0.
@@ -3158,13 +3158,13 @@ bool CSoundFile::ProcessEffects()
 
 		// Tone-Portamento
 		case CMD_TONEPORTAMENTO:
-			TonePortamento(m_PlayState, nChn, static_cast<uint16>(param));
+			TonePortamento(nChn, static_cast<uint16>(param));
 			break;
 
 		// Tone-Portamento + Volume Slide
 		case CMD_TONEPORTAVOL:
 			if ((param) || (GetType() != MOD_TYPE_MOD)) VolumeSlide(chn, static_cast<ModCommand::PARAM>(param));
-			TonePortamento(m_PlayState, nChn, 0);
+			TonePortamento(nChn, 0);
 			break;
 
 		// Vibrato
@@ -4109,8 +4109,28 @@ std::pair<uint16, bool> CSoundFile::GetVolCmdTonePorta(const ModCommand &m, uint
 }
 
 
+void CSoundFile::TonePortamento(CHANNELINDEX nChn, uint16 param)
+{
+	auto delta = TonePortamento(m_PlayState, nChn, param);
+	if(!delta)
+		return;
+
+#ifndef NO_PLUGINS
+	ModChannel &chn = m_PlayState.Chn[nChn];
+	if(!m_playBehaviour[kPluginIgnoreTonePortamento] && chn.pModInstrument != nullptr && chn.pModInstrument->midiPWD != 0)
+	{
+		IMixPlugin *plugin = GetChannelInstrumentPlugin(chn);
+		if(plugin != nullptr)
+		{
+			plugin->MidiTonePortamento(delta, chn.GetPluginNote(m_playBehaviour[kITRealNoteMapping], true), chn.pModInstrument->midiPWD, nChn);
+		}
+	}
+#endif  // NO_PLUGINS
+}
+
+
 // Portamento Slide
-void CSoundFile::TonePortamento(PlayState &playState, CHANNELINDEX nChn, uint16 param) const
+int32 CSoundFile::TonePortamento(PlayState &playState, CHANNELINDEX nChn, uint16 param) const
 {
 	ModChannel &chn = playState.Chn[nChn];
 	chn.dwFlags.set(CHN_PORTAMENTO);
@@ -4130,7 +4150,7 @@ void CSoundFile::TonePortamento(PlayState &playState, CHANNELINDEX nChn, uint16 
 		//Behavior: Param tells number of finesteps(or 'fullsteps'(notes) with glissando)
 		//to slide per row(not per tick).
 		if(chn.portamentoSlide == 0)
-			return;
+			return 0;
 
 		const int32 oldPortamentoTickSlide = (playState.m_nTickCount != 0) ? chn.m_PortamentoTickSlide : 0;
 
@@ -4163,7 +4183,7 @@ void CSoundFile::TonePortamento(PlayState &playState, CHANNELINDEX nChn, uint16 
 			chn.m_CalculateFreq = true;
 		}
 
-		return;
+		return 0;
 	}
 
 	bool doPorta = !chn.isFirstTick
@@ -4177,20 +4197,19 @@ void CSoundFile::TonePortamento(PlayState &playState, CHANNELINDEX nChn, uint16 
 		delta -= 0xF0;
 		doPorta = chn.isFirstTick;
 	}
+	delta *= (GetType() == MOD_TYPE_669) ? 2 : 4;
 
 	if(chn.nPeriod && chn.nPortamentoDest && doPorta)
 	{
-		delta *= (GetType() == MOD_TYPE_669) ? 2 : 4;
-		if(!PeriodsAreFrequencies())
-			delta = -delta;
+		const int32 actualDelta = PeriodsAreFrequencies() ? delta : -delta;
 		if(chn.nPeriod < chn.nPortamentoDest || chn.portaTargetReached)
 		{
-			DoFreqSlide(chn, chn.nPeriod, delta, true);
+			DoFreqSlide(chn, chn.nPeriod, actualDelta, true);
 			if(chn.nPeriod > chn.nPortamentoDest)
 				chn.nPeriod = chn.nPortamentoDest;
 		} else if(chn.nPeriod > chn.nPortamentoDest)
 		{
-			DoFreqSlide(chn, chn.nPeriod, -delta, true);
+			DoFreqSlide(chn, chn.nPeriod, -actualDelta, true);
 			if(chn.nPeriod < chn.nPortamentoDest)
 				chn.nPeriod = chn.nPortamentoDest;
 			// FT2 compatibility: Reaching portamento target from below forces subsequent portamentos on the same note to use the logic for reaching the note from above instead.
@@ -4206,6 +4225,7 @@ void CSoundFile::TonePortamento(PlayState &playState, CHANNELINDEX nChn, uint16 
 	if(chn.nPeriod == chn.nPortamentoDest && (m_playBehaviour[kITPortaTargetReached] || GetType() == MOD_TYPE_MOD))
 		chn.nPortamentoDest = 0;
 
+	return doPorta ? delta : 0;
 }
 
 

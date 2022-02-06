@@ -2624,7 +2624,8 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 			realNote = pIns->NoteMap[note - NOTE_MIN];
 		// Experimental VST panning
 		//ProcessMIDIMacro(nChn, false, m_MidiCfg.Global[MIDIOUT_PAN], 0, nPlugin);
-		SendMIDINote(nChn, realNote, static_cast<uint16>(velocity));
+		if(m_playBehaviour[kPluginIgnoreTonePortamento] || !chn.rowCommand.IsPortamento())
+			SendMIDINote(nChn, realNote, static_cast<uint16>(velocity));
 	}
 
 	const bool processVolumeAlsoOnNote = (pIns->pluginVelocityHandling == PLUGIN_VELOCITYHANDLING_VOLUME);

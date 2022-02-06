@@ -146,6 +146,7 @@ public:
 	virtual void MidiCC(MIDIEvents::MidiCC /*nController*/, uint8 /*nParam*/, CHANNELINDEX /*trackChannel*/) { }
 	virtual void MidiPitchBendRaw(int32 /*pitchbend*/, CHANNELINDEX /*trackChannel*/) {}
 	virtual void MidiPitchBend(int32 /*increment*/, int8 /*pwd*/, CHANNELINDEX /*trackChannel*/) { }
+	virtual void MidiTonePortamento(int32 /*increment*/, uint8 /*newNote*/, int8 /*pwd*/, CHANNELINDEX /*trackChannel*/) { }
 	virtual void MidiVibrato(int32 /*depth*/, int8 /*pwd*/, CHANNELINDEX /*trackerChn*/) { }
 	virtual void MidiCommand(const ModInstrument &/*instr*/, uint16 /*note*/, uint16 /*vol*/, CHANNELINDEX /*trackChannel*/) { }
 	virtual void HardAllNotesOff() { }
@@ -258,6 +259,7 @@ protected:
 		int32 midiPitchBendPos = 0;  // Current Pitch Wheel position, in 16.11 fixed point format. Lowest bit is used for indicating that vibrato was applied. Vibrato offset itself is not stored in this value.
 		uint16 currentProgram = uint16_max;
 		uint16 currentBank = uint16_max;
+		uint8 lastNote = 0 /* NOTE_NONE */;
 		uint8  noteOnMap[128][MAX_CHANNELS];
 
 		void ResetProgram() { currentProgram = uint16_max; currentBank = uint16_max; }
@@ -271,6 +273,7 @@ public:
 	void MidiCC(MIDIEvents::MidiCC nController, uint8 nParam, CHANNELINDEX trackChannel) override;
 	void MidiPitchBendRaw(int32 pitchbend, CHANNELINDEX trackerChn) override;
 	void MidiPitchBend(int32 increment, int8 pwd, CHANNELINDEX trackerChn) override;
+	void MidiTonePortamento(int32 increment, uint8 newNote, int8 pwd, CHANNELINDEX trackerChn) override;
 	void MidiVibrato(int32 depth, int8 pwd, CHANNELINDEX trackerChn) override;
 	void MidiCommand(const ModInstrument &instr, uint16 note, uint16 vol, CHANNELINDEX trackChannel) override;
 	bool IsNotePlaying(uint8 note, CHANNELINDEX trackerChn) override;

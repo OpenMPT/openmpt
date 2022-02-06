@@ -135,7 +135,6 @@ CString IMixPlugin::GetFormattedParamName(PlugParamIndex param)
 // Get a parameter's current value, represented by the plugin.
 CString IMixPlugin::GetFormattedParamValue(PlugParamIndex param)
 {
-
 	CString paramDisplay = GetParamDisplay(param);
 	CString paramUnits = GetParamLabel(param);
 	paramDisplay.Trim();
@@ -836,6 +835,27 @@ void IMidiPlugin::MidiPitchBend(int32 increment, int8 pwd, CHANNELINDEX trackerC
 }
 
 
+void IMidiPlugin::MidiTonePortamento(int32 increment, uint8 newNote, int8 pwd, CHANNELINDEX trackerChn)
+{
+	auto midiCh = GetMidiChannel(trackerChn);
+	increment = EncodePitchBendParam(increment);
+	ApplyPitchWheelDepth(increment, pwd);
+
+	int32 newPitchBendPos = (increment + m_MidiCh[midiCh].midiPitchBendPos) & kPitchBendMask;
+
+	int32 targetBend = EncodePitchBendParam(64 * (newNote - static_cast<int32>(m_MidiCh[midiCh].lastNote)));
+	ApplyPitchWheelDepth(targetBend, pwd);
+	targetBend += EncodePitchBendParam(MIDIEvents::pitchBendCentre);
+
+	if((newPitchBendPos > targetBend && increment > 0) || (newPitchBendPos < targetBend && increment < 0))
+		newPitchBendPos = targetBend;
+
+	Limit(newPitchBendPos, EncodePitchBendParam(MIDIEvents::pitchBendMin), EncodePitchBendParam(MIDIEvents::pitchBendMax));
+
+	SendMidiPitchBend(midiCh, newPitchBendPos);
+}
+
+
 // Set MIDI pitch for given MIDI channel using fixed point pitch bend value (converted back to 0-16383 MIDI range)
 void IMidiPlugin::SendMidiPitchBend(uint8 midiCh, int32 newPitchBendPos)
 {
@@ -922,7 +942,7 @@ void IMidiPlugin::MidiCommand(const ModInstrument &instr, uint16 note, uint16 vo
 	// "Hard core" All Sounds Off on this midi and tracker channel
 	// This one doesn't check the note mask - just one note off per note.
 	// Also less likely to cause a VST event buffer overflow.
-	else if(note == NOTE_NOTECUT)	// ^^
+	else if(note == NOTE_NOTECUT)  // ^^
 	{
 		MidiSend(MIDIEvents::CC(MIDIEvents::MIDICC_AllNotesOff, midiCh, 0));
 		MidiSend(MIDIEvents::CC(MIDIEvents::MIDICC_AllSoundOff, midiCh, 0));
@@ -938,7 +958,7 @@ void IMidiPlugin::MidiCommand(const ModInstrument &instr, uint16 note, uint16 vo
 
 	// All "active" notes off on this midi and tracker channel
 	// using note mask.
-	else if(note == NOTE_KEYOFF || note == NOTE_FADE) // ==, ~~
+	else if(note == NOTE_KEYOFF || note == NOTE_FADE)  // ==, ~~
 	{
 		for(uint8 i = 0; i < std::size(channel.noteOnMap); i++)
 		{
@@ -954,6 +974,7 @@ void IMidiPlugin::MidiCommand(const ModInstrument &instr, uint16 note, uint16 vo
 	// Note On
 	else if(note >= NOTE_MIN && note < NOTE_MIN + mpt::array_size<decltype(channel.noteOnMap)>::size)
 	{
+		m_MidiCh[midiCh].lastNote = static_cast<uint8>(note);
 		note -= NOTE_MIN;
 
 		// Reset pitch bend on each new note, tracker style.

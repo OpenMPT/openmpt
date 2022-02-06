@@ -124,9 +124,9 @@ void ModChannel::UpdateInstrumentVolume(const ModSample *smp, const ModInstrumen
 }
 
 
-ModCommand::NOTE ModChannel::GetPluginNote(bool realNoteMapping) const
+ModCommand::NOTE ModChannel::GetPluginNote(bool realNoteMapping, bool ignoreArpeggio) const
 {
-	if(nArpeggioLastNote != NOTE_NONE)
+	if(nArpeggioLastNote != NOTE_NONE && !ignoreArpeggio)
 	{
 		// If an arpeggio is playing, this definitely the last playing note, which may be different from the arpeggio base note stored in nNote.
 		return nArpeggioLastNote;
