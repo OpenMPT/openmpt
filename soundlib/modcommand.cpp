@@ -900,6 +900,40 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 }
 
 
+bool ModCommand::IsAnyPitchSlide() const
+{
+	switch(command)
+	{
+	case CMD_PORTAMENTOUP:
+	case CMD_PORTAMENTODOWN:
+	case CMD_TONEPORTAMENTO:
+	case CMD_TONEPORTAVOL:
+	case CMD_NOTESLIDEUP:
+	case CMD_NOTESLIDEDOWN:
+	case CMD_NOTESLIDEUPRETRIG:
+	case CMD_NOTESLIDEDOWNRETRIG:
+		return true;
+	case CMD_MODCMDEX:
+	case CMD_XFINEPORTAUPDOWN:
+		if(param >= 0x10 && param <= 0x2F)
+			return true;
+		break;
+	default:
+		break;
+	}
+	switch(volcmd)
+	{
+	case VOLCMD_TONEPORTAMENTO:
+	case VOLCMD_PORTAUP:
+	case VOLCMD_PORTADOWN:
+		return true;
+	default:
+		break;
+	}
+	return false;
+}
+
+
 bool ModCommand::IsContinousCommand(const CSoundFile &sndFile) const
 {
 	switch(command)

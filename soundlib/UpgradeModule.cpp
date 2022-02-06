@@ -726,6 +726,19 @@ void CSoundFile::UpgradeModule()
 				plugin.Info.szLibraryName = "Flanger (Legacy)";
 		}
 	}
+
+	if(m_dwLastSavedWithVersion < MPT_V("1.31.00.09") && (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM)))
+	{
+		// Old-style plugin tone portamento
+		for(auto &plugin : m_MixPlugins)
+		{
+			if(plugin.IsValidPlugin())
+			{
+				m_playBehaviour.set(kPluginIgnoreTonePortamento);
+				break;
+			}
+		}
+	}
 }
 
 OPENMPT_NAMESPACE_END

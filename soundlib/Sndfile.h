@@ -1078,20 +1078,22 @@ protected:
 	};
 	// Channel Effects
 	void UpdateS3MEffectMemory(ModChannel &chn, ModCommand::PARAM param) const;
-	void PortamentoUp(CHANNELINDEX nChn, ModCommand::PARAM param, const bool doFinePortamentoAsRegular = false);
-	void PortamentoDown(CHANNELINDEX nChn, ModCommand::PARAM param, const bool doFinePortamentoAsRegular = false);
-	void MidiPortamento(CHANNELINDEX nChn, int param, bool doFineSlides);
+	void PortamentoUp(CHANNELINDEX nChn, ModCommand::PARAM param, const bool doFinePortamentoAsRegular);
+	void PortamentoUp(PlayState &playState, CHANNELINDEX nChn, ModCommand::PARAM param, const bool doFinePortamentoAsRegular) const;
+	void PortamentoDown(CHANNELINDEX nChn, ModCommand::PARAM param, const bool doFinePortamentoAsRegular);
+	void PortamentoDown(PlayState &playState, CHANNELINDEX nChn, ModCommand::PARAM param, const bool doFinePortamentoAsRegular) const;
+	void MidiPortamento(CHANNELINDEX nChn, int param, const bool doFineSlides);
 	void FinePortamentoUp(ModChannel &chn, ModCommand::PARAM param) const;
 	void FinePortamentoDown(ModChannel &chn, ModCommand::PARAM param) const;
 	void ExtraFinePortamentoUp(ModChannel &chn, ModCommand::PARAM param) const;
 	void ExtraFinePortamentoDown(ModChannel &chn, ModCommand::PARAM param) const;
-	void PortamentoMPT(ModChannel &chn, int);
-	void PortamentoFineMPT(ModChannel &chn, int);
-	void PortamentoExtraFineMPT(ModChannel &chn, int);
+	void PortamentoMPT(ModChannel &chn, int param) const;
+	void PortamentoFineMPT(PlayState &playState, CHANNELINDEX nChn, int param) const;
+	void PortamentoExtraFineMPT(ModChannel &chn, int param) const;
 	void SetFinetune(CHANNELINDEX channel, PlayState &playState, bool isSmooth) const;
 	void NoteSlide(ModChannel &chn, uint32 param, bool slideUp, bool retrig) const;
 	std::pair<uint16, bool> GetVolCmdTonePorta(const ModCommand &m, uint32 startTick) const;
-	void TonePortamento(ModChannel &chn, uint16 param) const;
+	void TonePortamento(PlayState &playState, CHANNELINDEX nChn, uint16 param) const;
 	void Vibrato(ModChannel &chn, uint32 param) const;
 	void FineVibrato(ModChannel &chn, uint32 param) const;
 	void VolumeSlide(ModChannel &chn, ModCommand::PARAM param) const;
@@ -1144,7 +1146,7 @@ public:
 		return m_playBehaviour[kPeriodsAreHertz] && !UseFinetuneAndTranspose();
 	}
 	
-	// Returns true if the current format uses transpose+finetune rather than frequency in Hz to specify middle-C.
+	// Returns true if the format uses transpose+finetune rather than frequency in Hz to specify middle-C.
 	static constexpr bool UseFinetuneAndTranspose(MODTYPE type) noexcept
 	{
 		return (type & (MOD_TYPE_AMF0 | MOD_TYPE_DIGI | MOD_TYPE_MED | MOD_TYPE_MOD | MOD_TYPE_MTM | MOD_TYPE_OKT | MOD_TYPE_SFX | MOD_TYPE_STP | MOD_TYPE_XM));
@@ -1152,6 +1154,16 @@ public:
 	bool UseFinetuneAndTranspose() const noexcept
 	{
 		return UseFinetuneAndTranspose(GetType());
+	}
+
+	// Returns true if the format uses combined commands for fine and regular portamento slides
+	static constexpr bool UseCombinedPortamentoCommands(MODTYPE type) noexcept
+	{
+		return !(type & (MOD_TYPE_MOD | MOD_TYPE_XM | MOD_TYPE_MT2 | MOD_TYPE_MED | MOD_TYPE_AMF0 | MOD_TYPE_DIGI | MOD_TYPE_STP | MOD_TYPE_DTM));
+	}
+	bool UseCombinedPortamentoCommands() const noexcept
+	{
+		return UseCombinedPortamentoCommands(GetType());
 	}
 
 	bool DestroySample(SAMPLEINDEX nSample);

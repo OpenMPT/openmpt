@@ -120,20 +120,69 @@ public:
 			bool updateInc = (chn.PitchEnv.flags & (ENV_ENABLED | ENV_FILTER)) == ENV_ENABLED;
 			if(i >= portaStart)
 			{
-				chn.isFirstTick = false;
+				state->m_nTickCount = i - portaStart;
+				chn.isFirstTick = (i == portaStart);
 				const ModCommand &m = *sndFile.Patterns[state->m_nPattern].GetpModCommand(state->m_nRow, channel);
 				auto command = m.command;
-				if(m.volcmd == VOLCMD_TONEPORTAMENTO)
+				switch(m.volcmd)
 				{
-					const auto [porta, clearEffectCommand] = sndFile.GetVolCmdTonePorta(m, 0);
-					sndFile.TonePortamento(chn, porta);
-					if(clearEffectCommand)
-						command = CMD_NONE;
+				case VOLCMD_TONEPORTAMENTO:
+					{
+						const auto [porta, clearEffectCommand] = sndFile.GetVolCmdTonePorta(m, 0);
+						sndFile.TonePortamento(*state, channel, porta);
+						if(clearEffectCommand)
+							command = CMD_NONE;
+					}
+					break;
+				case VOLCMD_PORTAUP:
+					sndFile.PortamentoUp(*state, channel, static_cast<ModCommand::PARAM>(m.vol << 2), sndFile.m_playBehaviour[kITVolColFinePortamento]);
+					break;
+				case VOLCMD_PORTADOWN:
+					sndFile.PortamentoDown(*state, channel, static_cast<ModCommand::PARAM>(m.vol << 2), sndFile.m_playBehaviour[kITVolColFinePortamento]);
+					break;
+				default:
+					break;
 				}
-				if(command == CMD_TONEPORTAMENTO)
-					sndFile.TonePortamento(chn, m.param);
-				else if(command == CMD_TONEPORTAVOL)
-					sndFile.TonePortamento(chn, 0);
+				switch(command)
+				{
+				case CMD_TONEPORTAMENTO:
+					sndFile.TonePortamento(*state, channel, m.param);
+					break;
+				case CMD_TONEPORTAVOL:
+					sndFile.TonePortamento(*state, channel, 0);
+					break;
+				case CMD_PORTAMENTOUP:
+					if(m.param || !(sndFile.GetType() & MOD_TYPE_MOD))
+						sndFile.PortamentoUp(*state, channel, m.param, false);
+					break;
+				case CMD_PORTAMENTODOWN:
+					if(m.param || !(sndFile.GetType() & MOD_TYPE_MOD))
+						sndFile.PortamentoUp(*state, channel, m.param, false);
+					break;
+				case CMD_MODCMDEX:
+					if(!(m.param & 0x0F) && !(sndFile.GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2)))
+						break;
+					if((m.param & 0xF0) == 0x10)
+						sndFile.FinePortamentoUp(chn, m.param & 0x0F);
+					else if((m.param & 0xF0) == 0x20)
+						sndFile.FinePortamentoDown(chn, m.param & 0x0F);
+					break;
+				case CMD_XFINEPORTAUPDOWN:
+					if((m.param & 0xF0) == 0x10)
+						sndFile.ExtraFinePortamentoUp(chn, m.param & 0x0F);
+					else if((m.param & 0xF0) == 0x20)
+						sndFile.ExtraFinePortamentoDown(chn, m.param & 0x0F);
+					break;
+				case CMD_NOTESLIDEUP:
+				case CMD_NOTESLIDEDOWN:
+				case CMD_NOTESLIDEUPRETRIG:
+				case CMD_NOTESLIDEDOWNRETRIG:
+					sndFile.NoteSlide(chn, m.param, command == CMD_NOTESLIDEUP || command == CMD_NOTESLIDEUPRETRIG, command == CMD_NOTESLIDEUPRETRIG || command == CMD_NOTESLIDEDOWNRETRIG);
+					break;
+				default:
+					break;
+				}
+
 				updateInc = true;
 			}
 
@@ -216,6 +265,7 @@ public:
 				}
 			}
 		}
+		state->m_nTickCount = 0;
 
 		if(stopNote)
 		{
@@ -261,15 +311,10 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 
 	// Fast LUTs for commands that are too weird / complicated / whatever to emulate in sample position adjust mode.
 	std::bitset<MAX_EFFECTS> forbiddenCommands;
-	std::bitset<MAX_VOLCMDS> forbiddenVolCommands;
 
 	if(adjustSamplePos)
 	{
-		forbiddenCommands.set(CMD_ARPEGGIO);       forbiddenCommands.set(CMD_PORTAMENTOUP);
-		forbiddenCommands.set(CMD_PORTAMENTODOWN); forbiddenCommands.set(CMD_XFINEPORTAUPDOWN);
-		forbiddenCommands.set(CMD_NOTESLIDEUP);    forbiddenCommands.set(CMD_NOTESLIDEUPRETRIG);
-		forbiddenCommands.set(CMD_NOTESLIDEDOWN);  forbiddenCommands.set(CMD_NOTESLIDEDOWNRETRIG);
-		forbiddenVolCommands.set(VOLCMD_PORTAUP);  forbiddenVolCommands.set(VOLCMD_PORTADOWN);
+		forbiddenCommands.set(CMD_ARPEGGIO);
 
 		if(target.mode == GetLengthTarget::SeekPosition && target.pos.order < orderList.size())
 		{
@@ -1035,11 +1080,6 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 							}
 						}
 					}
-
-					if(m.volcmd < forbiddenVolCommands.size() && forbiddenVolCommands[m.volcmd])
-					{
-						stopNote = true;
-					}
 				}
 
 				if(stopNote)
@@ -1150,10 +1190,10 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 
 					if(chn.isPaused)
 						continue;
-					if(porta)
+					if(m.IsAnyPitchSlide())
 					{
 						// Portamento needs immediate syncing, as the pitch changes on each tick
-						uint32 portaTick = memory.chnSettings[nChn].ticksToRender + startTick + 1;
+						uint32 portaTick = memory.chnSettings[nChn].ticksToRender + startTick;
 						memory.chnSettings[nChn].ticksToRender += numTicks;
 						memory.RenderChannel(nChn, tickDuration, portaTick);
 					} else
@@ -2962,7 +3002,7 @@ bool CSoundFile::ProcessEffects()
 				if(clearEffectCommand)
 					cmd = CMD_NONE;
 
-				TonePortamento(chn, porta);
+				TonePortamento(m_PlayState, nChn, porta);
 			} else
 			{
 				// FT2 Compatibility: FT2 ignores some volume commands with parameter = 0.
@@ -3101,14 +3141,14 @@ bool CSoundFile::ProcessEffects()
 
 		// Portamento Up
 		case CMD_PORTAMENTOUP:
-			if ((!param) && (GetType() & MOD_TYPE_MOD)) break;
-			PortamentoUp(nChn, static_cast<ModCommand::PARAM>(param));
+			if(param || !(GetType() & MOD_TYPE_MOD))
+				PortamentoUp(nChn, static_cast<ModCommand::PARAM>(param), false);
 			break;
 
 		// Portamento Down
 		case CMD_PORTAMENTODOWN:
-			if ((!param) && (GetType() & MOD_TYPE_MOD)) break;
-			PortamentoDown(nChn, static_cast<ModCommand::PARAM>(param));
+			if(param || !(GetType() & MOD_TYPE_MOD))
+				PortamentoDown(nChn, static_cast<ModCommand::PARAM>(param), false);
 			break;
 
 		// Volume Slide
@@ -3118,13 +3158,13 @@ bool CSoundFile::ProcessEffects()
 
 		// Tone-Portamento
 		case CMD_TONEPORTAMENTO:
-			TonePortamento(chn, static_cast<uint16>(param));
+			TonePortamento(m_PlayState, nChn, static_cast<uint16>(param));
 			break;
 
 		// Tone-Portamento + Volume Slide
 		case CMD_TONEPORTAVOL:
 			if ((param) || (GetType() != MOD_TYPE_MOD)) VolumeSlide(chn, static_cast<ModCommand::PARAM>(param));
-			TonePortamento(chn, 0);
+			TonePortamento(m_PlayState, nChn, 0);
 			break;
 
 		// Vibrato
@@ -3366,8 +3406,16 @@ bool CSoundFile::ProcessEffects()
 		case CMD_XFINEPORTAUPDOWN:
 			switch(param & 0xF0)
 			{
-			case 0x10: ExtraFinePortamentoUp(chn, param & 0x0F); break;
-			case 0x20: ExtraFinePortamentoDown(chn, param & 0x0F); break;
+			case 0x10:
+				ExtraFinePortamentoUp(chn, param & 0x0F);
+				if(!m_playBehaviour[kPluginIgnoreTonePortamento])
+					MidiPortamento(nChn, 0xE0 | (param & 0x0F), true);
+				break;
+			case 0x20:
+				ExtraFinePortamentoDown(chn, param & 0x0F);
+				if(!m_playBehaviour[kPluginIgnoreTonePortamento])
+					MidiPortamento(nChn, -static_cast<int>(0xE0 | (param & 0x0F)), true);
+				break;
 			// ModPlug XM Extensions (ignore in compatible mode)
 			case 0x50:
 			case 0x60:
@@ -3707,7 +3755,14 @@ ROWINDEX CSoundFile::PatternBreak(PlayState &state, CHANNELINDEX chn, uint8 para
 
 void CSoundFile::PortamentoUp(CHANNELINDEX nChn, ModCommand::PARAM param, const bool doFinePortamentoAsRegular)
 {
-	ModChannel &chn = m_PlayState.Chn[nChn];
+	PortamentoUp(m_PlayState, nChn, param, doFinePortamentoAsRegular);
+	MidiPortamento(nChn, m_PlayState.Chn[nChn].nOldPortaUp, !doFinePortamentoAsRegular && UseCombinedPortamentoCommands());
+}
+
+
+void CSoundFile::PortamentoUp(PlayState &playState, CHANNELINDEX nChn, ModCommand::PARAM param, const bool doFinePortamentoAsRegular) const
+{
+	ModChannel &chn = playState.Chn[nChn];
 
 	if(param)
 	{
@@ -3721,16 +3776,13 @@ void CSoundFile::PortamentoUp(CHANNELINDEX nChn, ModCommand::PARAM param, const 
 		param = chn.nOldPortaUp;
 	}
 
-	const bool doFineSlides = !doFinePortamentoAsRegular && !(GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM | MOD_TYPE_MT2 | MOD_TYPE_MED | MOD_TYPE_AMF0 | MOD_TYPE_DIGI | MOD_TYPE_STP | MOD_TYPE_DTM));
-
-	// Process MIDI pitch bend for instrument plugins
-	MidiPortamento(nChn, param, doFineSlides);
+	const bool doFineSlides = !doFinePortamentoAsRegular && UseCombinedPortamentoCommands();
 
 	if(GetType() == MOD_TYPE_MPT && chn.pModInstrument && chn.pModInstrument->pTuning)
 	{
 		// Portamento for instruments with custom tuning
 		if(param >= 0xF0 && !doFinePortamentoAsRegular)
-			PortamentoFineMPT(chn, param - 0xF0);
+			PortamentoFineMPT(playState, nChn, param - 0xF0);
 		else if(param >= 0xE0 && !doFinePortamentoAsRegular)
 			PortamentoExtraFineMPT(chn, param - 0xE0);
 		else
@@ -3775,7 +3827,14 @@ void CSoundFile::PortamentoUp(CHANNELINDEX nChn, ModCommand::PARAM param, const 
 
 void CSoundFile::PortamentoDown(CHANNELINDEX nChn, ModCommand::PARAM param, const bool doFinePortamentoAsRegular)
 {
-	ModChannel &chn = m_PlayState.Chn[nChn];
+	PortamentoDown(m_PlayState, nChn, param, doFinePortamentoAsRegular);
+	MidiPortamento(nChn, -static_cast<int>(m_PlayState.Chn[nChn].nOldPortaDown), !doFinePortamentoAsRegular && UseCombinedPortamentoCommands());
+}
+
+
+void CSoundFile::PortamentoDown(PlayState &playState, CHANNELINDEX nChn, ModCommand::PARAM param, const bool doFinePortamentoAsRegular) const
+{
+	ModChannel &chn = playState.Chn[nChn];
 
 	if(param)
 	{
@@ -3789,16 +3848,13 @@ void CSoundFile::PortamentoDown(CHANNELINDEX nChn, ModCommand::PARAM param, cons
 		param = chn.nOldPortaDown;
 	}
 
-	const bool doFineSlides = !doFinePortamentoAsRegular && !(GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM | MOD_TYPE_MT2 | MOD_TYPE_MED | MOD_TYPE_AMF0 | MOD_TYPE_DIGI | MOD_TYPE_STP | MOD_TYPE_DTM));
-
-	// Process MIDI pitch bend for instrument plugins
-	MidiPortamento(nChn, -static_cast<int>(param), doFineSlides);
+	const bool doFineSlides = !doFinePortamentoAsRegular && UseCombinedPortamentoCommands();
 
 	if(GetType() == MOD_TYPE_MPT && chn.pModInstrument && chn.pModInstrument->pTuning)
 	{
 		// Portamento for instruments with custom tuning
 		if(param >= 0xF0 && !doFinePortamentoAsRegular)
-			PortamentoFineMPT(chn, -static_cast<int>(param - 0xF0));
+			PortamentoFineMPT(playState, nChn, -static_cast<int>(param - 0xF0));
 		else if(param >= 0xE0 && !doFinePortamentoAsRegular)
 			PortamentoExtraFineMPT(chn, -static_cast<int>(param - 0xE0));
 		else
@@ -3842,7 +3898,7 @@ void CSoundFile::PortamentoDown(CHANNELINDEX nChn, ModCommand::PARAM param, cons
 
 
 // Send portamento commands to plugins
-void CSoundFile::MidiPortamento(CHANNELINDEX nChn, int param, bool doFineSlides)
+void CSoundFile::MidiPortamento(CHANNELINDEX nChn, int param, const bool doFineSlides)
 {
 	int actualParam = std::abs(param);
 	int pitchBend = 0;
@@ -3992,7 +4048,7 @@ void CSoundFile::SetFinetune(CHANNELINDEX channel, PlayState &playState, bool is
 // Oktalyzer: Slide down on first tick only, or on every tick
 void CSoundFile::NoteSlide(ModChannel &chn, uint32 param, bool slideUp, bool retrig) const
 {
-	if(m_SongFlags[SONG_FIRSTTICK])
+	if(chn.isFirstTick)
 	{
 		if(param & 0xF0)
 			chn.noteSlideParam = static_cast<uint8>(param & 0xF0) | (chn.noteSlideParam & 0x0F);
@@ -4005,7 +4061,7 @@ void CSoundFile::NoteSlide(ModChannel &chn, uint32 param, bool slideUp, bool ret
 	if(GetType() == MOD_TYPE_OKT)
 		doTrigger = ((chn.noteSlideParam & 0xF0) == 0x10) || m_SongFlags[SONG_FIRSTTICK];
 	else
-		doTrigger = !m_SongFlags[SONG_FIRSTTICK] && (--chn.noteSlideCounter == 0);
+		doTrigger = !chn.isFirstTick && (--chn.noteSlideCounter == 0);
 
 	if(doTrigger)
 	{
@@ -4054,8 +4110,9 @@ std::pair<uint16, bool> CSoundFile::GetVolCmdTonePorta(const ModCommand &m, uint
 
 
 // Portamento Slide
-void CSoundFile::TonePortamento(ModChannel &chn, uint16 param) const
+void CSoundFile::TonePortamento(PlayState &playState, CHANNELINDEX nChn, uint16 param) const
 {
+	ModChannel &chn = playState.Chn[nChn];
 	chn.dwFlags.set(CHN_PORTAMENTO);
 
 	//IT compatibility 03: Share effect memory with portamento up/down
@@ -4075,13 +4132,13 @@ void CSoundFile::TonePortamento(ModChannel &chn, uint16 param) const
 		if(chn.portamentoSlide == 0)
 			return;
 
-		const int32 oldPortamentoTickSlide = (m_PlayState.m_nTickCount != 0) ? chn.m_PortamentoTickSlide : 0;
+		const int32 oldPortamentoTickSlide = (playState.m_nTickCount != 0) ? chn.m_PortamentoTickSlide : 0;
 
 		int32 delta = chn.portamentoSlide;
 		if(chn.nPortamentoDest < 0)
 			delta = -delta;
 
-		chn.m_PortamentoTickSlide = static_cast<int32>((m_PlayState.m_nTickCount + 1.0) * delta / m_PlayState.m_nMusicSpeed);
+		chn.m_PortamentoTickSlide = static_cast<int32>((playState.m_nTickCount + 1.0) * delta / playState.m_nMusicSpeed);
 
 		if(chn.dwFlags[CHN_GLISSANDO])
 		{
@@ -4111,7 +4168,7 @@ void CSoundFile::TonePortamento(ModChannel &chn, uint16 param) const
 
 	bool doPorta = !chn.isFirstTick
 	               || (GetType() & (MOD_TYPE_DBM | MOD_TYPE_669))
-	               || (m_PlayState.m_nMusicSpeed == 1 && m_playBehaviour[kSlidesAtSpeed1])
+	               || (playState.m_nMusicSpeed == 1 && m_playBehaviour[kSlidesAtSpeed1])
 	               || (GetType() == MOD_TYPE_MED && m_SongFlags[SONG_FASTVOLSLIDES]);
 
 	int32 delta = chn.portamentoSlide;
@@ -4488,9 +4545,23 @@ void CSoundFile::ExtendedMODCommands(CHANNELINDEX nChn, ModCommand::PARAM param)
 		}
 		break;
 	// E1x: Fine Portamento Up
-	case 0x10:	if ((param) || (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2))) FinePortamentoUp(chn, param); break;
+	case 0x10:
+		if(param || (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2)))
+		{
+			FinePortamentoUp(chn, param);
+			if(!m_playBehaviour[kPluginIgnoreTonePortamento])
+				MidiPortamento(nChn, 0xF0 | param, true);
+		}
+		break;
 	// E2x: Fine Portamento Down
-	case 0x20:	if ((param) || (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2))) FinePortamentoDown(chn, param); break;
+	case 0x20:
+		if(param || (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2)))
+		{
+			FinePortamentoDown(chn, param);
+			if(!m_playBehaviour[kPluginIgnoreTonePortamento])
+				MidiPortamento(nChn, -static_cast<int>(0xF0 | param), true);
+		}
+		break;
 	// E3x: Set Glissando Control
 	case 0x30:	chn.dwFlags.set(CHN_GLISSANDO, param != 0); break;
 	// E4x: Set Vibrato WaveForm
@@ -6323,7 +6394,7 @@ void CSoundFile::UpdateTimeSignature()
 }
 
 
-void CSoundFile::PortamentoMPT(ModChannel &chn, int param)
+void CSoundFile::PortamentoMPT(ModChannel &chn, int param) const
 {
 	//Behavior: Modifies portamento by param-steps on every tick.
 	//Note that step meaning depends on tuning.
@@ -6333,18 +6404,19 @@ void CSoundFile::PortamentoMPT(ModChannel &chn, int param)
 }
 
 
-void CSoundFile::PortamentoFineMPT(ModChannel &chn, int param)
+void CSoundFile::PortamentoFineMPT(PlayState &playState, CHANNELINDEX nChn, int param) const
 {
+	ModChannel &chn = playState.Chn[nChn];
 	//Behavior: Divides portamento change between ticks/row. For example
 	//if Ticks/row == 6, and param == +-6, portamento goes up/down by one tuning-dependent
 	//fine step every tick.
 
-	if(m_PlayState.m_nTickCount == 0)
+	if(playState.m_nTickCount == 0)
 		chn.nOldFinePortaUpDown = 0;
 
-	const int tickParam = static_cast<int>((m_PlayState.m_nTickCount + 1.0) * param / m_PlayState.m_nMusicSpeed);
+	const int tickParam = static_cast<int>((playState.m_nTickCount + 1.0) * param / playState.m_nMusicSpeed);
 	chn.m_PortamentoFineSteps += (param >= 0) ? tickParam - chn.nOldFinePortaUpDown : tickParam + chn.nOldFinePortaUpDown;
-	if(m_PlayState.m_nTickCount + 1 == m_PlayState.m_nMusicSpeed)
+	if(playState.m_nTickCount + 1 == playState.m_nMusicSpeed)
 		chn.nOldFinePortaUpDown = static_cast<int8>(std::abs(param));
 	else
 		chn.nOldFinePortaUpDown = static_cast<int8>(std::abs(tickParam));
@@ -6353,7 +6425,7 @@ void CSoundFile::PortamentoFineMPT(ModChannel &chn, int param)
 }
 
 
-void CSoundFile::PortamentoExtraFineMPT(ModChannel &chn, int param)
+void CSoundFile::PortamentoExtraFineMPT(ModChannel &chn, int param) const
 {
 	// This kinda behaves like regular fine portamento.
 	// It changes the pitch by n finetune steps on the first tick.

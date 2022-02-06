@@ -457,9 +457,9 @@ bool EffectInfo::GetEffectNameEx(CString &pszName, const ModCommand &m, uint32 p
 		{
 			TCHAR sign = (gFXInfo[ndx].effect == CMD_PORTAMENTOUP) ? _T('+') : _T('-');
 
-			if((sndFile.GetType() & MOD_TYPE_S3MITMPT) && ((param & 0xF0) == 0xF0))
+			if((sndFile.UseCombinedPortamentoCommands()) && ((param & 0xF0) == 0xF0))
 				s.Format(_T("fine %c%d"), sign, (param & 0x0F));
-			else if((sndFile.GetType() & MOD_TYPE_S3MITMPT) && ((param & 0xF0) == 0xE0))
+			else if((sndFile.UseCombinedPortamentoCommands()) && ((param & 0xF0) == 0xE0))
 				s.Format(_T("extra fine %c%d"), sign, (param & 0x0F));
 			else
 				s.Format(_T("%c%d"), sign, param);

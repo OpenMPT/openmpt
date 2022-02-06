@@ -195,6 +195,8 @@ public:
 	static bool IsNoteOrEmpty(NOTE note) { return note == NOTE_NONE || IsNote(note); }
 	// Returns true if any of the commands in this cell trigger a tone portamento.
 	bool IsPortamento() const { return command == CMD_TONEPORTAMENTO || command == CMD_TONEPORTAVOL || volcmd == VOLCMD_TONEPORTAMENTO; }
+	// Returns true if any commands in this cell trigger any sort of pitch slide / portamento.
+	bool IsAnyPitchSlide() const;
 	// Returns true if the cell contains a sliding or otherwise continuous effect command.
 	bool IsContinousCommand(const CSoundFile &sndFile) const;
 	bool IsContinousVolColCommand() const;
