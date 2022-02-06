@@ -144,6 +144,7 @@ protected:
 	afx_msg void OnInsertSlot();
 	afx_msg void OnClonePlug();
 	LRESULT OnParamAutomated(WPARAM plugin, LPARAM param);
+	LRESULT OnDryWetRatioChangedFromPlayer(WPARAM plugin, LPARAM);
 
 	afx_msg void OnWetDryExpandChanged();
 	afx_msg void OnSpecialMixProcessingChanged();

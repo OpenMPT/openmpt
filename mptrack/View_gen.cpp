@@ -116,6 +116,7 @@ BEGIN_MESSAGE_MAP(CViewGlobals, CFormView)
 	ON_MESSAGE(WM_MOD_VIEWMSG,	&CViewGlobals::OnModViewMsg)
 	ON_MESSAGE(WM_MOD_MIDIMSG,	&CViewGlobals::OnMidiMsg)
 	ON_MESSAGE(WM_MOD_PLUGPARAMAUTOMATE,	&CViewGlobals::OnParamAutomated)
+	ON_MESSAGE(WM_MOD_PLUGINDRYWETRATIOCHANGED, &CViewGlobals::OnDryWetRatioChangedFromPlayer)
 
 	ON_COMMAND(ID_EDIT_UNDO, &CViewGlobals::OnEditUndo)
 	ON_COMMAND(ID_EDIT_REDO, &CViewGlobals::OnEditRedo)
@@ -221,7 +222,7 @@ void CViewGlobals::OnInitialUpdate()
 	m_CbnSpecialMixProcessing.AddString(_T("Mix Subtract"));
 	m_CbnSpecialMixProcessing.AddString(_T("Middle Subtract"));
 	m_CbnSpecialMixProcessing.AddString(_T("LR Balance"));
-	m_SpinMixGain.SetRange(0,80);
+	m_SpinMixGain.SetRange(0, 80);
 	m_SpinMixGain.SetPos(10);
 	SetDlgItemText(IDC_EDIT16, _T("Gain: x1.0"));
 
@@ -588,7 +589,7 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 		if(outputSel >= 0)
 			m_CbnOutput.SetCurSel(outputSel);
 	}
-	if (plugHint.GetType()[HINT_PLUGINPARAM] && updatePlug)
+	if(plugHint.GetType()[HINT_PLUGINPARAM] && updatePlug)
 	{
 		OnParamChanged();
 	}
@@ -1117,6 +1118,16 @@ LRESULT CViewGlobals::OnParamAutomated(WPARAM plugin, LPARAM param)
 	if(plugin == m_nCurrentPlugin && param == m_nCurrentParam)
 	{
 		OnParamChanged();
+	}
+	return 0;
+}
+
+
+LRESULT CViewGlobals::OnDryWetRatioChangedFromPlayer(WPARAM plugin, LPARAM)
+{
+	if(plugin == m_nCurrentPlugin)
+	{
+		UpdateDryWetDisplay();
 	}
 	return 0;
 }

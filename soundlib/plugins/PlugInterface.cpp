@@ -200,10 +200,12 @@ void IMixPlugin::RecalculateGain()
 }
 
 
-void IMixPlugin::SetDryRatio(uint32 param)
+void IMixPlugin::SetDryRatio(float dryRatio)
 {
-	param = std::min(param, uint32(127));
-	m_pMixStruct->fDryRatio = 1.0f - (param / 127.0f);
+	m_pMixStruct->fDryRatio = std::clamp(dryRatio, 0.0f, 1.0f);
+#ifdef MODPLUG_TRACKER
+	m_SndFile.m_pluginDryWetRatioChanged.set(m_nSlot);
+#endif  // MODPLUG_TRACKER
 }
 
 

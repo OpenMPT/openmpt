@@ -2300,11 +2300,20 @@ LRESULT CMainFrame::OnUpdatePosition(WPARAM, LPARAM lParam)
 			PostMessage(WM_COMMAND, ID_PLAYER_STOP);
 		}
 		//Log("OnUpdatePosition: row=%d time=%lu\n", pnotify->nRow, pnotify->TimestampSamples);
-		if (GetModPlaying())
+		if(CModDoc *modDoc = GetModPlaying(); modDoc != nullptr)
 		{
-			m_wndTree.UpdatePlayPos(GetModPlaying(), pnotify);
+			m_wndTree.UpdatePlayPos(modDoc, pnotify);
 			if (GetFollowSong())
 				::SendMessage(GetFollowSong(), WM_MOD_UPDATEPOSITION, 0, lParam);
+			if(m_pSndFile->m_pluginDryWetRatioChanged.any())
+			{
+				for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
+				{
+					if(m_pSndFile->m_pluginDryWetRatioChanged[i])
+						modDoc->PostMessageToAllViews(WM_MOD_PLUGINDRYWETRATIOCHANGED, i);
+				}
+				m_pSndFile->m_pluginDryWetRatioChanged.reset();
+			}
 		}
 		m_nMixChn = pnotify->mixedChannels;
 
