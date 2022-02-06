@@ -838,15 +838,17 @@ void IMidiPlugin::MidiPitchBend(int32 increment, int8 pwd, CHANNELINDEX trackerC
 void IMidiPlugin::MidiTonePortamento(int32 increment, uint8 newNote, int8 pwd, CHANNELINDEX trackerChn)
 {
 	auto midiCh = GetMidiChannel(trackerChn);
-	increment = EncodePitchBendParam(increment);
-	ApplyPitchWheelDepth(increment, pwd);
-
-	int32 newPitchBendPos = (increment + m_MidiCh[midiCh].midiPitchBendPos) & kPitchBendMask;
 
 	int32 targetBend = EncodePitchBendParam(64 * (newNote - static_cast<int32>(m_MidiCh[midiCh].lastNote)));
 	ApplyPitchWheelDepth(targetBend, pwd);
 	targetBend += EncodePitchBendParam(MIDIEvents::pitchBendCentre);
 
+	if(targetBend < m_MidiCh[midiCh].midiPitchBendPos)
+		increment = -increment;
+	increment = EncodePitchBendParam(increment);
+	ApplyPitchWheelDepth(increment, pwd);
+
+	int32 newPitchBendPos = (increment + m_MidiCh[midiCh].midiPitchBendPos) & kPitchBendMask;
 	if((newPitchBendPos > targetBend && increment > 0) || (newPitchBendPos < targetBend && increment < 0))
 		newPitchBendPos = targetBend;
 
