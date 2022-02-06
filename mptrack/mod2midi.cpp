@@ -361,6 +361,13 @@ namespace MidiExport
 			IMidiPlugin::MidiPitchBend(increment, pwd, trackerChn);
 		}
 
+		void MidiTonePortamento(int32 increment, uint8 newNote, int8 pwd, CHANNELINDEX trackerChn) override
+		{
+			SynchronizeMidiChannelState();
+			SynchronizeMidiPitchWheelDepth(trackerChn);
+			IMidiPlugin::MidiTonePortamento(increment, newNote, pwd, trackerChn);
+		}
+
 		void MidiVibrato(int32 depth, int8 pwd, CHANNELINDEX trackerChn) override
 		{
 			SynchronizeMidiChannelState();
