@@ -88,6 +88,7 @@ public:
 	bool MidiSysexSend(mpt::const_byte_span sysex) override;
 	void MidiCC(MIDIEvents::MidiCC nController, uint8 nParam, CHANNELINDEX trackChannel) override;
 	void MidiPitchBend(int32 increment, int8 pwd, CHANNELINDEX trackChannel) override;
+	void MidiTonePortamento(int32 increment, uint8 newNote, int8 pwd, CHANNELINDEX trackChannel) override;
 	void MidiVibrato(int32 depth, int8 pwd, CHANNELINDEX trackChannel) override;
 	void MidiCommand(const ModInstrument &instr, uint16 note, uint16 vol, CHANNELINDEX trackChannel) override;
 	void HardAllNotesOff() override;

@@ -232,6 +232,15 @@ void LFOPlugin::MidiPitchBend(int32 increment, int8 pwd, CHANNELINDEX trackChann
 }
 
 
+void LFOPlugin::MidiTonePortamento(int32 increment, uint8 newNote, int8 pwd, CHANNELINDEX trackChannel)
+{
+	if(IMixPlugin *plugin = GetOutputPlugin())
+	{
+		plugin->MidiTonePortamento(increment, newNote, pwd, trackChannel);
+	}
+}
+
+
 void LFOPlugin::MidiVibrato(int32 depth, int8 pwd, CHANNELINDEX trackChannel)
 {
 	if(IMixPlugin *plugin = GetOutputPlugin())
