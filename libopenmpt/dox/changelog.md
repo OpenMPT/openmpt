@@ -7,6 +7,7 @@ is just a high-level summary.
 
 ### libopenmpt 0.7.0-pre
 
+ *  [**New**] `GTK` and `GT2` files from Gramouf Tracker are now supported.
  *  [**New**] C API: New stream callbacks for various platform extensions to the
     C stdio interface: `openmpt_stream_get_file_posix_lfs64_callbacks()` in
     `libopenmpt/libopenmpt_stream_callbacks_file_posix_lfs64.h` for explicit
@@ -65,6 +66,11 @@ is just a high-level summary.
     `openmpt_stream_get_file_callbacks2()`.
  *  [**Regression**] Using the system-provided liballegro42 is no longer
     supported. The option `BUNDLED_ALLEGRO42=1` does not exist any more.
+
+ *  Seeking with sample sync now supports portamento up / down commands as well
+    as IMF/ PTM note slides. Tone portamento is now synchronized correctly when
+    seeking in DBM, 669 and MED with fast slides (first tick of portamento was
+    previously not executed).
 
 ### libopenmpt 0.6.0 (2021-12-23)
 
