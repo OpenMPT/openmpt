@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.6.2-pre
 
+ *  pugixml: Update to v1.12 (2022-02-09).
+
 ### libopenmpt 0.6.1 (2022-01-30)
 
  *  [**Bug**] Linking libmpg123 no longer fails on OpenBSD.
