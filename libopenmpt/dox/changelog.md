@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.5.17-pre
 
+ *  pugixml: Update to v1.12 (2022-02-09).
+
 ### libopenmpt 0.5.16 (2022-01-30)
 
  *  [**Bug**] Possible hang with malformed DMF, DSM, MED and OKT files
