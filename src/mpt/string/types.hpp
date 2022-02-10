@@ -36,6 +36,7 @@ enum class common_encoding
 	cp850,
 	cp437,
 	windows1252,
+	amiga,
 };
 
 
