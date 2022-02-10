@@ -495,7 +495,7 @@ inline UINT codepage_from_encoding(logical_encoding encoding) {
 			result = CP_ACP;
 			break;
 		case logical_encoding::active_locale:
-			result = 0;
+			throw std::domain_error("unsupported encoding");
 			break;
 	}
 	return result;
