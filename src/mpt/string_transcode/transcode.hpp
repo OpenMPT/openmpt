@@ -191,7 +191,7 @@ inline mpt::widestring decode_ascii(const Tsrcstring & str, mpt::widechar replac
 	mpt::widestring res;
 	res.reserve(str.length());
 	for (std::size_t i = 0; i < str.length(); ++i) {
-		uint8 c = str[i];
+		uint8 c = mpt::char_value(str[i]);
 		if (c <= 0x7f) {
 			res.push_back(static_cast<mpt::widechar>(static_cast<uint32>(c)));
 		} else {
@@ -222,7 +222,7 @@ inline mpt::widestring decode_iso8859_1(const Tsrcstring & str, mpt::widechar re
 	mpt::widestring res;
 	res.reserve(str.length());
 	for (std::size_t i = 0; i < str.length(); ++i) {
-		uint8 c = str[i];
+		uint8 c = mpt::char_value(str[i]);
 		res.push_back(static_cast<mpt::widechar>(static_cast<uint32>(c)));
 	}
 	return res;
