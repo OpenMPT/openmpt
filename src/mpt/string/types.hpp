@@ -37,6 +37,7 @@ enum class common_encoding
 	cp437,
 	windows1252,
 	amiga,
+	riscos,
 };
 
 

@@ -369,6 +369,7 @@ static Tdststring EncodeImpl(Charset charset, const mpt::widestring &src)
 		case Charset::CP437AMS2:   return mpt::encode<Tdststring>(CharsetTableCP437AMS2, src); break;
 		case Charset::Windows1252: return mpt::encode<Tdststring>(mpt::common_encoding::windows1252, src); break;
 		case Charset::Amiga:       return mpt::encode<Tdststring>(mpt::common_encoding::amiga, src); break;
+		case Charset::RISC_OS:     return mpt::encode<Tdststring>(mpt::common_encoding::riscos, src); break;
 	}
 	return Tdststring();
 }
@@ -395,6 +396,7 @@ static mpt::widestring DecodeImpl(Charset charset, const Tsrcstring &src)
 		case Charset::CP437AMS2:   return mpt::decode<Tsrcstring>(CharsetTableCP437AMS2, src); break;
 		case Charset::Windows1252: return mpt::decode<Tsrcstring>(mpt::common_encoding::windows1252, src); break;
 		case Charset::Amiga:       return mpt::decode<Tsrcstring>(mpt::common_encoding::amiga, src); break;
+		case Charset::RISC_OS:     return mpt::decode<Tsrcstring>(mpt::common_encoding::riscos, src); break;
 	}
 	return mpt::widestring();
 }
