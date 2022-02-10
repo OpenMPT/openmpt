@@ -490,6 +490,9 @@ inline bool windows_has_encoding(common_encoding encoding) {
 		case common_encoding::windows1252:
 			result = has_codepage(1252);
 			break;
+		case common_encoding::amiga:
+			result = false;
+			break;
 	}
 	return result;
 }
@@ -543,6 +546,9 @@ inline UINT codepage_from_encoding(common_encoding encoding) {
 			break;
 		case common_encoding::windows1252:
 			result = 1252;
+			break;
+		case common_encoding::amiga:
+			throw std::domain_error("unsupported encoding");
 			break;
 	}
 	return result;
