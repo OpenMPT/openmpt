@@ -1309,7 +1309,7 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 	m_modFormat.type = U_("mod");
 	if(modMagicResult.madeWithTracker)
 		m_modFormat.madeWithTracker = modMagicResult.madeWithTracker;
-	m_modFormat.charset = mpt::Charset::ISO8859_1;
+	m_modFormat.charset = mpt::Charset::Amiga;
 
 	return true;
 }
@@ -1811,7 +1811,7 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 	m_modFormat.formatName = U_("Soundtracker");
 	m_modFormat.type = U_("stk");
 	m_modFormat.madeWithTracker = madeWithTracker;
-	m_modFormat.charset = mpt::Charset::ISO8859_1;
+	m_modFormat.charset = mpt::Charset::Amiga;
 
 	// Reading samples
 	if(loadFlags & loadSampleData)
@@ -1900,13 +1900,13 @@ bool CSoundFile::ReadICE(FileReader &file, ModLoadingFlags loadFlags)
 		m_modFormat.formatName = U_("MnemoTroN SoundTracker");
 		m_modFormat.type = U_("st26");
 		m_modFormat.madeWithTracker = U_("SoundTracker 2.6");
-		m_modFormat.charset = mpt::Charset::ISO8859_1;
+		m_modFormat.charset = mpt::Charset::Amiga;
 	} else if(IsMagic(magic, "IT10"))
 	{
 		m_modFormat.formatName = U_("Ice Tracker");
 		m_modFormat.type = U_("ice");
 		m_modFormat.madeWithTracker = U_("Ice Tracker 1.0 / 1.1");
-		m_modFormat.charset = mpt::Charset::ISO8859_1;
+		m_modFormat.charset = mpt::Charset::Amiga;
 	} else
 	{
 		return false;
@@ -2140,7 +2140,7 @@ bool CSoundFile::ReadPT36(FileReader &file, ModLoadingFlags loadFlags)
 			chunk.Skip(4);
 			if(chunk.ReadMagic("PT") && iffHead.chunksize > 6)
 			{
-				chunk.ReadString<mpt::String::maybeNullTerminated>(version, mpt::Charset::ISO8859_1, iffHead.chunksize - 6);
+				chunk.ReadString<mpt::String::maybeNullTerminated>(version, mpt::Charset::Amiga, iffHead.chunksize - 6);
 			}
 			break;
 
@@ -2196,7 +2196,7 @@ bool CSoundFile::ReadPT36(FileReader &file, ModLoadingFlags loadFlags)
 			std::string author;
 			commentChunk.ReadString<mpt::String::maybeNullTerminated>(author, 32);
 			if(author != "UNNAMED AUTHOR")
-				m_songArtist = mpt::ToUnicode(mpt::Charset::ISO8859_1, author);
+				m_songArtist = mpt::ToUnicode(mpt::Charset::Amiga, author);
 			if(!commentChunk.NoBytesLeft())
 			{
 				m_songMessage.ReadFixedLineLength(commentChunk, commentChunk.BytesLeft(), 40, 0);
