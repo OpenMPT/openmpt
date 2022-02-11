@@ -69,6 +69,10 @@ enum class Charset {
 	Amiga,
 	RISC_OS,
 
+	ISO8859_1_no_C1,
+	ISO8859_15_no_C1,
+	Amiga_no_C1,
+
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
 	Locale, // CP_ACP on windows, current C locale otherwise
 #endif // MPT_ENABLE_CHARSET_LOCALE

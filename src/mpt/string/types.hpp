@@ -38,6 +38,9 @@ enum class common_encoding
 	windows1252,
 	amiga,
 	riscos,
+	iso8859_1_no_c1,
+	iso8859_15_no_c1,
+	amiga_no_c1,
 };
 
 
