@@ -370,6 +370,7 @@ static Tdststring EncodeImpl(Charset charset, const mpt::widestring &src)
 		case Charset::Windows1252:      return mpt::encode<Tdststring>(mpt::common_encoding::windows1252, src); break;
 		case Charset::Amiga:            return mpt::encode<Tdststring>(mpt::common_encoding::amiga, src); break;
 		case Charset::RISC_OS:          return mpt::encode<Tdststring>(mpt::common_encoding::riscos, src); break;
+		case Charset::AtariST:          return mpt::encode<Tdststring>(mpt::common_encoding::atarist, src); break;
 		case Charset::ISO8859_1_no_C1:  return mpt::encode<Tdststring>(mpt::common_encoding::iso8859_1_no_c1, src); break;
 		case Charset::ISO8859_15_no_C1: return mpt::encode<Tdststring>(mpt::common_encoding::iso8859_15_no_c1, src); break;
 		case Charset::Amiga_no_C1:      return mpt::encode<Tdststring>(mpt::common_encoding::amiga_no_c1, src); break;
@@ -400,6 +401,7 @@ static mpt::widestring DecodeImpl(Charset charset, const Tsrcstring &src)
 		case Charset::Windows1252:      return mpt::decode<Tsrcstring>(mpt::common_encoding::windows1252, src); break;
 		case Charset::Amiga:            return mpt::decode<Tsrcstring>(mpt::common_encoding::amiga, src); break;
 		case Charset::RISC_OS:          return mpt::decode<Tsrcstring>(mpt::common_encoding::riscos, src); break;
+		case Charset::AtariST:          return mpt::decode<Tsrcstring>(mpt::common_encoding::atarist, src); break;
 		case Charset::ISO8859_1_no_C1:  return mpt::decode<Tsrcstring>(mpt::common_encoding::iso8859_1_no_c1, src); break;
 		case Charset::ISO8859_15_no_C1: return mpt::decode<Tsrcstring>(mpt::common_encoding::iso8859_15_no_c1, src); break;
 		case Charset::Amiga_no_C1:      return mpt::decode<Tsrcstring>(mpt::common_encoding::amiga_no_c1, src); break;

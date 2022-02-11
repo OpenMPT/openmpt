@@ -68,6 +68,7 @@ enum class Charset {
 
 	Amiga,
 	RISC_OS,
+	AtariST,
 
 	ISO8859_1_no_C1,
 	ISO8859_15_no_C1,
