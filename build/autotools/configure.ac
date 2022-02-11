@@ -21,15 +21,13 @@ AM_PROG_CC_C_O
 AC_PROG_CXX
 AC_PROG_INSTALL
 
-# We need C++17 support, Autoconf does not yet support C++20. Yay.
-# See <https://github.com/autoconf-archive/autoconf-archive/pull/244>.
-#AX_CXX_COMPILE_STDCXX(20, [noext], [optional])
-#AS_IF([test "x$HAVE_CXX20" != "x1"],
-# [
-#  AX_CXX_COMPILE_STDCXX(17, [noext], [mandatory])
-# ],[]
-#)
-AX_CXX_COMPILE_STDCXX(17, [noext], [mandatory])
+# We need C++17 support.
+AX_CXX_COMPILE_STDCXX(20, [noext], [optional])
+AS_IF([test "x$HAVE_CXX20" != "x1"],
+ [
+  AX_CXX_COMPILE_STDCXX(17, [noext], [mandatory])
+ ],[]
+)
 
 AC_LANG_PUSH([C])
 AX_CHECK_COMPILE_FLAG([-fvisibility=hidden], [CFLAGS="$CFLAGS -fvisibility=hidden"])
