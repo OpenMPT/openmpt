@@ -1932,7 +1932,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	if(m_dwLastSavedWithVersion)
 		m_modFormat.charset = mpt::Charset::Windows1252;
 	else if(GetType() == MOD_TYPE_MOD)
-		m_modFormat.charset = mpt::Charset::Amiga;
+		m_modFormat.charset = mpt::Charset::Amiga_no_C1;
 	else
 		m_modFormat.charset = mpt::Charset::CP437;
 
