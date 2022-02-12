@@ -290,6 +290,10 @@
 
 #if defined(LIBOPENMPT_BUILD)
 
+#ifndef LIBOPENMPT_NO_DEPRECATE
+#define LIBOPENMPT_NO_DEPRECATE
+#endif
+
 #if (defined(_DEBUG) || defined(DEBUG)) && !defined(MPT_BUILD_DEBUG)
 #define MPT_BUILD_DEBUG
 #endif
