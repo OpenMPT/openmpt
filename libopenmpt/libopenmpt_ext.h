@@ -164,7 +164,7 @@ typedef struct openmpt_module_ext_interface_interactive {
 	 * \sa openmpt_module_get_current_tempo
 	 * \deprecated Please use openmpt_module_ext_interface_interactive3::set_current_tempo2().
 	 */
-	int ( * set_current_tempo ) ( openmpt_module_ext * mod_ext, int32_t tempo );
+	LIBOPENMPT_DEPRECATED int ( * set_current_tempo ) ( openmpt_module_ext * mod_ext, int32_t tempo );
 
 	/*! Set the current module tempo factor without affecting playback pitch
 	 *
