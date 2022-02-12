@@ -967,6 +967,15 @@ int32_t openmpt_module_get_current_tempo( openmpt_module * mod ) {
 	}
 	return 0;
 }
+double openmpt_module_get_current_tempo2( openmpt_module * mod ) {
+	try {
+		openmpt::interface::check_soundfile( mod );
+		return mod->impl->get_current_tempo2();
+	} catch ( ... ) {
+		openmpt::report_exception( __func__, mod );
+	}
+	return 0;
+}
 int32_t openmpt_module_get_current_order( openmpt_module * mod ) {
 	try {
 		openmpt::interface::check_soundfile( mod );
@@ -1786,6 +1795,19 @@ static double get_note_finetune( openmpt_module_ext * mod_ext, int32_t channel )
 
 
 
+static int set_current_tempo2( openmpt_module_ext * mod_ext, double tempo ) {
+	try {
+		openmpt::interface::check_soundfile( mod_ext );
+		mod_ext->impl->set_current_tempo2( tempo );
+		return 1;
+	} catch ( ... ) {
+		openmpt::report_exception( __func__, mod_ext ? &mod_ext->mod : NULL );
+	}
+	return 0;
+}
+
+
+
 /* add stuff here */
 
 
@@ -1840,6 +1862,13 @@ int openmpt_module_ext_get_interface( openmpt_module_ext * mod_ext, const char *
 			i->get_channel_panning = &get_channel_panning;
 			i->set_note_finetune = &set_note_finetune;
 			i->get_note_finetune = &get_note_finetune;
+			result = 1;
+
+
+
+		} else if ( !std::strcmp( interface_id, LIBOPENMPT_EXT_C_INTERFACE_INTERACTIVE3 ) && ( interface_size == sizeof( openmpt_module_ext_interface_interactive3 ) ) ) {
+			openmpt_module_ext_interface_interactive3 * i = static_cast< openmpt_module_ext_interface_interactive3 * >( interface );
+			i->set_current_tempo2 = &set_current_tempo2;
 			result = 1;
 
 

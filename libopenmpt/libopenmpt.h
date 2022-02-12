@@ -1159,8 +1159,16 @@ LIBOPENMPT_API int32_t openmpt_module_get_current_speed( openmpt_module * mod );
  *
  * \param mod The module handle to work on.
  * \return The current tempo in tracker units. The exact meaning of this value depends on the tempo mode being used.
+ * \deprecated Please use openmpt_module_get_current_tempo2().
  */
-LIBOPENMPT_API int32_t openmpt_module_get_current_tempo( openmpt_module * mod );
+LIBOPENMPT_API LIBOPENMPT_DEPRECATED int32_t openmpt_module_get_current_tempo( openmpt_module * mod );
+/*! \brief Get the current tempo
+ *
+ * \param mod The module handle to work on.
+ * \return The current tempo in tracker units. The exact meaning of this value depends on the tempo mode being used.
+ * \since 0.7.0
+ */
+LIBOPENMPT_API double openmpt_module_get_current_tempo2( openmpt_module * mod );
 /*! \brief Get the current order
  *
  * \param mod The module handle to work on.

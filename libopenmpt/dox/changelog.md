@@ -8,6 +8,9 @@ is just a high-level summary.
 ### libopenmpt 0.7.0-pre
 
  *  [**New**] `GTK` and `GT2` files from Gramouf Tracker are now supported.
+ *  [**New**] libopenmpt: New APIs for getting the current tempo as a floating
+    point value: `openmpt::module::get_current_tempo2()` (C++), and
+    `openmpt_module_get_current_tempo2()` (C).
  *  [**New**] C API: New stream callbacks for various platform extensions to the
     C stdio interface: `openmpt_stream_get_file_posix_lfs64_callbacks()` in
     `libopenmpt/libopenmpt_stream_callbacks_file_posix_lfs64.h` for explicit
@@ -38,6 +41,10 @@ is just a high-level summary.
     `openmpt_probe_file_header()`,
     `openmpt_probe_file_header_without_filesize()`, and
     `openmpt_probe_file_header_from_stream()` in libopenmpt 0.3.0.
+ *  [**New**] libopenmpt_ext: New interface `interactive3` adding
+    `openmpt::ext::interactive3::set_current_tempo2()` (C++) and
+    `openmpt_module_ext_interface_interactive3.set_current_tempo2()` (C) which
+    allow setting non-integer tempo values. 
  *  [**New**] `Makefile` `CONFIG=djgpp` now supports `CPU=` option to build
     optimized for a particular CPU. See `build/make/config-djgpp.mk` for all
     available options. `FLAVOURED_DIR=1` places the CPU-specific optimized

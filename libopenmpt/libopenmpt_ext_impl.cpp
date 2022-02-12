@@ -85,6 +85,8 @@ namespace openmpt {
 			return dynamic_cast< ext::interactive * >( this );
 		} else if ( interface_id == ext::interactive2_id ) {
 			return dynamic_cast< ext::interactive2 * >( this );
+		} else if ( interface_id == ext::interactive3_id ) {
+			return dynamic_cast< ext::interactive3 * >( this );
 
 
 
@@ -342,6 +344,13 @@ namespace openmpt {
 		}
 		auto & chn = m_sndFile->m_PlayState.Chn[channel];
 		return chn.microTuning / 32768.0;
+	}
+
+	void module_ext_impl::set_current_tempo2( double tempo ) {
+		if ( tempo < 32.0 || tempo > 512.0 ) {
+			throw openmpt::exception("invalid tempo");
+		}
+		m_sndFile->m_PlayState.m_nMusicTempo = decltype( m_sndFile->m_PlayState.m_nMusicTempo )( tempo );
 	}
 
 	/* add stuff here */

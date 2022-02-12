@@ -212,6 +212,7 @@ public:
 	double get_current_estimated_bpm() const;
 	std::int32_t get_current_speed() const;
 	std::int32_t get_current_tempo() const;
+	double get_current_tempo2() const;
 	std::int32_t get_current_order() const;
 	std::int32_t get_current_pattern() const;
 	std::int32_t get_current_row() const;

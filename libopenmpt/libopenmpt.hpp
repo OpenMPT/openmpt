@@ -843,8 +843,15 @@ public:
 	//! Get the current tempo
 	/*!
 	  \return The current tempo in tracker units. The exact meaning of this value depends on the tempo mode being used.
+	  \deprecated Please use openmpt::module::get_current_tempo2().
 	*/
-	std::int32_t get_current_tempo() const;
+	LIBOPENMPT_ATTR_DEPRECATED std::int32_t get_current_tempo() const;
+	//! Get the current tempo
+	/*!
+	  \return The current tempo in tracker units. The exact meaning of this value depends on the tempo mode being used.
+	  \since 0.7.0
+	*/
+	double get_current_tempo2() const;
 	//! Get the current order
 	/*!
 	  \return The current order at which the module is being played back.

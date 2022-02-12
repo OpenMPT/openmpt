@@ -1076,8 +1076,17 @@ Declare Function openmpt_module_get_current_speed(ByVal module As openmpt_module
 
   \param module The module handle to work on.
   \return The current tempo in tracker units. The exact meaning of this value depends on the tempo mode being used.
+  \deprecated Please use openmpt_module_get_current_tempo2().
 '/
 Declare Function openmpt_module_get_current_tempo(ByVal module As openmpt_module Ptr) As Long
+
+/'* \brief Get the current tempo
+
+  \param module The module handle to work on.
+  \return The current tempo in tracker units. The exact meaning of this value depends on the tempo mode being used.
+  \since 0.7.0
+'/
+Declare Function openmpt_module_get_current_tempo2(ByVal module As openmpt_module Ptr) As Long
 
 /'* \brief Get the current order
 

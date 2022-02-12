@@ -1286,7 +1286,7 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 					log << "   ";
 					log << "Spd:" << std::setw(2) << std::setfill(':') << mod.get_current_speed();
 					log << " ";
-					log << "Tmp:" << std::setw(3) << std::setfill(':') << mod.get_current_tempo();
+					log << "Tmp:" << std::setw(6) << std::setfill(':') << std::fixed << std::setprecision(2) << mod.get_current_tempo2();
 					log << "   ";
 					log << std::endl;
 				}
@@ -1347,7 +1347,7 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 					log << " ";
 					log << "Spd:" << std::setw(2) << std::setfill(':') << mod.get_current_speed();
 					log << "|";
-					log << "Tmp:" << std::setw(3) << std::setfill(':') << mod.get_current_tempo();
+					log << "Tmp:" << std::setw(3) << std::setfill(':') << std::fixed << std::setprecision(2) << mod.get_current_tempo2();
 				}
 			}
 			if ( flags.show_progress ) {
