@@ -325,6 +325,7 @@
 		54F2D0191B80C78B8982EE59 /* algorithm.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = algorithm.hpp; path = ../../src/mpt/base/algorithm.hpp; sourceTree = "<group>"; };
 		55356226EAAC215859487866 /* span.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = span.hpp; path = ../../src/mpt/audio/span.hpp; sourceTree = "<group>"; };
 		55C6E46D9A1589DFDC3CC2AD /* Dlsbank.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Dlsbank.cpp; path = ../../soundlib/Dlsbank.cpp; sourceTree = "<group>"; };
+		55EF6B83EC187D75AD7ED9C3 /* tests_endian_int24.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = tests_endian_int24.hpp; path = ../../src/mpt/endian/tests/tests_endian_int24.hpp; sourceTree = "<group>"; };
 		5609DBF3C331EA65C4C4DA33 /* utility.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = utility.hpp; path = ../../src/mpt/base/utility.hpp; sourceTree = "<group>"; };
 		567D9E616834DE53DDA2CCA1 /* InstrumentExtensions.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = InstrumentExtensions.cpp; path = ../../soundlib/InstrumentExtensions.cpp; sourceTree = "<group>"; };
 		57E617F588CA0FE79BE24635 /* Reverb.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Reverb.h; path = ../../sounddsp/Reverb.h; sourceTree = "<group>"; };
@@ -611,6 +612,7 @@
 			isa = PBXGroup;
 			children = (
 				9620F5BDA843ABAF8144E3FD /* tests_endian_floatingpoint.hpp */,
+				55EF6B83EC187D75AD7ED9C3 /* tests_endian_int24.hpp */,
 				C10B2BDD886FE6CF1327BA1D /* tests_endian_integer.hpp */,
 			);
 			name = tests;

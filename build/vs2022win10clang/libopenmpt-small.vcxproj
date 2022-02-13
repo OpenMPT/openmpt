@@ -1321,6 +1321,7 @@
     <ClInclude Include="..\..\src\mpt\endian\int24.hpp" />
     <ClInclude Include="..\..\src\mpt\endian\integer.hpp" />
     <ClInclude Include="..\..\src\mpt\endian\tests\tests_endian_floatingpoint.hpp" />
+    <ClInclude Include="..\..\src\mpt\endian\tests\tests_endian_int24.hpp" />
     <ClInclude Include="..\..\src\mpt\endian\tests\tests_endian_integer.hpp" />
     <ClInclude Include="..\..\src\mpt\environment\environment.hpp" />
     <ClInclude Include="..\..\src\mpt\exception_text\exception_text.hpp" />

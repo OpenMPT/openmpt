@@ -510,6 +510,9 @@
     <ClInclude Include="..\..\src\mpt\endian\tests\tests_endian_floatingpoint.hpp">
       <Filter>src\mpt\endian\tests</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\mpt\endian\tests\tests_endian_int24.hpp">
+      <Filter>src\mpt\endian\tests</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\mpt\endian\tests\tests_endian_integer.hpp">
       <Filter>src\mpt\endian\tests</Filter>
     </ClInclude>

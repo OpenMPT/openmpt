@@ -9,6 +9,7 @@
 #include "mpt/base/macros.hpp"
 #include "mpt/base/memory.hpp"
 #include "mpt/base/namespace.hpp"
+#include "mpt/endian/integer.hpp"
 
 #include <array>
 #include <limits>
@@ -40,13 +41,19 @@ struct uint24 {
 			bytes[2] = mpt::byte_cast<std::byte>(static_cast<uint8>((static_cast<Tunsigned>(other) >> 16) & 0xff));
 		}
 	}
-	operator int() const noexcept {
+	operator unsigned int() const noexcept {
 		MPT_MAYBE_CONSTANT_IF(mpt::endian_is_big()) {
 			return (mpt::byte_cast<uint8>(bytes[0]) * 65536) + (mpt::byte_cast<uint8>(bytes[1]) * 256) + mpt::byte_cast<uint8>(bytes[2]);
 		}
 		else {
 			return (mpt::byte_cast<uint8>(bytes[2]) * 65536) + (mpt::byte_cast<uint8>(bytes[1]) * 256) + mpt::byte_cast<uint8>(bytes[0]);
 		}
+	}
+	friend bool operator==(uint24 a, uint24 b) noexcept {
+		return static_cast<unsigned int>(a) == static_cast<unsigned int>(b);
+	}
+	friend bool operator!=(uint24 a, uint24 b) noexcept {
+		return static_cast<unsigned int>(a) != static_cast<unsigned int>(b);
 	}
 };
 
@@ -78,9 +85,52 @@ struct int24 {
 			return (static_cast<int8>(mpt::byte_cast<uint8>(bytes[2])) * 65536) + (mpt::byte_cast<uint8>(bytes[1]) * 256) + mpt::byte_cast<uint8>(bytes[0]);
 		}
 	}
+	friend bool operator==(int24 a, int24 b) noexcept {
+		return static_cast<int>(a) == static_cast<int>(b);
+	}
+	friend bool operator!=(int24 a, int24 b) noexcept {
+		return static_cast<int>(a) != static_cast<int>(b);
+	}
 };
 
 static_assert(sizeof(int24) == 3);
+
+
+
+template <>
+struct packed_int_type<int24> {
+	using type = int;
+};
+template <>
+struct packed_int_type<uint24> {
+	using type = unsigned int;
+};
+
+using int24le = packed<int24, mpt::endian::little>;
+using uint24le = packed<uint24, mpt::endian::little>;
+
+using int24be = packed<int24, mpt::endian::big>;
+using uint24be = packed<uint24, mpt::endian::big>;
+
+constexpr bool declare_binary_safe(const int24le &) {
+	return true;
+}
+constexpr bool declare_binary_safe(const uint24le &) {
+	return true;
+}
+
+constexpr bool declare_binary_safe(const int24be &) {
+	return true;
+}
+constexpr bool declare_binary_safe(const uint24be &) {
+	return true;
+}
+
+static_assert(mpt::check_binary_size<int24le>(3));
+static_assert(mpt::check_binary_size<uint24le>(3));
+
+static_assert(mpt::check_binary_size<int24be>(3));
+static_assert(mpt::check_binary_size<uint24be>(3));
 
 
 

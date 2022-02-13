@@ -239,6 +239,7 @@ MPT_FILES_SRC_MPT += src/mpt/binary/tests/tests_binary.hpp
 MPT_FILES_SRC_MPT += src/mpt/crc/tests/tests_crc.hpp
 #MPT_FILES_SRC_MPT += src/mpt/crypto/tests/tests_crypto.hpp
 MPT_FILES_SRC_MPT += src/mpt/endian/tests/tests_endian_floatingpoint.hpp
+MPT_FILES_SRC_MPT += src/mpt/endian/tests/tests_endian_int24.hpp
 MPT_FILES_SRC_MPT += src/mpt/endian/tests/tests_endian_integer.hpp
 MPT_FILES_SRC_MPT += src/mpt/format/tests/tests_format_message.hpp
 MPT_FILES_SRC_MPT += src/mpt/format/tests/tests_format_simple.hpp

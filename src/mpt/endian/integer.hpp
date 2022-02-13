@@ -27,14 +27,15 @@ inline namespace MPT_INLINE_NS {
 
 
 
-template <typename T, mpt::endian endian, std::size_t size>
+template <typename T, mpt::endian endian, std::size_t size, typename Tint = T>
 MPT_CONSTEXPRINLINE std::array<std::byte, size> EndianEncode(T val) noexcept {
 	static_assert(endian == mpt::endian::little || endian == mpt::endian::big);
-	static_assert(std::numeric_limits<T>::is_integer);
-	static_assert(!std::numeric_limits<T>::is_signed);
+	static_assert(std::numeric_limits<Tint>::is_integer);
+	static_assert(!std::numeric_limits<Tint>::is_signed);
 	static_assert(sizeof(T) == size);
 	using base_type = T;
-	using unsigned_base_type = typename std::make_unsigned<base_type>::type;
+	using int_type = Tint;
+	using unsigned_base_type = typename std::make_unsigned<int_type>::type;
 	unsigned_base_type uval = static_cast<unsigned_base_type>(val);
 	std::array<std::byte, size> data{};
 	if constexpr (endian == mpt::endian::little) {
@@ -49,14 +50,15 @@ MPT_CONSTEXPRINLINE std::array<std::byte, size> EndianEncode(T val) noexcept {
 	return data;
 }
 
-template <typename T, mpt::endian endian, std::size_t size>
+template <typename T, mpt::endian endian, std::size_t size, typename Tint = T>
 MPT_CONSTEXPRINLINE T EndianDecode(std::array<std::byte, size> data) noexcept {
 	static_assert(endian == mpt::endian::little || endian == mpt::endian::big);
-	static_assert(std::numeric_limits<T>::is_integer);
-	static_assert(!std::numeric_limits<T>::is_signed);
+	static_assert(std::numeric_limits<Tint>::is_integer);
+	static_assert(!std::numeric_limits<Tint>::is_signed);
 	static_assert(sizeof(T) == size);
 	using base_type = T;
-	using unsigned_base_type = typename std::make_unsigned<base_type>::type;
+	using int_type = Tint;
+	using unsigned_base_type = typename std::make_unsigned<int_type>::type;
 	base_type val = base_type();
 	unsigned_base_type uval = unsigned_base_type();
 	if constexpr (endian == mpt::endian::little) {
@@ -74,66 +76,71 @@ MPT_CONSTEXPRINLINE T EndianDecode(std::array<std::byte, size> data) noexcept {
 
 
 
+template <typename T>
+struct packed_int_type {
+	using type = T;
+};
+
 // On-disk integer types with defined endianness and no alignemnt requirements
 // Note: To easily debug module loaders (and anything else that uses this
 // wrapper struct), you can use the Debugger Visualizers available in
 // build/vs/debug/ to conveniently view the wrapped contents.
 
-template <typename T, mpt::endian endian>
+template <typename T, mpt::endian endian, typename Tint = typename mpt::packed_int_type<T>::type>
 struct packed {
 public:
 	using base_type = T;
+	using int_type = Tint;
 
 public:
 	std::array<std::byte, sizeof(base_type)> data;
 
 public:
 	MPT_CONSTEXPR20_FUN void set(base_type val) noexcept {
-		static_assert(std::numeric_limits<T>::is_integer);
+		static_assert(std::numeric_limits<int_type>::is_integer);
 		MPT_MAYBE_CONSTANT_IF(MPT_IS_CONSTANT_EVALUATED20()) {
 			if constexpr (endian == mpt::endian::big) {
-				typename std::make_unsigned<base_type>::type uval = val;
+				typename std::make_unsigned<int_type>::type uval = val;
 				for (std::size_t i = 0; i < sizeof(base_type); ++i) {
 					data[i] = static_cast<std::byte>((uval >> (8 * (sizeof(base_type) - 1 - i))) & 0xffu);
 				}
 			} else {
-				typename std::make_unsigned<base_type>::type uval = val;
+				typename std::make_unsigned<int_type>::type uval = val;
 				for (std::size_t i = 0; i < sizeof(base_type); ++i) {
 					data[i] = static_cast<std::byte>((uval >> (8 * i)) & 0xffu);
 				}
 			}
 		}
 		else {
-			if constexpr (mpt::endian::native == mpt::endian::little || mpt::endian::native == mpt::endian::big) {
+			if constexpr (std::is_integral<base_type>::value && (mpt::endian::native == mpt::endian::little || mpt::endian::native == mpt::endian::big)) {
 				if constexpr (mpt::endian::native != endian) {
 					val = mpt::byteswap(val);
 				}
 				std::memcpy(data.data(), &val, sizeof(val));
 			} else {
-				using unsigned_base_type = typename std::make_unsigned<base_type>::type;
-				data = EndianEncode<unsigned_base_type, endian, sizeof(T)>(val);
+				data = EndianEncode<base_type, endian, sizeof(base_type), std::make_unsigned<int_type>::type>(val);
 			}
 		}
 	}
 	MPT_CONSTEXPR20_FUN base_type get() const noexcept {
-		static_assert(std::numeric_limits<T>::is_integer);
+		static_assert(std::numeric_limits<int_type>::is_integer);
 		MPT_MAYBE_CONSTANT_IF(MPT_IS_CONSTANT_EVALUATED20()) {
 			if constexpr (endian == mpt::endian::big) {
-				typename std::make_unsigned<base_type>::type uval = 0;
+				typename std::make_unsigned<int_type>::type uval = 0;
 				for (std::size_t i = 0; i < sizeof(base_type); ++i) {
-					uval |= static_cast<typename std::make_unsigned<base_type>::type>(data[i]) << (8 * (sizeof(base_type) - 1 - i));
+					uval |= static_cast<typename std::make_unsigned<int_type>::type>(data[i]) << (8 * (sizeof(base_type) - 1 - i));
 				}
 				return static_cast<base_type>(uval);
 			} else {
-				typename std::make_unsigned<base_type>::type uval = 0;
+				typename std::make_unsigned<int_type>::type uval = 0;
 				for (std::size_t i = 0; i < sizeof(base_type); ++i) {
-					uval |= static_cast<typename std::make_unsigned<base_type>::type>(data[i]) << (8 * i);
+					uval |= static_cast<typename std::make_unsigned<int_type>::type>(data[i]) << (8 * i);
 				}
 				return static_cast<base_type>(uval);
 			}
 		}
 		else {
-			if constexpr (mpt::endian::native == mpt::endian::little || mpt::endian::native == mpt::endian::big) {
+			if constexpr (std::is_integral<base_type>::value && (mpt::endian::native == mpt::endian::little || mpt::endian::native == mpt::endian::big)) {
 				base_type val = base_type();
 				std::memcpy(&val, data.data(), sizeof(val));
 				if constexpr (mpt::endian::native != endian) {
@@ -141,8 +148,7 @@ public:
 				}
 				return val;
 			} else {
-				using unsigned_base_type = typename std::make_unsigned<base_type>::type;
-				return EndianDecode<unsigned_base_type, endian, sizeof(T)>(data);
+				return EndianDecode<base_type, endian, sizeof(base_type), std::make_unsigned<int_type>::type>(data);
 			}
 		}
 	}
