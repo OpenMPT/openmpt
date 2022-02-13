@@ -118,7 +118,7 @@ public:
 				}
 				std::memcpy(data.data(), &val, sizeof(val));
 			} else {
-				data = EndianEncode<base_type, endian, sizeof(base_type), std::make_unsigned<int_type>::type>(val);
+				data = EndianEncode<base_type, endian, sizeof(base_type), typename std::make_unsigned<int_type>::type>(val);
 			}
 		}
 	}
@@ -148,7 +148,7 @@ public:
 				}
 				return val;
 			} else {
-				return EndianDecode<base_type, endian, sizeof(base_type), std::make_unsigned<int_type>::type>(data);
+				return EndianDecode<base_type, endian, sizeof(base_type), typename std::make_unsigned<int_type>::type>(data);
 			}
 		}
 	}
