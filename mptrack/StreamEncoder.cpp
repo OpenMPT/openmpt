@@ -105,24 +105,6 @@ static inline std::pair<bool, std::size_t> WriteInterleavedImpl(std::ostream &f,
 					written += channels * format.GetSampleFormat().GetSampleSize();
 					interleaved += channels;
 				}
-			} else if constexpr(std::is_same<Tsample, int24>::value)
-			{
-				MPT_ASSERT(!mpt::endian_is_weird());
-				for(std::size_t frame = 0; frame < frameCount; ++frame)
-				{
-					for(uint16 channel = 0; channel < channels; ++channel)
-					{
-						std::array<std::byte, 3> data;
-						std::memcpy(data.data(), interleaved, 3);
-						MPT_MAYBE_CONSTANT_IF(endian != mpt::get_endian())
-						{
-							std::reverse(data.begin(), data.end());
-						}
-						mpt::IO::Write(bf, data);
-						written += data.size();
-						interleaved += 3;
-					}
-				}
 			} else
 			{
 				std::vector<typename mpt::make_endian<endian, Tsample>::type> frameData(channels);
