@@ -161,10 +161,11 @@ TEMPO CCtrlGeneral::SliderToTempo(int value) const
 		return m_tempoMax - TEMPO(value, 0);
 	} else
 	{
-		auto tempo = TempoSliderRange() - TEMPO(value, 0) + m_tempoMin;
-		if(tempo >= TEMPO_SPLIT_THRESHOLD)
-			tempo = TEMPO((tempo - TEMPO_SPLIT_THRESHOLD).GetInt() * TEMPO_SPLIT_PRECISION, 0) + TEMPO_SPLIT_THRESHOLD;
-		return tempo;
+		const auto tempoSliderSplit = TempoToSlider(TEMPO_SPLIT_THRESHOLD);
+		if(value <= tempoSliderSplit)
+			return m_tempoMax - TEMPO(value * TEMPO_SPLIT_PRECISION, 0);
+		else
+			return m_tempoMin + TempoSliderRange() - TEMPO(value, 0);
 	}
 }
 
@@ -176,10 +177,10 @@ int CCtrlGeneral::TempoToSlider(TEMPO tempo) const
 		return (m_tempoMax - tempo).GetInt();
 	} else
 	{
-		if(tempo >= TEMPO_SPLIT_THRESHOLD)
-			tempo = TEMPO((tempo - TEMPO_SPLIT_THRESHOLD).GetInt() / TEMPO_SPLIT_PRECISION + TEMPO_SPLIT_THRESHOLD.GetInt(), 0);
-		const auto range = TempoSliderRange();
-		return (range - std::min(tempo, range)).GetInt();
+		if(tempo < TEMPO_SPLIT_THRESHOLD)
+			return (TempoSliderRange() - (std::max(m_tempoMin, tempo) - m_tempoMin)).GetInt();
+		else
+			return (m_tempoMax - std::min(m_tempoMax, tempo)).GetInt() / TEMPO_SPLIT_PRECISION;
 	}
 }
 
