@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt 0.6.2-pre
 
+ *  ISO-8859-1-related charsets from Amiga OS and RISC OS are now handled more
+    accurately, thus voiding some unwanted control characters.
+
  *  pugixml: Update to v1.12 (2022-02-09).
 
 ### libopenmpt 0.6.1 (2022-01-30)
