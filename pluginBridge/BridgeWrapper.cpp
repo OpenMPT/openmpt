@@ -108,8 +108,8 @@ bool ComponentPluginBridge::DoInitialize()
 	const mpt::PathString generationSuffix = (generation == Generation::Legacy) ? P_("Legacy") : P_("");
 	const mpt::PathString exeNames[] =
 	{
-		theApp.GetInstallPath() + P_("PluginBridge") + generationSuffix + P_("-") + archName + P_(".exe"),                          // Local
-		theApp.GetInstallBinPath() + archName + P_("\\") + P_("PluginBridge") + generationSuffix + P_("-") + archName + P_(".exe")  // Multi-arch
+		theApp.GetInstallBinPath() + archName + P_("\\") + P_("PluginBridge") + generationSuffix + P_("-") + archName + P_(".exe"),  // Multi-arch
+		theApp.GetInstallPath() + P_("PluginBridge") + generationSuffix + P_("-") + archName + P_(".exe")                            // Local
 	};
 	for(const auto &candidate : exeNames)
 	{
