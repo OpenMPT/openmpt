@@ -89,6 +89,7 @@ static const char * in_openmpt_string = "in_openmpt " OPENMPT_API_VERSION_STRING
 #include <iostream>
 #include <iterator>
 #include <sstream>
+#include <filesystem>
 
 #include <cstring>
 
@@ -98,10 +99,19 @@ static const char * in_openmpt_string = "in_openmpt " OPENMPT_API_VERSION_STRING
 
 #define WINAMP_DSP_HEADROOM_FACTOR 2
 #define WINAMP_BUFFER_SIZE_FRAMES  576
+#ifndef WINAMP_BUTTON1
+#define WINAMP_BUTTON1             40044
+#define WINAMP_BUTTON1_SHIFT       40144
+#define WINAMP_BUTTON5             40048
+#define WINAMP_BUTTON5_SHIFT       40148
+#endif
 
 #define WM_OPENMPT_SEEK (WM_USER+3)
+#define WM_OPENMPT_CHANGE_SUBSONG (WM_USER+4)
 
 #define SHORT_TITLE "in_openmpt"
+
+LRESULT CALLBACK WndProc( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam ); // for subclassing winamp's main window
 
 static void apply_options();
 
@@ -170,6 +180,7 @@ struct self_winamp_t {
 	openmpt::module * mod;
 	HANDLE PlayThread;
 	DWORD PlayThreadID;
+	WNDPROC OldWndProc;
 	bool paused;
 	std::vector<std::int16_t> buffer;
 	std::vector<std::int16_t> interleaved_buffer;
@@ -195,6 +206,7 @@ struct self_winamp_t {
 		mod = 0;
 		PlayThread = 0;
 		PlayThreadID = 0;
+		OldWndProc = 0;
 		paused = false;
 		buffer.resize( WINAMP_BUFFER_SIZE_FRAMES * channels );
 		interleaved_buffer.resize( WINAMP_BUFFER_SIZE_FRAMES * channels * WINAMP_DSP_HEADROOM_FACTOR );
@@ -239,7 +251,8 @@ static DWORD WINAPI DecodeThread( LPVOID );
 static std::basic_string<TCHAR> generate_infotext( const std::basic_string<TCHAR> & filename, const openmpt::module & mod ) {
 	std::basic_ostringstream<TCHAR> str;
 	str << TEXT("filename: ") << filename << std::endl;
-	str << TEXT("duration: ") << mod.get_duration_seconds() << TEXT("seconds") << std::endl;
+	str << TEXT("duration: ") << mod.get_duration_seconds() << TEXT(" seconds") << std::endl;
+	str << TEXT("number of subsongs: ") << mod.get_num_subsongs() << std::endl;
 	std::vector<std::string> metadatakeys = mod.get_metadata_keys();
 	for ( std::vector<std::string>::iterator key = metadatakeys.begin(); key != metadatakeys.end(); ++key ) {
 		if ( *key == "message_raw" ) {
@@ -309,6 +322,8 @@ static int play( const in_char * fn ) {
 		self->mod = new openmpt::module( s, std::clog, ctls );
 		self->cached_filename = fn;
 		self->cached_title = StringToWINAPI( StringDecode( self->mod->get_metadata( "title" ), CP_UTF8 ) );
+		if (self->cached_title.length() == 0)
+			self->cached_title = std::filesystem::path( self->cached_filename ).stem();  // there is no metadata title, use file name instead
 		self->cached_length = static_cast<int>( self->mod->get_duration_seconds() * 1000.0 );
 		self->cached_infotext = generate_infotext( self->cached_filename, *self->mod );
 		apply_options();
@@ -325,6 +340,8 @@ static int play( const in_char * fn ) {
 		self->paused = false;
 		self->decode_position_frames = 0;
 		self->PlayThread = CreateThread( NULL, 0, DecodeThread, NULL, 0, &self->PlayThreadID );
+		if ( self->mod->get_num_subsongs() != 1 )
+			self->OldWndProc = (WNDPROC)SetWindowLong( inmod.hMainWindow, GWL_WNDPROC, (LONG)WndProc );
 		return 0;
 	} catch ( ... ) {
 		if ( self->mod ) {
@@ -355,6 +372,10 @@ static void stop() {
 	CloseHandle( self->PlayThread );
 	self->PlayThread = 0;
 	self->PlayThreadID = 0;
+	if ( self->OldWndProc ) {
+		SetWindowLong( inmod.hMainWindow, GWL_WNDPROC, (LONG)self->OldWndProc ); // disable subclassing
+		self->OldWndProc = 0;
+	}
 	delete self->mod;
 	self->mod = 0;
 	inmod.outMod->Close();
@@ -412,6 +433,10 @@ static void getfileinfo( const in_char * filename, in_char * title, int * length
 		}
 		if ( title ) {
 			std::basic_string<TCHAR> truncated_title = self->cached_title;
+			if ( self->mod && self->mod->get_num_subsongs() > 1 ) { // add subsong position info to the title
+				std::string subsong_title_info = " (" + std::to_string( self->mod->get_selected_subsong() + 1 ) + "/" + std::to_string( self->mod->get_num_subsongs() ) + ")";
+				truncated_title = truncated_title + StringToWINAPI( StringDecode( subsong_title_info, CP_UTF8 ) );
+			}
 			if ( truncated_title.length() >= GETFILEINFO_TITLE_LENGTH ) {
 				truncated_title.resize( GETFILEINFO_TITLE_LENGTH - 1 );
 			}
@@ -440,6 +465,40 @@ static void eq_set( int /* on */ , char /* data */ [10], int /* preamp */ ) {
 	return;
 }
 
+LRESULT CALLBACK WndProc( HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam ) {
+	switch ( uMsg ) {
+		case WM_COMMAND:
+		case WM_SYSCOMMAND:
+			std::int8_t delta_subsong_index = 0;
+			switch ( wParam ) {
+				case WINAMP_BUTTON1:  // user pressed "back" button
+					delta_subsong_index = -1;
+					break;
+				case WINAMP_BUTTON1_SHIFT:
+					delta_subsong_index = -10;
+					break;
+				case WINAMP_BUTTON5:  // user pressed "next" button
+					delta_subsong_index = 1;
+					break;
+				case WINAMP_BUTTON5_SHIFT:
+					delta_subsong_index = 10;
+			}
+			if ( delta_subsong_index ) {
+				std::int32_t new_subsong_index = self->mod->get_selected_subsong() + delta_subsong_index;
+
+				if ( new_subsong_index >= 0 && new_subsong_index < self->mod->get_num_subsongs() ) {
+					PostThreadMessage( self->PlayThreadID, WM_OPENMPT_CHANGE_SUBSONG, 0, new_subsong_index );
+					return 0;  // prevent winamp for executing default action (to play another playlist item, or to fastfoward/rewind 5 seconds)
+				} else if ( wParam == WINAMP_BUTTON1_SHIFT || wParam == WINAMP_BUTTON5_SHIFT )
+					return 0; // we cannot fastfoward/rewind 5 seconds because we can get out of subsong's bounds
+				break;
+			}
+			break;
+	}
+
+	return CallWindowProc( self->OldWndProc, hwnd, uMsg, wParam, lParam );
+}
+
 static DWORD WINAPI DecodeThread( LPVOID ) {
 	MSG msg;
 	PeekMessage( &msg, NULL, 0, 0, PM_NOREMOVE );
@@ -449,8 +508,16 @@ static DWORD WINAPI DecodeThread( LPVOID ) {
 		while ( PeekMessage( &msg, NULL, 0, 0, PM_REMOVE ) ) {
 			if ( msg.message == WM_QUIT ) {
 				quit = true;
-			} else if ( msg.message == WM_OPENMPT_SEEK ) {
-				double pos_seconds = self->mod->set_position_seconds( msg.lParam * 0.001 );
+			} else if ( msg.message == WM_OPENMPT_SEEK || msg.message == WM_OPENMPT_CHANGE_SUBSONG ) {
+				double pos_seconds = 0;
+				if (msg.message == WM_OPENMPT_SEEK)
+					pos_seconds = self->mod->set_position_seconds( msg.lParam * 0.001 );
+				else {
+					self->mod->select_subsong( msg.lParam );
+					self->mod->set_position_seconds( 0.0 );
+					self->cached_length = static_cast<int>( self->mod->get_duration_seconds() * 1000.0 );
+					SendMessage( inmod.hMainWindow, WM_WA_IPC, 0, IPC_UPDTITLE ); // update length and position in GUI
+				}
 				self->decode_position_frames = (std::int64_t)( pos_seconds * (double)self->samplerate);
 				eof = false;
 				inmod.outMod->Flush( (int)( pos_seconds * 1000.0 ) );
@@ -462,8 +529,13 @@ static DWORD WINAPI DecodeThread( LPVOID ) {
 		if ( eof ) {
 			inmod.outMod->CanWrite(); // update output plugin state
 			if ( !inmod.outMod->IsPlaying() ) {
-				PostMessage( inmod.hMainWindow, WM_WA_MPEG_EOF, 0, 0 );
-				return 0;
+				std::int32_t new_subsong_index = self->mod->get_selected_subsong() + 1;  // try to play next subsong, if that's not possible, play the next track in playlist
+				if ( new_subsong_index < self->mod->get_num_subsongs() ) {
+					PostThreadMessage( self->PlayThreadID, WM_OPENMPT_CHANGE_SUBSONG, 0, new_subsong_index );
+				} else {
+					PostMessage( inmod.hMainWindow, WM_WA_MPEG_EOF, 0, 0 );
+					return 0;
+				}
 			}
 			Sleep( 10 );
 		} else {
