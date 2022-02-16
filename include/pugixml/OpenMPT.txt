@@ -1,2 +1,2 @@
-Directory contents based on pugixml 1.12.
+Directory contents based on pugixml 1.12.1.
 The docs and scripts folders have been omitted.
