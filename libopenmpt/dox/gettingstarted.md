@@ -119,11 +119,13 @@ How to compile
 
             make CONFIG=clang
 
-     -  mingw-w64:
+     -  MinGW-w64:
 
-            make CONFIG=mingw64-win32    # for win32
-
-            make CONFIG=mingw64-win64    # for win64
+            make CONFIG=mingw-w64 \
+                 MINGW_FLAVOUR=[|-posix|-win32] \
+                 WINDOWS_ARCH=[x86|amd64] \
+                 WINDOWS_FAMILY=[|desktop-app|app|phone-app|pc-app] \
+                 WINDOWS_VERSION=[win95|win98|winme|winnt4|win2000|winxp|winxp64|winvista|win7|win8|win8.1|win10]
 
      -  emscripten (on Unix-like systems):
 

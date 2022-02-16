@@ -45,6 +45,11 @@ is just a high-level summary.
     `openmpt::ext::interactive3::set_current_tempo2()` (C++) and
     `openmpt_module_ext_interface_interactive3.set_current_tempo2()` (C) which
     allow setting non-integer tempo values. 
+ *  [**New**] New `Makefile` option `CONFIG=mingw-w64` which consolidates all
+    MinGW-w64 build configurations with the following options:
+    `MINGW_FLAVOUR=[|-posix|-win32]`, `WINDOWS_ARCH=[x86|amd64]`,
+    `WINDOWS_FAMILY=[|desktop-app|app|phone-app|pc-app]`, and
+    `WINDOWS_VERSION=[win95|win98|winme|winnt4|win2000|winxp|winxp64|winvista|win7|win8|win8.1|win10]`.
  *  [**New**] `Makefile` `CONFIG=djgpp` now supports `CPU=` option to build
     optimized for a particular CPU. See `build/make/config-djgpp.mk` for all
     available options. `FLAVOURED_DIR=1` places the CPU-specific optimized
@@ -55,6 +60,10 @@ is just a high-level summary.
     `CONFIG=standard` instead.
  *  [**Change**] `Makefile` `CONFIG=macosx` and `CONFIG=haiku` have been
     removed. The OS is auto-detected.
+ *  [**Change**] `Makefile` options `CONFIG=mingw64-win32`,
+    `CONFIG=mingw64-win64`, `CONFIG=mingw64-winrt-x86`, and
+    `CONFIG=mingw64-winrt-amd64` are deprecated. Please use `CONFIG=mingw-w64`
+    instead.
  *  [**Change**] `Makefile` `CONFIG=djgpp` option `USE_ALLEGRO42` now
     defaults to `1` and implies building a liballegro42 locally. This requires
     executing `build/download_externals.sh` before building to download the
