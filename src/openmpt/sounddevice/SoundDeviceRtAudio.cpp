@@ -122,16 +122,16 @@ struct RtAudio_v5_1_0_Shim<RtAudio, false>
 {
 
 	static constexpr const char *rtaudio_api_names[][2] = {
-		{"unspecified", "Unknown"},
-		{"alsa", "ALSA"},
-		{"pulse", "Pulse"},
-		{"oss", "OpenSoundSystem"},
-		{"jack", "Jack"},
-		{"core", "CoreAudio"},
-		{"wasapi", "WASAPI"},
-		{"asio", "ASIO"},
-		{"ds", "DirectSound"},
-		{"dummy", "Dummy"},
+		{"unspecified", "Unknown"        },
+		{"alsa",        "ALSA"           },
+		{"pulse",       "Pulse"          },
+		{"oss",         "OpenSoundSystem"},
+		{"jack",        "Jack"           },
+		{"core",        "CoreAudio"      },
+		{"wasapi",      "WASAPI"         },
+		{"asio",        "ASIO"           },
+		{"ds",          "DirectSound"    },
+		{"dummy",       "Dummy"          },
 	};
 
 	static constexpr typename RtAudio::Api rtaudio_all_apis[] = {

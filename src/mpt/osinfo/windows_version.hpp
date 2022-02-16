@@ -29,8 +29,7 @@ namespace windows {
 class Version {
 
 public:
-	enum Number : uint64
-	{
+	enum Number : uint64 {
 		WinNT4 = 0x0000000400000000ull,
 		Win2000 = 0x0000000500000000ull,
 		WinXP = 0x0000000500000001ull,

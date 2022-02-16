@@ -98,7 +98,7 @@ public:
 public:
 	MPT_CONSTEXPR20_FUN void set(base_type val) noexcept {
 		static_assert(std::numeric_limits<int_type>::is_integer);
-		MPT_MAYBE_CONSTANT_IF(MPT_IS_CONSTANT_EVALUATED20()) {
+		MPT_MAYBE_CONSTANT_IF (MPT_IS_CONSTANT_EVALUATED20()) {
 			if constexpr (endian == mpt::endian::big) {
 				typename std::make_unsigned<int_type>::type uval = val;
 				for (std::size_t i = 0; i < sizeof(base_type); ++i) {
@@ -110,8 +110,7 @@ public:
 					data[i] = static_cast<std::byte>((uval >> (8 * i)) & 0xffu);
 				}
 			}
-		}
-		else {
+		} else {
 			if constexpr (std::is_integral<base_type>::value && (mpt::endian::native == mpt::endian::little || mpt::endian::native == mpt::endian::big)) {
 				if constexpr (mpt::endian::native != endian) {
 					val = mpt::byteswap(val);
@@ -124,7 +123,7 @@ public:
 	}
 	MPT_CONSTEXPR20_FUN base_type get() const noexcept {
 		static_assert(std::numeric_limits<int_type>::is_integer);
-		MPT_MAYBE_CONSTANT_IF(MPT_IS_CONSTANT_EVALUATED20()) {
+		MPT_MAYBE_CONSTANT_IF (MPT_IS_CONSTANT_EVALUATED20()) {
 			if constexpr (endian == mpt::endian::big) {
 				typename std::make_unsigned<int_type>::type uval = 0;
 				for (std::size_t i = 0; i < sizeof(base_type); ++i) {
@@ -138,8 +137,7 @@ public:
 				}
 				return static_cast<base_type>(uval);
 			}
-		}
-		else {
+		} else {
 			if constexpr (std::is_integral<base_type>::value && (mpt::endian::native == mpt::endian::little || mpt::endian::native == mpt::endian::big)) {
 				base_type val = base_type();
 				std::memcpy(&val, data.data(), sizeof(val));

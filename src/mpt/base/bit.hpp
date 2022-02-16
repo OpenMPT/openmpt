@@ -120,16 +120,14 @@ constexpr bool endian_is_weird() noexcept {
 
 #if MPT_COMPILER_MSVC
 // same definition as VS2022 C++20 in order to be compatible with debugvis
-enum class endian
-{
+enum class endian {
 	little = 0,
 	big = 1,
 	weird = -1,
 	native = little,
 };
 #else // !MPT_COMPILER_MSVC
-enum class endian
-{
+enum class endian {
 	little = 0x78563412u,
 	big = 0x12345678u,
 	weird = 1u,
@@ -152,7 +150,9 @@ MPT_FORCEINLINE mpt::endian endian_probe() noexcept {
 	static_assert(sizeof(endian_probe_type) == 4);
 	constexpr endian_probe_type endian_probe_big = 0x12345678u;
 	constexpr endian_probe_type endian_probe_little = 0x78563412u;
-	const std::array<std::byte, sizeof(endian_probe_type)> probe{{std::byte{0x12}, std::byte{0x34}, std::byte{0x56}, std::byte{0x78}}};
+	const std::array<std::byte, sizeof(endian_probe_type)> probe{
+		{std::byte{0x12}, std::byte{0x34}, std::byte{0x56}, std::byte{0x78}}
+    };
 	const endian_probe_type test = mpt::bit_cast<endian_probe_type>(probe);
 	mpt::endian result = mpt::endian::native;
 	switch (test) {
@@ -392,28 +392,28 @@ using std::byteswap;
 
 constexpr inline uint16 byteswap_impl_constexpr16(uint16 x) noexcept {
 	return uint16(0)
-		| ((x >> 8) & 0x00FFu)
-		| ((x << 8) & 0xFF00u);
+		 | ((x >> 8) & 0x00FFu)
+		 | ((x << 8) & 0xFF00u);
 }
 
 constexpr inline uint32 byteswap_impl_constexpr32(uint32 x) noexcept {
 	return uint32(0)
-		| ((x & 0x000000FFu) << 24)
-		| ((x & 0x0000FF00u) << 8)
-		| ((x & 0x00FF0000u) >> 8)
-		| ((x & 0xFF000000u) >> 24);
+		 | ((x & 0x000000FFu) << 24)
+		 | ((x & 0x0000FF00u) << 8)
+		 | ((x & 0x00FF0000u) >> 8)
+		 | ((x & 0xFF000000u) >> 24);
 }
 
 constexpr inline uint64 byteswap_impl_constexpr64(uint64 x) noexcept {
 	return uint64(0)
-		| (((x >> 0) & 0xffull) << 56)
-		| (((x >> 8) & 0xffull) << 48)
-		| (((x >> 16) & 0xffull) << 40)
-		| (((x >> 24) & 0xffull) << 32)
-		| (((x >> 32) & 0xffull) << 24)
-		| (((x >> 40) & 0xffull) << 16)
-		| (((x >> 48) & 0xffull) << 8)
-		| (((x >> 56) & 0xffull) << 0);
+		 | (((x >> 0) & 0xffull) << 56)
+		 | (((x >> 8) & 0xffull) << 48)
+		 | (((x >> 16) & 0xffull) << 40)
+		 | (((x >> 24) & 0xffull) << 32)
+		 | (((x >> 32) & 0xffull) << 24)
+		 | (((x >> 40) & 0xffull) << 16)
+		 | (((x >> 48) & 0xffull) << 8)
+		 | (((x >> 56) & 0xffull) << 0);
 }
 
 #if MPT_COMPILER_GCC
@@ -438,55 +438,49 @@ constexpr inline uint64 byteswap_impl_constexpr64(uint64 x) noexcept {
 #endif
 
 MPT_CONSTEXPR20_FUN uint64 byteswap_impl(uint64 value) noexcept {
-	MPT_MAYBE_CONSTANT_IF(MPT_IS_CONSTANT_EVALUATED20()) {
+	MPT_MAYBE_CONSTANT_IF (MPT_IS_CONSTANT_EVALUATED20()) {
 		return byteswap_impl_constexpr64(value);
-	}
-	else {
+	} else {
 		return MPT_byteswap_impl64(value);
 	}
 }
 
 MPT_CONSTEXPR20_FUN uint32 byteswap_impl(uint32 value) noexcept {
-	MPT_MAYBE_CONSTANT_IF(MPT_IS_CONSTANT_EVALUATED20()) {
+	MPT_MAYBE_CONSTANT_IF (MPT_IS_CONSTANT_EVALUATED20()) {
 		return byteswap_impl_constexpr32(value);
-	}
-	else {
+	} else {
 		return MPT_byteswap_impl32(value);
 	}
 }
 
 MPT_CONSTEXPR20_FUN uint16 byteswap_impl(uint16 value) noexcept {
-	MPT_MAYBE_CONSTANT_IF(MPT_IS_CONSTANT_EVALUATED20()) {
+	MPT_MAYBE_CONSTANT_IF (MPT_IS_CONSTANT_EVALUATED20()) {
 		return byteswap_impl_constexpr16(value);
-	}
-	else {
+	} else {
 		return MPT_byteswap_impl16(value);
 	}
 }
 
 MPT_CONSTEXPR20_FUN int64 byteswap_impl(int64 value) noexcept {
-	MPT_MAYBE_CONSTANT_IF(MPT_IS_CONSTANT_EVALUATED20()) {
+	MPT_MAYBE_CONSTANT_IF (MPT_IS_CONSTANT_EVALUATED20()) {
 		return byteswap_impl_constexpr64(value);
-	}
-	else {
+	} else {
 		return MPT_byteswap_impl64(value);
 	}
 }
 
 MPT_CONSTEXPR20_FUN int32 byteswap_impl(int32 value) noexcept {
-	MPT_MAYBE_CONSTANT_IF(MPT_IS_CONSTANT_EVALUATED20()) {
+	MPT_MAYBE_CONSTANT_IF (MPT_IS_CONSTANT_EVALUATED20()) {
 		return byteswap_impl_constexpr32(value);
-	}
-	else {
+	} else {
 		return MPT_byteswap_impl32(value);
 	}
 }
 
 MPT_CONSTEXPR20_FUN int16 byteswap_impl(int16 value) noexcept {
-	MPT_MAYBE_CONSTANT_IF(MPT_IS_CONSTANT_EVALUATED20()) {
+	MPT_MAYBE_CONSTANT_IF (MPT_IS_CONSTANT_EVALUATED20()) {
 		return byteswap_impl_constexpr16(value);
-	}
-	else {
+	} else {
 		return MPT_byteswap_impl16(value);
 	}
 }

@@ -53,8 +53,7 @@ namespace crypto {
 
 class keystore {
 public:
-	enum class domain
-	{
+	enum class domain {
 		system = 1,
 		user = 2,
 	};
