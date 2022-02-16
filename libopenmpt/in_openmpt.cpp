@@ -113,8 +113,8 @@ static std::string StringEncode( const std::wstring &src, UINT codepage )
 		return std::string();
 	}
 	std::vector<CHAR> encoded_string( required_size );
-	WideCharToMultiByte( codepage, 0, src.c_str(), -1, &encoded_string[0], encoded_string.size(), NULL, NULL );
-	return &encoded_string[0];
+	WideCharToMultiByte( codepage, 0, src.c_str(), -1, encoded_string.data(), encoded_string.size(), NULL, NULL );
+	return encoded_string.data();
 }
 
 static std::wstring StringDecode( const std::string & src, UINT codepage )
@@ -125,8 +125,8 @@ static std::wstring StringDecode( const std::string & src, UINT codepage )
 		return std::wstring();
 	}
 	std::vector<WCHAR> decoded_string( required_size );
-	MultiByteToWideChar( codepage, 0, src.c_str(), -1, &decoded_string[0], decoded_string.size() );
-	return &decoded_string[0];
+	MultiByteToWideChar( codepage, 0, src.c_str(), -1, decoded_string.data(), decoded_string.size() );
+	return decoded_string.data();
 }
 
 #if defined(UNICODE)
@@ -283,7 +283,7 @@ static void about( HWND hwndParent ) {
 static void init() {
 	if ( !self ) {
 		self = new self_winamp_t();
-		inmod.FileExtensions = &(self->filetypes_string[0]);
+		inmod.FileExtensions = self->filetypes_string.data();
 	}
 }
 
@@ -472,20 +472,20 @@ static DWORD WINAPI DecodeThread( LPVOID ) {
 				int frames = 0;
 				switch ( self->channels ) {
 				case 1:
-					frames = self->mod->read( self->samplerate, WINAMP_BUFFER_SIZE_FRAMES, (&(self->buffer[0]))+0*WINAMP_BUFFER_SIZE_FRAMES );
+					frames = self->mod->read( self->samplerate, WINAMP_BUFFER_SIZE_FRAMES, self->buffer.data() + 0*WINAMP_BUFFER_SIZE_FRAMES );
 					for ( int frame = 0; frame < frames; frame++ ) {
 						self->interleaved_buffer[frame*1+0] = self->buffer[0*WINAMP_BUFFER_SIZE_FRAMES+frame];
 					}
 					break;
 				case 2:
-					frames = self->mod->read( self->samplerate, WINAMP_BUFFER_SIZE_FRAMES, (&(self->buffer[0]))+0*WINAMP_BUFFER_SIZE_FRAMES, (&(self->buffer[0]))+1*WINAMP_BUFFER_SIZE_FRAMES );
+					frames = self->mod->read( self->samplerate, WINAMP_BUFFER_SIZE_FRAMES, self->buffer.data() + 0*WINAMP_BUFFER_SIZE_FRAMES, self->buffer.data() + 1*WINAMP_BUFFER_SIZE_FRAMES );
 					for ( int frame = 0; frame < frames; frame++ ) {
 						self->interleaved_buffer[frame*2+0] = self->buffer[0*WINAMP_BUFFER_SIZE_FRAMES+frame];
 						self->interleaved_buffer[frame*2+1] = self->buffer[1*WINAMP_BUFFER_SIZE_FRAMES+frame];
 					}
 					break;
 				case 4:
-					frames = self->mod->read( self->samplerate, WINAMP_BUFFER_SIZE_FRAMES, (&(self->buffer[0]))+0*WINAMP_BUFFER_SIZE_FRAMES, (&(self->buffer[0]))+1*WINAMP_BUFFER_SIZE_FRAMES, (&(self->buffer[0]))+2*WINAMP_BUFFER_SIZE_FRAMES, (&(self->buffer[0]))+3*WINAMP_BUFFER_SIZE_FRAMES );
+					frames = self->mod->read( self->samplerate, WINAMP_BUFFER_SIZE_FRAMES, self->buffer.data() + 0*WINAMP_BUFFER_SIZE_FRAMES, self->buffer.data() + 1*WINAMP_BUFFER_SIZE_FRAMES, self->buffer.data() + 2*WINAMP_BUFFER_SIZE_FRAMES, self->buffer.data() + 3*WINAMP_BUFFER_SIZE_FRAMES );
 					for ( int frame = 0; frame < frames; frame++ ) {
 						self->interleaved_buffer[frame*4+0] = self->buffer[0*WINAMP_BUFFER_SIZE_FRAMES+frame];
 						self->interleaved_buffer[frame*4+1] = self->buffer[1*WINAMP_BUFFER_SIZE_FRAMES+frame];
@@ -499,13 +499,13 @@ static DWORD WINAPI DecodeThread( LPVOID ) {
 				} else {
 					self->decode_position_frames += frames;
 					std::int64_t decode_pos_ms = (self->decode_position_frames * 1000 / self->samplerate );
-					inmod.SAAddPCMData( &( self->interleaved_buffer[0] ), self->channels, BPS, (int)decode_pos_ms );
-					inmod.VSAAddPCMData( &( self->interleaved_buffer[0] ), self->channels, BPS, (int)decode_pos_ms );
+					inmod.SAAddPCMData( self->interleaved_buffer.data(), self->channels, BPS, (int)decode_pos_ms );
+					inmod.VSAAddPCMData( self->interleaved_buffer.data(), self->channels, BPS, (int)decode_pos_ms );
 					if ( dsp_active ) {
-						frames = inmod.dsp_dosamples( &( self->interleaved_buffer[0] ), frames, BPS, self->channels, self->samplerate );
+						frames = inmod.dsp_dosamples( self->interleaved_buffer.data(), frames, BPS, self->channels, self->samplerate );
 					}
 					int bytes = frames * self->channels * sizeof( signed short );
-					inmod.outMod->Write( (char*)&( self->interleaved_buffer[0] ), bytes );
+					inmod.outMod->Write( (char*)self->interleaved_buffer.data(), bytes );
 				}
 			} else {
 				Sleep( 10 );
