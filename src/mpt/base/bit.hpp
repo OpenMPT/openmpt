@@ -112,8 +112,7 @@ constexpr bool endian_is_weird() noexcept {
 
 #endif // !MPT_COMPILER_GENERIC
 
-enum class endian
-{
+enum class endian {
 	little = 0x78563412u,
 	big = 0x12345678u,
 	weird = 1u,
@@ -135,7 +134,9 @@ MPT_FORCEINLINE mpt::endian endian_probe() noexcept {
 	static_assert(sizeof(endian_probe_type) == 4);
 	constexpr endian_probe_type endian_probe_big = 0x12345678u;
 	constexpr endian_probe_type endian_probe_little = 0x78563412u;
-	const std::array<std::byte, sizeof(endian_probe_type)> probe{{std::byte{0x12}, std::byte{0x34}, std::byte{0x56}, std::byte{0x78}}};
+	const std::array<std::byte, sizeof(endian_probe_type)> probe{
+		{std::byte{0x12}, std::byte{0x34}, std::byte{0x56}, std::byte{0x78}}
+    };
 	const endian_probe_type test = mpt::bit_cast<endian_probe_type>(probe);
 	mpt::endian result = mpt::endian::native;
 	switch (test) {

@@ -43,8 +43,7 @@ public:
 	typedef void * (*func_ptr)(); // pointer to function returning void *
 	static_assert(sizeof(func_ptr) == sizeof(void *));
 
-	enum class path_search
-	{
+	enum class path_search {
 		invalid,
 		unsafe,
 		default_,
@@ -53,14 +52,12 @@ public:
 		none,
 	};
 
-	enum class path_prefix
-	{
+	enum class path_prefix {
 		none,
 		default_,
 	};
 
-	enum class path_suffix
-	{
+	enum class path_suffix {
 		none,
 		default_,
 	};
