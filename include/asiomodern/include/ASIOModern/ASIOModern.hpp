@@ -163,7 +163,10 @@ private:
 private:
 	static inline std::mutex                                      s_AllocationMutex;
 	static inline std::array<bool, MaxInstances>                  s_Allocation                = detail::init_array<bool, MaxInstances>(false);
-	static inline std::array<CallbacksWrapperState, MaxInstances> s_AsioCallbackWrapperStates = detail::init_array<CallbacksWrapperState, MaxInstances>(CallbacksWrapperState{{nullptr, nullptr, nullptr, nullptr}, nullptr});
+	static inline std::array<CallbacksWrapperState, MaxInstances> s_AsioCallbackWrapperStates = detail::init_array<CallbacksWrapperState, MaxInstances>(CallbacksWrapperState{
+		{nullptr, nullptr, nullptr, nullptr},
+        nullptr
+    });
 	static constexpr inline std::array<Callbacks, MaxInstances>   s_AsioCallbacks             = construct_callbacks_array<std::array<CallbacksWrapperState, MaxInstances>, &s_AsioCallbackWrapperStates>(std::make_index_sequence<MaxInstances>());
 
 private:

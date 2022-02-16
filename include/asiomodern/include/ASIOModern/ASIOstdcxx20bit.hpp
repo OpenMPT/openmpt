@@ -28,8 +28,7 @@ typename std::enable_if<(sizeof(To) == sizeof(From)) && std::is_trivially_copyab
 	std::memcpy(&dst, &src, sizeof(To));
 	return dst;
 }
-enum class endian
-{
+enum class endian {
 #if ASIO_SYSTEM_WINDOWS
 	little = 0,
 	big    = 1,
