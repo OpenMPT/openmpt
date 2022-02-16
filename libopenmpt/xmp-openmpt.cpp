@@ -228,8 +228,8 @@ static std::string StringEncode( const std::wstring &src, UINT codepage )
 		return std::string();
 	}
 	std::vector<CHAR> encoded_string( required_size );
-	WideCharToMultiByte( codepage, 0, src.c_str(), -1, &encoded_string[0], encoded_string.size(), nullptr, nullptr);
-	return &encoded_string[0];
+	WideCharToMultiByte( codepage, 0, src.c_str(), -1, encoded_string.data(), encoded_string.size(), nullptr, nullptr);
+	return encoded_string.data();
 }
 
 static std::wstring StringDecode( const std::string & src, UINT codepage )
@@ -240,8 +240,8 @@ static std::wstring StringDecode( const std::string & src, UINT codepage )
 		return std::wstring();
 	}
 	std::vector<WCHAR> decoded_string( required_size );
-	MultiByteToWideChar( codepage, 0, src.c_str(), -1, &decoded_string[0], decoded_string.size() );
-	return &decoded_string[0];
+	MultiByteToWideChar( codepage, 0, src.c_str(), -1, decoded_string.data(), decoded_string.size() );
+	return decoded_string.data();
 }
 
 #if defined(UNICODE)
