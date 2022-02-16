@@ -85,7 +85,7 @@ constexpr bool operator>=(version_info const a, version_info const b) noexcept {
 
 constexpr inline version_info Version = {
 	{MPT_VERSION_MAJOR, MPT_VERSION_MINOR, MPT_VERSION_PATCH},
-    MPT_VERSION_BUILD
+	MPT_VERSION_BUILD
 };
 
 
