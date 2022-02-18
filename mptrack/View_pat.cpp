@@ -2935,6 +2935,16 @@ int CViewPattern::GetDefaultVolume(const ModCommand &m, ModCommand::INSTR lastIn
 }
 
 
+int CViewPattern::GetBaseNote() const
+{
+	const CModDoc *modDoc = GetDocument();
+	INSTRUMENTINDEX instr = static_cast<INSTRUMENTINDEX>(GetCurrentInstrument());
+	if(!instr && !IsLiveRecord())
+		instr = GetCursorCommand().instr;
+	return modDoc->GetBaseNote(instr);
+}
+
+
 void CViewPattern::OnDropSelection()
 {
 	CModDoc *pModDoc;
@@ -4138,7 +4148,6 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		return kcNull;
 
 	CSoundFile &sndFile = pModDoc->GetSoundFile();
-	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 
 	switch(wParam)
 	{
@@ -4497,22 +4506,22 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 	if(wParam >= kcVPStartNotes && wParam <= kcVPEndNotes)
 	{
 		if(enterNote)
-			TempEnterNote(static_cast<ModCommand::NOTE>(wParam - kcVPStartNotes + pModDoc->GetBaseNote(GetCurrentInstrument())));
+			TempEnterNote(static_cast<ModCommand::NOTE>(wParam - kcVPStartNotes + GetBaseNote()));
 		return wParam;
 	} else if(wParam >= kcVPStartChords && wParam <= kcVPEndChords)
 	{
 		if(enterNote)
-			TempEnterChord(static_cast<ModCommand::NOTE>(wParam - kcVPStartChords + pModDoc->GetBaseNote(GetCurrentInstrument())));
+			TempEnterChord(static_cast<ModCommand::NOTE>(wParam - kcVPStartChords + GetBaseNote()));
 		return wParam;
 	}
 
 	if(wParam >= kcVPStartNoteStops && wParam <= kcVPEndNoteStops)
 	{
-		TempStopNote(static_cast<ModCommand::NOTE>(wParam - kcVPStartNoteStops + pModDoc->GetBaseNote(GetCurrentInstrument())));
+		TempStopNote(static_cast<ModCommand::NOTE>(wParam - kcVPStartNoteStops + GetBaseNote()));
 		return wParam;
 	} else if(wParam >= kcVPStartChordStops && wParam <= kcVPEndChordStops)
 	{
-		TempStopChord(static_cast<ModCommand::NOTE>(wParam - kcVPStartChordStops + pModDoc->GetBaseNote(GetCurrentInstrument())));
+		TempStopChord(static_cast<ModCommand::NOTE>(wParam - kcVPStartChordStops + GetBaseNote()));
 		return wParam;
 	}
 
@@ -5476,7 +5485,7 @@ void CViewPattern::PreviewNote(ROWINDEX row, CHANNELINDEX channel)
 int CViewPattern::ConstructChord(int note, ModCommand::NOTE (&outNotes)[MPTChord::notesPerChord], ModCommand::NOTE baseNote)
 {
 	const MPTChords &chords = TrackerSettings::GetChords();
-	UINT baseNoteOffset = GetDocument()->GetBaseNote(GetCurrentInstrument());
+	UINT baseNoteOffset = GetBaseNote();
 	UINT chordNum = note - baseNoteOffset;
 
 	if(chordNum >= chords.size())
