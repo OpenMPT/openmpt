@@ -1485,7 +1485,6 @@ static constexpr MsgBoxHidableMessage HidableMessages[] =
 {
 	{ _T("Note: First two bytes of oneshot samples are silenced for ProTracker compatibility."), 1, true },
 	{ _T("Hint: To create IT-files without MPT-specific extensions included, try compatibility export from File-menu."), 1 << 1, true },
-	{ _T("Press OK to apply signed/unsigned conversion\n (note: this often significantly increases volume level)"), 1 << 2, false },
 	{ _T("Hint: To create XM-files without MPT-specific extensions included, try compatibility export from File-menu."), 1 << 3, true },
 	{ _T("Warning: The exported file will not contain any of MPT's file format hacks."), 1 << 4, true },
 };

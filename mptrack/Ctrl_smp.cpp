@@ -2714,9 +2714,6 @@ void CCtrlSamples::OnSignUnSign()
 {
 	if(!m_sndFile.GetSample(m_nSample).HasSampleData()) return;
 
-	if(m_modDoc.IsNotePlaying(0, m_nSample, 0))
-		MsgBoxHidable(ConfirmSignUnsignWhenPlaying);
-
 	BeginWaitCursor();
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
 	SampleSelectionPoints selection = GetSelectionPoints();
