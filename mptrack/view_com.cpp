@@ -189,7 +189,7 @@ LRESULT CViewComments::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 		return kcNull;
 
 	auto modDoc = GetDocument();
-	const auto noteOffset = wParam + NOTE_MIN + CMainFrame::GetMainFrame()->GetBaseOctave() * 12;
+	const auto noteOffset = wParam + modDoc->GetBaseNote(m_noteInstr);
 	const auto lastInstr = m_noteInstr;
 	if(wParam >= kcCommentsStartNotes && wParam <= kcCommentsEndNotes)
 	{

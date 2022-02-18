@@ -533,9 +533,8 @@ LRESULT CAbstractVstEditor::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 	{
 		if(ValidateCurrentInstrument())
 		{
-			CModDoc* pModDoc = m_VstPlugin.GetModDoc();
-			CMainFrame* pMainFrm = CMainFrame::GetMainFrame();
-			const ModCommand::NOTE note = static_cast<ModCommand::NOTE>(wParam - kcVSTGUIStartNotes + NOTE_MIN + pMainFrm->GetBaseOctave() * 12);
+			CModDoc *pModDoc = m_VstPlugin.GetModDoc();
+			const ModCommand::NOTE note = static_cast<ModCommand::NOTE>(wParam - kcVSTGUIStartNotes + pModDoc->GetBaseNote(m_nInstrument));
 			if(ModCommand::IsNote(note))
 			{
 				pModDoc->PlayNote(PlayNoteParam(note).Instrument(m_nInstrument), &m_noteChannel);
@@ -547,9 +546,8 @@ LRESULT CAbstractVstEditor::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 	{
 		if(ValidateCurrentInstrument())
 		{
-			CModDoc* pModDoc = m_VstPlugin.GetModDoc();
-			CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-			const ModCommand::NOTE note = static_cast<ModCommand::NOTE>(wParam - kcVSTGUIStartNoteStops + NOTE_MIN + pMainFrm->GetBaseOctave() * 12);
+			CModDoc *pModDoc = m_VstPlugin.GetModDoc();
+			const ModCommand::NOTE note = static_cast<ModCommand::NOTE>(wParam - kcVSTGUIStartNoteStops + pModDoc->GetBaseNote(m_nInstrument));
 			if(ModCommand::IsNote(note))
 			{
 				pModDoc->NoteOff(note, false, m_nInstrument, m_noteChannel[note - NOTE_MIN]);

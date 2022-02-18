@@ -4011,7 +4011,13 @@ LRESULT CModTree::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		stop = (wParam >= kcTreeViewStartNoteStops && wParam <= kcTreeViewEndNoteStops) && !IsSampleBrowser();
 	if(start || stop)
 	{
-		note = static_cast<ModCommand::NOTE>(wParam - (start ? kcTreeViewStartNotes : kcTreeViewStartNoteStops) + 1 + pMainFrm->GetBaseOctave() * 12);
+		const ModItem modItem = GetModItem(GetSelectedItem());
+		uint32 modItemID = modItem.val1;
+		CModDoc *modDoc = m_docInfo.count(m_selectedDoc) ? m_selectedDoc : nullptr;
+		int baseNote = NOTE_MIN + pMainFrm->GetBaseOctave() * 12;
+		if(modDoc && modItem.type == MODITEM_INSTRUMENT)
+			baseNote = modDoc->GetBaseNote(static_cast<INSTRUMENTINDEX>(modItem.val1));
+		note = static_cast<ModCommand::NOTE>(wParam - (start ? kcTreeViewStartNotes : kcTreeViewStartNoteStops) + baseNote);
 	} else if(wParam == kcTreeViewStopPreview)
 	{
 		note = NOTE_NOTECUT;

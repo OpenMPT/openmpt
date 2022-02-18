@@ -1343,4 +1343,11 @@ int CModDoc::GetInstrumentGroupSize(INSTRUMENTINDEX instr) const
 }
 
 
+int CModDoc::GetBaseNote(INSTRUMENTINDEX instr) const
+{
+	// This may look a bit strange (using -12 and -4 instead of just -5 in the second part) but this is to keep custom tunings centered around middle-C on the keyboard.
+	return NOTE_MIDDLEC - 12 + (CMainFrame::GetMainFrame()->GetBaseOctave() - 4) * GetInstrumentGroupSize(instr);
+}
+
+
 OPENMPT_NAMESPACE_END

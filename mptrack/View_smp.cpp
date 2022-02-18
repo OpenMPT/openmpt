@@ -3711,10 +3711,9 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcNoteCut:			PlayNote(NOTE_NOTECUT); return wParam;
 	}
 
-	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if(wParam >= kcSampStartNotes && wParam <= kcSampEndNotes)
 	{
-		const ModCommand::NOTE note = static_cast<ModCommand::NOTE>(wParam - kcSampStartNotes + NOTE_MIN + pMainFrm->GetBaseOctave() * 12);
+		const ModCommand::NOTE note = static_cast<ModCommand::NOTE>(wParam - kcSampStartNotes + pModDoc->GetBaseNote(0));
 		if(ModCommand::IsNote(note))
 		{
 			switch(TrackerSettings::Instance().sampleEditorKeyBehaviour)
@@ -3733,7 +3732,7 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		}
 	} else if(wParam >= kcSampStartNoteStops && wParam <= kcSampEndNoteStops)
 	{
-		const ModCommand::NOTE note = static_cast<ModCommand::NOTE>(wParam - kcSampStartNoteStops + NOTE_MIN + pMainFrm->GetBaseOctave() * 12);
+		const ModCommand::NOTE note = static_cast<ModCommand::NOTE>(wParam - kcSampStartNoteStops + pModDoc->GetBaseNote(0));
 		if(ModCommand::IsNote(note))
 		{
 			switch(TrackerSettings::Instance().sampleEditorKeyBehaviour)

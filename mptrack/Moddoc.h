@@ -401,6 +401,7 @@ protected:
 	SAMPLEINDEX GetSampleIndex(const ModCommand &m, ModCommand::INSTR lastInstr = 0) const;
 	// Get group (octave) size from given instrument (or sample in sample mode)
 	int GetInstrumentGroupSize(INSTRUMENTINDEX instr) const;
+	int GetBaseNote(INSTRUMENTINDEX instr) const;
 
 	// Convert a linear volume property to decibels
 	static CString LinearToDecibels(double value, double valueAtZeroDB);

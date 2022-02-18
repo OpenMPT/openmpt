@@ -4497,22 +4497,22 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 	if(wParam >= kcVPStartNotes && wParam <= kcVPEndNotes)
 	{
 		if(enterNote)
-			TempEnterNote(static_cast<ModCommand::NOTE>(wParam - kcVPStartNotes + 1 + pMainFrm->GetBaseOctave() * 12));
+			TempEnterNote(static_cast<ModCommand::NOTE>(wParam - kcVPStartNotes + pModDoc->GetBaseNote(GetCurrentInstrument())));
 		return wParam;
 	} else if(wParam >= kcVPStartChords && wParam <= kcVPEndChords)
 	{
 		if(enterNote)
-			TempEnterChord(static_cast<ModCommand::NOTE>(wParam - kcVPStartChords + 1 + pMainFrm->GetBaseOctave() * 12));
+			TempEnterChord(static_cast<ModCommand::NOTE>(wParam - kcVPStartChords + pModDoc->GetBaseNote(GetCurrentInstrument())));
 		return wParam;
 	}
 
 	if(wParam >= kcVPStartNoteStops && wParam <= kcVPEndNoteStops)
 	{
-		TempStopNote(static_cast<ModCommand::NOTE>(wParam - kcVPStartNoteStops + 1 + pMainFrm->GetBaseOctave() * 12));
+		TempStopNote(static_cast<ModCommand::NOTE>(wParam - kcVPStartNoteStops + pModDoc->GetBaseNote(GetCurrentInstrument())));
 		return wParam;
 	} else if(wParam >= kcVPStartChordStops && wParam <= kcVPEndChordStops)
 	{
-		TempStopChord(static_cast<ModCommand::NOTE>(wParam - kcVPStartChordStops + 1 + pMainFrm->GetBaseOctave() * 12));
+		TempStopChord(static_cast<ModCommand::NOTE>(wParam - kcVPStartChordStops + pModDoc->GetBaseNote(GetCurrentInstrument())));
 		return wParam;
 	}
 
@@ -5476,8 +5476,8 @@ void CViewPattern::PreviewNote(ROWINDEX row, CHANNELINDEX channel)
 int CViewPattern::ConstructChord(int note, ModCommand::NOTE (&outNotes)[MPTChord::notesPerChord], ModCommand::NOTE baseNote)
 {
 	const MPTChords &chords = TrackerSettings::GetChords();
-	UINT baseOctave = CMainFrame::GetMainFrame()->GetBaseOctave();
-	UINT chordNum = note - baseOctave * 12 - NOTE_MIN;
+	UINT baseNoteOffset = GetDocument()->GetBaseNote(GetCurrentInstrument());
+	UINT chordNum = note - baseNoteOffset;
 
 	if(chordNum >= chords.size())
 	{
@@ -5495,7 +5495,7 @@ int CViewPattern::ConstructChord(int note, ModCommand::NOTE (&outNotes)[MPTChord
 	} else
 	{
 		// Default mode: Use base key
-		key = static_cast<ModCommand::NOTE>(chord.key + baseOctave * 12 + NOTE_MIN);
+		key = static_cast<ModCommand::NOTE>(chord.key + baseNoteOffset);
 	}
 	if(!ModCommand::IsNote(key))
 	{
