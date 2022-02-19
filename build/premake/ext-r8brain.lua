@@ -21,6 +21,7 @@
    "../../include/r8brain/CDSPFracInterpolator.h",
    "../../include/r8brain/CDSPHBDownsampler.h",
    "../../include/r8brain/CDSPHBUpsampler.h",
+   "../../include/r8brain/CDSPHBUpsampler.inc",
    "../../include/r8brain/CDSPProcessor.h",
    "../../include/r8brain/CDSPRealFFT.h",
    "../../include/r8brain/CDSPResampler.h",
