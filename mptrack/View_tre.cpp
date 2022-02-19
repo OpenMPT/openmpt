@@ -4014,10 +4014,10 @@ LRESULT CModTree::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		const ModItem modItem = GetModItem(GetSelectedItem());
 		uint32 modItemID = modItem.val1;
 		CModDoc *modDoc = m_docInfo.count(m_selectedDoc) ? m_selectedDoc : nullptr;
-		int baseNote = NOTE_MIN + pMainFrm->GetBaseOctave() * 12;
+		const int noteOffset = wParam - (start ? kcTreeViewStartNotes : kcTreeViewStartNoteStops);
+		note = static_cast<ModCommand::NOTE>(Clamp(NOTE_MIN + pMainFrm->GetBaseOctave() * 12 + noteOffset, NOTE_MIN, NOTE_MAX));
 		if(modDoc && modItem.type == MODITEM_INSTRUMENT)
-			baseNote = modDoc->GetBaseNote(static_cast<INSTRUMENTINDEX>(modItem.val1));
-		note = static_cast<ModCommand::NOTE>(wParam - (start ? kcTreeViewStartNotes : kcTreeViewStartNoteStops) + baseNote);
+			note = modDoc->GetNoteWithBaseOctave(noteOffset, static_cast<INSTRUMENTINDEX>(modItem.val1));
 	} else if(wParam == kcTreeViewStopPreview)
 	{
 		note = NOTE_NOTECUT;

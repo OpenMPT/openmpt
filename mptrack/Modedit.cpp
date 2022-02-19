@@ -1350,4 +1350,10 @@ int CModDoc::GetBaseNote(INSTRUMENTINDEX instr) const
 }
 
 
+ModCommand::NOTE CModDoc::GetNoteWithBaseOctave(int noteOffset, INSTRUMENTINDEX instr) const
+{
+	return static_cast<ModCommand::NOTE>(Clamp(GetBaseNote(instr) + noteOffset, NOTE_MIN, NOTE_MAX));
+}
+
+
 OPENMPT_NAMESPACE_END

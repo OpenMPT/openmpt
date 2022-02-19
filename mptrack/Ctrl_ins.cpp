@@ -572,7 +572,7 @@ LRESULT CNoteMapWnd::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		if(m_bIns && ((key >= '0' && key <= '9') || (key == ' ')))
 			HandleChar(key);
 		else
-			EnterNote(static_cast<uint32>(wParam - kcInsNoteMapStartNotes + m_modDoc.GetBaseNote(m_nInstrument)));
+			EnterNote(m_modDoc.GetNoteWithBaseOctave(wParam - kcInsNoteMapStartNotes, m_nInstrument));
 
 		return wParam;
 	}
