@@ -193,7 +193,7 @@ LRESULT CViewComments::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 	{
 		const auto lastInstr = m_noteInstr;
 		m_noteInstr = (m_nListId == IDC_LIST_SAMPLES) ? INSTRUMENTINDEX_INVALID : static_cast<INSTRUMENTINDEX>(item);
-		const auto note = modDoc->GetNoteWithBaseOctave(wParam - kcCommentsStartNotes, m_noteInstr);
+		const auto note = modDoc->GetNoteWithBaseOctave(static_cast<int>(wParam - kcCommentsStartNotes), m_noteInstr);
 		PlayNoteParam params(note);
 		if(m_nListId == IDC_LIST_SAMPLES)
 			params.Sample(static_cast<SAMPLEINDEX>(item));
@@ -208,7 +208,7 @@ LRESULT CViewComments::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 		return wParam;
 	} else if(wParam >= kcCommentsStartNoteStops && wParam <= kcCommentsEndNoteStops)
 	{
-		const auto note = modDoc->GetNoteWithBaseOctave(wParam - kcCommentsStartNoteStops, m_noteInstr);
+		const auto note = modDoc->GetNoteWithBaseOctave(static_cast<int>(wParam - kcCommentsStartNoteStops), m_noteInstr);
 		modDoc->NoteOff(note, false, m_noteInstr, m_noteChannel);
 		return wParam;
 	} else if(wParam == kcToggleSmpInsList)

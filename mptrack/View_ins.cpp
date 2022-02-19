@@ -2336,12 +2336,12 @@ LRESULT CViewInstrument::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 	}
 	if(wParam >= kcInstrumentStartNotes && wParam <= kcInstrumentEndNotes)
 	{
-		PlayNote(pModDoc->GetNoteWithBaseOctave(wParam - kcInstrumentStartNotes, m_nInstrument));
+		PlayNote(pModDoc->GetNoteWithBaseOctave(static_cast<int>(wParam - kcInstrumentStartNotes), m_nInstrument));
 		return wParam;
 	}
 	if(wParam >= kcInstrumentStartNoteStops && wParam <= kcInstrumentEndNoteStops)
 	{
-		ModCommand::NOTE note = pModDoc->GetNoteWithBaseOctave(wParam - kcInstrumentStartNoteStops, m_nInstrument);
+		ModCommand::NOTE note = pModDoc->GetNoteWithBaseOctave(static_cast<int>(wParam - kcInstrumentStartNoteStops), m_nInstrument);
 		if(ModCommand::IsNote(note))
 		{
 			m_baPlayingNote[note] = false;

@@ -3713,7 +3713,7 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 
 	if(wParam >= kcSampStartNotes && wParam <= kcSampEndNotes)
 	{
-		const ModCommand::NOTE note = pModDoc->GetNoteWithBaseOctave(wParam - kcSampStartNotes, 0);
+		const ModCommand::NOTE note = pModDoc->GetNoteWithBaseOctave(static_cast<int>(wParam - kcSampStartNotes), 0);
 		if(ModCommand::IsNote(note))
 		{
 			switch(TrackerSettings::Instance().sampleEditorKeyBehaviour)
@@ -3732,7 +3732,7 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		}
 	} else if(wParam >= kcSampStartNoteStops && wParam <= kcSampEndNoteStops)
 	{
-		const ModCommand::NOTE note = pModDoc->GetNoteWithBaseOctave(wParam - kcSampStartNoteStops, 0);
+		const ModCommand::NOTE note = pModDoc->GetNoteWithBaseOctave(static_cast<int>(wParam - kcSampStartNoteStops), 0);
 		if(ModCommand::IsNote(note))
 		{
 			switch(TrackerSettings::Instance().sampleEditorKeyBehaviour)

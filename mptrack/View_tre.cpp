@@ -4012,9 +4012,8 @@ LRESULT CModTree::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 	if(start || stop)
 	{
 		const ModItem modItem = GetModItem(GetSelectedItem());
-		uint32 modItemID = modItem.val1;
 		CModDoc *modDoc = m_docInfo.count(m_selectedDoc) ? m_selectedDoc : nullptr;
-		const int noteOffset = wParam - (start ? kcTreeViewStartNotes : kcTreeViewStartNoteStops);
+		const int noteOffset = static_cast<int>(wParam - (start ? kcTreeViewStartNotes : kcTreeViewStartNoteStops));
 		note = static_cast<ModCommand::NOTE>(Clamp(NOTE_MIN + pMainFrm->GetBaseOctave() * 12 + noteOffset, NOTE_MIN, NOTE_MAX));
 		if(modDoc && modItem.type == MODITEM_INSTRUMENT)
 			note = modDoc->GetNoteWithBaseOctave(noteOffset, static_cast<INSTRUMENTINDEX>(modItem.val1));
