@@ -487,10 +487,10 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				break;
 
 			case CMD_S3MCMDEX:
-				if(!chn.rowCommand.param && (GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)))
-					chn.rowCommand.param = chn.nOldCmdEx;
+				if(!pChn[nChn].rowCommand.param && (GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT)))
+					pChn[nChn].rowCommand.param = pChn[nChn].nOldCmdEx;
 				else
-					chn.nOldCmdEx = static_cast<ModCommand::PARAM>(chn.rowCommand.param);
+					pChn[nChn].nOldCmdEx = static_cast<ModCommand::PARAM>(pChn[nChn].rowCommand.param);
 				if((p->param & 0xF0) == 0x60)
 				{
 					// Fine Pattern Delay
