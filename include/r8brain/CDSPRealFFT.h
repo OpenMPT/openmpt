@@ -11,7 +11,7 @@
  * minimizes time necessary to initialize the FFT object of the required
  * length.
  *
- * r8brain-free-src Copyright (c) 2013-2021 Aleksey Vaneev
+ * r8brain-free-src Copyright (c) 2013-2022 Aleksey Vaneev
  * See the "LICENSE" file for license.
  */
 
@@ -242,7 +242,10 @@ public:
 
 		const double* const ip = aip;
 		double* const op = aop;
+
+		#if !R8B_IPP
 		double t;
+		#endif // !R8B_IPP
 
 	#endif // R8B_FLOATFFT
 
@@ -289,16 +292,84 @@ public:
 
 	#else // R8B_FLOATFFT
 
-		const double* const ip = aip;
-		double* const op = aop;
+		const double* ip = aip;
+		double* op = aop;
 
 	#endif // R8B_FLOATFFT
 
-	#if R8B_IPP
+	// SIMD implementations assume that pointers are address-aligned.
 
-		ippsMul_64f_I( (const Ipp64f*) ip, (Ipp64f*) op, Len );
+	#if !R8B_FLOATFFT && defined( R8B_SSE2 )
 
-	#else // R8B_IPP
+		int c8 = Len >> 3;
+
+		while( c8 != 0 )
+		{
+			const __m128d iv1 = _mm_load_pd( ip );
+			const __m128d iv2 = _mm_load_pd( ip + 2 );
+			const __m128d ov1 = _mm_load_pd( op );
+			const __m128d ov2 = _mm_load_pd( op + 2 );
+			_mm_store_pd( op, _mm_mul_pd( iv1, ov1 ));
+			_mm_store_pd( op + 2, _mm_mul_pd( iv2, ov2 ));
+
+			const __m128d iv3 = _mm_load_pd( ip + 4 );
+			const __m128d ov3 = _mm_load_pd( op + 4 );
+			const __m128d iv4 = _mm_load_pd( ip + 6 );
+			const __m128d ov4 = _mm_load_pd( op + 6 );
+			_mm_store_pd( op + 4, _mm_mul_pd( iv3, ov3 ));
+			_mm_store_pd( op + 6, _mm_mul_pd( iv4, ov4 ));
+
+			ip += 8;
+			op += 8;
+			c8--;
+		}
+
+		int c = Len & 7;
+
+		while( c != 0 )
+		{
+			*op *= *ip;
+			ip++;
+			op++;
+			c--;
+		}
+
+	#elif !R8B_FLOATFFT && defined( R8B_NEON )
+
+		int c8 = Len >> 3;
+
+		while( c8 != 0 )
+		{
+			const float64x2_t iv1 = vld1q_f64( ip );
+			const float64x2_t iv2 = vld1q_f64( ip + 2 );
+			const float64x2_t ov1 = vld1q_f64( op );
+			const float64x2_t ov2 = vld1q_f64( op + 2 );
+			vst1q_f64( op, vmulq_f64( iv1, ov1 ));
+			vst1q_f64( op + 2, vmulq_f64( iv2, ov2 ));
+
+			const float64x2_t iv3 = vld1q_f64( ip + 4 );
+			const float64x2_t iv4 = vld1q_f64( ip + 6 );
+			const float64x2_t ov3 = vld1q_f64( op + 4 );
+			const float64x2_t ov4 = vld1q_f64( op + 6 );
+			vst1q_f64( op + 4, vmulq_f64( iv3, ov3 ));
+			vst1q_f64( op + 6, vmulq_f64( iv4, ov4 ));
+
+			ip += 8;
+			op += 8;
+			c8--;
+		}
+
+		int c = Len & 7;
+
+		while( c != 0 )
+		{
+			*op *= *ip;
+			ip++;
+			op++;
+			c--;
+		}
+
+	#else // SIMD
 
 		int i;
 
@@ -307,7 +378,7 @@ public:
 			op[ i ] *= ip[ i ];
 		}
 
-	#endif // R8B_IPP
+	#endif // SIMD
 	}
 
 	/**
@@ -652,8 +723,8 @@ inline void calcMinPhaseTransform( double* const Kernel, const int KernelLen,
 	CFixedBuffer< double > ip( Len );
 	CFixedBuffer< double > ip2( Len2 + 1 );
 
-	memcpy( &ip[ 0 ], Kernel, KernelLen * sizeof( double ));
-	memset( &ip[ KernelLen ], 0, ( Len - KernelLen ) * sizeof( double ));
+	memcpy( &ip[ 0 ], Kernel, KernelLen * sizeof( ip[ 0 ]));
+	memset( &ip[ KernelLen ], 0, ( Len - KernelLen ) * sizeof( ip[ 0 ]));
 
 	CDSPRealFFTKeeper ffto( LenBits );
 	ffto -> forward( ip );
@@ -732,7 +803,7 @@ inline void calcMinPhaseTransform( double* const Kernel, const int KernelLen,
 	}
 	else
 	{
-		memcpy( &Kernel[ 0 ], &ip[ 0 ], KernelLen * sizeof( double ));
+		memcpy( &Kernel[ 0 ], &ip[ 0 ], KernelLen * sizeof( Kernel[ 0 ]));
 	}
 
 	if( DCGroupDelay != NULL )

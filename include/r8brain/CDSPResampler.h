@@ -9,7 +9,7 @@
  * This file includes the master sample rate converter (resampler) class that
  * combines all elements of this library into a single front-end class.
  *
- * r8brain-free-src Copyright (c) 2013-2021 Aleksey Vaneev
+ * r8brain-free-src Copyright (c) 2013-2022 Aleksey Vaneev
  * See the "LICENSE" file for license.
  */
 
@@ -299,9 +299,14 @@ public:
 				addProcessor( new CDSPFracInterpolator( SrcSampleRate2 * div,
 					DstSampleRate, ReqAtten, false, LatencyFrac ));
 
-				const double tb = ( 1.0 - SrcSampleRate * div /
-					DstSampleRate ) / tbw; // Divide TransBand by a constant
-					// that assures a linear response in the pass-band.
+				double tb = ( 1.0 - SrcSampleRate * div / DstSampleRate ) /
+					tbw; // Divide TransBand by a constant that assures a
+					// linear response in the pass-band.
+
+				if( tb > CDSPFIRFilter :: getLPMaxTransBand() )
+				{
+					tb = CDSPFIRFilter :: getLPMaxTransBand();
+				}
 
 				addProcessor( new CDSPBlockConvolver(
 					CDSPFIRFilterCache :: getLPFilter( 1.0 / num, tb,
@@ -494,8 +499,8 @@ public:
 	 * @param iplen Length of the input buffer in samples.
 	 * @param[out] op Output buffer pointer.
 	 * @param oplen Length of the output buffer in samples.
-	 * @tparam Tin Input buffer type.
-	 * @tparam Tout Output buffer type.
+	 * @tparam Tin Input buffer's element type.
+	 * @tparam Tout Output buffer's element type.
 	 */
 
 	template< typename Tin, typename Tout >
@@ -518,7 +523,7 @@ public:
 				if( !IsZero )
 				{
 					IsZero = true;
-					memset( p, 0, MaxInLen * sizeof( double ));
+					memset( p, 0, MaxInLen * sizeof( p[ 0 ]));
 				}
 			}
 			else

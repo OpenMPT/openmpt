@@ -8,7 +8,7 @@
  *
  * This file includes low-pass FIR filter generator and filter cache.
  *
- * r8brain-free-src Copyright (c) 2013-2021 Aleksey Vaneev
+ * r8brain-free-src Copyright (c) 2013-2022 Aleksey Vaneev
  * See the "LICENSE" file for license.
  */
 
@@ -209,7 +209,7 @@ private:
 	CFixedBuffer< double > KernelBlock; ///< FIR filter buffer, capacity
 		///< equals to 1 << ( BlockLenBits + 1 ). Second part of the buffer
 		///< contains zero-padding to allow alias-free convolution.
-		///< Memory-aligned.
+		///< Address-aligned.
 		///<
 
 	CDSPFIRFilter()
@@ -520,7 +520,7 @@ private:
 			}
 
 			memset( &KernelBlock[ sinc.fl2 + 1 ], 0,
-				( BlockLen * 2 - KernelLen ) * sizeof( double ));
+				( BlockLen * 2 - KernelLen ) * sizeof( KernelBlock[ 0 ]));
 
 			ffto -> forward( KernelBlock );
 			ffto -> convertToZP( KernelBlock );
@@ -531,7 +531,7 @@ private:
 				ffto -> getInvMulConst() * ReqGain );
 
 			memset( &KernelBlock[ KernelLen ], 0,
-				( BlockLen * 2 - KernelLen ) * sizeof( double ));
+				( BlockLen * 2 - KernelLen ) * sizeof( KernelBlock[ 0 ]));
 
 			ffto -> forward( KernelBlock );
 		}

@@ -83,15 +83,15 @@ PFFFT which is only slightly slower than Intel IPP FFT in performance.  There
 are two macros available: `R8B_PFFFT` and `R8B_PFFFT_DOUBLE`.  The first macro
 enables PFFFT that works in single-precision resolution, thus limiting the
 overall resampler's precision to 24-bit sample rate conversions (for
-mission-critical professional audio applications, using the `R8B_PFFFT` is not
-recommended as its peak error is quite large).  The second macro enables PFFFT
-implementation that works in double-precision resolution, making use of SSE2,
-AVX, and NEON intrinsics, yielding precision that is equal to both Intel IPP
-and Ooura FFT implementations.
+mission-critical professional audio applications, using the `R8B_PFFFT` macro
+is not recommended as its peak error is quite large).  The second macro
+enables PFFFT implementation that works in double-precision resolution, making
+use of SSE2, AVX, and NEON intrinsics, yielding precision that is equal to
+both Intel IPP and Ooura FFT implementations.
 
 To use the PFFFT, define the `R8B_PFFFT` or `R8B_PFFFT_DOUBLE` macro, compile
-and include the supplied `pffft.cpp` file, or the `pffft_double.c` file from
-the `pffft_double` folder, to your project build.
+and include the supplied `pffft.cpp` or `pffft_double/pffft_double.c` file to
+your project build.
 
     #define R8B_PFFFT 1
 
@@ -101,19 +101,18 @@ the `pffft_double` folder, to your project build.
 
 The code of this library was commented in the [Doxygen](http://www.doxygen.org/)
 style.  To generate the documentation locally you may run the
-`doxygen ./other/r8bdoxy.txt` command from the library's directory.
+`doxygen ./other/r8bdoxy.txt` command from the library's folder.
 
 Preliminary tests show that the r8b::CDSPResampler24 resampler class achieves
-`61.2*n_cores` Mflops (`83.3*n_cores` for Intel IPP FFT) when converting 1
+`31.8*n_cores` Mrops (`44*n_cores` for Intel IPP FFT) when converting 1
 channel of 24-bit audio from 44100 to 96000 sample rate (2% transition band),
-on an Intel Core i7-7700K processor-based 64-bit AVX2-enabled system without
-overclocking.  This approximately translates to a real-time resampling of
-`637*n_cores` (`868*n_cores`) audio streams, at 100% CPU load.  Speed
-performance when converting to other sample rates may vary greatly.  When
-comparing performance of this resampler library to another library make sure
-that the competing library is also tuned to produce a fully linear-phase
-response, has similar stop-band characteristics, and similar sample timing
-precision.
+on a Ryzen 3700X processor-based 64-bit system.  This approximately translates
+to a real-time resampling of `720*n_cores` (`1000*n_cores`) audio streams, at
+100% CPU load.  Speed performance when converting to other sample rates may
+vary greatly.  When comparing performance of this resampler library to another
+library make sure that the competing library is also tuned to produce a fully
+linear-phase response, has similar stop-band characteristics and similar
+sample timing precision.
 
 ## Dynamic Link Library ##
 
@@ -151,13 +150,13 @@ attenuation in decibel.
 
 The transition band is specified as the normalized spectral space of the input
 signal (or the output signal if the downsampling is performed) between the
-low-pass filter's -3 dB point and the Nyquist frequency, and ranges from
-0.5% to 45%.  Stop-band attenuation can be specified in the range 49 to 218
-decibel.  Both transition band and stop-band attenuation affect resampler's
-overall speed performance and initial output delay.  For your information,
-transition frequency range spans 175% of the specified transition band, which
-means that for 2% transition band, frequency response below 0.965\*Nyquist is
-linear.
+low-pass filter's -3 dB point and the Nyquist frequency, and ranges from 0.5%
+to 45%.  Stop-band attenuation can be specified in the range from 49 to 218
+decibel.  Both the transition band and stop-band attenuation affect
+resampler's overall speed performance and initial output delay.  For your
+information, transition frequency range spans 175% of the specified transition
+band, which means that for 2% transition band, frequency response below
+0.965\*Nyquist is linear.
 
 This SRC library also implements a much faster "power of 2" resampling (e.g.
 2X, 4X, 8X, 16X, 3X, 3\*2X, 3\*4X, 3\*8X, etc. upsampling and downsampling),
@@ -206,6 +205,37 @@ maintaining confidence in this library among the interested parties. The
 inclusion into this list is not mandatory.
 
 ## Change Log ##
+
+Version 5.6:
+
+* Added SSE and NEON implementations to `CDSPHBUpsampler` yielding 15%
+performance improvement of power-of-2 upsampling.
+* Added SSE and NEON implementations to the `CDSPRealFFT::multiplyBlocksZP`
+function, for 2-3% performance improvement.
+* Added intermediate interpolator's transition band limitation, for logical
+hardness (not practically needed).
+* Added the `aDoConsumeLatency` parameter to `CDSPHBUpsampler` constructor,
+for "inline" DSP uses of the class.
+* Made various minor changes across the codebase.
+
+Version 5.5:
+
+* Hardened positional logic of fractional filter calculation, removed
+redundant multiplications.
+* Removed unnecessary function templating from the `CDSPSincFilterGen` class.
+* Added the `__ARM_NEON` macro to NEON availability detection.
+
+Version 5.4:
+
+* Added compiler specializations to previously optimized inner loops.
+"Shuffled" SIMD interpolation code is not efficient on Apple M1. Intel C++
+Compiler vectorizes "whole stepping" interpolation as good as a
+manually-written SSE.
+* Reorganized SIMD instructions for a slightly better performance.
+* Changed internal buffer sizes of half-band resamplers (1-2% performance
+boost).
+* Fixed compiler warnings in PFFFT code.
+* Added several asserts to the code.
 
 Version 5.3:
 
