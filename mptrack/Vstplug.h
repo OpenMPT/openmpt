@@ -136,7 +136,6 @@ public:
 	void CacheParameterNames(int32 firstParam, int32 lastParam) override;
 
 public:
-	void Release() override;
 	void SaveAllParameters() override;
 	void RestoreAllParameters(int32 program) override;
 	void Process(float *pOutL, float *pOutR, uint32 numFrames) override;

@@ -73,7 +73,6 @@ public:
 	static IMixPlugin* Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct);
 	LFOPlugin(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct);
 
-	void Release() override { delete this; }
 	int32 GetUID() const override { int32 id; memcpy(&id, "LFO ", 4); return id; }
 	int32 GetVersion() const override { return 0; }
 	void Idle() override { }

@@ -42,7 +42,6 @@ public:
 	static IMixPlugin* Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct);
 	Distortion(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct);
 
-	void Release() override { delete this; }
 	int32 GetUID() const override { return 0xEF114C90; }
 	int32 GetVersion() const override { return 0; }
 	void Idle() override { }

@@ -125,7 +125,7 @@ public:
 	double GetOutputLatency() const;
 
 	// Destroy the plugin
-	virtual void Release() = 0;
+	virtual void Release() { delete this; }
 	virtual int32 GetUID() const = 0;
 	virtual int32 GetVersion() const = 0;
 	virtual void Idle() = 0;

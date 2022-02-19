@@ -1035,12 +1035,6 @@ CVstPlugin::~CVstPlugin()
 }
 
 
-void CVstPlugin::Release()
-{
-	delete this;
-}
-
-
 void CVstPlugin::Idle()
 {
 	if(m_needIdle)

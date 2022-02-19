@@ -68,7 +68,6 @@ public:
 	static IMixPlugin* Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct);
 	DigiBoosterEcho(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct);
 
-	void Release() override { delete this; }
 	void SaveAllParameters() override;
 	void RestoreAllParameters(int32 program) override;
 	int32 GetUID() const override { int32le id; memcpy(&id, "Echo", 4); return id; }

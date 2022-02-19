@@ -35,7 +35,6 @@ public:
 	static IMixPlugin* Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct);
 	Gargle(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct);
 
-	void Release() override { delete this; }
 	int32 GetUID() const override { return 0xDAFD8210; }
 	int32 GetVersion() const override { return 0; }
 	void Idle() override { }

@@ -156,7 +156,6 @@ public:
 
 	/////////////////////////////////////////////////
 	// Destroy the plugin
-	void Release() final { delete this; }
 	int32 GetUID() const final { return 'MMID'; }
 	int32 GetVersion() const final { return 2; }
 	void Idle() final { }

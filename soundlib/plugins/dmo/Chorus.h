@@ -57,7 +57,6 @@ public:
 	static IMixPlugin* Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct);
 	Chorus(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct, bool stereoBuffers = false);
 
-	void Release() override { delete this; }
 	int32 GetUID() const override { return 0xEFE6629C; }
 	int32 GetVersion() const override { return 0; }
 	void Idle() override { }

@@ -51,7 +51,6 @@ protected:
 	~DMOPlugin();
 
 public:
-	void Release() override { delete this; }
 	int32 GetUID() const override { return m_uid; }
 	int32 GetVersion() const override { return 2; }
 	void Idle() override { }
