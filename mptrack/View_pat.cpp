@@ -4852,7 +4852,7 @@ void CViewPattern::TempStopNote(ModCommand::NOTE note, const bool fromMidi, bool
 {
 	CModDoc *pModDoc = GetDocument();
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	if(pModDoc == nullptr || pMainFrm == nullptr)
+	if(pModDoc == nullptr || pMainFrm == nullptr || !ModCommand::IsNote(note))
 	{
 		return;
 	}
@@ -4862,11 +4862,7 @@ void CViewPattern::TempStopNote(ModCommand::NOTE note, const bool fromMidi, bool
 		return;
 	}
 	const CModSpecifications &specs = sndFile.GetModSpecifications();
-
-	if(!ModCommand::IsSpecialNote(note))
-	{
-		Limit(note, specs.noteMin, specs.noteMax);
-	}
+	Limit(note, specs.noteMin, specs.noteMax);
 
 	const bool liveRecord = IsLiveRecord();
 	const bool isSplit = IsNoteSplit(note);
