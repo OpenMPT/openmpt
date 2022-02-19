@@ -104,7 +104,7 @@
 #if !defined( R8B_FLTTEST )
 	/**
 	 * This macro, when equal to 1, enables fractional delay filter bank
-	 * testing: in this mode the filter bank becomes dynamic member of the
+	 * testing: in this mode the filter bank becomes a dynamic member of the
 	 * CDSPFracInterpolator object instead of being a global static object.
 	 */
 
@@ -113,13 +113,13 @@
 
 #if !defined( R8B_FASTTIMING )
 	/**
-	 * This macro, when equal to 1, enables fast approach to interpolation
-	 * sample timing. This approach improves interpolation performance
-	 * (by around 15%) at the expense of a minor sample timing drift which is
+	 * This macro, when equal to 1, enables a fast interpolation sample
+	 * timing technique. This technique improves interpolation performance
+	 * (by around 10%) at the expense of a minor sample timing drift which is
 	 * on the order of 1e-6 samples per 10 billion output samples. This
-	 * setting does not apply to whole-number stepping if it is in use as this
-	 * stepping provides zero timing error without performance impact. Also
-	 * does not apply to the cases when whole-numbered (2X, 3X, etc.)
+	 * setting does not apply to whole-number stepping, if it is in use, as
+	 * this stepping provides zero timing error without performance impact.
+	 * Also does not apply to the cases when a whole-numbered (2X, 3X, etc.)
 	 * resampling is in the actual use.
 	 */
 
@@ -129,7 +129,7 @@
 #if !defined( R8B_EXTFFT )
 	/**
 	 * This macro, when equal to 1, extends length of low-pass filters' FFT
-	 * block by a factor of 2 by zero-padding it. This usually improves the
+	 * block by a factor of 2, by zero-padding it. This usually improves the
 	 * overall time performance of the resampler at the expense of a higher
 	 * overall latency (initial processing delay). If such delay is not an
 	 * issue, setting this macro to 1 is preferrable. This macro can only have
@@ -142,7 +142,9 @@
 #if !defined( R8B_PFFFT )
 	/**
 	 * When defined as 1, enables PFFFT routines which are fast, but which
-	 * are limited to 24-bit precision.
+	 * are limited to 24-bit precision. May be a good choice for time-series
+	 * interpolation, when stop-band attenuation higher than 120 dB is not
+	 * required.
 	 */
 
 	#define R8B_PFFFT 0
@@ -163,8 +165,8 @@
 
 #if !defined( R8B_FLOATFFT )
 	/**
-	 * The R8B_FLOATFFT definition enables double-to-float buffer conversion
-	 * for FFT operations for algorithms that work with "float" values. This
+	 * The R8B_FLOATFFT definition enables double-to-float buffer conversions
+	 * for FFT operations, for algorithms that work with "float" values. This
 	 * macro should not be changed from the default "0" here.
 	 */
 

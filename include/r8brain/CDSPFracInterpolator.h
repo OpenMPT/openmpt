@@ -8,7 +8,7 @@
  *
  * This file includes fractional delay interpolator class.
  *
- * r8brain-free-src Copyright (c) 2013-2021 Aleksey Vaneev
+ * r8brain-free-src Copyright (c) 2013-2022 Aleksey Vaneev
  * See the "LICENSE" file for license.
  */
 
@@ -141,7 +141,7 @@ public:
 					p += ElementSize;
 				}
 
-				#if defined( R8B_SSE2 ) || defined( R8B_NEON )
+				#if defined( R8B_SIMD_ISH )
 					shuffle2_3( Table, TableEnd );
 				#endif // SIMD
 			}
@@ -160,7 +160,7 @@ public:
 					p += ElementSize;
 				}
 
-				#if defined( R8B_SSE2 ) || defined( R8B_NEON )
+				#if defined( R8B_SIMD_ISH )
 					shuffle2_4( Table, TableEnd );
 				#endif // SIMD
 			}
@@ -177,7 +177,7 @@ public:
 					p += ElementSize;
 				}
 
-				#if defined( R8B_SSE2 ) || defined( R8B_NEON )
+				#if defined( R8B_SIMD_ISH )
 					shuffle2_2( Table, TableEnd );
 				#endif // SIMD
 			}
@@ -717,11 +717,12 @@ public:
 		R8BASSERT( DstSampleRate > 0.0 );
 		R8BASSERT( PrevLatency >= 0.0 );
 		R8BASSERT( BufLenBits >= 5 );
-		R8BASSERT(( 1 << BufLenBits ) >= FilterLen * 3 );
 
 		InitFracPos = PrevLatency;
 		Latency = (int) InitFracPos;
 		InitFracPos -= Latency;
+
+		R8BASSERT( Latency >= 0 );
 
 		#if R8B_FLTTEST
 
@@ -755,6 +756,9 @@ public:
 		fl2 = FilterLen >> 1;
 		fll = fl2 - 1;
 		flo = fll + fl2;
+		flb = BufLen - fll;
+
+		R8BASSERT(( 1 << BufLenBits ) >= FilterLen * 3 );
 
 		static const CConvolveFn FltConvFn0[ 13 ] = {
 			&CDSPFracInterpolator :: convolve0< 6 >,
@@ -819,10 +823,10 @@ public:
 		LatencyLeft = Latency;
 		BufLeft = 0;
 		WritePos = 0;
-		ReadPos = BufLen - fll; // Set "read" position to account for filter's
+		ReadPos = flb; // Set "read" position to account for filter's
 			// latency at zero fractional delay.
 
-		memset( &Buf[ ReadPos ], 0, fll * sizeof( double ));
+		memset( &Buf[ ReadPos ], 0, ( BufLen - flb ) * sizeof( Buf[ 0 ]));
 
 		if( IsWhole )
 		{
@@ -845,7 +849,7 @@ public:
 		R8BASSERT( l >= 0 );
 		R8BASSERT( ip != op0 || l == 0 || SrcSampleRate > DstSampleRate );
 
-		if( LatencyLeft > 0 )
+		if( LatencyLeft != 0 )
 		{
 			if( LatencyLeft >= l )
 			{
@@ -864,16 +868,15 @@ public:
 		{
 			// Add new input samples to both halves of the ring buffer.
 
-			const int b = min( min( l, BufLen - WritePos ),
-				BufLen - fll - BufLeft );
+			const int b = min( min( l, BufLen - WritePos ), flb - BufLeft );
 
 			double* const wp1 = Buf + WritePos;
-			memcpy( wp1, ip, b * sizeof( double ));
+			memcpy( wp1, ip, b * sizeof( wp1[ 0 ]));
 
 			if( WritePos < flo )
 			{
 				const int c = min( b, flo - WritePos );
-				memcpy( wp1 + BufLen, wp1, c * sizeof( double ));
+				memcpy( wp1 + BufLen, wp1, c * sizeof( wp1[ 0 ]));
 			}
 
 			ip += b;
@@ -927,6 +930,8 @@ private:
 	int fll; ///< Input latency.
 		///<
 	int flo; ///< Overrun length.
+		///<
+	int flb; ///< Initial read position and maximal buffer write length.
 		///<
 	double Buf[ BufLen + 29 ]; ///< The ring buffer, including overrun
 		///< protection for maximal filter length.
@@ -982,7 +987,7 @@ private:
 #endif // R8B_FASTTIMING
 
 	typedef double*( CDSPFracInterpolator :: *CConvolveFn )( double* op ); ///<
-		///< Convolution funtion type.
+		///< Convolution function type.
 		///<
 	CConvolveFn convfn; ///< Convolution function in use.
 		///<
@@ -992,7 +997,7 @@ private:
 	 *
 	 * @param[out] op Output buffer.
 	 * @return Advanced "op" value.
-	 * @tparam fltlen Filter length.
+	 * @tparam fltlen Filter length, in taps.
 	 */
 
 	template< int fltlen >
@@ -1004,7 +1009,7 @@ private:
 			const double* const rp = Buf + ReadPos;
 			int i;
 
-		#if defined( R8B_SSE2 )
+		#if defined( R8B_SSE2 ) && !defined( __INTEL_COMPILER )
 
 			__m128d s = _mm_setzero_pd();
 
@@ -1024,15 +1029,12 @@ private:
 
 			for( i = 0; i < fltlen; i += 2 )
 			{
-				const float64x2_t m = vmulq_f64( vld1q_f64( ftp + i ),
-					vld1q_f64( rp + i ));
-
-				s = vaddq_f64( s, m );
+				s = vmlaq_f64( s, vld1q_f64( ftp + i ), vld1q_f64( rp + i ));
 			}
 
 			*op = vaddvq_f64( s );
 
-		#else // defined( R8B_NEON )
+		#else // SIMD
 
 			double s = 0.0;
 
@@ -1043,7 +1045,7 @@ private:
 
 			*op = s;
 
-		#endif // defined( R8B_NEON )
+		#endif // SIMD
 
 			op++;
 
@@ -1081,7 +1083,7 @@ private:
 			const double* const rp = Buf + ReadPos;
 			int i;
 
-		#if defined( R8B_SSE2 )
+		#if defined( R8B_SSE2 ) && defined( R8B_SIMD_ISH )
 
 			const __m128d x1 = _mm_set1_pd( x );
 			const __m128d x2 = _mm_set1_pd( x2d );
@@ -1089,18 +1091,22 @@ private:
 
 			for( i = 0; i < fltlen; i += 2 )
 			{
-				const __m128d xx1 = _mm_mul_pd( _mm_load_pd( ftp + 2 ), x1 );
-				const __m128d xx2 = _mm_mul_pd( _mm_load_pd( ftp + 4 ), x2 );
-				const __m128d xxs1 = _mm_add_pd( xx1, xx2 );
-				const __m128d xxs2 = _mm_add_pd( _mm_load_pd( ftp ), xxs1 );
-
-				s = _mm_add_pd( s, _mm_mul_pd( xxs2, _mm_loadu_pd( rp + i )));
+				const __m128d ftp2 = _mm_load_pd( ftp + 2 );
+				const __m128d xx1 = _mm_mul_pd( ftp2, x1 );
+				const __m128d ftp4 = _mm_load_pd( ftp + 4 );
+				const __m128d xx2 = _mm_mul_pd( ftp4, x2 );
+				const __m128d ftp0 = _mm_load_pd( ftp );
 				ftp += 6;
+
+				const __m128d rpi = _mm_loadu_pd( rp + i );
+				const __m128d xxs = _mm_add_pd( ftp0, _mm_add_pd( xx1, xx2 ));
+
+				s = _mm_add_pd( s, _mm_mul_pd( rpi, xxs ));
 			}
 
 			_mm_storel_pd( op, _mm_add_pd( s, _mm_shuffle_pd( s, s, 1 )));
 
-		#elif defined( R8B_NEON )
+		#elif defined( R8B_NEON ) && defined( R8B_SIMD_ISH )
 
 			const float64x2_t x1 = vdupq_n_f64( x );
 			const float64x2_t x2 = vdupq_n_f64( x2d );
@@ -1108,18 +1114,23 @@ private:
 
 			for( i = 0; i < fltlen; i += 2 )
 			{
-				const float64x2_t xx1 = vmulq_f64( vld1q_f64( ftp + 2 ), x1 );
-				const float64x2_t xx2 = vmulq_f64( vld1q_f64( ftp + 4 ), x2 );
-				const float64x2_t xxs1 = vaddq_f64( xx1, xx2 );
-				const float64x2_t xxs2 = vaddq_f64( vld1q_f64( ftp ), xxs1 );
-
-				s = vaddq_f64( s, vmulq_f64( xxs2, vld1q_f64( rp + i )));
+				const float64x2_t ftp2 = vld1q_f64( ftp + 2 );
+				const float64x2_t xx1 = vmulq_f64( ftp2, x1 );
+				const float64x2_t ftp4 = vld1q_f64( ftp + 4 );
+				const float64x2_t xx2 = vmulq_f64( ftp4, x2 );
+				const float64x2_t ftp0 = vld1q_f64( ftp );
 				ftp += 6;
+
+				const float64x2_t rpi = vld1q_f64( rp + i );
+				const float64x2_t xxs = vaddq_f64( ftp0,
+					vaddq_f64( xx1, xx2 ));
+
+				s = vmlaq_f64( s, rpi, xxs );
 			}
 
 			*op = vaddvq_f64( s );
 
-		#else // defined( R8B_NEON )
+		#else // SIMD
 
 			double s = 0.0;
 
@@ -1131,7 +1142,7 @@ private:
 
 			*op = s;
 
-		#endif // defined( R8B_NEON )
+		#endif // SIMD
 
 			op++;
 
