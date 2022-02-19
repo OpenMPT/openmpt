@@ -419,7 +419,7 @@ void CWaveDevice::InternalFillAudioBuffer()
 	ULONG oldBuffersPending = InterlockedExchangeAdd(&m_nBuffersPending, 0);  // read
 	ULONG nLatency = oldBuffersPending * m_nWaveBufferSize;
 
-	ULONG nBytesWritten = 0;
+	[[maybe_unused]] ULONG nBytesWritten = 0;
 	while((oldBuffersPending < m_nPreparedHeaders) && !m_Failed)
 	{
 #if(_WIN32_WINNT >= 0x0600)
