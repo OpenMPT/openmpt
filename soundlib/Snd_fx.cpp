@@ -2278,8 +2278,7 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 					case DuplicateNoteAction::NoteOff:
 					case DuplicateNoteAction::NoteFade:
 						// Switch off duplicated note played on this plugin
-						SendMIDINote(i, chn.GetPluginNote(m_playBehaviour[kITRealNoteMapping]) + NOTE_MAX_SPECIAL, 0);
-						chn.nArpeggioLastNote = NOTE_NONE;
+						SendMIDINote(i, chn.lastMidiNoteWithoutArp | IMixPlugin::MIDI_NOTE_OFF, 0);
 						break;
 					}
 				}
@@ -2331,7 +2330,7 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 			{
 				// apply NNA to this plugin iff it is currently playing a note on this tracker channel
 				// (and if it is playing a note, we know that would be the last note played on this chan).
-				applyNNAtoPlug = pPlugin->IsNotePlaying(srcChn.GetPluginNote(m_playBehaviour[kITRealNoteMapping]), nChn);
+				applyNNAtoPlug = pPlugin->IsNotePlaying(srcChn.lastMidiNoteWithoutArp, nChn);
 			}
 		}
 	}
@@ -4761,7 +4760,7 @@ void CSoundFile::ExtendedS3MCommands(CHANNELINDEX nChn, ModCommand::PARAM param)
 								IMixPlugin *pPlugin;
 								if(pIns != nullptr && pIns->nMixPlug && (pPlugin = m_MixPlugins[pIns->nMixPlug - 1].pMixPlugin) != nullptr)
 								{
-									pPlugin->MidiCommand(*pIns, bkChn.nNote + NOTE_MAX_SPECIAL, 0, nChn);
+									pPlugin->MidiCommand(*pIns, bkChn.nNote | IMixPlugin::MIDI_NOTE_OFF, 0, nChn);
 								}
 #endif // NO_PLUGINS
 							}
@@ -5812,7 +5811,7 @@ void CSoundFile::NoteCut(CHANNELINDEX nChn, uint32 nTick, bool cutSample)
 		chn.dwFlags.set(CHN_FASTVOLRAMP);
 
 		// instro sends to a midi chan
-		SendMIDINote(nChn, /*chn.nNote+*/NOTE_MAX_SPECIAL, 0);
+		SendMIDINote(nChn, NOTE_KEYOFF, 0);
 		
 		if(chn.dwFlags[CHN_ADLIB] && m_opl)
 		{

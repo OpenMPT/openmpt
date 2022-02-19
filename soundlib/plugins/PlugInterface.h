@@ -85,6 +85,15 @@ public:
 	bool m_passKeypressesToPlug = false;
 	bool m_recordMIDIOut = false;
 
+	// Combine with note value sent to IMixPlugin::MidiCommand
+	enum MidiNoteFlag : uint16
+	{
+		MIDI_NOTE_MASK     = 0x0FF,
+		MIDI_NOTE_OFF      = 0x100,  // Send note-off for a specific note
+		MIDI_NOTE_ARPEGGIO = 0x200,  // Note is part of an arpeggio, don't store it as the last triggered note
+	};
+
+
 protected:
 	virtual ~IMixPlugin();
 

@@ -1165,7 +1165,7 @@ bool CModDoc::NoteOff(UINT note, bool fade, INSTRUMENTINDEX ins, CHANNELINDEX cu
 				IMixPlugin *pPlugin =  m_SndFile.m_MixPlugins[plug - 1].pMixPlugin;
 				if(pPlugin)
 				{
-					pPlugin->MidiCommand(*pIns, pIns->NoteMap[note - NOTE_MIN] + NOTE_KEYOFF, 0, currentChn);
+					pPlugin->MidiCommand(*pIns, pIns->NoteMap[note - NOTE_MIN] | IMixPlugin::MIDI_NOTE_OFF, 0, currentChn);
 				}
 			}
 		}

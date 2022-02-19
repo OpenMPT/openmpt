@@ -1047,7 +1047,7 @@ void CSoundFile::ProcessTremor(CHANNELINDEX nChn, int &vol)
 		{
 			const bool isPlaying = pPlugin->IsNotePlaying(chn.nLastNote, nChn);
 			if(vol == 0 && isPlaying)
-				pPlugin->MidiCommand(*pIns, chn.nLastNote + NOTE_MAX_SPECIAL, 0, nChn);
+				pPlugin->MidiCommand(*pIns, chn.nLastNote | IMixPlugin::MIDI_NOTE_OFF, 0, nChn);
 			else if(vol != 0 && !isPlaying)
 				pPlugin->MidiCommand(*pIns, chn.nLastNote, static_cast<uint16>(chn.nVolume), nChn);
 		}
@@ -1444,17 +1444,17 @@ void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int32 &period, Tuning::NOTEI
 		IMixPlugin *pPlugin =  m_MixPlugins[pIns->nMixPlug - 1].pMixPlugin;
 		if(pPlugin)
 		{
-			uint8 step = 0;
 			const bool arpOnRow = (chn.rowCommand.command == CMD_ARPEGGIO);
-			const ModCommand::NOTE lastNote = ModCommand::IsNote(chn.nLastNote) ? static_cast<ModCommand::NOTE>(pIns->NoteMap[chn.nLastNote - NOTE_MIN]) : static_cast<ModCommand::NOTE>(NOTE_NONE);
+			const ModCommand::NOTE lastNote = chn.lastMidiNoteWithoutArp;
+			ModCommand::NOTE arpNote = chn.lastMidiNoteWithoutArp;
 			if(arpOnRow)
 			{
-				switch(m_PlayState.m_nTickCount % 3)
+				const uint32 tick = m_PlayState.m_nTickCount % (m_PlayState.m_nMusicSpeed + m_PlayState.m_nFrameDelay);
+				switch(tick % 3)
 				{
-				case 1: step = chn.nArpeggio >> 4; break;
-				case 2: step = chn.nArpeggio & 0x0F; break;
+				case 1: arpNote += chn.nArpeggio >> 4; break;
+				case 2: arpNote += chn.nArpeggio & 0x0F; break;
 				}
-				chn.nArpeggioBaseNote = lastNote;
 			}
 
 			// Trigger new note:
@@ -1464,19 +1464,23 @@ void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int32 &period, Tuning::NOTEI
 			// - If there's no arpeggio
 			//   - but an arpeggio note is still active and
 			//   - there's no note stop or new note that would stop it anyway
-			if((arpOnRow && chn.nArpeggioLastNote != chn.nArpeggioBaseNote + step && (!m_SongFlags[SONG_FIRSTTICK] || !chn.rowCommand.IsNote()))
-				|| (!arpOnRow && chn.rowCommand.note == NOTE_NONE && chn.nArpeggioLastNote != NOTE_NONE))
-				SendMIDINote(nChn, chn.nArpeggioBaseNote + step, static_cast<uint16>(chn.nVolume));
+			if((arpOnRow && chn.nArpeggioLastNote != arpNote && (!chn.isFirstTick || !chn.rowCommand.IsNote() || chn.rowCommand.IsPortamento()))
+				|| (!arpOnRow && (chn.rowCommand.note == NOTE_NONE || chn.rowCommand.IsPortamento()) && chn.nArpeggioLastNote != NOTE_NONE))
+				SendMIDINote(nChn, arpNote | IMixPlugin::MIDI_NOTE_ARPEGGIO, static_cast<uint16>(chn.nVolume));
 			// Stop note:
 			// - If some arpeggio note is still registered or
 			// - When starting an arpeggio on a row with no other note on it, stop some possibly still playing note.
 			if(chn.nArpeggioLastNote != NOTE_NONE)
-				SendMIDINote(nChn, chn.nArpeggioLastNote + NOTE_MAX_SPECIAL, 0);
-			else if(arpOnRow && m_SongFlags[SONG_FIRSTTICK] && !chn.rowCommand.IsNote() && ModCommand::IsNote(lastNote))
-				SendMIDINote(nChn, lastNote + NOTE_MAX_SPECIAL, 0);
+			{
+				if(!arpOnRow || chn.nArpeggioLastNote != arpNote)
+					SendMIDINote(nChn, chn.nArpeggioLastNote | IMixPlugin::MIDI_NOTE_OFF, 0);
+			} else if(arpOnRow && chn.isFirstTick && !chn.rowCommand.IsNote() && ModCommand::IsNote(lastNote))
+			{
+				SendMIDINote(nChn, lastNote | IMixPlugin::MIDI_NOTE_OFF, 0);
+			}
 
 			if(chn.rowCommand.command == CMD_ARPEGGIO)
-				chn.nArpeggioLastNote = chn.nArpeggioBaseNote + step;
+				chn.nArpeggioLastNote = arpNote;
 			else
 				chn.nArpeggioLastNote = NOTE_NONE;
 		}

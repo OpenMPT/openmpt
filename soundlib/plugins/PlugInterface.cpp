@@ -799,7 +799,7 @@ void IMidiPlugin::MidiCC(MIDIEvents::MidiCC nController, uint8 nParam, CHANNELIN
 	//Error checking
 	LimitMax(nController, MIDIEvents::MIDICC_end);
 	LimitMax(nParam, uint8(127));
-	auto midiCh = GetMidiChannel(trackChannel);
+	const auto midiCh = GetMidiChannel(trackChannel);
 
 	if(m_SndFile.m_playBehaviour[kMIDICCBugEmulation])
 		MidiSend(MIDIEvents::Event(MIDIEvents::evControllerChange, midiCh, nParam, static_cast<uint8>(nController)));	// param and controller are swapped (old broken implementation)
@@ -818,7 +818,7 @@ void IMidiPlugin::MidiPitchBendRaw(int32 pitchbend, CHANNELINDEX trackerChn)
 // Bend MIDI pitch for given MIDI channel using fine tracker param (one unit = 1/64th of a note step)
 void IMidiPlugin::MidiPitchBend(int32 increment, int8 pwd, CHANNELINDEX trackerChn)
 {
-	auto midiCh = GetMidiChannel(trackerChn);
+	const auto midiCh = GetMidiChannel(trackerChn);
 	if(m_SndFile.m_playBehaviour[kOldMIDIPitchBends])
 	{
 		// OpenMPT Legacy: Old pitch slides never were really accurate, but setting the PWD to 13 in plugins would give the closest results.
@@ -839,7 +839,7 @@ void IMidiPlugin::MidiPitchBend(int32 increment, int8 pwd, CHANNELINDEX trackerC
 
 void IMidiPlugin::MidiTonePortamento(int32 increment, uint8 newNote, int8 pwd, CHANNELINDEX trackerChn)
 {
-	auto midiCh = GetMidiChannel(trackerChn);
+	const auto midiCh = GetMidiChannel(trackerChn);
 
 	int32 targetBend = EncodePitchBendParam(64 * (newNote - static_cast<int32>(m_MidiCh[midiCh].lastNote)));
 	ApplyPitchWheelDepth(targetBend, pwd);
@@ -872,7 +872,7 @@ void IMidiPlugin::SendMidiPitchBend(uint8 midiCh, int32 newPitchBendPos)
 // Apply vibrato effect through pitch wheel commands on a given MIDI channel.
 void IMidiPlugin::MidiVibrato(int32 depth, int8 pwd, CHANNELINDEX trackerChn)
 {
-	auto midiCh = GetMidiChannel(trackerChn);
+	const auto midiCh = GetMidiChannel(trackerChn);
 	depth = EncodePitchBendParam(depth);
 	if(depth != 0 || (m_MidiCh[midiCh].midiPitchBendPos & kVibratoFlag))
 	{
@@ -898,8 +898,9 @@ void IMidiPlugin::MidiCommand(const ModInstrument &instr, uint16 note, uint16 vo
 	if(trackChannel >= MAX_CHANNELS)
 		return;
 
-	auto midiCh = GetMidiChannel(trackChannel);
+	const auto midiCh = GetMidiChannel(trackChannel);
 	PlugInstrChannel &channel = m_MidiCh[midiCh];
+	uint8 rawNote = static_cast<uint8>(note & MIDI_NOTE_MASK);
 
 	uint16 midiBank = instr.wMidiBank - 1;
 	uint8 midiProg = instr.nMidiProgram - 1;
@@ -933,9 +934,9 @@ void IMidiPlugin::MidiCommand(const ModInstrument &instr, uint16 note, uint16 vo
 
 
 	// Specific Note Off
-	if(note > NOTE_MAX_SPECIAL)
+	if(note & MIDI_NOTE_OFF)
 	{
-		uint8 i = static_cast<uint8>(note - NOTE_MAX_SPECIAL - NOTE_MIN);
+		uint8 i = rawNote - NOTE_MIN;
 		if(channel.noteOnMap[i][trackChannel])
 		{
 			channel.noteOnMap[i][trackChannel]--;
@@ -976,17 +977,20 @@ void IMidiPlugin::MidiCommand(const ModInstrument &instr, uint16 note, uint16 vo
 	}
 
 	// Note On
-	else if(note >= NOTE_MIN && note < NOTE_MIN + mpt::array_size<decltype(channel.noteOnMap)>::size)
+	else if(rawNote >= NOTE_MIN && rawNote < NOTE_MIN + mpt::array_size<decltype(channel.noteOnMap)>::size)
 	{
-		m_MidiCh[midiCh].lastNote = static_cast<uint8>(note);
-		note -= NOTE_MIN;
-
-		// Reset pitch bend on each new note, tracker style.
-		// This is done if the pitch wheel has been moved or there was a vibrato on the previous row (in which case the "vstVibratoFlag" bit of the pitch bend memory is set)
-		auto newPitchBendPos = EncodePitchBendParam(Clamp(m_SndFile.m_PlayState.Chn[trackChannel].GetMIDIPitchBend(), MIDIEvents::pitchBendMin, MIDIEvents::pitchBendMax));
-		if(m_MidiCh[midiCh].midiPitchBendPos != newPitchBendPos)
+		if(!(note & MIDI_NOTE_ARPEGGIO))
 		{
-			SendMidiPitchBend(midiCh, newPitchBendPos);
+			m_MidiCh[midiCh].lastNote = rawNote;
+			m_SndFile.m_PlayState.Chn[trackChannel].lastMidiNoteWithoutArp = rawNote;
+
+			// Reset pitch bend on each new note, tracker style.
+			// This is done if the pitch wheel has been moved or there was a vibrato on the previous row (in which case the "vstVibratoFlag" bit of the pitch bend memory is set)
+			auto newPitchBendPos = EncodePitchBendParam(Clamp(m_SndFile.m_PlayState.Chn[trackChannel].GetMIDIPitchBend(), MIDIEvents::pitchBendMin, MIDIEvents::pitchBendMax));
+			if(m_MidiCh[midiCh].midiPitchBendPos != newPitchBendPos)
+			{
+				SendMidiPitchBend(midiCh, newPitchBendPos);
+			}
 		}
 
 		// count instances of active notes.
@@ -994,12 +998,13 @@ void IMidiPlugin::MidiCommand(const ModInstrument &instr, uint16 note, uint16 vo
 		// Problem: if a note dies out naturally and we never send a note off, this counter
 		// will block at max until note off. Is this a problem?
 		// Safe to assume we won't need more than 255 note offs max on a given note?
-		if(channel.noteOnMap[note][trackChannel] < uint8_max)
+		rawNote -= NOTE_MIN;
+		if(channel.noteOnMap[rawNote][trackChannel] < uint8_max)
 		{
-			channel.noteOnMap[note][trackChannel]++;
+			channel.noteOnMap[rawNote][trackChannel]++;
 		}
 
-		MidiSend(MIDIEvents::NoteOn(midiCh, static_cast<uint8>(note), volume));
+		MidiSend(MIDIEvents::NoteOn(midiCh, rawNote, volume));
 	}
 }
 

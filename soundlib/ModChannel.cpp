@@ -20,6 +20,7 @@ void ModChannel::Reset(ResetFlags resetMask, const CSoundFile &sndFile, CHANNELI
 	if(resetMask & resetSetPosBasic)
 	{
 		nNote = nNewNote = NOTE_NONE;
+		nArpeggioLastNote = lastMidiNoteWithoutArp = NOTE_NONE;
 		nNewIns = nOldIns = 0;
 		pModSample = nullptr;
 		pModInstrument = nullptr;
