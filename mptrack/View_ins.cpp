@@ -2282,8 +2282,6 @@ LRESULT CViewInstrument::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 		return kcNull;
 	CSoundFile &sndFile = pModDoc->GetSoundFile();
 
-	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-
 	switch(wParam)
 	{
 		case kcPrevInstrument:	OnPrevInstrument(); return wParam;
@@ -2338,12 +2336,12 @@ LRESULT CViewInstrument::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 	}
 	if(wParam >= kcInstrumentStartNotes && wParam <= kcInstrumentEndNotes)
 	{
-		PlayNote(static_cast<ModCommand::NOTE>(wParam - kcInstrumentStartNotes + 1 + pMainFrm->GetBaseOctave() * 12));
+		PlayNote(pModDoc->GetNoteWithBaseOctave(static_cast<int>(wParam - kcInstrumentStartNotes), m_nInstrument));
 		return wParam;
 	}
 	if(wParam >= kcInstrumentStartNoteStops && wParam <= kcInstrumentEndNoteStops)
 	{
-		ModCommand::NOTE note = static_cast<ModCommand::NOTE>(wParam - kcInstrumentStartNoteStops + 1 + pMainFrm->GetBaseOctave() * 12);
+		ModCommand::NOTE note = pModDoc->GetNoteWithBaseOctave(static_cast<int>(wParam - kcInstrumentStartNoteStops), m_nInstrument);
 		if(ModCommand::IsNote(note))
 		{
 			m_baPlayingNote[note] = false;

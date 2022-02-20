@@ -257,6 +257,7 @@ public:
 	}
 	// Get ModCommand at the pattern cursor position.
 	ModCommand &GetCursorCommand() { return GetModCommand(m_Cursor); };
+	const ModCommand& GetCursorCommand() const { return const_cast<CViewPattern *>(this)->GetModCommand(m_Cursor); };
 	void SanitizeCursor();
 
 	UINT GetColumnOffset(PatternCursor::Columns column) const;
@@ -347,6 +348,8 @@ public:
 	void EnterAftertouch(ModCommand::NOTE note, int atValue);
 
 	int GetDefaultVolume(const ModCommand &m, ModCommand::INSTR lastInstr = 0) const;
+	int GetBaseNote() const;
+	ModCommand::NOTE GetNoteWithBaseOctave(int note) const;
 
 	// Construct a chord from the chord presets. Returns number of notes in chord.
 	int ConstructChord(int note, ModCommand::NOTE (&outNotes)[MPTChord::notesPerChord], ModCommand::NOTE baseNote);

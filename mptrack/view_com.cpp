@@ -189,17 +189,16 @@ LRESULT CViewComments::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 		return kcNull;
 
 	auto modDoc = GetDocument();
-	const auto noteOffset = wParam + NOTE_MIN + CMainFrame::GetMainFrame()->GetBaseOctave() * 12;
-	const auto lastInstr = m_noteInstr;
 	if(wParam >= kcCommentsStartNotes && wParam <= kcCommentsEndNotes)
 	{
-		const auto note = static_cast<ModCommand::NOTE>(noteOffset - kcCommentsStartNotes);
+		const auto lastInstr = m_noteInstr;
+		m_noteInstr = (m_nListId == IDC_LIST_SAMPLES) ? INSTRUMENTINDEX_INVALID : static_cast<INSTRUMENTINDEX>(item);
+		const auto note = modDoc->GetNoteWithBaseOctave(static_cast<int>(wParam - kcCommentsStartNotes), m_noteInstr);
 		PlayNoteParam params(note);
-		m_noteInstr = INSTRUMENTINDEX_INVALID;
 		if(m_nListId == IDC_LIST_SAMPLES)
 			params.Sample(static_cast<SAMPLEINDEX>(item));
 		else if(m_nListId == IDC_LIST_INSTRUMENTS)
-			params.Instrument(m_noteInstr = static_cast<INSTRUMENTINDEX>(item));
+			params.Instrument(m_noteInstr);
 		else
 			return kcNull;
 		if(m_lastNote != NOTE_NONE)
@@ -209,8 +208,8 @@ LRESULT CViewComments::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 		return wParam;
 	} else if(wParam >= kcCommentsStartNoteStops && wParam <= kcCommentsEndNoteStops)
 	{
-		const auto note = static_cast<ModCommand::NOTE>(noteOffset - kcCommentsStartNoteStops);
-		modDoc->NoteOff(note, false, lastInstr, m_noteChannel);
+		const auto note = modDoc->GetNoteWithBaseOctave(static_cast<int>(wParam - kcCommentsStartNoteStops), m_noteInstr);
+		modDoc->NoteOff(note, false, m_noteInstr, m_noteChannel);
 		return wParam;
 	} else if(wParam == kcToggleSmpInsList)
 	{

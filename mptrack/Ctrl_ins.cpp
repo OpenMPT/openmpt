@@ -561,7 +561,6 @@ void CNoteMapWnd::OnInstrumentDuplicate()
 
 LRESULT CNoteMapWnd::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 {
-	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	ModInstrument *pIns = m_modDoc.GetSoundFile().Instruments[m_nInstrument];
 
 	// Handle notes
@@ -573,7 +572,7 @@ LRESULT CNoteMapWnd::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		if(m_bIns && ((key >= '0' && key <= '9') || (key == ' ')))
 			HandleChar(key);
 		else
-			EnterNote(static_cast<uint32>(wParam - kcInsNoteMapStartNotes + 1 + pMainFrm->GetBaseOctave() * 12));
+			EnterNote(m_modDoc.GetNoteWithBaseOctave(static_cast<int>(wParam - kcInsNoteMapStartNotes), m_nInstrument));
 
 		return wParam;
 	}

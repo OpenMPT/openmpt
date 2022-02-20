@@ -2935,6 +2935,26 @@ int CViewPattern::GetDefaultVolume(const ModCommand &m, ModCommand::INSTR lastIn
 }
 
 
+int CViewPattern::GetBaseNote() const
+{
+	const CModDoc *modDoc = GetDocument();
+	INSTRUMENTINDEX instr = static_cast<INSTRUMENTINDEX>(GetCurrentInstrument());
+	if(!instr && !IsLiveRecord())
+		instr = GetCursorCommand().instr;
+	return modDoc->GetBaseNote(instr);
+}
+
+
+ModCommand::NOTE CViewPattern::GetNoteWithBaseOctave(int note) const
+{
+	const CModDoc *modDoc = GetDocument();
+	INSTRUMENTINDEX instr = static_cast<INSTRUMENTINDEX>(GetCurrentInstrument());
+	if(!instr && !IsLiveRecord())
+		instr = GetCursorCommand().instr;
+	return modDoc->GetNoteWithBaseOctave(note, instr);
+}
+
+
 void CViewPattern::OnDropSelection()
 {
 	CModDoc *pModDoc;
@@ -4138,7 +4158,6 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		return kcNull;
 
 	CSoundFile &sndFile = pModDoc->GetSoundFile();
-	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 
 	switch(wParam)
 	{
@@ -4497,22 +4516,22 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 	if(wParam >= kcVPStartNotes && wParam <= kcVPEndNotes)
 	{
 		if(enterNote)
-			TempEnterNote(static_cast<ModCommand::NOTE>(wParam - kcVPStartNotes + 1 + pMainFrm->GetBaseOctave() * 12));
+			TempEnterNote(GetNoteWithBaseOctave(static_cast<int>(wParam - kcVPStartNotes)));
 		return wParam;
 	} else if(wParam >= kcVPStartChords && wParam <= kcVPEndChords)
 	{
 		if(enterNote)
-			TempEnterChord(static_cast<ModCommand::NOTE>(wParam - kcVPStartChords + 1 + pMainFrm->GetBaseOctave() * 12));
+			TempEnterChord(GetNoteWithBaseOctave(static_cast<int>(wParam - kcVPStartChords)));
 		return wParam;
 	}
 
 	if(wParam >= kcVPStartNoteStops && wParam <= kcVPEndNoteStops)
 	{
-		TempStopNote(static_cast<ModCommand::NOTE>(wParam - kcVPStartNoteStops + 1 + pMainFrm->GetBaseOctave() * 12));
+		TempStopNote(GetNoteWithBaseOctave(static_cast<int>(wParam - kcVPStartNoteStops)));
 		return wParam;
 	} else if(wParam >= kcVPStartChordStops && wParam <= kcVPEndChordStops)
 	{
-		TempStopChord(static_cast<ModCommand::NOTE>(wParam - kcVPStartChordStops + 1 + pMainFrm->GetBaseOctave() * 12));
+		TempStopChord(GetNoteWithBaseOctave(static_cast<int>(wParam - kcVPStartChordStops)));
 		return wParam;
 	}
 
@@ -4843,7 +4862,7 @@ void CViewPattern::TempStopNote(ModCommand::NOTE note, const bool fromMidi, bool
 {
 	CModDoc *pModDoc = GetDocument();
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	if(pModDoc == nullptr || pMainFrm == nullptr)
+	if(pModDoc == nullptr || pMainFrm == nullptr || !ModCommand::IsNote(note))
 	{
 		return;
 	}
@@ -4853,11 +4872,7 @@ void CViewPattern::TempStopNote(ModCommand::NOTE note, const bool fromMidi, bool
 		return;
 	}
 	const CModSpecifications &specs = sndFile.GetModSpecifications();
-
-	if(!ModCommand::IsSpecialNote(note))
-	{
-		Limit(note, specs.noteMin, specs.noteMax);
-	}
+	Limit(note, specs.noteMin, specs.noteMax);
 
 	const bool liveRecord = IsLiveRecord();
 	const bool isSplit = IsNoteSplit(note);
@@ -5476,8 +5491,7 @@ void CViewPattern::PreviewNote(ROWINDEX row, CHANNELINDEX channel)
 int CViewPattern::ConstructChord(int note, ModCommand::NOTE (&outNotes)[MPTChord::notesPerChord], ModCommand::NOTE baseNote)
 {
 	const MPTChords &chords = TrackerSettings::GetChords();
-	UINT baseOctave = CMainFrame::GetMainFrame()->GetBaseOctave();
-	UINT chordNum = note - baseOctave * 12 - NOTE_MIN;
+	UINT chordNum = note - GetBaseNote();
 
 	if(chordNum >= chords.size())
 	{
@@ -5495,7 +5509,7 @@ int CViewPattern::ConstructChord(int note, ModCommand::NOTE (&outNotes)[MPTChord
 	} else
 	{
 		// Default mode: Use base key
-		key = static_cast<ModCommand::NOTE>(chord.key + baseOctave * 12 + NOTE_MIN);
+		key = GetNoteWithBaseOctave(chord.key);
 	}
 	if(!ModCommand::IsNote(key))
 	{
