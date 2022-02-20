@@ -916,7 +916,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 		
 			if(m_playBehaviour[kST3EffectMemory] && param != 0)
 			{
-				UpdateS3MEffectMemory(&chn, param);
+				UpdateS3MEffectMemory(pChn, param);
 			}
 		}
 
