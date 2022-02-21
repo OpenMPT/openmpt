@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.3.38-pre
 
+ *  FLAC: Update to v1.3.4 (2022-02-21).
+
 ### libopenmpt 0.3.37 (2022-01-30)
 
  *  [**Bug**] Possible hang with malformed DMF, DSM and OKT files containing
