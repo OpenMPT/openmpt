@@ -937,7 +937,7 @@ void IMidiPlugin::MidiCommand(const ModInstrument &instr, uint16 note, uint16 vo
 	if(note & MIDI_NOTE_OFF)
 	{
 		uint8 i = rawNote - NOTE_MIN;
-		if(channel.noteOnMap[i][trackChannel])
+		if(i < mpt::array_size<decltype(channel.noteOnMap)>::size && channel.noteOnMap[i][trackChannel])
 		{
 			channel.noteOnMap[i][trackChannel]--;
 			MidiSend(MIDIEvents::NoteOff(midiCh, i, 0));
