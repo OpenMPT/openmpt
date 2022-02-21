@@ -7,6 +7,7 @@ is just a high-level summary.
 
 ### libopenmpt 0.5.17-pre
 
+ *  FLAC: Update to v1.3.4 (2022-02-21).
  *  pugixml: Update to v1.12.1 (2022-02-16).
 
 ### libopenmpt 0.5.16 (2022-01-30)
