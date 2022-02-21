@@ -1,13 +1,6 @@
-flac 1.3.3.
+flac 1.3.4.
 The FLAC package has been left pretty much untouched, except for a few changes:
  *  Obviously, unnecessary folders and files (documentation, makefiles, etc.) have
     been removed.
- *  The following commits from git master have been applied:
-     *  https://github.com/xiph/flac/commit/66dd7f05d7dc973f8ce55d24ebcc88447242d4e5
-     *  https://github.com/xiph/flac/commit/04974d271531d429384a6f124919ff64fbbefd81
-     *  https://github.com/xiph/flac/commit/c34c3459b514df02d922a882d406986e7f47afa4
-     *  https://github.com/xiph/flac/commit/09f47c00e18a77390acfc2e725564542756effaf
-     *  https://github.com/xiph/flac/commit/8147ee7ea214195bddab403840c95d4c748bfedc
-     *  https://github.com/xiph/flac/commit/5598543a9663a846a0b7e42f395207bc44381e41
  *  For building, premake is used to generate Visual Studio project files.
     See ../build/premake/ for details.
