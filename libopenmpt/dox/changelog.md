@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.4.30-pre
 
+ *  FLAC: Update to v1.3.4 (2022-02-21).
+
 ### libopenmpt 0.4.29 (2022-01-30)
 
  *  [**Bug**] This release is identical to 0.4.28. It happened due to running
