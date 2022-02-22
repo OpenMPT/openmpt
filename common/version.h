@@ -79,7 +79,7 @@ public:
 		return m_Version;
 	}
 
-	MPT_FORCEINLINE Version Masked(uint32 mask) const noexcept
+	MPT_CONSTEXPRINLINE Version Masked(uint32 mask) const noexcept
 	{
 		return Version(m_Version & mask);
 	}
