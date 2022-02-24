@@ -384,13 +384,13 @@
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
-    <OutDir>..\..\lib\vs2022win10\arm\Debug\</OutDir>
+    <OutDir>..\..\lib\vs2022win10\ARM\Debug\</OutDir>
     <IntDir>..\..\obj\vs2022win10\portaudiocpp\arm\Debug\</IntDir>
     <TargetName>openmpt-portaudiocpp</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
-    <OutDir>..\..\lib\vs2022win10\arm64\Debug\</OutDir>
+    <OutDir>..\..\lib\vs2022win10\ARM64\Debug\</OutDir>
     <IntDir>..\..\obj\vs2022win10\portaudiocpp\arm64\Debug\</IntDir>
     <TargetName>openmpt-portaudiocpp</TargetName>
     <TargetExt>.lib</TargetExt>
@@ -408,13 +408,13 @@
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
-    <OutDir>..\..\lib\vs2022win10\arm\Release\</OutDir>
+    <OutDir>..\..\lib\vs2022win10\ARM\Release\</OutDir>
     <IntDir>..\..\obj\vs2022win10\portaudiocpp\arm\Release\</IntDir>
     <TargetName>openmpt-portaudiocpp</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
-    <OutDir>..\..\lib\vs2022win10\arm64\Release\</OutDir>
+    <OutDir>..\..\lib\vs2022win10\ARM64\Release\</OutDir>
     <IntDir>..\..\obj\vs2022win10\portaudiocpp\arm64\Release\</IntDir>
     <TargetName>openmpt-portaudiocpp</TargetName>
     <TargetExt>.lib</TargetExt>
@@ -432,13 +432,13 @@
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Checked|ARM'">
-    <OutDir>..\..\lib\vs2022win10\arm\Checked\</OutDir>
+    <OutDir>..\..\lib\vs2022win10\ARM\Checked\</OutDir>
     <IntDir>..\..\obj\vs2022win10\portaudiocpp\arm\Checked\</IntDir>
     <TargetName>openmpt-portaudiocpp</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Checked|ARM64'">
-    <OutDir>..\..\lib\vs2022win10\arm64\Checked\</OutDir>
+    <OutDir>..\..\lib\vs2022win10\ARM64\Checked\</OutDir>
     <IntDir>..\..\obj\vs2022win10\portaudiocpp\arm64\Checked\</IntDir>
     <TargetName>openmpt-portaudiocpp</TargetName>
     <TargetExt>.lib</TargetExt>
@@ -456,13 +456,13 @@
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|ARM'">
-    <OutDir>..\..\lib\vs2022win10\arm\DebugShared\</OutDir>
+    <OutDir>..\..\lib\vs2022win10\ARM\DebugShared\</OutDir>
     <IntDir>..\..\obj\vs2022win10\portaudiocpp\arm\DebugShared\</IntDir>
     <TargetName>openmpt-portaudiocpp</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|ARM64'">
-    <OutDir>..\..\lib\vs2022win10\arm64\DebugShared\</OutDir>
+    <OutDir>..\..\lib\vs2022win10\ARM64\DebugShared\</OutDir>
     <IntDir>..\..\obj\vs2022win10\portaudiocpp\arm64\DebugShared\</IntDir>
     <TargetName>openmpt-portaudiocpp</TargetName>
     <TargetExt>.lib</TargetExt>
@@ -480,13 +480,13 @@
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|ARM'">
-    <OutDir>..\..\lib\vs2022win10\arm\ReleaseShared\</OutDir>
+    <OutDir>..\..\lib\vs2022win10\ARM\ReleaseShared\</OutDir>
     <IntDir>..\..\obj\vs2022win10\portaudiocpp\arm\ReleaseShared\</IntDir>
     <TargetName>openmpt-portaudiocpp</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|ARM64'">
-    <OutDir>..\..\lib\vs2022win10\arm64\ReleaseShared\</OutDir>
+    <OutDir>..\..\lib\vs2022win10\ARM64\ReleaseShared\</OutDir>
     <IntDir>..\..\obj\vs2022win10\portaudiocpp\arm64\ReleaseShared\</IntDir>
     <TargetName>openmpt-portaudiocpp</TargetName>
     <TargetExt>.lib</TargetExt>
@@ -504,13 +504,13 @@
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|ARM'">
-    <OutDir>..\..\lib\vs2022win10\arm\CheckedShared\</OutDir>
+    <OutDir>..\..\lib\vs2022win10\ARM\CheckedShared\</OutDir>
     <IntDir>..\..\obj\vs2022win10\portaudiocpp\arm\CheckedShared\</IntDir>
     <TargetName>openmpt-portaudiocpp</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|ARM64'">
-    <OutDir>..\..\lib\vs2022win10\arm64\CheckedShared\</OutDir>
+    <OutDir>..\..\lib\vs2022win10\ARM64\CheckedShared\</OutDir>
     <IntDir>..\..\obj\vs2022win10\portaudiocpp\arm64\CheckedShared\</IntDir>
     <TargetName>openmpt-portaudiocpp</TargetName>
     <TargetExt>.lib</TargetExt>

@@ -368,14 +368,14 @@
     <IgnoreImportLibrary>false</IgnoreImportLibrary>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
-    <OutDir>..\..\lib\vs2022uwp\arm\Debug\</OutDir>
+    <OutDir>..\..\lib\vs2022uwp\ARM\Debug\</OutDir>
     <IntDir>..\..\obj\vs2022uwp\rtmidi\arm\Debug\</IntDir>
     <TargetName>openmpt-rtmidi</TargetName>
     <TargetExt>.lib</TargetExt>
     <IgnoreImportLibrary>false</IgnoreImportLibrary>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
-    <OutDir>..\..\lib\vs2022uwp\arm64\Debug\</OutDir>
+    <OutDir>..\..\lib\vs2022uwp\ARM64\Debug\</OutDir>
     <IntDir>..\..\obj\vs2022uwp\rtmidi\arm64\Debug\</IntDir>
     <TargetName>openmpt-rtmidi</TargetName>
     <TargetExt>.lib</TargetExt>
@@ -396,14 +396,14 @@
     <IgnoreImportLibrary>false</IgnoreImportLibrary>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
-    <OutDir>..\..\lib\vs2022uwp\arm\Release\</OutDir>
+    <OutDir>..\..\lib\vs2022uwp\ARM\Release\</OutDir>
     <IntDir>..\..\obj\vs2022uwp\rtmidi\arm\Release\</IntDir>
     <TargetName>openmpt-rtmidi</TargetName>
     <TargetExt>.lib</TargetExt>
     <IgnoreImportLibrary>false</IgnoreImportLibrary>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
-    <OutDir>..\..\lib\vs2022uwp\arm64\Release\</OutDir>
+    <OutDir>..\..\lib\vs2022uwp\ARM64\Release\</OutDir>
     <IntDir>..\..\obj\vs2022uwp\rtmidi\arm64\Release\</IntDir>
     <TargetName>openmpt-rtmidi</TargetName>
     <TargetExt>.lib</TargetExt>
@@ -424,14 +424,14 @@
     <IgnoreImportLibrary>false</IgnoreImportLibrary>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Checked|ARM'">
-    <OutDir>..\..\lib\vs2022uwp\arm\Checked\</OutDir>
+    <OutDir>..\..\lib\vs2022uwp\ARM\Checked\</OutDir>
     <IntDir>..\..\obj\vs2022uwp\rtmidi\arm\Checked\</IntDir>
     <TargetName>openmpt-rtmidi</TargetName>
     <TargetExt>.lib</TargetExt>
     <IgnoreImportLibrary>false</IgnoreImportLibrary>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Checked|ARM64'">
-    <OutDir>..\..\lib\vs2022uwp\arm64\Checked\</OutDir>
+    <OutDir>..\..\lib\vs2022uwp\ARM64\Checked\</OutDir>
     <IntDir>..\..\obj\vs2022uwp\rtmidi\arm64\Checked\</IntDir>
     <TargetName>openmpt-rtmidi</TargetName>
     <TargetExt>.lib</TargetExt>
@@ -452,14 +452,14 @@
     <IgnoreImportLibrary>false</IgnoreImportLibrary>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|ARM'">
-    <OutDir>..\..\lib\vs2022uwp\arm\DebugShared\</OutDir>
+    <OutDir>..\..\lib\vs2022uwp\ARM\DebugShared\</OutDir>
     <IntDir>..\..\obj\vs2022uwp\rtmidi\arm\DebugShared\</IntDir>
     <TargetName>openmpt-rtmidi</TargetName>
     <TargetExt>.lib</TargetExt>
     <IgnoreImportLibrary>false</IgnoreImportLibrary>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|ARM64'">
-    <OutDir>..\..\lib\vs2022uwp\arm64\DebugShared\</OutDir>
+    <OutDir>..\..\lib\vs2022uwp\ARM64\DebugShared\</OutDir>
     <IntDir>..\..\obj\vs2022uwp\rtmidi\arm64\DebugShared\</IntDir>
     <TargetName>openmpt-rtmidi</TargetName>
     <TargetExt>.lib</TargetExt>
@@ -480,14 +480,14 @@
     <IgnoreImportLibrary>false</IgnoreImportLibrary>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|ARM'">
-    <OutDir>..\..\lib\vs2022uwp\arm\ReleaseShared\</OutDir>
+    <OutDir>..\..\lib\vs2022uwp\ARM\ReleaseShared\</OutDir>
     <IntDir>..\..\obj\vs2022uwp\rtmidi\arm\ReleaseShared\</IntDir>
     <TargetName>openmpt-rtmidi</TargetName>
     <TargetExt>.lib</TargetExt>
     <IgnoreImportLibrary>false</IgnoreImportLibrary>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|ARM64'">
-    <OutDir>..\..\lib\vs2022uwp\arm64\ReleaseShared\</OutDir>
+    <OutDir>..\..\lib\vs2022uwp\ARM64\ReleaseShared\</OutDir>
     <IntDir>..\..\obj\vs2022uwp\rtmidi\arm64\ReleaseShared\</IntDir>
     <TargetName>openmpt-rtmidi</TargetName>
     <TargetExt>.lib</TargetExt>
@@ -508,14 +508,14 @@
     <IgnoreImportLibrary>false</IgnoreImportLibrary>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|ARM'">
-    <OutDir>..\..\lib\vs2022uwp\arm\CheckedShared\</OutDir>
+    <OutDir>..\..\lib\vs2022uwp\ARM\CheckedShared\</OutDir>
     <IntDir>..\..\obj\vs2022uwp\rtmidi\arm\CheckedShared\</IntDir>
     <TargetName>openmpt-rtmidi</TargetName>
     <TargetExt>.lib</TargetExt>
     <IgnoreImportLibrary>false</IgnoreImportLibrary>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|ARM64'">
-    <OutDir>..\..\lib\vs2022uwp\arm64\CheckedShared\</OutDir>
+    <OutDir>..\..\lib\vs2022uwp\ARM64\CheckedShared\</OutDir>
     <IntDir>..\..\obj\vs2022uwp\rtmidi\arm64\CheckedShared\</IntDir>
     <TargetName>openmpt-rtmidi</TargetName>
     <TargetExt>.lib</TargetExt>

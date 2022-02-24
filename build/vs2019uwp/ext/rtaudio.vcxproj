@@ -368,14 +368,14 @@
     <IgnoreImportLibrary>false</IgnoreImportLibrary>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
-    <OutDir>..\..\lib\vs2019uwp\arm\Debug\</OutDir>
+    <OutDir>..\..\lib\vs2019uwp\ARM\Debug\</OutDir>
     <IntDir>..\..\obj\vs2019uwp\rtaudio\arm\Debug\</IntDir>
     <TargetName>openmpt-rtaudio</TargetName>
     <TargetExt>.lib</TargetExt>
     <IgnoreImportLibrary>false</IgnoreImportLibrary>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
-    <OutDir>..\..\lib\vs2019uwp\arm64\Debug\</OutDir>
+    <OutDir>..\..\lib\vs2019uwp\ARM64\Debug\</OutDir>
     <IntDir>..\..\obj\vs2019uwp\rtaudio\arm64\Debug\</IntDir>
     <TargetName>openmpt-rtaudio</TargetName>
     <TargetExt>.lib</TargetExt>
@@ -396,14 +396,14 @@
     <IgnoreImportLibrary>false</IgnoreImportLibrary>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
-    <OutDir>..\..\lib\vs2019uwp\arm\Release\</OutDir>
+    <OutDir>..\..\lib\vs2019uwp\ARM\Release\</OutDir>
     <IntDir>..\..\obj\vs2019uwp\rtaudio\arm\Release\</IntDir>
     <TargetName>openmpt-rtaudio</TargetName>
     <TargetExt>.lib</TargetExt>
     <IgnoreImportLibrary>false</IgnoreImportLibrary>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
-    <OutDir>..\..\lib\vs2019uwp\arm64\Release\</OutDir>
+    <OutDir>..\..\lib\vs2019uwp\ARM64\Release\</OutDir>
     <IntDir>..\..\obj\vs2019uwp\rtaudio\arm64\Release\</IntDir>
     <TargetName>openmpt-rtaudio</TargetName>
     <TargetExt>.lib</TargetExt>
@@ -424,14 +424,14 @@
     <IgnoreImportLibrary>false</IgnoreImportLibrary>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Checked|ARM'">
-    <OutDir>..\..\lib\vs2019uwp\arm\Checked\</OutDir>
+    <OutDir>..\..\lib\vs2019uwp\ARM\Checked\</OutDir>
     <IntDir>..\..\obj\vs2019uwp\rtaudio\arm\Checked\</IntDir>
     <TargetName>openmpt-rtaudio</TargetName>
     <TargetExt>.lib</TargetExt>
     <IgnoreImportLibrary>false</IgnoreImportLibrary>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Checked|ARM64'">
-    <OutDir>..\..\lib\vs2019uwp\arm64\Checked\</OutDir>
+    <OutDir>..\..\lib\vs2019uwp\ARM64\Checked\</OutDir>
     <IntDir>..\..\obj\vs2019uwp\rtaudio\arm64\Checked\</IntDir>
     <TargetName>openmpt-rtaudio</TargetName>
     <TargetExt>.lib</TargetExt>
@@ -452,14 +452,14 @@
     <IgnoreImportLibrary>false</IgnoreImportLibrary>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|ARM'">
-    <OutDir>..\..\lib\vs2019uwp\arm\DebugShared\</OutDir>
+    <OutDir>..\..\lib\vs2019uwp\ARM\DebugShared\</OutDir>
     <IntDir>..\..\obj\vs2019uwp\rtaudio\arm\DebugShared\</IntDir>
     <TargetName>openmpt-rtaudio</TargetName>
     <TargetExt>.lib</TargetExt>
     <IgnoreImportLibrary>false</IgnoreImportLibrary>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|ARM64'">
-    <OutDir>..\..\lib\vs2019uwp\arm64\DebugShared\</OutDir>
+    <OutDir>..\..\lib\vs2019uwp\ARM64\DebugShared\</OutDir>
     <IntDir>..\..\obj\vs2019uwp\rtaudio\arm64\DebugShared\</IntDir>
     <TargetName>openmpt-rtaudio</TargetName>
     <TargetExt>.lib</TargetExt>
@@ -480,14 +480,14 @@
     <IgnoreImportLibrary>false</IgnoreImportLibrary>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|ARM'">
-    <OutDir>..\..\lib\vs2019uwp\arm\ReleaseShared\</OutDir>
+    <OutDir>..\..\lib\vs2019uwp\ARM\ReleaseShared\</OutDir>
     <IntDir>..\..\obj\vs2019uwp\rtaudio\arm\ReleaseShared\</IntDir>
     <TargetName>openmpt-rtaudio</TargetName>
     <TargetExt>.lib</TargetExt>
     <IgnoreImportLibrary>false</IgnoreImportLibrary>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|ARM64'">
-    <OutDir>..\..\lib\vs2019uwp\arm64\ReleaseShared\</OutDir>
+    <OutDir>..\..\lib\vs2019uwp\ARM64\ReleaseShared\</OutDir>
     <IntDir>..\..\obj\vs2019uwp\rtaudio\arm64\ReleaseShared\</IntDir>
     <TargetName>openmpt-rtaudio</TargetName>
     <TargetExt>.lib</TargetExt>
@@ -508,14 +508,14 @@
     <IgnoreImportLibrary>false</IgnoreImportLibrary>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|ARM'">
-    <OutDir>..\..\lib\vs2019uwp\arm\CheckedShared\</OutDir>
+    <OutDir>..\..\lib\vs2019uwp\ARM\CheckedShared\</OutDir>
     <IntDir>..\..\obj\vs2019uwp\rtaudio\arm\CheckedShared\</IntDir>
     <TargetName>openmpt-rtaudio</TargetName>
     <TargetExt>.lib</TargetExt>
     <IgnoreImportLibrary>false</IgnoreImportLibrary>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|ARM64'">
-    <OutDir>..\..\lib\vs2019uwp\arm64\CheckedShared\</OutDir>
+    <OutDir>..\..\lib\vs2019uwp\ARM64\CheckedShared\</OutDir>
     <IntDir>..\..\obj\vs2019uwp\rtaudio\arm64\CheckedShared\</IntDir>
     <TargetName>openmpt-rtaudio</TargetName>
     <TargetExt>.lib</TargetExt>

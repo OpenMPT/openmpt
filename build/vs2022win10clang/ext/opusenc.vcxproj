@@ -352,13 +352,13 @@
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
-    <OutDir>..\..\lib\vs2022win10clang\arm\Debug\</OutDir>
+    <OutDir>..\..\lib\vs2022win10clang\ARM\Debug\</OutDir>
     <IntDir>..\..\obj\vs2022win10clang\opusenc\arm\Debug\</IntDir>
     <TargetName>openmpt-opusenc</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
-    <OutDir>..\..\lib\vs2022win10clang\arm64\Debug\</OutDir>
+    <OutDir>..\..\lib\vs2022win10clang\ARM64\Debug\</OutDir>
     <IntDir>..\..\obj\vs2022win10clang\opusenc\arm64\Debug\</IntDir>
     <TargetName>openmpt-opusenc</TargetName>
     <TargetExt>.lib</TargetExt>
@@ -376,13 +376,13 @@
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
-    <OutDir>..\..\lib\vs2022win10clang\arm\Release\</OutDir>
+    <OutDir>..\..\lib\vs2022win10clang\ARM\Release\</OutDir>
     <IntDir>..\..\obj\vs2022win10clang\opusenc\arm\Release\</IntDir>
     <TargetName>openmpt-opusenc</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
-    <OutDir>..\..\lib\vs2022win10clang\arm64\Release\</OutDir>
+    <OutDir>..\..\lib\vs2022win10clang\ARM64\Release\</OutDir>
     <IntDir>..\..\obj\vs2022win10clang\opusenc\arm64\Release\</IntDir>
     <TargetName>openmpt-opusenc</TargetName>
     <TargetExt>.lib</TargetExt>
@@ -400,13 +400,13 @@
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Checked|ARM'">
-    <OutDir>..\..\lib\vs2022win10clang\arm\Checked\</OutDir>
+    <OutDir>..\..\lib\vs2022win10clang\ARM\Checked\</OutDir>
     <IntDir>..\..\obj\vs2022win10clang\opusenc\arm\Checked\</IntDir>
     <TargetName>openmpt-opusenc</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Checked|ARM64'">
-    <OutDir>..\..\lib\vs2022win10clang\arm64\Checked\</OutDir>
+    <OutDir>..\..\lib\vs2022win10clang\ARM64\Checked\</OutDir>
     <IntDir>..\..\obj\vs2022win10clang\opusenc\arm64\Checked\</IntDir>
     <TargetName>openmpt-opusenc</TargetName>
     <TargetExt>.lib</TargetExt>

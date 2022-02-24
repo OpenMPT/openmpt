@@ -384,13 +384,13 @@
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
-    <OutDir>..\..\lib\vs2019win10\arm\Debug\</OutDir>
+    <OutDir>..\..\lib\vs2019win10\ARM\Debug\</OutDir>
     <IntDir>..\..\obj\vs2019win10\stb_vorbis\arm\Debug\</IntDir>
     <TargetName>openmpt-stb_vorbis</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
-    <OutDir>..\..\lib\vs2019win10\arm64\Debug\</OutDir>
+    <OutDir>..\..\lib\vs2019win10\ARM64\Debug\</OutDir>
     <IntDir>..\..\obj\vs2019win10\stb_vorbis\arm64\Debug\</IntDir>
     <TargetName>openmpt-stb_vorbis</TargetName>
     <TargetExt>.lib</TargetExt>
@@ -408,13 +408,13 @@
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
-    <OutDir>..\..\lib\vs2019win10\arm\Release\</OutDir>
+    <OutDir>..\..\lib\vs2019win10\ARM\Release\</OutDir>
     <IntDir>..\..\obj\vs2019win10\stb_vorbis\arm\Release\</IntDir>
     <TargetName>openmpt-stb_vorbis</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
-    <OutDir>..\..\lib\vs2019win10\arm64\Release\</OutDir>
+    <OutDir>..\..\lib\vs2019win10\ARM64\Release\</OutDir>
     <IntDir>..\..\obj\vs2019win10\stb_vorbis\arm64\Release\</IntDir>
     <TargetName>openmpt-stb_vorbis</TargetName>
     <TargetExt>.lib</TargetExt>
@@ -432,13 +432,13 @@
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Checked|ARM'">
-    <OutDir>..\..\lib\vs2019win10\arm\Checked\</OutDir>
+    <OutDir>..\..\lib\vs2019win10\ARM\Checked\</OutDir>
     <IntDir>..\..\obj\vs2019win10\stb_vorbis\arm\Checked\</IntDir>
     <TargetName>openmpt-stb_vorbis</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Checked|ARM64'">
-    <OutDir>..\..\lib\vs2019win10\arm64\Checked\</OutDir>
+    <OutDir>..\..\lib\vs2019win10\ARM64\Checked\</OutDir>
     <IntDir>..\..\obj\vs2019win10\stb_vorbis\arm64\Checked\</IntDir>
     <TargetName>openmpt-stb_vorbis</TargetName>
     <TargetExt>.lib</TargetExt>

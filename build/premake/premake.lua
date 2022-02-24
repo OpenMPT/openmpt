@@ -55,51 +55,37 @@ newoption {
 
 mpt_projectpathname = _ACTION
 mpt_bindirsuffix = ""
-mpt_bindirsuffix32 = ""
-mpt_bindirsuffix64 = ""
 
 if _OPTIONS["uwp"] then
 	allplatforms = { "x86", "x86_64", "arm", "arm64" }
 	trkplatforms = { "x86", "x86_64", "arm", "arm64" }
 	mpt_projectpathname = mpt_projectpathname .. "uwp"
 	mpt_bindirsuffix = mpt_bindirsuffix .. "uwp"
-	mpt_bindirsuffix32 = mpt_bindirsuffix32 .. "uwp"
-	mpt_bindirsuffix64 = mpt_bindirsuffix64 .. "uwp"
 elseif _OPTIONS["win10"] then
 	allplatforms = { "x86", "x86_64", "arm", "arm64" }
 	trkplatforms = { "x86", "x86_64", "arm", "arm64" }
 	mpt_projectpathname = mpt_projectpathname .. "win10"
 	mpt_bindirsuffix = mpt_bindirsuffix .. "win10"
-	mpt_bindirsuffix32 = mpt_bindirsuffix32 .. "win10"
-	mpt_bindirsuffix64 = mpt_bindirsuffix64 .. "win10"
 elseif _OPTIONS["win81"] then
 	allplatforms = { "x86", "x86_64" }
 	trkplatforms = { "x86", "x86_64" }
 	mpt_projectpathname = mpt_projectpathname .. "win81"
 	mpt_bindirsuffix = mpt_bindirsuffix .. "win81"
-	mpt_bindirsuffix32 = mpt_bindirsuffix32 .. "win81"
-	mpt_bindirsuffix64 = mpt_bindirsuffix64 .. "win81"
 elseif _OPTIONS["win7"] then
 	allplatforms = { "x86", "x86_64" }
 	trkplatforms = { "x86", "x86_64" }
 	mpt_projectpathname = mpt_projectpathname .. "win7"
 	mpt_bindirsuffix = mpt_bindirsuffix .. "win7"
-	mpt_bindirsuffix32 = mpt_bindirsuffix32 .. "win7"
-	mpt_bindirsuffix64 = mpt_bindirsuffix64 .. "win7"
 elseif _OPTIONS["winxp"] then
 	allplatforms = { "x86", "x86_64" }
 	trkplatforms = { "x86", "x86_64" }
 	mpt_projectpathname = mpt_projectpathname .. "winxp"
 	mpt_bindirsuffix = mpt_bindirsuffix .. "winxp"
-	mpt_bindirsuffix32 = mpt_bindirsuffix32 .. "winxp"
-	mpt_bindirsuffix64 = mpt_bindirsuffix64 .. "winxp"
 end
 
 if _OPTIONS["clang"] then
 	mpt_projectpathname = mpt_projectpathname .. "clang"
 	mpt_bindirsuffix = mpt_bindirsuffix .. "clang"
-	mpt_bindirsuffix32 = mpt_bindirsuffix32 .. "clang"
-	mpt_bindirsuffix64 = mpt_bindirsuffix64 .. "clang"
 end
 
 

@@ -368,14 +368,14 @@
     <IgnoreImportLibrary>false</IgnoreImportLibrary>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
-    <OutDir>..\..\lib\vs2019uwp\arm\Debug\</OutDir>
+    <OutDir>..\..\lib\vs2019uwp\ARM\Debug\</OutDir>
     <IntDir>..\..\obj\vs2019uwp\UnRAR\arm\Debug\</IntDir>
     <TargetName>openmpt-unrar</TargetName>
     <TargetExt>.lib</TargetExt>
     <IgnoreImportLibrary>false</IgnoreImportLibrary>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
-    <OutDir>..\..\lib\vs2019uwp\arm64\Debug\</OutDir>
+    <OutDir>..\..\lib\vs2019uwp\ARM64\Debug\</OutDir>
     <IntDir>..\..\obj\vs2019uwp\UnRAR\arm64\Debug\</IntDir>
     <TargetName>openmpt-unrar</TargetName>
     <TargetExt>.lib</TargetExt>
@@ -396,14 +396,14 @@
     <IgnoreImportLibrary>false</IgnoreImportLibrary>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
-    <OutDir>..\..\lib\vs2019uwp\arm\Release\</OutDir>
+    <OutDir>..\..\lib\vs2019uwp\ARM\Release\</OutDir>
     <IntDir>..\..\obj\vs2019uwp\UnRAR\arm\Release\</IntDir>
     <TargetName>openmpt-unrar</TargetName>
     <TargetExt>.lib</TargetExt>
     <IgnoreImportLibrary>false</IgnoreImportLibrary>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
-    <OutDir>..\..\lib\vs2019uwp\arm64\Release\</OutDir>
+    <OutDir>..\..\lib\vs2019uwp\ARM64\Release\</OutDir>
     <IntDir>..\..\obj\vs2019uwp\UnRAR\arm64\Release\</IntDir>
     <TargetName>openmpt-unrar</TargetName>
     <TargetExt>.lib</TargetExt>
@@ -424,14 +424,14 @@
     <IgnoreImportLibrary>false</IgnoreImportLibrary>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Checked|ARM'">
-    <OutDir>..\..\lib\vs2019uwp\arm\Checked\</OutDir>
+    <OutDir>..\..\lib\vs2019uwp\ARM\Checked\</OutDir>
     <IntDir>..\..\obj\vs2019uwp\UnRAR\arm\Checked\</IntDir>
     <TargetName>openmpt-unrar</TargetName>
     <TargetExt>.lib</TargetExt>
     <IgnoreImportLibrary>false</IgnoreImportLibrary>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Checked|ARM64'">
-    <OutDir>..\..\lib\vs2019uwp\arm64\Checked\</OutDir>
+    <OutDir>..\..\lib\vs2019uwp\ARM64\Checked\</OutDir>
     <IntDir>..\..\obj\vs2019uwp\UnRAR\arm64\Checked\</IntDir>
     <TargetName>openmpt-unrar</TargetName>
     <TargetExt>.lib</TargetExt>
