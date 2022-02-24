@@ -1,5 +1,8 @@
 
 	filter {}
+		location ( "../../build/" .. mpt_projectpathname )
+
+	filter {}
 		preferredtoolarchitecture "x86_64"
 
 	filter { "platforms:x86" }

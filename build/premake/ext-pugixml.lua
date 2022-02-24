@@ -2,7 +2,7 @@
  project "pugixml"
   uuid "07B89124-7C71-42cc-81AB-62B09BB61F9B"
   language "C++"
-  location ( "../../build/" .. mpt_projectpathname .. "/ext" )
+  location ( "%{wks.location}" .. "/ext" )
   dofile "../../build/premake/premake-defaults-LIB.lua"
   targetname "openmpt-pugixml"
   includedirs { }

@@ -2,7 +2,7 @@
  project "ogg"
   uuid "d8d5e11c-f959-49ef-b741-b3f6de52ded8"
   language "C"
-  location ( "../../build/" .. mpt_projectpathname .. "/ext" )
+  location ( "%{wks.location}" .. "/ext" )
   dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
   targetname "openmpt-ogg"
   includedirs { "../../include/ogg/include" }

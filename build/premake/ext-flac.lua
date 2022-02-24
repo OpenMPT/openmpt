@@ -2,7 +2,7 @@
  project "flac"
   uuid "E599F5AA-F9A3-46CC-8DB0-C8DEFCEB90C5"
   language "C"
-  location ( "../../build/" .. mpt_projectpathname .. "/ext" )
+  location ( "%{wks.location}" .. "/ext" )
   dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
   targetname "openmpt-flac"
   local extincludedirs = {

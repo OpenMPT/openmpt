@@ -2,7 +2,6 @@
  project "xmp-openmpt"
   uuid "AEA14F53-ADB0-45E5-9823-81F4F36886C2"
   language "C++"
-  location ( "../../build/" .. mpt_projectpathname )
   vpaths { ["*"] = "../../libopenmpt/" }
   dofile "../../build/premake/premake-defaults-DLL.lua"
   warnings "Extra"

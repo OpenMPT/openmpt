@@ -3,7 +3,7 @@
   -- NOTE: Unlike the official libvorbis, we built everything into a single library instead of the vorbis, vorbisenc, vorbisfile split.
   uuid "b544dcb7-16e5-41bc-b51b-7ead8cfdfa05"
   language "C"
-  location ( "../../build/" .. mpt_projectpathname .. "/ext" )
+  location ( "%{wks.location}" .. "/ext" )
   dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
   targetname "openmpt-vorbis"
   local extincludedirs = {

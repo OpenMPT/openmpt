@@ -2,7 +2,7 @@
  project "opusenc"
   uuid "290bbf89-2572-4291-9d9c-ff021d4fd313"
   language "C"
-  location ( "../../build/" .. mpt_projectpathname .. "/ext" )
+  location ( "%{wks.location}" .. "/ext" )
   dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
   targetname "openmpt-opusenc"
   local extincludedirs = {

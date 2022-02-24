@@ -2,7 +2,7 @@
  project "lame"
   uuid "b545694a-ce2a-44f8-ba88-147c36369308"
   language "C"
-  location ( "../../build/" .. mpt_projectpathname .. "/ext" )
+  location ( "%{wks.location}" .. "/ext" )
   dofile "../../build/premake/premake-defaults-DLL.lua"
   targetname "openmpt-lame"
   includedirs { "../../include/lame/include" }

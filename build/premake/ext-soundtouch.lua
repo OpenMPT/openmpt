@@ -2,7 +2,7 @@
  project "soundtouch"
   uuid "F5F8F6DE-84CF-4E9D-91EA-D9B5E2AA36CD"
   language "C++"
-  location ( "../../build/" .. mpt_projectpathname .. "/ext" )
+  location ( "%{wks.location}" .. "/ext" )
   dofile "../../build/premake/premake-defaults-DLL.lua"
   targetname "openmpt-soundtouch"
   includedirs { "../../include/soundtouch/include" }

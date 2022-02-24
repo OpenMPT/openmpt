@@ -2,7 +2,6 @@
  project "updatesigntool"
   uuid "89b3630f-5728-4902-8258-d4dbc532e185"
   language "C++"
-  location ( "../../build/" .. mpt_projectpathname )
   vpaths { ["*"] = "../../" }
   dofile "../../build/premake/premake-defaults-EXE.lua"
   includedirs {

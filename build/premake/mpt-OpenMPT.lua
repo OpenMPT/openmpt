@@ -12,7 +12,6 @@ else
 	uuid "ba66db50-e2f0-4c9e-b650-0cca6c66e1c1"
 end
   language "C++"
-  location ( "../../build/" .. mpt_projectpathname )
   vpaths { ["*"] = "../../" }
   dofile "../../build/premake/premake-defaults-EXEGUI.lua"
 if stringmode == "UTF8" then
@@ -258,7 +257,6 @@ end
  project "OpenMPT-NativeSupport"
   uuid "563a631d-fe07-47bc-a98f-9fe5b3ebabfa"
   language "C++"
-  location ( "../../build/" .. mpt_projectpathname )
   vpaths { ["*"] = "../../" }
   dofile "../../build/premake/premake-defaults-DLL.lua"
   includedirs {
@@ -303,7 +301,6 @@ end
  project "OpenMPT-WineWrapper"
   uuid "f3da2bf5-e84a-4f71-80ab-884594863d3a"
   language "C"
-  location ( "../../build/" .. mpt_projectpathname )
   vpaths { ["*"] = "../../" }
   dofile "../../build/premake/premake-defaults-DLL.lua"
   includedirs {

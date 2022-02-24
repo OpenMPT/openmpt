@@ -2,7 +2,7 @@
  project "rtmidi"
   uuid "05BBD03D-0985-4D76-8DDD-534DA631C3A8"
   language "C++"
-  location ( "../../build/" .. mpt_projectpathname .. "/ext" )
+  location ( "%{wks.location}" .. "/ext" )
   dofile "../../build/premake/premake-defaults-LIB.lua"
   targetname "openmpt-rtmidi"
 	filter {}

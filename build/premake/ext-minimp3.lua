@@ -2,7 +2,7 @@
  project "minimp3"
   uuid "e88c4285-efb1-4226-bcac-e904ba792a48"
   language "C"
-  location ( "../../build/" .. mpt_projectpathname .. "/ext" )
+  location ( "%{wks.location}" .. "/ext" )
   dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
   targetname "openmpt-minimp3"
   includedirs { }

@@ -2,7 +2,6 @@
  project "libopenmpt"
   uuid "9C5101EF-3E20-4558-809B-277FDD50E878"
   language "C++"
-  location ( "../../build/" .. mpt_projectpathname )
   vpaths { ["*"] = "../../" }
   dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
   local extincludedirs = {

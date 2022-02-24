@@ -110,7 +110,6 @@ if _OPTIONS["group"] == "libopenmpt_test" then
 
 solution "libopenmpt_test"
 	startproject "libopenmpt_test"
- location ( "../../build/" .. mpt_projectpathname )
  configurations { "Debug", "Release", "Checked", "DebugShared", "ReleaseShared", "CheckedShared" }
  platforms ( allplatforms )
 
@@ -126,7 +125,6 @@ if _OPTIONS["group"] == "in_openmpt" then
 
 solution "in_openmpt"
 	startproject "in_openmpt"
- location ( "../../build/" .. mpt_projectpathname )
  configurations { "Debug", "Release", "Checked" }
  platforms { "x86" }
 
@@ -143,7 +141,6 @@ if _OPTIONS["group"] == "xmp-openmpt" then
 
 solution "xmp-openmpt"
 	startproject "xmp-openmpt"
- location ( "../../build/" .. mpt_projectpathname )
  configurations { "Debug", "Release", "Checked" }
  platforms { "x86" }
 
@@ -161,7 +158,6 @@ if _OPTIONS["group"] == "libopenmpt-small" then
 
 solution "libopenmpt-small"
 	startproject "libopenmpt-small"
- location ( "../../build/" .. mpt_projectpathname )
  configurations { "Debug", "Release", "Checked", "DebugShared", "ReleaseShared", "CheckedShared" }
  platforms ( allplatforms )
 
@@ -177,7 +173,6 @@ if _OPTIONS["group"] == "libopenmpt" then
 
 solution "libopenmpt"
 	startproject "libopenmpt"
- location ( "../../build/" .. mpt_projectpathname )
  configurations { "Debug", "Release", "Checked", "DebugShared", "ReleaseShared", "CheckedShared" }
  platforms ( allplatforms )
 
@@ -200,7 +195,6 @@ if _OPTIONS["group"] == "openmpt123" then
 
 solution "openmpt123"
 	startproject "openmpt123"
- location ( "../../build/" .. mpt_projectpathname )
  configurations { "Debug", "Release", "Checked", "DebugShared", "ReleaseShared", "CheckedShared" }
  platforms ( allplatforms )
 
@@ -219,7 +213,6 @@ if _OPTIONS["group"] == "PluginBridge" then
 
 solution "PluginBridge"
 	startproject "PluginBridge"
- location ( "../../build/" .. mpt_projectpathname )
  configurations { "Debug", "Release", "Checked" }
  platforms ( trkplatforms )
 
@@ -233,7 +226,6 @@ charset = "Unicode"
 stringmode = "UTF8"
 solution "OpenMPT-UTF8"
 	startproject "OpenMPT-UTF8"
- location ( "../../build/" .. mpt_projectpathname )
  configurations { "Debug", "Release", "Checked", "DebugShared", "ReleaseShared", "CheckedShared" }
  platforms ( trkplatforms )
 
@@ -264,7 +256,6 @@ charset = "MBCS"
 stringmode = "WCHAR"
 solution "OpenMPT-ANSI"
 	startproject "OpenMPT-ANSI"
- location ( "../../build/" .. mpt_projectpathname )
  configurations { "Debug", "Release", "Checked", "DebugShared", "ReleaseShared", "CheckedShared" }
  platforms ( trkplatforms )
 
@@ -295,7 +286,6 @@ charset = "Unicode"
 stringmode = "WCHAR"
 solution "OpenMPT"
 	startproject "OpenMPT"
- location ( "../../build/" .. mpt_projectpathname )
  configurations { "Debug", "Release", "Checked", "DebugShared", "ReleaseShared", "CheckedShared" }
  platforms ( trkplatforms )
 
@@ -328,7 +318,6 @@ end
 if _OPTIONS["group"] == "all-externals" then
 
 solution "all-externals"
- location ( "../../build/" .. mpt_projectpathname .. "/ext" )
  configurations { "Debug", "Release", "Checked", "DebugShared", "ReleaseShared", "CheckedShared" }
  platforms ( allplatforms )
 
