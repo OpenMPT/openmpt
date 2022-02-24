@@ -367,16 +367,26 @@ void MidiInOut::Resume()
 void MidiInOut::Suspend()
 {
 	// Suspend MIDI I/O
-	if(m_midiOut.isPortOpen() && m_sendTimingInfo)
+	if(m_midiOut.isPortOpen())
 	{
 		try
 		{
-			unsigned char message[1] = { 0xFC };	// Stop
-			m_midiOut.sendMessage(message, 1);
+			// Need to flush remaining events from HardAllNotesOff
+			for(const auto &message : m_outQueue)
+			{
+				m_midiOut.sendMessage(message.m_message, message.m_size);
+			}
+			m_outQueue.clear();
+			if(m_sendTimingInfo)
+			{
+				unsigned char message[1] = { 0xFC };	// Stop
+				m_midiOut.sendMessage(message, 1);
+			}
 		} catch(const RtMidiError &)
 		{
 		}
 	}
+
 	//CloseDevice(inputDevice);
 	CloseDevice(m_outputDevice);
 	m_clock.SetResolution(0);

@@ -1,5 +1,5 @@
 RtMidi cross-platform MIDI classes
-version 4.0.0 from https://github.com/thestk/rtmidi/
+commit e8ae727b4728b49dad5f9a2c312945148fa25454 from https://github.com/thestk/rtmidi/
 Files not used by OpenMPT (config/, doc/, msw/, tests/, build systems, C API)
 have been removed from this folder. No further local changes have been made.
 License.txt has been extracted from the readme for OpenMPT's license package.
