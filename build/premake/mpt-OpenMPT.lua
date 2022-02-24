@@ -2,23 +2,19 @@
 if charset == "Unicode" then
 if stringmode == "WCHAR" then
   project "OpenMPT"
-  mpt_projectname = "OpenMPT"
 	uuid "37FC32A4-8DDC-4A9C-A30C-62989DD8ACE9"
 else
   project "OpenMPT-UTF8"
-  mpt_projectname = "OpenMPT-UTF8"
 	uuid "e89507fa-a251-457e-9957-f6b453c77daf"
 end
 else
 	project "OpenMPT-ANSI"
-	mpt_projectname = "OpenMPT-ANSI"
 	uuid "ba66db50-e2f0-4c9e-b650-0cca6c66e1c1"
 end
   language "C++"
   location ( "../../build/" .. mpt_projectpathname )
   vpaths { ["*"] = "../../" }
   dofile "../../build/premake/premake-defaults-EXEGUI.lua"
-  dofile "../../build/premake/premake-defaults.lua"
 if stringmode == "UTF8" then
    targetname "OpenMPT-UTF8"
 elseif charset == "MBCS" then
@@ -264,9 +260,7 @@ end
   language "C++"
   location ( "../../build/" .. mpt_projectpathname )
   vpaths { ["*"] = "../../" }
-  mpt_projectname = "OpenMPT-NativeSupport"
   dofile "../../build/premake/premake-defaults-DLL.lua"
-  dofile "../../build/premake/premake-defaults.lua"
   includedirs {
    "../../src",
    "../../common",
@@ -311,9 +305,7 @@ end
   language "C"
   location ( "../../build/" .. mpt_projectpathname )
   vpaths { ["*"] = "../../" }
-  mpt_projectname = "OpenMPT-WineWrapper"
   dofile "../../build/premake/premake-defaults-DLL.lua"
-  dofile "../../build/premake/premake-defaults.lua"
   includedirs {
    "../../src",
    "../../common",

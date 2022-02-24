@@ -3,9 +3,7 @@
   uuid "BC116B29-9958-4389-B294-7529BB7C7D37"
   language "C++"
   location ( "../../build/" .. mpt_projectpathname .. "/ext" )
-  mpt_projectname = "r8brain"
   dofile "../../build/premake/premake-defaults-LIB.lua"
-  dofile "../../build/premake/premake-defaults.lua"
   targetname "openmpt-r8brain"
   includedirs { "../../include/r8brain" }
 	filter {}

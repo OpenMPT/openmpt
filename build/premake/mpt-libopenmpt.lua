@@ -4,9 +4,7 @@
   language "C++"
   location ( "../../build/" .. mpt_projectpathname )
   vpaths { ["*"] = "../../" }
-  mpt_projectname = "libopenmpt"
   dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
-  dofile "../../build/premake/premake-defaults.lua"
   local extincludedirs = {
    "../../include/mpg123/ports/MSVC++",
    "../../include/mpg123/src/libmpg123",
@@ -78,8 +76,8 @@
 	}
 	filter { "action:vs*", "kind:SharedLib or ConsoleApp or WindowedApp" }
 		resdefines {
-			"MPT_BUILD_VER_FILENAME=\"" .. mpt_projectname .. ".dll\"",
-			"MPT_BUILD_VER_FILEDESC=\"" .. mpt_projectname .. "\"",
+			"MPT_BUILD_VER_FILENAME=\"" .. "libopenmpt" .. ".dll\"",
+			"MPT_BUILD_VER_FILEDESC=\"" .. "libopenmpt" .. "\"",
 		}
 	filter { "action:vs*", "kind:SharedLib or ConsoleApp or WindowedApp" }
 		resincludedirs {

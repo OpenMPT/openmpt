@@ -4,9 +4,7 @@
   language "C++"
   location ( "../../build/" .. mpt_projectpathname )
   vpaths { ["*"] = "../../examples/" }
-  mpt_projectname = "libopenmpt_example_cxx"
   dofile "../../build/premake/premake-defaults-EXE.lua"
-  dofile "../../build/premake/premake-defaults.lua"
   warnings "Extra"
   local extincludedirs = {
    "../..",
@@ -36,9 +34,7 @@
   language "C"
   location ( "../../build/" .. mpt_projectpathname )
   vpaths { ["*"] = "../../examples/" }
-  mpt_projectname = "libopenmpt_example_c"
   dofile "../../build/premake/premake-defaults-EXE.lua"
-  dofile "../../build/premake/premake-defaults.lua"
   warnings "Extra"
   local extincludedirs = {
    "../..",
@@ -67,9 +63,7 @@
   language "C"
   location ( "../../build/" .. mpt_projectpathname )
   vpaths { ["*"] = "../../examples/" }
-  mpt_projectname = "libopenmpt_example_c_mem"
   dofile "../../build/premake/premake-defaults-EXE.lua"
-  dofile "../../build/premake/premake-defaults.lua"
   warnings "Extra"
   local extincludedirs = {
    "../..",
@@ -98,9 +92,7 @@
   language "C"
   location ( "../../build/" .. mpt_projectpathname )
   vpaths { ["*"] = "../../examples/" }
-  mpt_projectname = "libopenmpt_example_c_unsafe"
   dofile "../../build/premake/premake-defaults-EXE.lua"
-  dofile "../../build/premake/premake-defaults.lua"
   warnings "Extra"
   local extincludedirs = {
    "../..",
@@ -129,9 +121,7 @@
   language "C"
   location ( "../../build/" .. mpt_projectpathname )
   vpaths { ["*"] = "../../examples/" }
-  mpt_projectname = "libopenmpt_example_c_probe"
   dofile "../../build/premake/premake-defaults-EXE.lua"
-  dofile "../../build/premake/premake-defaults.lua"
   warnings "Extra"
   local extincludedirs = {
    "../..",

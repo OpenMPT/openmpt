@@ -3,9 +3,7 @@
   uuid "95CC809B-03FC-4EDB-BB20-FD07A698C05F"
   language "C++"
   location ( "../../build/" .. mpt_projectpathname .. "/ext" )
-  mpt_projectname = "unrar"
   dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
-  dofile "../../build/premake/premake-defaults.lua"
   targetname "openmpt-unrar"
   includedirs { "../../include/unrar" }
 	filter {}

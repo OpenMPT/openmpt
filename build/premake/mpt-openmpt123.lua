@@ -4,9 +4,7 @@
   language "C++"
   location ( "../../build/" .. mpt_projectpathname )
   vpaths { ["*"] = "../../" }
-  mpt_projectname = "openmpt123"
   dofile "../../build/premake/premake-defaults-EXE.lua"
-  dofile "../../build/premake/premake-defaults.lua"
   warnings "Extra"
   local extincludedirs = {
    "../..",
@@ -36,8 +34,8 @@
 	
 	filter { "action:vs*", "kind:SharedLib or ConsoleApp or WindowedApp" }
 		resdefines {
-			"MPT_BUILD_VER_FILENAME=\"" .. mpt_projectname .. ".exe\"",
-			"MPT_BUILD_VER_FILEDESC=\"" .. mpt_projectname .. "\"",
+			"MPT_BUILD_VER_FILENAME=\"" .. "openmpt123" .. ".exe\"",
+			"MPT_BUILD_VER_FILEDESC=\"" .. "openmpt123" .. "\"",
 		}
 	filter { "action:vs*", "kind:SharedLib or ConsoleApp or WindowedApp" }
 		resincludedirs {

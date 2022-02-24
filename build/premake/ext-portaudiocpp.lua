@@ -3,9 +3,7 @@
   uuid "627cf18a-c8ca-451e-afd0-8679cadfda6b"
   language "C++"
   location ( "../../build/" .. mpt_projectpathname .. "/ext" )
-  mpt_projectname = "portaudiocpp"
   dofile "../../build/premake/premake-defaults-LIB.lua"
-  dofile "../../build/premake/premake-defaults.lua"
   targetname "openmpt-portaudiocpp"
   includedirs { "../../include/portaudio/include", "../../include/portaudio/bindings/cpp/include" }
 	filter {}

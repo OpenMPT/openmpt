@@ -1,6 +1,6 @@
 
 	filter {}
-		objdir ( "../../build/obj/" .. mpt_projectpathname .. "/" .. mpt_projectname )
+		objdir ( "../../build/obj/" .. mpt_projectpathname .. "/" .. "%{prj.name}" )
 	filter {}
 
 	filter {}

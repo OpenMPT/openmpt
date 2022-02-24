@@ -4,9 +4,7 @@
   language "C++"
   location ( "../../build/" .. mpt_projectpathname )
   vpaths { ["*"] = "../../" }
-  mpt_projectname = "updatesigntool"
   dofile "../../build/premake/premake-defaults-EXE.lua"
-  dofile "../../build/premake/premake-defaults.lua"
   includedirs {
    "../../src",
    "../../common",

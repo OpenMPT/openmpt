@@ -3,9 +3,7 @@
   uuid "9a2d9099-e1a2-4287-b845-e3598ad24d70"
   language "C"
   location ( "../../build/" .. mpt_projectpathname .. "/ext" )
-  mpt_projectname = "opus"
   dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
-  dofile "../../build/premake/premake-defaults.lua"
   targetname "openmpt-opus"
   local extincludedirs = {
    "../../include/ogg/include",

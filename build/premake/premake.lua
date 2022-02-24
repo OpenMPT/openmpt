@@ -102,6 +102,11 @@ if _OPTIONS["clang"] then
 	mpt_bindirsuffix64 = mpt_bindirsuffix64 .. "clang"
 end
 
+
+dofile "../../build/premake/premake-defaults.lua"
+dofile "../../build/premake/premake-defaults-solution.lua"
+
+
 if _OPTIONS["group"] == "libopenmpt_test" then
 
 solution "libopenmpt_test"
@@ -109,7 +114,6 @@ solution "libopenmpt_test"
  location ( "../../build/" .. mpt_projectpathname )
  configurations { "Debug", "Release", "Checked", "DebugShared", "ReleaseShared", "CheckedShared" }
  platforms ( allplatforms )
-	dofile "../../build/premake/premake-defaults-solution.lua"
 
  dofile "../../build/premake/mpt-libopenmpt_test.lua"
  dofile "../../build/premake/ext-mpg123.lua"
@@ -126,7 +130,6 @@ solution "in_openmpt"
  location ( "../../build/" .. mpt_projectpathname )
  configurations { "Debug", "Release", "Checked" }
  platforms { "x86" }
-	dofile "../../build/premake/premake-defaults-solution.lua"
 
  dofile "../../build/premake/mpt-in_openmpt.lua"
  dofile "../../build/premake/mpt-libopenmpt.lua"
@@ -144,7 +147,6 @@ solution "xmp-openmpt"
  location ( "../../build/" .. mpt_projectpathname )
  configurations { "Debug", "Release", "Checked" }
  platforms { "x86" }
-	dofile "../../build/premake/premake-defaults-solution.lua"
 
  dofile "../../build/premake/mpt-xmp-openmpt.lua"
  dofile "../../build/premake/mpt-libopenmpt.lua"
@@ -163,7 +165,6 @@ solution "libopenmpt-small"
  location ( "../../build/" .. mpt_projectpathname )
  configurations { "Debug", "Release", "Checked", "DebugShared", "ReleaseShared", "CheckedShared" }
  platforms ( allplatforms )
-	dofile "../../build/premake/premake-defaults-solution.lua"
 
  dofile "../../build/premake/mpt-libopenmpt-small.lua"
  dofile "../../build/premake/ext-minimp3.lua"
@@ -180,7 +181,6 @@ solution "libopenmpt"
  location ( "../../build/" .. mpt_projectpathname )
  configurations { "Debug", "Release", "Checked", "DebugShared", "ReleaseShared", "CheckedShared" }
  platforms ( allplatforms )
-	dofile "../../build/premake/premake-defaults-solution.lua"
 
  dofile "../../build/premake/mpt-libopenmpt.lua"
  if not _OPTIONS["uwp"] then
@@ -204,7 +204,6 @@ solution "openmpt123"
  location ( "../../build/" .. mpt_projectpathname )
  configurations { "Debug", "Release", "Checked", "DebugShared", "ReleaseShared", "CheckedShared" }
  platforms ( allplatforms )
-	dofile "../../build/premake/premake-defaults-solution.lua"
 
  dofile "../../build/premake/mpt-openmpt123.lua"
  dofile "../../build/premake/mpt-libopenmpt.lua"
@@ -224,7 +223,6 @@ solution "PluginBridge"
  location ( "../../build/" .. mpt_projectpathname )
  configurations { "Debug", "Release", "Checked" }
  platforms ( trkplatforms )
-	dofile "../../build/premake/premake-defaults-solution.lua"
 
  dofile "../../build/premake/mpt-PluginBridge.lua"
 
@@ -239,7 +237,6 @@ solution "OpenMPT-UTF8"
  location ( "../../build/" .. mpt_projectpathname )
  configurations { "Debug", "Release", "Checked", "DebugShared", "ReleaseShared", "CheckedShared" }
  platforms ( trkplatforms )
-	dofile "../../build/premake/premake-defaults-solution.lua"
 
  dofile "../../build/premake/mpt-OpenMPT.lua"
  dofile "../../build/premake/mpt-PluginBridge.lua"
@@ -271,7 +268,6 @@ solution "OpenMPT-ANSI"
  location ( "../../build/" .. mpt_projectpathname )
  configurations { "Debug", "Release", "Checked", "DebugShared", "ReleaseShared", "CheckedShared" }
  platforms ( trkplatforms )
-	dofile "../../build/premake/premake-defaults-solution.lua"
 
  dofile "../../build/premake/mpt-OpenMPT.lua"
  dofile "../../build/premake/mpt-PluginBridge.lua"
@@ -303,7 +299,6 @@ solution "OpenMPT"
  location ( "../../build/" .. mpt_projectpathname )
  configurations { "Debug", "Release", "Checked", "DebugShared", "ReleaseShared", "CheckedShared" }
  platforms ( trkplatforms )
-	dofile "../../build/premake/premake-defaults-solution.lua"
 
  dofile "../../build/premake/mpt-OpenMPT.lua"
  dofile "../../build/premake/mpt-PluginBridge.lua"
@@ -337,7 +332,6 @@ solution "all-externals"
  location ( "../../build/" .. mpt_projectpathname .. "/ext" )
  configurations { "Debug", "Release", "Checked", "DebugShared", "ReleaseShared", "CheckedShared" }
  platforms ( allplatforms )
-	dofile "../../build/premake/premake-defaults-solution.lua"
 
  dofile "../../build/premake/ext-ancient.lua"
  dofile "../../build/premake/ext-flac.lua"

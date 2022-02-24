@@ -4,9 +4,7 @@
   language "C++"
   location ( "../../build/" .. mpt_projectpathname )
   vpaths { ["*"] = "../../" }
-  mpt_projectname = "libopenmpt_test"
   dofile "../../build/premake/premake-defaults-EXE.lua"
-  dofile "../../build/premake/premake-defaults.lua"
   local extincludedirs = {
    "../../include/mpg123/ports/MSVC++",
    "../../include/mpg123/src/libmpg123",

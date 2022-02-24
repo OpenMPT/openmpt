@@ -4,9 +4,7 @@
   language "C++"
   location ( "../../build/" .. mpt_projectpathname )
   vpaths { ["*"] = "../../" }
-  mpt_projectname = "PluginBridge"
   dofile "../../build/premake/premake-defaults-EXEGUI.lua"
-  dofile "../../build/premake/premake-defaults.lua"
   local extincludedirs = {
   }
 	filter { "action:vs*" }
@@ -75,9 +73,7 @@
   language "C++"
   location ( "../../build/" .. mpt_projectpathname )
   vpaths { ["*"] = "../../" }
-  mpt_projectname = "PluginBridgeLegacy"
   dofile "../../build/premake/premake-defaults-EXEGUI.lua"
-  dofile "../../build/premake/premake-defaults.lua"
   local extincludedirs = {
   }
 	filter { "action:vs*" }

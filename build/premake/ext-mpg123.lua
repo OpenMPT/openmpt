@@ -3,9 +3,7 @@
   uuid "7adfafb9-0a83-4d35-9891-fb24fdf30b53"
   language "C"
   location ( "../../build/" .. mpt_projectpathname .. "/ext" )
-  mpt_projectname = "mpg123"
   dofile "../../build/premake/premake-defaults-DLL.lua"
-  dofile "../../build/premake/premake-defaults.lua"
   targetname "openmpt-mpg123"
   includedirs {
    "../../include/mpg123/ports/MSVC++",
