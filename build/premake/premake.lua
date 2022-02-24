@@ -104,7 +104,6 @@ end
 
 
 dofile "../../build/premake/premake-defaults.lua"
-dofile "../../build/premake/premake-defaults-solution.lua"
 
 
 if _OPTIONS["group"] == "libopenmpt_test" then
