@@ -58,27 +58,22 @@ mpt_bindirsuffix = ""
 
 if _OPTIONS["uwp"] then
 	allplatforms = { "x86", "x86_64", "arm", "arm64" }
-	trkplatforms = { "x86", "x86_64", "arm", "arm64" }
 	mpt_projectpathname = mpt_projectpathname .. "uwp"
 	mpt_bindirsuffix = mpt_bindirsuffix .. "uwp"
 elseif _OPTIONS["win10"] then
 	allplatforms = { "x86", "x86_64", "arm", "arm64" }
-	trkplatforms = { "x86", "x86_64", "arm", "arm64" }
 	mpt_projectpathname = mpt_projectpathname .. "win10"
 	mpt_bindirsuffix = mpt_bindirsuffix .. "win10"
 elseif _OPTIONS["win81"] then
 	allplatforms = { "x86", "x86_64" }
-	trkplatforms = { "x86", "x86_64" }
 	mpt_projectpathname = mpt_projectpathname .. "win81"
 	mpt_bindirsuffix = mpt_bindirsuffix .. "win81"
 elseif _OPTIONS["win7"] then
 	allplatforms = { "x86", "x86_64" }
-	trkplatforms = { "x86", "x86_64" }
 	mpt_projectpathname = mpt_projectpathname .. "win7"
 	mpt_bindirsuffix = mpt_bindirsuffix .. "win7"
 elseif _OPTIONS["winxp"] then
 	allplatforms = { "x86", "x86_64" }
-	trkplatforms = { "x86", "x86_64" }
 	mpt_projectpathname = mpt_projectpathname .. "winxp"
 	mpt_bindirsuffix = mpt_bindirsuffix .. "winxp"
 end
@@ -200,7 +195,7 @@ if _OPTIONS["group"] == "PluginBridge" then
 solution "PluginBridge"
 	startproject "PluginBridge"
  configurations { "Debug", "Release", "Checked" }
- platforms ( trkplatforms )
+ platforms ( allplatforms )
 
  dofile "../../build/premake/mpt-PluginBridge.lua"
 
@@ -213,7 +208,7 @@ stringmode = "UTF8"
 solution "OpenMPT-UTF8"
 	startproject "OpenMPT-UTF8"
  configurations { "Debug", "Release", "Checked", "DebugShared", "ReleaseShared", "CheckedShared" }
- platforms ( trkplatforms )
+ platforms ( allplatforms )
 
  dofile "../../build/premake/mpt-OpenMPT.lua"
  dofile "../../build/premake/mpt-PluginBridge.lua"
@@ -243,7 +238,7 @@ stringmode = "WCHAR"
 solution "OpenMPT-ANSI"
 	startproject "OpenMPT-ANSI"
  configurations { "Debug", "Release", "Checked", "DebugShared", "ReleaseShared", "CheckedShared" }
- platforms ( trkplatforms )
+ platforms ( allplatforms )
 
  dofile "../../build/premake/mpt-OpenMPT.lua"
  dofile "../../build/premake/mpt-PluginBridge.lua"
@@ -273,7 +268,7 @@ stringmode = "WCHAR"
 solution "OpenMPT"
 	startproject "OpenMPT"
  configurations { "Debug", "Release", "Checked", "DebugShared", "ReleaseShared", "CheckedShared" }
- platforms ( trkplatforms )
+ platforms ( allplatforms )
 
  dofile "../../build/premake/mpt-OpenMPT.lua"
  dofile "../../build/premake/mpt-PluginBridge.lua"
