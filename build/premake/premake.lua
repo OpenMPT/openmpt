@@ -53,11 +53,7 @@ newoption {
 mpt_projectpathname = _ACTION
 mpt_bindirsuffix = ""
 
-if _OPTIONS["windows-family"] == "uwp" then
-	allplatforms = { "x86", "x86_64", "arm", "arm64" }
-	mpt_projectpathname = mpt_projectpathname .. "uwp"
-	mpt_bindirsuffix = mpt_bindirsuffix .. "uwp"
-elseif _OPTIONS["windows-version"] == "win10" then
+if _OPTIONS["windows-version"] == "win10" then
 	allplatforms = { "x86", "x86_64", "arm", "arm64" }
 	mpt_projectpathname = mpt_projectpathname .. "win10"
 	mpt_bindirsuffix = mpt_bindirsuffix .. "win10"
@@ -73,6 +69,11 @@ elseif _OPTIONS["windows-version"] == "winxp" then
 	allplatforms = { "x86", "x86_64" }
 	mpt_projectpathname = mpt_projectpathname .. "winxp"
 	mpt_bindirsuffix = mpt_bindirsuffix .. "winxp"
+end
+
+if _OPTIONS["windows-family"] == "uwp" then
+	mpt_projectpathname = mpt_projectpathname .. "uwp"
+	mpt_bindirsuffix = mpt_bindirsuffix .. "uwp"
 end
 
 if _OPTIONS["clang"] then

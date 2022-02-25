@@ -1527,11 +1527,11 @@ bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION).msvc.zip: bin/$
 	svn export ./build/vs2019win7             bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/vs2019win7             --native-eol CRLF
 	svn export ./build/vs2019win81            bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/vs2019win81            --native-eol CRLF
 	svn export ./build/vs2019win10            bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/vs2019win10            --native-eol CRLF
-	svn export ./build/vs2019uwp              bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/vs2019uwp              --native-eol CRLF
+	svn export ./build/vs2019win10uwp         bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/vs2019win10uwp         --native-eol CRLF
 	svn export ./build/vs2022win7             bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/vs2022win7             --native-eol CRLF
 	svn export ./build/vs2022win81            bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/vs2022win81            --native-eol CRLF
 	svn export ./build/vs2022win10            bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/vs2022win10            --native-eol CRLF
-	svn export ./build/vs2022uwp              bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/vs2022uwp              --native-eol CRLF
+	svn export ./build/vs2022win10uwp         bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/vs2022win10uwp         --native-eol CRLF
 	svn export ./build/vs2022win10clang       bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/vs2022win10clang       --native-eol CRLF
 	svn export ./build/download_externals.cmd bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/download_externals.cmd --native-eol CRLF
 	svn export ./common                bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/common                --native-eol CRLF
