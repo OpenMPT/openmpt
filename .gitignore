@@ -42,23 +42,23 @@
 /build/vs2017winxp/Debug
 /build/vs2017winxp/OpenMPT-custom.*
 /build/vs2017winxp/Release
-/build/vs2019uwp/.vs
 /build/vs2019win10/*.user
 /build/vs2019win10/.vs
+/build/vs2019win10uwp/.vs
 /build/vs2019win7/*.user
 /build/vs2019win7/.vs
 /build/vs2019win81/*.user
 /build/vs2019win81/.vs
-/build/vs2022uwp/*.user
-/build/vs2022uwp/.vs
-/build/vs2022uwp/ext/.vs
-/build/vs2022uwp/ext/Generated Files
 /build/vs2022win10/*.user
 /build/vs2022win10/.vs
 /build/vs2022win10/ext/*.user
 /build/vs2022win10clang/*.user
 /build/vs2022win10clang/.vs
 /build/vs2022win10clang/ext/*.user
+/build/vs2022win10uwp/*.user
+/build/vs2022win10uwp/.vs
+/build/vs2022win10uwp/ext/.vs
+/build/vs2022win10uwp/ext/Generated Files
 /build/vs2022win7/*.user
 /build/vs2022win7/.vs
 /build/vs2022win7/ext/*.user
