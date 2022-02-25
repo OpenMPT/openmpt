@@ -106,8 +106,8 @@ if _OPTIONS["group"] == "in_openmpt" then
 
 solution "in_openmpt"
 	startproject "in_openmpt"
- configurations { "Debug", "Release", "Checked" }
- platforms { "x86" }
+ configurations { "Debug", "Release", "Checked", "DebugShared", "ReleaseShared", "CheckedShared" }
+ platforms ( allplatforms )
 
  dofile "../../build/premake/mpt-in_openmpt.lua"
  dofile "../../build/premake/mpt-libopenmpt.lua"
@@ -122,8 +122,8 @@ if _OPTIONS["group"] == "xmp-openmpt" then
 
 solution "xmp-openmpt"
 	startproject "xmp-openmpt"
- configurations { "Debug", "Release", "Checked" }
- platforms { "x86" }
+ configurations { "Debug", "Release", "Checked", "DebugShared", "ReleaseShared", "CheckedShared" }
+ platforms ( allplatforms )
 
  dofile "../../build/premake/mpt-xmp-openmpt.lua"
  dofile "../../build/premake/mpt-libopenmpt.lua"
@@ -194,7 +194,7 @@ if _OPTIONS["group"] == "PluginBridge" then
 
 solution "PluginBridge"
 	startproject "PluginBridge"
- configurations { "Debug", "Release", "Checked" }
+ configurations { "Debug", "Release", "Checked", "DebugShared", "ReleaseShared", "CheckedShared" }
  platforms ( allplatforms )
 
  dofile "../../build/premake/mpt-PluginBridge.lua"
