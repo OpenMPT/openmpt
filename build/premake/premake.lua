@@ -50,25 +50,21 @@ newoption {
 	description = "ClangCL projects",
 }
 
-mpt_projectpathname = _ACTION
-mpt_bindirsuffix = ""
+
+
+mpt_projectpathname = _ACTION .. _OPTIONS["windows-version"]
+mpt_bindirsuffix = _OPTIONS["windows-version"]
 
 if _OPTIONS["windows-version"] == "win10" then
 	allplatforms = { "x86", "x86_64", "arm", "arm64" }
-	mpt_projectpathname = mpt_projectpathname .. "win10"
-	mpt_bindirsuffix = mpt_bindirsuffix .. "win10"
 elseif _OPTIONS["windows-version"] == "win81" then
 	allplatforms = { "x86", "x86_64" }
-	mpt_projectpathname = mpt_projectpathname .. "win81"
-	mpt_bindirsuffix = mpt_bindirsuffix .. "win81"
 elseif _OPTIONS["windows-version"] == "win7" then
 	allplatforms = { "x86", "x86_64" }
-	mpt_projectpathname = mpt_projectpathname .. "win7"
-	mpt_bindirsuffix = mpt_bindirsuffix .. "win7"
 elseif _OPTIONS["windows-version"] == "winxp" then
 	allplatforms = { "x86", "x86_64" }
-	mpt_projectpathname = mpt_projectpathname .. "winxp"
-	mpt_bindirsuffix = mpt_bindirsuffix .. "winxp"
+else
+	allplatforms = { "x86", "x86_64" }
 end
 
 if _OPTIONS["windows-family"] == "uwp" then
