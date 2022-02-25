@@ -22,102 +22,102 @@ fi
 
 
 
-${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt_test vs2017 --winxp && \
-${PREMAKE} --file=build/premake/premake.lua --group=in_openmpt vs2017 --winxp && \
-${PREMAKE} --file=build/premake/premake.lua --group=xmp-openmpt vs2017 --winxp && \
-${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt-small vs2017 --winxp && \
-${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt vs2017 --winxp && \
-${PREMAKE} --file=build/premake/premake.lua --group=openmpt123 vs2017 --winxp && \
-${PREMAKE} --file=build/premake/premake.lua --group=PluginBridge vs2017 --winxp && \
-${PREMAKE} --file=build/premake/premake.lua --group=OpenMPT vs2017 --winxp && \
-${PREMAKE} --file=build/premake/premake.lua --group=all-externals vs2017 --winxp && \
+${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt_test  vs2017 --windows-version=winxp && \
+${PREMAKE} --file=build/premake/premake.lua --group=in_openmpt       vs2017 --windows-version=winxp && \
+${PREMAKE} --file=build/premake/premake.lua --group=xmp-openmpt      vs2017 --windows-version=winxp && \
+${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt-small vs2017 --windows-version=winxp && \
+${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt       vs2017 --windows-version=winxp && \
+${PREMAKE} --file=build/premake/premake.lua --group=openmpt123       vs2017 --windows-version=winxp && \
+${PREMAKE} --file=build/premake/premake.lua --group=PluginBridge     vs2017 --windows-version=winxp && \
+${PREMAKE} --file=build/premake/premake.lua --group=OpenMPT          vs2017 --windows-version=winxp && \
+${PREMAKE} --file=build/premake/premake.lua --group=all-externals    vs2017 --windows-version=winxp && \
 echo ok &
 
-${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt_test vs2019 --win7 && \
-${PREMAKE} --file=build/premake/premake.lua --group=in_openmpt vs2019 --win7 && \
-${PREMAKE} --file=build/premake/premake.lua --group=xmp-openmpt vs2019 --win7 && \
-${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt-small vs2019 --win7 && \
-${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt vs2019 --win7 && \
-${PREMAKE} --file=build/premake/premake.lua --group=openmpt123 vs2019 --win7 && \
-${PREMAKE} --file=build/premake/premake.lua --group=PluginBridge vs2019 --win7 && \
-${PREMAKE} --file=build/premake/premake.lua --group=OpenMPT vs2019 --win7 && \
-${PREMAKE} --file=build/premake/premake.lua --group=all-externals vs2019 --win7 && \
+${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt_test  vs2019 --windows-version=win7 && \
+${PREMAKE} --file=build/premake/premake.lua --group=in_openmpt       vs2019 --windows-version=win7 && \
+${PREMAKE} --file=build/premake/premake.lua --group=xmp-openmpt      vs2019 --windows-version=win7 && \
+${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt-small vs2019 --windows-version=win7 && \
+${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt       vs2019 --windows-version=win7 && \
+${PREMAKE} --file=build/premake/premake.lua --group=openmpt123       vs2019 --windows-version=win7 && \
+${PREMAKE} --file=build/premake/premake.lua --group=PluginBridge     vs2019 --windows-version=win7 && \
+${PREMAKE} --file=build/premake/premake.lua --group=OpenMPT          vs2019 --windows-version=win7 && \
+${PREMAKE} --file=build/premake/premake.lua --group=all-externals    vs2019 --windows-version=win7 && \
 echo ok &
 
-${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt_test vs2019 --win81 && \
-${PREMAKE} --file=build/premake/premake.lua --group=in_openmpt vs2019 --win81 && \
-${PREMAKE} --file=build/premake/premake.lua --group=xmp-openmpt vs2019 --win81 && \
-${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt-small vs2019 --win81 && \
-${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt vs2019 --win81 && \
-${PREMAKE} --file=build/premake/premake.lua --group=openmpt123 vs2019 --win81 && \
-${PREMAKE} --file=build/premake/premake.lua --group=PluginBridge vs2019 --win81 && \
-${PREMAKE} --file=build/premake/premake.lua --group=OpenMPT vs2019 --win81 && \
-${PREMAKE} --file=build/premake/premake.lua --group=all-externals vs2019 --win81 && \
+${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt_test  vs2019 --windows-version=win81 && \
+${PREMAKE} --file=build/premake/premake.lua --group=in_openmpt       vs2019 --windows-version=win81 && \
+${PREMAKE} --file=build/premake/premake.lua --group=xmp-openmpt      vs2019 --windows-version=win81 && \
+${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt-small vs2019 --windows-version=win81 && \
+${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt       vs2019 --windows-version=win81 && \
+${PREMAKE} --file=build/premake/premake.lua --group=openmpt123       vs2019 --windows-version=win81 && \
+${PREMAKE} --file=build/premake/premake.lua --group=PluginBridge     vs2019 --windows-version=win81 && \
+${PREMAKE} --file=build/premake/premake.lua --group=OpenMPT          vs2019 --windows-version=win81 && \
+${PREMAKE} --file=build/premake/premake.lua --group=all-externals    vs2019 --windows-version=win81 && \
 echo ok &
 
-${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt_test vs2019 --win10 && \
-${PREMAKE} --file=build/premake/premake.lua --group=in_openmpt vs2019 --win10 && \
-${PREMAKE} --file=build/premake/premake.lua --group=xmp-openmpt vs2019 --win10 && \
-${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt-small vs2019 --win10 && \
-${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt vs2019 --win10 && \
-${PREMAKE} --file=build/premake/premake.lua --group=openmpt123 vs2019 --win10 && \
-${PREMAKE} --file=build/premake/premake.lua --group=PluginBridge vs2019 --win10 && \
-${PREMAKE} --file=build/premake/premake.lua --group=OpenMPT vs2019 --win10 && \
-${PREMAKE} --file=build/premake/premake.lua --group=all-externals vs2019 --win10 && \
+${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt_test  vs2019 --windows-version=win10 && \
+${PREMAKE} --file=build/premake/premake.lua --group=in_openmpt       vs2019 --windows-version=win10 && \
+${PREMAKE} --file=build/premake/premake.lua --group=xmp-openmpt      vs2019 --windows-version=win10 && \
+${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt-small vs2019 --windows-version=win10 && \
+${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt       vs2019 --windows-version=win10 && \
+${PREMAKE} --file=build/premake/premake.lua --group=openmpt123       vs2019 --windows-version=win10 && \
+${PREMAKE} --file=build/premake/premake.lua --group=PluginBridge     vs2019 --windows-version=win10 && \
+${PREMAKE} --file=build/premake/premake.lua --group=OpenMPT          vs2019 --windows-version=win10 && \
+${PREMAKE} --file=build/premake/premake.lua --group=all-externals    vs2019 --windows-version=win10 && \
 echo ok &
 
-${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt_test vs2022 --win7 && \
-${PREMAKE} --file=build/premake/premake.lua --group=in_openmpt vs2022 --win7 && \
-${PREMAKE} --file=build/premake/premake.lua --group=xmp-openmpt vs2022 --win7 && \
-${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt-small vs2022 --win7 && \
-${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt vs2022 --win7 && \
-${PREMAKE} --file=build/premake/premake.lua --group=openmpt123 vs2022 --win7 && \
-${PREMAKE} --file=build/premake/premake.lua --group=PluginBridge vs2022 --win7 && \
-${PREMAKE} --file=build/premake/premake.lua --group=OpenMPT vs2022 --win7 && \
-${PREMAKE} --file=build/premake/premake.lua --group=all-externals vs2022 --win7 && \
+${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt_test  vs2022 --windows-version=win7 && \
+${PREMAKE} --file=build/premake/premake.lua --group=in_openmpt       vs2022 --windows-version=win7 && \
+${PREMAKE} --file=build/premake/premake.lua --group=xmp-openmpt      vs2022 --windows-version=win7 && \
+${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt-small vs2022 --windows-version=win7 && \
+${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt       vs2022 --windows-version=win7 && \
+${PREMAKE} --file=build/premake/premake.lua --group=openmpt123       vs2022 --windows-version=win7 && \
+${PREMAKE} --file=build/premake/premake.lua --group=PluginBridge     vs2022 --windows-version=win7 && \
+${PREMAKE} --file=build/premake/premake.lua --group=OpenMPT          vs2022 --windows-version=win7 && \
+${PREMAKE} --file=build/premake/premake.lua --group=all-externals    vs2022 --windows-version=win7 && \
 echo ok &
 
-${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt_test vs2022 --win81 && \
-${PREMAKE} --file=build/premake/premake.lua --group=in_openmpt vs2022 --win81 && \
-${PREMAKE} --file=build/premake/premake.lua --group=xmp-openmpt vs2022 --win81 && \
-${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt-small vs2022 --win81 && \
-${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt vs2022 --win81 && \
-${PREMAKE} --file=build/premake/premake.lua --group=openmpt123 vs2022 --win81 && \
-${PREMAKE} --file=build/premake/premake.lua --group=PluginBridge vs2022 --win81 && \
-${PREMAKE} --file=build/premake/premake.lua --group=OpenMPT vs2022 --win81 && \
-${PREMAKE} --file=build/premake/premake.lua --group=all-externals vs2022 --win81 && \
+${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt_test  vs2022 --windows-version=win81 && \
+${PREMAKE} --file=build/premake/premake.lua --group=in_openmpt       vs2022 --windows-version=win81 && \
+${PREMAKE} --file=build/premake/premake.lua --group=xmp-openmpt      vs2022 --windows-version=win81 && \
+${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt-small vs2022 --windows-version=win81 && \
+${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt       vs2022 --windows-version=win81 && \
+${PREMAKE} --file=build/premake/premake.lua --group=openmpt123       vs2022 --windows-version=win81 && \
+${PREMAKE} --file=build/premake/premake.lua --group=PluginBridge     vs2022 --windows-version=win81 && \
+${PREMAKE} --file=build/premake/premake.lua --group=OpenMPT          vs2022 --windows-version=win81 && \
+${PREMAKE} --file=build/premake/premake.lua --group=all-externals    vs2022 --windows-version=win81 && \
 echo ok &
 
-${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt_test vs2022 --win10 && \
-${PREMAKE} --file=build/premake/premake.lua --group=in_openmpt vs2022 --win10 && \
-${PREMAKE} --file=build/premake/premake.lua --group=xmp-openmpt vs2022 --win10 && \
-${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt-small vs2022 --win10 && \
-${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt vs2022 --win10 && \
-${PREMAKE} --file=build/premake/premake.lua --group=openmpt123 vs2022 --win10 && \
-${PREMAKE} --file=build/premake/premake.lua --group=PluginBridge vs2022 --win10 && \
-${PREMAKE} --file=build/premake/premake.lua --group=OpenMPT vs2022 --win10 && \
-${PREMAKE} --file=build/premake/premake.lua --group=all-externals vs2022 --win10 && \
+${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt_test  vs2022 --windows-version=win10 && \
+${PREMAKE} --file=build/premake/premake.lua --group=in_openmpt       vs2022 --windows-version=win10 && \
+${PREMAKE} --file=build/premake/premake.lua --group=xmp-openmpt      vs2022 --windows-version=win10 && \
+${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt-small vs2022 --windows-version=win10 && \
+${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt       vs2022 --windows-version=win10 && \
+${PREMAKE} --file=build/premake/premake.lua --group=openmpt123       vs2022 --windows-version=win10 && \
+${PREMAKE} --file=build/premake/premake.lua --group=PluginBridge     vs2022 --windows-version=win10 && \
+${PREMAKE} --file=build/premake/premake.lua --group=OpenMPT          vs2022 --windows-version=win10 && \
+${PREMAKE} --file=build/premake/premake.lua --group=all-externals    vs2022 --windows-version=win10 && \
 echo ok &
 
-${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt_test vs2022 --clang --win10 && \
-${PREMAKE} --file=build/premake/premake.lua --group=in_openmpt vs2022 --clang --win10 && \
-${PREMAKE} --file=build/premake/premake.lua --group=xmp-openmpt vs2022 --clang --win10 && \
-${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt-small vs2022 --clang --win10 && \
-${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt vs2022 --clang --win10 && \
-${PREMAKE} --file=build/premake/premake.lua --group=openmpt123 vs2022 --clang --win10 && \
-${PREMAKE} --file=build/premake/premake.lua --group=PluginBridge vs2022 --clang --win10 && \
-${PREMAKE} --file=build/premake/premake.lua --group=OpenMPT vs2022 --clang --win10 && \
-${PREMAKE} --file=build/premake/premake.lua --group=all-externals vs2022 --clang --win10 && \
+${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt_test  vs2022 --clang --windows-version=win10 && \
+${PREMAKE} --file=build/premake/premake.lua --group=in_openmpt       vs2022 --clang --windows-version=win10 && \
+${PREMAKE} --file=build/premake/premake.lua --group=xmp-openmpt      vs2022 --clang --windows-version=win10 && \
+${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt-small vs2022 --clang --windows-version=win10 && \
+${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt       vs2022 --clang --windows-version=win10 && \
+${PREMAKE} --file=build/premake/premake.lua --group=openmpt123       vs2022 --clang --windows-version=win10 && \
+${PREMAKE} --file=build/premake/premake.lua --group=PluginBridge     vs2022 --clang --windows-version=win10 && \
+${PREMAKE} --file=build/premake/premake.lua --group=OpenMPT          vs2022 --clang --windows-version=win10 && \
+${PREMAKE} --file=build/premake/premake.lua --group=all-externals    vs2022 --clang --windows-version=win10 && \
 echo ok &
 
-${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt-small vs2019 --win10 --uwp && \
-${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt vs2019 --win10 --uwp && \
-${PREMAKE} --file=build/premake/premake.lua --group=all-externals vs2019 --win10 --uwp && \
+${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt-small vs2019 --windows-version=win10 --windows-family=uwp && \
+${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt       vs2019 --windows-version=win10 --windows-family=uwp && \
+${PREMAKE} --file=build/premake/premake.lua --group=all-externals    vs2019 --windows-version=win10 --windows-family=uwp && \
 echo ok &
 
-${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt-small vs2022 --win10 --uwp && \
-${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt vs2022 --win10 --uwp && \
-${PREMAKE} --file=build/premake/premake.lua --group=all-externals vs2022 --win10 --uwp && \
+${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt-small vs2022 --windows-version=win10 --windows-family=uwp && \
+${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt       vs2022 --windows-version=win10 --windows-family=uwp && \
+${PREMAKE} --file=build/premake/premake.lua --group=all-externals    vs2022 --windows-version=win10 --windows-family=uwp && \
 echo ok &
 
 ${PREMAKE} --file=build/premake-xcode/premake.lua --target=macosx xcode4 && \

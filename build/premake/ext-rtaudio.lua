@@ -10,7 +10,7 @@
 		characterset "Unicode"
 	filter {}
 	filter { "action:vs2017" }
-		if _OPTIONS["winxp"] then
+		if _OPTIONS["windows-version"] == "winxp" then
 			defines {
 				"__WINDOWS_DS__",
 			}
@@ -20,7 +20,7 @@
 			}
 		end
 	filter { "not action:vs2017" }
-		if _OPTIONS["winxp"] then
+		if _OPTIONS["windows-version"] == "winxp" then
 			defines {
 				"__WINDOWS_DS__",
 			}
@@ -34,7 +34,7 @@
    "../../include/rtaudio/RtAudio.cpp",
    "../../include/rtaudio/RtAudio.h",
   }
-	if _OPTIONS["winxp"] then
+	if _OPTIONS["windows-version"] == "winxp" then
 		if _OPTIONS["clang"] then
 			filter { "not kind:StaticLib" }
 				links { "dsound" }

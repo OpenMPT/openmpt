@@ -27,25 +27,27 @@ newoption {
 }
 
 newoption {
-	trigger = "winxp",
-	description = "Generate XP targetting projects",
-}
-newoption {
-	trigger = "win7",
-	description = "Generate Windows 7 Desktop targetting projects",
-}
-newoption {
-	trigger = "win81",
-	description = "Generate Windows 8.1 Desktop targetting projects",
-}
-newoption {
-	trigger = "win10",
-	description = "Generate Windows 10 Desktop targetting projects",
+	trigger = "windows-version",
+	value = "Windows Version",
+	description = "Target Windows Version",
+	default = "win81",
+	allowed = {
+		{ "winxp", "Windows XP" },
+		{ "win7", "Windows 7" },
+		{ "win81", "Windows 8.1" },
+		{ "win10", "Wiondows 10" }
+	}
 }
 
 newoption {
-	trigger = "uwp",
-	description = "Generate Windows UWP targetting projects",
+	trigger = "windows-family",
+	value = "Windows Family",
+	description = "Target Windows Family",
+	default = "desktop",
+	allowed = {
+		{ "desktop", "Win32" },
+		{ "uwp", "UWP" }
+	}
 }
 
 newoption {
@@ -56,23 +58,23 @@ newoption {
 mpt_projectpathname = _ACTION
 mpt_bindirsuffix = ""
 
-if _OPTIONS["uwp"] then
+if _OPTIONS["windows-family"] == "uwp" then
 	allplatforms = { "x86", "x86_64", "arm", "arm64" }
 	mpt_projectpathname = mpt_projectpathname .. "uwp"
 	mpt_bindirsuffix = mpt_bindirsuffix .. "uwp"
-elseif _OPTIONS["win10"] then
+elseif _OPTIONS["windows-version"] == "win10" then
 	allplatforms = { "x86", "x86_64", "arm", "arm64" }
 	mpt_projectpathname = mpt_projectpathname .. "win10"
 	mpt_bindirsuffix = mpt_bindirsuffix .. "win10"
-elseif _OPTIONS["win81"] then
+elseif _OPTIONS["windows-version"] == "win81" then
 	allplatforms = { "x86", "x86_64" }
 	mpt_projectpathname = mpt_projectpathname .. "win81"
 	mpt_bindirsuffix = mpt_bindirsuffix .. "win81"
-elseif _OPTIONS["win7"] then
+elseif _OPTIONS["windows-version"] == "win7" then
 	allplatforms = { "x86", "x86_64" }
 	mpt_projectpathname = mpt_projectpathname .. "win7"
 	mpt_bindirsuffix = mpt_bindirsuffix .. "win7"
-elseif _OPTIONS["winxp"] then
+elseif _OPTIONS["windows-version"] == "winxp" then
 	allplatforms = { "x86", "x86_64" }
 	mpt_projectpathname = mpt_projectpathname .. "winxp"
 	mpt_bindirsuffix = mpt_bindirsuffix .. "winxp"
@@ -148,12 +150,12 @@ solution "libopenmpt"
 	startproject "libopenmpt"
 
  dofile "../../build/premake/mpt-libopenmpt.lua"
- if not _OPTIONS["uwp"] then
+ if _OPTIONS["windows-family"] ~= "uwp" then
   dofile "../../build/premake/mpt-libopenmpt_examples.lua"
  end
  dofile "../../build/premake/ext-mpg123.lua"
  dofile "../../build/premake/ext-ogg.lua"
- if not _OPTIONS["uwp"] then
+ if _OPTIONS["windows-family"] ~= "uwp" then
   dofile "../../build/premake/ext-portaudio.lua"
   dofile "../../build/premake/ext-portaudiocpp.lua"
  end
@@ -309,7 +311,7 @@ end
 
 
 
-if _OPTIONS["uwp"] then
+if _OPTIONS["windows-family"] == "uwp" then
 
 	require('vstudio')
 

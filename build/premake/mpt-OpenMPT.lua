@@ -57,7 +57,7 @@ end
 	files {
 		"../../mptrack/res/OpenMPT.manifest",
 	}
-	if not _OPTIONS["winxp"] then
+	if _OPTIONS["windows-version"] ~= "winxp" then
 		files {
 			"../../include/asiomodern/include/ASIOModern/*.hpp",
 		}
@@ -212,7 +212,7 @@ end
    "vorbis",
   }
   filter {}
-	if not _OPTIONS["winxp"] then
+	if _OPTIONS["windows-version"] ~= "winxp" then
   linkoptions {
    "/DELAYLOAD:mf.dll",
    "/DELAYLOAD:mfplat.dll",

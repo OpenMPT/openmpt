@@ -46,15 +46,15 @@
 			kind "StaticLib"
 		elseif mykind == "GUI" then
 			kind "WindowedApp"
-			if _OPTIONS["win10"] then
+			if _OPTIONS["windows-version"] == "win10" then
 				files {
 					"../../build/vs/win10.manifest",
 				}
-			elseif  _OPTIONS["win81"] then
+			elseif  _OPTIONS["windows-version"] == "win81" then
 				files {
 					"../../build/vs/win81.manifest",
 				}
-			elseif  _OPTIONS["win7"] then
+			elseif  _OPTIONS["windows-version"] == "win7" then
 				files {
 					"../../build/vs/win7.manifest",
 				}
@@ -77,7 +77,7 @@
 	filter {}
 
 	filter {}
-		if _OPTIONS["winxp"] then
+		if _OPTIONS["windows-version"] == "winxp" then
 			if _ACTION == "vs2017" then
 				toolset "v141_xp"
 			end
@@ -102,7 +102,7 @@
 			cppdialect "C++20"
 		end
 	filter { "action:vs*", "action:vs2017" }
-		if _OPTIONS["win10"] then
+		if _OPTIONS["windows-version"] == "win10" then
 			conformancemode "On"
 		end
 	filter { "action:vs*", "not action:vs2017" }
@@ -115,7 +115,7 @@
 
 	filter {}
 	filter { "action:vs*" }
-		if not _OPTIONS["clang"] and not _OPTIONS["winxp"] and not _OPTIONS["uwp"] then
+		if not _OPTIONS["clang"] and _OPTIONS["windows-version"] ~= "winxp" and _OPTIONS["windows-family"] ~= "uwp" then
 			spectremitigations "On"
 		end
 	filter {}
@@ -202,7 +202,7 @@
 	filter { "configurations:Debug", "architecture:not ARM", "architecture:not ARM64" }
 		symbols "FastLink"
 	filter { "configurations:Debug" }
-		if not _OPTIONS["uwp"] then
+		if _OPTIONS["windows-family"] ~= "uwp" then
 			staticruntime "On"
 		end
 	 runtime "Debug"
@@ -222,7 +222,7 @@
    defines { "MPT_BUILD_MSVC_STATIC" }
    defines { "MPT_BUILD_CHECKED" }
    symbols "On"
-		if not _OPTIONS["uwp"] then
+		if _OPTIONS["windows-family"] ~= "uwp" then
 			staticruntime "On"
 		end
 	 runtime "Release"
@@ -246,7 +246,7 @@
 		if not _OPTIONS["clang"] then
 			flags { "LinkTimeOptimization" }
 		end
-		if not _OPTIONS["uwp"] then
+		if _OPTIONS["windows-family"] ~= "uwp" then
 			staticruntime "On"
 		end
 	 runtime "Release"
@@ -268,7 +268,7 @@
 			flags { "MultiProcessorCompile" }
 		end
 
-	if _OPTIONS["winxp"] then
+	if _OPTIONS["windows-version"] == "winxp" then
 
 		filter { "architecture:x86" }
 			vectorextensions "IA32"
@@ -309,7 +309,7 @@
 
   filter {}
   
-	if not _OPTIONS["winxp"] and not _OPTIONS["uwp"] then
+	if _OPTIONS["windows-version"] ~= "winxp" and _OPTIONS["windows-family"] ~= "uwp" then
 		filter {}
 		filter { "action:vs2017" }
 			systemversion "10.0.17763.0"
@@ -322,7 +322,7 @@
 		filter {}
 	end
 
-	if _OPTIONS["win10"] then
+	if _OPTIONS["windows-version"] == "win10" then
 		filter {}
 		defines { "_WIN32_WINNT=0x0A00" }
 		filter {}
@@ -338,15 +338,15 @@
 		filter { "architecture:ARM64" }
 			defines { "NTDDI_VERSION=0x0A000004" } -- Windows 10 1709 Build 16299
 		filter {}
-	elseif _OPTIONS["win81"] then
+	elseif _OPTIONS["windows-version"] == "win81" then
 		filter {}
 		defines { "_WIN32_WINNT=0x0603" }
 		defines { "NTDDI_VERSION=0x06030000" }
-	elseif _OPTIONS["win7"] then
+	elseif _OPTIONS["windows-version"] == "win7" then
 		filter {}
 		defines { "_WIN32_WINNT=0x0601" }
 		defines { "NTDDI_VERSION=0x06010000" }
-	elseif _OPTIONS["winxp"] then
+	elseif _OPTIONS["windows-version"] == "winxp" then
 		filter {}
 		systemversion "7.0"
 		filter {}
