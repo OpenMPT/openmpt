@@ -122,6 +122,12 @@ end
 			"../../mptrack/res/OpenMPT-win81.manifest",
 			"../../mptrack/res/OpenMPT-win10.manifest",
 		}
+	else
+		excludes {
+			"../../mptrack/res/OpenMPT-win7.manifest",
+			"../../mptrack/res/OpenMPT-win81.manifest",
+			"../../mptrack/res/OpenMPT-win10.manifest",
+		}
 	end
 
 	defines { "MPT_BUILD_ENABLE_PCH" }
