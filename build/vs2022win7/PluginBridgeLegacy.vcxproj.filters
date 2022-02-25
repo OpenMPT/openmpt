@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <Filter Include="build">
+      <UniqueIdentifier>{D5562E0F-416B-56C0-0AED-F91F76C052F1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="build\vs">
+      <UniqueIdentifier>{4D3A0C18-3907-6723-6220-55CB4E4C9CB1}</UniqueIdentifier>
+    </Filter>
     <Filter Include="common">
       <UniqueIdentifier>{AEFEE3F6-9AA0-0ECD-835B-22216F9C951D}</UniqueIdentifier>
     </Filter>
@@ -622,8 +628,11 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\pluginBridge\PluginBridge-win7.manifest">
+    <None Include="..\..\pluginBridge\PluginBridge.manifest">
       <Filter>pluginBridge</Filter>
+    </None>
+    <None Include="..\vs\win7.manifest">
+      <Filter>build\vs</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

@@ -2278,6 +2278,9 @@
     <None Include="..\..\mptrack\res\NODROP.CUR">
       <Filter>mptrack\res</Filter>
     </None>
+    <None Include="..\..\mptrack\res\OpenMPT.manifest">
+      <Filter>mptrack\res</Filter>
+    </None>
     <None Include="..\..\mptrack\res\defaultKeybindings.mkb">
       <Filter>mptrack\res</Filter>
     </None>

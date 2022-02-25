@@ -54,19 +54,9 @@ end
    "$(IntDir)/svn_version",
    "../../build/svn_version",
   }
-	if _OPTIONS["win10"] then
-		files {
-			"../../mptrack/res/OpenMPT-win10.manifest",
-		}
-	elseif  _OPTIONS["win81"] then
-		files {
-			"../../mptrack/res/OpenMPT-win81.manifest",
-		}
-	elseif  _OPTIONS["win7"] then
-		files {
-			"../../mptrack/res/OpenMPT-win7.manifest",
-		}
-	end
+	files {
+		"../../mptrack/res/OpenMPT.manifest",
+	}
 	if not _OPTIONS["winxp"] then
 		files {
 			"../../include/asiomodern/include/ASIOModern/*.hpp",
@@ -107,28 +97,6 @@ end
    "../../mptrack/mptrack.rc",
    "../../mptrack/res/*.*", -- resource data files
   }
-	if _OPTIONS["win10"] then
-		excludes {
-			"../../mptrack/res/OpenMPT-win7.manifest",
-			"../../mptrack/res/OpenMPT-win81.manifest",
-		}
-	elseif  _OPTIONS["win81"] then
-		excludes {
-			"../../mptrack/res/OpenMPT-win7.manifest",
-			"../../mptrack/res/OpenMPT-win10.manifest",
-		}
-	elseif  _OPTIONS["win7"] then
-		excludes {
-			"../../mptrack/res/OpenMPT-win81.manifest",
-			"../../mptrack/res/OpenMPT-win10.manifest",
-		}
-	else
-		excludes {
-			"../../mptrack/res/OpenMPT-win7.manifest",
-			"../../mptrack/res/OpenMPT-win81.manifest",
-			"../../mptrack/res/OpenMPT-win10.manifest",
-		}
-	end
 
 	defines { "MPT_BUILD_ENABLE_PCH" }
 	pchsource "../../build/pch/PCH.cpp"

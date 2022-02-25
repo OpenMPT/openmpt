@@ -39,19 +39,9 @@
   files {
    "../../pluginBridge/PluginBridge.rc",
   }
-	if _OPTIONS["win10"] then
-		files {
-			"../../pluginBridge/PluginBridge-win10.manifest",
-		}
-	elseif _OPTIONS["win81"] then
-		files {
-			"../../pluginBridge/PluginBridge-win81.manifest",
-		}
-	elseif _OPTIONS["win7"] then
-		files {
-			"../../pluginBridge/PluginBridge-win7.manifest",
-		}
-	end
+	files {
+		"../../pluginBridge/PluginBridge.manifest",
+	}
   defines { "MODPLUG_TRACKER" }
   dpiawareness "None"
   largeaddressaware ( true )
@@ -107,19 +97,9 @@
   files {
    "../../pluginBridge/PluginBridge.rc",
   }
-	if _OPTIONS["win10"] then
-		files {
-			"../../pluginBridge/PluginBridge-win10.manifest",
-		}
-	elseif _OPTIONS["win81"] then
-		files {
-			"../../pluginBridge/PluginBridge-win81.manifest",
-		}
-	elseif _OPTIONS["win7"] then
-		files {
-			"../../pluginBridge/PluginBridge-win7.manifest",
-		}
-	end
+	files {
+		"../../pluginBridge/PluginBridge.manifest",
+	}
   defines { "MODPLUG_TRACKER" }
   dpiawareness "None"
   largeaddressaware ( false )

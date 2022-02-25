@@ -2320,7 +2320,7 @@
     <None Include="..\..\mptrack\res\NODROP.CUR">
       <Filter>mptrack\res</Filter>
     </None>
-    <None Include="..\..\mptrack\res\OpenMPT-win7.manifest">
+    <None Include="..\..\mptrack\res\OpenMPT.manifest">
       <Filter>mptrack\res</Filter>
     </None>
     <None Include="..\..\mptrack\res\defaultKeybindings.mkb">
@@ -2331,6 +2331,9 @@
     </None>
     <None Include="..\..\mptrack\res\nodrag.cur">
       <Filter>mptrack\res</Filter>
+    </None>
+    <None Include="..\vs\win7.manifest">
+      <Filter>build\vs</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
