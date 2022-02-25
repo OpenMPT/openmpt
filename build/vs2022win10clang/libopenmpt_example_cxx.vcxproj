@@ -551,7 +551,7 @@
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A000004;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\include\portaudio\bindings\cpp\include;..\..\include\portaudio\include;..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -569,7 +569,7 @@
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A000004;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\include\portaudio\bindings\cpp\include;..\..\include\portaudio\include;..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -821,7 +821,7 @@
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A000004;LIBOPENMPT_USE_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\include\portaudio\bindings\cpp\include;..\..\include\portaudio\include;..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -839,7 +839,7 @@
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A000004;LIBOPENMPT_USE_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\include\portaudio\bindings\cpp\include;..\..\include\portaudio\include;..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>

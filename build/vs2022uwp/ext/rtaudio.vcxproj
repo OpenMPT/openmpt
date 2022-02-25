@@ -568,7 +568,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A000004;__WINDOWS_WASAPI__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -588,7 +588,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A000004;__WINDOWS_WASAPI__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -854,7 +854,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A000004;__WINDOWS_WASAPI__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -874,7 +874,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A000004;__WINDOWS_WASAPI__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>

@@ -557,7 +557,7 @@
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A000004;MODPLUG_TRACKER;MPT_BUILD_UPDATESIGNTOOL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\src;..\..\common;..\..\include;..\..\include\nlohmann-json\include;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -578,7 +578,7 @@
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A000004;MODPLUG_TRACKER;MPT_BUILD_UPDATESIGNTOOL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\src;..\..\common;..\..\include;..\..\include\nlohmann-json\include;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -863,7 +863,7 @@
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A000004;MODPLUG_TRACKER;MPT_BUILD_UPDATESIGNTOOL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\src;..\..\common;..\..\include;..\..\include\nlohmann-json\include;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -884,7 +884,7 @@
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A000004;MODPLUG_TRACKER;MPT_BUILD_UPDATESIGNTOOL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\src;..\..\common;..\..\include;..\..\include\nlohmann-json\include;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
