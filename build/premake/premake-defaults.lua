@@ -5,6 +5,9 @@
 	filter {}
 		preferredtoolarchitecture "x86_64"
 
+	configurations { "Debug", "Release", "Checked", "DebugShared", "ReleaseShared", "CheckedShared" }
+	platforms ( allplatforms )
+
 	filter { "platforms:x86" }
 		system "Windows"
 		architecture "x86"

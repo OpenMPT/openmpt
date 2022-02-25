@@ -91,8 +91,6 @@ if _OPTIONS["group"] == "libopenmpt_test" then
 
 solution "libopenmpt_test"
 	startproject "libopenmpt_test"
- configurations { "Debug", "Release", "Checked", "DebugShared", "ReleaseShared", "CheckedShared" }
- platforms ( allplatforms )
 
  dofile "../../build/premake/mpt-libopenmpt_test.lua"
  dofile "../../build/premake/ext-mpg123.lua"
@@ -106,8 +104,6 @@ if _OPTIONS["group"] == "in_openmpt" then
 
 solution "in_openmpt"
 	startproject "in_openmpt"
- configurations { "Debug", "Release", "Checked", "DebugShared", "ReleaseShared", "CheckedShared" }
- platforms ( allplatforms )
 
  dofile "../../build/premake/mpt-in_openmpt.lua"
  dofile "../../build/premake/mpt-libopenmpt.lua"
@@ -122,8 +118,6 @@ if _OPTIONS["group"] == "xmp-openmpt" then
 
 solution "xmp-openmpt"
 	startproject "xmp-openmpt"
- configurations { "Debug", "Release", "Checked", "DebugShared", "ReleaseShared", "CheckedShared" }
- platforms ( allplatforms )
 
  dofile "../../build/premake/mpt-xmp-openmpt.lua"
  dofile "../../build/premake/mpt-libopenmpt.lua"
@@ -139,8 +133,6 @@ if _OPTIONS["group"] == "libopenmpt-small" then
 
 solution "libopenmpt-small"
 	startproject "libopenmpt-small"
- configurations { "Debug", "Release", "Checked", "DebugShared", "ReleaseShared", "CheckedShared" }
- platforms ( allplatforms )
 
  dofile "../../build/premake/mpt-libopenmpt-small.lua"
  dofile "../../build/premake/ext-minimp3.lua"
@@ -154,8 +146,6 @@ if _OPTIONS["group"] == "libopenmpt" then
 
 solution "libopenmpt"
 	startproject "libopenmpt"
- configurations { "Debug", "Release", "Checked", "DebugShared", "ReleaseShared", "CheckedShared" }
- platforms ( allplatforms )
 
  dofile "../../build/premake/mpt-libopenmpt.lua"
  if not _OPTIONS["uwp"] then
@@ -176,8 +166,6 @@ if _OPTIONS["group"] == "openmpt123" then
 
 solution "openmpt123"
 	startproject "openmpt123"
- configurations { "Debug", "Release", "Checked", "DebugShared", "ReleaseShared", "CheckedShared" }
- platforms ( allplatforms )
 
  dofile "../../build/premake/mpt-openmpt123.lua"
  dofile "../../build/premake/mpt-libopenmpt.lua"
@@ -194,8 +182,6 @@ if _OPTIONS["group"] == "PluginBridge" then
 
 solution "PluginBridge"
 	startproject "PluginBridge"
- configurations { "Debug", "Release", "Checked", "DebugShared", "ReleaseShared", "CheckedShared" }
- platforms ( allplatforms )
 
  dofile "../../build/premake/mpt-PluginBridge.lua"
 
@@ -207,8 +193,6 @@ charset = "Unicode"
 stringmode = "UTF8"
 solution "OpenMPT-UTF8"
 	startproject "OpenMPT-UTF8"
- configurations { "Debug", "Release", "Checked", "DebugShared", "ReleaseShared", "CheckedShared" }
- platforms ( allplatforms )
 
  dofile "../../build/premake/mpt-OpenMPT.lua"
  dofile "../../build/premake/mpt-PluginBridge.lua"
@@ -237,8 +221,6 @@ charset = "MBCS"
 stringmode = "WCHAR"
 solution "OpenMPT-ANSI"
 	startproject "OpenMPT-ANSI"
- configurations { "Debug", "Release", "Checked", "DebugShared", "ReleaseShared", "CheckedShared" }
- platforms ( allplatforms )
 
  dofile "../../build/premake/mpt-OpenMPT.lua"
  dofile "../../build/premake/mpt-PluginBridge.lua"
@@ -267,8 +249,6 @@ charset = "Unicode"
 stringmode = "WCHAR"
 solution "OpenMPT"
 	startproject "OpenMPT"
- configurations { "Debug", "Release", "Checked", "DebugShared", "ReleaseShared", "CheckedShared" }
- platforms ( allplatforms )
 
  dofile "../../build/premake/mpt-OpenMPT.lua"
  dofile "../../build/premake/mpt-PluginBridge.lua"
@@ -299,8 +279,6 @@ end
 if _OPTIONS["group"] == "all-externals" then
 
 solution "all-externals"
- configurations { "Debug", "Release", "Checked", "DebugShared", "ReleaseShared", "CheckedShared" }
- platforms ( allplatforms )
 
  dofile "../../build/premake/ext-ancient.lua"
  dofile "../../build/premake/ext-flac.lua"
