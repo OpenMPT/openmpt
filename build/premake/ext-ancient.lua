@@ -3,7 +3,7 @@ project "ancient"
 	uuid "e1184509-74f7-421d-a8c8-feec2c28ecc2"
 	language "C++"
 	location ( "%{wks.location}" .. "/ext" )
-	dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
+	mpt_kind "default"
 	targetname "openmpt-ancient"
 	includedirs {
 		"../../include/ancient/api",

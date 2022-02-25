@@ -3,7 +3,7 @@
   uuid "7adfafb9-0a83-4d35-9891-fb24fdf30b53"
   language "C"
   location ( "%{wks.location}" .. "/ext" )
-  dofile "../../build/premake/premake-defaults-DLL.lua"
+  mpt_kind "shared"
   targetname "openmpt-mpg123"
   includedirs {
    "../../include/mpg123/ports/MSVC++",

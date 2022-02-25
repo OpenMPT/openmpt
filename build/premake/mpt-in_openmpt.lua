@@ -3,7 +3,7 @@
   uuid "D75AEB78-5537-49BD-9085-F92DEEFA84E8"
   language "C++"
   vpaths { ["*"] = "../../libopenmpt/" }
-  dofile "../../build/premake/premake-defaults-DLL.lua"
+  mpt_kind "shared"
   warnings "Extra"
   local extincludedirs = {
    "../..",

@@ -13,7 +13,7 @@ else
 end
   language "C++"
   vpaths { ["*"] = "../../" }
-  dofile "../../build/premake/premake-defaults-EXEGUI.lua"
+  mpt_kind "GUI"
 if stringmode == "UTF8" then
    targetname "OpenMPT-UTF8"
 elseif charset == "MBCS" then
@@ -258,7 +258,7 @@ end
   uuid "563a631d-fe07-47bc-a98f-9fe5b3ebabfa"
   language "C++"
   vpaths { ["*"] = "../../" }
-  dofile "../../build/premake/premake-defaults-DLL.lua"
+  mpt_kind "shared"
   includedirs {
    "../../src",
    "../../common",
@@ -302,7 +302,7 @@ end
   uuid "f3da2bf5-e84a-4f71-80ab-884594863d3a"
   language "C"
   vpaths { ["*"] = "../../" }
-  dofile "../../build/premake/premake-defaults-DLL.lua"
+  mpt_kind "shared"
   includedirs {
    "../../src",
    "../../common",

@@ -3,7 +3,7 @@
   uuid "189B867F-FF4B-45A1-B741-A97492EE69AF"
   language "C"
   location ( "%{wks.location}" .. "/ext" )
-  dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
+  mpt_kind "default"
   targetname "openmpt-portaudio"
   includedirs { "../../include/portaudio/include", "../../include/portaudio/src/common", "../../include/portaudio/src/os/win" }
 	filter {}

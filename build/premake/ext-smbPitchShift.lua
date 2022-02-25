@@ -3,7 +3,7 @@
   uuid "89AF16DD-32CC-4A7E-B219-5F117D761F9F"
   language "C++"
   location ( "%{wks.location}" .. "/ext" )
-  dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
+  mpt_kind "default"
   targetname "openmpt-smbpitchshift"
   includedirs { }
 	filter {}

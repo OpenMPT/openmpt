@@ -18,6 +18,37 @@
 		system "Windows"
 		architecture "ARM64"
 	filter {}
+	
+	function mpt_kind(mykind)
+		if mykind == "" then
+			-- nothing
+		elseif mykind == "default" then
+			filter {}
+			filter { "configurations:Debug" }
+				kind "StaticLib"
+			filter { "configurations:DebugShared" }
+				kind "SharedLib"
+			filter { "configurations:Checked" }
+				kind "StaticLib"
+			filter { "configurations:CheckedShared" }
+				kind "SharedLib"
+			filter { "configurations:Release" }
+				kind "StaticLib"
+			filter { "configurations:ReleaseShared" }
+				kind "SharedLib"
+			filter {}
+		elseif mykind == "shared" then
+			kind "SharedLib"
+		elseif mykind == "static" then
+			kind "StaticLib"
+		elseif mykind == "GUI" then
+			kind "WindowedApp"
+		elseif mykind == "Console" then
+			kind "ConsoleApp"
+		else
+			-- nothing
+		end
+	end
 
 	filter {}
 		objdir ( "../../build/obj/" .. mpt_projectpathname .. "/" .. "%{prj.name}" )
@@ -83,7 +114,7 @@
 	filter {}
 
   filter { "kind:StaticLib" }
-   targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/%{cfg.architecture}/%{cfg.buildcfg}" )
+	targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/%{cfg.architecture}/%{cfg.buildcfg}" )
   	
   filter { "kind:not StaticLib", "configurations:Debug", "architecture:x86" }
 		targetdir ( "../../bin/debug/" .. _ACTION .. "-" .. mpt_bindirsuffix .. "-static/x86" )

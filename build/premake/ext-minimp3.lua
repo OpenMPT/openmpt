@@ -3,7 +3,7 @@
   uuid "e88c4285-efb1-4226-bcac-e904ba792a48"
   language "C"
   location ( "%{wks.location}" .. "/ext" )
-  dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
+  mpt_kind "default"
   targetname "openmpt-minimp3"
   includedirs { }
 	filter {}

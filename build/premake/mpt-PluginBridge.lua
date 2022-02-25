@@ -3,7 +3,7 @@
   uuid "1A147336-891E-49AC-9EAD-A750599A224C"
   language "C++"
   vpaths { ["*"] = "../../" }
-  dofile "../../build/premake/premake-defaults-EXEGUI.lua"
+  mpt_kind "GUI"
   local extincludedirs = {
   }
 	filter { "action:vs*" }
@@ -71,7 +71,7 @@
   uuid "BDEC2D44-C957-4940-A32B-02824AF6E21D"
   language "C++"
   vpaths { ["*"] = "../../" }
-  dofile "../../build/premake/premake-defaults-EXEGUI.lua"
+  mpt_kind "GUI"
   local extincludedirs = {
   }
 	filter { "action:vs*" }

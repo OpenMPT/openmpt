@@ -3,7 +3,7 @@
   uuid "25560abd-41fc-444c-9e71-f8502bc7ee96"
   language "C++"
   vpaths { ["*"] = "../../" }
-  dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
+  mpt_kind "default"
   local extincludedirs = {
    "../../include",
   }

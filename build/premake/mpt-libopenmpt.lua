@@ -3,7 +3,7 @@
   uuid "9C5101EF-3E20-4558-809B-277FDD50E878"
   language "C++"
   vpaths { ["*"] = "../../" }
-  dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
+  mpt_kind "default"
   local extincludedirs = {
    "../../include/mpg123/ports/MSVC++",
    "../../include/mpg123/src/libmpg123",

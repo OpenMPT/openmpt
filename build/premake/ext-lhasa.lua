@@ -3,7 +3,7 @@
   uuid "6B11F6A8-B131-4D2B-80EF-5731A9016436"
   language "C"
   location ( "%{wks.location}" .. "/ext" )
-  dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
+  mpt_kind "default"
   targetname "openmpt-lhasa"
 	filter { "action:vs*" }
 		characterset "Unicode"

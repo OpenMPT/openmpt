@@ -3,7 +3,7 @@
   uuid "290bbf89-2572-4291-9d9c-ff021d4fd313"
   language "C"
   location ( "%{wks.location}" .. "/ext" )
-  dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
+  mpt_kind "default"
   targetname "openmpt-opusenc"
   local extincludedirs = {
    "../../include/ogg/include",

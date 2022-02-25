@@ -3,7 +3,7 @@
   uuid "BC116B29-9958-4389-B294-7529BB7C7D37"
   language "C++"
   location ( "%{wks.location}" .. "/ext" )
-  dofile "../../build/premake/premake-defaults-LIB.lua"
+  mpt_kind "static"
   targetname "openmpt-r8brain"
   includedirs { "../../include/r8brain" }
 	filter {}

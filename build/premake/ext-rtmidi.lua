@@ -3,7 +3,7 @@
   uuid "05BBD03D-0985-4D76-8DDD-534DA631C3A8"
   language "C++"
   location ( "%{wks.location}" .. "/ext" )
-  dofile "../../build/premake/premake-defaults-LIB.lua"
+  mpt_kind "static"
   targetname "openmpt-rtmidi"
 	filter {}
 	filter { "action:vs*" }

@@ -3,7 +3,7 @@
   uuid "07B89124-7C71-42cc-81AB-62B09BB61F9B"
   language "C++"
   location ( "%{wks.location}" .. "/ext" )
-  dofile "../../build/premake/premake-defaults-LIB.lua"
+  mpt_kind "static"
   targetname "openmpt-pugixml"
   includedirs { }
 	filter {}

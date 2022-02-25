@@ -4,7 +4,7 @@
   uuid "b544dcb7-16e5-41bc-b51b-7ead8cfdfa05"
   language "C"
   location ( "%{wks.location}" .. "/ext" )
-  dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
+  mpt_kind "default"
   targetname "openmpt-vorbis"
   local extincludedirs = {
    "../../include/ogg/include",

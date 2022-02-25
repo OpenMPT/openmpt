@@ -3,7 +3,7 @@
   uuid "89b3630f-5728-4902-8258-d4dbc532e185"
   language "C++"
   vpaths { ["*"] = "../../" }
-  dofile "../../build/premake/premake-defaults-EXE.lua"
+  mpt_kind "Console"
   includedirs {
    "../../src",
    "../../common",

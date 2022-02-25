@@ -3,7 +3,7 @@
   uuid "b545694a-ce2a-44f8-ba88-147c36369308"
   language "C"
   location ( "%{wks.location}" .. "/ext" )
-  dofile "../../build/premake/premake-defaults-DLL.lua"
+  mpt_kind "shared"
   targetname "openmpt-lame"
   includedirs { "../../include/lame/include" }
   includedirs { "../../include/lame/mpglib" }

@@ -1,3 +1,0 @@
-
-  filter {}
-   kind "SharedLib"

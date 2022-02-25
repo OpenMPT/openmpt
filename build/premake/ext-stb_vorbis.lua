@@ -3,7 +3,7 @@
   uuid "E0D81662-85EF-4172-B0D8-F8DCFF712607"
   language "C"
   location ( "%{wks.location}" .. "/ext" )
-  dofile "../../build/premake/premake-defaults-LIBorDLL.lua"
+  mpt_kind "default"
   targetname "openmpt-stb_vorbis"
   includedirs { }
 	filter {}
