@@ -1,9 +1,4 @@
 
--- premake gets a tiny bit confused if the same project appears in multiple
--- solutions in a single run. premake adds a bogus $projectname path to the
--- intermediate objects directory in that case. work-around using multiple
--- invocations of premake and a custom option to distinguish them.
-
 MPT_PREMAKE_VERSION = ""
 
 MPT_PREMAKE_VERSION = "5.0"
