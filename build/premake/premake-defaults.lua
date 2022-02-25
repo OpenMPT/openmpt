@@ -162,6 +162,14 @@
   filter { "kind:not StaticLib", "configurations:ReleaseShared", "architecture:ARM64" }
 		targetdir ( "../../bin/release/" .. _ACTION .. "-" .. mpt_bindirsuffix64 .. "-shared/arm64" )
 
+	filter { "configurations:Debug", "architecture:ARM" }
+		editandcontinue "Off"
+	filter { "configurations:Debug", "architecture:ARM64" }
+		editandcontinue "Off"
+	filter { "configurations:DebugShared", "architecture:ARM" }
+		editandcontinue "Off"
+	filter { "configurations:DebugShared", "architecture:ARM64" }
+		editandcontinue "Off"
 
 	filter { "configurations:Debug" }
    defines { "DEBUG" }
