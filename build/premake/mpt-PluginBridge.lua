@@ -111,7 +111,11 @@
 		files {
 			"../../pluginBridge/PluginBridge-win10.manifest",
 		}
-	else
+	elseif _OPTIONS["win81"] then
+		files {
+			"../../pluginBridge/PluginBridge-win81.manifest",
+		}
+	elseif _OPTIONS["win7"] then
 		files {
 			"../../pluginBridge/PluginBridge-win7.manifest",
 		}
