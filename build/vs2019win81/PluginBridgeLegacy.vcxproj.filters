@@ -622,7 +622,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\pluginBridge\PluginBridge-win7.manifest">
+    <None Include="..\..\pluginBridge\PluginBridge-win81.manifest">
       <Filter>pluginBridge</Filter>
     </None>
   </ItemGroup>
