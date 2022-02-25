@@ -616,11 +616,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\pluginBridge\PluginBridge-win7.manifest">
-      <Filter>pluginBridge</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <ResourceCompile Include="..\..\pluginBridge\PluginBridge.rc">
       <Filter>pluginBridge</Filter>
     </ResourceCompile>
