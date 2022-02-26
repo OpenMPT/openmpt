@@ -546,6 +546,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -567,6 +568,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -588,6 +590,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -608,6 +611,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -632,6 +636,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -657,6 +662,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -682,6 +688,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -707,6 +714,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -734,6 +742,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -760,6 +769,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -786,6 +796,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -812,6 +823,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -834,6 +846,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -856,6 +869,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -878,6 +892,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -900,6 +915,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -926,6 +942,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -953,6 +970,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -980,6 +998,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -1007,6 +1026,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -1036,6 +1056,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -1064,6 +1085,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -1092,6 +1114,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -1120,6 +1143,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>

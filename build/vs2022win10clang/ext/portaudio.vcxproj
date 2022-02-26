@@ -506,6 +506,7 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 /wd6001 /wd6011 /wd6053 /wd6216 /wd6217 /wd6255 /wd6258 /wd6385 /wd6386 /wd6387 /wd28159 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -524,6 +525,7 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 /wd6001 /wd6011 /wd6053 /wd6216 /wd6217 /wd6255 /wd6258 /wd6385 /wd6386 /wd6387 /wd28159 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -542,6 +544,7 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 /wd6001 /wd6011 /wd6053 /wd6216 /wd6217 /wd6255 /wd6258 /wd6385 /wd6386 /wd6387 /wd28159 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -559,6 +562,7 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 /wd6001 /wd6011 /wd6053 /wd6216 /wd6217 /wd6255 /wd6258 /wd6385 /wd6386 /wd6387 /wd28159 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -581,6 +585,7 @@
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 /wd6001 /wd6011 /wd6053 /wd6216 /wd6217 /wd6255 /wd6258 /wd6385 /wd6386 /wd6387 /wd28159 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -604,6 +609,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 /wd6001 /wd6011 /wd6053 /wd6216 /wd6217 /wd6255 /wd6258 /wd6385 /wd6386 /wd6387 /wd28159 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -627,6 +633,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 /wd6001 /wd6011 /wd6053 /wd6216 /wd6217 /wd6255 /wd6258 /wd6385 /wd6386 /wd6387 /wd28159 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -650,6 +657,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 /wd6001 /wd6011 /wd6053 /wd6216 /wd6217 /wd6255 /wd6258 /wd6385 /wd6386 /wd6387 /wd28159 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -675,6 +683,7 @@
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 /wd6001 /wd6011 /wd6053 /wd6216 /wd6217 /wd6255 /wd6258 /wd6385 /wd6386 /wd6387 /wd28159 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -699,6 +708,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 /wd6001 /wd6011 /wd6053 /wd6216 /wd6217 /wd6255 /wd6258 /wd6385 /wd6386 /wd6387 /wd28159 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -723,6 +733,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 /wd6001 /wd6011 /wd6053 /wd6216 /wd6217 /wd6255 /wd6258 /wd6385 /wd6386 /wd6387 /wd28159 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -747,6 +758,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 /wd6001 /wd6011 /wd6053 /wd6216 /wd6217 /wd6255 /wd6258 /wd6385 /wd6386 /wd6387 /wd28159 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -766,6 +778,7 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 /wd6001 /wd6011 /wd6053 /wd6216 /wd6217 /wd6255 /wd6258 /wd6385 /wd6386 /wd6387 /wd28159 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -785,6 +798,7 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 /wd6001 /wd6011 /wd6053 /wd6216 /wd6217 /wd6255 /wd6258 /wd6385 /wd6386 /wd6387 /wd28159 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -804,6 +818,7 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 /wd6001 /wd6011 /wd6053 /wd6216 /wd6217 /wd6255 /wd6258 /wd6385 /wd6386 /wd6387 /wd28159 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -823,6 +838,7 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 /wd6001 /wd6011 /wd6053 /wd6216 /wd6217 /wd6255 /wd6258 /wd6385 /wd6386 /wd6387 /wd28159 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -847,6 +863,7 @@
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 /wd6001 /wd6011 /wd6053 /wd6216 /wd6217 /wd6255 /wd6258 /wd6385 /wd6386 /wd6387 /wd28159 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -872,6 +889,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 /wd6001 /wd6011 /wd6053 /wd6216 /wd6217 /wd6255 /wd6258 /wd6385 /wd6386 /wd6387 /wd28159 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -897,6 +915,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 /wd6001 /wd6011 /wd6053 /wd6216 /wd6217 /wd6255 /wd6258 /wd6385 /wd6386 /wd6387 /wd28159 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -922,6 +941,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 /wd6001 /wd6011 /wd6053 /wd6216 /wd6217 /wd6255 /wd6258 /wd6385 /wd6386 /wd6387 /wd28159 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -949,6 +969,7 @@
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 /wd6001 /wd6011 /wd6053 /wd6216 /wd6217 /wd6255 /wd6258 /wd6385 /wd6386 /wd6387 /wd28159 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -975,6 +996,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 /wd6001 /wd6011 /wd6053 /wd6216 /wd6217 /wd6255 /wd6258 /wd6385 /wd6386 /wd6387 /wd28159 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -1001,6 +1023,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 /wd6001 /wd6011 /wd6053 /wd6216 /wd6217 /wd6255 /wd6258 /wd6385 /wd6386 /wd6387 /wd28159 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -1027,6 +1050,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 /wd6001 /wd6011 /wd6053 /wd6216 /wd6217 /wd6255 /wd6258 /wd6385 /wd6386 /wd6387 /wd28159 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
