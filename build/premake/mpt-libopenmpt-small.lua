@@ -10,7 +10,7 @@
 	filter { "action:vs*" }
 		includedirs ( extincludedirs )
 	filter { "not action:vs*" }
-		sysincludedirs ( extincludedirs )
+		externalincludedirs ( extincludedirs )
 	filter {}
   includedirs {
    "../..",
