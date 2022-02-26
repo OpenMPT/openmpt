@@ -86,6 +86,8 @@
 		ConsoleApp = "Console",
 		WindowedApp = "Console",
 		Makefile = "",
+		None = "",
+		Utility = "",
 		SharedLib = "Library",
 		StaticLib = "Library"
 	}
@@ -189,16 +191,16 @@
 	end
 
 	function m.compiler(cfg)
-		if configuration_iscustombuild(cfg) or configuration_isfilelist(cfg) then
+		if cfg.project.kind == p.NONE or configuration_iscustombuild(cfg) or configuration_isfilelist(cfg) then
 			_p(3, '<Compiler Required="no"/>')
 			return
 		end
 
 		local toolset = m.getcompiler(cfg)
-		local sysincludedirs = toolset.getincludedirs(cfg, {}, cfg.sysincludedirs, cfg.frameworkdirs)
+		local externalincludedirs = toolset.getincludedirs(cfg, {}, cfg.externalincludedirs, cfg.frameworkdirs)
 		local forceincludes = toolset.getforceincludes(cfg)
-		local cxxflags = table.concat(table.join(sysincludedirs, toolset.getcxxflags(cfg), forceincludes, cfg.buildoptions), ";")
-		local cflags   = table.concat(table.join(sysincludedirs, toolset.getcflags(cfg), forceincludes, cfg.buildoptions), ";")
+		local cxxflags = table.concat(table.join(externalincludedirs, toolset.getcxxflags(cfg), forceincludes, cfg.buildoptions), ";")
+		local cflags   = table.concat(table.join(externalincludedirs, toolset.getcflags(cfg), forceincludes, cfg.buildoptions), ";")
 		local asmflags = ""
 		local pch      = p.tools.gcc.getpch(cfg)
 		local usepch   = "yes"
@@ -219,7 +221,7 @@
 	end
 
 	function m.linker(cfg)
-		if configuration_iscustombuild(cfg) or configuration_isfilelist(cfg) then
+		if cfg.project.kind == p.NONE or configuration_iscustombuild(cfg) or configuration_isfilelist(cfg) then
 			_p(3, '<Linker Required="no"/>')
 			return
 		end
@@ -246,7 +248,7 @@
 		local options = table.concat(cfg.resoptions, ";")
 
 		_x(3, '<ResourceCompiler Options="%s%s" Required="yes">', defines, options)
-		for _, includepath in ipairs(table.join(cfg.sysincludedirs, cfg.includedirs, cfg.resincludedirs)) do
+		for _, includepath in ipairs(table.join(cfg.externalincludedirs, cfg.includedirs, cfg.resincludedirs)) do
 			_x(4, '<IncludePath Value="%s"/>', project.getrelative(cfg.project, includepath))
 		end
 		_p(3, '</ResourceCompiler>')
@@ -471,6 +473,7 @@
 		SharedLib   = "Dynamic Library",
 		StaticLib   = "Static Library",
 		WindowedApp = "Executable",
+		None = "",
 		Utility     = "",
 	}
 
@@ -493,7 +496,7 @@
 			local cfgname  = codelite.cfgname(cfg)
 			local compiler = m.getcompilername(cfg)
 			local debugger = m.debuggers[cfg.debugger] or m.debuggers.Default
-			local type = m.types[cfg.kind]
+			local type = m.types[cfg.kind] or ""
 
 			_x(2, '<Configuration Name="%s" CompilerType="%s" DebuggerType="%s" Type="%s" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">', cfgname, compiler, debugger, type)
 

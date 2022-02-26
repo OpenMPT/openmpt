@@ -499,18 +499,13 @@
 					NDEBUG,
 					N_FSEEKO,
 					HAVE_SSIZE_T_LIBZIP,
+					HAVE_CONFIG_H,
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				OBJROOT = "obj/Release/zip-lib";
 				ONLY_ACTIVE_ARCH = NO;
-				OTHER_CFLAGS = (
-					"-arch x86_64",
-				);
-				OTHER_LDFLAGS = (
-					"-arch x86_64",
-				);
 				STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = static;
 				SYMROOT = bin/Release;
 				USER_HEADER_SEARCH_PATHS = (
@@ -536,18 +531,13 @@
 					_DEBUG,
 					N_FSEEKO,
 					HAVE_SSIZE_T_LIBZIP,
+					HAVE_CONFIG_H,
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				OBJROOT = "obj/Debug/zip-lib";
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_CFLAGS = (
-					"-arch x86_64",
-				);
-				OTHER_LDFLAGS = (
-					"-arch x86_64",
-				);
 				STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = static;
 				SYMROOT = bin/Debug;
 				USER_HEADER_SEARCH_PATHS = (

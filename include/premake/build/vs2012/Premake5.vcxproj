@@ -364,6 +364,8 @@
     <None Include="..\..\modules\vstudio\tests\vc2019\test_compile_settings.lua" />
     <None Include="..\..\modules\vstudio\tests\vc2019\test_link.lua" />
     <None Include="..\..\modules\vstudio\tests\vc2019\test_toolset_settings.lua" />
+    <None Include="..\..\modules\vstudio\tests\vc2022\test_compile_settings.lua" />
+    <None Include="..\..\modules\vstudio\tests\vc2022\test_output_props.lua" />
     <None Include="..\..\modules\vstudio\tests\vc2022\test_toolset_settings.lua" />
     <None Include="..\..\modules\vstudio\vs2005.lua" />
     <None Include="..\..\modules\vstudio\vs2005_csproj.lua" />

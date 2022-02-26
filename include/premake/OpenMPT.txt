@@ -1,1 +1,1 @@
-Premake version 5.0-beta1
+Premake version 5.0.0-dev commit 1cd78b4a902969bd4fde2b617785fb7e33e5a913 (2022-02-22)

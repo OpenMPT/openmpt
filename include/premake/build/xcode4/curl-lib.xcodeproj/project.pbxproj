@@ -952,19 +952,15 @@
 					CURL_STATICLIB,
 					HTTP_ONLY,
 					USE_ZLIB,
-					USE_DARWINSSL,
+					USE_MBEDTLS,
+					CURL_HIDDEN_SYMBOLS,
+					"CURL_CA_BUNDLE=\\\"/etc/ssl/certs/ca-certificates.crt\\\"",
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				OBJROOT = "obj/Debug/curl-lib";
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_CFLAGS = (
-					"-arch x86_64",
-				);
-				OTHER_LDFLAGS = (
-					"-arch x86_64",
-				);
 				STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = static;
 				SYMROOT = bin/Debug;
 				SYSTEM_HEADER_SEARCH_PATHS = (
@@ -1019,19 +1015,15 @@
 					CURL_STATICLIB,
 					HTTP_ONLY,
 					USE_ZLIB,
-					USE_DARWINSSL,
+					USE_MBEDTLS,
+					CURL_HIDDEN_SYMBOLS,
+					"CURL_CA_BUNDLE=\\\"/etc/ssl/certs/ca-certificates.crt\\\"",
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				OBJROOT = "obj/Release/curl-lib";
 				ONLY_ACTIVE_ARCH = NO;
-				OTHER_CFLAGS = (
-					"-arch x86_64",
-				);
-				OTHER_LDFLAGS = (
-					"-arch x86_64",
-				);
 				STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = static;
 				SYMROOT = bin/Release;
 				SYSTEM_HEADER_SEARCH_PATHS = (

@@ -257,6 +257,8 @@
           <File Name="../../modules/vstudio/tests/vc2019/test_toolset_settings.lua"/>
         </VirtualDirectory>
         <VirtualDirectory Name="vc2022">
+          <File Name="../../modules/vstudio/tests/vc2022/test_compile_settings.lua"/>
+          <File Name="../../modules/vstudio/tests/vc2022/test_output_props.lua"/>
           <File Name="../../modules/vstudio/tests/vc2022/test_toolset_settings.lua"/>
         </VirtualDirectory>
       </VirtualDirectory>

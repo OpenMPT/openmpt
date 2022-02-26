@@ -243,6 +243,7 @@
 				m.generateManifest,
 				m.extensionsToDeleteOnClean,
 				m.executablePath,
+				m.allModulesPublic,
 			}
 		end
 	end
@@ -389,10 +390,15 @@
 			m.compileAs,
 			m.callingConvention,
 			m.languageStandard,
+			m.languageStandardC,
 			m.conformanceMode,
 			m.structMemberAlignment,
 			m.useFullPaths,
-			m.removeUnreferencedCodeData
+			m.removeUnreferencedCodeData,
+			m.compileAsWinRT,
+			m.externalWarningLevel,
+			m.externalAngleBrackets,
+			m.scanSourceForModuleDependencies,
 		}
 
 		if cfg.kind == p.STATICLIB then
@@ -791,7 +797,7 @@
 ---
 	m.categories.ClCompile = {
 		name       = "ClCompile",
-		extensions = { ".cc", ".cpp", ".cxx", ".c++", ".c", ".s", ".m", ".mm" },
+		extensions = { ".cc", ".cpp", ".cxx", ".c++", ".c", ".s", ".m", ".mm", ".cppm", ".ixx" },
 		priority   = 2,
 
 		emitFiles = function(prj, group)
@@ -815,6 +821,9 @@
 						m.compileAs,
 						m.runtimeTypeInfo,
 						m.warningLevelFile,
+						m.compileAsWinRT,
+						m.externalWarningLevelFile,
+						m.externalAngleBrackets,
 					}
 				else
 					return {
@@ -1413,9 +1422,18 @@
 			links = vstudio.getLinks(cfg, explicit)
 		end
 
-		if #links > 0 then
-			links = path.translate(table.concat(links, ";"))
-			m.element("AdditionalDependencies", nil, "%s;%%(AdditionalDependencies)", links)
+		links = path.translate(table.concat(links, ";"))
+
+		local additional = ";%(AdditionalDependencies)"
+		if cfg.inheritdependencies ~= nil then
+			if not cfg.inheritdependencies then
+				additional = ""
+			end
+		end
+
+		-- If there are no links and dependencies should be inherited, the tag doesn't have to be generated.
+		if #links > 0 or additional == "" then
+			m.element("AdditionalDependencies", nil, "%s%s", links, additional)
 		end
 	end
 
@@ -1477,21 +1495,37 @@
 			elseif (cfg.cppdialect == "C++17") then
 				m.element("LanguageStandard", nil, 'stdcpp17')
 			elseif (cfg.cppdialect == "C++20") then
-				m.element("LanguageStandard", nil, 'stdcpplatest')
+				m.element("LanguageStandard", nil, iif(_ACTION == "vs2017", 'stdcpplatest', 'stdcpp20'))
 			elseif (cfg.cppdialect == "C++latest") then
 				m.element("LanguageStandard", nil, 'stdcpplatest')
 			end
 		end
 	end
 
+
+	function m.languageStandardC(cfg)
+		if _ACTION >= "vs2019" then
+			if (cfg.cdialect == "C11") then
+				m.element("LanguageStandard_C", nil, 'stdc11')
+			elseif (cfg.cdialect == "C17") then
+				m.element("LanguageStandard_C", nil, 'stdc17')
+			end
+		end
+	end
+
+
 	function m.conformanceMode(cfg)
 		if _ACTION >= "vs2017" then
 			if cfg.conformancemode ~= nil then
-				if cfg.conformancemode then
-					m.element("ConformanceMode", nil, "true")
-				else
-					m.element("ConformanceMode", nil, "false")
-				end
+				m.element("ConformanceMode", nil, iif(cfg.conformancemode, "true", "false"))
+			end
+		end
+	end
+
+	function m.allModulesPublic(cfg)
+		if _ACTION >= "vs2019" then
+			if cfg.allmodulespublic ~= nil then
+				m.element("AllProjectBMIsArePublic", nil, iif(cfg.allmodulespublic, "true", "false"))
 			end
 		end
 	end
@@ -1527,6 +1561,14 @@
 				m.element("RemoveUnreferencedCodeData", nil, "true")
 			else
 				m.element("RemoveUnreferencedCodeData", nil, "false")
+			end
+		end
+	end
+
+	function m.compileAsWinRT(cfg, condition)
+		if _ACTION >= "vs2019" then
+			if cfg and cfg.consumewinrtextension ~= nil then
+				m.element("CompileAsWinRT", condition, iif(cfg.consumewinrtextension, "true", "false"))
 			end
 		end
 	end
@@ -2131,9 +2173,13 @@
 
 
 	function m.includePath(cfg)
-		local dirs = vstudio.path(cfg, cfg.sysincludedirs)
+		local dirs = vstudio.path(cfg, cfg.externalincludedirs)
 		if #dirs > 0 then
-			m.element("IncludePath", nil, "%s;$(IncludePath)", table.concat(dirs, ";"))
+			if _ACTION < "vs2022" then
+				m.element("IncludePath", nil, "%s;$(IncludePath)", table.concat(dirs, ";"))
+			else
+				m.element("ExternalIncludePath", nil, "%s;$(ExternalIncludePath)", table.concat(dirs, ";"))
+			end
 		end
 	end
 
@@ -2573,7 +2619,8 @@
 
 
 	function m.resourceAdditionalIncludeDirectories(cfg)
-		m.additionalIncludeDirectories(cfg, table.join(cfg.includedirs, cfg.resincludedirs))
+		local dirs = table.join(cfg.includedirs, cfg.resincludedirs)
+		m.additionalIncludeDirectories(cfg, dirs)
 	end
 
 
@@ -2818,6 +2865,48 @@
 		local map = { Off = "TurnOffAllWarnings", High = "Level4", Extra = "Level4", Everything = "EnableAllWarnings" }
 		if cfg.warnings then
 			m.element("WarningLevel", condition, map[cfg.warnings] or "Level3")
+		end
+	end
+
+
+	function m.externalWarningLevel(cfg)
+		if _ACTION >= "vs2022" then
+			local map = { Off = "TurnOffAllWarnings", High = "Level4", Extra = "Level4", Everything = "Level4" }
+			m.element("ExternalWarningLevel", nil, map[cfg.externalwarnings] or "Level3")
+		end
+	end
+
+
+	function m.externalWarningLevelFile(cfg, condition)
+		if _ACTION >= "vs2022" then
+			if cfg.externalwarnings then
+				local map = { Off = "TurnOffAllWarnings", High = "Level4", Extra = "Level4", Everything = "Level4" }
+				m.element("ExternalWarningLevel", condition, map[cfg.externalwarnings] or "Level3")
+			end
+		end
+	end
+
+
+	function m.externalAngleBrackets(cfg, condition)
+		if _ACTION >= "vs2022" then
+			if cfg.externalanglebrackets == p.OFF then
+				m.element("TreatAngleIncludeAsExternal", condition, "false")
+			elseif cfg.externalanglebrackets == p.ON then
+				m.element("TreatAngleIncludeAsExternal", condition, "true")
+			end
+		end
+	end
+
+
+	function m.scanSourceForModuleDependencies(cfg)
+		if _ACTION >= "vs2019" then
+			if cfg.scanformoduledependencies ~= nil then
+				if cfg.scanformoduledependencies then
+					m.element("ScanSourceForModuleDependencies", nil, "true")
+				else
+					m.element("ScanSourceForModuleDependencies", nil, "false")
+				end
+			end
 		end
 	end
 

@@ -69,6 +69,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>PREMAKE_COMPRESSION;CURL_STATICLIB;PREMAKE_CURL;NDEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -92,6 +93,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>PREMAKE_COMPRESSION;CURL_STATICLIB;PREMAKE_CURL;_DEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -365,6 +367,8 @@
     <None Include="..\..\modules\vstudio\tests\vc2019\test_compile_settings.lua" />
     <None Include="..\..\modules\vstudio\tests\vc2019\test_link.lua" />
     <None Include="..\..\modules\vstudio\tests\vc2019\test_toolset_settings.lua" />
+    <None Include="..\..\modules\vstudio\tests\vc2022\test_compile_settings.lua" />
+    <None Include="..\..\modules\vstudio\tests\vc2022\test_output_props.lua" />
     <None Include="..\..\modules\vstudio\tests\vc2022\test_toolset_settings.lua" />
     <None Include="..\..\modules\vstudio\vs2005.lua" />
     <None Include="..\..\modules\vstudio\vs2005_csproj.lua" />

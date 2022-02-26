@@ -45,14 +45,14 @@
     <IntDir>obj\Win32\Release\curl-lib\</IntDir>
     <TargetName>curl-lib</TargetName>
     <TargetExt>.lib</TargetExt>
-    <IncludePath>..\..\contrib\curl\include;$(IncludePath)</IncludePath>
+    <ExternalIncludePath>..\..\contrib\curl\include;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>bin\Win32\Debug\</OutDir>
     <IntDir>obj\Win32\Debug\curl-lib\</IntDir>
     <TargetName>curl-lib</TargetName>
     <TargetExt>.lib</TargetExt>
-    <IncludePath>..\..\contrib\curl\include;$(IncludePath)</IncludePath>
+    <ExternalIncludePath>..\..\contrib\curl\include;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -69,6 +69,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -90,6 +91,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

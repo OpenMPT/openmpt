@@ -25,7 +25,7 @@ These add-on modules are available from other developers; follow the links for m
 
 ## Build System Modules
 
-* [CMake](https://github.com/Geequlim/premake-modules/tree/master/cmake) : CMakeLists exporter for premake
+* [CMake](https://github.com/Jarod42/premake-cmake) : CMakeLists exporter for premake
 * [Ninja](https://github.com/jimon/premake-ninja) : [Ninja](https://github.com/martine/ninja) support
 
 ## Tool Modules
@@ -34,9 +34,9 @@ These add-on modules are available from other developers; follow the links for m
 * [CompilationUnit](https://github.com/dcourtois/premake-compilationunit) : [Single compilation unit](https://en.wikipedia.org/wiki/Single_Compilation_Unit) support
 * [Export](https://github.com/Meoo/premake-export) : premake usage/export module
 * [Generate compile_commands.json](https://github.com/tarruda/premake-export-compile-commands) : Export clang compilation database
+* [Generate compile_commands.json](https://github.com/MattBystrin/premake-ecc) : Alternative exporter for clang compilation database
 * [GitHub Packages](https://github.com/mversluys/premake-ghp) : Consume libraries directly from GitHub releases
 * [Pkgconfig](https://github.com/tarruda/premake-pkgconfig) : Pure lua implementation of pkgconfig for premake
-* [Pkgconfig](https://github.com/Geequlim/premake-modules/tree/master/pkgconfig) : pkg-config loader for premake
 * [Platform test](https://github.com/tarruda/premake-platform-test) : Perform platform checks in your premake configuration
 
 ## Library Modules

@@ -13,10 +13,12 @@ cdialect "value"
 * `C90`: ISO C90
 * `C99`: ISO C99
 * `C11`: ISO C11
+* `C17`: ISO C17
 * `gnu89`: GNU dialect of ISO C89
 * `gnu90`: GNU dialect of ISO C90
 * `gnu99`: GNU dialect of ISO C99
 * `gnu11`: GNU dialect of ISO C11
+* `gnu17`: GNU dialect of ISO C17
 
 ### Applies To ###
 

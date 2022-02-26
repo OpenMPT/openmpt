@@ -142,6 +142,16 @@
 		tokens = true,
 	}
 
+	p.api.register {
+		name = "externalanglebrackets",
+		scope = "config",
+		kind = "string",
+		allowed = {
+			"On",
+			"Off",
+		},
+	}
+
 	p.api.register {   -- DEPRECATED 2019-10-21
 		name = "debuggerflavor",
 		scope = "config",
@@ -159,6 +169,12 @@
 		debugger('VisualStudio' .. value)
 	end)
 
+	p.api.register {
+		name = "scanformoduledependencies",
+		scope = "config",
+		kind = "boolean"
+	}
+
 
 --
 -- Decide when the full module should be loaded.
@@ -174,5 +190,6 @@
 			_ACTION == "vs2015" or
 			_ACTION == "vs2017" or
 			_ACTION == "vs2019" or
+			_ACTION == "vs2022" or
 			false;
 	end

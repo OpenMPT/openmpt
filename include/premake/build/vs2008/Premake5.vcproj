@@ -1181,6 +1181,14 @@
 						Name="vc2022"
 						>
 						<File
+							RelativePath="..\..\modules\vstudio\tests\vc2022\test_compile_settings.lua"
+							>
+						</File>
+						<File
+							RelativePath="..\..\modules\vstudio\tests\vc2022\test_output_props.lua"
+							>
+						</File>
+						<File
 							RelativePath="..\..\modules\vstudio\tests\vc2022\test_toolset_settings.lua"
 							>
 						</File>

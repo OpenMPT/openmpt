@@ -909,6 +909,12 @@
     <None Include="..\..\modules\vstudio\tests\vc2019\test_toolset_settings.lua">
       <Filter>modules\vstudio\tests\vc2019</Filter>
     </None>
+    <None Include="..\..\modules\vstudio\tests\vc2022\test_compile_settings.lua">
+      <Filter>modules\vstudio\tests\vc2022</Filter>
+    </None>
+    <None Include="..\..\modules\vstudio\tests\vc2022\test_output_props.lua">
+      <Filter>modules\vstudio\tests\vc2022</Filter>
+    </None>
     <None Include="..\..\modules\vstudio\tests\vc2022\test_toolset_settings.lua">
       <Filter>modules\vstudio\tests\vc2022</Filter>
     </None>

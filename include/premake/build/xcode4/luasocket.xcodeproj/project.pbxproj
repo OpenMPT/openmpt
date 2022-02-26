@@ -83,13 +83,13 @@
 		B4D5E3C1DAFC137342030A01 /* ltn12.lua */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.lua; name = ltn12.lua; path = ../../binmodules/luasocket/src/ltn12.lua; sourceTree = "<group>"; };
 		B5F4E937DE2FA1E9C5CB2F77 /* headers.lua */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.lua; name = headers.lua; path = ../../binmodules/luasocket/src/headers.lua; sourceTree = "<group>"; };
 		BBA36DF3D2B60925C2D20433 /* compat.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = compat.h; path = ../../binmodules/luasocket/src/compat.h; sourceTree = "<group>"; };
+		C3E6D15BEA0D010D5113F79B /* libluasocket.so */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; name = libluasocket.so; path = libluasocket.so; sourceTree = BUILT_PRODUCTS_DIR; };
 		CEB8B3CEE0E2908014D37A0E /* libluashim-lib.a */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = luashim-lib.xcodeproj; path = "luashim-lib.xcodeproj"; sourceTree = SOURCE_ROOT; };
 		D0F61C4BF2C1C97D2F76F28B /* unixstream.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = unixstream.h; path = ../../binmodules/luasocket/src/unixstream.h; sourceTree = "<group>"; };
 		D430F993771F20450644FFD3 /* ftp.lua */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.lua; name = ftp.lua; path = ../../binmodules/luasocket/src/ftp.lua; sourceTree = "<group>"; };
 		D77EE0691FEFC49B648E96A9 /* auxiliar.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = auxiliar.h; path = ../../binmodules/luasocket/src/auxiliar.h; sourceTree = "<group>"; };
 		D8F5FB21F0089653E0249161 /* serial.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = serial.c; path = ../../binmodules/luasocket/src/serial.c; sourceTree = "<group>"; };
 		D904242BF016BF5DE032BA6B /* select.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = select.h; path = ../../binmodules/luasocket/src/select.h; sourceTree = "<group>"; };
-		DDB2E86D344052DF0CB966AD /* libluasocket.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; name = libluasocket.dylib; path = libluasocket.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		E3D65F798828FD2B9A6145B9 /* tcp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = tcp.h; path = ../../binmodules/luasocket/src/tcp.h; sourceTree = "<group>"; };
 		E848989FFF5B33D1EF772EDF /* http.lua */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.lua; name = http.lua; path = ../../binmodules/luasocket/src/http.lua; sourceTree = "<group>"; };
 		E988BF9B8CD448CDA7A515DB /* io.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = io.h; path = ../../binmodules/luasocket/src/io.h; sourceTree = "<group>"; };
@@ -100,7 +100,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		AEEFAF5DA855B0CF9BF10D9D /* Frameworks */ = {
+		E6E8514B89D677FD18FC578B /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -111,7 +111,7 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		FF644B09EA5070FB32363949 /* Embed Libraries */ = {
+		180D20772F1FBBA91F3BB6B7 /* Embed Libraries */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
@@ -208,7 +208,7 @@
 		A6C936B49B3FADE6EA134CF4 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				DDB2E86D344052DF0CB966AD /* libluasocket.dylib */,
+				C3E6D15BEA0D010D5113F79B /* libluasocket.so */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -216,14 +216,14 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		1858E6B360C9CAE5A5689CF3 /* luasocket */ = {
+		461C69E13F826B53331DC821 /* luasocket */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 9D2AF7BC9690F92E8A2C55FC /* Build configuration list for PBXNativeTarget "luasocket" */;
+			buildConfigurationList = D52399AA7811C05C07379FEA /* Build configuration list for PBXNativeTarget "luasocket" */;
 			buildPhases = (
-				1ED72FFD183D316F0BD88E3D /* Resources */,
-				8884495481EA4AC67585A794 /* Sources */,
-				AEEFAF5DA855B0CF9BF10D9D /* Frameworks */,
-				FF644B09EA5070FB32363949 /* Embed Libraries */,
+				56CFD1EBF9BDF89D88E3D82B /* Resources */,
+				C07CEB42636B11F4F290F182 /* Sources */,
+				E6E8514B89D677FD18FC578B /* Frameworks */,
+				180D20772F1FBBA91F3BB6B7 /* Embed Libraries */,
 			);
 			buildRules = (
 			);
@@ -232,7 +232,7 @@
 			);
 			name = luasocket;
 			productName = luasocket;
-			productReference = DDB2E86D344052DF0CB966AD /* libluasocket.dylib */;
+			productReference = C3E6D15BEA0D010D5113F79B /* libluasocket.so */;
 			productType = "com.apple.product-type.library.dynamic";
 		};
 /* End PBXNativeTarget section */
@@ -253,7 +253,7 @@
 			);
 			projectRoot = "";
 			targets = (
-				1858E6B360C9CAE5A5689CF3 /* libluasocket.dylib */,
+				461C69E13F826B53331DC821 /* libluasocket.so */,
 			);
 		};
 /* End PBXProject section */
@@ -269,7 +269,7 @@
 /* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
-		1ED72FFD183D316F0BD88E3D /* Resources */ = {
+		56CFD1EBF9BDF89D88E3D82B /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -279,7 +279,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		8884495481EA4AC67585A794 /* Sources */ = {
+		C07CEB42636B11F4F290F182 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -340,12 +340,6 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				OBJROOT = obj/Debug/luasocket;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_CFLAGS = (
-					"-arch x86_64",
-				);
-				OTHER_LDFLAGS = (
-					"-arch x86_64",
-				);
 				STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = static;
 				SYMROOT = ../../bin/debug;
 				USER_HEADER_SEARCH_PATHS = (
@@ -353,6 +347,34 @@
 					../../contrib/luashim,
 				);
 				WARNING_CFLAGS = "-Wall -Wextra";
+			};
+			name = Debug;
+		};
+		4449B46A91ACAA9C07CBAAAA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CONFIGURATION_BUILD_DIR = ../../bin/release;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				EXECUTABLE_EXTENSION = so;
+				EXECUTABLE_PREFIX = lib;
+				GCC_DYNAMIC_NO_PIC = NO;
+				INSTALL_PATH = /usr/local/lib;
+				PRODUCT_NAME = luasocket;
+			};
+			name = Release;
+		};
+		6B317D702E9D3F226D40E3B0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CONFIGURATION_BUILD_DIR = ../../bin/debug;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				EXECUTABLE_EXTENSION = so;
+				EXECUTABLE_PREFIX = lib;
+				GCC_DYNAMIC_NO_PIC = NO;
+				INSTALL_PATH = /usr/local/lib;
+				PRODUCT_NAME = luasocket;
 			};
 			name = Debug;
 		};
@@ -375,12 +397,6 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				OBJROOT = obj/Release/luasocket;
 				ONLY_ACTIVE_ARCH = NO;
-				OTHER_CFLAGS = (
-					"-arch x86_64",
-				);
-				OTHER_LDFLAGS = (
-					"-arch x86_64",
-				);
 				STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = static;
 				SYMROOT = ../../bin/release;
 				USER_HEADER_SEARCH_PATHS = (
@@ -390,32 +406,6 @@
 				WARNING_CFLAGS = "-Wall -Wextra";
 			};
 			name = Release;
-		};
-		C1E349FC3305EAEEE8CC983C /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CONFIGURATION_BUILD_DIR = ../../bin/release;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				EXECUTABLE_PREFIX = lib;
-				GCC_DYNAMIC_NO_PIC = NO;
-				INSTALL_PATH = /usr/local/lib;
-				PRODUCT_NAME = luasocket;
-			};
-			name = Release;
-		};
-		EFE48682E9A642F423A544C2 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CONFIGURATION_BUILD_DIR = ../../bin/debug;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				EXECUTABLE_PREFIX = lib;
-				GCC_DYNAMIC_NO_PIC = NO;
-				INSTALL_PATH = /usr/local/lib;
-				PRODUCT_NAME = luasocket;
-			};
-			name = Debug;
 		};
 /* End XCBuildConfiguration section */
 
@@ -429,11 +419,11 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		9D2AF7BC9690F92E8A2C55FC /* Build configuration list for PBXNativeTarget "libluasocket.dylib" */ = {
+		D52399AA7811C05C07379FEA /* Build configuration list for PBXNativeTarget "libluasocket.so" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				C1E349FC3305EAEEE8CC983C /* Release */,
-				EFE48682E9A642F423A544C2 /* Debug */,
+				4449B46A91ACAA9C07CBAAAA /* Release */,
+				6B317D702E9D3F226D40E3B0 /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

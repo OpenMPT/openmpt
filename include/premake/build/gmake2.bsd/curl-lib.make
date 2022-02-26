@@ -37,7 +37,7 @@ ifeq ($(config),release)
 TARGETDIR = bin/Release
 TARGET = $(TARGETDIR)/libcurl-lib.a
 OBJDIR = obj/Release/curl-lib
-DEFINES += -DPREMAKE_COMPRESSION -DPREMAKE_CURL -DNDEBUG -DBUILDING_LIBCURL -DCURL_STATICLIB -DHTTP_ONLY -DUSE_ZLIB -DUSE_MBEDTLS -DCURL_HIDDEN_SYMBOLS -DCURL_CA_BUNDLE=\"/etc/ssl/cert.pem\"
+DEFINES += -DPREMAKE_COMPRESSION -DPREMAKE_CURL -DNDEBUG -DBUILDING_LIBCURL -DCURL_STATICLIB -DHTTP_ONLY -DUSE_ZLIB -DUSE_MBEDTLS -DCURL_HIDDEN_SYMBOLS -DCURL_CA_BUNDLE=\"/etc/ssl/certs/ca-certificates.crt\"
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -O3 -w
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -O3 -w -fno-stack-protector
 ALL_LDFLAGS += $(LDFLAGS) -s
@@ -46,7 +46,7 @@ else ifeq ($(config),debug)
 TARGETDIR = bin/Debug
 TARGET = $(TARGETDIR)/libcurl-lib.a
 OBJDIR = obj/Debug/curl-lib
-DEFINES += -DPREMAKE_COMPRESSION -DPREMAKE_CURL -D_DEBUG -DBUILDING_LIBCURL -DCURL_STATICLIB -DHTTP_ONLY -DUSE_ZLIB -DUSE_MBEDTLS -DCURL_HIDDEN_SYMBOLS -DCURL_CA_BUNDLE=\"/etc/ssl/cert.pem\"
+DEFINES += -DPREMAKE_COMPRESSION -DPREMAKE_CURL -D_DEBUG -DBUILDING_LIBCURL -DCURL_STATICLIB -DHTTP_ONLY -DUSE_ZLIB -DUSE_MBEDTLS -DCURL_HIDDEN_SYMBOLS -DCURL_CA_BUNDLE=\"/etc/ssl/certs/ca-certificates.crt\"
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -g -w
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -g -w
 ALL_LDFLAGS += $(LDFLAGS)
@@ -354,7 +354,7 @@ ifeq (posix,$(SHELLTYPE))
 	$(SILENT) rm -rf $(OBJDIR)
 else
 	$(SILENT) if exist $(subst /,\\,$(TARGET)) del $(subst /,\\,$(TARGET))
-	$(SILENT) if exist $(subst /,\\,$(GENERATED)) rmdir /s /q $(subst /,\\,$(GENERATED))
+	$(SILENT) if exist $(subst /,\\,$(GENERATED)) del /s /q $(subst /,\\,$(GENERATED))
 	$(SILENT) if exist $(subst /,\\,$(OBJDIR)) rmdir /s /q $(subst /,\\,$(OBJDIR))
 endif
 

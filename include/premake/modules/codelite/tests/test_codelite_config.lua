@@ -27,6 +27,14 @@
 		cfg = test.getconfig(prj, "Debug")
 	end
 
+	function suite.OnProjectCfg_KindNone()
+		kind "None"
+		prepare()
+		codelite.project.compiler(cfg)
+		test.capture [[
+      <Compiler Required="no"/>
+		]]
+	end
 
 	function suite.OnProjectCfg_Compiler()
 		prepare()
@@ -69,7 +77,7 @@
 	end
 
 	function suite.OnProjectCfg_SysIncludes()
-		sysincludedirs { "sysdir", "sysdir2/"}
+		externalincludedirs { "sysdir", "sysdir2/"}
 		prepare()
 		codelite.project.compiler(cfg)
 		test.capture [[
@@ -100,6 +108,15 @@
 		test.capture [[
       <Compiler Options="" C_Options="" Assembler="" Required="yes" PreCompiledHeader="pch.h" PCHInCommandLine="yes" UseDifferentPCHFlags="no" PCHFlags="">
       </Compiler>
+		]]
+	end
+
+	function suite.OnProjectCfg_LinkerKindNone()
+		kind "None"
+		prepare()
+		codelite.project.linker(cfg)
+		test.capture [[
+      <Linker Required="no"/>
 		]]
 	end
 
@@ -171,7 +188,7 @@
 
 	function suite.OnProjectCfg_ResSysInclude()
 		files { "x.rc" }
-		sysincludedirs { "sysdir/" }
+		externalincludedirs { "sysdir/" }
 		prepare()
 		codelite.project.resourceCompiler(cfg)
 		test.capture [[

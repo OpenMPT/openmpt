@@ -303,7 +303,7 @@
         <Preprocessor Value="USE_ZLIB"/>
         <Preprocessor Value="USE_MBEDTLS"/>
         <Preprocessor Value="CURL_HIDDEN_SYMBOLS"/>
-        <Preprocessor Value="CURL_CA_BUNDLE=&quot;/etc/ssl/cert.pem&quot;"/>
+        <Preprocessor Value="CURL_CA_BUNDLE=&quot;/etc/ssl/certs/ca-certificates.crt&quot;"/>
       </Compiler>
       <Linker Required="yes" Options="">
       </Linker>
@@ -343,7 +343,7 @@
         <Preprocessor Value="USE_ZLIB"/>
         <Preprocessor Value="USE_MBEDTLS"/>
         <Preprocessor Value="CURL_HIDDEN_SYMBOLS"/>
-        <Preprocessor Value="CURL_CA_BUNDLE=&quot;/etc/ssl/cert.pem&quot;"/>
+        <Preprocessor Value="CURL_CA_BUNDLE=&quot;/etc/ssl/certs/ca-certificates.crt&quot;"/>
       </Compiler>
       <Linker Required="yes" Options="">
       </Linker>
