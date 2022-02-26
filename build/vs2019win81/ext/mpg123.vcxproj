@@ -283,6 +283,7 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
@@ -305,6 +306,7 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
@@ -331,6 +333,7 @@
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
@@ -357,6 +360,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
@@ -385,6 +389,7 @@
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
@@ -412,6 +417,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
@@ -435,6 +441,7 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
@@ -456,6 +463,7 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
@@ -481,6 +489,7 @@
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
@@ -507,6 +516,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
@@ -535,6 +545,7 @@
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
@@ -562,6 +573,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>

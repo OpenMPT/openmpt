@@ -30,6 +30,8 @@ echo " cc 99"
 cc    -std=c99 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.c -o bin/headercheck.cc99.out
 echo " cc 11"
 cc    -std=c11 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.c -o bin/headercheck.cc11.out
+echo " cc 17"
+cc    -std=c17 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.c -o bin/headercheck.cc17.out
 if cc -std=c18 -c bin/empty.c -o bin/empty.cc18.out > /dev/null 2>&1 ; then
 echo " cc 18"
 cc    -std=c18 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.c -o bin/headercheck.cc18.out
@@ -40,6 +42,8 @@ echo " gcc 99"
 gcc   -std=c99 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.c -o bin/headercheck.gcc99.out
 echo " gcc 11"
 gcc   -std=c11 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.c -o bin/headercheck.gcc11.out
+echo " gcc 17"
+gcc   -std=c17 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.c -o bin/headercheck.gcc17.out
 if gcc -std=c18 -c bin/empty.c -o bin/empty.gcc18.out > /dev/null 2>&1 ; then
 echo " gcc 18"
 gcc   -std=c18 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.c -o bin/headercheck.gcc18.out
@@ -50,6 +54,8 @@ echo " clang 99"
 clang -std=c99 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.c -o bin/headercheck.clang99.out
 echo " clang 11"
 clang -std=c11 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.c -o bin/headercheck.clang11.out
+echo " clang 17"
+clang -std=c17 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.c -o bin/headercheck.clang17.out
 if clang -std=c18 -c bin/empty.c -o bin/empty.clang18.out > /dev/null 2>&1 ; then
 echo " clang 18"
 clang -std=c18 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.c -o bin/headercheck.clang18.out

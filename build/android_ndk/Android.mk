@@ -6,7 +6,7 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE := openmpt
 
-LOCAL_CFLAGS   +=#-std=c99
+LOCAL_CFLAGS   += -std=c17
 LOCAL_CPPFLAGS += -std=c++17 -fexceptions -frtti
 
 LOCAL_CPP_FEATURES += exceptions rtti

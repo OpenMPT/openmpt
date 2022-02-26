@@ -5,7 +5,7 @@ LD  = mingw32-g++$(MINGW_FLAVOUR)
 AR  = mingw32-gcc-ar$(MINGW_FLAVOUR)
 
 CXXFLAGS_STDCXX = -std=gnu++17 -fexceptions -frtti
-CFLAGS_STDC = -std=gnu99
+CFLAGS_STDC = -std=gnu17
 CXXFLAGS += $(CXXFLAGS_STDCXX)
 CFLAGS += $(CFLAGS_STDC)
 

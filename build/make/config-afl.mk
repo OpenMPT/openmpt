@@ -14,7 +14,7 @@ CXXFLAGS_STDCXX = -std=$(STDCXX) -fexceptions -frtti -pthread
 else ifeq ($(shell printf '\n' > bin/empty.cpp ; if $(CXX) -std=c++17 -c bin/empty.cpp -o bin/empty.out > /dev/null 2>&1 ; then echo 'c++17' ; fi ), c++17)
 CXXFLAGS_STDCXX = -std=c++17 -fexceptions -frtti -pthread
 endif
-CFLAGS_STDC = -std=c99 -pthread
+CFLAGS_STDC = -std=c17 -pthread
 CXXFLAGS += $(CXXFLAGS_STDCXX)
 CFLAGS += $(CFLAGS_STDC)
 LDFLAGS  += -pthread

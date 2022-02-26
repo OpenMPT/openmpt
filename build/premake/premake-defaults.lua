@@ -91,6 +91,7 @@
 	filter {}
 
 	filter {}
+		cdialect "C17"
 	filter { "action:vs*", "language:C++", "action:vs2017" }
 		cppdialect "C++17"
 	filter { "action:vs*", "language:C++", "action:vs2019" }
@@ -110,7 +111,7 @@
 	filter { "not action:vs*", "language:C++" }
 		buildoptions { "-std=c++17" }
 	filter { "not action:vs*", "language:C" }
-		buildoptions { "-std=c99" }
+		buildoptions { "-std=c17" }
 	filter {}
 
 	filter {}

@@ -1,5 +1,6 @@
 
 	filter {}
+		cdialect "C17"
 		cppdialect "C++17"
 
 	filter { "configurations:Debug" }

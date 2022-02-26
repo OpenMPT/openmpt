@@ -7,7 +7,7 @@ AR  = i386-pc-msdosdjgpp-ar
 # Note that we are using GNU extensions instead of 100% standards-compliant
 # mode, because otherwise DJGPP-specific headers/functions are unavailable.
 CXXFLAGS_STDCXX = -std=gnu++17 -fexceptions -frtti
-CFLAGS_STDC = -std=gnu99
+CFLAGS_STDC = -std=gnu17
 CXXFLAGS += $(CXXFLAGS_STDCXX) -fno-threadsafe-statics
 CFLAGS += $(CFLAGS_STDC)
 
