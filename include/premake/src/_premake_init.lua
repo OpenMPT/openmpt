@@ -1360,28 +1360,6 @@
 		}
 	}
 
-	api.register {  --OpenMPT
-		name = "spectremitigations",  --OpenMPT
-		scope = "config",  --OpenMPT
-		kind = "string",  --OpenMPT
-		allowed = {  --OpenMPT
-			"Default",  --OpenMPT
-			"On",  --OpenMPT
-			"Off",  --OpenMPT
-		}  --OpenMPT
-	}  --OpenMPT
-
-	api.register {  --OpenMPT
-		name = "dataexecutionprevention",  --OpenMPT
-		scope = "config",  --OpenMPT
-		kind = "string",  --OpenMPT
-		allowed = {  --OpenMPT
-			"Default",  --OpenMPT
-			"Off",  --OpenMPT
-			"On",  --OpenMPT
-		}  --OpenMPT
-	}  --OpenMPT
-
 	api.register {
 		name = "largeaddressaware",
 		scope = "config",

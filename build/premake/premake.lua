@@ -52,6 +52,99 @@ newoption {
 
 
 
+require('vstudio')
+
+
+
+premake.action._list["vs2022"].vstudio.versionName = "Version 17"
+
+
+
+premake.api.register {
+	name = "spectremitigations",
+	scope = "config",
+	kind = "string",
+	allowed = {
+		"Default",
+		"On",
+		"Off",
+	}
+}
+
+function premake.vstudio.vc2010.spectreMitigations(cfg)
+	if (cfg.spectremitigations == 'On') then
+		if _ACTION >= "vs2017" then
+			premake.vstudio.vc2010.element("SpectreMitigation", nil, "Spectre")
+		end
+	end
+end
+
+premake.override(premake.vstudio.vc2010.elements, "configurationProperties", function(base, prj)
+	local calls = base(prj)
+	table.insertafter(calls, premake.vstudio.vc2010.wholeProgramOptimization, premake.vstudio.vc2010.spectreMitigations)
+	return calls
+end)
+
+
+
+premake.api.register {
+	name = "dataexecutionprevention",
+	scope = "config",
+	kind = "string",
+	allowed = {
+		"Default",
+		"Off",
+		"On",
+	}
+}
+
+function premake.vstudio.vc2010.dataExecutionPrevention(cfg)
+	if (cfg.dataexecutionprevention == 'Off') then
+		premake.vstudio.vc2010.element("DataExecutionPrevention", nil, 'false')
+	end
+end
+
+premake.override(premake.vstudio.vc2010.elements, "link", function(base, prj)
+	local calls = base(prj)
+	table.insertafter(calls, premake.vstudio.vc2010.ignoreDefaultLibraries, premake.vstudio.vc2010.dataExecutionPrevention)
+	return calls
+end)
+
+
+
+function premake.vstudio.vc2010.languageStandard2022(cfg)
+	if _ACTION >= "vs2022" then
+		if (cfg.cppdialect == "C++14") then
+			premake.vstudio.vc2010.element("LanguageStandard", nil, 'stdcpp14')
+		elseif (cfg.cppdialect == "C++17") then
+			premake.vstudio.vc2010.element("LanguageStandard", nil, 'stdcpp17')
+		elseif (cfg.cppdialect == "C++20") then
+			premake.vstudio.vc2010.element("LanguageStandard", nil, 'stdcpp20')
+		elseif (cfg.cppdialect == "C++latest") then
+			premake.vstudio.vc2010.element("LanguageStandard", nil, 'stdcpplatest')
+		end
+	elseif _ACTION >= "vs2017" then
+		if (cfg.cppdialect == "C++14") then
+			premake.vstudio.vc2010.element("LanguageStandard", nil, 'stdcpp14')
+		elseif (cfg.cppdialect == "C++17") then
+			premake.vstudio.vc2010.element("LanguageStandard", nil, 'stdcpp17')
+		elseif (cfg.cppdialect == "C++20") then
+			premake.vstudio.vc2010.element("LanguageStandard", nil, 'stdcpplatest')
+		elseif (cfg.cppdialect == "C++latest") then
+			premake.vstudio.vc2010.element("LanguageStandard", nil, 'stdcpplatest')
+		end
+	end
+end
+
+premake.override(premake.vstudio.vc2010.elements, "clCompile", function(base, prj)
+	local calls = base(prj)
+	table.insertafter(calls, premake.vstudio.vc2010.languageStandard, premake.vstudio.vc2010.languageStandard2022)
+	table.remove(calls, table.indexof(calls, premake.vstudio.vc2010.languageStandard))
+	return calls
+end)
+
+
+
 mpt_projectpathname = _ACTION .. _OPTIONS["windows-version"]
 mpt_bindirsuffix = _OPTIONS["windows-version"]
 

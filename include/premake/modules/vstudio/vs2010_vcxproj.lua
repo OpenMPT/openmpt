@@ -197,7 +197,6 @@
 				m.platformToolset,
 				m.toolsVersion,
 				m.wholeProgramOptimization,
-				m.spectreMitigations,  --OpenMPT
 				m.nmakeOutDirs,
 				m.windowsSDKDesktopARMSupport,
 			}
@@ -542,7 +541,6 @@
 				m.moduleDefinitionFile,
 				m.treatLinkerWarningAsErrors,
 				m.ignoreDefaultLibraries,
-				m.dataExecutionPrevention,  --OpenMPT
 				m.largeAddressAware,
 				m.targetMachine,
 				m.additionalLinkOptions,
@@ -1465,13 +1463,6 @@
 	end
 
 
-	function m.dataExecutionPrevention(cfg)  --OpenMPT
-		if (cfg.dataexecutionprevention == 'Off') then  --OpenMPT
-			m.element("DataExecutionPrevention", nil, 'false')  --OpenMPT
-		end  --OpenMPT
-	end  --OpenMPT
-
-
 	function m.largeAddressAware(cfg)
 		if (cfg.largeaddressaware == true) then
 			m.element("LargeAddressAware", nil, 'true')
@@ -1480,17 +1471,6 @@
 
 
 	function m.languageStandard(cfg)
-		if _ACTION >= "vs2022" then  --OpenMPT
-			if (cfg.cppdialect == "C++14") then  --OpenMPT
-				m.element("LanguageStandard", nil, 'stdcpp14')  --OpenMPT
-			elseif (cfg.cppdialect == "C++17") then  --OpenMPT
-				m.element("LanguageStandard", nil, 'stdcpp17')  --OpenMPT
-			elseif (cfg.cppdialect == "C++20") then  --OpenMPT
-				m.element("LanguageStandard", nil, 'stdcpp20')  --OpenMPT
-			elseif (cfg.cppdialect == "C++latest") then  --OpenMPT
-				m.element("LanguageStandard", nil, 'stdcpplatest')  --OpenMPT
-			end  --OpenMPT
-		else  --OpenMPT
 		if _ACTION >= "vs2017" then
 			if (cfg.cppdialect == "C++14") then
 				m.element("LanguageStandard", nil, 'stdcpp14')
@@ -1502,7 +1482,6 @@
 				m.element("LanguageStandard", nil, 'stdcpplatest')
 			end
 		end
-		end  --OpenMPT
 	end
 
 	function m.conformanceMode(cfg)
@@ -1682,14 +1661,6 @@
 			m.element("WholeProgramOptimization", nil, "true")
 		end
 	end
-
-	function m.spectreMitigations(cfg)  --OpenMPT
-		if (cfg.spectremitigations == 'On') then  --OpenMPT
-			if _ACTION >= "vs2017" then  --OpenMPT
-				m.element("SpectreMitigation", nil, "Spectre")  --OpenMPT
-			end  --OpenMPT
-		end  --OpenMPT
-	end  --OpenMPT
 
 	function m.clCompileAdditionalIncludeDirectories(cfg)
 		m.additionalIncludeDirectories(cfg, cfg.includedirs)
