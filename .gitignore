@@ -118,6 +118,7 @@
 /contrib/libmodplug-0.8.9.0/m4/ltversion.m4
 /contrib/libmodplug-0.8.9.0/m4/lt~obsolete.m4
 /contrib/libmodplug-0.8.9.0/m4/pkg.m4
+/contrib/premake/premake.git
 /examples/*.d
 /examples/*.o
 /include/htmlhelp
