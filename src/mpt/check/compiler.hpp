@@ -7,6 +7,12 @@
 #include "mpt/base/detect_quirks.hpp"
 #include "mpt/base/compiletime_warning.hpp"
 
+#ifndef MPT_CHECK_CXX_IGNORE_PREPROCESSOR
+#if defined(MPT_COMPILER_QUIRK_MSVC_OLD_PREPROCESSOR)
+MPT_WARNING("C++ preprocessor is not standard conformings.")
+#endif
+#endif
+
 #ifndef MPT_CHECK_CXX_IGNORE_WARNING_FASTMATH
 #if MPT_COMPILER_MSVC
 #if (defined(_M_FP_FAST) && (_M_FP_FAST == 1))

@@ -107,6 +107,35 @@ end)
 
 
 
+premake.api.register {
+	name = "preprocessor",
+	scope = "config",
+	kind = "string",
+	allowed = {
+		"Default",
+		"Standard",
+		"Legacy",
+	}
+}
+
+function premake.vstudio.vc2010.preprocessor(cfg)
+	if _ACTION >= "vs2019" then
+		if (cfg.preprocessor == 'Standard') then
+			premake.vstudio.vc2010.element("UseStandardPreprocessor", nil, "true")
+		elseif (cfg.preprocessor == 'Legacy') then
+			premake.vstudio.vc2010.element("UseStandardPreprocessor", nil, "false")
+		end
+	end
+end
+
+premake.override(premake.vstudio.vc2010.elements, "clCompile", function(base, prj)
+	local calls = base(prj)
+	table.insertafter(calls, premake.vstudio.vc2010.externalAngleBrackets, premake.vstudio.vc2010.preprocessor)
+	return calls
+end)
+
+
+
 mpt_projectpathname = _ACTION .. _OPTIONS["windows-version"]
 mpt_bindirsuffix = _OPTIONS["windows-version"]
 

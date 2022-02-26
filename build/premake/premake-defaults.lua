@@ -106,7 +106,10 @@
 		if _OPTIONS["windows-version"] == "win10" then
 			conformancemode "On"
 		end
+	filter { "action:vs*", "action:vs2017" }
+		defines { "MPT_CHECK_CXX_IGNORE_PREPROCESSOR" }
 	filter { "action:vs*", "not action:vs2017" }
+		preprocessor "Standard"
 		conformancemode "On"
 	filter { "not action:vs*", "language:C++" }
 		buildoptions { "-std=c++17" }

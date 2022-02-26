@@ -288,7 +288,7 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>MPT_BUILD_RETRO;DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0501;NTDDI_VERSION=0x05010100;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>MPT_BUILD_RETRO;MPT_CHECK_CXX_IGNORE_PREPROCESSOR;DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0501;NTDDI_VERSION=0x05010100;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
@@ -308,7 +308,7 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>MPT_BUILD_RETRO;DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0502;NTDDI_VERSION=0x05020000;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>MPT_BUILD_RETRO;MPT_CHECK_CXX_IGNORE_PREPROCESSOR;DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0502;NTDDI_VERSION=0x05020000;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
@@ -327,7 +327,7 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>MPT_BUILD_RETRO;NDEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0501;NTDDI_VERSION=0x05010100;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>MPT_BUILD_RETRO;MPT_CHECK_CXX_IGNORE_PREPROCESSOR;NDEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0501;NTDDI_VERSION=0x05010100;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -351,7 +351,7 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>MPT_BUILD_RETRO;NDEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0502;NTDDI_VERSION=0x05020000;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>MPT_BUILD_RETRO;MPT_CHECK_CXX_IGNORE_PREPROCESSOR;NDEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0502;NTDDI_VERSION=0x05020000;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -374,7 +374,7 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>MPT_BUILD_RETRO;DEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0501;NTDDI_VERSION=0x05010100;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>MPT_BUILD_RETRO;MPT_CHECK_CXX_IGNORE_PREPROCESSOR;DEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0501;NTDDI_VERSION=0x05010100;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -399,7 +399,7 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>MPT_BUILD_RETRO;DEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0502;NTDDI_VERSION=0x05020000;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>MPT_BUILD_RETRO;MPT_CHECK_CXX_IGNORE_PREPROCESSOR;DEBUG;MPT_BUILD_MSVC_STATIC;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0502;NTDDI_VERSION=0x05020000;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -423,7 +423,7 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>MPT_BUILD_RETRO;DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0501;NTDDI_VERSION=0x05010100;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>MPT_BUILD_RETRO;MPT_CHECK_CXX_IGNORE_PREPROCESSOR;DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0501;NTDDI_VERSION=0x05010100;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
@@ -442,7 +442,7 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>MPT_BUILD_RETRO;DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0502;NTDDI_VERSION=0x05020000;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>MPT_BUILD_RETRO;MPT_CHECK_CXX_IGNORE_PREPROCESSOR;DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0502;NTDDI_VERSION=0x05020000;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
@@ -460,7 +460,7 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>MPT_BUILD_RETRO;NDEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0501;NTDDI_VERSION=0x05010100;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>MPT_BUILD_RETRO;MPT_CHECK_CXX_IGNORE_PREPROCESSOR;NDEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0501;NTDDI_VERSION=0x05010100;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -484,7 +484,7 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>MPT_BUILD_RETRO;NDEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0502;NTDDI_VERSION=0x05020000;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>MPT_BUILD_RETRO;MPT_CHECK_CXX_IGNORE_PREPROCESSOR;NDEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0502;NTDDI_VERSION=0x05020000;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -507,7 +507,7 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>MPT_BUILD_RETRO;DEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0501;NTDDI_VERSION=0x05010100;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>MPT_BUILD_RETRO;MPT_CHECK_CXX_IGNORE_PREPROCESSOR;DEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0501;NTDDI_VERSION=0x05010100;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -532,7 +532,7 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>MPT_BUILD_RETRO;DEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0502;NTDDI_VERSION=0x05020000;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>MPT_BUILD_RETRO;MPT_CHECK_CXX_IGNORE_PREPROCESSOR;DEBUG;MPT_BUILD_MSVC_SHARED;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0502;NTDDI_VERSION=0x05020000;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>

@@ -560,6 +560,7 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -585,6 +586,7 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -610,6 +612,7 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -634,6 +637,7 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -662,6 +666,7 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -691,6 +696,7 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -720,6 +726,7 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -749,6 +756,7 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -780,6 +788,7 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -810,6 +819,7 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -840,6 +850,7 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -870,6 +881,7 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -896,6 +908,7 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -920,6 +933,7 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -944,6 +958,7 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -968,6 +983,7 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -996,6 +1012,7 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -1025,6 +1042,7 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -1054,6 +1072,7 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -1083,6 +1102,7 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -1114,6 +1134,7 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -1144,6 +1165,7 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -1174,6 +1196,7 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -1204,6 +1227,7 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>

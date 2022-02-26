@@ -272,6 +272,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -295,6 +296,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -322,6 +324,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -349,6 +352,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -378,6 +382,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -406,6 +411,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -430,6 +436,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -452,6 +459,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -478,6 +486,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -505,6 +514,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -534,6 +544,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -562,6 +573,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

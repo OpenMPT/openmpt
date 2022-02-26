@@ -541,6 +541,7 @@
       <AdditionalOptions>/wd4244 /wd4334 /wd6255 /wd6297 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -562,6 +563,7 @@
       <AdditionalOptions>/wd4244 /wd4334 /wd6255 /wd6297 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -583,6 +585,7 @@
       <AdditionalOptions>/wd4244 /wd4334 /wd6255 /wd6297 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -603,6 +606,7 @@
       <AdditionalOptions>/wd4244 /wd4334 /wd6255 /wd6297 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -627,6 +631,7 @@
       <AdditionalOptions>/wd4244 /wd4334 /wd6255 /wd6297 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -652,6 +657,7 @@
       <AdditionalOptions>/wd4244 /wd4334 /wd6255 /wd6297 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -677,6 +683,7 @@
       <AdditionalOptions>/wd4244 /wd4334 /wd6255 /wd6297 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -702,6 +709,7 @@
       <AdditionalOptions>/wd4244 /wd4334 /wd6255 /wd6297 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -729,6 +737,7 @@
       <AdditionalOptions>/wd4244 /wd4334 /wd6255 /wd6297 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -755,6 +764,7 @@
       <AdditionalOptions>/wd4244 /wd4334 /wd6255 /wd6297 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -781,6 +791,7 @@
       <AdditionalOptions>/wd4244 /wd4334 /wd6255 /wd6297 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -807,6 +818,7 @@
       <AdditionalOptions>/wd4244 /wd4334 /wd6255 /wd6297 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -829,6 +841,7 @@
       <AdditionalOptions>/wd4244 /wd4334 /wd6255 /wd6297 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -850,6 +863,7 @@
       <AdditionalOptions>/wd4244 /wd4334 /wd6255 /wd6297 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -871,6 +885,7 @@
       <AdditionalOptions>/wd4244 /wd4334 /wd6255 /wd6297 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -892,6 +907,7 @@
       <AdditionalOptions>/wd4244 /wd4334 /wd6255 /wd6297 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -917,6 +933,7 @@
       <AdditionalOptions>/wd4244 /wd4334 /wd6255 /wd6297 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -943,6 +960,7 @@
       <AdditionalOptions>/wd4244 /wd4334 /wd6255 /wd6297 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -969,6 +987,7 @@
       <AdditionalOptions>/wd4244 /wd4334 /wd6255 /wd6297 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -995,6 +1014,7 @@
       <AdditionalOptions>/wd4244 /wd4334 /wd6255 /wd6297 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -1023,6 +1043,7 @@
       <AdditionalOptions>/wd4244 /wd4334 /wd6255 /wd6297 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -1050,6 +1071,7 @@
       <AdditionalOptions>/wd4244 /wd4334 /wd6255 /wd6297 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -1077,6 +1099,7 @@
       <AdditionalOptions>/wd4244 /wd4334 /wd6255 /wd6297 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -1104,6 +1127,7 @@
       <AdditionalOptions>/wd4244 /wd4334 /wd6255 /wd6297 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

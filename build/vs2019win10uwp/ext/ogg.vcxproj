@@ -547,6 +547,7 @@
       <AdditionalOptions>/wd6001 /wd6011 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -569,6 +570,7 @@
       <AdditionalOptions>/wd6001 /wd6011 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -591,6 +593,7 @@
       <AdditionalOptions>/wd6001 /wd6011 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -612,6 +615,7 @@
       <AdditionalOptions>/wd6001 /wd6011 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -637,6 +641,7 @@
       <AdditionalOptions>/wd6001 /wd6011 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -663,6 +668,7 @@
       <AdditionalOptions>/wd6001 /wd6011 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -689,6 +695,7 @@
       <AdditionalOptions>/wd6001 /wd6011 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -715,6 +722,7 @@
       <AdditionalOptions>/wd6001 /wd6011 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -743,6 +751,7 @@
       <AdditionalOptions>/wd6001 /wd6011 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -770,6 +779,7 @@
       <AdditionalOptions>/wd6001 /wd6011 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -797,6 +807,7 @@
       <AdditionalOptions>/wd6001 /wd6011 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -824,6 +835,7 @@
       <AdditionalOptions>/wd6001 /wd6011 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -847,6 +859,7 @@
       <AdditionalOptions>/wd6001 /wd6011 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -870,6 +883,7 @@
       <AdditionalOptions>/wd6001 /wd6011 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -893,6 +907,7 @@
       <AdditionalOptions>/wd6001 /wd6011 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -916,6 +931,7 @@
       <AdditionalOptions>/wd6001 /wd6011 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -943,6 +959,7 @@
       <AdditionalOptions>/wd6001 /wd6011 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -971,6 +988,7 @@
       <AdditionalOptions>/wd6001 /wd6011 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -999,6 +1017,7 @@
       <AdditionalOptions>/wd6001 /wd6011 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -1027,6 +1046,7 @@
       <AdditionalOptions>/wd6001 /wd6011 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -1057,6 +1077,7 @@
       <AdditionalOptions>/wd6001 /wd6011 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -1086,6 +1107,7 @@
       <AdditionalOptions>/wd6001 /wd6011 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -1115,6 +1137,7 @@
       <AdditionalOptions>/wd6001 /wd6011 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
@@ -1144,6 +1167,7 @@
       <AdditionalOptions>/wd6001 /wd6011 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
