@@ -17,7 +17,6 @@ newoption {
   { "openmpt123", "openmpt123" },
   { "PluginBridge", "PluginBridge" },
   { "OpenMPT", "OpenMPT" },
-  { "all-externals", "all-externals" }
  }
 }
 
@@ -362,38 +361,6 @@ solution "OpenMPT"
  dofile "../../build/premake/ext-rtmidi.lua"
  dofile "../../build/premake/ext-smbPitchShift.lua"
  dofile "../../build/premake/ext-soundtouch.lua"
- dofile "../../build/premake/ext-UnRAR.lua"
- dofile "../../build/premake/ext-vorbis.lua"
- dofile "../../build/premake/ext-zlib.lua"
-
-end
-
--- overwrite all external projects once again with the full matrix of possible build config combinations
-if _OPTIONS["group"] == "all-externals" then
-
-solution "all-externals"
-
- dofile "../../build/premake/ext-ancient.lua"
- dofile "../../build/premake/ext-flac.lua"
- dofile "../../build/premake/ext-lame.lua"
- dofile "../../build/premake/ext-lhasa.lua"
- dofile "../../build/premake/ext-minimp3.lua"
- dofile "../../build/premake/ext-miniz.lua"
- dofile "../../build/premake/ext-minizip.lua"
- dofile "../../build/premake/ext-mpg123.lua"
- dofile "../../build/premake/ext-ogg.lua"
- dofile "../../build/premake/ext-opus.lua"
- dofile "../../build/premake/ext-opusenc.lua"
- dofile "../../build/premake/ext-opusfile.lua"
- dofile "../../build/premake/ext-portaudio.lua"
- dofile "../../build/premake/ext-portaudiocpp.lua"
- dofile "../../build/premake/ext-pugixml.lua"
- dofile "../../build/premake/ext-r8brain.lua"
- dofile "../../build/premake/ext-rtaudio.lua"
- dofile "../../build/premake/ext-rtmidi.lua"
- dofile "../../build/premake/ext-smbPitchShift.lua"
- dofile "../../build/premake/ext-soundtouch.lua"
- dofile "../../build/premake/ext-stb_vorbis.lua"
  dofile "../../build/premake/ext-UnRAR.lua"
  dofile "../../build/premake/ext-vorbis.lua"
  dofile "../../build/premake/ext-zlib.lua"
