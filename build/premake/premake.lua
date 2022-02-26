@@ -55,10 +55,6 @@ require('vstudio')
 
 
 
-premake.action._list["vs2022"].vstudio.versionName = "Version 17"
-
-
-
 premake.api.register {
 	name = "spectremitigations",
 	scope = "config",
@@ -106,39 +102,6 @@ end
 premake.override(premake.vstudio.vc2010.elements, "link", function(base, prj)
 	local calls = base(prj)
 	table.insertafter(calls, premake.vstudio.vc2010.ignoreDefaultLibraries, premake.vstudio.vc2010.dataExecutionPrevention)
-	return calls
-end)
-
-
-
-function premake.vstudio.vc2010.languageStandard2022(cfg)
-	if _ACTION >= "vs2022" then
-		if (cfg.cppdialect == "C++14") then
-			premake.vstudio.vc2010.element("LanguageStandard", nil, 'stdcpp14')
-		elseif (cfg.cppdialect == "C++17") then
-			premake.vstudio.vc2010.element("LanguageStandard", nil, 'stdcpp17')
-		elseif (cfg.cppdialect == "C++20") then
-			premake.vstudio.vc2010.element("LanguageStandard", nil, 'stdcpp20')
-		elseif (cfg.cppdialect == "C++latest") then
-			premake.vstudio.vc2010.element("LanguageStandard", nil, 'stdcpplatest')
-		end
-	elseif _ACTION >= "vs2017" then
-		if (cfg.cppdialect == "C++14") then
-			premake.vstudio.vc2010.element("LanguageStandard", nil, 'stdcpp14')
-		elseif (cfg.cppdialect == "C++17") then
-			premake.vstudio.vc2010.element("LanguageStandard", nil, 'stdcpp17')
-		elseif (cfg.cppdialect == "C++20") then
-			premake.vstudio.vc2010.element("LanguageStandard", nil, 'stdcpplatest')
-		elseif (cfg.cppdialect == "C++latest") then
-			premake.vstudio.vc2010.element("LanguageStandard", nil, 'stdcpplatest')
-		end
-	end
-end
-
-premake.override(premake.vstudio.vc2010.elements, "clCompile", function(base, prj)
-	local calls = base(prj)
-	table.insertafter(calls, premake.vstudio.vc2010.languageStandard, premake.vstudio.vc2010.languageStandard2022)
-	table.remove(calls, table.indexof(calls, premake.vstudio.vc2010.languageStandard))
 	return calls
 end)
 
