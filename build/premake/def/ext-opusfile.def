@@ -1,6 +1,6 @@
 EXPORTS
-;gccxml -I. opusfile.h -fxml=out.xml
-;cat out.xml | grep Function | grep 'file=\"f3\"' | awk '{print $3;}' | sed 's/name=//g' | sed 's/"//g' | sort
+;castxml --castxml-gccxml -o out.xml -I. -I../../opus/include/ opusfile.h
+:cat out.xml | grep Function | grep 'file=\"f39\"' | awk '{print $3;}' | sed 's/name=//g' | sed 's/"//g' | sort
 op_bitrate
 op_bitrate_instant
 op_channel_count
@@ -40,6 +40,8 @@ op_test_open
 op_test_url
 op_url_stream_create
 op_url_stream_vcreate
+op_vopen_url
+op_vtest_url
 opus_granule_sample
 opus_head_parse
 opus_picture_tag_clear
@@ -61,5 +63,3 @@ opus_tags_parse
 opus_tags_query
 opus_tags_query_count
 opus_tags_set_binary_suffix
-op_vopen_url
-op_vtest_url
