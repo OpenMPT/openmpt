@@ -8,7 +8,6 @@ fill_win32_filefunc64W
 ;zlib/contrib/minizip $ cat *.h | grep ZEXPORT | tr '(' ' ' | awk '{print $4;}' | sort
 unzClose
 unzCloseCurrentFile
-unzeof
 unzGetCurrentFileInfo
 unzGetCurrentFileInfo64
 unzGetCurrentFileZStreamPos64
@@ -38,6 +37,7 @@ unzRepair
 unzSetOffset
 unzSetOffset64
 unzStringFileNameCompare
+unzeof
 unztell
 unztell64
 zipClose

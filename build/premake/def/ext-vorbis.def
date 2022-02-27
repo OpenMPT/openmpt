@@ -50,10 +50,10 @@ vorbis_block_init
 vorbis_comment_add
 vorbis_comment_add_tag
 vorbis_comment_clear
-vorbis_commentheader_out
 vorbis_comment_init
 vorbis_comment_query
 vorbis_comment_query_count
+vorbis_commentheader_out
 vorbis_dsp_clear
 vorbis_encode_ctl
 vorbis_encode_init

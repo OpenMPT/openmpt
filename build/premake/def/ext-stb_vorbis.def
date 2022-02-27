@@ -2,6 +2,7 @@ LIBRARY
 EXPORTS
 ;cat include/stb_vorbis/stb_vorbis.c | grep '^extern' | grep -E -o 'stb_vorbis_.*\(' | sed 's/ *(//' | sed 's/.* //g' | sed 's/(//g'
 stb_vorbis_get_info
+stb_vorbis_get_comment
 stb_vorbis_get_error
 stb_vorbis_close
 stb_vorbis_get_sample_offset
