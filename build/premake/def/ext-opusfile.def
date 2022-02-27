@@ -1,6 +1,6 @@
 EXPORTS
 ;castxml --castxml-gccxml -o out.xml -I. -I../../opus/include/ opusfile.h
-:cat out.xml | grep Function | grep 'file=\"f39\"' | awk '{print $3;}' | sed 's/name=//g' | sed 's/"//g' | sort
+;cat out.xml | grep Function | grep 'file=\"f39\"' | awk '{print $3;}' | sed 's/name=//g' | sed 's/"//g' | sort
 op_bitrate
 op_bitrate_instant
 op_channel_count
