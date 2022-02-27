@@ -215,12 +215,12 @@ SafeOutputFile::~SafeOutputFile() noexcept(false)
 	}
 	if(!stream().rdbuf())
 	{
-		#if MPT_COMPILER_MSVC
+		#if MPT_LIBCXX_MS
 			if(m_f)
 			{
 				std::fclose(m_f);
 			}
-		#endif // MPT_COMPILER_MSVC
+		#endif // MPT_LIBCXX_MS
 		if(mayThrow && (stream().exceptions() & (std::ios::badbit | std::ios::failbit)))
 		{
 			// cppcheck-suppress exceptThrowInDestructor
