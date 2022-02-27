@@ -12,6 +12,7 @@
 #include "mptFileIO.h"
 
 #if defined(MPT_ENABLE_FILEIO)
+#include "mpt/base/detect_libcxx.hpp"
 #include "mpt/io/io.hpp"
 #include "mpt/io/io_stdstream.hpp"
 #if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
@@ -29,10 +30,10 @@
 #endif // MODPLUG_TRACKER
 
 #if defined(MPT_ENABLE_FILEIO)
-#if MPT_COMPILER_MSVC
+#if MPT_LIBCXX_MS
 #include <stdio.h>
 #include <tchar.h>
-#endif // MPT_COMPILER_MSVC
+#endif // MPT_LIBCXX_MS
 #endif // MPT_ENABLE_FILEIO
 
 
@@ -112,7 +113,7 @@ bool SetFilesystemCompression(const mpt::PathString &filename)
 
 namespace mpt {
 
-#if MPT_COMPILER_MSVC
+#if MPT_LIBCXX_MS
 
 mpt::tstring SafeOutputFile::convert_mode(std::ios_base::openmode mode, FlushMode flushMode)
 {
@@ -191,7 +192,7 @@ std::FILE * SafeOutputFile::internal_fopen(const mpt::PathString &filename, std:
 	return f;
 }
 
-#endif // MPT_COMPILER_MSVC
+#endif // MPT_LIBCXX_MS
 
 // cppcheck-suppress exceptThrowInDestructor
 SafeOutputFile::~SafeOutputFile() noexcept(false)
@@ -199,12 +200,12 @@ SafeOutputFile::~SafeOutputFile() noexcept(false)
 	const bool mayThrow = (std::uncaught_exceptions() == 0);
 	if(!stream())
 	{
-		#if MPT_COMPILER_MSVC
+		#if MPT_LIBCXX_MS
 			if(m_f)
 			{
 				std::fclose(m_f);
 			}
-		#endif // MPT_COMPILER_MSVC
+		#endif // MPT_LIBCXX_MS
 		if(mayThrow && (stream().exceptions() & (std::ios::badbit | std::ios::failbit)))
 		{
 			// cppcheck-suppress exceptThrowInDestructor
@@ -227,12 +228,12 @@ SafeOutputFile::~SafeOutputFile() noexcept(false)
 		}
 		return;
 	}
-#if MPT_COMPILER_MSVC
+#if MPT_LIBCXX_MS
 	if(!m_f)
 	{
 		return;
 	}
-#endif // MPT_COMPILER_MSVC
+#endif // MPT_LIBCXX_MS
 	bool errorOnFlush = false;
 	if(m_FlushMode != FlushMode::None)
 	{
@@ -245,7 +246,7 @@ SafeOutputFile::~SafeOutputFile() noexcept(false)
 		} catch(const std::exception &)
 		{
 			errorOnFlush = true;
-#if MPT_COMPILER_MSVC
+#if MPT_LIBCXX_MS
 			if(m_FlushMode != FlushMode::None)
 			{
 				if(std::fflush(m_f) != 0)
@@ -257,7 +258,7 @@ SafeOutputFile::~SafeOutputFile() noexcept(false)
 			{
 				errorOnFlush = true;
 			}
-#endif // MPT_COMPILER_MSVC
+#endif // MPT_LIBCXX_MS
 			if(mayThrow)
 			{
 				// ignore errorOnFlush here, and re-throw the earlier exception
@@ -266,7 +267,7 @@ SafeOutputFile::~SafeOutputFile() noexcept(false)
 			}
 		}
 	}
-#if MPT_COMPILER_MSVC
+#if MPT_LIBCXX_MS
 	if(m_FlushMode != FlushMode::None)
 	{
 		if(std::fflush(m_f) != 0)
@@ -278,7 +279,7 @@ SafeOutputFile::~SafeOutputFile() noexcept(false)
 	{
 		errorOnFlush = true;
 	}
-#endif // MPT_COMPILER_MSVC
+#endif // MPT_LIBCXX_MS
 	if(mayThrow && errorOnFlush && (stream().exceptions() & (std::ios::badbit | std::ios::failbit)))
 	{
 		// cppcheck-suppress exceptThrowInDestructor

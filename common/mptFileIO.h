@@ -13,6 +13,7 @@
 
 #if defined(MPT_ENABLE_FILEIO)
 
+#include "mpt/base/detect_libcxx.hpp"
 #include "mpt/io_read/filecursor_memory.hpp"
 #include "mpt/io_read/filecursor_stdstream.hpp"
 
@@ -31,9 +32,9 @@
 #include <streambuf>
 #include <utility>
 
-#if MPT_COMPILER_MSVC
+#if MPT_LIBCXX_MS
 #include <cstdio>
-#endif // !MPT_COMPILER_MSVC
+#endif // !MPT_LIBCXX_MS
 
 #ifdef MODPLUG_TRACKER
 #if MPT_OS_WINDOWS
@@ -102,13 +103,13 @@ public:
 	{
 		detail::fstream_open<Tbase>(*this, filename, mode);
 	}
-#if MPT_COMPILER_MSVC
+#if MPT_LIBCXX_MS
 protected:
 	fstream(std::FILE * file)
 		: std::fstream(file)
 	{
 	}
-#endif // MPT_COMPILER_MSVC
+#endif // MPT_LIBCXX_MS
 public:
 	void open(const mpt::PathString & filename, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out)
 	{
@@ -133,13 +134,13 @@ public:
 	{
 		detail::fstream_open<Tbase>(*this, filename, mode);
 	}
-#if MPT_COMPILER_MSVC
+#if MPT_LIBCXX_MS
 protected:
 	ifstream(std::FILE * file)
 		: std::ifstream(file)
 	{
 	}
-#endif // MPT_COMPILER_MSVC
+#endif // MPT_LIBCXX_MS
 public:
 	void open(const mpt::PathString & filename, std::ios_base::openmode mode = std::ios_base::in)
 	{
@@ -164,13 +165,13 @@ public:
 	{
 		detail::fstream_open<Tbase>(*this, filename, mode);
 	}
-#if MPT_COMPILER_MSVC
+#if MPT_LIBCXX_MS
 protected:
 	ofstream(std::FILE * file)
 		: std::ofstream(file)
 	{
 	}
-#endif // MPT_COMPILER_MSVC
+#endif // MPT_LIBCXX_MS
 public:
 	void open(const mpt::PathString & filename, std::ios_base::openmode mode = std::ios_base::out)
 	{
@@ -202,12 +203,12 @@ class SafeOutputFile
 {
 private:
 	FlushMode m_FlushMode;
-#if MPT_COMPILER_MSVC
+#if MPT_LIBCXX_MS
 	std::FILE *m_f = nullptr;
-#else // !MPT_COMPILER_MSVC
+#else // !MPT_LIBCXX_MS
 	mpt::ofstream m_s;
-#endif // MPT_COMPILER_MSVC
-#if MPT_COMPILER_MSVC
+#endif // MPT_LIBCXX_MS
+#if MPT_LIBCXX_MS
 	class FILEostream
 		: public mpt::ofstream
 	{
@@ -221,16 +222,16 @@ private:
 	FILEostream m_s;
 	static mpt::tstring convert_mode(std::ios_base::openmode mode, FlushMode flushMode);
 	std::FILE * internal_fopen(const mpt::PathString &filename, std::ios_base::openmode mode, FlushMode flushMode);
-#endif // MPT_COMPILER_MSVC
+#endif // MPT_LIBCXX_MS
 public:
 	SafeOutputFile() = delete;
 	explicit SafeOutputFile(const mpt::PathString &filename, std::ios_base::openmode mode = std::ios_base::out, FlushMode flushMode = FlushMode::Full)
 		: m_FlushMode(flushMode)
-#if MPT_COMPILER_MSVC
+#if MPT_LIBCXX_MS
 		, m_s(internal_fopen(filename, mode | std::ios_base::out, flushMode))
-#else // !MPT_COMPILER_MSVC
+#else // !MPT_LIBCXX_MS
 		, m_s(filename, mode)
-#endif // MPT_COMPILER_MSVC
+#endif // MPT_LIBCXX_MS
 	{
 		if(!stream().is_open())
 		{
