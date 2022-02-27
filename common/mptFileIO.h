@@ -30,6 +30,8 @@
 #include <ios>
 #include <ostream>
 #include <streambuf>
+#include <string>
+#include <string_view>
 #include <utility>
 
 #if MPT_LIBCXX_MS
@@ -116,9 +118,11 @@ public:
 		detail::fstream_open<Tbase>(*this, filename, mode);
 	}
 	void open(const char * filename, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out) = delete;
+	void open(const std::string_view & filename, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out) = delete;
 	void open(const std::string & filename, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out) = delete;
 #if MPT_OS_WINDOWS
 	void open(const wchar_t * filename, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out) = delete;
+	void open(const std::wstring_view & filename, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out) = delete;
 	void open(const std::wstring & filename, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out) = delete;
 #endif
 };
@@ -147,9 +151,11 @@ public:
 		detail::fstream_open<Tbase>(*this, filename, mode);
 	}
 	void open(const char * filename, std::ios_base::openmode mode = std::ios_base::in) = delete;
+	void open(const std::string_view & filename, std::ios_base::openmode mode = std::ios_base::in) = delete;
 	void open(const std::string & filename, std::ios_base::openmode mode = std::ios_base::in) = delete;
 #if MPT_OS_WINDOWS
 	void open(const wchar_t * filename, std::ios_base::openmode mode = std::ios_base::in) = delete;
+	void open(const std::wstring_view & filename, std::ios_base::openmode mode = std::ios_base::in) = delete;
 	void open(const std::wstring & filename, std::ios_base::openmode mode = std::ios_base::in) = delete;
 #endif
 };
@@ -178,9 +184,11 @@ public:
 		detail::fstream_open<Tbase>(*this, filename, mode);
 	}
 	void open(const char * filename, std::ios_base::openmode mode = std::ios_base::out) = delete;
+	void open(const std::string_view & filename, std::ios_base::openmode mode = std::ios_base::out) = delete;
 	void open(const std::string & filename, std::ios_base::openmode mode = std::ios_base::out) = delete;
 #if MPT_OS_WINDOWS
 	void open(const wchar_t * filename, std::ios_base::openmode mode = std::ios_base::out) = delete;
+	void open(const std::wstring_view & filename, std::ios_base::openmode mode = std::ios_base::out) = delete;
 	void open(const std::wstring & filename, std::ios_base::openmode mode = std::ios_base::out) = delete;
 #endif
 };
