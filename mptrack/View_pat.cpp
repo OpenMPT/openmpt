@@ -2820,12 +2820,34 @@ bool CViewPattern::DataEntry(bool up, bool coarse)
 	// Notes per octave for non-TET12 tunings and coarse note steps
 	std::vector<int> lastGroupSize(pSndFile->GetNumChannels(), 12);
 
+	bool applyToSpecialNotes = true;
+	if(column == PatternCursor::noteColumn)
+	{
+		const CPattern &pattern = pSndFile->Patterns[m_nPattern];
+		const CHANNELINDEX startChn = m_Selection.GetStartChannel(), endChn = m_Selection.GetEndChannel();
+		const ROWINDEX endRow = m_Selection.GetEndRow();
+		for(ROWINDEX row = m_Selection.GetStartRow(); row <= endRow && applyToSpecialNotes; row++)
+		{
+			const ModCommand *m = pattern.GetpModCommand(row, startChn);
+			for(CHANNELINDEX chn = startChn; chn <= endChn; chn++, m++)
+			{
+				if(!m_Selection.ContainsHorizontal(PatternCursor(0, chn, PatternCursor::noteColumn)))
+					continue;
+				if(m->IsNote())
+				{
+					applyToSpecialNotes = false;
+					break;
+				}
+			}
+		}
+	}
+
 	ApplyToSelection([&] (ModCommand &m, ROWINDEX, CHANNELINDEX chn)
 	{
 		if(column == PatternCursor::noteColumn && m_Selection.ContainsHorizontal(PatternCursor(0, chn, PatternCursor::noteColumn)))
 		{
 			// Increase / decrease note
-			if(m.IsNote())
+			if(m.IsNote() && !applyToSpecialNotes)
 			{
 				if(m.instr > 0)
 				{
@@ -2834,7 +2856,7 @@ bool CViewPattern::DataEntry(bool up, bool coarse)
 				int note = m.note + offset * (coarse ? lastGroupSize[chn] : 1);
 				Limit(note, noteMin, noteMax);
 				m.note = (ModCommand::NOTE)note;
-			} else if(m.IsSpecialNote())
+			} else if(m.IsSpecialNote() && applyToSpecialNotes)
 			{
 				ModCommand::NOTE note = m.note;
 				do
