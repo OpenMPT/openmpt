@@ -153,7 +153,7 @@ public:
 	MPT_FORCEINLINE bool channels_are_contiguous() const noexcept {
 		return true;
 	}
-	MPT_FORCEINLINE  bool frames_are_contiguous() const noexcept {
+	MPT_FORCEINLINE bool frames_are_contiguous() const noexcept {
 		return false;
 	}
 	MPT_FORCEINLINE std::size_t size_channels() const noexcept {
