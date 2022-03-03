@@ -357,8 +357,8 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 				+ MPT_UFORMAT("Build Date: {}\n")(Build::GetBuildDateString())
 				+ MPT_UFORMAT("Compiler: {}\n")(Build::GetBuildCompilerString())
 				+ MPT_UFORMAT("Architecture: {}\n")(mpt::OS::Windows::Name(mpt::OS::Windows::GetProcessArchitecture()))
-				+ MPT_UFORMAT("Required Windows Kernel Level: {}\n")(mpt::OS::Windows::Version::VersionToString(mpt::OS::Windows::Version::GetMinimumKernelLevel()))
-				+ MPT_UFORMAT("Required Windows API Level: {}\n")(mpt::OS::Windows::Version::VersionToString(mpt::OS::Windows::Version::GetMinimumAPILevel()));
+				+ MPT_UFORMAT("Required Windows Kernel Level: {}\n")(mpt::OS::Windows::Version::GetName(mpt::OS::Windows::Version::GetMinimumKernelLevel()))
+				+ MPT_UFORMAT("Required Windows API Level: {}\n")(mpt::OS::Windows::Version::GetName(mpt::OS::Windows::Version::GetMinimumAPILevel()));
 			{
 				text += U_("Required CPU features: ");
 				std::vector<mpt::ustring> features;
@@ -397,7 +397,7 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 			text += MPT_UFORMAT("CPU Name: {}\n")(mpt::ToUnicode(mpt::Charset::ASCII, (std::strlen(CPUInfo.BrandID) > 0) ? std::string(CPUInfo.BrandID) : std::string("")));
 			text += MPT_UFORMAT("Available CPU features: {}\n")(ProcSupportToString(CPUInfo.AvailableFeatures));
 #endif // MPT_ENABLE_ARCH_INTRINSICS
-			text += MPT_UFORMAT("Operating System: {}\n\n")(mpt::OS::Windows::Version::Current().GetName());
+			text += MPT_UFORMAT("Operating System: {}\n\n")(mpt::OS::Windows::Version::GetName(mpt::OS::Windows::Version::Current()));
 			text += MPT_UFORMAT("OpenMPT Install Path{1}: {0}\n")(theApp.GetInstallPath(), theApp.IsPortableMode() ? U_(" (portable)") : U_(""));
 			text += MPT_UFORMAT("OpenMPT Executable Path{1}: {0}\n")(theApp.GetInstallBinArchPath(), theApp.IsPortableMode() ? U_(" (portable)") : U_(""));
 			text += MPT_UFORMAT("Settings{1}: {0}\n")(theApp.GetConfigFileName(), theApp.IsPortableMode() ? U_(" (portable)") : U_(""));
