@@ -100,7 +100,6 @@ class fstream
 private:
 	typedef std::fstream Tbase;
 public:
-	fstream() {}
 	fstream(const mpt::PathString & filename, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out)
 	{
 		detail::fstream_open<Tbase>(*this, filename, mode);
@@ -113,10 +112,6 @@ protected:
 	}
 #endif // MPT_LIBCXX_MS
 public:
-	void open(const mpt::PathString & filename, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out)
-	{
-		detail::fstream_open<Tbase>(*this, filename, mode);
-	}
 	void open(const char * filename, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out) = delete;
 	void open(const std::string_view & filename, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out) = delete;
 	void open(const std::string & filename, std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out) = delete;
@@ -133,7 +128,6 @@ class ifstream
 private:
 	typedef std::ifstream Tbase;
 public:
-	ifstream() {}
 	ifstream(const mpt::PathString & filename, std::ios_base::openmode mode = std::ios_base::in)
 	{
 		detail::fstream_open<Tbase>(*this, filename, mode);
@@ -146,10 +140,6 @@ protected:
 	}
 #endif // MPT_LIBCXX_MS
 public:
-	void open(const mpt::PathString & filename, std::ios_base::openmode mode = std::ios_base::in)
-	{
-		detail::fstream_open<Tbase>(*this, filename, mode);
-	}
 	void open(const char * filename, std::ios_base::openmode mode = std::ios_base::in) = delete;
 	void open(const std::string_view & filename, std::ios_base::openmode mode = std::ios_base::in) = delete;
 	void open(const std::string & filename, std::ios_base::openmode mode = std::ios_base::in) = delete;
@@ -166,7 +156,6 @@ class ofstream
 private:
 	typedef std::ofstream Tbase;
 public:
-	ofstream() {}
 	ofstream(const mpt::PathString & filename, std::ios_base::openmode mode = std::ios_base::out)
 	{
 		detail::fstream_open<Tbase>(*this, filename, mode);
@@ -179,10 +168,6 @@ protected:
 	}
 #endif // MPT_LIBCXX_MS
 public:
-	void open(const mpt::PathString & filename, std::ios_base::openmode mode = std::ios_base::out)
-	{
-		detail::fstream_open<Tbase>(*this, filename, mode);
-	}
 	void open(const char * filename, std::ios_base::openmode mode = std::ios_base::out) = delete;
 	void open(const std::string_view & filename, std::ios_base::openmode mode = std::ios_base::out) = delete;
 	void open(const std::string & filename, std::ios_base::openmode mode = std::ios_base::out) = delete;
@@ -322,8 +307,6 @@ public:
 	mpt::PathString GetFilename() const;
 	std::istream& GetStream();
 	mpt::const_byte_span GetCache();
-private:
-	bool Open(const mpt::PathString &filename, bool allowWholeFileCaching = false);
 };
 
 

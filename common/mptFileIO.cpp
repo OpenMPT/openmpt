@@ -375,26 +375,12 @@ LazyFileRef::operator std::string () const
 
 
 InputFile::InputFile(const mpt::PathString &filename, bool allowWholeFileCaching)
-	: m_IsValid(false)
+	: m_Filename(filename)
+	, m_File(filename, std::ios::binary | std::ios::in)
+	, m_IsValid(false)
 	, m_IsCached(false)
 {
 	MPT_ASSERT(!filename.empty());
-	Open(filename, allowWholeFileCaching);
-}
-
-InputFile::~InputFile()
-{
-	return;
-}
-
-
-bool InputFile::Open(const mpt::PathString &filename, bool allowWholeFileCaching)
-{
-	m_IsCached = false;
-	m_Cache.resize(0);
-	m_Cache.shrink_to_fit();
-	m_Filename = filename;
-	m_File.open(m_Filename, std::ios::binary | std::ios::in);
 	if(allowWholeFileCaching)
 	{
 		if(mpt::IO::IsReadSeekable(m_File))
@@ -402,13 +388,13 @@ bool InputFile::Open(const mpt::PathString &filename, bool allowWholeFileCaching
 			if(!mpt::IO::SeekEnd(m_File))
 			{
 				m_File.close();
-				return false;
+				return;
 			}
 			mpt::IO::Offset filesize = mpt::IO::TellRead(m_File);
 			if(!mpt::IO::SeekBegin(m_File))
 			{
 				m_File.close();
-				return false;
+				return;
 			}
 			if(mpt::in_range<std::size_t>(filesize))
 			{
@@ -417,22 +403,29 @@ bool InputFile::Open(const mpt::PathString &filename, bool allowWholeFileCaching
 				if(mpt::IO::ReadRaw(m_File, mpt::as_span(m_Cache)).size() != mpt::saturate_cast<std::size_t>(filesize))
 				{
 					m_File.close();
-					return false;
+					return;
 				}
 				if(!mpt::IO::SeekBegin(m_File))
 				{
 					m_File.close();
-					return false;
+					return;
 				}
 				m_IsCached = true;
 				m_IsValid = true;
-				return true;
+				return;
 			}
 		}
 	}
 	m_IsValid = true;
-	return m_File.good();
+	return;
 }
+
+
+InputFile::~InputFile()
+{
+	return;
+}
+
 
 
 bool InputFile::IsValid() const
