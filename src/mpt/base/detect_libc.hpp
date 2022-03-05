@@ -50,6 +50,29 @@
 #define MPT_LIBC_APPLE 0
 #endif
 
+#if MPT_LIBC_MS
+#if defined(_DEBUG)
+#define MPT_LIBC_MS_DEBUG 1
+#endif
+#if defined(_DLL)
+#define MPT_LIBC_MS_SHARED 1
+#define MPT_LIBC_MS_STATIC 0
+#else
+#define MPT_LIBC_MS_SHARED 0
+#define MPT_LIBC_MS_STATIC 1
+#endif
+#endif
+
+#ifndef MPT_LIBC_MS_DEBUG
+#define MPT_LIBC_MS_DEBUG 0
+#endif
+#ifndef MPT_LIBC_MS_SHARED
+#define MPT_LIBC_MS_SHARED 0
+#endif
+#ifndef MPT_LIBC_MS_STATIC
+#define MPT_LIBC_MS_STATIC 0
+#endif
+
 
 
 #endif // MPT_BASE_DETECT_LIBC_HPP
