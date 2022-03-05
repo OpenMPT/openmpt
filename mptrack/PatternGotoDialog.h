@@ -40,6 +40,7 @@ protected:
 	inline void LockControls() { m_controlLock = true; }
 	inline void UnlockControls() { m_controlLock = false; }
 
+	void UpdateNumRows();
 	void UpdateTime();
 
 	void DoDataExchange(CDataExchange* pDX) override;

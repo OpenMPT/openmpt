@@ -56,8 +56,8 @@ BOOL CPatternGotoDialog::OnInitDialog()
 	SetIcon(icon, FALSE);
 	SetIcon(icon, TRUE);
 
-	m_SpinRow.SetRange32(0, MAX_PATTERN_ROWS - 1);
-	m_SpinChannel.SetRange32(1, MAX_BASECHANNELS);
+	UpdateNumRows();
+	m_SpinChannel.SetRange32(1, m_SndFile.GetNumChannels());
 	m_SpinPattern.SetRange32(0, std::max(m_SndFile.Patterns.GetNumPatterns(), PATTERNINDEX(1)) - 1);
 	m_SpinOrder.SetRange32(0, std::max(m_SndFile.Order().GetLengthTailTrimmed(), ORDERINDEX(1)) - 1);
 	SetDlgItemInt(IDC_GOTO_ROW, m_nRow);
@@ -111,6 +111,7 @@ void CPatternGotoDialog::OnPatternChanged()
 
 	LockControls();
 	SetDlgItemInt(IDC_GOTO_ORD, m_nOrder);
+	UpdateNumRows();
 	UpdateTime();
 	UnlockControls();
 }
@@ -129,6 +130,7 @@ void CPatternGotoDialog::OnOrderChanged()
 
 	LockControls();
 	SetDlgItemInt(IDC_GOTO_PAT, m_nPattern);
+	UpdateNumRows();
 	UpdateTime();
 	UnlockControls();
 }
@@ -171,6 +173,18 @@ void CPatternGotoDialog::OnTimeChanged()
 	SetDlgItemInt(IDC_GOTO_ROW, m_nRow);
 	SetDlgItemInt(IDC_GOTO_PAT, m_nPattern);
 	UnlockControls();
+}
+
+
+void CPatternGotoDialog::UpdateNumRows()
+{
+	const ROWINDEX maxRow = (m_SndFile.Patterns.IsValidPat(m_nPattern) ? m_SndFile.Patterns[m_nPattern].GetNumRows() : MAX_PATTERN_ROWS) - 1;
+	m_SpinRow.SetRange32(0, maxRow);
+	if(m_nRow > maxRow)
+	{
+		m_nRow = maxRow;
+		SetDlgItemInt(IDC_GOTO_ROW, m_nRow);
+	}
 }
 
 
