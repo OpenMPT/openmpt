@@ -1117,7 +1117,7 @@ void CViewGlobals::OnSelectPlugin()
 
 LRESULT CViewGlobals::OnParamAutomated(WPARAM plugin, LPARAM param)
 {
-	if(plugin == m_nCurrentPlugin && param == m_nCurrentParam)
+	if(plugin == m_nCurrentPlugin && static_cast<PlugParamIndex>(param) == m_nCurrentParam)
 	{
 		OnParamChanged();
 	}
