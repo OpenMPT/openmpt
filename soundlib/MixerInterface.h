@@ -41,16 +41,19 @@ struct MixerTraits
 template<class Traits>
 struct NoInterpolation
 {
+	ModChannel &channel;
+
 	MPT_FORCEINLINE NoInterpolation(ModChannel &c, const CResampler &, unsigned int)
+		: channel{c}
 	{
 		// Adding 0.5 to the sample position before the interpolation loop starts
 		// effectively gives us nearest-neighbour with rounding instead of truncation.
 		// This gives us more consistent behaviour between forward and reverse playing of a sample.
 		c.position += SamplePosition::Ratio(1, 2);
 	}
-	MPT_FORCEINLINE void End(ModChannel &c)
+	MPT_FORCEINLINE ~NoInterpolation()
 	{
-		c.position -= SamplePosition::Ratio(1, 2);
+		channel.position -= SamplePosition::Ratio(1, 2);
 	}
 
 	MPT_FORCEINLINE void operator() (typename Traits::outbuf_t &outSample, const typename Traits::input_t * const inBuffer, const int32)
@@ -82,12 +85,8 @@ static void SampleLoop(ModChannel &chn, const CResampler &resampler, typename Tr
 	const typename Traits::input_t * MPT_RESTRICT inSample = static_cast<const typename Traits::input_t *>(c.pCurrentSample);
 
 	InterpolationFunc interpolate{c, resampler, numSamples};
-	FilterFunc filter;
-	MixFunc mix;
-
-	// Do initialisation if necessary
-	filter.Start(c);
-	mix.Start(c);
+	FilterFunc filter{c};
+	MixFunc mix{c};
 
 	unsigned int samples = numSamples;
 	SamplePosition smpPos = c.position;            // Fixed-point sample position
@@ -105,10 +104,6 @@ static void SampleLoop(ModChannel &chn, const CResampler &resampler, typename Tr
 	}
 
 	c.position = smpPos;
-
-	mix.End(c);
-	filter.End(c);
-	interpolate.End(c);
 }
 
 // Type of the SampleLoop function above
