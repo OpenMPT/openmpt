@@ -41,7 +41,7 @@ struct MixerTraits
 template<class Traits>
 struct NoInterpolation
 {
-	MPT_FORCEINLINE void Start(const ModChannel &, const CResampler &) { }
+	MPT_FORCEINLINE NoInterpolation(const ModChannel &, const CResampler &, unsigned int) { }
 	MPT_FORCEINLINE void End(const ModChannel &) { }
 
 	MPT_FORCEINLINE void operator() (typename Traits::outbuf_t &outSample, const typename Traits::input_t * const inBuffer, const int32)
@@ -72,12 +72,11 @@ static void SampleLoop(ModChannel &chn, const CResampler &resampler, typename Tr
 	ModChannel &c = chn;
 	const typename Traits::input_t * MPT_RESTRICT inSample = static_cast<const typename Traits::input_t *>(c.pCurrentSample);
 
-	InterpolationFunc interpolate;
+	InterpolationFunc interpolate{c, resampler, numSamples};
 	FilterFunc filter;
 	MixFunc mix;
 
 	// Do initialisation if necessary
-	interpolate.Start(c, resampler);
 	filter.Start(c);
 	mix.Start(c);
 
