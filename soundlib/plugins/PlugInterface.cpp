@@ -499,7 +499,7 @@ void IMixPlugin::SaveAllParameters()
 	m_pMixStruct->defaultProgram = -1;
 	
 	// Default implementation: Save all parameter values
-	PlugParamIndex numParams = std::min(GetNumParameters(), static_cast<int32>((std::numeric_limits<uint32>::max() - sizeof(uint32)) / sizeof(IEEE754binary32LE)));
+	PlugParamIndex numParams = std::min(GetNumParameters(), static_cast<PlugParamIndex>((std::numeric_limits<uint32>::max() - sizeof(uint32)) / sizeof(IEEE754binary32LE)));
 	uint32 nLen = numParams * sizeof(IEEE754binary32LE);
 	if (!nLen) return;
 	nLen += sizeof(uint32);

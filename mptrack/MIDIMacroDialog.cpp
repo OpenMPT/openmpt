@@ -347,7 +347,7 @@ void CMidiMacroSetup::OnViewAllParams(UINT id)
 #ifndef NO_PLUGINS
 	CString message, plugName;
 	int sfx = id - ID_PLUGSELECT;
-	int param = m_MidiCfg.MacroToPlugParam(sfx);
+	PlugParamIndex param = m_MidiCfg.MacroToPlugParam(sfx);
 	message.Format(_T("These are the parameters that can be controlled by macro SF%X:\n\n"), sfx);
 
 	for(PLUGINDEX plug = 0; plug < MAX_MIXPLUGINS; plug++)

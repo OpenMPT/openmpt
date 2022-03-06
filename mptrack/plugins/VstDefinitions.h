@@ -600,7 +600,7 @@ struct AEffect
 	SetParameterProc setParameter;
 	GetParameterFunc getParameter;
 	int32 numPrograms;
-	int32 numParams;
+	uint32 numParams;
 	int32 numInputs;
 	int32 numOutputs;
 	VstFlags flags;

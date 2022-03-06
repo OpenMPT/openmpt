@@ -257,7 +257,7 @@ void CDefaultVstEditor::UpdateControls(bool updateParamNames)
 
 	int curScrollMin, curScrollMax;
 	paramScroller.GetScrollRange(&curScrollMin, &curScrollMax);
-	if(curScrollMax != scrollMax)
+	if(static_cast<PlugParamIndex>(curScrollMax) != scrollMax)
 	{
 		// Number of parameters changed - update scrollbar limits
 		paramScroller.SetScrollRange(0, scrollMax);

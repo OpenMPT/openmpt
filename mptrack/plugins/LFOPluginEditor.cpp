@@ -76,7 +76,7 @@ bool LFOPluginEditor::OpenEditor(CWnd *parent)
 		s += mpt::ToCString(mpt::Charset::UTF8, MIDIEvents::MidiCCNames[i]);
 		m_midiCC.AddString(s);
 	}
-	if(m_lfoPlugin.m_outputToCC && m_lfoPlugin.m_outputParam != int32_max)
+	if(m_lfoPlugin.m_outputToCC && m_lfoPlugin.m_outputParam != LFOPlugin::INVALID_OUTPUT_PARAM)
 	{
 		m_midiCC.SetCurSel(m_lfoPlugin.m_outputParam & 0x7F);
 		SetDlgItemInt(IDC_EDIT1, 1 + ((m_lfoPlugin.m_outputParam & 0xF00) >> 8));
