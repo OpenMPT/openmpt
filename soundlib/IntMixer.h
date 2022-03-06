@@ -50,21 +50,34 @@ struct AmigaBlepInterpolation
 	SamplePosition subIncrement;
 	Paula::State *paula;
 	int numSteps;
+	unsigned int remainingSamples = 0;
 	bool filter;
 
-	MPT_FORCEINLINE void Start(ModChannel &chn, const CResampler &)
+	MPT_FORCEINLINE AmigaBlepInterpolation(ModChannel &chn, const CResampler &, unsigned int numSamples)
 	{
 		paula = &chn.paulaState;
 		numSteps = paula->numSteps;
 		filter = chn.dwFlags[CHN_AMIGAFILTER];
 		if(numSteps)
-			subIncrement = chn.increment / paula->numSteps;
+		{
+			subIncrement = chn.increment / numSteps;
+			// May we read past the start or end of sample if we do partial sample increments?
+			// If that's the case, don't apply any sub increments on the source sample if we reached the last output sample
+			// Note that this should only happen with notes well outside the Amiga note range, e.g. in software-mixed formats like MED
+			const int32 targetPos = (chn.position + chn.increment * numSamples).GetInt();
+			if(static_cast<SmpLength>(targetPos) > chn.nLength)
+				remainingSamples = numSamples;
+		}
+		
 	}
 
 	MPT_FORCEINLINE void End(const ModChannel &) { }
 
 	MPT_FORCEINLINE void operator() (typename Traits::outbuf_t &outSample, const typename Traits::input_t * const MPT_RESTRICT inBuffer, const uint32 posLo)
 	{
+		if(--remainingSamples == 0)
+			subIncrement = {};
+
 		SamplePosition pos(0, posLo);
 		// First, process steps of full length (one Amiga clock interval)
 		for(int step = numSteps; step > 0; step--)
@@ -102,7 +115,7 @@ struct AmigaBlepInterpolation
 template<class Traits>
 struct LinearInterpolation
 {
-	MPT_FORCEINLINE void Start(const ModChannel &, const CResampler &) { }
+	MPT_FORCEINLINE LinearInterpolation(const ModChannel &, const CResampler &, unsigned int) { }
 
 	MPT_FORCEINLINE void End(const ModChannel &) { }
 
@@ -125,7 +138,7 @@ struct LinearInterpolation
 template<class Traits>
 struct FastSincInterpolation
 {
-	MPT_FORCEINLINE void Start(const ModChannel &, const CResampler &) { }
+	MPT_FORCEINLINE FastSincInterpolation(const ModChannel &, const CResampler &, unsigned int) { }
 	MPT_FORCEINLINE void End(const ModChannel &) { }
 
 	MPT_FORCEINLINE void operator() (typename Traits::outbuf_t &outSample, const typename Traits::input_t * const MPT_RESTRICT inBuffer, const uint32 posLo)
@@ -150,7 +163,7 @@ struct PolyphaseInterpolation
 {
 	const SINC_TYPE *sinc;
 
-	MPT_FORCEINLINE void Start(const ModChannel &chn, const CResampler &resampler)
+	MPT_FORCEINLINE PolyphaseInterpolation(const ModChannel &chn, const CResampler &resampler, unsigned int)
 	{
 		#ifdef MODPLUG_TRACKER
 			// Otherwise causes "warning C4100: 'resampler' : unreferenced formal parameter"
@@ -190,7 +203,7 @@ struct FIRFilterInterpolation
 {
 	const int16 *WFIRlut;
 
-	MPT_FORCEINLINE void Start(const ModChannel &, const CResampler &resampler)
+	MPT_FORCEINLINE FIRFilterInterpolation(const ModChannel &, const CResampler &resampler, unsigned int)
 	{
 		WFIRlut = resampler.m_WindowedFIR.lut;
 	}

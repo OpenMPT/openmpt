@@ -39,7 +39,7 @@ typedef IntToFloatTraits<2, 2, mixsample_t, int16, -int16_min> Int16SToFloatS;
 template<class Traits>
 struct LinearInterpolation
 {
-	MPT_FORCEINLINE void Start(const ModChannel &, const CResampler &) { }
+	MPT_FORCEINLINE LinearInterpolation(const ModChannel &, const CResampler &, unsigned int) { }
 
 	MPT_FORCEINLINE void End(const ModChannel &) { }
 
@@ -62,7 +62,7 @@ struct LinearInterpolation
 template<class Traits>
 struct FastSincInterpolation
 {
-	MPT_FORCEINLINE void Start(const ModChannel &, const CResampler &) { }
+	MPT_FORCEINLINE FastSincInterpolation(const ModChannel &, const CResampler &, unsigned int) { }
 	MPT_FORCEINLINE void End(const ModChannel &) { }
 
 	MPT_FORCEINLINE void operator() (typename Traits::outbuf_t &outSample, const typename Traits::input_t * const inBuffer, const uint32 posLo)
@@ -87,7 +87,7 @@ struct PolyphaseInterpolation
 {
 	const typename Traits::output_t *sinc;
 
-	MPT_FORCEINLINE void Start(const ModChannel &chn, const CResampler &resampler)
+	MPT_FORCEINLINE PolyphaseInterpolation(const ModChannel &chn, const CResampler &resampler, unsigned int)
 	{
 		sinc = (((chn.increment > SamplePosition(0x130000000ll)) || (chn.increment < -SamplePosition(-0x130000000ll))) ?
 			(((chn.increment > SamplePosition(0x180000000ll)) || (chn.increment < SamplePosition(-0x180000000ll))) ? resampler.gDownsample2x : resampler.gDownsample13x) : resampler.gKaiserSinc);
@@ -121,7 +121,7 @@ struct FIRFilterInterpolation
 {
 	const typename Traits::output_t *WFIRlut;
 
-	MPT_FORCEINLINE void Start(const ModChannel &, const CResampler &resampler)
+	MPT_FORCEINLINE FIRFilterInterpolation(const ModChannel &, const CResampler &resampler, unsigned int)
 	{
 		WFIRlut = resampler.m_WindowedFIR.lut;
 	}
