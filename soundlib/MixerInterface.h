@@ -41,7 +41,7 @@ struct MixerTraits
 template<class Traits>
 struct NoInterpolation
 {
-	MPT_FORCEINLINE NoInterpolation(ModChannel &c, const CResampler &, unsigned int)
+	MPT_FORCEINLINE NoInterpolation(ModChannel &c, const CResampler &, unsigned int) { }
 	MPT_FORCEINLINE void End(const ModChannel &) { }
 
 	MPT_FORCEINLINE void operator() (typename Traits::outbuf_t &outSample, const typename Traits::input_t * const inBuffer, const int32)
