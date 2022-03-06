@@ -1137,14 +1137,14 @@ LRESULT CViewGlobals::OnDryWetRatioChangedFromPlayer(WPARAM plugin, LPARAM)
 
 void CViewGlobals::OnParamChanged()
 {
-	int cursel = static_cast<int>(m_CbnParam.GetItemData(m_CbnParam.GetCurSel()));
+	PlugParamIndex cursel = static_cast<PlugParamIndex>(m_CbnParam.GetItemData(m_CbnParam.GetCurSel()));
 
 	IMixPlugin *pPlugin = GetCurrentPlugin();
 
-	if(pPlugin != nullptr && cursel != CB_ERR)
+	if(pPlugin != nullptr && cursel != static_cast<PlugParamIndex>(CB_ERR))
 	{
 		const PlugParamIndex nParams = pPlugin->GetNumParameters();
-		if(cursel >= 0 && cursel < nParams) m_nCurrentParam = cursel;
+		if(cursel < nParams) m_nCurrentParam = cursel;
 		if(m_nCurrentParam < nParams)
 		{
 			const auto value = pPlugin->GetScaledUIParam(m_nCurrentParam);

@@ -1057,7 +1057,7 @@ int32 CVstPlugin::GetNumPrograms() const
 
 PlugParamIndex CVstPlugin::GetNumParameters() const
 {
-	return std::max(m_Effect.numParams, int32(0));
+	return m_Effect.numParams;
 }
 
 
@@ -1261,7 +1261,7 @@ void CVstPlugin::SetParameter(PlugParamIndex nIndex, PlugParamValue fValue)
 
 
 // Helper function for retreiving parameter name / label / display
-CString CVstPlugin::GetParamPropertyString(int32 param, Vst::VstOpcodeToPlugin opcode)
+CString CVstPlugin::GetParamPropertyString(PlugParamIndex param, Vst::VstOpcodeToPlugin opcode)
 {
 	if(m_Effect.numParams > 0 && param < m_Effect.numParams)
 	{

@@ -161,7 +161,7 @@ public:
 
 protected:
 	// Helper function for retreiving parameter name / label / display
-	CString GetParamPropertyString(int32 param, Vst::VstOpcodeToPlugin opcode);
+	CString GetParamPropertyString(PlugParamIndex param, Vst::VstOpcodeToPlugin opcode);
 
 	// Set up input / output buffers.
 	bool InitializeIOBuffers();
