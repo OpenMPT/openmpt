@@ -391,7 +391,6 @@ void CCtrlSamples::OnActivatePage(LPARAM lParam)
 		} else
 		{
 			if (nIns > 0) lParam = nIns;
-			m_parent.InstrumentChanged(-1);
 		}
 	} else if (lParam > 0)
 	{

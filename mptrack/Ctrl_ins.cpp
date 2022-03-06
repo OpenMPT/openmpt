@@ -1162,7 +1162,6 @@ void CCtrlInstruments::OnActivatePage(LPARAM lParam)
 	{
 		int nIns = m_parent.GetInstrumentChange();
 		if (nIns > 0) lParam = nIns;
-		m_parent.InstrumentChanged(-1);
 	} else if(lParam > 0)
 	{
 		m_parent.InstrumentChanged(static_cast<INSTRUMENTINDEX>(lParam));
