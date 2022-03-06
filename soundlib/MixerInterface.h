@@ -41,7 +41,7 @@ struct MixerTraits
 template<class Traits>
 struct NoInterpolation
 {
-	MPT_FORCEINLINE void Start(ModChannel &c, const CResampler &)
+	MPT_FORCEINLINE NoInterpolation(ModChannel &c, const CResampler &, unsigned int)
 	{
 		// Adding 0.5 to the sample position before the interpolation loop starts
 		// effectively gives us nearest-neighbour with rounding instead of truncation.
@@ -81,12 +81,11 @@ static void SampleLoop(ModChannel &chn, const CResampler &resampler, typename Tr
 	ModChannel &c = chn;
 	const typename Traits::input_t * MPT_RESTRICT inSample = static_cast<const typename Traits::input_t *>(c.pCurrentSample);
 
-	InterpolationFunc interpolate;
+	InterpolationFunc interpolate{c, resampler, numSamples};
 	FilterFunc filter;
 	MixFunc mix;
 
 	// Do initialisation if necessary
-	interpolate.Start(c, resampler);
 	filter.Start(c);
 	mix.Start(c);
 
