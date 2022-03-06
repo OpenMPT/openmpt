@@ -42,7 +42,6 @@ template<class Traits>
 struct NoInterpolation
 {
 	MPT_FORCEINLINE NoInterpolation(const ModChannel &, const CResampler &, unsigned int) { }
-	MPT_FORCEINLINE void End(const ModChannel &) { }
 
 	MPT_FORCEINLINE void operator() (typename Traits::outbuf_t &outSample, const typename Traits::input_t * const inBuffer, const int32)
 	{
@@ -73,12 +72,8 @@ static void SampleLoop(ModChannel &chn, const CResampler &resampler, typename Tr
 	const typename Traits::input_t * MPT_RESTRICT inSample = static_cast<const typename Traits::input_t *>(c.pCurrentSample);
 
 	InterpolationFunc interpolate{c, resampler, numSamples};
-	FilterFunc filter;
-	MixFunc mix;
-
-	// Do initialisation if necessary
-	filter.Start(c);
-	mix.Start(c);
+	FilterFunc filter{c};
+	MixFunc mix{c};
 
 	unsigned int samples = numSamples;
 	SamplePosition smpPos = c.position;	// Fixed-point sample position
@@ -94,10 +89,6 @@ static void SampleLoop(ModChannel &chn, const CResampler &resampler, typename Tr
 
 		smpPos += increment;
 	}
-
-	mix.End(c);
-	filter.End(c);
-	interpolate.End(c);
 
 	c.position = smpPos;
 }
