@@ -912,7 +912,6 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, PatternEditPos &pastePos
 								else
 									m.command = CMD_TEMPO;
 							}
-							break;
 						}
 					}
 				}
