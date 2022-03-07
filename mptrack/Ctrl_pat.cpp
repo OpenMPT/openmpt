@@ -552,7 +552,6 @@ void CCtrlPatterns::OnActivatePage(LPARAM lParam)
 	{
 		SetCurrentInstrument(nIns);
 	}
-	m_parent.InstrumentChanged(-1);
 
 	if(!(lParam & 0x80000000))
 	{
