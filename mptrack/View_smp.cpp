@@ -1958,16 +1958,18 @@ void CViewSample::OnMouseMove(UINT flags, CPoint point)
 		}
 
 		// Note: point.x might have changed in if block above in case we're scrolling.
-		const bool fineDrag = (flags & MK_SHIFT) && m_startDragValue != MAX_SAMPLE_LENGTH && !m_dwStatus[SMPSTATUS_DRAWING];
-		const SmpLength x = fineDrag ? m_startDragValue + (point.x - m_startDragPoint.x) / Util::ScalePixels(2, m_hWnd) : SnapToGrid(ScreenToSample(point.x));
+		const SmpLength x = m_fineDrag ? m_startDragValue + (point.x - m_startDragPoint.x) / Util::ScalePixels(2, m_hWnd) : SnapToGrid(ScreenToSample(SampleToScreen(m_startDragValue) + point.x - m_startDragPoint.x));
 		
-		if((flags & MK_SHIFT) && !fineDrag)
+		if((flags & MK_SHIFT) && !m_fineDrag)
 		{
+			m_fineDrag = true;
 			m_startDragPoint = point;
 			m_startDragValue = x;
-		} else if(!(flags & MK_SHIFT))
+		} else if(!(flags & MK_SHIFT) && m_fineDrag)
 		{
-			m_startDragValue = MAX_SAMPLE_LENGTH;
+			m_fineDrag = false;
+			m_startDragPoint = point;
+			m_startDragValue = ScreenToSample(point.x);
 		}
 
 		bool update = false;
@@ -2114,10 +2116,8 @@ void CViewSample::OnLButtonDown(UINT flags, CPoint point)
 	{
 		m_dragItem = item;
 		m_startDragPoint = point;
-		if(flags & MK_SHIFT)
-			m_startDragValue = itemPos;
-		else
-			m_startDragValue = MAX_SAMPLE_LENGTH;
+		m_startDragValue = itemPos;
+		m_fineDrag = (flags & MK_SHIFT);
 		m_dragPreparedUndo = false;
 
 		switch(m_dragItem)
