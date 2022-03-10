@@ -2177,6 +2177,7 @@ void CViewPattern::OnEditGoto()
 			SetCurrentColumn(dlg.m_nChannel - 1);
 		if(dlg.m_nRow != GetCurrentRow())
 			SetCurrentRow(dlg.m_nRow);
+		CriticalSection cs;
 		pModDoc->SetElapsedTime(dlg.m_nOrder, dlg.m_nRow, false);
 	}
 	return;
