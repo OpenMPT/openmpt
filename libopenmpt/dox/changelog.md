@@ -7,8 +7,19 @@ is just a high-level summary.
 
 ### libopenmpt 0.6.2-pre
 
+ *  [**Sec**] Possible out-of-bounds write in malformed IT / XM / MPTM files
+    using the internal LFO plugin. (r17076)
+ *  [**Sec**] Possible out-of-bounds read when using Amiga BLEP interpolation
+    with extremely high-pitched notes. (r17078, r17079)
+
  *  ISO-8859-1-related charsets from Amiga OS and RISC OS are now handled more
     accurately, thus avoiding some unwanted control characters.
+ *  MO3: Pattern indices 254 / 255 were not treated as playable patterns even if
+    the original file was a MOD / XM.
+ *  Correctly apply ST3-style effect memory when seeking in S3M files.
+ *  Command S (S3M / IT style) effect memory was not applied when seeking.
+ *  Initial channel mute status was not reported correctly in `get_channel_mute_status`
+    since libopenmpt 0.6.0.
 
  *  FLAC: Update to v1.3.4 (2022-02-21).
  *  pugixml: Update to v1.12.1 (2022-02-16).
