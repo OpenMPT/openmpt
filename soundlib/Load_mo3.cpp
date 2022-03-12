@@ -884,7 +884,8 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 
-	ReadOrderFromFile<uint8>(Order(), musicChunk, fileHeader.numOrders, 0xFF, 0xFE);
+	const bool hasOrderSeparators = !(m_nType & (MOD_TYPE_MOD | MOD_TYPE_XM));
+	ReadOrderFromFile<uint8>(Order(), musicChunk, fileHeader.numOrders, hasOrderSeparators ? 0xFF : uint16_max, hasOrderSeparators ? 0xFE : uint16_max);
 
 	// Track assignments for all patterns
 	FileReader trackChunk = musicChunk.ReadChunk(fileHeader.numPatterns * fileHeader.numChannels * sizeof(uint16));
