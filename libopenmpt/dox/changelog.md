@@ -8,7 +8,7 @@ is just a high-level summary.
 ### libopenmpt 0.6.2-pre
 
  *  ISO-8859-1-related charsets from Amiga OS and RISC OS are now handled more
-    accurately, thus voiding some unwanted control characters.
+    accurately, thus avoiding some unwanted control characters.
 
  *  FLAC: Update to v1.3.4 (2022-02-21).
  *  pugixml: Update to v1.12.1 (2022-02-16).
