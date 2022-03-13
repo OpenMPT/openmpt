@@ -41,6 +41,14 @@ public:
 
 	CEffectVis(CViewPattern *pViewPattern, ROWINDEX startRow, ROWINDEX endRow, CHANNELINDEX nchn, CModDoc &modDoc, PATTERNINDEX pat);
 
+	void UpdateSelection(ROWINDEX startRow, ROWINDEX endRow, CHANNELINDEX nchn, PATTERNINDEX pat);
+	void Update();
+	void OpenEditor(CWnd *parent);
+	void SetPlayCursor(PATTERNINDEX nPat, ROWINDEX nRow);
+	void DoClose();
+
+	afx_msg void OnSize(UINT nType, int cx, int cy);
+
 protected:
 	void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV support
 	void PostNcDestroy() override;
@@ -120,16 +128,6 @@ protected:
 	DECLARE_MESSAGE_MAP()
 	BOOL OnInitDialog() override;
 	afx_msg void OnPaint();
-
-public:
-
-	void UpdateSelection(ROWINDEX startRow, ROWINDEX endRow, CHANNELINDEX nchn, PATTERNINDEX pat);
-	void Update();
-	void OpenEditor(CWnd *parent);
-	void SetPlayCursor(PATTERNINDEX nPat, ROWINDEX nRow);
-	void DoClose();
-
-	afx_msg void OnSize(UINT nType, int cx, int cy);
 
 protected:
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
