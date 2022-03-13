@@ -791,6 +791,8 @@ public:
 	Setting<mpt::ustring> patternFontDot;
 	Setting<int32> effectVisWidth;
 	Setting<int32> effectVisHeight;
+	Setting<int32> effectVisX;
+	Setting<int32> effectVisY;
 	Setting<CString> patternAccessibilityFormat;
 	CachedSetting<bool> patternAlwaysDrawWholePatternOnScrollSlow;
 	CachedSetting<bool> orderListOldDropBehaviour;

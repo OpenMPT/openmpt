@@ -444,10 +444,22 @@ void CEffectVis::OpenEditor(CWnd *parent)
 
 	if(TrackerSettings::Instance().effectVisWidth > 0 && TrackerSettings::Instance().effectVisHeight > 0)
 	{
-		SetWindowPos(nullptr,
-			0, 0,
-			MulDiv(TrackerSettings::Instance().effectVisWidth, Util::GetDPIx(m_hWnd), 96), MulDiv(TrackerSettings::Instance().effectVisHeight, Util::GetDPIy(m_hWnd), 96),
-			SWP_NOZORDER | SWP_NOMOVE);
+		WINDOWPLACEMENT wnd;
+		wnd.length = sizeof(wnd);
+		GetWindowPlacement(&wnd);
+		wnd.showCmd = SW_SHOWNOACTIVATE;
+		CRect rect = wnd.rcNormalPosition;
+		if(TrackerSettings::Instance().effectVisX > int32_min && TrackerSettings::Instance().effectVisY > int32_min)
+		{
+			CRect mainRect;
+			CMainFrame::GetMainFrame()->GetWindowRect(mainRect);
+			rect.left = mainRect.left + MulDiv(TrackerSettings::Instance().effectVisX, Util::GetDPIx(m_hWnd), 96);
+			rect.top = mainRect.top + MulDiv(TrackerSettings::Instance().effectVisY, Util::GetDPIx(m_hWnd), 96);
+		}
+		rect.right = rect.left + MulDiv(TrackerSettings::Instance().effectVisWidth, Util::GetDPIx(m_hWnd), 96);
+		rect.bottom = rect.top + MulDiv(TrackerSettings::Instance().effectVisHeight, Util::GetDPIx(m_hWnd), 96);
+		wnd.rcNormalPosition = rect;
+		SetWindowPlacement(&wnd);
 	}
 
 	ShowWindow(SW_SHOW);
@@ -474,10 +486,18 @@ void CEffectVis::OnCancel()
 
 void CEffectVis::DoClose()
 {
-	CRect rect;
-	GetWindowRect(rect);
+	WINDOWPLACEMENT wnd;
+	wnd.length = sizeof(wnd);
+	GetWindowPlacement(&wnd);
+	CRect mainRect;
+	CMainFrame::GetMainFrame()->GetWindowRect(mainRect);
+
+	CRect rect = wnd.rcNormalPosition;
+	rect.MoveToXY(rect.left - mainRect.left, rect.top - mainRect.top);
 	TrackerSettings::Instance().effectVisWidth = MulDiv(rect.Width(), 96, Util::GetDPIx(m_hWnd));
 	TrackerSettings::Instance().effectVisHeight = MulDiv(rect.Height(), 96, Util::GetDPIy(m_hWnd));
+	TrackerSettings::Instance().effectVisX = MulDiv(rect.left, 96, Util::GetDPIx(m_hWnd));
+	TrackerSettings::Instance().effectVisY = MulDiv(rect.top, 96, Util::GetDPIy(m_hWnd));
 
 	m_dcGrid.SelectObject(m_pbOldGrid);
 	m_dcGrid.DeleteDC();
@@ -506,8 +526,7 @@ void CEffectVis::OnSize(UINT nType, int cx, int cy)
 	MPT_UNREFERENCED_PARAMETER(cx);
 	MPT_UNREFERENCED_PARAMETER(cy);
 	GetClientRect(&m_rcFullWin);
-	m_rcDraw.SetRect( m_rcFullWin.left,  m_rcFullWin.top,
-				      m_rcFullWin.right, m_rcFullWin.bottom - m_marginBottom);
+	m_rcDraw.SetRect(m_rcFullWin.left, m_rcFullWin.top, m_rcFullWin.right, m_rcFullWin.bottom - m_marginBottom);
 
 	const int actionListWidth = Util::ScalePixels(170, m_hWnd);
 	const int commandListWidth = Util::ScalePixels(160, m_hWnd);
