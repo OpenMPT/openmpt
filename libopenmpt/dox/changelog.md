@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.6.3-pre
+
 ### libopenmpt 0.6.2 (2022-03-13)
 
  *  [**Sec**] Possible out-of-bounds write in malformed IT / XM / MPTM files
