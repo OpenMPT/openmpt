@@ -31,6 +31,48 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.30.03.00 (13 March 2022, revision 17105)
+-------------------------------------------
+Tree view
+- [Fix] <js> Avoid playing a sound when double-clicking the folder of a soundfont drum instrument (http://bugs.openmpt.org/view.php?id=1516).
+
+General tab
+- [Imp] <js> Plugin dry / wet ratio is now updated immediately when modified through macros or plugin volume handling (http://bugs.openmpt.org/view.php?id=1463).
+- [Fix] <js> The tempo slider position was not set correctly in the MPTM format (tx coda).
+
+Pattern tab
+- [Imp] <js> The base octave setting now respects the current instrument's group size where possible (http://bugs.openmpt.org/view.php?id=1568).
+- [Imp] <js> Goto Dialog: Limit channel and row spinners to current pattern and module limits (http://bugs.openmpt.org/view.php?id=1575).
+- [Mod] <js> Data Entry shortcuts and Ctrl + Scroll Wheel now only affect "special" notes if no regular notes are selected (http://bugs.openmpt.org/view.php?id=1573).
+- [Fix] <js> Go To Dialog: Fixed rare crash when module is playing while the jump is being applied (http://bugs.openmpt.org/view.php?id=1578).
+- [Fix] <js> Correctly apply shared effect memory when seeking in S3M files.
+- [Fix] <js> Apply Command S (S3M / IT / MPTM) effect memory when seeking.
+
+Sample tab
+- [Imp] <js> Improve behaviour when dragging an item in the sample editor and the initial grab point wasn't exactly the horizontal position of the item.
+
+Mod Conversion
+- [Fix] <js> MOD / XM command EBF conversion was broken in OpenMPT 1.30.02.00.
+
+VST / DMO Plugins
+- [Mod] <js> Apply (hidden) auto-suspend setting when new adding plugins to a module, not when creating a plugin instance (which also happens when loading an existing module).
+- [Fix] <js> With malformed modules, the LFO plugin could output invalid parameter changes to other plugins, causing a crash depending on how the target plugin handles such invalid parameters.
+
+Playback
+- [Fix] <js> Fixed potential crash when using the Amiga BLEP resampler and playing extremely high notes.
+
+Other formats
+- [Fix] <js> MO3: Pattern indices 254 / 255 are no longer treated as +++ / --- when the original file was a MOD / XM.
+
+Misc
+- [Imp] <js> Apply default channel colors when changing the number of channels via Song Properties.
+- [Mod] <js> The active instrument is now remembered more consistently when switching between tabs. This allows to e.g. change to a specific instrument in the pattern editor, then go to the instrument editor and see the same instrument there (as before) and finally go to the sample editor and also see the correct sample there.
+- [Mod] <js> MIDI Export: Default to mapped drum export.
+
+Third-Party Libraries
+- [Imp] Update flac (v1.3.4), r8brain (v5.6) and UnRAR (v6.1.6)
+
+
 v1.30.02.00 (30 January 2022, revision 16761)
 ---------------------------------------------
 Tree view
@@ -57,7 +99,7 @@ Sample tab
 - [Fix] <js> The sample value shown as percentage in the status bar was displayed as a value between 0 and 1 instead of 0 and 100 as intended.
 
 Mod Conversion
-- [Fix] <js> MOD / XM command EBF is now converted to MPTM / IT /S3M command DFE instead of DFF, as the latter slides up, not down.
+- [Fix] <js> MOD / XM command EBF is now converted to MPTM / IT / S3M command DFE instead of DFF, as the latter slides up, not down.
 
 Playback
 - [Mod] <js> The letter "z" is now evaluated in fixed MIDI macros (Z80...ZFF) the same way as in Impulse Tracker.
@@ -627,7 +669,7 @@ Other formats
 Misc
 - [Imp] <js> When inverting icons in high contrast / dark themes, only invert their brightness but keep the hue.
 - [Fix] <js> Since OpenMPT 1.29.01.00, Note Off / Cut / Fade shortcuts were missing in new installations, when resetting keys to defaults or when importing very old OpenMPT keyboard configurations (http://bugs.openmpt.org/view.php?id=1385).
-- [Fix] <js> Fix possible crash when resetting keyboard mapping while a separator item was focussed.
+- [Fix] <js> Keyboard configuration: Fixed possible crash when resetting keyboard mapping while a separator item was focussed.
 - [Fix] <js> MIDI Export: In "Melodic (any)" mode, exported MIDI channels were inconsistent between notes / tracker events and Zxx macros past channel 10 (http://forum.openmpt.org/index.php?topic=6504.0).
 
 Third-Party Libraries
