@@ -1045,7 +1045,9 @@ void MakeNameCompatible(wchar *Name,size_t MaxSize)
           else
             if (Devices[J][K]==0)
             {
-              MatchFound=s[K]==0 || s[K]=='.' || IsPathDiv(s[K]);
+              // Names like aux.txt are accessible without \\?\ prefix
+              // since Windows 11. Pure aux is still prohibited.
+              MatchFound=s[K]==0 || s[K]=='.' && !IsWindows11OrGreater() || IsPathDiv(s[K]);
               break;
             }
             else
