@@ -171,18 +171,33 @@ static void GetPasswordText(wchar *Str,uint MaxLength)
   {
 #ifdef _WIN_ALL
     HANDLE hConIn=GetStdHandle(STD_INPUT_HANDLE);
-    HANDLE hConOut=GetStdHandle(STD_OUTPUT_HANDLE);
-    DWORD ConInMode,ConOutMode;
-    DWORD Read=0;
+    DWORD ConInMode;
     GetConsoleMode(hConIn,&ConInMode);
-    GetConsoleMode(hConOut,&ConOutMode);
-    SetConsoleMode(hConIn,ENABLE_LINE_INPUT);
-    SetConsoleMode(hConOut,ENABLE_PROCESSED_OUTPUT|ENABLE_WRAP_AT_EOL_OUTPUT);
+    SetConsoleMode(hConIn,ENABLE_LINE_INPUT); // Remove ENABLE_ECHO_INPUT.
 
+    // We prefer ReadConsole to ReadFile, so we can read Unicode input.
+    DWORD Read=0;
     ReadConsole(hConIn,Str,MaxLength-1,&Read,NULL);
     Str[Read]=0;
     SetConsoleMode(hConIn,ConInMode);
-    SetConsoleMode(hConOut,ConOutMode);
+
+    // If entered password is longer than MAXPASSWORD and truncated,
+    // read its unread part anyway, so it isn't read later as the second
+    // password for -p switch. Low level FlushConsoleInputBuffer doesn't help
+    // for high level ReadConsole, which in line input mode seems to store
+    // the rest of string in its own internal buffer.
+    if (wcschr(Str,'\r')==NULL) // If '\r' is missing, the password was truncated.
+      while (true)
+      {
+        wchar Trail[64];
+        DWORD TrailRead=0;
+        // Use ASIZE(Trail)-1 to reserve the space for trailing 0.
+        ReadConsole(hConIn,Trail,ASIZE(Trail)-1,&TrailRead,NULL);
+        Trail[TrailRead]=0;
+        if (TrailRead==0 || wcschr(Trail,'\r')!=NULL)
+          break;
+      }
+
 #else
     char StrA[MAXPASSWORD*4]; // "*4" for multibyte UTF-8 characters.
 #if defined(_EMX) || defined (__VMS)
