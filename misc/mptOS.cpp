@@ -169,7 +169,7 @@ mpt::osinfo::windows::Version Version::GetMinimumAPILevel() noexcept
 	#if MPT_OS_WINDOWS
 		return mpt::osinfo::windows::Version::FromSDK();
 	#else // !MPT_OS_WINDOWS
-		return mpt::osinfo::windows::Version();
+		return mpt::osinfo::windows::Version::NoWindows();
 	#endif // MPT_OS_WINDOWS
 }
 
