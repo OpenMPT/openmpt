@@ -64,6 +64,7 @@
 #  MODERN=0            Pass more modern compiler options.
 #  NATIVE=0            Optimize for system CPU.
 #  STDCXX=c++17        C++ standard version (only for GCC and clang)
+#  ANALYZE=0           Enable static analyzer.
 #  CHECKED=0           Enable run-time assertions.
 #  CHECKED_ADDRESS=0   Enable address sanitizer
 #  CHECKED_UNDEFINED=0 Enable undefined behaviour sanitizer

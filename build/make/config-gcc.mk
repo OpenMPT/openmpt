@@ -37,6 +37,11 @@ CXXFLAGS += -flto
 CFLAGS   += -flto
 endif
 
+ifeq ($(ANALYZE),1)
+CXXFLAGS += -fanalyzer -Wno-analyzer-malloc-leak -Wno-analyzer-null-dereference -Wno-analyzer-possible-null-argument -Wno-analyzer-possible-null-dereference 
+CFLAGS   += -fanalyzer -Wno-analyzer-malloc-leak -Wno-analyzer-null-dereference -Wno-analyzer-possible-null-argument -Wno-analyzer-possible-null-dereference
+endif
+
 ifeq ($(CHECKED_ADDRESS),1)
 CXXFLAGS += -fsanitize=address
 CFLAGS   += -fsanitize=address
