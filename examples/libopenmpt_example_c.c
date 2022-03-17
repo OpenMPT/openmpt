@@ -218,6 +218,7 @@ cleanup:
 	if ( pa_initialized ) {
 		Pa_Terminate();
 		pa_initialized = 0;
+		(void)pa_initialized;
 	}
 
 	if ( mod ) {
