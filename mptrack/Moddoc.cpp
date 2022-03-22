@@ -2632,7 +2632,7 @@ void CModDoc::OnPatternPlayNoLoop()
 		}
 		m_SndFile.m_SongFlags.reset(SONG_PAUSED | SONG_STEP);
 		m_SndFile.SetCurrentOrder(nOrd);
-		if (m_SndFile.Order()[nOrd] == nPat)
+		if(nOrd < m_SndFile.Order().size() && m_SndFile.Order()[nOrd] == nPat)
 			m_SndFile.DontLoopPattern(nPat, nRow);
 		else
 			m_SndFile.LoopPattern(nPat);
