@@ -37,6 +37,8 @@ static const char * const license =
 
 #include "openmpt123_config.hpp"
 
+#include "mpt/base/check_platform.hpp"
+
 #include <algorithm>
 #include <deque>
 #include <fstream>
@@ -2287,6 +2289,7 @@ static int main( int argc, char * argv [] ) {
 #endif
 	#if defined( __DJGPP__ )
 		_crt0_startup_flags &= ~_CRT0_FLAG_LOCK_MEMORY;  /* disable automatic locking for all further memory allocations */
+		assert(mpt::platform::libc().is_ok());
 	#endif /* __DJGPP__ */
 	std::vector<std::string> args;
 	#if defined(WIN32) && defined(UNICODE)

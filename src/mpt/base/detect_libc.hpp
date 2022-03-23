@@ -27,6 +27,8 @@
 #define MPT_LIBC_BIONIC 1
 #elif defined(__APPLE__)
 #define MPT_LIBC_APPLE 1
+#elif defined(__DJGPP__)
+#define MPT_LIBC_DJGPP 1
 #else
 #define MPT_LIBC_GENERIC 1
 #endif
@@ -48,6 +50,9 @@
 #endif
 #ifndef MPT_LIBC_APPLE
 #define MPT_LIBC_APPLE 0
+#endif
+#ifndef MPT_LIBC_DJGPP
+#define MPT_LIBC_DJGPP 0
 #endif
 
 #if MPT_LIBC_MS

@@ -14,6 +14,7 @@
 
 #ifdef ENABLE_TESTS
 
+#include "mpt/base/check_platform.hpp"
 #include "mpt/base/numbers.hpp"
 #include "mpt/crc/crc.hpp"
 #include "mpt/environment/environment.hpp"
@@ -195,6 +196,13 @@ void DoTests()
 
 		PathPrefix = new mpt::PathString(mpt::PathString::FromUnicode(pathprefix));
 
+	#endif
+
+	#if MPT_OS_DJGPP
+		void (*TestLIBC)(void) = []() {
+			VERIFY_EQUAL(mpt::platform::libc().is_ok(), true);
+		};
+		DO_TEST(do_mpt_test);
 	#endif
 
 	void (*do_mpt_test)(void) = []() {
