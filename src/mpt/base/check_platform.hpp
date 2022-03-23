@@ -13,6 +13,7 @@
 
 #include <cassert>
 #include <cstddef>
+#include <cstdint>
 
 #if MPT_LIBC_DJGPP
 #include <crt0.h>
