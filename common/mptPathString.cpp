@@ -393,7 +393,7 @@ PathString PathString::RelativePathToAbsolute(const PathString &relativeTo) cons
 
 bool PathString::IsPathSeparator(RawPathString::value_type c)
 {
-#if MPT_OS_WINDOWS
+#if MPT_OS_WINDOWS || MPT_OS_DJGPP
 	return (c == PC_('\\')) || (c == PC_('/'));
 #else
 	return c == PC_('/');
@@ -402,7 +402,7 @@ bool PathString::IsPathSeparator(RawPathString::value_type c)
 
 RawPathString::value_type PathString::GetDefaultPathSeparator()
 {
-#if MPT_OS_WINDOWS
+#if MPT_OS_WINDOWS || MPT_OS_DJGPP
 	return PC_('\\');
 #else
 	return PC_('/');
