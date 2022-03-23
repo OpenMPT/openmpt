@@ -89,10 +89,6 @@
 #endif
 
 #define MPT_TEST_HAS_FILESYSTEM 1
-#if MPT_OS_DJGPP
-#undef MPT_TEST_HAS_FILESYSTEM
-#define MPT_TEST_HAS_FILESYSTEM 0
-#endif
 
 #include "TestTools.h"
 
@@ -2669,12 +2665,20 @@ static bool ShouldRunTests()
 
 static mpt::PathString GetTestFilenameBase()
 {
+#if MPT_OS_DJGPP
+	return Test::GetPathPrefix() + P_("test\\test.");
+#else
 	return Test::GetPathPrefix() + P_("./test/test.");
+#endif
 }
 
 static mpt::PathString GetTempFilenameBase()
 {
+#if MPT_OS_DJGPP
+	return P_("test.");
+#else
 	return P_("./test.");
+#endif
 }
 
 typedef std::shared_ptr<CSoundFile> TSoundFileContainer;
@@ -2748,14 +2752,22 @@ static MPT_NOINLINE void TestLoadSaveFile()
 
 	// Test MPTM file loading
 	{
+#if MPT_OS_DJGPP
+		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBaseSrc + P_("mpt"));
+#else
 		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBaseSrc + P_("mptm"));
+#endif
 
 		TestLoadMPTMFile(GetSoundFile(sndFileContainer));
 
 		#ifndef MODPLUG_NO_FILESAVE
 			// Test file saving
 			GetSoundFile(sndFileContainer).m_dwLastSavedWithVersion = Version::Current();
+#if MPT_OS_DJGPP
+			SaveIT(sndFileContainer, filenameBase + P_("spt"));
+#else
 			SaveIT(sndFileContainer, filenameBase + P_("saved.mptm"));
+#endif
 		#endif
 
 		DestroySoundFileContainer(sndFileContainer);
@@ -2764,13 +2776,21 @@ static MPT_NOINLINE void TestLoadSaveFile()
 	// Reload the saved file and test if everything is still working correctly.
 	#ifndef MODPLUG_NO_FILESAVE
 	{
+#if MPT_OS_DJGPP
+		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + P_("spt"));
+#else
 		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + P_("saved.mptm"));
+#endif
 
 		TestLoadMPTMFile(GetSoundFile(sndFileContainer));
 
 		DestroySoundFileContainer(sndFileContainer);
 
+#if MPT_OS_DJGPP
+		RemoveFile(filenameBase + P_("spt"));
+#else
 		RemoveFile(filenameBase + P_("saved.mptm"));
+#endif
 	}
 	#endif
 
@@ -2791,7 +2811,11 @@ static MPT_NOINLINE void TestLoadSaveFile()
 		#ifndef MODPLUG_NO_FILESAVE
 			// Test file saving
 			GetSoundFile(sndFileContainer).m_dwLastSavedWithVersion = Version::Current();
+#if MPT_OS_DJGPP
+			SaveXM(sndFileContainer, filenameBase + P_("sxm"));
+#else
 			SaveXM(sndFileContainer, filenameBase + P_("saved.xm"));
+#endif
 		#endif
 
 		DestroySoundFileContainer(sndFileContainer);
@@ -2800,13 +2824,21 @@ static MPT_NOINLINE void TestLoadSaveFile()
 	// Reload the saved file and test if everything is still working correctly.
 	#ifndef MODPLUG_NO_FILESAVE
 	{
+#if MPT_OS_DJGPP
+		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + P_("sxm"));
+#else
 		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + P_("saved.xm"));
+#endif
 
 		TestLoadXMFile(GetSoundFile(sndFileContainer));
 
 		DestroySoundFileContainer(sndFileContainer);
 
+#if MPT_OS_DJGPP
+		RemoveFile(filenameBase + P_("sxm"));
+#else
 		RemoveFile(filenameBase + P_("saved.xm"));
+#endif
 	}
 	#endif
 
@@ -2836,7 +2868,11 @@ static MPT_NOINLINE void TestLoadSaveFile()
 			// Test file saving
 			sndFile.ChnSettings[1].dwFlags.set(CHN_MUTE);
 			sndFile.m_dwLastSavedWithVersion = Version::Current();
+#if MPT_OS_DJGPP
+			SaveS3M(sndFileContainer, filenameBase + P_("ss3"));
+#else
 			SaveS3M(sndFileContainer, filenameBase + P_("saved.s3m"));
+#endif
 		#endif
 
 		DestroySoundFileContainer(sndFileContainer);
@@ -2845,13 +2881,21 @@ static MPT_NOINLINE void TestLoadSaveFile()
 	// Reload the saved file and test if everything is still working correctly.
 	#ifndef MODPLUG_NO_FILESAVE
 	{
+#if MPT_OS_DJGPP
+		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + P_("ss3"));
+#else
 		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + P_("saved.s3m"));
+#endif
 
 		TestLoadS3MFile(GetSoundFile(sndFileContainer), true);
 
 		DestroySoundFileContainer(sndFileContainer);
 
+#if MPT_OS_DJGPP
+		RemoveFile(filenameBase + P_("ss3"));
+#else
 		RemoveFile(filenameBase + P_("saved.s3m"));
+#endif
 	}
 	#endif
 
@@ -2864,7 +2908,11 @@ static MPT_NOINLINE void TestLoadSaveFile()
 
 #ifndef MODPLUG_NO_FILESAVE
 		// Test file saving
+#if MPT_OS_DJGPP
+		SaveMOD(sndFileContainer, filenameBase + P_("smo"));
+#else
 		SaveMOD(sndFileContainer, filenameBase + P_("saved.mod"));
+#endif
 #endif
 
 		DestroySoundFileContainer(sndFileContainer);
@@ -2873,10 +2921,18 @@ static MPT_NOINLINE void TestLoadSaveFile()
 	// Reload the saved file and test if everything is still working correctly.
 #ifndef MODPLUG_NO_FILESAVE
 	{
+#if MPT_OS_DJGPP
+		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + P_("smo"));
+#else
 		TSoundFileContainer sndFileContainer = CreateSoundFileContainer(filenameBase + P_("saved.mod"));
+#endif
 		TestLoadMODFile(GetSoundFile(sndFileContainer));
 		DestroySoundFileContainer(sndFileContainer);
+#if MPT_OS_DJGPP
+		RemoveFile(filenameBase + P_("smo"));
+#else
 		RemoveFile(filenameBase + P_("saved.mod"));
+#endif
 	}
 #endif
 
