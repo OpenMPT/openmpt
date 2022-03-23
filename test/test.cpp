@@ -202,7 +202,7 @@ void DoTests()
 		void (*TestLIBC)(void) = []() {
 			VERIFY_EQUAL(mpt::platform::libc().is_ok(), true);
 		};
-		DO_TEST(do_mpt_test);
+		DO_TEST(TestLIBC);
 	#endif
 
 	void (*do_mpt_test)(void) = []() {
