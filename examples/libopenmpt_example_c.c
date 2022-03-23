@@ -89,11 +89,13 @@ static void libopenmpt_example_print_error( const char * func_name, int mod_err,
 }
 
 #if defined( __DJGPP__ )
+/* clang-format off */
 int _crt0_startup_flags = 0
 	| _CRT0_FLAG_NONMOVE_SBRK          /* force interrupt compatible allocation */
 	| _CRT0_DISABLE_SBRK_ADDRESS_WRAP  /* force NT compatible allocation */
 	| _CRT0_FLAG_LOCK_MEMORY           /* lock all code and data at program startup */
 	| 0;
+/* clang-format on */
 #endif /* __DJGPP__ */
 #if ( defined( _WIN32 ) || defined( WIN32 ) ) && ( defined( _UNICODE ) || defined( UNICODE ) )
 int wmain( int argc, wchar_t * argv[] ) {

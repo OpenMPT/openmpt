@@ -2276,12 +2276,14 @@ public:
 #endif
 
 #if defined( __DJGPP__ )
+/* clang-format off */
 extern "C" int _crt0_startup_flags = 0
 	| _CRT0_FLAG_NONMOVE_SBRK          /* force interrupt compatible allocation */
 	| _CRT0_DISABLE_SBRK_ADDRESS_WRAP  /* force NT compatible allocation */
 	| _CRT0_FLAG_LOCK_MEMORY           /* lock all code and data at program startup */
 	| 0;
 #endif /* __DJGPP__ */
+/* clang-format on */
 #if defined(WIN32) && defined(UNICODE)
 static int wmain( int wargc, wchar_t * wargv [] ) {
 #else
