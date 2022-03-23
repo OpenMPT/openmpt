@@ -104,9 +104,9 @@ int wmain( int argc, wchar_t * argv[] ) {
 int main( int argc, char * argv[] ) {
 #endif
 #if defined( __DJGPP__ )
-/* clang-format off */
+	/* clang-format off */
 	_crt0_startup_flags &= ~_CRT0_FLAG_LOCK_MEMORY;  /* disable automatic locking for all further memory allocations */
-/* clang-format on */
+	/* clang-format on */
 #endif /* __DJGPP__ */
 
 	int result = 0;
