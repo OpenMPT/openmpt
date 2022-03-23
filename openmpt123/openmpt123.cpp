@@ -64,6 +64,7 @@ static const char * const license =
 
 #if defined(__DJGPP__)
 #include <conio.h>
+#include <crt0.h>
 #include <dpmi.h>
 #include <fcntl.h>
 #include <io.h>
@@ -2272,11 +2273,21 @@ public:
 
 #endif
 
+#if defined( __DJGPP__ )
+extern "C" int _crt0_startup_flags = 0
+	| _CRT0_FLAG_NONMOVE_SBRK          /* force interrupt compatible allocation */
+	| _CRT0_DISABLE_SBRK_ADDRESS_WRAP  /* force NT compatible allocation */
+	| _CRT0_FLAG_LOCK_MEMORY           /* lock all code and data at program startup */
+	| 0;
+#endif /* __DJGPP__ */
 #if defined(WIN32) && defined(UNICODE)
 static int wmain( int wargc, wchar_t * wargv [] ) {
 #else
 static int main( int argc, char * argv [] ) {
 #endif
+	#if defined( __DJGPP__ )
+		_crt0_startup_flags &= ~_CRT0_FLAG_LOCK_MEMORY;  /* disable automatic locking for all further memory allocations */
+	#endif /* __DJGPP__ */
 	std::vector<std::string> args;
 	#if defined(WIN32) && defined(UNICODE)
 		for ( int arg = 0; arg < wargc; ++arg ) {

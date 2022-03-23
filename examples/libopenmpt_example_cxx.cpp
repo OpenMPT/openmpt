@@ -33,6 +33,17 @@
 #endif
 #endif
 
+#if defined( __DJGPP__ )
+#include <crt0.h>
+#endif /* __DJGPP__ */
+
+#if defined( __DJGPP__ )
+extern "C" int _crt0_startup_flags = 0
+	| _CRT0_FLAG_NONMOVE_SBRK          /* force interrupt compatible allocation */
+	| _CRT0_DISABLE_SBRK_ADDRESS_WRAP  /* force NT compatible allocation */
+	| _CRT0_FLAG_LOCK_MEMORY           /* lock all code and data at program startup */
+	| 0;
+#endif /* __DJGPP__ */
 #if ( defined( _WIN32 ) || defined( WIN32 ) ) && ( defined( _UNICODE ) || defined( UNICODE ) )
 #if defined( __GNUC__ )
 // mingw-w64 g++ does only default to special C linkage for "main", but not for "wmain" (see <https://sourceforge.net/p/mingw-w64/wiki2/Unicode%20apps/>).
@@ -43,6 +54,9 @@ int wmain( int argc, wchar_t * argv[] ) {
 #else
 int main( int argc, char * argv[] ) {
 #endif
+#if defined( __DJGPP__ )
+	_crt0_startup_flags &= ~_CRT0_FLAG_LOCK_MEMORY;  /* disable automatic locking for all further memory allocations */
+#endif /* __DJGPP__ */
 	try {
 		if ( argc != 2 ) {
 			throw std::runtime_error( "Usage: libopenmpt_example_cxx SOMEMODULE" );

@@ -22,6 +22,10 @@
 #include <libopenmpt/libopenmpt.h>
 #include <libopenmpt/libopenmpt_stream_callbacks_fd.h>
 
+#if defined( __DJGPP__ )
+#include <crt0.h>
+#endif /* __DJGPP__ */
+
 #define BUFFERSIZE 480
 #define SAMPLERATE 48000
 
@@ -84,11 +88,21 @@ static ssize_t xwrite( int fd, const void * buffer, size_t size ) {
 
 static int16_t buffer[BUFFERSIZE * 2];
 
+#if defined( __DJGPP__ )
+int _crt0_startup_flags = 0
+	| _CRT0_FLAG_NONMOVE_SBRK          /* force interrupt compatible allocation */
+	| _CRT0_DISABLE_SBRK_ADDRESS_WRAP  /* force NT compatible allocation */
+	| _CRT0_FLAG_LOCK_MEMORY           /* lock all code and data at program startup */
+	| 0;
+#endif /* __DJGPP__ */
 #if ( defined( _WIN32 ) || defined( WIN32 ) ) && ( defined( _UNICODE ) || defined( UNICODE ) )
 int wmain( int argc, wchar_t * argv[] ) {
 #else
 int main( int argc, char * argv[] ) {
 #endif
+#if defined( __DJGPP__ )
+	_crt0_startup_flags &= ~_CRT0_FLAG_LOCK_MEMORY;  /* disable automatic locking for all further memory allocations */
+#endif /* __DJGPP__ */
 
 	int result = 0;
 	openmpt_module * mod = 0;
