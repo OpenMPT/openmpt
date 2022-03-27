@@ -17,9 +17,9 @@
 
 AlwaysShowComponentsList=no
 AppId={{40c97d3e-7763-4b88-8c6a-0901befee4af}
-AppVerName=OpenMPT {#GetAppVersion}
+AppVerName=OpenMPT {#GetAppVersion} RETRO
 AppVersion={#GetAppVersion}
-AppName=OpenMPT
+AppName=OpenMPT RETRO
 AppPublisher=OpenMPT
 AppPublisherURL=https://openmpt.org/
 AppSupportURL=https://forum.openmpt.org/
