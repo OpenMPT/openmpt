@@ -3835,7 +3835,10 @@ void CViewSample::OnSampleSlice()
 				newSample.PrecomputeLoops(sndFile, false);
 
 				if(sndFile.GetNumInstruments() > 0)
-					modDoc->InsertInstrument(nextSmp);
+				{
+					if(auto instr = modDoc->InsertInstrument(nextSmp); instr != INSTRUMENTINDEX_INVALID)
+						sndFile.Instruments[instr]->name = sndFile.m_szNames[nextSmp];
+				}
 			}
 		}
 	}
