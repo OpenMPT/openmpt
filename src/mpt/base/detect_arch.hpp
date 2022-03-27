@@ -67,7 +67,7 @@
 
 
 
-#else  // MPT_COMPILER
+#else // MPT_COMPILER
 
 
 
@@ -93,7 +93,7 @@
 
 
 
-#endif  // MPT_COMPILER
+#endif // MPT_COMPILER
 
 
 
