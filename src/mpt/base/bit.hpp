@@ -75,49 +75,6 @@ constexpr bool endian_is_weird() noexcept {
 
 #else // !C++20
 
-#if !MPT_COMPILER_GENERIC
-
-#if MPT_COMPILER_MSVC
-#define MPT_PLATFORM_LITTLE_ENDIAN
-#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
-#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-#define MPT_PLATFORM_BIG_ENDIAN
-#elif __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-#define MPT_PLATFORM_LITTLE_ENDIAN
-#endif
-#elif defined(__BYTE_ORDER__) && defined(__ORDER_BIG_ENDIAN__) && defined(__ORDER_LITTLE_ENDIAN__)
-#if __ORDER_BIG_ENDIAN__ != __ORDER_LITTLE_ENDIAN__
-#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-#define MPT_PLATFORM_BIG_ENDIAN
-#elif __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-#define MPT_PLATFORM_LITTLE_ENDIAN
-#endif
-#endif
-#endif
-
-// fallback:
-#if !defined(MPT_PLATFORM_BIG_ENDIAN) && !defined(MPT_PLATFORM_LITTLE_ENDIAN)
-#if (defined(_BIG_ENDIAN) && !defined(_LITTLE_ENDIAN)) \
-	|| (defined(__BIG_ENDIAN__) && !defined(__LITTLE_ENDIAN__)) \
-	|| (defined(_STLP_BIG_ENDIAN) && !defined(_STLP_LITTLE_ENDIAN))
-#define MPT_PLATFORM_BIG_ENDIAN
-#elif (defined(_LITTLE_ENDIAN) && !defined(_BIG_ENDIAN)) \
-	|| (defined(__LITTLE_ENDIAN__) && !defined(__BIG_ENDIAN__)) \
-	|| (defined(_STLP_LITTLE_ENDIAN) && !defined(_STLP_BIG_ENDIAN))
-#define MPT_PLATFORM_LITTLE_ENDIAN
-#elif defined(__hpux) || defined(__hppa) \
-	|| defined(_MIPSEB) \
-	|| defined(__s390__)
-#define MPT_PLATFORM_BIG_ENDIAN
-#elif defined(__i386__) || defined(_M_IX86) \
-	|| defined(__amd64) || defined(__amd64__) || defined(_M_AMD64) || defined(__x86_64) || defined(__x86_64__) || defined(_M_X64) \
-	|| defined(__bfin__)
-#define MPT_PLATFORM_LITTLE_ENDIAN
-#endif
-#endif
-
-#endif // !MPT_COMPILER_GENERIC
-
 #if MPT_COMPILER_MSVC
 // same definition as VS2022 C++20 in order to be compatible with debugvis
 enum class endian {
@@ -133,9 +90,9 @@ enum class endian {
 	weird = 1u,
 #if MPT_COMPILER_GENERIC
 	native = 0u,
-#elif defined(MPT_PLATFORM_LITTLE_ENDIAN)
+#elif defined(MPT_ARCH_LITTLE_ENDIAN)
 	native = little,
-#elif defined(MPT_PLATFORM_BIG_ENDIAN)
+#elif defined(MPT_ARCH_BIG_ENDIAN)
 	native = big,
 #else
 	native = 0u,
