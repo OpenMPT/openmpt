@@ -106,4 +106,8 @@
 
 
 
+#define MPT_MODE_KERNEL 0
+
+
+
 #endif // MPT_BASE_DETECT_OS_HPP
