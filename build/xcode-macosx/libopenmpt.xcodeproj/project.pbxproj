@@ -236,6 +236,7 @@
 		1AA25C6F0B99CA61779D4AAF /* check_platform.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = check_platform.hpp; path = ../../src/mpt/base/check_platform.hpp; sourceTree = "<group>"; };
 		1AD54F9F7616A3114970EDDF /* Paula.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Paula.h; path = ../../soundlib/Paula.h; sourceTree = "<group>"; };
 		1B5F95F15FAE3B63A1D57431 /* Tagging.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Tagging.cpp; path = ../../soundlib/Tagging.cpp; sourceTree = "<group>"; };
+		1C2F81B7DEEFE2293C24BFF7 /* detect_arch.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = detect_arch.hpp; path = ../../src/mpt/base/detect_arch.hpp; sourceTree = "<group>"; };
 		1C6D52530D64C04579684093 /* SampleFormatOpus.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SampleFormatOpus.cpp; path = ../../soundlib/SampleFormatOpus.cpp; sourceTree = "<group>"; };
 		1CE2C4318A0AD2A38B9DC271 /* device.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = device.hpp; path = ../../src/mpt/random/device.hpp; sourceTree = "<group>"; };
 		1E7AA06D8BA2AEDF8D359EAD /* simple.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = simple.hpp; path = ../../src/mpt/format/simple.hpp; sourceTree = "<group>"; };
@@ -1041,6 +1042,7 @@
 				86260AE5E2AD0F576B4FC925 /* compiletime_warning.hpp */,
 				021DA33D0EA855AF898D217D /* constexpr_throw.hpp */,
 				C3FAC67D5688906FBF6134BD /* detect.hpp */,
+				1C2F81B7DEEFE2293C24BFF7 /* detect_arch.hpp */,
 				321030713E9AE2E3B97FAEB1 /* detect_compiler.hpp */,
 				17F58A2FDAB5EAA137EAC86F /* detect_libc.hpp */,
 				755174CF6950BE41EE3BD30F /* detect_libcxx.hpp */,

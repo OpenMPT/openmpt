@@ -216,6 +216,9 @@
     <ClInclude Include="..\..\src\mpt\base\detect.hpp">
       <Filter>src\mpt\base</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\mpt\base\detect_arch.hpp">
+      <Filter>src\mpt\base</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\mpt\base\detect_compiler.hpp">
       <Filter>src\mpt\base</Filter>
     </ClInclude>

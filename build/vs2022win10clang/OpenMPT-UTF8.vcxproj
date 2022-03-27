@@ -1772,6 +1772,7 @@
     <ClInclude Include="..\..\src\mpt\base\compiletime_warning.hpp" />
     <ClInclude Include="..\..\src\mpt\base\constexpr_throw.hpp" />
     <ClInclude Include="..\..\src\mpt\base\detect.hpp" />
+    <ClInclude Include="..\..\src\mpt\base\detect_arch.hpp" />
     <ClInclude Include="..\..\src\mpt\base\detect_compiler.hpp" />
     <ClInclude Include="..\..\src\mpt\base\detect_libc.hpp" />
     <ClInclude Include="..\..\src\mpt\base\detect_libcxx.hpp" />
