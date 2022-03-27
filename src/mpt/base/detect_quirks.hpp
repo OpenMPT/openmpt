@@ -104,6 +104,42 @@
 
 
 
+#if MPT_COMPILER_GCC || MPT_COMPILER_CLANG
+
+#if defined(__FAST_MATH__)
+#define MPT_COMPILER_QUIRK_FASTMATH 1
+#endif
+#if defined(__FINITE_MATH_ONLY__)
+#if (__FINITE_MATH_ONLY__ >= 1)
+#define MPT_COMPILER_QUIRK_FINITEMATH 1
+#endif
+#endif
+
+#elif MPT_COMPILER_MSVC
+
+#if defined(_M_FP_FAST)
+#define MPT_COMPILER_QUIRK_FASTMATH 1
+#define MPT_COMPILER_QUIRK_FINITEMATH 1
+#endif
+
+#endif
+
+#ifndef MPT_COMPILER_QUIRK_FASTMATH
+#define MPT_COMPILER_QUIRK_FASTMATH 0
+#endif
+
+#ifndef MPT_COMPILER_QUIRK_FINITEMATH
+#define MPT_COMPILER_QUIRK_FINITEMATH 0
+#endif
+
+
+
+#if MPT_COMPILER_GCC && !defined(__arm__)
+#if defined(_SOFT_FLOAT)
+#define MPT_COMPILER_QUIRK_FLOAT_EMULATED 1
+#endif
+#endif
+
 #if defined(__arm__)
 
 #if defined(__SOFTFP__)
