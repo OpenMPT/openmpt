@@ -604,10 +604,34 @@ PLUGINDEX CModDoc::RemovePlugs(const std::vector<bool> &keepMask)
 		}
 
 		plug.Destroy();
-		plug = SNDMIXPLUGIN();
+		plug = {};
+
+		for(PLUGINDEX srcPlugSlot = 0; srcPlugSlot < nPlug; srcPlugSlot++)
+		{
+			SNDMIXPLUGIN &srcPlug = GetSoundFile().m_MixPlugins[srcPlugSlot];
+			if(srcPlug.GetOutputPlugin() == nPlug)
+			{
+				srcPlug.SetOutputToMaster();
+				UpdateAllViews(nullptr, PluginHint(static_cast<PLUGINDEX>(srcPlugSlot + 1)).Info());
+			}
+		}
+		UpdateAllViews(nullptr, PluginHint(static_cast<PLUGINDEX>(nPlug + 1)).Info().Names());
 	}
 
+	if(nRemoved && m_SndFile.GetModSpecifications().supportsPlugins)
+		SetModified();
+
 	return nRemoved;
+}
+
+
+bool CModDoc::RemovePlugin(PLUGINDEX plugin)
+{
+	if(plugin >= MAX_MIXPLUGINS)
+		return false;
+	std::vector<bool> keepMask(MAX_MIXPLUGINS, true);
+	keepMask[plugin] = false;
+	return RemovePlugs(keepMask) == 1;
 }
 
 

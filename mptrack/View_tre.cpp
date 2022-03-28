@@ -1809,6 +1809,13 @@ void CModTree::DeleteTreeItem(HTREEITEM hItem)
 		}
 		break;
 
+	case MODITEM_EFFECT:
+		if(modDoc && Reporting::Confirm(TreeDeletionString(UL_("plugin FX"), modItemID + 1, sndFile->m_MixPlugins[modItemID].GetName()), false, true) == cnfYes)
+		{
+			modDoc->RemovePlugin(static_cast<PLUGINDEX>(modItemID));
+		}
+		break;
+
 	case MODITEM_MIDIINSTRUMENT:
 		SetMidiInstrument(modItemID, P_(""));
 		RefreshMidiLibrary();
@@ -3151,6 +3158,7 @@ void CModTree::OnItemRightClick(HTREEITEM hItem, CPoint pt)
 					if(modDoc != nullptr)
 					{
 						AppendMenu(hMenu, (modDoc->GetSoundFile().m_MixPlugins[modItemID].IsBypassed() ? MF_CHECKED : 0) | MF_STRING, ID_MODTREE_MUTE, _T("&Bypass"));
+						AppendMenu(hMenu, MF_STRING, ID_MODTREE_REMOVE, _T("&Delete Plugin"));
 					}
 				}
 				break;

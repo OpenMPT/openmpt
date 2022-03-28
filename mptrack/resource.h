@@ -728,6 +728,7 @@
 #define IDC_CLONEPLUG                   2236
 #define IDC_INSERTFXSLOT                2237
 #define IDC_FILTERMODE                  2238
+#define IDC_DELPLUGIN                   2239
 #define IDC_AUTOSAVE_USECUSTOMDIR       2245
 #define IDC_BUTTON_MODTYPE2             2246
 #define IDC_SLIDER_SAMPLEPREAMP3        2248
