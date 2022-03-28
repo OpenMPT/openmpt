@@ -329,7 +329,7 @@ void ZLIB_INTERNAL _tr_stored_block OF((deflate_state *s, charf *buf,
 # define _tr_tally_dist(s, distance, length, flush) \
   { uch len = (uch)(length); \
     ush dist = (ush)(distance); \
-    s->sym_buf[s->sym_next++] = dist; \
+    s->sym_buf[s->sym_next++] = /* OpenMPT */ (uch) /* OpenMPT */ dist; \
     s->sym_buf[s->sym_next++] = dist >> 8; \
     s->sym_buf[s->sym_next++] = len; \
     dist--; \
