@@ -200,23 +200,8 @@ void CSelectPluginDlg::OnOK()
 	} else if(m_pPlugin->IsValidPlugin())
 	{
 		// No effect
-		CriticalSection cs;
-		m_pPlugin->Destroy();
-		// Clear plugin info
-		MemsetZero(m_pPlugin->Info);
-		changed = true;
 		if(m_pModDoc)
-		{
-			for(PLUGINDEX plug = 0; plug < m_nPlugSlot; plug++)
-			{
-				auto &srcPlug = m_pModDoc->GetSoundFile().m_MixPlugins[plug];
-				if(srcPlug.GetOutputPlugin() == m_nPlugSlot)
-				{
-					srcPlug.SetOutputToMaster();
-					m_pModDoc->UpdateAllViews(nullptr, PluginHint(static_cast<PLUGINDEX>(plug + 1)).Info());
-				}
-			}
-		}
+			changed = m_pModDoc->RemovePlugin(m_nPlugSlot);
 	}
 
 	//remember window size:

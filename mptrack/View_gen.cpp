@@ -84,6 +84,7 @@ BEGIN_MESSAGE_MAP(CViewGlobals, CFormView)
 	ON_COMMAND(IDC_CHECK10,		&CViewGlobals::OnBypassChanged)
 	ON_COMMAND(IDC_CHECK11,		&CViewGlobals::OnDryMixChanged)
 	ON_COMMAND(IDC_BUTTON1,		&CViewGlobals::OnSelectPlugin)
+	ON_COMMAND(IDC_DELPLUGIN,	&CViewGlobals::OnRemovePlugin)
 	ON_COMMAND(IDC_BUTTON2,		&CViewGlobals::OnEditPlugin)
 	ON_COMMAND(IDC_BUTTON4,		&CViewGlobals::OnNextPlugin)
 	ON_COMMAND(IDC_BUTTON5,		&CViewGlobals::OnPrevPlugin)
@@ -1112,6 +1113,23 @@ void CViewGlobals::OnSelectPlugin()
 		OnParamChanged();
 	}
 #endif // NO_PLUGINS
+}
+
+
+void CViewGlobals::OnRemovePlugin()
+{
+#ifndef NO_PLUGINS
+	CModDoc *pModDoc = GetDocument();
+
+	if(pModDoc && m_nCurrentPlugin < MAX_MIXPLUGINS && Reporting::Confirm(MPT_UFORMAT("Remove plugin FX{}: {}?")(m_nCurrentPlugin + 1, pModDoc->GetSoundFile().m_MixPlugins[m_nCurrentPlugin].GetName()), false, true) == cnfYes)
+	{
+		if(pModDoc->RemovePlugin(m_nCurrentPlugin))
+		{
+			OnPluginChanged();
+			OnParamChanged();
+		}
+	}
+#endif  // NO_PLUGINS
 }
 
 

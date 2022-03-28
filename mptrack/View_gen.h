@@ -135,6 +135,7 @@ protected:
 	afx_msg void OnLoadParam();
 	afx_msg void OnSaveParam();
 	afx_msg void OnSelectPlugin();
+	afx_msg void OnRemovePlugin();
 	afx_msg void OnSetParameter();
 	afx_msg void OnEditPlugin();
 	afx_msg void OnMixModeChanged();

@@ -239,6 +239,7 @@ public:
 	bool ConvertInstrumentsToSamples();
 	bool ConvertSamplesToInstruments();
 	PLUGINDEX RemovePlugs(const std::vector<bool> &keepMask);
+	bool RemovePlugin(PLUGINDEX plugin);
 
 	void ClonePlugin(SNDMIXPLUGIN &target, const SNDMIXPLUGIN &source);
 	void AppendModule(const CSoundFile &source);
