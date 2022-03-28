@@ -1,9 +1,11 @@
-zlib 1.2.11.
+zlib 1.2.12.
 Files not required by OpenMPT have been removed.
 OpenMPT specific changes:
+ *  A work-around for <https://github.com/madler/zlib/issues/606> been applied
+    in deflate.h.
  *  iowin32.c has been modified to only use Windows 8 WinRT API when actually
     compiling for Windows 8 or later.
- *  All custom modifications are marked with // OpenMPT
+ *  All custom modifications are marked with /* OpenMPT */
  *  For building, premake is used to generate Visual Studio project files.
     See ../build/premake/ for details.
 No further changes have been made.
