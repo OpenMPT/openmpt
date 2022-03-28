@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.4.31-pre
 
+ *  zlib: Update to v1.2.12 (2022-03-27).
+
 ### libopenmpt 0.4.30 (2022-03-13)
 
  *  [**Sec**] Possible out-of-bounds write in malformed IT / XM / MPTM files
