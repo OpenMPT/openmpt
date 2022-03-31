@@ -157,7 +157,7 @@ public:
 					break;
 				case CMD_PORTAMENTODOWN:
 					if(m.param || !(sndFile.GetType() & MOD_TYPE_MOD))
-						sndFile.PortamentoUp(*state, channel, m.param, false);
+						sndFile.PortamentoDown(*state, channel, m.param, false);
 					break;
 				case CMD_MODCMDEX:
 					if(!(m.param & 0x0F) && !(sndFile.GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2)))
