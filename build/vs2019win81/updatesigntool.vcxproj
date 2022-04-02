@@ -765,6 +765,7 @@
     <ClInclude Include="..\..\src\mpt\library\library.hpp" />
     <ClInclude Include="..\..\src\mpt\mutex\mutex.hpp" />
     <ClInclude Include="..\..\src\mpt\osinfo\class.hpp" />
+    <ClInclude Include="..\..\src\mpt\osinfo\dos_version.hpp" />
     <ClInclude Include="..\..\src\mpt\osinfo\windows_version.hpp" />
     <ClInclude Include="..\..\src\mpt\out_of_memory\out_of_memory.hpp" />
     <ClInclude Include="..\..\src\mpt\parse\parse.hpp" />
