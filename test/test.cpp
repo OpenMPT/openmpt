@@ -15,6 +15,7 @@
 #ifdef ENABLE_TESTS
 
 #include "mpt/base/check_platform.hpp"
+#include "mpt/base/detect.hpp"
 #include "mpt/base/numbers.hpp"
 #include "mpt/crc/crc.hpp"
 #include "mpt/environment/environment.hpp"
@@ -22,6 +23,8 @@
 #include "mpt/io/io.hpp"
 #include "mpt/io/io_stdstream.hpp"
 #include "mpt/io_read/filecursor_stdstream.hpp"
+#include "mpt/osinfo/class.hpp"
+#include "mpt/osinfo/dos_version.hpp"
 #include "mpt/test/test.hpp"
 #include "mpt/test/test_macros.hpp"
 #include "mpt/uuid/uuid.hpp"
@@ -151,8 +154,17 @@ void DoTests()
 	
 		std::cout << "libopenmpt test suite" << std::endl;
 
-		std::cout << "Version.: " << mpt::ToCharset(mpt::Charset::ASCII, Build::GetVersionString(Build::StringVersion | Build::StringRevision | Build::StringSourceInfo | Build::StringBuildFlags | Build::StringBuildFeatures)) << std::endl;
+		std::cout << "Version: " << mpt::ToCharset(mpt::Charset::ASCII, Build::GetVersionString(Build::StringVersion | Build::StringRevision | Build::StringSourceInfo | Build::StringBuildFlags | Build::StringBuildFeatures)) << std::endl;
 		std::cout << "Compiler: " << mpt::ToCharset(mpt::Charset::ASCII, Build::GetBuildCompilerString()) << std::endl;
+		std::cout << "OS: " << mpt::osinfo::get_class_name(mpt::osinfo::get_class()) << " (" << mpt::osinfo::get_sysname() << ")" << std::endl;
+		#if MPT_OS_DJGPP
+			mpt::osinfo::dos::Version ver = mpt::osinfo::dos::Version::Current();
+			std::cout << "DOS: " << ver.GetOEM() << " " << static_cast<int>(ver.GetSystemEmulated().Major) << "." << static_cast<int>(ver.GetSystemEmulated().Minor) << " (true " << static_cast<int>(ver.GetSystem().Major) << "." << static_cast<int>(ver.GetSystem().Minor) << ")" << std::endl;
+			std::cout << "DPMI: " << static_cast<int>(ver.GetDPMI().Major) << "." << static_cast<int>(ver.GetDPMI().Minor) << std::endl;
+			std::cout << "DPMI Host: " << ver.GetDPMIVendor() << " " << static_cast<int>(ver.GetDPMIHost().Major) << "." << static_cast<int>(ver.GetDPMIHost().Minor) << std::endl;
+			std::cout << "Host OS: " << ver.GetHostName() << " " << ver.GetHostVersion() << "." << ver.GetHostRevision() << "." << ver.GetHostPatch() << " (" << "multitasking=" << static_cast<int>(ver.IsHostMultitasking()) << ", " << "fixedtimer=" << static_cast<int>(ver.HasHostFixedTimer()) << ")" << std::endl;
+			std::cout << "BIOS Date: " << ver.GetBIOSDate() << std::endl;
+		#endif // MPT_OS_DJGPP
 
 		std::cout << std::flush;
 
