@@ -67,8 +67,6 @@
 		"../../src/mpt/crypto/**.hpp",
 		"../../src/mpt/json/**.cpp",
 		"../../src/mpt/json/**.hpp",
-		"../../src/mpt/osinfo/**.cpp",
-		"../../src/mpt/osinfo/**.hpp",
 		"../../src/mpt/uuid_namespace/**.cpp",
 		"../../src/mpt/uuid_namespace/**.hpp",
 		"../../test/mpt_tests_crypto.cpp",

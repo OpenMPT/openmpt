@@ -88,6 +88,9 @@
     <Filter Include="src\mpt\mutex">
       <UniqueIdentifier>{8FBB9C7E-FB7B-18B5-C4B6-613230365D91}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\mpt\osinfo">
+      <UniqueIdentifier>{EA69B456-D637-A85C-BFCB-1883AB3884C1}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\mpt\out_of_memory">
       <UniqueIdentifier>{208F8479-8CFB-3F74-55EF-D7D1C11A62DC}</UniqueIdentifier>
     </Filter>
@@ -812,6 +815,15 @@
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\mutex\mutex.hpp">
       <Filter>src\mpt\mutex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\osinfo\class.hpp">
+      <Filter>src\mpt\osinfo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\osinfo\dos_version.hpp">
+      <Filter>src\mpt\osinfo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\osinfo\windows_version.hpp">
+      <Filter>src\mpt\osinfo</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\out_of_memory\out_of_memory.hpp">
       <Filter>src\mpt\out_of_memory</Filter>
