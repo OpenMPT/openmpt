@@ -50,7 +50,7 @@ inline mpt::osinfo::osclass get_class_from_sysname(const std::string & sysname) 
 		result = mpt::osinfo::osclass::BSD;
 	} else if (sysname == "Haiku") {
 		result = mpt::osinfo::osclass::Haiku;
-	} else if (sysname == "IBMPcDos" || sysname == "CompqDOS" || sysname == "MsoftDOS" || sysname == "AT&T DOS" || sysname == "ZenitDOS" || sysname == "HP DOS" || sysname == "GrBulDOS" || sysname == "PBellDOS" || sysname == "DEC DOS" || sysname == "OlivtDOS" || sysname == "TI DOS" || sysname == "Toshiba" || sysname == "NWin3Dev" || sysname == "MSWinDev" || sysname == "MSWinDev" || sysname == "HP DOS" || sysname == "RxDOS" || sysname == "PTS-DOS" || sysname == "GenSoft" || sysname == "DR-DOS" || sysname == "NovelDOS" || sysname == "FreeDOS" || sysname == "MS-DOS") {
+	} else if (sysname == "IBMPcDos" || sysname == "CompqDOS" || sysname == "MsoftDOS" || sysname == "AT&T DOS" || sysname == "ZenitDOS" || sysname == "HP DOS" || sysname == "GrBulDOS" || sysname == "PBellDOS" || sysname == "DEC DOS" || sysname == "OlivtDOS" || sysname == "TI DOS" || sysname == "Toshiba" || sysname == "NWin3Dev" || sysname == "MSWinDev" || sysname == "RxDOS" || sysname == "PTS-DOS" || sysname == "GenSoft" || sysname == "DR-DOS" || sysname == "NovelDOS" || sysname == "FreeDOS" || sysname == "MS-DOS") {
 		result = mpt::osinfo::osclass::DOS;
 	}
 	return result;
