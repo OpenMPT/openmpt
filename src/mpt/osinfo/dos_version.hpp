@@ -39,11 +39,11 @@ public:
 
 	enum class Host {
 		DOS,
-		Windows3,
-		Windows95,
-		Windows98,
-		WindowsME,
-		WindowsNT,
+		Win3,
+		Win95,
+		Win98,
+		WinME,
+		WinNT,
 		OS2,
 		OS2Warp,
 		DOSEmu,
@@ -174,7 +174,7 @@ public:
 			char * os = std::getenv("OS");
 			if (os) {
 				if (std::string(os) == std::string("Windows_NT")) {
-					host = Host::WindowsNT;
+					host = Host::WinNT;
 					host_version = 0;
 					host_revision = 0;
 					host_patch = 0;
@@ -193,15 +193,15 @@ public:
 				host_revision = r.h.ah;
 				host_patch = 0;
 				if (host_version > 4) {
-					host = Host::WindowsME;
+					host = Host::WinME;
 				} else if ((host_version == 4) && (host_revision >= 90)) {
-					host = Host::WindowsME;
+					host = Host::WinME;
 				} else if ((host_version == 4) && (host_revision >= 10)) {
-					host = Host::Windows98;
+					host = Host::Win98;
 				} else if (host_version == 4) {
-					host = Host::Windows95;
+					host = Host::Win95;
 				} else {
-					host = Host::Windows3;
+					host = Host::Win3;
 				}
 				host_multitasking = true;
 				host_fixedtimer = true;
@@ -344,19 +344,19 @@ public:
 			case Host::DOS:
 				result = "DOS";
 				break;
-			case Host::Windows3:
+			case Host::Win3:
 				result = "Windows 3.x";
 				break;
-			case Host::Windows95:
+			case Host::Win95:
 				result = "Windows 95";
 				break;
-			case Host::Windows98:
+			case Host::Win98:
 				result = "Windows 98";
 				break;
-			case Host::WindowsME:
+			case Host::WinME:
 				result = "Windows ME";
 				break;
-			case Host::WindowsNT:
+			case Host::WinNT:
 				result = "Windows NT";
 				break;
 			case Host::OS2:
