@@ -1959,13 +1959,13 @@ void CViewSample::OnMouseMove(UINT flags, CPoint point)
 
 		// Note: point.x might have changed in if block above in case we're scrolling.
 		SmpLength x;
-		if(m_fineDrag)
-		{
-			x = m_startDragValue + (point.x - m_startDragPoint.x) / Util::ScalePixels(2, m_hWnd);
-		} else if(m_dwStatus[SMPSTATUS_DRAWING])
+		if(m_dwStatus[SMPSTATUS_DRAWING])
 		{
 			// Do not snap to grid and adjust for mouse-down position when drawing
 			x = ScreenToSample(point.x);
+		} else if(m_fineDrag)
+		{
+			x = m_startDragValue + (point.x - m_startDragPoint.x) / Util::ScalePixels(2, m_hWnd);
 		} else if (m_nZoom < 0 || (m_nZoom == 0 && sample.nLength > static_cast<SmpLength>(m_rcClient.Width())))
 		{
 			// Don't adjust selection to mouse down point when zooming into the sample
@@ -2066,6 +2066,7 @@ void CViewSample::OnMouseMove(UINT flags, CPoint point)
 					m_lastDrawPoint.SetPoint(-1, -1);
 				}
 
+				LimitMax(old, sample.nLength);
 				if(sample.GetElementarySampleSize() == 2)
 					SetSampleData<int16, uint16>(sample, point, old);
 				else if(sample.GetElementarySampleSize() == 1)
