@@ -507,6 +507,9 @@
     <ClInclude Include="..\..\src\mpt\osinfo\class.hpp">
       <Filter>src\mpt\osinfo</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\mpt\osinfo\dos_memory.hpp">
+      <Filter>src\mpt\osinfo</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\mpt\osinfo\dos_version.hpp">
       <Filter>src\mpt\osinfo</Filter>
     </ClInclude>

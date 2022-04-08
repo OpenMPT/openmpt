@@ -26,9 +26,9 @@
 		BDB5A0B818F6F42AEC513EF8 /* window.c in Sources */ = {isa = PBXBuildFile; fileRef = 72232FC08935CAF27951C600 /* window.c */; };
 		D5E5E506C0D20AF808B7D346 /* lsp.c in Sources */ = {isa = PBXBuildFile; fileRef = 6F30132E1382B0E025BAF96E /* lsp.c */; };
 		D85CD4BE497F75B0FF4622FE /* vorbisenc.c in Sources */ = {isa = PBXBuildFile; fileRef = 92BA4166BAF4FA18A29087A6 /* vorbisenc.c */; };
-		DBA06C398F9C856B714EC279 /* openmpt-ogg.lib in Frameworks */ = {isa = PBXBuildFile; fileRef = E03059217A8A4213B6C2A761 /* openmpt-ogg.lib */; };
 		E344DF0C2793847E69BABD4C /* sharedbook.c in Sources */ = {isa = PBXBuildFile; fileRef = 72897ED494552C06D10A5514 /* sharedbook.c */; };
 		E77EFABE1862F2B02B7B28FE /* bitrate.c in Sources */ = {isa = PBXBuildFile; fileRef = 0944F5662F6B251896721BA6 /* bitrate.c */; };
+		E852DCFD023C3F2FBDC2533D /* libopenmpt-ogg.so in Frameworks */ = {isa = PBXBuildFile; fileRef = CCC4ADA562EDBF9724541BE5 /* libopenmpt-ogg.so */; };
 		FC4D923C52DAFCAE2B54107C /* res0.c in Sources */ = {isa = PBXBuildFile; fileRef = 16DFB5041A5087369BBD2B44 /* res0.c */; };
 /* End PBXBuildFile section */
 
@@ -37,20 +37,19 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 386FE2DA60AA9B8C4846291A /* ogg.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = 886C6A4681D26BB8756DC886;
-			remoteInfo = "openmpt-ogg.dll";
+			remoteGlobalIDString = 33D214C31EBE3AB566A40303;
+			remoteInfo = "libopenmpt-ogg.so";
 		};
 		EAF35B5FE4595CD1D7F4B99F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 386FE2DA60AA9B8C4846291A /* ogg.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = 5036DE60765D0E12DD6404A0;
-			remoteInfo = "openmpt-ogg.dll";
+			remoteGlobalIDString = 6851D87DB0C2BCAFF5618EBD;
+			remoteInfo = "libopenmpt-ogg.so";
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		058BB8B85C19232A349236F8 /* openmpt-vorbis.dll */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; name = "openmpt-vorbis.dll"; path = "openmpt-vorbis.dll"; sourceTree = BUILT_PRODUCTS_DIR; };
 		07BE8ECA1ED129FC0EED250A /* window.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = window.h; path = ../../../include/vorbis/lib/window.h; sourceTree = "<group>"; };
 		0944F5662F6B251896721BA6 /* bitrate.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = bitrate.c; path = ../../../include/vorbis/lib/bitrate.c; sourceTree = "<group>"; };
 		0C6D4B2032937AD2999A7160 /* smallft.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = smallft.h; path = ../../../include/vorbis/lib/smallft.h; sourceTree = "<group>"; };
@@ -70,7 +69,7 @@
 		35F064C44D02FFF63D1EFB04 /* lookup.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = lookup.c; path = ../../../include/vorbis/lib/lookup.c; sourceTree = "<group>"; };
 		374A6BCA5F85247C4720B20A /* highlevel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = highlevel.h; path = ../../../include/vorbis/lib/highlevel.h; sourceTree = "<group>"; };
 		379713488007F77AC4A6C988 /* mapping0.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = mapping0.c; path = ../../../include/vorbis/lib/mapping0.c; sourceTree = "<group>"; };
-		386FE2DA60AA9B8C4846291A /* openmpt-ogg.lib */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "ogg.xcodeproj"; path = ogg.xcodeproj; sourceTree = SOURCE_ROOT; };
+		386FE2DA60AA9B8C4846291A /* libopenmpt-ogg.so */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "ogg.xcodeproj"; path = ogg.xcodeproj; sourceTree = SOURCE_ROOT; };
 		3A6CA00462A758B64A42E644 /* synthesis.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = synthesis.c; path = ../../../include/vorbis/lib/synthesis.c; sourceTree = "<group>"; };
 		3AED1EF451FFBA26421BB534 /* floor0.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = floor0.c; path = ../../../include/vorbis/lib/floor0.c; sourceTree = "<group>"; };
 		3B10AC6A3E817E9CBFEE22AA /* mdct.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = mdct.h; path = ../../../include/vorbis/lib/mdct.h; sourceTree = "<group>"; };
@@ -92,6 +91,7 @@
 		746BBDBB37D77F6D767B23FB /* psych_16.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = psych_16.h; path = ../../../include/vorbis/lib/modes/psych_16.h; sourceTree = "<group>"; };
 		777077261A5E9DD8A9847D66 /* block.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = block.c; path = ../../../include/vorbis/lib/block.c; sourceTree = "<group>"; };
 		7EC1E432F2AA5BE414F80A72 /* res_books_stereo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = res_books_stereo.h; path = ../../../include/vorbis/lib/books/coupled/res_books_stereo.h; sourceTree = "<group>"; };
+		89BF8075B9514F67945E8EB5 /* libopenmpt-vorbis.so */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; name = "libopenmpt-vorbis.so"; path = "libopenmpt-vorbis.so"; sourceTree = BUILT_PRODUCTS_DIR; };
 		90EE3C51B2B9E983EF6F1291 /* setup_8.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = setup_8.h; path = ../../../include/vorbis/lib/modes/setup_8.h; sourceTree = "<group>"; };
 		92BA4166BAF4FA18A29087A6 /* vorbisenc.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = vorbisenc.c; path = ../../../include/vorbis/lib/vorbisenc.c; sourceTree = "<group>"; };
 		94C8EB12391B88C44B53D152 /* psy.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = psy.h; path = ../../../include/vorbis/lib/psy.h; sourceTree = "<group>"; };
@@ -122,18 +122,18 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		7C0E12287574139A690F7068 /* Frameworks */ = {
+		6DA18365588DA957A07371A5 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DBA06C398F9C856B714EC279 /* openmpt-ogg.lib in Frameworks */,
+				E852DCFD023C3F2FBDC2533D /* libopenmpt-ogg.so in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		8DA68C947892B286C0787AD4 /* Embed Libraries */ = {
+		31DB41118868AB8360E1BF51 /* Embed Libraries */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
@@ -187,7 +187,7 @@
 		80C578BF97D813F187F40EFF /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				E03059217A8A4213B6C2A761 /* openmpt-ogg.lib */,
+				CCC4ADA562EDBF9724541BE5 /* libopenmpt-ogg.so */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -279,7 +279,7 @@
 		A6C936B49B3FADE6EA134CF4 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				058BB8B85C19232A349236F8 /* openmpt-vorbis.dll */,
+				89BF8075B9514F67945E8EB5 /* libopenmpt-vorbis.so */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -313,14 +313,14 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		6EE3599EB7543DD0FBF30FDE /* vorbis */ = {
+		99AE9DBBC1E9566DA984E3FB /* vorbis */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 6A495A8763AF5BF9574AB8C7 /* Build configuration list for PBXNativeTarget "vorbis" */;
+			buildConfigurationList = 5BDCCBC446C8F1B68EAEBA04 /* Build configuration list for PBXNativeTarget "vorbis" */;
 			buildPhases = (
-				EBF592C8E55B943AD8F6F108 /* Resources */,
-				55A2AC1F4F08AD9142A40A5F /* Sources */,
-				7C0E12287574139A690F7068 /* Frameworks */,
-				8DA68C947892B286C0787AD4 /* Embed Libraries */,
+				DD890405C87529F7105AF245 /* Resources */,
+				47361D5C3222434E7A080B9C /* Sources */,
+				6DA18365588DA957A07371A5 /* Frameworks */,
+				31DB41118868AB8360E1BF51 /* Embed Libraries */,
 			);
 			buildRules = (
 			);
@@ -329,7 +329,7 @@
 			);
 			name = vorbis;
 			productName = vorbis;
-			productReference = 058BB8B85C19232A349236F8 /* openmpt-vorbis.dll */;
+			productReference = 89BF8075B9514F67945E8EB5 /* libopenmpt-vorbis.so */;
 			productType = "com.apple.product-type.library.dynamic";
 		};
 /* End PBXNativeTarget section */
@@ -350,23 +350,23 @@
 			);
 			projectRoot = "";
 			targets = (
-				6EE3599EB7543DD0FBF30FDE /* openmpt-vorbis.dll */,
+				99AE9DBBC1E9566DA984E3FB /* libopenmpt-vorbis.so */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		E03059217A8A4213B6C2A761 /* openmpt-ogg.lib */ = {
+		CCC4ADA562EDBF9724541BE5 /* libopenmpt-ogg.so */ = {
 			isa = PBXReferenceProxy;
 			fileType = "compiled.mach-o.dylib";
-			path = "openmpt-ogg.lib";
+			path = "libopenmpt-ogg.so";
 			remoteRef = EAF35B5FE4595CD1D7F4B99F /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
-		EBF592C8E55B943AD8F6F108 /* Resources */ = {
+		DD890405C87529F7105AF245 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -376,7 +376,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		55A2AC1F4F08AD9142A40A5F /* Sources */ = {
+		47361D5C3222434E7A080B9C /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -410,7 +410,7 @@
 /* Begin PBXTargetDependency section */
 		6E7DB5C8859050FA75AC4C08 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			name = "openmpt-ogg.lib";
+			name = "libopenmpt-ogg.so";
 			targetProxy = 3D2DCDF83693CF6A2A2F2C38 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -437,6 +437,9 @@
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$$ORIGIN",
+				);
 				OBJROOT = obj/Debug/vorbis;
 				ONLY_ACTIVE_ARCH = YES;
 				SYMROOT = "../../../bin/debug/xcode4-macosx/all";
@@ -450,6 +453,20 @@
 				);
 			};
 			name = Debug;
+		};
+		23738C0467C23176A9E96A44 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CONFIGURATION_BUILD_DIR = "../../../bin/release/xcode4-macosx/all";
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				EXECUTABLE_EXTENSION = so;
+				EXECUTABLE_PREFIX = lib;
+				GCC_DYNAMIC_NO_PIC = NO;
+				INSTALL_PATH = /usr/local/lib;
+				PRODUCT_NAME = "openmpt-vorbis";
+			};
+			name = Release;
 		};
 		6BA64F7E7862FEF0ED4D6DBE /* Release */ = {
 			isa = XCBuildConfiguration;
@@ -466,6 +483,9 @@
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$$ORIGIN",
+				);
 				OBJROOT = obj/Release/vorbis;
 				ONLY_ACTIVE_ARCH = NO;
 				SYMROOT = "../../../bin/release/xcode4-macosx/all";
@@ -480,31 +500,19 @@
 			};
 			name = Release;
 		};
-		AC0271CDA5C42E3FDFC3300D /* Debug */ = {
+		6EECA68AE00F477C95D5F4CA /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CONFIGURATION_BUILD_DIR = "../../../bin/debug/xcode4-macosx/all";
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				EXECUTABLE_EXTENSION = dll;
+				EXECUTABLE_EXTENSION = so;
+				EXECUTABLE_PREFIX = lib;
 				GCC_DYNAMIC_NO_PIC = NO;
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = "openmpt-vorbis";
 			};
 			name = Debug;
-		};
-		FD2934076E4BD4F924128247 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CONFIGURATION_BUILD_DIR = "../../../bin/release/xcode4-macosx/all";
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				EXECUTABLE_EXTENSION = dll;
-				GCC_DYNAMIC_NO_PIC = NO;
-				INSTALL_PATH = /usr/local/lib;
-				PRODUCT_NAME = "openmpt-vorbis";
-			};
-			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
@@ -518,11 +526,11 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
-		6A495A8763AF5BF9574AB8C7 /* Build configuration list for PBXNativeTarget "openmpt-vorbis.dll" */ = {
+		5BDCCBC446C8F1B68EAEBA04 /* Build configuration list for PBXNativeTarget "libopenmpt-vorbis.so" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				AC0271CDA5C42E3FDFC3300D /* Debug */,
-				FD2934076E4BD4F924128247 /* Release */,
+				6EECA68AE00F477C95D5F4CA /* Debug */,
+				23738C0467C23176A9E96A44 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

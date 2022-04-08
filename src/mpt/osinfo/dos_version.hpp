@@ -39,6 +39,7 @@ public:
 
 	enum class Host {
 		DOS,
+		Win2,
 		Win3,
 		Win95,
 		Win98,
@@ -188,7 +189,15 @@ public:
 			__dpmi_regs r{};
 			r.x.ax = 0x1600;
 			__dpmi_int(0x2f, &r);
-			if ((r.h.al != 0) && (r.h.al != 1) && (r.h.al != 0x80) && (r.h.al != 0xFF)) {
+			if ((r.h.al == 0x01) || (r.h.al == 0xFF)) {
+				host = Host::Win2;
+				host_version = 2;
+				host_revision = 0;
+				host_patch = 0;
+				host_multitasking = true;
+				host_fixedtimer = true;
+				detected = true;
+			} else if ((r.h.al != 0x00) && (r.h.al != 0x01) && (r.h.al != 0x80) && (r.h.al != 0xFF)) {
 				host_version = r.h.al;
 				host_revision = r.h.ah;
 				host_patch = 0;
@@ -343,6 +352,9 @@ public:
 		switch (m_Host) {
 			case Host::DOS:
 				result = "DOS";
+				break;
+			case Host::Win2:
+				result = "Windows/386 2.x";
 				break;
 			case Host::Win3:
 				result = "Windows 3.x";

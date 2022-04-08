@@ -25,6 +25,7 @@
 #include "mpt/io_read/filecursor_stdstream.hpp"
 #include "mpt/osinfo/class.hpp"
 #include "mpt/osinfo/dos_version.hpp"
+#include "mpt/osinfo/dos_memory.hpp"
 #include "mpt/test/test.hpp"
 #include "mpt/test/test_macros.hpp"
 #include "mpt/uuid/uuid.hpp"
@@ -164,10 +165,28 @@ void DoTests()
 			std::cout << "DPMI Host: " << ver.GetDPMIVendor() << " " << static_cast<int>(ver.GetDPMIHost().Major) << "." << static_cast<int>(ver.GetDPMIHost().Minor) << std::endl;
 			std::cout << "Host OS: " << ver.GetHostName() << " " << ver.GetHostVersion() << "." << ver.GetHostRevision() << "." << ver.GetHostPatch() << " (" << "multitasking=" << static_cast<int>(ver.IsHostMultitasking()) << ", " << "fixedtimer=" << static_cast<int>(ver.HasHostFixedTimer()) << ")" << std::endl;
 			std::cout << "BIOS Date: " << ver.GetBIOSDate() << std::endl;
+			const mpt::osinfo::dos::memory_info mem = mpt::osinfo::dos::get_memory_info();
+			auto print_mem = [](std::optional<std::size_t> value) -> std::string {
+				if (!value) {
+					return "???";
+				}
+				if (value >= (10ull * 1024 * 1024 * 1024)) {
+					return MPT_AFORMAT("{}{}")(*value / 1024 / 1024 / 1024, "GiB");
+				} else if (value >= (10 * 1024 * 1024)) {
+					return MPT_AFORMAT("{}{}")(*value / 1024 / 1024, "MiB");
+				} else if (value >= (10 * 1024)) {
+					return MPT_AFORMAT("{}{}")(*value / 1024, "kiB");
+					} else {
+					return MPT_AFORMAT("{}{}")(*value, "B");
+				}
+			};
+			std::cout << "Memory (virtual): " << print_mem(mem.get_virtual_used()) << " used / " << print_mem(mem.get_virtual_total()) << " total (" << print_mem(mem.get_virtual_free()) << " free, " << print_mem(mem.get_virtual_external_fragmentation()) << " fragmented)" << std::endl;
+			std::cout << "RAM: " << print_mem(mem.get_physical_used()) << " used / " << print_mem(mem.get_physical_total()) << " total (" << print_mem(mem.get_physical_free()) << " free, " << print_mem(mem.get_physical_used_locked()) << " locked)" << std::endl;
+			std::cout << "Swap: " << print_mem(mem.get_swap_total()) << " total" << std::endl;
 		#endif // MPT_OS_DJGPP
 
 		std::cout << std::flush;
-
+		
 	#endif
 
 	#if MPT_OS_WINDOWS
