@@ -195,7 +195,7 @@ inline memory_info get_memory_info() {
 			}
 			if (dpmi_free_mem_info.free_linear_address_space_in_pages != 0xffffffffu) {
 				result.free_virtual = dpmi_free_mem_info.free_linear_address_space_in_pages * page_size;
-				}
+			}
 			if (dpmi_free_mem_info.size_of_paging_file_partition_in_pages != 0xffffffffu) {
 				result.total_swap = dpmi_free_mem_info.size_of_paging_file_partition_in_pages * page_size;
 			}
