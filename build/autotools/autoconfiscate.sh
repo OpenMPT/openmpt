@@ -12,7 +12,7 @@ set -e
 echo "Gathering version ..."
 . libopenmpt/libopenmpt_version.mk
 
-echo "Cleaning local buid ..."
+echo "Cleaning local build ..."
 make NO_SDL=1 NO_SDL2=1 clean
 
 echo "Cleaning dist-autotools.tar ..."
