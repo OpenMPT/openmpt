@@ -1,4 +1,4 @@
-name: MSYS2 Makefile
+name: MSYS2 Autotools
 
 on:
   push:
