@@ -13,16 +13,16 @@ jobs:
     strategy:
       matrix:
         include:
-          - { sys: MINGW64, env: x86_64 }
-          - { sys: MINGW32, env: i686 }
-          - { sys: UCRT64,  env: ucrt-x86_64 }
+          - { sys: MINGW64, rep: mingw64, env: x86_64 }
+          - { sys: MINGW32, rep: mingw32, env: i686 }
+          - { sys: UCRT64,  rep: ucrt64,  env: ucrt-x86_64 }
     steps:
       - uses: actions/checkout@v2
       - uses: msys2/setup-msys2@v2
         with:
           msystem: ${{matrix.sys}}
           update: true
-          install: git base-devel mingw-w64-${{matrix.env}}-toolchain
+          install: msys/base-devel msys/autoconf ${{matrix.rep}}/mingw-w64-${{matrix.env}}-toolchain msys/autoconf-archive msys/automake msys/ccache msys/doxygen msys/gawk msys/help2man msys/libtool msys/git msys/p7zip msys/perl-XML-LibXML msys/subversion msys/unzip msys/xz msys/zip ${{matrix.rep}}/mingw-w64-${{matrix.env}}-clang ${{matrix.rep}}/mingw-w64-${{matrix.env}}-flac ${{matrix.rep}}/mingw-w64-${{matrix.env}}-libltdl ${{matrix.rep}}/mingw-w64-${{matrix.env}}-libogg ${{matrix.rep}}/mingw-w64-${{matrix.env}}-libsndfile ${{matrix.rep}}/mingw-w64-${{matrix.env}}-libvorbis ${{matrix.rep}}/mingw-w64-${{matrix.env}}-mpg123 ${{matrix.rep}}/mingw-w64-${{matrix.env}}-portaudio ${{matrix.rep}}/mingw-w64-${{matrix.env}}-pulseaudio ${{matrix.rep}}/mingw-w64-${{matrix.env}}-SDL2 ${{matrix.rep}}/mingw-w64-${{matrix.env}}-zlib
       - name: make
         run: make
       - name: make check
