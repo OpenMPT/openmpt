@@ -11,7 +11,11 @@ set -e
 #
 
 # We want ccache
-export PATH="/usr/lib/ccache:$PATH"
+if [ "${MSYSTEM}x" == "x" ]; then
+ export PATH="/usr/lib/ccache:$PATH"
+#else
+# export PATH="/usr/lib/ccache/bin:$PATH"
+fi
 
 # Create bin directory
 mkdir -p bin
@@ -62,6 +66,7 @@ clang -std=c18 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.c -o bin/hea
 fi
 if [ `uname -s` != "Darwin" ] ; then
 if [ `uname -m` == "x86_64" ] ; then
+if [ "${MSYSTEM}x" == "x" ]; then
 echo " pcc"
 pcc -I. bin/headercheck.c -o bin/headercheck.pcc.out
 echo " pcc 89"
@@ -72,6 +77,7 @@ echo " pcc 11"
 pcc -std=c11 -I. bin/headercheck.c -o bin/headercheck.pcc11.out
 echo " tcc"
 tcc -Wall -Wunusupported -Wwrite-strings -Werror -I. bin/headercheck.c -o bin/headercheck.tcc.out
+fi
 fi
 fi
 rm bin/headercheck.*.out
