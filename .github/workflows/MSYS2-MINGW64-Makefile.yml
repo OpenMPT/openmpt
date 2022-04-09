@@ -1,4 +1,4 @@
-name: MSYS2-MINGW32 Makefile
+name: MSYS2-MINGW64 Makefile
 
 on:
   push:

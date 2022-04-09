@@ -1,4 +1,4 @@
-name: MSYS2-UCRT64 Makefile
+name: MSYS2 Makefile
 
 on:
   push:
@@ -10,13 +10,19 @@ jobs:
     defaults:
       run:
         shell: msys2 {0}
+    strategy:
+      matrix:
+        include:
+          - { sys: MINGW64, env: x86_64 }
+          - { sys: MINGW32, env: i686 }
+          - { sys: UCRT64,  env: ucrt-x86_64 }
     steps:
       - uses: actions/checkout@v2
       - uses: msys2/setup-msys2@v2
         with:
-          msystem: UCRT64
+          msystem: ${{matrix.sys}}
           update: true
-          install: git base-devel mingw-w64-ucrt-x86_64-toolchain
+          install: git base-devel mingw-w64-${{matrix.env}}-toolchain
       - name: make
         run: make
       - name: make check
