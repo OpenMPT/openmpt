@@ -227,7 +227,28 @@ LIBOPENMPT_SO_VERSION=$(LIBOPENMPT_LTVER_CURRENT)
 
 # host setup
 
-ifeq ($(OS),Windows_NT)
+ifneq ($(MSYSTEM)x,x)
+
+HOST=unix
+HOST_FLAVOUR=
+
+TOOLCHAIN_SUFFIX=
+
+CPPCHECK = cppcheck
+
+MKDIR_P = mkdir -p
+RM = rm -f
+RMTREE = rm -rf
+INSTALL = install
+INSTALL_MAKE_DIR = install -d
+INSTALL_DIR = cp -r -v
+FIXPATH = $1
+
+HOST_FLAVOUR=MSYS2
+
+NUMTHREADS:=$(shell nproc)
+
+else ifeq ($(OS),Windows_NT)
 
 HOST=windows
 HOST_FLAVOUR=
