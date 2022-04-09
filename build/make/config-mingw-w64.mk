@@ -79,7 +79,11 @@ else
 $(error unknown WINDOWS_VERSION)
 endif
 
+ifeq ($(MINGW_COMPILER),clang)
+include build/make/warnings-clang.mk
+else
 include build/make/warnings-gcc.mk
+endif
 
 EXESUFFIX=.exe
 SOSUFFIX=.dll

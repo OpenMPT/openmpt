@@ -9,6 +9,26 @@ include build/make/config-clang.mk
 DYNLINK=0
 SHARED_SONAME=0
 
+else ifeq ($(HOST_FLAVOUR),MSYS2)
+
+ifeq ($(MSYSTEM),MINGW64)
+WINDOWS_ARCH=amd64
+include build/make/config-mingw-w64.mk
+else ifeq ($(MSYSTEM),MINGW32)
+WINDOWS_ARCH=i686
+include build/make/config-mingw-w64.mk
+else ifeq ($(MSYSTEM),UCRT64)
+WINDOWS_ARCH=amd64
+include build/make/config-mingw-w64.mk
+else ifeq ($(MSYSTEM),CLANG64)
+WINDOWS_ARCH=amd64
+MINGW_COMPILER=clang
+include build/make/config-mingw-w64.mk
+else
+WINDOWS_ARCH=x86
+include build/make/config-mingw-w64.mk
+endif
+
 else ifeq ($(HOST_FLAVOUR),LINUX)
 
 include build/make/config-gcc.mk
@@ -37,13 +57,13 @@ include build/make/config-gcc.mk
 
 else
 
-include build/make/config-generic.mk
+include build/make/config-unknown.mk
 
 endif
 
 else
 
-include build/make/config-generic.mk
+include build/make/config-unknown.mk
 
 endif
 
