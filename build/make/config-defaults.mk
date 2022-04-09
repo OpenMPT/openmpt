@@ -15,7 +15,7 @@ ifeq ($(MSYSTEM),MINGW64)
 WINDOWS_ARCH=amd64
 include build/make/config-mingw-w64.mk
 else ifeq ($(MSYSTEM),MINGW32)
-WINDOWS_ARCH=i686
+WINDOWS_ARCH=x86
 include build/make/config-mingw-w64.mk
 else ifeq ($(MSYSTEM),UCRT64)
 WINDOWS_ARCH=amd64
