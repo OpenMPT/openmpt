@@ -331,16 +331,16 @@
 		defines { "_WIN32_WINNT=0x0A00" }
 		filter {}
 		filter { "architecture:x86" }
-			defines { "NTDDI_VERSION=0x0A000000" }
+			defines { "NTDDI_VERSION=0x0A000007" } -- Windows 10 1903 Build 18362
 		filter {}
 		filter { "architecture:x86_64" }
-			defines { "NTDDI_VERSION=0x0A000000" }
+			defines { "NTDDI_VERSION=0x0A000007" } -- Windows 10 1903 Build 18362
 		filter {}
 		filter { "architecture:ARM" }
-			defines { "NTDDI_VERSION=0x0A000004" } -- Windows 10 1709 Build 16299
+			defines { "NTDDI_VERSION=0x0A000007" } -- Windows 10 1903 Build 18362
 		filter {}
 		filter { "architecture:ARM64" }
-			defines { "NTDDI_VERSION=0x0A000004" } -- Windows 10 1709 Build 16299
+			defines { "NTDDI_VERSION=0x0A000007" } -- Windows 10 1903 Build 18362
 		filter {}
 	elseif _OPTIONS["windows-version"] == "win81" then
 		filter {}

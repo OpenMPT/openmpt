@@ -186,7 +186,7 @@ update = {
 				"can_autoupdate": True,
 				"autoupdate_minversion": "1.30.00.08",
 				"os": "windows",
-				"required_windows_version": { "version_major":10, "version_minor":0, "servicepack_major":0, "servicepack_minor":0, "build":0, "wine_major":1, "wine_minor":8, "wine_update":0 },
+				"required_windows_version": { "version_major":10, "version_minor":0, "servicepack_major":0, "servicepack_minor":0, "build":18362, "wine_major":1, "wine_minor":8, "wine_update":0 },
 				"required_architectures": {},
 				"supported_architectures": { "x86":True },
 				"required_processor_features": { "x86":{"sse2":True} }
@@ -210,7 +210,7 @@ update = {
 				"can_autoupdate": True,
 				"autoupdate_minversion": "1.30.00.08",
 				"os": "windows",
-				"required_windows_version": { "version_major":10, "version_minor":0, "servicepack_major":0, "servicepack_minor":0, "build":0, "wine_major":1, "wine_minor":8, "wine_update":0 },
+				"required_windows_version": { "version_major":10, "version_minor":0, "servicepack_major":0, "servicepack_minor":0, "build":18362, "wine_major":1, "wine_minor":8, "wine_update":0 },
 				"required_architectures": {},
 				"supported_architectures": { "amd64":True },
 				"required_processor_features": { "amd64":{"sse2":True} }
@@ -234,7 +234,7 @@ update = {
 				"can_autoupdate": True,
 				"autoupdate_minversion": "1.30.00.08",
 				"os": "windows",
-				"required_windows_version": { "version_major":10, "version_minor":0, "servicepack_major":0, "servicepack_minor":0, "build":0, "wine_major":1, "wine_minor":8, "wine_update":0 },
+				"required_windows_version": { "version_major":10, "version_minor":0, "servicepack_major":0, "servicepack_minor":0, "build":18362, "wine_major":1, "wine_minor":8, "wine_update":0 },
 				"required_architectures": {},
 				"supported_architectures": { "arm":True },
 				"required_processor_features": { "arm":{} }
@@ -246,7 +246,7 @@ update = {
 				"can_autoupdate": True,
 				"autoupdate_minversion": "1.30.00.08",
 				"os": "windows",
-				"required_windows_version": { "version_major":10, "version_minor":0, "servicepack_major":0, "servicepack_minor":0, "build":0, "wine_major":1, "wine_minor":8, "wine_update":0 },
+				"required_windows_version": { "version_major":10, "version_minor":0, "servicepack_major":0, "servicepack_minor":0, "build":18362, "wine_major":1, "wine_minor":8, "wine_update":0 },
 				"required_architectures": {},
 				"supported_architectures": { "arm64":True },
 				"required_processor_features": { "arm64":{} }

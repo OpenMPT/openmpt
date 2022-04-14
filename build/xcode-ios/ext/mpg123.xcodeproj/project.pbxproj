@@ -47,7 +47,6 @@
 		748089C69CBB42788456D006 /* layer1.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = layer1.c; path = ../../../include/mpg123/src/libmpg123/layer1.c; sourceTree = "<group>"; };
 		754AC0BABDBBA4EC025A76FA /* index.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = index.c; path = ../../../include/mpg123/src/libmpg123/index.c; sourceTree = "<group>"; };
 		78DBF380C14CD7B205EBA9C0 /* frame.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = frame.c; path = ../../../include/mpg123/src/libmpg123/frame.c; sourceTree = "<group>"; };
-		87D8429AB76A118C927750DA /* libopenmpt-mpg123.so */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; name = "libopenmpt-mpg123.so"; path = "libopenmpt-mpg123.so"; sourceTree = BUILT_PRODUCTS_DIR; };
 		907B4FB6D8EC33E81D8B05F6 /* synth.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = synth.c; path = ../../../include/mpg123/src/libmpg123/synth.c; sourceTree = "<group>"; };
 		9796B208BFD16ABAA76CF848 /* layer2.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = layer2.c; path = ../../../include/mpg123/src/libmpg123/layer2.c; sourceTree = "<group>"; };
 		A1E03F02D3D989B44DB8C542 /* synth_8bit.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = synth_8bit.c; path = ../../../include/mpg123/src/libmpg123/synth_8bit.c; sourceTree = "<group>"; };
@@ -57,6 +56,7 @@
 		BAACDA4AE2E792FCCA83208A /* layer3.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = layer3.c; path = ../../../include/mpg123/src/libmpg123/layer3.c; sourceTree = "<group>"; };
 		C3752BE686E0ED98C5849226 /* icy2utf8.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = icy2utf8.c; path = ../../../include/mpg123/src/libmpg123/icy2utf8.c; sourceTree = "<group>"; };
 		C3CD341CF5C67ECE6FA5BA5C /* synth_real.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = synth_real.c; path = ../../../include/mpg123/src/libmpg123/synth_real.c; sourceTree = "<group>"; };
+		C6BCBF7D1D4A29EFF5C33DBD /* openmpt-mpg123.dll */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; name = "openmpt-mpg123.dll"; path = "openmpt-mpg123.dll"; sourceTree = BUILT_PRODUCTS_DIR; };
 		CDD5DB15FEB9D30711D20955 /* compat_str.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = compat_str.c; path = ../../../include/mpg123/src/compat/compat_str.c; sourceTree = "<group>"; };
 		E598BBB4FCAB56E6ECC751F4 /* icy.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = icy.c; path = ../../../include/mpg123/src/libmpg123/icy.c; sourceTree = "<group>"; };
 		F4F6A4743D6788A682065AB4 /* dct64.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = dct64.c; path = ../../../include/mpg123/src/libmpg123/dct64.c; sourceTree = "<group>"; };
@@ -64,7 +64,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		292CFB0A141920FC5BFEE94A /* Frameworks */ = {
+		A9087E6DA26E7FDF9609DCAD /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -74,7 +74,7 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		FE2335F654B0A0682D29B436 /* Embed Libraries */ = {
+		E2ED1E19CDD9440B15BF0C59 /* Embed Libraries */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
@@ -139,7 +139,7 @@
 		A6C936B49B3FADE6EA134CF4 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				87D8429AB76A118C927750DA /* libopenmpt-mpg123.so */,
+				C6BCBF7D1D4A29EFF5C33DBD /* openmpt-mpg123.dll */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -147,14 +147,14 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		EEF52F40172FE7F2FECB7580 /* mpg123 */ = {
+		6CFC1BC3B56CFFF5FA0BD203 /* mpg123 */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 176843690254695B4A3A31A9 /* Build configuration list for PBXNativeTarget "mpg123" */;
+			buildConfigurationList = 9743C6CC90A9C83E8445250C /* Build configuration list for PBXNativeTarget "mpg123" */;
 			buildPhases = (
-				99147BAA8400A19CCBE669EA /* Resources */,
-				02C19501EDADBAF335938341 /* Sources */,
-				292CFB0A141920FC5BFEE94A /* Frameworks */,
-				FE2335F654B0A0682D29B436 /* Embed Libraries */,
+				18EFFF0D1256007F05F15D4D /* Resources */,
+				829D18647C0319D66F9E76A4 /* Sources */,
+				A9087E6DA26E7FDF9609DCAD /* Frameworks */,
+				E2ED1E19CDD9440B15BF0C59 /* Embed Libraries */,
 			);
 			buildRules = (
 			);
@@ -162,7 +162,7 @@
 			);
 			name = mpg123;
 			productName = mpg123;
-			productReference = 87D8429AB76A118C927750DA /* libopenmpt-mpg123.so */;
+			productReference = C6BCBF7D1D4A29EFF5C33DBD /* openmpt-mpg123.dll */;
 			productType = "com.apple.product-type.library.dynamic";
 		};
 /* End PBXNativeTarget section */
@@ -177,13 +177,13 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				EEF52F40172FE7F2FECB7580 /* libopenmpt-mpg123.so */,
+				6CFC1BC3B56CFFF5FA0BD203 /* openmpt-mpg123.dll */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		99147BAA8400A19CCBE669EA /* Resources */ = {
+		18EFFF0D1256007F05F15D4D /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -193,7 +193,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		02C19501EDADBAF335938341 /* Sources */ = {
+		829D18647C0319D66F9E76A4 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -231,34 +231,6 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
-		274D00696B9BA5DBADC2DEA9 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CONFIGURATION_BUILD_DIR = "../../../bin/release/xcode4-ios/all";
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				EXECUTABLE_EXTENSION = so;
-				EXECUTABLE_PREFIX = lib;
-				GCC_DYNAMIC_NO_PIC = NO;
-				INSTALL_PATH = /usr/local/lib;
-				PRODUCT_NAME = "openmpt-mpg123";
-			};
-			name = Release;
-		};
-		28A3BDAF99C65EA14F8D0BEF /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CONFIGURATION_BUILD_DIR = "../../../bin/debug/xcode4-ios/all";
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				EXECUTABLE_EXTENSION = so;
-				EXECUTABLE_PREFIX = lib;
-				GCC_DYNAMIC_NO_PIC = NO;
-				INSTALL_PATH = /usr/local/lib;
-				PRODUCT_NAME = "openmpt-mpg123";
-			};
-			name = Debug;
-		};
 		4C50EB499ED7163B711B7989 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -290,6 +262,19 @@
 			};
 			name = Debug;
 		};
+		7C31350CED53D5FEA31A834C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CONFIGURATION_BUILD_DIR = "../../../bin/release/xcode4-ios/all";
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				EXECUTABLE_EXTENSION = dll;
+				GCC_DYNAMIC_NO_PIC = NO;
+				INSTALL_PATH = /usr/local/lib;
+				PRODUCT_NAME = "openmpt-mpg123";
+			};
+			name = Release;
+		};
 		98A0BBC3A55D6B351A47DA03 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -318,23 +303,36 @@
 			};
 			name = Release;
 		};
+		9C9C6D92965E2A04D05D2BD2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CONFIGURATION_BUILD_DIR = "../../../bin/debug/xcode4-ios/all";
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				EXECUTABLE_EXTENSION = dll;
+				GCC_DYNAMIC_NO_PIC = NO;
+				INSTALL_PATH = /usr/local/lib;
+				PRODUCT_NAME = "openmpt-mpg123";
+			};
+			name = Debug;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		176843690254695B4A3A31A9 /* Build configuration list for PBXNativeTarget "libopenmpt-mpg123.so" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				28A3BDAF99C65EA14F8D0BEF /* Debug */,
-				274D00696B9BA5DBADC2DEA9 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
-		};
 		1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "mpg123" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				4C50EB499ED7163B711B7989 /* Debug */,
 				98A0BBC3A55D6B351A47DA03 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		9743C6CC90A9C83E8445250C /* Build configuration list for PBXNativeTarget "openmpt-mpg123.dll" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9C9C6D92965E2A04D05D2BD2 /* Debug */,
+				7C31350CED53D5FEA31A834C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
