@@ -26,6 +26,7 @@ del /f /q "%OUTDIR%\openmpt-wine-support.zip"
  include\nlohmann-json\include\nlohmann\thirdparty\hedley\*.hpp ^
  include\rtkit\rtkit.c ^
  include\rtkit\rtkit.h ^
+ src\mpt\arch\*.hpp ^
  src\mpt\audio\*.hpp ^
  src\mpt\base\*.hpp ^
  src\mpt\base\tests\*.hpp ^

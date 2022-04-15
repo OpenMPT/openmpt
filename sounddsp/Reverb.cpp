@@ -13,6 +13,9 @@
 
 #ifndef NO_REVERB
 #include "Reverb.h"
+#if defined(MPT_ENABLE_ARCH_INTRINSICS_SSE2)
+#include "../common/mptCPU.h"
+#endif
 #include "../soundlib/MixerLoops.h"
 #include "mpt/base/numbers.hpp"
 

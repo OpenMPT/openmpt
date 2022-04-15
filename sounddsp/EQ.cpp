@@ -20,7 +20,9 @@
 #include "openmpt/soundbase/MixSampleConvert.hpp"
 
 #ifndef NO_EQ
-#include "../misc/mptCPU.h"
+#if defined(MPT_ENABLE_ARCH_INTRINSICS_SSE)
+#include "../common/mptCPU.h"
+#endif
 #endif
 
 #include <algorithm>

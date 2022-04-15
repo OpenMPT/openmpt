@@ -61,6 +61,9 @@
     <Filter Include="src\mpt">
       <UniqueIdentifier>{0D1E30A9-79FD-AE44-8215-3A1BEE7315A6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\mpt\arch">
+      <UniqueIdentifier>{BA90CF03-A6F3-5EA8-4F79-975E3BBB2A2B}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\mpt\audio">
       <UniqueIdentifier>{EE51C37D-5A12-3FB4-234D-88318FCC8390}</UniqueIdentifier>
     </Filter>
@@ -252,6 +255,9 @@
     <ClInclude Include="..\..\common\mptBaseUtils.h">
       <Filter>common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\common\mptCPU.h">
+      <Filter>common</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\common\mptFileIO.h">
       <Filter>common</Filter>
     </ClInclude>
@@ -319,9 +325,6 @@
       <Filter>include\asiomodern\include\ASIOModern</Filter>
     </ClInclude>
     <ClInclude Include="..\..\misc\WriteMemoryDump.h">
-      <Filter>misc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\misc\mptCPU.h">
       <Filter>misc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\misc\mptColor.h">
@@ -905,6 +908,15 @@
     </ClInclude>
     <ClInclude Include="..\..\soundlib\tuningcollection.h">
       <Filter>soundlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\arch\arch.hpp">
+      <Filter>src\mpt\arch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\arch\feature_flags.hpp">
+      <Filter>src\mpt\arch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\arch\x86_amd64.hpp">
+      <Filter>src\mpt\arch</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\audio\sample.hpp">
       <Filter>src\mpt\audio</Filter>
@@ -1522,9 +1534,6 @@
     </ClCompile>
     <ClCompile Include="..\..\common\version.cpp">
       <Filter>common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\misc\mptCPU.cpp">
-      <Filter>misc</Filter>
     </ClCompile>
     <ClCompile Include="..\..\misc\mptColor.cpp">
       <Filter>misc</Filter>

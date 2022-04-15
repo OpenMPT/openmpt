@@ -83,6 +83,7 @@
 
 #include "../common/ComponentManager.h"
 #include "../common/FileReader.h"
+#include "../common/mptCPU.h"
 #include "../common/mptFileIO.h"
 #include "../common/mptRandom.h"
 #include "../common/mptStringBuffer.h"
@@ -91,7 +92,6 @@
 #include "../common/serialization_utils.h"
 #include "../common/version.h"
 
-#include "../misc/mptCPU.h"
 #include "../misc/mptLibrary.h"
 #include "../misc/mptMutex.h"
 #include "../misc/mptOS.h"

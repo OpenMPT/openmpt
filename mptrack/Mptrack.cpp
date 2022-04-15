@@ -37,7 +37,7 @@
 #include "MPTrackWine.h"
 #include "MPTrackUtil.h"
 #include "../misc/mptOS.h"
-#include "../misc/mptCPU.h"
+#include "mpt/arch/arch.hpp"
 #include <afxdatarecovery.h>
 
 // GDI+
@@ -981,7 +981,7 @@ void CTrackApp::CreatePaths()
 static bool ProcessorCanRunCurrentBuild()
 {
 #ifdef MPT_ENABLE_ARCH_INTRINSICS
-	if((CPU::Info::Get().AvailableFeatures & CPU::GetMinimumFeatures()) != CPU::GetMinimumFeatures())
+	if(!mpt::arch::get_cpu_info().has_features(mpt::arch::current::assumed_features()))
 	{
 		return false;
 	}

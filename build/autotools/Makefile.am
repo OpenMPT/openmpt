@@ -113,6 +113,9 @@ pkgconfig_DATA =
 nobase_include_HEADERS = 
 
 MPT_FILES_SRC_MPT = 
+MPT_FILES_SRC_MPT += src/mpt/arch/arch.hpp
+MPT_FILES_SRC_MPT += src/mpt/arch/feature_flags.hpp
+MPT_FILES_SRC_MPT += src/mpt/arch/x86_amd64.hpp
 MPT_FILES_SRC_MPT += src/mpt/audio/sample.hpp
 MPT_FILES_SRC_MPT += src/mpt/audio/span.hpp
 MPT_FILES_SRC_MPT += src/mpt/base/algorithm.hpp
@@ -291,6 +294,7 @@ MPT_FILES_COMMON += common/mptAssert.h
 MPT_FILES_COMMON += common/mptBaseMacros.h
 MPT_FILES_COMMON += common/mptBaseTypes.h
 MPT_FILES_COMMON += common/mptBaseUtils.h
+MPT_FILES_COMMON += common/mptCPU.h
 MPT_FILES_COMMON += common/mptFileIO.cpp
 MPT_FILES_COMMON += common/mptFileIO.h
 MPT_FILES_COMMON += common/mptPathString.cpp

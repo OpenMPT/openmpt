@@ -56,6 +56,8 @@
    "../../libopenmpt/libopenmpt_impl.cpp",
   }
 	excludes {
+		"../../src/mpt/arch/**.cpp",
+		"../../src/mpt/arch/**.hpp",
 		"../../src/mpt/crypto/**.cpp",
 		"../../src/mpt/crypto/**.hpp",
 		"../../src/mpt/json/**.cpp",

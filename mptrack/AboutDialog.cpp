@@ -296,7 +296,7 @@ void CAboutDlg::OnTabChange(NMHDR * /*pNMHDR*/ , LRESULT * /*pResult*/ )
 
 
 #ifdef MPT_ENABLE_ARCH_INTRINSICS
-static mpt::ustring ProcSupportToString(uint32 procSupport)
+static mpt::ustring CPUFeaturesToString(mpt::arch::current::feature_flags procSupport)
 {
 	std::vector<mpt::ustring> features;
 #if MPT_COMPILER_MSVC
@@ -309,26 +309,26 @@ static mpt::ustring ProcSupportToString(uint32 procSupport)
 	struct ProcFlag
 	{
 		decltype(procSupport) flag;
-		const char *name;
+		const mpt::uchar *name;
 	};
 	static constexpr ProcFlag flags[] =
 	{
-		{ 0, "" },
+		{ mpt::arch::current::feature::none, UL_("") },
 #if defined(MPT_ENABLE_ARCH_X86) || defined(MPT_ENABLE_ARCH_AMD64)
-		{ CPU::feature::mmx, "mmx" },
-		{ CPU::feature::sse, "sse" },
-		{ CPU::feature::sse2, "sse2" },
-		{ CPU::feature::sse3, "sse3" },
-		{ CPU::feature::ssse3, "ssse3" },
-		{ CPU::feature::sse4_1, "sse4.1" },
-		{ CPU::feature::sse4_2, "sse4.2" },
-		{ CPU::feature::avx, "avx" },
-		{ CPU::feature::avx2, "avx2" },
+		{ mpt::arch::x86::feature::mmx, UL_("mmx") },
+		{ mpt::arch::x86::feature::sse, UL_("sse") },
+		{ mpt::arch::x86::feature::sse2, UL_("sse2") },
+		{ mpt::arch::x86::feature::sse3, UL_("sse3") },
+		{ mpt::arch::x86::feature::ssse3, UL_("ssse3") },
+		{ mpt::arch::x86::feature::sse4_1, UL_("sse4.1") },
+		{ mpt::arch::x86::feature::sse4_2, UL_("sse4.2") },
+		{ mpt::arch::x86::feature::avx, UL_("avx") },
+		{ mpt::arch::x86::feature::avx2, UL_("avx2") },
 #endif
 	};
 	for(const auto &f : flags)
 	{
-		if(procSupport & f.flag) features.push_back(mpt::ToUnicode(mpt::Charset::ASCII, f.name));
+		if(procSupport & f.flag) features.push_back(f.name);
 	}
 #else
 	MPT_UNUSED_VARIABLE(procSupport);
@@ -344,7 +344,7 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 	const mpt::ustring yes = U_("yes");
 	const mpt::ustring no = U_("no");
 #ifdef MPT_ENABLE_ARCH_INTRINSICS
-	const CPU::Info CPUInfo = CPU::Info::Get();
+	const mpt::arch::current::cpu_info CPUInfo = mpt::arch::get_cpu_info();
 #endif // MPT_ENABLE_ARCH_INTRINSICS
 	mpt::ustring text;
 	switch(tab)
@@ -361,40 +361,37 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 			{
 				text += U_("Required CPU features: ");
 				std::vector<mpt::ustring> features;
-				#if MPT_COMPILER_MSVC
-					#if defined(_M_X64)
+				#ifdef MPT_ENABLE_ARCH_INTRINSICS
+					#if MPT_ARCH_AMD64
 						features.push_back(U_("x86-64"));
-						if(CPU::GetMinimumFeatures() & CPU::feature::avx) features.push_back(U_("avx"));
-						if(CPU::GetMinimumFeatures() & CPU::feature::avx2) features.push_back(U_("avx2"));
-					#elif defined(_M_IX86)
-						if(CPU::GetMinimumFeatures() & CPU::feature::sse) features.push_back(U_("sse"));
-						if(CPU::GetMinimumFeatures() & CPU::feature::sse2) features.push_back(U_("sse2"));
-						if(CPU::GetMinimumFeatures() & CPU::feature::avx) features.push_back(U_("avx"));
-						if(CPU::GetMinimumFeatures() & CPU::feature::avx2) features.push_back(U_("avx2"));
-					#else
-						if(CPU::GetMinimumFeatures() & CPU::feature::sse) features.push_back(U_("sse"));
-						if(CPU::GetMinimumFeatures() & CPU::feature::sse2) features.push_back(U_("sse2"));
-						if(CPU::GetMinimumFeatures() & CPU::feature::avx) features.push_back(U_("avx"));
-						if(CPU::GetMinimumFeatures() & CPU::feature::avx2) features.push_back(U_("avx2"));
+						if(mpt::arch::current::assumed_features() & mpt::arch::current::feature::avx) features.push_back(U_("avx"));
+						if(mpt::arch::current::assumed_features() & mpt::arch::current::feature::avx2) features.push_back(U_("avx2"));
+					#elif MPT_ARCH_X86
+						if(mpt::arch::current::assumed_features() & mpt::arch::current::feature::sse) features.push_back(U_("sse"));
+						if(mpt::arch::current::assumed_features() & mpt::arch::current::feature::sse2) features.push_back(U_("sse2"));
+						if(mpt::arch::current::assumed_features() & mpt::arch::current::feature::avx) features.push_back(U_("avx"));
+						if(mpt::arch::current::assumed_features() & mpt::arch::current::feature::avx2) features.push_back(U_("avx2"));
 					#endif
 				#endif
 				text += mpt::String::Combine(features, U_(" "));
 				text += lf;
 			}
 #ifdef MPT_ENABLE_ARCH_INTRINSICS
-			text += MPT_UFORMAT("Optional CPU features used: {}\n")(ProcSupportToString(CPU::GetEnabledFeatures()));
+			text += MPT_UFORMAT("Optional CPU features used: {}\n")(CPUFeaturesToString(CPU::GetEnabledFeatures()));
 #endif // MPT_ENABLE_ARCH_INTRINSICS
 			text += lf;
 			text += MPT_UFORMAT("System Architecture: {}\n")(mpt::OS::Windows::Name(mpt::OS::Windows::GetHostArchitecture()));
 #ifdef MPT_ENABLE_ARCH_INTRINSICS
+#if MPT_ARCH_X86 || MPT_ARCH_AMD64
 			text += MPT_UFORMAT("CPU: {}, Family {}, Model {}, Stepping {}\n")
-				( mpt::ToUnicode(mpt::Charset::ASCII, (std::strlen(CPUInfo.VendorID) > 0) ? std::string(CPUInfo.VendorID) : std::string("Generic"))
-				, CPUInfo.Family
-				, CPUInfo.Model
-				, CPUInfo.Stepping
+				( mpt::ToUnicode(mpt::Charset::ASCII, (CPUInfo.get_vendor_string().length() > 0) ? CPUInfo.get_vendor_string() : std::string("Generic"))
+				, CPUInfo.get_family()
+				, CPUInfo.get_model()
+				, CPUInfo.get_stepping()
 				);
-			text += MPT_UFORMAT("CPU Name: {}\n")(mpt::ToUnicode(mpt::Charset::ASCII, (std::strlen(CPUInfo.BrandID) > 0) ? std::string(CPUInfo.BrandID) : std::string("")));
-			text += MPT_UFORMAT("Available CPU features: {}\n")(ProcSupportToString(CPUInfo.AvailableFeatures));
+			text += MPT_UFORMAT("CPU Name: {}\n")(mpt::ToUnicode(mpt::Charset::ASCII, (CPUInfo.get_brand_string().length() > 0) ? CPUInfo.get_brand_string() : std::string("")));
+#endif
+			text += MPT_UFORMAT("Available CPU features: {}\n")(CPUFeaturesToString(CPUInfo.get_features()));
 #endif // MPT_ENABLE_ARCH_INTRINSICS
 			text += MPT_UFORMAT("Operating System: {}\n\n")(mpt::OS::Windows::Version::GetName(mpt::osinfo::windows::Version::Current()));
 			text += MPT_UFORMAT("OpenMPT Install Path{1}: {0}\n")(theApp.GetInstallPath(), theApp.IsPortableMode() ? U_(" (portable)") : U_(""));
