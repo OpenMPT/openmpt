@@ -977,7 +977,7 @@ private:
 			"movl $1, %eax\n"
 			"jmp done\n"
 			"not_cyrix:\n"
-			"movl $0, eax\n
+			"movl $0, eax\n"
 			"jmp done\n"
 			"done:\n"
 			: "=a" (result)
