@@ -9,14 +9,6 @@
 #include "mpt/base/namespace.hpp"
 #include "mpt/path/path.hpp"
 #include "mpt/string/types.hpp"
-#include "mpt/string_transcode/transcode.hpp"
-
-#if !defined(MPT_COMPILER_QUIRK_NO_FILESYSTEM)
-#include <filesystem>
-#endif // !MPT_COMPILER_QUIRK_NO_FILESYSTEM
-#if MPT_OS_WINDOWS && defined(MPT_COMPILER_QUIRK_NO_FILESYSTEM)
-#include <vector>
-#endif // MPT_OS_WINDOWS && MPT_COMPILER_QUIRK_NO_FILESYSTEM
 
 #if MPT_OS_WINDOWS
 #include <windows.h>
@@ -59,42 +51,6 @@ using os_path = mpt::lstring;
 		x \
 	}
 #endif // MPT_OS_WINDOWS
-
-
-
-inline mpt::os_path support_long_path(const mpt::os_path & path) {
-#if MPT_OS_WINDOWS
-	if (path.length() < MAX_PATH) {
-		// path is short enough
-		return path;
-	}
-	if (path.substr(0, 4) == MPT_OSPATH_LITERAL("\\\\?\\")) {
-		// path is already in prefixed form
-		return path;
-	}
-#if !defined(MPT_COMPILER_QUIRK_NO_FILESYSTEM)
-	const mpt::os_path absolute_path = mpt::transcode<mpt::os_path>(std::filesystem::absolute(mpt::transcode<std::filesystem::path>(path)));
-#else  // !MPT_COMPILER_QUIRK_NO_FILESYSTEM
-	mpt::os_path absolute_path = path;
-	DWORD size = GetFullPathName(path.c_str(), 0, nullptr, nullptr);
-	if (size != 0) {
-		std::vector<TCHAR> fullPathName(size, TEXT('\0'));
-		if (GetFullPathName(path.c_str(), size, fullPathName.data(), nullptr) != 0) {
-			absolute_path = fullPathName.data();
-		}
-	}
-#endif // !MPT_COMPILER_QUIRK_NO_FILESYSTEM
-	if (absolute_path.substr(0, 2) == MPT_OSPATH_LITERAL("\\\\")) {
-		// Path is a network share: \\server\foo.bar -> \\?\UNC\server\foo.bar
-		return MPT_OSPATH_LITERAL("\\\\?\\UNC") + absolute_path.substr(1);
-	} else {
-		// Regular file: C:\foo.bar -> \\?\C:\foo.bar
-		return MPT_OSPATH_LITERAL("\\\\?\\") + absolute_path;
-	}
-#else
-	return path;
-#endif
-}
 
 
 

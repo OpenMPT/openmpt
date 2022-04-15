@@ -7,6 +7,7 @@
 
 #include "mpt/base/detect.hpp"
 #include "mpt/base/namespace.hpp"
+#include "mpt/path/os_path.hpp"
 #include "mpt/string/types.hpp"
 #include "mpt/string_transcode/transcode.hpp"
 

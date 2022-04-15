@@ -405,6 +405,7 @@
 		830F3566F431D658A9F883A6 /* Logging.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Logging.cpp; path = ../../common/Logging.cpp; sourceTree = "<group>"; };
 		84A787B7269123A91DB835F7 /* Chorus.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Chorus.cpp; path = ../../soundlib/plugins/dmo/Chorus.cpp; sourceTree = "<group>"; };
 		85812219180EEC0B80E79059 /* secure.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = secure.hpp; path = ../../src/mpt/base/secure.hpp; sourceTree = "<group>"; };
+		85A36D37F9FDB22977E13B77 /* os_path_long.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = os_path_long.hpp; path = ../../src/mpt/path/os_path_long.hpp; sourceTree = "<group>"; };
 		86260AE5E2AD0F576B4FC925 /* compiletime_warning.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = compiletime_warning.hpp; path = ../../src/mpt/base/compiletime_warning.hpp; sourceTree = "<group>"; };
 		87A62ABDE1A741AFA8EE38FD /* AudioCriticalSection.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AudioCriticalSection.h; path = ../../soundlib/AudioCriticalSection.h; sourceTree = "<group>"; };
 		8856685FF57E76D1F711669F /* base64.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = base64.hpp; path = ../../src/mpt/binary/base64.hpp; sourceTree = "<group>"; };
@@ -780,6 +781,7 @@
 			isa = PBXGroup;
 			children = (
 				50318A59BD5998CBBEEC8899 /* os_path.hpp */,
+				85A36D37F9FDB22977E13B77 /* os_path_long.hpp */,
 				7C2DCED7ED506FC9A3171D17 /* path.hpp */,
 			);
 			name = path;
