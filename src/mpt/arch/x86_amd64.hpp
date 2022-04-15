@@ -545,7 +545,7 @@ public:
 	MPT_CONSTEXPRINLINE [[nodiscard]] bool can_long_mode() const noexcept {
 #if !MPT_ARCH_AMD64
 		return LongMode;
-#else // MPT_ARCH_AMD64
+#else  // MPT_ARCH_AMD64
 		return true;
 #endif // !MPT_ARCH_AMD64
 	}
@@ -563,68 +563,67 @@ private:
 
 		MPT_CONSTEXPR20_FUN [[nodiscard]] fixed_string<4> as_text4() const noexcept {
 			fixed_string<4> result;
-			result[0+0] = (a >> 0) & 0xff;
-			result[0+1] = (a >> 8) & 0xff;
-			result[0+2] = (a >>16) & 0xff;
-			result[0+3] = (a >>24) & 0xff;
+			result[0 + 0] = (a >> 0) & 0xff;
+			result[0 + 1] = (a >> 8) & 0xff;
+			result[0 + 2] = (a >> 16) & 0xff;
+			result[0 + 3] = (a >> 24) & 0xff;
 			return result;
 		}
 
 		MPT_CONSTEXPR20_FUN [[nodiscard]] fixed_string<12> as_text12bcd() const noexcept {
 			fixed_string<12> result;
-			result[0+0] = (b >> 0) & 0xff;
-			result[0+1] = (b >> 8) & 0xff;
-			result[0+2] = (b >>16) & 0xff;
-			result[0+3] = (b >>24) & 0xff;
-			result[4+0] = (c >> 0) & 0xff;
-			result[4+1] = (c >> 8) & 0xff;
-			result[4+2] = (c >>16) & 0xff;
-			result[4+3] = (c >>24) & 0xff;
-			result[8+0] = (d >> 0) & 0xff;
-			result[8+1] = (d >> 8) & 0xff;
-			result[8+2] = (d >>16) & 0xff;
-			result[8+3] = (d >>24) & 0xff;
+			result[0 + 0] = (b >> 0) & 0xff;
+			result[0 + 1] = (b >> 8) & 0xff;
+			result[0 + 2] = (b >> 16) & 0xff;
+			result[0 + 3] = (b >> 24) & 0xff;
+			result[4 + 0] = (c >> 0) & 0xff;
+			result[4 + 1] = (c >> 8) & 0xff;
+			result[4 + 2] = (c >> 16) & 0xff;
+			result[4 + 3] = (c >> 24) & 0xff;
+			result[8 + 0] = (d >> 0) & 0xff;
+			result[8 + 1] = (d >> 8) & 0xff;
+			result[8 + 2] = (d >> 16) & 0xff;
+			result[8 + 3] = (d >> 24) & 0xff;
 			return result;
 		}
 
 		MPT_CONSTEXPR20_FUN [[nodiscard]] fixed_string<12> as_text12bdc() const noexcept {
 			fixed_string<12> result;
-			result[0+0] = (b >> 0) & 0xff;
-			result[0+1] = (b >> 8) & 0xff;
-			result[0+2] = (b >>16) & 0xff;
-			result[0+3] = (b >>24) & 0xff;
-			result[4+0] = (d >> 0) & 0xff;
-			result[4+1] = (d >> 8) & 0xff;
-			result[4+2] = (d >>16) & 0xff;
-			result[4+3] = (d >>24) & 0xff;
-			result[8+0] = (c >> 0) & 0xff;
-			result[8+1] = (c >> 8) & 0xff;
-			result[8+2] = (c >>16) & 0xff;
-			result[8+3] = (c >>24) & 0xff;
+			result[0 + 0] = (b >> 0) & 0xff;
+			result[0 + 1] = (b >> 8) & 0xff;
+			result[0 + 2] = (b >> 16) & 0xff;
+			result[0 + 3] = (b >> 24) & 0xff;
+			result[4 + 0] = (d >> 0) & 0xff;
+			result[4 + 1] = (d >> 8) & 0xff;
+			result[4 + 2] = (d >> 16) & 0xff;
+			result[4 + 3] = (d >> 24) & 0xff;
+			result[8 + 0] = (c >> 0) & 0xff;
+			result[8 + 1] = (c >> 8) & 0xff;
+			result[8 + 2] = (c >> 16) & 0xff;
+			result[8 + 3] = (c >> 24) & 0xff;
 			return result;
 		}
 
 		MPT_CONSTEXPR20_FUN [[nodiscard]] fixed_string<16> as_text16() const noexcept {
 			fixed_string<16> result;
-			result[0+0] = (a >> 0) & 0xff;
-			result[0+1] = (a >> 8) & 0xff;
-			result[0+2] = (a >>16) & 0xff;
-			result[0+3] = (a >>24) & 0xff;
-			result[4+0] = (b >> 0) & 0xff;
-			result[4+1] = (b >> 8) & 0xff;
-			result[4+2] = (b >>16) & 0xff;
-			result[4+3] = (b >>24) & 0xff;
-			result[8+0] = (d >> 0) & 0xff;
-			result[8+1] = (d >> 8) & 0xff;
-			result[8+2] = (d >>16) & 0xff;
-			result[8+3] = (d >>24) & 0xff;
-			result[12+0] = (c >> 0) & 0xff;
-			result[12+1] = (c >> 8) & 0xff;
-			result[12+2] = (c >>16) & 0xff;
-			result[12+3] = (c >>24) & 0xff;
+			result[0 + 0] = (a >> 0) & 0xff;
+			result[0 + 1] = (a >> 8) & 0xff;
+			result[0 + 2] = (a >> 16) & 0xff;
+			result[0 + 3] = (a >> 24) & 0xff;
+			result[4 + 0] = (b >> 0) & 0xff;
+			result[4 + 1] = (b >> 8) & 0xff;
+			result[4 + 2] = (b >> 16) & 0xff;
+			result[4 + 3] = (b >> 24) & 0xff;
+			result[8 + 0] = (d >> 0) & 0xff;
+			result[8 + 1] = (d >> 8) & 0xff;
+			result[8 + 2] = (d >> 16) & 0xff;
+			result[8 + 3] = (d >> 24) & 0xff;
+			result[12 + 0] = (c >> 0) & 0xff;
+			result[12 + 1] = (c >> 8) & 0xff;
+			result[12 + 2] = (c >> 16) & 0xff;
+			result[12 + 3] = (c >> 24) & 0xff;
 			return result;
 		}
-
 	};
 
 #if MPT_COMPILER_MSVC || MPT_COMPILER_GCC || MPT_COMPILER_CLANG
@@ -679,7 +678,6 @@ private:
 		return cpuid_result result{};
 
 #endif // MPT_COMPILER
-
 	}
 
 	static [[nodiscard]] cpuid_result cpuidex(uint32 function_a, uint32 function_c) noexcept {
@@ -732,7 +730,6 @@ private:
 		return cpuid_result result{};
 
 #endif // MPT_COMPILER
-
 	}
 
 #endif // MPT_COMPILER_MSVC || MPT_COMPILER_GCC || MPT_COMPILER_CLANG
@@ -744,7 +741,7 @@ private:
 #if MPT_OS_DJGPP
 
 	static [[nodiscard]] uint8 detect_cpu_level() noexcept {
-	
+
 #if 0
 		uint8 result = 0;
 		__dpmi_version_ret dpmi_version{};
@@ -764,7 +761,6 @@ private:
 		}
 		return result;
 #endif
-
 	}
 
 #endif // MPT_OS_DJGPP
@@ -833,9 +829,9 @@ private:
 #elif MPT_COMPILER_MSVC && MPT_MODE_KERNEL
 
 		const std::size_t cr0 = __readcr0();
-		if (!(cr0 & (1 << 2))) {  // EM
+		if (!(cr0 & (1 << 2))) { // EM
 			result = 2;
-			if (cr0 & (1 << 4)) {  // ET
+			if (cr0 & (1 << 4)) { // ET
 				result = 3;
 			}
 		}
@@ -853,7 +849,6 @@ private:
 		return result;
 
 #endif
-
 	}
 
 #if MPT_COMPILER_MSVC || MPT_COMPILER_GCC || MPT_COMPILER_CLANG
@@ -872,7 +867,7 @@ private:
 	static [[nodiscard]] bool can_toggle_eflags_ac() noexcept {
 #if MPT_COMPILER_MSVC || MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 		return can_toggle_eflags(0x0004'0000);
-#else // MPT_COMPILER
+#else  // MPT_COMPILER
 		return (assumed_features() & feature::i486) != 0;
 #endif // MPT_COMPILER
 	}
@@ -880,14 +875,14 @@ private:
 	static [[nodiscard]] bool can_toggle_eflags_id() noexcept {
 #if MPT_COMPILER_MSVC || MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 		return can_toggle_eflags(0x0020'0000);
-#else // MPT_COMPILER
+#else  // MPT_COMPILER
 		return (assumed_features() & feature::tsc) != 0;
 #endif // MPT_COMPILER
 	}
 
 	static [[nodiscard]] bool detect_nexgen() noexcept {
 
-#if	MPT_ARCH_X86 && MPT_COMPILER_MSVC
+#if MPT_ARCH_X86 && MPT_COMPILER_MSVC
 
 		uint8 result = 0;
 		// clang-format off
@@ -937,12 +932,11 @@ private:
 		return false;
 
 #endif
-
 	}
 
 	static [[nodiscard]] bool detect_cyrix() noexcept {
 
-#if	MPT_ARCH_X86 && MPT_COMPILER_MSVC
+#if MPT_ARCH_X86 && MPT_COMPILER_MSVC
 
 		uint8 result = 0;
 		// clang-format off

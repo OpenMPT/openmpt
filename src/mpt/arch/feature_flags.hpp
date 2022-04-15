@@ -24,8 +24,7 @@ private:
 public:
 	constexpr [[nodiscard]] basic_feature_flags() noexcept = default;
 	explicit constexpr [[nodiscard]] basic_feature_flags(bitset flags) noexcept
-		: m_flags(flags)
-	{
+		: m_flags(flags) {
 		return;
 	}
 	constexpr [[nodiscard]] basic_feature_flags operator~() noexcept {
@@ -44,13 +43,13 @@ public:
 		return *this;
 	}
 	friend constexpr [[nodiscard]] basic_feature_flags operator&(basic_feature_flags a, basic_feature_flags b) noexcept {
-		return basic_feature_flags{ static_cast<bitset>(a.m_flags & b.m_flags) };
+		return basic_feature_flags{static_cast<bitset>(a.m_flags & b.m_flags)};
 	}
 	friend constexpr [[nodiscard]] basic_feature_flags operator|(basic_feature_flags a, basic_feature_flags b) noexcept {
-		return basic_feature_flags{ static_cast<bitset>(a.m_flags | b.m_flags) };
+		return basic_feature_flags{static_cast<bitset>(a.m_flags | b.m_flags)};
 	}
 	friend constexpr [[nodiscard]] basic_feature_flags operator^(basic_feature_flags a, basic_feature_flags b) noexcept {
-		return basic_feature_flags{ static_cast<bitset>(a.m_flags ^ b.m_flags) };
+		return basic_feature_flags{static_cast<bitset>(a.m_flags ^ b.m_flags)};
 	}
 	friend constexpr [[nodiscard]] bool operator==(basic_feature_flags a, basic_feature_flags b) noexcept {
 		return a.m_flags == b.m_flags;

@@ -127,8 +127,7 @@ private:
 	const mpt::arch::current::feature_flags Features;
 public:
 	MPT_CONSTEXPRINLINE feature_flags_cache(const mpt::arch::cpu_info & info) noexcept
-		: Features(info.get_features())
-	{
+		: Features(info.get_features()) {
 		return;
 	}
 	MPT_CONSTEXPRINLINE [[nodiscard]] bool operator[](mpt::arch::current::feature_flags query_features) const noexcept {
