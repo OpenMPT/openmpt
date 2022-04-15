@@ -663,9 +663,11 @@ private:
 		unsigned int b{};
 		unsigned int c{};
 		unsigned int d{};
+		// clang-format off
 		__asm__ __volatile__ ("cpuid \n\t
 			: "=a" (a), "=b" (b), "=c" (c), "=d" (d)
 			: "0" (function));
+		// clang-format on
 		result.a = a;
 		result.b = b;
 		result.c = c;
@@ -714,9 +716,11 @@ private:
 		unsigned int b{};
 		unsigned int c{};
 		unsigned int d{};
+		// clang-format off
 		__asm__ __volatile__ ("cpuid \n\t
 			: "=a" (a), "=b" (b), "=c" (c), "=d" (d)
 			: "0" (function_a), "2" (function_c));
+		// clang-format on
 		result.a = a;
 		result.b = b;
 		result.c = c;
@@ -886,6 +890,7 @@ private:
 #if	MPT_ARCH_X86 && MPT_COMPILER_MSVC
 
 		uint8 result = 0;
+		// clang-format off
 		_asm {
 			mov eax, 0x5555
 			xor edx, edx
@@ -899,11 +904,13 @@ private:
 				jmp done
 			done:
 		}
+		// clang-format on
 		return (result != 0);
 
 #elif MPT_ARCH_X86 && (MPT_COMPILER_GCC || MPT_COMPILER_CLANG)
 
 		unsigned int result = 0;
+		// clang-format off
 		__asm__ __volatile(
 			"movl $0x5555, %eax\n"
 			"xorl %edx, %edx\n"
@@ -921,6 +928,7 @@ private:
 			:
 			: "%eax", "%ebx", "%ecx"
 		);
+		// clang-format on
 		return (result != 0);
 
 #else
@@ -937,6 +945,7 @@ private:
 #if	MPT_ARCH_X86 && MPT_COMPILER_MSVC
 
 		uint8 result = 0;
+		// clang-format off
 		_asm {
 			xor  ax, ax
 			sahf
@@ -949,11 +958,13 @@ private:
 				mov  result, 1
 			not_cyrix:
 		}
+		// clang-format on
 		return (result != 0);
 
 #elif MPT_ARCH_X86 && (MPT_COMPILER_GCC || MPT_COMPILER_CLANG)
 
 		unsigned int result = 0;
+		// clang-format off
 		__asm__ __volatile(
 			"xor %ax, %ax\n"
 			"shaf\n"
@@ -973,6 +984,7 @@ private:
 			:
 			: "%eax", "%ebx"
 		);
+		// clang-format off
 		return (result != 0);
 
 #else
