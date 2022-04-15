@@ -7,7 +7,6 @@
 
 #include "mpt/base/detect.hpp"
 #include "mpt/base/namespace.hpp"
-#include "mpt/path/path.hpp"
 #include "mpt/string/types.hpp"
 
 #if MPT_OS_WINDOWS
