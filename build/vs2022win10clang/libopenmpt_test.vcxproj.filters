@@ -25,6 +25,9 @@
     <Filter Include="src\mpt">
       <UniqueIdentifier>{0D1E30A9-79FD-AE44-8215-3A1BEE7315A6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\mpt\arch">
+      <UniqueIdentifier>{BA90CF03-A6F3-5EA8-4F79-975E3BBB2A2B}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\mpt\audio">
       <UniqueIdentifier>{EE51C37D-5A12-3FB4-234D-88318FCC8390}</UniqueIdentifier>
     </Filter>
@@ -81,9 +84,6 @@
     </Filter>
     <Filter Include="src\mpt\io_write">
       <UniqueIdentifier>{BE6C5801-AA65-7753-D397-5CD8BFEF565F}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\mpt\library">
-      <UniqueIdentifier>{31CC822E-9D57-F0F2-A668-73E712734CF3}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\mpt\mutex">
       <UniqueIdentifier>{8FBB9C7E-FB7B-18B5-C4B6-613230365D91}</UniqueIdentifier>
@@ -504,6 +504,15 @@
     <ClInclude Include="..\..\soundlib\tuningcollection.h">
       <Filter>soundlib</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\mpt\arch\arch.hpp">
+      <Filter>src\mpt\arch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\arch\feature_flags.hpp">
+      <Filter>src\mpt\arch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\arch\x86_amd64.hpp">
+      <Filter>src\mpt\arch</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\mpt\audio\sample.hpp">
       <Filter>src\mpt\audio</Filter>
     </ClInclude>
@@ -812,9 +821,6 @@
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\io_write\buffer.hpp">
       <Filter>src\mpt\io_write</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\mpt\library\library.hpp">
-      <Filter>src\mpt\library</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\mutex\mutex.hpp">
       <Filter>src\mpt\mutex</Filter>

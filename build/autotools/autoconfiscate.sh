@@ -60,10 +60,12 @@ svn export ./src/mpt/io             bin/dist-autotools/src/mpt/io
 svn export ./src/mpt/io_read        bin/dist-autotools/src/mpt/io_read
 svn export ./src/mpt/io_write       bin/dist-autotools/src/mpt/io_write
 #svn export ./src/mpt/json           bin/dist-autotools/src/mpt/json
+#svn export ./src/mpt/library        bin/dist-autotools/src/mpt/library
 svn export ./src/mpt/mutex          bin/dist-autotools/src/mpt/mutex
 svn export ./src/mpt/out_of_memory  bin/dist-autotools/src/mpt/out_of_memory
 svn export ./src/mpt/osinfo         bin/dist-autotools/src/mpt/osinfo
 svn export ./src/mpt/parse          bin/dist-autotools/src/mpt/parse
+svn export ./src/mpt/path           bin/dist-autotools/src/mpt/path
 svn export ./src/mpt/random         bin/dist-autotools/src/mpt/random
 svn export ./src/mpt/string         bin/dist-autotools/src/mpt/string
 svn export ./src/mpt/string_transcode bin/dist-autotools/src/mpt/string_transcode
@@ -124,10 +126,12 @@ cp -r ./src/mpt/io             bin/dist-autotools/src/mpt/io
 cp -r ./src/mpt/io_read        bin/dist-autotools/src/mpt/io_read
 cp -r ./src/mpt/io_write       bin/dist-autotools/src/mpt/io_write
 #cp -r ./src/mpt/json           bin/dist-autotools/src/mpt/json
+#cp -r ./src/mpt/library        bin/dist-autotools/src/mpt/library
 cp -r ./src/mpt/mutex          bin/dist-autotools/src/mpt/mutex
 cp -r ./src/mpt/out_of_memory  bin/dist-autotools/src/mpt/out_of_memory
 cp -r ./src/mpt/osinfo         bin/dist-autotools/src/mpt/osinfo
 cp -r ./src/mpt/parse          bin/dist-autotools/src/mpt/parse
+cp -r ./src/mpt/path           bin/dist-autotools/src/mpt/path
 cp -r ./src/mpt/random         bin/dist-autotools/src/mpt/random
 cp -r ./src/mpt/string         bin/dist-autotools/src/mpt/string
 cp -r ./src/mpt/string_transcode bin/dist-autotools/src/mpt/string_transcode

@@ -60,14 +60,12 @@
    "../../libopenmpt/libopenmpt_impl.cpp",
   }
 	excludes {
-		"../../src/mpt/arch/**.cpp",
-		"../../src/mpt/arch/**.hpp",
 		"../../src/mpt/crypto/**.cpp",
 		"../../src/mpt/crypto/**.hpp",
 		"../../src/mpt/json/**.cpp",
 		"../../src/mpt/json/**.hpp",
-		"../../src/mpt/osinfo/**.cpp",
-		"../../src/mpt/osinfo/**.hpp",
+		"../../src/mpt/library/**.cpp",
+		"../../src/mpt/library/**.hpp",
 		"../../src/mpt/test/**.cpp",
 		"../../src/mpt/test/**.hpp",
 		"../../src/mpt/uuid_namespace/**.cpp",
