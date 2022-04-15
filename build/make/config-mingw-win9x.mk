@@ -18,9 +18,12 @@ ARFLAGS  := rcs
 
 LDFLAGS  += -static -static-libgcc -static-libstdc++
 
-#CXXFLAGS += -ffunction-sections -fdata-sections
-#CFLAGS   += -ffunction-sections -fdata-sections
-#LDFLAGS  += -Wl,--gc-sections
+# enable gc-sections for all configurations in order to remove as much of the
+# stdlib as possible
+MPT_COMPILER_NOGCSECTIONS=1
+CXXFLAGS += -ffunction-sections -fdata-sections
+CFLAGS   += -ffunction-sections -fdata-sections
+LDFLAGS  += -Wl,--gc-sections
 
 CXXFLAGS += -march=i486 -m80387 -mtune=pentium
 CFLAGS   += -march=i486 -m80387 -mtune=pentium
