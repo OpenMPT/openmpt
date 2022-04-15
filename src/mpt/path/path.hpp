@@ -10,9 +10,14 @@
 #include "mpt/string/types.hpp"
 #include "mpt/string_transcode/transcode.hpp"
 
+#if !defined(MPT_COMPILER_QUIRK_NO_FILESYSTEM)
 #include <filesystem>
+#endif // !MPT_COMPILER_QUIRK_NO_FILESYSTEM
 #include <type_traits>
 #include <utility>
+#if MPT_OS_WINDOWS && defined(MPT_COMPILER_QUIRK_NO_FILESYSTEM)
+#include <vector>
+#endif // MPT_OS_WINDOWS && MPT_COMPILER_QUIRK_NO_FILESYSTEM
 
 #if MPT_OS_WINDOWS
 #include <windows.h>
@@ -25,36 +30,7 @@ inline namespace MPT_INLINE_NS {
 
 
 
-// mpt::os_path is an alias to a string type that represents native operating system path encoding.
-// Note that this differs from std::filesystem::path::string_type on both Windows and Posix.
-// On Windows, we actually honor UNICODE and thus allow os_path.c_str() to be usable with WinAPI functions.
-// On Posix, we use a type-safe string type in locale encoding, in contrast to the encoding-confused supposedly UTF8 std::string in std::filesystem::path.
-
-#if MPT_OS_WINDOWS
-using os_path = mpt::winstring;
-#else  // !MPT_OS_WINDOWS
-using os_path = mpt::lstring;
-#endif // MPT_OS_WINDOWS
-
-
-
-// mpt::os_path literals that do not involve runtime conversion.
-
-#if MPT_OS_WINDOWS
-#define MPT_OSPATH_CHAR(x)    TEXT(x)
-#define MPT_OSPATH_LITERAL(x) TEXT(x)
-#define MPT_OSPATH(x) \
-	mpt::winstring { \
-		TEXT(x) \
-	}
-#else // !MPT_OS_WINDOWS
-#define MPT_OSPATH_CHAR(x)    x
-#define MPT_OSPATH_LITERAL(x) x
-#define MPT_OSPATH(x) \
-	mpt::lstring { \
-		x \
-	}
-#endif // MPT_OS_WINDOWS
+#if !defined(MPT_COMPILER_QUIRK_NO_FILESYSTEM)
 
 
 
@@ -473,28 +449,7 @@ struct string_transcoder<mpt::path> {
 
 
 
-inline mpt::os_path support_long_path(const mpt::os_path & path) {
-#if MPT_OS_WINDOWS
-	if (path.length() < MAX_PATH) {
-		// path is short enough
-		return path;
-	}
-	if (path.substr(0, 4) == MPT_OSPATH_LITERAL("\\\\?\\")) {
-		// path is already in prefixed form
-		return path;
-	}
-	const mpt::os_path absolute_path = mpt::transcode<mpt::os_path>(std::filesystem::absolute(mpt::transcode<std::filesystem::path>(path)));
-	if (absolute_path.substr(0, 2) == MPT_OSPATH_LITERAL("\\\\")) {
-		// Path is a network share: \\server\foo.bar -> \\?\UNC\server\foo.bar
-		return MPT_OSPATH_LITERAL("\\\\?\\UNC") + absolute_path.substr(1);
-	} else {
-		// Regular file: C:\foo.bar -> \\?\C:\foo.bar
-		return MPT_OSPATH_LITERAL("\\\\?\\") + absolute_path;
-	}
-#else
-	return path;
-#endif
-}
+#endif // !MPT_COMPILER_QUIRK_NO_FILESYSTEM
 
 
 

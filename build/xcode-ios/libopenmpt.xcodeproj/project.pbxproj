@@ -320,6 +320,7 @@
 		4E4D213FE0DAEB3149B38F7F /* Load_plm.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Load_plm.cpp; path = ../../soundlib/Load_plm.cpp; sourceTree = "<group>"; };
 		4E96BB31E124852349FD2971 /* types.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = types.hpp; path = ../../src/mpt/string/types.hpp; sourceTree = "<group>"; };
 		4FB7A50743B6EE79C8A20347 /* floatingpoint.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = floatingpoint.hpp; path = ../../src/mpt/base/floatingpoint.hpp; sourceTree = "<group>"; };
+		50318A59BD5998CBBEEC8899 /* os_path.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = os_path.hpp; path = ../../src/mpt/path/os_path.hpp; sourceTree = "<group>"; };
 		50CF7EB4C1F21FA677B8CCF4 /* mptFileIO.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = mptFileIO.h; path = ../../common/mptFileIO.h; sourceTree = "<group>"; };
 		50FB747FA860E7715A6F02BF /* MIDIMacros.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = MIDIMacros.cpp; path = ../../soundlib/MIDIMacros.cpp; sourceTree = "<group>"; };
 		5178AA15C29B4B077861F855 /* mfc.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = mfc.hpp; path = ../../src/mpt/detect/mfc.hpp; sourceTree = "<group>"; };
@@ -778,6 +779,7 @@
 		5288703955F9426BD765E679 /* path */ = {
 			isa = PBXGroup;
 			children = (
+				50318A59BD5998CBBEEC8899 /* os_path.hpp */,
 				7C2DCED7ED506FC9A3171D17 /* path.hpp */,
 			);
 			name = path;
