@@ -1451,7 +1451,6 @@
     <ClInclude Include="..\..\src\mpt\io_read\filedata_stdstream.hpp" />
     <ClInclude Include="..\..\src\mpt\io_read\filereader.hpp" />
     <ClInclude Include="..\..\src\mpt\io_write\buffer.hpp" />
-    <ClInclude Include="..\..\src\mpt\library\library.hpp" />
     <ClInclude Include="..\..\src\mpt\mutex\mutex.hpp" />
     <ClInclude Include="..\..\src\mpt\osinfo\class.hpp" />
     <ClInclude Include="..\..\src\mpt\osinfo\windows_version.hpp" />
@@ -1459,7 +1458,6 @@
     <ClInclude Include="..\..\src\mpt\parse\parse.hpp" />
     <ClInclude Include="..\..\src\mpt\parse\split.hpp" />
     <ClInclude Include="..\..\src\mpt\parse\tests\tests_parse.hpp" />
-    <ClInclude Include="..\..\src\mpt\path\path.hpp" />
     <ClInclude Include="..\..\src\mpt\random\crand.hpp" />
     <ClInclude Include="..\..\src\mpt\random\default_engines.hpp" />
     <ClInclude Include="..\..\src\mpt\random\device.hpp" />

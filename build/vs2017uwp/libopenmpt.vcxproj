@@ -826,7 +826,9 @@
     <ClInclude Include="..\..\src\mpt\json\json.hpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClInclude>
-    <ClInclude Include="..\..\src\mpt\library\library.hpp" />
+    <ClInclude Include="..\..\src\mpt\library\library.hpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="..\..\src\mpt\mutex\mutex.hpp" />
     <ClInclude Include="..\..\src\mpt\osinfo\class.hpp" />
     <ClInclude Include="..\..\src\mpt\osinfo\windows_version.hpp" />
@@ -834,7 +836,9 @@
     <ClInclude Include="..\..\src\mpt\parse\parse.hpp" />
     <ClInclude Include="..\..\src\mpt\parse\split.hpp" />
     <ClInclude Include="..\..\src\mpt\parse\tests\tests_parse.hpp" />
-    <ClInclude Include="..\..\src\mpt\path\path.hpp" />
+    <ClInclude Include="..\..\src\mpt\path\path.hpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="..\..\src\mpt\random\crand.hpp" />
     <ClInclude Include="..\..\src\mpt\random\default_engines.hpp" />
     <ClInclude Include="..\..\src\mpt\random\device.hpp" />

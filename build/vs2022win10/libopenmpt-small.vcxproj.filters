@@ -82,9 +82,6 @@
     <Filter Include="src\mpt\io_write">
       <UniqueIdentifier>{BE6C5801-AA65-7753-D397-5CD8BFEF565F}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\mpt\library">
-      <UniqueIdentifier>{31CC822E-9D57-F0F2-A668-73E712734CF3}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src\mpt\mutex">
       <UniqueIdentifier>{8FBB9C7E-FB7B-18B5-C4B6-613230365D91}</UniqueIdentifier>
     </Filter>
@@ -99,9 +96,6 @@
     </Filter>
     <Filter Include="src\mpt\parse\tests">
       <UniqueIdentifier>{D9DE24CF-4540-02DD-CEAD-488F3A0E399C}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\mpt\path">
-      <UniqueIdentifier>{4984D703-35E7-66A8-DE6C-9F5ECAAE322B}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\mpt\random">
       <UniqueIdentifier>{3DBF705C-298D-6462-1221-D588FE8D40C7}</UniqueIdentifier>
@@ -783,9 +777,6 @@
     <ClInclude Include="..\..\src\mpt\io_write\buffer.hpp">
       <Filter>src\mpt\io_write</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\mpt\library\library.hpp">
-      <Filter>src\mpt\library</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\mpt\mutex\mutex.hpp">
       <Filter>src\mpt\mutex</Filter>
     </ClInclude>
@@ -806,9 +797,6 @@
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\parse\tests\tests_parse.hpp">
       <Filter>src\mpt\parse\tests</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\mpt\path\path.hpp">
-      <Filter>src\mpt\path</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\random\crand.hpp">
       <Filter>src\mpt\random</Filter>
