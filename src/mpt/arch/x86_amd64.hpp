@@ -462,7 +462,11 @@ struct fixed_string {
 		return m_data.data() + m_data.size();
 	}
 	constexpr [[nodiscard]] operator std::string_view() const noexcept {
+#if MPT_CXX_AT_LEAST(20)
 		return std::string_view(m_data.begin(), std::find(m_data.begin(), m_data.end(), '\0'));
+#else
+		return std::string_view(m_data.data(), std::find(m_data.begin(), m_data.end(), '\0') - m_data.begin());
+#endif
 	}
 	template <std::size_t M>
 	friend MPT_CONSTEXPR20_FUN [[nodiscard]] auto operator+(fixed_string<N> a, fixed_string<M> b) -> fixed_string<N + M> {
