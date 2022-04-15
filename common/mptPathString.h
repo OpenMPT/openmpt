@@ -12,13 +12,15 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
-#include "mptString.h"
-
 #include "mpt/base/namespace.hpp"
+#include "mpt/path/os_path.hpp"
+
+#include "openmpt/base/FlagSet.hpp"
+
+#include "mptString.h"
 
 #include <vector>
 
-#include "openmpt/base/FlagSet.hpp"
 
 #define MPT_DEPRECATED_PATH
 //#define MPT_DEPRECATED_PATH [[deprecated]]
@@ -28,11 +30,13 @@ OPENMPT_NAMESPACE_BEGIN
 namespace mpt
 {
 
-#if MPT_OS_WINDOWS
-typedef mpt::winstring RawPathString;
-#else // !MPT_OS_WINDOWS
-typedef std::string RawPathString;
-#endif // if MPT_OS_WINDOWS
+
+
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
+using RawPathString = mpt::os_path;
+#else // !MPT_ENABLE_CHARSET_LOCALE
+using RawPathString = std::string;
+#endif // MPT_ENABLE_CHARSET_LOCALE
 
 
 
@@ -233,23 +237,26 @@ public:
 
 	// conversions
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
-	std::string ToLocale() const { return path; }
-	std::string ToUTF8() const { return mpt::ToCharset(mpt::Charset::UTF8, mpt::Charset::Locale, path); }
+
+	std::string ToLocale() const { return mpt::ToCharset(mpt::Charset::Locale, path); }
+	std::string ToUTF8() const { return mpt::ToCharset(mpt::Charset::UTF8, path); }
 #if MPT_WSTRING_CONVERT
-	std::wstring ToWide() const { return mpt::ToWide(mpt::Charset::Locale, path); }
+	std::wstring ToWide() const { return mpt::ToWide(path); }
 #endif
-	mpt::ustring ToUnicode() const { return mpt::ToUnicode(mpt::Charset::Locale, path); }
-	static PathString FromLocale(const std::string &path) { return PathString(path); }
-	static PathString FromLocaleSilent(const std::string &path) { return PathString(path); }
-	static PathString FromUTF8(const std::string &path) { return PathString(mpt::ToCharset(mpt::Charset::Locale, mpt::Charset::UTF8, path)); }
+	mpt::ustring ToUnicode() const { return mpt::ToUnicode(path); }
+	static PathString FromLocale(const std::string &path) { return PathString(mpt::ToLocale(mpt::Charset::Locale, path)); }
+	static PathString FromLocaleSilent(const std::string &path) { return PathString(mpt::ToLocale(mpt::Charset::Locale, path)); }
+	static PathString FromUTF8(const std::string &path) { return PathString(mpt::ToLocale(mpt::Charset::UTF8, path)); }
 #if MPT_WSTRING_CONVERT
-	static PathString FromWide(const std::wstring &path) { return PathString(mpt::ToCharset(mpt::Charset::Locale, path)); }
+	static PathString FromWide(const std::wstring &path) { return PathString(mpt::ToLocale(path)); }
 #endif
-	static PathString FromUnicode(const mpt::ustring &path) { return PathString(mpt::ToCharset(mpt::Charset::Locale, path)); }
+	static PathString FromUnicode(const mpt::ustring &path) { return PathString(mpt::ToLocale(path)); }
 	RawPathString AsNative() const { return path; }
 	RawPathString AsNativePrefixed() const { return path; }
 	static PathString FromNative(const RawPathString &path) { return PathString(path); }
+
 #else // !MPT_ENABLE_CHARSET_LOCALE
+
 	std::string ToUTF8() const { return path; }
 #if MPT_WSTRING_CONVERT
 	std::wstring ToWide() const { return mpt::ToWide(mpt::Charset::UTF8, path); }
@@ -263,6 +270,7 @@ public:
 	RawPathString AsNative() const { return path; }
 	RawPathString AsNativePrefixed() const { return path; }
 	static PathString FromNative(const RawPathString &path) { return PathString(path); }
+
 #endif // MPT_ENABLE_CHARSET_LOCALE
 
 	// Convert a path to its simplified form (currently only implemented on Windows)
