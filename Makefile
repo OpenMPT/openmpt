@@ -420,9 +420,19 @@ endif
 else ifeq ($(OPTIMIZE),speed)
 CXXFLAGS += -O2
 CFLAGS   += -O2 -fno-strict-aliasing
+ifneq ($(MPT_COMPILER_NOGCSECTIONS),1)
+CXXFLAGS += -ffunction-sections -fdata-sections
+CFLAGS   += -ffunction-sections -fdata-sections
+LDFLAGS  += -Wl,--gc-sections
+endif
 else ifeq ($(OPTIMIZE),vectorize)
 CXXFLAGS += -O3
 CFLAGS   += -O3 -fno-strict-aliasing
+ifneq ($(MPT_COMPILER_NOGCSECTIONS),1)
+CXXFLAGS += -ffunction-sections -fdata-sections
+CFLAGS   += -ffunction-sections -fdata-sections
+LDFLAGS  += -Wl,--gc-sections
+endif
 endif
 
 ifeq ($(OPTIMIZE_FASTMATH),1)
