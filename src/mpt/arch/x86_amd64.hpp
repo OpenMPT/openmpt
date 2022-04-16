@@ -334,7 +334,7 @@ enum class vendor : uint8 {
 
 
 // clang-format off
-MPT_CONSTEVAL [[nodiscard]] feature_flags assumed_features() noexcept {
+[[nodiscard]] MPT_CONSTEVAL feature_flags assumed_features() noexcept {
 	feature_flags flags{};
 #if MPT_ARCH_X86 || MPT_ARCH_AMD64
 	#ifdef MPT_ARCH_X86_I386
@@ -434,34 +434,34 @@ MPT_CONSTEVAL [[nodiscard]] feature_flags assumed_features() noexcept {
 template <std::size_t N>
 struct fixed_string {
 	std::array<char, N> m_data = {};
-	constexpr [[nodiscard]] const char & operator[](std::size_t i) const noexcept {
+	[[nodiscard]] constexpr const char & operator[](std::size_t i) const noexcept {
 		return m_data[i];
 	}
-	constexpr [[nodiscard]] char & operator[](std::size_t i) noexcept {
+	[[nodiscard]] constexpr char & operator[](std::size_t i) noexcept {
 		return m_data[i];
 	}
-	constexpr [[nodiscard]] std::size_t size() const noexcept {
+	[[nodiscard]] constexpr std::size_t size() const noexcept {
 		return m_data.size();
 	}
-	constexpr [[nodiscard]] const char * data() const noexcept {
+	[[nodiscard]] constexpr const char * data() const noexcept {
 		return m_data.data();
 	}
-	constexpr [[nodiscard]] char * data() noexcept {
+	[[nodiscard]] constexpr char * data() noexcept {
 		return m_data.data();
 	}
-	constexpr [[nodiscard]] const char * begin() const noexcept {
+	[[nodiscard]] constexpr const char * begin() const noexcept {
 		return m_data.data();
 	}
-	constexpr [[nodiscard]] char * begin() noexcept {
+	[[nodiscard]] constexpr char * begin() noexcept {
 		return m_data.data();
 	}
-	constexpr [[nodiscard]] const char * end() const noexcept {
+	[[nodiscard]] constexpr const char * end() const noexcept {
 		return m_data.data() + m_data.size();
 	}
-	constexpr [[nodiscard]] char * end() noexcept {
+	[[nodiscard]] constexpr char * end() noexcept {
 		return m_data.data() + m_data.size();
 	}
-	constexpr [[nodiscard]] operator std::string_view() const noexcept {
+	[[nodiscard]] constexpr operator std::string_view() const noexcept {
 #if MPT_CXX_AT_LEAST(20)
 		return std::string_view(m_data.begin(), std::find(m_data.begin(), m_data.end(), '\0'));
 #else
@@ -469,13 +469,13 @@ struct fixed_string {
 #endif
 	}
 	template <std::size_t M>
-	friend MPT_CONSTEXPR20_FUN [[nodiscard]] auto operator+(fixed_string<N> a, fixed_string<M> b) -> fixed_string<N + M> {
+	[[nodiscard]] friend MPT_CONSTEXPR20_FUN auto operator+(fixed_string<N> a, fixed_string<M> b) -> fixed_string<N + M> {
 		fixed_string<N + M> result;
 		std::copy(a.begin(), a.end(), result.data() + 0);
 		std::copy(b.begin(), b.end(), result.data() + N);
 		return result;
 	}
-	constexpr [[nodiscard]] explicit operator std::string() const noexcept {
+	[[nodiscard]] constexpr explicit operator std::string() const noexcept {
 		return std::string(m_data.begin(), std::find(m_data.begin(), m_data.end(), '\0'));
 	}
 };
@@ -502,51 +502,51 @@ private:
 
 public:
 
-	MPT_CONSTEXPRINLINE [[nodiscard]] bool operator[](feature_flags query_features) const noexcept {
+	[[nodiscard]] MPT_CONSTEXPRINLINE bool operator[](feature_flags query_features) const noexcept {
 		return ((Features & query_features) == query_features);
 	}
 
-	MPT_CONSTEXPRINLINE [[nodiscard]] bool has_features(feature_flags query_features) const noexcept {
+	[[nodiscard]] MPT_CONSTEXPRINLINE bool has_features(feature_flags query_features) const noexcept {
 		return ((Features & query_features) == query_features);
 	}
 
-	MPT_CONSTEXPRINLINE [[nodiscard]] feature_flags get_features() const noexcept {
+	[[nodiscard]] MPT_CONSTEXPRINLINE feature_flags get_features() const noexcept {
 		return Features;
 	}
 
-	MPT_CONSTEXPRINLINE [[nodiscard]] uint32 get_cpuid() const noexcept {
+	[[nodiscard]] MPT_CONSTEXPRINLINE uint32 get_cpuid() const noexcept {
 		return CPUID;
 	}
 
-	MPT_CONSTEXPRINLINE [[nodiscard]] vendor get_vendor() const noexcept {
+	[[nodiscard]] MPT_CONSTEXPRINLINE vendor get_vendor() const noexcept {
 		return Vendor;
 	}
 
-	MPT_CONSTEXPRINLINE [[nodiscard]] uint16 get_family() const noexcept {
+	[[nodiscard]] MPT_CONSTEXPRINLINE uint16 get_family() const noexcept {
 		return Family;
 	}
 
-	MPT_CONSTEXPRINLINE [[nodiscard]] uint8 get_model() const noexcept {
+	[[nodiscard]] MPT_CONSTEXPRINLINE uint8 get_model() const noexcept {
 		return Model;
 	}
 
-	MPT_CONSTEXPRINLINE [[nodiscard]] uint8 get_stepping() const noexcept {
+	[[nodiscard]] MPT_CONSTEXPRINLINE uint8 get_stepping() const noexcept {
 		return Stepping;
 	}
 
-	inline [[nodiscard]] std::string get_vendor_string() const {
+	[[nodiscard]] inline std::string get_vendor_string() const {
 		return std::string(VendorID);
 	}
 
-	inline [[nodiscard]] std::string get_brand_string() const {
+	[[nodiscard]] inline std::string get_brand_string() const {
 		return std::string(BrandID);
 	}
 
-	MPT_CONSTEXPRINLINE [[nodiscard]] bool is_virtual() const noexcept {
+	[[nodiscard]] MPT_CONSTEXPRINLINE bool is_virtual() const noexcept {
 		return Virtualized;
 	}
 
-	MPT_CONSTEXPRINLINE [[nodiscard]] bool can_long_mode() const noexcept {
+	[[nodiscard]] MPT_CONSTEXPRINLINE bool can_long_mode() const noexcept {
 #if !MPT_ARCH_AMD64
 		return LongMode;
 #else  // MPT_ARCH_AMD64
@@ -565,7 +565,7 @@ private:
 		uint32 c = 0;
 		uint32 d = 0;
 
-		MPT_CONSTEXPR20_FUN [[nodiscard]] fixed_string<4> as_text4() const noexcept {
+		[[nodiscard]] MPT_CONSTEXPR20_FUN fixed_string<4> as_text4() const noexcept {
 			fixed_string<4> result;
 			result[0 + 0] = (a >> 0) & 0xff;
 			result[0 + 1] = (a >> 8) & 0xff;
@@ -574,7 +574,7 @@ private:
 			return result;
 		}
 
-		MPT_CONSTEXPR20_FUN [[nodiscard]] fixed_string<12> as_text12bcd() const noexcept {
+		[[nodiscard]] MPT_CONSTEXPR20_FUN fixed_string<12> as_text12bcd() const noexcept {
 			fixed_string<12> result;
 			result[0 + 0] = (b >> 0) & 0xff;
 			result[0 + 1] = (b >> 8) & 0xff;
@@ -591,7 +591,7 @@ private:
 			return result;
 		}
 
-		MPT_CONSTEXPR20_FUN [[nodiscard]] fixed_string<12> as_text12bdc() const noexcept {
+		[[nodiscard]] MPT_CONSTEXPR20_FUN fixed_string<12> as_text12bdc() const noexcept {
 			fixed_string<12> result;
 			result[0 + 0] = (b >> 0) & 0xff;
 			result[0 + 1] = (b >> 8) & 0xff;
@@ -608,7 +608,7 @@ private:
 			return result;
 		}
 
-		MPT_CONSTEXPR20_FUN [[nodiscard]] fixed_string<16> as_text16() const noexcept {
+		[[nodiscard]] MPT_CONSTEXPR20_FUN fixed_string<16> as_text16() const noexcept {
 			fixed_string<16> result;
 			result[0 + 0] = (a >> 0) & 0xff;
 			result[0 + 1] = (a >> 8) & 0xff;
@@ -632,7 +632,7 @@ private:
 
 #if MPT_COMPILER_MSVC || MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 
-	static [[nodiscard]] cpuid_result cpuid(uint32 function) noexcept {
+	[[nodiscard]] static cpuid_result cpuid(uint32 function) noexcept {
 
 #if MPT_COMPILER_MSVC
 
@@ -685,7 +685,7 @@ private:
 #endif // MPT_COMPILER
 	}
 
-	static [[nodiscard]] cpuid_result cpuidex(uint32 function_a, uint32 function_c) noexcept {
+	[[nodiscard]] static cpuid_result cpuidex(uint32 function_a, uint32 function_c) noexcept {
 
 #if MPT_COMPILER_MSVC
 
@@ -746,7 +746,7 @@ private:
 
 #if MPT_OS_DJGPP
 
-	static [[nodiscard]] uint8 detect_cpu_level() noexcept {
+	[[nodiscard]] static uint8 detect_cpu_level() noexcept {
 
 #if 0
 		uint8 result = 0;
@@ -771,7 +771,7 @@ private:
 
 #endif // MPT_OS_DJGPP
 
-	static [[nodiscard]] uint8 detect_fpu_level() noexcept {
+	[[nodiscard]] static uint8 detect_fpu_level() noexcept {
 
 #if MPT_OS_DJGPP
 
@@ -859,7 +859,7 @@ private:
 
 #if MPT_COMPILER_MSVC || MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 
-	static [[nodiscard]] bool can_toggle_eflags(std::size_t mask) noexcept {
+	[[nodiscard]] static bool can_toggle_eflags(std::size_t mask) noexcept {
 		std::size_t eflags_old = __readeflags();
 		std::size_t eflags_flipped = eflags_old ^ mask;
 		__writeeflags(eflags_flipped);
@@ -870,7 +870,7 @@ private:
 
 #endif
 
-	static [[nodiscard]] bool can_toggle_eflags_ac() noexcept {
+	[[nodiscard]] static bool can_toggle_eflags_ac() noexcept {
 #if MPT_COMPILER_MSVC || MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 		return can_toggle_eflags(0x0004'0000);
 #else  // MPT_COMPILER
@@ -878,7 +878,7 @@ private:
 #endif // MPT_COMPILER
 	}
 
-	static [[nodiscard]] bool can_toggle_eflags_id() noexcept {
+	[[nodiscard]] static bool can_toggle_eflags_id() noexcept {
 #if MPT_COMPILER_MSVC || MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 		return can_toggle_eflags(0x0020'0000);
 #else  // MPT_COMPILER
@@ -886,7 +886,7 @@ private:
 #endif // MPT_COMPILER
 	}
 
-	static [[nodiscard]] bool detect_nexgen() noexcept {
+	[[nodiscard]] static bool detect_nexgen() noexcept {
 
 #if MPT_ARCH_X86 && MPT_COMPILER_MSVC
 
@@ -940,7 +940,7 @@ private:
 #endif
 	}
 
-	static [[nodiscard]] bool detect_cyrix() noexcept {
+	[[nodiscard]] static bool detect_cyrix() noexcept {
 
 #if MPT_ARCH_X86 && MPT_COMPILER_MSVC
 
@@ -996,7 +996,7 @@ private:
 
 	}
 
-	static [[nodiscard]] uint16 read_cyrix_id() noexcept {
+	[[nodiscard]] static uint16 read_cyrix_id() noexcept {
 
 #if MPT_OS_DJGPP
 

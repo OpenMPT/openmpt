@@ -47,14 +47,14 @@ inline void EnableAvailableFeatures() noexcept
 }
 
 // enabled processor features for inline asm and intrinsics
-MPT_FORCEINLINE [[nodiscard]] mpt::arch::current::feature_flags GetEnabledFeatures() noexcept
+[[nodiscard]] MPT_FORCEINLINE mpt::arch::current::feature_flags GetEnabledFeatures() noexcept
 {
 	return CPU::detail::EnabledFeatures;
 }
 
 struct Info
 {
-	MPT_FORCEINLINE [[nodiscard]] bool HasFeatureSet(mpt::arch::current::feature_flags features) const noexcept
+	[[nodiscard]] MPT_FORCEINLINE bool HasFeatureSet(mpt::arch::current::feature_flags features) const noexcept
 	{
 		return features == (GetEnabledFeatures() & features);
 	}
@@ -69,7 +69,7 @@ struct Info
 private:
 	const mpt::arch::feature_flags_cache m_features{mpt::arch::get_cpu_info()};
 public:
-	MPT_FORCEINLINE [[nodiscard]] bool HasFeatureSet(mpt::arch::current::feature_flags features) const noexcept
+	[[nodiscard]] MPT_FORCEINLINE bool HasFeatureSet(mpt::arch::current::feature_flags features) const noexcept
 	{
 		return m_features[features];
 	}
@@ -86,7 +86,7 @@ public:
 
 namespace feature = mpt::arch::current::feature;
 
-MPT_FORCEINLINE [[nodiscard]] bool HasFeatureSet(mpt::arch::current::feature_flags features) noexcept
+[[nodiscard]] MPT_FORCEINLINE bool HasFeatureSet(mpt::arch::current::feature_flags features) noexcept
 {
 	return CPU::Info{}.HasFeatureSet(features);
 }

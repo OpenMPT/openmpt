@@ -22,12 +22,12 @@ struct basic_feature_flags {
 private:
 	bitset m_flags{};
 public:
-	constexpr [[nodiscard]] basic_feature_flags() noexcept = default;
-	explicit constexpr [[nodiscard]] basic_feature_flags(bitset flags) noexcept
+	[[nodiscard]] constexpr basic_feature_flags() noexcept = default;
+	[[nodiscard]] explicit constexpr basic_feature_flags(bitset flags) noexcept
 		: m_flags(flags) {
 		return;
 	}
-	constexpr [[nodiscard]] basic_feature_flags operator~() noexcept {
+	[[nodiscard]] constexpr basic_feature_flags operator~() noexcept {
 		return basic_feature_flags{~m_flags};
 	}
 	constexpr basic_feature_flags & operator&=(basic_feature_flags o) noexcept {
@@ -42,28 +42,28 @@ public:
 		m_flags ^= o.m_flags;
 		return *this;
 	}
-	friend constexpr [[nodiscard]] basic_feature_flags operator&(basic_feature_flags a, basic_feature_flags b) noexcept {
+	[[nodiscard]] friend constexpr basic_feature_flags operator&(basic_feature_flags a, basic_feature_flags b) noexcept {
 		return basic_feature_flags{static_cast<bitset>(a.m_flags & b.m_flags)};
 	}
-	friend constexpr [[nodiscard]] basic_feature_flags operator|(basic_feature_flags a, basic_feature_flags b) noexcept {
+	[[nodiscard]] friend constexpr basic_feature_flags operator|(basic_feature_flags a, basic_feature_flags b) noexcept {
 		return basic_feature_flags{static_cast<bitset>(a.m_flags | b.m_flags)};
 	}
-	friend constexpr [[nodiscard]] basic_feature_flags operator^(basic_feature_flags a, basic_feature_flags b) noexcept {
+	[[nodiscard]] friend constexpr basic_feature_flags operator^(basic_feature_flags a, basic_feature_flags b) noexcept {
 		return basic_feature_flags{static_cast<bitset>(a.m_flags ^ b.m_flags)};
 	}
-	friend constexpr [[nodiscard]] bool operator==(basic_feature_flags a, basic_feature_flags b) noexcept {
+	[[nodiscard]] friend constexpr bool operator==(basic_feature_flags a, basic_feature_flags b) noexcept {
 		return a.m_flags == b.m_flags;
 	}
-	friend constexpr [[nodiscard]] bool operator!=(basic_feature_flags a, basic_feature_flags b) noexcept {
+	[[nodiscard]] friend constexpr bool operator!=(basic_feature_flags a, basic_feature_flags b) noexcept {
 		return a.m_flags != b.m_flags;
 	}
-	constexpr [[nodiscard]] bool supports(basic_feature_flags query) noexcept {
+	[[nodiscard]] constexpr bool supports(basic_feature_flags query) noexcept {
 		return (m_flags & query.m_flags) == query.m_flags;
 	}
-	explicit constexpr [[nodiscard]] operator bool() const noexcept {
+	[[nodiscard]] explicit constexpr operator bool() const noexcept {
 		return m_flags ? true : false;
 	}
-	constexpr [[nodiscard]] bool operator!() const noexcept {
+	[[nodiscard]] constexpr bool operator!() const noexcept {
 		return m_flags ? false : true;
 	}
 };

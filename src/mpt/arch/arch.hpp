@@ -87,7 +87,7 @@ public:
 	}
 };
 
-MPT_CONSTEVAL [[nodiscard]] feature_flags assumed_features() noexcept {
+[[nodiscard]] MPT_CONSTEVAL feature_flags assumed_features() noexcept {
 	return {};
 }
 
@@ -130,13 +130,13 @@ public:
 		: Features(info.get_features()) {
 		return;
 	}
-	MPT_CONSTEXPRINLINE [[nodiscard]] bool operator[](mpt::arch::current::feature_flags query_features) const noexcept {
+	[[nodiscard]] MPT_CONSTEXPRINLINE bool operator[](mpt::arch::current::feature_flags query_features) const noexcept {
 		return ((Features & query_features) == query_features);
 	}
-	MPT_CONSTEXPRINLINE [[nodiscard]] bool has_features(mpt::arch::current::feature_flags query_features) const noexcept {
+	[[nodiscard]] MPT_CONSTEXPRINLINE bool has_features(mpt::arch::current::feature_flags query_features) const noexcept {
 		return ((Features & query_features) == query_features);
 	}
-	MPT_CONSTEXPRINLINE [[nodiscard]] mpt::arch::current::feature_flags get_features() const noexcept {
+	[[nodiscard]] MPT_CONSTEXPRINLINE mpt::arch::current::feature_flags get_features() const noexcept {
 		return Features;
 	}
 };
