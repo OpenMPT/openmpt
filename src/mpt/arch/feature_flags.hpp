@@ -18,12 +18,12 @@ namespace arch {
 
 
 template <typename bitset>
-struct basic_feature_flags {
+struct [[nodiscard]] basic_feature_flags {
 private:
 	bitset m_flags{};
 public:
-	[[nodiscard]] constexpr basic_feature_flags() noexcept = default;
-	[[nodiscard]] explicit constexpr basic_feature_flags(bitset flags) noexcept
+	constexpr basic_feature_flags() noexcept = default;
+	explicit constexpr basic_feature_flags(bitset flags) noexcept
 		: m_flags(flags) {
 		return;
 	}
