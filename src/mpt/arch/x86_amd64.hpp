@@ -475,7 +475,7 @@ struct fixed_string {
 		std::copy(b.begin(), b.end(), result.data() + N);
 		return result;
 	}
-	[[nodiscard]] constexpr explicit operator std::string() const noexcept {
+	[[nodiscard]] inline explicit operator std::string() const {
 		return std::string(m_data.begin(), std::find(m_data.begin(), m_data.end(), '\0'));
 	}
 };
