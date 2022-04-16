@@ -913,21 +913,21 @@ private:
 		unsigned int result = 0;
 		// clang-format off
 		__asm__ __volatile(
-			"movl $0x5555, %eax\n"
-			"xorl %edx, %edx\n"
-			"movl $2, %ecx\n"
+			"movl $0x5555, %%eax\n"
+			"xorl %%edx, %%edx\n"
+			"movl $2, %%ecx\n"
 			"clc\n"
-			"divl %ecx\n"
-			"jz found\n"
-			"movl $0, %eax\n"
-			"jmp done\n"
-			"found:\n"
-			"movl $0, %eax\n"
-			"jmp done\n"
-			"done:\n"
+			"divl %%ecx\n"
+			"jz detect_nexgen_found\n"
+			"movl $0, %%eax\n"
+			"jmp detect_nexgen_done\n"
+			"detect_nexgen_found:\n"
+			"movl $0, %%eax\n"
+			"jmp detect_nexgen_done\n"
+			"detect_nexgen_done:\n"
 			: "=a" (result)
 			:
-			: "%eax", "%ebx", "%ecx"
+			: "%ebx", "%ecx"
 		);
 		// clang-format on
 		return (result != 0);
@@ -966,23 +966,23 @@ private:
 		unsigned int result = 0;
 		// clang-format off
 		__asm__ __volatile(
-			"xor %ax, %ax\n"
-			"shaf\n"
-			"movw $5, %ax\n"
-			"movw $2, %bx\n"
-			"divb %bl\n"
+			"xor %%ax, %%ax\n"
+			"sahf\n"
+			"movw $5, %%ax\n"
+			"movw $2, %%bx\n"
+			"divb %%bl\n"
 			"lahf\n"
-			"cmpw $2, %ah\n"
-			"jne not_cyrix\n"
-			"movl $1, %eax\n"
-			"jmp done\n"
-			"not_cyrix:\n"
+			"cmpb $2, %%ah\n"
+			"jne detect_cyrix_done_not_cyrix\n"
+			"movl $1, %%eax\n"
+			"jmp detect_cyrix_done\n"
+			"detect_cyrix_done_not_cyrix:\n"
 			"movl $0, eax\n"
-			"jmp done\n"
-			"done:\n"
+			"jmp detect_cyrix_done\n"
+			"detect_cyrix_done:\n"
 			: "=a" (result)
 			:
-			: "%eax", "%ebx"
+			: "%ebx"
 		);
 		// clang-format off
 		return (result != 0);
