@@ -39,7 +39,7 @@ How to compile
 
         To compile the project, open `build/vsVERSIONwin7/OpenMPT.sln` (VERSION
         being 2019, or 2022) and hit the compile button. Other target systems
-        can be found in the `vs2019*`, and `vs2022` sibling folders.
+        can be found in the `vs2019*`, and `vs2022*` sibling folders.
 
         Note that you have to build the `PluginBridge` and `PluginBridgeLegacy`
         projects manually for architectures other than the one you are building
