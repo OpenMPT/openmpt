@@ -394,7 +394,6 @@ bool COrderList::SetCurSel(ORDERINDEX sel, bool setPlayPos, bool shiftClick, boo
 	PATTERNINDEX n = Order()[m_nScrollPos];
 	if(setPlayPos && !shiftClick && sndFile.Patterns.IsValidPat(n))
 	{
-		CriticalSection cs;
 		const bool isPlaying = IsPlaying();
 		bool changedPos = false;
 
@@ -403,6 +402,7 @@ bool COrderList::SetCurSel(ORDERINDEX sel, bool setPlayPos, bool shiftClick, boo
 			pMainFrm->ResetNotificationBuffer();
 
 			// Update channel parameters and play time
+			CriticalSection cs;
 			m_modDoc.SetElapsedTime(m_nScrollPos, 0, !sndFile.m_SongFlags[SONG_PAUSED | SONG_STEP]);
 
 			changedPos = true;
@@ -410,6 +410,7 @@ bool COrderList::SetCurSel(ORDERINDEX sel, bool setPlayPos, bool shiftClick, boo
 		{
 			FlagSet<SongFlags> pausedFlags = sndFile.m_SongFlags & (SONG_PAUSED | SONG_STEP | SONG_PATTERNLOOP);
 			// Update channel parameters and play time
+			CriticalSection cs;
 			sndFile.SetCurrentOrder(m_nScrollPos);
 			m_modDoc.SetElapsedTime(m_nScrollPos, 0, !sndFile.m_SongFlags[SONG_PAUSED | SONG_STEP]);
 			sndFile.m_SongFlags.set(pausedFlags);
