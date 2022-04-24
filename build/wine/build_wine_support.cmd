@@ -95,6 +95,7 @@ del /f /q "%OUTDIR%\openmpt-wine-support.zip"
  || goto error
 
 cd %BATCH_DIR%
+mkdir "%OUTDIR%"
 move ..\..\openmpt-wine-support.zip "%OUTDIR%\" || goto error
 
 goto noerror
