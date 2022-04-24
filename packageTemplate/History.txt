@@ -31,13 +31,42 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.30.04.00 (24 April 2022, revision 17270)
+-------------------------------------------
+Tree view
+- [Imp] <js> Allow plugin instances to be removed through the context menu or pressing the Delete key (http://bugs.openmpt.org/view.php?id=1583).
+
+General tab
+- [Imp] <js> Allow plugin instances to be removed with a dedicated button (http://bugs.openmpt.org/view.php?id=1583).
+
+Pattern tab
+- [Imp] <js> Parameter Editor: Remember last window position in addition to size (http://bugs.openmpt.org/view.php?id=1579).
+- [Fix] <js> Pitch / Pan Separation and Random Variation instrument properties were not resetting properly when seeking, potentially causing instruments to be played e.g. at a vastly different pan position compared to playing the module continuously.
+
+Sample tab
+- [Imp] <js> When in instrument mode, slicing at cue points now assigns the sample name to newly added instruments.
+- [Mod] <js> Allow broken SBI files created with JuceOPLVSTi to be loaded.
+- [Mod] <js> The sample grid is no longer applied to sample drawing.
+- [Fix] <js> Drawing sample data with Shift pressed could cause a crash in OpenMPT 1.30.03.00 (http://bugs.openmpt.org/view.php?id=1592).
+- [Fix] <js> Dragging improvements from OpenMPT 1.30.03.00 actually made things worse when zooming into a sample (http://bugs.openmpt.org/view.php?id=1581).
+
+Other formats
+- [Fix] <js> MED: Stereo samples were not imported correctly.
+
+Misc
+- [Fix] <js> Fixed a crash when trying to play song from current pattern if the pattern is not part of the current order list.
+
+Third-Party Libraries
+- [Imp] Update zlib (v1.2.12)
+
+
 v1.30.03.00 (13 March 2022, revision 17105)
 -------------------------------------------
 Tree view
 - [Fix] <js> Avoid playing a sound when double-clicking the folder of a soundfont drum instrument (http://bugs.openmpt.org/view.php?id=1516).
 
 General tab
-- [Imp] <js> Plugin dry / wet ratio is now updated immediately when modified through macros or plugin volume handling (http://bugs.openmpt.org/view.php?id=1463).
+- [Imp] <js> Plugin dry / wet ratio display is now updated immediately when modified through macros or plugin volume handling (http://bugs.openmpt.org/view.php?id=1463).
 - [Fix] <js> The tempo slider position was not set correctly in the MPTM format (tx coda).
 
 Pattern tab
@@ -49,7 +78,7 @@ Pattern tab
 - [Fix] <js> Apply Command S (S3M / IT / MPTM) effect memory when seeking.
 
 Sample tab
-- [Imp] <js> Improve behaviour when dragging an item in the sample editor and the initial grab point wasn't exactly the horizontal position of the item.
+- [Imp] <js> Improve behaviour when dragging a timeline item in the sample editor and the initial grab point wasn't exactly the horizontal position of the item.
 
 Mod Conversion
 - [Fix] <js> MOD / XM command EBF conversion was broken in OpenMPT 1.30.02.00.
@@ -94,7 +123,7 @@ Sample tab
 - [Imp] <js> Added .sam to recognized raw sample extensions (http://bugs.openmpt.org/view.php?id=1546).
 - [Imp] <js> When an exising sample already uses the .s3i extension, offer it as the default format to save the sample (http://bugs.openmpt.org/view.php?id=1546).
 - [Mod] <js> Allow sustain loops to be edited even if the current format doesn't support them, in case they were imported from another format (http://bugs.openmpt.org/view.php?id=1544).
-- [Mod] <js> Newly created samples no longer set the default cue points to multiplies of 2048 samples (http://bugs.openmpt.org/view.php?id=1540).
+- [Mod] <js> Newly created samples no longer set the default cue points to multiples of 2048 samples (http://bugs.openmpt.org/view.php?id=1540).
 - [Fix] <js> Fixed a crash when hovering sample display of a sample slot that failed to load an external sample.
 - [Fix] <js> The sample value shown as percentage in the status bar was displayed as a value between 0 and 1 instead of 0 and 100 as intended.
 
@@ -129,7 +158,7 @@ Module cleanup
 Misc
 - [Imp] <js> Improved startup time for OpenMPT configurations with many / large soundfonts. 
 - [Imp] <js> SF2: Support tuning on the preset level.
-- [Imp] <js> Added S3I to default format dropdown in sample editor settings.
+- [Imp] <js> Added S3I to default format choice in sample editor settings.
 - [Imp] <js> The default artist name can now be set in the Welcome dialog.
 - [Mod] <js> When opening files, they are now first tried to be loaded files as modules, and only when that fails they are tried again as an archive. This fixes loading songs using plugins that store their plugin data chunk as a ZIP file (e.g. RetroPlug, http://bugs.openmpt.org/view.php?id=1548).
 - [Mod] <js> The VSTNeverUnloadAnyPlugin hidden setting introduced in OpenMPT 1.30.01.00 was moved from the INI category "BrokenPluginWorkarounds" to category "Broken Plugin Workarounds" (same as VSTMaskAllCrashes setting).
