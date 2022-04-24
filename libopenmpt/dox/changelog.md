@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.6.4-pre
+
 ### libopenmpt 0.6.3 (2022-04-24)
 
  *  Pitch / Pan Separation and Random Variation instrument properties were not
