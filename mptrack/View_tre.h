@@ -86,7 +86,8 @@ protected:
 		MODITEM_HDR_PATTERNS,
 		MODITEM_HDR_SAMPLES,
 		MODITEM_HDR_INSTRUMENTS,
-		MODITEM_END_SONGITEMS = MODITEM_HDR_INSTRUMENTS,
+		MODITEM_HDR_EFFECTS,
+		MODITEM_END_SONGITEMS = MODITEM_HDR_EFFECTS,
 
 		MODITEM_HDR_INSTRUMENTLIB,
 		MODITEM_HDR_MIDILIB,
@@ -262,6 +263,10 @@ protected:
 	void InsertOrDupItem(bool insert);
 	void OnItemRightClick(HTREEITEM hItem, CPoint pt);
 
+	static bool HasEffectPlugins(const CSoundFile &sndFile);
+	static bool AllPluginsBypassed(const CSoundFile &sndFile, bool onlyEffects);
+	static void BypassAllPlugins(CSoundFile &sndFile, bool bypass, bool onlyEffects);
+
 // Generated message map functions
 protected:
 	//{{AFX_MSG(CModTree)
@@ -285,6 +290,7 @@ protected:
 	afx_msg void OnDeleteTreeItem();
 	afx_msg void OnOpenTreeItem();
 	afx_msg void OnMuteTreeItem();
+	afx_msg void OnMuteOnlyEffects();
 	afx_msg void OnSoloTreeItem();
 	afx_msg void OnUnmuteAllTreeItem();
 	afx_msg void OnDuplicateTreeItem() { InsertOrDupItem(false); }
