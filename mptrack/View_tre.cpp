@@ -109,6 +109,7 @@ BEGIN_MESSAGE_MAP(CModTree, CTreeCtrl)
 	ON_COMMAND(ID_MODTREE_REFRESHINSTRLIB, &CModTree::OnRefreshInstrLib)
 	ON_COMMAND(ID_MODTREE_OPENITEM,		&CModTree::OnOpenTreeItem)
 	ON_COMMAND(ID_MODTREE_MUTE,			&CModTree::OnMuteTreeItem)
+	ON_COMMAND(ID_MODTREE_MUTE_ONLY_EFFECTS, &CModTree::OnMuteOnlyEffects)
 	ON_COMMAND(ID_MODTREE_SOLO,			&CModTree::OnSoloTreeItem)
 	ON_COMMAND(ID_MODTREE_UNMUTEALL,	&CModTree::OnUnmuteAllTreeItem)
 	ON_COMMAND(ID_MODTREE_DUPLICATE,	&CModTree::OnDuplicateTreeItem)
@@ -1374,6 +1375,8 @@ CModTree::ModItem CModTree::GetModItem(HTREEITEM hItem)
 				return ModItem(MODITEM_HDR_SAMPLES);
 			if(hItem == info->hInstruments)
 				return ModItem(MODITEM_HDR_INSTRUMENTS);
+			if(hItem == info->hEffects)
+				return ModItem(MODITEM_HDR_EFFECTS);
 			if(hItem == info->hComments)
 				return ModItem(MODITEM_COMMENTS);
 			// Order List or Sequence item?
@@ -3150,6 +3153,15 @@ void CModTree::OnItemRightClick(HTREEITEM hItem, CPoint pt)
 				}
 				break;
 
+			case MODITEM_HDR_EFFECTS:
+				if(sndFile->m_loadedPlugins)
+				{
+					AppendMenu(hMenu, MF_STRING | (AllPluginsBypassed(*sndFile, false) ? MF_CHECKED : 0), ID_MODTREE_MUTE, _T("B&ypass All Plugins"));
+					if(HasEffectPlugins(*sndFile))
+						AppendMenu(hMenu, MF_STRING | (AllPluginsBypassed(*sndFile, true) ? MF_CHECKED : 0), ID_MODTREE_MUTE_ONLY_EFFECTS, _T("Bypass All &Effects"));
+				}
+				break;
+
 			case MODITEM_EFFECT:
 				{
 					nDefault = ID_MODTREE_EXECUTE;
@@ -3540,14 +3552,39 @@ void CModTree::OnMuteTreeItem()
 		{
 			modDoc.MuteInstrument((INSTRUMENTINDEX)modItemID, !modDoc.IsInstrumentMuted((INSTRUMENTINDEX)modItemID));
 			UpdateView(*info, InstrumentHint((INSTRUMENTINDEX)modItemID).Info().Names());
-		} else if((modItem.type == MODITEM_EFFECT))
+		} else if(modItem.type == MODITEM_EFFECT)
 		{
 			IMixPlugin *pPlugin = modDoc.GetSoundFile().m_MixPlugins[modItemID].pMixPlugin;
 			if(pPlugin == nullptr)
 				return;
 			pPlugin->ToggleBypass();
-			modDoc.SetModified();
+			if(modDoc.GetSoundFile().GetModSpecifications().supportsPlugins)
+				modDoc.SetModified();
 			//UpdateView(*info, PluginHint(static_cast<PLUGINDEX>(modItemID + 1)));
+		} else if(modItem.type == MODITEM_HDR_EFFECTS)
+		{
+			auto &sndFile = modDoc.GetSoundFile();
+			BypassAllPlugins(sndFile, !AllPluginsBypassed(sndFile, false), false);
+		}
+	}
+}
+
+
+void CModTree::OnMuteOnlyEffects()
+{
+	HTREEITEM hItem = GetSelectedItem();
+
+	const ModItem modItem = GetModItem(hItem);
+	const uint32 modItemID = modItem.val1;
+
+	ModTreeDocInfo *info = GetDocumentInfoFromItem(hItem);
+	if(info)
+	{
+		CModDoc &modDoc = info->modDoc;
+		if(modItem.type == MODITEM_HDR_EFFECTS)
+		{
+			auto &sndFile = modDoc.GetSoundFile();
+			BypassAllPlugins(sndFile, !AllPluginsBypassed(sndFile, true), true);
 		}
 	}
 }
@@ -3608,6 +3645,55 @@ void CModTree::OnUnmuteAllTreeItem()
 			UpdateView(*info, InstrumentHint().Info().Names());
 		}
 	}
+}
+
+
+bool CModTree::HasEffectPlugins(const CSoundFile &sndFile)
+{
+	for(const auto &plugin : sndFile.m_MixPlugins)
+	{
+		if(!plugin.pMixPlugin)
+			continue;
+		if(!plugin.pMixPlugin->IsInstrument())
+			return true;
+	}
+	return false;
+
+}
+
+
+bool CModTree::AllPluginsBypassed(const CSoundFile &sndFile, bool onlyEffects)
+{
+	for(const auto &plugin : sndFile.m_MixPlugins)
+	{
+		if(!plugin.pMixPlugin)
+			continue;
+		if(onlyEffects && plugin.pMixPlugin->IsInstrument())
+			continue;
+		if(!plugin.IsBypassed())
+			return false;
+	}
+	return true;
+}
+
+
+void CModTree::BypassAllPlugins(CSoundFile &sndFile, bool bypass, bool onlyEffects)
+{
+	bool modified = false;
+	for(auto &plugin : sndFile.m_MixPlugins)
+	{
+		if(!plugin.pMixPlugin)
+			continue;
+		if(onlyEffects && plugin.pMixPlugin->IsInstrument())
+			continue;
+		if(plugin.IsBypassed() != bypass)
+		{
+			plugin.pMixPlugin->Bypass(bypass);
+			modified = true;
+		}
+	}
+	if(modified && sndFile.GetModSpecifications().supportsPlugins && sndFile.GetpModDoc())
+		sndFile.GetpModDoc()->SetModified();
 }
 
 
