@@ -1239,6 +1239,13 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			// Pitch/Pan Separation can be overridden by panning commands: Added 2021-11-01, https://github.com/schismtracker/schismtracker/commit/6e9f1207015cae0fe1b829fff7bb867e02ec6dea
 			if(schismDateVersion < SchismVersionFromDate<2021, 11, 01>::date)
 				m_playBehaviour.reset(kITPitchPanSeparation);
+			// Various fixes to multisampled instruments: Added 2022-04-30, https://github.com/schismtracker/schismtracker/commit/1b2f7d5522fcb971f134a6664182ca569f7c8008
+			if(schismDateVersion < SchismVersionFromDate<2022, 04, 30>::date)
+			{
+				m_playBehaviour.reset(kITEmptyNoteMapSlot);
+				m_playBehaviour.reset(kITPortamentoSwapResetsPos);
+				m_playBehaviour.reset(kITMultiSampleInstrumentNumber);
+			}
 			break;
 		case 4:
 			madeWithTracker = MPT_UFORMAT("pyIT {}.{}")((fileHeader.cwtv & 0x0F00) >> 8, mpt::ufmt::hex0<2>(fileHeader.cwtv & 0xFF));
