@@ -2,9 +2,9 @@ name: C/C++ CI
 
 on:
   push:
-    branches: [ OpenMPT-1.30 ]
+    branches: [ OpenMPT-1.29 ]
   pull_request:
-    branches: [ OpenMPT-1.30 ]
+    branches: [ OpenMPT-1.29 ]
 
 jobs:
   build:
