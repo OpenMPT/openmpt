@@ -2,14 +2,14 @@ name: C/C++ CI
 
 on:
   push:
-    branches: [ OpenMPT-1.30 ]
+    branches: [ OpenMPT-1.27 ]
   pull_request:
-    branches: [ OpenMPT-1.30 ]
+    branches: [ OpenMPT-1.27 ]
 
 jobs:
   build:
 
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-18.04
 
     steps:
     - uses: actions/checkout@v2
