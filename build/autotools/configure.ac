@@ -298,7 +298,7 @@ AC_LANG_POP([C++])
 AC_LANG_PUSH([C++])
 case $host_os in
  mingw32*)
-  AC_CHECK_HEADER([mingw.thread.h],
+  AC_CHECK_HEADER([mingw.mutex.h],
    [
     have_mingwstdtthreads=1
    ],
