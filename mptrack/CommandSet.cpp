@@ -757,6 +757,7 @@ static constexpr struct
 	{2030, kcFileSaveOPL, _T("File/Export OPL Register Dump") },
 	{2031, kcSampleLoadRaw, _T("Load Raw Sample")},
 	{2032, kcTogglePatternPlayRow, _T("Toggle row playback when navigating")},
+	{2033, kcInsNoteMapTransposeSamples, _T("Transpose Samples / Reset Map") },
 };
 
 // Get command descriptions etc.. loaded up.

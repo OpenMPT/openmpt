@@ -716,6 +716,7 @@ enum CommandID
 	kcInsNoteMapCopyCurrentNote,
 	kcInsNoteMapCopyCurrentSample,
 	kcInsNoteMapReset,
+	kcInsNoteMapTransposeSamples,
 	kcInsNoteMapRemove,
 	kcInsNoteMapTransposeUp,
 	kcInsNoteMapTransposeDown,

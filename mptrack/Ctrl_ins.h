@@ -77,6 +77,7 @@ protected:
 	afx_msg void OnMapTransposeUp();
 	afx_msg void OnMapTransposeDown();
 	afx_msg void OnMapReset();
+	afx_msg void OnTransposeSamples();
 	afx_msg void OnMapRemove();
 	afx_msg void OnEditSample(UINT nID);
 	afx_msg void OnEditSampleMap();

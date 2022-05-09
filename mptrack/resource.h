@@ -1034,6 +1034,7 @@
 #define ID_PATTERN_DELETEALLROW         32818
 #define ID_PATTERN_INSERTALLROW         32819
 #define ID_NOTEMAP_REMOVE               32820
+#define ID_NOTEMAP_TRANSPOSE_SAMPLES    32821
 #define ID_MODTREE_EXECUTE              32822
 #define ID_MODTREE_REMOVE               32823
 #define ID_IMPORT_MIDILIB               32824
