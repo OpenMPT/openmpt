@@ -195,7 +195,7 @@ void CViewPattern::OnInitialUpdate()
 	SetCurrentPattern(0);
 	m_fallbackInstrument = 0;
 	m_nLastPlayedRow = 0;
-	m_nLastPlayedOrder = 0;
+	m_nLastPlayedOrder = ORDERINDEX_INVALID;
 	m_prevChordNote = NOTE_NONE;
 }
 
@@ -3498,7 +3498,7 @@ LRESULT CViewPattern::OnPlayerNotify(Notification *pnotify)
 			{
 				if(pat < pSndFile->Patterns.Size())
 				{
-					if(pat != m_nPattern || updateOrderList)
+					if(pat != m_nPattern || ord != m_nOrder || updateOrderList)
 					{
 						if(pat != m_nPattern)
 							SetCurrentPattern(pat, row);
