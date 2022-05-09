@@ -47,16 +47,17 @@ BEGIN_MESSAGE_MAP(CNoteMapWnd, CStatic)
 	ON_WM_RBUTTONDOWN()
 	ON_WM_LBUTTONDBLCLK()
 	ON_WM_MOUSEWHEEL()
-	ON_COMMAND(ID_NOTEMAP_TRANS_UP,		&CNoteMapWnd::OnMapTransposeUp)
-	ON_COMMAND(ID_NOTEMAP_TRANS_DOWN,	&CNoteMapWnd::OnMapTransposeDown)
-	ON_COMMAND(ID_NOTEMAP_COPY_NOTE,	&CNoteMapWnd::OnMapCopyNote)
-	ON_COMMAND(ID_NOTEMAP_COPY_SMP,		&CNoteMapWnd::OnMapCopySample)
-	ON_COMMAND(ID_NOTEMAP_RESET,		&CNoteMapWnd::OnMapReset)
-	ON_COMMAND(ID_NOTEMAP_REMOVE,		&CNoteMapWnd::OnMapRemove)
-	ON_COMMAND(ID_INSTRUMENT_SAMPLEMAP, &CNoteMapWnd::OnEditSampleMap)
-	ON_COMMAND(ID_INSTRUMENT_DUPLICATE, &CNoteMapWnd::OnInstrumentDuplicate)
-	ON_COMMAND_RANGE(ID_NOTEMAP_EDITSAMPLE, ID_NOTEMAP_EDITSAMPLE+MAX_SAMPLES, &CNoteMapWnd::OnEditSample)
-	ON_MESSAGE(WM_MOD_KEYCOMMAND,		&CNoteMapWnd::OnCustomKeyMsg)
+	ON_COMMAND(ID_NOTEMAP_TRANS_UP,          &CNoteMapWnd::OnMapTransposeUp)
+	ON_COMMAND(ID_NOTEMAP_TRANS_DOWN,        &CNoteMapWnd::OnMapTransposeDown)
+	ON_COMMAND(ID_NOTEMAP_COPY_NOTE,         &CNoteMapWnd::OnMapCopyNote)
+	ON_COMMAND(ID_NOTEMAP_COPY_SMP,          &CNoteMapWnd::OnMapCopySample)
+	ON_COMMAND(ID_NOTEMAP_RESET,             &CNoteMapWnd::OnMapReset)
+	ON_COMMAND(ID_NOTEMAP_TRANSPOSE_SAMPLES, &CNoteMapWnd::OnTransposeSamples)
+	ON_COMMAND(ID_NOTEMAP_REMOVE,            &CNoteMapWnd::OnMapRemove)
+	ON_COMMAND(ID_INSTRUMENT_SAMPLEMAP,      &CNoteMapWnd::OnEditSampleMap)
+	ON_COMMAND(ID_INSTRUMENT_DUPLICATE,      &CNoteMapWnd::OnInstrumentDuplicate)
+	ON_MESSAGE(WM_MOD_KEYCOMMAND,            &CNoteMapWnd::OnCustomKeyMsg)
+	ON_COMMAND_RANGE(ID_NOTEMAP_EDITSAMPLE, ID_NOTEMAP_EDITSAMPLE + MAX_SAMPLES, &CNoteMapWnd::OnEditSample)
 END_MESSAGE_MAP()
 
 
@@ -349,19 +350,20 @@ void CNoteMapWnd::OnRButtonDown(UINT, CPoint pt)
 				AppendMenu(hMenu, MF_POPUP, reinterpret_cast<UINT_PTR>(hSubMenu), ih->GetKeyTextFromCommand(kcInsNoteMapEditSample, _T("&Edit Sample")));
 				AppendMenu(hMenu, MF_SEPARATOR, 0, NULL);
 			}
-			AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_COPY_SMP, ih->GetKeyTextFromCommand(kcInsNoteMapCopyCurrentSample, MPT_CFORMAT("Map all notes to &sample {}")(pIns->Keyboard[m_nNote])));
+			AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_COPY_SMP, ih->GetKeyTextFromCommand(kcInsNoteMapCopyCurrentSample, MPT_CFORMAT("Map All Notes to &Sample {}")(pIns->Keyboard[m_nNote])));
 
 			if(sndFile.GetType() != MOD_TYPE_XM)
 			{
 				if(ModCommand::IsNote(pIns->NoteMap[m_nNote]))
 				{
-					AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_COPY_NOTE, ih->GetKeyTextFromCommand(kcInsNoteMapCopyCurrentNote, MPT_CFORMAT("Map all &notes to {}")(mpt::ToCString(sndFile.GetNoteName(pIns->NoteMap[m_nNote], m_nInstrument)))));
+					AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_COPY_NOTE, ih->GetKeyTextFromCommand(kcInsNoteMapCopyCurrentNote, MPT_CFORMAT("Map All &Notes to {}")(mpt::ToCString(sndFile.GetNoteName(pIns->NoteMap[m_nNote], m_nInstrument)))));
 				}
-				AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_TRANS_UP, ih->GetKeyTextFromCommand(kcInsNoteMapTransposeUp, _T("Transpose map &up")));
-				AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_TRANS_DOWN, ih->GetKeyTextFromCommand(kcInsNoteMapTransposeDown, _T("Transpose map &down")));
+				AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_TRANS_UP, ih->GetKeyTextFromCommand(kcInsNoteMapTransposeUp, _T("Transpose Map &Up")));
+				AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_TRANS_DOWN, ih->GetKeyTextFromCommand(kcInsNoteMapTransposeDown, _T("Transpose Map &Down")));
 			}
-			AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_RESET, ih->GetKeyTextFromCommand(kcInsNoteMapReset, _T("&Reset note mapping")));
-			AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_REMOVE, ih->GetKeyTextFromCommand(kcInsNoteMapRemove, _T("Remo&ve all samples")));
+			AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_RESET, ih->GetKeyTextFromCommand(kcInsNoteMapReset, _T("&Reset Note Mapping")));
+			AppendMenu(hMenu, MF_STRING | (pIns->CanConvertToDefaultNoteMap().empty() ? MF_GRAYED : 0), ID_NOTEMAP_TRANSPOSE_SAMPLES, ih->GetKeyTextFromCommand(kcInsNoteMapTransposeSamples, _T("&Transpose Samples / Reset Map")));
+			AppendMenu(hMenu, MF_STRING, ID_NOTEMAP_REMOVE, ih->GetKeyTextFromCommand(kcInsNoteMapRemove, _T("Remo&ve All Samples")));
 			AppendMenu(hMenu, MF_STRING, ID_INSTRUMENT_DUPLICATE, ih->GetKeyTextFromCommand(kcInstrumentCtrlDuplicate, _T("Duplicate &Instrument")));
 			SetMenuDefaultItem(hMenu, ID_INSTRUMENT_SAMPLEMAP, FALSE);
 			ClientToScreen(&pt);
@@ -455,6 +457,35 @@ void CNoteMapWnd::OnMapReset()
 			UpdateAccessibleTitle();
 		}
 	}
+}
+
+
+void CNoteMapWnd::OnTransposeSamples()
+{
+	auto &sndFile = m_modDoc.GetSoundFile();
+	ModInstrument *pIns = sndFile.Instruments[m_nInstrument];
+	if(!pIns)
+		return;
+	const auto samples = pIns->CanConvertToDefaultNoteMap();
+	if(samples.empty())
+		return;
+
+	PrepareUndo("Transpose Samples");
+	for(const auto &[smp, transpose] : samples)
+	{
+		if(smp > sndFile.GetNumSamples())
+			continue;
+		m_modDoc.GetSampleUndo().PrepareUndo(smp, sundo_none, "Transpose");
+		auto &sample = sndFile.GetSample(smp);
+		if(sndFile.UseFinetuneAndTranspose())
+			sample.RelativeTone += transpose;
+		else
+			sample.Transpose(transpose / 12.0);
+		m_modDoc.UpdateAllViews(nullptr, SampleHint(smp).Info(), &m_pParent);
+	}
+	pIns->ResetNoteMap();
+	m_pParent.SetModified(InstrumentHint().Info(), false);
+	Invalidate(FALSE);
 }
 
 
@@ -595,6 +626,7 @@ LRESULT CNoteMapWnd::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 	case kcInsNoteMapCopyCurrentSample:	OnMapCopySample(); return wParam;
 	case kcInsNoteMapCopyCurrentNote:	OnMapCopyNote(); return wParam;
 	case kcInsNoteMapReset:				OnMapReset(); return wParam;
+	case kcInsNoteMapTransposeSamples:	OnTransposeSamples(); return wParam;
 	case kcInsNoteMapRemove:			OnMapRemove(); return wParam;
 
 	case kcInsNoteMapEditSample:		if(pIns) OnEditSample(pIns->Keyboard[m_nNote] + ID_NOTEMAP_EDITSAMPLE); return wParam;
