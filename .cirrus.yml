@@ -17,7 +17,7 @@ task:
 task:
     name: macos-xcode13
     macos_instance:
-        image: monterey-xcode-13.2
+        image: monterey-xcode-13.3
     install_script: brew update && brew install p7zip help2man doxygen autoconf-archive mpg123 libogg libvorbis portaudio flac libsndfile
     build_script: make STRICT=1 FORCE_DEPS=1 NO_SDL2=1
     test_script: make STRICT=1 FORCE_DEPS=1 NO_SDL2=1 check
