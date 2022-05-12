@@ -2,7 +2,9 @@ name: MSYS2 Autotools
 
 on:
   push:
-    branches: [ master ]
+    branches: [ OpenMPT-1.30 ]
+  pull_request:
+    branches: [ OpenMPT-1.30 ]
 
 jobs:
   build:
