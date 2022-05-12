@@ -9,6 +9,8 @@ on:
 jobs:
   build:
     runs-on: windows-latest
+    env:
+      MAKEFLAGS: -j${{ env.NUMBER_OF_PROCESSORS }}
     defaults:
       run:
         shell: msys2 {0}
