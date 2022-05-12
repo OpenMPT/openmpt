@@ -23,7 +23,7 @@ CFLAGS_STDC = -std=c99
 CXXFLAGS += $(CXXFLAGS_STDCXX)
 CFLAGS += $(CFLAGS_STDC)
 
-CPPFLAGS += -DNOMINMAX
+CPPFLAGS +=
 CXXFLAGS += -municode -mconsole -mthreads
 CFLAGS   += -municode -mconsole -mthreads
 LDFLAGS  +=
