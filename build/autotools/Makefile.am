@@ -73,26 +73,26 @@ if HAVE_PORTAUDIOCPP
 libopenmpt_example_cxx_SOURCES = examples/libopenmpt_example_cxx.cpp
 endif
 
-libopenmpt_example_c_stdout_CPPFLAGS = 
-libopenmpt_example_c_probe_CPPFLAGS = 
+libopenmpt_example_c_stdout_CPPFLAGS = $(WIN32_CPPFLAGS)
+libopenmpt_example_c_probe_CPPFLAGS = $(WIN32_CPPFLAGS)
 if HAVE_PORTAUDIO
-libopenmpt_example_c_CPPFLAGS = $(PORTAUDIO_CFLAGS)
-libopenmpt_example_c_mem_CPPFLAGS = $(PORTAUDIO_CFLAGS)
-libopenmpt_example_c_unsafe_CPPFLAGS = $(PORTAUDIO_CFLAGS)
+libopenmpt_example_c_CPPFLAGS = $(WIN32_CPPFLAGS) $(PORTAUDIO_CFLAGS)
+libopenmpt_example_c_mem_CPPFLAGS = $(WIN32_CPPFLAGS) $(PORTAUDIO_CFLAGS)
+libopenmpt_example_c_unsafe_CPPFLAGS = $(WIN32_CPPFLAGS) $(PORTAUDIO_CFLAGS)
 endif
 if HAVE_PORTAUDIOCPP
-libopenmpt_example_cxx_CPPFLAGS = $(MINGWSTDTHREADS_CPPFLAGS) $(PORTAUDIOCPP_CFLAGS)
+libopenmpt_example_cxx_CPPFLAGS = $(WIN32_CPPFLAGS) $(MINGWSTDTHREADS_CPPFLAGS) $(PORTAUDIOCPP_CFLAGS)
 endif
 
-libopenmpt_example_c_stdout_CFLAGS = $(WIN32_CONSOLE_CFLAGS)
-libopenmpt_example_c_probe_CFLAGS = $(WIN32_CONSOLE_CFLAGS)
+libopenmpt_example_c_stdout_CFLAGS = $(WIN32_CFLAGS) $(WIN32_CONSOLE_CFLAGS)
+libopenmpt_example_c_probe_CFLAGS = $(WIN32_CFLAGS) $(WIN32_CONSOLE_CFLAGS)
 if HAVE_PORTAUDIO
-libopenmpt_example_c_CFLAGS = $(WIN32_CONSOLE_CFLAGS)
-libopenmpt_example_c_mem_CFLAGS = $(WIN32_CONSOLE_CFLAGS)
-libopenmpt_example_c_unsafe_CFLAGS = $(WIN32_CONSOLE_CFLAGS)
+libopenmpt_example_c_CFLAGS = $(WIN32_CFLAGS) $(WIN32_CONSOLE_CFLAGS)
+libopenmpt_example_c_mem_CFLAGS = $(WIN32_CFLAGS) $(WIN32_CONSOLE_CFLAGS)
+libopenmpt_example_c_unsafe_CFLAGS = $(WIN32_CFLAGS) $(WIN32_CONSOLE_CFLAGS)
 endif
 if HAVE_PORTAUDIOCPP
-libopenmpt_example_cxx_CXXFLAGS = $(WIN32_CONSOLE_CXXFLAGS)
+libopenmpt_example_cxx_CXXFLAGS = $(WIN32_CXXFLAGS) $(WIN32_CONSOLE_CXXFLAGS)
 endif
 
 libopenmpt_example_c_stdout_LDADD = $(lib_LTLIBRARIES)
@@ -528,10 +528,14 @@ nobase_include_HEADERS += libopenmpt/libopenmpt_stream_callbacks_file_posix.h
 nobase_include_HEADERS += libopenmpt/libopenmpt_stream_callbacks_file_posix_lfs64.h
 nobase_include_HEADERS += libopenmpt/libopenmpt_ext.h
 nobase_include_HEADERS += libopenmpt/libopenmpt_ext.hpp
-libopenmpt_la_CPPFLAGS = $(MINGWSTDTHREADS_CPPFLAGS) -DLIBOPENMPT_BUILD -I$(srcdir)/build/svn_version -I$(srcdir)/ -I$(srcdir)/src -I$(srcdir)/common $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS)
-libopenmpt_la_CXXFLAGS = $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS)
-libopenmpt_la_CFLAGS = $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS)
-libopenmpt_la_LIBADD = $(ZLIB_LIBS) $(MPG123_LIBS) $(OGG_LIBS) $(VORBIS_LIBS) $(VORBISFILE_LIBS) $(LIBOPENMPT_WIN32_LIBS)
+libopenmpt_la_CPPFLAGS =
+libopenmpt_la_CPPFLAGS += $(WIN32_CPPFLAGS) $(MINGWSTDTHREADS_CPPFLAGS) -DLIBOPENMPT_BUILD -I$(srcdir)/build/svn_version -I$(srcdir)/ -I$(srcdir)/src -I$(srcdir)/common $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS)
+libopenmpt_la_CXXFLAGS =
+libopenmpt_la_CXXFLAGS += $(WIN32_CXXFLAGS) $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS)
+libopenmpt_la_CFLAGS =
+libopenmpt_la_CFLAGS += $(WIN32_CFLAGS) $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS)
+libopenmpt_la_LIBADD =
+libopenmpt_la_LIBADD += $(ZLIB_LIBS) $(MPG123_LIBS) $(OGG_LIBS) $(VORBIS_LIBS) $(VORBISFILE_LIBS) $(LIBOPENMPT_WIN32_LIBS)
 libopenmpt_la_SOURCES = 
 libopenmpt_la_SOURCES += build/svn_version/svn_version.h
 libopenmpt_la_SOURCES += $(MPT_FILES_SRC_MPT)
@@ -563,10 +567,14 @@ libopenmpt_la_SOURCES += libopenmpt/libopenmpt_version.h
 
 if ENABLE_TESTS
 check_PROGRAMS += libopenmpttest
-libopenmpttest_CPPFLAGS = $(MINGWSTDTHREADS_CPPFLAGS) -DLIBOPENMPT_BUILD -DLIBOPENMPT_BUILD_TEST -I$(srcdir)/build/svn_version -I$(srcdir)/ -I$(srcdir)/src -I$(srcdir)/common $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS)
-libopenmpttest_CXXFLAGS = $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS) $(WIN32_CONSOLE_CXXFLAGS)
-libopenmpttest_CFLAGS = $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS) $(WIN32_CONSOLE_CFLAGS)
-libopenmpttest_LDADD = $(ZLIB_LIBS) $(MPG123_LIBS) $(OGG_LIBS) $(VORBIS_LIBS) $(VORBISFILE_LIBS) $(LIBOPENMPT_WIN32_LIBS)
+libopenmpttest_CPPFLAGS =
+libopenmpttest_CPPFLAGS += $(WIN32_CPPFLAGS) $(MINGWSTDTHREADS_CPPFLAGS) -DLIBOPENMPT_BUILD -DLIBOPENMPT_BUILD_TEST -I$(srcdir)/build/svn_version -I$(srcdir)/ -I$(srcdir)/src -I$(srcdir)/common $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS)
+libopenmpttest_CXXFLAGS =
+libopenmpttest_CXXFLAGS += $(WIN32_CXXFLAGS) $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS) $(WIN32_CONSOLE_CXXFLAGS)
+libopenmpttest_CFLAGS =
+libopenmpttest_CFLAGS += $(WIN32_CFLAGS) $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS) $(WIN32_CONSOLE_CFLAGS)
+libopenmpttest_LDADD =
+libopenmpttest_LDADD += $(ZLIB_LIBS) $(MPG123_LIBS) $(OGG_LIBS) $(VORBIS_LIBS) $(VORBISFILE_LIBS) $(LIBOPENMPT_WIN32_LIBS)
 libopenmpttest_SOURCES = 
 libopenmpttest_SOURCES += libopenmpt/libopenmpt_test.cpp
 libopenmpttest_SOURCES += test/mpt_tests_base.cpp
@@ -620,8 +628,10 @@ endif
 if ENABLE_OPENMPT123
 
 bin_PROGRAMS += bin/openmpt123
-bin_openmpt123_CPPFLAGS = $(MINGWSTDTHREADS_CPPFLAGS) -I$(srcdir)/src $(PORTAUDIO_CFLAGS) $(PULSEAUDIO_CFLAGS) $(SDL2_CFLAGS) $(SNDFILE_CFLAGS) $(FLAC_CFLAGS)
-bin_openmpt123_CXXFLAGS = $(WIN32_CONSOLE_CXXFLAGS)
+bin_openmpt123_CPPFLAGS =
+bin_openmpt123_CPPFLAGS += $(WIN32_CPPFLAGS) $(MINGWSTDTHREADS_CPPFLAGS) -I$(srcdir)/src $(PORTAUDIO_CFLAGS) $(PULSEAUDIO_CFLAGS) $(SDL2_CFLAGS) $(SNDFILE_CFLAGS) $(FLAC_CFLAGS)
+bin_openmpt123_CXXFLAGS =
+bin_openmpt123_CXXFLAGS += $(WIN32_CXXFLAGS) $(WIN32_CONSOLE_CXXFLAGS)
 bin_openmpt123_LDADD = libopenmpt.la $(PORTAUDIO_LIBS) $(PULSEAUDIO_LIBS) $(SDL2_LIBS) $(SNDFILE_LIBS) $(FLAC_LIBS) $(OPENMPT123_WIN32_LIBS)
 bin_openmpt123_SOURCES = 
 bin_openmpt123_SOURCES += $(MPT_FILES_SRC_MPT)
