@@ -50,6 +50,8 @@ is just a high-level summary.
     `MINGW_FLAVOUR=[|-posix|-win32]`, `WINDOWS_ARCH=[x86|amd64]`,
     `WINDOWS_FAMILY=[|desktop-app|app|phone-app|pc-app]`, and
     `WINDOWS_VERSION=[win95|win98|winme|winnt4|win2000|winxp|winxp64|winvista|win7|win8|win8.1|win10]`.
+ *  [**New**] Building with MSYS2 is now fully supported for Makefile and
+    Autotools build systems.
  *  [**New**] `Makefile` `CONFIG=djgpp` now supports `CPU=` option to build
     optimized for a particular CPU. See `build/make/config-djgpp.mk` for all
     available options. `FLAVOURED_DIR=1` places the CPU-specific optimized
