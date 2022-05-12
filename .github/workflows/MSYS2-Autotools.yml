@@ -3,6 +3,8 @@ name: MSYS2 Autotools
 on:
   push:
     branches: [ master ]
+  pull_request:
+    branches: [ master ]
 
 jobs:
   build:
