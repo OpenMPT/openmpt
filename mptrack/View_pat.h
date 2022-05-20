@@ -363,7 +363,7 @@ public:
 	void SetSelectionInstrument(const INSTRUMENTINDEX instr, bool setEmptyInstrument);
 
 	void FindInstrument();
-	void JumpToPrevOrNextEntry(bool nextEntry);
+	void JumpToPrevOrNextEntry(bool nextEntry, bool select);
 
 	void TogglePluginEditor(int chan);
 

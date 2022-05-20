@@ -758,6 +758,8 @@ static constexpr struct
 	{2031, kcSampleLoadRaw, _T("Load Raw Sample")},
 	{2032, kcTogglePatternPlayRow, _T("Toggle row playback when navigating")},
 	{2033, kcInsNoteMapTransposeSamples, _T("Transpose Samples / Reset Map") },
+	{KeyCommand::Hidden, kcPrevEntryInColumnSelect, _T("kcPrevEntryInColumnSelect")},
+	{KeyCommand::Hidden, kcNextEntryInColumnSelect, _T("kcNextEntryInColumnSelect")},
 };
 
 // Get command descriptions etc.. loaded up.

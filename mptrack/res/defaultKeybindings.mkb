@@ -62,6 +62,8 @@ version:1
 2:1339:4:33:5		//Jump up by beat: Alt+PGUP (KeyDown|KeyHold)
 2:1340:6:34:5		//Snap down to beat: Ctrl+Alt+PGDOWN (KeyDown|KeyHold)
 2:1341:6:33:5		//Snap up to beat: Ctrl+Alt+PGUP (KeyDown|KeyHold)
+2:1971:6:38:5		//Jump to previous entry in column: Ctrl+Alt+UP (KeyDown|KeyHold)
+2:1972:6:40:5		//Jump to next entry in column: Ctrl+Alt+DOWN (KeyDown|KeyHold)
 2:1038:0:40:5		//Navigate down by 1 row: DOWN (KeyDown|KeyHold)
 2:1039:0:38:5		//Navigate up by 1 row: UP (KeyDown|KeyHold)
 2:1691:4:40:5		//Navigate down by spacing: Alt+DOWN (KeyDown|KeyHold)
