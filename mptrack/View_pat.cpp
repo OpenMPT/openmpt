@@ -4312,7 +4312,11 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 
 		case kcPrevEntryInColumn:
 		case kcNextEntryInColumn:
-			JumpToPrevOrNextEntry(wParam == kcNextEntryInColumn);
+			JumpToPrevOrNextEntry(wParam == kcNextEntryInColumn, false);
+			return wParam;
+		case kcPrevEntryInColumnSelect:
+		case kcNextEntryInColumnSelect:
+			JumpToPrevOrNextEntry(wParam == kcNextEntryInColumnSelect, true);
 			return wParam;
 
 		case kcNextPattern:	{	PATTERNINDEX n = m_nPattern + 1;
@@ -7074,7 +7078,7 @@ void CViewPattern::FindInstrument()
 
 
 // Find previous or next column entry (note, instrument, ...) on this channel
-void CViewPattern::JumpToPrevOrNextEntry(bool nextEntry)
+void CViewPattern::JumpToPrevOrNextEntry(bool nextEntry, bool select)
 {
 	const CSoundFile *sndFile = GetSoundFile();
 	if(sndFile == nullptr || GetCurrentOrder() >= Order().size())
@@ -7117,18 +7121,26 @@ void CViewPattern::JumpToPrevOrNextEntry(bool nextEntry)
 
 			if(found)
 			{
-				SetCurrentOrder(ord);
-				SetCurrentPattern(pat, row);
-				if(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_PLAYNAVIGATEROW)
+				if(select)
 				{
-					PatternStep(row);
+					CursorJump(static_cast<int>(row) - m_Cursor.GetRow(), false);
+				} else
+				{
+					SetCurrentOrder(ord);
+					SetCurrentPattern(pat, row);
+					if(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_PLAYNAVIGATEROW)
+					{
+						PatternStep(row);
+					}
 				}
 				return;
 			}
 			row += direction;
 		}
 
-		// Continue search in prev/next pattern
+		// Continue search in prev/next pattern (unless we also select - selections cannot span multiple patterns)
+		if(select)
+			return;
 		ORDERINDEX nextOrd = nextEntry ? order.GetNextOrderIgnoringSkips(ord) : order.GetPreviousOrderIgnoringSkips(ord);
 		pat = order[nextOrd];
 		if(nextOrd == ord || !sndFile->Patterns.IsValidPat(pat))
