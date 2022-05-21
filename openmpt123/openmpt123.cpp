@@ -1060,6 +1060,7 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 	
 	if ( multiline ) {
 		lines += 1;
+		// cppcheck-suppress identicalInnerCondition
 		if ( flags.show_ui ) {
 			lines += 1;
 		}
