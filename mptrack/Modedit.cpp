@@ -486,7 +486,7 @@ INSTRUMENTINDEX CModDoc::ReArrangeInstruments(const std::vector<INSTRUMENTINDEX>
 		m_SndFile.DestroyInstrument(i, doNoDeleteAssociatedSamples);
 	}
 
-	PrepareUndoForAllPatterns(false, "Rearrange Instrumens");
+	PrepareUndoForAllPatterns(false, "Rearrange Instruments");
 	GetInstrumentUndo().RearrangeInstruments(newIndex);
 	m_SndFile.Patterns.ForEachModCommand([&newIndex] (ModCommand &m)
 	{
