@@ -99,8 +99,7 @@ MPT_WARNING("Warning: libopenmpt is known to trigger bad code generation with Cl
 
 #if defined(MPT_ASSERT_HANDLER_NEEDED) && !defined(ENABLE_TESTS)
 
-MPT_NOINLINE void AssertHandler(const mpt::source_location &loc, const char *expr, const char *msg)
-{
+MPT_NOINLINE void AssertHandler(const mpt::source_location &loc, const char *expr, const char *msg) {
 	if(msg) {
 		mpt::log::GlobalLogger().SendLogMessage(loc, LogError, "ASSERT",
 			MPT_USTRING("ASSERTION FAILED: ") + mpt::ToUnicode(mpt::CharsetSource, msg) + MPT_USTRING(" (") + mpt::ToUnicode(mpt::CharsetSource, expr) + MPT_USTRING(")")
