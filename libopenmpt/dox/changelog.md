@@ -14,6 +14,10 @@ is just a high-level summary.
  *  [**Bug**] examples: Linking failed when using Autotools build system
     targeting MinGW.
 
+ *  [**Change**] Support for mingw-std-threads when building for MinGW targets
+    is now deprecated because this is not supported for GCC 11 or later (see
+    <https://github.com/meganz/mingw-std-threads/issues/79>).
+
 ### libopenmpt 0.6.3 (2022-04-24)
 
  *  Pitch / Pan Separation and Random Variation instrument properties were not
