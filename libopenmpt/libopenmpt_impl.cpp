@@ -87,12 +87,8 @@ MPT_WARNING("Warning: libopenmpt for WinRT is built with reduced functionality. 
 MPT_WARNING("Warning: libopenmpt built in non thread-safe mode because mutexes are not supported by the C++ standard library available.")
 #endif // MPT_MUTEX_NONE
 
-#if (defined(__MINGW32__) || defined(__MINGW64__)) && !defined(_GLIBCXX_HAS_GTHREADS) 
-#if defined(MPT_WITH_MINGWSTDTHREADS)
-MPT_WARNING("Warning: Building with mingw-std-threads is deprecated because this is not supported with GCC 11 or later.")
-#else // !MINGWSTDTHREADS
+#if MPT_OS_WINDOWS && (defined(__MINGW32__) || defined(__MINGW64__)) && MPT_LIBCXX_GNU && !defined(_GLIBCXX_HAS_GTHREADS)
 MPT_WARNING("Warning: Platform (Windows) supports multi-threading, however the toolchain (MinGW/GCC) does not. The resulting libopenmpt may not be thread-safe. This is a MinGW/GCC issue. You can avoid this warning by using a MinGW toolchain built with posix threading model as opposed to win32 threading model.")
-#endif // MINGWSTDTHREADS
 #endif // MINGW
 
 #if MPT_CLANG_AT_LEAST(5,0,0) && MPT_CLANG_BEFORE(11,0,0) && defined(__powerpc__) && !defined(__powerpc64__)

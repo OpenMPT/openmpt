@@ -52,34 +52,6 @@ AX_PTHREAD([
  []
 )
 
-# mingw c++ thread
-AC_LANG_PUSH([C++])
-case $host_os in
- mingw32*)
-  AC_CHECK_HEADER([mingw.mutex.h],
-   [
-    have_mingwstdtthreads=1
-   ],
-   [
-    have_mingwstdtthreads=0
-   ]
-  )
-  ;;
- *)
-  have_mingwstdtthreads=0
-  ;;
-esac
-AC_LANG_POP([C++])
-AS_IF([test "x$have_mingwstdtthreads" = "x1"],
- [
-  MINGWSTDTHREADS_CPPFLAGS=-DMPT_WITH_MINGWSTDTHREADS
- ],
- [
-  MINGWSTDTHREADS_CPPFLAGS=
- ]
-)
-AC_SUBST([MINGWSTDTHREADS_CPPFLAGS])
-
 
 LIBOPENMPT_LTVER_CURRENT=!!MPT_LIBOPENMPT_LTVER_CURRENT!!
 LIBOPENMPT_LTVER_REVISION=!!MPT_LIBOPENMPT_LTVER_REVISION!!
