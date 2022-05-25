@@ -618,14 +618,14 @@ private:
 			result[4 + 1] = (b >> 8) & 0xff;
 			result[4 + 2] = (b >> 16) & 0xff;
 			result[4 + 3] = (b >> 24) & 0xff;
-			result[8 + 0] = (d >> 0) & 0xff;
-			result[8 + 1] = (d >> 8) & 0xff;
-			result[8 + 2] = (d >> 16) & 0xff;
-			result[8 + 3] = (d >> 24) & 0xff;
-			result[12 + 0] = (c >> 0) & 0xff;
-			result[12 + 1] = (c >> 8) & 0xff;
-			result[12 + 2] = (c >> 16) & 0xff;
-			result[12 + 3] = (c >> 24) & 0xff;
+			result[8 + 0] = (c >> 0) & 0xff;
+			result[8 + 1] = (c >> 8) & 0xff;
+			result[8 + 2] = (c >> 16) & 0xff;
+			result[8 + 3] = (c >> 24) & 0xff;
+			result[12 + 0] = (d >> 0) & 0xff;
+			result[12 + 1] = (d >> 8) & 0xff;
+			result[12 + 2] = (d >> 16) & 0xff;
+			result[12 + 3] = (d >> 24) & 0xff;
 			return result;
 		}
 	};
