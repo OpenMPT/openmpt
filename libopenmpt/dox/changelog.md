@@ -70,6 +70,9 @@ is just a high-level summary.
     defaults to `1` and implies building a liballegro42 locally. This requires
     executing `build/download_externals.sh` before building to download the
     liballegro42 sources.
+ *  [**Change**] Support for mingw-std-threads when building for MinGW targets
+    is now deprecated because this is not supported for GCC 11 or later (see
+    <https://github.com/meganz/mingw-std-threads/issues/79>).
 
  *  [**Regression**] Full support for Visual Studio 2017 has been removed. We
     still support targeting Windows XP with Visual Studio 2017.
