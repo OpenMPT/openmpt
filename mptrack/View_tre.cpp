@@ -3575,7 +3575,7 @@ void CModTree::OnMuteOnlyEffects()
 	HTREEITEM hItem = GetSelectedItem();
 
 	const ModItem modItem = GetModItem(hItem);
-	const uint32 modItemID = modItem.val1;
+	[[maybe_unused]] const uint32 modItemID = modItem.val1;
 
 	ModTreeDocInfo *info = GetDocumentInfoFromItem(hItem);
 	if(info)
