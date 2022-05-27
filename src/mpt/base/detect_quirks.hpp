@@ -197,4 +197,35 @@
 
 
 
+#if MPT_CXX_AT_LEAST(20)
+#if MPT_LIBCXX_MS && MPT_OS_WINDOWS
+#if defined(NTDDI_VERSION)
+#if (NTDDI_VERSION < 0x0A000007) // < Windows 10 1903
+// std::chrono timezones require Windows 10 1903 with VS2022 as of 2022-01-22.
+// See <https://github.com/microsoft/STL/issues/1911> and
+// <https://github.com/microsoft/STL/issues/2163>.
+#define MPT_LIBCXX_QUIRK_NO_CHRONO_DATE
+#endif
+#else
+#define MPT_LIBCXX_QUIRK_NO_CHRONO_DATE
+#endif
+#endif
+#if MPT_LIBCXX_GNU_BEFORE(11)
+#define MPT_LIBCXX_QUIRK_NO_CHRONO_DATE
+#elif MPT_LIBCXX_LLVM_BEFORE(7000)
+#define MPT_LIBCXX_QUIRK_NO_CHRONO_DATE
+#endif
+#if MPT_LIBCXX_MS && (MPT_MSVC_BEFORE(2022, 2) || !MPT_COMPILER_MSVC)
+// Causes massive memory leaks.
+// See
+// <https://developercommunity.visualstudio.com/t/stdchronoget-tzdb-list-memory-leak/1644641>
+// / <https://github.com/microsoft/STL/issues/2504>.
+#define MPT_LIBCXX_QUIRK_NO_CHRONO_DATE_PARSE
+#elif MPT_LIBCXX_GNU
+#define MPT_LIBCXX_QUIRK_NO_CHRONO_DATE_PARSE
+#endif
+#endif
+
+
+
 #endif // MPT_BASE_DETECT_QUIRKS_HPP
