@@ -846,7 +846,7 @@ inline bool operator ==(Gregorian a, Gregorian b) {
 }
 
 static int64 TestDate1(int s, int m, int h, int D, int M, int Y) {
-	return mpt::Date::Unix::FromUTC(Gregorian::ToTM(Gregorian{Y,M,D,h,m,s}));
+	return mpt::Date::UnixFromUTCtm(Gregorian::ToTM(Gregorian{Y,M,D,h,m,s}));
 }
 
 static Gregorian TestDate2(int s, int m, int h, int D, int M, int Y) {
@@ -1121,30 +1121,30 @@ static MPT_NOINLINE void TestMisc2()
 	VERIFY_EQUAL(    1413064016, TestDate1( 56, 46, 21, 11, 10, 2014 ));
 	VERIFY_EQUAL(    1413064100, TestDate1( 20, 48, 21, 11, 10, 2014 ));
 
-	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::Unix(             0).AsUTC()), TestDate2(  0,  0,  0,  1,  1, 1970 ));
-	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::Unix(          3600).AsUTC()), TestDate2(  0,  0,  1,  1,  1, 1970 ));
-	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::Unix(         86400).AsUTC()), TestDate2(  0,  0,  0,  2,  1, 1970 ));
-	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::Unix(      31536000).AsUTC()), TestDate2(  0,  0,  0,  1,  1, 1971 ));
-	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::Unix(     100000000).AsUTC()), TestDate2( 40, 46,  9,  3,  3, 1973 ));
-	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::Unix(     951782400).AsUTC()), TestDate2(  0,  0,  0, 29,  2, 2000 ));
-	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::Unix(    1000000000).AsUTC()), TestDate2( 40, 46,  1,  9,  9, 2001 ));
-	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::Unix(    1044057600).AsUTC()), TestDate2(  0,  0,  0,  1,  2, 2003 ));
-	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::Unix(    1044144000).AsUTC()), TestDate2(  0,  0,  0,  2,  2, 2003 ));
-	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::Unix(    1046476800).AsUTC()), TestDate2(  0,  0,  0,  1,  3, 2003 ));
-	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::Unix(    1064966400).AsUTC()), TestDate2(  0,  0,  0,  1, 10, 2003 ));
-	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::Unix(    1077926399).AsUTC()), TestDate2( 59, 59, 23, 27,  2, 2004 ));
-	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::Unix(    1077926400).AsUTC()), TestDate2(  0,  0,  0, 28,  2, 2004 ));
-	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::Unix(    1077926410).AsUTC()), TestDate2( 10,  0,  0, 28,  2, 2004 ));
-	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::Unix(    1078012799).AsUTC()), TestDate2( 59, 59, 23, 28,  2, 2004 ));
-	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::Unix(    1078012800).AsUTC()), TestDate2(  0,  0,  0, 29,  2, 2004 ));
-	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::Unix(    1078012820).AsUTC()), TestDate2( 20,  0,  0, 29,  2, 2004 ));
-	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::Unix(    1078099199).AsUTC()), TestDate2( 59, 59, 23, 29,  2, 2004 ));
-	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::Unix(    1078099200).AsUTC()), TestDate2(  0,  0,  0,  1,  3, 2004 ));
-	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::Unix(    1078099230).AsUTC()), TestDate2( 30,  0,  0,  1,  3, 2004 ));
-	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::Unix(    1078185599).AsUTC()), TestDate2( 59, 59, 23,  1,  3, 2004 ));
-	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::Unix(    1096588800).AsUTC()), TestDate2(  0,  0,  0,  1, 10, 2004 ));
-	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::Unix(    1413064016).AsUTC()), TestDate2( 56, 46, 21, 11, 10, 2014 ));
-	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::Unix(    1413064100).AsUTC()), TestDate2( 20, 48, 21, 11, 10, 2014 ));
+	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::UnixAsUTCtm(mpt::Date::Unix(             0))), TestDate2(  0,  0,  0,  1,  1, 1970 ));
+	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::UnixAsUTCtm(mpt::Date::Unix(          3600))), TestDate2(  0,  0,  1,  1,  1, 1970 ));
+	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::UnixAsUTCtm(mpt::Date::Unix(         86400))), TestDate2(  0,  0,  0,  2,  1, 1970 ));
+	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::UnixAsUTCtm(mpt::Date::Unix(      31536000))), TestDate2(  0,  0,  0,  1,  1, 1971 ));
+	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::UnixAsUTCtm(mpt::Date::Unix(     100000000))), TestDate2( 40, 46,  9,  3,  3, 1973 ));
+	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::UnixAsUTCtm(mpt::Date::Unix(     951782400))), TestDate2(  0,  0,  0, 29,  2, 2000 ));
+	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::UnixAsUTCtm(mpt::Date::Unix(    1000000000))), TestDate2( 40, 46,  1,  9,  9, 2001 ));
+	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::UnixAsUTCtm(mpt::Date::Unix(    1044057600))), TestDate2(  0,  0,  0,  1,  2, 2003 ));
+	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::UnixAsUTCtm(mpt::Date::Unix(    1044144000))), TestDate2(  0,  0,  0,  2,  2, 2003 ));
+	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::UnixAsUTCtm(mpt::Date::Unix(    1046476800))), TestDate2(  0,  0,  0,  1,  3, 2003 ));
+	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::UnixAsUTCtm(mpt::Date::Unix(    1064966400))), TestDate2(  0,  0,  0,  1, 10, 2003 ));
+	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::UnixAsUTCtm(mpt::Date::Unix(    1077926399))), TestDate2( 59, 59, 23, 27,  2, 2004 ));
+	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::UnixAsUTCtm(mpt::Date::Unix(    1077926400))), TestDate2(  0,  0,  0, 28,  2, 2004 ));
+	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::UnixAsUTCtm(mpt::Date::Unix(    1077926410))), TestDate2( 10,  0,  0, 28,  2, 2004 ));
+	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::UnixAsUTCtm(mpt::Date::Unix(    1078012799))), TestDate2( 59, 59, 23, 28,  2, 2004 ));
+	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::UnixAsUTCtm(mpt::Date::Unix(    1078012800))), TestDate2(  0,  0,  0, 29,  2, 2004 ));
+	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::UnixAsUTCtm(mpt::Date::Unix(    1078012820))), TestDate2( 20,  0,  0, 29,  2, 2004 ));
+	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::UnixAsUTCtm(mpt::Date::Unix(    1078099199))), TestDate2( 59, 59, 23, 29,  2, 2004 ));
+	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::UnixAsUTCtm(mpt::Date::Unix(    1078099200))), TestDate2(  0,  0,  0,  1,  3, 2004 ));
+	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::UnixAsUTCtm(mpt::Date::Unix(    1078099230))), TestDate2( 30,  0,  0,  1,  3, 2004 ));
+	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::UnixAsUTCtm(mpt::Date::Unix(    1078185599))), TestDate2( 59, 59, 23,  1,  3, 2004 ));
+	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::UnixAsUTCtm(mpt::Date::Unix(    1096588800))), TestDate2(  0,  0,  0,  1, 10, 2004 ));
+	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::UnixAsUTCtm(mpt::Date::Unix(    1413064016))), TestDate2( 56, 46, 21, 11, 10, 2014 ));
+	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::UnixAsUTCtm(mpt::Date::Unix(    1413064100))), TestDate2( 20, 48, 21, 11, 10, 2014 ));
 
 
 #ifdef MODPLUG_TRACKER

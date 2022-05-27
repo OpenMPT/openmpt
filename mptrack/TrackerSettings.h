@@ -491,7 +491,7 @@ template<> inline mpt::Date::Unix FromSettingValue(const SettingValue &val)
 		lastUpdate.tm_year -= 1900;
 		lastUpdate.tm_mon--;
 	}
-	time_t outTime = mpt::Date::Unix::FromUTC(lastUpdate);
+	time_t outTime = mpt::Date::UnixFromUTCtm(lastUpdate);
 	if(outTime < 0)
 	{
 		outTime = 0;

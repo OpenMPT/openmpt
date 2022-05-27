@@ -128,16 +128,16 @@ static void FromDaynum(int32 d, int32 & year, int32 & month, int32 & day)
 	day = static_cast<int32>(dd);
 }
 
-mpt::Date::Unix Unix::FromUTC(tm timeUtc)
+mpt::Date::Unix UnixFromUTCtm(tm timeUtc)
 {
 	int32 daynum = ToDaynum(timeUtc.tm_year+1900, timeUtc.tm_mon+1, timeUtc.tm_mday);
 	int64 seconds = static_cast<int64>(daynum - ToDaynum(1970,1,1))*24*60*60 + timeUtc.tm_hour*60*60 + timeUtc.tm_min*60 + timeUtc.tm_sec;
 	return mpt::Date::Unix(seconds);
 }
 
-tm Unix::AsUTC() const 
+tm UnixAsUTCtm(mpt::Date::Unix unix)
 {
-	int64 tmp = Value;
+	int64 tmp = static_cast<int64>(unix);
 	int64 seconds = tmp % 60; tmp /= 60;
 	int64 minutes = tmp % 60; tmp /= 60;
 	int64 hours   = tmp % 24; tmp /= 24;

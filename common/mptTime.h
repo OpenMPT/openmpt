@@ -53,10 +53,11 @@ public:
 	Unix();
 	explicit Unix(int64 unixtime);
 	operator int64 () const;
-public:
-	static mpt::Date::Unix FromUTC(tm timeUtc);
-	tm AsUTC() const;
 };
+
+mpt::Date::Unix UnixFromUTCtm(tm timeUtc);
+
+tm UnixAsUTCtm(mpt::Date::Unix unix);
 
 mpt::ustring ToShortenedISO8601(tm date); // i.e. 2015-01-15T18:32:01Z
 
