@@ -135,9 +135,9 @@ mpt::Date::Unix UnixFromUTCtm(tm timeUtc)
 	return mpt::Date::Unix(seconds);
 }
 
-tm UnixAsUTCtm(mpt::Date::Unix unix)
+tm UnixAsUTCtm(mpt::Date::Unix unixtime)
 {
-	int64 tmp = static_cast<int64>(unix);
+	int64 tmp = static_cast<int64>(unixtime);
 	int64 seconds = tmp % 60; tmp /= 60;
 	int64 minutes = tmp % 60; tmp /= 60;
 	int64 hours   = tmp % 24; tmp /= 24;

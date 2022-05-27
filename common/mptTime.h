@@ -57,7 +57,7 @@ public:
 
 mpt::Date::Unix UnixFromUTCtm(tm timeUtc);
 
-tm UnixAsUTCtm(mpt::Date::Unix unix);
+tm UnixAsUTCtm(mpt::Date::Unix unixtime);
 
 mpt::ustring ToShortenedISO8601(tm date); // i.e. 2015-01-15T18:32:01Z
 
