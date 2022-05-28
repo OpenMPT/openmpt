@@ -1214,9 +1214,9 @@ bool CSoundFile::ReadGT2(FileReader &file, ModLoadingFlags loadFlags)
 	m_playBehaviour.set(kApplyOffsetWithoutNote);
 
 	FileHistory mptHistory;
-	mptHistory.loadDate.tm_mday = Clamp<uint8, uint8>(fileHeader.day, 1, 31);
-	mptHistory.loadDate.tm_mon = Clamp<uint8, uint8>(fileHeader.month, 1, 12) - 1;
-	mptHistory.loadDate.tm_year = fileHeader.year - 1900;
+	mptHistory.loadDate.day = Clamp<uint8, uint8>(fileHeader.day, 1, 31);
+	mptHistory.loadDate.month = Clamp<uint8, uint8>(fileHeader.month, 1, 12);
+	mptHistory.loadDate.year = fileHeader.year;
 	m_FileHistory.push_back(mptHistory);
 
 	m_nChannels = 32;

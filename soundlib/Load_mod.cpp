@@ -2180,12 +2180,12 @@ bool CSoundFile::ReadPT36(FileReader &file, ModLoadingFlags loadFlags)
 		   && mpt::is_in_range(info.dateMinute, 0, 59) && mpt::is_in_range(info.dateSecond, 0, 59))
 		{
 			FileHistory mptHistory;
-			mptHistory.loadDate.tm_year = info.dateYear;
-			mptHistory.loadDate.tm_mon = info.dateMonth - 1;
-			mptHistory.loadDate.tm_mday = info.dateDay;
-			mptHistory.loadDate.tm_hour = info.dateHour;
-			mptHistory.loadDate.tm_min = info.dateMinute;
-			mptHistory.loadDate.tm_sec = info.dateSecond;
+			mptHistory.loadDate.year = info.dateYear + 1900;
+			mptHistory.loadDate.month = info.dateMonth;
+			mptHistory.loadDate.day = info.dateDay;
+			mptHistory.loadDate.hours = info.dateHour;
+			mptHistory.loadDate.minutes = info.dateMinute;
+			mptHistory.loadDate.seconds = info.dateSecond;
 			m_FileHistory.push_back(mptHistory);
 		}
 	}

@@ -57,6 +57,7 @@ mpt::ustring ToUString(uint64 time100ns); // i.e. 2015-01-15 18:32:01.718
 
 enum class LogicalTimezone
 {
+	Unspecified,
 	UTC,
 #if defined(MODPLUG_TRACKER)
 	Local,
@@ -95,6 +96,33 @@ struct Gregorian
 			;
 	}
 };
+
+using AnyGregorian = Gregorian<LogicalTimezone::Unspecified>;
+
+#if defined(MPT_TIME_CTIME)
+inline tm AsTm(AnyGregorian val)
+{
+	tm result{};
+	result.tm_year = val.year - 1900;
+	result.tm_mon = val.month - 1;
+	result.tm_mday = val.day;
+	result.tm_hour = val.hours;
+	result.tm_min = val.minutes;
+	result.tm_sec = static_cast<int>(val.seconds);
+	return result;
+}
+inline AnyGregorian AsGregorian(tm val)
+{
+	AnyGregorian result{};
+	result.year = val.tm_year + 1900;
+	result.month = val.tm_mon + 1;
+	result.day = val.tm_mday;
+	result.hours = val.tm_hour;
+	result.minutes = val.tm_min;
+	result.seconds = val.tm_sec;
+	return result;
+}
+#endif
 
 using UTC = Gregorian<LogicalTimezone::UTC>;
 
@@ -185,6 +213,8 @@ mpt::Date::Unix UnixFromUTC(UTC timeUtc);
 mpt::Date::UTC UnixAsUTC(Unix tp);
 
 #endif
+
+mpt::ustring ToShortenedISO8601(AnyGregorian date); // i.e. 2015-01-15T18:32:01
 
 mpt::ustring ToShortenedISO8601(UTC date); // i.e. 2015-01-15T18:32:01Z
 

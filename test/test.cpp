@@ -812,45 +812,12 @@ static MPT_NOINLINE void TestStringFormatting()
 }
 
 
-namespace {
-
-struct Gregorian {
-	int Y,M,D,h,m,s;
-	static Gregorian FromTM(tm t) {
-		Gregorian g;
-		g.Y = t.tm_year + 1900;
-		g.M = t.tm_mon + 1;
-		g.D = t.tm_mday;
-		g.h = t.tm_hour;
-		g.m = t.tm_min;
-		g.s = t.tm_sec;
-		return g;
-	}
-	static tm ToTM(Gregorian g) {
-		tm t;
-		MemsetZero(t);
-		t.tm_year = g.Y - 1900;
-		t.tm_mon = g.M - 1;
-		t.tm_mday = g.D;
-		t.tm_hour = g.h;
-		t.tm_min = g.m;
-		t.tm_sec = g.s;
-		return t;
-	}
-};
-
-inline bool operator ==(Gregorian a, Gregorian b) {
-	return a.Y == b.Y && a.M == b.M && a.D == b.D && a.h == b.h && a.m == b.m && a.s == b.s;
+static int64 TestDate1(int s, int m, int h, unsigned int D, unsigned int M, int Y) {
+	return mpt::Date::UnixAsSeconds(mpt::Date::UnixFromUTC(mpt::Date::UTC{Y,M,D,h,m,s}));
 }
 
-}
-
-static int64 TestDate1(int s, int m, int h, int D, int M, int Y) {
-	return mpt::Date::UnixAsSeconds(mpt::Date::UnixFromUTCtm(Gregorian::ToTM(Gregorian{Y,M,D,h,m,s})));
-}
-
-static Gregorian TestDate2(int s, int m, int h, int D, int M, int Y) {
-	return Gregorian{Y,M,D,h,m,s};
+static mpt::Date::UTC TestDate2(int s, int m, int h, unsigned int D, unsigned int M, int Y) {
+	return mpt::Date::UTC{Y,M,D,h,m,s};
 }
 
 
@@ -1121,30 +1088,30 @@ static MPT_NOINLINE void TestMisc2()
 	VERIFY_EQUAL(    1413064016, TestDate1( 56, 46, 21, 11, 10, 2014 ));
 	VERIFY_EQUAL(    1413064100, TestDate1( 20, 48, 21, 11, 10, 2014 ));
 
-	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::UnixAsUTCtm(mpt::Date::UnixFromSeconds(             0))), TestDate2(  0,  0,  0,  1,  1, 1970 ));
-	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::UnixAsUTCtm(mpt::Date::UnixFromSeconds(          3600))), TestDate2(  0,  0,  1,  1,  1, 1970 ));
-	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::UnixAsUTCtm(mpt::Date::UnixFromSeconds(         86400))), TestDate2(  0,  0,  0,  2,  1, 1970 ));
-	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::UnixAsUTCtm(mpt::Date::UnixFromSeconds(      31536000))), TestDate2(  0,  0,  0,  1,  1, 1971 ));
-	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::UnixAsUTCtm(mpt::Date::UnixFromSeconds(     100000000))), TestDate2( 40, 46,  9,  3,  3, 1973 ));
-	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::UnixAsUTCtm(mpt::Date::UnixFromSeconds(     951782400))), TestDate2(  0,  0,  0, 29,  2, 2000 ));
-	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::UnixAsUTCtm(mpt::Date::UnixFromSeconds(    1000000000))), TestDate2( 40, 46,  1,  9,  9, 2001 ));
-	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::UnixAsUTCtm(mpt::Date::UnixFromSeconds(    1044057600))), TestDate2(  0,  0,  0,  1,  2, 2003 ));
-	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::UnixAsUTCtm(mpt::Date::UnixFromSeconds(    1044144000))), TestDate2(  0,  0,  0,  2,  2, 2003 ));
-	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::UnixAsUTCtm(mpt::Date::UnixFromSeconds(    1046476800))), TestDate2(  0,  0,  0,  1,  3, 2003 ));
-	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::UnixAsUTCtm(mpt::Date::UnixFromSeconds(    1064966400))), TestDate2(  0,  0,  0,  1, 10, 2003 ));
-	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::UnixAsUTCtm(mpt::Date::UnixFromSeconds(    1077926399))), TestDate2( 59, 59, 23, 27,  2, 2004 ));
-	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::UnixAsUTCtm(mpt::Date::UnixFromSeconds(    1077926400))), TestDate2(  0,  0,  0, 28,  2, 2004 ));
-	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::UnixAsUTCtm(mpt::Date::UnixFromSeconds(    1077926410))), TestDate2( 10,  0,  0, 28,  2, 2004 ));
-	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::UnixAsUTCtm(mpt::Date::UnixFromSeconds(    1078012799))), TestDate2( 59, 59, 23, 28,  2, 2004 ));
-	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::UnixAsUTCtm(mpt::Date::UnixFromSeconds(    1078012800))), TestDate2(  0,  0,  0, 29,  2, 2004 ));
-	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::UnixAsUTCtm(mpt::Date::UnixFromSeconds(    1078012820))), TestDate2( 20,  0,  0, 29,  2, 2004 ));
-	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::UnixAsUTCtm(mpt::Date::UnixFromSeconds(    1078099199))), TestDate2( 59, 59, 23, 29,  2, 2004 ));
-	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::UnixAsUTCtm(mpt::Date::UnixFromSeconds(    1078099200))), TestDate2(  0,  0,  0,  1,  3, 2004 ));
-	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::UnixAsUTCtm(mpt::Date::UnixFromSeconds(    1078099230))), TestDate2( 30,  0,  0,  1,  3, 2004 ));
-	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::UnixAsUTCtm(mpt::Date::UnixFromSeconds(    1078185599))), TestDate2( 59, 59, 23,  1,  3, 2004 ));
-	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::UnixAsUTCtm(mpt::Date::UnixFromSeconds(    1096588800))), TestDate2(  0,  0,  0,  1, 10, 2004 ));
-	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::UnixAsUTCtm(mpt::Date::UnixFromSeconds(    1413064016))), TestDate2( 56, 46, 21, 11, 10, 2014 ));
-	VERIFY_EQUAL(Gregorian::FromTM(mpt::Date::UnixAsUTCtm(mpt::Date::UnixFromSeconds(    1413064100))), TestDate2( 20, 48, 21, 11, 10, 2014 ));
+	VERIFY_EQUAL(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(             0)), TestDate2(  0,  0,  0,  1,  1, 1970 ));
+	VERIFY_EQUAL(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(          3600)), TestDate2(  0,  0,  1,  1,  1, 1970 ));
+	VERIFY_EQUAL(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(         86400)), TestDate2(  0,  0,  0,  2,  1, 1970 ));
+	VERIFY_EQUAL(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(      31536000)), TestDate2(  0,  0,  0,  1,  1, 1971 ));
+	VERIFY_EQUAL(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(     100000000)), TestDate2( 40, 46,  9,  3,  3, 1973 ));
+	VERIFY_EQUAL(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(     951782400)), TestDate2(  0,  0,  0, 29,  2, 2000 ));
+	VERIFY_EQUAL(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(    1000000000)), TestDate2( 40, 46,  1,  9,  9, 2001 ));
+	VERIFY_EQUAL(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(    1044057600)), TestDate2(  0,  0,  0,  1,  2, 2003 ));
+	VERIFY_EQUAL(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(    1044144000)), TestDate2(  0,  0,  0,  2,  2, 2003 ));
+	VERIFY_EQUAL(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(    1046476800)), TestDate2(  0,  0,  0,  1,  3, 2003 ));
+	VERIFY_EQUAL(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(    1064966400)), TestDate2(  0,  0,  0,  1, 10, 2003 ));
+	VERIFY_EQUAL(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(    1077926399)), TestDate2( 59, 59, 23, 27,  2, 2004 ));
+	VERIFY_EQUAL(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(    1077926400)), TestDate2(  0,  0,  0, 28,  2, 2004 ));
+	VERIFY_EQUAL(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(    1077926410)), TestDate2( 10,  0,  0, 28,  2, 2004 ));
+	VERIFY_EQUAL(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(    1078012799)), TestDate2( 59, 59, 23, 28,  2, 2004 ));
+	VERIFY_EQUAL(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(    1078012800)), TestDate2(  0,  0,  0, 29,  2, 2004 ));
+	VERIFY_EQUAL(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(    1078012820)), TestDate2( 20,  0,  0, 29,  2, 2004 ));
+	VERIFY_EQUAL(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(    1078099199)), TestDate2( 59, 59, 23, 29,  2, 2004 ));
+	VERIFY_EQUAL(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(    1078099200)), TestDate2(  0,  0,  0,  1,  3, 2004 ));
+	VERIFY_EQUAL(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(    1078099230)), TestDate2( 30,  0,  0,  1,  3, 2004 ));
+	VERIFY_EQUAL(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(    1078185599)), TestDate2( 59, 59, 23,  1,  3, 2004 ));
+	VERIFY_EQUAL(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(    1096588800)), TestDate2(  0,  0,  0,  1, 10, 2004 ));
+	VERIFY_EQUAL(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(    1413064016)), TestDate2( 56, 46, 21, 11, 10, 2014 ));
+	VERIFY_EQUAL(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(    1413064100)), TestDate2( 20, 48, 21, 11, 10, 2014 ));
 
 
 #ifdef MODPLUG_TRACKER
@@ -2104,12 +2071,12 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 	// Edit history
 	VERIFY_EQUAL_NONCONT(sndFile.GetFileHistory().size() > 15, true);
 	const FileHistory &fh = sndFile.GetFileHistory().front();
-	VERIFY_EQUAL_NONCONT(fh.loadDate.tm_year, 111);
-	VERIFY_EQUAL_NONCONT(fh.loadDate.tm_mon, 5);
-	VERIFY_EQUAL_NONCONT(fh.loadDate.tm_mday, 14);
-	VERIFY_EQUAL_NONCONT(fh.loadDate.tm_hour, 21);
-	VERIFY_EQUAL_NONCONT(fh.loadDate.tm_min, 8);
-	VERIFY_EQUAL_NONCONT(fh.loadDate.tm_sec, 32);
+	VERIFY_EQUAL_NONCONT(fh.loadDate.year, 2011);
+	VERIFY_EQUAL_NONCONT(fh.loadDate.month, 6);
+	VERIFY_EQUAL_NONCONT(fh.loadDate.day, 14);
+	VERIFY_EQUAL_NONCONT(fh.loadDate.hours, 21);
+	VERIFY_EQUAL_NONCONT(fh.loadDate.minutes, 8);
+	VERIFY_EQUAL_NONCONT(fh.loadDate.seconds, 32);
 	VERIFY_EQUAL_NONCONT((uint32)((double)fh.openTime / HISTORY_TIMER_PRECISION), 31);
 
 	// Macros

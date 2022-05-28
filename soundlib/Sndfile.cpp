@@ -56,12 +56,12 @@ bool SettingCacheCompleteFileBeforeLoading()
 
 mpt::ustring FileHistory::AsISO8601() const
 {
-	tm date = loadDate;
+	tm date = mpt::Date::AsTm(loadDate);
 	if(openTime > 0)
 	{
 		// Calculate the date when editing finished.
 		double openSeconds = static_cast<double>(openTime) / HISTORY_TIMER_PRECISION;
-		tm tmpLoadDate = loadDate;
+		tm tmpLoadDate = mpt::Date::AsTm(loadDate);
 		int64 loadDateSinceEpoch = mpt::Date::UnixAsSeconds(mpt::Date::UnixFromUTCtm(tmpLoadDate));
 		int64 saveDateSinceEpoch = loadDateSinceEpoch + mpt::saturate_round<int64>(openSeconds);
 		date = mpt::Date::UnixAsUTCtm(mpt::Date::UnixFromSeconds(saveDateSinceEpoch));

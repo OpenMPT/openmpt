@@ -1317,7 +1317,8 @@ BOOL CEditHistoryDlg::OnInitDialog()
 		if(entry.HasValidDate())
 		{
 			TCHAR szDate[32];
-			_tcsftime(szDate, std::size(szDate), _T("%d %b %Y, %H:%M:%S"), &entry.loadDate);
+			const tm loadDate = mpt::Date::AsTm(entry.loadDate);
+			_tcsftime(szDate, std::size(szDate), _T("%d %b %Y, %H:%M:%S"), &loadDate);
 			sDate = szDate;
 		} else
 		{

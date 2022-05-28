@@ -1360,15 +1360,13 @@ static uint32 SaveITEditHistory(const CSoundFile &sndFile, std::ostream *file)
 		{
 			// Current ("new") timestamp
 			const time_t creationTime = pModDoc->GetCreationTime();
-
-			MemsetZero(mptHistory.loadDate);
+			mptHistory.loadDate = mpt::Date::AnyGregorian{};
 			//localtime_s(&loadDate, &creationTime);
 			const tm* const p = localtime(&creationTime);
 			if (p != nullptr)
-				mptHistory.loadDate = *p;
+				mptHistory.loadDate = mpt::Date::AsGregorian(*p);
 			else
 				sndFile.AddToLog(LogError, U_("Unable to retrieve current time."));
-
 			mptHistory.openTime = (uint32)(difftime(time(nullptr), creationTime) * HISTORY_TIMER_PRECISION);
 #endif // MODPLUG_TRACKER
 		}

@@ -911,9 +911,9 @@ bool CSoundFile::ReadDMF(FileReader &file, ModLoadingFlags loadFlags)
 	m_songArtist = mpt::ToUnicode(mpt::Charset::CP437, mpt::String::ReadBuf(mpt::String::spacePadded, fileHeader.composer));
 
 	FileHistory mptHistory;
-	mptHistory.loadDate.tm_mday = Clamp(fileHeader.creationDay, uint8(1), uint8(31));
-	mptHistory.loadDate.tm_mon = Clamp(fileHeader.creationMonth, uint8(1), uint8(12)) - 1;
-	mptHistory.loadDate.tm_year = fileHeader.creationYear;
+	mptHistory.loadDate.day = Clamp(fileHeader.creationDay, uint8(1), uint8(31));
+	mptHistory.loadDate.month = Clamp(fileHeader.creationMonth, uint8(1), uint8(12));
+	mptHistory.loadDate.year = 1900 + fileHeader.creationYear;
 	m_FileHistory.clear();
 	m_FileHistory.push_back(mptHistory);
 

@@ -146,10 +146,21 @@ mpt::Date::UTC UnixAsUTC(Unix tp)
 
 #endif
 
-mpt::ustring ToShortenedISO8601(mpt::Date::UTC date)
+template <LogicalTimezone TZ>
+static mpt::ustring ToShortenedISO8601Impl(mpt::Date::Gregorian<TZ> date)
 {
 	mpt::ustring result;
-	mpt::ustring tz = U_("Z");
+	mpt::ustring tz;
+	if constexpr(TZ == LogicalTimezone::Unspecified)
+	{
+		tz = U_("");
+	} else if constexpr(TZ == LogicalTimezone::UTC)
+	{
+		tz = U_("Z");
+	} else
+	{
+		tz = U_("");
+	}
 	if(date.year == 0)
 	{
 		return result;
@@ -170,6 +181,16 @@ mpt::ustring ToShortenedISO8601(mpt::Date::UTC date)
 	result += U_(":") + mpt::ufmt::dec0<2>(date.seconds);
 	result += tz;
 	return result;
+}
+
+mpt::ustring ToShortenedISO8601(mpt::Date::AnyGregorian date)
+{
+	return ToShortenedISO8601Impl(date);
+}
+
+mpt::ustring ToShortenedISO8601(mpt::Date::UTC date)
+{
+	return ToShortenedISO8601Impl(date);
 }
 
 #if defined(MPT_TIME_CTIME)
