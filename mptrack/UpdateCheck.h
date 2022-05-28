@@ -14,7 +14,7 @@
 
 #include "mpt/uuid/uuid.hpp"
 
-#include <time.h>
+#include "../common/mptTime.h"
 
 #include <atomic>
 
@@ -40,9 +40,12 @@ enum UpdateChannel : uint32
 
 struct UpdateCheckResult
 {
-	time_t CheckTime = time_t{};
+	mpt::Date::Unix CheckTime = mpt::Date::Unix{};
 	std::vector<std::byte> json;
-	bool IsFromCache() const noexcept { return CheckTime == time_t{}; }
+	bool IsFromCache() const noexcept
+	{
+		return CheckTime == mpt::Date::Unix{};
+	}
 };
 
 class CUpdateCheck

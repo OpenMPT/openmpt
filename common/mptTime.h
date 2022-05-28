@@ -12,9 +12,20 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
+#if MPT_CXX_AT_LEAST(20) && !defined(MPT_LIBCXX_QUIRK_NO_CHRONO_DATE)
+#include <chrono>
+#endif
 #include <string>
 
+#if MPT_CXX_BEFORE(20) || defined(MPT_LIBCXX_QUIRK_NO_CHRONO_DATE)
 #include <time.h>
+#endif
+
+#define MPT_TIME_CTIME
+
+#if defined(MPT_TIME_CTIME)
+#include <time.h>
+#endif
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -44,22 +55,148 @@ mpt::ustring ToUString(uint64 time100ns); // i.e. 2015-01-15 18:32:01.718
 
 #endif // MODPLUG_TRACKER
 
-class Unix
+enum class LogicalTimezone
 {
-// int64 counts 1s since 1970-01-01T00:00Z
-private:
-	int64 Value;
-public:
-	Unix();
-	explicit Unix(int64 unixtime);
-	operator int64 () const;
+	UTC,
+#if defined(MODPLUG_TRACKER)
+	Local,
+#endif // MODPLUG_TRACKER
 };
+
+template <LogicalTimezone tz>
+struct Gregorian
+{
+	int          year    = 0;
+	unsigned int month   = 0;
+	unsigned int day     = 0;
+	int32        hours   = 0;
+	int32        minutes = 0;
+	int64        seconds = 0;
+	friend bool operator==(const Gregorian<tz>& lhs, const Gregorian<tz>& rhs)
+	{
+		return true
+			&& lhs.year == rhs.year
+			&& lhs.month == rhs.month
+			&& lhs.day == rhs.day
+			&& lhs.hours == rhs.hours
+			&& lhs.minutes == rhs.minutes
+			&& lhs.seconds == rhs.seconds
+			;
+	}
+	friend bool operator!=(const Gregorian<tz>& lhs, const Gregorian<tz>& rhs)
+	{
+		return false
+			|| lhs.year != rhs.year
+			|| lhs.month != rhs.month
+			|| lhs.day != rhs.day
+			|| lhs.hours != rhs.hours
+			|| lhs.minutes != rhs.minutes
+			|| lhs.seconds != rhs.seconds
+			;
+	}
+};
+
+using UTC = Gregorian<LogicalTimezone::UTC>;
+
+#if defined(MODPLUG_TRACKER)
+using Local = Gregorian<LogicalTimezone::Local>;
+#endif // MODPLUG_TRACKER
+
+#if MPT_CXX_AT_LEAST(20) && !defined(MPT_LIBCXX_QUIRK_NO_CHRONO_DATE)
+
+using Unix = std::chrono::system_clock::time_point;
+
+inline Unix UnixNow()
+{
+	return std::chrono::system_clock::now();
+}
+
+inline int64 UnixAsSeconds(Unix tp)
+{
+	return std::chrono::duration_cast<std::chrono::seconds>(tp.time_since_epoch()).count();
+}
+
+inline Unix UnixFromSeconds(int64 seconds)
+{
+	return std::chrono::system_clock::time_point{std::chrono::seconds{seconds}};
+}
+
+inline mpt::Date::Unix UnixFromUTC(UTC utc)
+{
+	std::chrono::year_month_day ymd =
+		std::chrono::year{utc.year} /
+		std::chrono::month{utc.month} /
+		std::chrono::day{utc.day};
+	std::chrono::hh_mm_ss<std::chrono::seconds> hms{
+		std::chrono::hours{utc.hours} +
+		std::chrono::minutes{utc.minutes} +
+		std::chrono::seconds{utc.seconds}};
+	return std::chrono::system_clock::time_point{static_cast<std::chrono::sys_days>(ymd)} + hms.to_duration();
+}
+
+inline mpt::Date::UTC UnixAsUTC(Unix tp)
+{
+	std::chrono::sys_days dp = std::chrono::floor<std::chrono::days>(tp);
+	std::chrono::year_month_day ymd{dp};
+	std::chrono::hh_mm_ss hms{tp - dp};
+	mpt::Date::UTC result;
+	result.year = static_cast<int>(ymd.year());
+	result.month = static_cast<unsigned int>(ymd.month());
+	result.day = static_cast<unsigned int>(ymd.day());
+	result.hours = hms.hours().count();
+	result.minutes = hms.minutes().count();
+	result.seconds = hms.seconds().count();
+	return result;
+}
+
+#else
+
+// int64 counts 1s since 1970-01-01T00:00Z
+struct Unix
+{
+	int64 value{};
+	friend bool operator==(const Unix &a, const Unix &b)
+	{
+		return a.value == b.value;
+	}
+	friend bool operator!=(const Unix &a, const Unix &b)
+	{
+		return a.value != b.value;
+	}
+};
+
+inline Unix UnixNow()
+{
+	return Unix{static_cast<int64>(time(nullptr))};
+}
+
+inline int64 UnixAsSeconds(Unix tp)
+{
+	return tp.value;
+}
+
+inline Unix UnixFromSeconds(int64 seconds)
+{
+	return Unix{seconds};
+}
+
+mpt::Date::Unix UnixFromUTC(UTC timeUtc);
+
+mpt::Date::UTC UnixAsUTC(Unix tp);
+
+#endif
+
+mpt::ustring ToShortenedISO8601(UTC date); // i.e. 2015-01-15T18:32:01Z
+
+#if defined(MPT_TIME_CTIME)
 
 mpt::Date::Unix UnixFromUTCtm(tm timeUtc);
 
 tm UnixAsUTCtm(mpt::Date::Unix unixtime);
 
 mpt::ustring ToShortenedISO8601(tm date); // i.e. 2015-01-15T18:32:01Z
+
+#endif
 
 } // namespace Date
 } // namespace mpt

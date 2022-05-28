@@ -471,32 +471,12 @@ template<> inline ProcessPriorityClass FromSettingValue(const SettingValue &val)
 
 template<> inline SettingValue ToSettingValue(const mpt::Date::Unix &val)
 {
-	time_t t = val;
-	const tm* lastUpdate = gmtime(&t);
-	CString outDate;
-	if(lastUpdate)
-	{
-		outDate.Format(_T("%04d-%02d-%02d %02d:%02d"), lastUpdate->tm_year + 1900, lastUpdate->tm_mon + 1, lastUpdate->tm_mday, lastUpdate->tm_hour, lastUpdate->tm_min);
-	}
-	return SettingValue(mpt::ToUnicode(outDate), "UTC");
+	return SettingValue(mpt::ufmt::val(mpt::Date::UnixAsSeconds(val)), "UnixTime");
 }
 template<> inline mpt::Date::Unix FromSettingValue(const SettingValue &val)
 {
-	MPT_ASSERT(val.GetTypeTag() == "UTC");
-	std::string s = mpt::ToCharset(mpt::Charset::Locale, val.as<mpt::ustring>());
-	tm lastUpdate;
-	MemsetZero(lastUpdate);
-	if(sscanf(s.c_str(), "%04d-%02d-%02d %02d:%02d", &lastUpdate.tm_year, &lastUpdate.tm_mon, &lastUpdate.tm_mday, &lastUpdate.tm_hour, &lastUpdate.tm_min) == 5)
-	{
-		lastUpdate.tm_year -= 1900;
-		lastUpdate.tm_mon--;
-	}
-	time_t outTime = mpt::Date::UnixFromUTCtm(lastUpdate);
-	if(outTime < 0)
-	{
-		outTime = 0;
-	}
-	return mpt::Date::Unix(outTime);
+	MPT_ASSERT(val.GetTypeTag() == "UnixTime");
+	return mpt::Date::UnixFromSeconds(mpt::ConvertStringTo<int64>(val.as<mpt::ustring>()));
 }
 
 struct FontSetting

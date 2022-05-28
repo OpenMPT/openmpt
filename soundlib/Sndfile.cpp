@@ -62,9 +62,9 @@ mpt::ustring FileHistory::AsISO8601() const
 		// Calculate the date when editing finished.
 		double openSeconds = static_cast<double>(openTime) / HISTORY_TIMER_PRECISION;
 		tm tmpLoadDate = loadDate;
-		int64 loadDateSinceEpoch = mpt::Date::UnixFromUTCtm(tmpLoadDate);
+		int64 loadDateSinceEpoch = mpt::Date::UnixAsSeconds(mpt::Date::UnixFromUTCtm(tmpLoadDate));
 		int64 saveDateSinceEpoch = loadDateSinceEpoch + mpt::saturate_round<int64>(openSeconds);
-		date = mpt::Date::UnixAsUTCtm(mpt::Date::Unix(saveDateSinceEpoch));
+		date = mpt::Date::UnixAsUTCtm(mpt::Date::UnixFromSeconds(saveDateSinceEpoch));
 	}
 	return mpt::Date::ToShortenedISO8601(date);
 }

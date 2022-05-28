@@ -328,7 +328,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	// Update
 	, UpdateEnabled(conf, U_("Update"), U_("Enabled"), true)
 	, UpdateInstallAutomatically(conf, U_("Update"), U_("InstallAutomatically"), false)
-	, UpdateLastUpdateCheck(conf, U_("Update"), U_("LastUpdateCheck"), mpt::Date::Unix(time_t()))
+	, UpdateLastUpdateCheck(conf, U_("Update"), U_("LastUpdateCheck"), mpt::Date::Unix{})
 	, UpdateUpdateCheckPeriod_DEPRECATED(conf, U_("Update"), U_("UpdateCheckPeriod"), 7)
 	, UpdateIntervalDays(conf, U_("Update"), U_("UpdateCheckIntervalDays"), 7)
 	, UpdateChannel(conf, U_("Update"), U_("Channel"), UpdateChannelRelease)
@@ -823,6 +823,10 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 		conf.Forget(UpdateUpdateCheckPeriod_DEPRECATED.GetPath());
 		conf.Forget(UpdateUpdateURL_DEPRECATED.GetPath());
 		conf.Forget(UpdateSendGUID_DEPRECATED.GetPath());
+	}
+	if(storedVersion < MPT_V("1.31.00.12"))
+	{
+		UpdateLastUpdateCheck = mpt::Date::Unix{};
 	}
 #endif // MPT_ENABLE_UPDATE
 

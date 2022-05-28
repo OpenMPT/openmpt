@@ -13,7 +13,9 @@
 
 #include "mptStringBuffer.h"
 
-#include <time.h>
+#if MPT_CXX_AT_LEAST(20) && !defined(MPT_LIBCXX_QUIRK_NO_CHRONO_DATE)
+#include <chrono>
+#endif
 
 #if MPT_OS_WINDOWS
 #include <windows.h>
@@ -81,22 +83,7 @@ mpt::ustring ToUString(uint64 time100ns)
 
 #endif // MODPLUG_TRACKER
 
-Unix::Unix()
-	: Value(0)
-{
-	return;
-}
-
-Unix::Unix(int64 unixtime)
-	: Value(unixtime)
-{
-	return;
-}
-
-Unix::operator int64 () const
-{
-	return Value;
-}
+#if MPT_CXX_BEFORE(20) || defined(MPT_LIBCXX_QUIRK_NO_CHRONO_DATE) || defined(MPT_TIME_CTIME)
 
 static int32 ToDaynum(int32 year, int32 month, int32 day)
 {
@@ -128,16 +115,75 @@ static void FromDaynum(int32 d, int32 & year, int32 & month, int32 & day)
 	day = static_cast<int32>(dd);
 }
 
+#endif
+
+#if MPT_CXX_BEFORE(20) || defined(MPT_LIBCXX_QUIRK_NO_CHRONO_DATE)
+
+mpt::Date::Unix UnixFromUTC(UTC timeUtc)
+{
+	int32 daynum = ToDaynum(timeUtc.year, timeUtc.month, timeUtc.day);
+	int64 seconds = static_cast<int64>(daynum - ToDaynum(1970, 1, 1)) * 24 * 60 * 60 + timeUtc.hours * 60 * 60 + timeUtc.minutes * 60 + timeUtc.seconds;
+	return Unix{seconds};
+}
+
+mpt::Date::UTC UnixAsUTC(Unix tp)
+{
+	int64 tmp = tp.value;
+	int64 seconds = tmp % 60; tmp /= 60;
+	int64 minutes = tmp % 60; tmp /= 60;
+	int64 hours   = tmp % 24; tmp /= 24;
+	int32 year = 0, month = 0, day = 0;
+	FromDaynum(static_cast<int32>(tmp) + ToDaynum(1970,1,1), year, month, day);
+	mpt::Date::UTC result = {};
+	result.year = year;
+	result.month = month;
+	result.day = day;
+	result.hours = static_cast<int32>(hours);
+	result.minutes = static_cast<int32>(minutes);
+	result.seconds = static_cast<int64>(seconds);
+	return result;
+}
+
+#endif
+
+mpt::ustring ToShortenedISO8601(mpt::Date::UTC date)
+{
+	mpt::ustring result;
+	mpt::ustring tz = U_("Z");
+	if(date.year == 0)
+	{
+		return result;
+	}
+	result += mpt::ufmt::dec0<4>(date.year);
+	result += U_("-") + mpt::ufmt::dec0<2>(date.month);
+	result += U_("-") + mpt::ufmt::dec0<2>(date.day);
+	if(date.hours == 0 && date.minutes == 0 && date.seconds)
+	{
+		return result;
+	}
+	result += U_("T");
+	result += mpt::ufmt::dec0<2>(date.hours) + U_(":") + mpt::ufmt::dec0<2>(date.minutes);
+	if(date.seconds == 0)
+	{
+		return result + tz;
+	}
+	result += U_(":") + mpt::ufmt::dec0<2>(date.seconds);
+	result += tz;
+	return result;
+}
+
+#if defined(MPT_TIME_CTIME)
+
 mpt::Date::Unix UnixFromUTCtm(tm timeUtc)
 {
 	int32 daynum = ToDaynum(timeUtc.tm_year+1900, timeUtc.tm_mon+1, timeUtc.tm_mday);
 	int64 seconds = static_cast<int64>(daynum - ToDaynum(1970,1,1))*24*60*60 + timeUtc.tm_hour*60*60 + timeUtc.tm_min*60 + timeUtc.tm_sec;
-	return mpt::Date::Unix(seconds);
+	return mpt::Date::UnixFromSeconds(seconds);
 }
 
 tm UnixAsUTCtm(mpt::Date::Unix unixtime)
 {
-	int64 tmp = static_cast<int64>(unixtime);
+	int64 tmp = mpt::Date::UnixAsSeconds(unixtime);
 	int64 seconds = tmp % 60; tmp /= 60;
 	int64 minutes = tmp % 60; tmp /= 60;
 	int64 hours   = tmp % 24; tmp /= 24;
@@ -202,6 +248,8 @@ mpt::ustring ToShortenedISO8601(tm date)
 	result += tz;
 	return result;
 }
+
+#endif
 
 } // namespace Date
 } // namespace mpt

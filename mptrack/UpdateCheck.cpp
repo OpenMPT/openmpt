@@ -459,11 +459,11 @@ void CUpdateCheck::StartUpdateCheckAsync(bool isAutoUpdate)
 			return;
 		}
 		// Do we actually need to run the update check right now?
-		const time_t now = time(nullptr);
-		const time_t lastCheck = TrackerSettings::Instance().UpdateLastUpdateCheck.Get();
+		const mpt::Date::Unix now = mpt::Date::UnixNow();
+		const mpt::Date::Unix lastCheck = TrackerSettings::Instance().UpdateLastUpdateCheck.Get();
 		// Check update interval. Note that we always check for updates when the system time had gone backwards (i.e. when the last update check supposedly happened in the future).
-		const double secsSinceLastCheck = difftime(now, lastCheck);
-		if(secsSinceLastCheck > 0.0 && secsSinceLastCheck < updateCheckPeriod * 86400.0)
+		const int64 secsSinceLastCheck = mpt::Date::UnixAsSeconds(now) - mpt::Date::UnixAsSeconds(lastCheck);
+		if(secsSinceLastCheck > 0 && secsSinceLastCheck < updateCheckPeriod * 86400)
 		{
 			loadPersisted = true;
 		}
@@ -481,7 +481,7 @@ void CUpdateCheck::StartUpdateCheckAsync(bool isAutoUpdate)
 				);
 			if(Reporting::Confirm(msg, _T("OpenMPT Update")) == cnfNo)
 			{
-				TrackerSettings::Instance().UpdateLastUpdateCheck = mpt::Date::Unix(now);
+				TrackerSettings::Instance().UpdateLastUpdateCheck = now;
 				return;
 			}
 		}
@@ -659,7 +659,7 @@ UpdateCheckResult CUpdateCheck::SearchUpdate(const CUpdateCheck::Context &contex
 				{
 					std::vector<std::byte> data = GetFileReader(f).ReadRawDataAsByteVector();
 					nlohmann::json::parse(mpt::buffer_cast<std::string>(data)).get<Update::versions>();
-					result.CheckTime = time_t{};
+					result.CheckTime = mpt::Date::Unix{};
 					result.json = data;
 					loaded = true;
 				}
@@ -790,7 +790,7 @@ UpdateCheckResult CUpdateCheck::SearchUpdateModern(HTTP::InternetSession &intern
 
 	// Now, evaluate the downloaded data.
 	UpdateCheckResult result;
-	result.CheckTime = time(nullptr);
+	result.CheckTime = mpt::Date::UnixNow();
 	try
 	{
 		nlohmann::json::parse(mpt::buffer_cast<std::string>(resultHTTP.Data)).get<Update::versions>();
@@ -1324,7 +1324,7 @@ void CUpdateCheck::AcknowledgeSuccess(const UpdateCheckResult &result)
 {
 	if(!result.IsFromCache())
 	{
-		TrackerSettings::Instance().UpdateLastUpdateCheck = mpt::Date::Unix(result.CheckTime);
+		TrackerSettings::Instance().UpdateLastUpdateCheck = result.CheckTime;
 	}
 }
 
@@ -1621,14 +1621,10 @@ void CUpdateSetupDlg::SettingChanged(const SettingPath &changedPath)
 	if(changedPath == TrackerSettings::Instance().UpdateLastUpdateCheck.GetPath())
 	{
 		CString updateText;
-		const time_t t = TrackerSettings::Instance().UpdateLastUpdateCheck.Get();
-		if(t > 0)
+		const mpt::Date::Unix t = TrackerSettings::Instance().UpdateLastUpdateCheck.Get();
+		if(t != mpt::Date::Unix{})
 		{
-			const tm* const lastUpdate = localtime(&t);
-			if(lastUpdate != nullptr)
-			{
-				updateText.Format(_T("The last successful update check was run on %04d-%02d-%02d, %02d:%02d."), lastUpdate->tm_year + 1900, lastUpdate->tm_mon + 1, lastUpdate->tm_mday, lastUpdate->tm_hour, lastUpdate->tm_min);
-			}
+			updateText += CTime(mpt::Date::UnixAsSeconds(t)).Format(_T("The last successful update check was run on %F, %R."));
 		}
 		updateText += _T("\r\n");
 		SetDlgItemText(IDC_LASTUPDATE, updateText);
