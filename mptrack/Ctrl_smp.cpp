@@ -2977,6 +2977,14 @@ void CCtrlSamples::OnBaseNoteChanged()
 			sample.nC5Speed = newFreq;
 			LockControls();
 			SetDlgItemInt(IDC_EDIT5, newFreq, FALSE);
+
+			// Due to rounding imprecisions if the base note is below 0, we recalculate it here to make sure that the value stays consistent.
+			int basenote = (NOTE_MIDDLEC - NOTE_MIN) + ModSample::FrequencyToTranspose(newFreq).first;
+			Limit(basenote, BASENOTE_MIN, BASENOTE_MAX);
+			basenote -= BASENOTE_MIN;
+			if(basenote != m_CbnBaseNote.GetCurSel())
+				m_CbnBaseNote.SetCurSel(basenote);
+
 			OnFineTuneChangedDone();
 			UnlockControls();
 			SetModified(SampleHint().Info(), false, false);
