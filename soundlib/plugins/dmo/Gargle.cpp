@@ -180,7 +180,7 @@ CString Gargle::GetParamDisplay(PlugParamIndex param)
 
 uint32 Gargle::RateInHertz() const
 {
-	return Util::Round<uint32>(m_param[kGargleRate] * 999.0f) + 1;
+	return mpt::clamp(Util::Round<uint32>(m_param[kGargleRate] * 999.0f), static_cast<uint32>(0), std::numeric_limits<uint32>::max() - 1) + 1;
 }
 
 
