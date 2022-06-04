@@ -25,6 +25,7 @@
 #include "../../common/mptFileIO.h"
 #include "../mod_specifications.h"
 #endif // MODPLUG_TRACKER
+#include "../../soundlib/AudioCriticalSection.h"
 #include "mpt/base/aligned_array.hpp"
 #include "mpt/io/base.hpp"
 #include "mpt/io/io.hpp"
