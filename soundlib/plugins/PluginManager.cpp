@@ -248,6 +248,36 @@ void VSTPluginLib::WriteToCache() const
 #endif // MODPLUG_TRACKER
 
 
+void VSTPluginLib::InsertPluginInstanceIntoList(IMixPlugin &pluginInstance)
+{
+	pluginInstance.m_pNext = pPluginsList;
+	if(pPluginsList)
+	{
+		pPluginsList->m_pPrev = &pluginInstance;
+	}
+	pPluginsList = &pluginInstance;
+}
+
+
+void VSTPluginLib::RemovePluginInstanceFromList(IMixPlugin &pluginInstance)
+{
+	if(pPluginsList == &pluginInstance)
+	{
+		pPluginsList = pluginInstance.m_pNext;
+	}
+	if(pluginInstance.m_pNext)
+	{
+		pluginInstance.m_pNext->m_pPrev = pluginInstance.m_pPrev;
+	}
+	if(pluginInstance.m_pPrev)
+	{
+		pluginInstance.m_pPrev->m_pNext = pluginInstance.m_pNext;
+	}
+	pluginInstance.m_pPrev = nullptr;
+	pluginInstance.m_pNext = nullptr;
+}
+
+
 bool CreateMixPluginProc(SNDMIXPLUGIN &mixPlugin, CSoundFile &sndFile)
 {
 #ifdef MODPLUG_TRACKER
@@ -342,7 +372,7 @@ CVstPluginManager::~CVstPluginManager()
 		while(plug->pPluginsList != nullptr)
 		{
 			IMixPlugin *pluginInstance = plug->pPluginsList;
-			pluginInstance->RemoveFromFactoryList();
+			plug->RemovePluginInstanceFromList(*pluginInstance);
 			pluginInstance->Release();
 		}
 		delete plug;
@@ -630,7 +660,7 @@ bool CVstPluginManager::RemovePlugin(VSTPluginLib *pFactory)
 			while(plug->pPluginsList != nullptr)
 			{
 				IMixPlugin *pluginInstance = plug->pPluginsList;
-				pluginInstance->RemoveFromFactoryList();
+				plug->RemovePluginInstanceFromList(*pluginInstance);
 				pluginInstance->Release();
 			}
 			pluginList.erase(p);
@@ -700,7 +730,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 		IMixPlugin *plugin = pFound->Create(*pFound, sndFile, mixPlugin);
 		if(plugin)
 		{
-			plugin->InsertIntoFactoryList();
+			pFound->InsertPluginInstanceIntoList(*plugin);
 		}
 		return plugin != nullptr;
 	}
@@ -760,7 +790,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 			CVstPlugin *pVstPlug = new (std::nothrow) CVstPlugin(maskCrashes, hLibrary, *pFound, mixPlugin, *pEffect, sndFile);
 			if(pVstPlug)
 			{
-				pVstPlug->InsertIntoFactoryList();
+				pFound->InsertPluginInstanceIntoList(*pVstPlug);
 			}
 			if(pVstPlug == nullptr)
 			{

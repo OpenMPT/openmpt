@@ -71,28 +71,6 @@ IMixPlugin::~IMixPlugin()
 }
 
 
-void IMixPlugin::RemoveFromFactoryList()
-{
-	if (m_Factory.pPluginsList == this) m_Factory.pPluginsList = m_pNext;
-
-	if (m_pNext) m_pNext->m_pPrev = m_pPrev;
-	if (m_pPrev) m_pPrev->m_pNext = m_pNext;
-	m_pPrev = nullptr;
-	m_pNext = nullptr;
-}
-
-
-void IMixPlugin::InsertIntoFactoryList()
-{
-	m_pNext = m_Factory.pPluginsList;
-	if(m_Factory.pPluginsList)
-	{
-		m_Factory.pPluginsList->m_pPrev = this;
-	}
-	m_Factory.pPluginsList = this;
-}
-
-
 #ifdef MODPLUG_TRACKER
 
 void IMixPlugin::SetSlot(PLUGINDEX slot)
@@ -1082,7 +1060,7 @@ void SNDMIXPLUGIN::Destroy()
 	if(pMixPlugin)
 	{
 		CriticalSection cs;
-		pMixPlugin->RemoveFromFactoryList();
+		pMixPlugin->GetPluginFactory().RemovePluginInstanceFromList(*pMixPlugin);
 		pMixPlugin->Release();
 		pMixPlugin = nullptr;
 	}

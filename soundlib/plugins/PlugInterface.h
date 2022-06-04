@@ -57,6 +57,7 @@ struct SNDMIXPLUGINSTATE
 class IMixPlugin
 {
 	friend class CAbstractVstEditor;
+	friend struct VSTPluginLib;
 
 protected:
 	IMixPlugin *m_pNext = nullptr, *m_pPrev = nullptr;
@@ -96,11 +97,6 @@ public:
 
 protected:
 	virtual ~IMixPlugin();
-
-public:
-	// Insert plugin into list of loaded plugins.
-	void InsertIntoFactoryList();
-	void RemoveFromFactoryList();
 
 public:
 	// Non-virtual part of the interface
