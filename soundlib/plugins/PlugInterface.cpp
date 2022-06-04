@@ -49,6 +49,7 @@ IMixPlugin::IMixPlugin(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN 
 	, m_pMixStruct(&mixStruct)
 {
 	m_SndFile.m_loadedPlugins++;
+	m_pMixStruct->pMixPlugin = this;
 	m_MixState.pMixBuffer = mpt::align_bytes<8, MIXBUFFERSIZE * 2>(m_MixBuffer);
 	while(m_pMixStruct != &(m_SndFile.m_MixPlugins[m_nSlot]) && m_nSlot < MAX_MIXPLUGINS - 1)
 	{
@@ -63,12 +64,8 @@ IMixPlugin::~IMixPlugin()
 	CloseEditor();
 	CriticalSection cs;
 #endif // MODPLUG_TRACKER
-
-	// First thing to do, if we don't want to hang in a loop
-	RemoveFromFactoryList();
-
+	m_pMixStruct->pMixPlugin = nullptr;
 	m_SndFile.m_loadedPlugins--;
-
 	m_pMixStruct = nullptr;
 }
 
@@ -76,10 +73,6 @@ IMixPlugin::~IMixPlugin()
 void IMixPlugin::RemoveFromFactoryList()
 {
 	if (m_Factory.pPluginsList == this) m_Factory.pPluginsList = m_pNext;
-	if (m_pMixStruct)
-	{
-		m_pMixStruct->pMixPlugin = nullptr;
-	}
 
 	if (m_pNext) m_pNext->m_pPrev = m_pPrev;
 	if (m_pPrev) m_pPrev->m_pNext = m_pNext;
@@ -90,8 +83,6 @@ void IMixPlugin::RemoveFromFactoryList()
 
 void IMixPlugin::InsertIntoFactoryList()
 {
-	m_pMixStruct->pMixPlugin = this;
-
 	m_pNext = m_Factory.pPluginsList;
 	if(m_Factory.pPluginsList)
 	{
@@ -1089,6 +1080,8 @@ void SNDMIXPLUGIN::Destroy()
 {
 	if(pMixPlugin)
 	{
+		CriticalSection cs;
+		pMixPlugin->RemoveFromFactoryList();
 		pMixPlugin->Release();
 		pMixPlugin = nullptr;
 	}

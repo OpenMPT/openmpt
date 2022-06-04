@@ -44,7 +44,6 @@ Compressor::Compressor(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN 
 	m_param[kCompPredelay] = 1.0f;
 
 	m_mixBuffer.Initialize(2, 2);
-	InsertIntoFactoryList();
 }
 
 

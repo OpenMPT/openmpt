@@ -46,7 +46,6 @@ Flanger::Flanger(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN &mixSt
 
 	// Already done in Chorus constructor
 	//m_mixBuffer.Initialize(2, 2);
-	//InsertIntoFactoryList();
 }
 
 

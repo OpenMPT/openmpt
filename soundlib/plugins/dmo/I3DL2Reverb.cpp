@@ -98,7 +98,6 @@ I3DL2Reverb::I3DL2Reverb(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGI
 	SetCurrentProgram(m_program);
 
 	m_mixBuffer.Initialize(2, 2);
-	InsertIntoFactoryList();
 }
 
 

@@ -341,6 +341,7 @@ CVstPluginManager::~CVstPluginManager()
 	{
 		while(plug->pPluginsList != nullptr)
 		{
+			plug->pPluginsList->RemoveFromFactoryList();
 			plug->pPluginsList->Release();
 		}
 		delete plug;
@@ -627,6 +628,7 @@ bool CVstPluginManager::RemovePlugin(VSTPluginLib *pFactory)
 
 			while(plug->pPluginsList != nullptr)
 			{
+				plug->pPluginsList->RemoveFromFactoryList();
 				plug->pPluginsList->Release();
 			}
 			pluginList.erase(p);
@@ -694,6 +696,10 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 	if(pFound != nullptr && pFound->Create != nullptr)
 	{
 		IMixPlugin *plugin = pFound->Create(*pFound, sndFile, mixPlugin);
+		if(plugin)
+		{
+			plugin->InsertIntoFactoryList();
+		}
 		return plugin != nullptr;
 	}
 
@@ -750,6 +756,10 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 			pFound->WriteToCache();
 
 			CVstPlugin *pVstPlug = new (std::nothrow) CVstPlugin(maskCrashes, hLibrary, *pFound, mixPlugin, *pEffect, sndFile);
+			if(pVstPlug)
+			{
+				pVstPlug->InsertIntoFactoryList();
+			}
 			if(pVstPlug == nullptr)
 			{
 				validPlugin = false;

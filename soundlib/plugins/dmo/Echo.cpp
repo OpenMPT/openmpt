@@ -42,7 +42,6 @@ Echo::Echo(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN &mixStruct)
 	m_param[kEchoPanDelay] = 0.0f;
 
 	m_mixBuffer.Initialize(2, 2);
-	InsertIntoFactoryList();
 }
 
 

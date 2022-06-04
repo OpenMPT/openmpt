@@ -38,7 +38,6 @@ ParamEq::ParamEq(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN &mixSt
 	m_param[kEqGain] = 0.5f;
 
 	m_mixBuffer.Initialize(2, 2);
-	InsertIntoFactoryList();
 }
 
 

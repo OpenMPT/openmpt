@@ -85,7 +85,6 @@ DMOPlugin::DMOPlugin(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN &m
 		m_pMediaParams = nullptr;
 	m_alignedBuffer.f32 = mpt::align_bytes<16, MIXBUFFERSIZE * 2>(m_interleavedBuffer.f32);
 	m_mixBuffer.Initialize(2, 2);
-	InsertIntoFactoryList();
 }
 
 

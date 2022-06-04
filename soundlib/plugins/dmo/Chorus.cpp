@@ -42,7 +42,6 @@ Chorus::Chorus(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN &mixStru
 	m_param[kChorusDelay] = 0.8f;
 
 	m_mixBuffer.Initialize(2, 2);
-	InsertIntoFactoryList();
 }
 
 

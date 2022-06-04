@@ -27,7 +27,6 @@ SymMODEcho::SymMODEcho(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN 
 	, m_chunk(PluginChunk::Default())
 {
 	m_mixBuffer.Initialize(2, 2);
-	InsertIntoFactoryList();
 	RecalculateEchoParams();
 }
 

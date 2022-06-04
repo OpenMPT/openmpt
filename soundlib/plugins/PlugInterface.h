@@ -97,6 +97,7 @@ public:
 protected:
 	virtual ~IMixPlugin();
 
+public:
 	// Insert plugin into list of loaded plugins.
 	void InsertIntoFactoryList();
 	void RemoveFromFactoryList();

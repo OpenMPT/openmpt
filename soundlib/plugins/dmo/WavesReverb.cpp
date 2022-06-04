@@ -37,7 +37,6 @@ WavesReverb::WavesReverb(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGI
 	m_param[kRvbHighFreqRTRatio] = 0.0f;
 
 	m_mixBuffer.Initialize(2, 2);
-	InsertIntoFactoryList();
 }
 
 

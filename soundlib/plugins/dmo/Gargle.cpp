@@ -35,7 +35,6 @@ Gargle::Gargle(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN &mixStru
 	m_param[kGargleWaveShape] = 0.0f;
 
 	m_mixBuffer.Initialize(2, 2);
-	InsertIntoFactoryList();
 }
 
 

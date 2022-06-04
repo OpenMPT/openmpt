@@ -880,7 +880,6 @@ CVstPlugin::CVstPlugin(bool maskCrashes, HMODULE hLibrary, VSTPluginLib &factory
 {
 	// Open plugin and initialize data structures
 	Initialize();
-	InsertIntoFactoryList();
 
 	m_isInitialized = true;
 }

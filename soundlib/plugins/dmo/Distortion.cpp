@@ -42,7 +42,6 @@ Distortion::Distortion(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN 
 	m_param[kDistPostEQBandwidth] = 0.291f;
 
 	m_mixBuffer.Initialize(2, 2);
-	InsertIntoFactoryList();
 }
 
 
