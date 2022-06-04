@@ -358,37 +358,28 @@ static bool ImportMDLCommands(ModCommand &m, uint8 vol, uint8 cmd1, uint8 cmd2, 
 	// If we have Dxx + G00, or Dxx + H00, combine them into Lxx/Kxx.
 	ModCommand::CombineEffects(e1, p1, e2, p2);
 
-	bool lostCommand = false;
-	// Try to fit the "best" effect into e2.
-	if(e1 == CMD_NONE)
-	{
-		// Easy
-	} else if(e2 == CMD_NONE)
-	{
-		// Almost as easy
-		e2 = e1;
-		p2 = p1;
-		e1 = CMD_NONE;
-	} else if(e1 == e2 && e1 != CMD_S3MCMDEX)
+	// Try to preserve the "best" effect.
+	if(e1 == CMD_NONE || (e1 == e2 && e1 != CMD_S3MCMDEX))
 	{
 		// Digitrakker processes the effects left-to-right, so if both effects are the same, the
 		// second essentially overrides the first.
-		e1 = CMD_NONE;
+		m.SetEffectCommand(e2, p2);
+		return false;
+	} else if(e2 == CMD_NONE)
+	{
+		m.SetEffectCommand(e1, p1);
+		return false;
 	} else if(!vol)
 	{
 		return m.FillInTwoCommands(e1, p1, e2, p2).first != CMD_NONE;
 	} else
 	{
 		if(ModCommand::GetEffectWeight(e1) > ModCommand::GetEffectWeight(e2))
-		{
-			std::swap(e1, e2);
-			std::swap(p1, p2);
-			lostCommand = true;
-		}
+			m.SetEffectCommand(e1, p1);
+		else
+			m.SetEffectCommand(e2, p2);
+		return true;
 	}
-
-	m.SetEffectCommand(e2, p2);
-	return lostCommand;
 }
 
 
