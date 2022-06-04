@@ -103,7 +103,7 @@ protected:
 
 public:
 	// Non-virtual part of the interface
-	IMixPlugin(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct);
+	IMixPlugin(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN &mixStruct);
 	inline CSoundFile &GetSoundFile() { return m_SndFile; }
 	inline const CSoundFile &GetSoundFile() const { return m_SndFile; }
 
@@ -278,7 +278,7 @@ protected:
 	std::array<PlugInstrChannel, 16> m_MidiCh;  // MIDI channel state
 
 public:
-	IMidiPlugin(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct);
+	IMidiPlugin(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN &mixStruct);
 
 	void MidiCC(MIDIEvents::MidiCC nController, uint8 nParam, CHANNELINDEX trackChannel) override;
 	void MidiPitchBendRaw(int32 pitchbend, CHANNELINDEX trackerChn) override;

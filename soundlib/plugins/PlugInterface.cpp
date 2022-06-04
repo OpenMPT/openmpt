@@ -43,10 +43,10 @@ const CModDoc *IMixPlugin::GetModDoc() const { return m_SndFile.GetpModDoc(); }
 #endif // MODPLUG_TRACKER
 
 
-IMixPlugin::IMixPlugin(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct)
+IMixPlugin::IMixPlugin(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN &mixStruct)
 	: m_Factory(factory)
 	, m_SndFile(sndFile)
-	, m_pMixStruct(mixStruct)
+	, m_pMixStruct(&mixStruct)
 {
 	m_SndFile.m_loadedPlugins++;
 	m_MixState.pMixBuffer = mpt::align_bytes<8, MIXBUFFERSIZE * 2>(m_MixBuffer);
@@ -759,7 +759,7 @@ bool IMixPlugin::LoadProgram(mpt::PathString fileName)
 // IMidiPlugin: Default implementation of plugins with MIDI input //
 ////////////////////////////////////////////////////////////////////
 
-IMidiPlugin::IMidiPlugin(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct)
+IMidiPlugin::IMidiPlugin(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN &mixStruct)
 	: IMixPlugin(factory, sndFile, mixStruct)
 	, m_MidiCh{{}}
 {

@@ -868,7 +868,7 @@ intptr_t CVstPlugin::VstFileSelector(bool destructor, VstFileSelect &fileSel)
 //
 
 CVstPlugin::CVstPlugin(bool maskCrashes, HMODULE hLibrary, VSTPluginLib &factory, SNDMIXPLUGIN &mixStruct, AEffect &effect, CSoundFile &sndFile)
-	: IMidiPlugin(factory, sndFile, &mixStruct)
+	: IMidiPlugin(factory, sndFile, mixStruct)
 	, m_maskCrashes(maskCrashes)
 	, m_Effect(effect)
 	, timeInfo{}

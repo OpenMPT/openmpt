@@ -693,7 +693,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 
 	if(pFound != nullptr && pFound->Create != nullptr)
 	{
-		IMixPlugin *plugin = pFound->Create(*pFound, sndFile, &mixPlugin);
+		IMixPlugin *plugin = pFound->Create(*pFound, sndFile, mixPlugin);
 		return plugin != nullptr;
 	}
 

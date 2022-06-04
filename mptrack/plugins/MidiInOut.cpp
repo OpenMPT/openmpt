@@ -25,7 +25,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-IMixPlugin* MidiInOut::Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct)
+IMixPlugin* MidiInOut::Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN &mixStruct)
 {
 	try
 	{
@@ -37,7 +37,7 @@ IMixPlugin* MidiInOut::Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIX
 }
 
 
-MidiInOut::MidiInOut(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct)
+MidiInOut::MidiInOut(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN &mixStruct)
 	: IMidiPlugin(factory, sndFile, mixStruct)
 	, m_inputDevice(m_midiIn)
 	, m_outputDevice(m_midiOut)
