@@ -341,8 +341,9 @@ CVstPluginManager::~CVstPluginManager()
 	{
 		while(plug->pPluginsList != nullptr)
 		{
-			plug->pPluginsList->RemoveFromFactoryList();
-			plug->pPluginsList->Release();
+			IMixPlugin *pluginInstance = plug->pPluginsList;
+			pluginInstance->RemoveFromFactoryList();
+			pluginInstance->Release();
 		}
 		delete plug;
 	}
@@ -628,8 +629,9 @@ bool CVstPluginManager::RemovePlugin(VSTPluginLib *pFactory)
 
 			while(plug->pPluginsList != nullptr)
 			{
-				plug->pPluginsList->RemoveFromFactoryList();
-				plug->pPluginsList->Release();
+				IMixPlugin *pluginInstance = plug->pPluginsList;
+				pluginInstance->RemoveFromFactoryList();
+				pluginInstance->Release();
 			}
 			pluginList.erase(p);
 			delete plug;
