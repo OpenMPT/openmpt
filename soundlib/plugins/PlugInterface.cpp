@@ -73,7 +73,7 @@ IMixPlugin::~IMixPlugin()
 }
 
 
-void IMixPlugin::RemoveFactoryList()
+void IMixPlugin::RemoveFromFactoryList()
 {
 	if (m_Factory.pPluginsList == this) m_Factory.pPluginsList = m_pNext;
 	if (m_pMixStruct)
