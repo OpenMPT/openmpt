@@ -99,6 +99,7 @@ protected:
 
 	// Insert plugin into list of loaded plugins.
 	void InsertIntoFactoryList();
+	void RemoveFromFactoryList();
 
 public:
 	// Non-virtual part of the interface
