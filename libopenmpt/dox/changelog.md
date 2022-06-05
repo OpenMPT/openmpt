@@ -56,6 +56,8 @@ is just a high-level summary.
     optimized for a particular CPU. See `build/make/config-djgpp.mk` for all
     available options. `FLAVOURED_DIR=1` places the CPU-specific optimized
     builds in separate folders below `bin/`.
+ *  [**New**] Building with a MinGW32 CRTDLL toolchain is now supported via
+    `Makefile` option `CONFIG=mingw32crt-win95`.
 
  *  [**Change**] ctl `seek.sync_samples` now defaults to 1.
  *  [**Change**] `Makefile` `CONFIG=generic` is gone. Please use
