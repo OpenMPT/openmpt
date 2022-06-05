@@ -19,7 +19,7 @@
 
 #define LIBOPENMPT_EXAMPLE_PROBE_RESULT LIBOPENMPT_EXAMPLE_PROBE_RESULT_BINARY
 
-#if defined(__MINGW32__) && !defined(__MINGW64__)
+#if defined( __MINGW32__ ) && !defined( __MINGW64__ )
 #include <sys/types.h>
 #endif
 

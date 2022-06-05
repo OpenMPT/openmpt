@@ -11,7 +11,7 @@
  * Usage: libopenmpt_example_c_stdout SOMEMODULE | aplay --file-type raw --format=dat
  */
 
-#if defined(__MINGW32__) && !defined(__MINGW64__)
+#if defined( __MINGW32__ ) && !defined( __MINGW64__ )
 #include <sys/types.h>
 #endif
 

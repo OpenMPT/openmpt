@@ -12,7 +12,7 @@
  * CAUTION: This simple example does no error cheking at all.
  */
 
-#if defined(__MINGW32__) && !defined(__MINGW64__)
+#if defined( __MINGW32__ ) && !defined( __MINGW64__ )
 #include <sys/types.h>
 #endif
 
