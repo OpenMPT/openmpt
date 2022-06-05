@@ -30,7 +30,7 @@ inline namespace MPT_INLINE_NS {
 
 
 
-#if MPT_OS_WINDOWS
+#if MPT_OS_WINDOWS && !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
 
 
 
@@ -274,7 +274,7 @@ inline bool IsValid(::UUID uuid) {
 
 
 
-#endif // MPT_OS_WINDOWS
+#endif // MPT_OS_WINDOWS && !MPT_COMPILER_QUIRK_NO_WCHAR
 
 
 

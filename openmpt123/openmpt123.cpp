@@ -37,6 +37,10 @@ static const char * const license =
 
 #include "openmpt123_config.hpp"
 
+#if defined(__MINGW32__) && !defined(__MINGW64__)
+#include <sys/types.h>
+#endif
+
 #include "mpt/base/check_platform.hpp"
 
 #include <algorithm>

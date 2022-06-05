@@ -37,6 +37,11 @@
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
+
+#if defined(__MINGW32__) && !defined(__MINGW64__)
+#include <sys/types.h>
+#endif
+
 #if defined(MPT_WITH_MFC)
 #include <afxwin.h>
 #include <afxcmn.h>

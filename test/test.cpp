@@ -189,7 +189,7 @@ void DoTests()
 		
 	#endif
 
-	#if MPT_OS_WINDOWS
+	#if MPT_OS_WINDOWS && !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
 
 		// prefix for test suite
 		std::wstring pathprefix = std::wstring();
@@ -213,6 +213,31 @@ void DoTests()
 		}
 
 		PathPrefix = new mpt::PathString(mpt::PathString::FromWide(pathprefix));
+
+	#elif MPT_OS_WINDOWS
+	
+		// prefix for test suite
+		std::string pathprefix = std::string();
+
+		bool libopenmpt = false;
+		#ifdef LIBOPENMPT_BUILD
+			libopenmpt = true;
+		#endif
+
+#if !MPT_OS_WINDOWS_WINRT
+		// set path prefix for test files (if provided)
+		std::vector<CHAR> buf(GetEnvironmentVariable("srcdir", NULL, 0) + 1);
+		if(GetEnvironmentVariable("srcdir", buf.data(), static_cast<DWORD>(buf.size())) > 0)
+		{
+			pathprefix = buf.data();
+		} else
+#endif
+		if(libopenmpt && IsDebuggerPresent())
+		{
+			pathprefix = "../../";
+		}
+
+		PathPrefix = new mpt::PathString(mpt::PathString::FromLocale(pathprefix));
 
 	#else
 

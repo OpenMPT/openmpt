@@ -675,6 +675,76 @@ inline UINT codepage_from_encoding(common_encoding encoding) {
 	return result;
 }
 
+inline common_encoding encoding_from_codepage(UINT codepage, common_encoding fallback, bool * is_fallback = nullptr) {
+	common_encoding result = common_encoding::windows1252;
+	if (is_fallback) {
+		*is_fallback = false;
+	}
+	switch (codepage) {
+		case CP_UTF8:
+			result = common_encoding::utf8;
+			break;
+		case 20127:
+			result = common_encoding::ascii;
+			break;
+		case 28591:
+			result = common_encoding::iso8859_1;
+			break;
+		case 28605:
+			result = common_encoding::iso8859_15;
+			break;
+		case 850:
+			result = common_encoding::cp850;
+			break;
+		case 437:
+			result = common_encoding::cp437;
+			break;
+		case 1252:
+			result = common_encoding::windows1252;
+			break;
+		default:
+			if (is_fallback) {
+				*is_fallback = true;
+			}
+			result = fallback;
+			break;
+	}
+	return result;
+}
+
+inline common_encoding encoding_from_codepage(UINT codepage) {
+	common_encoding result = common_encoding::windows1252;
+	switch (codepage) {
+		case CP_UTF8:
+			result = common_encoding::utf8;
+			break;
+		case 20127:
+			result = common_encoding::ascii;
+			break;
+		case 28591:
+			result = common_encoding::iso8859_1;
+			break;
+		case 28605:
+			result = common_encoding::iso8859_15;
+			break;
+		case 850:
+			result = common_encoding::cp850;
+			break;
+		case 437:
+			result = common_encoding::cp437;
+			break;
+		case 1252:
+			result = common_encoding::windows1252;
+			break;
+		default:
+			throw std::domain_error("unsupported encoding");
+			break;
+	}
+	return result;
+}
+
+#if !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
+
 template <typename Tdststring>
 inline Tdststring encode_codepage(UINT codepage, const mpt::widestring & src) {
 	static_assert(sizeof(typename Tdststring::value_type) == sizeof(char));
@@ -700,6 +770,8 @@ inline mpt::widestring decode_codepage(UINT codepage, const Tsrcstring & src) {
 	}
 	return decoded_string;
 }
+
+#endif // !MPT_COMPILER_QUIRK_NO_WCHAR
 
 #endif // MPT_OS_WINDOWS
 
@@ -918,14 +990,14 @@ inline Tdststring encode_locale(const std::locale & locale, const mpt::widestrin
 
 
 
-#if MPT_OS_WINDOWS
+#if MPT_OS_WINDOWS && !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
 template <typename Tdststring>
 inline Tdststring encode(UINT codepage, const mpt::widestring & src) {
 	static_assert(sizeof(typename Tdststring::value_type) == sizeof(char));
 	static_assert(mpt::is_character<typename Tdststring::value_type>::value);
 	return encode_codepage<Tdststring>(codepage, src);
 }
-#endif // MPT_OS_WINDOWS
+#endif // MPT_OS_WINDOWS && !MPT_COMPILER_QUIRK_NO_WCHAR
 
 #if !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
 template <typename Tdststring>
@@ -947,11 +1019,11 @@ template <typename Tdststring>
 inline Tdststring encode(common_encoding encoding, const mpt::widestring & src) {
 	static_assert(sizeof(typename Tdststring::value_type) == sizeof(char));
 	static_assert(mpt::is_character<typename Tdststring::value_type>::value);
-#if MPT_OS_WINDOWS
+#if MPT_OS_WINDOWS && !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
 	if (windows_has_encoding(encoding)) {
 		return encode_codepage<Tdststring>(codepage_from_encoding(encoding), src);
 	}
-#endif
+#endif // MPT_OS_WINDOWS && !MPT_COMPILER_QUIRK_NO_WCHAR
 	switch (encoding) {
 		case common_encoding::utf8:
 			return encode_utf8<Tdststring>(src);
@@ -1000,11 +1072,21 @@ template <typename Tdststring>
 inline Tdststring encode(logical_encoding encoding, const mpt::widestring & src) {
 	static_assert(sizeof(typename Tdststring::value_type) == sizeof(char));
 	static_assert(mpt::is_character<typename Tdststring::value_type>::value);
-#if MPT_OS_WINDOWS
+#if MPT_OS_WINDOWS && !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
 	if (windows_has_encoding(encoding)) {
 		return encode_codepage<Tdststring>(codepage_from_encoding(encoding), src);
 	}
-#endif
+#elif MPT_OS_WINDOWS && defined(MPT_COMPILER_QUIRK_NO_WCHAR)
+	switch (encoding) {
+		case logical_encoding::locale:
+		        return encode<Tdststring>(encoding_from_codepage(GetACP(), common_encoding::windows1252), src);
+			break;
+		case logical_encoding::active_locale:
+		        return encode<Tdststring>(encoding_from_codepage(GetACP(), common_encoding::windows1252), src);
+			break;
+	}
+	throw std::domain_error("unsupported encoding");
+#endif // MPT_OS_WINDOWS && !MPT_COMPILER_QUIRK_NO_WCHAR
 #if MPT_OS_DJGPP
 	switch (encoding) {
 		case logical_encoding::locale:
@@ -1059,11 +1141,11 @@ template <typename Tsrcstring>
 inline mpt::widestring decode(common_encoding encoding, const Tsrcstring & src) {
 	static_assert(sizeof(typename Tsrcstring::value_type) == sizeof(char));
 	static_assert(mpt::is_character<typename Tsrcstring::value_type>::value);
-#if MPT_OS_WINDOWS
+#if MPT_OS_WINDOWS && !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
 	if (windows_has_encoding(encoding)) {
 		return decode_codepage(codepage_from_encoding(encoding), src);
 	}
-#endif
+#endif // MPT_OS_WINDOWS && !MPT_COMPILER_QUIRK_NO_WCHAR
 	switch (encoding) {
 		case common_encoding::utf8:
 			return decode_utf8(src);
@@ -1112,11 +1194,21 @@ template <typename Tsrcstring>
 inline mpt::widestring decode(logical_encoding encoding, const Tsrcstring & src) {
 	static_assert(sizeof(typename Tsrcstring::value_type) == sizeof(char));
 	static_assert(mpt::is_character<typename Tsrcstring::value_type>::value);
-#if MPT_OS_WINDOWS
+#if MPT_OS_WINDOWS && !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
 	if (windows_has_encoding(encoding)) {
 		return decode_codepage(codepage_from_encoding(encoding), src);
 	}
-#endif
+#elif MPT_OS_WINDOWS && defined(MPT_COMPILER_QUIRK_NO_WCHAR)
+	switch (encoding) {
+		case logical_encoding::locale:
+			return decode(encoding_from_codepage(GetACP(), common_encoding::windows1252), src);
+			break;
+		case logical_encoding::active_locale:
+			return decode(encoding_from_codepage(GetACP(), common_encoding::windows1252), src);
+			break;
+	}
+	throw std::domain_error("unsupported encoding");
+#endif // MPT_OS_WINDOWS && !MPT_COMPILER_QUIRK_NO_WCHAR
 #if MPT_OS_DJGPP
 	switch (encoding) {
 		case logical_encoding::locale:

@@ -353,7 +353,7 @@
 
 
 
-#if (MPT_COMPILER_MSVC && !defined(MPT_USTRING_MODE_UTF8_FORCE)) || defined(MODPLUG_TRACKER)
+#if ((MPT_COMPILER_MSVC && !defined(MPT_USTRING_MODE_UTF8_FORCE)) || defined(MODPLUG_TRACKER)) && !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
 
 	// Use wide strings for MSVC because this is the native encoding on 
 	// microsoft platforms.
@@ -369,7 +369,7 @@
 
 #endif
 
-#if (MPT_COMPILER_MSVC && !defined(MPT_USTRING_MODE_UTF8_FORCE)) || MPT_OS_WINDOWS || MPT_WSTRING_FORMAT
+#if ((MPT_COMPILER_MSVC && !defined(MPT_USTRING_MODE_UTF8_FORCE)) || MPT_OS_WINDOWS || MPT_WSTRING_FORMAT) && !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
 
 	// mpt::ToWide
 	// Required on Windows by mpt::PathString.

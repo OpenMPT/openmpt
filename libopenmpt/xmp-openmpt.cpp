@@ -36,12 +36,17 @@
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
+
+#if defined(__MINGW32__) && !defined(__MINGW64__)
+#include <sys/types.h>
+#endif
+
 #if defined(MPT_WITH_MFC)
 #include <afxwin.h>
 #include <afxcmn.h>
 #endif // MPT_WITH_MFC
 #include <windows.h>
-#include <WindowsX.h>
+#include <windowsx.h>
 
 #ifdef LIBOPENMPT_BUILD_DLL
 #undef LIBOPENMPT_BUILD_DLL

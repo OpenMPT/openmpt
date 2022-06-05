@@ -688,7 +688,7 @@ static mpt::Charset CharsetFromCodePage(uint16 codepage, mpt::Charset fallback, 
 
 mpt::ustring ToUnicode(uint16 codepage, mpt::Charset fallback, const std::string &str)
 {
-	#if MPT_OS_WINDOWS
+	#if MPT_OS_WINDOWS && !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
 		mpt::ustring result;
 		bool noCharsetMatch = true;
 		mpt::Charset charset = mpt::CharsetFromCodePage(codepage, fallback, &noCharsetMatch);

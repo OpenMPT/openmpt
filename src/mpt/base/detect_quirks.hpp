@@ -91,9 +91,28 @@
 
 #if MPT_LIBCXX_GNU
 #if !defined(_GLIBCXX_USE_WCHAR_T)
+#ifndef MPT_COMPILER_QUIRK_NO_WCHAR
 #define MPT_COMPILER_QUIRK_NO_WCHAR
 #endif
 #endif
+#endif
+#if defined(__MINGW32__) && !defined(__MINGW64__) && (defined(_WIN32_WINDOWS) || defined(WINVER))
+#if defined(_WIN32_WINDOWS)
+#if (_WIN32_WINDOWS < 0x0500)
+#ifndef MPT_COMPILER_QUIRK_NO_WCHAR
+#define MPT_COMPILER_QUIRK_NO_WCHAR
+#endif
+#endif
+#endif
+#if defined(WINVER)
+#if (WINVER < 0x0500)
+#ifndef MPT_COMPILER_QUIRK_NO_WCHAR
+#define MPT_COMPILER_QUIRK_NO_WCHAR
+#endif
+#endif
+#endif
+#endif
+
 
 
 

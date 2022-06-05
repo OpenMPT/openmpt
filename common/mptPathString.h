@@ -201,7 +201,42 @@ public:
 
 public:
 
-#if MPT_OS_WINDOWS
+
+
+#if MPT_OS_WINDOWS && defined(MPT_COMPILER_QUIRK_NO_WCHAR)
+
+
+
+	// conversions
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
+	MPT_DEPRECATED_PATH std::string ToLocale() const { return mpt::ToCharset(mpt::Charset::Locale, path); }
+#endif
+	std::string ToUTF8() const { return mpt::ToCharset(mpt::Charset::UTF8, path); }
+	mpt::ustring ToUnicode() const { return mpt::ToUnicode(path); }
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
+	MPT_DEPRECATED_PATH static PathString FromLocale(const std::string &path) { return PathString(mpt::ToWin(mpt::Charset::Locale, path)); }
+	static PathString FromLocaleSilent(const std::string &path) { return PathString(mpt::ToWin(mpt::Charset::Locale, path)); }
+#endif
+	static PathString FromUTF8(const std::string &path) { return PathString(mpt::ToWin(mpt::Charset::UTF8, path)); }
+	static PathString FromUnicode(const mpt::ustring &path) { return PathString(mpt::ToWin(path)); }
+	RawPathString AsNative() const { return path; }
+	// Return native string, with possible \\?\ prefix if it exceeds MAX_PATH characters.
+	RawPathString AsNativePrefixed() const;
+	static PathString FromNative(const RawPathString &path) { return PathString(path); }
+#if defined(MPT_WITH_MFC)
+	// CString TCHAR, so this is CHAR or WCHAR, depending on UNICODE
+	CString ToCString() const { return mpt::ToCString(path); }
+	static PathString FromCString(const CString &path) { return PathString(mpt::ToWin(path)); }
+#endif // MPT_WITH_MFC
+
+	// Convert a path to its simplified form, i.e. remove ".\" and "..\" entries
+	mpt::PathString Simplify() const;
+
+
+
+#elif MPT_OS_WINDOWS
+
+
 
 #if !(MPT_WSTRING_CONVERT)
 #error "mpt::PathString on Windows depends on MPT_WSTRING_CONVERT)"
@@ -233,7 +268,11 @@ public:
 	// Convert a path to its simplified form, i.e. remove ".\" and "..\" entries
 	mpt::PathString Simplify() const;
 
+
+
 #else // !MPT_OS_WINDOWS
+
+
 
 	// conversions
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
@@ -276,7 +315,11 @@ public:
 	// Convert a path to its simplified form (currently only implemented on Windows)
 	[[deprecated]] mpt::PathString Simplify() const { return PathString(path); }
 
+
+
 #endif // MPT_OS_WINDOWS
+
+
 
 };
 

@@ -9,6 +9,10 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
+#if defined(__MINGW32__) && !defined(__MINGW64__)
+#include <sys/types.h>
+#endif
+
 #include "libopenmpt_internal.h"
 #include "libopenmpt.hpp"
 #include "libopenmpt_ext.hpp"

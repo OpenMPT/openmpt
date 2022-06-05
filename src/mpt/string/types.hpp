@@ -208,8 +208,10 @@ template <typename Tchar>
 struct windows_char_traits { };
 template <>
 struct windows_char_traits<CHAR> { using string_type = mpt::lstring; };
+#if !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
 template <>
 struct windows_char_traits<WCHAR> { using string_type = std::wstring; };
+#endif // !MPT_COMPILER_QUIRK_NO_WCHAR
 
 using tstring = windows_char_traits<TCHAR>::string_type;
 

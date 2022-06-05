@@ -11,6 +11,10 @@
  * Usage: libopenmpt_example_c SOMEMODULE
  */
 
+#if defined(__MINGW32__) && !defined(__MINGW64__)
+#include <sys/types.h>
+#endif
+
 #include <memory.h>
 #include <stdint.h>
 #include <stdio.h>

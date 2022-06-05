@@ -182,10 +182,14 @@ static std::string show_waveout_devices( std::ostream & /*log*/ ) {
 	devices << " waveout:" << std::endl;
 	for ( UINT i = 0; i < waveOutGetNumDevs(); ++i ) {
 		devices << "    " << i << ": ";
-		WAVEOUTCAPSW caps;
+		WAVEOUTCAPS caps;
 		ZeroMemory( &caps, sizeof( caps ) );
-		waveOutGetDevCapsW( i, &caps, sizeof( caps ) );
-		devices << mpt::transcode<std::string>( mpt::common_encoding::utf8, caps.szPname );
+		waveOutGetDevCaps( i, &caps, sizeof( caps ) );
+		#if defined(UNICODE)
+			devices << mpt::transcode<std::string>( mpt::common_encoding::utf8, caps.szPname );
+		#else
+			devices << mpt::transcode<std::string>( mpt::common_encoding::utf8, mpt::logical_encoding::locale, caps.szPname );
+		#endif
 		devices << std::endl;
 	}
 	return devices.str();
