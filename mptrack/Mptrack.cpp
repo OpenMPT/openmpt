@@ -38,6 +38,24 @@
 #include "MPTrackUtil.h"
 #include "../misc/mptOS.h"
 #include "mpt/arch/arch.hpp"
+#if MPT_MSVC_AT_LEAST(2022, 2) && MPT_MSVC_BEFORE(2022, 3)
+// Work-around <https://developercommunity.visualstudio.com/t/warning-C4311-in-MFC-header-afxrecovery/10041328>,
+// see <https://developercommunity.visualstudio.com/t/Compiler-warnings-after-upgrading-to-17/10036311#T-N10061908>.
+template <class ARG_KEY>
+AFX_INLINE UINT AFXAPI HashKey(ARG_KEY key);
+template <>
+AFX_INLINE UINT AFXAPI HashKey<CDocument*>(CDocument *key)
+{
+	// (algorithm copied from STL hash in xfunctional)
+#pragma warning(suppress: 4302) // 'type cast' : truncation
+#pragma warning(suppress: 4311) // pointer truncation
+	ldiv_t HashVal = ldiv((long)(CDocument*)key, 127773);
+	HashVal.rem = 16807 * HashVal.rem - 2836 * HashVal.quot;
+	if(HashVal.rem < 0)
+		HashVal.rem += 2147483647;
+	return ((UINT)HashVal.rem);
+}
+#endif
 #include <afxdatarecovery.h>
 
 // GDI+
