@@ -154,9 +154,7 @@ BOOL CTempoSwingDlg::OnInitDialog()
 		m_controls[i] = std::make_unique<RowCtls>();
 		auto &r = m_controls[i];
 		// Row label
-		TCHAR s[16];
-		wsprintf(s, _T("Row %u:"), i + 1);
-		r->rowLabel.Create(s, WS_CHILD | WS_VISIBLE | SS_CENTERIMAGE, CRect(rect.left, rect.top, rect.right, rect.top + m.rowHeight), &m_container);
+		r->rowLabel.Create(MPT_CFORMAT("Row {}:")(i + 1), WS_CHILD | WS_VISIBLE | SS_CENTERIMAGE, CRect(rect.left, rect.top, rect.right, rect.top + m.rowHeight), &m_container);
 		r->rowLabel.SetFont(GetFont());
 
 		// Value label
