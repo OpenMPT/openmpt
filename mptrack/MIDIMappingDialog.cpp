@@ -116,7 +116,7 @@ BOOL CMIDIMappingDialog::OnInitDialog()
 	
 	// Add controller names
 	CString s;
-	for(size_t i = MIDIEvents::MIDICC_start; i <= MIDIEvents::MIDICC_end; i++)
+	for(uint8 i = MIDIEvents::MIDICC_start; i <= MIDIEvents::MIDICC_end; i++)
 	{
 		s.Format(_T("%3u "), i);
 		s += mpt::ToCString(mpt::Charset::UTF8, MIDIEvents::MidiCCNames[i]);
