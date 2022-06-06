@@ -3154,7 +3154,7 @@ void CModTree::OnItemRightClick(HTREEITEM hItem, CPoint pt)
 				break;
 
 			case MODITEM_HDR_EFFECTS:
-				if(sndFile->m_loadedPlugins)
+				if(sndFile && sndFile->m_loadedPlugins)
 				{
 					AppendMenu(hMenu, MF_STRING | (AllPluginsBypassed(*sndFile, false) ? MF_CHECKED : 0), ID_MODTREE_MUTE, _T("B&ypass All Plugins"));
 					if(HasEffectPlugins(*sndFile))
