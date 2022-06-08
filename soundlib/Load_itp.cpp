@@ -250,7 +250,7 @@ bool CSoundFile::ReadITP(FileReader &file, ModLoadingFlags loadFlags)
 #ifdef MODPLUG_TRACKER
 		if(version <= 0x102)
 		{
-			instrPaths[ins] = mpt::PathString::FromLocaleSilent(path);
+			instrPaths[ins] = mpt::PathString::FromLocale(path);
 		} else
 #endif // MODPLUG_TRACKER
 		{
