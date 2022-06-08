@@ -261,22 +261,13 @@ inline std::wstring ToWString(const mpt::PathString & x) { return x.ToWide(); }
 
 } // namespace mpt
 
-#if MPT_OS_WINDOWS
-
-#ifdef UNICODE
-#define MPT_PATHSTRING_LITERAL(x) ( L ## x )
-#define MPT_PATHSTRING(x) mpt::PathString::FromNative( L ## x )
-#else
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
+#define MPT_PATHSTRING_LITERAL(x) MPT_OSPATH_LITERAL( x )
+#define MPT_PATHSTRING(x) mpt::PathString::FromNative(MPT_OSPATH_LITERAL( x ))
+#else // !MPT_ENABLE_CHARSET_LOCALE
 #define MPT_PATHSTRING_LITERAL(x) ( x )
 #define MPT_PATHSTRING(x) mpt::PathString::FromNative( x )
-#endif
-
-#else // !MPT_OS_WINDOWS
-
-#define MPT_PATHSTRING_LITERAL(x) ( x )
-#define MPT_PATHSTRING(x) mpt::PathString::FromNative( x )
-
-#endif // MPT_OS_WINDOWS
+#endif // MPT_ENABLE_CHARSET_LOCALE
 
 #define PC_(x) MPT_PATHSTRING_LITERAL(x)
 #define PL_(x) MPT_PATHSTRING_LITERAL(x)
