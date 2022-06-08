@@ -199,6 +199,8 @@ struct logical_encoding_char_traits : std::char_traits<char> {
 
 using lstring = std::basic_string<char, mpt::logical_encoding_char_traits<logical_encoding::locale>>;
 
+using utf8string = std::basic_string<char, mpt::common_encoding_char_traits<common_encoding::utf8>>;
+
 using source_string = std::basic_string<char, mpt::common_encoding_char_traits<source_encoding>>;
 using exception_string = std::basic_string<char, mpt::logical_encoding_char_traits<exception_encoding>>;
 

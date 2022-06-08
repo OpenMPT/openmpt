@@ -10,6 +10,7 @@
 #include "stdafx.h"
 #include "mptPathString.h"
 
+#include "mpt/string_transcode/transcode.hpp"
 #include "mpt/uuid/uuid.hpp"
 
 #include "misc_util.h"
@@ -142,6 +143,75 @@ PathString PathString::Simplify() const
 
 namespace mpt
 {
+
+
+
+mpt::ustring PathString::ToUnicode() const
+{
+	return mpt::transcode<mpt::ustring>(path);
+}
+
+PathString PathString::FromUnicode(const mpt::ustring &path)
+{
+	return PathString(mpt::transcode<mpt::RawPathString>(path));
+}
+
+
+std::string PathString::ToUTF8() const
+{
+	return mpt::transcode<std::string>(mpt::common_encoding::utf8, path);
+}
+
+PathString PathString::FromUTF8(const std::string &path)
+{
+	return PathString(mpt::transcode<mpt::RawPathString>(mpt::common_encoding::utf8, path));
+}
+
+
+#if MPT_WSTRING_CONVERT
+
+std::wstring PathString::ToWide() const
+{
+	return mpt::transcode<std::wstring>(path);
+}
+
+PathString PathString::FromWide(const std::wstring &path)
+{
+	return PathString(mpt::transcode<mpt::RawPathString>(path));
+}
+
+#endif // MPT_WSTRING_CONVERT
+
+
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
+
+std::string PathString::ToLocale() const
+{
+	return mpt::transcode<std::string>(mpt::logical_encoding::locale, path);
+}
+
+PathString PathString::FromLocale(const std::string &path)
+{
+	return PathString(mpt::transcode<mpt::RawPathString>(mpt::logical_encoding::locale, path));
+}
+
+#endif // MPT_ENABLE_CHARSET_LOCALE
+
+
+#if defined(MPT_WITH_MFC)
+
+CString PathString::ToCString() const
+{
+	return mpt::transcode<CString>(path);
+}
+
+PathString PathString::FromCString(const CString &path)
+{
+	return PathString(mpt::transcode<mpt::RawPathString>(path));
+}
+
+#endif // MPT_WITH_MFC
+
 
 
 #if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS

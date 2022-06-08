@@ -14,6 +14,7 @@
 
 #include "mpt/base/namespace.hpp"
 #include "mpt/path/os_path.hpp"
+#include "mpt/string/types.hpp"
 
 #include "openmpt/base/FlagSet.hpp"
 
@@ -32,7 +33,7 @@ namespace mpt
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
 using RawPathString = mpt::os_path;
 #else // !MPT_ENABLE_CHARSET_LOCALE
-using RawPathString = std::string;
+using RawPathString = mpt::utf8string;
 #endif // MPT_ENABLE_CHARSET_LOCALE
 
 
@@ -221,83 +222,26 @@ public:
 
 
 
-#if MPT_OS_WINDOWS
+	mpt::ustring ToUnicode() const;
+	static PathString FromUnicode(const mpt::ustring &path);
 
+	std::string ToUTF8() const;
+	static PathString FromUTF8(const std::string &path);
 
-
-#if MPT_OS_WINDOWS && !defined(MPT_COMPILER_QUIRK_NO_WCHAR) && !(MPT_WSTRING_CONVERT)
-#error "mpt::PathString on Windows depends on MPT_WSTRING_CONVERT)"
+#if MPT_WSTRING_CONVERT
+	std::wstring ToWide() const;
+	static PathString FromWide(const std::wstring &path);
 #endif // MPT_WSTRING_CONVERT
 
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
-	std::string ToLocale() const { return mpt::ToCharset(mpt::Charset::Locale, path); }
+	std::string ToLocale() const;
+	static PathString FromLocale(const std::string &path);
 #endif // MPT_ENABLE_CHARSET_LOCALE
-	std::string ToUTF8() const { return mpt::ToCharset(mpt::Charset::UTF8, path); }
-#if MPT_WSTRING_CONVERT
-	std::wstring ToWide() const { return mpt::ToWide(path); }
-#endif // MPT_WSTRING_CONVERT
-	mpt::ustring ToUnicode() const { return mpt::ToUnicode(path); }
-#if defined(MPT_ENABLE_CHARSET_LOCALE)
-	static PathString FromLocale(const std::string &path) { return PathString(mpt::ToWin(mpt::Charset::Locale, path)); }
-#endif // MPT_ENABLE_CHARSET_LOCALE
-	static PathString FromUTF8(const std::string &path) { return PathString(mpt::ToWin(mpt::Charset::UTF8, path)); }
-#if MPT_WSTRING_CONVERT
-	static PathString FromWide(const std::wstring &path) { return PathString(mpt::ToWin(path)); }
-#endif // MPT_WSTRING_CONVERT
-	static PathString FromUnicode(const mpt::ustring &path) { return PathString(mpt::ToWin(path)); }
+
 #if defined(MPT_WITH_MFC)
-	// CString TCHAR, so this is CHAR or WCHAR, depending on UNICODE
-	CString ToCString() const { return mpt::ToCString(path); }
-	static PathString FromCString(const CString &path) { return PathString(mpt::ToWin(path)); }
+	CString ToCString() const;
+	static PathString FromCString(const CString &path);
 #endif // MPT_WITH_MFC
-
-
-
-#else // !MPT_OS_WINDOWS
-
-#if defined(MPT_ENABLE_CHARSET_LOCALE)
-
-
-
-#if defined(MPT_ENABLE_CHARSET_LOCALE)
-	std::string ToLocale() const { return mpt::ToCharset(mpt::Charset::Locale, path); }
-#endif // MPT_WSTRING_CONVERT
-	std::string ToUTF8() const { return mpt::ToCharset(mpt::Charset::UTF8, path); }
-#if MPT_WSTRING_CONVERT
-	std::wstring ToWide() const { return mpt::ToWide(path); }
-#endif // MPT_WSTRING_CONVERT
-	mpt::ustring ToUnicode() const { return mpt::ToUnicode(path); }
-#if defined(MPT_ENABLE_CHARSET_LOCALE)
-	static PathString FromLocale(const std::string &path) { return PathString(mpt::ToLocale(mpt::Charset::Locale, path)); }
-#endif // MPT_WSTRING_CONVERT
-	static PathString FromUTF8(const std::string &path) { return PathString(mpt::ToLocale(mpt::Charset::UTF8, path)); }
-#if MPT_WSTRING_CONVERT
-	static PathString FromWide(const std::wstring &path) { return PathString(mpt::ToLocale(path)); }
-#endif // MPT_WSTRING_CONVERT
-	static PathString FromUnicode(const mpt::ustring &path) { return PathString(mpt::ToLocale(path)); }
-
-
-
-#else // !MPT_ENABLE_CHARSET_LOCALE
-
-
-
-	std::string ToUTF8() const { return path; }
-#if MPT_WSTRING_CONVERT
-	std::wstring ToWide() const { return mpt::ToWide(mpt::Charset::UTF8, path); }
-#endif // MPT_WSTRING_CONVERT
-	mpt::ustring ToUnicode() const { return mpt::ToUnicode(mpt::Charset::UTF8, path); }
-	static PathString FromUTF8(const std::string &path) { return PathString(path); }
-#if MPT_WSTRING_CONVERT
-	static PathString FromWide(const std::wstring &path) { return PathString(mpt::ToCharset(mpt::Charset::UTF8, path)); }
-#endif // MPT_WSTRING_CONVERT
-	static PathString FromUnicode(const mpt::ustring &path) { return PathString(mpt::ToCharset(mpt::Charset::UTF8, path)); }
-
-
-
-#endif // MPT_ENABLE_CHARSET_LOCALE
-
-#endif // MPT_OS_WINDOWS
 
 
 
