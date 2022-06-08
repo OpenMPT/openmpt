@@ -199,8 +199,10 @@ public:
 public:
 
 
+
 	RawPathString AsNative() const { return path; }
 	static PathString FromNative(const RawPathString& path) { return PathString(path); }
+
 
 #if MPT_OS_WINDOWS
 	// Return native string, with possible \\?\ prefix if it exceeds MAX_PATH characters.
@@ -318,15 +320,9 @@ public:
 
 
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
-#if MPT_OS_WINDOWS
-#ifdef UNICODE
-inline std::string ToAString(const mpt::PathString & x) { return mpt::ToCharset(mpt::Charset::Locale, x.ToUnicode()); }
+inline std::string ToAString(const mpt::PathString & x) { return x.ToLocale(); }
 #else
-inline std::string ToAString(const mpt::PathString & x) { return mpt::ToCharset(mpt::Charset::Locale, x.AsNative()); }
-#endif
-#else
-inline std::string ToAString(const mpt::PathString & x) { return mpt::ToCharset(mpt::Charset::Locale, x.ToUnicode()); }
-#endif
+inline std::string ToAString(const mpt::PathString& x) { return x.ToUTF8(); }
 #endif
 inline mpt::ustring ToUString(const mpt::PathString & x) { return x.ToUnicode(); }
 #if MPT_WSTRING_FORMAT
