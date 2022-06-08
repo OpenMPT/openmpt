@@ -199,6 +199,25 @@ public:
 public:
 
 
+	RawPathString AsNative() const { return path; }
+	static PathString FromNative(const RawPathString& path) { return PathString(path); }
+
+#if MPT_OS_WINDOWS
+	// Return native string, with possible \\?\ prefix if it exceeds MAX_PATH characters.
+	RawPathString AsNativePrefixed() const;
+#else // !MPT_OS_WINDOWS
+	RawPathString AsNativePrefixed() const { return path; }
+#endif // MPT_OS_WINDOWS
+
+#if MPT_OS_WINDOWS
+	// Convert a path to its simplified form, i.e. remove ".\" and "..\" entries
+	mpt::PathString Simplify() const;
+#else // !MPT_OS_WINDOWS
+	// Convert a path to its simplified form (currently only implemented on Windows)
+	[[deprecated]] mpt::PathString Simplify() const { return PathString(path); }
+#endif // MPT_OS_WINDOWS
+
+
 
 #if MPT_OS_WINDOWS && defined(MPT_COMPILER_QUIRK_NO_WCHAR)
 
@@ -214,18 +233,11 @@ public:
 #endif
 	static PathString FromUTF8(const std::string &path) { return PathString(mpt::ToWin(mpt::Charset::UTF8, path)); }
 	static PathString FromUnicode(const mpt::ustring &path) { return PathString(mpt::ToWin(path)); }
-	RawPathString AsNative() const { return path; }
-	// Return native string, with possible \\?\ prefix if it exceeds MAX_PATH characters.
-	RawPathString AsNativePrefixed() const;
-	static PathString FromNative(const RawPathString &path) { return PathString(path); }
 #if defined(MPT_WITH_MFC)
 	// CString TCHAR, so this is CHAR or WCHAR, depending on UNICODE
 	CString ToCString() const { return mpt::ToCString(path); }
 	static PathString FromCString(const CString &path) { return PathString(mpt::ToWin(path)); }
 #endif // MPT_WITH_MFC
-
-	// Convert a path to its simplified form, i.e. remove ".\" and "..\" entries
-	mpt::PathString Simplify() const;
 
 
 
@@ -249,18 +261,11 @@ public:
 	static PathString FromUTF8(const std::string &path) { return PathString(mpt::ToWin(mpt::Charset::UTF8, path)); }
 	static PathString FromWide(const std::wstring &path) { return PathString(mpt::ToWin(path)); }
 	static PathString FromUnicode(const mpt::ustring &path) { return PathString(mpt::ToWin(path)); }
-	RawPathString AsNative() const { return path; }
-	// Return native string, with possible \\?\ prefix if it exceeds MAX_PATH characters.
-	RawPathString AsNativePrefixed() const;
-	static PathString FromNative(const RawPathString &path) { return PathString(path); }
 #if defined(MPT_WITH_MFC)
 	// CString TCHAR, so this is CHAR or WCHAR, depending on UNICODE
 	CString ToCString() const { return mpt::ToCString(path); }
 	static PathString FromCString(const CString &path) { return PathString(mpt::ToWin(path)); }
 #endif // MPT_WITH_MFC
-
-	// Convert a path to its simplified form, i.e. remove ".\" and "..\" entries
-	mpt::PathString Simplify() const;
 
 
 
@@ -282,12 +287,6 @@ public:
 	static PathString FromWide(const std::wstring &path) { return PathString(mpt::ToLocale(path)); }
 #endif
 	static PathString FromUnicode(const mpt::ustring &path) { return PathString(mpt::ToLocale(path)); }
-	RawPathString AsNative() const { return path; }
-	RawPathString AsNativePrefixed() const { return path; }
-	static PathString FromNative(const RawPathString &path) { return PathString(path); }
-
-	// Convert a path to its simplified form (currently only implemented on Windows)
-	[[deprecated]] mpt::PathString Simplify() const { return PathString(path); }
 
 
 
@@ -305,12 +304,6 @@ public:
 	static PathString FromWide(const std::wstring &path) { return PathString(mpt::ToCharset(mpt::Charset::UTF8, path)); }
 #endif
 	static PathString FromUnicode(const mpt::ustring &path) { return PathString(mpt::ToCharset(mpt::Charset::UTF8, path)); }
-	RawPathString AsNative() const { return path; }
-	RawPathString AsNativePrefixed() const { return path; }
-	static PathString FromNative(const RawPathString &path) { return PathString(path); }
-
-	// Convert a path to its simplified form (currently only implemented on Windows)
-	[[deprecated]] mpt::PathString Simplify() const { return PathString(path); }
 
 
 
