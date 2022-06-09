@@ -640,17 +640,21 @@ mpt::PathString GetTempDirectory()
 	return mpt::GetExecutableDirectory();
 }
 
-mpt::PathString CreateTempFileName(const mpt::PathString &fileNamePrefix, const mpt::PathString &fileNameExtension)
+
+
+TemporaryPathname::TemporaryPathname(const mpt::PathString &fileNamePrefix, const mpt::PathString &fileNameExtension)
 {
 	mpt::PathString filename = mpt::GetTempDirectory();
 	filename += (!fileNamePrefix.empty() ? fileNamePrefix + P_("_") : mpt::PathString());
 	filename += mpt::PathString::FromUnicode(mpt::UUID::GenerateLocalUseOnly(mpt::global_prng()).ToUString());
 	filename += (!fileNameExtension.empty() ? P_(".") + fileNameExtension : mpt::PathString());
-	return filename;
+	m_Path = filename;
 }
 
-TempFileGuard::TempFileGuard(const mpt::PathString &filename)
-	: filename(filename)
+
+
+TempFileGuard::TempFileGuard(const mpt::TemporaryPathname &pathname)
+	: filename(pathname.GetPathname())
 {
 	return;
 }
@@ -669,8 +673,8 @@ TempFileGuard::~TempFileGuard()
 }
 
 
-TempDirGuard::TempDirGuard(const mpt::PathString &dirname_)
-	: dirname(dirname_.WithTrailingSlash())
+TempDirGuard::TempDirGuard(const mpt::TemporaryPathname &pathname)
+	: dirname(pathname.GetPathname().WithTrailingSlash())
 {
 	if(dirname.empty())
 	{

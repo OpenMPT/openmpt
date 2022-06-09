@@ -1839,7 +1839,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 			thisName += fileExt;
 			if(wsdlg.m_Settings.outputToSample)
 			{
-				thisName = mpt::CreateTempFileName(P_("OpenMPT"));
+				thisName = mpt::TemporaryPathname{P_("OpenMPT")}.GetPathname();
 				// Ensure this temporary file is marked as temporary in the file system, to increase the chance it will never be written to disk
 				HANDLE hFile = ::CreateFile(thisName.AsNative().c_str(), GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_TEMPORARY, NULL);
 				if(hFile != INVALID_HANDLE_VALUE)

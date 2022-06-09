@@ -912,7 +912,7 @@ void CDoWaveConvert::Run()
 	std::vector<float> normalizeBufferData;
 	float *normalizeBuffer = nullptr;
 	float normalizePeak = 0.0f;
-	const mpt::PathString normalizeFileName = mpt::CreateTempFileName(P_("OpenMPT"));
+	const mpt::PathString normalizeFileName = mpt::TemporaryPathname{P_("OpenMPT")}.GetPathname();
 	std::optional<mpt::fstream> normalizeFile;
 	if(m_Settings.normalize)
 	{

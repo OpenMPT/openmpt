@@ -320,7 +320,20 @@ mpt::PathString GetTempDirectory();
 
 
 // Returns a new unique absolute path.
-mpt::PathString CreateTempFileName(const mpt::PathString& fileNamePrefix = mpt::PathString(), const mpt::PathString& fileNameExtension = P_("tmp"));
+class TemporaryPathname
+{
+private:
+	mpt::PathString m_Path;
+public:
+	TemporaryPathname(const mpt::PathString &fileNamePrefix = mpt::PathString(), const mpt::PathString &fileNameExtension = P_("tmp"));
+public:
+	mpt::PathString GetPathname() const
+	{
+		return m_Path;
+	}
+};
+
+
 
 // Scoped temporary file guard. Deletes the file when going out of scope.
 // The file itself is not created automatically.
@@ -329,7 +342,7 @@ class TempFileGuard
 private:
 	const mpt::PathString filename;
 public:
-	TempFileGuard(const mpt::PathString &filename = CreateTempFileName());
+	TempFileGuard(const mpt::TemporaryPathname &pathname = mpt::TemporaryPathname{});
 	mpt::PathString GetFilename() const;
 	~TempFileGuard();
 };
@@ -342,10 +355,12 @@ class TempDirGuard
 private:
 	mpt::PathString dirname;
 public:
-	TempDirGuard(const mpt::PathString &dirname_ = CreateTempFileName());
+	TempDirGuard(const mpt::TemporaryPathname &pathname = mpt::TemporaryPathname{});
 	mpt::PathString GetDirname() const;
 	~TempDirGuard();
 };
+
+
 
 #endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
 

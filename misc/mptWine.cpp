@@ -242,7 +242,7 @@ ExecResult Context::ExecutePosixShellScript(std::string script, FlagSet<ExecFlag
 
 	progress(userdata);
 
-	mpt::TempDirGuard dirWindowsTemp(mpt::CreateTempFileName());
+	mpt::TempDirGuard dirWindowsTemp{};
 	if(dirWindowsTemp.GetDirname().empty())
 	{
 		throw mpt::Wine::Exception("Creating temporary directoy failed.");
