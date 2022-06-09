@@ -3088,7 +3088,7 @@ void CModDoc::OnSaveTemplateModule()
 	{
 		sName += P_("newTemplate") + mpt::PathString::FromUnicode(mpt::ufmt::val(i));
 		sName += P_(".") + mpt::PathString::FromUnicode(m_SndFile.GetModSpecifications().GetFileExtension());
-		if (!mpt::FS::FileOrDirectoryExists(templateFolder + sName))
+		if (!mpt::FS::PathExists(templateFolder + sName))
 			break;
 	}
 

@@ -847,7 +847,7 @@ void CTrackApp::SetupPaths(bool overridePortable)
 	// First, determine if the executable is installed in multi-arch mode or in the old standard mode.
 	bool modeMultiArch = false;
 	bool modeSourceProject = false;
-	const mpt::PathString exePath = mpt::GetExecutablePath();
+	const mpt::PathString exePath = mpt::GetExecutableDirectory();
 	auto exePathComponents = mpt::String::Split<mpt::ustring>(exePath.GetDir().WithoutTrailingSlash().ToUnicode(), P_("\\").ToUnicode());
 	if(exePathComponents.size() >= 2)
 	{
@@ -1097,7 +1097,7 @@ BOOL CTrackApp::InitInstanceEarly(CMPTCommandLineInfo &cmdInfo)
 	#endif
 
 	// Avoid e.g. audio APIs trying to load wdmaud.drv from arbitrary working directory
-	::SetCurrentDirectory(mpt::GetExecutablePath().AsNative().c_str());
+	::SetCurrentDirectory(mpt::GetExecutableDirectory().AsNative().c_str());
 
 	// Initialize OLE MFC support
 	BOOL oleinit = AfxOleInit();

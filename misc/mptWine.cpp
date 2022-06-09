@@ -682,7 +682,7 @@ ExecResult Context::ExecutePosixShellScript(std::string script, FlagSet<ExecFlag
 		}
 	}
 
-	mpt::DeleteWholeDirectoryTree(dirWindows);
+	mpt::FS::DeleteDirectoryTree(dirWindows);
 
 	return result;
 

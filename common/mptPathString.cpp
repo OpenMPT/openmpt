@@ -375,7 +375,7 @@ bool FS::IsFile(const mpt::PathString &path)
 	return ((dwAttrib != INVALID_FILE_ATTRIBUTES) && !(dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
 }
 
-bool FS::FileOrDirectoryExists(const mpt::PathString &path)
+bool FS::PathExists(const mpt::PathString &path)
 {
 	return ::PathFileExists(path.AsNative().c_str()) != FALSE;
 }
@@ -502,6 +502,7 @@ bool PathString::IsAbsolute() const
 }
 
 
+
 #if MPT_OS_WINDOWS
 
 #if !(MPT_OS_WINDOWS_WINRT && (_WIN32_WINNT < 0x0a00))
@@ -523,9 +524,18 @@ mpt::PathString GetAbsolutePath(const mpt::PathString &path)
 
 #endif
 
-#ifdef MODPLUG_TRACKER
+#endif // MPT_OS_WINDOWS
 
-bool DeleteWholeDirectoryTree(mpt::PathString path)
+
+
+#if MPT_OS_WINDOWS && defined(MODPLUG_TRACKER)
+
+
+
+namespace FS
+{
+
+bool DeleteDirectoryTree(mpt::PathString path)
 {
 	if(path.AsNative().empty())
 	{
@@ -535,7 +545,7 @@ bool DeleteWholeDirectoryTree(mpt::PathString path)
 	{
 		return false;
 	}
-	if(!mpt::FS::FileOrDirectoryExists(path))
+	if(!mpt::FS::PathExists(path))
 	{
 		return true;
 	}
@@ -557,7 +567,7 @@ bool DeleteWholeDirectoryTree(mpt::PathString path)
 				filename = path + filename;
 				if(mpt::FS::IsDirectory(filename))
 				{
-					if(!DeleteWholeDirectoryTree(filename))
+					if(!mpt::FS::DeleteDirectoryTree(filename))
 					{
 						return false;
 					}
@@ -579,15 +589,11 @@ bool DeleteWholeDirectoryTree(mpt::PathString path)
 	return true;
 }
 
-#endif // MODPLUG_TRACKER
-
-#endif // MPT_OS_WINDOWS
+} // namespace FS
 
 
 
-#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
-
-mpt::PathString GetExecutablePath()
+mpt::PathString GetExecutableDirectory()
 {
 	std::vector<TCHAR> exeFileName(MAX_PATH);
 	while(GetModuleFileName(0, exeFileName.data(), mpt::saturate_cast<DWORD>(exeFileName.size())) >= exeFileName.size())
@@ -604,11 +610,11 @@ mpt::PathString GetExecutablePath()
 
 #if !MPT_OS_WINDOWS_WINRT
 
-mpt::PathString GetSystemPath()
+mpt::PathString GetSystemDirectory()
 {
-	DWORD size = GetSystemDirectory(nullptr, 0);
+	DWORD size = ::GetSystemDirectory(nullptr, 0);
 	std::vector<TCHAR> path(size + 1);
-	if(!GetSystemDirectory(path.data(), size + 1))
+	if(!::GetSystemDirectory(path.data(), size + 1))
 	{
 		return mpt::PathString();
 	}
@@ -617,11 +623,7 @@ mpt::PathString GetSystemPath()
 
 #endif // !MPT_OS_WINDOWS_WINRT
 
-#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
 
-
-
-#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
 
 mpt::PathString GetTempDirectory()
 {
@@ -635,7 +637,7 @@ mpt::PathString GetTempDirectory()
 		}
 	}
 	// use exe directory as fallback
-	return mpt::GetExecutablePath();
+	return mpt::GetExecutableDirectory();
 }
 
 mpt::PathString CreateTempFileName(const mpt::PathString &fileNamePrefix, const mpt::PathString &fileNameExtension)
@@ -689,7 +691,7 @@ TempDirGuard::~TempDirGuard()
 {
 	if(!dirname.empty())
 	{
-		DeleteWholeDirectoryTree(dirname);
+		mpt::FS::DeleteDirectoryTree(dirname);
 	}
 }
 
@@ -700,6 +702,8 @@ TempDirGuard::~TempDirGuard()
 
 
 #if defined(MODPLUG_TRACKER)
+
+
 
 static inline char SanitizeFilenameChar(char c)
 {
@@ -816,10 +820,6 @@ void SanitizeFilename(CString &str)
 }
 #endif // MPT_WITH_MFC
 
-#endif // MODPLUG_TRACKER
-
-
-#if defined(MODPLUG_TRACKER)
 
 
 mpt::PathString FileType::AsFilterString(FlagSet<FileTypeFormat> format) const
@@ -932,6 +932,7 @@ mpt::PathString ToFilterOnlyString(const std::vector<FileType> &fileTypes, bool 
 	}
 	return filter.empty() ? filter : (prependSemicolonWhenNotEmpty ? P_(";") : P_("")) + filter;
 }
+
 
 
 #endif // MODPLUG_TRACKER

@@ -254,7 +254,7 @@ inline mpt::ustring ToUString(const mpt::PathString & x) { return x.ToUnicode();
 inline std::wstring ToWString(const mpt::PathString & x) { return x.ToWide(); }
 #endif
 
-} // namespace mpt
+
 
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
 #define MPT_PATHSTRING_LITERAL(x) MPT_OSPATH_LITERAL( x )
@@ -268,25 +268,6 @@ inline std::wstring ToWString(const mpt::PathString & x) { return x.ToWide(); }
 #define PL_(x) MPT_PATHSTRING_LITERAL(x)
 #define P_(x) MPT_PATHSTRING(x)
 
-namespace mpt
-{
-
-
-#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
-
-namespace FS
-{
-
-	// Verify if this path represents a valid directory on the file system.
-	bool IsDirectory(const mpt::PathString &path);
-	// Verify if this path exists and is a file on the file system.
-	bool IsFile(const mpt::PathString &path);
-
-	bool FileOrDirectoryExists(const mpt::PathString &path);
-
-} // namespace FS
-
-#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
 
 
 #if MPT_OS_WINDOWS
@@ -298,38 +279,48 @@ mpt::PathString GetAbsolutePath(const mpt::PathString &path);
 
 #endif
 
-#ifdef MODPLUG_TRACKER
-
-// Deletes a complete directory tree. Handle with EXTREME care.
-// Returns false if any file could not be removed and aborts as soon as it
-// encounters any error. path must be absolute.
-bool DeleteWholeDirectoryTree(mpt::PathString path);
-
-#endif // MODPLUG_TRACKER
-
 #endif // MPT_OS_WINDOWS
+
+
 
 #if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
 
+
+
+namespace FS
+{
+
+	// Verify if this path represents a valid directory on the file system.
+	bool IsDirectory(const mpt::PathString &path);
+	// Verify if this path exists and is a file on the file system.
+	bool IsFile(const mpt::PathString &path);
+	// Verify that a path exists (no matter what type)
+	bool PathExists(const mpt::PathString &path);
+
+	// Deletes a complete directory tree. Handle with EXTREME care.
+	// Returns false if any file could not be removed and aborts as soon as it
+	// encounters any error. path must be absolute.
+	bool DeleteDirectoryTree(mpt::PathString path);
+
+} // namespace FS
+
+
+
 // Returns the application executable path or an empty string (if unknown), e.g. "C:\mptrack\"
-mpt::PathString GetExecutablePath();
+mpt::PathString GetExecutableDirectory();
 
 #if !MPT_OS_WINDOWS_WINRT
 // Returns the system directory path, e.g. "C:\Windows\System32\"
-mpt::PathString GetSystemPath();
+mpt::PathString GetSystemDirectory();
 #endif // !MPT_OS_WINDOWS_WINRT
-
-#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
-
-#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
 
 // Returns temporary directory (with trailing backslash added) (e.g. "C:\TEMP\")
 mpt::PathString GetTempDirectory();
 
+
+
 // Returns a new unique absolute path.
-mpt::PathString CreateTempFileName(const mpt::PathString &fileNamePrefix = mpt::PathString(), const mpt::PathString &fileNameExtension = P_("tmp"));
-
-
+mpt::PathString CreateTempFileName(const mpt::PathString& fileNamePrefix = mpt::PathString(), const mpt::PathString& fileNameExtension = P_("tmp"));
 
 // Scoped temporary file guard. Deletes the file when going out of scope.
 // The file itself is not created automatically.

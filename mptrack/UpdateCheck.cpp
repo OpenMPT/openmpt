@@ -737,7 +737,7 @@ void CUpdateCheck::CleanOldUpdates(const CUpdateCheck::Settings & /* settings */
 	}
 	mpt::PathString dirTempOpenMPT = dirTemp + P_("OpenMPT") + mpt::PathString::FromNative(mpt::RawPathString(1, mpt::PathString::GetDefaultPathSeparator()));
 	mpt::PathString dirTempOpenMPTUpdates = dirTempOpenMPT + P_("Updates") + mpt::PathString::FromNative(mpt::RawPathString(1, mpt::PathString::GetDefaultPathSeparator()));
-	mpt::DeleteWholeDirectoryTree(dirTempOpenMPTUpdates);
+	mpt::FS::DeleteDirectoryTree(dirTempOpenMPTUpdates);
 }
 
 
