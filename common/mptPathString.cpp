@@ -301,7 +301,7 @@ PathString PathString::FromCString(const CString &path)
 
 
 
-#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
+#if MPT_OS_WINDOWS
 
 void PathString::SplitPath(PathString *prefix, PathString *drive, PathString *dir, PathString *fbase, PathString *fext) const
 {
@@ -438,6 +438,91 @@ PathString PathString::GetFilename() const
 	return name + ext;
 }
 
+#else // !MPT_OS_WINDOWS
+
+void PathString::SplitPath(PathString *dir, PathString *fbase, PathString *fext) const
+{
+
+	if(dir) *dir = mpt::PathString();
+	if(fbase) *fbase = mpt::PathString();
+	if(fext) *fext = mpt::PathString();
+
+	mpt::RawPathString p = path;
+
+	mpt::RawPathString::size_type last_slash = p.find_last_of(PL_("/"));
+	if(last_slash != mpt::RawPathString::npos)
+	{
+		if(dir) *dir = mpt::PathString::FromNative(p.substr(0, last_slash + 1));
+		p = p.substr(last_slash + 1);
+	} else
+	{
+		if(dir) *dir = mpt::PathString();
+	}
+	mpt::RawPathString::size_type last_dot = p.find_last_of(PL_("."));
+	if(last_dot == mpt::RawPathString::npos)
+	{
+		if(fbase) *fbase = mpt::PathString::FromNative(p);
+		if(fext) *fext = mpt::PathString();
+	} else if(last_dot == 0)
+	{
+		if(fbase) *fbase = mpt::PathString::FromNative(p);
+		if(fext) *fext = mpt::PathString();
+	} else if(p == PL_(".") || p == PL_(".."))
+	{
+		if(fbase) *fbase = mpt::PathString::FromNative(p);
+		if(fext) *fext = mpt::PathString();
+	} else
+	{
+		if(fbase) *fbase = mpt::PathString::FromNative(p.substr(0, last_dot));
+		if(fext) *fext = mpt::PathString::FromNative(p.substr(last_dot));
+	}
+
+}
+
+PathString PathString::GetPrefix() const
+{
+	return mpt::PathString();
+}
+PathString PathString::GetDrive() const
+{
+	return mpt::PathString();
+}
+PathString PathString::GetDirectory() const
+{
+	PathString dir;
+	SplitPath(&dir, nullptr, nullptr);
+	return dir;
+}
+PathString PathString::GetDirectoryWithDrive() const
+{
+	PathString dir;
+	SplitPath(&dir, nullptr, nullptr);
+	return dir;
+}
+PathString PathString::GetFilenameBase() const
+{
+	PathString fname;
+	SplitPath(nullptr, &fname, nullptr);
+	return fname;
+}
+PathString PathString::GetFilenameExtension() const
+{
+	PathString ext;
+	SplitPath(nullptr, nullptr, &ext);
+	return ext;
+}
+PathString PathString::GetFilename() const
+{
+	PathString name, ext;
+	SplitPath(nullptr, &name, &ext);
+	return name + ext;
+}
+
+#endif // MPT_OS_WINDOWS
+
+
+
+#if MPT_OS_WINDOWS
 
 bool FS::IsDirectory(const mpt::PathString &path)
 {

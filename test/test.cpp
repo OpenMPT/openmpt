@@ -1405,7 +1405,7 @@ static MPT_NOINLINE void TestCharsets()
 
 	// Path splitting
 
-#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
+#if MPT_OS_WINDOWS
 
 	VERIFY_EQUAL(P_("").GetPrefix(), P_(""));
 	VERIFY_EQUAL(P_("").GetDrive(), P_(""));
@@ -1561,7 +1561,61 @@ static MPT_NOINLINE void TestCharsets()
 	VERIFY_EQUAL(P_("\\\\?\\UNC\\server\\share\\dir1\\dir2\\name.foo.ext").GetFilenameBase(), P_("name.foo"));
 	VERIFY_EQUAL(P_("\\\\?\\UNC\\server\\share\\dir1\\dir2\\name.foo.ext").GetFilenameExtension(), P_(".ext"));
 	VERIFY_EQUAL(P_("\\\\?\\UNC\\server\\share\\dir1\\dir2\\name.foo.ext").GetFilename(), P_("name.foo.ext"));
-#endif
+
+#else // !MPT_OS_WINDOWS
+
+
+	VERIFY_EQUAL(P_("").GetDirectory(), P_(""));
+	VERIFY_EQUAL(P_("").GetFilenameBase(), P_(""));
+	VERIFY_EQUAL(P_("").GetFilenameExtension(), P_(""));
+	VERIFY_EQUAL(P_("").GetFilename(), P_(""));
+
+	VERIFY_EQUAL(P_("/").GetDirectory(), P_("/"));
+	VERIFY_EQUAL(P_("/").GetFilenameBase(), P_(""));
+	VERIFY_EQUAL(P_("/").GetFilenameExtension(), P_(""));
+	VERIFY_EQUAL(P_("/").GetFilename(), P_(""));
+
+	VERIFY_EQUAL(P_("/directory/").GetDirectory(), P_("/directory/"));
+	VERIFY_EQUAL(P_("/directory/").GetFilenameBase(), P_(""));
+	VERIFY_EQUAL(P_("/directory/").GetFilenameExtension(), P_(""));
+	VERIFY_EQUAL(P_("/directory/").GetFilename(), P_(""));
+
+	VERIFY_EQUAL(P_("/directory/file.txt").GetDirectory(), P_("/directory/"));
+	VERIFY_EQUAL(P_("/directory/file.txt").GetFilenameBase(), P_("file"));
+	VERIFY_EQUAL(P_("/directory/file.txt").GetFilenameExtension(), P_(".txt"));
+	VERIFY_EQUAL(P_("/directory/file.txt").GetFilename(), P_("file.txt"));
+
+	VERIFY_EQUAL(P_(".").GetDirectory(), P_(""));
+	VERIFY_EQUAL(P_(".").GetFilenameBase(), P_("."));
+	VERIFY_EQUAL(P_(".").GetFilenameExtension(), P_(""));
+	VERIFY_EQUAL(P_(".").GetFilename(), P_("."));
+
+	VERIFY_EQUAL(P_("..").GetDirectory(), P_(""));
+	VERIFY_EQUAL(P_("..").GetFilenameBase(), P_(".."));
+	VERIFY_EQUAL(P_("..").GetFilenameExtension(), P_(""));
+	VERIFY_EQUAL(P_("..").GetFilename(), P_(".."));
+
+	VERIFY_EQUAL(P_("dir/.").GetDirectory(), P_("dir/"));
+	VERIFY_EQUAL(P_("dir/.").GetFilenameBase(), P_("."));
+	VERIFY_EQUAL(P_("dir/.").GetFilenameExtension(), P_(""));
+	VERIFY_EQUAL(P_("dir/.").GetFilename(), P_("."));
+
+	VERIFY_EQUAL(P_("dir/..").GetDirectory(), P_("dir/"));
+	VERIFY_EQUAL(P_("dir/..").GetFilenameBase(), P_(".."));
+	VERIFY_EQUAL(P_("dir/..").GetFilenameExtension(), P_(""));
+	VERIFY_EQUAL(P_("dir/..").GetFilename(), P_(".."));
+
+	VERIFY_EQUAL(P_(".txt").GetDirectory(), P_(""));
+	VERIFY_EQUAL(P_(".txt").GetFilenameBase(), P_(".txt"));
+	VERIFY_EQUAL(P_(".txt").GetFilenameExtension(), P_(""));
+	VERIFY_EQUAL(P_(".txt").GetFilename(), P_(".txt"));
+
+	VERIFY_EQUAL(P_("//server").GetDirectory(), P_("//"));
+	VERIFY_EQUAL(P_("//server").GetFilenameBase(), P_("server"));
+	VERIFY_EQUAL(P_("//server").GetFilenameExtension(), P_(""));
+	VERIFY_EQUAL(P_("//server").GetFilename(), P_("server"));
+
+#endif // MPT_OS_WINDOWS
 
 
 
