@@ -27,11 +27,10 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-#if MPT_OS_WINDOWS
+
 
 namespace mpt
 {
-
 
 mpt::RawPathString SupportLongPath(const mpt::RawPathString &path)
 {
@@ -60,6 +59,16 @@ mpt::RawPathString SupportLongPath(const mpt::RawPathString &path)
 	return path;
 #endif // MPT_OS_WINDOWS
 }
+
+} // namespace mpt
+
+
+
+#if MPT_OS_WINDOWS
+
+namespace mpt
+{
+
 
 
 #if !MPT_OS_WINDOWS_WINRT
