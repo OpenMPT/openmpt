@@ -281,7 +281,7 @@ public:
 		, m_frames(frames) {
 		m_buffer.contiguous = buffer;
 	}
-	MPT_CONSTEXPRINLINE audio_span(audio_span_contiguous<sample_type > buffer) noexcept
+	MPT_CONSTEXPRINLINE audio_span(audio_span_contiguous<sample_type> buffer) noexcept
 		: m_frame_stride(1)
 		, m_channel_stride(buffer.size_frames())
 		, m_channels(buffer.size_channels())
@@ -295,7 +295,7 @@ public:
 		, m_frames(frames) {
 		m_buffer.contiguous = buffer;
 	}
-	MPT_CONSTEXPRINLINE audio_span(audio_span_planar<sample_type > buffer) noexcept
+	MPT_CONSTEXPRINLINE audio_span(audio_span_planar<sample_type> buffer) noexcept
 		: m_frame_stride(1)
 		, m_channel_stride(0)
 		, m_channels(buffer.size_channels())
@@ -309,7 +309,7 @@ public:
 		, m_frames(frames) {
 		m_buffer.planes = planes;
 	}
-	MPT_CONSTEXPRINLINE audio_span(audio_span_planar_strided<sample_type > buffer) noexcept
+	MPT_CONSTEXPRINLINE audio_span(audio_span_planar_strided<sample_type> buffer) noexcept
 		: m_frame_stride(static_cast<std::ptrdiff_t>(buffer.frame_stride()))
 		, m_channel_stride(0)
 		, m_channels(buffer.size_channels())
