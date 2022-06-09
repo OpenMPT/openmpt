@@ -8,6 +8,9 @@
 #include "mpt/base/macros.hpp"
 #include "mpt/base/namespace.hpp"
 
+#include <utility>
+#include <variant>
+
 #include <cassert>
 #include <cstddef>
 
@@ -406,6 +409,24 @@ public:
 		return m_buffer.frame_stride();
 	}
 };
+
+
+
+template <typename Tspan, typename Tfunc>
+MPT_FORCEINLINE auto audio_span_optimized_visit(Tspan span, Tfunc && f) -> decltype(std::forward<Tfunc>(f)(span)) const {
+	using sample_type = typename Tspan::sample_type;
+	std::variant<Tspan, audio_span_interleaved<sample_type>, audio_span_contiguous<sample_type>, audio_span_planar<sample_type>, audio_span_planar_strided<sample_type>> v{ span };
+	if (span.data() && span.is_contiguous() && span.frames_are_contiguous()) {
+		v = audio_span_interleaved<sample_type>{ span.data(), span.size_channels(), span.size_frames() };
+	} else if (span.data() && span.is_contiguous() && span.channels_are_contiguous()) {
+		v = audio_span_contiguous<sample_type>{ span.data(), span.size_channels(), span.size_frames() };
+	} else if (span.data_planar() && span.channels_are_contiguous()) {
+		v = audio_span_planar<sample_type>{ span.data_planar(), span.size_channels(), span.size_frames() };
+	} else if (span.data_planar()) {
+		v = audio_span_planar_strided<sample_type>{ span.data_planar(), span.size_channels(), span.size_frames(), span.frame_stride() };
+	}
+	return std::visit(std::forward<Tfunc>(f), v);
+}
 
 
 
