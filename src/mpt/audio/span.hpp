@@ -18,7 +18,7 @@ namespace mpt {
 inline namespace MPT_INLINE_NS {
 
 
-	
+
 // LRLRLRLRLR
 
 template <typename SampleType>
