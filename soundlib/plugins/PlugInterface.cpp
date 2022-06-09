@@ -632,7 +632,7 @@ bool IMixPlugin::SaveProgram()
 	const bool useDefaultDir = !defaultDir.empty();
 	if(!useDefaultDir && mpt::FS::IsFile(m_Factory.dllPath))
 	{
-		defaultDir = m_Factory.dllPath.GetPath();
+		defaultDir = m_Factory.dllPath.GetDirectoryWithDrive();
 	}
 
 	CString progName = m_Factory.libraryName.ToCString() + _T(" - ") + GetCurrentProgramName();
@@ -675,7 +675,7 @@ bool IMixPlugin::LoadProgram(mpt::PathString fileName)
 	bool useDefaultDir = !defaultDir.empty();
 	if(!useDefaultDir && mpt::FS::IsFile(m_Factory.dllPath))
 	{
-		defaultDir = m_Factory.dllPath.GetPath();
+		defaultDir = m_Factory.dllPath.GetDirectoryWithDrive();
 	}
 
 	if(fileName.empty())

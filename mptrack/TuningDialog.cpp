@@ -785,7 +785,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 	{
 		mpt::PathString fileName;
 		mpt::PathString fileExt;
-		file.SplitPath(nullptr, nullptr, &fileName, &fileExt);
+		file.SplitPath(nullptr, nullptr, nullptr, &fileName, &fileExt);
 		const mpt::ustring fileNameExt = (fileName + fileExt).ToUnicode();
 
 		const bool bIsTun = (mpt::PathString::CompareNoCase(fileExt, mpt::PathString::FromUTF8(CTuning::s_FileExtension)) == 0);

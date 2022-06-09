@@ -105,7 +105,7 @@ mpt::PathString CAutoSaver::GetBasePath(const CModDoc &modDoc, bool createPath) 
 		if(modDoc.m_bHasValidPath && !(path = modDoc.GetPathNameMpt()).empty())
 		{
 			// File has a user-chosen path - remove filename
-			path = path.GetPath();
+			path = path.GetDirectoryWithDrive();
 		} else
 		{
 			// if it doesn't, put it in settings dir

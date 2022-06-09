@@ -128,7 +128,7 @@ CDocument *CModDocManager::OpenDocumentFile(LPCTSTR lpszFileName, BOOL bAddToMRU
 		return pDoc;
 	}
 
-	if(const auto fileExt = filename.GetFileExt(); !mpt::PathString::CompareNoCase(fileExt, P_(".dll")) || !mpt::PathString::CompareNoCase(fileExt, P_(".vst3")))
+	if(const auto fileExt = filename.GetFilenameExtension(); !mpt::PathString::CompareNoCase(fileExt, P_(".dll")) || !mpt::PathString::CompareNoCase(fileExt, P_(".vst3")))
 	{
 		if(auto plugManager = theApp.GetPluginManager(); plugManager != nullptr)
 		{

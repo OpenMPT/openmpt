@@ -674,8 +674,8 @@ intptr_t VSTCALLBACK CVstPlugin::MasterCallBack(AEffect *effect, VstOpcodeToHost
 			{
 				pathStr = U_("%1");
 			}
-			const mpt::PathString projectPath = pVstPlugin->GetModDoc()->GetPathNameMpt().GetPath();
-			const mpt::PathString projectFile = pVstPlugin->GetModDoc()->GetPathNameMpt().GetFullFileName();
+			const mpt::PathString projectPath = pVstPlugin->GetModDoc()->GetPathNameMpt().GetDirectoryWithDrive();
+			const mpt::PathString projectFile = pVstPlugin->GetModDoc()->GetPathNameMpt().GetFilename();
 			pathStr = mpt::String::Replace(pathStr, U_("%1"), U_("?1?"));
 			pathStr = mpt::String::Replace(pathStr, U_("%2"), U_("?2?"));
 			pathStr = mpt::String::Replace(pathStr, U_("?1?"), projectPath.ToUnicode());
@@ -764,7 +764,7 @@ intptr_t CVstPlugin::VstFileSelector(bool destructor, VstFileSelect &fileSel)
 			}
 			dlg.ExtensionFilter(extensions)
 				.WorkingDirectory(mpt::PathString::FromLocale(workingDir))
-				.AddPlace(GetPluginFactory().dllPath.GetPath());
+				.AddPlace(GetPluginFactory().dllPath.GetDirectoryWithDrive());
 			if(!dlg.Show(GetEditor()))
 				return 0;
 

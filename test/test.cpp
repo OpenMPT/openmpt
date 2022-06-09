@@ -1407,141 +1407,160 @@ static MPT_NOINLINE void TestCharsets()
 
 #if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
 
+	VERIFY_EQUAL(P_("").GetPrefix(), P_(""));
 	VERIFY_EQUAL(P_("").GetDrive(), P_(""));
-	VERIFY_EQUAL(P_("").GetDir(), P_(""));
-	VERIFY_EQUAL(P_("").GetPath(), P_(""));
-	VERIFY_EQUAL(P_("").GetFileName(), P_(""));
-	VERIFY_EQUAL(P_("").GetFileExt(), P_(""));
-	VERIFY_EQUAL(P_("").GetFullFileName(), P_(""));
+	VERIFY_EQUAL(P_("").GetDirectory(), P_(""));
+	VERIFY_EQUAL(P_("").GetDirectoryWithDrive(), P_(""));
+	VERIFY_EQUAL(P_("").GetFilenameBase(), P_(""));
+	VERIFY_EQUAL(P_("").GetFilenameExtension(), P_(""));
+	VERIFY_EQUAL(P_("").GetFilename(), P_(""));
 
+	VERIFY_EQUAL(P_("C:\\").GetPrefix(), P_(""));
 	VERIFY_EQUAL(P_("C:\\").GetDrive(), P_("C:"));
-	VERIFY_EQUAL(P_("C:\\").GetDir(), P_("\\"));
-	VERIFY_EQUAL(P_("C:\\").GetPath(), P_("C:\\"));
-	VERIFY_EQUAL(P_("C:\\").GetFileName(), P_(""));
-	VERIFY_EQUAL(P_("C:\\").GetFileExt(), P_(""));
-	VERIFY_EQUAL(P_("C:\\").GetFullFileName(), P_(""));
+	VERIFY_EQUAL(P_("C:\\").GetDirectory(), P_("\\"));
+	VERIFY_EQUAL(P_("C:\\").GetDirectoryWithDrive(), P_("C:\\"));
+	VERIFY_EQUAL(P_("C:\\").GetFilenameBase(), P_(""));
+	VERIFY_EQUAL(P_("C:\\").GetFilenameExtension(), P_(""));
+	VERIFY_EQUAL(P_("C:\\").GetFilename(), P_(""));
 
+	VERIFY_EQUAL(P_("\\directory\\").GetPrefix(), P_(""));
 	VERIFY_EQUAL(P_("\\directory\\").GetDrive(), P_(""));
-	VERIFY_EQUAL(P_("\\directory\\").GetDir(), P_("\\directory\\"));
-	VERIFY_EQUAL(P_("\\directory\\").GetPath(), P_("\\directory\\"));
-	VERIFY_EQUAL(P_("\\directory\\").GetFileName(), P_(""));
-	VERIFY_EQUAL(P_("\\directory\\").GetFileExt(), P_(""));
-	VERIFY_EQUAL(P_("\\directory\\").GetFullFileName(), P_(""));
+	VERIFY_EQUAL(P_("\\directory\\").GetDirectory(), P_("\\directory\\"));
+	VERIFY_EQUAL(P_("\\directory\\").GetDirectoryWithDrive(), P_("\\directory\\"));
+	VERIFY_EQUAL(P_("\\directory\\").GetFilenameBase(), P_(""));
+	VERIFY_EQUAL(P_("\\directory\\").GetFilenameExtension(), P_(""));
+	VERIFY_EQUAL(P_("\\directory\\").GetFilename(), P_(""));
 
+	VERIFY_EQUAL(P_("\\directory\\file.txt").GetPrefix(), P_(""));
 	VERIFY_EQUAL(P_("\\directory\\file.txt").GetDrive(), P_(""));
-	VERIFY_EQUAL(P_("\\directory\\file.txt").GetDir(), P_("\\directory\\"));
-	VERIFY_EQUAL(P_("\\directory\\file.txt").GetPath(), P_("\\directory\\"));
-	VERIFY_EQUAL(P_("\\directory\\file.txt").GetFileName(), P_("file"));
-	VERIFY_EQUAL(P_("\\directory\\file.txt").GetFileExt(), P_(".txt"));
-	VERIFY_EQUAL(P_("\\directory\\file.txt").GetFullFileName(), P_("file.txt"));
+	VERIFY_EQUAL(P_("\\directory\\file.txt").GetDirectory(), P_("\\directory\\"));
+	VERIFY_EQUAL(P_("\\directory\\file.txt").GetDirectoryWithDrive(), P_("\\directory\\"));
+	VERIFY_EQUAL(P_("\\directory\\file.txt").GetFilenameBase(), P_("file"));
+	VERIFY_EQUAL(P_("\\directory\\file.txt").GetFilenameExtension(), P_(".txt"));
+	VERIFY_EQUAL(P_("\\directory\\file.txt").GetFilename(), P_("file.txt"));
 
+	VERIFY_EQUAL(P_(".").GetPrefix(), P_(""));
 	VERIFY_EQUAL(P_(".").GetDrive(), P_(""));
-	VERIFY_EQUAL(P_(".").GetDir(), P_(""));
-	VERIFY_EQUAL(P_(".").GetPath(), P_(""));
-	VERIFY_EQUAL(P_(".").GetFileName(), P_("."));
-	VERIFY_EQUAL(P_(".").GetFileExt(), P_(""));
-	VERIFY_EQUAL(P_(".").GetFullFileName(), P_("."));
+	VERIFY_EQUAL(P_(".").GetDirectory(), P_(""));
+	VERIFY_EQUAL(P_(".").GetDirectoryWithDrive(), P_(""));
+	VERIFY_EQUAL(P_(".").GetFilenameBase(), P_("."));
+	VERIFY_EQUAL(P_(".").GetFilenameExtension(), P_(""));
+	VERIFY_EQUAL(P_(".").GetFilename(), P_("."));
 
+	VERIFY_EQUAL(P_("..").GetPrefix(), P_(""));
 	VERIFY_EQUAL(P_("..").GetDrive(), P_(""));
-	VERIFY_EQUAL(P_("..").GetDir(), P_(""));
-	VERIFY_EQUAL(P_("..").GetPath(), P_(""));
-	VERIFY_EQUAL(P_("..").GetFileName(), P_(".."));
-	VERIFY_EQUAL(P_("..").GetFileExt(), P_(""));
-	VERIFY_EQUAL(P_("..").GetFullFileName(), P_(".."));
+	VERIFY_EQUAL(P_("..").GetDirectory(), P_(""));
+	VERIFY_EQUAL(P_("..").GetDirectoryWithDrive(), P_(""));
+	VERIFY_EQUAL(P_("..").GetFilenameBase(), P_(".."));
+	VERIFY_EQUAL(P_("..").GetFilenameExtension(), P_(""));
+	VERIFY_EQUAL(P_("..").GetFilename(), P_(".."));
 
+	VERIFY_EQUAL(P_("dir\\.").GetPrefix(), P_(""));
 	VERIFY_EQUAL(P_("dir\\.").GetDrive(), P_(""));
-	VERIFY_EQUAL(P_("dir\\.").GetDir(), P_("dir\\"));
-	VERIFY_EQUAL(P_("dir\\.").GetPath(), P_("dir\\"));
-	VERIFY_EQUAL(P_("dir\\.").GetFileName(), P_("."));
-	VERIFY_EQUAL(P_("dir\\.").GetFileExt(), P_(""));
-	VERIFY_EQUAL(P_("dir\\.").GetFullFileName(), P_("."));
+	VERIFY_EQUAL(P_("dir\\.").GetDirectory(), P_("dir\\"));
+	VERIFY_EQUAL(P_("dir\\.").GetDirectoryWithDrive(), P_("dir\\"));
+	VERIFY_EQUAL(P_("dir\\.").GetFilenameBase(), P_("."));
+	VERIFY_EQUAL(P_("dir\\.").GetFilenameExtension(), P_(""));
+	VERIFY_EQUAL(P_("dir\\.").GetFilename(), P_("."));
 
+	VERIFY_EQUAL(P_("dir\\..").GetPrefix(), P_(""));
 	VERIFY_EQUAL(P_("dir\\..").GetDrive(), P_(""));
-	VERIFY_EQUAL(P_("dir\\..").GetDir(), P_("dir\\"));
-	VERIFY_EQUAL(P_("dir\\..").GetPath(), P_("dir\\"));
-	VERIFY_EQUAL(P_("dir\\..").GetFileName(), P_(".."));
-	VERIFY_EQUAL(P_("dir\\..").GetFileExt(), P_(""));
-	VERIFY_EQUAL(P_("dir\\..").GetFullFileName(), P_(".."));
+	VERIFY_EQUAL(P_("dir\\..").GetDirectory(), P_("dir\\"));
+	VERIFY_EQUAL(P_("dir\\..").GetDirectoryWithDrive(), P_("dir\\"));
+	VERIFY_EQUAL(P_("dir\\..").GetFilenameBase(), P_(".."));
+	VERIFY_EQUAL(P_("dir\\..").GetFilenameExtension(), P_(""));
+	VERIFY_EQUAL(P_("dir\\..").GetFilename(), P_(".."));
 
+	VERIFY_EQUAL(P_(".txt").GetPrefix(), P_(""));
 	VERIFY_EQUAL(P_(".txt").GetDrive(), P_(""));
-	VERIFY_EQUAL(P_(".txt").GetDir(), P_(""));
-	VERIFY_EQUAL(P_(".txt").GetPath(), P_(""));
-	VERIFY_EQUAL(P_(".txt").GetFileName(), P_(".txt"));
-	VERIFY_EQUAL(P_(".txt").GetFileExt(), P_(""));
-	VERIFY_EQUAL(P_(".txt").GetFullFileName(), P_(".txt"));
+	VERIFY_EQUAL(P_(".txt").GetDirectory(), P_(""));
+	VERIFY_EQUAL(P_(".txt").GetDirectoryWithDrive(), P_(""));
+	VERIFY_EQUAL(P_(".txt").GetFilenameBase(), P_(".txt"));
+	VERIFY_EQUAL(P_(".txt").GetFilenameExtension(), P_(""));
+	VERIFY_EQUAL(P_(".txt").GetFilename(), P_(".txt"));
 
+	VERIFY_EQUAL(P_("C:tmp.txt").GetPrefix(), P_(""));
 	VERIFY_EQUAL(P_("C:tmp.txt").GetDrive(), P_("C:"));
-	VERIFY_EQUAL(P_("C:tmp.txt").GetDir(), P_(""));
-	VERIFY_EQUAL(P_("C:tmp.txt").GetPath(), P_("C:"));
-	VERIFY_EQUAL(P_("C:tmp.txt").GetFileName(), P_("tmp"));
-	VERIFY_EQUAL(P_("C:tmp.txt").GetFileExt(), P_(".txt"));
-	VERIFY_EQUAL(P_("C:tmp.txt").GetFullFileName(), P_("tmp.txt"));
+	VERIFY_EQUAL(P_("C:tmp.txt").GetDirectory(), P_(""));
+	VERIFY_EQUAL(P_("C:tmp.txt").GetDirectoryWithDrive(), P_("C:"));
+	VERIFY_EQUAL(P_("C:tmp.txt").GetFilenameBase(), P_("tmp"));
+	VERIFY_EQUAL(P_("C:tmp.txt").GetFilenameExtension(), P_(".txt"));
+	VERIFY_EQUAL(P_("C:tmp.txt").GetFilename(), P_("tmp.txt"));
 
+	VERIFY_EQUAL(P_("C:tempdir\\tmp.txt").GetPrefix(), P_(""));
 	VERIFY_EQUAL(P_("C:tempdir\\tmp.txt").GetDrive(), P_("C:"));
-	VERIFY_EQUAL(P_("C:tempdir\\tmp.txt").GetDir(), P_("tempdir\\"));
-	VERIFY_EQUAL(P_("C:tempdir\\tmp.txt").GetPath(), P_("C:tempdir\\"));
-	VERIFY_EQUAL(P_("C:tempdir\\tmp.txt").GetFileName(), P_("tmp"));
-	VERIFY_EQUAL(P_("C:tempdir\\tmp.txt").GetFileExt(), P_(".txt"));
-	VERIFY_EQUAL(P_("C:tempdir\\tmp.txt").GetFullFileName(), P_("tmp.txt"));
+	VERIFY_EQUAL(P_("C:tempdir\\tmp.txt").GetDirectory(), P_("tempdir\\"));
+	VERIFY_EQUAL(P_("C:tempdir\\tmp.txt").GetDirectoryWithDrive(), P_("C:tempdir\\"));
+	VERIFY_EQUAL(P_("C:tempdir\\tmp.txt").GetFilenameBase(), P_("tmp"));
+	VERIFY_EQUAL(P_("C:tempdir\\tmp.txt").GetFilenameExtension(), P_(".txt"));
+	VERIFY_EQUAL(P_("C:tempdir\\tmp.txt").GetFilename(), P_("tmp.txt"));
 
+	VERIFY_EQUAL(P_("C:\\tempdir\\tmp.txt").GetPrefix(), P_(""));
 	VERIFY_EQUAL(P_("C:\\tempdir\\tmp.txt").GetDrive(), P_("C:"));
-	VERIFY_EQUAL(P_("C:\\tempdir\\tmp.txt").GetDir(), P_("\\tempdir\\"));
-	VERIFY_EQUAL(P_("C:\\tempdir\\tmp.txt").GetPath(), P_("C:\\tempdir\\"));
-	VERIFY_EQUAL(P_("C:\\tempdir\\tmp.txt").GetFileName(), P_("tmp"));
-	VERIFY_EQUAL(P_("C:\\tempdir\\tmp.txt").GetFileExt(), P_(".txt"));
-	VERIFY_EQUAL(P_("C:\\tempdir\\tmp.txt").GetFullFileName(), P_("tmp.txt"));
+	VERIFY_EQUAL(P_("C:\\tempdir\\tmp.txt").GetDirectory(), P_("\\tempdir\\"));
+	VERIFY_EQUAL(P_("C:\\tempdir\\tmp.txt").GetDirectoryWithDrive(), P_("C:\\tempdir\\"));
+	VERIFY_EQUAL(P_("C:\\tempdir\\tmp.txt").GetFilenameBase(), P_("tmp"));
+	VERIFY_EQUAL(P_("C:\\tempdir\\tmp.txt").GetFilenameExtension(), P_(".txt"));
+	VERIFY_EQUAL(P_("C:\\tempdir\\tmp.txt").GetFilename(), P_("tmp.txt"));
 
-	VERIFY_EQUAL(P_("C:\\tempdir\\tmp.foo.txt").GetFileName(), P_("tmp.foo"));
-	VERIFY_EQUAL(P_("C:\\tempdir\\tmp.foo.txt").GetFileExt(), P_(".txt"));
+	VERIFY_EQUAL(P_("C:\\tempdir\\tmp.foo.txt").GetFilenameBase(), P_("tmp.foo"));
+	VERIFY_EQUAL(P_("C:\\tempdir\\tmp.foo.txt").GetFilenameExtension(), P_(".txt"));
 
+	VERIFY_EQUAL(P_("\\\\server").GetPrefix(), P_(""));
 	VERIFY_EQUAL(P_("\\\\server").GetDrive(), P_("\\\\server"));
-	VERIFY_EQUAL(P_("\\\\server").GetDir(), P_(""));
-	VERIFY_EQUAL(P_("\\\\server").GetPath(), P_("\\\\server"));
-	VERIFY_EQUAL(P_("\\\\server").GetFileName(), P_(""));
-	VERIFY_EQUAL(P_("\\\\server").GetFileExt(), P_(""));
-	VERIFY_EQUAL(P_("\\\\server").GetFullFileName(), P_(""));
+	VERIFY_EQUAL(P_("\\\\server").GetDirectory(), P_(""));
+	VERIFY_EQUAL(P_("\\\\server").GetDirectoryWithDrive(), P_("\\\\server"));
+	VERIFY_EQUAL(P_("\\\\server").GetFilenameBase(), P_(""));
+	VERIFY_EQUAL(P_("\\\\server").GetFilenameExtension(), P_(""));
+	VERIFY_EQUAL(P_("\\\\server").GetFilename(), P_(""));
 
+	VERIFY_EQUAL(P_("\\\\server\\").GetPrefix(), P_(""));
 	VERIFY_EQUAL(P_("\\\\server\\").GetDrive(), P_("\\\\server\\"));
-	VERIFY_EQUAL(P_("\\\\server\\").GetDir(), P_(""));
-	VERIFY_EQUAL(P_("\\\\server\\").GetPath(), P_("\\\\server\\"));
-	VERIFY_EQUAL(P_("\\\\server\\").GetFileName(), P_(""));
-	VERIFY_EQUAL(P_("\\\\server\\").GetFileExt(), P_(""));
-	VERIFY_EQUAL(P_("\\\\server\\").GetFullFileName(), P_(""));
+	VERIFY_EQUAL(P_("\\\\server\\").GetDirectory(), P_(""));
+	VERIFY_EQUAL(P_("\\\\server\\").GetDirectoryWithDrive(), P_("\\\\server\\"));
+	VERIFY_EQUAL(P_("\\\\server\\").GetFilenameBase(), P_(""));
+	VERIFY_EQUAL(P_("\\\\server\\").GetFilenameExtension(), P_(""));
+	VERIFY_EQUAL(P_("\\\\server\\").GetFilename(), P_(""));
 
+	VERIFY_EQUAL(P_("\\\\server\\share").GetPrefix(), P_(""));
 	VERIFY_EQUAL(P_("\\\\server\\share").GetDrive(), P_("\\\\server\\share"));
-	VERIFY_EQUAL(P_("\\\\server\\share").GetDir(), P_(""));
-	VERIFY_EQUAL(P_("\\\\server\\share").GetPath(), P_("\\\\server\\share"));
-	VERIFY_EQUAL(P_("\\\\server\\share").GetFileName(), P_(""));
-	VERIFY_EQUAL(P_("\\\\server\\share").GetFileExt(), P_(""));
-	VERIFY_EQUAL(P_("\\\\server\\share").GetFullFileName(), P_(""));
+	VERIFY_EQUAL(P_("\\\\server\\share").GetDirectory(), P_(""));
+	VERIFY_EQUAL(P_("\\\\server\\share").GetDirectoryWithDrive(), P_("\\\\server\\share"));
+	VERIFY_EQUAL(P_("\\\\server\\share").GetFilenameBase(), P_(""));
+	VERIFY_EQUAL(P_("\\\\server\\share").GetFilenameExtension(), P_(""));
+	VERIFY_EQUAL(P_("\\\\server\\share").GetFilename(), P_(""));
 
+	VERIFY_EQUAL(P_("\\\\server\\share\\").GetPrefix(), P_(""));
 	VERIFY_EQUAL(P_("\\\\server\\share\\").GetDrive(), P_("\\\\server\\share"));
-	VERIFY_EQUAL(P_("\\\\server\\share\\").GetDir(), P_("\\"));
-	VERIFY_EQUAL(P_("\\\\server\\share\\").GetPath(), P_("\\\\server\\share\\"));
-	VERIFY_EQUAL(P_("\\\\server\\share\\").GetFileName(), P_(""));
-	VERIFY_EQUAL(P_("\\\\server\\share\\").GetFileExt(), P_(""));
-	VERIFY_EQUAL(P_("\\\\server\\share\\").GetFullFileName(), P_(""));
+	VERIFY_EQUAL(P_("\\\\server\\share\\").GetDirectory(), P_("\\"));
+	VERIFY_EQUAL(P_("\\\\server\\share\\").GetDirectoryWithDrive(), P_("\\\\server\\share\\"));
+	VERIFY_EQUAL(P_("\\\\server\\share\\").GetFilenameBase(), P_(""));
+	VERIFY_EQUAL(P_("\\\\server\\share\\").GetFilenameExtension(), P_(""));
+	VERIFY_EQUAL(P_("\\\\server\\share\\").GetFilename(), P_(""));
 
+	VERIFY_EQUAL(P_("\\\\server\\share\\dir1\\dir2\\name.foo.ext").GetPrefix(), P_(""));
 	VERIFY_EQUAL(P_("\\\\server\\share\\dir1\\dir2\\name.foo.ext").GetDrive(), P_("\\\\server\\share"));
-	VERIFY_EQUAL(P_("\\\\server\\share\\dir1\\dir2\\name.foo.ext").GetDir(), P_("\\dir1\\dir2\\"));
-	VERIFY_EQUAL(P_("\\\\server\\share\\dir1\\dir2\\name.foo.ext").GetPath(), P_("\\\\server\\share\\dir1\\dir2\\"));
-	VERIFY_EQUAL(P_("\\\\server\\share\\dir1\\dir2\\name.foo.ext").GetFileName(), P_("name.foo"));
-	VERIFY_EQUAL(P_("\\\\server\\share\\dir1\\dir2\\name.foo.ext").GetFileExt(), P_(".ext"));
-	VERIFY_EQUAL(P_("\\\\server\\share\\dir1\\dir2\\name.foo.ext").GetFullFileName(), P_("name.foo.ext"));
+	VERIFY_EQUAL(P_("\\\\server\\share\\dir1\\dir2\\name.foo.ext").GetDirectory(), P_("\\dir1\\dir2\\"));
+	VERIFY_EQUAL(P_("\\\\server\\share\\dir1\\dir2\\name.foo.ext").GetDirectoryWithDrive(), P_("\\\\server\\share\\dir1\\dir2\\"));
+	VERIFY_EQUAL(P_("\\\\server\\share\\dir1\\dir2\\name.foo.ext").GetFilenameBase(), P_("name.foo"));
+	VERIFY_EQUAL(P_("\\\\server\\share\\dir1\\dir2\\name.foo.ext").GetFilenameExtension(), P_(".ext"));
+	VERIFY_EQUAL(P_("\\\\server\\share\\dir1\\dir2\\name.foo.ext").GetFilename(), P_("name.foo.ext"));
 
+	VERIFY_EQUAL(P_("\\\\?\\C:\\tempdir\\dir.2\\tmp.foo.txt").GetPrefix(), P_("\\\\?\\"));
 	VERIFY_EQUAL(P_("\\\\?\\C:\\tempdir\\dir.2\\tmp.foo.txt").GetDrive(), P_("C:"));
-	VERIFY_EQUAL(P_("\\\\?\\C:\\tempdir\\dir.2\\tmp.foo.txt").GetDir(), P_("\\tempdir\\dir.2\\"));
-	VERIFY_EQUAL(P_("\\\\?\\C:\\tempdir\\dir.2\\tmp.foo.txt").GetPath(), P_("C:\\tempdir\\dir.2\\"));
-	VERIFY_EQUAL(P_("\\\\?\\C:\\tempdir\\dir.2\\tmp.foo.txt").GetFileName(), P_("tmp.foo"));
-	VERIFY_EQUAL(P_("\\\\?\\C:\\tempdir\\dir.2\\tmp.foo.txt").GetFileExt(), P_(".txt"));
-	VERIFY_EQUAL(P_("\\\\?\\C:\\tempdir\\dir.2\\tmp.foo.txt").GetFullFileName(), P_("tmp.foo.txt"));
+	VERIFY_EQUAL(P_("\\\\?\\C:\\tempdir\\dir.2\\tmp.foo.txt").GetDirectory(), P_("\\tempdir\\dir.2\\"));
+	VERIFY_EQUAL(P_("\\\\?\\C:\\tempdir\\dir.2\\tmp.foo.txt").GetDirectoryWithDrive(), P_("C:\\tempdir\\dir.2\\"));
+	VERIFY_EQUAL(P_("\\\\?\\C:\\tempdir\\dir.2\\tmp.foo.txt").GetFilenameBase(), P_("tmp.foo"));
+	VERIFY_EQUAL(P_("\\\\?\\C:\\tempdir\\dir.2\\tmp.foo.txt").GetFilenameExtension(), P_(".txt"));
+	VERIFY_EQUAL(P_("\\\\?\\C:\\tempdir\\dir.2\\tmp.foo.txt").GetFilename(), P_("tmp.foo.txt"));
 	
+	VERIFY_EQUAL(P_("\\\\?\\UNC\\server\\share\\dir1\\dir2\\name.foo.ext").GetPrefix(), P_("\\\\?\\UNC"));
 	VERIFY_EQUAL(P_("\\\\?\\UNC\\server\\share\\dir1\\dir2\\name.foo.ext").GetDrive(), P_("\\\\server\\share"));
-	VERIFY_EQUAL(P_("\\\\?\\UNC\\server\\share\\dir1\\dir2\\name.foo.ext").GetDir(), P_("\\dir1\\dir2\\"));
-	VERIFY_EQUAL(P_("\\\\?\\UNC\\server\\share\\dir1\\dir2\\name.foo.ext").GetPath(), P_("\\\\server\\share\\dir1\\dir2\\"));
-	VERIFY_EQUAL(P_("\\\\?\\UNC\\server\\share\\dir1\\dir2\\name.foo.ext").GetFileName(), P_("name.foo"));
-	VERIFY_EQUAL(P_("\\\\?\\UNC\\server\\share\\dir1\\dir2\\name.foo.ext").GetFileExt(), P_(".ext"));
-	VERIFY_EQUAL(P_("\\\\?\\UNC\\server\\share\\dir1\\dir2\\name.foo.ext").GetFullFileName(), P_("name.foo.ext"));
+	VERIFY_EQUAL(P_("\\\\?\\UNC\\server\\share\\dir1\\dir2\\name.foo.ext").GetDirectory(), P_("\\dir1\\dir2\\"));
+	VERIFY_EQUAL(P_("\\\\?\\UNC\\server\\share\\dir1\\dir2\\name.foo.ext").GetDirectoryWithDrive(), P_("\\\\server\\share\\dir1\\dir2\\"));
+	VERIFY_EQUAL(P_("\\\\?\\UNC\\server\\share\\dir1\\dir2\\name.foo.ext").GetFilenameBase(), P_("name.foo"));
+	VERIFY_EQUAL(P_("\\\\?\\UNC\\server\\share\\dir1\\dir2\\name.foo.ext").GetFilenameExtension(), P_(".ext"));
+	VERIFY_EQUAL(P_("\\\\?\\UNC\\server\\share\\dir1\\dir2\\name.foo.ext").GetFilename(), P_("name.foo.ext"));
 #endif
 
 

@@ -122,9 +122,9 @@ BOOL COptionsGeneral::OnInitDialog()
 		::SendMessage(m_defaultTemplate.m_hWnd, CB_ADDSTRING, 0, (LPARAM)fileW.c_str());
 	}
 	file = TrackerSettings::Instance().defaultTemplateFile;
-	if(file.GetPath() == basePath)
+	if(file.GetDirectoryWithDrive() == basePath)
 	{
-		file = file.GetFullFileName();
+		file = file.GetFilename();
 	}
 	m_defaultTemplate.SetWindowText(file.AsNative().c_str());
 
@@ -215,9 +215,9 @@ void COptionsGeneral::OnBrowseTemplate()
 	if(dlg.Show(this))
 	{
 		defaultFile = dlg.GetFirstFile();
-		if(defaultFile.GetPath() == basePath)
+		if(defaultFile.GetDirectoryWithDrive() == basePath)
 		{
-			defaultFile = defaultFile.GetFullFileName();
+			defaultFile = defaultFile.GetFilename();
 		}
 		m_defaultTemplate.SetWindowText(defaultFile.AsNative().c_str());
 		OnTemplateChanged();

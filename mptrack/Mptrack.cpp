@@ -369,7 +369,7 @@ void CTrackApp::ImportMidiConfig(const mpt::PathString &filename, bool hideWarni
 	}
 
 	IniFileSettingsContainer file(filename);
-	ImportMidiConfig(file, filename.GetPath());
+	ImportMidiConfig(file, filename.GetDirectoryWithDrive());
 }
 
 
@@ -848,7 +848,7 @@ void CTrackApp::SetupPaths(bool overridePortable)
 	bool modeMultiArch = false;
 	bool modeSourceProject = false;
 	const mpt::PathString exePath = mpt::GetExecutableDirectory();
-	auto exePathComponents = mpt::String::Split<mpt::ustring>(exePath.GetDir().WithoutTrailingSlash().ToUnicode(), P_("\\").ToUnicode());
+	auto exePathComponents = mpt::String::Split<mpt::ustring>(exePath.GetDirectory().WithoutTrailingSlash().ToUnicode(), P_("\\").ToUnicode());
 	if(exePathComponents.size() >= 2)
 	{
 		if(exePathComponents[exePathComponents.size()-1] == mpt::OS::Windows::Name(mpt::OS::Windows::GetProcessArchitecture()))

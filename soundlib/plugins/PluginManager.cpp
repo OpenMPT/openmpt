@@ -529,7 +529,7 @@ static bool TryLoadPlugin(bool maskCrashes, VSTPluginLib *plug, HINSTANCE hLib, 
 // Add a plugin to the list of known plugins.
 VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool maskCrashes, const mpt::ustring &tags, bool fromCache, bool *fileFound)
 {
-	const mpt::PathString fileName = dllPath.GetFileName();
+	const mpt::PathString fileName = dllPath.GetFilenameBase();
 
 	// Check if this is already a known plugin.
 	for(const auto &dupePlug : pluginList)

@@ -1070,7 +1070,7 @@ bool CCtrlSamples::OpenSample(const mpt::PathString &fileName, FlagSet<OpenSampl
 		if(sample.filename.empty())
 		{
 			mpt::PathString name, ext;
-			fileName.SplitPath(nullptr, nullptr, &name, &ext);
+			fileName.SplitPath(nullptr, nullptr, nullptr, &name, &ext);
 
 			if(m_sndFile.m_szNames[m_nSample].empty()) m_sndFile.m_szNames[m_nSample] = name.ToLocale();
 
@@ -1409,14 +1409,14 @@ void CCtrlSamples::SaveSample(bool doBatchSave)
 		{
 			// For on-disk samples, propose their original filename and location
 			auto path = m_sndFile.GetSamplePath(m_nSample);
-			fileName = path.GetFullFileName();
-			defaultPath = path.GetPath();
+			fileName = path.GetFilename();
+			defaultPath = path.GetDirectoryWithDrive();
 		}
 		if(fileName.empty()) fileName = mpt::PathString::FromLocale(sample.filename);
 		if(fileName.empty()) fileName = mpt::PathString::FromLocale(m_sndFile.m_szNames[m_nSample]);
 		if(fileName.empty()) fileName = P_("untitled");
 
-		const mpt::PathString ext = fileName.GetFileExt();
+		const mpt::PathString ext = fileName.GetFilenameExtension();
 		if(!mpt::PathString::CompareNoCase(ext, P_(".flac"))) defaultFormat = dfFLAC;
 		else if(!mpt::PathString::CompareNoCase(ext, P_(".wav"))) defaultFormat = dfWAV;
 		else if(!mpt::PathString::CompareNoCase(ext, P_(".s3i"))) defaultFormat = dfS3I;
@@ -1425,7 +1425,7 @@ void CCtrlSamples::SaveSample(bool doBatchSave)
 	} else
 	{
 		// Save all samples
-		fileName = m_sndFile.GetpModDoc()->GetPathNameMpt().GetFileName();
+		fileName = m_sndFile.GetpModDoc()->GetPathNameMpt().GetFilenameBase();
 		if(fileName.empty()) fileName = P_("untitled");
 
 		fileName += P_(" - %sample_number% - ");

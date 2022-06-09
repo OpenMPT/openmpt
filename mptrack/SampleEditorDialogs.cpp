@@ -191,7 +191,7 @@ BOOL CRawSampleDlg::OnInitDialog()
 	{
 		CString title;
 		GetWindowText(title);
-		title += _T(" - ") + filename->GetFullFileName().ToCString();
+		title += _T(" - ") + filename->GetFilename().ToCString();
 		SetWindowText(title);
 	}
 	m_SpinOffset.SetRange32(0, mpt::saturate_cast<int>(m_file.GetLength() - 1u));

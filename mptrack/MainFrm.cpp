@@ -2926,7 +2926,7 @@ HMENU CMainFrame::CreateFileMenu(const size_t maxCount, std::vector<mpt::PathStr
 			while(filesAdded < maxCount && scanner.Next(fileName))
 			{
 				paths.push_back(fileName);
-				CString file = fileName.GetFullFileName().ToCString();
+				CString file = fileName.GetFilename().ToCString();
 				file.Replace(_T("&"), _T("&&"));
 				AppendMenu(hMenu, MF_STRING, idRangeBegin + filesAdded, file);
 				filesAdded++;
@@ -3039,7 +3039,7 @@ void CMainFrame::UpdateMRUList()
 
 			const mpt::PathString &pathMPT = TrackerSettings::Instance().mruFiles[i];
 			mpt::winstring path = pathMPT.AsNative();
-			if(!mpt::PathString::CompareNoCase(workDir, pathMPT.GetPath()))
+			if(!mpt::PathString::CompareNoCase(workDir, pathMPT.GetDirectoryWithDrive()))
 			{
 				// Only show filename
 				path = path.substr(workDir.AsNative().length());

@@ -1368,7 +1368,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 					FileReader insFile = GetFileReader(f);
 					if(ReadInstrumentFromFile(ins, insFile, false))
 					{
-						mpt::PathString filename = midiMapName.GetFullFileName();
+						mpt::PathString filename = midiMapName.GetFilename();
 						pIns = Instruments[ins];
 						if(!pIns->filename[0]) pIns->filename = filename.ToLocale();
 						if(!pIns->name[0])

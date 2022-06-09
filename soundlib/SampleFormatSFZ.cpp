@@ -647,7 +647,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 				if(!filename.empty())
 				{
 					if(filenameU8.find(':') == std::string::npos)
-						filename = file.GetOptionalFileName().value_or(P_("")).GetPath() + filename;
+						filename = file.GetOptionalFileName().value_or(P_("")).GetDirectoryWithDrive() + filename;
 					filename = filename.Simplify();
 					// Avoid recursive #include
 					if(std::find_if(files.begin(), files.end(), [&filename](const SFZInputFile &f) { return f.file.GetOptionalFileName().value_or(P_("")) == filename; }) == files.end())
@@ -814,7 +814,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 		{
 			if(region.filename.find(':') == std::string::npos)
 			{
-				filename = file.GetOptionalFileName().value_or(P_("")).GetPath() + filename;
+				filename = file.GetOptionalFileName().value_or(P_("")).GetDirectoryWithDrive() + filename;
 			}
 			filename = filename.Simplify();
 			SetSamplePath(smp, filename);
@@ -836,7 +836,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 		if(!region.name.empty())
 			m_szNames[smp] = mpt::ToCharset(GetCharsetInternal(), mpt::Charset::UTF8, region.name);
 		if(!m_szNames[smp][0])
-			m_szNames[smp] = mpt::ToCharset(GetCharsetInternal(), mpt::PathString::FromUTF8(region.filename).GetFileName().ToUnicode());
+			m_szNames[smp] = mpt::ToCharset(GetCharsetInternal(), mpt::PathString::FromUTF8(region.filename).GetFilenameBase().ToUnicode());
 
 		if(region.useSampleKeyRoot)
 		{
@@ -1004,7 +1004,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 			// Avoid ruining the original samples
 			if(auto filename = GetSamplePath(smp); !filename.empty())
 			{
-				filename = filename.GetPath() + filename.GetFileName() + filenameModifier + filename.GetFileExt();
+				filename = filename.GetDirectoryWithDrive() + filename.GetFilenameBase() + filenameModifier + filename.GetFilenameExtension();
 				SetSamplePath(smp, filename);
 			}
 		}
@@ -1075,9 +1075,9 @@ bool CSoundFile::SaveSFZInstrument(INSTRUMENTINDEX nInstr, std::ostream &f, cons
 
 	// Creating directory names with trailing spaces or dots is a bad idea, as they are difficult to remove in Windows.
 	const mpt::RawPathString whitespaceDirName = PL_(" \n\r\t.");
-	const mpt::PathString sampleBaseName = mpt::PathString::FromNative(mpt::trim(filename.GetFileName().AsNative(), whitespaceDirName));
+	const mpt::PathString sampleBaseName = mpt::PathString::FromNative(mpt::trim(filename.GetFilenameBase().AsNative(), whitespaceDirName));
 	const mpt::PathString sampleDirName = (sampleBaseName.empty() ? P_("Samples") : sampleBaseName)  + P_("/");
-	const mpt::PathString sampleBasePath = filename.GetPath() + sampleDirName;
+	const mpt::PathString sampleBasePath = filename.GetDirectoryWithDrive() + sampleDirName;
 	if(!mpt::FS::IsDirectory(sampleBasePath) && !::CreateDirectory(sampleBasePath.AsNative().c_str(), nullptr))
 		return false;
 
@@ -1211,7 +1211,7 @@ bool CSoundFile::SaveSFZInstrument(INSTRUMENTINDEX nInstr, std::ostream &f, cons
 		{
 			f << "\nregion_label=" << mpt::ToCharset(mpt::Charset::UTF8, GetCharsetInternal(), m_szNames[ins->Keyboard[i]]);
 		}
-		f << "\nsample=" << sampleName.GetFullFileName().ToUTF8();
+		f << "\nsample=" << sampleName.GetFilename().ToUTF8();
 		f << "\nlokey=" << i;
 		f << "\nhikey=" << endOfRegion;
 		if(sample.rootNote != NOTE_NONE)

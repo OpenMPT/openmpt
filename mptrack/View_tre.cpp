@@ -471,8 +471,8 @@ bool CModTree::SetSoundFile(FileReader &file)
 	m_SongFile->Patterns.DestroyPatterns();
 	m_SongFile->m_songMessage.clear();
 	const mpt::PathString fileName = file.GetOptionalFileName().value_or(P_(""));
-	m_InstrLibPath = fileName.GetPath();
-	m_SongFileName = fileName.GetFullFileName();
+	m_InstrLibPath = fileName.GetDirectoryWithDrive();
+	m_SongFileName = fileName.GetFilename();
 	RefreshInstrumentLibrary();
 	return true;
 }
@@ -585,7 +585,7 @@ void CModTree::RefreshMidiLibrary()
 		const LPARAM param = (MODITEM_MIDIINSTRUMENT << MIDILIB_SHIFT) | iMidi;
 		if(!midiLib[iMidi].empty())
 		{
-			s += _T(": ") + midiLib[iMidi].GetFullFileName().ToCString();
+			s += _T(": ") + midiLib[iMidi].GetFilename().ToCString();
 			dwImage = IMAGE_INSTRUMENTS;
 		}
 		if(!m_tiMidi[iMidi])
@@ -621,7 +621,7 @@ void CModTree::RefreshMidiLibrary()
 		const LPARAM param = (MODITEM_MIDIPERCUSSION << MIDILIB_SHIFT) | iPerc;
 		if(!midiLib[iPerc | 0x80].empty())
 		{
-			s += _T(": ") + midiLib[iPerc | 0x80].GetFullFileName().ToCString();
+			s += _T(": ") + midiLib[iPerc | 0x80].GetFilename().ToCString();
 			dwImage = IMAGE_SAMPLES;
 		}
 		if(!m_tiPerc[iPerc])
@@ -671,7 +671,7 @@ void CModTree::RefreshDlsBanks()
 				CDLSBank dlsBank = *CTrackApp::gpDLSBanks[iDls];
 				// Add DLS file folder
 				m_tiDLS[iDls] = InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM,
-					dlsBank.GetFileName().GetFullFileName().AsNative().c_str(), IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, iDls, TVI_ROOT, hDlsRoot);
+					dlsBank.GetFileName().GetFilename().AsNative().c_str(), IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, iDls, TVI_ROOT, hDlsRoot);
 				// Memorize Banks
 				std::map<uint16, HTREEITEM> banks;
 				// Add Drum Kits folder
@@ -829,7 +829,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 	if(generalHint.GetType()[HINT_MODTYPE | HINT_MODGENERAL] || (!info.hSong))
 	{
 		// Module folder + sub folders
-		CString name = modDoc.GetPathNameMpt().GetFullFileName().ToCString();
+		CString name = modDoc.GetPathNameMpt().GetFilename().ToCString();
 		if(name.IsEmpty())
 			name = SanitizePathComponent(modDoc.GetTitle());
 
@@ -2041,7 +2041,7 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 			static constexpr auto allExtsBlacklist = {"txt", "diz", "nfo", "doc", "ini", "pdf", "zip", "rar", "lha", "exe", "dll", "lnk", "url"};
 
 			// Get lower-case file extension without dot.
-			mpt::PathString extPS = fileName.GetFileExt();
+			mpt::PathString extPS = fileName.GetFilenameExtension();
 			std::string ext = extPS.ToUTF8();
 			if(!ext.empty())
 			{
@@ -2367,9 +2367,9 @@ void CModTree::SetFullInstrumentLibraryPath(mpt::PathString path)
 	{
 		// Browse module contents
 		CModTree *dirBrowser = CMainFrame::GetMainFrame()->GetUpperTreeview();
-		dirBrowser->m_InstrLibPath = path.GetPath();
+		dirBrowser->m_InstrLibPath = path.GetDirectoryWithDrive();
 		dirBrowser->RefreshInstrumentLibrary();
-		dirBrowser->InstrumentLibraryChDir(path.GetFullFileName(), true);
+		dirBrowser->InstrumentLibraryChDir(path.GetFilename(), true);
 	}
 }
 
@@ -2409,7 +2409,7 @@ void CModTree::InstrumentLibraryChDir(mpt::PathString dir, bool isSong)
 			} else
 			{
 				// Go one dir up.
-				mpt::winstring prevDir = m_InstrLibPath.GetPath().AsNative();
+				mpt::winstring prevDir = m_InstrLibPath.GetDirectoryWithDrive().AsNative();
 				mpt::winstring::size_type pos = prevDir.find_last_of(_T("\\/"), prevDir.length() - 2);
 				if(pos != mpt::winstring::npos)
 				{

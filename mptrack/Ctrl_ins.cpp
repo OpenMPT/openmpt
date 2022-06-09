@@ -1651,7 +1651,7 @@ bool CCtrlInstruments::OpenInstrument(const mpt::PathString &fileName)
 		if (pIns)
 		{
 			mpt::PathString name, ext;
-			fileName.SplitPath(nullptr, nullptr, &name, &ext);
+			fileName.SplitPath(nullptr, nullptr, nullptr, &name, &ext);
 
 			if (!pIns->name[0] && m_sndFile.GetModSpecifications().instrNameLengthMax > 0)
 			{
@@ -2053,7 +2053,7 @@ void CCtrlInstruments::SaveInstrument(bool doBatchSave)
 	} else
 	{
 		// Save all samples
-		fileName = m_sndFile.GetpModDoc()->GetPathNameMpt().GetFileName();
+		fileName = m_sndFile.GetpModDoc()->GetPathNameMpt().GetFilenameBase();
 		if(fileName.empty()) fileName = P_("untitled");
 
 		fileName += P_(" - %instrument_number% - ");

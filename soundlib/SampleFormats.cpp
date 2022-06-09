@@ -269,7 +269,7 @@ bool CSoundFile::ReadInstrumentFromSong(INSTRUMENTINDEX targetInstr, const CSoun
 #ifdef MODPLUG_TRACKER
 	if(pIns->filename.empty() && srcSong.GetpModDoc() != nullptr && &srcSong != this)
 	{
-		pIns->filename = srcSong.GetpModDoc()->GetPathNameMpt().GetFullFileName().ToLocale();
+		pIns->filename = srcSong.GetpModDoc()->GetPathNameMpt().GetFilename().ToLocale();
 	}
 #endif
 	pIns->Convert(srcSong.GetType(), GetType());
@@ -2265,7 +2265,7 @@ bool CSoundFile::ReadITSSample(SAMPLEINDEX nSample, FileReader &file, bool rewin
 		{
 			if(file.GetOptionalFileName())
 			{
-				filename = filename.RelativePathToAbsolute(file.GetOptionalFileName()->GetPath());
+				filename = filename.RelativePathToAbsolute(file.GetOptionalFileName()->GetDirectoryWithDrive());
 			}
 			if(!LoadExternalSample(nSample, filename))
 			{
@@ -2445,7 +2445,7 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, std::ostream &f, cons
 		} else
 		{
 #ifdef MPT_EXTERNAL_SAMPLES
-			const std::string filenameU8 = GetSamplePath(smp).AbsolutePathToRelative(filename.GetPath()).ToUTF8();
+			const std::string filenameU8 = GetSamplePath(smp).AbsolutePathToRelative(filename.GetDirectoryWithDrive()).ToUTF8();
 			const size_t strSize = filenameU8.size();
 			size_t intBytes = 0;
 			if(mpt::IO::WriteVarInt(f, strSize, &intBytes))

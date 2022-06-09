@@ -229,26 +229,29 @@ PathString PathString::FromCString(const CString &path)
 
 #if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
 
-void PathString::SplitPath(PathString *drive, PathString *dir, PathString *fname, PathString *ext) const
+void PathString::SplitPath(PathString *prefix, PathString *drive, PathString *dir, PathString *fbase, PathString *fext) const
 {
 	// We cannot use CRT splitpath here, because:
 	//  * limited to _MAX_PATH or similar
 	//  * no support for UNC paths
 	//  * no support for \\?\ prefixed paths
 
+	if(prefix) *prefix = mpt::PathString();
 	if(drive) *drive = mpt::PathString();
 	if(dir) *dir = mpt::PathString();
-	if(fname) *fname = mpt::PathString();
-	if(ext) *ext = mpt::PathString();
+	if(fbase) *fbase = mpt::PathString();
+	if(fext) *fext = mpt::PathString();
 
 	mpt::RawPathString p = path;
 
 	// remove \\?\\ prefix
 	if(p.substr(0, 8) == PL_("\\\\?\\UNC\\"))
 	{
+		if(prefix) *prefix = P_("\\\\?\\UNC");
 		p = PL_("\\\\") + p.substr(8);
 	} else if(p.substr(0, 4) == PL_("\\\\?\\"))
 	{
+		if (prefix) *prefix = P_("\\\\?\\");
 		p = p.substr(4);
 	}
 
@@ -300,58 +303,64 @@ void PathString::SplitPath(PathString *drive, PathString *dir, PathString *fname
 	mpt::RawPathString::size_type last_dot = p.find_last_of(PL_("."));
 	if(last_dot == mpt::RawPathString::npos)
 	{
-		if(fname) *fname = mpt::PathString::FromNative(p);
-		if(ext) *ext = mpt::PathString();
+		if(fbase) *fbase = mpt::PathString::FromNative(p);
+		if(fext) *fext = mpt::PathString();
 	} else if(last_dot == 0)
 	{
-		if(fname) *fname = mpt::PathString::FromNative(p);
-		if(ext) *ext = mpt::PathString();
+		if(fbase) *fbase = mpt::PathString::FromNative(p);
+		if(fext) *fext = mpt::PathString();
 	} else if(p == PL_(".") || p == PL_(".."))
 	{
-		if(fname) *fname = mpt::PathString::FromNative(p);
-		if(ext) *ext = mpt::PathString();
+		if(fbase) *fbase = mpt::PathString::FromNative(p);
+		if(fext) *fext = mpt::PathString();
 	} else
 	{
-		if(fname) *fname = mpt::PathString::FromNative(p.substr(0, last_dot));
-		if(ext) *ext = mpt::PathString::FromNative(p.substr(last_dot));
+		if(fbase) *fbase = mpt::PathString::FromNative(p.substr(0, last_dot));
+		if(fext) *fext = mpt::PathString::FromNative(p.substr(last_dot));
 	}
 
 }
 
+PathString PathString::GetPrefix() const
+{
+	PathString prefix;
+	SplitPath(&prefix, nullptr, nullptr, nullptr, nullptr);
+	return prefix;
+}
 PathString PathString::GetDrive() const
 {
 	PathString drive;
-	SplitPath(&drive, nullptr, nullptr, nullptr);
+	SplitPath(nullptr, &drive, nullptr, nullptr, nullptr);
 	return drive;
 }
-PathString PathString::GetDir() const
+PathString PathString::GetDirectory() const
 {
 	PathString dir;
-	SplitPath(nullptr, &dir, nullptr, nullptr);
+	SplitPath(nullptr, nullptr, &dir, nullptr, nullptr);
 	return dir;
 }
-PathString PathString::GetPath() const
+PathString PathString::GetDirectoryWithDrive() const
 {
 	PathString drive, dir;
-	SplitPath(&drive, &dir, nullptr, nullptr);
+	SplitPath(nullptr, &drive, &dir, nullptr, nullptr);
 	return drive + dir;
 }
-PathString PathString::GetFileName() const
+PathString PathString::GetFilenameBase() const
 {
 	PathString fname;
-	SplitPath(nullptr, nullptr, &fname, nullptr);
+	SplitPath(nullptr, nullptr, nullptr, &fname, nullptr);
 	return fname;
 }
-PathString PathString::GetFileExt() const
+PathString PathString::GetFilenameExtension() const
 {
 	PathString ext;
-	SplitPath(nullptr, nullptr, nullptr, &ext);
+	SplitPath(nullptr, nullptr, nullptr, nullptr, &ext);
 	return ext;
 }
-PathString PathString::GetFullFileName() const
+PathString PathString::GetFilename() const
 {
 	PathString name, ext;
-	SplitPath(nullptr, nullptr, &name, &ext);
+	SplitPath(nullptr, nullptr, nullptr, &name, &ext);
 	return name + ext;
 }
 
@@ -400,7 +409,7 @@ bool FS::PathExists(const mpt::PathString &path)
 
 PathString PathString::ReplaceExt(const mpt::PathString &newExt) const
 {
-	return GetDrive() + GetDir() + GetFileName() + newExt;
+	return GetDrive() + GetDirectory() + GetFilenameBase() + newExt;
 }
 
 
@@ -609,7 +618,7 @@ mpt::PathString GetExecutableDirectory()
 		}
 		exeFileName.resize(exeFileName.size() * 2);
 	}
-	return mpt::GetAbsolutePath(mpt::PathString::FromNative(exeFileName.data()).GetPath());
+	return mpt::GetAbsolutePath(mpt::PathString::FromNative(exeFileName.data()).GetDirectoryWithDrive());
 }
 
 

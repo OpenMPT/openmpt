@@ -1233,7 +1233,7 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 			
 			auto filename = mpt::PathString::FromUnicode(mpt::ToUnicode(mpt::Charset::Amiga_no_C1, symInst.GetName()));
 			if(file.GetOptionalFileName())
-				filename = file.GetOptionalFileName()->GetPath() + filename.GetFullFileName();
+				filename = file.GetOptionalFileName()->GetDirectoryWithDrive() + filename.GetFilename();
 			
 			if(!LoadExternalSample(sample, filename))
 				AddToLog(LogError, MPT_UFORMAT("Unable to load sample {}: {}")(sample, filename));

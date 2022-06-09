@@ -56,7 +56,7 @@ BOOL MissingExternalSamplesDlg::OnInitDialog()
 	m_List.SetExtendedStyle(m_List.GetExtendedStyle() | LVS_EX_FULLROWSELECT);
 
 	GenerateList();
-	SetWindowText((_T("Missing External Samples - ") + m_modDoc.GetPathNameMpt().GetFullFileName().AsNative()).c_str());
+	SetWindowText((_T("Missing External Samples - ") + m_modDoc.GetPathNameMpt().GetFilename().AsNative()).c_str());
 
 	return TRUE;
 }
@@ -144,7 +144,7 @@ void MissingExternalSamplesDlg::OnScanFolder()
 			{
 				if(m_sndFile.IsExternalSampleMissing(smp))
 				{
-					if(!mpt::PathString::CompareNoCase(m_sndFile.GetSamplePath(smp).GetFullFileName(), fileName.GetFullFileName()))
+					if(!mpt::PathString::CompareNoCase(m_sndFile.GetSamplePath(smp).GetFilename(), fileName.GetFilename()))
 					{
 						if(SetSample(smp, fileName))
 						{
@@ -250,7 +250,7 @@ BOOL ModifiedExternalSamplesDlg::OnInitDialog()
 	m_List.SetExtendedStyle(m_List.GetExtendedStyle() | LVS_EX_FULLROWSELECT | LVS_EX_CHECKBOXES);
 
 	GenerateList();
-	SetWindowText((_T("Modified External Samples - ") + m_modDoc.GetPathNameMpt().GetFullFileName().AsNative()).c_str());
+	SetWindowText((_T("Modified External Samples - ") + m_modDoc.GetPathNameMpt().GetFilename().AsNative()).c_str());
 
 	return TRUE;
 }

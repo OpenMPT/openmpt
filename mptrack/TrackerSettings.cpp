@@ -1585,7 +1585,7 @@ mpt::PathString DefaultAndWorkingDirectory::GetWorkingDir() const
 // Return true if the value changed.
 bool DefaultAndWorkingDirectory::InternalSet(mpt::PathString &dest, const mpt::PathString &filenameFrom, bool stripFilename)
 {
-	mpt::PathString newPath = (stripFilename ? filenameFrom.GetPath() : filenameFrom);
+	mpt::PathString newPath = (stripFilename ? filenameFrom.GetDirectoryWithDrive() : filenameFrom);
 	newPath.EnsureTrailingSlash();
 	mpt::PathString oldPath = dest;
 	dest = newPath;

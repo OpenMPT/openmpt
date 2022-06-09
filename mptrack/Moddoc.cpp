@@ -411,7 +411,7 @@ bool CModDoc::SaveSample(SAMPLEINDEX smp)
 		if(!filename.empty())
 		{
 			auto &sample = m_SndFile.GetSample(smp);
-			const auto ext = filename.GetFileExt().ToUnicode().substr(1);
+			const auto ext = filename.GetFilenameExtension().ToUnicode().substr(1);
 			const auto format = FromSettingValue<SampleEditorDefaultFormat>(ext);
 
 			try
@@ -493,8 +493,8 @@ BOOL CModDoc::DoSave(const mpt::PathString &filename, bool setPath)
 	if(filename.empty() || m_ShowSavedialog)
 	{
 		mpt::PathString drive = docFileName.GetDrive();
-		mpt::PathString dir = docFileName.GetDir();
-		mpt::PathString fileName = docFileName.GetFileName();
+		mpt::PathString dir = docFileName.GetDirectory();
+		mpt::PathString fileName = docFileName.GetFilenameBase();
 		if(fileName.empty())
 		{
 			fileName = mpt::PathString::FromCString(SanitizePathComponent(GetTitle()));
@@ -1671,7 +1671,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 
 	FileDialog dlg = SaveFileDialog()
 		.DefaultExtension(extension)
-		.DefaultFilename(GetPathNameMpt().GetFileName() + P_(".") + extension)
+		.DefaultFilename(GetPathNameMpt().GetFilenameBase() + P_(".") + extension)
 		.ExtensionFilter(encFactory->GetTraits().fileDescription + U_(" (*.") + extension.ToUnicode() + U_(")|*.") + extension.ToUnicode() + U_("||"))
 		.WorkingDirectory(TrackerSettings::Instance().PathExport.GetWorkingDir());
 	if(!wsdlg.m_Settings.outputToSample && !dlg.Show()) return;
@@ -1680,7 +1680,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 	TrackerSettings::Instance().PathExport.SetDefaultDir(dlg.GetWorkingDirectory(), true);
 
 	mpt::PathString drive, dir, name, ext;
-	dlg.GetFirstFile().SplitPath(&drive, &dir, &name, &ext);
+	dlg.GetFirstFile().SplitPath(nullptr, &drive, &dir, &name, &ext);
 	const mpt::PathString fileName = drive + dir + name;
 	const mpt::PathString fileExt = ext;
 
@@ -2057,7 +2057,7 @@ void CModDoc::OnFileCompatibilitySave()
 		mpt::PathString drive;
 		mpt::PathString dir;
 		mpt::PathString fileName;
-		GetPathNameMpt().SplitPath(&drive, &dir, &fileName, nullptr);
+		GetPathNameMpt().SplitPath(nullptr, &drive, &dir, &fileName, nullptr);
 
 		filename = drive;
 		filename += dir;
@@ -2825,7 +2825,7 @@ void CModDoc::ChangeFileExtension(MODTYPE nNewType)
 		mpt::PathString dir;
 		mpt::PathString fname;
 		mpt::PathString fext;
-		GetPathNameMpt().SplitPath(&drive, &dir, &fname, &fext);
+		GetPathNameMpt().SplitPath(nullptr, &drive, &dir, &fname, &fext);
 
 		mpt::PathString newPath = drive + dir;
 
@@ -3240,7 +3240,7 @@ void CModDoc::SerializeViews() const
 
 	SettingsContainer &settings = theApp.GetSongSettings();
 	const std::string s = f.str();
-	settings.Write(U_("WindowSettings"), pathName.GetFullFileName().ToUnicode(), pathName);
+	settings.Write(U_("WindowSettings"), pathName.GetFilename().ToUnicode(), pathName);
 	settings.Write(U_("WindowSettings"), pathName.ToUnicode(), mpt::encode_hex(mpt::as_span(s)));
 }
 
@@ -3261,7 +3261,7 @@ void CModDoc::DeserializeViews()
 		if(s.size() < 2)
 		{
 			// Try searching for filename instead of full path name
-			const mpt::ustring altName = settings.Read<mpt::ustring>(U_("WindowSettings"), pathName.GetFullFileName().ToUnicode());
+			const mpt::ustring altName = settings.Read<mpt::ustring>(U_("WindowSettings"), pathName.GetFilename().ToUnicode());
 			s = settings.Read<mpt::ustring>(U_("WindowSettings"), altName);
 			if(s.size() < 2) return;
 		}
