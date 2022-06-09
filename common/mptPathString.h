@@ -136,8 +136,6 @@ public:
 	static bool IsPathSeparator(RawPathString::value_type c);
 	static RawPathString::value_type GetDefaultPathSeparator();
 
-#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
-
 	// Return the same path string with a different (or appended) extension (including "."), e.g. "foo.bar",".txt" -> "foo.txt" or "C:\OpenMPT\foo",".txt" -> "C:\OpenMPT\foo.txt"
 	PathString ReplaceExt(const mpt::PathString &newExt) const;
 
@@ -179,6 +177,8 @@ public:
 		result.EnsureTrailingSlash();
 		return result;
 	}
+
+#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
 
 	// Relative / absolute paths conversion
 

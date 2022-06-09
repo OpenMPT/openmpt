@@ -479,12 +479,15 @@ bool FS::PathExists(const mpt::PathString &path)
 #endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
 
 
-#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
 
 PathString PathString::ReplaceExt(const mpt::PathString &newExt) const
 {
 	return GetDrive() + GetDirectory() + GetFilenameBase() + newExt;
 }
+
+
+
+#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
 
 
 // Convert an absolute path to a path that's relative to "&relativeTo".
