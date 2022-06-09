@@ -181,7 +181,9 @@ public:
 	}
 
 	// Relative / absolute paths conversion
-	mpt::PathString AbsolutePathToRelative(const mpt::PathString &relativeTo) const;
+
+	mpt::PathString AbsolutePathToRelative(const mpt::PathString &relativeTo) const; // similar to std::fs::path::lexically_approximate
+	
 	mpt::PathString RelativePathToAbsolute(const mpt::PathString &relativeTo) const;
 
 #endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
@@ -197,13 +199,8 @@ public:
 
 
 
-#if MPT_OS_WINDOWS
 	// Convert a path to its simplified form, i.e. remove ".\" and "..\" entries
-	mpt::PathString Simplify() const;
-#else // !MPT_OS_WINDOWS
-	// Convert a path to its simplified form (currently only implemented on Windows)
-	[[deprecated]] mpt::PathString Simplify() const { return PathString(path); }
-#endif // MPT_OS_WINDOWS
+	mpt::PathString Simplify() const;  // similar to std::fs::path::lexically_normal
 
 
 

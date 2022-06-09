@@ -81,14 +81,27 @@ int PathString::CompareNoCase(const PathString & a, const PathString & b)
 #endif // !MPT_OS_WINDOWS_WINRT
 
 
+
+} // namespace mpt
+
+#endif // MPT_OS_WINDOWS
+
+
+
+namespace mpt
+{
+
 // Convert a path to its simplified form, i.e. remove ".\" and "..\" entries
 // Note: We use our own implementation as PathCanonicalize is limited to MAX_PATH
 // and unlimited versions are only available on Windows 8 and later.
 // Furthermore, we also convert forward-slashes to backslashes and always remove trailing slashes.
 PathString PathString::Simplify() const
 {
+#if MPT_OS_WINDOWS
 	if(path.empty())
+	{
 		return PathString();
+	}
 
 	std::vector<RawPathString> components;
 	RawPathString root;
@@ -119,7 +132,9 @@ PathString PathString::Simplify() const
 	{
 		auto pos = path.find_first_of(PL_("\\/"), startPos);
 		if(pos == RawPathString::npos)
+		{
 			pos = path.size();
+		}
 		mpt::RawPathString dir = path.substr(startPos, pos - startPos);
 		if(dir == PL_(".."))
 		{
@@ -145,13 +160,72 @@ PathString PathString::Simplify() const
 		result += component + PL_("\\");
 	}
 	if(!components.empty())
+	{
 		result.pop_back();
+	}
 	return mpt::PathString(result);
+#else // !MPT_OS_WINDOWS
+	if(path.empty())
+	{
+		return PathString();
+	}
+
+	std::vector<RawPathString> components;
+	RawPathString root;
+	RawPathString::size_type startPos = 0;
+	if(path.substr(0, 2) == PL_("./"))
+	{
+		// Special case for relative paths
+		root = PL_("./");
+		startPos = 2;
+	} else if(path.size() >= 1 && (path[0] == PC_('/')))
+	{
+		// Special case for relative paths
+		root = PL_("/");
+		startPos = 1;
+	}
+
+	while(startPos < path.size())
+	{
+		auto pos = path.find_first_of(PL_("/"), startPos);
+		if(pos == RawPathString::npos)
+		{
+			pos = path.size();
+		}
+		mpt::RawPathString dir = path.substr(startPos, pos - startPos);
+		if(dir == PL_(".."))
+		{
+			// Go back one directory
+			if(!components.empty())
+			{
+				components.pop_back();
+			}
+		} else if(dir == PL_("."))
+		{
+			// nop
+		} else if(!dir.empty())
+		{
+			components.push_back(std::move(dir));
+		}
+		startPos = pos + 1;
+	}
+
+	RawPathString result = root;
+	result.reserve(path.size());
+	for(const auto &component : components)
+	{
+		result += component + PL_("/");
+	}
+	if(!components.empty())
+	{
+		result.pop_back();
+	}
+	return mpt::PathString(result);
+#endif // MPT_OS_WINDOWS
 }
 
 } // namespace mpt
 
-#endif // MPT_OS_WINDOWS
 
 
 namespace mpt

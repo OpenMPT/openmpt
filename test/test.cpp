@@ -1579,7 +1579,9 @@ static MPT_NOINLINE void TestCharsets()
 	VERIFY_EQUAL(P_("\\foo").RelativePathToAbsolute(exePath), P_("C:\\foo"));
 	VERIFY_EQUAL(P_("\\\\server\\path\\file").AbsolutePathToRelative(exePath), P_("\\\\server\\path\\file"));
 	VERIFY_EQUAL(P_("\\\\server\\path\\file").RelativePathToAbsolute(exePath), P_("\\\\server\\path\\file"));
+#endif
 
+#if MPT_OS_WINDOWS
 	VERIFY_EQUAL(P_("").Simplify(), P_(""));
 	VERIFY_EQUAL(P_(" ").Simplify(), P_(" "));
 	VERIFY_EQUAL(P_("foo\\bar").Simplify(), P_("foo\\bar"));
@@ -1595,8 +1597,18 @@ static MPT_NOINLINE void TestCharsets()
 	VERIFY_EQUAL(P_("C:\\.").Simplify(), P_("C:\\"));
 	VERIFY_EQUAL(P_("\\\\foo\\..\\.bar").Simplify(), P_("\\\\.bar"));
 	VERIFY_EQUAL(P_("\\\\foo\\..\\..\\bar").Simplify(), P_("\\\\bar"));
+#else
+	VERIFY_EQUAL(P_("/").Simplify(), P_("/"));
+	VERIFY_EQUAL(P_("").Simplify(), P_(""));
+	VERIFY_EQUAL(P_(" ").Simplify(), P_(" "));
+	VERIFY_EQUAL(P_("foo/bar").Simplify(), P_("foo/bar"));
+	VERIFY_EQUAL(P_("./foo/bar").Simplify(), P_("./foo/bar"));
+	VERIFY_EQUAL(P_(".//foo/bar").Simplify(), P_("./foo/bar"));
+	VERIFY_EQUAL(P_(".//foo/bar").Simplify(), P_("./foo/bar"));
+	VERIFY_EQUAL(P_("/foo/bar").Simplify(), P_("/foo/bar"));
+	VERIFY_EQUAL(P_("//foo/../.bar").Simplify(), P_("/.bar"));
+	VERIFY_EQUAL(P_("//foo/../../bar").Simplify(), P_("/bar"));
 #endif
-
 
 
 #ifdef MODPLUG_TRACKER
