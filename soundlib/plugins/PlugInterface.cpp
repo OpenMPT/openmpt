@@ -636,7 +636,7 @@ bool IMixPlugin::SaveProgram()
 	}
 
 	CString progName = m_Factory.libraryName.ToCString() + _T(" - ") + GetCurrentProgramName();
-	SanitizeFilename(progName);
+	progName = SanitizePathComponent(progName);
 
 	FileDialog dlg = SaveFileDialog()
 		.DefaultExtension("fxb")

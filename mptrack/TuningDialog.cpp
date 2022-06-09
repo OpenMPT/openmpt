@@ -657,7 +657,7 @@ void CTuningDialog::OnBnClickedButtonExport()
 		if(!m_TuningCollectionsNames[pTC].IsEmpty())
 		{
 			mpt::PathString name = mpt::PathString::FromUnicode(mpt::ToUnicode(m_TuningCollectionsNames[pTC]));
-			SanitizeFilename(name);
+			name = SanitizePathComponent(name);
 			fileName += name + P_(" - ");
 		}
 		fileName += P_("%tuning_number% - %tuning_name%");
@@ -689,10 +689,10 @@ void CTuningDialog::OnBnClickedButtonExport()
 			}
 			mpt::ustring fileNameW = fileName.ToUnicode();
 			mpt::ustring numberW = mpt::ufmt::fmt(i + 1, numberFmt);
-			SanitizeFilename(numberW);
+			numberW = SanitizePathComponent(numberW);
 			fileNameW = mpt::String::Replace(fileNameW, U_("%tuning_number%"), numberW);
 			mpt::ustring nameW = mpt::ToUnicode(tuningName);
-			SanitizeFilename(nameW);
+			nameW = SanitizePathComponent(nameW);
 			fileNameW = mpt::String::Replace(fileNameW, U_("%tuning_name%"), nameW);
 			fileName = mpt::PathString::FromUnicode(fileNameW);
 

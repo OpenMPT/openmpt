@@ -1434,7 +1434,7 @@ void CCtrlSamples::SaveSample(bool doBatchSave)
 		else
 			fileName += P_("%sample_filename%");
 	}
-	SanitizeFilename(fileName);
+	fileName = SanitizePathComponent(fileName);
 
 	int filter;
 	switch(defaultFormat)
@@ -1495,8 +1495,8 @@ void CCtrlSamples::SaveSample(bool doBatchSave)
 			{
 				sampleName = mpt::ToCString(m_sndFile.GetCharsetInternal(), (!m_sndFile.m_szNames[smp].empty()) ? std::string(m_sndFile.m_szNames[smp]) : "untitled");
 				sampleFilename = mpt::ToCString(m_sndFile.GetCharsetInternal(), (!sample.filename.empty()) ? sample.GetFilename() : m_sndFile.m_szNames[smp]);
-				SanitizeFilename(sampleName);
-				SanitizeFilename(sampleFilename);
+				sampleName = SanitizePathComponent(sampleName);
+				sampleFilename = SanitizePathComponent(sampleFilename);
 
 				mpt::ustring fileNameU = fileName.ToUnicode();
 				fileNameU = mpt::String::Replace(fileNameU, U_("%sample_number%"), mpt::ufmt::fmt(smp, numberFmt));

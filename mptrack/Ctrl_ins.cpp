@@ -2063,7 +2063,7 @@ void CCtrlInstruments::SaveInstrument(bool doBatchSave)
 			fileName += P_("%instrument_filename%");
 
 	}
-	SanitizeFilename(fileName);
+	fileName = SanitizePathComponent(fileName);
 
 	int index;
 	if(TrackerSettings::Instance().compressITI)
@@ -2114,8 +2114,8 @@ void CCtrlInstruments::SaveInstrument(bool doBatchSave)
 			{
 				instrName = mpt::ToCString(m_sndFile.GetCharsetInternal(), pIns->name[0] ? pIns->GetName() : "untitled");
 				instrFilename = mpt::ToCString(m_sndFile.GetCharsetInternal(), pIns->filename[0] ? pIns->GetFilename() : pIns->GetName());
-				SanitizeFilename(instrName);
-				SanitizeFilename(instrFilename);
+				instrName = SanitizePathComponent(instrName);
+				instrFilename = SanitizePathComponent(instrFilename);
 
 				mpt::ustring fileNameW = fileName.ToUnicode();
 				fileNameW = mpt::String::Replace(fileNameW, U_("%instrument_number%"), mpt::ufmt::fmt(ins, numberFmt));

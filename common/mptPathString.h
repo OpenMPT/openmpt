@@ -140,11 +140,6 @@ public:
 	// Return the same path string with a different (or appended) extension (including "."), e.g. "foo.bar",".txt" -> "foo.txt" or "C:\OpenMPT\foo",".txt" -> "C:\OpenMPT\foo.txt"
 	PathString ReplaceExt(const mpt::PathString &newExt) const;
 
-	// Removes special characters from a filename component and replaces them with a safe replacement character ("_" on windows).
-	// Returns the result.
-	// Note that this also removes path component separators, so this should only be used on single-component PathString objects.
-	PathString SanitizeComponent() const;
-
 	bool HasTrailingSlash() const
 	{
 		if(path.empty())
@@ -371,33 +366,16 @@ public:
 #if defined(MODPLUG_TRACKER)
 
 // Sanitize a filename (remove special chars)
-void SanitizeFilename(mpt::PathString &filename);
 
-void SanitizeFilename(char *beg, char *end);
-void SanitizeFilename(wchar_t *beg, wchar_t *end);
+mpt::PathString SanitizePathComponent(const mpt::PathString &filename);
 
-void SanitizeFilename(std::string &str);
-void SanitizeFilename(std::wstring &str);
+std::string SanitizePathComponent(std::string str);
+std::wstring SanitizePathComponent(std::wstring str);
 #if MPT_USTRING_MODE_UTF8
-void SanitizeFilename(mpt::u8string &str);
+mpt::u8string SanitizePathComponent(mpt::u8string str);
 #endif // MPT_USTRING_MODE_UTF8
-
-template <std::size_t size>
-void SanitizeFilename(char (&buffer)[size])
-{
-	static_assert(size > 0);
-	SanitizeFilename(buffer, buffer + size);
-}
-
-template <std::size_t size>
-void SanitizeFilename(wchar_t (&buffer)[size])
-{
-	static_assert(size > 0);
-	SanitizeFilename(buffer, buffer + size);
-}
-
 #if defined(MPT_WITH_MFC)
-void SanitizeFilename(CString &str);
+CString SanitizePathComponent(CString str);
 #endif // MPT_WITH_MFC
 
 #endif // MODPLUG_TRACKER

@@ -292,7 +292,7 @@ bool UnpackTuningCollection(const CTuningCollection &tc, const mpt::PathString &
 		{
 			tuningName = U_("untitled");
 		}
-		SanitizeFilename(tuningName);
+		tuningName = SanitizePathComponent(tuningName);
 		fn += mpt::PathString::FromUnicode(MPT_UFORMAT("{} - {}")(mpt::ufmt::fmt(i + 1, numberFmt), tuningName));
 		fn += mpt::PathString::FromUTF8(CTuning::s_FileExtension);
 		if(mpt::FS::PathExists(fn))

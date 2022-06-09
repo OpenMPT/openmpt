@@ -249,7 +249,7 @@ int DebugReporter::RescueFiles()
 			filename += crashDirectory.path;
 			filename += mpt::PathString::FromUnicode(mpt::ufmt::val(++numFiles));
 			filename += P_("_");
-			filename += mpt::PathString::FromCString(modDoc->GetTitle()).SanitizeComponent();
+			filename += mpt::PathString::FromCString(SanitizePathComponent(modDoc->GetTitle()));
 			filename += P_(".");
 			filename += mpt::PathString::FromUnicode(modDoc->GetSoundFile().GetModSpecifications().GetFileExtension());
 

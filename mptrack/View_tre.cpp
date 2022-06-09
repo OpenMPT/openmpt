@@ -831,7 +831,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 		// Module folder + sub folders
 		CString name = modDoc.GetPathNameMpt().GetFullFileName().ToCString();
 		if(name.IsEmpty())
-			name = mpt::PathString::FromCString(modDoc.GetTitle()).SanitizeComponent().ToCString();
+			name = SanitizePathComponent(modDoc.GetTitle());
 
 		if(!info.hSong)
 		{

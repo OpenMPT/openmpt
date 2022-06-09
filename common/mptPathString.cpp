@@ -391,14 +391,6 @@ PathString PathString::ReplaceExt(const mpt::PathString &newExt) const
 }
 
 
-PathString PathString::SanitizeComponent() const
-{
-	PathString result = *this;
-	SanitizeFilename(result);
-	return result;
-}
-
-
 // Convert an absolute path to a path that's relative to "&relativeTo".
 PathString PathString::AbsolutePathToRelative(const PathString &relativeTo) const
 {
@@ -709,7 +701,7 @@ TempDirGuard::~TempDirGuard()
 
 
 
-static inline char SanitizeFilenameChar(char c)
+static inline char SanitizePathComponentChar(char c)
 {
 	if(	c == '\\' ||
 		c == '\"' ||
@@ -726,7 +718,7 @@ static inline char SanitizeFilenameChar(char c)
 	return c;
 }
 
-static inline wchar_t SanitizeFilenameChar(wchar_t c)
+static inline wchar_t SanitizePathComponentChar(wchar_t c)
 {
 	if(	c == L'\\' ||
 		c == L'\"' ||
@@ -744,7 +736,7 @@ static inline wchar_t SanitizeFilenameChar(wchar_t c)
 }
 
 #if MPT_CXX_AT_LEAST(20)
-static inline char8_t SanitizeFilenameChar(char8_t c)
+static inline char8_t SanitizePathComponentChar(char8_t c)
 {
 	if(	c == u8'\\' ||
 		c == u8'\"' ||
@@ -762,65 +754,53 @@ static inline char8_t SanitizeFilenameChar(char8_t c)
 }
 #endif
 
-void SanitizeFilename(mpt::PathString &filename)
+mpt::PathString SanitizePathComponent(const mpt::PathString &filename)
 {
 	mpt::RawPathString tmp = filename.AsNative();
 	for(auto &c : tmp)
 	{
-		c = SanitizeFilenameChar(c);
+		c = SanitizePathComponentChar(c);
 	}
-	filename = mpt::PathString::FromNative(tmp);
+	return mpt::PathString::FromNative(tmp);
 }
 
-void SanitizeFilename(char *beg, char *end)
-{
-	for(char *it = beg; it != end; ++it)
-	{
-		*it = SanitizeFilenameChar(*it);
-	}
-}
-
-void SanitizeFilename(wchar_t *beg, wchar_t *end)
-{
-	for(wchar_t *it = beg; it != end; ++it)
-	{
-		*it = SanitizeFilenameChar(*it);
-	}
-}
-
-void SanitizeFilename(std::string &str)
+std::string SanitizePathComponent(std::string str)
 {
 	for(size_t i = 0; i < str.length(); i++)
 	{
-		str[i] = SanitizeFilenameChar(str[i]);
+		str[i] = SanitizePathComponentChar(str[i]);
 	}
+	return str;
 }
 
-void SanitizeFilename(std::wstring &str)
+std::wstring SanitizePathComponent(std::wstring str)
 {
 	for(size_t i = 0; i < str.length(); i++)
 	{
-		str[i] = SanitizeFilenameChar(str[i]);
+		str[i] = SanitizePathComponentChar(str[i]);
 	}
+	return str;
 }
 
 #if MPT_USTRING_MODE_UTF8
-void SanitizeFilename(mpt::u8string &str)
+mpt::u8string SanitizePathComponent(mpt::u8string str)
 {
 	for(size_t i = 0; i < str.length(); i++)
 	{
-		str[i] = SanitizeFilenameChar(str[i]);
+		str[i] = SanitizePathComponentChar(str[i]);
 	}
+	return str;
 }
 #endif // MPT_USTRING_MODE_UTF8
 
 #if defined(MPT_WITH_MFC)
-void SanitizeFilename(CString &str)
+CString SanitizePathComponent(CString str)
 {
 	for(int i = 0; i < str.GetLength(); i++)
 	{
-		str.SetAt(i, SanitizeFilenameChar(str.GetAt(i)));
+		str.SetAt(i, SanitizePathComponentChar(str.GetAt(i)));
 	}
+	return str;
 }
 #endif // MPT_WITH_MFC
 

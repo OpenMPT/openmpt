@@ -497,7 +497,7 @@ BOOL CModDoc::DoSave(const mpt::PathString &filename, bool setPath)
 		mpt::PathString fileName = docFileName.GetFileName();
 		if(fileName.empty())
 		{
-			fileName = mpt::PathString::FromCString(GetTitle()).SanitizeComponent();
+			fileName = mpt::PathString::FromCString(SanitizePathComponent(GetTitle()));
 		}
 		mpt::PathString defaultSaveName = drive + dir + fileName + ext;
 
@@ -1833,7 +1833,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 
 			if(!fileNameAdd.empty())
 			{
-				SanitizeFilename(fileNameAdd);
+				fileNameAdd = SanitizePathComponent(fileNameAdd);
 				thisName += mpt::PathString::FromUnicode(fileNameAdd);
 			}
 			thisName += fileExt;
@@ -2832,7 +2832,7 @@ void CModDoc::ChangeFileExtension(MODTYPE nNewType)
 		// Catch case where we don't have a filename yet.
 		if(fname.empty())
 		{
-			newPath += mpt::PathString::FromCString(GetTitle()).SanitizeComponent();
+			newPath += mpt::PathString::FromCString(SanitizePathComponent(GetTitle()));
 		} else
 		{
 			newPath += fname;
