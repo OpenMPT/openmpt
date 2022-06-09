@@ -731,7 +731,7 @@ void CUpdateCheck::CleanOldUpdates(const CUpdateCheck::Settings & /* settings */
 	{
 		return;
 	}
-	if(!dirTemp.IsDirectory())
+	if(!mpt::FS::IsDirectory(dirTemp))
 	{
 		return;
 	}

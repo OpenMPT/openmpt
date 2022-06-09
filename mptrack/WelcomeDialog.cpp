@@ -56,7 +56,7 @@ BOOL WelcomeDlg::OnInitDialog()
 	} else if(SHGetSpecialFolderPath(0, str, CSIDL_PROGRAM_FILES, FALSE))
 	{
 		m_vstPath = mpt::PathString::FromNative(ParseMaybeNullTerminatedStringFromBufferWithSizeInBytes<mpt::winstring>(str, datasize)) + P_("\\Steinberg\\VstPlugins\\");
-		if(!m_vstPath.IsDirectory())
+		if(!mpt::FS::IsDirectory(m_vstPath))
 		{
 			m_vstPath = mpt::PathString();
 		}
@@ -107,7 +107,7 @@ BOOL WelcomeDlg::OnInitDialog()
 	}
 	if(keyFile != nullptr)
 	{
-		if(GetFullKeyPath(keyFile).IsFile())
+		if(mpt::FS::IsFile(GetFullKeyPath(keyFile)))
 		{
 			int i = combo->AddString(_T("OpenMPT / Chromatic (") + CString(keyFileName) + _T(")"));
 			combo->SetItemDataPtr(i, (void *)keyFile);

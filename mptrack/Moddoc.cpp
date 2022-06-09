@@ -520,10 +520,10 @@ BOOL CModDoc::DoSave(const mpt::PathString &filename, bool setPath)
 	if((TrackerSettings::Instance().CreateBackupFiles)
 		&& (IsModified()) && (!mpt::PathString::CompareNoCase(saveFileName, docFileName)))
 	{
-		if(saveFileName.IsFile())
+		if(mpt::FS::IsFile(saveFileName))
 		{
 			mpt::PathString backupFileName = saveFileName.ReplaceExt(P_(".bak"));
-			if(backupFileName.IsFile())
+			if(mpt::FS::IsFile(backupFileName))
 			{
 				DeleteFile(backupFileName.AsNative().c_str());
 			}
@@ -3073,7 +3073,7 @@ void CModDoc::OnSaveTemplateModule()
 {
 	// Create template folder if doesn't exist already.
 	const mpt::PathString templateFolder = TrackerSettings::Instance().PathUserTemplates.GetDefaultDir();
-	if (!templateFolder.IsDirectory())
+	if (!mpt::FS::IsDirectory(templateFolder))
 	{
 		if (!CreateDirectory(templateFolder.AsNative().c_str(), nullptr))
 		{
@@ -3088,7 +3088,7 @@ void CModDoc::OnSaveTemplateModule()
 	{
 		sName += P_("newTemplate") + mpt::PathString::FromUnicode(mpt::ufmt::val(i));
 		sName += P_(".") + mpt::PathString::FromUnicode(m_SndFile.GetModSpecifications().GetFileExtension());
-		if (!(templateFolder + sName).FileOrDirectoryExists())
+		if (!mpt::FS::FileOrDirectoryExists(templateFolder + sName))
 			break;
 	}
 

@@ -112,7 +112,7 @@ mpt::PathString CAutoSaver::GetBasePath(const CModDoc &modDoc, bool createPath) 
 			path = theApp.GetConfigPath() + P_("Autosave\\");
 			if(createPath && !CreateDirectory(path.AsNative().c_str(), nullptr) && GetLastError() == ERROR_PATH_NOT_FOUND)
 				path = theApp.GetConfigPath();
-			else if(!createPath && !path.IsDirectory())
+			else if(!createPath && !mpt::FS::IsDirectory(path))
 				path = theApp.GetConfigPath();
 		}
 	} else

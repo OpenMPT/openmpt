@@ -126,7 +126,7 @@ struct CrashOutputDirectory
 		const mpt::PathString timestampDir = mpt::PathString::FromCString((CTime::GetCurrentTime()).Format(_T("%Y-%m-%d %H.%M.%S\\")));
 		// Create a crash directory
 		path = mpt::GetTempDirectory() + P_("OpenMPT Crash Files\\");
-		if(!path.IsDirectory())
+		if(!mpt::FS::IsDirectory(path))
 		{
 			CreateDirectory(path.AsNative().c_str(), nullptr);
 		}
@@ -137,7 +137,7 @@ struct CrashOutputDirectory
 		SetFilesystemCompression(path);
 		// Compression will be inherited by children directories and files automatically.
 		path += timestampDir;
-		if(!path.IsDirectory())
+		if(!mpt::FS::IsDirectory(path))
 		{
 			if(!CreateDirectory(path.AsNative().c_str(), nullptr))
 			{

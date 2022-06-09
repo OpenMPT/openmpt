@@ -179,7 +179,7 @@ BOOL PathConfigDlg::OnKillActive()
 {
 	mpt::PathString path = GetPath(IDC_AUTOSAVE_PATH);
 
-	if (!path.IsDirectory() && IsDlgButtonChecked(IDC_AUTOSAVE_ENABLE) && !IsDlgButtonChecked(IDC_AUTOSAVE_USEORIGDIR))
+	if (!mpt::FS::IsDirectory(path) && IsDlgButtonChecked(IDC_AUTOSAVE_ENABLE) && !IsDlgButtonChecked(IDC_AUTOSAVE_USEORIGDIR))
 	{
 		Reporting::Error("Backup path does not exist.");
 		GetDlgItem(IDC_AUTOSAVE_PATH)->SetFocus();

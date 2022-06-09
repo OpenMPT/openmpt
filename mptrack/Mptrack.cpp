@@ -832,7 +832,7 @@ bool CTrackApp::MoveConfigFile(const mpt::PathString &fileName, mpt::PathString 
 	else
 		newPath += fileName;
 
-	if(!newPath.IsFile() && oldPath.IsFile())
+	if(!mpt::FS::IsFile(newPath) && mpt::FS::IsFile(oldPath))
 	{
 		return MoveFile(oldPath.AsNative().c_str(), newPath.AsNative().c_str()) != 0;
 	}
@@ -907,7 +907,7 @@ void CTrackApp::SetupPaths(bool overridePortable)
 	// Check if the user has configured portable mode.
 	bool configInstallPortable = false;
 	mpt::PathString portableFlagFilename = (configPathPortable + P_("OpenMPT.portable"));
-	bool configPortableFlag = portableFlagFilename.IsFile();
+	bool configPortableFlag = mpt::FS::IsFile(portableFlagFilename);
 	configInstallPortable = configInstallPortable || configPortableFlag;
 	// before 1.29.00.13:
 	configInstallPortable = configInstallPortable || (GetPrivateProfileInt(_T("Paths"), _T("UseAppDataDirectory"), 1, (configPathPortable + P_("mptrack.ini")).AsNative().c_str()) == 0);
@@ -946,16 +946,16 @@ void CTrackApp::CreatePaths()
 	// Create missing diretories
 	if(!IsPortableMode())
 	{
-		if(!m_ConfigPath.IsDirectory())
+		if(!mpt::FS::IsDirectory(m_ConfigPath))
 		{
 			CreateDirectory(m_ConfigPath.AsNative().c_str(), 0);
 		}
 	}
-	if(!(GetConfigPath() + P_("Components")).IsDirectory())
+	if(!mpt::FS::IsDirectory(GetConfigPath() + P_("Components")))
 	{
 		CreateDirectory((GetConfigPath() + P_("Components")).AsNative().c_str(), 0);
 	}
-	if(!(GetConfigPath() + P_("Components\\") + mpt::PathString::FromUnicode(mpt::OS::Windows::Name(mpt::OS::Windows::GetProcessArchitecture()))).IsDirectory())
+	if(!mpt::FS::IsDirectory(GetConfigPath() + P_("Components\\") + mpt::PathString::FromUnicode(mpt::OS::Windows::Name(mpt::OS::Windows::GetProcessArchitecture()))))
 	{
 		CreateDirectory((GetConfigPath() + P_("Components\\") + mpt::PathString::FromUnicode(mpt::OS::Windows::Name(mpt::OS::Windows::GetProcessArchitecture()))).AsNative().c_str(), 0);
 	}
@@ -972,7 +972,7 @@ void CTrackApp::CreatePaths()
 		// Import old tunings
 		const mpt::PathString oldTunings = GetInstallPath() + P_("tunings\\");
 
-		if(oldTunings.IsDirectory())
+		if(mpt::FS::IsDirectory(oldTunings))
 		{
 			const mpt::PathString searchPattern = oldTunings + P_("*.*");
 			WIN32_FIND_DATA FindFileData;
@@ -1652,7 +1652,7 @@ CModDoc *CTrackApp::NewDocument(MODTYPE newType)
 			const mpt::PathString dirs[] = { GetConfigPath() + P_("TemplateModules\\"), GetInstallPath() + P_("TemplateModules\\"), mpt::PathString() };
 			for(const auto &dir : dirs)
 			{
-				if((dir + templateFile).IsFile())
+				if(mpt::FS::IsFile(dir + templateFile))
 				{
 					if(CModDoc *modDoc = static_cast<CModDoc *>(m_pModTemplate->OpenTemplateFile(dir + templateFile)))
 					{

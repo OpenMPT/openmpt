@@ -113,7 +113,7 @@ bool ComponentPluginBridge::DoInitialize()
 	};
 	for(const auto &candidate : exeNames)
 	{
-		if(candidate.IsFile())
+		if(mpt::FS::IsFile(candidate))
 		{
 			exeName = candidate;
 			break;

@@ -134,7 +134,7 @@ public:
 				case mpt::LibrarySearchPath::Application:
 					{
 						const mpt::PathString dllPath = mpt::GetExecutablePath();
-						if(!dllPath.empty() && mpt::PathIsAbsolute(dllPath) && dllPath.IsDirectory())
+						if(!dllPath.empty() && dllPath.IsAbsolute() && mpt::FS::IsDirectory(dllPath))
 						{
 							hModule = LoadLibrary((dllPath + path.GetFileName()).AsNative().c_str());
 						}
@@ -166,7 +166,7 @@ public:
 				case mpt::LibrarySearchPath::Application:
 					{
 						const mpt::PathString dllPath = mpt::GetExecutablePath();
-						if(!dllPath.empty() && mpt::PathIsAbsolute(dllPath) && dllPath.IsDirectory())
+						if(!dllPath.empty() && dllPath.IsAbsolute() && mpt::FS::IsDirectory(dllPath))
 						{
 							hModule = LoadLibrary((dllPath + path.GetFileName()).AsNative().c_str());
 						}
@@ -175,7 +175,7 @@ public:
 				case mpt::LibrarySearchPath::System:
 					{
 						const mpt::PathString dllPath = mpt::GetSystemPath();
-						if(!dllPath.empty() && mpt::PathIsAbsolute(dllPath) && dllPath.IsDirectory())
+						if(!dllPath.empty() && dllPath.IsAbsolute() && mpt::FS::IsDirectory(dllPath))
 						{
 							hModule = LoadLibrary((dllPath + path.GetFileName()).AsNative().c_str());
 						}

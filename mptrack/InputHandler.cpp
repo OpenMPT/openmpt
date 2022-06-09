@@ -45,7 +45,7 @@ CInputHandler::CInputHandler(CWnd *mainframe)
 		if (bNoExistingKbdFileSetting)
 			TrackerSettings::Instance().m_szKbdFile = sDefaultPath;
 		bool bSuccess = false;
-		if (sDefaultPath.IsFile())
+		if (mpt::FS::IsFile(sDefaultPath))
 			bSuccess = m_activeCommandSet->LoadFile(sDefaultPath);
 		if (!bSuccess)
 		{

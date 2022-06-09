@@ -986,21 +986,21 @@ void TrackerSettings::MigrateOldSoundDeviceSettings(SoundDevice::Manager &manage
 
 void TrackerSettings::MigrateTunings(const Version storedVersion)
 {
-	if(!PathTunings.GetDefaultDir().IsDirectory())
+	if(!mpt::FS::IsDirectory(PathTunings.GetDefaultDir()))
 	{
 		CreateDirectory(PathTunings.GetDefaultDir().AsNative().c_str(), 0);
 	}
-	if(!(PathTunings.GetDefaultDir() + P_("Built-in\\")).IsDirectory())
+	if(!mpt::FS::IsDirectory(PathTunings.GetDefaultDir() + P_("Built-in\\")))
 	{
 		CreateDirectory((PathTunings.GetDefaultDir() + P_("Built-in\\")).AsNative().c_str(), 0);
 	}
-	if(!(PathTunings.GetDefaultDir() + P_("Locale\\")).IsDirectory())
+	if(!mpt::FS::IsDirectory(PathTunings.GetDefaultDir() + P_("Locale\\")))
 	{
 		CreateDirectory((PathTunings.GetDefaultDir() + P_("Local\\")).AsNative().c_str(), 0);
 	}
 	{
 		mpt::PathString fn = PathTunings.GetDefaultDir() + P_("Built-in\\12TET.tun");
-		if(!fn.FileOrDirectoryExists())
+		if(!mpt::FS::FileOrDirectoryExists(fn))
 		{
 			std::unique_ptr<CTuning> pT = CSoundFile::CreateTuning12TET(U_("12TET"));
 			mpt::SafeOutputFile sf(fn, std::ios::binary, mpt::FlushMode::Full);
@@ -1009,7 +1009,7 @@ void TrackerSettings::MigrateTunings(const Version storedVersion)
 	}
 	{
 		mpt::PathString fn = PathTunings.GetDefaultDir() + P_("Built-in\\12TET [[fs15 1.17.02.49]].tun");
-		if(!fn.FileOrDirectoryExists())
+		if(!mpt::FS::FileOrDirectoryExists(fn))
 		{
 			std::unique_ptr<CTuning> pT = CSoundFile::CreateTuning12TET(U_("12TET [[fs15 1.17.02.49]]"));
 			mpt::SafeOutputFile sf(fn, std::ios::binary, mpt::FlushMode::Full);

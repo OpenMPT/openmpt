@@ -343,46 +343,41 @@ PathString PathString::GetFullFileName() const
 }
 
 
-bool PathString::IsDirectory() const
+bool FS::IsDirectory(const mpt::PathString &path)
 {
 	// Using PathIsDirectoryW here instead would increase libopenmpt dependencies by shlwapi.dll.
 	// GetFileAttributesW also does the job just fine.
 	#if MPT_OS_WINDOWS_WINRT
 		WIN32_FILE_ATTRIBUTE_DATA data = {};
-		if(::GetFileAttributesExW(path.c_str(), GetFileExInfoStandard, &data) == 0)
+		if(::GetFileAttributesExW(path.AsNative().c_str(), GetFileExInfoStandard, &data) == 0)
 		{
 			return false;
 		}
 		DWORD dwAttrib = data.dwFileAttributes;
 	#else // !MPT_OS_WINDOWS_WINRT
-		DWORD dwAttrib = ::GetFileAttributes(path.c_str());
+		DWORD dwAttrib = ::GetFileAttributes(path.AsNative().c_str());
 	#endif // MPT_OS_WINDOWS_WINRT
 	return ((dwAttrib != INVALID_FILE_ATTRIBUTES) && (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
 }
 
-bool PathString::IsFile() const
+bool FS::IsFile(const mpt::PathString &path)
 {
 	#if MPT_OS_WINDOWS_WINRT
 		WIN32_FILE_ATTRIBUTE_DATA data = {};
-		if (::GetFileAttributesExW(path.c_str(), GetFileExInfoStandard, &data) == 0)
+		if (::GetFileAttributesExW(path.AsNative().c_str(), GetFileExInfoStandard, &data) == 0)
 		{
 			return false;
 		}
 		DWORD dwAttrib = data.dwFileAttributes;
 	#else // !MPT_OS_WINDOWS_WINRT
-		DWORD dwAttrib = ::GetFileAttributes(path.c_str());
+		DWORD dwAttrib = ::GetFileAttributes(path.AsNative().c_str());
 	#endif // MPT_OS_WINDOWS_WINRT
 	return ((dwAttrib != INVALID_FILE_ATTRIBUTES) && !(dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
 }
 
-#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
-
-
-#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
-
-bool PathString::FileOrDirectoryExists() const
+bool FS::FileOrDirectoryExists(const mpt::PathString &path)
 {
-	return ::PathFileExists(path.c_str()) != FALSE;
+	return ::PathFileExists(path.AsNative().c_str()) != FALSE;
 }
 
 #endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
@@ -480,34 +475,29 @@ RawPathString::value_type PathString::GetDefaultPathSeparator()
 }
 
 
-} // namespace mpt
 
-
-namespace mpt
+bool PathString::IsAbsolute() const
 {
-
-bool PathIsAbsolute(const mpt::PathString &path) {
-	mpt::RawPathString rawpath = path.AsNative();
 #if MPT_OS_WINDOWS
-	if(rawpath.substr(0, 8) == PL_("\\\\?\\UNC\\"))
+	if(path.substr(0, 8) == PL_("\\\\?\\UNC\\"))
 	{
 		return true;
 	}
-	if(rawpath.substr(0, 4) == PL_("\\\\?\\"))
+	if(path.substr(0, 4) == PL_("\\\\?\\"))
 	{
 		return true;
 	}
-	if(rawpath.substr(0, 2) == PL_("\\\\"))
+	if(path.substr(0, 2) == PL_("\\\\"))
 	{
 		return true; // UNC
 	}
-	if(rawpath.substr(0, 2) == PL_("//"))
+	if(path.substr(0, 2) == PL_("//"))
 	{
 		return true; // UNC
 	}
-	return (rawpath.length()) >= 3 && (rawpath[1] == ':') && mpt::PathString::IsPathSeparator(rawpath[2]);
+	return (path.length()) >= 3 && (path[1] == ':') && IsPathSeparator(path[2]);
 #else
-	return (rawpath.length() >= 1) && mpt::PathString::IsPathSeparator(rawpath[0]);
+	return (path.length() >= 1) && IsPathSeparator(path[0]);
 #endif
 }
 
@@ -545,11 +535,11 @@ bool DeleteWholeDirectoryTree(mpt::PathString path)
 	{
 		return false;
 	}
-	if(!path.FileOrDirectoryExists())
+	if(!mpt::FS::FileOrDirectoryExists(path))
 	{
 		return true;
 	}
-	if(!path.IsDirectory())
+	if(!mpt::FS::IsDirectory(path))
 	{
 		return false;
 	}
@@ -565,13 +555,13 @@ bool DeleteWholeDirectoryTree(mpt::PathString path)
 			if(filename != P_(".") && filename != P_(".."))
 			{
 				filename = path + filename;
-				if(filename.IsDirectory())
+				if(mpt::FS::IsDirectory(filename))
 				{
 					if(!DeleteWholeDirectoryTree(filename))
 					{
 						return false;
 					}
-				} else if(filename.IsFile())
+				} else if(mpt::FS::IsFile(filename))
 				{
 					if(DeleteFile(filename.AsNative().c_str()) == 0)
 					{

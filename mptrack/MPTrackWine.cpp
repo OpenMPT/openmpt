@@ -308,7 +308,7 @@ void Initialize()
 			std::string Host_Native_OpenMPT_Wine_WineVersion_OpenMPTVersion;
 			static void CreatePath(mpt::PathString path)
 			{
-				if(path.IsDirectory())
+				if(mpt::FS::IsDirectory(path))
 				{
 					return;
 				}
@@ -352,7 +352,7 @@ void Initialize()
 
 		if(!TrackerSettings::Instance().WineSupportAlwaysRecompile)
 		{
-			if((paths.AppData_Wine_WineVersion_OpenMPTVersion.WithTrailingSlash() + P_("success.txt")).IsFile())
+			if(mpt::FS::IsFile(paths.AppData_Wine_WineVersion_OpenMPTVersion.WithTrailingSlash() + P_("success.txt")))
 			{
 				theApp.SetWineWrapperDllFilename(paths.AppData_Wine_WineVersion_OpenMPTVersion.WithTrailingSlash() + P_("openmpt_wine_wrapper.dll"));
 				return;

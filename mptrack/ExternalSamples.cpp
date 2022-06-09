@@ -269,7 +269,7 @@ void ModifiedExternalSamplesDlg::GenerateList()
 
 		if(m_sndFile.GetSample(smp).uFlags[SMP_MODIFIED])
 			status = _T("modified");
-		else if(!m_sndFile.GetSamplePath(smp).IsFile())
+		else if(!mpt::FS::IsFile(m_sndFile.GetSamplePath(smp)))
 			status = _T("missing");
 		else
 			continue;

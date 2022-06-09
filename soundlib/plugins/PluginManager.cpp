@@ -539,7 +539,7 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 
 	if(fileFound != nullptr)
 	{
-		*fileFound = dllPath.IsFile();
+		*fileFound = mpt::FS::IsFile(dllPath);
 	}
 
 	// Look if the plugin info is stored in the PluginCache
@@ -760,7 +760,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 				if(!fullPath.empty())
 				{
 					fullPath = theApp.PathInstallRelativeToAbsolute(fullPath);
-					if(fullPath.IsFile())
+					if(mpt::FS::IsFile(fullPath))
 					{
 						pFound = AddPlugin(fullPath, maskCrashes);
 					}

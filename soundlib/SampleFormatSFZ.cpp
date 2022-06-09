@@ -1078,7 +1078,7 @@ bool CSoundFile::SaveSFZInstrument(INSTRUMENTINDEX nInstr, std::ostream &f, cons
 	const mpt::PathString sampleBaseName = mpt::PathString::FromNative(mpt::trim(filename.GetFileName().AsNative(), whitespaceDirName));
 	const mpt::PathString sampleDirName = (sampleBaseName.empty() ? P_("Samples") : sampleBaseName)  + P_("/");
 	const mpt::PathString sampleBasePath = filename.GetPath() + sampleDirName;
-	if(!sampleBasePath.IsDirectory() && !::CreateDirectory(sampleBasePath.AsNative().c_str(), nullptr))
+	if(!mpt::FS::IsDirectory(sampleBasePath) && !::CreateDirectory(sampleBasePath.AsNative().c_str(), nullptr))
 		return false;
 
 	const double tickDuration = m_PlayState.m_nSamplesPerTick / static_cast<double>(m_MixerSettings.gdwMixingFreq);

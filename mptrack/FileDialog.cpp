@@ -53,7 +53,7 @@ public:
 	// Avoid this by re-implementing our own version which doesn't throw.
 	void AddPlace(const mpt::PathString &path)
 	{
-		if(m_bVistaStyle && path.IsDirectory())
+		if(m_bVistaStyle && mpt::FS::IsDirectory(path))
 		{
 			CComPtr<IShellItem> shellItem;
 			HRESULT hr = SHCreateItemFromParsingName(path.ToWide().c_str(), nullptr, IID_IShellItem, reinterpret_cast<void **>(&shellItem));

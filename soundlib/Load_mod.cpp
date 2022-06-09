@@ -1223,7 +1223,7 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				mpt::PathString infoName = filename + ext;
 				char stMagic[16];
-				if(infoName.IsFile())
+				if(mpt::FS::IsFile(infoName))
 				{
 					amFile.emplace(infoName, SettingCacheCompleteFileBeforeLoading());
 					if(amFile->IsValid() && (amData = GetFileReader(*amFile)).IsValid() && amData.ReadArray(stMagic))

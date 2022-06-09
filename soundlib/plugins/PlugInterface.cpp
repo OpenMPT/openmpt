@@ -630,7 +630,7 @@ bool IMixPlugin::SaveProgram()
 {
 	mpt::PathString defaultDir = TrackerSettings::Instance().PathPluginPresets.GetWorkingDir();
 	const bool useDefaultDir = !defaultDir.empty();
-	if(!useDefaultDir && m_Factory.dllPath.IsFile())
+	if(!useDefaultDir && mpt::FS::IsFile(m_Factory.dllPath))
 	{
 		defaultDir = m_Factory.dllPath.GetPath();
 	}
@@ -673,7 +673,7 @@ bool IMixPlugin::LoadProgram(mpt::PathString fileName)
 {
 	mpt::PathString defaultDir = TrackerSettings::Instance().PathPluginPresets.GetWorkingDir();
 	bool useDefaultDir = !defaultDir.empty();
-	if(!useDefaultDir && m_Factory.dllPath.IsFile())
+	if(!useDefaultDir && mpt::FS::IsFile(m_Factory.dllPath))
 	{
 		defaultDir = m_Factory.dllPath.GetPath();
 	}

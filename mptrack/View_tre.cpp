@@ -2134,9 +2134,9 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 						const auto nativePath = (m_InstrLibPath.AsNative() + wfd.cFileName);
 						if(const auto resolvedName = linkResolver.Resolve(nativePath.c_str()); !resolvedName.empty())
 						{
-							if(resolvedName.IsDirectory() && showDirs)
+							if(mpt::FS::IsDirectory(resolvedName) && showDirs)
 								type = IMAGE_FOLDER;
-							else if(resolvedName.IsFile())
+							else if(mpt::FS::IsFile(resolvedName))
 								type = FilterFile(resolvedName);
 						}
 					}
@@ -2359,11 +2359,11 @@ int CALLBACK CModTree::ModTreeDrumCompareProc(LPARAM lParam1, LPARAM lParam2, LP
 
 void CModTree::SetFullInstrumentLibraryPath(mpt::PathString path)
 {
-	if(path.IsDirectory())
+	if(mpt::FS::IsDirectory(path))
 	{
 		path.EnsureTrailingSlash();
 		InstrumentLibraryChDir(path, false);
-	} else if(path.IsFile())
+	} else if(mpt::FS::IsFile(path))
 	{
 		// Browse module contents
 		CModTree *dirBrowser = CMainFrame::GetMainFrame()->GetUpperTreeview();
@@ -2433,7 +2433,7 @@ void CModTree::InstrumentLibraryChDir(mpt::PathString dir, bool isSong)
 
 				FolderScanner scan(dir, FolderScanner::kFilesAndDirectories);
 				mpt::PathString name;
-				if(scan.Next(name) && !scan.Next(name) && name.IsDirectory())
+				if(scan.Next(name) && !scan.Next(name) && mpt::FS::IsDirectory(name))
 				{
 					// There is only one directory and nothing else in the path,
 					// so skip this directory and automatically descend further down into the tree.
@@ -2444,7 +2444,7 @@ void CModTree::InstrumentLibraryChDir(mpt::PathString dir, bool isSong)
 			} while(false);
 		}
 
-		if(dir.IsDirectory())
+		if(mpt::FS::IsDirectory(dir))
 		{
 			m_SongFileName = P_("");
 			delete m_SongFile;
@@ -3380,7 +3380,7 @@ void CModTree::OnXButtonUp(UINT nFlags, UINT nButton, CPoint point)
 		} else if(nButton == XBUTTON2)
 		{
 			const auto &previousPath = CMainFrame::GetMainFrame()->GetUpperTreeview()->m_previousPath;
-			InstrumentLibraryChDir(previousPath, (m_InstrLibPath + previousPath).IsFile());
+			InstrumentLibraryChDir(previousPath, mpt::FS::IsFile(m_InstrLibPath + previousPath));
 		}
 	}
 	CTreeCtrl::OnXButtonUp(nFlags, nButton, point);

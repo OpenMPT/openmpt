@@ -362,7 +362,7 @@ ExecResult Context::ExecutePosixShellScript(std::string script, FlagSet<ExecFlag
 					continue;
 				}
 				combinedPath += mpt::PathString::FromUnicode(path[singlepath]);
-				if(!combinedPath.IsDirectory())
+				if(!mpt::FS::IsDirectory(combinedPath))
 				{
 					if(::CreateDirectory(combinedPath.AsNative().c_str(), nullptr) == 0)
 					{
@@ -573,7 +573,7 @@ ExecResult Context::ExecutePosixShellScript(std::string script, FlagSet<ExecFlag
 		return result;
 	}
 
-	while(!(dirWindows + P_("done")).IsFile())
+	while(!mpt::FS::IsFile(dirWindows + P_("done")))
 	{ // wait
 		if(progressCancel(userdata) != ExecuteProgressContinueWaiting)
 		{
@@ -660,10 +660,10 @@ ExecResult Context::ExecutePosixShellScript(std::string script, FlagSet<ExecFlag
 				{
 					filename = path + filename;
 					filetree[filename.ToUTF8()] = std::vector<char>();
-					if(filename.IsDirectory())
+					if(mpt::FS::IsDirectory(filename))
 					{
 						paths.push_back(filename);
-					} else if(filename.IsFile())
+					} else if(mpt::FS::IsFile(filename))
 					{
 						try
 						{

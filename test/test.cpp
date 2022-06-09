@@ -2630,9 +2630,9 @@ static void TestLoadMODFile(CSoundFile &sndFile)
 static bool ShouldRunTests()
 {
 	mpt::PathString theFile = theApp.GetInstallPath();
-	if(theFile.IsDirectory() && (theFile + P_("test")).IsDirectory())
+	if(mpt::FS::IsDirectory(theFile) && mpt::FS::IsDirectory(theFile + P_("test")))
 	{
-		if((theFile + P_("test\\test.mptm")).IsFile())
+		if(mpt::FS::IsFile(theFile + P_("test\\test.mptm")))
 		{
 			return true;
 		}

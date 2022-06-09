@@ -130,13 +130,6 @@ public:
 	PathString GetFileExt() const;		// Extension including dot, e.g. ".exe"
 	PathString GetFullFileName() const;	// File name + extension, e.g. "OpenMPT.exe"
 
-	// Verify if this path represents a valid directory on the file system.
-	bool IsDirectory() const;
-	// Verify if this path exists and is a file on the file system.
-	bool IsFile() const;
-
-	bool FileOrDirectoryExists() const;
-
 #endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
 
 	static bool IsPathSeparator(RawPathString::value_type c);
@@ -196,6 +189,8 @@ public:
 	mpt::PathString RelativePathToAbsolute(const mpt::PathString &relativeTo) const;
 
 #endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
+
+	bool IsAbsolute() const;
 
 public:
 
@@ -277,7 +272,22 @@ namespace mpt
 {
 
 
-bool PathIsAbsolute(const mpt::PathString &path);
+#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
+
+namespace FS
+{
+
+	// Verify if this path represents a valid directory on the file system.
+	bool IsDirectory(const mpt::PathString &path);
+	// Verify if this path exists and is a file on the file system.
+	bool IsFile(const mpt::PathString &path);
+
+	bool FileOrDirectoryExists(const mpt::PathString &path);
+
+} // namespace FS
+
+#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
+
 
 #if MPT_OS_WINDOWS
 
