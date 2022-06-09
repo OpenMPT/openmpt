@@ -195,12 +195,6 @@ public:
 	static PathString FromNative(const RawPathString& path) { return PathString(path); }
 
 
-#if MPT_OS_WINDOWS
-	// Return native string, with possible \\?\ prefix if it exceeds MAX_PATH characters.
-	RawPathString AsNativePrefixed() const;
-#else // !MPT_OS_WINDOWS
-	RawPathString AsNativePrefixed() const { return path; }
-#endif // MPT_OS_WINDOWS
 
 #if MPT_OS_WINDOWS
 	// Convert a path to its simplified form, i.e. remove ".\" and "..\" entries
@@ -262,6 +256,11 @@ inline std::wstring ToWString(const mpt::PathString & x) { return x.ToWide(); }
 #define PC_(x) MPT_PATHSTRING_LITERAL(x)
 #define PL_(x) MPT_PATHSTRING_LITERAL(x)
 #define P_(x) MPT_PATHSTRING(x)
+
+
+
+// Return native string, with possible \\?\ prefix if it exceeds MAX_PATH characters.
+mpt::RawPathString SupportLongPath(const mpt::RawPathString &path);
 
 
 

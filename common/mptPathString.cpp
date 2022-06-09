@@ -33,18 +33,19 @@ namespace mpt
 {
 
 
-RawPathString PathString::AsNativePrefixed() const
+mpt::RawPathString SupportLongPath(const mpt::RawPathString &path)
 {
+#if MPT_OS_WINDOWS
 #if MPT_OS_WINDOWS_WINRT && (_WIN32_WINNT < 0x0a00)
 	// For WinRT on Windows 8, there is no official wy to determine an absolute path.
 	return path;
-#else
+#else // !MPT_OS_WINDOWS_WINRT
 	if(path.length() < MAX_PATH || path.substr(0, 4) == PL_("\\\\?\\"))
 	{
 		// Path is short enough or already in prefixed form
 		return path;
 	}
-	const RawPathString absPath = mpt::GetAbsolutePath(*this).AsNative();
+	const RawPathString absPath = mpt::GetAbsolutePath(mpt::PathString::FromNative(path)).AsNative();
 	if(absPath.substr(0, 2) == PL_("\\\\"))
 	{
 		// Path is a network share: \\server\foo.bar -> \\?\UNC\server\foo.bar
@@ -54,7 +55,10 @@ RawPathString PathString::AsNativePrefixed() const
 		// Regular file: C:\foo.bar -> \\?\C:\foo.bar
 		return PL_("\\\\?\\") + absPath;
 	}
-#endif
+#endif // MPT_OS_WINDOWS_WINRT
+#else // !MPT_OS_WINDOWS
+	return path;
+#endif // MPT_OS_WINDOWS
 }
 
 

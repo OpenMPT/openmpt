@@ -90,7 +90,7 @@ bool SetFilesystemCompression(int fd)
 }
 bool SetFilesystemCompression(const mpt::PathString &filename)
 {
-	DWORD attributes = GetFileAttributes(filename.AsNativePrefixed().c_str());
+	DWORD attributes = GetFileAttributes(mpt::SupportLongPath(filename.AsNative()).c_str());
 	if(attributes == INVALID_FILE_ATTRIBUTES)
 	{
 		return false;
@@ -99,7 +99,7 @@ bool SetFilesystemCompression(const mpt::PathString &filename)
 	{
 		return true;
 	}
-	HANDLE hFile = CreateFile(filename.AsNativePrefixed().c_str(), GENERIC_ALL, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
+	HANDLE hFile = CreateFile(mpt::SupportLongPath(filename.AsNative()).c_str(), GENERIC_ALL, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
 	if(hFile == INVALID_HANDLE_VALUE)
 	{
 		return false;
@@ -174,9 +174,9 @@ std::FILE * SafeOutputFile::internal_fopen(const mpt::PathString &filename, std:
 	}
 	std::FILE *f =
 		#ifdef UNICODE
-			_wfopen(filename.AsNativePrefixed().c_str(), fopen_mode.c_str())
+			_wfopen(mpt::SupportLongPath(filename.AsNative()).c_str(), fopen_mode.c_str())
 		#else
-			std::fopen(filename.AsNativePrefixed().c_str(), fopen_mode.c_str())
+			std::fopen(mpt::SupportLongPath(filename.AsNative()).c_str(), fopen_mode.c_str())
 		#endif
 		;
 	if(!f)

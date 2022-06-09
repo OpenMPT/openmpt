@@ -83,7 +83,7 @@ inline void fstream_open(Tbase & base, const mpt::PathString & filename, std::io
 			base.open(mpt::ToCharset(mpt::Charset::Locale, filename.AsNative()).c_str(), mode);
 		#endif // MPT_GCC_AT_LEAST(9,1,0)
 	#else // !MPT_COMPILER_QUIRK_WINDOWS_FSTREAM_NO_WCHAR
-		base.open(filename.AsNativePrefixed().c_str(), mode);
+		base.open(mpt::SupportLongPath(filename.AsNative()).c_str(), mode);
 	#endif // MPT_COMPILER_QUIRK_WINDOWS_FSTREAM_NO_WCHAR
 }
 

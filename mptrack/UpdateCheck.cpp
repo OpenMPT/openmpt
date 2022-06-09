@@ -1112,8 +1112,8 @@ public:
 				mpt::PathString dirTempOpenMPT = dirTemp + P_("OpenMPT") + mpt::PathString::FromNative(mpt::RawPathString(1, mpt::PathString::GetDefaultPathSeparator()));
 				dirTempOpenMPTUpdates = dirTempOpenMPT + P_("Updates") + mpt::PathString::FromNative(mpt::RawPathString(1, mpt::PathString::GetDefaultPathSeparator()));
 				updateFilename = dirTempOpenMPTUpdates + mpt::PathString::FromUnicode(downloadinfo.filename);
-				::CreateDirectory(dirTempOpenMPT.AsNativePrefixed().c_str(), NULL);
-				::CreateDirectory(dirTempOpenMPTUpdates.AsNativePrefixed().c_str(), NULL);
+				::CreateDirectory(mpt::SupportLongPath(dirTempOpenMPT.AsNative()).c_str(), NULL);
+				::CreateDirectory(mpt::SupportLongPath(dirTempOpenMPTUpdates.AsNative()).c_str(), NULL);
 			
 				{
 			
