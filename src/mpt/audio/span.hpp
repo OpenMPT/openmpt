@@ -103,7 +103,7 @@ public:
 		return false;
 	}
 	MPT_FORCEINLINE bool channels_are_contiguous() const noexcept {
-		return false;
+		return true;
 	}
 	MPT_FORCEINLINE bool frames_are_contiguous() const noexcept {
 		return false;
@@ -325,10 +325,10 @@ public:
 		return is_contiguous() ? m_buffer.contiguous[(m_channel_stride * static_cast<std::ptrdiff_t>(channel)) + (m_frame_stride * static_cast<std::ptrdiff_t>(frame))] : m_buffer.planes[channel][frame * static_cast<std::ptrdiff_t>(m_frame_stride)];
 	}
 	MPT_FORCEINLINE bool channels_are_contiguous() const noexcept {
-		return (m_channel_stride == static_cast<std::ptrdiff_t>(m_frames));
+		return (m_frame_stride == 1);
 	}
 	MPT_FORCEINLINE bool frames_are_contiguous() const noexcept {
-		return (m_frame_stride == static_cast<std::ptrdiff_t>(m_channels));
+		return (m_channel_stride == 1);
 	}
 	MPT_FORCEINLINE std::size_t size_channels() const noexcept {
 		return m_channels;
