@@ -415,7 +415,7 @@ public:
 
 		FileDialog dlg = SaveFileDialog()
 			.DefaultExtension(extension)
-			.DefaultFilename(m_modDoc.GetPathNameMpt().GetFilenameBase().ReplaceExt(P_(".") + extension))
+			.DefaultFilename(m_modDoc.GetPathNameMpt().GetFilenameBase().ReplaceExtension(P_(".") + extension))
 			.ExtensionFilter(MPT_UFORMAT("{} Files|*.{}||")(mpt::ToUpperCase(extension.ToUnicode()), extension))
 			.WorkingDirectory(TrackerSettings::Instance().PathExport.GetWorkingDir());
 		if(!dlg.Show())
@@ -570,7 +570,7 @@ public:
 
 			mpt::PathString currentFileName = fileName;
 			if(m_subSongs.size() > 1)
-				currentFileName = fileName.ReplaceExt(mpt::PathString::FromNative(MPT_TFORMAT(" ({})")(mpt::ufmt::fmt(i + 1, songIndexFmt))) + fileName.GetFilenameExtension());
+				currentFileName = fileName.ReplaceExtension(mpt::PathString::FromNative(MPT_TFORMAT(" ({})")(mpt::ufmt::fmt(i + 1, songIndexFmt))) + fileName.GetFilenameExtension());
 			mpt::SafeOutputFile sf(currentFileName, std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
 			mpt::ofstream &f = sf;
 			try
@@ -583,7 +583,7 @@ public:
 				else if(s_format == ExportFormat::VGM)
 					m_oplLogger.WriteVGM(f, loopStart, fileTags);
 				else
-					m_oplLogger.WriteVGZ(f, loopStart, fileTags, currentFileName.ReplaceExt(P_(".vgm")).GetFilename().ToUnicode());
+					m_oplLogger.WriteVGZ(f, loopStart, fileTags, currentFileName.ReplaceExtension(P_(".vgm")).GetFilename().ToUnicode());
 			} catch(const std::exception &)
 			{
 				Reporting::Error(MPT_UFORMAT("Unable to write to file {}!")(currentFileName));

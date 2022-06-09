@@ -1506,7 +1506,7 @@ void CCtrlSamples::SaveSample(bool doBatchSave)
 
 				// Need to enforce S3I for Adlib samples
 				if(isAdlib && saveFormat != dfS3I)
-					fileName = fileName.ReplaceExt(P_(".s3i"));
+					fileName = fileName.ReplaceExtension(P_(".s3i"));
 			}
 
 			try

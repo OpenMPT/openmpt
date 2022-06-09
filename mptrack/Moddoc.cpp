@@ -522,7 +522,7 @@ BOOL CModDoc::DoSave(const mpt::PathString &filename, bool setPath)
 	{
 		if(mpt::FS::IsFile(saveFileName))
 		{
-			mpt::PathString backupFileName = saveFileName.ReplaceExt(P_(".bak"));
+			mpt::PathString backupFileName = saveFileName.ReplaceExtension(P_(".bak"));
 			if(mpt::FS::IsFile(backupFileName))
 			{
 				DeleteFile(backupFileName.AsNative().c_str());
@@ -1989,7 +1989,7 @@ void CModDoc::OnFileMidiConvert()
 
 	if ((!pMainFrm) || (!m_SndFile.GetType())) return;
 
-	mpt::PathString filename = GetPathNameMpt().ReplaceExt(P_(".mid"));
+	mpt::PathString filename = GetPathNameMpt().ReplaceExtension(P_(".mid"));
 
 	FileDialog dlg = SaveFileDialog()
 		.DefaultExtension("mid")

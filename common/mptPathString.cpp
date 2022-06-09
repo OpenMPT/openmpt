@@ -565,14 +565,10 @@ bool FS::PathExists(const mpt::PathString &path)
 
 
 
-#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
-
-PathString PathString::ReplaceExt(const mpt::PathString &newExt) const
+PathString PathString::ReplaceExtension(const mpt::PathString &newExt) const
 {
-	return GetDrive() + GetDirectory() + GetFilenameBase() + newExt;
+	return GetDirectoryWithDrive() + GetFilenameBase() + newExt;
 }
-
-#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
 
 
 
