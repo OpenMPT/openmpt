@@ -522,7 +522,7 @@ PathString PathString::GetFilename() const
 
 
 
-#if MPT_OS_WINDOWS
+#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
 
 bool FS::IsDirectory(const mpt::PathString &path)
 {
