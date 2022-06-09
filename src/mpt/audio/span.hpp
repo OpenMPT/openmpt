@@ -18,6 +18,171 @@ namespace mpt {
 inline namespace MPT_INLINE_NS {
 
 
+	
+// LRLRLRLRLR
+
+template <typename SampleType>
+struct audio_span_interleaved {
+public:
+	using sample_type = SampleType;
+
+private:
+	SampleType * const m_buffer;
+	std::size_t m_channels;
+	std::size_t m_frames;
+
+public:
+	MPT_CONSTEXPRINLINE audio_span_interleaved(SampleType * buffer, std::size_t channels, std::size_t frames) noexcept
+		: m_buffer(buffer)
+		, m_channels(channels)
+		, m_frames(frames) {
+		return;
+	}
+	MPT_FORCEINLINE SampleType * const * data_planar() const noexcept {
+		return nullptr;
+	}
+	MPT_FORCEINLINE SampleType * data() const noexcept {
+		return m_buffer;
+	}
+	MPT_FORCEINLINE SampleType & operator()(std::size_t channel, std::size_t frame) const {
+		return m_buffer[m_channels * frame + channel];
+	}
+	MPT_FORCEINLINE bool is_contiguous() const noexcept {
+		return true;
+	}
+	MPT_FORCEINLINE bool channels_are_contiguous() const noexcept {
+		return false;
+	}
+	MPT_FORCEINLINE bool frames_are_contiguous() const noexcept {
+		return true;
+	}
+	MPT_FORCEINLINE std::size_t size_channels() const noexcept {
+		return m_channels;
+	}
+	MPT_FORCEINLINE std::size_t size_frames() const noexcept {
+		return m_frames;
+	}
+	MPT_FORCEINLINE std::size_t size_samples() const noexcept {
+		return m_channels * m_frames;
+	}
+};
+
+struct audio_span_frames_are_contiguous_t {
+};
+
+inline constexpr audio_span_frames_are_contiguous_t audio_span_frames_are_contiguous;
+
+
+
+// LLLLLRRRRR
+
+template <typename SampleType>
+struct audio_span_contiguous {
+public:
+	using sample_type = SampleType;
+
+private:
+	SampleType * const m_buffer;
+	std::size_t m_channels;
+	std::size_t m_frames;
+
+public:
+	MPT_CONSTEXPRINLINE audio_span_contiguous(SampleType * buffer, std::size_t channels, std::size_t frames) noexcept
+		: m_buffer(buffer)
+		, m_channels(channels)
+		, m_frames(frames) {
+		return;
+	}
+	MPT_FORCEINLINE SampleType * const * data_planar() const noexcept {
+		return nullptr;
+	}
+	MPT_FORCEINLINE SampleType * data() const noexcept {
+		return m_buffer;
+	}
+	MPT_FORCEINLINE SampleType & operator()(std::size_t channel, std::size_t frame) const {
+		return m_buffer[(m_frames * channel) + frame];
+	}
+	MPT_FORCEINLINE bool is_contiguous() const noexcept {
+		return true;
+	}
+	MPT_FORCEINLINE bool channels_are_contiguous() const noexcept {
+		return true;
+	}
+	MPT_FORCEINLINE bool frames_are_contiguous() const noexcept {
+		return false;
+	}
+	MPT_FORCEINLINE std::size_t size_channels() const noexcept {
+		return m_channels;
+	}
+	MPT_FORCEINLINE std::size_t size_frames() const noexcept {
+		return m_frames;
+	}
+	MPT_FORCEINLINE std::size_t size_samples() const noexcept {
+		return m_channels * m_frames;
+	}
+};
+
+struct audio_span_channels_are_contiguous_t {
+};
+
+inline constexpr audio_span_channels_are_contiguous_t audio_span_channels_are_contiguous;
+
+
+
+// LLLLL RRRRR
+
+template <typename SampleType>
+struct audio_span_planar {
+public:
+	using sample_type = SampleType;
+
+private:
+	SampleType * const * m_buffers;
+	std::size_t m_channels;
+	std::size_t m_frames;
+
+public:
+	MPT_CONSTEXPRINLINE audio_span_planar(SampleType * const * buffers, std::size_t channels, std::size_t frames) noexcept
+		: m_buffers(buffers)
+		, m_channels(channels)
+		, m_frames(frames) {
+		return;
+	}
+	MPT_FORCEINLINE SampleType * const * data_planar() const noexcept {
+		return m_buffers;
+	}
+	MPT_FORCEINLINE SampleType * data() const noexcept {
+		return nullptr;
+	}
+	MPT_FORCEINLINE SampleType & operator()(std::size_t channel, std::size_t frame) const {
+		return m_buffers[channel][frame];
+	}
+	MPT_FORCEINLINE bool is_contiguous() const noexcept {
+		return false;
+	}
+	MPT_FORCEINLINE bool channels_are_contiguous() const noexcept {
+		return true;
+	}
+	MPT_FORCEINLINE bool frames_are_contiguous() const noexcept {
+		return false;
+	}
+	MPT_FORCEINLINE std::size_t size_channels() const noexcept {
+		return m_channels;
+	}
+	MPT_FORCEINLINE std::size_t size_frames() const noexcept {
+		return m_frames;
+	}
+	MPT_FORCEINLINE std::size_t size_samples() const noexcept {
+		return m_channels * m_frames;
+	}
+};
+
+struct audio_span_channels_are_planar_t {
+};
+
+inline constexpr audio_span_channels_are_planar_t audio_span_channels_are_planar;
+
+
 
 // LxxxLxxxLxxxLxxxLxxx xRxxxRxxxRxxxRxxxRxx
 template <typename SampleType>
@@ -71,174 +236,12 @@ public:
 	}
 };
 
-
-// LLLLL RRRRR
-template <typename SampleType>
-struct audio_span_planar {
-public:
-	using sample_type = SampleType;
-
-private:
-	SampleType * const * m_buffers;
-	std::size_t m_channels;
-	std::size_t m_frames;
-
-public:
-	MPT_CONSTEXPRINLINE audio_span_planar(SampleType * const * buffers, std::size_t channels, std::size_t frames) noexcept
-		: m_buffers(buffers)
-		, m_channels(channels)
-		, m_frames(frames) {
-		return;
-	}
-	MPT_FORCEINLINE SampleType * const * data_planar() const noexcept {
-		return m_buffers;
-	}
-	MPT_FORCEINLINE SampleType * data() const noexcept {
-		return nullptr;
-	}
-	MPT_FORCEINLINE SampleType & operator()(std::size_t channel, std::size_t frame) const {
-		return m_buffers[channel][frame];
-	}
-	MPT_FORCEINLINE bool is_contiguous() const noexcept {
-		return false;
-	}
-	MPT_FORCEINLINE bool channels_are_contiguous() const noexcept {
-		return true;
-	}
-	MPT_FORCEINLINE bool frames_are_contiguous() const noexcept {
-		return false;
-	}
-	MPT_FORCEINLINE std::size_t size_channels() const noexcept {
-		return m_channels;
-	}
-	MPT_FORCEINLINE std::size_t size_frames() const noexcept {
-		return m_frames;
-	}
-	MPT_FORCEINLINE std::size_t size_samples() const noexcept {
-		return m_channels * m_frames;
-	}
-};
-
-
-// LLLLLRRRRR
-template <typename SampleType>
-struct audio_span_contiguous {
-public:
-	using sample_type = SampleType;
-
-private:
-	SampleType * const m_buffer;
-	std::size_t m_channels;
-	std::size_t m_frames;
-
-public:
-	MPT_CONSTEXPRINLINE audio_span_contiguous(SampleType * buffer, std::size_t channels, std::size_t frames) noexcept
-		: m_buffer(buffer)
-		, m_channels(channels)
-		, m_frames(frames) {
-		return;
-	}
-	MPT_FORCEINLINE SampleType * const * data_planar() const noexcept {
-		return nullptr;
-	}
-	MPT_FORCEINLINE SampleType * data() const noexcept {
-		return m_buffer;
-	}
-	MPT_FORCEINLINE SampleType & operator()(std::size_t channel, std::size_t frame) const {
-		return m_buffer[(m_frames * channel) + frame];
-	}
-	MPT_FORCEINLINE bool is_contiguous() const noexcept {
-		return true;
-	}
-	MPT_FORCEINLINE bool channels_are_contiguous() const noexcept {
-		return true;
-	}
-	MPT_FORCEINLINE bool frames_are_contiguous() const noexcept {
-		return false;
-	}
-	MPT_FORCEINLINE std::size_t size_channels() const noexcept {
-		return m_channels;
-	}
-	MPT_FORCEINLINE std::size_t size_frames() const noexcept {
-		return m_frames;
-	}
-	MPT_FORCEINLINE std::size_t size_samples() const noexcept {
-		return m_channels * m_frames;
-	}
-};
-
-
-// LRLRLRLRLR
-template <typename SampleType>
-struct audio_span_interleaved {
-public:
-	using sample_type = SampleType;
-
-private:
-	SampleType * const m_buffer;
-	std::size_t m_channels;
-	std::size_t m_frames;
-
-public:
-	MPT_CONSTEXPRINLINE audio_span_interleaved(SampleType * buffer, std::size_t channels, std::size_t frames) noexcept
-		: m_buffer(buffer)
-		, m_channels(channels)
-		, m_frames(frames) {
-		return;
-	}
-	MPT_FORCEINLINE SampleType * const * data_planar() const noexcept {
-		return nullptr;
-	}
-	MPT_FORCEINLINE SampleType * data() const noexcept {
-		return m_buffer;
-	}
-	MPT_FORCEINLINE SampleType & operator()(std::size_t channel, std::size_t frame) const {
-		return m_buffer[m_channels * frame + channel];
-	}
-	MPT_FORCEINLINE bool is_contiguous() const noexcept {
-		return true;
-	}
-	MPT_FORCEINLINE bool channels_are_contiguous() const noexcept {
-		return false;
-	}
-	MPT_FORCEINLINE bool frames_are_contiguous() const noexcept {
-		return true;
-	}
-	MPT_FORCEINLINE std::size_t size_channels() const noexcept {
-		return m_channels;
-	}
-	MPT_FORCEINLINE std::size_t size_frames() const noexcept {
-		return m_frames;
-	}
-	MPT_FORCEINLINE std::size_t size_samples() const noexcept {
-		return m_channels * m_frames;
-	}
-};
-
-
-struct audio_span_frames_are_contiguous_t {
-};
-
-struct audio_span_channels_are_contiguous_t {
-};
-
-struct audio_span_channels_are_planar_t {
-};
-
 struct audio_span_channels_are_planar_and_strided_t {
 };
 
-// LRLRLRLRLR
-inline constexpr audio_span_frames_are_contiguous_t audio_span_frames_are_contiguous;
-
-// LLLLLRRRRR
-inline constexpr audio_span_channels_are_contiguous_t audio_span_channels_are_contiguous;
-
-// LLLLL RRRRR
-inline constexpr audio_span_channels_are_planar_t audio_span_channels_are_planar;
-
-// LxxxLxxxLxxxLxxxLxxx xRxxxRxxxRxxxRxxxRxx
 inline constexpr audio_span_channels_are_planar_and_strided_t audio_span_channels_are_planar_and_strided;
+
+
 
 template <typename SampleType>
 struct audio_span {
@@ -340,6 +343,7 @@ public:
 		return m_channels * m_frames;
 	}
 };
+
 
 
 template <typename Taudio_span>
