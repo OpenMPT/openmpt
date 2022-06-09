@@ -154,8 +154,8 @@ private:
 
 	static mpt::path get_application_path() {
 		std::vector<TCHAR> path(MAX_PATH);
-		while (GetModuleFileName(0, path.data(), mpt::saturate_cast<DWORD>(path.size())) >= path.size()) {
-			if (GetLastError() != ERROR_INSUFFICIENT_BUFFER) {
+		while (::GetModuleFileName(0, path.data(), mpt::saturate_cast<DWORD>(path.size())) >= path.size()) {
+			if (::GetLastError() != ERROR_INSUFFICIENT_BUFFER) {
 				return mpt::path{};
 			}
 			path.resize(mpt::exponential_grow(path.size()));
@@ -164,9 +164,9 @@ private:
 	}
 
 	static mpt::path get_system_path() {
-		DWORD size = GetSystemDirectory(nullptr, 0);
+		DWORD size = ::GetSystemDirectory(nullptr, 0);
 		std::vector<TCHAR> path(size + 1);
-		if (!GetSystemDirectory(path.data(), size + 1)) {
+		if (!::GetSystemDirectory(path.data(), size + 1)) {
 			return mpt::path{};
 		}
 		return mpt::transcode<mpt::path>(mpt::winstring(path.data()));
@@ -197,16 +197,16 @@ public:
 #else  // Windows 8
 		switch (path.search) {
 			case library::path_search::unsafe:
-				hModule = LoadPackagedLibrary(filename.ospath().c_str(), 0);
+				hModule = ::LoadPackagedLibrary(filename.ospath().c_str(), 0);
 				break;
 			case library::path_search::default_:
-				hModule = LoadPackagedLibrary(filename.ospath().c_str(), 0);
+				hModule = ::LoadPackagedLibrary(filename.ospath().c_str(), 0);
 				break;
 			case library::path_search::system:
 				hModule = NULL; // Only application packaged libraries can be loaded dynamically in WinRT
 				break;
 			case library::path_search::application:
-				hModule = LoadPackagedLibrary(filename.ospath().c_str(), 0);
+				hModule = ::LoadPackagedLibrary(filename.ospath().c_str(), 0);
 				break;
 			case library::path_search::none:
 				hModule = NULL; // Absolute path is not supported in WinRT
@@ -223,19 +223,19 @@ public:
 
 		switch (path.search) {
 			case library::path_search::unsafe:
-				hModule = LoadLibrary(filename.ospath().c_str());
+				hModule = ::LoadLibrary(filename.ospath().c_str());
 				break;
 			case library::path_search::default_:
-				hModule = LoadLibraryEx(filename.ospath().c_str(), NULL, LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
+				hModule = ::LoadLibraryEx(filename.ospath().c_str(), NULL, LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
 				break;
 			case library::path_search::system:
-				hModule = LoadLibraryEx(filename.ospath().c_str(), NULL, LOAD_LIBRARY_SEARCH_SYSTEM32);
+				hModule = ::LoadLibraryEx(filename.ospath().c_str(), NULL, LOAD_LIBRARY_SEARCH_SYSTEM32);
 				break;
 			case library::path_search::application:
-				hModule = LoadLibraryEx(filename.ospath().c_str(), NULL, LOAD_LIBRARY_SEARCH_APPLICATION_DIR);
+				hModule = ::LoadLibraryEx(filename.ospath().c_str(), NULL, LOAD_LIBRARY_SEARCH_APPLICATION_DIR);
 				break;
 			case library::path_search::none:
-				hModule = LoadLibraryEx(filename.ospath().c_str(), NULL, LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR);
+				hModule = ::LoadLibraryEx(filename.ospath().c_str(), NULL, LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR);
 				break;
 			case library::path_search::invalid:
 				hModule = NULL;
@@ -246,10 +246,10 @@ public:
 
 		switch (path.search) {
 			case library::path_search::unsafe:
-				hModule = LoadLibrary(filename.ospath().c_str());
+				hModule = ::LoadLibrary(filename.ospath().c_str());
 				break;
 			case library::path_search::default_:
-				hModule = LoadLibrary(filename.ospath().c_str());
+				hModule = ::LoadLibrary(filename.ospath().c_str());
 				break;
 			case library::path_search::system:
 				{
@@ -257,7 +257,7 @@ public:
 					if (system_path.empty()) {
 						hModule = NULL;
 					} else {
-						hModule = LoadLibrary((system_path / filename).ospath().c_str());
+						hModule = ::LoadLibrary((system_path / filename).ospath().c_str());
 					}
 				}
 				break;
@@ -267,12 +267,12 @@ public:
 					if (application_path.empty()) {
 						hModule = NULL;
 					} else {
-						hModule = LoadLibrary((application_path / filename).ospath().c_str());
+						hModule = ::LoadLibrary((application_path / filename).ospath().c_str());
 					}
 				}
 				break;
 			case library::path_search::none:
-				hModule = LoadLibrary(filename.ospath().c_str());
+				hModule = ::LoadLibrary(filename.ospath().c_str());
 				break;
 			case library::path_search::invalid:
 				hModule = NULL;
