@@ -293,15 +293,15 @@ struct PathTraits
 
 	static inline constexpr PathStyle path_style = EPathStyle;
 	using raw_path_type = TRawPath;
+	using char_type = typename raw_path_type::value_type;
 
 	static_assert((path_style == PathStyle::WindowsNT) || (path_style == PathStyle::Posix));
 
 
 
-	static bool IsPathSeparator(raw_path_type::value_type c)
+	static bool IsPathSeparator(char_type c)
 	{
 		using namespace path_literals;
-		using char_type = raw_path_type::value_type;
 		bool result{};
 		if constexpr((path_style == PathStyle::WindowsNT) || (path_style == PathStyle::Windows9x) || (path_style == PathStyle::DJGPP))
 		{
@@ -318,11 +318,10 @@ struct PathTraits
 
 
 
-	static raw_path_type::value_type GetDefaultPathSeparator()
+	static char_type GetDefaultPathSeparator()
 	{
 		using namespace path_literals;
-		using char_type = raw_path_type::value_type;
-		typename raw_path_type::value_type result{};
+		char_type result{};
 		if constexpr((path_style == PathStyle::WindowsNT) || (path_style == PathStyle::Windows9x) || (path_style == PathStyle::DJGPP))
 		{
 			result = L<char_type>('\\');
@@ -342,7 +341,6 @@ struct PathTraits
 	{
 
 		using namespace path_literals;
-		using char_type = raw_path_type::value_type;
 
 		if(prefix) *prefix = raw_path_type();
 		if(drive) *drive = raw_path_type();
@@ -483,7 +481,6 @@ struct PathTraits
 	{
 
 		using namespace path_literals;
-		using char_type = raw_path_type::value_type;
 
 		raw_path_type result{};
 
@@ -625,11 +622,10 @@ struct PathTraits
 
 	static bool IsAbsolute(const raw_path_type &path)
 	{
+		using namespace path_literals;
 		bool result{};
 		if constexpr(path_style == PathStyle::WindowsNT)
 		{
-			using namespace path_literals;
-			using char_type = raw_path_type::value_type;
 			if(path.substr(0, 8) == L<char_type>("\\\\?\\UNC\\"))
 			{
 				return true;
