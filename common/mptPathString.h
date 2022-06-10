@@ -269,12 +269,32 @@ struct literals<char32_t> {
 
 
 
-struct NativePathTraits
+enum class PathStyle
+{
+	Posix,
+	WindowsNT,
+	Windows9x,
+	DJGPP,
+};
+
+#if MPT_OS_WINDOWS
+inline constexpr PathStyle NativePathStyle = PathStyle::WindowsNT;
+#else
+inline constexpr PathStyle NativePathStyle = PathStyle::Posix;
+#endif
+
+
+
+template <typename TRawPath, PathStyle EPathStyle>
+struct PathTraits
 {
 
 
 
-	using raw_path_type = RawPathString;
+	static inline constexpr PathStyle path_style = EPathStyle;
+	using raw_path_type = TRawPath;
+
+	static_assert((path_style == PathStyle::WindowsNT) || (path_style == PathStyle::Posix));
 
 
 
@@ -282,11 +302,18 @@ struct NativePathTraits
 	{
 		using namespace path_literals;
 		using char_type = raw_path_type::value_type;
-#if MPT_OS_WINDOWS || MPT_OS_DJGPP
-		return (c == L<char_type>('\\')) || (c == L<char_type>('/'));
-#else
-		return c == L<char_type>('/');
-#endif
+		bool result{};
+		if constexpr((path_style == PathStyle::WindowsNT) || (path_style == PathStyle::Windows9x) || (path_style == PathStyle::DJGPP))
+		{
+			result = (c == L<char_type>('\\')) || (c == L<char_type>('/'));
+		} else if constexpr(path_style == PathStyle::Posix)
+		{
+			result = (c == L<char_type>('/'));
+		} else
+		{
+			//static_assert(false);
+		}
+		return result;
 	}
 
 
@@ -295,11 +322,18 @@ struct NativePathTraits
 	{
 		using namespace path_literals;
 		using char_type = raw_path_type::value_type;
-#if MPT_OS_WINDOWS || MPT_OS_DJGPP
-		return L<char_type>('\\');
-#else
-		return L<char_type>('/');
-#endif
+		typename raw_path_type::value_type result{};
+		if constexpr((path_style == PathStyle::WindowsNT) || (path_style == PathStyle::Windows9x) || (path_style == PathStyle::DJGPP))
+		{
+			result = L<char_type>('\\');
+		} else if constexpr(path_style == PathStyle::Posix)
+		{
+			result = L<char_type>('/');
+		} else
+		{
+			//static_assert(false);
+		}
+		return result;
 	}
 
 
@@ -316,119 +350,126 @@ struct NativePathTraits
 		if(fbase) *fbase = raw_path_type();
 		if(fext) *fext = raw_path_type();
 
-#if MPT_OS_WINDOWS
-
-		// We cannot use CRT splitpath here, because:
-		//  * limited to _MAX_PATH or similar
-		//  * no support for UNC paths
-		//  * no support for \\?\ prefixed paths
-
-		// remove \\?\\ prefix
-		if(p.substr(0, 8) == L<char_type>("\\\\?\\UNC\\"))
+		if constexpr(path_style == PathStyle::WindowsNT)
 		{
-			if(prefix) *prefix = L<char_type>("\\\\?\\UNC");
-			p = L<char_type>("\\\\") + p.substr(8);
-		} else if(p.substr(0, 4) == L<char_type>("\\\\?\\"))
-		{
-			if (prefix) *prefix = L<char_type>("\\\\?\\");
-			p = p.substr(4);
-		}
 
-		if(p.length() >= 2 && (
-			p.substr(0, 2) == L<char_type>("\\\\")
-			|| p.substr(0, 2) == L<char_type>("\\/")
-			|| p.substr(0, 2) == L<char_type>("/\\")
-			|| p.substr(0, 2) == L<char_type>("//")
-			))
-		{ // UNC
-			raw_path_type::size_type first_slash = p.substr(2).find_first_of(L<char_type>("\\/"));
-			if(first_slash != raw_path_type::npos)
+			// We cannot use CRT splitpath here, because:
+			//  * limited to _MAX_PATH or similar
+			//  * no support for UNC paths
+			//  * no support for \\?\ prefixed paths
+
+			// remove \\?\\ prefix
+			if(p.substr(0, 8) == L<char_type>("\\\\?\\UNC\\"))
 			{
-				raw_path_type::size_type second_slash = p.substr(2 + first_slash + 1).find_first_of(L<char_type>("\\/"));
-				if(second_slash != raw_path_type::npos)
+				if(prefix) *prefix = L<char_type>("\\\\?\\UNC");
+				p = L<char_type>("\\\\") + p.substr(8);
+			} else if(p.substr(0, 4) == L<char_type>("\\\\?\\"))
+			{
+				if (prefix) *prefix = L<char_type>("\\\\?\\");
+				p = p.substr(4);
+			}
+
+			if(p.length() >= 2 && (
+				p.substr(0, 2) == L<char_type>("\\\\")
+				|| p.substr(0, 2) == L<char_type>("\\/")
+				|| p.substr(0, 2) == L<char_type>("/\\")
+				|| p.substr(0, 2) == L<char_type>("//")
+				))
+			{ // UNC
+				typename raw_path_type::size_type first_slash = p.substr(2).find_first_of(L<char_type>("\\/"));
+				if(first_slash != raw_path_type::npos)
 				{
-					if(drive) *drive = p.substr(0, 2 + first_slash + 1 + second_slash);
-					p = p.substr(2 + first_slash + 1 + second_slash);
+					typename raw_path_type::size_type second_slash = p.substr(2 + first_slash + 1).find_first_of(L<char_type>("\\/"));
+					if(second_slash != raw_path_type::npos)
+					{
+						if(drive) *drive = p.substr(0, 2 + first_slash + 1 + second_slash);
+						p = p.substr(2 + first_slash + 1 + second_slash);
+					} else
+					{
+						if(drive) *drive = p;
+						p = raw_path_type();
+					}
 				} else
 				{
 					if(drive) *drive = p;
 					p = raw_path_type();
 				}
 			} else
-			{
-				if(drive) *drive = p;
-				p = raw_path_type();
+			{ // local
+				if(p.length() >= 2 && (p[1] == L<char_type>(':')))
+				{
+					if(drive) *drive = p.substr(0, 2);
+					p = p.substr(2);
+				} else
+				{
+					if(drive) *drive = raw_path_type();
+				}
 			}
-		} else
-		{ // local
-			if(p.length() >= 2 && (p[1] == L<char_type>(':')))
+			typename raw_path_type::size_type last_slash = p.find_last_of(L<char_type>("\\/"));
+			if(last_slash != raw_path_type::npos)
 			{
-				if(drive) *drive = p.substr(0, 2);
-				p = p.substr(2);
+				if(dir) *dir = p.substr(0, last_slash + 1);
+				p = p.substr(last_slash + 1);
 			} else
 			{
-				if(drive) *drive = raw_path_type();
+				if(dir) *dir = raw_path_type();
 			}
-		}
-		raw_path_type::size_type last_slash = p.find_last_of(L<char_type>("\\/"));
-		if(last_slash != raw_path_type::npos)
-		{
-			if(dir) *dir = p.substr(0, last_slash + 1);
-			p = p.substr(last_slash + 1);
-		} else
-		{
-			if(dir) *dir = raw_path_type();
-		}
-		raw_path_type::size_type last_dot = p.find_last_of(L<char_type>("."));
-		if(last_dot == raw_path_type::npos)
-		{
-			if(fbase) *fbase = p;
-			if(fext) *fext = raw_path_type();
-		} else if(last_dot == 0)
-		{
-			if(fbase) *fbase = p;
-			if(fext) *fext = raw_path_type();
-		} else if(p == L<char_type>(".") || p == L<char_type>(".."))
-		{
-			if(fbase) *fbase = p;
-			if(fext) *fext = raw_path_type();
-		} else
-		{
-			if(fbase) *fbase = p.substr(0, last_dot);
-			if(fext) *fext = p.substr(last_dot);
-		}
+			typename raw_path_type::size_type last_dot = p.find_last_of(L<char_type>("."));
+			if(last_dot == raw_path_type::npos)
+			{
+				if(fbase) *fbase = p;
+				if(fext) *fext = raw_path_type();
+			} else if(last_dot == 0)
+			{
+				if(fbase) *fbase = p;
+				if(fext) *fext = raw_path_type();
+			} else if(p == L<char_type>(".") || p == L<char_type>(".."))
+			{
+				if(fbase) *fbase = p;
+				if(fext) *fext = raw_path_type();
+			} else
+			{
+				if(fbase) *fbase = p.substr(0, last_dot);
+				if(fext) *fext = p.substr(last_dot);
+			}
 
-#else // !MOT_OS_WINDOWS
-
-		raw_path_type::size_type last_slash = p.find_last_of(L<char_type>("/"));
-		if(last_slash != raw_path_type::npos)
+		} else if constexpr(path_style == PathStyle::Posix)
 		{
-			if(dir) *dir = p.substr(0, last_slash + 1);
-			p = p.substr(last_slash + 1);
+
+			typename raw_path_type::size_type last_slash = p.find_last_of(L<char_type>("/"));
+			if(last_slash != raw_path_type::npos)
+			{
+				if(dir) *dir = p.substr(0, last_slash + 1);
+				p = p.substr(last_slash + 1);
+			} else
+			{
+				if(dir) *dir = raw_path_type();
+			}
+			typename raw_path_type::size_type last_dot = p.find_last_of(L<char_type>("."));
+			if(last_dot == raw_path_type::npos)
+			{
+				if(fbase) *fbase = p;
+				if(fext) *fext = raw_path_type();
+			} else if(last_dot == 0)
+			{
+				if(fbase) *fbase = p;
+				if(fext) *fext = raw_path_type();
+			} else if(p == L<char_type>(".") || p == L<char_type>(".."))
+			{
+				if(fbase) *fbase = p;
+				if(fext) *fext = raw_path_type();
+			} else
+			{
+				if(fbase) *fbase = p.substr(0, last_dot);
+				if(fext) *fext = p.substr(last_dot);
+			}
+
 		} else
 		{
-			if(dir) *dir = raw_path_type();
-		}
-		raw_path_type::size_type last_dot = p.find_last_of(L<char_type>("."));
-		if(last_dot == raw_path_type::npos)
-		{
-			if(fbase) *fbase = p;
-			if(fext) *fext = raw_path_type();
-		} else if(last_dot == 0)
-		{
-			if(fbase) *fbase = p;
-			if(fext) *fext = raw_path_type();
-		} else if(p == L<char_type>(".") || p == L<char_type>(".."))
-		{
-			if(fbase) *fbase = p;
-			if(fext) *fext = raw_path_type();
-		} else
-		{
-			if(fbase) *fbase = p.substr(0, last_dot);
-			if(fext) *fext = p.substr(last_dot);
-		}
 
-#endif // MPT_OS_WINDOWS
+			//static_assert(false);
+
+		}
 
 	}
 
@@ -444,128 +485,137 @@ struct NativePathTraits
 		using namespace path_literals;
 		using char_type = raw_path_type::value_type;
 
+		raw_path_type result{};
+
 		if(path.empty())
 		{
-			return raw_path_type();
+			return result;
 		}
-
-#if MPT_OS_WINDOWS
 
 		std::vector<raw_path_type> components;
-		raw_path_type root;
-		raw_path_type::size_type startPos = 0;
-		if(path.size() >= 2 && path[1] == L<char_type>(':'))
-		{
-			// Drive letter
-			root = path.substr(0, 2) + L<char_type>('\\');
-			startPos = 2;
-		} else if(path.substr(0, 2) == L<char_type>("\\\\"))
-		{
-			// Network share
-			root = L<char_type>("\\\\");
-			startPos = 2;
-		} else if(path.substr(0, 2) == L<char_type>(".\\") || path.substr(0, 2) == L<char_type>("./"))
-		{
-			// Special case for relative paths
-			root = L<char_type>(".\\");
-			startPos = 2;
-		} else if(path.size() >= 1 && (path[0] == L<char_type>('\\') || path[0] == L<char_type>('/')))
-		{
-			// Special case for relative paths
-			root = L<char_type>("\\");
-			startPos = 1;
-		}
 
-		while(startPos < path.size())
+		if constexpr(path_style == PathStyle::WindowsNT)
 		{
-			auto pos = path.find_first_of(L<char_type>("\\/"), startPos);
-			if(pos == raw_path_type::npos)
+
+			raw_path_type root;
+			typename raw_path_type::size_type startPos = 0;
+			if(path.size() >= 2 && path[1] == L<char_type>(':'))
 			{
-				pos = path.size();
+				// Drive letter
+				root = path.substr(0, 2) + L<char_type>('\\');
+				startPos = 2;
+			} else if(path.substr(0, 2) == L<char_type>("\\\\"))
+			{
+				// Network share
+				root = L<char_type>("\\\\");
+				startPos = 2;
+			} else if(path.substr(0, 2) == L<char_type>(".\\") || path.substr(0, 2) == L<char_type>("./"))
+			{
+				// Special case for relative paths
+				root = L<char_type>(".\\");
+				startPos = 2;
+			} else if(path.size() >= 1 && (path[0] == L<char_type>('\\') || path[0] == L<char_type>('/')))
+			{
+				// Special case for relative paths
+				root = L<char_type>("\\");
+				startPos = 1;
 			}
-			raw_path_type dir = path.substr(startPos, pos - startPos);
-			if(dir == L<char_type>(".."))
+
+			while(startPos < path.size())
 			{
-				// Go back one directory
-				if(!components.empty())
+				auto pos = path.find_first_of(L<char_type>("\\/"), startPos);
+				if(pos == raw_path_type::npos)
 				{
-					components.pop_back();
+					pos = path.size();
 				}
-			} else if(dir == L<char_type>("."))
-			{
-				// nop
-			} else if(!dir.empty())
-			{
-				components.push_back(std::move(dir));
-			}
-			startPos = pos + 1;
-		}
-
-		raw_path_type result = root;
-		result.reserve(path.size());
-		for(const auto &component : components)
-		{
-			result += component + L<char_type>("\\");
-		}
-		if(!components.empty())
-		{
-			result.pop_back();
-		}
-
-#else // !MPT_OS_WINDOWS
-	
-		std::vector<raw_path_type> components;
-		raw_path_type root;
-		raw_path_type::size_type startPos = 0;
-		if(path.substr(0, 2) == L<char_type>("./"))
-		{
-			// Special case for relative paths
-			root = L<char_type>("./");
-			startPos = 2;
-		} else if(path.size() >= 1 && (path[0] == L<char_type>('/')))
-		{
-			// Special case for relative paths
-			root = L<char_type>("/");
-			startPos = 1;
-		}
-
-		while(startPos < path.size())
-		{
-			auto pos = path.find_first_of(L<char_type>("/"), startPos);
-			if(pos == raw_path_type::npos)
-			{
-				pos = path.size();
-			}
-			raw_path_type dir = path.substr(startPos, pos - startPos);
-			if(dir == L<char_type>(".."))
-			{
-				// Go back one directory
-				if(!components.empty())
+				raw_path_type dir = path.substr(startPos, pos - startPos);
+				if(dir == L<char_type>(".."))
 				{
-					components.pop_back();
+					// Go back one directory
+					if(!components.empty())
+					{
+						components.pop_back();
+					}
+				} else if(dir == L<char_type>("."))
+				{
+					// nop
+				} else if(!dir.empty())
+				{
+					components.push_back(std::move(dir));
 				}
-			} else if(dir == L<char_type>("."))
-			{
-				// nop
-			} else if(!dir.empty())
-			{
-				components.push_back(std::move(dir));
+				startPos = pos + 1;
 			}
-			startPos = pos + 1;
-		}
 
-		raw_path_type result = root;
-		result.reserve(path.size());
-		for(const auto &component : components)
-		{
-			result += component + L<char_type>("/");
-		}
-		if(!components.empty())
-		{
-			result.pop_back();
-		}
+			result = root;
+			result.reserve(path.size());
+			for(const auto &component : components)
+			{
+				result += component + L<char_type>("\\");
+			}
+			if(!components.empty())
+			{
+				result.pop_back();
+			}
 
-#endif // MPT_OS_WINDOWS
+		} else if constexpr(path_style == PathStyle::Posix)
+		{
+
+			raw_path_type root;
+			typename raw_path_type::size_type startPos = 0;
+			if(path.substr(0, 2) == L<char_type>("./"))
+			{
+				// Special case for relative paths
+				root = L<char_type>("./");
+				startPos = 2;
+			} else if(path.size() >= 1 && (path[0] == L<char_type>('/')))
+			{
+				// Special case for relative paths
+				root = L<char_type>("/");
+				startPos = 1;
+			}
+
+			while(startPos < path.size())
+			{
+				auto pos = path.find_first_of(L<char_type>("/"), startPos);
+				if(pos == raw_path_type::npos)
+				{
+					pos = path.size();
+				}
+				raw_path_type dir = path.substr(startPos, pos - startPos);
+				if(dir == L<char_type>(".."))
+				{
+					// Go back one directory
+					if(!components.empty())
+					{
+						components.pop_back();
+					}
+				} else if(dir == L<char_type>("."))
+				{
+					// nop
+				} else if(!dir.empty())
+				{
+					components.push_back(std::move(dir));
+				}
+				startPos = pos + 1;
+			}
+
+			result = root;
+			result.reserve(path.size());
+			for(const auto &component : components)
+			{
+				result += component + L<char_type>("/");
+			}
+			if(!components.empty())
+			{
+				result.pop_back();
+			}
+
+		} else
+		{
+
+			//static_assert(false);
+
+		}
 
 		return result;
 
@@ -575,29 +625,36 @@ struct NativePathTraits
 
 	static bool IsAbsolute(const raw_path_type &path)
 	{
-#if MPT_OS_WINDOWS
-		using namespace path_literals;
-		using char_type = raw_path_type::value_type;
-		if(path.substr(0, 8) == L<char_type>("\\\\?\\UNC\\"))
+		bool result{};
+		if constexpr(path_style == PathStyle::WindowsNT)
 		{
-			return true;
-		}
-		if(path.substr(0, 4) == L<char_type>("\\\\?\\"))
+			using namespace path_literals;
+			using char_type = raw_path_type::value_type;
+			if(path.substr(0, 8) == L<char_type>("\\\\?\\UNC\\"))
+			{
+				return true;
+			}
+			if(path.substr(0, 4) == L<char_type>("\\\\?\\"))
+			{
+				return true;
+			}
+			if(path.substr(0, 2) == L<char_type>("\\\\"))
+			{
+				return true; // UNC
+			}
+			if(path.substr(0, 2) == L<char_type>("//"))
+			{
+				return true; // UNC
+			}
+			result = (path.length()) >= 3 && (path[1] == L<char_type>(':')) && IsPathSeparator(path[2]);
+		} else if constexpr(path_style == PathStyle::Posix)
 		{
-			return true;
-		}
-		if(path.substr(0, 2) == L<char_type>("\\\\"))
+			result = (path.length() >= 1) && IsPathSeparator(path[0]);
+		} else
 		{
-			return true; // UNC
+			//static_assert(false);
 		}
-		if(path.substr(0, 2) == L<char_type>("//"))
-		{
-			return true; // UNC
-		}
-		return (path.length()) >= 3 && (path[1] == L<char_type>(':')) && IsPathSeparator(path[2]);
-#else
-		return (path.length() >= 1) && IsPathSeparator(path[0]);
-#endif
+		return result;
 	}
 
 
@@ -611,7 +668,7 @@ class PathString
 
 private:
 
-	using path_traits = NativePathTraits;
+	using path_traits = PathTraits<RawPathString, NativePathStyle>;
 	using raw_path_type = path_traits::raw_path_type;
 
 	raw_path_type path;
