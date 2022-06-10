@@ -112,16 +112,7 @@ public:
 
 public:
 
-#if MPT_OS_WINDOWS
-
 	void SplitPath(PathString *prefix, PathString *drive, PathString *dir, PathString *fbase, PathString *fext) const;
-	// \\?\ prefixes will be removed and \\?\\UNC prefixes converted to canonical \\ form.
-
-#else // !MPT_OS_WINDOWS
-
-	void SplitPath(PathString *dir, PathString *fbase, PathString *fext) const;
-
-#endif // MPT_OS_WINDOWS
 
 	PathString GetPrefix() const;             // \\?\ or \\?\\UNC or empty
 	PathString GetDrive() const;              // Drive letter + colon, e.g. "C:" or \\server\\share
