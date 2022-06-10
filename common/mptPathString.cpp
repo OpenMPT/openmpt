@@ -369,8 +369,6 @@ void PathString::SplitPath(PathString *prefix, PathString *drive, PathString *di
 
 #else // !MOT_OS_WINDOWS
 
-	mpt::RawPathString p = path;
-
 	mpt::RawPathString::size_type last_slash = p.find_last_of(PL_("/"));
 	if(last_slash != mpt::RawPathString::npos)
 	{
