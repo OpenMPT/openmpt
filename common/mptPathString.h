@@ -63,24 +63,29 @@ public:
 		path = other.path;
 		return *this;
 	}
+
 	PathString & assign(PathString && other) noexcept
 	{
 		path = std::move(other.path);
 		return *this;
 	}
+	
 	PathString & operator = (const PathString & other)
 	{
 		return assign(other);
 	}
+	
 	PathString &operator = (PathString && other) noexcept
 	{
 		return assign(std::move(other));
 	}
+	
 	PathString & append(const PathString & other)
 	{
 		path.append(other.path);
 		return *this;
 	}
+	
 	PathString & operator += (const PathString & other)
 	{
 		return append(other);
@@ -95,98 +100,38 @@ public:
 	{
 		return a.AsNative() < b.AsNative();
 	}
+
 	friend bool operator == (const PathString & a, const PathString & b)
 	{
 		return a.AsNative() == b.AsNative();
 	}
+	
 	friend bool operator != (const PathString & a, const PathString & b)
 	{
 		return a.AsNative() != b.AsNative();
 	}
 
-	bool empty() const { return path.empty(); }
+	bool empty() const
+	{
+		return path.empty();
+	}
 
-	std::size_t Length() const { return path.size(); }
-
-
+	std::size_t Length() const
+	{
+		return path.size();
+	}
 
 public:
 
-	void SplitPath(PathString *prefix, PathString *drive, PathString *dir, PathString *fbase, PathString *fext) const;
-
-	PathString GetPrefix() const;             // \\?\ or \\?\\UNC or empty
-	PathString GetDrive() const;              // Drive letter + colon, e.g. "C:" or \\server\\share
-	PathString GetDirectory() const;          // Directory, e.g. "\OpenMPT\"
-	PathString GetDirectoryWithDrive() const; // Drive + Dir, e.g. "C:\OpenMPT\"
-	PathString GetFilenameBase() const;       // File name without extension, e.g. "OpenMPT"
-	PathString GetFilenameExtension() const;  // Extension including dot, e.g. ".exe"
-	PathString GetFilename() const;           // File name + extension, e.g. "OpenMPT.exe"
-
-	static bool IsPathSeparator(RawPathString::value_type c);
-	static RawPathString::value_type GetDefaultPathSeparator();
-
-	// Return the same path string with a different (or appended) extension (including "."), e.g. "foo.bar",".txt" -> "foo.txt" or "C:\OpenMPT\foo",".txt" -> "C:\OpenMPT\foo.txt"
-	PathString ReplaceExtension(const mpt::PathString &newExt) const;
-
-	bool HasTrailingSlash() const
+	RawPathString AsNative() const
 	{
-		if(path.empty())
-		{
-			return false;
-		}
-		RawPathString::value_type c = path[path.length() - 1];
-		return IsPathSeparator(c);
+		return path;
 	}
-
-	mpt::PathString WithoutTrailingSlash() const
-	{
-		mpt::PathString result = *this;
-		while(result.HasTrailingSlash())
-		{
-			if(result.Length() == 1)
-			{
-				return result;
-			}
-			result = mpt::PathString(result.AsNative().substr(0, result.AsNative().length() - 1));
-		}
-		return result;
-	}
-
-	mpt::PathString WithTrailingSlash() const
-	{
-		mpt::PathString result = *this;
-		if(!result.empty() && !result.HasTrailingSlash())
-		{
-			result.path += GetDefaultPathSeparator();
-		}
-		return result;
-	}
-
-#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
-
-	// Relative / absolute paths conversion
-
-	mpt::PathString AbsolutePathToRelative(const mpt::PathString &relativeTo) const; // similar to std::fs::path::lexically_approximate
 	
-	mpt::PathString RelativePathToAbsolute(const mpt::PathString &relativeTo) const;
-
-#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
-
-	bool IsAbsolute() const;
-
-public:
-
-
-
-	RawPathString AsNative() const { return path; }
-	static PathString FromNative(const RawPathString& path) { return PathString(path); }
-
-
-
-	// Convert a path to its simplified form, i.e. remove ".\" and "..\" entries
-	mpt::PathString Simplify() const;  // similar to std::fs::path::lexically_normal
-
-
+	static PathString FromNative(const RawPathString &path)
+	{
+		return PathString(path);
+	}
 
 	mpt::ustring ToUnicode() const;
 	static PathString FromUnicode(const mpt::ustring &path);
@@ -209,7 +154,73 @@ public:
 	static PathString FromCString(const CString &path);
 #endif // MPT_WITH_MFC
 
+public:
 
+	static bool IsPathSeparator(RawPathString::value_type c);
+
+	static RawPathString::value_type GetDefaultPathSeparator();
+
+	bool HasTrailingSlash() const
+	{
+		if(path.empty())
+		{
+			return false;
+		}
+		RawPathString::value_type c = path[path.length() - 1];
+		return IsPathSeparator(c);
+	}
+
+	PathString WithoutTrailingSlash() const
+	{
+		PathString result = *this;
+		while(result.HasTrailingSlash())
+		{
+			if(result.Length() == 1)
+			{
+				return result;
+			}
+			result = PathString(result.AsNative().substr(0, result.AsNative().length() - 1));
+		}
+		return result;
+	}
+
+	PathString WithTrailingSlash() const
+	{
+		PathString result = *this;
+		if(!result.empty() && !result.HasTrailingSlash())
+		{
+			result.path += GetDefaultPathSeparator();
+		}
+		return result;
+	}
+
+	void SplitPath(PathString *prefix, PathString *drive, PathString *dir, PathString *fbase, PathString *fext) const;
+
+	PathString GetPrefix() const;             // \\?\ or \\?\\UNC or empty
+	PathString GetDrive() const;              // Drive letter + colon, e.g. "C:" or \\server\share
+	PathString GetDirectory() const;          // Directory, e.g. "\OpenMPT\"
+	PathString GetDirectoryWithDrive() const; // Drive + Dir, e.g. "C:\OpenMPT\"
+	PathString GetFilenameBase() const;       // File name without extension, e.g. "OpenMPT"
+	PathString GetFilenameExtension() const;  // Extension including dot, e.g. ".exe"
+	PathString GetFilename() const;           // File name + extension, e.g. "OpenMPT.exe"
+
+	// Return the same path string with a different (or appended) extension (including "."), e.g. "foo.bar",".txt" -> "foo.txt" or "C:\OpenMPT\foo",".txt" -> "C:\OpenMPT\foo.txt"
+	PathString ReplaceExtension(const PathString &newExt) const;
+
+	// Convert a path to its simplified form, i.e. remove ".\" and "..\" entries
+	PathString Simplify() const;  // similar to std::fs::path::lexically_normal
+
+	bool IsAbsolute() const;
+
+#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
+
+	// Relative / absolute paths conversion
+
+	PathString AbsolutePathToRelative(const PathString &relativeTo) const; // similar to std::fs::path::lexically_approximate
+	
+	PathString RelativePathToAbsolute(const PathString &relativeTo) const;
+
+#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
 
 };
 
