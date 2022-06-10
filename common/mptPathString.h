@@ -57,6 +57,8 @@ struct NativePathTraits
 
 	static RawPathString Simplify(const RawPathString &path);
 
+	static bool IsAbsolute(const RawPathString &path);
+
 };
 
 
@@ -340,7 +342,10 @@ public:
 		return PathString::FromNative(path_traits::Simplify(path));
 	}
 
-	bool IsAbsolute() const;
+	bool IsAbsolute() const
+	{
+		return path_traits::IsAbsolute(path);
+	}
 
 #if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
 

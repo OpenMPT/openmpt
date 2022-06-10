@@ -415,7 +415,7 @@ PathString PathString::RelativePathToAbsolute(const PathString &relativeTo) cons
 
 
 
-bool PathString::IsAbsolute() const
+bool NativePathTraits::IsAbsolute(const RawPathString &path)
 {
 #if MPT_OS_WINDOWS
 	if(path.substr(0, 8) == PL_("\\\\?\\UNC\\"))
