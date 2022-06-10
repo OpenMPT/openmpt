@@ -49,6 +49,8 @@ using RawPathString = mpt::utf8string;
 struct NativePathTraits
 {
 
+	using raw_path_type = RawPathString;
+
 	static bool IsPathSeparator(RawPathString::value_type c);
 
 	static RawPathString::value_type GetDefaultPathSeparator();
@@ -69,12 +71,13 @@ class PathString
 private:
 
 	using path_traits = NativePathTraits;
+	using raw_path_type = path_traits::raw_path_type;
 
-	RawPathString path;
-
+	raw_path_type path;
+	
 private:
 
-	explicit PathString(const RawPathString & path_)
+	explicit PathString(const raw_path_type &path_)
 		: path(path_)
 	{
 		return;
@@ -156,12 +159,12 @@ public:
 
 public:
 
-	RawPathString AsNative() const
+	raw_path_type AsNative() const
 	{
 		return path;
 	}
 	
-	static PathString FromNative(const RawPathString &path)
+	static PathString FromNative(const raw_path_type &path)
 	{
 		return PathString(path);
 	}
@@ -173,7 +176,7 @@ public:
 
 	static PathString FromUnicode(const mpt::ustring &path)
 	{
-		return PathString(mpt::transcode<mpt::RawPathString>(path));
+		return PathString(mpt::transcode<raw_path_type>(path));
 	}
 
 	std::string ToUTF8() const
@@ -183,7 +186,7 @@ public:
 
 	static PathString FromUTF8(const std::string &path)
 	{
-		return PathString(mpt::transcode<mpt::RawPathString>(mpt::common_encoding::utf8, path));
+		return PathString(mpt::transcode<raw_path_type>(mpt::common_encoding::utf8, path));
 	}
 
 #if MPT_WSTRING_CONVERT
@@ -195,7 +198,7 @@ public:
 
 	static PathString FromWide(const std::wstring &path)
 	{
-		return PathString(mpt::transcode<mpt::RawPathString>(path));
+		return PathString(mpt::transcode<raw_path_type>(path));
 	}
 
 #endif // MPT_WSTRING_CONVERT
@@ -209,7 +212,7 @@ public:
 
 	static PathString FromLocale(const std::string &path)
 	{
-		return PathString(mpt::transcode<mpt::RawPathString>(mpt::logical_encoding::locale, path));
+		return PathString(mpt::transcode<raw_path_type>(mpt::logical_encoding::locale, path));
 	}
 
 #endif // MPT_ENABLE_CHARSET_LOCALE
@@ -223,19 +226,19 @@ public:
 
 	static PathString FromCString(const CString &path)
 	{
-		return PathString(mpt::transcode<mpt::RawPathString>(path));
+		return PathString(mpt::transcode<raw_path_type>(path));
 	}
 
 #endif // MPT_WITH_MFC
 
 public:
 
-	static bool IsPathSeparator(RawPathString::value_type c)
+	static bool IsPathSeparator(raw_path_type::value_type c)
 	{
 		return path_traits::IsPathSeparator(c);
 	}
 
-	static RawPathString::value_type GetDefaultPathSeparator()
+	static raw_path_type::value_type GetDefaultPathSeparator()
 	{
 		return path_traits::GetDefaultPathSeparator();
 	}
@@ -246,7 +249,7 @@ public:
 		{
 			return false;
 		}
-		RawPathString::value_type c = path[path.length() - 1];
+		raw_path_type::value_type c = path[path.length() - 1];
 		return IsPathSeparator(c);
 	}
 

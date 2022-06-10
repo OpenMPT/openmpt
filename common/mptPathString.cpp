@@ -100,7 +100,7 @@ RawPathString::value_type NativePathTraits::GetDefaultPathSeparator()
 RawPathString NativePathTraits::Simplify(const RawPathString &path)
 {
 
-	if (path.empty())
+	if(path.empty())
 	{
 		return RawPathString();
 	}
@@ -256,7 +256,7 @@ void NativePathTraits::SplitPath(RawPathString p, RawPathString *prefix, RawPath
 		p = p.substr(4);
 	}
 
-	if (p.length() >= 2 && (
+	if(p.length() >= 2 && (
 		p.substr(0, 2) == PL_("\\\\")
 		|| p.substr(0, 2) == PL_("\\/")
 		|| p.substr(0, 2) == PL_("/\\")
