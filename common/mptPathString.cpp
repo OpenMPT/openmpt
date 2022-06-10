@@ -401,56 +401,6 @@ void PathString::SplitPath(PathString *prefix, PathString *drive, PathString *di
 
 }
 
-PathString PathString::GetPrefix() const
-{
-	PathString prefix;
-	SplitPath(&prefix, nullptr, nullptr, nullptr, nullptr);
-	return prefix;
-}
-PathString PathString::GetDrive() const
-{
-	PathString drive;
-	SplitPath(nullptr, &drive, nullptr, nullptr, nullptr);
-	return drive;
-}
-PathString PathString::GetDirectory() const
-{
-	PathString dir;
-	SplitPath(nullptr, nullptr, &dir, nullptr, nullptr);
-	return dir;
-}
-PathString PathString::GetDirectoryWithDrive() const
-{
-	PathString drive, dir;
-	SplitPath(nullptr, &drive, &dir, nullptr, nullptr);
-	return drive + dir;
-}
-PathString PathString::GetFilenameBase() const
-{
-	PathString fname;
-	SplitPath(nullptr, nullptr, nullptr, &fname, nullptr);
-	return fname;
-}
-PathString PathString::GetFilenameExtension() const
-{
-	PathString ext;
-	SplitPath(nullptr, nullptr, nullptr, nullptr, &ext);
-	return ext;
-}
-PathString PathString::GetFilename() const
-{
-	PathString name, ext;
-	SplitPath(nullptr, nullptr, nullptr, &name, &ext);
-	return name + ext;
-}
-
-
-
-PathString PathString::ReplaceExtension(const mpt::PathString &newExt) const
-{
-	return GetDirectoryWithDrive() + GetFilenameBase() + newExt;
-}
-
 
 
 #if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
@@ -511,26 +461,6 @@ PathString PathString::RelativePathToAbsolute(const PathString &relativeTo) cons
 
 
 #endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
-
-
-
-bool PathString::IsPathSeparator(RawPathString::value_type c)
-{
-#if MPT_OS_WINDOWS || MPT_OS_DJGPP
-	return (c == PC_('\\')) || (c == PC_('/'));
-#else
-	return c == PC_('/');
-#endif
-}
-
-RawPathString::value_type PathString::GetDefaultPathSeparator()
-{
-#if MPT_OS_WINDOWS || MPT_OS_DJGPP
-	return PC_('\\');
-#else
-	return PC_('/');
-#endif
-}
 
 
 

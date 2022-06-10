@@ -31,9 +31,17 @@ namespace mpt
 
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
 using RawPathString = mpt::os_path;
+#define MPT_PATHSTRING_LITERAL(x) MPT_OSPATH_LITERAL( x )
+#define MPT_PATHSTRING(x) mpt::PathString::FromNative(MPT_OSPATH_LITERAL( x ))
 #else // !MPT_ENABLE_CHARSET_LOCALE
 using RawPathString = mpt::utf8string;
+#define MPT_PATHSTRING_LITERAL(x) ( x )
+#define MPT_PATHSTRING(x) mpt::PathString::FromNative( x )
 #endif // MPT_ENABLE_CHARSET_LOCALE
+
+#define PC_(x) MPT_PATHSTRING_LITERAL(x)
+#define PL_(x) MPT_PATHSTRING_LITERAL(x)
+#define P_(x) MPT_PATHSTRING(x)
 
 
 
@@ -156,9 +164,23 @@ public:
 
 public:
 
-	static bool IsPathSeparator(RawPathString::value_type c);
+	static bool IsPathSeparator(RawPathString::value_type c)
+	{
+#if MPT_OS_WINDOWS || MPT_OS_DJGPP
+		return (c == PC_('\\')) || (c == PC_('/'));
+#else
+		return c == PC_('/');
+#endif
+	}
 
-	static RawPathString::value_type GetDefaultPathSeparator();
+	static RawPathString::value_type GetDefaultPathSeparator()
+	{
+#if MPT_OS_WINDOWS || MPT_OS_DJGPP
+		return PC_('\\');
+#else
+		return PC_('/');
+#endif
+	}
 
 	bool HasTrailingSlash() const
 	{
@@ -196,16 +218,67 @@ public:
 
 	void SplitPath(PathString *prefix, PathString *drive, PathString *dir, PathString *fbase, PathString *fext) const;
 
-	PathString GetPrefix() const;             // \\?\ or \\?\\UNC or empty
-	PathString GetDrive() const;              // Drive letter + colon, e.g. "C:" or \\server\share
-	PathString GetDirectory() const;          // Directory, e.g. "\OpenMPT\"
-	PathString GetDirectoryWithDrive() const; // Drive + Dir, e.g. "C:\OpenMPT\"
-	PathString GetFilenameBase() const;       // File name without extension, e.g. "OpenMPT"
-	PathString GetFilenameExtension() const;  // Extension including dot, e.g. ".exe"
-	PathString GetFilename() const;           // File name + extension, e.g. "OpenMPT.exe"
+	// \\?\ or \\?\\UNC or empty
+	PathString GetPrefix() const
+	{
+		PathString prefix;
+		SplitPath(&prefix, nullptr, nullptr, nullptr, nullptr);
+		return prefix;
+	}
+	
+	// Drive letter + colon, e.g. "C:" or \\server\share
+	PathString GetDrive() const
+	{
+		PathString drive;
+		SplitPath(nullptr, &drive, nullptr, nullptr, nullptr);
+		return drive;
+	}
+	
+	// Directory, e.g. "\OpenMPT\"
+	PathString GetDirectory() const
+	{
+		PathString dir;
+		SplitPath(nullptr, nullptr, &dir, nullptr, nullptr);
+		return dir;
+	}
+	
+	// Drive + Dir, e.g. "C:\OpenMPT\"
+	PathString GetDirectoryWithDrive() const
+	{
+		PathString drive, dir;
+		SplitPath(nullptr, &drive, &dir, nullptr, nullptr);
+		return drive + dir;
+	}
+	
+	// File name without extension, e.g. "OpenMPT"
+	PathString GetFilenameBase() const
+	{
+		PathString fname;
+		SplitPath(nullptr, nullptr, nullptr, &fname, nullptr);
+		return fname;
+	}
+	
+	// Extension including dot, e.g. ".exe"
+	PathString GetFilenameExtension() const
+	{
+		PathString ext;
+		SplitPath(nullptr, nullptr, nullptr, nullptr, &ext);
+		return ext;
+	}
+	
+	// File name + extension, e.g. "OpenMPT.exe"
+	PathString GetFilename() const
+	{
+		PathString name, ext;
+		SplitPath(nullptr, nullptr, nullptr, &name, &ext);
+		return name + ext;
+	}
 
 	// Return the same path string with a different (or appended) extension (including "."), e.g. "foo.bar",".txt" -> "foo.txt" or "C:\OpenMPT\foo",".txt" -> "C:\OpenMPT\foo.txt"
-	PathString ReplaceExtension(const PathString &newExt) const;
+	PathString ReplaceExtension(const PathString &newExt) const
+	{
+		return GetDirectoryWithDrive() + GetFilenameBase() + newExt;
+	}
 
 	// Convert a path to its simplified form, i.e. remove ".\" and "..\" entries
 	PathString Simplify() const;  // similar to std::fs::path::lexically_normal
@@ -235,20 +308,6 @@ inline mpt::ustring ToUString(const mpt::PathString & x) { return x.ToUnicode();
 #if MPT_WSTRING_FORMAT
 inline std::wstring ToWString(const mpt::PathString & x) { return x.ToWide(); }
 #endif
-
-
-
-#if defined(MPT_ENABLE_CHARSET_LOCALE)
-#define MPT_PATHSTRING_LITERAL(x) MPT_OSPATH_LITERAL( x )
-#define MPT_PATHSTRING(x) mpt::PathString::FromNative(MPT_OSPATH_LITERAL( x ))
-#else // !MPT_ENABLE_CHARSET_LOCALE
-#define MPT_PATHSTRING_LITERAL(x) ( x )
-#define MPT_PATHSTRING(x) mpt::PathString::FromNative( x )
-#endif // MPT_ENABLE_CHARSET_LOCALE
-
-#define PC_(x) MPT_PATHSTRING_LITERAL(x)
-#define PL_(x) MPT_PATHSTRING_LITERAL(x)
-#define P_(x) MPT_PATHSTRING(x)
 
 
 
