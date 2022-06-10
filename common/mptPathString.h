@@ -46,10 +46,27 @@ using RawPathString = mpt::utf8string;
 
 
 
+struct NativePathTraits
+{
+
+	static bool IsPathSeparator(RawPathString::value_type c);
+
+	static RawPathString::value_type GetDefaultPathSeparator();
+
+	static void SplitPath(RawPathString path, RawPathString *prefix, RawPathString *drive, RawPathString *dir, RawPathString *fbase, RawPathString *fext);
+
+	static RawPathString Simplify(const RawPathString &path);
+
+};
+
+
+
 class PathString
 {
 
 private:
+
+	using path_traits = NativePathTraits;
 
 	RawPathString path;
 
@@ -208,20 +225,12 @@ public:
 
 	static bool IsPathSeparator(RawPathString::value_type c)
 	{
-#if MPT_OS_WINDOWS || MPT_OS_DJGPP
-		return (c == PC_('\\')) || (c == PC_('/'));
-#else
-		return c == PC_('/');
-#endif
+		return path_traits::IsPathSeparator(c);
 	}
 
 	static RawPathString::value_type GetDefaultPathSeparator()
 	{
-#if MPT_OS_WINDOWS || MPT_OS_DJGPP
-		return PC_('\\');
-#else
-		return PC_('/');
-#endif
+		return path_traits::GetDefaultPathSeparator();
 	}
 
 	bool HasTrailingSlash() const
@@ -258,7 +267,10 @@ public:
 		return result;
 	}
 
-	void SplitPath(PathString *prefix, PathString *drive, PathString *dir, PathString *fbase, PathString *fext) const;
+	void SplitPath(PathString *prefix, PathString *drive, PathString *dir, PathString *fbase, PathString *fext) const
+	{
+		path_traits::SplitPath(path, prefix ? &prefix->path : nullptr, drive ? &drive->path : nullptr, dir ? &dir->path : nullptr, fbase ? &fbase->path : nullptr, fext ? &fext->path : nullptr);
+	}
 
 	// \\?\ or \\?\\UNC or empty
 	PathString GetPrefix() const
@@ -322,8 +334,11 @@ public:
 		return GetDirectoryWithDrive() + GetFilenameBase() + newExt;
 	}
 
-	// Convert a path to its simplified form, i.e. remove ".\" and "..\" entries
-	PathString Simplify() const;  // similar to std::fs::path::lexically_normal
+	// Convert a path to its simplified form, i.e. remove ".\" and "..\" entries, similar to std::fs::path::lexically_normal
+	PathString Simplify() const
+	{
+		return PathString::FromNative(path_traits::Simplify(path));
+	}
 
 	bool IsAbsolute() const;
 

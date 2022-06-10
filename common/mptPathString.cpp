@@ -69,17 +69,41 @@ int PathCompareNoCase(const PathString & a, const PathString & b)
 
 
 
+bool NativePathTraits::IsPathSeparator(RawPathString::value_type c)
+{
+#if MPT_OS_WINDOWS || MPT_OS_DJGPP
+	return (c == PC_('\\')) || (c == PC_('/'));
+#else
+	return c == PC_('/');
+#endif
+}
+
+
+
+RawPathString::value_type NativePathTraits::GetDefaultPathSeparator()
+{
+#if MPT_OS_WINDOWS || MPT_OS_DJGPP
+	return PC_('\\');
+#else
+	return PC_('/');
+#endif
+}
+
+
+
 // Convert a path to its simplified form, i.e. remove ".\" and "..\" entries
 // Note: We use our own implementation as PathCanonicalize is limited to MAX_PATH
 // and unlimited versions are only available on Windows 8 and later.
 // Furthermore, we also convert forward-slashes to backslashes and always remove trailing slashes.
-PathString PathString::Simplify() const
+RawPathString NativePathTraits::Simplify(const RawPathString &path)
 {
-#if MPT_OS_WINDOWS
-	if(path.empty())
+
+	if (path.empty())
 	{
-		return PathString();
+		return RawPathString();
 	}
+
+#if MPT_OS_WINDOWS
 
 	std::vector<RawPathString> components;
 	RawPathString root;
@@ -113,7 +137,7 @@ PathString PathString::Simplify() const
 		{
 			pos = path.size();
 		}
-		mpt::RawPathString dir = path.substr(startPos, pos - startPos);
+		RawPathString dir = path.substr(startPos, pos - startPos);
 		if(dir == PL_(".."))
 		{
 			// Go back one directory
@@ -141,13 +165,9 @@ PathString PathString::Simplify() const
 	{
 		result.pop_back();
 	}
-	return mpt::PathString(result);
-#else // !MPT_OS_WINDOWS
-	if(path.empty())
-	{
-		return PathString();
-	}
 
+#else // !MPT_OS_WINDOWS
+	
 	std::vector<RawPathString> components;
 	RawPathString root;
 	RawPathString::size_type startPos = 0;
@@ -170,7 +190,7 @@ PathString PathString::Simplify() const
 		{
 			pos = path.size();
 		}
-		mpt::RawPathString dir = path.substr(startPos, pos - startPos);
+		RawPathString dir = path.substr(startPos, pos - startPos);
 		if(dir == PL_(".."))
 		{
 			// Go back one directory
@@ -198,22 +218,23 @@ PathString PathString::Simplify() const
 	{
 		result.pop_back();
 	}
-	return mpt::PathString(result);
+
 #endif // MPT_OS_WINDOWS
+
+	return result;
+
 }
 
 
 
-void PathString::SplitPath(PathString *prefix, PathString *drive, PathString *dir, PathString *fbase, PathString *fext) const
+void NativePathTraits::SplitPath(RawPathString p, RawPathString *prefix, RawPathString *drive, RawPathString *dir, RawPathString *fbase, RawPathString *fext)
 {
 
-	if(prefix) *prefix = mpt::PathString();
-	if(drive) *drive = mpt::PathString();
-	if(dir) *dir = mpt::PathString();
-	if(fbase) *fbase = mpt::PathString();
-	if(fext) *fext = mpt::PathString();
-
-	mpt::RawPathString p = path;
+	if(prefix) *prefix = RawPathString();
+	if(drive) *drive = RawPathString();
+	if(dir) *dir = RawPathString();
+	if(fbase) *fbase = RawPathString();
+	if(fext) *fext = RawPathString();
 
 #if MPT_OS_WINDOWS
 
@@ -225,11 +246,11 @@ void PathString::SplitPath(PathString *prefix, PathString *drive, PathString *di
 	// remove \\?\\ prefix
 	if(p.substr(0, 8) == PL_("\\\\?\\UNC\\"))
 	{
-		if(prefix) *prefix = P_("\\\\?\\UNC");
+		if(prefix) *prefix = PL_("\\\\?\\UNC");
 		p = PL_("\\\\") + p.substr(8);
 	} else if(p.substr(0, 4) == PL_("\\\\?\\"))
 	{
-		if (prefix) *prefix = P_("\\\\?\\");
+		if (prefix) *prefix = PL_("\\\\?\\");
 		p = p.substr(4);
 	}
 
@@ -240,91 +261,91 @@ void PathString::SplitPath(PathString *prefix, PathString *drive, PathString *di
 		|| p.substr(0, 2) == PL_("//")
 		))
 	{ // UNC
-		mpt::RawPathString::size_type first_slash = p.substr(2).find_first_of(PL_("\\/"));
-		if(first_slash != mpt::RawPathString::npos)
+		RawPathString::size_type first_slash = p.substr(2).find_first_of(PL_("\\/"));
+		if(first_slash != RawPathString::npos)
 		{
-			mpt::RawPathString::size_type second_slash = p.substr(2 + first_slash + 1).find_first_of(PL_("\\/"));
-			if(second_slash != mpt::RawPathString::npos)
+			RawPathString::size_type second_slash = p.substr(2 + first_slash + 1).find_first_of(PL_("\\/"));
+			if(second_slash != RawPathString::npos)
 			{
-				if(drive) *drive = mpt::PathString::FromNative(p.substr(0, 2 + first_slash + 1 + second_slash));
+				if(drive) *drive = p.substr(0, 2 + first_slash + 1 + second_slash);
 				p = p.substr(2 + first_slash + 1 + second_slash);
 			} else
 			{
-				if(drive) *drive = mpt::PathString::FromNative(p);
-				p = mpt::RawPathString();
+				if(drive) *drive = p;
+				p = RawPathString();
 			}
 		} else
 		{
-			if(drive) *drive = mpt::PathString::FromNative(p);
-			p = mpt::RawPathString();
+			if(drive) *drive = p;
+			p = RawPathString();
 		}
 	} else
 	{ // local
 		if(p.length() >= 2 && (p[1] == PC_(':')))
 		{
-			if(drive) *drive = mpt::PathString::FromNative(p.substr(0, 2));
+			if(drive) *drive = p.substr(0, 2);
 			p = p.substr(2);
 		} else
 		{
-			if(drive) *drive = mpt::PathString();
+			if(drive) *drive = RawPathString();
 		}
 	}
-	mpt::RawPathString::size_type last_slash = p.find_last_of(PL_("\\/"));
-	if(last_slash != mpt::RawPathString::npos)
+	RawPathString::size_type last_slash = p.find_last_of(PL_("\\/"));
+	if(last_slash != RawPathString::npos)
 	{
-		if(dir) *dir = mpt::PathString::FromNative(p.substr(0, last_slash + 1));
+		if(dir) *dir = p.substr(0, last_slash + 1);
 		p = p.substr(last_slash + 1);
 	} else
 	{
-		if(dir) *dir = mpt::PathString();
+		if(dir) *dir = RawPathString();
 	}
-	mpt::RawPathString::size_type last_dot = p.find_last_of(PL_("."));
-	if(last_dot == mpt::RawPathString::npos)
+	RawPathString::size_type last_dot = p.find_last_of(PL_("."));
+	if(last_dot == RawPathString::npos)
 	{
-		if(fbase) *fbase = mpt::PathString::FromNative(p);
-		if(fext) *fext = mpt::PathString();
+		if(fbase) *fbase = p;
+		if(fext) *fext = RawPathString();
 	} else if(last_dot == 0)
 	{
-		if(fbase) *fbase = mpt::PathString::FromNative(p);
-		if(fext) *fext = mpt::PathString();
+		if(fbase) *fbase = p;
+		if(fext) *fext = RawPathString();
 	} else if(p == PL_(".") || p == PL_(".."))
 	{
-		if(fbase) *fbase = mpt::PathString::FromNative(p);
-		if(fext) *fext = mpt::PathString();
+		if(fbase) *fbase = p;
+		if(fext) *fext = RawPathString();
 	} else
 	{
-		if(fbase) *fbase = mpt::PathString::FromNative(p.substr(0, last_dot));
-		if(fext) *fext = mpt::PathString::FromNative(p.substr(last_dot));
+		if(fbase) *fbase = p.substr(0, last_dot);
+		if(fext) *fext = p.substr(last_dot);
 	}
 
 #else // !MOT_OS_WINDOWS
 
-	mpt::RawPathString::size_type last_slash = p.find_last_of(PL_("/"));
-	if(last_slash != mpt::RawPathString::npos)
+	RawPathString::size_type last_slash = p.find_last_of(PL_("/"));
+	if(last_slash != RawPathString::npos)
 	{
-		if(dir) *dir = mpt::PathString::FromNative(p.substr(0, last_slash + 1));
+		if(dir) *dir = p.substr(0, last_slash + 1);
 		p = p.substr(last_slash + 1);
 	} else
 	{
-		if(dir) *dir = mpt::PathString();
+		if(dir) *dir = RawPathString();
 	}
-	mpt::RawPathString::size_type last_dot = p.find_last_of(PL_("."));
-	if(last_dot == mpt::RawPathString::npos)
+	RawPathString::size_type last_dot = p.find_last_of(PL_("."));
+	if(last_dot == RawPathString::npos)
 	{
-		if(fbase) *fbase = mpt::PathString::FromNative(p);
-		if(fext) *fext = mpt::PathString();
+		if(fbase) *fbase = p;
+		if(fext) *fext = RawPathString();
 	} else if(last_dot == 0)
 	{
-		if(fbase) *fbase = mpt::PathString::FromNative(p);
-		if(fext) *fext = mpt::PathString();
+		if(fbase) *fbase = p;
+		if(fext) *fext = RawPathString();
 	} else if(p == PL_(".") || p == PL_(".."))
 	{
-		if(fbase) *fbase = mpt::PathString::FromNative(p);
-		if(fext) *fext = mpt::PathString();
+		if(fbase) *fbase = p;
+		if(fext) *fext = RawPathString();
 	} else
 	{
-		if(fbase) *fbase = mpt::PathString::FromNative(p.substr(0, last_dot));
-		if(fext) *fext = mpt::PathString::FromNative(p.substr(last_dot));
+		if(fbase) *fbase = p.substr(0, last_dot);
+		if(fext) *fext = p.substr(last_dot);
 	}
 
 #endif // MPT_OS_WINDOWS
