@@ -274,7 +274,7 @@ enum class PathStyle
 	Posix,
 	WindowsNT,
 	Windows9x,
-	DJGPP,
+	DOS_DJGPP,
 };
 
 #if MPT_OS_WINDOWS
@@ -303,7 +303,7 @@ struct PathTraits
 	{
 		using namespace path_literals;
 		bool result{};
-		if constexpr((path_style == PathStyle::WindowsNT) || (path_style == PathStyle::Windows9x) || (path_style == PathStyle::DJGPP))
+		if constexpr((path_style == PathStyle::WindowsNT) || (path_style == PathStyle::Windows9x) || (path_style == PathStyle::DOS_DJGPP))
 		{
 			result = (c == L<char_type>('\\')) || (c == L<char_type>('/'));
 		} else if constexpr(path_style == PathStyle::Posix)
@@ -322,7 +322,7 @@ struct PathTraits
 	{
 		using namespace path_literals;
 		char_type result{};
-		if constexpr((path_style == PathStyle::WindowsNT) || (path_style == PathStyle::Windows9x) || (path_style == PathStyle::DJGPP))
+		if constexpr((path_style == PathStyle::WindowsNT) || (path_style == PathStyle::Windows9x) || (path_style == PathStyle::DOS_DJGPP))
 		{
 			result = L<char_type>('\\');
 		} else if constexpr(path_style == PathStyle::Posix)
