@@ -24,6 +24,8 @@ OPENMPT_NAMESPACE_BEGIN
 namespace mpt
 {
 
+
+
 mpt::RawPathString SupportLongPath(const mpt::RawPathString &path)
 {
 #if MPT_OS_WINDOWS
@@ -52,16 +54,9 @@ mpt::RawPathString SupportLongPath(const mpt::RawPathString &path)
 #endif // MPT_OS_WINDOWS
 }
 
-} // namespace mpt
-
 
 
 #if MPT_OS_WINDOWS
-
-namespace mpt
-{
-
-
 
 #if !MPT_OS_WINDOWS_WINRT
 
@@ -72,16 +67,9 @@ int PathString::CompareNoCase(const PathString & a, const PathString & b)
 
 #endif // !MPT_OS_WINDOWS_WINRT
 
-
-
-} // namespace mpt
-
 #endif // MPT_OS_WINDOWS
 
 
-
-namespace mpt
-{
 
 // Convert a path to its simplified form, i.e. remove ".\" and "..\" entries
 // Note: We use our own implementation as PathCanonicalize is limited to MAX_PATH
@@ -215,13 +203,6 @@ PathString PathString::Simplify() const
 	return mpt::PathString(result);
 #endif // MPT_OS_WINDOWS
 }
-
-} // namespace mpt
-
-
-
-namespace mpt
-{
 
 
 
