@@ -10,6 +10,8 @@
 #include "stdafx.h"
 #include "mptPathString.h"
 
+#include <vector>
+
 #if MPT_OS_WINDOWS
 #include <windows.h>
 #include <tchar.h>
