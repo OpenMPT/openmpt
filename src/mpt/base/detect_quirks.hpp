@@ -29,6 +29,12 @@
 
 
 
+#if MPT_GCC_BEFORE(9, 1, 0)
+#define MPT_COMPILER_QUIRK_NO_CONSTEXPR_THROW
+#endif
+
+
+
 #if MPT_CXX_BEFORE(20) && MPT_COMPILER_MSVC
 // Compiler has multiplication/division semantics when shifting signed integers.
 // In C++20, this behaviour is required by the standard.
