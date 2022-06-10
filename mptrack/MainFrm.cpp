@@ -2913,7 +2913,7 @@ HMENU CMainFrame::CreateFileMenu(const size_t maxCount, std::vector<mpt::PathStr
 		for(size_t i = 0; i < 2; i++) // 0: app items, 1: user items
 		{
 			// To avoid duplicates, check whether app path and config path are the same.
-			if (i == 1 && mpt::PathString::CompareNoCase(theApp.GetInstallPath(), theApp.GetConfigPath()) == 0)
+			if (i == 1 && mpt::PathCompareNoCase(theApp.GetInstallPath(), theApp.GetConfigPath()) == 0)
 				break;
 
 			mpt::PathString basePath;
@@ -3040,7 +3040,7 @@ void CMainFrame::UpdateMRUList()
 
 			const mpt::PathString &pathMPT = TrackerSettings::Instance().mruFiles[i];
 			mpt::winstring path = pathMPT.AsNative();
-			if(!mpt::PathString::CompareNoCase(workDir, pathMPT.GetDirectoryWithDrive()))
+			if(!mpt::PathCompareNoCase(workDir, pathMPT.GetDirectoryWithDrive()))
 			{
 				// Only show filename
 				path = path.substr(workDir.AsNative().length());

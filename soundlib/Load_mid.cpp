@@ -1347,7 +1347,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 			if(CDLSBank::IsDLSBank(midiMapName))
 			{
 				CDLSBank *dlsBank = nullptr;
-				if(cachedBank != nullptr && !mpt::PathString::CompareNoCase(cachedBankName, midiMapName))
+				if(cachedBank != nullptr && !mpt::PathCompareNoCase(cachedBankName, midiMapName))
 				{
 					dlsBank = cachedBank.get();
 				} else

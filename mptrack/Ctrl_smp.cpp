@@ -1417,9 +1417,9 @@ void CCtrlSamples::SaveSample(bool doBatchSave)
 		if(fileName.empty()) fileName = P_("untitled");
 
 		const mpt::PathString ext = fileName.GetFilenameExtension();
-		if(!mpt::PathString::CompareNoCase(ext, P_(".flac"))) defaultFormat = dfFLAC;
-		else if(!mpt::PathString::CompareNoCase(ext, P_(".wav"))) defaultFormat = dfWAV;
-		else if(!mpt::PathString::CompareNoCase(ext, P_(".s3i"))) defaultFormat = dfS3I;
+		if(!mpt::PathCompareNoCase(ext, P_(".flac"))) defaultFormat = dfFLAC;
+		else if(!mpt::PathCompareNoCase(ext, P_(".wav"))) defaultFormat = dfWAV;
+		else if(!mpt::PathCompareNoCase(ext, P_(".s3i"))) defaultFormat = dfS3I;
 
 		hasAdlib = sample.uFlags[CHN_ADLIB];
 	} else

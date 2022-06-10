@@ -537,7 +537,7 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 	// Check if this is already a known plugin.
 	for(const auto &dupePlug : pluginList)
 	{
-		if(!dllPath.CompareNoCase(dllPath, dupePlug->dllPath)) return dupePlug;
+		if(!mpt::PathCompareNoCase(dllPath, dupePlug->dllPath)) return dupePlug;
 	}
 
 	if(fileFound != nullptr)
@@ -701,7 +701,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 		const bool matchID = (plug->pluginId1 == mixPlugin.Info.dwPluginId1)
 			&& (plug->pluginId2 == mixPlugin.Info.dwPluginId2);
 #if MPT_OS_WINDOWS && !MPT_OS_WINDOWS_WINRT
-		const bool matchName = !mpt::PathString::CompareNoCase(plug->libraryName, libraryName);
+		const bool matchName = !mpt::PathCompareNoCase(plug->libraryName, libraryName);
 #else
 		const bool matchName = !mpt::CompareNoCaseAscii(plug->libraryName.ToUTF8(), libraryName);
 #endif

@@ -121,7 +121,7 @@ protected:
 public:
 	CDLSBank();
 
-	bool operator==(const CDLSBank &other) const noexcept { return !mpt::PathString::CompareNoCase(m_szFileName, other.m_szFileName); }
+	bool operator==(const CDLSBank &other) const noexcept { return !mpt::PathCompareNoCase(m_szFileName, other.m_szFileName); }
 
 	static bool IsDLSBank(const mpt::PathString &filename);
 	static uint32 MakeMelodicCode(uint32 bank, uint32 instr) { return ((bank << 16) | (instr));}

@@ -788,9 +788,9 @@ void CTuningDialog::OnBnClickedButtonImport()
 		file.SplitPath(nullptr, nullptr, nullptr, &fileName, &fileExt);
 		const mpt::ustring fileNameExt = (fileName + fileExt).ToUnicode();
 
-		const bool bIsTun = (mpt::PathString::CompareNoCase(fileExt, mpt::PathString::FromUTF8(CTuning::s_FileExtension)) == 0);
-		const bool bIsScl = (mpt::PathString::CompareNoCase(fileExt, P_(".scl")) == 0);
-		//const bool bIsTc = (mpt::PathString::CompareNoCase(fileExt, mpt::PathString::FromUTF8(CTuningCollection::s_FileExtension)) == 0);
+		const bool bIsTun = (mpt::PathCompareNoCase(fileExt, mpt::PathString::FromUTF8(CTuning::s_FileExtension)) == 0);
+		const bool bIsScl = (mpt::PathCompareNoCase(fileExt, P_(".scl")) == 0);
+		//const bool bIsTc = (mpt::PathCompareNoCase(fileExt, mpt::PathString::FromUTF8(CTuningCollection::s_FileExtension)) == 0);
 
 		mpt::ifstream fin(file, std::ios::binary);
 

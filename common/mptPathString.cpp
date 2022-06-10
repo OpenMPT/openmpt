@@ -60,9 +60,9 @@ mpt::RawPathString SupportLongPath(const mpt::RawPathString &path)
 
 #if !MPT_OS_WINDOWS_WINRT
 
-int PathString::CompareNoCase(const PathString & a, const PathString & b)
+int PathCompareNoCase(const PathString & a, const PathString & b)
 {
-	return lstrcmpi(a.path.c_str(), b.path.c_str());
+	return lstrcmpi(a.AsNative().c_str(), b.AsNative().c_str());
 }
 
 #endif // !MPT_OS_WINDOWS_WINRT

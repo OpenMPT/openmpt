@@ -145,7 +145,7 @@ void MissingExternalSamplesDlg::OnScanFolder()
 			{
 				if(m_sndFile.IsExternalSampleMissing(smp))
 				{
-					if(!mpt::PathString::CompareNoCase(m_sndFile.GetSamplePath(smp).GetFilename(), fileName.GetFilename()))
+					if(!mpt::PathCompareNoCase(m_sndFile.GetSamplePath(smp).GetFilename(), fileName.GetFilename()))
 					{
 						if(SetSample(smp, fileName))
 						{

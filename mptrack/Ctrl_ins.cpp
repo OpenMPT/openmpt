@@ -2099,8 +2099,8 @@ void CCtrlInstruments::SaveInstrument(bool doBatchSave)
 	CString instrName, instrFilename;
 
 	bool ok = true;
-	const bool saveXI = !mpt::PathString::CompareNoCase(dlg.GetExtension(), P_("xi"));
-	const bool saveSFZ = !mpt::PathString::CompareNoCase(dlg.GetExtension(), P_("sfz"));
+	const bool saveXI = !mpt::PathCompareNoCase(dlg.GetExtension(), P_("xi"));
+	const bool saveSFZ = !mpt::PathCompareNoCase(dlg.GetExtension(), P_("sfz"));
 	const bool doCompress = index == 2 || index == 6;
 	const bool allowExternal = index == 3;
 

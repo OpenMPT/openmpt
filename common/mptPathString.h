@@ -113,12 +113,6 @@ public:
 public:
 
 #if MPT_OS_WINDOWS
-#if !MPT_OS_WINDOWS_WINRT
-	static int CompareNoCase(const PathString & a, const PathString & b);
-#endif // !MPT_OS_WINDOWS_WINRT
-#endif
-
-#if MPT_OS_WINDOWS
 
 	void SplitPath(PathString *prefix, PathString *drive, PathString *dir, PathString *fbase, PathString *fext) const;
 	// \\?\ prefixes will be removed and \\?\\UNC prefixes converted to canonical \\ form.
@@ -258,6 +252,14 @@ inline std::wstring ToWString(const mpt::PathString & x) { return x.ToWide(); }
 
 // Return native string, with possible \\?\ prefix if it exceeds MAX_PATH characters.
 mpt::RawPathString SupportLongPath(const mpt::RawPathString &path);
+
+
+
+#if MPT_OS_WINDOWS
+#if !MPT_OS_WINDOWS_WINRT
+int PathCompareNoCase(const PathString &a, const PathString &b);
+#endif // !MPT_OS_WINDOWS_WINRT
+#endif
 
 
 

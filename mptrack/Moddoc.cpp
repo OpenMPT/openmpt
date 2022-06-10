@@ -520,7 +520,7 @@ BOOL CModDoc::DoSave(const mpt::PathString &filename, bool setPath)
 
 	// Do we need to create a backup file ?
 	if((TrackerSettings::Instance().CreateBackupFiles)
-		&& (IsModified()) && (!mpt::PathString::CompareNoCase(saveFileName, docFileName)))
+		&& (IsModified()) && (!mpt::PathCompareNoCase(saveFileName, docFileName)))
 	{
 		if(mpt::FS::IsFile(saveFileName))
 		{

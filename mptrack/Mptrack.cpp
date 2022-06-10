@@ -456,7 +456,7 @@ struct CompareLessPathStringNoCase
 {
 	inline bool operator()(const mpt::PathString &l, const mpt::PathString &r) const
 	{
-		return mpt::PathString::CompareNoCase(l, r) < 0;
+		return mpt::PathCompareNoCase(l, r) < 0;
 	}
 };
 
@@ -561,7 +561,7 @@ bool CTrackApp::AddDLSBank(const mpt::PathString &filename)
 	// Check for dupes
 	for(const auto &bank : gpDLSBanks)
 	{
-		if(bank && !mpt::PathString::CompareNoCase(filename, bank->GetFileName()))
+		if(bank && !mpt::PathCompareNoCase(filename, bank->GetFileName()))
 			return true;
 	}
 	try
@@ -763,7 +763,7 @@ void CTrackApp::RemoveMruItem(const mpt::PathString &path)
 	auto &mruFiles = TrackerSettings::Instance().mruFiles;
 	for(auto i = mruFiles.begin(); i != mruFiles.end(); i++)
 	{
-		if(!mpt::PathString::CompareNoCase(*i, path))
+		if(!mpt::PathCompareNoCase(*i, path))
 		{
 			mruFiles.erase(i);
 			break;

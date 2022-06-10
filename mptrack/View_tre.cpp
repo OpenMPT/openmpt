@@ -396,7 +396,7 @@ mpt::PathString CModTree::InsLibGetFullPath(HTREEITEM hItem) const
 
 bool CModTree::InsLibSetFullPath(const mpt::PathString &libPath, const mpt::PathString &songName)
 {
-	if(!songName.empty() && mpt::PathString::CompareNoCase(m_SongFileName, songName))
+	if(!songName.empty() && mpt::PathCompareNoCase(m_SongFileName, songName))
 	{
 		// Load module for previewing its instruments
 		InputFile f(libPath + songName, TrackerSettings::Instance().MiscCacheCompleteFileBeforeLoading);
@@ -1636,7 +1636,7 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, ModCommand::NOTE note, int volume)
 				{
 					CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 					CDLSBank *dlsBank = nullptr;
-					if(!mpt::PathString::CompareNoCase(m_cachedBankName, midiLib[modItemID]))
+					if(!mpt::PathCompareNoCase(m_cachedBankName, midiLib[modItemID]))
 					{
 						dlsBank = m_cachedBank.get();
 					}
