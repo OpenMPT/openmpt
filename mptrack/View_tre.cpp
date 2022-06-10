@@ -218,7 +218,7 @@ void CModTree::Init()
 			if(!m_InstrLibPath.empty())
 				break;
 		}
-		m_InstrLibPath.EnsureTrailingSlash();
+		m_InstrLibPath = m_InstrLibPath.WithTrailingSlash();
 		m_pDataTree->InsLibSetFullPath(m_InstrLibPath, mpt::PathString());
 	}
 
@@ -388,7 +388,7 @@ BOOL CModTree::PreTranslateMessage(MSG *pMsg)
 mpt::PathString CModTree::InsLibGetFullPath(HTREEITEM hItem) const
 {
 	mpt::PathString fullPath = m_InstrLibPath;
-	fullPath.EnsureTrailingSlash();
+	fullPath = fullPath.WithTrailingSlash();
 	return fullPath + mpt::PathString::FromCString(GetItemText(hItem));
 }
 
@@ -2361,7 +2361,7 @@ void CModTree::SetFullInstrumentLibraryPath(mpt::PathString path)
 {
 	if(mpt::FS::IsDirectory(path))
 	{
-		path.EnsureTrailingSlash();
+		path = path.WithTrailingSlash();
 		InstrumentLibraryChDir(path, false);
 	} else if(mpt::FS::IsFile(path))
 	{
@@ -2427,7 +2427,7 @@ void CModTree::InstrumentLibraryChDir(mpt::PathString dir, bool isSong)
 				if(!dir.HasTrailingSlash())
 				{
 					dir = m_InstrLibPath + dir;
-					dir.EnsureTrailingSlash();
+					dir = dir.WithTrailingSlash();
 				}
 				m_InstrLibHighlightPath = P_("..");  // Highlight first entry
 
@@ -2438,7 +2438,7 @@ void CModTree::InstrumentLibraryChDir(mpt::PathString dir, bool isSong)
 					// There is only one directory and nothing else in the path,
 					// so skip this directory and automatically descend further down into the tree.
 					dir = name;
-					dir.EnsureTrailingSlash();
+					dir = dir.WithTrailingSlash();
 					continue;
 				}
 			} while(false);

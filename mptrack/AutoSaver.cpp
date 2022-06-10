@@ -119,7 +119,7 @@ mpt::PathString CAutoSaver::GetBasePath(const CModDoc &modDoc, bool createPath) 
 	{
 		path = GetPath();
 	}
-	return path.EnsureTrailingSlash();
+	return path.WithTrailingSlash();
 }
 
 

@@ -729,7 +729,7 @@ bool DeleteDirectoryTree(mpt::PathString path)
 	{
 		return false;
 	}
-	path.EnsureTrailingSlash();
+	path = path.WithTrailingSlash();
 	HANDLE hFind = NULL;
 	WIN32_FIND_DATA wfd = {};
 	hFind = FindFirstFile((path + P_("*.*")).AsNative().c_str(), &wfd);

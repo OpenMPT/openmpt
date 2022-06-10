@@ -642,12 +642,12 @@ ExecResult Context::ExecutePosixShellScript(std::string script, FlagSet<ExecFlag
 
 	std::deque<mpt::PathString> paths;
 	paths.push_back(dirWindows + P_("filetree"));
-	mpt::PathString basePath = (dirWindows + P_("filetree")).EnsureTrailingSlash();
+	mpt::PathString basePath = (dirWindows + P_("filetree")).WithTrailingSlash();
 	while(!paths.empty())
 	{
 		mpt::PathString path = paths.front();
 		paths.pop_front();
-		path.EnsureTrailingSlash();
+		path = path.WithTrailingSlash();
 		HANDLE hFind = NULL;
 		WIN32_FIND_DATA wfd = {};
 		hFind = FindFirstFile((path + P_("*.*")).AsNative().c_str(), &wfd);

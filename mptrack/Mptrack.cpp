@@ -381,7 +381,7 @@ static mpt::PathString GetUltraSoundPatchDir(SettingsContainer &file, const mpt:
 	if(patchDir.empty() || patchDir == P_(".\\"))
 		patchDir = path;
 	if(!patchDir.empty())
-		patchDir.EnsureTrailingSlash();
+		patchDir = patchDir.WithTrailingSlash();
 	return patchDir;
 }
 

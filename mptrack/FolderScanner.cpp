@@ -44,7 +44,7 @@ bool FolderScanner::Next(mpt::PathString &file)
 
 			m_currentPath = m_paths.back();
 			m_paths.pop_back();
-			m_currentPath.EnsureTrailingSlash();
+			m_currentPath = m_currentPath.WithTrailingSlash();
 			m_hFind = FindFirstFile((m_currentPath + m_filter).AsNative().c_str(), &m_wfd);
 		}
 

@@ -94,7 +94,7 @@ BOOL PathConfigDlg::OnInitDialog()
 
 mpt::PathString PathConfigDlg::GetPath(int id)
 {
-	return mpt::PathString::FromCString(GetWindowTextString(*GetDlgItem(id))).EnsureTrailingSlash();
+	return mpt::PathString::FromCString(GetWindowTextString(*GetDlgItem(id))).WithTrailingSlash();
 }
 
 

@@ -153,14 +153,6 @@ public:
 		RawPathString::value_type c = path[path.length() - 1];
 		return IsPathSeparator(c);
 	}
-	mpt::PathString &EnsureTrailingSlash()
-	{
-		if(!path.empty() && !HasTrailingSlash())
-		{
-			path += GetDefaultPathSeparator();
-		}
-		return *this;
-	}
 
 	mpt::PathString WithoutTrailingSlash() const
 	{
@@ -179,7 +171,10 @@ public:
 	mpt::PathString WithTrailingSlash() const
 	{
 		mpt::PathString result = *this;
-		result.EnsureTrailingSlash();
+		if(!result.empty() && !result.HasTrailingSlash())
+		{
+			result.path += GetDefaultPathSeparator();
+		}
 		return result;
 	}
 
