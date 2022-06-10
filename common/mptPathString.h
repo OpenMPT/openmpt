@@ -144,6 +144,11 @@ public:
 		return path.empty();
 	}
 
+	std::size_t length() const
+	{
+		return path.size();
+	}
+
 	std::size_t Length() const
 	{
 		return path.size();
@@ -347,16 +352,6 @@ public:
 		return path_traits::IsAbsolute(path);
 	}
 
-#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
-
-	// Relative / absolute paths conversion
-
-	PathString AbsolutePathToRelative(const PathString &relativeTo) const; // similar to std::fs::path::lexically_approximate
-	
-	PathString RelativePathToAbsolute(const PathString &relativeTo) const;
-
-#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
-
 };
 
 
@@ -388,6 +383,23 @@ inline std::wstring ToWString(const mpt::PathString &x)
 // Return native string, with possible \\?\ prefix if it exceeds MAX_PATH characters.
 mpt::RawPathString SupportLongPath(const mpt::RawPathString &path);
 
+#if MPT_OS_WINDOWS
+#if !(MPT_OS_WINDOWS_WINRT && (_WIN32_WINNT < 0x0a00))
+// Returns the absolute path for a potentially relative path and removes ".." or "." components. (same as GetFullPathNameW)
+mpt::PathString GetAbsolutePath(const mpt::PathString &path);
+#endif
+#endif // MPT_OS_WINDOWS
+
+#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
+
+// Relative / absolute paths conversion
+
+mpt::PathString AbsolutePathToRelative(const mpt::PathString &p, const mpt::PathString &relativeTo); // similar to std::fs::path::lexically_approximate
+	
+mpt::PathString RelativePathToAbsolute(const mpt::PathString &p, const mpt::PathString &relativeTo);
+
+#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
+
 
 
 #if MPT_OS_WINDOWS
@@ -395,19 +407,6 @@ mpt::RawPathString SupportLongPath(const mpt::RawPathString &path);
 int PathCompareNoCase(const PathString &a, const PathString &b);
 #endif // !MPT_OS_WINDOWS_WINRT
 #endif
-
-
-
-#if MPT_OS_WINDOWS
-
-#if !(MPT_OS_WINDOWS_WINRT && (_WIN32_WINNT < 0x0a00))
-
-// Returns the absolute path for a potentially relative path and removes ".." or "." components. (same as GetFullPathNameW)
-mpt::PathString GetAbsolutePath(const mpt::PathString &path);
-
-#endif
-
-#endif // MPT_OS_WINDOWS
 
 
 

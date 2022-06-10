@@ -301,10 +301,10 @@ public:
 #endif // !MPT_BUILD_RETRO
 
 	// Relative / absolute paths conversion
-	mpt::PathString PathAbsoluteToInstallRelative(const mpt::PathString &path) { return path.AbsolutePathToRelative(GetInstallPath()); }
-	mpt::PathString PathInstallRelativeToAbsolute(const mpt::PathString &path) { return path.RelativePathToAbsolute(GetInstallPath()); }
-	mpt::PathString PathAbsoluteToInstallBinArchRelative(const mpt::PathString &path) { return path.AbsolutePathToRelative(GetInstallBinArchPath()); }
-	mpt::PathString PathInstallBinArchRelativeToAbsolute(const mpt::PathString &path) { return path.RelativePathToAbsolute(GetInstallBinArchPath()); }
+	mpt::PathString PathAbsoluteToInstallRelative(const mpt::PathString &path) { return mpt::AbsolutePathToRelative(path, GetInstallPath()); }
+	mpt::PathString PathInstallRelativeToAbsolute(const mpt::PathString &path) { return mpt::RelativePathToAbsolute(path, GetInstallPath()); }
+	mpt::PathString PathAbsoluteToInstallBinArchRelative(const mpt::PathString &path) { return mpt::AbsolutePathToRelative(path, GetInstallBinArchPath()); }
+	mpt::PathString PathInstallBinArchRelativeToAbsolute(const mpt::PathString &path) { return mpt::RelativePathToAbsolute(path, GetInstallBinArchPath()); }
 
 	static void OpenModulesDialog(std::vector<mpt::PathString> &files, const mpt::PathString &overridePath = mpt::PathString());
 

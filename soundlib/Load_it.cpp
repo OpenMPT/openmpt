@@ -1856,7 +1856,7 @@ bool CSoundFile::SaveIT(std::ostream &f, const mpt::PathString &filename, bool c
 		} else
 		{
 #ifdef MPT_EXTERNAL_SAMPLES
-			const std::string filenameU8 = GetSamplePath(smp).AbsolutePathToRelative(filename.GetDirectoryWithDrive()).ToUTF8();
+			const std::string filenameU8 = mpt::AbsolutePathToRelative(GetSamplePath(smp), filename.GetDirectoryWithDrive()).ToUTF8();
 			const size_t strSize = filenameU8.size();
 			size_t intBytes = 0;
 			if(mpt::IO::WriteVarInt(f, strSize, &intBytes))

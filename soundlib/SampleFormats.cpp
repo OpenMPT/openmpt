@@ -2265,7 +2265,7 @@ bool CSoundFile::ReadITSSample(SAMPLEINDEX nSample, FileReader &file, bool rewin
 		{
 			if(file.GetOptionalFileName())
 			{
-				filename = filename.RelativePathToAbsolute(file.GetOptionalFileName()->GetDirectoryWithDrive());
+				filename = mpt::RelativePathToAbsolute(filename, file.GetOptionalFileName()->GetDirectoryWithDrive());
 			}
 			if(!LoadExternalSample(nSample, filename))
 			{
@@ -2445,7 +2445,7 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, std::ostream &f, cons
 		} else
 		{
 #ifdef MPT_EXTERNAL_SAMPLES
-			const std::string filenameU8 = GetSamplePath(smp).AbsolutePathToRelative(filename.GetDirectoryWithDrive()).ToUTF8();
+			const std::string filenameU8 = mpt::AbsolutePathToRelative(GetSamplePath(smp), filename.GetDirectoryWithDrive()).ToUTF8();
 			const size_t strSize = filenameU8.size();
 			size_t intBytes = 0;
 			if(mpt::IO::WriteVarInt(f, strSize, &intBytes))

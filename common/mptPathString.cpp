@@ -358,50 +358,50 @@ void NativePathTraits::SplitPath(RawPathString p, RawPathString *prefix, RawPath
 
 
 // Convert an absolute path to a path that's relative to "&relativeTo".
-PathString PathString::AbsolutePathToRelative(const PathString &relativeTo) const
+mpt::PathString AbsolutePathToRelative(const mpt::PathString &path, const mpt::PathString &relativeTo)
 {
-	mpt::PathString result = *this;
+	mpt::PathString result = path;
 	if(path.empty())
 	{
 		return result;
 	}
-	if(!_tcsncicmp(relativeTo.AsNative().c_str(), AsNative().c_str(), relativeTo.AsNative().length()))
+	if(!_tcsncicmp(relativeTo.AsNative().c_str(), path.AsNative().c_str(), relativeTo.AsNative().length()))
 	{
 		// Path is OpenMPT's directory or a sub directory ("C:\OpenMPT\Somepath" => ".\Somepath")
 		result = P_(".\\"); // ".\"
-		result += mpt::PathString::FromNative(AsNative().substr(relativeTo.AsNative().length()));
-	} else if(!_tcsncicmp(relativeTo.AsNative().c_str(), AsNative().c_str(), 2))
+		result += mpt::PathString::FromNative(path.AsNative().substr(relativeTo.AsNative().length()));
+	} else if(!_tcsncicmp(relativeTo.AsNative().c_str(), path.AsNative().c_str(), 2))
 	{
 		// Path is on the same drive as OpenMPT ("C:\Somepath" => "\Somepath")
-		result = mpt::PathString::FromNative(AsNative().substr(2));
+		result = mpt::PathString::FromNative(path.AsNative().substr(2));
 	}
 	return result;
 }
 
 
 // Convert a path that is relative to "&relativeTo" to an absolute path.
-PathString PathString::RelativePathToAbsolute(const PathString &relativeTo) const
+mpt::PathString RelativePathToAbsolute(const mpt::PathString &path, const mpt::PathString &relativeTo)
 {
-	mpt::PathString result = *this;
+	mpt::PathString result = path;
 	if(path.empty())
 	{
 		return result;
 	}
-	if(path.length() >= 2 && path[0] == PC_('\\') && path[1] == PC_('\\'))
+	if(path.length() >= 2 && path.AsNative()[0] == PC_('\\') && path.AsNative()[1] == PC_('\\'))
 	{
 		// Network / UNC paths
 		return result;
-	} if(path.length() >= 1 && path[0] == PC_('\\'))
+	} if(path.length() >= 1 && path.AsNative()[0] == PC_('\\'))
 	{
 		// Path is on the same drive as relativeTo ("\Somepath\" => "C:\Somepath\")
 		result = mpt::PathString::FromNative(relativeTo.AsNative().substr(0, 2));
 		result += mpt::PathString(path);
-	} else if(path.length() >= 2 && path.substr(0, 2) == PL_(".\\"))
+	} else if(path.length() >= 2 && path.AsNative().substr(0, 2) == PL_(".\\"))
 	{
 		// Path is in relativeTo or a sub directory (".\Somepath\" => "C:\OpenMPT\Somepath\")
 		result = relativeTo; // "C:\OpenMPT\"
-		result += mpt::PathString::FromNative(AsNative().substr(2));
-	} else if(path.length() < 3 || path[1] != PC_(':') || path[2] != PC_('\\'))
+		result += mpt::PathString::FromNative(path.AsNative().substr(2));
+	} else if(path.length() < 3 || path.AsNative()[1] != PC_(':') || path.AsNative()[2] != PC_('\\'))
 	{
 		// Any other path not starting with drive letter
 		result = relativeTo;  // "C:\OpenMPT\"

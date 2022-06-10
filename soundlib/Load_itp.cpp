@@ -259,10 +259,10 @@ bool CSoundFile::ReadITP(FileReader &file, ModLoadingFlags loadFlags)
 #ifdef MODPLUG_TRACKER
 		if(const auto fileName = file.GetOptionalFileName(); fileName.has_value())
 		{
-			instrPaths[ins] = instrPaths[ins].RelativePathToAbsolute(fileName->GetDirectoryWithDrive());
+			instrPaths[ins] = mpt::AbsolutePathToRelative(instrPaths[ins], fileName->GetDirectoryWithDrive());
 		} else if(GetpModDoc() != nullptr)
 		{
-			instrPaths[ins] = instrPaths[ins].RelativePathToAbsolute(GetpModDoc()->GetPathNameMpt().GetDirectoryWithDrive());
+			instrPaths[ins] = mpt::RelativePathToAbsolute(instrPaths[ins], GetpModDoc()->GetPathNameMpt().GetDirectoryWithDrive());
 		}
 #endif // MODPLUG_TRACKER
 	}

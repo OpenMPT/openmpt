@@ -1623,17 +1623,17 @@ static MPT_NOINLINE void TestCharsets()
 	// Path conversions
 #ifdef MODPLUG_TRACKER
 	const mpt::PathString exePath = P_("C:\\OpenMPT\\");
-	VERIFY_EQUAL(P_("C:\\OpenMPT\\").AbsolutePathToRelative(exePath), P_(".\\"));
-	VERIFY_EQUAL(P_("c:\\OpenMPT\\foo").AbsolutePathToRelative(exePath), P_(".\\foo"));
-	VERIFY_EQUAL(P_("C:\\foo").AbsolutePathToRelative(exePath), P_("\\foo"));
-	VERIFY_EQUAL(P_(".\\").RelativePathToAbsolute(exePath), P_("C:\\OpenMPT\\"));
-	VERIFY_EQUAL(P_(".\\foo").RelativePathToAbsolute(exePath), P_("C:\\OpenMPT\\foo"));
-	VERIFY_EQUAL(P_("..\\foo").RelativePathToAbsolute(exePath).Simplify(), P_("C:\\foo"));
-	VERIFY_EQUAL(P_("..\\..\\foo").RelativePathToAbsolute(exePath).Simplify(), P_("C:\\foo"));
-	VERIFY_EQUAL(P_("file").RelativePathToAbsolute(exePath), P_("C:\\OpenMPT\\file"));
-	VERIFY_EQUAL(P_("\\foo").RelativePathToAbsolute(exePath), P_("C:\\foo"));
-	VERIFY_EQUAL(P_("\\\\server\\path\\file").AbsolutePathToRelative(exePath), P_("\\\\server\\path\\file"));
-	VERIFY_EQUAL(P_("\\\\server\\path\\file").RelativePathToAbsolute(exePath), P_("\\\\server\\path\\file"));
+	VERIFY_EQUAL(mpt::AbsolutePathToRelative(P_("C:\\OpenMPT\\"), exePath), P_(".\\"));
+	VERIFY_EQUAL(mpt::AbsolutePathToRelative(P_("c:\\OpenMPT\\foo"), exePath), P_(".\\foo"));
+	VERIFY_EQUAL(mpt::AbsolutePathToRelative(P_("C:\\foo"), exePath), P_("\\foo"));
+	VERIFY_EQUAL(mpt::RelativePathToAbsolute(P_(".\\"), exePath), P_("C:\\OpenMPT\\"));
+	VERIFY_EQUAL(mpt::RelativePathToAbsolute(P_(".\\foo"), exePath), P_("C:\\OpenMPT\\foo"));
+	VERIFY_EQUAL(mpt::RelativePathToAbsolute(P_("..\\foo"), exePath).Simplify(), P_("C:\\foo"));
+	VERIFY_EQUAL(mpt::RelativePathToAbsolute(P_("..\\..\\foo"), exePath).Simplify(), P_("C:\\foo"));
+	VERIFY_EQUAL(mpt::RelativePathToAbsolute(P_("file"), exePath), P_("C:\\OpenMPT\\file"));
+	VERIFY_EQUAL(mpt::RelativePathToAbsolute(P_("\\foo"), exePath), P_("C:\\foo"));
+	VERIFY_EQUAL(mpt::AbsolutePathToRelative(P_("\\\\server\\path\\file"), exePath), P_("\\\\server\\path\\file"));
+	VERIFY_EQUAL(mpt::RelativePathToAbsolute(P_("\\\\server\\path\\file"), exePath), P_("\\\\server\\path\\file"));
 #endif
 
 #if MPT_OS_WINDOWS

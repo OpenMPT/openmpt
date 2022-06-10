@@ -508,10 +508,10 @@ bool CSoundFile::CreateInternal(FileReader file, ModLoadingFlags loadFlags)
 			mpt::PathString filename = GetSamplePath(nSmp);
 			if(file.GetOptionalFileName())
 			{
-				filename = filename.RelativePathToAbsolute(file.GetOptionalFileName()->GetDirectoryWithDrive());
+				filename = mpt::RelativePathToAbsolute(filename, file.GetOptionalFileName()->GetDirectoryWithDrive());
 			} else if(GetpModDoc() != nullptr)
 			{
-				filename = filename.RelativePathToAbsolute(GetpModDoc()->GetPathNameMpt().GetDirectoryWithDrive());
+				filename = mpt::RelativePathToAbsolute(filename, GetpModDoc()->GetPathNameMpt().GetDirectoryWithDrive());
 			}
 			filename = filename.Simplify();
 			if(!LoadExternalSample(nSmp, filename))
