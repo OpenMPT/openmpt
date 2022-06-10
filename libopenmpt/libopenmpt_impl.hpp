@@ -40,7 +40,12 @@ template <typename Ttraits, typename Tfilenametraits>
 using FileCursor = mpt::IO::FileCursor<Ttraits, Tfilenametraits>;
 } // namespace detail
 namespace mpt {
+namespace DetailPathString {
+template <typename Traits>
 class PathString;
+} // namespace DetailPathString
+struct NativePathTraits;
+using PathString = DetailPathString::PathString<NativePathTraits>;
 } // namespace mpt
 using FileCursor = detail::FileCursor<mpt::IO::FileCursorTraitsFileData, mpt::IO::FileCursorFilenameTraits<mpt::PathString>>;
 class CSoundFile;

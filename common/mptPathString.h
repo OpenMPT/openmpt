@@ -277,21 +277,24 @@ enum class PathStyle
 	DOS_DJGPP,
 };
 
+struct NativePathStyleTag
+{
 #if MPT_OS_WINDOWS
-inline constexpr PathStyle NativePathStyle = PathStyle::WindowsNT;
+	static inline constexpr PathStyle path_style = PathStyle::WindowsNT;
 #else
-inline constexpr PathStyle NativePathStyle = PathStyle::Posix;
+	static inline constexpr PathStyle path_style = PathStyle::Posix;
 #endif
+};
 
 
 
-template <typename TRawPath, PathStyle EPathStyle>
+template <typename TRawPath, typename PathStyleTag>
 struct PathTraits
 {
 
 
 
-	static inline constexpr PathStyle path_style = EPathStyle;
+	static inline constexpr PathStyle path_style = PathStyleTag::path_style;
 	using raw_path_type = TRawPath;
 	using char_type = typename raw_path_type::value_type;
 
@@ -659,13 +662,25 @@ struct PathTraits
 
 
 
+struct NativePathTraits
+	: public PathTraits<RawPathString, NativePathStyleTag>
+{
+};
+
+
+
+namespace DetailPathString
+{
+
+template <typename Traits>
 class PathString
 {
 
 private:
 
-	using path_traits = PathTraits<RawPathString, NativePathStyle>;
-	using raw_path_type = path_traits::raw_path_type;
+	using path_traits = Traits;
+	using raw_path_type = typename path_traits::raw_path_type;
+	using char_type = typename raw_path_type::value_type;
 
 	raw_path_type path;
 	
@@ -827,12 +842,12 @@ public:
 
 public:
 
-	static bool IsPathSeparator(raw_path_type::value_type c)
+	static bool IsPathSeparator(char_type c)
 	{
 		return path_traits::IsPathSeparator(c);
 	}
 
-	static raw_path_type::value_type GetDefaultPathSeparator()
+	static char_type GetDefaultPathSeparator()
 	{
 		return path_traits::GetDefaultPathSeparator();
 	}
@@ -843,7 +858,7 @@ public:
 		{
 			return false;
 		}
-		raw_path_type::value_type c = path[path.length() - 1];
+		char_type c = path[path.length() - 1];
 		return IsPathSeparator(c);
 	}
 
@@ -950,6 +965,10 @@ public:
 	}
 
 };
+
+} // namespace DetailPathString
+
+using PathString = DetailPathString::PathString<NativePathTraits>;
 
 
 
