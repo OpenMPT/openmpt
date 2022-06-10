@@ -16,14 +16,13 @@
 #include "mpt/path/os_path.hpp"
 #include "mpt/string/types.hpp"
 
-#include "openmpt/base/FlagSet.hpp"
-
 #include "mptString.h"
 
-#include <vector>
 
 
 OPENMPT_NAMESPACE_BEGIN
+
+
 
 namespace mpt
 {
@@ -275,87 +274,6 @@ mpt::PathString GetAbsolutePath(const mpt::PathString &path);
 
 
 
-#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
-
-
-
-namespace FS
-{
-
-	// Verify if this path represents a valid directory on the file system.
-	bool IsDirectory(const mpt::PathString &path);
-	// Verify if this path exists and is a file on the file system.
-	bool IsFile(const mpt::PathString &path);
-	// Verify that a path exists (no matter what type)
-	bool PathExists(const mpt::PathString &path);
-
-	// Deletes a complete directory tree. Handle with EXTREME care.
-	// Returns false if any file could not be removed and aborts as soon as it
-	// encounters any error. path must be absolute.
-	bool DeleteDirectoryTree(mpt::PathString path);
-
-} // namespace FS
-
-
-
-// Returns the application executable path or an empty string (if unknown), e.g. "C:\mptrack\"
-mpt::PathString GetExecutableDirectory();
-
-#if !MPT_OS_WINDOWS_WINRT
-// Returns the system directory path, e.g. "C:\Windows\System32\"
-mpt::PathString GetSystemDirectory();
-#endif // !MPT_OS_WINDOWS_WINRT
-
-// Returns temporary directory (with trailing backslash added) (e.g. "C:\TEMP\")
-mpt::PathString GetTempDirectory();
-
-
-
-// Returns a new unique absolute path.
-class TemporaryPathname
-{
-private:
-	mpt::PathString m_Path;
-public:
-	TemporaryPathname(const mpt::PathString &fileNamePrefix = mpt::PathString(), const mpt::PathString &fileNameExtension = P_("tmp"));
-public:
-	mpt::PathString GetPathname() const
-	{
-		return m_Path;
-	}
-};
-
-
-
-// Scoped temporary file guard. Deletes the file when going out of scope.
-// The file itself is not created automatically.
-class TempFileGuard
-{
-private:
-	const mpt::PathString filename;
-public:
-	TempFileGuard(const mpt::TemporaryPathname &pathname = mpt::TemporaryPathname{});
-	mpt::PathString GetFilename() const;
-	~TempFileGuard();
-};
-
-
-// Scoped temporary directory guard. Deletes the directory when going out of scope.
-// The directory itself is created automatically.
-class TempDirGuard
-{
-private:
-	mpt::PathString dirname;
-public:
-	TempDirGuard(const mpt::TemporaryPathname &pathname = mpt::TemporaryPathname{});
-	mpt::PathString GetDirname() const;
-	~TempDirGuard();
-};
-
-
-
-#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
-
 } // namespace mpt
 
 
@@ -377,70 +295,6 @@ CString SanitizePathComponent(CString str);
 
 #endif // MODPLUG_TRACKER
 
-
-#if defined(MODPLUG_TRACKER)
-
-enum FileTypeFormat
-{
-	FileTypeFormatNone           = 0   , // do not show extensions after description, i.e. "Foo Files"
-	FileTypeFormatShowExtensions = 1<<0, // show extensions after descripten, i.e. "Foo Files (*.foo,*.bar)"
-};
-MPT_DECLARE_ENUM(FileTypeFormat)
-
-class FileType
-{
-private:
-	mpt::ustring m_ShortName; // "flac", "mod" (lowercase)
-	mpt::ustring m_Description; // "FastTracker 2 Module"
-	std::vector<std::string> m_MimeTypes; // "audio/ogg" (in ASCII)
-	std::vector<mpt::PathString> m_Extensions; // "mod", "xm" (lowercase)
-	std::vector<mpt::PathString> m_Prefixes; // "mod" for "mod.*"
-public:
-	FileType() { }
-	FileType(const std::vector<FileType> &group)
-	{
-		for(const auto &type : group)
-		{
-			mpt::append(m_MimeTypes, type.m_MimeTypes);
-			mpt::append(m_Extensions, type.m_Extensions);
-			mpt::append(m_Prefixes, type.m_Prefixes);
-		}
-	}
-	static FileType Any()
-	{
-		return FileType().ShortName(U_("*")).Description(U_("All Files")).AddExtension(P_("*"));
-	}
-public:
-	FileType& ShortName(const mpt::ustring &shortName) { m_ShortName = shortName; return *this; }
-	FileType& Description(const mpt::ustring &description) { m_Description = description; return *this; }
-	FileType& MimeTypes(const std::vector<std::string> &mimeTypes) { m_MimeTypes = mimeTypes; return *this; }
-	FileType& Extensions(const std::vector<mpt::PathString> &extensions) { m_Extensions = extensions; return *this; }
-	FileType& Prefixes(const std::vector<mpt::PathString> &prefixes) { m_Prefixes = prefixes; return *this; }
-	FileType& AddMimeType(const std::string &mimeType) { m_MimeTypes.push_back(mimeType); return *this; }
-	FileType& AddExtension(const mpt::PathString &extension) { m_Extensions.push_back(extension); return *this; }
-	FileType& AddPrefix(const mpt::PathString &prefix) { m_Prefixes.push_back(prefix); return *this; }
-public:
-	mpt::ustring GetShortName() const { return m_ShortName; }
-	mpt::ustring GetDescription() const { return m_Description; }
-	std::vector<std::string> GetMimeTypes() const { return m_MimeTypes; }
-	std::vector<mpt::PathString> GetExtensions() const { return m_Extensions; }
-	std::vector<mpt::PathString> GetPrefixes() const { return m_Prefixes; }
-public:
-	mpt::PathString AsFilterString(FlagSet<FileTypeFormat> format = FileTypeFormatNone) const;
-	mpt::PathString AsFilterOnlyString() const;
-}; // class FileType
-
-
-// "Ogg Vorbis|*.ogg;*.oga|" // FileTypeFormatNone
-// "Ogg Vorbis (*.ogg,*.oga)|*.ogg;*.oga|" // FileTypeFormatShowExtensions
-mpt::PathString ToFilterString(const FileType &fileType, FlagSet<FileTypeFormat> format = FileTypeFormatNone);
-mpt::PathString ToFilterString(const std::vector<FileType> &fileTypes, FlagSet<FileTypeFormat> format = FileTypeFormatNone);
-
-// "*.ogg;*.oga" / ";*.ogg;*.oga"
-mpt::PathString ToFilterOnlyString(const FileType &fileType, bool prependSemicolonWhenNotEmpty = false);
-mpt::PathString ToFilterOnlyString(const std::vector<FileType> &fileTypes, bool prependSemicolonWhenNotEmpty = false);
-
-#endif // MODPLUG_TRACKER
 
 
 OPENMPT_NAMESPACE_END

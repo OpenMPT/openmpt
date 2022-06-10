@@ -18,6 +18,7 @@
 #include "../mptrack/Vstplug.h"
 #include "../mptrack/ExceptionHandler.h"
 #include "../common/mptFileIO.h"
+#include "../common/mptFS.h"
 #include "../common/mptStringBuffer.h"
 #include "../common/misc_util.h"
 

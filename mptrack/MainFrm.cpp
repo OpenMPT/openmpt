@@ -40,6 +40,7 @@
 #include "PatternClipboard.h"
 #include "PatternFont.h"
 #include "../common/mptFileIO.h"
+#include "../common/mptFS.h"
 #include "../common/FileReader.h"
 #include "../common/Profiler.h"
 #include "../soundlib/plugins/PlugInterface.h"

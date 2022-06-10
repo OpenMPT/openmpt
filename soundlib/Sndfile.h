@@ -16,6 +16,7 @@
 #include "SoundFilePlayConfig.h"
 #include "MixerSettings.h"
 #include "../common/misc_util.h"
+#include "../common/mptFileType.h"
 #include "../common/mptRandom.h"
 #include "../common/version.h"
 #include <vector>

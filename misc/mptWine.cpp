@@ -13,6 +13,8 @@
 
 #include "mptOS.h"
 #include "../common/mptFileIO.h"
+#include "../common/mptFileTemporary.h"
+#include "../common/mptFS.h"
 
 #include <deque>
 #include <map>

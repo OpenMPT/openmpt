@@ -36,6 +36,7 @@
 #include "../soundlib/plugins/PluginManager.h"
 #include "MPTrackWine.h"
 #include "MPTrackUtil.h"
+#include "../common/mptFS.h"
 #include "../misc/mptOS.h"
 #include "mpt/arch/arch.hpp"
 #if MPT_MSVC_AT_LEAST(2022, 2) && MPT_MSVC_BEFORE(2022, 3)

@@ -13,6 +13,8 @@
 
 #include "mpt/osinfo/windows_version.hpp"
 
+#include "../common/mptFS.h"
+
 #if MPT_OS_WINDOWS
 #include <windows.h>
 #elif MPT_OS_ANDROID

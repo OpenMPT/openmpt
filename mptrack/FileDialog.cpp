@@ -12,6 +12,7 @@
 #include "FileDialog.h"
 #include "Mainfrm.h"
 #include "InputHandler.h"
+#include "../common/mptFS.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

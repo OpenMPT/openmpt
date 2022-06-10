@@ -23,6 +23,7 @@
 #include "../../mptrack/FileDialog.h"
 #include "../../mptrack/VstPresets.h"
 #include "../../common/mptFileIO.h"
+#include "../../common/mptFS.h"
 #include "../mod_specifications.h"
 #endif // MODPLUG_TRACKER
 #include "../../soundlib/AudioCriticalSection.h"

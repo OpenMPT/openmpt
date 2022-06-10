@@ -37,8 +37,10 @@
 #include "../soundlib/modsmp_ctrl.h"
 #include "CleanupSong.h"
 #include "../common/mptStringBuffer.h"
+#include "../common/mptFileTemporary.h"
 #include "../common/mptFileIO.h"
 #include <sstream>
+#include "../common/mptFS.h"
 #include "../common/FileReader.h"
 #include "FileDialog.h"
 #include "ExternalSamples.h"

@@ -13,6 +13,7 @@
 #include "PathConfigDlg.h"
 #include "FileDialog.h"
 #include "Mainfrm.h"
+#include "../common/mptFS.h"
 
 OPENMPT_NAMESPACE_BEGIN
 

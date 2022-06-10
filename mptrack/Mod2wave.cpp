@@ -16,6 +16,7 @@
 #include "Mpdlgs.h"
 #include "mod2wave.h"
 #include "WAVTools.h"
+#include "../common/mptFileTemporary.h"
 #include "../common/mptString.h"
 #include "../common/version.h"
 #include "../soundlib/MixerLoops.h"

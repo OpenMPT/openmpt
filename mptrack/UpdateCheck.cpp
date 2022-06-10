@@ -13,6 +13,7 @@
 #include "mpt/binary/hex.hpp"
 #include "../common/version.h"
 #include "../common/misc_util.h"
+#include "../common/mptFS.h"
 #include "../common/mptStringBuffer.h"
 #include "Mptrack.h"
 #include "TrackerSettings.h"

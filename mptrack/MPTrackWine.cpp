@@ -24,6 +24,7 @@
 #include "TrackerSettings.h"
 #include "../common/ComponentManager.h"
 #include "../common/mptFileIO.h"
+#include "../common/mptFS.h"
 #include "../misc/mptOS.h"
 #include "mpt/crc/crc.hpp"
 #include "../common/FileReader.h"

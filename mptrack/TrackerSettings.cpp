@@ -29,6 +29,7 @@
 #include "../soundlib/mod_specifications.h"
 #include "../soundlib/Tables.h"
 #include "../common/mptFileIO.h"
+#include "../common/mptFS.h"
 #include "../soundlib/tuningcollection.h"
 #include "TuningDialog.h"
 

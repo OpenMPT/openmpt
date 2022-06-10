@@ -11,17 +11,9 @@
 #include "mptPathString.h"
 
 #include "mpt/string_transcode/transcode.hpp"
-#include "mpt/uuid/uuid.hpp"
-
-#include "misc_util.h"
-
-#include "mptRandom.h"
 
 #if MPT_OS_WINDOWS
 #include <windows.h>
-#if defined(MODPLUG_TRACKER)
-#include <shlwapi.h>
-#endif
 #include <tchar.h>
 #endif
 
@@ -522,49 +514,6 @@ PathString PathString::GetFilename() const
 
 
 
-#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
-
-bool FS::IsDirectory(const mpt::PathString &path)
-{
-	// Using PathIsDirectoryW here instead would increase libopenmpt dependencies by shlwapi.dll.
-	// GetFileAttributesW also does the job just fine.
-	#if MPT_OS_WINDOWS_WINRT
-		WIN32_FILE_ATTRIBUTE_DATA data = {};
-		if(::GetFileAttributesExW(path.AsNative().c_str(), GetFileExInfoStandard, &data) == 0)
-		{
-			return false;
-		}
-		DWORD dwAttrib = data.dwFileAttributes;
-	#else // !MPT_OS_WINDOWS_WINRT
-		DWORD dwAttrib = ::GetFileAttributes(path.AsNative().c_str());
-	#endif // MPT_OS_WINDOWS_WINRT
-	return ((dwAttrib != INVALID_FILE_ATTRIBUTES) && (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
-}
-
-bool FS::IsFile(const mpt::PathString &path)
-{
-	#if MPT_OS_WINDOWS_WINRT
-		WIN32_FILE_ATTRIBUTE_DATA data = {};
-		if (::GetFileAttributesExW(path.AsNative().c_str(), GetFileExInfoStandard, &data) == 0)
-		{
-			return false;
-		}
-		DWORD dwAttrib = data.dwFileAttributes;
-	#else // !MPT_OS_WINDOWS_WINRT
-		DWORD dwAttrib = ::GetFileAttributes(path.AsNative().c_str());
-	#endif // MPT_OS_WINDOWS_WINRT
-	return ((dwAttrib != INVALID_FILE_ATTRIBUTES) && !(dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
-}
-
-bool FS::PathExists(const mpt::PathString &path)
-{
-	return ::PathFileExists(path.AsNative().c_str()) != FALSE;
-}
-
-#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
-
-
-
 PathString PathString::ReplaceExtension(const mpt::PathString &newExt) const
 {
 	return GetDirectoryWithDrive() + GetFilenameBase() + newExt;
@@ -630,6 +579,7 @@ PathString PathString::RelativePathToAbsolute(const PathString &relativeTo) cons
 
 
 #endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
+
 
 
 bool PathString::IsPathSeparator(RawPathString::value_type c)
@@ -703,179 +653,6 @@ mpt::PathString GetAbsolutePath(const mpt::PathString &path)
 #endif // MPT_OS_WINDOWS
 
 
-
-#if MPT_OS_WINDOWS && defined(MODPLUG_TRACKER)
-
-
-
-namespace FS
-{
-
-bool DeleteDirectoryTree(mpt::PathString path)
-{
-	if(path.AsNative().empty())
-	{
-		return false;
-	}
-	if(PathIsRelative(path.AsNative().c_str()) == TRUE)
-	{
-		return false;
-	}
-	if(!mpt::FS::PathExists(path))
-	{
-		return true;
-	}
-	if(!mpt::FS::IsDirectory(path))
-	{
-		return false;
-	}
-	path = path.WithTrailingSlash();
-	HANDLE hFind = NULL;
-	WIN32_FIND_DATA wfd = {};
-	hFind = FindFirstFile((path + P_("*.*")).AsNative().c_str(), &wfd);
-	if(hFind != NULL && hFind != INVALID_HANDLE_VALUE)
-	{
-		do
-		{
-			mpt::PathString filename = mpt::PathString::FromNative(wfd.cFileName);
-			if(filename != P_(".") && filename != P_(".."))
-			{
-				filename = path + filename;
-				if(mpt::FS::IsDirectory(filename))
-				{
-					if(!mpt::FS::DeleteDirectoryTree(filename))
-					{
-						return false;
-					}
-				} else if(mpt::FS::IsFile(filename))
-				{
-					if(DeleteFile(filename.AsNative().c_str()) == 0)
-					{
-						return false;
-					}
-				}
-			}
-		} while(FindNextFile(hFind, &wfd));
-		FindClose(hFind);
-	}
-	if(RemoveDirectory(path.AsNative().c_str()) == 0)
-	{
-		return false;
-	}
-	return true;
-}
-
-} // namespace FS
-
-
-
-mpt::PathString GetExecutableDirectory()
-{
-	std::vector<TCHAR> exeFileName(MAX_PATH);
-	while(GetModuleFileName(0, exeFileName.data(), mpt::saturate_cast<DWORD>(exeFileName.size())) >= exeFileName.size())
-	{
-		if(GetLastError() != ERROR_INSUFFICIENT_BUFFER)
-		{
-			return mpt::PathString();
-		}
-		exeFileName.resize(exeFileName.size() * 2);
-	}
-	return mpt::GetAbsolutePath(mpt::PathString::FromNative(exeFileName.data()).GetDirectoryWithDrive());
-}
-
-
-#if !MPT_OS_WINDOWS_WINRT
-
-mpt::PathString GetSystemDirectory()
-{
-	DWORD size = ::GetSystemDirectory(nullptr, 0);
-	std::vector<TCHAR> path(size + 1);
-	if(!::GetSystemDirectory(path.data(), size + 1))
-	{
-		return mpt::PathString();
-	}
-	return mpt::PathString::FromNative(path.data()) + P_("\\");
-}
-
-#endif // !MPT_OS_WINDOWS_WINRT
-
-
-
-mpt::PathString GetTempDirectory()
-{
-	DWORD size = GetTempPath(0, nullptr);
-	if(size)
-	{
-		std::vector<TCHAR> tempPath(size + 1);
-		if(GetTempPath(size + 1, tempPath.data()))
-		{
-			return mpt::PathString::FromNative(tempPath.data());
-		}
-	}
-	// use exe directory as fallback
-	return mpt::GetExecutableDirectory();
-}
-
-
-
-TemporaryPathname::TemporaryPathname(const mpt::PathString &fileNamePrefix, const mpt::PathString &fileNameExtension)
-{
-	mpt::PathString filename = mpt::GetTempDirectory();
-	filename += (!fileNamePrefix.empty() ? fileNamePrefix + P_("_") : mpt::PathString());
-	filename += mpt::PathString::FromUnicode(mpt::UUID::GenerateLocalUseOnly(mpt::global_prng()).ToUString());
-	filename += (!fileNameExtension.empty() ? P_(".") + fileNameExtension : mpt::PathString());
-	m_Path = filename;
-}
-
-
-
-TempFileGuard::TempFileGuard(const mpt::TemporaryPathname &pathname)
-	: filename(pathname.GetPathname())
-{
-	return;
-}
-
-mpt::PathString TempFileGuard::GetFilename() const
-{
-	return filename;
-}
-
-TempFileGuard::~TempFileGuard()
-{
-	if(!filename.empty())
-	{
-		DeleteFile(filename.AsNative().c_str());
-	}
-}
-
-
-TempDirGuard::TempDirGuard(const mpt::TemporaryPathname &pathname)
-	: dirname(pathname.GetPathname().WithTrailingSlash())
-{
-	if(dirname.empty())
-	{
-		return;
-	}
-	if(::CreateDirectory(dirname.AsNative().c_str(), NULL) == 0)
-	{ // fail
-		dirname = mpt::PathString();
-	}
-}
-
-mpt::PathString TempDirGuard::GetDirname() const
-{
-	return dirname;
-}
-
-TempDirGuard::~TempDirGuard()
-{
-	if(!dirname.empty())
-	{
-		mpt::FS::DeleteDirectoryTree(dirname);
-	}
-}
-
-#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
 
 } // namespace mpt
 
@@ -987,119 +764,6 @@ CString SanitizePathComponent(CString str)
 	return str;
 }
 #endif // MPT_WITH_MFC
-
-
-
-mpt::PathString FileType::AsFilterString(FlagSet<FileTypeFormat> format) const
-{
-	mpt::PathString filter;
-	if(GetShortName().empty() || GetExtensions().empty())
-	{
-		return filter;
-	}
-	if(!GetDescription().empty())
-	{
-		filter += mpt::PathString::FromUnicode(GetDescription());
-	} else
-	{
-		filter += mpt::PathString::FromUnicode(GetShortName());
-	}
-	const auto extensions = GetExtensions();
-	if(format[FileTypeFormatShowExtensions])
-	{
-		filter += P_(" (");
-		bool first = true;
-		for(const auto &ext : extensions)
-		{
-			if(first)
-			{
-				first = false;
-			} else
-			{
-				filter += P_(",");
-			}
-			filter += P_("*.");
-			filter += ext;
-		}
-		filter += P_(")");
-	}
-	filter += P_("|");
-	{
-		bool first = true;
-		for(const auto &ext : extensions)
-		{
-			if(first)
-			{
-				first = false;
-			} else
-			{
-				filter += P_(";");
-			}
-			filter += P_("*.");
-			filter += ext;
-		}
-	}
-	filter += P_("|");
-	return filter;
-}
-
-
-mpt::PathString FileType::AsFilterOnlyString() const
-{
-	mpt::PathString filter;
-	const auto extensions = GetExtensions();
-	{
-		bool first = true;
-		for(const auto &ext : extensions)
-		{
-			if(first)
-			{
-				first = false;
-			} else
-			{
-				filter += P_(";");
-			}
-			filter += P_("*.");
-			filter += ext;
-		}
-	}
-	return filter;
-}
-
-
-mpt::PathString ToFilterString(const FileType &fileType, FlagSet<FileTypeFormat> format)
-{
-	return fileType.AsFilterString(format);
-}
-
-
-mpt::PathString ToFilterString(const std::vector<FileType> &fileTypes, FlagSet<FileTypeFormat> format)
-{
-	mpt::PathString filter;
-	for(const auto &type : fileTypes)
-	{
-		filter += type.AsFilterString(format);
-	}
-	return filter;
-}
-
-
-mpt::PathString ToFilterOnlyString(const FileType &fileType, bool prependSemicolonWhenNotEmpty)
-{
-	mpt::PathString filter = fileType.AsFilterOnlyString();
-	return filter.empty() ? filter : (prependSemicolonWhenNotEmpty ? P_(";") : P_("")) + filter;
-}
-
-
-mpt::PathString ToFilterOnlyString(const std::vector<FileType> &fileTypes, bool prependSemicolonWhenNotEmpty)
-{
-	mpt::PathString filter;
-	for(const auto &type : fileTypes)
-	{
-		filter += type.AsFilterOnlyString();
-	}
-	return filter.empty() ? filter : (prependSemicolonWhenNotEmpty ? P_(";") : P_("")) + filter;
-}
 
 
 

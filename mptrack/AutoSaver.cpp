@@ -16,6 +16,7 @@
 #include "FileDialog.h"
 #include "FolderScanner.h"
 #include "resource.h"
+#include "../common/mptFS.h"
 #include "../soundlib/mod_specifications.h"
 #include <algorithm>
 

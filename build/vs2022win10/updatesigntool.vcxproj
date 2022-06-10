@@ -1271,7 +1271,10 @@
     <ClInclude Include="..\..\common\mptBaseTypes.h" />
     <ClInclude Include="..\..\common\mptBaseUtils.h" />
     <ClInclude Include="..\..\common\mptCPU.h" />
+    <ClInclude Include="..\..\common\mptFS.h" />
     <ClInclude Include="..\..\common\mptFileIO.h" />
+    <ClInclude Include="..\..\common\mptFileTemporary.h" />
+    <ClInclude Include="..\..\common\mptFileType.h" />
     <ClInclude Include="..\..\common\mptPathString.h" />
     <ClInclude Include="..\..\common\mptRandom.h" />
     <ClInclude Include="..\..\common\mptString.h" />
@@ -1465,7 +1468,10 @@
     <ClCompile Include="..\..\common\ComponentManager.cpp" />
     <ClCompile Include="..\..\common\Logging.cpp" />
     <ClCompile Include="..\..\common\Profiler.cpp" />
+    <ClCompile Include="..\..\common\mptFS.cpp" />
     <ClCompile Include="..\..\common\mptFileIO.cpp" />
+    <ClCompile Include="..\..\common\mptFileTemporary.cpp" />
+    <ClCompile Include="..\..\common\mptFileType.cpp" />
     <ClCompile Include="..\..\common\mptPathString.cpp" />
     <ClCompile Include="..\..\common\mptRandom.cpp" />
     <ClCompile Include="..\..\common\mptString.cpp" />

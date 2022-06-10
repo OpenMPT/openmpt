@@ -44,6 +44,9 @@
 #ifdef MPT_WITH_VST
 #include "../../mptrack/Vstplug.h"
 #include "../../pluginBridge/BridgeWrapper.h"
+#ifdef MODPLUG_TRACKER
+#include "../../common/mptFS.h"
+#endif // MODPLUG_TRACKER
 #endif // MPT_WITH_VST
 
 #if defined(MPT_WITH_DMO)

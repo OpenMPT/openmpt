@@ -17,6 +17,7 @@
 #include "../mptrack/Moddoc.h"
 #include "../mptrack/Mptrack.h"
 #include "../common/mptFileIO.h"
+#include "../common/mptFS.h"
 #endif // MODPLUG_TRACKER
 
 OPENMPT_NAMESPACE_BEGIN

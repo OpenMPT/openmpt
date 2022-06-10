@@ -19,6 +19,7 @@
 #include "Dlsbank.h"
 #include "dlg_misc.h"
 #include "../common/mptFileIO.h"
+#include "../common/mptFS.h"
 #include "../common/FileReader.h"
 #include "FileDialog.h"
 #include "Globals.h"

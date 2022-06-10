@@ -61,6 +61,7 @@
 #include "../mptrack/HTTP.h"
 #endif // MODPLUG_TRACKER
 #include "../common/mptFileIO.h"
+#include "../common/mptFS.h"
 #ifdef MODPLUG_TRACKER
 #include "mpt/crypto/hash.hpp"
 #include "mpt/crypto/jwk.hpp"

@@ -12,6 +12,7 @@
 #include "WelcomeDialog.h"
 #include "resource.h"
 #include "Mainfrm.h"
+#include "../common/mptFS.h"
 #include "../common/mptStringBuffer.h"
 #include "InputHandler.h"
 #include "CommandSet.h"

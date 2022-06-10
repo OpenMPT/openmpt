@@ -21,6 +21,7 @@
 #endif
 #ifdef MPT_EXTERNAL_SAMPLES
 // For loading external data in Startrekker files
+#include "../common/mptFS.h"
 #include "../common/mptPathString.h"
 #endif  // MPT_EXTERNAL_SAMPLES
 

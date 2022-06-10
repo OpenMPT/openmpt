@@ -17,6 +17,7 @@
 #include "../common/mptFileIO.h"
 #include "Loaders.h"
 #ifdef MODPLUG_TRACKER
+#include "../common/mptFS.h"
 #include "../mptrack/TrackerSettings.h"
 #endif //MODPLUG_TRACKER
 

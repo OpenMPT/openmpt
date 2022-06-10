@@ -15,6 +15,7 @@
 #include "ModDocTemplate.h"
 #include "Reporting.h"
 #include "SelectPluginDialog.h"
+#include "../common/mptFS.h"
 #include "../soundlib/plugins/PluginManager.h"
 
 OPENMPT_NAMESPACE_BEGIN
