@@ -33,20 +33,22 @@ mpt::RawPathString SupportLongPath(const mpt::RawPathString &path)
 	// For WinRT on Windows 8, there is no official wy to determine an absolute path.
 	return path;
 #else // !MPT_OS_WINDOWS_WINRT
-	if(path.length() < MAX_PATH || path.substr(0, 4) == PL_("\\\\?\\"))
+	using namespace path_literals;
+	using char_type = RawPathString::value_type;
+	if(path.length() < MAX_PATH || path.substr(0, 4) == L<char_type>("\\\\?\\"))
 	{
 		// Path is short enough or already in prefixed form
 		return path;
 	}
 	const RawPathString absPath = mpt::GetAbsolutePath(mpt::PathString::FromNative(path)).AsNative();
-	if(absPath.substr(0, 2) == PL_("\\\\"))
+	if(absPath.substr(0, 2) == L<char_type>("\\\\"))
 	{
 		// Path is a network share: \\server\foo.bar -> \\?\UNC\server\foo.bar
-		return PL_("\\\\?\\UNC") + absPath.substr(1);
+		return L<char_type>("\\\\?\\UNC") + absPath.substr(1);
 	} else
 	{
 		// Regular file: C:\foo.bar -> \\?\C:\foo.bar
-		return PL_("\\\\?\\") + absPath;
+		return L<char_type>("\\\\?\\") + absPath;
 	}
 #endif // MPT_OS_WINDOWS_WINRT
 #else // !MPT_OS_WINDOWS
@@ -73,10 +75,12 @@ int PathCompareNoCase(const PathString & a, const PathString & b)
 
 bool NativePathTraits::IsPathSeparator(RawPathString::value_type c)
 {
+	using namespace path_literals;
+	using char_type = RawPathString::value_type;
 #if MPT_OS_WINDOWS || MPT_OS_DJGPP
-	return (c == PC_('\\')) || (c == PC_('/'));
+	return (c == L<char_type>('\\')) || (c == L<char_type>('/'));
 #else
-	return c == PC_('/');
+	return c == L<char_type>('/');
 #endif
 }
 
@@ -84,10 +88,12 @@ bool NativePathTraits::IsPathSeparator(RawPathString::value_type c)
 
 RawPathString::value_type NativePathTraits::GetDefaultPathSeparator()
 {
+	using namespace path_literals;
+	using char_type = RawPathString::value_type;
 #if MPT_OS_WINDOWS || MPT_OS_DJGPP
-	return PC_('\\');
+	return L<char_type>('\\');
 #else
-	return PC_('/');
+	return L<char_type>('/');
 #endif
 }
 
@@ -100,6 +106,9 @@ RawPathString::value_type NativePathTraits::GetDefaultPathSeparator()
 RawPathString NativePathTraits::Simplify(const RawPathString &path)
 {
 
+	using namespace path_literals;
+	using char_type = RawPathString::value_type;
+
 	if(path.empty())
 	{
 		return RawPathString();
@@ -110,44 +119,44 @@ RawPathString NativePathTraits::Simplify(const RawPathString &path)
 	std::vector<RawPathString> components;
 	RawPathString root;
 	RawPathString::size_type startPos = 0;
-	if(path.size() >= 2 && path[1] == PC_(':'))
+	if(path.size() >= 2 && path[1] == L<char_type>(':'))
 	{
 		// Drive letter
-		root = path.substr(0, 2) + PC_('\\');
+		root = path.substr(0, 2) + L<char_type>('\\');
 		startPos = 2;
-	} else if(path.substr(0, 2) == PL_("\\\\"))
+	} else if(path.substr(0, 2) == L<char_type>("\\\\"))
 	{
 		// Network share
-		root = PL_("\\\\");
+		root = L<char_type>("\\\\");
 		startPos = 2;
-	} else if(path.substr(0, 2) == PL_(".\\") || path.substr(0, 2) == PL_("./"))
+	} else if(path.substr(0, 2) == L<char_type>(".\\") || path.substr(0, 2) == L<char_type>("./"))
 	{
 		// Special case for relative paths
-		root = PL_(".\\");
+		root = L<char_type>(".\\");
 		startPos = 2;
-	} else if(path.size() >= 1 && (path[0] == PC_('\\') || path[0] == PC_('/')))
+	} else if(path.size() >= 1 && (path[0] == L<char_type>('\\') || path[0] == L<char_type>('/')))
 	{
 		// Special case for relative paths
-		root = PL_("\\");
+		root = L<char_type>("\\");
 		startPos = 1;
 	}
 
 	while(startPos < path.size())
 	{
-		auto pos = path.find_first_of(PL_("\\/"), startPos);
+		auto pos = path.find_first_of(L<char_type>("\\/"), startPos);
 		if(pos == RawPathString::npos)
 		{
 			pos = path.size();
 		}
 		RawPathString dir = path.substr(startPos, pos - startPos);
-		if(dir == PL_(".."))
+		if(dir == L<char_type>(".."))
 		{
 			// Go back one directory
 			if(!components.empty())
 			{
 				components.pop_back();
 			}
-		} else if(dir == PL_("."))
+		} else if(dir == L<char_type>("."))
 		{
 			// nop
 		} else if(!dir.empty())
@@ -161,7 +170,7 @@ RawPathString NativePathTraits::Simplify(const RawPathString &path)
 	result.reserve(path.size());
 	for(const auto &component : components)
 	{
-		result += component + PL_("\\");
+		result += component + L<char_type>("\\");
 	}
 	if(!components.empty())
 	{
@@ -173,34 +182,34 @@ RawPathString NativePathTraits::Simplify(const RawPathString &path)
 	std::vector<RawPathString> components;
 	RawPathString root;
 	RawPathString::size_type startPos = 0;
-	if(path.substr(0, 2) == PL_("./"))
+	if(path.substr(0, 2) == L<char_type>("./"))
 	{
 		// Special case for relative paths
-		root = PL_("./");
+		root = L<char_type>("./");
 		startPos = 2;
-	} else if(path.size() >= 1 && (path[0] == PC_('/')))
+	} else if(path.size() >= 1 && (path[0] == L<char_type>('/')))
 	{
 		// Special case for relative paths
-		root = PL_("/");
+		root = L<char_type>("/");
 		startPos = 1;
 	}
 
 	while(startPos < path.size())
 	{
-		auto pos = path.find_first_of(PL_("/"), startPos);
+		auto pos = path.find_first_of(L<char_type>("/"), startPos);
 		if(pos == RawPathString::npos)
 		{
 			pos = path.size();
 		}
 		RawPathString dir = path.substr(startPos, pos - startPos);
-		if(dir == PL_(".."))
+		if(dir == L<char_type>(".."))
 		{
 			// Go back one directory
 			if(!components.empty())
 			{
 				components.pop_back();
 			}
-		} else if(dir == PL_("."))
+		} else if(dir == L<char_type>("."))
 		{
 			// nop
 		} else if(!dir.empty())
@@ -214,7 +223,7 @@ RawPathString NativePathTraits::Simplify(const RawPathString &path)
 	result.reserve(path.size());
 	for(const auto &component : components)
 	{
-		result += component + PL_("/");
+		result += component + L<char_type>("/");
 	}
 	if(!components.empty())
 	{
@@ -232,6 +241,9 @@ RawPathString NativePathTraits::Simplify(const RawPathString &path)
 void NativePathTraits::SplitPath(RawPathString p, RawPathString *prefix, RawPathString *drive, RawPathString *dir, RawPathString *fbase, RawPathString *fext)
 {
 
+	using namespace path_literals;
+	using char_type = RawPathString::value_type;
+
 	if(prefix) *prefix = RawPathString();
 	if(drive) *drive = RawPathString();
 	if(dir) *dir = RawPathString();
@@ -246,27 +258,27 @@ void NativePathTraits::SplitPath(RawPathString p, RawPathString *prefix, RawPath
 	//  * no support for \\?\ prefixed paths
 
 	// remove \\?\\ prefix
-	if(p.substr(0, 8) == PL_("\\\\?\\UNC\\"))
+	if(p.substr(0, 8) == L<char_type>("\\\\?\\UNC\\"))
 	{
-		if(prefix) *prefix = PL_("\\\\?\\UNC");
-		p = PL_("\\\\") + p.substr(8);
-	} else if(p.substr(0, 4) == PL_("\\\\?\\"))
+		if(prefix) *prefix = L<char_type>("\\\\?\\UNC");
+		p = L<char_type>("\\\\") + p.substr(8);
+	} else if(p.substr(0, 4) == L<char_type>("\\\\?\\"))
 	{
-		if (prefix) *prefix = PL_("\\\\?\\");
+		if (prefix) *prefix = L<char_type>("\\\\?\\");
 		p = p.substr(4);
 	}
 
 	if(p.length() >= 2 && (
-		p.substr(0, 2) == PL_("\\\\")
-		|| p.substr(0, 2) == PL_("\\/")
-		|| p.substr(0, 2) == PL_("/\\")
-		|| p.substr(0, 2) == PL_("//")
+		p.substr(0, 2) == L<char_type>("\\\\")
+		|| p.substr(0, 2) == L<char_type>("\\/")
+		|| p.substr(0, 2) == L<char_type>("/\\")
+		|| p.substr(0, 2) == L<char_type>("//")
 		))
 	{ // UNC
-		RawPathString::size_type first_slash = p.substr(2).find_first_of(PL_("\\/"));
+		RawPathString::size_type first_slash = p.substr(2).find_first_of(L<char_type>("\\/"));
 		if(first_slash != RawPathString::npos)
 		{
-			RawPathString::size_type second_slash = p.substr(2 + first_slash + 1).find_first_of(PL_("\\/"));
+			RawPathString::size_type second_slash = p.substr(2 + first_slash + 1).find_first_of(L<char_type>("\\/"));
 			if(second_slash != RawPathString::npos)
 			{
 				if(drive) *drive = p.substr(0, 2 + first_slash + 1 + second_slash);
@@ -283,7 +295,7 @@ void NativePathTraits::SplitPath(RawPathString p, RawPathString *prefix, RawPath
 		}
 	} else
 	{ // local
-		if(p.length() >= 2 && (p[1] == PC_(':')))
+		if(p.length() >= 2 && (p[1] == L<char_type>(':')))
 		{
 			if(drive) *drive = p.substr(0, 2);
 			p = p.substr(2);
@@ -292,7 +304,7 @@ void NativePathTraits::SplitPath(RawPathString p, RawPathString *prefix, RawPath
 			if(drive) *drive = RawPathString();
 		}
 	}
-	RawPathString::size_type last_slash = p.find_last_of(PL_("\\/"));
+	RawPathString::size_type last_slash = p.find_last_of(L<char_type>("\\/"));
 	if(last_slash != RawPathString::npos)
 	{
 		if(dir) *dir = p.substr(0, last_slash + 1);
@@ -301,7 +313,7 @@ void NativePathTraits::SplitPath(RawPathString p, RawPathString *prefix, RawPath
 	{
 		if(dir) *dir = RawPathString();
 	}
-	RawPathString::size_type last_dot = p.find_last_of(PL_("."));
+	RawPathString::size_type last_dot = p.find_last_of(L<char_type>("."));
 	if(last_dot == RawPathString::npos)
 	{
 		if(fbase) *fbase = p;
@@ -310,7 +322,7 @@ void NativePathTraits::SplitPath(RawPathString p, RawPathString *prefix, RawPath
 	{
 		if(fbase) *fbase = p;
 		if(fext) *fext = RawPathString();
-	} else if(p == PL_(".") || p == PL_(".."))
+	} else if(p == L<char_type>(".") || p == L<char_type>(".."))
 	{
 		if(fbase) *fbase = p;
 		if(fext) *fext = RawPathString();
@@ -322,7 +334,7 @@ void NativePathTraits::SplitPath(RawPathString p, RawPathString *prefix, RawPath
 
 #else // !MOT_OS_WINDOWS
 
-	RawPathString::size_type last_slash = p.find_last_of(PL_("/"));
+	RawPathString::size_type last_slash = p.find_last_of(L<char_type>("/"));
 	if(last_slash != RawPathString::npos)
 	{
 		if(dir) *dir = p.substr(0, last_slash + 1);
@@ -331,7 +343,7 @@ void NativePathTraits::SplitPath(RawPathString p, RawPathString *prefix, RawPath
 	{
 		if(dir) *dir = RawPathString();
 	}
-	RawPathString::size_type last_dot = p.find_last_of(PL_("."));
+	RawPathString::size_type last_dot = p.find_last_of(L<char_type>("."));
 	if(last_dot == RawPathString::npos)
 	{
 		if(fbase) *fbase = p;
@@ -340,7 +352,7 @@ void NativePathTraits::SplitPath(RawPathString p, RawPathString *prefix, RawPath
 	{
 		if(fbase) *fbase = p;
 		if(fext) *fext = RawPathString();
-	} else if(p == PL_(".") || p == PL_(".."))
+	} else if(p == L<char_type>(".") || p == L<char_type>(".."))
 	{
 		if(fbase) *fbase = p;
 		if(fext) *fext = RawPathString();
@@ -362,6 +374,8 @@ void NativePathTraits::SplitPath(RawPathString p, RawPathString *prefix, RawPath
 // Convert an absolute path to a path that's relative to "&relativeTo".
 mpt::PathString AbsolutePathToRelative(const mpt::PathString &path, const mpt::PathString &relativeTo)
 {
+	using namespace path_literals;
+	using char_type = RawPathString::value_type;
 	mpt::PathString result = path;
 	if(path.empty())
 	{
@@ -370,7 +384,7 @@ mpt::PathString AbsolutePathToRelative(const mpt::PathString &path, const mpt::P
 	if(!_tcsncicmp(relativeTo.AsNative().c_str(), path.AsNative().c_str(), relativeTo.AsNative().length()))
 	{
 		// Path is OpenMPT's directory or a sub directory ("C:\OpenMPT\Somepath" => ".\Somepath")
-		result = P_(".\\"); // ".\"
+		result = mpt::PathString::FromNative(L<char_type>(".\\")); // ".\"
 		result += mpt::PathString::FromNative(path.AsNative().substr(relativeTo.AsNative().length()));
 	} else if(!_tcsncicmp(relativeTo.AsNative().c_str(), path.AsNative().c_str(), 2))
 	{
@@ -384,26 +398,28 @@ mpt::PathString AbsolutePathToRelative(const mpt::PathString &path, const mpt::P
 // Convert a path that is relative to "&relativeTo" to an absolute path.
 mpt::PathString RelativePathToAbsolute(const mpt::PathString &path, const mpt::PathString &relativeTo)
 {
+	using namespace path_literals;
+	using char_type = RawPathString::value_type;
 	mpt::PathString result = path;
 	if(path.empty())
 	{
 		return result;
 	}
-	if(path.length() >= 2 && path.AsNative()[0] == PC_('\\') && path.AsNative()[1] == PC_('\\'))
+	if(path.length() >= 2 && path.AsNative()[0] == L<char_type>('\\') && path.AsNative()[1] == L<char_type>('\\'))
 	{
 		// Network / UNC paths
 		return result;
-	} if(path.length() >= 1 && path.AsNative()[0] == PC_('\\'))
+	} if(path.length() >= 1 && path.AsNative()[0] == L<char_type>('\\'))
 	{
 		// Path is on the same drive as relativeTo ("\Somepath\" => "C:\Somepath\")
 		result = mpt::PathString::FromNative(relativeTo.AsNative().substr(0, 2));
 		result += mpt::PathString(path);
-	} else if(path.length() >= 2 && path.AsNative().substr(0, 2) == PL_(".\\"))
+	} else if(path.length() >= 2 && path.AsNative().substr(0, 2) == L<char_type>(".\\"))
 	{
 		// Path is in relativeTo or a sub directory (".\Somepath\" => "C:\OpenMPT\Somepath\")
 		result = relativeTo; // "C:\OpenMPT\"
 		result += mpt::PathString::FromNative(path.AsNative().substr(2));
-	} else if(path.length() < 3 || path.AsNative()[1] != PC_(':') || path.AsNative()[2] != PC_('\\'))
+	} else if(path.length() < 3 || path.AsNative()[1] != L<char_type>(':') || path.AsNative()[2] != L<char_type>('\\'))
 	{
 		// Any other path not starting with drive letter
 		result = relativeTo;  // "C:\OpenMPT\"
@@ -420,23 +436,25 @@ mpt::PathString RelativePathToAbsolute(const mpt::PathString &path, const mpt::P
 bool NativePathTraits::IsAbsolute(const RawPathString &path)
 {
 #if MPT_OS_WINDOWS
-	if(path.substr(0, 8) == PL_("\\\\?\\UNC\\"))
+	using namespace path_literals;
+	using char_type = RawPathString::value_type;
+	if(path.substr(0, 8) == L<char_type>("\\\\?\\UNC\\"))
 	{
 		return true;
 	}
-	if(path.substr(0, 4) == PL_("\\\\?\\"))
+	if(path.substr(0, 4) == L<char_type>("\\\\?\\"))
 	{
 		return true;
 	}
-	if(path.substr(0, 2) == PL_("\\\\"))
+	if(path.substr(0, 2) == L<char_type>("\\\\"))
 	{
 		return true; // UNC
 	}
-	if(path.substr(0, 2) == PL_("//"))
+	if(path.substr(0, 2) == L<char_type>("//"))
 	{
 		return true; // UNC
 	}
-	return (path.length()) >= 3 && (path[1] == ':') && IsPathSeparator(path[2]);
+	return (path.length()) >= 3 && (path[1] == L<char_type>(':')) && IsPathSeparator(path[2]);
 #else
 	return (path.length() >= 1) && IsPathSeparator(path[0]);
 #endif

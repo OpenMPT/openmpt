@@ -12,12 +12,16 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
+#include "mpt/base/detect.hpp"
 #include "mpt/base/namespace.hpp"
 #include "mpt/path/os_path.hpp"
 #include "mpt/string/types.hpp"
 #include "mpt/string_transcode/transcode.hpp"
 
 #include "mptString.h"
+
+#include <stdexcept>
+#include <string_view>
 
 
 
@@ -44,6 +48,223 @@ using RawPathString = mpt::utf8string;
 #define PL_(x) MPT_PATHSTRING_LITERAL(x)
 #define P_(x) MPT_PATHSTRING(x)
 
+
+namespace path_literals
+{
+
+template <typename Tchar>
+struct literals;
+
+template <typename Tchar>
+MPT_CONSTEVAL Tchar L(char x) {
+	return path_literals::literals<Tchar>::L(x);
+}
+
+template <typename Tchar, std::size_t N>
+MPT_CONSTEVAL const Tchar * L(const char (&x)[N]) {
+	return path_literals::literals<Tchar>::L(x);
+}
+
+template <>
+struct literals<char> {
+	using char_type = char;
+	static MPT_CONSTEVAL char_type L(char c) {
+		if (c == '\0') return '\0';
+		if (c == '\\') return '\\';
+		if (c == '/') return '/';
+		if (c == '.') return '.';
+		if (c == ':') return ':';
+#if defined(MPT_COMPILER_QUIRK_NO_CONSTEXPR_THROW)
+		else return false ? 0 : throw std::domain_error("invalid path literal");
+#else
+		throw std::domain_error("invalid path literal");
+#endif
+	}
+	template <std::size_t N>
+	static MPT_CONSTEVAL const char_type * L(const char (&s)[N]) {
+		if (std::string_view(s) == std::string_view("")) return "";
+		if (std::string_view(s) == std::string_view("/")) return "/";
+		if (std::string_view(s) == std::string_view(".")) return ".";
+		if (std::string_view(s) == std::string_view("\\")) return "\\";
+		if (std::string_view(s) == std::string_view("..")) return "..";
+		if (std::string_view(s) == std::string_view("//")) return "//";
+		if (std::string_view(s) == std::string_view("./")) return "./";
+		if (std::string_view(s) == std::string_view(".\\")) return ".\\";
+		if (std::string_view(s) == std::string_view("\\/")) return "\\/";
+		if (std::string_view(s) == std::string_view("/\\")) return "/\\";
+		if (std::string_view(s) == std::string_view("\\\\")) return "\\\\";
+		if (std::string_view(s) == std::string_view("\\\\?\\")) return "\\\\?\\";
+		if (std::string_view(s) == std::string_view("\\\\?\\UNC")) return "\\\\?\\UNC";
+		if (std::string_view(s) == std::string_view("\\\\?\\UNC\\")) return "\\\\?\\UNC\\";
+#if defined(MPT_COMPILER_QUIRK_NO_CONSTEXPR_THROW)
+		else return false ? nullptr : throw std::domain_error("invalid path literal");
+#else
+		throw std::domain_error("invalid path literal");
+#endif
+	}
+};
+
+#if !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
+template <>
+struct literals<wchar_t> {
+	using char_type = wchar_t;
+	static MPT_CONSTEVAL char_type L(char c) {
+		if (c == '\0') return L'\0';
+		if (c == '\\') return L'\\';
+		if (c == '/') return L'/';
+		if (c == '.') return L'.';
+		if (c == ':') return L':';
+#if defined(MPT_COMPILER_QUIRK_NO_CONSTEXPR_THROW)
+		else return false ? 0 : throw std::domain_error("invalid path literal");
+#else
+		throw std::domain_error("invalid path literal");
+#endif
+	}
+	template <std::size_t N>
+	static MPT_CONSTEVAL const char_type * L(const char (&s)[N]) {
+		if (std::string_view(s) == std::string_view("")) return L"";
+		if (std::string_view(s) == std::string_view("/")) return L"/";
+		if (std::string_view(s) == std::string_view(".")) return L".";
+		if (std::string_view(s) == std::string_view("\\")) return L"\\";
+		if (std::string_view(s) == std::string_view("..")) return L"..";
+		if (std::string_view(s) == std::string_view("//")) return L"//";
+		if (std::string_view(s) == std::string_view("./")) return L"./";
+		if (std::string_view(s) == std::string_view(".\\")) return L".\\";
+		if (std::string_view(s) == std::string_view("\\/")) return L"\\/";
+		if (std::string_view(s) == std::string_view("/\\")) return L"/\\";
+		if (std::string_view(s) == std::string_view("\\\\")) return L"\\\\";
+		if (std::string_view(s) == std::string_view("\\\\?\\")) return L"\\\\?\\";
+		if (std::string_view(s) == std::string_view("\\\\?\\UNC")) return L"\\\\?\\UNC";
+		if (std::string_view(s) == std::string_view("\\\\?\\UNC\\")) return L"\\\\?\\UNC\\";
+#if defined(MPT_COMPILER_QUIRK_NO_CONSTEXPR_THROW)
+		else return false ? nullptr : throw std::domain_error("invalid path literal");
+#else
+		throw std::domain_error("invalid path literal");
+#endif
+	}
+};
+#endif // !MPT_COMPILER_QUIRK_NO_WCHAR
+
+#if MPT_CXX_AT_LEAST(20)
+template <>
+struct literals<char8_t> {
+	using char_type = char8_t;
+	static MPT_CONSTEVAL char_type L(char c) {
+		if (c == '\0') return u8'\0';
+		if (c == '\\') return u8'\\';
+		if (c == '/') return u8'/';
+		if (c == '.') return u8'.';
+		if (c == ':') return u8':';
+#if defined(MPT_COMPILER_QUIRK_NO_CONSTEXPR_THROW)
+		else return false ? 0 : throw std::domain_error("invalid path literal");
+#else
+		throw std::domain_error("invalid path literal");
+#endif
+	}
+	template <std::size_t N>
+	static MPT_CONSTEVAL const char_type * L(const char (&s)[N]) {
+		if (std::string_view(s) == std::string_view("")) return u8"";
+		if (std::string_view(s) == std::string_view("/")) return u8"/";
+		if (std::string_view(s) == std::string_view(".")) return u8".";
+		if (std::string_view(s) == std::string_view("\\")) return u8"\\";
+		if (std::string_view(s) == std::string_view("..")) return u8"..";
+		if (std::string_view(s) == std::string_view("//")) return u8"//";
+		if (std::string_view(s) == std::string_view("./")) return u8"./";
+		if (std::string_view(s) == std::string_view(".\\")) return u8".\\";
+		if (std::string_view(s) == std::string_view("\\/")) return u8"\\/";
+		if (std::string_view(s) == std::string_view("/\\")) return u8"/\\";
+		if (std::string_view(s) == std::string_view("\\\\")) return u8"\\\\";
+		if (std::string_view(s) == std::string_view("\\\\?\\")) return u8"\\\\?\\";
+		if (std::string_view(s) == std::string_view("\\\\?\\UNC")) return u8"\\\\?\\UNC";
+		if (std::string_view(s) == std::string_view("\\\\?\\UNC\\")) return u8"\\\\?\\UNC\\";
+#if defined(MPT_COMPILER_QUIRK_NO_CONSTEXPR_THROW)
+		else return false ? nullptr : throw std::domain_error("invalid path literal");
+#else
+		throw std::domain_error("invalid path literal");
+#endif
+	}
+};
+#endif // C++20
+
+template <>
+struct literals<char16_t> {
+	using char_type = char16_t;
+	static MPT_CONSTEVAL char_type L(char c) {
+		if (c == '\0') return u'\0';
+		if (c == '\\') return u'\\';
+		if (c == '/') return u'/';
+		if (c == '.') return u'.';
+		if (c == ':') return u':';
+#if defined(MPT_COMPILER_QUIRK_NO_CONSTEXPR_THROW)
+		else return false ? 0 : throw std::domain_error("invalid path literal");
+#else
+		throw std::domain_error("invalid path literal");
+#endif
+	}
+	template <std::size_t N>
+	static MPT_CONSTEVAL const char_type * L(const char (&s)[N]) {
+		if (std::string_view(s) == std::string_view("")) return u"";
+		if (std::string_view(s) == std::string_view("/")) return u"/";
+		if (std::string_view(s) == std::string_view(".")) return u".";
+		if (std::string_view(s) == std::string_view("\\")) return u"\\";
+		if (std::string_view(s) == std::string_view("..")) return u"..";
+		if (std::string_view(s) == std::string_view("//")) return u"//";
+		if (std::string_view(s) == std::string_view("./")) return u"./";
+		if (std::string_view(s) == std::string_view(".\\")) return u".\\";
+		if (std::string_view(s) == std::string_view("\\/")) return u"\\/";
+		if (std::string_view(s) == std::string_view("/\\")) return u"/\\";
+		if (std::string_view(s) == std::string_view("\\\\")) return u"\\\\";
+		if (std::string_view(s) == std::string_view("\\\\?\\")) return u"\\\\?\\";
+		if (std::string_view(s) == std::string_view("\\\\?\\UNC")) return u"\\\\?\\UNC";
+		if (std::string_view(s) == std::string_view("\\\\?\\UNC\\")) return u"\\\\?\\UNC\\";
+#if defined(MPT_COMPILER_QUIRK_NO_CONSTEXPR_THROW)
+		else return false ? nullptr : throw std::domain_error("invalid path literal");
+#else
+		throw std::domain_error("invalid path literal");
+#endif
+	}
+};
+
+template <>
+struct literals<char32_t> {
+	using char_type = char32_t;
+	static MPT_CONSTEVAL char_type L(char c) {
+		if (c == '\0') return U'\0';
+		if (c == '\\') return U'\\';
+		if (c == '/') return U'/';
+		if (c == '.') return U'.';
+		if (c == ':') return U':';
+#if defined(MPT_COMPILER_QUIRK_NO_CONSTEXPR_THROW)
+		else return false ? 0 : throw std::domain_error("invalid path literal");
+#else
+		throw std::domain_error("invalid path literal");
+#endif
+	}
+	template <std::size_t N>
+	static MPT_CONSTEVAL const char_type * L(const char (&s)[N]) {
+		if (std::string_view(s) == std::string_view("")) return U"";
+		if (std::string_view(s) == std::string_view("/")) return U"/";
+		if (std::string_view(s) == std::string_view(".")) return U".";
+		if (std::string_view(s) == std::string_view("\\")) return U"\\";
+		if (std::string_view(s) == std::string_view("..")) return U"..";
+		if (std::string_view(s) == std::string_view("//")) return U"//";
+		if (std::string_view(s) == std::string_view("./")) return U"./";
+		if (std::string_view(s) == std::string_view(".\\")) return U".\\";
+		if (std::string_view(s) == std::string_view("\\/")) return U"\\/";
+		if (std::string_view(s) == std::string_view("/\\")) return U"/\\";
+		if (std::string_view(s) == std::string_view("\\\\")) return U"\\\\";
+		if (std::string_view(s) == std::string_view("\\\\?\\")) return U"\\\\?\\";
+		if (std::string_view(s) == std::string_view("\\\\?\\UNC")) return U"\\\\?\\UNC";
+		if (std::string_view(s) == std::string_view("\\\\?\\UNC\\")) return U"\\\\?\\UNC\\";
+#if defined(MPT_COMPILER_QUIRK_NO_CONSTEXPR_THROW)
+		else return false ? nullptr : throw std::domain_error("invalid path literal");
+#else
+		throw std::domain_error("invalid path literal");
+#endif
+	}
+};
+
+} // namespace path_literals
 
 
 struct NativePathTraits
