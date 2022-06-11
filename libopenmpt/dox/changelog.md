@@ -18,6 +18,8 @@ is just a high-level summary.
     is now deprecated because this is not supported for GCC 11 or later (see
     <https://github.com/meganz/mingw-std-threads/issues/79>).
 
+ *  Ping-pong sample loops sometimes stopped playing at the end of the loop.
+
 ### libopenmpt 0.6.3 (2022-04-24)
 
  *  Pitch / Pan Separation and Random Variation instrument properties were not
