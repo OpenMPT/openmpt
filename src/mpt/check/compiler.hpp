@@ -78,7 +78,10 @@ MPT_WARNING("C++ compiler uses non-Unicode wchar_t.")
 
 #ifndef MPT_CHECK_CXX_IGNORE_WARNING_EBCDIC
 #if defined(__STDC_MB_MIGHT_NEQ_WC__) && (__STDC_MB_MIGHT_NEQ_WC__ == 1)
+#if !(MPT_COMPILER_CLANG && MPT_OS_FREEBSD)
+// Disabled on FreeBSD because <https://github.com/llvm/llvm-project/blob/c7a56af3072c2fa89f0968d7f00b22f7bff0812b/clang/lib/Basic/Targets/OSTargets.h#L225>.
 MPT_WARNING("C++ compiler uses a weird 8bit charset, maybe EBCDIC.")
+#endif
 #endif
 #endif
 
