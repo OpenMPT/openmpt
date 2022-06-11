@@ -431,7 +431,7 @@ public:
 #endif // MPT_OS
 
 
-LibraryPath::LibraryPath(mpt::LibrarySearchPath searchPath, class mpt::PathString const &fileName)
+LibraryPath::LibraryPath(mpt::LibrarySearchPath searchPath, const mpt::PathString &fileName)
 	: searchPath(searchPath)
 	, fileName(fileName)
 {
