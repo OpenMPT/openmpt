@@ -669,11 +669,8 @@ struct NativePathTraits
 
 
 
-namespace DetailPathString
-{
-
 template <typename Traits>
-class PathString
+class BasicPathString
 {
 
 private:
@@ -686,7 +683,7 @@ private:
 	
 private:
 
-	explicit PathString(const raw_path_type &path_)
+	explicit BasicPathString(const raw_path_type &path_)
 		: path(path_)
 	{
 		return;
@@ -694,59 +691,59 @@ private:
 
 public:
 
-	PathString() = default;
-	PathString(const PathString &) = default;
-	PathString(PathString &&) noexcept = default;
+	BasicPathString() = default;
+	BasicPathString(const BasicPathString &) = default;
+	BasicPathString(BasicPathString &&) noexcept = default;
 
-	PathString & assign(const PathString & other)
+	BasicPathString & assign(const BasicPathString & other)
 	{
 		path = other.path;
 		return *this;
 	}
 
-	PathString & assign(PathString && other) noexcept
+	BasicPathString & assign(BasicPathString && other) noexcept
 	{
 		path = std::move(other.path);
 		return *this;
 	}
 	
-	PathString & operator = (const PathString & other)
+	BasicPathString & operator = (const BasicPathString & other)
 	{
 		return assign(other);
 	}
 	
-	PathString &operator = (PathString && other) noexcept
+	BasicPathString &operator = (BasicPathString && other) noexcept
 	{
 		return assign(std::move(other));
 	}
 	
-	PathString & append(const PathString & other)
+	BasicPathString & append(const BasicPathString & other)
 	{
 		path.append(other.path);
 		return *this;
 	}
 	
-	PathString & operator += (const PathString & other)
+	BasicPathString & operator += (const BasicPathString & other)
 	{
 		return append(other);
 	}
 
-	friend PathString operator + (const PathString & a, const PathString & b)
+	friend BasicPathString operator + (const BasicPathString & a, const BasicPathString & b)
 	{
-		return PathString(a).append(b);
+		return BasicPathString(a).append(b);
 	}
 
-	friend bool operator < (const PathString & a, const PathString & b)
+	friend bool operator < (const BasicPathString & a, const BasicPathString & b)
 	{
 		return a.AsNative() < b.AsNative();
 	}
 
-	friend bool operator == (const PathString & a, const PathString & b)
+	friend bool operator == (const BasicPathString & a, const BasicPathString & b)
 	{
 		return a.AsNative() == b.AsNative();
 	}
 	
-	friend bool operator != (const PathString & a, const PathString & b)
+	friend bool operator != (const BasicPathString & a, const BasicPathString & b)
 	{
 		return a.AsNative() != b.AsNative();
 	}
@@ -773,9 +770,9 @@ public:
 		return path;
 	}
 	
-	static PathString FromNative(const raw_path_type &path)
+	static BasicPathString FromNative(const raw_path_type &path)
 	{
-		return PathString(path);
+		return BasicPathString(path);
 	}
 
 	mpt::ustring ToUnicode() const
@@ -783,9 +780,9 @@ public:
 		return mpt::transcode<mpt::ustring>(path);
 	}
 
-	static PathString FromUnicode(const mpt::ustring &path)
+	static BasicPathString FromUnicode(const mpt::ustring &path)
 	{
-		return PathString(mpt::transcode<raw_path_type>(path));
+		return BasicPathString(mpt::transcode<raw_path_type>(path));
 	}
 
 	std::string ToUTF8() const
@@ -793,9 +790,9 @@ public:
 		return mpt::transcode<std::string>(mpt::common_encoding::utf8, path);
 	}
 
-	static PathString FromUTF8(const std::string &path)
+	static BasicPathString FromUTF8(const std::string &path)
 	{
-		return PathString(mpt::transcode<raw_path_type>(mpt::common_encoding::utf8, path));
+		return BasicPathString(mpt::transcode<raw_path_type>(mpt::common_encoding::utf8, path));
 	}
 
 #if MPT_WSTRING_CONVERT
@@ -805,9 +802,9 @@ public:
 		return mpt::transcode<std::wstring>(path);
 	}
 
-	static PathString FromWide(const std::wstring &path)
+	static BasicPathString FromWide(const std::wstring &path)
 	{
-		return PathString(mpt::transcode<raw_path_type>(path));
+		return BasicPathString(mpt::transcode<raw_path_type>(path));
 	}
 
 #endif // MPT_WSTRING_CONVERT
@@ -819,9 +816,9 @@ public:
 		return mpt::transcode<std::string>(mpt::logical_encoding::locale, path);
 	}
 
-	static PathString FromLocale(const std::string &path)
+	static BasicPathString FromLocale(const std::string &path)
 	{
-		return PathString(mpt::transcode<raw_path_type>(mpt::logical_encoding::locale, path));
+		return BasicPathString(mpt::transcode<raw_path_type>(mpt::logical_encoding::locale, path));
 	}
 
 #endif // MPT_ENABLE_CHARSET_LOCALE
@@ -833,9 +830,9 @@ public:
 		return mpt::transcode<CString>(path);
 	}
 
-	static PathString FromCString(const CString &path)
+	static BasicPathString FromCString(const CString &path)
 	{
-		return PathString(mpt::transcode<raw_path_type>(path));
+		return BasicPathString(mpt::transcode<raw_path_type>(path));
 	}
 
 #endif // MPT_WITH_MFC
@@ -862,23 +859,23 @@ public:
 		return IsPathSeparator(c);
 	}
 
-	PathString WithoutTrailingSlash() const
+	BasicPathString WithoutTrailingSlash() const
 	{
-		PathString result = *this;
+		BasicPathString result = *this;
 		while(result.HasTrailingSlash())
 		{
 			if(result.Length() == 1)
 			{
 				return result;
 			}
-			result = PathString(result.AsNative().substr(0, result.AsNative().length() - 1));
+			result = BasicPathString(result.AsNative().substr(0, result.AsNative().length() - 1));
 		}
 		return result;
 	}
 
-	PathString WithTrailingSlash() const
+	BasicPathString WithTrailingSlash() const
 	{
-		PathString result = *this;
+		BasicPathString result = *this;
 		if(!result.empty() && !result.HasTrailingSlash())
 		{
 			result.path += GetDefaultPathSeparator();
@@ -886,77 +883,77 @@ public:
 		return result;
 	}
 
-	void SplitPath(PathString *prefix, PathString *drive, PathString *dir, PathString *fbase, PathString *fext) const
+	void SplitPath(BasicPathString *prefix, BasicPathString *drive, BasicPathString *dir, BasicPathString *fbase, BasicPathString *fext) const
 	{
 		path_traits::SplitPath(path, prefix ? &prefix->path : nullptr, drive ? &drive->path : nullptr, dir ? &dir->path : nullptr, fbase ? &fbase->path : nullptr, fext ? &fext->path : nullptr);
 	}
 
 	// \\?\ or \\?\\UNC or empty
-	PathString GetPrefix() const
+	BasicPathString GetPrefix() const
 	{
-		PathString prefix;
+		BasicPathString prefix;
 		SplitPath(&prefix, nullptr, nullptr, nullptr, nullptr);
 		return prefix;
 	}
 	
 	// Drive letter + colon, e.g. "C:" or \\server\share
-	PathString GetDrive() const
+	BasicPathString GetDrive() const
 	{
-		PathString drive;
+		BasicPathString drive;
 		SplitPath(nullptr, &drive, nullptr, nullptr, nullptr);
 		return drive;
 	}
 	
 	// Directory, e.g. "\OpenMPT\"
-	PathString GetDirectory() const
+	BasicPathString GetDirectory() const
 	{
-		PathString dir;
+		BasicPathString dir;
 		SplitPath(nullptr, nullptr, &dir, nullptr, nullptr);
 		return dir;
 	}
 	
 	// Drive + Dir, e.g. "C:\OpenMPT\"
-	PathString GetDirectoryWithDrive() const
+	BasicPathString GetDirectoryWithDrive() const
 	{
-		PathString drive, dir;
+		BasicPathString drive, dir;
 		SplitPath(nullptr, &drive, &dir, nullptr, nullptr);
 		return drive + dir;
 	}
 	
 	// File name without extension, e.g. "OpenMPT"
-	PathString GetFilenameBase() const
+	BasicPathString GetFilenameBase() const
 	{
-		PathString fname;
+		BasicPathString fname;
 		SplitPath(nullptr, nullptr, nullptr, &fname, nullptr);
 		return fname;
 	}
 	
 	// Extension including dot, e.g. ".exe"
-	PathString GetFilenameExtension() const
+	BasicPathString GetFilenameExtension() const
 	{
-		PathString ext;
+		BasicPathString ext;
 		SplitPath(nullptr, nullptr, nullptr, nullptr, &ext);
 		return ext;
 	}
 	
 	// File name + extension, e.g. "OpenMPT.exe"
-	PathString GetFilename() const
+	BasicPathString GetFilename() const
 	{
-		PathString name, ext;
+		BasicPathString name, ext;
 		SplitPath(nullptr, nullptr, nullptr, &name, &ext);
 		return name + ext;
 	}
 
 	// Return the same path string with a different (or appended) extension (including "."), e.g. "foo.bar",".txt" -> "foo.txt" or "C:\OpenMPT\foo",".txt" -> "C:\OpenMPT\foo.txt"
-	PathString ReplaceExtension(const PathString &newExt) const
+	BasicPathString ReplaceExtension(const BasicPathString &newExt) const
 	{
 		return GetDirectoryWithDrive() + GetFilenameBase() + newExt;
 	}
 
 	// Convert a path to its simplified form, i.e. remove ".\" and "..\" entries, similar to std::fs::path::lexically_normal
-	PathString Simplify() const
+	BasicPathString Simplify() const
 	{
-		return PathString::FromNative(path_traits::Simplify(path));
+		return BasicPathString::FromNative(path_traits::Simplify(path));
 	}
 
 	bool IsAbsolute() const
@@ -966,9 +963,9 @@ public:
 
 };
 
-} // namespace DetailPathString
 
-using PathString = DetailPathString::PathString<NativePathTraits>;
+
+using PathString = BasicPathString<NativePathTraits>;
 
 
 

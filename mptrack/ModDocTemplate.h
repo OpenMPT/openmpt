@@ -18,12 +18,10 @@ OPENMPT_NAMESPACE_BEGIN
 
 class CModDoc;
 namespace mpt {
-namespace DetailPathString {
 template <typename Traits>
-class PathString;
-} // namespace DetailPathString
+class BasicPathString;
 struct NativePathTraits;
-using PathString = DetailPathString::PathString<NativePathTraits>;
+using PathString = BasicPathString<NativePathTraits>;
 } // namespace mpt
 
 class CModDocTemplate: public CMultiDocTemplate
