@@ -31,6 +31,34 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.30.05.00 (12 June 2022, revision 17503)
+------------------------------------------
+Tree view
+- [New] <js> Can now (un-)bypass all plugins at once through the tree view, or alternatively just all effect plugins (http://bugs.openmpt.org/view.php?id=1410).
+
+Pattern tab
+- [Imp] <js> Allow "Jump to previous / next entry in column" shortcuts to be used together with the selection key. Search is only performed in the current pattern in this case (http://bugs.openmpt.org/view.php?id=1598).
+- [Mod] <js> There are now default key bindings for "Jump to previous / next entry in column" (Ctrl + Alt + Up / Down).
+- [Fix] <js> When stalling the pattern auto-follow (e.g. while drawing a selection) and transitioning to the next order containing the same pattern again, the order list and pattern editor weren't updated to reflect the new order position (tx NoobTracker).
+- [Fix] <js> When the currently selected order item contained the same pattern as the first order item, restarting song playback gave the visual impression that the previously selected order item was still being played instead of the first order item.
+
+Sample tab
+- [Fix] <js> Consecutive transposition especially with middle-C frequencies below 8363 Hz could cause a wrong sample rate to be calculated in IT / MPTM.
+- [Fix] <js> Displaying extremely long samples with a very low sample rate could cause OpenMPT to hang.
+
+Instrument tab
+- [New] <js> Added a new option to the sample map context menu, "Transpose Samples / Reset Map", which - if at all possible - resets the instrument's note mapping to the default and compensates for that by transposing samples instead (http://bugs.openmpt.org/view.php?id=1596).
+
+Mod Conversion
+- [Fix] <js> Remove portamento up / down and volume slide commands with parameter 00 when converting from MOD.
+
+Playback
+- [Fix] <js> Bidi-looped samples sometimes stopped playing at the end of the loop (http://bugs.openmpt.org/view.php?id=1597).
+
+Installer/release package
+- [Mod] <js> Re-mapped some assignments in DE_jojo.mkb to match newly added default shortcuts.
+
+
 v1.30.04.00 (24 April 2022, revision 17270)
 -------------------------------------------
 Tree view
