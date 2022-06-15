@@ -151,9 +151,16 @@ CString Echo::GetParamName(PlugParamIndex param)
 
 CString Echo::GetParamLabel(PlugParamIndex param)
 {
-	if(param == kEchoLeftDelay || param == kEchoRightDelay)
+	switch(param)
+	{
+	case kEchoFeedback:
+		return _T("%");
+	case kEchoLeftDelay:
+	case kEchoRightDelay:
 		return _T("ms");
-	return CString();
+	default:
+		return CString{};
+	}
 }
 
 
@@ -163,12 +170,14 @@ CString Echo::GetParamDisplay(PlugParamIndex param)
 	switch(param)
 	{
 	case kEchoWetDry:
+		s.Format(_T("%.1f : %.1f"), m_param[param] * 100.0f, 100.0f - m_param[param] * 100.0f);
+		break;
 	case kEchoFeedback:
 		s.Format(_T("%.2f"), m_param[param] * 100.0f);
 		break;
 	case kEchoLeftDelay:
 	case kEchoRightDelay:
-		s.Format(_T("%.2f"), m_param[param] * 2000.0f);
+		s.Format(_T("%.2f"), 1.0f + m_param[param] * 1999.0f);
 		break;
 	case kEchoPanDelay:
 		s = (m_param[param] <= 0.5) ? _T("No") : _T("Yes");
@@ -182,8 +191,8 @@ CString Echo::GetParamDisplay(PlugParamIndex param)
 void Echo::RecalculateEchoParams()
 {
 	m_initialFeedback = std::sqrt(1.0f - (m_param[kEchoFeedback] * m_param[kEchoFeedback]));
-	m_delayTime[0] = static_cast<uint32>(m_param[kEchoLeftDelay] * (2 * m_sampleRate));
-	m_delayTime[1] = static_cast<uint32>(m_param[kEchoRightDelay] * (2 * m_sampleRate));
+	m_delayTime[0] = static_cast<uint32>((1.0f + m_param[kEchoLeftDelay] * 1999.0f) / 1000.0f * m_sampleRate);
+	m_delayTime[1] = static_cast<uint32>((1.0f + m_param[kEchoRightDelay] * 1999.0f) / 1000.0f * m_sampleRate);
 	m_crossEcho = (m_param[kEchoPanDelay]) > 0.5f;
 }
 
