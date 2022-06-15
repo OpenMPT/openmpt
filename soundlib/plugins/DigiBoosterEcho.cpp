@@ -186,7 +186,11 @@ CString DigiBoosterEcho::GetParamDisplay(PlugParamIndex param)
 	{
 		int val = m_chunk.param[param];
 		if(param == kEchoDelay)
+		{
+			if(val == 0)
+				val = 167;
 			val *= 2;
+		}	
 		s.Format(_T("%d"), val);
 	}
 	return s;
@@ -215,7 +219,9 @@ void DigiBoosterEcho::SetChunk(const ChunkData &chunk, bool)
 
 void DigiBoosterEcho::RecalculateEchoParams()
 {
-	m_delayTime = (m_chunk.param[kEchoDelay] * m_sampleRate + 250) / 500;
+	// The fallback value when the delay is 0 was determined experimentally from DBPro 2.21 output.
+	// The C implementation of libdigibooster3 has no specific handling of this value and thus produces a delay with maximum length.
+	m_delayTime = ((m_chunk.param[kEchoDelay] ? m_chunk.param[kEchoDelay] : 167u) * m_sampleRate + 250u) / 500u;
 	m_PMix = (m_chunk.param[kEchoMix]) * (1.0f / 256.0f);
 	m_NMix = (256 - m_chunk.param[kEchoMix]) * (1.0f / 256.0f);
 	m_PCrossPBack = (m_chunk.param[kEchoCross] * m_chunk.param[kEchoFeedback]) * (1.0f / 65536.0f);
