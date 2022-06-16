@@ -27,6 +27,8 @@ namespace mpt {
 inline namespace mpt_libopenmpt {
 template <typename Traits, bool allow_transcode_locale>
 class BasicPathString;
+struct NativePathTraits;
+using native_path = BasicPathString<NativePathTraits, true>;
 namespace IO {
 class FileCursorTraitsFileData;
 template <typename Tpath>
@@ -44,9 +46,9 @@ using FileCursor = mpt::IO::FileCursor<Ttraits, Tfilenametraits>;
 namespace mpt {
 struct NativePathTraits;
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
-using PathString = mpt::BasicPathString<NativePathTraits, true>;
+using PathString = mpt::native_path;
 #else
-using PathString = mpt::BasicPathString<NativePathTraits, false>;
+using PathString = mpt::BasicPathString<mpt::NativePathTraits, false>;
 #endif
 } // namespace mpt
 using FileCursor = detail::FileCursor<mpt::IO::FileCursorTraitsFileData, mpt::IO::FileCursorFilenameTraits<mpt::PathString>>;

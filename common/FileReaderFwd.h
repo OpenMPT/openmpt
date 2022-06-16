@@ -18,6 +18,8 @@ inline namespace MPT_INLINE_NS {
 
 template <typename Traits, bool allow_transcode_locale>
 class BasicPathString;
+struct NativePathTraits;
+using native_path = BasicPathString<NativePathTraits, true>;
 
 namespace IO {
 
@@ -55,11 +57,10 @@ class FileReader;
 } // namespace detail
 
 namespace mpt {
-struct NativePathTraits;
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
-using PathString = mpt::BasicPathString<NativePathTraits, true>;
+using PathString = mpt::native_path;
 #else
-using PathString = mpt::BasicPathString<NativePathTraits, false>;
+using PathString = mpt::BasicPathString<mpt::NativePathTraits, false>;
 #endif
 } // namespace mpt
 

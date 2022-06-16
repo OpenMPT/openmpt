@@ -234,6 +234,7 @@
 		15A918AF09A862218E9376EF /* aligned_array.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = aligned_array.hpp; path = ../../src/mpt/base/aligned_array.hpp; sourceTree = "<group>"; };
 		1679D9615AC87ED39CEFB7A1 /* alloc.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = alloc.hpp; path = ../../src/mpt/base/alloc.hpp; sourceTree = "<group>"; };
 		175234BFDDE02C314BE252FF /* detect_os.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = detect_os.hpp; path = ../../src/mpt/base/detect_os.hpp; sourceTree = "<group>"; };
+		178BC3E3DA4C245537810223 /* native_path.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = native_path.hpp; path = ../../src/mpt/path/native_path.hpp; sourceTree = "<group>"; };
 		17F58A2FDAB5EAA137EAC86F /* detect_libc.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = detect_libc.hpp; path = ../../src/mpt/base/detect_libc.hpp; sourceTree = "<group>"; };
 		18A72A335CF5CFA59F1D0873 /* seed.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = seed.hpp; path = ../../src/mpt/random/seed.hpp; sourceTree = "<group>"; };
 		1A0FD6B58B3277A740F924F5 /* Sndmix.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Sndmix.cpp; path = ../../soundlib/Sndmix.cpp; sourceTree = "<group>"; };
@@ -794,6 +795,7 @@
 			isa = PBXGroup;
 			children = (
 				F244B139942E4D2B8B555F79 /* basic_path.hpp */,
+				178BC3E3DA4C245537810223 /* native_path.hpp */,
 				50318A59BD5998CBBEEC8899 /* os_path.hpp */,
 				85A36D37F9FDB22977E13B77 /* os_path_long.hpp */,
 				7C2DCED7ED506FC9A3171D17 /* path.hpp */,

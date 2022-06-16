@@ -15,6 +15,7 @@
 #include "mpt/base/detect.hpp"
 #include "mpt/base/namespace.hpp"
 #include "mpt/path/basic_path.hpp"
+#include "mpt/path/native_path.hpp"
 #include "mpt/path/os_path.hpp"
 #include "mpt/string/types.hpp"
 
@@ -47,30 +48,10 @@ using RawPathString = mpt::utf8string;
 
 
 
-struct NativePathStyleTag
-{
-#if MPT_OS_WINDOWS
-#if defined(NTDDI_VERSION) || defined(_WIN32_WINNT)
-	static inline constexpr mpt::PathStyle path_style = mpt::PathStyle::WindowsNT;
-#else
-	static inline constexpr mpt::PathStyle path_style = mpt::PathStyle::Windows9x;
-#endif
-#elif MPT_OS_DJGPP
-	static inline constexpr mpt::PathStyle path_style = mpt::PathStyle::DOS_DJGPP;
-#else
-	static inline constexpr mpt::PathStyle path_style = mpt::PathStyle::Posix;
-#endif
-};
-
-struct NativePathTraits
-	: public PathTraits<RawPathString, NativePathStyleTag>
-{
-};
-
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
-using PathString = mpt::BasicPathString<NativePathTraits, true>;
+using PathString = mpt::native_path;
 #else
-using PathString = mpt::BasicPathString<NativePathTraits, false>;
+using PathString = mpt::BasicPathString<mpt::NativePathTraits, false>;
 #endif
 
 

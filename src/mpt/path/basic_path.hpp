@@ -9,7 +9,6 @@
 #include "mpt/base/macros.hpp"
 #include "mpt/base/namespace.hpp"
 #include "mpt/detect/mfc.hpp"
-#include "mpt/path/os_path.hpp"
 #include "mpt/string_transcode/transcode.hpp"
 
 #include <stdexcept>
@@ -352,9 +351,9 @@ struct literals<char32_t> {
 
 enum class PathStyle {
 	Posix,
-	WindowsNT,
-	Windows9x,
 	DOS_DJGPP,
+	Windows9x,
+	WindowsNT,
 };
 
 template <PathStyle EStyle>

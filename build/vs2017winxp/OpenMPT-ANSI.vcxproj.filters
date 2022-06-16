@@ -1242,6 +1242,9 @@
     <ClInclude Include="..\..\src\mpt\path\basic_path.hpp">
       <Filter>src\mpt\path</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\mpt\path\native_path.hpp">
+      <Filter>src\mpt\path</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\mpt\path\os_path.hpp">
       <Filter>src\mpt\path</Filter>
     </ClInclude>

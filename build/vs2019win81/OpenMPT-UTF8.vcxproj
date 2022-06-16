@@ -1121,6 +1121,7 @@
     <ClInclude Include="..\..\src\mpt\parse\split.hpp" />
     <ClInclude Include="..\..\src\mpt\parse\tests\tests_parse.hpp" />
     <ClInclude Include="..\..\src\mpt\path\basic_path.hpp" />
+    <ClInclude Include="..\..\src\mpt\path\native_path.hpp" />
     <ClInclude Include="..\..\src\mpt\path\os_path.hpp" />
     <ClInclude Include="..\..\src\mpt\path\os_path_long.hpp" />
     <ClInclude Include="..\..\src\mpt\path\path.hpp" />
