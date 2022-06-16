@@ -743,11 +743,17 @@ private:
 
 	raw_path_type path;
 
-private:
+public:
 
-	explicit BasicPathString(const raw_path_type & path_)
+	template <typename Tpath, typename std::enable_if<std::is_same<Tpath, raw_path_type>::value, bool>::type = true>
+	BasicPathString(const Tpath & path_)
 		: path(path_) {
 		return;
+	}
+
+	template <typename Tpath, typename std::enable_if<std::is_same<Tpath, raw_path_type>::value, bool>::type = true>
+	operator Tpath() const {
+		return path;
 	}
 
 public:

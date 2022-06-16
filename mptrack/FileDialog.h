@@ -41,12 +41,15 @@ protected:
 
 public:
 	// Default extension to use if none is specified.
+	FileDialog &DefaultExtension(const mpt::RawPathString &ext) { m_defaultExtension = ext; return *this; }
 	FileDialog &DefaultExtension(const mpt::PathString &ext) { m_defaultExtension = ext.AsNative(); return *this; }
 	FileDialog &DefaultExtension(const AnyStringLocale &ext) { m_defaultExtension = mpt::ToWin(ext); return *this; }
 	// Default suggested filename.
+	FileDialog &DefaultFilename(const mpt::RawPathString &name) { m_defaultFilename = name; return *this; }
 	FileDialog &DefaultFilename(const mpt::PathString &name) { m_defaultFilename = name.AsNative(); return *this; }
 	FileDialog &DefaultFilename(const AnyStringLocale &name) { m_defaultFilename = mpt::ToWin(name); return *this; }
 	// List of possible extensions. Format: "description|extensions|...|description|extensions||"
+	FileDialog &ExtensionFilter(const mpt::RawPathString &filter) { m_extFilter = filter; return *this; }
 	FileDialog &ExtensionFilter(const mpt::PathString &filter) { m_extFilter = filter.AsNative(); return *this; }
 	FileDialog &ExtensionFilter(const AnyStringLocale &filter) { m_extFilter = mpt::ToWin(filter); return *this; }
 	// Default directory of the dialog.
