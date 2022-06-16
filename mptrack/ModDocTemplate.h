@@ -14,28 +14,13 @@
 
 #include "mpt/base/namespace.hpp"
 
-#include <unordered_set>
+#include "../common/mptPathString.h"
 
-namespace mpt {
-inline namespace MPT_INLINE_NS {
-template <typename Traits, bool allow_transcode_locale>
-class BasicPathString;
-struct NativePathTraits;
-using native_path = BasicPathString<NativePathTraits, true>;
-}
-}
+#include <unordered_set>
 
 OPENMPT_NAMESPACE_BEGIN
 
 class CModDoc;
-namespace mpt {
-struct NativePathTraits;
-#if defined(MPT_ENABLE_CHARSET_LOCALE)
-using PathString = mpt::native_path;
-#else
-using PathString = mpt::BasicPathString<mpt::NativePathTraits, false>;
-#endif
-} // namespace mpt
 
 class CModDocTemplate: public CMultiDocTemplate
 {
