@@ -277,10 +277,22 @@ enum class PathStyle
 	DOS_DJGPP,
 };
 
+template <PathStyle EStyle>
+struct PathStyleTag
+{
+	static inline constexpr PathStyle path_style = EStyle;
+};
+
 struct NativePathStyleTag
 {
 #if MPT_OS_WINDOWS
+#if defined(NTDDI_VERSION) || defined(_WIN32_WINNT)
 	static inline constexpr PathStyle path_style = PathStyle::WindowsNT;
+#else
+	static inline constexpr PathStyle path_style = PathStyle::Windows9x;
+#endif
+#elif MPT_OS_DJGPP
+	static inline constexpr PathStyle path_style = PathStyle::DOS_DJGPP;
 #else
 	static inline constexpr PathStyle path_style = PathStyle::Posix;
 #endif
@@ -297,8 +309,6 @@ struct PathTraits
 	static inline constexpr PathStyle path_style = PathStyleTag::path_style;
 	using raw_path_type = TRawPath;
 	using char_type = typename raw_path_type::value_type;
-
-	static_assert((path_style == PathStyle::WindowsNT) || (path_style == PathStyle::Posix));
 
 
 
@@ -351,7 +361,7 @@ struct PathTraits
 		if(fbase) *fbase = raw_path_type();
 		if(fext) *fext = raw_path_type();
 
-		if constexpr(path_style == PathStyle::WindowsNT)
+		if constexpr((path_style == PathStyle::WindowsNT) || (path_style == PathStyle::Windows9x) || (path_style == PathStyle::DOS_DJGPP))
 		{
 
 			// We cannot use CRT splitpath here, because:
@@ -359,18 +369,21 @@ struct PathTraits
 			//  * no support for UNC paths
 			//  * no support for \\?\ prefixed paths
 
-			// remove \\?\\ prefix
-			if(p.substr(0, 8) == L<char_type>("\\\\?\\UNC\\"))
+			if constexpr(path_style == PathStyle::WindowsNT)
 			{
-				if(prefix) *prefix = L<char_type>("\\\\?\\UNC");
-				p = L<char_type>("\\\\") + p.substr(8);
-			} else if(p.substr(0, 4) == L<char_type>("\\\\?\\"))
-			{
-				if (prefix) *prefix = L<char_type>("\\\\?\\");
-				p = p.substr(4);
+				// remove \\?\\ prefix
+				if(p.substr(0, 8) == L<char_type>("\\\\?\\UNC\\"))
+				{
+					if(prefix) *prefix = L<char_type>("\\\\?\\UNC");
+					p = L<char_type>("\\\\") + p.substr(8);
+				} else if(p.substr(0, 4) == L<char_type>("\\\\?\\"))
+				{
+					if (prefix) *prefix = L<char_type>("\\\\?\\");
+					p = p.substr(4);
+				}
 			}
 
-			if(p.length() >= 2 && (
+			if(((path_style == PathStyle::WindowsNT) || (path_style == PathStyle::Windows9x)) && (p.length() >= 2) && (
 				p.substr(0, 2) == L<char_type>("\\\\")
 				|| p.substr(0, 2) == L<char_type>("\\/")
 				|| p.substr(0, 2) == L<char_type>("/\\")
@@ -494,7 +507,7 @@ struct PathTraits
 
 		std::vector<raw_path_type> components;
 
-		if constexpr(path_style == PathStyle::WindowsNT)
+		if constexpr((path_style == PathStyle::WindowsNT) || (path_style == PathStyle::Windows9x) || (path_style == PathStyle::DOS_DJGPP))
 		{
 
 			raw_path_type root;
@@ -504,7 +517,7 @@ struct PathTraits
 				// Drive letter
 				root = path.substr(0, 2) + L<char_type>('\\');
 				startPos = 2;
-			} else if(path.substr(0, 2) == L<char_type>("\\\\"))
+			} else if(((path_style == PathStyle::WindowsNT) || (path_style == PathStyle::Windows9x)) && (path.substr(0, 2) == L<char_type>("\\\\")))
 			{
 				// Network share
 				root = L<char_type>("\\\\");
@@ -645,6 +658,20 @@ struct PathTraits
 			{
 				return true; // UNC
 			}
+			result = (path.length()) >= 3 && (path[1] == L<char_type>(':')) && IsPathSeparator(path[2]);
+		} else if constexpr(path_style == PathStyle::Windows9x)
+		{
+			if(path.substr(0, 2) == L<char_type>("\\\\"))
+			{
+				return true; // UNC
+			}
+			if(path.substr(0, 2) == L<char_type>("//"))
+			{
+				return true; // UNC
+			}
+			result = (path.length()) >= 3 && (path[1] == L<char_type>(':')) && IsPathSeparator(path[2]);
+		} else if constexpr(path_style == PathStyle::DOS_DJGPP)
+		{
 			result = (path.length()) >= 3 && (path[1] == L<char_type>(':')) && IsPathSeparator(path[2]);
 		} else if constexpr(path_style == PathStyle::Posix)
 		{

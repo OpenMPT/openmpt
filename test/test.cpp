@@ -1563,8 +1563,7 @@ static MPT_NOINLINE void TestCharsets()
 	VERIFY_EQUAL(P_("\\\\?\\UNC\\server\\share\\dir1\\dir2\\name.foo.ext").GetFilenameExtension(), P_(".ext"));
 	VERIFY_EQUAL(P_("\\\\?\\UNC\\server\\share\\dir1\\dir2\\name.foo.ext").GetFilename(), P_("name.foo.ext"));
 
-#else // !MPT_OS_WINDOWS
-
+#elif !MPT_OS_DJGPP
 
 	VERIFY_EQUAL(P_("").GetDirectory(), P_(""));
 	VERIFY_EQUAL(P_("").GetFilenameBase(), P_(""));
@@ -1616,7 +1615,470 @@ static MPT_NOINLINE void TestCharsets()
 	VERIFY_EQUAL(P_("//server").GetFilenameExtension(), P_(""));
 	VERIFY_EQUAL(P_("//server").GetFilename(), P_("server"));
 
-#endif // MPT_OS_WINDOWS
+#endif // MPT_OS
+
+	{
+		using P = mpt::BasicPathString<mpt::PathTraits<std::string, mpt::PathStyleTag<mpt::PathStyle::WindowsNT>>>;
+
+		VERIFY_EQUAL(P::FromNative("").GetPrefix(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("").GetDrive(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("").GetDirectory(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("").GetDirectoryWithDrive(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("").GetFilenameBase(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("").GetFilenameExtension(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("").GetFilename(), P::FromNative(""));
+
+		VERIFY_EQUAL(P::FromNative("C:\\").GetPrefix(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("C:\\").GetDrive(), P::FromNative("C:"));
+		VERIFY_EQUAL(P::FromNative("C:\\").GetDirectory(), P::FromNative("\\"));
+		VERIFY_EQUAL(P::FromNative("C:\\").GetDirectoryWithDrive(), P::FromNative("C:\\"));
+		VERIFY_EQUAL(P::FromNative("C:\\").GetFilenameBase(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("C:\\").GetFilenameExtension(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("C:\\").GetFilename(), P::FromNative(""));
+
+		VERIFY_EQUAL(P::FromNative("\\directory\\").GetPrefix(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("\\directory\\").GetDrive(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("\\directory\\").GetDirectory(), P::FromNative("\\directory\\"));
+		VERIFY_EQUAL(P::FromNative("\\directory\\").GetDirectoryWithDrive(), P::FromNative("\\directory\\"));
+		VERIFY_EQUAL(P::FromNative("\\directory\\").GetFilenameBase(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("\\directory\\").GetFilenameExtension(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("\\directory\\").GetFilename(), P::FromNative(""));
+
+		VERIFY_EQUAL(P::FromNative("\\directory\\file.txt").GetPrefix(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("\\directory\\file.txt").GetDrive(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("\\directory\\file.txt").GetDirectory(), P::FromNative("\\directory\\"));
+		VERIFY_EQUAL(P::FromNative("\\directory\\file.txt").GetDirectoryWithDrive(), P::FromNative("\\directory\\"));
+		VERIFY_EQUAL(P::FromNative("\\directory\\file.txt").GetFilenameBase(), P::FromNative("file"));
+		VERIFY_EQUAL(P::FromNative("\\directory\\file.txt").GetFilenameExtension(), P::FromNative(".txt"));
+		VERIFY_EQUAL(P::FromNative("\\directory\\file.txt").GetFilename(), P::FromNative("file.txt"));
+
+		VERIFY_EQUAL(P::FromNative(".").GetPrefix(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative(".").GetDrive(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative(".").GetDirectory(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative(".").GetDirectoryWithDrive(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative(".").GetFilenameBase(), P::FromNative("."));
+		VERIFY_EQUAL(P::FromNative(".").GetFilenameExtension(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative(".").GetFilename(), P::FromNative("."));
+
+		VERIFY_EQUAL(P::FromNative("..").GetPrefix(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("..").GetDrive(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("..").GetDirectory(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("..").GetDirectoryWithDrive(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("..").GetFilenameBase(), P::FromNative(".."));
+		VERIFY_EQUAL(P::FromNative("..").GetFilenameExtension(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("..").GetFilename(), P::FromNative(".."));
+
+		VERIFY_EQUAL(P::FromNative("dir\\.").GetPrefix(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("dir\\.").GetDrive(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("dir\\.").GetDirectory(), P::FromNative("dir\\"));
+		VERIFY_EQUAL(P::FromNative("dir\\.").GetDirectoryWithDrive(), P::FromNative("dir\\"));
+		VERIFY_EQUAL(P::FromNative("dir\\.").GetFilenameBase(), P::FromNative("."));
+		VERIFY_EQUAL(P::FromNative("dir\\.").GetFilenameExtension(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("dir\\.").GetFilename(), P::FromNative("."));
+
+		VERIFY_EQUAL(P::FromNative("dir\\..").GetPrefix(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("dir\\..").GetDrive(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("dir\\..").GetDirectory(), P::FromNative("dir\\"));
+		VERIFY_EQUAL(P::FromNative("dir\\..").GetDirectoryWithDrive(), P::FromNative("dir\\"));
+		VERIFY_EQUAL(P::FromNative("dir\\..").GetFilenameBase(), P::FromNative(".."));
+		VERIFY_EQUAL(P::FromNative("dir\\..").GetFilenameExtension(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("dir\\..").GetFilename(), P::FromNative(".."));
+
+		VERIFY_EQUAL(P::FromNative(".txt").GetPrefix(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative(".txt").GetDrive(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative(".txt").GetDirectory(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative(".txt").GetDirectoryWithDrive(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative(".txt").GetFilenameBase(), P::FromNative(".txt"));
+		VERIFY_EQUAL(P::FromNative(".txt").GetFilenameExtension(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative(".txt").GetFilename(), P::FromNative(".txt"));
+
+		VERIFY_EQUAL(P::FromNative("C:tmp.txt").GetPrefix(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("C:tmp.txt").GetDrive(), P::FromNative("C:"));
+		VERIFY_EQUAL(P::FromNative("C:tmp.txt").GetDirectory(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("C:tmp.txt").GetDirectoryWithDrive(), P::FromNative("C:"));
+		VERIFY_EQUAL(P::FromNative("C:tmp.txt").GetFilenameBase(), P::FromNative("tmp"));
+		VERIFY_EQUAL(P::FromNative("C:tmp.txt").GetFilenameExtension(), P::FromNative(".txt"));
+		VERIFY_EQUAL(P::FromNative("C:tmp.txt").GetFilename(), P::FromNative("tmp.txt"));
+
+		VERIFY_EQUAL(P::FromNative("C:tempdir\\tmp.txt").GetPrefix(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("C:tempdir\\tmp.txt").GetDrive(), P::FromNative("C:"));
+		VERIFY_EQUAL(P::FromNative("C:tempdir\\tmp.txt").GetDirectory(), P::FromNative("tempdir\\"));
+		VERIFY_EQUAL(P::FromNative("C:tempdir\\tmp.txt").GetDirectoryWithDrive(), P::FromNative("C:tempdir\\"));
+		VERIFY_EQUAL(P::FromNative("C:tempdir\\tmp.txt").GetFilenameBase(), P::FromNative("tmp"));
+		VERIFY_EQUAL(P::FromNative("C:tempdir\\tmp.txt").GetFilenameExtension(), P::FromNative(".txt"));
+		VERIFY_EQUAL(P::FromNative("C:tempdir\\tmp.txt").GetFilename(), P::FromNative("tmp.txt"));
+
+		VERIFY_EQUAL(P::FromNative("C:\\tempdir\\tmp.txt").GetPrefix(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("C:\\tempdir\\tmp.txt").GetDrive(), P::FromNative("C:"));
+		VERIFY_EQUAL(P::FromNative("C:\\tempdir\\tmp.txt").GetDirectory(), P::FromNative("\\tempdir\\"));
+		VERIFY_EQUAL(P::FromNative("C:\\tempdir\\tmp.txt").GetDirectoryWithDrive(), P::FromNative("C:\\tempdir\\"));
+		VERIFY_EQUAL(P::FromNative("C:\\tempdir\\tmp.txt").GetFilenameBase(), P::FromNative("tmp"));
+		VERIFY_EQUAL(P::FromNative("C:\\tempdir\\tmp.txt").GetFilenameExtension(), P::FromNative(".txt"));
+		VERIFY_EQUAL(P::FromNative("C:\\tempdir\\tmp.txt").GetFilename(), P::FromNative("tmp.txt"));
+
+		VERIFY_EQUAL(P::FromNative("C:\\tempdir\\tmp.foo.txt").GetFilenameBase(), P::FromNative("tmp.foo"));
+		VERIFY_EQUAL(P::FromNative("C:\\tempdir\\tmp.foo.txt").GetFilenameExtension(), P::FromNative(".txt"));
+
+		VERIFY_EQUAL(P::FromNative("\\\\server").GetPrefix(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("\\\\server").GetDrive(), P::FromNative("\\\\server"));
+		VERIFY_EQUAL(P::FromNative("\\\\server").GetDirectory(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("\\\\server").GetDirectoryWithDrive(), P::FromNative("\\\\server"));
+		VERIFY_EQUAL(P::FromNative("\\\\server").GetFilenameBase(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("\\\\server").GetFilenameExtension(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("\\\\server").GetFilename(), P::FromNative(""));
+
+		VERIFY_EQUAL(P::FromNative("\\\\server\\").GetPrefix(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("\\\\server\\").GetDrive(), P::FromNative("\\\\server\\"));
+		VERIFY_EQUAL(P::FromNative("\\\\server\\").GetDirectory(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("\\\\server\\").GetDirectoryWithDrive(), P::FromNative("\\\\server\\"));
+		VERIFY_EQUAL(P::FromNative("\\\\server\\").GetFilenameBase(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("\\\\server\\").GetFilenameExtension(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("\\\\server\\").GetFilename(), P::FromNative(""));
+
+		VERIFY_EQUAL(P::FromNative("\\\\server\\share").GetPrefix(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("\\\\server\\share").GetDrive(), P::FromNative("\\\\server\\share"));
+		VERIFY_EQUAL(P::FromNative("\\\\server\\share").GetDirectory(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("\\\\server\\share").GetDirectoryWithDrive(), P::FromNative("\\\\server\\share"));
+		VERIFY_EQUAL(P::FromNative("\\\\server\\share").GetFilenameBase(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("\\\\server\\share").GetFilenameExtension(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("\\\\server\\share").GetFilename(), P::FromNative(""));
+
+		VERIFY_EQUAL(P::FromNative("\\\\server\\share\\").GetPrefix(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("\\\\server\\share\\").GetDrive(), P::FromNative("\\\\server\\share"));
+		VERIFY_EQUAL(P::FromNative("\\\\server\\share\\").GetDirectory(), P::FromNative("\\"));
+		VERIFY_EQUAL(P::FromNative("\\\\server\\share\\").GetDirectoryWithDrive(), P::FromNative("\\\\server\\share\\"));
+		VERIFY_EQUAL(P::FromNative("\\\\server\\share\\").GetFilenameBase(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("\\\\server\\share\\").GetFilenameExtension(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("\\\\server\\share\\").GetFilename(), P::FromNative(""));
+
+		VERIFY_EQUAL(P::FromNative("\\\\server\\share\\dir1\\dir2\\name.foo.ext").GetPrefix(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("\\\\server\\share\\dir1\\dir2\\name.foo.ext").GetDrive(), P::FromNative("\\\\server\\share"));
+		VERIFY_EQUAL(P::FromNative("\\\\server\\share\\dir1\\dir2\\name.foo.ext").GetDirectory(), P::FromNative("\\dir1\\dir2\\"));
+		VERIFY_EQUAL(P::FromNative("\\\\server\\share\\dir1\\dir2\\name.foo.ext").GetDirectoryWithDrive(), P::FromNative("\\\\server\\share\\dir1\\dir2\\"));
+		VERIFY_EQUAL(P::FromNative("\\\\server\\share\\dir1\\dir2\\name.foo.ext").GetFilenameBase(), P::FromNative("name.foo"));
+		VERIFY_EQUAL(P::FromNative("\\\\server\\share\\dir1\\dir2\\name.foo.ext").GetFilenameExtension(), P::FromNative(".ext"));
+		VERIFY_EQUAL(P::FromNative("\\\\server\\share\\dir1\\dir2\\name.foo.ext").GetFilename(), P::FromNative("name.foo.ext"));
+
+		VERIFY_EQUAL(P::FromNative("\\\\?\\C:\\tempdir\\dir.2\\tmp.foo.txt").GetPrefix(), P::FromNative("\\\\?\\"));
+		VERIFY_EQUAL(P::FromNative("\\\\?\\C:\\tempdir\\dir.2\\tmp.foo.txt").GetDrive(), P::FromNative("C:"));
+		VERIFY_EQUAL(P::FromNative("\\\\?\\C:\\tempdir\\dir.2\\tmp.foo.txt").GetDirectory(), P::FromNative("\\tempdir\\dir.2\\"));
+		VERIFY_EQUAL(P::FromNative("\\\\?\\C:\\tempdir\\dir.2\\tmp.foo.txt").GetDirectoryWithDrive(), P::FromNative("C:\\tempdir\\dir.2\\"));
+		VERIFY_EQUAL(P::FromNative("\\\\?\\C:\\tempdir\\dir.2\\tmp.foo.txt").GetFilenameBase(), P::FromNative("tmp.foo"));
+		VERIFY_EQUAL(P::FromNative("\\\\?\\C:\\tempdir\\dir.2\\tmp.foo.txt").GetFilenameExtension(), P::FromNative(".txt"));
+		VERIFY_EQUAL(P::FromNative("\\\\?\\C:\\tempdir\\dir.2\\tmp.foo.txt").GetFilename(), P::FromNative("tmp.foo.txt"));
+	
+		VERIFY_EQUAL(P::FromNative("\\\\?\\UNC\\server\\share\\dir1\\dir2\\name.foo.ext").GetPrefix(), P::FromNative("\\\\?\\UNC"));
+		VERIFY_EQUAL(P::FromNative("\\\\?\\UNC\\server\\share\\dir1\\dir2\\name.foo.ext").GetDrive(), P::FromNative("\\\\server\\share"));
+		VERIFY_EQUAL(P::FromNative("\\\\?\\UNC\\server\\share\\dir1\\dir2\\name.foo.ext").GetDirectory(), P::FromNative("\\dir1\\dir2\\"));
+		VERIFY_EQUAL(P::FromNative("\\\\?\\UNC\\server\\share\\dir1\\dir2\\name.foo.ext").GetDirectoryWithDrive(), P::FromNative("\\\\server\\share\\dir1\\dir2\\"));
+		VERIFY_EQUAL(P::FromNative("\\\\?\\UNC\\server\\share\\dir1\\dir2\\name.foo.ext").GetFilenameBase(), P::FromNative("name.foo"));
+		VERIFY_EQUAL(P::FromNative("\\\\?\\UNC\\server\\share\\dir1\\dir2\\name.foo.ext").GetFilenameExtension(), P::FromNative(".ext"));
+		VERIFY_EQUAL(P::FromNative("\\\\?\\UNC\\server\\share\\dir1\\dir2\\name.foo.ext").GetFilename(), P::FromNative("name.foo.ext"));
+
+	}
+
+	{
+		using P = mpt::BasicPathString<mpt::PathTraits<std::string, mpt::PathStyleTag<mpt::PathStyle::Windows9x>>>;
+
+		VERIFY_EQUAL(P::FromNative("").GetPrefix(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("").GetDrive(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("").GetDirectory(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("").GetDirectoryWithDrive(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("").GetFilenameBase(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("").GetFilenameExtension(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("").GetFilename(), P::FromNative(""));
+
+		VERIFY_EQUAL(P::FromNative("C:\\").GetPrefix(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("C:\\").GetDrive(), P::FromNative("C:"));
+		VERIFY_EQUAL(P::FromNative("C:\\").GetDirectory(), P::FromNative("\\"));
+		VERIFY_EQUAL(P::FromNative("C:\\").GetDirectoryWithDrive(), P::FromNative("C:\\"));
+		VERIFY_EQUAL(P::FromNative("C:\\").GetFilenameBase(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("C:\\").GetFilenameExtension(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("C:\\").GetFilename(), P::FromNative(""));
+
+		VERIFY_EQUAL(P::FromNative("\\directory\\").GetPrefix(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("\\directory\\").GetDrive(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("\\directory\\").GetDirectory(), P::FromNative("\\directory\\"));
+		VERIFY_EQUAL(P::FromNative("\\directory\\").GetDirectoryWithDrive(), P::FromNative("\\directory\\"));
+		VERIFY_EQUAL(P::FromNative("\\directory\\").GetFilenameBase(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("\\directory\\").GetFilenameExtension(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("\\directory\\").GetFilename(), P::FromNative(""));
+
+		VERIFY_EQUAL(P::FromNative("\\directory\\file.txt").GetPrefix(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("\\directory\\file.txt").GetDrive(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("\\directory\\file.txt").GetDirectory(), P::FromNative("\\directory\\"));
+		VERIFY_EQUAL(P::FromNative("\\directory\\file.txt").GetDirectoryWithDrive(), P::FromNative("\\directory\\"));
+		VERIFY_EQUAL(P::FromNative("\\directory\\file.txt").GetFilenameBase(), P::FromNative("file"));
+		VERIFY_EQUAL(P::FromNative("\\directory\\file.txt").GetFilenameExtension(), P::FromNative(".txt"));
+		VERIFY_EQUAL(P::FromNative("\\directory\\file.txt").GetFilename(), P::FromNative("file.txt"));
+
+		VERIFY_EQUAL(P::FromNative(".").GetPrefix(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative(".").GetDrive(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative(".").GetDirectory(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative(".").GetDirectoryWithDrive(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative(".").GetFilenameBase(), P::FromNative("."));
+		VERIFY_EQUAL(P::FromNative(".").GetFilenameExtension(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative(".").GetFilename(), P::FromNative("."));
+
+		VERIFY_EQUAL(P::FromNative("..").GetPrefix(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("..").GetDrive(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("..").GetDirectory(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("..").GetDirectoryWithDrive(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("..").GetFilenameBase(), P::FromNative(".."));
+		VERIFY_EQUAL(P::FromNative("..").GetFilenameExtension(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("..").GetFilename(), P::FromNative(".."));
+
+		VERIFY_EQUAL(P::FromNative("dir\\.").GetPrefix(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("dir\\.").GetDrive(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("dir\\.").GetDirectory(), P::FromNative("dir\\"));
+		VERIFY_EQUAL(P::FromNative("dir\\.").GetDirectoryWithDrive(), P::FromNative("dir\\"));
+		VERIFY_EQUAL(P::FromNative("dir\\.").GetFilenameBase(), P::FromNative("."));
+		VERIFY_EQUAL(P::FromNative("dir\\.").GetFilenameExtension(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("dir\\.").GetFilename(), P::FromNative("."));
+
+		VERIFY_EQUAL(P::FromNative("dir\\..").GetPrefix(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("dir\\..").GetDrive(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("dir\\..").GetDirectory(), P::FromNative("dir\\"));
+		VERIFY_EQUAL(P::FromNative("dir\\..").GetDirectoryWithDrive(), P::FromNative("dir\\"));
+		VERIFY_EQUAL(P::FromNative("dir\\..").GetFilenameBase(), P::FromNative(".."));
+		VERIFY_EQUAL(P::FromNative("dir\\..").GetFilenameExtension(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("dir\\..").GetFilename(), P::FromNative(".."));
+
+		VERIFY_EQUAL(P::FromNative(".txt").GetPrefix(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative(".txt").GetDrive(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative(".txt").GetDirectory(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative(".txt").GetDirectoryWithDrive(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative(".txt").GetFilenameBase(), P::FromNative(".txt"));
+		VERIFY_EQUAL(P::FromNative(".txt").GetFilenameExtension(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative(".txt").GetFilename(), P::FromNative(".txt"));
+
+		VERIFY_EQUAL(P::FromNative("C:tmp.txt").GetPrefix(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("C:tmp.txt").GetDrive(), P::FromNative("C:"));
+		VERIFY_EQUAL(P::FromNative("C:tmp.txt").GetDirectory(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("C:tmp.txt").GetDirectoryWithDrive(), P::FromNative("C:"));
+		VERIFY_EQUAL(P::FromNative("C:tmp.txt").GetFilenameBase(), P::FromNative("tmp"));
+		VERIFY_EQUAL(P::FromNative("C:tmp.txt").GetFilenameExtension(), P::FromNative(".txt"));
+		VERIFY_EQUAL(P::FromNative("C:tmp.txt").GetFilename(), P::FromNative("tmp.txt"));
+
+		VERIFY_EQUAL(P::FromNative("C:tempdir\\tmp.txt").GetPrefix(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("C:tempdir\\tmp.txt").GetDrive(), P::FromNative("C:"));
+		VERIFY_EQUAL(P::FromNative("C:tempdir\\tmp.txt").GetDirectory(), P::FromNative("tempdir\\"));
+		VERIFY_EQUAL(P::FromNative("C:tempdir\\tmp.txt").GetDirectoryWithDrive(), P::FromNative("C:tempdir\\"));
+		VERIFY_EQUAL(P::FromNative("C:tempdir\\tmp.txt").GetFilenameBase(), P::FromNative("tmp"));
+		VERIFY_EQUAL(P::FromNative("C:tempdir\\tmp.txt").GetFilenameExtension(), P::FromNative(".txt"));
+		VERIFY_EQUAL(P::FromNative("C:tempdir\\tmp.txt").GetFilename(), P::FromNative("tmp.txt"));
+
+		VERIFY_EQUAL(P::FromNative("C:\\tempdir\\tmp.txt").GetPrefix(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("C:\\tempdir\\tmp.txt").GetDrive(), P::FromNative("C:"));
+		VERIFY_EQUAL(P::FromNative("C:\\tempdir\\tmp.txt").GetDirectory(), P::FromNative("\\tempdir\\"));
+		VERIFY_EQUAL(P::FromNative("C:\\tempdir\\tmp.txt").GetDirectoryWithDrive(), P::FromNative("C:\\tempdir\\"));
+		VERIFY_EQUAL(P::FromNative("C:\\tempdir\\tmp.txt").GetFilenameBase(), P::FromNative("tmp"));
+		VERIFY_EQUAL(P::FromNative("C:\\tempdir\\tmp.txt").GetFilenameExtension(), P::FromNative(".txt"));
+		VERIFY_EQUAL(P::FromNative("C:\\tempdir\\tmp.txt").GetFilename(), P::FromNative("tmp.txt"));
+
+		VERIFY_EQUAL(P::FromNative("C:\\tempdir\\tmp.foo.txt").GetFilenameBase(), P::FromNative("tmp.foo"));
+		VERIFY_EQUAL(P::FromNative("C:\\tempdir\\tmp.foo.txt").GetFilenameExtension(), P::FromNative(".txt"));
+
+		VERIFY_EQUAL(P::FromNative("\\\\server").GetPrefix(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("\\\\server").GetDrive(), P::FromNative("\\\\server"));
+		VERIFY_EQUAL(P::FromNative("\\\\server").GetDirectory(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("\\\\server").GetDirectoryWithDrive(), P::FromNative("\\\\server"));
+		VERIFY_EQUAL(P::FromNative("\\\\server").GetFilenameBase(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("\\\\server").GetFilenameExtension(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("\\\\server").GetFilename(), P::FromNative(""));
+
+		VERIFY_EQUAL(P::FromNative("\\\\server\\").GetPrefix(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("\\\\server\\").GetDrive(), P::FromNative("\\\\server\\"));
+		VERIFY_EQUAL(P::FromNative("\\\\server\\").GetDirectory(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("\\\\server\\").GetDirectoryWithDrive(), P::FromNative("\\\\server\\"));
+		VERIFY_EQUAL(P::FromNative("\\\\server\\").GetFilenameBase(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("\\\\server\\").GetFilenameExtension(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("\\\\server\\").GetFilename(), P::FromNative(""));
+
+		VERIFY_EQUAL(P::FromNative("\\\\server\\share").GetPrefix(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("\\\\server\\share").GetDrive(), P::FromNative("\\\\server\\share"));
+		VERIFY_EQUAL(P::FromNative("\\\\server\\share").GetDirectory(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("\\\\server\\share").GetDirectoryWithDrive(), P::FromNative("\\\\server\\share"));
+		VERIFY_EQUAL(P::FromNative("\\\\server\\share").GetFilenameBase(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("\\\\server\\share").GetFilenameExtension(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("\\\\server\\share").GetFilename(), P::FromNative(""));
+
+		VERIFY_EQUAL(P::FromNative("\\\\server\\share\\").GetPrefix(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("\\\\server\\share\\").GetDrive(), P::FromNative("\\\\server\\share"));
+		VERIFY_EQUAL(P::FromNative("\\\\server\\share\\").GetDirectory(), P::FromNative("\\"));
+		VERIFY_EQUAL(P::FromNative("\\\\server\\share\\").GetDirectoryWithDrive(), P::FromNative("\\\\server\\share\\"));
+		VERIFY_EQUAL(P::FromNative("\\\\server\\share\\").GetFilenameBase(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("\\\\server\\share\\").GetFilenameExtension(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("\\\\server\\share\\").GetFilename(), P::FromNative(""));
+
+		VERIFY_EQUAL(P::FromNative("\\\\server\\share\\dir1\\dir2\\name.foo.ext").GetPrefix(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("\\\\server\\share\\dir1\\dir2\\name.foo.ext").GetDrive(), P::FromNative("\\\\server\\share"));
+		VERIFY_EQUAL(P::FromNative("\\\\server\\share\\dir1\\dir2\\name.foo.ext").GetDirectory(), P::FromNative("\\dir1\\dir2\\"));
+		VERIFY_EQUAL(P::FromNative("\\\\server\\share\\dir1\\dir2\\name.foo.ext").GetDirectoryWithDrive(), P::FromNative("\\\\server\\share\\dir1\\dir2\\"));
+		VERIFY_EQUAL(P::FromNative("\\\\server\\share\\dir1\\dir2\\name.foo.ext").GetFilenameBase(), P::FromNative("name.foo"));
+		VERIFY_EQUAL(P::FromNative("\\\\server\\share\\dir1\\dir2\\name.foo.ext").GetFilenameExtension(), P::FromNative(".ext"));
+		VERIFY_EQUAL(P::FromNative("\\\\server\\share\\dir1\\dir2\\name.foo.ext").GetFilename(), P::FromNative("name.foo.ext"));
+
+	}
+
+	{
+		using P = mpt::BasicPathString<mpt::PathTraits<std::string, mpt::PathStyleTag<mpt::PathStyle::DOS_DJGPP>>>;
+
+		VERIFY_EQUAL(P::FromNative("").GetPrefix(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("").GetDrive(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("").GetDirectory(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("").GetDirectoryWithDrive(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("").GetFilenameBase(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("").GetFilenameExtension(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("").GetFilename(), P::FromNative(""));
+
+		VERIFY_EQUAL(P::FromNative("C:\\").GetPrefix(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("C:\\").GetDrive(), P::FromNative("C:"));
+		VERIFY_EQUAL(P::FromNative("C:\\").GetDirectory(), P::FromNative("\\"));
+		VERIFY_EQUAL(P::FromNative("C:\\").GetDirectoryWithDrive(), P::FromNative("C:\\"));
+		VERIFY_EQUAL(P::FromNative("C:\\").GetFilenameBase(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("C:\\").GetFilenameExtension(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("C:\\").GetFilename(), P::FromNative(""));
+
+		VERIFY_EQUAL(P::FromNative("\\directory\\").GetPrefix(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("\\directory\\").GetDrive(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("\\directory\\").GetDirectory(), P::FromNative("\\directory\\"));
+		VERIFY_EQUAL(P::FromNative("\\directory\\").GetDirectoryWithDrive(), P::FromNative("\\directory\\"));
+		VERIFY_EQUAL(P::FromNative("\\directory\\").GetFilenameBase(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("\\directory\\").GetFilenameExtension(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("\\directory\\").GetFilename(), P::FromNative(""));
+
+		VERIFY_EQUAL(P::FromNative("\\directory\\file.txt").GetPrefix(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("\\directory\\file.txt").GetDrive(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("\\directory\\file.txt").GetDirectory(), P::FromNative("\\directory\\"));
+		VERIFY_EQUAL(P::FromNative("\\directory\\file.txt").GetDirectoryWithDrive(), P::FromNative("\\directory\\"));
+		VERIFY_EQUAL(P::FromNative("\\directory\\file.txt").GetFilenameBase(), P::FromNative("file"));
+		VERIFY_EQUAL(P::FromNative("\\directory\\file.txt").GetFilenameExtension(), P::FromNative(".txt"));
+		VERIFY_EQUAL(P::FromNative("\\directory\\file.txt").GetFilename(), P::FromNative("file.txt"));
+
+		VERIFY_EQUAL(P::FromNative(".").GetPrefix(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative(".").GetDrive(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative(".").GetDirectory(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative(".").GetDirectoryWithDrive(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative(".").GetFilenameBase(), P::FromNative("."));
+		VERIFY_EQUAL(P::FromNative(".").GetFilenameExtension(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative(".").GetFilename(), P::FromNative("."));
+
+		VERIFY_EQUAL(P::FromNative("..").GetPrefix(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("..").GetDrive(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("..").GetDirectory(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("..").GetDirectoryWithDrive(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("..").GetFilenameBase(), P::FromNative(".."));
+		VERIFY_EQUAL(P::FromNative("..").GetFilenameExtension(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("..").GetFilename(), P::FromNative(".."));
+
+		VERIFY_EQUAL(P::FromNative("dir\\.").GetPrefix(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("dir\\.").GetDrive(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("dir\\.").GetDirectory(), P::FromNative("dir\\"));
+		VERIFY_EQUAL(P::FromNative("dir\\.").GetDirectoryWithDrive(), P::FromNative("dir\\"));
+		VERIFY_EQUAL(P::FromNative("dir\\.").GetFilenameBase(), P::FromNative("."));
+		VERIFY_EQUAL(P::FromNative("dir\\.").GetFilenameExtension(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("dir\\.").GetFilename(), P::FromNative("."));
+
+		VERIFY_EQUAL(P::FromNative("dir\\..").GetPrefix(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("dir\\..").GetDrive(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("dir\\..").GetDirectory(), P::FromNative("dir\\"));
+		VERIFY_EQUAL(P::FromNative("dir\\..").GetDirectoryWithDrive(), P::FromNative("dir\\"));
+		VERIFY_EQUAL(P::FromNative("dir\\..").GetFilenameBase(), P::FromNative(".."));
+		VERIFY_EQUAL(P::FromNative("dir\\..").GetFilenameExtension(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("dir\\..").GetFilename(), P::FromNative(".."));
+
+		VERIFY_EQUAL(P::FromNative(".txt").GetPrefix(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative(".txt").GetDrive(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative(".txt").GetDirectory(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative(".txt").GetDirectoryWithDrive(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative(".txt").GetFilenameBase(), P::FromNative(".txt"));
+		VERIFY_EQUAL(P::FromNative(".txt").GetFilenameExtension(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative(".txt").GetFilename(), P::FromNative(".txt"));
+
+		VERIFY_EQUAL(P::FromNative("C:tmp.txt").GetPrefix(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("C:tmp.txt").GetDrive(), P::FromNative("C:"));
+		VERIFY_EQUAL(P::FromNative("C:tmp.txt").GetDirectory(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("C:tmp.txt").GetDirectoryWithDrive(), P::FromNative("C:"));
+		VERIFY_EQUAL(P::FromNative("C:tmp.txt").GetFilenameBase(), P::FromNative("tmp"));
+		VERIFY_EQUAL(P::FromNative("C:tmp.txt").GetFilenameExtension(), P::FromNative(".txt"));
+		VERIFY_EQUAL(P::FromNative("C:tmp.txt").GetFilename(), P::FromNative("tmp.txt"));
+
+		VERIFY_EQUAL(P::FromNative("C:tempdir\\tmp.txt").GetPrefix(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("C:tempdir\\tmp.txt").GetDrive(), P::FromNative("C:"));
+		VERIFY_EQUAL(P::FromNative("C:tempdir\\tmp.txt").GetDirectory(), P::FromNative("tempdir\\"));
+		VERIFY_EQUAL(P::FromNative("C:tempdir\\tmp.txt").GetDirectoryWithDrive(), P::FromNative("C:tempdir\\"));
+		VERIFY_EQUAL(P::FromNative("C:tempdir\\tmp.txt").GetFilenameBase(), P::FromNative("tmp"));
+		VERIFY_EQUAL(P::FromNative("C:tempdir\\tmp.txt").GetFilenameExtension(), P::FromNative(".txt"));
+		VERIFY_EQUAL(P::FromNative("C:tempdir\\tmp.txt").GetFilename(), P::FromNative("tmp.txt"));
+
+		VERIFY_EQUAL(P::FromNative("C:\\tempdir\\tmp.txt").GetPrefix(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("C:\\tempdir\\tmp.txt").GetDrive(), P::FromNative("C:"));
+		VERIFY_EQUAL(P::FromNative("C:\\tempdir\\tmp.txt").GetDirectory(), P::FromNative("\\tempdir\\"));
+		VERIFY_EQUAL(P::FromNative("C:\\tempdir\\tmp.txt").GetDirectoryWithDrive(), P::FromNative("C:\\tempdir\\"));
+		VERIFY_EQUAL(P::FromNative("C:\\tempdir\\tmp.txt").GetFilenameBase(), P::FromNative("tmp"));
+		VERIFY_EQUAL(P::FromNative("C:\\tempdir\\tmp.txt").GetFilenameExtension(), P::FromNative(".txt"));
+		VERIFY_EQUAL(P::FromNative("C:\\tempdir\\tmp.txt").GetFilename(), P::FromNative("tmp.txt"));
+
+		VERIFY_EQUAL(P::FromNative("C:\\tempdir\\tmp.foo.txt").GetFilenameBase(), P::FromNative("tmp.foo"));
+		VERIFY_EQUAL(P::FromNative("C:\\tempdir\\tmp.foo.txt").GetFilenameExtension(), P::FromNative(".txt"));
+
+	}
+
+	{
+		using P = mpt::BasicPathString<mpt::PathTraits<std::string, mpt::PathStyleTag<mpt::PathStyle::Posix>>>;
+
+		VERIFY_EQUAL(P::FromNative("").GetDirectory(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("").GetFilenameBase(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("").GetFilenameExtension(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("").GetFilename(), P::FromNative(""));
+
+		VERIFY_EQUAL(P::FromNative("/").GetDirectory(), P::FromNative("/"));
+		VERIFY_EQUAL(P::FromNative("/").GetFilenameBase(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("/").GetFilenameExtension(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("/").GetFilename(), P::FromNative(""));
+
+		VERIFY_EQUAL(P::FromNative("/directory/").GetDirectory(), P::FromNative("/directory/"));
+		VERIFY_EQUAL(P::FromNative("/directory/").GetFilenameBase(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("/directory/").GetFilenameExtension(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("/directory/").GetFilename(), P::FromNative(""));
+
+		VERIFY_EQUAL(P::FromNative("/directory/file.txt").GetDirectory(), P::FromNative("/directory/"));
+		VERIFY_EQUAL(P::FromNative("/directory/file.txt").GetFilenameBase(), P::FromNative("file"));
+		VERIFY_EQUAL(P::FromNative("/directory/file.txt").GetFilenameExtension(), P::FromNative(".txt"));
+		VERIFY_EQUAL(P::FromNative("/directory/file.txt").GetFilename(), P::FromNative("file.txt"));
+
+		VERIFY_EQUAL(P::FromNative(".").GetDirectory(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative(".").GetFilenameBase(), P::FromNative("."));
+		VERIFY_EQUAL(P::FromNative(".").GetFilenameExtension(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative(".").GetFilename(), P::FromNative("."));
+
+		VERIFY_EQUAL(P::FromNative("..").GetDirectory(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("..").GetFilenameBase(), P::FromNative(".."));
+		VERIFY_EQUAL(P::FromNative("..").GetFilenameExtension(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("..").GetFilename(), P::FromNative(".."));
+
+		VERIFY_EQUAL(P::FromNative("dir/.").GetDirectory(), P::FromNative("dir/"));
+		VERIFY_EQUAL(P::FromNative("dir/.").GetFilenameBase(), P::FromNative("."));
+		VERIFY_EQUAL(P::FromNative("dir/.").GetFilenameExtension(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("dir/.").GetFilename(), P::FromNative("."));
+
+		VERIFY_EQUAL(P::FromNative("dir/..").GetDirectory(), P::FromNative("dir/"));
+		VERIFY_EQUAL(P::FromNative("dir/..").GetFilenameBase(), P::FromNative(".."));
+		VERIFY_EQUAL(P::FromNative("dir/..").GetFilenameExtension(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("dir/..").GetFilename(), P::FromNative(".."));
+
+		VERIFY_EQUAL(P::FromNative(".txt").GetDirectory(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative(".txt").GetFilenameBase(), P::FromNative(".txt"));
+		VERIFY_EQUAL(P::FromNative(".txt").GetFilenameExtension(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative(".txt").GetFilename(), P::FromNative(".txt"));
+
+		VERIFY_EQUAL(P::FromNative("//server").GetDirectory(), P::FromNative("//"));
+		VERIFY_EQUAL(P::FromNative("//server").GetFilenameBase(), P::FromNative("server"));
+		VERIFY_EQUAL(P::FromNative("//server").GetFilenameExtension(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative("//server").GetFilename(), P::FromNative("server"));
+
+	}
 
 
 
@@ -1652,7 +2114,7 @@ static MPT_NOINLINE void TestCharsets()
 	VERIFY_EQUAL(P_("C:\\.").Simplify(), P_("C:\\"));
 	VERIFY_EQUAL(P_("\\\\foo\\..\\.bar").Simplify(), P_("\\\\.bar"));
 	VERIFY_EQUAL(P_("\\\\foo\\..\\..\\bar").Simplify(), P_("\\\\bar"));
-#else
+#elif !MPT_OS_DJGPP
 	VERIFY_EQUAL(P_("/").Simplify(), P_("/"));
 	VERIFY_EQUAL(P_("").Simplify(), P_(""));
 	VERIFY_EQUAL(P_(" ").Simplify(), P_(" "));
@@ -1663,8 +2125,73 @@ static MPT_NOINLINE void TestCharsets()
 	VERIFY_EQUAL(P_("/foo/bar").Simplify(), P_("/foo/bar"));
 	VERIFY_EQUAL(P_("//foo/../.bar").Simplify(), P_("/.bar"));
 	VERIFY_EQUAL(P_("//foo/../../bar").Simplify(), P_("/bar"));
-#endif
+#endif // MPT_OS
 
+	{
+		using P = mpt::BasicPathString<mpt::PathTraits<std::string, mpt::PathStyleTag<mpt::PathStyle::WindowsNT>>>;
+		VERIFY_EQUAL(P::FromNative("").Simplify(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative(" ").Simplify(), P::FromNative(" "));
+		VERIFY_EQUAL(P::FromNative("foo\\bar").Simplify(), P::FromNative("foo\\bar"));
+		VERIFY_EQUAL(P::FromNative(".\\foo\\bar").Simplify(), P::FromNative(".\\foo\\bar"));
+		VERIFY_EQUAL(P::FromNative(".\\\\foo\\bar").Simplify(), P::FromNative(".\\foo\\bar"));
+		VERIFY_EQUAL(P::FromNative("./\\foo\\bar").Simplify(), P::FromNative(".\\foo\\bar"));
+		VERIFY_EQUAL(P::FromNative("\\foo\\bar").Simplify(), P::FromNative("\\foo\\bar"));
+		VERIFY_EQUAL(P::FromNative("A:\\name_1\\.\\name_2\\..\\name_3\\").Simplify(), P::FromNative("A:\\name_1\\name_3"));
+		VERIFY_EQUAL(P::FromNative("A:\\name_1\\..\\name_2\\./name_3").Simplify(), P::FromNative("A:\\name_2\\name_3"));
+		VERIFY_EQUAL(P::FromNative("A:\\name_1\\.\\name_2\\.\\name_3\\..\\name_4\\..").Simplify(), P::FromNative("A:\\name_1\\name_2"));
+		VERIFY_EQUAL(P::FromNative("A:foo\\\\bar").Simplify(), P::FromNative("A:\\foo\\bar"));
+		VERIFY_EQUAL(P::FromNative("C:\\..").Simplify(), P::FromNative("C:\\"));
+		VERIFY_EQUAL(P::FromNative("C:\\.").Simplify(), P::FromNative("C:\\"));
+		VERIFY_EQUAL(P::FromNative("\\\\foo\\..\\.bar").Simplify(), P::FromNative("\\\\.bar"));
+		VERIFY_EQUAL(P::FromNative("\\\\foo\\..\\..\\bar").Simplify(), P::FromNative("\\\\bar"));
+	}
+	{
+		using P = mpt::BasicPathString<mpt::PathTraits<std::string, mpt::PathStyleTag<mpt::PathStyle::Windows9x>>>;
+		VERIFY_EQUAL(P::FromNative("").Simplify(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative(" ").Simplify(), P::FromNative(" "));
+		VERIFY_EQUAL(P::FromNative("foo\\bar").Simplify(), P::FromNative("foo\\bar"));
+		VERIFY_EQUAL(P::FromNative(".\\foo\\bar").Simplify(), P::FromNative(".\\foo\\bar"));
+		VERIFY_EQUAL(P::FromNative(".\\\\foo\\bar").Simplify(), P::FromNative(".\\foo\\bar"));
+		VERIFY_EQUAL(P::FromNative("./\\foo\\bar").Simplify(), P::FromNative(".\\foo\\bar"));
+		VERIFY_EQUAL(P::FromNative("\\foo\\bar").Simplify(), P::FromNative("\\foo\\bar"));
+		VERIFY_EQUAL(P::FromNative("A:\\name_1\\.\\name_2\\..\\name_3\\").Simplify(), P::FromNative("A:\\name_1\\name_3"));
+		VERIFY_EQUAL(P::FromNative("A:\\name_1\\..\\name_2\\./name_3").Simplify(), P::FromNative("A:\\name_2\\name_3"));
+		VERIFY_EQUAL(P::FromNative("A:\\name_1\\.\\name_2\\.\\name_3\\..\\name_4\\..").Simplify(), P::FromNative("A:\\name_1\\name_2"));
+		VERIFY_EQUAL(P::FromNative("A:foo\\\\bar").Simplify(), P::FromNative("A:\\foo\\bar"));
+		VERIFY_EQUAL(P::FromNative("C:\\..").Simplify(), P::FromNative("C:\\"));
+		VERIFY_EQUAL(P::FromNative("C:\\.").Simplify(), P::FromNative("C:\\"));
+		VERIFY_EQUAL(P::FromNative("\\\\foo\\..\\.bar").Simplify(), P::FromNative("\\\\.bar"));
+		VERIFY_EQUAL(P::FromNative("\\\\foo\\..\\..\\bar").Simplify(), P::FromNative("\\\\bar"));
+	}
+	{
+		using P = mpt::BasicPathString<mpt::PathTraits<std::string, mpt::PathStyleTag<mpt::PathStyle::DOS_DJGPP>>>;
+		VERIFY_EQUAL(P::FromNative("").Simplify(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative(" ").Simplify(), P::FromNative(" "));
+		VERIFY_EQUAL(P::FromNative("foo\\bar").Simplify(), P::FromNative("foo\\bar"));
+		VERIFY_EQUAL(P::FromNative(".\\foo\\bar").Simplify(), P::FromNative(".\\foo\\bar"));
+		VERIFY_EQUAL(P::FromNative(".\\\\foo\\bar").Simplify(), P::FromNative(".\\foo\\bar"));
+		VERIFY_EQUAL(P::FromNative("./\\foo\\bar").Simplify(), P::FromNative(".\\foo\\bar"));
+		VERIFY_EQUAL(P::FromNative("\\foo\\bar").Simplify(), P::FromNative("\\foo\\bar"));
+		VERIFY_EQUAL(P::FromNative("A:\\name_1\\.\\name_2\\..\\name_3\\").Simplify(), P::FromNative("A:\\name_1\\name_3"));
+		VERIFY_EQUAL(P::FromNative("A:\\name_1\\..\\name_2\\./name_3").Simplify(), P::FromNative("A:\\name_2\\name_3"));
+		VERIFY_EQUAL(P::FromNative("A:\\name_1\\.\\name_2\\.\\name_3\\..\\name_4\\..").Simplify(), P::FromNative("A:\\name_1\\name_2"));
+		VERIFY_EQUAL(P::FromNative("A:foo\\\\bar").Simplify(), P::FromNative("A:\\foo\\bar"));
+		VERIFY_EQUAL(P::FromNative("C:\\..").Simplify(), P::FromNative("C:\\"));
+		VERIFY_EQUAL(P::FromNative("C:\\.").Simplify(), P::FromNative("C:\\"));
+	}
+	{
+		using P = mpt::BasicPathString < mpt::PathTraits<std::string, mpt::PathStyleTag<mpt::PathStyle::Posix>>>;
+		VERIFY_EQUAL(P::FromNative("/").Simplify(), P::FromNative("/"));
+		VERIFY_EQUAL(P::FromNative("").Simplify(), P::FromNative(""));
+		VERIFY_EQUAL(P::FromNative(" ").Simplify(), P::FromNative(" "));
+		VERIFY_EQUAL(P::FromNative("foo/bar").Simplify(), P::FromNative("foo/bar"));
+		VERIFY_EQUAL(P::FromNative("./foo/bar").Simplify(), P::FromNative("./foo/bar"));
+		VERIFY_EQUAL(P::FromNative(".//foo/bar").Simplify(), P::FromNative("./foo/bar"));
+		VERIFY_EQUAL(P::FromNative(".//foo/bar").Simplify(), P::FromNative("./foo/bar"));
+		VERIFY_EQUAL(P::FromNative("/foo/bar").Simplify(), P::FromNative("/foo/bar"));
+		VERIFY_EQUAL(P::FromNative("//foo/../.bar").Simplify(), P::FromNative("/.bar"));
+		VERIFY_EQUAL(P::FromNative("//foo/../../bar").Simplify(), P::FromNative("/bar"));
+	}
 
 #ifdef MODPLUG_TRACKER
 #if MPT_COMPILER_MSVC
