@@ -1551,6 +1551,8 @@ static MPT_NOINLINE void TestPathNative()
 	VERIFY_EQUAL(P_("\\\\server\\share\\dir1\\dir2\\name.foo.ext").GetFilenameExtension(), P_(".ext"));
 	VERIFY_EQUAL(P_("\\\\server\\share\\dir1\\dir2\\name.foo.ext").GetFilename(), P_("name.foo.ext"));
 
+#if MPT_OS_WINDOWS_WINNT
+
 	VERIFY_EQUAL(P_("\\\\?\\C:\\tempdir\\dir.2\\tmp.foo.txt").GetPrefix(), P_("\\\\?\\"));
 	VERIFY_EQUAL(P_("\\\\?\\C:\\tempdir\\dir.2\\tmp.foo.txt").GetDrive(), P_("C:"));
 	VERIFY_EQUAL(P_("\\\\?\\C:\\tempdir\\dir.2\\tmp.foo.txt").GetDirectory(), P_("\\tempdir\\dir.2\\"));
@@ -1566,6 +1568,8 @@ static MPT_NOINLINE void TestPathNative()
 	VERIFY_EQUAL(P_("\\\\?\\UNC\\server\\share\\dir1\\dir2\\name.foo.ext").GetFilenameBase(), P_("name.foo"));
 	VERIFY_EQUAL(P_("\\\\?\\UNC\\server\\share\\dir1\\dir2\\name.foo.ext").GetFilenameExtension(), P_(".ext"));
 	VERIFY_EQUAL(P_("\\\\?\\UNC\\server\\share\\dir1\\dir2\\name.foo.ext").GetFilename(), P_("name.foo.ext"));
+
+#endif
 
 #elif !MPT_OS_DJGPP
 
