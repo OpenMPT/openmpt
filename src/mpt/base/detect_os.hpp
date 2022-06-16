@@ -36,9 +36,13 @@
 #if defined(NTDDI_VERSION) || defined(_WIN32_WINNT)
 #define MPT_OS_WINDOWS_WINNT 1
 #define MPT_OS_WINDOWS_WIN9X 0
-#else
+#elif defined(_WIN32_WINDOWS)
 #define MPT_OS_WINDOWS_WINNT 0
 #define MPT_OS_WINDOWS_WIN9X 1
+#else
+// assume modern
+#define MPT_OS_WINDOWS_WINNT 1
+#define MPT_OS_WINDOWS_WIN9X 0
 #endif
 #elif defined(__APPLE__)
 #define MPT_OS_MACOSX_OR_IOS 1
