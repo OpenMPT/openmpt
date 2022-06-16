@@ -734,11 +734,13 @@ struct PathTraits {
 template <typename Traits, bool allow_transcode_locale = true>
 class BasicPathString {
 
-private:
+public:
 
 	using path_traits = Traits;
 	using raw_path_type = typename path_traits::raw_path_type;
 	using char_type = typename raw_path_type::value_type;
+
+private:
 
 	raw_path_type path;
 

@@ -10,6 +10,7 @@
 #include "mpt/base/namespace.hpp"
 #include "mpt/path/basic_path.hpp"
 #include "mpt/path/os_path.hpp"
+#include "mpt/string/types.hpp"
 
 
 
@@ -33,6 +34,9 @@ struct NativePathStyleTag {
 };
 
 struct NativePathTraits : public PathTraits<mpt::os_path, NativePathStyleTag> {
+};
+
+struct Utf8PathTraits : public PathTraits<mpt::utf8string, NativePathStyleTag> {
 };
 
 using native_path = BasicPathString<NativePathTraits, true>;

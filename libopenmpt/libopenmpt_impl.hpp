@@ -47,7 +47,7 @@ namespace mpt {
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
 using PathString = mpt::native_path;
 #else
-using PathString = mpt::BasicPathString<mpt::NativePathTraits, false>;
+using PathString = mpt::BasicPathString<mpt::Utf8PathTraits, false>;
 #endif
 } // namespace mpt
 using FileCursor = detail::FileCursor<mpt::IO::FileCursorTraitsFileData, mpt::IO::FileCursorFilenameTraits<mpt::PathString>>;

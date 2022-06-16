@@ -33,26 +33,26 @@ namespace mpt
 
 
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
-using RawPathString = mpt::os_path;
+
+using PathString = mpt::native_path;
+
 #define MPT_PATHSTRING_LITERAL(x) MPT_OSPATH_LITERAL( x )
 #define MPT_PATHSTRING(x) mpt::PathString::FromNative(MPT_OSPATH_LITERAL( x ))
+
 #else // !MPT_ENABLE_CHARSET_LOCALE
-using RawPathString = mpt::utf8string;
+
+using PathString = mpt::BasicPathString<mpt::Utf8PathTraits, false>;
+
 #define MPT_PATHSTRING_LITERAL(x) ( x )
 #define MPT_PATHSTRING(x) mpt::PathString::FromNative( x )
+
 #endif // MPT_ENABLE_CHARSET_LOCALE
+
+using RawPathString = PathString::raw_path_type;
 
 #define PC_(x) MPT_PATHSTRING_LITERAL(x)
 #define PL_(x) MPT_PATHSTRING_LITERAL(x)
 #define P_(x) MPT_PATHSTRING(x)
-
-
-
-#if defined(MPT_ENABLE_CHARSET_LOCALE)
-using PathString = mpt::native_path;
-#else
-using PathString = mpt::BasicPathString<mpt::NativePathTraits, false>;
-#endif
 
 
 
