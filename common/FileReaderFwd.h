@@ -15,6 +15,10 @@
 
 namespace mpt {
 inline namespace MPT_INLINE_NS {
+
+template <typename Traits, bool allow_transcode_locale>
+class BasicPathString;
+
 namespace IO {
 
 class FileCursorTraitsMemory;
@@ -30,6 +34,7 @@ template <typename Ttraits, typename Tfilenametraits>
 class FileCursor;
 
 }
+
 }
 }
 
@@ -50,10 +55,12 @@ class FileReader;
 } // namespace detail
 
 namespace mpt {
-template <typename Traits>
-class BasicPathString;
 struct NativePathTraits;
-using PathString = BasicPathString<NativePathTraits>;
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
+using PathString = mpt::BasicPathString<NativePathTraits>;
+#else
+using PathString = mpt::BasicPathString<NativePathTraits, false>;
+#endif
 } // namespace mpt
 
 using FileCursor = detail::FileCursor<mpt::IO::FileCursorTraitsFileData, mpt::IO::FileCursorFilenameTraits<mpt::PathString>>;

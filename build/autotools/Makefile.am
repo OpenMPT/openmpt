@@ -216,6 +216,7 @@ MPT_FILES_SRC_MPT += src/mpt/osinfo/dos_version.hpp
 MPT_FILES_SRC_MPT += src/mpt/osinfo/windows_version.hpp
 MPT_FILES_SRC_MPT += src/mpt/out_of_memory/out_of_memory.hpp
 MPT_FILES_SRC_MPT += src/mpt/parse/parse.hpp
+MPT_FILES_SRC_MPT += src/mpt/path/basic_path.hpp
 MPT_FILES_SRC_MPT += src/mpt/path/path.hpp
 MPT_FILES_SRC_MPT += src/mpt/path/os_path.hpp
 MPT_FILES_SRC_MPT += src/mpt/path/os_path_long.hpp

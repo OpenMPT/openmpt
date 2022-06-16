@@ -569,6 +569,7 @@
 		F19DB8D9D040544B85225719 /* SoundFilePlayConfig.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SoundFilePlayConfig.cpp; path = ../../soundlib/SoundFilePlayConfig.cpp; sourceTree = "<group>"; };
 		F1E743CB3635E93D785D220B /* OggStream.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = OggStream.h; path = ../../soundlib/OggStream.h; sourceTree = "<group>"; };
 		F1F533090CC1A1BB10923949 /* filereader.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = filereader.hpp; path = ../../src/mpt/io_read/filereader.hpp; sourceTree = "<group>"; };
+		F244B139942E4D2B8B555F79 /* basic_path.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = basic_path.hpp; path = ../../src/mpt/path/basic_path.hpp; sourceTree = "<group>"; };
 		F3E5C0DEB6A6215013DAFF1E /* mptStringParse.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = mptStringParse.cpp; path = ../../common/mptStringParse.cpp; sourceTree = "<group>"; };
 		F42AAB0986B874FBEF911949 /* MIDIEvents.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MIDIEvents.h; path = ../../soundlib/MIDIEvents.h; sourceTree = "<group>"; };
 		F4775C614BDCCF53FDEAEAA1 /* Chorus.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Chorus.h; path = ../../soundlib/plugins/dmo/Chorus.h; sourceTree = "<group>"; };
@@ -792,6 +793,7 @@
 		5288703955F9426BD765E679 /* path */ = {
 			isa = PBXGroup;
 			children = (
+				F244B139942E4D2B8B555F79 /* basic_path.hpp */,
 				50318A59BD5998CBBEEC8899 /* os_path.hpp */,
 				85A36D37F9FDB22977E13B77 /* os_path_long.hpp */,
 				7C2DCED7ED506FC9A3171D17 /* path.hpp */,

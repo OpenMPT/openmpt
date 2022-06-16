@@ -25,6 +25,8 @@
 // forward declarations
 namespace mpt {
 inline namespace mpt_libopenmpt {
+template <typename Traits, bool allow_transcode_locale>
+class BasicPathString;
 namespace IO {
 class FileCursorTraitsFileData;
 template <typename Tpath>
@@ -40,10 +42,12 @@ template <typename Ttraits, typename Tfilenametraits>
 using FileCursor = mpt::IO::FileCursor<Ttraits, Tfilenametraits>;
 } // namespace detail
 namespace mpt {
-template <typename Traits>
-class BasicPathString;
 struct NativePathTraits;
-using PathString = BasicPathString<NativePathTraits>;
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
+using PathString = mpt::BasicPathString<NativePathTraits>;
+#else
+using PathString = mpt::BasicPathString<NativePathTraits, false>;
+#endif
 } // namespace mpt
 using FileCursor = detail::FileCursor<mpt::IO::FileCursorTraitsFileData, mpt::IO::FileCursorFilenameTraits<mpt::PathString>>;
 class CSoundFile;

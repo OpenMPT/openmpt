@@ -12,16 +12,27 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
+#include "mpt/base/namespace.hpp"
+
 #include <unordered_set>
+
+namespace mpt {
+inline namespace MPT_INLINE_NS {
+template <typename Traits, bool allow_transcode_locale>
+class BasicPathString;
+}
+}
 
 OPENMPT_NAMESPACE_BEGIN
 
 class CModDoc;
 namespace mpt {
-template <typename Traits>
-class BasicPathString;
 struct NativePathTraits;
-using PathString = BasicPathString<NativePathTraits>;
+#if defined(MPT_ENABLE_CHARSET_LOCALE)
+using PathString = mpt::BasicPathString<NativePathTraits>;
+#else
+using PathString = mpt::BasicPathString<NativePathTraits, false>;
+#endif
 } // namespace mpt
 
 class CModDocTemplate: public CMultiDocTemplate

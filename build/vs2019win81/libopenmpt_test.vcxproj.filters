@@ -858,6 +858,9 @@
     <ClInclude Include="..\..\src\mpt\parse\tests\tests_parse.hpp">
       <Filter>src\mpt\parse\tests</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\mpt\path\basic_path.hpp">
+      <Filter>src\mpt\path</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\mpt\path\os_path.hpp">
       <Filter>src\mpt\path</Filter>
     </ClInclude>
