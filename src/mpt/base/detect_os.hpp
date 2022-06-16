@@ -33,6 +33,13 @@
 #else // !WINAPI_FAMILY
 #define MPT_OS_WINDOWS_WINRT 0
 #endif // WINAPI_FAMILY
+#if defined(NTDDI_VERSION) || defined(_WIN32_WINNT)
+#define MPT_OS_WINDOWS_WINNT 1
+#define MPT_OS_WINDOWS_WIN9X 0
+#else
+#define MPT_OS_WINDOWS_WINNT 0
+#define MPT_OS_WINDOWS_WIN9X 1
+#endif
 #elif defined(__APPLE__)
 #define MPT_OS_MACOSX_OR_IOS 1
 //#include "TargetConditionals.h"
@@ -72,6 +79,12 @@
 #endif
 #ifndef MPT_OS_WINDOWS_WINRT
 #define MPT_OS_WINDOWS_WINRT 0
+#endif
+#ifndef MPT_OS_WINDOWS_WINNT
+#define MPT_OS_WINDOWS_WINNT 0
+#endif
+#ifndef MPT_OS_WINDOWS_WIN9X
+#define MPT_OS_WINDOWS_WIN9X 0
 #endif
 #ifndef MPT_OS_MACOSX_OR_IOS
 #define MPT_OS_MACOSX_OR_IOS 0

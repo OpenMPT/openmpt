@@ -76,8 +76,10 @@
 
 
 #if MPT_OS_WINDOWS && MPT_COMPILER_MSVC
-#if defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0600) // _WIN32_WINNT_VISTA
+#if defined(_WIN32_WINNT) 
+#if (_WIN32_WINNT >= 0x0600) // _WIN32_WINNT_VISTA
 #define MPT_COMPILER_QUIRK_COMPLEX_STD_MUTEX
+#endif
 #endif
 #endif
 
