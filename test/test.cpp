@@ -1657,6 +1657,9 @@ static MPT_NOINLINE void TestPathNative()
 static MPT_NOINLINE void TestPathForeign()
 {
 
+// emscripten compiler crash
+#if !MPT_OS_EMSCRIPTEN
+
 	{
 		using P = mpt::BasicPathString<mpt::PathTraits<std::string, mpt::PathStyleTag<mpt::PathStyle::WindowsNT>>>;
 
@@ -2120,6 +2123,8 @@ static MPT_NOINLINE void TestPathForeign()
 
 	}
 
+#endif
+
 	{
 		using P = mpt::BasicPathString<mpt::PathTraits<std::string, mpt::PathStyleTag<mpt::PathStyle::WindowsNT>>>;
 		VERIFY_EQUAL(P::FromNative("").Simplify(), P::FromNative(""));
@@ -2185,7 +2190,7 @@ static MPT_NOINLINE void TestPathForeign()
 		VERIFY_EQUAL(P::FromNative("//foo/../.bar").Simplify(), P::FromNative("/.bar"));
 		VERIFY_EQUAL(P::FromNative("//foo/../../bar").Simplify(), P::FromNative("/bar"));
 	}
-	
+
 }
 
 
