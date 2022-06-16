@@ -19,6 +19,7 @@ inline namespace MPT_INLINE_NS {
 template <typename Traits, bool allow_transcode_locale>
 class BasicPathString;
 struct NativePathTraits;
+struct Utf8PathTraits;
 using native_path = BasicPathString<NativePathTraits, true>;
 
 namespace IO {
