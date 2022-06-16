@@ -44,7 +44,6 @@ template <typename Ttraits, typename Tfilenametraits>
 using FileCursor = mpt::IO::FileCursor<Ttraits, Tfilenametraits>;
 } // namespace detail
 namespace mpt {
-struct NativePathTraits;
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
 using PathString = mpt::native_path;
 #else
