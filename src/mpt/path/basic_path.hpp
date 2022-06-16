@@ -635,7 +635,7 @@ struct PathTraits {
 
 			result = root;
 			result.reserve(path.size());
-			for (const auto & component : components) 	{
+			for (const auto & component : components) {
 				result += component + L<char_type>("\\");
 			}
 			if (!components.empty()) {
