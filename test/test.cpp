@@ -118,6 +118,8 @@ static MPT_NOINLINE void TestMisc1();
 static MPT_NOINLINE void TestMisc2();
 static MPT_NOINLINE void TestRandom();
 static MPT_NOINLINE void TestCharsets();
+static MPT_NOINLINE void TestPathNative();
+static MPT_NOINLINE void TestPathForeign();
 static MPT_NOINLINE void TestStringFormatting();
 static MPT_NOINLINE void TestSettings();
 static MPT_NOINLINE void TestStringIO();
@@ -277,6 +279,8 @@ void DoTests()
 	DO_TEST(TestMisc2);
 	DO_TEST(TestRandom);
 	DO_TEST(TestCharsets);
+	DO_TEST(TestPathNative);
+	DO_TEST(TestPathForeign);
 	DO_TEST(TestStringFormatting);
 	DO_TEST(TestSettings);
 	DO_TEST(TestStringIO);
@@ -1401,7 +1405,7 @@ static MPT_NOINLINE void TestRandom()
 }
 
 
-static MPT_NOINLINE void TestCharsets()
+static MPT_NOINLINE void TestPathNative()
 {
 
 	// Path splitting
@@ -1616,6 +1620,42 @@ static MPT_NOINLINE void TestCharsets()
 	VERIFY_EQUAL(P_("//server").GetFilename(), P_("server"));
 
 #endif // MPT_OS
+		
+#if MPT_OS_WINDOWS
+	VERIFY_EQUAL(P_("").Simplify(), P_(""));
+	VERIFY_EQUAL(P_(" ").Simplify(), P_(" "));
+	VERIFY_EQUAL(P_("foo\\bar").Simplify(), P_("foo\\bar"));
+	VERIFY_EQUAL(P_(".\\foo\\bar").Simplify(), P_(".\\foo\\bar"));
+	VERIFY_EQUAL(P_(".\\\\foo\\bar").Simplify(), P_(".\\foo\\bar"));
+	VERIFY_EQUAL(P_("./\\foo\\bar").Simplify(), P_(".\\foo\\bar"));
+	VERIFY_EQUAL(P_("\\foo\\bar").Simplify(), P_("\\foo\\bar"));
+	VERIFY_EQUAL(P_("A:\\name_1\\.\\name_2\\..\\name_3\\").Simplify(), P_("A:\\name_1\\name_3"));
+	VERIFY_EQUAL(P_("A:\\name_1\\..\\name_2\\./name_3").Simplify(), P_("A:\\name_2\\name_3"));
+	VERIFY_EQUAL(P_("A:\\name_1\\.\\name_2\\.\\name_3\\..\\name_4\\..").Simplify(), P_("A:\\name_1\\name_2"));
+	VERIFY_EQUAL(P_("A:foo\\\\bar").Simplify(), P_("A:\\foo\\bar"));
+	VERIFY_EQUAL(P_("C:\\..").Simplify(), P_("C:\\"));
+	VERIFY_EQUAL(P_("C:\\.").Simplify(), P_("C:\\"));
+	VERIFY_EQUAL(P_("\\\\foo\\..\\.bar").Simplify(), P_("\\\\.bar"));
+	VERIFY_EQUAL(P_("\\\\foo\\..\\..\\bar").Simplify(), P_("\\\\bar"));
+#elif !MPT_OS_DJGPP
+	VERIFY_EQUAL(P_("/").Simplify(), P_("/"));
+	VERIFY_EQUAL(P_("").Simplify(), P_(""));
+	VERIFY_EQUAL(P_(" ").Simplify(), P_(" "));
+	VERIFY_EQUAL(P_("foo/bar").Simplify(), P_("foo/bar"));
+	VERIFY_EQUAL(P_("./foo/bar").Simplify(), P_("./foo/bar"));
+	VERIFY_EQUAL(P_(".//foo/bar").Simplify(), P_("./foo/bar"));
+	VERIFY_EQUAL(P_(".//foo/bar").Simplify(), P_("./foo/bar"));
+	VERIFY_EQUAL(P_("/foo/bar").Simplify(), P_("/foo/bar"));
+	VERIFY_EQUAL(P_("//foo/../.bar").Simplify(), P_("/.bar"));
+	VERIFY_EQUAL(P_("//foo/../../bar").Simplify(), P_("/bar"));
+#endif // MPT_OS
+
+}
+
+
+
+static MPT_NOINLINE void TestPathForeign()
+{
 
 	{
 		using P = mpt::BasicPathString<mpt::PathTraits<std::string, mpt::PathStyleTag<mpt::PathStyle::WindowsNT>>>;
@@ -2080,53 +2120,6 @@ static MPT_NOINLINE void TestCharsets()
 
 	}
 
-
-
-	// Path conversions
-#ifdef MODPLUG_TRACKER
-	const mpt::PathString exePath = P_("C:\\OpenMPT\\");
-	VERIFY_EQUAL(mpt::AbsolutePathToRelative(P_("C:\\OpenMPT\\"), exePath), P_(".\\"));
-	VERIFY_EQUAL(mpt::AbsolutePathToRelative(P_("c:\\OpenMPT\\foo"), exePath), P_(".\\foo"));
-	VERIFY_EQUAL(mpt::AbsolutePathToRelative(P_("C:\\foo"), exePath), P_("\\foo"));
-	VERIFY_EQUAL(mpt::RelativePathToAbsolute(P_(".\\"), exePath), P_("C:\\OpenMPT\\"));
-	VERIFY_EQUAL(mpt::RelativePathToAbsolute(P_(".\\foo"), exePath), P_("C:\\OpenMPT\\foo"));
-	VERIFY_EQUAL(mpt::RelativePathToAbsolute(P_("..\\foo"), exePath).Simplify(), P_("C:\\foo"));
-	VERIFY_EQUAL(mpt::RelativePathToAbsolute(P_("..\\..\\foo"), exePath).Simplify(), P_("C:\\foo"));
-	VERIFY_EQUAL(mpt::RelativePathToAbsolute(P_("file"), exePath), P_("C:\\OpenMPT\\file"));
-	VERIFY_EQUAL(mpt::RelativePathToAbsolute(P_("\\foo"), exePath), P_("C:\\foo"));
-	VERIFY_EQUAL(mpt::AbsolutePathToRelative(P_("\\\\server\\path\\file"), exePath), P_("\\\\server\\path\\file"));
-	VERIFY_EQUAL(mpt::RelativePathToAbsolute(P_("\\\\server\\path\\file"), exePath), P_("\\\\server\\path\\file"));
-#endif
-
-#if MPT_OS_WINDOWS
-	VERIFY_EQUAL(P_("").Simplify(), P_(""));
-	VERIFY_EQUAL(P_(" ").Simplify(), P_(" "));
-	VERIFY_EQUAL(P_("foo\\bar").Simplify(), P_("foo\\bar"));
-	VERIFY_EQUAL(P_(".\\foo\\bar").Simplify(), P_(".\\foo\\bar"));
-	VERIFY_EQUAL(P_(".\\\\foo\\bar").Simplify(), P_(".\\foo\\bar"));
-	VERIFY_EQUAL(P_("./\\foo\\bar").Simplify(), P_(".\\foo\\bar"));
-	VERIFY_EQUAL(P_("\\foo\\bar").Simplify(), P_("\\foo\\bar"));
-	VERIFY_EQUAL(P_("A:\\name_1\\.\\name_2\\..\\name_3\\").Simplify(), P_("A:\\name_1\\name_3"));
-	VERIFY_EQUAL(P_("A:\\name_1\\..\\name_2\\./name_3").Simplify(), P_("A:\\name_2\\name_3"));
-	VERIFY_EQUAL(P_("A:\\name_1\\.\\name_2\\.\\name_3\\..\\name_4\\..").Simplify(), P_("A:\\name_1\\name_2"));
-	VERIFY_EQUAL(P_("A:foo\\\\bar").Simplify(), P_("A:\\foo\\bar"));
-	VERIFY_EQUAL(P_("C:\\..").Simplify(), P_("C:\\"));
-	VERIFY_EQUAL(P_("C:\\.").Simplify(), P_("C:\\"));
-	VERIFY_EQUAL(P_("\\\\foo\\..\\.bar").Simplify(), P_("\\\\.bar"));
-	VERIFY_EQUAL(P_("\\\\foo\\..\\..\\bar").Simplify(), P_("\\\\bar"));
-#elif !MPT_OS_DJGPP
-	VERIFY_EQUAL(P_("/").Simplify(), P_("/"));
-	VERIFY_EQUAL(P_("").Simplify(), P_(""));
-	VERIFY_EQUAL(P_(" ").Simplify(), P_(" "));
-	VERIFY_EQUAL(P_("foo/bar").Simplify(), P_("foo/bar"));
-	VERIFY_EQUAL(P_("./foo/bar").Simplify(), P_("./foo/bar"));
-	VERIFY_EQUAL(P_(".//foo/bar").Simplify(), P_("./foo/bar"));
-	VERIFY_EQUAL(P_(".//foo/bar").Simplify(), P_("./foo/bar"));
-	VERIFY_EQUAL(P_("/foo/bar").Simplify(), P_("/foo/bar"));
-	VERIFY_EQUAL(P_("//foo/../.bar").Simplify(), P_("/.bar"));
-	VERIFY_EQUAL(P_("//foo/../../bar").Simplify(), P_("/bar"));
-#endif // MPT_OS
-
 	{
 		using P = mpt::BasicPathString<mpt::PathTraits<std::string, mpt::PathStyleTag<mpt::PathStyle::WindowsNT>>>;
 		VERIFY_EQUAL(P::FromNative("").Simplify(), P::FromNative(""));
@@ -2192,6 +2185,29 @@ static MPT_NOINLINE void TestCharsets()
 		VERIFY_EQUAL(P::FromNative("//foo/../.bar").Simplify(), P::FromNative("/.bar"));
 		VERIFY_EQUAL(P::FromNative("//foo/../../bar").Simplify(), P::FromNative("/bar"));
 	}
+	
+}
+
+
+
+static MPT_NOINLINE void TestCharsets()
+{
+
+	// Path conversions
+#ifdef MODPLUG_TRACKER
+	const mpt::PathString exePath = P_("C:\\OpenMPT\\");
+	VERIFY_EQUAL(mpt::AbsolutePathToRelative(P_("C:\\OpenMPT\\"), exePath), P_(".\\"));
+	VERIFY_EQUAL(mpt::AbsolutePathToRelative(P_("c:\\OpenMPT\\foo"), exePath), P_(".\\foo"));
+	VERIFY_EQUAL(mpt::AbsolutePathToRelative(P_("C:\\foo"), exePath), P_("\\foo"));
+	VERIFY_EQUAL(mpt::RelativePathToAbsolute(P_(".\\"), exePath), P_("C:\\OpenMPT\\"));
+	VERIFY_EQUAL(mpt::RelativePathToAbsolute(P_(".\\foo"), exePath), P_("C:\\OpenMPT\\foo"));
+	VERIFY_EQUAL(mpt::RelativePathToAbsolute(P_("..\\foo"), exePath).Simplify(), P_("C:\\foo"));
+	VERIFY_EQUAL(mpt::RelativePathToAbsolute(P_("..\\..\\foo"), exePath).Simplify(), P_("C:\\foo"));
+	VERIFY_EQUAL(mpt::RelativePathToAbsolute(P_("file"), exePath), P_("C:\\OpenMPT\\file"));
+	VERIFY_EQUAL(mpt::RelativePathToAbsolute(P_("\\foo"), exePath), P_("C:\\foo"));
+	VERIFY_EQUAL(mpt::AbsolutePathToRelative(P_("\\\\server\\path\\file"), exePath), P_("\\\\server\\path\\file"));
+	VERIFY_EQUAL(mpt::RelativePathToAbsolute(P_("\\\\server\\path\\file"), exePath), P_("\\\\server\\path\\file"));
+#endif
 
 #ifdef MODPLUG_TRACKER
 #if MPT_COMPILER_MSVC
