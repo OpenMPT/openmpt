@@ -68,7 +68,7 @@ struct NativePathTraits
 };
 
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
-using PathString = mpt::BasicPathString<NativePathTraits>;
+using PathString = mpt::BasicPathString<NativePathTraits, true>;
 #else
 using PathString = mpt::BasicPathString<NativePathTraits, false>;
 #endif
