@@ -48,7 +48,7 @@ public:
 			return false;
 		}
 		DWORD dwAttrib = data.dwFileAttributes;
-#else // !MPT_OS_WINDOWS_WINRT
+#else  // !MPT_OS_WINDOWS_WINRT
 		DWORD dwAttrib = ::GetFileAttributes(path.AsNative().c_str());
 #endif // MPT_OS_WINDOWS_WINRT
 		return ((dwAttrib != INVALID_FILE_ATTRIBUTES) && (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
@@ -61,7 +61,7 @@ public:
 			return false;
 		}
 		DWORD dwAttrib = data.dwFileAttributes;
-#else // !MPT_OS_WINDOWS_WINRT
+#else  // !MPT_OS_WINDOWS_WINRT
 		DWORD dwAttrib = ::GetFileAttributes(path.AsNative().c_str());
 #endif // MPT_OS_WINDOWS_WINRT
 		return ((dwAttrib != INVALID_FILE_ATTRIBUTES) && !(dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
@@ -86,7 +86,6 @@ public:
 			return path;
 		}
 		return mpt::native_path::FromNative(fullPathName.data());
-
 	}
 #endif // !MPT_OS_WINDOWS_WINRT
 
@@ -162,7 +161,7 @@ public:
 						}
 					}
 				}
-			} while(::FindNextFile(hFind, &wfd));
+			} while (::FindNextFile(hFind, &wfd));
 			::FindClose(hFind);
 		}
 		if (::RemoveDirectory(path.AsNative().c_str()) == 0) {
@@ -170,9 +169,6 @@ public:
 		}
 		return true;
 	}
-
-
-
 };
 
 
