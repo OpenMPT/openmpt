@@ -3793,7 +3793,7 @@ void CModTree::OnSetItemPath()
 		SAMPLEINDEX smpID = static_cast<SAMPLEINDEX>(modItem.val1);
 		const mpt::PathString path = pModDoc->GetSoundFile().GetSamplePath(smpID);
 		FileDialog dlg = OpenFileDialog()
-			.ExtensionFilter("All Samples|*.wav;*.flac|All files(*.*)|*.*||");	// Only show samples that we actually can save as well.
+			.ExtensionFilter(U_("All Samples|*.wav;*.flac|All files(*.*)|*.*||"));	// Only show samples that we actually can save as well.
 		if(path.empty())
 			dlg.WorkingDirectory(TrackerSettings::Instance().PathSamples.GetWorkingDir());
 		else
@@ -3941,10 +3941,9 @@ void CModTree::OnImportMidiLib()
 void CModTree::OnExportMidiLib()
 {
 	FileDialog dlg = SaveFileDialog()
-		.DefaultExtension("ini")
-		.DefaultFilename("mptrack.ini")
-		.ExtensionFilter("Text and INI files (*.txt,*.ini)|*.txt;*.ini|"
-			"All Files (*.*)|*.*||");
+		.DefaultExtension(U_("ini"))
+		.DefaultFilename(P_("mptrack.ini"))
+		.ExtensionFilter(U_("Text and INI files (*.txt,*.ini)|*.txt;*.ini|All Files (*.*)|*.*||"));
 	if(!dlg.Show()) return;
 
 	CTrackApp::ExportMidiConfig(dlg.GetFirstFile());

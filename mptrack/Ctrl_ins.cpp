@@ -2074,7 +2074,7 @@ void CCtrlInstruments::SaveInstrument(bool doBatchSave)
 		index = 1;
 
 	FileDialog dlg = SaveFileDialog()
-		.DefaultExtension(m_sndFile.GetType() == MOD_TYPE_XM ? "xi" : "iti")
+		.DefaultExtension(m_sndFile.GetType() == MOD_TYPE_XM ? U_("xi") : U_("iti"))
 		.DefaultFilename(fileName)
 		.ExtensionFilter(
 			"Impulse Tracker Instruments (*.iti)|*.iti|"

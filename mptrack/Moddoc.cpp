@@ -1994,9 +1994,9 @@ void CModDoc::OnFileMidiConvert()
 	mpt::PathString filename = GetPathNameMpt().ReplaceExtension(P_(".mid"));
 
 	FileDialog dlg = SaveFileDialog()
-		.DefaultExtension("mid")
+		.DefaultExtension(U_("mid"))
 		.DefaultFilename(filename)
-		.ExtensionFilter("MIDI Files (*.mid)|*.mid||");
+		.ExtensionFilter(U_("MIDI Files (*.mid)|*.mid||"));
 	if(!dlg.Show()) return;
 
 	CModToMidi mididlg(m_SndFile, pMainFrm);

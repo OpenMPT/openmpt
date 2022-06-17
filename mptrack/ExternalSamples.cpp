@@ -97,7 +97,7 @@ void MissingExternalSamplesDlg::OnSetPath(NMHDR *, LRESULT *)
 
 	const mpt::PathString path = m_modDoc.GetSoundFile().GetSamplePath(smp);
 	FileDialog dlg = OpenFileDialog()
-		.ExtensionFilter("All Samples|*.wav;*.flac|All files(*.*)|*.*||");  // Only show samples that we actually can save as well.
+		.ExtensionFilter(U_("All Samples|*.wav;*.flac|All files(*.*)|*.*||"));  // Only show samples that we actually can save as well.
 	if(TrackerSettings::Instance().previewInFileDialogs)
 		dlg.EnableAudioPreview();
 	if(path.empty())

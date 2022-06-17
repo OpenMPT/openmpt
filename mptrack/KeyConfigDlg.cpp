@@ -730,9 +730,9 @@ void COptionsKeyboard::OnDestroy()
 void COptionsKeyboard::OnLoad()
 {
 	auto dlg = OpenFileDialog()
-	               .DefaultExtension("mkb")
+	               .DefaultExtension(U_("mkb"))
 	               .DefaultFilename(m_fullPathName)
-	               .ExtensionFilter("OpenMPT Key Bindings (*.mkb)|*.mkb||")
+	               .ExtensionFilter(U_("OpenMPT Key Bindings (*.mkb)|*.mkb||"))
 	               .AddPlace(theApp.GetInstallPkgPath() + P_("extraKeymaps"))
 	               .WorkingDirectory(TrackerSettings::Instance().m_szKbdFile);
 	if(!dlg.Show(this))
@@ -747,9 +747,9 @@ void COptionsKeyboard::OnLoad()
 void COptionsKeyboard::OnSave()
 {
 	auto dlg = SaveFileDialog()
-	               .DefaultExtension("mkb")
+	               .DefaultExtension(U_("mkb"))
 	               .DefaultFilename(m_fullPathName)
-	               .ExtensionFilter("OpenMPT Key Bindings (*.mkb)|*.mkb||")
+	               .ExtensionFilter(U_("OpenMPT Key Bindings (*.mkb)|*.mkb||"))
 	               .WorkingDirectory(TrackerSettings::Instance().m_szKbdFile);
 	if(!dlg.Show(this))
 		return;
