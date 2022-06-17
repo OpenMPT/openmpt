@@ -446,7 +446,7 @@ struct PathTraits {
 				}
 			}
 
-			if (((path_style == PathStyle::WindowsNT) || (path_style == PathStyle::Windows9x)) && (p.length() >= 2) && (p.substr(0, 2) == L<char_type>("\\\\") || p.substr(0, 2) == L<char_type>("\\/") || p.substr(0, 2) == L<char_type>("/\\") || p.substr(0, 2) == L<char_type>("//"))) {
+			MPT_MAYBE_CONSTANT_IF (((path_style == PathStyle::WindowsNT) || (path_style == PathStyle::Windows9x)) && (p.length() >= 2) && (p.substr(0, 2) == L<char_type>("\\\\") || p.substr(0, 2) == L<char_type>("\\/") || p.substr(0, 2) == L<char_type>("/\\") || p.substr(0, 2) == L<char_type>("//"))) {
 				// UNC
 				typename raw_path_type::size_type first_slash = p.substr(2).find_first_of(L<char_type>("\\/"));
 				if (first_slash != raw_path_type::npos) {
@@ -599,7 +599,7 @@ struct PathTraits {
 				// Drive letter
 				root = path.substr(0, 2) + L<char_type>('\\');
 				startPos = 2;
-			} else if (((path_style == PathStyle::WindowsNT) || (path_style == PathStyle::Windows9x)) && (path.substr(0, 2) == L<char_type>("\\\\"))) {
+			} else MPT_MAYBE_CONSTANT_IF (((path_style == PathStyle::WindowsNT) || (path_style == PathStyle::Windows9x)) && (path.substr(0, 2) == L<char_type>("\\\\"))) {
 				// Network share
 				root = L<char_type>("\\\\");
 				startPos = 2;
