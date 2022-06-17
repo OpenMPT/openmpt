@@ -1511,6 +1511,7 @@ bin/$(FLAVOUR_DIR)dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION).makefile.tar: b
 	svn export ./src/mpt/environment    bin/$(FLAVOUR_DIR)dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/environment
 	svn export ./src/mpt/exception_text bin/$(FLAVOUR_DIR)dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/exception_text
 	svn export ./src/mpt/format         bin/$(FLAVOUR_DIR)dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/format
+	#svn export ./src/mpt/fs             bin/$(FLAVOUR_DIR)dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/fs
 	svn export ./src/mpt/io             bin/$(FLAVOUR_DIR)dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/io
 	svn export ./src/mpt/io_read        bin/$(FLAVOUR_DIR)dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/io_read
 	svn export ./src/mpt/io_write       bin/$(FLAVOUR_DIR)dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/io_write
@@ -1604,6 +1605,7 @@ bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION).msvc.zip: bin/$
 	svn export ./src/mpt/environment    bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/environment    --native-eol CRLF
 	svn export ./src/mpt/exception_text bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/exception_text --native-eol CRLF
 	svn export ./src/mpt/format         bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/format         --native-eol CRLF
+	#svn export ./src/mpt/fs             bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/fs             --native-eol CRLF
 	svn export ./src/mpt/io             bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/io             --native-eol CRLF
 	svn export ./src/mpt/io_read        bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/io_read        --native-eol CRLF
 	svn export ./src/mpt/io_write       bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/io_write       --native-eol CRLF

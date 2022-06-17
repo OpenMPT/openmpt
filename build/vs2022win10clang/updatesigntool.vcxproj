@@ -1313,6 +1313,7 @@
     <ClInclude Include="..\..\src\mpt\format\simple_spec.hpp" />
     <ClInclude Include="..\..\src\mpt\format\tests\tests_format_message.hpp" />
     <ClInclude Include="..\..\src\mpt\format\tests\tests_format_simple.hpp" />
+    <ClInclude Include="..\..\src\mpt\fs\fs.hpp" />
     <ClInclude Include="..\..\src\mpt\io\base.hpp" />
     <ClInclude Include="..\..\src\mpt\io\io.hpp" />
     <ClInclude Include="..\..\src\mpt\io\io_span.hpp" />

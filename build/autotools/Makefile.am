@@ -184,6 +184,7 @@ MPT_FILES_SRC_MPT += src/mpt/format/simple.hpp
 MPT_FILES_SRC_MPT += src/mpt/format/simple_floatingpoint.hpp
 MPT_FILES_SRC_MPT += src/mpt/format/simple_integer.hpp
 MPT_FILES_SRC_MPT += src/mpt/format/simple_spec.hpp
+#MPT_FILES_SRC_MPT += src/mpt/fs/fs.hpp
 MPT_FILES_SRC_MPT += src/mpt/io/base.hpp
 MPT_FILES_SRC_MPT += src/mpt/io/io.hpp
 MPT_FILES_SRC_MPT += src/mpt/io/io_span.hpp

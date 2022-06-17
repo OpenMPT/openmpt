@@ -10,6 +10,10 @@
 #include "stdafx.h"
 #include "mptFS.h"
 
+#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
+#include "mpt/fs/fs.hpp"
+#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
+
 #include "mptBaseMacros.h"
 
 #if MPT_OS_WINDOWS
@@ -41,95 +45,24 @@ namespace FS
 
 bool IsDirectory(const mpt::PathString &path)
 {
-	// Using PathIsDirectoryW here instead would increase libopenmpt dependencies by shlwapi.dll.
-	// GetFileAttributesW also does the job just fine.
-	#if MPT_OS_WINDOWS_WINRT
-		WIN32_FILE_ATTRIBUTE_DATA data = {};
-		if(::GetFileAttributesExW(path.AsNative().c_str(), GetFileExInfoStandard, &data) == 0)
-		{
-			return false;
-		}
-		DWORD dwAttrib = data.dwFileAttributes;
-	#else // !MPT_OS_WINDOWS_WINRT
-		DWORD dwAttrib = ::GetFileAttributes(path.AsNative().c_str());
-	#endif // MPT_OS_WINDOWS_WINRT
-	return ((dwAttrib != INVALID_FILE_ATTRIBUTES) && (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
+	return mpt::fs<mpt::PathString>{}.is_directory(path);
 }
 
 bool IsFile(const mpt::PathString &path)
 {
-	#if MPT_OS_WINDOWS_WINRT
-		WIN32_FILE_ATTRIBUTE_DATA data = {};
-		if (::GetFileAttributesExW(path.AsNative().c_str(), GetFileExInfoStandard, &data) == 0)
-		{
-			return false;
-		}
-		DWORD dwAttrib = data.dwFileAttributes;
-	#else // !MPT_OS_WINDOWS_WINRT
-		DWORD dwAttrib = ::GetFileAttributes(path.AsNative().c_str());
-	#endif // MPT_OS_WINDOWS_WINRT
-	return ((dwAttrib != INVALID_FILE_ATTRIBUTES) && !(dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
+	return mpt::fs<mpt::PathString>{}.is_file(path);
 }
 
 bool PathExists(const mpt::PathString &path)
 {
-	return ::PathFileExists(path.AsNative().c_str()) != FALSE;
+	return mpt::fs<mpt::PathString>{}.exists(path);
 }
 
 
 
 bool DeleteDirectoryTree(mpt::PathString path)
 {
-	if(path.AsNative().empty())
-	{
-		return false;
-	}
-	if(PathIsRelative(path.AsNative().c_str()) == TRUE)
-	{
-		return false;
-	}
-	if(!mpt::FS::PathExists(path))
-	{
-		return true;
-	}
-	if(!mpt::FS::IsDirectory(path))
-	{
-		return false;
-	}
-	path = path.WithTrailingSlash();
-	HANDLE hFind = NULL;
-	WIN32_FIND_DATA wfd = {};
-	hFind = FindFirstFile((path + P_("*.*")).AsNative().c_str(), &wfd);
-	if(hFind != NULL && hFind != INVALID_HANDLE_VALUE)
-	{
-		do
-		{
-			mpt::PathString filename = mpt::PathString::FromNative(wfd.cFileName);
-			if(filename != P_(".") && filename != P_(".."))
-			{
-				filename = path + filename;
-				if(mpt::FS::IsDirectory(filename))
-				{
-					if(!mpt::FS::DeleteDirectoryTree(filename))
-					{
-						return false;
-					}
-				} else if(mpt::FS::IsFile(filename))
-				{
-					if(DeleteFile(filename.AsNative().c_str()) == 0)
-					{
-						return false;
-					}
-				}
-			}
-		} while(FindNextFile(hFind, &wfd));
-		FindClose(hFind);
-	}
-	if(RemoveDirectory(path.AsNative().c_str()) == 0)
-	{
-		return false;
-	}
-	return true;
+	return mpt::fs<mpt::PathString>{}.delete_tree(path);
 }
 
 
@@ -140,16 +73,7 @@ bool DeleteDirectoryTree(mpt::PathString path)
 
 mpt::PathString GetExecutableDirectory()
 {
-	std::vector<TCHAR> exeFileName(MAX_PATH);
-	while(GetModuleFileName(0, exeFileName.data(), mpt::saturate_cast<DWORD>(exeFileName.size())) >= exeFileName.size())
-	{
-		if(GetLastError() != ERROR_INSUFFICIENT_BUFFER)
-		{
-			return mpt::PathString();
-		}
-		exeFileName.resize(exeFileName.size() * 2);
-	}
-	return mpt::GetAbsolutePath(mpt::PathString::FromNative(exeFileName.data()).GetDirectoryWithDrive());
+	return mpt::fs<mpt::PathString>{}.get_application_directory();
 }
 
 
@@ -158,13 +82,7 @@ mpt::PathString GetExecutableDirectory()
 
 mpt::PathString GetSystemDirectory()
 {
-	DWORD size = ::GetSystemDirectory(nullptr, 0);
-	std::vector<TCHAR> path(size + 1);
-	if(!::GetSystemDirectory(path.data(), size + 1))
-	{
-		return mpt::PathString();
-	}
-	return mpt::PathString::FromNative(path.data()) + P_("\\");
+	return mpt::fs<mpt::PathString>{}.get_system_directory();
 }
 
 #endif // !MPT_OS_WINDOWS_WINRT
@@ -173,17 +91,7 @@ mpt::PathString GetSystemDirectory()
 
 mpt::PathString GetTempDirectory()
 {
-	DWORD size = GetTempPath(0, nullptr);
-	if(size)
-	{
-		std::vector<TCHAR> tempPath(size + 1);
-		if(GetTempPath(size + 1, tempPath.data()))
-		{
-			return mpt::PathString::FromNative(tempPath.data());
-		}
-	}
-	// use exe directory as fallback
-	return mpt::GetExecutableDirectory();
+	return mpt::fs<mpt::PathString>{}.get_temp_directory();
 }
 
 

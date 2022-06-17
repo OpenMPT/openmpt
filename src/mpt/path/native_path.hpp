@@ -41,6 +41,8 @@ struct Utf8PathTraits : public PathTraits<mpt::utf8string, NativePathStyleTag> {
 
 using native_path = BasicPathString<NativePathTraits, true>;
 
+#define MPT_NATIVE_PATH(x) mpt::native_path{MPT_OSPATH(x)}
+
 
 
 } // namespace MPT_INLINE_NS

@@ -70,6 +70,9 @@
     <Filter Include="src\mpt\format\tests">
       <UniqueIdentifier>{672FE5C8-53BE-6E92-FCDC-828DE84A7F38}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\mpt\fs">
+      <UniqueIdentifier>{7554AB6B-610C-EDB8-CA13-C614B6EA87A9}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\mpt\io">
       <UniqueIdentifier>{D454AB6B-C00C-EDB8-2914-C61415EB87A9}</UniqueIdentifier>
     </Filter>
@@ -434,6 +437,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\format\tests\tests_format_simple.hpp">
       <Filter>src\mpt\format\tests</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\fs\fs.hpp">
+      <Filter>src\mpt\fs</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\io\base.hpp">
       <Filter>src\mpt\io</Filter>

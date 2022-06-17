@@ -65,6 +65,8 @@
 	excludes {
 		"../../src/mpt/crypto/**.cpp",
 		"../../src/mpt/crypto/**.hpp",
+		"../../src/mpt/fs/**.cpp",
+		"../../src/mpt/fs/**.hpp",
 		"../../src/mpt/json/**.cpp",
 		"../../src/mpt/json/**.hpp",
 		"../../src/mpt/library/**.cpp",
