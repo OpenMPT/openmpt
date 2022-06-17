@@ -36,8 +36,8 @@ namespace mpt
 
 using PathString = mpt::native_path;
 
-#define MPT_PATHSTRING_LITERAL(x) MPT_OSPATH_LITERAL( x )
-#define MPT_PATHSTRING(x) mpt::PathString::FromNative(MPT_OSPATH_LITERAL( x ))
+#define MPT_PATHSTRING_LITERAL(x) MPT_OS_PATH_LITERAL( x )
+#define MPT_PATHSTRING(x) mpt::PathString::FromNative(MPT_OS_PATH_LITERAL( x ))
 
 #else // !MPT_ENABLE_CHARSET_LOCALE
 

@@ -36,16 +36,16 @@ using os_path = mpt::lstring;
 // mpt::os_path literals that do not involve runtime conversion.
 
 #if MPT_OS_WINDOWS
-#define MPT_OSPATH_CHAR(x)    TEXT(x)
-#define MPT_OSPATH_LITERAL(x) TEXT(x)
-#define MPT_OSPATH(x) \
+#define MPT_OS_PATH_CHAR(x)    TEXT(x)
+#define MPT_OS_PATH_LITERAL(x) TEXT(x)
+#define MPT_OS_PATH(x) \
 	mpt::winstring { \
 		TEXT(x) \
 	}
 #else // !MPT_OS_WINDOWS
-#define MPT_OSPATH_CHAR(x)    x
-#define MPT_OSPATH_LITERAL(x) x
-#define MPT_OSPATH(x) \
+#define MPT_OS_PATH_CHAR(x)    x
+#define MPT_OS_PATH_LITERAL(x) x
+#define MPT_OS_PATH(x) \
 	mpt::lstring { \
 		x \
 	}

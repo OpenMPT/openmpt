@@ -43,7 +43,7 @@ using native_path = BasicPathString<NativePathTraits, true>;
 
 #define MPT_NATIVE_PATH(x) \
 	mpt::native_path { \
-		MPT_OSPATH(x) \
+		MPT_OS_PATH(x) \
 	}
 
 

@@ -36,7 +36,7 @@ inline mpt::os_path support_long_path(const mpt::os_path & path) {
 		// path is short enough
 		return path;
 	}
-	if (path.substr(0, 4) == MPT_OSPATH_LITERAL("\\\\?\\")) {
+	if (path.substr(0, 4) == MPT_OS_PATH_LITERAL("\\\\?\\")) {
 		// path is already in prefixed form
 		return path;
 	}
@@ -52,12 +52,12 @@ inline mpt::os_path support_long_path(const mpt::os_path & path) {
 		}
 	}
 #endif // !MPT_COMPILER_QUIRK_NO_FILESYSTEM
-	if (absolute_path.substr(0, 2) == MPT_OSPATH_LITERAL("\\\\")) {
+	if (absolute_path.substr(0, 2) == MPT_OS_PATH_LITERAL("\\\\")) {
 		// Path is a network share: \\server\foo.bar -> \\?\UNC\server\foo.bar
-		return MPT_OSPATH_LITERAL("\\\\?\\UNC") + absolute_path.substr(1);
+		return MPT_OS_PATH_LITERAL("\\\\?\\UNC") + absolute_path.substr(1);
 	} else {
 		// Regular file: C:\foo.bar -> \\?\C:\foo.bar
-		return MPT_OSPATH_LITERAL("\\\\?\\") + absolute_path;
+		return MPT_OS_PATH_LITERAL("\\\\?\\") + absolute_path;
 	}
 #else
 	return path;
