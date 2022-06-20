@@ -32,6 +32,8 @@ class fs;
 
 
 
+#if MPT_OS_WINDOWS
+
 template <>
 class fs<mpt::native_path> {
 
@@ -170,6 +172,8 @@ public:
 		return true;
 	}
 };
+
+#endif // MPT_OS_WINDOWS
 
 
 
