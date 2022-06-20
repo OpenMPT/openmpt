@@ -83,8 +83,8 @@ LDFLAGS  += $(MPT_ARCH_TARGET)
 LDLIBS   += -lm 
 ARFLAGS  += 
 
-CXXFLAGS += -Os -ffast-math
-CFLAGS   += -Os -ffast-math -fno-strict-aliasing
+CXXFLAGS += -Os
+CFLAGS   += -Os -fno-strict-aliasing
 
 CXXFLAGS += -Wall -Wextra -Wundef -Wcast-qual -Wcast-align
 CFLAGS   += -Wall -Wextra -Wundef -Wcast-qual -Wcast-align
