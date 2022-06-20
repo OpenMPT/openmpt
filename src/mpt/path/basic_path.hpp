@@ -981,6 +981,14 @@ public:
 	bool IsAbsolute() const {
 		return path_traits::IsAbsolute(path);
 	}
+
+	bool is_absolute() const {
+		return path_traits::IsAbsolute(path);
+	}
+
+	bool is_relative() const {
+		return !path_traits::IsAbsolute(path);
+	}
 };
 
 
