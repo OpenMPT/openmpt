@@ -223,8 +223,8 @@ public:
 
 #if (_WIN32_WINNT >= 0x0602) && 0 // Windows 8
 		bool hasKB2533623 = true;
-#else // < Windows 8
-		// check for KB2533623
+#else                             // < Windows 8 \
+								  // check for KB2533623
 		bool hasKB2533623 = false;
 		mpt::osinfo::windows::Version WindowsVersion = mpt::osinfo::windows::Version::Current();
 		if (WindowsVersion.IsAtLeast(mpt::osinfo::windows::Version::Win8)) {
@@ -239,9 +239,9 @@ public:
 				hKernel32DLL = NULL;
 			}
 		}
-#endif // Windows 8
+#endif                            // Windows 8
 
-		MPT_MAYBE_CONSTANT_IF(hasKB2533623) {
+		MPT_MAYBE_CONSTANT_IF (hasKB2533623) {
 
 			switch (path.search) {
 				case library::path_search::unsafe:
@@ -300,7 +300,6 @@ public:
 					hModule = NULL;
 					break;
 			}
-
 		}
 
 #endif // MPT_OS_WINDOWS_WINRT
