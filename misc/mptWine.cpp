@@ -11,6 +11,8 @@
 #include "stdafx.h"
 #include "mptWine.h"
 
+#include "mpt/path/native_path.hpp"
+
 #include "mptOS.h"
 #include "../common/mptFileIO.h"
 #include "../common/mptFileTemporary.h"
@@ -50,7 +52,7 @@ Context::Context(mpt::OS::Wine::VersionContext versionContext)
 	{
 		throw mpt::Wine::Exception("Unknown Wine version detected.");
 	}
-	m_Kernel32 = std::make_shared<std::optional<mpt::library>>(mpt::library::load({ mpt::library::path_search::system, mpt::library::path_prefix::none, MPT_PATH("kernel32.dll"), mpt::library::path_suffix::none }));
+	m_Kernel32 = std::make_shared<std::optional<mpt::library>>(mpt::library::load({ mpt::library::path_search::system, mpt::library::path_prefix::none, MPT_NATIVE_PATH("kernel32.dll"), mpt::library::path_suffix::none }));
 	if(!m_Kernel32->has_value())
 	{
 		throw mpt::Wine::Exception("Could not load Wine kernel32.dll.");

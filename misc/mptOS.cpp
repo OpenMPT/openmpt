@@ -12,6 +12,8 @@
 #include "mptOS.h"
 
 #include "mpt/binary/hex.hpp"
+#include "mpt/library/library.hpp"
+#include "mpt/path/native_path.hpp"
 
 #if MPT_OS_WINDOWS
 #include <windows.h>
@@ -333,7 +335,7 @@ uint64 GetSystemMemorySize()
 static bool GatherSystemIsWine()
 {
 	bool SystemIsWine = false;
-	std::optional<mpt::library> NTDLL = mpt::library::load({ mpt::library::path_search::system, mpt::library::path_prefix::none, MPT_PATH("ntdll.dll"), mpt::library::path_suffix::none });
+	std::optional<mpt::library> NTDLL = mpt::library::load({ mpt::library::path_search::system, mpt::library::path_prefix::none, MPT_NATIVE_PATH("ntdll.dll"), mpt::library::path_suffix::none });
 	if(NTDLL)
 	{
 		SystemIsWine = (NTDLL->get_address("wine_get_version") != nullptr);
@@ -477,7 +479,7 @@ VersionContext::VersionContext()
 		{
 			return;
 		}
-		std::optional<mpt::library> NTDLL = mpt::library::load({mpt::library::path_search::system, mpt::library::path_prefix::none, MPT_PATH("ntdll.dll"), mpt::library::path_suffix::none});
+		std::optional<mpt::library> NTDLL = mpt::library::load({mpt::library::path_search::system, mpt::library::path_prefix::none, MPT_NATIVE_PATH("ntdll.dll"), mpt::library::path_suffix::none});
 		if(NTDLL)
 		{
 			const char * (__cdecl * wine_get_version)(void) = nullptr;

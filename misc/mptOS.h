@@ -12,7 +12,6 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
-#include "mpt/library/library.hpp"
 #include "mpt/osinfo/class.hpp"
 #include "mpt/osinfo/windows_version.hpp"
 

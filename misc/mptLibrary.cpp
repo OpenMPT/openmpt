@@ -11,234 +11,89 @@
 #include "stdafx.h"
 #include "mptLibrary.h"
 
-#include "mpt/osinfo/windows_version.hpp"
+#include "mpt/library/library.hpp"
 
 #include "../common/mptFS.h"
 
-#if MPT_OS_WINDOWS
-#include <windows.h>
-#elif MPT_OS_ANDROID
-#include <dlfcn.h>
-#elif defined(MPT_WITH_LTDL)
-#include <ltdl.h>
-#elif defined(MPT_WITH_DL)
-#include <dlfcn.h>
-#endif
+#include <optional>
+
 
 
 OPENMPT_NAMESPACE_BEGIN
+
 
 
 namespace mpt
 {
 
 
-#if MPT_OS_WINDOWS
-
-
-// KB2533623 / Win8
-#ifndef LOAD_LIBRARY_SEARCH_DEFAULT_DIRS
-#define LOAD_LIBRARY_SEARCH_DEFAULT_DIRS    0x00001000
-#endif
-#ifndef LOAD_LIBRARY_SEARCH_APPLICATION_DIR
-#define LOAD_LIBRARY_SEARCH_APPLICATION_DIR 0x00000200
-#endif
-#ifndef LOAD_LIBRARY_SEARCH_SYSTEM32
-#define LOAD_LIBRARY_SEARCH_SYSTEM32        0x00000800
-#endif
-#ifndef LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR
-#define LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR    0x00000100
-#endif
-
 
 class LibraryHandle
 {
 
 private:
 
-	HMODULE hModule;
+	std::optional<mpt::library> lib;
 
-public:
+private:
 
-	LibraryHandle(const mpt::LibraryPath &path)
-		: hModule(NULL)
+	static mpt::library::path convert_path(const mpt::LibraryPath &path)
 	{
-
-#if MPT_OS_WINDOWS_WINRT
-
-#if (_WIN32_WINNT < 0x0602)
-		(void)path;
-		hModule = NULL; // unsupported
-#else
+		mpt::library::path result{};
+		result.prefix = mpt::library::path_prefix::none;
+		result.suffix = mpt::library::path_suffix::none;
 		switch(path.GetSearchPath())
 		{
-			case mpt::LibrarySearchPath::Default:
-				hModule = LoadPackagedLibrary(path.GetFileName().AsNative().c_str(), 0);
-				break;
-			case mpt::LibrarySearchPath::Application:
-				hModule = LoadPackagedLibrary(path.GetFileName().AsNative().c_str(), 0);
-				break;
-			case mpt::LibrarySearchPath::System:
-				hModule = NULL; // Only application packaged libraries can be loaded dynamically in WinRT
-				break;
-			case mpt::LibrarySearchPath::FullPath:
-				hModule = NULL; // Absolute path is not supported in WinRT
-				break;
-			case mpt::LibrarySearchPath::Invalid:
-				MPT_ASSERT_NOTREACHED();
-				break;
-		}
-#endif
-
-#else // !MPT_OS_WINDOWS_WINRT
-
-#if (_WIN32_WINNT >= 0x0602)
-		bool hasKB2533623 = true;
+		case LibrarySearchPath::Default:
+			result.search = mpt::library::path_search::default_;
+			result.filename = path.GetFileName();
+			break;
+		case LibrarySearchPath::System:
+			result.search = mpt::library::path_search::system;
+			result.filename = path.GetFileName();
+			break;
+// Using restricted search paths applies to potential DLL dependencies
+// recursively.
+// This fails loading for e.g. Codec or Plugin DLLs in application
+// directory if they depend on the MSVC C or C++ runtime (which is
+// located in the system directory).
+// Just rely on the default search path here.
+#if MPT_OS_WINDOWS && defined(MODPLUG_TRACKER)
+		case LibrarySearchPath::Application:
+			if (!mpt::GetExecutableDirectory().empty()) {
+				result.search = mpt::library::path_search::unsafe;
+				result.filename = mpt::GetExecutableDirectory().WithTrailingSlash() + path.GetFileName();
+			} else {
+				result.search = mpt::library::path_search::invalid;
+				result.filename = path.GetFileName();
+			}
+			break;
+		case LibrarySearchPath::FullPath:
+			result.search = mpt::library::path_search::unsafe;
+			result.filename = path.GetFileName();
+			break;
 #else
-		// Check for KB2533623:
-		bool hasKB2533623 = false;
-		mpt::osinfo::windows::Version WindowsVersion = mpt::osinfo::windows::Version::Current();
-		if(WindowsVersion.IsAtLeast(mpt::osinfo::windows::Version::Win8))
-		{
-			hasKB2533623 = true;
-		} else if(WindowsVersion.IsAtLeast(mpt::osinfo::windows::Version::WinVista))
-		{
-			HMODULE hKernel32DLL = LoadLibrary(TEXT("kernel32.dll"));
-			if(hKernel32DLL)
-			{
-				if(::GetProcAddress(hKernel32DLL, "SetDefaultDllDirectories") != nullptr)
-				{
-					hasKB2533623 = true;
-				}
-				FreeLibrary(hKernel32DLL);
-				hKernel32DLL = NULL;
-			}
-		}
+		case LibrarySearchPath::Application:
+			result.search = mpt::library::path_search::application;
+			result.filename = path.GetFileName();
+			break;
+		case LibrarySearchPath::FullPath:
+			result.search = mpt::library::path_search::none;
+			result.filename = path.GetFileName();
+			break;
 #endif
-
-		MPT_MAYBE_CONSTANT_IF(hasKB2533623)
-		{
-			switch(path.GetSearchPath())
-			{
-				case mpt::LibrarySearchPath::Default:
-					hModule = LoadLibraryEx(path.GetFileName().AsNative().c_str(), NULL, LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
-					break;
-				case mpt::LibrarySearchPath::System:
-					hModule = LoadLibraryEx(path.GetFileName().AsNative().c_str(), NULL, LOAD_LIBRARY_SEARCH_SYSTEM32);
-					break;
-#if defined(MODPLUG_TRACKER)
-					// Using restricted search paths applies to potential DLL dependencies
-					// recursively.
-					// This fails loading for e.g. Codec or Plugin DLLs in application
-					// directory if they depend on the MSVC C or C++ runtime (which is
-					// located in the system directory).
-					// Just rely on the default search path here.
-				case mpt::LibrarySearchPath::Application:
-					{
-						const mpt::PathString dllPath = mpt::GetExecutableDirectory();
-						if(!dllPath.empty() && dllPath.IsAbsolute() && mpt::FS::IsDirectory(dllPath))
-						{
-							hModule = LoadLibrary((dllPath + path.GetFileName()).AsNative().c_str());
-						}
-					}
-					break;
-				case mpt::LibrarySearchPath::FullPath:
-					hModule = LoadLibrary(path.GetFileName().AsNative().c_str());
-					break;
-#else
-					// For libopenmpt, do the safe thing.
-				case mpt::LibrarySearchPath::Application:
-					hModule = LoadLibraryEx(path.GetFileName().AsNative().c_str(), NULL, LOAD_LIBRARY_SEARCH_APPLICATION_DIR);
-					break;
-				case mpt::LibrarySearchPath::FullPath:
-					hModule = LoadLibraryEx(path.GetFileName().AsNative().c_str(), NULL, LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR);
-					break;
-#endif
-				case mpt::LibrarySearchPath::Invalid:
-					MPT_ASSERT_NOTREACHED();
-					break;
-			}
-		} else
-		{
-			switch(path.GetSearchPath())
-			{
-				case mpt::LibrarySearchPath::Default:
-					hModule = LoadLibrary(path.GetFileName().AsNative().c_str());
-					break;
-				case mpt::LibrarySearchPath::Application:
-					{
-						const mpt::PathString dllPath = mpt::GetExecutableDirectory();
-						if(!dllPath.empty() && dllPath.IsAbsolute() && mpt::FS::IsDirectory(dllPath))
-						{
-							hModule = LoadLibrary((dllPath + path.GetFileName()).AsNative().c_str());
-						}
-					}
-					break;
-				case mpt::LibrarySearchPath::System:
-					{
-						const mpt::PathString dllPath = mpt::GetSystemDirectory();
-						if(!dllPath.empty() && dllPath.IsAbsolute() && mpt::FS::IsDirectory(dllPath))
-						{
-							hModule = LoadLibrary((dllPath + path.GetFileName()).AsNative().c_str());
-						}
-					}
-					break;
-				case mpt::LibrarySearchPath::FullPath:
-					hModule = LoadLibrary(path.GetFileName().AsNative().c_str());
-					break;
-				case mpt::LibrarySearchPath::Invalid:
-					MPT_ASSERT_NOTREACHED();
-					break;
-			}
+		default:
+			result.search = mpt::library::path_search::invalid;
+			result.filename = path.GetFileName();
+			break;
 		}
-
-#endif // MPT_OS_WINDOWS_WINRT
-
+		return result;
 	}
-
-	LibraryHandle(const LibraryHandle &) = delete;
-
-	LibraryHandle & operator=(const LibraryHandle &) = delete;
-
-	~LibraryHandle()
-	{
-		if(IsValid())
-		{
-			FreeLibrary(hModule);
-		}
-		hModule = NULL;
-	}
-
-public:
-
-	bool IsValid() const
-	{
-		return (hModule != NULL);
-	}
-
-	FuncPtr GetProcAddress(const std::string &symbol) const
-	{
-		if(!IsValid())
-		{
-			return nullptr;
-		}
-		return reinterpret_cast<FuncPtr>(::GetProcAddress(hModule, symbol.c_str()));
-	}
-
-};
-
-
-#elif MPT_OS_ANDROID
-
-
-// Fake implementation.
-// Load shared objects from the JAVA side of things.
-class LibraryHandle
-{
 
 public:
 
 	LibraryHandle(const mpt::LibraryPath &path)
+		: lib(mpt::library::load(convert_path(path)))
 	{
 		return;
 	}
@@ -256,7 +111,7 @@ public:
 
 	bool IsValid() const
 	{
-		return true;
+		return lib.has_value();
 	}
 
 	FuncPtr GetProcAddress(const std::string &symbol) const
@@ -265,170 +120,11 @@ public:
 		{
 			return nullptr;
 		}
-		return reinterpret_cast<FuncPtr>(dlsym(0, symbol.c_str()));
+		return lib->get_address(symbol);
 	}
 
 };
 
-
-
-#elif defined(MPT_WITH_LTDL)
-
-
-class LibraryHandle
-{
-
-private:
-
-	bool inited;
-	lt_dlhandle handle;
-
-public:
-
-	LibraryHandle(const mpt::LibraryPath &path)
-		: inited(false)
-		, handle(0)
-	{
-		if(lt_dlinit() != 0)
-		{
-			return;
-		}
-		inited = true;
-		handle = lt_dlopenext(path.GetFileName().AsNative().c_str());
-	}
-
-	LibraryHandle(const LibraryHandle &) = delete;
-
-	LibraryHandle & operator=(const LibraryHandle &) = delete;
-
-	~LibraryHandle()
-	{
-		if(IsValid())
-		{
-			lt_dlclose(handle);
-		}
-		handle = 0;
-		if(inited)
-		{
-			lt_dlexit();
-			inited = false;
-		}
-	}
-
-public:
-
-	bool IsValid() const
-	{
-		return handle != 0;
-	}
-
-	FuncPtr GetProcAddress(const std::string &symbol) const
-	{
-		if(!IsValid())
-		{
-			return nullptr;
-		}
-		return reinterpret_cast<FuncPtr>(lt_dlsym(handle, symbol.c_str()));
-	}
-
-};
-
-
-#elif defined(MPT_WITH_DL)
-
-
-class LibraryHandle
-{
-
-private:
-
-	void* handle;
-
-public:
-
-	LibraryHandle(const mpt::LibraryPath &path)
-		: handle(NULL)
-	{
-		handle = dlopen(path.GetFileName().AsNative().c_str(), RTLD_NOW);
-	}
-
-	LibraryHandle(const LibraryHandle &) = delete;
-
-	LibraryHandle & operator=(const LibraryHandle &) = delete;
-
-	~LibraryHandle()
-	{
-		if(IsValid())
-		{
-			dlclose(handle);
-		}
-		handle = NULL;
-	}
-
-public:
-
-	bool IsValid() const
-	{
-		return handle != NULL;
-	}
-
-	FuncPtr GetProcAddress(const std::string &symbol) const
-	{
-		if(!IsValid())
-		{
-			return NULL;
-		}
-		return reinterpret_cast<FuncPtr>(dlsym(handle, symbol.c_str()));
-	}
-
-};
-
-
-#else // MPT_OS
-
-
-// dummy implementation
-
-class LibraryHandle
-{
-public:
-
-	LibraryHandle(const mpt::LibraryPath &path)
-	{
-		MPT_UNREFERENCED_PARAMETER(path);
-		return;
-	}
-
-	LibraryHandle(const LibraryHandle &) = delete;
-
-	LibraryHandle & operator=(const LibraryHandle &) = delete;
-
-	~LibraryHandle()
-	{
-		return;
-	}
-
-public:
-
-	bool IsValid() const
-	{
-		return false;
-	}
-
-	FuncPtr GetProcAddress(const std::string &symbol) const
-	{
-		MPT_UNREFERENCED_PARAMETER(symbol);
-		if(!IsValid())
-		{
-			return nullptr;
-		}
-		return nullptr;
-	}
-
-};
-
-
-#endif // MPT_OS
 
 
 LibraryPath::LibraryPath(mpt::LibrarySearchPath searchPath, const mpt::PathString &fileName)
@@ -507,6 +203,7 @@ LibraryPath LibraryPath::FullPath(const mpt::PathString &path)
 }
 
 
+
 Library::Library()
 {
 	return;
@@ -549,7 +246,9 @@ FuncPtr Library::GetProcAddress(const std::string &symbol) const
 }
 
 
+
 } // namespace mpt
+
 
 
 OPENMPT_NAMESPACE_END
