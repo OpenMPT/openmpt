@@ -70,7 +70,7 @@ Dependencies
      *  **libogg**, **libvorbis**, and **libvorbisfile** (or **stb_vorbis** can
         be used internally)
  *  Building on Unix-like systems requires:
-     *  **GNU make**
+     *  **GNU make >= 3.82**
      *  **pkg-config**
  *  The Autotools-based build system requires:
      *  **pkg-config 0.24** or higher

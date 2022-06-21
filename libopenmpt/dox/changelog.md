@@ -58,6 +58,7 @@ is just a high-level summary.
     builds in separate folders below `bin/`.
  *  [**New**] Building with a MinGW32 CRTDLL toolchain is now supported via
     `Makefile` option `CONFIG=mingw32crt-win95`.
+ *  [**New**] `Makefile` now uses `PKG_CONFIG` as path to `pkg-config`.
 
  *  [**Change**] ctl `seek.sync_samples` now defaults to 1.
  *  [**Change**] `Makefile` `CONFIG=generic` is gone. Please use
@@ -90,6 +91,8 @@ is just a high-level summary.
     `openmpt_stream_get_file_callbacks2()`.
  *  [**Regression**] Using the system-provided liballegro42 is no longer
     supported. The option `BUNDLED_ALLEGRO42=1` does not exist any more.
+ *  [**Regression**] Support for GNU make older than 3.82 has been removed for
+    `Makefile` builds.
 
  *  Seeking with sample sync now supports portamento up / down commands as well
     as IMF/ PTM note slides. Tone portamento is now synchronized correctly when
