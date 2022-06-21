@@ -13,10 +13,10 @@ else
 $(error unknown WINDOWS_ARCH)
 endif
 
-CC  := $(or $(CC),$(MINGW_ARCH)-w64-mingw32-gcc$(MINGW_FLAVOUR))
-CXX := $(or $(CXX),$(MINGW_ARCH)-w64-mingw32-g++$(MINGW_FLAVOUR))
-LD  := $(or $(CXX))
-AR  := $(or $(AR),$(MINGW_ARCH)-w64-mingw32-ar$(MINGW_FLAVOUR))
+CC  = $(MINGW_ARCH)-w64-mingw32-gcc$(MINGW_FLAVOUR)
+CXX = $(MINGW_ARCH)-w64-mingw32-g++$(MINGW_FLAVOUR)
+LD  = $(MINGW_ARCH)-w64-mingw32-g++$(MINGW_FLAVOUR)
+AR  = $(MINGW_ARCH)-w64-mingw32-ar$(MINGW_FLAVOUR)
 
 CXXFLAGS_STDCXX = -std=c++17 -fexceptions -frtti
 CFLAGS_STDC = -std=c17
