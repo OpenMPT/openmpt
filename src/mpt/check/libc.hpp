@@ -33,7 +33,12 @@ MPT_WARNING("C stdlib does not provide math constants. Please #define _USE_MATH_
 
 #ifndef MPT_CHECK_LIBC_IGNORE_WARNING_NO_MTRT
 #if MPT_PLATFORM_MULTITHREADED
-#if MPT_LIBC_MS || MPT_LIBC_MINGW
+#if MPT_LIBC_MINGW
+// MinGW only has `#define _MT` in header files instead of `#define _MT 1`.
+#if !defined(_MT)
+MPT_WARNING("C stdlib is not multi-threaded.")
+#endif
+#elif MPT_LIBC_MS
 #if defined(_MT)
 #if (_MT != 1)
 MPT_WARNING("C stdlib is not multi-threaded.")
