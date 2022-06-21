@@ -1,8 +1,8 @@
 
-CC  = emcc -c
-CXX = em++ -c
-LD  = em++
-AR  = emar
+CC  ?= emcc -c
+CXX ?= em++ -c
+LD  ?= em++
+AR  ?= emar
 LINK.cc = em++ $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) $(TARGET_ARCH)
 
 EMSCRIPTEN_TARGET?=default

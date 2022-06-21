@@ -3,8 +3,8 @@ $(warning warning: CONFIG=generic is deprecated. Use CONFIG=standard instead.)
 
 CC  ?= cc 
 CXX ?= c++
-LD  ?= c++
-AR  = ar
+LD  ?= $(CXX)
+AR  ?= ar
 
 CXXFLAGS_STDCXX = -std=c++17
 CFLAGS_STDC = -std=c99

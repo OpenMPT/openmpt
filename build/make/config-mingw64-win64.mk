@@ -1,8 +1,8 @@
 
-CC  = x86_64-w64-mingw32-gcc$(MINGW_FLAVOUR)
-CXX = x86_64-w64-mingw32-g++$(MINGW_FLAVOUR)
-LD  = x86_64-w64-mingw32-g++$(MINGW_FLAVOUR)
-AR  = x86_64-w64-mingw32-ar$(MINGW_FLAVOUR)
+CC  ?= x86_64-w64-mingw32-gcc$(MINGW_FLAVOUR)
+CXX ?= x86_64-w64-mingw32-g++$(MINGW_FLAVOUR)
+LD  ?= $(CXX)
+AR  ?= x86_64-w64-mingw32-ar$(MINGW_FLAVOUR)
 
 CXXFLAGS_STDCXX = -std=c++17
 CFLAGS_STDC = -std=c99

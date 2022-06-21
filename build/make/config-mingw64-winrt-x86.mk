@@ -1,8 +1,8 @@
 
-CC  = i686-w64-mingw32-gcc$(MINGW_FLAVOUR)
-CXX = i686-w64-mingw32-g++$(MINGW_FLAVOUR)
-LD  = i686-w64-mingw32-g++$(MINGW_FLAVOUR)
-AR  = i686-w64-mingw32-ar$(MINGW_FLAVOUR)
+CC  ?= i686-w64-mingw32-gcc$(MINGW_FLAVOUR)
+CXX ?= i686-w64-mingw32-g++$(MINGW_FLAVOUR)
+LD  ?= $(CXX)
+AR  ?= i686-w64-mingw32-ar$(MINGW_FLAVOUR)
 
 CXXFLAGS_STDCXX = -std=c++17
 CFLAGS_STDC = -std=c99
