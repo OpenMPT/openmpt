@@ -24,9 +24,15 @@ CXXFLAGS += $(CXXFLAGS_STDCXX)
 CFLAGS += $(CFLAGS_STDC)
 
 CPPFLAGS += -DNOMINMAX
-CXXFLAGS += -municode -mconsole -mthreads
-CFLAGS   += -municode -mconsole -mthreads
-LDFLAGS  +=
+ifeq ($(MINGW_COMPILER),clang)
+CXXFLAGS += -municode
+CFLAGS   += -municode
+LDFLAGS  += -mconsole -mthreads
+else
+CXXFLAGS += -municode -mthreads
+CFLAGS   += -municode -mthreads
+LDFLAGS  += -mconsole
+endif
 LDLIBS   += -lm -lole32 -lrpcrt4 -lwinmm
 ARFLAGS  := rcs
 
