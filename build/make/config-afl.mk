@@ -1,8 +1,8 @@
 
-CC  = contrib/fuzzing/afl/afl-clang-lto
-CXX = contrib/fuzzing/afl/afl-clang-lto++
-LD  = contrib/fuzzing/afl/afl-clang-lto++
-AR  = ar 
+CC  := $(or $(CC),contrib/fuzzing/afl/afl-clang-lto)
+CXX := $(or $(CXX),contrib/fuzzing/afl/afl-clang-lto++)
+LD  := $(or $(LD),$(CXX))
+AR  := $(or $(AR),ar)
 
 ifneq ($(STDCXX),)
 CXXFLAGS_STDCXX = -std=$(STDCXX) -fexceptions -frtti -pthread

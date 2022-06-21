@@ -1,8 +1,8 @@
 
-CC  ?= cc 
-CXX ?= c++
-LD  ?= c++
-AR  = ar
+CC  := $(or $(CC),cc)
+CXX := $(or $(CXX),c++)
+LD  := $(or $(LD),$(CXX))
+AR  := $(or $(AR),ar)
 
 CXXFLAGS_STDCXX = -std=c++17
 CFLAGS_STDC = -std=c17
