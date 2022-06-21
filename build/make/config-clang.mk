@@ -1,8 +1,8 @@
 
-CC  := $(if $(findstring environment,$(origin CC)),$(CC),$(TOOLCHAIN_PREFIX)clang$(TOOLCHAIN_SUFFIX))
-CXX := $(if $(findstring environment,$(origin CXX)),$(CXX),$(TOOLCHAIN_PREFIX)clang++$(TOOLCHAIN_SUFFIX))
-LD  := $(if $(findstring environment,$(origin LD)),$(LD),$(CXX))
-AR  := $(if $(findstring environment,$(origin AR)),$(AR),$(TOOLCHAIN_PREFIX)ar$(TOOLCHAIN_SUFFIX))
+CC  = $(TOOLCHAIN_PREFIX)clang$(TOOLCHAIN_SUFFIX) 
+CXX = $(TOOLCHAIN_PREFIX)clang++$(TOOLCHAIN_SUFFIX) 
+LD  = $(TOOLCHAIN_PREFIX)clang++$(TOOLCHAIN_SUFFIX) 
+AR  = $(TOOLCHAIN_PREFIX)ar$(TOOLCHAIN_SUFFIX) 
 
 ifneq ($(STDCXX),)
 CXXFLAGS_STDCXX = -std=$(STDCXX) -fexceptions -frtti -pthread

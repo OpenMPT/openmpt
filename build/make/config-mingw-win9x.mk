@@ -1,8 +1,8 @@
 
-CC  := $(if $(findstring environment,$(origin CC)),$(CC),mingw32-gcc$(MINGW_FLAVOUR))
-CXX := $(if $(findstring environment,$(origin CXX)),$(CXX),mingw32-g++$(MINGW_FLAVOUR))
-LD  := $(if $(findstring environment,$(origin LD)),$(LD),$(CXX))
-AR  := $(if $(findstring environment,$(origin AR)),$(AR),mingw32-gcc-ar$(MINGW_FLAVOUR))
+CC  = mingw32-gcc$(MINGW_FLAVOUR)
+CXX = mingw32-g++$(MINGW_FLAVOUR)
+LD  = mingw32-g++$(MINGW_FLAVOUR)
+AR  = mingw32-gcc-ar$(MINGW_FLAVOUR)
 
 CXXFLAGS_STDCXX = -std=gnu++17 -fexceptions -frtti
 CFLAGS_STDC = -std=gnu17

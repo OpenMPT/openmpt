@@ -1,8 +1,8 @@
 
-CC  := $(if $(findstring environment,$(origin CC)),$(CC),i386-mingw32crt-gcc$(MINGW_FLAVOUR))
-CXX := $(if $(findstring environment,$(origin CXX)),$(CXX),i386-mingw32crt-g++$(MINGW_FLAVOUR))
-LD  := $(if $(findstring environment,$(origin LD)),$(LD),$(CXX))
-AR  := $(if $(findstring environment,$(origin AR)),$(AR),i386-mingw32crt-gcc-ar$(MINGW_FLAVOUR))
+CC  = i386-mingw32crt-gcc$(MINGW_FLAVOUR)
+CXX = i386-mingw32crt-g++$(MINGW_FLAVOUR)
+LD  = i386-mingw32crt-g++$(MINGW_FLAVOUR)
+AR  = i386-mingw32crt-gcc-ar$(MINGW_FLAVOUR)
 
 CXXFLAGS_STDCXX = -std=gnu++17 -fexceptions -frtti
 CFLAGS_STDC = -std=gnu17
