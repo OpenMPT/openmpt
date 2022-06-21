@@ -317,6 +317,19 @@ BINDIR_MADE:=$(shell $(MKDIR_P) bin)
 
 # compiler setup
 
+ifeq ($(origin CC),default)
+undefine CC
+endif
+ifeq ($(origin CXX),default)
+undefine CXX
+endif
+ifeq ($(origin LD),default)
+undefine LD
+endif
+ifeq ($(origin AR),default)
+undefine AR
+endif
+
 ifeq ($(CONFIG)x,x)
 
 include build/make/config-defaults.mk
