@@ -12,7 +12,9 @@
 #include "stdafx.h"
 #include "Moddoc.h"
 #include "Mainfrm.h"
+#include "InputHandler.h"
 #include "CleanupSong.h"
+#include "ProgressDialog.h"
 #include "../common/mptStringBuffer.h"
 #include "../soundlib/mod_specifications.h"
 #include "../soundlib/modsmp_ctrl.h"
@@ -502,55 +504,194 @@ bool CModCleanupDlg::RearrangePatterns()
 }
 
 
+class UnusedSampleScanner : public CProgressDialog
+{
+public:
+	UnusedSampleScanner(CModDoc &modDoc, std::vector<bool> &samplesUsed, std::set<PATTERNINDEX> &patternsToAnalyze)
+		: m_modDoc{modDoc}
+		, m_samplesUsed{samplesUsed}
+		, m_patternsToAnalyze{patternsToAnalyze}
+	{
+	}
+
+protected:
+	void Run() override
+	{
+		CSoundFile &sndFile = m_modDoc.GetSoundFile();
+
+		const auto subSongs = sndFile.GetAllSubSongs();
+		const auto totalSamples = mpt::saturate_round<uint64>(std::accumulate(subSongs.begin(), subSongs.end(), 0.0, [](double acc, const auto &song) { return acc + song.duration; }) * sndFile.GetSampleRate());
+		SetRange(0, totalSamples);
+
+		CMainFrame::GetMainFrame()->StopMod(&m_modDoc);
+		const auto origSequence = sndFile.Order.GetCurrentSequenceIndex();
+		const auto origRepeatCount = sndFile.GetRepeatCount();
+		sndFile.SetRepeatCount(0);
+		sndFile.m_bIsRendering = true;
+		auto origPlayState = std::make_unique<CSoundFile::PlayState>(std::move(sndFile.m_PlayState));
+		sndFile.m_PlayState = {};
+		auto prevTime = timeGetTime();
+		uint64 renderedSamples = 0;
+		for(const auto &song : subSongs)
+		{
+			sndFile.ResetPlayPos();
+			sndFile.GetLength(eAdjust, GetLengthTarget(song.startOrder, song.startRow).StartPos(song.sequence, 0, 0));
+			sndFile.m_SongFlags.reset(SONG_PLAY_FLAGS);
+			while(!m_abort)
+			{
+				auto tickSamples = sndFile.ReadOneTick();
+				if(!tickSamples)
+					break;
+
+				renderedSamples += tickSamples;
+				for(const auto &chn : sndFile.m_PlayState.Chn)
+				{
+					if(chn.pModSample == nullptr)
+						continue;
+					SAMPLEINDEX smp = static_cast<SAMPLEINDEX>(std::distance<const ModSample *>(&sndFile.GetSample(0), chn.pModSample));
+					m_samplesUsed[smp] = true;
+				}
+				m_patternsToAnalyze.erase(sndFile.m_PlayState.m_nPattern);
+
+				auto currentTime = timeGetTime();
+				if(currentTime - prevTime >= 16)
+				{
+					prevTime = currentTime;
+					SetText(MPT_CFORMAT("Finding unused samples... {}%")(renderedSamples * 100 / totalSamples));
+					SetProgress(renderedSamples);
+					ProcessMessages();
+				}
+			}
+		}
+		sndFile.m_PlayState = std::move(*origPlayState);
+		sndFile.SetRepeatCount(origRepeatCount);
+		sndFile.Order.SetSequence(origSequence);
+		sndFile.m_bIsRendering = false;
+
+		EndDialog(m_abort ? IDCANCEL : IDOK);
+	}
+
+	CModDoc &m_modDoc;
+	std::vector<bool> &m_samplesUsed;
+	std::set<PATTERNINDEX> &m_patternsToAnalyze;
+};
+
+
 // Remove unused samples
 bool CModCleanupDlg::RemoveUnusedSamples()
 {
-	CSoundFile &sndFile = modDoc.GetSoundFile();
-
-	std::vector<bool> samplesUsed(sndFile.GetNumSamples() + 1, true);
-
 	BeginWaitCursor();
 
-	// Check if any samples are not referenced in the patterns (sample mode) or by an instrument (instrument mode).
-	// This doesn't check yet if a sample is referenced by an instrument, but actually unused in the patterns.
-	for(SAMPLEINDEX smp = 1; smp <= sndFile.GetNumSamples(); smp++) if (sndFile.GetSample(smp).HasSampleData())
+	CSoundFile &sndFile = modDoc.GetSoundFile();
+	SAMPLEINDEX numRemoved = 0;
+
+	std::vector<bool> samplesUsed(sndFile.GetNumSamples() + 1, false);
+	// Never count empty slots towards removed count
+	for(SAMPLEINDEX smp = 1; smp <= sndFile.GetNumSamples(); smp++)
 	{
-		if(!modDoc.IsSampleUsed(smp))
-		{
-			samplesUsed[smp] = false;
-		}
+		if(!sndFile.GetSample(smp).HasSampleData())
+			samplesUsed[smp] = true;
 	}
 
-	SAMPLEINDEX nRemoved = sndFile.RemoveSelectedSamples(samplesUsed);
+	std::set<PATTERNINDEX> patternsToAnalyze;
+	for(PATTERNINDEX pat = 0; pat < sndFile.Patterns.GetNumPatterns(); pat++)
+	{
+		if(sndFile.Patterns.IsValidPat(pat))
+			patternsToAnalyze.insert(pat);
+	}
 
-	const SAMPLEINDEX unusedInsSamples = sndFile.DetectUnusedSamples(samplesUsed);
+	if(sndFile.GetNumInstruments())
+	{
+		// Easy: Samples that aren't used by any instruments
+		for(INSTRUMENTINDEX i = 1; i <= sndFile.GetNumInstruments(); i++)
+		{
+			if(sndFile.Instruments[i] != nullptr)
+				sndFile.Instruments[i]->GetSamples(samplesUsed);
+		}
+		numRemoved = sndFile.RemoveSelectedSamples(samplesUsed);
+
+		// Don't count the samples that we just removed twice towards total number of removed samples
+		samplesUsed.assign(samplesUsed.size(), false);
+		for(SAMPLEINDEX smp = 1; smp <= sndFile.GetNumSamples(); smp++)
+		{
+			if(!sndFile.GetSample(smp).HasSampleData())
+				samplesUsed[smp] = true;
+		}
+
+		BypassInputHandler bih;
+		UnusedSampleScanner dlg{modDoc, samplesUsed, patternsToAnalyze};
+		if(dlg.DoModal() != IDOK)
+			return (numRemoved > 0);
+	}
+
+	// Instrument mode: For patterns that were not played, just do basic checks
+	// Sample mode: The heart of the unused sample detection
+	std::vector<ModCommand::INSTR> lastIns;
+	for(PATTERNINDEX pat : patternsToAnalyze)
+	{
+		lastIns.assign(sndFile.GetNumChannels(), 0);
+		const auto &pattern = sndFile.Patterns[pat];
+		for(ROWINDEX row = 0; row < pattern.GetNumRows(); row++)
+		{
+			for(CHANNELINDEX chn = 0; chn < pattern.GetNumChannels(); chn++)
+			{
+				const auto &m = *pattern.GetpModCommand(row, chn);
+				if(m.IsPcNote())
+					continue;
+
+				auto instr = m.instr;
+				if(instr)
+					lastIns[chn] = instr;
+				else
+					instr = lastIns[chn];
+
+				if(sndFile.GetNumInstruments())
+				{
+					if(m.IsNote() && sndFile.Instruments[instr])
+					{
+						auto sample = sndFile.Instruments[instr]->Keyboard[m.note - NOTE_MIN];
+						if(sample < samplesUsed.size())
+							samplesUsed[sample] = true;
+					}
+				} else
+				{
+					if(instr < samplesUsed.size())
+						samplesUsed[instr] = true;
+				}
+			}
+		}
+	}
 
 	EndWaitCursor();
 
-	if(unusedInsSamples)
+	if(sndFile.GetNumInstruments())
 	{
-		mpt::ustring s = MPT_UFORMAT("OpenMPT detected {} sample{} referenced by an instrument,\nbut not used in the song. Do you want to remove them?")
-			( unusedInsSamples
-			, (unusedInsSamples == 1) ? U_("") : U_("s")
-			);
-		if(Reporting::Confirm(s, "Sample Cleanup", false, false, this) == cnfYes)
+		const auto unusedInsSamples = std::count(samplesUsed.begin() + 1, samplesUsed.end(), false);
+		if(unusedInsSamples)
 		{
-			nRemoved += sndFile.RemoveSelectedSamples(samplesUsed);
+			mpt::ustring s = MPT_UFORMAT("OpenMPT detected {} sample{} referenced by an instrument,\nbut not used in the song. Do you want to remove them?")(unusedInsSamples, (unusedInsSamples == 1) ? U_("") : U_("s"));
+			if(Reporting::Confirm(s, "Sample Cleanup", false, false, this) == cnfYes)
+			{
+				numRemoved += sndFile.RemoveSelectedSamples(samplesUsed);
+			}
 		}
-	}
-
-	if(nRemoved > 0)
+	} else
 	{
-		modDoc.AddToLog(LogNotification, MPT_UFORMAT("{} unused sample{} removed")(nRemoved, (nRemoved == 1) ? U_("") : U_("s")));
+		numRemoved += sndFile.RemoveSelectedSamples(samplesUsed);
 	}
 
-	return (nRemoved > 0);
+	if(numRemoved > 0)
+	{
+		modDoc.AddToLog(LogNotification, MPT_UFORMAT("{} unused sample{} removed")(numRemoved, (numRemoved == 1) ? U_("") : U_("s")));
+	}
+
+	return (numRemoved > 0);
 }
 
 
-// Check if the stereo channels of a sample contain identical data
+// Check if the left and right channel of a sample contain identical data
 template<typename T>
-static bool ComapreStereoChannels(SmpLength length, const T *sampleData)
+static bool CompareStereoChannels(SmpLength length, const T *sampleData)
 {
 	for(SmpLength i = 0; i < length; i++, sampleData += 2)
 	{
@@ -591,10 +732,10 @@ bool CModCleanupDlg::OptimizeSamples()
 			bool identicalChannels = false;
 			if(sample.GetElementarySampleSize() == 1)
 			{
-				identicalChannels = ComapreStereoChannels(loopLength, sample.sample8());
+				identicalChannels = CompareStereoChannels(loopLength, sample.sample8());
 			} else if(sample.GetElementarySampleSize() == 2)
 			{
-				identicalChannels = ComapreStereoChannels(loopLength, sample.sample16());
+				identicalChannels = CompareStereoChannels(loopLength, sample.sample16());
 			}
 			if(identicalChannels)
 			{
