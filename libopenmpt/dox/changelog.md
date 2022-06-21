@@ -7,6 +7,14 @@ is just a high-level summary.
 
 ### libopenmpt 0.6.5-pre
 
+ *  [**Bug**] `Makefile` now also uses `CC`, `CXX`, `LD`, and `AR` when set as
+    environment variables.
+
+ *  [**New**] `Makefile` now uses `PKG_CONFIG` as path to `pkg-config`.
+
+ *  [**Regression**] GNU make older than 3.82 is no longer supported for
+    `Makefile` builds.
+
 ### libopenmpt 0.6.4 (2022-06-12)
 
  *  [**Bug**] openmpt123: Linking failed when using Autotools build system
