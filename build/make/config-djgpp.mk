@@ -1,8 +1,8 @@
 
-CC  = i386-pc-msdosdjgpp-gcc
-CXX = i386-pc-msdosdjgpp-g++
-LD  = i386-pc-msdosdjgpp-g++
-AR  = i386-pc-msdosdjgpp-ar
+CC  := $(if $(findstring environment,$(origin CC)),$(CC),i386-pc-msdosdjgpp-gcc)
+CXX := $(if $(findstring environment,$(origin CXX)),$(CXX),i386-pc-msdosdjgpp-g++)
+LD  := $(if $(findstring environment,$(origin LD)),$(LD),$(CXX))
+AR  := $(if $(findstring environment,$(origin AR)),$(AR),i386-pc-msdosdjgpp-ar)
 
 # Note that we are using GNU extensions instead of 100% standards-compliant
 # mode, because otherwise DJGPP-specific headers/functions are unavailable.

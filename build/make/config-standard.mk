@@ -1,8 +1,8 @@
 
-CC  ?= cc 
-CXX ?= c++
-LD  ?= c++
-AR  = ar
+CC  := $(if $(findstring environment,$(origin CC)),$(CC),cc)
+CXX := $(if $(findstring environment,$(origin CXX)),$(CXX),c++)
+LD  := $(if $(findstring environment,$(origin LD)),$(LD),$(CXX))
+AR  := $(if $(findstring environment,$(origin AR)),$(AR),ar)
 
 CXXFLAGS_STDCXX = -std=c++17
 CFLAGS_STDC = -std=c17

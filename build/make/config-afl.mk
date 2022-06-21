@@ -1,8 +1,8 @@
 
-CC  = contrib/fuzzing/afl/afl-clang-lto
-CXX = contrib/fuzzing/afl/afl-clang-lto++
-LD  = contrib/fuzzing/afl/afl-clang-lto++
-AR  = ar 
+CC  := $(if $(findstring environment,$(origin CC)),$(CC),contrib/fuzzing/afl/afl-clang-lto)
+CXX := $(if $(findstring environment,$(origin CXX)),$(CXX),contrib/fuzzing/afl/afl-clang-lto++)
+LD  := $(if $(findstring environment,$(origin LD)),$(LD),$(CXX))
+AR  := $(if $(findstring environment,$(origin AR)),$(AR),ar)
 
 ifneq ($(STDCXX),)
 CXXFLAGS_STDCXX = -std=$(STDCXX) -fexceptions -frtti -pthread

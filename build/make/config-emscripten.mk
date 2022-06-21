@@ -1,8 +1,8 @@
 
-CC  = emcc -c
-CXX = em++ -c
-LD  = em++
-AR  = emar
+CC  := $(if $(findstring environment,$(origin CC)),$(CC),emcc -c)
+CXX := $(if $(findstring environment,$(origin CXX)),$(CXX),em++ -c)
+LD  := $(if $(findstring environment,$(origin LD)),$(LD),em++)
+AR  := $(if $(findstring environment,$(origin AR)),$(AR),emar)
 LINK.cc = em++ $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) $(TARGET_ARCH)
 
 EMSCRIPTEN_TARGET?=default
