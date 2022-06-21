@@ -10,15 +10,25 @@ CXXFLAGS += $(CXXFLAGS_STDCXX)
 CFLAGS += $(CFLAGS_STDC)
 
 CPPFLAGS += -DWIN32 -D_WIN32 -DWIN64 -D_WIN64
-CXXFLAGS += -municode -mconsole -mthreads
-CFLAGS   += -municode -mconsole -mthreads
-LDFLAGS  +=
+ifeq ($(MINGW_COMPILER),clang)
+CXXFLAGS += -municode
+CFLAGS   += -municode
+LDFLAGS  += -mconsole -mthreads
+else
+CXXFLAGS += -municode -mthreads
+CFLAGS   += -municode -mthreads
+LDFLAGS  += -mconsole
+endif
 LDLIBS   += -lm -lole32 -lrpcrt4 -lwinmm
 ARFLAGS  := rcs
 
 PC_LIBS_PRIVATE += -lole32 -lrpcrt4
 
+ifeq ($(MINGW_COMPILER),clang)
+include build/make/warnings-clang.mk
+else
 include build/make/warnings-gcc.mk
+endif
 
 EXESUFFIX=.exe
 SOSUFFIX=.dll
