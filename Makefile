@@ -32,6 +32,7 @@
 #  LDFLAGS
 #  LDLIBS
 #  ARFLAGS
+#  PKG_CONFIG
 #
 #  CXXSTDLIB_PCLIBSPRIVATE   C++ standard library (or libraries) required for
 #                   static linking. This will be put in the pkg-config file
@@ -330,6 +331,8 @@ ifeq ($(origin AR),default)
 undefine AR
 endif
 
+PKG_CONFIG ?= pkg-config
+
 ifeq ($(CONFIG)x,x)
 
 include build/make/config-defaults.mk
@@ -531,10 +534,10 @@ else
 ifeq ($(NO_ZLIB),1)
 else
 #LDLIBS   += -lz
-ifeq ($(shell pkg-config$(TOOLCHAIN_SUFFIX) --exists zlib && echo yes),yes)
-CPPFLAGS_ZLIB := $(shell pkg-config$(TOOLCHAIN_SUFFIX) --cflags-only-I zlib ) -DMPT_WITH_ZLIB
-LDFLAGS_ZLIB  := $(shell pkg-config$(TOOLCHAIN_SUFFIX) --libs-only-L   zlib ) $(shell pkg-config$(TOOLCHAIN_SUFFIX) --libs-only-other zlib )
-LDLIBS_ZLIB   := $(shell pkg-config$(TOOLCHAIN_SUFFIX) --libs-only-l   zlib )
+ifeq ($(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --exists zlib && echo yes),yes)
+CPPFLAGS_ZLIB := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --cflags-only-I zlib ) -DMPT_WITH_ZLIB
+LDFLAGS_ZLIB  := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-L   zlib ) $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-other zlib )
+LDLIBS_ZLIB   := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-l   zlib )
 PC_REQUIRES_ZLIB := zlib
 else
 ifeq ($(FORCE_DEPS),1)
@@ -586,10 +589,10 @@ else
 ifeq ($(NO_MPG123),1)
 else
 #LDLIBS   += -lmpg123
-ifeq ($(shell pkg-config$(TOOLCHAIN_SUFFIX) --exists 'libmpg123 >= 1.14.0' && echo yes),yes)
-CPPFLAGS_MPG123 := $(shell pkg-config$(TOOLCHAIN_SUFFIX) --cflags-only-I 'libmpg123 >= 1.14.0' ) -DMPT_WITH_MPG123
-LDFLAGS_MPG123  := $(shell pkg-config$(TOOLCHAIN_SUFFIX) --libs-only-L   'libmpg123 >= 1.14.0' ) $(shell pkg-config$(TOOLCHAIN_SUFFIX) --libs-only-other 'libmpg123 >= 1.14.0' )
-LDLIBS_MPG123   := $(shell pkg-config$(TOOLCHAIN_SUFFIX) --libs-only-l   'libmpg123 >= 1.14.0' )
+ifeq ($(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --exists 'libmpg123 >= 1.14.0' && echo yes),yes)
+CPPFLAGS_MPG123 := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --cflags-only-I 'libmpg123 >= 1.14.0' ) -DMPT_WITH_MPG123
+LDFLAGS_MPG123  := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-L   'libmpg123 >= 1.14.0' ) $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-other 'libmpg123 >= 1.14.0' )
+LDLIBS_MPG123   := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-l   'libmpg123 >= 1.14.0' )
 PC_REQUIRES_MPG123 := libmpg123
 else
 ifeq ($(FORCE_DEPS),1)
@@ -616,10 +619,10 @@ else
 ifeq ($(NO_OGG),1)
 else
 #LDLIBS   += -logg
-ifeq ($(shell pkg-config$(TOOLCHAIN_SUFFIX) --exists ogg && echo yes),yes)
-CPPFLAGS_OGG := $(shell pkg-config$(TOOLCHAIN_SUFFIX) --cflags-only-I ogg ) -DMPT_WITH_OGG
-LDFLAGS_OGG  := $(shell pkg-config$(TOOLCHAIN_SUFFIX) --libs-only-L   ogg ) $(shell pkg-config$(TOOLCHAIN_SUFFIX) --libs-only-other ogg )
-LDLIBS_OGG   := $(shell pkg-config$(TOOLCHAIN_SUFFIX) --libs-only-l   ogg )
+ifeq ($(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --exists ogg && echo yes),yes)
+CPPFLAGS_OGG := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --cflags-only-I ogg ) -DMPT_WITH_OGG
+LDFLAGS_OGG  := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-L   ogg ) $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-other ogg )
+LDLIBS_OGG   := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-l   ogg )
 PC_REQUIRES_OGG := ogg
 else
 ifeq ($(FORCE_DEPS),1)
@@ -666,10 +669,10 @@ else
 ifeq ($(NO_VORBIS),1)
 else
 #LDLIBS   += -lvorbis
-ifeq ($(shell pkg-config$(TOOLCHAIN_SUFFIX) --exists vorbis && echo yes),yes)
-CPPFLAGS_VORBIS := $(shell pkg-config$(TOOLCHAIN_SUFFIX) --cflags-only-I vorbis ) -DMPT_WITH_VORBIS
-LDFLAGS_VORBIS  := $(shell pkg-config$(TOOLCHAIN_SUFFIX) --libs-only-L   vorbis ) $(shell pkg-config$(TOOLCHAIN_SUFFIX) --libs-only-other vorbis )
-LDLIBS_VORBIS   := $(shell pkg-config$(TOOLCHAIN_SUFFIX) --libs-only-l   vorbis )
+ifeq ($(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --exists vorbis && echo yes),yes)
+CPPFLAGS_VORBIS := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --cflags-only-I vorbis ) -DMPT_WITH_VORBIS
+LDFLAGS_VORBIS  := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-L   vorbis ) $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-other vorbis )
+LDLIBS_VORBIS   := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-l   vorbis )
 PC_REQUIRES_VORBIS := vorbis
 else
 ifeq ($(FORCE_DEPS),1)
@@ -690,10 +693,10 @@ else
 ifeq ($(NO_VORBISFILE),1)
 else
 #LDLIBS   += -lvorbisfile
-ifeq ($(shell pkg-config$(TOOLCHAIN_SUFFIX) --exists vorbisfile && echo yes),yes)
-CPPFLAGS_VORBISFILE := $(shell pkg-config$(TOOLCHAIN_SUFFIX) --cflags-only-I vorbisfile ) -DMPT_WITH_VORBISFILE
-LDFLAGS_VORBISFILE  := $(shell pkg-config$(TOOLCHAIN_SUFFIX) --libs-only-L   vorbisfile ) $(shell pkg-config$(TOOLCHAIN_SUFFIX) --libs-only-other vorbisfile )
-LDLIBS_VORBISFILE   := $(shell pkg-config$(TOOLCHAIN_SUFFIX) --libs-only-l   vorbisfile )
+ifeq ($(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --exists vorbisfile && echo yes),yes)
+CPPFLAGS_VORBISFILE := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --cflags-only-I vorbisfile ) -DMPT_WITH_VORBISFILE
+LDFLAGS_VORBISFILE  := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-L   vorbisfile ) $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-other vorbisfile )
+LDLIBS_VORBISFILE   := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-l   vorbisfile )
 PC_REQUIRES_VORBISFILE := vorbisfile
 else
 ifeq ($(FORCE_DEPS),1)
@@ -709,10 +712,10 @@ endif
 ifeq ($(NO_SDL2),1)
 else
 #LDLIBS   += -lsdl2
-ifeq ($(shell pkg-config$(TOOLCHAIN_SUFFIX) --exists 'sdl2 >= 2.0.4' && echo yes),yes)
-CPPFLAGS_SDL2 := $(shell pkg-config$(TOOLCHAIN_SUFFIX) --cflags-only-I 'sdl2 >= 2.0.4' ) -DMPT_WITH_SDL2
-LDFLAGS_SDL2  := $(shell pkg-config$(TOOLCHAIN_SUFFIX) --libs-only-L   'sdl2 >= 2.0.4' ) $(shell pkg-config$(TOOLCHAIN_SUFFIX) --libs-only-other 'sdl2 >= 2.0.4' )
-LDLIBS_SDL2   := $(shell pkg-config$(TOOLCHAIN_SUFFIX) --libs-only-l   'sdl2 >= 2.0.4' )
+ifeq ($(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --exists 'sdl2 >= 2.0.4' && echo yes),yes)
+CPPFLAGS_SDL2 := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --cflags-only-I 'sdl2 >= 2.0.4' ) -DMPT_WITH_SDL2
+LDFLAGS_SDL2  := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-L   'sdl2 >= 2.0.4' ) $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-other 'sdl2 >= 2.0.4' )
+LDLIBS_SDL2   := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-l   'sdl2 >= 2.0.4' )
 else
 ifeq ($(FORCE_DEPS),1)
 $(error sdl2 not found)
@@ -726,10 +729,10 @@ endif
 ifeq ($(NO_PORTAUDIO),1)
 else
 #LDLIBS   += -lportaudio
-ifeq ($(shell pkg-config$(TOOLCHAIN_SUFFIX) --exists portaudio-2.0 && echo yes),yes)
-CPPFLAGS_PORTAUDIO := $(shell pkg-config$(TOOLCHAIN_SUFFIX) --cflags-only-I portaudio-2.0 ) -DMPT_WITH_PORTAUDIO
-LDFLAGS_PORTAUDIO  := $(shell pkg-config$(TOOLCHAIN_SUFFIX) --libs-only-L   portaudio-2.0 ) $(shell pkg-config$(TOOLCHAIN_SUFFIX) --libs-only-other portaudio-2.0 )
-LDLIBS_PORTAUDIO   := $(shell pkg-config$(TOOLCHAIN_SUFFIX) --libs-only-l   portaudio-2.0 )
+ifeq ($(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --exists portaudio-2.0 && echo yes),yes)
+CPPFLAGS_PORTAUDIO := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --cflags-only-I portaudio-2.0 ) -DMPT_WITH_PORTAUDIO
+LDFLAGS_PORTAUDIO  := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-L   portaudio-2.0 ) $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-other portaudio-2.0 )
+LDLIBS_PORTAUDIO   := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-l   portaudio-2.0 )
 else
 ifeq ($(FORCE_DEPS),1)
 $(error portaudio not found)
@@ -743,10 +746,10 @@ endif
 ifeq ($(NO_PORTAUDIOCPP),1)
 else
 #LDLIBS   += -lportaudiocpp
-ifeq ($(shell pkg-config$(TOOLCHAIN_SUFFIX) --exists portaudiocpp && echo yes),yes)
-CPPFLAGS_PORTAUDIOCPP := $(shell pkg-config$(TOOLCHAIN_SUFFIX) --cflags-only-I portaudiocpp ) -DMPT_WITH_PORTAUDIOCPP
-LDFLAGS_PORTAUDIOCPP  := $(shell pkg-config$(TOOLCHAIN_SUFFIX) --libs-only-L   portaudiocpp ) $(shell pkg-config$(TOOLCHAIN_SUFFIX) --libs-only-other portaudiocpp )
-LDLIBS_PORTAUDIOCPP   := $(shell pkg-config$(TOOLCHAIN_SUFFIX) --libs-only-l   portaudiocpp )
+ifeq ($(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --exists portaudiocpp && echo yes),yes)
+CPPFLAGS_PORTAUDIOCPP := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --cflags-only-I portaudiocpp ) -DMPT_WITH_PORTAUDIOCPP
+LDFLAGS_PORTAUDIOCPP  := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-L   portaudiocpp ) $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-other portaudiocpp )
+LDLIBS_PORTAUDIOCPP   := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-l   portaudiocpp )
 else
 ifeq ($(FORCE_DEPS),1)
 $(error portaudiocpp not found)
@@ -760,10 +763,10 @@ endif
 ifeq ($(NO_PULSEAUDIO),1)
 else
 #LDLIBS   += -lpulse-simple
-ifeq ($(shell pkg-config$(TOOLCHAIN_SUFFIX) --exists libpulse libpulse-simple && echo yes),yes)
-CPPFLAGS_PULSEAUDIO := $(shell pkg-config$(TOOLCHAIN_SUFFIX) --cflags-only-I libpulse libpulse-simple ) -DMPT_WITH_PULSEAUDIO
-LDFLAGS_PULSEAUDIO  := $(shell pkg-config$(TOOLCHAIN_SUFFIX) --libs-only-L   libpulse libpulse-simple ) $(shell pkg-config$(TOOLCHAIN_SUFFIX) --libs-only-other libpulse libpulse-simple )
-LDLIBS_PULSEAUDIO   := $(shell pkg-config$(TOOLCHAIN_SUFFIX) --libs-only-l   libpulse libpulse-simple )
+ifeq ($(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --exists libpulse libpulse-simple && echo yes),yes)
+CPPFLAGS_PULSEAUDIO := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --cflags-only-I libpulse libpulse-simple ) -DMPT_WITH_PULSEAUDIO
+LDFLAGS_PULSEAUDIO  := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-L   libpulse libpulse-simple ) $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-other libpulse libpulse-simple )
+LDLIBS_PULSEAUDIO   := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-l   libpulse libpulse-simple )
 else
 ifeq ($(FORCE_DEPS),1)
 $(error pulseaudio not found)
@@ -777,10 +780,10 @@ endif
 ifeq ($(NO_FLAC),1)
 else
 #LDLIBS   += -lFLAC
-ifeq ($(shell pkg-config$(TOOLCHAIN_SUFFIX) --exists 'flac >= 1.3.0' && echo yes),yes)
-CPPFLAGS_FLAC := $(shell pkg-config$(TOOLCHAIN_SUFFIX) --cflags-only-I 'flac >= 1.3.0' ) -DMPT_WITH_FLAC
-LDFLAGS_FLAC  := $(shell pkg-config$(TOOLCHAIN_SUFFIX) --libs-only-L   'flac >= 1.3.0' ) $(shell pkg-config$(TOOLCHAIN_SUFFIX) --libs-only-other 'flac >= 1.3.0' )
-LDLIBS_FLAC   := $(shell pkg-config$(TOOLCHAIN_SUFFIX) --libs-only-l   'flac >= 1.3.0' )
+ifeq ($(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --exists 'flac >= 1.3.0' && echo yes),yes)
+CPPFLAGS_FLAC := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --cflags-only-I 'flac >= 1.3.0' ) -DMPT_WITH_FLAC
+LDFLAGS_FLAC  := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-L   'flac >= 1.3.0' ) $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-other 'flac >= 1.3.0' )
+LDLIBS_FLAC   := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-l   'flac >= 1.3.0' )
 else
 ifeq ($(FORCE_DEPS),1)
 $(error flac not found)
@@ -794,10 +797,10 @@ endif
 ifeq ($(NO_SNDFILE),1)
 else
 #LDLIBS   += -lsndfile
-ifeq ($(shell pkg-config$(TOOLCHAIN_SUFFIX) --exists sndfile && echo yes),yes)
-CPPFLAGS_SNDFILE := $(shell pkg-config$(TOOLCHAIN_SUFFIX) --cflags-only-I   sndfile ) -DMPT_WITH_SNDFILE
-LDFLAGS_SNDFILE  := $(shell pkg-config$(TOOLCHAIN_SUFFIX) --libs-only-L     sndfile ) $(shell pkg-config$(TOOLCHAIN_SUFFIX) --libs-only-other sndfile )
-LDLIBS_SNDFILE   := $(shell pkg-config$(TOOLCHAIN_SUFFIX) --libs-only-l     sndfile )
+ifeq ($(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --exists sndfile && echo yes),yes)
+CPPFLAGS_SNDFILE := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --cflags-only-I   sndfile ) -DMPT_WITH_SNDFILE
+LDFLAGS_SNDFILE  := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-L     sndfile ) $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-other sndfile )
+LDLIBS_SNDFILE   := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-l     sndfile )
 else
 ifeq ($(FORCE_DEPS),1)
 $(error sndfile not found)
