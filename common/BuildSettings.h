@@ -23,7 +23,14 @@
 #if MPT_OS_WINDOWS
 
 #if !defined(WINVER) && !defined(_WIN32_WINDOWS) && !defined(_WIN32_WINNT)
+#if MPT_COMPILER_CLANG
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wreserved-id-macro"
+#endif // MPT_COMPILER_CLANG
 #define _WIN32_WINNT 0x0601 // _WIN32_WINNT_WIN7
+#if MPT_COMPILER_CLANG
+#pragma clang diagnostic pop
+#endif // MPT_COMPILER_CLANG
 #endif
 
 #ifndef WINVER
