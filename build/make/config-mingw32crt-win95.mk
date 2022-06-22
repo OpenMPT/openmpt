@@ -1,8 +1,16 @@
 
-CC  ?= i386-mingw32crt-gcc$(MINGW_FLAVOUR)
-CXX ?= i386-mingw32crt-g++$(MINGW_FLAVOUR)
-LD  ?= $(CXX)
-AR  ?= i386-mingw32crt-gcc-ar$(MINGW_FLAVOUR)
+ifeq ($(origin CC),default)
+CC  = i386-mingw32crt-gcc$(MINGW_FLAVOUR)
+endif
+ifeq ($(origin CXX),default)
+CXX = i386-mingw32crt-g++$(MINGW_FLAVOUR)
+endif
+ifeq ($(origin LD),default)
+LD  = $(CXX)
+endif
+ifeq ($(origin AR),default)
+AR  = i386-mingw32crt-gcc-ar$(MINGW_FLAVOUR)
+endif
 
 CXXFLAGS_STDCXX = -std=gnu++17 -fexceptions -frtti
 CFLAGS_STDC = -std=gnu17

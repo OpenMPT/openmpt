@@ -1,8 +1,16 @@
 
-CC  ?= $(TOOLCHAIN_PREFIX)icx$(TOOLCHAIN_SUFFIX)
-CXX ?= $(TOOLCHAIN_PREFIX)icpx$(TOOLCHAIN_SUFFIX)
-LD  ?= $(CXX)
-AR  ?= $(TOOLCHAIN_PREFIX)ar$(TOOLCHAIN_SUFFIX)
+ifeq ($(origin CC),default)
+CC  = $(TOOLCHAIN_PREFIX)icx$(TOOLCHAIN_SUFFIX)
+endif
+ifeq ($(origin CXX),default)
+CXX = $(TOOLCHAIN_PREFIX)icpx$(TOOLCHAIN_SUFFIX)
+endif
+ifeq ($(origin LD),default)
+LD  = $(CXX)
+endif
+ifeq ($(origin AR),default)
+AR  = $(TOOLCHAIN_PREFIX)ar$(TOOLCHAIN_SUFFIX)
+endif
 
 ifneq ($(STDCXX),)
 CXXFLAGS_STDCXX = -std=$(STDCXX) -fexceptions -frtti -pthread

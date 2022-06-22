@@ -1,8 +1,16 @@
 
-CC  ?= mingw32-gcc$(MINGW_FLAVOUR)
-CXX ?= mingw32-g++$(MINGW_FLAVOUR)
-LD  ?= $(CXX)
-AR  ?= mingw32-gcc-ar$(MINGW_FLAVOUR)
+ifeq ($(origin CC),default)
+CC  = mingw32-gcc$(MINGW_FLAVOUR)
+endif
+ifeq ($(origin CXX),default)
+CXX = mingw32-g++$(MINGW_FLAVOUR)
+endif
+ifeq ($(origin LD),default)
+LD  = $(CXX)
+endif
+ifeq ($(origin AR),default)
+AR  = mingw32-gcc-ar$(MINGW_FLAVOUR)
+endif
 
 CXXFLAGS_STDCXX = -std=gnu++17 -fexceptions -frtti
 CFLAGS_STDC = -std=gnu17

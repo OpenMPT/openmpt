@@ -91,8 +91,6 @@ is just a high-level summary.
     `openmpt_stream_get_file_callbacks2()`.
  *  [**Regression**] Using the system-provided liballegro42 is no longer
     supported. The option `BUNDLED_ALLEGRO42=1` does not exist any more.
- *  [**Regression**] Support for GNU make older than 3.82 has been removed for
-    `Makefile` builds.
 
  *  Seeking with sample sync now supports portamento up / down commands as well
     as IMF/ PTM note slides. Tone portamento is now synchronized correctly when
