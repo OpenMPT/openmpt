@@ -2552,7 +2552,7 @@ static int main( int argc, char * argv [] ) {
 } // namespace openmpt123
 
 #if defined(WIN32) && defined(UNICODE)
-#if defined(__GNUC__)
+#if defined(__GNUC__) || (defined(__clang__) && !defined(_MSC_VER))
 // mingw64 does only default to special C linkage for "main", but not for "wmain".
 extern "C" int wmain( int wargc, wchar_t * wargv [] );
 extern "C"

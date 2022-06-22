@@ -51,7 +51,7 @@ extern "C" int _crt0_startup_flags = 0
 /* clang-format on */
 #endif /* __DJGPP__ */
 #if ( defined( _WIN32 ) || defined( WIN32 ) ) && ( defined( _UNICODE ) || defined( UNICODE ) )
-#if defined( __GNUC__ )
+#if defined( __GNUC__ ) || ( defined( __clang__ ) && !defined( _MSC_VER ) )
 // mingw-w64 g++ does only default to special C linkage for "main", but not for "wmain" (see <https://sourceforge.net/p/mingw-w64/wiki2/Unicode%20apps/>).
 extern "C" int wmain( int /*argc*/, wchar_t * /*argv*/[] );
 extern "C" int wmain( int argc, wchar_t * argv[] ) {
