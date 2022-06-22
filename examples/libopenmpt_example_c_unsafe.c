@@ -31,6 +31,9 @@ static int16_t right[BUFFERSIZE];
 static int16_t * const buffers[2] = { left, right };
 
 #if ( defined( _WIN32 ) || defined( WIN32 ) ) && ( defined( _UNICODE ) || defined( UNICODE ) )
+#if defined( __clang__ ) && !defined( _MSC_VER )
+int wmain( int argc, wchar_t * argv[] );
+#endif
 int wmain( int argc, wchar_t * argv[] ) {
 #else
 int main( int argc, char * argv[] ) {

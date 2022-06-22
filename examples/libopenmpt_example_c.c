@@ -73,6 +73,9 @@ static void libopenmpt_example_print_error( const char * func_name, int mod_err,
 }
 
 #if ( defined( _WIN32 ) || defined( WIN32 ) ) && ( defined( _UNICODE ) || defined( UNICODE ) )
+#if defined( __clang__ ) && !defined( _MSC_VER )
+int wmain( int argc, wchar_t * argv[] );
+#endif
 int wmain( int argc, wchar_t * argv[] ) {
 #else
 int main( int argc, char * argv[] ) {
