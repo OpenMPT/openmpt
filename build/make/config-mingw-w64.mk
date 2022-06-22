@@ -13,10 +13,18 @@ else
 $(error unknown WINDOWS_ARCH)
 endif
 
-CC  ?= $(MINGW_ARCH)-w64-mingw32-gcc$(MINGW_FLAVOUR)
-CXX ?= $(MINGW_ARCH)-w64-mingw32-g++$(MINGW_FLAVOUR)
-LD  ?= $(CXX)
-AR  ?= $(MINGW_ARCH)-w64-mingw32-ar$(MINGW_FLAVOUR)
+ifeq ($(origin CC),default)
+CC  = $(MINGW_ARCH)-w64-mingw32-gcc$(MINGW_FLAVOUR)
+endif
+ifeq ($(origin CXX),default)
+CXX = $(MINGW_ARCH)-w64-mingw32-g++$(MINGW_FLAVOUR)
+endif
+ifeq ($(origin LD),default)
+LD  = $(CXX)
+endif
+ifeq ($(origin AR),default)
+AR  = $(MINGW_ARCH)-w64-mingw32-ar$(MINGW_FLAVOUR)
+endif
 
 CXXFLAGS_STDCXX = -std=c++17 -fexceptions -frtti
 CFLAGS_STDC = -std=c99

@@ -1,10 +1,18 @@
 
 $(warning warning: CONFIG=generic is deprecated. Use CONFIG=standard instead.)
 
-CC  ?= cc 
-CXX ?= c++
-LD  ?= $(CXX)
-AR  ?= ar
+ifeq ($(origin CC),default)
+CC  = cc
+endif
+ifeq ($(origin CXX),default)
+CXX = c++
+endif
+ifeq ($(origin LD),default)
+LD  = $(CXX)
+endif
+ifeq ($(origin AR),default)
+AR  = ar
+endif
 
 CXXFLAGS_STDCXX = -std=c++17
 CFLAGS_STDC = -std=c99

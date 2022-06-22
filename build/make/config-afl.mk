@@ -1,8 +1,16 @@
 
-CC  ?= contrib/fuzzing/afl/afl-clang-lto
-CXX ?= contrib/fuzzing/afl/afl-clang-lto++
-LD  ?= $(CXX)
-AR  ?= ar
+ifeq ($(origin CC),default)
+CC  = contrib/fuzzing/afl/afl-clang-lto
+endif
+ifeq ($(origin CXX),default)
+CXX = contrib/fuzzing/afl/afl-clang-lto++
+endif
+ifeq ($(origin LD),default)
+LD  = $(CXX)
+endif
+ifeq ($(origin AR),default)
+AR  = ar
+endif
 
 ifneq ($(STDCXX),)
 CXXFLAGS_STDCXX = -std=$(STDCXX)

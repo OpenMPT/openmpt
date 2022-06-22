@@ -1,8 +1,16 @@
 
-CC  ?= x86_64-w64-mingw32-gcc$(MINGW_FLAVOUR)
-CXX ?= x86_64-w64-mingw32-g++$(MINGW_FLAVOUR)
-LD  ?= $(CXX)
-AR  ?= x86_64-w64-mingw32-ar$(MINGW_FLAVOUR)
+ifeq ($(origin CC),default)
+CC  = x86_64-w64-mingw32-gcc$(MINGW_FLAVOUR)
+endif
+ifeq ($(origin CXX),default)
+CXX = x86_64-w64-mingw32-g++$(MINGW_FLAVOUR)
+endif
+ifeq ($(origin LD),default)
+LD  = $(CXX)
+endif
+ifeq ($(origin AR),default)
+AR  = x86_64-w64-mingw32-ar$(MINGW_FLAVOUR)
+endif
 
 CXXFLAGS_STDCXX = -std=c++17
 CFLAGS_STDC = -std=c99

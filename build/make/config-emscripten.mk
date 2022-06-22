@@ -1,8 +1,16 @@
 
-CC  ?= emcc -c
-CXX ?= em++ -c
-LD  ?= em++
-AR  ?= emar
+ifeq ($(origin CC),default)
+CC  = emcc -c
+endif
+ifeq ($(origin CXX),default)
+CXX = em++ -c
+endif
+ifeq ($(origin LD),default)
+LD  = em++
+endif
+ifeq ($(origin AR),default)
+AR  = emar
+endif
 LINK.cc = em++ $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) $(TARGET_ARCH)
 
 EMSCRIPTEN_TARGET?=default

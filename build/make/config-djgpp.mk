@@ -1,8 +1,16 @@
 
-CC  ?= i386-pc-msdosdjgpp-gcc
-CXX ?= i386-pc-msdosdjgpp-g++
-LD  ?= $(CXX)
-AR  ?= i386-pc-msdosdjgpp-ar
+ifeq ($(origin CC),default)
+CC  = i386-pc-msdosdjgpp-gcc
+endif
+ifeq ($(origin CXX),default)
+CXX = i386-pc-msdosdjgpp-g++
+endif
+ifeq ($(origin LD),default)
+LD  = $(CXX)
+endif
+ifeq ($(origin AR),default)
+AR  = i386-pc-msdosdjgpp-ar
+endif
 
 # Note that we are using GNU extensions instead of 100% standards-compliant
 # mode, because otherwise DJGPP-specific headers/functions are unavailable.
