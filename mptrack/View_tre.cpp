@@ -1121,7 +1121,8 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 
 		for(size_t pat = sndFile.Patterns.Size(); pat < info.tiPatterns.size(); pat++)
 		{
-			DeleteItem(info.tiPatterns[pat]);
+			if(info.tiPatterns[pat])
+				DeleteItem(info.tiPatterns[pat]);
 		}
 		info.tiPatterns.resize(sndFile.Patterns.Size(), nullptr);
 
