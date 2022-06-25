@@ -31,7 +31,19 @@ inline namespace MPT_INLINE_NS {
 
 
 
-#if !defined(MPT_COMPILER_QUIRK_NO_FILESYSTEM)
+#if defined(MPT_COMPILER_QUIRK_NO_FILESYSTEM)
+
+
+
+using path = mpt::os_path;
+#define MPT_PATH_CHAR(x)    MPT_OSPATH_CHAR(x)
+#define MPT_PATH_LITERAL(x) MPT_OSPATH_LITERAL(x)
+#define MPT_PATH(x)         MPT_OSPATH(x)
+
+
+
+
+#else // !MPT_COMPILER_QUIRK_NO_FILESYSTEM
 
 
 
@@ -450,7 +462,7 @@ struct string_transcoder<mpt::path> {
 
 
 
-#endif // !MPT_COMPILER_QUIRK_NO_FILESYSTEM
+#endif // MPT_COMPILER_QUIRK_NO_FILESYSTEM
 
 
 
