@@ -40,3 +40,5 @@
 
 /* use the unicode support within libmpg123 */
 #define WANT_WIN32_UNICODE
+
+#define OFF_MAX ((off_t)((sizeof(off_t) <= 4) ? ((uint32_t)-1/2) : ((uint64_t)-1/2))) /* OpenMPT */
