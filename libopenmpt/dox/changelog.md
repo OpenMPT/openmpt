@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.5.19-pre
 
+ *  mpg123: Update to v1.30.0 (2022-06-26).
+
 ### libopenmpt 0.5.18 (2022-04-24)
 
  *  Pitch / Pan Separation and Random Variation instrument properties were not
