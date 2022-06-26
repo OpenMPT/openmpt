@@ -7,7 +7,7 @@
 #include <stdint.h>
 #include <inttypes.h>
 
-#define MPG123_API_VERSION 46
+#define MPG123_API_VERSION 47
 #define MPG123_NO_CONFIGURE
 #define MPG123_NO_LARGENAME
 #include <stddef.h>
