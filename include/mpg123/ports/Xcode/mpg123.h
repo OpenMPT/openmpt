@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include <sys/types.h>
 
-#define MPG123_API_VERSION 46 /* OpenMPT */
+#define MPG123_API_VERSION 47 /* OpenMPT */
 #define MPG123_NO_CONFIGURE
 #define MPG123_NO_LARGENAME /* OpenMPT */
 #include <stddef.h> /* OpenMPT */
