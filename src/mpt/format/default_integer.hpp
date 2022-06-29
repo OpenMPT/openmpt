@@ -24,7 +24,6 @@
 #include <charconv>
 #endif // MPT_FORMAT_FORMAT_DEFAULT_INT_CXX17
 #if !MPT_FORMAT_FORMAT_DEFAULT_INT_CXX17
-#include <ios>
 #include <locale>
 #include <sstream>
 #endif // !MPT_FORMAT_FORMAT_DEFAULT_INT_CXX17
