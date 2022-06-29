@@ -6,11 +6,11 @@
 
 #include "mpt/base/detect.hpp"
 
-#if 1
+#if !defined(MPT_LIBCXX_QUIRK_NO_TO_CHARS_INT)
 #define MPT_FORMAT_FORMAT_DEFAULT_INT_CXX17 1
-#else
+#else // MPT_LIBCXX_QUIRK_NO_TO_CHARS_INT
 #define MPT_FORMAT_FORMAT_DEFAULT_INT_CXX17 0
-#endif
+#endif // !MPT_LIBCXX_QUIRK_NO_TO_CHARS_INT
 
 #if MPT_FORMAT_FORMAT_DEFAULT_INT_CXX17
 #include "mpt/base/algorithm.hpp"
