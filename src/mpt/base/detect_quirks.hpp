@@ -256,7 +256,15 @@
 
 
 
-//#define MPT_LIBCXX_QUIRK_NO_TO_CHARS_INT
+#if MPT_OS_MACOSX_OR_IOS
+#if defined(TARGET_OS_OSX)
+#if (TARGET_OS_OSX != 0)
+#if (MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_15)
+#define MPT_LIBCXX_QUIRK_NO_TO_CHARS_INT
+#endif
+#endif
+#endif
+#endif
 
 
 
