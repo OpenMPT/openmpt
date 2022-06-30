@@ -8,6 +8,7 @@
 #include "mpt/base/detect.hpp"
 #include "mpt/base/namespace.hpp"
 #include "mpt/format/simple.hpp"
+#include "mpt/format/simple_integer.hpp"
 #include "mpt/string/types.hpp"
 #include "mpt/test/test.hpp"
 #include "mpt/test/test_macros.hpp"
@@ -68,6 +69,26 @@ MPT_TEST_GROUP_INLINE("mpt/format/simple")
 	MPT_TEST_EXPECT_EQUAL(mpt::format<mpt::ustring>::HEX0<8>(0xa2345678), MPT_USTRING("A2345678"));
 	MPT_TEST_EXPECT_EQUAL(mpt::format<mpt::ustring>::HEX0<9>(0xa2345678), MPT_USTRING("0A2345678"));
 	MPT_TEST_EXPECT_EQUAL(mpt::format<mpt::ustring>::HEX0<10>(0xa2345678), MPT_USTRING("00A2345678"));
+
+#if MPT_FORMAT_FORMAT_SIMPLE_INT_CXX17
+
+	MPT_TEST_EXPECT_EQUAL(mpt::format_simple_integer_to_chars<std::string>(std::numeric_limits<int16>::min(), 10), "-32768");
+	MPT_TEST_EXPECT_EQUAL(mpt::format_simple_integer_to_chars<std::string>(std::numeric_limits<int16>::max(), 10), "32767");
+
+	MPT_TEST_EXPECT_EQUAL(mpt::format_simple_integer_to_chars<std::string>(std::numeric_limits<int16>::min(), 7), "-164351");
+	MPT_TEST_EXPECT_EQUAL(mpt::format_simple_integer_to_chars<std::string>(std::numeric_limits<int16>::min() + 1, 7), "-164350");
+	MPT_TEST_EXPECT_EQUAL(mpt::format_simple_integer_to_chars<std::string>(std::numeric_limits<int16>::max(), 7), "164350");
+
+#else // !MPT_FORMAT_FORMAT_SIMPLE_INT_CXX17
+
+	MPT_TEST_EXPECT_EQUAL(mpt::format_simple_integer_to_stream<std::string>(std::numeric_limits<int16>::min(), 10), "-32768");
+	MPT_TEST_EXPECT_EQUAL(mpt::format_simple_integer_to_stream<std::string>(std::numeric_limits<int16>::max(), 10), "32767");
+
+	MPT_TEST_EXPECT_EQUAL(mpt::format_simple_integer_to_stream<std::string>(std::numeric_limits<int16>::min(), 7), "-164351");
+	MPT_TEST_EXPECT_EQUAL(mpt::format_simple_integer_to_stream<std::string>(std::numeric_limits<int16>::min() + 1, 7), "-164350");
+	MPT_TEST_EXPECT_EQUAL(mpt::format_simple_integer_to_stream<std::string>(std::numeric_limits<int16>::max(), 7), "164350");
+
+#endif // MPT_FORMAT_FORMAT_SIMPLE_INT_CXX17
 
 #if !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
 	MPT_TEST_EXPECT_EQUAL(mpt::format<std::wstring>::hex(0x123e), L"123e");

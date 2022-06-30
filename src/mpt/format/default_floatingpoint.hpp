@@ -7,7 +7,7 @@
 
 #include "mpt/base/detect.hpp"
 
-#if MPT_MSVC_AT_LEAST(2019, 4) || MPT_GCC_AT_LEAST(11, 1, 0)
+#if !defined(MPT_LIBCXX_QUIRK_NO_TO_CHARS_FLOAT)
 #define MPT_FORMAT_FORMAT_DEFAULT_FLOAT_CXX17 1
 #else
 #define MPT_FORMAT_FORMAT_DEFAULT_FLOAT_CXX17 0
