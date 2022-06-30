@@ -19,7 +19,7 @@
 #include "mpt/string/types.hpp"
 
 #if !MPT_FORMAT_FORMAT_SIMPLE_INT_CXX17
-#include <algoritm>
+#include <algorithm>
 #endif // !MPT_FORMAT_FORMAT_SIMPLE_INT_CXX17
 #if MPT_FORMAT_FORMAT_SIMPLE_INT_CXX17
 #include <charconv>
