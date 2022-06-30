@@ -9,6 +9,8 @@ is just a high-level summary.
 
  *  [**Bug**] `Makefile` now also uses `CC`, `CXX`, `LD`, and `AR` when set as
     environment variables.
+ *  [**Bug**] libopenmpt can now be built to target macOS down to version 10.13
+    again.
 
  *  [**New**] `Makefile` now uses `PKG_CONFIG` as path to `pkg-config`.
 
