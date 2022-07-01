@@ -16,7 +16,9 @@
 #include "PluginManager.h"
 #include "PlugInterface.h"
 
+#if defined(MPT_WITH_DMO)
 #include "mpt/uuid/guid.hpp"
+#endif // MPT_WITH_DMO
 #include "mpt/uuid/uuid.hpp"
 
 // Built-in plugins
