@@ -71,7 +71,7 @@ MPT_WARNING("Warning: libopenmpt for WinRT is built with reduced functionality. 
 #endif // _WIN32_WINNT
 #endif // MPT_OS_WINDOWS && MPT_OS_WINDOWS_WINRT
 
-#if defined(MPT_BUILD_MSVC) || defined(MPT_BUILD_VCPKG)
+#if defined(MPT_BUILD_MSVC)
 #if MPT_OS_WINDOWS_WINRT
 #pragma comment(lib, "ole32.lib")
 #else
