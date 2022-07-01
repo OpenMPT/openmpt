@@ -87,5 +87,9 @@
    "vorbis",
    "zlib",
   }
+	links {
+		"ole32.lib",
+		"rpcrt4.lib",
+	}
   filter {}
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }

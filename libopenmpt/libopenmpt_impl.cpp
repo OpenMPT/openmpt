@@ -71,14 +71,6 @@ MPT_WARNING("Warning: libopenmpt for WinRT is built with reduced functionality. 
 #endif // _WIN32_WINNT
 #endif // MPT_OS_WINDOWS && MPT_OS_WINDOWS_WINRT
 
-#if defined(MPT_BUILD_MSVC)
-#if MPT_OS_WINDOWS_WINRT
-#pragma comment(lib, "ole32.lib")
-#else
-#pragma comment(lib, "rpcrt4.lib")
-#endif
-#endif // MPT_BUILD_MSVC
-
 #if MPT_PLATFORM_MULTITHREADED && MPT_MUTEX_NONE
 MPT_WARNING("Warning: libopenmpt built in non thread-safe mode because mutexes are not supported by the C++ standard library available.")
 #endif // MPT_MUTEX_NONE

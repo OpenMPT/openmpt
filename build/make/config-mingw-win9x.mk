@@ -21,8 +21,11 @@ CPPFLAGS += -DWINVER=0x0410 -D_WIN32_WINDOWS=0x0410 -DNOMINMAX -DMPT_BUILD_RETRO
 CXXFLAGS += -mconsole -mthreads
 CFLAGS   += -mconsole -mthreads
 LDFLAGS  += 
-LDLIBS   += -lm -lole32 -lrpcrt4 -lwinmm
+LDLIBS   += -lm
 ARFLAGS  := rcs
+
+LDLIBS_LIBOPENMPTTEST += -lole32 -lrpcrt4
+LDLIBS_OPENMPT123 += -lwinmm
 
 LDFLAGS  += -static -static-libgcc -static-libstdc++
 

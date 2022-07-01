@@ -41,8 +41,11 @@ CXXFLAGS += -municode -mthreads
 CFLAGS   += -municode -mthreads
 LDFLAGS  += -mconsole
 endif
-LDLIBS   += -lm -lole32 -lrpcrt4 -lwinmm
+LDLIBS   += -lm
 ARFLAGS  := rcs
+
+LDLIBS_LIBOPENMPTTEST += -lole32 -lrpcrt4
+LDLIBS_OPENMPT123 += -lwinmm
 
 PC_LIBS_PRIVATE += -lole32 -lrpcrt4
 

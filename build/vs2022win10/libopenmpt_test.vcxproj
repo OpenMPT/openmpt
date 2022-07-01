@@ -560,6 +560,7 @@
       <SubSystem>Console</SubSystem>
       <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
       <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
+      <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -586,6 +587,7 @@
       <SubSystem>Console</SubSystem>
       <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
       <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
+      <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -611,6 +613,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -636,6 +639,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -667,6 +671,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -697,6 +702,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -727,6 +733,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -757,6 +764,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -789,6 +797,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -820,6 +829,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -851,6 +861,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -882,6 +893,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -907,6 +919,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -932,6 +945,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -957,6 +971,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -982,6 +997,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1013,6 +1029,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1043,6 +1060,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1073,6 +1091,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1103,6 +1122,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1135,6 +1155,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1166,6 +1187,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1197,6 +1219,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1228,6 +1251,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
