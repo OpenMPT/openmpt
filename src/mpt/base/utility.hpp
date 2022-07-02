@@ -13,6 +13,7 @@
 #include "mpt/base/saturate_cast.hpp"
 #endif
 
+#include <new>
 #include <type_traits>
 #include <utility>
 
@@ -65,8 +66,7 @@ struct value_initializer {
 template <typename T, std::size_t N>
 struct value_initializer<T[N]> {
 	inline void operator()(T (&a)[N]) {
-		for (auto & e : a)
-		{
+		for (auto & e : a) {
 			value_initializer<T>{}(e);
 		}
 	}
@@ -75,6 +75,19 @@ struct value_initializer<T[N]> {
 template <typename T>
 inline void reset(T & x) {
 	value_initializer<T>{}(x);
+}
+
+template <typename T, typename... Targs>
+void reset(T & x, Targs &&... args) {
+	x = T{std::forward<Targs>(args)...};
+}
+
+
+
+template <typename T, typename... Targs>
+void reconstruct(T & x, Targs &&... args) {
+	x.~T();
+	new (&x) T{std::forward<Targs>(args)...};
 }
 
 
