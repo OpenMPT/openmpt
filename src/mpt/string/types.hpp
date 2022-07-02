@@ -257,7 +257,7 @@ using u8char = char;
 
 
 
-#if !defined(MPT_USTRING_MODE_UTF8_FORCE) && (MPT_COMPILER_MSVC || (MPT_DETECTED_MFC && defined(UNICODE)))
+#if !defined(MPT_USTRING_MODE_UTF8_FORCE) && !defined(MPT_COMPILER_QUIRK_NO_WCHAR) && (MPT_COMPILER_MSVC || (MPT_DETECTED_MFC && defined(UNICODE)))
 // Use wide strings for MSVC because this is the native encoding on
 // microsoft platforms.
 #define MPT_USTRING_MODE_WIDE 1
