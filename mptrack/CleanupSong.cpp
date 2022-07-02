@@ -529,7 +529,7 @@ protected:
 		sndFile.SetRepeatCount(0);
 		sndFile.m_bIsRendering = true;
 		auto origPlayState = std::make_unique<CSoundFile::PlayState>(std::move(sndFile.m_PlayState));
-		sndFile.m_PlayState = {};
+		mpt::reconstruct(sndFile.m_PlayState);
 		auto prevTime = timeGetTime();
 		uint64 renderedSamples = 0;
 		for(const auto &song : subSongs)
