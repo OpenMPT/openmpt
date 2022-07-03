@@ -10,11 +10,16 @@
 #include "stdafx.h"
 #include "mptPathString.h"
 
+#include "mpt/path/os_path_long.hpp"
+
 #include <vector>
 
 #if MPT_OS_WINDOWS
-#include <windows.h>
 #include <tchar.h>
+#endif
+
+#if MPT_OS_WINDOWS
+#include <windows.h>
 #endif
 
 OPENMPT_NAMESPACE_BEGIN
@@ -28,32 +33,7 @@ namespace mpt
 
 mpt::RawPathString SupportLongPath(const mpt::RawPathString &path)
 {
-#if MPT_OS_WINDOWS
-#if MPT_OS_WINDOWS_WINRT && (_WIN32_WINNT < 0x0a00)
-	// For WinRT on Windows 8, there is no official wy to determine an absolute path.
-	return path;
-#else // !MPT_OS_WINDOWS_WINRT
-	using namespace path_literals;
-	using char_type = RawPathString::value_type;
-	if(path.length() < MAX_PATH || path.substr(0, 4) == L<char_type>("\\\\?\\"))
-	{
-		// Path is short enough or already in prefixed form
-		return path;
-	}
-	const RawPathString absPath = mpt::GetAbsolutePath(mpt::PathString::FromNative(path)).AsNative();
-	if(absPath.substr(0, 2) == L<char_type>("\\\\"))
-	{
-		// Path is a network share: \\server\foo.bar -> \\?\UNC\server\foo.bar
-		return L<char_type>("\\\\?\\UNC") + absPath.substr(1);
-	} else
-	{
-		// Regular file: C:\foo.bar -> \\?\C:\foo.bar
-		return L<char_type>("\\\\?\\") + absPath;
-	}
-#endif // MPT_OS_WINDOWS_WINRT
-#else // !MPT_OS_WINDOWS
-	return path;
-#endif // MPT_OS_WINDOWS
+	return mpt::support_long_path(path);
 }
 
 
