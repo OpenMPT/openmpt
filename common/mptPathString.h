@@ -80,9 +80,6 @@ inline std::wstring ToWString(const mpt::PathString &x)
 
 
 
-// Return native string, with possible \\?\ prefix if it exceeds MAX_PATH characters.
-mpt::RawPathString SupportLongPath(const mpt::RawPathString &path);
-
 #if MPT_OS_WINDOWS
 #if !(MPT_OS_WINDOWS_WINRT && (_WIN32_WINNT < 0x0a00))
 // Returns the absolute path for a potentially relative path and removes ".." or "." components. (same as GetFullPathNameW)

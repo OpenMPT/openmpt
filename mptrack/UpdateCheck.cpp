@@ -31,6 +31,7 @@
 #include "mpt/io/io.hpp"
 #include "mpt/io/io_stdstream.hpp"
 #include "mpt/fs/fs.hpp"
+#include "mpt/path/os_path_long.hpp"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -1114,8 +1115,8 @@ public:
 				mpt::PathString dirTempOpenMPT = dirTemp + P_("OpenMPT") + mpt::PathString::FromNative(mpt::RawPathString(1, mpt::PathString::GetDefaultPathSeparator()));
 				dirTempOpenMPTUpdates = dirTempOpenMPT + P_("Updates") + mpt::PathString::FromNative(mpt::RawPathString(1, mpt::PathString::GetDefaultPathSeparator()));
 				updateFilename = dirTempOpenMPTUpdates + mpt::PathString::FromUnicode(downloadinfo.filename);
-				::CreateDirectory(mpt::SupportLongPath(dirTempOpenMPT.AsNative()).c_str(), NULL);
-				::CreateDirectory(mpt::SupportLongPath(dirTempOpenMPTUpdates.AsNative()).c_str(), NULL);
+				::CreateDirectory(mpt::support_long_path(dirTempOpenMPT.AsNative()).c_str(), NULL);
+				::CreateDirectory(mpt::support_long_path(dirTempOpenMPTUpdates.AsNative()).c_str(), NULL);
 			
 				{
 			

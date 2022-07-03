@@ -14,6 +14,7 @@
 #if defined(MPT_ENABLE_FILEIO)
 
 #include "mpt/base/detect_libcxx.hpp"
+#include "mpt/path/os_path_long.hpp"
 #include "mpt/io_read/filecursor_memory.hpp"
 #include "mpt/io_read/filecursor_stdstream.hpp"
 
@@ -83,7 +84,7 @@ inline void fstream_open(Tbase & base, const mpt::PathString & filename, std::io
 			base.open(mpt::ToCharset(mpt::Charset::Locale, filename.AsNative()).c_str(), mode);
 		#endif // MPT_GCC_AT_LEAST(9,1,0)
 	#else // !MPT_COMPILER_QUIRK_WINDOWS_FSTREAM_NO_WCHAR
-		base.open(mpt::SupportLongPath(filename.AsNative()).c_str(), mode);
+		base.open(mpt::support_long_path(filename.AsNative()).c_str(), mode);
 	#endif // MPT_COMPILER_QUIRK_WINDOWS_FSTREAM_NO_WCHAR
 }
 

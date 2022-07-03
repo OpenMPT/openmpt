@@ -31,17 +31,6 @@ namespace mpt
 
 
 
-mpt::RawPathString SupportLongPath(const mpt::RawPathString &path)
-{
-#if defined(MPT_ENABLE_CHARSET_LOCALE)
-	return mpt::support_long_path(path);
-#else
-	return path;
-#endif
-}
-
-
-
 #if MPT_OS_WINDOWS
 
 #if !MPT_OS_WINDOWS_WINRT
