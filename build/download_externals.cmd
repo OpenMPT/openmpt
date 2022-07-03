@@ -52,7 +52,7 @@ if "%MPT_DOWNLOAD%" == "yes" (
  call build\scriptlib\download.cmd "https://github.com/bkaradzic/GENie/archive/78817a9707c1a02e845fb38b3adcc5353b02d377.zip"         "build\externals\GENie-78817a9707c1a02e845fb38b3adcc5353b02d377.zip"        || goto error
  call build\scriptlib\download.cmd "https://github.com/premake/premake-core/releases/download/v5.0.0-alpha13/premake-5.0.0-alpha13-src.zip" "build\externals\premake-5.0.0-alpha13-src.zip" || goto error
 
- call build\scriptlib\download.cmd "http://download.nullsoft.com/winamp/plugin-dev/WA5.55_SDK.exe"                                   "build\externals\WA5.55_SDK.exe"  || goto error
+ call build\scriptlib\download.cmd "https://web.archive.org/web/20131217072017if_/http://download.nullsoft.com/winamp/plugin-dev/WA5.55_SDK.exe" "build\externals\WA5.55_SDK.exe"  || goto error
  call build\scriptlib\download.cmd "https://www.un4seen.com/files/xmp-sdk.zip"                                                       "build\externals\xmp-sdk.zip"     || goto error
  call build\scriptlib\download.cmd "https://web.archive.org/web/20191011060157if_/https://www.steinberg.net/sdk_downloads/asiosdk2.3.zip" "build\externals\asiosdk2.3.zip"  || goto error
 
