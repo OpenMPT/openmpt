@@ -365,6 +365,7 @@ BOOL CViewSample::OnScrollBy(CSize sizeScroll, BOOL bDoScroll)
 		if(scrollByX) SetScrollPos(SB_HORZ, x);
 		if(scrollByY) SetScrollPos(SB_VERT, y);
 		m_forceRedrawWaveform  = true;
+		m_scrolledSinceLastMouseMove = true;
 	}
 	return TRUE;
 }
@@ -1980,7 +1981,7 @@ void CViewSample::OnMouseMove(UINT flags, CPoint point)
 			m_fineDrag = true;
 			m_startDragPoint = point;
 			m_startDragValue = x;
-		} else if(!(flags & MK_SHIFT) && m_fineDrag)
+		} else if(!(flags & MK_SHIFT) && (m_fineDrag || m_scrolledSinceLastMouseMove))
 		{
 			m_fineDrag = false;
 			m_startDragPoint = point;
@@ -2082,6 +2083,7 @@ void CViewSample::OnMouseMove(UINT flags, CPoint point)
 			UpdateWindow();
 		}
 	}
+	m_scrolledSinceLastMouseMove = false;
 }
 
 
@@ -2135,6 +2137,7 @@ void CViewSample::OnLButtonDown(UINT flags, CPoint point)
 		m_startDragValue = itemPos;
 		m_fineDrag = (flags & MK_SHIFT);
 		m_dragPreparedUndo = false;
+		m_scrolledSinceLastMouseMove = false;
 
 		switch(m_dragItem)
 		{
