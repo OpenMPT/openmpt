@@ -173,7 +173,7 @@ mpt::PathString SanitizePathComponent(const mpt::PathString &filename)
 	return mpt::PathString::FromNative(tmp);
 }
 
-std::string SanitizePathComponent(std::string str)
+mpt::ustring SanitizePathComponent(mpt::ustring str)
 {
 	for(size_t i = 0; i < str.length(); i++)
 	{
@@ -181,26 +181,6 @@ std::string SanitizePathComponent(std::string str)
 	}
 	return str;
 }
-
-std::wstring SanitizePathComponent(std::wstring str)
-{
-	for(size_t i = 0; i < str.length(); i++)
-	{
-		str[i] = SanitizePathComponentChar(str[i]);
-	}
-	return str;
-}
-
-#if MPT_USTRING_MODE_UTF8
-mpt::u8string SanitizePathComponent(mpt::u8string str)
-{
-	for(size_t i = 0; i < str.length(); i++)
-	{
-		str[i] = SanitizePathComponentChar(str[i]);
-	}
-	return str;
-}
-#endif // MPT_USTRING_MODE_UTF8
 
 #if defined(MPT_WITH_MFC)
 CString SanitizePathComponent(CString str)

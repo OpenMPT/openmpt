@@ -117,11 +117,8 @@ int PathCompareNoCase(const PathString &a, const PathString &b);
 
 mpt::PathString SanitizePathComponent(const mpt::PathString &filename);
 
-std::string SanitizePathComponent(std::string str);
-std::wstring SanitizePathComponent(std::wstring str);
-#if MPT_USTRING_MODE_UTF8
-mpt::u8string SanitizePathComponent(mpt::u8string str);
-#endif // MPT_USTRING_MODE_UTF8
+mpt::ustring SanitizePathComponent(mpt::ustring str);
+
 #if defined(MPT_WITH_MFC)
 CString SanitizePathComponent(CString str);
 #endif // MPT_WITH_MFC
