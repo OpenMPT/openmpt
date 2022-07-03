@@ -145,6 +145,10 @@ public:
 
 
 
+using native_fs = fs<mpt::native_path>;
+
+
+
 #endif // MPT_OS_WINDOWS
 
 

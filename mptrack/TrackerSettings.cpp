@@ -32,7 +32,7 @@
 #include "mpt/fs/common_directories.hpp"
 #include "../soundlib/tuningcollection.h"
 #include "TuningDialog.h"
-
+#include "mpt/fs/fs.hpp"
 
 #include <algorithm>
 
@@ -987,21 +987,21 @@ void TrackerSettings::MigrateOldSoundDeviceSettings(SoundDevice::Manager &manage
 
 void TrackerSettings::MigrateTunings(const Version storedVersion)
 {
-	if(!mpt::FS::IsDirectory(PathTunings.GetDefaultDir()))
+	if(!mpt::native_fs{}.is_directory(PathTunings.GetDefaultDir()))
 	{
 		CreateDirectory(PathTunings.GetDefaultDir().AsNative().c_str(), 0);
 	}
-	if(!mpt::FS::IsDirectory(PathTunings.GetDefaultDir() + P_("Built-in\\")))
+	if(!mpt::native_fs{}.is_directory(PathTunings.GetDefaultDir() + P_("Built-in\\")))
 	{
 		CreateDirectory((PathTunings.GetDefaultDir() + P_("Built-in\\")).AsNative().c_str(), 0);
 	}
-	if(!mpt::FS::IsDirectory(PathTunings.GetDefaultDir() + P_("Locale\\")))
+	if(!mpt::native_fs{}.is_directory(PathTunings.GetDefaultDir() + P_("Locale\\")))
 	{
 		CreateDirectory((PathTunings.GetDefaultDir() + P_("Local\\")).AsNative().c_str(), 0);
 	}
 	{
 		mpt::PathString fn = PathTunings.GetDefaultDir() + P_("Built-in\\12TET.tun");
-		if(!mpt::FS::PathExists(fn))
+		if(!mpt::native_fs{}.exists(fn))
 		{
 			std::unique_ptr<CTuning> pT = CSoundFile::CreateTuning12TET(U_("12TET"));
 			mpt::SafeOutputFile sf(fn, std::ios::binary, mpt::FlushMode::Full);
@@ -1010,7 +1010,7 @@ void TrackerSettings::MigrateTunings(const Version storedVersion)
 	}
 	{
 		mpt::PathString fn = PathTunings.GetDefaultDir() + P_("Built-in\\12TET [[fs15 1.17.02.49]].tun");
-		if(!mpt::FS::PathExists(fn))
+		if(!mpt::native_fs{}.exists(fn))
 		{
 			std::unique_ptr<CTuning> pT = CSoundFile::CreateTuning12TET(U_("12TET [[fs15 1.17.02.49]]"));
 			mpt::SafeOutputFile sf(fn, std::ios::binary, mpt::FlushMode::Full);

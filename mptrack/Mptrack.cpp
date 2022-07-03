@@ -39,6 +39,7 @@
 #include "mpt/fs/common_directories.hpp"
 #include "../misc/mptOS.h"
 #include "mpt/arch/arch.hpp"
+#include "mpt/fs/fs.hpp"
 #if MPT_MSVC_AT_LEAST(2022, 2) && MPT_MSVC_BEFORE(2022, 3)
 // Work-around <https://developercommunity.visualstudio.com/t/warning-C4311-in-MFC-header-afxrecovery/10041328>,
 // see <https://developercommunity.visualstudio.com/t/Compiler-warnings-after-upgrading-to-17/10036311#T-N10061908>.
@@ -833,7 +834,7 @@ bool CTrackApp::MoveConfigFile(const mpt::PathString &fileName, mpt::PathString 
 	else
 		newPath += fileName;
 
-	if(!mpt::FS::IsFile(newPath) && mpt::FS::IsFile(oldPath))
+	if(!mpt::native_fs{}.is_file(newPath) && mpt::native_fs{}.is_file(oldPath))
 	{
 		return MoveFile(oldPath.AsNative().c_str(), newPath.AsNative().c_str()) != 0;
 	}
@@ -908,7 +909,7 @@ void CTrackApp::SetupPaths(bool overridePortable)
 	// Check if the user has configured portable mode.
 	bool configInstallPortable = false;
 	mpt::PathString portableFlagFilename = (configPathPortable + P_("OpenMPT.portable"));
-	bool configPortableFlag = mpt::FS::IsFile(portableFlagFilename);
+	bool configPortableFlag = mpt::native_fs{}.is_file(portableFlagFilename);
 	configInstallPortable = configInstallPortable || configPortableFlag;
 	// before 1.29.00.13:
 	configInstallPortable = configInstallPortable || (GetPrivateProfileInt(_T("Paths"), _T("UseAppDataDirectory"), 1, (configPathPortable + P_("mptrack.ini")).AsNative().c_str()) == 0);
@@ -947,16 +948,16 @@ void CTrackApp::CreatePaths()
 	// Create missing diretories
 	if(!IsPortableMode())
 	{
-		if(!mpt::FS::IsDirectory(m_ConfigPath))
+		if(!mpt::native_fs{}.is_directory(m_ConfigPath))
 		{
 			CreateDirectory(m_ConfigPath.AsNative().c_str(), 0);
 		}
 	}
-	if(!mpt::FS::IsDirectory(GetConfigPath() + P_("Components")))
+	if(!mpt::native_fs{}.is_directory(GetConfigPath() + P_("Components")))
 	{
 		CreateDirectory((GetConfigPath() + P_("Components")).AsNative().c_str(), 0);
 	}
-	if(!mpt::FS::IsDirectory(GetConfigPath() + P_("Components\\") + mpt::PathString::FromUnicode(mpt::OS::Windows::Name(mpt::OS::Windows::GetProcessArchitecture()))))
+	if(!mpt::native_fs{}.is_directory(GetConfigPath() + P_("Components\\") + mpt::PathString::FromUnicode(mpt::OS::Windows::Name(mpt::OS::Windows::GetProcessArchitecture()))))
 	{
 		CreateDirectory((GetConfigPath() + P_("Components\\") + mpt::PathString::FromUnicode(mpt::OS::Windows::Name(mpt::OS::Windows::GetProcessArchitecture()))).AsNative().c_str(), 0);
 	}
@@ -973,7 +974,7 @@ void CTrackApp::CreatePaths()
 		// Import old tunings
 		const mpt::PathString oldTunings = GetInstallPath() + P_("tunings\\");
 
-		if(mpt::FS::IsDirectory(oldTunings))
+		if(mpt::native_fs{}.is_directory(oldTunings))
 		{
 			const mpt::PathString searchPattern = oldTunings + P_("*.*");
 			WIN32_FIND_DATA FindFileData;
@@ -1653,7 +1654,7 @@ CModDoc *CTrackApp::NewDocument(MODTYPE newType)
 			const mpt::PathString dirs[] = { GetConfigPath() + P_("TemplateModules\\"), GetInstallPath() + P_("TemplateModules\\"), mpt::PathString() };
 			for(const auto &dir : dirs)
 			{
-				if(mpt::FS::IsFile(dir + templateFile))
+				if(mpt::native_fs{}.is_file(dir + templateFile))
 				{
 					if(CModDoc *modDoc = static_cast<CModDoc *>(m_pModTemplate->OpenTemplateFile(dir + templateFile)))
 					{

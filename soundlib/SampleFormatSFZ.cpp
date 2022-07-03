@@ -15,7 +15,7 @@
 #endif // MODPLUG_TRACKER
 #ifndef MODPLUG_NO_FILESAVE
 #include "../common/mptFileIO.h"
-#include "../common/mptFS.h"
+#include "mpt/fs/fs.hpp"
 #endif // !MODPLUG_NO_FILESAVE
 #include "modsmp_ctrl.h"
 #include "mpt/base/numbers.hpp"
@@ -1079,7 +1079,7 @@ bool CSoundFile::SaveSFZInstrument(INSTRUMENTINDEX nInstr, std::ostream &f, cons
 	const mpt::PathString sampleBaseName = mpt::PathString::FromNative(mpt::trim(filename.GetFilenameBase().AsNative(), whitespaceDirName));
 	const mpt::PathString sampleDirName = (sampleBaseName.empty() ? P_("Samples") : sampleBaseName)  + P_("/");
 	const mpt::PathString sampleBasePath = filename.GetDirectoryWithDrive() + sampleDirName;
-	if(!mpt::FS::IsDirectory(sampleBasePath) && !::CreateDirectory(sampleBasePath.AsNative().c_str(), nullptr))
+	if(!mpt::native_fs{}.is_directory(sampleBasePath) && !::CreateDirectory(sampleBasePath.AsNative().c_str(), nullptr))
 		return false;
 
 	const double tickDuration = m_PlayState.m_nSamplesPerTick / static_cast<double>(m_MixerSettings.gdwMixingFreq);

@@ -44,7 +44,7 @@ public:
 			}
 			exeFileName.resize(exeFileName.size() * 2);
 		}
-		return mpt::fs<mpt::native_path>{}.absolute(mpt::native_path::FromNative(exeFileName.data()).GetDirectoryWithDrive());
+		return mpt::native_fs{}.absolute(mpt::native_path::FromNative(exeFileName.data()).GetDirectoryWithDrive());
 	}
 
 #if !MPT_OS_WINDOWS_WINRT

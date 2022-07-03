@@ -21,7 +21,7 @@
 #endif
 #ifdef MPT_EXTERNAL_SAMPLES
 // For loading external data in Startrekker files
-#include "../common/mptFS.h"
+#include "mpt/fs/fs.hpp"
 #include "../common/mptPathString.h"
 #endif  // MPT_EXTERNAL_SAMPLES
 
@@ -1224,7 +1224,7 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				mpt::PathString infoName = filename + ext;
 				char stMagic[16];
-				if(mpt::FS::IsFile(infoName))
+				if(mpt::native_fs{}.is_file(infoName))
 				{
 					amFile.emplace(infoName, SettingCacheCompleteFileBeforeLoading());
 					if(amFile->IsValid() && (amData = GetFileReader(*amFile)).IsValid() && amData.ReadArray(stMagic))

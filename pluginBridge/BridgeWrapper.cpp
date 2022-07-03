@@ -18,7 +18,7 @@
 #include "../mptrack/Vstplug.h"
 #include "../mptrack/ExceptionHandler.h"
 #include "../common/mptFileIO.h"
-#include "../common/mptFS.h"
+#include "mpt/fs/fs.hpp"
 #include "../common/mptStringBuffer.h"
 #include "../common/misc_util.h"
 
@@ -114,7 +114,7 @@ bool ComponentPluginBridge::DoInitialize()
 	};
 	for(const auto &candidate : exeNames)
 	{
-		if(mpt::FS::IsFile(candidate))
+		if(mpt::native_fs{}.is_file(candidate))
 		{
 			exeName = candidate;
 			break;

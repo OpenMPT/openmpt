@@ -12,7 +12,7 @@
 #include "WelcomeDialog.h"
 #include "resource.h"
 #include "Mainfrm.h"
-#include "../common/mptFS.h"
+#include "mpt/fs/fs.hpp"
 #include "../common/mptStringBuffer.h"
 #include "InputHandler.h"
 #include "CommandSet.h"
@@ -57,7 +57,7 @@ BOOL WelcomeDlg::OnInitDialog()
 	} else if(SHGetSpecialFolderPath(0, str, CSIDL_PROGRAM_FILES, FALSE))
 	{
 		m_vstPath = mpt::PathString::FromNative(ParseMaybeNullTerminatedStringFromBufferWithSizeInBytes<mpt::winstring>(str, datasize)) + P_("\\Steinberg\\VstPlugins\\");
-		if(!mpt::FS::IsDirectory(m_vstPath))
+		if(!mpt::native_fs{}.is_directory(m_vstPath))
 		{
 			m_vstPath = mpt::PathString();
 		}
@@ -108,7 +108,7 @@ BOOL WelcomeDlg::OnInitDialog()
 	}
 	if(keyFile != nullptr)
 	{
-		if(mpt::FS::IsFile(GetFullKeyPath(keyFile)))
+		if(mpt::native_fs{}.is_file(GetFullKeyPath(keyFile)))
 		{
 			int i = combo->AddString(_T("OpenMPT / Chromatic (") + CString(keyFileName) + _T(")"));
 			combo->SetItemDataPtr(i, (void *)keyFile);

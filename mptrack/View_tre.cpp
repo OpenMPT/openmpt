@@ -19,7 +19,7 @@
 #include "Dlsbank.h"
 #include "dlg_misc.h"
 #include "../common/mptFileIO.h"
-#include "../common/mptFS.h"
+#include "mpt/fs/fs.hpp"
 #include "../common/FileReader.h"
 #include "FileDialog.h"
 #include "Globals.h"
@@ -2136,9 +2136,9 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 						const auto nativePath = (m_InstrLibPath.AsNative() + wfd.cFileName);
 						if(const auto resolvedName = linkResolver.Resolve(nativePath.c_str()); !resolvedName.empty())
 						{
-							if(mpt::FS::IsDirectory(resolvedName) && showDirs)
+							if(mpt::native_fs{}.is_directory(resolvedName) && showDirs)
 								type = IMAGE_FOLDER;
-							else if(mpt::FS::IsFile(resolvedName))
+							else if(mpt::native_fs{}.is_file(resolvedName))
 								type = FilterFile(resolvedName);
 						}
 					}
@@ -2361,11 +2361,11 @@ int CALLBACK CModTree::ModTreeDrumCompareProc(LPARAM lParam1, LPARAM lParam2, LP
 
 void CModTree::SetFullInstrumentLibraryPath(mpt::PathString path)
 {
-	if(mpt::FS::IsDirectory(path))
+	if(mpt::native_fs{}.is_directory(path))
 	{
 		path = path.WithTrailingSlash();
 		InstrumentLibraryChDir(path, false);
-	} else if(mpt::FS::IsFile(path))
+	} else if(mpt::native_fs{}.is_file(path))
 	{
 		// Browse module contents
 		CModTree *dirBrowser = CMainFrame::GetMainFrame()->GetUpperTreeview();
@@ -2435,7 +2435,7 @@ void CModTree::InstrumentLibraryChDir(mpt::PathString dir, bool isSong)
 
 				FolderScanner scan(dir, FolderScanner::kFilesAndDirectories);
 				mpt::PathString name;
-				if(scan.Next(name) && !scan.Next(name) && mpt::FS::IsDirectory(name))
+				if(scan.Next(name) && !scan.Next(name) && mpt::native_fs{}.is_directory(name))
 				{
 					// There is only one directory and nothing else in the path,
 					// so skip this directory and automatically descend further down into the tree.
@@ -2446,7 +2446,7 @@ void CModTree::InstrumentLibraryChDir(mpt::PathString dir, bool isSong)
 			} while(false);
 		}
 
-		if(mpt::FS::IsDirectory(dir))
+		if(mpt::native_fs{}.is_directory(dir))
 		{
 			m_SongFileName = P_("");
 			delete m_SongFile;
@@ -3382,7 +3382,7 @@ void CModTree::OnXButtonUp(UINT nFlags, UINT nButton, CPoint point)
 		} else if(nButton == XBUTTON2)
 		{
 			const auto &previousPath = CMainFrame::GetMainFrame()->GetUpperTreeview()->m_previousPath;
-			InstrumentLibraryChDir(previousPath, mpt::FS::IsFile(m_InstrLibPath + previousPath));
+			InstrumentLibraryChDir(previousPath, mpt::native_fs{}.is_file(m_InstrLibPath + previousPath));
 		}
 	}
 	CTreeCtrl::OnXButtonUp(nFlags, nButton, point);

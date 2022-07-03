@@ -11,12 +11,12 @@
 #include "stdafx.h"
 #include "mptWine.h"
 
+#include "mpt/fs/fs.hpp"
 #include "mpt/path/native_path.hpp"
 
 #include "mptOS.h"
 #include "../common/mptFileIO.h"
 #include "../common/mptFileTemporary.h"
-#include "../common/mptFS.h"
 
 #include <deque>
 #include <map>
@@ -366,7 +366,7 @@ ExecResult Context::ExecutePosixShellScript(std::string script, FlagSet<ExecFlag
 					continue;
 				}
 				combinedPath += mpt::PathString::FromUnicode(path[singlepath]);
-				if(!mpt::FS::IsDirectory(combinedPath))
+				if(!mpt::native_fs{}.is_directory(combinedPath))
 				{
 					if(::CreateDirectory(combinedPath.AsNative().c_str(), nullptr) == 0)
 					{
@@ -577,7 +577,7 @@ ExecResult Context::ExecutePosixShellScript(std::string script, FlagSet<ExecFlag
 		return result;
 	}
 
-	while(!mpt::FS::IsFile(dirWindows + P_("done")))
+	while(!mpt::native_fs{}.is_file(dirWindows + P_("done")))
 	{ // wait
 		if(progressCancel(userdata) != ExecuteProgressContinueWaiting)
 		{
@@ -664,10 +664,10 @@ ExecResult Context::ExecutePosixShellScript(std::string script, FlagSet<ExecFlag
 				{
 					filename = path + filename;
 					filetree[filename.ToUTF8()] = std::vector<char>();
-					if(mpt::FS::IsDirectory(filename))
+					if(mpt::native_fs{}.is_directory(filename))
 					{
 						paths.push_back(filename);
-					} else if(mpt::FS::IsFile(filename))
+					} else if(mpt::native_fs{}.is_file(filename))
 					{
 						try
 						{
@@ -686,7 +686,7 @@ ExecResult Context::ExecutePosixShellScript(std::string script, FlagSet<ExecFlag
 		}
 	}
 
-	mpt::FS::DeleteDirectoryTree(dirWindows);
+	mpt::native_fs{}.delete_tree(dirWindows);
 
 	return result;
 

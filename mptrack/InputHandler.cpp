@@ -13,7 +13,7 @@
 #include "InputHandler.h"
 #include "resource.h"
 #include "Mainfrm.h"
-#include "../common/mptFS.h"
+#include "mpt/fs/fs.hpp"
 #include "../soundlib/MIDIEvents.h"
 
 
@@ -46,7 +46,7 @@ CInputHandler::CInputHandler(CWnd *mainframe)
 		if (bNoExistingKbdFileSetting)
 			TrackerSettings::Instance().m_szKbdFile = sDefaultPath;
 		bool bSuccess = false;
-		if (mpt::FS::IsFile(sDefaultPath))
+		if (mpt::native_fs{}.is_file(sDefaultPath))
 			bSuccess = m_activeCommandSet->LoadFile(sDefaultPath);
 		if (!bSuccess)
 		{

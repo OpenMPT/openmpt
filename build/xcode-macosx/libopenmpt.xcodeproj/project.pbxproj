@@ -69,7 +69,6 @@
 		7DDE7A6B76A93A1D011DA0AB /* SampleFormatMediaFoundation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D2D268330651A7A51E4B8673 /* SampleFormatMediaFoundation.cpp */; };
 		7FDA539F18273951466E39DF /* Load_it.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 62235C27A6720199E8993A67 /* Load_it.cpp */; };
 		80EEA677809189A9BAE63CB7 /* MIDIMacros.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 50FB747FA860E7715A6F02BF /* MIDIMacros.cpp */; };
-		82AC5AA466F362D6EAE090E4 /* mptFS.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1DF41B6C4ED8135E61F049AC /* mptFS.cpp */; };
 		8479AC1F9F461AD1A316B25F /* Load_digi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D14936A73E714519400434E7 /* Load_digi.cpp */; };
 		84A9E60B844CC93DBEA17C4B /* MixerLoops.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B810F0D30F7663C5C1847F13 /* MixerLoops.cpp */; };
 		8676CA3F6593E471419D407F /* Load_gt2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 10E0ADC7A36E77B90C471C07 /* Load_gt2.cpp */; };
@@ -247,7 +246,6 @@
 		1C2F81B7DEEFE2293C24BFF7 /* detect_arch.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = detect_arch.hpp; path = ../../src/mpt/base/detect_arch.hpp; sourceTree = "<group>"; };
 		1C6D52530D64C04579684093 /* SampleFormatOpus.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SampleFormatOpus.cpp; path = ../../soundlib/SampleFormatOpus.cpp; sourceTree = "<group>"; };
 		1CE2C4318A0AD2A38B9DC271 /* device.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = device.hpp; path = ../../src/mpt/random/device.hpp; sourceTree = "<group>"; };
-		1DF41B6C4ED8135E61F049AC /* mptFS.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = mptFS.cpp; path = ../../common/mptFS.cpp; sourceTree = "<group>"; };
 		1E7AA06D8BA2AEDF8D359EAD /* simple.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = simple.hpp; path = ../../src/mpt/format/simple.hpp; sourceTree = "<group>"; };
 		1F41A2D3B1CF6CC51AA81113 /* Load_s3m.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Load_s3m.cpp; path = ../../soundlib/Load_s3m.cpp; sourceTree = "<group>"; };
 		1F5AB80DB1E881FF1AC1264D /* WAVTools.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = WAVTools.cpp; path = ../../soundlib/WAVTools.cpp; sourceTree = "<group>"; };
@@ -334,7 +332,6 @@
 		5178AA15C29B4B077861F855 /* mfc.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = mfc.hpp; path = ../../src/mpt/detect/mfc.hpp; sourceTree = "<group>"; };
 		51E2F9635E6DABD5D95277A3 /* SoundFilePlayConfig.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SoundFilePlayConfig.h; path = ../../soundlib/SoundFilePlayConfig.h; sourceTree = "<group>"; };
 		51EB7985F3D51577EAFC27C5 /* base64url.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = base64url.hpp; path = ../../src/mpt/binary/base64url.hpp; sourceTree = "<group>"; };
-		536E6FF683003EE85E0D7E36 /* mptFS.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = mptFS.h; path = ../../common/mptFS.h; sourceTree = "<group>"; };
 		54393E69E6C7085B4F9FACA9 /* Load_uax.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Load_uax.cpp; path = ../../soundlib/Load_uax.cpp; sourceTree = "<group>"; };
 		54F2D0191B80C78B8982EE59 /* algorithm.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = algorithm.hpp; path = ../../src/mpt/base/algorithm.hpp; sourceTree = "<group>"; };
 		55356226EAAC215859487866 /* span.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = span.hpp; path = ../../src/mpt/audio/span.hpp; sourceTree = "<group>"; };
@@ -1005,8 +1002,6 @@
 				F78A378464B245F6664535C4 /* mptBaseTypes.h */,
 				12DCF57C800503EE8197F3BC /* mptBaseUtils.h */,
 				BA99A2F415DAF666E9354134 /* mptCPU.h */,
-				1DF41B6C4ED8135E61F049AC /* mptFS.cpp */,
-				536E6FF683003EE85E0D7E36 /* mptFS.h */,
 				13F63AEAA68404DC0F5CA92A /* mptFileIO.cpp */,
 				50CF7EB4C1F21FA677B8CCF4 /* mptFileIO.h */,
 				FF7F8F60F37ED8D27869EDA0 /* mptFileTemporary.cpp */,
@@ -1503,7 +1498,6 @@
 				B591ED4C6887F6FEB9AA538C /* ComponentManager.cpp in Sources */,
 				527E833E969254708A63D97E /* Logging.cpp in Sources */,
 				1CE1B0B6B52E9668E37596F6 /* Profiler.cpp in Sources */,
-				82AC5AA466F362D6EAE090E4 /* mptFS.cpp in Sources */,
 				1CD4D902FBF1F334D7FB4F42 /* mptFileIO.cpp in Sources */,
 				BB65D2D86E5BDC8ABF7E3918 /* mptFileTemporary.cpp in Sources */,
 				1F7082161F13654859681856 /* mptFileType.cpp in Sources */,

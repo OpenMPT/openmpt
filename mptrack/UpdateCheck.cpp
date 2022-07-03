@@ -30,6 +30,7 @@
 #include "Moddoc.h"
 #include "mpt/io/io.hpp"
 #include "mpt/io/io_stdstream.hpp"
+#include "mpt/fs/fs.hpp"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -732,13 +733,13 @@ void CUpdateCheck::CleanOldUpdates(const CUpdateCheck::Settings & /* settings */
 	{
 		return;
 	}
-	if(!mpt::FS::IsDirectory(dirTemp))
+	if(!mpt::native_fs{}.is_directory(dirTemp))
 	{
 		return;
 	}
 	mpt::PathString dirTempOpenMPT = dirTemp + P_("OpenMPT") + mpt::PathString::FromNative(mpt::RawPathString(1, mpt::PathString::GetDefaultPathSeparator()));
 	mpt::PathString dirTempOpenMPTUpdates = dirTempOpenMPT + P_("Updates") + mpt::PathString::FromNative(mpt::RawPathString(1, mpt::PathString::GetDefaultPathSeparator()));
-	mpt::FS::DeleteDirectoryTree(dirTempOpenMPTUpdates);
+	mpt::native_fs{}.delete_tree(dirTempOpenMPTUpdates);
 }
 
 

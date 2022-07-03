@@ -40,7 +40,7 @@
 #include "PatternClipboard.h"
 #include "PatternFont.h"
 #include "../common/mptFileIO.h"
-#include "../common/mptFS.h"
+#include "mpt/fs/fs.hpp"
 #include "../common/FileReader.h"
 #include "../common/Profiler.h"
 #include "../soundlib/plugins/PlugInterface.h"
@@ -434,7 +434,7 @@ void CMainFrame::OnDropFiles(HDROP hDropInfo)
 			const mpt::PathString file = mpt::PathString::FromNative(fileName.data());
 #ifdef MPT_BUILD_DEBUG
 			// Debug Hack: Quickly scan a folder containing module files (without running out of window handles ;)
-			if(m_InputHandler->CtrlPressed() && m_InputHandler->AltPressed() && m_InputHandler->ShiftPressed() && mpt::FS::IsDirectory(file))
+			if(m_InputHandler->CtrlPressed() && m_InputHandler->AltPressed() && m_InputHandler->ShiftPressed() && mpt::native_fs{}.is_directory(file))
 			{
 				FolderScanner scanner(file, FolderScanner::kOnlyFiles | FolderScanner::kFindInSubDirectories);
 				mpt::PathString scanName;
@@ -2229,7 +2229,7 @@ void CMainFrame::OpenMenuItemFile(const UINT nId, const bool isTemplateFile)
 	if (nIndex < vecFilePaths.size())
 	{
 		const mpt::PathString& sPath = vecFilePaths[nIndex];
-		const bool bExists = mpt::FS::IsFile(sPath);
+		const bool bExists = mpt::native_fs{}.is_file(sPath);
 		CDocument *pDoc = nullptr;
 		if(bExists)
 		{
@@ -2919,7 +2919,7 @@ HMENU CMainFrame::CreateFileMenu(const size_t maxCount, std::vector<mpt::PathStr
 			mpt::PathString basePath;
 			basePath = (i == 0) ? theApp.GetInstallPath() : theApp.GetConfigPath();
 			basePath += folderName;
-			if(!mpt::FS::IsDirectory(basePath))
+			if(!mpt::native_fs{}.is_directory(basePath))
 				continue;
 
 			FolderScanner scanner(basePath, FolderScanner::kOnlyFiles);

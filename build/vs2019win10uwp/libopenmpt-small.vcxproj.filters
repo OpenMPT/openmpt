@@ -189,9 +189,6 @@
     <ClInclude Include="..\..\common\mptCPU.h">
       <Filter>common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\common\mptFS.h">
-      <Filter>common</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\common\mptFileIO.h">
       <Filter>common</Filter>
     </ClInclude>
@@ -1002,9 +999,6 @@
       <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\common\Profiler.cpp">
-      <Filter>common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\common\mptFS.cpp">
       <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\common\mptFileIO.cpp">

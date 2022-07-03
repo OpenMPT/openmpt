@@ -40,7 +40,7 @@
 #include "../common/mptFileTemporary.h"
 #include "../common/mptFileIO.h"
 #include <sstream>
-#include "../common/mptFS.h"
+#include "mpt/fs/fs.hpp"
 #include "../common/FileReader.h"
 #include "FileDialog.h"
 #include "ExternalSamples.h"
@@ -522,10 +522,10 @@ BOOL CModDoc::DoSave(const mpt::PathString &filename, bool setPath)
 	if((TrackerSettings::Instance().CreateBackupFiles)
 		&& (IsModified()) && (!mpt::PathCompareNoCase(saveFileName, docFileName)))
 	{
-		if(mpt::FS::IsFile(saveFileName))
+		if(mpt::native_fs{}.is_file(saveFileName))
 		{
 			mpt::PathString backupFileName = saveFileName.ReplaceExtension(P_(".bak"));
-			if(mpt::FS::IsFile(backupFileName))
+			if(mpt::native_fs{}.is_file(backupFileName))
 			{
 				DeleteFile(backupFileName.AsNative().c_str());
 			}
@@ -3075,7 +3075,7 @@ void CModDoc::OnSaveTemplateModule()
 {
 	// Create template folder if doesn't exist already.
 	const mpt::PathString templateFolder = TrackerSettings::Instance().PathUserTemplates.GetDefaultDir();
-	if (!mpt::FS::IsDirectory(templateFolder))
+	if (!mpt::native_fs{}.is_directory(templateFolder))
 	{
 		if (!CreateDirectory(templateFolder.AsNative().c_str(), nullptr))
 		{
@@ -3090,7 +3090,7 @@ void CModDoc::OnSaveTemplateModule()
 	{
 		sName += P_("newTemplate") + mpt::PathString::FromUnicode(mpt::ufmt::val(i));
 		sName += P_(".") + mpt::PathString::FromUnicode(m_SndFile.GetModSpecifications().GetFileExtension());
-		if (!mpt::FS::PathExists(templateFolder + sName))
+		if (!mpt::native_fs{}.exists(templateFolder + sName))
 			break;
 	}
 

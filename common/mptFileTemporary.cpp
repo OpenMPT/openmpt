@@ -12,11 +12,11 @@
 
 #ifdef MODPLUG_TRACKER
 #include "mpt/fs/common_directories.hpp"
+#include "mpt/fs/fs.hpp"
 #endif // MODPLUG_TRACKER
 #include "mpt/string_transcode/transcode.hpp"
 #include "mpt/uuid/uuid.hpp"
 
-#include "mptFS.h"
 #include "mptRandom.h"
 
 #if MPT_OS_WINDOWS
@@ -91,7 +91,7 @@ TempDirGuard::~TempDirGuard()
 {
 	if(!dirname.empty())
 	{
-		mpt::FS::DeleteDirectoryTree(dirname);
+		mpt::native_fs{}.delete_tree(dirname);
 	}
 }
 

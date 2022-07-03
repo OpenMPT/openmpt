@@ -23,7 +23,7 @@
 #include "../../mptrack/FileDialog.h"
 #include "../../mptrack/VstPresets.h"
 #include "../../common/mptFileIO.h"
-#include "../../common/mptFS.h"
+#include "mpt/fs/fs.hpp"
 #include "../mod_specifications.h"
 #endif // MODPLUG_TRACKER
 #include "../../soundlib/AudioCriticalSection.h"
@@ -631,7 +631,7 @@ bool IMixPlugin::SaveProgram()
 {
 	mpt::PathString defaultDir = TrackerSettings::Instance().PathPluginPresets.GetWorkingDir();
 	const bool useDefaultDir = !defaultDir.empty();
-	if(!useDefaultDir && mpt::FS::IsFile(m_Factory.dllPath))
+	if(!useDefaultDir && mpt::native_fs{}.is_file(m_Factory.dllPath))
 	{
 		defaultDir = m_Factory.dllPath.GetDirectoryWithDrive();
 	}
@@ -674,7 +674,7 @@ bool IMixPlugin::LoadProgram(mpt::PathString fileName)
 {
 	mpt::PathString defaultDir = TrackerSettings::Instance().PathPluginPresets.GetWorkingDir();
 	bool useDefaultDir = !defaultDir.empty();
-	if(!useDefaultDir && mpt::FS::IsFile(m_Factory.dllPath))
+	if(!useDefaultDir && mpt::native_fs{}.is_file(m_Factory.dllPath))
 	{
 		defaultDir = m_Factory.dllPath.GetDirectoryWithDrive();
 	}

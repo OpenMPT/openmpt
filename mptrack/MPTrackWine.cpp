@@ -24,7 +24,7 @@
 #include "TrackerSettings.h"
 #include "../common/ComponentManager.h"
 #include "../common/mptFileIO.h"
-#include "../common/mptFS.h"
+#include "mpt/fs/fs.hpp"
 #include "../misc/mptOS.h"
 #include "mpt/crc/crc.hpp"
 #include "../common/FileReader.h"
@@ -309,7 +309,7 @@ void Initialize()
 			std::string Host_Native_OpenMPT_Wine_WineVersion_OpenMPTVersion;
 			static void CreatePath(mpt::PathString path)
 			{
-				if(mpt::FS::IsDirectory(path))
+				if(mpt::native_fs{}.is_directory(path))
 				{
 					return;
 				}
@@ -353,7 +353,7 @@ void Initialize()
 
 		if(!TrackerSettings::Instance().WineSupportAlwaysRecompile)
 		{
-			if(mpt::FS::IsFile(paths.AppData_Wine_WineVersion_OpenMPTVersion.WithTrailingSlash() + P_("success.txt")))
+			if(mpt::native_fs{}.is_file(paths.AppData_Wine_WineVersion_OpenMPTVersion.WithTrailingSlash() + P_("success.txt")))
 			{
 				theApp.SetWineWrapperDllFilename(paths.AppData_Wine_WineVersion_OpenMPTVersion.WithTrailingSlash() + P_("openmpt_wine_wrapper.dll"));
 				return;

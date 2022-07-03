@@ -13,7 +13,7 @@
 #include "PathConfigDlg.h"
 #include "FileDialog.h"
 #include "Mainfrm.h"
-#include "../common/mptFS.h"
+#include "mpt/fs/fs.hpp"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -180,7 +180,7 @@ BOOL PathConfigDlg::OnKillActive()
 {
 	mpt::PathString path = GetPath(IDC_AUTOSAVE_PATH);
 
-	if (!mpt::FS::IsDirectory(path) && IsDlgButtonChecked(IDC_AUTOSAVE_ENABLE) && !IsDlgButtonChecked(IDC_AUTOSAVE_USEORIGDIR))
+	if (!mpt::native_fs{}.is_directory(path) && IsDlgButtonChecked(IDC_AUTOSAVE_ENABLE) && !IsDlgButtonChecked(IDC_AUTOSAVE_USEORIGDIR))
 	{
 		Reporting::Error("Backup path does not exist.");
 		GetDlgItem(IDC_AUTOSAVE_PATH)->SetFocus();

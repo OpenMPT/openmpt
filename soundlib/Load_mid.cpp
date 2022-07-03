@@ -17,7 +17,7 @@
 #include "../mptrack/Moddoc.h"
 #include "../mptrack/Mptrack.h"
 #include "../common/mptFileIO.h"
-#include "../common/mptFS.h"
+#include "mpt/fs/fs.hpp"
 #endif // MODPLUG_TRACKER
 
 OPENMPT_NAMESPACE_BEGIN
@@ -1314,7 +1314,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 		for(const auto &ext : { P_(".sf2"), P_(".sf3"), P_(".sf4"), P_(".sbk"), P_(".dls") })
 		{
 			mpt::PathString filename = file.GetOptionalFileName().value_or(P_("")).ReplaceExtension(ext);
-			if(mpt::FS::IsFile(filename))
+			if(mpt::native_fs{}.is_file(filename))
 			{
 				embeddedBank = std::make_unique<CDLSBank>();
 				if(embeddedBank->Open(filename))

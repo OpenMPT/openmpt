@@ -15,7 +15,6 @@
 #include "ModDocTemplate.h"
 #include "Reporting.h"
 #include "SelectPluginDialog.h"
-#include "../common/mptFS.h"
 #include "../soundlib/plugins/PluginManager.h"
 
 OPENMPT_NAMESPACE_BEGIN
@@ -117,7 +116,7 @@ CDocument *CModDocManager::OpenDocumentFile(LPCTSTR lpszFileName, BOOL bAddToMRU
 {
 	const mpt::PathString filename = (lpszFileName ? mpt::PathString::FromCString(lpszFileName) : mpt::PathString());
 
-	if(mpt::FS::IsDirectory(filename))
+	if(mpt::native_fs{}.is_directory(filename))
 	{
 		FolderScanner scanner(filename, FolderScanner::kOnlyFiles | FolderScanner::kFindInSubDirectories);
 		mpt::PathString file;
@@ -147,7 +146,7 @@ CDocument *CModDocManager::OpenDocumentFile(LPCTSTR lpszFileName, BOOL bAddToMRU
 	CDocument *pDoc = CDocManager::OpenDocumentFile(lpszFileName, bAddToMRU);
 	if(pDoc == nullptr && !filename.empty())
 	{
-		if(!mpt::FS::IsFile(filename))
+		if(!mpt::native_fs{}.is_file(filename))
 		{
 			Reporting::Error(MPT_CFORMAT("Unable to open \"{}\": file does not exist.")(filename.ToCString()));
 			theApp.RemoveMruItem(filename);

@@ -47,7 +47,7 @@
 #include "../../mptrack/Vstplug.h"
 #include "../../pluginBridge/BridgeWrapper.h"
 #ifdef MODPLUG_TRACKER
-#include "../../common/mptFS.h"
+#include "mpt/fs/fs.hpp"
 #endif // MODPLUG_TRACKER
 #endif // MPT_WITH_VST
 
@@ -544,7 +544,7 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 
 	if(fileFound != nullptr)
 	{
-		*fileFound = mpt::FS::IsFile(dllPath);
+		*fileFound = mpt::native_fs{}.is_file(dllPath);
 	}
 
 	// Look if the plugin info is stored in the PluginCache
@@ -765,7 +765,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 				if(!fullPath.empty())
 				{
 					fullPath = theApp.PathInstallRelativeToAbsolute(fullPath);
-					if(mpt::FS::IsFile(fullPath))
+					if(mpt::native_fs{}.is_file(fullPath))
 					{
 						pFound = AddPlugin(fullPath, maskCrashes);
 					}

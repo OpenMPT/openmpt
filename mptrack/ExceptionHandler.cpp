@@ -21,6 +21,7 @@
 #include "../common/version.h"
 #include "../common/mptFileIO.h"
 #include "mpt/fs/common_directories.hpp"
+#include "mpt/fs/fs.hpp"
 #include "../soundlib/mod_specifications.h"
 
 #include <atomic>
@@ -127,7 +128,7 @@ struct CrashOutputDirectory
 		const mpt::PathString timestampDir = mpt::PathString::FromCString((CTime::GetCurrentTime()).Format(_T("%Y-%m-%d %H.%M.%S\\")));
 		// Create a crash directory
 		path = mpt::common_directories::get_temp_directory() + P_("OpenMPT Crash Files\\");
-		if(!mpt::FS::IsDirectory(path))
+		if(!mpt::native_fs{}.is_directory(path))
 		{
 			CreateDirectory(path.AsNative().c_str(), nullptr);
 		}
@@ -138,7 +139,7 @@ struct CrashOutputDirectory
 		SetFilesystemCompression(path);
 		// Compression will be inherited by children directories and files automatically.
 		path += timestampDir;
-		if(!mpt::FS::IsDirectory(path))
+		if(!mpt::native_fs{}.is_directory(path))
 		{
 			if(!CreateDirectory(path.AsNative().c_str(), nullptr))
 			{
