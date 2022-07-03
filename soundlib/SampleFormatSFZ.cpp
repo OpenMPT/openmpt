@@ -15,7 +15,9 @@
 #endif // MODPLUG_TRACKER
 #ifndef MODPLUG_NO_FILESAVE
 #include "../common/mptFileIO.h"
+#ifdef MODPLUG_TRACKER
 #include "mpt/fs/fs.hpp"
+#endif // MODPLUG_TRACKER
 #endif // !MODPLUG_NO_FILESAVE
 #include "modsmp_ctrl.h"
 #include "mpt/base/numbers.hpp"
