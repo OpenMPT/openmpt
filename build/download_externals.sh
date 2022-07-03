@@ -115,6 +115,6 @@ download_and_unpack_zip "cwsdpmi"   "https://lib.openmpt.org/files/libopenmpt/co
 download                            "https://lib.openmpt.org/files/libopenmpt/contrib/djgpp/cwsdpmi/csdpmi7s.zip" "build/externals/csdpmi7s.zip"
 #download_and_unpack_zip "cwsdpmi"   "https://djgpp.mirror.garr.it/current/v2misc/csdpmi7b.zip" "build/externals/csdpmi7b.zip" "."
 #download                            "https://djgpp.mirror.garr.it/current/v2misc/csdpmi7s.zip" "build/externals/csdpmi7s.zip"
-download_and_unpack_7z  "winamp" "http://download.nullsoft.com/winamp/plugin-dev/WA5.55_SDK.exe" "build/externals/WA5.55_SDK.exe" "."
+download_and_unpack_7z  "winamp" "https://web.archive.org/web/20131217072017if_/http://download.nullsoft.com/winamp/plugin-dev/WA5.55_SDK.exe" "build/externals/WA5.55_SDK.exe" "."
 ln -s OUT.H include/winamp/Winamp/out.h
 download_and_unpack_zip "xmplay" "https://www.un4seen.com/files/xmp-sdk.zip"                     "build/externals/xmp-sdk.zip"    "."
