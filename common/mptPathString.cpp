@@ -144,11 +144,6 @@ mpt::PathString GetAbsolutePath(const mpt::PathString &path)
 
 
 
-mpt::PathString SanitizePathComponent(const mpt::PathString &filename)
-{
-	return filename.AsSanitizedComponent();
-}
-
 mpt::ustring SanitizePathComponent(mpt::ustring str)
 {
 	return mpt::PathString::FromUnicode(str).AsSanitizedComponent().ToUnicode();

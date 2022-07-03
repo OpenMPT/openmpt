@@ -115,8 +115,6 @@ int PathCompareNoCase(const PathString &a, const PathString &b);
 
 // Sanitize a filename (remove special chars)
 
-mpt::PathString SanitizePathComponent(const mpt::PathString &filename);
-
 mpt::ustring SanitizePathComponent(mpt::ustring str);
 
 #if defined(MPT_WITH_MFC)

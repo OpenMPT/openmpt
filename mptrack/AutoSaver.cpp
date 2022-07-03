@@ -126,7 +126,7 @@ mpt::PathString CAutoSaver::GetBasePath(const CModDoc &modDoc, bool createPath) 
 
 mpt::PathString CAutoSaver::GetBaseName(const CModDoc &modDoc) const
 {
-	return mpt::PathString::FromCString(SanitizePathComponent(modDoc.GetTitle()));
+	return mpt::PathString::FromCString(modDoc.GetTitle()).AsSanitizedComponent();
 }
 
 

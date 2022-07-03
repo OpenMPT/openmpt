@@ -1433,7 +1433,7 @@ void CCtrlSamples::SaveSample(bool doBatchSave)
 		else
 			fileName += P_("%sample_filename%");
 	}
-	fileName = SanitizePathComponent(fileName);
+	fileName = fileName.AsSanitizedComponent();
 
 	int filter;
 	switch(defaultFormat)

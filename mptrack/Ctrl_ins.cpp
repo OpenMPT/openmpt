@@ -2063,7 +2063,7 @@ void CCtrlInstruments::SaveInstrument(bool doBatchSave)
 			fileName += P_("%instrument_filename%");
 
 	}
-	fileName = SanitizePathComponent(fileName);
+	fileName = fileName.AsSanitizedComponent();
 
 	int index;
 	if(TrackerSettings::Instance().compressITI)

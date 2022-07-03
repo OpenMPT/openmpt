@@ -656,9 +656,7 @@ void CTuningDialog::OnBnClickedButtonExport()
 		}
 		if(!m_TuningCollectionsNames[pTC].IsEmpty())
 		{
-			mpt::PathString name = mpt::PathString::FromUnicode(mpt::ToUnicode(m_TuningCollectionsNames[pTC]));
-			name = SanitizePathComponent(name);
-			fileName += name + P_(" - ");
+			fileName += mpt::PathString::FromUnicode(mpt::ToUnicode(m_TuningCollectionsNames[pTC])).AsSanitizedComponent() + P_(" - ");
 		}
 		fileName += P_("%tuning_number% - %tuning_name%");
 
