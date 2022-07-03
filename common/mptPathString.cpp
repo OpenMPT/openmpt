@@ -144,52 +144,20 @@ mpt::PathString GetAbsolutePath(const mpt::PathString &path)
 
 
 
-template <typename Tchar>
-static inline Tchar SanitizePathComponentChar(Tchar c)
-{
-	using namespace mpt::path_literals;
-	if(	c == L<Tchar>('\\') ||
-		c == L<Tchar>('\"') ||
-		c == L<Tchar>('/') ||
-		c == L<Tchar>(':') ||
-		c == L<Tchar>('?') ||
-		c == L<Tchar>('<') ||
-		c == L<Tchar>('>') ||
-		c == L<Tchar>('|') ||
-		c == L<Tchar>('*'))
-	{
-		c = L<Tchar>('_');
-	}
-	return c;
-}
-
 mpt::PathString SanitizePathComponent(const mpt::PathString &filename)
 {
-	mpt::RawPathString tmp = filename.AsNative();
-	for(auto &c : tmp)
-	{
-		c = SanitizePathComponentChar(c);
-	}
-	return mpt::PathString::FromNative(tmp);
+	return filename.AsSanitizedComponent();
 }
 
 mpt::ustring SanitizePathComponent(mpt::ustring str)
 {
-	for(size_t i = 0; i < str.length(); i++)
-	{
-		str[i] = SanitizePathComponentChar(str[i]);
-	}
-	return str;
+	return mpt::PathString::FromUnicode(str).AsSanitizedComponent().ToUnicode();
 }
 
 #if defined(MPT_WITH_MFC)
 CString SanitizePathComponent(CString str)
 {
-	for(int i = 0; i < str.GetLength(); i++)
-	{
-		str.SetAt(i, SanitizePathComponentChar(str.GetAt(i)));
-	}
-	return str;
+	return mpt::PathString::FromCString(str).AsSanitizedComponent().ToCString();
 }
 #endif // MPT_WITH_MFC
 
