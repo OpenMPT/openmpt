@@ -144,58 +144,24 @@ mpt::PathString GetAbsolutePath(const mpt::PathString &path)
 
 
 
-static inline char SanitizePathComponentChar(char c)
+template <typename Tchar>
+static inline Tchar SanitizePathComponentChar(Tchar c)
 {
-	if(	c == '\\' ||
-		c == '\"' ||
-		c == '/'  ||
-		c == ':'  ||
-		c == '?'  ||
-		c == '<'  ||
-		c == '>'  ||
-		c == '|'  ||
-		c == '*')
+	using namespace mpt::path_literals;
+	if(	c == L<Tchar>('\\') ||
+		c == L<Tchar>('\"') ||
+		c == L<Tchar>('/') ||
+		c == L<Tchar>(':') ||
+		c == L<Tchar>('?') ||
+		c == L<Tchar>('<') ||
+		c == L<Tchar>('>') ||
+		c == L<Tchar>('|') ||
+		c == L<Tchar>('*'))
 	{
-		c = '_';
+		c = L<Tchar>('_');
 	}
 	return c;
 }
-
-static inline wchar_t SanitizePathComponentChar(wchar_t c)
-{
-	if(	c == L'\\' ||
-		c == L'\"' ||
-		c == L'/'  ||
-		c == L':'  ||
-		c == L'?'  ||
-		c == L'<'  ||
-		c == L'>'  ||
-		c == L'|'  ||
-		c == L'*')
-	{
-		c = L'_';
-	}
-	return c;
-}
-
-#if MPT_CXX_AT_LEAST(20)
-static inline char8_t SanitizePathComponentChar(char8_t c)
-{
-	if(	c == u8'\\' ||
-		c == u8'\"' ||
-		c == u8'/'  ||
-		c == u8':'  ||
-		c == u8'?'  ||
-		c == u8'<'  ||
-		c == u8'>'  ||
-		c == u8'|'  ||
-		c == u8'*')
-	{
-		c = u8'_';
-	}
-	return c;
-}
-#endif
 
 mpt::PathString SanitizePathComponent(const mpt::PathString &filename)
 {
