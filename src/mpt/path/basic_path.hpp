@@ -474,6 +474,41 @@ struct PathTraits {
 
 
 
+	static bool IsValidComponentChar(char_type c) {
+		using namespace path_literals;
+		bool result = true;
+		if constexpr ((path_style == PathStyle::WindowsNT) || (path_style == PathStyle::Windows9x) || (path_style == PathStyle::DOS_DJGPP)) {
+			if(	c == L<char_type>('\\') ||
+				c == L<char_type>('\"') ||
+				c == L<char_type>('/') ||
+				c == L<char_type>(':') ||
+				c == L<char_type>('?') ||
+				c == L<char_type>('<') ||
+				c == L<char_type>('>') ||
+				c == L<char_type>('|') ||
+				c == L<char_type>('*'))
+			{
+				result = false;
+			} else {
+				result = true;
+			}
+		} else if constexpr (path_style == PathStyle::Posix) {
+			result = (c != L<char_type>('/'));
+		} else {
+			// nothing
+		}
+		return result;
+	}
+
+
+
+	static char_type InvalidComponentCharReplacement() {
+		using namespace path_literals;
+		return L<char_type>('_');
+	}
+
+
+
 	static void SplitPath(raw_path_type p, raw_path_type * prefix, raw_path_type * drive, raw_path_type * dir, raw_path_type * fbase, raw_path_type * fext) {
 
 		using namespace path_literals;
@@ -964,6 +999,16 @@ public:
 		}
 		char_type c = path[path.length() - 1];
 		return IsPathSeparator(c);
+	}
+
+	BasicPathString AsSanitizedComponent() const {
+		BasicPathString result = *this;
+		for (auto & c : result.path) {
+			if (!path_traits::IsValidComponentChar(c)) {
+				c = path_traits::InvalidComponentCharReplacement();
+			}
+		}
+		return result;
 	}
 
 	BasicPathString WithoutTrailingSlash() const {
