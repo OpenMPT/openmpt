@@ -55,6 +55,20 @@ struct literals<char> {
 			return '.';
 		if (c == ':')
 			return ':';
+		if (c == '?')
+			return '?';
+		if (c == '*')
+			return '*';
+		if (c == '|')
+			return '|';
+		if (c == '<')
+			return '<';
+		if (c == '>')
+			return '>';
+		if (c == '\"')
+			return '\"';
+		if (c == '_')
+			return '_';
 #if defined(MPT_COMPILER_QUIRK_NO_CONSTEXPR_THROW)
 		else
 			return false ? 0 : throw std::domain_error("invalid path literal");
@@ -116,6 +130,20 @@ struct literals<wchar_t> {
 			return L'.';
 		if (c == ':')
 			return L':';
+		if (c == '?')
+			return L'?';
+		if (c == '*')
+			return L'*';
+		if (c == '|')
+			return L'|';
+		if (c == '<')
+			return L'<';
+		if (c == '>')
+			return L'>';
+		if (c == '\"')
+			return L'\"';
+		if (c == '_')
+			return L'_';
 #if defined(MPT_COMPILER_QUIRK_NO_CONSTEXPR_THROW)
 		else
 			return false ? 0 : throw std::domain_error("invalid path literal");
@@ -178,6 +206,20 @@ struct literals<char8_t> {
 			return u8'.';
 		if (c == ':')
 			return u8':';
+		if (c == '?')
+			return u8'?';
+		if (c == '*')
+			return u8'*';
+		if (c == '|')
+			return u8'|';
+		if (c == '<')
+			return u8'<';
+		if (c == '>')
+			return u8'>';
+		if (c == '\"')
+			return u8'\"';
+		if (c == '_')
+			return u8'_';
 #if defined(MPT_COMPILER_QUIRK_NO_CONSTEXPR_THROW)
 		else
 			return false ? 0 : throw std::domain_error("invalid path literal");
@@ -239,6 +281,20 @@ struct literals<char16_t> {
 			return u'.';
 		if (c == ':')
 			return u':';
+		if (c == '?')
+			return u'?';
+		if (c == '*')
+			return u'*';
+		if (c == '|')
+			return u'|';
+		if (c == '<')
+			return u'<';
+		if (c == '>')
+			return u'>';
+		if (c == '\"')
+			return u'\"';
+		if (c == '_')
+			return u'_';
 #if defined(MPT_COMPILER_QUIRK_NO_CONSTEXPR_THROW)
 		else
 			return false ? 0 : throw std::domain_error("invalid path literal");
@@ -299,6 +355,20 @@ struct literals<char32_t> {
 			return U'.';
 		if (c == ':')
 			return U':';
+		if (c == '?')
+			return U'?';
+		if (c == '*')
+			return U'*';
+		if (c == '|')
+			return U'|';
+		if (c == '<')
+			return U'<';
+		if (c == '>')
+			return U'>';
+		if (c == '\"')
+			return U'\"';
+		if (c == '_')
+			return U'_';
 #if defined(MPT_COMPILER_QUIRK_NO_CONSTEXPR_THROW)
 		else
 			return false ? 0 : throw std::domain_error("invalid path literal");
