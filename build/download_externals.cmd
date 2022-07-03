@@ -69,7 +69,7 @@ goto error
 :main
 if not exist "build\externals" mkdir "build\externals"
 
-call :download_and_unpack "winamp"    "http://download.nullsoft.com/winamp/plugin-dev/WA5.55_SDK.exe"              "WA5.55_SDK.exe"                     "."                "-" || goto error
+call :download_and_unpack "winamp"    "https://web.archive.org/web/20131217072017if_/http://download.nullsoft.com/winamp/plugin-dev/WA5.55_SDK.exe" "WA5.55_SDK.exe"                     "."                "-" || goto error
 
 call :download_and_unpack "xmplay"    "https://www.un4seen.com/files/xmp-sdk.zip"                                  "xmp-sdk.zip"                        "."                "-" || goto error
 
