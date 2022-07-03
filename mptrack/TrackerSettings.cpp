@@ -29,7 +29,7 @@
 #include "../soundlib/mod_specifications.h"
 #include "../soundlib/Tables.h"
 #include "../common/mptFileIO.h"
-#include "../common/mptFS.h"
+#include "mpt/fs/common_directories.hpp"
 #include "../soundlib/tuningcollection.h"
 #include "TuningDialog.h"
 
@@ -299,7 +299,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, AutosaveIntervalMinutes(conf, U_("AutoSave"), U_("IntervalMinutes"), 10)
 	, AutosaveHistoryDepth(conf, U_("AutoSave"), U_("BackupHistory"), 3)
 	, AutosaveUseOriginalPath(conf, U_("AutoSave"), U_("UseOriginalPath"), true)
-	, AutosavePath(conf, U_("AutoSave"), U_("Path"), mpt::GetTempDirectory())
+	, AutosavePath(conf, U_("AutoSave"), U_("Path"), mpt::common_directories::get_temp_directory())
 	// Paths
 	, PathSongs(conf, U_("Paths"), U_("Songs_Directory"), mpt::PathString())
 	, PathSamples(conf, U_("Paths"), U_("Samples_Directory"), mpt::PathString())

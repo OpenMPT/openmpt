@@ -71,32 +71,6 @@ bool DeleteDirectoryTree(mpt::PathString path)
 
 
 
-mpt::PathString GetExecutableDirectory()
-{
-	return mpt::fs<mpt::PathString>{}.get_application_directory();
-}
-
-
-
-#if !MPT_OS_WINDOWS_WINRT
-
-mpt::PathString GetSystemDirectory()
-{
-	return mpt::fs<mpt::PathString>{}.get_system_directory();
-}
-
-#endif // !MPT_OS_WINDOWS_WINRT
-
-
-
-mpt::PathString GetTempDirectory()
-{
-	return mpt::fs<mpt::PathString>{}.get_temp_directory();
-}
-
-
-
-
 #else
 MPT_MSVC_WORKAROUND_LNK4221(mptFS)
 #endif // MODPLUG_TRACKER && MPT_OS_WINDOWS

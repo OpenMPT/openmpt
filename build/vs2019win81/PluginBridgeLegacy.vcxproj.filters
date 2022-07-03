@@ -444,6 +444,9 @@
     <ClInclude Include="..\..\src\mpt\format\tests\tests_format_simple.hpp">
       <Filter>src\mpt\format\tests</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\mpt\fs\common_directories.hpp">
+      <Filter>src\mpt\fs</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\mpt\fs\fs.hpp">
       <Filter>src\mpt\fs</Filter>
     </ClInclude>

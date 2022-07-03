@@ -52,19 +52,6 @@ namespace FS
 
 
 
-// Returns the application executable path or an empty string (if unknown), e.g. "C:\mptrack\"
-mpt::PathString GetExecutableDirectory();
-
-#if !MPT_OS_WINDOWS_WINRT
-// Returns the system directory path, e.g. "C:\Windows\System32\"
-mpt::PathString GetSystemDirectory();
-#endif // !MPT_OS_WINDOWS_WINRT
-
-// Returns temporary directory (with trailing backslash added) (e.g. "C:\TEMP\")
-mpt::PathString GetTempDirectory();
-
-
-
 #endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
 
 

@@ -11,6 +11,7 @@
 #include "stdafx.h"
 #include "mptLibrary.h"
 
+#include "mpt/fs/common_directories.hpp"
 #include "mpt/library/library.hpp"
 
 #include "../common/mptFS.h"
@@ -60,9 +61,9 @@ private:
 // Just rely on the default search path here.
 #if MPT_OS_WINDOWS && defined(MODPLUG_TRACKER)
 		case LibrarySearchPath::Application:
-			if (!mpt::GetExecutableDirectory().empty()) {
+			if (!mpt::common_directories::get_application_directory().empty()) {
 				result.search = mpt::library::path_search::unsafe;
-				result.filename = mpt::GetExecutableDirectory().WithTrailingSlash() + path.GetFileName();
+				result.filename = mpt::common_directories::get_application_directory().WithTrailingSlash() + path.GetFileName();
 			} else {
 				result.search = mpt::library::path_search::invalid;
 				result.filename = path.GetFileName();

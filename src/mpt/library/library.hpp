@@ -11,6 +11,7 @@
 #include "mpt/base/saturate_cast.hpp"
 #include "mpt/detect/dl.hpp"
 #include "mpt/detect/ltdl.hpp"
+#include "mpt/fs/common_directories.hpp"
 #include "mpt/fs/fs.hpp"
 #include "mpt/osinfo/windows_version.hpp"
 #include "mpt/path/native_path.hpp"
@@ -275,7 +276,7 @@ public:
 					break;
 				case library::path_search::system:
 					{
-						mpt::native_path system_path = mpt::fs<mpt::native_path>{}.get_system_directory();
+						mpt::native_path system_path = mpt::common_directories::get_system_directory();
 						if (system_path.empty()) {
 							hModule = NULL;
 						} else {
@@ -285,7 +286,7 @@ public:
 					break;
 				case library::path_search::application:
 					{
-						mpt::native_path application_path = mpt::fs<mpt::native_path>{}.get_application_directory();
+						mpt::native_path application_path = mpt::common_directories::get_application_directory();
 						if (application_path.empty()) {
 							hModule = NULL;
 						} else {

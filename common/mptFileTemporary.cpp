@@ -10,6 +10,9 @@
 #include "stdafx.h"
 #include "mptFileTemporary.h"
 
+#ifdef MODPLUG_TRACKER
+#include "mpt/fs/common_directories.hpp"
+#endif // MODPLUG_TRACKER
 #include "mpt/string_transcode/transcode.hpp"
 #include "mpt/uuid/uuid.hpp"
 
@@ -37,7 +40,7 @@ namespace mpt
 
 TemporaryPathname::TemporaryPathname(const mpt::PathString &fileNamePrefix, const mpt::PathString &fileNameExtension)
 {
-	mpt::PathString filename = mpt::GetTempDirectory();
+	mpt::PathString filename = mpt::common_directories::get_temp_directory();
 	filename += (!fileNamePrefix.empty() ? fileNamePrefix + P_("_") : mpt::PathString());
 	filename += mpt::PathString::FromUnicode(mpt::UUID::GenerateLocalUseOnly(mpt::global_prng()).ToUString());
 	filename += (!fileNameExtension.empty() ? P_(".") + fileNameExtension : mpt::PathString());

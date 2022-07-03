@@ -19,6 +19,10 @@
 #include "mpt/base/numbers.hpp"
 #include "mpt/crc/crc.hpp"
 #include "mpt/environment/environment.hpp"
+#ifdef MODPLUG_TRACKER
+#include "mpt/fs/common_directories.hpp"
+#include "mpt/fs/fs.hpp"
+#endif // MODPLUG_TRACKER
 #include "mpt/io/base.hpp"
 #include "mpt/io/io.hpp"
 #include "mpt/io/io_stdstream.hpp"
@@ -61,7 +65,6 @@
 #include "../mptrack/HTTP.h"
 #endif // MODPLUG_TRACKER
 #include "../common/mptFileIO.h"
-#include "../common/mptFS.h"
 #ifdef MODPLUG_TRACKER
 #include "mpt/crypto/hash.hpp"
 #include "mpt/crypto/jwk.hpp"

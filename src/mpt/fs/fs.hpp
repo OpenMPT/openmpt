@@ -7,9 +7,6 @@
 
 #include "mpt/base/detect.hpp"
 #include "mpt/base/namespace.hpp"
-#if MPT_OS_WINDOWS
-#include "mpt/base/saturate_cast.hpp"
-#endif // MPT_OS_WINDOWS
 #include "mpt/path/native_path.hpp"
 
 #if MPT_OS_WINDOWS
@@ -34,6 +31,8 @@ class fs;
 
 #if MPT_OS_WINDOWS
 
+
+
 template <>
 class fs<mpt::native_path> {
 
@@ -41,6 +40,7 @@ class fs<mpt::native_path> {
 
 public:
 
+	// Verify if this path represents a valid directory on the file system.
 	bool is_directory(const mpt::native_path & path) {
 		// Using PathIsDirectoryW here instead would increase libopenmpt dependencies by shlwapi.dll.
 		// GetFileAttributesW also does the job just fine.
@@ -56,6 +56,7 @@ public:
 		return ((dwAttrib != INVALID_FILE_ATTRIBUTES) && (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
 	}
 
+	// Verify if this path exists and is a file on the file system.
 	bool is_file(const mpt::native_path & path) {
 #if MPT_OS_WINDOWS_WINRT
 		WIN32_FILE_ATTRIBUTE_DATA data = {};
@@ -69,6 +70,7 @@ public:
 		return ((dwAttrib != INVALID_FILE_ATTRIBUTES) && !(dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
 	}
 
+	// Verify that a path exists (no matter what type)
 	bool exists(const mpt::native_path & path) {
 		return ::PathFileExists(path.AsNative().c_str()) != FALSE;
 	}
@@ -91,46 +93,13 @@ public:
 	}
 #endif // !MPT_OS_WINDOWS_WINRT
 
-public:
-
-	mpt::native_path get_application_directory() {
-		std::vector<TCHAR> exeFileName(MAX_PATH);
-		while (::GetModuleFileName(0, exeFileName.data(), mpt::saturate_cast<DWORD>(exeFileName.size())) >= exeFileName.size()) {
-			if (::GetLastError() != ERROR_INSUFFICIENT_BUFFER) {
-				return mpt::native_path();
-			}
-			exeFileName.resize(exeFileName.size() * 2);
-		}
-		return mpt::fs<mpt::native_path>{}.absolute(mpt::native_path::FromNative(exeFileName.data()).GetDirectoryWithDrive());
-	}
-
-#if !MPT_OS_WINDOWS_WINRT
-	mpt::native_path get_system_directory() {
-		DWORD size = ::GetSystemDirectory(nullptr, 0);
-		std::vector<TCHAR> path(size + 1);
-		if (!::GetSystemDirectory(path.data(), size + 1)) {
-			return mpt::native_path();
-		}
-		return mpt::native_path::FromNative(path.data()) + MPT_NATIVE_PATH("\\");
-	}
-#endif // !MPT_OS_WINDOWS_WINRT
-
-	mpt::native_path get_temp_directory() {
-		DWORD size = ::GetTempPath(0, nullptr);
-		if (size) {
-			std::vector<TCHAR> tempPath(size + 1);
-			if (::GetTempPath(size + 1, tempPath.data())) {
-				return mpt::native_path::FromNative(tempPath.data());
-			}
-		}
-		// use app directory as fallback
-		return mpt::fs<mpt::native_path>{}.get_application_directory();
-	}
-
 
 
 public:
 
+	// Deletes a complete directory tree. Handle with EXTREME care.
+	// Returns false if any file could not be removed and aborts as soon as it
+	// encounters any error. path must be absolute.
 	bool delete_tree(mpt::native_path path) {
 		if (path.AsNative().empty()) {
 			return false;
@@ -171,7 +140,10 @@ public:
 		}
 		return true;
 	}
-};
+
+}; // class fs
+
+
 
 #endif // MPT_OS_WINDOWS
 

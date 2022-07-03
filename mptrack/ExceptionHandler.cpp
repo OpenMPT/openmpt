@@ -20,7 +20,7 @@
 #include "../misc/WriteMemoryDump.h"
 #include "../common/version.h"
 #include "../common/mptFileIO.h"
-#include "../common/mptFS.h"
+#include "mpt/fs/common_directories.hpp"
 #include "../soundlib/mod_specifications.h"
 
 #include <atomic>
@@ -126,7 +126,7 @@ struct CrashOutputDirectory
 	{
 		const mpt::PathString timestampDir = mpt::PathString::FromCString((CTime::GetCurrentTime()).Format(_T("%Y-%m-%d %H.%M.%S\\")));
 		// Create a crash directory
-		path = mpt::GetTempDirectory() + P_("OpenMPT Crash Files\\");
+		path = mpt::common_directories::get_temp_directory() + P_("OpenMPT Crash Files\\");
 		if(!mpt::FS::IsDirectory(path))
 		{
 			CreateDirectory(path.AsNative().c_str(), nullptr);

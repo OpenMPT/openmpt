@@ -36,7 +36,7 @@
 #include "../soundlib/plugins/PluginManager.h"
 #include "MPTrackWine.h"
 #include "MPTrackUtil.h"
-#include "../common/mptFS.h"
+#include "mpt/fs/common_directories.hpp"
 #include "../misc/mptOS.h"
 #include "mpt/arch/arch.hpp"
 #if MPT_MSVC_AT_LEAST(2022, 2) && MPT_MSVC_BEFORE(2022, 3)
@@ -848,7 +848,7 @@ void CTrackApp::SetupPaths(bool overridePortable)
 	// First, determine if the executable is installed in multi-arch mode or in the old standard mode.
 	bool modeMultiArch = false;
 	bool modeSourceProject = false;
-	const mpt::PathString exePath = mpt::GetExecutableDirectory();
+	const mpt::PathString exePath = mpt::common_directories::get_application_directory();
 	auto exePathComponents = mpt::String::Split<mpt::ustring>(exePath.GetDirectory().WithoutTrailingSlash().ToUnicode(), P_("\\").ToUnicode());
 	if(exePathComponents.size() >= 2)
 	{
@@ -1098,7 +1098,7 @@ BOOL CTrackApp::InitInstanceEarly(CMPTCommandLineInfo &cmdInfo)
 	#endif
 
 	// Avoid e.g. audio APIs trying to load wdmaud.drv from arbitrary working directory
-	::SetCurrentDirectory(mpt::GetExecutableDirectory().AsNative().c_str());
+	::SetCurrentDirectory(mpt::common_directories::get_application_directory().AsNative().c_str());
 
 	// Initialize OLE MFC support
 	BOOL oleinit = AfxOleInit();

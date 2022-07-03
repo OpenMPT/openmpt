@@ -13,7 +13,7 @@
 #include "mpt/binary/hex.hpp"
 #include "../common/version.h"
 #include "../common/misc_util.h"
-#include "../common/mptFS.h"
+#include "mpt/fs/common_directories.hpp"
 #include "../common/mptStringBuffer.h"
 #include "Mptrack.h"
 #include "TrackerSettings.h"
@@ -723,7 +723,7 @@ UpdateCheckResult CUpdateCheck::SearchUpdate(const CUpdateCheck::Context &contex
 
 void CUpdateCheck::CleanOldUpdates(const CUpdateCheck::Settings & /* settings */ , const CUpdateCheck::Context & /* context */ )
 {
-	mpt::PathString dirTemp = mpt::GetTempDirectory();
+	mpt::PathString dirTemp = mpt::common_directories::get_temp_directory();
 	if(dirTemp.empty())
 	{
 		return;
@@ -1109,7 +1109,7 @@ public:
 				}
 
 				UpdateProgress(_T("Preparing download..."), 6.0);
-				mpt::PathString dirTemp = mpt::GetTempDirectory();
+				mpt::PathString dirTemp = mpt::common_directories::get_temp_directory();
 				mpt::PathString dirTempOpenMPT = dirTemp + P_("OpenMPT") + mpt::PathString::FromNative(mpt::RawPathString(1, mpt::PathString::GetDefaultPathSeparator()));
 				dirTempOpenMPTUpdates = dirTempOpenMPT + P_("Updates") + mpt::PathString::FromNative(mpt::RawPathString(1, mpt::PathString::GetDefaultPathSeparator()));
 				updateFilename = dirTempOpenMPTUpdates + mpt::PathString::FromUnicode(downloadinfo.filename);
