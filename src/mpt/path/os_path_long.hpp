@@ -29,6 +29,18 @@ inline namespace MPT_INLINE_NS {
 
 inline mpt::os_path support_long_path(const mpt::os_path & path) {
 #if MPT_OS_WINDOWS
+#if !MPT_OS_WINDOWS_WINRT
+#define MPT_PATH_OS_PATH_USE_WINDOWS_LONG_PATH_PREFIX
+#else // MPT_OS_WINDOWS_WINRT
+#if defined(_WIN32_WINNT)
+// For WinRT on Windows 8, there is no official wy to determine an absolute path.
+#if (_WIN32_WINNT >= 0x0a00)
+#define MPT_PATH_OS_PATH_USE_WINDOWS_LONG_PATH_PREFIX
+#endif // Windows >= 10
+#endif // Windows NT
+#endif // !MPT_OS_WINDOWS_WINRT
+#endif // MPT_OS_WINDOWS
+#if defined(MPT_PATH_OS_PATH_USE_WINDOWS_LONG_PATH_PREFIX)
 	if (path.length() < MAX_PATH) {
 		// path is short enough
 		return path;
