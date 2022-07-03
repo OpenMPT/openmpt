@@ -478,16 +478,7 @@ struct PathTraits {
 		using namespace path_literals;
 		bool result = true;
 		if constexpr ((path_style == PathStyle::WindowsNT) || (path_style == PathStyle::Windows9x) || (path_style == PathStyle::DOS_DJGPP)) {
-			if(	c == L<char_type>('\\') ||
-				c == L<char_type>('\"') ||
-				c == L<char_type>('/') ||
-				c == L<char_type>(':') ||
-				c == L<char_type>('?') ||
-				c == L<char_type>('<') ||
-				c == L<char_type>('>') ||
-				c == L<char_type>('|') ||
-				c == L<char_type>('*'))
-			{
+			if (c == L<char_type>('\\') || c == L<char_type>('\"') || c == L<char_type>('/') || c == L<char_type>(':') || c == L<char_type>('?') || c == L<char_type>('<') || c == L<char_type>('>') || c == L<char_type>('|') || c == L<char_type>('*')) {
 				result = false;
 			} else {
 				result = true;
