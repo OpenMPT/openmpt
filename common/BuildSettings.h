@@ -32,8 +32,7 @@
 
 
 
-// Dependencies from the MSVC build system
-#if defined(MPT_BUILD_MSVC)
+#if defined(MPT_BUILD_DEFAULT_DEPENDENCIES)
 
 // This section defines which dependencies are available when building with
 // MSVC. Other build systems provide MPT_WITH_* macros via command-line or other
@@ -123,12 +122,7 @@
 
 #if defined(LIBOPENMPT_BUILD)
 
-// OpenMPT and libopenmpt dependencies (not for openmp123, player plugins or examples)
-#if defined(LIBOPENMPT_BUILD_FULL) && defined(LIBOPENMPT_BUILD_SMALL)
-#error "only one of LIBOPENMPT_BUILD_FULL or LIBOPENMPT_BUILD_SMALL can be defined"
-#endif // LIBOPENMPT_BUILD_FULL && LIBOPENMPT_BUILD_SMALL
-
-#if defined(LIBOPENMPT_BUILD_SMALL)
+#if defined(MPT_BUILD_DEFAULT_DEPENDENCIES_SMALL)
 
 //#define MPT_WITH_DL
 //#define MPT_WITH_FLAC
@@ -143,7 +137,7 @@
 //#define MPT_WITH_VORBISFILE
 //#define MPT_WITH_ZLIB
 
-#else // !LIBOPENMPT_BUILD_SMALL
+#else // !MPT_BUILD_DEFAULT_DEPENDENCIES_SMALL
 
 //#define MPT_WITH_DL
 //#define MPT_WITH_FLAC
@@ -158,11 +152,11 @@
 #define MPT_WITH_VORBISFILE
 #define MPT_WITH_ZLIB
 
-#endif // LIBOPENMPT_BUILD_SMALL
+#endif // MPT_BUILD_DEFAULT_DEPENDENCIES_SMALL
 
 #endif // LIBOPENMPT_BUILD
 
-#endif // MPT_BUILD_MSVC
+#endif // MPT_BUILD_DEFAULT_DEPENDENCIES
 
 
 

@@ -32,7 +32,7 @@
   excludes {
    "../../mptrack/wine/WineWrapper.cpp",
   }
-  defines { "MODPLUG_TRACKER", "MPT_BUILD_WINESUPPORT" }
+  defines { "MODPLUG_TRACKER", "MPT_BUILD_WINESUPPORT", "MPT_BUILD_DEFAULT_DEPENDENCIES" }
   largeaddressaware ( true )
   characterset "Unicode"
   warnings "Extra"

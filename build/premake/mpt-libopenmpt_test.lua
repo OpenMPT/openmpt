@@ -80,7 +80,7 @@
 	}
   characterset "Unicode"
   warnings "Extra"
-  defines { "LIBOPENMPT_BUILD", "LIBOPENMPT_BUILD_TEST" }
+  defines { "LIBOPENMPT_BUILD", "LIBOPENMPT_BUILD_TEST", "MPT_BUILD_DEFAULT_DEPENDENCIES" }
   links {
    "mpg123",
    "ogg",

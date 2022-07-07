@@ -112,7 +112,7 @@ end
 		"PCH.h"
 	}
 
-  defines { "MODPLUG_TRACKER" }
+  defines { "MODPLUG_TRACKER", "MPT_BUILD_DEFAULT_DEPENDENCIES" }
   dpiawareness "None"
   largeaddressaware ( true )
   characterset(charset)

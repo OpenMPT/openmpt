@@ -29,7 +29,7 @@
    "../../openmpt123/*.cpp",
    "../../openmpt123/*.hpp",
   }
-  defines { }
+  defines { "MPT_BUILD_DEFAULT_DEPENDENCIES" }
 	
 	filter { "action:vs*", "kind:SharedLib or ConsoleApp or WindowedApp" }
 		resdefines {

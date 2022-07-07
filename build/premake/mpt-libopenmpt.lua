@@ -97,7 +97,7 @@
 
   characterset "Unicode"
   warnings "Extra"
-  defines { "LIBOPENMPT_BUILD" }
+  defines { "LIBOPENMPT_BUILD", "MPT_BUILD_DEFAULT_DEPENDENCIES" }
   filter { "kind:SharedLib" }
    defines { "LIBOPENMPT_BUILD_DLL" }
   filter { "kind:SharedLib" }
