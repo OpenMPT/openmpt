@@ -18,33 +18,6 @@
 
 
 
-// set windows version early so that we can deduce dependencies from SDK version
-
-#if MPT_OS_WINDOWS
-
-#if !defined(WINVER) && !defined(_WIN32_WINDOWS) && !defined(_WIN32_WINNT)
-#if MPT_COMPILER_CLANG
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wreserved-id-macro"
-#endif // MPT_COMPILER_CLANG
-#define _WIN32_WINNT 0x0601 // _WIN32_WINNT_WIN7
-#if MPT_COMPILER_CLANG
-#pragma clang diagnostic pop
-#endif // MPT_COMPILER_CLANG
-#endif
-
-#ifndef WINVER
-#if defined(_WIN32_WINNT)
-#define WINVER _WIN32_WINNT
-#elif defined(_WIN32_WINDOWS)
-#define WINVER _WIN32_WINDOWS
-#endif
-#endif
-
-#endif // MPT_OS_WINDOWS
-
-
-
 #if defined(MODPLUG_TRACKER) && defined(LIBOPENMPT_BUILD)
 #error "either MODPLUG_TRACKER or LIBOPENMPT_BUILD has to be defined"
 #elif defined(MODPLUG_TRACKER)
