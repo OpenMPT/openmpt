@@ -114,7 +114,7 @@ AS_IF([test "x$with_zlib" != "xno"],
   PKG_CHECK_MODULES([ZLIB], [zlib],
    [
     ZLIB_PKG=zlib
-    AC_DEFINE([MPT_WITH_ZLIB], [], [with zlib])
+    ZLIB_CFLAGS="-DMPT_WITH_ZLIB $ZLIB_CFLAGS"
    ], [AC_MSG_ERROR([Unable to find zlib.])])
  ]
 )
@@ -127,7 +127,7 @@ AS_IF([test "x$with_mpg123" != "xno"],
   PKG_CHECK_MODULES([MPG123], [libmpg123 >= 1.14.0],
    [
     MPG123_PKG=libmpg123
-    AC_DEFINE([MPT_WITH_MPG123], [], [with mpg123])
+    MPG123_CFLAGS="-DMPT_WITH_MPG123 $MPG123_CFLAGS"
    ], [AC_MSG_ERROR([Unable to find libmpg123.])])
  ]
 )
@@ -140,7 +140,7 @@ AS_IF([test "x$with_ogg" != "xno"],
   PKG_CHECK_MODULES([OGG], [ogg],
    [
     OGG_PKG=ogg
-    AC_DEFINE([MPT_WITH_OGG], [], [with ogg])
+    OGG_CFLAGS="-DMPT_WITH_OGG $OGG_CFLAGS"
    ], [AC_MSG_ERROR([Unable to find libogg.])])
  ]
 )
@@ -153,7 +153,7 @@ AS_IF([test "x$with_vorbis" != "xno"],
   PKG_CHECK_MODULES([VORBIS], [vorbis],
    [
     VORBIS_PKG=vorbis
-    AC_DEFINE([MPT_WITH_VORBIS], [], [with vorbis])
+    VORBIS_CFLAGS="-DMPT_WITH_VORBIS $VORBIS_CFLAGS"
    ], [AC_MSG_ERROR([Unable to find libvorbis.])])
  ]
 )
@@ -166,7 +166,7 @@ AS_IF([test "x$with_vorbisfile" != "xno"],
   PKG_CHECK_MODULES([VORBISFILE], [vorbisfile],
    [
     VORBISFILE_PKG=vorbisfile
-    AC_DEFINE([MPT_WITH_VORBISFILE], [], [with vorbisfile])
+    VORBISFILE_CFLAGS="-DMPT_WITH_VORBISFILE $VORBISFILE_CFLAGS"
    ], [AC_MSG_ERROR([Unable to find libvorbisfile.])])
  ]
 )
@@ -203,7 +203,7 @@ AS_IF([test "x$with_pulseaudio" != "xno"],
   PKG_CHECK_MODULES([PULSEAUDIO], [libpulse libpulse-simple],
    [
     have_pulseaudio=1
-    AC_DEFINE([MPT_WITH_PULSEAUDIO], [], [with libpulseaudio])
+    PULSEAUDIO_CFLAGS="-DMPT_WITH_PULSEAUDIO $PULSEAUDIO_CFLAGS"
    ],
    [
     have_pulseaudio=0
@@ -222,7 +222,7 @@ AS_IF([test "x$with_pulseaudio" = "xyes"],
   PKG_CHECK_MODULES([PULSEAUDIO], [libpulse libpulse-simple],
    [
     have_pulseaudio=1
-    AC_DEFINE([MPT_WITH_PULSEAUDIO], [], [with libpulseaudio])
+    PULSEAUDIO_CFLAGS="-DMPT_WITH_PULSEAUDIO $PULSEAUDIO_CFLAGS"
    ],
    [
     have_pulseaudio=0
@@ -246,7 +246,7 @@ AS_IF([test "x$with_portaudio" != "xno"],
   PKG_CHECK_MODULES([PORTAUDIO], [portaudio-2.0],
    [
     have_portaudio=1
-    AC_DEFINE([MPT_WITH_PORTAUDIO], [], [with libportaudio])
+    PORTAUDIO_CFLAGS="-DMPT_WITH_PORTAUDIO $PORTAUDIO_CFLAGS"
    ],
    [
     have_portaudio=0
@@ -269,7 +269,7 @@ AS_IF([test "x$with_portaudiocpp" != "xno"],
   PKG_CHECK_MODULES([PORTAUDIOCPP], [portaudiocpp],
    [
     have_portaudiocpp=1
-    AC_DEFINE([MPT_WITH_PORTAUDIOCPP], [], [with libportaudiocpp])
+    PORTAUDIOCPP_CFLAGS="-DMPT_WITH_PORTAUDIOCPP $PORTAUDIOCPP_CFLAGS"
    ],
    [
     have_portaudiocpp=0
@@ -289,7 +289,7 @@ AC_ARG_WITH([sdl2], AS_HELP_STRING([--with-sdl2], [Enable use of libsdl2.]))
 AS_IF([test "x$enable_openmpt123" != "xno"],[
 AS_IF([test "x$with_sdl2" = "xyes"],
  [
-  PKG_CHECK_MODULES([SDL2], [sdl2 >= 2.0.4], [AC_DEFINE([MPT_WITH_SDL2], [], [with libsdl2])], [AC_MSG_ERROR([Unable to find libsdl2.])])
+  PKG_CHECK_MODULES([SDL2], [sdl2 >= 2.0.4], [SDL2_CFLAGS="-DMPT_WITH_SDL2 $SDL2_CFLAGS"], [AC_MSG_ERROR([Unable to find libsdl2.])])
  ]
 )
 ])
@@ -299,7 +299,7 @@ AC_ARG_WITH([sndfile], AS_HELP_STRING([--without-sndfile], [Disable use of libsn
 AS_IF([test "x$enable_openmpt123" != "xno"],[
 AS_IF([test "x$with_sndfile" != "xno"],
  [
-  PKG_CHECK_MODULES([SNDFILE], [sndfile], [AC_DEFINE([MPT_WITH_SNDFILE], [], [with libsndfile])], [AC_MSG_ERROR([Unable to find libsndfile.])])
+  PKG_CHECK_MODULES([SNDFILE], [sndfile], [SNDFILE_CFLAGS="-DMPT_WITH_SNDFILE $SNDFILE_CFLAGS"], [AC_MSG_ERROR([Unable to find libsndfile.])])
  ]
 )
 ])
@@ -309,7 +309,7 @@ AC_ARG_WITH([flac], AS_HELP_STRING([--without-flac], [Disable use of libflac.]))
 AS_IF([test "x$enable_openmpt123" != "xno"],[
 AS_IF([test "x$with_flac" != "xno"],
  [
-  PKG_CHECK_MODULES([FLAC], [flac >= 1.3.0], [AC_DEFINE([MPT_WITH_FLAC], [], [with libflac])], [AC_MSG_ERROR([Unable to find libflac >= 1.3.0.])])
+  PKG_CHECK_MODULES([FLAC], [flac >= 1.3.0], [FLAC_CFLAGS="-DMPT_WITH_FLAC $FLAC_CFLAGS"], [AC_MSG_ERROR([Unable to find libflac >= 1.3.0.])])
  ]
 )
 ])
