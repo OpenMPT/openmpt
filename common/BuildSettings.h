@@ -32,18 +32,6 @@
 
 
 
-#if defined(LIBOPENMPT_BUILD)
-
-// Fixup dependencies which are currently not used in libopenmpt itself,
-// however might be set by some build systems like autotools anyway for simplicity.
-#ifdef MPT_WITH_FLAC
-#undef MPT_WITH_FLAC
-#endif
-
-#endif // LIBOPENMPT_BUILD
-
-
-
 // Dependencies from the MSVC build system
 #if defined(MPT_BUILD_MSVC)
 
@@ -241,6 +229,10 @@
 
 
 #if defined(LIBOPENMPT_BUILD)
+
+#ifdef MPT_WITH_FLAC
+#error "Building libopenmpt with FLAC is useless and not a supported configuration. Please fix your build system to not list libflac as a dependency for libopenmpt itself. It is only a dependency of openmpt123."
+#endif
 
 #ifndef LIBOPENMPT_NO_DEPRECATE
 #define LIBOPENMPT_NO_DEPRECATE
