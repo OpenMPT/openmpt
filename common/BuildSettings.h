@@ -634,12 +634,6 @@
 
 // third-party library configuration
 
-#if MPT_OS_WINDOWS
-#ifndef UNICODE
-#define MPT_CHECK_WINDOWS_IGNORE_WARNING_NO_UNICODE
-#endif // !UNICODE
-#endif // MPT_OS_WINDOWS
-
 #ifdef MPT_WITH_ANCIENT
 #ifdef MPT_BUILD_MSVC_SHARED
 #define ANCIENT_API_DECLSPEC_DLLIMPORT

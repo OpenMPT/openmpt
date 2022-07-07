@@ -23,6 +23,10 @@
 #endif
 #elif defined(_WIN32)
 #define MPT_OS_WINDOWS 1
+#if !defined(_WIN32_WINDOWS) && !defined(WINVER)
+// include modern SDK version header if not targeting Win9x
+#include <sdkddkver.h>
+#endif
 #if defined(WINAPI_FAMILY)
 #include <winapifamily.h>
 #if (WINAPI_FAMILY == WINAPI_FAMILY_DESKTOP_APP)
@@ -36,13 +40,20 @@
 #if defined(NTDDI_VERSION) || defined(_WIN32_WINNT)
 #define MPT_OS_WINDOWS_WINNT 1
 #define MPT_OS_WINDOWS_WIN9X 0
+#define MPT_OS_WINDOWS_WIN32 0
 #elif defined(_WIN32_WINDOWS)
 #define MPT_OS_WINDOWS_WINNT 0
 #define MPT_OS_WINDOWS_WIN9X 1
+#define MPT_OS_WINDOWS_WIN32 0
+#elif defined(WINVER)
+#define MPT_OS_WINDOWS_WINNT 0
+#define MPT_OS_WINDOWS_WIN9X 0
+#define MPT_OS_WINDOWS_WIN32 1
 #else
 // assume modern
 #define MPT_OS_WINDOWS_WINNT 1
 #define MPT_OS_WINDOWS_WIN9X 0
+#define MPT_OS_WINDOWS_WIN32 0
 #endif
 #elif defined(__APPLE__)
 #define MPT_OS_MACOSX_OR_IOS 1
