@@ -77,6 +77,13 @@
 	}
 
   defines { "LIBOPENMPT_BUILD" }
+	defines {
+		"MPT_WITH_MPG123",
+		"MPT_WITH_OGG",
+		"MPT_WITH_VORBIS",
+		"MPT_WITH_VORBISFILE",
+		"MPT_WITH_ZLIB",
+	}
   links {
    "mpg123",
    "vorbis",

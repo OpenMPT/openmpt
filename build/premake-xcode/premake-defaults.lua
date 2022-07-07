@@ -23,7 +23,6 @@
 	filter {}
 
 	filter {}
-		defines { "MPT_BUILD_XCODE" }
 		system = _OPTIONS["target"]
 
 	filter {}
