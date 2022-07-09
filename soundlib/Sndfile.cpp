@@ -57,19 +57,47 @@ bool SettingCacheCompleteFileBeforeLoading()
 }
 
 
-mpt::ustring FileHistory::AsISO8601() const
+mpt::ustring FileHistory::AsISO8601(mpt::Date::LogicalTimezone internalTimezone) const
 {
-	tm date = mpt::Date::AsTm(loadDate);
 	if(openTime > 0)
 	{
 		// Calculate the date when editing finished.
 		double openSeconds = static_cast<double>(openTime) / HISTORY_TIMER_PRECISION;
-		tm tmpLoadDate = mpt::Date::AsTm(loadDate);
-		int64 loadDateSinceEpoch = mpt::Date::UnixAsSeconds(mpt::Date::UnixFromUTCtm(tmpLoadDate));
-		int64 saveDateSinceEpoch = loadDateSinceEpoch + mpt::saturate_round<int64>(openSeconds);
-		date = mpt::Date::UnixAsUTCtm(mpt::Date::UnixFromSeconds(saveDateSinceEpoch));
+		mpt::Date::AnyGregorian tmpLoadDate = loadDate;
+		if (internalTimezone == mpt::Date::LogicalTimezone::UTC)
+		{
+			int64 loadDateSinceEpoch = mpt::Date::UnixAsSeconds(mpt::Date::UnixFromUTC(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::UTC>(tmpLoadDate)));
+			int64 saveDateSinceEpoch = loadDateSinceEpoch + mpt::saturate_round<int64>(openSeconds);
+			return mpt::Date::ToShortenedISO8601(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(saveDateSinceEpoch)));
+#ifdef MODPLUG_TRACKER
+		} else if(internalTimezone == mpt::Date::LogicalTimezone::Local)
+		{
+			int64 loadDateSinceEpoch = mpt::Date::UnixAsSeconds(mpt::Date::UnixFromLocal(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::Local>(tmpLoadDate)));
+			int64 saveDateSinceEpoch = loadDateSinceEpoch + mpt::saturate_round<int64>(openSeconds);
+			return mpt::Date::ToShortenedISO8601(mpt::Date::UnixAsLocal(mpt::Date::UnixFromSeconds(saveDateSinceEpoch)));
+#endif // MODPLUG_TRACKER
+		} else
+		{
+			// assume UTC for unspecified timezone when calculating
+			int64 loadDateSinceEpoch = mpt::Date::UnixAsSeconds(mpt::Date::UnixFromUTC(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::UTC>(tmpLoadDate)));
+			int64 saveDateSinceEpoch = loadDateSinceEpoch + mpt::saturate_round<int64>(openSeconds);
+			return mpt::Date::ToShortenedISO8601(mpt::Date::forget_timezone(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(saveDateSinceEpoch))));
+		}
+	} else
+	{
+		if(internalTimezone == mpt::Date::LogicalTimezone::UTC)
+		{
+			return mpt::Date::ToShortenedISO8601(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::UTC>(loadDate));
+#ifdef MODPLUG_TRACKER
+		} else if(internalTimezone == mpt::Date::LogicalTimezone::Local)
+		{
+			return mpt::Date::ToShortenedISO8601(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::Local>(loadDate));
+#endif // MODPLUG_TRACKER
+		} else
+		{
+			return mpt::Date::ToShortenedISO8601(loadDate);
+		}
 	}
-	return mpt::Date::ToShortenedISO8601(date);
 }
 
 
@@ -486,7 +514,49 @@ bool CSoundFile::CreateInternal(FileReader file, ModLoadingFlags loadFlags)
 		InitializeGlobals();
 		m_visitedRows.Initialize(true);
 		m_dwCreatedWithVersion = Version::Current();
+#if MPT_TIME_UTC_ON_DISK
+#ifdef MODPLUG_TRACKER
+		if(GetType() & MOD_TYPE_IT)
+		{
+			m_modFormat.timezone = mpt::Date::LogicalTimezone::UTC;
+		} else
+		{
+			m_modFormat.timezone = mpt::Date::LogicalTimezone::Local;
+		}
+#else // !MODPLUG_TRACKER
+		if (GetType() & MOD_TYPE_IT)
+		{
+			m_modFormat.timezone = mpt::Date::LogicalTimezone::UTC;
+		} else
+		{
+			m_modFormat.timezone = mpt::Date::LogicalTimezone::Unspecified;
+		}
+#endif // MODPLUG_TRACKER
+#else
+#ifdef MODPLUG_TRACKER
+		m_modFormat.timezone = mpt::Date::LogicalTimezone::Local;
+#else // !MODPLUG_TRACKER
+		m_modFormat.timezone = mpt::Date::LogicalTimezone::Unspecified;
+#endif // MODPLUG_TRACKER
+#endif
 	}
+
+#if MPT_TIME_UTC_ON_DISK
+#ifdef MODPLUG_TRACKER
+	// convert timestamps to UTC
+	if(m_modFormat.timezone == mpt::Date::LogicalTimezone::Local)
+	{
+		for(auto & fileHistoryEntry : m_FileHistory)
+		{
+			if(fileHistoryEntry.HasValidDate())
+			{
+				fileHistoryEntry.loadDate = mpt::Date::forget_timezone(mpt::Date::UnixAsUTC(mpt::Date::UnixFromLocal(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::Local>(fileHistoryEntry.loadDate))));
+			}
+		}
+		m_modFormat.timezone = mpt::Date::LogicalTimezone::UTC;
+	}
+#endif // MODPLUG_TRACKER
+#endif
 
 	// Adjust channels
 	const auto muteFlag = GetChannelMuteFlag();

@@ -248,7 +248,7 @@ struct FileHistory
 	// Time the file was open in the editor, in 1/18.2th seconds (frequency of a standard DOS timer, to keep compatibility with Impulse Tracker easy).
 	uint32 openTime = 0;
 	// Return the date as a (possibly truncated if not enough precision is available) ISO 8601 formatted date.
-	mpt::ustring AsISO8601() const;
+	mpt::ustring AsISO8601(mpt::Date::LogicalTimezone internalTimezone) const;
 	// Returns true if the date component is valid. Some formats only store edit time, not edit date.
 	bool HasValidDate() const
 	{
@@ -286,6 +286,7 @@ struct ModFormatDetails
 	mpt::ustring originalFormatName; // "FastTracker 2" in the case of converted formats like MO3 or GDM
 	mpt::ustring originalType;       // "xm" in the case of converted formats like MO3 or GDM
 	mpt::Charset charset = mpt::Charset::UTF8;
+	mpt::Date::LogicalTimezone timezone = mpt::Date::LogicalTimezone::Unspecified;
 };
 
 
@@ -752,6 +753,10 @@ public:
 		#else // MODPLUG_TRACKER
 			return GetCharsetFile();
 		#endif // MODPLUG_TRACKER
+	}
+	mpt::Date::LogicalTimezone GetTimezoneInternal() const
+	{
+		return m_modFormat.timezone;
 	}
 
 	ModMessageHeuristicOrder GetMessageHeuristic() const;

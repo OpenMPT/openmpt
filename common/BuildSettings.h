@@ -321,6 +321,9 @@
 
 #endif
 
+#define MPT_TIME_UTC_ON_DISK 0
+#define MPT_TIME_UTC_ON_DISK_VERSION MPT_V("1.31.00.13")
+
 
 
 // fixing stuff up

@@ -83,7 +83,7 @@ mpt::ustring ToUString(uint64 time100ns)
 
 #endif // MODPLUG_TRACKER
 
-#if MPT_CXX_BEFORE(20) || defined(MPT_LIBCXX_QUIRK_NO_CHRONO_DATE) || defined(MPT_TIME_CTIME)
+#if MPT_CXX_BEFORE(20) || defined(MPT_LIBCXX_QUIRK_NO_CHRONO_DATE)
 
 static int32 ToDaynum(int32 year, int32 month, int32 day)
 {
@@ -115,10 +115,6 @@ static void FromDaynum(int32 d, int32 & year, int32 & month, int32 & day)
 	day = static_cast<int32>(dd);
 }
 
-#endif
-
-#if MPT_CXX_BEFORE(20) || defined(MPT_LIBCXX_QUIRK_NO_CHRONO_DATE)
-
 mpt::Date::Unix UnixFromUTC(UTC timeUtc)
 {
 	int32 daynum = ToDaynum(timeUtc.year, timeUtc.month, timeUtc.day);
@@ -140,9 +136,152 @@ mpt::Date::UTC UnixAsUTC(Unix tp)
 	result.day = day;
 	result.hours = static_cast<int32>(hours);
 	result.minutes = static_cast<int32>(minutes);
-	result.seconds = static_cast<int64>(seconds);
+	result.seconds = seconds;
 	return result;
 }
+
+#if defined(MODPLUG_TRACKER)
+
+mpt::Date::Unix UnixFromLocal(Local timeLocal)
+{
+#if defined(MPT_FALLBACK_TIMEZONE_WINDOWS_HISTORIC)
+	SYSTEMTIME sys_local{};
+	sys_local.wYear = static_cast<uint16>(timeLocal.year);
+	sys_local.wMonth = static_cast<uint16>(timeLocal.month);
+	sys_local.wDay = static_cast<uint16>(timeLocal.day);
+	sys_local.wHour = static_cast<uint16>(timeLocal.hours);
+	sys_local.wMinute = static_cast<uint16>(timeLocal.minutes);
+	sys_local.wSecond = static_cast<uint16>(timeLocal.seconds);
+	sys_local.wMilliseconds = 0;
+	DYNAMIC_TIME_ZONE_INFORMATION dtzi{};
+	if(GetDynamicTimeZoneInformation(&dtzi) == TIME_ZONE_ID_INVALID) // WinVista
+	{
+		return mpt::Date::Unix{};
+	}
+	SYSTEMTIME sys_utc{};
+	if(TzSpecificLocalTimeToSystemTimeEx(&dzti, &sys_local, &sys_utc) == FALSE) // Win7/Win8
+	{
+		return mpt::Date::Unix{};
+	}
+	FILETIME ft{};
+	if(SystemTimeToFileTime(&sys_utc, &ft) == FALSE) // Win 2000
+	{
+		return mpt::Date::Unix{};
+	}
+	ULARGE_INTEGER time_value{};
+	time_value.LowPart = ft.dwLowDateTime;
+	time_value.HighPart = ft.dwHighDateTime;
+	return mpt::Date::UnixFromSeconds(static_cast<int64>((time_value.QuadPart - 116444736000000000LL) / 10000000LL));
+#elif defined(MPT_FALLBACK_TIMEZONE_WINDOWS_CURRENT)
+	SYSTEMTIME sys_local{};
+	sys_local.wYear = static_cast<uint16>(timeLocal.year);
+	sys_local.wMonth = static_cast<uint16>(timeLocal.month);
+	sys_local.wDay = static_cast<uint16>(timeLocal.day);
+	sys_local.wHour = static_cast<uint16>(timeLocal.hours);
+	sys_local.wMinute = static_cast<uint16>(timeLocal.minutes);
+	sys_local.wSecond = static_cast<uint16>(timeLocal.seconds);
+	sys_local.wMilliseconds = 0;
+	SYSTEMTIME sys_utc{};
+	if(TzSpecificLocalTimeToSystemTime(NULL, &sys_local, &sys_utc) == FALSE) // WinXP
+	{
+		return mpt::Date::Unix{};
+	}
+	FILETIME ft{};
+	if(SystemTimeToFileTime(&sys_utc, &ft) == FALSE) // Win 2000
+	{
+		return mpt::Date::Unix{};
+	}
+	ULARGE_INTEGER time_value{};
+	time_value.LowPart = ft.dwLowDateTime;
+	time_value.HighPart = ft.dwHighDateTime;
+	return mpt::Date::UnixFromSeconds(static_cast<int64>((time_value.QuadPart - 116444736000000000LL) / 10000000LL));
+#elif defined(MPT_FALLBACK_TIMEZONE_C)
+	std::tm tmp{};
+	tmp.tm_year = timeLocal.year - 1900;
+	tmp.tm_mon = timeLocal.month - 1;
+	tmp.tm_mday = timeLocal.day;
+	tmp.tm_hour = timeLocal.hours;
+	tmp.tm_min = timeLocal.minutes;
+	tmp.tm_sec = static_cast<int>(timeLocal.seconds);
+	return mpt::Date::UnixFromSeconds(static_cast<int64>(std::mktime(&tmp)));
+#endif
+}
+
+mpt::Date::Local UnixAsLocal(Unix tp)
+{
+#if defined(MPT_FALLBACK_TIMEZONE_WINDOWS_HISTORIC)
+	ULARGE_INTEGER time_value{};
+	time_value.QuadPart = static_cast<int64>(mpt::Date::UnixAsSeconds(tp)) * 10000000LL + 116444736000000000LL;
+	FILETIME ft{};
+	ft.dwLowDateTime = time_value.LowPart;
+	ft.dwHighDateTime = time_value.HighPart;
+	SYSTEMTIME sys_utc{};
+	if(FileTimeToSystemTime(&ft, &sys_utc) == FALSE) // WinXP
+	{
+		return mpt::Date::Local{};
+	}
+	DYNAMIC_TIME_ZONE_INFORMATION dtzi{};
+	if(GetDynamicTimeZoneInformation(&dtzi) == TIME_ZONE_ID_INVALID) // WinVista
+	{
+		return mpt::Date::Local{};
+	}
+	SYSTEMTIME sys_local{};
+	if(SystemTimeToTzSpecificLocalTimeEx(&dzti, &sys_utc, &sys_local) == FALSE) // Win7/Win8
+	{
+		return mpt::Date::Local{};
+	}
+	mpt::Date::Local result{};
+	result.year = sys_local.wYear;
+	result.month = sys_local.wMonth;
+	result.day = sys_local.wDay;
+	result.hours = sys_local.wHour;
+	result.minutes = sys_local.wMinute;
+	result.seconds = sys_local.wSecond;
+	return result;
+#elif defined(MPT_FALLBACK_TIMEZONE_WINDOWS_CURRENT)
+	ULARGE_INTEGER time_value{};
+	time_value.QuadPart = static_cast<int64>(mpt::Date::UnixAsSeconds(tp)) * 10000000LL + 116444736000000000LL;
+	FILETIME ft{};
+	ft.dwLowDateTime = time_value.LowPart;
+	ft.dwHighDateTime = time_value.HighPart;
+	SYSTEMTIME sys_utc{};
+	if(FileTimeToSystemTime(&ft, &sys_utc) == FALSE) // WinXP
+	{
+		return mpt::Date::Local{};
+	}
+	SYSTEMTIME sys_local{};
+	if(SystemTimeToTzSpecificLocalTime(NULL, &sys_utc, &sys_local) == FALSE) // Win2000
+	{
+		return mpt::Date::Local{};
+	}
+	mpt::Date::Local result{};
+	result.year = sys_local.wYear;
+	result.month = sys_local.wMonth;
+	result.day = sys_local.wDay;
+	result.hours = sys_local.wHour;
+	result.minutes = sys_local.wMinute;
+	result.seconds = sys_local.wSecond;
+	return result;
+#elif defined(MPT_FALLBACK_TIMEZONE_C)
+	std::time_t time_tp = static_cast<std::time_t>(mpt::Date::UnixAsSeconds(tp));
+	std::tm *tmp = std::localtime(&time_tp);
+	if(!tmp)
+	{
+		return mpt::Date::Local{};
+	}
+	std::tm local = *tmp;
+	mpt::Date::Local result{};
+	result.year = local.tm_year + 1900;
+	result.month = local.tm_mon + 1;
+	result.day = local.tm_mday;
+	result.hours = local.tm_hour;
+	result.minutes = local.tm_min;
+	result.seconds = local.tm_sec;
+	return result;
+#endif
+}
+
+#endif // MODPLUG_TRACKER
 
 #endif
 
@@ -193,84 +332,12 @@ mpt::ustring ToShortenedISO8601(mpt::Date::UTC date)
 	return ToShortenedISO8601Impl(date);
 }
 
-#if defined(MPT_TIME_CTIME)
-
-mpt::Date::Unix UnixFromUTCtm(tm timeUtc)
+#ifdef MODPLUG_TRACKER
+mpt::ustring ToShortenedISO8601(Local date)
 {
-	int32 daynum = ToDaynum(timeUtc.tm_year+1900, timeUtc.tm_mon+1, timeUtc.tm_mday);
-	int64 seconds = static_cast<int64>(daynum - ToDaynum(1970,1,1))*24*60*60 + timeUtc.tm_hour*60*60 + timeUtc.tm_min*60 + timeUtc.tm_sec;
-	return mpt::Date::UnixFromSeconds(seconds);
+	return ToShortenedISO8601Impl(date);
 }
-
-tm UnixAsUTCtm(mpt::Date::Unix unixtime)
-{
-	int64 tmp = mpt::Date::UnixAsSeconds(unixtime);
-	int64 seconds = tmp % 60; tmp /= 60;
-	int64 minutes = tmp % 60; tmp /= 60;
-	int64 hours   = tmp % 24; tmp /= 24;
-	int32 year = 0, month = 0, day = 0;
-	FromDaynum(static_cast<int32>(tmp) + ToDaynum(1970,1,1), year, month, day);
-	tm result = {};
-	result.tm_year = year - 1900;
-	result.tm_mon = month - 1;
-	result.tm_mday = day;
-	result.tm_hour = static_cast<int32>(hours);
-	result.tm_min = static_cast<int32>(minutes);
-	result.tm_sec = static_cast<int32>(seconds);
-	return result;
-}
-
-mpt::ustring ToShortenedISO8601(tm date)
-{
-	// We assume date in UTC here.
-	// There are too many differences in supported format specifiers in strftime()
-	// and strftime does not support reduced precision ISO8601 at all.
-	// Just do the formatting ourselves.
-	mpt::ustring result;
-	mpt::ustring tz = U_("Z");
-	if(date.tm_year == 0)
-	{
-		return result;
-	}
-	result += mpt::ufmt::dec0<4>(date.tm_year + 1900);
-	if(date.tm_mon < 0 || date.tm_mon > 11)
-	{
-		return result;
-	}
-	result += U_("-") + mpt::ufmt::dec0<2>(date.tm_mon + 1);
-	if(date.tm_mday < 1 || date.tm_mday > 31)
-	{
-		return result;
-	}
-	result += U_("-") + mpt::ufmt::dec0<2>(date.tm_mday);
-	if(date.tm_hour == 0 && date.tm_min == 0 && date.tm_sec == 0)
-	{
-		return result;
-	}
-	if(date.tm_hour < 0 || date.tm_hour > 23)
-	{
-		return result;
-	}
-	if(date.tm_min < 0 || date.tm_min > 59)
-	{
-		return result;
-	}
-	result += U_("T");
-	if(date.tm_isdst > 0)
-	{
-		tz = U_("+01:00");
-	}
-	result += mpt::ufmt::dec0<2>(date.tm_hour) + U_(":") + mpt::ufmt::dec0<2>(date.tm_min);
-	if(date.tm_sec < 0 || date.tm_sec > 61)
-	{
-		return result + tz;
-	}
-	result += U_(":") + mpt::ufmt::dec0<2>(date.tm_sec);
-	result += tz;
-	return result;
-}
-
-#endif
+#endif // MODPLUG_TRACKER
 
 } // namespace Date
 } // namespace mpt

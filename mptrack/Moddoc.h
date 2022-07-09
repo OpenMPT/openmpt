@@ -14,10 +14,10 @@
 
 #include "Sndfile.h"
 #include "../common/misc_util.h"
+#include "../common/mptTime.h"
 #include "Undo.h"
 #include "Notification.h"
 #include "UpdateHints.h"
-#include <time.h>
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -130,7 +130,7 @@ protected:
 	CSampleUndo m_SampleUndo;
 	CInstrumentUndo m_InstrumentUndo;
 	SplitKeyboardSettings m_SplitKeyboardSettings;	// this is maybe not the best place to keep them, but it should do the job
-	time_t m_creationTime;
+	mpt::Date::Unix m_creationTime;
 
 	std::atomic<bool> m_modifiedAutosave = false; // Modified since last autosave?
 
@@ -221,7 +221,7 @@ public:
 	CInstrumentUndo &GetInstrumentUndo() { return m_InstrumentUndo; }
 	SplitKeyboardSettings &GetSplitKeyboardSettings() { return m_SplitKeyboardSettings; }
 
-	time_t GetCreationTime() const { return m_creationTime; }
+	mpt::Date::Unix GetCreationTime() const { return m_creationTime; }
 
 // operations
 public:

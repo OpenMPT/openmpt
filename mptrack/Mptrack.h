@@ -166,6 +166,7 @@ protected:
 
 public:
 	CTrackApp();
+	~CTrackApp();
 
 	CDataRecoveryHandler *GetDataRecoveryHandler() override;
 	void AddToRecentFileList(LPCTSTR lpszPathName) override;

@@ -2182,6 +2182,11 @@ bool CSoundFile::ReadPT36(FileReader &file, ModLoadingFlags loadFlags)
 		if(mpt::is_in_range(info.dateMonth, 1, 12) && mpt::is_in_range(info.dateDay, 1, 31) && mpt::is_in_range(info.dateHour, 0, 23)
 		   && mpt::is_in_range(info.dateMinute, 0, 59) && mpt::is_in_range(info.dateSecond, 0, 59))
 		{
+#ifdef MODPLUG_TRACKER
+			m_modFormat.timezone = mpt::Date::LogicalTimezone::Local;
+#else
+			m_modFormat.timezone = mpt::Date::LogicalTimezone::Unspecified;
+#endif
 			FileHistory mptHistory;
 			mptHistory.loadDate.year = info.dateYear + 1900;
 			mptHistory.loadDate.month = info.dateMonth;

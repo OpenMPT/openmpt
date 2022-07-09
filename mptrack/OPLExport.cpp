@@ -398,7 +398,7 @@ public:
 		SetDlgItemText(IDC_EDIT2, mpt::ToWin(m_sndFile.GetCharsetFile(), m_sndFile.GetTitle()).c_str());
 		SetDlgItemText(IDC_EDIT3, mpt::ToWin(m_sndFile.m_songArtist).c_str());
 		if(!m_sndFile.GetFileHistory().empty())
-			SetDlgItemText(IDC_EDIT4, mpt::ToWin(mpt::String::Replace(m_sndFile.GetFileHistory().back().AsISO8601().substr(0, 10), U_("-"), U_("/"))).c_str());
+			SetDlgItemText(IDC_EDIT4, mpt::ToWin(mpt::String::Replace(m_sndFile.GetFileHistory().back().AsISO8601(m_sndFile.GetTimezoneInternal()).substr(0, 10), U_("-"), U_("/"))).c_str());
 		SetDlgItemText(IDC_EDIT5, mpt::ToWin(m_sndFile.GetCharsetFile(), m_sndFile.m_songMessage.GetFormatted(SongMessage::leCRLF)).c_str());
 
 		m_locked = false;

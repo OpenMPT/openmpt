@@ -2741,12 +2741,37 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 	// Edit history
 	VERIFY_EQUAL_NONCONT(sndFile.GetFileHistory().size() > 15, true);
 	const FileHistory &fh = sndFile.GetFileHistory().front();
-	VERIFY_EQUAL_NONCONT(fh.loadDate.year, 2011);
-	VERIFY_EQUAL_NONCONT(fh.loadDate.month, 6);
-	VERIFY_EQUAL_NONCONT(fh.loadDate.day, 14);
-	VERIFY_EQUAL_NONCONT(fh.loadDate.hours, 21);
-	VERIFY_EQUAL_NONCONT(fh.loadDate.minutes, 8);
-	VERIFY_EQUAL_NONCONT(fh.loadDate.seconds, 32);
+#ifdef MODPLUG_TRACKER
+	if(sndFile.GetTimezoneInternal() == mpt::Date::LogicalTimezone::UTC)
+	{
+		VERIFY_EQUAL_NONCONT(mpt::Date::forget_timezone(mpt::Date::UnixAsLocal(mpt::Date::UnixFromUTC(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::UTC>(fh.loadDate)))).year, 2011);
+		VERIFY_EQUAL_NONCONT(mpt::Date::forget_timezone(mpt::Date::UnixAsLocal(mpt::Date::UnixFromUTC(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::UTC>(fh.loadDate)))).month, 6);
+		VERIFY_EQUAL_NONCONT(mpt::Date::forget_timezone(mpt::Date::UnixAsLocal(mpt::Date::UnixFromUTC(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::UTC>(fh.loadDate)))).day, 14);
+#if MPT_CXX_AT_LEAST(20) && !defined(MPT_LIBCXX_QUIRK_NO_CHRONO_DATE)
+		VERIFY_EQUAL_NONCONT(mpt::Date::forget_timezone(mpt::Date::UnixAsLocal(mpt::Date::UnixFromUTC(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::UTC>(fh.loadDate)))).hours, 21);
+#else
+#if defined(MPT_FALLBACK_TIMEZONE_WINDOWS_HISTORIC)
+		VERIFY_EQUAL_NONCONT(mpt::Date::forget_timezone(mpt::Date::UnixAsLocal(mpt::Date::UnixFromUTC(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::UTC>(fh.loadDate)))).hours, 21);
+#elif defined(MPT_FALLBACK_TIMEZONE_WINDOWS_CURRENT)
+		VERIFY_EQUAL_NONCONT(mpt::Date::forget_timezone(mpt::Date::UnixAsLocal(mpt::Date::UnixFromUTC(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::UTC>(fh.loadDate)))).hours, 21);
+#elif defined(MPT_FALLBACK_TIMEZONE_C)
+		VERIFY_EQUAL_NONCONT(mpt::Date::forget_timezone(mpt::Date::UnixAsLocal(mpt::Date::UnixFromUTC(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::UTC>(fh.loadDate)))).hours, 22);
+#else
+		VERIFY_EQUAL_NONCONT(mpt::Date::forget_timezone(mpt::Date::UnixAsLocal(mpt::Date::UnixFromUTC(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::UTC>(fh.loadDate)))).hours, 22);
+#endif
+#endif
+		VERIFY_EQUAL_NONCONT(mpt::Date::forget_timezone(mpt::Date::UnixAsLocal(mpt::Date::UnixFromUTC(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::UTC>(fh.loadDate)))).minutes, 8);
+		VERIFY_EQUAL_NONCONT(mpt::Date::forget_timezone(mpt::Date::UnixAsLocal(mpt::Date::UnixFromUTC(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::UTC>(fh.loadDate)))).seconds, 32);
+	} else
+#endif // MODPLUG_TRACKER
+	{
+		VERIFY_EQUAL_NONCONT(fh.loadDate.year, 2011);
+		VERIFY_EQUAL_NONCONT(fh.loadDate.month, 6);
+		VERIFY_EQUAL_NONCONT(fh.loadDate.day, 14);
+		VERIFY_EQUAL_NONCONT(fh.loadDate.hours, 21);
+		VERIFY_EQUAL_NONCONT(fh.loadDate.minutes, 8);
+		VERIFY_EQUAL_NONCONT(fh.loadDate.seconds, 32);
+	}
 	VERIFY_EQUAL_NONCONT((uint32)((double)fh.openTime / HISTORY_TIMER_PRECISION), 31);
 
 	// Macros

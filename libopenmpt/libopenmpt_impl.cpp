@@ -1229,7 +1229,7 @@ std::string module_impl::get_metadata( const std::string & key ) const {
 		if ( m_sndFile->GetFileHistory().empty() || !m_sndFile->GetFileHistory().back().HasValidDate() ) {
 			return std::string();
 		}
-		return mpt::transcode<std::string>( mpt::common_encoding::utf8, m_sndFile->GetFileHistory().back().AsISO8601() );
+		return mpt::transcode<std::string>( mpt::common_encoding::utf8, m_sndFile->GetFileHistory().back().AsISO8601( m_sndFile->GetTimezoneInternal() ) );
 	} else if ( key == std::string("message") ) {
 		std::string retval = m_sndFile->m_songMessage.GetFormatted( OpenMPT::SongMessage::leLF );
 		if ( retval.empty() ) {

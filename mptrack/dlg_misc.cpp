@@ -1311,18 +1311,15 @@ BOOL CEditHistoryDlg::OnInitDialog()
 	for(const auto &entry : editHistory)
 	{
 		totalTime += entry.openTime;
-
 		// Date
-		CString sDate;
+		CString sDate = CString(_T("<unknown date>"));
 		if(entry.HasValidDate())
 		{
-			TCHAR szDate[32];
-			const tm loadDate = mpt::Date::AsTm(entry.loadDate);
-			_tcsftime(szDate, std::size(szDate), _T("%d %b %Y, %H:%M:%S"), &loadDate);
-			sDate = szDate;
-		} else
-		{
-			sDate = _T("<unknown date>");
+			const mpt::Date::Unix unixdate = ((m_modDoc.GetSoundFile().GetTimezoneInternal() == mpt::Date::LogicalTimezone::Local) || (m_modDoc.GetSoundFile().GetTimezoneInternal() == mpt::Date::LogicalTimezone::Unspecified))
+				? mpt::Date::UnixFromLocal(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::Local>(entry.loadDate))
+				: mpt::Date::UnixFromUTC(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::UTC>(entry.loadDate));
+				;
+			sDate = CTime(mpt::Date::UnixAsSeconds(unixdate)).Format(_T("%d %b %Y, %H:%M:%S"));
 		}
 		// Time + stuff
 		uint32 duration = mpt::saturate_round<uint32>(entry.openTime / HISTORY_TIMER_PRECISION);

@@ -1278,6 +1278,19 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	m_modFormat.type = (GetType() == MOD_TYPE_MPT) ? U_("mptm") : U_("it");
 	m_modFormat.madeWithTracker = std::move(madeWithTracker);
 	m_modFormat.charset = m_dwLastSavedWithVersion ? mpt::Charset::Windows1252 : mpt::Charset::CP437;
+#if MPT_TIME_UTC_ON_DISK
+#ifdef MODPLUG_TRACKER
+	m_modFormat.timezone = (m_dwLastSavedWithVersion && (m_dwLastSavedWithVersion >= MPT_TIME_UTC_ON_DISK_VERSION)) ? mpt::Date::LogicalTimezone::UTC : mpt::Date::LogicalTimezone::Local;
+#else
+	m_modFormat.timezone = (m_dwLastSavedWithVersion && (m_dwLastSavedWithVersion >= MPT_TIME_UTC_ON_DISK_VERSION)) ? mpt::Date::LogicalTimezone::UTC : mpt::Date::LogicalTimezone::Unspecified;
+#endif
+#else
+#ifdef MODPLUG_TRACKER
+	m_modFormat.timezone = mpt::Date::LogicalTimezone::Local;
+#else
+	m_modFormat.timezone = mpt::Date::LogicalTimezone::Unspecified;
+#endif
+#endif
 
 	return true;
 }
@@ -1359,15 +1372,19 @@ static uint32 SaveITEditHistory(const CSoundFile &sndFile, std::ostream *file)
 		} else if(pModDoc != nullptr)
 		{
 			// Current ("new") timestamp
-			const time_t creationTime = pModDoc->GetCreationTime();
-			mptHistory.loadDate = mpt::Date::AnyGregorian{};
-			//localtime_s(&loadDate, &creationTime);
-			const tm* const p = localtime(&creationTime);
-			if (p != nullptr)
-				mptHistory.loadDate = mpt::Date::AsGregorian(*p);
-			else
-				sndFile.AddToLog(LogError, U_("Unable to retrieve current time."));
-			mptHistory.openTime = (uint32)(difftime(time(nullptr), creationTime) * HISTORY_TIMER_PRECISION);
+			const mpt::Date::Unix creationTime = pModDoc->GetCreationTime();
+			if(sndFile.GetTimezoneInternal() == mpt::Date::LogicalTimezone::UTC)
+			{
+				mptHistory.loadDate = mpt::Date::forget_timezone(mpt::Date::UnixAsUTC(creationTime));
+			} else if(sndFile.GetTimezoneInternal() == mpt::Date::LogicalTimezone::Local)
+			{
+				mptHistory.loadDate = mpt::Date::forget_timezone(mpt::Date::UnixAsLocal(creationTime));
+			} else
+			{
+				// assume UTC
+				mptHistory.loadDate = mpt::Date::forget_timezone(mpt::Date::UnixAsUTC(creationTime));
+			}
+			mptHistory.openTime = static_cast<uint32>(mpt::round((mpt::Date::UnixAsSeconds(mpt::Date::UnixNow()) - mpt::Date::UnixAsSeconds(creationTime)) * HISTORY_TIMER_PRECISION));
 #endif // MODPLUG_TRACKER
 		}
 

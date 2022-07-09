@@ -138,7 +138,7 @@ CModDoc::CModDoc()
 	, m_InstrumentUndo(*this)
 {
 	// Set the creation date of this file (or the load time if we're loading an existing file)
-	time(&m_creationTime);
+	m_creationTime = mpt::Date::UnixNow();
 
 	ReinitRecordState();
 

@@ -634,6 +634,24 @@ CTrackApp::CTrackApp()
 }
 
 
+CTrackApp::~CTrackApp()
+{
+#if !defined(MPT_LIBCXX_QUIRK_NO_CHRONO_DATE) && defined(MPT_LIBCXX_QUIRK_CHRONO_TZ_MEMLEAK)
+	// Work-around memleak (see <https://github.com/microsoft/STL/issues/2504#issuecomment-1068008937>)
+	try
+	{
+		std::chrono::get_tzdb_list().~tzdb_list();
+	} catch(const std::exception &)
+	{
+		// nothing
+	} catch(...)
+	{
+		// nothing
+	}
+#endif
+}
+
+
 class OpenMPTDataRecoveryHandler
 	: public CDataRecoveryHandler
 {

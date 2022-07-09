@@ -18,14 +18,23 @@
 #include <string>
 
 #if MPT_CXX_BEFORE(20) || defined(MPT_LIBCXX_QUIRK_NO_CHRONO_DATE)
-#include <time.h>
+#include <ctime>
 #endif
 
-#define MPT_TIME_CTIME
-
-#if defined(MPT_TIME_CTIME)
-#include <time.h>
+#if MPT_CXX_BEFORE(20) || defined(MPT_LIBCXX_QUIRK_NO_CHRONO_DATE)
+#if MPT_OS_WINDOWS && defined(_WIN32_WINNT)
+#if (_WIN32_WINNT >= 0x0602) // Win8
+#define MPT_FALLBACK_TIMEZONE_WINDOWS_HISTORIC
+#elif (_WIN32_WINNT >= 0x0501) // WinXP
+#define MPT_FALLBACK_TIMEZONE_WINDOWS_CURRENT
+#else
+#define MPT_FALLBACK_TIMEZONE_C
 #endif
+#else
+#define MPT_FALLBACK_TIMEZONE_C
+#endif
+#endif
+
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -99,36 +108,37 @@ struct Gregorian
 
 using AnyGregorian = Gregorian<LogicalTimezone::Unspecified>;
 
-#if defined(MPT_TIME_CTIME)
-inline tm AsTm(AnyGregorian val)
-{
-	tm result{};
-	result.tm_year = val.year - 1900;
-	result.tm_mon = val.month - 1;
-	result.tm_mday = val.day;
-	result.tm_hour = val.hours;
-	result.tm_min = val.minutes;
-	result.tm_sec = static_cast<int>(val.seconds);
-	return result;
-}
-inline AnyGregorian AsGregorian(tm val)
-{
-	AnyGregorian result{};
-	result.year = val.tm_year + 1900;
-	result.month = val.tm_mon + 1;
-	result.day = val.tm_mday;
-	result.hours = val.tm_hour;
-	result.minutes = val.tm_min;
-	result.seconds = val.tm_sec;
-	return result;
-}
-#endif
-
 using UTC = Gregorian<LogicalTimezone::UTC>;
 
 #if defined(MODPLUG_TRACKER)
 using Local = Gregorian<LogicalTimezone::Local>;
 #endif // MODPLUG_TRACKER
+
+template <LogicalTimezone TZ>
+inline Gregorian<TZ> interpret_as_timezone(AnyGregorian gregorian)
+{
+	Gregorian<TZ> result;
+	result.year = gregorian.year;
+	result.month = gregorian.month;
+	result.day = gregorian.day;
+	result.hours = gregorian.hours;
+	result.minutes = gregorian.minutes;
+	result.seconds = gregorian.seconds;
+	return result;
+}
+
+template <LogicalTimezone TZ>
+inline Gregorian<LogicalTimezone::Unspecified> forget_timezone(Gregorian<TZ> gregorian)
+{
+	Gregorian<LogicalTimezone::Unspecified> result;
+	result.year = gregorian.year;
+	result.month = gregorian.month;
+	result.day = gregorian.day;
+	result.hours = gregorian.hours;
+	result.minutes = gregorian.minutes;
+	result.seconds = gregorian.seconds;
+	return result;
+}
 
 #if MPT_CXX_AT_LEAST(20) && !defined(MPT_LIBCXX_QUIRK_NO_CHRONO_DATE)
 
@@ -151,15 +161,15 @@ inline Unix UnixFromSeconds(int64 seconds)
 
 inline mpt::Date::Unix UnixFromUTC(UTC utc)
 {
-	std::chrono::year_month_day ymd =
-		std::chrono::year{utc.year} /
-		std::chrono::month{utc.month} /
-		std::chrono::day{utc.day};
-	std::chrono::hh_mm_ss<std::chrono::seconds> hms{
-		std::chrono::hours{utc.hours} +
-		std::chrono::minutes{utc.minutes} +
-		std::chrono::seconds{utc.seconds}};
-	return std::chrono::system_clock::time_point{static_cast<std::chrono::sys_days>(ymd)} + hms.to_duration();
+	return std::chrono::system_clock::time_point{
+		std::chrono::sys_days {
+			std::chrono::year{ utc.year } /
+			std::chrono::month{ utc.month } /
+			std::chrono::day{ utc.day }
+		} +
+		std::chrono::hours{ utc.hours } +
+		std::chrono::minutes{ utc.minutes } +
+		std::chrono::seconds{ utc.seconds }};
 }
 
 inline mpt::Date::UTC UnixAsUTC(Unix tp)
@@ -176,6 +186,40 @@ inline mpt::Date::UTC UnixAsUTC(Unix tp)
 	result.seconds = hms.seconds().count();
 	return result;
 }
+
+#if defined(MODPLUG_TRACKER)
+
+inline mpt::Date::Unix UnixFromLocal(Local local)
+{
+	std::chrono::time_point<std::chrono::local_t, std::chrono::seconds> local_tp = 
+		std::chrono::local_days {
+			std::chrono::year{ local.year } /
+			std::chrono::month{ local.month } /
+			std::chrono::day{ local.day }
+		} +
+		std::chrono::hours{ local.hours } +
+		std::chrono::minutes{ local.minutes } +
+		std::chrono::seconds{ local.seconds };
+	return std::chrono::zoned_time{std::chrono::current_zone(), local_tp}.get_sys_time();
+}
+
+inline mpt::Date::Local UnixAsLocal(Unix tp)
+{
+	std::chrono::zoned_time local_tp{ std::chrono::current_zone(), tp };
+	std::chrono::local_days dp = std::chrono::floor<std::chrono::days>(local_tp.get_local_time());
+	std::chrono::year_month_day ymd{dp};
+	std::chrono::hh_mm_ss hms{local_tp.get_local_time() - dp};
+	mpt::Date::Local result;
+	result.year = static_cast<int>(ymd.year());
+	result.month = static_cast<unsigned int>(ymd.month());
+	result.day = static_cast<unsigned int>(ymd.day());
+	result.hours = hms.hours().count();
+	result.minutes = hms.minutes().count();
+	result.seconds = hms.seconds().count();
+	return result;
+}
+
+#endif // MODPLUG_TRACKER
 
 #else
 
@@ -195,7 +239,7 @@ struct Unix
 
 inline Unix UnixNow()
 {
-	return Unix{static_cast<int64>(time(nullptr))};
+	return Unix{static_cast<int64>(std::time(nullptr))};
 }
 
 inline int64 UnixAsSeconds(Unix tp)
@@ -212,21 +256,23 @@ mpt::Date::Unix UnixFromUTC(UTC timeUtc);
 
 mpt::Date::UTC UnixAsUTC(Unix tp);
 
+#if defined(MODPLUG_TRACKER)
+
+mpt::Date::Unix UnixFromLocal(Local timeLocal);
+
+mpt::Date::Local UnixAsLocal(Unix tp);
+
+#endif // MODPLUG_TRACKER
+
 #endif
 
 mpt::ustring ToShortenedISO8601(AnyGregorian date); // i.e. 2015-01-15T18:32:01
 
 mpt::ustring ToShortenedISO8601(UTC date); // i.e. 2015-01-15T18:32:01Z
 
-#if defined(MPT_TIME_CTIME)
-
-mpt::Date::Unix UnixFromUTCtm(tm timeUtc);
-
-tm UnixAsUTCtm(mpt::Date::Unix unixtime);
-
-mpt::ustring ToShortenedISO8601(tm date); // i.e. 2015-01-15T18:32:01Z
-
-#endif
+#ifdef MODPLUG_TRACKER
+mpt::ustring ToShortenedISO8601(Local date); // i.e. 2015-01-15T18:32:01
+#endif // MODPLUG_TRACKER
 
 } // namespace Date
 } // namespace mpt
