@@ -28,6 +28,7 @@
 #include "ExceptionHandler.h"
 #include "../soundlib/mod_specifications.h"
 #include "../soundlib/Tables.h"
+#include "mpt/io_file/outputfile.hpp"
 #include "../common/mptFileIO.h"
 #include "mpt/fs/common_directories.hpp"
 #include "../soundlib/tuningcollection.h"
@@ -1004,7 +1005,7 @@ void TrackerSettings::MigrateTunings(const Version storedVersion)
 		if(!mpt::native_fs{}.exists(fn))
 		{
 			std::unique_ptr<CTuning> pT = CSoundFile::CreateTuning12TET(U_("12TET"));
-			mpt::SafeOutputFile sf(fn, std::ios::binary, mpt::FlushMode::Full);
+			mpt::IO::SafeOutputFile sf(fn, std::ios::binary, mpt::IO::FlushMode::Full);
 			pT->Serialize(sf);
 		}
 	}
@@ -1013,7 +1014,7 @@ void TrackerSettings::MigrateTunings(const Version storedVersion)
 		if(!mpt::native_fs{}.exists(fn))
 		{
 			std::unique_ptr<CTuning> pT = CSoundFile::CreateTuning12TET(U_("12TET [[fs15 1.17.02.49]]"));
-			mpt::SafeOutputFile sf(fn, std::ios::binary, mpt::FlushMode::Full);
+			mpt::IO::SafeOutputFile sf(fn, std::ios::binary, mpt::IO::FlushMode::Full);
 			pT->Serialize(sf);
 		}
 	}

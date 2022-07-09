@@ -22,6 +22,8 @@
 #ifdef MPT_EXTERNAL_SAMPLES
 // For loading external data in Startrekker files
 #include "mpt/fs/fs.hpp"
+#include "mpt/io_file/inputfile.hpp"
+#include "mpt/io_file/inputfile_filecursor.hpp"
 #include "../common/mptPathString.h"
 #endif  // MPT_EXTERNAL_SAMPLES
 
@@ -1213,7 +1215,7 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 	if((loadFlags & loadSampleData) && isStartrekker)
 	{
 #ifdef MPT_EXTERNAL_SAMPLES
-		std::optional<InputFile> amFile;
+		std::optional<mpt::IO::InputFile> amFile;
 		FileReader amData;
 		if(file.GetOptionalFileName())
 		{

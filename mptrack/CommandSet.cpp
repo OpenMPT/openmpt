@@ -15,6 +15,7 @@
 #include "../soundlib/mod_specifications.h"
 #include "../soundlib/Tables.h"
 #include "../mptrack/Reporting.h"
+#include "mpt/io_file/outputfile.hpp"
 #include "../common/mptFileIO.h"
 #include <sstream>
 #include "TrackerSettings.h"
@@ -1517,8 +1518,8 @@ ctx:UID:Description:Modifier:Key:EventMask
 ...
 */
 
-	mpt::SafeOutputFile sf(filename, std::ios::out, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
-	mpt::ofstream& f = sf;
+	mpt::IO::SafeOutputFile sf(filename, std::ios::out, mpt::IO::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
+	mpt::IO::ofstream& f = sf;
 	if(!f)
 	{
 		ErrorBox(IDS_CANT_OPEN_FILE_FOR_WRITING);

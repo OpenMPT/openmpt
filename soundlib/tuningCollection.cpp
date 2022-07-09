@@ -18,6 +18,7 @@
 #include "Loaders.h"
 #ifdef MODPLUG_TRACKER
 #include "mpt/fs/fs.hpp"
+#include "mpt/io_file/outputfile.hpp"
 #include "../mptrack/TrackerSettings.h"
 #endif //MODPLUG_TRACKER
 
@@ -300,7 +301,7 @@ bool UnpackTuningCollection(const CTuningCollection &tc, const mpt::PathString &
 			error = true;
 		} else
 		{
-			mpt::SafeOutputFile sfout(fn, std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
+			mpt::IO::SafeOutputFile sfout(fn, std::ios::binary, mpt::IO::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
 			if(tuning.Serialize(sfout) != Tuning::SerializationResult::Success)
 			{
 				error = true;

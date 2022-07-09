@@ -29,6 +29,9 @@
 #include "../tracklib/SampleEdit.h"
 #include "Autotune.h"
 #include "../common/mptStringBuffer.h"
+#include "mpt/io_file/inputfile.hpp"
+#include "mpt/io_file/inputfile_filecursor.hpp"
+#include "mpt/io_file/outputfile.hpp"
 #include "../common/mptFileIO.h"
 #include "../common/FileReader.h"
 #include "openmpt/soundbase/Copy.hpp"
@@ -981,7 +984,7 @@ void CCtrlSamples::PrepareUndo(const char *description, sampleUndoTypes type, Sm
 bool CCtrlSamples::OpenSample(const mpt::PathString &fileName, FlagSet<OpenSampleTypes> types)
 {
 	BeginWaitCursor();
-	InputFile f(fileName, TrackerSettings::Instance().MiscCacheCompleteFileBeforeLoading);
+	mpt::IO::InputFile f(fileName, TrackerSettings::Instance().MiscCacheCompleteFileBeforeLoading);
 	if(!f.IsValid())
 	{
 		EndWaitCursor();
@@ -1510,8 +1513,8 @@ void CCtrlSamples::SaveSample(bool doBatchSave)
 
 			try
 			{
-				mpt::SafeOutputFile sf(fileName, std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
-				mpt::ofstream &f = sf;
+				mpt::IO::SafeOutputFile sf(fileName, std::ios::binary, mpt::IO::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
+				mpt::IO::ofstream &f = sf;
 				if(!f)
 				{
 					ok = false;

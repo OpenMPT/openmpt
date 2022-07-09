@@ -430,12 +430,12 @@ namespace MidiExport
 		SNDMIXPLUGIN tempoTrackPlugin;
 		VSTPluginLib m_plugFactory;
 		CSoundFile &m_sndFile;
-		mpt::ofstream &m_file;
+		std::ostream &m_file;
 		const GetLengthType m_songLength;
 		const bool m_wasInstrumentMode;
 
 	public:
-		Conversion(CSoundFile &sndFile, const InstrMap &instrMap, mpt::ofstream &file, bool overlappingInstruments, const GetLengthType &songLength)
+		Conversion(CSoundFile &sndFile, const InstrMap &instrMap, std::ostream &file, bool overlappingInstruments, const GetLengthType &songLength)
 			: m_oldInstruments(sndFile.GetNumInstruments())
 			, m_plugFactory(nullptr, true, {}, {}, {})
 			, m_sndFile(sndFile)

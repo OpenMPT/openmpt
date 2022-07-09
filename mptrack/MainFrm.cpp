@@ -41,6 +41,8 @@
 #include "PatternFont.h"
 #include "../common/mptFileIO.h"
 #include "mpt/fs/fs.hpp"
+#include "mpt/io_file/inputfile.hpp"
+#include "mpt/io_file/inputfile_filecursor.hpp"
 #include "../common/FileReader.h"
 #include "../common/Profiler.h"
 #include "../soundlib/plugins/PlugInterface.h"
@@ -441,7 +443,7 @@ void CMainFrame::OnDropFiles(HDROP hDropInfo)
 				size_t failed = 0, total = 0;
 				while(scanner.Next(scanName))
 				{
-					InputFile inputFile(scanName, TrackerSettings::Instance().MiscCacheCompleteFileBeforeLoading);
+					mpt::IO::InputFile inputFile(scanName, TrackerSettings::Instance().MiscCacheCompleteFileBeforeLoading);
 					if(!inputFile.IsValid())
 						continue;
 					auto sndFile = std::make_unique<CSoundFile>();
@@ -1560,7 +1562,7 @@ bool CMainFrame::PlaySoundFile(const mpt::PathString &filename, ModCommand::NOTE
 
 		if(!ok && !filename.empty())
 		{
-			InputFile f(filename, TrackerSettings::Instance().MiscCacheCompleteFileBeforeLoading);
+			mpt::IO::InputFile f(filename, TrackerSettings::Instance().MiscCacheCompleteFileBeforeLoading);
 			if(f.IsValid())
 			{
 				FileReader file = GetFileReader(f);

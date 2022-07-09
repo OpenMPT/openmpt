@@ -22,6 +22,8 @@
 #include "../mptrack/Moddoc.h"
 #endif // MODPLUG_TRACKER
 #ifdef MPT_EXTERNAL_SAMPLES
+#include "mpt/io_file/inputfile.hpp"
+#include "mpt/io_file/inputfile_filecursor.hpp"
 #include "../common/mptFileIO.h"
 #endif // MPT_EXTERNAL_SAMPLES
 
@@ -361,7 +363,7 @@ bool CSoundFile::ReadITP(FileReader &file, ModLoadingFlags loadFlags)
 			continue;
 
 #ifdef MPT_EXTERNAL_SAMPLES
-		InputFile f(instrPaths[ins], SettingCacheCompleteFileBeforeLoading());
+		mpt::IO::InputFile f(instrPaths[ins], SettingCacheCompleteFileBeforeLoading());
 		FileReader instrFile = GetFileReader(f);
 		if(!ReadInstrumentFromFile(ins + 1, instrFile, true))
 		{

@@ -117,13 +117,13 @@ class CDoWaveConvert: public CProgressDialog
 public:
 	const CWaveConvertSettings &m_Settings;
 	CSoundFile &m_SndFile;
-	mpt::ofstream &fileStream;
+	std::ostream &fileStream;
 	const CString &caption;
 	uint64 m_dwSongLimit;
 	bool m_bGivePlugsIdleTime;
 
 public:
-	CDoWaveConvert(CSoundFile &sndFile, mpt::ofstream &f, const CString &caption, const CWaveConvertSettings &settings, CWnd *parent = NULL)
+	CDoWaveConvert(CSoundFile &sndFile, std::ostream &f, const CString &caption, const CWaveConvertSettings &settings, CWnd *parent = NULL)
 		: CProgressDialog(parent)
 		, m_Settings(settings)
 		, m_SndFile(sndFile)

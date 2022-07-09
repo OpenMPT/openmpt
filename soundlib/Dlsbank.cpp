@@ -13,6 +13,8 @@
 #include "Sndfile.h"
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/Mptrack.h"
+#include "mpt/io_file/inputfile.hpp"
+#include "mpt/io_file/inputfile_filecursor.hpp"
 #include "../common/mptFileIO.h"
 #endif
 #include "Dlsbank.h"
@@ -1364,7 +1366,7 @@ bool CDLSBank::Open(const mpt::PathString &filename)
 {
 	if(filename.empty()) return false;
 	m_szFileName = filename;
-	InputFile f(filename, SettingCacheCompleteFileBeforeLoading());
+	mpt::IO::InputFile f(filename, SettingCacheCompleteFileBeforeLoading());
 	if(!f.IsValid()) return false;
 	return Open(GetFileReader(f));
 }

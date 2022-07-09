@@ -16,6 +16,7 @@
 #include "ProgressDialog.h"
 #include "../soundlib/OPL.h"
 #include "../soundlib/Tagging.h"
+#include "mpt/io_file/outputfile.hpp"
 
 #include <zlib/zlib.h>
 
@@ -571,8 +572,8 @@ public:
 			mpt::PathString currentFileName = fileName;
 			if(m_subSongs.size() > 1)
 				currentFileName = fileName.ReplaceExtension(mpt::PathString::FromNative(MPT_TFORMAT(" ({})")(mpt::ufmt::fmt(i + 1, songIndexFmt))) + fileName.GetFilenameExtension());
-			mpt::SafeOutputFile sf(currentFileName, std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
-			mpt::ofstream &f = sf;
+			mpt::IO::SafeOutputFile sf(currentFileName, std::ios::binary, mpt::IO::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
+			mpt::IO::ofstream &f = sf;
 			try
 			{
 				if(!f)

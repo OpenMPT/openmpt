@@ -36,7 +36,7 @@ class TemporaryPathname
 private:
 	mpt::PathString m_Path;
 public:
-	TemporaryPathname(const mpt::PathString &fileNamePrefix = mpt::PathString(), const mpt::PathString &fileNameExtension = P_("tmp"));
+	TemporaryPathname(const mpt::PathString &fileNameExtension = P_("tmp"));
 public:
 	mpt::PathString GetPathname() const
 	{

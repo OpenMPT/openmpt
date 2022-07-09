@@ -64,6 +64,10 @@
 #include "../mptrack/Settings.h"
 #include "../mptrack/HTTP.h"
 #endif // MODPLUG_TRACKER
+#include "mpt/io_file/fileref.hpp"
+#include "mpt/io_file/inputfile.hpp"
+#include "mpt/io_file/inputfile_filecursor.hpp"
+#include "mpt/io_file/outputfile.hpp"
 #include "../common/mptFileIO.h"
 #ifdef MODPLUG_TRACKER
 #include "mpt/crypto/hash.hpp"
@@ -996,7 +1000,7 @@ static MPT_NOINLINE void TestMisc2()
 		data.push_back(mpt::as_byte(2));
 		mpt::PathString fn = GetTempFilenameBase() + P_("lazy");
 		RemoveFile(fn);
-		mpt::LazyFileRef f(fn);
+		mpt::IO::FileRef f(fn);
 		f = data;
 		std::vector<std::byte> data2;
 		data2 = f;

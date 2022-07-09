@@ -22,6 +22,9 @@
 // LoadProgram/SaveProgram
 #include "../../mptrack/FileDialog.h"
 #include "../../mptrack/VstPresets.h"
+#include "mpt/io_file/inputfile.hpp"
+#include "mpt/io_file/inputfile_filecursor.hpp"
+#include "mpt/io_file/outputfile.hpp"
 #include "../../common/mptFileIO.h"
 #include "mpt/fs/fs.hpp"
 #include "../mod_specifications.h"
@@ -656,8 +659,8 @@ bool IMixPlugin::SaveProgram()
 
 	try
 	{
-		mpt::SafeOutputFile sf(dlg.GetFirstFile(), std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
-		mpt::ofstream &f = sf;
+		mpt::IO::SafeOutputFile sf(dlg.GetFirstFile(), std::ios::binary, mpt::IO::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
+		mpt::IO::ofstream &f = sf;
 		f.exceptions(f.exceptions() | std::ios::badbit | std::ios::failbit);
 		if(f.good() && VSTPresets::SaveFile(f, *this, isBank))
 			return true;
@@ -698,7 +701,7 @@ bool IMixPlugin::LoadProgram(mpt::PathString fileName)
 	}
 
 	const char *errorStr = nullptr;
-	InputFile f(fileName, SettingCacheCompleteFileBeforeLoading());
+	mpt::IO::InputFile f(fileName, SettingCacheCompleteFileBeforeLoading());
 	if(f.IsValid())
 	{
 		FileReader file = GetFileReader(f);

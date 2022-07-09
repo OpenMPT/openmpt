@@ -26,6 +26,9 @@
 #include "../common/misc_util.h"
 #include "../common/mptStringBuffer.h"
 #include "SelectPluginDialog.h"
+#include "mpt/io_file/inputfile.hpp"
+#include "mpt/io_file/inputfile_filecursor.hpp"
+#include "mpt/io_file/outputfile.hpp"
 #include "../common/mptFileIO.h"
 #include "../common/FileReader.h"
 #include "FileDialog.h"
@@ -1603,7 +1606,7 @@ void CCtrlInstruments::UpdateFilterText()
 bool CCtrlInstruments::OpenInstrument(const mpt::PathString &fileName)
 {
 	BeginWaitCursor();
-	InputFile f(fileName, TrackerSettings::Instance().MiscCacheCompleteFileBeforeLoading);
+	mpt::IO::InputFile f(fileName, TrackerSettings::Instance().MiscCacheCompleteFileBeforeLoading);
 	if(!f.IsValid())
 	{
 		EndWaitCursor();
@@ -2127,8 +2130,8 @@ void CCtrlInstruments::SaveInstrument(bool doBatchSave)
 			try
 			{
 				ScopedLogCapturer logcapturer(m_modDoc);
-				mpt::SafeOutputFile sf(fileName, std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
-				mpt::ofstream &f = sf;
+				mpt::IO::SafeOutputFile sf(fileName, std::ios::binary, mpt::IO::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
+				mpt::IO::ofstream &f = sf;
 				if(!f)
 				{
 					ok = false;

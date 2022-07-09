@@ -85,6 +85,9 @@
     <Filter Include="src\mpt\io\tests">
       <UniqueIdentifier>{B68E2391-A287-42E3-CBB9-2768B71122EF}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\mpt\io_file">
+      <UniqueIdentifier>{D34C5655-3FD8-C319-48E9-460EB4F31F1A}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\mpt\io_read">
       <UniqueIdentifier>{EFCE5C55-5B5A-CA19-646B-4D0ED075261A}</UniqueIdentifier>
     </Filter>
@@ -467,6 +470,30 @@
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\io\tests\tests_io.hpp">
       <Filter>src\mpt\io\tests</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\io_file\fileadapter.hpp">
+      <Filter>src\mpt\io_file</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\io_file\fileref.hpp">
+      <Filter>src\mpt\io_file</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\io_file\fstream.hpp">
+      <Filter>src\mpt\io_file</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\io_file\inputfile.hpp">
+      <Filter>src\mpt\io_file</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\io_file\inputfile_filecursor.hpp">
+      <Filter>src\mpt\io_file</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\io_file\outputfile.hpp">
+      <Filter>src\mpt\io_file</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\io_file\unique_basename.hpp">
+      <Filter>src\mpt\io_file</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\io_file\unique_tempfilename.hpp">
+      <Filter>src\mpt\io_file</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\io_read\callbackstream.hpp">
       <Filter>src\mpt\io_read</Filter>

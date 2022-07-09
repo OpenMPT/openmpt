@@ -16,6 +16,8 @@
 #include "../mptrack/TrackerSettings.h"
 #include "../mptrack/Moddoc.h"
 #include "../mptrack/Mptrack.h"
+#include "mpt/io_file/inputfile.hpp"
+#include "mpt/io_file/inputfile_filecursor.hpp"
 #include "../common/mptFileIO.h"
 #include "mpt/fs/fs.hpp"
 #endif // MODPLUG_TRACKER
@@ -1363,7 +1365,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 			} else
 			{
 				// Load from Instrument or Sample file
-				InputFile f(midiMapName, SettingCacheCompleteFileBeforeLoading());
+				mpt::IO::InputFile f(midiMapName, SettingCacheCompleteFileBeforeLoading());
 				if(f.IsValid())
 				{
 					FileReader insFile = GetFileReader(f);

@@ -12,8 +12,12 @@
 #include "Sndfile.h"
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/TrackerSettings.h"
+#include "mpt/io_file/inputfile.hpp"
+#include "mpt/io_file/inputfile_filecursor.hpp"
+#include "../common/mptFileIO.h"
 #endif // MODPLUG_TRACKER
 #ifndef MODPLUG_NO_FILESAVE
+#include "mpt/io_file/outputfile.hpp"
 #include "../common/mptFileIO.h"
 #ifdef MODPLUG_TRACKER
 #include "mpt/fs/fs.hpp"
@@ -494,10 +498,10 @@ struct SFZRegion
 struct SFZInputFile
 {
 	FileReader file;
-	std::unique_ptr<InputFile> inputFile;  // FileReader has pointers into this so its address must not change
+	std::unique_ptr<mpt::IO::InputFile> inputFile;  // FileReader has pointers into this so its address must not change
 	std::string remain;
 
-	SFZInputFile(FileReader f = {}, std::unique_ptr<InputFile> i = {}, std::string r = {})
+	SFZInputFile(FileReader f = {}, std::unique_ptr<mpt::IO::InputFile> i = {}, std::string r = {})
 		: file{std::move(f)}, inputFile{std::move(i)}, remain{std::move(r)} {}
 	SFZInputFile(SFZInputFile &&) = default;
 };
@@ -655,7 +659,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 					// Avoid recursive #include
 					if(std::find_if(files.begin(), files.end(), [&filename](const SFZInputFile &f) { return f.file.GetOptionalFileName().value_or(P_("")) == filename; }) == files.end())
 					{
-						auto f = std::make_unique<InputFile>(filename);
+						auto f = std::make_unique<mpt::IO::InputFile>(filename);
 						if(f->IsValid())
 						{
 							s.erase(0, charsRead);
@@ -821,7 +825,7 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 			}
 			filename = filename.Simplify();
 			SetSamplePath(smp, filename);
-			InputFile f(filename, SettingCacheCompleteFileBeforeLoading());
+			mpt::IO::InputFile f(filename, SettingCacheCompleteFileBeforeLoading());
 			FileReader smpFile = GetFileReader(f);
 			if(!ReadSampleFromFile(smp, smpFile, false))
 			{
@@ -1068,9 +1072,9 @@ static void WriteSFZEnvelope(std::ostream &f, double tickDuration, int index, co
 bool CSoundFile::SaveSFZInstrument(INSTRUMENTINDEX nInstr, std::ostream &f, const mpt::PathString &filename, bool useFLACsamples) const
 {
 #ifdef MODPLUG_TRACKER
-	const mpt::FlushMode flushMode = mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave);
+	const mpt::IO::FlushMode flushMode = mpt::IO::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave);
 #else
-	const mpt::FlushMode flushMode = mpt::FlushMode::Full;
+	const mpt::IO::FlushMode flushMode = mpt::IO::FlushMode::Full;
 #endif
 	const ModInstrument *ins = Instruments[nInstr];
 	if(ins == nullptr)
@@ -1186,10 +1190,10 @@ bool CSoundFile::SaveSFZInstrument(INSTRUMENTINDEX nInstr, std::ostream &f, cons
 		bool success = false;
 		try
 		{
-			mpt::SafeOutputFile sfSmp(sampleName, std::ios::binary, flushMode);
+			mpt::IO::SafeOutputFile sfSmp(sampleName, std::ios::binary, flushMode);
 			if(sfSmp)
 			{
-				mpt::ofstream &fSmp = sfSmp;
+				mpt::IO::ofstream &fSmp = sfSmp;
 				fSmp.exceptions(fSmp.exceptions() | std::ios::badbit | std::ios::failbit);
 
 				if(isAdlib)

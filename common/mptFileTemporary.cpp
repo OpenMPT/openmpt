@@ -10,10 +10,12 @@
 #include "stdafx.h"
 #include "mptFileTemporary.h"
 
-#ifdef MODPLUG_TRACKER
+#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
 #include "mpt/fs/common_directories.hpp"
 #include "mpt/fs/fs.hpp"
-#endif // MODPLUG_TRACKER
+#include "mpt/io_file/unique_basename.hpp"
+#include "mpt/io_file/unique_tempfilename.hpp"
+#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
 #include "mpt/string_transcode/transcode.hpp"
 #include "mpt/uuid/uuid.hpp"
 
@@ -38,13 +40,15 @@ namespace mpt
 
 
 
-TemporaryPathname::TemporaryPathname(const mpt::PathString &fileNamePrefix, const mpt::PathString &fileNameExtension)
+TemporaryPathname::TemporaryPathname(const mpt::PathString &fileNameExtension)
 {
-	mpt::PathString filename = mpt::common_directories::get_temp_directory();
-	filename += (!fileNamePrefix.empty() ? fileNamePrefix + P_("_") : mpt::PathString());
-	filename += mpt::PathString::FromUnicode(mpt::UUID::GenerateLocalUseOnly(mpt::global_prng()).ToUString());
-	filename += (!fileNameExtension.empty() ? P_(".") + fileNameExtension : mpt::PathString());
-	m_Path = filename;
+	mpt::PathString prefix;
+#if defined(LIBOPENMPT_BUILD)
+	prefix = P_("libopenmpt");
+#else
+	prefix = P_("OpenMPT");
+#endif
+	m_Path = mpt::PathString::FromNative(mpt::IO::unique_tempfilename{mpt::IO::unique_basename{prefix, mpt::UUID::GenerateLocalUseOnly(mpt::global_prng())}, fileNameExtension});
 }
 
 

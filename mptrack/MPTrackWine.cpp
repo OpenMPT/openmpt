@@ -23,6 +23,8 @@
 #include "AboutDialog.h"
 #include "TrackerSettings.h"
 #include "../common/ComponentManager.h"
+#include "mpt/io_file/inputfile.hpp"
+#include "mpt/io_file/inputfile_filecursor.hpp"
 #include "../common/mptFileIO.h"
 #include "mpt/fs/fs.hpp"
 #include "../misc/mptOS.h"
@@ -111,7 +113,7 @@ static mpt::crc64_jones WineHashVersion(mpt::crc64_jones crc)
 
 static mpt::crc64_jones WineHashFile(mpt::crc64_jones crc, mpt::PathString filename)
 {
-	InputFile file(filename, TrackerSettings::Instance().MiscCacheCompleteFileBeforeLoading);
+	mpt::IO::InputFile file(filename, TrackerSettings::Instance().MiscCacheCompleteFileBeforeLoading);
 	if(!file.IsValid())
 	{
 		return crc;

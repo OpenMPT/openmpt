@@ -38,6 +38,9 @@
 #include "CleanupSong.h"
 #include "../common/mptStringBuffer.h"
 #include "../common/mptFileTemporary.h"
+#include "mpt/io_file/inputfile.hpp"
+#include "mpt/io_file/inputfile_filecursor.hpp"
+#include "mpt/io_file/outputfile.hpp"
 #include "../common/mptFileIO.h"
 #include <sstream>
 #include "mpt/fs/fs.hpp"
@@ -199,7 +202,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 
 		MPT_LOG_GLOBAL(LogDebug, "Loader", U_("Open..."));
 
-		InputFile f(filename, TrackerSettings::Instance().MiscCacheCompleteFileBeforeLoading);
+		mpt::IO::InputFile f(filename, TrackerSettings::Instance().MiscCacheCompleteFileBeforeLoading);
 		if (f.IsValid())
 		{
 			FileReader file = GetFileReader(f);
@@ -318,8 +321,8 @@ bool CModDoc::OnSaveDocument(const mpt::PathString &filename, const bool setPath
 	m_SndFile.m_dwLastSavedWithVersion = Version::Current();
 	try
 	{
-		mpt::SafeOutputFile sf(filename, std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
-		mpt::ofstream &f = sf;
+		mpt::IO::SafeOutputFile sf(filename, std::ios::binary, mpt::IO::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
+		mpt::IO::ofstream &f = sf;
 		if(f)
 		{
 			if(m_SndFile.m_SongFlags[SONG_IMPORTED] && !(GetModType() & (MOD_TYPE_MOD | MOD_TYPE_S3M)))
@@ -418,10 +421,10 @@ bool CModDoc::SaveSample(SAMPLEINDEX smp)
 
 			try
 			{
-				mpt::SafeOutputFile sf(filename, std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
+				mpt::IO::SafeOutputFile sf(filename, std::ios::binary, mpt::IO::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
 				if(sf)
 				{
-					mpt::ofstream &f = sf;
+					mpt::IO::ofstream &f = sf;
 					f.exceptions(f.exceptions() | std::ios::badbit | std::ios::failbit);
 
 					if(sample.uFlags[CHN_ADLIB] || format == dfS3I)
@@ -558,7 +561,7 @@ void CModDoc::OnAppendModule()
 		auto source = std::make_unique<CSoundFile>();
 		for(const auto &file : files)
 		{
-			InputFile f(file, TrackerSettings::Instance().MiscCacheCompleteFileBeforeLoading);
+			mpt::IO::InputFile f(file, TrackerSettings::Instance().MiscCacheCompleteFileBeforeLoading);
 			if(!f.IsValid())
 			{
 				AddToLog("Unable to open source file!");
@@ -1841,7 +1844,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 			thisName += fileExt;
 			if(wsdlg.m_Settings.outputToSample)
 			{
-				thisName = mpt::TemporaryPathname{P_("OpenMPT")}.GetPathname();
+				thisName = mpt::TemporaryPathname{}.GetPathname();
 				// Ensure this temporary file is marked as temporary in the file system, to increase the chance it will never be written to disk
 				HANDLE hFile = ::CreateFile(thisName.AsNative().c_str(), GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_TEMPORARY, NULL);
 				if(hFile != INVALID_HANDLE_VALUE)
@@ -1854,8 +1857,8 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 			bool cancel = true;
 			try
 			{
-				mpt::SafeOutputFile safeFileStream(thisName, std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
-				mpt::ofstream &f = safeFileStream;
+				mpt::IO::SafeOutputFile safeFileStream(thisName, std::ios::binary, mpt::IO::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
+				mpt::IO::ofstream &f = safeFileStream;
 				f.exceptions(f.exceptions() | std::ios::badbit | std::ios::failbit);
 
 				if(!f)
@@ -1878,7 +1881,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 			{
 				if(!cancel)
 				{
-					InputFile f(thisName, TrackerSettings::Instance().MiscCacheCompleteFileBeforeLoading);
+					mpt::IO::InputFile f(thisName, TrackerSettings::Instance().MiscCacheCompleteFileBeforeLoading);
 					if(f.IsValid())
 					{
 						FileReader file = GetFileReader(f);
@@ -2005,8 +2008,8 @@ void CModDoc::OnFileMidiConvert()
 	{
 		try
 		{
-			mpt::SafeOutputFile sf(dlg.GetFirstFile(), std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
-			mpt::ofstream &f = sf;
+			mpt::IO::SafeOutputFile sf(dlg.GetFirstFile(), std::ios::binary, mpt::IO::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
+			mpt::IO::ofstream &f = sf;
 			f.exceptions(f.exceptions() | std::ios::badbit | std::ios::failbit);
 
 			if(!f.good())
@@ -2084,8 +2087,8 @@ void CModDoc::OnFileCompatibilitySave()
 	BeginWaitCursor();
 	try
 	{
-		mpt::SafeOutputFile sf(filename, std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
-		mpt::ofstream &f = sf;
+		mpt::IO::SafeOutputFile sf(filename, std::ios::binary, mpt::IO::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
+		mpt::IO::ofstream &f = sf;
 		if(f)
 		{
 			f.exceptions(f.exceptions() | std::ios::badbit | std::ios::failbit);

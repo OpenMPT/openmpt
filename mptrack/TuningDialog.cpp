@@ -16,6 +16,7 @@
 #include "mpt/io/io_stdstream.hpp"
 #include "TrackerSettings.h"
 #include <algorithm>
+#include "mpt/io_file/outputfile.hpp"
 #include "../common/mptFileIO.h"
 #include "../common/misc_util.h"
 #include "TuningDialog.h"
@@ -618,8 +619,8 @@ void CTuningDialog::OnBnClickedButtonExport()
 		BeginWaitCursor();
 		try
 		{
-			mpt::SafeOutputFile sfout(dlg.GetFirstFile(), std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
-			mpt::ofstream &fout = sfout;
+			mpt::IO::SafeOutputFile sfout(dlg.GetFirstFile(), std::ios::binary, mpt::IO::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
+			mpt::IO::ofstream &fout = sfout;
 			fout.exceptions(fout.exceptions() | std::ios::badbit | std::ios::failbit);
 
 			if(tuningFilter != -1 && filterIndex == tuningFilter)
@@ -696,8 +697,8 @@ void CTuningDialog::OnBnClickedButtonExport()
 
 			try
 			{
-				mpt::SafeOutputFile sfout(fileName, std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
-				mpt::ofstream &fout = sfout;
+				mpt::IO::SafeOutputFile sfout(fileName, std::ios::binary, mpt::IO::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
+				mpt::IO::ofstream &fout = sfout;
 				fout.exceptions(fout.exceptions() | std::ios::badbit | std::ios::failbit);
 				if(tuning.Serialize(fout) != Tuning::SerializationResult::Success)
 				{

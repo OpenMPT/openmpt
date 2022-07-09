@@ -21,6 +21,9 @@
 #include "../soundlib/OPL.h"
 #include "../common/misc_util.h"
 #include "../common/mptStringBuffer.h"
+#include "mpt/io_file/inputfile.hpp"
+#include "mpt/io_file/inputfile_filecursor.hpp"
+#include "mpt/io_file/outputfile.hpp"
 #include "../common/mptFileIO.h"
 #include <sstream>
 // Plugin cloning
@@ -1172,8 +1175,8 @@ bool CModDoc::SaveEnvelope(INSTRUMENTINDEX ins, EnvelopeType env, const mpt::Pat
 	bool ok = false;
 	try
 	{
-		mpt::SafeOutputFile sf(fileName, std::ios::binary, mpt::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
-		mpt::ofstream &f = sf;
+		mpt::IO::SafeOutputFile sf(fileName, std::ios::binary, mpt::IO::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
+		mpt::IO::ofstream &f = sf;
 		f.exceptions(f.exceptions() | std::ios::badbit | std::ios::failbit);
 		if(f)
 			ok = mpt::IO::WriteRaw(f, s.GetString(), s.GetLength());
@@ -1209,7 +1212,7 @@ bool CModDoc::PasteEnvelope(INSTRUMENTINDEX ins, EnvelopeType env)
 
 bool CModDoc::LoadEnvelope(INSTRUMENTINDEX nIns, EnvelopeType nEnv, const mpt::PathString &fileName)
 {
-	InputFile f(fileName, TrackerSettings::Instance().MiscCacheCompleteFileBeforeLoading);
+	mpt::IO::InputFile f(fileName, TrackerSettings::Instance().MiscCacheCompleteFileBeforeLoading);
 	if(nIns < 1 || nIns > m_SndFile.m_nInstruments || !m_SndFile.Instruments[nIns] || !f.IsValid())
 		return false;
 	BeginWaitCursor();

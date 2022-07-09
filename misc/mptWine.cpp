@@ -12,6 +12,7 @@
 #include "mptWine.h"
 
 #include "mpt/fs/fs.hpp"
+#include "mpt/io_file/fileref.hpp"
 #include "mpt/path/native_path.hpp"
 
 #include "mptOS.h"
@@ -378,7 +379,7 @@ ExecResult Context::ExecutePosixShellScript(std::string script, FlagSet<ExecFlag
 		}
 		try
 		{
-			mpt::LazyFileRef out(dirWindows + P_("filetree") + P_("\\") + mpt::PathString::FromUTF8(mpt::replace(file.first, std::string("/"), std::string("\\"))));
+			mpt::IO::FileRef out(dirWindows + P_("filetree") + P_("\\") + mpt::PathString::FromUTF8(mpt::replace(file.first, std::string("/"), std::string("\\"))));
 			out = file.second;
 		} catch(std::exception &)
 		{
@@ -671,7 +672,7 @@ ExecResult Context::ExecutePosixShellScript(std::string script, FlagSet<ExecFlag
 					{
 						try
 						{
-							mpt::LazyFileRef f(filename);
+							mpt::IO::FileRef f(filename);
 							std::vector<char> buf = f;
 							mpt::PathString treeFilename = mpt::PathString::FromNative(filename.AsNative().substr(basePath.AsNative().length()));
 							result.filetree[treeFilename.ToUTF8()] = buf;

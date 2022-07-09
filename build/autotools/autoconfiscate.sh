@@ -58,6 +58,7 @@ svn export ./src/mpt/exception_text bin/dist-autotools/src/mpt/exception_text
 svn export ./src/mpt/format         bin/dist-autotools/src/mpt/format
 #svn export ./src/mpt/fs             bin/dist-autotools/src/mpt/fs
 svn export ./src/mpt/io             bin/dist-autotools/src/mpt/io
+svn export ./src/mpt/io_file        bin/dist-autotools/src/mpt/io_file
 svn export ./src/mpt/io_read        bin/dist-autotools/src/mpt/io_read
 svn export ./src/mpt/io_write       bin/dist-autotools/src/mpt/io_write
 #svn export ./src/mpt/json           bin/dist-autotools/src/mpt/json
@@ -125,6 +126,7 @@ cp -r ./src/mpt/exception_text bin/dist-autotools/src/mpt/exception_text
 cp -r ./src/mpt/format         bin/dist-autotools/src/mpt/format
 #cp -r ./src/mpt/fs             bin/dist-autotools/src/mpt/fs
 cp -r ./src/mpt/io             bin/dist-autotools/src/mpt/io
+cp -r ./src/mpt/io_file        bin/dist-autotools/src/mpt/io_file
 cp -r ./src/mpt/io_read        bin/dist-autotools/src/mpt/io_read
 cp -r ./src/mpt/io_write       bin/dist-autotools/src/mpt/io_write
 #cp -r ./src/mpt/json           bin/dist-autotools/src/mpt/json

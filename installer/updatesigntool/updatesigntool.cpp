@@ -9,6 +9,8 @@
 #include "mpt/io/base.hpp"
 #include "mpt/io/io.hpp"
 #include "mpt/io/io_stdstream.hpp"
+#include "mpt/io_file/fstream.hpp"
+#include "mpt/io_file/outputfile.hpp"
 #include "mpt/out_of_memory/out_of_memory.hpp"
 #include "mpt/string/types.hpp"
 #include "mpt/string_transcode/transcode.hpp"
@@ -107,8 +109,8 @@ static void main(const std::vector<mpt::ustring> &args)
 			mpt::ustring filename = args[3];
 			mpt::crypto::keystore keystore(mpt::crypto::keystore::domain::user);
 			mpt::crypto::asymmetric::rsassa_pss<>::managed_private_key key(keystore, keyname);
-			mpt::SafeOutputFile sfo(mpt::PathString::FromUnicode(filename));
-			mpt::ofstream & fo = sfo.stream();
+			mpt::IO::SafeOutputFile sfo(mpt::PathString::FromUnicode(filename));
+			mpt::IO::ofstream & fo = sfo.stream();
 			mpt::IO::WriteText(fo, mpt::transcode<std::string>(mpt::common_encoding::utf8, key.get_public_key_data().as_jwk()));
 			fo.flush();
 		} else if(args[1] == MPT_USTRING("sign"))
@@ -125,7 +127,7 @@ static void main(const std::vector<mpt::ustring> &args)
 			mpt::crypto::asymmetric::rsassa_pss<>::managed_private_key key(keystore, keyname);
 			std::vector<std::byte> data;
 			{
-				mpt::ifstream fi(mpt::PathString::FromUnicode(inputfilename), std::ios::binary);
+				mpt::IO::ifstream fi(mpt::PathString::FromUnicode(inputfilename), std::ios::binary);
 				fi.imbue(std::locale::classic());
 				fi.exceptions(std::ios::badbit);
 				while(!mpt::IO::IsEof(fi))
@@ -140,22 +142,22 @@ static void main(const std::vector<mpt::ustring> &args)
 			} else if(mode == MPT_USTRING("raw"))
 			{
 				std::vector<std::byte> signature = key.sign(mpt::as_span(data));
-				mpt::SafeOutputFile sfo(mpt::PathString::FromUnicode(outputfilename));
-				mpt::ofstream & fo = sfo.stream();
+				mpt::IO::SafeOutputFile sfo(mpt::PathString::FromUnicode(outputfilename));
+				mpt::IO::ofstream & fo = sfo.stream();
 				mpt::IO::WriteRaw(fo, mpt::as_span(signature));
 				fo.flush();
 			} else if(mode == MPT_USTRING("jws_compact"))
 			{
 				mpt::ustring signature = key.jws_compact_sign(mpt::as_span(data));
-				mpt::SafeOutputFile sfo(mpt::PathString::FromUnicode(outputfilename));
-				mpt::ofstream & fo = sfo.stream();
+				mpt::IO::SafeOutputFile sfo(mpt::PathString::FromUnicode(outputfilename));
+				mpt::IO::ofstream & fo = sfo.stream();
 				mpt::IO::WriteText(fo, mpt::transcode<std::string>(mpt::common_encoding::utf8, signature));
 				fo.flush();
 			} else if(mode == MPT_USTRING("jws"))
 			{
 				mpt::ustring signature = key.jws_sign(mpt::as_span(data));
-				mpt::SafeOutputFile sfo(mpt::PathString::FromUnicode(outputfilename));
-				mpt::ofstream & fo = sfo.stream();
+				mpt::IO::SafeOutputFile sfo(mpt::PathString::FromUnicode(outputfilename));
+				mpt::IO::ofstream & fo = sfo.stream();
 				mpt::IO::WriteText(fo, mpt::transcode<std::string>(mpt::common_encoding::utf8, signature));
 				fo.flush();
 			} else

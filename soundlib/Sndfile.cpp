@@ -18,6 +18,9 @@
 #include "../mptrack/Mainfrm.h"
 #endif // MODPLUG_TRACKER
 #ifdef MPT_EXTERNAL_SAMPLES
+#include "mpt/io_file/inputfile.hpp"
+#include "mpt/io_file/inputfile_filecursor.hpp"
+#include "../common/mptFileIO.h"
 #include "../common/mptFileIO.h"
 #endif // MPT_EXTERNAL_SAMPLES
 #include "../common/version.h"
@@ -1966,7 +1969,7 @@ void CSoundFile::PrecomputeSampleLoops(bool updateChannels)
 bool CSoundFile::LoadExternalSample(SAMPLEINDEX smp, const mpt::PathString &filename)
 {
 	bool ok = false;
-	InputFile f(filename, SettingCacheCompleteFileBeforeLoading());
+	mpt::IO::InputFile f(filename, SettingCacheCompleteFileBeforeLoading());
 
 	if(f.IsValid())
 	{

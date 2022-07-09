@@ -37,6 +37,7 @@
 #include "MPTrackWine.h"
 #include "MPTrackUtil.h"
 #include "mpt/fs/common_directories.hpp"
+#include "mpt/io_file/outputfile.hpp"
 #include "../misc/mptOS.h"
 #include "mpt/arch/arch.hpp"
 #include "mpt/fs/fs.hpp"
@@ -916,7 +917,7 @@ void CTrackApp::SetupPaths(bool overridePortable)
 	// convert to new style
 	if(configInstallPortable && !configPortableFlag)
 	{
-		mpt::SafeOutputFile f(portableFlagFilename);
+		mpt::IO::SafeOutputFile f(portableFlagFilename);
 	}
 
 	// Determine portable mode.

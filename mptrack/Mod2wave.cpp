@@ -24,6 +24,7 @@
 #include "../common/Dither.h"
 #include "../soundlib/AudioReadTarget.h"
 #include "../soundlib/plugins/PlugInterface.h"
+#include "mpt/io_file/fstream.hpp"
 #include "../common/mptFileIO.h"
 #include "mpt/audio/span.hpp"
 #include <variant>
@@ -913,8 +914,8 @@ void CDoWaveConvert::Run()
 	std::vector<float> normalizeBufferData;
 	float *normalizeBuffer = nullptr;
 	float normalizePeak = 0.0f;
-	const mpt::PathString normalizeFileName = mpt::TemporaryPathname{P_("OpenMPT")}.GetPathname();
-	std::optional<mpt::fstream> normalizeFile;
+	const mpt::PathString normalizeFileName = mpt::TemporaryPathname{}.GetPathname();
+	std::optional<mpt::IO::fstream> normalizeFile;
 	if(m_Settings.normalize)
 	{
 		normalizeBufferData.resize(MIXBUFFERSIZE * 4);

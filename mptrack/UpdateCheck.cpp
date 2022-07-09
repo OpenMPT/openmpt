@@ -28,9 +28,12 @@
 #include "openmpt/sounddevice/SoundDeviceManager.hpp"
 #include "ProgressDialog.h"
 #include "Moddoc.h"
+#include "mpt/fs/fs.hpp"
 #include "mpt/io/io.hpp"
 #include "mpt/io/io_stdstream.hpp"
-#include "mpt/fs/fs.hpp"
+#include "mpt/io_file/inputfile.hpp"
+#include "mpt/io_file/inputfile_filecursor.hpp"
+#include "mpt/io_file/outputfile.hpp"
 #include "mpt/path/os_path_long.hpp"
 
 
@@ -657,7 +660,7 @@ UpdateCheckResult CUpdateCheck::SearchUpdate(const CUpdateCheck::Context &contex
 		{
 			try
 			{
-				InputFile f(settings.persistencePath + P_("update-") + mpt::PathString::FromUnicode(GetChannelName(settings.channel)) + P_(".json"));
+				mpt::IO::InputFile f(settings.persistencePath + P_("update-") + mpt::PathString::FromUnicode(GetChannelName(settings.channel)) + P_(".json"));
 				if(f.IsValid())
 				{
 					std::vector<std::byte> data = GetFileReader(f).ReadRawDataAsByteVector();
@@ -688,7 +691,7 @@ UpdateCheckResult CUpdateCheck::SearchUpdate(const CUpdateCheck::Context &contex
 			result = SearchUpdateModern(internet, settings);
 			try
 			{
-				mpt::SafeOutputFile f(settings.persistencePath + P_("update-") + mpt::PathString::FromUnicode(GetChannelName(settings.channel)) + P_(".json"), std::ios::binary);
+				mpt::IO::SafeOutputFile f(settings.persistencePath + P_("update-") + mpt::PathString::FromUnicode(GetChannelName(settings.channel)) + P_(".json"), std::ios::binary);
 				f.stream().imbue(std::locale::classic());
 				mpt::IO::WriteRaw(f.stream(), mpt::as_span(result.json));
 				f.stream().flush();
@@ -1121,7 +1124,7 @@ public:
 				{
 			
 					UpdateProgress(_T("Creating file..."), 7.0);
-					mpt::SafeOutputFile file(updateFilename, std::ios::binary);
+					mpt::IO::SafeOutputFile file(updateFilename, std::ios::binary);
 					file.stream().imbue(std::locale::classic());
 					file.stream().exceptions(std::ios::failbit | std::ios::badbit);
 				
@@ -1241,7 +1244,7 @@ public:
 				{
 					try
 					{
-						mpt::SafeOutputFile file(dirTempOpenMPTUpdates + P_("update.vbs"), std::ios::binary);
+						mpt::IO::SafeOutputFile file(dirTempOpenMPTUpdates + P_("update.vbs"), std::ios::binary);
 						file.stream().imbue(std::locale::classic());
 						file.stream().exceptions(std::ios::failbit | std::ios::badbit);
 						mpt::IO::WriteRaw(file.stream(), mpt::as_span(std::string(updateScript)));

@@ -18,6 +18,8 @@
 #include "Moddoc.h"
 #include "Dlsbank.h"
 #include "dlg_misc.h"
+#include "mpt/io_file/inputfile.hpp"
+#include "mpt/io_file/inputfile_filecursor.hpp"
 #include "../common/mptFileIO.h"
 #include "mpt/fs/fs.hpp"
 #include "../common/FileReader.h"
@@ -399,7 +401,7 @@ bool CModTree::InsLibSetFullPath(const mpt::PathString &libPath, const mpt::Path
 	if(!songName.empty() && mpt::PathCompareNoCase(m_SongFileName, songName))
 	{
 		// Load module for previewing its instruments
-		InputFile f(libPath + songName, TrackerSettings::Instance().MiscCacheCompleteFileBeforeLoading);
+		mpt::IO::InputFile f(libPath + songName, TrackerSettings::Instance().MiscCacheCompleteFileBeforeLoading);
 		if(f.IsValid())
 		{
 			FileReader file = GetFileReader(f);

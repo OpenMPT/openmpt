@@ -21,6 +21,7 @@
 #include "Mainfrm.h"
 
 #include <algorithm>
+#include "mpt/io_file/outputfile.hpp"
 #include "../common/mptFileIO.h"
 
 
@@ -429,8 +430,8 @@ static std::vector<char> ReadFile(const mpt::PathString &filename)
 static void WriteFileUTF16LE(const mpt::PathString &filename, const std::wstring &str)
 {
 	static_assert(sizeof(wchar_t) == 2);
-	mpt::SafeOutputFile sinifile(filename, std::ios::binary, mpt::FlushMode::Full);
-	mpt::ofstream& inifile = sinifile;
+	mpt::IO::SafeOutputFile sinifile(filename, std::ios::binary, mpt::IO::FlushMode::Full);
+	mpt::IO::ofstream& inifile = sinifile;
 	const uint8 UTF16LE_BOM[] = { 0xff, 0xfe };
 	inifile.write(reinterpret_cast<const char*>(UTF16LE_BOM), 2);
 	inifile.write(reinterpret_cast<const char*>(str.c_str()), str.length() * sizeof(std::wstring::value_type));
