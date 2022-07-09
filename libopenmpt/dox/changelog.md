@@ -60,6 +60,8 @@ is just a high-level summary.
     `Makefile` option `CONFIG=mingw32crt-win95`.
  *  [**New**] `Makefile` now uses `PKG_CONFIG` as path to `pkg-config`.
 
+ *  [**Change**] `"date"` metadata will now exlude the UTC time zone signifier
+    `Z` if the precise time zone is unknown.
  *  [**Change**] ctl `seek.sync_samples` now defaults to 1.
  *  [**Change**] `Makefile` `CONFIG=generic` is gone. Please use
     `CONFIG=standard` instead.
