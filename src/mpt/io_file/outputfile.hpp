@@ -51,7 +51,7 @@ private:
 	FlushMode m_FlushMode;
 #if MPT_LIBCXX_MS
 	std::FILE * m_f = nullptr;
-#else // !MPT_LIBCXX_MS
+#else  // !MPT_LIBCXX_MS
 	mpt::IO::ofstream m_s;
 #endif // MPT_LIBCXX_MS
 #if MPT_LIBCXX_MS
@@ -142,7 +142,7 @@ public:
 		: m_FlushMode(flushMode)
 #if MPT_LIBCXX_MS
 		, m_s(internal_fopen(filename, mode | std::ios_base::out, flushMode))
-#else // !MPT_LIBCXX_MS
+#else  // !MPT_LIBCXX_MS
 		, m_s(filename, mode)
 #endif // MPT_LIBCXX_MS
 	{

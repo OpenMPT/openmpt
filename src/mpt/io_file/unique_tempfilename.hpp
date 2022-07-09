@@ -31,8 +31,7 @@ private:
 
 public:
 	unique_tempfilename(const unique_basename & basename, const mpt::os_path & extension = MPT_OS_PATH("tmp"))
-		: m_Filename(mpt::common_directories::get_temp_directory().WithTrailingSlash() + static_cast<mpt::os_path>(basename) + (extension.empty() ? extension : MPT_OS_PATH(".") + extension))
-	{
+		: m_Filename(mpt::common_directories::get_temp_directory().WithTrailingSlash() + static_cast<mpt::os_path>(basename) + (extension.empty() ? extension : MPT_OS_PATH(".") + extension)) {
 		return;
 	}
 

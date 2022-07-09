@@ -57,7 +57,6 @@ public:
 	std::istream & GetStream() {
 		return m_File;
 	}
-
 };
 
 
@@ -118,7 +117,7 @@ public:
 		return m_IsCached;
 	}
 
-	mpt::os_path  GetFilename() const {
+	mpt::os_path GetFilename() const {
 		return m_Filename;
 	}
 
@@ -131,7 +130,6 @@ public:
 		assert(m_IsCached);
 		return mpt::as_span(m_Cache);
 	}
-
 };
 
 
@@ -149,7 +147,7 @@ public:
 			m_impl.emplace<UncachedInputFile>(filename);
 		}
 	}
-	
+
 	~InputFile() = default;
 
 	bool IsValid() const {
@@ -196,7 +194,6 @@ public:
 		}
 		throw std::bad_variant_access();
 	}
-
 };
 
 

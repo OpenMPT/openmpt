@@ -147,7 +147,7 @@ public:
 		if (m_IsTempFile) {
 #if MPT_OS_WINDOWS
 			DeleteFile(m_Filename.c_str());
-#else // !MPT_OS_WINDOWS
+#else  // !MPT_OS_WINDOWS
 			std::remove(m_Filename.c_str());
 			//std::error_code ec{};
 			//std::filesystem::remove(mpt::transcode<std::filesystem::path>(m_Filename.AsNative()), ec);

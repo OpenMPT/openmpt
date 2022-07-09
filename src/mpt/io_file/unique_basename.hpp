@@ -42,34 +42,29 @@ private:
 
 public:
 	explicit unique_basename(mpt::UUID uuid)
-		: m_Basename(mpt::transcode<mpt::os_path>(uuid.ToUString()))
-	{
+		: m_Basename(mpt::transcode<mpt::os_path>(uuid.ToUString())) {
 		return;
 	}
 
 	explicit unique_basename(const mpt::os_path & prefix, mpt::UUID uuid)
-		: m_Basename((prefix.empty() ? prefix : prefix + MPT_OS_PATH("-")) + mpt::transcode<mpt::os_path>(uuid.ToUString()))
-	{
+		: m_Basename((prefix.empty() ? prefix : prefix + MPT_OS_PATH("-")) + mpt::transcode<mpt::os_path>(uuid.ToUString())) {
 		return;
 	}
 
 	template <typename Trng>
 	explicit unique_basename(Trng & rng)
-		: m_Basename(mpt::transcode<mpt::os_path>(mpt::UUID::Generate(rng).ToUString()))
-	{
+		: m_Basename(mpt::transcode<mpt::os_path>(mpt::UUID::Generate(rng).ToUString())) {
 		return;
 	}
 
 	template <typename Trng>
 	explicit unique_basename(const mpt::os_path & prefix, Trng & rng)
-		: m_Basename((prefix.empty() ? prefix : prefix + MPT_OS_PATH("-")) + mpt::transcode<mpt::os_path>(mpt::UUID::Generate(rng).ToUString()))
-	{
+		: m_Basename((prefix.empty() ? prefix : prefix + MPT_OS_PATH("-")) + mpt::transcode<mpt::os_path>(mpt::UUID::Generate(rng).ToUString())) {
 		return;
 	}
 
 	explicit unique_basename()
-		: m_Basename(mpt::transcode<mpt::os_path>(make_uuid().ToUString()))
-	{
+		: m_Basename(mpt::transcode<mpt::os_path>(make_uuid().ToUString())) {
 		return;
 	}
 

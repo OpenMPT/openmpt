@@ -43,16 +43,16 @@ namespace IO {
 
 namespace detail {
 
-template<typename Tbase>
+template <typename Tbase>
 inline void fstream_open(Tbase & base, const mpt::os_path & filename, std::ios_base::openmode mode) {
 #if defined(MPT_COMPILER_QUIRK_WINDOWS_FSTREAM_NO_WCHAR)
 #if MPT_GCC_AT_LEAST(9, 1, 0) && !defined(MPT_COMPILER_QUIRK_NO_FILESYSTEM)
 	base.open(static_cast<std::filesystem::path>(mpt::support_long_path(filename)), mode);
-#else // !MPT_GCC_AT_LEAST(9,1,0) || MPT_COMPILER_QUIRK_NO_FILESYSTEM
+#else  // !MPT_GCC_AT_LEAST(9,1,0) || MPT_COMPILER_QUIRK_NO_FILESYSTEM
 	// Warning: MinGW with GCC earlier than 9.1 detected. Standard library does neither provide std::fstream wchar_t overloads nor std::filesystem with wchar_t support. Unicode filename support is thus unavailable.
 	base.open(mpt::transcode<std::string>(mpt::logical_encoding::locale, mpt::support_long_path(filename)).c_str(), mode);
 #endif // MPT_GCC_AT_LEAST(9,1,0) && !MPT_COMPILER_QUIRK_NO_FILESYSTEM
-#else // !MPT_COMPILER_QUIRK_WINDOWS_FSTREAM_NO_WCHAR
+#else  // !MPT_COMPILER_QUIRK_WINDOWS_FSTREAM_NO_WCHAR
 	base.open(mpt::support_long_path(filename).c_str(), mode);
 #endif // MPT_COMPILER_QUIRK_WINDOWS_FSTREAM_NO_WCHAR
 }
