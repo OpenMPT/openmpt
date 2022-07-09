@@ -159,7 +159,7 @@ mpt::Date::Unix UnixFromLocal(Local timeLocal)
 		return mpt::Date::Unix{};
 	}
 	SYSTEMTIME sys_utc{};
-	if(TzSpecificLocalTimeToSystemTimeEx(&dzti, &sys_local, &sys_utc) == FALSE) // Win7/Win8
+	if(TzSpecificLocalTimeToSystemTimeEx(&dtzi, &sys_local, &sys_utc) == FALSE) // Win7/Win8
 	{
 		return mpt::Date::Unix{};
 	}
@@ -226,7 +226,7 @@ mpt::Date::Local UnixAsLocal(Unix tp)
 		return mpt::Date::Local{};
 	}
 	SYSTEMTIME sys_local{};
-	if(SystemTimeToTzSpecificLocalTimeEx(&dzti, &sys_utc, &sys_local) == FALSE) // Win7/Win8
+	if(SystemTimeToTzSpecificLocalTimeEx(&dtzi, &sys_utc, &sys_local) == FALSE) // Win7/Win8
 	{
 		return mpt::Date::Local{};
 	}
