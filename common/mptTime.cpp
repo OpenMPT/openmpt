@@ -12,7 +12,7 @@
 #include "mptTime.h"
 
 #if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
-#include "mpt/library/library.hpp"
+#include "mpt/osinfo/windows_wine_version.hpp"
 #endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
 
 #include "mptStringBuffer.h"
@@ -155,26 +155,12 @@ struct tz_error
 {
 };
 
-#if MPT_OS_WINDOWS
-
-static bool is_wine() {
-	bool result = false;
-	std::optional<mpt::library> NTDLL = mpt::library::load({ mpt::library::path_search::system, mpt::library::path_prefix::none, MPT_NATIVE_PATH("ntdll.dll"), mpt::library::path_suffix::none });
-	if(NTDLL)
-	{
-		result = (NTDLL->get_address("wine_get_version") != nullptr);
-	}
-	return result;
-}
-
-#endif // MPT_OS_WINDOWS
-
 Unix UnixFromLocal(Local timeLocal)
 {
 #if defined(MPT_FALLBACK_TIMEZONE_WINDOWS_HISTORIC)
 	try
 	{
-		if(is_wine())
+		if(mpt::osinfo::windows::current_is_wine())
 		{
 			throw tz_error{};
 		}
@@ -257,7 +243,7 @@ Local UnixAsLocal(Unix tp)
 #if defined(MPT_FALLBACK_TIMEZONE_WINDOWS_HISTORIC)
 	try
 	{
-		if(is_wine())
+		if(mpt::osinfo::windows::current_is_wine())
 		{
 			throw tz_error{};
 		}

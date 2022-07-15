@@ -332,23 +332,12 @@ uint64 GetSystemMemorySize()
 
 #if MPT_OS_WINDOWS
 
-static bool GatherSystemIsWine()
-{
-	bool SystemIsWine = false;
-	std::optional<mpt::library> NTDLL = mpt::library::load({ mpt::library::path_search::system, mpt::library::path_prefix::none, MPT_NATIVE_PATH("ntdll.dll"), mpt::library::path_suffix::none });
-	if(NTDLL)
-	{
-		SystemIsWine = (NTDLL->get_address("wine_get_version") != nullptr);
-	}
-	return SystemIsWine;
-}
-
 namespace {
 struct SystemIsWineCache
 {
 	bool SystemIsWine;
 	SystemIsWineCache()
-		: SystemIsWine(GatherSystemIsWine())
+		: SystemIsWine(mpt::osinfo::windows::current_is_wine())
 	{
 		return;
 	}
