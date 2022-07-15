@@ -14,25 +14,25 @@
 
 #if MPT_CXX_AT_LEAST(20) && !defined(MPT_LIBCXX_QUIRK_NO_CHRONO_DATE)
 #include <chrono>
+#include <exception>
 #endif
 #include <string>
 
-#if MPT_CXX_BEFORE(20) || defined(MPT_LIBCXX_QUIRK_NO_CHRONO_DATE)
 #include <ctime>
-#endif
 
-#if MPT_CXX_BEFORE(20) || defined(MPT_LIBCXX_QUIRK_NO_CHRONO_DATE)
 #if MPT_OS_WINDOWS && defined(_WIN32_WINNT)
 #if (_WIN32_WINNT >= 0x0602) // Win8
 #define MPT_FALLBACK_TIMEZONE_WINDOWS_HISTORIC
+#define MPT_FALLBACK_TIMEZONE_WINDOWS_CURRENT
+#define MPT_FALLBACK_TIMEZONE_C
 #elif (_WIN32_WINNT >= 0x0501) // WinXP
 #define MPT_FALLBACK_TIMEZONE_WINDOWS_CURRENT
+#define MPT_FALLBACK_TIMEZONE_C
 #else
 #define MPT_FALLBACK_TIMEZONE_C
 #endif
 #else
 #define MPT_FALLBACK_TIMEZONE_C
-#endif
 #endif
 
 
@@ -140,88 +140,8 @@ inline Gregorian<LogicalTimezone::Unspecified> forget_timezone(Gregorian<TZ> gre
 	return result;
 }
 
-#if MPT_CXX_AT_LEAST(20) && !defined(MPT_LIBCXX_QUIRK_NO_CHRONO_DATE)
-
-using Unix = std::chrono::system_clock::time_point;
-
-inline Unix UnixNow()
+namespace nochrono
 {
-	return std::chrono::system_clock::now();
-}
-
-inline int64 UnixAsSeconds(Unix tp)
-{
-	return std::chrono::duration_cast<std::chrono::seconds>(tp.time_since_epoch()).count();
-}
-
-inline Unix UnixFromSeconds(int64 seconds)
-{
-	return std::chrono::system_clock::time_point{std::chrono::seconds{seconds}};
-}
-
-inline mpt::Date::Unix UnixFromUTC(UTC utc)
-{
-	return std::chrono::system_clock::time_point{
-		std::chrono::sys_days {
-			std::chrono::year{ utc.year } /
-			std::chrono::month{ utc.month } /
-			std::chrono::day{ utc.day }
-		} +
-		std::chrono::hours{ utc.hours } +
-		std::chrono::minutes{ utc.minutes } +
-		std::chrono::seconds{ utc.seconds }};
-}
-
-inline mpt::Date::UTC UnixAsUTC(Unix tp)
-{
-	std::chrono::sys_days dp = std::chrono::floor<std::chrono::days>(tp);
-	std::chrono::year_month_day ymd{dp};
-	std::chrono::hh_mm_ss hms{tp - dp};
-	mpt::Date::UTC result;
-	result.year = static_cast<int>(ymd.year());
-	result.month = static_cast<unsigned int>(ymd.month());
-	result.day = static_cast<unsigned int>(ymd.day());
-	result.hours = hms.hours().count();
-	result.minutes = hms.minutes().count();
-	result.seconds = hms.seconds().count();
-	return result;
-}
-
-#if defined(MODPLUG_TRACKER)
-
-inline mpt::Date::Unix UnixFromLocal(Local local)
-{
-	std::chrono::time_point<std::chrono::local_t, std::chrono::seconds> local_tp = 
-		std::chrono::local_days {
-			std::chrono::year{ local.year } /
-			std::chrono::month{ local.month } /
-			std::chrono::day{ local.day }
-		} +
-		std::chrono::hours{ local.hours } +
-		std::chrono::minutes{ local.minutes } +
-		std::chrono::seconds{ local.seconds };
-	return std::chrono::zoned_time{std::chrono::current_zone(), local_tp}.get_sys_time();
-}
-
-inline mpt::Date::Local UnixAsLocal(Unix tp)
-{
-	std::chrono::zoned_time local_tp{ std::chrono::current_zone(), tp };
-	std::chrono::local_days dp = std::chrono::floor<std::chrono::days>(local_tp.get_local_time());
-	std::chrono::year_month_day ymd{dp};
-	std::chrono::hh_mm_ss hms{local_tp.get_local_time() - dp};
-	mpt::Date::Local result;
-	result.year = static_cast<int>(ymd.year());
-	result.month = static_cast<unsigned int>(ymd.month());
-	result.day = static_cast<unsigned int>(ymd.day());
-	result.hours = hms.hours().count();
-	result.minutes = hms.minutes().count();
-	result.seconds = hms.seconds().count();
-	return result;
-}
-
-#endif // MODPLUG_TRACKER
-
-#else
 
 // int64 counts 1s since 1970-01-01T00:00Z
 struct Unix
@@ -252,15 +172,140 @@ inline Unix UnixFromSeconds(int64 seconds)
 	return Unix{seconds};
 }
 
-mpt::Date::Unix UnixFromUTC(UTC timeUtc);
+Unix UnixFromUTC(UTC timeUtc);
 
-mpt::Date::UTC UnixAsUTC(Unix tp);
+UTC UnixAsUTC(Unix tp);
 
 #if defined(MODPLUG_TRACKER)
 
-mpt::Date::Unix UnixFromLocal(Local timeLocal);
+Unix UnixFromLocal(Local timeLocal);
 
-mpt::Date::Local UnixAsLocal(Unix tp);
+Local UnixAsLocal(Unix tp);
+
+#endif // MODPLUG_TRACKER
+
+} // namespace nochrono
+
+#if MPT_CXX_AT_LEAST(20) && !defined(MPT_LIBCXX_QUIRK_NO_CHRONO_DATE)
+
+using Unix = std::chrono::system_clock::time_point;
+
+inline Unix UnixNow()
+{
+	return std::chrono::system_clock::now();
+}
+
+inline int64 UnixAsSeconds(Unix tp)
+{
+	return std::chrono::duration_cast<std::chrono::seconds>(tp.time_since_epoch()).count();
+}
+
+inline Unix UnixFromSeconds(int64 seconds)
+{
+	return std::chrono::system_clock::time_point{std::chrono::seconds{seconds}};
+}
+
+inline mpt::Date::Unix UnixFromUTC(UTC utc)
+{
+	try
+	{
+		return std::chrono::system_clock::time_point{
+			std::chrono::sys_days {
+				std::chrono::year{ utc.year } /
+				std::chrono::month{ utc.month } /
+				std::chrono::day{ utc.day }
+			} +
+			std::chrono::hours{ utc.hours } +
+			std::chrono::minutes{ utc.minutes } +
+			std::chrono::seconds{ utc.seconds }};
+	} catch(const std::exception &)
+	{
+		return mpt::Date::UnixFromSeconds(mpt::Date::nochrono::UnixAsSeconds(mpt::Date::nochrono::UnixFromUTC(utc)));
+	}
+}
+
+inline mpt::Date::UTC UnixAsUTC(Unix tp)
+{
+	try
+	{
+		std::chrono::sys_days dp = std::chrono::floor<std::chrono::days>(tp);
+		std::chrono::year_month_day ymd{dp};
+		std::chrono::hh_mm_ss hms{tp - dp};
+		mpt::Date::UTC result;
+		result.year = static_cast<int>(ymd.year());
+		result.month = static_cast<unsigned int>(ymd.month());
+		result.day = static_cast<unsigned int>(ymd.day());
+		result.hours = hms.hours().count();
+		result.minutes = hms.minutes().count();
+		result.seconds = hms.seconds().count();
+		return result;
+	} catch(const std::exception &)
+	{
+		return mpt::Date::nochrono::UnixAsUTC(mpt::Date::nochrono::UnixFromSeconds(mpt::Date::UnixAsSeconds(tp)));
+	}
+}
+
+#if defined(MODPLUG_TRACKER)
+
+inline mpt::Date::Unix UnixFromLocal(Local local)
+{
+	try
+	{
+		std::chrono::time_point<std::chrono::local_t, std::chrono::seconds> local_tp =
+			std::chrono::local_days {
+				std::chrono::year{ local.year } /
+				std::chrono::month{ local.month } /
+				std::chrono::day{ local.day }
+			} +
+			std::chrono::hours{ local.hours } +
+			std::chrono::minutes{ local.minutes } +
+			std::chrono::seconds{ local.seconds };
+		return std::chrono::zoned_time{std::chrono::current_zone(), local_tp}.get_sys_time();
+	} catch(const std::exception &)
+	{
+		return mpt::Date::UnixFromSeconds(mpt::Date::nochrono::UnixAsSeconds(mpt::Date::nochrono::UnixFromLocal(local)));
+	}
+}
+
+inline mpt::Date::Local UnixAsLocal(Unix tp)
+{
+	try
+	{
+		std::chrono::zoned_time local_tp{ std::chrono::current_zone(), tp };
+		std::chrono::local_days dp = std::chrono::floor<std::chrono::days>(local_tp.get_local_time());
+		std::chrono::year_month_day ymd{dp};
+		std::chrono::hh_mm_ss hms{local_tp.get_local_time() - dp};
+		mpt::Date::Local result;
+		result.year = static_cast<int>(ymd.year());
+		result.month = static_cast<unsigned int>(ymd.month());
+		result.day = static_cast<unsigned int>(ymd.day());
+		result.hours = hms.hours().count();
+		result.minutes = hms.minutes().count();
+		result.seconds = hms.seconds().count();
+		return result;
+	} catch(const std::exception &)
+	{
+		return mpt::Date::nochrono::UnixAsLocal(mpt::Date::nochrono::UnixFromSeconds(mpt::Date::UnixAsSeconds(tp)));
+	}
+}
+
+#endif // MODPLUG_TRACKER
+
+#else
+
+using Unix = nochrono::Unix;
+
+using nochrono::UnixNow;
+using nochrono::UnixAsSeconds;
+using nochrono::UnixFromSeconds;
+
+using nochrono::UnixFromUTC;
+using nochrono::UnixAsUTC;
+
+#if defined(MODPLUG_TRACKER)
+
+using nochrono::UnixFromLocal;
+using nochrono::UnixAsLocal;
 
 #endif // MODPLUG_TRACKER
 

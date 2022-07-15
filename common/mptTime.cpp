@@ -11,11 +11,19 @@
 #include "stdafx.h"
 #include "mptTime.h"
 
+#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
+#include "mpt/library/library.hpp"
+#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
+
 #include "mptStringBuffer.h"
 
 #if MPT_CXX_AT_LEAST(20) && !defined(MPT_LIBCXX_QUIRK_NO_CHRONO_DATE)
 #include <chrono>
 #endif
+
+#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
+#include <optional>
+#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
 
 #if MPT_OS_WINDOWS
 #include <windows.h>
@@ -83,7 +91,8 @@ mpt::ustring ToUString(uint64 time100ns)
 
 #endif // MODPLUG_TRACKER
 
-#if MPT_CXX_BEFORE(20) || defined(MPT_LIBCXX_QUIRK_NO_CHRONO_DATE)
+namespace nochrono
+{
 
 static int32 ToDaynum(int32 year, int32 month, int32 day)
 {
@@ -115,14 +124,14 @@ static void FromDaynum(int32 d, int32 & year, int32 & month, int32 & day)
 	day = static_cast<int32>(dd);
 }
 
-mpt::Date::Unix UnixFromUTC(UTC timeUtc)
+Unix UnixFromUTC(UTC timeUtc)
 {
 	int32 daynum = ToDaynum(timeUtc.year, timeUtc.month, timeUtc.day);
 	int64 seconds = static_cast<int64>(daynum - ToDaynum(1970, 1, 1)) * 24 * 60 * 60 + timeUtc.hours * 60 * 60 + timeUtc.minutes * 60 + timeUtc.seconds;
 	return Unix{seconds};
 }
 
-mpt::Date::UTC UnixAsUTC(Unix tp)
+UTC UnixAsUTC(Unix tp)
 {
 	int64 tmp = tp.value;
 	int64 seconds = tmp % 60; tmp /= 60;
@@ -130,7 +139,7 @@ mpt::Date::UTC UnixAsUTC(Unix tp)
 	int64 hours   = tmp % 24; tmp /= 24;
 	int32 year = 0, month = 0, day = 0;
 	FromDaynum(static_cast<int32>(tmp) + ToDaynum(1970,1,1), year, month, day);
-	mpt::Date::UTC result = {};
+	UTC result = {};
 	result.year = year;
 	result.month = month;
 	result.day = day;
@@ -142,60 +151,96 @@ mpt::Date::UTC UnixAsUTC(Unix tp)
 
 #if defined(MODPLUG_TRACKER)
 
-mpt::Date::Unix UnixFromLocal(Local timeLocal)
+struct tz_error
+{
+};
+
+#if MPT_OS_WINDOWS
+
+static bool is_wine() {
+	bool result = false;
+	std::optional<mpt::library> NTDLL = mpt::library::load({ mpt::library::path_search::system, mpt::library::path_prefix::none, MPT_NATIVE_PATH("ntdll.dll"), mpt::library::path_suffix::none });
+	if(NTDLL)
+	{
+		result = (NTDLL->get_address("wine_get_version") != nullptr);
+	}
+	return result;
+}
+
+#endif // MPT_OS_WINDOWS
+
+Unix UnixFromLocal(Local timeLocal)
 {
 #if defined(MPT_FALLBACK_TIMEZONE_WINDOWS_HISTORIC)
-	SYSTEMTIME sys_local{};
-	sys_local.wYear = static_cast<uint16>(timeLocal.year);
-	sys_local.wMonth = static_cast<uint16>(timeLocal.month);
-	sys_local.wDay = static_cast<uint16>(timeLocal.day);
-	sys_local.wHour = static_cast<uint16>(timeLocal.hours);
-	sys_local.wMinute = static_cast<uint16>(timeLocal.minutes);
-	sys_local.wSecond = static_cast<uint16>(timeLocal.seconds);
-	sys_local.wMilliseconds = 0;
-	DYNAMIC_TIME_ZONE_INFORMATION dtzi{};
-	if(GetDynamicTimeZoneInformation(&dtzi) == TIME_ZONE_ID_INVALID) // WinVista
+	try
 	{
-		return mpt::Date::Unix{};
-	}
-	SYSTEMTIME sys_utc{};
-	if(TzSpecificLocalTimeToSystemTimeEx(&dtzi, &sys_local, &sys_utc) == FALSE) // Win7/Win8
+		if(is_wine())
+		{
+			throw tz_error{};
+		}
+		SYSTEMTIME sys_local{};
+		sys_local.wYear = static_cast<uint16>(timeLocal.year);
+		sys_local.wMonth = static_cast<uint16>(timeLocal.month);
+		sys_local.wDay = static_cast<uint16>(timeLocal.day);
+		sys_local.wHour = static_cast<uint16>(timeLocal.hours);
+		sys_local.wMinute = static_cast<uint16>(timeLocal.minutes);
+		sys_local.wSecond = static_cast<uint16>(timeLocal.seconds);
+		sys_local.wMilliseconds = 0;
+		DYNAMIC_TIME_ZONE_INFORMATION dtzi{};
+		if(GetDynamicTimeZoneInformation(&dtzi) == TIME_ZONE_ID_INVALID) // WinVista
+		{
+			throw tz_error{};
+		}
+		SYSTEMTIME sys_utc{};
+		if(TzSpecificLocalTimeToSystemTimeEx(&dtzi, &sys_local, &sys_utc) == FALSE) // Win7/Win8
+		{
+			throw tz_error{};
+		}
+		FILETIME ft{};
+		if(SystemTimeToFileTime(&sys_utc, &ft) == FALSE) // Win 2000
+		{
+			throw tz_error{};
+		}
+		ULARGE_INTEGER time_value{};
+		time_value.LowPart = ft.dwLowDateTime;
+		time_value.HighPart = ft.dwHighDateTime;
+		return UnixFromSeconds(static_cast<int64>((time_value.QuadPart - 116444736000000000LL) / 10000000LL));
+	} catch(const tz_error &)
 	{
-		return mpt::Date::Unix{};
+		// nothing
 	}
-	FILETIME ft{};
-	if(SystemTimeToFileTime(&sys_utc, &ft) == FALSE) // Win 2000
+#endif
+#if defined(MPT_FALLBACK_TIMEZONE_WINDOWS_CURRENT)
+	try
 	{
-		return mpt::Date::Unix{};
-	}
-	ULARGE_INTEGER time_value{};
-	time_value.LowPart = ft.dwLowDateTime;
-	time_value.HighPart = ft.dwHighDateTime;
-	return mpt::Date::UnixFromSeconds(static_cast<int64>((time_value.QuadPart - 116444736000000000LL) / 10000000LL));
-#elif defined(MPT_FALLBACK_TIMEZONE_WINDOWS_CURRENT)
-	SYSTEMTIME sys_local{};
-	sys_local.wYear = static_cast<uint16>(timeLocal.year);
-	sys_local.wMonth = static_cast<uint16>(timeLocal.month);
-	sys_local.wDay = static_cast<uint16>(timeLocal.day);
-	sys_local.wHour = static_cast<uint16>(timeLocal.hours);
-	sys_local.wMinute = static_cast<uint16>(timeLocal.minutes);
-	sys_local.wSecond = static_cast<uint16>(timeLocal.seconds);
-	sys_local.wMilliseconds = 0;
-	SYSTEMTIME sys_utc{};
-	if(TzSpecificLocalTimeToSystemTime(NULL, &sys_local, &sys_utc) == FALSE) // WinXP
+		SYSTEMTIME sys_local{};
+		sys_local.wYear = static_cast<uint16>(timeLocal.year);
+		sys_local.wMonth = static_cast<uint16>(timeLocal.month);
+		sys_local.wDay = static_cast<uint16>(timeLocal.day);
+		sys_local.wHour = static_cast<uint16>(timeLocal.hours);
+		sys_local.wMinute = static_cast<uint16>(timeLocal.minutes);
+		sys_local.wSecond = static_cast<uint16>(timeLocal.seconds);
+		sys_local.wMilliseconds = 0;
+		SYSTEMTIME sys_utc{};
+		if(TzSpecificLocalTimeToSystemTime(NULL, &sys_local, &sys_utc) == FALSE) // WinXP
+		{
+			throw tz_error{};
+		}
+		FILETIME ft{};
+		if(SystemTimeToFileTime(&sys_utc, &ft) == FALSE) // Win 2000
+		{
+			throw tz_error{};
+		}
+		ULARGE_INTEGER time_value{};
+		time_value.LowPart = ft.dwLowDateTime;
+		time_value.HighPart = ft.dwHighDateTime;
+		return UnixFromSeconds(static_cast<int64>((time_value.QuadPart - 116444736000000000LL) / 10000000LL));
+	} catch(const tz_error &)
 	{
-		return mpt::Date::Unix{};
+		// nothing
 	}
-	FILETIME ft{};
-	if(SystemTimeToFileTime(&sys_utc, &ft) == FALSE) // Win 2000
-	{
-		return mpt::Date::Unix{};
-	}
-	ULARGE_INTEGER time_value{};
-	time_value.LowPart = ft.dwLowDateTime;
-	time_value.HighPart = ft.dwHighDateTime;
-	return mpt::Date::UnixFromSeconds(static_cast<int64>((time_value.QuadPart - 116444736000000000LL) / 10000000LL));
-#elif defined(MPT_FALLBACK_TIMEZONE_C)
+#endif
+#if defined(MPT_FALLBACK_TIMEZONE_C)
 	std::tm tmp{};
 	tmp.tm_year = timeLocal.year - 1900;
 	tmp.tm_mon = timeLocal.month - 1;
@@ -203,74 +248,92 @@ mpt::Date::Unix UnixFromLocal(Local timeLocal)
 	tmp.tm_hour = timeLocal.hours;
 	tmp.tm_min = timeLocal.minutes;
 	tmp.tm_sec = static_cast<int>(timeLocal.seconds);
-	return mpt::Date::UnixFromSeconds(static_cast<int64>(std::mktime(&tmp)));
+	return UnixFromSeconds(static_cast<int64>(std::mktime(&tmp)));
 #endif
 }
 
-mpt::Date::Local UnixAsLocal(Unix tp)
+Local UnixAsLocal(Unix tp)
 {
 #if defined(MPT_FALLBACK_TIMEZONE_WINDOWS_HISTORIC)
-	ULARGE_INTEGER time_value{};
-	time_value.QuadPart = static_cast<int64>(mpt::Date::UnixAsSeconds(tp)) * 10000000LL + 116444736000000000LL;
-	FILETIME ft{};
-	ft.dwLowDateTime = time_value.LowPart;
-	ft.dwHighDateTime = time_value.HighPart;
-	SYSTEMTIME sys_utc{};
-	if(FileTimeToSystemTime(&ft, &sys_utc) == FALSE) // WinXP
+	try
 	{
-		return mpt::Date::Local{};
-	}
-	DYNAMIC_TIME_ZONE_INFORMATION dtzi{};
-	if(GetDynamicTimeZoneInformation(&dtzi) == TIME_ZONE_ID_INVALID) // WinVista
+		if(is_wine())
+		{
+			throw tz_error{};
+		}
+		ULARGE_INTEGER time_value{};
+		time_value.QuadPart = static_cast<int64>(UnixAsSeconds(tp)) * 10000000LL + 116444736000000000LL;
+		FILETIME ft{};
+		ft.dwLowDateTime = time_value.LowPart;
+		ft.dwHighDateTime = time_value.HighPart;
+		SYSTEMTIME sys_utc{};
+		if(FileTimeToSystemTime(&ft, &sys_utc) == FALSE) // WinXP
+		{
+			throw tz_error{};
+		}
+		DYNAMIC_TIME_ZONE_INFORMATION dtzi{};
+		if(GetDynamicTimeZoneInformation(&dtzi) == TIME_ZONE_ID_INVALID) // WinVista
+		{
+			throw tz_error{};
+		}
+		SYSTEMTIME sys_local{};
+		if(SystemTimeToTzSpecificLocalTimeEx(&dtzi, &sys_utc, &sys_local) == FALSE) // Win7/Win8
+		{
+			throw tz_error{};
+		}
+		Local result{};
+		result.year = sys_local.wYear;
+		result.month = sys_local.wMonth;
+		result.day = sys_local.wDay;
+		result.hours = sys_local.wHour;
+		result.minutes = sys_local.wMinute;
+		result.seconds = sys_local.wSecond;
+		return result;
+	} catch(const tz_error&)
 	{
-		return mpt::Date::Local{};
+		// nothing
 	}
-	SYSTEMTIME sys_local{};
-	if(SystemTimeToTzSpecificLocalTimeEx(&dtzi, &sys_utc, &sys_local) == FALSE) // Win7/Win8
+#endif
+#if defined(MPT_FALLBACK_TIMEZONE_WINDOWS_CURRENT)
+	try
 	{
-		return mpt::Date::Local{};
-	}
-	mpt::Date::Local result{};
-	result.year = sys_local.wYear;
-	result.month = sys_local.wMonth;
-	result.day = sys_local.wDay;
-	result.hours = sys_local.wHour;
-	result.minutes = sys_local.wMinute;
-	result.seconds = sys_local.wSecond;
-	return result;
-#elif defined(MPT_FALLBACK_TIMEZONE_WINDOWS_CURRENT)
-	ULARGE_INTEGER time_value{};
-	time_value.QuadPart = static_cast<int64>(mpt::Date::UnixAsSeconds(tp)) * 10000000LL + 116444736000000000LL;
-	FILETIME ft{};
-	ft.dwLowDateTime = time_value.LowPart;
-	ft.dwHighDateTime = time_value.HighPart;
-	SYSTEMTIME sys_utc{};
-	if(FileTimeToSystemTime(&ft, &sys_utc) == FALSE) // WinXP
+		ULARGE_INTEGER time_value{};
+		time_value.QuadPart = static_cast<int64>(UnixAsSeconds(tp)) * 10000000LL + 116444736000000000LL;
+		FILETIME ft{};
+		ft.dwLowDateTime = time_value.LowPart;
+		ft.dwHighDateTime = time_value.HighPart;
+		SYSTEMTIME sys_utc{};
+		if(FileTimeToSystemTime(&ft, &sys_utc) == FALSE) // WinXP
+		{
+			throw tz_error{};
+		}
+		SYSTEMTIME sys_local{};
+		if(SystemTimeToTzSpecificLocalTime(NULL, &sys_utc, &sys_local) == FALSE) // Win2000
+		{
+			throw tz_error{};
+		}
+		Local result{};
+		result.year = sys_local.wYear;
+		result.month = sys_local.wMonth;
+		result.day = sys_local.wDay;
+		result.hours = sys_local.wHour;
+		result.minutes = sys_local.wMinute;
+		result.seconds = sys_local.wSecond;
+		return result;
+	} catch(const tz_error&)
 	{
-		return mpt::Date::Local{};
+		// nothing
 	}
-	SYSTEMTIME sys_local{};
-	if(SystemTimeToTzSpecificLocalTime(NULL, &sys_utc, &sys_local) == FALSE) // Win2000
-	{
-		return mpt::Date::Local{};
-	}
-	mpt::Date::Local result{};
-	result.year = sys_local.wYear;
-	result.month = sys_local.wMonth;
-	result.day = sys_local.wDay;
-	result.hours = sys_local.wHour;
-	result.minutes = sys_local.wMinute;
-	result.seconds = sys_local.wSecond;
-	return result;
-#elif defined(MPT_FALLBACK_TIMEZONE_C)
-	std::time_t time_tp = static_cast<std::time_t>(mpt::Date::UnixAsSeconds(tp));
+#endif
+#if defined(MPT_FALLBACK_TIMEZONE_C)
+	std::time_t time_tp = static_cast<std::time_t>(UnixAsSeconds(tp));
 	std::tm *tmp = std::localtime(&time_tp);
 	if(!tmp)
 	{
-		return mpt::Date::Local{};
+		return Local{};
 	}
 	std::tm local = *tmp;
-	mpt::Date::Local result{};
+	Local result{};
 	result.year = local.tm_year + 1900;
 	result.month = local.tm_mon + 1;
 	result.day = local.tm_mday;
@@ -283,7 +346,7 @@ mpt::Date::Local UnixAsLocal(Unix tp)
 
 #endif // MODPLUG_TRACKER
 
-#endif
+} // namespace nochrono
 
 template <LogicalTimezone TZ>
 static mpt::ustring ToShortenedISO8601Impl(mpt::Date::Gregorian<TZ> date)
