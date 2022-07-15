@@ -222,10 +222,9 @@ public:
 
 #else // !MPT_OS_WINDOWS_WINRT
 
-#if (_WIN32_WINNT >= 0x0602) && 0 // Windows 8
+#if (_WIN32_WINNT >= 0x0602) && 0
 		bool hasKB2533623 = true;
-#else                             // < Windows 8
-								  // check for KB2533623
+#else
 		bool hasKB2533623 = false;
 		mpt::osinfo::windows::Version WindowsVersion = mpt::osinfo::windows::Version::Current();
 		if (WindowsVersion.IsAtLeast(mpt::osinfo::windows::Version::Win8)) {
@@ -240,7 +239,7 @@ public:
 				hKernel32DLL = NULL;
 			}
 		}
-#endif                            // Windows 8
+#endif
 
 		MPT_MAYBE_CONSTANT_IF (hasKB2533623) {
 
