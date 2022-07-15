@@ -224,7 +224,7 @@ public:
 
 #if (_WIN32_WINNT >= 0x0602) && 0 // Windows 8
 		bool hasKB2533623 = true;
-#else                             // < Windows 8 \
+#else                             // < Windows 8
 								  // check for KB2533623
 		bool hasKB2533623 = false;
 		mpt::osinfo::windows::Version WindowsVersion = mpt::osinfo::windows::Version::Current();
