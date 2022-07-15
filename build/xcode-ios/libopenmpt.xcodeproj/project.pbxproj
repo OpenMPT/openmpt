@@ -441,6 +441,7 @@
 		915D6003E8C2D2F59AD0EE43 /* message.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = message.hpp; path = ../../src/mpt/format/message.hpp; sourceTree = "<group>"; };
 		91AA522185A99B930A94B061 /* I3DL2Reverb.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = I3DL2Reverb.h; path = ../../soundlib/plugins/dmo/I3DL2Reverb.h; sourceTree = "<group>"; };
 		91EC613953A4F2ABFABFBF79 /* libopenmpt_stream_callbacks_file.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = libopenmpt_stream_callbacks_file.h; path = ../../libopenmpt/libopenmpt_stream_callbacks_file.h; sourceTree = "<group>"; };
+		92AB21E22B230F54570A0022 /* windows_wine_version.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = windows_wine_version.hpp; path = ../../src/mpt/osinfo/windows_wine_version.hpp; sourceTree = "<group>"; };
 		9334A009842C0DFBF02F8E49 /* Compressor.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Compressor.cpp; path = ../../soundlib/plugins/dmo/Compressor.cpp; sourceTree = "<group>"; };
 		949CE444733F7FB628218284 /* io_virtual_wrapper.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = io_virtual_wrapper.hpp; path = ../../src/mpt/io/io_virtual_wrapper.hpp; sourceTree = "<group>"; };
 		94CA18088E8BD47AC88AD648 /* Profiler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Profiler.h; path = ../../common/Profiler.h; sourceTree = "<group>"; };
@@ -866,6 +867,7 @@
 				9FCB791A628BD98CBFC0B75A /* dos_memory.hpp */,
 				0F8105B483DB4AA601BED3F4 /* dos_version.hpp */,
 				C885A07E2286B770E9CDAEBE /* windows_version.hpp */,
+				92AB21E22B230F54570A0022 /* windows_wine_version.hpp */,
 			);
 			name = osinfo;
 			sourceTree = "<group>";

@@ -13,6 +13,7 @@
 #include "mpt/base/saturate_round.hpp"
 #include "mpt/osinfo/class.hpp"
 #include "mpt/osinfo/windows_version.hpp"
+#include "mpt/osinfo/windows_wine_version.hpp"
 #include "mpt/string/types.hpp"
 #include "openmpt/base/FlagSet.hpp"
 #include "openmpt/base/Types.hpp"

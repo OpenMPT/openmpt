@@ -864,6 +864,9 @@
     <ClInclude Include="..\..\src\mpt\osinfo\windows_version.hpp">
       <Filter>src\mpt\osinfo</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\mpt\osinfo\windows_wine_version.hpp">
+      <Filter>src\mpt\osinfo</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\mpt\out_of_memory\out_of_memory.hpp">
       <Filter>src\mpt\out_of_memory</Filter>
     </ClInclude>

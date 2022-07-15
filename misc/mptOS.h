@@ -14,6 +14,7 @@
 
 #include "mpt/osinfo/class.hpp"
 #include "mpt/osinfo/windows_version.hpp"
+#include "mpt/osinfo/windows_wine_version.hpp"
 
 
 OPENMPT_NAMESPACE_BEGIN
