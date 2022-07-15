@@ -390,7 +390,7 @@ public:
 
 public:
 	bool IsValid() const {
-		return true;
+		return valid;
 	}
 
 private:
