@@ -321,11 +321,37 @@ BINDIR_MADE:=$(shell $(MKDIR_P) bin)
 PKG_CONFIG ?= pkg-config
 
 ifeq ($(CONFIG)x,x)
-
 include build/make/config-defaults.mk
 
-else
+else ifeq ($(CONFIG),mingw64-win32)
+$(warning warning: 'CONFIG=mingw64-win32' is deprecated. Use 'CONFIG=mingw-w64 WINDOWS_ARCH=x86' instead.)
+WINDOWS_ARCH=x86
+WINDOWS_FAMILY=
+WINDOWS_VERSION=
+include build/make/config-mingw-w64.mk
 
+else ifeq ($(CONFIG),mingw64-win64)
+$(warning warning: 'CONFIG=mingw64-win64' is deprecated. Use 'CONFIG=mingw-w64 WINDOWS_ARCH=amd64' instead.)
+WINDOWS_ARCH=amd64
+WINDOWS_FAMILY=
+WINDOWS_VERSION=
+include build/make/config-mingw-w64.mk
+
+else ifeq ($(CONFIG),mingw64-winrt-x86)
+$(warning warning: 'CONFIG=mingw64-winrt-x86' is deprecated. Use 'CONFIG=mingw-w64 WINDOWS_ARCH=x86 WINDOWS_FAMILY=pc-app WINDOWS_VERSION=win8' instead.)
+WINDOWS_ARCH=x86
+WINDOWS_FAMILY=pc-app
+WINDOWS_VERSION=win8
+include build/make/config-mingw-w64.mk
+
+else ifeq ($(CONFIG),mingw64-winrt-amd64)
+$(warning warning: 'CONFIG=mingw64-winrt-amd64' is deprecated. Use 'CONFIG=mingw-w64 WINDOWS_ARCH=amd64 WINDOWS_FAMILY=pc-app WINDOWS_VERSION=win8' instead.)
+WINDOWS_ARCH=amd64
+WINDOWS_FAMILY=pc-app
+WINDOWS_VERSION=win8
+include build/make/config-mingw-w64.mk
+
+else
 include build/make/config-$(CONFIG).mk
 
 endif
