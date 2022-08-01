@@ -44,15 +44,15 @@ namespace ASIO {
 
 
 
+inline namespace ASIO_VERSION_NAMESPACE {
+
+
+
 #if ASIO_SYSTEM_WINDOWS
 
 
 
 namespace Windows {
-
-
-
-inline namespace ASIO_VERSION_NAMESPACE {
 
 
 
@@ -492,15 +492,15 @@ inline std::unique_ptr<IBufferSwitchDispatcher> CreateBufferSwitchDispatcher(Tfu
 
 
 
-} // namespace ASIO_VERSION_NAMESPACE
-
-
-
 } // namespace Windows
 
 
 
 #endif // ASIO_SYSTEM_WINDOWS
+
+
+
+} // namespace ASIO_VERSION_NAMESPACE
 
 
 

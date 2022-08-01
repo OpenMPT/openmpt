@@ -27,11 +27,11 @@ namespace ASIO {
 
 
 
-inline namespace Modern {
-
-
-
 inline namespace ASIO_VERSION_NAMESPACE {
+
+
+
+inline namespace Modern {
 
 
 
@@ -945,11 +945,11 @@ public:
 
 
 
-} // namespace ASIO_VERSION_NAMESPACE
-
-
-
 } // namespace Modern
+
+
+
+} // namespace ASIO_VERSION_NAMESPACE
 
 
 
