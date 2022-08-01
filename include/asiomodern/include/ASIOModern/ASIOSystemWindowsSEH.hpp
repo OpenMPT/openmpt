@@ -30,15 +30,15 @@ namespace ASIO {
 
 
 
+inline namespace ASIO_VERSION_NAMESPACE {
+
+
+
 #if ASIO_SYSTEM_WINDOWS
 
 
 
 namespace Windows {
-
-
-
-inline namespace ASIO_VERSION_NAMESPACE {
 
 
 
@@ -264,15 +264,15 @@ public:
 
 
 
-} // namespace ASIO_VERSION_NAMESPACE
-
-
-
 } // namespace Windows
 
 
 
 #endif // ASIO_SYSTEM_WINDOWS
+
+
+
+} // namespace ASIO_VERSION_NAMESPACE
 
 
 

@@ -73,6 +73,10 @@ namespace ASIO {
 
 
 
+inline namespace ASIO_VERSION_NAMESPACE {
+
+
+
 #define ASIO_PP_DEFER(m, ...) m(__VA_ARGS__)
 
 #define ASIO_PP_STRINGIFY(x) #x
@@ -167,10 +171,6 @@ namespace ASIO {
 
 
 inline namespace Core {
-
-
-
-inline namespace ASIO_VERSION_NAMESPACE {
 
 
 
@@ -370,11 +370,11 @@ static_assert(sizeof(CharBuf<1>) == 1);
 
 
 
-} // namespace ASIO_VERSION_NAMESPACE
-
-
-
 } // namespace Core
+
+
+
+} // namespace ASIO_VERSION_NAMESPACE
 
 
 

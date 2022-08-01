@@ -17,7 +17,7 @@ namespace ASIO {
 
 #define ASIO_MODERNSDK_VERSION_MAJOR 0
 #define ASIO_MODERNSDK_VERSION_MINOR 12
-#define ASIO_MODERNSDK_VERSION_PATCH 5
+#define ASIO_MODERNSDK_VERSION_PATCH 6
 #define ASIO_MODERNSDK_VERSION_BUILD 0
 
 
@@ -31,11 +31,11 @@ namespace ASIO {
 
 
 
-inline namespace Version {
-
-
-
 inline namespace ASIO_VERSION_NAMESPACE {
+
+
+
+inline namespace Version {
 
 
 
@@ -117,11 +117,11 @@ constexpr inline VersionInfo ModernSDKVersion = {
 
 
 
-} // namespace ASIO_VERSION_NAMESPACE
-
-
-
 } // namespace Version
+
+
+
+} // namespace ASIO_VERSION_NAMESPACE
 
 
 

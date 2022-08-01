@@ -20,11 +20,11 @@ namespace ASIO {
 
 
 
-inline namespace Core {
-
-
-
 inline namespace ASIO_VERSION_NAMESPACE {
+
+
+
+inline namespace Core {
 
 
 
@@ -454,11 +454,11 @@ public:
 
 
 
-} // namespace ASIO_VERSION_NAMESPACE
-
-
-
 } // namespace Core
+
+
+
+} // namespace ASIO_VERSION_NAMESPACE
 
 
 
