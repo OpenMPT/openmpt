@@ -35,8 +35,7 @@ template <typename Tvalue>
 struct adl_serializer<std::map<mpt::ustring, Tvalue>> {
 	static void to_json(json & j, const std::map<mpt::ustring, Tvalue> & val) {
 		std::map<std::string, Tvalue> utf8map;
-		for (const auto & value : val)
-		{
+		for (const auto & value : val) {
 			utf8map[mpt::transcode<std::string>(mpt::common_encoding::utf8, value.first)] = value.second;
 		}
 		j = std::move(utf8map);
@@ -44,8 +43,7 @@ struct adl_serializer<std::map<mpt::ustring, Tvalue>> {
 	static void from_json(const json & j, std::map<mpt::ustring, Tvalue> & val) {
 		std::map<std::string, Tvalue> utf8map = j.get<std::map<std::string, Tvalue>>();
 		std::map<mpt::ustring, Tvalue> result;
-		for (const auto & value : utf8map)
-		{
+		for (const auto & value : utf8map) {
 			result[mpt::transcode<mpt::ustring>(mpt::common_encoding::utf8, value.first)] = value.second;
 		}
 		val = std::move(result);
@@ -57,11 +55,9 @@ struct adl_serializer<std::optional<Tvalue>> {
 		j = (val ? json{*val} : json{nullptr});
 	}
 	static void from_json(const json & j, std::optional<Tvalue> & val) {
-		if (!j.is_null())
-		{
+		if (!j.is_null()) {
 			val = j.get<Tvalue>();
-		} else
-		{
+		} else {
 			val = std::nullopt;
 		}
 	}
