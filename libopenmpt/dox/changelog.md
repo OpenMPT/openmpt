@@ -14,7 +14,7 @@ is just a high-level summary.
 
  *  [**New**] `Makefile` now uses `PKG_CONFIG` as path to `pkg-config`.
 
- *  mpg123: Update to v1.30.1 (2022-07-13).
+ *  mpg123: Update to v1.30.2 (2022-08-01).
 
 ### libopenmpt 0.6.4 (2022-06-12)
 
