@@ -7,7 +7,7 @@ is just a high-level summary.
 
 ### libopenmpt 0.4.31-pre
 
- *  mpg123: Update to v1.30.1 (2022-07-13).
+ *  mpg123: Update to v1.30.2 (2022-08-01).
  *  zlib: Update to v1.2.12 (2022-03-27).
 
 ### libopenmpt 0.4.30 (2022-03-13)
