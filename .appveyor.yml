@@ -87,7 +87,7 @@ for:
     
     build_script:
       - build\auto\build_openmpt_args.cmd %MPT_APPVEYOR_VS% %MPT_APPVEYOR_TARGET% %MPT_APPVEYOR_ARCH_CONFIG% Release 7z default
-      - build\tools\7zip\7z.exe a -r -t7z -mx9 -y bin\$(MPT_APPVEYOR_VS)-$(MPT_APPVEYOR_TARGET)-$(MPT_APPVEYOR_ARCH).7z bin\release\$(MPT_APPVEYOR_VS)-$(MPT_APPVEYOR_TARGET)-static\$(MPT_APPVEYOR_ARCH)
+      - build\tools\7zip\7z.exe a -r -t7z -mx9 -y bin\%MPT_APPVEYOR_VS%-%MPT_APPVEYOR_TARGET%-%MPT_APPVEYOR_ARCH%.7z bin\release\%MPT_APPVEYOR_VS%-%MPT_APPVEYOR_TARGET%-static\%MPT_APPVEYOR_ARCH%
     
     artifacts:
       - path: 'bin\$(MPT_APPVEYOR_VS)-$(MPT_APPVEYOR_TARGET)-$(MPT_APPVEYOR_ARCH).7z'
