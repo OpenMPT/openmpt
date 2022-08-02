@@ -87,22 +87,10 @@ for:
     
     build_script:
       - build\auto\build_openmpt_args.cmd %MPT_APPVEYOR_VS% %MPT_APPVEYOR_TARGET% %MPT_APPVEYOR_ARCH_CONFIG% Release 7z default
+      - build\tools\7zip\7z.exe a -r -t7z -mx9 -y bin\$(MPT_APPVEYOR_VS)-$(MPT_APPVEYOR_TARGET)-$(MPT_APPVEYOR_ARCH).7z bin\release\$(MPT_APPVEYOR_VS)-$(MPT_APPVEYOR_TARGET)-static\$(MPT_APPVEYOR_ARCH)
     
     artifacts:
-      - path: 'bin\release\$(MPT_APPVEYOR_VS)-$(MPT_APPVEYOR_TARGET)-static\$(MPT_APPVEYOR_ARCH)\OpenMPT.exe'
-      - path: 'bin\release\$(MPT_APPVEYOR_VS)-$(MPT_APPVEYOR_TARGET)-static\$(MPT_APPVEYOR_ARCH)\OpenMPT.pdb'
-      - path: 'bin\release\$(MPT_APPVEYOR_VS)-$(MPT_APPVEYOR_TARGET)-static\$(MPT_APPVEYOR_ARCH)\openmpt-lame.dll'
-      - path: 'bin\release\$(MPT_APPVEYOR_VS)-$(MPT_APPVEYOR_TARGET)-static\$(MPT_APPVEYOR_ARCH)\openmpt-lame.pdb'
-      - path: 'bin\release\$(MPT_APPVEYOR_VS)-$(MPT_APPVEYOR_TARGET)-static\$(MPT_APPVEYOR_ARCH)\openmpt-mpg123.dll'
-      - path: 'bin\release\$(MPT_APPVEYOR_VS)-$(MPT_APPVEYOR_TARGET)-static\$(MPT_APPVEYOR_ARCH)\openmpt-mpg123.pdb'
-      - path: 'bin\release\$(MPT_APPVEYOR_VS)-$(MPT_APPVEYOR_TARGET)-static\$(MPT_APPVEYOR_ARCH)\openmpt-soundtouch.dll'
-      - path: 'bin\release\$(MPT_APPVEYOR_VS)-$(MPT_APPVEYOR_TARGET)-static\$(MPT_APPVEYOR_ARCH)\openmpt-soundtouch.pdb'
-      - path: 'bin\release\$(MPT_APPVEYOR_VS)-$(MPT_APPVEYOR_TARGET)-static\$(MPT_APPVEYOR_ARCH)\PluginBridge-$(MPT_APPVEYOR_ARCH).exe'
-      - path: 'bin\release\$(MPT_APPVEYOR_VS)-$(MPT_APPVEYOR_TARGET)-static\$(MPT_APPVEYOR_ARCH)\PluginBridge-$(MPT_APPVEYOR_ARCH).pdb'
-      - path: 'bin\release\$(MPT_APPVEYOR_VS)-$(MPT_APPVEYOR_TARGET)-static\$(MPT_APPVEYOR_ARCH)\PluginBridgeLegacy-$(MPT_APPVEYOR_ARCH).exe'
-      - path: 'bin\release\$(MPT_APPVEYOR_VS)-$(MPT_APPVEYOR_TARGET)-static\$(MPT_APPVEYOR_ARCH)\PluginBridgeLegacy-$(MPT_APPVEYOR_ARCH).pdb'
-      - path: 'bin\release\$(MPT_APPVEYOR_VS)-$(MPT_APPVEYOR_TARGET)-static\$(MPT_APPVEYOR_ARCH)\openmpt-wine-support.zip'
-      - path: 'bin\release\$(MPT_APPVEYOR_VS)-$(MPT_APPVEYOR_TARGET)-static\$(MPT_APPVEYOR_ARCH)\updatesigntool.exe'
+      - path: 'bin\$(MPT_APPVEYOR_VS)-$(MPT_APPVEYOR_TARGET)-$(MPT_APPVEYOR_ARCH).7z'
   
   -
     matrix:
@@ -193,6 +181,7 @@ for:
             Get-AppVeyorArtifacts OpenMPT openmpt -Token $env:OPENMPT_APPVEYOR_API_TOKEN -JobName 'VS2022 Win10 arm64'
             Get-AppVeyorArtifacts OpenMPT openmpt -Token $env:OPENMPT_APPVEYOR_API_TOKEN -JobName 'VS2022 Win7 x86'
             Get-AppVeyorArtifacts OpenMPT openmpt -Token $env:OPENMPT_APPVEYOR_API_TOKEN -JobName 'VS2022 Win7 amd64'
+      - build\tools\7zip\7z.exe x -y bin\*.7z
 
     build_script:
       - build\auto\build_openmpt_release_packages_multiarch.cmd auto
