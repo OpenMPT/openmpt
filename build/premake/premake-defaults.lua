@@ -270,7 +270,7 @@
 	filter {}
 		if _OPTIONS["clang"] then
 			-- work-around
-			-- <https://developercommunity.visualstudio.com/t/lots-of-lld-link-warnings-about-PDB-with/1667797>
+			-- <https://github.com/llvm/llvm-project/issues/56285>
 			symbols "Off"
 		end
 
