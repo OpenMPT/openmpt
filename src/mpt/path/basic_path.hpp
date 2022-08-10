@@ -504,7 +504,7 @@ struct PathTraits {
 // Work-around <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=105329> /
 // <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=105651>.
 #pragma GCC push_options
-#pragma GCC optimize ("O1")
+#pragma GCC optimize("O1")
 #endif
 	static void SplitPath(raw_path_type p, raw_path_type * prefix, raw_path_type * drive, raw_path_type * dir, raw_path_type * fbase, raw_path_type * fext) {
 
@@ -684,7 +684,7 @@ struct PathTraits {
 // Work-around <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=105329> /
 // <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=105651>.
 #pragma GCC push_options
-#pragma GCC optimize ("O1")
+#pragma GCC optimize("O1")
 #endif
 	// Convert a path to its simplified form, i.e. remove ".\" and "..\" entries
 	// Note: We use our own implementation as PathCanonicalize is limited to MAX_PATH
@@ -811,7 +811,7 @@ struct PathTraits {
 // Work-around <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=105329> /
 // <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=105651>.
 #pragma GCC push_options
-#pragma GCC optimize ("O1")
+#pragma GCC optimize("O1")
 #endif
 	static bool IsAbsolute(const raw_path_type & path) {
 		using namespace path_literals;
