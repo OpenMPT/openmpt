@@ -83,7 +83,7 @@ protected:
 	IState() noexcept = default;
 
 public:
-	IState(const IState &) = delete;
+	IState(const IState &)             = delete;
 	IState & operator=(const IState &) = delete;
 
 public:
@@ -95,7 +95,7 @@ protected:
 	ITranslator() noexcept = default;
 
 public:
-	ITranslator(const ITranslator &) = delete;
+	ITranslator(const ITranslator &)             = delete;
 	ITranslator & operator=(const ITranslator &) = delete;
 
 public:
@@ -233,7 +233,7 @@ public:
 	[[nodiscard]] ErrorCode getChannelInfo(ChannelInfo * info) final {
 		return CallDriver([&]() { return m_Driver->getChannelInfo(info); }, __func__);
 	}
-	[[nodiscard]] ErrorCode createBuffers(BufferInfo * bufferInfos, Long numChannels, Long bufferSize, Callbacks const * callbacks) final {
+	[[nodiscard]] ErrorCode createBuffers(BufferInfo * bufferInfos, Long numChannels, Long bufferSize, const Callbacks * callbacks) final {
 		return CallDriver([&]() { return m_Driver->createBuffers(bufferInfos, numChannels, bufferSize, callbacks); }, __func__);
 	}
 	[[nodiscard]] ErrorCode disposeBuffers() final {

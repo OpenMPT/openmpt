@@ -89,8 +89,8 @@ private:
 	HKEY m_Key = NULL;
 
 public:
-	HKey()             = default;
-	HKey(const HKey &) = delete;
+	HKey()                         = default;
+	HKey(const HKey &)             = delete;
 	HKey & operator=(const HKey &) = delete;
 	~HKey() {
 		if (m_Key) {
@@ -302,7 +302,7 @@ public:
 	[[nodiscard]] ErrorCode getChannelInfo(ChannelInfo * info) final {
 		return m_Driver->getChannelInfo(info);
 	}
-	[[nodiscard]] ErrorCode createBuffers(BufferInfo * bufferInfos, Long numChannels, Long bufferSize, Callbacks const * callbacks) final {
+	[[nodiscard]] ErrorCode createBuffers(BufferInfo * bufferInfos, Long numChannels, Long bufferSize, const Callbacks * callbacks) final {
 		return m_Driver->createBuffers(bufferInfos, numChannels, bufferSize, callbacks);
 	}
 	[[nodiscard]] ErrorCode disposeBuffers() final {
@@ -401,7 +401,7 @@ error:
 		CloseHandle(m_hBufferSwitch[0]);
 	}
 
-	BufferSwitchDispatcherBase(const BufferSwitchDispatcherBase &) noexcept = delete;
+	BufferSwitchDispatcherBase(const BufferSwitchDispatcherBase &) noexcept             = delete;
 	BufferSwitchDispatcherBase & operator=(const BufferSwitchDispatcherBase &) noexcept = delete;
 
 private:
