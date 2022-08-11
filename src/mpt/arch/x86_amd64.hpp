@@ -1316,29 +1316,25 @@ public:
 				cpuid_result ExtendedVendorString = cpuid(0x8000'0000u);
 				if ((ExtendedVendorString.a & 0xffff'0000u) == 0x8000'0000u) {
 					if (ExtendedVendorString.a >= 0x8000'0001u) {
+						// clang-format off
 						cpuid_result ExtendedFeatureFlags = cpuid(0x8000'0001u);
 #if !MPT_ARCH_AMD64
 						if (ExtendedFeatureFlags.d & (1 << 29)) {
 							LongMode = true;
 						}
-#endif // !MPT_ARCH_AMD64 \
-	// clang-format off
+#endif // !MPT_ARCH_AMD64
 						Features |= (ExtendedFeatureFlags.c & (1 <<  0)) ? (feature::lahf) : feature::none;
 						Features |= (ExtendedFeatureFlags.c & (1 <<  5)) ? (feature::lzcnt) : feature::none;
-						// clang-format on
 						if (x3dnowknown) {
-							// clang-format off
 							Features |= (ExtendedFeatureFlags.d & (1 << 31)) ? (feature::x3dnow) : feature::none;
-							// clang-format on
 						}
 						if (Vendor == vendor::AMD) {
-							// clang-format off
 							Features |= (ExtendedFeatureFlags.d & (1 << 22)) ? (feature::mmxext) : feature::none;
 							Features |= (ExtendedFeatureFlags.d & (1 << 30)) ? (feature::x3dnowext) : feature::none;
 							Features |= (ExtendedFeatureFlags.c & (1 <<  5)) ? (feature::popcnt) : feature::none;
 							Features |= (ExtendedFeatureFlags.c & (1 <<  8)) ? (feature::x3dnowprefetch) : feature::none;
-							// clang-format on
 						}
+						// clang-format on
 					}
 					if (ExtendedVendorString.a >= 0x8000'0004u) {
 						BrandID = cpuid(0x8000'0002u).as_text16() + cpuid(0x8000'0003u).as_text16() + cpuid(0x8000'0004u).as_text16();
