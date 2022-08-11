@@ -984,7 +984,7 @@ private:
 			:
 			: "%ebx"
 		);
-		// clang-format off
+		// clang-format on
 		return (result != 0);
 
 #else
