@@ -81,8 +81,14 @@ public:
 	void InternalFillAudioBuffer();
 	bool InternalStart();
 	void InternalStop();
-	bool InternalIsOpen() const { return m_Stream ? true : false; }
-	bool InternalHasGetStreamPosition() const { return false; }
+	bool InternalIsOpen() const
+	{
+		return m_Stream ? true : false;
+	}
+	bool InternalHasGetStreamPosition() const
+	{
+		return false;
+	}
 	int64 InternalGetStreamPositionFrames() const;
 	SoundDevice::BufferAttributes InternalGetEffectiveBufferAttributes() const;
 	SoundDevice::Statistics GetStatistics() const;
