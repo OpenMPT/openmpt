@@ -208,8 +208,8 @@ static_assert(sizeof(MessageSelector) == SizeOfLong);
 struct Callbacks {
 	void(ASIO_CALL * bufferSwitch ASIO_ATTR_CALL)(Long doubleBufferIndex, Bool directProcess) noexcept                                      = nullptr;
 	void(ASIO_CALL * sampleRateDidChange ASIO_ATTR_CALL)(SampleRate sRate) noexcept                                                         = nullptr;
-	Long(ASIO_CALL * asioMessage ASIO_ATTR_CALL)(MessageSelector selector, Long value, void const * message, Double const * opt) noexcept   = nullptr;
-	Time const *(ASIO_CALL * bufferSwitchTimeInfo ASIO_ATTR_CALL)(Time const * params, Long doubleBufferIndex, Bool directProcess) noexcept = nullptr;
+	Long(ASIO_CALL * asioMessage ASIO_ATTR_CALL)(MessageSelector selector, Long value, const void * message, const Double * opt) noexcept   = nullptr;
+	const Time *(ASIO_CALL * bufferSwitchTimeInfo ASIO_ATTR_CALL)(const Time * params, Long doubleBufferIndex, Bool directProcess) noexcept = nullptr;
 };
 #if ASIO_SYSTEM_WINDOWS && (ASIO_COMPILER_GCC || ASIO_COMPILER_CLANG)
 #pragma pop_macro("cdecl")
@@ -410,7 +410,7 @@ ASIO_INTERFACE ISystemDriver : public IUnknown {
 	[[nodiscard]] virtual ErrorCode ASIO_DRIVERCALL setClockSource    ASIO_ATTR_DRIVERCALL(Long reference)                                                                           = 0;
 	[[nodiscard]] virtual ErrorCode ASIO_DRIVERCALL getSamplePosition ASIO_ATTR_DRIVERCALL(HiLoLongLong * samplePosition, HiLoLongLong * timeStamp)                                  = 0;
 	[[nodiscard]] virtual ErrorCode ASIO_DRIVERCALL getChannelInfo    ASIO_ATTR_DRIVERCALL(ChannelInfo * info)                                                                       = 0;
-	[[nodiscard]] virtual ErrorCode ASIO_DRIVERCALL createBuffers     ASIO_ATTR_DRIVERCALL(BufferInfo * bufferInfos, Long numChannels, Long bufferSize, Callbacks const * callbacks) = 0;
+	[[nodiscard]] virtual ErrorCode ASIO_DRIVERCALL createBuffers     ASIO_ATTR_DRIVERCALL(BufferInfo * bufferInfos, Long numChannels, Long bufferSize, const Callbacks * callbacks) = 0;
 	[[nodiscard]] virtual ErrorCode ASIO_DRIVERCALL disposeBuffers    ASIO_ATTR_DRIVERCALL()                                                                                         = 0;
 	[[nodiscard]] virtual ErrorCode ASIO_DRIVERCALL controlPanel      ASIO_ATTR_DRIVERCALL()                                                                                         = 0;
 	[[nodiscard]] virtual ErrorCode ASIO_DRIVERCALL future            ASIO_ATTR_DRIVERCALL(FutureSelector selector, void * opt)                                                      = 0;
@@ -445,7 +445,7 @@ public:
 	[[nodiscard]] virtual ErrorCode setClockSource(Long reference)                                                                          = 0;
 	[[nodiscard]] virtual ErrorCode getSamplePosition(HiLoLongLong * samplePosition, HiLoLongLong * timeStamp)                              = 0;
 	[[nodiscard]] virtual ErrorCode getChannelInfo(ChannelInfo * info)                                                                      = 0;
-	[[nodiscard]] virtual ErrorCode createBuffers(BufferInfo * bufferInfos, Long numChannels, Long bufferSize, Callbacks const * callbacks) = 0;
+	[[nodiscard]] virtual ErrorCode createBuffers(BufferInfo * bufferInfos, Long numChannels, Long bufferSize, const Callbacks * callbacks) = 0;
 	[[nodiscard]] virtual ErrorCode disposeBuffers()                                                                                        = 0;
 	[[nodiscard]] virtual ErrorCode controlPanel()                                                                                          = 0;
 	[[nodiscard]] virtual ErrorCode future(FutureSelector selector, void * opt)                                                             = 0;

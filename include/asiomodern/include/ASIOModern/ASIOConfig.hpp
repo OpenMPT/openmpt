@@ -283,11 +283,11 @@ private:
 	Char buf[size] = "";
 
 public:
-	CharBuf()                = default;
-	CharBuf(const CharBuf &) = default;
-	CharBuf(CharBuf &&)      = default;
+	CharBuf()                            = default;
+	CharBuf(const CharBuf &)             = default;
+	CharBuf(CharBuf &&)                  = default;
 	CharBuf & operator=(const CharBuf &) = default;
-	CharBuf & operator=(CharBuf &&) = default;
+	CharBuf & operator=(CharBuf &&)      = default;
 
 public:
 	constexpr CharBuf(std::nullptr_t) noexcept
