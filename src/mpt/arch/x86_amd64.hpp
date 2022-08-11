@@ -993,7 +993,6 @@ private:
 		return false;
 
 #endif
-
 	}
 
 	[[nodiscard]] static uint16 read_cyrix_id() noexcept {
@@ -1009,7 +1008,7 @@ private:
 		inportb(0x23);
 		return result;
 
-#elif	MPT_COMPILER_MSVC && MPT_MODE_KERNEL
+#elif MPT_COMPILER_MSVC && MPT_MODE_KERNEL
 
 		uint16 result = 0;
 		__outbyte(0x22, 0x00);
@@ -1025,7 +1024,6 @@ private:
 		return 0x00'00;
 
 #endif
-
 	}
 
 #endif // MPT_ARCH_X86
@@ -1133,7 +1131,7 @@ public:
 		Features |= featureset::amd64;
 
 #endif // MPT_ARCH
-		
+
 		if (Features.supports(feature::cpuid)) {
 			// with cpuid
 			cpuid_result VendorString = cpuid(0x0000'0000u);
@@ -1200,11 +1198,13 @@ public:
 			if ((VendorString.a >= 0x0000'0001u) || (Vendor == vendor::Cyrix)) {
 				cpuid_result StandardFeatureFlags = cpuid(0x0000'0001u);
 				CPUID = StandardFeatureFlags.a;
+				// clang-format off
 				uint32 BaseStepping = (StandardFeatureFlags.a >>  0) & 0x0f;
 				uint32 BaseModel    = (StandardFeatureFlags.a >>  4) & 0x0f;
 				uint32 BaseFamily   = (StandardFeatureFlags.a >>  8) & 0x0f;
 				uint32 ExtModel     = (StandardFeatureFlags.a >> 16) & 0x0f;
 				uint32 ExtFamily    = (StandardFeatureFlags.a >> 20) & 0xff;
+				// clang-format on
 				if (BaseFamily == 0xf) {
 					Family = static_cast<uint16>(ExtFamily + BaseFamily);
 				} else {
@@ -1221,6 +1221,7 @@ public:
 					Model = static_cast<uint8>(BaseModel);
 				}
 				Stepping = static_cast<uint8>(BaseStepping);
+				// clang-format off
 				Features |= (StandardFeatureFlags.d & (1 <<  0)) ? (feature::fpu | feature::fsin) : feature::none;
 				Features |= (StandardFeatureFlags.d & (1 <<  4)) ? (feature::tsc) : feature::none;
 				Features |= (StandardFeatureFlags.d & (1 <<  8)) ? (feature::cx8) : feature::none;
@@ -1238,15 +1239,18 @@ public:
 				Features |= (StandardFeatureFlags.c & (1 << 23)) ? (feature::popcnt) : feature::none;
 				Features |= (StandardFeatureFlags.c & (1 << 28)) ? (feature::avx) : feature::none;
 				Features |= (StandardFeatureFlags.c & (1 << 29)) ? (feature::f16c) : feature::none;
+				// clang-format on
 				if (StandardFeatureFlags.c & (1 << 31)) {
 					Virtualized = true;
 				}
 			}
 			if (VendorString.a >= 0x0000'0007u) {
 				cpuid_result ExtendedFeatures = cpuidex(0x0000'0007u, 0x0000'0000u);
+				// clang-format off
 				Features |= (ExtendedFeatures.b & (1 <<  3)) ? (feature::bmi1) : feature::none;
 				Features |= (ExtendedFeatures.b & (1 <<  5)) ? (feature::avx2) : feature::none;
 				Features |= (ExtendedFeatures.b & (1 <<  8)) ? (feature::bmi2) : feature::none;
+				// clang-format on
 			}
 			// 3DNow! manual recommends to just execute 0x8000'0000u.
 			// It is totally unknown how earlier CPUs from other vendors
@@ -1318,16 +1322,22 @@ public:
 							LongMode = true;
 						}
 #endif // !MPT_ARCH_AMD64
+						// clang-format off
 						Features |= (ExtendedFeatureFlags.c & (1 <<  0)) ? (feature::lahf) : feature::none;
 						Features |= (ExtendedFeatureFlags.c & (1 <<  5)) ? (feature::lzcnt) : feature::none;
+						// clang-format on
 						if (x3dnowknown) {
+							// clang-format off
 							Features |= (ExtendedFeatureFlags.d & (1 << 31)) ? (feature::x3dnow) : feature::none;
+							// clang-format on
 						}
 						if (Vendor == vendor::AMD) {
+							// clang-format off
 							Features |= (ExtendedFeatureFlags.d & (1 << 22)) ? (feature::mmxext) : feature::none;
 							Features |= (ExtendedFeatureFlags.d & (1 << 30)) ? (feature::x3dnowext) : feature::none;
 							Features |= (ExtendedFeatureFlags.c & (1 <<  5)) ? (feature::popcnt) : feature::none;
 							Features |= (ExtendedFeatureFlags.c & (1 <<  8)) ? (feature::x3dnowprefetch) : feature::none;
+							// clang-format on
 						}
 					}
 					if (ExtendedVendorString.a >= 0x8000'0004u) {
@@ -1415,6 +1425,7 @@ public:
 
 #endif // MPT_ARCH
 
+		// clang-format off
 		Features |= (IsProcessorFeaturePresent(PF_RDTSC_INSTRUCTION_AVAILABLE) != 0)   ? (feature::tsc | feature::i486) : feature::none;
 		Features |= (IsProcessorFeaturePresent(PF_COMPARE_EXCHANGE_DOUBLE) != 0)       ? (feature::cx8 | feature::i486) : feature::none;
 		Features |= (IsProcessorFeaturePresent(PF_MMX_INSTRUCTIONS_AVAILABLE) != 0)    ? (feature::mmx | feature::i486) : feature::none;
@@ -1427,6 +1438,7 @@ public:
 		Features |= (IsProcessorFeaturePresent(PF_SSE4_2_INSTRUCTIONS_AVAILABLE) != 0) ? (feature::sse4_1) : feature::none;
 		Features |= (IsProcessorFeaturePresent(PF_AVX_INSTRUCTIONS_AVAILABLE) != 0)    ? (feature::avx) : feature::none;
 		Features |= (IsProcessorFeaturePresent(PF_AVX2_INSTRUCTIONS_AVAILABLE) != 0)   ? (feature::avx2 | feature::fma | feature::bmi1) : feature::none;
+		// clang-format on
 
 #elif MPT_OS_DJGPP
 
