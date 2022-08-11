@@ -50,7 +50,11 @@ private:
 	Tstring group_sep;  // int
 public:
 	MPT_CONSTEXPRINLINE format_simple_spec() noexcept
-		: flags(0), width(0), precision(-1), group(0), group_sep() { }
+		: flags(0)
+		, width(0)
+		, precision(-1)
+		, group(0)
+		, group_sep() { }
 	MPT_CONSTEXPRINLINE format_simple_flags GetFlags() const noexcept {
 		return flags;
 	}

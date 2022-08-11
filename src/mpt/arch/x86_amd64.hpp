@@ -1321,8 +1321,8 @@ public:
 						if (ExtendedFeatureFlags.d & (1 << 29)) {
 							LongMode = true;
 						}
-#endif // !MPT_ARCH_AMD64
-						// clang-format off
+#endif // !MPT_ARCH_AMD64 \
+	// clang-format off
 						Features |= (ExtendedFeatureFlags.c & (1 <<  0)) ? (feature::lahf) : feature::none;
 						Features |= (ExtendedFeatureFlags.c & (1 <<  5)) ? (feature::lzcnt) : feature::none;
 						// clang-format on
@@ -1452,9 +1452,7 @@ public:
 #endif
 
 #endif // MPT_ARCH_X86 || MPT_ARCH_AMD64
-
 	}
-
 };
 
 

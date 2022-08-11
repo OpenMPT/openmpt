@@ -377,14 +377,20 @@ struct AppInfo
 		Name = name;
 		return *this;
 	}
-	mpt::ustring GetName() const { return Name; }
+	mpt::ustring GetName() const
+	{
+		return Name;
+	}
 #if MPT_OS_WINDOWS
 	AppInfo &SetHWND(HWND hwnd)
 	{
 		UIHandle = reinterpret_cast<uintptr_t>(hwnd);
 		return *this;
 	}
-	HWND GetHWND() const { return reinterpret_cast<HWND>(UIHandle); }
+	HWND GetHWND() const
+	{
+		return reinterpret_cast<HWND>(UIHandle);
+	}
 #endif  // MPT_OS_WINDOWS
 };
 

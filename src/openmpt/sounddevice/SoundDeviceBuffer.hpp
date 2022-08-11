@@ -31,8 +31,8 @@ class BufferIO
 {
 
 private:
-	mpt::audio_span_interleaved<const Tsample> const m_src;
-	mpt::audio_span_interleaved<Tsample> const m_dst;
+	const mpt::audio_span_interleaved<const Tsample> m_src;
+	const mpt::audio_span_interleaved<Tsample> m_dst;
 	std::size_t m_countFramesReadProcessed;
 	std::size_t m_countFramesWriteProcessed;
 	const BufferFormat m_bufferFormat;

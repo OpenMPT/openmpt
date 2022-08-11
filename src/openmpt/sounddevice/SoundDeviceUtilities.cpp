@@ -404,7 +404,8 @@ void CAudioThread::Deactivate()
 
 
 CSoundDeviceWithThread::CSoundDeviceWithThread(ILogger &logger, SoundDevice::Info info, SoundDevice::SysInfo sysInfo)
-	: SoundDevice::Base(logger, info, sysInfo), m_AudioThread(*this)
+	: SoundDevice::Base(logger, info, sysInfo)
+	, m_AudioThread(*this)
 {
 	return;
 }

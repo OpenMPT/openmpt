@@ -187,13 +187,19 @@ public:
 	void InternalFillAudioBuffer();
 	bool InternalStart();
 	void InternalStop();
-	bool InternalIsOpen() const { return m_BuffersCreated; }
+	bool InternalIsOpen() const
+	{
+		return m_BuffersCreated;
+	}
 
 	bool InternalIsPlayingSilence() const;
 	void InternalStopAndAvoidPlayingSilence();
 	void InternalEndPlayingSilence();
 
-	bool OnIdle() { return HandleRequests(); }
+	bool OnIdle()
+	{
+		return HandleRequests();
+	}
 
 	SoundDevice::Caps InternalGetDeviceCaps();
 	SoundDevice::DynamicCaps GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates);
@@ -206,13 +212,19 @@ public:
 	SoundDevice::Statistics GetStatistics() const;
 
 public:
-	static std::unique_ptr<SoundDevice::BackendInitializer> BackendInitializer() { return std::make_unique<SoundDevice::BackendInitializer>(); }
+	static std::unique_ptr<SoundDevice::BackendInitializer> BackendInitializer()
+	{
+		return std::make_unique<SoundDevice::BackendInitializer>();
+	}
 	static std::vector<SoundDevice::Info> EnumerateDevices(ILogger &logger, SoundDevice::SysInfo sysInfo);
 
 protected:
 	void OpenDriver();
 	void CloseDriver();
-	bool IsDriverOpen() const { return (m_Driver != nullptr); }
+	bool IsDriverOpen() const
+	{
+		return (m_Driver != nullptr);
+	}
 
 	bool InternalHasTimeInfo() const;
 
