@@ -115,8 +115,8 @@ PackConstructorInitializers: Never
 PointerAlignment: Middle
 PPIndentWidth: -1
 #RawStringFormats
-QualifierAlignment: Custom
-QualifierOrder: ['static', 'inline', 'volatile', 'const', 'type']
+QualifierAlignment: Leave
+#QualifierOrder: ['static', 'inline', 'constexpr', 'volatile', 'const', 'restrict', 'type']
 ReferenceAlignment: Pointer
 ReflowComments: false
 RemoveBracesLLVM: false

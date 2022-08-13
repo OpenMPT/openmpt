@@ -113,8 +113,8 @@ PackConstructorInitializers: Never
 #PenaltyReturnTypeOnItsOwnLine
 PointerAlignment: Right
 PPIndentWidth: -1
-QualifierAlignment: Custom
-QualifierOrder: ['static', 'inline', 'volatile', 'const', 'type']
+QualifierAlignment: Leave
+#QualifierOrder: ['static', 'inline', 'constexpr', 'volatile', 'const', 'restrict', 'type']
 #RawStringFormats
 ReferenceAlignment: Pointer
 ReflowComments: false
