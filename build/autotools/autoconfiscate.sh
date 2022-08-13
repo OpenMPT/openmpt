@@ -13,7 +13,7 @@ echo "Gathering version ..."
 . libopenmpt/libopenmpt_version.mk
 
 echo "Cleaning local build ..."
-make NO_SDL=1 NO_SDL2=1 clean
+make clean
 
 echo "Cleaning dist-autotools.tar ..."
 rm -rf bin/dist-autotools.tar || true
@@ -180,14 +180,14 @@ echo " BUILD_SVNVERSION=${BUILD_SVNVERSION}"
 echo " BUILD_SVNDATE=${BUILD_SVNDATE}"
 
 echo "Building man pages ..."
-make NO_SDL=1 NO_SDL2=1 bin/openmpt123.1
+make bin/openmpt123.1
 
 echo "Copying man pages ..."
 mkdir bin/dist-autotools/man
 cp bin/openmpt123.1 bin/dist-autotools/man/openmpt123.1
 
 echo "Cleaning local buid ..."
-make NO_SDL=1 NO_SDL2=1 clean
+make clean
 
 echo "Changing to autotools package directory ..."
 OLDDIR="$(pwd)"
@@ -248,7 +248,7 @@ make check
 
 echo "Building dist-autotools.tar ..."
 cd "$OLDDIR"
-MPT_LIBOPENMPT_VERSION=$(make NO_SDL=1 NO_SDL2=1 distversion-tarball)
+MPT_LIBOPENMPT_VERSION=$(make distversion-tarball)
 cd bin/dist-autotools
 rm -rf libopenmpt
 mkdir -p libopenmpt/src.autotools/$MPT_LIBOPENMPT_VERSION/
