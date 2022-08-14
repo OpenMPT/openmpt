@@ -11,9 +11,12 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
-#include "mpt/io_file/fileadapter.hpp"
+#ifdef MPT_WITH_UNRAR
 
+#include "mpt/io_file/fileadapter.hpp"
 #include "../common/FileReader.h"
+
+#endif // MPT_WITH_UNRAR
 
 #include "archive.h"
 
