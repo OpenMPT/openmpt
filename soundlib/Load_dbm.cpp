@@ -161,6 +161,10 @@ static void ConvertDBMEffect(uint8 &command, uint8 &param)
 			command = CMD_NONE;
 		break;
 
+	case CMD_PATTERNBREAK:
+		param = ((param >> 4) * 10) + (param & 0x0F);
+		break;
+
 #ifdef MODPLUG_TRACKER
 	case CMD_VIBRATO:
 		if(param & 0x0F)
