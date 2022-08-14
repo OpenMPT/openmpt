@@ -425,7 +425,7 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 			ModSample &mptSmp = Samples[instrHeader.sample];
 			mptSmp.Initialize();
 			mptSmp.nVolume = std::min(static_cast<uint16>(instrHeader.volume), uint16(64)) * 4u;
-			mptSmp.nC5Speed = instrHeader.sampleRate;
+			mptSmp.nC5Speed = Util::muldivr(instrHeader.sampleRate, 8303, 8363);
 
 			if(instrHeader.loopLength && (instrHeader.flags & (DBMInstrument::smpLoop | DBMInstrument::smpPingPongLoop)))
 			{
