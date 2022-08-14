@@ -197,6 +197,7 @@ void CViewPattern::OnInitialUpdate()
 	m_nLastPlayedRow = 0;
 	m_nLastPlayedOrder = ORDERINDEX_INVALID;
 	m_prevChordNote = NOTE_NONE;
+	m_previousPCevent.fill({PLUGINDEX_INVALID, 0});
 }
 
 
@@ -3545,6 +3546,43 @@ LRESULT CViewPattern::OnPlayerNotify(Notification *pnotify)
 	return 0;
 }
 
+CHANNELINDEX CViewPattern::GetRecordChannelForPCEvent(PLUGINDEX plugSlot, PlugParamIndex paramIndex) const
+{
+	CModDoc *pModDoc = GetDocument();
+	if(pModDoc == nullptr)
+		return 0;
+
+	CSoundFile &sndFile = pModDoc->GetSoundFile();
+	const auto plugParam = std::make_pair(static_cast<PLUGINDEX>(plugSlot), static_cast<PlugParamIndex>(paramIndex));
+	const PatternEditPos editPos = GetEditPos(sndFile, IsLiveRecord());
+	const CHANNELINDEX editChn = editPos.channel;
+	const ROWINDEX row = editPos.row;
+	const PATTERNINDEX pattern = editPos.pattern;
+	const auto editGroup = pModDoc->GetChannelRecordGroup(editChn);
+	CHANNELINDEX candidateChn = CHANNELINDEX_INVALID;
+
+	for(CHANNELINDEX c = 0; c < sndFile.GetNumChannels(); c++)
+	{
+		if(pModDoc->GetChannelRecordGroup(c) != editGroup)
+			continue;
+
+		const ModCommand &m = *sndFile.Patterns[pattern].GetpModCommand(row, c);
+		if((m_previousPCevent[c] == plugParam && m.IsEmpty()) || (m.IsPcNote() && m.instr == plugSlot + 1 && m.GetValueVolCol() == paramIndex))
+		{
+			return c;
+			break;
+		}
+		if(m.IsEmpty() && (candidateChn == CHANNELINDEX_INVALID || c == editChn))
+		{
+			candidateChn = c;
+		}
+	}
+	if(candidateChn != CHANNELINDEX_INVALID)
+		return candidateChn;
+	else
+		return editChn;
+}
+
 // record plugin parameter changes into current pattern
 LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM plugSlot, LPARAM paramIndex)
 {
@@ -3554,23 +3592,26 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM plugSlot, LPARAM paramIndex
 	
 	CSoundFile &sndFile = pModDoc->GetSoundFile();
 
-	//Work out where to put the new data
-	const PatternEditPos editPos = GetEditPos(sndFile, IsLiveRecord());
-	const CHANNELINDEX chn = editPos.channel;
-	const ROWINDEX row = editPos.row;
-	const PATTERNINDEX pattern = editPos.pattern;
-
-	ModCommand &mSrc = *sndFile.Patterns[pattern].GetpModCommand(row, chn);
-	ModCommand m = mSrc;
-
-	// TODO: Is the right plugin active? Move to a chan with the right plug
-	// Probably won't do this - finish fluctuator implementation instead.
-
 	IMixPlugin *pPlug = sndFile.m_MixPlugins[plugSlot].pMixPlugin;
 	if(pPlug == nullptr)
 		return 0;
 
-	if(sndFile.GetModSpecifications().HasNote(NOTE_PCS))
+	// Work out where and how to put the new data
+	const bool usePCevent = sndFile.GetModSpecifications().HasNote(NOTE_PCS);
+	const PatternEditPos editPos = GetEditPos(sndFile, IsLiveRecord());
+	const ROWINDEX row = editPos.row;
+	const PATTERNINDEX pattern = editPos.pattern;
+	CHANNELINDEX chn = editPos.channel;
+	const auto plugParam = std::make_pair(static_cast<PLUGINDEX>(plugSlot), static_cast<PlugParamIndex>(paramIndex));
+	const bool doMultiChannelRecording = pModDoc->GetChannelRecordGroup(chn) != RecordGroup::NoGroup;
+
+	if(usePCevent && doMultiChannelRecording)
+		chn = GetRecordChannelForPCEvent(plugParam.first, plugParam.second);
+
+	ModCommand &mSrc = *sndFile.Patterns[pattern].GetpModCommand(row, chn);
+	ModCommand m = mSrc;
+
+	if(usePCevent)
 	{
 		// MPTM: Use PC Notes
 
@@ -3578,6 +3619,7 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM plugSlot, LPARAM paramIndex
 		if(m.IsEmpty() || m.IsPcNote())
 		{
 			m.Set(NOTE_PCS, static_cast<ModCommand::INSTR>(plugSlot + 1), static_cast<uint16>(paramIndex), static_cast<uint16>(pPlug->GetParameter(static_cast<PlugParamIndex>(paramIndex)) * ModCommand::maxColumnValue));
+			m_previousPCevent[chn] = plugParam;
 		}
 	} else if(sndFile.GetModSpecifications().HasCommand(CMD_SMOOTHMIDI))
 	{
@@ -3772,9 +3814,13 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 		const bool liveRecord = IsLiveRecord();
 
 		PatternEditPos editPos = GetEditPos(sndFile, liveRecord);
+		if(pModDoc->GetChannelRecordGroup(editPos.channel) != RecordGroup::NoGroup)
+			editPos.channel = GetRecordChannelForPCEvent(mappedIndex - 1, paramIndex);
+
 		ModCommand &m = GetModCommand(sndFile, editPos);
 		pModDoc->GetPatternUndo().PrepareUndo(editPos.pattern, editPos.channel, editPos.row, 1, 1, "MIDI Mapping Record");
 		m.Set(NOTE_PCS, mappedIndex, static_cast<uint16>(paramIndex), static_cast<uint16>((paramValue * ModCommand::maxColumnValue) / 16383));
+		m_previousPCevent[editPos.channel] = std::make_pair(static_cast<PLUGINDEX>(mappedIndex - 1), paramIndex);
 		if(!liveRecord)
 			InvalidateRow(editPos.row);
 		pModDoc->SetModified();
