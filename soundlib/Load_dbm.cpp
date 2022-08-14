@@ -159,6 +159,10 @@ static std::pair<EffectCommand, uint8> ConvertDBMEffect(const uint8 cmd, uint8 p
 			command = CMD_NONE;
 		break;
 
+	case CMD_PATTERNBREAK:
+		param = ((param >> 4) * 10) + (param & 0x0F);
+		break;
+
 #ifdef MODPLUG_TRACKER
 	case CMD_VIBRATO:
 		if(param & 0x0F)
