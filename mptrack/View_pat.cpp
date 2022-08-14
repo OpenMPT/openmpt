@@ -3558,11 +3558,12 @@ CHANNELINDEX CViewPattern::GetRecordChannelForPCEvent(PLUGINDEX plugSlot, PlugPa
 	const CHANNELINDEX editChn = editPos.channel;
 	const ROWINDEX row = editPos.row;
 	const PATTERNINDEX pattern = editPos.pattern;
+	const auto editGroup = pModDoc->GetChannelRecordGroup(editChn);
 	CHANNELINDEX candidateChn = CHANNELINDEX_INVALID;
 
 	for(CHANNELINDEX c = 0; c < sndFile.GetNumChannels(); c++)
 	{
-		if(pModDoc->GetChannelRecordGroup(c) == RecordGroup::NoGroup)
+		if(pModDoc->GetChannelRecordGroup(c) != editGroup)
 			continue;
 
 		const ModCommand &m = *sndFile.Patterns[pattern].GetpModCommand(row, c);
