@@ -367,6 +367,11 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		m_playBehaviour.reset(kST3OffsetWithoutInstrument);
 		m_playBehaviour.reset(kApplyUpperPeriodLimit);
 	}
+	if (fileHeader.cwtv <= S3MFileHeader::trkST3_01)
+	{
+		// This broken behaviour is not present in ST3.01
+		m_playBehaviour.reset(kST3TonePortaWithAdlibNote);
+	}
 
 	if((fileHeader.cwtv & S3MFileHeader::trackerMask) > S3MFileHeader::trkScreamTracker)
 	{
