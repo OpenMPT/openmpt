@@ -209,6 +209,7 @@ protected:
 	CModDoc::NoteToChannelMap m_noteChannel;  // Note -> Preview channel assignment
 	std::array<ModCommand::NOTE, 10> m_octaveKeyMemory;
 	std::array<ModCommand::NOTE, MAX_BASECHANNELS> m_previousNote;
+	std::array<std::pair<PLUGINDEX, PlugParamIndex>, MAX_BASECHANNELS> m_previousPCevent;  // For multichannel recording
 	std::array<uint8, NOTE_MAX + NOTE_MIN> m_activeNoteChannel;
 	std::array<uint8, NOTE_MAX + NOTE_MIN> m_splitActiveNoteChannel;
 	static constexpr uint8 NOTE_CHANNEL_MAP_INVALID = 0xFF;
@@ -558,6 +559,8 @@ private:
 
 	// Like IsEditingEnabled(), but shows some notification when editing is not enabled.
 	bool IsEditingEnabled_bmsg();
+
+	CHANNELINDEX GetRecordChannelForPCEvent(PLUGINDEX plugSlot, PlugParamIndex paramIndex) const;
 
 	// Play one pattern row and stop ("step mode")
 	void PatternStep(ROWINDEX row = ROWINDEX_INVALID);
