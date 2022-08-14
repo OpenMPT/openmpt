@@ -701,6 +701,7 @@ void CLegacyPlaybackSettingsDlg::OnFilterStringChanged()
 			else
 				desc = _T("Ignore tone portamento for instrument plugins");
 			break;
+		case kST3TonePortaWithAdlibNote: desc = _T("Adlib Notes with Tone Portamento are delayed until the next row"); break;
 
 		default: MPT_ASSERT_NOTREACHED();
 		}

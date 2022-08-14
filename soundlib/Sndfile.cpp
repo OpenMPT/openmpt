@@ -1219,6 +1219,7 @@ PlayBehaviourSet CSoundFile::GetSupportedPlaybackBehaviour(MODTYPE type)
 		playBehaviour.set(kST3SampleSwap);
 		playBehaviour.set(kOPLNoteOffOnNoteChange);
 		playBehaviour.set(kApplyUpperPeriodLimit);
+		playBehaviour.set(kST3TonePortaWithAdlibNote);
 		break;
 
 	case MOD_TYPE_MOD:

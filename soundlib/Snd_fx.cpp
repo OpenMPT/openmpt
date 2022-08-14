@@ -4177,6 +4177,11 @@ int32 CSoundFile::TonePortamento(PlayState &playState, CHANNELINDEX nChn, uint16
 		return 0;
 	}
 
+	// ST3: Adlib Note + Tone Portamento does not execute the slide, but changes to the target note instantly on the next row (unless there is another note with tone portamento)
+	// Test case: TonePortamentoWithAdlibNote.s3m
+	if(m_playBehaviour[kST3TonePortaWithAdlibNote] && chn.dwFlags[CHN_ADLIB] && chn.rowCommand.IsNote())
+		return 0;
+
 	bool doPorta = !chn.isFirstTick
 	               || (GetType() & (MOD_TYPE_DBM | MOD_TYPE_669))
 	               || (playState.m_nMusicSpeed == 1 && m_playBehaviour[kSlidesAtSpeed1])

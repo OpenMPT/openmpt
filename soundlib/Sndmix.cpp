@@ -692,6 +692,17 @@ bool CSoundFile::ProcessRow()
 				// Test case: NoteDelay-NextRow.mod
 				pChn->nPeriod = GetPeriodFromNote(pChn->rowCommand.note, pChn->nFineTune, 0);
 			}
+			if(m_playBehaviour[kST3TonePortaWithAdlibNote]
+				&& !m->IsNote()
+				&& pChn->dwFlags[CHN_ADLIB]
+				&& pChn->nPortamentoDest
+				&& pChn->rowCommand.IsNote()
+				&& pChn->rowCommand.IsPortamento())
+			{
+				// ST3: Adlib Note + Tone Portamento does not execute the slide, but changes to the target note instantly on the next row (unless there is another note with tone portamento)
+				// Test case: TonePortamentoWithAdlibNote.s3m
+				pChn->nPeriod = pChn->nPortamentoDest;
+			}
 			if(m_playBehaviour[kMODTempoOnSecondTick] && !m_playBehaviour[kMODVBlankTiming] && m_PlayState.m_nMusicSpeed == 1 && pChn->rowCommand.command == CMD_TEMPO)
 			{
 				// ProTracker sets the tempo after the first tick. This block handles the case of one tick per row.

@@ -322,6 +322,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 				m_playBehaviour.set(kPeriodsAreHertz);
 			if(schismDateVersion >= SchismVersionFromDate<2016, 05, 13>::date)
 				m_playBehaviour.set(kITShortSampleRetrig);
+			m_playBehaviour.reset(kST3TonePortaWithAdlibNote);
 		}
 		nonCompatTracker = true;
 		break;

@@ -622,6 +622,7 @@ void CSoundFile::UpgradeModule()
 			{ kST3RetrigAfterNoteCut,      MPT_V("1.29.00.00") },
 			{ kFT2ST3OffsetOutOfRange,     MPT_V("1.29.00.00") },
 			{ kApplyUpperPeriodLimit,      MPT_V("1.30.00.45") },
+			{ kST3TonePortaWithAdlibNote,  MPT_V("1.31.00.13") },
 		};
 
 		for(const auto &b : behaviours)
