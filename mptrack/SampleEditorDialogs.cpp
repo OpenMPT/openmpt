@@ -634,7 +634,7 @@ void CSampleXFadeDlg::DoDataExchange(CDataExchange* pDX)
 BOOL CSampleXFadeDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
-	const bool hasNormal = m_sample.uFlags[CHN_LOOP] && m_sample.nLoopStart > 0;
+	const bool hasNormal = (m_sample.uFlags[CHN_LOOP] || !m_sample.uFlags[CHN_SUSTAINLOOP]) && m_sample.nLoopStart > 0;
 	const bool hasSustain = m_sample.uFlags[CHN_SUSTAINLOOP] && m_sample.nSustainStart > 0;
 	const bool hasBothLoops = hasNormal && hasSustain;
 	m_RadioNormalLoop.EnableWindow(hasBothLoops);
