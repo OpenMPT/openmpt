@@ -1550,6 +1550,7 @@ void CVstPlugin::HardAllNotesOff()
 
 	const bool isWavestation = GetUID() == FourCC("KLWV");
 	const bool isSawer = GetUID() == FourCC("SaWR");
+	const bool isTranceGate = GetUID() == FourCC("TTGA");
 	for(uint8 mc = 0; mc < m_MidiCh.size(); mc++)
 	{
 		PlugInstrChannel &channel = m_MidiCh[mc];
@@ -1557,12 +1558,13 @@ void CVstPlugin::HardAllNotesOff()
 
 		SendMidiPitchBend(mc, EncodePitchBendParam(MIDIEvents::pitchBendCentre));  // centre pitch bend
 
-		if(!isWavestation && !isSawer)
+		if(!isWavestation && !isSawer && !isTranceGate)
 		{
 			// Korg Wavestation doesn't seem to like this CC, it can introduce ghost notes or
 			// prevent new notes from being played.
 			// Image-Line Sawer does not like it either and resets some parameters so that the plugin is all
 			// distorted afterwards.
+			// T-Force Trance Gate 2 also resets some controllers that are not desirable to be reset, such as user-configured resonance
 			MidiSend(MIDIEvents::CC(MIDIEvents::MIDICC_AllControllersOff, mc, 0));
 		}
 		if(!isSawer)
