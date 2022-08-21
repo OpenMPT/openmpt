@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.5.19-pre
+### libopenmpt 0.5.19 (2022-08-21)
 
  *  DBM: Sample middle-C frequencies were slightly off.
     laffik_-_marynarze.dbm sounds much more bearable now.
