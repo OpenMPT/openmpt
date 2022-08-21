@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.6.6-pre
+
 ### libopenmpt 0.6.5 (2022-08-21)
 
  *  [**Bug**] `Makefile` now also uses `CC`, `CXX`, `LD`, and `AR` when set as
