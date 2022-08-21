@@ -31,6 +31,34 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.30.06.00 (21 August 2022, revision 17755)
+--------------------------------------------
+Tree view
+- [Fix] <js> Under some circumstances (e.g. after removing all unused patterns in Song Cleanup and then removing all patterns in a second Song Cleanup), the complete upper tree view could be emptied, eventually leading to a crash (tx eightbitbubsy).
+- [Fix] <js> Show BRR files in sample browser (http://bugs.openmpt.org/view.php?id=1617).
+
+Pattern tab
+- [Imp] <js> In multi-channel record mode, PC events (both when recorded from plugin or via MIDI mapping) are now distributed to all channels of the current record group (http://bugs.openmpt.org/view.php?id=1622).
+
+Sample tab
+- [Fix] <js> Calculate correct selection point after scrolling with an 1:x zoom factor (http://bugs.openmpt.org/view.php?id=1611).
+- [Fix] <js> When the crossfade dialog was allowed to be opened because normal loop points were set despite the loop itself not being enabled, it still tried to use the sustain loop points instead, even if they resulted in an empty loop.
+
+VST / DMO Plugins
+- [Fix] <js> Don't send All Controllers Off to T-Force Trance Gate 2 plugin, as it also resets some user-configured parameters such as resonance (http://bugs.openmpt.org/view.php?id=1610).
+
+Other formats
+- [Fix] <js> DBM: Sample middle-C frequencies were slightly off. laffik_-_marynarze.dbm sounds much more bearable now.
+- [Fix] <js> DBM: Fixed pattern break parameter interpretation.
+
+Bundled plugins
+- [Fix] <js> Echo DMO: Setting the delay parameter to 0 yielded a 2-second echo delay instead of 1ms.
+- [Fix] <js> Digi Booster Echo: Setting the delay parameter to 0 yielded a 510ms echo delay instead of approximately 334ms.
+
+Third-Party Libraries
+- [Imp] Update mpg123 (v1.30.2), nlohmann json (v3.11.2) and UnRAR (v6.1.7)
+
+
 v1.30.05.00 (12 June 2022, revision 17503)
 ------------------------------------------
 Tree view

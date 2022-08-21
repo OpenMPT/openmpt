@@ -14,6 +14,14 @@ is just a high-level summary.
 
  *  [**New**] `Makefile` now uses `PKG_CONFIG` as path to `pkg-config`.
 
+ *  DBM: Sample middle-C frequencies were slightly off.
+    laffik_-_marynarze.dbm sounds much more bearable now.
+ *  DBM: Fixed pattern break parameter interpretation.
+ *  Echo DMO: Setting the delay parameter to 0 yielded a 2-second echo delay
+    instead of 1ms.
+ *  Digi Booster Echo: Setting the delay parameter to 0 yielded a 510ms echo
+    delay instead of approximately 334ms.
+
  *  mpg123: Update to v1.30.2 (2022-08-01).
 
 ### libopenmpt 0.6.4 (2022-06-12)
