@@ -206,19 +206,7 @@ public:
 
 #endif // WIN32
 
-static inline float mpt_round( float val ) {
-	if ( val >= 0.0f ) {
-		return std::floor( val + 0.5f );
-	} else {
-		return std::ceil( val - 0.5f );
-	}
-}
-
-static inline long mpt_lround( float val ) {
-	return static_cast< long >( mpt_round( val ) );
-}
-
-static inline std::string append_software_tag( std::string software ) {
+inline std::string append_software_tag( std::string software ) {
 	std::string openmpt123 = std::string() + "openmpt123 " + OPENMPT123_VERSION_STRING + " (libopenmpt " + openmpt::string::get( "library_version" ) + ", OpenMPT " + openmpt::string::get( "core_version" ) + ")";
 	if ( software.empty() ) {
 		software = openmpt123;
@@ -228,11 +216,11 @@ static inline std::string append_software_tag( std::string software ) {
 	return software;
 }
 
-static inline std::string get_encoder_tag() {
+inline std::string get_encoder_tag() {
 	return std::string() + "openmpt123 " + OPENMPT123_VERSION_STRING + " (libopenmpt " + openmpt::string::get( "library_version" ) + ", OpenMPT " + openmpt::string::get( "core_version" ) + ")";
 }
 
-static inline std::string get_extension( std::string filename ) {
+inline std::string get_extension( std::string filename ) {
 	if ( filename.find_last_of( "." ) != std::string::npos ) {
 		return filename.substr( filename.find_last_of( "." ) + 1 );
 	}
@@ -248,7 +236,7 @@ enum class Mode {
 	Render
 };
 
-static inline std::string mode_to_string( Mode mode ) {
+inline std::string mode_to_string( Mode mode ) {
 	switch ( mode ) {
 		case Mode::None:   return "none"; break;
 		case Mode::Probe:  return "probe"; break;
@@ -260,8 +248,8 @@ static inline std::string mode_to_string( Mode mode ) {
 	return "";
 }
 
-static const std::int32_t default_low = -2;
-static const std::int32_t default_high = -1;
+inline const std::int32_t default_low = -2;
+inline const std::int32_t default_high = -1;
 
 struct commandlineflags {
 	Mode mode;
