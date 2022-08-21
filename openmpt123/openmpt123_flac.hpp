@@ -15,6 +15,8 @@
 
 #if defined(MPT_WITH_FLAC)
 
+#include "mpt/base/saturate_round.hpp"
+
 #if defined(_MSC_VER) && defined(__clang__) && defined(__c2__)
 #include <sys/types.h>
 #if __STDC__
@@ -112,7 +114,7 @@ public:
 				} else if ( in >= 1.0f ) {
 					in = 1.0f;
 				}
-				FLAC__int32 out = mpt_lround( in * (1<<23) );
+				FLAC__int32 out = mpt::saturate_round<FLAC__int32>( in * (1<<23) );
 				out = std::max( 0 - (1<<23), out );
 				out = std::min( out, 0 + (1<<23) - 1 );
 				interleaved_buffer.push_back( out );
