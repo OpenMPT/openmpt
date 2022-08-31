@@ -29,7 +29,6 @@
    "../../openmpt123/*.cpp",
    "../../openmpt123/*.hpp",
   }
-  defines { "MPT_BUILD_DEFAULT_DEPENDENCIES" }
 	
 	filter { "action:vs*", "kind:SharedLib or ConsoleApp or WindowedApp" }
 		resdefines {
@@ -59,6 +58,14 @@
     "ksuser",
     "winmm",
   }
+  defines { "MPT_WITH_FLAC" }
+  defines { "MPT_WITH_PORTAUDIO" }
+  filter {}
+  filter { "configurations:*Shared" }
+  filter { "not configurations:*Shared" }
+   defines { "FLAC__NO_DLL" }
+  filter {}
+  
   filter {}
   filter { "action:vs*" }
 		linkoptions { "wsetargv.obj" }
