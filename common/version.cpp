@@ -15,7 +15,12 @@
 #include "mptStringParse.h" 
 
 #include "versionNumber.h"
+
+#if __has_include("svn_version.h")
 #include "svn_version.h"
+#else
+#include "../build/svn_version/svn_version.h"
+#endif
 
 
 
