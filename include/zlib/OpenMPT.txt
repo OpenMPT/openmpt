@@ -3,6 +3,10 @@ Files not required by OpenMPT have been removed.
 OpenMPT specific changes:
  *  A work-around for <https://github.com/madler/zlib/issues/606> been applied
     in deflate.h.
+ *  <https://github.com/madler/zlib/commit/eff308af425b67093bab25f80f1ae950166bece1>
+    and
+    <https://github.com/madler/zlib/commit/1eb7682f845ac9e9bf9ae35bbfb3bad5dacbd91d>
+    for CVE-2022-37434 have been applied.
  *  iowin32.c has been modified to only use Windows 8 WinRT API when actually
     compiling for Windows 8 or later.
  *  All custom modifications are marked with /* OpenMPT */
