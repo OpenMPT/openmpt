@@ -84,7 +84,7 @@ generic/sse3      := $(___) -march=i686        $(FPU_SSE3)   -mtune=generic     
 generic/ssse3     := $(___) -march=i686        $(FPU_SSSE3)  -mtune=generic     $(OPT_SIMD)   # Intel Core-2.., AMD Bobcat.., Via Nano-1000..
 generic/sse4_1    := $(___) -march=i686        $(FPU_SSE4_1) -mtune=generic     $(OPT_SIMD)   # Intel Core-1st, AMD Bulldozer.., Via Nano-3000..
 generic/sse4_2    := $(___) -march=i686        $(FPU_SSE4_2) -mtune=generic     $(OPT_SIMD)   # Intel Core-1st, AMD Bulldozer.., Via Nano-C..
-generic/sse4a     := $(XX_) -march=i686        $(FPU_SSE4A)  -mtune=amd         $(OPT_SIMD)   # AMD K10..
+generic/sse4a     := $(XX_) -march=i686        $(FPU_SSE4A)  -mtune=generic     $(OPT_SIMD)   # AMD K10..
 
 intel/i386        := $(XX_) -march=i386        $(FPU_NONE)   -mtune=i386        $(OPT_DEF)
 intel/i486sx      := $(___) -march=i486        $(FPU_NONE)   -mtune=i486        $(OPT_DEF)
@@ -118,7 +118,7 @@ amd/geode-lx      := $(___) -march=geode       $(FPU_3DNOW)  -mtune=geode       
 amd/geode-nx      := $(___) -march=athlon-xp   $(FPU_3DASSE) -mtune=athlon-xp   $(OPT_SIMD)
 amd/bobcat        := $(___) -march=i686        $(FPU_SSE4A)  -mtune=amdfam10    $(OPT_SIMD)
 amd/late-3dnow    := $(XX_) -march=athlon-xp   $(FPU_3DASSE) -mtune=athlon-xp   $(OPT_SIMD)
-amd/late          := $(XX_) -march=i686        $(FPU_SSE2)   -mtune=amd         $(OPT_SIMD)
+amd/late          := $(XX_) -march=i686        $(FPU_SSE2)   -mtune=generic     $(OPT_SIMD)
 
 nexgen/nx586      := $(___) -march=i486        $(FPU_NONE)   -mtune=pentium     $(OPT_DEF)    # ???
 nexgen/nx586pf    := $(___) -march=i486        $(FPU_387)    -mtune=pentium     $(OPT_DEF)    # ???
