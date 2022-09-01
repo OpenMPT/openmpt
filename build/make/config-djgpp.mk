@@ -78,6 +78,7 @@ CACHE_ATOM       :=512  # 512
 CACHE_K63        :=256  # 128/256
 
 generic/common    := $(XXX) -march=i386        $(FPU_387)    -mtune=pentium     $(OPT_DEF)
+generic/late      := $(XX_) -march=i686        $(FPU_SSE2)   -mtune=generic     $(OPT_SIMD)
 
 generic/nofpu     := $(XX_) -march=i386        $(FPU_NONE)   -mtune=i386        $(OPT_DEF)    # 386SX, 486SX, Cyrix Cx486SLC, NexGen Nx586
 generic/386       := $(XXX) -march=i386        $(FPU_387)    -mtune=i386        $(OPT_DEF)    # 386DX
