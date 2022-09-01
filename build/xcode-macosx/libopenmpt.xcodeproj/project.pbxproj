@@ -1733,7 +1733,6 @@
 					../../common,
 					../../soundlib,
 					"\"$(IntDir)/svn_version\"",
-					../svn_version,
 				);
 			};
 			name = Release;
@@ -1780,7 +1779,6 @@
 					../../common,
 					../../soundlib,
 					"\"$(IntDir)/svn_version\"",
-					../svn_version,
 				);
 			};
 			name = Debug;

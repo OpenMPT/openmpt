@@ -20,7 +20,6 @@
    "../../src",
    "../../openmpt123",
    "$(IntDir)/svn_version",
-   "../../build/svn_version",
   }
   files {
    "../../src/mpt/base/*.hpp",
@@ -38,8 +37,6 @@
 	filter { "action:vs*", "kind:SharedLib or ConsoleApp or WindowedApp" }
 		resincludedirs {
 			"$(IntDir)/svn_version",
-			"../../build/svn_version",
-			"$(ProjDir)/../../build/svn_version",
 		}
 		files {
 			"../../libopenmpt/libopenmpt_version.rc",

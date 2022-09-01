@@ -9,7 +9,6 @@
    "../../common",
    "../../include",
    "$(IntDir)/svn_version",
-   "../../build/svn_version",
   }
   files {
    "../../mptrack/wine/WineWrapper.c",

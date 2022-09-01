@@ -546,7 +546,7 @@ nobase_include_HEADERS += libopenmpt/libopenmpt_stream_callbacks_file_posix_lfs6
 nobase_include_HEADERS += libopenmpt/libopenmpt_ext.h
 nobase_include_HEADERS += libopenmpt/libopenmpt_ext.hpp
 libopenmpt_la_CPPFLAGS =
-libopenmpt_la_CPPFLAGS += $(WIN32_CPPFLAGS) -DLIBOPENMPT_BUILD -I$(srcdir)/build/svn_version -I$(srcdir)/ -I$(srcdir)/src -I$(srcdir)/common $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS)
+libopenmpt_la_CPPFLAGS += $(WIN32_CPPFLAGS) -DLIBOPENMPT_BUILD -I$(srcdir)/ -I$(srcdir)/src -I$(srcdir)/common $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS)
 libopenmpt_la_CXXFLAGS =
 libopenmpt_la_CXXFLAGS += $(WIN32_CXXFLAGS) $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS)
 libopenmpt_la_CFLAGS =
@@ -585,7 +585,7 @@ libopenmpt_la_SOURCES += libopenmpt/libopenmpt_version.h
 if ENABLE_TESTS
 check_PROGRAMS += libopenmpttest
 libopenmpttest_CPPFLAGS =
-libopenmpttest_CPPFLAGS += $(WIN32_CPPFLAGS) -DLIBOPENMPT_BUILD -DLIBOPENMPT_BUILD_TEST -I$(srcdir)/build/svn_version -I$(srcdir)/ -I$(srcdir)/src -I$(srcdir)/common $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS)
+libopenmpttest_CPPFLAGS += $(WIN32_CPPFLAGS) -DLIBOPENMPT_BUILD -DLIBOPENMPT_BUILD_TEST -I$(srcdir)/ -I$(srcdir)/src -I$(srcdir)/common $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS)
 libopenmpttest_CXXFLAGS =
 libopenmpttest_CXXFLAGS += $(WIN32_CXXFLAGS) $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_CFLAGS) $(VORBIS_CFLAGS) $(VORBISFILE_CFLAGS) $(WIN32_CONSOLE_CXXFLAGS)
 libopenmpttest_CFLAGS =

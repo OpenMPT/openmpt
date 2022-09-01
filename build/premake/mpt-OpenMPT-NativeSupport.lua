@@ -14,7 +14,6 @@
    "../../include/portaudio/include",
    "../../include/rtaudio",
    "$(IntDir)/svn_version",
-   "../../build/svn_version",
   }
   files {
    "../../include/asiomodern/include/ASIOModern/*.hpp",

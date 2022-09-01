@@ -52,7 +52,6 @@ end
    "../../common",
    "../../soundlib",
    "$(IntDir)/svn_version",
-   "../../build/svn_version",
   }
 	files {
 		"../../mptrack/res/OpenMPT.manifest",

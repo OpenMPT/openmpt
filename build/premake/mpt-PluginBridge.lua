@@ -15,7 +15,6 @@
    "../../src",
    "../../common",
    "$(IntDir)/svn_version",
-   "../../build/svn_version",
   }
   files {
    "../../src/mpt/**.cpp",
@@ -73,7 +72,6 @@
    "../../src",
    "../../common",
    "$(IntDir)/svn_version",
-   "../../build/svn_version",
   }
   files {
    "../../src/mpt/**.cpp",

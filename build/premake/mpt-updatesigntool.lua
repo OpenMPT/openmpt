@@ -10,7 +10,6 @@
    "../../include",
    "../../include/nlohmann-json/include",
    "$(IntDir)/svn_version",
-   "../../build/svn_version",
   }
   files {
    "../../src/mpt/**.cpp",

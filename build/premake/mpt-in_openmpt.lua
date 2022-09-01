@@ -17,7 +17,6 @@
   includedirs {
    "../..",
    "$(IntDir)/svn_version",
-   "../../build/svn_version",
   }
   files {
    "../../libopenmpt/in_openmpt.cpp",
@@ -36,8 +35,6 @@
 	filter { "action:vs*", "kind:SharedLib or ConsoleApp or WindowedApp" }
 		resincludedirs {
 			"$(IntDir)/svn_version",
-			"../../build/svn_version",
-			"$(ProjDir)/../../build/svn_version",
 		}
 		files {
 			"../../libopenmpt/libopenmpt_version.rc",
