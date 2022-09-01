@@ -62,6 +62,21 @@ endif
 OPT_DEF  := -Os
 OPT_SIMD := -O3
 
+CACHE_386 :=64  # 0/64/128
+CACHE_486 :=128 # 0/64/128/256
+CACHE_S7  :=256 # 128/256/512
+CACHE_SS7 :=512 # 256/512/1024
+
+CACHE_PENTIUMPRO :=512  # 256/512/1024
+CACHE_CELERON    :=0    # 0/128/256
+CACHE_PENTIUM2   :=512  # 256/512
+CACHE_PENTIUM3   :=256  # 256/512
+CACHE_PENTIUMM   :=1024 # 1024/2048
+CACHE_PENTIUM4   :=256  # 256/512
+CACHE_PENTIUM41  :=512  # 512/1024
+CACHE_ATOM       :=512  # 512
+CACHE_K63        :=256  # 128/256
+
 generic/common    := $(XXX) -march=i386        $(FPU_387)    -mtune=pentium     $(OPT_DEF)
 
 generic/nofpu     := $(XX_) -march=i386        $(FPU_NONE)   -mtune=i386        $(OPT_DEF)    # 386SX, 486SX, Cyrix Cx486SLC, NexGen Nx586
@@ -86,88 +101,90 @@ generic/sse4_1    := $(___) -march=i686        $(FPU_SSE4_1) -mtune=generic     
 generic/sse4_2    := $(___) -march=i686        $(FPU_SSE4_2) -mtune=generic     $(OPT_SIMD)   # Intel Core-1st, AMD Bulldozer.., Via Nano-C..
 generic/sse4a     := $(XX_) -march=i686        $(FPU_SSE4A)  -mtune=generic     $(OPT_SIMD)   # AMD K10..
 
-intel/i386        := $(XX_) -march=i386        $(FPU_NONE)   -mtune=i386        $(OPT_DEF)
-intel/i486sx      := $(___) -march=i486        $(FPU_NONE)   -mtune=i486        $(OPT_DEF)
-intel/i386+80287  := $(XX_) -march=i386        $(FPU_287)    -mtune=i386        $(OPT_DEF)
-intel/i386+80387  := $(XX_) -march=i386        $(FPU_387)    -mtune=i386        $(OPT_DEF)
-intel/i486dx      := $(XXX) -march=i486        $(FPU_387)    -mtune=i486        $(OPT_DEF)
-intel/pentium     := $(XXX) -march=pentium     $(FPU_387)    -mtune=pentium     $(OPT_DEF)
-intel/pentium-mmx := $(XXX) -march=pentium-mmx $(FPU_MMX)    -mtune=pentium-mmx $(OPT_SIMD)
-intel/pentium-pro := $(___) -march=pentiumpro  $(FPU_387)    -mtune=pentiumpro  $(OPT_DEF)
-intel/pentium2    := $(___) -march=pentium2    $(FPU_MMX)    -mtune=pentium2    $(OPT_SIMD)
-intel/pentium3    := $(___) -march=pentium3    $(FPU_SSE)    -mtune=pentium3    $(OPT_SIMD)
-intel/pentium-m   := $(___) -march=pentium-m   $(FPU_SSE2)   -mtune=pentium-m   $(OPT_SIMD)
-intel/pentium4    := $(___) -march=pentium4    $(FPU_SSE2)   -mtune=pentium4    $(OPT_SIMD)
-intel/pentium4.1  := $(___) -march=prescott    $(FPU_SSE3)   -mtune=prescott    $(OPT_SIMD)
-intel/atom        := $(___) -march=bonnell     $(FPU_SSSE3)  -mtune=bonnell     $(OPT_SIMD)
+intel/i386        := $(XX_) -march=i386        $(FPU_NONE)   -mtune=i386        $(OPT_DEF)         --param l1-cache-size=0  --param l2-cache-size=$(CACHE_386)
+intel/i486sx      := $(___) -march=i486        $(FPU_NONE)   -mtune=i486        $(OPT_DEF)         --param l1-cache-size=6  --param l2-cache-size=$(CACHE_486)
+intel/i386+80287  := $(XX_) -march=i386        $(FPU_287)    -mtune=i386        $(OPT_DEF)         --param l1-cache-size=0  --param l2-cache-size=$(CACHE_386)
+intel/i386+80387  := $(XX_) -march=i386        $(FPU_387)    -mtune=i386        $(OPT_DEF)         --param l1-cache-size=0  --param l2-cache-size=$(CACHE_386)
+intel/i486dx      := $(XXX) -march=i486        $(FPU_387)    -mtune=i486        $(OPT_DEF)         --param l1-cache-size=6  --param l2-cache-size=$(CACHE_486)
+intel/pentium     := $(XXX) -march=pentium     $(FPU_387)    -mtune=pentium     $(OPT_DEF)         --param l1-cache-size=8  --param l2-cache-size=$(CACHE_S7)
+intel/pentium-mmx := $(XXX) -march=pentium-mmx $(FPU_MMX)    -mtune=pentium-mmx $(OPT_SIMD)        --param l1-cache-size=16 --param l2-cache-size=$(CACHE_S7)
+intel/pentium-pro := $(___) -march=pentiumpro  $(FPU_387)    -mtune=pentiumpro  $(OPT_DEF)         --param l1-cache-size=8  --param l2-cache-size=$(CACHE_PENTIUMPRO)
+intel/pentium2    := $(___) -march=pentium2    $(FPU_MMX)    -mtune=pentium2    $(OPT_SIMD)        --param l1-cache-size=16 --param l2-cache-size=$(CACHE_PENTIUM2)
+intel/celeron     := $(___) -march=pentium2    $(FPU_MMX)    -mtune=pentium2    $(OPT_SIMD)        --param l1-cache-size=16 --param l2-cache-size=$(CACHE_CELERON)
+intel/pentium3    := $(___) -march=pentium3    $(FPU_SSE)    -mtune=pentium3    $(OPT_SIMD)        --param l1-cache-size=16 --param l2-cache-size=$(CACHE_PENTIUM3)
+intel/pentium-m   := $(___) -march=pentium-m   $(FPU_SSE2)   -mtune=pentium-m   $(OPT_SIMD)        --param l1-cache-size=16 --param l2-cache-size=$(CACHE_PENTIUMM)
+intel/pentium4    := $(___) -march=pentium4    $(FPU_SSE2)   -mtune=pentium4    $(OPT_SIMD)        --param l1-cache-size=8  --param l2-cache-size=$(CACHE_PENTIUM4)
+intel/pentium4.1  := $(___) -march=prescott    $(FPU_SSE3)   -mtune=prescott    $(OPT_SIMD)        --param l1-cache-size=8  --param l2-cache-size=$(CACHE_PENTIUM41)
+intel/atom        := $(___) -march=bonnell     $(FPU_SSSE3)  -mtune=bonnell     $(OPT_SIMD)        --param l1-cache-size=24 --param l2-cache-size=$(CACHE_ATOM)
 intel/late        := $(XX_) -march=i686        $(FPU_SSE2)   -mtune=intel       $(OPT_SIMD)
 
-amd/am386         := $(___) -march=i386        $(FPU_NONE)   -mtune=i386        $(OPT_DEF)
-amd/am486sx       := $(___) -march=i486        $(FPU_NONE)   -mtune=i486        $(OPT_DEF)
-amd/am386+80387   := $(___) -march=i386        $(FPU_387)    -mtune=i386        $(OPT_DEF)
-amd/am486dx       := $(___) -march=i486        $(FPU_387)    -mtune=i486        $(OPT_DEF)
-amd/am5x86        := $(___) -march=i486        $(FPU_387)    -mtune=i486        $(OPT_DEF)
-amd/k5            := $(XXX) -march=i586        $(FPU_387)    -mtune=k6          $(OPT_DEF)    # ???
-amd/k6            := $(XXX) -march=k6          $(FPU_MMX)    -mtune=k6          $(OPT_SIMD)
-amd/k6-2          := $(XXX) -march=k6-2        $(FPU_3DNOW)  -mtune=k6-2        $(OPT_SIMD)
-amd/k6-3          := $(___) -march=k6-3        $(FPU_3DNOW)  -mtune=k6-3        $(OPT_SIMD)
-amd/athlon        := $(XX_) -march=athlon      $(FPU_3DNOWA) -mtune=athlon      $(OPT_SIMD)
-amd/athlon-xp     := $(XX_) -march=athlon-xp   $(FPU_3DASSE) -mtune=athlon-xp   $(OPT_SIMD)
-amd/geode-gx      := $(___) -march=geode       $(FPU_3DNOW)  -mtune=geode       $(OPT_SIMD)
-amd/geode-lx      := $(___) -march=geode       $(FPU_3DNOW)  -mtune=geode       $(OPT_SIMD)
-amd/geode-nx      := $(___) -march=athlon-xp   $(FPU_3DASSE) -mtune=athlon-xp   $(OPT_SIMD)
-amd/bobcat        := $(___) -march=i686        $(FPU_SSE4A)  -mtune=amdfam10    $(OPT_SIMD)
-amd/late-3dnow    := $(XX_) -march=athlon-xp   $(FPU_3DASSE) -mtune=athlon-xp   $(OPT_SIMD)
+amd/am386         := $(___) -march=i386        $(FPU_NONE)   -mtune=i386        $(OPT_DEF)         --param l1-cache-size=0  --param l2-cache-size=$(CACHE_386)
+amd/am486sx       := $(___) -march=i486        $(FPU_NONE)   -mtune=i486        $(OPT_DEF)         --param l1-cache-size=6  --param l2-cache-size=$(CACHE_486)
+amd/am386+80387   := $(___) -march=i386        $(FPU_387)    -mtune=i386        $(OPT_DEF)         --param l1-cache-size=0  --param l2-cache-size=$(CACHE_386)
+amd/am486dx       := $(___) -march=i486        $(FPU_387)    -mtune=i486        $(OPT_DEF)         --param l1-cache-size=6  --param l2-cache-size=$(CACHE_486)
+amd/am5x86        := $(___) -march=i486        $(FPU_387)    -mtune=i486        $(OPT_DEF)         --param l1-cache-size=12 --param l2-cache-size=$(CACHE_486)
+amd/k5            := $(XXX) -march=i586        $(FPU_387)    -mtune=k6          $(OPT_DEF)  $(TBD) --param l1-cache-size=8  --param l2-cache-size=$(CACHE_S7)
+amd/k6            := $(XXX) -march=k6          $(FPU_MMX)    -mtune=k6          $(OPT_SIMD)        --param l1-cache-size=32 --param l2-cache-size=$(CACHE_S7)
+amd/k6-2          := $(XXX) -march=k6-2        $(FPU_3DNOW)  -mtune=k6-2        $(OPT_SIMD)        --param l1-cache-size=32 --param l2-cache-size=$(CACHE_SS7)
+amd/k6-3          := $(___) -march=k6-3        $(FPU_3DNOW)  -mtune=k6-3        $(OPT_SIMD)        --param l1-cache-size=32 --param l2-cache-size=$(CACHE_K63)
+amd/athlon        := $(XX_) -march=athlon      $(FPU_3DNOWA) -mtune=athlon      $(OPT_SIMD)        --param l1-cache-size=64 --param l2-cache-size=512
+amd/duron         := $(XX_) -march=athlon      $(FPU_3DNOWA) -mtune=athlon      $(OPT_SIMD)        --param l1-cache-size=64 --param l2-cache-size=64
+amd/athlon-xp     := $(XX_) -march=athlon-xp   $(FPU_3DASSE) -mtune=athlon-xp   $(OPT_SIMD)        --param l1-cache-size=64 --param l2-cache-size=256
+amd/geode-gx      := $(___) -march=geode       $(FPU_3DNOW)  -mtune=geode       $(OPT_SIMD)        --param l1-cache-size=16 --param l2-cache-size=128
+amd/geode-lx      := $(___) -march=geode       $(FPU_3DNOW)  -mtune=geode       $(OPT_SIMD)        --param l1-cache-size=64 --param l2-cache-size=128
+amd/geode-nx      := $(___) -march=athlon-xp   $(FPU_3DASSE) -mtune=athlon-xp   $(OPT_SIMD)        --param l1-cache-size=64 --param l2-cache-size=256
+amd/bobcat        := $(___) -march=i686        $(FPU_SSE4A)  -mtune=amdfam10    $(OPT_SIMD)        --param l1-cache-size=64 --param l2-cache-size=512
+amd/late-3dnow    := $(XX_) -march=athlon-xp   $(FPU_3DASSE) -mtune=athlon-xp   $(OPT_SIMD)        --param l1-cache-size=64 --param l2-cache-size=256
 amd/late          := $(XX_) -march=i686        $(FPU_SSE2)   -mtune=generic     $(OPT_SIMD)
 
-nexgen/nx586      := $(___) -march=i486        $(FPU_NONE)   -mtune=pentium     $(OPT_DEF)    # ???
-nexgen/nx586pf    := $(___) -march=i486        $(FPU_387)    -mtune=pentium     $(OPT_DEF)    # ???
+nexgen/nx586      := $(___) -march=i486        $(FPU_NONE)   -mtune=pentium     $(OPT_DEF)  $(TBD) --param l1-cache-size=16 --param l2-cache-size=$(CACHE_486)
+nexgen/nx586pf    := $(___) -march=i486        $(FPU_387)    -mtune=pentium     $(OPT_DEF)  $(TBD) --param l1-cache-size=16 --param l2-cache-size=$(CACHE_486)
 
-cyrix/cx486slc    := $(___) -march=i386        $(FPU_NONE)   -mtune=i486        $(OPT_DEF)
-cyrix/cx486dlc    := $(___) -march=i386        $(FPU_NONE)   -mtune=i486        $(OPT_DEF)
-cyrix/cx4x86s     := $(___) -march=i486        $(FPU_NONE)   -mtune=i486        $(OPT_DEF)
-cyrix/cx4x86dx    := $(___) -march=i486        $(FPU_387)    -mtune=i486        $(OPT_DEF)
-cyrix/cx5x86      := $(___) -march=i486        $(FPU_387)    -mtune=i486        $(OPT_DEF)
-cyrix/6x86        := $(XXX) -march=i486        $(FPU_387)    -mtune=pentium     $(OPT_DEF)    # ???
-cyrix/6x86l       := $(___) -march=i486        $(FPU_387)    -mtune=pentium     $(OPT_DEF)    # ???
-cyrix/6x86mx      := $(___) -march=i686        $(FPU_MMX)    -mtune=pentium2    $(OPT_SIMD)   # ???
-cyrix/mediagx-gx  := $(___) -march=i486        $(FPU_387)    -mtune=i486        $(OPT_DEF)
-cyrix/mediagx-gxm := $(___) -march=i686        $(FPU_MMX)    -mtune=pentium2    $(OPT_SIMD)   # ???
+cyrix/cx486slc    := $(___) -march=i386        $(FPU_NONE)   -mtune=i486        $(OPT_DEF)         --param l1-cache-size=1  --param l2-cache-size=$(CACHE_386)
+cyrix/cx486dlc    := $(___) -march=i386        $(FPU_NONE)   -mtune=i486        $(OPT_DEF)         --param l1-cache-size=1  --param l2-cache-size=$(CACHE_386)
+cyrix/cx4x86s     := $(___) -march=i486        $(FPU_NONE)   -mtune=i486        $(OPT_DEF)         --param l1-cache-size=2  --param l2-cache-size=$(CACHE_486)
+cyrix/cx4x86dx    := $(___) -march=i486        $(FPU_387)    -mtune=i486        $(OPT_DEF)         --param l1-cache-size=6  --param l2-cache-size=$(CACHE_486)
+cyrix/cx5x86      := $(___) -march=i486        $(FPU_387)    -mtune=i486        $(OPT_DEF)         --param l1-cache-size=12 --param l2-cache-size=$(CACHE_486)
+cyrix/6x86        := $(XXX) -march=i486        $(FPU_387)    -mtune=pentium     $(OPT_DEF)  $(TBD) --param l1-cache-size=12 --param l2-cache-size=$(CACHE_S7)
+cyrix/6x86l       := $(___) -march=i486        $(FPU_387)    -mtune=pentium     $(OPT_DEF)  $(TBD) --param l1-cache-size=12 --param l2-cache-size=$(CACHE_S7)
+cyrix/6x86mx      := $(___) -march=i686        $(FPU_MMX)    -mtune=pentium2    $(OPT_SIMD) $(TBD) --param l1-cache-size=48 --param l2-cache-size=$(CACHE_SS7)
+cyrix/mediagx-gx  := $(___) -march=i486        $(FPU_387)    -mtune=i486        $(OPT_DEF)         --param l1-cache-size=9  --param l2-cache-size=0
+cyrix/mediagx-gxm := $(___) -march=i686        $(FPU_MMX)    -mtune=pentium2    $(OPT_SIMD) $(TBD) --param l1-cache-size=9  --param l2-cache-size=0
 
-nsc/geode-gx1     := $(___) -march=i686        $(FPU_MMX)    -mtune=pentium2    $(OPT_SIMD)   # ???
-nsc/geode-gx2     := $(___) -march=geode       $(FPU_3DNOW)  -mtune=geode       $(OPT_SIMD)
+nsc/geode-gx1     := $(___) -march=i686        $(FPU_MMX)    -mtune=pentium2    $(OPT_SIMD) $(TBD) --param l1-cache-size=9  --param l2-cache-size=0
+nsc/geode-gx2     := $(___) -march=geode       $(FPU_3DNOW)  -mtune=geode       $(OPT_SIMD)        --param l1-cache-size=16 --param l2-cache-size=128
 
-idt/winchip-c6    := $(XX_) -march=winchip-c6  $(FPU_MMX)    -mtune=winchip-c6  $(OPT_SIMD)
-idt/winchip2      := $(XX_) -march=winchip2    $(FPU_3DNOW)  -mtune=winchip2    $(OPT_SIMD)
+idt/winchip-c6    := $(XX_) -march=winchip-c6  $(FPU_MMX)    -mtune=winchip-c6  $(OPT_SIMD         --param l1-cache-size=32 --param l2-cache-size=$(CACHE_S7)
+idt/winchip2      := $(XX_) -march=winchip2    $(FPU_3DNOW)  -mtune=winchip2    $(OPT_SIMD)        --param l1-cache-size=32 --param l2-cache-size=$(CACHE_SS7)
 
-via/cyrix3-joshua := $(XX_) -march=i686        $(FPU_3DNOW)  -mtune=c3          $(OPT_SIMD)   # ???
-via/cyrix3-samuel := $(___) -march=c3          $(FPU_3DNOW)  -mtune=c3          $(OPT_SIMD)
-via/c3-samuel2    := $(___) -march=samuel-2    $(FPU_3DNOW)  -mtune=samuel-2    $(OPT_SIMD)
-via/c3-ezra       := $(___) -march=samuel-2    $(FPU_3DNOW)  -mtune=samuel-2    $(OPT_SIMD)
-via/c3-nehemiah   := $(XX_) -march=nehemiah    $(FPU_SSE)    -mtune=nehemiah    $(OPT_SIMD)
-via/c7-esther     := $(XX_) -march=esther      $(FPU_SSE3)   -mtune=esther      $(OPT_SIMD)
+via/cyrix3-joshua := $(XX_) -march=i686        $(FPU_3DNOW)  -mtune=c3          $(OPT_SIMD) $(TBD) --param l1-cache-size=48 --param l2-cache-size=256
+via/cyrix3-samuel := $(___) -march=c3          $(FPU_3DNOW)  -mtune=c3          $(OPT_SIMD)        --param l1-cache-size=64 --param l2-cache-size=0
+via/c3-samuel2    := $(___) -march=samuel-2    $(FPU_3DNOW)  -mtune=samuel-2    $(OPT_SIMD)        --param l1-cache-size=64 --param l2-cache-size=64
+via/c3-ezra       := $(___) -march=samuel-2    $(FPU_3DNOW)  -mtune=samuel-2    $(OPT_SIMD)        --param l1-cache-size=64 --param l2-cache-size=64
+via/c3-nehemiah   := $(XX_) -march=nehemiah    $(FPU_SSE)    -mtune=nehemiah    $(OPT_SIMD)        --param l1-cache-size=64 --param l2-cache-size=64
+via/c7-esther     := $(XX_) -march=esther      $(FPU_SSE3)   -mtune=esther      $(OPT_SIMD)        --param l1-cache-size=64 --param l2-cache-size=128
 via/late          := $(XX_) -march=i686        $(FPU_SSE2)   -mtune=esther      $(OPT_SIMD)
 
-umc/u5s           := $(___) -march=i486        $(FPU_NONE)   -mtune=i486        $(OPT_DEF)
-umc/u5d           := $(___) -march=i486        $(FPU_387)    -mtune=i486        $(OPT_DEF)
+umc/u5s           := $(___) -march=i486        $(FPU_NONE)   -mtune=i486        $(OPT_DEF)         --param l1-cache-size=6  --param l2-cache-size=$(CACHE_486)
+umc/u5d           := $(___) -march=i486        $(FPU_387)    -mtune=i486        $(OPT_DEF)         --param l1-cache-size=6  --param l2-cache-size=$(CACHE_486)
 
-transmeta/crusoe  := $(___) -march=i686        $(FPU_MMX)    -mtune=pentium2    $(OPT_SIMD)   # ???
-transmeta/efficeon:= $(___) -march=i686        $(FPU_SSE2)   -mtune=pentium-m   $(OPT_SIMD)   # ???
-transmeta/tm8800  := $(___) -march=i686        $(FPU_SSE3)   -mtune=pentium-m   $(OPT_SIMD)   # ???
+transmeta/crusoe  := $(___) -march=i686        $(FPU_MMX)    -mtune=pentium2    $(OPT_SIMD) $(TBD) --param l1-cache-size=64 --param l2-cache-size=256
+transmeta/efficeon:= $(___) -march=i686        $(FPU_SSE2)   -mtune=pentium-m   $(OPT_SIMD) $(TBD) --param l1-cache-size=64 --param l2-cache-size=1024
+transmeta/tm8800  := $(___) -march=i686        $(FPU_SSE3)   -mtune=pentium-m   $(OPT_SIMD) $(TBD) --param l1-cache-size=64 --param l2-cache-size=1024
 
-uli/m6117c        := $(___) -march=i386        $(FPU_NONE)   -mtune=i386        $(OPT_DEF)
+uli/m6117c        := $(___) -march=i386        $(FPU_NONE)   -mtune=i386        $(OPT_DEF)         --param l1-cache-size=0  --param l2-cache-size=$(CACHE_386)
 
-rise/mp6          := $(XX_) -march=i486        $(FPU_MMX)    -mtune=pentium-mmx $(OPT_SIMD)   # ???
+rise/mp6          := $(XX_) -march=i486        $(FPU_MMX)    -mtune=pentium-mmx $(OPT_SIMD) $(TBD) --param l1-cache-size=8  --param l2-cache-size=$(CACHE_SS7)
 
-sis/55x           := $(___) -march=i586        $(FPU_MMX)    -mtune=pentium-mmx $(OPT_SIMD)   # ???
+sis/55x           := $(___) -march=i586        $(FPU_MMX)    -mtune=pentium-mmx $(OPT_SIMD) $(TBD) --param l1-cache-size=8  --param l2-cache-size=0
 
-dmnp/m6117d       := $(___) -march=i386        $(FPU_NONE)   -mtune=i386        $(OPT_DEF)
-dmnp/vortex86sx   := $(___) -march=i386        $(FPU_NONE)   -mtune=i386        $(OPT_DEF)
-dmnp/vortex86dx   := $(___) -march=i486        $(FPU_387)    -mtune=i486        $(OPT_DEF)
-dmnp/vortex86mx   := $(___) -march=i486        $(FPU_387)    -mtune=i486        $(OPT_DEF)
-dmnp/vortex86     := $(___) -march=i586        $(FPU_MMX)    -mtune=pentium-mmx $(OPT_SIMD)   # ???
-dmnp/vortex86dx2  := $(___) -march=i586        $(FPU_MMX)    -mtune=pentium-mmx $(OPT_SIMD)   # ???
-dmnp/vortex86dx3  := $(___) -march=i686        $(FPU_SSE)    -mtune=pentium3    $(OPT_SIMD)   # ???
+dmnp/m6117d       := $(___) -march=i386        $(FPU_NONE)   -mtune=i386        $(OPT_DEF)         --param l1-cache-size=0  --param l2-cache-size=$(CACHE_386)
+dmnp/vortex86sx   := $(___) -march=i386        $(FPU_NONE)   -mtune=i386        $(OPT_DEF)         --param l1-cache-size=16 --param l2-cache-size=0
+dmnp/vortex86dx   := $(___) -march=i486        $(FPU_387)    -mtune=i486        $(OPT_DEF)         --param l1-cache-size=16 --param l2-cache-size=256
+dmnp/vortex86mx   := $(___) -march=i486        $(FPU_387)    -mtune=i486        $(OPT_DEF)         --param l1-cache-size=16 --param l2-cache-size=256
+dmnp/vortex86     := $(___) -march=i586        $(FPU_MMX)    -mtune=pentium-mmx $(OPT_SIMD) $(TBD) --param l1-cache-size=8  --param l2-cache-size=0
+dmnp/vortex86dx2  := $(___) -march=i586        $(FPU_MMX)    -mtune=pentium-mmx $(OPT_SIMD) $(TBD) --param l1-cache-size=16 --param l2-cache-size=256
+dmnp/vortex86dx3  := $(___) -march=i686        $(FPU_SSE)    -mtune=pentium3    $(OPT_SIMD) $(TBD) --param l1-cache-size=32 --param l2-cache-size=512
 
 ifeq ($($(CPU)),)
 $(error unknown CPU)
