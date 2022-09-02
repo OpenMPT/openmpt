@@ -25,6 +25,14 @@ namespace mpt {
 inline namespace MPT_INLINE_NS {
 
 
+
+template <typename Tdst, typename Tsrc>
+MPT_CONSTEXPRINLINE Tdst c_cast(Tsrc && x) {
+	return (Tdst)std::forward<Tsrc>(x);
+}
+
+
+
 #if MPT_CXX_AT_LEAST(20) && !MPT_LIBCXX_LLVM_BEFORE(13000)
 
 using std::in_range;
