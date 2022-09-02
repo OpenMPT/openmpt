@@ -151,56 +151,56 @@ static std::string get_library_version_string() {
 }
 
 static std::string get_library_features_string() {
-	return mpt::transcode<std::string>( mpt::common_encoding::utf8, mpt::trim(OpenMPT::Build::GetBuildFeaturesString()));
+	return mpt::transcode<std::string>( mpt::common_encoding::utf8, mpt::trim( OpenMPT::Build::GetBuildFeaturesString() ) );
 }
 
 static std::string get_core_version_string() {
-	return mpt::transcode<std::string>( mpt::common_encoding::utf8, OpenMPT::Build::GetVersionStringExtended());
+	return mpt::transcode<std::string>( mpt::common_encoding::utf8, OpenMPT::Build::GetVersionStringExtended() );
 }
 
 static std::string get_source_url_string() {
-	return mpt::transcode<std::string>( mpt::common_encoding::utf8, OpenMPT::SourceInfo::Current().GetUrlWithRevision());
+	return mpt::transcode<std::string>( mpt::common_encoding::utf8, OpenMPT::SourceInfo::Current().GetUrlWithRevision() );
 }
 
 static std::string get_source_date_string() {
-	return mpt::transcode<std::string>( mpt::common_encoding::utf8, OpenMPT::SourceInfo::Current().Date());
+	return mpt::transcode<std::string>( mpt::common_encoding::utf8, OpenMPT::SourceInfo::Current().Date() );
 }
 
 static std::string get_source_revision_string() {
 	const OpenMPT::SourceInfo sourceInfo = OpenMPT::SourceInfo::Current();
-	return sourceInfo.Revision() ? mpt::format_value_default<std::string>(sourceInfo.Revision()) : std::string();
+	return sourceInfo.Revision() ? mpt::format_value_default<std::string>( sourceInfo.Revision() ) : std::string();
 }
 
 static std::string get_build_string() {
-	return mpt::transcode<std::string>( mpt::common_encoding::utf8, OpenMPT::Build::GetBuildDateString());
+	return mpt::transcode<std::string>( mpt::common_encoding::utf8, OpenMPT::Build::GetBuildDateString() );
 }
 
 static std::string get_build_compiler_string() {
-	return mpt::transcode<std::string>( mpt::common_encoding::utf8, OpenMPT::Build::GetBuildCompilerString());
+	return mpt::transcode<std::string>( mpt::common_encoding::utf8, OpenMPT::Build::GetBuildCompilerString() );
 }
 
 static std::string get_credits_string() {
-	return mpt::transcode<std::string>( mpt::common_encoding::utf8, OpenMPT::Build::GetFullCreditsString());
+	return mpt::transcode<std::string>( mpt::common_encoding::utf8, OpenMPT::Build::GetFullCreditsString() );
 }
 
 static std::string get_contact_string() {
-	return mpt::transcode<std::string>( mpt::common_encoding::utf8, MPT_USTRING("Forum: ") + OpenMPT::Build::GetURL(OpenMPT::Build::Url::Forum));
+	return mpt::transcode<std::string>( mpt::common_encoding::utf8, MPT_USTRING("Forum: ") + OpenMPT::Build::GetURL( OpenMPT::Build::Url::Forum ) );
 }
 
 static std::string get_license_string() {
-	return mpt::transcode<std::string>( mpt::common_encoding::utf8, OpenMPT::Build::GetLicenseString());
+	return mpt::transcode<std::string>( mpt::common_encoding::utf8, OpenMPT::Build::GetLicenseString() );
 }
 
 static std::string get_url_string() {
-	return mpt::transcode<std::string>( mpt::common_encoding::utf8, OpenMPT::Build::GetURL(OpenMPT::Build::Url::Website));
+	return mpt::transcode<std::string>( mpt::common_encoding::utf8, OpenMPT::Build::GetURL( OpenMPT::Build::Url::Website ) );
 }
 
 static std::string get_support_forum_url_string() {
-	return mpt::transcode<std::string>( mpt::common_encoding::utf8, OpenMPT::Build::GetURL(OpenMPT::Build::Url::Forum));
+	return mpt::transcode<std::string>( mpt::common_encoding::utf8, OpenMPT::Build::GetURL( OpenMPT::Build::Url::Forum ) );
 }
 
 static std::string get_bugtracker_url_string() {
-	return mpt::transcode<std::string>( mpt::common_encoding::utf8, OpenMPT::Build::GetURL(OpenMPT::Build::Url::Bugtracker));
+	return mpt::transcode<std::string>( mpt::common_encoding::utf8, OpenMPT::Build::GetURL( OpenMPT::Build::Url::Bugtracker ) );
 }
 
 std::string get_string( const std::string & key ) {
