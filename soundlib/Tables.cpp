@@ -782,7 +782,7 @@ void CResampler::InitializeTablesFromScratch(bool force)
 
 		getsinc(gKaiserSinc, 9.6377, 0.97);
 		getsinc(gDownsample13x, 8.5, 0.5);
-		getsinc(gDownsample2x, 2.7625, 0.425);
+		getsinc(gDownsample2x, 7.0, 0.425);
 
 #ifdef MODPLUG_TRACKER
 		StaticTablesInitialized = true;
