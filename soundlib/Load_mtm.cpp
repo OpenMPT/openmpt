@@ -56,8 +56,10 @@ struct MTMSampleHeader
 			mptSmp.nLoopStart = loopStart;
 			mptSmp.nLoopEnd = std::max(loopEnd.get(), uint32(1)) - 1;
 			LimitMax(mptSmp.nLoopEnd, mptSmp.nLength);
-			if(mptSmp.nLoopStart + 4 >= mptSmp.nLoopEnd) mptSmp.nLoopStart = mptSmp.nLoopEnd = 0;
-			if(mptSmp.nLoopEnd) mptSmp.uFlags.set(CHN_LOOP);
+			if(mptSmp.nLoopStart + 4 >= mptSmp.nLoopEnd)
+				mptSmp.nLoopStart = mptSmp.nLoopEnd = 0;
+			if(mptSmp.nLoopEnd > 2)
+				mptSmp.uFlags.set(CHN_LOOP);
 			mptSmp.nFineTune = finetune; // Uses MOD units but allows the full int8 range rather than just -8...+7 so we keep the value as-is and convert it during playback
 			mptSmp.nC5Speed = ModSample::TransposeToFrequency(0, finetune * 16);
 
