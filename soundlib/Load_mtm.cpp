@@ -56,8 +56,10 @@ struct MTMSampleHeader
 			mptSmp.nLoopStart = loopStart;
 			mptSmp.nLoopEnd = loopEnd;
 			LimitMax(mptSmp.nLoopEnd, mptSmp.nLength);
-			if(mptSmp.nLoopStart + 4 >= mptSmp.nLoopEnd) mptSmp.nLoopStart = mptSmp.nLoopEnd = 0;
-			if(mptSmp.nLoopEnd) mptSmp.uFlags.set(CHN_LOOP);
+			if(mptSmp.nLoopStart + 4 >= mptSmp.nLoopEnd)
+				mptSmp.nLoopStart = mptSmp.nLoopEnd = 0;
+			if(mptSmp.nLoopEnd > 2)
+				mptSmp.uFlags.set(CHN_LOOP);
 			mptSmp.nFineTune = MOD2XMFineTune(finetune);
 			mptSmp.nC5Speed = ModSample::TransposeToFrequency(0, mptSmp.nFineTune);
 
