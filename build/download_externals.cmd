@@ -49,7 +49,7 @@ call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://www.python.org/ftp
 
 call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://netcologne.dl.sourceforge.net/project/innounp/innounp/innounp%%%%200.50/innounp050.rar"  "build\externals\innounp050.rar"               dbbc809308267a866db9d6b751fdeda6d179e1a65d8ddb14bb51984431ae91493f9a76105e1789b245732043a2c696c869ed10964b48cf59f81e55bd52f85330  141621 || goto error
 
-call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://files.jrsoftware.org/is/6/innosetup-6.2.0.exe"                                            "build\externals\innosetup-6.2.0.exe"  09799b39effeaa7b9ea3cd5757e2a202d5653a109d6748f902fc88f7bd3ec7072fccfe1ef2140274164e19a1727f1f19ec6679285b1c8a5569ff4a649e1e3a6b 4699720 || goto error
+call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://files.jrsoftware.org/is/6/innosetup-6.2.1.exe"                                            "build\externals\innosetup-6.2.1.exe"  be4a517ea178b988931548bf2cc7cdda2fc5a66da5ff82e4ed60bacd1854a79ea26bed41138a65d6392fca1e22517f78d5053bd09bb98a6b4c6bad1e3b6c28f9 4710104 || goto error
 
 
 call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://download.openmpt.org/resources/modules/example_songs_ompt_1_30.7z"                       "build\externals\example_songs_ompt_1_30.7z"  bfecf7f97fd71bd52bcfb38307ccb98c751e6a0fa0c1f31208b22b9392f03ea3da8f9271327df2de4fc2e463e0c13c6a24107fbe18caf8f446b7e7cf93073fa5 4881392 || goto error
@@ -76,7 +76,7 @@ call build\scriptlib\unpack.cmd "build\tools\python3" "build\externals\python-3.
 call :killdir "build\tools\innounp"   || goto error
 call :killdir "build\tools\innosetup" || goto error
 call build\scriptlib\unpack.cmd "build\tools\innounp" "build\externals\innounp050.rar" "." || goto error
-build\tools\innounp\innounp.exe -x -dbuild\tools\innosetup "build\externals\innosetup-6.2.0.exe" || goto error
+build\tools\innounp\innounp.exe -x -dbuild\tools\innosetup "build\externals\innosetup-6.2.1.exe" || goto error
 
 call build\scriptlib\unpack.cmd "packageTemplate\ExampleSongs" "build\externals\example_songs_ompt_1_30.7z" "." || goto error
 
