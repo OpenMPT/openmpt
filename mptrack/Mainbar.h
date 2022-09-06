@@ -143,6 +143,9 @@ protected:
 	UINT m_cxOriginal = 0, m_cyOriginal = 0, m_nTrackPos = 0;
 	UINT m_nTreeSplitRatio = 0;
 
+	CEdit m_filterEdit;
+	CModTree *m_filterSource = nullptr;
+
 public:
 	CModTree *m_pModTree = nullptr, *m_pModTreeData = nullptr;
 
@@ -168,11 +171,15 @@ public:
 	LRESULT SendMessageToModTree(UINT cmdID, WPARAM wParam, LPARAM lParam);
 	bool SetTreeSoundfile(FileReader &file);
 
+	void StartTreeFilter(CModTree &source);
 
 protected:
 	//{{AFX_VIRTUAL(CModTreeBar)
 	CSize CalcFixedLayout(BOOL bStretch, BOOL bHorz) override;
+	BOOL PreTranslateMessage(MSG *pMsg) override;
 	//}}AFX_VIRTUAL
+
+	void CloseTreeFilter();
 
 protected:
 	//{{AFX_MSG(CModTreeBar)
@@ -189,6 +196,8 @@ protected:
 	afx_msg void OnNcRButtonDown(UINT, CPoint) { CancelTracking(); }
 	afx_msg void OnRButtonDown(UINT, CPoint) { CancelTracking(); }
 	afx_msg LRESULT OnInitDialog(WPARAM, LPARAM);
+	afx_msg void OnFilterChanged();
+	afx_msg void OnFilterLostFocus();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

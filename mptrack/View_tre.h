@@ -1,5 +1,5 @@
 /*
- * view_tre.h
+ * View_tre.h
  * ----------
  * Purpose: Tree view for managing open songs, sound files, file browser, ...
  * Notes  : (currently none)
@@ -12,6 +12,13 @@
 #pragma once
 
 #include "openmpt/all/BuildSettings.hpp"
+
+#include "../soundlib/modcommand.h"
+#include "../soundlib/Snd_defs.h"
+
+#include "Mptrack.h"
+#include "Notification.h"
+#include "UpdateHints.h"
 
 #include <vector>
 #include <bitset>
@@ -60,15 +67,7 @@ public:
 
 class CModTree: public CTreeCtrl
 {
-protected:
-	enum TreeStatus
-	{
-		TREESTATUS_RDRAG        = 0x01,
-		TREESTATUS_LDRAG        = 0x02,
-		TREESTATUS_SINGLEEXPAND = 0x04,
-		TREESTATUS_DRAGGING     = (TREESTATUS_RDRAG | TREESTATUS_LDRAG)
-	};
-
+public:
 	enum ModItemType : uint8
 	{
 		MODITEM_NULL = 0,
@@ -100,6 +99,15 @@ protected:
 		MODITEM_INSLIB_SONG,
 		MODITEM_DLSBANK_FOLDER,
 		MODITEM_DLSBANK_INSTRUMENT,
+	};
+
+protected:
+	enum TreeStatus
+	{
+		TREESTATUS_RDRAG = 0x01,
+		TREESTATUS_LDRAG = 0x02,
+		TREESTATUS_SINGLEEXPAND = 0x04,
+		TREESTATUS_DRAGGING = (TREESTATUS_RDRAG | TREESTATUS_LDRAG)
 	};
 
 	// Bit mask magic
@@ -173,7 +181,6 @@ protected:
 	std::unique_ptr<CDLSBank> m_cachedBank;
 	mpt::PathString m_cachedBankName;
 
-	CString m_compareStrL, m_compareStrR;  // Cache for ModTreeInsLibCompareNamesProc to avoid constant re-allocations
 #if (_WIN32_WINNT >= _WIN32_WINNT_WIN7)
 	DWORD m_stringCompareFlags = NORM_IGNORECASE | NORM_IGNOREWIDTH | SORT_DIGITSASNUMBERS;
 #else
@@ -185,18 +192,37 @@ protected:
 	mpt::PathString m_InstrLibHighlightPath;  // Folder to highlight in browser after a refresh
 	mpt::PathString m_SongFileName;           // Name of open module, without path (== m_InstrLibPath).
 	mpt::PathString m_previousPath;           // The folder from which we came from when navigating one folder up
-	std::vector<const char*> m_modExtensions;                  // cached in order to avoid querying too often when changing browsed folder
-	std::vector<mpt::PathString> m_MediaFoundationExtensions;  // cached in order to avoid querying too often when changing browsed folder
-	bool m_showAllFiles = false;
+	
+	std::vector<const char*> m_modExtensions;                  // Cached in order to avoid querying too often when changing browsed folder
+	std::vector<mpt::PathString> m_MediaFoundationExtensions;  // Cached in order to avoid querying too often when changing browsed folder
 
+	struct FileBrowserEntry
+	{
+		mpt::winstring name;
+		uint64 size;
+		uint64 modtime;
+		uint32 image;
+		bool hidden;
+	};
+	std::vector<FileBrowserEntry> m_fileBrowserEntries;
+	mpt::winstring m_filterString;
+
+	enum class LibrarySortOrder
+	{
+		Name,
+		Date,
+		Size,
+	};
+
+	static LibrarySortOrder m_librarySort;
+
+	bool m_showAllFiles = false;
 	bool m_doLabelEdit = false;
 
 public:
 	CModTree(CModTree *pDataTree);
 	~CModTree();
 
-// Attributes
-public:
 	void Init();
 	bool InsLibSetFullPath(const mpt::PathString &libPath, const mpt::PathString &songFolder);
 	mpt::PathString InsLibGetFullPath(HTREEITEM hItem) const;
@@ -204,8 +230,6 @@ public:
 	void RefreshMidiLibrary();
 	void RefreshDlsBanks();
 	void RefreshInstrumentLibrary();
-	void EmptyInstrumentLibrary();
-	void FillInstrumentLibrary(const TCHAR *selectedItem = nullptr);
 	void MonitorInstrumentLibrary();
 	ModItem GetModItem(HTREEITEM hItem);
 	BOOL SetMidiInstrument(UINT nIns, const mpt::PathString &fileName);
@@ -233,12 +257,17 @@ public:
 
 	bool IsSampleBrowser() const { return m_pDataTree == nullptr; }
 	CModTree *GetSampleBrowser() { return IsSampleBrowser() ? this : m_pDataTree; }
+	CModTree *GetOtherView();
+
+	void SetInstrumentLibraryFilter(const mpt::winstring &filter);
+	void SetInstrumentLibraryFilterSortOrder(LibrarySortOrder sortType);
+	void SortInstrumentLibrary();
 
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CModTree)
 public:
-	BOOL PreTranslateMessage(MSG* pMsg) override;
+	BOOL PreTranslateMessage(MSG *pMsg) override;
 	//}}AFX_VIRTUAL
 
 // Drag & Drop operations
@@ -248,11 +277,9 @@ public:
 	BOOL OnDrop(COleDataObject* pDataObject, DROPEFFECT dropEffect, CPoint point);
 
 protected:
-	int ModTreeInsLibCompareNamesGetItem(HTREEITEM item, CString &resultStr);
-	static int CALLBACK ModTreeInsLibCompareNamesProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	static int CALLBACK ModTreeInsLibCompareProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	static int CALLBACK ModTreeDrumCompareProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
-	HTREEITEM InsertInsLibItem(const TCHAR *name, int image, const TCHAR *selectIfMatch);
+	int ImageToSortOrder(int image) const;
 	ModTreeDocInfo *GetDocumentInfoFromItem(HTREEITEM hItem);
 	CModDoc *GetDocumentFromItem(HTREEITEM hItem) { ModTreeDocInfo *info = GetDocumentInfoFromItem(hItem); return info ? &info->modDoc : nullptr; }
 	ModTreeDocInfo *GetDocumentInfoFromModDoc(CModDoc &modDoc);
@@ -267,7 +294,11 @@ protected:
 	static bool AllPluginsBypassed(const CSoundFile &sndFile, bool onlyEffects);
 	static void BypassAllPlugins(CSoundFile &sndFile, bool bypass, bool onlyEffects);
 
-// Generated message map functions
+	void FillInstrumentLibrary(const TCHAR *selectedItem = nullptr);
+	void FilterInstrumentLibrary(mpt::winstring filter, const TCHAR *selectedItem = nullptr);
+
+	HMENU AddLibraryFindAndSortMenus(HMENU hMenu) const;
+
 protected:
 	//{{AFX_MSG(CModTree)
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
@@ -283,7 +314,7 @@ protected:
 	afx_msg void OnItemLeftClick(LPNMHDR pNMHDR, LRESULT *pResult);
 	afx_msg void OnItemRightClick(LPNMHDR, LRESULT *pResult);
 	afx_msg void OnItemExpanded(LPNMHDR pnmhdr, LRESULT *pResult);
-	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
+	afx_msg void OnGetDispInfo(LPNMHDR pnmhdr, LRESULT *pResult);
 	afx_msg void OnRefreshTree();
 	afx_msg void OnExecuteItem();
 	afx_msg void OnPlayTreeItem();
@@ -301,6 +332,8 @@ protected:
 	afx_msg void OnBeginLabelEdit(NMHDR *nmhdr, LRESULT *result);
 	afx_msg void OnEndLabelEdit(NMHDR *nmhdr, LRESULT *result);
 	afx_msg void OnDropFiles(HDROP hDropInfo);
+	afx_msg void OnKillFocus(CWnd *pNewWnd);
+	afx_msg void OnSetFocus(CWnd *pOldWnd);
 
 	afx_msg void OnSetItemPath();
 	afx_msg void OnSaveItem();
@@ -321,13 +354,15 @@ protected:
 	afx_msg void OnGotoInstrumentDir();
 	afx_msg void OnGotoSampleDir();
 
+	afx_msg void OnOpenInstrumentLibraryFilter();
+	afx_msg void OnSortByName() { SetInstrumentLibraryFilterSortOrder(LibrarySortOrder::Name); }
+	afx_msg void OnSortByDate() { SetInstrumentLibraryFilterSortOrder(LibrarySortOrder::Date); }
+	afx_msg void OnSortBySize() { SetInstrumentLibraryFilterSortOrder(LibrarySortOrder::Size); }
+
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
 	LRESULT OnMidiMsg(WPARAM midiData, LPARAM);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
-public:
-	afx_msg void OnKillFocus(CWnd *pNewWnd);
-	afx_msg void OnSetFocus(CWnd *pOldWnd);
 };
 
 

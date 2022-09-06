@@ -332,6 +332,12 @@ void COptionsKeyboard::DefineCommandCategories()
 		newCat.AddCommands(kcStartVSTGUICommands, kcEndVSTGUICommands);
 		commandCategories.push_back(newCat);
 	}
+
+	{
+		CommandCategory newCat(_T("  Tree View"), kCtxViewTree);
+		newCat.AddCommands(kcStartTreeViewCommands, kcEndTreeViewCommands);
+		commandCategories.push_back(newCat);
+	}
 }
 
 

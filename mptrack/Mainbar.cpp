@@ -781,7 +781,12 @@ BEGIN_MESSAGE_MAP(CModTreeBar, CDialogBar)
 	ON_WM_NCLBUTTONDOWN()
 	ON_WM_LBUTTONUP()
 	ON_WM_NCLBUTTONUP()
-	ON_MESSAGE(WM_INITDIALOG,	&CModTreeBar::OnInitDialog)
+	ON_MESSAGE(WM_INITDIALOG, &CModTreeBar::OnInitDialog)
+
+	ON_EN_CHANGE(IDC_EDIT1,             &CModTreeBar::OnFilterChanged)
+	ON_EN_KILLFOCUS(IDC_EDIT1,          &CModTreeBar::OnFilterLostFocus)
+	ON_COMMAND(ID_CLOSE_LIBRARY_FILTER, &CModTreeBar::CloseTreeFilter)
+
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -832,6 +837,46 @@ void CModTreeBar::Init()
 }
 
 
+BOOL CModTreeBar::PreTranslateMessage(MSG *pMsg)
+{
+	if(m_filterEdit && pMsg->hwnd == m_filterEdit && pMsg->message == WM_KEYDOWN && m_filterSource != nullptr)
+	{
+		switch(pMsg->wParam)
+		{
+		case VK_RETURN:
+			if(const auto modItem = m_filterSource->GetModItem(m_filterSource->GetSelectedItem()); (modItem.type == CModTree::MODITEM_INSLIB_FOLDER || modItem.type == CModTree::MODITEM_INSLIB_SONG))
+			{
+				m_filterSource->PostMessage(WM_COMMAND, ID_MODTREE_EXECUTE);
+			}
+			[[fallthrough]];
+		case VK_ESCAPE:
+			CloseTreeFilter();
+			return TRUE;
+
+		case VK_TAB:
+			if(m_filterSource)
+			{
+				m_filterSource->SetFocus();
+				return TRUE;
+			}
+			break;
+
+		case VK_UP:
+		case VK_DOWN:
+			if(const auto selectedItem = m_filterSource->GetSelectedItem(); selectedItem != nullptr)
+			{
+				const auto item = m_filterSource->GetNextItem(selectedItem, (pMsg->wParam == VK_UP) ? TVGN_PREVIOUS : TVGN_NEXT);
+				if(item)
+					m_filterSource->SelectItem(item);
+				return TRUE;
+			}
+			break;
+		}
+	}
+	return CDialogBar::PreTranslateMessage(pMsg);
+}
+
+
 void CModTreeBar::RefreshDlsBanks()
 {
 	if(m_pModTree) m_pModTree->RefreshDlsBanks();
@@ -863,8 +908,23 @@ void CModTreeBar::RecalcLayout()
 		if(cyavail < 0) cyavail = 0;
 		cytree = (cyavail * m_nTreeSplitRatio) >> 8;
 		cydata = cyavail - cytree;
-		m_pModTree->SetWindowPos(NULL, 0,0, rect.Width(), cytree, SWP_NOZORDER|SWP_NOACTIVATE);
-		m_pModTreeData->SetWindowPos(NULL, 0,cytree+3, rect.Width(), cydata, SWP_NOZORDER|SWP_NOACTIVATE);
+		if(m_filterSource == m_pModTree)
+		{
+			int editHeight = Util::ScalePixels(20, m_hWnd);
+			m_pModTree->SetWindowPos(nullptr, 0, 0, rect.Width(), cytree - editHeight, SWP_NOZORDER | SWP_NOACTIVATE);
+			m_pModTreeData->SetWindowPos(nullptr, 0, cytree + 3, rect.Width(), cydata, SWP_NOZORDER | SWP_NOACTIVATE);
+			m_filterEdit.SetWindowPos(m_pModTree, 0, cytree - editHeight, rect.Width(), editHeight, SWP_NOACTIVATE);
+		} else if(m_filterSource == m_pModTreeData)
+		{
+			int editHeight = Util::ScalePixels(20, m_hWnd);
+			m_pModTree->SetWindowPos(nullptr, 0, 0, rect.Width(), cytree, SWP_NOZORDER | SWP_NOACTIVATE);
+			m_pModTreeData->SetWindowPos(nullptr, 0, cytree + 3, rect.Width(), cydata - editHeight, SWP_NOZORDER | SWP_NOACTIVATE);
+			m_filterEdit.SetWindowPos(m_pModTreeData, 0, cytree + 3 + cydata - editHeight, rect.Width(), editHeight, SWP_NOACTIVATE);
+		} else
+		{
+			m_pModTree->SetWindowPos(nullptr, 0, 0, rect.Width(), cytree, SWP_NOZORDER | SWP_NOACTIVATE);
+			m_pModTreeData->SetWindowPos(nullptr, 0, cytree + 3, rect.Width(), cydata, SWP_NOZORDER | SWP_NOACTIVATE);
+		}
 	}
 }
 
@@ -1229,6 +1289,61 @@ bool CModTreeBar::SetTreeSoundfile(FileReader &file)
 	return m_pModTree->SetSoundFile(file);
 }
 
+
+void CModTreeBar::StartTreeFilter(CModTree &source)
+{
+	if(!m_filterEdit)
+	{
+		CRect rect;
+		GetClientRect(rect);
+		rect.bottom = Util::ScalePixels(20, m_hWnd);
+
+		m_pModTree->GetItemRect(m_pModTree->GetFirstVisibleItem(), rect, FALSE);
+		m_filterEdit.Create(WS_VISIBLE | WS_CHILD | WS_BORDER | WS_TABSTOP | ES_LEFT | ES_AUTOHSCROLL, rect, this, IDC_EDIT1);
+		m_filterEdit.SetFont(GetFont());
+	} else if(m_filterSource != &source)
+	{
+		m_filterEdit.SetWindowText(_T(""));
+	}
+	m_filterEdit.SetFocus();
+	m_filterSource = &source;
+	RecalcLayout();
+}
+
+
+void CModTreeBar::OnFilterChanged()
+{
+	if(m_filterSource)
+	{
+		CString filter;
+		m_filterEdit.GetWindowText(filter);
+		m_filterSource->SetInstrumentLibraryFilter(mpt::ToWin(filter));
+	}
+}
+
+
+void CModTreeBar::OnFilterLostFocus()
+{
+	if(m_filterEdit && !m_filterEdit.GetWindowTextLength())
+		CloseTreeFilter();
+}
+
+
+void CModTreeBar::CloseTreeFilter()
+{
+	if(m_filterSource)
+	{
+		m_filterSource->SetInstrumentLibraryFilter({});
+		if(GetFocus() == &m_filterEdit)
+			m_filterSource->SetFocus();
+		m_filterSource = nullptr;
+	}
+	if(m_filterEdit)
+	{
+		m_filterEdit.DestroyWindow();
+		RecalcLayout();
+	}
+}
 
 
 

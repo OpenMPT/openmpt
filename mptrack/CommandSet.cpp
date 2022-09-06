@@ -422,6 +422,13 @@ constexpr struct
 	{kcToggleSmpInsList,                       VK_TAB,             ModNone,            kKeyEventDown,                   kCtxViewComments,        MPT_V("1.31")},
 	{kcExecuteSmpInsListItem,                  VK_RETURN,          ModNone,            kKeyEventDown,                   kCtxViewComments,        MPT_V("1.31")},
 	{kcRenameSmpInsListItem,                   VK_RETURN,          ModCtrl,            kKeyEventDown,                   kCtxViewComments,        MPT_V("1.31")},
+	{kcTreeViewOpen,                           VK_RETURN,          ModNone,            kKeyEventDown,                   kCtxViewTree,            MPT_V("1.31.00.14")},
+	{kcTreeViewPlay,                           VK_SPACE,           ModNone,            kKeyEventDown,                   kCtxViewTree,            MPT_V("1.31.00.14")},
+	{kcTreeViewInsert,                         VK_INSERT,          ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxViewTree,            MPT_V("1.31.00.14")},
+	{kcTreeViewDuplicate,                      VK_INSERT,          ModShift,           kKeyEventDown | kKeyEventRepeat, kCtxViewTree,            MPT_V("1.31.00.14")},
+	{kcTreeViewDelete,                         VK_DELETE,          ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxViewTree,            MPT_V("1.31.00.14")},
+	{kcTreeViewRename,                         VK_RETURN,          ModCtrl,            kKeyEventDown,                   kCtxViewTree,            MPT_V("1.31.00.14")},
+	{kcTreeViewFind,                           'F',                ModCtrl,            kKeyEventDown,                   kCtxViewTree,            MPT_V("1.31.00.14")},
 	{kcVSTGUIPrevPreset,                       VK_SUBTRACT,        ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxVSTGUI,              MPT_V("1.31")},
 	{kcVSTGUINextPreset,                       VK_ADD,             ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxVSTGUI,              MPT_V("1.31")},
 	{kcVSTGUIPrevPresetJump,                   VK_SUBTRACT,        ModCtrl,            kKeyEventDown | kKeyEventRepeat, kCtxVSTGUI,              MPT_V("1.31")},
@@ -1212,6 +1219,16 @@ static constexpr struct
 	{2033, kcInsNoteMapTransposeSamples, _T("Transpose Samples / Reset Map") },
 	{KeyCommand::Hidden, kcPrevEntryInColumnSelect, _T("kcPrevEntryInColumnSelect")},
 	{KeyCommand::Hidden, kcNextEntryInColumnSelect, _T("kcNextEntryInColumnSelect")},
+	{2034, kcTreeViewOpen, _T("Open / View Item")},
+	{2035, kcTreeViewPlay, _T("Play Item")},
+	{2036, kcTreeViewInsert, _T("Insert Item")},
+	{2037, kcTreeViewDuplicate, _T("Duplicate Item")},
+	{2038, kcTreeViewDelete, _T("Delete Item")},
+	{2039, kcTreeViewRename, _T("Rename Item / Send To Editor")},
+	{2040, kcTreeViewFind, _T("Find in Instrument Library")},
+	{2041, kcTreeViewSortByName, _T("Sort Instrument Library By Name")},
+	{2042, kcTreeViewSortByDate, _T("Sort Instrument Library By Date")},
+	{2043, kcTreeViewSortBySize, _T("Sort Instrument Library By Size")},
 };
 
 // Get command descriptions etc.. loaded up.
@@ -2262,6 +2279,7 @@ CString KeyCombination::GetContextText(InputTargetContext ctx)
 		case kCtxViewSamples:			return _T("Sample Context [bottom]");
 		case kCtxViewInstruments:		return _T("Instrument Context [bottom]");
 		case kCtxViewComments:			return _T("Comments Context [bottom]");
+		case kCtxViewTree:				return _T("Tree View");
 		case kCtxCtrlGeneral:			return _T("General Context [top]");
 		case kCtxCtrlPatterns:			return _T("Pattern Context [top]");
 		case kCtxCtrlSamples:			return _T("Sample Context [top]");
