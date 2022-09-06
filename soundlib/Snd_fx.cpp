@@ -2290,7 +2290,11 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 					case DuplicateNoteAction::NoteOff:
 					case DuplicateNoteAction::NoteFade:
 						// Switch off duplicated note played on this plugin
-						SendMIDINote(i, chn.lastMidiNoteWithoutArp | IMixPlugin::MIDI_NOTE_OFF, 0);
+						if(chn.lastMidiNoteWithoutArp != NOTE_NONE)
+						{
+							SendMIDINote(i, chn.lastMidiNoteWithoutArp | IMixPlugin::MIDI_NOTE_OFF, 0);
+							chn.lastMidiNoteWithoutArp = NOTE_NONE;
+						}
 						break;
 					}
 				}
@@ -2342,7 +2346,7 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 			{
 				// apply NNA to this plugin iff it is currently playing a note on this tracker channel
 				// (and if it is playing a note, we know that would be the last note played on this chan).
-				applyNNAtoPlug = pPlugin->IsNotePlaying(srcChn.lastMidiNoteWithoutArp, nChn);
+				applyNNAtoPlug = (srcChn.lastMidiNoteWithoutArp != NOTE_NONE) && pPlugin->IsNotePlaying(srcChn.lastMidiNoteWithoutArp, nChn);
 			}
 		}
 	}
@@ -2351,6 +2355,25 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 	// New Note Action
 	if(!srcChn.IsSamplePlaying() && !applyNNAtoPlug)
 		return CHANNELINDEX_INVALID;
+
+#ifndef NO_PLUGINS
+	if(applyNNAtoPlug && pPlugin)
+	{
+		switch(srcChn.nNNA)
+		{
+			case NewNoteAction::NoteOff:
+			case NewNoteAction::NoteCut:
+			case NewNoteAction::NoteFade:
+				// Switch off note played on this plugin, on this tracker channel and midi channel
+				SendMIDINote(nChn, NOTE_KEYOFF, 0);
+				srcChn.nArpeggioLastNote = NOTE_NONE;
+				srcChn.lastMidiNoteWithoutArp = NOTE_NONE;
+				break;
+			case NewNoteAction::Continue:
+				break;
+		}
+	}
+#endif  // NO_PLUGINS
 
 	CHANNELINDEX nnaChn = GetNNAChannel(nChn);
 	if(nnaChn == CHANNELINDEX_INVALID)
@@ -2366,23 +2389,6 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 
 	chn.nMasterChn = nChn < GetNumChannels() ? nChn + 1 : 0;
 	chn.nCommand = CMD_NONE;
-#ifndef NO_PLUGINS
-	if(applyNNAtoPlug && pPlugin)
-	{
-		switch(srcChn.nNNA)
-		{
-		case NewNoteAction::NoteOff:
-		case NewNoteAction::NoteCut:
-		case NewNoteAction::NoteFade:
-			// Switch off note played on this plugin, on this tracker channel and midi channel
-			SendMIDINote(nChn, NOTE_KEYOFF, 0);
-			srcChn.nArpeggioLastNote = NOTE_NONE;
-			break;
-		case NewNoteAction::Continue:
-			break;
-		}
-	}
-#endif // NO_PLUGINS
 
 	// Key Off the note
 	switch(srcChn.nNNA)
