@@ -73,7 +73,7 @@ enum CommandID
 	//Global
 	kcGlobalStart = kcFirst,
 	kcStartFile = kcGlobalStart,
-	kcFileNew = kcGlobalStart,
+	kcFileNew = kcStartFile,
 	kcFileOpen,
 	kcFileAppend,
 	kcFileClose,
@@ -624,7 +624,7 @@ enum CommandID
 	kcSetFXParamE,
 	kcSetFXParamF,
 
-	//Effect commands. ORDER IS CRUCIAL.
+	//Effect commands. ORDER IS CRUCIAL and must match EffectCommand enum!
 	kcSetFXStart,
 	kcFixedFXStart = kcSetFXStart,
 	kcSetFXarp = kcSetFXStart,  //0,j
@@ -1052,10 +1052,7 @@ protected:
 	CommandID FindCmd(uint32 uid) const;
 	bool KeyCombinationConflict(KeyCombination kc1, KeyCombination kc2, bool checkEventConflict = true) const;
 
-	const CModSpecifications *m_oldSpecs = nullptr;
-	KeyCommand m_commands[kcNumCommands];
-	std::bitset<kCtxMaxInputContexts> m_isParentContext[kCtxMaxInputContexts];
-	std::bitset<kNumRules> m_enforceRule;
+	void ApplyDefaultKeybindings(const Version onlyCommandsAfterVersion = {});
 
 public:
 	CCommandSet();
@@ -1084,8 +1081,14 @@ public:
 	void GenKeyMap(KeyMap &km);            // Generate a keymap from this command set
 	bool SaveFile(const mpt::PathString &filename);
 	bool LoadFile(const mpt::PathString &filename);
-	bool LoadFile(std::istream &iStrm, const mpt::ustring &filenameDescription, const bool fillExistingSet = false);
-	bool LoadDefaultKeymap();
+	bool LoadFile(std::istream &iStrm, const mpt::ustring &filenameDescription);
+	void LoadDefaultKeymap();
+
+protected:
+	const CModSpecifications *m_oldSpecs = nullptr;
+	KeyCommand m_commands[kcNumCommands];
+	std::bitset<kCtxMaxInputContexts> m_isParentContext[kCtxMaxInputContexts];
+	std::bitset<kNumRules> m_enforceRule;
 };
 
 OPENMPT_NAMESPACE_END

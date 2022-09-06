@@ -25,8 +25,6 @@ OPENMPT_NAMESPACE_BEGIN
 
 namespace
 {
-// Version of the .mkb format
-constexpr int KEYMAP_VERSION = 1;
 
 constexpr std::tuple<InputTargetContext, CommandID, CommandID> NoteContexts[] =
 {
@@ -38,6 +36,459 @@ constexpr std::tuple<InputTargetContext, CommandID, CommandID> NoteContexts[] =
 	{kCtxVSTGUI, kcVSTGUIStartNotes, kcVSTGUIStartNoteStops},
 	{kCtxViewComments, kcCommentsStartNotes, kcCommentsStartNoteStops},
 };
+
+constexpr struct
+{
+	CommandID cmd;
+	uint16 key;  // Virtual key code, or scan code if high bit is set
+	FlagSet<Modifiers> modifiers;
+	FlagSet<KeyEventType> events;
+	InputTargetContext ctx;
+	Version addedInVersion;
+} DefaultKeybindings[] =
+// clang-format off
+{
+	{kcFileNew,                                'N',                ModCtrl,            kKeyEventDown,                   kCtxAllContexts,         MPT_V("1.31")},
+	{kcFileOpen,                               'O',                ModCtrl,            kKeyEventDown,                   kCtxAllContexts,         MPT_V("1.31")},
+	{kcFileClose,                              'W',                ModCtrl,            kKeyEventDown | kKeyEventRepeat, kCtxAllContexts,         MPT_V("1.31")},
+	{kcFileCloseAll,                           'W',                ModShift | ModCtrl, kKeyEventDown,                   kCtxAllContexts,         MPT_V("1.31")},
+	{kcFileSave,                               'S',                ModCtrl,            kKeyEventDown,                   kCtxAllContexts,         MPT_V("1.31")},
+	{kcFileSaveAs,                             'S',                ModShift | ModCtrl, kKeyEventDown,                   kCtxAllContexts,         MPT_V("1.31")},
+	{kcPrevDocument,                           VK_BROWSER_BACK,    ModNone,            kKeyEventDown,                   kCtxAllContexts,         MPT_V("1.31")},
+	{kcNextDocument,                           VK_BROWSER_FORWARD, ModNone,            kKeyEventDown,                   kCtxAllContexts,         MPT_V("1.31")},
+	{kcPlayPauseSong,                          VK_F5,              ModNone,            kKeyEventDown,                   kCtxAllContexts,         MPT_V("1.31")},
+	{kcPauseSong,                              VK_F8,              ModNone,            kKeyEventDown,                   kCtxAllContexts,         MPT_V("1.31")},
+	{kcStopSong,                               VK_ESCAPE,          ModNone,            kKeyEventDown,                   kCtxAllContexts,         MPT_V("1.31")},
+	{kcPlaySongFromStart,                      VK_F6,              ModNone,            kKeyEventDown,                   kCtxAllContexts,         MPT_V("1.31")},
+	{kcPlaySongFromCursor,                     VK_F6,              ModCtrl,            kKeyEventDown,                   kCtxAllContexts,         MPT_V("1.31")},
+	{kcPlayPatternFromStart,                   VK_F7,              ModNone,            kKeyEventDown,                   kCtxAllContexts,         MPT_V("1.31")},
+	{kcPlayPatternFromCursor,                  VK_F7,              ModCtrl,            kKeyEventDown,                   kCtxAllContexts,         MPT_V("1.31")},
+	{kcMidiRecord,                             VK_F9,              ModNone,            kKeyEventDown,                   kCtxAllContexts,         MPT_V("1.31")},
+	{kcEditUndo,                               'Z',                ModCtrl,            kKeyEventDown,                   kCtxAllContexts,         MPT_V("1.31")},
+	{kcEditRedo,                               'Y',                ModCtrl,            kKeyEventDown,                   kCtxAllContexts,         MPT_V("1.31")},
+	{kcEditCut,                                'X',                ModCtrl,            kKeyEventDown,                   kCtxAllContexts,         MPT_V("1.31")},
+	{kcEditCopy,                               'C',                ModCtrl,            kKeyEventDown,                   kCtxAllContexts,         MPT_V("1.31")},
+	{kcEditPaste,                              'V',                ModCtrl,            kKeyEventDown,                   kCtxAllContexts,         MPT_V("1.31")},
+	{kcEditPaste,                              VK_INSERT,          ModShift,           kKeyEventDown,                   kCtxAllContexts,         MPT_V("1.31")},
+	{kcEditMixPaste,                           'V',                ModShift | ModCtrl, kKeyEventDown,                   kCtxAllContexts,         MPT_V("1.31")},
+	{kcEditPasteFlood,                         'V',                ModShift,           kKeyEventDown | kKeyEventRepeat, kCtxAllContexts,         MPT_V("1.31")},
+	{kcEditPushForwardPaste,                   'V',                ModCtrl | ModAlt,   kKeyEventDown,                   kCtxAllContexts,         MPT_V("1.31")},
+	{kcEditSelectAll,                          '5',                ModCtrl,            kKeyEventDown,                   kCtxAllContexts,         MPT_V("1.31")},
+	{kcEditFind,                               'F',                ModCtrl,            kKeyEventDown,                   kCtxAllContexts,         MPT_V("1.31")},
+	{kcEditFindNext,                           VK_F3,              ModNone,            kKeyEventDown,                   kCtxAllContexts,         MPT_V("1.31")},
+	{kcViewGeneral,                            'G',                ModAlt,             kKeyEventDown,                   kCtxAllContexts,         MPT_V("1.31")},
+	{kcViewPattern,                            'P',                ModAlt,             kKeyEventDown,                   kCtxAllContexts,         MPT_V("1.31")},
+	{kcViewSamples,                            'S',                ModAlt,             kKeyEventDown,                   kCtxAllContexts,         MPT_V("1.31")},
+	{kcViewInstruments,                        'N',                ModAlt,             kKeyEventDown,                   kCtxAllContexts,         MPT_V("1.31")},
+	{kcViewComments,                           VK_F9,              ModShift,           kKeyEventDown,                   kCtxAllContexts,         MPT_V("1.31")},
+	{kcViewComments,                           'C',                ModAlt,             kKeyEventDown,                   kCtxAllContexts,         MPT_V("1.31")},
+	{kcViewTree,                               VK_F2,              ModCtrl,            kKeyEventDown,                   kCtxAllContexts,         MPT_V("1.31")},
+	{kcViewOptions,                            VK_F1,              ModCtrl,            kKeyEventDown,                   kCtxAllContexts,         MPT_V("1.31")},
+	{kcViewMIDImapping,                        VK_F3,              ModCtrl,            kKeyEventDown,                   kCtxAllContexts,         MPT_V("1.31")},
+	{kcSwitchToInstrLibrary,                   'I',                ModAlt,             kKeyEventDown | kKeyEventRepeat, kCtxAllContexts,         MPT_V("1.31")},
+	{kcHelp,                                   VK_F1,              ModNone,            kKeyEventDown,                   kCtxAllContexts,         MPT_V("1.31")},
+	{kcPrevInstrument,                         VK_DIVIDE,          ModCtrl,            kKeyEventDown | kKeyEventRepeat, kCtxAllContexts,         MPT_V("1.31")},
+	{kcPrevInstrument,                         VK_UP,              ModCtrl,            kKeyEventDown | kKeyEventRepeat, kCtxAllContexts,         MPT_V("1.31")},
+	{kcNextInstrument,                         VK_MULTIPLY,        ModCtrl,            kKeyEventDown | kKeyEventRepeat, kCtxAllContexts,         MPT_V("1.31")},
+	{kcNextInstrument,                         VK_DOWN,            ModCtrl,            kKeyEventDown | kKeyEventRepeat, kCtxAllContexts,         MPT_V("1.31")},
+	{kcPrevOctave,                             VK_DIVIDE,          ModNone,            kKeyEventDown,                   kCtxAllContexts,         MPT_V("1.31")},
+	{kcNextOctave,                             VK_MULTIPLY,        ModNone,            kKeyEventDown,                   kCtxAllContexts,         MPT_V("1.31")},
+	{kcPrevOrder,                              VK_LEFT,            ModCtrl,            kKeyEventDown | kKeyEventRepeat, kCtxAllContexts,         MPT_V("1.31")},
+	{kcNextOrder,                              VK_RIGHT,           ModCtrl,            kKeyEventDown | kKeyEventRepeat, kCtxAllContexts,         MPT_V("1.31")},
+	{kcPatternJumpDownh1,                      VK_NEXT,            ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxViewPatterns,        MPT_V("1.31")},
+	{kcPatternJumpUph1,                        VK_PRIOR,           ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxViewPatterns,        MPT_V("1.31")},
+	{kcPatternJumpDownh2,                      VK_NEXT,            ModAlt,             kKeyEventDown | kKeyEventRepeat, kCtxViewPatterns,        MPT_V("1.31")},
+	{kcPatternJumpUph2,                        VK_PRIOR,           ModAlt,             kKeyEventDown | kKeyEventRepeat, kCtxViewPatterns,        MPT_V("1.31")},
+	{kcPatternSnapDownh2,                      VK_NEXT,            ModCtrl | ModAlt,   kKeyEventDown | kKeyEventRepeat, kCtxViewPatterns,        MPT_V("1.31")},
+	{kcPatternSnapUph2,                        VK_PRIOR,           ModCtrl | ModAlt,   kKeyEventDown | kKeyEventRepeat, kCtxViewPatterns,        MPT_V("1.31")},
+	{kcPrevEntryInColumn,                      VK_UP,              ModCtrl | ModAlt,   kKeyEventDown | kKeyEventRepeat, kCtxViewPatterns,        MPT_V("1.31")},
+	{kcNextEntryInColumn,                      VK_DOWN,            ModCtrl | ModAlt,   kKeyEventDown | kKeyEventRepeat, kCtxViewPatterns,        MPT_V("1.31")},
+	{kcNavigateDown,                           VK_DOWN,            ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxViewPatterns,        MPT_V("1.31")},
+	{kcNavigateUp,                             VK_UP,              ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxViewPatterns,        MPT_V("1.31")},
+	{kcNavigateDownBySpacing,                  VK_DOWN,            ModAlt,             kKeyEventDown | kKeyEventRepeat, kCtxViewPatterns,        MPT_V("1.31")},
+	{kcNavigateUpBySpacing,                    VK_UP,              ModAlt,             kKeyEventDown | kKeyEventRepeat, kCtxViewPatterns,        MPT_V("1.31")},
+	{kcNavigateLeft,                           VK_LEFT,            ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxViewPatterns,        MPT_V("1.31")},
+	{kcNavigateRight,                          VK_RIGHT,           ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxViewPatterns,        MPT_V("1.31")},
+	{kcNavigateNextChan,                       VK_TAB,             ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxViewPatterns,        MPT_V("1.31")},
+	{kcNavigatePrevChan,                       VK_TAB,             ModShift,           kKeyEventDown | kKeyEventRepeat, kCtxViewPatterns,        MPT_V("1.31")},
+	{kcHomeHorizontal,                         VK_HOME,            ModNone,            kKeyEventDown,                   kCtxViewPatterns,        MPT_V("1.31")},
+	{kcHomeVertical,                           VK_HOME,            ModCtrl,            kKeyEventDown,                   kCtxViewPatterns,        MPT_V("1.31")},
+	{kcHomeAbsolute,                           VK_HOME,            ModCtrl | ModAlt,   kKeyEventDown,                   kCtxViewPatterns,        MPT_V("1.31")},
+	{kcEndHorizontal,                          VK_END,             ModNone,            kKeyEventDown,                   kCtxViewPatterns,        MPT_V("1.31")},
+	{kcEndVertical,                            VK_END,             ModCtrl,            kKeyEventDown,                   kCtxViewPatterns,        MPT_V("1.31")},
+	{kcEndAbsolute,                            VK_END,             ModCtrl | ModAlt,   kKeyEventDown,                   kCtxViewPatterns,        MPT_V("1.31")},
+	{kcSelect,                                 VK_SHIFT,           ModShift,           kKeyEventDown,                   kCtxViewPatterns,        MPT_V("1.31")},
+	{kcCopySelect,                             VK_CONTROL,         ModCtrl,            kKeyEventDown,                   kCtxViewPatterns,        MPT_V("1.31")},
+	{kcSelectChannel,                          'L',                ModCtrl,            kKeyEventDown,                   kCtxViewPatterns,        MPT_V("1.31")},
+	{kcSelectColumn,                           'L',                ModShift | ModCtrl, kKeyEventDown,                   kCtxViewPatterns,        MPT_V("1.31")},
+	{kcSelectBeat,                             'B',                ModCtrl,            kKeyEventDown,                   kCtxViewPatterns,        MPT_V("1.31")},
+	{kcSelectMeasure,                          'B',                ModShift | ModCtrl, kKeyEventDown,                   kCtxViewPatterns,        MPT_V("1.31")},
+	{kcToggleFollowSong,                       VK_CANCEL,          ModCtrl,            kKeyEventDown,                   kCtxViewPatterns,        MPT_V("1.31")},
+	{kcToggleFollowSong,                       VK_SCROLL,          ModNone,            kKeyEventDown,                   kCtxViewPatterns,        MPT_V("1.31")},
+	{kcToggleFollowSong,                       VK_F11,             ModNone,            kKeyEventDown,                   kCtxViewPatterns,        MPT_V("1.31")},
+	{kcCursorCopy,                             VK_RETURN,          ModNone,            kKeyEventDown,                   kCtxViewPatterns,        MPT_V("1.31")},
+	{kcCursorPaste,                            VK_SPACE,           ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxViewPatterns,        MPT_V("1.31")},
+	{kcPatternRecord,                          VK_SPACE,           ModCtrl,            kKeyEventDown,                   kCtxViewPatterns,        MPT_V("1.31")},
+	{kcPatternPlayRow,                         VK_RETURN,          ModCtrl,            kKeyEventDown | kKeyEventRepeat, kCtxViewPatterns,        MPT_V("1.31")},
+	{kcSetSpacing,                             VK_MENU,            ModAlt,             kKeyEventDown,                   kCtxViewPatterns,        MPT_V("1.31")},
+	{kcSwitchToOrderList,                      VK_TAB,             ModCtrl,            kKeyEventDown,                   kCtxViewPatterns,        MPT_V("1.31")},
+	{kcDuplicatePattern,                       'D',                ModCtrl,            kKeyEventDown | kKeyEventRepeat, kCtxViewPatterns,        MPT_V("1.31")},
+	{kcPatternEditPCNotePlugin,                VK_OEM_2,           ModCtrl,            kKeyEventDown,                   kCtxViewPatterns,        MPT_V("1.31")},
+	{kcTogglePluginEditor,                     'P',                ModCtrl | ModAlt,   kKeyEventDown,                   kCtxViewPatterns,        MPT_V("1.31")},
+	{kcShowNoteProperties,                     VK_APPS,            ModNone,            kKeyEventDown,                   kCtxViewPatterns,        MPT_V("1.31")},
+	{kcShowPatternProperties,                  'P',                ModShift | ModAlt,  kKeyEventDown,                   kCtxViewPatterns,        MPT_V("1.31")},
+	{kcShowSplitKeyboardSettings,              'E',                ModCtrl,            kKeyEventDown,                   kCtxViewPatterns,        MPT_V("1.31")},
+	{kcChangeLoopStatus,                       VK_F11,             ModShift,           kKeyEventDown,                   kCtxViewPatterns,        MPT_V("1.31")},
+	{kcTimeAtRow,                              'P',                ModCtrl,            kKeyEventDown,                   kCtxViewPatterns,        MPT_V("1.31")},
+	{kcQuantizeSettings,                       'Q',                ModAlt,             kKeyEventDown,                   kCtxViewPatterns,        MPT_V("1.31")},
+	{kcToggleClipboardManager,                 'M',                ModShift | ModCtrl, kKeyEventDown,                   kCtxViewPatterns,        MPT_V("1.31")},
+	{kcClipboardPrev,                          VK_LEFT,            ModShift | ModCtrl, kKeyEventDown,                   kCtxViewPatterns,        MPT_V("1.31")},
+	{kcClipboardNext,                          VK_RIGHT,           ModShift | ModCtrl, kKeyEventDown,                   kCtxViewPatterns,        MPT_V("1.31")},
+	{kcChannelMute,                            VK_F10,             ModNone,            kKeyEventDown,                   kCtxViewPatterns,        MPT_V("1.31")},
+	{kcChannelSolo,                            VK_F10,             ModCtrl,            kKeyEventDown,                   kCtxViewPatterns,        MPT_V("1.31")},
+	{kcChannelUnmuteAll,                       VK_F10,             ModCtrl | ModAlt,   kKeyEventDown,                   kCtxViewPatterns,        MPT_V("1.31")},
+	{kcChannelRecordSelect,                    '1',                ModCtrl,            kKeyEventDown,                   kCtxViewPatterns,        MPT_V("1.31")},
+	{kcChannelSplitRecordSelect,               '2',                ModCtrl,            kKeyEventDown,                   kCtxViewPatterns,        MPT_V("1.31")},
+	{kcChannelReset,                           'R',                ModCtrl,            kKeyEventDown,                   kCtxViewPatterns,        MPT_V("1.31")},
+	{kcTransposeUp,                            'Q',                ModCtrl,            kKeyEventDown | kKeyEventRepeat, kCtxViewPatterns,        MPT_V("1.31")},
+	{kcTransposeDown,                          'A',                ModCtrl,            kKeyEventDown | kKeyEventRepeat, kCtxViewPatterns,        MPT_V("1.31")},
+	{kcTransposeOctUp,                         'Q',                ModShift | ModCtrl, kKeyEventDown | kKeyEventRepeat, kCtxViewPatterns,        MPT_V("1.31")},
+	{kcTransposeOctDown,                       'A',                ModShift | ModCtrl, kKeyEventDown | kKeyEventRepeat, kCtxViewPatterns,        MPT_V("1.31")},
+	{kcTransposeCustom,                        'T',                ModCtrl,            kKeyEventDown,                   kCtxViewPatterns,        MPT_V("1.31")},
+	{kcDataEntryUp,                            VK_ADD,             ModCtrl,            kKeyEventDown | kKeyEventRepeat, kCtxViewPatterns,        MPT_V("1.31")},
+	{kcDataEntryUp,                            VK_OEM_PLUS,        ModCtrl,            kKeyEventDown | kKeyEventRepeat, kCtxViewPatterns,        MPT_V("1.31")},
+	{kcDataEntryDown,                          VK_SUBTRACT,        ModCtrl,            kKeyEventDown | kKeyEventRepeat, kCtxViewPatterns,        MPT_V("1.31")},
+	{kcDataEntryDown,                          VK_OEM_MINUS,       ModCtrl,            kKeyEventDown | kKeyEventRepeat, kCtxViewPatterns,        MPT_V("1.31")},
+	{kcDataEntryUpCoarse,                      VK_ADD,             ModShift | ModCtrl, kKeyEventDown,                   kCtxViewPatterns,        MPT_V("1.31")},
+	{kcDataEntryUpCoarse,                      VK_OEM_PLUS,        ModShift | ModCtrl, kKeyEventDown,                   kCtxViewPatterns,        MPT_V("1.31")},
+	{kcDataEntryDownCoarse,                    VK_SUBTRACT,        ModShift | ModCtrl, kKeyEventDown,                   kCtxViewPatterns,        MPT_V("1.31")},
+	{kcDataEntryDownCoarse,                    VK_OEM_MINUS,       ModShift | ModCtrl, kKeyEventDown,                   kCtxViewPatterns,        MPT_V("1.31")},
+	{kcPatternAmplify,                         'M',                ModCtrl,            kKeyEventDown,                   kCtxViewPatterns,        MPT_V("1.31")},
+	{kcPatternInterpolateVol,                  'J',                ModCtrl,            kKeyEventDown,                   kCtxViewPatterns,        MPT_V("1.31")},
+	{kcPatternInterpolateEffect,               'K',                ModCtrl,            kKeyEventDown,                   kCtxViewPatterns,        MPT_V("1.31")},
+	{kcPatternVisualizeEffect,                 'B',                ModAlt,             kKeyEventDown,                   kCtxViewPatterns,        MPT_V("1.31")},
+	{kcPatternGoto,                            'G',                ModCtrl,            kKeyEventDown,                   kCtxViewPatterns,        MPT_V("1.31")},
+	{kcPatternSetInstrument,                   'I',                ModCtrl,            kKeyEventDown,                   kCtxViewPatterns,        MPT_V("1.31")},
+	{kcPatternGrowSelection,                   'E',                ModAlt,             kKeyEventDown | kKeyEventRepeat, kCtxViewPatterns,        MPT_V("1.31")},
+	{kcPatternShrinkSelection,                 'D',                ModAlt,             kKeyEventDown | kKeyEventRepeat, kCtxViewPatterns,        MPT_V("1.31")},
+	{kcClearField,                             VK_DELETE,          ModNone,            kKeyEventDown,                   kCtxViewPatterns,        MPT_V("1.31")},
+	{kcClearFieldITStyle,                      VK_OEM_PERIOD,      ModShift,           kKeyEventDown,                   kCtxViewPatterns,        MPT_V("1.31")},
+	{kcClearRowStep,                           VK_DELETE,          ModCtrl,            kKeyEventDown | kKeyEventRepeat, kCtxViewPatterns,        MPT_V("1.31")},
+	{kcClearFieldStepITStyle,                  VK_DELETE,          ModShift,           kKeyEventDown | kKeyEventRepeat, kCtxViewPatterns,        MPT_V("1.31")},
+	{kcDeleteRow,                              VK_BACK,            ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxViewPatterns,        MPT_V("1.31")},
+	{kcDeleteWholeRow,                         VK_BACK,            ModCtrl,            kKeyEventDown | kKeyEventRepeat, kCtxViewPatterns,        MPT_V("1.31")},
+	{kcDeleteRowGlobal,                        VK_BACK,            ModAlt,             kKeyEventDown | kKeyEventRepeat, kCtxViewPatterns,        MPT_V("1.31")},
+	{kcDeleteWholeRowGlobal,                   VK_BACK,            ModCtrl | ModAlt,   kKeyEventDown | kKeyEventRepeat, kCtxViewPatterns,        MPT_V("1.31")},
+	{kcInsertRow,                              VK_INSERT,          ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxViewPatterns,        MPT_V("1.31")},
+	{kcInsertWholeRow,                         VK_INSERT,          ModCtrl,            kKeyEventDown | kKeyEventRepeat, kCtxViewPatterns,        MPT_V("1.31")},
+	{kcInsertRowGlobal,                        VK_INSERT,          ModAlt,             kKeyEventDown | kKeyEventRepeat, kCtxViewPatterns,        MPT_V("1.31")},
+	{kcInsertWholeRowGlobal,                   VK_INSERT,          ModCtrl | ModAlt,   kKeyEventDown | kKeyEventRepeat, kCtxViewPatterns,        MPT_V("1.31")},
+	{kcPrevPattern,                            VK_SUBTRACT,        ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxViewPatterns,        MPT_V("1.31")},
+	{kcNextPattern,                            VK_ADD,             ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxViewPatterns,        MPT_V("1.31")},
+	{kcPrevSequence,                           VK_OEM_MINUS,       ModCtrl | ModAlt,   kKeyEventDown | kKeyEventRepeat, kCtxViewPatterns,        MPT_V("1.31")},
+	{kcPrevSequence,                           VK_SUBTRACT,        ModCtrl | ModAlt,   kKeyEventDown | kKeyEventRepeat, kCtxViewPatterns,        MPT_V("1.31")},
+	{kcNextSequence,                           VK_OEM_PLUS,        ModCtrl | ModAlt,   kKeyEventDown | kKeyEventRepeat, kCtxViewPatterns,        MPT_V("1.31")},
+	{kcNextSequence,                           VK_ADD,             ModCtrl | ModAlt,   kKeyEventDown | kKeyEventRepeat, kCtxViewPatterns,        MPT_V("1.31")},
+	{kcVPNoteC_0,                              16 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcVPNoteCS0,                              17 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcVPNoteD_0,                              18 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcVPNoteDS0,                              19 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcVPNoteE_0,                              20 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcVPNoteF_0,                              21 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcVPNoteFS0,                              22 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcVPNoteG_0,                              23 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcVPNoteGS0,                              24 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcVPNoteA_1,                              25 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcVPNoteAS1,                              26 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcVPNoteB_1,                              27 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcVPNoteC_1,                              30 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcVPNoteCS1,                              31 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcVPNoteD_1,                              32 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcVPNoteDS1,                              33 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcVPNoteE_1,                              34 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcVPNoteF_1,                              35 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcVPNoteFS1,                              36 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcVPNoteG_1,                              37 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcVPNoteGS1,                              38 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcVPNoteA_2,                              39 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcVPNoteAS2,                              40 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcVPNoteB_2,                              43 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcVPNoteC_2,                              44 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcVPNoteCS2,                              45 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcVPNoteD_2,                              46 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcVPNoteDS2,                              47 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcVPNoteE_2,                              48 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcVPNoteF_2,                              49 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcVPNoteFS2,                              50 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcVPNoteG_2,                              51 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcVPNoteGS2,                              52 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcVPNoteA_3,                              53 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcSetOctave0,                             '0',                ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcSetOctave0,                             VK_NUMPAD0,         ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcSetOctave1,                             '1',                ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcSetOctave1,                             VK_NUMPAD1,         ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcSetOctave2,                             '2',                ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcSetOctave2,                             VK_NUMPAD2,         ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcSetOctave3,                             '3',                ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcSetOctave3,                             VK_NUMPAD3,         ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcSetOctave4,                             '4',                ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcSetOctave4,                             VK_NUMPAD4,         ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcSetOctave5,                             '5',                ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcSetOctave5,                             VK_NUMPAD5,         ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcSetOctave6,                             '6',                ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcSetOctave6,                             VK_NUMPAD6,         ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcSetOctave7,                             '7',                ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcSetOctave7,                             VK_NUMPAD7,         ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcSetOctave8,                             '8',                ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcSetOctave8,                             VK_NUMPAD8,         ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcSetOctave9,                             '9',                ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcSetOctave9,                             VK_NUMPAD9,         ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcChordModifier,                          VK_SHIFT,           ModShift,           kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcNoteCut,                                VK_OEM_3,           ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcNoteOff,                                VK_OEM_PLUS,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcNoteFade,                               VK_OEM_PLUS,        ModShift,           kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcNotePC,                                 VK_OEM_MINUS,       ModShift,           kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcNotePCS,                                VK_OEM_MINUS,       ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
+	{kcSetIns0,                                VK_NUMPAD0,         ModNone,            kKeyEventDown,                   kCtxViewPatternsIns,     MPT_V("1.31")},
+	{kcSetIns0,                                '0',                ModNone,            kKeyEventDown,                   kCtxViewPatternsIns,     MPT_V("1.31")},
+	{kcSetIns1,                                VK_NUMPAD1,         ModNone,            kKeyEventDown,                   kCtxViewPatternsIns,     MPT_V("1.31")},
+	{kcSetIns1,                                '1',                ModNone,            kKeyEventDown,                   kCtxViewPatternsIns,     MPT_V("1.31")},
+	{kcSetIns2,                                VK_NUMPAD2,         ModNone,            kKeyEventDown,                   kCtxViewPatternsIns,     MPT_V("1.31")},
+	{kcSetIns2,                                '2',                ModNone,            kKeyEventDown,                   kCtxViewPatternsIns,     MPT_V("1.31")},
+	{kcSetIns3,                                VK_NUMPAD3,         ModNone,            kKeyEventDown,                   kCtxViewPatternsIns,     MPT_V("1.31")},
+	{kcSetIns3,                                '3',                ModNone,            kKeyEventDown,                   kCtxViewPatternsIns,     MPT_V("1.31")},
+	{kcSetIns4,                                VK_NUMPAD4,         ModNone,            kKeyEventDown,                   kCtxViewPatternsIns,     MPT_V("1.31")},
+	{kcSetIns4,                                '4',                ModNone,            kKeyEventDown,                   kCtxViewPatternsIns,     MPT_V("1.31")},
+	{kcSetIns5,                                VK_NUMPAD5,         ModNone,            kKeyEventDown,                   kCtxViewPatternsIns,     MPT_V("1.31")},
+	{kcSetIns5,                                '5',                ModNone,            kKeyEventDown,                   kCtxViewPatternsIns,     MPT_V("1.31")},
+	{kcSetIns6,                                VK_NUMPAD6,         ModNone,            kKeyEventDown,                   kCtxViewPatternsIns,     MPT_V("1.31")},
+	{kcSetIns6,                                '6',                ModNone,            kKeyEventDown,                   kCtxViewPatternsIns,     MPT_V("1.31")},
+	{kcSetIns7,                                VK_NUMPAD7,         ModNone,            kKeyEventDown,                   kCtxViewPatternsIns,     MPT_V("1.31")},
+	{kcSetIns7,                                '7',                ModNone,            kKeyEventDown,                   kCtxViewPatternsIns,     MPT_V("1.31")},
+	{kcSetIns8,                                VK_NUMPAD8,         ModNone,            kKeyEventDown,                   kCtxViewPatternsIns,     MPT_V("1.31")},
+	{kcSetIns8,                                '8',                ModNone,            kKeyEventDown,                   kCtxViewPatternsIns,     MPT_V("1.31")},
+	{kcSetIns9,                                VK_NUMPAD9,         ModNone,            kKeyEventDown,                   kCtxViewPatternsIns,     MPT_V("1.31")},
+	{kcSetIns9,                                '9',                ModNone,            kKeyEventDown,                   kCtxViewPatternsIns,     MPT_V("1.31")},
+	{kcSetVolume0,                             '0',                ModNone,            kKeyEventDown,                   kCtxViewPatternsVol,     MPT_V("1.31")},
+	{kcSetVolume0,                             VK_NUMPAD0,         ModNone,            kKeyEventDown,                   kCtxViewPatternsVol,     MPT_V("1.31")},
+	{kcSetVolume1,                             '1',                ModNone,            kKeyEventDown,                   kCtxViewPatternsVol,     MPT_V("1.31")},
+	{kcSetVolume1,                             VK_NUMPAD1,         ModNone,            kKeyEventDown,                   kCtxViewPatternsVol,     MPT_V("1.31")},
+	{kcSetVolume2,                             '2',                ModNone,            kKeyEventDown,                   kCtxViewPatternsVol,     MPT_V("1.31")},
+	{kcSetVolume2,                             VK_NUMPAD2,         ModNone,            kKeyEventDown,                   kCtxViewPatternsVol,     MPT_V("1.31")},
+	{kcSetVolume3,                             '3',                ModNone,            kKeyEventDown,                   kCtxViewPatternsVol,     MPT_V("1.31")},
+	{kcSetVolume3,                             VK_NUMPAD3,         ModNone,            kKeyEventDown,                   kCtxViewPatternsVol,     MPT_V("1.31")},
+	{kcSetVolume4,                             '4',                ModNone,            kKeyEventDown,                   kCtxViewPatternsVol,     MPT_V("1.31")},
+	{kcSetVolume4,                             VK_NUMPAD4,         ModNone,            kKeyEventDown,                   kCtxViewPatternsVol,     MPT_V("1.31")},
+	{kcSetVolume5,                             '5',                ModNone,            kKeyEventDown,                   kCtxViewPatternsVol,     MPT_V("1.31")},
+	{kcSetVolume5,                             VK_NUMPAD5,         ModNone,            kKeyEventDown,                   kCtxViewPatternsVol,     MPT_V("1.31")},
+	{kcSetVolume6,                             '6',                ModNone,            kKeyEventDown,                   kCtxViewPatternsVol,     MPT_V("1.31")},
+	{kcSetVolume6,                             VK_NUMPAD6,         ModNone,            kKeyEventDown,                   kCtxViewPatternsVol,     MPT_V("1.31")},
+	{kcSetVolume7,                             '7',                ModNone,            kKeyEventDown,                   kCtxViewPatternsVol,     MPT_V("1.31")},
+	{kcSetVolume7,                             VK_NUMPAD7,         ModNone,            kKeyEventDown,                   kCtxViewPatternsVol,     MPT_V("1.31")},
+	{kcSetVolume8,                             '8',                ModNone,            kKeyEventDown,                   kCtxViewPatternsVol,     MPT_V("1.31")},
+	{kcSetVolume8,                             VK_NUMPAD8,         ModNone,            kKeyEventDown,                   kCtxViewPatternsVol,     MPT_V("1.31")},
+	{kcSetVolume9,                             '9',                ModNone,            kKeyEventDown,                   kCtxViewPatternsVol,     MPT_V("1.31")},
+	{kcSetVolume9,                             VK_NUMPAD9,         ModNone,            kKeyEventDown,                   kCtxViewPatternsVol,     MPT_V("1.31")},
+	{kcSetVolumeVol,                           'V',                ModNone,            kKeyEventDown,                   kCtxViewPatternsVol,     MPT_V("1.31")},
+	{kcSetVolumePan,                           'P',                ModNone,            kKeyEventDown,                   kCtxViewPatternsVol,     MPT_V("1.31")},
+	{kcSetVolumeVolSlideUp,                    'C',                ModNone,            kKeyEventDown,                   kCtxViewPatternsVol,     MPT_V("1.31")},
+	{kcSetVolumeVolSlideDown,                  'D',                ModNone,            kKeyEventDown,                   kCtxViewPatternsVol,     MPT_V("1.31")},
+	{kcSetVolumeFineVolUp,                     'A',                ModNone,            kKeyEventDown,                   kCtxViewPatternsVol,     MPT_V("1.31")},
+	{kcSetVolumeFineVolDown,                   'B',                ModNone,            kKeyEventDown,                   kCtxViewPatternsVol,     MPT_V("1.31")},
+	{kcSetVolumeVibratoSpd,                    'U',                ModNone,            kKeyEventDown,                   kCtxViewPatternsVol,     MPT_V("1.31")},
+	{kcSetVolumeVibrato,                       'H',                ModNone,            kKeyEventDown,                   kCtxViewPatternsVol,     MPT_V("1.31")},
+	{kcSetVolumeXMPanLeft,                     'L',                ModNone,            kKeyEventDown,                   kCtxViewPatternsVol,     MPT_V("1.31")},
+	{kcSetVolumeXMPanRight,                    'R',                ModNone,            kKeyEventDown,                   kCtxViewPatternsVol,     MPT_V("1.31")},
+	{kcSetVolumePortamento,                    'G',                ModNone,            kKeyEventDown,                   kCtxViewPatternsVol,     MPT_V("1.31")},
+	{kcSetVolumeITPortaUp,                     'F',                ModNone,            kKeyEventDown,                   kCtxViewPatternsVol,     MPT_V("1.31")},
+	{kcSetVolumeITPortaDown,                   'E',                ModNone,            kKeyEventDown,                   kCtxViewPatternsVol,     MPT_V("1.31")},
+	{kcSetVolumeITOffset,                      'O',                ModNone,            kKeyEventDown,                   kCtxViewPatternsVol,     MPT_V("1.31")},
+	{kcSetFXmacroSlide,                        VK_OEM_5,           ModNone,            kKeyEventDown,                   kCtxViewPatternsFX,      MPT_V("1.31")},
+	{kcSetFXdelaycut,                          VK_OEM_1,           ModShift,           kKeyEventDown,                   kCtxViewPatternsFX,      MPT_V("1.31")},
+	{kcSetFXdelaycut,                          VK_OEM_1,           ModNone,            kKeyEventDown,                   kCtxViewPatternsFX,      MPT_V("1.31")},
+	{kcSetFXextension,                         VK_OEM_2,           ModNone,            kKeyEventDown,                   kCtxViewPatternsFX,      MPT_V("1.31")},
+	{kcSetFXFinetune,                          VK_OEM_PLUS,        ModNone,            kKeyEventDown,                   kCtxViewPatternsFX,      MPT_V("1.31")},
+	{kcSetFXFinetuneSmooth,                    VK_OEM_PLUS,        ModShift,           kKeyEventDown,                   kCtxViewPatternsFX,      MPT_V("1.31")},
+	{kcSetFXParam0,                            '0',                ModNone,            kKeyEventDown,                   kCtxViewPatternsFXparam, MPT_V("1.31")},
+	{kcSetFXParam0,                            VK_NUMPAD0,         ModNone,            kKeyEventDown,                   kCtxViewPatternsFXparam, MPT_V("1.31")},
+	{kcSetFXParam1,                            '1',                ModNone,            kKeyEventDown,                   kCtxViewPatternsFXparam, MPT_V("1.31")},
+	{kcSetFXParam1,                            VK_NUMPAD1,         ModNone,            kKeyEventDown,                   kCtxViewPatternsFXparam, MPT_V("1.31")},
+	{kcSetFXParam2,                            '2',                ModNone,            kKeyEventDown,                   kCtxViewPatternsFXparam, MPT_V("1.31")},
+	{kcSetFXParam2,                            VK_NUMPAD2,         ModNone,            kKeyEventDown,                   kCtxViewPatternsFXparam, MPT_V("1.31")},
+	{kcSetFXParam3,                            '3',                ModNone,            kKeyEventDown,                   kCtxViewPatternsFXparam, MPT_V("1.31")},
+	{kcSetFXParam3,                            VK_NUMPAD3,         ModNone,            kKeyEventDown,                   kCtxViewPatternsFXparam, MPT_V("1.31")},
+	{kcSetFXParam4,                            '4',                ModNone,            kKeyEventDown,                   kCtxViewPatternsFXparam, MPT_V("1.31")},
+	{kcSetFXParam4,                            VK_NUMPAD4,         ModNone,            kKeyEventDown,                   kCtxViewPatternsFXparam, MPT_V("1.31")},
+	{kcSetFXParam5,                            '5',                ModNone,            kKeyEventDown,                   kCtxViewPatternsFXparam, MPT_V("1.31")},
+	{kcSetFXParam5,                            VK_NUMPAD5,         ModNone,            kKeyEventDown,                   kCtxViewPatternsFXparam, MPT_V("1.31")},
+	{kcSetFXParam6,                            '6',                ModNone,            kKeyEventDown,                   kCtxViewPatternsFXparam, MPT_V("1.31")},
+	{kcSetFXParam6,                            VK_NUMPAD6,         ModNone,            kKeyEventDown,                   kCtxViewPatternsFXparam, MPT_V("1.31")},
+	{kcSetFXParam7,                            '7',                ModNone,            kKeyEventDown,                   kCtxViewPatternsFXparam, MPT_V("1.31")},
+	{kcSetFXParam7,                            VK_NUMPAD7,         ModNone,            kKeyEventDown,                   kCtxViewPatternsFXparam, MPT_V("1.31")},
+	{kcSetFXParam8,                            '8',                ModNone,            kKeyEventDown,                   kCtxViewPatternsFXparam, MPT_V("1.31")},
+	{kcSetFXParam8,                            VK_NUMPAD8,         ModNone,            kKeyEventDown,                   kCtxViewPatternsFXparam, MPT_V("1.31")},
+	{kcSetFXParam9,                            '9',                ModNone,            kKeyEventDown,                   kCtxViewPatternsFXparam, MPT_V("1.31")},
+	{kcSetFXParam9,                            VK_NUMPAD9,         ModNone,            kKeyEventDown,                   kCtxViewPatternsFXparam, MPT_V("1.31")},
+	{kcSetFXParamA,                            'A',                ModNone,            kKeyEventDown,                   kCtxViewPatternsFXparam, MPT_V("1.31")},
+	{kcSetFXParamB,                            'B',                ModNone,            kKeyEventDown,                   kCtxViewPatternsFXparam, MPT_V("1.31")},
+	{kcSetFXParamC,                            'C',                ModNone,            kKeyEventDown,                   kCtxViewPatternsFXparam, MPT_V("1.31")},
+	{kcSetFXParamD,                            'D',                ModNone,            kKeyEventDown,                   kCtxViewPatternsFXparam, MPT_V("1.31")},
+	{kcSetFXParamE,                            'E',                ModNone,            kKeyEventDown,                   kCtxViewPatternsFXparam, MPT_V("1.31")},
+	{kcSetFXParamF,                            'F',                ModNone,            kKeyEventDown,                   kCtxViewPatternsFXparam, MPT_V("1.31")},
+	{kcSampleLoad,                             VK_RETURN,          ModNone,            kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
+	{kcSampleLoadRaw,                          VK_RETURN,          ModShift,           kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
+	{kcSampleTransposeUp,                      'Q',                ModCtrl,            kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
+	{kcSampleTransposeDown,                    'A',                ModCtrl,            kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
+	{kcSampleTransposeOctUp,                   'Q',                ModShift | ModCtrl, kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
+	{kcSampleTransposeOctDown,                 'A',                ModShift | ModCtrl, kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
+	{kcSampleTrim,                             'T',                ModCtrl,            kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
+	{kcSampleTrimToLoopEnd,                    'T',                ModShift | ModCtrl, kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
+	{kcSampleSilence,                          VK_BACK,            ModNone,            kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
+	{kcSampleNormalize,                        'N',                ModShift,           kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
+	{kcSampleAmplify,                          'M',                ModCtrl,            kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
+	{kcSampleReverse,                          'R',                ModShift | ModCtrl, kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
+	{kcSampleDelete,                           VK_DELETE,          ModNone,            kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
+	{kcSampleZoomUp,                           VK_ADD,             ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxViewSamples,         MPT_V("1.31")},
+	{kcSampleZoomUp,                           VK_OEM_PLUS,        ModCtrl,            kKeyEventDown | kKeyEventRepeat, kCtxViewSamples,         MPT_V("1.31")},
+	{kcSampleZoomDown,                         VK_SUBTRACT,        ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxViewSamples,         MPT_V("1.31")},
+	{kcSampleZoomDown,                         VK_OEM_MINUS,       ModCtrl,            kKeyEventDown | kKeyEventRepeat, kCtxViewSamples,         MPT_V("1.31")},
+	{kcSampleZoomSelection,                    VK_SPACE,           ModNone,            kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
+	{kcSampleCenterSampleStart,                '1',                ModNone,            kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
+	{kcSampleCenterSampleEnd,                  '2',                ModNone,            kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
+	{kcSampleCenterLoopStart,                  '1',                ModCtrl,            kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
+	{kcSampleCenterLoopEnd,                    '2',                ModCtrl,            kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
+	{kcSampleCenterSustainStart,               '3',                ModCtrl,            kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
+	{kcSampleCenterSustainEnd,                 '4',                ModCtrl,            kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
+	{kcSample8Bit,                             '8',                ModCtrl,            kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
+	{kcSampleMonoMix,                          'M',                ModShift,           kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
+	{kcSampleMonoLeft,                         'L',                ModShift,           kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
+	{kcSampleMonoRight,                        'R',                ModShift,           kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
+	{kcSampleMonoSplit,                        'S',                ModShift,           kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
+	{kcSampleStereoSep,                        'P',                ModCtrl,            kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
+	{kcSampleUpsample,                         'F',                ModCtrl,            kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
+	{kcSampleDownsample,                       'G',                ModCtrl,            kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
+	{kcSampleResample,                         'R',                ModCtrl,            kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
+	{kcSampleInvert,                           'I',                ModCtrl,            kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
+	{kcSampleSignUnsign,                       'U',                ModCtrl,            kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
+	{kcSampleRemoveDCOffset,                   'E',                ModCtrl,            kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
+	{kcSampleQuickFade,                        'D',                ModCtrl,            kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
+	{kcSampleXFade,                            'L',                ModCtrl,            kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
+	{CommandID(kcStartSampleCues + 0),         '1',                ModShift,           kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
+	{CommandID(kcStartSampleCues + 1),         '2',                ModShift,           kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
+	{CommandID(kcStartSampleCues + 2),         '3',                ModShift,           kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
+	{CommandID(kcStartSampleCues + 3),         '4',                ModShift,           kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
+	{CommandID(kcStartSampleCues + 4),         '5',                ModShift,           kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
+	{CommandID(kcStartSampleCues + 5),         '6',                ModShift,           kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
+	{CommandID(kcStartSampleCues + 6),         '7',                ModShift,           kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
+	{CommandID(kcStartSampleCues + 7),         '8',                ModShift,           kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
+	{CommandID(kcStartSampleCues + 8),         '9',                ModShift,           kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
+	{kcInstrumentEnvelopeZoomIn,               VK_ADD,             ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxViewInstruments,     MPT_V("1.31")},
+	{kcInstrumentEnvelopeZoomIn,               VK_OEM_PLUS,        ModCtrl,            kKeyEventDown | kKeyEventRepeat, kCtxViewInstruments,     MPT_V("1.31")},
+	{kcInstrumentEnvelopeZoomOut,              VK_SUBTRACT,        ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxViewInstruments,     MPT_V("1.31")},
+	{kcInstrumentEnvelopeZoomOut,              VK_OEM_MINUS,       ModCtrl,            kKeyEventDown | kKeyEventRepeat, kCtxViewInstruments,     MPT_V("1.31")},
+	{kcInstrumentEnvelopeScale,                'E',                ModCtrl,            kKeyEventDown,                   kCtxViewInstruments,     MPT_V("1.31")},
+	{kcInstrumentEnvelopeSwitchToVolume,       'M',                ModShift,           kKeyEventDown,                   kCtxViewInstruments,     MPT_V("1.31")},
+	{kcInstrumentEnvelopeSwitchToPanning,      'P',                ModShift,           kKeyEventDown,                   kCtxViewInstruments,     MPT_V("1.31")},
+	{kcInstrumentEnvelopeSwitchToPitch,        'I',                ModShift,           kKeyEventDown,                   kCtxViewInstruments,     MPT_V("1.31")},
+	{kcInstrumentEnvelopeToggleVolume,         'M',                ModShift | ModCtrl, kKeyEventDown,                   kCtxViewInstruments,     MPT_V("1.31")},
+	{kcInstrumentEnvelopeTogglePanning,        'P',                ModShift | ModCtrl, kKeyEventDown,                   kCtxViewInstruments,     MPT_V("1.31")},
+	{kcInstrumentEnvelopeTogglePitch,          'I',                ModShift | ModCtrl, kKeyEventDown,                   kCtxViewInstruments,     MPT_V("1.31")},
+	{kcInstrumentEnvelopeToggleFilter,         'F',                ModShift | ModCtrl, kKeyEventDown,                   kCtxViewInstruments,     MPT_V("1.31")},
+	{kcInstrumentEnvelopeToggleLoop,           'L',                ModShift,           kKeyEventDown,                   kCtxViewInstruments,     MPT_V("1.31")},
+	{kcInstrumentEnvelopeSelectLoopStart,      VK_HOME,            ModShift,           kKeyEventDown,                   kCtxViewInstruments,     MPT_V("1.31")},
+	{kcInstrumentEnvelopeSelectLoopEnd,        VK_END,             ModShift,           kKeyEventDown,                   kCtxViewInstruments,     MPT_V("1.31")},
+	{kcInstrumentEnvelopeToggleSustain,        'L',                ModShift | ModCtrl, kKeyEventDown,                   kCtxViewInstruments,     MPT_V("1.31")},
+	{kcInstrumentEnvelopeSelectSustainStart,   VK_HOME,            ModShift | ModCtrl, kKeyEventDown,                   kCtxViewInstruments,     MPT_V("1.31")},
+	{kcInstrumentEnvelopeSelectSustainEnd,     VK_END,             ModShift | ModCtrl, kKeyEventDown,                   kCtxViewInstruments,     MPT_V("1.31")},
+	{kcInstrumentEnvelopeToggleCarry,          'C',                ModShift | ModCtrl, kKeyEventDown,                   kCtxViewInstruments,     MPT_V("1.31")},
+	{kcInstrumentEnvelopePointPrev,            VK_TAB,             ModShift,           kKeyEventDown | kKeyEventRepeat, kCtxViewInstruments,     MPT_V("1.31")},
+	{kcInstrumentEnvelopePointNext,            VK_TAB,             ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxViewInstruments,     MPT_V("1.31")},
+	{kcInstrumentEnvelopePointMoveLeft,        VK_LEFT,            ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxViewInstruments,     MPT_V("1.31")},
+	{kcInstrumentEnvelopePointMoveRight,       VK_RIGHT,           ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxViewInstruments,     MPT_V("1.31")},
+	{kcInstrumentEnvelopePointMoveLeftCoarse,  VK_LEFT,            ModShift,           kKeyEventDown | kKeyEventRepeat, kCtxViewInstruments,     MPT_V("1.31")},
+	{kcInstrumentEnvelopePointMoveRightCoarse, VK_RIGHT,           ModShift,           kKeyEventDown | kKeyEventRepeat, kCtxViewInstruments,     MPT_V("1.31")},
+	{kcInstrumentEnvelopePointMoveUp,          VK_UP,              ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxViewInstruments,     MPT_V("1.31")},
+	{kcInstrumentEnvelopePointMoveUp8,         VK_PRIOR,           ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxViewInstruments,     MPT_V("1.31")},
+	{kcInstrumentEnvelopePointMoveDown,        VK_DOWN,            ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxViewInstruments,     MPT_V("1.31")},
+	{kcInstrumentEnvelopePointMoveDown8,       VK_NEXT,            ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxViewInstruments,     MPT_V("1.31")},
+	{kcInstrumentEnvelopePointInsert,          VK_INSERT,          ModNone,            kKeyEventDown,                   kCtxViewInstruments,     MPT_V("1.31")},
+	{kcInstrumentEnvelopePointRemove,          VK_DELETE,          ModNone,            kKeyEventDown,                   kCtxViewInstruments,     MPT_V("1.31")},
+	{kcInstrumentEnvelopePointRemove,          VK_BACK,            ModNone,            kKeyEventDown,                   kCtxViewInstruments,     MPT_V("1.31")},
+	{kcInstrumentEnvelopeSetLoopStart,         VK_HOME,            ModNone,            kKeyEventDown,                   kCtxViewInstruments,     MPT_V("1.31")},
+	{kcInstrumentEnvelopeSetLoopEnd,           VK_END,             ModNone,            kKeyEventDown,                   kCtxViewInstruments,     MPT_V("1.31")},
+	{kcInstrumentEnvelopeSetSustainLoopStart,  VK_HOME,            ModCtrl,            kKeyEventDown,                   kCtxViewInstruments,     MPT_V("1.31")},
+	{kcInstrumentEnvelopeSetSustainLoopEnd,    VK_END,             ModCtrl,            kKeyEventDown,                   kCtxViewInstruments,     MPT_V("1.31")},
+	{kcInstrumentEnvelopeToggleReleaseNode,    'R',                ModCtrl,            kKeyEventDown,                   kCtxViewInstruments,     MPT_V("1.31")},
+	{kcToggleSmpInsList,                       VK_TAB,             ModNone,            kKeyEventDown,                   kCtxViewComments,        MPT_V("1.31")},
+	{kcExecuteSmpInsListItem,                  VK_RETURN,          ModNone,            kKeyEventDown,                   kCtxViewComments,        MPT_V("1.31")},
+	{kcRenameSmpInsListItem,                   VK_RETURN,          ModCtrl,            kKeyEventDown,                   kCtxViewComments,        MPT_V("1.31")},
+	{kcVSTGUIPrevPreset,                       VK_SUBTRACT,        ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxVSTGUI,              MPT_V("1.31")},
+	{kcVSTGUINextPreset,                       VK_ADD,             ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxVSTGUI,              MPT_V("1.31")},
+	{kcVSTGUIPrevPresetJump,                   VK_SUBTRACT,        ModCtrl,            kKeyEventDown | kKeyEventRepeat, kCtxVSTGUI,              MPT_V("1.31")},
+	{kcVSTGUINextPresetJump,                   VK_ADD,             ModCtrl,            kKeyEventDown | kKeyEventRepeat, kCtxVSTGUI,              MPT_V("1.31")},
+	{kcVSTGUIRandParams,                       'D',                ModShift | ModCtrl, kKeyEventDown,                   kCtxVSTGUI,              MPT_V("1.31")},
+	{kcVSTGUIToggleRecordParams,               'R',                ModCtrl,            kKeyEventDown,                   kCtxVSTGUI,              MPT_V("1.31")},
+	{kcVSTGUIToggleSendKeysToPlug,             'K',                ModCtrl,            kKeyEventDown,                   kCtxVSTGUI,              MPT_V("1.31")},
+	{kcVSTGUIBypassPlug,                       'B',                ModCtrl,            kKeyEventDown,                   kCtxVSTGUI,              MPT_V("1.31")},
+	{kcInstrumentCtrlDuplicate,                'D',                ModCtrl,            kKeyEventDown,                   kCtxCtrlInstruments,     MPT_V("1.31")},
+	{kcInsNoteMapEditSampleMap,                'E',                ModShift | ModCtrl, kKeyEventDown,                   kCtxCtrlInstruments,     MPT_V("1.31")},
+	{kcInsNoteMapEditSample,                   'E',                ModCtrl,            kKeyEventDown,                   kCtxCtrlInstruments,     MPT_V("1.31")},
+	{kcInsNoteMapCopyCurrentNote,              'M',                ModShift | ModCtrl, kKeyEventDown,                   kCtxCtrlInstruments,     MPT_V("1.31")},
+	{kcInsNoteMapCopyCurrentSample,            'M',                ModCtrl,            kKeyEventDown,                   kCtxCtrlInstruments,     MPT_V("1.31")},
+	{kcInsNoteMapReset,                        'R',                ModCtrl,            kKeyEventDown,                   kCtxCtrlInstruments,     MPT_V("1.31")},
+	{kcInsNoteMapTransposeUp,                  'Q',                ModCtrl,            kKeyEventDown,                   kCtxCtrlInstruments,     MPT_V("1.31")},
+	{kcInsNoteMapTransposeDown,                'A',                ModCtrl,            kKeyEventDown,                   kCtxCtrlInstruments,     MPT_V("1.31")},
+	{kcInsNoteMapTransposeOctUp,               'Q',                ModShift | ModCtrl, kKeyEventDown,                   kCtxCtrlInstruments,     MPT_V("1.31")},
+	{kcInsNoteMapTransposeOctDown,             'A',                ModShift | ModCtrl, kKeyEventDown,                   kCtxCtrlInstruments,     MPT_V("1.31")},
+	{kcOrderlistEditDelete,                    VK_DELETE,          ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxCtrlOrderlist,       MPT_V("1.31")},
+	{kcOrderlistEditInsert,                    VK_INSERT,          ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxCtrlOrderlist,       MPT_V("1.31")},
+	{kcOrderlistEditInsertSeparator,           VK_INSERT,          ModCtrl,            kKeyEventDown | kKeyEventRepeat, kCtxCtrlOrderlist,       MPT_V("1.31")},
+	{kcOrderlistEditCopyOrders,                'C',                ModShift | ModCtrl, kKeyEventDown,                   kCtxCtrlOrderlist,       MPT_V("1.31")},
+	{kcOrderlistEditPattern,                   VK_RETURN,          ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxCtrlOrderlist,       MPT_V("1.31")},
+	{kcOrderlistSwitchToPatternView,           VK_TAB,             ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxCtrlOrderlist,       MPT_V("1.31")},
+	{kcOrderlistNavigateLeft,                  VK_LEFT,            ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxCtrlOrderlist,       MPT_V("1.31")},
+	{kcOrderlistNavigateLeft,                  VK_UP,              ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxCtrlOrderlist,       MPT_V("1.31")},
+	{kcOrderlistNavigateRight,                 VK_RIGHT,           ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxCtrlOrderlist,       MPT_V("1.31")},
+	{kcOrderlistNavigateRight,                 VK_DOWN,            ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxCtrlOrderlist,       MPT_V("1.31")},
+	{kcOrderlistNavigateFirst,                 VK_HOME,            ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxCtrlOrderlist,       MPT_V("1.31")},
+	{kcOrderlistNavigateLast,                  VK_END,             ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxCtrlOrderlist,       MPT_V("1.31")},
+	{kcOrderlistPat0,                          '0',                ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxCtrlOrderlist,       MPT_V("1.31")},
+	{kcOrderlistPat0,                          VK_NUMPAD0,         ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxCtrlOrderlist,       MPT_V("1.31")},
+	{kcOrderlistPat1,                          '1',                ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxCtrlOrderlist,       MPT_V("1.31")},
+	{kcOrderlistPat1,                          VK_NUMPAD1,         ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxCtrlOrderlist,       MPT_V("1.31")},
+	{kcOrderlistPat2,                          '2',                ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxCtrlOrderlist,       MPT_V("1.31")},
+	{kcOrderlistPat2,                          VK_NUMPAD2,         ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxCtrlOrderlist,       MPT_V("1.31")},
+	{kcOrderlistPat3,                          '3',                ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxCtrlOrderlist,       MPT_V("1.31")},
+	{kcOrderlistPat3,                          VK_NUMPAD3,         ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxCtrlOrderlist,       MPT_V("1.31")},
+	{kcOrderlistPat4,                          '4',                ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxCtrlOrderlist,       MPT_V("1.31")},
+	{kcOrderlistPat4,                          VK_NUMPAD4,         ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxCtrlOrderlist,       MPT_V("1.31")},
+	{kcOrderlistPat5,                          '5',                ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxCtrlOrderlist,       MPT_V("1.31")},
+	{kcOrderlistPat5,                          VK_NUMPAD5,         ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxCtrlOrderlist,       MPT_V("1.31")},
+	{kcOrderlistPat6,                          '6',                ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxCtrlOrderlist,       MPT_V("1.31")},
+	{kcOrderlistPat6,                          VK_NUMPAD6,         ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxCtrlOrderlist,       MPT_V("1.31")},
+	{kcOrderlistPat7,                          '7',                ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxCtrlOrderlist,       MPT_V("1.31")},
+	{kcOrderlistPat7,                          VK_NUMPAD7,         ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxCtrlOrderlist,       MPT_V("1.31")},
+	{kcOrderlistPat8,                          '8',                ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxCtrlOrderlist,       MPT_V("1.31")},
+	{kcOrderlistPat8,                          VK_NUMPAD8,         ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxCtrlOrderlist,       MPT_V("1.31")},
+	{kcOrderlistPat9,                          '9',                ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxCtrlOrderlist,       MPT_V("1.31")},
+	{kcOrderlistPat9,                          VK_NUMPAD9,         ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxCtrlOrderlist,       MPT_V("1.31")},
+	{kcOrderlistPatPlus,                       VK_ADD,             ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxCtrlOrderlist,       MPT_V("1.31")},
+	{kcOrderlistPatPlus,                       VK_OEM_PLUS,        ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxCtrlOrderlist,       MPT_V("1.31")},
+	{kcOrderlistPatMinus,                      VK_SUBTRACT,        ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxCtrlOrderlist,       MPT_V("1.31")},
+	{kcOrderlistPatMinus,                      VK_OEM_MINUS,       ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxCtrlOrderlist,       MPT_V("1.31")},
+	{kcOrderlistPatIgnore,                     'I',                ModNone,            kKeyEventDown,                   kCtxCtrlOrderlist,       MPT_V("1.31")},
+	{kcOrderlistPatInvalid,                    VK_SPACE,           ModNone,            kKeyEventDown,                   kCtxCtrlOrderlist,       MPT_V("1.31")},
+	{kcOrderlistLockPlayback,                  'L',                ModCtrl,            kKeyEventDown,                   kCtxCtrlOrderlist,       MPT_V("1.31")},
+	{kcOrderlistUnlockPlayback,                'U',                ModCtrl,            kKeyEventDown,                   kCtxCtrlOrderlist,       MPT_V("1.31")},
+	{kcChnSettingsPrev,                        VK_LEFT,            ModAlt,             kKeyEventDown | kKeyEventRepeat, kCtxChannelSettings,     MPT_V("1.31")},
+	{kcChnSettingsPrev,                        VK_BACK,            ModShift,           kKeyEventDown | kKeyEventRepeat, kCtxChannelSettings,     MPT_V("1.31")},
+	{kcChnSettingsNext,                        VK_RIGHT,           ModAlt,             kKeyEventDown | kKeyEventRepeat, kCtxChannelSettings,     MPT_V("1.31")},
+	{kcChnSettingsNext,                        VK_RETURN,          ModShift,           kKeyEventDown | kKeyEventRepeat, kCtxChannelSettings,     MPT_V("1.31")},
+	{kcChnColorFromPrev,                       VK_LEFT,            ModShift | ModAlt,  kKeyEventDown,                   kCtxChannelSettings,     MPT_V("1.31")},
+	{kcChnColorFromNext,                       VK_RIGHT,           ModShift | ModAlt,  kKeyEventDown,                   kCtxChannelSettings,     MPT_V("1.31")},
+	{kcChnSettingsClose,                       VK_RETURN,          ModNone,            kKeyEventDown,                   kCtxChannelSettings,     MPT_V("1.31")},
+};
+// clang-format on
 
 };  // namespace
 
@@ -1529,7 +1980,7 @@ ctx:UID:Description:Modifier:Key:EventMask
 	     "//- Format is:                                                         -\n"
 	     "//- Context:Command ID:Modifiers:Key:KeypressEventType     //Comments  -\n"
 	     "//----------------------------------------------------------------------\n"
-	     "version:" << KEYMAP_VERSION << "\n";
+	     "version:" << mpt::ToCharset(mpt::Charset::ASCII, Version::Current().ToUString()) << "\n";
 
 	std::vector<HKL> layouts(GetKeyboardLayoutList(0, nullptr));
 	GetKeyboardLayoutList(static_cast<int>(layouts.size()), layouts.data());
@@ -1574,14 +2025,9 @@ ctx:UID:Description:Modifier:Key:EventMask
 }
 
 
-static std::string GetDefaultKeymap()
+bool CCommandSet::LoadFile(std::istream &iStrm, const mpt::ustring &filenameDescription)
 {
-	return mpt::make_basic_string(mpt::byte_cast<mpt::span<const char>>(GetResource(MAKEINTRESOURCE(IDR_DEFAULT_KEYBINDINGS), TEXT("KEYBINDINGS"))));
-}
-
-
-bool CCommandSet::LoadFile(std::istream &iStrm, const mpt::ustring &filenameDescription, const bool fillExistingSet)
-{
+	Version keymapVersion;
 	KeyCombination kc;
 	char s[1024];
 	std::string curLine;
@@ -1589,11 +2035,8 @@ bool CCommandSet::LoadFile(std::istream &iStrm, const mpt::ustring &filenameDesc
 	int l = 0;
 	m_oldSpecs = nullptr;  // After clearing the key set, need to fix effect letters
 
-	if(!fillExistingSet)
-	{
-		for(auto &cmd : m_commands)
-			cmd.kcList.clear();
-	}
+	for(auto &cmd : m_commands)
+		cmd.kcList.clear();
 
 	CString errText;
 	int errorCount = 0;
@@ -1625,11 +2068,11 @@ bool CCommandSet::LoadFile(std::istream &iStrm, const mpt::ustring &filenameDesc
 		tokens = mpt::String::Split<std::string>(curLine, ":");
 		if(tokens.size() == 2 && !mpt::CompareNoCaseAscii(tokens[0], "version"))
 		{
-			// This line indicates the version of this keymap file (e.g. "version:1")
-			int fileVersion = ConvertStrTo<int>(tokens[1]);
-			if(fileVersion > KEYMAP_VERSION)
+			// This line indicates the version of this keymap file (e.g. "version:1" on older versions, in newer version the OpenMPT version that was used to save the file)
+			keymapVersion = Version::Parse(mpt::ToUnicode(mpt::Charset::ASCII, tokens[1]));
+			if(keymapVersion > Version::Current())
 			{
-				errText.AppendFormat(_T("File version is %d, but your version of OpenMPT only supports loading files up to version %d.\n"), fileVersion, KEYMAP_VERSION);
+				errText += MPT_CFORMAT("Keymap was saved with OpenMPT {}, but you are running OpenMPT {}.")(keymapVersion, Version::Current());
 			}
 			continue;
 		}
@@ -1664,14 +2107,6 @@ bool CCommandSet::LoadFile(std::istream &iStrm, const mpt::ustring &filenameDesc
 
 			// Event
 			kc.EventType(static_cast<KeyEventType>(ConvertStrTo<int>(tokens[4])));
-
-			if(fillExistingSet && cmd != kcNull && GetKeyListSize(cmd) != 0)
-			{
-				// Do not map shortcuts that already have custom keys assigned.
-				// In particular with default note keys, this can create awkward keymaps when loading
-				// e.g. an IT-style keymap and it contains two keys mapped to the same notes.
-				continue;
-			}
 		}
 
 		// Error checking
@@ -1690,20 +2125,11 @@ bool CCommandSet::LoadFile(std::istream &iStrm, const mpt::ustring &filenameDesc
 			}
 		} else
 		{
-			Add(kc, cmd, !fillExistingSet, -1, !fillExistingSet);
+			Add(kc, cmd, true, -1, true);
 		}
 	}
 
-	if(!fillExistingSet)
-	{
-		// Add the default command set to our freshly loaded command set.
-		std::istringstream ss{ GetDefaultKeymap() };
-		LoadFile(ss, mpt::ustring(), true);
-	} else
-	{
-		// We were just adding stuff to an existing command set - don't delete it!
-		return true;
-	}
+	ApplyDefaultKeybindings(keymapVersion);
 
 	// Fix up old keymaps containing legacy commands that have been merged into other commands
 	static constexpr std::pair<CommandID, CommandID> MergeCommands[] =
@@ -1744,10 +2170,69 @@ bool CCommandSet::LoadFile(const mpt::PathString &filename)
 }
 
 
-bool CCommandSet::LoadDefaultKeymap()
+void CCommandSet::LoadDefaultKeymap()
 {
-	std::istringstream ss{ GetDefaultKeymap() };
-	return LoadFile(ss, U_("\"executable resource\""));
+	for(auto &cmd : m_commands)
+		cmd.kcList.clear();
+	ApplyDefaultKeybindings();
+}
+
+
+void CCommandSet::ApplyDefaultKeybindings(const Version onlyCommandsAfterVersion)
+{
+	std::vector<HKL> layouts(GetKeyboardLayoutList(0, nullptr));
+	GetKeyboardLayoutList(static_cast<int>(layouts.size()), layouts.data());
+
+	const auto previousVersion = TrackerSettings::Instance().PreviousSettingsVersion;
+
+	for(const auto &kb : DefaultKeybindings)
+	{
+		if(onlyCommandsAfterVersion != Version{})
+		{
+			if(kb.addedInVersion <= onlyCommandsAfterVersion)
+				continue;
+
+			// Do not map shortcuts that already have custom keys assigned.
+			// In particular with default note keys, this can create awkward keymaps when loading
+			// e.g. an IT-style keymap and it contains two keys mapped to the same notes.
+			if(GetKeyListSize(kb.cmd) != 0)
+				continue;
+		}
+
+		KeyCombination kc;
+		kc.Context(kb.ctx);
+		kc.Modifier(kb.modifiers);
+		kc.EventType(kb.events);
+
+		if(kb.key & 0x8000)
+		{
+			// Virtual Key code / Scan code
+			UINT vk = 0;
+			for(auto i = layouts.begin(); i != layouts.end() && vk == 0; i++)
+			{
+				vk = MapVirtualKeyEx(kb.key & 0x7FFF, MAPVK_VSC_TO_VK, *i);
+			}
+			if(vk)
+				kc.KeyCode(vk);
+			else
+				kc.KeyCode(kb.key & 0x7FFF);
+		} else
+		{
+			kc.KeyCode(kb.key);
+		}
+
+		if(auto conflictCmd = IsConflicting(kc, kb.cmd, false); conflictCmd.first != kcNull)
+		{
+			// Allow cross-context conflicts in case the newly added shortcut is in a more specific context
+			// - unless the conflicting shortcut is the reserved dummy shortcut (which was used to prevent
+			// default shortcuts from being added back before default key binding versioning was added).
+			if(conflictCmd.first == kcDummyShortcut || !m_isParentContext[conflictCmd.second.Context()][kb.ctx])
+				continue;
+		}
+
+		m_commands[kb.cmd].kcList.push_back(kc);
+		EnforceAll(kc, kb.cmd, true);
+	}
 }
 
 

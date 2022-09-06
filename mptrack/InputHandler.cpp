@@ -52,8 +52,8 @@ CInputHandler::CInputHandler(CWnd *mainframe)
 		{
 			// Load keybindings from resources.
 			MPT_LOG_GLOBAL(LogDebug, "InputHandler", U_("Loading keybindings from resources\n"));
-			bSuccess = m_activeCommandSet->LoadDefaultKeymap();
-			if (bSuccess && bNoExistingKbdFileSetting)
+			m_activeCommandSet->LoadDefaultKeymap();
+			if (bNoExistingKbdFileSetting)
 			{
 				m_activeCommandSet->SaveFile(TrackerSettings::Instance().m_szKbdFile);
 			}

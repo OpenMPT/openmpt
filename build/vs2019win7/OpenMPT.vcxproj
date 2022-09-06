@@ -1497,7 +1497,6 @@
     <None Include="..\..\mptrack\res\MPTRACK.RC2" />
     <None Include="..\..\mptrack\res\NODROP.CUR" />
     <None Include="..\..\mptrack\res\OpenMPT.manifest" />
-    <None Include="..\..\mptrack\res\defaultKeybindings.mkb" />
     <None Include="..\..\mptrack\res\moddoc.ico" />
     <None Include="..\..\mptrack\res\nodrag.cur" />
     <None Include="..\vs\win7.manifest" />
