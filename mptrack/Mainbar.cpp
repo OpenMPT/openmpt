@@ -839,7 +839,7 @@ void CModTreeBar::Init()
 
 BOOL CModTreeBar::PreTranslateMessage(MSG *pMsg)
 {
-	if(m_filterEdit && pMsg->hwnd == m_filterEdit && pMsg->message == WM_KEYDOWN && m_filterSource != nullptr)
+	if(m_filterEdit && pMsg->hwnd == m_filterEdit.m_hWnd && pMsg->message == WM_KEYDOWN && m_filterSource != nullptr)
 	{
 		switch(pMsg->wParam)
 		{
