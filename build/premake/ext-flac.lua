@@ -34,9 +34,10 @@
    "../../include/flac/src/libFLAC/format.c",
    "../../include/flac/src/libFLAC/lpc.c",
    "../../include/flac/src/libFLAC/lpc_intrin_avx2.c",
+   "../../include/flac/src/libFLAC/lpc_intrin_fma.c",
+   "../../include/flac/src/libFLAC/lpc_intrin_neon.c",
    "../../include/flac/src/libFLAC/lpc_intrin_sse2.c",
    "../../include/flac/src/libFLAC/lpc_intrin_sse41.c",
-   "../../include/flac/src/libFLAC/lpc_intrin_sse.c",
    "../../include/flac/src/libFLAC/md5.c",
    "../../include/flac/src/libFLAC/memory.c",
    "../../include/flac/src/libFLAC/metadata_iterators.c",
@@ -52,7 +53,6 @@
    "../../include/flac/src/libFLAC/stream_encoder_intrin_ssse3.c",
    "../../include/flac/src/libFLAC/stream_encoder_framing.c",
    "../../include/flac/src/libFLAC/window.c",
-   "../../include/flac/src/libFLAC/windows_unicode_filenames.c",
   }
   files {
    "../../include/flac/src/libFLAC/include/private/all.h",
@@ -106,7 +106,6 @@
   filter { "action:vs*" }
     files {
      "../../include/flac/include/share/win_utf8_io.h",
-     "../../include/flac/include/share/windows_unicode_filenames.h",
     }
   filter {}
   filter { "action:vs*" }
@@ -117,7 +116,7 @@
   filter {}
   defines { "FLAC__HAS_OGG=1" }
   links { "ogg" }
-  defines { "PACKAGE_VERSION=\"1.3.4\"" }
+  defines { "PACKAGE_VERSION=\"1.4.0\"" }
   filter {}
   filter { "kind:StaticLib" }
    defines { "FLAC__NO_DLL" }
