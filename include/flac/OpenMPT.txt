@@ -1,5 +1,8 @@
 flac 1.4.0.
 The FLAC package has been left pretty much untouched, except for a few changes:
+ *  In `include/share/compat.h`, the Windows XP compatibility warning has been
+    disabled.
+ *  All modifications have been marked with "/* OpenMPT */".
  *  Obviously, unnecessary folders and files (documentation, makefiles, etc.) have
     been removed.
  *  For building, premake is used to generate Visual Studio project files.
