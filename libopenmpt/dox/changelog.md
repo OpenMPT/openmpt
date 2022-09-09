@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.5.20-pre
 
+ *  FLAC: Update to v1.4.0 (2022-09-09).
+
 ### libopenmpt 0.5.19 (2022-08-21)
 
  *  DBM: Sample middle-C frequencies were slightly off.
