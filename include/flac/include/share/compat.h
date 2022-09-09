@@ -142,7 +142,9 @@
 #    define PRIx64 "I64x"
 #  endif
 #  if defined(_USING_V110_SDK71_) && !defined(_DLL)
+#if 0 /* OpenMPT */
 #    pragma message("WARNING: This compile will NOT FUNCTION PROPERLY on Windows XP. See comments in include/share/compat.h for details")
+#endif /* OpenMPT */
 #define FLAC__USE_FILELENGTHI64
 /*
  *************************************************************************************
