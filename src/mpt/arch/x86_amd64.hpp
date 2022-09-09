@@ -836,9 +836,9 @@ private:
 
 		uint8 result = 0;
 		const std::size_t cr0 = __readcr0();
-		if (!(cr0 & (1 << 2))) { // EM
+		if (!(cr0 & (1u << 2))) { // EM
 			result = 2;
-			if (cr0 & (1 << 4)) { // ET
+			if (cr0 & (1u << 4)) { // ET
 				result = 3;
 			}
 		}
@@ -1224,34 +1224,34 @@ public:
 				}
 				Stepping = static_cast<uint8>(BaseStepping);
 				// clang-format off
-				Features |= (StandardFeatureFlags.d & (1 <<  0)) ? (feature::fpu | feature::fsin) : feature::none;
-				Features |= (StandardFeatureFlags.d & (1 <<  4)) ? (feature::tsc) : feature::none;
-				Features |= (StandardFeatureFlags.d & (1 <<  8)) ? (feature::cx8) : feature::none;
-				Features |= (StandardFeatureFlags.d & (1 << 15)) ? (feature::cmov) : feature::none;
-				Features |= (StandardFeatureFlags.d & (1 << 23)) ? (feature::mmx) : feature::none;
-				Features |= (StandardFeatureFlags.d & (1 << 25)) ? (feature::sse | feature::x3dnowprefetch) : feature::none;
-				Features |= (StandardFeatureFlags.d & (1 << 26)) ? (feature::sse2) : feature::none;
-				Features |= (StandardFeatureFlags.c & (1 <<  0)) ? (feature::sse3) : feature::none;
-				Features |= (StandardFeatureFlags.c & (1 <<  9)) ? (feature::ssse3) : feature::none;
-				Features |= (StandardFeatureFlags.c & (1 << 12)) ? (feature::fma) : feature::none;
-				Features |= (StandardFeatureFlags.c & (1 << 13)) ? (feature::cx16) : feature::none;
-				Features |= (StandardFeatureFlags.c & (1 << 19)) ? (feature::sse4_1) : feature::none;
-				Features |= (StandardFeatureFlags.c & (1 << 20)) ? (feature::sse4_2) : feature::none;
-				Features |= (StandardFeatureFlags.c & (1 << 22)) ? (feature::movbe) : feature::none;
-				Features |= (StandardFeatureFlags.c & (1 << 23)) ? (feature::popcnt) : feature::none;
-				Features |= (StandardFeatureFlags.c & (1 << 28)) ? (feature::avx) : feature::none;
-				Features |= (StandardFeatureFlags.c & (1 << 29)) ? (feature::f16c) : feature::none;
+				Features |= (StandardFeatureFlags.d & (1u <<  0)) ? (feature::fpu | feature::fsin) : feature::none;
+				Features |= (StandardFeatureFlags.d & (1u <<  4)) ? (feature::tsc) : feature::none;
+				Features |= (StandardFeatureFlags.d & (1u <<  8)) ? (feature::cx8) : feature::none;
+				Features |= (StandardFeatureFlags.d & (1u << 15)) ? (feature::cmov) : feature::none;
+				Features |= (StandardFeatureFlags.d & (1u << 23)) ? (feature::mmx) : feature::none;
+				Features |= (StandardFeatureFlags.d & (1u << 25)) ? (feature::sse | feature::x3dnowprefetch) : feature::none;
+				Features |= (StandardFeatureFlags.d & (1u << 26)) ? (feature::sse2) : feature::none;
+				Features |= (StandardFeatureFlags.c & (1u <<  0)) ? (feature::sse3) : feature::none;
+				Features |= (StandardFeatureFlags.c & (1u <<  9)) ? (feature::ssse3) : feature::none;
+				Features |= (StandardFeatureFlags.c & (1u << 12)) ? (feature::fma) : feature::none;
+				Features |= (StandardFeatureFlags.c & (1u << 13)) ? (feature::cx16) : feature::none;
+				Features |= (StandardFeatureFlags.c & (1u << 19)) ? (feature::sse4_1) : feature::none;
+				Features |= (StandardFeatureFlags.c & (1u << 20)) ? (feature::sse4_2) : feature::none;
+				Features |= (StandardFeatureFlags.c & (1u << 22)) ? (feature::movbe) : feature::none;
+				Features |= (StandardFeatureFlags.c & (1u << 23)) ? (feature::popcnt) : feature::none;
+				Features |= (StandardFeatureFlags.c & (1u << 28)) ? (feature::avx) : feature::none;
+				Features |= (StandardFeatureFlags.c & (1u << 29)) ? (feature::f16c) : feature::none;
 				// clang-format on
-				if (StandardFeatureFlags.c & (1 << 31)) {
+				if (StandardFeatureFlags.c & (1u << 31)) {
 					Virtualized = true;
 				}
 			}
 			if (VendorString.a >= 0x0000'0007u) {
 				cpuid_result ExtendedFeatures = cpuidex(0x0000'0007u, 0x0000'0000u);
 				// clang-format off
-				Features |= (ExtendedFeatures.b & (1 <<  3)) ? (feature::bmi1) : feature::none;
-				Features |= (ExtendedFeatures.b & (1 <<  5)) ? (feature::avx2) : feature::none;
-				Features |= (ExtendedFeatures.b & (1 <<  8)) ? (feature::bmi2) : feature::none;
+				Features |= (ExtendedFeatures.b & (1u <<  3)) ? (feature::bmi1) : feature::none;
+				Features |= (ExtendedFeatures.b & (1u <<  5)) ? (feature::avx2) : feature::none;
+				Features |= (ExtendedFeatures.b & (1u <<  8)) ? (feature::bmi2) : feature::none;
 				// clang-format on
 			}
 			// 3DNow! manual recommends to just execute 0x8000'0000u.
@@ -1321,20 +1321,20 @@ public:
 						// clang-format off
 						cpuid_result ExtendedFeatureFlags = cpuid(0x8000'0001u);
 #if !MPT_ARCH_AMD64
-						if (ExtendedFeatureFlags.d & (1 << 29)) {
+						if (ExtendedFeatureFlags.d & (1u << 29)) {
 							LongMode = true;
 						}
 #endif // !MPT_ARCH_AMD64
-						Features |= (ExtendedFeatureFlags.c & (1 <<  0)) ? (feature::lahf) : feature::none;
-						Features |= (ExtendedFeatureFlags.c & (1 <<  5)) ? (feature::lzcnt) : feature::none;
+						Features |= (ExtendedFeatureFlags.c & (1u <<  0)) ? (feature::lahf) : feature::none;
+						Features |= (ExtendedFeatureFlags.c & (1u <<  5)) ? (feature::lzcnt) : feature::none;
 						if (x3dnowknown) {
-							Features |= (ExtendedFeatureFlags.d & (1 << 31)) ? (feature::x3dnow) : feature::none;
+							Features |= (ExtendedFeatureFlags.d & (1u << 31)) ? (feature::x3dnow) : feature::none;
 						}
 						if (Vendor == vendor::AMD) {
-							Features |= (ExtendedFeatureFlags.d & (1 << 22)) ? (feature::mmxext) : feature::none;
-							Features |= (ExtendedFeatureFlags.d & (1 << 30)) ? (feature::x3dnowext) : feature::none;
-							Features |= (ExtendedFeatureFlags.c & (1 <<  5)) ? (feature::popcnt) : feature::none;
-							Features |= (ExtendedFeatureFlags.c & (1 <<  8)) ? (feature::x3dnowprefetch) : feature::none;
+							Features |= (ExtendedFeatureFlags.d & (1u << 22)) ? (feature::mmxext) : feature::none;
+							Features |= (ExtendedFeatureFlags.d & (1u << 30)) ? (feature::x3dnowext) : feature::none;
+							Features |= (ExtendedFeatureFlags.c & (1u <<  5)) ? (feature::popcnt) : feature::none;
+							Features |= (ExtendedFeatureFlags.c & (1u <<  8)) ? (feature::x3dnowprefetch) : feature::none;
 						}
 						// clang-format on
 					}
