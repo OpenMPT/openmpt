@@ -1,6 +1,6 @@
 /* libFLAC - Free Lossless Audio Codec library
  * Copyright (C) 2001-2009  Josh Coalson
- * Copyright (C) 2011-2016  Xiph.Org Foundation
+ * Copyright (C) 2011-2022  Xiph.Org Foundation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -53,10 +53,8 @@
 #define dfprintf(file, format, ...)
 #endif
 
-#if defined FLAC__CPU_PPC
-#if defined(__linux__) || (defined(__FreeBSD__) && (__FreeBSD__ >= 12))
+#if defined(HAVE_SYS_AUXV_H)
 #include <sys/auxv.h>
-#endif
 #endif
 
 #if (defined FLAC__CPU_IA32 || defined FLAC__CPU_X86_64) && (defined FLAC__HAS_NASM || FLAC__HAS_X86INTRIN) && !defined FLAC__NO_ASM
@@ -247,15 +245,14 @@ ppc_cpu_info (FLAC__CPUInfo *info)
 #define PPC_FEATURE2_ARCH_2_07		0x80000000
 #endif
 
-#ifdef __linux__
+#if defined (__linux__) && defined(HAVE_GETAUXVAL)
 	if (getauxval(AT_HWCAP2) & PPC_FEATURE2_ARCH_3_00) {
 		info->ppc.arch_3_00 = true;
 	} else if (getauxval(AT_HWCAP2) & PPC_FEATURE2_ARCH_2_07) {
 		info->ppc.arch_2_07 = true;
 	}
-#elif defined(__FreeBSD__) && (__FreeBSD__ >= 12)
-	long hwcaps;
-	/* elf_aux_info() appeared in FreeBSD 12.0 */
+#elif defined(__FreeBSD__) && defined(HAVE_SYS_AUXV_H)
+	unsigned long hwcaps;
 	elf_aux_info(AT_HWCAP2, &hwcaps, sizeof(hwcaps));
 	if (hwcaps & PPC_FEATURE2_ARCH_3_00) {
 		info->ppc.arch_3_00 = true;
@@ -267,7 +264,8 @@ ppc_cpu_info (FLAC__CPUInfo *info)
 	info->ppc.arch_2_07 = false;
 	info->ppc.arch_3_00 = false;
 #else
-#error Unsupported platform! Please add support for reading ppc hwcaps.
+	info->ppc.arch_2_07 = false;
+	info->ppc.arch_3_00 = false;
 #endif
 
 #else
