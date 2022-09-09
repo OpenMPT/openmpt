@@ -158,6 +158,10 @@ public:
 	{
 		WriteInterleavedInt(frameCount, interleaved);
 	}
+	void WriteInterleaved(std::size_t frameCount, const int32 *interleaved) override
+	{
+		WriteInterleavedInt(frameCount, interleaved);
+	}
 	void WriteFinalize() override
 	{
 		FLAC__stream_encoder_finish(encoder);
@@ -188,6 +192,7 @@ FLACEncoder::FLACEncoder()
 	traits.maxChannels = 4;
 	traits.samplerates = TrackerSettings::Instance().GetSampleRates();
 	traits.modes = Encoder::ModeLossless;
+	traits.formats.push_back({ Encoder::Format::Encoding::Integer, 32, mpt::get_endian() });
 	traits.formats.push_back({ Encoder::Format::Encoding::Integer, 24, mpt::get_endian() });
 	traits.formats.push_back({ Encoder::Format::Encoding::Integer, 16, mpt::get_endian() });
 	traits.formats.push_back({ Encoder::Format::Encoding::Integer, 8, mpt::get_endian() });
