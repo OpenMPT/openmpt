@@ -979,7 +979,7 @@ private:
 			"movl $1, %%eax\n"
 			"jmp detect_cyrix_done\n"
 			"detect_cyrix_done_not_cyrix:\n"
-			"movl $0, eax\n"
+			"movl $0, %%eax\n"
 			"jmp detect_cyrix_done\n"
 			"detect_cyrix_done:\n"
 			: "=a" (result)
