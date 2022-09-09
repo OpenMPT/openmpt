@@ -1,5 +1,5 @@
 /* libFLAC - Free Lossless Audio Codec library
- * Copyright (C) 2013-2016  Xiph.Org Foundation
+ * Copyright (C) 2022 Xiph.Org Foundation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -29,38 +29,45 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef _WIN32
-
-#ifndef flac__windows_unicode_filenames_h
-#define flac__windows_unicode_filenames_h
-
-#include <stdio.h>
-#include <sys/stat.h>
-#include <sys/utime.h>
-#include "FLAC/ordinals.h"
-
-/***** FIXME: KLUDGE: export these syms for flac.exe, metaflac.exe, etc. *****/
-#include "FLAC/export.h"
-
-#ifdef __cplusplus
-extern "C" {
+#ifdef HAVE_CONFIG_H
+#  include <config.h>
 #endif
 
-FLAC_API void flac_internal_set_utf8_filenames(FLAC__bool flag);
-FLAC_API FLAC__bool flac_internal_get_utf8_filenames(void);
-#define flac_set_utf8_filenames flac_internal_set_utf8_filenames
-#define flac_get_utf8_filenames flac_internal_get_utf8_filenames
+#include "private/cpu.h"
 
-FLAC_API FILE* flac_internal_fopen_utf8(const char *filename, const char *mode);
-FLAC_API int flac_internal_stat64_utf8(const char *path, struct __stat64 *buffer);
-FLAC_API int flac_internal_chmod_utf8(const char *filename, int pmode);
-FLAC_API int flac_internal_utime_utf8(const char *filename, struct utimbuf *times);
-FLAC_API int flac_internal_unlink_utf8(const char *filename);
-FLAC_API int flac_internal_rename_utf8(const char *oldname, const char *newname);
+#ifndef FLAC__INTEGER_ONLY_LIBRARY
+#ifndef FLAC__NO_ASM
+#if defined FLAC__CPU_X86_64 && FLAC__HAS_X86INTRIN
+#include "private/lpc.h"
+#ifdef FLAC__FMA_SUPPORTED
 
-#ifdef __cplusplus
-} /* extern "C" */
-#endif
+#include "FLAC/assert.h"
 
-#endif
-#endif
+FLAC__FAST_MATH_TARGET("fma")
+void FLAC__lpc_compute_autocorrelation_intrin_fma_lag_8(const FLAC__real data[], uint32_t data_len, uint32_t lag, double autoc[])
+{
+#undef MAX_LAG
+#define MAX_LAG 8
+#include "deduplication/lpc_compute_autocorrelation_intrin.c"
+}
+
+FLAC__FAST_MATH_TARGET("fma")
+void FLAC__lpc_compute_autocorrelation_intrin_fma_lag_12(const FLAC__real data[], uint32_t data_len, uint32_t lag, double autoc[])
+{
+#undef MAX_LAG
+#define MAX_LAG 12
+#include "deduplication/lpc_compute_autocorrelation_intrin.c"
+}
+FLAC__FAST_MATH_TARGET("fma")
+void FLAC__lpc_compute_autocorrelation_intrin_fma_lag_16(const FLAC__real data[], uint32_t data_len, uint32_t lag, double autoc[])
+{
+#undef MAX_LAG
+#define MAX_LAG 16
+#include "deduplication/lpc_compute_autocorrelation_intrin.c"
+
+}
+
+#endif /* FLAC__FMA_SUPPORTED */
+#endif /* FLAC__CPU_X86_64 && FLAC__HAS_X86INTRIN */
+#endif /* FLAC__NO_ASM */
+#endif /* FLAC__INTEGER_ONLY_LIBRARY */
