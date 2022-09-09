@@ -81,9 +81,6 @@
     <ClInclude Include="..\..\..\include\flac\include\share\win_utf8_io.h">
       <Filter>include\share</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\flac\include\share\windows_unicode_filenames.h">
-      <Filter>include\share</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\flac\src\libFLAC\include\private\all.h">
       <Filter>src\libFLAC\include\private</Filter>
     </ClInclude>
@@ -191,7 +188,10 @@
     <ClCompile Include="..\..\..\include\flac\src\libFLAC\lpc_intrin_avx2.c">
       <Filter>src\libFLAC</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\include\flac\src\libFLAC\lpc_intrin_sse.c">
+    <ClCompile Include="..\..\..\include\flac\src\libFLAC\lpc_intrin_fma.c">
+      <Filter>src\libFLAC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\include\flac\src\libFLAC\lpc_intrin_neon.c">
       <Filter>src\libFLAC</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\flac\src\libFLAC\lpc_intrin_sse2.c">
@@ -243,9 +243,6 @@
       <Filter>src\libFLAC</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\flac\src\libFLAC\window.c">
-      <Filter>src\libFLAC</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\include\flac\src\libFLAC\windows_unicode_filenames.c">
       <Filter>src\libFLAC</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\flac\src\share\win_utf8_io\win_utf8_io.c">
