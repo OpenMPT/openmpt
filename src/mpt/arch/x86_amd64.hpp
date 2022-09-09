@@ -834,6 +834,7 @@ private:
 
 #elif MPT_COMPILER_MSVC && MPT_MODE_KERNEL
 
+		uint8 result = 0;
 		const std::size_t cr0 = __readcr0();
 		if (!(cr0 & (1 << 2))) { // EM
 			result = 2;
@@ -845,6 +846,7 @@ private:
 
 #else
 
+		uint8 result = 0;
 		if ((assumed_features() & feature::fpu) && (assumed_features() & feature::fsin)) {
 			result = 3;
 		} else if (assumed_features() & feature::fpu) {
@@ -1076,7 +1078,7 @@ public:
 				if (detect_cyrix()) {
 					Vendor = vendor::Cyrix;
 					uint16 id = read_cyrix_id();
-					if ((0x00'00 <= id) && (id <= 0x07'00)) {
+					if (id <= 0x07'00) {
 						// Cx486SLC / Cx486DLC
 						Family = 3;
 						Model = static_cast<uint8>((id & 0xff'00) >> 8);
