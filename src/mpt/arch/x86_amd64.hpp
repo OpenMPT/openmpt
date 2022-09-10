@@ -58,6 +58,7 @@
 	#define MPT_ARCH_X86_CMOV
 	#define MPT_ARCH_X86_MMX
 	#define MPT_ARCH_X86_3DNOWPREFETCH
+	#define MPT_ARCH_X86_FXSR
 	#define MPT_ARCH_X86_SSE
 	#define MPT_ARCH_X86_SSE2
 #elif defined(_M_IX86) && defined(_M_IX86_FP)
@@ -72,6 +73,7 @@
 		#define MPT_ARCH_X86_CMOV
 		#define MPT_ARCH_X86_MMX
 		#define MPT_ARCH_X86_3DNOWPREFETCH
+		#define MPT_ARCH_X86_FXSR
 		#define MPT_ARCH_X86_SSE
 		#define MPT_ARCH_X86_SSE2
 	#elif (_M_IX86_FP == 1)
@@ -85,6 +87,7 @@
 		#define MPT_ARCH_X86_CMOV
 		#define MPT_ARCH_X86_MMX
 		#define MPT_ARCH_X86_3DNOWPREFETCH
+		#define MPT_ARCH_X86_FXSR
 		#define MPT_ARCH_X86_SSE
 	#elif MPT_MSVC_AT_LEAST(2008, 0)
 		#define MPT_ARCH_X86_I386
@@ -156,6 +159,9 @@
 #endif
 #ifdef __3dNOW_A__
 	#define MPT_ARCH_X86_3DNOWEXT
+#endif
+#ifdef __FXSR__
+	#define MPT_ARCH_X86_FXSR
 #endif
 #ifdef __SSE__
 	#define MPT_ARCH_X86_3DNOWPREFETCH
@@ -254,23 +260,24 @@ inline constexpr feature_flags mmxext         = feature_flags{ 0x0000'0200 };
 inline constexpr feature_flags x3dnow         = feature_flags{ 0x0000'0400 };
 inline constexpr feature_flags x3dnowext      = feature_flags{ 0x0000'0800 };
 inline constexpr feature_flags x3dnowprefetch = feature_flags{ 0x0000'1000 };
-inline constexpr feature_flags sse            = feature_flags{ 0x0000'2000 };
-inline constexpr feature_flags sse2           = feature_flags{ 0x0000'4000 };
-inline constexpr feature_flags sse3           = feature_flags{ 0x0000'8000 };
-inline constexpr feature_flags ssse3          = feature_flags{ 0x0001'0000 };
-inline constexpr feature_flags sse4_1         = feature_flags{ 0x0002'0000 };
-inline constexpr feature_flags sse4_2         = feature_flags{ 0x0004'0000 };
-inline constexpr feature_flags avx            = feature_flags{ 0x0008'0000 };
-inline constexpr feature_flags avx2           = feature_flags{ 0x0010'0000 };
-inline constexpr feature_flags cx16           = feature_flags{ 0x0020'0000 };
-inline constexpr feature_flags lahf           = feature_flags{ 0x0040'0000 };
-inline constexpr feature_flags popcnt         = feature_flags{ 0x0080'0000 };
-inline constexpr feature_flags bmi1           = feature_flags{ 0x0100'0000 };
-inline constexpr feature_flags bmi2           = feature_flags{ 0x0200'0000 };
-inline constexpr feature_flags f16c           = feature_flags{ 0x0400'0000 };
-inline constexpr feature_flags fma            = feature_flags{ 0x0800'0000 };
-inline constexpr feature_flags lzcnt          = feature_flags{ 0x1000'0000 };
-inline constexpr feature_flags movbe          = feature_flags{ 0x2000'0000 };
+inline constexpr feature_flags fxsr           = feature_flags{ 0x0000'2000 };
+inline constexpr feature_flags sse            = feature_flags{ 0x0000'4000 };
+inline constexpr feature_flags sse2           = feature_flags{ 0x0000'8000 };
+inline constexpr feature_flags sse3           = feature_flags{ 0x0001'0000 };
+inline constexpr feature_flags ssse3          = feature_flags{ 0x0002'0000 };
+inline constexpr feature_flags sse4_1         = feature_flags{ 0x0004'0000 };
+inline constexpr feature_flags sse4_2         = feature_flags{ 0x0008'0000 };
+inline constexpr feature_flags avx            = feature_flags{ 0x0010'0000 };
+inline constexpr feature_flags avx2           = feature_flags{ 0x0020'0000 };
+inline constexpr feature_flags cx16           = feature_flags{ 0x0040'0000 };
+inline constexpr feature_flags lahf           = feature_flags{ 0x0080'0000 };
+inline constexpr feature_flags popcnt         = feature_flags{ 0x0100'0000 };
+inline constexpr feature_flags bmi1           = feature_flags{ 0x0200'0000 };
+inline constexpr feature_flags bmi2           = feature_flags{ 0x0400'0000 };
+inline constexpr feature_flags f16c           = feature_flags{ 0x0800'0000 };
+inline constexpr feature_flags fma            = feature_flags{ 0x1000'0000 };
+inline constexpr feature_flags lzcnt          = feature_flags{ 0x2000'0000 };
+inline constexpr feature_flags movbe          = feature_flags{ 0x4000'0000 };
 } // namespace feature
 
 namespace featureset {
@@ -281,7 +288,7 @@ inline constexpr feature_flags i586      = featureset::i486DX    | feature::cpui
 inline constexpr feature_flags i586_mmx  = featureset::i586      | feature::mmx;
 inline constexpr feature_flags i686      = featureset::i586      | feature::cmov;
 inline constexpr feature_flags i686_mmx  = featureset::i686      | feature::mmx;
-inline constexpr feature_flags i686_sse  = featureset::i686_mmx  | feature::sse | feature::x3dnowprefetch;
+inline constexpr feature_flags i686_sse  = featureset::i686_mmx  | feature::fxsr | feature::sse | feature::x3dnowprefetch;
 inline constexpr feature_flags i686_sse2 = featureset::i686_sse  | feature::sse2;
 inline constexpr feature_flags i786      = featureset::i686_sse2;
 inline constexpr feature_flags amd64     = featureset::i686_sse2;
@@ -372,6 +379,9 @@ enum class vendor : uint8 {
 	#endif
 	#ifdef MPT_ARCH_X86_3DNOWPREFETCH
 		flags |= feature::x3dnowprefetch;
+	#endif
+	#ifdef MPT_ARCH_X86_FXSR
+		flags |= feature::fxsr;
 	#endif
 	#ifdef MPT_ARCH_X86_SSE
 		flags |= feature::sse;
@@ -1229,6 +1239,7 @@ public:
 				Features |= (StandardFeatureFlags.d & (1u <<  8)) ? (feature::cx8) : feature::none;
 				Features |= (StandardFeatureFlags.d & (1u << 15)) ? (feature::cmov) : feature::none;
 				Features |= (StandardFeatureFlags.d & (1u << 23)) ? (feature::mmx) : feature::none;
+				Features |= (StandardFeatureFlags.d & (1u << 24)) ? (feature::fxsr) : feature::none;
 				Features |= (StandardFeatureFlags.d & (1u << 25)) ? (feature::sse | feature::x3dnowprefetch) : feature::none;
 				Features |= (StandardFeatureFlags.d & (1u << 26)) ? (feature::sse2) : feature::none;
 				Features |= (StandardFeatureFlags.c & (1u <<  0)) ? (feature::sse3) : feature::none;
@@ -1428,7 +1439,7 @@ public:
 		Features |= (IsProcessorFeaturePresent(PF_COMPARE_EXCHANGE_DOUBLE) != 0)       ? (feature::cx8 | feature::i486) : feature::none;
 		Features |= (IsProcessorFeaturePresent(PF_MMX_INSTRUCTIONS_AVAILABLE) != 0)    ? (feature::mmx | feature::i486) : feature::none;
 		Features |= (IsProcessorFeaturePresent(PF_3DNOW_INSTRUCTIONS_AVAILABLE) != 0)  ? (feature::x3dnow) : feature::none;
-		Features |= (IsProcessorFeaturePresent(PF_XMMI_INSTRUCTIONS_AVAILABLE) != 0)   ? (feature::sse | feature::x3dnowprefetch | feature::cmov) : feature::none;
+		Features |= (IsProcessorFeaturePresent(PF_XMMI_INSTRUCTIONS_AVAILABLE) != 0)   ? (feature::sse | feature::fxsr | feature::x3dnowprefetch | feature::cmov) : feature::none;
 		Features |= (IsProcessorFeaturePresent(PF_XMMI64_INSTRUCTIONS_AVAILABLE) != 0) ? (feature::sse2) : feature::none;
 		Features |= (IsProcessorFeaturePresent(PF_SSE3_INSTRUCTIONS_AVAILABLE) != 0)   ? (feature::sse3) : feature::none;
 		Features |= (IsProcessorFeaturePresent(PF_SSSE3_INSTRUCTIONS_AVAILABLE) != 0)  ? (feature::ssse3) : feature::none;
