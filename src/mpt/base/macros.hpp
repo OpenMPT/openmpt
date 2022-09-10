@@ -53,7 +53,7 @@
 #if MPT_CXX_AT_LEAST(20)
 // this assumes that for C++20, a consteval function will be used
 #define MPT_FORCE_CONSTEVAL_EXPRESSION(expr) (expr)
-#define MPT_FORCE_CONSTEVAL_VALUE(val) (val)
+#define MPT_FORCE_CONSTEVAL_VALUE(val)       (val)
 #else // !C++20
 #define MPT_FORCE_CONSTEVAL_EXPRESSION(expr) [&]() { \
 	constexpr auto x = (expr); \
