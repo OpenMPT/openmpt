@@ -3872,7 +3872,7 @@ void CViewSample::OnSampleInsertCuePoint()
 		{
 			modDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_none, "Insert Cue Point");
 			pt = m_dwMenuParam;
-			SetModified(SampleHint().Info().Data(), true, true);
+			SetModified(SampleHint().Info().Data(), true, false);
 			break;
 		}
 	}
@@ -3891,7 +3891,7 @@ void CViewSample::OnSampleDeleteCuePoint()
 
 	modDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_none, "Delete Cue Point");
 	sample.cues[m_dwMenuParam] = MAX_SAMPLE_LENGTH;
-	SetModified(SampleHint().Info().Data(), true, true);
+	SetModified(SampleHint().Info().Data(), true, false);
 }
 
 
