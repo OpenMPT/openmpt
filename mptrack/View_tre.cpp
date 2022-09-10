@@ -3222,7 +3222,10 @@ void CModTree::OnItemRightClick(HTREEITEM hItem, CPoint pt)
 
 		case MODITEM_HDR_INSTRUMENTLIB:
 			if(!IsSampleBrowser())
+			{
+				hSubMenu = AddLibraryFindAndSortMenus(hMenu);
 				break;
+			}
 			if(!m_SongFileName.empty())
 				AppendMenu(hMenu, MF_STRING, ID_MODTREE_CLOSE, _T("&Close Song"));
 			[[fallthrough]];
