@@ -213,7 +213,7 @@ MPT_CONSTEVAL Version operator "" _LiteralVersionImpl (const char * str, std::si
 // Create Version object from version string and check syntax, all at compile time.
 // cppcheck false-positive
 // cppcheck-suppress preprocessorErrorDirective
-#define MPT_V(strver) MPT_FORCE_CONSTEVAL(Version{( strver ## _LiteralVersionImpl ).GetRawVersion()})
+#define MPT_V(strver) MPT_FORCE_CONSTEVAL_VALUE(Version{( strver ## _LiteralVersionImpl ).GetRawVersion()})
 
 
 
