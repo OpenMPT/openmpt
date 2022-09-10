@@ -2231,7 +2231,7 @@ void CModTree::SetInstrumentLibraryFilter(const mpt::winstring &filter)
 		return;
 
 	m_filterString = filter;
-	FilterInstrumentLibrary(mpt::ToWin(m_filterString), GetItemText(GetSelectedItem()));
+	FilterInstrumentLibrary(m_filterString, GetItemText(GetSelectedItem()));
 }
 
 
@@ -2241,10 +2241,10 @@ void CModTree::SetInstrumentLibraryFilterSortOrder(LibrarySortOrder sortType)
 		return;
 
 	m_librarySort = sortType;
-	GetSampleBrowser()->SortInstrumentLibrary();
-	GetSampleBrowser()->FilterInstrumentLibrary(mpt::ToWin(m_filterString), GetItemText(GetSelectedItem()));
+	SortInstrumentLibrary();
+	FilterInstrumentLibrary(m_filterString, GetItemText(GetSelectedItem()));
 	GetOtherView()->SortInstrumentLibrary();
-	GetOtherView()->FilterInstrumentLibrary(mpt::ToWin(m_filterString), GetItemText(GetSelectedItem()));
+	GetOtherView()->FilterInstrumentLibrary(GetOtherView()->m_filterString, GetItemText(GetSelectedItem()));
 }
 
 
