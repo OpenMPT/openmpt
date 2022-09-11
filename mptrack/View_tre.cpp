@@ -248,10 +248,9 @@ BOOL CModTree::PreTranslateMessage(MSG *pMsg)
 
 	if(m_doLabelEdit)
 	{
-		if(pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_RETURN)
+		if(pMsg->message == WM_KEYDOWN && (pMsg->wParam == VK_RETURN || pMsg->wParam == VK_ESCAPE))
 		{
-			// End editing by making edit box lose focus.
-			SetFocus();
+			EndEditLabelNow((pMsg->wParam == VK_ESCAPE) ? TRUE : FALSE);
 			return TRUE;
 		}
 		return CTreeCtrl::PreTranslateMessage(pMsg);
