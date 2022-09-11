@@ -277,7 +277,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4334 /wd6001 /wd6011 /wd6031 /wd6297 /wd28182 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4334 /wd6001 /wd6011 /wd6031 /wd6297 /wd6386 /wd28182 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -296,7 +296,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4334 /wd6001 /wd6011 /wd6031 /wd6297 /wd28182 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4334 /wd6001 /wd6011 /wd6031 /wd6297 /wd6386 /wd28182 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -319,7 +319,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4334 /wd6001 /wd6011 /wd6031 /wd6297 /wd28182 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4334 /wd6001 /wd6011 /wd6031 /wd6297 /wd6386 /wd28182 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -342,7 +342,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4334 /wd6001 /wd6011 /wd6031 /wd6297 /wd28182 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4334 /wd6001 /wd6011 /wd6031 /wd6297 /wd6386 /wd28182 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -367,7 +367,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4334 /wd6001 /wd6011 /wd6031 /wd6297 /wd28182 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4334 /wd6001 /wd6011 /wd6031 /wd6297 /wd6386 /wd28182 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -391,7 +391,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4334 /wd6001 /wd6011 /wd6031 /wd6297 /wd28182 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4334 /wd6001 /wd6011 /wd6031 /wd6297 /wd6386 /wd28182 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -411,7 +411,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4334 /wd6001 /wd6011 /wd6031 /wd6297 /wd28182 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4334 /wd6001 /wd6011 /wd6031 /wd6297 /wd6386 /wd28182 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -430,7 +430,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4334 /wd6001 /wd6011 /wd6031 /wd6297 /wd28182 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4334 /wd6001 /wd6011 /wd6031 /wd6297 /wd6386 /wd28182 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -453,7 +453,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4334 /wd6001 /wd6011 /wd6031 /wd6297 /wd28182 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4334 /wd6001 /wd6011 /wd6031 /wd6297 /wd6386 /wd28182 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -477,7 +477,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4334 /wd6001 /wd6011 /wd6031 /wd6297 /wd28182 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4334 /wd6001 /wd6011 /wd6031 /wd6297 /wd6386 /wd28182 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -503,7 +503,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4334 /wd6001 /wd6011 /wd6031 /wd6297 /wd28182 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4334 /wd6001 /wd6011 /wd6031 /wd6297 /wd6386 /wd28182 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -528,7 +528,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4334 /wd6001 /wd6011 /wd6031 /wd6297 /wd28182 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4334 /wd6001 /wd6011 /wd6031 /wd6297 /wd6386 /wd28182 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
