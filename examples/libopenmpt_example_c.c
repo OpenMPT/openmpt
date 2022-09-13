@@ -38,7 +38,7 @@
 #include <libopenmpt/libopenmpt_stream_callbacks_file_mingw.h>
 #elif defined( LIBOPENMPT_STREAM_CALLBACKS_FILE_MSVCRT ) && ( defined( _MSC_VER ) || ( defined( __clang__ ) && defined( _WIN32 ) ) )
 #include <libopenmpt/libopenmpt_stream_callbacks_file_msvcrt.h>
-#elif defined( LIBOPENMPT_STREAM_CALLBACKS_FILE_POSIX ) && MPT_WITH_POSIX && defined( _POSIX_C_SOURCE )
+#elif defined( LIBOPENMPT_STREAM_CALLBACKS_FILE_POSIX ) && defined( MPT_WITH_POSIX ) && defined( _POSIX_C_SOURCE )
 #if ( _POSIX_C_SOURCE > 200112L )
 #include <libopenmpt/libopenmpt_stream_callbacks_file_posix.h>
 #else
@@ -168,7 +168,7 @@ int main( int argc, char * argv[] ) {
 	mod = openmpt_module_create2( openmpt_stream_get_file_mingw_callbacks(), file, &libopenmpt_example_logfunc, NULL, &libopenmpt_example_errfunc, NULL, &mod_err, &mod_err_str, NULL );
 #elif defined( LIBOPENMPT_STREAM_CALLBACKS_FILE_MSVCRT ) && ( defined( _MSC_VER ) || ( defined( __clang__ ) && defined( _WIN32 ) ) )
 	mod = openmpt_module_create2( openmpt_stream_get_file_msvcrt_callbacks(), file, &libopenmpt_example_logfunc, NULL, &libopenmpt_example_errfunc, NULL, &mod_err, &mod_err_str, NULL );
-#elif defined( LIBOPENMPT_STREAM_CALLBACKS_FILE_POSIX ) && MPT_WITH_POSIX && defined( _POSIX_C_SOURCE )
+#elif defined( LIBOPENMPT_STREAM_CALLBACKS_FILE_POSIX ) && defined( MPT_WITH_POSIX ) && defined( _POSIX_C_SOURCE )
 #if ( _POSIX_C_SOURCE > 200112L )
 	mod = openmpt_module_create2( openmpt_stream_get_file_posix_callbacks(), file, &libopenmpt_example_logfunc, NULL, &libopenmpt_example_errfunc, NULL, &mod_err, &mod_err_str, NULL );
 #else
