@@ -15,7 +15,7 @@
 #include <unistd.h>
 #if defined( _POSIX_VERSION )
 #if ( _POSIX_VERSION > 0 )
-#ifndef
+#ifndef MPT_WITH_POSIX
 #define MPT_WITH_POSIX
 #endif
 #endif
