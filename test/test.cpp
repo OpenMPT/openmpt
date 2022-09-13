@@ -88,6 +88,9 @@
 #include <istream>
 #include <ostream>
 #include <stdexcept>
+#ifdef LIBOPENMPT_BUILD
+#include <cfenv>
+#endif // LIBOPENMPT_BUILD
 #if MPT_COMPILER_MSVC
 #include <tchar.h>
 #endif
@@ -168,6 +171,31 @@ void DoTests()
 		std::cout << "Version: " << mpt::ToCharset(mpt::Charset::ASCII, Build::GetVersionString(Build::StringVersion | Build::StringRevision | Build::StringSourceInfo | Build::StringBuildFlags | Build::StringBuildFeatures)) << std::endl;
 		std::cout << "Compiler: " << mpt::ToCharset(mpt::Charset::ASCII, Build::GetBuildCompilerString()) << std::endl;
 		std::cout << "OS: " << mpt::osinfo::get_class_name(mpt::osinfo::get_class()) << " (" << mpt::osinfo::get_sysname() << ")" << std::endl;
+		{
+			auto format_rounding = [](int rounding_mode) {
+				std::string result;
+				switch(rounding_mode)
+				{
+				case FE_DOWNWARD:
+					result = "FE_DOWNWARD";
+					break;
+				case FE_TONEAREST:
+					result = "FE_TONEAREST";
+					break;
+				case FE_TOWARDZERO:
+					result = "FE_TOWARDZERO";
+					break;
+				case FE_UPWARD:
+					result = "FE_UPWARD";
+					break;
+				default:
+					result = "UNKNOWN: " + mpt::afmt::hex(rounding_mode);
+					break;
+				}
+				return result;
+			};
+			std::cout << "Rounding mode: " << format_rounding(std::fegetround());
+		}
 		#if MPT_OS_DJGPP
 			mpt::osinfo::dos::Version ver = mpt::osinfo::dos::Version::Current();
 			std::cout << "DOS: " << ver.GetOEM() << " " << static_cast<int>(ver.GetSystemEmulated().Major) << "." << static_cast<int>(ver.GetSystemEmulated().Minor) << " (true " << static_cast<int>(ver.GetSystem().Major) << "." << static_cast<int>(ver.GetSystem().Minor) << ")" << std::endl;
