@@ -11,7 +11,7 @@
  * Usage: libopenmpt_example_c SOMEMODULE
  */
 
-#if defined( unix ) ||  defined( __unix__ ) || defined( __unix )
+#if defined( unix ) || defined( __unix__ ) || defined( __unix )
 #include <unistd.h>
 #if defined( _POSIX_VERSION )
 #if ( _POSIX_VERSION > 0 )
