@@ -225,6 +225,12 @@
 
 
 
+#if MPT_LIBC_DJGPP
+#define MPT_LIBC_QUIRK_NO_FENV
+#endif
+
+
+
 #if MPT_CXX_AT_LEAST(20)
 #if MPT_LIBCXX_MS && MPT_OS_WINDOWS
 #if defined(NTDDI_VERSION)
