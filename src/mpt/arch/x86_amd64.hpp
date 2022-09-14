@@ -481,7 +481,7 @@ struct fixed_string {
 		return m_data.data() + m_data.size();
 	}
 	[[nodiscard]] constexpr operator std::string_view() const noexcept {
-#if MPT_CXX_AT_LEAST(20)
+#if MPT_CXX_AT_LEAST(20) && !defined(MPT_COMPILER_QUIRK_NO_STRING_VIEW_ITERATOR_CTOR)
 		return std::string_view(m_data.begin(), std::find(m_data.begin(), m_data.end(), '\0'));
 #else
 		return std::string_view(m_data.data(), std::find(m_data.begin(), m_data.end(), '\0') - m_data.begin());
