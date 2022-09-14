@@ -1785,7 +1785,7 @@ public:
 	}
 
 	static MPT_FORCEINLINE void fxrstor(const fxsave_state * state) noexcept {
-		__builtin_ia32_fxrstor(state);
+		__builtin_ia32_fxrstor(const_cast<fxsave_state *>(state));
 	}
 
 	static MPT_FORCEINLINE bool have_fxsr() noexcept {
