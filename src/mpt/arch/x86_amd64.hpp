@@ -20,6 +20,9 @@
 #include <atomic>
 #endif
 #endif
+#if MPT_ARCH_X86 || MPT_ARCH_AMD64
+#include <optional>
+#endif
 #include <string>
 #include <string_view>
 
