@@ -256,10 +256,10 @@ using feature_flags = mpt::arch::basic_feature_flags<uint32>;
 
 namespace feature {
 inline constexpr feature_flags none           = feature_flags{};
-inline constexpr feature_flags i386           = feature_flags{ 0x0000'0001 };
+inline constexpr feature_flags intel386       = feature_flags{ 0x0000'0001 };
 inline constexpr feature_flags fpu            = feature_flags{ 0x0000'0002 };
 inline constexpr feature_flags fsin           = feature_flags{ 0x0000'0004 };
-inline constexpr feature_flags i486           = feature_flags{ 0x0000'0008 };  // XADD, BSWAP, CMPXCHG
+inline constexpr feature_flags intel486       = feature_flags{ 0x0000'0008 };  // XADD, BSWAP, CMPXCHG
 inline constexpr feature_flags cpuid          = feature_flags{ 0x0000'0010 };
 inline constexpr feature_flags tsc            = feature_flags{ 0x0000'0020 };
 inline constexpr feature_flags cx8            = feature_flags{ 0x0000'0040 };
@@ -290,26 +290,26 @@ inline constexpr feature_flags movbe          = feature_flags{ 0x4000'0000 };
 } // namespace feature
 
 namespace featureset {
-inline constexpr feature_flags i386      = feature::i386;
-inline constexpr feature_flags i486SX    = featureset::i386      | feature::i486;
-inline constexpr feature_flags i486DX    = featureset::i486SX    | feature::fpu | feature::fsin;
-inline constexpr feature_flags i586      = featureset::i486DX    | feature::cpuid | feature::tsc | feature::cx8;
-inline constexpr feature_flags i586_mmx  = featureset::i586      | feature::mmx;
-inline constexpr feature_flags i686      = featureset::i586      | feature::cmov;
-inline constexpr feature_flags i686_mmx  = featureset::i686      | feature::mmx;
-inline constexpr feature_flags i686_sse  = featureset::i686_mmx  | feature::fxsr | feature::sse | feature::x3dnowprefetch;
-inline constexpr feature_flags i686_sse2 = featureset::i686_sse  | feature::sse2;
-inline constexpr feature_flags i786      = featureset::i686_sse2;
-inline constexpr feature_flags amd64     = featureset::i686_sse2;
-inline constexpr feature_flags amd64_v2  = featureset::amd64     | feature::cx16 | feature::lahf | feature::popcnt | feature::sse3 | feature::ssse3 | feature::sse4_1 | feature::sse4_2;
-inline constexpr feature_flags amd64_v3  = featureset::amd64_v2  | feature::avx | feature::avx2 | feature::bmi1 | feature::bmi2 | feature::f16c | feature::fma | feature::lzcnt | feature::movbe;
-inline constexpr feature_flags msvc_x86_1998   = featureset::i386 | feature::fpu | feature::fsin;
-inline constexpr feature_flags msvc_x86_2005   = featureset::i486DX;
-inline constexpr feature_flags msvc_x86_2008   = featureset::i586;
-inline constexpr feature_flags msvc_x86_sse    = featureset::i686_sse;
-inline constexpr feature_flags msvc_x86_sse2   = featureset::i686_sse2;
-inline constexpr feature_flags msvc_x86_avx    = featureset::i686_sse2 | feature::avx;
-inline constexpr feature_flags msvc_x86_avx2   = featureset::i686_sse2 | feature::avx | feature::avx2 | feature::fma | feature::bmi1;
+inline constexpr feature_flags intel386        = feature::intel386;
+inline constexpr feature_flags intel486SX      = featureset::intel386      | feature::intel486;
+inline constexpr feature_flags intel486DX      = featureset::intel486SX    | feature::fpu | feature::fsin;
+inline constexpr feature_flags intel586        = featureset::intel486DX    | feature::cpuid | feature::tsc | feature::cx8;
+inline constexpr feature_flags intel586_mmx    = featureset::intel586      | feature::mmx;
+inline constexpr feature_flags intel686        = featureset::intel586      | feature::cmov;
+inline constexpr feature_flags intel686_mmx    = featureset::intel686      | feature::mmx;
+inline constexpr feature_flags intel686_sse    = featureset::intel686_mmx  | feature::fxsr | feature::sse | feature::x3dnowprefetch;
+inline constexpr feature_flags intel686_sse2   = featureset::intel686_sse  | feature::sse2;
+inline constexpr feature_flags intel786        = featureset::intel686_sse2;
+inline constexpr feature_flags amd64           = featureset::intel686_sse2;
+inline constexpr feature_flags amd64_v2        = featureset::amd64     | feature::cx16 | feature::lahf | feature::popcnt | feature::sse3 | feature::ssse3 | feature::sse4_1 | feature::sse4_2;
+inline constexpr feature_flags amd64_v3        = featureset::amd64_v2  | feature::avx | feature::avx2 | feature::bmi1 | feature::bmi2 | feature::f16c | feature::fma | feature::lzcnt | feature::movbe;
+inline constexpr feature_flags msvc_x86_1998   = featureset::intel386 | feature::fpu | feature::fsin;
+inline constexpr feature_flags msvc_x86_2005   = featureset::intel486DX;
+inline constexpr feature_flags msvc_x86_2008   = featureset::intel586;
+inline constexpr feature_flags msvc_x86_sse    = featureset::intel686_sse;
+inline constexpr feature_flags msvc_x86_sse2   = featureset::intel686_sse2;
+inline constexpr feature_flags msvc_x86_avx    = featureset::intel686_sse2 | feature::avx;
+inline constexpr feature_flags msvc_x86_avx2   = featureset::intel686_sse2 | feature::avx | feature::avx2 | feature::fma | feature::bmi1;
 inline constexpr feature_flags msvc_amd64      = featureset::amd64;
 inline constexpr feature_flags msvc_amd64_avx  = featureset::amd64 | feature::avx;
 inline constexpr feature_flags msvc_amd64_avx2 = featureset::amd64 | feature::avx | feature::avx2 | feature::fma | feature::bmi1;
@@ -354,7 +354,7 @@ enum class vendor : uint8 {
 	feature_flags flags{};
 #if MPT_ARCH_X86 || MPT_ARCH_AMD64
 	#ifdef MPT_ARCH_X86_I386
-		flags |= feature::i386;
+		flags |= feature::intel386;
 	#endif
 	#ifdef MPT_ARCH_X86_FPU
 		flags |= feature::fpu;
@@ -895,7 +895,7 @@ private:
 #if MPT_COMPILER_MSVC || MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 		return can_toggle_eflags(0x0004'0000);
 #else  // MPT_COMPILER
-		return (assumed_features() & feature::i486) != 0;
+		return (assumed_features() & feature::intel486) != 0;
 #endif // MPT_COMPILER
 	}
 
@@ -1061,17 +1061,17 @@ public:
 
 #if MPT_ARCH_X86 || !MPT_ARCH_X86_AMD64_FAST_DETECT
 
-		Features |= featureset::i386;
+		Features |= featureset::intel386;
 
 		if (can_toggle_eflags_ac()) {
-			Features |= feature::i486;
+			Features |= feature::intel486;
 		}
 		if (can_toggle_eflags_id()) {
 			Features |= feature::cpuid;
 		}
 		if (!Features.supports(feature::cpuid)) {
 			// without cpuid
-			if (!Features.supports(feature::i486)) {
+			if (!Features.supports(feature::intel486)) {
 				// 386
 				const uint8 fpu_level = detect_fpu_level();
 				if (fpu_level >= 2) {
@@ -1402,7 +1402,7 @@ public:
 						}
 						Model = (si.wProcessorRevision & 0xff00) >> 8;
 						Stepping = (si.wProcessorRevision & 0x00ff) >> 0;
-						Features |= featureset::i386;
+						Features |= featureset::intel386;
 						break;
 					case PROCESSOR_INTEL_486:
 						Family = si.wProcessorLevel;
@@ -1415,20 +1415,20 @@ public:
 						}
 						Model = (si.wProcessorRevision & 0xff00) >> 8;
 						Stepping = (si.wProcessorRevision & 0x00ff) >> 0;
-						Features |= featureset::i486SX;
+						Features |= featureset::intel486SX;
 						break;
 					case PROCESSOR_INTEL_PENTIUM:
 						Family = si.wProcessorLevel;
 						Model = (si.wProcessorRevision & 0xff00) >> 8;
 						Stepping = (si.wProcessorRevision & 0x00ff) >> 0;
 						// rely on IsProcessorFeaturePresent() for > 486 features
-						// Features |= featureset::i586;
-						Features |= featureset::i486SX;
+						// Features |= featureset::intel586;
+						Features |= featureset::intel486SX;
 						break;
 				}
 				break;
 		}
-		Features |= featureset::i386;
+		Features |= featureset::intel386;
 		const uint8 fpu_level = detect_fpu_level();
 		if (fpu_level >= 2) {
 			Features |= feature::fpu;
@@ -1444,9 +1444,9 @@ public:
 #endif // MPT_ARCH
 
 		// clang-format off
-		Features |= (IsProcessorFeaturePresent(PF_RDTSC_INSTRUCTION_AVAILABLE) != 0)   ? (feature::tsc | feature::i486) : feature::none;
-		Features |= (IsProcessorFeaturePresent(PF_COMPARE_EXCHANGE_DOUBLE) != 0)       ? (feature::cx8 | feature::i486) : feature::none;
-		Features |= (IsProcessorFeaturePresent(PF_MMX_INSTRUCTIONS_AVAILABLE) != 0)    ? (feature::mmx | feature::i486) : feature::none;
+		Features |= (IsProcessorFeaturePresent(PF_RDTSC_INSTRUCTION_AVAILABLE) != 0)   ? (feature::tsc | feature::intel486) : feature::none;
+		Features |= (IsProcessorFeaturePresent(PF_COMPARE_EXCHANGE_DOUBLE) != 0)       ? (feature::cx8 | feature::intel486) : feature::none;
+		Features |= (IsProcessorFeaturePresent(PF_MMX_INSTRUCTIONS_AVAILABLE) != 0)    ? (feature::mmx | feature::intel486) : feature::none;
 		Features |= (IsProcessorFeaturePresent(PF_3DNOW_INSTRUCTIONS_AVAILABLE) != 0)  ? (feature::x3dnow) : feature::none;
 		Features |= (IsProcessorFeaturePresent(PF_XMMI_INSTRUCTIONS_AVAILABLE) != 0)   ? (feature::sse | feature::fxsr | feature::x3dnowprefetch | feature::cmov) : feature::none;
 		Features |= (IsProcessorFeaturePresent(PF_XMMI64_INSTRUCTIONS_AVAILABLE) != 0) ? (feature::sse2) : feature::none;
@@ -1461,8 +1461,8 @@ public:
 #elif MPT_OS_DJGPP
 
 		const uint8 cpu_level = detect_cpu_level();
-		Features |= (cpu_level >= 3) ? featureset::i386 : feature::none;
-		Features |= (cpu_level >= 4) ? featureset::i486SX : feature::none;
+		Features |= (cpu_level >= 3) ? featureset::intel386 : feature::none;
+		Features |= (cpu_level >= 4) ? featureset::intel486SX : feature::none;
 		const uint8 fpu_level = detect_fpu_level();
 		Features |= (fpu_level >= 2) ? feature::fpu : feature::none;
 		Features |= (fpu_level >= 3) ? feature::fsin : feature::none;
