@@ -1873,7 +1873,6 @@ public:
 	};
 
 #endif // MPT_ARCH
-
 };
 
 
