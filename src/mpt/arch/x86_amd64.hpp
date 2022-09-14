@@ -1538,9 +1538,9 @@ public:
 
 	struct control_state {
 		uint8 x87_level = 0;
-		uint16 x87fcw = 0;  // default 0x37f (glibc) / 0x27f (msvc)
+		uint16 x87fcw = 0; // default 0x37f (glibc) / 0x27f (msvc)
 		uint32 mxcsr_mask = 0;
-		uint32 mxcsr = 0;  // default: 0x00001f80
+		uint32 mxcsr = 0; // default: 0x00001f80
 	};
 
 #if MPT_ARCH_X86
@@ -1668,7 +1668,8 @@ public:
 		return cpu_info{}[mpt::arch::x86::feature::fsin] ? 3 : 2;
 #else
 		cpu_info tmp{};
-		return tmp[mpt::arch::x86::feature::fsin] ? 3 : tmp[mpt::arch::x86::feature::fpu] ? 2 : 0;
+		return tmp[mpt::arch::x86::feature::fsin] ? 3 : tmp[mpt::arch::x86::feature::fpu] ? 2
+																						  : 0;
 #endif
 	}
 
@@ -1832,7 +1833,7 @@ public:
 #endif // MPT_ARCH
 
 	class guard {
-	
+
 	private:
 
 		const control_state m_oldstate;
@@ -1840,8 +1841,7 @@ public:
 	public:
 
 		MPT_FORCEINLINE guard(std::optional<rounding> rounding, std::optional<bool> denormals_as_zero, std::optional<precision> precision, std::optional<bool> infinity_projective) noexcept
-			: m_oldstate(get_state())
-		{
+			: m_oldstate(get_state()) {
 			control_state state = m_oldstate;
 			if (rounding) {
 				if (state.x87_level) {
@@ -1872,9 +1872,7 @@ public:
 		MPT_FORCEINLINE ~guard() {
 			set_state(m_oldstate);
 		}
-
 	};
-
 };
 
 
