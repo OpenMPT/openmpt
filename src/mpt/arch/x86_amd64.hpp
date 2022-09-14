@@ -1760,8 +1760,7 @@ public:
 	static MPT_FORCEINLINE void set_state(control_state state) noexcept {
 		fxsave_state tmp = {};
 		fxsave(&tmp);
-		result.x87_level = 3;
-		tmp.x87fcw = state.x87fcw;
+		tmp.fcw = state.x87fcw;
 		tmp.mxcsr_mask = state.mxcsr_mask;
 		tmp.mxcsr = state.mxcsr;
 		fxrstor(&tmp);
