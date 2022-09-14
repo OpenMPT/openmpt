@@ -1830,8 +1830,6 @@ public:
 
 #endif // MPT_COMPILER
 
-#endif // MPT_ARCH
-
 	class guard {
 
 	private:
@@ -1873,6 +1871,9 @@ public:
 			set_state(m_oldstate);
 		}
 	};
+
+#endif // MPT_ARCH
+
 };
 
 
