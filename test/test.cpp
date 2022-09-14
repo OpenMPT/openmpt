@@ -14,6 +14,9 @@
 
 #ifdef ENABLE_TESTS
 
+#ifdef LIBOPENMPT_BUILD
+#include "mpt/arch/x86_amd64.hpp"
+#endif
 #include "mpt/base/check_platform.hpp"
 #include "mpt/base/detect.hpp"
 #include "mpt/base/numbers.hpp"
@@ -198,6 +201,115 @@ void DoTests()
 				std::cout << "Rounding mode: " << format_rounding(std::fegetround());
 			}
 		#endif // !MPT_LIBC_QUIRK_NO_FENV
+		#if MPT_ARCH_X86 || MPT_ARCH_AMD64
+			{
+				const mpt::arch::x86::floating_point::control_state fpstate = mpt::arch::x86::floating_point::get_state();
+				if(fpstate.x87_level)
+				{
+					auto format_rounding = [](uint16 fcw) {
+						std::string result;
+						switch((fcw & mpt::arch::x86::floating_point::FCW_RC) >> mpt::countr_zero(mpt::arch::x86::floating_point::FCW_RC))
+						{
+						case mpt::to_underlying(mpt::arch::x86::floating_point::rounding::nearest):
+							result = "ROUND_NEAREST";
+							break;
+						case mpt::to_underlying(mpt::arch::x86::floating_point::rounding::down):
+							result = "ROUND_DOWN";
+							break;
+						case mpt::to_underlying(mpt::arch::x86::floating_point::rounding::up):
+							result = "ROUND_UP";
+							break;
+						case mpt::to_underlying(mpt::arch::x86::floating_point::rounding::zero):
+							result = "ROUND_ZERO";
+							break;
+						}
+						return result;
+					};
+					auto format_precision = [](uint16 fcw) {
+						std::string result;
+						switch((fcw & mpt::arch::x86::floating_point::FCW_PC) >> mpt::countr_zero(mpt::arch::x86::floating_point::FCW_PC))
+						{
+						case mpt::to_underlying(mpt::arch::x86::floating_point::precision::single24):
+							result = "PRECISION_SINGLE";
+							break;
+						case mpt::to_underlying(mpt::arch::x86::floating_point::precision::double53):
+							result = "PRECISION_DOUBLE";
+							break;
+						case mpt::to_underlying(mpt::arch::x86::floating_point::precision::extended64):
+							result = "PRECISION_EXTENDED";
+							break;
+						case mpt::to_underlying(mpt::arch::x86::floating_point::precision::reserved):
+							result = "PRECISION_UNDEFINED";
+							break;
+						}
+						return result;
+					};
+					std::cout << "FCW: " << std::hex << std::setfill('0') << std::setw(4) << fpstate.x87fcw << std::endl;
+					std::cout << " " << format_rounding(fpstate.x87fcw);
+					std::cout << " " << format_precision(fpstate.x87fcw);
+					if (fpstate.x87_level <= 2) {
+						std::cout << " " << (fpstate.x87fcw & mpt::arch::x86::floating_point::FCW_X) ? std::string("INFINITY-AFFINE") : std::string("INFINITY-PROJECTIVE");
+					}
+					std::cout << std::endl;
+				}
+				if(fpstate.mxcsr_mask)
+				{
+					auto format_rounding = [](uint32 csr) {
+						std::string result;
+						switch((csr & mpt::arch::x86::floating_point::MXCSR_RC) >> mpt::countr_zero(mpt::arch::x86::floating_point::MXCSR_RC))
+						{
+						case mpt::to_underlying(mpt::arch::x86::floating_point::rounding::nearest):
+							result = "ROUND_NEAREST";
+							break;
+						case mpt::to_underlying(mpt::arch::x86::floating_point::rounding::down):
+							result = "ROUND_DOWN";
+							break;
+						case mpt::to_underlying(mpt::arch::x86::floating_point::rounding::up):
+							result = "ROUND_UP";
+							break;
+						case mpt::to_underlying(mpt::arch::x86::floating_point::rounding::zero):
+							result = "ROUND_ZERO";
+							break;
+						}
+						return result;
+					};
+					std::cout << "MXCSR (mask): " << std::hex << std::setfill('0') << std::setw(8) << fpstate.mxcsr << " (" << std::hex << std::setfill('0') << std::setw(8) << fpstate.mxcsr_mask << ")" << std::endl;
+					std::cout << " " << format_rounding(fpstate.mxcsr);
+					if(fpstate.mxcsr & fpstate.mxcsr_mask & mpt::arch::x86::floating_point::MXCSR_FTZ)
+					{
+						std::cout << " " << "FTZ";
+					}
+					if(fpstate.mxcsr & fpstate.mxcsr_mask & mpt::arch::x86::floating_point::MXCSR_DAZ)
+					{
+						std::cout << " " << "DAZ";
+					}
+					std::cout << std::endl;
+				}
+				if(fpstate.x87_level || fpstate.mxcsr_mask)
+				{
+					std::cout << "FP Exceptions: ";
+					if(fpstate.x87_level)
+					{
+						if(!(fpstate.x87fcw & mpt::arch::x86::floating_point::FCW_IM)) std::cout << " x87/#I";
+						if(!(fpstate.x87fcw & mpt::arch::x86::floating_point::FCW_DM)) std::cout << " x87/#D";
+						if(!(fpstate.x87fcw & mpt::arch::x86::floating_point::FCW_ZM)) std::cout << " x87/#Z";
+						if(!(fpstate.x87fcw & mpt::arch::x86::floating_point::FCW_OM)) std::cout << " x87/#O";
+						if(!(fpstate.x87fcw & mpt::arch::x86::floating_point::FCW_UM)) std::cout << " x87/#U";
+						if(!(fpstate.x87fcw & mpt::arch::x86::floating_point::FCW_PM)) std::cout << " x87/#P";
+					}
+					if(fpstate.mxcsr_mask)
+					{
+						if(!(fpstate.mxcsr & fpstate.mxcsr_mask & mpt::arch::x86::floating_point::MXCSR_IM)) std::cout << " sse/#I";
+						if(!(fpstate.mxcsr & fpstate.mxcsr_mask & mpt::arch::x86::floating_point::MXCSR_DM)) std::cout << " sse/#D";
+						if(!(fpstate.mxcsr & fpstate.mxcsr_mask & mpt::arch::x86::floating_point::MXCSR_ZM)) std::cout << " sse/#Z";
+						if(!(fpstate.mxcsr & fpstate.mxcsr_mask & mpt::arch::x86::floating_point::MXCSR_OM)) std::cout << " sse/#O";
+						if(!(fpstate.mxcsr & fpstate.mxcsr_mask & mpt::arch::x86::floating_point::MXCSR_UM)) std::cout << " sse/#U";
+						if(!(fpstate.mxcsr & fpstate.mxcsr_mask & mpt::arch::x86::floating_point::MXCSR_PM)) std::cout << " sse/#P";
+					}
+					std::cout << std::endl;
+				}
+			}
+		#endif // MPT_ARCH_X86 || MPT_ARCH_AMD64
 		#if MPT_OS_DJGPP
 			mpt::osinfo::dos::Version ver = mpt::osinfo::dos::Version::Current();
 			std::cout << "DOS: " << ver.GetOEM() << " " << static_cast<int>(ver.GetSystemEmulated().Major) << "." << static_cast<int>(ver.GetSystemEmulated().Minor) << " (true " << static_cast<int>(ver.GetSystem().Major) << "." << static_cast<int>(ver.GetSystem().Minor) << ")" << std::endl;
