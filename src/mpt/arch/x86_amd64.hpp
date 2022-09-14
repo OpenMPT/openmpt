@@ -1548,17 +1548,21 @@ public:
 
 	[[nodiscard]] static MPT_FORCEINLINE uint16 get_x87fcw() noexcept {
 		uint16 tmp = 0;
+		// clang-format off
 		_asm {
 			fwait
 			fnstcw tmp
 		}
+		// clang-format on
 		return tmp;
 	}
 
 	static MPT_FORCEINLINE void set_x87fcw(uint16 fcw) noexcept {
+		// clang-format off
 		_asm {
 			fldcw fcw
 		}
+		// clang-format on
 	}
 
 	[[nodiscard]] static MPT_FORCEINLINE uint32 get_mxcsr() noexcept {
@@ -1582,14 +1586,18 @@ public:
 	[[nodiscard]] static MPT_FORCEINLINE uint16 get_x87fcw() noexcept {
 		typedef unsigned int fpu_control_t __attribute__((__mode__(__HI__)));
 		fpu_control_t tmp = 0;
+		// clang-format off
 		__asm__ __volatile__("fwait" "\n" "fnstcw %0" : "=m" (*&tmp));
+		// clang-format on
 		return static_cast<uint16>(tmp);
 	}
 
 	static MPT_FORCEINLINE void set_x87fcw(uint16 fcw) noexcept {
 		typedef unsigned int fpu_control_t __attribute__((__mode__(__HI__)));
 		fpu_control_t tmp = fcw;
+		// clang-format off
 		__asm__ __volatile__("fldcw %0" : : "m" (*&tmp));
+		// clang-format on
 	}
 
 	[[nodiscard]] static MPT_FORCEINLINE uint32 get_mxcsr() noexcept {
@@ -1597,7 +1605,9 @@ public:
 		return __builtin_ia32_stmxcsr();
 #else
 		uint32 csr = 0;
+		// clang-format off
 		__asm__ __volatile__("stmxcsr %0" : "=m" (csr));
+		// clang-format on
 		return csr;
 #endif
 	}
@@ -1614,7 +1624,9 @@ public:
 		std::atomic_thread_fence(std::memory_order_seq_cst);
 #endif
 #else
+		// clang-format off
 		__asm__ __volatile__("ldmxcsr %0" : : "m" (csr));
+		// clang-format on
 #endif
 	}
 
@@ -1622,7 +1634,9 @@ public:
 #ifdef MPT_ARCH_X86_FXSR
 		__builtin_ia32_fxsave(state);
 #else
+		// clang-format off
 		__asm__ __volatile__("fxsave %0" : : "m" (*state));
+		// clang-format on
 #endif
 	}
 
@@ -1630,7 +1644,9 @@ public:
 #ifdef MPT_ARCH_X86_FXSR
 		__builtin_ia32_fxrstor(const_cast<fxsave_state *>(state));
 #else
+		// clang-format off
 		__asm__ __volatile__("fxrstor %0" : : "m" (*state));
+		// clang-format on
 #endif
 	}
 
@@ -1754,14 +1770,18 @@ public:
 	[[nodiscard]] static MPT_FORCEINLINE uint16 get_x87fcw() noexcept {
 		typedef unsigned int fpu_control_t __attribute__((__mode__(__HI__)));
 		fpu_control_t tmp = 0;
+		// clang-format off
 		__asm__ __volatile__("fwait" "\n" "fnstcw %0" : "=m" (*&tmp));
+		// clang-format on
 		return static_cast<uint16>(tmp);
 	}
 
 	static MPT_FORCEINLINE void set_x87fcw(uint16 fcw) noexcept {
 		typedef unsigned int fpu_control_t __attribute__((__mode__(__HI__)));
 		fpu_control_t tmp = fcw;
+		// clang-format off
 		__asm__ __volatile__("fldcw %0" : : "m" (*&tmp));
+		// clang-format on
 	}
 
 	[[nodiscard]] static MPT_FORCEINLINE uint32 get_mxcsr() noexcept {
