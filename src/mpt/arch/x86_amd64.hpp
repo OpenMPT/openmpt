@@ -5,14 +5,21 @@
 
 
 #include "mpt/arch/feature_flags.hpp"
+#include "mpt/base/bit.hpp"
 #include "mpt/base/detect.hpp"
 #include "mpt/base/integer.hpp"
 #include "mpt/base/macros.hpp"
 #include "mpt/base/namespace.hpp"
+#include "mpt/base/utility.hpp"
 #include "mpt/osinfo/windows_version.hpp"
 
 #include <algorithm>
 #include <array>
+#if MPT_ARCH_X86 || MPT_ARCH_AMD64
+#if MPT_COMPILER_GCC
+#include <atomic>
+#endif
+#endif
 #include <string>
 #include <string_view>
 
@@ -29,6 +36,7 @@
 
 #if MPT_ARCH_X86 || MPT_ARCH_AMD64
 #if MPT_COMPILER_MSVC
+#include <immintrin.h>
 #include <intrin.h>
 #elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 #include <cpuid.h>
@@ -1462,6 +1470,390 @@ public:
 
 #endif // MPT_ARCH_X86 || MPT_ARCH_AMD64
 	}
+};
+
+
+
+struct floating_point {
+
+public:
+
+	static inline constexpr uint16 FCW_IM = (1 << 0);
+	static inline constexpr uint16 FCW_DM = (1 << 1);
+	static inline constexpr uint16 FCW_ZM = (1 << 2);
+	static inline constexpr uint16 FCW_OM = (1 << 3);
+	static inline constexpr uint16 FCW_UM = (1 << 4);
+	static inline constexpr uint16 FCW_PM = (1 << 5);
+	static inline constexpr uint16 FCW_PC = 0x0300;
+	static inline constexpr uint16 FCW_RC = 0x0c00;
+	static inline constexpr uint16 FCW_X = (1 << 12);
+
+	static inline constexpr uint32 MXCSR_IE = (1 << 0);
+	static inline constexpr uint32 MXCSR_DE = (1 << 1);
+	static inline constexpr uint32 MXCSR_ZE = (1 << 2);
+	static inline constexpr uint32 MXCSR_OE = (1 << 3);
+	static inline constexpr uint32 MXCSR_UE = (1 << 4);
+	static inline constexpr uint32 MXCSR_PE = (1 << 5);
+	static inline constexpr uint32 MXCSR_DAZ = (1 << 6);
+	static inline constexpr uint32 MXCSR_IM = (1 << 7);
+	static inline constexpr uint32 MXCSR_DM = (1 << 8);
+	static inline constexpr uint32 MXCSR_ZM = (1 << 9);
+	static inline constexpr uint32 MXCSR_OM = (1 << 10);
+	static inline constexpr uint32 MXCSR_UM = (1 << 11);
+	static inline constexpr uint32 MXCSR_PM = (1 << 12);
+	static inline constexpr uint32 MXCSR_RC = (1 << 13) | (1 << 14);
+	static inline constexpr uint32 MXCSR_FTZ = (1 << 15);
+
+	enum class precision : uint8 {
+		single24 = 0,
+		reserved = 1,
+		double53 = 2,
+		extended64 = 3,
+	};
+
+	enum class rounding : uint8 {
+		nearest = 0,
+		down = 1,
+		up = 2,
+		zero = 3,
+	};
+
+	struct alignas(16) fxsave_state {
+		uint16 fcw;
+		uint16 fsw;
+		uint16 ftw;
+		uint16 fop;
+		uint32 fip;
+		uint32 fcs;
+		uint32 foo;
+		uint32 fos;
+		uint32 mxcsr;
+		uint32 mxcsr_mask;
+		uint32 st_space[32];
+		uint32 xmm_space[32];
+		uint8 padding[224];
+	};
+	static_assert(sizeof(fxsave_state) == 512);
+
+	struct control_state {
+		uint8 x87_level = 0;
+		uint16 x87fcw = 0;  // default 0x37f (glibc) / 0x27f (msvc)
+		uint32 mxcsr_mask = 0;
+		uint32 mxcsr = 0;  // default: 0x00001f80
+	};
+
+#if MPT_ARCH_X86
+
+#if MPT_COMPILER_MSVC
+
+	[[nodiscard]] static MPT_FORCEINLINE uint16 get_x87fcw() noexcept {
+		uint16 tmp = 0;
+		_asm {
+			fwait
+			fnstcw tmp
+		}
+		return tmp;
+	}
+
+	static MPT_FORCEINLINE void set_x87fcw(uint16 fcw) noexcept {
+		_asm {
+			fldcw fcw
+		}
+	}
+
+	[[nodiscard]] static MPT_FORCEINLINE uint32 get_mxcsr() noexcept {
+		return _mm_getcsr();
+	}
+
+	static MPT_FORCEINLINE void set_mxcsr(uint32 csr) noexcept {
+		_mm_setcsr(csr);
+	}
+
+	static MPT_FORCEINLINE void fxsave(fxsave_state * state) noexcept {
+		_fxsave(state);
+	}
+
+	static MPT_FORCEINLINE void fxrstor(const fxsave_state * state) noexcept {
+		_fxrstor(state);
+	}
+
+#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
+
+	[[nodiscard]] static MPT_FORCEINLINE uint16 get_x87fcw() noexcept {
+		typedef unsigned int fpu_control_t __attribute__((__mode__(__HI__)));
+		fpu_control_t tmp = 0;
+		__asm__ __volatile__("fwait" "\n" "fnstcw %0" : "=m" (*&tmp));
+		return static_cast<uint16>(tmp);
+	}
+
+	static MPT_FORCEINLINE void set_x87fcw(uint16 fcw) noexcept {
+		typedef unsigned int fpu_control_t __attribute__((__mode__(__HI__)));
+		fpu_control_t tmp = fcw;
+		__asm__ __volatile__("fldcw %0" : : "m" (*&tmp));
+	}
+
+	[[nodiscard]] static MPT_FORCEINLINE uint32 get_mxcsr() noexcept {
+#ifdef MPT_ARCH_X86_SSE
+		return __builtin_ia32_stmxcsr();
+#else
+		uint32 csr = 0;
+		__asm__ __volatile__("stmxcsr %0" : "=m" (csr));
+		return csr;
+#endif
+	}
+
+	static MPT_FORCEINLINE void set_mxcsr(uint32 csr) noexcept {
+#ifdef MPT_ARCH_X86_SSE
+#if MPT_COMPILER_GCC
+		// https://gcc.gnu.org/bugzilla/show_bug.cgi?id=55752
+		std::atomic_thread_fence(std::memory_order_seq_cst);
+#endif
+		__builtin_ia32_ldmxcsr(csr);
+#if MPT_COMPILER_GCC
+		// https://gcc.gnu.org/bugzilla/show_bug.cgi?id=55752
+		std::atomic_thread_fence(std::memory_order_seq_cst);
+#endif
+#else
+		__asm__ __volatile__("ldmxcsr %0" : : "m" (csr));
+#endif
+	}
+
+	static MPT_FORCEINLINE void fxsave(fxsave_state * state) noexcept {
+#ifdef MPT_ARCH_X86_FXSR
+		__builtin_ia32_fxsave(state);
+#else
+		__asm__ __volatile__("fxsave %0" : : "m" (*state));
+#endif
+	}
+
+	static MPT_FORCEINLINE void fxrstor(const fxsave_state * state) noexcept {
+#ifdef MPT_ARCH_X86_FXSR
+		__builtin_ia32_fxrstor(const_cast<fxsave_state *>(state));
+#else
+		__asm__ __volatile__("fxrstor %0" : : "m" (*state));
+#endif
+	}
+
+#endif // MPT_COMPILER
+
+	static MPT_FORCEINLINE bool have_fxsr() noexcept {
+#ifdef MPT_ARCH_X86_FXSR
+		return true;
+#else
+		return cpu_info{}[mpt::arch::x86::feature::fxsr];
+#endif
+	}
+
+	static MPT_FORCEINLINE uint8 get_fpu_level() noexcept {
+#ifdef MPT_ARCH_X86_FSIN
+		return 3;
+#elif defined(MPT_ARCH_X86_FPU)
+		return cpu_info{}[mpt::arch::x86::feature::fsin] ? 3 : 2;
+#else
+		cpu_info tmp{};
+		return tmp[mpt::arch::x86::feature::fsin] ? 3 : tmp[mpt::arch::x86::feature::fpu] ? 2 : 0;
+#endif
+	}
+
+	static MPT_FORCEINLINE control_state get_state() noexcept {
+		control_state result;
+#ifdef MPT_ARCH_X86_FXSR
+		fxsave_state tmp = {};
+		fxsave(&tmp);
+		result.x87_level = 3;
+		result.x87fcw = tmp.fcw;
+		result.mxcsr_mask = tmp.mxcsr_mask;
+		result.mxcsr = tmp.mxcsr;
+#else
+		if (have_fxsr()) {
+			fxsave_state tmp = {};
+			fxsave(&tmp);
+			result.x87_level = 3;
+			result.x87fcw = tmp.fcw;
+			result.mxcsr_mask = tmp.mxcsr_mask;
+			result.mxcsr = tmp.mxcsr;
+		} else {
+			result.x87_level = get_fpu_level();
+			if (result.x87_level > 0) {
+				result.x87fcw = get_x87fcw();
+			}
+		}
+#endif
+		return result;
+	}
+
+	static MPT_FORCEINLINE void set_state(control_state state) noexcept {
+		if (state.x87_level) {
+			set_x87fcw(state.x87fcw);
+		}
+		if (state.mxcsr_mask) {
+			set_mxcsr(state.mxcsr);
+		}
+	}
+
+#elif MPT_ARCH_AMD64
+
+#if MPT_COMPILER_MSVC
+
+	[[nodiscard]] static MPT_FORCEINLINE uint16 get_x87fcw() noexcept {
+		fxsave_state state = {};
+		fxsave(&state);
+		return state.fcw;
+	}
+
+	static MPT_FORCEINLINE void set_x87fcw(uint16 fcw) noexcept {
+		fxsave_state state = {};
+		fxsave(&state);
+		state.fcw = fcw;
+		fxrstor(&state);
+	}
+
+	[[nodiscard]] static MPT_FORCEINLINE uint32 get_mxcsr() noexcept {
+		return _mm_getcsr();
+	}
+
+	static MPT_FORCEINLINE void set_mxcsr(uint32 csr) noexcept {
+		_mm_setcsr(csr);
+	}
+
+	static MPT_FORCEINLINE void fxsave(fxsave_state * state) noexcept {
+		_fxsave(state);
+	}
+
+	static MPT_FORCEINLINE void fxrstor(const fxsave_state * state) noexcept {
+		_fxrstor(state);
+	}
+
+	static MPT_FORCEINLINE bool have_fxsr() noexcept {
+		return true;
+	}
+
+	static MPT_FORCEINLINE control_state get_state() noexcept {
+		control_state result;
+		fxsave_state tmp = {};
+		fxsave(&tmp);
+		result.x87_level = 3;
+		result.x87fcw = tmp.fcw;
+		result.mxcsr_mask = tmp.mxcsr_mask;
+		result.mxcsr = tmp.mxcsr;
+		return result;
+	}
+
+	static MPT_FORCEINLINE void set_state(control_state state) noexcept {
+		fxsave_state tmp = {};
+		fxsave(&tmp);
+		result.x87_level = 3;
+		tmp.x87fcw = state.x87fcw;
+		tmp.mxcsr_mask = state.mxcsr_mask;
+		tmp.mxcsr = state.mxcsr;
+		fxrstor(&tmp);
+	}
+
+#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
+
+	[[nodiscard]] static MPT_FORCEINLINE uint16 get_x87fcw() noexcept {
+		typedef unsigned int fpu_control_t __attribute__((__mode__(__HI__)));
+		fpu_control_t tmp = 0;
+		__asm__ __volatile__("fwait" "\n" "fnstcw %0" : "=m" (*&tmp));
+		return static_cast<uint16>(tmp);
+	}
+
+	static MPT_FORCEINLINE void set_x87fcw(uint16 fcw) noexcept {
+		typedef unsigned int fpu_control_t __attribute__((__mode__(__HI__)));
+		fpu_control_t tmp = fcw;
+		__asm__ __volatile__("fldcw %0" : : "m" (*&tmp));
+	}
+
+	[[nodiscard]] static MPT_FORCEINLINE uint32 get_mxcsr() noexcept {
+		return __builtin_ia32_stmxcsr();
+	}
+
+	static MPT_FORCEINLINE void set_mxcsr(uint32 csr) noexcept {
+#if MPT_COMPILER_GCC
+		// https://gcc.gnu.org/bugzilla/show_bug.cgi?id=55752
+		std::atomic_thread_fence(std::memory_order_seq_cst);
+#endif
+		__builtin_ia32_ldmxcsr(csr);
+#if MPT_COMPILER_GCC
+		// https://gcc.gnu.org/bugzilla/show_bug.cgi?id=55752
+		std::atomic_thread_fence(std::memory_order_seq_cst);
+#endif
+	}
+
+	static MPT_FORCEINLINE void fxsave(fxsave_state * state) noexcept {
+		__builtin_ia32_fxsave(state);
+	}
+
+	static MPT_FORCEINLINE void fxrstor(const fxsave_state * state) noexcept {
+		__builtin_ia32_fxrstor(state);
+	}
+
+	static MPT_FORCEINLINE bool have_fxsr() noexcept {
+		return true;
+	}
+
+	static MPT_FORCEINLINE control_state get_state() noexcept {
+		control_state result;
+		result.x87_level = 3;
+		result.x87fcw = get_x87fcw();
+		result.mxcsr_mask = 0x0000'ffff;
+		result.mxcsr = get_mxcsr();
+		return result;
+	}
+
+	static MPT_FORCEINLINE void set_state(control_state state) noexcept {
+		set_x87fcw(state.x87fcw);
+		set_mxcsr(state.mxcsr);
+	}
+
+#endif // MPT_COMPILER
+
+#endif // MPT_ARCH
+
+	class guard {
+	
+	private:
+
+		const control_state m_oldstate;
+
+	public:
+
+		MPT_FORCEINLINE guard(std::optional<rounding> rounding, std::optional<bool> denormals_as_zero, std::optional<precision> precision, std::optional<bool> infinity_projective) noexcept
+			: m_oldstate(get_state())
+		{
+			control_state state = m_oldstate;
+			if (rounding) {
+				if (state.x87_level) {
+					state.x87fcw = (state.x87fcw & ~FCW_RC) | (mpt::to_underlying(*rounding) << mpt::countr_zero(FCW_RC));
+				}
+				if ((state.mxcsr_mask & MXCSR_RC) == MXCSR_RC) {
+					state.mxcsr = (state.mxcsr & ~MXCSR_RC) | (mpt::to_underlying(*rounding) << mpt::countr_zero(MXCSR_RC));
+				}
+			}
+			if (denormals_as_zero) {
+				if (state.mxcsr_mask) {
+					state.mxcsr = (state.mxcsr & ~(MXCSR_FTZ | MXCSR_DAZ)) | ((*denormals_as_zero) ? ((MXCSR_FTZ | MXCSR_DAZ) & state.mxcsr_mask) : 0);
+				}
+			}
+			if (precision) {
+				if (state.x87_level) {
+					state.x87fcw = (state.x87fcw & ~FCW_PC) | (mpt::to_underlying(*precision) << mpt::countr_zero(FCW_PC));
+				}
+			}
+			if (infinity_projective) {
+				if (state.x87_level <= 2) {
+					state.x87fcw = (state.x87fcw & ~FCW_X) | ((*infinity_projective) ? 0 : FCW_X);
+				}
+			}
+			set_state(state);
+		}
+
+		MPT_FORCEINLINE ~guard() {
+			set_state(m_oldstate);
+		}
+
+	};
+
 };
 
 
