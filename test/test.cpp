@@ -86,6 +86,7 @@
 #include <sstream>
 #include <limits>
 #ifdef LIBOPENMPT_BUILD
+#include <iomanip>
 #include <iostream>
 #endif // LIBOPENMPT_BUILD
 #include <istream>
