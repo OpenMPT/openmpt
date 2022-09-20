@@ -25,6 +25,10 @@
 #include "MPEGFrame.h"
 #endif // MPT_ENABLE_MP3_SAMPLES
 #if defined(MPT_WITH_MINIMP3)
+#include "mpt/base/alloc.hpp"
+#endif // MPT_WITH_MINIMP3
+
+#if defined(MPT_WITH_MINIMP3)
 #include <minimp3/minimp3.h>
 #endif // MPT_WITH_MINIMP3
 
@@ -603,19 +607,19 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool raw, b
 
 	std::vector<int16> raw_sample_data;
 
-	mp3dec_t mp3;
-	std::memset(&mp3, 0, sizeof(mp3dec_t));
-	mp3dec_init(&mp3);
+	mpt::heap_value<mp3dec_t> mp3;
+	std::memset(&*mp3, 0, sizeof(mp3dec_t));
+	mp3dec_init(&*mp3);
 	
 	int rate = 0;
 	int channels = 0;
 
 	mp3dec_frame_info_t info;
 	std::memset(&info, 0, sizeof(mp3dec_frame_info_t));
+	std::vector<int16> sample_buf(MINIMP3_MAX_SAMPLES_PER_FRAME);
 	do
 	{
-		int16 sample_buf[MINIMP3_MAX_SAMPLES_PER_FRAME];
-		int frame_samples = mp3dec_decode_frame(&mp3, stream_pos, mpt::saturate_cast<int>(bytes_left), sample_buf, &info);
+		int frame_samples = mp3dec_decode_frame(&*mp3, stream_pos, mpt::saturate_cast<int>(bytes_left), sample_buf.data(), &info);
 		if(frame_samples < 0 || info.frame_bytes < 0) break; // internal error in minimp3
 		if(frame_samples > 0 && info.frame_bytes == 0) break; // internal error in minimp3
 		if(frame_samples == 0 && info.frame_bytes == 0) break; // end of stream, no progress
@@ -635,7 +639,7 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool raw, b
 			{
 				try
 				{
-					mpt::append(raw_sample_data, sample_buf, sample_buf + frame_samples * channels);
+					mpt::append(raw_sample_data, sample_buf.data(), sample_buf.data() + frame_samples * channels);
 				} catch(mpt::out_of_memory e)
 				{
 					mpt::delete_out_of_memory(e);
