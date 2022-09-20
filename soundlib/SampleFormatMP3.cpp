@@ -151,6 +151,14 @@ static mpt::ustring ReadMPG123String(const char (&str)[N])
 #endif // MPT_WITH_MPG123
 
 
+#if defined(MPT_WITH_MINIMP3)
+static MPT_NOINLINE int mp3dec_decode_frame_no_inline(mp3dec_t *dec, const uint8_t *mp3, int mp3_bytes, mp3d_sample_t *pcm, mp3dec_frame_info_t *info)
+{
+	return mp3dec_decode_frame(dec, mp3, mp3_bytes, pcm, info);
+}
+#endif // MPT_WITH_MINIMP3
+
+
 bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool raw, bool mo3Decode)
 {
 #if defined(MPT_WITH_MPG123) || defined(MPT_WITH_MINIMP3)
@@ -603,7 +611,7 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool raw, b
 	std::vector<int16> sample_buf(MINIMP3_MAX_SAMPLES_PER_FRAME);
 	do
 	{
-		int frame_samples = mp3dec_decode_frame(&*mp3, stream_pos, mpt::saturate_cast<int>(bytes_left), sample_buf.data(), &info);
+		int frame_samples = mp3dec_decode_frame_no_inline(&*mp3, stream_pos, mpt::saturate_cast<int>(bytes_left), sample_buf.data(), &info);
 		if(frame_samples < 0 || info.frame_bytes < 0) break; // internal error in minimp3
 		if(frame_samples > 0 && info.frame_bytes == 0) break; // internal error in minimp3
 		if(frame_samples == 0 && info.frame_bytes == 0) break; // end of stream, no progress
