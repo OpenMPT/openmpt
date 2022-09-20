@@ -11,6 +11,7 @@
 
 #include "stdafx.h"
 #include "Sndfile.h"
+#include "plugins/PluginManager.h"
 #include "../common/mptStringBuffer.h"
 #include "../common/version.h"
 
