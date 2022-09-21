@@ -516,7 +516,7 @@ public:
 	{
 		return bytes[i];
 	}
-	MPT_FORCEINLINE IEEE754binary32Emulated() { }
+	IEEE754binary32Emulated() = default;
 	MPT_FORCEINLINE explicit IEEE754binary32Emulated(float32 f)
 	{
 		SetInt32(EncodeIEEE754binary32(f));
@@ -577,7 +577,7 @@ public:
 	{
 		return bytes[i];
 	}
-	MPT_FORCEINLINE IEEE754binary64Emulated() { }
+	IEEE754binary64Emulated() = default;
 	MPT_FORCEINLINE explicit IEEE754binary64Emulated(float64 f)
 	{
 		SetInt64(EncodeIEEE754binary64(f));
@@ -668,7 +668,7 @@ public:
 			STATIC_ASSERT(false);
 		#endif
 	}
-	MPT_FORCEINLINE IEEE754binary32Native() { }
+	IEEE754binary32Native() = default;
 	MPT_FORCEINLINE explicit IEEE754binary32Native(float32 f)
 	{
 		value = f;
@@ -734,7 +734,7 @@ public:
 			STATIC_ASSERT(false);
 		#endif
 	}
-	MPT_FORCEINLINE IEEE754binary64Native() { }
+	IEEE754binary64Native() = default;
 	MPT_FORCEINLINE explicit IEEE754binary64Native(float64 f)
 	{
 		value = f;
