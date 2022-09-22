@@ -480,7 +480,11 @@ bool EffectInfo::GetEffectNameEx(CString &pszName, const ModCommand &m, uint32 p
 	case CMD_TREMOLO:
 	case CMD_PANBRELLO:
 	case CMD_FINEVIBRATO:
-		if (param)
+		if(param && !(param & 0xF0))
+			s.Format(_T("speed=continue depth=%d"), param & 0x0F);
+		else if(param && !(param & 0x0F))
+			s.Format(_T("speed=%d depth=continue"), param >> 4);
+		else if(param)
 			s.Format(_T("speed=%d depth=%d"), param >> 4, param & 0x0F);
 		else
 			s = _T("continue");
