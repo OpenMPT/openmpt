@@ -84,8 +84,16 @@ enum DragonDropType
 
 struct DRAGONDROP
 {
+	enum class InsertType
+	{
+		Unspecified,
+		Replace,
+		InsertNew
+	};
+
 	const CSoundFile *sndFile = nullptr;
 	DragonDropType dropType = DRAGONDROP_NOTHING;
+	InsertType insertType = InsertType::Unspecified;
 	uint32 dropItem = 0;
 	LPARAM dropParam = 0;
 

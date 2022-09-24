@@ -4191,14 +4191,14 @@ LRESULT CModTree::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		return wParam;
 
 	case kcTreeViewRename:
+	case kcTreeViewSendToEditorInsertNew:
 		if(HTREEITEM hItem = GetSelectedItem(); hItem)
 		{
 			const ModItem modItem = GetModItem(hItem);
 			static constexpr ModItemType instrumentTypes[] = {MODITEM_INSLIB_SAMPLE, MODITEM_INSLIB_INSTRUMENT, MODITEM_MIDIINSTRUMENT, MODITEM_MIDIPERCUSSION, MODITEM_DLSBANK_INSTRUMENT};
 			if(mpt::contains(instrumentTypes, modItem.type))
 			{
-				// Load sample into currently selected sample or instrument slot
-				// Additionally pressing Shift creates a new sample or instrument slot. Shift key is handled in the Drag&drop handler
+				// Load sample into currently selected (or new) sample or instrument slot
 				CModScrollView *view = static_cast<CModScrollView *>(CMainFrame::GetMainFrame()->GetActiveView());
 				if(view)
 				{
@@ -4211,12 +4211,13 @@ LRESULT CModTree::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 					m_itemDrag = modItem;
 					if((isSampleView || isInstrumentView) && GetDropInfo(dropInfo, fullPath))
 					{
+						dropInfo.insertType = (wParam == kcTreeViewSendToEditorInsertNew) ? DRAGONDROP::InsertType::InsertNew : DRAGONDROP::InsertType::Replace;
 						view->SendMessage(WM_MOD_DRAGONDROPPING, TRUE, reinterpret_cast<LPARAM>(&dropInfo));
 						// In case a message box like "create instrument for sample?" showed up
 						SetFocus();
 					}
 				}
-			} else if(!IsSampleBrowser())
+			} else if(!IsSampleBrowser() && wParam != kcTreeViewSendToEditorInsertNew)
 			{
 				EditLabel(hItem);
 			}

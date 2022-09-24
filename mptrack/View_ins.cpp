@@ -2110,7 +2110,10 @@ BOOL CViewInstrument::OnDragonDrop(BOOL doDrop, const DRAGONDROP *dropInfo)
 		break;
 	}
 	
-	const bool insertNew = CMainFrame::GetInputHandler()->ShiftPressed() && sndFile.GetNumInstruments() > 0;
+	bool insertNew = CMainFrame::GetInputHandler()->ShiftPressed() && sndFile.GetNumInstruments() > 0;
+	if(dropInfo->insertType != DRAGONDROP::InsertType::Unspecified)
+		insertNew = dropInfo->insertType == DRAGONDROP::InsertType::InsertNew && sndFile.GetNumInstruments() > 0;
+
 	if(insertNew && !sndFile.CanAddMoreInstruments())
 		canDrop = false;
 

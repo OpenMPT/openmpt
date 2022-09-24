@@ -428,6 +428,7 @@ constexpr struct
 	{kcTreeViewDuplicate,                      VK_INSERT,          ModShift,           kKeyEventDown | kKeyEventRepeat, kCtxViewTree,            MPT_V("1.31.00.14")},
 	{kcTreeViewDelete,                         VK_DELETE,          ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxViewTree,            MPT_V("1.31.00.14")},
 	{kcTreeViewRename,                         VK_RETURN,          ModCtrl,            kKeyEventDown,                   kCtxViewTree,            MPT_V("1.31.00.14")},
+	{kcTreeViewSendToEditorInsertNew,          VK_RETURN,          ModShift | ModCtrl, kKeyEventDown,                   kCtxViewTree,            MPT_V("1.31.00.15")},
 	{kcTreeViewFind,                           'F',                ModCtrl,            kKeyEventDown,                   kCtxViewTree,            MPT_V("1.31.00.14")},
 	{kcVSTGUIPrevPreset,                       VK_SUBTRACT,        ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxVSTGUI,              MPT_V("1.31")},
 	{kcVSTGUINextPreset,                       VK_ADD,             ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxVSTGUI,              MPT_V("1.31")},
@@ -1229,6 +1230,7 @@ static constexpr struct
 	{2041, kcTreeViewSortByName, _T("Sort Instrument Library By Name")},
 	{2042, kcTreeViewSortByDate, _T("Sort Instrument Library By Date")},
 	{2043, kcTreeViewSortBySize, _T("Sort Instrument Library By Size")},
+	{2044, kcTreeViewSendToEditorInsertNew, _T("Send To Editor (Insert New)")},
 };
 
 // Get command descriptions etc.. loaded up.

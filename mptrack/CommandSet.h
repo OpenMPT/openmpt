@@ -821,6 +821,7 @@ enum CommandID
 	kcTreeViewDuplicate,
 	kcTreeViewDelete,
 	kcTreeViewRename,
+	kcTreeViewSendToEditorInsertNew,
 	kcTreeViewFind,
 	kcTreeViewSortByName,
 	kcTreeViewSortByDate,

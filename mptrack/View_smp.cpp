@@ -3160,7 +3160,10 @@ BOOL CViewSample::OnDragonDrop(BOOL doDrop, const DRAGONDROP *dropInfo)
 		break;
 	}
 	
-	const bool insertNew = CMainFrame::GetInputHandler()->ShiftPressed();
+	bool insertNew = CMainFrame::GetInputHandler()->ShiftPressed();
+	if(dropInfo->insertType != DRAGONDROP::InsertType::Unspecified)
+		insertNew = dropInfo->insertType == DRAGONDROP::InsertType::InsertNew;
+
 	if(insertNew && !sndFile.CanAddMoreSamples())
 		canDrop = false;
 	
