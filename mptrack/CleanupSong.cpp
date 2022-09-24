@@ -524,6 +524,15 @@ protected:
 		SetRange(0, totalSamples);
 
 		CMainFrame::GetMainFrame()->StopMod(&m_modDoc);
+
+		// We're not interested in plugin rendering
+		std::bitset<MAX_MIXPLUGINS> plugMuteStatus;
+		for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
+		{
+			plugMuteStatus[i] = sndFile.m_MixPlugins[i].IsBypassed();
+			sndFile.m_MixPlugins[i].SetBypass(true);
+		}
+
 		const auto origSequence = sndFile.Order.GetCurrentSequenceIndex();
 		const auto origRepeatCount = sndFile.GetRepeatCount();
 		sndFile.SetRepeatCount(0);
@@ -567,6 +576,11 @@ protected:
 		sndFile.SetRepeatCount(origRepeatCount);
 		sndFile.Order.SetSequence(origSequence);
 		sndFile.m_bIsRendering = false;
+
+		for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
+		{
+			sndFile.m_MixPlugins[i].SetBypass(plugMuteStatus[i]);
+		}
 
 		EndDialog(m_abort ? IDCANCEL : IDOK);
 	}
@@ -744,7 +758,7 @@ bool CModCleanupDlg::OptimizeSamples()
 			}
 		}
 
-		if(sample.HasSampleData() && sample.nLength > loopLength + 2) numLoopOpt++;
+		if(sample.HasSampleData() && sample.nLength > loopLength) numLoopOpt++;
 	}
 	if(!numLoopOpt && !numStereoOpt) return false;
 
