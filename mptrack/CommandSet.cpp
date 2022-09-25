@@ -760,6 +760,7 @@ static constexpr struct
 	{2033, kcInsNoteMapTransposeSamples, _T("Transpose Samples / Reset Map") },
 	{KeyCommand::Hidden, kcPrevEntryInColumnSelect, _T("kcPrevEntryInColumnSelect")},
 	{KeyCommand::Hidden, kcNextEntryInColumnSelect, _T("kcNextEntryInColumnSelect")},
+	{2045, kcPlayStopSong, _T("Play Song / Stop Song")},
 };
 
 // Get command descriptions etc.. loaded up.
