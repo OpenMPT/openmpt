@@ -1231,6 +1231,7 @@ static constexpr struct
 	{2042, kcTreeViewSortByDate, _T("Sort Instrument Library By Date")},
 	{2043, kcTreeViewSortBySize, _T("Sort Instrument Library By Size")},
 	{2044, kcTreeViewSendToEditorInsertNew, _T("Send To Editor (Insert New)")},
+	{2045, kcPlayStopSong, _T("Play Song / Stop Song") },
 };
 
 // Get command descriptions etc.. loaded up.

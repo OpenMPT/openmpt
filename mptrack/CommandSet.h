@@ -95,6 +95,7 @@ enum CommandID
 
 	kcStartPlayCommands,
 	kcPlayPauseSong = kcStartPlayCommands,
+	kcPlayStopSong,
 	kcPauseSong,
 	kcStopSong,
 	kcPlaySongFromStart,

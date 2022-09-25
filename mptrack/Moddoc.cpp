@@ -2126,7 +2126,7 @@ void CModDoc::OnPlayerPlay()
 			pChildFrm->SendViewMessage(VIEWMSG_PATTERNLOOP, 0);
 		}
 
-		bool isPlaying = (pMainFrm->GetModPlaying() == this);
+		const bool isPlaying = (pMainFrm->GetModPlaying() == this);
 		if(isPlaying && !m_SndFile.m_SongFlags[SONG_PAUSED | SONG_STEP/*|SONG_PATTERNLOOP*/])
 		{
 			OnPlayerPause();
@@ -2735,6 +2735,12 @@ LRESULT CModDoc::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcPlaySongFromCursor: OnPatternPlayNoLoop(); break;
 		case kcPlaySongFromStart: OnPlayerPlayFromStart(); break;
 		case kcPlayPauseSong: OnPlayerPlay(); break;
+		case kcPlayStopSong:
+			if(CMainFrame::GetMainFrame()->GetModPlaying() == this)
+				OnPlayerStop();
+			else
+				OnPlayerPlay();
+			break;
 		case kcPlaySongFromPattern: OnPatternRestart(false); break;
 		case kcStopSong: OnPlayerStop(); break;
 		case kcPanic: OnPanic(); break;
