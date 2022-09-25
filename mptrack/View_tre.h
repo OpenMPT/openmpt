@@ -235,7 +235,7 @@ public:
 	BOOL SetMidiInstrument(UINT nIns, const mpt::PathString &fileName);
 	BOOL SetMidiPercussion(UINT nPerc, const mpt::PathString &fileName);
 	bool ExecuteItem(HTREEITEM hItem);
-	void DeleteTreeItem(HTREEITEM hItem);
+	void DeleteTreeItem(HTREEITEM hItem, const bool permanently);
 	static void PlayDLSItem(const CDLSBank &dlsBank, const DlsItem &item, ModCommand::NOTE note);
 	BOOL PlayItem(HTREEITEM hItem, ModCommand::NOTE nParam, int volume = -1);
 	BOOL OpenTreeItem(HTREEITEM hItem);

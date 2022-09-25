@@ -1680,7 +1680,7 @@ static mpt::ustring TreeDeletionString(const mpt::uchar *type, uint32 id, const 
 }
 
 
-void CModTree::DeleteTreeItem(HTREEITEM hItem)
+void CModTree::DeleteTreeItem(HTREEITEM hItem, const bool permanently)
 {
 	const ModItem modItem = GetModItem(hItem);
 	uint32 modItemID = modItem.val1;
@@ -1803,7 +1803,7 @@ void CModTree::DeleteTreeItem(HTREEITEM hItem)
 			fos.hwnd = m_hWnd;
 			fos.wFunc = FO_DELETE;
 			fos.pFrom = fullPath.c_str();
-			fos.fFlags = CMainFrame::GetInputHandler()->ShiftPressed() ? 0 : FOF_ALLOWUNDO;
+			fos.fFlags = permanently ? 0 : FOF_ALLOWUNDO;
 			if(!SHFileOperation(&fos) && !fos.fAnyOperationsAborted)
 			{
 				HTREEITEM newSel = GetNextSiblingItem(hItem);
@@ -3563,7 +3563,7 @@ void CModTree::OnExecuteItem()
 
 void CModTree::OnDeleteTreeItem()
 {
-	DeleteTreeItem(GetSelectedItem());
+	DeleteTreeItem(GetSelectedItem(), CMainFrame::GetInputHandler()->ShiftPressed());
 }
 
 
@@ -4183,7 +4183,8 @@ LRESULT CModTree::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		return wParam;
 
 	case kcTreeViewDelete:
-		DeleteTreeItem(GetSelectedItem());
+	case kcTreeViewDeletePermanently:
+		DeleteTreeItem(GetSelectedItem(), wParam == kcTreeViewDeletePermanently);
 		return wParam;
 
 	case kcTreeViewFind:

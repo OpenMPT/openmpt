@@ -427,6 +427,7 @@ constexpr struct
 	{kcTreeViewInsert,                         VK_INSERT,          ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxViewTree,            MPT_V("1.31.00.14")},
 	{kcTreeViewDuplicate,                      VK_INSERT,          ModShift,           kKeyEventDown | kKeyEventRepeat, kCtxViewTree,            MPT_V("1.31.00.14")},
 	{kcTreeViewDelete,                         VK_DELETE,          ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxViewTree,            MPT_V("1.31.00.14")},
+	{kcTreeViewDeletePermanently,              VK_DELETE,          ModShift,           kKeyEventDown | kKeyEventRepeat, kCtxViewTree,            MPT_V("1.31.00.16")},
 	{kcTreeViewRename,                         VK_RETURN,          ModCtrl,            kKeyEventDown,                   kCtxViewTree,            MPT_V("1.31.00.14")},
 	{kcTreeViewSendToEditorInsertNew,          VK_RETURN,          ModShift | ModCtrl, kKeyEventDown,                   kCtxViewTree,            MPT_V("1.31.00.15")},
 	{kcTreeViewFind,                           'F',                ModCtrl,            kKeyEventDown,                   kCtxViewTree,            MPT_V("1.31.00.14")},
@@ -1231,7 +1232,8 @@ static constexpr struct
 	{2042, kcTreeViewSortByDate, _T("Sort Instrument Library By Date")},
 	{2043, kcTreeViewSortBySize, _T("Sort Instrument Library By Size")},
 	{2044, kcTreeViewSendToEditorInsertNew, _T("Send To Editor (Insert New)")},
-	{2045, kcPlayStopSong, _T("Play Song / Stop Song") },
+	{2045, kcPlayStopSong, _T("Play Song / Stop Song")},
+	{2046, kcTreeViewDeletePermanently, _T("Delete Item Permanently")},
 };
 
 // Get command descriptions etc.. loaded up.
