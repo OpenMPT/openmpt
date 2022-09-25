@@ -12,9 +12,9 @@ is just a high-level summary.
 
  *  MTM: In MultiTracker, setting speed and tempo are mutually exclusive
     commands. Still, some MultiTracker modules were made to be played with
-	external players such as DMP, so they actually rely on "standard" speed /
-	tempo behaviour. Decide which behaviour to use by checking of speed and
-	tempo commands are found on the same row.
+    external players such as DMP, so they actually rely on "standard" speed /
+    tempo behaviour. Decide which behaviour to use by checking of speed and
+    tempo commands are found on the same row.
  *  MTM: Ignore sample loops if the loop end is <= 2.
  *  Echo DMO: Migrate left and right delay values in modules made with OpenMPT
     versions between 1.27.01.00 and 1.30.05.00 to the correct interpretation.
