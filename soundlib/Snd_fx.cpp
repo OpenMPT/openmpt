@@ -596,6 +596,21 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				{
 					chn.nLastNote = note;
 					chn.RestorePanAndFilter();
+
+					if(!adjustSamplePos || memory.chnSettings[nChn].ticksToRender == GetLengthMemory::IGNORE_CHANNEL)
+					{
+						// Even if we don't intend to render anything on this channel, update instrument cutoff/resonance because it might override a Zxx effect evaluated earlier.
+						const ModInstrument *instr = chn.pModInstrument;
+						if(chn.nNewIns && chn.nNewIns <= GetNumInstruments())
+							instr = Instruments[chn.nNewIns];
+						if(instr != nullptr)
+						{
+							if(instr->IsCutoffEnabled())
+								chn.nCutOff = instr->GetCutoff();
+							if(instr->IsResonanceEnabled())
+								chn.nResonance = instr->GetResonance();
+						}
+					}
 				}
 
 				// Update channel panning
@@ -990,7 +1005,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 
 				uint32 paramHi = m.param >> 4, paramLo = m.param & 0x0F;
 				uint32 startTick = 0;
-				bool porta = m.command == CMD_TONEPORTAMENTO || m.command == CMD_TONEPORTAVOL || m.volcmd == VOLCMD_TONEPORTAMENTO;
+				const bool porta = m.IsPortamento();
 				bool stopNote = false;
 
 				if(m.instr) chn.prevNoteOffset = 0;
