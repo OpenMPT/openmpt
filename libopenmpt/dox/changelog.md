@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.6.7-pre
+
 ### libopenmpt 0.6.6 (2022-09-25)
 
  *  [**Sec**] Possible crash when playing manipulated IT / MPTM files with a T00
