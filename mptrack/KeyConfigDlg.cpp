@@ -604,16 +604,28 @@ void COptionsKeyboard::OnRestoreKeyChoice()
 	CInputHandler *ih = CMainFrame::GetInputHandler();
 
 	// Do nothing if there's nothing to restore
-	if(cmd == kcNull || m_curKeyChoice < 0 || m_curKeyChoice >= ih->GetKeyListSize(cmd))
+	if(cmd == kcNull || ((m_curKeyChoice < 0 || m_curKeyChoice >= ih->GetKeyListSize(cmd)) && ih->GetKeyListSize(cmd) != 0))
 	{
 		::MessageBeep(MB_ICONWARNING);
 		return;
 	}
 
-	// Restore current key combination choice for currently selected command.
-	kc = ih->m_activeCommandSet->GetKey(cmd, m_curKeyChoice);
-	m_localCmdSet->Remove(m_curKeyChoice, cmd);
-	m_localCmdSet->Add(kc, cmd, true, m_curKeyChoice);
+	if(ih->GetKeyListSize(cmd) == 0)
+	{
+		// Restore the defaults for this key
+		mpt::heap_value<CCommandSet> defaultSet;
+		defaultSet->LoadDefaultKeymap();
+		for(int i = 0; i < defaultSet->GetKeyListSize(cmd); i++)
+		{
+			m_localCmdSet->Add(defaultSet->GetKey(cmd, i), cmd, true, m_curKeyChoice);
+		}
+	} else
+	{
+		// Restore current key combination choice for currently selected command.
+		kc = ih->m_activeCommandSet->GetKey(cmd, m_curKeyChoice);
+		m_localCmdSet->Remove(m_curKeyChoice, cmd);
+		m_localCmdSet->Add(kc, cmd, true, m_curKeyChoice);
+	}
 
 	ForceUpdateGUI();
 	return;
