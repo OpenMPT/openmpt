@@ -31,6 +31,41 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.30.07.00 (25 September 2022, revision 17944)
+-----------------------------------------------
+Tree view
+- [Imp] <js> Allow ESC to cancel label editing.
+
+Pattern tab
+- [Mod] <js> Clarify that a 0 digit means using the previous value in the effect info of vibrato / tremolo / panbrello pattern commands.
+
+Sample tab
+- [Fix] <js> Inserting or deleting cue points no longer marks external samples as modified.
+
+Instrument tab
+- [Fix] <js> SFZ: Don't import one-shot loop type as an actual loop. The only difference to the no_loop type is the note-off behaviour.
+
+VST / DMO Plugins
+- [Fix] <js> Previous notes were not stopped properly when a new note was struck and all mix channels were occupied.
+
+Playback
+- [Fix] <js> Possible crash when playing manipulated IT / MPTM files with a T00 command.
+
+Other formats
+- [Imp] <js> MID: Fall back to just finding suitable soundfont instrument by MSB bank if MSB + LSB search was not successful. This is particularly relevant for SF2 soundfonts as they only support the bank MSB (http://bugs.openmpt.org/view.php?id=1628).
+- [Fix] <js> MTM: In MultiTracker, setting speed and tempo are mutually exclusive commands. Still, some MultiTracker modules were made to be played with external players such as DMP, so they actually rely on "standard" speed / tempo behaviour. Decide which behaviour to use by checking of speed and tempo commands are found on the same row (tx AliceLR).
+- [Fix] <js> MTM: Ignore sample loops if the loop end is <= 2.
+
+Bundled plugins
+- [Fix] <js> Echo DMO: Migrate left and right delay values in modules made with OpenMPT versions between 1.27.01.00 and 1.30.05.00 to the correct interpretation (https://bugs.openmpt.org/view.php?id=1631).
+
+Misc
+- [Fix] <js> Fixed some issues with stuck notes and inconsistent state updates between channels.
+
+Third-Party Libraries
+- [Imp] Update flac (v1.4.1)
+
+
 v1.30.06.00 (21 August 2022, revision 17755)
 --------------------------------------------
 Tree view
