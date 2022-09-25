@@ -999,7 +999,7 @@ bool CCtrlSamples::OpenSample(const mpt::PathString &fileName, FlagSet<OpenSampl
 	}
 
 	PrepareUndo("Replace", sundo_replace);
-	const auto parentIns = GetParentInstrumentWithSameName();
+	const auto parentIns = m_modDoc.GetParentInstrumentWithSameName(m_nSample);
 	bool bOk = false;
 	if(types[OpenSampleKnown])
 	{
@@ -1109,7 +1109,7 @@ bool CCtrlSamples::OpenSample(const CSoundFile &sndFile, SAMPLEINDEX nSample)
 	BeginWaitCursor();
 
 	PrepareUndo("Replace", sundo_replace);
-	const auto parentIns = GetParentInstrumentWithSameName();
+	const auto parentIns = m_modDoc.GetParentInstrumentWithSameName(m_nSample);
 	if(m_sndFile.ReadSampleFromSong(m_nSample, sndFile, nSample))
 	{
 		SetModified(SampleHint().Info().Data().Names(), true, false);
@@ -2784,7 +2784,7 @@ void CCtrlSamples::OnNameChanged()
 		if(!m_startedEdit)
 		{
 			PrepareUndo("Set Name");
-			m_editInstrumentName = GetParentInstrumentWithSameName();
+			m_editInstrumentName = m_modDoc.GetParentInstrumentWithSameName(m_nSample);
 			if(m_editInstrumentName != INSTRUMENTINDEX_INVALID)
 				m_modDoc.GetInstrumentUndo().PrepareUndo(m_editInstrumentName, "Set Name");
 		}
@@ -3770,21 +3770,6 @@ void CCtrlSamples::OnInitOPLInstrument()
 		SetModified(SampleHint().Info().Data().Names(), true, true);
 		SwitchToView();
 	}
-}
-
-
-INSTRUMENTINDEX CCtrlSamples::GetParentInstrumentWithSameName() const
-{
-	auto ins = m_modDoc.FindSampleParent(m_nSample);
-	if(ins == INSTRUMENTINDEX_INVALID)
-		return INSTRUMENTINDEX_INVALID;
-	auto instr = m_sndFile.Instruments[ins];
-	if(instr == nullptr)
-		return INSTRUMENTINDEX_INVALID;
-	if((!instr->name.empty() && instr->name != m_sndFile.m_szNames[m_nSample]) || instr->GetSamples().size() != 1)
-		return INSTRUMENTINDEX_INVALID;
-
-	return ins;
 }
 
 

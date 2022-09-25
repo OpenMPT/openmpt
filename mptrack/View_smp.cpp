@@ -2706,6 +2706,7 @@ void CViewSample::DoPaste(PasteMode pasteMode)
 
 		CSoundFile &sndFile = pModDoc->GetSoundFile();
 		ModSample &sample = sndFile.GetSample(m_nSample);
+		const auto parentIns = pModDoc->GetParentInstrumentWithSameName(m_nSample);
 
 		if(!sample.HasSampleData() || sample.uFlags[CHN_ADLIB])
 			pasteMode = PasteMode::Replace;
@@ -2719,14 +2720,14 @@ void CViewSample::DoPaste(PasteMode pasteMode)
 				return;
 			}
 		}
-			
+
 		// Save old data for mixpaste
 		ModSample oldSample = sample;
 		std::string oldSampleName = sndFile.m_szNames[m_nSample];
 
 		if(pasteMode != PasteMode::Replace)
 		{
-			sample.pData.pSample = nullptr;	// prevent old sample from being deleted.
+			sample.pData.pSample = nullptr;  // prevent old sample from being deleted.
 		}
 
 		FileReader file(data);
@@ -2839,7 +2840,19 @@ void CViewSample::DoPaste(PasteMode pasteMode)
 			sample.PrecomputeLoops(sndFile, true);
 			SetModified(SampleHint().Info().Data().Names(), true, false);
 			if(pasteMode == PasteMode::Replace)
+			{
 				sndFile.ResetSamplePath(m_nSample);
+
+				if(parentIns <= sndFile.GetNumInstruments())
+				{
+					if(auto instr = sndFile.Instruments[parentIns]; instr != nullptr)
+					{
+						pModDoc->GetInstrumentUndo().PrepareUndo(parentIns, "Set Name");
+						instr->name = sndFile.m_szNames[m_nSample];
+						pModDoc->UpdateAllViews(this, InstrumentHint(parentIns).Names(), this);
+					}
+				}
+			}
 		} else
 		{
 			if(pasteMode == PasteMode::MixPaste)

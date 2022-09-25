@@ -404,6 +404,7 @@ protected:
 	int GetInstrumentGroupSize(INSTRUMENTINDEX instr) const;
 	int GetBaseNote(INSTRUMENTINDEX instr) const;
 	ModCommand::NOTE GetNoteWithBaseOctave(int noteOffset, INSTRUMENTINDEX instr) const;
+	INSTRUMENTINDEX GetParentInstrumentWithSameName(SAMPLEINDEX smp) const;
 
 	// Convert a linear volume property to decibels
 	static CString LinearToDecibels(double value, double valueAtZeroDB);

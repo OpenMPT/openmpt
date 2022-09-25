@@ -72,8 +72,6 @@ protected:
 
 	bool IsOPLInstrument() const;
 
-	INSTRUMENTINDEX GetParentInstrumentWithSameName() const;
-
 public:
 	CCtrlSamples(CModControlView &parent, CModDoc &document);
 	~CCtrlSamples();

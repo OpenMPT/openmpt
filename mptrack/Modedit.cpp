@@ -1383,4 +1383,19 @@ ModCommand::NOTE CModDoc::GetNoteWithBaseOctave(int noteOffset, INSTRUMENTINDEX 
 }
 
 
+INSTRUMENTINDEX CModDoc::GetParentInstrumentWithSameName(SAMPLEINDEX smp) const
+{
+	auto ins = FindSampleParent(smp);
+	if(ins == INSTRUMENTINDEX_INVALID)
+		return INSTRUMENTINDEX_INVALID;
+	auto instr = m_SndFile.Instruments[ins];
+	if(instr == nullptr)
+		return INSTRUMENTINDEX_INVALID;
+	if((!instr->name.empty() && instr->name != m_SndFile.m_szNames[smp]) || instr->GetSamples().size() != 1)
+		return INSTRUMENTINDEX_INVALID;
+
+	return ins;
+}
+
+
 OPENMPT_NAMESPACE_END
