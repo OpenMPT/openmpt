@@ -90,8 +90,10 @@ struct string_transcoder<std::filesystem::path> {
 			// completely unknown implementation, assume it can sanely convert to/from UTF16/UTF32
 			if constexpr (sizeof(mpt::widechar) == sizeof(char32_t)) {
 				return mpt::transcode<mpt::widestring>(src.u32string());
-			} else {
+			} else if constexpr (sizeof(mpt::widechar) == sizeof(char16_t)) {
 				return mpt::transcode<mpt::widestring>(src.u16string());
+			} else {
+				return mpt::transcode<mpt::widestring>(src.u32string());
 			}
 #endif
 		}
@@ -125,8 +127,10 @@ struct string_transcoder<std::filesystem::path> {
 			// completely unknown implementation, assume it can sanely convert to/from UTF16/UTF32
 			if constexpr (sizeof(mpt::widechar) == sizeof(char32_t)) {
 				return std::filesystem::path{mpt::transcode<std::u32string>(src), fmt};
-			} else {
+			} else if constexpr (sizeof(mpt::widechar) == sizeof(char16_t)) {
 				return std::filesystem::path{mpt::transcode<std::u16string>(src), fmt};
+			} else {
+				return std::filesystem::path{mpt::transcode<std::u32string>(src), fmt};
 			}
 #endif
 		}
