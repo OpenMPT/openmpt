@@ -487,6 +487,7 @@ void CSoundFile::CreateStereoMix(int count)
 			{
 				// ProTracker compatibility: Instrument changes without a note do not happen instantly, but rather when the sample loop has finished playing.
 				// Test case: PTInstrSwap.mod, PTSwapNoLoop.mod
+#ifdef MODPLUG_TRACKER
 				if(m_SamplePlayLengths != nullptr)
 				{
 					// Even if the sample was playing at zero volume, we need to retain its full length for correct sample swap timing
@@ -496,6 +497,7 @@ void CSoundFile::CreateStereoMix(int count)
 						(*m_SamplePlayLengths)[smp] = std::max((*m_SamplePlayLengths)[smp], std::min(chn.nLength, chn.position.GetUInt()));
 					}
 				}
+#endif
 				const ModSample &smp = Samples[chn.nNewIns];
 				chn.pModSample = &smp;
 				chn.pCurrentSample = smp.samplev();
