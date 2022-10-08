@@ -34,24 +34,24 @@ namespace openmpt {
 
 class module_ext_impl;
 
-class LIBOPENMPT_CXX_API module_ext : public module {
+class LIBOPENMPT_CXX_API_CLASS module_ext : public module {
 	
 private:
 	module_ext_impl * ext_impl;
 private:
 	// non-copyable
-	module_ext( const module_ext & );
-	void operator = ( const module_ext & );
+	LIBOPENMPT_CXX_API_MEMBER module_ext( const module_ext & );
+	LIBOPENMPT_CXX_API_MEMBER void operator = ( const module_ext & );
 public:
-	module_ext( std::istream & stream, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
-	module_ext( const std::vector<std::byte> & data, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
-	module_ext( const std::vector<std::uint8_t> & data, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
-	module_ext( const std::vector<char> & data, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
-	module_ext( const std::byte * data, std::size_t size, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
-	module_ext( const std::uint8_t * data, std::size_t size, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
-	module_ext( const char * data, std::size_t size, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
-	module_ext( const void * data, std::size_t size, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
-	virtual ~module_ext();
+	LIBOPENMPT_CXX_API_MEMBER module_ext( std::istream & stream, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
+	LIBOPENMPT_CXX_API_MEMBER module_ext( const std::vector<std::byte> & data, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
+	LIBOPENMPT_CXX_API_MEMBER module_ext( const std::vector<std::uint8_t> & data, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
+	LIBOPENMPT_CXX_API_MEMBER module_ext( const std::vector<char> & data, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
+	LIBOPENMPT_CXX_API_MEMBER module_ext( const std::byte * data, std::size_t size, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
+	LIBOPENMPT_CXX_API_MEMBER module_ext( const std::uint8_t * data, std::size_t size, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
+	LIBOPENMPT_CXX_API_MEMBER module_ext( const char * data, std::size_t size, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
+	LIBOPENMPT_CXX_API_MEMBER module_ext( const void * data, std::size_t size, std::ostream & log = std::clog, const std::map< std::string, std::string > & ctls = detail::initial_ctls_map() );
+	LIBOPENMPT_CXX_API_MEMBER virtual ~module_ext();
 
 public:
 
@@ -73,7 +73,7 @@ public:
 	  \param interface_id The name of the extension interface to retrieve.
 	  \return The interface object. This may be a nullptr if the extension was not found.
 	*/
-	void * get_interface( const std::string & interface_id );
+	LIBOPENMPT_CXX_API_MEMBER void * get_interface( const std::string & interface_id );
 
 }; // class module_ext
 
