@@ -209,13 +209,6 @@
 #endif
 #endif
 
-#if defined(__EMSCRIPTEN__)
-
-/* Only the C API is supported for emscripten. Disable the C++ API. */
-#undef LIBOPENMPT_CXX_API
-#define LIBOPENMPT_CXX_API LIBOPENMPT_API_HELPER_LOCAL 
-#endif
-
 #endif
 
 /*!

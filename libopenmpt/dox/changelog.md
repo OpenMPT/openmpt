@@ -59,6 +59,7 @@ is just a high-level summary.
  *  [**New**] Building with a MinGW32 CRTDLL toolchain is now supported via
     `Makefile` option `CONFIG=mingw32crt-win95`.
  *  [**New**] `Makefile` now uses `PKG_CONFIG` as path to `pkg-config`.
+ *  [**New**] The C++ API is now also enabled for Emscripten builds by default.
 
  *  [**Change**] `"date"` metadata will now exlude the UTC time zone signifier
     `Z` if the precise time zone is unknown.
