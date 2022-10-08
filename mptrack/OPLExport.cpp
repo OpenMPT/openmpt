@@ -151,8 +151,8 @@ public:
 			header.lengthBytes += WriteDRODelay(f, header.lengthMs - prevOffsetMs);
 		
 		MPT_ASSERT(mpt::IO::TellWrite(f) == static_cast<mpt::IO::Offset>(header.lengthBytes + sizeof(header)));
-		// AdPlug can read some metadata following the register dump, but DroTrimmer panics if it see that data.
-		// As the metadata is very limited (40 characters per field, unknown 8-bit encoding) we'll leave that feature to the VGM export.
+		// AdPlug can read some metadata following the register dump, but DroTrimmer panics if it sees that data.
+		// As the metadata is very limited (40 characters per field, unspecified 8-bit encoding) we'll leave that feature to the VGM export.
 #if 0
 		mpt::IO::Write(f, mpt::as_byte(0xFF));
 		mpt::IO::Write(f, mpt::as_byte(0xFF));
@@ -426,6 +426,7 @@ public:
 		}
 		TrackerSettings::Instance().PathExport.SetWorkingDir(dlg.GetWorkingDirectory());
 
+		m_conversionRunning = true;
 		DoConversion(dlg.GetFirstFile());
 
 		CProgressDialog::OnOK();
