@@ -595,10 +595,25 @@ bool EffectInfo::GetEffectNameEx(CString &pszName, const ModCommand &m, uint32 p
 		break;
 
 	case CMD_OFFSET:
-		if (param)
+		if (m.volcmd == VOLCMD_OFFSET && m.vol == 0)
+		{
+			pszName.Format(_T("Percentage: %d%%"), m.param * 100 / 256);
+		} else if(param || m.volcmd == VOLCMD_OFFSET)
+		{
+			if (m.volcmd == VOLCMD_OFFSET && m.IsNote() && m.instr)
+			{
+				if(SAMPLEINDEX smp = sndFile.GetSampleIndex(m.note, m.instr); smp > 0 && smp <= sndFile.GetNumSamples())
+				{
+					const ModSample &sample = sndFile.GetSample(smp);
+					if(m.vol > 0 && m.vol <= std::size(sample.cues))
+						param += sample.cues[m.vol - 1];
+				}
+			}
 			pszName.Format(_T("Set Offset to %s"), mpt::cfmt::dec(3, _T(","), param).GetString());
-		else
+		} else
+		{
 			s = _T("continue");
+		}
 		break;
 
 	case CMD_CHANNELVOLUME:
@@ -1040,7 +1055,10 @@ bool EffectInfo::GetVolCmdParamInfo(const ModCommand &m, CString *s) const
 				s->Append(_T("unknown"));
 		} else
 		{
-			*s = _T("continue");
+			if(m.command == CMD_OFFSET)
+				s->Format(_T("Percentage: %d%%"), m.param * 100 / 256);
+			else
+				*s = _T("continue");
 		}
 		break;
 
