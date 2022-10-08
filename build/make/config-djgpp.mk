@@ -29,7 +29,7 @@ SSE?=0
 
 ifneq ($(SSE),0)
 	FPU_NONE   := -mno-80387
-	FPU_287    := -m80387 -mno-fancy-math-387 -mfpmath=387
+	FPU_287    := -m80387 -mfpmath=387 -mno-fancy-math-387
 	FPU_387    := -m80387 -mfpmath=387
 	FPU_MMX    := -m80387 -mmmx -mfpmath=387
 	FPU_3DNOW  := -m80387 -mmmx -m3dnow -mfpmath=387
@@ -44,7 +44,7 @@ ifneq ($(SSE),0)
 	FPU_SSE4A  := -m80387 -mmmx -msse -msse2 -msse3 -mssse3 -msse4a -mfpmath=sse
 else
 	FPU_NONE   := -mno-80387
-	FPU_287    := -m80387 -mno-fancy-math-387 -mfpmath=387
+	FPU_287    := -m80387 -mfpmath=387 -mno-fancy-math-387
 	FPU_387    := -m80387 -mfpmath=387
 	FPU_MMX    := -m80387 -mmmx -mfpmath=387
 	FPU_3DNOW  := -m80387 -mmmx -m3dnow -mfpmath=387
