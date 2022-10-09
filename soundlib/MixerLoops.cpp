@@ -39,24 +39,6 @@ void StereoMixToFloat(const int32 *pSrc, float *pOut1, float *pOut2, uint32 nCou
 }
 
 
-void FloatToMonoMix(const float *pIn, int32 *pOut, uint32 nCount, const float _f2ic)
-{
-	for(uint32 i=0; i<nCount; ++i)
-	{
-		*pOut++ = (int)(*pIn++ * _f2ic);
-	}
-}
-
-
-void MonoMixToFloat(const int32 *pSrc, float *pOut, uint32 nCount, const float _i2fc)
-{
-	for(uint32 i=0; i<nCount; ++i)
-	{
-		*pOut++ = *pSrc++ * _i2fc;
-	}
-}
-
-
 
 void InitMixBuffer(mixsample_t *pBuffer, uint32 nSamples)
 {
@@ -159,6 +141,8 @@ void EndChannelOfs(ModChannel &chn, mixsample_t *pBuffer, uint32 nSamples)
 
 
 
+#ifndef MPT_INTMIXER
+
 void InterleaveStereo(const mixsample_t * MPT_RESTRICT inputL, const mixsample_t * MPT_RESTRICT inputR, mixsample_t * MPT_RESTRICT output, size_t numSamples)
 {
 	while(numSamples--)
@@ -177,6 +161,8 @@ void DeinterleaveStereo(const mixsample_t * MPT_RESTRICT input, mixsample_t * MP
 		*(outputR++) = *(input++);
 	}
 }
+
+#endif
 
 
 
