@@ -854,7 +854,9 @@ private:
 		uint32 param_ecx = num;
 		uint32 result_eax = 0;
 		uint32 result_edx = 0;
+		// clang-format off
 		__asm__ __volatile__("xgetbv" : "=a" (result_eax), "=d" (result_edx) : "c" (param_ecx));
+		// clang-format on
 		return static_cast<uint64>(result_eax) + (static_cast<uint64>(result_edx) << 32);
 
 #else
@@ -862,7 +864,6 @@ private:
 		return _xgetbv(num);
 
 #endif
-
 	}
 
 #endif // MPT_COMPILER_MSVC || MPT_COMPILER_GCC || MPT_COMPILER_CLANG
@@ -1481,6 +1482,7 @@ public:
 
 #if MPT_ARCH_AMD64
 
+			// clang-format off
 			Modes |= mode::xmm128sse;
 			const bool have_xsave =
 #ifdef MPT_ARCH_X86_XSAVE
@@ -1492,9 +1494,11 @@ public:
 				const uint64 xcr0 = read_xcr(0x0000'0000u);
 				Modes |= (xcr0 & (1ull << 2)) ? mode::ymm256avx : mode::base;
 			}
+			// clang-format on
 
 #else // !MPT_ARCH_AMD64
 
+			// clang-format off
 			const bool have_xsave =
 #ifdef MPT_ARCH_X86_XSAVE
 				true;
@@ -1562,6 +1566,7 @@ public:
 #endif // MPT_MODE_KERNEL
 				}
 			}
+			// clang-format on
 
 #endif // MPT_ARCH_AMD64
 
@@ -1579,7 +1584,6 @@ public:
 					}
 				}
 			}
-
 		}
 
 #elif MPT_OS_WINDOWS
