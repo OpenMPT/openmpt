@@ -120,9 +120,15 @@
 	#endif
 #endif
 #if defined(__AVX__)
+	#ifndef MPT_ARCH_X86_XSAVE
+	#define MPT_ARCH_X86_XSAVE
+	#endif
 	#define MPT_ARCH_X86_AVX
 #endif
 #if defined(__AVX2__)
+	#ifndef MPT_ARCH_X86_XSAVE
+	#define MPT_ARCH_X86_XSAVE
+	#endif
 	#define MPT_ARCH_X86_AVX2
 	#define MPT_ARCH_X86_FMA
 	#define MPT_ARCH_X86_BMI1
@@ -194,6 +200,9 @@
 #ifdef __SSE4_2__
 	#define MPT_ARCH_X86_SSE4_2
 #endif
+#ifdef __XSAVE__
+	#define MPT_ARCH_X86_XSAVE
+#endif
 #ifdef __AVX__
 	#define MPT_ARCH_X86_AVX
 #endif
@@ -252,6 +261,10 @@ namespace x86 {
 using feature_flags = mpt::arch::basic_feature_flags<uint32>;
 
 
+using mode_flags = mpt::arch::basic_feature_flags<uint8>;
+
+
+
 // clang-format off
 
 namespace feature {
@@ -276,18 +289,25 @@ inline constexpr feature_flags sse3           = feature_flags{ 0x0001'0000 };
 inline constexpr feature_flags ssse3          = feature_flags{ 0x0002'0000 };
 inline constexpr feature_flags sse4_1         = feature_flags{ 0x0004'0000 };
 inline constexpr feature_flags sse4_2         = feature_flags{ 0x0008'0000 };
-inline constexpr feature_flags avx            = feature_flags{ 0x0010'0000 };
-inline constexpr feature_flags avx2           = feature_flags{ 0x0020'0000 };
-inline constexpr feature_flags cx16           = feature_flags{ 0x0040'0000 };
-inline constexpr feature_flags lahf           = feature_flags{ 0x0080'0000 };
-inline constexpr feature_flags popcnt         = feature_flags{ 0x0100'0000 };
-inline constexpr feature_flags bmi1           = feature_flags{ 0x0200'0000 };
-inline constexpr feature_flags bmi2           = feature_flags{ 0x0400'0000 };
-inline constexpr feature_flags f16c           = feature_flags{ 0x0800'0000 };
-inline constexpr feature_flags fma            = feature_flags{ 0x1000'0000 };
-inline constexpr feature_flags lzcnt          = feature_flags{ 0x2000'0000 };
-inline constexpr feature_flags movbe          = feature_flags{ 0x4000'0000 };
+inline constexpr feature_flags xsave          = feature_flags{ 0x0010'0000 };
+inline constexpr feature_flags avx            = feature_flags{ 0x0020'0000 };
+inline constexpr feature_flags avx2           = feature_flags{ 0x0040'0000 };
+inline constexpr feature_flags cx16           = feature_flags{ 0x0080'0000 };
+inline constexpr feature_flags lahf           = feature_flags{ 0x0100'0000 };
+inline constexpr feature_flags popcnt         = feature_flags{ 0x0200'0000 };
+inline constexpr feature_flags bmi1           = feature_flags{ 0x0400'0000 };
+inline constexpr feature_flags bmi2           = feature_flags{ 0x0800'0000 };
+inline constexpr feature_flags f16c           = feature_flags{ 0x1000'0000 };
+inline constexpr feature_flags fma            = feature_flags{ 0x2000'0000 };
+inline constexpr feature_flags lzcnt          = feature_flags{ 0x4000'0000 };
+inline constexpr feature_flags movbe          = feature_flags{ 0x8000'0000 };
 } // namespace feature
+
+namespace mode {
+inline constexpr mode_flags base      = mode_flags{ 0x00 };
+inline constexpr mode_flags xmm128sse = mode_flags{ 0x01 };
+inline constexpr mode_flags ymm256avx = mode_flags{ 0x02 };
+} // namespace mode
 
 namespace featureset {
 inline constexpr feature_flags intel386        = feature::intel386;
@@ -302,17 +322,43 @@ inline constexpr feature_flags intel686_sse2   = featureset::intel686_sse  | fea
 inline constexpr feature_flags intel786        = featureset::intel686_sse2;
 inline constexpr feature_flags amd64           = featureset::intel686_sse2;
 inline constexpr feature_flags amd64_v2        = featureset::amd64     | feature::cx16 | feature::lahf | feature::popcnt | feature::sse3 | feature::ssse3 | feature::sse4_1 | feature::sse4_2;
-inline constexpr feature_flags amd64_v3        = featureset::amd64_v2  | feature::avx | feature::avx2 | feature::bmi1 | feature::bmi2 | feature::f16c | feature::fma | feature::lzcnt | feature::movbe;
+inline constexpr feature_flags amd64_v3        = featureset::amd64_v2  | feature::xsave | feature::avx | feature::avx2 | feature::bmi1 | feature::bmi2 | feature::f16c | feature::fma | feature::lzcnt | feature::movbe;
 inline constexpr feature_flags msvc_x86_1998   = featureset::intel386 | feature::fpu | feature::fsin;
 inline constexpr feature_flags msvc_x86_2005   = featureset::intel486DX;
 inline constexpr feature_flags msvc_x86_2008   = featureset::intel586;
 inline constexpr feature_flags msvc_x86_sse    = featureset::intel686_sse;
 inline constexpr feature_flags msvc_x86_sse2   = featureset::intel686_sse2;
-inline constexpr feature_flags msvc_x86_avx    = featureset::intel686_sse2 | feature::avx;
-inline constexpr feature_flags msvc_x86_avx2   = featureset::intel686_sse2 | feature::avx | feature::avx2 | feature::fma | feature::bmi1;
+inline constexpr feature_flags msvc_x86_avx    = featureset::intel686_sse2 | feature::xsave | feature::avx;
+inline constexpr feature_flags msvc_x86_avx2   = featureset::intel686_sse2 | feature::xsave | feature::avx | feature::avx2 | feature::fma | feature::bmi1;
 inline constexpr feature_flags msvc_amd64      = featureset::amd64;
-inline constexpr feature_flags msvc_amd64_avx  = featureset::amd64 | feature::avx;
-inline constexpr feature_flags msvc_amd64_avx2 = featureset::amd64 | feature::avx | feature::avx2 | feature::fma | feature::bmi1;
+inline constexpr feature_flags msvc_amd64_avx  = featureset::amd64 | feature::xsave | feature::avx;
+inline constexpr feature_flags msvc_amd64_avx2 = featureset::amd64 | feature::xsave | feature::avx | feature::avx2 | feature::fma | feature::bmi1;
+} // namespace featureset
+
+namespace modeset {
+inline constexpr mode_flags intel386        = mode::base;
+inline constexpr mode_flags intel486SX      = mode::base;
+inline constexpr mode_flags intel486DX      = mode::base;
+inline constexpr mode_flags intel586        = mode::base;
+inline constexpr mode_flags intel586_mmx    = mode::base;
+inline constexpr mode_flags intel686        = mode::base;
+inline constexpr mode_flags intel686_mmx    = mode::base;
+inline constexpr mode_flags intel686_sse    = mode::base | mode::xmm128sse;
+inline constexpr mode_flags intel686_sse2   = mode::base | mode::xmm128sse;
+inline constexpr mode_flags intel786        = mode::base | mode::xmm128sse;
+inline constexpr mode_flags amd64           = mode::base | mode::xmm128sse;
+inline constexpr mode_flags amd64_v2        = mode::base | mode::xmm128sse;
+inline constexpr mode_flags amd64_v3        = mode::base | mode::xmm128sse | mode::ymm256avx;
+inline constexpr mode_flags msvc_x86_1998   = mode::base;
+inline constexpr mode_flags msvc_x86_2005   = mode::base;
+inline constexpr mode_flags msvc_x86_2008   = mode::base;
+inline constexpr mode_flags msvc_x86_sse    = mode::base | mode::xmm128sse;
+inline constexpr mode_flags msvc_x86_sse2   = mode::base | mode::xmm128sse;
+inline constexpr mode_flags msvc_x86_avx    = mode::base | mode::xmm128sse | mode::ymm256avx;
+inline constexpr mode_flags msvc_x86_avx2   = mode::base | mode::xmm128sse | mode::ymm256avx;
+inline constexpr mode_flags msvc_amd64      = mode::base | mode::xmm128sse;
+inline constexpr mode_flags msvc_amd64_avx  = mode::base | mode::xmm128sse | mode::ymm256avx;
+inline constexpr mode_flags msvc_amd64_avx2 = mode::base | mode::xmm128sse | mode::ymm256avx;
 } // namespace featureset
 
 // clang-format on
@@ -410,6 +456,9 @@ enum class vendor : uint8 {
 	#ifdef MPT_ARCH_X86_SSE4_2
 		flags |= feature::sse4_2;
 	#endif
+	#ifdef MPT_ARCH_X86_XSAVE
+		flags |= feature::xsave;
+	#endif
 	#ifdef MPT_ARCH_X86_AVX
 		flags |= feature::avx;
 	#endif
@@ -442,6 +491,22 @@ enum class vendor : uint8 {
 	#endif
 	#ifdef MPT_ARCH_X86_MOVBE
 		flags |= feature::movbe;
+	#endif
+#endif // MPT_ARCH_X86 || MPT_ARCH_AMD64
+	return flags;
+}
+// clang-format on
+
+
+// clang-format off
+[[nodiscard]] MPT_CONSTEVAL mode_flags assumed_modes() noexcept {
+	mode_flags flags{};
+#if MPT_ARCH_X86 || MPT_ARCH_AMD64
+	#ifdef MPT_ARCH_X86_SSE
+		flags |= mode::xmm128sse;
+	#endif
+	#ifdef MPT_ARCH_X86_AVX
+		flags |= mode::ymm256avx;
 	#endif
 #endif // MPT_ARCH_X86 || MPT_ARCH_AMD64
 	return flags;
@@ -505,6 +570,7 @@ struct cpu_info {
 private:
 
 	feature_flags Features{};
+	mode_flags Modes{};
 	uint32 CPUID = 0;
 	vendor Vendor = vendor::unknown;
 	uint16 Family = 0;
@@ -531,6 +597,18 @@ public:
 
 	[[nodiscard]] MPT_CONSTEXPRINLINE feature_flags get_features() const noexcept {
 		return Features;
+	}
+
+	[[nodiscard]] MPT_CONSTEXPRINLINE bool operator[](mode_flags query_modes) const noexcept {
+		return ((Modes & query_modes) == query_modes);
+	}
+
+	[[nodiscard]] MPT_CONSTEXPRINLINE bool enabled_modes(mode_flags query_modes) const noexcept {
+		return ((Modes & query_modes) == query_modes);
+	}
+
+	[[nodiscard]] MPT_CONSTEXPRINLINE mode_flags get_modes() const noexcept {
+		return Modes;
 	}
 
 	[[nodiscard]] MPT_CONSTEXPRINLINE uint32 get_cpuid() const noexcept {
@@ -757,6 +835,36 @@ private:
 #endif // MPT_COMPILER
 	}
 
+#if MPT_MODE_KERNEL
+
+	[[nodiscard]] static uint32 read_cr4() noexcept {
+		return __readcr4();
+	}
+
+#endif // MPT_MODE_KERNEL
+
+	[[nodiscard]] static uint64 read_xcr(uint32 num) noexcept {
+
+#if MPT_COMPILER_MSVC
+
+		return _xgetbv(num);
+
+#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
+
+		uint32 param_ecx = num;
+		uint32 result_eax = 0;
+		uint32 result_edx = 0;
+		__asm__ __volatile__("xgetbv" : "=a" (result_eax), "=d" (result_edx) : "c" (param_ecx));
+		return static_cast<uint64>(result_eax) + (static_cast<uint64>(result_edx) << 32);
+
+#else
+
+		return _xgetbv(num);
+
+#endif
+
+	}
+
 #endif // MPT_COMPILER_MSVC || MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 
 private:
@@ -819,7 +927,7 @@ private:
 #elif MPT_OS_WINDOWS
 
 		uint8 result = 0;
-#if defined(_WIN32_WINNT)
+#if MPT_OS_WINDOWS_WINNT
 #if (_WIN32_WINNT >= _WIN32_WINNT_NT4)
 		if (mpt::osinfo::windows::Version::Current().IsAtLeast(mpt::osinfo::windows::Version::Win2000)) {
 			if (IsProcessorFeaturePresent(PF_FLOATING_POINT_EMULATED) == 0) {
@@ -1150,8 +1258,11 @@ public:
 #elif MPT_ARCH_AMD64
 
 		Features |= featureset::amd64;
+		Modes |= modeset::amd64;
 
 #endif // MPT_ARCH
+
+		bool have_osxsave = false;
 
 		if (Features.supports(feature::cpuid)) {
 			// with cpuid
@@ -1259,9 +1370,13 @@ public:
 				Features |= (StandardFeatureFlags.c & (1u << 20)) ? (feature::sse4_2) : feature::none;
 				Features |= (StandardFeatureFlags.c & (1u << 22)) ? (feature::movbe) : feature::none;
 				Features |= (StandardFeatureFlags.c & (1u << 23)) ? (feature::popcnt) : feature::none;
+				Features |= (StandardFeatureFlags.c & (1u << 26)) ? (feature::xsave) : feature::none;
 				Features |= (StandardFeatureFlags.c & (1u << 28)) ? (feature::avx) : feature::none;
 				Features |= (StandardFeatureFlags.c & (1u << 29)) ? (feature::f16c) : feature::none;
 				// clang-format on
+				if (StandardFeatureFlags.c & (1u << 27)) {
+					have_osxsave = true;
+				}
 				if (StandardFeatureFlags.c & (1u << 31)) {
 					Virtualized = true;
 				}
@@ -1363,6 +1478,93 @@ public:
 					}
 				}
 			}
+
+#if MPT_ARCH_AMD64
+
+			Modes |= mode::xmm128sse;
+			const bool have_xsave =
+#ifdef MPT_ARCH_X86_XSAVE
+				true;
+#else
+				Features.supports(feature::xsave);
+#endif
+			MPT_MAYBE_CONSTANT_IF (have_xsave && have_osxsave) {
+				const uint64 xcr0 = read_xcr(0x0000'0000u);
+				Modes |= (xcr0 & (1ull << 2)) ? mode::ymm256avx : mode::base;
+			}
+
+#else // !MPT_ARCH_AMD64
+
+			const bool have_xsave =
+#ifdef MPT_ARCH_X86_XSAVE
+				true;
+#else
+				Features.supports(feature::xsave);
+#endif
+			MPT_MAYBE_CONSTANT_IF (have_xsave && have_osxsave) {
+				const uint64 xcr0 = read_xcr(0x0000'0000u);
+				Modes |= (xcr0 & (1ull << 1)) ? mode::xmm128sse : mode::base;
+				Modes |= (xcr0 & (1ull << 2)) ? mode::ymm256avx : mode::base;
+			} else {
+				const bool have_fxsr =
+#ifdef MPT_ARCH_X86_FXSR
+					true;
+#else
+					Features.supports(feature::fxsr);
+#endif
+				MPT_MAYBE_CONSTANT_IF (have_fxsr) {
+#if MPT_MODE_KERNEL
+					const uint32 cr4 = read_cr4();
+					Modes |= (cr4 & (1u << 9)) ? mode::xmm128sse : mode::base;
+#else // !MPT_MODE_KERNEL
+					// There is no way for user-mode code to check for SSE enabled in CR4.
+					// Assume based on FXSR and SSE and platform heuristics.
+					// Avoid assumption on DOS.
+#if MPT_OS_WINDOWS
+					// get from platform API
+#if MPT_OS_WINDOWS_WINNT
+#ifdef PF_XMMI_INSTRUCTIONS_AVAILABLE
+					Modes |= (IsProcessorFeaturePresent(PF_XMMI_INSTRUCTIONS_AVAILABLE) != 0) ? (mode::xmm128sse) : mode::base;
+#endif
+#elif MPT_OS_WINDOWS_WIN9X
+#if (_WIN32_WINDOWS >= 0x0410) // Windows 98
+					const bool have_sse =
+#ifdef MPT_ARCH_X86_SSE
+						true;
+#else
+						Features.supports(feature::sse);
+#endif
+					MPT_MAYBE_CONSTANT_IF (have_sse) {
+						Modes |= mode::xmm128sse;
+					}
+#endif // Windows 98
+#else // MPT_OS_WINDOWS
+					// nothing
+#endif // MPT_OS_WINDOWS
+#elif MPT_OS_DJGPP || MPT_OS_UNKNOWN
+					// avoid SSE on DOS and unknown systems,
+					// however if we directly targeting >= SSE, then assume it's activated because the process will crash otherwise anyway
+#ifdef MPT_ARCH_X86_SSE
+					Modes |= mode::xmm128sse;
+#endif
+#else // MPT_OS
+					// assume based on FXSR and SSE
+					const bool have_sse =
+#ifdef MPT_ARCH_X86_SSE
+						true;
+#else
+						Features.supports(feature::sse);
+#endif
+					MPT_MAYBE_CONSTANT_IF (have_sse) {
+						Modes |= mode::xmm128sse;
+					}
+#endif // MPT_OS
+#endif // MPT_MODE_KERNEL
+				}
+			}
+
+#endif // MPT_ARCH_AMD64
+
 			if (Virtualized) {
 				cpuid_result HypervisorVendorID = cpuid(0x4000'0000u);
 				if (HypervisorVendorID.a >= 0x4000'0000u) {
@@ -1377,6 +1579,7 @@ public:
 					}
 				}
 			}
+
 		}
 
 #elif MPT_OS_WINDOWS
@@ -1443,6 +1646,7 @@ public:
 
 #endif // MPT_ARCH
 
+#if MPT_OS_WINDOWS_WINNT
 		// clang-format off
 		Features |= (IsProcessorFeaturePresent(PF_RDTSC_INSTRUCTION_AVAILABLE) != 0)   ? (feature::tsc | feature::intel486) : feature::none;
 		Features |= (IsProcessorFeaturePresent(PF_COMPARE_EXCHANGE_DOUBLE) != 0)       ? (feature::cx8 | feature::intel486) : feature::none;
@@ -1454,9 +1658,18 @@ public:
 		Features |= (IsProcessorFeaturePresent(PF_SSSE3_INSTRUCTIONS_AVAILABLE) != 0)  ? (feature::ssse3) : feature::none;
 		Features |= (IsProcessorFeaturePresent(PF_SSE4_1_INSTRUCTIONS_AVAILABLE) != 0) ? (feature::sse4_1) : feature::none;
 		Features |= (IsProcessorFeaturePresent(PF_SSE4_2_INSTRUCTIONS_AVAILABLE) != 0) ? (feature::sse4_1) : feature::none;
-		Features |= (IsProcessorFeaturePresent(PF_AVX_INSTRUCTIONS_AVAILABLE) != 0)    ? (feature::avx) : feature::none;
+		Features |= (IsProcessorFeaturePresent(PF_AVX_INSTRUCTIONS_AVAILABLE) != 0)    ? (feature::avx | feature::xsave) : feature::none;
 		Features |= (IsProcessorFeaturePresent(PF_AVX2_INSTRUCTIONS_AVAILABLE) != 0)   ? (feature::avx2 | feature::fma | feature::bmi1) : feature::none;
+		Modes |= (IsProcessorFeaturePresent(PF_XMMI_INSTRUCTIONS_AVAILABLE) != 0)   ? (mode::xmm128sse) : mode::base;
+		Modes |= (IsProcessorFeaturePresent(PF_XMMI64_INSTRUCTIONS_AVAILABLE) != 0) ? (mode::xmm128sse) : mode::base;
+		Modes |= (IsProcessorFeaturePresent(PF_SSE3_INSTRUCTIONS_AVAILABLE) != 0)   ? (mode::xmm128sse) : mode::base;
+		Modes |= (IsProcessorFeaturePresent(PF_SSSE3_INSTRUCTIONS_AVAILABLE) != 0)  ? (mode::xmm128sse) : mode::base;
+		Modes |= (IsProcessorFeaturePresent(PF_SSE4_1_INSTRUCTIONS_AVAILABLE) != 0) ? (mode::xmm128sse) : mode::base;
+		Modes |= (IsProcessorFeaturePresent(PF_SSE4_2_INSTRUCTIONS_AVAILABLE) != 0) ? (mode::xmm128sse) : mode::base;
+		Modes |= (IsProcessorFeaturePresent(PF_AVX_INSTRUCTIONS_AVAILABLE) != 0)    ? (mode::xmm128sse | mode::ymm256avx) : mode::base;
+		Modes |= (IsProcessorFeaturePresent(PF_AVX2_INSTRUCTIONS_AVAILABLE) != 0)   ? (mode::xmm128sse | mode::ymm256avx) : mode::base;
 		// clang-format on
+#endif
 
 #elif MPT_OS_DJGPP
 
@@ -1661,6 +1874,15 @@ public:
 #endif
 	}
 
+	static MPT_FORCEINLINE bool have_sse() noexcept {
+#ifdef MPT_ARCH_X86_SSE
+		return true;
+#else
+		const cpu_info cpu_info;
+		return cpu_info[mpt::arch::x86::feature::sse] && cpu_info[mpt::arch::x86::mode::xmm128sse];
+#endif
+	}
+
 	static MPT_FORCEINLINE uint8 get_fpu_level() noexcept {
 #ifdef MPT_ARCH_X86_FSIN
 		return 3;
@@ -1701,12 +1923,51 @@ public:
 	}
 
 	static MPT_FORCEINLINE void set_state(control_state state) noexcept {
+#ifdef MPT_ARCH_X86_SSE
 		if (state.x87_level) {
 			set_x87fcw(state.x87fcw);
 		}
 		if (state.mxcsr_mask) {
 			set_mxcsr(state.mxcsr);
 		}
+#else
+		if (have_sse()) {
+			if (state.x87_level) {
+				set_x87fcw(state.x87fcw);
+			}
+			if (state.mxcsr_mask) {
+				set_mxcsr(state.mxcsr);
+			}
+		} else {
+#ifdef MPT_ARCH_X86_FXSR
+			fxsave_state tmp = {};
+			fxsave(&tmp);
+			if (state.x87_level) {
+				tmp.x87cw = state.x87fcw;
+			}
+			if (state.mxcsr_mask) {
+				tmp.mxcsr = state.mxcsr;
+			}
+			fxrstor(&tmp);
+#else
+			if (have_fxsr()) {
+				fxsave_state tmp = {};
+				fxsave(&tmp);
+				if (state.x87_level) {
+					tmp.x87cw = state.x87fcw;
+				}
+				if (state.mxcsr_mask) {
+					tmp.mxcsr = state.mxcsr;
+				}
+				fxrstor(&tmp);
+			} else {
+				if (state.x87_level) {
+					tmp.x87cw = state.x87fcw;
+				}
+			}
+#endif
+		}
+#endif
 	}
 
 #elif MPT_ARCH_AMD64

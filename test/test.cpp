@@ -329,7 +329,7 @@ void DoTests()
 					return MPT_AFORMAT("{}{}")(*value / 1024 / 1024, "MiB");
 				} else if (value >= (10 * 1024)) {
 					return MPT_AFORMAT("{}{}")(*value / 1024, "kiB");
-					} else {
+				} else {
 					return MPT_AFORMAT("{}{}")(*value, "B");
 				}
 			};

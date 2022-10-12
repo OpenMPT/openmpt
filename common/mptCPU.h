@@ -38,12 +38,14 @@ namespace detail
 {
 
 inline MPT_CONSTINIT mpt::arch::current::feature_flags EnabledFeatures;
+inline MPT_CONSTINIT mpt::arch::current::mode_flags EnabledModes;
 
 } // namespace detail
 
 inline void EnableAvailableFeatures() noexcept
 {
 	CPU::detail::EnabledFeatures = mpt::arch::get_cpu_info().get_features();
+	CPU::detail::EnabledModes = mpt::arch::get_cpu_info().get_modes();
 }
 
 // enabled processor features for inline asm and intrinsics
@@ -51,12 +53,20 @@ inline void EnableAvailableFeatures() noexcept
 {
 	return CPU::detail::EnabledFeatures;
 }
+[[nodiscard]] MPT_FORCEINLINE mpt::arch::current::mode_flags GetEnabledModes() noexcept
+{
+	return CPU::detail::EnabledModes;
+}
 
 struct Info
 {
 	[[nodiscard]] MPT_FORCEINLINE bool HasFeatureSet(mpt::arch::current::feature_flags features) const noexcept
 	{
 		return features == (GetEnabledFeatures() & features);
+	}
+	[[nodiscard]] MPT_FORCEINLINE bool HasModesEnabled(mpt::arch::current::mode_flags modes) const noexcept
+	{
+		return modes == (GetEnabledModes() & modes);
 	}
 };
 
@@ -67,11 +77,15 @@ struct Info
 struct Info
 {
 private:
-	const mpt::arch::feature_flags_cache m_features{mpt::arch::get_cpu_info()};
+	const mpt::arch::flags_cache m_flags{mpt::arch::get_cpu_info()};
 public:
 	[[nodiscard]] MPT_FORCEINLINE bool HasFeatureSet(mpt::arch::current::feature_flags features) const noexcept
 	{
-		return m_features[features];
+		return m_flags[features];
+	}
+	[[nodiscard]] MPT_FORCEINLINE bool HasModesEnabled(mpt::arch::current::mode_flags modes) const noexcept
+	{
+		return m_flags[modes];
 	}
 };
 
@@ -85,12 +99,17 @@ public:
 // legacy interface
 
 namespace feature = mpt::arch::current::feature;
+namespace mode = mpt::arch::current::mode;
 
 [[nodiscard]] MPT_FORCEINLINE bool HasFeatureSet(mpt::arch::current::feature_flags features) noexcept
 {
 	return CPU::Info{}.HasFeatureSet(features);
 }
 
+[[nodiscard]] MPT_FORCEINLINE bool HasModesEnabled(mpt::arch::current::mode_flags modes) noexcept
+{
+	return CPU::Info{}.HasModesEnabled(modes);
+}
 
 
 

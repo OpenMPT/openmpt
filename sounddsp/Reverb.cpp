@@ -592,7 +592,7 @@ void CReverb::ReverbProcessPostFiltering2x(const int32 * MPT_RESTRICT pRvb, int3
 void CReverb::ReverbProcessPostFiltering1x(const int32 * MPT_RESTRICT pRvb, int32 * MPT_RESTRICT pDry, uint32 nSamples)
 {
 #if defined(MPT_ENABLE_ARCH_INTRINSICS_SSE2)
-	if(CPU::HasFeatureSet(CPU::feature::sse2))
+	if(CPU::HasFeatureSet(CPU::feature::sse2) && CPU::HasModesEnabled(CPU::mode::xmm128sse))
 	{
 		__m128i nDCRRvb_Y1 = Load64SSE(gnDCRRvb_Y1);
 		__m128i nDCRRvb_X1 = Load64SSE(gnDCRRvb_X1);
@@ -654,7 +654,7 @@ void CReverb::ReverbProcessPostFiltering1x(const int32 * MPT_RESTRICT pRvb, int3
 void CReverb::ReverbDCRemoval(int32 * MPT_RESTRICT pBuffer, uint32 nSamples)
 {
 #if defined(MPT_ENABLE_ARCH_INTRINSICS_SSE2)
-	if(CPU::HasFeatureSet(CPU::feature::sse2))
+	if(CPU::HasFeatureSet(CPU::feature::sse2) && CPU::HasModesEnabled(CPU::mode::xmm128sse))
 	{
 		__m128i nDCRRvb_Y1 = Load64SSE(gnDCRRvb_Y1);
 		__m128i nDCRRvb_X1 = Load64SSE(gnDCRRvb_X1);
@@ -719,7 +719,7 @@ void CReverb::ProcessPreDelay(SWRvbRefDelay * MPT_RESTRICT pPreDelay, const int3
 	uint32 preDifPos = pPreDelay->nPreDifPos;
 	uint32 delayPos = pPreDelay->nDelayPos - 1;
 #if defined(MPT_ENABLE_ARCH_INTRINSICS_SSE2)
-	if(CPU::HasFeatureSet(CPU::feature::sse2))
+	if(CPU::HasFeatureSet(CPU::feature::sse2) && CPU::HasModesEnabled(CPU::mode::xmm128sse))
 	{
 		__m128i coeffs = _mm_cvtsi32_si128(pPreDelay->nCoeffs.lr);
 		__m128i history = _mm_cvtsi32_si128(pPreDelay->History.lr);
@@ -791,7 +791,7 @@ void CReverb::ProcessPreDelay(SWRvbRefDelay * MPT_RESTRICT pPreDelay, const int3
 void CReverb::ProcessReflections(SWRvbRefDelay * MPT_RESTRICT pPreDelay, LR16 * MPT_RESTRICT pRefOut, int32 * MPT_RESTRICT pOut, uint32 nSamples)
 {
 #if defined(MPT_ENABLE_ARCH_INTRINSICS_SSE2)
-	if(CPU::HasFeatureSet(CPU::feature::sse2))
+	if(CPU::HasFeatureSet(CPU::feature::sse2) && CPU::HasModesEnabled(CPU::mode::xmm128sse))
 	{
 		union
 		{
@@ -886,7 +886,7 @@ void CReverb::ProcessLateReverb(SWLateReverb * MPT_RESTRICT pReverb, LR16 * MPT_
 	#define DELAY_OFFSET(x) ((delayPos - (x)) & RVBDLY_MASK)
 
 #if defined(MPT_ENABLE_ARCH_INTRINSICS_SSE2)
-	if(CPU::HasFeatureSet(CPU::feature::sse2))
+	if(CPU::HasFeatureSet(CPU::feature::sse2) && CPU::HasModesEnabled(CPU::mode::xmm128sse))
 	{
 		int delayPos = pReverb->nDelayPos & RVBDLY_MASK;
 		__m128i rvbOutGains = Load64SSE(pReverb->RvbOutGains);

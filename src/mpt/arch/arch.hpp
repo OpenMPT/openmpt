@@ -26,36 +26,37 @@ namespace arch {
 
 namespace unknown {
 
-struct no_feature_flags {
-	constexpr no_feature_flags() noexcept = default;
-	constexpr no_feature_flags operator~() noexcept {
-		return no_feature_flags{};
+template <typename tag>
+struct no_flags {
+	constexpr no_flags() noexcept = default;
+	constexpr no_flags operator~() noexcept {
+		return no_flags{};
 	}
-	constexpr no_feature_flags & operator&=(no_feature_flags) noexcept {
+	constexpr no_flags & operator&=(no_flags) noexcept {
 		return *this;
 	}
-	constexpr no_feature_flags & operator|=(no_feature_flags) noexcept {
+	constexpr no_flags & operator|=(no_flags) noexcept {
 		return *this;
 	}
-	constexpr no_feature_flags & operator^=(no_feature_flags) noexcept {
+	constexpr no_flags & operator^=(no_flags) noexcept {
 		return *this;
 	}
-	friend constexpr no_feature_flags operator&(no_feature_flags, no_feature_flags) noexcept {
-		return no_feature_flags{};
+	friend constexpr no_flags operator&(no_flags, no_flags) noexcept {
+		return no_flags{};
 	}
-	friend constexpr no_feature_flags operator|(no_feature_flags, no_feature_flags) noexcept {
-		return no_feature_flags{};
+	friend constexpr no_flags operator|(no_flags, no_flags) noexcept {
+		return no_flags{};
 	}
-	friend constexpr no_feature_flags operator^(no_feature_flags, no_feature_flags) noexcept {
-		return no_feature_flags{};
+	friend constexpr no_flags operator^(no_flags, no_flags) noexcept {
+		return no_flags{};
 	}
-	friend constexpr bool operator==(no_feature_flags, no_feature_flags) noexcept {
+	friend constexpr bool operator==(no_flags, no_flags) noexcept {
 		return true;
 	}
-	friend constexpr bool operator!=(no_feature_flags, no_feature_flags) noexcept {
+	friend constexpr bool operator!=(no_flags, no_flags) noexcept {
 		return false;
 	}
-	constexpr bool supports(no_feature_flags) noexcept {
+	constexpr bool supports(no_flags) noexcept {
 		return true;
 	}
 	explicit constexpr operator bool() const noexcept {
@@ -66,11 +67,22 @@ struct no_feature_flags {
 	}
 };
 
-using feature_flags = mpt::arch::basic_feature_flags<no_feature_flags>;
+struct no_feature_flags_tag {
+};
+
+struct no_mode_flags_tag {
+};
+
+using feature_flags = mpt::arch::basic_feature_flags<no_flags<no_feature_flags_tag>>;
+using mode_flags = mpt::arch::basic_feature_flags<no_flags<no_mode_flags_tag>>;
 
 namespace feature {
 inline constexpr feature_flags none = feature_flags{};
 } // namespace feature
+
+namespace mode {
+inline constexpr mode_flags none = mode_flags{};
+} // namespace mode
 
 struct cpu_info {
 public:
@@ -85,9 +97,22 @@ public:
 	MPT_CONSTEXPRINLINE feature_flags get_features() const noexcept {
 		return {};
 	}
+	MPT_CONSTEXPRINLINE bool operator[](mode_flags) const noexcept {
+		return true;
+	}
+	MPT_CONSTEXPRINLINE bool enabled_modes(mode_flags) const noexcept {
+		return true;
+	}
+	MPT_CONSTEXPRINLINE mode_flags get_modes() const noexcept {
+		return {};
+	}
 };
 
 [[nodiscard]] MPT_CONSTEVAL feature_flags assumed_features() noexcept {
+	return {};
+}
+
+[[nodiscard]] MPT_CONSTEVAL mode_flags assumed_modes() noexcept {
 	return {};
 }
 
@@ -122,12 +147,14 @@ inline info_initializer g_info_initializer;
 
 } // namespace detail
 
-struct feature_flags_cache {
+struct flags_cache {
 private:
 	const mpt::arch::current::feature_flags Features;
+	const mpt::arch::current::mode_flags Modes;
 public:
-	MPT_CONSTEXPRINLINE feature_flags_cache(const mpt::arch::cpu_info & info) noexcept
-		: Features(info.get_features()) {
+	MPT_CONSTEXPRINLINE flags_cache(const mpt::arch::cpu_info & info) noexcept
+		: Features(info.get_features())
+		, Modes(info.get_modes()) {
 		return;
 	}
 	[[nodiscard]] MPT_CONSTEXPRINLINE bool operator[](mpt::arch::current::feature_flags query_features) const noexcept {
@@ -138,6 +165,15 @@ public:
 	}
 	[[nodiscard]] MPT_CONSTEXPRINLINE mpt::arch::current::feature_flags get_features() const noexcept {
 		return Features;
+	}
+	[[nodiscard]] MPT_CONSTEXPRINLINE bool operator[](mpt::arch::current::mode_flags query_modes) const noexcept {
+		return ((Modes & query_modes) == query_modes);
+	}
+	[[nodiscard]] MPT_CONSTEXPRINLINE bool has_features(mpt::arch::current::mode_flags query_modes) const noexcept {
+		return ((Modes & query_modes) == query_modes);
+	}
+	[[nodiscard]] MPT_CONSTEXPRINLINE mpt::arch::current::mode_flags get_modes() const noexcept {
+		return Modes;
 	}
 };
 

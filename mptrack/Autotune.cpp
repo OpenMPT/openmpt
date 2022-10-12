@@ -302,7 +302,7 @@ bool Autotune::Apply(double pitchReference, int targetNote)
 
 	AutotuneHistogram autocorr =
 #if defined(MPT_ENABLE_ARCH_INTRINSICS_SSE2)
-		(CPU::HasFeatureSet(CPU::feature::sse2)) ? std::transform_reduce(std::execution::par_unseq, std::begin(notes), std::end(notes), AutotuneHistogram{}, AutotuneHistogramReduce{}, [ctx](int note) { return CalculateNoteHistogramSSE2(note, ctx); } ) :
+		(CPU::HasFeatureSet(CPU::feature::sse2) && CPU::HasModesEnabled(CPU::mode::xmm128sse)) ? std::transform_reduce(std::execution::par_unseq, std::begin(notes), std::end(notes), AutotuneHistogram{}, AutotuneHistogramReduce{}, [ctx](int note) { return CalculateNoteHistogramSSE2(note, ctx); } ) :
 #endif
 		std::transform_reduce(std::execution::par_unseq, std::begin(notes), std::end(notes), AutotuneHistogram{}, AutotuneHistogramReduce{}, [ctx](int note) { return CalculateNoteHistogram(note, ctx); } );
 	

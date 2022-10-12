@@ -178,14 +178,14 @@ static bool IsArchitectureFeatureSupported(const mpt::ustring &architecture, con
 			if(feature == U_("")) return true;
 			else if(feature == U_("lm")) return CPUInfo.can_long_mode();
 			else if(feature == U_("mmx")) return CPUInfo[mpt::arch::current::feature::mmx];
-			else if(feature == U_("sse")) return CPUInfo[mpt::arch::current::feature::sse];
-			else if(feature == U_("sse2")) return CPUInfo[mpt::arch::current::feature::sse2];
-			else if(feature == U_("sse3")) return CPUInfo[mpt::arch::current::feature::sse3];
-			else if(feature == U_("ssse3")) return CPUInfo[mpt::arch::current::feature::ssse3];
-			else if(feature == U_("sse4.1")) return CPUInfo[mpt::arch::current::feature::sse4_1];
-			else if(feature == U_("sse4.2")) return CPUInfo[mpt::arch::current::feature::sse4_2];
-			else if(feature == U_("avx")) return CPUInfo[mpt::arch::current::feature::avx];
-			else if(feature == U_("avx2")) return CPUInfo[mpt::arch::current::feature::avx2];
+			else if(feature == U_("sse")) return CPUInfo[mpt::arch::current::feature::sse] && CPUInfo[mpt::arch::current::mode::xmm128sse];
+			else if(feature == U_("sse2")) return CPUInfo[mpt::arch::current::feature::sse2] && CPUInfo[mpt::arch::current::mode::xmm128sse];
+			else if(feature == U_("sse3")) return CPUInfo[mpt::arch::current::feature::sse3] && CPUInfo[mpt::arch::current::mode::xmm128sse];
+			else if(feature == U_("ssse3")) return CPUInfo[mpt::arch::current::feature::ssse3] && CPUInfo[mpt::arch::current::mode::xmm128sse];
+			else if(feature == U_("sse4.1")) return CPUInfo[mpt::arch::current::feature::sse4_1] && CPUInfo[mpt::arch::current::mode::xmm128sse];
+			else if(feature == U_("sse4.2")) return CPUInfo[mpt::arch::current::feature::sse4_2] && CPUInfo[mpt::arch::current::mode::xmm128sse];
+			else if(feature == U_("avx")) return CPUInfo[mpt::arch::current::feature::avx] && CPUInfo[mpt::arch::current::mode::ymm256avx];
+			else if(feature == U_("avx2")) return CPUInfo[mpt::arch::current::feature::avx2] && CPUInfo[mpt::arch::current::mode::ymm256avx];
 			else return false;
 		#else // MPT_ARCH
 			MPT_UNUSED_VARIABLE(feature);
@@ -625,15 +625,15 @@ std::string CUpdateCheck::GetStatisticsDataV3(const Settings &settings)
 			j["System"]["Processor"]["Id"]["Model"] = CPUInfo.get_model();
 			j["System"]["Processor"]["Id"]["Stepping"] = CPUInfo.get_stepping();
 			j["System"]["Processor"]["Features"]["lm"] = CPUInfo.can_long_mode();
-			j["System"]["Processor"]["Features"]["mmx"] = CPUInfo[mpt::arch::current::feature::mmx];
-			j["System"]["Processor"]["Features"]["sse"] = CPUInfo[mpt::arch::current::feature::sse];
-			j["System"]["Processor"]["Features"]["sse2"] = CPUInfo[mpt::arch::current::feature::sse2];
-			j["System"]["Processor"]["Features"]["sse3"] = CPUInfo[mpt::arch::current::feature::sse3];
-			j["System"]["Processor"]["Features"]["ssse3"] = CPUInfo[mpt::arch::current::feature::ssse3];
-			j["System"]["Processor"]["Features"]["sse4.1"] = CPUInfo[mpt::arch::current::feature::sse4_1];
-			j["System"]["Processor"]["Features"]["sse4.2"] = CPUInfo[mpt::arch::current::feature::sse4_2];
-			j["System"]["Processor"]["Features"]["avx"] = CPUInfo[mpt::arch::current::feature::avx];
-			j["System"]["Processor"]["Features"]["avx2"] = CPUInfo[mpt::arch::current::feature::avx2];
+			j["System"]["Processor"]["Features"]["mmx"] = CPUInfo[mpt::arch::current::feature::mmx] && CPUInfo[mpt::arch::current::mode::xmm128sse];
+			j["System"]["Processor"]["Features"]["sse"] = CPUInfo[mpt::arch::current::feature::sse] && CPUInfo[mpt::arch::current::mode::xmm128sse];
+			j["System"]["Processor"]["Features"]["sse2"] = CPUInfo[mpt::arch::current::feature::sse2] && CPUInfo[mpt::arch::current::mode::xmm128sse];
+			j["System"]["Processor"]["Features"]["sse3"] = CPUInfo[mpt::arch::current::feature::sse3] && CPUInfo[mpt::arch::current::mode::xmm128sse];
+			j["System"]["Processor"]["Features"]["ssse3"] = CPUInfo[mpt::arch::current::feature::ssse3] && CPUInfo[mpt::arch::current::mode::xmm128sse];
+			j["System"]["Processor"]["Features"]["sse4.1"] = CPUInfo[mpt::arch::current::feature::sse4_1] && CPUInfo[mpt::arch::current::mode::xmm128sse];
+			j["System"]["Processor"]["Features"]["sse4.2"] = CPUInfo[mpt::arch::current::feature::sse4_2] && CPUInfo[mpt::arch::current::mode::xmm128sse];
+			j["System"]["Processor"]["Features"]["avx"] = CPUInfo[mpt::arch::current::feature::avx] && CPUInfo[mpt::arch::current::mode::ymm256avx];
+			j["System"]["Processor"]["Features"]["avx2"] = CPUInfo[mpt::arch::current::feature::avx2] && CPUInfo[mpt::arch::current::mode::ymm256avx];
 			j["System"]["Processor"]["Virtual"] = CPUInfo.is_virtual();
 		#endif // MPT_ARCH_X86 || MPT_ARCH_AMD64
 	#endif // MPT_ENABLE_ARCH_INTRINSICS
