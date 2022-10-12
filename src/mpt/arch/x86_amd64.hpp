@@ -1947,7 +1947,7 @@ public:
 			fxsave_state tmp = {};
 			fxsave(&tmp);
 			if (state.x87_level) {
-				tmp.x87fcw = state.x87fcw;
+				tmp.fcw = state.x87fcw;
 			}
 			if (state.mxcsr_mask) {
 				tmp.mxcsr = state.mxcsr;
@@ -1958,7 +1958,7 @@ public:
 				fxsave_state tmp = {};
 				fxsave(&tmp);
 				if (state.x87_level) {
-					tmp.x87fcw = state.x87fcw;
+					tmp.fcw = state.x87fcw;
 				}
 				if (state.mxcsr_mask) {
 					tmp.mxcsr = state.mxcsr;
@@ -1966,7 +1966,7 @@ public:
 				fxrstor(&tmp);
 			} else {
 				if (state.x87_level) {
-					tmp.x87fcw = state.x87fcw;
+					set_x87fcw(state.x87fcw);
 				}
 			}
 #endif
