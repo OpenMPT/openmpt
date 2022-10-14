@@ -124,17 +124,25 @@ amd/am486sx       := $(___) -march=i486        $(FPU_NONE)   -mtune=i486        
 amd/am386+80387   := $(___) -march=i386        $(FPU_387)    -mtune=i386        $(OPT_DEF)         --param l1-cache-size=0  --param l2-cache-size=$(CACHE_386)
 amd/am486dx       := $(___) -march=i486        $(FPU_387)    -mtune=i486        $(OPT_DEF)         --param l1-cache-size=6  --param l2-cache-size=$(CACHE_486)
 amd/am5x86        := $(___) -march=i486        $(FPU_387)    -mtune=i486        $(OPT_DEF)         --param l1-cache-size=12 --param l2-cache-size=$(CACHE_486)
-amd/k5            := $(XXX) -march=i586        $(FPU_387)    -mtune=k6          $(OPT_DEF)  $(TBD) --param l1-cache-size=8  --param l2-cache-size=$(CACHE_S7)
+amd/k5            := $(XXX) -march=i586        $(FPU_387)    -mtune=i586        $(OPT_DEF)  $(TBD) --param l1-cache-size=8  --param l2-cache-size=$(CACHE_S7)
+amd/k5-pentium    := $(XXX) -march=i586        $(FPU_387)    -mtune=pentium     $(OPT_DEF)  $(TBD) --param l1-cache-size=8  --param l2-cache-size=$(CACHE_S7)
+amd/k5-pentium2   := $(XXX) -march=i586        $(FPU_387)    -mtune=pentium2    $(OPT_DEF)  $(TBD) --param l1-cache-size=8  --param l2-cache-size=$(CACHE_S7)
+amd/k5-k6         := $(XXX) -march=i586        $(FPU_387)    -mtune=k6          $(OPT_DEF)  $(TBD) --param l1-cache-size=8  --param l2-cache-size=$(CACHE_S7)
 amd/k6            := $(XXX) -march=k6          $(FPU_MMX)    -mtune=k6          $(OPT_SIMD)        --param l1-cache-size=32 --param l2-cache-size=$(CACHE_S7)
 amd/k6-2          := $(XXX) -march=k6-2        $(FPU_3DNOW)  -mtune=k6-2        $(OPT_SIMD)        --param l1-cache-size=32 --param l2-cache-size=$(CACHE_SS7)
 amd/k6-3          := $(___) -march=k6-3        $(FPU_3DNOW)  -mtune=k6-3        $(OPT_SIMD)        --param l1-cache-size=32 --param l2-cache-size=$(CACHE_K63)
 amd/athlon        := $(XX_) -march=athlon      $(FPU_3DNOWA) -mtune=athlon      $(OPT_SIMD)        --param l1-cache-size=64 --param l2-cache-size=512
 amd/duron         := $(XX_) -march=athlon      $(FPU_3DNOWA) -mtune=athlon      $(OPT_SIMD)        --param l1-cache-size=64 --param l2-cache-size=64
 amd/athlon-xp     := $(XX_) -march=athlon-xp   $(FPU_3DASSE) -mtune=athlon-xp   $(OPT_SIMD)        --param l1-cache-size=64 --param l2-cache-size=256
+amd/athlon64      := $(X__) -march=k8          $(FPU_SSE2)   -mtune=k8          $(OPT_SIMD)        --param l1-cache-size=64 --param l2-cache-size=512
+amd/sempron64     := $(___) -march=k8          $(FPU_SSE2)   -mtune=k8          $(OPT_SIMD)        --param l1-cache-size=64 --param l2-cache-size=128
+amd/athlon64-sse3 := $(___) -march=k8-sse3     $(FPU_SSE3)   -mtune=k8-sse3     $(OPT_SIMD)        --param l1-cache-size=64 --param l2-cache-size=512
+amd/k10           := $(___) -march=amdfam10    $(FPU_SSE4A)  -mtune=amdfam10    $(OPT_SIMD)        --param l1-cache-size=64 --param l2-cache-size=512
 amd/geode-gx      := $(___) -march=geode       $(FPU_3DNOW)  -mtune=geode       $(OPT_SIMD)        --param l1-cache-size=16 --param l2-cache-size=128
 amd/geode-lx      := $(___) -march=geode       $(FPU_3DNOW)  -mtune=geode       $(OPT_SIMD)        --param l1-cache-size=64 --param l2-cache-size=128
 amd/geode-nx      := $(___) -march=athlon-xp   $(FPU_3DASSE) -mtune=athlon-xp   $(OPT_SIMD)        --param l1-cache-size=64 --param l2-cache-size=256
-amd/bobcat        := $(___) -march=i686        $(FPU_SSE4A)  -mtune=amdfam10    $(OPT_SIMD)        --param l1-cache-size=64 --param l2-cache-size=512
+amd/bobcat        := $(___) -march=btver1      $(FPU_SSE4A)  -mtune=btver1      $(OPT_SIMD)        --param l1-cache-size=32 --param l2-cache-size=512
+amd/jaguar        := $(___) -march=btver2      $(FPU_SSE4A)  -mtune=btver2      $(OPT_SIMD)        --param l1-cache-size=32 --param l2-cache-size=1024
 amd/late-3dnow    := $(XX_) -march=athlon-xp   $(FPU_3DASSE) -mtune=athlon-xp   $(OPT_SIMD)        --param l1-cache-size=64 --param l2-cache-size=256
 amd/late          := $(XX_) -march=i686        $(FPU_SSE2)   -mtune=generic     $(OPT_SIMD)
 
