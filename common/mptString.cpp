@@ -363,8 +363,22 @@ static Tdststring EncodeImpl(Charset charset, const mpt::widestring &src)
 		case Charset::ASCII:            return mpt::encode<Tdststring>(mpt::common_encoding::ascii, src); break;
 		case Charset::ISO8859_1:        return mpt::encode<Tdststring>(mpt::common_encoding::iso8859_1, src); break;
 		case Charset::ISO8859_15:       return mpt::encode<Tdststring>(mpt::common_encoding::iso8859_15, src); break;
-		case Charset::CP850:            return mpt::encode<Tdststring>(mpt::common_encoding::cp850, src); break;
 		case Charset::CP437:            return mpt::encode<Tdststring>(mpt::common_encoding::cp437, src); break;
+		case Charset::CP737:            return mpt::encode<Tdststring>(mpt::common_encoding::cp737, src); break;
+		case Charset::CP775:            return mpt::encode<Tdststring>(mpt::common_encoding::cp775, src); break;
+		case Charset::CP850:            return mpt::encode<Tdststring>(mpt::common_encoding::cp850, src); break;
+		case Charset::CP852:            return mpt::encode<Tdststring>(mpt::common_encoding::cp852, src); break;
+		case Charset::CP855:            return mpt::encode<Tdststring>(mpt::common_encoding::cp855, src); break;
+		case Charset::CP857:            return mpt::encode<Tdststring>(mpt::common_encoding::cp857, src); break;
+		case Charset::CP860:            return mpt::encode<Tdststring>(mpt::common_encoding::cp860, src); break;
+		case Charset::CP861:            return mpt::encode<Tdststring>(mpt::common_encoding::cp861, src); break;
+		case Charset::CP862:            return mpt::encode<Tdststring>(mpt::common_encoding::cp862, src); break;
+		case Charset::CP863:            return mpt::encode<Tdststring>(mpt::common_encoding::cp863, src); break;
+		case Charset::CP864:            return mpt::encode<Tdststring>(mpt::common_encoding::cp864, src); break;
+		case Charset::CP865:            return mpt::encode<Tdststring>(mpt::common_encoding::cp865, src); break;
+		case Charset::CP866:            return mpt::encode<Tdststring>(mpt::common_encoding::cp866, src); break;
+		case Charset::CP869:            return mpt::encode<Tdststring>(mpt::common_encoding::cp869, src); break;
+		case Charset::CP874:            return mpt::encode<Tdststring>(mpt::common_encoding::cp874, src); break;
 		case Charset::CP437AMS:         return mpt::encode<Tdststring>(CharsetTableCP437AMS, src); break;
 		case Charset::CP437AMS2:        return mpt::encode<Tdststring>(CharsetTableCP437AMS2, src); break;
 		case Charset::Windows1252:      return mpt::encode<Tdststring>(mpt::common_encoding::windows1252, src); break;
@@ -394,8 +408,22 @@ static mpt::widestring DecodeImpl(Charset charset, const Tsrcstring &src)
 		case Charset::ASCII:            return mpt::decode<Tsrcstring>(mpt::common_encoding::ascii, src); break;
 		case Charset::ISO8859_1:        return mpt::decode<Tsrcstring>(mpt::common_encoding::iso8859_1, src); break;
 		case Charset::ISO8859_15:       return mpt::decode<Tsrcstring>(mpt::common_encoding::iso8859_15, src); break;
-		case Charset::CP850:            return mpt::decode<Tsrcstring>(mpt::common_encoding::cp850, src); break;
 		case Charset::CP437:            return mpt::decode<Tsrcstring>(mpt::common_encoding::cp437, src); break;
+		case Charset::CP737:            return mpt::decode<Tsrcstring>(mpt::common_encoding::cp737, src); break;
+		case Charset::CP775:            return mpt::decode<Tsrcstring>(mpt::common_encoding::cp775, src); break;
+		case Charset::CP850:            return mpt::decode<Tsrcstring>(mpt::common_encoding::cp850, src); break;
+		case Charset::CP852:            return mpt::decode<Tsrcstring>(mpt::common_encoding::cp852, src); break;
+		case Charset::CP855:            return mpt::decode<Tsrcstring>(mpt::common_encoding::cp855, src); break;
+		case Charset::CP857:            return mpt::decode<Tsrcstring>(mpt::common_encoding::cp857, src); break;
+		case Charset::CP860:            return mpt::decode<Tsrcstring>(mpt::common_encoding::cp860, src); break;
+		case Charset::CP861:            return mpt::decode<Tsrcstring>(mpt::common_encoding::cp861, src); break;
+		case Charset::CP862:            return mpt::decode<Tsrcstring>(mpt::common_encoding::cp862, src); break;
+		case Charset::CP863:            return mpt::decode<Tsrcstring>(mpt::common_encoding::cp863, src); break;
+		case Charset::CP864:            return mpt::decode<Tsrcstring>(mpt::common_encoding::cp864, src); break;
+		case Charset::CP865:            return mpt::decode<Tsrcstring>(mpt::common_encoding::cp865, src); break;
+		case Charset::CP866:            return mpt::decode<Tsrcstring>(mpt::common_encoding::cp866, src); break;
+		case Charset::CP869:            return mpt::decode<Tsrcstring>(mpt::common_encoding::cp869, src); break;
+		case Charset::CP874:            return mpt::decode<Tsrcstring>(mpt::common_encoding::cp874, src); break;
 		case Charset::CP437AMS:         return mpt::decode<Tsrcstring>(CharsetTableCP437AMS, src); break;
 		case Charset::CP437AMS2:        return mpt::decode<Tsrcstring>(CharsetTableCP437AMS2, src); break;
 		case Charset::Windows1252:      return mpt::decode<Tsrcstring>(mpt::common_encoding::windows1252, src); break;
@@ -672,6 +700,66 @@ static mpt::Charset CharsetFromCodePage(uint16 codepage, mpt::Charset fallback, 
 		break;
 	case 437:
 		result = mpt::Charset::CP437;
+		if(isFallback) *isFallback = false;
+		break;
+	case 737:
+		result = mpt::Charset::CP737;
+		if(isFallback) *isFallback = false;
+		break;
+	case 775:
+		result = mpt::Charset::CP775;
+		if(isFallback) *isFallback = false;
+		break;
+	case 850:
+		result = mpt::Charset::CP850;
+		if(isFallback) *isFallback = false;
+		break;
+	case 852:
+		result = mpt::Charset::CP852;
+		if(isFallback) *isFallback = false;
+		break;
+	case 855:
+		result = mpt::Charset::CP855;
+		if(isFallback) *isFallback = false;
+		break;
+	case 857:
+		result = mpt::Charset::CP857;
+		if(isFallback) *isFallback = false;
+		break;
+	case 860:
+		result = mpt::Charset::CP860;
+		if(isFallback) *isFallback = false;
+		break;
+	case 861:
+		result = mpt::Charset::CP861;
+		if(isFallback) *isFallback = false;
+		break;
+	case 862:
+		result = mpt::Charset::CP862;
+		if(isFallback) *isFallback = false;
+		break;
+	case 863:
+		result = mpt::Charset::CP863;
+		if(isFallback) *isFallback = false;
+		break;
+	case 864:
+		result = mpt::Charset::CP864;
+		if(isFallback) *isFallback = false;
+		break;
+	case 865:
+		result = mpt::Charset::CP865;
+		if(isFallback) *isFallback = false;
+		break;
+	case 866:
+		result = mpt::Charset::CP866;
+		if(isFallback) *isFallback = false;
+		break;
+	case 869:
+		result = mpt::Charset::CP869;
+		if(isFallback) *isFallback = false;
+		break;
+	case 874:
+		result = mpt::Charset::CP874;
 		if(isFallback) *isFallback = false;
 		break;
 	case 1252:
