@@ -70,6 +70,7 @@ static constexpr struct { mpt::osinfo::windows::Version version; const mpt::ucha
 	{ mpt::osinfo::windows::Version{ mpt::osinfo::windows::Version::WinNewer, mpt::osinfo::windows::Version::ServicePack{ 0, 0 }, 22621, 0 }, UL_("Windows 11 (or newer)"), false },
 	{ mpt::osinfo::windows::Version{ mpt::osinfo::windows::Version::Win10, mpt::osinfo::windows::Version::ServicePack{ 0, 0 }, 22621, 0 }, UL_("Windows 11 22H2"), true },
 	{ mpt::osinfo::windows::Version{ mpt::osinfo::windows::Version::Win10, mpt::osinfo::windows::Version::ServicePack{ 0, 0 }, 22000, 0 }, UL_("Windows 11 21H2"), true },
+	{ mpt::osinfo::windows::Version{ mpt::osinfo::windows::Version::Win10, mpt::osinfo::windows::Version::ServicePack{ 0, 0 }, 19045, 0 }, UL_("Windows 10 22H2"), true },
 	{ mpt::osinfo::windows::Version{ mpt::osinfo::windows::Version::Win10, mpt::osinfo::windows::Version::ServicePack{ 0, 0 }, 19044, 0 }, UL_("Windows 10 21H2"), true },
 	{ mpt::osinfo::windows::Version{ mpt::osinfo::windows::Version::Win10, mpt::osinfo::windows::Version::ServicePack{ 0, 0 }, 19043, 0 }, UL_("Windows 10 21H1"), true },
 	{ mpt::osinfo::windows::Version{ mpt::osinfo::windows::Version::Win10, mpt::osinfo::windows::Version::ServicePack{ 0, 0 }, 19042, 0 }, UL_("Windows 10 20H2"), true },
