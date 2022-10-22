@@ -46,31 +46,73 @@ public:
 	}
 	void WriteInterleaved(std::size_t frameCount, const double *interleaved) override
 	{
-		WriteInterleavedBE(f, settings.Channels, settings.Format, frameCount, interleaved);
+		if(settings.Format.endian == mpt::endian::little)
+		{
+			WriteInterleavedLE(f, settings.Channels, settings.Format, frameCount, interleaved);
+		} else
+		{
+			WriteInterleavedBE(f, settings.Channels, settings.Format, frameCount, interleaved);
+		}
 	}
 	void WriteInterleaved(std::size_t frameCount, const float *interleaved) override
 	{
-		WriteInterleavedBE(f, settings.Channels, settings.Format, frameCount, interleaved);
+		if(settings.Format.endian == mpt::endian::little)
+		{
+			WriteInterleavedLE(f, settings.Channels, settings.Format, frameCount, interleaved);
+		} else
+		{
+			WriteInterleavedBE(f, settings.Channels, settings.Format, frameCount, interleaved);
+		}
 	}
 	void WriteInterleaved(std::size_t frameCount, const int32 *interleaved) override
 	{
-		WriteInterleavedBE(f, settings.Channels, settings.Format, frameCount, interleaved);
+		if(settings.Format.endian == mpt::endian::little)
+		{
+			WriteInterleavedLE(f, settings.Channels, settings.Format, frameCount, interleaved);
+		} else
+		{
+			WriteInterleavedBE(f, settings.Channels, settings.Format, frameCount, interleaved);
+		}
 	}
 	void WriteInterleaved(std::size_t frameCount, const int24 *interleaved) override
 	{
-		WriteInterleavedBE(f, settings.Channels, settings.Format, frameCount, interleaved);
+		if(settings.Format.endian == mpt::endian::little)
+		{
+			WriteInterleavedLE(f, settings.Channels, settings.Format, frameCount, interleaved);
+		} else
+		{
+			WriteInterleavedBE(f, settings.Channels, settings.Format, frameCount, interleaved);
+		}
 	}
 	void WriteInterleaved(std::size_t frameCount, const int16 *interleaved) override
 	{
-		WriteInterleavedBE(f, settings.Channels, settings.Format, frameCount, interleaved);
+		if(settings.Format.endian == mpt::endian::little)
+		{
+			WriteInterleavedLE(f, settings.Channels, settings.Format, frameCount, interleaved);
+		} else
+		{
+			WriteInterleavedBE(f, settings.Channels, settings.Format, frameCount, interleaved);
+		}
 	}
 	void WriteInterleaved(std::size_t frameCount, const int8 *interleaved) override
 	{
-		WriteInterleavedBE(f, settings.Channels, settings.Format, frameCount, interleaved);
+		if(settings.Format.endian == mpt::endian::little)
+		{
+			WriteInterleavedLE(f, settings.Channels, settings.Format, frameCount, interleaved);
+		} else
+		{
+			WriteInterleavedBE(f, settings.Channels, settings.Format, frameCount, interleaved);
+		}
 	}
 	void WriteInterleaved(std::size_t frameCount, const uint8 *interleaved) override
 	{
-		WriteInterleavedBE(f, settings.Channels, settings.Format, frameCount, interleaved);
+		if(settings.Format.endian == mpt::endian::little)
+		{
+			WriteInterleavedLE(f, settings.Channels, settings.Format, frameCount, interleaved);
+		} else
+		{
+			WriteInterleavedBE(f, settings.Channels, settings.Format, frameCount, interleaved);
+		}
 	}
 	void WriteCues(const std::vector<uint64> &cues) override
 	{
