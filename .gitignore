@@ -162,7 +162,14 @@
 /include/asiomodern/package_helper_getversion.cpp
 /include/asiomodern/run_clang-format.sh
 /include/cwsdpmi/*
+/include/flac/.clang-format
+/include/flac/.github
+/include/flac/.gitignore
+/include/flac/.gitlab-ci.yml
+/include/flac/.travis.yml
+/include/flac/CHANGELOG.md
 /include/flac/CMakeLists.txt
+/include/flac/CONTRIBUTING.md
 /include/flac/COPYING.FDL
 /include/flac/COPYING.GPL
 /include/flac/COPYING.LGPL
@@ -173,6 +180,8 @@
 /include/flac/Makefile.in
 /include/flac/Makefile.lite
 /include/flac/PaxHeaders
+/include/flac/README.md
+/include/flac/Scripts
 /include/flac/aclocal.m4
 /include/flac/ar-lib
 /include/flac/autogen.sh
@@ -426,6 +435,10 @@
 /include/mpg123/src/mpg123-with-modules
 /include/mpg123/src/mpg123.c
 /include/mpg123/src/mpg123app.h
+/include/mpg123/src/net123.h
+/include/mpg123/src/net123_exec.c
+/include/mpg123/src/net123_winhttp.c
+/include/mpg123/src/net123_wininet.c
 /include/mpg123/src/out123-with-modules
 /include/mpg123/src/out123.c
 /include/mpg123/src/playlist.c
@@ -438,6 +451,10 @@
 /include/mpg123/src/sysutil.h
 /include/mpg123/src/term.c
 /include/mpg123/src/term.h
+/include/mpg123/src/term_none.c
+/include/mpg123/src/term_posix.c
+/include/mpg123/src/term_win32.c
+/include/mpg123/src/terms.h
 /include/mpg123/src/tests
 /include/mpg123/src/waves.c
 /include/mpg123/src/waves.h
