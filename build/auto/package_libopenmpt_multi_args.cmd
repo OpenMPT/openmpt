@@ -78,10 +78,10 @@ copy /y ..\..\include\zlib\README                            .\Licenses\License.
 rem copy /y ..\..\include\zlib\contrib\minizip\MiniZip64_info.txt .\Licenses\License.minizip.txt || goto error
 copy /y ..\..\LICENSE .\LICENSE.txt || goto error
 copy /y ..\..\libopenmpt\dox\changelog.md .\ || goto error
-copy /y ..\..\libopenmpt\doc\xmp-openmpt.txt .\XMPlay\ || goto error
-copy /y ..\..\libopenmpt\doc\in_openmpt.txt .\Winamp\ || goto error
-copy /y ..\..\libopenmpt\doc\xmp-openmpt.txt .\XMPlay-legacy\ || goto error
-copy /y ..\..\libopenmpt\doc\in_openmpt.txt .\Winamp-legacy\ || goto error
+copy /y ..\..\libopenmpt\xmp-openmpt\xmp-openmpt.txt .\XMPlay\ || goto error
+copy /y ..\..\libopenmpt\in_openmpt\in_openmpt.txt .\Winamp\ || goto error
+copy /y ..\..\libopenmpt\xmp-openmpt\xmp-openmpt.txt .\XMPlay-legacy\ || goto error
+copy /y ..\..\libopenmpt\in_openmpt\in_openmpt.txt .\Winamp-legacy\ || goto error
 copy /y ..\..\bin\release\%MPT_VS_VER%-win81-static\x86\openmpt123.exe .\openmpt123\x86\ || goto error
 copy /y ..\..\bin\release\%MPT_VS_VER%-win81-static\x86\openmpt-mpg123.dll .\openmpt123\x86\ || goto error
 copy /y ..\..\bin\release\%MPT_VS_VER%-win81-static\amd64\openmpt123.exe .\openmpt123\amd64\ || goto error

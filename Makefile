@@ -970,10 +970,7 @@ endif
 
 LIBOPENMPT_CXX_SOURCES += \
  $(SOUNDLIB_CXX_SOURCES) \
- libopenmpt/libopenmpt_c.cpp \
- libopenmpt/libopenmpt_cxx.cpp \
- libopenmpt/libopenmpt_impl.cpp \
- libopenmpt/libopenmpt_ext_impl.cpp \
+ $(sort $(wildcard libopenmpt/*.cpp)) \
  
 include/miniz/miniz$(FLAVOUR_O).o : CFLAGS+=$(CFLAGS_SILENT)
 include/miniz/miniz.test$(FLAVOUR_O).o : CFLAGS+=$(CFLAGS_SILENT)
@@ -1064,8 +1061,8 @@ endif
 
 
 INOPENMPT_CXX_SOURCES += \
- libopenmpt/libopenmpt_plugin_gui.cpp \
- libopenmpt/in_openmpt.cpp \
+ libopenmpt/plugin-common/libopenmpt_plugin_gui.cpp \
+ libopenmpt/in_openmpt/in_openmpt.cpp \
  
 
 INOPENMPT_OBJECTS += $(INOPENMPT_CXX_SOURCES:.cpp=$(FLAVOUR_O).o) $(INOPENMPT_C_SOURCES:.c=$(FLAVOUR_O).o)
@@ -1076,8 +1073,8 @@ ALL_DEPENDS += $(INOPENMPT_DEPENDS)
 
 XMPOPENMPT_CXX_SOURCES += \
  include/pugixml/src/pugixml.cpp \
- libopenmpt/libopenmpt_plugin_gui.cpp \
- libopenmpt/xmp-openmpt.cpp \
+ libopenmpt/plugin-common/libopenmpt_plugin_gui.cpp \
+ libopenmpt/xmp-openmpt/xmp-openmpt.cpp \
  
 
 XMPOPENMPT_OBJECTS += $(XMPOPENMPT_CXX_SOURCES:.cpp=$(FLAVOUR_O).o) $(XMPOPENMPT_C_SOURCES:.c=$(FLAVOUR_O).o)
@@ -1772,10 +1769,10 @@ endif
 	mkdir -p                                     bin/$(FLAVOUR_DIR)dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/openmpt123
 	cp bin/$(FLAVOUR_DIR)openmpt123.exe                        bin/$(FLAVOUR_DIR)dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/openmpt123/openmpt123.exe
 	mkdir -p                                     bin/$(FLAVOUR_DIR)dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/XMPlay
-	svn export ./libopenmpt/doc/xmp-openmpt.txt  bin/$(FLAVOUR_DIR)dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/XMPlay/xmp-openmpt.txt --native-eol CRLF
+	svn export ./libopenmpt/xmp-openmpt/xmp-openmpt.txt  bin/$(FLAVOUR_DIR)dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/XMPlay/xmp-openmpt.txt --native-eol CRLF
 	cp bin/$(FLAVOUR_DIR)xmp-openmpt.dll                       bin/$(FLAVOUR_DIR)dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/XMPlay/xmp-openmpt.dll
 	mkdir -p                                     bin/$(FLAVOUR_DIR)dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Winamp
-	svn export ./libopenmpt/doc/in_openmpt.txt   bin/$(FLAVOUR_DIR)dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Winamp/in_openmpt.txt --native-eol CRLF
+	svn export ./libopenmpt/in_openmpt/in_openmpt.txt   bin/$(FLAVOUR_DIR)dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Winamp/in_openmpt.txt --native-eol CRLF
 	cp bin/$(FLAVOUR_DIR)in_openmpt.dll                        bin/$(FLAVOUR_DIR)dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Winamp/in_openmpt.dll
 	cd bin/$(FLAVOUR_DIR)dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/ && ../../../build/tools/7zip/7z a -tzip -mx=9 ../libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.retro.win9x.zip *
 
@@ -1802,10 +1799,10 @@ endif
 	mkdir -p                                     bin/$(FLAVOUR_DIR)dist-retro-win95crt/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/openmpt123
 	cp bin/$(FLAVOUR_DIR)openmpt123.exe                        bin/$(FLAVOUR_DIR)dist-retro-win95crt/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/openmpt123/openmpt123.exe
 	#mkdir -p                                     bin/$(FLAVOUR_DIR)dist-retro-win95crt/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/XMPlay
-	#svn export ./libopenmpt/doc/xmp-openmpt.txt  bin/$(FLAVOUR_DIR)dist-retro-win95crt/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/XMPlay/xmp-openmpt.txt --native-eol CRLF
+	#svn export ./libopenmpt/xmp-openmpt/xmp-openmpt.txt  bin/$(FLAVOUR_DIR)dist-retro-win95crt/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/XMPlay/xmp-openmpt.txt --native-eol CRLF
 	#cp bin/$(FLAVOUR_DIR)xmp-openmpt.dll                       bin/$(FLAVOUR_DIR)dist-retro-win95crt/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/XMPlay/xmp-openmpt.dll
 	#mkdir -p                                     bin/$(FLAVOUR_DIR)dist-retro-win95crt/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Winamp
-	#svn export ./libopenmpt/doc/in_openmpt.txt   bin/$(FLAVOUR_DIR)dist-retro-win95crt/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Winamp/in_openmpt.txt --native-eol CRLF
+	#svn export ./libopenmpt/in_openmpt/in_openmpt.txt   bin/$(FLAVOUR_DIR)dist-retro-win95crt/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Winamp/in_openmpt.txt --native-eol CRLF
 	#cp bin/$(FLAVOUR_DIR)in_openmpt.dll                        bin/$(FLAVOUR_DIR)dist-retro-win95crt/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Winamp/in_openmpt.dll
 	cd bin/$(FLAVOUR_DIR)dist-retro-win95crt/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/ && 7z a -tzip -mx=9 ../libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.retro.win95crt.zip *
 

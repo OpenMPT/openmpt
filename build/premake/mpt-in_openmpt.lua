@@ -19,12 +19,12 @@
    "$(IntDir)/svn_version",
   }
   files {
-   "../../libopenmpt/in_openmpt.cpp",
-   "../../libopenmpt/libopenmpt_plugin_settings.hpp",
-   "../../libopenmpt/libopenmpt_plugin_gui.hpp",
-   "../../libopenmpt/libopenmpt_plugin_gui.cpp",
-   "../../libopenmpt/libopenmpt_plugin_gui.rc",
-   "../../libopenmpt/resource.h",
+   "../../libopenmpt/in_openmpt/in_openmpt.cpp",
+   "../../libopenmpt/plugin-common/libopenmpt_plugin_settings.hpp",
+   "../../libopenmpt/plugin-common/libopenmpt_plugin_gui.hpp",
+   "../../libopenmpt/plugin-common/libopenmpt_plugin_gui.cpp",
+   "../../libopenmpt/plugin-common/libopenmpt_plugin_gui.rc",
+   "../../libopenmpt/plugin-common/resource.h",
   }
 	
 	filter { "action:vs*", "kind:SharedLib or ConsoleApp or WindowedApp" }

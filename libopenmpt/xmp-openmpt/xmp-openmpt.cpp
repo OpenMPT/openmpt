@@ -66,17 +66,17 @@
 
 #include <tchar.h>
 
-#include "libopenmpt.hpp"
-#include "libopenmpt_ext.hpp"
+#include "../libopenmpt.hpp"
+#include "../libopenmpt_ext.hpp"
 
-#include "libopenmpt_plugin_settings.hpp"
+#include "../plugin-common/libopenmpt_plugin_settings.hpp"
 
-#include "libopenmpt_plugin_gui.hpp"
+#include "../plugin-common/libopenmpt_plugin_gui.hpp"
 
 #if __has_include("svn_version.h")
 #include "svn_version.h"
 #else
-#include "../build/svn_version/svn_version.h"
+#include "../../build/svn_version/svn_version.h"
 #endif
 #if defined(OPENMPT_VERSION_REVISION)
 static const char * xmp_openmpt_string = "OpenMPT (" OPENMPT_API_VERSION_STRING "." OPENMPT_API_VERSION_STRINGIZE(OPENMPT_VERSION_REVISION) ")";
