@@ -218,8 +218,7 @@ LOCAL_SRC_FILES += \
 	sounddsp/DSP.cpp \
 	sounddsp/EQ.cpp \
 	sounddsp/Reverb.cpp \
-	test/TestToolsLib.cpp \
-	test/test.cpp
+	
 
 include $(BUILD_SHARED_LIBRARY)
 
