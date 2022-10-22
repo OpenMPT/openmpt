@@ -1550,7 +1550,6 @@
     <ClCompile Include="..\..\libopenmpt\libopenmpt_cxx.cpp" />
     <ClCompile Include="..\..\libopenmpt\libopenmpt_ext_impl.cpp" />
     <ClCompile Include="..\..\libopenmpt\libopenmpt_impl.cpp" />
-    <ClCompile Include="..\..\libopenmpt\libopenmpt_test.cpp" />
     <ClCompile Include="..\..\sounddsp\AGC.cpp" />
     <ClCompile Include="..\..\sounddsp\DSP.cpp" />
     <ClCompile Include="..\..\sounddsp\EQ.cpp" />
@@ -1666,6 +1665,7 @@
     <ClCompile Include="..\..\soundlib\tuning.cpp" />
     <ClCompile Include="..\..\soundlib\tuningCollection.cpp" />
     <ClCompile Include="..\..\test\TestToolsLib.cpp" />
+    <ClCompile Include="..\..\test\libopenmpt_test.cpp" />
     <ClCompile Include="..\..\test\mpt_tests_base.cpp" />
     <ClCompile Include="..\..\test\mpt_tests_binary.cpp" />
     <ClCompile Include="..\..\test\mpt_tests_crc.cpp" />

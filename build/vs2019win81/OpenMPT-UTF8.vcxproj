@@ -1466,6 +1466,7 @@
     <ClCompile Include="..\..\src\openmpt\sounddevice\SoundDeviceUtilities.cpp" />
     <ClCompile Include="..\..\src\openmpt\sounddevice\SoundDeviceWaveout.cpp" />
     <ClCompile Include="..\..\test\TestToolsLib.cpp" />
+    <ClCompile Include="..\..\test\libopenmpt_test.cpp" />
     <ClCompile Include="..\..\test\mpt_tests_base.cpp" />
     <ClCompile Include="..\..\test\mpt_tests_binary.cpp" />
     <ClCompile Include="..\..\test\mpt_tests_crc.cpp" />

@@ -9,13 +9,17 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
+#include "mpt/base/macros.hpp"
+
+#if defined( LIBOPENMPT_BUILD_TEST )
+
 #if defined(__MINGW32__) && !defined(__MINGW64__)
 #include <sys/types.h>
 #endif
 
-#include "libopenmpt_internal.h"
+#include "../libopenmpt/libopenmpt_internal.h"
 
-#include "test/test.h"
+#include "test.h"
 
 #include <iostream>
 #include <locale>
@@ -28,8 +32,6 @@
 #endif /* __DJGPP__ */
 
 using namespace OpenMPT;
-
-#if defined( LIBOPENMPT_BUILD_TEST )
 
 #if defined( __DJGPP__ )
 #if 0
@@ -89,5 +91,9 @@ int main( int /*argc*/ , char * /*argv*/ [] ) {
 	}
 	return 0;
 }
+
+#else // !LIBOPENMPT_BUILD_TEST
+
+unsigned char libopenmpt_test_dummy = 0;
 
 #endif // LIBOPENMPT_BUILD_TEST

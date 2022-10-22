@@ -1099,7 +1099,7 @@ ALL_DEPENDS += $(OPENMPT123_DEPENDS)
 
 
 LIBOPENMPTTEST_CXX_SOURCES += \
- libopenmpt/libopenmpt_test.cpp \
+ test/libopenmpt_test.cpp \
  $(SOUNDLIB_CXX_SOURCES) \
  test/mpt_tests_base.cpp \
  test/mpt_tests_binary.cpp \
@@ -1119,7 +1119,7 @@ LIBOPENMPTTEST_CXX_SOURCES += \
 # test/mpt_tests_uuid_namespace.cpp \
 
 LIBOPENMPTTEST_C_SOURCES += \
- libopenmpt/libopenmpt_test_djgpp_helper.c \
+ test/libopenmpt_test_djgpp_helper.c \
  
 LIBOPENMPTTEST_OBJECTS = $(LIBOPENMPTTEST_CXX_SOURCES:.cpp=.test$(FLAVOUR_O).o) $(LIBOPENMPTTEST_C_SOURCES:.c=.test$(FLAVOUR_O).o)
 LIBOPENMPTTEST_DEPENDS = $(LIBOPENMPTTEST_CXX_SOURCES:.cpp=.test$(FLAVOUR_O).d) $(LIBOPENMPTTEST_C_SOURCES:.c=.test$(FLAVOUR_O).d)

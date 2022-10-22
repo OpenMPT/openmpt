@@ -59,7 +59,6 @@
    "../../libopenmpt/libopenmpt_cxx.cpp",
    "../../libopenmpt/libopenmpt_ext_impl.cpp",
    "../../libopenmpt/libopenmpt_impl.cpp",
-   "../../libopenmpt/libopenmpt_test.cpp",
   }
 	excludes {
 		"../../src/mpt/crypto/**.cpp",

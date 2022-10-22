@@ -1103,9 +1103,6 @@
     <ClCompile Include="..\..\libopenmpt\libopenmpt_impl.cpp">
       <Filter>libopenmpt</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\libopenmpt\libopenmpt_test.cpp">
-      <Filter>libopenmpt</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\sounddsp\AGC.cpp">
       <Filter>sounddsp</Filter>
     </ClCompile>
@@ -1449,6 +1446,9 @@
       <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\test\TestToolsLib.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\libopenmpt_test.cpp">
       <Filter>test</Filter>
     </ClCompile>
     <ClCompile Include="..\..\test\mpt_tests_base.cpp">
