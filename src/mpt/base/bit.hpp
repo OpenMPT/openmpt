@@ -374,6 +374,8 @@ constexpr inline uint64 byteswap_impl_constexpr64(uint64 x) noexcept {
 }
 
 #if MPT_COMPILER_GCC
+// Clang also supports these,
+// however <https://github.com/llvm/llvm-project/issues/58470>.
 #define MPT_byteswap_impl16 __builtin_bswap16
 #define MPT_byteswap_impl32 __builtin_bswap32
 #define MPT_byteswap_impl64 __builtin_bswap64
