@@ -1753,7 +1753,7 @@ bin/$(FLAVOUR_DIR)dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.ret
 	mkdir -p                                     bin/$(FLAVOUR_DIR)dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)
 	mkdir -p                                     bin/$(FLAVOUR_DIR)dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Licenses
 	svn export ./LICENSE                         bin/$(FLAVOUR_DIR)dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/LICENSE.TXT --native-eol CRLF
-	svn export ./libopenmpt/dox/changelog.md     bin/$(FLAVOUR_DIR)dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Changelog.txt --native-eol CRLF
+	svn export ./doc/libopenmpt/changelog.md     bin/$(FLAVOUR_DIR)dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Changelog.txt --native-eol CRLF
 	svn export ./src/mpt/LICENSE.BSD-3-Clause.txt bin/$(FLAVOUR_DIR)dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Licenses/license.mpt.BSD-3-Clause.txt --native-eol CRLF
 	svn export ./src/mpt/LICENSE.BSL-1.0.txt     bin/$(FLAVOUR_DIR)dist-retro-win9x/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Licenses/license.mpt.BSL-1.0.txt --native-eol CRLF
 ifeq ($(ALLOW_LGPL),1)
@@ -1783,7 +1783,7 @@ bin/$(FLAVOUR_DIR)dist-retro-win95crt/libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.
 	mkdir -p                                     bin/$(FLAVOUR_DIR)dist-retro-win95crt/libopenmpt-$(DIST_LIBOPENMPT_VERSION)
 	mkdir -p                                     bin/$(FLAVOUR_DIR)dist-retro-win95crt/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Licenses
 	svn export ./LICENSE                         bin/$(FLAVOUR_DIR)dist-retro-win95crt/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/LICENSE.TXT --native-eol CRLF
-	svn export ./libopenmpt/dox/changelog.md     bin/$(FLAVOUR_DIR)dist-retro-win95crt/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Changelog.txt --native-eol CRLF
+	svn export ./doc/libopenmpt/changelog.md     bin/$(FLAVOUR_DIR)dist-retro-win95crt/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Changelog.txt --native-eol CRLF
 	svn export ./src/mpt/LICENSE.BSD-3-Clause.txt bin/$(FLAVOUR_DIR)dist-retro-win95crt/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Licenses/license.mpt.BSD-3-Clause.txt --native-eol CRLF
 	svn export ./src/mpt/LICENSE.BSL-1.0.txt     bin/$(FLAVOUR_DIR)dist-retro-win95crt/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Licenses/license.mpt.BSL-1.0.txt --native-eol CRLF
 ifeq ($(ALLOW_LGPL),1)

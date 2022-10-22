@@ -854,16 +854,16 @@ WARN_LOGFILE           =
 # spaces. See also FILE_PATTERNS and EXTENSION_MAPPING
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = libopenmpt/dox/index.dox \
+INPUT                  = doc/libopenmpt/index.dox \
                          README.md \
-                         libopenmpt/dox/dependencies.md \
-                         libopenmpt/dox/gettingstarted.md \
-                         libopenmpt/dox/packaging.md \
+                         doc/libopenmpt/dependencies.md \
+                         doc/libopenmpt/gettingstarted.md \
+                         doc/libopenmpt/packaging.md \
                          doc/contributing.md \
                          doc/libopenmpt_styleguide.md \
                          doc/openmpt_styleguide.md \
-                         libopenmpt/dox/tests.md \
-                         libopenmpt/dox/changelog.md \
+                         doc/libopenmpt/tests.md \
+                         doc/libopenmpt/changelog.md \
                          doc/module_formats.md \
                          libopenmpt/libopenmpt.hpp \
                          libopenmpt/libopenmpt.h \

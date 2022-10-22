@@ -28,12 +28,12 @@ function setprerel {
 }
 
 function addchangelog {
-	echo -n > libopenmpt/dox/changelog.md.tmp
-	cat libopenmpt/dox/changelog.md | head -n 7 >> libopenmpt/dox/changelog.md.tmp
-	echo "### libopenmpt ${LIBOPENMPT_VERSION_MAJOR}.${LIBOPENMPT_VERSION_MINOR}.${LIBOPENMPT_VERSION_PATCH}-pre" >> libopenmpt/dox/changelog.md.tmp
-	echo "" >> libopenmpt/dox/changelog.md.tmp
-	cat libopenmpt/dox/changelog.md | tail -n +8 >> libopenmpt/dox/changelog.md.tmp
-	mv libopenmpt/dox/changelog.md.tmp libopenmpt/dox/changelog.md
+	echo -n > doc/libopenmpt/changelog.md.tmp
+	cat doc/libopenmpt/changelog.md | head -n 7 >> doc/libopenmpt/changelog.md.tmp
+	echo "### libopenmpt ${LIBOPENMPT_VERSION_MAJOR}.${LIBOPENMPT_VERSION_MINOR}.${LIBOPENMPT_VERSION_PATCH}-pre" >> doc/libopenmpt/changelog.md.tmp
+	echo "" >> doc/libopenmpt/changelog.md.tmp
+	cat doc/libopenmpt/changelog.md | tail -n +8 >> doc/libopenmpt/changelog.md.tmp
+	mv doc/libopenmpt/changelog.md.tmp doc/libopenmpt/changelog.md
 }
 
 function writeall {
@@ -61,11 +61,11 @@ case $MODE in
 		cat libopenmpt/libopenmpt_version.h | sed -e 's/#define OPENMPT_API_VERSION_PREREL.*/#define OPENMPT_API_VERSION_PREREL ""/' > libopenmpt/libopenmpt_version.h.tmp && mv libopenmpt/libopenmpt_version.h.tmp libopenmpt/libopenmpt_version.h
 		cat libopenmpt/libopenmpt_version.h | sed -e 's/#define OPENMPT_API_VERSION_IS_PREREL.*/#define OPENMPT_API_VERSION_IS_PREREL 0/' > libopenmpt/libopenmpt_version.h.tmp && mv libopenmpt/libopenmpt_version.h.tmp libopenmpt/libopenmpt_version.h
 		cat libopenmpt/libopenmpt_version.mk | sed -e 's/LIBOPENMPT_VERSION_PREREL=.*/LIBOPENMPT_VERSION_PREREL=/' > libopenmpt/libopenmpt_version.mk.tmp && mv libopenmpt/libopenmpt_version.mk.tmp libopenmpt/libopenmpt_version.mk
-		echo -n > libopenmpt/dox/changelog.md.tmp
-		cat libopenmpt/dox/changelog.md | head -n 7 >> libopenmpt/dox/changelog.md.tmp
-		cat libopenmpt/dox/changelog.md | head -n 8 | tail -n 1 | sed -e s/-pre/\ \(${DATE}\)/ | sed -e s/-rc/\ \(${DATE}\)/ >> libopenmpt/dox/changelog.md.tmp
-		cat libopenmpt/dox/changelog.md | tail -n +9 >> libopenmpt/dox/changelog.md.tmp
-		mv libopenmpt/dox/changelog.md.tmp libopenmpt/dox/changelog.md
+		echo -n > doc/libopenmpt/changelog.md.tmp
+		cat doc/libopenmpt/changelog.md | head -n 7 >> doc/libopenmpt/changelog.md.tmp
+		cat doc/libopenmpt/changelog.md | head -n 8 | tail -n 1 | sed -e s/-pre/\ \(${DATE}\)/ | sed -e s/-rc/\ \(${DATE}\)/ >> doc/libopenmpt/changelog.md.tmp
+		cat doc/libopenmpt/changelog.md | tail -n +9 >> doc/libopenmpt/changelog.md.tmp
+		mv doc/libopenmpt/changelog.md.tmp doc/libopenmpt/changelog.md
 		;;
 
 	release-rc)
@@ -73,11 +73,11 @@ case $MODE in
 		LIBOPENMPT_VERSION_PREREL=-rc.$PARAM1
 		writeall
 		setprerel
-		echo -n > libopenmpt/dox/changelog.md.tmp
-		cat libopenmpt/dox/changelog.md | head -n 7 >> libopenmpt/dox/changelog.md.tmp
-		cat libopenmpt/dox/changelog.md | head -n 8 | tail -n 1 | sed -e s/-pre/-rc/ >> libopenmpt/dox/changelog.md.tmp
-		cat libopenmpt/dox/changelog.md | tail -n +9 >> libopenmpt/dox/changelog.md.tmp
-		mv libopenmpt/dox/changelog.md.tmp libopenmpt/dox/changelog.md
+		echo -n > doc/libopenmpt/changelog.md.tmp
+		cat doc/libopenmpt/changelog.md | head -n 7 >> doc/libopenmpt/changelog.md.tmp
+		cat doc/libopenmpt/changelog.md | head -n 8 | tail -n 1 | sed -e s/-pre/-rc/ >> doc/libopenmpt/changelog.md.tmp
+		cat doc/libopenmpt/changelog.md | tail -n +9 >> doc/libopenmpt/changelog.md.tmp
+		mv doc/libopenmpt/changelog.md.tmp doc/libopenmpt/changelog.md
 		;;
 
 	bumpmajor)
