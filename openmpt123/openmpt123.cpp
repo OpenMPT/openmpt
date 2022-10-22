@@ -594,6 +594,34 @@ static std::string get_device_string( const std::string & device ) {
 	return device;
 }
 
+static void show_help_keyboard( textout & log, bool man_version = false ) {
+	if ( !man_version ) {
+		show_info( log, false );
+	}
+	log << "Keyboard hotkeys (use 'openmpt123 --ui'):" << std::endl;
+	log << std::endl;
+	log << " [q]      quit" << std::endl;
+	log << " [ ]      pause / unpause" << std::endl;
+	log << " [N]      skip 10 files backward" << std::endl;
+	log << " [n]      prev file" << std::endl;
+	log << " [m]      next file" << std::endl;
+	log << " [M]      skip 10 files forward" << std::endl;
+	log << " [h]      seek 10 seconds backward" << std::endl;
+	log << " [j]      seek 1 seconds backward" << std::endl;
+	log << " [k]      seek 1 seconds forward" << std::endl;
+	log << " [l]      seek 10 seconds forward" << std::endl;
+	log << " [u]|[i]  +/- tempo" << std::endl;
+	log << " [o]|[p]  +/- pitch" << std::endl;
+	log << " [3]|[4]  +/- gain" << std::endl;
+	log << " [5]|[6]  +/- stereo separation" << std::endl;
+	log << " [7]|[8]  +/- filter taps" << std::endl;
+	log << " [9]|[0]  +/- volume ramping" << std::endl;
+	log << std::endl;
+	if ( !man_version ) {
+		log.writeout();
+	}
+}
+
 static void show_help( textout & log, bool with_info = true, bool longhelp = false, bool man_version = false, const std::string & message = std::string() ) {
 	if ( with_info ) {
 		show_info( log, false );
@@ -607,6 +635,7 @@ static void show_help( textout & log, bool with_info = true, bool longhelp = fal
 		}
 		if ( man_version ) {
 			log << "Options:" << std::endl;
+			log << std::endl;
 		}
 		log << " -h, --help                 Show help" << std::endl;
 		log << "     --help-keyboard        Show keyboard hotkeys in ui mode" << std::endl;
@@ -692,6 +721,8 @@ static void show_help( textout & log, bool with_info = true, bool longhelp = fal
 				log << extension;
 			}
 			log << std::endl;
+		} else {
+			show_help_keyboard( log, true );
 		}
 	}
 
@@ -701,30 +732,6 @@ static void show_help( textout & log, bool with_info = true, bool longhelp = fal
 		log << message;
 		log << std::endl;
 	}
-	log.writeout();
-}
-
-static void show_help_keyboard( textout & log ) {
-	show_info( log, false );
-	log << "Keyboard hotkeys (use 'openmpt123 --ui'):" << std::endl;
-	log << std::endl;
-	log << " [q]     quit" << std::endl;
-	log << " [ ]     pause / unpause" << std::endl;
-	log << " [N]     skip 10 files backward" << std::endl;
-	log << " [n]     prev file" << std::endl;
-	log << " [m]     next file" << std::endl;
-	log << " [M]     skip 10 files forward" << std::endl;
-	log << " [h]     seek 10 seconds backward" << std::endl;
-	log << " [j]     seek 1 seconds backward" << std::endl;
-	log << " [k]     seek 1 seconds forward" << std::endl;
-	log << " [l]     seek 10 seconds forward" << std::endl;
-	log << " [u]|[i] +/- tempo" << std::endl;
-	log << " [o]|[p] +/- pitch" << std::endl;
-	log << " [3]|[4] +/- gain" << std::endl;
-	log << " [5]|[6] +/- stereo separation" << std::endl;
-	log << " [7]|[8] +/- filter taps" << std::endl;
-	log << " [9]|[0] +/- volume ramping" << std::endl;
-	log << std::endl;
 	log.writeout();
 }
 
