@@ -95,11 +95,11 @@ static_assert(sizeof(int24) == 3);
 
 template <>
 struct packed_int_type<int24> {
-	using type = int;
+	using type = int32;
 };
 template <>
 struct packed_int_type<uint24> {
-	using type = unsigned int;
+	using type = uint32;
 };
 
 using int24le = packed<int24, mpt::endian::little>;
