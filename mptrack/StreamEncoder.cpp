@@ -96,14 +96,14 @@ static inline std::pair<bool, std::size_t> WriteInterleavedImpl(std::ostream &f,
 			}
 		} else
 		{
-			std::vector<typename mpt::make_endian<endian, Tsample>::type> frameData(channels);
 			for(std::size_t frame = 0; frame < frameCount; ++frame)
 			{
 				for(uint16 channel = 0; channel < channels; ++channel)
 				{
-					frameData[channel] = interleaved[channel];
+					typename mpt::make_endian<endian, Tsample>::type sample{};
+					sample = interleaved[channel];
+					mpt::IO::Write(bf, sample);
 				}
-				mpt::IO::WriteRaw(bf, reinterpret_cast<const std::byte*>(frameData.data()), channels * format.GetSampleFormat().GetSampleSize());
 				written += channels * format.GetSampleFormat().GetSampleSize();
 				interleaved += channels;
 			}
