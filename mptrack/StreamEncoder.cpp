@@ -96,32 +96,16 @@ static inline std::pair<bool, std::size_t> WriteInterleavedImpl(std::ostream &f,
 			}
 		} else
 		{
-			if constexpr(std::is_floating_point<Tsample>::value)
+			std::vector<typename mpt::make_endian<endian, Tsample>::type> frameData(channels);
+			for(std::size_t frame = 0; frame < frameCount; ++frame)
 			{
-				std::vector<typename mpt::make_endian<endian, Tsample>::type> frameData(channels);
-				for(std::size_t frame = 0; frame < frameCount; ++frame)
+				for(uint16 channel = 0; channel < channels; ++channel)
 				{
-					for(uint16 channel = 0; channel < channels; ++channel)
-					{
-						frameData[channel] = interleaved[channel];
-					}
-					mpt::IO::WriteRaw(bf, reinterpret_cast<const std::byte*>(frameData.data()), channels * format.GetSampleFormat().GetSampleSize());
-					written += channels * format.GetSampleFormat().GetSampleSize();
-					interleaved += channels;
+					frameData[channel] = interleaved[channel];
 				}
-			} else
-			{
-				std::vector<typename mpt::make_endian<endian, Tsample>::type> frameData(channels);
-				for(std::size_t frame = 0; frame < frameCount; ++frame)
-				{
-					for(uint16 channel = 0; channel < channels; ++channel)
-					{
-						frameData[channel] = interleaved[channel];
-					}
-					mpt::IO::WriteRaw(bf, reinterpret_cast<const std::byte*>(frameData.data()), channels * format.GetSampleFormat().GetSampleSize());
-					written += channels * format.GetSampleFormat().GetSampleSize();
-					interleaved += channels;
-				}
+				mpt::IO::WriteRaw(bf, reinterpret_cast<const std::byte*>(frameData.data()), channels * format.GetSampleFormat().GetSampleSize());
+				written += channels * format.GetSampleFormat().GetSampleSize();
+				interleaved += channels;
 			}
 		}
 		if(bf.HasWriteError())
