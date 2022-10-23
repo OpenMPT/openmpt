@@ -143,6 +143,10 @@ public:
 	MPT_FORCEINLINE explicit IEEE754binary32Emulated(float32 f) {
 		SetInt32(EncodeIEEE754binary32(f));
 	}
+	MPT_FORCEINLINE IEEE754binary32Emulated & operator=(float32 f) {
+		SetInt32(EncodeIEEE754binary32(f));
+		return *this;
+	}
 	// b0...b3 are in memory order, i.e. depend on the endianness of this type
 	// little endian: (0x00,0x00,0x80,0x3f)
 	// big endian:    (0x3f,0x80,0x00,0x00)
@@ -193,6 +197,10 @@ public:
 	IEEE754binary64Emulated() = default;
 	MPT_FORCEINLINE explicit IEEE754binary64Emulated(float64 f) {
 		SetInt64(EncodeIEEE754binary64(f));
+	}
+	MPT_FORCEINLINE IEEE754binary64Emulated & operator=(float64 f) {
+		SetInt64(EncodeIEEE754binary64(f));
+		return *this;
 	}
 	MPT_FORCEINLINE explicit IEEE754binary64Emulated(std::byte b0, std::byte b1, std::byte b2, std::byte b3, std::byte b4, std::byte b5, std::byte b6, std::byte b7) {
 		bytes[0] = b0;
@@ -287,6 +295,10 @@ public:
 	MPT_FORCEINLINE explicit IEEE754binary32Native(float32 f) {
 		value = f;
 	}
+	MPT_FORCEINLINE IEEE754binary32Native & operator=(float32 f) {
+		value = f;
+		return *this;
+	}
 	// b0...b3 are in memory order, i.e. depend on the endianness of this type
 	// little endian: (0x00,0x00,0x80,0x3f)
 	// big endian:    (0x3f,0x80,0x00,0x00)
@@ -335,6 +347,10 @@ public:
 	IEEE754binary64Native() = default;
 	MPT_FORCEINLINE explicit IEEE754binary64Native(float64 f) {
 		value = f;
+	}
+	MPT_FORCEINLINE IEEE754binary64Native & operator=(float64 f) {
+		value = f;
+		return *this;
 	}
 	MPT_FORCEINLINE explicit IEEE754binary64Native(std::byte b0, std::byte b1, std::byte b2, std::byte b3, std::byte b4, std::byte b5, std::byte b6, std::byte b7) {
 		static_assert(endian == mpt::endian::little || endian == mpt::endian::big);
