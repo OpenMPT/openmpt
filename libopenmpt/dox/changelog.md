@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.6.7-pre
 
+ *  FLAC: Update to v1.4.2 (2022-10-22).
+
 ### libopenmpt 0.6.6 (2022-09-25)
 
  *  [**Sec**] Possible crash when playing manipulated IT / MPTM files with a T00
