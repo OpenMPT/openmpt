@@ -10,6 +10,7 @@
 #include "mpt/base/memory.hpp"
 #include "mpt/endian/floatingpoint.hpp"
 #include "mpt/endian/integer.hpp"
+#include "mpt/endian/type_traits.hpp"
 #include "openmpt/base/Types.hpp"
 
 

@@ -11,6 +11,7 @@
 #include "mpt/base/macros.hpp"
 #include "mpt/base/memory.hpp"
 #include "mpt/base/namespace.hpp"
+#include "mpt/endian/type_traits.hpp"
 
 #include <array>
 #include <limits>
@@ -300,20 +301,6 @@ static_assert(mpt::check_binary_size<uint8be>(1));
 
 
 template <typename T>
-struct make_le {
-	using type = packed<typename std::remove_const<T>::type, mpt::endian::little>;
-};
-
-template <typename T>
-struct make_be {
-	using type = packed<typename std::remove_const<T>::type, mpt::endian::big>;
-};
-
-template <mpt::endian endian, typename T>
-struct make_endian {
-};
-
-template <typename T>
 struct make_endian<mpt::endian::little, T> {
 	using type = packed<typename std::remove_const<T>::type, mpt::endian::little>;
 };
@@ -322,6 +309,8 @@ template <typename T>
 struct make_endian<mpt::endian::big, T> {
 	using type = packed<typename std::remove_const<T>::type, mpt::endian::big>;
 };
+
+
 
 template <typename T>
 MPT_CONSTEXPR20_FUN auto as_le(T v) noexcept -> typename mpt::make_le<typename std::remove_const<T>::type>::type {
@@ -336,6 +325,8 @@ MPT_CONSTEXPR20_FUN auto as_be(T v) noexcept -> typename mpt::make_be<typename s
 	res = v;
 	return res;
 }
+
+
 
 template <typename Tpacked>
 MPT_CONSTEXPR20_FUN Tpacked as_endian(typename Tpacked::base_type v) noexcept {

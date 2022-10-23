@@ -12,6 +12,10 @@
 
 #include "StreamEncoder.h"
 
+#include "mpt/endian/floatingpoint.hpp"
+#include "mpt/endian/int24.hpp"
+#include "mpt/endian/integer.hpp"
+#include "mpt/endian/type_traits.hpp"
 #include "mpt/io/base.hpp"
 #include "mpt/io/io.hpp"
 #include "mpt/io/io_stdstream.hpp"
@@ -94,12 +98,12 @@ static inline std::pair<bool, std::size_t> WriteInterleavedImpl(std::ostream &f,
 		{
 			if constexpr(std::is_floating_point<Tsample>::value)
 			{
-				std::vector<typename mpt::make_float_endian<endian, Tsample>::type> frameData(channels);
+				std::vector<typename mpt::make_endian<endian, Tsample>::type> frameData(channels);
 				for(std::size_t frame = 0; frame < frameCount; ++frame)
 				{
 					for(uint16 channel = 0; channel < channels; ++channel)
 					{
-						frameData[channel] = typename mpt::make_float_endian<endian, Tsample>::type(interleaved[channel]);
+						frameData[channel] = interleaved[channel];
 					}
 					mpt::IO::WriteRaw(bf, reinterpret_cast<const std::byte*>(frameData.data()), channels * format.GetSampleFormat().GetSampleSize());
 					written += channels * format.GetSampleFormat().GetSampleSize();

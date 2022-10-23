@@ -491,6 +491,7 @@
 		B3A14F450EE2A2B7E23CED85 /* OPL.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = OPL.cpp; path = ../../soundlib/OPL.cpp; sourceTree = "<group>"; };
 		B50C144B262EB53DDBF5628B /* Reverb.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Reverb.cpp; path = ../../sounddsp/Reverb.cpp; sourceTree = "<group>"; };
 		B5449C6B226CAADD23FF9AAB /* ModSequence.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ModSequence.h; path = ../../soundlib/ModSequence.h; sourceTree = "<group>"; };
+		B547A5AF29A1EAA1A78573EF /* type_traits.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = type_traits.hpp; path = ../../src/mpt/endian/type_traits.hpp; sourceTree = "<group>"; };
 		B569F9F747F7C3E9B0D06837 /* Load_669.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Load_669.cpp; path = ../../soundlib/Load_669.cpp; sourceTree = "<group>"; };
 		B810F0D30F7663C5C1847F13 /* MixerLoops.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = MixerLoops.cpp; path = ../../soundlib/MixerLoops.cpp; sourceTree = "<group>"; };
 		B99E396D4C2C035FB504A7AD /* Load_c67.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Load_c67.cpp; path = ../../soundlib/Load_c67.cpp; sourceTree = "<group>"; };
@@ -681,6 +682,7 @@
 				A527626137B52C53A08DD0A1 /* int24.hpp */,
 				3CC72D5B942CA04D463ABB9B /* integer.hpp */,
 				0317FD4359A567B5321E7B83 /* tests */,
+				B547A5AF29A1EAA1A78573EF /* type_traits.hpp */,
 			);
 			name = endian;
 			sourceTree = "<group>";

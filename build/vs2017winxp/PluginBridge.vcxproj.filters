@@ -393,6 +393,9 @@
     <ClInclude Include="..\..\src\mpt\endian\tests\tests_endian_integer.hpp">
       <Filter>src\mpt\endian\tests</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\mpt\endian\type_traits.hpp">
+      <Filter>src\mpt\endian</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\mpt\environment\environment.hpp">
       <Filter>src\mpt\environment</Filter>
     </ClInclude>

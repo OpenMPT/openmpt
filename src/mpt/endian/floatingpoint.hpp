@@ -10,6 +10,7 @@
 #include "mpt/base/macros.hpp"
 #include "mpt/base/memory.hpp"
 #include "mpt/base/namespace.hpp"
+#include "mpt/endian/type_traits.hpp"
 
 #include <limits>
 
@@ -449,46 +450,24 @@ static_assert(sizeof(float64be_fast) == 8);
 
 
 
-template <typename Tfloat>
-struct make_float_be {
+template <>
+struct make_endian<mpt::endian::little, float> {
+	using type = IEEE754binary32LE;
 };
 
 template <>
-struct make_float_be<double> {
-	using type = IEEE754binary64BE;
-};
-
-template <>
-struct make_float_be<float> {
+struct make_endian<mpt::endian::big, float> {
 	using type = IEEE754binary32BE;
 };
 
-template <typename Tfloat>
-struct make_float_le {
-};
-
 template <>
-struct make_float_le<double> {
+struct make_endian<mpt::endian::little, double> {
 	using type = IEEE754binary64LE;
 };
 
 template <>
-struct make_float_le<float> {
-	using type = IEEE754binary32LE;
-};
-
-template <mpt::endian endian, typename T>
-struct make_float_endian {
-};
-
-template <typename T>
-struct make_float_endian<mpt::endian::little, T> {
-	using type = typename make_float_le<typename std::remove_const<T>::type>::type;
-};
-
-template <typename T>
-struct make_float_endian<mpt::endian::big, T> {
-	using type = typename make_float_be<typename std::remove_const<T>::type>::type;
+struct make_endian<mpt::endian::big, double> {
+	using type = IEEE754binary64BE;
 };
 
 
