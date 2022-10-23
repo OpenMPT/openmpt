@@ -235,10 +235,6 @@
 /include/flac/src/libFLAC/libFLAC_static.vcproj
 /include/flac/src/libFLAC/libFLAC_static.vcxproj
 /include/flac/src/libFLAC/libFLAC_static.vcxproj.filters
-/include/flac/src/libFLAC/ia32/CMakeLists.txt
-/include/flac/src/libFLAC/ia32/Makefile.am
-/include/flac/src/libFLAC/ia32/Makefile.in
-/include/flac/src/libFLAC/ia32/PaxHeaders
 /include/flac/src/libFLAC/include/Makefile.am
 /include/flac/src/libFLAC/include/Makefile.in
 /include/flac/src/libFLAC/include/PaxHeaders
