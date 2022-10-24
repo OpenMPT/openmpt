@@ -49,6 +49,7 @@
 			Fast = "-ffast-math",
 		},
 		strictaliasing = gcc.shared.strictaliasing,
+		openmp = gcc.shared.openmp,
 		optimize = {
 			Off = "-O0",
 			On = "-O2",
@@ -114,6 +115,9 @@
 --
 
 	clang.cxxflags = table.merge(gcc.cxxflags, {
+		sanitize = {
+			Fuzzer = "-fsanitize=fuzzer",
+		},
 	})
 
 	function clang.getcxxflags(cfg)

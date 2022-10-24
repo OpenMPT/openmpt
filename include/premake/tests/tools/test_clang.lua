@@ -37,7 +37,7 @@
 		prepare()
 		test.contains({ "-mmacosx-version-min=10.9" }, clang.getcflags(cfg))
 	end
-	
+
 	function suite.cxxflags_macosx_systemversion()
 		system "MacOSX"
 		systemversion "10.9"
@@ -50,7 +50,7 @@
 		prepare()
 		test.excludes({ "-mmacosx-version-min=10.9" }, clang.getcxxflags(cfg))
 	end
-	
+
 --
 -- Check iOS deployment target flags
 --
@@ -61,11 +61,36 @@
 		prepare()
 		test.contains({ "-miphoneos-version-min=12.1" }, clang.getcflags(cfg))
 	end
-	
+
 	function suite.cxxflags_ios_systemversion()
 		system "iOS"
 		systemversion "5.0"
 		prepare()
 		test.contains({ "-miphoneos-version-min=5.0" }, clang.getcxxflags(cfg))
 	end
-	
+
+--
+-- Check handling of openmp.
+--
+
+	function suite.cflags_onOpenmpOn()
+		openmp "On"
+		prepare()
+		test.contains("-fopenmp", clang.getcflags(cfg))
+	end
+
+	function suite.cflags_onOpenmpOff()
+		openmp "Off"
+		prepare()
+		test.excludes("-fopenmp", clang.getcflags(cfg))
+	end
+
+--
+-- Check the translation of CXXFLAGS.
+--
+
+function suite.cxxflags_onSanitizeFuzzer()
+	sanitize { "Fuzzer" }
+	prepare()
+	test.contains({ "-fsanitize=fuzzer" }, clang.getcxxflags(cfg))
+end

@@ -93,17 +93,17 @@
 		C159C5CA65AC637C77E4AC0A /* linit.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = linit.c; path = ../../contrib/lua/src/linit.c; sourceTree = "<group>"; };
 		C8F86CF8190C01AA9B8A3338 /* lua.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = lua.h; path = ../../contrib/lua/src/lua.h; sourceTree = "<group>"; };
 		CCE00FA6E3F2AAD8D40EA5E6 /* lopcodes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = lopcodes.h; path = ../../contrib/lua/src/lopcodes.h; sourceTree = "<group>"; };
-		D0CD90B5D1808DA745625EF5 /* liblua-lib.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "liblua-lib.a"; path = "liblua-lib.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		D88715F07B753CA20A9B1C30 /* llimits.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = llimits.h; path = ../../contrib/lua/src/llimits.h; sourceTree = "<group>"; };
 		DF69E352E2DAB58464475992 /* ltable.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = ltable.c; path = ../../contrib/lua/src/ltable.c; sourceTree = "<group>"; };
 		E2B3DB9A85A2024C14C7E1DA /* lstring.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = lstring.h; path = ../../contrib/lua/src/lstring.h; sourceTree = "<group>"; };
+		E7DDB6948ACBDD4619F1BCD4 /* lua-lib.lib */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "lua-lib.lib"; path = "lua-lib.lib"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E96791248DBA2ED69FF27764 /* lfunc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = lfunc.h; path = ../../contrib/lua/src/lfunc.h; sourceTree = "<group>"; };
 		F26A559E95587C50247E5BDE /* lundump.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = lundump.h; path = ../../contrib/lua/src/lundump.h; sourceTree = "<group>"; };
 		FE9D2846A18B4EF830B12E86 /* lparser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = lparser.h; path = ../../contrib/lua/src/lparser.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		49B173A57857C797D19921E5 /* Frameworks */ = {
+		2BB38204D0061FB6E23E6844 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -113,7 +113,7 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		51A84151C33359C372347F91 /* Embed Libraries */ = {
+		BC676370BFD835A24144D9B0 /* Embed Libraries */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
@@ -194,7 +194,7 @@
 		A6C936B49B3FADE6EA134CF4 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				D0CD90B5D1808DA745625EF5 /* liblua-lib.a */,
+				E7DDB6948ACBDD4619F1BCD4 /* lua-lib.lib */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -202,14 +202,14 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		B31BA5FB5609CCADE52FAC3B /* lua-lib */ = {
+		75BF0BFAE74A246C964B4A3A /* lua-lib */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 37ECBC0466930FF6BFD46A44 /* Build configuration list for PBXNativeTarget "lua-lib" */;
+			buildConfigurationList = 19EECA63BE416815D079B0A3 /* Build configuration list for PBXNativeTarget "lua-lib" */;
 			buildPhases = (
-				B998F445E83F48374180A285 /* Resources */,
-				23460D9C51EC618EAB2DBBDC /* Sources */,
-				49B173A57857C797D19921E5 /* Frameworks */,
-				51A84151C33359C372347F91 /* Embed Libraries */,
+				9B9B02A43FEDA0565225E8E4 /* Resources */,
+				05481BFBA99AB9ADBBD3023B /* Sources */,
+				2BB38204D0061FB6E23E6844 /* Frameworks */,
+				BC676370BFD835A24144D9B0 /* Embed Libraries */,
 			);
 			buildRules = (
 			);
@@ -217,7 +217,7 @@
 			);
 			name = "lua-lib";
 			productName = "lua-lib";
-			productReference = D0CD90B5D1808DA745625EF5 /* liblua-lib.a */;
+			productReference = E7DDB6948ACBDD4619F1BCD4 /* lua-lib.lib */;
 			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
@@ -232,13 +232,13 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				B31BA5FB5609CCADE52FAC3B /* liblua-lib.a */,
+				75BF0BFAE74A246C964B4A3A /* lua-lib.lib */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		B998F445E83F48374180A285 /* Resources */ = {
+		9B9B02A43FEDA0565225E8E4 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -248,7 +248,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		23460D9C51EC618EAB2DBBDC /* Sources */ = {
+		05481BFBA99AB9ADBBD3023B /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -293,22 +293,22 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
-		3682EC4491C43FB6651E8A84 /* Release */ = {
+		65F28BA98E2D445B75C8D1E9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CONFIGURATION_BUILD_DIR = bin/Release;
+				CONFIGURATION_BUILD_DIR = bin/x64/Debug;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				EXECUTABLE_EXTENSION = lib;
 				GCC_DYNAMIC_NO_PIC = NO;
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = "lua-lib";
 			};
-			name = Release;
+			name = Debug;
 		};
 		8FD4E4F533206E274DF13B35 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
 				CONFIGURATION_BUILD_DIR = "$(SYMROOT)";
 				CONFIGURATION_TEMP_DIR = "$(OBJROOT)";
 				COPY_PHASE_STRIP = NO;
@@ -319,16 +319,14 @@
 					CURL_STATICLIB,
 					PREMAKE_CURL,
 					_DEBUG,
-					LUA_USE_POSIX,
-					LUA_USE_DLOPEN,
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				OBJROOT = "obj/Debug/lua-lib";
+				OBJROOT = "obj/x64/Debug/lua-lib";
 				ONLY_ACTIVE_ARCH = YES;
 				STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = static;
-				SYMROOT = bin/Debug;
+				SYMROOT = bin/x64/Debug;
 				USER_HEADER_SEARCH_PATHS = (
 					../../contrib/lua/src,
 				);
@@ -336,22 +334,9 @@
 			};
 			name = Debug;
 		};
-		CA26F6CAF9B8C5BCD4C6050A /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CONFIGURATION_BUILD_DIR = bin/Debug;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				GCC_DYNAMIC_NO_PIC = NO;
-				INSTALL_PATH = /usr/local/lib;
-				PRODUCT_NAME = "lua-lib";
-			};
-			name = Debug;
-		};
 		CD09D06F715C6E218394B6AF /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
 				CONFIGURATION_BUILD_DIR = "$(SYMROOT)";
 				CONFIGURATION_TEMP_DIR = "$(OBJROOT)";
 				GCC_OPTIMIZATION_LEVEL = fast;
@@ -360,16 +345,14 @@
 					CURL_STATICLIB,
 					PREMAKE_CURL,
 					NDEBUG,
-					LUA_USE_POSIX,
-					LUA_USE_DLOPEN,
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				OBJROOT = "obj/Release/lua-lib";
+				OBJROOT = "obj/x64/Release/lua-lib";
 				ONLY_ACTIVE_ARCH = NO;
 				STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = static;
-				SYMROOT = bin/Release;
+				SYMROOT = bin/x64/Release;
 				USER_HEADER_SEARCH_PATHS = (
 					../../contrib/lua/src,
 				);
@@ -377,23 +360,40 @@
 			};
 			name = Release;
 		};
+		F38734E31552E21552080B23 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CONFIGURATION_BUILD_DIR = bin/x64/Release;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				EXECUTABLE_EXTENSION = lib;
+				GCC_DYNAMIC_NO_PIC = NO;
+				INSTALL_PATH = /usr/local/lib;
+				PRODUCT_NAME = "lua-lib";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "lua-lib" */ = {
+		19EECA63BE416815D079B0A3 /* Build configuration list for PBXNativeTarget "lua-lib.lib" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				CD09D06F715C6E218394B6AF /* Release */,
-				8FD4E4F533206E274DF13B35 /* Debug */,
+				F38734E31552E21552080B23 /* Release */,
+				F38734E31552E21552080B23 /* Release */,
+				65F28BA98E2D445B75C8D1E9 /* Debug */,
+				65F28BA98E2D445B75C8D1E9 /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		37ECBC0466930FF6BFD46A44 /* Build configuration list for PBXNativeTarget "liblua-lib.a" */ = {
+		1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "lua-lib" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				3682EC4491C43FB6651E8A84 /* Release */,
-				CA26F6CAF9B8C5BCD4C6050A /* Debug */,
+				CD09D06F715C6E218394B6AF /* Release */,
+				CD09D06F715C6E218394B6AF /* Release */,
+				8FD4E4F533206E274DF13B35 /* Debug */,
+				8FD4E4F533206E274DF13B35 /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

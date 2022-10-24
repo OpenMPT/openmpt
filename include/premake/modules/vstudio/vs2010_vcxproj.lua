@@ -195,6 +195,7 @@
 				m.clrSupport,
 				m.characterSet,
 				m.platformToolset,
+				m.sanitizers,
 				m.toolsVersion,
 				m.wholeProgramOptimization,
 				m.nmakeOutDirs,
@@ -430,7 +431,7 @@
 	end
 
 	function m.buildStep(cfg)
-		if #cfg.buildCommands > 0 or #cfg.buildOutputs > 0 or #cfg.buildInputs > 0 or cfg.buildMessage then
+		if #cfg.buildcommands > 0 or #cfg.buildoutputs > 0 or #cfg.buildinputs > 0 or cfg.buildmessage then
 
 			p.push('<CustomBuildStep>')
 			p.callArray(m.elements.buildStep, cfg)
@@ -1056,6 +1057,32 @@
 		end
 	}
 
+
+---
+-- AppxManifest group
+---
+	m.categories.AppxManifest = {
+		name       = "AppxManifest",
+		extensions = { ".appxmanifest" },
+		priority   = 12,
+
+		emitFiles = function(prj, group)
+			local fileFunc = {
+				m.fileType,
+				m.subType,
+			}
+
+			local fileCfgFunc = {
+				m.excludedFromBuild,
+			}
+
+			m.emitFiles(prj, group, "AppxManifest", fileFunc, fileCfgFunc)
+		end,
+
+		emitFilter = function(prj, group)
+			m.filterGroup(prj, group, "AppxManifest")
+		end
+	}
 
 ---
 -- Categorize files into groups.
@@ -1891,6 +1918,11 @@
 	end
 
 
+	function m.subType(cfg, file)
+		m.element("SubType", nil, "Designer")
+	end
+
+
 	function m.floatingPointModel(cfg)
 		if cfg.floatingpoint and cfg.floatingpoint ~= "Default" then
 			m.element("FloatingPointModel", nil, cfg.floatingpoint)
@@ -2472,6 +2504,19 @@
 				end
 			else
 				m.element("PlatformToolset", nil, version)
+			end
+		end
+	end
+
+	function m.sanitizers(cfg)
+		if _ACTION >= "vs2019" and cfg.sanitize then
+			if table.contains(cfg.sanitize, "Address") then
+				m.element("EnableASAN", nil, "true")
+			end
+		end
+		if _ACTION >= "vs2022" and cfg.sanitize then
+			if table.contains(cfg.sanitize, "Fuzzer") then
+				m.element("EnableFuzzer", nil, "true")
 			end
 		end
 	end

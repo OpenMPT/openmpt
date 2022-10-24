@@ -29,9 +29,9 @@ ifeq ($(origin AR), default)
 endif
 INCLUDES += -I../../contrib/lua/src -I../../contrib/luashim
 FORCE_INCLUDE +=
-ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
+ALL_CPPFLAGS += $(CPPFLAGS) -MD -MP $(DEFINES) $(INCLUDES)
 ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
-ALL_LDFLAGS += $(LDFLAGS) -dynamiclib -Wl,-install_name,@rpath/libluasocket.dylib -arch x86_64
+ALL_LDFLAGS += $(LDFLAGS) -dynamiclib -Wl,-install_name,@rpath/libluasocket.dylib
 LINKCMD = $(CC) -o "$@" $(OBJECTS) $(RESOURCES) $(ALL_LDFLAGS) $(LIBS)
 define PREBUILDCMDS
 endef
@@ -45,8 +45,8 @@ TARGETDIR = ../../bin/release
 TARGET = $(TARGETDIR)/libluasocket.dylib
 OBJDIR = obj/Release/luasocket
 DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -DNDEBUG -DLUASOCKET_API=__attribute__\(\(visibility\(\"default\"\)\)\)
-ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -O3 -fPIC -Wall -Wextra -arch x86_64
-ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -O3 -fPIC -Wall -Wextra -fno-stack-protector -arch x86_64
+ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -O3 -fPIC -Wall -Wextra
+ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -O3 -fPIC -Wall -Wextra -fno-stack-protector
 LIBS += bin/Release/libluashim-lib.a
 LDDEPS += bin/Release/libluashim-lib.a
 
@@ -55,8 +55,8 @@ TARGETDIR = ../../bin/debug
 TARGET = $(TARGETDIR)/libluasocket.dylib
 OBJDIR = obj/Debug/luasocket
 DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -D_DEBUG -DLUASOCKET_API=__attribute__\(\(visibility\(\"default\"\)\)\)
-ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -fPIC -g -Wall -Wextra -arch x86_64
-ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -fPIC -g -Wall -Wextra -arch x86_64
+ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -fPIC -g -Wall -Wextra
+ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -fPIC -g -Wall -Wextra
 LIBS += bin/Debug/libluashim-lib.a
 LDDEPS += bin/Debug/libluashim-lib.a
 
@@ -174,61 +174,61 @@ endif
 # #############################################
 
 $(OBJDIR)/main.o: ../../binmodules/luasocket/main.c
-	@echo $(notdir $<)
+	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/auxiliar.o: ../../binmodules/luasocket/src/auxiliar.c
-	@echo $(notdir $<)
+	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/buffer.o: ../../binmodules/luasocket/src/buffer.c
-	@echo $(notdir $<)
+	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/compat.o: ../../binmodules/luasocket/src/compat.c
-	@echo $(notdir $<)
+	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/except.o: ../../binmodules/luasocket/src/except.c
-	@echo $(notdir $<)
+	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/inet.o: ../../binmodules/luasocket/src/inet.c
-	@echo $(notdir $<)
+	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/io.o: ../../binmodules/luasocket/src/io.c
-	@echo $(notdir $<)
+	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/luasocket.o: ../../binmodules/luasocket/src/luasocket.c
-	@echo $(notdir $<)
+	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/mime.o: ../../binmodules/luasocket/src/mime.c
-	@echo $(notdir $<)
+	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/options.o: ../../binmodules/luasocket/src/options.c
-	@echo $(notdir $<)
+	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/select.o: ../../binmodules/luasocket/src/select.c
-	@echo $(notdir $<)
+	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/serial.o: ../../binmodules/luasocket/src/serial.c
-	@echo $(notdir $<)
+	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/tcp.o: ../../binmodules/luasocket/src/tcp.c
-	@echo $(notdir $<)
+	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/timeout.o: ../../binmodules/luasocket/src/timeout.c
-	@echo $(notdir $<)
+	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/udp.o: ../../binmodules/luasocket/src/udp.c
-	@echo $(notdir $<)
+	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/unix.o: ../../binmodules/luasocket/src/unix.c
-	@echo $(notdir $<)
+	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/unixdgram.o: ../../binmodules/luasocket/src/unixdgram.c
-	@echo $(notdir $<)
+	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/unixstream.o: ../../binmodules/luasocket/src/unixstream.c
-	@echo $(notdir $<)
+	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/usocket.o: ../../binmodules/luasocket/src/usocket.c
-	@echo $(notdir $<)
+	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 
 -include $(OBJECTS:%.o=%.d)

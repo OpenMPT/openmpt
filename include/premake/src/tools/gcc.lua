@@ -21,7 +21,7 @@
 		system = {
 			haiku = "-MMD",
 			wii = { "-MMD", "-MP", "-I$(LIBOGC_INC)", "$(MACHDEP)" },
-			_ = { "-MMD", "-MP" }
+			_ = { "-MD", "-MP" }
 		}
 	}
 
@@ -66,6 +66,9 @@
 			Level1 = { "-fstrict-aliasing", "-Wstrict-aliasing=1" },
 			Level2 = { "-fstrict-aliasing", "-Wstrict-aliasing=2" },
 			Level3 = { "-fstrict-aliasing", "-Wstrict-aliasing=3" },
+		},
+		openmp = {
+			On = "-fopenmp"
 		},
 		optimize = {
 			Off = "-O0",
@@ -225,6 +228,9 @@
 		},
 		rtti = {
 			Off = "-fno-rtti"
+		},
+		sanitize = {
+			Address = "-fsanitize=address",
 		},
 		visibility = {
 			Default = "-fvisibility=default",

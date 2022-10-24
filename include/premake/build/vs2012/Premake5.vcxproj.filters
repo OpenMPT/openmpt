@@ -600,6 +600,9 @@
     <None Include="..\..\modules\gmake2\tests\test_gmake2_tools.lua">
       <Filter>modules\gmake2\tests</Filter>
     </None>
+    <None Include="..\..\modules\gmake2\tests\test_gmake2_wks.lua">
+      <Filter>modules\gmake2\tests</Filter>
+    </None>
     <None Include="..\..\modules\raw\README.md">
       <Filter>modules\raw</Filter>
     </None>

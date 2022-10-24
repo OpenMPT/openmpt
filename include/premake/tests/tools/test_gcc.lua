@@ -53,9 +53,9 @@
 -- By default, the -MMD -MP are used to generate dependencies.
 --
 
-	function suite.cppflags_defaultWithMMD()
+	function suite.cppflags_defaultWithMD()
 		prepare()
-		test.contains({"-MMD", "-MP"}, gcc.getcppflags(cfg))
+		test.contains({"-MD", "-MP"}, gcc.getcppflags(cfg))
 	end
 
 
@@ -356,16 +356,22 @@
 -- Check the translation of CXXFLAGS.
 --
 
-	function suite.cflags_onNoExceptions()
+	function suite.cxxflags_onNoExceptions()
 		exceptionhandling "Off"
 		prepare()
 		test.contains({ "-fno-exceptions" }, gcc.getcxxflags(cfg))
 	end
 
-	function suite.cflags_onNoBufferSecurityCheck()
+	function suite.cxxflags_onNoBufferSecurityCheck()
 		flags { "NoBufferSecurityCheck" }
 		prepare()
 		test.contains({ "-fno-stack-protector" }, gcc.getcxxflags(cfg))
+	end
+
+	function suite.cxxflags_onSanitizeAddress()
+		sanitize { "Address" }
+		prepare()
+		test.contains({ "-fsanitize=address" }, gcc.getcxxflags(cfg))
 	end
 
 --
@@ -702,6 +708,21 @@
 		test.contains({ "-fstrict-aliasing", "-Wstrict-aliasing=3" }, gcc.getcflags(cfg))
 	end
 
+--
+-- Check handling of openmp.
+--
+
+	function suite.cflags_onOpenmpOn()
+		openmp "On"
+		prepare()
+		test.contains("-fopenmp", gcc.getcflags(cfg))
+	end
+
+	function suite.cflags_onOpenmpOff()
+		openmp "Off"
+		prepare()
+		test.excludes("-fopenmp", gcc.getcflags(cfg))
+	end
 
 --
 -- Check handling of system search paths.

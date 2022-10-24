@@ -36,11 +36,11 @@ endif
 
 PROJECTS := Premake5 lua-lib luashim-lib zlib-lib zip-lib mbedtls-lib curl-lib example luasocket
 
-.PHONY: all clean help $(PROJECTS) Binary Modules contrib
+.PHONY: all clean help $(PROJECTS) Binary\ Modules contrib
 
 all: $(PROJECTS)
 
-Binary Modules: example luasocket
+Binary\ Modules: example luasocket
 
 contrib: curl-lib lua-lib luashim-lib mbedtls-lib zip-lib zlib-lib
 

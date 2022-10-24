@@ -290,7 +290,7 @@
       <ResourceCompiler Options=""/>
     </GlobalSettings>
     <Configuration Name="Release" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Static Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-isystem ../../contrib/curl/include;-O3;-w;-fno-stack-protector" C_Options="-isystem ../../contrib/curl/include;-O3;-w" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
+      <Compiler Options="-isystem ../../contrib/curl/include;-O3;-w;-fno-stack-protector" C_Options="-isystem ../../contrib/curl/include;-O3;-w" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlagsPolicy="1" PCHFlags="">
         <IncludePath Value="../../contrib/curl/lib"/>
         <IncludePath Value="../../contrib/mbedtls/include"/>
         <IncludePath Value="../../contrib/zlib"/>
@@ -303,7 +303,6 @@
         <Preprocessor Value="USE_ZLIB"/>
         <Preprocessor Value="USE_MBEDTLS"/>
         <Preprocessor Value="CURL_HIDDEN_SYMBOLS"/>
-        <Preprocessor Value="CURL_CA_BUNDLE=&quot;/etc/ssl/certs/ca-certificates.crt&quot;"/>
       </Compiler>
       <Linker Required="yes" Options="">
       </Linker>
@@ -330,7 +329,7 @@
       </Completion>
     </Configuration>
     <Configuration Name="Debug" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Static Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-isystem ../../contrib/curl/include;-g;-w" C_Options="-isystem ../../contrib/curl/include;-g;-w" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
+      <Compiler Options="-isystem ../../contrib/curl/include;-g;-w" C_Options="-isystem ../../contrib/curl/include;-g;-w" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlagsPolicy="1" PCHFlags="">
         <IncludePath Value="../../contrib/curl/lib"/>
         <IncludePath Value="../../contrib/mbedtls/include"/>
         <IncludePath Value="../../contrib/zlib"/>
@@ -343,7 +342,6 @@
         <Preprocessor Value="USE_ZLIB"/>
         <Preprocessor Value="USE_MBEDTLS"/>
         <Preprocessor Value="CURL_HIDDEN_SYMBOLS"/>
-        <Preprocessor Value="CURL_CA_BUNDLE=&quot;/etc/ssl/certs/ca-certificates.crt&quot;"/>
       </Compiler>
       <Linker Required="yes" Options="">
       </Linker>

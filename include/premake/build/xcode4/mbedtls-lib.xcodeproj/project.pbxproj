@@ -105,7 +105,6 @@
 		050E49EA2D49029C14E4902A /* padlock.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = padlock.c; path = ../../contrib/mbedtls/library/padlock.c; sourceTree = "<group>"; };
 		0567282F179104E14B81EE6F /* pk_internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = pk_internal.h; path = ../../contrib/mbedtls/include/mbedtls/pk_internal.h; sourceTree = "<group>"; };
 		05B99D03C9255EB507C90343 /* certs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = certs.h; path = ../../contrib/mbedtls/include/mbedtls/certs.h; sourceTree = "<group>"; };
-		06385D5EF1248350390A4B9E /* libmbedtls-lib.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "libmbedtls-lib.a"; path = "libmbedtls-lib.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		0641BA40A92FE0F23855C080 /* aes.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = aes.c; path = ../../contrib/mbedtls/library/aes.c; sourceTree = "<group>"; };
 		08DBEBE21FEE8714100A8222 /* arc4.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = arc4.c; path = ../../contrib/mbedtls/library/arc4.c; sourceTree = "<group>"; };
 		099426039F0AE5350DA73C43 /* psa_util.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = psa_util.h; path = ../../contrib/mbedtls/include/mbedtls/psa_util.h; sourceTree = "<group>"; };
@@ -274,12 +273,13 @@
 		F53EA272982CC9242752A8B2 /* pem.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = pem.c; path = ../../contrib/mbedtls/library/pem.c; sourceTree = "<group>"; };
 		F845D66D2A3F211FA41E5CAD /* version.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = version.h; path = ../../contrib/mbedtls/include/mbedtls/version.h; sourceTree = "<group>"; };
 		F871A49DC694F84F4DA34ADD /* asn1write.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = asn1write.h; path = ../../contrib/mbedtls/include/mbedtls/asn1write.h; sourceTree = "<group>"; };
+		FACB9DFD20F1CDAF87F8C43D /* mbedtls-lib.lib */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "mbedtls-lib.lib"; path = "mbedtls-lib.lib"; sourceTree = BUILT_PRODUCTS_DIR; };
 		FAF137C40D1B1476410BFE04 /* crypto_struct.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = crypto_struct.h; path = ../../contrib/mbedtls/include/psa/crypto_struct.h; sourceTree = "<group>"; };
 		FDA80C7A25E2C52C0D7E52BA /* version.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = version.c; path = ../../contrib/mbedtls/library/version.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		3CC653CE3D7950C0B15B220E /* Frameworks */ = {
+		2F6C1CEDD25A439F6180232D /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -289,7 +289,7 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		5D75CFBA56DBD12C4A772DFA /* Embed Libraries */ = {
+		90B25C99A7C4F7CB97E0F2D9 /* Embed Libraries */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
@@ -514,7 +514,7 @@
 		A6C936B49B3FADE6EA134CF4 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				06385D5EF1248350390A4B9E /* libmbedtls-lib.a */,
+				FACB9DFD20F1CDAF87F8C43D /* mbedtls-lib.lib */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -532,14 +532,14 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		389B01845EC13136C5C827C4 /* mbedtls-lib */ = {
+		D3692A43CCCF2BB5C06A8883 /* mbedtls-lib */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 2B019C2D2BB4991F9F966A6D /* Build configuration list for PBXNativeTarget "mbedtls-lib" */;
+			buildConfigurationList = 1DA7654CC0958BFE4FBB6B8C /* Build configuration list for PBXNativeTarget "mbedtls-lib" */;
 			buildPhases = (
-				ACADD46EAD60D1602142A2AE /* Resources */,
-				165AEDC5170DEAB78AEFBC05 /* Sources */,
-				3CC653CE3D7950C0B15B220E /* Frameworks */,
-				5D75CFBA56DBD12C4A772DFA /* Embed Libraries */,
+				9F539D8D4241C43FD167A3CD /* Resources */,
+				0900B6E4ABEEDD963B14BD24 /* Sources */,
+				2F6C1CEDD25A439F6180232D /* Frameworks */,
+				90B25C99A7C4F7CB97E0F2D9 /* Embed Libraries */,
 			);
 			buildRules = (
 			);
@@ -547,7 +547,7 @@
 			);
 			name = "mbedtls-lib";
 			productName = "mbedtls-lib";
-			productReference = 06385D5EF1248350390A4B9E /* libmbedtls-lib.a */;
+			productReference = FACB9DFD20F1CDAF87F8C43D /* mbedtls-lib.lib */;
 			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
@@ -562,13 +562,13 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				389B01845EC13136C5C827C4 /* libmbedtls-lib.a */,
+				D3692A43CCCF2BB5C06A8883 /* mbedtls-lib.lib */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		ACADD46EAD60D1602142A2AE /* Resources */ = {
+		9F539D8D4241C43FD167A3CD /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -578,7 +578,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		165AEDC5170DEAB78AEFBC05 /* Sources */ = {
+		0900B6E4ABEEDD963B14BD24 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -677,10 +677,22 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		26E1CC12EA4D8DC428F13252 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CONFIGURATION_BUILD_DIR = bin/x64/Debug;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				EXECUTABLE_EXTENSION = lib;
+				GCC_DYNAMIC_NO_PIC = NO;
+				INSTALL_PATH = /usr/local/lib;
+				PRODUCT_NAME = "mbedtls-lib";
+			};
+			name = Debug;
+		};
 		53A7B19E571883D0D88527DE /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
 				CONFIGURATION_BUILD_DIR = "$(SYMROOT)";
 				CONFIGURATION_TEMP_DIR = "$(OBJROOT)";
 				COPY_PHASE_STRIP = NO;
@@ -696,10 +708,10 @@
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				OBJROOT = "obj/Debug/mbedtls-lib";
+				OBJROOT = "obj/x64/Debug/mbedtls-lib";
 				ONLY_ACTIVE_ARCH = YES;
 				STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = static;
-				SYMROOT = bin/Debug;
+				SYMROOT = bin/x64/Debug;
 				USER_HEADER_SEARCH_PATHS = (
 					../../contrib/mbedtls/include,
 					../../contrib/zlib,
@@ -708,12 +720,13 @@
 			};
 			name = Debug;
 		};
-		A310602D9CD21C9FD6D11E6D /* Release */ = {
+		AD48338CFAAB29BE70CA29CC /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CONFIGURATION_BUILD_DIR = bin/Release;
+				CONFIGURATION_BUILD_DIR = bin/x64/Release;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				EXECUTABLE_EXTENSION = lib;
 				GCC_DYNAMIC_NO_PIC = NO;
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = "mbedtls-lib";
@@ -723,7 +736,6 @@
 		D0C26B5873B0920A02D67198 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
 				CONFIGURATION_BUILD_DIR = "$(SYMROOT)";
 				CONFIGURATION_TEMP_DIR = "$(OBJROOT)";
 				GCC_OPTIMIZATION_LEVEL = fast;
@@ -737,10 +749,10 @@
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				OBJROOT = "obj/Release/mbedtls-lib";
+				OBJROOT = "obj/x64/Release/mbedtls-lib";
 				ONLY_ACTIVE_ARCH = NO;
 				STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = static;
-				SYMROOT = bin/Release;
+				SYMROOT = bin/x64/Release;
 				USER_HEADER_SEARCH_PATHS = (
 					../../contrib/mbedtls/include,
 					../../contrib/zlib,
@@ -749,35 +761,27 @@
 			};
 			name = Release;
 		};
-		D9C45C730AA854651DC08AB3 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CONFIGURATION_BUILD_DIR = bin/Debug;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				GCC_DYNAMIC_NO_PIC = NO;
-				INSTALL_PATH = /usr/local/lib;
-				PRODUCT_NAME = "mbedtls-lib";
-			};
-			name = Debug;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "mbedtls-lib" */ = {
+		1DA7654CC0958BFE4FBB6B8C /* Build configuration list for PBXNativeTarget "mbedtls-lib.lib" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				D0C26B5873B0920A02D67198 /* Release */,
-				53A7B19E571883D0D88527DE /* Debug */,
+				AD48338CFAAB29BE70CA29CC /* Release */,
+				AD48338CFAAB29BE70CA29CC /* Release */,
+				26E1CC12EA4D8DC428F13252 /* Debug */,
+				26E1CC12EA4D8DC428F13252 /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		2B019C2D2BB4991F9F966A6D /* Build configuration list for PBXNativeTarget "libmbedtls-lib.a" */ = {
+		1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "mbedtls-lib" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				A310602D9CD21C9FD6D11E6D /* Release */,
-				D9C45C730AA854651DC08AB3 /* Debug */,
+				D0C26B5873B0920A02D67198 /* Release */,
+				D0C26B5873B0920A02D67198 /* Release */,
+				53A7B19E571883D0D88527DE /* Debug */,
+				53A7B19E571883D0D88527DE /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

@@ -129,6 +129,7 @@
         <File Name="../../modules/gmake2/tests/test_gmake2_perfile_flags.lua"/>
         <File Name="../../modules/gmake2/tests/test_gmake2_target_rules.lua"/>
         <File Name="../../modules/gmake2/tests/test_gmake2_tools.lua"/>
+        <File Name="../../modules/gmake2/tests/test_gmake2_wks.lua"/>
       </VirtualDirectory>
     </VirtualDirectory>
     <VirtualDirectory Name="raw">
@@ -529,7 +530,7 @@
       <ResourceCompiler Options=""/>
     </GlobalSettings>
     <Configuration Name="Release" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-O3;-Wall;-Wextra;-fno-stack-protector;-arch x86_64" C_Options="-O3;-Wall;-Wextra;-arch x86_64" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
+      <Compiler Options="-O3;-Wall;-Wextra;-fno-stack-protector" C_Options="-O3;-Wall;-Wextra" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlagsPolicy="1" PCHFlags="">
         <IncludePath Value="../../contrib/lua/src"/>
         <IncludePath Value="../../contrib/luashim"/>
         <IncludePath Value="../../contrib/zlib"/>
@@ -541,7 +542,7 @@
         <Preprocessor Value="NDEBUG"/>
         <Preprocessor Value="LUA_USE_MACOSX"/>
       </Compiler>
-      <Linker Required="yes" Options="-arch x86_64;bin/Release/liblua-lib.a;bin/Release/libzip-lib.a;bin/Release/libzlib-lib.a;bin/Release/libcurl-lib.a;-framework;CoreServices;-framework;Foundation;-framework;Security;-lreadline">
+      <Linker Required="yes" Options="bin/Release/liblua-lib.a;bin/Release/libzip-lib.a;bin/Release/libzlib-lib.a;bin/Release/libcurl-lib.a;-framework;CoreServices;-framework;Foundation;-framework;Security;-lreadline">
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../bin/release/premake5" IntermediateDirectory="obj/Release/Premake5" Command="../../bin/release/premake5" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
@@ -566,7 +567,7 @@
       </Completion>
     </Configuration>
     <Configuration Name="Debug" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-g;-Wall;-Wextra;-arch x86_64" C_Options="-g;-Wall;-Wextra;-arch x86_64" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
+      <Compiler Options="-g;-Wall;-Wextra" C_Options="-g;-Wall;-Wextra" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlagsPolicy="1" PCHFlags="">
         <IncludePath Value="../../contrib/lua/src"/>
         <IncludePath Value="../../contrib/luashim"/>
         <IncludePath Value="../../contrib/zlib"/>
@@ -578,7 +579,7 @@
         <Preprocessor Value="_DEBUG"/>
         <Preprocessor Value="LUA_USE_MACOSX"/>
       </Compiler>
-      <Linker Required="yes" Options="-arch x86_64;bin/Debug/liblua-lib.a;bin/Debug/libzip-lib.a;bin/Debug/libzlib-lib.a;bin/Debug/libcurl-lib.a;-framework;CoreServices;-framework;Foundation;-framework;Security;-lreadline">
+      <Linker Required="yes" Options="bin/Debug/liblua-lib.a;bin/Debug/libzip-lib.a;bin/Debug/libzlib-lib.a;bin/Debug/libcurl-lib.a;-framework;CoreServices;-framework;Foundation;-framework;Security;-lreadline">
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../bin/debug/premake5" IntermediateDirectory="obj/Debug/Premake5" Command="bin/debug/premake5" CommandArguments="--scripts=./../.. test" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="../.." PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>

@@ -116,6 +116,11 @@
 
 	function m.files(prj)
 		local tr = project.getsourcetree(prj)
+		if #tr.children == 0 then
+			-- handle project without files
+			_p(1, '<VirtualDirectory Name="%s"/>', tr.name)
+			return
+		end
 		tree.traverse(tr, {
 			-- folders are handled at the internal nodes
 			onbranchenter = function(node, depth)
@@ -209,7 +214,7 @@
 			usepch = "no"
 		end
 
-		_x(3, '<Compiler Options="%s" C_Options="%s" Assembler="%s" Required="yes" PreCompiledHeader="%s" PCHInCommandLine="%s" UseDifferentPCHFlags="no" PCHFlags="">', cxxflags, cflags, asmflags, pch, usepch)
+		_x(3, '<Compiler Options="%s" C_Options="%s" Assembler="%s" Required="yes" PreCompiledHeader="%s" PCHInCommandLine="%s" PCHFlagsPolicy="1" PCHFlags="">', cxxflags, cflags, asmflags, pch, usepch)
 
 		for _, includedir in ipairs(cfg.includedirs) do
 			_x(4, '<IncludePath Value="%s"/>', project.getrelative(cfg.project, includedir))
@@ -320,7 +325,7 @@
 			_p(3, '<PreBuild>')
 			p.escaper(codelite.escElementText)
 			if cfg.prebuildmessage then
-				local command = os.translateCommandsAndPaths("@{ECHO} " .. cfg.prebuildmessage, cfg.project.basedir, cfg.project.location)
+				local command = os.translateCommandsAndPaths("@{ECHO} " .. p.quote(cfg.prebuildmessage), cfg.project.basedir, cfg.project.location)
 				_x(4, '<Command Enabled="yes">%s</Command>', command)
 			end
 			local commands = os.translateCommandsAndPaths(cfg.prebuildcommands, cfg.project.basedir, cfg.project.location)
@@ -337,7 +342,7 @@
 			_p(3, '<PostBuild>')
 			p.escaper(codelite.escElementText)
 			if cfg.postbuildmessage then
-				local command = os.translateCommandsAndPaths("@{ECHO} " .. cfg.postbuildmessage, cfg.project.basedir, cfg.project.location)
+				local command = os.translateCommandsAndPaths("@{ECHO} " .. p.quote(cfg.postbuildmessage), cfg.project.basedir, cfg.project.location)
 				_x(4, '<Command Enabled="yes">%s</Command>', command)
 			end
 			local commands = os.translateCommandsAndPaths(cfg.postbuildcommands, cfg.project.basedir, cfg.project.location)
@@ -383,19 +388,19 @@
 		local dependencies = {}
 		local makefilerules = {}
 		local function addrule(dependencies, makefilerules, config, filename)
-			if #config.buildcommands == 0 or #config.buildOutputs == 0 then
+			if #config.buildcommands == 0 or #config.buildoutputs == 0 then
 				return false
 			end
-			local inputs = table.implode(project.getrelative(cfg.project, config.buildInputs), "", "", " ")
+			local inputs = table.implode(project.getrelative(cfg.project, config.buildinputs), "", "", " ")
 			if filename ~= "" and inputs ~= "" then
 				filename = filename .. " "
 			end
-			local outputs = project.getrelative(cfg.project, config.buildOutputs[1])
+			local outputs = project.getrelative(cfg.project, config.buildoutputs[1])
 			local buildmessage = ""
 			if config.buildmessage then
-				buildmessage = "\t@{ECHO} " .. config.buildmessage .. "\n"
+				buildmessage = "\t@{ECHO} " .. p.quote(config.buildmessage) .. "\n"
 			end
-			local commands = table.implode(config.buildCommands,"\t","\n","")
+			local commands = table.implode(config.buildcommands,"\t","\n","")
 			table.insert(makefilerules, os.translateCommandsAndPaths(outputs .. ": " .. filename .. inputs .. "\n" .. buildmessage .. commands, cfg.project.basedir, cfg.project.location))
 			table.insertflat(dependencies, outputs)
 			return true

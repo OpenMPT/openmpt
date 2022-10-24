@@ -748,7 +748,7 @@
 		_p('%s: %s', file.buildoutputs[1], dependencies)
 
 		if file.buildmessage then
-			_p('\t@echo %s', file.buildmessage)
+			_p('\t@echo %s', p.quote(file.buildmessage))
 		end
 
 		if file.buildcommands then
@@ -779,7 +779,7 @@
 
 
 	function cpp.dependencies(prj)
-		-- include the dependencies, built by GCC (with the -MMD flag)
+		-- include the dependencies, built by GCC (with the -MD flag)
 		_p('-include $(OBJECTS:%%.o=%%.d)')
 		_p('ifneq (,$(PCH))')
 			_p('  -include $(PCH_PLACEHOLDER).d')

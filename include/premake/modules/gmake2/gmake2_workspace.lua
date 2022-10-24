@@ -128,7 +128,7 @@
 		local tr = p.workspace.grouptree(wks)
 		tree.traverse(tr, {
 			onbranch = function(n)
-				table.insert(groups, n.path)
+				table.insert(groups, p.esc(n.path))
 			end
 		})
 
@@ -146,7 +146,7 @@
 		local tr = p.workspace.grouptree(wks)
 		tree.traverse(tr, {
 			onbranch = function(n)
-				local rule = n.path .. ":"
+				local rule = p.esc(n.path) .. ":"
 				local projectTargets = {}
 				local groupTargets = {}
 				for i, c in pairs(n.children)
@@ -183,7 +183,8 @@
 		for prj in p.workspace.eachproject(wks) do
 			local deps = project.getdependencies(prj)
 			deps = table.extract(deps, "name")
-			_p('%s:%s', p.esc(prj.name), gmake2.list(deps))
+
+			_p('%s:%s', p.esc(prj.name), gmake2.list(p.esc(deps)))
 
 			local cfgvar = gmake2.tovar(prj.name)
 			_p('ifneq (,$(%s_config))', cfgvar)

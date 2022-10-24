@@ -81,14 +81,14 @@ windows-clean:
 	$(SILENT) if exist .\build rmdir /s /q .\build
 	$(SILENT) if exist .\obj rmdir /s /q .\obj
 	
-mingw-clean: windows-clean
+mingw-clean: nix-clean
 	
 mingw: mingw-clean
-	if not exist build\bootstrap (mkdir build\bootstrap)
+	mkdir -p build/bootstrap
 	$(CC) -o build/bootstrap/premake_bootstrap -DPREMAKE_NO_BUILTIN_SCRIPTS -I"$(LUA_DIR)" -I"$(LUASHIM_DIR)" $(SRC) -lole32 -lversion
 	./build/bootstrap/premake_bootstrap embed
 	./build/bootstrap/premake_bootstrap --arch=$(PLATFORM) --os=windows --to=build/bootstrap --cc=mingw gmake2
-	$(MAKE) -C build/bootstrap config=$(CONFIG)_$(PLATFORM)
+	$(MAKE) -C build/bootstrap -j`getconf _NPROCESSORS_ONLN` config=$(CONFIG)_$(PLATFORM:x86=win32)
 
 macosx: osx
 
@@ -107,7 +107,7 @@ linux-clean: nix-clean
 
 linux: linux-clean
 	mkdir -p build/bootstrap
-	$(CC) -o build/bootstrap/premake_bootstrap -DPREMAKE_NO_BUILTIN_SCRIPTS -DLUA_USE_POSIX -DLUA_USE_DLOPEN -I"$(LUA_DIR)" -I"$(LUASHIM_DIR)" $(SRC) -lm -ldl -lrt
+	$(CC) -o build/bootstrap/premake_bootstrap -DPREMAKE_NO_BUILTIN_SCRIPTS -DLUA_USE_POSIX -DLUA_USE_DLOPEN -I"$(LUA_DIR)" -I"$(LUASHIM_DIR)" $(SRC) -lm -ldl -lrt -luuid
 	./build/bootstrap/premake_bootstrap embed
 	./build/bootstrap/premake_bootstrap --to=build/bootstrap gmake2
 	$(MAKE) -C build/bootstrap -j`getconf _NPROCESSORS_ONLN` config=$(CONFIG)
