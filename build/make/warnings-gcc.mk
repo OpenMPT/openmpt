@@ -25,3 +25,5 @@ CFLAGS_SILENT += -Wno-type-limits
 CFLAGS_SILENT += -Wno-unused-but-set-variable
 CFLAGS_SILENT += -Wno-unused-function
 CFLAGS_SILENT += -Wno-unused-parameter
+
+FASTMATH_STYLE=gcc

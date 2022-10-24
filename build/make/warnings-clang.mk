@@ -26,3 +26,5 @@ CFLAGS_SILENT += -Wno-sign-compare
 CFLAGS_SILENT += -Wno-unused-function
 CFLAGS_SILENT += -Wno-unused-parameter
 CFLAGS_SILENT += -Wno-unused-variable
+
+FASTMATH_STYLE=clang

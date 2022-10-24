@@ -58,7 +58,10 @@
 #           debug      -O0
 #           none
 #  OPTIMIZE_LTO=0      Build with link-time-optimizations
-#  OPTIMIZE_FASTMATH=0 Use non-standard-compliant fastmath optimizations (-ffast-math)
+#  OPTIMIZE_FASTMATH=0 Use no non-standard-compliant fastmath optimizations
+#                   =1  + use mild non-standard-compliant fastmath optimizations
+#                   =2  + assume no inf/nan
+#                   =3  + set ftz/daz
 #  TEST=1              Include test suite in default target.
 #  ONLY_TEST=0         Only build the test suite.
 #  STRICT=0            Treat warnings as errors.
@@ -464,10 +467,140 @@ LDFLAGS  += -Wl,--gc-sections
 endif
 endif
 
-ifeq ($(OPTIMIZE_FASTMATH),1)
+ifeq ($(FASTMATH_STYLE),gcc)
+
+ifeq ($(OPTIMIZE_FASTMATH),3)
+CPPFLAGS += -DMPT_CHECK_CXX_IGNORE_WARNING_FASTMATH -DMPT_CHECK_CXX_IGNORE_WARNING_FINITEMATH
+CXXFLAGS += -ffast-math
+CFLAGS += -ffast-math
+else ifeq ($(OPTIMIZE_FASTMATH),2)
+CPPFLAGS += -DMPT_CHECK_CXX_IGNORE_WARNING_FINITEMATH
+CXXFLAGS += -fno-math-errno
+CXXFLAGS += -ffinite-math-only
+CXXFLAGS += -fno-rounding-math
+CXXFLAGS += -fno-signaling-nans
+CXXFLAGS += -fexcess-precision=fast
+CXXFLAGS += -fcx-limited-range
+CXXFLAGS += -fassociative-math
+CXXFLAGS += -freciprocal-math
+CXXFLAGS += -fno-signed-zeros
+CXXFLAGS += -fno-trapping-math
+CFLAGS += -fno-math-errno
+CFLAGS += -ffinite-math-only
+CFLAGS += -fno-rounding-math
+CFLAGS += -fno-signaling-nans
+CFLAGS += -fexcess-precision=fast
+CFLAGS += -fcx-limited-range
+CFLAGS += -fassociative-math
+CFLAGS += -freciprocal-math
+CFLAGS += -fno-signed-zeros
+CFLAGS += -fno-trapping-math
+else ifeq ($(OPTIMIZE_FASTMATH),1)
+CXXFLAGS += -fno-math-errno
+CXXFLAGS += -fno-rounding-math
+CXXFLAGS += -fno-signaling-nans
+CXXFLAGS += -fexcess-precision=fast
+CXXFLAGS += -fcx-limited-range
+CXXFLAGS += -fassociative-math
+CXXFLAGS += -freciprocal-math
+CXXFLAGS += -fno-signed-zeros
+CXXFLAGS += -fno-trapping-math
+CFLAGS += -fno-math-errno
+CFLAGS += -fno-rounding-math
+CFLAGS += -fno-signaling-nans
+CFLAGS += -fexcess-precision=fast
+CFLAGS += -fcx-limited-range
+CFLAGS += -fassociative-math
+CFLAGS += -freciprocal-math
+CFLAGS += -fno-signed-zeros
+CFLAGS += -fno-trapping-math
+endif
+
+else ifeq ($(FASTMATH_STYLE),clang)
+
+ifeq ($(OPTIMIZE_FASTMATH),3)
+CPPFLAGS += -DMPT_CHECK_CXX_IGNORE_WARNING_FASTMATH -DMPT_CHECK_CXX_IGNORE_WARNING_FINITEMATH
+CXXFLAGS += -ffast-math
+CFLAGS += -ffast-math
+else ifeq ($(OPTIMIZE_FASTMATH),2)
+CPPFLAGS += -DMPT_CHECK_CXX_IGNORE_WARNING_FINITEMATH
+CXXFLAGS += -fno-math-errno
+CXXFLAGS += -ffinite-math-only
+CXXFLAGS += -fno-honor-infinities
+CXXFLAGS += -fno-honor-nans
+CXXFLAGS += -ffp-contract=fast
+CXXFLAGS += -fassociative-math
+CXXFLAGS += -freciprocal-math
+CXXFLAGS += -fno-signed-zeros
+CXXFLAGS += -fno-trapping-math
+CFLAGS += -fno-math-errno
+CFLAGS += -ffinite-math-only
+CFLAGS += -fno-honor-infinities
+CFLAGS += -fno-honor-nans
+CFLAGS += -ffp-contract=fast
+CFLAGS += -fassociative-math
+CFLAGS += -freciprocal-math
+CFLAGS += -fno-signed-zeros
+CFLAGS += -fno-trapping-math
+else ifeq ($(OPTIMIZE_FASTMATH),1)
+CXXFLAGS += -fno-math-errno
+CXXFLAGS += -ffp-contract=fast
+CXXFLAGS += -fassociative-math
+CXXFLAGS += -freciprocal-math
+CXXFLAGS += -fno-signed-zeros
+CXXFLAGS += -fno-trapping-math
+CFLAGS += -fno-math-errno
+CFLAGS += -ffp-contract=fast
+CFLAGS += -fassociative-math
+CFLAGS += -freciprocal-math
+CFLAGS += -fno-signed-zeros
+CFLAGS += -fno-trapping-math
+endif
+
+else
+
+ifeq ($(OPTIMIZE_FASTMATH),3)
+CPPFLAGS += -DMPT_CHECK_CXX_IGNORE_WARNING_FASTMATH -DMPT_CHECK_CXX_IGNORE_WARNING_FINITEMATH
+CXXFLAGS += -ffast-math
+CFLAGS += -ffast-math
+else ifeq ($(OPTIMIZE_FASTMATH),2)
+CPPFLAGS += -DMPT_CHECK_CXX_IGNORE_WARNING_FASTMATH -DMPT_CHECK_CXX_IGNORE_WARNING_FINITEMATH
+CXXFLAGS += -ffast-math
+CFLAGS += -ffast-math
+else ifeq ($(OPTIMIZE_FASTMATH),1)
+CPPFLAGS += -DMPT_CHECK_CXX_IGNORE_WARNING_FASTMATH -DMPT_CHECK_CXX_IGNORE_WARNING_FINITEMATH
+CXXFLAGS += -ffast-math
+CFLAGS += -ffast-math
+endif
+
+endif
+
+ifeq ($(OPTIMIZE_FASTMATH),2)
 CPPFLAGS += -DMPT_CHECK_CXX_IGNORE_WARNING_FASTMATH -DMPT_CHECK_CXX_IGNORE_WARNING_FINITEMATH
 CXXFLAGS += -ffast-math
 CFLAGS   += -ffast-math
+else ifeq ($(OPTIMIZE_FASTMATH),1)
+CPPFLAGS += -DMPT_CHECK_CXX_IGNORE_WARNING_FINITEMATH
+CXXFLAGS += -fassociative-math
+CXXFLAGS += -fcx-limited-range
+CXXFLAGS += -fexcess-precision=fast
+CXXFLAGS += -ffinite-math-only
+CXXFLAGS += -freciprocal-math
+CXXFLAGS += -fno-math-errno
+CXXFLAGS += -fno-rounding-math
+CXXFLAGS += -fno-signaling-nans
+CXXFLAGS += -fno-signed-zeros
+CXXFLAGS += -fno-trapping-math
+CFLAGS += -fassociative-math
+CFLAGS += -fcx-limited-range
+CFLAGS += -fexcess-precision=fast
+CFLAGS += -ffinite-math-only
+CFLAGS += -freciprocal-math
+CFLAGS += -fno-math-errno
+CFLAGS += -fno-rounding-math
+CFLAGS += -fno-signaling-nans
+CFLAGS += -fno-signed-zeros
+CFLAGS += -fno-trapping-math
 endif
 
 ifeq ($(CHECKED),1)

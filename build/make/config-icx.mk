@@ -37,6 +37,8 @@ OPTIMIZE=vectorize
 OPTIMIZE_FASTMATH=0
 OPTIMIZE_LTO=1
 
+FASTMATH_STYLE=
+
 CXXFLAGS += -fp-model=precise
 CFLAGS   += -fp-model=precise
 
