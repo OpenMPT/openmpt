@@ -348,9 +348,16 @@ using std::byteswap;
 #else // !C++23
 
 constexpr inline uint16 byteswap_impl_constexpr16(uint16 x) noexcept {
+#if MPT_COMPILER_GCC
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wconversion"
+#endif // MPT_COMPILER_GCC
 	return uint16(0)
 		 | ((x >> 8) & 0x00FFu)
 		 | ((x << 8) & 0xFF00u);
+#if MPT_COMPILER_GCC
+#pragma GCC diagnostic pop
+#endif // MPT_COMPILER_GCC
 }
 
 constexpr inline uint32 byteswap_impl_constexpr32(uint32 x) noexcept {
