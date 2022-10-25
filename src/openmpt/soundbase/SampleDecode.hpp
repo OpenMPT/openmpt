@@ -262,15 +262,15 @@ struct DecodeInt64
 	MPT_FORCEINLINE output_t operator()(const input_t *inBuf)
 	{
 		const uint64 tmp = (uint64(0)
-				| (static_cast<uint64>(mpt::byte_cast<uint8>(inBuf[b0])) << 0)
-				| (static_cast<uint64>(mpt::byte_cast<uint8>(inBuf[b1])) << 8)
-				| (static_cast<uint64>(mpt::byte_cast<uint8>(inBuf[b2])) << 16)
-				| (static_cast<uint64>(mpt::byte_cast<uint8>(inBuf[b3])) << 24)
-				| (static_cast<uint64>(mpt::byte_cast<uint8>(inBuf[b4])) << 32)
-				| (static_cast<uint64>(mpt::byte_cast<uint8>(inBuf[b5])) << 40)
-				| (static_cast<uint64>(mpt::byte_cast<uint8>(inBuf[b6])) << 48)
-				| (static_cast<uint64>(mpt::byte_cast<uint8>(inBuf[b7])) << 56))
-			 - offset;
+							| (static_cast<uint64>(mpt::byte_cast<uint8>(inBuf[b0])) << 0)
+							| (static_cast<uint64>(mpt::byte_cast<uint8>(inBuf[b1])) << 8)
+							| (static_cast<uint64>(mpt::byte_cast<uint8>(inBuf[b2])) << 16)
+							| (static_cast<uint64>(mpt::byte_cast<uint8>(inBuf[b3])) << 24)
+							| (static_cast<uint64>(mpt::byte_cast<uint8>(inBuf[b4])) << 32)
+							| (static_cast<uint64>(mpt::byte_cast<uint8>(inBuf[b5])) << 40)
+							| (static_cast<uint64>(mpt::byte_cast<uint8>(inBuf[b6])) << 48)
+							| (static_cast<uint64>(mpt::byte_cast<uint8>(inBuf[b7])) << 56))
+						 - offset;
 		return static_cast<int64>(tmp);
 	}
 };
