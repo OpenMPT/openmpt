@@ -261,7 +261,7 @@ struct DecodeInt64
 	static constexpr std::size_t input_inc = 8;
 	MPT_FORCEINLINE output_t operator()(const input_t *inBuf)
 	{
-		return static_cast<int64>((uint64(0)
+		const uint64 tmp = (uint64(0)
 				| (static_cast<uint64>(mpt::byte_cast<uint8>(inBuf[b0])) << 0)
 				| (static_cast<uint64>(mpt::byte_cast<uint8>(inBuf[b1])) << 8)
 				| (static_cast<uint64>(mpt::byte_cast<uint8>(inBuf[b2])) << 16)
@@ -270,7 +270,8 @@ struct DecodeInt64
 				| (static_cast<uint64>(mpt::byte_cast<uint8>(inBuf[b5])) << 40)
 				| (static_cast<uint64>(mpt::byte_cast<uint8>(inBuf[b6])) << 48)
 				| (static_cast<uint64>(mpt::byte_cast<uint8>(inBuf[b7])) << 56))
-			 - offset);
+			 - offset;
+		return static_cast<int64>(tmp);
 	}
 };
 
