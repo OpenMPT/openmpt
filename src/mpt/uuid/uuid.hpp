@@ -113,11 +113,11 @@ private:
 	MPT_CONSTEXPRINLINE uint8 Nn() const noexcept {
 		return static_cast<uint8>((Data4 >> 56) & 0xffu);
 	}
-	void MakeRFC4122(uint8 version) noexcept {
 #if MPT_COMPILER_GCC
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wconversion"
 #endif // MPT_COMPILER_GCC
+	void MakeRFC4122(uint8 version) noexcept {
 		// variant
 		uint8 Nn = static_cast<uint8>((Data4 >> 56) & 0xffu);
 		Data4 &= 0x00ffffffffffffffull;
@@ -131,10 +131,10 @@ private:
 		Mm &= ~(0xf0u);
 		Mm |= (version << 4u);
 		Data3 |= static_cast<uint16>(Mm) << 8;
+	}
 #if MPT_COMPILER_GCC
 #pragma GCC diagnostic pop
 #endif // MPT_COMPILER_GCC
-	}
 #if MPT_OS_WINDOWS
 private:
 	static mpt::UUID UUIDFromWin32(::UUID uuid) {
