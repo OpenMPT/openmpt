@@ -497,19 +497,6 @@
 
 
 
-// stdlib configuration
-
-#if MPT_COMPILER_CLANG
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wreserved-id-macro"
-#endif
-
-#if MPT_COMPILER_CLANG
-#pragma clang diagnostic pop
-#endif
-
-
-
 // compiler configuration
 
 #if MPT_COMPILER_MSVC
@@ -547,12 +534,6 @@
 #endif // MODPLUG_TRACKER
 
 #endif // MPT_COMPILER_CLANG
-
-
-
-
-
-// standard library quirks
 
 
 
