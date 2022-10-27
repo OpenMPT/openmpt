@@ -504,10 +504,6 @@
 #pragma clang diagnostic ignored "-Wreserved-id-macro"
 #endif
 
-#define __STDC_CONSTANT_MACROS
-#define __STDC_FORMAT_MACROS
-#define __STDC_LIMIT_MACROS
-
 #define _USE_MATH_DEFINES
 
 #if MPT_COMPILER_CLANG
