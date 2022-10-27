@@ -520,8 +520,6 @@
 
 #if MPT_COMPILER_MSVC
 
-#define VC_EXTRALEAN		// Exclude rarely-used stuff from Windows headers
-
 #pragma warning(default:4800) // Implicit conversion from 'int' to bool. Possible information loss
 
 #pragma warning(disable:4355) // 'this' : used in base member initializer list
