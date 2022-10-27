@@ -7,12 +7,6 @@
 #include "mpt/base/detect_quirks.hpp"
 #include "mpt/base/compiletime_warning.hpp"
 
-#ifndef _USE_MATH_DEFINES
-#ifndef MPT_CHECK_LIBC_IGNORE_WARNING_NO_USE_MATH_DEFINES
-MPT_WARNING("C stdlib does not provide math constants. Please #define _USE_MATH_DEFINES.")
-#endif
-#endif
-
 #ifndef MPT_CHECK_LIBC_IGNORE_WARNING_NO_MTRT
 #if MPT_PLATFORM_MULTITHREADED
 #if MPT_LIBC_MINGW

@@ -504,8 +504,6 @@
 #pragma clang diagnostic ignored "-Wreserved-id-macro"
 #endif
 
-#define _USE_MATH_DEFINES
-
 #if MPT_COMPILER_CLANG
 #pragma clang diagnostic pop
 #endif
