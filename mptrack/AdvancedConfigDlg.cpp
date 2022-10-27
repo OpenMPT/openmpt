@@ -18,9 +18,9 @@ OPENMPT_NAMESPACE_BEGIN
 
 BEGIN_MESSAGE_MAP(COptionsAdvanced, CPropertyPage)
 	ON_NOTIFY(NM_DBLCLK,	IDC_LIST1,	&COptionsAdvanced::OnOptionDblClick)
-#ifndef MPT_MFC_FULL
+#ifdef _AFX_NO_MFC_CONTROLS_IN_DIALOGS
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_LIST1, &COptionsAdvanced::OnCustomDrawList)
-#endif
+#endif // _AFX_NO_MFC_CONTROLS_IN_DIALOGS
 	ON_EN_CHANGE(IDC_EDIT1,				&COptionsAdvanced::OnFindStringChanged)
 	ON_COMMAND(IDC_BUTTON1, &COptionsAdvanced::OnSaveNow)
 END_MESSAGE_MAP()
@@ -243,7 +243,7 @@ BOOL COptionsAdvanced::OnSetActive()
 }
 
 
-#ifdef MPT_MFC_FULL
+#ifndef _AFX_NO_MFC_CONTROLS_IN_DIALOGS
 
 
 COLORREF CAdvancedSettingsList::OnGetCellBkColor(int nRow, int /* nColumn */ )
@@ -262,7 +262,7 @@ COLORREF CAdvancedSettingsList::OnGetCellTextColor(int nRow, int nColumn)
 }
 
 
-#else // !MPT_MFC_FULL
+#else // _AFX_NO_MFC_CONTROLS_IN_DIALOGS
 
 
 void COptionsAdvanced::OnCustomDrawList(NMHDR* pNMHDR, LRESULT* pResult)
@@ -287,7 +287,7 @@ void COptionsAdvanced::OnCustomDrawList(NMHDR* pNMHDR, LRESULT* pResult)
 }
 
 
-#endif // MPT_MFC_FULL
+#endif // !_AFX_NO_MFC_CONTROLS_IN_DIALOGS
 
 
 void COptionsAdvanced::OnOptionDblClick(NMHDR *, LRESULT *)

@@ -63,7 +63,7 @@ public:
 };
 
 
-#ifdef MPT_MFC_FULL
+#ifndef _AFX_NO_MFC_CONTROLS_IN_DIALOGS
 
 class CMFCListCtrlEx : public CMFCListCtrl
 {
@@ -98,7 +98,7 @@ public:
 #endif
 };
 
-#endif // MPT_MFC_FULL
+#endif // !_AFX_NO_MFC_CONTROLS_IN_DIALOGS
 
 
 OPENMPT_NAMESPACE_END

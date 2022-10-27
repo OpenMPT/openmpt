@@ -22,7 +22,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-#ifdef MPT_MFC_FULL
+#ifndef _AFX_NO_MFC_CONTROLS_IN_DIALOGS
 
 class CAdvancedSettingsList : public CMFCListCtrlEx
 {
@@ -34,16 +34,16 @@ public:
 	COLORREF OnGetCellTextColor(int nRow, int nColumn) override;
 };
 
-#endif // MPT_MFC_FULL
+#endif // !_AFX_NO_MFC_CONTROLS_IN_DIALOGS
 
 
 class COptionsAdvanced: public CPropertyPage
 {
-#ifdef MPT_MFC_FULL
+#ifndef _AFX_NO_MFC_CONTROLS_IN_DIALOGS
 	using ListCtrl = CAdvancedSettingsList;
-#else   // MPT_MFC_FULL
+#else  // _AFX_NO_MFC_CONTROLS_IN_DIALOGS
 	using ListCtrl = CListCtrlEx;
-#endif  // !MPT_MFC_FULL
+#endif // !_AFX_NO_MFC_CONTROLS_IN_DIALOGS
 
 protected:
 	ListCtrl m_List;
@@ -57,11 +57,11 @@ protected:
 	bool m_listGrouped = false;
 
 public:
-#ifdef MPT_MFC_FULL
+#ifndef _AFX_NO_MFC_CONTROLS_IN_DIALOGS
 	COptionsAdvanced():CPropertyPage(IDD_OPTIONS_ADVANCED), m_List(m_indexToPath) {}
-#else // !MPT_MFC_FULL
+#else // _AFX_NO_MFC_CONTROLS_IN_DIALOGS
 	COptionsAdvanced():CPropertyPage(IDD_OPTIONS_ADVANCED) {}
-#endif // MPT_MFC_FULL
+#endif // !_AFX_NO_MFC_CONTROLS_IN_DIALOGS
 
 protected:
 	BOOL OnInitDialog() override;
@@ -74,9 +74,9 @@ protected:
 	afx_msg void OnSettingsChanged() { SetModified(TRUE); }
 	afx_msg void OnFindStringChanged() { ReInit(); }
 	afx_msg void OnSaveNow();
-#ifndef MPT_MFC_FULL
+#ifdef _AFX_NO_MFC_CONTROLS_IN_DIALOGS
 	afx_msg void OnCustomDrawList(NMHDR* pNMHDR, LRESULT* pResult);
-#endif // !MPT_MFC_FULL
+#endif // _AFX_NO_MFC_CONTROLS_IN_DIALOGS
 
 	void ReInit();
 

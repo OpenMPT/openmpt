@@ -37,10 +37,10 @@
 #include <afxcview.h>
 // cppcheck-suppress missingInclude
 #include <afxdlgs.h>
-#ifdef MPT_MFC_FULL
+#ifndef _AFX_NO_MFC_CONTROLS_IN_DIALOGS
 // cppcheck-suppress missingInclude
 #include <afxlistctrl.h>
-#endif // MPT_MFC_FULL
+#endif // !_AFX_NO_MFC_CONTROLS_IN_DIALOGS
 // cppcheck-suppress missingInclude
 #include <afxole.h>
 

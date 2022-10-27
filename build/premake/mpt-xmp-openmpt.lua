@@ -49,7 +49,7 @@
   characterset "Unicode"
 
 	flags { "MFC" }
-	defines { "_CSTRING_DISABLE_NARROW_WIDE_CONVERSION" }
+	defines { "_CSTRING_DISABLE_NARROW_WIDE_CONVERSION", "_AFX_NO_MFC_CONTROLS_IN_DIALOGS" }
 	-- work-around https://developercommunity.visualstudio.com/t/link-errors-when-building-mfc-application-with-cla/1617786
 	if _OPTIONS["clang"] then
 		filter {}

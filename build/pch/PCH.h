@@ -17,9 +17,9 @@
 #include <afxcmn.h>
 #include <afxcview.h>
 #include <afxdlgs.h>
-#ifdef MPT_MFC_FULL
+#ifndef _AFX_NO_MFC_CONTROLS_IN_DIALOGS
 #include <afxlistctrl.h>
-#endif // MPT_MFC_FULL
+#endif // !_AFX_NO_MFC_CONTROLS_IN_DIALOGS
 #include <afxole.h>
 #endif // MPT_WITH_MFC
 #endif // MODPLUG_TRACKER
