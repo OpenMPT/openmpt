@@ -47,7 +47,9 @@
 	filter {}
 
   characterset "Unicode"
-  flags { "MFC" }
+
+	flags { "MFC" }
+	defines { "_CSTRING_DISABLE_NARROW_WIDE_CONVERSION" }
 	-- work-around https://developercommunity.visualstudio.com/t/link-errors-when-building-mfc-application-with-cla/1617786
 	if _OPTIONS["clang"] then
 		filter {}
@@ -83,6 +85,7 @@
 			links { "mfc140u.lib", "msvcrt.lib" }
 		filter {}
 	end
+
   links { "libopenmpt", "zlib", "vorbis", "ogg", "mpg123", "pugixml" }
   filter {}
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }

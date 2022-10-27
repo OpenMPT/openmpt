@@ -123,7 +123,9 @@ end
 if stringmode == "UTF8" then
 	defines { "MPT_USTRING_MODE_UTF8_FORCE" }
 end
-  flags { "MFC" }
+
+	flags { "MFC" }
+	defines { "_CSTRING_DISABLE_NARROW_WIDE_CONVERSION" }
 	-- work-around https://developercommunity.visualstudio.com/t/link-errors-when-building-mfc-application-with-cla/1617786
 	if _OPTIONS["clang"] then
 		filter {}

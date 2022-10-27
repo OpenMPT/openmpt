@@ -444,7 +444,6 @@
 
 #ifdef MPT_WITH_MFC
 //#define MPT_MFC_FULL  // use full MFC, including MFC controls
-#define _CSTRING_DISABLE_NARROW_WIDE_CONVERSION
 #endif // MPT_WITH_MFC
 
 #if defined(MODPLUG_TRACKER)
