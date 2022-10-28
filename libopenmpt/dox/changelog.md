@@ -7,6 +7,7 @@ is just a high-level summary.
 
 ### libopenmpt 0.4.33-pre
 
+ *  mpg123: Update to v1.31.0 (2022-10-28).
  *  FLAC: Update to v1.4.2 (2022-10-22).
 
 ### libopenmpt 0.4.32 (2022-09-25)
