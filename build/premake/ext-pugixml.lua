@@ -3,12 +3,16 @@
   uuid "07B89124-7C71-42cc-81AB-62B09BB61F9B"
   language "C++"
   location ( "%{wks.location}" .. "/ext" )
-  mpt_kind "static"
+  mpt_kind "default"
   targetname "openmpt-pugixml"
   includedirs { }
 	filter {}
 	filter { "action:vs*" }
 		characterset "Unicode"
+	filter {}
+	filter { "configurations:*Shared" }
+		defines { "PUGIXML_API=__declspec(dllexport)" }
+	filter { "not configurations:*Shared" }
 	filter {}
   files {
    "../../include/pugixml/src/pugixml.cpp",
@@ -31,6 +35,10 @@ function mpt_use_pugixml ()
 		externalincludedirs {
 			"../../include/pugixml/src",
 		}
+	filter {}
+	filter { "configurations:*Shared" }
+		defines { "PUGIXML_API=__declspec(dllimport)" }
+	filter { "not configurations:*Shared" }
 	filter {}
 	links {
 		"pugixml",
