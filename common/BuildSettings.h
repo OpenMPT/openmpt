@@ -32,14 +32,6 @@
 
 
 
-#if defined(MPT_BUILD_DEFAULT_DEPENDENCIES)
-
-// This section defines which dependencies are available when building with
-// MSVC. Other build systems provide MPT_WITH_* macros via command-line or other
-// means.
-// OpenMPT should compile and run successfully (albeit with reduced
-// functionality) with any or all dependencies missing/disabled.
-
 #if defined(MODPLUG_TRACKER)
 
 #if defined(MPT_BUILD_RETRO)
@@ -60,65 +52,23 @@
 #endif
 #endif
 
-#if MPT_OS_WINDOWS
-#if !defined(MPT_BUILD_WINESUPPORT) && !defined(MPT_BUILD_UPDATESIGNTOOL)
-#define MPT_WITH_MFC
-#endif // !MPT_BUILD_WINESUPPORT && !MPT_BUILD_UPDATESIGNTOOL
-#endif // MPT_OS_WINDOWS
-
-// OpenMPT-only dependencies
-#define MPT_WITH_ANCIENT
-#if !defined(MPT_BUILD_RETRO) && !MPT_COMPILER_CLANG && !MPT_MSVC_BEFORE(2019,0)
-// disabled for VS2017 because of multiple initialization of inline variables
-// https://developercommunity.visualstudio.com/t/static-inline-variable-gets-destroyed-multiple-tim/297876
-#define MPT_WITH_ASIO
-#endif
-#if defined(MPT_BUILD_RETRO)
-#define MPT_WITH_DIRECTSOUND
-#endif
 #define MPT_WITH_DMO
-#define MPT_WITH_LAME
-#define MPT_WITH_LHASA
-#define MPT_WITH_MINIZIP
-#define MPT_WITH_NLOHMANNJSON
-#define MPT_WITH_OPUS
-#define MPT_WITH_OPUSENC
-#define MPT_WITH_OPUSFILE
-#define MPT_WITH_PORTAUDIO
-//#define MPT_WITH_PULSEAUDIO
-//#define MPT_WITH_PULSEAUDIOSIMPLE
-#define MPT_WITH_RTAUDIO
-#define MPT_WITH_SMBPITCHSHIFT
-#define MPT_WITH_UNRAR
-#define MPT_WITH_VORBISENC
+
 #define MPT_WITH_VST
 
-// OpenMPT and libopenmpt dependencies (not for openmp123, player plugins or examples)
-//#define MPT_WITH_DL
-#define MPT_WITH_FLAC
-//#define MPT_WITH_LTDL
 #if MPT_OS_WINDOWS
 #if (_WIN32_WINNT >= 0x0601)
 #define MPT_WITH_MEDIAFOUNDATION
 #endif
 #endif
-//#define MPT_WITH_MINIMP3
-//#define MPT_WITH_MINIZ
-#define MPT_WITH_MPG123
-#define MPT_WITH_OGG
-//#define MPT_WITH_STBVORBIS
-#define MPT_WITH_VORBIS
-#define MPT_WITH_VORBISFILE
+
 #if MPT_OS_WINDOWS
 #if (_WIN32_WINNT >= 0x0A00)
 #define MPT_WITH_WINDOWS10
 #endif
 #endif
-#define MPT_WITH_ZLIB
 
 #endif // MODPLUG_TRACKER
-
-#endif // MPT_BUILD_DEFAULT_DEPENDENCIES
 
 
 
@@ -481,8 +431,6 @@
 #endif // MODPLUG_TRACKER
 
 #endif // MPT_COMPILER_CLANG
-
-
 
 
 

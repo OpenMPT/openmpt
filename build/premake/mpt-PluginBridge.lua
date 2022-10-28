@@ -4,13 +4,6 @@
   language "C++"
   vpaths { ["*"] = "../../" }
   mpt_kind "GUI"
-  local extincludedirs = {
-  }
-	filter { "action:vs*" }
-		includedirs ( extincludedirs )
-	filter { "not action:vs*" }
-		externalincludedirs ( extincludedirs )
-	filter {}
   includedirs {
    "../../src",
    "../../common",
@@ -41,7 +34,7 @@
 	files {
 		"../../pluginBridge/PluginBridge.manifest",
 	}
-  defines { "MODPLUG_TRACKER", "MPT_BUILD_DEFAULT_DEPENDENCIES" }
+  defines { "MODPLUG_TRACKER" }
   dpiawareness "None"
   largeaddressaware ( true )
   characterset "Unicode"
@@ -61,13 +54,6 @@
   language "C++"
   vpaths { ["*"] = "../../" }
   mpt_kind "GUI"
-  local extincludedirs = {
-  }
-	filter { "action:vs*" }
-		includedirs ( extincludedirs )
-	filter { "not action:vs*" }
-		externalincludedirs ( extincludedirs )
-	filter {}
   includedirs {
    "../../src",
    "../../common",
@@ -98,7 +84,7 @@
 	files {
 		"../../pluginBridge/PluginBridge.manifest",
 	}
-  defines { "MODPLUG_TRACKER", "MPT_BUILD_DEFAULT_DEPENDENCIES" }
+  defines { "MODPLUG_TRACKER" }
   dpiawareness "None"
   largeaddressaware ( false )
 	filter {}

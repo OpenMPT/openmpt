@@ -23,29 +23,58 @@ else
 end
   filter {}
 	
+	mpt_use_mfc()
+	defines { "MPT_WITH_MFC" }
+	if _OPTIONS["windows-version"] == "winxp" then
+		defines { "MPT_WITH_DIRECTSOUND" }
+	end
+
 	mpt_use_ancient()
-	if _OPTIONS["windows-version"] ~= "winxp" then
+	defines { "MPT_WITH_ANCIENT" }
+	if _OPTIONS["windows-version"] ~= "winxp" and not _OPTIONS["clang"] then
+		-- disabled for VS2017 because of multiple initialization of inline variables
+		-- https://developercommunity.visualstudio.com/t/static-inline-variable-gets-destroyed-multiple-tim/297876
 		mpt_use_asiomodern()
+		defines { "MPT_WITH_ASIO" }
 	end
 	mpt_use_flac()
+	defines { "MPT_WITH_FLAC" }
 	mpt_use_lame()
+	defines { "MPT_WITH_LAME" }
 	mpt_use_lhasa()
+	defines { "MPT_WITH_LHASA" }
 	mpt_use_minizip()
+	defines { "MPT_WITH_MINIZIP" }
 	mpt_use_mpg123()
+	defines { "MPT_WITH_MPG123" }
 	mpt_use_nlohmannjson()
+	defines { "MPT_WITH_NLOHMANNJSON" }
 	mpt_use_ogg()
+	defines { "MPT_WITH_OGG" }
 	mpt_use_opus()
+	defines { "MPT_WITH_OPUS" }
 	mpt_use_opusenc()
+	defines { "MPT_WITH_OPUSENC" }
 	mpt_use_opusfile()
+	defines { "MPT_WITH_OPUSFILE" }
 	mpt_use_portaudio()
+	defines { "MPT_WITH_PORTAUDIO" }
 	mpt_use_r8brain()
+	defines { "MPT_WITH_R8BRAIN" }
 	mpt_use_rtaudio()
+	defines { "MPT_WITH_RTAUDIO" }
 	mpt_use_rtmidi()
+	defines { "MPT_WITH_RTMIDI" }
 	mpt_use_smbpitchshift()
+	defines { "MPT_WITH_SMBPITCHSHIFT" }
 	mpt_use_soundtouch()
+	defines { "MPT_WITH_SOUNDTOUCH" }
 	mpt_use_unrar()
+	defines { "MPT_WITH_UNRAR" }
 	mpt_use_vorbis()
+	defines { "MPT_WITH_VORBIS", "MPT_WITH_VORBISENC", "MPT_WITH_VORBISFILE" }
 	mpt_use_zlib()
+	defines { "MPT_WITH_ZLIB" }
 	
   includedirs {
    "../../src",
@@ -106,7 +135,7 @@ end
 		"PCH.h"
 	}
 
-  defines { "MODPLUG_TRACKER", "MPT_BUILD_DEFAULT_DEPENDENCIES" }
+  defines { "MODPLUG_TRACKER" }
   dpiawareness "None"
   largeaddressaware ( true )
   characterset(charset)
@@ -118,8 +147,6 @@ end
 if stringmode == "UTF8" then
 	defines { "MPT_USTRING_MODE_UTF8_FORCE" }
 end
-
-	mpt_use_mfc()
 
   warnings "Extra"
   filter {}

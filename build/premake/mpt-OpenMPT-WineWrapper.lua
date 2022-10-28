@@ -13,7 +13,7 @@
   files {
    "../../mptrack/wine/WineWrapper.c",
   }
-  defines { "MODPLUG_TRACKER", "MPT_BUILD_WINESUPPORT_WRAPPER", "MPT_BUILD_DEFAULT_DEPENDENCIES" }
+  defines { "MODPLUG_TRACKER", "MPT_BUILD_WINESUPPORT_WRAPPER" }
   largeaddressaware ( true )
   characterset "Unicode"
   warnings "Extra"

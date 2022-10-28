@@ -5,12 +5,16 @@
   vpaths { ["*"] = "../../" }
   mpt_kind "shared"
 	
-	if _OPTIONS["windows-version"] ~= "winxp" then
+	if _OPTIONS["windows-version"] ~= "winxp" and not _OPTIONS["clang"] then
 		mpt_use_asiomodern()
+		defines { "MPT_WITH_ASIO" }
 	end
 	mpt_use_nlohmannjson()
+	defines { "MPT_WITH_NLOHMANNJSON" }
 	mpt_use_portaudio()
+	defines { "MPT_WITH_PORTAUDIO" }
 	mpt_use_rtaudio()
+	defines { "MPT_WITH_RTAUDIO" }
 	
   includedirs {
    "../../src",
@@ -32,7 +36,7 @@
   excludes {
    "../../mptrack/wine/WineWrapper.cpp",
   }
-  defines { "MODPLUG_TRACKER", "MPT_BUILD_WINESUPPORT", "MPT_BUILD_DEFAULT_DEPENDENCIES" }
+  defines { "MODPLUG_TRACKER", "MPT_BUILD_WINESUPPORT" }
   largeaddressaware ( true )
   characterset "Unicode"
   warnings "Extra"
