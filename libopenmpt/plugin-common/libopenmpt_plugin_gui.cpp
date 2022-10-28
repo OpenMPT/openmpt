@@ -7,31 +7,6 @@
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
-#ifndef _CRT_SECURE_NO_WARNINGS
-#define _CRT_SECURE_NO_WARNINGS
-#endif
-#if !defined(WINVER) && !defined(_WIN32_WINDOWS)
-#ifndef _WIN32_WINNT
-#define _WIN32_WINNT 0x0501 // _WIN32_WINNT_WINXP
-#endif
-#endif
-#if !defined(MPT_BUILD_RETRO)
-#if defined(_MSC_VER)
-#define MPT_WITH_MFC
-#endif
-#else
-#if defined(_WIN32_WINNT)
-#if (_WIN32_WINNT >= 0x0501)
-#if defined(_MSC_VER)
-#define MPT_WITH_MFC
-#endif
-#endif
-#endif
-#endif
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-
 #if defined(__MINGW32__) && !defined(__MINGW64__)
 #include <sys/types.h>
 #endif

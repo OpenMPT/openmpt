@@ -43,6 +43,7 @@
   characterset "Unicode"
 
 	mpt_use_mfc()
+	defines { "MPT_WITH_MFC" }
 
   filter {}
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }
