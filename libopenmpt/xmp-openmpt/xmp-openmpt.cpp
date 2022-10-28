@@ -7,8 +7,6 @@
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
-#ifndef NO_XMPLAY
-
 #if defined(__MINGW32__) && !defined(__MINGW64__)
 #include <sys/types.h>
 #endif
@@ -1855,6 +1853,3 @@ BOOL WINAPI DllMain( HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved ) {
 }
 
 #endif
-
-
-#endif // NO_XMPLAY

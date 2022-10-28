@@ -7,8 +7,6 @@
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
-#ifndef NO_WINAMP
-
 #if defined(__MINGW32__) && !defined(__MINGW64__)
 #include <sys/types.h>
 #endif
@@ -544,6 +542,3 @@ void DllMainDetach() {
 #endif
 
 #endif // MPT_WITH_MFC
-
-
-#endif // NO_WINAMP
