@@ -10,6 +10,14 @@
 	mpt_use_vorbis()
 	mpt_use_zlib()
 	
+	defines {
+		"MPT_WITH_MPG123",
+		"MPT_WITH_OGG",
+		"MPT_WITH_VORBIS",
+		"MPT_WITH_VORBISFILE",
+		"MPT_WITH_ZLIB",
+	}
+	
   includedirs {
    "../..",
    "../../src",
@@ -72,7 +80,7 @@
 	}
   characterset "Unicode"
   warnings "Extra"
-  defines { "LIBOPENMPT_BUILD", "LIBOPENMPT_BUILD_TEST", "MPT_BUILD_DEFAULT_DEPENDENCIES" }
+  defines { "LIBOPENMPT_BUILD", "LIBOPENMPT_BUILD_TEST" }
 	links {
 		"ole32.lib",
 		"rpcrt4.lib",

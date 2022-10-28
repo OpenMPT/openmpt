@@ -9,6 +9,12 @@
 	mpt_use_miniz()
 	mpt_use_stbvorbis()
 	
+	defines {
+		"MPT_WITH_MINIMP3",
+		"MPT_WITH_MINIZ",
+		"MPT_WITH_STBVORBIS",
+	}
+	
   includedirs {
    "../..",
    "../../src",
@@ -91,7 +97,7 @@
 
   characterset "Unicode"
   warnings "Extra"
-  defines { "LIBOPENMPT_BUILD", "MPT_BUILD_DEFAULT_DEPENDENCIES", "MPT_BUILD_DEFAULT_DEPENDENCIES_SMALL" }
+  defines { "LIBOPENMPT_BUILD" }
   filter { "kind:SharedLib" }
    defines { "LIBOPENMPT_BUILD_DLL" }
   filter { "kind:SharedLib" }

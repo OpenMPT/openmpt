@@ -37,10 +37,8 @@
 // This section defines which dependencies are available when building with
 // MSVC. Other build systems provide MPT_WITH_* macros via command-line or other
 // means.
-// OpenMPT and libopenmpt should compile and run successfully (albeit with
-// reduced functionality) with any or all dependencies missing/disabled.
-// The defaults match the bundled third-party libraries with the addition of
-// ASIO and VST SDKs.
+// OpenMPT should compile and run successfully (albeit with reduced
+// functionality) with any or all dependencies missing/disabled.
 
 #if defined(MODPLUG_TRACKER)
 
@@ -119,42 +117,6 @@
 #define MPT_WITH_ZLIB
 
 #endif // MODPLUG_TRACKER
-
-#if defined(LIBOPENMPT_BUILD)
-
-#if defined(MPT_BUILD_DEFAULT_DEPENDENCIES_SMALL)
-
-//#define MPT_WITH_DL
-//#define MPT_WITH_FLAC
-//#define MPT_WITH_LTDL
-//#define MPT_WITH_MEDIAFOUNDATION
-#define MPT_WITH_MINIMP3
-#define MPT_WITH_MINIZ
-//#define MPT_WITH_MPG123
-//#define MPT_WITH_OGG
-#define MPT_WITH_STBVORBIS
-//#define MPT_WITH_VORBIS
-//#define MPT_WITH_VORBISFILE
-//#define MPT_WITH_ZLIB
-
-#else // !MPT_BUILD_DEFAULT_DEPENDENCIES_SMALL
-
-//#define MPT_WITH_DL
-//#define MPT_WITH_FLAC
-//#define MPT_WITH_LTDL
-//#define MPT_WITH_MEDIAFOUNDATION
-//#define MPT_WITH_MINIMP3
-//#define MPT_WITH_MINIZ
-#define MPT_WITH_MPG123
-#define MPT_WITH_OGG
-//#define MPT_WITH_STBVORBIS
-#define MPT_WITH_VORBIS
-#define MPT_WITH_VORBISFILE
-#define MPT_WITH_ZLIB
-
-#endif // MPT_BUILD_DEFAULT_DEPENDENCIES_SMALL
-
-#endif // LIBOPENMPT_BUILD
 
 #endif // MPT_BUILD_DEFAULT_DEPENDENCIES
 
