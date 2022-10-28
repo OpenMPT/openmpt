@@ -30,3 +30,25 @@ project "ancient"
 	filter { "kind:SharedLib" }
 		defines { "ANCIENT_API_DECLSPEC_DLLEXPORT" }
 	filter {}
+
+function mpt_use_ancient ()
+	filter {}
+	filter { "action:vs*" }
+		includedirs {
+			"../../include/ancient/api",
+		}
+	filter { "not action:vs*" }
+		externalincludedirs {
+			"../../include/ancient/api",
+		}
+	filter {}
+	filter {}
+	filter { "configurations:*Shared" }
+		defines { "ANCIENT_API_DECLSPEC_DLLIMPORT" }
+	filter { "not configurations:*Shared" }
+	filter {}
+	links {
+		"ancient",
+	}
+	filter {}
+end

@@ -130,3 +130,20 @@
 		files { "../../include/portaudio/build/msvc/portaudio.def" }
 	end
   filter {}
+
+function mpt_use_portaudio ()
+	filter {}
+	filter { "action:vs*" }
+		includedirs {
+			"../../include/portaudio/include",
+		}
+	filter { "not action:vs*" }
+		externalincludedirs {
+			"../../include/portaudio/include",
+		}
+	filter {}
+	links {
+		"portaudio",
+	}
+	filter {}
+end

@@ -4,18 +4,12 @@
   language "C++"
   vpaths { ["*"] = "../../" }
   mpt_kind "Console"
-  local extincludedirs = {
-   "../../include/mpg123/ports/MSVC++",
-   "../../include/mpg123/src/libmpg123",
-   "../../include/ogg/include",
-   "../../include/vorbis/include",
-   "../../include/zlib",
-  }
-	filter { "action:vs*" }
-		includedirs ( extincludedirs )
-	filter { "not action:vs*" }
-		externalincludedirs ( extincludedirs )
-	filter {}
+	
+	mpt_use_mpg123()
+	mpt_use_ogg()
+	mpt_use_vorbis()
+	mpt_use_zlib()
+	
   includedirs {
    "../..",
    "../../src",
@@ -79,12 +73,6 @@
   characterset "Unicode"
   warnings "Extra"
   defines { "LIBOPENMPT_BUILD", "LIBOPENMPT_BUILD_TEST", "MPT_BUILD_DEFAULT_DEPENDENCIES" }
-  links {
-   "mpg123",
-   "ogg",
-   "vorbis",
-   "zlib",
-  }
 	links {
 		"ole32.lib",
 		"rpcrt4.lib",

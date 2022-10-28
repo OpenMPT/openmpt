@@ -18,3 +18,20 @@
   filter { "action:vs*", "kind:SharedLib" }
     files { "../../build/premake/def/ext-minimp3.def" }
   filter {}
+
+function mpt_use_minimp3 ()
+	filter {}
+	filter { "action:vs*" }
+		includedirs {
+			"../../include",
+		}
+	filter { "not action:vs*" }
+		externalincludedirs {
+			"../../include",
+		}
+	filter {}
+	links {
+		"minimp3",
+	}
+	filter {}
+end

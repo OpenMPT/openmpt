@@ -20,3 +20,20 @@
   filter { "action:vs*" }
     buildoptions { "/wd6054", "/wd28182" } -- /analyze
   filter {}
+
+function mpt_use_pugixml ()
+	filter {}
+	filter { "action:vs*" }
+		includedirs {
+			"../../include/pugixml/src",
+		}
+	filter { "not action:vs*" }
+		externalincludedirs {
+			"../../include/pugixml/src",
+		}
+	filter {}
+	links {
+		"pugixml",
+	}
+	filter {}
+end

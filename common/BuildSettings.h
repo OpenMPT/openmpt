@@ -526,43 +526,15 @@
 
 // third-party library configuration
 
-#ifdef MPT_WITH_ANCIENT
-#ifdef MPT_BUILD_MSVC_SHARED
-#define ANCIENT_API_DECLSPEC_DLLIMPORT
-#endif
-#endif
-
-#ifdef MPT_WITH_FLAC
-#ifdef MPT_BUILD_MSVC_STATIC
-#define FLAC__NO_DLL
-#endif
-#endif
-
-#ifdef MPT_WITH_SMBPITCHSHIFT
-#ifdef MPT_BUILD_MSVC_SHARED
-#define SMBPITCHSHIFT_USE_DLL
-#endif
-#endif
-
 #ifdef MPT_WITH_STBVORBIS
+#ifndef STB_VORBIS_HEADER_ONLY
 #define STB_VORBIS_HEADER_ONLY
-#ifndef STB_VORBIS_NO_PULLDATA_API
-#define STB_VORBIS_NO_PULLDATA_API
-#endif
-#ifndef STB_VORBIS_NO_STDIO
-#define STB_VORBIS_NO_STDIO
 #endif
 #endif
 
 #ifdef MPT_WITH_VORBISFILE
 #ifndef OV_EXCLUDE_STATIC_CALLBACKS
 #define OV_EXCLUDE_STATIC_CALLBACKS
-#endif
-#endif
-
-#ifdef MPT_WITH_ZLIB
-#ifdef MPT_BUILD_MSVC_SHARED
-#define ZLIB_DLL
 #endif
 #endif
 

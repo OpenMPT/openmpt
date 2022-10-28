@@ -22,31 +22,31 @@ else
    targetname "OpenMPT"
 end
   filter {}
-  local extincludedirs = {
-   "../../include",
-   "../../include/ancient/api",
-   "../../include/asiomodern/include",
-   "../../include/ASIOSDK2/common",
-   "../../include/flac/include",
-   "../../include/lame/include",
-   "../../include/lhasa/lib/public",
-   "../../include/mpg123/ports/MSVC++",
-   "../../include/mpg123/src/libmpg123",
-   "../../include/nlohmann-json/include",
-   "../../include/ogg/include",
-   "../../include/opus/include",
-   "../../include/opusenc/include",
-   "../../include/opusfile/include",
-   "../../include/portaudio/include",
-   "../../include/rtaudio",
-   "../../include/vorbis/include",
-   "../../include/zlib",
-  }
-	filter { "action:vs*" }
-		includedirs ( extincludedirs )
-	filter { "not action:vs*" }
-		externalincludedirs ( extincludedirs )
-	filter {}
+	
+	mpt_use_ancient()
+	if _OPTIONS["windows-version"] ~= "winxp" then
+		mpt_use_asiomodern()
+	end
+	mpt_use_flac()
+	mpt_use_lame()
+	mpt_use_lhasa()
+	mpt_use_minizip()
+	mpt_use_mpg123()
+	mpt_use_nlohmannjson()
+	mpt_use_ogg()
+	mpt_use_opus()
+	mpt_use_opusenc()
+	mpt_use_opusfile()
+	mpt_use_portaudio()
+	mpt_use_r8brain()
+	mpt_use_rtaudio()
+	mpt_use_rtmidi()
+	mpt_use_smbpitchshift()
+	mpt_use_soundtouch()
+	mpt_use_unrar()
+	mpt_use_vorbis()
+	mpt_use_zlib()
+	
   includedirs {
    "../../src",
    "../../common",
@@ -56,11 +56,6 @@ end
 	files {
 		"../../mptrack/res/OpenMPT.manifest",
 	}
-	if _OPTIONS["windows-version"] ~= "winxp" then
-		files {
-			"../../include/asiomodern/include/ASIOModern/*.hpp",
-		}
-	end
   files {
    "../../src/mpt/**.cpp",
    "../../src/mpt/**.hpp",
@@ -127,27 +122,6 @@ end
 	mpt_use_mfc()
 
   warnings "Extra"
-  links {
-   "ancient",
-   "UnRAR",
-   "zlib",
-   "minizip",
-   "smbPitchShift",
-   "lame",
-   "lhasa",
-   "flac",
-   "mpg123",
-   "ogg",
-   "opus",
-   "opusenc",
-   "opusfile",
-   "portaudio",
-   "r8brain",
-   "rtaudio",
-   "rtmidi",
-   "soundtouch",
-   "vorbis",
-  }
   filter {}
 	if _OPTIONS["windows-version"] ~= "winxp" then
   linkoptions {

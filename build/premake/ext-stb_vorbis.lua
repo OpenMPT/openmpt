@@ -20,3 +20,25 @@
   filter { "kind:SharedLib" }
    files { "../../build/premake/def/ext-stb_vorbis.def" }
   filter {}
+
+function mpt_use_stbvorbis ()
+	filter {}
+	filter { "action:vs*" }
+		includedirs {
+			"../../include",
+		}
+	filter { "not action:vs*" }
+		externalincludedirs {
+			"../../include",
+		}
+	filter {}
+	defines {
+		"STB_VORBIS_HEADER_ONLY",
+		"STB_VORBIS_NO_PULLDATA_API",
+		"STB_VORBIS_NO_STDIO",
+	}
+	links {
+		"stb_vorbis",
+	}
+	filter {}
+end

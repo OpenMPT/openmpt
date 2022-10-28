@@ -62,3 +62,20 @@
 	filter { "action:vs*" }
 		buildoptions { "/wd6031", "/wd6262" } -- analyze
 	filter {}
+
+function mpt_use_lame ()
+	filter {}
+	filter { "action:vs*" }
+		includedirs {
+			"../../include/lame/include",
+		}
+	filter { "not action:vs*" }
+		externalincludedirs {
+			"../../include/lame/include",
+		}
+	filter {}
+	links {
+		"lame",
+	}
+	filter {}
+end

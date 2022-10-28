@@ -4,14 +4,11 @@
   language "C++"
   vpaths { ["*"] = "../../" }
   mpt_kind "default"
-  local extincludedirs = {
-   "../../include",
-  }
-	filter { "action:vs*" }
-		includedirs ( extincludedirs )
-	filter { "not action:vs*" }
-		externalincludedirs ( extincludedirs )
-	filter {}
+	
+	mpt_use_minimp3()
+	mpt_use_miniz()
+	mpt_use_stbvorbis()
+	
   includedirs {
    "../..",
    "../../src",
@@ -99,9 +96,25 @@
    defines { "LIBOPENMPT_BUILD_DLL" }
   filter { "kind:SharedLib" }
   filter {}
-  links {
-   "minimp3",
-   "miniz",
-   "stb_vorbis"
-  }
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }
+
+function mpt_use_libopenmpt_small ()
+	filter {}
+	filter { "action:vs*" }
+		includedirs {
+			"../..",
+		}
+	filter { "not action:vs*" }
+		externalincludedirs {
+			"../..",
+		}
+	filter {}
+	filter { "configurations:*Shared" }
+		defines { "LIBOPENMPT_USE_DLL" }
+	filter { "not configurations:*Shared" }
+	filter {}
+	links {
+		"libopenmpt-small",
+	}
+	filter {}
+end

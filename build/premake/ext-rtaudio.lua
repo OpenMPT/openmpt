@@ -52,3 +52,20 @@
 	filter { "action:vs*" }
 		buildoptions { "/wd6031" } -- analyze
 	filter {}
+
+function mpt_use_rtaudio ()
+	filter {}
+	filter { "action:vs*" }
+		includedirs {
+			"../../include/rtaudio",
+		}
+	filter { "not action:vs*" }
+		externalincludedirs {
+			"../../include/rtaudio",
+		}
+	filter {}
+	links {
+		"rtaudio",
+	}
+	filter {}
+end

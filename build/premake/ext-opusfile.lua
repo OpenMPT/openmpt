@@ -5,15 +5,10 @@
   location ( "%{wks.location}" .. "/ext" )
   mpt_kind "default"
   targetname "openmpt-opusfile"
-  local extincludedirs = {
-   "../../include/ogg/include",
-   "../../include/opus/include",
-	}
-	filter { "action:vs*" }
-		includedirs ( extincludedirs )
-	filter { "not action:vs*" }
-		externalincludedirs ( extincludedirs )
-	filter {}
+	
+	mpt_use_ogg()
+	mpt_use_opus()
+	
   includedirs {
    "../../include/opusfile/include",
   }
@@ -28,10 +23,26 @@
    "../../include/opusfile/src/*.c",
    "../../include/opusfile/src/*.h",
   }
-  links { "ogg", "opus" }
   filter { "action:vs*" }
     buildoptions { "/wd4267" }
   filter {}
   filter { "kind:SharedLib" }
    files { "../../build/premake/def/ext-opusfile.def" }
   filter {}
+
+function mpt_use_opusfile ()
+	filter {}
+	filter { "action:vs*" }
+		includedirs {
+			"../../include/opusfile/include",
+		}
+	filter { "not action:vs*" }
+		externalincludedirs {
+			"../../include/opusfile/include",
+		}
+	filter {}
+	links {
+		"opusfile",
+	}
+	filter {}
+end

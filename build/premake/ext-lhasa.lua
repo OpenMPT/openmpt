@@ -53,3 +53,20 @@
   filter { "kind:SharedLib" }
    files { "../../build/premake/def/ext-lhasa.def" }
   filter {}
+
+function mpt_use_lhasa ()
+	filter {}
+	filter { "action:vs*" }
+		includedirs {
+			"../../include/lhasa/lib/public",
+		}
+	filter { "not action:vs*" }
+		externalincludedirs {
+			"../../include/lhasa/lib/public",
+		}
+	filter {}
+	links {
+		"lhasa",
+	}
+	filter {}
+end

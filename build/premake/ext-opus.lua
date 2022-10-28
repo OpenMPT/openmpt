@@ -5,14 +5,6 @@
   location ( "%{wks.location}" .. "/ext" )
   mpt_kind "default"
   targetname "openmpt-opus"
-  local extincludedirs = {
-   "../../include/ogg/include",
-	}
- 	filter { "action:vs*" }
-		includedirs ( extincludedirs )
-	filter { "not action:vs*" }
-		externalincludedirs ( extincludedirs )
-	filter {}
   includedirs {
    "../../include/opus/include",
    "../../include/opus/celt",
@@ -72,3 +64,20 @@
 		if _OPTIONS["clang"] then
 			defines { "FLOAT_APPROX" }
 		end
+
+function mpt_use_opus ()
+	filter {}
+	filter { "action:vs*" }
+		includedirs {
+			"../../include/opus/include",
+		}
+	filter { "not action:vs*" }
+		externalincludedirs {
+			"../../include/opus/include",
+		}
+	filter {}
+	links {
+		"opus",
+	}
+	filter {}
+end

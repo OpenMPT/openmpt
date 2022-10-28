@@ -5,15 +5,10 @@
   location ( "%{wks.location}" .. "/ext" )
   mpt_kind "default"
   targetname "openmpt-opusenc"
-  local extincludedirs = {
-   "../../include/ogg/include",
-   "../../include/opus/include",
-	}
-	filter { "action:vs*" }
-		includedirs ( extincludedirs )
-	filter { "not action:vs*" }
-		externalincludedirs ( extincludedirs )
-	filter {}
+	
+	mpt_use_ogg()
+	mpt_use_opus()
+	
   includedirs {
    "../../include/opusenc/include",
    "../../include/opusenc/win32",
@@ -33,7 +28,6 @@
   }
 	defines { "HAVE_CONFIG_H" }
 	defines { "OUTSIDE_SPEEX", "RANDOM_PREFIX=libopusenc" }
-  links { "ogg", "opus" }
   filter { "action:vs*" }
     buildoptions {
 			"/wd4018",
@@ -56,3 +50,20 @@
   filter { "kind:SharedLib" }
    defines { "DLL_EXPORT" }
   filter {}
+
+function mpt_use_opusenc ()
+	filter {}
+	filter { "action:vs*" }
+		includedirs {
+			"../../include/opusenc/include",
+		}
+	filter { "not action:vs*" }
+		externalincludedirs {
+			"../../include/opusenc/include",
+		}
+	filter {}
+	links {
+		"opusenc",
+	}
+	filter {}
+end

@@ -28,3 +28,20 @@
 			links { "winmm" }
 		filter {}
 	end
+
+function mpt_use_rtmidi ()
+	filter {}
+	filter { "action:vs*" }
+		includedirs {
+			"../../include",
+		}
+	filter { "not action:vs*" }
+		externalincludedirs {
+			"../../include",
+		}
+	filter {}
+	links {
+		"rtmidi",
+	}
+	filter {}
+end

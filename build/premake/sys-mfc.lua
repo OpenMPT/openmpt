@@ -1,5 +1,6 @@
 
 function mpt_use_mfc ()
+	filter {}
 	flags { "MFC" }
 	defines {
 		"_CSTRING_DISABLE_NARROW_WIDE_CONVERSION",
@@ -70,4 +71,5 @@ function mpt_use_mfc ()
 			end
 		filter {}
 	end	
+	filter {}
 end

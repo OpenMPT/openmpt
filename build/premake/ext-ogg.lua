@@ -23,3 +23,20 @@
   filter { "action:vs*" }
     buildoptions { "/wd6001", "/wd6011" } -- /analyze
   filter {}
+
+function mpt_use_ogg ()
+	filter {}
+	filter { "action:vs*" }
+		includedirs {
+			"../../include/ogg/include",
+		}
+	filter { "not action:vs*" }
+		externalincludedirs {
+			"../../include/ogg/include",
+		}
+	filter {}
+	links {
+		"ogg",
+	}
+	filter {}
+end

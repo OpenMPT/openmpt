@@ -5,14 +5,9 @@
   location ( "%{wks.location}" .. "/ext" )
   mpt_kind "default"
   targetname "openmpt-minizip"
-  local extincludedirs = {
-		"../../include/zlib",
-	}
-	filter { "action:vs*" }
-		includedirs ( extincludedirs )
-	filter { "not action:vs*" }
-		externalincludedirs ( extincludedirs )
-	filter {}
+	
+	mpt_use_zlib()
+	
   includedirs {
 		"../../include/zlib/contrib/minizip"
 	}
@@ -39,13 +34,26 @@
    "zlib"
   }
   filter {}
-  filter { "kind:StaticLib" }
-  filter { "kind:SharedLib" }
-   defines { "ZLIB_DLL" }
-  filter {}
   filter { "kind:SharedLib" }
    files { "../../build/premake/def/ext-minizip.def" }
   filter {}
 	filter { "action:vs*" }
 		buildoptions { "/wd6262" } -- analyze
 	filter {}
+
+function mpt_use_minizip ()
+	filter {}
+	filter { "action:vs*" }
+		includedirs {
+			"../../include/zlib",
+		}
+	filter { "not action:vs*" }
+		externalincludedirs {
+			"../../include/zlib",
+		}
+	filter {}
+	links {
+		"minizip",
+	}
+	filter {}
+end

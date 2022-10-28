@@ -20,3 +20,20 @@
 	filter { "kind:SharedLib" }
 		defines { "MINIZ_EXPORT=__declspec(dllexport)" }
 	filter {}
+
+function mpt_use_miniz ()
+	filter {}
+	filter { "action:vs*" }
+		includedirs {
+			"../../include",
+		}
+	filter { "not action:vs*" }
+		externalincludedirs {
+			"../../include",
+		}
+	filter {}
+	links {
+		"miniz",
+	}
+	filter {}
+end

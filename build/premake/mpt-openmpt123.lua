@@ -5,16 +5,12 @@
   vpaths { ["*"] = "../../" }
   mpt_kind "Console"
   warnings "Extra"
-  local extincludedirs = {
-   "../..",
-   "../../include/flac/include",
-   "../../include/portaudio/include",
-  }
-	filter { "action:vs*" }
-		includedirs ( extincludedirs )
-	filter { "not action:vs*" }
-		externalincludedirs ( extincludedirs )
-	filter {}
+	
+	mpt_use_libopenmpt()
+	
+	mpt_use_flac()
+	mpt_use_portaudio()
+	
   includedirs {
    "../..",
    "../../src",
@@ -49,9 +45,6 @@
 	
   characterset "Unicode"
   links {
-    "libopenmpt",
-    "flac",
-    "portaudio",
     "ksuser",
     "winmm",
   }
@@ -66,9 +59,5 @@
   filter {}
   filter { "action:vs*" }
 		linkoptions { "wsetargv.obj" }
-  filter {}
-  filter { "configurations:*Shared" }
-   defines { "LIBOPENMPT_USE_DLL" }
-  filter { "not configurations:*Shared" }
   filter {}
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }

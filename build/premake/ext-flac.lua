@@ -123,3 +123,25 @@
   filter { "kind:SharedLib" }
    defines { "FLAC_API_EXPORTS" }
   filter {}
+
+function mpt_use_flac ()
+	filter {}
+	filter { "action:vs*" }
+		includedirs {
+			"../../include/flac/include",
+		}
+	filter { "not action:vs*" }
+		externalincludedirs {
+			"../../include/flac/include",
+		}
+	filter {}
+	filter {}
+	filter { "configurations:*Shared" }
+	filter { "not configurations:*Shared" }
+		defines { "FLAC__NO_DLL" }
+	filter {}
+	links {
+		"flac",
+	}
+	filter {}
+end

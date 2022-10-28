@@ -55,3 +55,20 @@
 		buildoptions { "/wd6262" } -- analyze
 	filter {}
   defines { "DLL_EXPORTS" }
+
+function mpt_use_soundtouch ()
+	filter {}
+	filter { "action:vs*" }
+		includedirs {
+			"../../include",
+		}
+	filter { "not action:vs*" }
+		externalincludedirs {
+			"../../include",
+		}
+	filter {}
+	links {
+		"soundtouch",
+	}
+	filter {}
+end

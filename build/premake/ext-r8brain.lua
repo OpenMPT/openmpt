@@ -29,3 +29,20 @@
    "../../include/r8brain/r8bconf.h",
    "../../include/r8brain/r8butil.h",
   }
+
+function mpt_use_r8brain ()
+	filter {}
+	filter { "action:vs*" }
+		includedirs {
+			"../../include",
+		}
+	filter { "not action:vs*" }
+		externalincludedirs {
+			"../../include",
+		}
+	filter {}
+	links {
+		"r8brain",
+	}
+	filter {}
+end

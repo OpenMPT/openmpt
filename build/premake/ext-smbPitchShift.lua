@@ -22,3 +22,24 @@
   filter { "kind:SharedLib" }
    defines { "SMBPITCHSHIFT_BUILD_DLL" }
   filter {}
+
+function mpt_use_smbpitchshift ()
+	filter {}
+	filter { "action:vs*" }
+		includedirs {
+			"../../include",
+		}
+	filter { "not action:vs*" }
+		externalincludedirs {
+			"../../include",
+		}
+	filter {}
+	filter { "configurations:*Shared" }
+		defines { "SMBPITCHSHIFT_USE_DLL" }
+	filter { "not configurations:*Shared" }
+	filter {}
+	links {
+		"smbPitchShift",
+	}
+	filter {}
+end

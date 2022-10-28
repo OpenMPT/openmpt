@@ -5,28 +5,14 @@
   vpaths { ["*"] = "../../examples/" }
   mpt_kind "Console"
   warnings "Extra"
-  local extincludedirs = {
-   "../..",
-   "../../include/portaudio/bindings/cpp/include",
-   "../../include/portaudio/include",
-  }
-	filter { "action:vs*" }
-		includedirs ( extincludedirs )
-	filter { "not action:vs*" }
-		externalincludedirs ( extincludedirs )
-	filter {}
-  includedirs {
-   "../..",
-  }
+	mpt_use_libopenmpt()
+	mpt_use_portaudio()
+	mpt_use_portaudiocpp()
   files {
    "../../examples/libopenmpt_example_cxx.cpp",
   }
   characterset "Unicode"
-  links { "libopenmpt", "zlib", "vorbis", "ogg", "mpg123", "portaudio", "portaudiocpp", "ksuser", "winmm" }
-  filter { "not configurations:*Shared" }
-  filter { "configurations:*Shared" }
-   defines { "LIBOPENMPT_USE_DLL" }
-  filter {}
+  links { "ksuser", "winmm" }
 
  project "libopenmpt_example_c"
   uuid "3f39804d-01c0-479c-ab8b-025683529c57"
@@ -34,26 +20,13 @@
   vpaths { ["*"] = "../../examples/" }
   mpt_kind "Console"
   warnings "Extra"
-  local extincludedirs = {
-   "../..",
-   "../../include/portaudio/include",
-  }
-	filter { "action:vs*" }
-		includedirs ( extincludedirs )
-	filter { "not action:vs*" }
-		externalincludedirs ( extincludedirs )
-	filter {}
-  includedirs {
-   "../..",
-  }
+	mpt_use_libopenmpt()
+	mpt_use_portaudio()
   files {
    "../../examples/libopenmpt_example_c.c",
   }
   characterset "Unicode"
-  links { "libopenmpt", "zlib", "vorbis", "ogg", "mpg123", "portaudio", "ksuser", "winmm" }
-  filter { "not configurations:*Shared" }
-  filter { "configurations:*Shared" }
-   defines { "LIBOPENMPT_USE_DLL" }
+  links { "ksuser", "winmm" }
   filter {}
 
  project "libopenmpt_example_c_mem"
@@ -62,26 +35,13 @@
   vpaths { ["*"] = "../../examples/" }
   mpt_kind "Console"
   warnings "Extra"
-  local extincludedirs = {
-   "../..",
-   "../../include/portaudio/include",
-  }
-	filter { "action:vs*" }
-		includedirs ( extincludedirs )
-	filter { "not action:vs*" }
-		externalincludedirs ( extincludedirs )
-	filter {}
-  includedirs {
-   "../..",
-  }
+	mpt_use_libopenmpt()
+	mpt_use_portaudio()
   files {
    "../../examples/libopenmpt_example_c_mem.c",
   }
   characterset "Unicode"
-  links { "libopenmpt", "zlib", "vorbis", "ogg", "mpg123", "portaudio", "ksuser", "winmm" }
-  filter { "not configurations:*Shared" }
-  filter { "configurations:*Shared" }
-   defines { "LIBOPENMPT_USE_DLL" }
+  links { "ksuser", "winmm" }
   filter {}
 
  project "libopenmpt_example_c_unsafe"
@@ -90,26 +50,13 @@
   vpaths { ["*"] = "../../examples/" }
   mpt_kind "Console"
   warnings "Extra"
-  local extincludedirs = {
-   "../..",
-   "../../include/portaudio/include",
-  }
-	filter { "action:vs*" }
-		includedirs ( extincludedirs )
-	filter { "not action:vs*" }
-		externalincludedirs ( extincludedirs )
-	filter {}
-  includedirs {
-   "../..",
-  }
+	mpt_use_libopenmpt()
+	mpt_use_portaudio()
   files {
    "../../examples/libopenmpt_example_c_unsafe.c",
   }
   characterset "Unicode"
-  links { "libopenmpt", "zlib", "vorbis", "ogg", "mpg123", "portaudio", "ksuser", "winmm" }
-  filter { "not configurations:*Shared" }
-  filter { "configurations:*Shared" }
-   defines { "LIBOPENMPT_USE_DLL" }
+  links { "ksuser", "winmm" }
   filter {}
 
  project "libopenmpt_example_c_probe"
@@ -118,25 +65,10 @@
   vpaths { ["*"] = "../../examples/" }
   mpt_kind "Console"
   warnings "Extra"
-  local extincludedirs = {
-   "../..",
-   "../../include/portaudio/include",
-  }
-	filter { "action:vs*" }
-		includedirs ( extincludedirs )
-	filter { "not action:vs*" }
-		externalincludedirs ( extincludedirs )
-	filter {}
-  includedirs {
-   "../..",
-  }
+	mpt_use_libopenmpt()
   files {
    "../../examples/libopenmpt_example_c_probe.c",
   }
   characterset "Unicode"
-  links { "libopenmpt", "zlib", "vorbis", "ogg" }
-  filter { "not configurations:*Shared" }
-  filter { "configurations:*Shared" }
-   defines { "LIBOPENMPT_USE_DLL" }
   filter {}
 

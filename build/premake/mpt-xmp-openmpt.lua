@@ -5,16 +5,12 @@
   vpaths { ["*"] = "../../libopenmpt/" }
   mpt_kind "shared"
   warnings "Extra"
-  local extincludedirs = {
-   "../..",
-   "../../include",
-   "../../include/pugixml/src",
-  }
-  filter { "action:vs*" }
-    includedirs ( extincludedirs )
-  filter { "not action:vs*" }
-    externalincludedirs ( extincludedirs )
-  filter {}
+	
+	mpt_use_libopenmpt()
+	
+	mpt_use_pugixml()
+	mpt_use_xmplay()
+	
   includedirs {
    "../..",
    "$(IntDir)/svn_version",
@@ -50,6 +46,5 @@
 
 	mpt_use_mfc()
 
-  links { "libopenmpt", "zlib", "vorbis", "ogg", "mpg123", "pugixml" }
   filter {}
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }

@@ -51,3 +51,24 @@
   filter { "action:vs*" }
     buildoptions { "/wd6297", "/wd6385" } -- /analyze
   filter {}
+
+function mpt_use_zlib ()
+	filter {}
+	filter { "action:vs*" }
+		includedirs {
+			"../../include/zlib",
+		}
+	filter { "not action:vs*" }
+		externalincludedirs {
+			"../../include/zlib",
+		}
+	filter {}
+	filter { "configurations:*Shared" }
+		defines { "ZLIB_DLL" }
+	filter { "not configurations:*Shared" }
+	filter {}
+	links {
+		"zlib",
+	}
+	filter {}
+end

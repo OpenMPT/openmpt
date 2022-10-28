@@ -5,7 +5,10 @@
   location ( "%{wks.location}" .. "/ext" )
   mpt_kind "static"
   targetname "openmpt-portaudiocpp"
-  includedirs { "../../include/portaudio/include", "../../include/portaudio/bindings/cpp/include" }
+	
+	mpt_use_portaudio()
+	
+  includedirs { "../../include/portaudio/bindings/cpp/include" }
 	filter {}
 	filter { "action:vs*" }
 		characterset "Unicode"
@@ -25,7 +28,6 @@
   files {
    "../../include/portaudio/bindings/cpp/source/portaudiocpp/*.cxx",
   }
-  links { "portaudio" }
   filter { "configurations:Debug" }
    defines { "PA_ENABLE_DEBUG_OUTPUT" }
   filter { "configurations:DebugShared" }
@@ -33,3 +35,20 @@
   filter { "configurations:DebugMDd" }
    defines { "PA_ENABLE_DEBUG_OUTPUT" }
   filter {}
+
+function mpt_use_portaudiocpp ()
+	filter {}
+	filter { "action:vs*" }
+		includedirs {
+			"../../include/portaudio/bindings/cpp/include",
+		}
+	filter { "not action:vs*" }
+		externalincludedirs {
+			"../../include/portaudio/bindings/cpp/include",
+		}
+	filter {}
+	links {
+		"portaudiocpp",
+	}
+	filter {}
+end

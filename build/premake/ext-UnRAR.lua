@@ -148,3 +148,20 @@
   filter { "kind:SharedLib" }
    files { "../../include/unrar/dll_nocrypt.def" }
   filter {}
+
+function mpt_use_unrar ()
+	filter {}
+	filter { "action:vs*" }
+		includedirs {
+			"../../include",
+		}
+	filter { "not action:vs*" }
+		externalincludedirs {
+			"../../include",
+		}
+	filter {}
+	links {
+		"UnRAR",
+	}
+	filter {}
+end
