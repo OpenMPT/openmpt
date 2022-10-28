@@ -32,7 +32,7 @@ ASM_NAME(dct64_MMX):
 	fstps    (%edx)
 	movl 276(%esp),%edi
 	flds    4(%eax)
-#if defined(PIC) && defined(__APPLE__)
+#ifdef PIC_GLOBAL_PTR
 	movl GLOBAL_VAR_PTR(costab_mmxsse),%ebx
 #else
 	leal GLOBAL_VAR(costab_mmxsse),%ebx
