@@ -11,6 +11,11 @@
 	mpt_use_flac()
 	mpt_use_portaudio()
 	
+	defines {
+		"MPT_WITH_FLAC",
+		"MPT_WITH_PORTAUDIO",
+	}
+	
   includedirs {
    "../..",
    "../../src",
@@ -48,13 +53,6 @@
     "ksuser",
     "winmm",
   }
-  defines { "MPT_WITH_FLAC" }
-  defines { "MPT_WITH_PORTAUDIO" }
-  filter {}
-  filter { "configurations:*Shared" }
-  filter { "not configurations:*Shared" }
-   defines { "FLAC__NO_DLL" }
-  filter {}
   
   filter {}
   filter { "action:vs*" }

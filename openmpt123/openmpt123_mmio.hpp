@@ -13,7 +13,7 @@
 #include "openmpt123_config.hpp"
 #include "openmpt123.hpp"
 
-#if defined(MPT_WITH_MMIO)
+#if defined(WIN32)
 
 namespace openmpt123 {
 
@@ -128,6 +128,6 @@ public:
 
 } // namespace openmpt123
 
-#endif // MPT_WITH_MMIO
+#endif // WIN32
 
 #endif // OPENMPT123_MMIO_HPP
