@@ -198,7 +198,6 @@
 	filter { "configurations:Debug" }
    defines { "DEBUG" }
    defines { "MPT_BUILD_DEBUG" }
-   defines { "MPT_BUILD_MSVC_STATIC" }
 	filter { "configurations:Debug", "architecture:ARM" }
 		symbols "On"
 	filter { "configurations:Debug", "architecture:ARM64" }
@@ -215,7 +214,6 @@
   filter { "configurations:DebugShared" }
    defines { "DEBUG" }
    defines { "MPT_BUILD_DEBUG" }
-   defines { "MPT_BUILD_MSVC_SHARED" }
    symbols "On"
 	 runtime "Debug"
    optimize "Debug"
@@ -223,7 +221,6 @@
 	 
   filter { "configurations:Checked" }
    defines { "DEBUG" }
-   defines { "MPT_BUILD_MSVC_STATIC" }
    defines { "MPT_BUILD_CHECKED" }
    symbols "On"
 		if _OPTIONS["windows-family"] ~= "uwp" then
@@ -235,7 +232,6 @@
 
   filter { "configurations:CheckedShared" }
    defines { "DEBUG" }
-   defines { "MPT_BUILD_MSVC_SHARED" }
    defines { "MPT_BUILD_CHECKED" }
    symbols "On"
 	 runtime "Release"
@@ -245,7 +241,6 @@
 	 
   filter { "configurations:Release" }
    defines { "NDEBUG" }
-   defines { "MPT_BUILD_MSVC_STATIC" }
    symbols "On"
 		if not _OPTIONS["clang"] then
 			flags { "LinkTimeOptimization" }
@@ -258,7 +253,6 @@
 
   filter { "configurations:ReleaseShared" }
    defines { "NDEBUG" }
-   defines { "MPT_BUILD_MSVC_SHARED" }
    symbols "On"
 		if not _OPTIONS["clang"] then
 			flags { "LinkTimeOptimization" }
