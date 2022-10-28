@@ -48,43 +48,7 @@
 
   characterset "Unicode"
 
-	flags { "MFC" }
-	defines { "_CSTRING_DISABLE_NARROW_WIDE_CONVERSION", "_AFX_NO_MFC_CONTROLS_IN_DIALOGS" }
-	-- work-around https://developercommunity.visualstudio.com/t/link-errors-when-building-mfc-application-with-cla/1617786
-	if _OPTIONS["clang"] then
-		filter {}
-		filter { "configurations:Debug" }
-			if true then -- _AFX_NO_MFC_CONTROLS_IN_DIALOGS
-				ignoredefaultlibraries { "afxnmcdd.lib"}
-				links { "afxnmcdd.lib" }
-			end
-			ignoredefaultlibraries { "uafxcwd.lib", "libcmtd.lib" }
-			links { "uafxcwd.lib", "libcmtd.lib" }
-		filter { "configurations:DebugShared" }
-			ignoredefaultlibraries { "mfc140ud.lib", "msvcrtd.lib" }
-			links { "mfc140ud.lib", "msvcrtd.lib" }
-		filter { "configurations:Checked" }
-			if true then -- _AFX_NO_MFC_CONTROLS_IN_DIALOGS
-				ignoredefaultlibraries { "afxnmcd.lib" }
-				links { "afxnmcd.lib" }
-			end
-			ignoredefaultlibraries { "uafxcw.lib", "libcmt.lib" }
-			links { "uafxcw.lib", "libcmt.lib" }
-		filter { "configurations:CheckedShared" }
-			ignoredefaultlibraries { "mfc140u.lib", "msvcrt.lib" }
-			links { "mfc140u.lib", "msvcrt.lib" }
-		filter { "configurations:Release" }
-			if true then -- _AFX_NO_MFC_CONTROLS_IN_DIALOGS
-				ignoredefaultlibraries { "afxnmcd.lib" }
-				links { "afxnmcd.lib" }
-			end
-			ignoredefaultlibraries { "uafxcw.lib", "libcmt.lib" }
-			links { "uafxcw.lib", "libcmt.lib" }
-		filter { "configurations:ReleaseShared" }
-			ignoredefaultlibraries { "mfc140u.lib", "msvcrt.lib" }
-			links { "mfc140u.lib", "msvcrt.lib" }
-		filter {}
-	end
+	mpt_use_mfc()
 
   links { "libopenmpt", "zlib", "vorbis", "ogg", "mpg123", "pugixml" }
   filter {}
