@@ -109,6 +109,7 @@ generic/ssse3     := $(___) -march=i686        $(FPU_SSSE3)  -mtune=generic     
 generic/sse4_1    := $(___) -march=i686        $(FPU_SSE4_1) -mtune=generic     $(OPT_SIMD)   # Intel Core-1st, AMD Bulldozer.., Via Nano-3000..
 generic/sse4_2    := $(___) -march=i686        $(FPU_SSE4_2) -mtune=generic     $(OPT_SIMD)   # Intel Core-1st, AMD Bulldozer.., Via Nano-C..
 generic/sse4a     := $(X__) -march=i686        $(FPU_SSE4A)  -mtune=generic     $(OPT_SIMD)   # AMD K10..
+generic/late      := $(XXX) -march=i686        $(FPU_SSSE3)  -mtune=generic     $(OPT_SIMD)   # Intel Core-2.., AMD Bobcat.., Via Nano-1000..
 
 intel/i386        := $(XX_) -march=i386        $(FPU_NONE)   -mtune=i386        $(OPT_DEF)         --param l1-cache-size=0  --param l2-cache-size=$(CACHE_386)
 intel/i486sx      := $(___) -march=i486        $(FPU_NONE)   -mtune=i486        $(OPT_DEF)         --param l1-cache-size=6  --param l2-cache-size=$(CACHE_486)
