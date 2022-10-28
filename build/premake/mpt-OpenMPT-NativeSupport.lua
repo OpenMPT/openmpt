@@ -4,19 +4,20 @@
   language "C++"
   vpaths { ["*"] = "../../" }
   mpt_kind "shared"
+	
+	if _OPTIONS["windows-version"] ~= "winxp" then
+		mpt_use_asiomodern()
+	end
+	mpt_use_nlohmannjson()
+	mpt_use_portaudio()
+	mpt_use_rtaudio()
+	
   includedirs {
    "../../src",
    "../../common",
-   "../../include",
-   "../../include/asiomodern/include",
-   "../../include/ASIOSDK2/common",
-   "../../include/nlohmann-json/include",
-   "../../include/portaudio/include",
-   "../../include/rtaudio",
    "$(IntDir)/svn_version",
   }
   files {
-   "../../include/asiomodern/include/ASIOModern/*.hpp",
    "../../src/mpt/**.cpp",
    "../../src/mpt/**.hpp",
    "../../src/openmpt/**.cpp",
@@ -35,9 +36,5 @@
   largeaddressaware ( true )
   characterset "Unicode"
   warnings "Extra"
-  links {
-   "portaudio",
-   "rtaudio",
-  }
   filter {}
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }
