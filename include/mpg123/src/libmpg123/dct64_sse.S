@@ -77,7 +77,7 @@ ASM_NAME(dct64_sse):
 	subps 		%xmm0, %xmm5
 	subps 		%xmm1, %xmm4
 	
-#if defined(PIC) && defined(__APPLE__)
+#ifdef PIC_GLOBAL_PTR
 	mov			GLOBAL_VAR_PTR(costab_mmxsse), %ecx
 #else
 	lea			GLOBAL_VAR(costab_mmxsse), %ecx

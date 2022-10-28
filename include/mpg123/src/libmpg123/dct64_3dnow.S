@@ -36,7 +36,7 @@ ASM_NAME(dct64_3dnow):
 	/* femms */
 
 	/* 1 */
-#if defined(PIC) && defined(__APPLE__)
+#ifdef PIC_GLOBAL_PTR
 	movl GLOBAL_VAR_PTR(pnts),%eax
 	movl (%eax),%eax
 #else
@@ -140,7 +140,7 @@ ASM_NAME(dct64_3dnow):
 	movd %mm5,64(%ebx)
 	
 	/* 2 */
-#if defined(PIC) && defined(__APPLE__)
+#ifdef PIC_GLOBAL_PTR
 	movl GLOBAL_VAR_PTR(pnts),%eax
 	movl 4(%eax),%eax
 #else
@@ -248,7 +248,7 @@ ASM_NAME(dct64_3dnow):
 	movd %mm5,96(%esi)
 
 	/* 3 */
-#if defined(PIC) && defined(__APPLE__)
+#ifdef PIC_GLOBAL_PTR
 	movl GLOBAL_VAR_PTR(pnts),%eax
 	movl 8(%eax),%eax
 #else
@@ -354,7 +354,7 @@ ASM_NAME(dct64_3dnow):
 	movd %mm6,112(%ebx)
 	
 	/*  4 */
-#if defined(PIC) && defined(__APPLE__)
+#ifdef PIC_GLOBAL_PTR
 	movl GLOBAL_VAR_PTR(pnts),%eax
 	movl 12(%eax),%eax
 #else
@@ -469,7 +469,7 @@ ASM_NAME(dct64_3dnow):
 	pi2fd %mm0,%mm0	
 	movd %eax,%mm1
 	pi2fd %mm1,%mm1
-#if defined(PIC) && defined(__APPLE__)
+#ifdef PIC_GLOBAL_PTR
 	movl GLOBAL_VAR_PTR(pnts),%eax
 	movl 16(%eax),%eax
 #else
