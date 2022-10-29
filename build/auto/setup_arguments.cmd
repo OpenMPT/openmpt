@@ -24,6 +24,7 @@ exit 1
 :setupargumentsstart
 
 
+if "%MPT_VS_TARGET%" == "winxpansi" set MPT_VS_WITHTARGET=%MPT_VS_VER%winxpansi
 if "%MPT_VS_TARGET%" == "winxp"   set MPT_VS_WITHTARGET=%MPT_VS_VER%winxp
 if "%MPT_VS_TARGET%" == "vista"   set MPT_VS_WITHTARGET=%MPT_VS_VER%winvista
 if "%MPT_VS_TARGET%" == "win7"    set MPT_VS_WITHTARGET=%MPT_VS_VER%win7
@@ -34,6 +35,7 @@ if "%MPT_VS_TARGET%" == "win10clang" set MPT_VS_WITHTARGET=%MPT_VS_VER%win10clan
 
 
 if "%MPT_VS_ARCH%" == "Win32" (
+	if "%MPT_VS_TARGET%" == "winxpansi" set MPT_BIN_TARGET=winxpansi
 	if "%MPT_VS_TARGET%" == "winxp"   set MPT_BIN_TARGET=winxp
 	if "%MPT_VS_TARGET%" == "vista"   set MPT_BIN_TARGET=vista
 	if "%MPT_VS_TARGET%" == "win7"    set MPT_BIN_TARGET=win7
@@ -43,6 +45,7 @@ if "%MPT_VS_ARCH%" == "Win32" (
 	if "%MPT_VS_TARGET%" == "win10clang" set MPT_BIN_TARGET=win10clang
 )
 if "%MPT_VS_ARCH%" == "x64" (
+	if "%MPT_VS_TARGET%" == "winxpansi" set MPT_BIN_TARGET=winxpansi
 	if "%MPT_VS_TARGET%" == "winxp"   set MPT_BIN_TARGET=winxp
 	if "%MPT_VS_TARGET%" == "vista"   set MPT_BIN_TARGET=vista
 	if "%MPT_VS_TARGET%" == "win7"    set MPT_BIN_TARGET=win7
@@ -52,6 +55,7 @@ if "%MPT_VS_ARCH%" == "x64" (
 	if "%MPT_VS_TARGET%" == "win10clang" set MPT_BIN_TARGET=win10clang
 )
 if "%MPT_VS_ARCH%" == "ARM" (
+	if "%MPT_VS_TARGET%" == "winxpansi" set MPT_BIN_TARGET=winxpansi
 	if "%MPT_VS_TARGET%" == "winxp"   set MPT_BIN_TARGET=winxp
 	if "%MPT_VS_TARGET%" == "vista"   set MPT_BIN_TARGET=vista
 	if "%MPT_VS_TARGET%" == "win7"    set MPT_BIN_TARGET=win7
@@ -61,6 +65,7 @@ if "%MPT_VS_ARCH%" == "ARM" (
 	if "%MPT_VS_TARGET%" == "win10clang" set MPT_BIN_TARGET=win10clang
 )
 if "%MPT_VS_ARCH%" == "ARM64" (
+	if "%MPT_VS_TARGET%" == "winxpansi" set MPT_BIN_TARGET=winxpansi
 	if "%MPT_VS_TARGET%" == "winxp"   set MPT_BIN_TARGET=winxp
 	if "%MPT_VS_TARGET%" == "vista"   set MPT_BIN_TARGET=vista
 	if "%MPT_VS_TARGET%" == "win7"    set MPT_BIN_TARGET=win7
@@ -70,6 +75,7 @@ if "%MPT_VS_ARCH%" == "ARM64" (
 	if "%MPT_VS_TARGET%" == "win10clang" set MPT_BIN_TARGET=win10clang
 )
 
+if "%MPT_VS_TARGET%" == "winxpansi" set MPT_BIN_TARGET32=winxpansi
 if "%MPT_VS_TARGET%" == "winxp"   set MPT_BIN_TARGET32=winxp
 if "%MPT_VS_TARGET%" == "vista"   set MPT_BIN_TARGET32=vista
 if "%MPT_VS_TARGET%" == "win7"    set MPT_BIN_TARGET32=win7
@@ -78,6 +84,7 @@ if "%MPT_VS_TARGET%" == "win10"   set MPT_BIN_TARGET32=win10
 if "%MPT_VS_TARGET%" == "default" set MPT_BIN_TARGET32=win10
 if "%MPT_VS_TARGET%" == "win10clang" set MPT_BIN_TARGET32=win10clang
 
+if "%MPT_VS_TARGET%" == "winxpansi" set MPT_BIN_TARGET64=winxpansi
 if "%MPT_VS_TARGET%" == "winxp"   set MPT_BIN_TARGET64=winxp
 if "%MPT_VS_TARGET%" == "vista"   set MPT_BIN_TARGET64=vista
 if "%MPT_VS_TARGET%" == "win7"    set MPT_BIN_TARGET64=win7
@@ -108,6 +115,7 @@ if "%MPT_VS_ARCH%" == "x64"   set MPT_DIST_VARIANT_ARCH=amd64
 if "%MPT_VS_ARCH%" == "ARM"   set MPT_DIST_VARIANT_ARCH=arm
 if "%MPT_VS_ARCH%" == "ARM64" set MPT_DIST_VARIANT_ARCH=arm64
 
+if "%MPT_VS_TARGET%" == "winxpansi" set MPT_DIST_VARIANT_OS=winxpansi
 if "%MPT_VS_TARGET%" == "winxp"   set MPT_DIST_VARIANT_OS=winxp
 if "%MPT_VS_TARGET%" == "vista"   set MPT_DIST_VARIANT_OS=winvista
 if "%MPT_VS_TARGET%" == "win7"    set MPT_DIST_VARIANT_OS=win7
@@ -119,6 +127,7 @@ if "%MPT_VS_TARGET%" == "win10clang" set MPT_DIST_VARIANT_OS=win10clang
 set MPT_DIST_VARIANT=%MPT_DIST_VARIANT_OS%-%MPT_DIST_VARIANT_ARCH%
 
 
+if "%MPT_VS_TARGET%" == "winxpansi" set MPT_DIST_VARIANT_PREFIX=retro-winxpansi
 if "%MPT_VS_TARGET%" == "winxp"   set MPT_DIST_VARIANT_PREFIX=retro-winxp
 if "%MPT_VS_TARGET%" == "vista"   set MPT_DIST_VARIANT_PREFIX=retro-winvista
 if "%MPT_VS_TARGET%" == "win7"    set MPT_DIST_VARIANT_PREFIX=win7

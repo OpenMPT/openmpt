@@ -20,6 +20,17 @@ if errorlevel 1 goto errversion
 
 
 start cmd /c ^( ^
+%PREMAKE% --file=build/premake/premake.lua --group=libopenmpt_test  vs2017 --windows-version=winxp --charset=MBCS ^&^& ^
+%PREMAKE% --file=build/premake/premake.lua --group=in_openmpt       vs2017 --windows-version=winxp --charset=MBCS ^&^& ^
+%PREMAKE% --file=build/premake/premake.lua --group=xmp-openmpt      vs2017 --windows-version=winxp --charset=MBCS ^&^& ^
+%PREMAKE% --file=build/premake/premake.lua --group=libopenmpt-small vs2017 --windows-version=winxp --charset=MBCS ^&^& ^
+%PREMAKE% --file=build/premake/premake.lua --group=libopenmpt       vs2017 --windows-version=winxp --charset=MBCS ^&^& ^
+%PREMAKE% --file=build/premake/premake.lua --group=openmpt123       vs2017 --windows-version=winxp --charset=MBCS ^&^& ^
+%PREMAKE% --file=build/premake/premake.lua --group=PluginBridge     vs2017 --windows-version=winxp --charset=MBCS ^&^& ^
+%PREMAKE% --file=build/premake/premake.lua --group=OpenMPT          vs2017 --windows-version=winxp --charset=MBCS ^&^& ^
+echo Done ^) ^|^| pause
+
+start cmd /c ^( ^
 %PREMAKE% --file=build/premake/premake.lua --group=libopenmpt_test  vs2017 --windows-version=winxp ^&^& ^
 %PREMAKE% --file=build/premake/premake.lua --group=in_openmpt       vs2017 --windows-version=winxp ^&^& ^
 %PREMAKE% --file=build/premake/premake.lua --group=xmp-openmpt      vs2017 --windows-version=winxp ^&^& ^
