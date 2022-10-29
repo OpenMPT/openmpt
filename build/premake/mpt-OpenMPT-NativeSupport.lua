@@ -37,6 +37,9 @@
    "../../mptrack/wine/WineWrapper.cpp",
   }
   defines { "MODPLUG_TRACKER", "MPT_BUILD_WINESUPPORT" }
+	if _OPTIONS["charset"] ~= "Unicode" then
+		defines { "MPT_CHECK_WINDOWS_IGNORE_WARNING_NO_UNICODE" }
+	end
   warnings "Extra"
   filter {}
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }

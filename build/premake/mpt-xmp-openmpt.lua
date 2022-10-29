@@ -44,6 +44,9 @@
 
 	mpt_use_mfc()
 	defines { "MPT_WITH_MFC" }
+	if _OPTIONS["charset"] ~= "Unicode" then
+		defines { "NO_WARN_MBCS_MFC_DEPRECATION" }
+	end
 
   filter {}
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }

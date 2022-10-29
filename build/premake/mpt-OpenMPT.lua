@@ -138,14 +138,17 @@ end
   defines { "MODPLUG_TRACKER" }
   dpiawareness "None"
   characterset(charset)
-if charset == "Unicode" then
-else
-	defines { "NO_WARN_MBCS_MFC_DEPRECATION" }
-	defines { "MPT_CHECK_WINDOWS_IGNORE_WARNING_NO_UNICODE" }
-end
-if stringmode == "UTF8" then
-	defines { "MPT_USTRING_MODE_UTF8_FORCE" }
-end
+	if charset == "Unicode" then
+	else
+		defines { "NO_WARN_MBCS_MFC_DEPRECATION" }
+		defines { "MPT_CHECK_WINDOWS_IGNORE_WARNING_NO_UNICODE" }
+	end
+	if _OPTIONS["charset"] ~= "Unicode" then
+		defines { "NO_WARN_MBCS_MFC_DEPRECATION" }
+	end
+	if stringmode == "UTF8" then
+		defines { "MPT_USTRING_MODE_UTF8_FORCE" }
+	end
 
   warnings "Extra"
   filter {}

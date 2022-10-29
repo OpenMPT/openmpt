@@ -36,6 +36,9 @@
 	}
   defines { "MODPLUG_TRACKER" }
   dpiawareness "None"
+	if _OPTIONS["charset"] ~= "Unicode" then
+		defines { "MPT_CHECK_WINDOWS_IGNORE_WARNING_NO_UNICODE" }
+	end
   warnings "Extra"
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }
   filter { "architecture:x86" }
@@ -95,6 +98,9 @@
 	filter { "action:vs*", "architecture:ARM64" }
 		-- dataexecutionprevention "Off" -- not supported by windows loader on arm64
 	filter {}
+	if _OPTIONS["charset"] ~= "Unicode" then
+		defines { "MPT_CHECK_WINDOWS_IGNORE_WARNING_NO_UNICODE" }
+	end
   warnings "Extra"
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }
   filter { "architecture:x86" }
