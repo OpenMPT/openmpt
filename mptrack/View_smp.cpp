@@ -1201,7 +1201,9 @@ void CViewSample::OnDraw(CDC *pDC)
 		CModScrollView::OnDraw(pDC);
 		return;
 	}
-	
+	LimitMax(m_dwBeginSel, sample.nLength);
+	LimitMax(m_dwEndSel, sample.nLength);
+
 	// Create off-screen image and timeline font
 	if(!m_offScreenDC.m_hDC)
 	{
