@@ -867,6 +867,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ImportLibrary>..\..\..\bin\debug\vs2019-win10uwp-shared\x86\openmpt-vorbis.lib</ImportLibrary>
       <ModuleDefinitionFile>../../premake/def/ext-vorbis.def</ModuleDefinitionFile>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
@@ -891,6 +892,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ImportLibrary>..\..\..\bin\debug\vs2019-win10uwp-shared\amd64\openmpt-vorbis.lib</ImportLibrary>
       <ModuleDefinitionFile>../../premake/def/ext-vorbis.def</ModuleDefinitionFile>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|ARM'">
@@ -915,6 +917,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ImportLibrary>..\..\..\bin\debug\vs2019-win10uwp-shared\arm\openmpt-vorbis.lib</ImportLibrary>
       <ModuleDefinitionFile>../../premake/def/ext-vorbis.def</ModuleDefinitionFile>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|ARM64'">
@@ -939,6 +942,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ImportLibrary>..\..\..\bin\debug\vs2019-win10uwp-shared\arm64\openmpt-vorbis.lib</ImportLibrary>
       <ModuleDefinitionFile>../../premake/def/ext-vorbis.def</ModuleDefinitionFile>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">
@@ -969,6 +973,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <ImportLibrary>..\..\..\bin\release\vs2019-win10uwp-shared\x86\openmpt-vorbis.lib</ImportLibrary>
       <ModuleDefinitionFile>../../premake/def/ext-vorbis.def</ModuleDefinitionFile>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
@@ -998,6 +1003,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <ImportLibrary>..\..\..\bin\release\vs2019-win10uwp-shared\amd64\openmpt-vorbis.lib</ImportLibrary>
       <ModuleDefinitionFile>../../premake/def/ext-vorbis.def</ModuleDefinitionFile>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|ARM'">
@@ -1027,6 +1033,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <ImportLibrary>..\..\..\bin\release\vs2019-win10uwp-shared\arm\openmpt-vorbis.lib</ImportLibrary>
       <ModuleDefinitionFile>../../premake/def/ext-vorbis.def</ModuleDefinitionFile>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|ARM64'">
@@ -1056,6 +1063,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <ImportLibrary>..\..\..\bin\release\vs2019-win10uwp-shared\arm64\openmpt-vorbis.lib</ImportLibrary>
       <ModuleDefinitionFile>../../premake/def/ext-vorbis.def</ModuleDefinitionFile>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|Win32'">
@@ -1087,6 +1095,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <ImportLibrary>..\..\..\bin\checked\vs2019-win10uwp-shared\x86\openmpt-vorbis.lib</ImportLibrary>
       <ModuleDefinitionFile>../../premake/def/ext-vorbis.def</ModuleDefinitionFile>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|x64'">
@@ -1117,6 +1126,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <ImportLibrary>..\..\..\bin\checked\vs2019-win10uwp-shared\amd64\openmpt-vorbis.lib</ImportLibrary>
       <ModuleDefinitionFile>../../premake/def/ext-vorbis.def</ModuleDefinitionFile>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|ARM'">
@@ -1147,6 +1157,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <ImportLibrary>..\..\..\bin\checked\vs2019-win10uwp-shared\arm\openmpt-vorbis.lib</ImportLibrary>
       <ModuleDefinitionFile>../../premake/def/ext-vorbis.def</ModuleDefinitionFile>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|ARM64'">
@@ -1177,6 +1188,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <ImportLibrary>..\..\..\bin\checked\vs2019-win10uwp-shared\arm64\openmpt-vorbis.lib</ImportLibrary>
       <ModuleDefinitionFile>../../premake/def/ext-vorbis.def</ModuleDefinitionFile>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

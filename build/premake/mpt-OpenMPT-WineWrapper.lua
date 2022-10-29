@@ -14,7 +14,6 @@
    "../../mptrack/wine/WineWrapper.c",
   }
   defines { "MODPLUG_TRACKER", "MPT_BUILD_WINESUPPORT_WRAPPER" }
-  largeaddressaware ( true )
   warnings "Extra"
   links {
    "OpenMPT-NativeSupport",

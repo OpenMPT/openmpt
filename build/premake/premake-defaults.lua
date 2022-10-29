@@ -90,6 +90,7 @@
 
 	filter {}
 		characterset "Unicode"
+		largeaddressaware ( true )
 	filter {}
 
 	filter {}

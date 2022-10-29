@@ -880,6 +880,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ImportLibrary>..\..\..\bin\debug\vs2022-win10uwp-shared\x86\openmpt-ogg.lib</ImportLibrary>
       <ModuleDefinitionFile>../../../include/ogg/win32/ogg.def</ModuleDefinitionFile>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
@@ -905,6 +906,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ImportLibrary>..\..\..\bin\debug\vs2022-win10uwp-shared\amd64\openmpt-ogg.lib</ImportLibrary>
       <ModuleDefinitionFile>../../../include/ogg/win32/ogg.def</ModuleDefinitionFile>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|ARM'">
@@ -930,6 +932,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ImportLibrary>..\..\..\bin\debug\vs2022-win10uwp-shared\arm\openmpt-ogg.lib</ImportLibrary>
       <ModuleDefinitionFile>../../../include/ogg/win32/ogg.def</ModuleDefinitionFile>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|ARM64'">
@@ -955,6 +958,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ImportLibrary>..\..\..\bin\debug\vs2022-win10uwp-shared\arm64\openmpt-ogg.lib</ImportLibrary>
       <ModuleDefinitionFile>../../../include/ogg/win32/ogg.def</ModuleDefinitionFile>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">
@@ -986,6 +990,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <ImportLibrary>..\..\..\bin\release\vs2022-win10uwp-shared\x86\openmpt-ogg.lib</ImportLibrary>
       <ModuleDefinitionFile>../../../include/ogg/win32/ogg.def</ModuleDefinitionFile>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
@@ -1016,6 +1021,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <ImportLibrary>..\..\..\bin\release\vs2022-win10uwp-shared\amd64\openmpt-ogg.lib</ImportLibrary>
       <ModuleDefinitionFile>../../../include/ogg/win32/ogg.def</ModuleDefinitionFile>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|ARM'">
@@ -1046,6 +1052,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <ImportLibrary>..\..\..\bin\release\vs2022-win10uwp-shared\arm\openmpt-ogg.lib</ImportLibrary>
       <ModuleDefinitionFile>../../../include/ogg/win32/ogg.def</ModuleDefinitionFile>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|ARM64'">
@@ -1076,6 +1083,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <ImportLibrary>..\..\..\bin\release\vs2022-win10uwp-shared\arm64\openmpt-ogg.lib</ImportLibrary>
       <ModuleDefinitionFile>../../../include/ogg/win32/ogg.def</ModuleDefinitionFile>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|Win32'">
@@ -1108,6 +1116,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <ImportLibrary>..\..\..\bin\checked\vs2022-win10uwp-shared\x86\openmpt-ogg.lib</ImportLibrary>
       <ModuleDefinitionFile>../../../include/ogg/win32/ogg.def</ModuleDefinitionFile>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|x64'">
@@ -1139,6 +1148,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <ImportLibrary>..\..\..\bin\checked\vs2022-win10uwp-shared\amd64\openmpt-ogg.lib</ImportLibrary>
       <ModuleDefinitionFile>../../../include/ogg/win32/ogg.def</ModuleDefinitionFile>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|ARM'">
@@ -1170,6 +1180,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <ImportLibrary>..\..\..\bin\checked\vs2022-win10uwp-shared\arm\openmpt-ogg.lib</ImportLibrary>
       <ModuleDefinitionFile>../../../include/ogg/win32/ogg.def</ModuleDefinitionFile>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|ARM64'">
@@ -1201,6 +1212,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <ImportLibrary>..\..\..\bin\checked\vs2022-win10uwp-shared\arm64\openmpt-ogg.lib</ImportLibrary>
       <ModuleDefinitionFile>../../../include/ogg/win32/ogg.def</ModuleDefinitionFile>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

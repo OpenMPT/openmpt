@@ -783,6 +783,7 @@
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <ImportLibrary>..\..\..\bin\debug\vs2022-win10clang-shared\x86\openmpt-minimp3.lib</ImportLibrary>
       <ModuleDefinitionFile>../../premake/def/ext-minimp3.def</ModuleDefinitionFile>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
@@ -803,6 +804,7 @@
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <ImportLibrary>..\..\..\bin\debug\vs2022-win10clang-shared\amd64\openmpt-minimp3.lib</ImportLibrary>
       <ModuleDefinitionFile>../../premake/def/ext-minimp3.def</ModuleDefinitionFile>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|ARM'">
@@ -823,6 +825,7 @@
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <ImportLibrary>..\..\..\bin\debug\vs2022-win10clang-shared\arm\openmpt-minimp3.lib</ImportLibrary>
       <ModuleDefinitionFile>../../premake/def/ext-minimp3.def</ModuleDefinitionFile>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|ARM64'">
@@ -843,6 +846,7 @@
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <ImportLibrary>..\..\..\bin\debug\vs2022-win10clang-shared\arm64\openmpt-minimp3.lib</ImportLibrary>
       <ModuleDefinitionFile>../../premake/def/ext-minimp3.def</ModuleDefinitionFile>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">
@@ -870,6 +874,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <ImportLibrary>..\..\..\bin\release\vs2022-win10clang-shared\x86\openmpt-minimp3.lib</ImportLibrary>
       <ModuleDefinitionFile>../../premake/def/ext-minimp3.def</ModuleDefinitionFile>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
@@ -896,6 +901,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <ImportLibrary>..\..\..\bin\release\vs2022-win10clang-shared\amd64\openmpt-minimp3.lib</ImportLibrary>
       <ModuleDefinitionFile>../../premake/def/ext-minimp3.def</ModuleDefinitionFile>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|ARM'">
@@ -922,6 +928,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <ImportLibrary>..\..\..\bin\release\vs2022-win10clang-shared\arm\openmpt-minimp3.lib</ImportLibrary>
       <ModuleDefinitionFile>../../premake/def/ext-minimp3.def</ModuleDefinitionFile>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|ARM64'">
@@ -948,6 +955,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <ImportLibrary>..\..\..\bin\release\vs2022-win10clang-shared\arm64\openmpt-minimp3.lib</ImportLibrary>
       <ModuleDefinitionFile>../../premake/def/ext-minimp3.def</ModuleDefinitionFile>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|Win32'">
@@ -976,6 +984,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <ImportLibrary>..\..\..\bin\checked\vs2022-win10clang-shared\x86\openmpt-minimp3.lib</ImportLibrary>
       <ModuleDefinitionFile>../../premake/def/ext-minimp3.def</ModuleDefinitionFile>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|x64'">
@@ -1003,6 +1012,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <ImportLibrary>..\..\..\bin\checked\vs2022-win10clang-shared\amd64\openmpt-minimp3.lib</ImportLibrary>
       <ModuleDefinitionFile>../../premake/def/ext-minimp3.def</ModuleDefinitionFile>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|ARM'">
@@ -1030,6 +1040,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <ImportLibrary>..\..\..\bin\checked\vs2022-win10clang-shared\arm\openmpt-minimp3.lib</ImportLibrary>
       <ModuleDefinitionFile>../../premake/def/ext-minimp3.def</ModuleDefinitionFile>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|ARM64'">
@@ -1057,6 +1068,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <ImportLibrary>..\..\..\bin\checked\vs2022-win10clang-shared\arm64\openmpt-minimp3.lib</ImportLibrary>
       <ModuleDefinitionFile>../../premake/def/ext-minimp3.def</ModuleDefinitionFile>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

@@ -431,6 +431,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ImportLibrary>..\..\..\bin\debug\vs2019-win7-shared\x86\openmpt-stb_vorbis.lib</ImportLibrary>
       <ModuleDefinitionFile>../../premake/def/ext-stb_vorbis.def</ModuleDefinitionFile>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
@@ -453,6 +454,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ImportLibrary>..\..\..\bin\debug\vs2019-win7-shared\amd64\openmpt-stb_vorbis.lib</ImportLibrary>
       <ModuleDefinitionFile>../../premake/def/ext-stb_vorbis.def</ModuleDefinitionFile>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">
@@ -481,6 +483,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <ImportLibrary>..\..\..\bin\release\vs2019-win7-shared\x86\openmpt-stb_vorbis.lib</ImportLibrary>
       <ModuleDefinitionFile>../../premake/def/ext-stb_vorbis.def</ModuleDefinitionFile>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
@@ -508,6 +511,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <ImportLibrary>..\..\..\bin\release\vs2019-win7-shared\amd64\openmpt-stb_vorbis.lib</ImportLibrary>
       <ModuleDefinitionFile>../../premake/def/ext-stb_vorbis.def</ModuleDefinitionFile>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|Win32'">
@@ -537,6 +541,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <ImportLibrary>..\..\..\bin\checked\vs2019-win7-shared\x86\openmpt-stb_vorbis.lib</ImportLibrary>
       <ModuleDefinitionFile>../../premake/def/ext-stb_vorbis.def</ModuleDefinitionFile>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|x64'">
@@ -565,6 +570,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <ImportLibrary>..\..\..\bin\checked\vs2019-win7-shared\amd64\openmpt-stb_vorbis.lib</ImportLibrary>
       <ModuleDefinitionFile>../../premake/def/ext-stb_vorbis.def</ModuleDefinitionFile>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

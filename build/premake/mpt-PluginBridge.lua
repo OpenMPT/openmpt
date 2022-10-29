@@ -36,7 +36,6 @@
 	}
   defines { "MODPLUG_TRACKER" }
   dpiawareness "None"
-  largeaddressaware ( true )
   warnings "Extra"
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }
   filter { "architecture:x86" }

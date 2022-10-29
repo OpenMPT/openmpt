@@ -37,7 +37,6 @@
    "../../mptrack/wine/WineWrapper.cpp",
   }
   defines { "MODPLUG_TRACKER", "MPT_BUILD_WINESUPPORT" }
-  largeaddressaware ( true )
   warnings "Extra"
   filter {}
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }

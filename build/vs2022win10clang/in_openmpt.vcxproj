@@ -556,6 +556,7 @@
       <AdditionalDependencies>afxnmcdd.lib;nafxcwd.lib;libcmtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>..\..\bin\debug\vs2022-win10clang-static\x86\in_openmpt.lib</ImportLibrary>
       <IgnoreSpecificDefaultLibraries>afxnmcdd.lib;nafxcwd.lib;libcmtd.lib</IgnoreSpecificDefaultLibraries>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -586,6 +587,7 @@
       <AdditionalDependencies>afxnmcdd.lib;nafxcwd.lib;libcmtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>..\..\bin\debug\vs2022-win10clang-static\amd64\in_openmpt.lib</ImportLibrary>
       <IgnoreSpecificDefaultLibraries>afxnmcdd.lib;nafxcwd.lib;libcmtd.lib</IgnoreSpecificDefaultLibraries>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -616,6 +618,7 @@
       <AdditionalDependencies>afxnmcdd.lib;nafxcwd.lib;libcmtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>..\..\bin\debug\vs2022-win10clang-static\arm\in_openmpt.lib</ImportLibrary>
       <IgnoreSpecificDefaultLibraries>afxnmcdd.lib;nafxcwd.lib;libcmtd.lib</IgnoreSpecificDefaultLibraries>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -646,6 +649,7 @@
       <AdditionalDependencies>afxnmcdd.lib;nafxcwd.lib;libcmtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>..\..\bin\debug\vs2022-win10clang-static\arm64\in_openmpt.lib</ImportLibrary>
       <IgnoreSpecificDefaultLibraries>afxnmcdd.lib;nafxcwd.lib;libcmtd.lib</IgnoreSpecificDefaultLibraries>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -683,6 +687,7 @@
       <AdditionalDependencies>afxnmcd.lib;nafxcw.lib;libcmt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>..\..\bin\release\vs2022-win10clang-static\x86\in_openmpt.lib</ImportLibrary>
       <IgnoreSpecificDefaultLibraries>afxnmcd.lib;nafxcw.lib;libcmt.lib</IgnoreSpecificDefaultLibraries>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -719,6 +724,7 @@
       <AdditionalDependencies>afxnmcd.lib;nafxcw.lib;libcmt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>..\..\bin\release\vs2022-win10clang-static\amd64\in_openmpt.lib</ImportLibrary>
       <IgnoreSpecificDefaultLibraries>afxnmcd.lib;nafxcw.lib;libcmt.lib</IgnoreSpecificDefaultLibraries>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -755,6 +761,7 @@
       <AdditionalDependencies>afxnmcd.lib;nafxcw.lib;libcmt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>..\..\bin\release\vs2022-win10clang-static\arm\in_openmpt.lib</ImportLibrary>
       <IgnoreSpecificDefaultLibraries>afxnmcd.lib;nafxcw.lib;libcmt.lib</IgnoreSpecificDefaultLibraries>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -791,6 +798,7 @@
       <AdditionalDependencies>afxnmcd.lib;nafxcw.lib;libcmt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>..\..\bin\release\vs2022-win10clang-static\arm64\in_openmpt.lib</ImportLibrary>
       <IgnoreSpecificDefaultLibraries>afxnmcd.lib;nafxcw.lib;libcmt.lib</IgnoreSpecificDefaultLibraries>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -829,6 +837,7 @@
       <AdditionalDependencies>afxnmcd.lib;nafxcw.lib;libcmt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>..\..\bin\checked\vs2022-win10clang-static\x86\in_openmpt.lib</ImportLibrary>
       <IgnoreSpecificDefaultLibraries>afxnmcd.lib;nafxcw.lib;libcmt.lib</IgnoreSpecificDefaultLibraries>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -866,6 +875,7 @@
       <AdditionalDependencies>afxnmcd.lib;nafxcw.lib;libcmt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>..\..\bin\checked\vs2022-win10clang-static\amd64\in_openmpt.lib</ImportLibrary>
       <IgnoreSpecificDefaultLibraries>afxnmcd.lib;nafxcw.lib;libcmt.lib</IgnoreSpecificDefaultLibraries>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -903,6 +913,7 @@
       <AdditionalDependencies>afxnmcd.lib;nafxcw.lib;libcmt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>..\..\bin\checked\vs2022-win10clang-static\arm\in_openmpt.lib</ImportLibrary>
       <IgnoreSpecificDefaultLibraries>afxnmcd.lib;nafxcw.lib;libcmt.lib</IgnoreSpecificDefaultLibraries>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -940,6 +951,7 @@
       <AdditionalDependencies>afxnmcd.lib;nafxcw.lib;libcmt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>..\..\bin\checked\vs2022-win10clang-static\arm64\in_openmpt.lib</ImportLibrary>
       <IgnoreSpecificDefaultLibraries>afxnmcd.lib;nafxcw.lib;libcmt.lib</IgnoreSpecificDefaultLibraries>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -970,6 +982,7 @@
       <AdditionalDependencies>mfc140d.lib;msvcrtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>..\..\bin\debug\vs2022-win10clang-shared\x86\in_openmpt.lib</ImportLibrary>
       <IgnoreSpecificDefaultLibraries>mfc140d.lib;msvcrtd.lib</IgnoreSpecificDefaultLibraries>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1000,6 +1013,7 @@
       <AdditionalDependencies>mfc140d.lib;msvcrtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>..\..\bin\debug\vs2022-win10clang-shared\amd64\in_openmpt.lib</ImportLibrary>
       <IgnoreSpecificDefaultLibraries>mfc140d.lib;msvcrtd.lib</IgnoreSpecificDefaultLibraries>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1030,6 +1044,7 @@
       <AdditionalDependencies>mfc140d.lib;msvcrtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>..\..\bin\debug\vs2022-win10clang-shared\arm\in_openmpt.lib</ImportLibrary>
       <IgnoreSpecificDefaultLibraries>mfc140d.lib;msvcrtd.lib</IgnoreSpecificDefaultLibraries>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1060,6 +1075,7 @@
       <AdditionalDependencies>mfc140d.lib;msvcrtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>..\..\bin\debug\vs2022-win10clang-shared\arm64\in_openmpt.lib</ImportLibrary>
       <IgnoreSpecificDefaultLibraries>mfc140d.lib;msvcrtd.lib</IgnoreSpecificDefaultLibraries>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1097,6 +1113,7 @@
       <AdditionalDependencies>mfc140.lib;msvcrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>..\..\bin\release\vs2022-win10clang-shared\x86\in_openmpt.lib</ImportLibrary>
       <IgnoreSpecificDefaultLibraries>mfc140.lib;msvcrt.lib</IgnoreSpecificDefaultLibraries>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1133,6 +1150,7 @@
       <AdditionalDependencies>mfc140.lib;msvcrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>..\..\bin\release\vs2022-win10clang-shared\amd64\in_openmpt.lib</ImportLibrary>
       <IgnoreSpecificDefaultLibraries>mfc140.lib;msvcrt.lib</IgnoreSpecificDefaultLibraries>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1169,6 +1187,7 @@
       <AdditionalDependencies>mfc140.lib;msvcrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>..\..\bin\release\vs2022-win10clang-shared\arm\in_openmpt.lib</ImportLibrary>
       <IgnoreSpecificDefaultLibraries>mfc140.lib;msvcrt.lib</IgnoreSpecificDefaultLibraries>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1205,6 +1224,7 @@
       <AdditionalDependencies>mfc140.lib;msvcrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>..\..\bin\release\vs2022-win10clang-shared\arm64\in_openmpt.lib</ImportLibrary>
       <IgnoreSpecificDefaultLibraries>mfc140.lib;msvcrt.lib</IgnoreSpecificDefaultLibraries>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1243,6 +1263,7 @@
       <AdditionalDependencies>mfc140.lib;msvcrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>..\..\bin\checked\vs2022-win10clang-shared\x86\in_openmpt.lib</ImportLibrary>
       <IgnoreSpecificDefaultLibraries>mfc140.lib;msvcrt.lib</IgnoreSpecificDefaultLibraries>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1280,6 +1301,7 @@
       <AdditionalDependencies>mfc140.lib;msvcrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>..\..\bin\checked\vs2022-win10clang-shared\amd64\in_openmpt.lib</ImportLibrary>
       <IgnoreSpecificDefaultLibraries>mfc140.lib;msvcrt.lib</IgnoreSpecificDefaultLibraries>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1317,6 +1339,7 @@
       <AdditionalDependencies>mfc140.lib;msvcrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>..\..\bin\checked\vs2022-win10clang-shared\arm\in_openmpt.lib</ImportLibrary>
       <IgnoreSpecificDefaultLibraries>mfc140.lib;msvcrt.lib</IgnoreSpecificDefaultLibraries>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1354,6 +1377,7 @@
       <AdditionalDependencies>mfc140.lib;msvcrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>..\..\bin\checked\vs2022-win10clang-shared\arm64\in_openmpt.lib</ImportLibrary>
       <IgnoreSpecificDefaultLibraries>mfc140.lib;msvcrt.lib</IgnoreSpecificDefaultLibraries>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>

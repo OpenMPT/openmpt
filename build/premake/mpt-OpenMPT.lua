@@ -137,7 +137,6 @@ end
 
   defines { "MODPLUG_TRACKER" }
   dpiawareness "None"
-  largeaddressaware ( true )
   characterset(charset)
 if charset == "Unicode" then
 else
