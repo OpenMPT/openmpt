@@ -12,9 +12,6 @@
 		"../../include/zlib/contrib/minizip"
 	}
 	filter {}
-	filter { "action:vs*" }
-		characterset "Unicode"
-	filter {}
   files {
    "../../include/zlib/contrib/minizip/ioapi.c",
    "../../include/zlib/contrib/minizip/iowin32.c",

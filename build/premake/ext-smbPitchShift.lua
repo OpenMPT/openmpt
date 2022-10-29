@@ -7,9 +7,6 @@
   targetname "openmpt-smbpitchshift"
   includedirs { }
 	filter {}
-	filter { "action:vs*" }
-		characterset "Unicode"
-	filter {}
   files {
    "../../include/smbPitchShift/smbPitchShift.cpp",
   }

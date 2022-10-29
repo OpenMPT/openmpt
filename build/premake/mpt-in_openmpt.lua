@@ -40,8 +40,6 @@
 		resdefines { "MPT_BUILD_VER_EXE" }
 	filter {}
 
-  characterset "Unicode"
-
 	mpt_use_mfc()
 	defines { "MPT_WITH_MFC" }
 

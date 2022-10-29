@@ -11,7 +11,6 @@
   files {
    "../../examples/libopenmpt_example_cxx.cpp",
   }
-  characterset "Unicode"
   links { "ksuser", "winmm" }
 
  project "libopenmpt_example_c"
@@ -25,7 +24,6 @@
   files {
    "../../examples/libopenmpt_example_c.c",
   }
-  characterset "Unicode"
   links { "ksuser", "winmm" }
   filter {}
 
@@ -40,7 +38,6 @@
   files {
    "../../examples/libopenmpt_example_c_mem.c",
   }
-  characterset "Unicode"
   links { "ksuser", "winmm" }
   filter {}
 
@@ -55,7 +52,6 @@
   files {
    "../../examples/libopenmpt_example_c_unsafe.c",
   }
-  characterset "Unicode"
   links { "ksuser", "winmm" }
   filter {}
 
@@ -69,6 +65,5 @@
   files {
    "../../examples/libopenmpt_example_c_probe.c",
   }
-  characterset "Unicode"
   filter {}
 

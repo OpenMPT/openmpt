@@ -6,9 +6,6 @@
   mpt_kind "static"
   targetname "openmpt-rtmidi"
 	filter {}
-	filter { "action:vs*" }
-		characterset "Unicode"
-	filter {}
   files {
    "../../include/rtmidi/RtMidi.cpp"
   }

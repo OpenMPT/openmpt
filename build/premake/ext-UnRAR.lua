@@ -7,9 +7,6 @@
   targetname "openmpt-unrar"
   includedirs { "../../include/unrar" }
 	filter {}
-	filter { "action:vs*" }
-		characterset "Unicode"
-	filter {}
   defines {
    "NOMINMAX",
    "NOVOLUME",

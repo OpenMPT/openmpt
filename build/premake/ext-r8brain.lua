@@ -7,9 +7,6 @@
   targetname "openmpt-r8brain"
   includedirs { "../../include/r8brain" }
 	filter {}
-	filter { "action:vs*" }
-		characterset "Unicode"
-	filter {}
   files {
    "../../include/r8brain/r8bbase.cpp",
   }

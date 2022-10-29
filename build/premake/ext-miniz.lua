@@ -6,9 +6,6 @@
   mpt_kind "default"
   targetname "openmpt-miniz"
 	filter {}
-	filter { "action:vs*" }
-		characterset "Unicode"
-	filter {}
   files {
    "../../include/miniz/miniz.c",
    "../../include/miniz/miniz.h",

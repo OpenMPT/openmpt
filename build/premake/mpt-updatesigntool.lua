@@ -29,7 +29,6 @@
 	}
   defines { "MODPLUG_TRACKER", "MPT_BUILD_UPDATESIGNTOOL", "MPT_BUILD_DEFAULT_DEPENDENCIES" }
   largeaddressaware ( true )
-  characterset "Unicode"
   warnings "Extra"
   filter {}
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }

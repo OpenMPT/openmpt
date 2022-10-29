@@ -12,9 +12,6 @@
    "../../include/mpg123/src",
   }
 	filter {}
-	filter { "action:vs*" }
-		characterset "Unicode"
-	filter {}
   files {
    "../../include/mpg123/src/compat/compat.c",
    "../../include/mpg123/src/compat/compat_str.c",

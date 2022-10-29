@@ -11,9 +11,6 @@ project "ancient"
 		"../../include/ancient/src",
 	}
 	filter {}
-	filter { "action:vs*" }
-		characterset "Unicode"
-	filter {}
 	files {
 		"../../include/ancient/api/ancient/**.hpp",
 	}

@@ -7,9 +7,6 @@
   targetname "openmpt-minimp3"
   includedirs { }
 	filter {}
-	filter { "action:vs*" }
-		characterset "Unicode"
-	filter {}
   defines { }
   files {
    "../../include/minimp3/minimp3.c",

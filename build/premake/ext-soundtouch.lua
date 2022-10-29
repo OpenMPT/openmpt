@@ -7,9 +7,6 @@
   targetname "openmpt-soundtouch"
   includedirs { "../../include/soundtouch/include" }
 	filter {}
-	filter { "action:vs*" }
-		characterset "Unicode"
-	filter {}
   files {
    "../../include/soundtouch/include/BPMDetect.h",
    "../../include/soundtouch/include/FIFOSampleBuffer.h",

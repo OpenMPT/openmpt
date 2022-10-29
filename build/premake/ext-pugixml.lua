@@ -7,9 +7,6 @@
   targetname "openmpt-pugixml"
   includedirs { }
 	filter {}
-	filter { "action:vs*" }
-		characterset "Unicode"
-	filter {}
 	filter { "configurations:*Shared" }
 		defines { "PUGIXML_API=__declspec(dllexport)" }
 	filter { "not configurations:*Shared" }

@@ -7,9 +7,6 @@
   targetname "openmpt-zlib"
   includedirs { "../../include/zlib" }
 	filter {}
-	filter { "action:vs*" }
-		characterset "Unicode"
-	filter {}
   files {
    "../../include/zlib/adler32.c",
    "../../include/zlib/compress.c",

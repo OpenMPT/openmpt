@@ -18,9 +18,6 @@
 		"../../include/flac/src/libFLAC/include",
 	}
 	filter {}
-	filter { "action:vs*" }
-		characterset "Unicode"
-	filter {}
   files {
    "../../include/flac/src/libFLAC/bitmath.c",
    "../../include/flac/src/libFLAC/bitreader.c",

@@ -15,7 +15,6 @@
   }
   defines { "MODPLUG_TRACKER", "MPT_BUILD_WINESUPPORT_WRAPPER" }
   largeaddressaware ( true )
-  characterset "Unicode"
   warnings "Extra"
   links {
    "OpenMPT-NativeSupport",

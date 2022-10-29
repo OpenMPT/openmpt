@@ -10,9 +10,6 @@
   includedirs { "../../include/lame/libmp3lame" }
   includedirs { "../../build/premake/inc/lame" }
 	filter {}
-	filter { "action:vs*" }
-		characterset "Unicode"
-	filter {}
   files {
    "../../include/lame/include/lame.def",
   }

@@ -37,7 +37,6 @@
   defines { "MODPLUG_TRACKER" }
   dpiawareness "None"
   largeaddressaware ( true )
-  characterset "Unicode"
   warnings "Extra"
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }
   filter { "architecture:x86" }
@@ -97,7 +96,6 @@
 	filter { "action:vs*", "architecture:ARM64" }
 		-- dataexecutionprevention "Off" -- not supported by windows loader on arm64
 	filter {}
-  characterset "Unicode"
   warnings "Extra"
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }
   filter { "architecture:x86" }

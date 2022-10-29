@@ -48,7 +48,6 @@
 		resdefines { "MPT_BUILD_VER_EXE" }
 	filter {}
 	
-  characterset "Unicode"
   links {
     "ksuser",
     "winmm",

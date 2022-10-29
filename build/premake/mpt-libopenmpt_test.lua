@@ -78,7 +78,6 @@
 		"../../src/openmpt/sounddevice/**.cpp",
 		"../../src/openmpt/sounddevice/**.hpp",
 	}
-  characterset "Unicode"
   warnings "Extra"
   defines { "LIBOPENMPT_BUILD", "LIBOPENMPT_BUILD_TEST" }
 	links {

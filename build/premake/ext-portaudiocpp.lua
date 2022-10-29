@@ -10,9 +10,6 @@
 	
   includedirs { "../../include/portaudio/bindings/cpp/include" }
 	filter {}
-	filter { "action:vs*" }
-		characterset "Unicode"
-	filter {}
   defines {
    "PAWIN_USE_WDMKS_DEVICE_INFO",
    "PA_WDMKS_NO_KSGUID_LIB",

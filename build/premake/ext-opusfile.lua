@@ -13,9 +13,6 @@
    "../../include/opusfile/include",
   }
 	filter {}
-	filter { "action:vs*" }
-		characterset "Unicode"
-	filter {}
   files {
    "../../include/opusfile/include/opusfile.h",
   }

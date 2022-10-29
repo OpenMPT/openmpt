@@ -77,7 +77,6 @@
 		resdefines { "MPT_BUILD_VER_EXE" }
 	filter {}
 
-  characterset "Unicode"
   warnings "Extra"
   defines { "LIBOPENMPT_BUILD" }
   filter { "kind:SharedLib" }

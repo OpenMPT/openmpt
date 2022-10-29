@@ -5,9 +5,6 @@
   location ( "%{wks.location}" .. "/ext" )
   mpt_kind "default"
   targetname "openmpt-lhasa"
-	filter { "action:vs*" }
-		characterset "Unicode"
-	filter {}
   files {
    "../../include/lhasa/lib/crc16.c",
    "../../include/lhasa/lib/ext_header.c",

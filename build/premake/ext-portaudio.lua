@@ -7,9 +7,6 @@
   targetname "openmpt-portaudio"
   includedirs { "../../include/portaudio/include", "../../include/portaudio/src/common", "../../include/portaudio/src/os/win" }
 	filter {}
-	filter { "action:vs*" }
-		characterset "Unicode"
-	filter {}
 		if _OPTIONS["windows-version"] == "winxp" then
 			defines {
 				"PA_USE_ASIO=0",

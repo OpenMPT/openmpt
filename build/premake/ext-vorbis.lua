@@ -14,9 +14,6 @@
    "../../include/vorbis/lib",
   }
 	filter {}
-	filter { "action:vs*" }
-		characterset "Unicode"
-	filter {}
   files {
    "../../include/vorbis/include/vorbis/codec.h",
    "../../include/vorbis/include/vorbis/vorbisenc.h",

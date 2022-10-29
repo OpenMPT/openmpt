@@ -7,9 +7,6 @@
   targetname "openmpt-stb_vorbis"
   includedirs { }
 	filter {}
-	filter { "action:vs*" }
-		characterset "Unicode"
-	filter {}
   defines { "STB_VORBIS_NO_PULLDATA_API", "STB_VORBIS_NO_STDIO" }
   files {
    "../../include/stb_vorbis/stb_vorbis.c",

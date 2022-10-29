@@ -6,9 +6,6 @@
   mpt_kind "static"
   targetname "openmpt-rtaudio"
 	filter {}
-	filter { "action:vs*" }
-		characterset "Unicode"
-	filter {}
 	filter { "action:vs2017" }
 		if _OPTIONS["windows-version"] == "winxp" then
 			defines {

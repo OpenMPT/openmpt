@@ -7,9 +7,6 @@
   targetname "openmpt-ogg"
   includedirs { "../../include/ogg/include" }
 	filter {}
-	filter { "action:vs*" }
-		characterset "Unicode"
-	filter {}
   files {
    "../../include/ogg/include/ogg/ogg.h",
    "../../include/ogg/include/ogg/os_types.h",

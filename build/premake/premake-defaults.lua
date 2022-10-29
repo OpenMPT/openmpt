@@ -89,6 +89,8 @@
 	filter {}
 
 	filter {}
+		characterset "Unicode"
+	filter {}
 
 	filter {}
 		cdialect "C17"

@@ -14,9 +14,6 @@
    "../../include/opusenc/win32",
   }
 	filter {}
-	filter { "action:vs*" }
-		characterset "Unicode"
-	filter {}
   files {
    "../../include/opusenc/include/opusenc.h",
   }
