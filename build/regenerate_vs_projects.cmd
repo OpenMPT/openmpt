@@ -49,7 +49,7 @@ start cmd /c ^( ^
 %PREMAKE% --group=PluginBridge vs2017 --win7 ^&^& ^
 %PREMAKE% --group=OpenMPT vs2017 --win7 ^&^& ^
 %PREMAKE% --group=all-externals vs2017 --win7 ^&^& ^
-echo Done ^) ^|^| pause"
+echo Done ^) ^|^| pause
 
 start cmd /c ^( ^
 %PREMAKE% --group=libopenmpt_test vs2017 --win10 ^&^& ^
@@ -61,7 +61,7 @@ start cmd /c ^( ^
 %PREMAKE% --group=PluginBridge vs2017 --win10 ^&^& ^
 %PREMAKE% --group=OpenMPT vs2017 --win10 ^&^& ^
 %PREMAKE% --group=all-externals vs2017 --win10 ^&^& ^
-echo Done ^) ^|^| pause"
+echo Done ^) ^|^| pause
 
 start cmd /c ^( ^
 %PREMAKE% --group=libopenmpt_test vs2019 --win7 ^&^& ^
@@ -73,7 +73,7 @@ start cmd /c ^( ^
 %PREMAKE% --group=PluginBridge vs2019 --win7 ^&^& ^
 %PREMAKE% --group=OpenMPT vs2019 --win7 ^&^& ^
 %PREMAKE% --group=all-externals vs2019 --win7 ^&^& ^
-echo Done ^) ^|^| pause"
+echo Done ^) ^|^| pause
 
 start cmd /c ^( ^
 %PREMAKE% --group=libopenmpt_test vs2019 --win81 ^&^& ^
@@ -85,7 +85,7 @@ start cmd /c ^( ^
 %PREMAKE% --group=PluginBridge vs2019 --win81 ^&^& ^
 %PREMAKE% --group=OpenMPT vs2019 --win81 ^&^& ^
 %PREMAKE% --group=all-externals vs2019 --win81 ^&^& ^
-echo Done ^) ^|^| pause"
+echo Done ^) ^|^| pause
 
 start cmd /c ^( ^
 %PREMAKE% --group=libopenmpt_test vs2019 --win10 ^&^& ^
@@ -97,7 +97,7 @@ start cmd /c ^( ^
 %PREMAKE% --group=PluginBridge vs2019 --win10 ^&^& ^
 %PREMAKE% --group=OpenMPT vs2019 --win10 ^&^& ^
 %PREMAKE% --group=all-externals vs2019 --win10 ^&^& ^
-echo Done ^) ^|^| pause"
+echo Done ^) ^|^| pause
 
 start cmd /c ^( ^
 %PREMAKE% --group=libopenmpt_test vs2022 --win7 ^&^& ^
@@ -109,7 +109,7 @@ start cmd /c ^( ^
 %PREMAKE% --group=PluginBridge vs2022 --win7 ^&^& ^
 %PREMAKE% --group=OpenMPT vs2022 --win7 ^&^& ^
 %PREMAKE% --group=all-externals vs2022 --win7 ^&^& ^
-echo Done ^) ^|^| pause"
+echo Done ^) ^|^| pause
 
 start cmd /c ^( ^
 %PREMAKE% --group=libopenmpt_test vs2022 --win81 ^&^& ^
@@ -121,7 +121,7 @@ start cmd /c ^( ^
 %PREMAKE% --group=PluginBridge vs2022 --win81 ^&^& ^
 %PREMAKE% --group=OpenMPT vs2022 --win81 ^&^& ^
 %PREMAKE% --group=all-externals vs2022 --win81 ^&^& ^
-echo Done ^) ^|^| pause"
+echo Done ^) ^|^| pause
 
 start cmd /c ^( ^
 %PREMAKE% --group=libopenmpt_test vs2022 --win10 ^&^& ^
@@ -133,7 +133,7 @@ start cmd /c ^( ^
 %PREMAKE% --group=PluginBridge vs2022 --win10 ^&^& ^
 %PREMAKE% --group=OpenMPT vs2022 --win10 ^&^& ^
 %PREMAKE% --group=all-externals vs2022 --win10 ^&^& ^
-echo Done ^) ^|^| pause"
+echo Done ^) ^|^| pause
 
 start cmd /c ^( ^
 %PREMAKE% --group=libopenmpt_test vs2022 --clang --win10 ^&^& ^
@@ -145,19 +145,19 @@ start cmd /c ^( ^
 %PREMAKE% --group=PluginBridge vs2022 --clang --win10 ^&^& ^
 %PREMAKE% --group=OpenMPT vs2022 --clang --win10 ^&^& ^
 %PREMAKE% --group=all-externals vs2022 --clang --win10 ^&^& ^
-echo Done ^) ^|^| pause"
+echo Done ^) ^|^| pause
 
 start cmd /c ^( ^
 %PREMAKE% --group=libopenmpt-small vs2019 --win10 --uwp ^&^& ^
 %PREMAKE% --group=libopenmpt vs2019 --win10 --uwp ^&^& ^
 %PREMAKE% --group=all-externals vs2019 --win10 --uwp ^&^& ^
-echo Done ^) ^|^| pause"
+echo Done ^) ^|^| pause
 
 start cmd /c ^( ^
 %PREMAKE% --group=libopenmpt-small vs2022 --win10 --uwp ^&^& ^
 %PREMAKE% --group=libopenmpt vs2022 --win10 --uwp ^&^& ^
 %PREMAKE% --group=all-externals vs2022 --win10 --uwp ^&^& ^
-echo Done ^) ^|^| pause"
+echo Done ^) ^|^| pause
 
 
 
