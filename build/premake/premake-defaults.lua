@@ -89,7 +89,7 @@
 	filter {}
 
 	filter {}
-		characterset "Unicode"
+		characterset ( _OPTIONS["charset"] )
 		largeaddressaware ( true )
 	filter {}
 

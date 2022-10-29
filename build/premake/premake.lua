@@ -45,6 +45,17 @@ newoption {
 }
 
 newoption {
+	trigger = "charset",
+	value = "Character Set",
+	description = "Windows Default Character Set",
+	default = "Unicode",
+	allowed = {
+		{ "Unicode", "Unicode" },
+		{ "MBCS", "MBCS" }
+	}
+}
+
+newoption {
 	trigger = "clang",
 	description = "ClangCL projects",
 }
@@ -159,6 +170,11 @@ end
 if _OPTIONS["clang"] then
 	mpt_projectpathname = mpt_projectpathname .. "clang"
 	mpt_bindirsuffix = mpt_bindirsuffix .. "clang"
+end
+
+if _OPTIONS["charset"] == "MBCS" then
+	mpt_projectpathname = mpt_projectpathname .. "ansi"
+	mpt_bindirsuffix = mpt_bindirsuffix .. "ansi"
 end
 
 
