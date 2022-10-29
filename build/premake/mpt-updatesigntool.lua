@@ -4,11 +4,11 @@
   language "C++"
   vpaths { ["*"] = "../../" }
   mpt_kind "Console"
+	mpt_use_nlohmannjson()
+	defines { "MPT_WITH_NLOHMANNJSON" }
   includedirs {
    "../../src",
    "../../common",
-   "../../include",
-   "../../include/nlohmann-json/include",
    "$(IntDir)/svn_version",
   }
   files {
@@ -27,7 +27,7 @@
 		"../../src/openmpt/sounddevice/**.cpp",
 		"../../src/openmpt/sounddevice/**.hpp",
 	}
-  defines { "MODPLUG_TRACKER", "MPT_BUILD_UPDATESIGNTOOL", "MPT_BUILD_DEFAULT_DEPENDENCIES" }
+  defines { "MODPLUG_TRACKER", "MPT_BUILD_UPDATESIGNTOOL" }
   warnings "Extra"
   filter {}
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }
