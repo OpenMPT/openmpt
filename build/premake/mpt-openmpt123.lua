@@ -48,6 +48,10 @@
 		resdefines { "MPT_BUILD_VER_EXE" }
 	filter {}
 	
+	if _OPTIONS["charset"] ~= "Unicode" then
+		defines { "MPT_CHECK_WINDOWS_IGNORE_WARNING_NO_UNICODE" }
+	end
+
   links {
     "ksuser",
     "winmm",
