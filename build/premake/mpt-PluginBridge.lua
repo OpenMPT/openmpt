@@ -36,6 +36,7 @@
 	}
   defines { "MODPLUG_TRACKER" }
   dpiawareness "None"
+	characterset "Unicode"
 	if _OPTIONS["charset"] ~= "Unicode" then
 		defines { "MPT_CHECK_WINDOWS_IGNORE_WARNING_NO_UNICODE" }
 	end
@@ -98,6 +99,7 @@
 	filter { "action:vs*", "architecture:ARM64" }
 		-- dataexecutionprevention "Off" -- not supported by windows loader on arm64
 	filter {}
+	characterset "Unicode"
 	if _OPTIONS["charset"] ~= "Unicode" then
 		defines { "MPT_CHECK_WINDOWS_IGNORE_WARNING_NO_UNICODE" }
 	end
