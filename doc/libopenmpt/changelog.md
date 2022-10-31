@@ -76,6 +76,14 @@ is just a high-level summary.
     defaults to `1` and implies building a liballegro42 locally. This requires
     executing `build/download_externals.sh` before building to download the
     liballegro42 sources.
+ *  [**Change**] in_openmpt: The Winamp input plugin in_openmpt is now
+    deprecated for use with the latest Winamp or WACUP releases. Please use the
+    native implementations available in Winamp >=5.9.0 or WACUP instead. This
+    does not mean that in_openmpt/in_mod will not receive further development,
+    it just means that the responsibility now lies with the player implementors
+    themselves. We will still maintain the status quo of our in_openmpt input
+    plugin for users of earlier Winamp version, or users on older systems, or
+    users of compatible players.
 
  *  [**Regression**] Full support for Visual Studio 2017 has been removed. We
     still support targeting Windows XP with Visual Studio 2017.
