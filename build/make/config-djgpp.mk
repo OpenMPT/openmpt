@@ -88,17 +88,19 @@ CACHE_SEMPRON64  :=128  # 128/256/512
 generic/common    := $(XXX) -march=i386        $(FPU_387)    -mtune=pentium     $(OPT_DEF)
 generic/late      := $(XX_) -march=i686        $(FPU_SSE2)   -mtune=generic     $(OPT_SIMD)
 
-generic/nofpu     := $(XX_) -march=i386        $(FPU_NONE)   -mtune=i386        $(OPT_DEF)    # 386SX, 486SX, Cyrix Cx486SLC, NexGen Nx586
-generic/386       := $(XXX) -march=i386        $(FPU_387)    -mtune=i386        $(OPT_DEF)    # 386DX
-generic/486       := $(XX_) -march=i486        $(FPU_387)    -mtune=i486        $(OPT_DEF)    # 486DX, AMD Am5x86, Cyrix Cx4x86DX..6x86L, NexGen Nx586-PF
-generic/586       := $(XX_) -march=i586        $(FPU_387)    -mtune=pentium     $(OPT_DEF)    # Intel Pentium, AMD K5
-generic/586-mmx   := $(XX_) -march=i586        $(FPU_MMX)    -mtune=pentium-mmx $(OPT_SIMD)   # Intel Pentium-MMX, AMD K6
-generic/686-mmx   := $(XXX) -march=i686        $(FPU_MMX)    -mtune=pentium2    $(OPT_SIMD)   # Intel Pentium-2.., AMD Bulldozer.., VIA C3-Nehemiah.., Transmeta Crusoe.., NSC Geode-GX1.., Cyrix 6x86MX..
+generic/nofpu     := $(XX_) -march=i386        $(FPU_NONE)   -mtune=i386        $(OPT_DEF)    # 386SX, 386DX, 486SX, Cyrix Cx486SLC..Cx486S, NexGen Nx586
+generic/386       := $(XXX) -march=i386        $(FPU_387)    -mtune=i386        $(OPT_DEF)    # 386+387
 
+generic/486       := $(XX_) -march=i486        $(FPU_387)    -mtune=i486        $(OPT_DEF)    # 486DX, AMD Am5x86, Cyrix Cx4x86DX..6x86L, NexGen Nx586-PF
 generic/486-mmx   := $(___) -march=i486        $(FPU_MMX)    -mtune=winchip-c6  $(OPT_SIMD)   # IDT WinChip-C6, Rise mP6
 generic/486-3dnow := $(___) -march=i486        $(FPU_3DNOW)  -mtune=winchip2    $(OPT_SIMD)   # IDT WinChip-2
+
+generic/586       := $(XX_) -march=i586        $(FPU_387)    -mtune=pentium     $(OPT_DEF)    # Intel Pentium, AMD K5
+generic/586-mmx   := $(XX_) -march=i586        $(FPU_MMX)    -mtune=pentium-mmx $(OPT_SIMD)   # Intel Pentium-MMX, AMD K6
 generic/586-3dnow := $(XX_) -march=k6-2        $(FPU_3DNOW)  -mtune=k6-2        $(OPT_SIMD)   # AMD K6-2..K6-3
+
 generic/686       := $(___) -march=pentiumpro  $(FPU_387)    -mtune=pentiumpro  $(OPT_DEF)    # Intel Pentium-Pro
+generic/686-mmx   := $(XXX) -march=i686        $(FPU_MMX)    -mtune=pentium2    $(OPT_SIMD)   # Intel Pentium-2.., AMD Bulldozer.., VIA C3-Nehemiah.., Transmeta Crusoe.., NSC Geode-GX1.., Cyrix 6x86MX..
 generic/686-3dnow := $(___) -march=i686        $(FPU_3DNOW)  -mtune=c3          $(OPT_SIMD)   # VIA Cyrix-3..C3-Ezra
 generic/686-3dnowa:= $(XX_) -march=athlon      $(FPU_3DNOWA) -mtune=athlon      $(OPT_SIMD)   # AMD Athlon..K10
 
