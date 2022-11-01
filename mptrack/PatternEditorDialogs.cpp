@@ -1590,14 +1590,7 @@ BOOL QuickChannelProperties::PreTranslateMessage(MSG *pMsg)
 			(pMsg->message == WM_SYSKEYDOWN) || (pMsg->message == WM_KEYDOWN))
 		{
 			CInputHandler *ih = CMainFrame::GetInputHandler();
-
-			//Translate message manually
-			UINT nChar = static_cast<UINT>(pMsg->wParam);
-			UINT nRepCnt = LOWORD(pMsg->lParam);
-			UINT nFlags = HIWORD(pMsg->lParam);
-			KeyEventType kT = ih->GetKeyEventType(nFlags);
-
-			if(ih->KeyEvent(kCtxChannelSettings, nChar, nRepCnt, nFlags, kT, this) != kcNull)
+			if(ih->KeyEvent(kCtxChannelSettings, ih->Translate(*pMsg), this) != kcNull)
 			{
 				return TRUE;  // Mapped to a command, no need to pass message on.
 			}

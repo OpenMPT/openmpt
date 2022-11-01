@@ -142,11 +142,11 @@ CommandID CInputHandler::GeneralKeyEvent(InputTargetContext context, int code, W
 }
 
 
-CommandID CInputHandler::KeyEvent(InputTargetContext context, UINT &nChar, UINT &/*nRepCnt*/, UINT &nFlags, KeyEventType keyEventType, CWnd *pSourceWnd)
+CommandID CInputHandler::KeyEvent(const InputTargetContext context, const KeyboardEvent &event, CWnd *pSourceWnd)
 {
-	if(InterceptSpecialKeys(nChar, nFlags, false))
+	if(InterceptSpecialKeys(event.key, event.flags, false))
 		return kcDummyShortcut;
-	KeyMapRange cmd = m_keyMap.equal_range(KeyCombination(context, m_modifierMask, nChar, keyEventType));
+	KeyMapRange cmd = m_keyMap.equal_range(KeyCombination(context, m_modifierMask, event.key, event.keyEventType));
 
 	if(pSourceWnd == nullptr)
 		pSourceWnd = m_pMainFrm;	// By default, send command message to main frame.
@@ -317,6 +317,29 @@ void CInputHandler::LogModifiers()
 	MPT_LOG_GLOBAL(LogDebug, "InputHandler", m_modifierMask[ModShift] ? U_("\tShft On") : U_("\tShft --"));
 	MPT_LOG_GLOBAL(LogDebug, "InputHandler", m_modifierMask[ModAlt] ? U_("\tAlt  On") : U_("\tAlt  --"));
 	MPT_LOG_GLOBAL(LogDebug, "InputHandler", m_modifierMask[ModWin] ? U_("\tWin  On\n") : U_("\tWin  --\n"));
+}
+
+
+CInputHandler::KeyboardEvent CInputHandler::Translate(const MSG &msg)
+{
+	uint32 key = static_cast<uint32>(msg.wParam);
+	if(key == VK_PACKET)
+	{
+		// This message was sent by something other than a physical keyboard and does not contain a real scancode or vkCode.
+		// To get at the vkCode, first force the WM_CHAR message to // get posted to the queue.
+		// This behaviour can be observed when using Microsoft's RDP client for iOS.
+		::TranslateMessage(&msg);
+		// Now peek at that WM_CHAR message to get the vkCode.
+		MSG msgChar{};
+		if(::PeekMessage(&msgChar, msgChar.hwnd, WM_CHAR, WM_CHAR, PM_NOREMOVE | PM_QS_POSTMESSAGE))
+		{
+			key = VkKeyScan(static_cast<WCHAR>(msgChar.wParam));
+		}
+	}
+
+	const auto repCnt = LOWORD(msg.lParam);
+	const auto flags = HIWORD(msg.lParam);
+	return {key, repCnt, flags, GetKeyEventType(flags)};
 }
 
 

@@ -258,13 +258,7 @@ BOOL CViewComments::PreTranslateMessage(MSG *pMsg)
 			|| (pMsg->message == WM_SYSKEYDOWN) || (pMsg->message == WM_KEYDOWN))
 		{
 			CInputHandler *ih = CMainFrame::GetInputHandler();
-
-			//Translate message manually
-			UINT nChar = static_cast<UINT>(pMsg->wParam);
-			UINT nRepCnt = LOWORD(pMsg->lParam);
-			UINT nFlags = HIWORD(pMsg->lParam);
-			KeyEventType kT = ih->GetKeyEventType(nFlags);
-			if(!ih->IsBypassed() && ih->KeyEvent(kCtxViewComments, nChar, nRepCnt, nFlags, kT) != kcNull)
+			if(!ih->IsBypassed() && ih->KeyEvent(kCtxViewComments, ih->Translate(*pMsg)) != kcNull)
 			{
 				return TRUE;  // Mapped to a command, no need to pass message on.
 			}
