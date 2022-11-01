@@ -341,16 +341,16 @@
 		defines { "_WIN32_WINNT=0x0A00" }
 		filter {}
 		filter { "architecture:x86" }
-			defines { "NTDDI_VERSION=0x0A000007" } -- Windows 10 1903 Build 18362
+			defines { "NTDDI_VERSION=0x0A000009" } -- Windows 10 20H2 Build 19042 (really 20H1, because 20H2 has no dedicated SDK version)
 		filter {}
 		filter { "architecture:x86_64" }
-			defines { "NTDDI_VERSION=0x0A000007" } -- Windows 10 1903 Build 18362
+			defines { "NTDDI_VERSION=0x0A000009" } -- Windows 10 20H2 Build 19042 (really 20H1, because 20H2 has no dedicated SDK version)
 		filter {}
 		filter { "architecture:ARM" }
-			defines { "NTDDI_VERSION=0x0A000007" } -- Windows 10 1903 Build 18362
+			defines { "NTDDI_VERSION=0x0A000009" } -- Windows 10 20H2 Build 19042 (really 20H1, because 20H2 has no dedicated SDK version)
 		filter {}
 		filter { "architecture:ARM64" }
-			defines { "NTDDI_VERSION=0x0A000007" } -- Windows 10 1903 Build 18362
+			defines { "NTDDI_VERSION=0x0A000009" } -- Windows 10 20H2 Build 19042 (really 20H1, because 20H2 has no dedicated SDK version)
 		filter {}
 	elseif _OPTIONS["windows-version"] == "win81" then
 		filter {}
