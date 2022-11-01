@@ -456,24 +456,19 @@ BOOL COrderList::PreTranslateMessage(MSG *pMsg)
 	   (pMsg->message == WM_SYSKEYDOWN) || (pMsg->message == WM_KEYDOWN))
 	{
 		CInputHandler *ih = CMainFrame::GetInputHandler();
+		const auto event = ih->Translate(*pMsg);
 
-		//Translate message manually
-		UINT nChar = (UINT)pMsg->wParam;
-		UINT nRepCnt = LOWORD(pMsg->lParam);
-		UINT nFlags = HIWORD(pMsg->lParam);
-		KeyEventType kT = ih->GetKeyEventType(nFlags);
-
-		if(ih->KeyEvent(kCtxCtrlOrderlist, nChar, nRepCnt, nFlags, kT) != kcNull)
+		if(ih->KeyEvent(kCtxCtrlOrderlist, event) != kcNull)
 			return true;  // Mapped to a command, no need to pass message on.
 
 		//HACK: masquerade as kCtxViewPatternsNote context until we implement appropriate
 		//      command propagation to kCtxCtrlOrderlist context.
 
-		if(ih->KeyEvent(kCtxViewPatternsNote, nChar, nRepCnt, nFlags, kT) != kcNull)
+		if(ih->KeyEvent(kCtxViewPatternsNote, event) != kcNull)
 			return true;  // Mapped to a command, no need to pass message on.
 
 		// Handle Application (menu) key
-		if(pMsg->message == WM_KEYDOWN && nChar == VK_APPS)
+		if(pMsg->message == WM_KEYDOWN && event.key == VK_APPS)
 		{
 			const auto selection = GetCurSel();
 			auto pt = (GetRectFromOrder(selection.firstOrd) | GetRectFromOrder(selection.lastOrd)).CenterPoint();

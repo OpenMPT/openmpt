@@ -37,10 +37,19 @@ public:
 	std::array<CommandID, 10> m_lastCommands;
 	size_t m_lastCommandPos = 0;
 
+	struct KeyboardEvent
+	{
+		uint32 key;
+		uint16 repeatCount;
+		uint16 flags;
+		KeyEventType keyEventType;
+	};
+
 public:
 	CInputHandler(CWnd *mainframe);
-	CommandID GeneralKeyEvent(InputTargetContext context, int code, WPARAM wParam , LPARAM lParam);
-	CommandID KeyEvent(InputTargetContext context, UINT &nChar, UINT &nRepCnt, UINT &nFlags, KeyEventType keyEventType, CWnd *pSourceWnd = nullptr);
+	CommandID GeneralKeyEvent(InputTargetContext context, int code, WPARAM wParam, LPARAM lParam);
+	CommandID KeyEvent(const InputTargetContext context, const KeyboardEvent &event, CWnd *pSourceWnd = nullptr);
+	static KeyboardEvent Translate(const MSG &msg);
 	static KeyEventType GetKeyEventType(UINT nFlags);
 	bool IsKeyPressHandledByTextBox(DWORD wparam, HWND hWnd) const;
 	CommandID HandleMIDIMessage(InputTargetContext context, uint32 message);

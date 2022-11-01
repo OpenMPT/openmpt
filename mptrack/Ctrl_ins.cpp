@@ -61,7 +61,7 @@ BEGIN_MESSAGE_MAP(CNoteMapWnd, CStatic)
 END_MESSAGE_MAP()
 
 
-BOOL CNoteMapWnd::PreTranslateMessage(MSG* pMsg)
+BOOL CNoteMapWnd::PreTranslateMessage(MSG *pMsg)
 {
 	if(!pMsg)
 		return TRUE;
@@ -72,22 +72,14 @@ BOOL CNoteMapWnd::PreTranslateMessage(MSG* pMsg)
 		if ((pMsg->message == WM_SYSKEYUP)   || (pMsg->message == WM_KEYUP) ||
 			(pMsg->message == WM_SYSKEYDOWN) || (pMsg->message == WM_KEYDOWN))
 		{
-			CInputHandler* ih = CMainFrame::GetInputHandler();
+			CInputHandler *ih = CMainFrame::GetInputHandler();
+			const auto event = ih->Translate(*pMsg);
 
-			//Translate message manually
-			UINT nChar = wParam;
-			UINT nRepCnt = LOWORD(pMsg->lParam);
-			UINT nFlags = HIWORD(pMsg->lParam);
-			KeyEventType kT = ih->GetKeyEventType(nFlags);
-			InputTargetContext ctx = (InputTargetContext)(kCtxInsNoteMap);
-
-			if (ih->KeyEvent(ctx, nChar, nRepCnt, nFlags, kT) != kcNull)
+			if (ih->KeyEvent(kCtxInsNoteMap, event) != kcNull)
 				return true; // Mapped to a command, no need to pass message on.
 
 			// a bit of a hack...
-			ctx = (InputTargetContext)(kCtxCtrlInstruments);
-
-			if (ih->KeyEvent(ctx, nChar, nRepCnt, nFlags, kT) != kcNull)
+			if (ih->KeyEvent(kCtxCtrlInstruments, event) != kcNull)
 				return true; // Mapped to a command, no need to pass message on.
 		}
 	}
@@ -2890,16 +2882,8 @@ BOOL CCtrlInstruments::PreTranslateMessage(MSG *pMsg)
 		if ((pMsg->message == WM_SYSKEYUP)   || (pMsg->message == WM_KEYUP) ||
 			(pMsg->message == WM_SYSKEYDOWN) || (pMsg->message == WM_KEYDOWN))
 		{
-			CInputHandler* ih = CMainFrame::GetInputHandler();
-
-			//Translate message manually
-			UINT nChar = static_cast<UINT>(pMsg->wParam);
-			UINT nRepCnt = LOWORD(pMsg->lParam);
-			UINT nFlags = HIWORD(pMsg->lParam);
-			KeyEventType kT = ih->GetKeyEventType(nFlags);
-			InputTargetContext ctx = (InputTargetContext)(kCtxCtrlInstruments);
-
-			if (ih->KeyEvent(ctx, nChar, nRepCnt, nFlags, kT) != kcNull)
+			CInputHandler *ih = CMainFrame::GetInputHandler();
+			if (ih->KeyEvent(kCtxCtrlInstruments, ih->Translate(*pMsg)) != kcNull)
 				return true; // Mapped to a command, no need to pass message on.
 		}
 

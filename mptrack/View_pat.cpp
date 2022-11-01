@@ -652,17 +652,13 @@ BOOL CViewPattern::PreTranslateMessage(MSG *pMsg)
 		{
 			CInputHandler *ih = CMainFrame::GetInputHandler();
 
-			//Translate message manually
-			UINT nChar = static_cast<UINT>(pMsg->wParam);
-			UINT nRepCnt = LOWORD(pMsg->lParam);
-			UINT nFlags = HIWORD(pMsg->lParam);
-			KeyEventType kT = ih->GetKeyEventType(nFlags);
 			InputTargetContext ctx = (InputTargetContext)(kCtxViewPatterns + 1 + m_Cursor.GetColumnType());
 			// If editing is disabled, preview notes no matter which column we are in
 			if(!IsEditingEnabled() && TrackerSettings::Instance().patternNoEditPopup)
 				ctx = kCtxViewPatternsNote;
 
-			if(ih->KeyEvent(ctx, nChar, nRepCnt, nFlags, kT) != kcNull)
+			const auto event = ih->Translate(*pMsg);
+			if(ih->KeyEvent(ctx, event) != kcNull)
 			{
 				return true;  // Mapped to a command, no need to pass message on.
 			}
@@ -671,23 +667,23 @@ BOOL CViewPattern::PreTranslateMessage(MSG *pMsg)
 			{
 				if(ctx == kCtxViewPatternsFX)
 				{
-					if(ih->KeyEvent(kCtxViewPatternsFXparam, nChar, nRepCnt, nFlags, kT) != kcNull)
+					if(ih->KeyEvent(kCtxViewPatternsFXparam, event) != kcNull)
 						return true;  // Mapped to a command, no need to pass message on.
 				} else if(ctx == kCtxViewPatternsFXparam)
 				{
-					if(ih->KeyEvent(kCtxViewPatternsFX, nChar, nRepCnt, nFlags, kT) != kcNull)
+					if(ih->KeyEvent(kCtxViewPatternsFX, event) != kcNull)
 						return true;  // Mapped to a command, no need to pass message on.
 				} else if(ctx == kCtxViewPatternsIns)
 				{
 					// Do the same with instrument->note column
-					if(ih->KeyEvent(kCtxViewPatternsNote, nChar, nRepCnt, nFlags, kT) != kcNull)
+					if(ih->KeyEvent(kCtxViewPatternsNote, event) != kcNull)
 						return true;  // Mapped to a command, no need to pass message on.
 				}
 			}
 			//end HACK.
 
 			// Handle Application (menu) key
-			if(pMsg->message == WM_KEYDOWN && nChar == VK_APPS)
+			if(pMsg->message == WM_KEYDOWN && event.key == VK_APPS)
 			{
 				OnRButtonDown(0, GetPointFromPosition(m_Cursor));
 			}

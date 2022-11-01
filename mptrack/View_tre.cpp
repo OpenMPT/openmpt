@@ -369,15 +369,7 @@ BOOL CModTree::PreTranslateMessage(MSG *pMsg)
 		(pMsg->message == WM_SYSKEYDOWN) || (pMsg->message == WM_KEYDOWN))
 	{
 		CInputHandler *ih = CMainFrame::GetInputHandler();
-
-		//Translate message manually
-		UINT nChar = (UINT)pMsg->wParam;
-		UINT nRepCnt = LOWORD(pMsg->lParam);
-		UINT nFlags = HIWORD(pMsg->lParam);
-		KeyEventType kT = ih->GetKeyEventType(nFlags);
-		InputTargetContext ctx = (InputTargetContext)(kCtxViewTree);
-
-		if(ih->KeyEvent(ctx, nChar, nRepCnt, nFlags, kT) != kcNull)
+		if(ih->KeyEvent(kCtxViewTree, ih->Translate(*pMsg)) != kcNull)
 			return true;  // Mapped to a command, no need to pass message on.
 	}
 	return CTreeCtrl::PreTranslateMessage(pMsg);

@@ -2246,19 +2246,12 @@ BOOL CViewInstrument::PreTranslateMessage(MSG *pMsg)
 			(pMsg->message == WM_SYSKEYDOWN) || (pMsg->message == WM_KEYDOWN))
 		{
 			CInputHandler *ih = CMainFrame::GetInputHandler();
-
-			//Translate message manually
-			UINT nChar = static_cast<UINT>(pMsg->wParam);
-			UINT nRepCnt = LOWORD(pMsg->lParam);
-			UINT nFlags = HIWORD(pMsg->lParam);
-			KeyEventType kT = ih->GetKeyEventType(nFlags);
-			InputTargetContext ctx = (InputTargetContext)(kCtxViewInstruments);
-
-			if(ih->KeyEvent(ctx, nChar, nRepCnt, nFlags, kT) != kcNull)
+			const auto event = ih->Translate(*pMsg);
+			if(ih->KeyEvent(kCtxViewInstruments, event) != kcNull)
 				return true;  // Mapped to a command, no need to pass message on.
 
 			// Handle Application (menu) key
-			if(pMsg->message == WM_KEYDOWN && nChar == VK_APPS)
+			if(pMsg->message == WM_KEYDOWN && event.key == VK_APPS)
 			{
 				CPoint pt(0, 0);
 				if(m_nDragItem > 0)

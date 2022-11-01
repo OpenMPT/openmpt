@@ -3625,20 +3625,13 @@ BOOL CViewSample::PreTranslateMessage(MSG *pMsg)
 		if ((pMsg->message == WM_SYSKEYUP)   || (pMsg->message == WM_KEYUP) ||
 			(pMsg->message == WM_SYSKEYDOWN) || (pMsg->message == WM_KEYDOWN))
 		{
-			CInputHandler* ih = CMainFrame::GetInputHandler();
-
-			//Translate message manually
-			UINT nChar = static_cast<UINT>(pMsg->wParam);
-			UINT nRepCnt = LOWORD(pMsg->lParam);
-			UINT nFlags = HIWORD(pMsg->lParam);
-			KeyEventType kT = ih->GetKeyEventType(nFlags);
-			InputTargetContext ctx = (InputTargetContext)(kCtxViewSamples);
-
-			if (ih->KeyEvent(ctx, nChar, nRepCnt, nFlags, kT) != kcNull)
+			CInputHandler *ih = CMainFrame::GetInputHandler();
+			const auto event = ih->Translate(*pMsg);
+			if (ih->KeyEvent(kCtxViewSamples, event) != kcNull)
 				return true; // Mapped to a command, no need to pass message on.
 
 			// Handle Application (menu) key
-			if(pMsg->message == WM_KEYDOWN && nChar == VK_APPS)
+			if(pMsg->message == WM_KEYDOWN && event.key == VK_APPS)
 			{
 				int x = Util::ScalePixels(32, m_hWnd);
 				OnRButtonDown(0, CPoint(x, x));

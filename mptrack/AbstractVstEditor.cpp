@@ -457,19 +457,15 @@ bool CAbstractVstEditor::HandleKeyMessage(MSG &msg)
 	if(ih->IsKeyPressHandledByTextBox(static_cast<DWORD>(msg.wParam), ::GetFocus()))
 		return false;
 
-	// Translate message manually
-	UINT nChar = (UINT)msg.wParam;
-	UINT nRepCnt = LOWORD(msg.lParam);
-	UINT nFlags = HIWORD(msg.lParam);
-	KeyEventType kT = ih->GetKeyEventType(nFlags);
+	const auto event = ih->Translate(msg);
 
 	// If we successfully mapped to a command and plug does not listen for keypresses, no need to pass message on.
-	if(ih->KeyEvent(kCtxVSTGUI, nChar, nRepCnt, nFlags, kT, this) != kcNull)
+	if(ih->KeyEvent(kCtxVSTGUI, event, this) != kcNull)
 		return true;
 
 	// Don't forward key repeats if plug does not listen for keypresses
 	// (avoids system beeps on note hold)
-	if(kT == kKeyEventRepeat)
+	if(event.keyEventType == kKeyEventRepeat)
 		return true;
 	
 	return false;
