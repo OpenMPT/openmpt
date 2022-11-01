@@ -45,7 +45,7 @@
 
 /* This is wicked switchery: Decide which way the aliases are facing. */
 
-#if _FILE_OFFSET_BITS+0 == LFS_ALIAS_BITS
+#if !(defined BUILD_NO_LARGENAME) && (_FILE_OFFSET_BITS+0 == LFS_ALIAS_BITS)
 
 /* The native functions have suffix, the aliases not. */
 #define NATIVE_SUFFIX MACROCAT(_, _FILE_OFFSET_BITS)
