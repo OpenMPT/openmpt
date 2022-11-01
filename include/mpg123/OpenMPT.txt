@@ -1,4 +1,4 @@
-libmpg123 library version 1.31.0 (2022-10-28).
+libmpg123 library version 1.31.1 (2022-11-01).
 The following changes have been made:
 - ports/MSVC++/config.h and ports/MSVC++/mpg123.h have been retained from older
   versions.
