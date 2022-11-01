@@ -653,7 +653,22 @@ BOOL CViewPattern::PreTranslateMessage(MSG *pMsg)
 			CInputHandler *ih = CMainFrame::GetInputHandler();
 
 			//Translate message manually
-			UINT nChar = static_cast<UINT>(pMsg->wParam);
+			UINT vkCode = static_cast<UINT>(pMsg->wParam);
+			if (vkCode == VK_PACKET)
+			{
+				// This message was sent by something other than a physical
+				// keyboard and does not contain a real scancode or vkCode.
+				// To get at the vkCode, first force the WM_CHAR message to
+				// get posted to the queue.
+				::TranslateMessage(pMsg);
+				// Now peek at that WM_CHAR message to get the vkCode.
+				MSG msg;
+				if( ::PeekMessage(&msg, pMsg->hwnd, WM_CHAR, WM_CHAR, PM_NOREMOVE | PM_QS_POSTMESSAGE))
+				{
+					vkCode = VkKeyScan(static_cast<WCHAR>(msg.wParam));
+				}
+			}
+
 			UINT nRepCnt = LOWORD(pMsg->lParam);
 			UINT nFlags = HIWORD(pMsg->lParam);
 			KeyEventType kT = ih->GetKeyEventType(nFlags);
@@ -662,7 +677,7 @@ BOOL CViewPattern::PreTranslateMessage(MSG *pMsg)
 			if(!IsEditingEnabled() && TrackerSettings::Instance().patternNoEditPopup)
 				ctx = kCtxViewPatternsNote;
 
-			if(ih->KeyEvent(ctx, nChar, nRepCnt, nFlags, kT) != kcNull)
+			if(ih->KeyEvent(ctx, vkCode, nRepCnt, nFlags, kT) != kcNull)
 			{
 				return true;  // Mapped to a command, no need to pass message on.
 			}
@@ -671,23 +686,23 @@ BOOL CViewPattern::PreTranslateMessage(MSG *pMsg)
 			{
 				if(ctx == kCtxViewPatternsFX)
 				{
-					if(ih->KeyEvent(kCtxViewPatternsFXparam, nChar, nRepCnt, nFlags, kT) != kcNull)
+					if(ih->KeyEvent(kCtxViewPatternsFXparam, vkCode, nRepCnt, nFlags, kT) != kcNull)
 						return true;  // Mapped to a command, no need to pass message on.
 				} else if(ctx == kCtxViewPatternsFXparam)
 				{
-					if(ih->KeyEvent(kCtxViewPatternsFX, nChar, nRepCnt, nFlags, kT) != kcNull)
+					if(ih->KeyEvent(kCtxViewPatternsFX, vkCode, nRepCnt, nFlags, kT) != kcNull)
 						return true;  // Mapped to a command, no need to pass message on.
 				} else if(ctx == kCtxViewPatternsIns)
 				{
 					// Do the same with instrument->note column
-					if(ih->KeyEvent(kCtxViewPatternsNote, nChar, nRepCnt, nFlags, kT) != kcNull)
+					if(ih->KeyEvent(kCtxViewPatternsNote, vkCode, nRepCnt, nFlags, kT) != kcNull)
 						return true;  // Mapped to a command, no need to pass message on.
 				}
 			}
 			//end HACK.
 
 			// Handle Application (menu) key
-			if(pMsg->message == WM_KEYDOWN && nChar == VK_APPS)
+			if(pMsg->message == WM_KEYDOWN && vkCode == VK_APPS)
 			{
 				OnRButtonDown(0, GetPointFromPosition(m_Cursor));
 			}
