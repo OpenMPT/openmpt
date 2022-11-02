@@ -332,12 +332,7 @@ CInputHandler::KeyboardEvent CInputHandler::Translate(const MSG &msg)
 		MSG msgChar{};
 		if(::PeekMessage(&msgChar, msgChar.hwnd, WM_CHAR, WM_CHAR, PM_NOREMOVE | PM_QS_POSTMESSAGE))
 		{
-			const WCHAR ch = static_cast<WCHAR>(msgChar.wParam & 0xffffu);
-			// skip unrepresentable CHAR in ANSI builds
-			if(mpt::in_range<std::make_unsigned<TCHAR>::type>(static_cast<std::make_unsigned<WCHAR>::type>(ch)))
-			{
-				key = VkKeyScan(static_cast<TCHAR>(ch));
-			}
+			key = VkKeyScanW(static_cast<WCHAR>(msgChar.wParam & 0xffffu));
 		}
 	}
 
