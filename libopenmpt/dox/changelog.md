@@ -9,6 +9,7 @@ is just a high-level summary.
 
  *  mpg123: Update to v1.31.1 (2022-11-01).
  *  FLAC: Update to v1.4.2 (2022-10-22).
+ *  pugixml: Update to v1.13 (2022-11-02).
 
 ### libopenmpt 0.5.20 (2022-09-25)
 
