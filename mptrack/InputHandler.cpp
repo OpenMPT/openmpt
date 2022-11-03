@@ -322,16 +322,22 @@ void CInputHandler::LogModifiers()
 
 CInputHandler::KeyboardEvent CInputHandler::Translate(const MSG &msg)
 {
+	MPT_ASSERT(msg.message == WM_KEYDOWN || msg.message == WM_SYSKEYDOWN || msg.message == WM_KEYUP || msg.message == WM_SYSKEYUP);
+
 	uint32 key = static_cast<uint32>(msg.wParam);
 	if(key == VK_PACKET)
 	{
-		// This message was sent by something other than a physical keyboard and does not contain a real scancode or vkCode.
-		// To get at the vkCode, first force the WM_CHAR message to // get posted to the queue.
+		// This message was sent by something other than a physical keyboard.
 		// This behaviour can be observed when using Microsoft's RDP client for iOS.
+
+		// VK_PACKET is not the real virtual key code, and the message does not contain a real scancode.
+		// To get at the virtual key code, we must first force the WM_CHAR message to get posted to the queue.
 		::TranslateMessage(&msg);
-		// Now peek at that WM_CHAR message to get the vkCode.
+
+		// Now remove that WM_CHAR message to get the virtual key code.  (The WM_CHAR message will get
+		// re-posted by the main message pump after this call stack unwinds to it.)
 		MSG msgChar{};
-		if(::PeekMessage(&msgChar, msgChar.hwnd, WM_CHAR, WM_CHAR, PM_NOREMOVE | PM_QS_POSTMESSAGE))
+		if(::PeekMessage(&msgChar, msgChar.hwnd, WM_CHAR, WM_CHAR, PM_REMOVE | PM_QS_POSTMESSAGE))
 		{
 			key = VkKeyScanW(static_cast<WCHAR>(msgChar.wParam & 0xffffu));
 		}
