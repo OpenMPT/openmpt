@@ -1058,7 +1058,7 @@ public:
 						rawSignature = std::move(resultHTTP.Data);
 					}
 					UpdateProgress(_T("Retrieving update signing public keys..."), 3.0);
-					std::vector<mpt::crypto::asymmetric::rsassa<>::public_key> keys;
+					std::vector<mpt::crypto::asymmetric::rsassa_pss<>::public_key> keys;
 					{
 						std::vector<mpt::ustring> keyAnchors = TrackerSettings::Instance().UpdateSigningKeysRootAnchors;
 						if(keyAnchors.empty())
@@ -1079,7 +1079,7 @@ public:
 #endif // MPT_BUILD_RETRO
 								HTTP::Result resultHTTP = internet(request);
 								resultHTTP.CheckStatus(200);
-								mpt::append(keys, mpt::crypto::asymmetric::rsassa<>::parse_jwk_set(mpt::ToUnicode(mpt::Charset::UTF8, mpt::buffer_cast<std::string>(resultHTTP.Data))));
+								mpt::append(keys, mpt::crypto::asymmetric::rsassa_pss<>::parse_jwk_set(mpt::ToUnicode(mpt::Charset::UTF8, mpt::buffer_cast<std::string>(resultHTTP.Data))));
 							} catch(mpt::out_of_memory e)
 							{
 								mpt::rethrow_out_of_memory(e);
@@ -1100,7 +1100,7 @@ public:
 					std::vector<std::byte> expectedPayload = mpt::buffer_cast<std::vector<std::byte>>(rawDownloadInfo);
 					mpt::ustring signature = mpt::ToUnicode(mpt::Charset::UTF8, mpt::buffer_cast<std::string>(rawSignature));
 
-					mpt::crypto::asymmetric::rsassa<>::jws_verify_at_least_one(keys, expectedPayload, signature);
+					mpt::crypto::asymmetric::rsassa_pss<>::jws_verify_at_least_one(keys, expectedPayload, signature);
 			
 				}
 
