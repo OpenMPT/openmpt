@@ -75,8 +75,8 @@ How to compile
 
 ### libopenmpt and openmpt123
 
-See [Dependencies](libopenmpt/dox/dependencies.md) and
-[Getting Started](libopenmpt/dox/gettingstarted.md).
+See [Dependencies](doc/libopenmpt/dependencies.md) and
+[Getting Started](doc/libopenmpt/gettingstarted.md).
 
 
 Contributing to OpenMPT/libopenmpt
