@@ -485,7 +485,7 @@ constexpr T byteswap(T x) noexcept {
 template <typename T>
 constexpr int lower_bound_entropy_bits(T x_) {
 	typename std::make_unsigned<T>::type x = static_cast<typename std::make_unsigned<T>::type>(x_);
-	return mpt::bit_width(x) == static_cast<typename std::make_unsigned<T>::type>(mpt::popcount(x)) ? mpt::bit_width(x) : mpt::bit_width(x) - 1;
+	return (static_cast<unsigned int>(mpt::bit_width(x)) == static_cast<typename std::make_unsigned<T>::type>(mpt::popcount(x))) ? mpt::bit_width(x) : mpt::bit_width(x) - 1;
 }
 
 
