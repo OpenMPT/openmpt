@@ -236,10 +236,10 @@ constexpr T bit_floor(T x) noexcept {
 }
 
 template <typename T>
-constexpr T bit_width(T x) noexcept {
+constexpr int bit_width(T x) noexcept {
 	static_assert(std::numeric_limits<T>::is_integer);
 	static_assert(std::is_unsigned<T>::value);
-	T result = 0;
+	int result = 0;
 	while (x > 0) {
 		x >>= 1;
 		result += 1;
