@@ -24,11 +24,39 @@ Patch submitters:
    <da>    Revenant   / Devin Acker
    <ih>    xaimus     / Imran Hameed
    <jb>    JoaoBaptMG / João Baptista de Paula e Silva
+   <kk>    SYRiNX     / Keith F. Kelly
    <ks>    coda       / Ken Snyder
 
 
 Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
+
+
+v1.30.08.00 (13 November 2022, revision 18159)
+----------------------------------------------
+Pattern tab
+- [Imp] <js> More accurate effect description when combining volume column cue points with regular offset.
+
+Sample tab
+- [Fix] <js> Avoid drawing sample waveform from uninitialized memory under some very specific circumstances.
+
+Other formats
+- [Fix] <js> MO3: Sample filenames were not imported correctly.
+
+Module cleanup
+- [Fix] <js> Automatic Sample Trimmer: Avoid over-trimming samples that are used for MOD-style sample swapping - it is important that the whole sample is preserved in this case even if it is playing completely silently, as the timing of sample swap depends on reaching that sample's end or loop end.
+
+Stream Export
+- [Fix] <jh> Little-endian RAW export was broken since OpenMPT 1.30.01.00, exporting big-endian samples instead.
+
+Misc
+- [New] <js> Added Play / Stop shortcut (http://bugs.openmpt.org/view.php?id=1619).
+- [Imp] <js> Keyboard configuration: If no choices are set, the Restore button now restores all default choices for the given shortcut (http://bugs.openmpt.org/view.php?id=1630).
+- [Fix] <js> OPL Export: Pressing the Cancel button didn't abort the conversion process.
+- [Fix] <kk & js> Most keyboard shortcuts were not accessible with Microsoft's RPD client for iOS and potentially other virtual keyboards (http://bugs.openmpt.org/view.php?id=1634).
+
+Third-Party Libraries
+- [Imp] Update flac (v1.4.2), mpg123 (v1.31.1) and UnRAR (v6.2.2) 
 
 
 v1.30.07.00 (25 September 2022, revision 17944)
@@ -60,7 +88,7 @@ Bundled plugins
 - [Fix] <js> Echo DMO: Migrate left and right delay values in modules made with OpenMPT versions between 1.27.01.00 and 1.30.05.00 to the correct interpretation (https://bugs.openmpt.org/view.php?id=1631).
 
 Misc
-- [Fix] <js> Fixed some issues with stuck notes and inconsistent state updates between channels.
+- [Fix] <js> MIDI Export: Fixed some issues with stuck notes and inconsistent state updates between channels.
 
 Third-Party Libraries
 - [Imp] Update flac (v1.4.1)
