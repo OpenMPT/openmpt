@@ -127,8 +127,6 @@ bool ExtractUnixLink50(CommandData *Cmd,const wchar *Name,FileHeader *hd)
   // Use hd->FileName instead of LinkName, since LinkName can include
   // the destination path as a prefix, which can confuse
   // IsRelativeSymlinkSafe algorithm.
-  // 2022.05.04: Use TargetW instead of previously used hd->RedirName
-  // for security reason.
   if (!Cmd->AbsoluteLinks && (IsFullPath(TargetW) ||
       !IsRelativeSymlinkSafe(Cmd,hd->FileName,Name,TargetW)))
     return false;

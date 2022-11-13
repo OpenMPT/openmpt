@@ -330,7 +330,6 @@ bool SetFileAttr(const wchar *Name,uint Attr)
 }
 
 
-#if 0
 wchar *MkTemp(wchar *Name,size_t MaxSize)
 {
   size_t Length=wcslen(Name);
@@ -364,7 +363,6 @@ wchar *MkTemp(wchar *Name,size_t MaxSize)
   }
   return Name;
 }
-#endif
 
 
 #if !defined(SFX_MODULE)
@@ -409,7 +407,7 @@ void CalcFileSum(File *SrcFile,uint *CRC32,byte *Blake2,uint Threads,int64 Size,
       if ((Flags & CALCFSUM_SHOWPROGRESS)!=0)
       {
         // Update only the current file progress in WinRAR, set the total to 0
-        // to keep it as is. It looks better for WinRAR,
+        // to keep it as is. It looks better for WinRAR.
         uiExtractProgress(TotalRead,FileLength,0,0);
       }
       else
