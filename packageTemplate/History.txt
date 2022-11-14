@@ -53,7 +53,7 @@ Misc
 - [New] <js> Added Play / Stop shortcut (http://bugs.openmpt.org/view.php?id=1619).
 - [Imp] <js> Keyboard configuration: If no choices are set, the Restore button now restores all default choices for the given shortcut (http://bugs.openmpt.org/view.php?id=1630).
 - [Fix] <js> OPL Export: Pressing the Cancel button didn't abort the conversion process.
-- [Fix] <kk & js> Most keyboard shortcuts were not accessible with Microsoft's RPD client for iOS and potentially other virtual keyboards (http://bugs.openmpt.org/view.php?id=1634).
+- [Fix] <kk & js> Most keyboard shortcuts were not accessible with Microsoft's RDP client for iOS and potentially other virtual keyboards (http://bugs.openmpt.org/view.php?id=1634).
 
 Third-Party Libraries
 - [Imp] Update flac (v1.4.2), mpg123 (v1.31.1) and UnRAR (v6.2.2) 
