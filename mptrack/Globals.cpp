@@ -647,6 +647,56 @@ void CModScrollView::UpdateIndicator(LPCTSTR lpszText)
 }
 
 
+BOOL CModScrollView::DoFractionalMouseWheel(short zDelta, int yPosOld)
+{
+	// CScrollView::DoMouseWheel() only scrolls an entire line at a time,
+	// and it does not internally accumulate fractional lines, so we
+	// must calculate and apply any remainder ourselves.
+
+	BOOL bVertBar;
+	BOOL bHorzBar;
+	CheckScrollBars(bHorzBar, bVertBar);
+	if(bVertBar)
+	{
+		const int yPosNew = GetScrollPos(SB_VERT);
+		const int dyActual = yPosNew - yPosOld;
+
+		UINT uWheelScrollLines = 3;  // reasonable default
+		::SystemParametersInfo(SPI_GETWHEELSCROLLLINES, 0, &uWheelScrollLines, 0);
+		int dyRequested;
+		if(uWheelScrollLines == WHEEL_PAGESCROLL)
+		{
+			dyRequested = m_pageDev.cy;
+		} else
+		{
+			dyRequested = ::MulDiv(std::abs(zDelta), uWheelScrollLines * m_lineDev.cy, WHEEL_DELTA);
+			dyRequested = std::min(dyRequested, static_cast<int>(m_pageDev.cy));
+		}
+		dyRequested *= (zDelta > 0 ? -1 : 1);
+
+		int yMin, yMax;
+		GetScrollRange(SB_VERT, &yMin, &yMax);
+		yMax = GetScrollLimit(SB_VERT);
+		int dyExpected;
+		if(dyRequested < 0)
+		{
+			dyExpected = std::max(dyRequested, yMin - yPosOld);
+		} else
+		{
+			dyExpected = std::min(dyRequested, yMax - yPosOld);
+		}
+
+		const int dyRemainder = dyExpected - dyActual;
+		if(dyRemainder != 0)
+		{
+			return OnScrollBy(CSize(0, dyRemainder), TRUE);
+		}
+	}
+
+	return TRUE;
+}
+
+
 BOOL CModScrollView::OnMouseWheel(UINT fFlags, short zDelta, CPoint point)
 {
 	// we don't handle anything but scrolling just now
@@ -656,7 +706,8 @@ BOOL CModScrollView::OnMouseWheel(UINT fFlags, short zDelta, CPoint point)
 	//if (GetParentSplitter(this, TRUE)) return FALSE;
 
 	// we can't get out of it--perform the scroll ourselves
-	return DoMouseWheel(fFlags, zDelta, point);
+	const int yPosOld = GetScrollPos(SB_VERT);
+	return DoMouseWheel(fFlags, zDelta, point) && DoFractionalMouseWheel(zDelta, yPosOld);
 }
 
 
