@@ -860,7 +860,7 @@ void CViewSample::DrawSampleData1(HDC hdc, int ymed, int cx, int cy, SmpLength l
 	}
 	LimitMax(numDrawSamples, len);
 
-	const int x0 = loopDiv ? (-cx / loopDiv) : (-1 << loopShift);
+	const int x0 = loopDiv ? -static_cast<int>(cx / loopDiv) : (-1 << loopShift);
 	::MoveToEx(hdc, x0, y0, nullptr);
 
 	if (uFlags & CHN_16BIT)
@@ -1971,7 +1971,7 @@ void CViewSample::OnMouseMove(UINT flags, CPoint point)
 		} else if(m_fineDrag)
 		{
 			x = m_startDragValue + (point.x - m_startDragPoint.x) / Util::ScalePixels(2, m_hWnd);
-		} else if (m_nZoom < 0 || (m_nZoom == 0 && sample.nLength > static_cast<SmpLength>(m_rcClient.Width())))
+		} else if(m_dragItem == HitTestItem::SampleData && (m_nZoom < 0 || (m_nZoom == 0 && sample.nLength < static_cast<SmpLength>(m_rcClient.Width()))))
 		{
 			// Don't adjust selection to mouse down point when zooming into the sample
 			x = SnapToGrid(ScreenToSample(point.x));
