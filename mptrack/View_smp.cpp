@@ -833,12 +833,11 @@ void CViewSample::DrawSampleData1(HDC hdc, int ymed, int cx, int cy, SmpLength l
 	if (uFlags & CHN_STEREO) smplsize *= 2;
 	if (uFlags & CHN_16BIT)
 	{
-		y0 = YCVT(*((signed short *)(psample-smplsize)),15);
+		y0 = YCVT(*((int16 *)(psample-smplsize)),15);
 	} else
 	{
 		y0 = YCVT(*(psample-smplsize),7);
 	}
-	::MoveToEx(hdc, -1, y0, NULL);
 
 	SmpLength numDrawSamples, loopDiv = 0;
 	int loopShift = 0;
@@ -861,6 +860,9 @@ void CViewSample::DrawSampleData1(HDC hdc, int ymed, int cx, int cy, SmpLength l
 	}
 	LimitMax(numDrawSamples, len);
 
+	const int x0 = loopDiv ? (-cx / loopDiv) : (-1 << loopShift);
+	::MoveToEx(hdc, x0, y0, nullptr);
+
 	if (uFlags & CHN_16BIT)
 	{
 		// 16-Bit
@@ -868,7 +870,7 @@ void CViewSample::DrawSampleData1(HDC hdc, int ymed, int cx, int cy, SmpLength l
 		{
 			int x = loopDiv ? ((n * cx) / loopDiv) : (n << loopShift);
 			int y = *(const int16 *)psample;
-			::LineTo(hdc, x, YCVT(y,15));
+			::LineTo(hdc, x, YCVT(y, 15));
 			psample += smplsize;
 		}
 	} else
@@ -878,7 +880,7 @@ void CViewSample::DrawSampleData1(HDC hdc, int ymed, int cx, int cy, SmpLength l
 		{
 			int x = loopDiv ? ((n * cx) / loopDiv) : (n << loopShift);
 			int y = *psample;
-			::LineTo(hdc, x, YCVT(y,7));
+			::LineTo(hdc, x, YCVT(y, 7));
 			psample += smplsize;
 		}
 	}
