@@ -441,6 +441,9 @@
     <ClInclude Include="..\..\src\mpt\crc\tests\tests_crc.hpp">
       <Filter>src\mpt\crc\tests</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\mpt\crypto\config.hpp">
+      <Filter>src\mpt\crypto</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\mpt\crypto\exception.hpp">
       <Filter>src\mpt\crypto</Filter>
     </ClInclude>

@@ -798,6 +798,7 @@
     <ClInclude Include="..\..\src\mpt\check\windows.hpp" />
     <ClInclude Include="..\..\src\mpt\crc\crc.hpp" />
     <ClInclude Include="..\..\src\mpt\crc\tests\tests_crc.hpp" />
+    <ClInclude Include="..\..\src\mpt\crypto\config.hpp" />
     <ClInclude Include="..\..\src\mpt\crypto\exception.hpp" />
     <ClInclude Include="..\..\src\mpt\crypto\hash.hpp" />
     <ClInclude Include="..\..\src\mpt\crypto\jwk.hpp" />
