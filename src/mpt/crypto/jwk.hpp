@@ -586,7 +586,7 @@ public:
 		CryptoPP::RSA::PublicKey as_cryptopp_publickey() const {
 			CryptoPP::RSA::PublicKey result{};
 			result.SetPublicExponent(CryptoPP::Integer(mpt::byte_cast<const CryptoPP::byte *>(public_exp.data()), public_exp.size(), CryptoPP::Integer::UNSIGNED, CryptoPP::ByteOrder::BIG_ENDIAN_ORDER));
-			result.SetModulus(CryptoPP::Integer(mpt::byte_cast<const CryptoPP::byte*>(modulus.data()), modulus.size(), CryptoPP::Integer::UNSIGNED, CryptoPP::ByteOrder::BIG_ENDIAN_ORDER));
+			result.SetModulus(CryptoPP::Integer(mpt::byte_cast<const CryptoPP::byte *>(modulus.data()), modulus.size(), CryptoPP::Integer::UNSIGNED, CryptoPP::ByteOrder::BIG_ENDIAN_ORDER));
 			return result;
 		}
 
@@ -697,7 +697,7 @@ public:
 		}
 
 		void verify(mpt::const_byte_span payload, const std::vector<std::byte> & signature) {
-			if (!CryptoPP::RSASS<CryptoPP::PSS, typename hash_type::traits::cryptopp_type>::Verifier(key).VerifyMessage(mpt::byte_cast<const CryptoPP::byte*>(payload.data()), payload.size(), mpt::byte_cast<const CryptoPP::byte*>(signature.data()), signature.size())) {
+			if (!CryptoPP::RSASS<CryptoPP::PSS, typename hash_type::traits::cryptopp_type>::Verifier(key).VerifyMessage(mpt::byte_cast<const CryptoPP::byte *>(payload.data()), payload.size(), mpt::byte_cast<const CryptoPP::byte *>(signature.data()), signature.size())) {
 				throw signature_verification_failed();
 			}
 		}

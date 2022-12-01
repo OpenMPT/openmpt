@@ -32,15 +32,15 @@ namespace crypto {
 
 #if defined(MPT_CRYPTO_CRYPTOPP)
 inline namespace cryptopp {
-} // inline namespace cryptopp
+} // namespace cryptopp
 #elif defined(MPT_CRYPTO_WINDOWS)
 inline namespace windows {
-} // inline namespace windows
+} // namespace windows
 #endif // MPT_CRYPTO
 
 
 
-} // namesapce crypto
+} // namespace crypto
 
 
 } // namespace MPT_INLINE_NS
