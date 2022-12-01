@@ -45,6 +45,8 @@
 #include "mpt/base/span.hpp"
 #include "mpt/base/utility.hpp"
 #include "mpt/crc/crc.hpp"
+#include "mpt/crypto/config.hpp"
+#include "mpt/crypto/exception.hpp"
 #include "mpt/crypto/hash.hpp"
 #include "mpt/crypto/jwk.hpp"
 #include "mpt/exception_text/exception_text.hpp"
