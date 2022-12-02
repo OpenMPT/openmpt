@@ -1105,7 +1105,7 @@ protected:
 	void DigiBoosterSampleReverse(ModChannel &chn, ModCommand::PARAM param) const;
 	void HandleDigiSamplePlayDirection(PlayState &state, CHANNELINDEX chn) const;
 	void NoteCut(CHANNELINDEX nChn, uint32 nTick, bool cutSample);
-	void PatternLoop(PlayState &state, ModChannel &chn, ModCommand::PARAM param) const;
+	void PatternLoop(PlayState &state, CHANNELINDEX nChn, ModCommand::PARAM param) const;
 	bool HandleNextRow(PlayState &state, const ModSequence &order, bool honorPatternLoop) const;
 	void ExtendedMODCommands(CHANNELINDEX nChn, ModCommand::PARAM param);
 	void ExtendedS3MCommands(CHANNELINDEX nChn, ModCommand::PARAM param);
