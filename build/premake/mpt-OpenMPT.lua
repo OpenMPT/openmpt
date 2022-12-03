@@ -37,6 +37,10 @@ end
 		mpt_use_asiomodern()
 		defines { "MPT_WITH_ASIO" }
 	end
+	if _OPTIONS["windows-version"] == "winxp" then
+		mpt_use_cryptopp()
+		defines { "MPT_WITH_CRYPTOPP" }
+	end
 	mpt_use_flac()
 	defines { "MPT_WITH_FLAC" }
 	mpt_use_lame()
