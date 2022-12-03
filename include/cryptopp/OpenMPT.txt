@@ -1,0 +1,5 @@
+cryptp++ library version 8.7.0 (2022-08-07).
+The following changes have been made:
+ *  Obviously, unnecessary folders and files have been removed.
+ *  For building, premake is used to generate Visual Studio project files.
+    See ../build/premake/ for details.
