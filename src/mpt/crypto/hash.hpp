@@ -25,9 +25,27 @@
 #endif // MPT_CRYPTO_WINDOWS
 
 #if defined(MPT_CRYPTO_CRYPTOPP)
+#if MPT_COMPILER_MSVC
+#pragma warning(push)
+#endif // MPT_COMPILER_MSVC
+#if MPT_COMPILER_GCC
+#pragma GCC diagnostic push
+#endif // MPT_COMPILER_GCC
+#if MPT_COMPILER_CLANG
+#pragma clang diagnostic push
+#endif // MPT_COMPILER_CLANG
 #include <cryptopp/cryptlib.h>
 #include <cryptopp/md5.h>
 #include <cryptopp/sha.h>
+#if MPT_COMPILER_CLANG
+#pragma clang diagnostic pop
+#endif // MPT_COMPILER_CLANG
+#if MPT_COMPILER_GCC
+#pragma GCC diagnostic pop
+#endif // MPT_COMPILER_GCC
+#if MPT_COMPILER_MSVC
+#pragma warning(pop)
+#endif // MPT_COMPILER_MSVC
 #endif // MPT_CRYPTO_CRYPTOPP
 
 
