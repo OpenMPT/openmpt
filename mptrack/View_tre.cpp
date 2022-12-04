@@ -704,21 +704,6 @@ void CModTree::RefreshDlsBanks()
 						}
 					}
 				}
-				// Sort items
-				for(auto &b : banks)
-				{
-					tvs.hParent = b.second;
-					tvs.lpfnCompare = ModTreeInsLibCompareProc;
-					tvs.lParam = reinterpret_cast<LPARAM>(this);
-					SortChildrenCB(&tvs);
-				}
-				if(hDrums)
-				{
-					tvs.hParent = hDrums;
-					tvs.lpfnCompare = ModTreeInsLibCompareProc;
-					tvs.lParam = reinterpret_cast<LPARAM>(this);
-					SortChildrenCB(&tvs);
-				}
 			}
 			hDlsRoot = m_tiDLS[iDls];
 		} else
@@ -2343,14 +2328,6 @@ void CModTree::MonitorInstrumentLibrary()
 		hWatchDir = INVALID_HANDLE_VALUE;
 		lastWatchDir = mpt::PathString();
 	}
-}
-
-
-int CALLBACK CModTree::ModTreeInsLibCompareProc(LPARAM lParam1, LPARAM lParam2, LPARAM)
-{
-	lParam1 &= 0x7FFFFFFF;
-	lParam2 &= 0x7FFFFFFF;
-	return static_cast<int>(lParam1 - lParam2);
 }
 
 

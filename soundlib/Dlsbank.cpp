@@ -667,16 +667,7 @@ bool CDLSBank::IsDLSBank(const mpt::PathString &filename)
 
 const DLSINSTRUMENT *CDLSBank::FindInstrument(bool isDrum, uint32 bank, uint32 program, uint32 key, uint32 *pInsNo) const
 {
-	// This helps finding the "more correct" instrument if we search for an instrument in any bank, and the higher-bank instruments appear first in the file
-	// Fixes issues when loading GeneralUser GS into OpenMPT's MIDI library.
-	std::vector<std::reference_wrapper<const DLSINSTRUMENT>> sortedInstr{m_Instruments.begin(), m_Instruments.end()};
-	if(bank >= 0x4000 || program >= 0x80)
-	{
-		std::sort(sortedInstr.begin(), sortedInstr.end(), [](const DLSINSTRUMENT &l, const DLSINSTRUMENT &r)
-				{ return std::tie(l.ulBank, l.ulInstrument) < std::tie(r.ulBank, r.ulInstrument); });
-	}
-
-	for(const DLSINSTRUMENT &dlsIns : sortedInstr)
+	for(const DLSINSTRUMENT &dlsIns : m_Instruments)
 	{
 		uint32 insbank = ((dlsIns.ulBank & 0x7F00) >> 1) | (dlsIns.ulBank & 0x7F);
 		if((bank >= 0x4000) || (insbank == bank))
@@ -695,8 +686,6 @@ const DLSINSTRUMENT *CDLSBank::FindInstrument(bool isDrum, uint32 bank, uint32 p
 						{
 							if(pInsNo)
 								*pInsNo = static_cast<uint32>(std::distance(m_Instruments.data(), &dlsIns));
-							// cppcheck false-positive
-							// cppcheck-suppress returnDanglingLifetime
 							return &dlsIns;
 						}
 					}
@@ -707,8 +696,6 @@ const DLSINSTRUMENT *CDLSBank::FindInstrument(bool isDrum, uint32 bank, uint32 p
 				{
 					if(pInsNo)
 						*pInsNo = static_cast<uint32>(std::distance(m_Instruments.data(), &dlsIns));
-					// cppcheck false-positive
-					// cppcheck-suppress returnDanglingLifetime
 					return &dlsIns;
 				}
 			}
@@ -1621,9 +1608,12 @@ bool CDLSBank::Open(FileReader file)
 	{
 		ConvertSF2ToDLS(sf2info);
 	}
-#ifdef DLSBANK_LOG
-	MPT_LOG_GLOBAL(LogDebug, "DLSBANK", U_("DLS bank closed"));
-#endif
+
+	// FindInstrument requires the instrument to be sorted for picking the best instrument from the MIDI library when there are multiple banks.
+	// And of course this is also helpful for creating the treeview UI
+	std::sort(m_Instruments.begin(), m_Instruments.end(), [](const DLSINSTRUMENT &l, const DLSINSTRUMENT &r)
+			  { return std::tie(l.ulBank, l.ulInstrument) < std::tie(r.ulBank, r.ulInstrument); });
+
 	return true;
 }
 

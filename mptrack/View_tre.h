@@ -277,7 +277,6 @@ public:
 	BOOL OnDrop(COleDataObject* pDataObject, DROPEFFECT dropEffect, CPoint point);
 
 protected:
-	static int CALLBACK ModTreeInsLibCompareProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	static int CALLBACK ModTreeDrumCompareProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	int ImageToSortOrder(int image) const;
 	ModTreeDocInfo *GetDocumentInfoFromItem(HTREEITEM hItem);
