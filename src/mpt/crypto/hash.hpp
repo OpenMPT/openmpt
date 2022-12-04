@@ -10,6 +10,7 @@
 #include "mpt/base/memory.hpp"
 #include "mpt/base/namespace.hpp"
 #include "mpt/base/saturate_cast.hpp"
+#include "mpt/crypto/config.hpp"
 #include "mpt/crypto/exception.hpp"
 
 #include <algorithm>
@@ -18,10 +19,34 @@
 #include <cassert>
 #include <cstddef>
 
-#if MPT_OS_WINDOWS
+#if defined(MPT_CRYPTO_WINDOWS)
 #include <windows.h> // must be before wincrypt.h for clang-cl
 #include <bcrypt.h>
-#endif // MPT_OS_WINDOWS
+#endif // MPT_CRYPTO_WINDOWS
+
+#if defined(MPT_CRYPTO_CRYPTOPP)
+#if MPT_COMPILER_MSVC
+#pragma warning(push)
+#endif // MPT_COMPILER_MSVC
+#if MPT_COMPILER_GCC
+#pragma GCC diagnostic push
+#endif // MPT_COMPILER_GCC
+#if MPT_COMPILER_CLANG
+#pragma clang diagnostic push
+#endif // MPT_COMPILER_CLANG
+#include <cryptopp/cryptlib.h>
+#include <cryptopp/md5.h>
+#include <cryptopp/sha.h>
+#if MPT_COMPILER_CLANG
+#pragma clang diagnostic pop
+#endif // MPT_COMPILER_CLANG
+#if MPT_COMPILER_GCC
+#pragma GCC diagnostic pop
+#endif // MPT_COMPILER_GCC
+#if MPT_COMPILER_MSVC
+#pragma warning(pop)
+#endif // MPT_COMPILER_MSVC
+#endif // MPT_CRYPTO_CRYPTOPP
 
 
 namespace mpt {
@@ -32,7 +57,8 @@ namespace crypto {
 
 
 
-#if MPT_OS_WINDOWS
+#if defined(MPT_CRYPTO_WINDOWS)
+namespace windows {
 
 
 namespace hash {
@@ -165,8 +191,83 @@ using SHA512 = hash_impl<hash_traits_sha512>;
 } // namespace hash
 
 
-#endif // MPT_OS_WINDOWS
+} // namespace windows
+#endif // MPT_CRYPTO_WINDOWS
 
+
+#if defined(MPT_CRYPTO_CRYPTOPP)
+namespace cryptopp {
+
+
+namespace hash {
+
+
+struct hash_traits_md5 {
+	static constexpr std::size_t output_bits = 128;
+	static constexpr std::size_t output_bytes = output_bits / 8;
+	using cryptopp_type = CryptoPP::Weak::MD5;
+};
+
+struct hash_traits_sha1 {
+	static constexpr std::size_t output_bits = 160;
+	static constexpr std::size_t output_bytes = output_bits / 8;
+	using cryptopp_type = CryptoPP::SHA1;
+};
+
+struct hash_traits_sha256 {
+	static constexpr std::size_t output_bits = 256;
+	static constexpr std::size_t output_bytes = output_bits / 8;
+	using cryptopp_type = CryptoPP::SHA256;
+};
+
+struct hash_traits_sha512 {
+	static constexpr std::size_t output_bits = 512;
+	static constexpr std::size_t output_bytes = output_bits / 8;
+	using cryptopp_type = CryptoPP::SHA512;
+};
+
+
+template <typename Traits>
+class hash_impl {
+
+public:
+	using traits = Traits;
+
+	using result_type = std::array<std::byte, traits::output_bytes>;
+
+private:
+	typename traits::cryptopp_type hash;
+
+public:
+	hash_impl() = default;
+	hash_impl(const hash_impl &) = delete;
+	hash_impl & operator=(const hash_impl &) = delete;
+	~hash_impl() = default;
+
+public:
+	hash_impl & process(mpt::const_byte_span data) {
+		hash.Update(mpt::byte_cast<const CryptoPP::byte *>(data.data()), data.size());
+		return *this;
+	}
+
+	result_type result() {
+		result_type res = mpt::init_array<std::byte, traits::output_bytes>(std::byte{0});
+		hash.Final(mpt::byte_cast<CryptoPP::byte *>(res.data()));
+		return res;
+	}
+};
+
+using MD5 = hash_impl<hash_traits_md5>;
+using SHA1 = hash_impl<hash_traits_sha1>;
+using SHA256 = hash_impl<hash_traits_sha256>;
+using SHA512 = hash_impl<hash_traits_sha512>;
+
+
+} // namespace hash
+
+
+} // namespace cryptopp
+#endif // MPT_CRYPTO_CRYPTOPP
 
 
 } // namespace crypto

@@ -7,17 +7,40 @@
 
 #include "mpt/base/detect.hpp"
 #include "mpt/base/namespace.hpp"
+#include "mpt/crypto/config.hpp"
 #include "mpt/format/simple.hpp"
 #include "mpt/out_of_memory/out_of_memory.hpp"
 
 #include <stdexcept>
 #include <string>
 
-#if MPT_OS_WINDOWS
+#if defined(MPT_CRYPTO_WINDOWS)
 #include <windows.h>  // must be before wincrypt.h for clang-cl
 #include <wincrypt.h> // must be before ncrypt.h
 #include <ncrypt.h>
-#endif // MPT_OS_WINDOWS
+#endif // MPT_CRYPTO_WINDOWS
+
+#if defined(MPT_CRYPTO_CRYPTOPP)
+#if MPT_COMPILER_MSVC
+#pragma warning(push)
+#endif // MPT_COMPILER_MSVC
+#if MPT_COMPILER_GCC
+#pragma GCC diagnostic push
+#endif // MPT_COMPILER_GCC
+#if MPT_COMPILER_CLANG
+#pragma clang diagnostic push
+#endif // MPT_COMPILER_CLANG
+#include <cryptopp/cryptlib.h>
+#if MPT_COMPILER_CLANG
+#pragma clang diagnostic pop
+#endif // MPT_COMPILER_CLANG
+#if MPT_COMPILER_GCC
+#pragma GCC diagnostic pop
+#endif // MPT_COMPILER_GCC
+#if MPT_COMPILER_MSVC
+#pragma warning(pop)
+#endif // MPT_COMPILER_MSVC
+#endif // MPT_CRYPTO_CRYPTOPP
 
 
 namespace mpt {
@@ -28,7 +51,9 @@ namespace crypto {
 
 
 
-#if MPT_OS_WINDOWS
+#if defined(MPT_CRYPTO_WINDOWS)
+namespace windows {
+
 
 class exception
 	: public std::runtime_error {
@@ -124,7 +149,19 @@ inline void CheckSECURITY_STATUS(SECURITY_STATUS status, const std::string & fun
 }
 
 
-#endif // MPT_OS_WINDOWS
+} // namespace windows
+#endif // MPT_CRYPTO_WINDOWS
+
+
+#if defined(MPT_WITH_CRYPTOPP)
+namespace cryptopp {
+
+
+using exception = CryptoPP::Exception;
+
+
+} // namespace cryptopp
+#endif // MPT_WITH_CRYPTOPP
 
 
 

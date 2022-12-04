@@ -295,6 +295,9 @@ solution "OpenMPT-UTF8"
  dofile "../../build/premake/sys-mfc.lua"
  dofile "../../build/premake/ext-ancient.lua"
  dofile "../../build/premake/ext-asiomodern.lua"
+if _OPTIONS["windows-version"] == "winxp" then
+ dofile "../../build/premake/ext-cryptopp.lua"
+end
  dofile "../../build/premake/ext-flac.lua"
  dofile "../../build/premake/ext-lame.lua"
  dofile "../../build/premake/ext-lhasa.lua"
@@ -328,6 +331,9 @@ solution "OpenMPT-ANSI"
  dofile "../../build/premake/sys-mfc.lua"
  dofile "../../build/premake/ext-ancient.lua"
  dofile "../../build/premake/ext-asiomodern.lua"
+if _OPTIONS["windows-version"] == "winxp" then
+ dofile "../../build/premake/ext-cryptopp.lua"
+end
  dofile "../../build/premake/ext-flac.lua"
  dofile "../../build/premake/ext-lame.lua"
  dofile "../../build/premake/ext-lhasa.lua"
@@ -361,6 +367,9 @@ solution "OpenMPT"
  dofile "../../build/premake/sys-mfc.lua"
  dofile "../../build/premake/ext-ancient.lua"
  dofile "../../build/premake/ext-asiomodern.lua"
+if _OPTIONS["windows-version"] == "winxp" then
+ dofile "../../build/premake/ext-cryptopp.lua"
+end
  dofile "../../build/premake/ext-flac.lua"
  dofile "../../build/premake/ext-lame.lua"
  dofile "../../build/premake/ext-lhasa.lua"

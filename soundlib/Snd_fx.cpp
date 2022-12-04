@@ -716,7 +716,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					break;
 
 				case 0xB0:  // Pattern Loop
-					PatternLoop(playState, chn, param & 0x0F);
+					PatternLoop(playState, nChn, param & 0x0F);
 					break;
 				
 				case 0xF0:  // Active macro
@@ -729,7 +729,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				switch(param & 0xF0)
 				{
 				case 0x60:  // Pattern Loop
-					PatternLoop(playState, chn, param & 0x0F);
+					PatternLoop(playState, nChn, param & 0x0F);
 					break;
 
 				case 0xF0:  // Active macro
@@ -4628,7 +4628,7 @@ void CSoundFile::ExtendedMODCommands(CHANNELINDEX nChn, ModCommand::PARAM param)
 	// E6x: Pattern Loop
 	case 0x60:
 		if(m_SongFlags[SONG_FIRSTTICK])
-			PatternLoop(m_PlayState, chn, param & 0x0F);
+			PatternLoop(m_PlayState, nChn, param & 0x0F);
 		break;
 	// E7x: Set Tremolo WaveForm
 	case 0x70:	chn.nTremoloType = param & 0x07; break;
@@ -4813,7 +4813,7 @@ void CSoundFile::ExtendedS3MCommands(CHANNELINDEX nChn, ModCommand::PARAM param)
 	// SBx: Pattern Loop
 	case 0xB0:
 		if(m_SongFlags[SONG_FIRSTTICK])
-			PatternLoop(m_PlayState, chn, param & 0x0F);
+			PatternLoop(m_PlayState, nChn, param & 0x0F);
 		break;
 	// SCx: Note Cut
 	case 0xC0:
@@ -5965,10 +5965,13 @@ void CSoundFile::SetTempo(TEMPO param, bool setFromUI)
 }
 
 
-void CSoundFile::PatternLoop(PlayState &state, ModChannel &chn, ModCommand::PARAM param) const
+void CSoundFile::PatternLoop(PlayState &state, CHANNELINDEX nChn, ModCommand::PARAM param) const
 {
-	if(m_playBehaviour[kST3NoMutedChannels] && chn.dwFlags[CHN_MUTE | CHN_SYNCMUTE])
+	if(m_playBehaviour[kST3NoMutedChannels] && state.Chn[nChn].dwFlags[CHN_MUTE | CHN_SYNCMUTE])
 		return;  // not even effects are processed on muted S3M channels
+
+	// ST3 doesn't have per-channel pattern loop memory.
+	ModChannel &chn = state.Chn[(GetType() == MOD_TYPE_S3M) ? 0 : nChn];
 
 	if(!param)
 	{
@@ -6024,17 +6027,6 @@ void CSoundFile::PatternLoop(PlayState &state, ModChannel &chn, ModCommand::PARA
 		if(m_playBehaviour[kITPatternLoopWithJumps])
 			state.m_posJump = ORDERINDEX_INVALID;
 	}
-
-	if(GetType() == MOD_TYPE_S3M)
-	{
-		// ST3 doesn't have per-channel pattern loop memory, so spam all changes to other channels as well.
-		for(CHANNELINDEX i = 0; i < GetNumChannels(); i++)
-		{
-			state.Chn[i].nPatternLoop = chn.nPatternLoop;
-			state.Chn[i].nPatternLoopCount = chn.nPatternLoopCount;
-		}
-	}
-
 }
 
 

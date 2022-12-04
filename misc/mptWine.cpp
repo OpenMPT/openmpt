@@ -616,7 +616,7 @@ ExecResult Context::ExecutePosixShellScript(std::string script, FlagSet<ExecFlag
 			std::streampos outputFileSize = outputFile.tellg();
 			outputFile.seekg(0, std::ios::beg);
 			std::vector<char> outputFileBuf(mpt::saturate_cast<std::size_t>(static_cast<std::streamoff>(outputFileSize)));
-			outputFile.read(&outputFileBuf[0], outputFileBuf.size());
+			outputFile.read(outputFileBuf.data(), outputFileBuf.size());
 			outputString = mpt::buffer_cast<std::string>(outputFileBuf);
 		}
 	}
@@ -633,7 +633,7 @@ ExecResult Context::ExecutePosixShellScript(std::string script, FlagSet<ExecFlag
 			std::streampos errorFileSize = errorFile.tellg();
 			errorFile.seekg(0, std::ios::beg);
 			std::vector<char> errorFileBuf(mpt::saturate_cast<std::size_t>(static_cast<std::streamoff>(errorFileSize)));
-			errorFile.read(&errorFileBuf[0], errorFileBuf.size());
+			errorFile.read(errorFileBuf.data(), errorFileBuf.size());
 			errorString = mpt::buffer_cast<std::string>(errorFileBuf);
 		}
 	}

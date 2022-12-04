@@ -194,7 +194,7 @@ if not singleThreaded:
 		raise Exception("Something went wrong during manual creation!")
 
 print("Updating package template...")
-pTemplate = Popen(["build\\auto\\update_package_template.cmd"], cwd="./")
+pTemplate = Popen(["build\\auto\\update_package_template_retro.cmd"], cwd="./")
 pTemplate.communicate()
 if(pTemplate.returncode != 0):
 	raise Exception("Something went wrong during updating package template!")

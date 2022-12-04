@@ -6,11 +6,13 @@
 
 
 #include "mpt/base/alloc.hpp"
+#include "mpt/base/detect.hpp"
 #include "mpt/base/memory.hpp"
 #include "mpt/base/namespace.hpp"
 #include "mpt/base/saturate_cast.hpp"
 #include "mpt/base/span.hpp"
 #include "mpt/binary/base64url.hpp"
+#include "mpt/crypto/config.hpp"
 #include "mpt/crypto/exception.hpp"
 #include "mpt/crypto/hash.hpp"
 #include "mpt/detect/nlohmann_json.hpp"
@@ -30,12 +32,36 @@
 #include <cstdint>
 #include <cstring>
 
-#if MPT_OS_WINDOWS
+#if defined(MPT_CRYPTO_WINDOWS)
 #include <windows.h> // must be before wincrypt.h for clang-cl
 #include <bcrypt.h>
 #include <wincrypt.h> // must be before ncrypt.h
 #include <ncrypt.h>
-#endif // MPT_OS_WINDOWS
+#endif // MPT_CRYPTO_WINDOWS
+
+#if defined(MPT_CRYPTO_CRYPTOPP)
+#if MPT_COMPILER_MSVC
+#pragma warning(push)
+#endif // MPT_COMPILER_MSVC
+#if MPT_COMPILER_GCC
+#pragma GCC diagnostic push
+#endif // MPT_COMPILER_GCC
+#if MPT_COMPILER_CLANG
+#pragma clang diagnostic push
+#endif // MPT_COMPILER_CLANG
+#include <cryptopp/cryptlib.h>
+#include <cryptopp/pssr.h>
+#include <cryptopp/rsa.h>
+#if MPT_COMPILER_CLANG
+#pragma clang diagnostic pop
+#endif // MPT_COMPILER_CLANG
+#if MPT_COMPILER_GCC
+#pragma GCC diagnostic pop
+#endif // MPT_COMPILER_GCC
+#if MPT_COMPILER_MSVC
+#pragma warning(pop)
+#endif // MPT_COMPILER_MSVC
+#endif // MPT_CRYPTO_CRYPTOPP
 
 
 namespace mpt {
@@ -47,7 +73,11 @@ namespace crypto {
 
 
 
-#if MPT_OS_WINDOWS && MPT_DETECTED_NLOHMANN_JSON
+#if MPT_DETECTED_NLOHMANN_JSON
+
+
+#if defined(MPT_CRYPTO_WINDOWS)
+namespace windows {
 
 
 
@@ -515,7 +545,278 @@ public:
 
 
 
-#endif // MPT_OS_WINDOWS && MPT_DETECTED_NLOHMANN_JSON
+} // namespace windows
+#endif // MPT_CRYPTO_WINDOWS
+
+
+
+#if defined(MPT_CRYPTO_CRYPTOPP)
+namespace cryptopp {
+
+
+
+namespace asymmetric {
+
+
+
+class signature_verification_failed
+	: public std::runtime_error {
+public:
+	signature_verification_failed()
+		: std::runtime_error("Signature Verification failed.") {
+		return;
+	}
+};
+
+
+
+inline std::vector<mpt::ustring> jws_get_keynames(const mpt::ustring & jws_) {
+	std::vector<mpt::ustring> result;
+	nlohmann::json jws = nlohmann::json::parse(mpt::transcode<std::string>(mpt::common_encoding::utf8, jws_));
+	for (const auto & s : jws["signatures"]) {
+		result.push_back(s["header"]["kid"]);
+	}
+	return result;
+}
+
+
+
+struct RSASSA_PSS_SHA512_traits {
+	using hash_type = mpt::crypto::hash::SHA512;
+	static constexpr const char * jwk_alg = "PS512";
+};
+
+
+
+template <typename Traits = RSASSA_PSS_SHA512_traits, std::size_t keysize = 4096>
+class rsassa_pss {
+
+public:
+	using hash_type = typename Traits::hash_type;
+	static constexpr const char * jwk_alg = Traits::jwk_alg;
+
+	struct public_key_data {
+
+		mpt::ustring name;
+		uint32 length = 0;
+		std::vector<std::byte> public_exp;
+		std::vector<std::byte> modulus;
+
+		CryptoPP::RSA::PublicKey as_cryptopp_publickey() const {
+			CryptoPP::RSA::PublicKey result{};
+			result.SetPublicExponent(CryptoPP::Integer(mpt::byte_cast<const CryptoPP::byte *>(public_exp.data()), public_exp.size(), CryptoPP::Integer::UNSIGNED, CryptoPP::ByteOrder::BIG_ENDIAN_ORDER));
+			result.SetModulus(CryptoPP::Integer(mpt::byte_cast<const CryptoPP::byte *>(modulus.data()), modulus.size(), CryptoPP::Integer::UNSIGNED, CryptoPP::ByteOrder::BIG_ENDIAN_ORDER));
+			return result;
+		}
+
+		mpt::ustring as_jwk() const {
+			nlohmann::json json = nlohmann::json::object();
+			json["kid"] = name;
+			json["kty"] = "RSA";
+			json["alg"] = jwk_alg;
+			json["use"] = "sig";
+			json["e"] = mpt::encode_base64url(mpt::as_span(public_exp));
+			json["n"] = mpt::encode_base64url(mpt::as_span(modulus));
+			return mpt::transcode<mpt::ustring>(mpt::common_encoding::utf8, json.dump());
+		}
+
+		static public_key_data from_jwk(const mpt::ustring & jwk) {
+			public_key_data result;
+			try {
+				nlohmann::json json = nlohmann::json::parse(mpt::transcode<std::string>(mpt::common_encoding::utf8, jwk));
+				if (json["kty"] != "RSA") {
+					throw std::runtime_error("Cannot parse RSA public key JWK.");
+				}
+				if (json["alg"] != jwk_alg) {
+					throw std::runtime_error("Cannot parse RSA public key JWK.");
+				}
+				if (json["use"] != "sig") {
+					throw std::runtime_error("Cannot parse RSA public key JWK.");
+				}
+				result.name = json["kid"].get<mpt::ustring>();
+				result.public_exp = mpt::decode_base64url(json["e"]);
+				result.modulus = mpt::decode_base64url(json["n"]);
+				result.length = mpt::saturate_cast<uint32>(result.modulus.size() * 8);
+			} catch (mpt::out_of_memory e) {
+				mpt::rethrow_out_of_memory(e);
+			} catch (...) {
+				throw std::runtime_error("Cannot parse RSA public key JWK.");
+			}
+			return result;
+		}
+
+		static public_key_data from_cryptopp_publickey(const mpt::ustring & name, const CryptoPP::RSA::PublicKey & key) {
+			public_key_data result;
+			result.name = name;
+			result.length = std::max(key.GetPublicExponent().BitCount(), key.GetModulus().BitCount());
+			result.public_exp.resize(key.GetPublicExponent().ByteCount(), std::byte{0});
+			key.GetPublicExponent().Encode(mpt::byte_cast<CryptoPP::byte *>(result.public_exp.data()), result.public_exp.size(), CryptoPP::Integer::UNSIGNED);
+			result.modulus.resize(key.GetModulus().ByteCount(), std::byte{0});
+			key.GetModulus().Encode(mpt::byte_cast<CryptoPP::byte *>(result.modulus.data()), result.modulus.size(), CryptoPP::Integer::UNSIGNED);
+			return result;
+		}
+	};
+
+
+
+	static std::vector<public_key_data> parse_jwk_set(const mpt::ustring & jwk_set_) {
+		std::vector<public_key_data> result;
+		nlohmann::json jwk_set = nlohmann::json::parse(mpt::transcode<std::string>(mpt::common_encoding::utf8, jwk_set_));
+		for (const auto & k : jwk_set["keys"]) {
+			try {
+				result.push_back(public_key_data::from_jwk(mpt::transcode<mpt::ustring>(mpt::common_encoding::utf8, k.dump())));
+			} catch (...) {
+				// nothing
+			}
+		}
+		return result;
+	}
+
+
+
+	class public_key {
+
+	private:
+		mpt::ustring name;
+		CryptoPP::RSA::PublicKey key;
+
+	public:
+		public_key(const public_key_data & data)
+			: name(data.name)
+			, key(data.as_cryptopp_publickey()) {
+			return;
+		}
+
+		public_key(const public_key & other)
+			: public_key(other.get_public_key_data()) {
+			return;
+		}
+
+		public_key & operator=(const public_key & other) {
+			if (&other == this) {
+				return *this;
+			}
+			public_key copy(other);
+			{
+				using std::swap;
+				swap(copy.name, name);
+				swap(copy.key, key);
+			}
+			return *this;
+		}
+
+		~public_key() = default;
+
+		mpt::ustring get_name() const {
+			return name;
+		}
+
+		public_key_data get_public_key_data() const {
+			return public_key_data::from_cryptopp_publickey(name, key);
+		}
+
+		void verify(mpt::const_byte_span payload, const std::vector<std::byte> & signature) {
+			if (!CryptoPP::RSASS<CryptoPP::PSS, typename hash_type::traits::cryptopp_type>::Verifier(key).VerifyMessage(mpt::byte_cast<const CryptoPP::byte *>(payload.data()), payload.size(), mpt::byte_cast<const CryptoPP::byte *>(signature.data()), signature.size())) {
+				throw signature_verification_failed();
+			}
+		}
+
+		std::vector<std::byte> jws_verify(const mpt::ustring & jws_) {
+			nlohmann::json jws = nlohmann::json::parse(mpt::transcode<std::string>(mpt::common_encoding::utf8, jws_));
+			std::vector<std::byte> payload = mpt::decode_base64url(jws["payload"]);
+			nlohmann::json jsignature = nlohmann::json::object();
+			bool sigfound = false;
+			for (const auto & s : jws["signatures"]) {
+				if (s["header"]["kid"] == mpt::transcode<std::string>(mpt::common_encoding::utf8, name)) {
+					jsignature = s;
+					sigfound = true;
+				}
+			}
+			if (!sigfound) {
+				throw signature_verification_failed();
+			}
+			std::vector<std::byte> protectedheaderraw = mpt::decode_base64url(jsignature["protected"]);
+			std::vector<std::byte> signature = mpt::decode_base64url(jsignature["signature"]);
+			nlohmann::json header = nlohmann::json::parse(mpt::buffer_cast<std::string>(protectedheaderraw));
+			if (header["typ"] != "JWT") {
+				throw signature_verification_failed();
+			}
+			if (header["alg"] != jwk_alg) {
+				throw signature_verification_failed();
+			}
+			verify(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(mpt::transcode<std::string>(mpt::common_encoding::utf8, mpt::encode_base64url(mpt::as_span(protectedheaderraw)) + MPT_USTRING(".") + mpt::encode_base64url(mpt::as_span(payload))))), signature);
+			return payload;
+		}
+
+		std::vector<std::byte> jws_compact_verify(const mpt::ustring & jws) {
+			std::vector<mpt::ustring> parts = mpt::split<mpt::ustring>(jws, MPT_USTRING("."));
+			if (parts.size() != 3) {
+				throw signature_verification_failed();
+			}
+			std::vector<std::byte> protectedheaderraw = mpt::decode_base64url(parts[0]);
+			std::vector<std::byte> payload = mpt::decode_base64url(parts[1]);
+			std::vector<std::byte> signature = mpt::decode_base64url(parts[2]);
+			nlohmann::json header = nlohmann::json::parse(mpt::buffer_cast<std::string>(protectedheaderraw));
+			if (header["typ"] != "JWT") {
+				throw signature_verification_failed();
+			}
+			if (header["alg"] != jwk_alg) {
+				throw signature_verification_failed();
+			}
+			verify(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(mpt::transcode<std::string>(mpt::common_encoding::utf8, mpt::encode_base64url(mpt::as_span(protectedheaderraw)) + MPT_USTRING(".") + mpt::encode_base64url(mpt::as_span(payload))))), signature);
+			return payload;
+		}
+	};
+
+
+
+	static inline void jws_verify_at_least_one(std::vector<public_key> & keys, const std::vector<std::byte> & expectedPayload, const mpt::ustring & signature) {
+		std::vector<mpt::ustring> keynames = mpt::crypto::asymmetric::jws_get_keynames(signature);
+		bool sigchecked = false;
+		for (const auto & keyname : keynames) {
+			for (auto & key : keys) {
+				if (key.get_name() == keyname) {
+					if (expectedPayload != key.jws_verify(signature)) {
+						throw mpt::crypto::asymmetric::signature_verification_failed();
+					}
+					sigchecked = true;
+				}
+			}
+		}
+		if (!sigchecked) {
+			throw mpt::crypto::asymmetric::signature_verification_failed();
+		}
+	}
+
+
+
+	static inline std::vector<std::byte> jws_verify_at_least_one(std::vector<public_key> & keys, const mpt::ustring & signature) {
+		std::vector<mpt::ustring> keynames = mpt::crypto::asymmetric::jws_get_keynames(signature);
+		for (const auto & keyname : keynames) {
+			for (auto & key : keys) {
+				if (key.get_name() == keyname) {
+					return key.jws_verify(signature);
+				}
+			}
+		}
+		throw mpt::crypto::asymmetric::signature_verification_failed();
+	}
+
+
+
+}; // class rsassa_pss
+
+
+
+} // namespace asymmetric
+
+
+
+} // namespace cryptopp
+#endif // MPT_CRYPTO_CRYPTOPP
+
+
+#endif // MPT_DETECTED_NLOHMANN_JSON
 
 
 

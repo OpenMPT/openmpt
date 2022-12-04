@@ -9,6 +9,7 @@
 #include "mpt/base/memory.hpp"
 #include "mpt/base/namespace.hpp"
 #include "mpt/base/span.hpp"
+#include "mpt/crypto/config.hpp"
 #include "mpt/crypto/exception.hpp"
 #include "mpt/crypto/hash.hpp"
 #include "mpt/crypto/jwk.hpp"
@@ -41,7 +42,7 @@ MPT_TEST_GROUP_INLINE("mpt/crypto")
 #pragma clang diagnostic pop
 #endif
 {
-#if MPT_OS_WINDOWS
+#if defined(MPT_CRYPTO_CRYPTOPP) || defined(MPT_CRYPTO_WINDOWS)
 	mpt::crypto::hash::SHA512::result_type sha512_abc{
 		std::byte{0xdd}, std::byte{0xaf}, std::byte{0x35}, std::byte{0xa1}, std::byte{0x93}, std::byte{0x61}, std::byte{0x7a}, std::byte{0xba},
 		std::byte{0xcc}, std::byte{0x41}, std::byte{0x73}, std::byte{0x49}, std::byte{0xae}, std::byte{0x20}, std::byte{0x41}, std::byte{0x31},
@@ -53,9 +54,9 @@ MPT_TEST_GROUP_INLINE("mpt/crypto")
 		std::byte{0x2a}, std::byte{0x9a}, std::byte{0xc9}, std::byte{0x4f}, std::byte{0xa5}, std::byte{0x4c}, std::byte{0xa4}, std::byte{0x9f}};
 	MPT_TEST_EXPECT_EQUAL(mpt::crypto::hash::SHA512().process(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(std::string("abc")))).result(), sha512_abc);
 
-#endif // MPT_OS_WINDOWS
+#endif // MPT_WITH_CRYPTOPP || MPT_OS_WINDOWS
 
-#if MPT_OS_WINDOWS && MPT_DETECTED_NLOHMANN_JSON
+#if MPT_OS_WINDOWS && defined(MPT_CRYPTO_WINDOWS) && !defined(MPT_CRYPTO_CRYPTOPP) && MPT_DETECTED_NLOHMANN_JSON
 
 	{
 
@@ -89,7 +90,7 @@ MPT_TEST_GROUP_INLINE("mpt/crypto")
 		key.destroy();
 	}
 
-#endif //  MPT_OS_WINDOWS && MPT_DETECTED_NLOHMANN_JSON
+#endif //  MPT_OS_WINDOWS && MPT_CRYPTO_WINDOWS && MPT_DETECTED_NLOHMANN_JSON
 }
 
 
