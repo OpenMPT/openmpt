@@ -237,7 +237,8 @@ protected:
 	void SetScrollSizes(int nMapMode, SIZE sizeTotal, const SIZE& sizePage = CScrollView::sizeDefault, const SIZE& sizeLine = CScrollView::sizeDefault);
 
 	// Fix for mousewheel granularity limitation in MFC's CScrollView
-	BOOL DoFractionalMouseWheel(short zDelta, int yPosOld);
+	int GetScrollBarForMouseWheel(BOOL bVerticalInput);
+	BOOL DoPreciseMouseWheel(short zDelta, BOOL bVerticalInput);
 
 	BOOL OnGesturePan(CPoint ptFrom, CPoint ptTo) override;
 

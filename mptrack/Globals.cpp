@@ -646,82 +646,86 @@ void CModScrollView::UpdateIndicator(LPCTSTR lpszText)
 	if (pMainFrm) pMainFrm->SetUserText((lpszText) ? lpszText : _T(""));
 }
 
-
-BOOL CModScrollView::DoFractionalMouseWheel(short zDelta, int yPosOld)
+int CModScrollView::GetScrollBarForMouseWheel(BOOL bVerticalInput)
 {
-	// CScrollView::DoMouseWheel() only scrolls an entire line at a time,
-	// and it does not internally accumulate fractional lines, so we
-	// must calculate and apply any remainder ourselves.
-
 	BOOL bVertBar;
 	BOOL bHorzBar;
 	CheckScrollBars(bHorzBar, bVertBar);
-	if(bVertBar)
+	return (bVerticalInput && bVertBar) ? SB_VERT : (bHorzBar ? SB_HORZ : -1);
+}
+
+BOOL CModScrollView::DoPreciseMouseWheel(short zDelta, BOOL bVerticalInput)
+{
+	// CScrollView::DoMouseWheel() scrolls only in whole lines and
+	// does not internally accumulate fractional lines, so we've
+	// rolled our own version of it here to handle fractional lines.
+
+	BOOL bResult = FALSE;
+
+	const int nScrollBar = GetScrollBarForMouseWheel(bVerticalInput);
+	if(nScrollBar >= 0)
 	{
-		const int yPosNew = GetScrollPos(SB_VERT);
-		const int dyActual = yPosNew - yPosOld;
+		const int dPage = static_cast<int>((nScrollBar == SB_HORZ) ? m_pageDev.cx : m_pageDev.cy);
+		const int dLine = static_cast<int>((nScrollBar == SB_HORZ) ? m_lineDev.cx : m_lineDev.cy);
 
 		UINT uWheelScrollLines = 3;  // reasonable default
 		::SystemParametersInfo(SPI_GETWHEELSCROLLLINES, 0, &uWheelScrollLines, 0);
-		int dyRequested;
+		int nDelta;
 		if(uWheelScrollLines == WHEEL_PAGESCROLL)
 		{
-			dyRequested = m_pageDev.cy;
+			nDelta = dPage;
 		} else
 		{
-			dyRequested = ::MulDiv(std::abs(zDelta), uWheelScrollLines * m_lineDev.cy, WHEEL_DELTA);
-			dyRequested = std::min(dyRequested, static_cast<int>(m_pageDev.cy));
+			nDelta = ::MulDiv(std::abs(zDelta), uWheelScrollLines * dLine, WHEEL_DELTA);
+			nDelta = std::min(nDelta, dPage);
 		}
-		dyRequested *= (zDelta > 0 ? -1 : 1);
+		nDelta *= (zDelta > 0 ? -1 : 1);
 
-		int yMin, yMax;
-		GetScrollRange(SB_VERT, &yMin, &yMax);
-		yMax = GetScrollLimit(SB_VERT);
-		int dyExpected;
-		if(dyRequested < 0)
+		int minScrollValue, maxScrollValue;
+		GetScrollRange(nScrollBar, &minScrollValue, &maxScrollValue);
+		maxScrollValue = GetScrollLimit(nScrollBar);
+		if(nDelta < 0)
 		{
-			dyExpected = std::max(dyRequested, yMin - yPosOld);
+			nDelta = std::max(nDelta, minScrollValue - GetScrollPos(nScrollBar));
 		} else
 		{
-			dyExpected = std::min(dyRequested, yMax - yPosOld);
+			nDelta = std::min(nDelta, maxScrollValue - GetScrollPos(nScrollBar));
 		}
 
-		const int dyRemainder = dyExpected - dyActual;
-		if(dyRemainder != 0)
+		if(nDelta != 0)
 		{
-			return OnScrollBy(CSize(0, dyRemainder), TRUE);
+			const auto &&szScroll = (nScrollBar == SB_HORZ) ? CSize(nDelta, 0) : CSize(0, nDelta);
+			bResult = OnScrollBy(szScroll, TRUE);
+			if(bResult)
+				UpdateWindow();
 		}
 	}
 
-	return TRUE;
+	return bResult;
 }
 
 
 BOOL CModScrollView::OnMouseWheel(UINT fFlags, short zDelta, CPoint point)
 {
-	// we don't handle anything but scrolling just now
-	if (fFlags & (MK_SHIFT | MK_CONTROL)) return FALSE;
+	MPT_UNREFERENCED_PARAMETER(point);
 
-	//if the parent is a splitter, it will handle the message
-	//if (GetParentSplitter(this, TRUE)) return FALSE;
+	// we don't handle anything but scrolling
+	if(fFlags & (MK_SHIFT | MK_CONTROL))
+		return FALSE;
 
-	// we can't get out of it--perform the scroll ourselves
-	const int yPosOld = GetScrollPos(SB_VERT);
-	return DoMouseWheel(fFlags, zDelta, point) && DoFractionalMouseWheel(zDelta, yPosOld);
+	return DoPreciseMouseWheel(zDelta, TRUE);
 }
 
 
 void CModScrollView::OnMouseHWheel(UINT fFlags, short zDelta, CPoint point)
 {
-	// we don't handle anything but scrolling just now
-	if (fFlags & (MK_SHIFT | MK_CONTROL))
-	{
-		CScrollView::OnMouseHWheel(fFlags, zDelta, point);
-		return;
-	}
+	MPT_UNREFERENCED_PARAMETER(point);
 
-	if (OnScrollBy(CSize(zDelta * m_lineDev.cx / WHEEL_DELTA, 0), TRUE))
-		UpdateWindow();
+	// we don't handle anything but scrolling
+	if(fFlags & (MK_SHIFT | MK_CONTROL))
+		return;
+
+	DoPreciseMouseWheel(zDelta, FALSE);
 }
 
 
