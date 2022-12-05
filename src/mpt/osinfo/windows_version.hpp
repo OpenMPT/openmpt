@@ -111,6 +111,12 @@ public:
 		return Version();
 	}
 
+	static constexpr Version AnyWindows() noexcept {
+		Version result = Version();
+		result.m_SystemIsWindows = true;
+		return result;
+	}
+
 	constexpr Version(mpt::osinfo::windows::Version::System system, mpt::osinfo::windows::Version::ServicePack servicePack, mpt::osinfo::windows::Version::Build build, mpt::osinfo::windows::Version::TypeId type) noexcept
 		: m_SystemIsWindows(true)
 		, m_System(system)

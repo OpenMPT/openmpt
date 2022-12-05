@@ -214,6 +214,7 @@ static UpdateInfo GetBestDownload(const Update::versions &versions)
 	
 	UpdateInfo result;
 	VersionWithRevision bestVersion = VersionWithRevision::Current();
+	mpt::osinfo::windows::Version bestRequiredWindowsVersion = mpt::osinfo::windows::Version::AnyWindows();
 
 	for(const auto & [versionname, versioninfo] : versions)
 	{
@@ -275,11 +276,14 @@ static UpdateInfo GetBestDownload(const Update::versions &versions)
 				}
 			}
 
-			if(mpt::OS::Windows::Version::Current().IsBefore(
+			const mpt::osinfo::windows::Version download_required_windows_version = mpt::osinfo::windows::Version(
 					mpt::osinfo::windows::Version::System(mpt::saturate_cast<uint32>(download.required_windows_version->version_major), mpt::saturate_cast<uint32>(download.required_windows_version->version_minor)),
 					mpt::osinfo::windows::Version::ServicePack(mpt::saturate_cast<uint16>(download.required_windows_version->servicepack_major), mpt::saturate_cast<uint16>(download.required_windows_version->servicepack_minor)),
-					mpt::osinfo::windows::Version::Build(mpt::saturate_cast<uint32>(download.required_windows_version->build))
-				))
+					mpt::osinfo::windows::Version::Build(mpt::saturate_cast<uint32>(download.required_windows_version->build)),
+					0
+				);
+
+			if(mpt::OS::Windows::Version::Current().IsBefore(download_required_windows_version))
 			{
 				download_supported = false;
 			}
@@ -295,12 +299,21 @@ static UpdateInfo GetBestDownload(const Update::versions &versions)
 			if(download_supported)
 			{
 				is_supported = true;
+				bool downloadtype_supported = false;
 				if(theApp.IsInstallerMode() && download.type == U_("installer"))
 				{
-					bestDownloadName = downloadname;
+					downloadtype_supported = true;
 				} else if(theApp.IsPortableMode() && download.type == U_("archive"))
 				{
-					bestDownloadName = downloadname;
+					downloadtype_supported = true;
+				}
+				if(downloadtype_supported)
+				{
+					if(download_required_windows_version.IsAtLeast(bestRequiredWindowsVersion))
+					{
+						bestRequiredWindowsVersion = download_required_windows_version;
+						bestDownloadName = downloadname;
+					}
 				}
 			}
 
