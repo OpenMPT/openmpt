@@ -2,7 +2,9 @@
  * View_tre.cpp
  * ------------
  * Purpose: Tree view for managing open songs, sound files, file browser, ...
- * Notes  : (currently none)
+ * Notes  : There are two instances of this class, one for the upper half and one for the lower half of the tree view.
+ *          The lower half is referred to the sample browser in the code, i.e. IsSampleBrowser() returns true for code
+ *          running in the lower half.
  * Authors: Olivier Lapicque
  *          OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
@@ -617,7 +619,6 @@ void CModTree::RefreshDlsBanks()
 		{
 			if(!m_tiDLS[iDls])
 			{
-				TVSORTCB tvs;
 				CDLSBank dlsBank = *CTrackApp::gpDLSBanks[iDls];
 				// Add DLS file folder
 				m_tiDLS[iDls] = InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM,
@@ -627,11 +628,11 @@ void CModTree::RefreshDlsBanks()
 				// Add Drum Kits folder
 				HTREEITEM hDrums = InsertItem(TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE | TVIF_PARAM,
 						_T("Drum Kits"), IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, DLS_DRUM_FOLDER_LPARAM, m_tiDLS[iDls], TVI_LAST);
-				// Add Instruments
-				UINT nInstr = dlsBank.GetNumInstruments();
-				MPT_ASSERT(nInstr <= 0x10000);
-				for(UINT iIns = 0; iIns < nInstr; iIns++)
+				// Add Instruments (done backwards to improve performance as per https://devblogs.microsoft.com/oldnewthing/20111125-00/?p=9033)
+				MPT_ASSERT(dlsBank.GetNumInstruments() <= 0x10000);
+				for(auto iIns = dlsBank.GetNumInstruments(); iIns > 0;)
 				{
+					iIns--;
 					const DLSINSTRUMENT *pDlsIns = dlsBank.GetInstrument(iIns);
 					if(pDlsIns)
 					{
@@ -642,10 +643,11 @@ void CModTree::RefreshDlsBanks()
 						if(pDlsIns->ulBank & F_INSTRUMENT_DRUMS)
 						{
 							HTREEITEM hKit = InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM,
-								szName, IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, lParamInstr, hDrums, TVI_LAST);
+								szName, IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, lParamInstr, hDrums, TVI_FIRST);
 							MPT_ASSERT(pDlsIns->Regions.size() <= 0x8000);
-							for(uint32 iRgn = 0; iRgn < static_cast<uint32>(pDlsIns->Regions.size()); iRgn++)
+							for(auto iRgn = static_cast<uint32>(pDlsIns->Regions.size()); iRgn > 0;)
 							{
+								iRgn--;
 								if(pDlsIns->Regions[iRgn].IsDummy())
 									continue;
 
@@ -678,12 +680,8 @@ void CModTree::RefreshDlsBanks()
 								}
 								LPARAM lParam = DlsItem::ToLPARAM(static_cast<uint16>(iIns), static_cast<uint16>(iRgn), true);
 								InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM,
-										szName, IMAGE_INSTRUMENTS, IMAGE_INSTRUMENTS, 0, 0, lParam, hKit, TVI_LAST);
+										szName, IMAGE_INSTRUMENTS, IMAGE_INSTRUMENTS, 0, 0, lParam, hKit, TVI_FIRST);
 							}
-							tvs.hParent = hKit;
-							tvs.lpfnCompare = ModTreeDrumCompareProc;
-							tvs.lParam = reinterpret_cast<LPARAM>(CTrackApp::gpDLSBanks[iDls].get());
-							SortChildrenCB(&tvs);
 						} else
 						// Melodic
 						{
@@ -700,7 +698,7 @@ void CModTree::RefreshDlsBanks()
 									m_tiDLS[iDls], insertAfter);
 							}
 							InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM,
-								szName, IMAGE_INSTRUMENTS, IMAGE_INSTRUMENTS, 0, 0, lParamInstr, hbank->second, TVI_LAST);
+								szName, IMAGE_INSTRUMENTS, IMAGE_INSTRUMENTS, 0, 0, lParamInstr, hbank->second, TVI_FIRST);
 						}
 					}
 				}
@@ -2328,30 +2326,6 @@ void CModTree::MonitorInstrumentLibrary()
 		hWatchDir = INVALID_HANDLE_VALUE;
 		lastWatchDir = mpt::PathString();
 	}
-}
-
-
-int CALLBACK CModTree::ModTreeDrumCompareProc(LPARAM lParam1, LPARAM lParam2, LPARAM pDLSBank)
-{
-	lParam1 &= 0x7FFFFFFF;
-	lParam2 &= 0x7FFFFFFF;
-	// Same drum instrument?
-	if((lParam1 & 0xFFFF) == (lParam2 & 0xFFFF))
-	{
-		if(pDLSBank)
-		{
-			// Compare minimum key of these regions
-			const DLSINSTRUMENT *pDlsIns = reinterpret_cast<CDLSBank *>(pDLSBank)->GetInstrument(lParam1 & 0xFFFF);
-			uint16 region1 = static_cast<uint16>((lParam1 >> 16) & 0xFFFF);
-			uint16 region2 = static_cast<uint16>((lParam2 >> 16) & 0xFFFF);
-			if(pDlsIns && region1 < pDlsIns->Regions.size() && region2 < pDlsIns->Regions.size())
-			{
-				lParam1 = pDlsIns->Regions[region1].uKeyMin;
-				lParam2 = pDlsIns->Regions[region2].uKeyMin;
-			}
-		}
-	}
-	return static_cast<int>(lParam1 - lParam2);
 }
 
 

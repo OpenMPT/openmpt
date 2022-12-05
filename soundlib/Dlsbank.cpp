@@ -1613,6 +1613,12 @@ bool CDLSBank::Open(FileReader file)
 	// And of course this is also helpful for creating the treeview UI
 	std::sort(m_Instruments.begin(), m_Instruments.end(), [](const DLSINSTRUMENT &l, const DLSINSTRUMENT &r)
 			  { return std::tie(l.ulBank, l.ulInstrument) < std::tie(r.ulBank, r.ulInstrument); });
+	// Sort regions (for drums)
+	for(auto &instr : m_Instruments)
+	{
+		std::sort(instr.Regions.begin(), instr.Regions.end(), [](const DLSREGION &l, const DLSREGION &r)
+				  { return std::tie(l.uKeyMin, l.uKeyMax) < std::tie(r.uKeyMin, r.uKeyMax); });
+	}
 
 	return true;
 }
