@@ -34,17 +34,17 @@
 using namespace OpenMPT;
 
 #if defined( __DJGPP__ )
-#if 0
 /* Work-around <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=45977> */
 /* clang-format off */
-extern "C" int _crt0_startup_flags = 0
-	| _CRT0_FLAG_NONMOVE_SBRK          /* force interrupt compatible allocation */
-	| _CRT0_DISABLE_SBRK_ADDRESS_WRAP  /* force NT compatible allocation */
-	| _CRT0_FLAG_LOCK_MEMORY           /* lock all code and data at program startup */
-	| 0;
+extern "C" {
+	int _crt0_startup_flags = 0
+		| _CRT0_FLAG_NONMOVE_SBRK          /* force interrupt compatible allocation */
+		| _CRT0_DISABLE_SBRK_ADDRESS_WRAP  /* force NT compatible allocation */
+		| _CRT0_FLAG_LOCK_MEMORY           /* lock all code and data at program startup */
+		| 0;
+}
 /* clang-format on */
 #endif /* __DJGPP__ */
-#endif
 #if (defined(_WIN32) || defined(WIN32)) && (defined(_UNICODE) || defined(UNICODE))
 #if defined(__GNUC__) || (defined(__clang__) && !defined(_MSC_VER))
 // mingw-w64 g++ does only default to special C linkage for "main", but not for "wmain" (see <https://sourceforge.net/p/mingw-w64/wiki2/Unicode%20apps/>).
