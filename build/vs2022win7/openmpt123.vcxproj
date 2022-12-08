@@ -760,6 +760,8 @@
     <ClInclude Include="..\..\src\mpt\string\buffer.hpp" />
     <ClInclude Include="..\..\src\mpt\string\types.hpp" />
     <ClInclude Include="..\..\src\mpt\string\utility.hpp" />
+    <ClInclude Include="..\..\src\mpt\string_transcode\macros.hpp" />
+    <ClInclude Include="..\..\src\mpt\string_transcode\transcode.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\openmpt123\openmpt123.cpp" />

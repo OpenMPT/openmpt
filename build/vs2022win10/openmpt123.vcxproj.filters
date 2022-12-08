@@ -22,6 +22,9 @@
     <Filter Include="src\mpt\string">
       <UniqueIdentifier>{13002060-FFCD-1366-E861-848CD4CEEFCA}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\mpt\string_transcode">
+      <UniqueIdentifier>{F5FA629F-E11F-B21F-0A6B-97AFF6EEB03D}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\openmpt123\openmpt123.hpp">
@@ -185,6 +188,12 @@
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\string\utility.hpp">
       <Filter>src\mpt\string</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\string_transcode\macros.hpp">
+      <Filter>src\mpt\string_transcode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\string_transcode\transcode.hpp">
+      <Filter>src\mpt\string_transcode</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
