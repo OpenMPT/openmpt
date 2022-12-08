@@ -19,6 +19,15 @@
     <Filter Include="src\mpt\detect">
       <UniqueIdentifier>{7535143C-6103-0842-4A97-78683604E4A6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\mpt\io">
+      <UniqueIdentifier>{D454AB6B-C00C-EDB8-2914-C61415EB87A9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\mpt\io_file">
+      <UniqueIdentifier>{D34C5655-3FD8-C319-48E9-460EB4F31F1A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\mpt\path">
+      <UniqueIdentifier>{4984D703-35E7-66A8-DE6C-9F5ECAAE322B}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\mpt\string">
       <UniqueIdentifier>{13002060-FFCD-1366-E861-848CD4CEEFCA}</UniqueIdentifier>
     </Filter>
@@ -179,6 +188,48 @@
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\detect\nlohmann_json.hpp">
       <Filter>src\mpt\detect</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\io\base.hpp">
+      <Filter>src\mpt\io</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\io\io.hpp">
+      <Filter>src\mpt\io</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\io\io_span.hpp">
+      <Filter>src\mpt\io</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\io\io_stdstream.hpp">
+      <Filter>src\mpt\io</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\io\io_virtual_wrapper.hpp">
+      <Filter>src\mpt\io</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\io_file\fileref.hpp">
+      <Filter>src\mpt\io_file</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\io_file\fstream.hpp">
+      <Filter>src\mpt\io_file</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\io_file\inputfile.hpp">
+      <Filter>src\mpt\io_file</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\io_file\outputfile.hpp">
+      <Filter>src\mpt\io_file</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\path\basic_path.hpp">
+      <Filter>src\mpt\path</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\path\native_path.hpp">
+      <Filter>src\mpt\path</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\path\os_path.hpp">
+      <Filter>src\mpt\path</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\path\os_path_long.hpp">
+      <Filter>src\mpt\path</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\path\path.hpp">
+      <Filter>src\mpt\path</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\string\buffer.hpp">
       <Filter>src\mpt\string</Filter>

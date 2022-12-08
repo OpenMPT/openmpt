@@ -15,11 +15,41 @@
 #include "mpt/base/compiletime_warning.hpp"
 #include "mpt/base/floatingpoint.hpp"
 #include "mpt/base/math.hpp"
+#include "mpt/base/namespace.hpp"
 #include "mpt/base/preprocessor.hpp"
+#include "mpt/io_file/fstream.hpp"
+#include "mpt/path/native_path.hpp"
 #include "mpt/string/utility.hpp"
+#include "mpt/string/types.hpp"
 #include "mpt/string_transcode/transcode.hpp"
 
 #include <string>
+
+namespace mpt {
+inline namespace MPT_INLINE_NS {
+
+template <>
+struct make_string_type<mpt::native_path> {
+	using type = mpt::native_path;
+};
+
+
+template <>
+struct is_string_type<mpt::native_path> : public std::true_type { };
+
+template <>
+struct string_transcoder<mpt::native_path> {
+	using string_type = mpt::native_path;
+	static inline mpt::widestring decode( const string_type & src ) {
+		return mpt::transcode<mpt::widestring>( src.AsNative() );
+	}
+	static inline string_type encode( const mpt::widestring & src ) {
+		return mpt::native_path::FromNative( mpt::transcode<mpt::native_path::raw_path_type>( src ) );
+	}
+};
+
+} // namespace MPT_INLINE_NS
+} // namespace mpt
 
 namespace openmpt123 {
 
@@ -222,11 +252,12 @@ inline std::string get_encoder_tag() {
 	return std::string() + "openmpt123 " + OPENMPT123_VERSION_STRING + " (libopenmpt " + openmpt::string::get( "library_version" ) + ", OpenMPT " + openmpt::string::get( "core_version" ) + ")";
 }
 
-inline std::string get_extension( std::string filename ) {
-	if ( filename.find_last_of( "." ) != std::string::npos ) {
-		return filename.substr( filename.find_last_of( "." ) + 1 );
+inline mpt::native_path get_extension( mpt::native_path filename ) {
+	mpt::native_path tmp = filename.GetFilenameExtension();
+	if ( !tmp.empty() ) {
+		tmp = mpt::native_path::FromNative( tmp.AsNative().substr( 1 ) );
 	}
-	return "";
+	return tmp;
 }
 
 enum class Mode {
@@ -293,9 +324,9 @@ struct commandlineflags {
 	bool shuffle;
 	bool restart;
 	std::size_t playlist_index;
-	std::vector<std::string> filenames;
-	std::string output_filename;
-	std::string output_extension;
+	std::vector<mpt::native_path> filenames;
+	mpt::native_path output_filename;
+	mpt::native_path output_extension;
 	bool force_overwrite;
 	bool paused;
 	std::string warnings;
@@ -418,7 +449,7 @@ struct commandlineflags {
 		shuffle = false;
 		restart = false;
 		playlist_index = 0;
-		output_extension = "auto";
+		output_extension = MPT_NATIVE_PATH("auto");
 		force_overwrite = false;
 		paused = false;
 	}
@@ -433,7 +464,7 @@ struct commandlineflags {
 			throw args_error_exception();
 		}
 		for ( const auto & filename : filenames ) {
-			if ( filename == "-" ) {
+			if ( filename == MPT_NATIVE_PATH("-") ) {
 				canUI = false;
 			}
 		}
@@ -499,8 +530,8 @@ struct commandlineflags {
 		if ( samplerate < 0 ) {
 			samplerate = commandlineflags().samplerate;
 		}
-		if ( output_extension == "auto" ) {
-			output_extension = "";
+		if ( output_extension == MPT_NATIVE_PATH("auto") ) {
+			output_extension = MPT_NATIVE_PATH("");
 		}
 		if ( mode != Mode::Render && !output_extension.empty() ) {
 			throw args_error_exception();
@@ -512,7 +543,7 @@ struct commandlineflags {
 			output_extension = get_extension( output_filename );
 		}
 		if ( output_extension.empty() ) {
-			output_extension = "wav";
+			output_extension = MPT_NATIVE_PATH("wav");
 		}
 	}
 };

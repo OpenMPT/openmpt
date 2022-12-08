@@ -39,7 +39,7 @@ namespace openmpt123 {
 class flac_stream_raii : public file_audio_stream_base {
 private:
 	commandlineflags flags;
-	std::string filename;
+	mpt::native_path filename;
 	bool called_init;
 	std::vector< std::pair< std::string, std::string > > tags;
 	FLAC__StreamMetadata * flac_metadata[1];
@@ -53,7 +53,7 @@ private:
 		}
 	}
 public:
-	flac_stream_raii( const std::string & filename_, const commandlineflags & flags_, std::ostream & /*log*/ ) : flags(flags_), filename(filename_), called_init(false), encoder(0) {
+	flac_stream_raii( const mpt::native_path & filename_, const commandlineflags & flags_, std::ostream & /*log*/ ) : flags(flags_), filename(filename_), called_init(false), encoder(0) {
 		flac_metadata[0] = 0;
 		encoder = FLAC__stream_encoder_new();
 		if ( !encoder ) {
@@ -102,7 +102,11 @@ public:
 	}
 	void write( const std::vector<float*> buffers, std::size_t frames ) override {
 		if ( !called_init ) {
-			FLAC__stream_encoder_init_file( encoder, filename.c_str(), NULL, 0 );
+#if defined(WIN32)
+			FLAC__stream_encoder_init_file( encoder, mpt::transcode<std::string>( mpt::common_encoding::utf8, filename ).c_str(), NULL, 0 );
+#else
+			FLAC__stream_encoder_init_file( encoder, filename.AsNative().c_str(), NULL, 0 );
+#endif
 			called_init = true;
 		}
 		interleaved_buffer.clear();
@@ -124,7 +128,11 @@ public:
 	}
 	void write( const std::vector<std::int16_t*> buffers, std::size_t frames ) override {
 		if ( !called_init ) {
-			FLAC__stream_encoder_init_file( encoder, filename.c_str(), NULL, 0 );
+#if defined(WIN32)
+			FLAC__stream_encoder_init_file( encoder, mpt::transcode<std::string>( mpt::common_encoding::utf8, filename ).c_str(), NULL, 0 );
+#else
+			FLAC__stream_encoder_init_file( encoder, filename.AsNative().c_str(), NULL, 0 );
+#endif
 			called_init = true;
 		}
 		interleaved_buffer.clear();

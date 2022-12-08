@@ -54,7 +54,7 @@ private:
 		}
 		return ( format_info.format & SF_FORMAT_TYPEMASK ) | subformat_info.format;
 	}
-	int find_format( const std::string & extension, match_mode_enum match_mode ) {
+	int find_format( const mpt::native_path & extension, match_mode_enum match_mode ) {
 
 		if ( match_mode == match_recurse ) {
 			int result = 0;
@@ -117,7 +117,7 @@ private:
 					case match_recurse:
 						break;
 					case match_exact:
-						if ( extension == format_info.extension ) {
+						if ( mpt::transcode<std::string>( mpt::common_encoding::utf8, extension ) == format_info.extension ) {
 							if ( flags.use_float && ( subformat_info.format == SF_FORMAT_FLOAT ) ) {
 								return matched_result( format_info, subformat_info, match_mode );
 							} else if ( !flags.use_float && ( subformat_info.format == SF_FORMAT_PCM_16 ) ) {
@@ -126,7 +126,7 @@ private:
 						}
 						break;
 					case match_better:
-						if ( extension == format_info.extension ) {
+						if ( mpt::transcode<std::string>( mpt::common_encoding::utf8, extension ) == format_info.extension ) {
 							if ( flags.use_float && ( subformat_info.format == SF_FORMAT_FLOAT || subformat_info.format == SF_FORMAT_DOUBLE ) ) {
 								return matched_result( format_info, subformat_info, match_mode );
 							} else if ( !flags.use_float && ( subformat_info.format & ( subformat_info.format == SF_FORMAT_PCM_16 || subformat_info.format == SF_FORMAT_PCM_24 || subformat_info.format == SF_FORMAT_PCM_32 ) ) ) {
@@ -135,7 +135,7 @@ private:
 						}
 						break;
 					case match_any:
-						if ( extension == format_info.extension ) {
+						if ( mpt::transcode<std::string>( mpt::common_encoding::utf8, extension ) == format_info.extension ) {
 							return matched_result( format_info, subformat_info, match_mode );
 						}
 						break;
@@ -154,9 +154,9 @@ private:
 		}
 	}
 public:
-	sndfile_stream_raii( const std::string & filename, const commandlineflags & flags_, std::ostream & log_ ) : flags(flags_), log(log_), sndfile(0) {
+	sndfile_stream_raii( const mpt::native_path & filename, const commandlineflags & flags_, std::ostream & log_ ) : flags(flags_), log(log_), sndfile(0) {
 		if ( flags.verbose ) {
-			find_format( "", match_print );
+			find_format( MPT_NATIVE_PATH(""), match_print );
 			log << std::endl;
 		}
 		int format = find_format( flags.output_extension, match_recurse );
@@ -168,7 +168,11 @@ public:
 		info.samplerate = flags.samplerate;
 		info.channels = flags.channels;
 		info.format = format;
-		sndfile = sf_open( filename.c_str(), SFM_WRITE, &info );
+#if defined(WIN32) && defined(UNICODE)
+		sndfile = sf_wchar_open( filename.AsNative().c_str(), SFM_WRITE, &info );
+#else
+		sndfile = sf_open( filename.AsNative().c_str(), SFM_WRITE, &info );
+#endif
 	}
 	~sndfile_stream_raii() {
 		sf_close( sndfile );

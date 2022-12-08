@@ -39,7 +39,7 @@ private:
 		}
 	}
 public:
-	mmio_stream_raii( const std::string & filename, const commandlineflags & flags_, std::ostream & log_ ) : log(log_), flags(flags_), mmio(NULL) {
+	mmio_stream_raii( const mpt::native_path & filename, const commandlineflags & flags_, std::ostream & log_ ) : log(log_), flags(flags_), mmio(NULL) {
 
 		ZeroMemory( &waveformatex, sizeof( WAVEFORMATEX ) );
 		waveformatex.cbSize = 0;
@@ -50,13 +50,13 @@ public:
 		waveformatex.nBlockAlign = static_cast<WORD>( flags.channels * ( waveformatex.wBitsPerSample / 8 ) );
 		waveformatex.nAvgBytesPerSec = waveformatex.nSamplesPerSec * waveformatex.nBlockAlign;
 
-		#if defined(WIN32) && defined(UNICODE)
-			wchar_t * tmp = _wcsdup( mpt::transcode<std::wstring>( mpt::common_encoding::utf8, filename ).c_str() );
+		#if defined(UNICODE)
+			wchar_t * tmp = _wcsdup( filename.AsNative().c_str() );
 			mmio = mmioOpen( tmp, NULL, MMIO_ALLOCBUF | MMIO_READWRITE | MMIO_CREATE );
 			free( tmp );
 			tmp = 0;
 		#else
-			char * tmp = strdup( filename.c_str() );
+			char * tmp = strdup( filename.AsNative()c_str() );
 			mmio = mmioOpen( tmp, NULL, MMIO_ALLOCBUF | MMIO_READWRITE | MMIO_CREATE );
 			free( tmp );
 			tmp = 0;

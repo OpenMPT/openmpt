@@ -53,6 +53,7 @@ static const char * const license =
 #include <locale>
 #include <map>
 #include <memory>
+#include <optional>
 #include <random>
 #include <set>
 #include <sstream>
@@ -201,25 +202,25 @@ class file_audio_stream_raii : public file_audio_stream_base {
 private:
 	std::unique_ptr<file_audio_stream_base> impl;
 public:
-	file_audio_stream_raii( const commandlineflags & flags, const std::string & filename, std::ostream & log )
+	file_audio_stream_raii( const commandlineflags & flags, const mpt::native_path & filename, std::ostream & log )
 		: impl(nullptr)
 	{
 		if ( !flags.force_overwrite ) {
-			std::ifstream testfile( filename, std::ios::binary );
+			mpt::IO::ifstream testfile( filename, std::ios::binary );
 			if ( testfile ) {
 				throw exception( "file already exists" );
 			}
 		}
 		if ( false ) {
 			// nothing
-		} else if ( flags.output_extension == "raw" ) {
+		} else if ( flags.output_extension == MPT_NATIVE_PATH("raw") ) {
 			impl = std::make_unique<raw_stream_raii>( filename, flags, log );
 #ifdef MPT_WITH_MMIO
-		} else if ( flags.output_extension == "wav" ) {
+		} else if ( flags.output_extension == MPT_NATIVE_PATH("wav") ) {
 			impl = std::make_unique<mmio_stream_raii>( filename, flags, log );
 #endif				
 #ifdef MPT_WITH_FLAC
-		} else if ( flags.output_extension == "flac" ) {
+		} else if ( flags.output_extension == MPT_NATIVE_PATH("flac") ) {
 			impl = std::make_unique<flac_stream_raii>( filename, flags, log );
 #endif				
 #ifdef MPT_WITH_SNDFILE
@@ -228,7 +229,7 @@ public:
 #endif
 		}
 		if ( !impl ) {
-			throw exception( "file format handler '" + flags.output_extension + "' not found" );
+			throw exception( "file format handler '" + mpt::transcode<std::string>( mpt::common_encoding::utf8, flags.output_extension ) + "' not found" );
 		}
 	}
 	virtual ~file_audio_stream_raii() {
@@ -302,13 +303,13 @@ static std::ostream & operator << ( std::ostream & s, const commandlineflags & f
 	s << "Seek target: " << flags.seek_target << std::endl;
 	s << "End time: " << flags.end_time << std::endl;
 	s << "Standard output: " << flags.use_stdout << std::endl;
-	s << "Output filename: " << flags.output_filename << std::endl;
+	s << "Output filename: " << mpt::transcode<std::string>( mpt::common_encoding::utf8, flags.output_filename ) << std::endl;
 	s << "Force overwrite output file: " << flags.force_overwrite << std::endl;
 	s << "Ctls: " << ctls_to_string( flags.ctls ) << std::endl;
 	s << std::endl;
 	s << "Files: " << std::endl;
 	for ( const auto & filename : flags.filenames ) {
-		s << " " << filename << std::endl;
+		s << " " << mpt::transcode<std::string>( mpt::common_encoding::utf8, filename ) << std::endl;
 	}
 	s << std::endl;
 	return s;
@@ -318,63 +319,16 @@ static std::string trim_eol( const std::string & str ) {
 	return mpt::trim( str, std::string( "\r\n" ) );
 }
 
-static std::string default_path_separator() {
-#if defined(WIN32)
-	return "\\";
-#else
-	return "/";
-#endif
+static mpt::native_path get_basepath( mpt::native_path filename ) {
+	return (filename.GetPrefix() + filename.GetDirectoryWithDrive()).WithTrailingSlash();
 }
 
-static std::string path_separators() {
-#if defined(WIN32)
-	return "\\/";
-#else
-	return "/";
-#endif
+static bool is_absolute( mpt::native_path filename ) {
+	return filename.IsAbsolute();
 }
 
-static bool is_path_separator( char c ) {
-#if defined(WIN32)
-	return ( c == '\\' ) || ( c == '/' );
-#else
-	return c == '/';
-#endif
-}
-
-static std::string get_basepath( std::string filename ) {
-	std::string::size_type pos = filename.find_last_of( path_separators() );
-	if ( pos == std::string::npos ) {
-		return std::string();
-	}
-	return filename.substr( 0, pos ) + default_path_separator();
-}
-
-static bool is_absolute( std::string filename ) {
-#if defined(WIN32)
-	if ( mpt::starts_with( filename, "\\\\?\\UNC\\" ) ) {
-		return true;
-	}
-	if ( mpt::starts_with( filename, "\\\\?\\" ) ) {
-		return true;
-	}
-	if ( mpt::starts_with( filename, "\\\\" ) ) {
-		return true; // UNC
-	}
-	if ( mpt::starts_with( filename, "//" ) ) {
-		return true; // UNC
-	}
-	return ( filename.length() ) >= 3 && ( filename[1] == ':' ) && is_path_separator( filename[2] );
-#else
-	return ( filename.length() >= 1 ) && is_path_separator( filename[0] );
-#endif
-}
-
-static std::string get_filename( const std::string & filepath ) {
-	if ( filepath.find_last_of( path_separators() ) == std::string::npos ) {
-		return filepath;
-	}
-	return filepath.substr( filepath.find_last_of( path_separators() ) + 1 );
+static mpt::native_path get_filename( const mpt::native_path & filepath ) {
+	return filepath.GetFilename();
 }
 
 static std::string prepend_lines( std::string str, const std::string & prefix ) {
@@ -652,8 +606,8 @@ static void show_help( textout & log, bool with_info = true, bool longhelp = fal
 		log << "     --buffer n             Set output buffer size to n ms [default: " << commandlineflags().buffer << "]" << std::endl;
 		log << "     --period n             Set output period size to n ms [default: " << commandlineflags().period  << "]" << std::endl;
 		log << "     --stdout               Write raw audio data to stdout [default: " << commandlineflags().use_stdout << "]" << std::endl;
-		log << "     --output-type t        Use output format t when writing to a individual PCM files (only applies to --render mode) [default: " << commandlineflags().output_extension << "]" << std::endl;
-		log << " -o, --output f             Write PCM output to file f instead of streaming to audio device (only applies to --ui and --batch modes) [default: " << commandlineflags().output_filename << "]" << std::endl;
+		log << "     --output-type t        Use output format t when writing to a individual PCM files (only applies to --render mode) [default: " << mpt::transcode<std::string>( mpt::common_encoding::utf8, commandlineflags().output_extension ) << "]" << std::endl;
+		log << " -o, --output f             Write PCM output to file f instead of streaming to audio device (only applies to --ui and --batch modes) [default: " << mpt::transcode<std::string>( mpt::common_encoding::utf8, commandlineflags().output_filename ) << "]" << std::endl;
 		log << "     --force                Force overwriting of output file [default: " << commandlineflags().force_overwrite << "]" << std::endl;
 		log << std::endl;
 		log << "     --                     Interpret further arguments as filenames" << std::endl;
@@ -1387,7 +1341,7 @@ static void show_fields( textout & log, const std::vector<field> & fields ) {
 	}
 }
 
-static void probe_mod_file( commandlineflags & flags, const std::string & filename, std::uint64_t filesize, std::istream & data_stream, textout & log ) {
+static void probe_mod_file( commandlineflags & flags, const mpt::native_path & filename, std::uint64_t filesize, std::istream & data_stream, textout & log ) {
 
 	log.writeout();
 
@@ -1397,21 +1351,21 @@ static void probe_mod_file( commandlineflags & flags, const std::string & filena
 		set_field( fields, "Playlist" ).ostream() << flags.playlist_index + 1 << "/" << flags.filenames.size();
 		set_field( fields, "Prev/Next" ).ostream()
 		    << "'"
-		    << ( flags.playlist_index > 0 ? get_filename( flags.filenames[ flags.playlist_index - 1 ] ) : std::string() )
+		    << ( flags.playlist_index > 0 ? mpt::transcode<std::string>( mpt::common_encoding::utf8, get_filename( flags.filenames[ flags.playlist_index - 1 ] ) ) : std::string() )
 		    << "'"
 		    << " / "
-		    << "['" << get_filename( filename ) << "']"
+		    << "['" << mpt::transcode<std::string>( mpt::common_encoding::utf8, get_filename( filename ) ) << "']"
 		    << " / "
 		    << "'"
-		    << ( flags.playlist_index + 1 < flags.filenames.size() ? get_filename( flags.filenames[ flags.playlist_index + 1 ] ) : std::string() )
+		    << ( flags.playlist_index + 1 < flags.filenames.size() ? mpt::transcode<std::string>( mpt::common_encoding::utf8, get_filename( flags.filenames[ flags.playlist_index + 1 ] ) ) : std::string() )
 		    << "'"
 		   ;
 	}
 	if ( flags.verbose ) {
-		set_field( fields, "Path" ).ostream() << filename;
+		set_field( fields, "Path" ).ostream() << mpt::transcode<std::string>( mpt::common_encoding::utf8, filename );
 	}
 	if ( flags.show_details ) {
-		set_field( fields, "Filename" ).ostream() << get_filename( filename );
+		set_field( fields, "Filename" ).ostream() << mpt::transcode<std::string>( mpt::common_encoding::utf8, get_filename( filename ) );
 		set_field( fields, "Size" ).ostream() << bytes_to_string( filesize );
 	}
 	
@@ -1440,7 +1394,7 @@ static void probe_mod_file( commandlineflags & flags, const std::string & filena
 }
 
 template < typename Tmod >
-void render_mod_file( commandlineflags & flags, const std::string & filename, std::uint64_t filesize, Tmod & mod, textout & log, write_buffers_interface & audio_stream ) {
+void render_mod_file( commandlineflags & flags, const mpt::native_path & filename, std::uint64_t filesize, Tmod & mod, textout & log, write_buffers_interface & audio_stream ) {
 
 	log.writeout();
 
@@ -1457,21 +1411,21 @@ void render_mod_file( commandlineflags & flags, const std::string & filename, st
 		set_field( fields, "Playlist" ).ostream() << flags.playlist_index + 1 << "/" << flags.filenames.size();
 		set_field( fields, "Prev/Next" ).ostream()
 		    << "'"
-		    << ( flags.playlist_index > 0 ? get_filename( flags.filenames[ flags.playlist_index - 1 ] ) : std::string() )
+		    << ( flags.playlist_index > 0 ? mpt::transcode<std::string>( mpt::common_encoding::utf8, get_filename( flags.filenames[ flags.playlist_index - 1 ] ) ) : std::string() )
 		    << "'"
 		    << " / "
-		    << "['" << get_filename( filename ) << "']"
+		    << "['" << mpt::transcode<std::string>( mpt::common_encoding::utf8, get_filename( filename ) ) << "']"
 		    << " / "
 		    << "'"
-		    << ( flags.playlist_index + 1 < flags.filenames.size() ? get_filename( flags.filenames[ flags.playlist_index + 1 ] ) : std::string() )
+		    << ( flags.playlist_index + 1 < flags.filenames.size() ? mpt::transcode<std::string>( mpt::common_encoding::utf8, get_filename( flags.filenames[ flags.playlist_index + 1 ] ) ) : std::string() )
 		    << "'"
 		   ;
 	}
 	if ( flags.verbose ) {
-		set_field( fields, "Path" ).ostream() << filename;
+		set_field( fields, "Path" ).ostream() << mpt::transcode<std::string>( mpt::common_encoding::utf8, filename );
 	}
 	if ( flags.show_details ) {
-		set_field( fields, "Filename" ).ostream() << get_filename( filename );
+		set_field( fields, "Filename" ).ostream() << mpt::transcode<std::string>( mpt::common_encoding::utf8, get_filename( filename ) );
 		set_field( fields, "Size" ).ostream() << bytes_to_string( filesize );
 		if ( !mod.get_metadata( "warnings" ).empty() ) {
 			set_field( fields, "Warnings" ).ostream() << mod.get_metadata( "warnings" );
@@ -1548,7 +1502,7 @@ void render_mod_file( commandlineflags & flags, const std::string & filename, st
 
 }
 
-static void probe_file( commandlineflags & flags, const std::string & filename, textout & log ) {
+static void probe_file( commandlineflags & flags, const mpt::native_path & filename, textout & log ) {
 
 	log.writeout();
 
@@ -1556,44 +1510,17 @@ static void probe_file( commandlineflags & flags, const std::string & filename, 
 
 	try {
 
-#if defined(WIN32) && defined(UNICODE) && !defined(_MSC_VER)
-		std::istringstream file_stream;
-#else
-		std::ifstream file_stream;
-#endif
+		std::optional<mpt::IO::ifstream> optional_file_stream;
 		std::uint64_t filesize = 0;
-		bool use_stdin = ( filename == "-" );
+		bool use_stdin = ( filename == MPT_NATIVE_PATH("-") );
 		if ( !use_stdin ) {
-			#if defined(WIN32) && defined(UNICODE) && !defined(_MSC_VER)
-				// Only MSVC has std::ifstream::ifstream(std::wstring).
-				// Fake it for other compilers using _wfopen().
-				std::string data;
-				FILE * f = _wfopen( mpt::transcode<std::wstring>( mpt::common_encoding::utf8, filename ).c_str(), L"rb" );
-				if ( f ) {
-					while ( !feof( f ) ) {
-						static const std::size_t BUFFER_SIZE = 4096;
-						char buffer[BUFFER_SIZE];
-						size_t data_read = fread( buffer, 1, BUFFER_SIZE, f );
-						std::copy( buffer, buffer + data_read, std::back_inserter( data ) );
-					}
-					fclose( f );
-					f = NULL;
-				}
-				file_stream.str( data );
-				filesize = data.length();
-			#elif defined(_MSC_VER) && defined(UNICODE)
-				file_stream.open( mpt::transcode<std::wstring>( mpt::common_encoding::utf8, filename ), std::ios::binary );
-				file_stream.seekg( 0, std::ios::end );
-				filesize = file_stream.tellg();
-				file_stream.seekg( 0, std::ios::beg );
-			#else
-				file_stream.open( filename, std::ios::binary );
-				file_stream.seekg( 0, std::ios::end );
-				filesize = file_stream.tellg();
-				file_stream.seekg( 0, std::ios::beg );
-			#endif
+			optional_file_stream.emplace( filename, std::ios::binary );
+			std::istream & file_stream = *optional_file_stream;
+			file_stream.seekg( 0, std::ios::end );
+			filesize = file_stream.tellg();
+			file_stream.seekg( 0, std::ios::beg );
 		}
-		std::istream & data_stream = use_stdin ? std::cin : file_stream;
+		std::istream & data_stream = use_stdin ? std::cin : *optional_file_stream;
 		if ( data_stream.fail() ) {
 			throw exception( "file open error" );
 		}
@@ -1604,18 +1531,18 @@ static void probe_file( commandlineflags & flags, const std::string & filename, 
 		throw;
 	} catch ( std::exception & e ) {
 		if ( !silentlog.str().empty() ) {
-			log << "errors probing '" << filename << "': " << silentlog.str() << std::endl;
+			log << "errors probing '" << mpt::transcode<std::string>( mpt::common_encoding::utf8, filename ) << "': " << silentlog.str() << std::endl;
 		} else {
-			log << "errors probing '" << filename << "'" << std::endl;
+			log << "errors probing '" << mpt::transcode<std::string>( mpt::common_encoding::utf8, filename ) << "'" << std::endl;
 		}
-		log << "error probing '" << filename << "': " << e.what() << std::endl;
+		log << "error probing '" << mpt::transcode<std::string>( mpt::common_encoding::utf8, filename ) << "': " << e.what() << std::endl;
 	} catch ( ... ) {
 		if ( !silentlog.str().empty() ) {
-			log << "errors probing '" << filename << "': " << silentlog.str() << std::endl;
+			log << "errors probing '" << mpt::transcode<std::string>( mpt::common_encoding::utf8, filename ) << "': " << silentlog.str() << std::endl;
 		} else {
-			log << "errors probing '" << filename << "'" << std::endl;
+			log << "errors probing '" << mpt::transcode<std::string>( mpt::common_encoding::utf8, filename ) << "'" << std::endl;
 		}
-		log << "unknown error probing '" << filename << "'" << std::endl;
+		log << "unknown error probing '" << mpt::transcode<std::string>( mpt::common_encoding::utf8, filename ) << "'" << std::endl;
 	}
 
 	log << std::endl;
@@ -1624,7 +1551,7 @@ static void probe_file( commandlineflags & flags, const std::string & filename, 
 
 }
 
-static void render_file( commandlineflags & flags, const std::string & filename, textout & log, write_buffers_interface & audio_stream ) {
+static void render_file( commandlineflags & flags, const mpt::native_path & filename, textout & log, write_buffers_interface & audio_stream ) {
 
 	log.writeout();
 
@@ -1632,44 +1559,17 @@ static void render_file( commandlineflags & flags, const std::string & filename,
 
 	try {
 
-#if defined(WIN32) && defined(UNICODE) && !defined(_MSC_VER)
-		std::istringstream file_stream;
-#else
-		std::ifstream file_stream;
-#endif
+		std::optional<mpt::IO::ifstream> optional_file_stream;
 		std::uint64_t filesize = 0;
-		bool use_stdin = ( filename == "-" );
+		bool use_stdin = ( filename == MPT_NATIVE_PATH("-") );
 		if ( !use_stdin ) {
-			#if defined(WIN32) && defined(UNICODE) && !defined(_MSC_VER)
-				// Only MSVC has std::ifstream::ifstream(std::wstring).
-				// Fake it for other compilers using _wfopen().
-				std::string data;
-				FILE * f = _wfopen( mpt::transcode<std::wstring>( mpt::common_encoding::utf8, filename ).c_str(), L"rb" );
-				if ( f ) {
-					while ( !feof( f ) ) {
-						static const std::size_t BUFFER_SIZE = 4096;
-						char buffer[BUFFER_SIZE];
-						size_t data_read = fread( buffer, 1, BUFFER_SIZE, f );
-						std::copy( buffer, buffer + data_read, std::back_inserter( data ) );
-					}
-					fclose( f );
-					f = NULL;
-				}
-				file_stream.str( data );
-				filesize = data.length();
-			#elif defined(_MSC_VER) && defined(UNICODE)
-				file_stream.open( mpt::transcode<std::wstring>( mpt::common_encoding::utf8, filename ), std::ios::binary );
-				file_stream.seekg( 0, std::ios::end );
-				filesize = file_stream.tellg();
-				file_stream.seekg( 0, std::ios::beg );
-			#else
-				file_stream.open( filename, std::ios::binary );
-				file_stream.seekg( 0, std::ios::end );
-				filesize = file_stream.tellg();
-				file_stream.seekg( 0, std::ios::beg );
-			#endif
+			optional_file_stream.emplace( filename, std::ios::binary );
+			std::istream & file_stream = *optional_file_stream;
+			file_stream.seekg( 0, std::ios::end );
+			filesize = file_stream.tellg();
+			file_stream.seekg( 0, std::ios::beg );
 		}
-		std::istream & data_stream = use_stdin ? std::cin : file_stream;
+		std::istream & data_stream = use_stdin ? std::cin : *optional_file_stream;
 		if ( data_stream.fail() ) {
 			throw exception( "file open error" );
 		}
@@ -1689,18 +1589,18 @@ static void render_file( commandlineflags & flags, const std::string & filename,
 		throw;
 	} catch ( std::exception & e ) {
 		if ( !silentlog.str().empty() ) {
-			log << "errors loading '" << filename << "': " << silentlog.str() << std::endl;
+			log << "errors loading '" << mpt::transcode<std::string>( mpt::common_encoding::utf8, filename ) << "': " << silentlog.str() << std::endl;
 		} else {
-			log << "errors loading '" << filename << "'" << std::endl;
+			log << "errors loading '" << mpt::transcode<std::string>( mpt::common_encoding::utf8, filename ) << "'" << std::endl;
 		}
-		log << "error playing '" << filename << "': " << e.what() << std::endl;
+		log << "error playing '" << mpt::transcode<std::string>( mpt::common_encoding::utf8, filename ) << "': " << e.what() << std::endl;
 	} catch ( ... ) {
 		if ( !silentlog.str().empty() ) {
-			log << "errors loading '" << filename << "': " << silentlog.str() << std::endl;
+			log << "errors loading '" << mpt::transcode<std::string>( mpt::common_encoding::utf8, filename ) << "': " << silentlog.str() << std::endl;
 		} else {
-			log << "errors loading '" << filename << "'" << std::endl;
+			log << "errors loading '" << mpt::transcode<std::string>( mpt::common_encoding::utf8, filename ) << "'" << std::endl;
 		}
-		log << "unknown error playing '" << filename << "'" << std::endl;
+		log << "unknown error playing '" << mpt::transcode<std::string>( mpt::common_encoding::utf8, filename ) << "'" << std::endl;
 	}
 
 	log << std::endl;
@@ -1710,9 +1610,9 @@ static void render_file( commandlineflags & flags, const std::string & filename,
 }
 
 
-static std::string get_random_filename( std::set<std::string> & filenames, std::default_random_engine & prng ) {
+static mpt::native_path get_random_filename( std::set<mpt::native_path> & filenames, std::default_random_engine & prng ) {
 	std::size_t index = std::uniform_int_distribution<std::size_t>( 0, filenames.size() - 1 )( prng );
-	std::set<std::string>::iterator it = filenames.begin();
+	std::set<mpt::native_path>::iterator it = filenames.begin();
 	std::advance( it, index );
 	return *it;
 }
@@ -1726,13 +1626,13 @@ static void render_files( commandlineflags & flags, textout & log, write_buffers
 		while ( true ) {
 			if ( flags.shuffle ) {
 				// TODO: improve prev/next logic
-				std::set<std::string> shuffle_set;
+				std::set<mpt::native_path> shuffle_set;
 				shuffle_set.insert( flags.filenames.begin(), flags.filenames.end() );
 				while ( true ) {
 					if ( shuffle_set.empty() ) {
 						break;
 					}
-					std::string filename = get_random_filename( shuffle_set, prng );
+					mpt::native_path filename = get_random_filename( shuffle_set, prng );
 					try {
 						flags.playlist_index = std::find( flags.filenames.begin(), flags.filenames.end(), filename ) - flags.filenames.begin();
 						render_file( flags, filename, log, audio_stream );
@@ -1749,7 +1649,7 @@ static void render_files( commandlineflags & flags, textout & log, write_buffers
 					}
 				}
 			} else {
-				std::vector<std::string>::iterator filename = flags.filenames.begin();
+				std::vector<mpt::native_path>::iterator filename = flags.filenames.begin();
 				while ( true ) {
 					if ( filename == flags.filenames.end() ) {
 						break;
@@ -1786,54 +1686,29 @@ static void render_files( commandlineflags & flags, textout & log, write_buffers
 }
 
 
-static bool parse_playlist( commandlineflags & flags, std::string filename, std::ostream & log ) {
+static bool parse_playlist( commandlineflags & flags, mpt::native_path filename, std::ostream & log ) {
 	log.flush();
 	bool is_playlist = false;
 	bool m3u8 = false;
-	if ( mpt::ends_with( filename, ".m3u" ) || mpt::ends_with( filename, ".m3U" ) || mpt::ends_with( filename, ".M3u" ) || mpt::ends_with( filename, ".M3U" ) ) {
+	if ( get_extension( filename ) == MPT_NATIVE_PATH("m3u") || get_extension( filename ) == MPT_NATIVE_PATH("m3U") || get_extension( filename ) == MPT_NATIVE_PATH("M3u") || get_extension( filename ) == MPT_NATIVE_PATH("M3U") ) {
 		is_playlist = true;
 	}
-	if (mpt::ends_with( filename, ".m3u8" ) || mpt::ends_with( filename, ".m3U8" ) || mpt::ends_with( filename, ".M3u8" ) || mpt::ends_with( filename, ".M3U8" ) ) {
+	if ( get_extension( filename ) == MPT_NATIVE_PATH("m3u8") || get_extension( filename ) == MPT_NATIVE_PATH("m3U8") || get_extension( filename ) == MPT_NATIVE_PATH("M3u8") || get_extension( filename ) == MPT_NATIVE_PATH("M3U8") ) {
 		is_playlist = true;
 		m3u8 = true;
 	}
-	if (mpt::ends_with( filename, ".pls" ) || mpt::ends_with( filename, ".plS" ) || mpt::ends_with( filename, ".pLs" ) || mpt::ends_with( filename, ".pLS" ) || mpt::ends_with( filename, ".Pls" )  || mpt::ends_with( filename, ".PlS" )  || mpt::ends_with( filename, ".PLs" )  || mpt::ends_with( filename, ".PLS" ) ) {
+	if ( get_extension( filename ) == MPT_NATIVE_PATH("pls") || get_extension( filename ) == MPT_NATIVE_PATH("plS") || get_extension( filename ) == MPT_NATIVE_PATH("pLs") || get_extension( filename ) == MPT_NATIVE_PATH("pLS") || get_extension( filename ) == MPT_NATIVE_PATH("Pls") || get_extension( filename ) == MPT_NATIVE_PATH("PlS")  || get_extension( filename ) == MPT_NATIVE_PATH("PLs") || get_extension( filename ) == MPT_NATIVE_PATH("PLS") ) {
 		is_playlist = true;
 	}
-	std::string basepath = get_basepath( filename );
+	mpt::native_path basepath = get_basepath( filename );
 	try {
-#if defined(WIN32) && defined(UNICODE) && !defined(_MSC_VER)
-		std::istringstream file_stream;
-#else
-		std::ifstream file_stream;
-#endif
-		#if defined(WIN32) && defined(UNICODE) && !defined(_MSC_VER)
-			// Only MSVC has std::ifstream::ifstream(std::wstring).
-			// Fake it for other compilers using _wfopen().
-			std::string data;
-			FILE * f = _wfopen( mpt::transcode<std::wstring>( mpt::common_encoding::utf8, filename ).c_str(), L"rb" );
-			if ( f ) {
-				while ( !feof( f ) ) {
-					static const std::size_t BUFFER_SIZE = 4096;
-					char buffer[BUFFER_SIZE];
-					size_t data_read = fread( buffer, 1, BUFFER_SIZE, f );
-					std::copy( buffer, buffer + data_read, std::back_inserter( data ) );
-				}
-				fclose( f );
-				f = NULL;
-			}
-			file_stream.str( data );
-		#elif defined(_MSC_VER) && defined(UNICODE)
-			file_stream.open( mpt::transcode<std::wstring>( mpt::common_encoding::utf8, filename ), std::ios::binary );
-		#else
-			file_stream.open( filename, std::ios::binary );
-		#endif
+		mpt::IO::ifstream file_stream( filename, std::ios::binary );
 		std::string line;
 		bool first = true;
 		bool extm3u = false;
 		bool pls = false;
 		while ( std::getline( file_stream, line ) ) {
-			std::string newfile;
+			mpt::native_path newfile;
 			line = trim_eol( line );
 			if ( first ) {
 				first = false;
@@ -1850,7 +1725,7 @@ static bool parse_playlist( commandlineflags & flags, std::string filename, std:
 			if ( pls ) {
 				if ( mpt::starts_with( line, "File" ) ) {
 					if ( line.find( "=" ) != std::string::npos ) {
-						flags.filenames.push_back( line.substr( line.find( "=" ) + 1 ) );
+						flags.filenames.push_back( mpt::transcode<mpt::native_path>( mpt::common_encoding::utf8, line.substr( line.find( "=" ) + 1 ) ) );
 					}
 				} else if ( mpt::starts_with( line, "Title" ) ) {
 					continue;
@@ -1870,22 +1745,22 @@ static bool parse_playlist( commandlineflags & flags, std::string filename, std:
 					continue;
 				}
 				if ( m3u8 ) {
-					newfile = line;
+					newfile = mpt::transcode<mpt::native_path>( mpt::common_encoding::utf8, line );
 				} else {
 #if defined(WIN32)
-					newfile = mpt::transcode<std::string>( mpt::common_encoding::utf8, mpt::logical_encoding::locale, line );
+					newfile = mpt::transcode<mpt::native_path>( mpt::logical_encoding::locale, line );
 #else
-					newfile = line;
+					newfile = mpt::transcode<mpt::native_path>( mpt::common_encoding::utf8, line );
 #endif
 				}
 			} else {
 				if ( m3u8 ) {
-					newfile = line;
+					newfile = mpt::transcode<mpt::native_path>( mpt::common_encoding::utf8, line );
 				} else {
 #if defined(WIN32)
-					newfile = mpt::transcode<std::string>( mpt::common_encoding::utf8, mpt::logical_encoding::locale, line );
+					newfile = mpt::transcode<mpt::native_path>( mpt::logical_encoding::locale, line );
 #else
-					newfile = line;
+					newfile = mpt::transcode<mpt::native_path>( mpt::common_encoding::utf8, line );
 #endif
 				}
 			}
@@ -1897,9 +1772,9 @@ static bool parse_playlist( commandlineflags & flags, std::string filename, std:
 			}
 		}
 	} catch ( std::exception & e ) {
-		log << "error loading '" << filename << "': " << e.what() << std::endl;
+		log << "error loading '" << mpt::transcode<std::string>( mpt::common_encoding::utf8, filename ) << "': " << e.what() << std::endl;
 	} catch ( ... ) {
-		log << "unknown error loading '" << filename << "'" << std::endl;
+		log << "unknown error loading '" << mpt::transcode<std::string>( mpt::common_encoding::utf8, filename ) << "'" << std::endl;
 	}
 	log.flush();
 	return is_playlist;
@@ -1927,9 +1802,9 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args,
 		std::string arg = *i;
 		std::string nextarg = ( i+1 != args.end() ) ? *(i+1) : "";
 		if ( files_only ) {
-			flags.filenames.push_back( arg );
+			flags.filenames.push_back( mpt::transcode<mpt::native_path>( mpt::common_encoding::utf8, arg ) );
 		} else if ( arg.substr( 0, 1 ) != "-" ) {
-			flags.filenames.push_back( arg );
+			flags.filenames.push_back( mpt::transcode<mpt::native_path>( mpt::common_encoding::utf8, arg ) );
 		} else {
 			if ( arg == "--" ) {
 				files_only = true;
@@ -2070,12 +1945,12 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args,
 			} else if ( arg == "--stdout" ) {
 				flags.use_stdout = true;
 			} else if ( ( arg == "-o" || arg == "--output" ) && nextarg != "" ) {
-				flags.output_filename = nextarg;
+				flags.output_filename = mpt::transcode<mpt::native_path>( mpt::common_encoding::utf8, nextarg );
 				++i;
 			} else if ( arg == "--force" ) {
 				flags.force_overwrite = true;
 			} else if ( arg == "--output-type" && nextarg != "" ) {
-				flags.output_extension = nextarg;
+				flags.output_extension = mpt::transcode<mpt::native_path>( mpt::common_encoding::utf8, nextarg );
 				++i;
 			} else if ( arg == "--samplerate" && nextarg != "" ) {
 				std::istringstream istr( nextarg );
@@ -2124,7 +1999,7 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args,
 				istr >> flags.dither;
 				++i;
 			} else if ( arg == "--playlist" && nextarg != "" ) {
-				parse_playlist( flags, nextarg, log );
+				parse_playlist( flags, mpt::transcode<mpt::native_path>( mpt::common_encoding::utf8, nextarg ), log );
 				++i;
 			} else if ( arg == "--randomize" ) {
 				flags.randomize = true;
@@ -2265,7 +2140,9 @@ static int main( int argc, char * argv [] ) {
 			args.push_back( mpt::transcode<std::string>( mpt::common_encoding::utf8, wargv[arg] ) );
 		}
 	#else
-		args = std::vector<std::string>( argv, argv + argc );
+		for ( int arg = 0; arg < argc; ++arg ) {
+			args.push_back( mpt::transcode<std::string>( mpt::common_encoding::utf8, mpt::logical_encoding::locale, argv[arg] ) );
+		}
 	#endif
 
 #if defined(WIN32)
@@ -2344,7 +2221,7 @@ static int main( int argc, char * argv [] ) {
 
 		bool stdin_can_ui = true;
 		for ( const auto & filename : flags.filenames ) {
-			if ( filename == "-" ) {
+			if ( filename == MPT_NATIVE_PATH("-") ) {
 				stdin_can_ui = false;
 				break;
 			}
@@ -2456,7 +2333,7 @@ static int main( int argc, char * argv [] ) {
 			case Mode::Render: {
 				for ( const auto & filename : flags.filenames ) {
 					flags.apply_default_buffer_sizes();
-					file_audio_stream_raii file_audio_stream( flags, filename + std::string(".") + flags.output_extension, log );
+					file_audio_stream_raii file_audio_stream( flags, filename + MPT_NATIVE_PATH(".") + flags.output_extension, log );
 					render_file( flags, filename, log, file_audio_stream );
 					flags.playlist_index++;
 				}
