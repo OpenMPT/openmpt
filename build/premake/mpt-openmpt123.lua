@@ -29,6 +29,7 @@
    "../../src/mpt/base/*.hpp",
    "../../src/mpt/detect/*.hpp",
    "../../src/mpt/string/*.hpp",
+   "../../src/mpt/string_transcode/*.hpp",
    "../../openmpt123/*.cpp",
    "../../openmpt123/*.hpp",
   }
