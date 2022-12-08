@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: BSL-1.0 OR BSD-3-Clause */
 
-#ifndef MPT_IO_FILE_INPUTFILE_FILECURSOR_HPP
-#define MPT_IO_FILE_INPUTFILE_FILECURSOR_HPP
+#ifndef MPT_IO_FILE_READ_INPUTFILE_FILECURSOR_HPP
+#define MPT_IO_FILE_READ_INPUTFILE_FILECURSOR_HPP
 
 
 
@@ -77,4 +77,4 @@ inline FileCursor<FileCursorTraitsFileData, FileCursorFilenameTraits<Tpath>> mak
 
 
 
-#endif // MPT_IO_FILE_INPUTFILE_FILECURSOR_HPP
+#endif // MPT_IO_FILE_READ_INPUTFILE_FILECURSOR_HPP

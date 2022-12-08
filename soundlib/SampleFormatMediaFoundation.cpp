@@ -23,7 +23,7 @@
 #include "../soundlib/ModSampleCopy.h"
 #include "../common/ComponentManager.h"
 #if defined(MPT_WITH_MEDIAFOUNDATION)
-#include "mpt/io_file/fileadapter.hpp"
+#include "mpt/io_file_adapter/fileadapter.hpp"
 #include "../common/FileReader.h"
 #include "../common/mptFileTemporary.h"
 #include <windows.h>

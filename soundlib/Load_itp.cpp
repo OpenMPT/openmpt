@@ -23,7 +23,7 @@
 #endif // MODPLUG_TRACKER
 #ifdef MPT_EXTERNAL_SAMPLES
 #include "mpt/io_file/inputfile.hpp"
-#include "mpt/io_file/inputfile_filecursor.hpp"
+#include "mpt/io_file_read/inputfile_filecursor.hpp"
 #include "../common/mptFileIO.h"
 #endif // MPT_EXTERNAL_SAMPLES
 

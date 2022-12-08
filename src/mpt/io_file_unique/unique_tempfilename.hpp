@@ -1,13 +1,13 @@
 /* SPDX-License-Identifier: BSL-1.0 OR BSD-3-Clause */
 
-#ifndef MPT_IO_FILE_UNIQUE_TEMPFILENAME_HPP
-#define MPT_IO_FILE_UNIQUE_TEMPFILENAME_HPP
+#ifndef MPT_IO_FILE_UNIQUE_UNIQUE_TEMPFILENAME_HPP
+#define MPT_IO_FILE_UNIQUE_UNIQUE_TEMPFILENAME_HPP
 
 
 
 #include "mpt/base/detect.hpp"
 #include "mpt/base/namespace.hpp"
-#include "mpt/io_file/unique_basename.hpp"
+#include "mpt/io_file_unique/unique_basename.hpp"
 #include "mpt/fs/common_directories.hpp"
 #include "mpt/fs/fs.hpp"
 #include "mpt/path/native_path.hpp"
@@ -53,4 +53,4 @@ public:
 
 
 
-#endif // MPT_IO_FILE_UNIQUE_TEMPFILENAME_HPP
+#endif // MPT_IO_FILE_UNIQUE_UNIQUE_TEMPFILENAME_HPP

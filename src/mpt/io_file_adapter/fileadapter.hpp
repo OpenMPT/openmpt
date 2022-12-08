@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: BSL-1.0 OR BSD-3-Clause */
 
-#ifndef MPT_IO_FILE_FILEADAPTER_HPP
-#define MPT_IO_FILE_FILEADAPTER_HPP
+#ifndef MPT_IO_FILE_ADAPTER_FILEADAPTER_HPP
+#define MPT_IO_FILE_ADAPTER_FILEADAPTER_HPP
 
 
 
@@ -14,8 +14,8 @@
 #include "mpt/io/io_stdstream.hpp"
 #include "mpt/io_file/fstream.hpp"
 #endif // !MPT_OS_WINDOWS
-#include "mpt/io_file/unique_basename.hpp"
-#include "mpt/io_file/unique_tempfilename.hpp"
+#include "mpt/io_file_unique/unique_basename.hpp"
+#include "mpt/io_file_unique/unique_tempfilename.hpp"
 #if MPT_OS_WINDOWS
 #include "mpt/path/os_path.hpp"
 #endif // MPT_OS_WINDOWS
@@ -179,4 +179,4 @@ public:
 
 
 
-#endif // MPT_IO_FILE_FILEADAPTER_HPP
+#endif // MPT_IO_FILE_ADAPTER_FILEADAPTER_HPP

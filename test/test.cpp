@@ -69,8 +69,8 @@
 #endif // MODPLUG_TRACKER
 #include "mpt/io_file/fileref.hpp"
 #include "mpt/io_file/inputfile.hpp"
-#include "mpt/io_file/inputfile_filecursor.hpp"
 #include "mpt/io_file/outputfile.hpp"
+#include "mpt/io_file_read/inputfile_filecursor.hpp"
 #include "../common/mptFileIO.h"
 #ifdef MODPLUG_TRACKER
 #include "mpt/crypto/hash.hpp"

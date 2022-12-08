@@ -13,8 +13,8 @@
 #if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
 #include "mpt/fs/common_directories.hpp"
 #include "mpt/fs/fs.hpp"
-#include "mpt/io_file/unique_basename.hpp"
-#include "mpt/io_file/unique_tempfilename.hpp"
+#include "mpt/io_file_unique/unique_basename.hpp"
+#include "mpt/io_file_unique/unique_tempfilename.hpp"
 #endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
 #include "mpt/string_transcode/transcode.hpp"
 #include "mpt/uuid/uuid.hpp"
