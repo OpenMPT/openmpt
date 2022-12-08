@@ -56,7 +56,7 @@ public:
 			free( tmp );
 			tmp = 0;
 		#else
-			char * tmp = strdup( filename.AsNative()c_str() );
+			char * tmp = strdup( filename.AsNative().c_str() );
 			mmio = mmioOpen( tmp, NULL, MMIO_ALLOCBUF | MMIO_READWRITE | MMIO_CREATE );
 			free( tmp );
 			tmp = 0;
