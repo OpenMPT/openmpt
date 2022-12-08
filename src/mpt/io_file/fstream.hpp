@@ -11,7 +11,6 @@
 #include "mpt/io/base.hpp"
 #include "mpt/io/io.hpp"
 #include "mpt/io/io_stdstream.hpp"
-#include "mpt/io_file/fstream.hpp"
 #include "mpt/path/os_path.hpp"
 #include "mpt/path/os_path_long.hpp"
 #include "mpt/string_transcode/transcode.hpp"
