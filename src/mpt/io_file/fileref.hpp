@@ -7,6 +7,7 @@
 
 #include "mpt/base/memory.hpp"
 #include "mpt/base/namespace.hpp"
+#include "mpt/base/saturate_cast.hpp"
 #include "mpt/base/span.hpp"
 #include "mpt/io/base.hpp"
 #include "mpt/io/io.hpp"
