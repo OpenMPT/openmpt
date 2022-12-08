@@ -267,20 +267,12 @@ static double pitch_flag_to_double( std::int32_t pitch ) {
 	return std::pow( 2.0, pitch / 24.0 );
 }
 
-static double my_round( double val ) {
-	if ( val >= 0.0 ) {
-		return std::floor( val + 0.5 );
-	} else {
-		return std::ceil( val - 0.5 );
-	}
-}
-
 static std::int32_t double_to_tempo_flag( double factor ) {
-	return static_cast<std::int32_t>( my_round( std::log( factor ) / std::log( 2.0 ) * 24.0 ) );
+	return static_cast<std::int32_t>( mpt::round( std::log( factor ) / std::log( 2.0 ) * 24.0 ) );
 }
 
 static std::int32_t double_to_pitch_flag( double factor ) {
-	return static_cast<std::int32_t>( my_round( std::log( factor ) / std::log( 2.0 ) * 24.0 ) );
+	return static_cast<std::int32_t>( mpt::round( std::log( factor ) / std::log( 2.0 ) * 24.0 ) );
 }
 
 static std::ostream & operator << ( std::ostream & s, const commandlineflags & flags ) {
@@ -322,49 +314,8 @@ static std::ostream & operator << ( std::ostream & s, const commandlineflags & f
 	return s;
 }
 
-static std::string replace( std::string str, const std::string & oldstr, const std::string & newstr ) {
-	std::size_t pos = 0;
-	while ( ( pos = str.find( oldstr, pos ) ) != std::string::npos ) {
-		str.replace( pos, oldstr.length(), newstr );
-		pos += newstr.length();
-	}
-	return str;
-}
-
-static bool begins_with( const std::string & str, const std::string & match ) {
-	return ( str.find( match ) == 0 );
-}
-
-static bool ends_with( const std::string & str, const std::string & match ) {
-	return ( str.rfind( match ) == ( str.length() - match.length() ) );
-}
-
-static std::string trim_left(std::string str, const std::string &whitespace = std::string()) {
-	std::string::size_type pos = str.find_first_not_of(whitespace);
-	if(pos != std::string::npos) {
-		str.erase(str.begin(), str.begin() + pos);
-	} else if(pos == std::string::npos && str.length() > 0 && str.find_last_of(whitespace) == str.length() - 1) {
-		return std::string();
-	}
-	return str;
-}
-
-static std::string trim_right(std::string str, const std::string &whitespace = std::string()) {
-	std::string::size_type pos = str.find_last_not_of(whitespace);
-	if(pos != std::string::npos) {
-		str.erase(str.begin() + pos + 1, str.end());
-	} else if(pos == std::string::npos && str.length() > 0 && str.find_first_of(whitespace) == 0) {
-		return std::string();
-	}
-	return str;
-}
-
-static std::string trim(std::string str, const std::string &whitespace = std::string()) {
-	return trim_right(trim_left(str, whitespace), whitespace);
-}
-
 static std::string trim_eol( const std::string & str ) {
-	return trim( str, "\r\n" );
+	return mpt::trim( str, std::string( "\r\n" ) );
 }
 
 static std::string default_path_separator() {
@@ -401,16 +352,16 @@ static std::string get_basepath( std::string filename ) {
 
 static bool is_absolute( std::string filename ) {
 #if defined(WIN32)
-	if ( begins_with( filename, "\\\\?\\UNC\\" ) ) {
+	if ( mpt::starts_with( filename, "\\\\?\\UNC\\" ) ) {
 		return true;
 	}
-	if ( begins_with( filename, "\\\\?\\" ) ) {
+	if ( mpt::starts_with( filename, "\\\\?\\" ) ) {
 		return true;
 	}
-	if ( begins_with( filename, "\\\\" ) ) {
+	if ( mpt::starts_with( filename, "\\\\" ) ) {
 		return true; // UNC
 	}
-	if ( begins_with( filename, "//" ) ) {
+	if ( mpt::starts_with( filename, "//" ) ) {
 		return true; // UNC
 	}
 	return ( filename.length() ) >= 3 && ( filename[1] == ':' ) && is_path_separator( filename[2] );
@@ -433,7 +384,7 @@ static std::string prepend_lines( std::string str, const std::string & prefix ) 
 	if ( str.substr( str.length() - 1, 1 ) == std::string("\n") ) {
 		str = str.substr( 0, str.length() - 1 );
 	}
-	return replace( str, std::string("\n"), std::string("\n") + prefix );
+	return mpt::replace( str, std::string("\n"), std::string("\n") + prefix );
 }
 
 static std::string bytes_to_string( std::uint64_t bytes ) {
@@ -1839,14 +1790,14 @@ static bool parse_playlist( commandlineflags & flags, std::string filename, std:
 	log.flush();
 	bool is_playlist = false;
 	bool m3u8 = false;
-	if ( ends_with( filename, ".m3u") || ends_with( filename, ".m3U") || ends_with( filename, ".M3u") || ends_with( filename, ".M3U") ) {
+	if ( mpt::ends_with( filename, ".m3u" ) || mpt::ends_with( filename, ".m3U" ) || mpt::ends_with( filename, ".M3u" ) || mpt::ends_with( filename, ".M3U" ) ) {
 		is_playlist = true;
 	}
-	if ( ends_with( filename, ".m3u8") || ends_with( filename, ".m3U8") || ends_with( filename, ".M3u8") || ends_with( filename, ".M3U8") ) {
+	if (mpt::ends_with( filename, ".m3u8" ) || mpt::ends_with( filename, ".m3U8" ) || mpt::ends_with( filename, ".M3u8" ) || mpt::ends_with( filename, ".M3U8" ) ) {
 		is_playlist = true;
 		m3u8 = true;
 	}
-	if ( ends_with( filename, ".pls") || ends_with( filename, ".plS") || ends_with( filename, ".pLs") || ends_with( filename, ".pLS") || ends_with( filename, ".Pls")  || ends_with( filename, ".PlS")  || ends_with( filename, ".PLs")  || ends_with( filename, ".PLS") ) {
+	if (mpt::ends_with( filename, ".pls" ) || mpt::ends_with( filename, ".plS" ) || mpt::ends_with( filename, ".pLs" ) || mpt::ends_with( filename, ".pLS" ) || mpt::ends_with( filename, ".Pls" )  || mpt::ends_with( filename, ".PlS" )  || mpt::ends_with( filename, ".PLs" )  || mpt::ends_with( filename, ".PLS" ) ) {
 		is_playlist = true;
 	}
 	std::string basepath = get_basepath( filename );
@@ -1897,25 +1848,25 @@ static bool parse_playlist( commandlineflags & flags, std::string filename, std:
 				continue;
 			}
 			if ( pls ) {
-				if ( begins_with( line, "File" ) ) {
+				if ( mpt::starts_with( line, "File" ) ) {
 					if ( line.find( "=" ) != std::string::npos ) {
 						flags.filenames.push_back( line.substr( line.find( "=" ) + 1 ) );
 					}
-				} else if ( begins_with( line, "Title" ) ) {
+				} else if ( mpt::starts_with( line, "Title" ) ) {
 					continue;
-				} else if ( begins_with( line, "Length" ) ) {
+				} else if ( mpt::starts_with( line, "Length" ) ) {
 					continue;
-				} else if ( begins_with( line, "NumberOfEntries" ) ) {
+				} else if ( mpt::starts_with( line, "NumberOfEntries" ) ) {
 					continue;
-				} else if ( begins_with( line, "Version" ) ) {
+				} else if ( mpt::starts_with( line, "Version" ) ) {
 					continue;
 				} else {
 					continue;
 				}
 			} else if ( extm3u ) {
-				if ( begins_with( line, "#EXTINF" ) ) {
+				if ( mpt::starts_with( line, "#EXTINF" ) ) {
 					continue;
-				} else if ( begins_with( line, "#" ) ) {
+				} else if ( mpt::starts_with( line, "#" ) ) {
 					continue;
 				}
 				if ( m3u8 ) {

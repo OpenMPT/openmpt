@@ -14,7 +14,9 @@
 
 #include "mpt/base/compiletime_warning.hpp"
 #include "mpt/base/floatingpoint.hpp"
+#include "mpt/base/math.hpp"
 #include "mpt/base/preprocessor.hpp"
+#include "mpt/string/utility.hpp"
 #include "mpt/string_transcode/transcode.hpp"
 
 #include <string>
