@@ -172,7 +172,7 @@ public:
 		return do_format(mpt::as_span(vals));
 	}
 
-}; // struct message_formatter<Tformat>
+}; // class message_formatter<Tformat>
 
 
 template <typename Tformatter, std::ptrdiff_t N, typename Tchar, typename Tstring>
