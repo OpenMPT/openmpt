@@ -76,7 +76,7 @@ inline constexpr auto stdio_encoding = logical_encoding::locale;
 inline constexpr auto environment_encoding = logical_encoding::locale;
 
 // std::exception::what()
-inline constexpr auto exception_encoding = logical_encoding::active_locale;
+inline constexpr auto exception_encoding = logical_encoding::locale;
 
 
 
@@ -216,6 +216,7 @@ using lstring = std::basic_string<char, mpt::logical_encoding_char_traits<logica
 using utf8string = std::basic_string<char, mpt::common_encoding_char_traits<common_encoding::utf8>>;
 
 using source_string = std::basic_string<char, mpt::common_encoding_char_traits<source_encoding>>;
+
 using exception_string = std::basic_string<char, mpt::logical_encoding_char_traits<exception_encoding>>;
 
 #if MPT_OS_WINDOWS
