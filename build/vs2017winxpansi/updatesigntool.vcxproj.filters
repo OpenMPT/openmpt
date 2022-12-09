@@ -504,6 +504,9 @@
     <ClInclude Include="..\..\src\mpt\exception_text\exception_text.hpp">
       <Filter>src\mpt\exception_text</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\mpt\format\concat.hpp">
+      <Filter>src\mpt\format</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\mpt\format\default_floatingpoint.hpp">
       <Filter>src\mpt\format</Filter>
     </ClInclude>

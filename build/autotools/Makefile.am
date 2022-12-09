@@ -175,6 +175,7 @@ MPT_FILES_SRC_MPT += src/mpt/endian/integer.hpp
 MPT_FILES_SRC_MPT += src/mpt/endian/type_traits.hpp
 MPT_FILES_SRC_MPT += src/mpt/environment/environment.hpp
 MPT_FILES_SRC_MPT += src/mpt/exception_text/exception_text.hpp
+MPT_FILES_SRC_MPT += src/mpt/format/concat.hpp
 MPT_FILES_SRC_MPT += src/mpt/format/default_floatingpoint.hpp
 MPT_FILES_SRC_MPT += src/mpt/format/default_formatter.hpp
 MPT_FILES_SRC_MPT += src/mpt/format/default_integer.hpp

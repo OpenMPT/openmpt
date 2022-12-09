@@ -365,6 +365,7 @@
 		66CA3B04BE2FADF6703DC944 /* mptBaseMacros.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = mptBaseMacros.h; path = ../../common/mptBaseMacros.h; sourceTree = "<group>"; };
 		681E06B9AC6CAC2BEE93E4F9 /* Message.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Message.cpp; path = ../../soundlib/Message.cpp; sourceTree = "<group>"; };
 		6858F8CA2EE6F03C9CE9170A /* LFOPlugin.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = LFOPlugin.h; path = ../../soundlib/plugins/LFOPlugin.h; sourceTree = "<group>"; };
+		68FC5709D624657BD7B75549 /* concat.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = concat.hpp; path = ../../src/mpt/format/concat.hpp; sourceTree = "<group>"; };
 		694D3F69FBDB095B64B3ADA9 /* Load_wav.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Load_wav.cpp; path = ../../soundlib/Load_wav.cpp; sourceTree = "<group>"; };
 		6A572747FCE4F13965BD9587 /* Load_itp.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Load_itp.cpp; path = ../../soundlib/Load_itp.cpp; sourceTree = "<group>"; };
 		6A66E753FCF4B14565CD5593 /* Load_dbm.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Load_dbm.cpp; path = ../../soundlib/Load_dbm.cpp; sourceTree = "<group>"; };
@@ -801,6 +802,7 @@
 		4ECA2D3165DCC86355F8C371 /* format */ = {
 			isa = PBXGroup;
 			children = (
+				68FC5709D624657BD7B75549 /* concat.hpp */,
 				80F9D5FD1722E7EFD889443D /* default_floatingpoint.hpp */,
 				E047D7E9F1FF17DB676D0629 /* default_formatter.hpp */,
 				7159D71DCB5AEE0F92A1E55D /* default_integer.hpp */,

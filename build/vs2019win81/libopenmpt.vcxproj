@@ -827,6 +827,7 @@
     <ClInclude Include="..\..\src\mpt\endian\type_traits.hpp" />
     <ClInclude Include="..\..\src\mpt\environment\environment.hpp" />
     <ClInclude Include="..\..\src\mpt\exception_text\exception_text.hpp" />
+    <ClInclude Include="..\..\src\mpt\format\concat.hpp" />
     <ClInclude Include="..\..\src\mpt\format\default_floatingpoint.hpp" />
     <ClInclude Include="..\..\src\mpt\format\default_formatter.hpp" />
     <ClInclude Include="..\..\src\mpt\format\default_integer.hpp" />
