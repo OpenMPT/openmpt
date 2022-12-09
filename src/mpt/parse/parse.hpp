@@ -155,7 +155,7 @@ inline T locale_parse_or(const std::locale & loc, const Tstring & str, T def) {
 
 
 template <typename T, typename Tstring>
-inline T locale_parse(const std::locale & loc, const std:: const Tstring & str) {
+inline T locale_parse(const std::locale & loc, const Tstring & str) {
 	return mpt::parse_or<T>(loc, str, T{});
 }
 
