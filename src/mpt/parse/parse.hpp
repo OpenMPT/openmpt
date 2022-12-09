@@ -47,28 +47,65 @@ inline std::string parse_as_internal_string_type(const Tstring & s) {
 
 
 template <typename T, typename Tstring>
-inline T ConvertStringTo(const Tstring & str) {
+inline bool parse_into(T & dst, const Tstring & str) {
 	std::basic_istringstream<typename decltype(mpt::parse_as_internal_string_type(mpt::as_string(str)))::value_type> stream(mpt::parse_as_internal_string_type(mpt::as_string(str)));
 	stream.imbue(std::locale::classic());
-	T value;
 	if constexpr (std::is_same<T, signed char>::value) {
 		signed int tmp;
 		if (!(stream >> tmp)) {
-			return T{};
+			return false;
+		}
+		dst = static_cast<T>(tmp);
+	} else if constexpr (std::is_same<T, unsigned char>::value) {
+		unsigned int tmp;
+		if (!(stream >> tmp)) {
+			return false;
+		}
+		dst = static_cast<T>(tmp);
+	} else {
+		if (!(stream >> dst)) {
+			return false;
+		}
+	}
+	return true;
+}
+
+
+template <typename T, typename Tstring>
+inline T parse_or(const Tstring & str, T def) {
+	std::basic_istringstream<typename decltype(mpt::parse_as_internal_string_type(mpt::as_string(str)))::value_type> stream(mpt::parse_as_internal_string_type(mpt::as_string(str)));
+	stream.imbue(std::locale::classic());
+	T value = def;
+	if constexpr (std::is_same<T, signed char>::value) {
+		signed int tmp;
+		if (!(stream >> tmp)) {
+			return def;
 		}
 		value = static_cast<T>(tmp);
 	} else if constexpr (std::is_same<T, unsigned char>::value) {
 		unsigned int tmp;
 		if (!(stream >> tmp)) {
-			return T{};
+			return def;
 		}
 		value = static_cast<T>(tmp);
 	} else {
 		if (!(stream >> value)) {
-			return T{};
+			return def;
 		}
 	}
 	return value;
+}
+
+
+template <typename T, typename Tstring>
+inline T parse(const Tstring & str) {
+	return mpt::parse_or<T>(str, T{});
+}
+
+
+template <typename T, typename Tstring>
+inline T ConvertStringTo(const Tstring & str) {
+	return mpt::parse<T>(str);
 }
 
 
