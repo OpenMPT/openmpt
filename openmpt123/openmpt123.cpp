@@ -1841,12 +1841,10 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args,
 			} else if ( arg == "--render" ) {
 				flags.mode = Mode::Render;
 			} else if ( arg == "--terminal-width" && nextarg != "" ) {
-				std::istringstream istr( nextarg );
-				istr >> flags.terminal_width;
+				mpt::parse_into( flags.terminal_width, nextarg );
 				++i;
 			} else if ( arg == "--terminal-height" && nextarg != "" ) {
-				std::istringstream istr( nextarg );
-				istr >> flags.terminal_height;
+				mpt::parse_into( flags.terminal_height, nextarg );
 				++i;
 			} else if ( arg == "--progress" ) {
 				flags.show_progress = true;
@@ -1931,16 +1929,13 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args,
 				}
 				++i;
 			} else if ( arg == "--buffer" && nextarg != "" ) {
-				std::istringstream istr( nextarg );
-				istr >> flags.buffer;
+				mpt::parse_into( flags.buffer, nextarg );
 				++i;
 			} else if ( arg == "--period" && nextarg != "" ) {
-				std::istringstream istr( nextarg );
-				istr >> flags.period;
+				mpt::parse_into( flags.period, nextarg );
 				++i;
 			} else if ( arg == "--update" && nextarg != "" ) {
-				std::istringstream istr( nextarg );
-				istr >> flags.ui_redraw_interval;
+				mpt::parse_into( flags.ui_redraw_interval, nextarg );
 				++i;
 			} else if ( arg == "--stdout" ) {
 				flags.use_stdout = true;
@@ -1953,50 +1948,37 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args,
 				flags.output_extension = mpt::transcode<mpt::native_path>( mpt::common_encoding::utf8, nextarg );
 				++i;
 			} else if ( arg == "--samplerate" && nextarg != "" ) {
-				std::istringstream istr( nextarg );
-				istr >> flags.samplerate;
+				mpt::parse_into( flags.samplerate, nextarg );
 				++i;
 			} else if ( arg == "--channels" && nextarg != "" ) {
-				std::istringstream istr( nextarg );
-				istr >> flags.channels;
+				mpt::parse_into( flags.channels, nextarg );
 				++i;
 			} else if ( arg == "--float" ) {
 				flags.use_float = true;
 			} else if ( arg == "--no-float" ) {
 				flags.use_float = false;
 			} else if ( arg == "--gain" && nextarg != "" ) {
-				std::istringstream istr( nextarg );
 				double gain = 0.0;
-				istr >> gain;
-				flags.gain = static_cast<std::int32_t>( gain * 100.0 );
+				mpt::parse_into( gain, nextarg );
+				flags.gain = mpt::saturate_round<std::int32_t>( gain * 100.0 );
 				++i;
 			} else if ( arg == "--stereo" && nextarg != "" ) {
-				std::istringstream istr( nextarg );
-				istr >> flags.separation;
+				mpt::parse_into( flags.separation, nextarg );
 				++i;
 			} else if ( arg == "--filter" && nextarg != "" ) {
-				std::istringstream istr( nextarg );
-				istr >> flags.filtertaps;
+				mpt::parse_into( flags.filtertaps, nextarg );
 				++i;
 			} else if ( arg == "--ramping" && nextarg != "" ) {
-				std::istringstream istr( nextarg );
-				istr >> flags.ramping;
+				mpt::parse_into( flags.ramping, nextarg );
 				++i;
 			} else if ( arg == "--tempo" && nextarg != "" ) {
-				std::istringstream istr( nextarg );
-				double tmp = 1.0;
-				istr >> tmp;
-				flags.tempo = double_to_tempo_flag( tmp );
+				flags.tempo = double_to_tempo_flag( mpt::parse_or<double>( nextarg, 1.0 ) );
 				++i;
 			} else if ( arg == "--pitch" && nextarg != "" ) {
-				std::istringstream istr( nextarg );
-				double tmp = 1.0;
-				istr >> tmp;
-				flags.pitch = double_to_pitch_flag( tmp );
+				flags.pitch = double_to_pitch_flag( mpt::parse_or<double>( nextarg, 1.0 ) );
 				++i;
 			} else if ( arg == "--dither" && nextarg != "" ) {
-				std::istringstream istr( nextarg );
-				istr >> flags.dither;
+				mpt::parse_into( flags.dither, nextarg );
 				++i;
 			} else if ( arg == "--playlist" && nextarg != "" ) {
 				parse_playlist( flags, mpt::transcode<mpt::native_path>( mpt::common_encoding::utf8, nextarg ), log );
@@ -2014,17 +1996,13 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args,
 			} else if ( arg == "--no-restart" ) {
 				flags.restart = false;
 			} else if ( arg == "--subsong" && nextarg != "" ) {
-				std::istringstream istr( nextarg );
-				istr >> flags.subsong;
+				mpt::parse_into( flags.subsong, nextarg );
 				++i;
 			} else if ( arg == "--repeat" && nextarg != "" ) {
-				std::istringstream istr( nextarg );
-				istr >> flags.repeatcount;
+				mpt::parse_into( flags.repeatcount, nextarg );
 				++i;
 			} else if ( arg == "--ctl" && nextarg != "" ) {
-				std::istringstream istr( nextarg );
-				std::string ctl_c_v;
-				istr >> ctl_c_v;
+				std::string ctl_c_v = nextarg;
 				if ( ctl_c_v.find( "=" ) == std::string::npos ) {
 					throw args_error_exception();
 				}
@@ -2036,12 +2014,10 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args,
 				flags.ctls[ ctl ] = val;
 				++i;
 			} else if ( arg == "--seek" && nextarg != "" ) {
-				std::istringstream istr( nextarg );
-				istr >> flags.seek_target;
+				mpt::parse_into( flags.seek_target, nextarg );
 				++i;
 			} else if ( arg == "--end-time" && nextarg != "" ) {
-				std::istringstream istr( nextarg );
-				istr >> flags.end_time;
+				mpt::parse_into( flags.end_time, nextarg );
 				++i;
 			} else if ( arg.size() > 0 && arg.substr( 0, 1 ) == "-" ) {
 				throw args_error_exception();

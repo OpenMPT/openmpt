@@ -104,9 +104,7 @@ public:
 	{
 		PaStreamParameters streamparameters;
 		std::memset( &streamparameters, 0, sizeof(PaStreamParameters) );
-		std::istringstream device_string( flags.device );
-		int device = -1;
-		device_string >> device;
+		const int device = mpt::parse_or<int>( flags.device, -1 );
 		streamparameters.device = ( device == -1 ) ? Pa_GetDefaultOutputDevice() : device;
 		streamparameters.channelCount = flags.channels;
 		streamparameters.sampleFormat = ( flags.use_float ? paFloat32 : paInt16 ) | paNonInterleaved;

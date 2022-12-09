@@ -17,7 +17,9 @@
 #include "mpt/base/math.hpp"
 #include "mpt/base/namespace.hpp"
 #include "mpt/base/preprocessor.hpp"
+#include "mpt/base/saturate_round.hpp"
 #include "mpt/io_file/fstream.hpp"
+#include "mpt/parse/parse.hpp"
 #include "mpt/path/native_path.hpp"
 #include "mpt/string/utility.hpp"
 #include "mpt/string/types.hpp"
@@ -399,18 +401,14 @@ struct commandlineflags {
 		if ( isatty( STDERR_FILENO ) ) {
 			const char * env_columns = std::getenv( "COLUMNS" );
 			if ( env_columns ) {
-				std::istringstream istr( env_columns );
-				int tmp = 0;
-				istr >> tmp;
+				int tmp = mpt::parse_or<int>( env_columns, 0 );
 				if ( tmp > 0 ) {
 					terminal_width = tmp;
 				}
 			}
 			const char * env_rows = std::getenv( "ROWS" );
 			if ( env_rows ) {
-				std::istringstream istr( env_rows );
-				int tmp = 0;
-				istr >> tmp;
+				int tmp = mpt::parse_or<int>( env_rows, 0 );
 				if ( tmp > 0 ) {
 					terminal_height = tmp;
 				}

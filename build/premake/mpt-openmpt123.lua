@@ -27,6 +27,7 @@
    "../../src/mpt/detect/*.hpp",
    "../../src/mpt/io/*.hpp",
    "../../src/mpt/io_file/*.hpp",
+   "../../src/mpt/parse/*.hpp",
    "../../src/mpt/path/*.hpp",
    "../../src/mpt/string/*.hpp",
    "../../src/mpt/string_transcode/*.hpp",
