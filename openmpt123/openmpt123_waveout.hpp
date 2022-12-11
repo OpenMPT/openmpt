@@ -175,9 +175,9 @@ public:
 	}
 };
 
-static std::string show_waveout_devices( std::ostream & /*log*/ ) {
-	std::ostringstream devices;
-	devices << " waveout:" << std::endl;
+static std::string show_waveout_devices( concat_stream<std::string> & /*log*/ ) {
+	string_concat_stream<std::string> devices;
+	devices << " waveout:" << lf;
 	for ( UINT i = 0; i < waveOutGetNumDevs(); ++i ) {
 		devices << "    " << i << ": ";
 		WAVEOUTCAPS caps;
@@ -188,7 +188,7 @@ static std::string show_waveout_devices( std::ostream & /*log*/ ) {
 		#else
 			devices << mpt::transcode<std::string>( mpt::common_encoding::utf8, mpt::logical_encoding::locale, caps.szPname );
 		#endif
-		devices << std::endl;
+		devices << lf;
 	}
 	return devices.str();
 }

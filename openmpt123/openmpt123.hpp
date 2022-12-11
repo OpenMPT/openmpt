@@ -18,11 +18,15 @@
 #include "mpt/base/namespace.hpp"
 #include "mpt/base/preprocessor.hpp"
 #include "mpt/base/saturate_round.hpp"
+#include "mpt/format/concat.hpp"
+#include "mpt/format/message.hpp"
+#include "mpt/format/message_macros.hpp"
+#include "mpt/format/simple.hpp"
 #include "mpt/io_file/fstream.hpp"
 #include "mpt/parse/parse.hpp"
 #include "mpt/path/native_path.hpp"
-#include "mpt/string/utility.hpp"
 #include "mpt/string/types.hpp"
+#include "mpt/string/utility.hpp"
 #include "mpt/string_transcode/transcode.hpp"
 
 #include <string>
@@ -71,24 +75,72 @@ struct args_error_exception {
 
 struct show_help_keyboard_exception { };
 
+
+template <typename Tstring, typename Tchar, typename T>
+inline Tstring align_right( const Tchar pad, std::size_t width, const T val ) {
+	assert( Tstring( 1, pad ).length() == 1 );
+	Tstring str = mpt::default_formatter::template format<Tstring>( val );
+	if ( width > str.length() ) {
+		str.insert( str.begin(), width - str.length(), pad );
+	}
+	return str;
+}
+
+template <typename Tstring>
+struct concat_stream {
+	virtual concat_stream & append( Tstring str ) = 0;
+	virtual void flush() = 0;
+	inline concat_stream<Tstring> & operator<<( concat_stream<Tstring> & (*func)( concat_stream<Tstring> & s ) ) {
+		return func( *this );
+	}
+};
+
+template <typename Tstring>
+inline concat_stream<Tstring> & lf( concat_stream<Tstring> & s ) {
+	return s.append( Tstring(1, mpt::char_constants<typename Tstring::value_type>::lf) );
+}
+
+template <typename T, typename Tstring>
+inline concat_stream<Tstring> & operator<<( concat_stream<Tstring> & s, const T & val ) {
+	return s.append( mpt::default_formatter::template format<Tstring>( val ) );
+}
+
+template <typename Tstring>
+struct string_concat_stream
+	: public concat_stream<Tstring>
+{
+private:
+	Tstring m_str;
+public:
+	inline void str( Tstring s ) {
+		m_str = std::move( s );
+	}
+	inline concat_stream<Tstring> & append( Tstring s ) override {
+		m_str += std::move( s );
+		return *this;
+	}
+	inline void flush() override {
+		return;
+	}
+	inline Tstring str() const {
+		return m_str;
+	}
+};
+
+
+struct field {
+	std::string key;
+	std::string val;
+};
+
+
 #if defined(WIN32)
 bool IsConsole( DWORD stdHandle );
 #endif
 bool IsTerminal( int fd );
 
 
-
-struct field {
-	std::string key;
-	std::string val;
-	field( const std::string & key )
-		: key(key)
-	{
-		return;
-	}
-};
-
-class textout : public std::ostringstream {
+class textout : public string_concat_stream<std::string> {
 public:
 	textout() {
 		return;

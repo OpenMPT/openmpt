@@ -22,7 +22,7 @@ namespace openmpt123 {
 class sndfile_stream_raii : public file_audio_stream_base {
 private:
 	commandlineflags flags;
-	std::ostream & log;
+	concat_stream<std::string> & log;
 	SNDFILE * sndfile;
 	std::vector<float> interleaved_float_buffer;
 	std::vector<std::int16_t> interleaved_int_buffer;
@@ -50,7 +50,7 @@ private:
 			    << format_info.name << " (" << format_info.extension << ")" << " / " << subformat_info.name
 			    << "', "
 			    << "match: " << match_mode_to_string( match_mode )
-			    << std::endl;
+			    << lf;
 		}
 		return ( format_info.format & SF_FORMAT_TYPEMASK ) | subformat_info.format;
 	}
@@ -108,11 +108,11 @@ private:
 						    << " / "
 						    << ( subformat_info.name ? subformat_info.name : "" )
 						    << " ["
-						    << std::setbase(16) << std::setw(8) << std::setfill('0') << format_info.format
+						    << mpt::format<std::string>::hex0<8>( format_info.format )
 						    << "|"
-						    << std::setbase(16) << std::setw(8) << std::setfill('0') << subformat_info.format
+						    << mpt::format<std::string>::hex0<8>( subformat_info.format )
 						    << "]"
-						    << std::endl;
+						    << lf;
 						break;
 					case match_recurse:
 						break;
@@ -154,10 +154,10 @@ private:
 		}
 	}
 public:
-	sndfile_stream_raii( const mpt::native_path & filename, const commandlineflags & flags_, std::ostream & log_ ) : flags(flags_), log(log_), sndfile(0) {
+	sndfile_stream_raii( const mpt::native_path & filename, const commandlineflags & flags_, concat_stream<std::string> & log_ ) : flags(flags_), log(log_), sndfile(0) {
 		if ( flags.verbose ) {
 			find_format( MPT_NATIVE_PATH(""), match_print );
-			log << std::endl;
+			log << lf;
 		}
 		int format = find_format( flags.output_extension, match_recurse );
 		if ( !format ) {

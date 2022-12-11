@@ -25,6 +25,7 @@
   files {
    "../../src/mpt/base/*.hpp",
    "../../src/mpt/detect/*.hpp",
+   "../../src/mpt/format/*.hpp",
    "../../src/mpt/io/*.hpp",
    "../../src/mpt/io_file/*.hpp",
    "../../src/mpt/parse/*.hpp",

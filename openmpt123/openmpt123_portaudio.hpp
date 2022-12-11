@@ -30,10 +30,10 @@ extern "C" void PaUtil_SetDebugPrintFunction(PaUtilLogCallback  cb);
 
 class portaudio_raii {
 private:
-	std::ostream & log;
+	concat_stream<std::string> & log;
 	bool log_set;
 	bool portaudio_initialized;
-	static std::ostream * portaudio_log_stream;
+	static concat_stream<std::string> * portaudio_log_stream;
 private:
 	static void portaudio_log_function( const char * log ) {
 		if ( portaudio_log_stream ) {
@@ -49,13 +49,13 @@ protected:
 			return;
 		}
 		if ( e == paOutputUnderflowed ) {
-			log << "PortAudio warning: " << Pa_GetErrorText( e ) << std::endl;
+			log << "PortAudio warning: " << Pa_GetErrorText( e ) << lf;
 			return;
 		}
 		throw portaudio_exception( e );
 	}
 public:
-	portaudio_raii( bool verbose, std::ostream & log ) : log(log), log_set(false), portaudio_initialized(false) {
+	portaudio_raii( bool verbose, concat_stream<std::string> & log ) : log(log), log_set(false), portaudio_initialized(false) {
 		if ( verbose ) {
 			portaudio_log_stream = &log;
 		} else {
@@ -68,7 +68,7 @@ public:
 		check_portaudio_error( Pa_Initialize() );
 		portaudio_initialized = true;
 		if ( verbose ) {
-			*portaudio_log_stream << std::endl;
+			*portaudio_log_stream << lf;
 		}
 	}
 	~portaudio_raii() {
@@ -86,7 +86,7 @@ public:
 	}
 };
 
-std::ostream * portaudio_raii::portaudio_log_stream = 0;
+concat_stream<std::string> * portaudio_raii::portaudio_log_stream = 0;
 
 class portaudio_stream_blocking_raii : public portaudio_raii, public write_buffers_interface {
 private:
@@ -96,7 +96,7 @@ private:
 	std::vector<float> sampleBufFloat;
 	std::vector<std::int16_t> sampleBufInt;
 public:
-	portaudio_stream_blocking_raii( commandlineflags & flags, std::ostream & log )
+	portaudio_stream_blocking_raii( commandlineflags & flags, concat_stream<std::string> & log )
 		: portaudio_raii(flags.verbose, log)
 		, stream(NULL)
 		, interleaved(false)
@@ -138,16 +138,16 @@ public:
 		}
 		flags.apply_default_buffer_sizes();
 		if ( flags.verbose ) {
-			log << "PortAudio:" << std::endl;
+			log << "PortAudio:" << lf;
 			log << " device: "
 				<< streamparameters.device
 				<< " [ " << Pa_GetHostApiInfo( Pa_GetDeviceInfo( streamparameters.device )->hostApi )->name << " / " << Pa_GetDeviceInfo( streamparameters.device )->name << " ] "
-				<< std::endl;
-			log << " low latency: " << Pa_GetDeviceInfo( streamparameters.device )->defaultLowOutputLatency << std::endl;
-			log << " high latency: " << Pa_GetDeviceInfo( streamparameters.device )->defaultHighOutputLatency << std::endl;
-			log << " suggested latency: " << streamparameters.suggestedLatency << std::endl;
-			log << " frames per buffer: " << framesperbuffer << std::endl;
-			log << " ui redraw: " << flags.period << std::endl;
+				<< lf;
+			log << " low latency: " << Pa_GetDeviceInfo( streamparameters.device )->defaultLowOutputLatency << lf;
+			log << " high latency: " << Pa_GetDeviceInfo( streamparameters.device )->defaultHighOutputLatency << lf;
+			log << " suggested latency: " << streamparameters.suggestedLatency << lf;
+			log << " frames per buffer: " << framesperbuffer << lf;
+			log << " ui redraw: " << flags.period << lf;
 		}
 		PaError e = PaError();
 		e = Pa_OpenStream( &stream, NULL, &streamparameters, flags.samplerate, framesperbuffer, ( flags.dither > 0 ) ? paNoFlag : paDitherOff, NULL, NULL );
@@ -163,11 +163,11 @@ public:
 		}
 		check_portaudio_error( Pa_StartStream( stream ) );
 		if ( flags.verbose ) {
-			log << " channels: " << streamparameters.channelCount << std::endl;
-			log << " sampleformat: " << ( ( ( streamparameters.sampleFormat & ~paNonInterleaved ) == paFloat32 ) ? "paFloat32" : "paInt16" ) << std::endl;
-			log << " latency: " << Pa_GetStreamInfo( stream )->outputLatency << std::endl;
-			log << " samplerate: " << Pa_GetStreamInfo( stream )->sampleRate << std::endl;
-			log << std::endl;
+			log << " channels: " << streamparameters.channelCount << lf;
+			log << " sampleformat: " << ( ( ( streamparameters.sampleFormat & ~paNonInterleaved ) == paFloat32 ) ? "paFloat32" : "paInt16" ) << lf;
+			log << " latency: " << Pa_GetStreamInfo( stream )->outputLatency << lf;
+			log << " samplerate: " << Pa_GetStreamInfo( stream )->sampleRate << lf;
+			log << lf;
 		}
 	}
 	~portaudio_stream_blocking_raii() {
@@ -245,9 +245,9 @@ public:
 
 #define portaudio_stream_raii portaudio_stream_blocking_raii
 
-static std::string show_portaudio_devices( std::ostream & log ) {
-	std::ostringstream devices;
-	devices << " portaudio:" << std::endl;
+static std::string show_portaudio_devices( concat_stream<std::string> & log ) {
+	string_concat_stream<std::string> devices;
+	devices << " portaudio:" << lf;
 	portaudio_raii portaudio( false, log );
 	for ( PaDeviceIndex i = 0; i < Pa_GetDeviceCount(); ++i ) {
 		if ( Pa_GetDeviceInfo( i ) && Pa_GetDeviceInfo( i )->maxOutputChannels > 0 ) {
@@ -273,7 +273,7 @@ static std::string show_portaudio_devices( std::ostream & log ) {
 			devices << ", ";
 			devices << "low latency: " << Pa_GetDeviceInfo( i )->defaultLowOutputLatency;
 			devices << ")";
-			devices << std::endl;
+			devices << lf;
 		}
 	}
 	return devices.str();

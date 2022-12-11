@@ -26,7 +26,7 @@ struct pulseaudio_exception : public exception {
 			if ( error == 0 ) {
 				return std::string();
 			}
-			std::ostringstream e;
+			string_concat_stream<std::string> e;
 			const char * str = pa_strerror( error );
 			if ( !str ) {
 				e << "error=" << error;
@@ -53,7 +53,7 @@ private:
 	std::vector<float> sampleBufFloat;
 	std::vector<std::int16_t> sampleBufInt;
 public:
-	pulseaudio_stream_raii( commandlineflags & flags, std::ostream & /* log */ )
+	pulseaudio_stream_raii( commandlineflags & flags, concat_stream<std::string> & /* log */ )
 		: stream(NULL)
 		, channels(flags.channels)
 		, sampleSize(flags.use_float ? sizeof( float ) : sizeof( std::int16_t ))
@@ -152,10 +152,10 @@ public:
 	}
 };
 
-static std::string show_pulseaudio_devices( std::ostream & /* log */ ) {
-	std::ostringstream devices;
-	devices << " pulseaudio:" << std::endl;
-	devices << "    " << "0" << ": Default Device" << std::endl;
+static std::string show_pulseaudio_devices( concat_stream<std::string> & /* log */ ) {
+	string_concat_stream<std::string> devices;
+	devices << " pulseaudio:" << lf;
+	devices << "    " << "0" << ": Default Device" << lf;
 	return devices.str();
 }
 

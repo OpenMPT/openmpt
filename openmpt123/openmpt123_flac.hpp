@@ -53,7 +53,7 @@ private:
 		}
 	}
 public:
-	flac_stream_raii( const mpt::native_path & filename_, const commandlineflags & flags_, std::ostream & /*log*/ ) : flags(flags_), filename(filename_), called_init(false), encoder(0) {
+	flac_stream_raii( const mpt::native_path & filename_, const commandlineflags & flags_, concat_stream<std::string> & /*log*/ ) : flags(flags_), filename(filename_), called_init(false), encoder(0) {
 		flac_metadata[0] = 0;
 		encoder = FLAC__stream_encoder_new();
 		if ( !encoder ) {

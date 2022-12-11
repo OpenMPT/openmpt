@@ -39,7 +39,7 @@ namespace openmpt123 {
 struct sdl2_exception : public exception {
 private:
 	static std::string text_from_code( int code ) {
-		std::ostringstream s;
+		string_concat_stream<std::string> s;
 		s << code;
 		return s.str();
 	}
@@ -65,7 +65,7 @@ public:
 
 class sdl2_stream_raii : public write_buffers_interface {
 private:
-	std::ostream & log;
+	concat_stream<std::string> & log;
 	sdl2_raii sdl2;
 	int dev;
 	std::size_t channels;
@@ -83,7 +83,7 @@ protected:
 		return result;
 	}
 public:
-	sdl2_stream_raii( commandlineflags & flags, std::ostream & log_ )
+	sdl2_stream_raii( commandlineflags & flags, concat_stream<std::string> & log_ )
 		: log(log_)
 		, sdl2( SDL_INIT_NOPARACHUTE | SDL_INIT_TIMER | SDL_INIT_AUDIO )
 		, dev(-1)
@@ -113,9 +113,9 @@ public:
 		audiospec.callback = NULL;
 		audiospec.userdata = NULL;
 		if ( flags.verbose ) {
-			log << "SDL2:" << std::endl;
-			log << " latency: " << ( audiospec.samples * 2.0 / flags.samplerate ) << " (2 * " << audiospec.samples << ")" << std::endl;
-			log << std::endl;
+			log << "SDL2:" << lf;
+			log << " latency: " << ( audiospec.samples * 2.0 / flags.samplerate ) << " (2 * " << audiospec.samples << ")" << lf;
+			log << lf;
 		}
 		sampleQueueMaxFrames = round_up_power2( ( flags.buffer * flags.samplerate ) / ( 1000 * 2 ) );
 		SDL_AudioSpec audiospec_obtained;
@@ -187,10 +187,10 @@ public:
 	}
 };
 
-static std::string show_sdl2_devices( std::ostream & /* log */ ) {
-	std::ostringstream devices;
+static std::string show_sdl2_devices( concat_stream<std::string> & /* log */ ) {
+	string_concat_stream<std::string> devices;
 	std::size_t device_index = 0;
-	devices << " SDL2:" << std::endl;
+	devices << " SDL2:" << lf;
 	sdl2_raii sdl2( SDL_INIT_NOPARACHUTE | SDL_INIT_AUDIO );
 	for ( int driver = 0; driver < SDL_GetNumAudioDrivers(); ++driver ) {
 		const char * driver_name = SDL_GetAudioDriver( driver );
@@ -211,7 +211,7 @@ static std::string show_sdl2_devices( std::ostream & /* log */ ) {
 			if ( std::string( device_name ).empty() ) {
 				continue;
 			}
-			devices << "    " << device_index << ": " << driver_name << " - " << device_name << std::endl;
+			devices << "    " << device_index << ": " << driver_name << " - " << device_name << lf;
 			device_index++;
 		}
 		SDL_AudioQuit();

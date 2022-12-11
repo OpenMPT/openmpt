@@ -87,7 +87,7 @@ private:
 		return result;
 	}
 public:
-	allegro42_stream_raii( commandlineflags & flags, std::ostream & log )
+	allegro42_stream_raii( commandlineflags & flags, concat_stream<std::string> & log )
 		: write_buffers_polling_wrapper_int(flags)
 		, stream(NULL)
 		, bits(16)
@@ -114,12 +114,12 @@ public:
 		period_frames = round_up_power2( ( flags.buffer * flags.samplerate ) / ( 1000 * 2 ) );
 		set_queue_size_frames( period_frames );
 		if ( flags.verbose ) {
-			log << "Allegro-4.2:" << std::endl;
-			log << " allegro samplerate: " << get_mixer_frequency() << std::endl;
-			log << " latency: " << flags.buffer << std::endl;
-			log << " period: " << flags.period << std::endl;
-			log << " frames per buffer: " << period_frames << std::endl;
-			log << " ui redraw: " << flags.ui_redraw_interval << std::endl;
+			log << "Allegro-4.2:" << lf;
+			log << " allegro samplerate: " << get_mixer_frequency() << lf;
+			log << " latency: " << flags.buffer << lf;
+			log << " period: " << flags.period << lf;
+			log << " frames per buffer: " << period_frames << lf;
+			log << " ui redraw: " << flags.ui_redraw_interval << lf;
 		}
 		stream = play_audio_stream( period_frames, 16, ( flags.channels > 1 ) ? TRUE : FALSE, flags.samplerate, 255, 128 );
 		if ( !stream ) {
@@ -171,10 +171,10 @@ public:
 	}
 };
 
-static std::string show_allegro42_devices( std::ostream & /* log */ ) {
-	std::ostringstream devices;
-	devices << " allegro42:" << std::endl;
-	devices << "    " << "0" << ": Default Device" << std::endl;
+static std::string show_allegro42_devices( concat_stream<std::string> & /* log */ ) {
+	string_concat_stream<std::string> devices;
+	devices << " allegro42:" << lf;
+	devices << "    " << "0" << ": Default Device" << lf;
 	return devices.str();
 }
 

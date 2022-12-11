@@ -19,6 +19,9 @@
     <Filter Include="src\mpt\detect">
       <UniqueIdentifier>{7535143C-6103-0842-4A97-78683604E4A6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\mpt\format">
+      <UniqueIdentifier>{C5847241-B152-6647-9AE6-D66D865342AC}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\mpt\io">
       <UniqueIdentifier>{D454AB6B-C00C-EDB8-2914-C61415EB87A9}</UniqueIdentifier>
     </Filter>
@@ -191,6 +194,45 @@
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\detect\nlohmann_json.hpp">
       <Filter>src\mpt\detect</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\format\concat.hpp">
+      <Filter>src\mpt\format</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\format\default_floatingpoint.hpp">
+      <Filter>src\mpt\format</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\format\default_formatter.hpp">
+      <Filter>src\mpt\format</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\format\default_integer.hpp">
+      <Filter>src\mpt\format</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\format\default_string.hpp">
+      <Filter>src\mpt\format</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\format\helpers.hpp">
+      <Filter>src\mpt\format</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\format\join.hpp">
+      <Filter>src\mpt\format</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\format\message.hpp">
+      <Filter>src\mpt\format</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\format\message_macros.hpp">
+      <Filter>src\mpt\format</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\format\simple.hpp">
+      <Filter>src\mpt\format</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\format\simple_floatingpoint.hpp">
+      <Filter>src\mpt\format</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\format\simple_integer.hpp">
+      <Filter>src\mpt\format</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\format\simple_spec.hpp">
+      <Filter>src\mpt\format</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\io\base.hpp">
       <Filter>src\mpt\io</Filter>
