@@ -122,17 +122,17 @@ bool CSoundFile::ReadWAV(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Setting up pattern
-	auto pattern = Patterns[0].GetRow(0);
-	pattern[0].note = pattern[1].note = NOTE_MIDDLEC;
-	pattern[0].instr = pattern[1].instr = 1;
+	auto row = Patterns[0].GetRow(0);
+	row[0].note = row[1].note = NOTE_MIDDLEC;
+	row[0].instr = row[1].instr = 1;
 
 	const FileReader sampleChunk = wavFile.GetSampleData();
 
 	// Read every channel into its own sample lot.
 	for(SAMPLEINDEX channel = 0; channel < GetNumSamples(); channel++)
 	{
-		pattern[channel].note = pattern[0].note;
-		pattern[channel].instr = static_cast<ModCommand::INSTR>(channel + 1);
+		row[channel].note = row[0].note;
+		row[channel].instr = static_cast<ModCommand::INSTR>(channel + 1);
 
 		ModSample &sample = Samples[channel + 1];
 		sample.Initialize();
@@ -155,13 +155,13 @@ bool CSoundFile::ReadWAV(FileReader &file, ModLoadingFlags loadFlags)
 				break;
 			case 2:
 				sample.nPan = (wavFile.GetNumChannels() == 3 ? 128u : 64u);
-				pattern[channel].command = CMD_S3MCMDEX;
-				pattern[channel].param = 0x91;
+				row[channel].command = CMD_S3MCMDEX;
+				row[channel].param = 0x91;
 				break;
 			case 3:
 				sample.nPan = 192;
-				pattern[channel].command = CMD_S3MCMDEX;
-				pattern[channel].param = 0x91;
+				row[channel].command = CMD_S3MCMDEX;
+				row[channel].param = 0x91;
 				break;
 			default:
 				sample.nPan = 128;

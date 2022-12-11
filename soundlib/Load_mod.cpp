@@ -2342,7 +2342,7 @@ bool CSoundFile::SaveMod(std::ostream &f) const
 				mpt::IO::Write(f, events);
 				continue;
 			}
-			auto rowBase = Patterns[pat].GetRow(row);
+			const auto rowBase = Patterns[pat].GetRow(row);
 
 			events.resize(writeChannels * 4);
 			size_t eventByte = 0;
