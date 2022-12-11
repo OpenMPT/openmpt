@@ -89,7 +89,6 @@ inline Tstring align_right( const Tchar pad, std::size_t width, const T val ) {
 template <typename Tstring>
 struct concat_stream {
 	virtual concat_stream & append( Tstring str ) = 0;
-	virtual void flush() = 0;
 	virtual ~concat_stream() = default;
 	inline concat_stream<Tstring> & operator<<( concat_stream<Tstring> & (*func)( concat_stream<Tstring> & s ) ) {
 		return func( *this );
@@ -119,9 +118,6 @@ public:
 	inline concat_stream<Tstring> & append( Tstring s ) override {
 		m_str += std::move( s );
 		return *this;
-	}
-	inline void flush() override {
-		return;
 	}
 	inline Tstring str() const {
 		return m_str;

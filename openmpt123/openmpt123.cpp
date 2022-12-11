@@ -1655,7 +1655,6 @@ static void render_files( commandlineflags & flags, textout & log, write_buffers
 
 
 static bool parse_playlist( commandlineflags & flags, mpt::native_path filename, concat_stream<std::string> & log ) {
-	log.flush();
 	bool is_playlist = false;
 	bool m3u8 = false;
 	if ( get_extension( filename ) == MPT_NATIVE_PATH("m3u") || get_extension( filename ) == MPT_NATIVE_PATH("m3U") || get_extension( filename ) == MPT_NATIVE_PATH("M3u") || get_extension( filename ) == MPT_NATIVE_PATH("M3U") ) {
@@ -1744,14 +1743,11 @@ static bool parse_playlist( commandlineflags & flags, mpt::native_path filename,
 	} catch ( ... ) {
 		log << "unknown error loading '" << mpt::transcode<std::string>( mpt::common_encoding::utf8, filename ) << "'" << lf;
 	}
-	log.flush();
 	return is_playlist;
 }
 
 
 static commandlineflags parse_openmpt123( const std::vector<std::string> & args, concat_stream<std::string> & log ) {
-
-	log.flush();
 
 	if ( args.size() <= 1 ) {
 		throw args_error_exception();
