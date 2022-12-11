@@ -279,8 +279,8 @@ void CModDoc::AppendModule(const CSoundFile &source)
 		const ROWINDEX copyRows = std::min(sourcePat.GetNumRows(), targetPat.GetNumRows());
 		for(ROWINDEX row = 0; row < copyRows; row++)
 		{
-			const ModCommand *src = sourcePat.GetRow(row);
-			ModCommand *m = targetPat.GetRow(row);
+			const ModCommand *src = sourcePat.GetpModCommand(row, 0);
+			ModCommand *m = targetPat.GetpModCommand(row, 0);
 			for(CHANNELINDEX chn = 0; chn < copyChannels; chn++, src++, m++)
 			{
 				*m = *src;

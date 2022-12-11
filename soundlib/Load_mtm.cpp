@@ -252,13 +252,12 @@ bool CSoundFile::ReadMTM(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			for(ROWINDEX row = 0; row < pattern.GetNumRows(); row++)
 			{
-				const auto rowBase = pattern.GetRow(row);
 				bool hasSpeedOnRow = false, hasTempoOnRow = false;
-				for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
+				for(const ModCommand &m : pattern.GetRow(row))
 				{
-					if(rowBase[chn].command == CMD_SPEED)
+					if(m.command == CMD_SPEED)
 						hasSpeedOnRow = true;
-					else if(rowBase[chn].command == CMD_TEMPO)
+					else if(m.command == CMD_TEMPO)
 						hasTempoOnRow = true;
 				}
 				if(hasSpeedOnRow && hasTempoOnRow)
@@ -277,12 +276,11 @@ bool CSoundFile::ReadMTM(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				for(ROWINDEX row = 0; row < pattern.GetNumRows(); row++)
 				{
-					const auto rowBase = pattern.GetRow(row);
-					for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
+					for(const ModCommand &m : pattern.GetRow(row))
 					{
-						if(rowBase[chn].command == CMD_SPEED || rowBase[chn].command == CMD_TEMPO)
+						if(m.command == CMD_SPEED || m.command == CMD_TEMPO)
 						{
-							const bool writeTempo = rowBase[chn].command == CMD_SPEED;
+							const bool writeTempo = m.command == CMD_SPEED;
 							pattern.WriteEffect(EffectWriter(writeTempo ? CMD_TEMPO : CMD_SPEED, writeTempo ? 125 : 6).Row(row));
 							break;
 						}

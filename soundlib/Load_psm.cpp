@@ -663,7 +663,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 		// Read pattern.
 		for(ROWINDEX row = 0; row < numRows; row++)
 		{
-			PatternRow rowBase = Patterns[pat].GetRow(row);
+			auto rowBase = Patterns[pat].GetRow(row);
 			uint16 rowSize = chunk.ReadUint16LE();
 			if(rowSize <= 2)
 			{

@@ -341,7 +341,7 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 
 		for(ROWINDEX row = 0; row < 64; row++)
 		{
-			PatternRow rowBase = Patterns[pat].GetRow(row);
+			auto rowBase = Patterns[pat].GetRow(row);
 
 			uint8 channelByte;
 			// If channel byte is zero, advance to next row.

@@ -202,7 +202,7 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 		uint8 effect[8] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
 		for(ROWINDEX row = 0; row < 64; row++)
 		{
-			PatternRow m = Patterns[pat].GetRow(row);
+			ModCommand *m = Patterns[pat].GetpModCommand(row, 0);
 
 			for(CHANNELINDEX chn = 0; chn < 8; chn++, m++)
 			{

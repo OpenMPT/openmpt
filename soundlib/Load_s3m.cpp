@@ -583,7 +583,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 
 		// Read pattern data
 		ROWINDEX row = 0;
-		PatternRow rowBase = Patterns[pat].GetRow(0);
+		auto rowBase = Patterns[pat].GetRow(0);
 
 		while(row < 64)
 		{
@@ -854,7 +854,7 @@ bool CSoundFile::SaveS3M(std::ostream &f) const
 					continue;
 				}
 
-				const PatternRow rowBase = Patterns[pat].GetRow(row);
+				const auto rowBase = Patterns[pat].GetRow(row);
 
 				CHANNELINDEX writeChannels = std::min(CHANNELINDEX(32), GetNumChannels());
 				for(CHANNELINDEX chn = 0; chn < writeChannels; chn++)

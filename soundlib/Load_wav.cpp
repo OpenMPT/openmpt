@@ -122,7 +122,7 @@ bool CSoundFile::ReadWAV(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Setting up pattern
-	PatternRow pattern = Patterns[0].GetRow(0);
+	auto pattern = Patterns[0].GetRow(0);
 	pattern[0].note = pattern[1].note = NOTE_MIDDLEC;
 	pattern[0].instr = pattern[1].instr = 1;
 

@@ -41,10 +41,9 @@ bool CPattern::IsEmptyRow(ROWINDEX row) const
 		return true;
 	}
 
-	PatternRow data = GetRow(row);
-	for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++, data++)
+	for(const auto &m : GetRow(row))
 	{
-		if(!data->IsEmpty())
+		if(!m.IsEmpty())
 		{
 			return false;
 		}
@@ -213,9 +212,9 @@ bool CPattern::Shrink()
 
 	for(ROWINDEX y = 0; y < m_Rows; y++)
 	{
-		const PatternRow srcRow = GetRow(y * 2);
-		const PatternRow nextSrcRow = GetRow(y * 2 + 1);
-		PatternRow destRow = GetRow(y);
+		const auto srcRow = GetRow(y * 2);
+		const auto nextSrcRow = GetRow(y * 2 + 1);
+		auto destRow = GetRow(y);
 
 		for(CHANNELINDEX x = 0; x < nChns; x++)
 		{

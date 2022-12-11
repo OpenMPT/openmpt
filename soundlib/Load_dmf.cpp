@@ -328,7 +328,7 @@ static PATTERNINDEX ConvertDMFPattern(FileReader &file, const uint8 fileVersion,
 		return pat;
 	}
 
-	PatternRow m = sndFile.Patterns[pat].GetRow(0);
+	ModCommand *m = sndFile.Patterns[pat].GetpModCommand(0, 0);
 	const CHANNELINDEX numChannels = std::min(static_cast<CHANNELINDEX>(sndFile.GetNumChannels() - 1), static_cast<CHANNELINDEX>(patHead.numTracks));
 
 	// When breaking to a pattern with less channels that the previous pattern,

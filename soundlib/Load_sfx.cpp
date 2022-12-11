@@ -293,7 +293,7 @@ bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)
 
 		for(ROWINDEX row = 0; row < 64; row++)
 		{
-			PatternRow rowBase = Patterns[pat].GetpModCommand(row, 0);
+			auto rowBase = Patterns[pat].GetRow(row);
 			for(CHANNELINDEX chn = 0; chn < 4; chn++)
 			{
 				ModCommand &m = rowBase[chn];

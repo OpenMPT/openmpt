@@ -78,7 +78,7 @@ static void ReadAMSPattern(CPattern &pattern, bool newVersion, FileReader &patte
 	ModCommand dummy;
 	for(ROWINDEX row = 0; row < pattern.GetNumRows(); row++)
 	{
-		PatternRow baseRow = pattern.GetRow(row);
+		auto baseRow = pattern.GetRow(row);
 		while(patternChunk.CanRead(1))
 		{
 			const uint8 flags = patternChunk.ReadUint8();

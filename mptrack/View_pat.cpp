@@ -3477,11 +3477,11 @@ LRESULT CViewPattern::OnPlayerNotify(Notification *pnotify)
 			m_nNextPlayRow = ROWINDEX_INVALID;
 			if((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SMOOTHSCROLL) && pSndFile->Patterns.IsValidPat(pat) && pSndFile->Patterns[pat].IsValidRow(row))
 			{
-				for(const ModCommand *m = pSndFile->Patterns[pat].GetRow(row), *mEnd = m + pSndFile->GetNumChannels(); m != mEnd; m++)
+				for(const ModCommand &m : pSndFile->Patterns[pat].GetRow(row))
 				{
-					if(m->command == CMD_PATTERNBREAK)
-						m_nNextPlayRow = m->param;
-					else if(m->command == CMD_POSITIONJUMP && (m_nNextPlayRow == ROWINDEX_INVALID || pSndFile->GetType() == MOD_TYPE_XM))
+					if(m.command == CMD_PATTERNBREAK)
+						m_nNextPlayRow = m.param;
+					else if(m.command == CMD_POSITIONJUMP && (m_nNextPlayRow == ROWINDEX_INVALID || pSndFile->GetType() == MOD_TYPE_XM))
 						m_nNextPlayRow = 0;
 				}
 			}
@@ -5635,7 +5635,7 @@ void CViewPattern::TempEnterChord(ModCommand::NOTE note)
 	}
 
 	const CHANNELINDEX chn = GetCurrentChannel();
-	const PatternRow rowBase = sndFile.Patterns[m_nPattern].GetRow(GetCurrentRow());
+	auto rowBase = sndFile.Patterns[m_nPattern].GetRow(GetCurrentRow());
 
 	ModCommand::NOTE chordNotes[MPTChord::notesPerChord], baseNote = rowBase[chn].note;
 	if(!ModCommand::IsNote(baseNote))
@@ -5649,7 +5649,7 @@ void CViewPattern::TempEnterChord(ModCommand::NOTE note)
 	}
 
 	// Save old row contents
-	std::vector<ModCommand> newRow(rowBase, rowBase + sndFile.GetNumChannels());
+	std::vector<ModCommand> newRow(rowBase.begin(), rowBase.end());
 
 	const bool liveRecord = IsLiveRecord();
 	const bool recordEnabled = IsEditingEnabled();

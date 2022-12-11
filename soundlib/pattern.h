@@ -19,13 +19,9 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-
 class CPatternContainer;
 class CSoundFile;
 class EffectWriter;
-
-typedef ModCommand* PatternRow;
-
 
 class CPattern
 {
@@ -50,10 +46,8 @@ public:
 	// Returns true if any pattern data is present.
 	bool IsValid() const { return !m_ModCommands.empty(); }
 
-	// Return PatternRow object which has operator[] defined so that ModCommand
-	// at (iRow, iChn) can be accessed with GetRow(iRow)[iChn].
-	PatternRow GetRow(const ROWINDEX row) { return GetpModCommand(row, 0); }
-	PatternRow GetRow(const ROWINDEX row) const { return const_cast<ModCommand *>(GetpModCommand(row, 0)); }
+	mpt::span<ModCommand> GetRow(const ROWINDEX row) { return mpt::as_span(GetpModCommand(row, 0), GetNumChannels()); }
+	mpt::span<const ModCommand> GetRow(const ROWINDEX row) const { return mpt::as_span(GetpModCommand(row, 0), GetNumChannels()); }
 
 	CHANNELINDEX GetNumChannels() const;
 

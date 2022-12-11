@@ -483,7 +483,7 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 			patternNameChunk.ReadSizedString<uint8be, mpt::String::maybeNullTerminated>(patName);
 			Patterns[pat].SetName(patName);
 
-			PatternRow patRow = Patterns[pat].GetRow(0);
+			auto patRow = Patterns[pat].GetRow(0);
 			ROWINDEX row = 0;
 			lostGlobalCommands.clear();
 			while(chunk.CanRead(1))

@@ -448,7 +448,7 @@ struct MidiChannelState
 };
 
 
-static CHANNELINDEX FindUnusedChannel(uint8 midiCh, ModCommand::NOTE note, const std::vector<ModChannelState> &channels, bool monoMode, PatternRow patRow)
+static CHANNELINDEX FindUnusedChannel(uint8 midiCh, ModCommand::NOTE note, const std::vector<ModChannelState> &channels, bool monoMode, mpt::span<ModCommand> patRow)
 {
 	for(size_t i = 0; i < channels.size(); i++)
 	{
@@ -506,7 +506,7 @@ static CHANNELINDEX FindUnusedChannel(uint8 midiCh, ModCommand::NOTE note, const
 }
 
 
-static void MIDINoteOff(MidiChannelState &midiChn, std::vector<ModChannelState> &modChnStatus, uint8 note, uint8 delay, PatternRow patRow, std::bitset<16> drumChns)
+static void MIDINoteOff(MidiChannelState &midiChn, std::vector<ModChannelState> &modChnStatus, uint8 note, uint8 delay, mpt::span<ModCommand> patRow, std::bitset<16> drumChns)
 {
 	CHANNELINDEX chn = midiChn.noteOn[note];
 	if(chn == CHANNELINDEX_INVALID)
@@ -769,7 +769,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 		}
 
 		PATTERNINDEX pat = Order()[ord];
-		PatternRow patRow = Patterns[pat].GetRow(row);
+		auto patRow = Patterns[pat].GetRow(row);
 
 		uint8 data1 = track.ReadUint8();
 		if(data1 == 0xFF)

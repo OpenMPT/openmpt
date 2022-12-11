@@ -1690,7 +1690,7 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 		uint8 autoSlide[4] = {0, 0, 0, 0};
 		for(ROWINDEX row = 0; row < 64; row++)
 		{
-			PatternRow rowBase = Patterns[pat].GetpModCommand(row, 0);
+			auto rowBase = Patterns[pat].GetRow(row);
 			for(CHANNELINDEX chn = 0; chn < 4; chn++)
 			{
 				ModCommand &m = rowBase[chn];
@@ -2342,7 +2342,7 @@ bool CSoundFile::SaveMod(std::ostream &f) const
 				mpt::IO::Write(f, events);
 				continue;
 			}
-			PatternRow rowBase = Patterns[pat].GetRow(row);
+			auto rowBase = Patterns[pat].GetRow(row);
 
 			events.resize(writeChannels * 4);
 			size_t eventByte = 0;

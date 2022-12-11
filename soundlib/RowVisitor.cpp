@@ -131,7 +131,7 @@ void RowVisitor::Initialize(bool reset)
 		{
 			const ROWINDEX row = i - 1;
 			uint32 maxLoopStates = 1;
-			auto m = pattern.GetRow(row);
+			auto m = pattern.GetpModCommand(row, 0);
 			// Break condition: If it's more than 16, it's probably wrong :) exact loop count depends on how loops overlap.
 			for(CHANNELINDEX chn = 0; chn < pattern.GetNumChannels() && maxLoopStates < 16; chn++, m++)
 			{
