@@ -1107,7 +1107,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					case CMD_FINETUNE:
 					case CMD_FINETUNE_SMOOTH:
 						memory.RenderChannel(nChn, oldTickDuration);  // Re-sync what we've got so far
-						SetFinetune(nChn, playState, false);  // TODO should render each tick individually for CMD_FINETUNE_SMOOTH for higher sync accuracy
+						chn.microTuning = CalculateFinetuneTarget(playState.m_nPattern, playState.m_nRow, nChn);  // TODO should render each tick individually for CMD_FINETUNE_SMOOTH for higher sync accuracy
 						break;
 					}
 					chn.isFirstTick = true;
@@ -3359,13 +3359,7 @@ bool CSoundFile::ProcessEffects()
 		case CMD_FINETUNE:
 		case CMD_FINETUNE_SMOOTH:
 			if(m_SongFlags[SONG_FIRSTTICK] || cmd == CMD_FINETUNE_SMOOTH)
-			{
-				SetFinetune(nChn, m_PlayState, cmd == CMD_FINETUNE_SMOOTH);
-#ifndef NO_PLUGINS
-				if(IMixPlugin *plugin = GetChannelInstrumentPlugin(m_PlayState.Chn[nChn]); plugin != nullptr)
-					plugin->MidiPitchBendRaw(chn.GetMIDIPitchBend(), nChn);
-#endif  // NO_PLUGINS
-			}
+				SetFinetune(m_PlayState.m_nPattern, m_PlayState.m_nRow, nChn, m_PlayState, cmd == CMD_FINETUNE_SMOOTH);
 			break;
 
 		// Set Channel Global Volume
@@ -3943,10 +3937,24 @@ void CSoundFile::ExtraFinePortamentoDown(ModChannel &chn, ModCommand::PARAM para
 }
 
 
-void CSoundFile::SetFinetune(CHANNELINDEX channel, PlayState &playState, bool isSmooth) const
+// Process finetune command from pattern editor
+void CSoundFile::ProcessFinetune(PATTERNINDEX pattern, ROWINDEX row, CHANNELINDEX channel, bool isSmooth)
+{
+	SetFinetune(pattern, row, channel, m_PlayState, isSmooth);
+	// Also apply to notes played via CModDoc::PlayNote
+	for(CHANNELINDEX chn = GetNumChannels(); chn < MAX_CHANNELS; chn++)
+	{
+		auto &modChn = m_PlayState.Chn[chn];
+		if(modChn.nMasterChn == channel + 1 && modChn.isPreviewNote && !modChn.dwFlags[CHN_KEYOFF])
+			modChn.microTuning = m_PlayState.Chn[channel].microTuning;
+	}
+}
+
+
+void CSoundFile::SetFinetune(PATTERNINDEX pattern, ROWINDEX row, CHANNELINDEX channel, PlayState &playState, bool isSmooth) const
 {
 	ModChannel &chn = playState.Chn[channel];
-	int16 newTuning = mpt::saturate_cast<int16>(static_cast<int32>(CalculateXParam(playState.m_nPattern, playState.m_nRow, channel, nullptr)) - 0x8000);
+	int16 newTuning = CalculateFinetuneTarget(pattern, row, channel);
 
 	if(isSmooth)
 	{
@@ -3958,6 +3966,17 @@ void CSoundFile::SetFinetune(CHANNELINDEX channel, PlayState &playState, bool is
 		}
 	}
 	chn.microTuning = newTuning;
+
+#ifndef NO_PLUGINS
+	if(IMixPlugin *plugin = GetChannelInstrumentPlugin(chn); plugin != nullptr)
+		plugin->MidiPitchBendRaw(chn.GetMIDIPitchBend(), channel);
+#endif  // NO_PLUGINS
+}
+
+
+int16 CSoundFile::CalculateFinetuneTarget(PATTERNINDEX pattern, ROWINDEX row, CHANNELINDEX channel) const
+{
+	return mpt::saturate_cast<int16>(static_cast<int32>(CalculateXParam(pattern, row, channel, nullptr)) - 0x8000);
 }
 
 

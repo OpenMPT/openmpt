@@ -1031,6 +1031,8 @@ public:
 
 	void ProcessRamping(ModChannel &chn) const;
 
+	void ProcessFinetune(PATTERNINDEX pattern, ROWINDEX row, CHANNELINDEX channel, bool isSmooth);
+
 protected:
 	// Global variable initializer for loader functions
 	void SetType(MODTYPE type);
@@ -1084,7 +1086,8 @@ protected:
 	void PortamentoMPT(ModChannel &chn, int);
 	void PortamentoFineMPT(ModChannel &chn, int);
 	void PortamentoExtraFineMPT(ModChannel &chn, int);
-	void SetFinetune(CHANNELINDEX channel, PlayState &playState, bool isSmooth) const;
+	void SetFinetune(PATTERNINDEX pattern, ROWINDEX row, CHANNELINDEX channel, PlayState &playState, bool isSmooth) const;
+	int16 CalculateFinetuneTarget(PATTERNINDEX pattern, ROWINDEX row, CHANNELINDEX channel) const;
 	void NoteSlide(ModChannel &chn, uint32 param, bool slideUp, bool retrig) const;
 	std::pair<uint16, bool> GetVolCmdTonePorta(const ModCommand &m, uint32 startTick) const;
 	void TonePortamento(ModChannel &chn, uint16 param) const;
