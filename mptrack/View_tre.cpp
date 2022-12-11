@@ -659,7 +659,7 @@ void CModTree::RefreshDlsBanks()
 			if(!m_tiDLS[iDls])
 			{
 				TVSORTCB tvs;
-				CDLSBank dlsBank = *CTrackApp::gpDLSBanks[iDls];
+				const CDLSBank &dlsBank = *CTrackApp::gpDLSBanks[iDls];
 				// Add DLS file folder
 				m_tiDLS[iDls] = InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM,
 					dlsBank.GetFileName().GetFullFileName().AsNative().c_str(), IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, iDls, TVI_ROOT, hDlsRoot);
