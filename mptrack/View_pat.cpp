@@ -3940,6 +3940,11 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 			m.command = (m.command == CMD_NONE) ? CMD_FINETUNE : CMD_FINETUNE_SMOOTH;
 			m.param = (midiByte2 << 1) | (midiByte1 >> 7);
 			update = true;
+			if(IsLiveRecord())
+			{
+				CriticalSection cs;
+				sndFile.ProcessFinetune(editpos.pattern, editpos.row, editpos.channel, false);
+			}
 		} else if(m.IsPcNote())
 		{
 			pModDoc->GetPatternUndo().PrepareUndo(editpos.pattern, editpos.channel, editpos.row, 1, 1, "MIDI Record Entry");
