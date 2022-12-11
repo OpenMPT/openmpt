@@ -52,10 +52,10 @@ struct ModTreeDocInfo
 class CModTreeDropTarget: public COleDropTarget
 {
 protected:
-	CModTree *m_pModTree;
+	CModTree *m_pModTree = nullptr;
 
 public:
-	CModTreeDropTarget() { m_pModTree = nullptr; }
+	CModTreeDropTarget() = default;
 	BOOL Register(CModTree *pWnd);
 
 public:
@@ -216,6 +216,8 @@ protected:
 
 	static LibrarySortOrder m_librarySort;
 
+	int m_redrawLockCount = 0;
+
 	bool m_showAllFiles = false;
 	bool m_doLabelEdit = false;
 
@@ -228,7 +230,7 @@ public:
 	mpt::PathString InsLibGetFullPath(HTREEITEM hItem) const;
 	bool SetSoundFile(FileReader &file);
 	void RefreshMidiLibrary();
-	void RefreshDlsBanks();
+	void RefreshDlsBanks(const bool forceRefresh = false);
 	void RefreshInstrumentLibrary();
 	void MonitorInstrumentLibrary();
 	ModItem GetModItem(HTREEITEM hItem);
@@ -296,6 +298,18 @@ protected:
 	void FilterInstrumentLibrary(mpt::winstring filter, const TCHAR *selectedItem = nullptr);
 
 	HMENU AddLibraryFindAndSortMenus(HMENU hMenu) const;
+
+	void LockRedraw()
+	{
+		if(!m_redrawLockCount++)
+			SetRedraw(FALSE);
+	}
+
+	void UnlockRedraw()
+	{
+		if(!--m_redrawLockCount)
+			SetRedraw(TRUE);
+	}
 
 protected:
 	//{{AFX_MSG(CModTree)

@@ -599,11 +599,9 @@ void CModTree::RefreshMidiLibrary()
 }
 
 
-void CModTree::RefreshDlsBanks()
+void CModTree::RefreshDlsBanks(const bool forceRefresh)
 {
 	const mpt::Charset charset = mpt::Charset::Locale;
-	TCHAR s[256];
-	HTREEITEM hDlsRoot = m_hMidiLib;
 
 	if(IsSampleBrowser())
 		return;
@@ -613,112 +611,150 @@ void CModTree::RefreshDlsBanks()
 		m_tiDLS.resize(CTrackApp::gpDLSBanks.size(), nullptr);
 	}
 
+	auto filter = mpt::ToWin(m_filterString);
+	const bool applyFilter = !filter.empty();
+	if(applyFilter)
+		filter = _T("*") + filter + _T("*");
+
+	LockRedraw();
+	HTREEITEM hInsertAfter = m_hMidiLib;
 	for(size_t iDls = 0; iDls < CTrackApp::gpDLSBanks.size(); iDls++)
 	{
-		if(CTrackApp::gpDLSBanks[iDls])
+		if(!CTrackApp::gpDLSBanks[iDls])
 		{
-			if(!m_tiDLS[iDls])
-			{
-				const CDLSBank &dlsBank = *CTrackApp::gpDLSBanks[iDls];
-				// Add DLS file folder
-				m_tiDLS[iDls] = InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM,
-					dlsBank.GetFileName().GetFilename().AsNative().c_str(), IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, iDls, TVI_ROOT, hDlsRoot);
-				// Memorize Banks
-				std::map<uint16, HTREEITEM> banks;
-				// Add Drum Kits folder
-				HTREEITEM hDrums = InsertItem(TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE | TVIF_PARAM,
-						_T("Drum Kits"), IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, DLS_DRUM_FOLDER_LPARAM, m_tiDLS[iDls], TVI_LAST);
-				// Add Instruments (done backwards to improve performance as per https://devblogs.microsoft.com/oldnewthing/20111125-00/?p=9033)
-				MPT_ASSERT(dlsBank.GetNumInstruments() <= 0x10000);
-				for(auto iIns = dlsBank.GetNumInstruments(); iIns > 0;)
-				{
-					iIns--;
-					const DLSINSTRUMENT *pDlsIns = dlsBank.GetInstrument(iIns);
-					if(pDlsIns)
-					{
-						TCHAR szName[256];
-						wsprintf(szName, _T("%u: %s"), pDlsIns->ulInstrument & 0x7F, mpt::ToCString(charset, pDlsIns->szName).GetString());
-						const LPARAM lParamInstr = DlsItem::ToLPARAM(static_cast<uint16>(iIns), (pDlsIns->ulInstrument & 0x7F), false);
-						// Drum Kit
-						if(pDlsIns->ulBank & F_INSTRUMENT_DRUMS)
-						{
-							HTREEITEM hKit = InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM,
-								szName, IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, lParamInstr, hDrums, TVI_FIRST);
-							MPT_ASSERT(pDlsIns->Regions.size() <= 0x8000);
-							for(auto iRgn = static_cast<uint32>(pDlsIns->Regions.size()); iRgn > 0;)
-							{
-								iRgn--;
-								if(pDlsIns->Regions[iRgn].IsDummy())
-									continue;
-
-								UINT keymin = pDlsIns->Regions[iRgn].uKeyMin;
-								UINT keymax = pDlsIns->Regions[iRgn].uKeyMax;
-
-								const char *regionName = dlsBank.GetRegionName(iIns, iRgn);
-								if(regionName == nullptr || !regionName[0])
-								{
-									if(keymin >= 24 && keymin <= 84)
-										regionName = szMidiPercussionNames[keymin - 24];
-									else
-										regionName = "";
-								}
-
-								if(keymin >= keymax)
-								{
-									wsprintf(szName, _T("%s%u: %s"),
-										mpt::ToCString(CSoundFile::GetDefaultNoteName(keymin % 12)).GetString(),
-										keymin / 12,
-										mpt::ToCString(charset, regionName).GetString());
-								} else
-								{
-									wsprintf(szName, _T("%s%u-%s%u: %s"),
-										mpt::ToCString(CSoundFile::GetDefaultNoteName(keymin % 12)).GetString(),
-										keymin / 12,
-										mpt::ToCString(CSoundFile::GetDefaultNoteName(keymax % 12)).GetString(),
-										keymax / 12,
-										mpt::ToCString(charset, regionName).GetString());
-								}
-								LPARAM lParam = DlsItem::ToLPARAM(static_cast<uint16>(iIns), static_cast<uint16>(iRgn), true);
-								InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM,
-										szName, IMAGE_INSTRUMENTS, IMAGE_INSTRUMENTS, 0, 0, lParam, hKit, TVI_FIRST);
-							}
-						} else
-						// Melodic
-						{
-							uint16 mbank = (pDlsIns->ulBank & 0x7F7F);
-							auto hbank = banks.find(mbank);
-							if(hbank == banks.end())
-							{
-								wsprintf(s, (mbank) ? _T("Melodic Bank %02d.%02d") : _T("Melodic"), mbank >> 8, mbank & 0x7F);
-								// Find out where to insert this bank in the tree
-								hbank = banks.insert(std::make_pair(mbank, nullptr)).first;
-								HTREEITEM insertAfter = (hbank == banks.begin()) ? TVI_FIRST : std::prev(hbank)->second;
-								hbank->second = InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE,
-									s, IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, 0,
-									m_tiDLS[iDls], insertAfter);
-							}
-							InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM,
-								szName, IMAGE_INSTRUMENTS, IMAGE_INSTRUMENTS, 0, 0, lParamInstr, hbank->second, TVI_FIRST);
-						}
-					}
-				}
-			}
-			hDlsRoot = m_tiDLS[iDls];
-		} else
-		{
+			// Was this bank removed?
 			if(m_tiDLS[iDls])
 			{
 				DeleteItem(m_tiDLS[iDls]);
 				m_tiDLS[iDls] = nullptr;
 			}
+			continue;
 		}
+
+		if(m_tiDLS[iDls] != nullptr && !forceRefresh)
+			continue;
+
+		// Add DLS file folder
+		const CDLSBank &dlsBank = *CTrackApp::gpDLSBanks[iDls];
+		if(m_tiDLS[iDls])
+			DeleteChildren(m_tiDLS[iDls]);
+		else
+			m_tiDLS[iDls] = InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM,
+				dlsBank.GetFileName().GetFilename().AsNative().c_str(), IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, iDls, TVI_ROOT, hInsertAfter);
+
+		std::map<uint16, HTREEITEM> banks;
+		HTREEITEM hDrums = nullptr;
+
+		// Add Instruments (done backwards to improve performance as per https://devblogs.microsoft.com/oldnewthing/20111125-00/?p=9033)
+		MPT_ASSERT(dlsBank.GetNumInstruments() <= 0x10000);
+		for(auto iIns = dlsBank.GetNumInstruments(); iIns > 0;)
+		{
+			iIns--;
+			const DLSINSTRUMENT *pDlsIns = dlsBank.GetInstrument(iIns);
+			if(!pDlsIns)
+				continue;
+
+			TCHAR szName[256];
+			const LPARAM lParamInstr = DlsItem::ToLPARAM(static_cast<uint16>(iIns), (pDlsIns->ulInstrument & 0x7F), false);
+			if(pDlsIns->ulBank & F_INSTRUMENT_DRUMS)
+			{
+				// Drum Kit
+				HTREEITEM hKit = nullptr;
+				MPT_ASSERT(pDlsIns->Regions.size() <= 0x8000);
+				for(auto region = static_cast<uint32>(pDlsIns->Regions.size()); region > 0;)
+				{
+					region--;
+					if(pDlsIns->Regions[region].IsDummy())
+						continue;
+
+					UINT keymin = pDlsIns->Regions[region].uKeyMin;
+					UINT keymax = pDlsIns->Regions[region].uKeyMax;
+
+					const char *regionName = dlsBank.GetRegionName(iIns, region);
+					if(regionName == nullptr || !regionName[0])
+					{
+						if(keymin >= 24 && keymin <= 84)
+							regionName = szMidiPercussionNames[keymin - 24];
+						else
+							regionName = "";
+					}
+
+					const auto regionNameStr = mpt::ToWin(charset, regionName);
+					if(applyFilter && !PathMatchSpec(regionNameStr.c_str(), filter.c_str()))
+						continue;
+
+					if(!hKit)
+					{
+						if(!hDrums)
+							hDrums = InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM, _T("Drum Kits"), IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, DLS_DRUM_FOLDER_LPARAM, m_tiDLS[iDls], TVI_LAST);
+
+						wsprintf(szName, _T("%u: %s"), pDlsIns->ulInstrument & 0x7F, mpt::ToWin(charset, pDlsIns->szName).c_str());
+						hKit = InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM, szName, IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, lParamInstr, hDrums, TVI_FIRST);
+					}
+
+					if(keymin >= keymax)
+					{
+						wsprintf(szName, _T("%s%u: %s"),
+							mpt::ToWin(CSoundFile::GetDefaultNoteName(keymin % 12)).c_str(),
+							keymin / 12,
+							regionNameStr.c_str());
+					} else
+					{
+						wsprintf(szName, _T("%s%u-%s%u: %s"),
+							mpt::ToWin(CSoundFile::GetDefaultNoteName(keymin % 12)).c_str(),
+							keymin / 12,
+							mpt::ToWin(CSoundFile::GetDefaultNoteName(keymax % 12)).c_str(),
+							keymax / 12,
+							regionNameStr.c_str());
+					}
+
+					LPARAM lParam = DlsItem::ToLPARAM(static_cast<uint16>(iIns), static_cast<uint16>(region), true);
+					InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM,
+							szName, IMAGE_INSTRUMENTS, IMAGE_INSTRUMENTS, 0, 0, lParam, hKit, TVI_FIRST);
+				}
+				if(applyFilter && hKit)
+					Expand(hKit, TVE_EXPAND);
+			} else
+			{
+				// Melodic
+				const auto instrName = mpt::ToWin(charset, pDlsIns->szName);
+				if(applyFilter && !PathMatchSpec(instrName.c_str(), filter.c_str()))
+					continue;
+
+				uint16 mbank = (pDlsIns->ulBank & 0x7F7F);
+				auto hbank = banks.find(mbank);
+				if(hbank == banks.end())
+				{
+					wsprintf(szName, mbank ? _T("Melodic Bank %02d.%02d") : _T("Melodic"), mbank >> 8, mbank & 0x7F);
+					// Find out where to insert this bank in the tree
+					hbank = banks.insert(std::make_pair(mbank, nullptr)).first;
+					HTREEITEM insertAfter = (hbank == banks.begin()) ? TVI_FIRST : std::prev(hbank)->second;
+					hbank->second = InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE,
+						szName, IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, 0,
+						m_tiDLS[iDls], insertAfter);
+				}
+
+				wsprintf(szName, _T("%u: %s"), pDlsIns->ulInstrument & 0x7F, instrName.c_str());
+				InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM,
+					szName, IMAGE_INSTRUMENTS, IMAGE_INSTRUMENTS, 0, 0, lParamInstr, hbank->second, TVI_FIRST);
+			}
+		}
+		if(applyFilter)
+		{
+			for(const auto &bank : banks)
+			{
+				Expand(bank.second, TVE_EXPAND);
+			}
+		}
+		hInsertAfter = m_tiDLS[iDls];
 	}
+	UnlockRedraw();
 }
 
 
 void CModTree::RefreshInstrumentLibrary()
 {
-	SetRedraw(FALSE);
+	LockRedraw();
 	// Check if the currently selected item should be selected after refreshing
 	CString selectedName;
 	if((IsSampleBrowser() || GetParentRootItem(GetSelectedItem()) == m_hInsLib)
@@ -735,7 +771,7 @@ void CModTree::RefreshInstrumentLibrary()
 	auto selectedItem = GetSelectedItem();
 	if(selectedItem)
 		EnsureVisible(selectedItem);
-	SetRedraw(TRUE);
+	UnlockRedraw();
 	if(!IsSampleBrowser())
 	{
 		m_pDataTree->InsLibSetFullPath(m_InstrLibPath, m_SongFileName);
@@ -1861,7 +1897,7 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 	if(!m_hInsLib && !IsSampleBrowser())
 		return;
 
-	SetRedraw(FALSE);
+	LockRedraw();
 
 	if(!IsSampleBrowser())
 	{
@@ -2078,7 +2114,7 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 	SortInstrumentLibrary();
 	FilterInstrumentLibrary({}, selectedItem);
 
-	SetRedraw(TRUE);
+	UnlockRedraw();
 
 	{
 		mpt::lock_guard<mpt::mutex> l(m_WatchDirMutex);
@@ -2111,7 +2147,7 @@ void CModTree::SortInstrumentLibrary()
 
 void CModTree::FilterInstrumentLibrary(mpt::winstring filter, const TCHAR *selectedItem)
 {
-	SetRedraw(FALSE);
+	LockRedraw();
 
 	if(!filter.empty())
 		filter = _T("*") + filter + _T("*");
@@ -2189,7 +2225,7 @@ void CModTree::FilterInstrumentLibrary(mpt::winstring filter, const TCHAR *selec
 		}
 	}
 
-	SetRedraw(TRUE);
+	UnlockRedraw();
 
 	if(selectedTreeItem)
 	{
@@ -2205,7 +2241,11 @@ void CModTree::SetInstrumentLibraryFilter(const mpt::winstring &filter)
 		return;
 
 	m_filterString = filter;
+	LockRedraw();
 	FilterInstrumentLibrary(m_filterString, GetItemText(GetSelectedItem()));
+	if(!IsSampleBrowser())
+		RefreshDlsBanks(true);
+	UnlockRedraw();
 }
 
 
