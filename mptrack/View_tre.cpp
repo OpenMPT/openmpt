@@ -2398,6 +2398,7 @@ void CModTree::InstrumentLibraryChDir(mpt::PathString dir, bool isSong)
 	}
 
 	GetParent()->PostMessage(WM_COMMAND, ID_CLOSE_LIBRARY_FILTER);
+	const bool updateDLSBanks = !m_filterString.empty();
 	m_filterString.clear();
 	m_pDataTree->m_filterString.clear();
 
@@ -2472,6 +2473,9 @@ void CModTree::InstrumentLibraryChDir(mpt::PathString dir, bool isSong)
 			ok = true;
 		}
 	}
+	if(updateDLSBanks)
+		RefreshDlsBanks(true);
+
 	EndWaitCursor();
 
 	if(ok)
