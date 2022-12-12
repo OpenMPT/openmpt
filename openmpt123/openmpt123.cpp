@@ -141,6 +141,8 @@ struct show_version_number_exception : public std::exception {
 struct show_long_version_number_exception : public std::exception {
 };
 
+constexpr auto libopenmpt_encoding = mpt::common_encoding::utf8;
+
 #if defined( WIN32 )
 bool IsConsole( DWORD stdHandle ) {
 	HANDLE hStd = GetStdHandle( stdHandle );
@@ -201,13 +203,13 @@ class file_audio_stream_raii : public file_audio_stream_base {
 private:
 	std::unique_ptr<file_audio_stream_base> impl;
 public:
-	file_audio_stream_raii( const commandlineflags & flags, const mpt::native_path & filename, concat_stream<std::string> & log )
+	file_audio_stream_raii( const commandlineflags & flags, const mpt::native_path & filename, concat_stream<mpt::ustring> & log )
 		: impl(nullptr)
 	{
 		if ( !flags.force_overwrite ) {
 			mpt::IO::ifstream testfile( filename, std::ios::binary );
 			if ( testfile ) {
-				throw exception( "file already exists" );
+				throw exception( MPT_USTRING("file already exists") );
 			}
 		}
 		if ( false ) {
@@ -228,16 +230,16 @@ public:
 #endif
 		}
 		if ( !impl ) {
-			throw exception( "file format handler '" + mpt::transcode<std::string>( mpt::common_encoding::utf8, flags.output_extension ) + "' not found" );
+			throw exception( MPT_USTRING("file format handler '") + mpt::transcode<mpt::ustring>( flags.output_extension ) + MPT_USTRING("' not found") );
 		}
 	}
 	virtual ~file_audio_stream_raii() {
 		return;
 	}
-	void write_metadata( std::map<std::string,std::string> metadata ) override {
+	void write_metadata( std::map<mpt::ustring, mpt::ustring> metadata ) override {
 		impl->write_metadata( metadata );
 	}
-	void write_updated_metadata( std::map<std::string,std::string> metadata ) override {
+	void write_updated_metadata( std::map<mpt::ustring, mpt::ustring> metadata ) override {
 		impl->write_updated_metadata( metadata );
 	}
 	void write( const std::vector<float*> buffers, std::size_t frames ) override {
@@ -248,13 +250,13 @@ public:
 	}
 };                                                                                                                
 
-static std::string ctls_to_string( const std::map<std::string, std::string> & ctls ) {
-	std::string result;
+static mpt::ustring ctls_to_string( const std::map<std::string, std::string> & ctls ) {
+	mpt::ustring result;
 	for ( const auto & ctl : ctls ) {
 		if ( !result.empty() ) {
-			result += "; ";
+			result += MPT_USTRING("; ");
 		}
-		result += ctl.first + "=" + ctl.second;
+		result += mpt::transcode<mpt::ustring>( libopenmpt_encoding, ctl.first ) + MPT_USTRING("=") + mpt::transcode<mpt::ustring>( libopenmpt_encoding, ctl.second );
 	}
 	return result;
 }
@@ -275,47 +277,47 @@ static std::int32_t double_to_pitch_flag( double factor ) {
 	return static_cast<std::int32_t>( mpt::round( std::log( factor ) / std::log( 2.0 ) * 24.0 ) );
 }
 
-static concat_stream<std::string> & operator << ( concat_stream<std::string> & s, const commandlineflags & flags ) {
-	s << "Quiet: " << flags.quiet << lf;
-	s << "Verbose: " << flags.verbose << lf;
-	s << "Mode : " << mode_to_string( flags.mode ) << lf;
-	s << "Show progress: " << flags.show_progress << lf;
-	s << "Show peak meters: " << flags.show_meters << lf;
-	s << "Show channel peak meters: " << flags.show_channel_meters << lf;
-	s << "Show details: " << flags.show_details << lf;
-	s << "Show message: " << flags.show_message << lf;
-	s << "Update: " << flags.ui_redraw_interval << "ms" << lf;
-	s << "Device: " << flags.device << lf;
-	s << "Buffer: " << flags.buffer << "ms" << lf;
-	s << "Period: " << flags.period << "ms" << lf;
-	s << "Samplerate: " << flags.samplerate << lf;
-	s << "Channels: " << flags.channels << lf;
-	s << "Float: " << flags.use_float << lf;
-	s << "Gain: " << flags.gain / 100.0 << lf;
-	s << "Stereo separation: " << flags.separation << lf;
-	s << "Interpolation filter taps: " << flags.filtertaps << lf;
-	s << "Volume ramping strength: " << flags.ramping << lf;
-	s << "Tempo: " << tempo_flag_to_double( flags.tempo ) << lf;
-	s << "Pitch: " << pitch_flag_to_double( flags.pitch ) << lf;
-	s << "Output dithering: " << flags.dither << lf;
-	s << "Repeat count: " << flags.repeatcount << lf;
-	s << "Seek target: " << flags.seek_target << lf;
-	s << "End time: " << flags.end_time << lf;
-	s << "Standard output: " << flags.use_stdout << lf;
-	s << "Output filename: " << mpt::transcode<std::string>( mpt::common_encoding::utf8, flags.output_filename ) << lf;
-	s << "Force overwrite output file: " << flags.force_overwrite << lf;
-	s << "Ctls: " << ctls_to_string( flags.ctls ) << lf;
+static concat_stream<mpt::ustring> & operator << ( concat_stream<mpt::ustring> & s, const commandlineflags & flags ) {
+	s << MPT_USTRING("Quiet: ") << flags.quiet << lf;
+	s << MPT_USTRING("Verbose: ") << flags.verbose << lf;
+	s << MPT_USTRING("Mode : ") << mode_to_string( flags.mode ) << lf;
+	s << MPT_USTRING("Show progress: ") << flags.show_progress << lf;
+	s << MPT_USTRING("Show peak meters: ") << flags.show_meters << lf;
+	s << MPT_USTRING("Show channel peak meters: ") << flags.show_channel_meters << lf;
+	s << MPT_USTRING("Show details: ") << flags.show_details << lf;
+	s << MPT_USTRING("Show message: ") << flags.show_message << lf;
+	s << MPT_USTRING("Update: ") << flags.ui_redraw_interval << MPT_USTRING("ms") << lf;
+	s << MPT_USTRING("Device: ") << flags.device << lf;
+	s << MPT_USTRING("Buffer: ") << flags.buffer << MPT_USTRING("ms") << lf;
+	s << MPT_USTRING("Period: ") << flags.period << MPT_USTRING("ms") << lf;
+	s << MPT_USTRING("Samplerate: ") << flags.samplerate << lf;
+	s << MPT_USTRING("Channels: ") << flags.channels << lf;
+	s << MPT_USTRING("Float: ") << flags.use_float << lf;
+	s << MPT_USTRING("Gain: ") << flags.gain / 100.0 << lf;
+	s << MPT_USTRING("Stereo separation: ") << flags.separation << lf;
+	s << MPT_USTRING("Interpolation filter taps: ") << flags.filtertaps << lf;
+	s << MPT_USTRING("Volume ramping strength: ") << flags.ramping << lf;
+	s << MPT_USTRING("Tempo: ") << tempo_flag_to_double( flags.tempo ) << lf;
+	s << MPT_USTRING("Pitch: ") << pitch_flag_to_double( flags.pitch ) << lf;
+	s << MPT_USTRING("Output dithering: ") << flags.dither << lf;
+	s << MPT_USTRING("Repeat count: ") << flags.repeatcount << lf;
+	s << MPT_USTRING("Seek target: ") << flags.seek_target << lf;
+	s << MPT_USTRING("End time: ") << flags.end_time << lf;
+	s << MPT_USTRING("Standard output: ") << flags.use_stdout << lf;
+	s << MPT_USTRING("Output filename: ") << mpt::transcode<mpt::ustring>( flags.output_filename ) << lf;
+	s << MPT_USTRING("Force overwrite output file: ") << flags.force_overwrite << lf;
+	s << MPT_USTRING("Ctls: ") << ctls_to_string( flags.ctls ) << lf;
 	s << lf;
-	s << "Files: " << lf;
+	s << MPT_USTRING("Files: ") << lf;
 	for ( const auto & filename : flags.filenames ) {
-		s << " " << mpt::transcode<std::string>( mpt::common_encoding::utf8, filename ) << lf;
+		s << MPT_USTRING(" ") << mpt::transcode<mpt::ustring>( filename ) << lf;
 	}
 	s << lf;
 	return s;
 }
 
 static std::string trim_eol( const std::string & str ) {
-	return mpt::trim( str, std::string( "\r\n" ) );
+	return mpt::trim( str, std::string("\r\n") );
 }
 
 static mpt::native_path get_basepath( mpt::native_path filename ) {
@@ -330,18 +332,18 @@ static mpt::native_path get_filename( const mpt::native_path & filepath ) {
 	return filepath.GetFilename();
 }
 
-static std::string prepend_lines( std::string str, const std::string & prefix ) {
+static mpt::ustring prepend_lines( mpt::ustring str, const mpt::ustring & prefix ) {
 	if ( str.empty() ) {
 		return str;
 	}
-	if ( str.substr( str.length() - 1, 1 ) == std::string("\n") ) {
+	if ( str.substr( str.length() - 1, 1 ) == MPT_USTRING("\n") ) {
 		str = str.substr( 0, str.length() - 1 );
 	}
-	return mpt::replace( str, std::string("\n"), std::string("\n") + prefix );
+	return mpt::replace( str, MPT_USTRING("\n"), MPT_USTRING("\n") + prefix );
 }
 
-static std::string bytes_to_string( std::uint64_t bytes ) {
-	static const char * const suffixes[] = { "B", "kB", "MB", "GB", "TB", "PB" };
+static mpt::ustring bytes_to_string( std::uint64_t bytes ) {
+	static const mpt::uchar * const suffixes[] = { MPT_ULITERAL("B"), MPT_ULITERAL("kB"), MPT_ULITERAL("MB"), MPT_ULITERAL("GB"), MPT_ULITERAL("TB"), MPT_ULITERAL("PB") };
 	int offset = 0;
 	while ( bytes > 9999 ) {
 		bytes /= 1000;
@@ -350,52 +352,52 @@ static std::string bytes_to_string( std::uint64_t bytes ) {
 			break;
 		}
 	}
-	return mpt::format<std::string>::val( bytes ) + suffixes[offset];
+	return mpt::format<mpt::ustring>::val( bytes ) + suffixes[offset];
 }
 
-static std::string seconds_to_string( double time ) {
+static mpt::ustring seconds_to_string( double time ) {
 	std::int64_t time_ms = static_cast<std::int64_t>( time * 1000 );
 	std::int64_t milliseconds = time_ms % 1000;
 	std::int64_t seconds = ( time_ms / 1000 ) % 60;
 	std::int64_t minutes = ( time_ms / ( 1000 * 60 ) ) % 60;
 	std::int64_t hours = ( time_ms / ( 1000 * 60 * 60 ) );
-	std::string str;
+	mpt::ustring str;
 	if ( hours > 0 ) {
-		str += mpt::format<std::string>::val( hours ) + ":";
+		str += mpt::format<mpt::ustring>::val( hours ) + MPT_USTRING(":");
 	}
-	str += mpt::format<std::string>::dec0<2>( minutes );
-	str += ":";
-	str += mpt::format<std::string>::dec0<2>( seconds );
-	str += ".";
-	str += mpt::format<std::string>::dec0<3>( milliseconds );
+	str += mpt::format<mpt::ustring>::dec0<2>( minutes );
+	str += MPT_USTRING(":");
+	str += mpt::format<mpt::ustring>::dec0<2>( seconds );
+	str += MPT_USTRING(".");
+	str += mpt::format<mpt::ustring>::dec0<3>( milliseconds );
 	return str;
 }
 
-static void show_info( concat_stream<std::string> & log, bool verbose ) {
-	log << "openmpt123" << " v" << OPENMPT123_VERSION_STRING << ", libopenmpt " << openmpt::string::get( "library_version" ) << " (" << "OpenMPT " << openmpt::string::get( "core_version" ) << ")" << lf;
-	log << "Copyright (c) 2013-2022 OpenMPT Project Developers and Contributors <https://lib.openmpt.org/>" << lf;
+static void show_info( concat_stream<mpt::ustring> & log, bool verbose ) {
+	log << MPT_USTRING("openmpt123") << MPT_USTRING(" v") << mpt::transcode<mpt::ustring>( mpt::source_encoding, OPENMPT123_VERSION_STRING ) << MPT_USTRING(", libopenmpt ") << mpt::transcode<mpt::ustring>( libopenmpt_encoding, openmpt::string::get( "library_version" ) ) << MPT_USTRING(" (") << MPT_USTRING("OpenMPT ") << mpt::transcode<mpt::ustring>( libopenmpt_encoding, openmpt::string::get( "core_version" ) ) << MPT_USTRING(")") << lf;
+	log << MPT_USTRING("Copyright (c) 2013-2022 OpenMPT Project Developers and Contributors <https://lib.openmpt.org/>") << lf;
 	if ( !verbose ) {
 		log << lf;
 		return;
 	}
-	log << "  libopenmpt source..: " << openmpt::string::get( "source_url" ) << lf;
-	log << "  libopenmpt date....: " << openmpt::string::get( "source_date" ) << lf;
-	log << "  libopenmpt srcinfo.: ";
+	log << MPT_USTRING("  libopenmpt source..: ") << mpt::transcode<mpt::ustring>( libopenmpt_encoding, openmpt::string::get( "source_url" ) ) << lf;
+	log << MPT_USTRING("  libopenmpt date....: ") << mpt::transcode<mpt::ustring>( libopenmpt_encoding, openmpt::string::get( "source_date" ) ) << lf;
+	log << MPT_USTRING("  libopenmpt srcinfo.: ");
 	{
-		std::vector<std::string> fields;
+		std::vector<mpt::ustring> fields;
 		if ( openmpt::string::get( "source_is_package" ) == "1" ) {
-			fields.push_back( "package" );
+			fields.push_back( MPT_USTRING("package") );
 		}
 		if ( openmpt::string::get( "source_is_release" ) == "1" ) {
-			fields.push_back( "release" );
+			fields.push_back( MPT_USTRING("release") );
 		}
 		if ( ( !openmpt::string::get( "source_revision" ).empty() ) && ( openmpt::string::get( "source_revision" ) != "0" ) ) {
-			std::string field = "rev" + openmpt::string::get( "source_revision" );
+			mpt::ustring field = MPT_USTRING("rev") + mpt::transcode<mpt::ustring>( libopenmpt_encoding, openmpt::string::get( "source_revision" ) );
 			if ( openmpt::string::get( "source_has_mixed_revisions" ) == "1" ) {
-				field += "+mixed";
+				field += MPT_USTRING("+mixed");
 			}
 			if ( openmpt::string::get( "source_is_modified" ) == "1" ) {
-				field += "+modified";
+				field += MPT_USTRING("+modified");
 			}
 			fields.push_back( field );
 		}
@@ -404,57 +406,57 @@ static void show_info( concat_stream<std::string> & log, bool verbose ) {
 			if ( first ) {
 				first = false;
 			} else {
-				log << ", ";
+				log << MPT_USTRING(", ");
 			}
 			log << field;
 		}
 	}
 	log << lf;
-	log << "  libopenmpt compiler: " << openmpt::string::get( "build_compiler" ) << lf;
-	log << "  libopenmpt features: " << openmpt::string::get( "library_features" ) << lf;
+	log << MPT_USTRING("  libopenmpt compiler: ") << mpt::transcode<mpt::ustring>( libopenmpt_encoding, openmpt::string::get( "build_compiler" ) ) << lf;
+	log << MPT_USTRING("  libopenmpt features: ") << mpt::transcode<mpt::ustring>( libopenmpt_encoding, openmpt::string::get( "library_features" ) ) << lf;
 #ifdef MPT_WITH_SDL2
-	log << " libSDL2 ";
+	log << MPT_USTRING(" libSDL2 ");
 	SDL_version sdlver;
 	std::memset( &sdlver, 0, sizeof( SDL_version ) );
 	SDL_GetVersion( &sdlver );
-	log << static_cast<int>( sdlver.major ) << "." << static_cast<int>( sdlver.minor ) << "." << static_cast<int>( sdlver.patch );
+	log << static_cast<int>( sdlver.major ) << MPT_USTRING(".") << static_cast<int>( sdlver.minor ) << MPT_USTRING(".") << static_cast<int>( sdlver.patch );
 	const char * revision = SDL_GetRevision();
 	if ( revision ) {
-		log << " (" << revision << ")";
+		log << MPT_USTRING(" (") << mpt::transcode<mpt::ustring>( sdl2_encoding, revision ) << MPT_USTRING(")");
 	}
-	log << ", ";
+	log << MPT_USTRING(", ");
 	std::memset( &sdlver, 0, sizeof( SDL_version ) );
 	SDL_VERSION( &sdlver );
-	log << "API: " << static_cast<int>( sdlver.major ) << "." << static_cast<int>( sdlver.minor ) << "." << static_cast<int>( sdlver.patch ) << "";
-	log << " <https://libsdl.org/>" << lf;
+	log << MPT_USTRING("API: ") << static_cast<int>( sdlver.major ) << MPT_USTRING(".") << static_cast<int>( sdlver.minor ) << MPT_USTRING(".") << static_cast<int>( sdlver.patch );
+	log << MPT_USTRING(" <https://libsdl.org/>") << lf;
 #endif
 #ifdef MPT_WITH_PULSEAUDIO
-	log << " " << "libpulse, libpulse-simple" << " (headers " << pa_get_headers_version()  << ", API " << PA_API_VERSION << ", PROTOCOL " << PA_PROTOCOL_VERSION << ", library " << ( pa_get_library_version() ? pa_get_library_version() : "unknown" ) << ") <https://www.freedesktop.org/wiki/Software/PulseAudio/>" << lf;
+	log << MPT_USTRING(" ") << MPT_USTRING("libpulse, libpulse-simple") << MPT_USTRING(" (headers ") << mpt::transcode<mpt::ustring>( pulseaudio_encoding, pa_get_headers_version() ) << MPT_USTRING(", API ") << PA_API_VERSION << MPT_USTRING(", PROTOCOL ") << PA_PROTOCOL_VERSION << MPT_USTRING(", library ") << mpt::transcode<mpt::ustring>( pulseaudio_encoding, ( pa_get_library_version() ? pa_get_library_version() : "unknown" ) ) << MPT_USTRING(") <https://www.freedesktop.org/wiki/Software/PulseAudio/>") << lf;
 #endif
 #ifdef MPT_WITH_PORTAUDIO
-	log << " " << Pa_GetVersionText() << " (" << Pa_GetVersion() << ") <http://portaudio.com/>" << lf;
+	log << MPT_USTRING(" ") << mpt::transcode<mpt::ustring>( portaudio_encoding, Pa_GetVersionText() ) << MPT_USTRING(" (") << Pa_GetVersion() << MPT_USTRING(") <http://portaudio.com/>") << lf;
 #endif
 #ifdef MPT_WITH_FLAC
-	log << " FLAC " << FLAC__VERSION_STRING << ", " << FLAC__VENDOR_STRING << ", API " << FLAC_API_VERSION_CURRENT << "." << FLAC_API_VERSION_REVISION << "." << FLAC_API_VERSION_AGE << " <https://xiph.org/flac/>" << lf;
+	log << MPT_USTRING(" FLAC ") << mpt::transcode<mpt::ustring>( mpt::source_encoding, FLAC__VERSION_STRING ) << MPT_USTRING(", ") << mpt::transcode<mpt::ustring>( mpt::source_encoding, FLAC__VENDOR_STRING ) << MPT_USTRING(", API ") << FLAC_API_VERSION_CURRENT << MPT_USTRING(".") << FLAC_API_VERSION_REVISION << MPT_USTRING(".") << FLAC_API_VERSION_AGE << MPT_USTRING(" <https://xiph.org/flac/>") << lf;
 #endif
 #ifdef MPT_WITH_SNDFILE
 	char sndfile_info[128];
 	std::memset( sndfile_info, 0, sizeof( sndfile_info ) );
 	sf_command( 0, SFC_GET_LIB_VERSION, sndfile_info, sizeof( sndfile_info ) );
 	sndfile_info[127] = '\0';
-	log << " libsndfile " << sndfile_info << " <http://mega-nerd.com/libsndfile/>" << lf;
+	log << MPT_USTRING(" libsndfile ") << mpt::transcode<mpt::ustring>( sndfile_encoding, sndfile_info ) << MPT_USTRING(" <http://mega-nerd.com/libsndfile/>") << lf;
 #endif
 	log << lf;
 }
 
 static void show_man_version( textout & log ) {
-	log << "openmpt123" << " v" << OPENMPT123_VERSION_STRING << lf;
+	log << MPT_USTRING("openmpt123") << MPT_USTRING(" v") << mpt::transcode<mpt::ustring>( mpt::source_encoding, OPENMPT123_VERSION_STRING ) << lf;
 	log << lf;
-	log << "Copyright (c) 2013-2022 OpenMPT Project Developers and Contributors <https://lib.openmpt.org/>" << lf;
+	log << MPT_USTRING("Copyright (c) 2013-2022 OpenMPT Project Developers and Contributors <https://lib.openmpt.org/>") << lf;
 }
 
 static void show_short_version( textout & log ) {
-	log << OPENMPT123_VERSION_STRING << " / " << openmpt::string::get( "library_version" ) << " / " << openmpt::string::get( "core_version" ) << lf;
+	log << mpt::transcode<mpt::ustring>( mpt::source_encoding, OPENMPT123_VERSION_STRING ) << MPT_USTRING(" / ") << mpt::transcode<mpt::ustring>( libopenmpt_encoding, openmpt::string::get( "library_version" ) ) << MPT_USTRING(" / ") << mpt::transcode<mpt::ustring>( libopenmpt_encoding, openmpt::string::get( "core_version" ) ) << lf;
 	log.writeout();
 }
 
@@ -470,28 +472,28 @@ static void show_long_version( textout & log ) {
 
 static void show_credits( textout & log ) {
 	show_info( log, false );
-	log << openmpt::string::get( "contact" ) << lf;
+	log << mpt::transcode<mpt::ustring>( libopenmpt_encoding, openmpt::string::get( "contact" ) ) << lf;
 	log << lf;
-	log << openmpt::string::get( "credits" ) << lf;
+	log << mpt::transcode<mpt::ustring>( libopenmpt_encoding, openmpt::string::get( "credits" ) ) << lf;
 	log.writeout();
 }
 
 static void show_license( textout & log ) {
 	show_info( log, false );
-	log << license << lf;
+	log << mpt::transcode<mpt::ustring>( mpt::source_encoding, license ) << lf;
 	log.writeout();
 }
 
-static std::string get_driver_string( const std::string & driver ) {
+static mpt::ustring get_driver_string( const mpt::ustring & driver ) {
 	if ( driver.empty() ) {
-		return "default";
+		return MPT_USTRING("default");
 	}
 	return driver;
 }
 
-static std::string get_device_string( const std::string & device ) {
+static mpt::ustring get_device_string( const mpt::ustring & device ) {
 	if ( device.empty() ) {
-		return "default";
+		return MPT_USTRING("default");
 	}
 	return device;
 }
@@ -500,127 +502,127 @@ static void show_help_keyboard( textout & log, bool man_version = false ) {
 	if ( !man_version ) {
 		show_info( log, false );
 	}
-	log << "Keyboard hotkeys (use 'openmpt123 --ui'):" << lf;
+	log << MPT_USTRING("Keyboard hotkeys (use 'openmpt123 --ui'):") << lf;
 	log << lf;
-	log << " [q]      quit" << lf;
-	log << " [ ]      pause / unpause" << lf;
-	log << " [N]      skip 10 files backward" << lf;
-	log << " [n]      prev file" << lf;
-	log << " [m]      next file" << lf;
-	log << " [M]      skip 10 files forward" << lf;
-	log << " [h]      seek 10 seconds backward" << lf;
-	log << " [j]      seek 1 seconds backward" << lf;
-	log << " [k]      seek 1 seconds forward" << lf;
-	log << " [l]      seek 10 seconds forward" << lf;
-	log << " [u]|[i]  +/- tempo" << lf;
-	log << " [o]|[p]  +/- pitch" << lf;
-	log << " [3]|[4]  +/- gain" << lf;
-	log << " [5]|[6]  +/- stereo separation" << lf;
-	log << " [7]|[8]  +/- filter taps" << lf;
-	log << " [9]|[0]  +/- volume ramping" << lf;
+	log << MPT_USTRING(" [q]      quit") << lf;
+	log << MPT_USTRING(" [ ]      pause / unpause") << lf;
+	log << MPT_USTRING(" [N]      skip 10 files backward") << lf;
+	log << MPT_USTRING(" [n]      prev file") << lf;
+	log << MPT_USTRING(" [m]      next file") << lf;
+	log << MPT_USTRING(" [M]      skip 10 files forward") << lf;
+	log << MPT_USTRING(" [h]      seek 10 seconds backward") << lf;
+	log << MPT_USTRING(" [j]      seek 1 seconds backward") << lf;
+	log << MPT_USTRING(" [k]      seek 1 seconds forward") << lf;
+	log << MPT_USTRING(" [l]      seek 10 seconds forward") << lf;
+	log << MPT_USTRING(" [u]|[i]  +/- tempo") << lf;
+	log << MPT_USTRING(" [o]|[p]  +/- pitch") << lf;
+	log << MPT_USTRING(" [3]|[4]  +/- gain") << lf;
+	log << MPT_USTRING(" [5]|[6]  +/- stereo separation") << lf;
+	log << MPT_USTRING(" [7]|[8]  +/- filter taps") << lf;
+	log << MPT_USTRING(" [9]|[0]  +/- volume ramping") << lf;
 	log << lf;
 	if ( !man_version ) {
 		log.writeout();
 	}
 }
 
-static void show_help( textout & log, bool with_info = true, bool longhelp = false, bool man_version = false, const std::string & message = std::string() ) {
+static void show_help( textout & log, bool with_info = true, bool longhelp = false, bool man_version = false, const mpt::ustring & message = mpt::ustring() ) {
 	if ( with_info ) {
 		show_info( log, false );
 	}
 	{
-		log << "Usage: openmpt123 [options] [--] file1 [file2] ..." << lf;
+		log << MPT_USTRING("Usage: openmpt123 [options] [--] file1 [file2] ...") << lf;
 		log << lf;
 		if ( man_version ) {
-			log << "openmpt123 plays module music files." << lf;
+			log << MPT_USTRING("openmpt123 plays module music files.") << lf;
 			log << lf;
 		}
 		if ( man_version ) {
-			log << "Options:" << lf;
+			log << MPT_USTRING("Options:") << lf;
 			log << lf;
 		}
-		log << " -h, --help                 Show help" << lf;
-		log << "     --help-keyboard        Show keyboard hotkeys in ui mode" << lf;
-		log << " -q, --quiet                Suppress non-error screen output" << lf;
-		log << " -v, --verbose              Show more screen output" << lf;
-		log << "     --version              Show version information and exit" << lf;
-		log << "     --short-version        Show version number and nothing else" << lf;
-		log << "     --long-version         Show long version information and exit" << lf;
-		log << "     --credits              Show elaborate contributors list" << lf;
-		log << "     --license              Show license" << lf;
+		log << MPT_USTRING(" -h, --help                 Show help") << lf;
+		log << MPT_USTRING("     --help-keyboard        Show keyboard hotkeys in ui mode") << lf;
+		log << MPT_USTRING(" -q, --quiet                Suppress non-error screen output") << lf;
+		log << MPT_USTRING(" -v, --verbose              Show more screen output") << lf;
+		log << MPT_USTRING("     --version              Show version information and exit") << lf;
+		log << MPT_USTRING("     --short-version        Show version number and nothing else") << lf;
+		log << MPT_USTRING("     --long-version         Show long version information and exit") << lf;
+		log << MPT_USTRING("     --credits              Show elaborate contributors list") << lf;
+		log << MPT_USTRING("     --license              Show license") << lf;
 		log << lf;
-		log << "     --probe                Probe each file whether it is a supported file format" << lf;
-		log << "     --info                 Display information about each file" << lf;
-		log << "     --ui                   Interactively play each file" << lf;
-		log << "     --batch                Play each file" << lf;
-		log << "     --render               Render each file to individual PCM data files" << lf;
+		log << MPT_USTRING("     --probe                Probe each file whether it is a supported file format") << lf;
+		log << MPT_USTRING("     --info                 Display information about each file") << lf;
+		log << MPT_USTRING("     --ui                   Interactively play each file") << lf;
+		log << MPT_USTRING("     --batch                Play each file") << lf;
+		log << MPT_USTRING("     --render               Render each file to individual PCM data files") << lf;
 		if ( !longhelp ) {
 			log << lf;
 			log.writeout();
 			return;
 		}
 		log << lf;
-		log << "     --terminal-width n     Assume terminal is n characters wide [default: " << commandlineflags().terminal_width << "]" << lf;
-		log << "     --terminal-height n    Assume terminal is n characters high [default: " << commandlineflags().terminal_height << "]" << lf;
+		log << MPT_USTRING("     --terminal-width n     Assume terminal is n characters wide [default: ") << commandlineflags().terminal_width << MPT_USTRING("]") << lf;
+		log << MPT_USTRING("     --terminal-height n    Assume terminal is n characters high [default: ") << commandlineflags().terminal_height << MPT_USTRING("]") << lf;
 		log << lf;
-		log << "     --[no-]progress        Show playback progress [default: " << commandlineflags().show_progress << "]" << lf;
-		log << "     --[no-]meters          Show peak meters [default: " << commandlineflags().show_meters << "]" << lf;
-		log << "     --[no-]channel-meters  Show channel peak meters (EXPERIMENTAL) [default: " << commandlineflags().show_channel_meters << "]" << lf;
-		log << "     --[no-]pattern         Show pattern (EXPERIMENTAL) [default: " << commandlineflags().show_pattern << "]" << lf;
+		log << MPT_USTRING("     --[no-]progress        Show playback progress [default: ") << commandlineflags().show_progress << MPT_USTRING("]") << lf;
+		log << MPT_USTRING("     --[no-]meters          Show peak meters [default: ") << commandlineflags().show_meters << MPT_USTRING("]") << lf;
+		log << MPT_USTRING("     --[no-]channel-meters  Show channel peak meters (EXPERIMENTAL) [default: ") << commandlineflags().show_channel_meters << MPT_USTRING("]") << lf;
+		log << MPT_USTRING("     --[no-]pattern         Show pattern (EXPERIMENTAL) [default: ") << commandlineflags().show_pattern << MPT_USTRING("]") << lf;
 		log << lf;
-		log << "     --[no-]details         Show song details [default: " << commandlineflags().show_details << "]" << lf;
-		log << "     --[no-]message         Show song message [default: " << commandlineflags().show_message << "]" << lf;
+		log << MPT_USTRING("     --[no-]details         Show song details [default: ") << commandlineflags().show_details << MPT_USTRING("]") << lf;
+		log << MPT_USTRING("     --[no-]message         Show song message [default: ") << commandlineflags().show_message << MPT_USTRING("]") << lf;
 		log << lf;
-		log << "     --update n             Set output update interval to n ms [default: " << commandlineflags().ui_redraw_interval << "]" << lf;
+		log << MPT_USTRING("     --update n             Set output update interval to n ms [default: ") << commandlineflags().ui_redraw_interval << MPT_USTRING("]") << lf;
 		log << lf;
-		log << "     --samplerate n         Set samplerate to n Hz [default: " << commandlineflags().samplerate << "]" << lf;
-		log << "     --channels n           use n [1,2,4] output channels [default: " << commandlineflags().channels << "]" << lf;
-		log << "     --[no-]float           Output 32bit floating point instead of 16bit integer [default: " << commandlineflags().use_float << "]" << lf;
+		log << MPT_USTRING("     --samplerate n         Set samplerate to n Hz [default: ") << commandlineflags().samplerate << MPT_USTRING("]") << lf;
+		log << MPT_USTRING("     --channels n           use n [1,2,4] output channels [default: ") << commandlineflags().channels << MPT_USTRING("]") << lf;
+		log << MPT_USTRING("     --[no-]float           Output 32bit floating point instead of 16bit integer [default: ") << commandlineflags().use_float << MPT_USTRING("]") << lf;
 		log << lf;
-		log << "     --gain n               Set output gain to n dB [default: " << commandlineflags().gain / 100.0 << "]" << lf;
-		log << "     --stereo n             Set stereo separation to n % [default: " << commandlineflags().separation << "]" << lf;
-		log << "     --filter n             Set interpolation filter taps to n [1,2,4,8] [default: " << commandlineflags().filtertaps << "]" << lf;
-		log << "     --ramping n            Set volume ramping strength n [0..5] [default: " << commandlineflags().ramping << "]" << lf;
-		log << "     --tempo f              Set tempo factor f [default: " << tempo_flag_to_double( commandlineflags().tempo ) << "]" << lf;
-		log << "     --pitch f              Set pitch factor f [default: " << pitch_flag_to_double( commandlineflags().pitch ) << "]" << lf;
-		log << "     --dither n             Dither type to use (if applicable for selected output format): [0=off,1=auto,2=0.5bit,3=1bit] [default: " << commandlineflags().dither << "]" << lf;
+		log << MPT_USTRING("     --gain n               Set output gain to n dB [default: ") << commandlineflags().gain / 100.0 << MPT_USTRING("]") << lf;
+		log << MPT_USTRING("     --stereo n             Set stereo separation to n % [default: ") << commandlineflags().separation << MPT_USTRING("]") << lf;
+		log << MPT_USTRING("     --filter n             Set interpolation filter taps to n [1,2,4,8] [default: ") << commandlineflags().filtertaps << MPT_USTRING("]") << lf;
+		log << MPT_USTRING("     --ramping n            Set volume ramping strength n [0..5] [default: ") << commandlineflags().ramping << MPT_USTRING("]") << lf;
+		log << MPT_USTRING("     --tempo f              Set tempo factor f [default: ") << tempo_flag_to_double( commandlineflags().tempo ) << MPT_USTRING("]") << lf;
+		log << MPT_USTRING("     --pitch f              Set pitch factor f [default: ") << pitch_flag_to_double( commandlineflags().pitch ) << MPT_USTRING("]") << lf;
+		log << MPT_USTRING("     --dither n             Dither type to use (if applicable for selected output format): [0=off,1=auto,2=0.5bit,3=1bit] [default: ") << commandlineflags().dither << MPT_USTRING("]") << lf;
 		log << lf;
-		log << "     --playlist file        Load playlist from file" << lf;
-		log << "     --[no-]randomize       Randomize playlist [default: " << commandlineflags().randomize << "]" << lf;
-		log << "     --[no-]shuffle         Shuffle through playlist [default: " << commandlineflags().shuffle << "]" << lf;
-		log << "     --[no-]restart         Restart playlist when finished [default: " << commandlineflags().restart << "]" << lf;
+		log << MPT_USTRING("     --playlist file        Load playlist from file") << lf;
+		log << MPT_USTRING("     --[no-]randomize       Randomize playlist [default: ") << commandlineflags().randomize << MPT_USTRING("]") << lf;
+		log << MPT_USTRING("     --[no-]shuffle         Shuffle through playlist [default: ") << commandlineflags().shuffle << MPT_USTRING("]") << lf;
+		log << MPT_USTRING("     --[no-]restart         Restart playlist when finished [default: ") << commandlineflags().restart << MPT_USTRING("]") << lf;
 		log << lf;
-		log << "     --subsong n            Select subsong n (-1 means play all subsongs consecutively) [default: " << commandlineflags().subsong << "]" << lf;
-		log << "     --repeat n             Repeat song n times (-1 means forever) [default: " << commandlineflags().repeatcount << "]" << lf;
-		log << "     --seek n               Seek to n seconds on start [default: " << commandlineflags().seek_target << "]" << lf;
-		log << "     --end-time n           Play until position is n seconds (0 means until the end) [default: " << commandlineflags().end_time << "]" << lf;
+		log << MPT_USTRING("     --subsong n            Select subsong n (-1 means play all subsongs consecutively) [default: ") << commandlineflags().subsong << MPT_USTRING("]") << lf;
+		log << MPT_USTRING("     --repeat n             Repeat song n times (-1 means forever) [default: ") << commandlineflags().repeatcount << MPT_USTRING("]") << lf;
+		log << MPT_USTRING("     --seek n               Seek to n seconds on start [default: ") << commandlineflags().seek_target << MPT_USTRING("]") << lf;
+		log << MPT_USTRING("     --end-time n           Play until position is n seconds (0 means until the end) [default: ") << commandlineflags().end_time << MPT_USTRING("]") << lf;
 		log << lf;
-		log << "     --ctl c=v              Set libopenmpt ctl c to value v" << lf;
+		log << MPT_USTRING("     --ctl c=v              Set libopenmpt ctl c to value v") << lf;
 		log << lf;
-		log << "     --driver n             Set output driver [default: " << get_driver_string( commandlineflags().driver ) << "]," << lf;
-		log << "     --device n             Set output device [default: " << get_device_string( commandlineflags().device ) << "]," << lf;
-		log << "                            use --device help to show available devices" << lf;
-		log << "     --buffer n             Set output buffer size to n ms [default: " << commandlineflags().buffer << "]" << lf;
-		log << "     --period n             Set output period size to n ms [default: " << commandlineflags().period  << "]" << lf;
-		log << "     --stdout               Write raw audio data to stdout [default: " << commandlineflags().use_stdout << "]" << lf;
-		log << "     --output-type t        Use output format t when writing to a individual PCM files (only applies to --render mode) [default: " << mpt::transcode<std::string>( mpt::common_encoding::utf8, commandlineflags().output_extension ) << "]" << lf;
-		log << " -o, --output f             Write PCM output to file f instead of streaming to audio device (only applies to --ui and --batch modes) [default: " << mpt::transcode<std::string>( mpt::common_encoding::utf8, commandlineflags().output_filename ) << "]" << lf;
-		log << "     --force                Force overwriting of output file [default: " << commandlineflags().force_overwrite << "]" << lf;
+		log << MPT_USTRING("     --driver n             Set output driver [default: ") << get_driver_string( commandlineflags().driver ) << MPT_USTRING("],") << lf;
+		log << MPT_USTRING("     --device n             Set output device [default: ") << get_device_string( commandlineflags().device ) << MPT_USTRING("],") << lf;
+		log << MPT_USTRING("                            use --device help to show available devices") << lf;
+		log << MPT_USTRING("     --buffer n             Set output buffer size to n ms [default: ") << commandlineflags().buffer << MPT_USTRING("]") << lf;
+		log << MPT_USTRING("     --period n             Set output period size to n ms [default: ") << commandlineflags().period  << MPT_USTRING("]") << lf;
+		log << MPT_USTRING("     --stdout               Write raw audio data to stdout [default: ") << commandlineflags().use_stdout << MPT_USTRING("]") << lf;
+		log << MPT_USTRING("     --output-type t        Use output format t when writing to a individual PCM files (only applies to --render mode) [default: ") << mpt::transcode<mpt::ustring>( commandlineflags().output_extension ) << MPT_USTRING("]") << lf;
+		log << MPT_USTRING(" -o, --output f             Write PCM output to file f instead of streaming to audio device (only applies to --ui and --batch modes) [default: ") << mpt::transcode<mpt::ustring>( commandlineflags().output_filename ) << MPT_USTRING("]") << lf;
+		log << MPT_USTRING("     --force                Force overwriting of output file [default: ") << commandlineflags().force_overwrite << MPT_USTRING("]") << lf;
 		log << lf;
-		log << "     --                     Interpret further arguments as filenames" << lf;
+		log << MPT_USTRING("     --                     Interpret further arguments as filenames") << lf;
 		log << lf;
 		if ( !man_version ) {
-			log << " Supported file formats: " << lf;
-			log << "    ";
+			log << MPT_USTRING(" Supported file formats: ") << lf;
+			log << MPT_USTRING("    ");
 			std::vector<std::string> extensions = openmpt::get_supported_extensions();
 			bool first = true;
 			for ( const auto & extension : extensions ) {
 				if ( first ) {
 					first = false;
 				} else {
-					log << ", ";
+					log << MPT_USTRING(", ");
 				}
-				log << extension;
+				log << mpt::transcode<mpt::ustring>( libopenmpt_encoding, extension );
 			}
 			log << lf;
 		} else {
@@ -784,14 +786,14 @@ static void update_meter( meter_type & meter, const commandlineflags & flags, st
 	}
 }
 
-static const char * const channel_tags[4][4] = {
-	{ " C", "  ", "  ", "  " },
-	{ " L", " R", "  ", "  " },
-	{ "FL", "FR", "RC", "  " },
-	{ "FL", "FR", "RL", "RR" },
+static const mpt::uchar * const channel_tags[4][4] = {
+	{ MPT_ULITERAL(" C"), MPT_ULITERAL("  "), MPT_ULITERAL("  "), MPT_ULITERAL("  ") },
+	{ MPT_ULITERAL(" L"), MPT_ULITERAL(" R"), MPT_ULITERAL("  "), MPT_ULITERAL("  ") },
+	{ MPT_ULITERAL("FL"), MPT_ULITERAL("FR"), MPT_ULITERAL("RC"), MPT_ULITERAL("  ") },
+	{ MPT_ULITERAL("FL"), MPT_ULITERAL("FR"), MPT_ULITERAL("RL"), MPT_ULITERAL("RR") },
 };
 
-static std::string channel_to_string( int channels, int channel, const meter_channel & meter, bool tiny = false ) {
+static mpt::ustring channel_to_string( int channels, int channel, const meter_channel & meter, bool tiny = false ) {
 	int val = std::numeric_limits<int>::min();
 	int hold_pos = std::numeric_limits<int>::min();
 	if ( meter.peak > 0.0f ) {
@@ -822,81 +824,81 @@ static std::string channel_to_string( int channels, int channel, const meter_cha
 	}
 	if ( tiny ) {
 		if ( meter.clip != 0.0f || meter.peak >= 1.0f ) {
-			return "#";
+			return MPT_USTRING("#");
 		} else if ( meter.peak > std::pow( 10.0f, -6.0f / 20.0f ) ) {
-			return "O";
+			return MPT_USTRING("O");
 		} else if ( meter.peak > std::pow( 10.0f, -12.0f / 20.0f ) ) {
-			return "o";
+			return MPT_USTRING("o");
 		} else if ( meter.peak > std::pow( 10.0f, -18.0f / 20.0f ) ) {
-			return ".";
+			return MPT_USTRING(".");
 		} else {
-			return " ";
+			return MPT_USTRING(" ");
 		}
 	} else {
-		std::string res1;
-		std::string res2;
-		res1 += "        ";
+		mpt::ustring res1;
+		mpt::ustring res2;
+		res1 += MPT_USTRING("        ");
 		res1 += channel_tags[channels-1][channel];
-		res1 += " : ";
-		res2 += std::string( val, '>' ) + std::string( std::size_t{48} - val, ' ' );
-		res2 += ( ( meter.clip != 0.0f ) ? "#" : ":" );
-		res2 += std::string( headroom, '>' ) + std::string( std::size_t{12} - headroom, ' ' );
-		std::string tmp = res2;
+		res1 += MPT_USTRING(" : ");
+		res2 += mpt::ustring( val, MPT_UCHAR('>') ) + mpt::ustring( std::size_t{48} - val, MPT_UCHAR(' ') );
+		res2 += ( ( meter.clip != 0.0f ) ? MPT_USTRING("#") : MPT_USTRING(":") );
+		res2 += mpt::ustring( headroom, MPT_UCHAR('>') ) + mpt::ustring( std::size_t{12} - headroom, MPT_UCHAR(' ') );
+		mpt::ustring tmp = res2;
 		if ( 0 <= hold_pos && hold_pos <= 60 ) {
 			if ( hold_pos == 48 ) {
-				tmp[hold_pos] = '#';
+				tmp[hold_pos] = MPT_UCHAR('#');
 			} else {
-				tmp[hold_pos] = ':';
+				tmp[hold_pos] = MPT_UCHAR(':');
 			}
 		}
 		return res1 + tmp;
 	}
 }
 
-static char peak_to_char( float peak ) {
+static mpt::ustring peak_to_string( float peak ) {
 	if ( peak >= 1.0f ) {
-		return '#';
+		return MPT_USTRING("#");
 	} else if ( peak >= 0.5f ) {
-		return 'O';
+		return MPT_USTRING("O");
 	} else if ( peak >= 0.25f ) {
-		return 'o';
+		return MPT_USTRING("o");
 	} else if ( peak >= 0.125f ) {
-		return '.';
+		return MPT_USTRING(".");
 	} else {
-		return ' ';
+		return MPT_USTRING(" ");
 	}
 }
 
-static std::string peak_to_string_left( float peak, int width ) {
-	std::string result;
+static mpt::ustring peak_to_string_left( float peak, int width ) {
+	mpt::ustring result;
 	float thresh = 1.0f;
 	while ( width-- ) {
 		if ( peak >= thresh ) {
 			if ( thresh == 1.0f ) {
-				result.push_back( '#' );
+				result.push_back( MPT_UCHAR('#') );
 			} else {
-				result.push_back( '<' );
+				result.push_back( MPT_UCHAR('<') );
 			}
 		} else {
-			result.push_back( ' ' );
+			result.push_back( MPT_UCHAR(' ') );
 		}
 		thresh *= 0.5f;
 	}
 	return result;
 }
 
-static std::string peak_to_string_right( float peak, int width ) {
-	std::string result;
+static mpt::ustring peak_to_string_right( float peak, int width ) {
+	mpt::ustring result;
 	float thresh = 1.0f;
 	while ( width-- ) {
 		if ( peak >= thresh ) {
 			if ( thresh == 1.0f ) {
-				result.push_back( '#' );
+				result.push_back( MPT_UCHAR('#') );
 			} else {
-				result.push_back( '>' );
+				result.push_back( MPT_UCHAR('>') );
 			}
 		} else {
-			result.push_back( ' ' );
+			result.push_back( MPT_UCHAR(' ') );
 		}
 		thresh *= 0.5f;
 	}
@@ -904,31 +906,31 @@ static std::string peak_to_string_right( float peak, int width ) {
 	return result;
 }
 
-static void draw_meters( concat_stream<std::string> & log, const meter_type & meter, const commandlineflags & flags ) {
+static void draw_meters( concat_stream<mpt::ustring> & log, const meter_type & meter, const commandlineflags & flags ) {
 	for ( int channel = 0; channel < flags.channels; ++channel ) {
 		log << channel_to_string( flags.channels, channel, meter.channels[channel] ) << lf;
 	}
 }
 
-static void draw_meters_tiny( concat_stream<std::string> & log, const meter_type & meter, const commandlineflags & flags ) {
+static void draw_meters_tiny( concat_stream<mpt::ustring> & log, const meter_type & meter, const commandlineflags & flags ) {
 	for ( int channel = 0; channel < flags.channels; ++channel ) {
 		log << channel_to_string( flags.channels, channel, meter.channels[channel], true );
 	}
 }
 
-static void draw_channel_meters_tiny( concat_stream<std::string> & log, float peak ) {
-	log << peak_to_char( peak );
+static void draw_channel_meters_tiny( concat_stream<mpt::ustring> & log, float peak ) {
+	log << peak_to_string( peak );
 }
 
-static void draw_channel_meters_tiny( concat_stream<std::string> & log, float peak_left, float peak_right ) {
-	log << peak_to_char( peak_left ) << peak_to_char( peak_right );
+static void draw_channel_meters_tiny( concat_stream<mpt::ustring> & log, float peak_left, float peak_right ) {
+	log << peak_to_string( peak_left ) << peak_to_string( peak_right );
 }
 
-static void draw_channel_meters( concat_stream<std::string> & log, float peak_left, float peak_right, int width ) {
+static void draw_channel_meters( concat_stream<mpt::ustring> & log, float peak_left, float peak_right, int width ) {
 	if ( width >= 8 + 1 + 8 ) {
 		width = 8 + 1 + 8;
 	}
-	log << peak_to_string_left( peak_left, width / 2 ) << ( width % 2 == 1 ? ":" : "" ) << peak_to_string_right( peak_right, width / 2 );
+	log << peak_to_string_left( peak_left, width / 2 ) << ( width % 2 == 1 ? MPT_USTRING(":") : MPT_USTRING("") ) << peak_to_string_right( peak_right, width / 2 );
 }
 
 template < typename Tsample, typename Tmod >
@@ -1078,7 +1080,7 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 			case 4: count = mod.read( flags.samplerate, bufsize, left.data(), right.data(), rear_left.data(), rear_right.data() ); break;
 		}
 		
-		char cpu_str[64] = "";
+		mpt::ustring cpu_str;
 		if ( flags.show_details ) {
 			cpu_end = std::clock();
 			if ( count > 0 ) {
@@ -1087,7 +1089,7 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 				cpu /= ( static_cast<double>( count ) ) / static_cast<double>( flags.samplerate );
 				double mix = ( static_cast<double>( count ) ) / static_cast<double>( flags.samplerate );
 				cpu_smooth = ( 1.0 - mix ) * cpu_smooth + mix * cpu;
-				std::snprintf( cpu_str, 64, "%.2f%%", cpu_smooth * 100.0 );
+				cpu_str = mpt::format<mpt::ustring>::fix( cpu_smooth * 100.0, 2 ) + MPT_USTRING("%");
 			}
 		}
 
@@ -1119,10 +1121,10 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 				if ( width > 11 ) {
 					width = 11;
 				}
-				log << " ";
+				log << MPT_USTRING(" ");
 				for ( std::int32_t channel = 0; channel < mod.get_num_channels(); ++channel ) {
 					if ( width >= 3 ) {
-						log << ":";
+						log << MPT_USTRING(":");
 					}
 					if ( width == 1 ) {
 						draw_channel_meters_tiny( log, ( mod.get_current_channel_vu_left( channel ) + mod.get_current_channel_vu_right( channel ) ) * (1.0f/std::sqrt(2.0f)) );
@@ -1133,7 +1135,7 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 					}
 				}
 				if ( width >= 3 ) {
-					log << ":";
+					log << MPT_USTRING(":");
 				}
 				log << lf;
 			}
@@ -1145,75 +1147,75 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 				for ( std::int32_t line = 0; line < pattern_lines; ++line ) {
 					std::int32_t row = mod.get_current_row() - ( pattern_lines / 2 ) + line;
 					if ( row == mod.get_current_row() ) {
-						log << ">";
+						log << MPT_USTRING(">");
 					} else {
-						log << " ";
+						log << MPT_USTRING(" ");
 					}
 					if ( row < 0 || row >= mod.get_pattern_num_rows( mod.get_current_pattern() ) ) {
 						for ( std::int32_t channel = 0; channel < mod.get_num_channels(); ++channel ) {
 							if ( width >= 3 ) {
-								log << ":";
+								log << MPT_USTRING(":");
 							}
-							log << std::string( width >= 3 ? width - 1 : width, ' ' );
+							log << mpt::ustring( width >= 3 ? width - 1 : width, MPT_UCHAR(' ') );
 						}
 					} else {
 						for ( std::int32_t channel = 0; channel < mod.get_num_channels(); ++channel ) {
 							if ( width >= 3 ) {
 								if ( row == mod.get_current_row() ) {
-									log << "+";
+									log << MPT_USTRING("+");
 								} else {
-									log << ":";
+									log << MPT_USTRING(":");
 								}
 							}
-							log << mod.format_pattern_row_channel( mod.get_current_pattern(), row, channel, width >= 3 ? width - 1 : width );
+							log << mpt::transcode<mpt::ustring>( libopenmpt_encoding, mod.format_pattern_row_channel( mod.get_current_pattern(), row, channel, width >= 3 ? width - 1 : width ) );
 						}
 					}
 					if ( width >= 3 ) {
-						log << ":";
+						log << MPT_USTRING(":");
 					}
 					log << lf;
 				}
 			}
 			if ( flags.show_ui ) {
-				log << "Settings...: ";
-				log << "Gain: " << flags.gain * 0.01f << " dB" << "   ";
-				log << "Stereo: " << flags.separation << " %" << "   ";
-				log << "Filter: " << flags.filtertaps << " taps" << "   ";
-				log << "Ramping: " << flags.ramping << "   ";
+				log << MPT_USTRING("Settings...: ");
+				log << MPT_USTRING("Gain: ") << flags.gain * 0.01f << MPT_USTRING(" dB") << MPT_USTRING("   ");
+				log << MPT_USTRING("Stereo: ") << flags.separation << MPT_USTRING(" %") << MPT_USTRING("   ");
+				log << MPT_USTRING("Filter: ") << flags.filtertaps << MPT_USTRING(" taps") << MPT_USTRING("   ");
+				log << MPT_USTRING("Ramping: ") << flags.ramping << MPT_USTRING("   ");
 				log  << lf;
 			}
 			if ( flags.show_details ) {
-				log << "Mixer......: ";
-				log << "CPU:" << align_right<std::string>( ':', 6, cpu_str );
-				log << "   ";
-				log << "Chn:" << align_right<std::string>( ':', 3, mod.get_current_playing_channels() );
-				log << "   ";
+				log << MPT_USTRING("Mixer......: ");
+				log << MPT_USTRING("CPU:") << align_right<mpt::ustring>( MPT_UCHAR(':'), 6, cpu_str );
+				log << MPT_USTRING("   ");
+				log << MPT_USTRING("Chn:") << align_right<mpt::ustring>( MPT_UCHAR(':'), 3, mod.get_current_playing_channels() );
+				log << MPT_USTRING("   ");
 				log << lf;
 				if ( flags.show_progress ) {
-					log << "Player.....: ";
-					log << "Ord:" << align_right<std::string>( ':', 3, mod.get_current_order() ) << "/" << align_right<std::string>( ':', 3, mod.get_num_orders() );
-					log << " ";
-					log << "Pat:" << align_right<std::string>( ':', 3, mod.get_current_pattern() );
-					log << " ";
-					log << "Row:" << align_right<std::string>( ':', 3, mod.get_current_row() );
-					log << "   ";
-					log << "Spd:" << align_right<std::string>( ':', 2, mod.get_current_speed() );
-					log << " ";
-					log << "Tmp:" << align_right<std::string>( ':', 6, mpt::format<std::string>::fix( mod.get_current_tempo2(), 2 ) );
-					log << "   ";
+					log << MPT_USTRING("Player.....: ");
+					log << MPT_USTRING("Ord:") << align_right<mpt::ustring>( MPT_UCHAR(':'), 3, mod.get_current_order() ) << MPT_USTRING("/") << align_right<mpt::ustring>( MPT_UCHAR(':'), 3, mod.get_num_orders() );
+					log << MPT_USTRING(" ");
+					log << MPT_USTRING("Pat:") << align_right<mpt::ustring>( MPT_UCHAR(':'), 3, mod.get_current_pattern() );
+					log << MPT_USTRING(" ");
+					log << MPT_USTRING("Row:") << align_right<mpt::ustring>( MPT_UCHAR(':'), 3, mod.get_current_row() );
+					log << MPT_USTRING("   ");
+					log << MPT_USTRING("Spd:") << align_right<mpt::ustring>( MPT_UCHAR(':'), 2, mod.get_current_speed() );
+					log << MPT_USTRING(" ");
+					log << MPT_USTRING("Tmp:") << align_right<mpt::ustring>( MPT_UCHAR(':'), 6, mpt::format<mpt::ustring>::fix( mod.get_current_tempo2(), 2 ) );
+					log << MPT_USTRING("   ");
 					log << lf;
 				}
 			}
 			if ( flags.show_progress ) {
-				log << "Position...: " << seconds_to_string( mod.get_position_seconds() ) << " / " << seconds_to_string( duration ) << "   " << lf;
+				log << MPT_USTRING("Position...: ") << seconds_to_string( mod.get_position_seconds() ) << MPT_USTRING(" / ") << seconds_to_string( duration ) << MPT_USTRING("   ") << lf;
 			}
 		} else if ( flags.show_channel_meters ) {
 			if ( flags.show_ui || flags.show_details || flags.show_progress ) {
 				int width = ( flags.terminal_width - 3 ) / mod.get_num_channels();
-				log << " ";
+				log << MPT_USTRING(" ");
 				for ( std::int32_t channel = 0; channel < mod.get_num_channels(); ++channel ) {
 					if ( width >= 3 ) {
-						log << ":";
+						log << MPT_USTRING(":");
 					}
 					if ( width == 1 ) {
 						draw_channel_meters_tiny( log, ( mod.get_current_channel_vu_left( channel ) + mod.get_current_channel_vu_right( channel ) ) * (1.0f/std::sqrt(2.0f)) );
@@ -1224,53 +1226,53 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 					}
 				}
 				if ( width >= 3 ) {
-					log << ":";
+					log << MPT_USTRING(":");
 				}
 			}
-			log << "   " << "\r";
+			log << MPT_USTRING("   ") << MPT_USTRING("\r");
 		} else {
 			if ( flags.show_ui ) {
-				log << " ";
-				log << align_right<std::string>( ':', 3, flags.gain * 0.01f ) << "dB";
-				log << "|";
-				log << align_right<std::string>( ':', 3, flags.separation ) << "%";
-				log << "|";
-				log << align_right<std::string>( ':', 2, flags.filtertaps ) << "taps";
-				log << "|";
-				log << align_right<std::string>( ':', 3, flags.ramping );
+				log << MPT_USTRING(" ");
+				log << align_right<mpt::ustring>( MPT_UCHAR(':'), 3, flags.gain * 0.01f ) << MPT_USTRING("dB");
+				log << MPT_USTRING("|");
+				log << align_right<mpt::ustring>( MPT_UCHAR(':'), 3, flags.separation ) << MPT_USTRING("%");
+				log << MPT_USTRING("|");
+				log << align_right<mpt::ustring>( MPT_UCHAR(':'), 2, flags.filtertaps ) << MPT_USTRING("taps");
+				log << MPT_USTRING("|");
+				log << align_right<mpt::ustring>( MPT_UCHAR(':'), 3, flags.ramping );
 			}
 			if ( flags.show_meters ) {
-				log << " ";
+				log << MPT_USTRING(" ");
 				draw_meters_tiny( log, meter, flags );
 			}
 			if ( flags.show_details && flags.show_ui ) {
-				log << " ";
-				log << "CPU:" << align_right<std::string>( ':', 6, cpu_str );
-				log << "|";
-				log << "Chn:" << align_right<std::string>( ':', 3, mod.get_current_playing_channels() );
+				log << MPT_USTRING(" ");
+				log << MPT_USTRING("CPU:") << align_right<mpt::ustring>( MPT_UCHAR(':'), 6, cpu_str );
+				log << MPT_USTRING("|");
+				log << MPT_USTRING("Chn:") << align_right<mpt::ustring>( MPT_UCHAR(':'), 3, mod.get_current_playing_channels() );
 			}
 			if ( flags.show_details && !flags.show_ui ) {
 				if ( flags.show_progress ) {
-					log << " ";
-					log << "Ord:" << align_right<std::string>( ':', 3, mod.get_current_order() ) << "/" << align_right<std::string>( ':', 3, mod.get_num_orders() );
-					log << "|";
-					log << "Pat:" << align_right<std::string>( ':', 3, mod.get_current_pattern() );
-					log << "|";
-					log << "Row:" << align_right<std::string>( ':', 3, mod.get_current_row() );
-					log << " ";
-					log << "Spd:" << align_right<std::string>( ':', 2, mod.get_current_speed() );
-					log << "|";
-					log << "Tmp:" << align_right<std::string>( ':', 3, mpt::format<std::string>::fix( mod.get_current_tempo2(), 2 ) );
+					log << MPT_USTRING(" ");
+					log << MPT_USTRING("Ord:") << align_right<mpt::ustring>( MPT_UCHAR(':'), 3, mod.get_current_order() ) << MPT_USTRING("/") << align_right<mpt::ustring>( MPT_UCHAR(':'), 3, mod.get_num_orders() );
+					log << MPT_USTRING("|");
+					log << MPT_USTRING("Pat:") << align_right<mpt::ustring>( MPT_UCHAR(':'), 3, mod.get_current_pattern() );
+					log << MPT_USTRING("|");
+					log << MPT_USTRING("Row:") << align_right<mpt::ustring>( MPT_UCHAR(':'), 3, mod.get_current_row() );
+					log << MPT_USTRING(" ");
+					log << MPT_USTRING("Spd:") << align_right<mpt::ustring>( MPT_UCHAR(':'), 2, mod.get_current_speed() );
+					log << MPT_USTRING("|");
+					log << MPT_USTRING("Tmp:") << align_right<mpt::ustring>( MPT_UCHAR(':'), 3, mpt::format<mpt::ustring>::fix( mod.get_current_tempo2(), 2 ) );
 				}
 			}
 			if ( flags.show_progress ) {
-				log << " ";
+				log << MPT_USTRING(" ");
 				log << seconds_to_string( mod.get_position_seconds() );
-				log << "/";
+				log << MPT_USTRING("/");
 				log << seconds_to_string( duration );
 			}
 			if ( flags.show_ui || flags.show_details || flags.show_progress ) {
-				log << "   " << "\r";
+				log << MPT_USTRING("   ") << MPT_USTRING("\r");
 			}
 		}
 
@@ -1291,32 +1293,32 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 }
 
 template < typename Tmod >
-std::map<std::string,std::string> get_metadata( const Tmod & mod ) {
-	std::map<std::string,std::string> result;
+std::map<mpt::ustring, mpt::ustring> get_metadata( const Tmod & mod ) {
+	std::map<mpt::ustring, mpt::ustring> result;
 	const std::vector<std::string> metadata_keys = mod.get_metadata_keys();
 	for ( const auto & key : metadata_keys ) {
-		result[ key ] = mod.get_metadata( key );
+		result[ mpt::transcode<mpt::ustring>( libopenmpt_encoding, key ) ] = mpt::transcode<mpt::ustring>( libopenmpt_encoding, mod.get_metadata( key ) );
 	}
 	return result;
 }
 
-static void set_field( std::vector<field> & fields, const std::string & name, const std::string & value ) {
+static void set_field( std::vector<field> & fields, const mpt::ustring & name, const mpt::ustring & value ) {
 	fields.push_back( field{ name, value } );
 }
 
 static void show_fields( textout & log, const std::vector<field> & fields ) {
 	const std::size_t fw = 11;
 	for ( const auto & field : fields ) {
-		std::string key = field.key;
-		std::string val = field.val;
+		mpt::ustring key = field.key;
+		mpt::ustring val = field.val;
 		if ( key.length() < fw ) {
-			key += std::string( fw - key.length(), '.' );
+			key += mpt::ustring( fw - key.length(), MPT_UCHAR('.') );
 		}
 		if ( key.length() > fw ) {
 			key = key.substr( 0, fw );
 		}
-		key += ": ";
-		val = prepend_lines( val, std::string( fw, ' ' ) + ": " );
+		key += MPT_USTRING(": ");
+		val = prepend_lines( val, mpt::ustring( fw, MPT_UCHAR(' ') ) + MPT_USTRING(": ") );
 		log << key << val << lf;
 	}
 }
@@ -1328,38 +1330,38 @@ static void probe_mod_file( commandlineflags & flags, const mpt::native_path & f
 	std::vector<field> fields;
 
 	if ( flags.filenames.size() > 1 ) {
-		set_field( fields, "Playlist", MPT_AFORMAT_MESSAGE( "{}/{}" )( flags.playlist_index + 1, flags.filenames.size() ) );
-		set_field( fields, "Prev/Next", MPT_AFORMAT_MESSAGE( "'{}' / ['{}'] / '{}'" )(
-		    ( flags.playlist_index > 0 ? mpt::transcode<std::string>( mpt::common_encoding::utf8, get_filename( flags.filenames[ flags.playlist_index - 1 ] ) ) : std::string() ),
-		    mpt::transcode<std::string>( mpt::common_encoding::utf8, get_filename( filename ) ),
-		    ( flags.playlist_index + 1 < flags.filenames.size() ? mpt::transcode<std::string>( mpt::common_encoding::utf8, get_filename( flags.filenames[ flags.playlist_index + 1 ] ) ) : std::string() )
+		set_field( fields, MPT_USTRING("Playlist"), MPT_UFORMAT_MESSAGE( "{}/{}" )( flags.playlist_index + 1, flags.filenames.size() ) );
+		set_field( fields, MPT_USTRING("Prev/Next"), MPT_UFORMAT_MESSAGE( "'{}' / ['{}'] / '{}'" )(
+		    ( flags.playlist_index > 0 ? mpt::transcode<mpt::ustring>( get_filename( flags.filenames[ flags.playlist_index - 1 ] ) ) : mpt::ustring() ),
+		    mpt::transcode<mpt::ustring>( get_filename( filename ) ),
+		    ( flags.playlist_index + 1 < flags.filenames.size() ? mpt::transcode<mpt::ustring>( get_filename( flags.filenames[ flags.playlist_index + 1 ] ) ) : mpt::ustring() )
 		    ) );
 	}
 	if ( flags.verbose ) {
-		set_field( fields, "Path", mpt::transcode<std::string>( mpt::common_encoding::utf8, filename ) );
+		set_field( fields, MPT_USTRING("Path"), mpt::transcode<mpt::ustring>( filename ) );
 	}
 	if ( flags.show_details ) {
-		set_field( fields, "Filename", mpt::transcode<std::string>( mpt::common_encoding::utf8, get_filename( filename ) ) );
-		set_field( fields, "Size", bytes_to_string( filesize ) );
+		set_field( fields, MPT_USTRING("Filename"), mpt::transcode<mpt::ustring>(  get_filename( filename ) ) );
+		set_field( fields, MPT_USTRING("Size"), bytes_to_string( filesize ) );
 	}
 	
 	int probe_result = openmpt::probe_file_header( openmpt::probe_file_header_flags_default2, data_stream );
-	std::string probe_result_string;
+	mpt::ustring probe_result_string;
 	switch ( probe_result ) {
 		case openmpt::probe_file_header_result_success:
-			probe_result_string = "Success";
+			probe_result_string = MPT_USTRING("Success");
 			break;
 		case openmpt::probe_file_header_result_failure:
-			probe_result_string = "Failure";
+			probe_result_string = MPT_USTRING("Failure");
 			break;
 		case openmpt::probe_file_header_result_wantmoredata:
-			probe_result_string = "Insufficient Data";
+			probe_result_string = MPT_USTRING("Insufficient Data");
 			break;
 		default:
-			probe_result_string = "Internal Error";
+			probe_result_string = MPT_USTRING("Internal Error");
 			break;
 	}
-	set_field( fields, "Probe", probe_result_string );
+	set_field( fields, MPT_USTRING("Probe"), probe_result_string );
 
 	show_fields( log, fields );
 
@@ -1382,54 +1384,54 @@ void render_mod_file( commandlineflags & flags, const mpt::native_path & filenam
 	std::vector<field> fields;
 
 	if ( flags.filenames.size() > 1 ) {
-		set_field( fields, "Playlist", MPT_AFORMAT_MESSAGE("{}/{}")( flags.playlist_index + 1, flags.filenames.size() ) );
-		set_field( fields, "Prev/Next", MPT_AFORMAT_MESSAGE("'{}' / ['{}'] / '{}'")(
-		    ( flags.playlist_index > 0 ? mpt::transcode<std::string>( mpt::common_encoding::utf8, get_filename( flags.filenames[ flags.playlist_index - 1 ] ) ) : std::string() ),
-		    mpt::transcode<std::string>( mpt::common_encoding::utf8, get_filename( filename ) ),
-		    ( flags.playlist_index + 1 < flags.filenames.size() ? mpt::transcode<std::string>( mpt::common_encoding::utf8, get_filename( flags.filenames[ flags.playlist_index + 1 ] ) ) : std::string() )
+		set_field( fields, MPT_USTRING("Playlist"), MPT_UFORMAT_MESSAGE("{}/{}")( flags.playlist_index + 1, flags.filenames.size() ) );
+		set_field( fields, MPT_USTRING("Prev/Next"), MPT_UFORMAT_MESSAGE("'{}' / ['{}'] / '{}'")(
+		    ( flags.playlist_index > 0 ? mpt::transcode<mpt::ustring>( get_filename( flags.filenames[ flags.playlist_index - 1 ] ) ) : mpt::ustring() ),
+		    mpt::transcode<mpt::ustring>( get_filename( filename ) ),
+		    ( flags.playlist_index + 1 < flags.filenames.size() ? mpt::transcode<mpt::ustring>( get_filename( flags.filenames[ flags.playlist_index + 1 ] ) ) : mpt::ustring() )
 		   ) );
 	}
 	if ( flags.verbose ) {
-		set_field( fields, "Path", mpt::transcode<std::string>( mpt::common_encoding::utf8, filename ) );
+		set_field( fields, MPT_USTRING("Path"), mpt::transcode<mpt::ustring>( filename ) );
 	}
 	if ( flags.show_details ) {
-		set_field( fields, "Filename", mpt::transcode<std::string>( mpt::common_encoding::utf8, get_filename( filename ) ) );
-		set_field( fields, "Size", bytes_to_string( filesize ) );
+		set_field( fields, MPT_USTRING("Filename"), mpt::transcode<mpt::ustring>( get_filename( filename ) ) );
+		set_field( fields, MPT_USTRING("Size"), bytes_to_string( filesize ) );
 		if ( !mod.get_metadata( "warnings" ).empty() ) {
-			set_field( fields, "Warnings", mod.get_metadata( "warnings" ) );
+			set_field( fields, MPT_USTRING("Warnings"), mpt::transcode<mpt::ustring>( libopenmpt_encoding, mod.get_metadata( "warnings" ) ) );
 		}
 		if ( !mod.get_metadata( "container" ).empty() ) {
-			set_field( fields, "Container", MPT_AFORMAT_MESSAGE("{} ({})")( mod.get_metadata( "container" ), mod.get_metadata( "container_long" ) ) );
+			set_field( fields, MPT_USTRING("Container"), MPT_UFORMAT_MESSAGE("{} ({})")( mpt::transcode<mpt::ustring>( libopenmpt_encoding, mod.get_metadata( "container" ) ), mpt::transcode<mpt::ustring>( libopenmpt_encoding, mod.get_metadata( "container_long" ) ) ) );
 		}
-		set_field( fields, "Type", MPT_AFORMAT_MESSAGE("{} ({})")( mod.get_metadata( "type" ), mod.get_metadata( "type_long" ) ) );
+		set_field( fields, MPT_USTRING("Type"), MPT_UFORMAT_MESSAGE("{} ({})")( mpt::transcode<mpt::ustring>( libopenmpt_encoding, mod.get_metadata( "type" ) ), mpt::transcode<mpt::ustring>( libopenmpt_encoding, mod.get_metadata( "type_long" ) ) ) );
 		if ( !mod.get_metadata( "originaltype" ).empty() ) {
-			set_field( fields, "Orig. Type", MPT_AFORMAT_MESSAGE("{} ({})")( mod.get_metadata( "originaltype" ), mod.get_metadata( "originaltype_long" ) ) );
+			set_field( fields, MPT_USTRING("Orig. Type"), MPT_UFORMAT_MESSAGE("{} ({})")( mpt::transcode<mpt::ustring>( libopenmpt_encoding, mod.get_metadata( "originaltype" ) ), mpt::transcode<mpt::ustring>( libopenmpt_encoding, mod.get_metadata( "originaltype_long" ) ) ) );
 		}
 		if ( ( mod.get_num_subsongs() > 1 ) && ( flags.subsong != -1 ) ) {
-			set_field( fields, "Subsong", mpt::format<std::string>::val( flags.subsong ) );
+			set_field( fields, MPT_USTRING("Subsong"), mpt::format<mpt::ustring>::val( flags.subsong ) );
 		}
-		set_field( fields, "Tracker", mod.get_metadata( "tracker" ) );
+		set_field( fields, MPT_USTRING("Tracker"), mpt::transcode<mpt::ustring>( libopenmpt_encoding, mod.get_metadata( "tracker" ) ) );
 		if ( !mod.get_metadata( "date" ).empty() ) {
-			set_field( fields, "Date", mod.get_metadata( "date" ) );
+			set_field( fields, MPT_USTRING("Date"), mpt::transcode<mpt::ustring>( libopenmpt_encoding, mod.get_metadata( "date" ) ) );
 		}
 		if ( !mod.get_metadata( "artist" ).empty() ) {
-			set_field( fields, "Artist", mod.get_metadata( "artist" ) );
+			set_field( fields, MPT_USTRING("Artist"), mpt::transcode<mpt::ustring>( libopenmpt_encoding, mod.get_metadata( "artist" ) ) );
 		}
 	}
 	if ( true ) {
-		set_field( fields, "Title", mod.get_metadata( "title" ) );
-		set_field( fields, "Duration", seconds_to_string( duration ) );
+		set_field( fields, MPT_USTRING("Title"), mpt::transcode<mpt::ustring>( libopenmpt_encoding, mod.get_metadata( "title" ) ) );
+		set_field( fields, MPT_USTRING("Duration"), seconds_to_string( duration ) );
 	}
 	if ( flags.show_details ) {
-		set_field( fields, "Subsongs", mpt::format<std::string>::val( mod.get_num_subsongs() ) );
-		set_field( fields, "Channels", mpt::format<std::string>::val( mod.get_num_channels() ) );
-		set_field( fields, "Orders", mpt::format<std::string>::val( mod.get_num_orders() ) );
-		set_field( fields, "Patterns", mpt::format<std::string>::val( mod.get_num_patterns() ) );
-		set_field( fields, "Instruments", mpt::format<std::string>::val( mod.get_num_instruments() ) );
-		set_field( fields, "Samples", mpt::format<std::string>::val( mod.get_num_samples() ) );
+		set_field( fields, MPT_USTRING("Subsongs"), mpt::format<mpt::ustring>::val( mod.get_num_subsongs() ) );
+		set_field( fields, MPT_USTRING("Channels"), mpt::format<mpt::ustring>::val( mod.get_num_channels() ) );
+		set_field( fields, MPT_USTRING("Orders"), mpt::format<mpt::ustring>::val( mod.get_num_orders() ) );
+		set_field( fields, MPT_USTRING("Patterns"), mpt::format<mpt::ustring>::val( mod.get_num_patterns() ) );
+		set_field( fields, MPT_USTRING("Instruments"), mpt::format<mpt::ustring>::val( mod.get_num_instruments() ) );
+		set_field( fields, MPT_USTRING("Samples"), mpt::format<mpt::ustring>::val( mod.get_num_samples() ) );
 	}
 	if ( flags.show_message ) {
-		set_field( fields, "Message", mod.get_metadata( "message" ) );
+		set_field( fields, MPT_USTRING("Message"), mpt::transcode<mpt::ustring>( libopenmpt_encoding, mod.get_metadata( "message" ) ) );
 	}
 
 	show_fields( log, fields );
@@ -1490,7 +1492,7 @@ static void probe_file( commandlineflags & flags, const mpt::native_path & filen
 		}
 		std::istream & data_stream = use_stdin ? std::cin : *optional_file_stream;
 		if ( data_stream.fail() ) {
-			throw exception( "file open error" );
+			throw exception( MPT_USTRING("file open error") );
 		}
 		
 		probe_mod_file( flags, filename, filesize, data_stream, log );
@@ -1499,18 +1501,18 @@ static void probe_file( commandlineflags & flags, const mpt::native_path & filen
 		throw;
 	} catch ( std::exception & e ) {
 		if ( !silentlog.str().empty() ) {
-			log << "errors probing '" << mpt::transcode<std::string>( mpt::common_encoding::utf8, filename ) << "': " << silentlog.str() << lf;
+			log << MPT_USTRING("errors probing '") << mpt::transcode<mpt::ustring>( filename ) << MPT_USTRING("': ") << mpt::transcode<mpt::ustring>( libopenmpt_encoding, silentlog.str() ) << lf;
 		} else {
-			log << "errors probing '" << mpt::transcode<std::string>( mpt::common_encoding::utf8, filename ) << "'" << lf;
+			log << MPT_USTRING("errors probing '") << mpt::transcode<mpt::ustring>( filename ) << MPT_USTRING("'") << lf;
 		}
-		log << "error probing '" << mpt::transcode<std::string>( mpt::common_encoding::utf8, filename ) << "': " << e.what() << lf;
+		log << MPT_USTRING("error probing '") << mpt::transcode<mpt::ustring>( filename ) << MPT_USTRING("': ") << mpt::get_exception_text<mpt::ustring>( e ) << lf;
 	} catch ( ... ) {
 		if ( !silentlog.str().empty() ) {
-			log << "errors probing '" << mpt::transcode<std::string>( mpt::common_encoding::utf8, filename ) << "': " << silentlog.str() << lf;
+			log << MPT_USTRING("errors probing '") << mpt::transcode<mpt::ustring>( filename ) << MPT_USTRING("': ") << mpt::transcode<mpt::ustring>( libopenmpt_encoding, silentlog.str() ) << lf;
 		} else {
-			log << "errors probing '" << mpt::transcode<std::string>( mpt::common_encoding::utf8, filename ) << "'" << lf;
+			log << MPT_USTRING("errors probing '") << mpt::transcode<mpt::ustring>( filename ) << MPT_USTRING("'") << lf;
 		}
-		log << "unknown error probing '" << mpt::transcode<std::string>( mpt::common_encoding::utf8, filename ) << "'" << lf;
+		log << MPT_USTRING("unknown error probing '") << mpt::transcode<mpt::ustring>( filename ) << MPT_USTRING("'") << lf;
 	}
 
 	log << lf;
@@ -1539,7 +1541,7 @@ static void render_file( commandlineflags & flags, const mpt::native_path & file
 		}
 		std::istream & data_stream = use_stdin ? std::cin : *optional_file_stream;
 		if ( data_stream.fail() ) {
-			throw exception( "file open error" );
+			throw exception( MPT_USTRING("file open error") );
 		}
 
 		{
@@ -1557,18 +1559,18 @@ static void render_file( commandlineflags & flags, const mpt::native_path & file
 		throw;
 	} catch ( std::exception & e ) {
 		if ( !silentlog.str().empty() ) {
-			log << "errors loading '" << mpt::transcode<std::string>( mpt::common_encoding::utf8, filename ) << "': " << silentlog.str() << lf;
+			log << MPT_USTRING("errors loading '") << mpt::transcode<mpt::ustring>( filename ) << MPT_USTRING("': ") << mpt::transcode<mpt::ustring>( libopenmpt_encoding, silentlog.str() ) << lf;
 		} else {
-			log << "errors loading '" << mpt::transcode<std::string>( mpt::common_encoding::utf8, filename ) << "'" << lf;
+			log << MPT_USTRING("errors loading '") << mpt::transcode<mpt::ustring>( filename ) << MPT_USTRING("'") << lf;
 		}
-		log << "error playing '" << mpt::transcode<std::string>( mpt::common_encoding::utf8, filename ) << "': " << e.what() << lf;
+		log << MPT_USTRING("error playing '") << mpt::transcode<mpt::ustring>( filename ) << MPT_USTRING("': ") << mpt::get_exception_text<mpt::ustring>( e ) << lf;
 	} catch ( ... ) {
 		if ( !silentlog.str().empty() ) {
-			log << "errors loading '" << mpt::transcode<std::string>( mpt::common_encoding::utf8, filename ) << "': " << silentlog.str() << lf;
+			log << MPT_USTRING("errors loading '") << mpt::transcode<mpt::ustring>( filename ) << MPT_USTRING("': ") << mpt::transcode<mpt::ustring>( libopenmpt_encoding,silentlog.str() ) << lf;
 		} else {
-			log << "errors loading '" << mpt::transcode<std::string>( mpt::common_encoding::utf8, filename ) << "'" << lf;
+			log << MPT_USTRING("errors loading '") << mpt::transcode<mpt::ustring>( filename ) << MPT_USTRING("'") << lf;
 		}
-		log << "unknown error playing '" << mpt::transcode<std::string>( mpt::common_encoding::utf8, filename ) << "'" << lf;
+		log << MPT_USTRING("unknown error playing '") << mpt::transcode<mpt::ustring>( filename ) << MPT_USTRING("'") << lf;
 	}
 
 	log << lf;
@@ -1654,7 +1656,7 @@ static void render_files( commandlineflags & flags, textout & log, write_buffers
 }
 
 
-static bool parse_playlist( commandlineflags & flags, mpt::native_path filename, concat_stream<std::string> & log ) {
+static bool parse_playlist( commandlineflags & flags, mpt::native_path filename, concat_stream<mpt::ustring> & log ) {
 	bool is_playlist = false;
 	bool m3u8 = false;
 	if ( get_extension( filename ) == MPT_NATIVE_PATH("m3u") || get_extension( filename ) == MPT_NATIVE_PATH("m3U") || get_extension( filename ) == MPT_NATIVE_PATH("M3u") || get_extension( filename ) == MPT_NATIVE_PATH("M3U") ) {
@@ -1689,10 +1691,17 @@ static bool parse_playlist( commandlineflags & flags, mpt::native_path filename,
 			if ( line.empty() ) {
 				continue;
 			}
+			constexpr auto pls_encoding = mpt::common_encoding::utf8;
+			constexpr auto m3u8_encoding = mpt::common_encoding::utf8;
+#if defined(WIN32)
+			constexpr auto m3u_encoding = mpt::logical_encoding::locale;
+#else
+			constexpr auto m3u_encoding = mpt::common_encoding::utf8;
+#endif
 			if ( pls ) {
 				if ( mpt::starts_with( line, "File" ) ) {
 					if ( line.find( "=" ) != std::string::npos ) {
-						flags.filenames.push_back( mpt::transcode<mpt::native_path>( mpt::common_encoding::utf8, line.substr( line.find( "=" ) + 1 ) ) );
+						flags.filenames.push_back( mpt::transcode<mpt::native_path>( pls_encoding, line.substr( line.find( "=" ) + 1 ) ) );
 					}
 				} else if ( mpt::starts_with( line, "Title" ) ) {
 					continue;
@@ -1712,23 +1721,15 @@ static bool parse_playlist( commandlineflags & flags, mpt::native_path filename,
 					continue;
 				}
 				if ( m3u8 ) {
-					newfile = mpt::transcode<mpt::native_path>( mpt::common_encoding::utf8, line );
+					newfile = mpt::transcode<mpt::native_path>( m3u8_encoding, line );
 				} else {
-#if defined(WIN32)
-					newfile = mpt::transcode<mpt::native_path>( mpt::logical_encoding::locale, line );
-#else
-					newfile = mpt::transcode<mpt::native_path>( mpt::common_encoding::utf8, line );
-#endif
+					newfile = mpt::transcode<mpt::native_path>( m3u_encoding, line );
 				}
 			} else {
 				if ( m3u8 ) {
-					newfile = mpt::transcode<mpt::native_path>( mpt::common_encoding::utf8, line );
+					newfile = mpt::transcode<mpt::native_path>( m3u8_encoding, line );
 				} else {
-#if defined(WIN32)
-					newfile = mpt::transcode<mpt::native_path>( mpt::logical_encoding::locale, line );
-#else
-					newfile = mpt::transcode<mpt::native_path>( mpt::common_encoding::utf8, line );
-#endif
+					newfile = mpt::transcode<mpt::native_path>( m3u_encoding, line );
 				}
 			}
 			if ( !newfile.empty() ) {
@@ -1739,15 +1740,15 @@ static bool parse_playlist( commandlineflags & flags, mpt::native_path filename,
 			}
 		}
 	} catch ( std::exception & e ) {
-		log << "error loading '" << mpt::transcode<std::string>( mpt::common_encoding::utf8, filename ) << "': " << e.what() << lf;
+		log << MPT_USTRING("error loading '") << mpt::transcode<mpt::ustring>( filename ) << MPT_USTRING("': ") << mpt::get_exception_text<mpt::ustring>( e ) << lf;
 	} catch ( ... ) {
-		log << "unknown error loading '" << mpt::transcode<std::string>( mpt::common_encoding::utf8, filename ) << "'" << lf;
+		log << MPT_USTRING("unknown error loading '") << mpt::transcode<mpt::ustring>( filename ) << MPT_USTRING("'") << lf;
 	}
 	return is_playlist;
 }
 
 
-static commandlineflags parse_openmpt123( const std::vector<std::string> & args, concat_stream<std::string> & log ) {
+static commandlineflags parse_openmpt123( const std::vector<mpt::ustring> & args, concat_stream<mpt::ustring> & log ) {
 
 	if ( args.size() <= 1 ) {
 		throw args_error_exception();
@@ -1763,113 +1764,113 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args,
 			// skip program name
 			continue;
 		}
-		std::string arg = *i;
-		std::string nextarg = ( i+1 != args.end() ) ? *(i+1) : "";
+		mpt::ustring arg = *i;
+		mpt::ustring nextarg = ( i+1 != args.end() ) ? *(i+1) : MPT_USTRING("");
 		if ( files_only ) {
-			flags.filenames.push_back( mpt::transcode<mpt::native_path>( mpt::common_encoding::utf8, arg ) );
-		} else if ( arg.substr( 0, 1 ) != "-" ) {
-			flags.filenames.push_back( mpt::transcode<mpt::native_path>( mpt::common_encoding::utf8, arg ) );
+			flags.filenames.push_back( mpt::transcode<mpt::native_path>( arg ) );
+		} else if ( arg.substr( 0, 1 ) != MPT_USTRING("-") ) {
+			flags.filenames.push_back( mpt::transcode<mpt::native_path>( arg ) );
 		} else {
-			if ( arg == "--" ) {
+			if ( arg == MPT_USTRING("--") ) {
 				files_only = true;
-			} else if ( arg == "-h" || arg == "--help" ) {
+			} else if ( arg == MPT_USTRING("-h") || arg == MPT_USTRING("--help") ) {
 				throw show_help_exception();
-			} else if ( arg == "--help-keyboard" ) {
+			} else if ( arg == MPT_USTRING("--help-keyboard") ) {
 				throw show_help_keyboard_exception();
-			} else if ( arg == "-q" || arg == "--quiet" ) {
+			} else if ( arg == MPT_USTRING("-q") || arg == MPT_USTRING("--quiet") ) {
 				flags.quiet = true;
-			} else if ( arg == "-v" || arg == "--verbose" ) {
+			} else if ( arg == MPT_USTRING("-v") || arg == MPT_USTRING("--verbose") ) {
 				flags.verbose = true;
-			} else if ( arg == "--man-version" ) {
+			} else if ( arg == MPT_USTRING("--man-version") ) {
 				throw show_man_version_exception();
-			} else if ( arg == "--man-help" ) {
+			} else if ( arg == MPT_USTRING("--man-help") ) {
 				throw show_man_help_exception();
-			} else if ( arg == "--version" ) {
+			} else if ( arg == MPT_USTRING("--version") ) {
 				throw show_version_number_exception();
-			} else if ( arg == "--short-version" ) {
+			} else if ( arg == MPT_USTRING("--short-version") ) {
 				throw show_short_version_number_exception();
-			} else if ( arg == "--long-version" ) {
+			} else if ( arg == MPT_USTRING("--long-version") ) {
 				throw show_long_version_number_exception();
-			} else if ( arg == "--credits" ) {
+			} else if ( arg == MPT_USTRING("--credits") ) {
 				throw show_credits_exception();
-			} else if ( arg == "--license" ) {
+			} else if ( arg == MPT_USTRING("--license") ) {
 				throw show_license_exception();
-			} else if ( arg == "--probe" ) {
+			} else if ( arg == MPT_USTRING("--probe") ) {
 				flags.mode = Mode::Probe;
-			} else if ( arg == "--info" ) {
+			} else if ( arg == MPT_USTRING("--info") ) {
 				flags.mode = Mode::Info;
-			} else if ( arg == "--ui" ) {
+			} else if ( arg == MPT_USTRING("--ui") ) {
 				flags.mode = Mode::UI;
-			} else if ( arg == "--batch" ) {
+			} else if ( arg == MPT_USTRING("--batch") ) {
 				flags.mode = Mode::Batch;
-			} else if ( arg == "--render" ) {
+			} else if ( arg == MPT_USTRING("--render") ) {
 				flags.mode = Mode::Render;
-			} else if ( arg == "--terminal-width" && nextarg != "" ) {
+			} else if ( arg == MPT_USTRING("--terminal-width") && nextarg != MPT_USTRING("") ) {
 				mpt::parse_into( flags.terminal_width, nextarg );
 				++i;
-			} else if ( arg == "--terminal-height" && nextarg != "" ) {
+			} else if ( arg == MPT_USTRING("--terminal-height") && nextarg != MPT_USTRING("") ) {
 				mpt::parse_into( flags.terminal_height, nextarg );
 				++i;
-			} else if ( arg == "--progress" ) {
+			} else if ( arg == MPT_USTRING("--progress") ) {
 				flags.show_progress = true;
-			} else if ( arg == "--no-progress" ) {
+			} else if ( arg == MPT_USTRING("--no-progress") ) {
 				flags.show_progress = false;
-			} else if ( arg == "--meters" ) {
+			} else if ( arg == MPT_USTRING("--meters") ) {
 				flags.show_meters = true;
-			} else if ( arg == "--no-meters" ) {
+			} else if ( arg == MPT_USTRING("--no-meters") ) {
 				flags.show_meters = false;
-			} else if ( arg == "--channel-meters" ) {
+			} else if ( arg == MPT_USTRING("--channel-meters") ) {
 				flags.show_channel_meters = true;
-			} else if ( arg == "--no-channel-meters" ) {
+			} else if ( arg == MPT_USTRING("--no-channel-meters") ) {
 				flags.show_channel_meters = false;
-			} else if ( arg == "--pattern" ) {
+			} else if ( arg == MPT_USTRING("--pattern") ) {
 				flags.show_pattern = true;
-			} else if ( arg == "--no-pattern" ) {
+			} else if ( arg == MPT_USTRING("--no-pattern") ) {
 				flags.show_pattern = false;
-			} else if ( arg == "--details" ) {
+			} else if ( arg == MPT_USTRING("--details") ) {
 				flags.show_details = true;
-			} else if ( arg == "--no-details" ) {
+			} else if ( arg == MPT_USTRING("--no-details") ) {
 				flags.show_details = false;
-			} else if ( arg == "--message" ) {
+			} else if ( arg == MPT_USTRING("--message") ) {
 				flags.show_message = true;
-			} else if ( arg == "--no-message" ) {
+			} else if ( arg == MPT_USTRING("--no-message") ) {
 				flags.show_message = false;
-			} else if ( arg == "--driver" && nextarg != "" ) {
+			} else if ( arg == MPT_USTRING("--driver") && nextarg != MPT_USTRING("") ) {
 				if ( false ) {
 					// nothing
-				} else if ( nextarg == "help" ) {
-					string_concat_stream<std::string> drivers;
-					drivers << " Available drivers:" << lf;
-					drivers << "    default" << lf;
+				} else if ( nextarg == MPT_USTRING("help") ) {
+					string_concat_stream<mpt::ustring> drivers;
+					drivers << MPT_USTRING(" Available drivers:") << lf;
+					drivers << MPT_USTRING("    default") << lf;
 #if defined( MPT_WITH_PULSEAUDIO )
-					drivers << "    pulseaudio" << lf;
+					drivers << MPT_USTRING("    pulseaudio") << lf;
 #endif
 #if defined( MPT_WITH_SDL2 )
-					drivers << "    sdl2" << lf;
+					drivers << MPT_USTRING("    sdl2") << lf;
 #endif
 #if defined( MPT_WITH_PORTAUDIO )
-					drivers << "    portaudio" << lf;
+					drivers << MPT_USTRING("    portaudio") << lf;
 #endif
 #if defined( WIN32 )
-					drivers << "    waveout" << lf;
+					drivers << MPT_USTRING("    waveout") << lf;
 #endif
 #if defined( MPT_WITH_ALLEGRO42 )
-					drivers << "    allegro42" << lf;
+					drivers << MPT_USTRING("    allegro42") << lf;
 #endif
 					throw show_help_exception( drivers.str() );
-				} else if ( nextarg == "default" ) {
-					flags.driver = "";
+				} else if ( nextarg == MPT_USTRING("default") ) {
+					flags.driver = MPT_USTRING("");
 				} else {
 					flags.driver = nextarg;
 				}
 				++i;
-			} else if ( arg == "--device" && nextarg != "" ) {
+			} else if ( arg == MPT_USTRING("--device") && nextarg != MPT_USTRING("") ) {
 				if ( false ) {
 					// nothing
-				} else if ( nextarg == "help" ) {
-					string_concat_stream<std::string> devices;
-					devices << " Available devices:" << lf;
-					devices << "    default: default" << lf;
+				} else if ( nextarg == MPT_USTRING("help") ) {
+					string_concat_stream<mpt::ustring> devices;
+					devices << MPT_USTRING(" Available devices:") << lf;
+					devices << MPT_USTRING("    default: default") << lf;
 #if defined( MPT_WITH_PULSEAUDIO )
 					devices << show_pulseaudio_devices(log);
 #endif
@@ -1886,87 +1887,87 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args,
 					devices << show_allegro42_devices( log );
 #endif
 					throw show_help_exception( devices.str() );
-				} else if ( nextarg == "default" ) {
-					flags.device = "";
+				} else if ( nextarg == MPT_USTRING("default") ) {
+					flags.device = MPT_USTRING("");
 				} else {
 					flags.device = nextarg;
 				}
 				++i;
-			} else if ( arg == "--buffer" && nextarg != "" ) {
+			} else if ( arg == MPT_USTRING("--buffer") && nextarg != MPT_USTRING("") ) {
 				mpt::parse_into( flags.buffer, nextarg );
 				++i;
-			} else if ( arg == "--period" && nextarg != "" ) {
+			} else if ( arg == MPT_USTRING("--period") && nextarg != MPT_USTRING("") ) {
 				mpt::parse_into( flags.period, nextarg );
 				++i;
-			} else if ( arg == "--update" && nextarg != "" ) {
+			} else if ( arg == MPT_USTRING("--update") && nextarg != MPT_USTRING("") ) {
 				mpt::parse_into( flags.ui_redraw_interval, nextarg );
 				++i;
-			} else if ( arg == "--stdout" ) {
+			} else if ( arg == MPT_USTRING("--stdout") ) {
 				flags.use_stdout = true;
-			} else if ( ( arg == "-o" || arg == "--output" ) && nextarg != "" ) {
-				flags.output_filename = mpt::transcode<mpt::native_path>( mpt::common_encoding::utf8, nextarg );
+			} else if ( ( arg == MPT_USTRING("-o") || arg == MPT_USTRING("--output") ) && nextarg != MPT_USTRING("") ) {
+				flags.output_filename = mpt::transcode<mpt::native_path>( nextarg );
 				++i;
-			} else if ( arg == "--force" ) {
+			} else if ( arg == MPT_USTRING("--force") ) {
 				flags.force_overwrite = true;
-			} else if ( arg == "--output-type" && nextarg != "" ) {
-				flags.output_extension = mpt::transcode<mpt::native_path>( mpt::common_encoding::utf8, nextarg );
+			} else if ( arg == MPT_USTRING("--output-type") && nextarg != MPT_USTRING("") ) {
+				flags.output_extension = mpt::transcode<mpt::native_path>( nextarg );
 				++i;
-			} else if ( arg == "--samplerate" && nextarg != "" ) {
+			} else if ( arg == MPT_USTRING("--samplerate") && nextarg != MPT_USTRING("") ) {
 				mpt::parse_into( flags.samplerate, nextarg );
 				++i;
-			} else if ( arg == "--channels" && nextarg != "" ) {
+			} else if ( arg == MPT_USTRING("--channels") && nextarg != MPT_USTRING("") ) {
 				mpt::parse_into( flags.channels, nextarg );
 				++i;
-			} else if ( arg == "--float" ) {
+			} else if ( arg == MPT_USTRING("--float") ) {
 				flags.use_float = true;
-			} else if ( arg == "--no-float" ) {
+			} else if ( arg == MPT_USTRING("--no-float") ) {
 				flags.use_float = false;
-			} else if ( arg == "--gain" && nextarg != "" ) {
+			} else if ( arg == MPT_USTRING("--gain") && nextarg != MPT_USTRING("") ) {
 				double gain = 0.0;
 				mpt::parse_into( gain, nextarg );
 				flags.gain = mpt::saturate_round<std::int32_t>( gain * 100.0 );
 				++i;
-			} else if ( arg == "--stereo" && nextarg != "" ) {
+			} else if ( arg == MPT_USTRING("--stereo") && nextarg != MPT_USTRING("") ) {
 				mpt::parse_into( flags.separation, nextarg );
 				++i;
-			} else if ( arg == "--filter" && nextarg != "" ) {
+			} else if ( arg == MPT_USTRING("--filter") && nextarg != MPT_USTRING("") ) {
 				mpt::parse_into( flags.filtertaps, nextarg );
 				++i;
-			} else if ( arg == "--ramping" && nextarg != "" ) {
+			} else if ( arg == MPT_USTRING("--ramping") && nextarg != MPT_USTRING("") ) {
 				mpt::parse_into( flags.ramping, nextarg );
 				++i;
-			} else if ( arg == "--tempo" && nextarg != "" ) {
+			} else if ( arg == MPT_USTRING("--tempo") && nextarg != MPT_USTRING("") ) {
 				flags.tempo = double_to_tempo_flag( mpt::parse_or<double>( nextarg, 1.0 ) );
 				++i;
-			} else if ( arg == "--pitch" && nextarg != "" ) {
+			} else if ( arg == MPT_USTRING("--pitch") && nextarg != MPT_USTRING("") ) {
 				flags.pitch = double_to_pitch_flag( mpt::parse_or<double>( nextarg, 1.0 ) );
 				++i;
-			} else if ( arg == "--dither" && nextarg != "" ) {
+			} else if ( arg == MPT_USTRING("--dither") && nextarg != MPT_USTRING("") ) {
 				mpt::parse_into( flags.dither, nextarg );
 				++i;
-			} else if ( arg == "--playlist" && nextarg != "" ) {
-				parse_playlist( flags, mpt::transcode<mpt::native_path>( mpt::common_encoding::utf8, nextarg ), log );
+			} else if ( arg == MPT_USTRING("--playlist") && nextarg != MPT_USTRING("") ) {
+				parse_playlist( flags, mpt::transcode<mpt::native_path>( nextarg ), log );
 				++i;
-			} else if ( arg == "--randomize" ) {
+			} else if ( arg == MPT_USTRING("--randomize") ) {
 				flags.randomize = true;
-			} else if ( arg == "--no-randomize" ) {
+			} else if ( arg == MPT_USTRING("--no-randomize") ) {
 				flags.randomize = false;
-			} else if ( arg == "--shuffle" ) {
+			} else if ( arg == MPT_USTRING("--shuffle") ) {
 				flags.shuffle = true;
-			} else if ( arg == "--no-shuffle" ) {
+			} else if ( arg == MPT_USTRING("--no-shuffle") ) {
 				flags.shuffle = false;
-			} else if ( arg == "--restart" ) {
+			} else if ( arg == MPT_USTRING("--restart") ) {
 				flags.restart = true;
-			} else if ( arg == "--no-restart" ) {
+			} else if ( arg == MPT_USTRING("--no-restart") ) {
 				flags.restart = false;
-			} else if ( arg == "--subsong" && nextarg != "" ) {
+			} else if ( arg == MPT_USTRING("--subsong") && nextarg != MPT_USTRING("") ) {
 				mpt::parse_into( flags.subsong, nextarg );
 				++i;
-			} else if ( arg == "--repeat" && nextarg != "" ) {
+			} else if ( arg == MPT_USTRING("--repeat") && nextarg != MPT_USTRING("") ) {
 				mpt::parse_into( flags.repeatcount, nextarg );
 				++i;
-			} else if ( arg == "--ctl" && nextarg != "" ) {
-				std::string ctl_c_v = nextarg;
+			} else if ( arg == MPT_USTRING("--ctl") && nextarg != MPT_USTRING("") ) {
+				std::string ctl_c_v = mpt::transcode<std::string>( libopenmpt_encoding, nextarg );
 				if ( ctl_c_v.find( "=" ) == std::string::npos ) {
 					throw args_error_exception();
 				}
@@ -1977,13 +1978,13 @@ static commandlineflags parse_openmpt123( const std::vector<std::string> & args,
 				}
 				flags.ctls[ ctl ] = val;
 				++i;
-			} else if ( arg == "--seek" && nextarg != "" ) {
+			} else if ( arg == MPT_USTRING("--seek") && nextarg != MPT_USTRING("") ) {
 				mpt::parse_into( flags.seek_target, nextarg );
 				++i;
-			} else if ( arg == "--end-time" && nextarg != "" ) {
+			} else if ( arg == MPT_USTRING("--end-time") && nextarg != MPT_USTRING("") ) {
 				mpt::parse_into( flags.end_time, nextarg );
 				++i;
-			} else if ( arg.size() > 0 && arg.substr( 0, 1 ) == "-" ) {
+			} else if ( arg.size() > 0 && arg.substr( 0, 1 ) == MPT_USTRING("-") ) {
 				throw args_error_exception();
 			}
 		}
@@ -2012,7 +2013,7 @@ public:
 				old_mode = _setmode( _fileno( file ), _O_TEXT );
 			#endif
 			if ( old_mode == -1 ) {
-				throw exception( "failed to set TEXT mode on file descriptor" );
+				throw exception( MPT_USTRING("failed to set TEXT mode on file descriptor") );
 			}
 		}
 	}
@@ -2038,7 +2039,7 @@ public:
 			fflush( file );
 			old_mode = _setmode( _fileno( file ), _O_BINARY );
 			if ( old_mode == -1 ) {
-				throw exception( "failed to set binary mode on file descriptor" );
+				throw exception( MPT_USTRING("failed to set binary mode on file descriptor") );
 			}
 		}
 	}
@@ -2074,14 +2075,14 @@ static int main( int argc, char * argv [] ) {
 		_crt0_startup_flags &= ~_CRT0_FLAG_LOCK_MEMORY;  /* disable automatic locking for all further memory allocations */
 		assert(mpt::platform::libc().is_ok());
 	#endif /* __DJGPP__ */
-	std::vector<std::string> args;
+	std::vector<mpt::ustring> args;
 	#if defined(WIN32) && defined(UNICODE)
 		for ( int arg = 0; arg < wargc; ++arg ) {
-			args.push_back( mpt::transcode<std::string>( mpt::common_encoding::utf8, wargv[arg] ) );
+			args.push_back( mpt::transcode<mpt::ustring>( wargv[arg] ) );
 		}
 	#else
 		for ( int arg = 0; arg < argc; ++arg ) {
-			args.push_back( mpt::transcode<std::string>( mpt::common_encoding::utf8, mpt::logical_encoding::locale, argv[arg] ) );
+			args.push_back( mpt::transcode<mpt::ustring>( mpt::logical_encoding::locale, argv[arg] ) );
 		}
 	#endif
 
@@ -2148,11 +2149,11 @@ static int main( int argc, char * argv [] ) {
 	} catch ( silent_exit_exception & ) {
 		return 0;
 	} catch ( std::exception & e ) {
-		std_err << "error: " << e.what() << lf;
+		std_err << MPT_USTRING("error: ") << mpt::get_exception_text<mpt::ustring>( e ) << lf;
 		std_err.writeout();
 		return 1;
 	} catch ( ... ) {
-		std_err << "unknown error" << lf;
+		std_err << MPT_USTRING("unknown error") << lf;
 		std_err.writeout();
 		return 1;
 	}
@@ -2238,35 +2239,35 @@ static int main( int argc, char * argv [] ) {
 					file_audio_stream_raii file_audio_stream( flags, flags.output_filename, log );
 					render_files( flags, log, file_audio_stream, prng );
 #if defined( MPT_WITH_PULSEAUDIO )
-				} else if ( flags.driver == "pulseaudio" || flags.driver.empty() ) {
+				} else if ( flags.driver == MPT_USTRING("pulseaudio") || flags.driver.empty() ) {
 					pulseaudio_stream_raii pulseaudio_stream( flags, log );
 					render_files( flags, log, pulseaudio_stream, prng );
 #endif
 #if defined( MPT_WITH_SDL2 )
-				} else if ( flags.driver == "sdl2" || flags.driver.empty() ) {
+				} else if ( flags.driver == MPT_USTRING("sdl2") || flags.driver.empty() ) {
 					sdl2_stream_raii sdl2_stream( flags, log );
 					render_files( flags, log, sdl2_stream, prng );
 #endif
 #if defined( MPT_WITH_PORTAUDIO )
-				} else if ( flags.driver == "portaudio" || flags.driver.empty() ) {
+				} else if ( flags.driver == MPT_USTRING("portaudio") || flags.driver.empty() ) {
 					portaudio_stream_raii portaudio_stream( flags, log );
 					render_files( flags, log, portaudio_stream, prng );
 #endif
 #if defined( WIN32 )
-				} else if ( flags.driver == "waveout" || flags.driver.empty() ) {
+				} else if ( flags.driver == MPT_USTRING("waveout") || flags.driver.empty() ) {
 					waveout_stream_raii waveout_stream( flags );
 					render_files( flags, log, waveout_stream, prng );
 #endif
 #if defined( MPT_WITH_ALLEGRO42 )
-				} else if ( flags.driver == "allegro42" || flags.driver.empty() ) {
+				} else if ( flags.driver == MPT_USTRING("allegro42") || flags.driver.empty() ) {
 					allegro42_stream_raii allegro42_stream( flags, log );
 					render_files( flags, log, allegro42_stream, prng );
 #endif
 				} else {
 					if ( flags.driver.empty() ) {
-						throw exception( "openmpt123 is compiled without any audio driver" );
+						throw exception( MPT_USTRING("openmpt123 is compiled without any audio driver") );
 					} else {
-						throw exception( "audio driver '" + flags.driver + "' not found" );
+						throw exception( MPT_USTRING("audio driver '") + flags.driver + MPT_USTRING("' not found") );
 					}
 				}
 			} break;
@@ -2287,36 +2288,36 @@ static int main( int argc, char * argv [] ) {
 		return 1;
 #ifdef MPT_WITH_ALLEGRO42
 	} catch ( allegro42_exception & e ) {
-		std_err << "Allegro-4.2 error: " << e.what() << lf;
+		std_err << MPT_USTRING("Allegro-4.2 error: ") << mpt::get_exception_text<mpt::ustring>( e ) << lf;
 		std_err.writeout();
 		return 1;
 #endif
 #ifdef MPT_WITH_PULSEAUDIO
 	} catch ( pulseaudio_exception & e ) {
-		std_err << "PulseAudio error: " << e.what() << lf;
+		std_err << MPT_USTRING("PulseAudio error: ") << mpt::get_exception_text<mpt::ustring>( e ) << lf;
 		std_err.writeout();
 		return 1;
 #endif
 #ifdef MPT_WITH_PORTAUDIO
 	} catch ( portaudio_exception & e ) {
-		std_err << "PortAudio error: " << e.what() << lf;
+		std_err << MPT_USTRING("PortAudio error: ") << mpt::get_exception_text<mpt::ustring>( e ) << lf;
 		std_err.writeout();
 		return 1;
 #endif
 #ifdef MPT_WITH_SDL2
 	} catch ( sdl2_exception & e ) {
-		std_err << "SDL2 error: " << e.what() << lf;
+		std_err << MPT_USTRING("SDL2 error: ") << mpt::get_exception_text<mpt::ustring>( e ) << lf;
 		std_err.writeout();
 		return 1;
 #endif
 	} catch ( silent_exit_exception & ) {
 		return 0;
 	} catch ( std::exception & e ) {
-		std_err << "error: " << e.what() << lf;
+		std_err << MPT_USTRING("error: ") << mpt::get_exception_text<mpt::ustring>( e ) << lf;
 		std_err.writeout();
 		return 1;
 	} catch ( ... ) {
-		std_err << "unknown error" << lf;
+		std_err << MPT_USTRING("unknown error") << lf;
 		std_err.writeout();
 		return 1;
 	}

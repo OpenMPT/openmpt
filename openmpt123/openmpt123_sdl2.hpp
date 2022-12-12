@@ -36,15 +36,17 @@ MPT_WARNING("Support for SDL2 < 2.0.4 has been deprecated and will be removed in
 
 namespace openmpt123 {
 
+inline constexpr auto sdl2_encoding = mpt::common_encoding::utf8;
+
 struct sdl2_exception : public exception {
 private:
-	static std::string text_from_code( int code ) {
-		string_concat_stream<std::string> s;
+	static mpt::ustring text_from_code( int code ) {
+		string_concat_stream<mpt::ustring> s;
 		s << code;
 		return s.str();
 	}
 public:
-	sdl2_exception( int code, const char * error ) : exception( text_from_code( code ) + " (" + ( error ? std::string(error) : std::string("NULL") ) + ")" ) { }
+	sdl2_exception( int code, const char * error ) : exception( text_from_code( code ) + MPT_USTRING(" (") + mpt::transcode<mpt::ustring>( sdl2_encoding, error ? std::string(error) : std::string("NULL") ) + MPT_USTRING(")") ) { }
 };
 
 static void check_sdl2_error( int e ) {
@@ -65,7 +67,7 @@ public:
 
 class sdl2_stream_raii : public write_buffers_interface {
 private:
-	concat_stream<std::string> & log;
+	concat_stream<mpt::ustring> & log;
 	sdl2_raii sdl2;
 	int dev;
 	std::size_t channels;
@@ -83,7 +85,7 @@ protected:
 		return result;
 	}
 public:
-	sdl2_stream_raii( commandlineflags & flags, concat_stream<std::string> & log_ )
+	sdl2_stream_raii( commandlineflags & flags, concat_stream<mpt::ustring> & log_ )
 		: log(log_)
 		, sdl2( SDL_INIT_NOPARACHUTE | SDL_INIT_TIMER | SDL_INIT_AUDIO )
 		, dev(-1)
@@ -113,8 +115,8 @@ public:
 		audiospec.callback = NULL;
 		audiospec.userdata = NULL;
 		if ( flags.verbose ) {
-			log << "SDL2:" << lf;
-			log << " latency: " << ( audiospec.samples * 2.0 / flags.samplerate ) << " (2 * " << audiospec.samples << ")" << lf;
+			log << MPT_USTRING("SDL2:") << lf;
+			log << MPT_USTRING(" latency: ") << ( audiospec.samples * 2.0 / flags.samplerate ) << MPT_USTRING(" (2 * ") << audiospec.samples << MPT_USTRING(")") << lf;
 			log << lf;
 		}
 		sampleQueueMaxFrames = round_up_power2( ( flags.buffer * flags.samplerate ) / ( 1000 * 2 ) );
@@ -187,10 +189,10 @@ public:
 	}
 };
 
-static std::string show_sdl2_devices( concat_stream<std::string> & /* log */ ) {
-	string_concat_stream<std::string> devices;
+static mpt::ustring show_sdl2_devices( concat_stream<mpt::ustring> & /* log */ ) {
+	string_concat_stream<mpt::ustring> devices;
 	std::size_t device_index = 0;
-	devices << " SDL2:" << lf;
+	devices << MPT_USTRING(" SDL2:") << lf;
 	sdl2_raii sdl2( SDL_INIT_NOPARACHUTE | SDL_INIT_AUDIO );
 	for ( int driver = 0; driver < SDL_GetNumAudioDrivers(); ++driver ) {
 		const char * driver_name = SDL_GetAudioDriver( driver );
@@ -211,7 +213,7 @@ static std::string show_sdl2_devices( concat_stream<std::string> & /* log */ ) {
 			if ( std::string( device_name ).empty() ) {
 				continue;
 			}
-			devices << "    " << device_index << ": " << driver_name << " - " << device_name << lf;
+			devices << MPT_USTRING("    ") << device_index << MPT_USTRING(": ") << mpt::transcode<mpt::ustring>( sdl2_encoding, driver_name ) << MPT_USTRING(" - ") << mpt::transcode<mpt::ustring>( sdl2_encoding, device_name ) << lf;
 			device_index++;
 		}
 		SDL_AudioQuit();

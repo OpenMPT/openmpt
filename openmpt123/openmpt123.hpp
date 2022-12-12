@@ -18,6 +18,7 @@
 #include "mpt/base/namespace.hpp"
 #include "mpt/base/preprocessor.hpp"
 #include "mpt/base/saturate_round.hpp"
+#include "mpt/exception_text/exception_text.hpp"
 #include "mpt/format/concat.hpp"
 #include "mpt/format/message.hpp"
 #include "mpt/format/message_macros.hpp"
@@ -60,13 +61,13 @@ struct string_transcoder<mpt::native_path> {
 namespace openmpt123 {
 
 struct exception : public openmpt::exception {
-	exception( const std::string & text ) : openmpt::exception(text) { }
+	exception( const mpt::ustring & text ) : openmpt::exception(mpt::transcode<std::string>( mpt::common_encoding::utf8, text )) { }
 };
 
 struct show_help_exception {
-	std::string message;
+	mpt::ustring message;
 	bool longhelp;
-	show_help_exception( const std::string & msg = "", bool longhelp_ = true ) : message(msg), longhelp(longhelp_) { }
+	show_help_exception( const mpt::ustring & msg = MPT_USTRING(""), bool longhelp_ = true ) : message(msg), longhelp(longhelp_) { }
 };
 
 struct args_error_exception {
@@ -127,8 +128,8 @@ public:
 
 
 struct field {
-	std::string key;
-	std::string val;
+	mpt::ustring key;
+	mpt::ustring val;
 };
 
 
@@ -138,7 +139,7 @@ bool IsConsole( DWORD stdHandle );
 bool IsTerminal( int fd );
 
 
-class textout : public string_concat_stream<std::string> {
+class textout : public string_concat_stream<mpt::ustring> {
 public:
 	textout() {
 		return;
@@ -147,9 +148,9 @@ public:
 		return;
 	}
 protected:
-	std::string pop() {
-		std::string text = str();
-		str(std::string());
+	mpt::ustring pop() {
+		mpt::ustring text = str();
+		str( mpt::ustring() );
 		return text;
 	}
 public:
@@ -196,14 +197,14 @@ public:
 	}
 private:
 	void writeout_impl() {
-		std::string text = pop();
+		mpt::ustring text = pop();
 		if ( text.length() > 0 ) {
 			#if defined(__DJGPP__)
-				s << mpt::transcode<std::string>( codepage, mpt::common_encoding::utf8, text );
+				s << mpt::transcode<std::string>( codepage, text );
 			#elif defined(__EMSCRIPTEN__)
-				s << text;
+				s << mpt::transcode<std::string>( mpt::common_encoding::utf8, text ) ;
 			#else
-				s << mpt::transcode<std::string>( mpt::logical_encoding::locale, mpt::common_encoding::utf8, text );
+				s << mpt::transcode<std::string>( mpt::logical_encoding::locale, text );
 		#endif
 			s.flush();
 		}	
@@ -215,7 +216,7 @@ public:
 	void cursor_up( std::size_t lines ) override {
 		s.flush();
 		for ( std::size_t line = 0; line < lines; ++line ) {
-			*this << "\x1b[1A";
+			*this << MPT_USTRING("\x1b[1A");
 		}
 	}
 };
@@ -248,21 +249,21 @@ public:
 	}
 private:
 	void writeout_impl() {
-		std::string text = pop();
+		mpt::ustring text = pop();
 		if ( text.length() > 0 ) {
 			if ( console ) {
 				#if defined(UNICODE)
-					std::wstring wtext = mpt::transcode<std::wstring>( mpt::common_encoding::utf8, text );
+					std::wstring wtext = mpt::transcode<std::wstring>( text );
 					WriteConsole( handle, wtext.data(), static_cast<DWORD>( wtext.size() ), NULL, NULL );
 				#else
-					std::string ltext = mpt::transcode<std::string>( mpt::logical_encoding::locale, mpt::common_encoding::utf8, text );
+					std::string ltext = mpt::transcode<std::string>( mpt::logical_encoding::locale, text );
 					WriteConsole( handle, ltext.data(), static_cast<DWORD>( ltext.size() ), NULL, NULL );
 				#endif
 			} else {
 				#if defined(UNICODE)
-					s << mpt::transcode<std::wstring>( mpt::common_encoding::utf8, text );
+					s << mpt::transcode<std::wstring>( text );
 				#else
-					s << mpt::transcode<std::string>( mpt::logical_encoding::locale, mpt::common_encoding::utf8, text );
+					s << mpt::transcode<std::string>( mpt::logical_encoding::locale, text );
 				#endif
 				s.flush();
 			}
@@ -290,18 +291,33 @@ public:
 
 #endif // WIN32
 
-inline std::string append_software_tag( std::string software ) {
-	std::string openmpt123 = std::string() + "openmpt123 " + OPENMPT123_VERSION_STRING + " (libopenmpt " + openmpt::string::get( "library_version" ) + ", OpenMPT " + openmpt::string::get( "core_version" ) + ")";
+inline mpt::ustring append_software_tag( mpt::ustring software ) {
+	mpt::ustring openmpt123 = mpt::ustring()
+		+ MPT_USTRING("openmpt123 ")
+		+ mpt::transcode<mpt::ustring>( mpt::source_encoding, OPENMPT123_VERSION_STRING )
+		+ MPT_USTRING(" (libopenmpt ")
+		+ mpt::transcode<mpt::ustring>( mpt::common_encoding::utf8, openmpt::string::get( "library_version" ) )
+		+ MPT_USTRING(", OpenMPT ")
+		+ mpt::transcode<mpt::ustring>( mpt::common_encoding::utf8, openmpt::string::get( "core_version" ) )
+		+ MPT_USTRING(")")
+		;
 	if ( software.empty() ) {
 		software = openmpt123;
 	} else {
-		software += " (via " + openmpt123 + ")";
+		software += MPT_USTRING(" (via ") + openmpt123 + MPT_USTRING(")");
 	}
 	return software;
 }
 
-inline std::string get_encoder_tag() {
-	return std::string() + "openmpt123 " + OPENMPT123_VERSION_STRING + " (libopenmpt " + openmpt::string::get( "library_version" ) + ", OpenMPT " + openmpt::string::get( "core_version" ) + ")";
+inline mpt::ustring get_encoder_tag() {
+	return mpt::ustring()
+		+ MPT_USTRING("openmpt123 ")
+		+ mpt::transcode<mpt::ustring>( mpt::source_encoding, OPENMPT123_VERSION_STRING )
+		+ MPT_USTRING(" (libopenmpt ")
+		+ mpt::transcode<mpt::ustring>( mpt::common_encoding::utf8, openmpt::string::get( "library_version" ) )
+		+ MPT_USTRING(", OpenMPT ")
+		+ mpt::transcode<mpt::ustring>( mpt::common_encoding::utf8, openmpt::string::get( "core_version" ) )
+		+ MPT_USTRING(")");
 }
 
 inline mpt::native_path get_extension( mpt::native_path filename ) {
@@ -321,16 +337,16 @@ enum class Mode {
 	Render
 };
 
-inline std::string mode_to_string( Mode mode ) {
+inline mpt::ustring mode_to_string( Mode mode ) {
 	switch ( mode ) {
-		case Mode::None:   return "none"; break;
-		case Mode::Probe:  return "probe"; break;
-		case Mode::Info:   return "info"; break;
-		case Mode::UI:     return "ui"; break;
-		case Mode::Batch:  return "batch"; break;
-		case Mode::Render: return "render"; break;
+		case Mode::None:   return MPT_USTRING("none"); break;
+		case Mode::Probe:  return MPT_USTRING("probe"); break;
+		case Mode::Info:   return MPT_USTRING("info"); break;
+		case Mode::UI:     return MPT_USTRING("ui"); break;
+		case Mode::Batch:  return MPT_USTRING("batch"); break;
+		case Mode::Render: return MPT_USTRING("render"); break;
 	}
-	return "";
+	return MPT_USTRING("");
 }
 
 inline const std::int32_t default_low = -2;
@@ -341,8 +357,8 @@ struct commandlineflags {
 	bool canUI;
 	std::int32_t ui_redraw_interval;
 	bool canProgress;
-	std::string driver;
-	std::string device;
+	mpt::ustring driver;
+	mpt::ustring device;
 	std::int32_t buffer;
 	std::int32_t period;
 	std::int32_t samplerate;
@@ -381,7 +397,7 @@ struct commandlineflags {
 	mpt::native_path output_extension;
 	bool force_overwrite;
 	bool paused;
-	std::string warnings;
+	mpt::ustring warnings;
 	void apply_default_buffer_sizes() {
 		if ( ui_redraw_interval == default_high ) {
 			ui_redraw_interval = 50;
@@ -402,8 +418,8 @@ struct commandlineflags {
 	commandlineflags() {
 		mode = Mode::UI;
 		ui_redraw_interval = default_high;
-		driver = "";
-		device = "";
+		driver = MPT_USTRING("");
+		device = MPT_USTRING("");
 		buffer = default_high;
 		period = default_high;
 #if defined(__DJGPP__)
@@ -613,11 +629,11 @@ protected:
 		return;
 	}
 public:
-	virtual void write_metadata( std::map<std::string,std::string> metadata ) {
+	virtual void write_metadata( std::map<mpt::ustring, mpt::ustring> metadata ) {
 		(void)metadata;
 		return;
 	}
-	virtual void write_updated_metadata( std::map<std::string,std::string> metadata ) {
+	virtual void write_updated_metadata( std::map<mpt::ustring, mpt::ustring> metadata ) {
 		(void)metadata;
 		return;
 	}
@@ -775,11 +791,11 @@ protected:
 		return;
 	}
 public:
-	void write_metadata( std::map<std::string,std::string> metadata ) override {
+	void write_metadata( std::map<mpt::ustring, mpt::ustring> metadata ) override {
 		(void)metadata;
 		return;
 	}
-	void write_updated_metadata( std::map<std::string,std::string> metadata ) override {
+	void write_updated_metadata( std::map<mpt::ustring, mpt::ustring> metadata ) override {
 		(void)metadata;
 		return;
 	}

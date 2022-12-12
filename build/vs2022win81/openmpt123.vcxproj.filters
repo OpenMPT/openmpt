@@ -19,6 +19,9 @@
     <Filter Include="src\mpt\detect">
       <UniqueIdentifier>{7535143C-6103-0842-4A97-78683604E4A6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\mpt\exception_text">
+      <UniqueIdentifier>{6F821773-5B7C-40C5-44E9-D6D53082A631}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\mpt\format">
       <UniqueIdentifier>{C5847241-B152-6647-9AE6-D66D865342AC}</UniqueIdentifier>
     </Filter>
@@ -194,6 +197,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\detect\nlohmann_json.hpp">
       <Filter>src\mpt\detect</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\exception_text\exception_text.hpp">
+      <Filter>src\mpt\exception_text</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\format\concat.hpp">
       <Filter>src\mpt\format</Filter>

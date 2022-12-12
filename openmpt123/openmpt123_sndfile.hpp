@@ -18,11 +18,13 @@
 #include <sndfile.h>
 
 namespace openmpt123 {
+
+inline constexpr auto sndfile_encoding = mpt::common_encoding::utf8;
 	
 class sndfile_stream_raii : public file_audio_stream_base {
 private:
 	commandlineflags flags;
-	concat_stream<std::string> & log;
+	concat_stream<mpt::ustring> & log;
 	SNDFILE * sndfile;
 	std::vector<float> interleaved_float_buffer;
 	std::vector<std::int16_t> interleaved_int_buffer;
@@ -34,22 +36,22 @@ private:
 		match_better,
 		match_any
 	};
-	std::string match_mode_to_string( match_mode_enum match_mode ) {
+	mpt::ustring match_mode_to_string( match_mode_enum match_mode ) {
 		switch ( match_mode ) {
-			case match_print  : return "print"  ; break;
-			case match_recurse: return "recurse"; break;
-			case match_exact  : return "exact"  ; break;
-			case match_better : return "better" ; break;
-			case match_any    : return "any"    ; break;
+			case match_print  : return MPT_USTRING("print")  ; break;
+			case match_recurse: return MPT_USTRING("recurse"); break;
+			case match_exact  : return MPT_USTRING("exact")  ; break;
+			case match_better : return MPT_USTRING("better") ; break;
+			case match_any    : return MPT_USTRING("any")    ; break;
 		}
-		return "";
+		return MPT_USTRING("");
 	}
 	int matched_result( const SF_FORMAT_INFO & format_info, const SF_FORMAT_INFO & subformat_info, match_mode_enum match_mode ) {
 		if ( flags.verbose ) {
-			log << "sndfile: using format '"
-			    << format_info.name << " (" << format_info.extension << ")" << " / " << subformat_info.name
-			    << "', "
-			    << "match: " << match_mode_to_string( match_mode )
+			log << MPT_USTRING("sndfile: using format '")
+			    << mpt::transcode<mpt::ustring>( sndfile_encoding, format_info.name ) << MPT_USTRING(" (") << mpt::transcode<mpt::ustring>( sndfile_encoding, format_info.extension ) << MPT_USTRING(")") << MPT_USTRING(" / ") << mpt::transcode<mpt::ustring>( sndfile_encoding, subformat_info.name )
+			    << MPT_USTRING("', ")
+			    << MPT_USTRING("match: ") << match_mode_to_string( match_mode )
 			    << lf;
 		}
 		return ( format_info.format & SF_FORMAT_TYPEMASK ) | subformat_info.format;
@@ -103,15 +105,15 @@ private:
 
 					switch ( match_mode ) {
 					case match_print:
-						log << "sndfile: "
-						    << ( format_info.name ? format_info.name : "" ) << " (" << ( format_info.extension ? format_info.extension : "" ) << ")"
-						    << " / "
-						    << ( subformat_info.name ? subformat_info.name : "" )
-						    << " ["
-						    << mpt::format<std::string>::hex0<8>( format_info.format )
-						    << "|"
-						    << mpt::format<std::string>::hex0<8>( subformat_info.format )
-						    << "]"
+						log << MPT_USTRING("sndfile: ")
+						    << mpt::transcode<mpt::ustring>( sndfile_encoding, ( format_info.name ? format_info.name : "" ) ) << MPT_USTRING(" (") << mpt::transcode<mpt::ustring>( sndfile_encoding, ( format_info.extension ? format_info.extension : "" ) ) << MPT_USTRING(")")
+						    << MPT_USTRING(" / ")
+						    << mpt::transcode<mpt::ustring>( sndfile_encoding, ( subformat_info.name ? subformat_info.name : "" ) )
+						    << MPT_USTRING(" [")
+						    << mpt::format<mpt::ustring>::hex0<8>( format_info.format )
+						    << MPT_USTRING("|")
+						    << mpt::format<mpt::ustring>::hex0<8>( subformat_info.format )
+						    << MPT_USTRING("]")
 						    << lf;
 						break;
 					case match_recurse:
@@ -154,14 +156,14 @@ private:
 		}
 	}
 public:
-	sndfile_stream_raii( const mpt::native_path & filename, const commandlineflags & flags_, concat_stream<std::string> & log_ ) : flags(flags_), log(log_), sndfile(0) {
+	sndfile_stream_raii( const mpt::native_path & filename, const commandlineflags & flags_, concat_stream<mpt::ustring> & log_ ) : flags(flags_), log(log_), sndfile(0) {
 		if ( flags.verbose ) {
 			find_format( MPT_NATIVE_PATH(""), match_print );
 			log << lf;
 		}
 		int format = find_format( flags.output_extension, match_recurse );
 		if ( !format ) {
-			throw exception( "unknown file type" );
+			throw exception( MPT_USTRING("unknown file type") );
 		}
 		SF_INFO info;
 		std::memset( &info, 0, sizeof( SF_INFO ) );
@@ -178,12 +180,12 @@ public:
 		sf_close( sndfile );
 		sndfile = 0;
 	}
-	void write_metadata( std::map<std::string,std::string> metadata ) override {
-		write_metadata_field( SF_STR_TITLE, metadata[ "title" ] );
-		write_metadata_field( SF_STR_ARTIST, metadata[ "artist" ] );
-		write_metadata_field( SF_STR_DATE, metadata[ "date" ] );
-		write_metadata_field( SF_STR_COMMENT, metadata[ "message" ] );
-		write_metadata_field( SF_STR_SOFTWARE, append_software_tag( metadata[ "tracker" ] ) );
+	void write_metadata( std::map<mpt::ustring, mpt::ustring> metadata ) override {
+		write_metadata_field( SF_STR_TITLE, mpt::transcode<std::string>( sndfile_encoding, metadata[ MPT_USTRING("title") ] ) );
+		write_metadata_field( SF_STR_ARTIST, mpt::transcode<std::string>( sndfile_encoding, metadata[ MPT_USTRING("artist") ] ) );
+		write_metadata_field( SF_STR_DATE, mpt::transcode<std::string>( sndfile_encoding, metadata[ MPT_USTRING("date") ] ) );
+		write_metadata_field( SF_STR_COMMENT, mpt::transcode<std::string>( sndfile_encoding, metadata[ MPT_USTRING("message") ] ) );
+		write_metadata_field( SF_STR_SOFTWARE, mpt::transcode<std::string>( sndfile_encoding, append_software_tag( metadata[ MPT_USTRING("tracker") ] ) ) );
 	}
 	void write( const std::vector<float*> buffers, std::size_t frames ) override {
 		interleaved_float_buffer.clear();

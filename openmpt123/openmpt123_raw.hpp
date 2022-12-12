@@ -24,13 +24,13 @@ private:
 	std::vector<float> interleaved_float_buffer;
 	std::vector<std::int16_t> interleaved_int_buffer;
 public:
-	raw_stream_raii( const mpt::native_path & filename, const commandlineflags & flags_, concat_stream<std::string> & /*log*/ ) : flags(flags_), file(filename, std::ios::binary) {
+	raw_stream_raii( const mpt::native_path & filename, const commandlineflags & flags_, concat_stream<mpt::ustring> & /*log*/ ) : flags(flags_), file(filename, std::ios::binary) {
 		return;
 	}
 	~raw_stream_raii() {
 		return;
 	}
-	void write_metadata( std::map<std::string, std::string> /* metadata */ ) override {
+	void write_metadata( std::map<mpt::ustring, mpt::ustring> /* metadata */ ) override {
 		return;
 	}
 	void write( const std::vector<float*> buffers, std::size_t frames ) override {

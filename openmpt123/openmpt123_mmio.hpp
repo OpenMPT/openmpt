@@ -19,7 +19,7 @@ namespace openmpt123 {
 
 class mmio_stream_raii : public file_audio_stream_base {
 private:
-	concat_stream<std::string> & log;
+	concat_stream<mpt::ustring> & log;
 	commandlineflags flags;
 	WAVEFORMATEX waveformatex;
 	HMMIO mmio;
@@ -30,16 +30,16 @@ private:
 private:
 	void CHECKED( HRESULT err ) {
 		if ( err != 0 ) {
-			throw exception( "error writing wave file" );
+			throw exception( MPT_USTRING("error writing wave file") );
 		}
 	}
 	void UNCHECKED( HRESULT err ) {
 		if ( err != 0 ) {
-			log << "error writing wave file" << lf;
+			log << MPT_USTRING("error writing wave file") << lf;
 		}
 	}
 public:
-	mmio_stream_raii( const mpt::native_path & filename, const commandlineflags & flags_, concat_stream<std::string> & log_ ) : log(log_), flags(flags_), mmio(NULL) {
+	mmio_stream_raii( const mpt::native_path & filename, const commandlineflags & flags_, concat_stream<mpt::ustring> & log_ ) : log(log_), flags(flags_), mmio(NULL) {
 
 		ZeroMemory( &waveformatex, sizeof( WAVEFORMATEX ) );
 		waveformatex.cbSize = 0;
