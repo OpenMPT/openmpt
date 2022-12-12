@@ -214,7 +214,7 @@ public:
 			// nothing
 		} else if ( flags.output_extension == MPT_NATIVE_PATH("raw") ) {
 			impl = std::make_unique<raw_stream_raii>( filename, flags, log );
-#ifdef MPT_WITH_MMIO
+#if defined(WIN32)
 		} else if ( flags.output_extension == MPT_NATIVE_PATH("wav") ) {
 			impl = std::make_unique<mmio_stream_raii>( filename, flags, log );
 #endif				
