@@ -781,6 +781,7 @@ BEGIN_MESSAGE_MAP(CModTreeBar, CDialogBar)
 	ON_WM_NCLBUTTONDOWN()
 	ON_WM_LBUTTONUP()
 	ON_WM_NCLBUTTONUP()
+	ON_WM_TIMER()
 	ON_MESSAGE(WM_INITDIALOG, &CModTreeBar::OnInitDialog)
 
 	ON_EN_CHANGE(IDC_EDIT1,             &CModTreeBar::OnFilterChanged)
@@ -1313,12 +1314,35 @@ void CModTreeBar::StartTreeFilter(CModTree &source)
 
 void CModTreeBar::OnFilterChanged()
 {
+	if(!m_filterSource)
+		return;
+
+	CString filter;
+	m_filterEdit.GetWindowText(filter);
+	if (filter.GetLength() < 1 || filter.GetLength() > 2)
+	{
+		CancelTimer();
+		m_filterSource->SetInstrumentLibraryFilter(mpt::ToWin(filter));
+	} else
+	{
+		if(!m_filterTimer)
+			m_filterTimer = SetTimer(1, 360 - filter.GetLength() * 120, nullptr);
+	}
+}
+
+
+void CModTreeBar::OnTimer(UINT_PTR id)
+{
+	if(id != m_filterTimer)
+		return;
+
 	if(m_filterSource)
 	{
 		CString filter;
 		m_filterEdit.GetWindowText(filter);
 		m_filterSource->SetInstrumentLibraryFilter(mpt::ToWin(filter));
 	}
+	CancelTimer();
 }
 
 
@@ -1331,6 +1355,7 @@ void CModTreeBar::OnFilterLostFocus()
 
 void CModTreeBar::CloseTreeFilter()
 {
+	CancelTimer();
 	if(m_filterSource)
 	{
 		m_filterSource->SetInstrumentLibraryFilter({});
@@ -1345,6 +1370,15 @@ void CModTreeBar::CloseTreeFilter()
 	}
 }
 
+
+void CModTreeBar::CancelTimer()
+{
+	if(m_filterTimer)
+	{
+		KillTimer(m_filterTimer);
+		m_filterTimer = 0;
+	}
+}
 
 
 ////////////////////////////////////////////////////////////////////////////////

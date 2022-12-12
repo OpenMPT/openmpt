@@ -145,6 +145,7 @@ protected:
 
 	CEdit m_filterEdit;
 	CModTree *m_filterSource = nullptr;
+	UINT_PTR m_filterTimer = 0;
 
 public:
 	CModTree *m_pModTree = nullptr, *m_pModTreeData = nullptr;
@@ -180,6 +181,7 @@ protected:
 	//}}AFX_VIRTUAL
 
 	void CloseTreeFilter();
+	void CancelTimer();
 
 protected:
 	//{{AFX_MSG(CModTreeBar)
@@ -198,6 +200,7 @@ protected:
 	afx_msg LRESULT OnInitDialog(WPARAM, LPARAM);
 	afx_msg void OnFilterChanged();
 	afx_msg void OnFilterLostFocus();
+	afx_msg void OnTimer(UINT_PTR id);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
