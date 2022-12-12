@@ -1417,11 +1417,11 @@ BEGIN
     CONTROL         "Spin1",IDC_SPIN_RESTARTPOS,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_NOTHOUSANDS,132,54,11,14
     CONTROL         "Loop Song",IDC_CHECK_LOOPSONG,"Button",BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,102,90,54,10
     CTEXT           "Not saved in song!",IDC_STATIC,96,102,66,12
-    CTEXT           "Initial Global Vol",IDC_STATIC,165,42,51,8
+    CTEXT           "Initial Global Volume",IDC_STATIC,165,42,64,8
     CONTROL         "",IDC_SLIDER_GLOBALVOL,"msctls_trackbar32",TBS_VERT | TBS_BOTH | TBS_NOTICKS | TBS_TOOLTIPS,181,50,24,50
     EDITTEXT        IDC_EDIT_GLOBALVOL,174,100,36,12,ES_AUTOHSCROLL | ES_NUMBER
     CONTROL         "",IDC_SPIN_GLOBALVOL,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_NOTHOUSANDS,203,98,11,14
-    CTEXT           "Synth Volume",IDC_STATIC,228,42,48,8
+    CTEXT           "Synth Volume",IDC_STATIC,232,42,48,8
     CONTROL         "",IDC_SLIDER_VSTIVOL,"msctls_trackbar32",TBS_VERT | TBS_BOTH | TBS_NOTICKS | TBS_TOOLTIPS,243,50,22,50
     EDITTEXT        IDC_EDIT_VSTIVOL,235,100,36,12,ES_AUTOHSCROLL | ES_NUMBER
     CONTROL         "",IDC_SPIN_VSTIVOL,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_NOTHOUSANDS,263,98,11,14
@@ -3222,8 +3222,6 @@ END
 
 STRINGTABLE
 BEGIN
-    IDS_UNABLE_TO_LOAD_KEYBINDINGS 
-                            "Loading keybindings failed. The keyboard won't work properly."
     IDS_CANT_OPEN_FILE_FOR_WRITING "Can't open keybindings file for writing."
     IDS_PATTERN_CLEANUP_UNAVAILABLE 
                             "Removing unused patterns is not available when using multiple sequences."
