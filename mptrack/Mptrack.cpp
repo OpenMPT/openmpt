@@ -360,8 +360,7 @@ void CTrackApp::ImportMidiConfig(const mpt::PathString &filename, bool hideWarni
 				{
 					uint32 prog = (ins < 128) ? ins : 0xFF;
 					uint32 key = (ins < 128) ? 0xFF : ins & 0x7F;
-					uint32 bank = (ins < 128) ? 0 : F_INSTRUMENT_DRUMS;
-					if (dlsbank.FindInstrument(ins >= 128, bank, prog, key))
+					if(dlsbank.FindInstrument(ins >= 128, 0xFFFF, prog, key))
 					{
 						midiLibrary[ins] = filename;
 					}

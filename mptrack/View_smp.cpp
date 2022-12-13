@@ -3218,7 +3218,7 @@ BOOL CViewSample::OnDragonDrop(BOOL doDrop, const DRAGONDROP *dropInfo)
 				if (dropInfo->dropItem & 0x80)
 				{
 					UINT key = dropInfo->dropItem & 0x7F;
-					pDlsIns = dlsbank.FindInstrument(TRUE, 0xFFFF, 0xFF, key, &nIns);
+					pDlsIns = dlsbank.FindInstrument(true, 0xFFFF, 0xFF, key, &nIns);
 					if(pDlsIns)
 					{
 						nRgn = dlsbank.GetRegionFromKey(nIns, key);
@@ -3229,7 +3229,7 @@ BOOL CViewSample::OnDragonDrop(BOOL doDrop, const DRAGONDROP *dropInfo)
 				} else
 				// Melodic
 				{
-					pDlsIns = dlsbank.FindInstrument(FALSE, 0xFFFF, dropInfo->dropItem, 60, &nIns);
+					pDlsIns = dlsbank.FindInstrument(false, 0xFFFF, dropInfo->dropItem, 60, &nIns);
 					if (pDlsIns) nRgn = dlsbank.GetRegionFromKey(nIns, 60);
 				}
 				canDrop = FALSE;

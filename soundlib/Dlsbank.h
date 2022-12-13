@@ -71,6 +71,11 @@ struct DLSINSTRUMENT
 	char szName[32];
 	// SF2 stuff (DO NOT USE! -> used internally by the SF2 loader)
 	uint16 wPresetBagNdx = 0, wPresetBagNum = 0;
+
+	constexpr bool operator<(const DLSINSTRUMENT &other) const
+	{
+		return std::tie(ulBank, ulInstrument) < std::tie(other.ulBank, other.ulInstrument);
+	}
 };
 
 struct DLSSAMPLEEX
