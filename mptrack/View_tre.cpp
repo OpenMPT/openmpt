@@ -1623,12 +1623,12 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, ModCommand::NOTE note, int volume)
 						uint32 item = 0;
 						if(modItemID < 0x80)
 						{
-							dlsBank->FindInstrument(false, 0xFFFF, modItemID, note - NOTE_MIN, &item);
-							PlayDLSItem(*dlsBank, DlsItem(static_cast<uint16>(item)), note);
+							if(dlsBank->FindInstrument(false, 0xFFFF, modItemID, note - NOTE_MIN, &item))
+								PlayDLSItem(*dlsBank, DlsItem(static_cast<uint16>(item)), note);
 						} else
 						{
-							dlsBank->FindInstrument(true, 0xFFFF, 0xFF, modItemID & 0x7F, &item);
-							PlayDLSItem(*dlsBank, DlsItem(static_cast<uint16>(item), static_cast<uint16>(dlsBank->GetRegionFromKey(item, modItemID & 0x7F))), note);
+							if(dlsBank->FindInstrument(true, 0xFFFF, 0xFF, modItemID & 0x7F, &item))
+								PlayDLSItem(*dlsBank, DlsItem(static_cast<uint16>(item), static_cast<uint16>(dlsBank->GetRegionFromKey(item, modItemID & 0x7F))), note);
 						}
 					} else
 					{
