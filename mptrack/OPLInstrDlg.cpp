@@ -105,7 +105,7 @@ BOOL OPLInstrDlg::PreTranslateMessage(MSG *pMsg)
 		// Forward key presses and drag&drop support to parent editor
 		if(pMsg->message == WM_SYSKEYUP || pMsg->message == WM_KEYUP ||
 			pMsg->message == WM_SYSKEYDOWN || pMsg->message == WM_KEYDOWN ||
-			pMsg->message == WM_DROPFILES)
+			pMsg->message == WM_DROPFILES || pMsg->message == WM_XBUTTONUP)
 		{
 			if(pMsg->hwnd == m_hWnd)
 			{
