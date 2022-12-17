@@ -3781,6 +3781,18 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcSampleToggleFollowPlayCursor:
 			TrackerSettings::Instance().m_followSamplePlayCursor = static_cast<FollowSamplePlayCursor>(
 				(static_cast<int>(TrackerSettings::Instance().m_followSamplePlayCursor.Get()) + 1) % int(FollowSamplePlayCursor::MaxOptions));
+			switch(TrackerSettings::Instance().m_followSamplePlayCursor.Get())
+			{
+			case FollowSamplePlayCursor::DoNotFollow:
+				CMainFrame::GetMainFrame()->SetHelpText(_T("Follow Sample Play Cursor: Do not follow"));
+				break;
+			case FollowSamplePlayCursor::Follow:
+				CMainFrame::GetMainFrame()->SetHelpText(_T("Follow Sample Play Cursor: Follow"));
+				break;
+			case FollowSamplePlayCursor::FollowCentered:
+				CMainFrame::GetMainFrame()->SetHelpText(_T("Follow Sample Play Cursor: Follow centered"));
+				break;
+			}
 			return wParam;
 	}
 
