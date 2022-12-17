@@ -37,8 +37,9 @@ void COptionsSampleEditor::DoDataExchange(CDataExchange* pDX)
 {
 	CPropertyPage::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(COptionsSampleEditor)
-	DDX_Control(pDX, IDC_DEFAULT_FORMAT,		m_cbnDefaultSampleFormat);
-	DDX_Control(pDX, IDC_VOLUME_HANDLING,		m_cbnDefaultVolumeHandling);
+	DDX_Control(pDX, IDC_DEFAULT_FORMAT, m_cbnDefaultSampleFormat);
+	DDX_Control(pDX, IDC_VOLUME_HANDLING, m_cbnDefaultVolumeHandling);
+	DDX_Control(pDX, IDC_COMBO3, m_cbnFollowSamplePlayCursor);
 	//}}AFX_DATA_MAP
 }
 
@@ -65,6 +66,11 @@ BOOL COptionsSampleEditor::OnInitDialog()
 
 	CheckRadioButton(IDC_RADIO1, IDC_RADIO3, IDC_RADIO1 + TrackerSettings::Instance().sampleEditorKeyBehaviour);
 
+	m_cbnFollowSamplePlayCursor.SetItemData(m_cbnFollowSamplePlayCursor.AddString(_T("Do not follow play cursor")), int(FollowSamplePlayCursor::DoNotFollow));
+	m_cbnFollowSamplePlayCursor.SetItemData(m_cbnFollowSamplePlayCursor.AddString(_T("Follow")), int(FollowSamplePlayCursor::Follow));
+	m_cbnFollowSamplePlayCursor.SetItemData(m_cbnFollowSamplePlayCursor.AddString(_T("Follow centered")), int(FollowSamplePlayCursor::FollowCentered));
+	m_cbnFollowSamplePlayCursor.SetCurSel(static_cast<int>(TrackerSettings::Instance().m_followSamplePlayCursor.Get()));
+
 	CheckDlgButton(IDC_COMPRESS_ITI, TrackerSettings::Instance().compressITI ? BST_CHECKED : BST_UNCHECKED);
 
 	m_cbnDefaultVolumeHandling.SetItemData(m_cbnDefaultVolumeHandling.AddString(_T("MIDI volume")), PLUGIN_VOLUMEHANDLING_MIDI);
@@ -87,6 +93,7 @@ void COptionsSampleEditor::OnOK()
 	TrackerSettings::Instance().m_nFinetuneStep = GetDlgItemInt(IDC_EDIT_FINETUNE);
 	TrackerSettings::Instance().m_SampleUndoBufferSize = SampleUndoBufferSize(GetDlgItemInt(IDC_EDIT_UNDOSIZE));
 	TrackerSettings::Instance().m_defaultSampleFormat = static_cast<SampleEditorDefaultFormat>(m_cbnDefaultSampleFormat.GetItemData(m_cbnDefaultSampleFormat.GetCurSel()));
+	TrackerSettings::Instance().m_followSamplePlayCursor = static_cast<FollowSamplePlayCursor>(m_cbnFollowSamplePlayCursor.GetItemData(m_cbnFollowSamplePlayCursor.GetCurSel()));
 	TrackerSettings::Instance().m_FLACCompressionLevel = static_cast<CSliderCtrl *>(GetDlgItem(IDC_SLIDER1))->GetPos();
 	TrackerSettings::Instance().sampleEditorKeyBehaviour = static_cast<SampleEditorKeyBehaviour>(GetCheckedRadioButton(IDC_RADIO1, IDC_RADIO3) - IDC_RADIO1);
 	TrackerSettings::Instance().compressITI = IsDlgButtonChecked(IDC_COMPRESS_ITI) != BST_UNCHECKED;
@@ -95,8 +102,7 @@ void COptionsSampleEditor::OnOK()
 	TrackerSettings::Instance().m_MayNormalizeSamplesOnLoad = IsDlgButtonChecked(IDC_NORMALIZE) != BST_UNCHECKED;
 	TrackerSettings::Instance().cursorPositionInHex = IsDlgButtonChecked(IDC_CURSORINHEX) != BST_UNCHECKED;
 
-	auto docs = theApp.GetOpenDocuments();
-	for(auto modDoc : docs)
+	for(auto modDoc : theApp.GetOpenDocuments())
 	{
 		modDoc->GetSampleUndo().RestrictBufferSize();
 	}

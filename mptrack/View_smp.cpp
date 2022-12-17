@@ -308,16 +308,19 @@ void CViewSample::UpdateScrollSize(int newZoom, bool forceRefresh, SmpLength cen
 }
 
 
-// Center given sample in the view
-void CViewSample::ScrollToSample(SmpLength centeredSample, bool refresh)
+void CViewSample::ScrollToSample(SmpLength sample, bool refresh, bool centerSample)
 {
-	int scrollToSample = centeredSample >> (std::max(1, m_nZoom) - 1);
-	scrollToSample -= (m_rcClient.Width() / 2) >> (-std::min(-1, m_nZoom) - 1);
+	int scrollToSample = sample >> (std::max(1, m_nZoom) - 1);
+	if(centerSample)
+		scrollToSample -= (m_rcClient.Width() / 2) >> (-std::min(-1, m_nZoom) - 1);
 
 	Limit(scrollToSample, 0, GetScrollLimit(SB_HORZ));
-	SetScrollPos(SB_HORZ, scrollToSample);
-
-	if(refresh) InvalidateSample();
+	if(GetScrollPos(SB_HORZ) != scrollToSample)
+	{
+		SetScrollPos(SB_HORZ, scrollToSample);
+		if(refresh)
+			InvalidateSample();
+	}
 }
 
 
@@ -1572,6 +1575,39 @@ LRESULT CViewSample::OnPlayerNotify(Notification *pnotify)
 			HDC hdc = ::GetDC(m_hWnd);
 			DrawPositionMarks();	// Erase old marks...
 			m_dwNotifyPos = pnotify->pos;
+
+			if(m_nZoom != 0 && TrackerSettings::Instance().m_followSamplePlayCursor != FollowSamplePlayCursor::DoNotFollow)
+			{
+				// Scroll sample into view if it's not in the visible range
+				size_t count = 0;
+				SmpLength scrollToPos = 0;
+				const auto &playChns = GetDocument()->GetSoundFile().m_PlayState.Chn;
+				for(CHANNELINDEX chn = 0; chn < MAX_CHANNELS; chn++)
+				{
+					if(m_dwNotifyPos[chn] == Notification::PosInvalid)
+						continue;
+
+					// Only update based on notes triggered by this view
+					if(!playChns[chn].isPreviewNote)
+						continue;
+					if(!ModCommand::IsNote(playChns[chn].nNewNote) || m_noteChannel[playChns[chn].nNewNote - NOTE_MIN] != chn)
+						continue;
+
+					count++;
+					if(count > 1)
+						break;
+					else
+						scrollToPos = m_dwNotifyPos[chn];
+				}
+				if(count == 1)
+				{
+					const auto screenPos = SampleToScreen(scrollToPos);
+					const bool alwaysCenter = (TrackerSettings::Instance().m_followSamplePlayCursor == FollowSamplePlayCursor::FollowCentered);
+					if(alwaysCenter || screenPos < m_rcClient.left || screenPos >= m_rcClient.right)
+						ScrollToSample(scrollToPos, true, alwaysCenter);
+				}
+			}
+
 			DrawPositionMarks();	// ...and draw new ones
 			BitBlt(hdc, m_rcClient.left, m_rcClient.top, m_rcClient.Width(), m_rcClient.Height(), m_offScreenDC, 0, 0, SRCCOPY);
 			::ReleaseDC(m_hWnd, hdc);
@@ -3741,6 +3777,11 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		// Those don't seem to work.
 		case kcNoteOff:			PlayNote(NOTE_KEYOFF); return wParam;
 		case kcNoteCut:			PlayNote(NOTE_NOTECUT); return wParam;
+
+		case kcSampleToggleFollowPlayCursor:
+			TrackerSettings::Instance().m_followSamplePlayCursor = static_cast<FollowSamplePlayCursor>(
+				(static_cast<int>(TrackerSettings::Instance().m_followSamplePlayCursor.Get()) + 1) % int(FollowSamplePlayCursor::MaxOptions));
+			return wParam;
 	}
 
 	if(wParam >= kcSampStartNotes && wParam <= kcSampEndNotes)

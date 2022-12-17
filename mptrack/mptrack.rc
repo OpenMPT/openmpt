@@ -179,10 +179,12 @@ BEGIN
     LTEXT           "Faster Encoding",IDC_STATIC,114,74,54,8
     CONTROL         "",IDC_SLIDER1,"msctls_trackbar32",TBS_AUTOTICKS | TBS_TOOLTIPS | WS_TABSTOP,168,72,48,12
     LTEXT           "Smaller Files",IDC_STATIC,222,74,54,8
-    LTEXT           "Note Cuts:",IDC_STATIC,12,90,264,12
-    CONTROL         "On New &Note",IDC_RADIO1,"Button",BS_AUTORADIOBUTTON,18,102,258,12
-    CONTROL         "On Key &Release",IDC_RADIO2,"Button",BS_AUTORADIOBUTTON,18,114,258,12
-    CONTROL         "Press &Again",IDC_RADIO3,"Button",BS_AUTORADIOBUTTON,18,126,258,12
+    LTEXT           "Note Cuts:",IDC_STATIC,12,90,132,12
+    CONTROL         "On New &Note",IDC_RADIO1,"Button",BS_AUTORADIOBUTTON,18,102,126,12
+    CONTROL         "On Key &Release",IDC_RADIO2,"Button",BS_AUTORADIOBUTTON,18,114,126,12
+    CONTROL         "Press &Again",IDC_RADIO3,"Button",BS_AUTORADIOBUTTON,18,126,126,12
+    LTEXT           "Automatic Scrolling when &Zoomed-In:",IDC_STATIC,144,90,132,12
+    COMBOBOX        IDC_COMBO3,144,102,126,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     GROUPBOX        "Instrument Editor",IDC_STATIC,6,150,276,48
     CONTROL         "&Compress ITI Files",IDC_COMPRESS_ITI,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,12,162,264,12
     LTEXT           "Default &Plugin Volume Command Handling:",IDC_STATIC,12,182,150,8
@@ -3612,7 +3614,6 @@ BEGIN
 0x3631, "\000" 
     0
 END
-
 
 #endif    // English (United Kingdom) resources
 /////////////////////////////////////////////////////////////////////////////

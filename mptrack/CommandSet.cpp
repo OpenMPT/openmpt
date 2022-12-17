@@ -496,6 +496,7 @@ constexpr struct
 	{kcChnColorFromPrev,                       VK_LEFT,            ModShift | ModAlt,  kKeyEventDown,                   kCtxChannelSettings,     MPT_V("1.31")},
 	{kcChnColorFromNext,                       VK_RIGHT,           ModShift | ModAlt,  kKeyEventDown,                   kCtxChannelSettings,     MPT_V("1.31")},
 	{kcChnSettingsClose,                       VK_RETURN,          ModNone,            kKeyEventDown,                   kCtxChannelSettings,     MPT_V("1.31")},
+	{kcSampleToggleFollowPlayCursor,           'F',                ModShift,           kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
 };
 // clang-format on
 
@@ -1234,6 +1235,7 @@ static constexpr struct
 	{2044, kcTreeViewSendToEditorInsertNew, _T("Send To Editor (Insert New)")},
 	{2045, kcPlayStopSong, _T("Play Song / Stop Song")},
 	{2046, kcTreeViewDeletePermanently, _T("Delete Item Permanently")},
+	{2047, kcSampleToggleFollowPlayCursor, _T("Toggle Follow Sample Play Cursor")},
 };
 
 // Get command descriptions etc.. loaded up.

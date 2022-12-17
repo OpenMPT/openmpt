@@ -240,6 +240,14 @@ enum SampleEditorDefaultFormat
 	dfS3I,
 };
 
+enum class FollowSamplePlayCursor
+{
+	DoNotFollow = 0,
+	Follow,
+	FollowCentered,
+	MaxOptions
+};
+
 enum class TimelineFormat
 {
 	Seconds = 0,
@@ -292,6 +300,9 @@ template<> inline RecordAftertouchOptions FromSettingValue(const SettingValue &v
 
 template<> inline SettingValue ToSettingValue(const SampleEditorKeyBehaviour &val) { return SettingValue(int32(val)); }
 template<> inline SampleEditorKeyBehaviour FromSettingValue(const SettingValue &val) { return SampleEditorKeyBehaviour(val.as<int32>()); }
+
+template<> inline SettingValue ToSettingValue(const FollowSamplePlayCursor &val) { return SettingValue(int32(val)); }
+template<> inline FollowSamplePlayCursor FromSettingValue(const SettingValue& val) { return FollowSamplePlayCursor(val.as<int32>()); }
 
 template<> inline SettingValue ToSettingValue(const TimelineFormat &val) { return SettingValue(int32(val)); }
 template<> inline TimelineFormat FromSettingValue(const SettingValue &val) { return TimelineFormat(val.as<int32>()); }
@@ -782,6 +793,7 @@ public:
 	Setting<SampleUndoBufferSize> m_SampleUndoBufferSize;
 	Setting<SampleEditorKeyBehaviour> sampleEditorKeyBehaviour;
 	Setting<SampleEditorDefaultFormat> m_defaultSampleFormat;
+	CachedSetting<FollowSamplePlayCursor> m_followSamplePlayCursor;
 	Setting<TimelineFormat> sampleEditorTimelineFormat;
 	Setting<ResamplingMode> sampleEditorDefaultResampler;
 	Setting<int32> m_nFinetuneStep;	// Increment finetune by x cents when using spin control.
