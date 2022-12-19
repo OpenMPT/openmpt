@@ -517,6 +517,8 @@ public:
 protected:
 	void Run() override
 	{
+		SetTitle(_T("Cleanup"));
+
 		CSoundFile &sndFile = m_modDoc.GetSoundFile();
 
 		const auto subSongs = sndFile.GetAllSubSongs();
