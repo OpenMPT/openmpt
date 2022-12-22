@@ -356,7 +356,7 @@ void MidiInOut::Resume()
 	m_clock.SetResolution(1);
 	OpenDevice(m_inputDevice.index, true);
 	OpenDevice(m_outputDevice.index, false);
-	if(m_midiOut.isPortOpen() && m_sendTimingInfo)
+	if(m_midiOut.isPortOpen() && m_sendTimingInfo && !m_SndFile.IsPaused())
 	{
 		MidiSend(0xFA);	// Start
 	}
@@ -387,7 +387,7 @@ void MidiInOut::Suspend()
 // Playback discontinuity
 void MidiInOut::PositionChanged()
 {
-	if(m_sendTimingInfo)
+	if(m_sendTimingInfo && !m_SndFile.IsPaused())
 	{
 		MidiSend(0xFC);	// Stop
 		MidiSend(0xFA);	// Start
