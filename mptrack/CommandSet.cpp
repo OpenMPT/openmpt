@@ -341,6 +341,7 @@ constexpr struct
 	{kcSampleTransposeDown,                    'A',                ModCtrl,            kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
 	{kcSampleTransposeOctUp,                   'Q',                ModShift | ModCtrl, kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
 	{kcSampleTransposeOctDown,                 'A',                ModShift | ModCtrl, kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
+	{kcSampleToggleFollowPlayCursor,           'F',                ModShift,           kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31.00.19")},
 	{kcSampleTrim,                             'T',                ModCtrl,            kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
 	{kcSampleTrimToLoopEnd,                    'T',                ModShift | ModCtrl, kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
 	{kcSampleSilence,                          VK_BACK,            ModNone,            kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
@@ -496,7 +497,6 @@ constexpr struct
 	{kcChnColorFromPrev,                       VK_LEFT,            ModShift | ModAlt,  kKeyEventDown,                   kCtxChannelSettings,     MPT_V("1.31")},
 	{kcChnColorFromNext,                       VK_RIGHT,           ModShift | ModAlt,  kKeyEventDown,                   kCtxChannelSettings,     MPT_V("1.31")},
 	{kcChnSettingsClose,                       VK_RETURN,          ModNone,            kKeyEventDown,                   kCtxChannelSettings,     MPT_V("1.31")},
-	{kcSampleToggleFollowPlayCursor,           'F',                ModShift,           kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
 };
 // clang-format on
 
