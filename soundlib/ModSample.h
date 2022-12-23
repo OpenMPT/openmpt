@@ -99,6 +99,34 @@ struct ModSample
 		MPT_ASSERT(GetElementarySampleSize() == sizeof(int16));
 		return pData.pSample16;
 	}
+	template <typename Tsample>
+	MPT_FORCEINLINE const Tsample *sample() const noexcept = delete;
+	template <typename Tsample>
+	MPT_FORCEINLINE Tsample *sample() noexcept = delete;
+	template <>
+	MPT_FORCEINLINE const int8 *sample<int8>() const noexcept
+	{
+		MPT_ASSERT(GetElementarySampleSize() == sizeof(int8));
+		return pData.pSample8;
+	}
+	template <>
+	MPT_FORCEINLINE int8 *sample<int8>() noexcept
+	{
+		MPT_ASSERT(GetElementarySampleSize() == sizeof(int8));
+		return pData.pSample8;
+	}
+	template <>
+	MPT_FORCEINLINE const int16 *sample<int16>() const noexcept
+	{
+		MPT_ASSERT(GetElementarySampleSize() == sizeof(int16));
+		return pData.pSample16;
+	}
+	template <>
+	MPT_FORCEINLINE int16 *sample<int16>() noexcept
+	{
+		MPT_ASSERT(GetElementarySampleSize() == sizeof(int16));
+		return pData.pSample16;
+	}
 
 	// Return the size of one (elementary) sample in bytes.
 	uint8 GetElementarySampleSize() const noexcept { return (uFlags & CHN_16BIT) ? 2 : 1; }
