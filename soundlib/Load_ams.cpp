@@ -1109,7 +1109,7 @@ void AMSUnpack(mpt::const_byte_span source, void * const dest, const size_t dest
 		int8 *out = static_cast<int8 *>(dest);
 		for(size_t i = depackSize; i != 0; i--)
 		{
-			int pos = *reinterpret_cast<uint8 *>(out);
+			int pos = static_cast<uint8>(*out);
 			if(pos != 128 && (pos & 0x80) != 0)
 			{
 				pos = -(pos & 0x7F);
