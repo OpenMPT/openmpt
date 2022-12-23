@@ -122,15 +122,15 @@ bool CGzipArchive::ExtractFile(std::size_t index)
 		std::array<char, mpt::IO::BUFFERSIZE_SMALL> inBuffer, outBuffer;
 		strm.avail_in = static_cast<uInt>(std::min(static_cast<FileReader::pos_type>(inBuffer.size()), bytesLeft));
 		inFile.ReadStructPartial(inBuffer, strm.avail_in);
-		strm.next_in = reinterpret_cast<Bytef *>(inBuffer.data());
+		strm.next_in = mpt::byte_cast<Bytef *>(inBuffer.data());
 		bytesLeft -= strm.avail_in;
 		do
 		{
 			strm.avail_out = static_cast<uInt>(outBuffer.size());
-			strm.next_out = reinterpret_cast<Bytef *>(outBuffer.data());
+			strm.next_out = mpt::byte_cast<Bytef *>(outBuffer.data());
 			retVal = inflate(&strm, Z_NO_FLUSH);
 			const auto output = mpt::as_span(outBuffer.data(), outBuffer.data() + outBuffer.size() - strm.avail_out);
-			crc = crc32(crc, reinterpret_cast<Bytef *>(output.data()), static_cast<uInt>(output.size()));
+			crc = crc32(crc, mpt::byte_cast<Bytef *>(output.data()), static_cast<uInt>(output.size()));
 			data.insert(data.end(), output.begin(), output.end());
 		} while(strm.avail_out == 0);
 	} while(retVal == Z_OK && bytesLeft);
