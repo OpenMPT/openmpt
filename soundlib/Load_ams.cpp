@@ -1035,27 +1035,27 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 /////////////////////////////////////////////////////////////////////
 // AMS Sample unpacking
 
-void AMSUnpack(const int8 * const source, size_t sourceSize, void * const dest, const size_t destSize, char packCharacter)
+void AMSUnpack(mpt::const_byte_span source, void * const dest, const size_t destSize, char packCharacter)
 {
 	std::vector<int8> tempBuf(destSize, 0);
 	size_t depackSize = destSize;
 
 	// Unpack Loop
 	{
-		const int8 *in = source;
+		const std::byte *in = source.data();
 		int8 *out = tempBuf.data();
 
-		size_t i = sourceSize, j = destSize;
+		size_t i = source.size(), j = destSize;
 		while(i != 0 && j != 0)
 		{
-			int8 ch = *(in++);
+			int8 ch = mpt::byte_cast<int8>(*(in++));
 			if(--i != 0 && ch == packCharacter)
 			{
-				uint8 repCount = *(in++);
+				uint8 repCount = mpt::byte_cast<uint8>(*(in++));
 				repCount = static_cast<uint8>(std::min(static_cast<size_t>(repCount), j));
 				if(--i != 0 && repCount)
 				{
-					ch = *(in++);
+					ch = mpt::byte_cast<int8>(*(in++));
 					i--;
 					while(repCount-- != 0)
 					{
