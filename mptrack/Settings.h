@@ -184,7 +184,7 @@ public:
 	operator std::vector<mpt::byte> () const
 	{
 		MPT_ASSERT(std::holds_alternative<std::vector<mpt::byte>>(value));
-		return std::get<std::vector<std::byte>>(value);			
+		return std::get<std::vector<mpt::byte>>(value);			
 	}
 	mpt::ustring FormatTypeAsString() const;
 	mpt::ustring FormatValueAsString() const;
