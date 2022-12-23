@@ -83,13 +83,18 @@ struct is_binary_safe : public std::conditional<declare_binary_safe(T{}), std::t
 
 // Generic Specialization for arrays.
 template <typename T, std::size_t N>
-struct is_binary_safe<T[N]> : public is_binary_safe<T> { };
+struct is_binary_safe<T[N]> : public is_binary_safe<typename std::remove_const<T>::type> { };
 template <typename T, std::size_t N>
-struct is_binary_safe<const T[N]> : public is_binary_safe<T> { };
+struct is_binary_safe<const T[N]> : public is_binary_safe<typename std::remove_const<T>::type> { };
 template <typename T, std::size_t N>
-struct is_binary_safe<std::array<T, N>> : public is_binary_safe<T> { };
+struct is_binary_safe<std::array<T, N>> : public is_binary_safe<typename std::remove_const<T>::type> { };
 template <typename T, std::size_t N>
-struct is_binary_safe<const std::array<T, N>> : public is_binary_safe<T> { };
+struct is_binary_safe<const std::array<T, N>> : public is_binary_safe<typename std::remove_const<T>::type> { };
+
+template <typename T>
+struct is_binary_safe<mpt::span<T>> : public is_binary_safe<typename std::remove_const<T>::type> { };
+template <typename T>
+struct is_binary_safe<const mpt::span<T>> : public is_binary_safe<typename std::remove_const<T>::type> { };
 
 
 template <typename T>
