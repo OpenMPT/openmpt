@@ -757,10 +757,9 @@ SerializationResult CTuning::InitDeserializeOLD(std::istream &inStrm, mpt::Chars
 		return SerializationResult::Failure;
 	}
 
-	char end[8];
-	MemsetZero(end);
-	inStrm.read(reinterpret_cast<char*>(&end), sizeof(end));
-	if(std::memcmp(end, "CTRTI_E.", 8))
+	std::array<char, 8> end = {};
+	mpt::IO::Read(inStrm, end);
+	if(std::memcmp(end.data(), "CTRTI_E.", 8))
 	{
 		return SerializationResult::Failure;
 	}
