@@ -32,7 +32,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 StreamWriterBase::StreamWriterBase(std::ostream &stream)
 	: f(stream)
-	, fStart(f.tellp())
+	, fStart(mpt::IO::TellWrite(f))
 {
 	return;
 }

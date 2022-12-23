@@ -155,7 +155,7 @@ void ID3V2Tagger::WriteID3v2Tags(std::ostream &s, const FileTags &tags, ReplayGa
 	if(!s) return;
 	
 	ID3v2Header tHeader;
-	std::streampos fOffset = s.tellp();
+	mpt::IO::Offset fOffset = mpt::IO::TellWrite(s);
 	uint32 paddingSize = 0;
 
 	totalID3v2Size = 0;
@@ -166,7 +166,7 @@ void ID3V2Tagger::WriteID3v2Tags(std::ostream &s, const FileTags &tags, ReplayGa
 	tHeader.version[1] = 0x00; // Ditto
 	tHeader.flags = 0; // No flags
 	tHeader.size  = 0; // will be filled later
-	s.write(reinterpret_cast<const char*>(&tHeader), sizeof(tHeader));
+	mpt::IO::Write(s, tHeader);
 	totalID3v2Size += sizeof(tHeader);
 
 	WriteID3v2Frame("TIT2", mpt::ToCharset(mpt::Charset::UTF8, tags.title), s);
@@ -185,9 +185,9 @@ void ID3V2Tagger::WriteID3v2Tags(std::ostream &s, const FileTags &tags, ReplayGa
 		paddingSize += GetMaxReplayGainFramesSizes();
 	} else if(replayGain.Tag == ReplayGain::TagWrite)
 	{
-		std::streampos replayGainBeg = s.tellp();
+		mpt::IO::Offset replayGainBeg = mpt::IO::TellWrite(s);
 		WriteID3v2ReplayGainFrames(replayGain, s);
-		std::streampos replayGainEnd = s.tellp();
+		mpt::IO::Offset replayGainEnd = mpt::IO::TellWrite(s);
 		paddingSize += GetMaxReplayGainFramesSizes() - static_cast<uint32>(replayGainEnd - replayGainBeg);
 	}
 
@@ -202,15 +202,15 @@ void ID3V2Tagger::WriteID3v2Tags(std::ostream &s, const FileTags &tags, ReplayGa
 	}
 	for(size_t i = 0; i < paddingSize; i++)
 	{
-		char c = 0;
-		s.write(&c, 1);
+		uint8 c = 0;
+		mpt::IO::Write(s, c);
 	}
 
 	// Write correct header (update tag size)
 	tHeader.size = intToSynchsafe(totalID3v2Size - sizeof(tHeader));
-	s.seekp(fOffset);
-	s.write(reinterpret_cast<const char*>(&tHeader), sizeof(tHeader));
-	s.seekp(totalID3v2Size - sizeof(tHeader), std::ios::cur);
+	mpt::IO::SeekAbsolute(s, fOffset);
+	mpt::IO::Write(s, tHeader);
+	mpt::IO::SeekRelative(s, totalID3v2Size - sizeof(tHeader));
 
 }
 
@@ -268,8 +268,8 @@ void ID3V2Tagger::WriteID3v2ReplayGainFrames(ReplayGain replayGain, std::ostream
 			std::memcpy(&frame.frameid, "TXXX", 4);
 			frame.size = intToSynchsafe(static_cast<uint32>(content.size()));
 			frame.flags = 0x4000; // discard if audio data changed
-			s.write(reinterpret_cast<const char*>(&frame), sizeof(ID3v2Frame));
-			s.write(content.data(), content.size());
+			mpt::IO::Write(s, frame);
+			mpt::IO::Write(s, mpt::as_span(content));
 		}
 
 	}
@@ -300,8 +300,8 @@ void ID3V2Tagger::WriteID3v2ReplayGainFrames(ReplayGain replayGain, std::ostream
 			std::memcpy(&frame.frameid, "TXXX", 4);
 			frame.size = intToSynchsafe(static_cast<uint32>(content.size()));
 			frame.flags = 0x4000; // discard if audio data changed
-			s.write(reinterpret_cast<const char*>(&frame), sizeof(ID3v2Frame));
-			s.write(content.data(), content.size());
+			mpt::IO::Write(s, frame);
+			mpt::IO::Write(s, mpt::as_span(content));
 		}
 
 	}
@@ -334,8 +334,8 @@ void ID3V2Tagger::WriteID3v2Frame(const char cFrameID[4], std::string sFramecont
 		std::memcpy(&tFrame.frameid, cFrameID, 4); // ID
 		tFrame.size = intToSynchsafe(static_cast<uint32>(sFramecontent.size())); // Text size
 		tFrame.flags = 0x0000; // No flags
-		s.write(reinterpret_cast<const char*>(&tFrame), sizeof(tFrame));
-		s.write(sFramecontent.c_str(), sFramecontent.size());
+		mpt::IO::Write(s, tFrame);
+		mpt::IO::Write(s, mpt::as_span(sFramecontent));
 
 		totalID3v2Size += static_cast<uint32>((sizeof(tFrame) + sFramecontent.size()));
 	}
@@ -407,7 +407,7 @@ private:
 		ID3v2OpenMPT,
 	};
 	ID3Type id3type;
-	std::streamoff id3v2Size;
+	mpt::IO::Offset id3v2Size;
 	FileTags Tags;
 public:
 	MP3LameStreamWriter(std::ostream &stream, bool compatible, const Encoder::Settings &settings_, const FileTags &tags)
@@ -554,7 +554,7 @@ public:
 			} else if(id3type == ID3v2OpenMPT)
 			{
 				Tags = tags;
-				std::streampos id3beg = f.tellp();
+				mpt::IO::Offset id3beg = mpt::IO::TellWrite(f);
 				ID3V2Tagger tagger(settings.Details);
 				ReplayGain replayGain;
 				if(settings.Details.MP3LameCalculatePeakSample || settings.Details.MP3LameCalculateReplayGain)
@@ -562,7 +562,7 @@ public:
 					replayGain.Tag = ReplayGain::TagReserve;
 				}
 				tagger.WriteID3v2Tags(f, tags, replayGain);
-				std::streampos id3end = f.tellp();
+				mpt::IO::Offset id3end = mpt::IO::TellWrite(f);
 				id3v2Size = id3end - id3beg;
 			}
 		}
@@ -622,14 +622,14 @@ public:
 		if(id3type == ID3v2OpenMPT && (settings.Details.MP3LameCalculatePeakSample || settings.Details.MP3LameCalculateReplayGain))
 		{ // update ID3v2 tag with replay gain information
 			replayGain.Tag = ReplayGain::TagWrite;
-			std::streampos endPos = f.tellp();
-			f.seekp(fStart);
+			mpt::IO::Offset endPos = mpt::IO::TellWrite(f);
+			mpt::IO::SeekAbsolute(f, fStart);
 			std::string tagdata(static_cast<std::size_t>(id3v2Size), '\0');
-			f.write(tagdata.data(), id3v2Size); // clear out the old tag
-			f.seekp(fStart);
+			mpt::IO::Write(f, mpt::as_span(tagdata.data(), id3v2Size)); // clear out the old tag
+			mpt::IO::SeekAbsolute(f, fStart);
 			ID3V2Tagger tagger(settings.Details);
 			tagger.WriteID3v2Tags(f, Tags, replayGain);
-			f.seekp(endPos);
+			mpt::IO::SeekAbsolute(f, endPos);
 		}
 		if(id3type == ID3v2Lame)
 		{
@@ -640,10 +640,10 @@ public:
 		}
 		if(!compatible)
 		{
-			std::streampos endPos = f.tellp();
+			mpt::IO::Offset endPos = mpt::IO::TellWrite(f);
 			f.seekp(fStart + id3v2Size);
 			buf.resize(lame_get_lametag_frame(gfp, nullptr, 0));
-			buf.resize(lame_get_lametag_frame(gfp, (unsigned char*)buf.data(), buf.size()));
+			buf.resize(lame_get_lametag_frame(gfp, mpt::byte_cast<unsigned char*>(buf.data()), buf.size()));
 			WriteBuffer();
 			f.seekp(endPos);
 		}

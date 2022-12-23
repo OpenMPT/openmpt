@@ -50,14 +50,14 @@ private:
 		MPT_UNREFERENCED_PARAMETER(flacenc);
 		MPT_UNREFERENCED_PARAMETER(samples);
 		MPT_UNREFERENCED_PARAMETER(current_frame);
-		f.write(reinterpret_cast<const char*>(buffer), bytes);
+		mpt::IO::WriteRaw(f, mpt::as_span(buffer, bytes));
 		if(!f) return FLAC__STREAM_ENCODER_WRITE_STATUS_FATAL_ERROR;
 		return FLAC__STREAM_ENCODER_WRITE_STATUS_OK;
 	}
 	FLAC__StreamEncoderSeekStatus SeekCallback(const FLAC__StreamEncoder *flacenc, FLAC__uint64 absolute_byte_offset)
 	{
 		MPT_UNREFERENCED_PARAMETER(flacenc);
-		f.seekp(absolute_byte_offset);
+		mpt::IO::SeekAbsolute(f, absolute_byte_offset);
 		if(!f) return FLAC__STREAM_ENCODER_SEEK_STATUS_ERROR;
 		return FLAC__STREAM_ENCODER_SEEK_STATUS_OK;
 	}
@@ -66,7 +66,7 @@ private:
 		MPT_UNREFERENCED_PARAMETER(flacenc);
 		if(absolute_byte_offset)
 		{
-			*absolute_byte_offset = f.tellp();
+			*absolute_byte_offset = mpt::IO::TellWrite(f);
 		}
 		if(!f) return FLAC__STREAM_ENCODER_TELL_STATUS_ERROR;
 		return FLAC__STREAM_ENCODER_TELL_STATUS_OK;
