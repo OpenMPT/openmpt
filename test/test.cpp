@@ -4707,7 +4707,7 @@ static MPT_NOINLINE void TestSampleConversion()
 	// Range checks
 	{
 		int8 oneSample = 1;
-		char *signed8 = reinterpret_cast<char *>(targetBuf);
+		signed char *signed8 = reinterpret_cast<signed char *>(targetBuf);
 		memset(signed8, 0, 4);
 		CopySample<SC::DecodeInt8>(reinterpret_cast<int8*>(targetBuf), 4, 1, reinterpret_cast<const mpt::byte*>(&oneSample), sizeof(oneSample), 1);
 		VERIFY_EQUAL_NONCONT(signed8[0], 1);
