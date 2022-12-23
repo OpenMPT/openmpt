@@ -78,7 +78,7 @@ bool ReadInstrumentHeaderField(ModInstrument * input, uint32 fcode, uint16 fsize
 
 
 // Sample decompression routines in format-specific source files
-void AMSUnpack(mpt::const_byte_span source, void * const dest, const size_t destSize, char packCharacter);
+void AMSUnpack(mpt::const_byte_span source, mpt::byte_span dest, char packCharacter);
 uintptr_t DMFUnpack(FileReader &file, uint8 *psample, uint32 maxlen);
 
 

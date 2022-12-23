@@ -1035,17 +1035,17 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 /////////////////////////////////////////////////////////////////////
 // AMS Sample unpacking
 
-void AMSUnpack(mpt::const_byte_span source, void * const dest, const size_t destSize, char packCharacter)
+void AMSUnpack(mpt::const_byte_span source, mpt::byte_span dest, char packCharacter)
 {
-	std::vector<int8> tempBuf(destSize, 0);
-	size_t depackSize = destSize;
+	std::vector<int8> tempBuf(dest.size(), 0);
+	std::size_t depackSize = dest.size();
 
 	// Unpack Loop
 	{
 		const std::byte *in = source.data();
 		int8 *out = tempBuf.data();
 
-		size_t i = source.size(), j = destSize;
+		size_t i = source.size(), j = dest.size();
 		while(i != 0 && j != 0)
 		{
 			int8 ch = mpt::byte_cast<int8>(*(in++));
@@ -1082,7 +1082,7 @@ void AMSUnpack(mpt::const_byte_span source, void * const dest, const size_t dest
 		int8 *out = tempBuf.data();
 		uint16 bitcount = 0x80;
 		size_t k = 0;
-		uint8 *dst = static_cast<uint8 *>(dest);
+		uint8 *dst = mpt::byte_cast<uint8 *>(dest.data());
 		for(size_t i = 0; i < depackSize; i++)
 		{
 			uint8 al = *out++;
@@ -1093,7 +1093,7 @@ void AMSUnpack(mpt::const_byte_span source, void * const dest, const size_t dest
 				bl = ((bl | (bl << 8)) >> ((dh + 8 - count) & 7)) & 0xFF;
 				bitcount = ((bitcount | (bitcount << 8)) >> 1) & 0xFF;
 				dst[k++] |= bl;
-				if(k >= destSize)
+				if(k >= dest.size())
 				{
 					k = 0;
 					dh++;
@@ -1106,7 +1106,7 @@ void AMSUnpack(mpt::const_byte_span source, void * const dest, const size_t dest
 	// Delta Unpack
 	{
 		int8 old = 0;
-		int8 *out = static_cast<int8 *>(dest);
+		uint8 *out = mpt::byte_cast<uint8*>(dest.data());
 		for(size_t i = depackSize; i != 0; i--)
 		{
 			int pos = static_cast<uint8>(*out);
@@ -1115,7 +1115,7 @@ void AMSUnpack(mpt::const_byte_span source, void * const dest, const size_t dest
 				pos = -(pos & 0x7F);
 			}
 			old -= static_cast<int8>(pos);
-			*(out++) = old;
+			*(out++) = static_cast<uint8>(old);
 		}
 	}
 }
