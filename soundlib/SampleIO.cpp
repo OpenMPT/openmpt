@@ -27,7 +27,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 // Sample decompression routines in other source files
-void AMSUnpack(const int8 * const source, size_t sourceSize, void * const dest, const size_t destSize, char packCharacter);
+void AMSUnpack(mpt::const_byte_span source, mpt::byte_span dest, int8 packCharacter);
 uintptr_t DMFUnpack(FileReader &file, uint8 *psample, uint32 maxlen);
 
 
@@ -179,7 +179,7 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 		LimitMax(sourceSize, mpt::saturate_cast<uint32>(packedDataView.size()));
 		bytesRead += sourceSize;
 
-		AMSUnpack(reinterpret_cast<const int8 *>(packedDataView.data()), packedDataView.size(), sample.samplev(), sample.GetSampleSizeInBytes(), packCharacter);
+		AMSUnpack(packedDataView.span(), mpt::as_span(sample.sampleb(), sample.GetSampleSizeInBytes()), packCharacter);
 		if(sample.uFlags[CHN_16BIT] && !mpt::endian_is_little())
 		{
 			auto p = sample.sample16();
