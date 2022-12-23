@@ -46,8 +46,8 @@ if "%MPT_DOWNLOAD%" == "yes" (
  )
 
  call build\scriptlib\download.cmd "https://www.7-zip.org/a/7za920.zip"                                                              "build\externals\7za920.zip"      || goto error
- call build\scriptlib\download.cmd "https://www.7-zip.org/a/7z1805-extra.7z"                                                         "build\externals\7z1805-extra.7z" || goto error
- call build\scriptlib\download.cmd "https://www.7-zip.org/a/7z1805.exe"                                                              "build\externals\7z1805.exe"      || goto error
+ call build\scriptlib\download.cmd "https://web.archive.org/web/20180506151102if_/https://www.7-zip.org/a/7z1805-extra.7z"           "build\externals\7z1805-extra.7z" || goto error
+ call build\scriptlib\download.cmd "https://web.archive.org/web/20180505172153if_/https://www.7-zip.org/a/7z1805.exe"                "build\externals\7z1805.exe"      || goto error
 
  call build\scriptlib\download.cmd "https://github.com/bkaradzic/GENie/archive/78817a9707c1a02e845fb38b3adcc5353b02d377.zip"         "build\externals\GENie-78817a9707c1a02e845fb38b3adcc5353b02d377.zip"        || goto error
  call build\scriptlib\download.cmd "https://github.com/premake/premake-core/releases/download/v5.0.0-alpha13/premake-5.0.0-alpha13-src.zip" "build\externals\premake-5.0.0-alpha13-src.zip" || goto error
