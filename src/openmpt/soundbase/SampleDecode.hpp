@@ -237,7 +237,12 @@ struct DecodeInt24
 	static constexpr std::size_t input_inc = 3;
 	MPT_FORCEINLINE output_t operator()(const input_t *inBuf)
 	{
-		return static_cast<int32>(((mpt::byte_cast<uint8>(inBuf[loByteIndex]) << 8) | (mpt::byte_cast<uint8>(inBuf[midByteIndex]) << 16) | (mpt::byte_cast<uint8>(inBuf[hiByteIndex]) << 24)) - offset);
+		const uint32 tmp = (uint32(0)
+							| (static_cast<uint32>(mpt::byte_cast<uint8>(inBuf[loByteIndex])) << 8)
+							| (static_cast<uint32>(mpt::byte_cast<uint8>(inBuf[midByteIndex])) << 16)
+							| (static_cast<uint32>(mpt::byte_cast<uint8>(inBuf[hiByteIndex])) << 24))
+						 - offset;
+		return static_cast<int32>(tmp);
 	}
 };
 
@@ -249,7 +254,13 @@ struct DecodeInt32
 	static constexpr std::size_t input_inc = 4;
 	MPT_FORCEINLINE output_t operator()(const input_t *inBuf)
 	{
-		return static_cast<int32>((mpt::byte_cast<uint8>(inBuf[loLoByteIndex]) | (mpt::byte_cast<uint8>(inBuf[loHiByteIndex]) << 8) | (mpt::byte_cast<uint8>(inBuf[hiLoByteIndex]) << 16) | (mpt::byte_cast<uint8>(inBuf[hiHiByteIndex]) << 24)) - offset);
+		const uint32 tmp = (uint32(0)
+							| (static_cast<uint32>(mpt::byte_cast<uint8>(inBuf[loLoByteIndex])) << 0)
+							| (static_cast<uint32>(mpt::byte_cast<uint8>(inBuf[loHiByteIndex])) << 8)
+							| (static_cast<uint32>(mpt::byte_cast<uint8>(inBuf[hiLoByteIndex])) << 16)
+							| (static_cast<uint32>(mpt::byte_cast<uint8>(inBuf[hiHiByteIndex])) << 24))
+						 - offset;
+		return static_cast<int32>(tmp);
 	}
 };
 
