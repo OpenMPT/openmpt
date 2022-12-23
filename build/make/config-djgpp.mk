@@ -157,7 +157,7 @@ intel/core2       := $(___) -march=core2       $(FPU_SSSE3)  -mtune=core2       
 
 intel/celeron     := $(___) -march=pentium2    $(FPU_MMX)    -mtune=pentium2    $(OPT_SIMD) --param l1-cache-size=16 --param l2-cache-size=$(CACHE_CELERON)
 intel/pentium-m   := $(___) -march=pentium-m   $(FPU_SSE2)   -mtune=pentium-m   $(OPT_SIMD) --param l1-cache-size=16 --param l2-cache-size=$(CACHE_PENTIUMM)
-intel/core        := $(___) -march=pentium-m   $(FPU_SSE3)   -mtune=pentium-m   $(OPT_SIMD) --param l1-cache-size=32 --param l2-cache-size=$(CACHE_CORE)
+intel/core        := $(___) -march=pentium-m   $(FPU_SSE3)   -mtune=core2       $(OPT_SIMD) --param l1-cache-size=32 --param l2-cache-size=$(CACHE_CORE)
 intel/atom        := $(___) -march=bonnell     $(FPU_SSSE3)  -mtune=bonnell     $(OPT_SIMD) --param l1-cache-size=24 --param l2-cache-size=$(CACHE_ATOM)
 
 intel/late        := $(XX_) -march=i686        $(FPU_SSSE3)  -mtune=intel       $(OPT_SIMD) 
