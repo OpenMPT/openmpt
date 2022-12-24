@@ -8,7 +8,7 @@
 #include "mpt/base/namespace.hpp"
 #include "mpt/format/default_formatter.hpp"
 
-#include <type_traits>
+#include <utility>
 
 
 
