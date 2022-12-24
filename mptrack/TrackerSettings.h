@@ -487,7 +487,7 @@ template<> inline SettingValue ToSettingValue(const mpt::Date::Unix &val)
 template<> inline mpt::Date::Unix FromSettingValue(const SettingValue &val)
 {
 	MPT_ASSERT(val.GetTypeTag() == "UnixTime");
-	return mpt::Date::UnixFromSeconds(mpt::ConvertStringTo<int64>(val.as<mpt::ustring>()));
+	return mpt::Date::UnixFromSeconds(ConvertStrTo<int64>(val.as<mpt::ustring>()));
 }
 
 struct FontSetting

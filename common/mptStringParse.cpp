@@ -20,7 +20,7 @@ OPENMPT_NAMESPACE_BEGIN
 template<typename T>
 inline T ConvertStrToHelper(const std::string &str)
 {
-	return mpt::ConvertStringTo<T>(str);
+	return mpt::parse<T>(str);
 }
 template<> inline bool ConvertStrToHelper(const std::string &str) { return ConvertStrToHelper<int>(str)?true:false; }
 template<> inline signed char ConvertStrToHelper(const std::string &str) { return static_cast<signed char>(ConvertStrToHelper<signed int>(str)); }
@@ -30,7 +30,7 @@ template<> inline unsigned char ConvertStrToHelper(const std::string &str) { ret
 template<typename T>
 inline T ConvertStrToHelper(const std::wstring &str)
 {
-	return mpt::ConvertStringTo<T>(str);
+	return mpt::parse<T>(str);
 }
 template<> inline bool ConvertStrToHelper(const std::wstring &str) { return ConvertStrToHelper<int>(str)?true:false; }
 template<> inline signed char ConvertStrToHelper(const std::wstring &str) { return static_cast<signed char>(ConvertStrToHelper<signed int>(str)); }
@@ -80,7 +80,7 @@ namespace Parse
 template<typename T>
 T HexToHelper(const std::string &str)
 {
-	return mpt::ConvertHexStringTo<T>(str);
+	return mpt::parse_hex<T>(str);
 }
 template<> unsigned char HexToHelper(const std::string &str) { return static_cast<unsigned char>(HexToHelper<unsigned int>(str)); }
 

@@ -1923,13 +1923,13 @@ void module_impl::ctl_set( std::string ctl, const std::string & value, bool thro
 	}
 	switch ( found_ctl->type ) {
 		case ctl_type::boolean:
-			ctl_set_boolean( ctl, mpt::ConvertStringTo<bool>( value ), throw_if_unknown );
+			ctl_set_boolean( ctl, mpt::parse<bool>( value ), throw_if_unknown );
 			break;
 		case ctl_type::integer:
-			ctl_set_integer( ctl, mpt::ConvertStringTo<std::int64_t>( value ), throw_if_unknown );
+			ctl_set_integer( ctl, mpt::parse<std::int64_t>( value ), throw_if_unknown );
 			break;
 		case ctl_type::floatingpoint:
-			ctl_set_floatingpoint( ctl, mpt::ConvertStringTo<double>( value ), throw_if_unknown );
+			ctl_set_floatingpoint( ctl, mpt::parse<double>( value ), throw_if_unknown );
 			break;
 		case ctl_type::text:
 			ctl_set_text( ctl, value, throw_if_unknown );

@@ -350,10 +350,10 @@ public:
 			return UUID();
 		}
 		UUID result;
-		result.Data1 = mpt::ConvertHexStringTo<uint32>(segments[0]);
-		result.Data2 = mpt::ConvertHexStringTo<uint16>(segments[1]);
-		result.Data3 = mpt::ConvertHexStringTo<uint16>(segments[2]);
-		result.Data4 = mpt::ConvertHexStringTo<uint64>(segments[3] + segments[4]);
+		result.Data1 = mpt::parse_hex<uint32>(segments[0]);
+		result.Data2 = mpt::parse_hex<uint16>(segments[1]);
+		result.Data3 = mpt::parse_hex<uint16>(segments[2]);
+		result.Data4 = mpt::parse_hex<uint64>(segments[3] + segments[4]);
 		return result;
 	}
 	std::string ToAString() const {

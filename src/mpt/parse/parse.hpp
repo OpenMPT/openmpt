@@ -161,13 +161,7 @@ inline T locale_parse(const std::locale & loc, const Tstring & str) {
 
 
 template <typename T, typename Tstring>
-inline T ConvertStringTo(const Tstring & str) {
-	return mpt::parse<T>(str);
-}
-
-
-template <typename T, typename Tstring>
-inline T ConvertHexStringTo(const Tstring & str) {
+inline T parse_hex(const Tstring & str) {
 	std::basic_istringstream<typename decltype(mpt::parse_as_internal_string_type(mpt::as_string(str)))::value_type> stream(mpt::parse_as_internal_string_type(mpt::as_string(str)));
 	stream.imbue(std::locale::classic());
 	T value;

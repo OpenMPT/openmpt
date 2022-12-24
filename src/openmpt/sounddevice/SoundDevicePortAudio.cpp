@@ -73,7 +73,7 @@ CPortaudioDevice::CPortaudioDevice(ILogger &logger, SoundDevice::Info info, Soun
 	} else
 	{
 		m_DeviceIsDefault = false;
-		m_DeviceIndex = mpt::ConvertStringTo<PaDeviceIndex>(internalID);
+		m_DeviceIndex = mpt::parse<PaDeviceIndex>(internalID);
 	}
 	m_HostApiType = Pa_GetHostApiInfo(Pa_GetDeviceInfo(m_DeviceIndex)->hostApi)->type;
 	m_StreamParameters = {};

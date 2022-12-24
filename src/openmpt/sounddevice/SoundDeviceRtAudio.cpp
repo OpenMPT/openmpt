@@ -584,7 +584,7 @@ unsigned int CRtAudioDevice::GetDevice(SoundDevice::Info info)
 	{
 		return 0;
 	}
-	return mpt::ConvertStringTo<unsigned int>(apidev[1]);
+	return mpt::parse<unsigned int>(apidev[1]);
 }
 
 

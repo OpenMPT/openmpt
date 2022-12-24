@@ -87,7 +87,7 @@ CWaveDevice::~CWaveDevice()
 
 int CWaveDevice::GetDeviceIndex() const
 {
-	return mpt::ConvertStringTo<int>(GetDeviceInternalID());
+	return mpt::parse<int>(GetDeviceInternalID());
 }
 
 
