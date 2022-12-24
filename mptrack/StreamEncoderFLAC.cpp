@@ -35,15 +35,15 @@ private:
 private:
 	static FLAC__StreamEncoderWriteStatus FLACWriteCallback(const FLAC__StreamEncoder *flacenc, const FLAC__byte buffer[], size_t bytes, unsigned samples, unsigned current_frame, void *client_data)
 	{
-		return reinterpret_cast<FLACStreamWriter*>(client_data)->WriteCallback(flacenc, buffer, bytes, samples, current_frame);
+		return mpt::void_ptr<FLACStreamWriter>(client_data)->WriteCallback(flacenc, buffer, bytes, samples, current_frame);
 	}
 	static FLAC__StreamEncoderSeekStatus FLACSeekCallback(const FLAC__StreamEncoder *flacenc, FLAC__uint64 absolute_byte_offset, void *client_data)
 	{
-		return reinterpret_cast<FLACStreamWriter*>(client_data)->SeekCallback(flacenc, absolute_byte_offset);
+		return mpt::void_ptr<FLACStreamWriter>(client_data)->SeekCallback(flacenc, absolute_byte_offset);
 	}
 	static FLAC__StreamEncoderTellStatus FLACTellCallback(const FLAC__StreamEncoder *flacenc, FLAC__uint64 *absolute_byte_offset, void *client_data)
 	{
-		return reinterpret_cast<FLACStreamWriter*>(client_data)->TellCallback(flacenc, absolute_byte_offset);
+		return mpt::void_ptr<FLACStreamWriter>(client_data)->TellCallback(flacenc, absolute_byte_offset);
 	}
 	FLAC__StreamEncoderWriteStatus WriteCallback(const FLAC__StreamEncoder *flacenc, const FLAC__byte buffer[], size_t bytes, unsigned samples, unsigned current_frame)
 	{

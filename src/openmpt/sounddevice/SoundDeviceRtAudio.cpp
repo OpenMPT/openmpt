@@ -10,6 +10,7 @@
 #include "SoundDeviceBase.hpp"
 
 #include "mpt/base/alloc.hpp"
+#include "mpt/base/pointer.hpp"
 #include "mpt/base/saturate_cast.hpp"
 #include "mpt/base/saturate_round.hpp"
 #include "mpt/format/message_macros.hpp"
@@ -368,7 +369,7 @@ SoundDevice::BufferAttributes CRtAudioDevice::InternalGetEffectiveBufferAttribut
 
 int CRtAudioDevice::RtAudioCallback(void *outputBuffer, void *inputBuffer, unsigned int nFrames, double streamTime, RtAudioStreamStatus status, void *userData)
 {
-	reinterpret_cast<CRtAudioDevice *>(userData)->AudioCallback(outputBuffer, inputBuffer, nFrames, streamTime, status);
+	mpt::void_ptr<CRtAudioDevice>(userData)->AudioCallback(outputBuffer, inputBuffer, nFrames, streamTime, status);
 	return 0;  // continue
 }
 

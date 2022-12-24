@@ -10,6 +10,7 @@
 
 #include "mpt/base/detect.hpp"
 #include "mpt/base/macros.hpp"
+#include "mpt/base/pointer.hpp"
 #include "mpt/base/saturate_cast.hpp"
 #include "mpt/base/saturate_round.hpp"
 #include "mpt/format/message_macros.hpp"
@@ -244,7 +245,7 @@ bool CPortaudioDevice::InternalOpen()
 	{
 		flags |= paDitherOff;
 	}
-	if(Pa_OpenStream(&m_Stream, (m_Settings.InputChannels > 0) ? &m_InputStreamParameters : NULL, &m_StreamParameters, m_Settings.Samplerate, framesPerBuffer, flags, StreamCallbackWrapper, reinterpret_cast<void *>(this)) != paNoError)
+	if(Pa_OpenStream(&m_Stream, (m_Settings.InputChannels > 0) ? &m_InputStreamParameters : NULL, &m_StreamParameters, m_Settings.Samplerate, framesPerBuffer, flags, StreamCallbackWrapper, mpt::void_ptr<CPortaudioDevice>(this)) != paNoError)
 	{
 		return false;
 	}
@@ -727,7 +728,7 @@ int CPortaudioDevice::StreamCallback(
 int CPortaudioDevice::StreamCallbackWrapper(
 	const void *input, void *output, unsigned long frameCount, const PaStreamCallbackTimeInfo *timeInfo, PaStreamCallbackFlags statusFlags, void *userData)
 {
-	return reinterpret_cast<CPortaudioDevice *>(userData)->StreamCallback(input, output, frameCount, timeInfo, statusFlags);
+	return mpt::void_ptr<CPortaudioDevice>(userData)->StreamCallback(input, output, frameCount, timeInfo, statusFlags);
 }
 
 

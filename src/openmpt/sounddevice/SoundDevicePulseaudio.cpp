@@ -10,6 +10,7 @@
 #include "SoundDeviceUtilities.hpp"
 
 #include "mpt/base/numeric.hpp"
+#include "mpt/base/pointer.hpp"
 #include "mpt/base/saturate_round.hpp"
 #include "mpt/format/message_macros.hpp"
 #include "mpt/format/simple.hpp"
@@ -60,7 +61,7 @@ mpt::ustring Pulseaudio::PulseErrorString(int error)
 static void PulseAudioSinkInfoListCallback(pa_context * /* c */, const pa_sink_info *i, int /* eol */, void *userdata)
 {
 	MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_USTRING("PulseAudioSinkInfoListCallback"));
-	std::vector<SoundDevice::Info> *devices_ = reinterpret_cast<std::vector<SoundDevice::Info> *>(userdata);
+	std::vector<SoundDevice::Info> *devices_ = mpt::void_ptr<std::vector<SoundDevice::Info>>(userdata);
 	if(!devices_)
 	{
 		return;

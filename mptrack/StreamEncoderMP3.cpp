@@ -353,7 +353,7 @@ using lame_t = lame_global_flags *;
 static void GenreEnumCallback(int num, const char *name, void *cookie)
 {
 	MPT_UNREFERENCED_PARAMETER(num);
-	Encoder::Traits &traits = *reinterpret_cast<Encoder::Traits*>(cookie);
+	Encoder::Traits &traits = *mpt::void_ptr<Encoder::Traits>(cookie);
 	if(name)
 	{
 		traits.genres.push_back(mpt::ToUnicode(mpt::Charset::ISO8859_1, name));

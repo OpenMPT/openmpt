@@ -98,13 +98,13 @@ void CExecutePosixShellScriptProgressDialog::OnCancel()
 
 mpt::Wine::ExecuteProgressResult CExecutePosixShellScriptProgressDialog::ProgressCancelCallback(void *userdata)
 {
-	return reinterpret_cast<CExecutePosixShellScriptProgressDialog*>(userdata)->Progress(true);
+	return mpt::void_ptr<CExecutePosixShellScriptProgressDialog>(userdata)->Progress(true);
 }
 
 
 void CExecutePosixShellScriptProgressDialog::ProgressCallback(void *userdata)
 {
-	reinterpret_cast<CExecutePosixShellScriptProgressDialog*>(userdata)->Progress(false);
+	mpt::void_ptr<CExecutePosixShellScriptProgressDialog>(userdata)->Progress(false);
 }
 
 

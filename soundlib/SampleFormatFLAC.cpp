@@ -490,7 +490,7 @@ struct FLAC__StreamEncoder_RAII
 
 	static FLAC__StreamEncoderWriteStatus StreamEncoderWriteCallback(const FLAC__StreamEncoder *encoder, const FLAC__byte buffer[], size_t bytes, unsigned samples, unsigned current_frame, void *client_data)
 	{
-		mpt::ofstream & file = *reinterpret_cast<mpt::ofstream*>(client_data);
+		mpt::ofstream & file = *mpt::void_ptr<mpt::ofstream>(client_data);
 		MPT_UNUSED_VARIABLE(encoder);
 		MPT_UNUSED_VARIABLE(samples);
 		MPT_UNUSED_VARIABLE(current_frame);
@@ -502,7 +502,7 @@ struct FLAC__StreamEncoder_RAII
 	}
 	static FLAC__StreamEncoderSeekStatus StreamEncoderSeekCallback(const FLAC__StreamEncoder *encoder, FLAC__uint64 absolute_byte_offset, void *client_data)
 	{
-		mpt::ofstream & file = *reinterpret_cast<mpt::ofstream*>(client_data);
+		mpt::ofstream & file = *mpt::void_ptr<mpt::ofstream>(client_data);
 		MPT_UNUSED_VARIABLE(encoder);
 		if(!mpt::in_range<mpt::IO::Offset>(absolute_byte_offset))
 		{
@@ -516,7 +516,7 @@ struct FLAC__StreamEncoder_RAII
 	}
 	static FLAC__StreamEncoderTellStatus StreamEncoderTellCallback(const FLAC__StreamEncoder *encoder, FLAC__uint64 *absolute_byte_offset, void *client_data)
 	{
-		mpt::ofstream & file = *reinterpret_cast<mpt::ofstream*>(client_data);
+		mpt::ofstream & file = *mpt::void_ptr<mpt::ofstream>(client_data);
 		MPT_UNUSED_VARIABLE(encoder);
 		mpt::IO::Offset pos = mpt::IO::TellWrite(file);
 		if(pos < 0)

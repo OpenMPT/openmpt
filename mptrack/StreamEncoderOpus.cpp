@@ -63,11 +63,11 @@ private:
 private:
 	static int CallbackWrite(void *user_data, const unsigned char *ptr, opus_int32 len)
 	{
-		return reinterpret_cast<OpusStreamWriter*>(user_data)->CallbackWriteImpl(ptr, len);
+		return mpt::void_ptr<OpusStreamWriter>(user_data)->CallbackWriteImpl(ptr, len);
 	}
 	static int CallbackClose(void *user_data)
 	{
-		return reinterpret_cast<OpusStreamWriter*>(user_data)->CallbackCloseImpl();
+		return mpt::void_ptr<OpusStreamWriter>(user_data)->CallbackCloseImpl();
 	}
 	int CallbackWriteImpl(const unsigned char *ptr, opus_int32 len)
 	{
