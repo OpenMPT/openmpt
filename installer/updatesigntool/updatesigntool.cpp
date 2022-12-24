@@ -24,7 +24,6 @@
 #include "../common/mptPathString.h"
 #include "../common/mptFileIO.h"
 #include "../common/Logging.h"
-#include "../common/misc_util.h"
 
 #include <exception>
 #include <iostream>
