@@ -195,29 +195,22 @@ using widechar = char32_t;
 
 
 
-template <common_encoding common_encoding_tag>
-struct common_encoding_char_traits : std::char_traits<char> {
+template <auto encoding_tag, typename encoding_type = decltype(encoding_tag)>
+struct encoding_char_traits : std::char_traits<char> {
 	static constexpr auto encoding() noexcept {
-		return common_encoding_tag;
-	}
-};
-
-template <logical_encoding logical_encoding_tag>
-struct logical_encoding_char_traits : std::char_traits<char> {
-	static constexpr auto encoding() noexcept {
-		return logical_encoding_tag;
+		return encoding_tag;
 	}
 };
 
 
 
-using lstring = std::basic_string<char, mpt::logical_encoding_char_traits<logical_encoding::locale>>;
+using lstring = std::basic_string<char, mpt::encoding_char_traits<logical_encoding::locale>>;
 
-using utf8string = std::basic_string<char, mpt::common_encoding_char_traits<common_encoding::utf8>>;
+using utf8string = std::basic_string<char, mpt::encoding_char_traits<common_encoding::utf8>>;
 
-using source_string = std::basic_string<char, mpt::common_encoding_char_traits<source_encoding>>;
+using source_string = std::basic_string<char, mpt::encoding_char_traits<source_encoding>>;
 
-using exception_string = std::basic_string<char, mpt::logical_encoding_char_traits<exception_encoding>>;
+using exception_string = std::basic_string<char, mpt::encoding_char_traits<exception_encoding>>;
 
 #if MPT_OS_WINDOWS
 
@@ -248,7 +241,7 @@ using u8char = char8_t;
 
 #else // !C++20
 
-using u8string = std::basic_string<char, mpt::common_encoding_char_traits<common_encoding::utf8>>;
+using u8string = std::basic_string<char, mpt::encoding_char_traits<common_encoding::utf8>>;
 using u8char = char;
 #define MPT_U8CHAR(x)    x
 #define MPT_U8LITERAL(x) x
