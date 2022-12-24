@@ -268,7 +268,7 @@ void StreamWriterBase::WriteBuffer()
 	{
 		return;
 	}
-	f.write(buf.data(), buf.size());
+	mpt::IO::WriteRaw(f, mpt::as_span(buf));
 	buf.resize(0);
 }
 

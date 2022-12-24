@@ -641,11 +641,11 @@ public:
 		if(!compatible)
 		{
 			mpt::IO::Offset endPos = mpt::IO::TellWrite(f);
-			f.seekp(fStart + id3v2Size);
+			mpt::IO::SeekAbsolute(f, fStart + id3v2Size);
 			buf.resize(lame_get_lametag_frame(gfp, nullptr, 0));
 			buf.resize(lame_get_lametag_frame(gfp, mpt::byte_cast<unsigned char*>(buf.data()), buf.size()));
 			WriteBuffer();
-			f.seekp(endPos);
+			mpt::IO::SeekAbsolute(f, endPos);
 		}
 	}
 	virtual ~MP3LameStreamWriter()

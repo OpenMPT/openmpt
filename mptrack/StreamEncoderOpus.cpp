@@ -79,7 +79,8 @@ private:
 		{
 			return 1;
 		}
-		buf.assign(ptr, ptr + len);
+		const std::byte *pb = mpt::byte_cast<const std::byte*>(ptr);
+		buf.assign(pb, pb + len);
 		WriteBuffer();
 		return 0;
 	}
