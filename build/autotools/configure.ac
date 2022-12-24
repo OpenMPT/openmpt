@@ -9,6 +9,8 @@ AC_CONFIG_FILES([Makefile libopenmpt/libopenmpt.pc Doxyfile])
 
 AM_INIT_AUTOMAKE([1.11 -Wall -Werror foreign subdir-objects])
 
+AC_USE_SYSTEM_EXTENSIONS
+
 AM_PROG_AR
 
 LT_INIT
