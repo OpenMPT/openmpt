@@ -50,7 +50,13 @@ template <typename T, typename Tstring>
 inline bool parse_into(T & dst, const Tstring & str) {
 	std::basic_istringstream<typename decltype(mpt::parse_as_internal_string_type(mpt::as_string(str)))::value_type> stream(mpt::parse_as_internal_string_type(mpt::as_string(str)));
 	stream.imbue(std::locale::classic());
-	if constexpr (std::is_same<T, signed char>::value) {
+	if constexpr (std::is_same<T, bool>::value) {
+		signed int tmp;
+		if (!(stream >> tmp)) {
+			return false;
+		}
+		dst = tmp ? true : false;
+	} else if constexpr (std::is_same<T, signed char>::value) {
 		signed int tmp;
 		if (!(stream >> tmp)) {
 			return false;
@@ -76,7 +82,13 @@ inline T parse_or(const Tstring & str, T def) {
 	std::basic_istringstream<typename decltype(mpt::parse_as_internal_string_type(mpt::as_string(str)))::value_type> stream(mpt::parse_as_internal_string_type(mpt::as_string(str)));
 	stream.imbue(std::locale::classic());
 	T value = def;
-	if constexpr (std::is_same<T, signed char>::value) {
+	if constexpr (std::is_same<T, bool>::value) {
+		int tmp;
+		if (!(stream >> tmp)) {
+			return def;
+		}
+		value = tmp ? true : false;
+	} else if constexpr (std::is_same<T, signed char>::value) {
 		signed int tmp;
 		if (!(stream >> tmp)) {
 			return def;
@@ -107,7 +119,13 @@ template <typename T, typename Tstring>
 inline bool locale_parse_into(const std::locale & loc, T & dst, const Tstring & str) {
 	std::basic_istringstream<typename decltype(mpt::parse_as_internal_string_type(mpt::as_string(str)))::value_type> stream(mpt::parse_as_internal_string_type(mpt::as_string(str)));
 	stream.imbue(loc);
-	if constexpr (std::is_same<T, signed char>::value) {
+	if constexpr (std::is_same<T, bool>::value) {
+		int tmp;
+		if (!(stream >> tmp)) {
+			return false;
+		}
+		dst = tmp ? true : false;
+	} else if constexpr (std::is_same<T, signed char>::value) {
 		signed int tmp;
 		if (!(stream >> tmp)) {
 			return false;
@@ -134,6 +152,12 @@ inline T locale_parse_or(const std::locale & loc, const Tstring & str, T def) {
 	stream.imbue(loc);
 	T value = def;
 	if constexpr (std::is_same<T, signed char>::value) {
+		signed int tmp;
+		if (!(stream >> tmp)) {
+			return def;
+		}
+		value = tmp ? true : false;
+	} else if constexpr (std::is_same<T, signed char>::value) {
 		signed int tmp;
 		if (!(stream >> tmp)) {
 			return def;

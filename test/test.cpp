@@ -871,6 +871,12 @@ static MPT_NOINLINE void TestStringFormatting()
 	VERIFY_EQUAL(mpt::parse_or<int>("", -1), -1);
 	VERIFY_EQUAL(mpt::parse_or<int>("0", -1), 0);
 
+	VERIFY_EQUAL(ConvertStrTo<bool>("1"), true);
+	VERIFY_EQUAL(ConvertStrTo<bool>("0"), false);
+	VERIFY_EQUAL(ConvertStrTo<bool>("2"), true);
+	VERIFY_EQUAL(ConvertStrTo<bool>("-0"), false);
+	VERIFY_EQUAL(ConvertStrTo<bool>("-1"), true);
+
 	VERIFY_EQUAL(ConvertStrTo<uint32>("586"), 586u);
 	VERIFY_EQUAL(ConvertStrTo<uint32>("2147483647"), (uint32)int32_max);
 	VERIFY_EQUAL(ConvertStrTo<uint32>("4294967295"), uint32_max);
