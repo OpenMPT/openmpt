@@ -15,6 +15,7 @@
 #include "mpt/uuid/uuid.hpp"
 #include "mpt/uuid_namespace/uuid_namespace.hpp"
 
+#include "../common/mptAssert.h"
 #include "../common/mptBaseMacros.h"
 #include "../common/mptBaseTypes.h"
 #include "../common/mptBaseUtils.h"
