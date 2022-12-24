@@ -61,6 +61,10 @@ is just a high-level summary.
  *  [**New**] `Makefile` now uses `PKG_CONFIG` as path to `pkg-config`.
  *  [**New**] The C++ API is now also enabled for Emscripten builds by default.
 
+ *  [**Change**] The official Windows builds (x86, amd64, arm, arm64) now
+    require Windows 10 20H2 (or later). The official legacy Windows builds
+    (x86-legacy, amd64-legacy) are unchanged and still require Windows 7 (or
+    later).
  *  [**Change**] `"date"` metadata will now exlude the UTC time zone signifier
     `Z` if the precise time zone is unknown.
  *  [**Change**] ctl `seek.sync_samples` now defaults to 1.
