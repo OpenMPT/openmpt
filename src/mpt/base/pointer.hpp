@@ -62,7 +62,7 @@ public:
 	MPT_FORCEINLINE T * operator->() {
 		return m_ptr;
 	}
-	MPT_FORCEINLINE operator void*() {
+	MPT_FORCEINLINE operator void *() {
 		return m_ptr;
 	}
 };
