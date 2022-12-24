@@ -625,7 +625,7 @@ public:
 			mpt::IO::Offset endPos = mpt::IO::TellWrite(f);
 			mpt::IO::SeekAbsolute(f, fStart);
 			std::string tagdata(static_cast<std::size_t>(id3v2Size), '\0');
-			mpt::IO::Write(f, mpt::as_span(tagdata.data(), id3v2Size)); // clear out the old tag
+			mpt::IO::Write(f, mpt::as_span(tagdata.data(), mpt::saturate_cast<std::size_t>(id3v2Size))); // clear out the old tag
 			mpt::IO::SeekAbsolute(f, fStart);
 			ID3V2Tagger tagger(settings.Details);
 			tagger.WriteID3v2Tags(f, Tags, replayGain);
