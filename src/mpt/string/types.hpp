@@ -197,7 +197,7 @@ using widechar = char32_t;
 
 #if MPT_MSVC_BEFORE(2019, 0)
 // Work-around for VS2017 auto template argument ICE.
-// Use as encoding_char_traits<decltype(foo), foo> instead of encoding_char_traits<foo>
+// Use as encoding_char_traits<std::remove_const<decltype(foo)>::type, foo> instead of encoding_char_traits<foo>
 template <typename encoding_type, encoding_type encoding_tag>
 struct encoding_char_traits : std::char_traits<char> {
 	static constexpr auto encoding() noexcept {
@@ -228,13 +228,13 @@ using utf8string = std::basic_string<char, mpt::encoding_char_traits<common_enco
 #endif
 
 #if MPT_MSVC_BEFORE(2019, 0)
-using source_string = std::basic_string<char, mpt::encoding_char_traits<decltype(source_encoding), source_encoding>>;
+using source_string = std::basic_string<char, mpt::encoding_char_traits<typename std::remove_const<decltype(source_encoding)>::type, source_encoding>>;
 #else
 using source_string = std::basic_string<char, mpt::encoding_char_traits<source_encoding>>;
 #endif
 
 #if MPT_MSVC_BEFORE(2019, 0)
-using exception_string = std::basic_string<char, mpt::encoding_char_traits<decltype(exception_encoding), exception_encoding>>;
+using exception_string = std::basic_string<char, mpt::encoding_char_traits<typename std::remove_const<decltype(exception_encoding)>::type, exception_encoding>>;
 #else
 using exception_string = std::basic_string<char, mpt::encoding_char_traits<exception_encoding>>;
 #endif
