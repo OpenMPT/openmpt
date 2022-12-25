@@ -552,12 +552,12 @@ bool CSoundFile::SaveWAVSample(SAMPLEINDEX nSample, std::ostream &f) const
 
 	// Write sample data
 	file.StartChunk(RIFFChunk::iddata);
-	file.Skip(SampleIO(
+	SampleIO(
 		sample.uFlags[CHN_16BIT] ? SampleIO::_16bit : SampleIO::_8bit,
 		sample.uFlags[CHN_STEREO] ? SampleIO::stereoInterleaved : SampleIO::mono,
 		SampleIO::littleEndian,
 		sample.uFlags[CHN_16BIT] ? SampleIO::signedPCM : SampleIO::unsignedPCM)
-		.WriteSample(f, sample));
+		.WriteSample(f, sample);
 
 	file.WriteLoopInformation(sample);
 	file.WriteExtraInformation(sample, GetType());

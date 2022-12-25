@@ -342,7 +342,7 @@ WAVWriter::WAVWriter(mpt::IO::OFileBase &stream)
 	: s(stream)
 {
 	// Skip file header for now
-	Seek(sizeof(RIFFHeader));
+	mpt::IO::SeekRelative(s, sizeof(RIFFHeader));
 }
 
 
@@ -353,18 +353,21 @@ WAVWriter::~WAVWriter()
 
 
 // Finalize the file by closing the last open chunk and updating the file header. Returns total size of file.
-std::size_t WAVWriter::Finalize()
+mpt::IO::Offset WAVWriter::Finalize()
 {
 	FinalizeChunk();
+
+	mpt::IO::Offset totalSize = mpt::IO::TellWrite(s);
 
 	RIFFHeader fileHeader;
 	Clear(fileHeader);
 	fileHeader.magic = RIFFHeader::idRIFF;
-	fileHeader.length = static_cast<uint32>(totalSize - 8);
+	fileHeader.length = mpt::saturate_cast<uint32>(totalSize - 8);
 	fileHeader.type = RIFFHeader::idWAVE;
 
-	Seek(0);
+	mpt::IO::SeekBegin(s);
 	Write(fileHeader);
+	mpt::IO::SeekAbsolute(s, totalSize);
 	finalized = true;
 
 	return totalSize;
@@ -376,25 +379,27 @@ void WAVWriter::StartChunk(RIFFChunk::ChunkIdentifiers id)
 {
 	FinalizeChunk();
 
-	chunkStartPos = position;
+	chunkHeaderPos = mpt::IO::TellWrite(s);
 	chunkHeader.id = id;
-	Skip(sizeof(chunkHeader));
+	mpt::IO::SeekRelative(s, sizeof(chunkHeader));
 }
 
 
 // End current chunk by updating the chunk header and writing a padding byte if necessary.
 void WAVWriter::FinalizeChunk()
 {
-	if(chunkStartPos != 0)
+	if(chunkHeaderPos != 0)
 	{
-		const std::size_t chunkSize = position - (chunkStartPos + sizeof(RIFFChunk));
+		const mpt::IO::Offset position = mpt::IO::TellWrite(s);
+
+		const mpt::IO::Offset chunkSize = position - (chunkHeaderPos + sizeof(RIFFChunk));
 		chunkHeader.length = mpt::saturate_cast<uint32>(chunkSize);
 
-		std::size_t curPos = position;
-		Seek(chunkStartPos);
+		mpt::IO::SeekAbsolute(s, chunkHeaderPos);
 		Write(chunkHeader);
 
-		Seek(curPos);
+		mpt::IO::SeekAbsolute(s, position);
+
 		if((chunkSize % 2u) != 0)
 		{
 			// Write padding
@@ -402,17 +407,8 @@ void WAVWriter::FinalizeChunk()
 			Write(padding);
 		}
 
-		chunkStartPos = 0;
+		chunkHeaderPos = 0;
 	}
-}
-
-
-// Seek to a position in file.
-void WAVWriter::Seek(std::size_t pos)
-{
-	position = pos;
-	totalSize = std::max(totalSize, position);
-	mpt::IO::SeekAbsolute(s, pos);
 }
 
 
@@ -426,26 +422,6 @@ void WAVWriter::Write(mpt::const_byte_span data)
 	{
 		return;
 	}
-	position += data.size();
-	totalSize = std::max(totalSize, position);
-}
-
-
-void WAVWriter::WriteBeforeDirect()
-{
-	MPT_ASSERT(!finalized);
-}
-
-
-void WAVWriter::WriteAfterDirect(bool success, std::size_t count)
-{
-	MPT_ASSERT(success); // this assertion is useful to catch mis-calculation of required buffer size for pre-allocate in-memory file buffers (like in View_smp.cpp for clipboard)
-	if (!success)
-	{
-		return;
-	}
-	position += count;
-	totalSize = std::max(totalSize, position);
 }
 
 

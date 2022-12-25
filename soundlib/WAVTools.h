@@ -340,13 +340,8 @@ protected:
 	// Output stream
 	mpt::IO::OFileBase &s;
 
-	// Cursor position
-	std::size_t position = 0;
-	// Total number of bytes written to file / memory
-	std::size_t totalSize = 0;
-
 	// Currently written chunk
-	std::size_t chunkStartPos = 0;
+	mpt::IO::Offset chunkHeaderPos = 0;
 	RIFFChunk chunkHeader;
 	bool finalized = false;
 
@@ -356,14 +351,9 @@ public:
 	~WAVWriter();
 
 	// Finalize the file by closing the last open chunk and updating the file header. Returns total size of file.
-	std::size_t Finalize();
+	mpt::IO::Offset Finalize();
 	// Begin writing a new chunk to the file.
 	void StartChunk(RIFFChunk::ChunkIdentifiers id);
-
-	// Skip some bytes... For example after writing sample data.
-	void Skip(size_t numBytes) { Seek(position + numBytes); }
-	// Get position in file (not counting any changes done to the file from outside this class, i.e. through GetFile())
-	std::size_t GetPosition() const { return position; }
 
 	// Write some data to the file.
 	template<typename T>
@@ -371,14 +361,8 @@ public:
 	{
 		Write(mpt::as_raw_memory(data));
 	}
-
 	// Write a buffer to the file.
 	void Write(mpt::const_byte_span data);
-
-	// Use before writing raw data directly to the underlying stream s
-	void WriteBeforeDirect();
-	// Use after writing raw data directly to the underlying stream s
-	void WriteAfterDirect(bool success, std::size_t count);
 
 	// Write the WAV format to the file.
 	void WriteFormat(uint32 sampleRate, uint16 bitDepth, uint16 numChannels, WAVFormatChunk::SampleFormats encoding);
@@ -392,8 +376,6 @@ public:
 	void WriteExtraInformation(const ModSample &sample, MODTYPE modType, const char *sampleName = nullptr);
 
 protected:
-	// Seek to a position in file.
-	void Seek(std::size_t pos);
 	// End current chunk by updating the chunk header and writing a padding byte if necessary.
 	void FinalizeChunk();
 

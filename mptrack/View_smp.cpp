@@ -2656,7 +2656,7 @@ void CViewSample::OnEditCopy()
 		// Write sample data
 		file.StartChunk(RIFFChunk::iddata);
 		
-		uint8 *sampleData = mpt::byte_cast<uint8 *>(data.data()) + file.GetPosition();
+		uint8 *sampleData = mpt::byte_cast<uint8 *>(data.data()) + ff.TellWrite();
 		memcpy(sampleData, sample.sampleb() + smpOffset, smpSize);
 		if(sample.GetElementarySampleSize() == 1)
 		{
@@ -2666,8 +2666,7 @@ void CViewSample::OnEditCopy()
 				*(sampleData++) ^= 0x80u;
 			}
 		}
-		
-		file.Skip(smpSize);
+		ff.SeekRelative(smpSize);
 
 		if(addLoopInfo)
 		{
