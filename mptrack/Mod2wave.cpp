@@ -1384,7 +1384,7 @@ void CDoWaveConvert::Run()
 			cues.reserve(patternCuePoints.size());
 			for(const auto &cue : patternCuePoints)
 			{
-				cues.push_back(static_cast<uint32>(cue.offset));
+				cues.push_back(cue.offset);
 			}
 			fileEnc->WriteCues(cues);
 		}
