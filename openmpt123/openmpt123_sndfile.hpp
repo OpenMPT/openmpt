@@ -78,7 +78,6 @@ private:
 			return 0;
 		}
 
-		int format = 0;
 		int major_count;
 		sf_command( 0, SFC_GET_FORMAT_MAJOR_COUNT, &major_count, sizeof( int ) );
 		for ( int m = 0; m < major_count; m++ ) {
@@ -86,7 +85,6 @@ private:
 			SF_FORMAT_INFO format_info;
 			format_info.format = m;
 			sf_command( 0, SFC_GET_FORMAT_MAJOR, &format_info, sizeof( SF_FORMAT_INFO ) );
-			format = format_info.format;
 
 			int subtype_count;
 			sf_command( 0, SFC_GET_FORMAT_SUBTYPE_COUNT, &subtype_count, sizeof( int ) );
@@ -95,7 +93,7 @@ private:
 				SF_FORMAT_INFO subformat_info;
 				subformat_info.format = s;
 				sf_command( 0, SFC_GET_FORMAT_SUBTYPE, &subformat_info, sizeof( SF_FORMAT_INFO ) );
-				format = ( format & SF_FORMAT_TYPEMASK ) | subformat_info.format;
+				int format = ( format_info.format & SF_FORMAT_TYPEMASK ) | ( subformat_info.format & SF_FORMAT_SUBMASK );
 
 				SF_INFO sfinfo;
 				std::memset( &sfinfo, 0, sizeof( SF_INFO ) );
@@ -106,13 +104,11 @@ private:
 					switch ( match_mode ) {
 					case match_print:
 						log << MPT_USTRING("sndfile: ")
-						    << mpt::transcode<mpt::ustring>( sndfile_encoding, ( format_info.name ? format_info.name : "" ) ) << MPT_USTRING(" (") << mpt::transcode<mpt::ustring>( sndfile_encoding, ( format_info.extension ? format_info.extension : "" ) ) << MPT_USTRING(")")
+						    << mpt::transcode<mpt::ustring>( sndfile_encoding, ( format_info.name ? format_info.name : "" ) ) << MPT_USTRING(" (.") << mpt::transcode<mpt::ustring>( sndfile_encoding, ( format_info.extension ? format_info.extension : "" ) ) << MPT_USTRING(")")
 						    << MPT_USTRING(" / ")
 						    << mpt::transcode<mpt::ustring>( sndfile_encoding, ( subformat_info.name ? subformat_info.name : "" ) )
 						    << MPT_USTRING(" [")
-						    << mpt::format<mpt::ustring>::hex0<8>( format_info.format )
-						    << MPT_USTRING("|")
-						    << mpt::format<mpt::ustring>::hex0<8>( subformat_info.format )
+						    << mpt::format<mpt::ustring>::hex0<8>( format )
 						    << MPT_USTRING("]")
 						    << lf;
 						break;
