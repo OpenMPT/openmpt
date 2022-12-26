@@ -331,7 +331,6 @@ public:
 	void ApplySampleSettings(ModSample &sample, mpt::Charset sampleCharset, mpt::charbuf<MAX_SAMPLENAME> &sampleName);
 };
 
-
 #ifndef MODPLUG_NO_FILESAVE
 
 class WAVWriter
@@ -359,12 +358,6 @@ public:
 	void WriteFormat(uint32 sampleRate, uint16 bitDepth, uint16 numChannels, WAVFormatChunk::SampleFormats encoding);
 	// Write text tags to the file.
 	void WriteMetatags(const FileTags &tags);
-	// Write a sample loop information chunk to the file.
-	void WriteLoopInformation(const ModSample &sample);
-	// Write a sample's cue points to the file.
-	void WriteCueInformation(const ModSample &sample);
-	// Write MPT's sample information chunk to the file.
-	void WriteExtraInformation(const ModSample &sample, MODTYPE modType, const char *sampleName = nullptr);
 
 protected:
 	// End current chunk by updating the chunk header and writing a padding byte if necessary.
@@ -372,6 +365,23 @@ protected:
 
 	// Write a single tag into a open idLIST chunk
 	void WriteTag(RIFFChunk::ChunkIdentifiers id, const mpt::ustring &utext);
+};
+
+class WAVSampleWriter
+	: public WAVWriter
+{
+
+public:
+	WAVSampleWriter(mpt::IO::OFileBase &stream);
+	~WAVSampleWriter();
+
+public:
+	// Write a sample loop information chunk to the file.
+	void WriteLoopInformation(const ModSample &sample);
+	// Write a sample's cue points to the file.
+	void WriteCueInformation(const ModSample &sample);
+	// Write MPT's sample information chunk to the file.
+	void WriteExtraInformation(const ModSample &sample, MODTYPE modType, const char *sampleName = nullptr);
 };
 
 #endif // MODPLUG_NO_FILESAVE

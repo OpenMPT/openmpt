@@ -511,8 +511,21 @@ void WAVWriter::WriteTag(RIFFChunk::ChunkIdentifiers id, const mpt::ustring &ute
 }
 
 
+WAVSampleWriter::WAVSampleWriter(mpt::IO::OFileBase &stream)
+	: WAVWriter(stream)
+{
+	return;
+}
+
+
+WAVSampleWriter::~WAVSampleWriter()
+{
+	return;
+}
+
+
 // Write a sample loop information chunk to the file.
-void WAVWriter::WriteLoopInformation(const ModSample &sample)
+void WAVSampleWriter::WriteLoopInformation(const ModSample &sample)
 {
 	if(!sample.uFlags[CHN_LOOP | CHN_SUSTAINLOOP] && !ModCommand::IsNote(sample.rootNote))
 	{
@@ -557,7 +570,7 @@ void WAVWriter::WriteLoopInformation(const ModSample &sample)
 
 
 // Write a sample's cue points to the file.
-void WAVWriter::WriteCueInformation(const ModSample &sample)
+void WAVSampleWriter::WriteCueInformation(const ModSample &sample)
 {
 	uint32 numMarkers = 0;
 	for(const auto cue : sample.cues)
@@ -582,7 +595,7 @@ void WAVWriter::WriteCueInformation(const ModSample &sample)
 
 
 // Write MPT's sample information chunk to the file.
-void WAVWriter::WriteExtraInformation(const ModSample &sample, MODTYPE modType, const char *sampleName)
+void WAVSampleWriter::WriteExtraInformation(const ModSample &sample, MODTYPE modType, const char *sampleName)
 {
 	StartChunk(RIFFChunk::idxtra);
 	WAVExtraChunk mptInfo;

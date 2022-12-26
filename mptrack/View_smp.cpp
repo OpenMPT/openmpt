@@ -2648,7 +2648,7 @@ void CViewSample::OnEditCopy()
 	{
 		std::pair<mpt::byte_span, mpt::IO::Offset> mf(data, 0);
 		mpt::IO::OFile<std::pair<mpt::byte_span, mpt::IO::Offset>> ff(mf);
-		WAVWriter file(ff);
+		WAVSampleWriter file(ff);
 
 		// Write sample format
 		file.WriteFormat(sample.GetSampleRate(sndFile.GetType()), sample.GetElementarySampleSize() * 8, sample.GetNumChannels(), WAVFormatChunk::fmtPCM);
