@@ -355,15 +355,6 @@ public:
 	// Begin writing a new chunk to the file.
 	void StartChunk(RIFFChunk::ChunkIdentifiers id);
 
-	// Write some data to the file.
-	template<typename T>
-	void Write(const T &data)
-	{
-		Write(mpt::as_raw_memory(data));
-	}
-	// Write a buffer to the file.
-	void Write(mpt::const_byte_span data);
-
 	// Write the WAV format to the file.
 	void WriteFormat(uint32 sampleRate, uint16 bitDepth, uint16 numChannels, WAVFormatChunk::SampleFormats encoding);
 	// Write text tags to the file.

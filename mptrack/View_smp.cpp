@@ -2675,7 +2675,10 @@ void CViewSample::OnEditCopy()
 		}
 		file.WriteExtraInformation(sample, sndFile.GetType(), sndFile.GetSampleName(m_nSample));
 
-		file.Finalize();
+		mpt::IO::Offset totalSize = file.Finalize();
+		MPT_ASSERT(totalSize <= memSize);
+		MPT_UNUSED_VARIABLE(totalSize);
+
 		clipboard.Close();
 	}
 	EndWaitCursor();

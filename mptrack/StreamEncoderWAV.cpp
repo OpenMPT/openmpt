@@ -99,7 +99,7 @@ public:
 			fileWAV->StartChunk(RIFFChunk::idcue_);
 			uint32le numPoints;
 			numPoints = mpt::saturate_cast<uint32>(cues.size());
-			fileWAV->Write(numPoints);
+			mpt::IO::Write(f, numPoints);
 
 			// Write all cue points
 			uint32 index = 0;
@@ -112,7 +112,7 @@ public:
 				cuePoint.chunkStart = 0;	// we use no Wave List Chunk (wavl) as we have only one data block, so this should be 0.
 				cuePoint.blockStart = 0;	// ditto
 				cuePoint.offset = cuePoint.position;
-				fileWAV->Write(cuePoint);
+				mpt::IO::Write(f, cuePoint);
 			}
 		}
 	}

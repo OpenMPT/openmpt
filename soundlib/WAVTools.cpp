@@ -366,7 +366,7 @@ mpt::IO::Offset WAVWriter::Finalize()
 	fileHeader.type = RIFFHeader::idWAVE;
 
 	mpt::IO::SeekBegin(s);
-	Write(fileHeader);
+	mpt::IO::Write(s, fileHeader);
 	mpt::IO::SeekAbsolute(s, totalSize);
 	finalized = true;
 
@@ -396,7 +396,7 @@ void WAVWriter::FinalizeChunk()
 		chunkHeader.length = mpt::saturate_cast<uint32>(chunkSize);
 
 		mpt::IO::SeekAbsolute(s, chunkHeaderPos);
-		Write(chunkHeader);
+		mpt::IO::Write(s, chunkHeader);
 
 		mpt::IO::SeekAbsolute(s, position);
 
@@ -404,23 +404,10 @@ void WAVWriter::FinalizeChunk()
 		{
 			// Write padding
 			uint8 padding = 0;
-			Write(padding);
+			mpt::IO::Write(s, padding);
 		}
 
 		chunkHeaderPos = 0;
-	}
-}
-
-
-// Write some data to the file.
-void WAVWriter::Write(mpt::const_byte_span data)
-{
-	MPT_ASSERT(!finalized);
-	auto success = mpt::IO::WriteRaw(s, data);
-	MPT_ASSERT(success); // this assertion is useful to catch mis-calculation of required buffer size for pre-allocate in-memory file buffers (like in View_smp.cpp for clipboard)
-	if(!success)
-	{
-		return;
 	}
 }
 
@@ -441,7 +428,7 @@ void WAVWriter::WriteFormat(uint32 sampleRate, uint16 bitDepth, uint16 numChanne
 	wavFormat.byteRate = wavFormat.sampleRate * wavFormat.blockAlign;
 	wavFormat.bitsPerSample = bitDepth;
 
-	Write(wavFormat);
+	mpt::IO::Write(s, wavFormat);
 
 	if(extensible)
 	{
@@ -468,7 +455,7 @@ void WAVWriter::WriteFormat(uint32 sampleRate, uint16 bitDepth, uint16 numChanne
 			break;
 		}
 		extFormat.subFormat = mpt::UUID(static_cast<uint16>(encoding), 0x0000, 0x0010, 0x800000AA00389B71ull);
-		Write(extFormat);
+		mpt::IO::Write(s, extFormat);
 	}
 }
 
@@ -477,14 +464,14 @@ void WAVWriter::WriteFormat(uint32 sampleRate, uint16 bitDepth, uint16 numChanne
 void WAVWriter::WriteMetatags(const FileTags &tags)
 {
 	StartChunk(RIFFChunk::idCSET);
-	Write(mpt::as_le(uint16(65001)));  // code page    (UTF-8)
-	Write(mpt::as_le(uint16(0)));      // country code (unset)
-	Write(mpt::as_le(uint16(0)));      // language     (unset)
-	Write(mpt::as_le(uint16(0)));      // dialect      (unset)
+	mpt::IO::Write(s, mpt::as_le(uint16(65001)));  // code page    (UTF-8)
+	mpt::IO::Write(s, mpt::as_le(uint16(0)));      // country code (unset)
+	mpt::IO::Write(s, mpt::as_le(uint16(0)));      // language     (unset)
+	mpt::IO::Write(s, mpt::as_le(uint16(0)));      // dialect      (unset)
 
 	StartChunk(RIFFChunk::idLIST);
 	const char info[] = { 'I', 'N', 'F', 'O' };
-	Write(info);
+	mpt::IO::Write(s, info);
 
 	WriteTag(RIFFChunk::idINAM, tags.title);
 	WriteTag(RIFFChunk::idIART, tags.artist);
@@ -512,13 +499,13 @@ void WAVWriter::WriteTag(RIFFChunk::ChunkIdentifiers id, const mpt::ustring &ute
 		Clear(chunk);
 		chunk.id = static_cast<uint32>(id);
 		chunk.length = length;
-		Write(chunk);
-		Write(mpt::byte_cast<mpt::const_byte_span>(mpt::span(text.c_str(), length)));
+		mpt::IO::Write(s, chunk);
+		mpt::IO::Write(s, mpt::byte_cast<mpt::const_byte_span>(mpt::span(text.c_str(), length)));
 
 		if((length % 2u) != 0)
 		{
 			uint8 padding = 0;
-			Write(padding);
+			mpt::IO::Write(s, padding);
 		}
 	}
 }
@@ -561,10 +548,10 @@ void WAVWriter::WriteLoopInformation(const ModSample &sample)
 		loops[info.numLoops++].ConvertToWAV(0, 0, false);
 	}
 
-	Write(info);
+	mpt::IO::Write(s, info);
 	for(uint32 i = 0; i < info.numLoops; i++)
 	{
-		Write(loops[i]);
+		mpt::IO::Write(s, loops[i]);
 	}
 }
 
@@ -580,7 +567,7 @@ void WAVWriter::WriteCueInformation(const ModSample &sample)
 	}
 
 	StartChunk(RIFFChunk::idcue_);
-	Write(mpt::as_le(numMarkers));
+	mpt::IO::Write(s, mpt::as_le(numMarkers));
 	uint32 i = 0;
 	for(const auto cue : sample.cues)
 	{
@@ -588,7 +575,7 @@ void WAVWriter::WriteCueInformation(const ModSample &sample)
 		{
 			WAVCuePoint cuePoint;
 			cuePoint.ConvertToWAV(i++, cue);
-			Write(cuePoint);
+			mpt::IO::Write(s, cuePoint);
 		}
 	}
 }
@@ -601,7 +588,7 @@ void WAVWriter::WriteExtraInformation(const ModSample &sample, MODTYPE modType, 
 	WAVExtraChunk mptInfo;
 
 	mptInfo.ConvertToWAV(sample, modType);
-	Write(mptInfo);
+	mpt::IO::Write(s, mptInfo);
 
 	if(sampleName != nullptr)
 	{
@@ -613,11 +600,11 @@ void WAVWriter::WriteExtraInformation(const ModSample &sample, MODTYPE modType, 
 
 		char name[MAX_SAMPLENAME];
 		mpt::String::WriteBuf(mpt::String::nullTerminated, name) = sampleName;
-		Write(name);
+		mpt::IO::Write(s, name);
 
 		char filename[MAX_SAMPLEFILENAME];
 		mpt::String::WriteBuf(mpt::String::nullTerminated, filename) = sample.filename;
-		Write(filename);
+		mpt::IO::Write(s, filename);
 	}
 }
 
