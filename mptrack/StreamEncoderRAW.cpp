@@ -14,7 +14,6 @@
 #include "StreamEncoderRAW.h"
 
 #include "Mptrack.h"
-#include "TrackerSettings.h"
 
 #include "../common/mptFileIO.h"
 #include "../soundlib/Sndfile.h"
@@ -140,7 +139,7 @@ RAWEncoder::RAWEncoder()
 	traits.canTags = false;
 	traits.canCues = false;
 	traits.maxChannels = 4;
-	traits.samplerates = TrackerSettings::Instance().GetSampleRates();
+	traits.samplerates = {};
 	traits.modes = Encoder::ModeLossless;
 	traits.formats.push_back({ Encoder::Format::Encoding::Float, 64, mpt::endian::little });
 	traits.formats.push_back({ Encoder::Format::Encoding::Float, 64, mpt::endian::big });

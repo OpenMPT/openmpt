@@ -14,7 +14,6 @@
 #include "StreamEncoderFLAC.h"
 
 #include "Mptrack.h"
-#include "TrackerSettings.h"
 
 #include <FLAC/metadata.h>
 #include <FLAC/format.h>
@@ -190,7 +189,7 @@ FLACEncoder::FLACEncoder()
 	traits.encoderSettingsName = U_("FLAC");
 	traits.canTags = true;
 	traits.maxChannels = 4;
-	traits.samplerates = TrackerSettings::Instance().GetSampleRates();
+	traits.samplerates = {};
 	traits.modes = Encoder::ModeLossless;
 	traits.formats.push_back({ Encoder::Format::Encoding::Integer, 32, mpt::get_endian() });
 	traits.formats.push_back({ Encoder::Format::Encoding::Integer, 24, mpt::get_endian() });

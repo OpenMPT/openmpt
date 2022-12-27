@@ -32,26 +32,26 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 static Encoder::Traits VorbisBuildTraits()
-	{
-		Encoder::Traits traits;
+{
+	Encoder::Traits traits;
 #if defined(MPT_WITH_OGG) && defined(MPT_WITH_VORBIS) && defined(MPT_WITH_VORBISENC)
-		traits.fileExtension = P_("ogg");
-		traits.fileShortDescription = U_("Vorbis");
-		traits.fileDescription = U_("Ogg Vorbis");
-		traits.encoderSettingsName = U_("Vorbis");
-		traits.canTags = true;
-		traits.maxChannels = 4;
-		traits.samplerates = mpt::make_vector(vorbis_samplerates);
-		traits.modes = Encoder::ModeABR | Encoder::ModeQuality;
-		traits.bitrates = mpt::make_vector(vorbis_bitrates);
-		traits.defaultSamplerate = 48000;
-		traits.defaultChannels = 2;
-		traits.defaultMode = Encoder::ModeQuality;
-		traits.defaultBitrate = 160;
-		traits.defaultQuality = 0.5;
+	traits.fileExtension = P_("ogg");
+	traits.fileShortDescription = U_("Vorbis");
+	traits.fileDescription = U_("Ogg Vorbis");
+	traits.encoderSettingsName = U_("Vorbis");
+	traits.canTags = true;
+	traits.maxChannels = 4;
+	traits.samplerates = mpt::make_vector(vorbis_samplerates);
+	traits.modes = Encoder::ModeABR | Encoder::ModeQuality;
+	traits.bitrates = mpt::make_vector(vorbis_bitrates);
+	traits.defaultSamplerate = 48000;
+	traits.defaultChannels = 2;
+	traits.defaultMode = Encoder::ModeQuality;
+	traits.defaultBitrate = 160;
+	traits.defaultQuality = 0.5;
 #endif
-		return traits;
-	}
+	return traits;
+}
 
 #if defined(MPT_WITH_OGG) && defined(MPT_WITH_VORBIS) && defined(MPT_WITH_VORBISENC)
 

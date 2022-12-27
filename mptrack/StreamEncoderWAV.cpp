@@ -17,7 +17,6 @@
 #include "mpt/io/io_stdstream.hpp"
 
 #include "Mptrack.h"
-#include "TrackerSettings.h"
 
 #include "../soundlib/Sndfile.h"
 #include "../soundlib/WAVTools.h"
@@ -138,7 +137,7 @@ WAVEncoder::WAVEncoder()
 	traits.canTags = true;
 	traits.canCues = true;
 	traits.maxChannels = 4;
-	traits.samplerates = TrackerSettings::Instance().GetSampleRates();
+	traits.samplerates = {};
 	traits.modes = Encoder::ModeLossless;
 	traits.formats.push_back({ Encoder::Format::Encoding::Float, 64, mpt::endian::little });
 	traits.formats.push_back({ Encoder::Format::Encoding::Float, 32, mpt::endian::little });

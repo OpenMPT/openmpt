@@ -293,9 +293,10 @@ void CWaveConvert::FillSamplerates()
 	EncoderSettingsConf &encSettings = m_Settings.GetEncoderSettings();
 	m_CbnSampleRate.CComboBox::ResetContent();
 	int sel = -1;
+	std::vector<uint32> samplerates = (!encTraits->samplerates.empty() ? encTraits->samplerates : TrackerSettings::Instance().GetSampleRates());
 	if(TrackerSettings::Instance().ExportDefaultToSoundcardSamplerate)
 	{
-		for(auto samplerate : encTraits->samplerates)
+		for(auto samplerate : samplerates)
 		{
 			if(samplerate == TrackerSettings::Instance().MixerSamplerate)
 			{
@@ -303,7 +304,7 @@ void CWaveConvert::FillSamplerates()
 			}
 		}
 	}
-	for(auto samplerate : encTraits->samplerates)
+	for(auto samplerate : samplerates)
 	{
 		int ndx = m_CbnSampleRate.AddString(MPT_CFORMAT("{} Hz")(samplerate));
 		m_CbnSampleRate.SetItemData(ndx, samplerate);

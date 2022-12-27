@@ -29,25 +29,25 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 static Encoder::Traits BuildTraits()
-	{
-		Encoder::Traits traits;
+{
+	Encoder::Traits traits;
 #if defined(MPT_WITH_OPUS) && defined(MPT_WITH_OPUSENC)
-		traits.fileExtension = P_("opus");
-		traits.fileShortDescription = U_("Opus");
-		traits.fileDescription = U_("Ogg Opus");
-		traits.encoderSettingsName = U_("Opus");
-		traits.canTags = true;
-		traits.maxChannels = 4;
-		traits.samplerates = mpt::make_vector(opus_all_samplerates);
-		traits.modes = Encoder::ModeCBR | Encoder::ModeVBR;
-		traits.bitrates = mpt::make_vector(opus_bitrates);
-		traits.defaultSamplerate = 48000;
-		traits.defaultChannels = 2;
-		traits.defaultMode = Encoder::ModeVBR;
-		traits.defaultBitrate = 128;
+	traits.fileExtension = P_("opus");
+	traits.fileShortDescription = U_("Opus");
+	traits.fileDescription = U_("Ogg Opus");
+	traits.encoderSettingsName = U_("Opus");
+	traits.canTags = true;
+	traits.maxChannels = 4;
+	traits.samplerates = mpt::make_vector(opus_all_samplerates);
+	traits.modes = Encoder::ModeCBR | Encoder::ModeVBR;
+	traits.bitrates = mpt::make_vector(opus_bitrates);
+	traits.defaultSamplerate = 48000;
+	traits.defaultChannels = 2;
+	traits.defaultMode = Encoder::ModeVBR;
+	traits.defaultBitrate = 128;
 #endif
-		return traits;
-	}
+	return traits;
+}
 
 
 
