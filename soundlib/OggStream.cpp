@@ -184,7 +184,7 @@ bool ReadPageAndSkipJunk(FileReader &file, PageInfo &pageInfo, std::vector<uint8
 			pageInfo = PageInfo();
 			pageData.clear();
 		}
-		file.Skip(1);
+		file.Skip(4);
 	}
 }
 
