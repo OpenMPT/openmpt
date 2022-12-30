@@ -11,6 +11,7 @@
 #include "OggStream.h"
 #include "mpt/crc/crc.hpp"
 #include "mpt/io_read/filereader.hpp"
+#include "../common/FileReader.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

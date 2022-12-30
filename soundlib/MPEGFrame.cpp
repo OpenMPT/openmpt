@@ -11,6 +11,7 @@
 #include "stdafx.h"
 #include "MPEGFrame.h"
 #include "mpt/io_read/filereader.hpp"
+#include "../common/FileReader.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
