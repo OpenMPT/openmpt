@@ -212,8 +212,7 @@ public:
 protected:
 	FileCursor CreateChunk(pos_type position, pos_type length) const {
 		pos_type readableLength = DataContainer().GetReadableLength(position, length);
-		if (readableLength == 0)
-		{
+		if (readableLength == 0) {
 			return FileCursor();
 		}
 		return FileCursor(CreateChunkImpl(SharedDataContainer(), position, std::min(length, DataContainer().GetLength() - position)));
