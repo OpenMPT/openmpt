@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <array>
 #include <limits>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -40,6 +41,224 @@ namespace IO {
 
 
 namespace FileReader {
+
+
+
+// TFileCursor members begin
+
+template <typename TFileCursor>
+std::optional<typename TFileCursor::filename_type> GetOptionalFileName(const TFileCursor & f) {
+	return f.GetOptionalFileName();
+}
+
+// Returns true if the object points to a valid (non-empty) stream.
+template <typename TFileCursor>
+bool IsValid(const TFileCursor & f) {
+	return f.IsValid();
+}
+
+// Reset cursor to first byte in file.
+template <typename TFileCursor>
+void Rewind(TFileCursor & f) {
+	f.Rewind();
+}
+
+// Seek to a position in the mapped file.
+// Returns false if position is invalid.
+template <typename TFileCursor>
+bool Seek(TFileCursor & f, typename TFileCursor::pos_type position) {
+	return f.Seek(position);
+}
+
+// Increases position by skipBytes.
+// Returns true if skipBytes could be skipped or false if the file end was reached earlier.
+template <typename TFileCursor>
+bool Skip(TFileCursor & f, typename TFileCursor::pos_type skipBytes) {
+	return f.Skip(skipBytes);
+}
+
+// Decreases position by skipBytes.
+// Returns true if skipBytes could be skipped or false if the file start was reached earlier.
+template <typename TFileCursor>
+bool SkipBack(TFileCursor & f, typename TFileCursor::pos_type skipBytes) {
+	return f.SkipBack(skipBytes);
+}
+
+// Returns cursor position in the mapped file.
+template <typename TFileCursor>
+typename TFileCursor::pos_type GetPosition(const TFileCursor & f) {
+	return f.GetPosition();
+}
+
+// Return true IFF seeking and GetLength() is fast.
+// In particular, it returns false for unseekable stream where GetLength()
+// requires pre-caching.
+template <typename TFileCursor>
+bool HasFastGetLength(const TFileCursor & f) {
+	return f.HasFastGetLength();
+}
+
+#if 0
+// Returns size of the mapped file in bytes.
+template <typename TFileCursor>
+MPT_FILECURSOR_DEPRECATED typename TFileCursor::pos_type GetLength(const TFileCursor & f) {
+	return f.GetLength();
+}
+#endif
+
+#if 0
+// Return byte count between cursor position and end of file, i.e. how many bytes can still be read.
+template <typename TFileCursor>
+MPT_FILECURSOR_DEPRECATED typename TFileCursor::pos_type BytesLeft(const TFileCursor & f) {
+	return f.BytesLeft();
+}
+#endif
+
+template <typename TFileCursor>
+bool EndOfFile(const TFileCursor & f) {
+	return f.EndOfFile();
+}
+
+template <typename TFileCursor>
+bool NoBytesLeft(const TFileCursor & f) {
+	return f.NoBytesLeft();
+}
+
+// Check if "amount" bytes can be read from the current position in the stream.
+template <typename TFileCursor>
+bool CanRead(const TFileCursor & f, typename TFileCursor::pos_type amount) {
+	return f.CanRead(amount);
+}
+
+// Check if file size is at least size, without potentially caching the whole file to query the exact file length.
+template <typename TFileCursor>
+bool LengthIsAtLeast(const TFileCursor & f, typename TFileCursor::pos_type size) {
+	return f.LengthIsAtLesat(size);
+}
+
+// Check if file size is exactly size, without potentially caching the whole file if it is larger.
+template <typename TFileCursor>
+bool LengthIs(const TFileCursor & f, typename TFileCursor::pos_type size) {
+	return f.LengthIs(size);
+}
+
+// Create a new FileCursor object for parsing a sub chunk at a given position with a given length.
+// The file cursor is not modified.
+template <typename TFileCursor>
+TFileCursor GetChunkAt(const TFileCursor & f, typename TFileCursor::pos_type position, typename TFileCursor::pos_type length) {
+	return f.GetChunkAt(position, length);
+}
+
+// Create a new FileCursor object for parsing a sub chunk at the current position with a given length.
+// The file cursor is not advanced.
+template <typename TFileCursor>
+TFileCursor GetChunk(TFileCursor & f, typename TFileCursor::pos_type length) {
+	return f.GetChunk(length);
+}
+
+// Create a new FileCursor object for parsing a sub chunk at the current position with a given length.
+// The file cursor is advanced by "length" bytes.
+template <typename TFileCursor>
+TFileCursor ReadChunk(TFileCursor & f, typename TFileCursor::pos_type length) {
+	return f.ReadChunk(length);
+}
+
+// Returns a pinned view into the remaining raw data from cursor position.
+template <typename TFileCursor>
+typename TFileCursor::PinnedView GetPinnedView(const TFileCursor & f) {
+	return f.GetPinnedView();
+}
+
+// Returns a pinned view into the remeining raw data from cursor position, clamped at size.
+template <typename TFileCursor>
+typename TFileCursor::PinnedView GetPinnedView(const TFileCursor & f, std::size_t size) {
+	return f.GetPinnedView(size);
+}
+
+// Returns a pinned view into the remeining raw data from cursor position.
+// File cursor is advaned by the size of the returned pinned view.
+template <typename TFileCursor>
+typename TFileCursor::PinnedView ReadPinnedView(TFileCursor & f) {
+	return f.ReadPinnedView();
+}
+
+// Returns a pinned view into the remeining raw data from cursor position, clamped at size.
+// File cursor is advaned by the size of the returned pinned view.
+template <typename TFileCursor>
+typename TFileCursor::PinnedView ReadPinnedView(TFileCursor & f, std::size_t size) {
+	return f.ReadPinnedView(size);
+}
+
+#if 0
+// Returns raw stream data at cursor position.
+// Should only be used if absolutely necessary, for example for sample reading, or when used with a small chunk of the file retrieved by ReadChunk().
+// Use GetPinnedView(size) whenever possible.
+template <typename TFileCursor>
+MPT_FILECURSOR_DEPRECATED mpt::const_byte_span GetRawData(const TFileCursor & f) {
+	return f.GetRawData();
+}
+#endif
+
+#if 0
+template <typename T, typename TFileCursor>
+MPT_FILECURSOR_DEPRECATED mpt::span<const T> GetRawData(const TFileCursor & f) {
+	return f.template GetRawData<T>();
+}
+#endif
+
+template <typename TFileCursor>
+mpt::byte_span GetRawWithOffset(const TFileCursor & f, std::size_t offset, mpt::byte_span dst) {
+	return f.GetRawWithOffset(offset, dst);
+}
+
+template <typename Tspan, typename TFileCursor>
+Tspan GetRawWithOffset(const TFileCursor & f, std::size_t offset, Tspan dst) {
+	return f.template GetRawWithOffset<Tspan>(offset, dst);
+}
+
+template <typename TFileCursor>
+mpt::byte_span GetRaw(const TFileCursor & f, mpt::byte_span dst) {
+	return f.GetRaw(dst);
+}
+
+template <typename Tspan, typename TFileCursor>
+Tspan GetRaw(const TFileCursor & f, Tspan dst) {
+	return f.template GetRaw<Tspan>(dst);
+}
+
+template <typename TFileCursor>
+mpt::byte_span ReadRaw(TFileCursor & f, mpt::byte_span dst) {
+	return f.ReadRaw(dst);
+}
+
+template <typename Tspan, typename TFileCursor>
+Tspan ReadRaw(TFileCursor & f, Tspan dst) {
+	return f.template ReadRaw<Tspan>(dst);
+}
+
+template <typename TFileCursor>
+std::vector<std::byte> GetRawDataAsByteVector(const TFileCursor & f) {
+	return f.GetRawDataAsByteVector();
+}
+
+template <typename TFileCursor>
+std::vector<std::byte> ReadRawDataAsByteVector(TFileCursor & f) {
+	return f.ReadRawDataAsByteVector();
+}
+
+template <typename TFileCursor>
+std::vector<std::byte> GetRawDataAsByteVector(const TFileCursor & f, std::size_t size) {
+	return f.GetRawDataAsByteVector(size);
+}
+
+template <typename TFileCursor>
+std::vector<std::byte> ReadRawDataAsByteVector(TFileCursor & f, std::size_t size) {
+	return f.ReadRawDataAsByteVector(size);
+}
+
+// TFileCursor members end
+
+
 
 // Read a "T" object from the stream.
 // If not enough bytes can be read, false is returned.
@@ -579,11 +798,17 @@ ChunkList<TChunkHeader, TFileCursor> ReadChunksUntil(TFileCursor & f, typename T
 	return result;
 }
 
+
+
 } // namespace FileReader
 
 
 
 } // namespace IO
+
+
+
+namespace FR = mpt::IO::FileReader;
 
 
 
