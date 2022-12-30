@@ -10,7 +10,7 @@
 #include "stdafx.h"
 #include "OggStream.h"
 #include "mpt/crc/crc.hpp"
-#include "../common/FileReader.h"
+#include "mpt/io_read/filereader.hpp"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -53,7 +53,7 @@ uint16 PageInfo::GetPageDataSize() const
 }
 
 
-bool AdvanceToPageMagic(FileReader &file)
+bool AdvanceToPageMagic(FileCursor &file)
 {
 #if MPT_COMPILER_MSVC
 #pragma warning(push)
@@ -64,75 +64,75 @@ bool AdvanceToPageMagic(FileReader &file)
 #pragma warning(pop)
 #endif // MPT_COMPILER_MSVC
 	{
-		if(!file.CanRead(4))
+		if(!mpt::FR::CanRead(file, 4))
 		{
 			return false;
 		}
-		if(file.ReadMagic("OggS"))
+		if(mpt::FR::ReadMagic(file, "OggS"))
 		{
-			file.SkipBack(4);
+			mpt::FR::SkipBack(file, 4);
 			return true;
 		}
-		file.Skip(1);
+		mpt::FR::Skip(file, 1);
 	}
 }
 
 
-bool ReadPage(FileReader &file, PageInfo &pageInfo, std::vector<uint8> *pageData)
+bool ReadPage(FileCursor &file, PageInfo &pageInfo, std::vector<uint8> *pageData)
 {
 	pageInfo = PageInfo();
 	if(pageData)
 	{
 		(*pageData).clear();
 	}
-	if(!file.ReadMagic("OggS"))
+	if(!mpt::FR::ReadMagic(file, "OggS"))
 	{
 		return false;
 	}
-	file.SkipBack(4);
-	FileReader filePageReader = file; // do not modify original file read position
-	if(!filePageReader.ReadStruct(pageInfo.header))
+	mpt::FR::SkipBack(file, 4);
+	FileCursor filePageCursor = file; // do not modify original file read position
+	if(!mpt::FR::ReadStruct(filePageCursor, pageInfo.header))
 	{
 		return false;
 	}
-	if(!filePageReader.CanRead(pageInfo.header.page_segments))
+	if(!mpt::FR::CanRead(filePageCursor, pageInfo.header.page_segments))
 	{
 		return false;
 	}
 	uint16 pageDataSize = 0;
 	for(uint8 segment = 0; segment < pageInfo.header.page_segments; ++segment)
 	{
-		pageInfo.segment_table[segment] = filePageReader.ReadIntLE<uint8>();
+		pageInfo.segment_table[segment] = mpt::FR::ReadIntLE<uint8>(filePageCursor);
 		pageDataSize += pageInfo.segment_table[segment];
 	}
-	if(!filePageReader.CanRead(pageDataSize))
+	if(!mpt::FR::CanRead(filePageCursor, pageDataSize))
 	{
 		return false;
 	}
 	if(pageData)
 	{
-		filePageReader.ReadVector(*pageData, pageDataSize);
+		mpt::FR::ReadVector(filePageCursor , *pageData, pageDataSize);
 	} else
 	{
-		filePageReader.Skip(pageDataSize);
+		mpt::FR::Skip(filePageCursor, pageDataSize);
 	}
-	filePageReader.SkipBack(pageInfo.GetPagePhysicalSize());
+	mpt::FR::SkipBack(filePageCursor, pageInfo.GetPagePhysicalSize());
 	{
 		mpt::crc32_ogg calculatedCRC;
 		uint8 rawHeader[sizeof(PageHeader)];
 		MemsetZero(rawHeader);
-		filePageReader.ReadArray(rawHeader);
+		mpt::FR::ReadArray(filePageCursor, rawHeader);
 		std::memset(rawHeader + 22, 0, 4); // clear out old crc
 		calculatedCRC.process(rawHeader, rawHeader + sizeof(rawHeader));
-		filePageReader.Skip(pageInfo.header.page_segments);
+		mpt::FR::Skip(filePageCursor, pageInfo.header.page_segments);
 		calculatedCRC.process(pageInfo.segment_table, pageInfo.segment_table + pageInfo.header.page_segments);
 		if(pageData)
 		{
-			filePageReader.Skip(pageDataSize);
+			mpt::FR::Skip(filePageCursor, pageDataSize);
 			calculatedCRC.process(*pageData);
 		} else
 		{
-			FileReader pageDataReader = filePageReader.ReadChunk(pageDataSize);
+			FileCursor pageDataReader = mpt::FR::ReadChunk(filePageCursor, pageDataSize);
 			auto pageDataView = pageDataReader.GetPinnedView();
 			calculatedCRC.process(pageDataView.GetSpan());
 		}
@@ -141,25 +141,25 @@ bool ReadPage(FileReader &file, PageInfo &pageInfo, std::vector<uint8> *pageData
 			return false;
 		}
 	}
-	file.Skip(pageInfo.GetPagePhysicalSize());
+	mpt::FR::Skip(file, pageInfo.GetPagePhysicalSize());
 	return true;
 }
 
 
-bool ReadPage(FileReader &file, PageInfo &pageInfo, std::vector<uint8> &pageData)
+bool ReadPage(FileCursor &file, PageInfo &pageInfo, std::vector<uint8> &pageData)
 {
 	return ReadPage(file, pageInfo, &pageData);
 }
 
 
-bool ReadPage(FileReader &file)
+bool ReadPage(FileCursor &file)
 {
 	PageInfo pageInfo;
 	return ReadPage(file, pageInfo);
 }
 
 
-bool ReadPageAndSkipJunk(FileReader &file, PageInfo &pageInfo, std::vector<uint8> &pageData)
+bool ReadPageAndSkipJunk(FileCursor &file, PageInfo &pageInfo, std::vector<uint8> &pageData)
 {
 	pageInfo = PageInfo();
 	pageData.clear();
@@ -184,7 +184,7 @@ bool ReadPageAndSkipJunk(FileReader &file, PageInfo &pageInfo, std::vector<uint8
 			pageInfo = PageInfo();
 			pageData.clear();
 		}
-		file.Skip(4);
+		mpt::FR::Skip(file, 4);
 	}
 }
 
