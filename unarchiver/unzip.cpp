@@ -224,7 +224,7 @@ CZipArchive::CZipArchive(FileReader &file) : ArchiveBase(file)
 	mz_zip_archive *zip = static_cast<mz_zip_archive*>(zipFile);
 	
 	(*zip) = {};
-	const auto fileData = file.GetRawData();
+	const mpt::const_byte_span fileData = file.GetRawData<std::byte>();
 	if(!mz_zip_reader_init_mem(zip, fileData.data(), fileData.size(), 0))
 	{
 		delete zip;

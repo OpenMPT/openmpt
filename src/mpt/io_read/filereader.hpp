@@ -193,42 +193,20 @@ typename TFileCursor::PinnedView ReadPinnedView(TFileCursor & f, std::size_t siz
 // Returns raw stream data at cursor position.
 // Should only be used if absolutely necessary, for example for sample reading, or when used with a small chunk of the file retrieved by ReadChunk().
 // Use GetPinnedView(size) whenever possible.
-template <typename TFileCursor>
-MPT_FILECURSOR_DEPRECATED mpt::const_byte_span GetRawData(const TFileCursor & f) {
-	return f.GetRawData();
-}
-#endif
-
-#if 0
 template <typename T, typename TFileCursor>
 MPT_FILECURSOR_DEPRECATED mpt::span<const T> GetRawData(const TFileCursor & f) {
 	return f.template GetRawData<T>();
 }
 #endif
 
-template <typename TFileCursor>
-mpt::byte_span GetRawWithOffset(const TFileCursor & f, std::size_t offset, mpt::byte_span dst) {
-	return f.GetRawWithOffset(offset, dst);
-}
-
 template <typename Tspan, typename TFileCursor>
 Tspan GetRawWithOffset(const TFileCursor & f, std::size_t offset, Tspan dst) {
 	return f.template GetRawWithOffset<Tspan>(offset, dst);
 }
 
-template <typename TFileCursor>
-mpt::byte_span GetRaw(const TFileCursor & f, mpt::byte_span dst) {
-	return f.GetRaw(dst);
-}
-
 template <typename Tspan, typename TFileCursor>
 Tspan GetRaw(const TFileCursor & f, Tspan dst) {
 	return f.template GetRaw<Tspan>(dst);
-}
-
-template <typename TFileCursor>
-mpt::byte_span ReadRaw(TFileCursor & f, mpt::byte_span dst) {
-	return f.ReadRaw(dst);
 }
 
 template <typename Tspan, typename TFileCursor>
