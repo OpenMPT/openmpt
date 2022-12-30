@@ -130,7 +130,7 @@ public:
 			streamPos = position;
 			return true;
 		}
-		if (position <= DataContainer().GetLength()) {
+		if (DataContainer().CanRead(0, position)) {
 			streamPos = position;
 			return true;
 		} else {
