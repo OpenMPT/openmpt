@@ -181,7 +181,7 @@ protected:
 	std::unique_ptr<CDLSBank> m_cachedBank;
 	mpt::PathString m_cachedBankName;
 
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN7)
+#if MPT_WINNT_AT_LEAST(MPT_WIN_7)
 	DWORD m_stringCompareFlags = NORM_IGNORECASE | NORM_IGNOREWIDTH | SORT_DIGITSASNUMBERS;
 #else
 	DWORD m_stringCompareFlags = NORM_IGNORECASE | NORM_IGNOREWIDTH;

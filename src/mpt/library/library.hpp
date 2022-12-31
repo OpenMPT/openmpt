@@ -194,7 +194,7 @@ public:
 
 #if MPT_OS_WINDOWS_WINRT
 
-#if (_WIN32_WINNT < 0x0602)
+#if MPT_WINRT_BEFORE(MPT_WIN_8)
 		MPT_UNUSED(path);
 		return std::nullopt;
 #else  // Windows 8
@@ -222,7 +222,7 @@ public:
 
 #else // !MPT_OS_WINDOWS_WINRT
 
-#if (_WIN32_WINNT >= 0x0602) && 0
+#if MPT_WINNT_AT_LEAST(MPT_WIN_8) && 0
 		bool hasKB2533623 = true;
 #else
 		bool hasKB2533623 = false;

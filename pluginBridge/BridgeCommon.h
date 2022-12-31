@@ -14,7 +14,7 @@
 
 #include <vector>
 
-#if (_WIN32_WINNT < _WIN32_WINNT_VISTA)
+#if MPT_WIN_BEFORE(MPT_WIN_VISTA)
 #include <intrin.h>
 #endif
 
@@ -252,7 +252,7 @@ public:
 	{
 		static_assert(sizeof(m_value) >= sizeof(T));
 		MPT_ASSERT((intptr_t(&m_value) & 3) == 0);
-#if (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
+#if MPT_WINNT_AT_LEAST(MPT_WIN_VISTA)
 		InterlockedExchange(&m_value, static_cast<LONG>(value));
 #else
 		_InterlockedExchange(&m_value, static_cast<LONG>(value));
@@ -261,7 +261,7 @@ public:
 	}
 	operator T() const
 	{
-#if (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
+#if MPT_WINNT_AT_LEAST(MPT_WIN_VISTA)
 		return static_cast<T>(InterlockedAdd(&m_value, 0));
 #else
 		return static_cast<T>(_InterlockedExchangeAdd(&m_value, 0));
@@ -270,7 +270,7 @@ public:
 
 	T exchange(T desired)
 	{
-#if (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
+#if MPT_WINNT_AT_LEAST(MPT_WIN_VISTA)
 		return static_cast<T>(InterlockedExchange(&m_value, static_cast<LONG>(desired)));
 #else
 		return static_cast<T>(_InterlockedExchange(&m_value, static_cast<LONG>(desired)));
@@ -279,7 +279,7 @@ public:
 
 	T fetch_add(T arg)
 	{
-#if (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
+#if MPT_WINNT_AT_LEAST(MPT_WIN_VISTA)
 		return static_cast<T>(InterlockedExchangeAdd(&m_value, static_cast<LONG>(arg)));
 #else
 		return static_cast<T>(_InterlockedExchangeAdd(&m_value, static_cast<LONG>(arg)));
@@ -288,7 +288,7 @@ public:
 
 	bool compare_exchange_strong(T &expected, T desired)
 	{
-#if (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
+#if MPT_WINNT_AT_LEAST(MPT_WIN_VISTA)
 		return InterlockedCompareExchange(&m_value, static_cast<LONG>(desired), static_cast<LONG>(expected)) == static_cast<LONG>(expected);
 #else
 		return _InterlockedCompareExchange(&m_value, static_cast<LONG>(desired), static_cast<LONG>(expected)) == static_cast<LONG>(expected);

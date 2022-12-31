@@ -928,8 +928,7 @@ private:
 #elif MPT_OS_WINDOWS
 
 		uint8 result = 0;
-#if MPT_OS_WINDOWS_WINNT
-#if (_WIN32_WINNT >= _WIN32_WINNT_NT4)
+#if MPT_WINNT_AT_LEAST(MPT_WIN_NT4)
 		if (mpt::osinfo::windows::Version::Current().IsAtLeast(mpt::osinfo::windows::Version::Win2000)) {
 			if (IsProcessorFeaturePresent(PF_FLOATING_POINT_EMULATED) == 0) {
 				result = 3;
@@ -940,15 +939,6 @@ private:
 				result = 3;
 			}
 		}
-#else
-		if ((assumed_features() & feature::fpu) && (assumed_features() & feature::fsin)) {
-			result = 3;
-		} else if (assumed_features() & feature::fpu) {
-			result = 2;
-		} else {
-			result = 0;
-		}
-#endif
 #else
 		if ((assumed_features() & feature::fpu) && (assumed_features() & feature::fsin)) {
 			result = 3;
@@ -1530,8 +1520,7 @@ public:
 #ifdef PF_XMMI_INSTRUCTIONS_AVAILABLE
 					Modes |= (IsProcessorFeaturePresent(PF_XMMI_INSTRUCTIONS_AVAILABLE) != 0) ? (mode::xmm128sse) : mode::base;
 #endif
-#elif MPT_OS_WINDOWS_WIN9X
-#if (_WIN32_WINDOWS >= 0x0410) // Windows 98
+#elif MPT_WIN9X_AT_LEAST(MPT_WIN_WIN98)
 					const bool have_sse =
 #ifdef MPT_ARCH_X86_SSE
 						true;
@@ -1541,7 +1530,6 @@ public:
 					MPT_MAYBE_CONSTANT_IF (have_sse) {
 						Modes |= mode::xmm128sse;
 					}
-#endif // Windows 98
 #else // MPT_OS_WINDOWS
 					// nothing
 #endif // MPT_OS_WINDOWS

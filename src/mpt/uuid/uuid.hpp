@@ -19,9 +19,9 @@
 #include "mpt/string/utility.hpp"
 
 #if MPT_OS_WINDOWS
-#if defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0600)
+#if MPT_WINNT_AT_LEAST(MPT_WIN_VISTA)
 #include <guiddef.h>
-#endif // _WIN32_WINNT
+#endif // MPT_WIN_VISTA
 #include <objbase.h>
 #include <rpc.h>
 #endif // MPT_OS_WINDOWS
@@ -241,18 +241,16 @@ public:
 	// Create a UUID
 	template <typename Trng>
 	static UUID Generate(Trng & rng) {
-#if MPT_OS_WINDOWS && MPT_OS_WINDOWS_WINRT
-#if (_WIN32_WINNT >= 0x0602)
+#if MPT_WINRT_AT_LEAST(MPT_WIN_8)
 		::GUID guid = ::GUID();
 		HRESULT result = CoCreateGuid(&guid);
 		if (result != S_OK) {
 			return mpt::UUID::RFC4122Random(rng);
 		}
 		return mpt::UUID::UUIDFromWin32(guid);
-#else
+#elif MPT_WINRT_BEFORE(MPT_WIN_8)
 		return mpt::UUID::RFC4122Random(rng);
-#endif
-#elif MPT_OS_WINDOWS && !MPT_OS_WINDOWS_WINRT
+#elif MPT_OS_WINDOWS
 		::UUID uuid = ::UUID();
 		RPC_STATUS status = ::UuidCreate(&uuid);
 		if (status != RPC_S_OK && status != RPC_S_UUID_LOCAL_ONLY) {
@@ -274,19 +272,16 @@ public:
 	// Safe for local use. May be faster.
 	template <typename Trng>
 	static UUID GenerateLocalUseOnly(Trng & rng) {
-#if MPT_OS_WINDOWS && MPT_OS_WINDOWS_WINRT
-#if (_WIN32_WINNT >= 0x0602)
+#if MPT_WINRT_AT_LEAST(MPT_WIN_8)
 		::GUID guid = ::GUID();
 		HRESULT result = CoCreateGuid(&guid);
 		if (result != S_OK) {
 			return mpt::UUID::RFC4122Random(rng);
 		}
 		return mpt::UUID::UUIDFromWin32(guid);
-#else
+#elif MPT_WINRT_BEFORE(MPT_WIN_8)
 		return mpt::UUID::RFC4122Random(rng);
-#endif
-#elif MPT_OS_WINDOWS && !MPT_OS_WINDOWS_WINRT
-#if _WIN32_WINNT >= 0x0501
+#elif MPT_WINNT_AT_LEAST(MPT_WIN_XP)
 		// Available since Win2000, but we check for WinXP in order to not use this
 		// function in Win32old builds. It is not available on some non-fully
 		// patched Win98SE installs in the wild.
@@ -303,11 +298,10 @@ public:
 			return mpt::UUID::RFC4122Random(rng);
 		}
 		return mpt::UUID::UUIDFromWin32(uuid);
-#else
+#elif MPT_OS_WINDOWS
 		// Fallback to ::UuidCreate is safe as ::UuidCreateSequential is only a
 		// tiny performance optimization.
 		return Generate(rng);
-#endif
 #else
 		return RFC4122Random(rng);
 #endif

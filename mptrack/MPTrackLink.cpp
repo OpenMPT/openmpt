@@ -35,7 +35,7 @@ OPENMPT_NAMESPACE_BEGIN
 #pragma comment(lib, "dmoguids.lib")
 #pragma comment(lib, "strmiids.lib")
 
-#if (_WIN32_WINNT >= 0x600)
+#if MPT_WINNT_AT_LEAST(MPT_WIN_VISTA)
 #pragma comment(lib, "avrt.lib")
 #endif
 #if defined(MPT_WITH_DIRECTSOUND)

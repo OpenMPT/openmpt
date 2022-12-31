@@ -11,7 +11,7 @@
 
 
 #if MPT_OS_WINDOWS && MPT_OS_WINDOWS_WINNT
-//#if (_WIN32_WINNT >= 0x0600) // >= Windows Vista
+//#if MPT_WINNT_AT_LEAST(MPT_WIN_VISTA)
 #define MPT_CRYPTO_WINDOWS
 //#endif // >= Windows Vista
 #endif // MPT_OS_WINDOWS

@@ -27,6 +27,7 @@
 
 #include "mpt/audio/span.hpp"
 #include "mpt/base/algorithm.hpp"
+#include "mpt/base/detect.hpp"
 #include "mpt/base/saturate_cast.hpp"
 #include "mpt/base/saturate_round.hpp"
 #include "mpt/format/default_integer.hpp"
@@ -59,17 +60,9 @@ OPENMPT_NAMESPACE_BEGIN
 
 #if !defined(MPT_BUILD_SILENCE_LIBOPENMPT_CONFIGURATION_WARNINGS)
 
-#if MPT_OS_WINDOWS && MPT_OS_WINDOWS_WINRT
-#if defined(NTDDI_VERSION)
-#if (NTDDI_VERSION < 0x06020000)
+#if MPT_WINRT_BEFORE(MPT_WIN_8)
 MPT_WARNING("Warning: libopenmpt for WinRT is built with reduced functionality. Please #define NTDDI_VERSION 0x0602000.")
-#endif
-#elif defined(_WIN32_WINNT)
-#if (_WIN32_WINNT < 0x0602)
-MPT_WARNING("Warning: libopenmpt for WinRT is built with reduced functionality. Please #define _WIN32_WINNT 0x0602.")
-#endif // _WIN32_WINNT
-#endif // _WIN32_WINNT
-#endif // MPT_OS_WINDOWS && MPT_OS_WINDOWS_WINRT
+#endif // MPT_WINRT_BEFORE(MPT_WIN_8)
 
 #if MPT_PLATFORM_MULTITHREADED && MPT_MUTEX_NONE
 MPT_WARNING("Warning: libopenmpt built in non thread-safe mode because mutexes are not supported by the C++ standard library available.")

@@ -79,7 +79,7 @@ public:
 
 public:
 
-#if !(MPT_OS_WINDOWS_WINRT && (_WIN32_WINNT < 0x0a00))
+#if !(MPT_WINRT_BEFORE(MPT_WIN_10))
 	mpt::native_path absolute(const mpt::native_path & path) {
 		DWORD size = ::GetFullPathName(path.AsNative().c_str(), 0, nullptr, nullptr);
 		if (size == 0) {

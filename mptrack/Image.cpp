@@ -68,7 +68,7 @@ namespace GDIP
 static CComPtr<IStream> GetStream(mpt::const_byte_span data)
 {
 	CComPtr<IStream> stream;
-#if (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
+#if MPT_WINNT_AT_LEAST(MPT_WIN_VISTA)
 	stream.Attach(SHCreateMemStream(mpt::byte_cast<const unsigned char *>(data.data()), mpt::saturate_cast<UINT>(data.size())));
 #else
 	HGLOBAL hGlobal = GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT, data.size());

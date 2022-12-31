@@ -24,7 +24,7 @@
 #include <cassert>
 
 #if MPT_OS_WINDOWS
-#if(_WIN32_WINNT >= 0x600)
+#if MPT_WINNT_AT_LEAST(MPT_WIN_VISTA)
 #include <avrt.h>
 #endif
 #include <mmsystem.h>
@@ -150,7 +150,7 @@ CAudioThread::~CAudioThread()
 CPriorityBooster::CPriorityBooster(SoundDevice::SysInfo sysInfo, bool boostPriority, const mpt::winstring &priorityClass, int priority)
 	: m_SysInfo(sysInfo)
 	, m_BoostPriority(boostPriority)
-#if(_WIN32_WINNT >= 0x600)
+#if MPT_WINNT_AT_LEAST(MPT_WIN_VISTA)
 	, task_idx(0)
 	, hTask(NULL)
 #else  // < Vista
@@ -164,7 +164,7 @@ CPriorityBooster::CPriorityBooster(SoundDevice::SysInfo sysInfo, bool boostPrior
 #endif
 	if(m_BoostPriority)
 	{
-#if(_WIN32_WINNT >= 0x600)
+#if MPT_WINNT_AT_LEAST(MPT_WIN_VISTA)
 		if(!priorityClass.empty())
 		{
 			hTask = AvSetMmThreadCharacteristics(priorityClass.c_str(), &task_idx);
@@ -184,7 +184,7 @@ CPriorityBooster::~CPriorityBooster()
 	MPT_SOUNDDEV_TRACE_SCOPE();
 	if(m_BoostPriority)
 	{
-#if(_WIN32_WINNT >= 0x600)
+#if MPT_WINNT_AT_LEAST(MPT_WIN_VISTA)
 		if(hTask)
 		{
 			AvRevertMmThreadCharacteristics(hTask);

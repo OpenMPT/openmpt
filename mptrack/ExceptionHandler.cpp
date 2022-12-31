@@ -743,7 +743,7 @@ void ExceptionHandler::Register()
 
 void ExceptionHandler::ConfigureSystemHandler()
 {
-#if (_WIN32_WINNT >= 0x0600)
+#if MPT_WINNT_AT_LEAST(MPT_WIN_VISTA)
 	if(delegateToWindowsHandler)
 	{
 		//SetErrorMode(0);
@@ -752,7 +752,7 @@ void ExceptionHandler::ConfigureSystemHandler()
 	{
 		g_OriginalErrorMode = ::SetErrorMode(::GetErrorMode() | SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX);
 	}
-#else // _WIN32_WINNT < 0x0600
+#else // < MPT_WIN_VISTA
 	if(delegateToWindowsHandler)
 	{
 		g_OriginalErrorMode = ::SetErrorMode(0);
@@ -760,7 +760,7 @@ void ExceptionHandler::ConfigureSystemHandler()
 	{
 		g_OriginalErrorMode = ::SetErrorMode(::SetErrorMode(0) | SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX);
 	}
-#endif // _WIN32_WINNT
+#endif // MPT_WIN_VISTA
 }
 
 

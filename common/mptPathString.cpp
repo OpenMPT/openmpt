@@ -113,7 +113,7 @@ mpt::PathString RelativePathToAbsolute(const mpt::PathString &path, const mpt::P
 
 #if MPT_OS_WINDOWS
 
-#if !(MPT_OS_WINDOWS_WINRT && (_WIN32_WINNT < 0x0a00))
+#if !(MPT_WINRT_BEFORE(MPT_WIN_10))
 
 mpt::PathString GetAbsolutePath(const mpt::PathString &path)
 {

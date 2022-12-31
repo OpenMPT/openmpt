@@ -73,7 +73,7 @@ namespace Util
 {
 	inline DWORD64 GetTickCount64()
 	{
-#if (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
+#if MPT_WINNT_AT_LEAST(MPT_WIN_VISTA)
 		return ::GetTickCount64();
 #else
 		return ::GetTickCount();

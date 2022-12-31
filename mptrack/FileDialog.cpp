@@ -49,7 +49,7 @@ public:
 		}
 	}
 
-#if NTDDI_VERSION >= NTDDI_VISTA
+#if MPT_WINNT_AT_LEAST(MPT_WIN_VISTA)
 	// MFC's AddPlace() is declared as throw() but can in fact throw if any of the COM calls fail, e.g. because the place does not exist.
 	// Avoid this by re-implementing our own version which doesn't throw.
 	void AddPlace(const mpt::PathString &path)
@@ -111,7 +111,7 @@ bool FileDialog::Show(CWnd *parent)
 	{
 		ofn.lpstrInitialDir = m_workingDirectory.c_str();
 	}
-#if NTDDI_VERSION >= NTDDI_VISTA
+#if MPT_WINNT_AT_LEAST(MPT_WIN_VISTA)
 	const auto places =
 	{
 		&TrackerSettings::Instance().PathPluginPresets,
@@ -143,7 +143,7 @@ bool FileDialog::Show(CWnd *parent)
 
 	if(m_multiSelect)
 	{
-#if NTDDI_VERSION >= NTDDI_VISTA
+#if MPT_WINNT_AT_LEAST(MPT_WIN_VISTA)
 		// Multiple files might have been selected
 		if(CComPtr<IShellItemArray> shellItems = dlg.GetResults(); shellItems != nullptr)
 		{

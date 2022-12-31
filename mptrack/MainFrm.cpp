@@ -3073,7 +3073,7 @@ BOOL CMainFrame::OnQueryEndSession()
 		if(modDoc->IsModified())
 			modifiedCount++;
 	}
-#if (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
+#if MPT_WINNT_AT_LEAST(MPT_WIN_VISTA)
 	ShutdownBlockReasonDestroy(m_hWnd);
 	if(modifiedCount > 0)
 	{

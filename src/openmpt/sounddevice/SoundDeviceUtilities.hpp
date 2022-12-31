@@ -51,7 +51,7 @@ class CPriorityBooster
 private:
 	SoundDevice::SysInfo m_SysInfo;
 	bool m_BoostPriority;
-#if(_WIN32_WINNT >= 0x600)
+#if MPT_WINNT_AT_LEAST(MPT_WIN_VISTA)
 	DWORD task_idx;
 	HANDLE hTask;
 #else  // < Vista

@@ -57,7 +57,7 @@ using recursive_mutex = std::recursive_mutex;
 
 #elif MPT_MUTEX_WIN32
 
-#if (_WIN32_WINNT >= 0x0600) // _WIN32_WINNT_VISTA
+#if MPT_WINNT_AT_LEAST(MPT_WIN_VISTA)
 
 // compatible with c++11 std::mutex, can eventually be replaced without touching any usage site
 class mutex {
