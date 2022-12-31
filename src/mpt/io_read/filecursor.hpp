@@ -215,7 +215,7 @@ protected:
 		if (readableLength == 0) {
 			return FileCursor();
 		}
-		return FileCursor(CreateChunkImpl(SharedDataContainer(), position, std::min(length, DataContainer().GetLength() - position)));
+		return FileCursor(CreateChunkImpl(SharedDataContainer(), position, readableLength));
 	}
 
 public:
