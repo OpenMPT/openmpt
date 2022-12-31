@@ -198,7 +198,7 @@ bool UpdatePageCRC(PageInfo &pageInfo, const std::vector<uint8> &pageData)
 	}
 	mpt::crc32_ogg crc;
 	pageInfo.header.CRC_checksum = 0;
-	char rawHeader[sizeof(PageHeader)];
+	std::byte rawHeader[sizeof(PageHeader)] = {};
 	std::memcpy(rawHeader, &pageInfo.header, sizeof(PageHeader));
 	crc.process(rawHeader, rawHeader + sizeof(PageHeader));
 	crc.process(pageInfo.segment_table, pageInfo.segment_table + pageInfo.header.page_segments);
