@@ -77,10 +77,8 @@
 
 
 #if MPT_OS_WINDOWS && MPT_COMPILER_MSVC
-#if defined(_WIN32_WINNT)
-#if (_WIN32_WINNT >= 0x0600) // _WIN32_WINNT_VISTA
+#if MPT_WINNT_AT_LEAST(MPT_WIN_VISTA)
 #define MPT_COMPILER_QUIRK_COMPLEX_STD_MUTEX
-#endif
 #endif
 #endif
 
@@ -105,20 +103,9 @@
 #endif
 #endif
 #endif
-#if defined(__MINGW32__) && !defined(__MINGW64__) && (defined(_WIN32_WINDOWS) || defined(WINVER))
-#if defined(_WIN32_WINDOWS)
-#if (_WIN32_WINDOWS < 0x0500)
+#if defined(__MINGW32__) && !defined(__MINGW64__) && (MPT_OS_WINDOWS_WIN9X || MPT_OS_WINDOWS_WIN32)
 #ifndef MPT_COMPILER_QUIRK_NO_WCHAR
 #define MPT_COMPILER_QUIRK_NO_WCHAR
-#endif
-#endif
-#endif
-#if defined(WINVER)
-#if (WINVER < 0x0500)
-#ifndef MPT_COMPILER_QUIRK_NO_WCHAR
-#define MPT_COMPILER_QUIRK_NO_WCHAR
-#endif
-#endif
 #endif
 #endif
 
@@ -240,14 +227,10 @@
 
 #if MPT_CXX_AT_LEAST(20)
 #if MPT_LIBCXX_MS && MPT_OS_WINDOWS
-#if defined(NTDDI_VERSION)
-#if (NTDDI_VERSION < 0x0A000007) // < Windows 10 1903
+#if MPT_WIN_BEFORE(MPT_WIN_10_1903)
 // std::chrono timezones require Windows 10 1903 with VS2022 as of 2022-01-22.
 // See <https://github.com/microsoft/STL/issues/1911> and
 // <https://github.com/microsoft/STL/issues/2163>.
-#define MPT_LIBCXX_QUIRK_NO_CHRONO_DATE
-#endif
-#else
 #define MPT_LIBCXX_QUIRK_NO_CHRONO_DATE
 #endif
 #endif
