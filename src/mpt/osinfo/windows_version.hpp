@@ -206,7 +206,7 @@ public:
 #endif // MPT_COMPILER_MSVC
 #if MPT_COMPILER_CLANG
 #pragma clang diagnostic pop
-#endif                       // MPT_COMPILER_CLANG
+#endif // MPT_COMPILER_CLANG
 		if (versioninfoex.dwPlatformId != VER_PLATFORM_WIN32_NT) {
 			return mpt::osinfo::windows::Version::FromSDK();
 		}
