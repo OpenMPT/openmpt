@@ -244,6 +244,26 @@ struct as_raw_memory_impl<const T[N]> {
 	}
 };
 
+template <typename T>
+struct as_raw_memory_impl<mpt::span<T>> {
+	inline mpt::const_byte_span operator()(const mpt::span<const T> & v) const {
+		static_assert(mpt::is_binary_safe<typename std::remove_const<T>::type>::value);
+		return mpt::as_span(reinterpret_cast<const std::byte*>(v.data()), v.size() * sizeof(T));
+	}
+	inline mpt::byte_span operator()(const mpt::span<T> & v) const {
+		static_assert(mpt::is_binary_safe<typename std::remove_const<T>::type>::value);
+		return mpt::as_span(reinterpret_cast<std::byte*>(v.data()), v.size() * sizeof(T));
+	}
+};
+
+template <typename T>
+struct as_raw_memory_impl<mpt::span<const T>> {
+	inline mpt::const_byte_span operator()(const mpt::span<const T> & v) const {
+		static_assert(mpt::is_binary_safe<typename std::remove_const<T>::type>::value);
+		return mpt::as_span(reinterpret_cast<const std::byte*>(v.data()), v.size() * sizeof(T));
+	}
+};
+
 // In order to be able to partially specialize it,
 // as_raw_memory is implemented via a class template.
 // Do not overload or specialize as_raw_memory directly.
