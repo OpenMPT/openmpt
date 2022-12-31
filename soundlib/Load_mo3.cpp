@@ -1600,7 +1600,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 			    &VorbisfileFilereaderTell};
 			OggVorbis_File vf;
 			MemsetZero(vf);
-			if(ov_open_callbacks(&sampleData, &vf, nullptr, 0, callbacks) == 0)
+			if(ov_open_callbacks(mpt::void_ptr<FileReader>(&sampleData), &vf, nullptr, 0, callbacks) == 0)
 			{
 				if(ov_streams(&vf) == 1)
 				{  // we do not support chained vorbis samples
