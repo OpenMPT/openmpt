@@ -405,7 +405,8 @@ bool UnpackXPK(std::vector<ContainerItem> &containerItems, FileReader &file, Con
 	bool result = false;
 	try
 	{
-		result = XPK_DoUnpack(mpt::as_span(file.GetRawData<std::byte>().data(), header.SrcLen - (sizeof(XPKFILEHEADER) - 8)), unpackedData, header.DstLen);
+		FileReader::PinnedView compressedData = file.GetPinnedView(header.SrcLen - (sizeof(XPKFILEHEADER) - 8));
+		result = XPK_DoUnpack(compressedData.span(), unpackedData, header.DstLen);
 	} catch(mpt::out_of_memory e)
 	{
 		mpt::delete_out_of_memory(e);
