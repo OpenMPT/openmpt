@@ -13,7 +13,9 @@
 #include "openmpt123_config.hpp"
 #include "openmpt123.hpp"
 
-#if defined(WIN32)
+#include "mpt/base/detect.hpp"
+
+#if MPT_OS_WINDOWS
 
 namespace openmpt123 {
 
@@ -195,6 +197,6 @@ static mpt::ustring show_waveout_devices( concat_stream<mpt::ustring> & /*log*/ 
 
 } // namespace openmpt123
 
-#endif // WIN32
+#endif // MPT_OS_WINDOWS
 
 #endif // OPENMPT123_WAVEOUT_HPP

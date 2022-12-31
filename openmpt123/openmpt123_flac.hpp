@@ -15,6 +15,7 @@
 
 #if defined(MPT_WITH_FLAC)
 
+#include "mpt/base/detect.hpp"
 #include "mpt/base/saturate_round.hpp"
 
 #if defined(_MSC_VER) && defined(__clang__) && defined(__c2__)
@@ -104,7 +105,7 @@ public:
 	}
 	void write( const std::vector<float*> buffers, std::size_t frames ) override {
 		if ( !called_init ) {
-#if defined(WIN32)
+#if MPT_OS_WINDOWS
 			FLAC__stream_encoder_init_file( encoder, mpt::transcode<std::string>( flac_encoding, filename ).c_str(), NULL, 0 );
 #else
 			FLAC__stream_encoder_init_file( encoder, filename.AsNative().c_str(), NULL, 0 );
@@ -130,7 +131,7 @@ public:
 	}
 	void write( const std::vector<std::int16_t*> buffers, std::size_t frames ) override {
 		if ( !called_init ) {
-#if defined(WIN32)
+#if MPT_OS_WINDOWS
 			FLAC__stream_encoder_init_file( encoder, mpt::transcode<std::string>( flac_encoding, filename ).c_str(), NULL, 0 );
 #else
 			FLAC__stream_encoder_init_file( encoder, filename.AsNative().c_str(), NULL, 0 );

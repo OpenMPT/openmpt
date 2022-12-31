@@ -13,6 +13,7 @@
 #include "openmpt123_config.hpp"
 
 #include "mpt/base/compiletime_warning.hpp"
+#include "mpt/base/detect.hpp"
 #include "mpt/base/floatingpoint.hpp"
 #include "mpt/base/math.hpp"
 #include "mpt/base/namespace.hpp"
@@ -133,7 +134,7 @@ struct field {
 };
 
 
-#if defined(WIN32)
+#if MPT_OS_WINDOWS
 bool IsConsole( DWORD stdHandle );
 #endif
 bool IsTerminal( int fd );
@@ -177,17 +178,17 @@ public:
 class textout_ostream : public textout {
 private:
 	std::ostream & s;
-#if defined(__DJGPP__)
+#if MPT_OS_DJGPP
 	mpt::common_encoding codepage;
 #endif
 public:
 	textout_ostream( std::ostream & s_ )
 		: s(s_)
-#if defined(__DJGPP__)
+#if MPT_OS_DJGPP
 		, codepage(mpt::common_encoding::cp437)
 #endif
 	{
-		#if defined(__DJGPP__)
+		#if MPT_OS_DJGPP
 			codepage = mpt::djgpp_get_locale_encoding();
 		#endif
 		return;
@@ -199,9 +200,9 @@ private:
 	void writeout_impl() {
 		mpt::ustring text = pop();
 		if ( text.length() > 0 ) {
-			#if defined(__DJGPP__)
+			#if MPT_OS_DJGPP
 				s << mpt::transcode<std::string>( codepage, text );
-			#elif defined(__EMSCRIPTEN__)
+			#elif MPT_OS_EMSCRIPTEN
 				s << mpt::transcode<std::string>( mpt::common_encoding::utf8, text ) ;
 			#else
 				s << mpt::transcode<std::string>( mpt::logical_encoding::locale, text );
@@ -221,7 +222,7 @@ public:
 	}
 };
 
-#if defined(WIN32)
+#if MPT_OS_WINDOWS
 
 class textout_ostream_console : public textout {
 private:
@@ -289,7 +290,7 @@ public:
 	}
 };
 
-#endif // WIN32
+#endif // MPT_OS_WINDOWS
 
 inline mpt::ustring append_software_tag( mpt::ustring software ) {
 	mpt::ustring openmpt123 = mpt::ustring()
@@ -422,7 +423,7 @@ struct commandlineflags {
 		device = MPT_USTRING("");
 		buffer = default_high;
 		period = default_high;
-#if defined(__DJGPP__)
+#if MPT_OS_DJGPP
 		samplerate = 44100;
 		channels = 2;
 		use_float = false;
@@ -444,14 +445,14 @@ struct commandlineflags {
 		end_time = 0.0;
 		quiet = false;
 		verbose = false;
-#if defined(__DJGPP__)
+#if MPT_OS_DJGPP
 		terminal_width = 80;
 		terminal_height = 25;
 #else
 		terminal_width = 72;
 		terminal_height = 23;
 #endif
-#if defined(WIN32)
+#if MPT_OS_WINDOWS
 		terminal_width = 72;
 		terminal_height = 23;
 		HANDLE hStdOutput = GetStdHandle( STD_OUTPUT_HANDLE );
@@ -463,7 +464,7 @@ struct commandlineflags {
 				terminal_height = std::min( static_cast<int>( 1 + csbi.srWindow.Bottom - csbi.srWindow.Top ), static_cast<int>( csbi.dwSize.Y ) );
 			}
 		}
-#else // WIN32
+#else // !MPT_OS_WINDOWS
 		if ( isatty( STDERR_FILENO ) ) {
 			const char * env_columns = std::getenv( "COLUMNS" );
 			if ( env_columns ) {
@@ -493,16 +494,16 @@ struct commandlineflags {
 				}
 			#endif
 		}
-#endif
+#endif // MPT_OS_WINDOWS
 		show_details = true;
 		show_message = false;
-#if defined(WIN32)
+#if MPT_OS_WINDOWS
 		canUI = IsTerminal( 0 ) ? true : false;
 		canProgress = IsTerminal( 2 ) ? true : false;
-#else // !WIN32
+#else // !MPT_OS_WINDOWS
 		canUI = isatty( STDIN_FILENO ) ? true : false;
 		canProgress = isatty( STDERR_FILENO ) ? true : false;
-#endif // WIN32
+#endif // MPT_OS_WINDOWS
 		show_ui = canUI;
 		show_progress = canProgress;
 		show_meters = canUI && canProgress;

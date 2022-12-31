@@ -42,6 +42,7 @@ static const char * const license =
 #endif
 
 #include "mpt/base/check_platform.hpp"
+#include "mpt/base/detect.hpp"
 
 #include <algorithm>
 #include <deque>
@@ -68,7 +69,7 @@ static const char * const license =
 #include <cstring>
 #include <ctime>
 
-#if defined(__DJGPP__)
+#if MPT_OS_DJGPP
 #include <conio.h>
 #include <crt0.h>
 #include <dpmi.h>
@@ -78,7 +79,7 @@ static const char * const license =
 #include <sys/types.h>
 #include <termios.h>
 #include <unistd.h>
-#elif defined(WIN32)
+#elif MPT_OS_WINDOWS
 #include <conio.h>
 #include <fcntl.h>
 #include <io.h>
@@ -143,7 +144,7 @@ struct show_long_version_number_exception : public std::exception {
 
 constexpr auto libopenmpt_encoding = mpt::common_encoding::utf8;
 
-#if defined( WIN32 )
+#if MPT_OS_WINDOWS
 bool IsConsole( DWORD stdHandle ) {
 	HANDLE hStd = GetStdHandle( stdHandle );
 	if ( ( hStd != NULL ) && ( hStd != INVALID_HANDLE_VALUE ) ) {
@@ -157,7 +158,7 @@ bool IsConsole( DWORD stdHandle ) {
 #endif
 
 bool IsTerminal( int fd ) {
-#if defined( WIN32 )
+#if MPT_OS_WINDOWS
 	if ( !_isatty( fd ) ) {
 		return false;
 	}
@@ -175,7 +176,7 @@ bool IsTerminal( int fd ) {
 #endif
 }
 
-#if !defined( WIN32 )
+#if !MPT_OS_WINDOWS
 
 static termios saved_attributes;
 
@@ -216,7 +217,7 @@ public:
 			// nothing
 		} else if ( flags.output_extension == MPT_NATIVE_PATH("raw") ) {
 			impl = std::make_unique<raw_stream_raii>( filename, flags, log );
-#if defined(WIN32)
+#if MPT_OS_WINDOWS
 		} else if ( flags.output_extension == MPT_NATIVE_PATH("wav") ) {
 			impl = std::make_unique<mmio_stream_raii>( filename, flags, log );
 #endif				
@@ -1011,7 +1012,7 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 
 		if ( flags.mode == Mode::UI ) {
 
-#if defined( __DJGPP__ )
+#if MPT_OS_DJGPP
 
 			while ( kbhit() ) {
 				int c = getch();
@@ -1020,7 +1021,7 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 				}
 			}
 
-#elif defined( WIN32 ) && defined( UNICODE )
+#elif MPT_OS_WINDOWS && defined( UNICODE )
 
 			while ( _kbhit() ) {
 				wint_t c = _getwch();
@@ -1029,7 +1030,7 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 				}
 			}
 
-#elif defined( WIN32 )
+#elif MPT_OS_WINDOWS
 
 			while ( _kbhit() ) {
 				int c = _getch();
@@ -1693,7 +1694,7 @@ static bool parse_playlist( commandlineflags & flags, mpt::native_path filename,
 			}
 			constexpr auto pls_encoding = mpt::common_encoding::utf8;
 			constexpr auto m3u8_encoding = mpt::common_encoding::utf8;
-#if defined(WIN32)
+#if MPT_OS_WINDOWS
 			constexpr auto m3u_encoding = mpt::logical_encoding::locale;
 #else
 			constexpr auto m3u_encoding = mpt::common_encoding::utf8;
@@ -1851,7 +1852,7 @@ static commandlineflags parse_openmpt123( const std::vector<mpt::ustring> & args
 #if defined( MPT_WITH_PORTAUDIO )
 					drivers << MPT_USTRING("    portaudio") << lf;
 #endif
-#if defined( WIN32 )
+#if MPT_OS_WINDOWS
 					drivers << MPT_USTRING("    waveout") << lf;
 #endif
 #if defined( MPT_WITH_ALLEGRO42 )
@@ -1880,7 +1881,7 @@ static commandlineflags parse_openmpt123( const std::vector<mpt::ustring> & args
 #if defined( MPT_WITH_PORTAUDIO )
 					devices << show_portaudio_devices( log );
 #endif
-#if defined( WIN32 )
+#if MPT_OS_WINDOWS
 					devices << show_waveout_devices( log );
 #endif
 #if defined( MPT_WITH_ALLEGRO42 )
@@ -1994,7 +1995,7 @@ static commandlineflags parse_openmpt123( const std::vector<mpt::ustring> & args
 
 }
 
-#if defined(WIN32)
+#if MPT_OS_WINDOWS
 
 class FD_utf8_raii {
 private:
@@ -2054,7 +2055,7 @@ public:
 
 #endif
 
-#if defined( __DJGPP__ )
+#if MPT_OS_DJGPP
 /* Work-around <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=45977> */
 /* clang-format off */
 extern "C" {
@@ -2065,18 +2066,18 @@ extern "C" {
 		| 0;
 }
 /* clang-format on */
-#endif /* __DJGPP__ */
-#if defined(WIN32) && defined(UNICODE)
+#endif /* MPT_OS_DJGPP */
+#if MPT_OS_WINDOWS && defined(UNICODE)
 static int wmain( int wargc, wchar_t * wargv [] ) {
 #else
 static int main( int argc, char * argv [] ) {
 #endif
-	#if defined( __DJGPP__ )
+	#if MPT_OS_DJGPP
 		_crt0_startup_flags &= ~_CRT0_FLAG_LOCK_MEMORY;  /* disable automatic locking for all further memory allocations */
 		assert(mpt::platform::libc().is_ok());
-	#endif /* __DJGPP__ */
+	#endif /* MPT_OS_DJGPP */
 	std::vector<mpt::ustring> args;
-	#if defined(WIN32) && defined(UNICODE)
+	#if MPT_OS_WINDOWS && defined(UNICODE)
 		for ( int arg = 0; arg < wargc; ++arg ) {
 			args.push_back( mpt::transcode<mpt::ustring>( wargv[arg] ) );
 		}
@@ -2086,13 +2087,13 @@ static int main( int argc, char * argv [] ) {
 		}
 	#endif
 
-#if defined(WIN32)
+#if MPT_OS_WINDOWS
 	FD_utf8_raii stdin_utf8_guard( stdin, true );
 	FD_utf8_raii stdout_utf8_guard( stdout, true );
 	FD_utf8_raii stderr_utf8_guard( stderr, true );
 #endif
 	textout_dummy dummy_log;
-#if defined(WIN32)
+#if MPT_OS_WINDOWS
 #if defined(UNICODE)
 	textout_ostream_console std_out( std::wcout, STD_OUTPUT_HANDLE );
 	textout_ostream_console std_err( std::wclog, STD_ERROR_HANDLE );
@@ -2174,17 +2175,17 @@ static int main( int argc, char * argv [] ) {
 		}
 
 		// set stdin binary
-#if defined(WIN32)
+#if MPT_OS_WINDOWS
 		FD_binary_raii stdin_guard( stdin, !stdin_can_ui );
 #endif
 
 		// set stdout binary
-#if defined(WIN32)
+#if MPT_OS_WINDOWS
 		FD_binary_raii stdout_guard( stdout, !stdout_can_ui );
 #endif
 
 		// setup terminal
-		#if !defined(WIN32)
+		#if !MPT_OS_WINDOWS
 			if ( stdin_can_ui ) {
 				if ( flags.mode == Mode::UI ) {
 					set_input_mode();
@@ -2253,7 +2254,7 @@ static int main( int argc, char * argv [] ) {
 					portaudio_stream_raii portaudio_stream( flags, log );
 					render_files( flags, log, portaudio_stream, prng );
 #endif
-#if defined( WIN32 )
+#if MPT_OS_WINDOWS
 				} else if ( flags.driver == MPT_USTRING("waveout") || flags.driver.empty() ) {
 					waveout_stream_raii waveout_stream( flags );
 					render_files( flags, log, waveout_stream, prng );
@@ -2327,7 +2328,7 @@ static int main( int argc, char * argv [] ) {
 
 } // namespace openmpt123
 
-#if defined(WIN32) && defined(UNICODE)
+#if MPT_OS_WINDOWS && defined(UNICODE)
 #if defined(__GNUC__) || (defined(__clang__) && !defined(_MSC_VER))
 // mingw64 does only default to special C linkage for "main", but not for "wmain".
 extern "C" int wmain( int wargc, wchar_t * wargv [] );

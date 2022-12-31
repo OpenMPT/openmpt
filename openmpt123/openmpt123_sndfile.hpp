@@ -15,6 +15,8 @@
 
 #if defined(MPT_WITH_SNDFILE)
 
+#include "mpt/base/detect.hpp"
+
 #include <sndfile.h>
 
 namespace openmpt123 {
@@ -166,7 +168,7 @@ public:
 		info.samplerate = flags.samplerate;
 		info.channels = flags.channels;
 		info.format = format;
-#if defined(WIN32) && defined(UNICODE)
+#if MPT_OS_WINDOWS && defined(UNICODE)
 		sndfile = sf_wchar_open( filename.AsNative().c_str(), SFM_WRITE, &info );
 #else
 		sndfile = sf_open( filename.AsNative().c_str(), SFM_WRITE, &info );

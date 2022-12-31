@@ -12,10 +12,6 @@
 
 #define MPT_INLINE_NS mpt_openmpt123
 
-#if defined(_WIN32)
-#include <windows.h>
-#endif // _WIN32
-
 #define OPENMPT123_VERSION_STRING OPENMPT_API_VERSION_STRING
 
 #endif // OPENMPT123_CONFIG_HPP
