@@ -217,6 +217,21 @@ bool CZipArchive::ExtractFile(std::size_t index)
 #elif defined(MPT_WITH_MINIZ)
 
 
+static size_t miniz_user_read(void *pOpaque, mz_uint64 file_ofs, void *pBuf, size_t n)
+{
+	FileReader &file = *mpt::void_ptr<FileReader>(pOpaque);
+	if(!mpt::in_range<FileReader::pos_type>(file_ofs))
+	{
+		return 0;
+	}
+	if(!file.Seek(static_cast<FileReader::pos_type>(file_ofs)))
+	{
+		return 0;
+	}
+	return file.ReadRaw(mpt::as_span(mpt::void_cast<std::byte*>(pBuf), n)).size();
+}
+
+
 CZipArchive::CZipArchive(FileReader &file) : ArchiveBase(file)
 {
 	zipFile = new mz_zip_archive();
@@ -224,8 +239,9 @@ CZipArchive::CZipArchive(FileReader &file) : ArchiveBase(file)
 	mz_zip_archive *zip = static_cast<mz_zip_archive*>(zipFile);
 	
 	(*zip) = {};
-	const mpt::const_byte_span fileData = file.GetRawData<std::byte>();
-	if(!mz_zip_reader_init_mem(zip, fileData.data(), fileData.size(), 0))
+	zip->m_pIO_opaque = mpt::void_ptr<FileReader>(&file);
+	zip->m_pRead = &miniz_user_read;
+	if(!mz_zip_reader_init(zip, file.GetLength(), 0))
 	{
 		delete zip;
 		zip = nullptr;
