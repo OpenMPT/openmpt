@@ -2041,6 +2041,8 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 			if(m_showAllFiles && !mpt::contains(hideFileExts, ext))
 				return IMAGE_SAMPLES;
 
+			// Avoid marking zip files as unknown files, as Windows may try to parse those zip files in our LinkResolver.
+			// Unless someone has a *very* peculiar file extension setup, these files cannot contain a link anyway, so we can speed up our directory listing.
 			return (knownExtension || ext == "zip") ? FILTER_REJECT_FILE : FILTER_UNKNOWN_FILE;
 		};
 
