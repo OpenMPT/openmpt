@@ -15,6 +15,8 @@ jobs:
     - uses: actions/checkout@v3
     - name: install dependencies
       run: sudo apt-get update && sudo apt-get install -y subversion libxml-xpath-perl git mawk zip unzip p7zip xz-utils make binutils gcc g++ clang tcc pkg-config help2man doxygen autoconf autoconf-archive automake libtool ccache zlib1g-dev libmpg123-dev libogg-dev libvorbis-dev portaudio19-dev libpulse-dev libflac-dev libsndfile1-dev libltdl-dev
+    - name: setup parallel make
+      run: echo "MAKEFLAGS=-j$(nproc)" >> $GITHUB_ENV
     - name: make
       run: make STRICT=1
     - name: make check
