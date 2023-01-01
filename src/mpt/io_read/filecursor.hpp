@@ -345,15 +345,6 @@ public:
 		return PinnedView(*this, size, true);
 	}
 
-	// Returns raw stream data at cursor position.
-	// Should only be used if absolutely necessary, for example for sample reading, or when used with a small chunk of the file retrieved by ReadChunk().
-	// Use GetPinnedView(size) whenever possible.
-	template <typename T>
-	MPT_FILECURSOR_DEPRECATED mpt::span<const T> GetRawData() const {
-		// deprecated because in case of an unseekable std::istream, this triggers caching of the whole file
-		return mpt::span(mpt::byte_cast<const T *>(DataContainer().GetRawData() + streamPos), DataContainer().GetLength() - streamPos);
-	}
-
 	template <typename Tspan>
 	Tspan GetRawWithOffset(std::size_t offset, Tspan dst) const {
 		return mpt::byte_cast<Tspan>(DataContainer().Read(streamPos + offset, mpt::byte_cast<mpt::byte_span>(dst)));
