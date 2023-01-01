@@ -2030,7 +2030,8 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 
 			static constexpr auto instrExts = {"xi", "iti", "sfz", "sf2", "sf3", "sf4", "sbk", "dls", "mss", "pat"};
 			static constexpr auto sampleExts = {"wav", "flac", "ogg", "opus", "mp1", "mp2", "mp3", "smp", "raw", "s3i", "its", "aif", "aiff", "au", "snd", "svx", "voc", "8sv", "8svx", "16sv", "16svx", "w64", "caf", "sb0", "sb2", "sbi", "brr"};
-			static constexpr auto allExtsBlacklist = {"txt", "diz", "nfo", "doc", "ini", "pdf", "zip", "rar", "lha", "exe", "dll", "lnk", "url"};
+			// These are hidden even when "show all files" is enabled, as it would be extremely unlikely that they contain any sample data
+			static constexpr auto hideFileExts = {"txt", "diz", "nfo", "doc", "ini", "pdf", "zip", "rar", "lha", "exe", "dll", "lnk", "url"};
 
 			// Get lower-case file extension without dot.
 			mpt::PathString extPS = fileName.GetFileExt();
@@ -2072,10 +2073,12 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 				knownExtension = false;
 			}
 
-			if(m_showAllFiles && !mpt::contains(allExtsBlacklist, ext))
+			if(m_showAllFiles && !mpt::contains(hideFileExts, ext))
 				return IMAGE_SAMPLES;
-				
-			return knownExtension ? FILTER_REJECT_FILE : FILTER_UNKNOWN_FILE;
+
+			// Avoid marking zip files as unknown files, as Windows may try to parse those zip files in our LinkResolver.
+			// Unless someone has a *very* peculiar file extension setup, these files cannot contain a link anyway, so we can speed up our directory listing.
+			return (knownExtension || ext == "zip") ? FILTER_REJECT_FILE : FILTER_UNKNOWN_FILE;
 		};
 
 		HKEY hkey = nullptr;
