@@ -46,6 +46,8 @@ struct S3MFileHeader
 		trkST3_01         = 0x1301,
 		trkIT2_14         = 0x3214,
 		trkBeRoTrackerOld = 0x4100,  // Used from 2004 to 2012
+		trkGraoumfTracker = 0x5447,
+		trkCamoto         = 0xCA00,
 	};
 
 	// Flags

@@ -282,15 +282,25 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		nonCompatTracker = true;
 		break;
 	case S3MFileHeader::trkOpenMPT:
-		trackerStr = MPT_USTRING("OpenMPT");
-		m_dwLastSavedWithVersion = (fileHeader.cwtv & S3MFileHeader::versionMask) << 16;
-		break; 
+		if(fileHeader.cwtv != S3MFileHeader::trkGraoumfTracker)
+		{
+			trackerStr = MPT_USTRING("OpenMPT");
+			m_dwLastSavedWithVersion = (fileHeader.cwtv & S3MFileHeader::versionMask) << 16;
+		} else
+		{
+			m_madeWithTracker = MPT_USTRING("Graoumf Tracker");
+		}
+		break;
 	case S3MFileHeader::trkBeRoTracker:
 		m_madeWithTracker = MPT_USTRING("BeRoTracker");
 		m_playBehaviour.set(kST3LimitPeriod);
 		break;
 	case S3MFileHeader::trkCreamTracker:
 		m_madeWithTracker = MPT_USTRING("CreamTracker");
+		break;
+	default:
+		if(fileHeader.cwtv == S3MFileHeader::trkCamoto)
+			m_madeWithTracker = MPT_USTRING("Camoto");
 		break;
 	}
 	if(!trackerStr.empty())
