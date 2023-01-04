@@ -2631,16 +2631,7 @@ void CCtrlInstruments::OnEnableCutOff()
 	{
 		PrepareUndo("Toggle Cutoff");
 		pIns->SetCutoff(pIns->GetCutoff(), enableCutOff);
-		for(auto &chn : m_sndFile.m_PlayState.Chn)
-		{
-			if (chn.pModInstrument == pIns)
-			{
-				if(enableCutOff)
-					chn.nCutOff = pIns->GetCutoff();
-				else
-					chn.nCutOff = 0x7F;
-			}
-		}
+		m_sndFile.UpdateInstrumentFilter(pIns, false, true, false);
 	}
 	UpdateFilterText();
 	SetModified(InstrumentHint().Info(), false);
@@ -2657,16 +2648,7 @@ void CCtrlInstruments::OnEnableResonance()
 	{
 		PrepareUndo("Toggle Resonance");
 		pIns->SetResonance(pIns->GetResonance(), enableReso);
-		for(auto &chn : m_sndFile.m_PlayState.Chn)
-		{
-			if (chn.pModInstrument == pIns)
-			{
-				if (enableReso)
-					chn.nResonance = pIns->GetResonance();
-				else
-					chn.nResonance = 0;
-			}
-		}
+		m_sndFile.UpdateInstrumentFilter(pIns, false, false, true);
 	}
 	UpdateFilterText();
 	SetModified(InstrumentHint().Info(), false);
@@ -2688,15 +2670,8 @@ void CCtrlInstruments::OnFilterModeChanged()
 
 			//Update channel settings where this instrument is active, if required.
 			if(instFiltermode != FilterMode::Unchanged)
-			{
-				for(auto &chn : m_sndFile.m_PlayState.Chn)
-				{
-					if(chn.pModInstrument == pIns)
-						chn.nFilterMode = instFiltermode;
-				}
-			}
+				m_sndFile.UpdateInstrumentFilter(pIns, true, false, false);
 		}
-
 	}
 }
 
@@ -2720,7 +2695,6 @@ void CCtrlInstruments::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 			
 		auto *pSlider = reinterpret_cast<const CSliderCtrl *>(pSB);
 		int32 n = pSlider->GetPos();
-		bool filterChanged = false;
 
 		if(pSlider == &m_SliderAttack)
 		{
@@ -2801,7 +2775,8 @@ void CCtrlInstruments::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 				pIns->SetCutoff(static_cast<uint8>(n), pIns->IsCutoffEnabled());
 				SetModified(InstrumentHint().Info(), false);
 				UpdateFilterText();
-				filterChanged = true;
+				CriticalSection cs;
+				m_sndFile.UpdateInstrumentFilter(pIns, false, true, false);
 			}
 		} else if(pSlider == &m_SliderResonance)
 		{
@@ -2816,22 +2791,8 @@ void CCtrlInstruments::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pSB)
 				pIns->SetResonance(static_cast<uint8>(n), pIns->IsResonanceEnabled());
 				SetModified(InstrumentHint().Info(), false);
 				UpdateFilterText();
-				filterChanged = true;
-			}
-		}
-
-		// Update channels
-		if(filterChanged)
-		{
-			for(auto &chn : m_sndFile.m_PlayState.Chn)
-			{
-				if(chn.pModInstrument == pIns)
-				{
-					if(pIns->IsCutoffEnabled())
-						chn.nCutOff = pIns->GetCutoff();
-					if(pIns->IsResonanceEnabled())
-						chn.nResonance = pIns->GetResonance();
-				}
+				CriticalSection cs;
+				m_sndFile.UpdateInstrumentFilter(pIns, false, false, true);
 			}
 		}
 	} else if(nCode == SB_ENDSCROLL)
