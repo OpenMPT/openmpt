@@ -149,8 +149,8 @@ public:
 
 protected:
 	CFastBitmap m_Dib;
-	CDC m_offScreenDC;
-	CBitmap m_offScreenBitmap;
+	CDC m_offScreenDC, m_vuMeterDC;
+	CBitmap m_offScreenBitmap, m_vuMeterBitmap;
 	CEditCommand *m_pEditWnd = nullptr;
 	CSize m_szHeader, m_szPluginHeader, m_szCell;
 	CRect m_oldClient;
@@ -163,6 +163,7 @@ protected:
 	static int32 m_nTransposeAmount;
 
 	int m_nXScroll = 0, m_nYScroll = 0;
+	int m_ledWidth = 0, m_ledHeight = 0;
 	PatternCursor::Columns m_nDetailLevel = PatternCursor::lastColumn;  // Visible Columns
 
 	// Cursor and selection positions
@@ -582,6 +583,8 @@ private:
 
 	void PlayNote(ModCommand::NOTE note, ModCommand::INSTR instr, int volume, CHANNELINDEX channel);
 	void PreviewNote(ROWINDEX row, CHANNELINDEX channel);
+
+	void CreateVUMeterBitmap();
 
 public:
 	afx_msg void OnRButtonUp(UINT nFlags, CPoint point);

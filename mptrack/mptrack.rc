@@ -2739,8 +2739,6 @@ IDB_PATTERNVIEW         BITMAP                  "res\\view_pat.bmp"
 
 IDB_COLORSETUP          BITMAP                  "res\\colors.bmp"
 
-IDB_VUMETERS            BITMAP                  "res\\vumeters.bmp"
-
 
 /////////////////////////////////////////////////////////////////////////////
 //

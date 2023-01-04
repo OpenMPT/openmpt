@@ -54,7 +54,6 @@
 #define IDB_PATTERNVIEW                 303
 #define IDB_MPTRACK                     304
 #define IDB_COLORSETUP                  305
-#define IDB_VUMETERS                    306
 #define IDB_SPLASHSCREEN                307
 #define IDB_ENVTOOLBAR                  308
 #define IDB_SMPTOOLBAR                  309
