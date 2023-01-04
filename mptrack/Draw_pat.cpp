@@ -33,14 +33,12 @@ OPENMPT_NAMESPACE_BEGIN
 // Headers
 enum
 {
-	ROWHDR_WIDTH       = 32,      // Row header
-	COLHDR_HEIGHT      = 16 + 4,  // Column header (name + color)
-	VUMETERS_HEIGHT    = 13,      // Height of vu-meters
-	PLUGNAME_HEIGHT    = 16,      // Height of plugin names
-	VUMETERS_BMPWIDTH  = 32,
-	VUMETERS_BMPHEIGHT = 10,
-	VUMETERS_MEDWIDTH  = 24,
-	VUMETERS_LOWIDTH   = 16,
+	ROWHDR_WIDTH           = 32,      // Row header
+	COLHDR_HEIGHT          = 16 + 4,  // Column header (name + color)
+	PLUGNAME_HEIGHT        = 16,      // Height of plugin names
+	VUMETERS_HEIGHT        = 13,      // Height of vu-meters (including padding)
+	VUMETERS_HEIGHT_LED    = 10,      // Height of vu-meters (without padding)
+	VUMETERS_LEDS_PER_SIDE = 8,
 };
 
 enum
@@ -107,6 +105,8 @@ void CViewPattern::UpdateColors()
 	MixColors(m_Dib, MODCOLOR_DEFAULTVOLUME, MODCOLOR_VOLUME, MODCOLOR_BACKNORMAL);
 	MixColors(m_Dib, MODCOLOR_DUMMYCOMMAND, MODCOLOR_TEXTNORMAL, MODCOLOR_BACKNORMAL);
 	m_Dib.SetBlendColor(TrackerSettings::Instance().rgbCustomColors[MODCOLOR_BLENDCOLOR]);
+
+	CreateVUMeterBitmap();
 }
 
 
@@ -132,6 +132,11 @@ bool CViewPattern::UpdateSizes()
 	if(oldy != m_szCell.cy)
 	{
 		m_Dib.SetSize(m_Dib.GetWidth(), m_szCell.cy);
+	}
+
+	if(oldx != m_szCell.cx || oldy != m_szCell.cy)
+	{
+		CreateVUMeterBitmap();
 	}
 
 	return (oldx != m_szCell.cx || oldy != m_szCell.cy);
@@ -219,7 +224,6 @@ void CViewPattern::UpdateView(UpdateHint hint, CObject *pObj)
 	{
 		InvalidateRow(static_cast<const RowHint &>(hint).GetRow());
 	}
-
 }
 
 
@@ -758,7 +762,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 				if(m_Status[psShowVUMeters])
 				{
 					OldVUMeters[ncolhdr] = 0;
-					DrawChannelVUMeter(hdc, rect.left + 1, rect.bottom, ncolhdr);
+					DrawChannelVUMeter(hdc, rect.left, rect.bottom, ncolhdr);
 					rect.top += vuHeight;
 					rect.bottom += vuHeight;
 				}
@@ -1180,46 +1184,33 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 
 void CViewPattern::DrawChannelVUMeter(HDC hdc, int x, int y, UINT nChn)
 {
-	if (ChnVUMeters[nChn] != OldVUMeters[nChn])
-	{
-		UINT vul, vur;
-		vul = (ChnVUMeters[nChn] & 0xFF00) >> 8;
-		vur = ChnVUMeters[nChn] & 0xFF;
-		vul /= 15;
-		vur /= 15;
-		if (vul > 8) vul = 8;
-		if (vur > 8) vur = 8;
-		x += (m_szCell.cx / 2);
+	if(ChnVUMeters[nChn] == OldVUMeters[nChn])
+		return;
+	
+	uint8 vuL = static_cast<uint8>((ChnVUMeters[nChn] & 0xFF00) >> 8);
+	uint8 vuR = static_cast<uint8>(ChnVUMeters[nChn] & 0xFF);
+	vuL /= 15;
+	vuR /= 15;
+	LimitMax(vuL, uint8(8));
+	LimitMax(vuR, uint8(8));
 
-		const auto &channel = GetSoundFile()->m_PlayState.Chn[nChn];
-		const bool isSynth =
-		    channel.dwFlags[CHN_ADLIB]
-		    || (channel.pModSample != nullptr && channel.pModSample->uFlags[CHN_ADLIB])
-		    || ((channel.pModSample == nullptr || !channel.pModSample->HasSampleData()) && channel.HasMIDIOutput());
-		const auto bmp = isSynth ? CMainFrame::bmpPluginVUMeters : CMainFrame::bmpVUMeters;
+	const int barWidth = m_ledWidth * VUMETERS_LEDS_PER_SIDE;
+	const int midSpacer = (m_ledWidth > 2) ? m_ledWidth / 2 : 0;
 
-		if (m_nDetailLevel <= PatternCursor::instrColumn)
-		{
-			DibBlt(hdc, x-VUMETERS_LOWIDTH-1, y, VUMETERS_LOWIDTH, VUMETERS_BMPHEIGHT,
-				VUMETERS_BMPWIDTH*2+VUMETERS_MEDWIDTH*2, vul * VUMETERS_BMPHEIGHT, bmp);
-			DibBlt(hdc, x-1, y, VUMETERS_LOWIDTH, VUMETERS_BMPHEIGHT,
-				VUMETERS_BMPWIDTH*2+VUMETERS_MEDWIDTH*2+VUMETERS_LOWIDTH, vur * VUMETERS_BMPHEIGHT, bmp);
-		} else
-		if (m_nDetailLevel <= PatternCursor::volumeColumn)
-		{
-			DibBlt(hdc, x - VUMETERS_MEDWIDTH-1, y, VUMETERS_MEDWIDTH, VUMETERS_BMPHEIGHT,
-				VUMETERS_BMPWIDTH*2, vul * VUMETERS_BMPHEIGHT, bmp);
-			DibBlt(hdc, x, y, VUMETERS_MEDWIDTH, VUMETERS_BMPHEIGHT,
-				VUMETERS_BMPWIDTH*2+VUMETERS_MEDWIDTH, vur * VUMETERS_BMPHEIGHT, bmp);
-		} else
-		{
-			DibBlt(hdc, x - VUMETERS_BMPWIDTH - 1, y, VUMETERS_BMPWIDTH, VUMETERS_BMPHEIGHT,
-				0, vul * VUMETERS_BMPHEIGHT, bmp);
-			DibBlt(hdc, x + 1, y, VUMETERS_BMPWIDTH, VUMETERS_BMPHEIGHT,
-				VUMETERS_BMPWIDTH, vur * VUMETERS_BMPHEIGHT, bmp);
-		}
-		OldVUMeters[nChn] = ChnVUMeters[nChn];
-	}
+	const auto &channel = GetSoundFile()->m_PlayState.Chn[nChn];
+	const bool isSynth =
+		channel.dwFlags[CHN_ADLIB]
+		|| (channel.pModSample != nullptr && channel.pModSample->uFlags[CHN_ADLIB])
+		|| ((channel.pModSample == nullptr || !channel.pModSample->HasSampleData()) && channel.HasMIDIOutput());
+
+	const auto oldBitmap = m_vuMeterDC.SelectObject(m_vuMeterBitmap);
+	const int srcOffsetX = isSynth ? barWidth * 2 : 0;
+	x += (m_szCell.cx / 2);
+	BitBlt(hdc, x - barWidth - (midSpacer - midSpacer / 2), y, barWidth, m_ledHeight, m_vuMeterDC, srcOffsetX, vuL * m_ledHeight, SRCCOPY);
+	BitBlt(hdc, x + midSpacer / 2, y, barWidth, m_ledHeight, m_vuMeterDC, srcOffsetX + barWidth, vuR * m_ledHeight, SRCCOPY);
+	m_vuMeterDC.SelectObject(oldBitmap);
+
+	OldVUMeters[nChn] = ChnVUMeters[nChn];
 }
 
 
@@ -1817,11 +1808,94 @@ void CViewPattern::UpdateAllVUMeters(Notification *pnotify)
 	{
 		ChnVUMeters[nChn] = static_cast<uint16>(pnotify->pos[nChn]);
 		if ((!isPlaying) || pnotify->type[Notification::Stop]) ChnVUMeters[nChn] = 0;
-		DrawChannelVUMeter(hdc, x + 1, rcClient.top + yPos, nChn);
+		DrawChannelVUMeter(hdc, x, rcClient.top + yPos, nChn);
 		nChn++;
 		x += m_szCell.cx;
 	}
 	::ReleaseDC(m_hWnd, hdc);
+}
+
+
+// This creates the VU meter LED bitmap, which looks somewhat like this:
+// Row 0
+// Row 1               [][]                             [][]              
+// Row 2             [][][][]                         [][][][]            
+// Row 3           [][][][][][]                     [][][][][][]          
+// Row 4         [][][][][][][][]                 [][][][][][][][]        
+// Row 5       [][][][][][][][][][]             [][][][][][][][][][]      
+// Row 6     [][][][][][][][][][][][]         [][][][][][][][][][][][]    
+// Row 7   [][][][][][][][][][][][][][]     [][][][][][][][][][][][][][]  
+// Row 8 [][][][][][][][][][][][][][][][] [][][][][][][][][][][][][][][][]
+// The left stack of LEDs uses the colors for sample-based instruments, the right stack is for synthesized / plugin instruments.
+void CViewPattern::CreateVUMeterBitmap()
+{
+	if(!m_hWnd)
+		return;
+	
+	const auto dc = GetDC();
+
+	m_vuMeterBitmap.DeleteObject();
+	m_vuMeterDC.DeleteDC();
+	m_vuMeterDC.CreateCompatibleDC(dc);
+
+	const int availableWidth = m_szCell.cx - Util::ScalePixels(2, m_hWnd);
+	m_ledWidth = static_cast<int>(availableWidth / (VUMETERS_LEDS_PER_SIDE * 2 + 0.5f));
+	if(m_ledWidth < 2)
+	{
+		// The half-width spacer between left and right channel is not added if the LED width is below 2 pixels, so check if we can increase the width to 2 pixels
+		m_ledWidth = std::max(availableWidth / (VUMETERS_LEDS_PER_SIDE * 2), 1);
+	}
+
+	m_ledHeight = Util::ScalePixels(VUMETERS_HEIGHT_LED, m_hWnd);
+	const int barWidth = m_ledWidth * VUMETERS_LEDS_PER_SIDE;
+	const int ledBlockHeight = m_ledHeight - 2;
+	
+	const int bmpWidth = barWidth * 4;
+	const int bmpHeight = m_ledHeight * (VUMETERS_LEDS_PER_SIDE + 1);
+
+	m_vuMeterBitmap.CreateCompatibleBitmap(dc, bmpWidth, bmpHeight);
+	const auto oldBitmap = m_vuMeterDC.SelectObject(m_vuMeterBitmap);
+	m_vuMeterDC.FillSolidRect(0, 0, bmpWidth, bmpHeight, GetSysColor(COLOR_BTNFACE));
+
+	const auto &Colors = TrackerSettings::Instance().rgbCustomColors;
+	const COLORREF shadowColor = (m_ledWidth > 2) ? RGB(0, 0, 0) : GetSysColor(COLOR_BTNSHADOW);
+
+	// 0: sample-based, 1: synthesized / plugin
+	for(int colorScheme = 0; colorScheme < 2; colorScheme++)
+	{
+		const int x = colorScheme * barWidth * 2 + barWidth;
+		for (int led = 0; led < VUMETERS_LEDS_PER_SIDE; led++)
+		{
+			COLORREF color;
+			if(led < 4)
+				color = Colors[colorScheme ? MODCOLOR_VUMETER_LO_VST : MODCOLOR_VUMETER_LO];
+			else if(led < 6)
+				color = Colors[colorScheme ? MODCOLOR_VUMETER_MED_VST : MODCOLOR_VUMETER_MED];
+			else
+				color = Colors[colorScheme ? MODCOLOR_VUMETER_HI_VST : MODCOLOR_VUMETER_HI];
+
+			const int ledOffsetX = led * m_ledWidth;
+			for(int y = (led + 1) * m_ledHeight; y < bmpHeight; y += m_ledHeight)
+			{
+				if(m_ledWidth > 1)
+				{
+					// With shadow
+					m_vuMeterDC.FillSolidRect(x + ledOffsetX + 1, y + 2, m_ledWidth - 1, ledBlockHeight, shadowColor);
+					m_vuMeterDC.FillSolidRect(x - m_ledWidth - ledOffsetX + 1, y + 2, m_ledWidth - 1, ledBlockHeight, shadowColor);
+					m_vuMeterDC.FillSolidRect(x + ledOffsetX, y + 1, m_ledWidth - 1, ledBlockHeight, color);
+					m_vuMeterDC.FillSolidRect(x - m_ledWidth - ledOffsetX, y + 1, m_ledWidth - 1, ledBlockHeight, color);
+				} else
+				{
+					// Solid
+					m_vuMeterDC.FillSolidRect(x + ledOffsetX, y + 1, m_ledWidth, ledBlockHeight, color);
+					m_vuMeterDC.FillSolidRect(x - m_ledWidth - ledOffsetX, y + 1, m_ledWidth, ledBlockHeight, color);
+				}
+			}
+		}
+	}
+
+	m_vuMeterDC.SelectObject(oldBitmap);
+	ReleaseDC(dc);
 }
 
 

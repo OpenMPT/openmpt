@@ -2363,9 +2363,6 @@
     <Image Include="..\..\mptrack\res\view_pat.bmp">
       <Filter>mptrack\res</Filter>
     </Image>
-    <Image Include="..\..\mptrack\res\vumeters.bmp">
-      <Filter>mptrack\res</Filter>
-    </Image>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="..\vs\debug\openmpt.natvis">

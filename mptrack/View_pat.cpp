@@ -162,6 +162,8 @@ CViewPattern::CViewPattern()
 
 CViewPattern::~CViewPattern()
 {
+	m_vuMeterBitmap.DeleteObject();
+	m_vuMeterDC.DeleteDC();
 	m_offScreenBitmap.DeleteObject();
 	m_offScreenDC.DeleteDC();
 }

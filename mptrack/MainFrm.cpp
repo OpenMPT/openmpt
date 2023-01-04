@@ -147,8 +147,6 @@ HCURSOR CMainFrame::curNoDrop = NULL;
 HCURSOR CMainFrame::curNoDrop2 = NULL;
 HCURSOR CMainFrame::curVSplit = NULL;
 MODPLUGDIB *CMainFrame::bmpNotes = nullptr;
-MODPLUGDIB *CMainFrame::bmpVUMeters = nullptr;
-MODPLUGDIB *CMainFrame::bmpPluginVUMeters = nullptr;
 COLORREF CMainFrame::gcolrefVuMeter[NUM_VUMETER_PENS*2];
 
 CInputHandler *CMainFrame::m_InputHandler = nullptr;
@@ -273,8 +271,6 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	curVSplit = theApp.LoadCursor(AFX_IDC_HSPLITBAR);
 	// bitmaps
 	bmpNotes = LoadDib(MAKEINTRESOURCE(IDB_PATTERNVIEW));
-	bmpVUMeters = LoadDib(MAKEINTRESOURCE(IDB_VUMETERS));
-	bmpPluginVUMeters = LoadDib(MAKEINTRESOURCE(IDB_VUMETERS));
 	// Toolbars
 	EnableDocking(CBRS_ALIGN_ANY);
 	if (!m_wndToolBar.Create(this)) return -1;
@@ -343,12 +339,6 @@ BOOL CMainFrame::DestroyWindow()
 	delete bmpNotes;
 	bmpNotes = nullptr;
 	
-	delete bmpVUMeters;
-	bmpVUMeters = nullptr;
-	
-	delete bmpPluginVUMeters;
-	bmpPluginVUMeters = nullptr;
-
 	PatternFont::DeleteFontData();
 
 	// Kill GDI Objects
@@ -1177,24 +1167,6 @@ void CMainFrame::Dump(CDumpContext& dc) const
 void CMainFrame::UpdateColors()
 {
 	const auto &colors = TrackerSettings::Instance().rgbCustomColors;
-	const struct { MODPLUGDIB *bitmap; uint32 lo, med, hi; } meters[] =
-	{
-		{ bmpVUMeters, MODCOLOR_VUMETER_LO, MODCOLOR_VUMETER_MED, MODCOLOR_VUMETER_HI },
-		{ bmpPluginVUMeters, MODCOLOR_VUMETER_LO_VST, MODCOLOR_VUMETER_MED_VST, MODCOLOR_VUMETER_HI_VST },
-	};
-	for(auto &meter : meters) if(meter.bitmap != nullptr)
-	{
-		meter.bitmap->bmiColors[7] = rgb2quad(GetSysColor(COLOR_BTNFACE));
-		meter.bitmap->bmiColors[8] = rgb2quad(GetSysColor(COLOR_BTNSHADOW));
-		meter.bitmap->bmiColors[15] = rgb2quad(GetSysColor(COLOR_BTNHIGHLIGHT));
-		meter.bitmap->bmiColors[10] = rgb2quad(colors[meter.lo]);
-		meter.bitmap->bmiColors[11] = rgb2quad(colors[meter.med]);
-		meter.bitmap->bmiColors[9] = rgb2quad(colors[meter.hi]);
-		meter.bitmap->bmiColors[2] = rgb2quad((colors[meter.lo] >> 1) & 0x7F7F7F);
-		meter.bitmap->bmiColors[3] = rgb2quad((colors[meter.med] >> 1) & 0x7F7F7F);
-		meter.bitmap->bmiColors[1] = rgb2quad((colors[meter.hi] >> 1) & 0x7F7F7F);
-	}
-
 	// Generel tab VU meters
 	for(UINT i = 0; i < NUM_VUMETER_PENS * 2; i++)
 	{
