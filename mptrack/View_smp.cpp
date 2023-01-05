@@ -308,11 +308,11 @@ void CViewSample::UpdateScrollSize(int newZoom, bool forceRefresh, SmpLength cen
 }
 
 
-void CViewSample::ScrollToSample(SmpLength sample, bool refresh, bool centerSample)
+void CViewSample::ScrollToSample(SmpLength sample, bool refresh, ScrollTarget target)
 {
 	int scrollToSample = sample >> (std::max(1, m_nZoom) - 1);
-	if(centerSample)
-		scrollToSample -= (m_rcClient.Width() / 2) >> (-std::min(-1, m_nZoom) - 1);
+	if(target != ScrollTarget::Left)
+		scrollToSample -= (m_rcClient.Width() / ((target == ScrollTarget::Right) ? 1 : 2)) >> (-std::min(-1, m_nZoom) - 1);
 
 	Limit(scrollToSample, 0, GetScrollLimit(SB_HORZ));
 	if(GetScrollPos(SB_HORZ) != scrollToSample)
@@ -1581,6 +1581,7 @@ LRESULT CViewSample::OnPlayerNotify(Notification *pnotify)
 				// Scroll sample into view if it's not in the visible range
 				size_t count = 0;
 				SmpLength scrollToPos = 0;
+				bool backwards = false;
 				const auto &playChns = GetDocument()->GetSoundFile().m_PlayState.Chn;
 				for(CHANNELINDEX chn = 0; chn < MAX_CHANNELS; chn++)
 				{
@@ -1596,15 +1597,23 @@ LRESULT CViewSample::OnPlayerNotify(Notification *pnotify)
 					count++;
 					if(count > 1)
 						break;
-					else
-						scrollToPos = m_dwNotifyPos[chn];
+
+					scrollToPos = m_dwNotifyPos[chn];
+					backwards = playChns[chn].dwFlags[CHN_PINGPONGFLAG];
 				}
 				if(count == 1)
 				{
 					const auto screenPos = SampleToScreen(scrollToPos);
 					const bool alwaysCenter = (TrackerSettings::Instance().m_followSamplePlayCursor == FollowSamplePlayCursor::FollowCentered);
 					if(alwaysCenter || screenPos < m_rcClient.left || screenPos >= m_rcClient.right)
-						ScrollToSample(scrollToPos, true, alwaysCenter);
+					{
+						ScrollTarget target = ScrollTarget::Left;
+						if(alwaysCenter)
+							target = ScrollTarget::Center;
+						else if(backwards)
+							target = ScrollTarget::Right;
+						ScrollToSample(scrollToPos, true, target);
+					}
 				}
 			}
 

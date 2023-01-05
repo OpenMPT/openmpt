@@ -54,6 +54,13 @@ protected:
 		CuePointLast = CuePointFirst + mpt::array_size<decltype(ModSample::cues)>::size - 1,
 	};
 
+	enum class ScrollTarget
+	{
+		Left,
+		Right,
+		Center,
+	};
+
 	std::unique_ptr<OPLInstrDlg> m_oplEditor;
 	CImageList m_bmpEnvBar;
 	CRect m_rcClient;
@@ -139,7 +146,7 @@ protected:
 	int GetZoomLevel(SmpLength length) const;
 	void DoZoom(int direction, const CPoint &zoomPoint = CPoint(-1, -1));
 	bool CanZoomSelection() const;
-	void ScrollToSample(SmpLength sample, bool refresh = true, bool centerSample = true);
+	void ScrollToSample(SmpLength sample, bool refresh = true, ScrollTarget target = ScrollTarget::Center);
 
 	SmpLength ScrollPosToSamplePos() const {return ScrollPosToSamplePos(m_nZoom);}
 	SmpLength ScrollPosToSamplePos(int nZoom) const;
