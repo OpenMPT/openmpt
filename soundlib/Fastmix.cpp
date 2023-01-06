@@ -288,7 +288,7 @@ struct MixLoopState
 #ifdef MPT_BUILD_DEBUG
 		{
 			SmpLength posDest = (nPos + nInc * (nSmpCount - 1)).GetUInt();
-			if (posDest < 0 || posDest > chn.nLength)
+			MPT_MAYBE_CONSTANT_IF(posDest < 0 || posDest > chn.nLength)
 			{
 				// We computed an invalid delta!
 				MPT_ASSERT_NOTREACHED();
