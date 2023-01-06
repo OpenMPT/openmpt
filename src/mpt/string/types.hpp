@@ -195,7 +195,7 @@ using widechar = char32_t;
 
 
 
-#if MPT_MSVC_BEFORE(2019, 0)
+#if defined(MPT_COMPILER_QUIRK_NO_AUTO_TEMPLATE_ARGUMENT)
 // Work-around for VS2017 auto template argument ICE.
 // Use as encoding_char_traits<std::remove_const<decltype(foo)>::type, foo> instead of encoding_char_traits<foo>
 template <typename encoding_type, encoding_type encoding_tag>
@@ -215,25 +215,25 @@ struct encoding_char_traits : std::char_traits<char> {
 
 
 
-#if MPT_MSVC_BEFORE(2019, 0)
+#if defined(MPT_COMPILER_QUIRK_NO_AUTO_TEMPLATE_ARGUMENT)
 using lstring = std::basic_string<char, mpt::encoding_char_traits<logical_encoding, logical_encoding::locale>>;
 #else
 using lstring = std::basic_string<char, mpt::encoding_char_traits<logical_encoding::locale>>;
 #endif
 
-#if MPT_MSVC_BEFORE(2019, 0)
+#if defined(MPT_COMPILER_QUIRK_NO_AUTO_TEMPLATE_ARGUMENT)
 using utf8string = std::basic_string<char, mpt::encoding_char_traits<common_encoding, common_encoding::utf8>>;
 #else
 using utf8string = std::basic_string<char, mpt::encoding_char_traits<common_encoding::utf8>>;
 #endif
 
-#if MPT_MSVC_BEFORE(2019, 0)
+#if defined(MPT_COMPILER_QUIRK_NO_AUTO_TEMPLATE_ARGUMENT)
 using source_string = std::basic_string<char, mpt::encoding_char_traits<typename std::remove_const<decltype(source_encoding)>::type, source_encoding>>;
 #else
 using source_string = std::basic_string<char, mpt::encoding_char_traits<source_encoding>>;
 #endif
 
-#if MPT_MSVC_BEFORE(2019, 0)
+#if defined(MPT_COMPILER_QUIRK_NO_AUTO_TEMPLATE_ARGUMENT)
 using exception_string = std::basic_string<char, mpt::encoding_char_traits<typename std::remove_const<decltype(exception_encoding)>::type, exception_encoding>>;
 #else
 using exception_string = std::basic_string<char, mpt::encoding_char_traits<exception_encoding>>;
@@ -268,7 +268,7 @@ using u8char = char8_t;
 
 #else // !C++20
 
-#if MPT_MSVC_BEFORE(2019, 0)
+#if defined(MPT_COMPILER_QUIRK_NO_AUTO_TEMPLATE_ARGUMENT)
 using u8string = std::basic_string<char, mpt::encoding_char_traits<common_encoding, common_encoding::utf8>>;
 #else
 using u8string = std::basic_string<char, mpt::encoding_char_traits<common_encoding::utf8>>;

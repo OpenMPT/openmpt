@@ -1832,7 +1832,7 @@ template <typename Tstring>
 struct string_transcoder {
 };
 
-#if MPT_MSVC_BEFORE(2019, 0)
+#if defined(MPT_COMPILER_QUIRK_NO_AUTO_TEMPLATE_ARGUMENT)
 template <typename encoding_type, encoding_type encoding>
 struct string_transcoder<std::basic_string<char, encoding_char_traits<encoding_type, encoding>>> {
 	using string_type = std::basic_string<char, encoding_char_traits<encoding_type, encoding>>;
