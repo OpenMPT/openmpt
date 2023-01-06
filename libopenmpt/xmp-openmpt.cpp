@@ -563,8 +563,8 @@ private:
 	xmplay_streambuf & operator = ( const xmplay_streambuf & );
 private:
 	XMPFILE & file;
-	static const std::size_t put_back = 4096;
-	static const std::size_t buf_size = 65536;
+	static inline constexpr std::size_t put_back = 4096;
+	static inline constexpr std::size_t buf_size = 65536;
 	std::vector<char> buffer;
 }; // class xmplay_streambuf
 
