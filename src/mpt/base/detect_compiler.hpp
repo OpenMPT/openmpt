@@ -43,8 +43,8 @@
 #define MPT_GCC_AT_LEAST(major, minor, patch) (MPT_COMPILER_GCC_VERSION >= MPT_COMPILER_MAKE_VERSION3((major), (minor), (patch)))
 #define MPT_GCC_BEFORE(major, minor, patch)   (MPT_COMPILER_GCC_VERSION < MPT_COMPILER_MAKE_VERSION3((major), (minor), (patch)))
 
-#if MPT_GCC_BEFORE(8, 1, 0)
-#error "GCC version 8.1 required"
+#if MPT_GCC_BEFORE(7, 1, 0)
+#error "GCC version 7.1 required"
 #endif
 
 #elif defined(_MSC_VER)
