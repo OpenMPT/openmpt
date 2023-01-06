@@ -42,6 +42,8 @@
 /build/vs2017winxp/Debug
 /build/vs2017winxp/OpenMPT-custom.*
 /build/vs2017winxp/Release
+/build/vs2017winxpansi/*.user
+/build/vs2017winxpansi/.vs
 /build/vs2019win10/*.user
 /build/vs2019win10/.vs
 /build/vs2019win10uwp/.vs
@@ -142,6 +144,9 @@
 /include/asiomodern/package_helper_getversion.cmd
 /include/asiomodern/package_helper_getversion.cpp
 /include/asiomodern/run_clang-format.sh
+/include/cryptopp/TestData
+/include/cryptopp/TestPrograms
+/include/cryptopp/TestVectors
 /include/cwsdpmi/*
 /include/flac/.clang-format
 /include/flac/.github
@@ -238,10 +243,6 @@
 /include/flac/src/libFLAC/libFLAC_static.vcproj
 /include/flac/src/libFLAC/libFLAC_static.vcxproj
 /include/flac/src/libFLAC/libFLAC_static.vcxproj.filters
-/include/flac/src/libFLAC/ia32/CMakeLists.txt
-/include/flac/src/libFLAC/ia32/Makefile.am
-/include/flac/src/libFLAC/ia32/Makefile.in
-/include/flac/src/libFLAC/ia32/PaxHeaders
 /include/flac/src/libFLAC/include/Makefile.am
 /include/flac/src/libFLAC/include/Makefile.in
 /include/flac/src/libFLAC/include/PaxHeaders
@@ -816,6 +817,9 @@
 /libopenmpt/RC*
 /libopenmpt/libopenmpt_plugin_gui.aps
 /libopenmpt/libopenmpt_version.aps
+/libopenmpt/in_openmpt/*.d
+/libopenmpt/plugin-common/*.d
+/libopenmpt/xmp-openmpt/*.d
 /mptrack/*.aps
 /mptrack/*.d
 /mptrack/*.ncb
