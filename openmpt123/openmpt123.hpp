@@ -188,11 +188,12 @@ public:
 	}
 public:
 	virtual void write( const std::string & text ) {
+		DWORD chars_written = 0;
 		#if defined(UNICODE)
 			std::wstring wtext = utf8_to_wstring( text );
-			WriteConsole( handle, wtext.data(), static_cast<DWORD>( wtext.size() ), NULL, NULL );
+			WriteConsole( handle, wtext.data(), static_cast<DWORD>( wtext.size() ), &chars_written, NULL );
 		#else
-			WriteConsole( handle, text.data(), static_cast<DWORD>( text.size() ), NULL, NULL );
+			WriteConsole( handle, text.data(), static_cast<DWORD>( text.size() ), &chars_written, NULL );
 		#endif
 	}
 };
