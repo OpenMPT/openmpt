@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt 0.5.21-pre
 
+ *  [**Bug**] openmpt123: openmpt123 crashed on Windows 9x when showing any
+    console output.
+
  *  mpg123: Update to v1.31.1 (2022-11-01).
  *  FLAC: Update to v1.4.2 (2022-10-22).
  *  pugixml: Update to v1.13 (2022-11-02).
