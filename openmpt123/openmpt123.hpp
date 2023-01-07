@@ -917,12 +917,13 @@ private:
 		std::string text = pop();
 		if ( text.length() > 0 ) {
 			if ( console ) {
+				DWORD chars_written = 0;
 				#if defined(UNICODE)
 					std::wstring wtext = utf8_to_wstring( text );
-					WriteConsole( handle, wtext.data(), static_cast<DWORD>( wtext.size() ), NULL, NULL );
+					WriteConsole( handle, wtext.data(), static_cast<DWORD>( wtext.size() ), &chars_written, NULL );
 				#else
 					std::string ltext = wstring_to_locale( utf8_to_wstring( text ) );
-					WriteConsole( handle, ltext.data(), static_cast<DWORD>( ltext.size() ), NULL, NULL );
+					WriteConsole( handle, ltext.data(), static_cast<DWORD>( ltext.size() ), &chars_written, NULL );
 				#endif
 			} else {
 				#if defined(UNICODE)
