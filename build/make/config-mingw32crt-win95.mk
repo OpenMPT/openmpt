@@ -36,8 +36,8 @@ CXXFLAGS += -ffunction-sections -fdata-sections
 CFLAGS   += -ffunction-sections -fdata-sections
 LDFLAGS  += -Wl,--gc-sections
 
-CXXFLAGS += -march=i486 -m80387 -mtune=pentium
-CFLAGS   += -march=i486 -m80387 -mtune=pentium
+CXXFLAGS += -march=i386 -m80387 -mtune=i486
+CFLAGS   += -march=i386 -m80387 -mtune=i486
 
 PC_LIBS_PRIVATE += -lole32 -lrpcrt4
 
