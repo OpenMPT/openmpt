@@ -1349,6 +1349,10 @@ void CSoundFile::InstrumentChange(ModChannel &chn, uint32 instr, bool bPorta, bo
 			// but still uses the sample info from the old one (bug?)
 			returnAfterVolumeAdjust = true;
 		}
+		// IT compatbility: Reset filter if portamento results in sample change
+		// Test case: FilterPortaSmpChange.it, FilterPortaSmpChange-InsMode.it
+		if(m_playBehaviour[kITResetFilterOnPortaSmpChange] && !m_nInstruments)
+			chn.triggerNote = true;
 	}
 	// IT compatibility: A lone instrument number should only reset sample properties to those of the corresponding sample in instrument mode.
 	// C#5 01 ... <-- sample 1
@@ -1951,6 +1955,7 @@ void CSoundFile::NoteChange(ModChannel &chn, int note, bool bPorta, bool bResetE
 	// Enable Ramping
 	if(!bPorta)
 	{
+		chn.triggerNote = true;
 		chn.nLeftVU = chn.nRightVU = 0xFF;
 		chn.dwFlags.reset(CHN_FILTER);
 		chn.dwFlags.set(CHN_FASTVOLRAMP);
@@ -1972,35 +1977,6 @@ void CSoundFile::NoteChange(ModChannel &chn, int note, bool bPorta, bool bResetE
 			chn.nAutoVibPos = 0;
 		}
 		chn.rightVol = chn.leftVol = 0;
-		bool useFilter = !m_SongFlags[SONG_MPTFILTERMODE];
-		// Setup Initial Filter for this note
-		if(pIns)
-		{
-			if(pIns->IsResonanceEnabled())
-			{
-				chn.nResonance = pIns->GetResonance();
-				useFilter = true;
-			}
-			if(pIns->IsCutoffEnabled())
-			{
-				chn.nCutOff = pIns->GetCutoff();
-				useFilter = true;
-			}
-			if(useFilter && (pIns->filterMode != FilterMode::Unchanged))
-			{
-				chn.nFilterMode = pIns->filterMode;
-			}
-		} else
-		{
-			chn.nVolSwing = chn.nPanSwing = 0;
-			chn.nCutSwing = chn.nResSwing = 0;
-		}
-		if((chn.nCutOff < 0x7F || m_playBehaviour[kITFilterBehaviour]) && useFilter)
-		{
-			int cutoff = SetupChannelFilter(chn, true);
-			if(cutoff >= 0 && chn.dwFlags[CHN_ADLIB] && m_opl && channelHint != CHANNELINDEX_INVALID)
-				m_opl->Volume(channelHint, chn.nCutOff / 2u, true);
-		}
 
 		if(chn.dwFlags[CHN_ADLIB] && m_opl && channelHint != CHANNELINDEX_INVALID)
 		{
@@ -2565,7 +2541,7 @@ bool CSoundFile::ProcessEffects()
 		{
 			chn.isFirstTick = tickCount == nStartTick;
 		}
-		chn.triggerNote = triggerNote;
+		chn.triggerNote = false;
 
 		// FT2 compatibility: Note + portamento + note delay = no portamento
 		// Test case: PortaDelay.xm
