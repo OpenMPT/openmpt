@@ -61,6 +61,7 @@ is just a high-level summary.
  *  [**New**] `Makefile` now uses `PKG_CONFIG` as path to `pkg-config`.
  *  [**New**] The C++ API is now also enabled for Emscripten builds by default.
  *  [**New**] Support for GCC 7 has been restored.
+ *  [**New**] Support for Android NDK 18 has been restored.
 
  *  [**Change**] The official Windows builds (x86, amd64, arm, arm64) now
     require Windows 10 20H2 (or later). The official legacy Windows builds
