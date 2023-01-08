@@ -22,7 +22,7 @@ Dependencies
         
      *  **Microsoft Visual Studio 2017 XP targeting toolset**
      *  **GCC 7.1** or higher
-     *  **Clang 7** or higher
+     *  **Clang 6** or higher
      *  **MinGW-W64 7.1** or higher (it is recommended to preferably use
         posix threading model as opposed to win32 threading model)
      *  **emscripten 3.1.1** or higher

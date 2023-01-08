@@ -103,7 +103,9 @@ constexpr bool check_binary_size(std::size_t size) noexcept {
 		&& (sizeof(T) == size)
 		&& (alignof(T) == 1)
 		&& std::is_standard_layout<T>::value
+#if !defined(MPT_LIBCXX_QUIRK_NO_HAS_UNIQUE_OBJECT_REPRESENTATIONS)
 		&& std::has_unique_object_representations<T>::value
+#endif
 		&& mpt::is_binary_safe<T>::value;
 }
 

@@ -26,8 +26,8 @@
 #define MPT_CLANG_AT_LEAST(major, minor, patch) (MPT_COMPILER_CLANG_VERSION >= MPT_COMPILER_MAKE_VERSION3((major), (minor), (patch)))
 #define MPT_CLANG_BEFORE(major, minor, patch)   (MPT_COMPILER_CLANG_VERSION < MPT_COMPILER_MAKE_VERSION3((major), (minor), (patch)))
 
-#if MPT_CLANG_BEFORE(7, 0, 0)
-#error "clang version 7 required"
+#if MPT_CLANG_BEFORE(6, 0, 0)
+#error "clang version 6 required"
 #endif
 
 #if defined(__clang_analyzer__)
