@@ -647,6 +647,7 @@ void CModTree::RefreshDlsBanks(const bool forceRefresh)
 
 		// Add Instruments (done backwards to improve performance as per https://devblogs.microsoft.com/oldnewthing/20111125-00/?p=9033)
 		MPT_ASSERT(dlsBank.GetNumInstruments() <= 0x10000);
+		bool anyMatches = false;
 		for(auto iIns = dlsBank.GetNumInstruments(); iIns > 0;)
 		{
 			iIns--;
@@ -711,6 +712,7 @@ void CModTree::RefreshDlsBanks(const bool forceRefresh)
 					LPARAM lParam = DlsItem::ToLPARAM(static_cast<uint16>(iIns), static_cast<uint16>(region), true);
 					InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM,
 							szName, IMAGE_INSTRUMENTS, IMAGE_INSTRUMENTS, 0, 0, lParam, hKit, TVI_FIRST);
+					anyMatches = true;
 				}
 				if(applyFilter && hKit)
 					Expand(hKit, TVE_EXPAND);
@@ -728,15 +730,15 @@ void CModTree::RefreshDlsBanks(const bool forceRefresh)
 					wsprintf(szName, mbank ? _T("Melodic Bank %02d.%02d") : _T("Melodic"), mbank >> 8, mbank & 0x7F);
 					// Find out where to insert this bank in the tree
 					hbank = banks.insert(std::make_pair(mbank, nullptr)).first;
-					HTREEITEM insertAfter = (hbank == banks.begin()) ? TVI_FIRST : std::prev(hbank)->second;
 					hbank->second = InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE,
 						szName, IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, 0,
-						m_tiDLS[iDls], insertAfter);
+						m_tiDLS[iDls], TVI_FIRST);
 				}
 
 				wsprintf(szName, _T("%u: %s"), pDlsIns->ulInstrument & 0x7F, instrName.c_str());
 				InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM,
 					szName, IMAGE_INSTRUMENTS, IMAGE_INSTRUMENTS, 0, 0, lParamInstr, hbank->second, TVI_FIRST);
+				anyMatches = true;
 			}
 		}
 		if(applyFilter)
@@ -746,7 +748,14 @@ void CModTree::RefreshDlsBanks(const bool forceRefresh)
 				Expand(bank.second, TVE_EXPAND);
 			}
 		}
-		hInsertAfter = m_tiDLS[iDls];
+		if(!anyMatches && applyFilter)
+		{
+			DeleteItem(m_tiDLS[iDls]);
+			m_tiDLS[iDls] = nullptr;
+		} else
+		{
+			hInsertAfter = m_tiDLS[iDls];
+		}
 	}
 	UnlockRedraw();
 }
