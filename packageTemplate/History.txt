@@ -32,6 +32,43 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.30.09.00 (8 January 2023, revision 18451)
+--------------------------------------------
+Tree view
+- [Fix] <js> Instead of playing silence, preview for missing MIDI library soundfont items was falling back to the first instrument in the soundfont.
+- [Mod] <js> ZIP files are no longer tried to be resolved as links in the file browser. This may slightly speed up populating the file browser, and should fix a potential crash reported by a user (http://bugs.openmpt.org/view.php?id=1645).
+
+Pattern tab
+- [Imp] <js> When recording MIDI pitch bend events, changes are now applied live (http://bugs.openmpt.org/view.php?id=1640).
+- [Imp] <js> VU meters now scale better with larger pattern fonts and high-DPI displays.
+- [Fix] <js> After removing channels, the pattern cursor sometimes became invisible if the channel it was previously located in no longer existed.
+
+Sample tab
+- [Fix] <js> Vertical lines sometimes showed up in zoomed-in waveforms. 
+- [Fix] <js> The dragging improvements from OpenMPT 1.30.04.00 are no longer applied to cue points and loop points, as the old behaviour is arguably better-suited there.
+- [Fix] <js> Avoid overwriting sample slot when loading an OPL instrument from an S3I file but current format doesn't support OPL.
+- [Fix] <js> The forward / backward mouse buttons to navigate to the next / previous sample slot now also work when clicking into the OPL editor.
+
+Instrument tab
+- [Fix] <js> Live update of filter settings only worked for running notes if the filter envelope was active.
+
+IT
+- [Fix] <js> In sample mode, portamento to a different sample turns off the filter if cutoff / resonance was previously 127 / 0.
+
+S3M
+- [Imp] <js> Detect files saved with Graoumf Tracker instead of claiming they were made with OpenMPT 4.47.
+- [Fix] <js> Pattern loop state was not propagated anymore since OpenMPT 1.30, leading to wrong song length calculation and SB0 + SBx being located on different channels not working properly anymore (http://bugs.openmpt.org/view.php?id=1641).
+
+Bundled plugins
+- [Imp] <js> MIDI I/O Plugin: MIDI Start message is no longer sent when previewing notes in patterns / samples or when pattern stepping is enabled (http://forum.openmpt.org/index.php?topic=6880.0).
+
+Misc
+- [Fix] <jh> Update Check: On modern portable amd64 installations, updates for the legacy version were downloaded instead (http://bugs.openmpt.org/view.php?id=1642).
+
+Third-Party Libraries
+- [Imp] Update UnRAR (v6.2.3) 
+
+
 v1.30.08.00 (13 November 2022, revision 18159)
 ----------------------------------------------
 Pattern tab
@@ -68,6 +105,7 @@ Pattern tab
 - [Mod] <js> Clarify that a 0 digit means using the previous value in the effect info of vibrato / tremolo / panbrello pattern commands.
 
 Sample tab
+- [Imp] <jh> 32-bit FLAC files can now be read.
 - [Fix] <js> Inserting or deleting cue points no longer marks external samples as modified.
 
 Instrument tab

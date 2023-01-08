@@ -10,6 +10,14 @@ is just a high-level summary.
  *  [**Bug**] openmpt123: openmpt123 crashed on Windows 9x when showing any
     console output.
 
+ *  IT: In sample mode, portamento to a different sample turns off the filter if
+    cutoff / resonance was previously 127 / 0.
+ *  S3M Detect files saved with Graoumf Tracker instead of claiming they were
+    made with OpenMPT 4.47.
+ *  S3M: Pattern loop state was not propagated anymore since libopenmpt 0.6.0,
+    leading to wrong song length calculation and SB0 + SBx being located on
+    different channels not working properly anymore.
+
  *  mpg123: Update to v1.31.1 (2022-11-01).
  *  FLAC: Update to v1.4.2 (2022-10-22).
  *  pugixml: Update to v1.13 (2022-11-02).
