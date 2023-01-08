@@ -56,19 +56,19 @@ enum
 };
 
 
-const CListCtrlEx::Header gSampleHeaders[SMPLIST_COLUMNS] =
+static constexpr CListCtrlEx::Header SampleHeaders[SMPLIST_COLUMNS] =
 {
 	{ _T("Sample Name"),	192, LVCFMT_LEFT },
 	{ _T("Num"),			45, LVCFMT_RIGHT },
 	{ _T("Size"),			72, LVCFMT_RIGHT },
-	{ _T("Type"),			45, LVCFMT_RIGHT },
+	{ _T("Type"),			80, LVCFMT_RIGHT },
 	{ _T("C-5 Freq"),		80, LVCFMT_RIGHT },
 	{ _T("Instr"),			64, LVCFMT_RIGHT },
 	{ _T("File Name"),		128, LVCFMT_RIGHT },
 	{ _T("Path"),			256, LVCFMT_LEFT },
 };
 
-const CListCtrlEx::Header gInstrumentHeaders[INSLIST_COLUMNS] =
+static constexpr CListCtrlEx::Header InstrumentHeaders[INSLIST_COLUMNS] =
 {
 	{ _T("Instrument Name"),	192, LVCFMT_LEFT },
 	{ _T("Num"),				45, LVCFMT_RIGHT },
@@ -308,11 +308,11 @@ void CViewComments::UpdateView(UpdateHint hint, CObject *)
 		if (m_nCurrentListId == IDC_LIST_SAMPLES)
 		{
 			// Add Sample Headers
-			m_ItemList.SetHeaders(gSampleHeaders);
+			m_ItemList.SetHeaders(SampleHeaders);
 		} else if (m_nCurrentListId == IDC_LIST_INSTRUMENTS)
 		{
 			// Add Instrument Headers
-			m_ItemList.SetHeaders(gInstrumentHeaders);
+			m_ItemList.SetHeaders(InstrumentHeaders);
 		} else
 		updateAll = true;
 	}
@@ -354,7 +354,7 @@ void CViewComments::UpdateView(UpdateHint hint, CObject *)
 						if(sample.uFlags[CHN_ADLIB])
 							s = _T("OPL");
 						else if(sample.HasSampleData())
-							s = MPT_CFORMAT("{} Bit")(sample.GetElementarySampleSize() * 8);
+							s = MPT_CFORMAT("{}-bit {}")(sample.GetElementarySampleSize() * 8, (sample.GetNumChannels() == 2) ? _T("stereo") : _T("mono"));
 						break;
 					case SMPLIST_INSTR:
 						if (sndFile.GetNumInstruments())
