@@ -729,7 +729,7 @@ void CWaveConvert::OnOK()
 
 	m_Settings.Tags = FileTags();
 
-	m_Settings.Tags.SetEncoder();
+	m_Settings.Tags.encoder = Version::Current().GetOpenMPTVersionString();
 
 	if(encSettings.Tags)
 	{
@@ -879,7 +879,7 @@ CWaveConvertSettings::CWaveConvertSettings(SettingsContainer &conf, const std::v
 	, silencePlugBuffers(false)
 	, outputToSample(false)
 {
-	Tags.SetEncoder();
+	Tags.encoder = Version::Current().GetOpenMPTVersionString();
 	for(const auto & factory : EncoderFactories)
 	{
 		const Encoder::Traits &encTraits = factory->GetTraits();
