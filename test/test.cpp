@@ -1817,12 +1817,24 @@ static MPT_NOINLINE void TestPathNative()
 
 
 
-static MPT_NOINLINE void TestPathForeign()
+
+#if MPT_OS_EMSCRIPTEN
+#if (__EMSCRIPTEN_major__ > 3)
+// ok
+#elif (__EMSCRIPTEN_major__ == 3) && (__EMSCRIPTEN_minor__ > 1)
+// ok
+#elif (__EMSCRIPTEN_major__ == 3) && (__EMSCRIPTEN_minor__ == 1) && (__EMSCRIPTEN_tiny__ >= 29)
+// ok
+#else
+#define MPT_EMSCRIPTEN_TEST_PATH_CRASH
+#endif
+#endif // MPT_OS_EMSCRIPTEN
+
+
+#if !defined(MPT_EMSCRIPTEN_TEST_PATH_CRASH)
+
+static MPT_NOINLINE void TestPathForeignWindowsNT()
 {
-
-// emscripten compiler crash
-#if !MPT_OS_EMSCRIPTEN
-
 	{
 		using P = mpt::BasicPathString<mpt::PathTraits<std::string, mpt::PathStyleTag<mpt::PathStyle::WindowsNT>>>;
 
@@ -1982,7 +1994,10 @@ static MPT_NOINLINE void TestPathForeign()
 		VERIFY_EQUAL(P::FromNative("\\\\?\\UNC\\server\\share\\dir1\\dir2\\name.foo.ext").GetFilename(), P::FromNative("name.foo.ext"));
 
 	}
+}
 
+static MPT_NOINLINE void TestPathForeignWindows9x()
+{
 	{
 		using P = mpt::BasicPathString<mpt::PathTraits<std::string, mpt::PathStyleTag<mpt::PathStyle::Windows9x>>>;
 
@@ -2126,7 +2141,10 @@ static MPT_NOINLINE void TestPathForeign()
 		VERIFY_EQUAL(P::FromNative("\\\\server\\share\\dir1\\dir2\\name.foo.ext").GetFilename(), P::FromNative("name.foo.ext"));
 
 	}
+}
 
+static MPT_NOINLINE void TestPathForeignDOSDJGPP()
+{
 	{
 		using P = mpt::BasicPathString<mpt::PathTraits<std::string, mpt::PathStyleTag<mpt::PathStyle::DOS_DJGPP>>>;
 
@@ -2230,7 +2248,10 @@ static MPT_NOINLINE void TestPathForeign()
 		VERIFY_EQUAL(P::FromNative("C:\\tempdir\\tmp.foo.txt").GetFilenameExtension(), P::FromNative(".txt"));
 
 	}
+}
 
+static MPT_NOINLINE void TestPathForeignPOSIX()
+{
 	{
 		using P = mpt::BasicPathString<mpt::PathTraits<std::string, mpt::PathStyleTag<mpt::PathStyle::Posix>>>;
 
@@ -2285,8 +2306,20 @@ static MPT_NOINLINE void TestPathForeign()
 		VERIFY_EQUAL(P::FromNative("//server").GetFilename(), P::FromNative("server"));
 
 	}
+}
 
-#endif
+#endif // !MPT_EMSCRIPTEN_TEST_PATH_CRASH
+
+
+static MPT_NOINLINE void TestPathForeign()
+{
+
+#if !defined(MPT_EMSCRIPTEN_TEST_PATH_CRASH)
+	TestPathForeignWindowsNT();
+	TestPathForeignWindows9x();
+	TestPathForeignDOSDJGPP();
+	TestPathForeignPOSIX();
+#endif // !MPT_EMSCRIPTEN_TEST_PATH_CRASH
 
 	{
 		using P = mpt::BasicPathString<mpt::PathTraits<std::string, mpt::PathStyleTag<mpt::PathStyle::WindowsNT>>>;
