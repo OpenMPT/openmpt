@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.3.42-pre
+
 ### libopenmpt 0.3.41 (2023-01-08)
 
  *  [**Bug**] openmpt123: openmpt123 crashed on Windows 9x when showing any
