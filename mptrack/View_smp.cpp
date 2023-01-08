@@ -2250,14 +2250,96 @@ void CViewSample::OnLButtonUp(UINT, CPoint)
 }
 
 
-void CViewSample::OnLButtonDblClk(UINT, CPoint)
+void CViewSample::OnLButtonDblClk(UINT, CPoint pt)
 {
-	CModDoc *pModDoc = GetDocument();
+	CModDoc *modDoc = GetDocument();
+	if(!modDoc)
+		return;
 
-	if (pModDoc)
+	auto &sample = modDoc->GetSoundFile().GetSample(m_nSample);
+	if(pt.y < m_timelineHeight)
 	{
-		SmpLength len = pModDoc->GetSoundFile().GetSample(m_nSample).nLength;
-		if (len && !m_dwStatus[SMPSTATUS_DRAWING]) SetCurSel(0, len);
+		const auto item = PointToItem(pt).first;
+		const char *undoName = "";
+		CString name;
+		SmpLength minVal = 0, maxVal = sample.nLength;
+		SmpLength *target = nullptr;
+		switch(item)
+		{
+		case HitTestItem::LoopStart:
+			undoName = "Set Loop Start";
+			name = _T("Loop Start");
+			target = &sample.nLoopStart;
+			if(sample.uFlags[CHN_LOOP])
+				maxVal = sample.nLoopEnd;
+			break;
+		case HitTestItem::LoopEnd:
+			undoName = "Set Loop End";
+			name = _T("Loop End");
+			if(sample.uFlags[CHN_LOOP])
+				minVal = sample.nLoopStart;
+			target = &sample.nLoopEnd;
+			break;
+		case HitTestItem::SustainStart:
+			undoName = "Set Sustain Loop Start";
+			name = _T("Sustain Loop Start");
+			target = &sample.nSustainStart;
+			if(sample.uFlags[CHN_SUSTAINLOOP])
+				maxVal = sample.nSustainEnd;
+			break;
+		case HitTestItem::SustainEnd:
+			undoName = "Set Sustain Loop End";
+			name = _T("Sustain Loop End");
+			target = &sample.nSustainEnd;
+			if(sample.uFlags[CHN_SUSTAINLOOP])
+				minVal = sample.nSustainStart;
+			break;
+		default:
+			if(IsCuePoint(item))
+			{
+				undoName = "Set Cue Point";
+				name.Format(_T("Cue Point %d"), CuePointFromItem(item) + 1);
+				target = &sample.cues[CuePointFromItem(item)];
+				maxVal = sample.nLength - 1u;
+			}
+			break;
+		}
+		
+		if(!target)
+			return;
+
+		CInputDlg dlg{this, _T("Enter new position of ") + name, static_cast<int32>(minVal), static_cast<int32>(maxVal), static_cast<int32>(*target)};
+		if(dlg.DoModal() == IDOK)
+		{
+			modDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_none, undoName);
+			*target = dlg.resultAsInt;
+			switch(item)
+			{
+			case HitTestItem::LoopStart:
+				if(!sample.uFlags[CHN_LOOP] && sample.nLoopEnd <= sample.nLoopStart)
+					sample.nLoopEnd = sample.nLength;
+				break;
+			case HitTestItem::LoopEnd:
+				if(!sample.uFlags[CHN_LOOP] && sample.nLoopEnd <= sample.nLoopStart)
+					sample.nLoopStart = 0;
+				break;
+			case HitTestItem::SustainStart:
+				if(!sample.uFlags[CHN_SUSTAINLOOP] && sample.nSustainEnd <= sample.nSustainStart)
+					sample.nSustainEnd = sample.nLength;
+				break;
+			case HitTestItem::SustainEnd:
+				if(!sample.uFlags[CHN_SUSTAINLOOP] && sample.nSustainEnd <= sample.nSustainStart)
+					sample.nSustainStart = 0;
+				break;
+			}
+			sample.PrecomputeLoops(modDoc->GetSoundFile());
+			SetModified(SampleHint().Info(), true, false);
+		}
+	} else
+	{
+		SmpLength len = sample.nLength;
+		if(len && !m_dwStatus[SMPSTATUS_DRAWING])
+			SetCurSel(0, len);
 	}
 }
 
