@@ -15,10 +15,7 @@ enum CRYPT_METHOD {
 #define CRYPT_BLOCK_SIZE         16
 #define CRYPT_BLOCK_MASK         (CRYPT_BLOCK_SIZE-1) // 0xf
 
-// 2013.04.29: set to 15 for RAR 5.00 beta 1.
-// 2022.09.07: changed to 16 for upcoming RAR 6.20.
-#define CRYPT5_KDF_LG2_COUNT     16 // LOG2 of PDKDF2 iteration count.
-
+#define CRYPT5_KDF_LG2_COUNT     15 // LOG2 of PDKDF2 iteration count.
 #define CRYPT5_KDF_LG2_COUNT_MAX 24 // LOG2 of maximum accepted iteration count.
 #define CRYPT_VERSION             0 // Supported encryption version.
 

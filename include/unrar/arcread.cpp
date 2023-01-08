@@ -1476,7 +1476,9 @@ bool Archive::ReadSubData(Array<byte> *UnpData,File *DestFile,bool TestMode)
   {
     if (SubHead.UnpSize>0x1000000)
     {
-      // So huge allocation must never happen in valid archives.
+      // Prevent the excessive allocation. When reading to memory, normally
+      // this function operates with reasonably small blocks, such as
+      // the archive comment, NTFS ACL or "Zone.Identifier" NTFS stream.
       uiMsg(UIERROR_SUBHEADERUNKNOWN,FileName);
       return false;
     }

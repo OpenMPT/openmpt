@@ -118,8 +118,12 @@ void ExtractStreams(Archive &Arc,const wchar *FileName,bool TestMode)
   if ((fd.FileAttr & FILE_ATTRIBUTE_READONLY)!=0)
     SetFileAttr(FileName,fd.FileAttr & ~FILE_ATTRIBUTE_READONLY);
   File CurFile;
-  if (CurFile.WCreate(FullName) && Arc.ReadSubData(NULL,&CurFile,false))
-    CurFile.Close();
+
+  if (CurFile.WCreate(FullName))
+  {
+    if (Arc.ReadSubData(NULL,&CurFile,false))
+      CurFile.Close();
+  }
 
   // Restoring original file timestamps.
   File HostFile;

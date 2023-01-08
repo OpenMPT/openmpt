@@ -71,6 +71,12 @@ class CmdExtract
     bool PrevProcessed; // If previous file was successfully extracted or tested.
     wchar DestFileName[NM];
     bool PasswordCancelled;
+    bool UpLinkExtracted; // At least one symlink with ".." in target was extracted.
+
+    // Last path checked for symlinks. We use it to improve the performance,
+    // so we do not check recently checked folders again.
+    std::wstring LastCheckedSymlink;
+
 #if defined(_WIN_ALL) && !defined(SFX_MODULE) && !defined(SILENT)
     bool Fat32,NotFat32;
 #endif
