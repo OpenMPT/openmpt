@@ -1819,15 +1819,7 @@ static MPT_NOINLINE void TestPathNative()
 
 
 #if MPT_OS_EMSCRIPTEN
-#if (__EMSCRIPTEN_major__ > 3)
-// ok
-#elif (__EMSCRIPTEN_major__ == 3) && (__EMSCRIPTEN_minor__ > 1)
-// ok
-#elif (__EMSCRIPTEN_major__ == 3) && (__EMSCRIPTEN_minor__ == 1) && (__EMSCRIPTEN_tiny__ >= 29)
-// ok
-#else
 #define MPT_EMSCRIPTEN_TEST_PATH_CRASH
-#endif
 #endif // MPT_OS_EMSCRIPTEN
 
 
