@@ -97,13 +97,13 @@ is just a high-level summary.
  *  [**Regression**] Support for mingw-std-threads has been removed. If you
     require a thread-safe libopenmpt, please build with POSIX threading model
     and/or complain to MinGW/GCC about not properly supporting C++11 features in
-    2022.
+    2023.
  *  [**Regression**] Support for Emscripten versions older than 3.1.1 has been
     removed.
  *  [**Regression**] C API: `openmpt_stream_get_file_callbacks()` used to
     provide 64bit file access on some platforms where long is 32bit. This never
     worked reliably for all platforms though. The behaviour is now changed to
-    always stick to what standard C supports with fseek and ftell, where the
+    always stick to what standard C supports with `fseek` and `ftell`, where the
     offset type is long. `openmpt_stream_get_file_callbacks()` is deprecated now
     due to behavioral change. Please migrate to
     `openmpt_stream_get_file_callbacks2()`.
