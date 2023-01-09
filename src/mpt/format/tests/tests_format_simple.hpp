@@ -16,6 +16,7 @@
 
 #include <limits>
 #include <string>
+#include <string_view>
 
 
 
@@ -169,6 +170,9 @@ MPT_TEST_GROUP_INLINE("mpt/format/simple")
 	MPT_TEST_EXPECT_EQUAL(mpt::format<std::string>::fix(6.12345, 3), "6.123");
 	MPT_TEST_EXPECT_EQUAL(mpt::format<std::string>::flt(6.12345, 4), "6.123");
 	MPT_TEST_EXPECT_EQUAL(mpt::format<std::string>::fix(6.12345, 4), "6.1235");
+
+	MPT_TEST_EXPECT_EQUAL(mpt::format<std::u32string>::val(std::u32string(U"foo")), U"foo");
+	MPT_TEST_EXPECT_EQUAL(mpt::format<std::u32string>::val(std::u32string_view(U"foo")), U"foo");
 
 #if MPT_DETECTED_MFC
 
