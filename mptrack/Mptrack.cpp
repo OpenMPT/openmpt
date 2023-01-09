@@ -667,6 +667,17 @@ public:
 		return bRet;
 	}
 
+	BOOL ReopenPreviousDocuments() override
+	{
+		// In case no previously open documents are to be re-opened,
+		// MFC RestartManager integration assumes the default action to be
+		// opening a new empty document (see CWinApp::ProcessShellCommand()
+		// and CWinApp::RestartInstance().
+		// We do not want that, so we always return TRUE.
+		CDataRecoveryHandler::ReopenPreviousDocuments();
+		return TRUE;
+	}
+
 	BOOL ReadOpenDocumentList() override
 	{
 		BOOL bRet = FALSE;  // return TRUE only if at least one document was found
@@ -694,7 +705,15 @@ public:
 
 		DeleteFile((theApp.GetConfigPath() + P_("restart.") + mpt::PathString::FromCString(GetRestartIdentifier()) + P_(".ini")).AsNative().c_str());
 
-		return bRet;
+		// In case no previously open documents are found,
+		// MFC RestartManager integration assumes the default action to be
+		// opening a new empty document (see CWinApp::RestartInstance() and
+		// after the call to RestartInstance()).
+		// We do not want that, so we always return TRUE.
+		
+		// return bRet;
+		return TRUE;
+
 	}
 
 };
