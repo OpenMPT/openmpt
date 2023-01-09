@@ -15,6 +15,7 @@
 #include "mpt/test/test_macros.hpp"
 
 #include <limits>
+#include <string>
 
 
 
