@@ -354,7 +354,7 @@ void CViewComments::UpdateView(UpdateHint hint, CObject *)
 						if(sample.uFlags[CHN_ADLIB])
 							s = _T("OPL");
 						else if(sample.HasSampleData())
-							s = MPT_CFORMAT("{}-bit {}")(sample.GetElementarySampleSize() * 8, (sample.GetNumChannels() == 2) ? _T("stereo") : _T("mono"));
+							s = MPT_CFORMAT("{}-bit {}")(sample.GetElementarySampleSize() * 8, (sample.GetNumChannels() == 2) ? CString(_T("stereo")) : CString(_T("mono")));
 						break;
 					case SMPLIST_INSTR:
 						if (sndFile.GetNumInstruments())
