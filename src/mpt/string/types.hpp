@@ -282,9 +282,10 @@ using winstring_view = mpt::tstring_view;
 using u8string = std::u8string;
 using u8string_view = std::u8string_view;
 using u8char = char8_t;
-#define MPT_U8CHAR(x)    u8##x
-#define MPT_U8LITERAL(x) u8##x
-#define MPT_U8STRING(x)  std::u8string(u8##x)
+#define MPT_U8CHAR(x)      u8##x
+#define MPT_U8LITERAL(x)   u8##x
+#define MPT_U8STRING(x)    std::u8string(u8##x)
+#define MPT_U8STRINVIEW(x) std::u8string_view(u8##x)
 
 #else // !C++20
 
@@ -296,9 +297,10 @@ using u8string = std::basic_string<char, mpt::encoding_char_traits<common_encodi
 using u8string_view = std::basic_string_view<char, mpt::encoding_char_traits<common_encoding::utf8>>;
 #endif
 using u8char = char;
-#define MPT_U8CHAR(x)    x
-#define MPT_U8LITERAL(x) x
-#define MPT_U8STRING(x)  mpt::u8string(x)
+#define MPT_U8CHAR(x)       x
+#define MPT_U8LITERAL(x)    x
+#define MPT_U8STRING(x)     mpt::u8string(x)
+#define MPT_U8STRINGVIEW(x) mpt::u8string_view(x)
 
 // mpt::u8string is a moderately type-safe string that is meant to contain
 // UTF-8 encoded char bytes.
@@ -358,9 +360,10 @@ using u8char = char;
 using ustring = std::wstring;
 using ustring_view = std::wstring_view;
 using uchar = wchar_t;
-#define MPT_UCHAR(x)    L##x
-#define MPT_ULITERAL(x) L##x
-#define MPT_USTRING(x)  std::wstring(L##x)
+#define MPT_UCHAR(x)       L##x
+#define MPT_ULITERAL(x)    L##x
+#define MPT_USTRING(x)     std::wstring(L##x)
+#define MPT_USTRINGVIEW(x) std::wstring_view(L##x)
 
 #endif // MPT_USTRING_MODE_WIDE
 
@@ -369,9 +372,10 @@ using uchar = wchar_t;
 using ustring = mpt::u8string;
 using ustring_view = mpt::u8string_view;
 using uchar = mpt::u8char;
-#define MPT_UCHAR(x)    MPT_U8CHAR(x)
-#define MPT_ULITERAL(x) MPT_U8LITERAL(x)
-#define MPT_USTRING(x)  MPT_U8STRING(x)
+#define MPT_UCHAR(x)       MPT_U8CHAR(x)
+#define MPT_ULITERAL(x)    MPT_U8LITERAL(x)
+#define MPT_USTRING(x)     MPT_U8STRING(x)
+#define MPT_USTRINGVIEW(x) MPT_U8STRINGVIEW(x)
 
 #endif // MPT_USTRING_MODE_UTF8
 
