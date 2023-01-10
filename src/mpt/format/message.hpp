@@ -33,11 +33,11 @@ public:
 	}
 };
 
-template <typename Tformatter, typename Tformat>
+template <typename Tformatter, typename Tstring>
 class message_formatter {
 
-public:
-	using Tstring = typename mpt::make_string_type<Tformat>::type;
+private:
+	using Tstringview = typename mpt::make_string_view_type<Tstring>::type;
 
 private:
 	Tstring format;
@@ -172,11 +172,14 @@ public:
 		return do_format(mpt::as_span(vals));
 	}
 
-}; // class message_formatter<Tformat>
+}; // class message_formatter
 
 
 template <typename Tformatter, std::ptrdiff_t N, typename Tchar, typename Tstring>
 class message_formatter_counted {
+
+private:
+	using Tstringview = typename mpt::make_string_view_type<Tstring>::type;
 
 private:
 	message_formatter<Tformatter, Tstring> formatter;
@@ -195,7 +198,7 @@ public:
 		return formatter(std::forward<Ts>(xs)...);
 	}
 
-}; // struct message_formatter_counted<Tformat>
+}; // struct message_formatter_counted
 
 
 template <typename Tchar>
