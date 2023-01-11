@@ -611,8 +611,11 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 						if (tempo.GetInt()) pChn->nOldTempo = static_cast<uint8>(tempo.GetInt()); else tempo.Set(pChn->nOldTempo);
 					}
 
-					if (tempo.GetInt() >= 0x20) playState.m_nMusicTempo = tempo;
-					else
+					const auto &specs = GetModSpecifications();
+					if(tempo.GetInt() >= 0x20)
+					{
+						playState.m_nMusicTempo = std::min(tempo, specs.GetTempoMax());
+					} else
 					{
 						// Tempo Slide
 						TEMPO tempoDiff((tempo.GetInt() & 0x0F) * nonRowTicks, 0);
@@ -626,14 +629,14 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 							else
 								playState.m_nMusicTempo.Set(0);
 						}
-					}
 
-					TEMPO tempoMin = GetModSpecifications().GetTempoMin(), tempoMax = GetModSpecifications().GetTempoMax();
-					if(m_playBehaviour[kTempoClamp])	// clamp tempo correctly in compatible mode
-					{
-						tempoMax.Set(255);
+						TEMPO tempoMin = specs.GetTempoMin(), tempoMax = specs.GetTempoMax();
+						if(m_playBehaviour[kTempoClamp])  // clamp tempo correctly in compatible mode
+						{
+							tempoMax.Set(255);
+						}
+						Limit(playState.m_nMusicTempo, tempoMin, tempoMax);
 					}
-					Limit(playState.m_nMusicTempo, tempoMin, tempoMax);
 				}
 				break;
 
