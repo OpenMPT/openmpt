@@ -67,8 +67,7 @@ Dependencies
  *  **J2B** support requires an inflate (deflate decompression) implementation:
      *  **zlib** (or **miniz** can be used internally)
  *  **MO3** support requires:
-     *  **libmpg123 >= 1.14.0** (or **minimp3 by Lion (github.com/lieff)** can
-        be used internally)
+     *  **libmpg123 >= 1.14.0** (or **minimp3** can be used internally)
      *  **libogg**, **libvorbis**, and **libvorbisfile** (or **stb_vorbis** can
         be used internally)
  *  Building on Unix-like systems requires:
