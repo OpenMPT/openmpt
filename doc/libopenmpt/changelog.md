@@ -79,6 +79,12 @@ is just a high-level summary.
     `CONFIG=mingw64-win64`, `CONFIG=mingw64-winrt-x86`, and
     `CONFIG=mingw64-winrt-amd64` are deprecated. Please use `CONFIG=mingw-w64`
     instead.
+ *  [**Change**] Autotools now default to C++20 and only fall back to C++17 when
+    C++20 is not supported.
+ *  [**Change**] `Makefile` now defaults to C++20 and only falls back to C++17
+    when C++20 is not supported by the compiler.
+ *  [**Change**] `Makefile` now defaults to C17 and only falls back to C11 when
+    C17 is not supported by the compiler.
  *  [**Change**] `Makefile` `CONFIG=djgpp` option `USE_ALLEGRO42` now
     defaults to `1` and implies building a liballegro42 locally. This requires
     executing `build/download_externals.sh` before building to download the
