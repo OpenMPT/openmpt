@@ -14,7 +14,13 @@ endif
 
 # Note that we are using GNU extensions instead of 100% standards-compliant
 # mode, because otherwise DJGPP-specific headers/functions are unavailable.
+ifneq ($(STDCXX),)
+CXXFLAGS_STDCXX = -std=$(STDCXX) -fexceptions -frtti -fpermissive
+else ifeq ($(shell printf '\n' > bin/empty.cpp ; if $(CXX) -std=gnu++20 -c bin/empty.cpp -o bin/empty.out > /dev/null 2>&1 ; then echo 'c++20' ; fi ), c++20)
+CXXFLAGS_STDCXX = -std=gnu++20 -fexceptions -frtti -fpermissive
+else ifeq ($(shell printf '\n' > bin/empty.cpp ; if $(CXX) -std=gnu++17 -c bin/empty.cpp -o bin/empty.out > /dev/null 2>&1 ; then echo 'c++17' ; fi ), c++17)
 CXXFLAGS_STDCXX = -std=gnu++17 -fexceptions -frtti -fpermissive
+endif
 CFLAGS_STDC     = -std=gnu17
 CXXFLAGS += $(CXXFLAGS_STDCXX) -fallow-store-data-races -fno-threadsafe-statics
 CFLAGS   += $(CFLAGS_STDC)     -fallow-store-data-races
