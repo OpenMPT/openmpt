@@ -682,7 +682,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					{
 #if MPT_MSVC_BEFORE(2019, 0)
 						// Work-around for VS2017 /std:c++17 /permissive-
-						// which fails to find operator < for tempalted user types inside std::min.
+						// which fails to find operator < for templated user types inside std::min.
 						playState.m_nMusicTempo.SetRaw(std::min(tempo.GetRaw(), specs.GetTempoMax().GetRaw()));
 #else
 						playState.m_nMusicTempo = std::min(tempo, specs.GetTempoMax());
