@@ -63,7 +63,7 @@ public:
 		}
 		if ( digi_card == DIGI_NONE ) {
 			remove_sound();
-			throw exception( "no audio device found" );
+			throw exception( MPT_USTRING("no audio device found") );
 		}
 	}
 	~allegro42_sound_raii() {
