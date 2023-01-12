@@ -10,9 +10,6 @@ CFLAGS_WARNINGS   += -Wframe-larger-than=4000 -Wstrict-prototypes
 CXXFLAGS_WARNINGS += 
 #CXXFLAGS_WARNINGS += -Wshadow -Wswitch-enum 
 LDFLAGS_WARNINGS  += -Wl,-no-undefined -Wl,--detect-odr-violations
-# re-renable after 1.29 branch
-#CXXFLAGS_WARNINGS += -Wdouble-promotion
-#CFLAGS_WARNINGS   += -Wdouble-promotion
 endif
 
 CFLAGS_SILENT += -Wno-cast-qual
