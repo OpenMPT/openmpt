@@ -4108,7 +4108,8 @@ static inline std::size_t strnlen(const char *str, std::size_t n)
 
 
 // Test String I/O functionality
-static MPT_NOINLINE void TestStringIO()
+
+static MPT_NOINLINE void TestStringIO1()
 {
 	char src0[4] = { '\0', 'X', ' ', 'X' };		// Weird empty buffer
 	char src1[4] = { 'X', ' ', '\0', 'X' };		// Weird buffer (hello Impulse Tracker)
@@ -4354,7 +4355,10 @@ static MPT_NOINLINE void TestStringIO()
 #undef WriteTest
 
 	}
+}
 
+static MPT_NOINLINE void TestStringIO2()
+{
 	{
 	
 		char s0[4] = {'\0', 'X', ' ', 'X' };
@@ -4465,9 +4469,13 @@ static MPT_NOINLINE void TestStringIO()
 		#undef CopyTest
 
 	}
-
 }
 
+static MPT_NOINLINE void TestStringIO()
+{
+	TestStringIO1();
+	TestStringIO2();
+}
 
 static MPT_NOINLINE void TestSampleConversion()
 {
