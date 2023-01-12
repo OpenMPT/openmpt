@@ -67,7 +67,8 @@
 #  STRICT=0            Treat warnings as errors.
 #  MODERN=0            Pass more modern compiler options.
 #  NATIVE=0            Optimize for system CPU.
-#  STDCXX=c++17        C++ standard version (only for GCC and clang)
+#  STDCXX=c++17        C++ standard version (default depends on compiler)
+#  STDC=c17            C standard version (default depends on compiler)
 #  ANALYZE=0           Enable static analyzer.
 #  CHECKED=0           Enable run-time assertions.
 #  CHECKED_ADDRESS=0   Enable address sanitizer

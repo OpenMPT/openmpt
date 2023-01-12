@@ -21,7 +21,13 @@ CXXFLAGS_STDCXX = -std=gnu++20 -fexceptions -frtti -fpermissive
 else
 CXXFLAGS_STDCXX = -std=gnu++17 -fexceptions -frtti -fpermissive
 endif
-CFLAGS_STDC     = -std=gnu17
+ifneq ($(STDC),)
+CFLAGS_STDC = -std=$(STDC)
+else ifeq ($(shell printf '\n' > bin/empty.c ; if $(CC) -std=gnu17 -c bin/empty.c -o bin/empty.out > /dev/null 2>&1 ; then echo 'c17' ; fi ), c17)
+CFLAGS_STDC = -std=gnu17
+else
+CFLAGS_STDC = -std=gnu11
+endif
 CXXFLAGS += $(CXXFLAGS_STDCXX) -fallow-store-data-races -fno-threadsafe-statics
 CFLAGS   += $(CFLAGS_STDC)     -fallow-store-data-races
 

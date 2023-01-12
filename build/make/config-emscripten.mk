@@ -24,7 +24,13 @@ CXXFLAGS_STDCXX = -std=c++20
 else
 CXXFLAGS_STDCXX = -std=c++17
 endif
+ifneq ($(STDC),)
+CFLAGS_STDC = -std=$(STDC)
+else ifeq ($(shell printf '\n' > bin/empty.c ; if $(CC) -std=c17 -c bin/empty.c -o bin/empty.out > /dev/null 2>&1 ; then echo 'c17' ; fi ), c17)
 CFLAGS_STDC = -std=c17
+else
+CFLAGS_STDC = -std=c11
+endif
 CXXFLAGS += $(CXXFLAGS_STDCXX)
 CFLAGS += $(CFLAGS_STDC)
 
