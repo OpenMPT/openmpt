@@ -4256,7 +4256,7 @@ static MPT_NOINLINE void TestStringIO1()
 
 #if MPT_COMPILER_MSVC
 #pragma warning(push)
-#endif MPT_COMPILER_MSVC
+#endif // MPT_COMPILER_MSVC
 
 	{
 
