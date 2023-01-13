@@ -4111,6 +4111,12 @@ static inline std::size_t strnlen(const char *str, std::size_t n)
 
 static MPT_NOINLINE void TestStringIO1()
 {
+
+#if MPT_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable:6054) // String '' might not be zero-terminated.
+#endif // MPT_COMPILER_MSVC
+
 	char src0[4] = { '\0', 'X', ' ', 'X' };		// Weird empty buffer
 	char src1[4] = { 'X', ' ', '\0', 'X' };		// Weird buffer (hello Impulse Tracker)
 	char src2[4] = { 'X', 'Y', 'Z', ' ' };		// Full buffer, last character space
@@ -4247,6 +4253,10 @@ static MPT_NOINLINE void TestStringIO1()
 
 #undef ReadTest
 #undef WriteTest
+
+#if MPT_COMPILER_MSVC
+#pragma warning(push)
+#endif MPT_COMPILER_MSVC
 
 	{
 
