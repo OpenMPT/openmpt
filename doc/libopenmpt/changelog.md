@@ -65,7 +65,7 @@ is just a high-level summary.
  *  [**New**] Support for Android NDK 18 has been restored.
 
  *  [**Change**] The official Windows builds (x86, amd64, arm, arm64) now
-    require Windows 10 20H2 (or later). The official legacy Windows builds
+    require Windows 10 21H2 (or later). The official legacy Windows builds
     (x86-legacy, amd64-legacy) are unchanged and still require Windows 7 (or
     later).
  *  [**Change**] `"date"` metadata will now exlude the UTC time zone signifier
