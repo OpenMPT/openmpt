@@ -134,7 +134,6 @@
 		E9363E2F818323E1AFCA246F /* TinyFFT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 03BF85B7480E2B298A3563F7 /* TinyFFT.cpp */; };
 		EA420947C95F2379A5687F87 /* Load_sfx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C950084F5BDDD241C4B6768F /* Load_sfx.cpp */; };
 		EDE4FB2CD37C025E96C1116C /* serialization_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 96E89174F0E9A866B8309FB4 /* serialization_utils.cpp */; };
-		EFB31B5289D7108439FCF192 /* mptStringFormat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7B166E3AEF70B32C6D543C7A /* mptStringFormat.cpp */; };
 		F0D031F98EB132AB662F7839 /* ModInstrument.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CC1927E18ED98853EC0E6621 /* ModInstrument.cpp */; };
 		F4EF37CFD40C5201B015AE0F /* Load_ult.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7FD19A57125F64497B380897 /* Load_ult.cpp */; };
 		F59363E88FB7591A3FDD3A28 /* SymMODEcho.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4738D7F0BB931CE23976A630 /* SymMODEcho.cpp */; };
@@ -400,7 +399,6 @@
 		78CAB4630B587E55743122A3 /* SampleIO.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SampleIO.cpp; path = ../../soundlib/SampleIO.cpp; sourceTree = "<group>"; };
 		793E301E72FFEC90ACFEEE5E /* base.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = base.hpp; path = ../../src/mpt/io/base.hpp; sourceTree = "<group>"; };
 		7A6823C37429E035AE28E203 /* Message.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Message.h; path = ../../soundlib/Message.h; sourceTree = "<group>"; };
-		7B166E3AEF70B32C6D543C7A /* mptStringFormat.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = mptStringFormat.cpp; path = ../../common/mptStringFormat.cpp; sourceTree = "<group>"; };
 		7C15603DE93D6EAFEAD05E7D /* engine.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = engine.hpp; path = ../../src/mpt/random/engine.hpp; sourceTree = "<group>"; };
 		7C2DCED7ED506FC9A3171D17 /* path.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = path.hpp; path = ../../src/mpt/path/path.hpp; sourceTree = "<group>"; };
 		7C6EC51BC0BD6A8D02E4A35B /* XMTools.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = XMTools.cpp; path = ../../soundlib/XMTools.cpp; sourceTree = "<group>"; };
@@ -1053,7 +1051,6 @@
 				4AECD572BC0F766471D623B2 /* mptString.h */,
 				C510221C396A670EB74DF05C /* mptStringBuffer.cpp */,
 				90E45EE632CDFAD829F50D26 /* mptStringBuffer.h */,
-				7B166E3AEF70B32C6D543C7A /* mptStringFormat.cpp */,
 				1A94BBC4BC7E57B6B3A56A04 /* mptStringFormat.h */,
 				F3E5C0DEB6A6215013DAFF1E /* mptStringParse.cpp */,
 				3C1C484802AA3FBA70AC6688 /* mptStringParse.h */,
@@ -1559,7 +1556,6 @@
 				926864F471857F264D8EDB34 /* mptRandom.cpp in Sources */,
 				9B05DDE07A22F812562C5420 /* mptString.cpp in Sources */,
 				8751165421750B86D19AEC94 /* mptStringBuffer.cpp in Sources */,
-				EFB31B5289D7108439FCF192 /* mptStringFormat.cpp in Sources */,
 				27CAC336C5ABC3E89D2A0976 /* mptStringParse.cpp in Sources */,
 				30BE965074D2678268A3EC90 /* mptTime.cpp in Sources */,
 				EDE4FB2CD37C025E96C1116C /* serialization_utils.cpp in Sources */,

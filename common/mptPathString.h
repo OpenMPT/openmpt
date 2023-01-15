@@ -56,27 +56,10 @@ using RawPathString = PathString::raw_path_type;
 
 
 
-#if defined(MPT_ENABLE_CHARSET_LOCALE)
-inline std::string ToAString(const mpt::PathString &x)
-{
-	return x.ToLocale();
-}
-#else
-inline std::string ToAString(const mpt::PathString &x)
-{
-	return x.ToUTF8();
-}
-#endif
 inline mpt::ustring ToUString(const mpt::PathString &x)
 {
 	return x.ToUnicode();
 }
-#if MPT_WSTRING_FORMAT
-inline std::wstring ToWString(const mpt::PathString &x)
-{
-	return x.ToWide();
-}
-#endif
 
 
 

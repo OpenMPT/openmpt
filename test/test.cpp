@@ -700,7 +700,7 @@ static std::string StringFormat(std::string format, T x)
 #endif
 
 template <typename Tfloat>
-static void TestFloatFormat(Tfloat x, std::string format, mpt::FormatFlags f, std::size_t width = 0, int precision = -1)
+static void TestFloatFormat(Tfloat x, std::string format, mpt::format_simple_flags f, std::size_t width = 0, int precision = -1)
 {
 #ifdef MODPLUG_TRACKER
 	std::string str_sprintf = StringFormat(format, x);

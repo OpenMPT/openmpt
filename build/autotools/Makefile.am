@@ -327,7 +327,6 @@ MPT_FILES_COMMON += common/mptString.cpp
 MPT_FILES_COMMON += common/mptString.h
 MPT_FILES_COMMON += common/mptStringBuffer.cpp
 MPT_FILES_COMMON += common/mptStringBuffer.h
-MPT_FILES_COMMON += common/mptStringFormat.cpp
 MPT_FILES_COMMON += common/mptStringFormat.h
 MPT_FILES_COMMON += common/mptStringParse.cpp
 MPT_FILES_COMMON += common/mptStringParse.h
