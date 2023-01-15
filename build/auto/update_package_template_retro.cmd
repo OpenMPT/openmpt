@@ -30,7 +30,7 @@ rem copy /y ..\include\pugixml\LICENSE.md                     .\Licenses\License
 copy /y ..\include\r8brain\LICENSE                        .\Licenses\License.R8Brain.txt || goto error
 copy /y ..\include\rtaudio\README.md                      .\Licenses\License.RtAudio.txt || goto error
 copy /y ..\include\rtkit\rtkit.h                          .\Licenses\License.RealtimeKit.txt || goto error
-copy /y ..\include\rtmidi\License.txt                     .\Licenses\License.RtMidi.txt || goto error
+copy /y ..\include\rtmidi\LICENSE                         .\Licenses\License.RtMidi.txt || goto error
 copy /y ..\include\smbPitchShift\smbPitchShift.cpp        .\Licenses\License.smbPitchShift.txt || goto error
 copy /y ..\include\soundtouch\COPYING.TXT                 .\Licenses\License.SoundTouch.txt || goto error
 rem copy /y ..\include\stb_vorbis\stb_vorbis.c                .\Licenses\License.stb_vorbis.txt || goto error

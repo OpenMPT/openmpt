@@ -1,8 +1,7 @@
 RtMidi cross-platform MIDI classes
-commit e8ae727b4728b49dad5f9a2c312945148fa25454 from https://github.com/thestk/rtmidi/
+https://github.com/thestk/rtmidi/ commit 806e18f575b68c23b26f9398e1b6866b335b5308 (2022-08-03)
 Files not used by OpenMPT (config/, doc/, msw/, tests/, build systems, C API)
 have been removed from this folder. No further local changes have been made.
-License.txt has been extracted from the readme for OpenMPT's license package.
 
 For building, premake is used to generate Visual Studio project files.
 See ../build/premake/ for details.
