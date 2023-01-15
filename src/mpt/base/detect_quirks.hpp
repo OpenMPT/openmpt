@@ -249,7 +249,7 @@
 #elif MPT_LIBCXX_GNU
 #define MPT_LIBCXX_QUIRK_NO_CHRONO_DATE_PARSE
 #endif
-#if MPT_LIBCXX_MS && (MPT_MSVC_BEFORE(2022, 3) || !MPT_COMPILER_MSVC)
+#if MPT_LIBCXX_MS && (MPT_MSVC_BEFORE(2022, 5) || !MPT_COMPILER_MSVC)
 // Causes massive memory leaks.
 // See
 // <https://developercommunity.visualstudio.com/t/stdchronoget-tzdb-list-memory-leak/1644641>
