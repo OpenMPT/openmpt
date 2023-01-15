@@ -1,6 +1,6 @@
 
-CXXFLAGS_WARNINGS += -Wcast-align -Wcast-qual -Wfloat-conversion -Wframe-larger-than=16000 -Winit-self -Wlogical-op -Wmissing-declarations -Wpointer-arith -Wstrict-aliasing -Wsuggest-override -Wundef
-CFLAGS_WARNINGS   += -Wcast-align -Wcast-qual -Wfloat-conversion                                       -Wlogical-op                                                                             -Wundef
+CXXFLAGS_WARNINGS += -Wcast-align -Wcast-qual -Wdouble-promotion -Wfloat-conversion -Wframe-larger-than=16000 -Winit-self -Wlogical-op -Wmissing-declarations -Wpointer-arith -Wstrict-aliasing -Wsuggest-override -Wundef
+CFLAGS_WARNINGS   += -Wcast-align -Wcast-qual -Wdouble-promotion -Wfloat-conversion                                       -Wlogical-op                                                                             -Wundef
 
 CXXFLAGS_WARNINGS += -Wno-psabi
 
@@ -13,6 +13,7 @@ LDFLAGS_WARNINGS  += -Wl,-no-undefined -Wl,--detect-odr-violations
 endif
 
 CFLAGS_SILENT += -Wno-cast-qual
+CFLAGS_SILENT += -Wno-double-promotion
 CFLAGS_SILENT += -Wno-empty-body
 CFLAGS_SILENT += -Wno-float-conversion
 CFLAGS_SILENT += -Wno-implicit-fallthrough
