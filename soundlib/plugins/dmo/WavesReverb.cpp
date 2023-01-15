@@ -226,8 +226,8 @@ CString WavesReverb::GetParamDisplay(PlugParamIndex param)
 void WavesReverb::RecalculateWavesReverbParams()
 {
 	// Recalculate filters
-	const double ReverbTimeSmp = -3000.0 / (m_SndFile.GetSampleRate() * ReverbTime());
-	const double ReverbTimeSmpHF = ReverbTimeSmp * (1.0 / HighFreqRTRatio() - 1.0);
+	const double ReverbTimeSmp = -3000.0 / static_cast<double>(m_SndFile.GetSampleRate() * ReverbTime());
+	const double ReverbTimeSmpHF = ReverbTimeSmp * (1.0 / static_cast<double>(HighFreqRTRatio()) - 1.0);
 
 	m_coeffs[0] = static_cast<float>(std::pow(10.0, m_delay[4] * ReverbTimeSmp));
 	m_coeffs[1] = static_cast<float>(std::pow(10.0, m_delay[5] * ReverbTimeSmp));
@@ -237,15 +237,15 @@ void WavesReverb::RecalculateWavesReverbParams()
 	{
 		double gain1 = std::pow(10.0, m_delay[pair] * ReverbTimeSmp);
 		double gain2 = (1.0 - std::pow(10.0, (m_delay[pair] + m_delay[4 + pair / 2]) * ReverbTimeSmpHF)) * 0.5;
-		double gain3 = gain1 * m_coeffs[pair / 2];
+		double gain3 = gain1 * static_cast<double>(m_coeffs[pair / 2]);
 		double gain4 = gain3 * (((gain3 + 1.0) * gain3 + 1.0) * gain3 + 1.0) + 1.0;
 		m_coeffs[2 + pair * 2] = static_cast<float>(gain1 * (1.0 - gain2));
 		m_coeffs[3 + pair * 2] = static_cast<float>(gain1 * gain2);
 		sum += gain4 * gain4;
 	}
 
-	double inGain = std::pow(10.0, GainInDecibel(m_param[kRvbInGain]) * 0.05);
-	double reverbMix = std::pow(10.0, GainInDecibel(m_param[kRvbReverbMix]) * 0.1);
+	double inGain = std::pow(10.0, static_cast<double>(GainInDecibel(m_param[kRvbInGain])) * 0.05);
+	double reverbMix = std::pow(10.0, static_cast<double>(GainInDecibel(m_param[kRvbReverbMix])) * 0.1);
 	m_dryFactor = static_cast<float>(std::sqrt(1.0 - reverbMix) * inGain);
 	m_wetFactor = static_cast<float>(std::sqrt(reverbMix) * (4.0 / std::sqrt(sum) * inGain));
 }

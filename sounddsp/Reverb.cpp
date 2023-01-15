@@ -51,9 +51,9 @@ CReverb::CReverb()
 }
 
 
-static int32 OnePoleLowPassCoef(int32 scale, float g, float F_c, float F_s)
+static int32 OnePoleLowPassCoef(int32 scale, double g, double F_c, double F_s)
 {
-	if(g > 0.999999f) return 0;
+	if(g > 0.999999) return 0;
 
 	g *= g;
 	double scale_over_1mg = scale / (1.0 - g);
@@ -61,13 +61,13 @@ static int32 OnePoleLowPassCoef(int32 scale, float g, float F_c, float F_s)
 	return mpt::saturate_round<int32>((1.0 - (std::sqrt((g + g) * (1.0 - cosw) - g * g * (1.0 - cosw * cosw)) + g * cosw)) * scale_over_1mg);
 }
 
-static float mBToLinear(int32 value_mB)
+static double mBToLinear(int32 value_mB)
 {
 	if(!value_mB) return 1;
 	if(value_mB <= -100000) return 0;
 
 	const double val = value_mB * 3.321928094887362304 / (100.0 * 20.0);	// log2(10)/(100*20)
-	return static_cast<float>(std::pow(2.0, val - static_cast<int32>(0.5 + val)));
+	return std::pow(2.0, val - static_cast<int32>(0.5 + val));
 }
 
 static int32 mBToLinear(int32 scale, int32 value_mB)
@@ -299,7 +299,7 @@ void CReverb::Initialize(bool bReset, MixSampleInt &gnRvbROfsVol, MixSampleInt &
 
 		// Room attenuation at high frequencies
 		int32 nRoomLP;
-		nRoomLP = OnePoleLowPassCoef(32768, mBToLinear(rvb.RoomHF), 5000, flOutputFrequency);
+		nRoomLP = OnePoleLowPassCoef(32768, mBToLinear(rvb.RoomHF), 5000, static_cast<double>(flOutputFrequency));
 		g_RefDelay.nCoeffs.c.l = (int16)nRoomLP;
 		g_RefDelay.nCoeffs.c.r = (int16)nRoomLP;
 
@@ -360,7 +360,7 @@ void CReverb::Initialize(bool bReset, MixSampleInt &gnRvbROfsVol, MixSampleInt &
 		float fReverbDamping = rvb.flReverbDamping * rvb.flReverbDamping;
 		int32 nDampingLowPass;
 
-		nDampingLowPass = OnePoleLowPassCoef(32768, fReverbDamping, 5000, flOutputFrequency);
+		nDampingLowPass = OnePoleLowPassCoef(32768, static_cast<double>(fReverbDamping), 5000, static_cast<double>(flOutputFrequency));
 		Limit(nDampingLowPass, 0x100, 0x7f00);
 		
 		g_LateReverb.nDecayLP[0].c.l = (int16)nDampingLowPass;
