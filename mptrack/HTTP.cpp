@@ -12,6 +12,7 @@
 #include "HTTP.h"
 #include "mpt/system_error/system_error.hpp"
 #include <WinInet.h>
+#include "mpt/format/join.hpp"
 #include "mpt/io/io.hpp"
 #include "mpt/io/io_stdstream.hpp"
 
@@ -323,7 +324,7 @@ Result Request::operator()(InternetSession &internet) const
 				arguments.push_back(MPT_UFORMAT("{}")(key));
 			}
 		}
-		queryPath += U_("?") + mpt::String::Combine(arguments, U_("&"));
+		queryPath += U_("?") + mpt::join_format(arguments, U_("&"));
 	}
 	Handle request = NativeHandle(HttpOpenRequest(
 		NativeHandle(connection),

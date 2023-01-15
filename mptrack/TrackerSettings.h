@@ -23,6 +23,7 @@
 #include "../sounddsp/EQ.h"
 #include "../sounddsp/DSP.h"
 #include "../sounddsp/Reverb.h"
+#include "mpt/format/join.hpp"
 #include "openmpt/sounddevice/SoundDevice.hpp"
 #include "StreamEncoderSettings.h"
 #include "Settings.h"
@@ -327,10 +328,10 @@ template<> inline PlugVolumeHandling FromSettingValue(const SettingValue &val)
 	return static_cast<PlugVolumeHandling>(val.as<int32>());
 }
 
-template<> inline SettingValue ToSettingValue(const std::vector<uint32> &val) { return mpt::String::Combine(val, U_(",")); }
+template<> inline SettingValue ToSettingValue(const std::vector<uint32> &val) { return mpt::join_format(val, U_(",")); }
 template<> inline std::vector<uint32> FromSettingValue(const SettingValue &val) { return mpt::String::Split<uint32>(val, U_(",")); }
 
-template<> inline SettingValue ToSettingValue(const std::vector<mpt::ustring> &val) { return mpt::String::Combine(val, U_(";")); }
+template<> inline SettingValue ToSettingValue(const std::vector<mpt::ustring> &val) { return mpt::join_format(val, U_(";")); }
 template<> inline std::vector<mpt::ustring> FromSettingValue(const SettingValue &val) { return mpt::String::Split<mpt::ustring>(val, U_(";")); }
 
 template<> inline SettingValue ToSettingValue(const SampleFormat &val) { return SettingValue(SampleFormat::ToInt(val)); }

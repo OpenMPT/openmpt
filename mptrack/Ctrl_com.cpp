@@ -15,6 +15,7 @@
 #include "Moddoc.h"
 #include "Globals.h"
 #include "Ctrl_com.h"
+#include "mpt/format/join.hpp"
 #include "view_com.h"
 #include "InputHandler.h"
 #include "../soundlib/mod_specifications.h"
@@ -287,7 +288,7 @@ void CCtrlComments::OnCommentsUpdated()
 			pos += lines[i].length();
 		}
 	}
-	lines_new = mpt::String::Combine(lines, std::string("\r\n"));
+	lines_new = mpt::join_format(lines, std::string("\r\n"));
 
 #endif
 

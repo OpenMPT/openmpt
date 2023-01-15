@@ -11,6 +11,7 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "AboutDialog.h"
+#include "mpt/format/join.hpp"
 #include "Image.h"
 #include "Mptrack.h"
 #include "TrackerSettings.h"
@@ -333,7 +334,7 @@ static mpt::ustring CPUFeaturesToString(mpt::arch::current::feature_flags procSu
 #else
 	MPT_UNUSED_VARIABLE(procSupport);
 #endif
-	return mpt::String::Combine(features, U_(" "));
+	return mpt::join_format(features, U_(" "));
 }
 #endif // MPT_ENABLE_ARCH_INTRINSICS
 
@@ -373,7 +374,7 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 						if(mpt::arch::current::assumed_features() & mpt::arch::current::feature::avx2) features.push_back(U_("avx2"));
 					#endif
 				#endif
-				text += mpt::String::Combine(features, U_(" "));
+				text += mpt::join_format(features, U_(" "));
 				text += lf;
 			}
 #ifdef MPT_ENABLE_ARCH_INTRINSICS

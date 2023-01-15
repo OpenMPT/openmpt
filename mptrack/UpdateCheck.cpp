@@ -28,6 +28,7 @@
 #include "openmpt/sounddevice/SoundDeviceManager.hpp"
 #include "ProgressDialog.h"
 #include "Moddoc.h"
+#include "mpt/format/join.hpp"
 #include "mpt/fs/fs.hpp"
 #include "mpt/io/io.hpp"
 #include "mpt/io/io_stdstream.hpp"
@@ -1243,11 +1244,11 @@ public:
 				{
 					if(theApp.IsSourceTreeMode())
 					{
-						throw Warning(MPT_UFORMAT("Refusing to launch update '{} {}' when running from source tree.")(updateFilename, mpt::String::Combine(downloadinfo.autoupdate_installer->arguments, U_(" "))));
+						throw Warning(MPT_UFORMAT("Refusing to launch update '{} {}' when running from source tree.")(updateFilename, mpt::join_format(downloadinfo.autoupdate_installer->arguments, U_(" "))));
 					}
 					if(reinterpret_cast<INT_PTR>(ShellExecute(NULL, NULL,
 						updateFilename.AsNative().c_str(),
-						mpt::ToWin(mpt::String::Combine(downloadinfo.autoupdate_installer->arguments, U_(" "))).c_str(),
+						mpt::ToWin(mpt::join_format(downloadinfo.autoupdate_installer->arguments, U_(" "))).c_str(),
 						dirTempOpenMPTUpdates.AsNative().c_str(),
 						SW_SHOWDEFAULT)) < 32)
 					{
@@ -1273,11 +1274,11 @@ public:
 					arguments.push_back(U_("\"") + downloadinfo.autoupdate_archive->restartbinary + U_("\""));
 					if(theApp.IsSourceTreeMode())
 					{
-						throw Warning(MPT_UFORMAT("Refusing to launch update '{} {}' when running from source tree.")(P_("cscript.exe"), mpt::String::Combine(arguments, U_(" "))));
+						throw Warning(MPT_UFORMAT("Refusing to launch update '{} {}' when running from source tree.")(P_("cscript.exe"), mpt::join_format(arguments, U_(" "))));
 					}
 					if(reinterpret_cast<INT_PTR>(ShellExecute(NULL, NULL,
 						P_("cscript.exe").AsNative().c_str(),
-						mpt::ToWin(mpt::String::Combine(arguments, U_(" "))).c_str(),
+						mpt::ToWin(mpt::join_format(arguments, U_(" "))).c_str(),
 						dirTempOpenMPTUpdates.AsNative().c_str(),
 						SW_SHOWDEFAULT)) < 32)
 					{

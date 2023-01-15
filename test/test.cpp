@@ -705,7 +705,7 @@ static void TestFloatFormat(Tfloat x, std::string format, mpt::format_simple_fla
 #ifdef MODPLUG_TRACKER
 	std::string str_sprintf = StringFormat(format, x);
 #endif
-	std::string str_iostreams = mpt::afmt::fmt(x, mpt::FormatSpec<std::string>().SetFlags(f).SetWidth(width).SetPrecision(precision));
+	std::string str_iostreams = mpt::afmt::fmt(x, mpt::format_simple_spec<std::string>().SetFlags(f).SetWidth(width).SetPrecision(precision));
 #ifdef MODPLUG_TRACKER
 	//MPT_LOG_GLOBAL(LogDebug, "test", mpt::ToUnicode(mpt::Charset::ASCII, str_sprintf));
 #endif

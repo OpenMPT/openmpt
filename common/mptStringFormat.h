@@ -15,6 +15,7 @@
 #include "mpt/endian/integer.hpp"
 #include "mpt/format/default_formatter.hpp"
 #include "mpt/format/message.hpp"
+#include "mpt/format/message_macros.hpp"
 #include "mpt/format/simple.hpp"
 #include "mpt/format/simple_spec.hpp"
 #include "mpt/string/types.hpp"
@@ -23,8 +24,6 @@
 #include "openmpt/base/FlagSet.hpp"
 
 #include "mptString.h"
-
-#include <vector>
 
 #include <cstddef>
 
@@ -112,10 +111,6 @@ inline auto format_value_default(const T & x) -> decltype(mpt::transcode<Tstring
 
 
 template <typename Tstring>
-using FormatSpec = mpt::format_simple_spec<Tstring>;
-
-
-template <typename Tstring>
 using fmtT = mpt::format<Tstring>;
 
 using afmt = fmtT<std::string>;
@@ -138,51 +133,28 @@ using cfmt = fmtT<CString>;
 #endif // MPT_WITH_MFC
 
 
-#define MPT_AFORMAT(f) mpt::format_message<mpt::default_formatter, mpt::parse_format_string_argument_count(f)>(f)
+#define MPT_AFORMAT(f) MPT_AFORMAT_MESSAGE(f)
 
 #if MPT_WSTRING_FORMAT
-#define MPT_WFORMAT(f) mpt::format_message_typed<mpt::default_formatter, mpt::parse_format_string_argument_count( L ## f ), std::wstring>( L ## f )
+#define MPT_WFORMAT(f) MPT_WFORMAT_MESSAGE(f)
 #endif
 
-#define MPT_UFORMAT(f) mpt::format_message_typed<mpt::default_formatter, mpt::parse_format_string_argument_count(MPT_ULITERAL(f)), mpt::ustring>(MPT_ULITERAL(f))
+#define MPT_UFORMAT(f) MPT_UFORMAT_MESSAGE(f)
 
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
-#define MPT_LFORMAT(f) mpt::format_message_typed<mpt::default_formatter, mpt::parse_format_string_argument_count(f), mpt::lstring>(f)
+#define MPT_LFORMAT(f) MPT_LFORMAT_MESSAGE(f)
 #endif // MPT_ENABLE_CHARSET_LOCALE
 
 #if MPT_OS_WINDOWS
-#define MPT_TFORMAT(f) mpt::format_message_typed<mpt::default_formatter, mpt::parse_format_string_argument_count(TEXT(f)), mpt::tstring>(TEXT(f))
-#endif
+#define MPT_TFORMAT(f) MPT_TFORMAT_MESSAGE(f)
+#endif // MPT_OS_WINDOWS
 
 #if defined(MPT_WITH_MFC)
-#define MPT_CFORMAT(f) mpt::format_message_typed<mpt::default_formatter, mpt::parse_format_string_argument_count(TEXT(f)), CString>(TEXT(f))
+#define MPT_CFORMAT(f) MPT_CFORMAT_MESSAGE(f)
 #endif // MPT_WITH_MFC
 
 
 } // namespace mpt
-
-
-
-namespace mpt { namespace String {
-
-// Combine a vector of values into a string, separated with the given separator.
-// No escaping is performed.
-template <typename Tstring, typename T>
-Tstring Combine(const std::vector<T> &vals, const Tstring &sep)
-{
-	Tstring str;
-	for(std::size_t i = 0; i < vals.size(); ++i)
-	{
-		if(i > 0)
-		{
-			str += sep;
-		}
-		str += mpt::format<Tstring>::val(vals[i]);
-	}
-	return str;
-}
-
-} } // namespace mpt::String
 
 
 

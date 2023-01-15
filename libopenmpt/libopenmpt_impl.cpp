@@ -33,6 +33,7 @@
 #include "mpt/format/default_integer.hpp"
 #include "mpt/format/default_floatingpoint.hpp"
 #include "mpt/format/default_string.hpp"
+#include "mpt/format/join.hpp"
 #include "mpt/io_read/callbackstream.hpp"
 #include "mpt/io_read/filecursor_callbackstream.hpp"
 #include "mpt/io_read/filecursor_memory.hpp"
@@ -138,7 +139,7 @@ static std::string get_library_version_string() {
 	}
 	if ( !fields.empty() ) {
 		str += "+";
-		str += OpenMPT::mpt::String::Combine( fields, std::string(".") );
+		str += OpenMPT::mpt::join_format( fields, std::string(".") );
 	}
 	return str;
 }

@@ -10,6 +10,8 @@
 #include "stdafx.h"
 #include "version.h"
 
+#include "mpt/format/join.hpp"
+
 #include "mptString.h"
 #include "mptStringFormat.h"
 #include "mptStringParse.h" 
@@ -518,7 +520,7 @@ mpt::ustring GetVersionString(FlagSet<Build::Strings> strings)
 	{
 		result.push_back(GetBuildFeaturesString());
 	}
-	return mpt::trim(mpt::String::Combine<mpt::ustring>(result, U_("")));
+	return mpt::trim(mpt::join_format<mpt::ustring>(result, U_("")));
 }
 
 mpt::ustring GetVersionStringPure()

@@ -16,6 +16,7 @@
 #include "Dlsbank.h"
 #endif // MODPLUG_TRACKER
 #include "../soundlib/AudioCriticalSection.h"
+#include "mpt/format/join.hpp"
 #ifndef MODPLUG_NO_FILESAVE
 #include "mpt/io/base.hpp"
 #include "mpt/io/io.hpp"
@@ -2184,12 +2185,12 @@ bool CSoundFile::ReadAUSample(SAMPLEINDEX nSample, FileReader &file, bool mayNor
 			}
 			linesPerField[lastField].push_back(AUTrimFieldFromAnnotationLine(line));
 		}
-		tags.title    = mpt::ToUnicode(charset, mpt::String::Combine(linesPerField["title"  ], std::string("\n")));
-		tags.artist   = mpt::ToUnicode(charset, mpt::String::Combine(linesPerField["artist" ], std::string("\n")));
-		tags.album    = mpt::ToUnicode(charset, mpt::String::Combine(linesPerField["album"  ], std::string("\n")));
-		tags.trackno  = mpt::ToUnicode(charset, mpt::String::Combine(linesPerField["track"  ], std::string("\n")));
-		tags.genre    = mpt::ToUnicode(charset, mpt::String::Combine(linesPerField["genre"  ], std::string("\n")));
-		tags.comments = mpt::ToUnicode(charset, mpt::String::Combine(linesPerField["comment"], std::string("\n")));
+		tags.title    = mpt::ToUnicode(charset, mpt::join_format(linesPerField["title"  ], std::string("\n")));
+		tags.artist   = mpt::ToUnicode(charset, mpt::join_format(linesPerField["artist" ], std::string("\n")));
+		tags.album    = mpt::ToUnicode(charset, mpt::join_format(linesPerField["album"  ], std::string("\n")));
+		tags.trackno  = mpt::ToUnicode(charset, mpt::join_format(linesPerField["track"  ], std::string("\n")));
+		tags.genre    = mpt::ToUnicode(charset, mpt::join_format(linesPerField["genre"  ], std::string("\n")));
+		tags.comments = mpt::ToUnicode(charset, mpt::join_format(linesPerField["comment"], std::string("\n")));
 	} else
 	{
 		// Most applications tend to write their own name here,

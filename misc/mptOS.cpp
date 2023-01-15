@@ -12,6 +12,7 @@
 #include "mptOS.h"
 
 #include "mpt/binary/hex.hpp"
+#include "mpt/format/join.hpp"
 #include "mpt/library/library.hpp"
 #include "mpt/path/native_path.hpp"
 
@@ -419,7 +420,7 @@ Version::Version(const mpt::ustring &rawVersion)
 	{
 		return;
 	}
-	mpt::ustring parsedVersion = mpt::String::Combine(version, U_("."));
+	mpt::ustring parsedVersion = mpt::join_format(version, U_("."));
 	std::size_t len = std::min(parsedVersion.length(), rawVersion.length());
 	if(len == 0)
 	{
