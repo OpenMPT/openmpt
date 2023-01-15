@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.3.42-pre
 
+ *  mpg123: Update to v1.31.2 (2023-01-14).
+
 ### libopenmpt 0.3.41 (2023-01-08)
 
  *  [**Bug**] openmpt123: openmpt123 crashed on Windows 9x when showing any
