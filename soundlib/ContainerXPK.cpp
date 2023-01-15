@@ -93,6 +93,8 @@ static uint8 XPK_ReadTable(int32 index)
 	};
 	if(index < 0) throw XPK_error();
 	if(static_cast<std::size_t>(index) >= mpt::size(xpk_table)) throw XPK_error();
+	// cppcheck false-positive
+	// cppcheck-suppress arrayIndexOutOfBoundsCond
 	return xpk_table[index];
 }
 
