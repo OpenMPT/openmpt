@@ -173,6 +173,7 @@ MPT_FILES_SRC_MPT += src/mpt/format/default_formatter.hpp
 MPT_FILES_SRC_MPT += src/mpt/format/default_integer.hpp
 MPT_FILES_SRC_MPT += src/mpt/format/default_string.hpp
 MPT_FILES_SRC_MPT += src/mpt/format/helpers.hpp
+MPT_FILES_SRC_MPT += src/mpt/format/join.hpp
 MPT_FILES_SRC_MPT += src/mpt/format/message.hpp
 MPT_FILES_SRC_MPT += src/mpt/format/message_macros.hpp
 MPT_FILES_SRC_MPT += src/mpt/format/simple.hpp
