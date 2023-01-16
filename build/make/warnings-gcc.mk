@@ -9,7 +9,11 @@ CXXFLAGS_WARNINGS +=
 CFLAGS_WARNINGS   += -Wframe-larger-than=4000 -Wstrict-prototypes
 CXXFLAGS_WARNINGS += 
 #CXXFLAGS_WARNINGS += -Wshadow -Wswitch-enum 
+# gold
 LDFLAGS_WARNINGS  += -Wl,-no-undefined -Wl,--detect-odr-violations
+# GCC 8
+CXXFLAGS_WARNINGS += -Wcast-align=strict
+CFLAGS_WARNINGS   += -Wcast-align=strict
 endif
 
 CFLAGS_SILENT += -Wno-cast-qual
