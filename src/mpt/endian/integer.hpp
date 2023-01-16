@@ -64,11 +64,11 @@ MPT_CONSTEXPRINLINE T EndianDecode(std::array<std::byte, size> data) noexcept {
 	unsigned_base_type uval = unsigned_base_type();
 	if constexpr (endian == mpt::endian::little) {
 		for (std::size_t i = 0; i < sizeof(base_type); ++i) {
-			uval |= static_cast<unsigned_base_type>(static_cast<uint8>(data[i])) << (i * 8);
+			uval |= static_cast<unsigned_base_type>(static_cast<unsigned_base_type>(static_cast<uint8>(data[i])) << (i * 8));
 		}
 	} else {
 		for (std::size_t i = 0; i < sizeof(base_type); ++i) {
-			uval |= static_cast<unsigned_base_type>(static_cast<uint8>(data[(sizeof(base_type) - 1) - i])) << (i * 8);
+			uval |= static_cast<unsigned_base_type>(static_cast<unsigned_base_type>(static_cast<uint8>(data[(sizeof(base_type) - 1) - i])) << (i * 8));
 		}
 	}
 	val = static_cast<base_type>(uval);
@@ -128,13 +128,13 @@ public:
 			if constexpr (endian == mpt::endian::big) {
 				typename std::make_unsigned<int_type>::type uval = 0;
 				for (std::size_t i = 0; i < sizeof(base_type); ++i) {
-					uval |= static_cast<typename std::make_unsigned<int_type>::type>(data[i]) << (8 * (sizeof(base_type) - 1 - i));
+					uval |= static_cast<typename std::make_unsigned<int_type>::type>(static_cast<typename std::make_unsigned<int_type>::type>(data[i]) << (8 * (sizeof(base_type) - 1 - i)));
 				}
 				return static_cast<base_type>(uval);
 			} else {
 				typename std::make_unsigned<int_type>::type uval = 0;
 				for (std::size_t i = 0; i < sizeof(base_type); ++i) {
-					uval |= static_cast<typename std::make_unsigned<int_type>::type>(data[i]) << (8 * i);
+					uval |= static_cast<typename std::make_unsigned<int_type>::type>(static_cast<typename std::make_unsigned<int_type>::type>(data[i]) << (8 * i));
 				}
 				return static_cast<base_type>(uval);
 			}
