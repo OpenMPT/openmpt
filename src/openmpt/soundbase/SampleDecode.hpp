@@ -204,7 +204,7 @@ struct DecodeInt16Delta
 	}
 	MPT_FORCEINLINE output_t operator()(const input_t *inBuf)
 	{
-		delta += mpt::byte_cast<uint8>(inBuf[loByteIndex]) | (mpt::byte_cast<uint8>(inBuf[hiByteIndex]) << 8);
+		delta += static_cast<uint16>(static_cast<uint16>(mpt::byte_cast<uint8>(inBuf[loByteIndex])) | static_cast<uint16>(mpt::byte_cast<uint8>(inBuf[hiByteIndex]) << 8));
 		return static_cast<int16>(delta);
 	}
 };
@@ -224,7 +224,7 @@ struct DecodeInt16Delta8
 		delta += mpt::byte_cast<uint8>(inBuf[0]);
 		int16 result = delta & 0xFF;
 		delta += mpt::byte_cast<uint8>(inBuf[1]);
-		result |= (delta << 8);
+		result |= static_cast<uint16>(delta << 8);
 		return result;
 	}
 };
