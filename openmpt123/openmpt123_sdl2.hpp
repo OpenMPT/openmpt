@@ -108,10 +108,10 @@ public:
 		std::memset( &audiospec, 0, sizeof( SDL_AudioSpec ) );
 		audiospec.freq = flags.samplerate;
 		audiospec.format = ( flags.use_float ? AUDIO_F32SYS : AUDIO_S16SYS );
-		audiospec.channels = flags.channels;
+		audiospec.channels = static_cast<Uint8>( flags.channels );
 		audiospec.silence = 0;
-		audiospec.samples = round_up_power2( ( flags.buffer * flags.samplerate ) / ( 1000 * 2 ) );
-		audiospec.size = audiospec.samples * audiospec.channels * ( flags.use_float ? sizeof( float ) : sizeof( std::int16_t ) );
+		audiospec.samples = static_cast<Uint16>( round_up_power2( ( flags.buffer * flags.samplerate ) / ( 1000 * 2 ) ) );
+		audiospec.size = static_cast<Uint32>( audiospec.samples * audiospec.channels * ( flags.use_float ? sizeof( float ) : sizeof( std::int16_t ) ) );
 		audiospec.callback = NULL;
 		audiospec.userdata = NULL;
 		if ( flags.verbose ) {
@@ -148,7 +148,7 @@ private:
 		while ( frames > 0 ) {
 			std::size_t chunk_frames = std::min( frames, get_num_writeable_frames() );
 			if ( chunk_frames > 0 ) {
-				check_sdl2_error( SDL_QueueAudio( dev, buffer, chunk_frames * channels * ( use_float ? sizeof( float ) : sizeof( std::int16_t ) ) ) );
+				check_sdl2_error( SDL_QueueAudio( dev, buffer, static_cast<Uint32>( chunk_frames * channels * ( use_float ? sizeof( float ) : sizeof( std::int16_t ) ) ) ) );
 				frames -= chunk_frames;
 				buffer += chunk_frames * channels;
 			} else {

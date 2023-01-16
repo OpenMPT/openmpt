@@ -65,19 +65,19 @@ public:
 		std::memset( &ss, 0, sizeof( pa_sample_spec ) );
 		ss.format = ( flags.use_float ? PA_SAMPLE_FLOAT32 : PA_SAMPLE_S16NE );
 		ss.rate = flags.samplerate;
-		ss.channels = flags.channels;
+		ss.channels = static_cast<std::uint8_t>( flags.channels );
 		pa_buffer_attr ba;
 		std::memset( &ba, 0, sizeof( pa_buffer_attr ) );
 		bool use_ba = false;
 		if ( flags.buffer != default_high && flags.buffer != default_low ) {
 			use_ba = true;
-			ba.maxlength = channels * sampleSize * ( flags.buffer * flags.samplerate / 1000 );
+			ba.maxlength = static_cast<std::uint32_t>( channels * sampleSize * ( flags.buffer * flags.samplerate / 1000 ) );
 		} else {
 			ba.maxlength = static_cast<std::uint32_t>(-1);
 		}
 		if ( flags.period != default_high && flags.period != default_low ) {
 			use_ba = true;
-			ba.minreq = channels * sampleSize * ( flags.period * flags.samplerate / 1000 );
+			ba.minreq = static_cast<std::uint32_t>( channels * sampleSize * ( flags.period * flags.samplerate / 1000 ) );
 			if ( ba.maxlength != static_cast<std::uint32_t>(-1) ) {
 				ba.tlength = ba.maxlength - ba.minreq;
 				ba.prebuf = ba.tlength;

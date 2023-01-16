@@ -727,7 +727,7 @@ struct meter_type {
 static const float falloff_rate = 20.0f / 1.7f;
 
 static void update_meter( meter_type & meter, const commandlineflags & flags, std::size_t count, const std::int16_t * const * buffers ) {
-	float falloff_factor = std::pow( 10.0f, -falloff_rate / flags.samplerate / 20.0f );
+	float falloff_factor = std::pow( 10.0f, -falloff_rate / static_cast<float>( flags.samplerate ) / 20.0f );
 	for ( int channel = 0; channel < flags.channels; ++channel ) {
 		meter.channels[channel].peak = 0.0f;
 		for ( std::size_t frame = 0; frame < count; ++frame ) {
@@ -756,7 +756,7 @@ static void update_meter( meter_type & meter, const commandlineflags & flags, st
 }
 
 static void update_meter( meter_type & meter, const commandlineflags & flags, std::size_t count, const float * const * buffers ) {
-	float falloff_factor = std::pow( 10.0f, -falloff_rate / flags.samplerate / 20.0f );
+	float falloff_factor = std::pow( 10.0f, -falloff_rate / static_cast<float>( flags.samplerate ) / 20.0f );
 	for ( int channel = 0; channel < flags.channels; ++channel ) {
 		if ( !count ) {
 			meter = meter_type();
@@ -1179,7 +1179,7 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 			}
 			if ( flags.show_ui ) {
 				log << MPT_USTRING("Settings...: ");
-				log << MPT_USTRING("Gain: ") << flags.gain * 0.01f << MPT_USTRING(" dB") << MPT_USTRING("   ");
+				log << MPT_USTRING("Gain: ") << static_cast<float>( flags.gain ) * 0.01f << MPT_USTRING(" dB") << MPT_USTRING("   ");
 				log << MPT_USTRING("Stereo: ") << flags.separation << MPT_USTRING(" %") << MPT_USTRING("   ");
 				log << MPT_USTRING("Filter: ") << flags.filtertaps << MPT_USTRING(" taps") << MPT_USTRING("   ");
 				log << MPT_USTRING("Ramping: ") << flags.ramping << MPT_USTRING("   ");
@@ -1234,7 +1234,7 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 		} else {
 			if ( flags.show_ui ) {
 				log << MPT_USTRING(" ");
-				log << align_right<mpt::ustring>( MPT_UCHAR(':'), 3, flags.gain * 0.01f ) << MPT_USTRING("dB");
+				log << align_right<mpt::ustring>( MPT_UCHAR(':'), 3, static_cast<float>( flags.gain ) * 0.01f ) << MPT_USTRING("dB");
 				log << MPT_USTRING("|");
 				log << align_right<mpt::ustring>( MPT_UCHAR(':'), 3, flags.separation ) << MPT_USTRING("%");
 				log << MPT_USTRING("|");
