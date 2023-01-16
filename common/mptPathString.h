@@ -56,7 +56,8 @@ using RawPathString = PathString::raw_path_type;
 
 
 
-inline mpt::ustring ToUString(const mpt::PathString &x)
+template <typename T, typename std::enable_if<std::is_same<T, mpt::PathString>::value, bool>::type = true>
+inline mpt::ustring ToUString(const T &x)
 {
 	return x.ToUnicode();
 }
