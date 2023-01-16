@@ -942,7 +942,7 @@ std::int32_t module_impl::get_render_param( int param ) const {
 void module_impl::set_render_param( int param, std::int32_t value ) {
 	switch ( param ) {
 		case module::RENDER_MASTERGAIN_MILLIBEL: {
-			m_Gain = static_cast<float>( std::pow( 10.0f, value * 0.001f * 0.5f ) );
+			m_Gain = std::pow( 10.0f, static_cast<float>( value ) * 0.001f * 0.5f );
 		} break;
 		case module::RENDER_STEREOSEPARATION_PERCENT: {
 			std::int32_t newvalue = value * OpenMPT::MixerSettings::StereoSeparationScale / 100;
