@@ -146,7 +146,7 @@ public:
 };
 
 struct self_xmplay_t {
-	std::vector<float> subsong_lengths;
+	std::vector<double> subsong_lengths;
 	std::vector<std::string> subsong_names;
 	std::size_t samplerate = 48000;
 	std::size_t num_channels = 2;
@@ -243,7 +243,7 @@ static std::string StringUpperCase( std::string str ) {
 	return str;
 }
 
-static std::string seconds_to_string( float time ) {
+static std::string seconds_to_string( double time ) {
 	std::int64_t time_ms = static_cast<std::int64_t>( time * 1000 );
 	std::int64_t seconds = ( time_ms / 1000 ) % 60;
 	std::int64_t minutes = ( time_ms / ( 1000 * 60 ) ) % 60;
@@ -737,7 +737,7 @@ static float * build_xmplay_length( const openmpt::module & /* mod */ ) {
 		return nullptr;
 	}
 	for ( std::size_t i = 0; i < self->subsong_lengths.size(); ++i ) {
-		result[i] = self->subsong_lengths[i];
+		result[i] = static_cast<float>( self->subsong_lengths[i] );
 	}
 	return result;
 }
@@ -971,14 +971,14 @@ static DWORD WINAPI openmpt_Open( const char * filename, XMPFILE file ) {
 		self->subsong_lengths.resize( num_subsongs );
 		for ( std::int32_t i = 0; i < num_subsongs; ++i ) {
 			self->mod->select_subsong( i );
-			self->subsong_lengths[i] = static_cast<float>( self->mod->get_duration_seconds() );
+			self->subsong_lengths[i] = self->mod->get_duration_seconds();
 		}
 		self->subsong_names = self->mod->get_subsong_names();
 		self->mod->select_subsong( 0 );
 		self->tempo_factor = 0;
 		self->pitch_factor = 0;
 
-		xmpfin->SetLength( self->subsong_lengths[0], TRUE );
+		xmpfin->SetLength( static_cast<float>( self->subsong_lengths[0] ), TRUE );
 		return 2;
 	} catch ( ... ) {
 		self->delete_mod();
@@ -1114,7 +1114,7 @@ static void WINAPI openmpt_GetGeneralInfo( char * buf ) {
 
 	if( !self->single_subsong_mode && self->subsong_lengths.size() > 1 ) {
 		for ( std::size_t i = 0; i < self->subsong_lengths.size(); ++i ) {
-			str << ( i == 0 ? "Subsongs\t" : "\t" ) << (i + 1) << ". " << seconds_to_string( self->subsong_lengths[i]) << " " << self->subsong_names[i] << "\r";
+			str << ( i == 0 ? "Subsongs\t" : "\t" ) << (i + 1) << ". " << seconds_to_string( self->subsong_lengths[i] ) << " " << self->subsong_names[i] << "\r";
 		}
 	}
 
@@ -1261,11 +1261,11 @@ static void WINAPI openmpt_GetSamples( char * buf ) {
 }
 
 static DWORD WINAPI openmpt_GetSubSongs( float * length ) {
-	*length = 0.0f;
+	double tmp = 0.0;
 	for ( auto sub_length : self->subsong_lengths ) {
-		*length += sub_length;
+		tmp += sub_length;
 	}
-
+	*length = static_cast<float>( tmp );
 	return static_cast<DWORD>( self->subsong_lengths.size() );
 }
 
