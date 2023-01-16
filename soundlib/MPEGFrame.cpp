@@ -92,7 +92,7 @@ MPEGFrame::MPEGFrame(FileCursor &file)
 	bool stereo = ((header[3] & 0xC0) >> 6) != 3;
 
 	isValid = true;
-	frameSize = (((mpegCoefficients[mpeg1][layer] * (bitRates[mpeg1][layer][bitRate] * 1000) / samplingRates[version][sampleRate]) + padding)) * (layer == 0 ? 4 : 1);
+	frameSize = static_cast<uint16>((((mpegCoefficients[mpeg1][layer] * (bitRates[mpeg1][layer][bitRate] * 1000) / samplingRates[version][sampleRate]) + padding)) * (layer == 0 ? uint16(4u) : uint16(1u)));
 	numSamples = samplesPerFrame[mpeg1][layer];
 	if(stereo)
 	{
