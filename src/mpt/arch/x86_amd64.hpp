@@ -664,65 +664,65 @@ private:
 
 		[[nodiscard]] MPT_CONSTEXPR20_FUN fixed_string<4> as_text4() const noexcept {
 			fixed_string<4> result;
-			result[0 + 0] = (a >> 0) & 0xff;
-			result[0 + 1] = (a >> 8) & 0xff;
-			result[0 + 2] = (a >> 16) & 0xff;
-			result[0 + 3] = (a >> 24) & 0xff;
+			result[0 + 0] = static_cast<char>((a >> 0) & 0xff);
+			result[0 + 1] = static_cast<char>((a >> 8) & 0xff);
+			result[0 + 2] = static_cast<char>((a >> 16) & 0xff);
+			result[0 + 3] = static_cast<char>((a >> 24) & 0xff);
 			return result;
 		}
 
 		[[nodiscard]] MPT_CONSTEXPR20_FUN fixed_string<12> as_text12bcd() const noexcept {
 			fixed_string<12> result;
-			result[0 + 0] = (b >> 0) & 0xff;
-			result[0 + 1] = (b >> 8) & 0xff;
-			result[0 + 2] = (b >> 16) & 0xff;
-			result[0 + 3] = (b >> 24) & 0xff;
-			result[4 + 0] = (c >> 0) & 0xff;
-			result[4 + 1] = (c >> 8) & 0xff;
-			result[4 + 2] = (c >> 16) & 0xff;
-			result[4 + 3] = (c >> 24) & 0xff;
-			result[8 + 0] = (d >> 0) & 0xff;
-			result[8 + 1] = (d >> 8) & 0xff;
-			result[8 + 2] = (d >> 16) & 0xff;
-			result[8 + 3] = (d >> 24) & 0xff;
+			result[0 + 0] = static_cast<char>((b >> 0) & 0xff);
+			result[0 + 1] = static_cast<char>((b >> 8) & 0xff);
+			result[0 + 2] = static_cast<char>((b >> 16) & 0xff);
+			result[0 + 3] = static_cast<char>((b >> 24) & 0xff);
+			result[4 + 0] = static_cast<char>((c >> 0) & 0xff);
+			result[4 + 1] = static_cast<char>((c >> 8) & 0xff);
+			result[4 + 2] = static_cast<char>((c >> 16) & 0xff);
+			result[4 + 3] = static_cast<char>((c >> 24) & 0xff);
+			result[8 + 0] = static_cast<char>((d >> 0) & 0xff);
+			result[8 + 1] = static_cast<char>((d >> 8) & 0xff);
+			result[8 + 2] = static_cast<char>((d >> 16) & 0xff);
+			result[8 + 3] = static_cast<char>((d >> 24) & 0xff);
 			return result;
 		}
 
 		[[nodiscard]] MPT_CONSTEXPR20_FUN fixed_string<12> as_text12bdc() const noexcept {
 			fixed_string<12> result;
-			result[0 + 0] = (b >> 0) & 0xff;
-			result[0 + 1] = (b >> 8) & 0xff;
-			result[0 + 2] = (b >> 16) & 0xff;
-			result[0 + 3] = (b >> 24) & 0xff;
-			result[4 + 0] = (d >> 0) & 0xff;
-			result[4 + 1] = (d >> 8) & 0xff;
-			result[4 + 2] = (d >> 16) & 0xff;
-			result[4 + 3] = (d >> 24) & 0xff;
-			result[8 + 0] = (c >> 0) & 0xff;
-			result[8 + 1] = (c >> 8) & 0xff;
-			result[8 + 2] = (c >> 16) & 0xff;
-			result[8 + 3] = (c >> 24) & 0xff;
+			result[0 + 0] = static_cast<char>((b >> 0) & 0xff);
+			result[0 + 1] = static_cast<char>((b >> 8) & 0xff);
+			result[0 + 2] = static_cast<char>((b >> 16) & 0xff);
+			result[0 + 3] = static_cast<char>((b >> 24) & 0xff);
+			result[4 + 0] = static_cast<char>((d >> 0) & 0xff);
+			result[4 + 1] = static_cast<char>((d >> 8) & 0xff);
+			result[4 + 2] = static_cast<char>((d >> 16) & 0xff);
+			result[4 + 3] = static_cast<char>((d >> 24) & 0xff);
+			result[8 + 0] = static_cast<char>((c >> 0) & 0xff);
+			result[8 + 1] = static_cast<char>((c >> 8) & 0xff);
+			result[8 + 2] = static_cast<char>((c >> 16) & 0xff);
+			result[8 + 3] = static_cast<char>((c >> 24) & 0xff);
 			return result;
 		}
 
 		[[nodiscard]] MPT_CONSTEXPR20_FUN fixed_string<16> as_text16() const noexcept {
 			fixed_string<16> result;
-			result[0 + 0] = (a >> 0) & 0xff;
-			result[0 + 1] = (a >> 8) & 0xff;
-			result[0 + 2] = (a >> 16) & 0xff;
-			result[0 + 3] = (a >> 24) & 0xff;
-			result[4 + 0] = (b >> 0) & 0xff;
-			result[4 + 1] = (b >> 8) & 0xff;
-			result[4 + 2] = (b >> 16) & 0xff;
-			result[4 + 3] = (b >> 24) & 0xff;
-			result[8 + 0] = (c >> 0) & 0xff;
-			result[8 + 1] = (c >> 8) & 0xff;
-			result[8 + 2] = (c >> 16) & 0xff;
-			result[8 + 3] = (c >> 24) & 0xff;
-			result[12 + 0] = (d >> 0) & 0xff;
-			result[12 + 1] = (d >> 8) & 0xff;
-			result[12 + 2] = (d >> 16) & 0xff;
-			result[12 + 3] = (d >> 24) & 0xff;
+			result[0 + 0] = static_cast<char>((a >> 0) & 0xff);
+			result[0 + 1] = static_cast<char>((a >> 8) & 0xff);
+			result[0 + 2] = static_cast<char>((a >> 16) & 0xff);
+			result[0 + 3] = static_cast<char>((a >> 24) & 0xff);
+			result[4 + 0] = static_cast<char>((b >> 0) & 0xff);
+			result[4 + 1] = static_cast<char>((b >> 8) & 0xff);
+			result[4 + 2] = static_cast<char>((b >> 16) & 0xff);
+			result[4 + 3] = static_cast<char>((b >> 24) & 0xff);
+			result[8 + 0] = static_cast<char>((c >> 0) & 0xff);
+			result[8 + 1] = static_cast<char>((c >> 8) & 0xff);
+			result[8 + 2] = static_cast<char>((c >> 16) & 0xff);
+			result[8 + 3] = static_cast<char>((c >> 24) & 0xff);
+			result[12 + 0] = static_cast<char>((d >> 0) & 0xff);
+			result[12 + 1] = static_cast<char>((d >> 8) & 0xff);
+			result[12 + 2] = static_cast<char>((d >> 16) & 0xff);
+			result[12 + 3] = static_cast<char>((d >> 24) & 0xff);
 			return result;
 		}
 	};
