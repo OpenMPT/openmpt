@@ -304,7 +304,7 @@ RATIOTYPE CTuning::GetRatio(const NOTEINDEXTYPE baseNote, const STEPINDEXTYPE ba
 	} else
 	{
 		// Geometric finestepping
-		fineRatio = std::pow(GetRatio(note + 1) / GetRatio(note), static_cast<RATIOTYPE>(fineStep) / (fineStepCount + 1));
+		fineRatio = std::pow(GetRatio(note + 1) / GetRatio(note), static_cast<RATIOTYPE>(fineStep) / static_cast<RATIOTYPE>(fineStepCount + 1));
 	}
 	return m_RatioTable[note - m_NoteMin] * fineRatio;
 }
@@ -368,7 +368,7 @@ void CTuning::UpdateFineStepTable()
 		}
 		m_RatioTableFine.resize(m_FineStepCount);
 		const RATIOTYPE q = GetRatio(GetNoteRange().first + 1) / GetRatio(GetNoteRange().first);
-		const RATIOTYPE rFineStep = std::pow(q, static_cast<RATIOTYPE>(1)/(m_FineStepCount+1));
+		const RATIOTYPE rFineStep = std::pow(q, static_cast<RATIOTYPE>(1) / static_cast<RATIOTYPE>(m_FineStepCount + 1));
 		for(USTEPINDEXTYPE i = 1; i<=m_FineStepCount; i++)
 			m_RatioTableFine[i-1] = std::pow(rFineStep, static_cast<RATIOTYPE>(i));
 		return;
@@ -390,8 +390,8 @@ void CTuning::UpdateFineStepTable()
 			const NOTEINDEXTYPE startnote = GetRefNote(GetNoteRange().first);
 			for(UNOTEINDEXTYPE i = 0; i<p; i++)
 			{
-				const NOTEINDEXTYPE refnote = GetRefNote(startnote+i);
-				const RATIOTYPE rFineStep = std::pow(GetRatio(refnote+1) / GetRatio(refnote), static_cast<RATIOTYPE>(1)/(m_FineStepCount+1));
+				const NOTEINDEXTYPE refnote = GetRefNote(static_cast<NOTEINDEXTYPE>(startnote + i));
+				const RATIOTYPE rFineStep = std::pow(GetRatio(refnote+1) / GetRatio(refnote), static_cast<RATIOTYPE>(1) / static_cast<RATIOTYPE>(m_FineStepCount + 1));
 				for(UNOTEINDEXTYPE j = 1; j<=m_FineStepCount; j++)
 				{
 					m_RatioTableFine[m_FineStepCount * refnote + (j-1)] = std::pow(rFineStep, static_cast<RATIOTYPE>(j));
