@@ -277,7 +277,7 @@ void ITCompression::WriteBits(int8 width, int v)
 {
 	while(width > remBits)
 	{
-		byteVal |= (v << bitPos);
+		byteVal |= static_cast<uint8>(v << bitPos);
 		width -= remBits;
 		v >>= remBits;
 		bitPos = 0;
@@ -288,7 +288,7 @@ void ITCompression::WriteBits(int8 width, int v)
 
 	if(width > 0)
 	{
-		byteVal |= (v & ((1 << width) - 1)) << bitPos;
+		byteVal |= static_cast<uint8>((v & ((1 << width) - 1)) << bitPos);
 		remBits -= width;
 		bitPos += width;
 	}
