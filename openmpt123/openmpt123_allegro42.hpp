@@ -19,6 +19,7 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
 #pragma GCC diagnostic ignored "-Wfloat-conversion"
+#pragma GCC diagnostic ignored "-Wdouble-promotion"
 #endif
 #include <allegro.h>
 #if defined(__GNUC__) && !defined(__clang__) && !defined(_MSC_VER)
