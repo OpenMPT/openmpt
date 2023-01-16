@@ -231,9 +231,9 @@ inline mpt::Date::UTC UnixAsUTC(Unix tp)
 		result.year = static_cast<int>(ymd.year());
 		result.month = static_cast<unsigned int>(ymd.month());
 		result.day = static_cast<unsigned int>(ymd.day());
-		result.hours = hms.hours().count();
-		result.minutes = hms.minutes().count();
-		result.seconds = hms.seconds().count();
+		result.hours = static_cast<int32>(hms.hours().count());
+		result.minutes = static_cast<int32>(hms.minutes().count());
+		result.seconds = static_cast<int64>(hms.seconds().count());
 		return result;
 	} catch(const std::exception &)
 	{
@@ -275,9 +275,9 @@ inline mpt::Date::Local UnixAsLocal(Unix tp)
 		result.year = static_cast<int>(ymd.year());
 		result.month = static_cast<unsigned int>(ymd.month());
 		result.day = static_cast<unsigned int>(ymd.day());
-		result.hours = hms.hours().count();
-		result.minutes = hms.minutes().count();
-		result.seconds = hms.seconds().count();
+		result.hours = static_cast<int32>(hms.hours().count());
+		result.minutes = static_cast<int32>(hms.minutes().count());
+		result.seconds = static_cast<int64>(hms.seconds().count());
 		return result;
 	} catch(const std::exception &)
 	{
