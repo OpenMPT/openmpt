@@ -1505,7 +1505,7 @@ static MPT_NOINLINE void TestMisc2()
 		float f  = ::powf(2.0f,         exp);
 		double d = ::pow (2.0 , (double)exp);
 		VERIFY_EQUAL_EPS(d, 6.349605, 0.00001);
-		VERIFY_EQUAL_EPS(f, 6.349605, 0.00001);
+		VERIFY_EQUAL_EPS(f, 6.349605f, 0.00001f);
 	#endif
 
 }
