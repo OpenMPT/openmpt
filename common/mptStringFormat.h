@@ -82,13 +82,13 @@ inline auto format_value_default(const mpt::packed<Tint, endian> & x) -> decltyp
 OPENMPT_NAMESPACE_BEGIN
 
 
-template <typename Tstring, typename T, std::enable_if_t<!mpt::is_string_type<typename mpt::make_string_type<T>::type>::value, bool> = true>
+template <typename Tstring, typename T>
 inline auto format_value_default(const T & x) -> decltype(mpt::transcode<Tstring>(x.ToUString())) {
 	return mpt::transcode<Tstring>(x.ToUString());
 }
 
 
-template <typename Tstring, typename T, std::enable_if_t<!mpt::is_string_type<typename mpt::make_string_type<T>::type>::value, bool> = true>
+template <typename Tstring, typename T>
 inline auto format_value_default(const T & x) -> decltype(mpt::transcode<Tstring>(ToUString(x))) {
 	return mpt::transcode<Tstring>(ToUString(x));
 }
@@ -98,13 +98,13 @@ namespace mpt
 {
 
 
-template <typename Tstring, typename T, std::enable_if_t<!mpt::is_string_type<typename mpt::make_string_type<T>::type>::value, bool> = true>
+template <typename Tstring, typename T>
 inline auto format_value_default(const T & x) -> decltype(mpt::transcode<Tstring>(x.ToUString())) {
 	return mpt::transcode<Tstring>(x.ToUString());
 }
 
 
-template <typename Tstring, typename T, std::enable_if_t<!mpt::is_string_type<typename mpt::make_string_type<T>::type>::value, bool> = true>
+template <typename Tstring, typename T>
 inline auto format_value_default(const T & x) -> decltype(mpt::transcode<Tstring>(ToUString(x))) {
 	return mpt::transcode<Tstring>(ToUString(x));
 }
