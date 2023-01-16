@@ -38,8 +38,13 @@ static inline bool Testbit(uint8 val, uint8 bitindex) {return ((val & (1 << biti
 
 static inline void Setbit(uint8& val, uint8 bitindex, bool newval)
 {
-	if(newval) val |= (1 << bitindex);
-	else val &= ~(1 << bitindex);
+	if(newval)
+	{
+		val |= static_cast<uint8>(1u << bitindex);
+	} else
+	{
+		val &= static_cast<uint8>(~(1u << bitindex));
+	}
 }
 
 
