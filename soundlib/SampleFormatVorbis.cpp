@@ -178,7 +178,7 @@ bool CSoundFile::ReadVorbisSample(SAMPLEINDEX sample, FileReader &file)
 
 	file.Rewind();
 
-	int rate = 0;
+	long rate = 0;
 	int channels = 0;
 	std::vector<int16> raw_sample_data;
 
@@ -325,7 +325,7 @@ bool CSoundFile::ReadVorbisSample(SAMPLEINDEX sample, FileReader &file)
 	DestroySampleThreadsafe(sample);
 	ModSample &mptSample = Samples[sample];
 	mptSample.Initialize();
-	mptSample.nC5Speed = rate;
+	mptSample.nC5Speed = static_cast<uint32>(rate);
 	mptSample.nLength = std::min(MAX_SAMPLE_LENGTH, mpt::saturate_cast<SmpLength>(raw_sample_data.size() / channels));
 
 	mptSample.uFlags.set(CHN_16BIT);

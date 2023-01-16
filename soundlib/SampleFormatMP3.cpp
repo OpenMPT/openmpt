@@ -598,7 +598,7 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool raw, b
 	{
 		m_szNames[sample] = mpt::ToCharset(GetCharsetInternal(), sampleName);
 		Samples[sample].Initialize();
-		Samples[sample].nC5Speed = rate;
+		Samples[sample].nC5Speed = static_cast<uint32>(rate);
 	}
 	Samples[sample].nLength = mpt::saturate_cast<SmpLength>((data.size() / channels) - data_skip_frames);
 
