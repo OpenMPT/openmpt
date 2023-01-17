@@ -210,6 +210,7 @@ MPT_FILES_SRC_MPT += src/mpt/osinfo/class.hpp
 MPT_FILES_SRC_MPT += src/mpt/osinfo/windows_version.hpp
 MPT_FILES_SRC_MPT += src/mpt/out_of_memory/out_of_memory.hpp
 MPT_FILES_SRC_MPT += src/mpt/parse/parse.hpp
+MPT_FILES_SRC_MPT += src/mpt/parse/split.hpp
 #MPT_FILES_SRC_MPT += src/mpt/path/path.hpp
 MPT_FILES_SRC_MPT += src/mpt/random/crand.hpp
 MPT_FILES_SRC_MPT += src/mpt/random/default_engines.hpp
