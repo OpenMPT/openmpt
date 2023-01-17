@@ -19,6 +19,8 @@
 #include "../common/mptFileIO.h"
 #include <sstream>
 #include "TrackerSettings.h"
+#include "mpt/parse/parse.hpp"
+#include "mpt/string/utility.hpp"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -2089,7 +2091,7 @@ bool CCommandSet::LoadFile(std::istream &iStrm, const mpt::ustring &filenameDesc
 		if (curLine.empty())
 			continue;
 
-		tokens = mpt::String::Split<std::string>(curLine, ":");
+		tokens = mpt::split(curLine, std::string(":"));
 		if(tokens.size() == 2 && !mpt::CompareNoCaseAscii(tokens[0], "version"))
 		{
 			// This line indicates the version of this keymap file (e.g. "version:1" on older versions, in newer version the OpenMPT version that was used to save the file)
@@ -2105,11 +2107,11 @@ bool CCommandSet::LoadFile(std::istream &iStrm, const mpt::ustring &filenameDesc
 		CommandID cmd = kcNumCommands;
 		if(tokens.size() >= 5)
 		{
-			kc.Context(static_cast<InputTargetContext>(ConvertStrTo<int>(tokens[0])));
-			cmd = FindCmd(ConvertStrTo<uint32>(tokens[1]));
+			kc.Context(static_cast<InputTargetContext>(mpt::parse<int>(tokens[0])));
+			cmd = FindCmd(mpt::parse<uint32>(tokens[1]));
 
 			// Modifier
-			kc.Modifier(static_cast<Modifiers>(ConvertStrTo<int>(tokens[2])));
+			kc.Modifier(static_cast<Modifiers>(mpt::parse<int>(tokens[2])));
 
 			// Virtual Key code / Scan code
 			UINT vk = 0;
@@ -2117,7 +2119,7 @@ bool CCommandSet::LoadFile(std::istream &iStrm, const mpt::ustring &filenameDesc
 			if(scPos != std::string::npos)
 			{
 				// Scan code present
-				UINT sc = ConvertStrTo<UINT>(tokens[3].substr(scPos + 1));
+				UINT sc = mpt::parse<UINT>(tokens[3].substr(scPos + 1));
 				for(auto i = layouts.begin(); i != layouts.end() && vk == 0; i++)
 				{
 					vk = MapVirtualKeyEx(sc, MAPVK_VSC_TO_VK, *i);
@@ -2125,12 +2127,12 @@ bool CCommandSet::LoadFile(std::istream &iStrm, const mpt::ustring &filenameDesc
 			}
 			if(vk == 0)
 			{
-				vk = ConvertStrTo<UINT>(tokens[3]);
+				vk = mpt::parse<UINT>(tokens[3]);
 			}
 			kc.KeyCode(vk);
 
 			// Event
-			kc.EventType(static_cast<KeyEventType>(ConvertStrTo<int>(tokens[4])));
+			kc.EventType(static_cast<KeyEventType>(mpt::parse<int>(tokens[4])));
 		}
 
 		// Error checking

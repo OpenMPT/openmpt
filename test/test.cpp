@@ -33,6 +33,8 @@
 #include "mpt/osinfo/class.hpp"
 #include "mpt/osinfo/dos_version.hpp"
 #include "mpt/osinfo/dos_memory.hpp"
+#include "mpt/parse/parse.hpp"
+#include "mpt/parse/split.hpp"
 #include "mpt/test/test.hpp"
 #include "mpt/test/test_macros.hpp"
 #include "mpt/uuid/uuid.hpp"
@@ -599,7 +601,7 @@ static MPT_NOINLINE void TestVersion()
 		{
 			continue;
 		}
-		std::vector<std::string> line_fields = mpt::String::Split<std::string>(line, std::string("="));
+		std::vector<std::string> line_fields = mpt::split(line, std::string("="));
 		VERIFY_EQUAL_NONCONT(line_fields.size(), 2u);
 		line_fields[0] = mpt::trim(line_fields[0]);
 		line_fields[1] = mpt::trim(line_fields[1]);
@@ -871,44 +873,44 @@ static MPT_NOINLINE void TestStringFormatting()
 	VERIFY_EQUAL(mpt::parse_or<int>("", -1), -1);
 	VERIFY_EQUAL(mpt::parse_or<int>("0", -1), 0);
 
-	VERIFY_EQUAL(ConvertStrTo<bool>("1"), true);
-	VERIFY_EQUAL(ConvertStrTo<bool>("0"), false);
-	VERIFY_EQUAL(ConvertStrTo<bool>("2"), true);
-	VERIFY_EQUAL(ConvertStrTo<bool>("-0"), false);
-	VERIFY_EQUAL(ConvertStrTo<bool>("-1"), true);
+	VERIFY_EQUAL(mpt::parse<bool>("1"), true);
+	VERIFY_EQUAL(mpt::parse<bool>("0"), false);
+	VERIFY_EQUAL(mpt::parse<bool>("2"), true);
+	VERIFY_EQUAL(mpt::parse<bool>("-0"), false);
+	VERIFY_EQUAL(mpt::parse<bool>("-1"), true);
 
-	VERIFY_EQUAL(ConvertStrTo<uint32>("586"), 586u);
-	VERIFY_EQUAL(ConvertStrTo<uint32>("2147483647"), (uint32)int32_max);
-	VERIFY_EQUAL(ConvertStrTo<uint32>("4294967295"), uint32_max);
+	VERIFY_EQUAL(mpt::parse<uint32>("586"), 586u);
+	VERIFY_EQUAL(mpt::parse<uint32>("2147483647"), (uint32)int32_max);
+	VERIFY_EQUAL(mpt::parse<uint32>("4294967295"), uint32_max);
 
-	VERIFY_EQUAL(ConvertStrTo<int64>("-9223372036854775808"), int64_min);
-	VERIFY_EQUAL(ConvertStrTo<int64>("-159"), -159);
-	VERIFY_EQUAL(ConvertStrTo<int64>("9223372036854775807"), int64_max);
+	VERIFY_EQUAL(mpt::parse<int64>("-9223372036854775808"), int64_min);
+	VERIFY_EQUAL(mpt::parse<int64>("-159"), -159);
+	VERIFY_EQUAL(mpt::parse<int64>("9223372036854775807"), int64_max);
 
-	VERIFY_EQUAL(ConvertStrTo<uint64>("85059"), 85059u);
-	VERIFY_EQUAL(ConvertStrTo<uint64>("9223372036854775807"), (uint64)int64_max);
-	VERIFY_EQUAL(ConvertStrTo<uint64>("18446744073709551615"), uint64_max);
+	VERIFY_EQUAL(mpt::parse<uint64>("85059"), 85059u);
+	VERIFY_EQUAL(mpt::parse<uint64>("9223372036854775807"), (uint64)int64_max);
+	VERIFY_EQUAL(mpt::parse<uint64>("18446744073709551615"), uint64_max);
 
-	VERIFY_EQUAL(ConvertStrTo<float>("-87.0"), -87.0f);
+	VERIFY_EQUAL(mpt::parse<float>("-87.0"), -87.0f);
 #if !MPT_OS_DJGPP
-	VERIFY_EQUAL(ConvertStrTo<double>("-0.5e-6"), -0.5e-6);
+	VERIFY_EQUAL(mpt::parse<double>("-0.5e-6"), -0.5e-6);
 #endif
 #if !MPT_OS_DJGPP
-	VERIFY_EQUAL(ConvertStrTo<double>("58.65403492763"), 58.65403492763);
+	VERIFY_EQUAL(mpt::parse<double>("58.65403492763"), 58.65403492763);
 #else
-	VERIFY_EQUAL_EPS(ConvertStrTo<double>("58.65403492763"), 58.65403492763, 0.0001);
+	VERIFY_EQUAL_EPS(mpt::parse<double>("58.65403492763"), 58.65403492763, 0.0001);
 #endif
 
-	VERIFY_EQUAL(ConvertStrTo<float>(mpt::afmt::val(-87.0)), -87.0f);
+	VERIFY_EQUAL(mpt::parse<float>(mpt::afmt::val(-87.0)), -87.0f);
 #if !MPT_OS_DJGPP
-	VERIFY_EQUAL(ConvertStrTo<double>(mpt::afmt::val(-0.5e-6)), -0.5e-6);
+	VERIFY_EQUAL(mpt::parse<double>(mpt::afmt::val(-0.5e-6)), -0.5e-6);
 #endif
 
-	VERIFY_EQUAL(mpt::String::Parse::Hex<unsigned char>("fe"), 254);
+	VERIFY_EQUAL(mpt::parse_hex<unsigned char>("fe"), 254);
 #if MPT_WSTRING_FORMAT
-	VERIFY_EQUAL(mpt::String::Parse::Hex<unsigned char>(L"fe"), 254);
+	VERIFY_EQUAL(mpt::parse_hex<unsigned char>(L"fe"), 254);
 #endif
-	VERIFY_EQUAL(mpt::String::Parse::Hex<unsigned int>(U_("ffff")), 65535);
+	VERIFY_EQUAL(mpt::parse_hex<unsigned int>(U_("ffff")), 65535);
 
 	TestFloatFormats(0.0f);
 	TestFloatFormats(-0.0f);
@@ -2543,7 +2545,7 @@ inline Test::CustomSettingsTestType FromSettingValue(const SettingValue &val)
 	std::size_t pos = xy.find(U_("|"));
 	mpt::ustring x = xy.substr(0, pos);
 	mpt::ustring y = xy.substr(pos + 1);
-	return Test::CustomSettingsTestType(ConvertStrTo<float>(x), ConvertStrTo<float>(y));
+	return Test::CustomSettingsTestType(mpt::parse<float>(x), mpt::parse<float>(y));
 }
 
 template <>

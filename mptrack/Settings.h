@@ -16,6 +16,7 @@
 
 #include "../common/misc_util.h"
 #include "mpt/mutex/mutex.hpp"
+#include "mpt/parse/parse.hpp"
 
 #include <map>
 #include <set>
@@ -246,10 +247,10 @@ template<> inline SettingValue ToSettingValue(const float &val) { return Setting
 template<> inline float FromSettingValue(const SettingValue &val) { return float(val.as<double>()); }
 
 template<> inline SettingValue ToSettingValue(const int64 &val) { return SettingValue(mpt::ufmt::dec(val), "int64"); }
-template<> inline int64 FromSettingValue(const SettingValue &val) { return ConvertStrTo<int64>(val.as<mpt::ustring>()); }
+template<> inline int64 FromSettingValue(const SettingValue &val) { return mpt::parse<int64>(val.as<mpt::ustring>()); }
 
 template<> inline SettingValue ToSettingValue(const uint64 &val) { return SettingValue(mpt::ufmt::dec(val), "uint64"); }
-template<> inline uint64 FromSettingValue(const SettingValue &val) { return ConvertStrTo<uint64>(val.as<mpt::ustring>()); }
+template<> inline uint64 FromSettingValue(const SettingValue &val) { return mpt::parse<uint64>(val.as<mpt::ustring>()); }
 
 template<> inline SettingValue ToSettingValue(const uint32 &val) { return SettingValue(int32(val)); }
 template<> inline uint32 FromSettingValue(const SettingValue &val) { return uint32(val.as<int32>()); }

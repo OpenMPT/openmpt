@@ -15,6 +15,7 @@
 #include "View_pat.h"
 #include "PatternFindReplace.h"
 #include "PatternFindReplaceDlg.h"
+#include "mpt/parse/parse.hpp"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -735,10 +736,10 @@ void CFindReplaceTab::RelativeOrMultiplyPrompt(CComboBox &comboBox, FindReplace:
 				int len = ::GetWindowTextLengthA(m_cbnParam);
 				std::string sHex(len, 0);
 				::GetWindowTextA(m_cbnParam, &sHex[0], len + 1);
-				item = mpt::String::Parse::HexToUnsignedInt(sHex);
+				item = mpt::parse_hex<unsigned int>(sHex);
 			} else
 			{
-				item = ConvertStrTo<int>(s);
+				item = mpt::parse<int>(s);
 			}
 		}
 	}
@@ -830,7 +831,7 @@ void CFindReplaceTab::OnParamChanged()
 		int len = ::GetWindowTextLengthA(m_cbnParam);
 		std::string s(len, 0);
 		::GetWindowTextA(m_cbnParam, &s[0], len + 1);
-		item = mpt::String::Parse::HexToUnsignedInt(s);
+		item = mpt::parse_hex<unsigned int>(s);
 	}
 
 	// Apply parameter value mask if required (e.g. SDx has mask D0).

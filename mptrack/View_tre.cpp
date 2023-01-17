@@ -32,6 +32,7 @@
 #include "../soundlib/mod_specifications.h"
 #include "../soundlib/plugins/PlugInterface.h"
 #include "../soundlib/MIDIEvents.h"
+#include "mpt/parse/parse.hpp"
 
 #include <winioctl.h>
 
@@ -1573,7 +1574,7 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, ModCommand::NOTE note, int volume)
 				if(!m_SongFileName.empty())
 				{
 					// Preview sample / instrument in module
-					const size_t n = ConvertStrTo<size_t>(GetItemText(hItem));
+					const size_t n = mpt::parse<size_t>(GetItemText(hItem));
 					if(pMainFrm && m_SongFile)
 					{
 						if(modItem.type == MODITEM_INSLIB_INSTRUMENT)
@@ -2535,7 +2536,7 @@ bool CModTree::GetDropInfo(DRAGONDROP &dropInfo, mpt::PathString &fullPath)
 	case MODITEM_INSLIB_INSTRUMENT:
 		if(!m_SongFileName.empty())
 		{
-			const uint32 n = ConvertStrTo<uint32>(GetItemText(m_hItemDrag));
+			const uint32 n = mpt::parse<uint32>(GetItemText(m_hItemDrag));
 			dropInfo.dropType = (m_itemDrag.type == MODITEM_INSLIB_SAMPLE) ? DRAGONDROP_SAMPLE : DRAGONDROP_INSTRUMENT;
 			dropInfo.dropItem = n;
 			dropInfo.sndFile = m_SongFile;
@@ -4524,7 +4525,7 @@ void CModTree::OnEndLabelEdit(NMHDR *nmhdr, LRESULT *result)
 		case MODITEM_ORDER:
 			if(!itemText.empty())
 			{
-				PATTERNINDEX pat = ConvertStrTo<PATTERNINDEX>(itemText);
+				PATTERNINDEX pat = mpt::parse<PATTERNINDEX>(itemText);
 				bool valid = true;
 				if(itemText[0] == UC_('-'))
 				{

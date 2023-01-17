@@ -43,6 +43,7 @@
 #include "../include/r8brain/CDSPResampler.h"
 #include "../soundlib/MixFuncTable.h"
 #include "mpt/audio/span.hpp"
+#include "mpt/parse/parse.hpp"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -2619,7 +2620,7 @@ void CCtrlSamples::OnPitchShiftTimeStretch()
 		// Get selected pitch modifier [-12,+12]
 		CString text;
 		static_cast<CComboBox *>(GetDlgItem(IDC_COMBO4))->GetWindowText(text);
-		float pm = ConvertStrTo<float>(text);
+		float pm = mpt::parse<float>(text);
 		if(pm == 0.0f) goto error;
 
 		// Compute pitch ratio in range [0.5f ; 2.0f] (1.0f means output == input)

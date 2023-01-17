@@ -17,6 +17,7 @@
 #include "View_pat.h"
 #include "../soundlib/mod_specifications.h"
 #include "../soundlib/Tables.h"
+#include "mpt/parse/parse.hpp"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -455,7 +456,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, PatternEditPos &pastePos
 				insertPat = order.GetInvalidPatIndex();
 			} else
 			{
-				insertPat = ConvertStrTo<PATTERNINDEX>(data.substr(curPos, 10));
+				insertPat = mpt::parse<PATTERNINDEX>(data.substr(curPos, 10));
 				if(patternMode == kMultiOverwrite)
 				{
 					// We only want the order of pasted patterns now, do not create any new patterns
@@ -614,7 +615,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, PatternEditPos &pastePos
 					}
 					pattern = patList[curPattern++];
 				} while (pattern == PATTERNINDEX_INVALID);
-				ROWINDEX numRows = ConvertStrTo<ROWINDEX>(data.substr(pos, 10));
+				ROWINDEX numRows = mpt::parse<ROWINDEX>(data.substr(pos, 10));
 				sndFile.Patterns[pattern].Resize(numRows);
 				patData = sndFile.Patterns[pattern].GetpModCommand(0, 0);
 				curRow = 0;
@@ -631,8 +632,8 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, PatternEditPos &pastePos
 				if(pos2 != std::string::npos)
 				{
 					pos2++;
-					ROWINDEX rpb = ConvertStrTo<ROWINDEX>(data.substr(pos, pos2 - pos));
-					ROWINDEX rpm = ConvertStrTo<ROWINDEX>(data.substr(pos2, eol - pos2));
+					ROWINDEX rpb = mpt::parse<ROWINDEX>(data.substr(pos, pos2 - pos));
+					ROWINDEX rpm = mpt::parse<ROWINDEX>(data.substr(pos2, eol - pos2));
 					sndFile.Patterns[pattern].SetSignature(rpb, rpm);
 				}
 			} else if(data.substr(pos, 7) == "Swing: ")
@@ -643,7 +644,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, PatternEditPos &pastePos
 				size_t i = 0;
 				while(pos != std::string::npos && pos < eol && i < swing.size())
 				{
-					swing[i++] = ConvertStrTo<TempoSwing::value_type>(data.substr(pos, eol - pos));
+					swing[i++] = mpt::parse<TempoSwing::value_type>(data.substr(pos, eol - pos));
 					pos = data.find(',', pos + 1);
 					if(pos != std::string::npos)
 						pos++;
@@ -805,7 +806,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, PatternEditPos &pastePos
 					{
 						if(m.IsPcNote())
 						{
-							m.SetValueVolCol(ConvertStrTo<uint16>(data.substr(pos + 5, 3)));
+							m.SetValueVolCol(mpt::parse<uint16>(data.substr(pos + 5, 3)));
 						} else
 						{
 							m.volcmd = VOLCMD_NONE;
@@ -834,7 +835,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, PatternEditPos &pastePos
 					{
 						firstCol = std::min(firstCol, PatternCursor::paramColumn);
 						lastCol = std::max(lastCol, PatternCursor::paramColumn);
-						m.SetValueEffectCol(ConvertStrTo<uint16>(data.substr(pos + 8, 3)));
+						m.SetValueEffectCol(mpt::parse<uint16>(data.substr(pos + 8, 3)));
 					} else if(!origModCmd.IsPcNote())
 					{
 						// No value provided in clipboard

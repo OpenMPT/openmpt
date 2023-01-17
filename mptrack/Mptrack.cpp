@@ -41,6 +41,7 @@
 #include "../misc/mptOS.h"
 #include "mpt/arch/arch.hpp"
 #include "mpt/fs/fs.hpp"
+#include "mpt/string/utility.hpp"
 #if MPT_MSVC_AT_LEAST(2022, 2) && MPT_MSVC_BEFORE(2022, 3)
 // Work-around <https://developercommunity.visualstudio.com/t/warning-C4311-in-MFC-header-afxrecovery/10041328>,
 // see <https://developercommunity.visualstudio.com/t/Compiler-warnings-after-upgrading-to-17/10036311#T-N10061908>.
@@ -887,7 +888,7 @@ void CTrackApp::SetupPaths(bool overridePortable)
 	bool modeMultiArch = false;
 	bool modeSourceProject = false;
 	const mpt::PathString exePath = mpt::common_directories::get_application_directory();
-	auto exePathComponents = mpt::String::Split<mpt::ustring>(exePath.GetDirectory().WithoutTrailingSlash().ToUnicode(), P_("\\").ToUnicode());
+	auto exePathComponents = mpt::split(exePath.GetDirectory().WithoutTrailingSlash().ToUnicode(), P_("\\").ToUnicode());
 	if(exePathComponents.size() >= 2)
 	{
 		if(exePathComponents[exePathComponents.size()-1] == mpt::OS::Windows::Name(mpt::OS::Windows::GetProcessArchitecture()))

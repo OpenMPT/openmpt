@@ -11,10 +11,11 @@
 #include "version.h"
 
 #include "mpt/format/join.hpp"
+#include "mpt/parse/parse.hpp"
+#include "mpt/string/utility.hpp"
 
 #include "mptString.h"
 #include "mptStringFormat.h"
-#include "mptStringParse.h" 
 
 #include "versionNumber.h"
 
@@ -54,10 +55,10 @@ mpt::ustring Version::GetOpenMPTVersionString() const
 Version Version::Parse(const mpt::ustring &s)
 {
 	uint32 result = 0;
-	std::vector<mpt::ustring> numbers = mpt::String::Split<mpt::ustring>(s, U_("."));
+	std::vector<mpt::ustring> numbers = mpt::split(s, U_("."));
 	for (std::size_t i = 0; i < numbers.size() && i < 4; ++i)
 	{
-		result |= (mpt::String::Parse::Hex<unsigned int>(numbers[i]) & 0xff) << ((3 - i) * 8);
+		result |= (mpt::parse_hex<unsigned int>(numbers[i]) & 0xff) << ((3 - i) * 8);
 	}
 	return Version(result);
 }
@@ -144,7 +145,7 @@ static int GetRevision()
 		{
 			svnversion = svnversion.substr(0, svnversion.find("P"));
 		}
-		return ConvertStrTo<int>(svnversion);
+		return mpt::parse<int>(svnversion);
 	#else
 		MPT_WARNING_STATEMENT("SVN revision unknown. Please check your build system.");
 		return 0;
@@ -280,14 +281,14 @@ VersionWithRevision VersionWithRevision::Parse(const mpt::ustring &s)
 {
 	Version version = Version::Parse(mpt::ustring());
 	uint64 revision = 0;
-	const auto tokens = mpt::String::Split<mpt::ustring>(s, U_("-"));
+	const auto tokens = mpt::split(s, U_("-"));
 	if(tokens.size() >= 1)
 	{
 		version = Version::Parse(tokens[0]);
 	}
 	if(tokens.size() >= 2)
 	{
-		revision = ConvertStrTo<uint64>(tokens[1].substr(1));
+		revision = mpt::parse<uint64>(tokens[1].substr(1));
 	}
 	return {version, revision};
 }

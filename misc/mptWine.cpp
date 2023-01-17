@@ -13,7 +13,9 @@
 
 #include "mpt/fs/fs.hpp"
 #include "mpt/io_file/fileref.hpp"
+#include "mpt/parse/parse.hpp"
 #include "mpt/path/native_path.hpp"
+#include "mpt/string/utility.hpp"
 
 #include "mptOS.h"
 #include "../common/mptFileIO.h"
@@ -356,7 +358,7 @@ ExecResult Context::ExecutePosixShellScript(std::string script, FlagSet<ExecFlag
 	::CreateDirectory((dirWindows + P_("filetree")).AsNative().c_str(), nullptr);
 	for(const auto &file : filetree)
 	{
-		std::vector<mpt::ustring> path = mpt::String::Split<mpt::ustring>(mpt::ToUnicode(mpt::Charset::UTF8, file.first), U_("/"));
+		std::vector<mpt::ustring> path = mpt::split(mpt::ToUnicode(mpt::Charset::UTF8, file.first), U_("/"));
 		mpt::PathString combinedPath = dirWindows + P_("filetree") + P_("\\");
 		if(path.size() > 1)
 		{
@@ -601,7 +603,7 @@ ExecResult Context::ExecutePosixShellScript(std::string script, FlagSet<ExecFlag
 		{
 			throw mpt::Wine::Exception("Script .exit file empty.");
 		}
-		exitCode = ConvertStrTo<int>(exitString);
+		exitCode = mpt::parse<int>(exitString);
 	}
 
 	progress(userdata);

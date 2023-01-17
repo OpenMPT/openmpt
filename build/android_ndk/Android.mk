@@ -94,7 +94,6 @@ LOCAL_SRC_FILES += \
 	common/mptRandom.cpp \
 	common/mptString.cpp \
 	common/mptStringBuffer.cpp \
-	common/mptStringParse.cpp \
 	common/mptTime.cpp \
 	common/Profiler.cpp \
 	common/serialization_utils.cpp \

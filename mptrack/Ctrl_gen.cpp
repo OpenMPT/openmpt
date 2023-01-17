@@ -21,6 +21,7 @@
 #include "../common/misc_util.h"
 #include "../common/mptTime.h"
 #include "../soundlib/mod_specifications.h"
+#include "mpt/parse/parse.hpp"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -527,7 +528,7 @@ void CCtrlGeneral::OnSpeedChanged()
 		m_EditSpeed.GetWindowText(s, mpt::saturate_cast<int>(std::size(s)));
 		if (s[0])
 		{
-			UINT n = ConvertStrTo<UINT>(s);
+			UINT n = mpt::parse<UINT>(s);
 			n = Clamp(n, m_sndFile.GetModSpecifications().speedMin, m_sndFile.GetModSpecifications().speedMax);
 			if (n != m_sndFile.m_nDefaultSpeed)
 			{
@@ -554,7 +555,7 @@ void CCtrlGeneral::OnVSTiVolChanged()
 		m_EditVSTiVol.GetWindowText(s, mpt::saturate_cast<int>(std::size(s)));
 		if (s[0])
 		{
-			UINT n = ConvertStrTo<UINT>(s);
+			UINT n = mpt::parse<UINT>(s);
 			Limit(n, 0u, 2000u);
 			if (n != m_sndFile.m_nVSTiVolume)
 			{
@@ -578,7 +579,7 @@ void CCtrlGeneral::OnSamplePAChanged()
 		m_EditSamplePA.GetWindowText(s, mpt::saturate_cast<int>(std::size(s)));
 		if (s[0])
 		{
-			UINT n = ConvertStrTo<UINT>(s);
+			UINT n = mpt::parse<UINT>(s);
 			Limit(n, 0u, 2000u);
 			if (n != m_sndFile.m_nSamplePreAmp)
 			{
@@ -601,7 +602,7 @@ void CCtrlGeneral::OnGlobalVolChanged()
 		m_EditGlobalVol.GetWindowText(s, mpt::saturate_cast<int>(std::size(s)));
 		if (s[0])
 		{
-			UINT n = ConvertStrTo<ORDERINDEX>(s) * GetGlobalVolumeFactor();
+			UINT n = mpt::parse<ORDERINDEX>(s) * GetGlobalVolumeFactor();
 			Limit(n, 0u, 256u);
 			if (n != m_sndFile.m_nDefaultGlobalVolume)
 			{ 
@@ -628,7 +629,7 @@ void CCtrlGeneral::OnRestartPosChanged()
 	if(!s[0])
 		return;
 
-	ORDERINDEX n = ConvertStrTo<ORDERINDEX>(s);
+	ORDERINDEX n = mpt::parse<ORDERINDEX>(s);
 	LimitMax(n, m_sndFile.Order().GetLastIndex());
 	while(n > 0 && n < m_sndFile.Order().GetLastIndex() && !m_sndFile.Order().IsValidPat(n))
 		n++;

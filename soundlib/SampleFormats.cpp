@@ -34,6 +34,7 @@
 #include "Loaders.h"
 #include "../common/FileReader.h"
 #include "../soundlib/ModSampleCopy.h"
+#include "mpt/string/utility.hpp"
 #include <functional>
 #include <map>
 
@@ -2163,7 +2164,7 @@ bool CSoundFile::ReadAUSample(SAMPLEINDEX nSample, FileReader &file, bool mayNor
 	annotation = mpt::replace(annotation, std::string("\r\n"), std::string("\n"));
 	annotation = mpt::replace(annotation, std::string("\r"), std::string("\n"));
 	mpt::Charset charset = mpt::IsUTF8(annotation) ? mpt::Charset::UTF8 : mpt::Charset::ISO8859_1;
-	const auto lines = mpt::String::Split<std::string>(annotation, "\n");
+	const auto lines = mpt::split(annotation, std::string("\n"));
 	bool hasFields = false;
 	for(const auto &line : lines)
 	{

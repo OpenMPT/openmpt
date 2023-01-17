@@ -208,7 +208,7 @@
 	// Use wide strings for MSVC because this is the native encoding on 
 	// microsoft platforms.
 
-	// mpt::ToWString, mpt::wfmt, ConvertStrTo<std::wstring>
+	// mpt::ToWString, mpt::wfmt, mpt::parse<std::wstring>
 	// Required by the tracker to ease interfacing with WinAPI.
 	// Required by MPT_USTRING_MODE_WIDE to ease type tunneling in mpt::format.
 	#define MPT_WSTRING_FORMAT 1

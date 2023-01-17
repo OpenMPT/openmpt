@@ -24,6 +24,8 @@
 #include "../sounddsp/DSP.h"
 #include "../sounddsp/Reverb.h"
 #include "mpt/format/join.hpp"
+#include "mpt/parse/parse.hpp"
+#include "mpt/parse/split.hpp"
 #include "openmpt/sounddevice/SoundDevice.hpp"
 #include "StreamEncoderSettings.h"
 #include "Settings.h"
@@ -329,10 +331,10 @@ template<> inline PlugVolumeHandling FromSettingValue(const SettingValue &val)
 }
 
 template<> inline SettingValue ToSettingValue(const std::vector<uint32> &val) { return mpt::join_format(val, U_(",")); }
-template<> inline std::vector<uint32> FromSettingValue(const SettingValue &val) { return mpt::String::Split<uint32>(val, U_(",")); }
+template<> inline std::vector<uint32> FromSettingValue(const SettingValue &val) { return mpt::split_parse<uint32>(val.as<mpt::ustring>(), U_(",")); }
 
 template<> inline SettingValue ToSettingValue(const std::vector<mpt::ustring> &val) { return mpt::join_format(val, U_(";")); }
-template<> inline std::vector<mpt::ustring> FromSettingValue(const SettingValue &val) { return mpt::String::Split<mpt::ustring>(val, U_(";")); }
+template<> inline std::vector<mpt::ustring> FromSettingValue(const SettingValue &val) { return mpt::split(val.as<mpt::ustring>(), U_(";")); }
 
 template<> inline SettingValue ToSettingValue(const SampleFormat &val) { return SettingValue(SampleFormat::ToInt(val)); }
 template<> inline SampleFormat FromSettingValue(const SettingValue &val) { return SampleFormat::FromInt(val.as<int32>()); }
@@ -488,7 +490,7 @@ template<> inline SettingValue ToSettingValue(const mpt::Date::Unix &val)
 template<> inline mpt::Date::Unix FromSettingValue(const SettingValue &val)
 {
 	MPT_ASSERT(val.GetTypeTag() == "UnixTime");
-	return mpt::Date::UnixFromSeconds(ConvertStrTo<int64>(val.as<mpt::ustring>()));
+	return mpt::Date::UnixFromSeconds(mpt::parse<int64>(val.as<mpt::ustring>()));
 }
 
 struct FontSetting
@@ -529,14 +531,14 @@ template<> inline FontSetting FromSettingValue(const SettingValue &val)
 	std::size_t sizeStart = setting.name.rfind(UC_(','));
 	if(sizeStart != std::string::npos)
 	{
-		const std::vector<mpt::ustring> fields = mpt::String::Split<mpt::ustring>(setting.name.substr(sizeStart + 1), U_("|"));
+		const std::vector<mpt::ustring> fields = mpt::split(setting.name.substr(sizeStart + 1), U_("|"));
 		if(fields.size() >= 1)
 		{
-			setting.size = ConvertStrTo<int32>(fields[0]);
+			setting.size = mpt::parse<int32>(fields[0]);
 		}
 		if(fields.size() >= 2)
 		{
-			setting.flags = static_cast<FontSetting::FontFlags>(ConvertStrTo<int32>(fields[1]));
+			setting.flags = static_cast<FontSetting::FontFlags>(mpt::parse<int32>(fields[1]));
 		}
 		setting.name.resize(sizeStart);
 	}

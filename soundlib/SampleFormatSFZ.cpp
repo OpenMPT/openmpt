@@ -25,6 +25,7 @@
 #endif // !MODPLUG_NO_FILESAVE
 #include "modsmp_ctrl.h"
 #include "mpt/base/numbers.hpp"
+#include "mpt/parse/parse.hpp"
 
 #include <functional>
 
@@ -59,9 +60,9 @@ struct SFZControl
 		if(key == "default_path")
 			defaultPath = value;
 		else if(key == "octave_offset")
-			octaveOffset = ConvertStrTo<int8>(value);
+			octaveOffset = mpt::parse<int8>(value);
 		else if(key == "note_offset")
-			noteOffset = ConvertStrTo<int8>(value);
+			noteOffset = mpt::parse<int8>(value);
 	}
 };
 
@@ -79,7 +80,7 @@ struct SFZFlexEG
 	void Parse(std::string_view key, const std::string &value)
 	{
 		key = key.substr(key.find('_') + 1);
-		const double v = ConvertStrTo<double>(value);
+		const double v = mpt::parse<double>(value);
 
 		const bool isTime = SFZStartsWith(key, "time"), isLevel = SFZStartsWith(key, "level");
 		std::string_view pointStr;
@@ -90,7 +91,7 @@ struct SFZFlexEG
 
 		if(!pointStr.empty() && SFZIsNumeric(pointStr))
 		{
-			PointIndex point = ConvertStrTo<PointIndex>(std::string(pointStr));
+			PointIndex point = mpt::parse<PointIndex>(std::string(pointStr));
 			if(point >= points.size() && point < MAX_ENVPOINTS)
 				points.resize(point + 1);
 
@@ -218,7 +219,7 @@ struct SFZEnvelope
 	void Parse(std::string_view key, const std::string &value)
 	{
 		key = key.substr(key.find('_') + 1);
-		double v = ConvertStrTo<double>(value);
+		double v = mpt::parse<double>(value);
 		if(key == "depth")
 			Limit(v, -12000.0, 12000.0);
 		else if(key == "start" || key == "sustain")
@@ -335,7 +336,7 @@ struct SFZRegion
 	template<typename T, typename Tc>
 	static void Read(const std::string &valueStr, T &value, Tc valueMin = std::numeric_limits<T>::min(), Tc valueMax = std::numeric_limits<T>::max())
 	{
-		double valueF = ConvertStrTo<double>(valueStr);
+		double valueF = mpt::parse<double>(valueStr);
 		if constexpr(std::numeric_limits<T>::is_integer)
 		{
 			valueF = mpt::round(valueF);
@@ -353,7 +354,7 @@ struct SFZRegion
 		if(value[0] >= '0' && value[0] <= '9')
 		{
 			// MIDI key
-			key = ConvertStrTo<uint8>(value);
+			key = mpt::parse<uint8>(value);
 		} else if(value.length() < 2)
 		{
 			return 0;
@@ -383,7 +384,7 @@ struct SFZRegion
 			if(octaveOffset >= value.length())
 				return 0;
 
-			int8 octave = ConvertStrTo<int8>(value.c_str() + octaveOffset);
+			int8 octave = mpt::parse<int8>(value.c_str() + octaveOffset);
 			key += (octave + 1) * 12;
 		}
 		key += control.octaveOffset * 12 + control.noteOffset;
@@ -487,7 +488,7 @@ struct SFZRegion
 			pitchEnv.Parse(key, value);
 		else if(SFZStartsWith(key, "eg") && SFZIsNumeric(key.substr(2, 2)) && key.substr(4, 1) == "_")
 		{
-			uint8 eg = ConvertStrTo<uint8>(std::string(key.substr(2, 2)));
+			uint8 eg = mpt::parse<uint8>(std::string(key.substr(2, 2)));
 			if(eg >= flexEGs.size())
 				flexEGs.resize(eg + 1);
 			flexEGs[eg].Parse(key, value);

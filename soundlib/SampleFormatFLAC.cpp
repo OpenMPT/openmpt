@@ -30,6 +30,7 @@
 #include "mpt/io/base.hpp"
 #include "mpt/io/io.hpp"
 #include "mpt/io/io_stdstream.hpp"
+#include "mpt/parse/parse.hpp"
 //#include "mpt/crc/crc.hpp"
 #include "OggStream.h"
 #ifdef MPT_WITH_OGG
@@ -217,14 +218,14 @@ struct FLACDecoder
 					client.sndFile.m_szNames[client.sample] = mpt::ToCharset(client.sndFile.GetCharsetInternal(), mpt::Charset::UTF8, mpt::String::ReadBuf(mpt::String::maybeNullTerminated, tag + 6, length - 6));
 				} else if(length > 11 && !mpt::CompareNoCaseAscii(tag, "SAMPLERATE=", 11))
 				{
-					uint32 sampleRate = ConvertStrTo<uint32>(tag + 11);
+					uint32 sampleRate = mpt::parse<uint32>(tag + 11);
 					if(sampleRate > 0) sample.nC5Speed = sampleRate;
 				} else if(length > 10 && !mpt::CompareNoCaseAscii(tag, "LOOPSTART=", 10))
 				{
-					loopStart = ConvertStrTo<SmpLength>(tag + 10);
+					loopStart = mpt::parse<SmpLength>(tag + 10);
 				} else if(length > 11 && !mpt::CompareNoCaseAscii(tag, "LOOPLENGTH=", 11))
 				{
-					loopLength = ConvertStrTo<SmpLength>(tag + 11);
+					loopLength = mpt::parse<SmpLength>(tag + 11);
 				}
 			}
 			if(loopLength > 0)

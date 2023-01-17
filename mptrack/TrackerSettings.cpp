@@ -34,6 +34,7 @@
 #include "../soundlib/tuningcollection.h"
 #include "TuningDialog.h"
 #include "mpt/fs/fs.hpp"
+#include "mpt/parse/parse.hpp"
 
 #include <algorithm>
 
@@ -1533,7 +1534,7 @@ std::bitset<128> StringToIgnoredCCs(const mpt::ustring &in)
 	CString ccToken = cc.Tokenize(_T(", "), curPos);
 	while(ccToken != _T(""))
 	{
-		int ccNumber = ConvertStrTo<int>(ccToken);
+		int ccNumber = mpt::parse<int>(ccToken);
 		if(ccNumber >= 0 && ccNumber <= 127)
 			midiIgnoreCCs.set(ccNumber);
 		ccToken = cc.Tokenize(_T(", "), curPos);

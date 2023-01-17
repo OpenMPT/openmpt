@@ -22,6 +22,7 @@
 #include "TuningDialog.h"
 #include "FileDialog.h"
 #include "Mainfrm.h"
+#include "mpt/parse/parse.hpp"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -535,7 +536,7 @@ void CTuningDialog::OnBnClickedButtonSetvalues()
 
 		CString buffer;
 		m_EditMiscActions.GetWindowText(buffer);
-		m_pActiveTuning->Multiply(ConvertStrTo<RATIOTYPE>(buffer));
+		m_pActiveTuning->Multiply(mpt::parse<RATIOTYPE>(buffer));
 		m_ModifiedTCs[GetpTuningCollection(m_pActiveTuning)] = true;
 		m_EditMiscActions.SetWindowText(_T(""));
 		m_RatioMapWnd.Invalidate();
@@ -934,7 +935,7 @@ void CTuningDialog::OnEnKillfocusEditFinetunesteps()
 	{
 		CString buffer;
 		m_EditFineTuneSteps.GetWindowText(buffer);
-		m_pActiveTuning->SetFineStepCount(ConvertStrTo<Tuning::USTEPINDEXTYPE>(buffer));
+		m_pActiveTuning->SetFineStepCount(mpt::parse<Tuning::USTEPINDEXTYPE>(buffer));
 		m_EditFineTuneSteps.SetWindowText(mpt::cfmt::val(m_pActiveTuning->GetFineStepCount()));
 		m_ModifiedTCs[GetpTuningCollection(m_pActiveTuning)] = true;
 		m_EditFineTuneSteps.Invalidate();
@@ -962,7 +963,7 @@ void CTuningDialog::OnEnKillfocusEditSteps()
 	{
 		CString buffer;
 		m_EditSteps.GetWindowText(buffer);
-		m_pActiveTuning->ChangeGroupsize(ConvertStrTo<UNOTEINDEXTYPE>(buffer));
+		m_pActiveTuning->ChangeGroupsize(mpt::parse<UNOTEINDEXTYPE>(buffer));
 		m_ModifiedTCs[GetpTuningCollection(m_pActiveTuning)] = true;
 		UpdateView(UM_TUNINGDATA);
 	}
@@ -1590,7 +1591,7 @@ CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, const m
 
 	SkipCommentLines(iStrm, str);
 	// str should now contain number of notes.
-	const size_t nNotes = 1 + ConvertStrTo<size_t>(str.c_str());
+	const size_t nNotes = 1 + mpt::parse<size_t>(str.c_str());
 	if (nNotes - 1 > s_nSclImportMaxNoteCount)
 		return enSclImportFailTooManyNotes;
 
@@ -1626,15 +1627,15 @@ CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, const m
 
 		if (*pNonDigit == '.') // Reading cents
 		{
-			SclFloat fCent = ConvertStrTo<SclFloat>(psz);
+			SclFloat fCent = mpt::parse<SclFloat>(psz);
 			fRatios.push_back(static_cast<Tuning::RATIOTYPE>(CentToRatio(fCent)));
 		}
 		else if (*pNonDigit == '/') // Reading ratios
 		{
 			*pNonDigit = 0; // Replace '/' with null.
-			int64 nNum = ConvertStrTo<int64>(psz);
+			int64 nNum = mpt::parse<int64>(psz);
 			psz = pNonDigit + 1;
-			int64 nDenom = ConvertStrTo<int64>(psz);
+			int64 nDenom = mpt::parse<int64>(psz);
 
 			if (nNum > int32_max || nDenom > int32_max)
 				return enSclImportFailTooLargeNumDenomIntegers;
@@ -1644,7 +1645,7 @@ CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, const m
 			fRatios.push_back(static_cast<Tuning::RATIOTYPE>((SclFloat)nNum / (SclFloat)nDenom));
 		}
 		else // Plain numbers.
-			fRatios.push_back(static_cast<Tuning::RATIOTYPE>(ConvertStrTo<int32>(psz)));
+			fRatios.push_back(static_cast<Tuning::RATIOTYPE>(mpt::parse<int32>(psz)));
 
 		std::string remainder = psz;
 		remainder = mpt::trim(remainder, std::string("\r\n"));

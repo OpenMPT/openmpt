@@ -25,6 +25,7 @@
 #include "SelectPluginDialog.h"
 #include "../pluginBridge/BridgeWrapper.h"
 #include "FolderScanner.h"
+#include "mpt/string/utility.hpp"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -345,7 +346,7 @@ void CSelectPluginDlg::UpdatePluginsList(const VSTPluginLib *forceSelect)
 
 	const int32 lastPluginID = TrackerSettings::Instance().gnPlugWindowLast;
 	const bool nameFilterActive = !m_nameFilter.empty();
-	const auto currentTags = mpt::String::Split<mpt::ustring>(m_nameFilter, U_(" "));
+	const auto currentTags = mpt::split(m_nameFilter, U_(" "));
 
 	if(pManager)
 	{

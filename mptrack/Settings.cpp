@@ -22,6 +22,7 @@
 
 #include <algorithm>
 #include "mpt/io_file/outputfile.hpp"
+#include "mpt/parse/parse.hpp"
 #include "../common/mptFileIO.h"
 
 
@@ -97,13 +98,13 @@ void SettingValue::SetFromString(const AnyStringLocale &newVal)
 	switch(GetType())
 	{
 		case SettingTypeBool:
-			value = ConvertStrTo<bool>(newVal);
+			value = mpt::parse<bool, mpt::ustring>(newVal);
 			break;
 		case SettingTypeInt:
-			value = ConvertStrTo<int32>(newVal);
+			value = mpt::parse<int32, mpt::ustring>(newVal);
 			break;
 		case SettingTypeFloat:
-			value = ConvertStrTo<double>(newVal);
+			value = mpt::parse<double, mpt::ustring>(newVal);
 			break;
 		case SettingTypeString:
 			value = newVal;
@@ -327,7 +328,7 @@ double IniFileSettingsBackend::ReadSettingRaw(const SettingPath &path, double de
 		}
 		buf.resize(mpt::exponential_grow(buf.size(), std::numeric_limits<DWORD>::max()));
 	}
-	return ConvertStrTo<double>(mpt::winstring(buf.data()));
+	return mpt::parse<double>(mpt::winstring(buf.data()));
 }
 
 int32 IniFileSettingsBackend::ReadSettingRaw(const SettingPath &path, int32 def) const

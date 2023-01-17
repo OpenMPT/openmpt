@@ -15,6 +15,8 @@
 #include "mpt/format/join.hpp"
 #include "mpt/io/io.hpp"
 #include "mpt/io/io_stdstream.hpp"
+#include "mpt/parse/parse.hpp"
+#include "mpt/string/utility.hpp"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -450,7 +452,7 @@ Request &Request::SetURI(const URI &uri)
 	host = uri.host;
 	if(!uri.port.empty())
 	{
-		port = HTTP::Port(ConvertStrTo<uint16>(uri.port));
+		port = HTTP::Port(mpt::parse<uint16>(uri.port));
 	} else
 	{
 		port = HTTP::Port::Default;
@@ -465,7 +467,7 @@ Request &Request::SetURI(const URI &uri)
 		path = uri.path;
 	}
 	query.clear();
-	auto keyvals = mpt::String::Split<mpt::ustring>(uri.query, U_("&"));
+	auto keyvals = mpt::split(uri.query, U_("&"));
 	for(const auto &keyval : keyvals)
 	{
 		std::size_t delim_pos = keyval.find(U_("="));

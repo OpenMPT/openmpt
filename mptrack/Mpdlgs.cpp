@@ -20,6 +20,7 @@
 #include "openmpt/sounddevice/SoundDevice.hpp"
 #include "openmpt/sounddevice/SoundDeviceManager.hpp"
 #include "../common/Dither.h"
+#include "mpt/parse/parse.hpp"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -35,7 +36,7 @@ const TCHAR *gszChnCfgNames[3] =
 
 static double ParseTime(CString str)
 {
-	return ConvertStrTo<double>(mpt::ToCharset(mpt::Charset::ASCII, str)) / 1000.0;
+	return mpt::parse<double>(mpt::ToCharset(mpt::Charset::ASCII, str)) / 1000.0;
 }
 
 
@@ -1150,9 +1151,9 @@ void COptionsMixer::UpdateRamping()
 	MixerSettings settings = TrackerSettings::Instance().GetMixerSettings();
 	CString s;
 	m_CEditRampUp.GetWindowText(s);
-	settings.SetVolumeRampUpMicroseconds(ConvertStrTo<int32>(s));
+	settings.SetVolumeRampUpMicroseconds(mpt::parse<int32>(s));
 	m_CEditRampDown.GetWindowText(s);
-	settings.SetVolumeRampDownMicroseconds(ConvertStrTo<int32>(s));
+	settings.SetVolumeRampDownMicroseconds(mpt::parse<int32>(s));
 	s.Format(_T("%i samples at %i Hz"), (int)settings.GetVolumeRampUpSamples(), (int)settings.gdwMixingFreq);
 	m_CInfoRampUp.SetWindowText(s);
 	s.Format(_T("%i samples at %i Hz"), (int)settings.GetVolumeRampDownSamples(), (int)settings.gdwMixingFreq);
@@ -1186,9 +1187,9 @@ void COptionsMixer::OnOK()
 		MixerSettings settings = TrackerSettings::Instance().GetMixerSettings();
 		CString s;
 		m_CEditRampUp.GetWindowText(s);
-		settings.SetVolumeRampUpMicroseconds(ConvertStrTo<int>(s));
+		settings.SetVolumeRampUpMicroseconds(mpt::parse<int>(s));
 		m_CEditRampDown.GetWindowText(s);
-		settings.SetVolumeRampDownMicroseconds(ConvertStrTo<int>(s));
+		settings.SetVolumeRampDownMicroseconds(mpt::parse<int>(s));
 		TrackerSettings::Instance().SetMixerSettings(settings);
 	}
 

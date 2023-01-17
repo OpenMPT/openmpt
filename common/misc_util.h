@@ -24,7 +24,6 @@
 // old
 #include "mptBaseUtils.h"
 #include "mptStringFormat.h"
-#include "mptStringParse.h"
 #include "mptTime.h"
 
 #include <stdexcept>
