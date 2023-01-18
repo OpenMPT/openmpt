@@ -176,9 +176,6 @@ mpt::winstring ToWin(const mpt::lstring &str);
 
 
 #if defined(MPT_WITH_MFC)
-#if !(MPT_WSTRING_CONVERT)
-#error "MFC depends on MPT_WSTRING_CONVERT)"
-#endif
 
 // Convert to a MFC CString. The CString encoding depends on UNICODE.
 // This should also be used when converting to TCHAR strings.
@@ -213,9 +210,6 @@ std::string ToCharset(Charset to, const CString &str);
 
 
 #if MPT_USTRING_MODE_WIDE
-#if !(MPT_WSTRING_CONVERT)
-#error "MPT_USTRING_MODE_WIDE depends on MPT_WSTRING_CONVERT)"
-#endif
 inline mpt::ustring ToUnicode(const std::wstring &str) { return str; }
 inline mpt::ustring ToUnicode(const wchar_t * str) { return (str ? std::wstring(str) : std::wstring()); }
 inline mpt::ustring ToUnicode(Charset from, const std::string &str) { return ToWide(from, str); }
@@ -243,9 +237,6 @@ mpt::ustring ToUnicode(const CString &str);
 #endif // MPT_USTRING_MODE_WIDE
 
 #if MPT_USTRING_MODE_WIDE
-#if !(MPT_WSTRING_CONVERT)
-#error "MPT_USTRING_MODE_WIDE depends on MPT_WSTRING_CONVERT)"
-#endif
 // nothing, std::wstring overloads will catch all stuff
 #else // !MPT_USTRING_MODE_WIDE
 #if MPT_WSTRING_CONVERT
