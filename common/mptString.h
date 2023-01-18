@@ -324,11 +324,11 @@ class BasicAnyString : public mpt::ustring
 
 private:
 	
-	static mpt::ustring From8bit(const std::string &str)
+	static mpt::ustring From8bit(std::string str)
 	{
 		if constexpr(charset == mpt::Charset::UTF8)
 		{
-			return mpt::ToUnicode(mpt::Charset::UTF8, str);
+			return mpt::ToUnicode(mpt::Charset::UTF8, std::move(str));
 		} else
 		{
 			// auto utf8 detection
@@ -336,14 +336,14 @@ private:
 			{
 				if(mpt::IsUTF8(str))
 				{
-					return mpt::ToUnicode(mpt::Charset::UTF8, str);
+					return mpt::ToUnicode(mpt::Charset::UTF8, std::move(str));
 				} else
 				{
-					return mpt::ToUnicode(charset, str);
+					return mpt::ToUnicode(charset, std::move(str));
 				}
 			} else
 			{
-				return mpt::ToUnicode(charset, str);
+				return mpt::ToUnicode(charset, std::move(str));
 			}
 		}
 	}
@@ -351,64 +351,38 @@ private:
 public:
 
 	// 8 bit
-	BasicAnyString(const char *str) : mpt::ustring(From8bit(str ? str : std::string())) { }
-	BasicAnyString(const std::string str) : mpt::ustring(From8bit(str)) { }
+	BasicAnyString(const char *str)
+		: mpt::ustring(From8bit(str ? str : std::string()))
+	{
+		return;
+	}
+	BasicAnyString(std::string str)
+		: mpt::ustring(From8bit(std::move(str)))
+	{
+		return;
+	}
 
-	// locale
-#if defined(MPT_ENABLE_CHARSET_LOCALE)
-	BasicAnyString(const mpt::lstring str) : mpt::ustring(mpt::ToUnicode(str)) { }
-#endif // MPT_ENABLE_CHARSET_LOCALE
-
-	// unicode
-	BasicAnyString(const mpt::ustring &str) : mpt::ustring(str) { }
-	BasicAnyString(mpt::ustring &&str) : mpt::ustring(std::move(str)) { }
-#if MPT_USTRING_MODE_UTF8 && MPT_WSTRING_CONVERT
-	BasicAnyString(const std::wstring &str) : mpt::ustring(mpt::ToUnicode(str)) { }
-#endif
-#if MPT_WSTRING_CONVERT
-	BasicAnyString(const wchar_t *str) : mpt::ustring(str ? mpt::ToUnicode(str) : mpt::ustring()) { }
-#endif
-
-	// mfc
-#if defined(MPT_WITH_MFC)
-	BasicAnyString(const CString &str) : mpt::ustring(mpt::ToUnicode(str)) { }
-#endif // MPT_WITH_MFC
-
-	// fallback for custom string types
-	template <typename Tstring> BasicAnyString(const Tstring &str) : mpt::ustring(mpt::ToUnicode(str)) { }
-	template <typename Tstring> BasicAnyString(Tstring &&str) : mpt::ustring(mpt::ToUnicode(std::forward<Tstring>(str))) { }
+	template <typename Tstring>
+	BasicAnyString(Tstring &&str)
+		: mpt::ustring(mpt::transcode<mpt::ustring>(std::forward<Tstring>(str)))
+	{
+		return;
+	}
 
 };
 
-// AnyUnicodeString is convertable to mpt::ustring and constructable from any unicode string,
+// AnyUnicodeString is convertable to mpt::ustring and constructable from any known encoding
 class AnyUnicodeString : public mpt::ustring
 {
 
 public:
 
-	// locale
-#if defined(MPT_ENABLE_CHARSET_LOCALE)
-	AnyUnicodeString(const mpt::lstring &str) : mpt::ustring(mpt::ToUnicode(str)) { }
-#endif // MPT_ENABLE_CHARSET_LOCALE
-
-	// unicode
-	AnyUnicodeString(const mpt::ustring &str) : mpt::ustring(str) { }
-	AnyUnicodeString(mpt::ustring &&str) : mpt::ustring(std::move(str)) { }
-#if MPT_USTRING_MODE_UTF8 && MPT_WSTRING_CONVERT
-	AnyUnicodeString(const std::wstring &str) : mpt::ustring(mpt::ToUnicode(str)) { }
-#endif
-#if MPT_WSTRING_CONVERT
-	AnyUnicodeString(const wchar_t *str) : mpt::ustring(str ? mpt::ToUnicode(str) : mpt::ustring()) { }
-#endif
-
-	// mfc
-#if defined(MPT_WITH_MFC)
-	AnyUnicodeString(const CString &str) : mpt::ustring(mpt::ToUnicode(str)) { }
-#endif // MPT_WITH_MFC
-
-	// fallback for custom string types
-	template <typename Tstring> AnyUnicodeString(const Tstring &str) : mpt::ustring(mpt::ToUnicode(str)) { }
-	template <typename Tstring> AnyUnicodeString(Tstring &&str) : mpt::ustring(mpt::ToUnicode(std::forward<Tstring>(str))) { }
+	template <typename Tstring>
+	AnyUnicodeString(Tstring &&str)
+		: mpt::ustring(mpt::transcode<mpt::ustring>(std::forward<Tstring>(str)))
+	{
+		return;
+	}
 
 };
 
