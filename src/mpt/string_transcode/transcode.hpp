@@ -17,6 +17,9 @@
 #if !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
 #include <locale>
 #endif // !MPT_COMPILER_QUIRK_NO_WCHAR
+#if MPT_OS_WINDOWS
+#include <optional>
+#endif // MPT_OS_WINDOWS
 #include <stdexcept>
 #include <string>
 #if !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
@@ -1037,11 +1040,8 @@ inline UINT codepage_from_encoding(common_encoding encoding) {
 	return result;
 }
 
-inline common_encoding encoding_from_codepage(UINT codepage, common_encoding fallback, bool * is_fallback = nullptr) {
-	common_encoding result = common_encoding::windows1252;
-	if (is_fallback) {
-		*is_fallback = false;
-	}
+inline std::optional<common_encoding> optional_encoding_from_codepage(UINT codepage) {
+	std::optional<common_encoding> result = std::nullopt;
 	switch (codepage) {
 		case CP_UTF8:
 			result = common_encoding::utf8;
@@ -1107,10 +1107,7 @@ inline common_encoding encoding_from_codepage(UINT codepage, common_encoding fal
 			result = common_encoding::windows1252;
 			break;
 		default:
-			if (is_fallback) {
-				*is_fallback = true;
-			}
-			result = fallback;
+			result = std::nullopt;
 			break;
 	}
 	return result;
@@ -1623,10 +1620,10 @@ inline Tdststring encode(logical_encoding encoding, const mpt::widestring & src)
 #elif MPT_OS_WINDOWS && defined(MPT_COMPILER_QUIRK_NO_WCHAR)
 	switch (encoding) {
 		case logical_encoding::locale:
-			return encode<Tdststring>(encoding_from_codepage(GetACP(), common_encoding::windows1252), src);
+			return encode<Tdststring>(optional_encoding_from_codepage(GetACP()).value_or(common_encoding::windows1252), src);
 			break;
 		case logical_encoding::active_locale:
-			return encode<Tdststring>(encoding_from_codepage(GetACP(), common_encoding::windows1252), src);
+			return encode<Tdststring>(optional_encoding_from_codepage(GetACP()).value_or( common_encoding::windows1252), src);
 			break;
 	}
 	throw std::domain_error("unsupported encoding");
@@ -1787,10 +1784,10 @@ inline mpt::widestring decode(logical_encoding encoding, const Tsrcstring & src)
 #elif MPT_OS_WINDOWS && defined(MPT_COMPILER_QUIRK_NO_WCHAR)
 	switch (encoding) {
 		case logical_encoding::locale:
-			return decode(encoding_from_codepage(GetACP(), common_encoding::windows1252), src);
+			return decode(optional_encoding_from_codepage(GetACP()).value_or(common_encoding::windows1252), src);
 			break;
 		case logical_encoding::active_locale:
-			return decode(encoding_from_codepage(GetACP(), common_encoding::windows1252), src);
+			return decode(optional_encoding_from_codepage(GetACP()).value_or(common_encoding::windows1252), src);
 			break;
 	}
 	throw std::domain_error("unsupported encoding");
