@@ -12,6 +12,7 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
+#include "mpt/base/detect.hpp"
 #include "mpt/endian/integer.hpp"
 #include "mpt/format/default_formatter.hpp"
 #include "mpt/format/message.hpp"
@@ -114,7 +115,7 @@ template <typename Tstring>
 using fmtT = mpt::format<Tstring>;
 
 using afmt = fmtT<std::string>;
-#if MPT_WSTRING_FORMAT
+#if !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
 using wfmt = fmtT<std::wstring>;
 #endif
 #if MPT_USTRING_MODE_WIDE
@@ -135,7 +136,7 @@ using cfmt = fmtT<CString>;
 
 #define MPT_AFORMAT(f) MPT_AFORMAT_MESSAGE(f)
 
-#if MPT_WSTRING_FORMAT
+#if !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
 #define MPT_WFORMAT(f) MPT_WFORMAT_MESSAGE(f)
 #endif
 

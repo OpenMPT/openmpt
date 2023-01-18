@@ -786,7 +786,7 @@ static MPT_NOINLINE void TestStringFormatting()
 	VERIFY_EQUAL(mpt::ufmt::HEX0<9>(0xa2345678), U_("0A2345678"));
 	VERIFY_EQUAL(mpt::ufmt::HEX0<10>(0xa2345678), U_("00A2345678"));
 
-#if MPT_WSTRING_FORMAT
+#if !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
 	VERIFY_EQUAL(mpt::wfmt::hex(0x123e), L"123e");
 	VERIFY_EQUAL(mpt::wfmt::hex0<6>(0x123e), L"00123e");
 	VERIFY_EQUAL(mpt::wfmt::hex0<2>(0x123e), L"123e");
@@ -907,7 +907,7 @@ static MPT_NOINLINE void TestStringFormatting()
 #endif
 
 	VERIFY_EQUAL(mpt::parse_hex<unsigned char>("fe"), 254);
-#if MPT_WSTRING_FORMAT
+#if !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
 	VERIFY_EQUAL(mpt::parse_hex<unsigned char>(L"fe"), 254);
 #endif
 	VERIFY_EQUAL(mpt::parse_hex<unsigned int>(U_("ffff")), 65535);
@@ -950,7 +950,7 @@ static MPT_NOINLINE void TestStringFormatting()
 	VERIFY_EQUAL(mpt::afmt::flt(6.12345, 4), "6.123");
 	VERIFY_EQUAL(mpt::afmt::fix(6.12345, 4), "6.1235");
 
-#if MPT_WSTRING_FORMAT
+#if !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
 	VERIFY_EQUAL(mpt::wfmt::flt(6.12345, 3), L"6.12");
 	VERIFY_EQUAL(mpt::wfmt::fix(6.12345, 3), L"6.123");
 	VERIFY_EQUAL(mpt::wfmt::flt(6.12345, 4), L"6.123");
@@ -971,7 +971,7 @@ static MPT_NOINLINE void TestStringFormatting()
 
 	//VERIFY_EQUAL(MPT_AFORMAT("{2}{1}{0}{2}{1}{0}{10}{9}{8}")(0,1,2,3,4,5,6,7,8,9,"a"), "210210a98");
 
-#if MPT_WSTRING_FORMAT
+#if !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
 	VERIFY_EQUAL(MPT_WFORMAT("{}{}{}")(1,2,3), L"123");
 #endif
 
