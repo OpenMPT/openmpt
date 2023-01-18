@@ -1623,7 +1623,7 @@ inline Tdststring encode(logical_encoding encoding, const mpt::widestring & src)
 			return encode<Tdststring>(optional_encoding_from_codepage(GetACP()).value_or(common_encoding::windows1252), src);
 			break;
 		case logical_encoding::active_locale:
-			return encode<Tdststring>(optional_encoding_from_codepage(GetACP()).value_or( common_encoding::windows1252), src);
+			return encode<Tdststring>(optional_encoding_from_codepage(GetACP()).value_or(common_encoding::windows1252), src);
 			break;
 	}
 	throw std::domain_error("unsupported encoding");
