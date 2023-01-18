@@ -35,21 +35,6 @@ namespace mpt
 {
 
 
-
-namespace String
-{
-
-
-template <typename Tstring, typename Tstring2, typename Tstring3>
-inline Tstring Replace(Tstring str, const Tstring2 &oldStr, const Tstring3 &newStr)
-{
-	return mpt::replace(str, oldStr, newStr);
-}
-
-
-} // namespace String
-
-
 enum class Charset {
 
 	UTF8,

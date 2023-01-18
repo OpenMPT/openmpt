@@ -16,6 +16,8 @@
 #ifndef MODPLUG_TRACKER
 
 
+#include "mpt/string/utility.hpp"
+
 #include <exception>
 #include <iostream>
 

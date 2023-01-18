@@ -34,6 +34,7 @@
 #include <mferror.h>
 #include <Propvarutil.h>
 #endif // MPT_WITH_MEDIAFOUNDATION
+#include "mpt/string/utility.hpp"
 
 
 OPENMPT_NAMESPACE_BEGIN

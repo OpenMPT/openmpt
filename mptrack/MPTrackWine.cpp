@@ -32,6 +32,7 @@
 #include "../common/FileReader.h"
 #include "../misc/mptWine.h"
 #include "MPTrackUtilWine.h"
+#include "mpt/string/utility.hpp"
 
 #include "wine/NativeSoundDevice.h"
 #include "openmpt/sounddevice/SoundDevice.hpp"

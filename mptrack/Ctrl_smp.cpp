@@ -44,6 +44,7 @@
 #include "../soundlib/MixFuncTable.h"
 #include "mpt/audio/span.hpp"
 #include "mpt/parse/parse.hpp"
+#include "mpt/string/utility.hpp"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -1502,9 +1503,9 @@ void CCtrlSamples::SaveSample(bool doBatchSave)
 				sampleFilename = SanitizePathComponent(sampleFilename);
 
 				mpt::ustring fileNameU = fileName.ToUnicode();
-				fileNameU = mpt::String::Replace(fileNameU, U_("%sample_number%"), mpt::ufmt::fmt(smp, numberFmt));
-				fileNameU = mpt::String::Replace(fileNameU, U_("%sample_filename%"), mpt::ToUnicode(sampleFilename));
-				fileNameU = mpt::String::Replace(fileNameU, U_("%sample_name%"), mpt::ToUnicode(sampleName));
+				fileNameU = mpt::replace(fileNameU, U_("%sample_number%"), mpt::ufmt::fmt(smp, numberFmt));
+				fileNameU = mpt::replace(fileNameU, U_("%sample_filename%"), mpt::ToUnicode(sampleFilename));
+				fileNameU = mpt::replace(fileNameU, U_("%sample_name%"), mpt::ToUnicode(sampleName));
 				fileName = mpt::PathString::FromUnicode(fileNameU);
 
 				// Need to enforce S3I for Adlib samples

@@ -17,6 +17,7 @@
 #include "TrackerSettings.h"
 #include "../common/version.h"
 #include "../misc/mptWine.h"
+#include "mpt/string/utility.hpp"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -256,7 +257,7 @@ BOOL CAboutDlg::OnInitDialog()
 		+ U_("\n");
 	app += U_("Version ") + Build::GetVersionStringSimple() + U_("\n\n");
 	app += Build::GetURL(Build::Url::Website) + U_("\n");
-	SetDlgItemText(IDC_EDIT3, mpt::ToCString(mpt::String::Replace(app, U_("\n"), U_("\r\n"))));
+	SetDlgItemText(IDC_EDIT3, mpt::ToCString(mpt::replace(app, U_("\n"), U_("\r\n"))));
 
 	m_bmp.SubclassDlgItem(IDC_BITMAP1, this);
 
@@ -292,7 +293,7 @@ void CAboutDlg::OnTimer(UINT_PTR nIDEvent)
 
 void CAboutDlg::OnTabChange(NMHDR * /*pNMHDR*/ , LRESULT * /*pResult*/ )
 {
-	m_TabEdit.SetWindowText(mpt::ToCString(mpt::String::Replace(GetTabText(m_Tab.GetCurSel()), U_("\n"), U_("\r\n"))));
+	m_TabEdit.SetWindowText(mpt::ToCString(mpt::replace(GetTabText(m_Tab.GetCurSel()), U_("\n"), U_("\r\n"))));
 }
 
 

@@ -74,6 +74,7 @@
 #endif
 #include "mpt/exception_text/exception_text.hpp"
 #include "mpt/out_of_memory/out_of_memory.hpp"
+#include "mpt/string/types.hpp"
 #include "mpt/system_error/system_error.hpp"
 
 #include "openmpt/base/Types.hpp"

@@ -53,6 +53,7 @@
 #include <HtmlHelp.h>
 #include <Dbt.h>  // device change messages
 #include "mpt/audio/span.hpp"
+#include "mpt/string/utility.hpp"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -3029,7 +3030,7 @@ void CMainFrame::UpdateMRUList()
 					path = path.substr(0, start + 1) + _T("...") + path.substr(end);
 				}
 			}
-			path = mpt::String::Replace(path, mpt::winstring(_T("&")), mpt::winstring(_T("&&")));
+			path = mpt::replace(path, mpt::winstring(_T("&")), mpt::winstring(_T("&&")));
 			s += path;
 			pMenu->InsertMenu(firstMenu + i, MF_STRING | MF_BYPOSITION, ID_MRU_LIST_FIRST + i, mpt::ToCString(s));
 		}

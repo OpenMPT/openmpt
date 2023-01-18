@@ -17,6 +17,7 @@
 #include "../soundlib/OPL.h"
 #include "../soundlib/Tagging.h"
 #include "mpt/io_file/outputfile.hpp"
+#include "mpt/string/utility.hpp"
 
 #include <zlib/zlib.h>
 
@@ -256,7 +257,7 @@ public:
 			{},  // Author name JP
 			fileTags.year,
 			{},  // Person who created the VGM file
-			mpt::String::Replace(fileTags.comments, U_("\r\n"), U_("\n")),
+			mpt::replace(fileTags.comments, U_("\r\n"), U_("\n")),
 		};
 		std::ostringstream tagStream;
 		for(const auto &tag : tags)
@@ -398,7 +399,7 @@ public:
 		SetDlgItemText(IDC_EDIT2, mpt::ToWin(m_sndFile.GetCharsetFile(), m_sndFile.GetTitle()).c_str());
 		SetDlgItemText(IDC_EDIT3, mpt::ToWin(m_sndFile.m_songArtist).c_str());
 		if(!m_sndFile.GetFileHistory().empty())
-			SetDlgItemText(IDC_EDIT4, mpt::ToWin(mpt::String::Replace(m_sndFile.GetFileHistory().back().AsISO8601(m_sndFile.GetTimezoneInternal()).substr(0, 10), U_("-"), U_("/"))).c_str());
+			SetDlgItemText(IDC_EDIT4, mpt::ToWin(mpt::replace(m_sndFile.GetFileHistory().back().AsISO8601(m_sndFile.GetTimezoneInternal()).substr(0, 10), U_("-"), U_("/"))).c_str());
 		SetDlgItemText(IDC_EDIT5, mpt::ToWin(m_sndFile.GetCharsetFile(), m_sndFile.m_songMessage.GetFormatted(SongMessage::leCRLF)).c_str());
 
 		m_locked = false;

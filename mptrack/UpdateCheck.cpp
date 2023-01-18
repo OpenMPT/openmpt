@@ -36,6 +36,7 @@
 #include "mpt/io_file_read/inputfile_filecursor.hpp"
 #include "mpt/io_file/outputfile.hpp"
 #include "mpt/path/os_path_long.hpp"
+#include "mpt/string/utility.hpp"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -527,7 +528,7 @@ void CUpdateCheck::StartUpdateCheckAsync(bool isAutoUpdate)
 	{
 		const auto enableStatistics = Reporting::Confirm(
 			U_("Do you want to contribute to OpenMPT by providing system statistics?\r\n\r\n") +
-			mpt::String::Replace(CUpdateCheck::GetStatisticsUserInformation(false), U_("\n"), U_("\r\n")) + U_("\r\n\r\n") +
+			mpt::replace(CUpdateCheck::GetStatisticsUserInformation(false), U_("\n"), U_("\r\n")) + U_("\r\n\r\n") +
 			MPT_UFORMAT("This option was previously {} on your system.\r\n")(TrackerSettings::Instance().UpdateStatistics ? U_("enabled") : U_("disabled")),
 			false, !TrackerSettings::Instance().UpdateStatistics.Get());
 		TrackerSettings::Instance().UpdateStatistics = (enableStatistics == ConfirmAnswer::cnfYes);
@@ -1626,12 +1627,12 @@ void CUpdateSetupDlg::OnShowStatisticsData(NMHDR * /*pNMHDR*/, LRESULT * /*pResu
 		{
 			statistics += U_("POST ") + settings.apiURL + U_("statistics/") + UL_("\n");
 		}
-		statistics += mpt::String::Replace(mpt::ToUnicode(mpt::Charset::UTF8, CUpdateCheck::GetStatisticsDataV3(settings)), U_("\t"), U_("    "));
+		statistics += mpt::replace(mpt::ToUnicode(mpt::Charset::UTF8, CUpdateCheck::GetStatisticsDataV3(settings)), U_("\t"), U_("    "));
 	}
 
 	InfoDialog dlg(this);
 	dlg.SetCaption(_T("Update Statistics Data"));
-	dlg.SetContent(mpt::ToWin(mpt::String::Replace(statistics, U_("\n"), U_("\r\n"))));
+	dlg.SetContent(mpt::ToWin(mpt::replace(statistics, U_("\n"), U_("\r\n"))));
 	dlg.DoModal();
 }
 

@@ -15,6 +15,7 @@
 
 #include "mpt/io/io.hpp"
 #include "mpt/io/io_stdstream.hpp"
+#include "mpt/string/utility.hpp"
 
 #include "Mptrack.h"
 
@@ -39,7 +40,7 @@ private:
 		{
 			return std::string();
 		}
-		return MPT_AFORMAT("{}={}\n")(field, mpt::ToCharset(mpt::Charset::UTF8, mpt::String::Replace(tag, U_("="), MPT_UTF8("\xEF\xBF\xBD")))); // U+FFFD
+		return MPT_AFORMAT("{}={}\n")(field, mpt::ToCharset(mpt::Charset::UTF8, mpt::replace(tag, U_("="), MPT_UTF8("\xEF\xBF\xBD")))); // U+FFFD
 	}
 
 public:

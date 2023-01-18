@@ -57,6 +57,8 @@
 #include "mpt/io_read/filedata.hpp"
 #include "mpt/io_read/filereader.hpp"
 #include "mpt/out_of_memory/out_of_memory.hpp"
+#include "mpt/string/types.hpp"
+#include "mpt/string/utility.hpp"
 #include "mpt/system_error/system_error.hpp"
 #if defined(MODPLUG_TRACKER)
 #include "mpt/uuid/guid.hpp"

@@ -24,6 +24,7 @@
 #include "mpt/fs/common_directories.hpp"
 #include "mpt/fs/fs.hpp"
 #include "../soundlib/mod_specifications.h"
+#include "mpt/string/utility.hpp"
 
 #include <atomic>
 

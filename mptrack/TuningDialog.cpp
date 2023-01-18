@@ -23,6 +23,7 @@
 #include "FileDialog.h"
 #include "Mainfrm.h"
 #include "mpt/parse/parse.hpp"
+#include "mpt/string/utility.hpp"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -690,10 +691,10 @@ void CTuningDialog::OnBnClickedButtonExport()
 			mpt::ustring fileNameW = fileName.ToUnicode();
 			mpt::ustring numberW = mpt::ufmt::fmt(i + 1, numberFmt);
 			numberW = SanitizePathComponent(numberW);
-			fileNameW = mpt::String::Replace(fileNameW, U_("%tuning_number%"), numberW);
+			fileNameW = mpt::replace(fileNameW, U_("%tuning_number%"), numberW);
 			mpt::ustring nameW = mpt::ToUnicode(tuningName);
 			nameW = SanitizePathComponent(nameW);
-			fileNameW = mpt::String::Replace(fileNameW, U_("%tuning_name%"), nameW);
+			fileNameW = mpt::replace(fileNameW, U_("%tuning_name%"), nameW);
 			fileName = mpt::PathString::FromUnicode(fileNameW);
 
 			try

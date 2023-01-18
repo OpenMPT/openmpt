@@ -31,6 +31,7 @@
 #include "../soundlib/plugins/OpCodes.h"
 #include "../soundlib/plugins/PluginManager.h"
 #include "../misc/mptOSException.h"
+#include "mpt/string/utility.hpp"
 
 using namespace Vst;
 DECLARE_FLAGSET(Vst::VstTimeInfoFlags)
@@ -676,10 +677,10 @@ intptr_t VSTCALLBACK CVstPlugin::MasterCallBack(AEffect *effect, VstOpcodeToHost
 			}
 			const mpt::PathString projectPath = pVstPlugin->GetModDoc()->GetPathNameMpt().GetDirectoryWithDrive();
 			const mpt::PathString projectFile = pVstPlugin->GetModDoc()->GetPathNameMpt().GetFilename();
-			pathStr = mpt::String::Replace(pathStr, U_("%1"), U_("?1?"));
-			pathStr = mpt::String::Replace(pathStr, U_("%2"), U_("?2?"));
-			pathStr = mpt::String::Replace(pathStr, U_("?1?"), projectPath.ToUnicode());
-			pathStr = mpt::String::Replace(pathStr, U_("?2?"), projectFile.ToUnicode());
+			pathStr = mpt::replace(pathStr, U_("%1"), U_("?1?"));
+			pathStr = mpt::replace(pathStr, U_("%2"), U_("?2?"));
+			pathStr = mpt::replace(pathStr, U_("?1?"), projectPath.ToUnicode());
+			pathStr = mpt::replace(pathStr, U_("?2?"), projectFile.ToUnicode());
 			mpt::PathString path = mpt::PathString::FromUnicode(pathStr);
 			if(path.empty())
 			{

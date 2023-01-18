@@ -32,6 +32,7 @@
 #include "../common/mptFileIO.h"
 #include "../common/FileReader.h"
 #include "FileDialog.h"
+#include "mpt/string/utility.hpp"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -2113,9 +2114,9 @@ void CCtrlInstruments::SaveInstrument(bool doBatchSave)
 				instrFilename = SanitizePathComponent(instrFilename);
 
 				mpt::ustring fileNameW = fileName.ToUnicode();
-				fileNameW = mpt::String::Replace(fileNameW, U_("%instrument_number%"), mpt::ufmt::fmt(ins, numberFmt));
-				fileNameW = mpt::String::Replace(fileNameW, U_("%instrument_filename%"), mpt::ToUnicode(instrFilename));
-				fileNameW = mpt::String::Replace(fileNameW, U_("%instrument_name%"), mpt::ToUnicode(instrName));
+				fileNameW = mpt::replace(fileNameW, U_("%instrument_number%"), mpt::ufmt::fmt(ins, numberFmt));
+				fileNameW = mpt::replace(fileNameW, U_("%instrument_filename%"), mpt::ToUnicode(instrFilename));
+				fileNameW = mpt::replace(fileNameW, U_("%instrument_name%"), mpt::ToUnicode(instrName));
 				fileName = mpt::PathString::FromUnicode(fileNameW);
 			}
 
