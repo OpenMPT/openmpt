@@ -15,6 +15,7 @@
 #include "mpt/string_transcode/transcode.hpp"
 
 #include <locale>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -677,98 +678,76 @@ CString ToCString(const mpt::ustring &str)
 
 
 
-static mpt::Charset CharsetFromCodePage(uint16 codepage, mpt::Charset fallback, bool * isFallback = nullptr)
+static std::optional<mpt::Charset> CharsetFromCodePage(uint16 codepage)
 {
-	mpt::Charset result = fallback;
+	std::optional<mpt::Charset> result = std::nullopt;
 	switch(codepage)
 	{
 	case 65001:
 		result = mpt::Charset::UTF8;
-		if(isFallback) *isFallback = false;
 		break;
 	case 20127:
 		result = mpt::Charset::ASCII;
-		if(isFallback) *isFallback = false;
 		break;
 	case 28591:
 		result = mpt::Charset::ISO8859_1;
-		if(isFallback) *isFallback = false;
 		break;
 	case 28605:
 		result = mpt::Charset::ISO8859_15;
-		if(isFallback) *isFallback = false;
 		break;
 	case 437:
 		result = mpt::Charset::CP437;
-		if(isFallback) *isFallback = false;
 		break;
 	case 737:
 		result = mpt::Charset::CP737;
-		if(isFallback) *isFallback = false;
 		break;
 	case 775:
 		result = mpt::Charset::CP775;
-		if(isFallback) *isFallback = false;
 		break;
 	case 850:
 		result = mpt::Charset::CP850;
-		if(isFallback) *isFallback = false;
 		break;
 	case 852:
 		result = mpt::Charset::CP852;
-		if(isFallback) *isFallback = false;
 		break;
 	case 855:
 		result = mpt::Charset::CP855;
-		if(isFallback) *isFallback = false;
 		break;
 	case 857:
 		result = mpt::Charset::CP857;
-		if(isFallback) *isFallback = false;
 		break;
 	case 860:
 		result = mpt::Charset::CP860;
-		if(isFallback) *isFallback = false;
 		break;
 	case 861:
 		result = mpt::Charset::CP861;
-		if(isFallback) *isFallback = false;
 		break;
 	case 862:
 		result = mpt::Charset::CP862;
-		if(isFallback) *isFallback = false;
 		break;
 	case 863:
 		result = mpt::Charset::CP863;
-		if(isFallback) *isFallback = false;
 		break;
 	case 864:
 		result = mpt::Charset::CP864;
-		if(isFallback) *isFallback = false;
 		break;
 	case 865:
 		result = mpt::Charset::CP865;
-		if(isFallback) *isFallback = false;
 		break;
 	case 866:
 		result = mpt::Charset::CP866;
-		if(isFallback) *isFallback = false;
 		break;
 	case 869:
 		result = mpt::Charset::CP869;
-		if(isFallback) *isFallback = false;
 		break;
 	case 874:
 		result = mpt::Charset::CP874;
-		if(isFallback) *isFallback = false;
 		break;
 	case 1252:
 		result = mpt::Charset::Windows1252;
-		if(isFallback) *isFallback = false;
 		break;
 	default:
-		result = fallback;
-		if(isFallback) *isFallback = true;
+		result = std::nullopt;
 		break;
 	}
 	return result;
@@ -778,18 +757,20 @@ mpt::ustring ToUnicode(uint16 codepage, mpt::Charset fallback, const std::string
 {
 	#if MPT_OS_WINDOWS && !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
 		mpt::ustring result;
-		bool noCharsetMatch = true;
-		mpt::Charset charset = mpt::CharsetFromCodePage(codepage, fallback, &noCharsetMatch);
-		if(noCharsetMatch && mpt::has_codepage(codepage))
+		std::optional<mpt::Charset> charset = mpt::CharsetFromCodePage(codepage);
+		if(charset)
+		{
+			result = mpt::ToUnicode(*charset, str);
+		} else if(mpt::has_codepage(codepage))
 		{
 			result = mpt::ToUnicode(mpt::decode<std::string>(codepage, str));
 		} else
 		{
-			result = mpt::ToUnicode(charset, str);
+			result = mpt::ToUnicode(fallback, str);
 		}
 		return result;
 	#else // !MPT_OS_WINDOWS
-		return mpt::ToUnicode(mpt::CharsetFromCodePage(codepage, fallback), str);
+		return mpt::ToUnicode(mpt::CharsetFromCodePage(codepage).value_or(fallback), str);
 	#endif // MPT_OS_WINDOWS
 }
 
