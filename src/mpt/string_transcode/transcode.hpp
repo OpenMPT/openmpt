@@ -1114,76 +1114,11 @@ inline std::optional<common_encoding> optional_encoding_from_codepage(UINT codep
 }
 
 inline common_encoding encoding_from_codepage(UINT codepage) {
-	common_encoding result = common_encoding::windows1252;
-	switch (codepage) {
-		case CP_UTF8:
-			result = common_encoding::utf8;
-			break;
-		case 20127:
-			result = common_encoding::ascii;
-			break;
-		case 28591:
-			result = common_encoding::iso8859_1;
-			break;
-		case 28605:
-			result = common_encoding::iso8859_15;
-			break;
-		case 437:
-			result = common_encoding::cp437;
-			break;
-		case 737:
-			result = common_encoding::cp737;
-			break;
-		case 775:
-			result = common_encoding::cp775;
-			break;
-		case 850:
-			result = common_encoding::cp850;
-			break;
-		case 852:
-			result = common_encoding::cp852;
-			break;
-		case 855:
-			result = common_encoding::cp855;
-			break;
-		case 857:
-			result = common_encoding::cp857;
-			break;
-		case 860:
-			result = common_encoding::cp860;
-			break;
-		case 861:
-			result = common_encoding::cp861;
-			break;
-		case 862:
-			result = common_encoding::cp862;
-			break;
-		case 863:
-			result = common_encoding::cp863;
-			break;
-		case 864:
-			result = common_encoding::cp864;
-			break;
-		case 865:
-			result = common_encoding::cp865;
-			break;
-		case 866:
-			result = common_encoding::cp866;
-			break;
-		case 869:
-			result = common_encoding::cp869;
-			break;
-		case 874:
-			result = common_encoding::cp874;
-			break;
-		case 1252:
-			result = common_encoding::windows1252;
-			break;
-		default:
-			throw std::domain_error("unsupported encoding");
-			break;
+	std::optional<common_encoding> optional_result = optional_encoding_from_codepage(codepage);
+	if (!optional_result) {
+		throw std::domain_error("unsupported encoding");
 	}
-	return result;
+	return *optional_result;
 }
 
 #if !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
