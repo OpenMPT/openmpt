@@ -118,11 +118,7 @@ using afmt = fmtT<std::string>;
 #if !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
 using wfmt = fmtT<std::wstring>;
 #endif
-#if MPT_USTRING_MODE_WIDE
-using ufmt = fmtT<std::wstring>;
-#else
 using ufmt = fmtT<mpt::ustring>;
-#endif
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
 using lfmt = fmtT<mpt::lstring>;
 #endif // MPT_ENABLE_CHARSET_LOCALE
