@@ -56,11 +56,11 @@ void Gargle::Process(float *pOutL, float *pOutR, uint32 numFrames)
 			if(triangle)
 			{
 				const uint32 stop = m_counter + remain;
-				const float factor = 1.0f / m_periodHalf;
+				const float factor = 1.0f / static_cast<float>(m_periodHalf);
 				for(uint32 i = m_counter; i < stop; i++)
 				{
-					*outL++ = *inL++ * i * factor;
-					*outR++ = *inR++ * i * factor;
+					*outL++ = *inL++ * static_cast<float>(i) * factor;
+					*outR++ = *inR++ * static_cast<float>(i) * factor;
 				}
 			} else
 			{
@@ -79,11 +79,11 @@ void Gargle::Process(float *pOutL, float *pOutR, uint32 numFrames)
 			if(triangle)
 			{
 				const uint32 stop = m_period - m_counter - remain;
-				const float factor = 1.0f / m_periodHalf;
+				const float factor = 1.0f / static_cast<float>(m_periodHalf);
 				for(uint32 i = m_period - m_counter; i > stop; i--)
 				{
-					*outL++ = *inL++ * i * factor;
-					*outR++ = *inR++ * i * factor;
+					*outL++ = *inL++ * static_cast<float>(i) * factor;
+					*outR++ = *inR++ * static_cast<float>(i) * factor;
 				}
 			} else
 			{

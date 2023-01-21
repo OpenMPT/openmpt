@@ -148,7 +148,7 @@ protected:
 
 public:
 	static LFOWaveform ParamToWaveform(float param) { return static_cast<LFOWaveform>(std::clamp(mpt::saturate_round<int>(param * 32.0f), 0, kNumWaveforms - 1)); }
-	static float WaveformToParam(LFOWaveform waveform) { return static_cast<int>(waveform) / 32.0f; }
+	static float WaveformToParam(LFOWaveform waveform) { return static_cast<float>(static_cast<int>(waveform)) / 32.0f; }
 };
 
 OPENMPT_NAMESPACE_END

@@ -191,8 +191,8 @@ CString Echo::GetParamDisplay(PlugParamIndex param)
 void Echo::RecalculateEchoParams()
 {
 	m_initialFeedback = std::sqrt(1.0f - (m_param[kEchoFeedback] * m_param[kEchoFeedback]));
-	m_delayTime[0] = static_cast<uint32>((1.0f + m_param[kEchoLeftDelay] * 1999.0f) / 1000.0f * m_sampleRate);
-	m_delayTime[1] = static_cast<uint32>((1.0f + m_param[kEchoRightDelay] * 1999.0f) / 1000.0f * m_sampleRate);
+	m_delayTime[0] = static_cast<uint32>((1.0f + m_param[kEchoLeftDelay] * 1999.0f) / 1000.0f * static_cast<float>(m_sampleRate));
+	m_delayTime[1] = static_cast<uint32>((1.0f + m_param[kEchoRightDelay] * 1999.0f) / 1000.0f * static_cast<float>(m_sampleRate));
 	m_crossEcho = (m_param[kEchoPanDelay]) > 0.5f;
 }
 

@@ -612,7 +612,7 @@ float I3DL2Reverb::CalcDecayCoeffs(int32 index)
 	if(decayHFRatio > 1.0f)
 		hfRef = mpt::numbers::pi_v<float>;
 
-	float c1 = std::pow(10.0f, ((m_delayTaps[index] / m_effectiveSampleRate) * -60.0f / DecayTime()) / 20.0f);
+	float c1 = std::pow(10.0f, ((static_cast<float>(m_delayTaps[index]) / m_effectiveSampleRate) * -60.0f / DecayTime()) / 20.0f);
 	float c2 = 0.0f;
 
 	float c21 = (std::pow(c1, 2.0f - 2.0f / decayHFRatio) - 1.0f) / (1.0f - std::cos(hfRef));

@@ -101,7 +101,7 @@ void ParamEq::Resume()
 {
 	m_isResumed = true;
 	// Limit center frequency to a third of the sampling rate.
-	m_maxFreqParam = Clamp((m_SndFile.GetSampleRate() / 3.0f - 80.0f) / 15920.0f, 0.0f, 1.0f);
+	m_maxFreqParam = Clamp((static_cast<float>(m_SndFile.GetSampleRate()) / 3.0f - 80.0f) / 15920.0f, 0.0f, 1.0f);
 	RecalculateEqParams();
 	PositionChanged();
 }
@@ -169,7 +169,7 @@ CString ParamEq::GetParamDisplay(PlugParamIndex param)
 void ParamEq::RecalculateEqParams()
 {
 	LimitMax(m_param[kEqCenter], m_maxFreqParam);
-	const float freq = FreqInHertz() / m_SndFile.GetSampleRate();
+	const float freq = FreqInHertz() / static_cast<float>(m_SndFile.GetSampleRate());
 	const float a = std::pow(10.0f, GainInDecibel() / 40.0f);
 	const float w0 = 2.0f * mpt::numbers::pi_v<float> * freq;
 	const float sinW0 = std::sin(w0);
