@@ -99,7 +99,7 @@ update = {
 		"announcement_url": announcement_url,
 		"changelog_url": changelog_url,
 		"downloads": {
-			"installer": {
+			"retro-installer": {
 				"url": download_base_url + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "/OpenMPT-" + version + "-RETRO-Setup.update.json",
 				"download_url": download_base_url + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "/OpenMPT-" + version + "-RETRO-Setup.exe",
 				"type": "installer",
@@ -111,7 +111,7 @@ update = {
 				"supported_architectures": { "x86":True,"amd64":True },
 				"required_processor_features": {}
 			},
-			"portable-x86": {
+			"retro-portable-x86": {
 				"url": download_base_url + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "/OpenMPT-" + version + "-RETRO-portable-x86.update.json",
 				"download_url": download_base_url + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "/OpenMPT-" + version + "-RETRO-portable-x86.zip",
 				"type": "archive",
@@ -123,7 +123,7 @@ update = {
 				"supported_architectures": { "x86":True },
 				"required_processor_features": {}
 			},
-			"portable-amd64": {
+			"retro-portable-amd64": {
 				"url": download_base_url + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "/OpenMPT-" + version + "-RETRO-portable-amd64.update.json",
 				"download_url": download_base_url + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "/OpenMPT-" + version + "-RETRO-portable-amd64.zip",
 				"type": "archive",
