@@ -175,7 +175,7 @@ void IMixPlugin::RecalculateGain()
 	if(IsInstrument())
 	{
 		gain /= m_SndFile.GetPlayConfig().getVSTiAttenuation();
-		gain = static_cast<float>(gain * (m_SndFile.m_nVSTiVolume / m_SndFile.GetPlayConfig().getNormalVSTiVol()));
+		gain = gain * (static_cast<float>(m_SndFile.m_nVSTiVolume) / m_SndFile.GetPlayConfig().getNormalVSTiVol());
 	}
 	m_fGain = gain;
 }
