@@ -23,8 +23,8 @@ void FloatToStereoMix(const float *pIn1, const float *pIn2, int32 *pOut, uint32 
 {
 	for(uint32 i=0; i<nCount; ++i)
 	{
-		*pOut++ = (int)(*pIn1++ * _f2ic);
-		*pOut++ = (int)(*pIn2++ * _f2ic);
+		*pOut++ = static_cast<int>(*pIn1++ * _f2ic);
+		*pOut++ = static_cast<int>(*pIn2++ * _f2ic);
 	}
 }
 
@@ -33,8 +33,8 @@ void StereoMixToFloat(const int32 *pSrc, float *pOut1, float *pOut2, uint32 nCou
 {
 	for(uint32 i=0; i<nCount; ++i)
 	{
-		*pOut1++ = *pSrc++ * _i2fc;
-		*pOut2++ = *pSrc++ * _i2fc;
+		*pOut1++ = static_cast<float>(*pSrc++) * _i2fc;
+		*pOut2++ = static_cast<float>(*pSrc++) * _i2fc;
 	}
 }
 
