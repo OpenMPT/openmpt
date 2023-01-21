@@ -424,7 +424,7 @@ void WAVWriter::WriteFormat(uint32 sampleRate, uint16 bitDepth, uint16 numChanne
 	wavFormat.format = static_cast<uint16>(extensible ? WAVFormatChunk::fmtExtensible : encoding);
 	wavFormat.numChannels = numChannels;
 	wavFormat.sampleRate = sampleRate;
-	wavFormat.blockAlign = (bitDepth * numChannels + 7) / 8;
+	wavFormat.blockAlign = static_cast<uint16>((bitDepth * numChannels + 7u) / 8u);
 	wavFormat.byteRate = wavFormat.sampleRate * wavFormat.blockAlign;
 	wavFormat.bitsPerSample = bitDepth;
 
