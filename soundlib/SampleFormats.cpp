@@ -967,7 +967,7 @@ static void PatchToSample(CSoundFile *that, SAMPLEINDEX nSample, GF1SampleHeader
 	sample.nLoopStart = sampleHeader.loopstart;
 	sample.nLoopEnd = sampleHeader.loopend;
 	sample.nC5Speed = sampleHeader.freq;
-	sample.nPan = (sampleHeader.balance * 256 + 8) / 15;
+	sample.nPan = static_cast<uint16>((sampleHeader.balance * 256 + 8) / 15);
 	if(sample.nPan > 256) sample.nPan = 128;
 	else sample.uFlags.set(CHN_PANNING);
 	sample.nVibType = VIB_SINE;
