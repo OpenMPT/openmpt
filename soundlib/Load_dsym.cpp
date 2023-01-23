@@ -259,16 +259,14 @@ bool CSoundFile::ReadDSym(FileReader &file, ModLoadingFlags loadFlags)
 	const auto allowedCommands = file.ReadArray<uint8, 8>();
 
 	std::vector<uint16le> sequence;
+	if(fileHeader.numOrders)
 	{
 		std::vector<std::byte> sequenceData;
-		if(fileHeader.numOrders)
-		{
-			const uint32 sequenceSize = fileHeader.numOrders * fileHeader.numChannels * 2u;
-			if(!ReadDSymChunk(file, sequenceData, sequenceSize))
-				return false;
-			FileReader sequenceChunk = FileReader(mpt::as_span(sequenceData));
-			sequenceChunk.ReadVector(sequenceData, sequenceData.size() / 2u);
-		}
+		const uint32 sequenceSize = fileHeader.numOrders * fileHeader.numChannels * 2u;
+		if(!ReadDSymChunk(file, sequenceData, sequenceSize))
+			return false;
+		FileReader sequenceChunk = FileReader(mpt::as_span(sequenceData));
+		sequenceChunk.ReadVector(sequence, sequenceData.size() / 2u);
 	}
 
 	std::vector<std::byte> trackData;
