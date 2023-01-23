@@ -9,7 +9,8 @@ OpenMPT release process
    * Update version number in all files
    * If year changed, see `doc/year_changed.md`
 2. Download latest pinned externals via build/download_externals.cmd.
-3. Run `build/build_openmpt_release.cmd` to build OpenMPT and the release
+3. Run `build/build_openmpt_release.cmd` and
+   `build/build_openmpt_release_retro.cmd` to build OpenMPT and the release
    packages.
 4. Upload release packages (openmpt.org, ftp.untergrund.net, SourceForge)
 5. Upload `OMPT_X.YY_ReleaseNotes.html` and `History.txt` to
