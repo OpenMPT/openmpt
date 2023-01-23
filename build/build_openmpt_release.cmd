@@ -2,7 +2,7 @@
 
 set BATCH_DIR=%~dp0
 cd %BATCH_DIR%
-cd ..\..
+cd ..
 
 set MY_DIR=%CD%
 
