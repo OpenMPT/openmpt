@@ -12,7 +12,7 @@ cd %BATCH_DIR%
 cd ..\..
 
 del /f /q "%OUTDIR%\openmpt-wine-support.zip"
-"C:\Program Files\7-Zip\7z.exe" a -tzip -mm=Deflate -mx=9 openmpt-wine-support.zip ^
+"build\tools\7zip\7z.exe" a -tzip -mm=Deflate -mx=9 openmpt-wine-support.zip ^
  LICENSE ^
  include\nlohmann-json\LICENSE.MIT ^
  include\nlohmann-json\include\nlohmann\*.hpp ^
