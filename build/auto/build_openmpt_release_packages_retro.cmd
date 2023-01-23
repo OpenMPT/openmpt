@@ -14,7 +14,7 @@ call build\auto\helper_get_openmpt_version.cmd
 
 cd build\auto || goto error
 
-set BUILD_PARAMS=--localtools --singlethreaded
+set BUILD_PARAMS=--singlethreaded
 if "x%1" == "xauto" (
 	set BUILD_PARAMS=%BUILD_PARAMS% --noninteractive
 	if "x%2" == "xsign" (

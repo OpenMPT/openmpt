@@ -8,17 +8,14 @@ from sys import executable
 import os, shutil, hashlib
 import sys
 
-path7z = "C:\\Program Files\\7-Zip\\7z.exe"
-pathISCC = "C:\\Program Files (x86)\\Inno Setup\\ISCC.exe"
+path7z = "build\\tools\\7zip\\7z.exe"
+pathISCC = "build\\tools\\innosetup5\\{app}\\ISCC.exe"
 singleThreaded = False
 interactive = True
 signBinaries = False
 signInstaller = False
 
 for arg in sys.argv:
-	if arg == '--localtools':
-		path7z = "build\\tools\\7zip\\7z.exe"
-		pathISCC = "build\\tools\\innosetup5\\{app}\\ISCC.exe"
 	if arg == '--singlethreaded':
 		singleThreaded = True
 	if arg == '--noninteractive':
