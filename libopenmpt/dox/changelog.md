@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.6.8-pre
 
+ *  [**Bug**] DSYM: Loading DSYM files got broken in 0.6.7.
+
  *  mpg123: Update to v1.31.2 (2023-01-14).
 
 ### libopenmpt 0.6.7 (2023-01-08)
