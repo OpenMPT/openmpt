@@ -206,7 +206,7 @@ private:
 				s << mpt::transcode<std::string>( mpt::common_encoding::utf8, text ) ;
 			#else
 				s << mpt::transcode<std::string>( mpt::logical_encoding::locale, text );
-		#endif
+			#endif
 			s.flush();
 		}	
 	}
