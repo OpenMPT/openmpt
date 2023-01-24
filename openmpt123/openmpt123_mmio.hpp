@@ -15,7 +15,7 @@
 
 #include "mpt/base/detect.hpp"
 
-#if MPT_OS_WINDOWS
+#if MPT_OS_WINDOWS && !MPT_OS_WINDOWS_WINRT
 
 namespace openmpt123 {
 

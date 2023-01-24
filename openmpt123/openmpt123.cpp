@@ -217,7 +217,7 @@ public:
 			// nothing
 		} else if ( flags.output_extension == MPT_NATIVE_PATH("raw") ) {
 			impl = std::make_unique<raw_stream_raii>( filename, flags, log );
-#if MPT_OS_WINDOWS
+#if MPT_OS_WINDOWS && !MPT_OS_WINDOWS_WINRT
 		} else if ( flags.output_extension == MPT_NATIVE_PATH("wav") ) {
 			impl = std::make_unique<mmio_stream_raii>( filename, flags, log );
 #endif				
@@ -1881,7 +1881,7 @@ static commandlineflags parse_openmpt123( const std::vector<mpt::ustring> & args
 #if defined( MPT_WITH_PORTAUDIO )
 					devices << show_portaudio_devices( log );
 #endif
-#if MPT_OS_WINDOWS
+#if MPT_OS_WINDOWS && !MPT_OS_WINDOWS_WINRT
 					devices << show_waveout_devices( log );
 #endif
 #if defined( MPT_WITH_ALLEGRO42 )
@@ -2254,7 +2254,7 @@ static int main( int argc, char * argv [] ) {
 					portaudio_stream_raii portaudio_stream( flags, log );
 					render_files( flags, log, portaudio_stream, prng );
 #endif
-#if MPT_OS_WINDOWS
+#if MPT_OS_WINDOWS && !MPT_OS_WINDOWS_WINRT
 				} else if ( flags.driver == MPT_USTRING("waveout") || flags.driver.empty() ) {
 					waveout_stream_raii waveout_stream( flags );
 					render_files( flags, log, waveout_stream, prng );
