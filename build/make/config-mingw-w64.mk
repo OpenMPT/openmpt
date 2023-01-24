@@ -67,13 +67,10 @@ else ifeq ($(WINDOWS_FAMILY),desktop-app)
 # nothing
 else ifeq ($(WINDOWS_FAMILY),app)
 CPPFLAGS += -DWINAPI_FAMILY=2
-OPENMPT123=0
 else ifeq ($(WINDOWS_FAMILY),phone-app)
 CPPFLAGS += -DWINAPI_FAMILY=3
-OPENMPT123=0
 else ifeq ($(WINDOWS_FAMILY),pc-app)
 CPPFLAGS += -DWINAPI_FAMILY=2
-OPENMPT123=0
 else
 $(error unknown WINDOWS_FAMILY)
 endif
