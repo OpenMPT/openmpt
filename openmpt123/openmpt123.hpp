@@ -120,7 +120,7 @@ private:
 				s << text;
 			#else
 				s << mpt::transcode<std::string>( mpt::logical_encoding::locale, mpt::common_encoding::utf8, text );
-		#endif
+			#endif
 			s.flush();
 		}	
 	}
