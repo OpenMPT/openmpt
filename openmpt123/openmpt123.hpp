@@ -222,7 +222,7 @@ public:
 	}
 };
 
-#if MPT_OS_WINDOWS
+#if MPT_OS_WINDOWS && !MPT_WINRT_BEFORE(MPT_WIN_10)
 
 class textout_ostream_console : public textout {
 private:
@@ -291,7 +291,7 @@ public:
 	}
 };
 
-#endif // MPT_OS_WINDOWS
+#endif // MPT_OS_WINDOWS && !MPT_WINRT_BEFORE(MPT_WIN_10)
 
 inline mpt::ustring append_software_tag( mpt::ustring software ) {
 	mpt::ustring openmpt123 = mpt::ustring()
@@ -453,7 +453,7 @@ struct commandlineflags {
 		terminal_width = 72;
 		terminal_height = 23;
 #endif
-#if MPT_OS_WINDOWS
+#if MPT_OS_WINDOWS && !MPT_WINRT_BEFORE(MPT_WIN_10)
 		terminal_width = 72;
 		terminal_height = 23;
 		HANDLE hStdOutput = GetStdHandle( STD_OUTPUT_HANDLE );
@@ -465,7 +465,7 @@ struct commandlineflags {
 				terminal_height = std::min( static_cast<int>( 1 + csbi.srWindow.Bottom - csbi.srWindow.Top ), static_cast<int>( csbi.dwSize.Y ) );
 			}
 		}
-#else // !MPT_OS_WINDOWS
+#else // !(MPT_OS_WINDOWS && !MPT_WINRT_BEFORE(MPT_WIN_10))
 		if ( isatty( STDERR_FILENO ) ) {
 			const char * env_columns = std::getenv( "COLUMNS" );
 			if ( env_columns ) {
@@ -495,7 +495,7 @@ struct commandlineflags {
 				}
 			#endif
 		}
-#endif // MPT_OS_WINDOWS
+#endif // MPT_OS_WINDOWS && !MPT_WINRT_BEFORE(MPT_WIN_10)
 		show_details = true;
 		show_message = false;
 #if MPT_OS_WINDOWS

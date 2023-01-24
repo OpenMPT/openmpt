@@ -144,7 +144,7 @@ struct show_long_version_number_exception : public std::exception {
 
 constexpr auto libopenmpt_encoding = mpt::common_encoding::utf8;
 
-#if MPT_OS_WINDOWS
+#if MPT_OS_WINDOWS && !MPT_WINRT_BEFORE(MPT_WIN_10)
 bool IsConsole( DWORD stdHandle ) {
 	HANDLE hStd = GetStdHandle( stdHandle );
 	if ( ( hStd != NULL ) && ( hStd != INVALID_HANDLE_VALUE ) ) {
@@ -155,10 +155,10 @@ bool IsConsole( DWORD stdHandle ) {
 	}
 	return false;
 }
-#endif
+#endif // MPT_OS_WINDOWS && !MPT_WINRT_BEFORE(MPT_WIN_10)
 
 bool IsTerminal( int fd ) {
-#if MPT_OS_WINDOWS
+#if MPT_OS_WINDOWS && !MPT_WINRT_BEFORE(MPT_WIN_10)
 	if ( !_isatty( fd ) ) {
 		return false;
 	}
@@ -2093,7 +2093,7 @@ static int main( int argc, char * argv [] ) {
 	FD_utf8_raii stderr_utf8_guard( stderr, true );
 #endif
 	textout_dummy dummy_log;
-#if MPT_OS_WINDOWS
+#if MPT_OS_WINDOWS && !MPT_WINRT_BEFORE(MPT_WIN_10)
 #if defined(UNICODE)
 	textout_ostream_console std_out( std::wcout, STD_OUTPUT_HANDLE );
 	textout_ostream_console std_err( std::wclog, STD_ERROR_HANDLE );
