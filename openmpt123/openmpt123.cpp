@@ -2101,6 +2101,14 @@ static int main( int argc, char * argv [] ) {
 	textout_ostream_console std_out( std::cout, STD_OUTPUT_HANDLE );
 	textout_ostream_console std_err( std::clog, STD_ERROR_HANDLE );
 #endif
+#elif MPT_OS_WINDOWS
+#if defined(UNICODE)
+	textout_wostream std_out( std::wcout );
+	textout_wostream std_err( std::wclog );
+#else
+	textout_ostream std_out( std::cout );
+	textout_ostream std_err( std::clog );
+#endif
 #else
 	textout_ostream std_out( std::cout );
 	textout_ostream std_err( std::clog );

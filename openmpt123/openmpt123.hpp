@@ -222,6 +222,42 @@ public:
 	}
 };
 
+#if MPT_OS_WINDOWS && defined(UNICODE)
+
+class textout_wostream : public textout {
+private:
+	std::wostream & s;
+public:
+	textout_wostream( std::wostream & s_ )
+		: s(s_)
+	{
+		return;
+	}
+	virtual ~textout_wostream() {
+		writeout_impl();
+	}
+private:
+	void writeout_impl() {
+		mpt::ustring text = pop();
+		if ( text.length() > 0 ) {
+			s << mpt::transcode<std::wstring>( text );
+			s.flush();
+		}	
+	}
+public:
+	void writeout() override {
+		writeout_impl();
+	}
+	void cursor_up( std::size_t lines ) override {
+		s.flush();
+		for ( std::size_t line = 0; line < lines; ++line ) {
+			*this << MPT_USTRING("\x1b[1A");
+		}
+	}
+};
+
+#endif // MPT_OS_WINDOWS && UNICODE
+
 #if MPT_OS_WINDOWS && !MPT_WINRT_BEFORE(MPT_WIN_10)
 
 class textout_ostream_console : public textout {
