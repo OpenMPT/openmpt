@@ -197,6 +197,6 @@ static mpt::ustring show_waveout_devices( concat_stream<mpt::ustring> & /*log*/ 
 
 } // namespace openmpt123
 
-#endif // MPT_OS_WINDOWS
+#endif // MPT_OS_WINDOWS && !MPT_OS_WINDOWS_WINRT
 
 #endif // OPENMPT123_WAVEOUT_HPP

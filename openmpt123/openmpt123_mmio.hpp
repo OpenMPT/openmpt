@@ -130,6 +130,6 @@ public:
 
 } // namespace openmpt123
 
-#endif // MPT_OS_WINDOWS
+#endif // MPT_OS_WINDOWS && !MPT_OS_WINDOWS_WINRT
 
 #endif // OPENMPT123_MMIO_HPP
