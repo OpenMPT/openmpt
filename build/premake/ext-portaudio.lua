@@ -20,7 +20,7 @@
 				"PA_USE_ASIO=0",
 				"PA_USE_DS=0",
 				"PA_USE_WMME=0",
-				"PA_USE_WASAPI=1",
+				"PA_USE_WASAPI=0",
 				"PA_USE_WDMKS=0",
 			}
 		else
@@ -80,9 +80,6 @@
 				"../../include/portaudio/src/hostapi/wasapi/pa_win_wasapi.c",
 			}
 		elseif _OPTIONS["windows-family"] == "uwp" then
-			files {
-				"../../include/portaudio/src/hostapi/wasapi/pa_win_wasapi.c",
-			}
 		else
 			files {
 				"../../include/portaudio/src/hostapi/wmme/pa_win_wmme.c",
@@ -123,6 +120,8 @@
   filter { "kind:SharedLib" }
 	if _OPTIONS["windows-version"] == "winxp" then
 		files { "../../build/premake/def/ext-portaudio-retro.def" }
+	elseif _OPTIONS["windows-family"] == "uwp" then
+		files { "../../build/premake/def/ext-portaudio-uwp.def" }
 	else
 		files { "../../include/portaudio/build/msvc/portaudio.def" }
 	end
