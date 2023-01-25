@@ -1021,7 +1021,7 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 				}
 			}
 
-#elif MPT_OS_WINDOWS && defined( UNICODE )
+#elif MPT_OS_WINDOWS && defined( UNICODE ) && !MPT_OS_WINDOWS_WINRT
 
 			while ( _kbhit() ) {
 				wint_t c = _getwch();
