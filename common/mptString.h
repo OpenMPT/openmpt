@@ -127,7 +127,7 @@ bool IsUTF8(const std::string &str);
 // The wide encoding is UTF-16 or UTF-32, based on sizeof(wchar_t).
 // If str does not contain any invalid characters, this conversion is lossless.
 // Invalid source bytes will be replaced by some replacement character or string.
-inline std::wstring ToWide(const std::wstring &str) { return str; }
+inline std::wstring ToWide(std::wstring str) { return str; }
 inline std::wstring ToWide(const wchar_t * str) { return (str ? std::wstring(str) : std::wstring()); }
 std::wstring ToWide(Charset from, const std::string &str);
 inline std::wstring ToWide(Charset from, const char * str) { return ToWide(from, str ? std::string(str) : std::string()); }
@@ -159,7 +159,7 @@ inline mpt::lstring ToLocale(const wchar_t * str) { return ToLocale(str ? std::w
 #endif
 mpt::lstring ToLocale(Charset from, const std::string &str);
 inline mpt::lstring ToLocale(Charset from, const char * str) { return ToLocale(from, str ? std::string(str): std::string()); }
-inline mpt::lstring ToLocale(const mpt::lstring &str) { return str; }
+inline mpt::lstring ToLocale(mpt::lstring str) { return str; }
 #endif // MPT_ENABLE_CHARSET_LOCALE
 
 #if MPT_OS_WINDOWS
@@ -180,7 +180,7 @@ mpt::winstring ToWin(const mpt::lstring &str);
 // Convert to a MFC CString. The CString encoding depends on UNICODE.
 // This should also be used when converting to TCHAR strings.
 // If UNICODE is defined, this is a completely lossless operation.
-inline CString ToCString(const CString &str) { return str; }
+inline CString ToCString(CString str) { return str; }
 CString ToCString(const std::wstring &str);
 inline CString ToCString(const wchar_t * str) { return ToCString(str ? std::wstring(str) : std::wstring()); }
 CString ToCString(Charset from, const std::string &str);
@@ -210,7 +210,7 @@ std::string ToCharset(Charset to, const CString &str);
 
 
 #if MPT_USTRING_MODE_WIDE
-inline mpt::ustring ToUnicode(const std::wstring &str) { return str; }
+inline mpt::ustring ToUnicode(std::wstring str) { return str; }
 inline mpt::ustring ToUnicode(const wchar_t * str) { return (str ? std::wstring(str) : std::wstring()); }
 inline mpt::ustring ToUnicode(Charset from, const std::string &str) { return ToWide(from, str); }
 inline mpt::ustring ToUnicode(Charset from, const char * str) { return ToUnicode(from, str ? std::string(str) : std::string()); }
@@ -221,7 +221,7 @@ inline mpt::ustring ToUnicode(const mpt::lstring &str) { return ToWide(str); }
 inline mpt::ustring ToUnicode(const CString &str) { return ToWide(str); }
 #endif // MFC
 #else // !MPT_USTRING_MODE_WIDE
-inline mpt::ustring ToUnicode(const mpt::ustring &str) { return str; }
+inline mpt::ustring ToUnicode(mpt::ustring str) { return str; }
 #if MPT_WSTRING_CONVERT
 mpt::ustring ToUnicode(const std::wstring &str);
 inline mpt::ustring ToUnicode(const wchar_t * str) { return ToUnicode(str ? std::wstring(str) : std::wstring()); }
