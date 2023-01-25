@@ -1588,6 +1588,13 @@ inline Tdststring encode(logical_encoding encoding, const mpt::widestring & src)
 #endif
 }
 
+template <typename Tdststring, typename Ttranscoder>
+inline auto encode(Ttranscoder transcoder, const mpt::widestring & src) -> decltype(transcoder.template encode<Tdststring>(src)) {
+	static_assert(sizeof(typename Tdststring::value_type) == sizeof(char));
+	static_assert(mpt::is_character<typename Tdststring::value_type>::value);
+	return transcoder.template encode<Tdststring>(src);
+}
+
 #if MPT_OS_WINDOWS
 template <typename Tsrcstring>
 inline mpt::widestring decode(UINT codepage, const Tsrcstring & src) {
@@ -1750,6 +1757,13 @@ inline mpt::widestring decode(logical_encoding encoding, const Tsrcstring & src)
 #else
 	throw std::domain_error("unsupported encoding");
 #endif
+}
+
+template <typename Tsrcstring, typename Ttranscoder>
+inline auto decode(Ttranscoder transcoder, const Tsrcstring & src) -> decltype(transcoder.template decode<Tsrcstring>(src)) {
+	static_assert(sizeof(typename Tsrcstring::value_type) == sizeof(char));
+	static_assert(mpt::is_character<typename Tsrcstring::value_type>::value);
+	return transcoder.template decode<Tsrcstring>(src);
 }
 
 
