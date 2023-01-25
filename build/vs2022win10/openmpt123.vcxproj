@@ -568,6 +568,9 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <Manifest>
+      <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -601,6 +604,9 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <Manifest>
+      <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -633,6 +639,9 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <Manifest>
+      <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -665,6 +674,9 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <Manifest>
+      <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -703,6 +715,9 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <Manifest>
+      <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -740,6 +755,9 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <Manifest>
+      <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -777,6 +795,9 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <Manifest>
+      <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -814,6 +835,9 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <Manifest>
+      <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -853,6 +877,9 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <Manifest>
+      <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -891,6 +918,9 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <Manifest>
+      <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -929,6 +959,9 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <Manifest>
+      <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -967,6 +1000,9 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <Manifest>
+      <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -999,6 +1035,9 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <Manifest>
+      <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -1031,6 +1070,9 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <Manifest>
+      <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -1063,6 +1105,9 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <Manifest>
+      <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -1095,6 +1140,9 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <Manifest>
+      <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -1133,6 +1181,9 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <Manifest>
+      <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -1170,6 +1221,9 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <Manifest>
+      <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -1207,6 +1261,9 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <Manifest>
+      <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -1244,6 +1301,9 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <Manifest>
+      <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -1283,6 +1343,9 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <Manifest>
+      <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -1321,6 +1384,9 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <Manifest>
+      <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -1359,6 +1425,9 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <Manifest>
+      <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -1397,6 +1466,9 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <Manifest>
+      <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -1491,6 +1563,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\openmpt123\openmpt123.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\vs\win10.manifest" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\libopenmpt\libopenmpt_version.rc" />

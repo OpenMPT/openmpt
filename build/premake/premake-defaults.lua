@@ -61,6 +61,19 @@
 			end
 		elseif mykind == "Console" then
 			kind "ConsoleApp"
+			if _OPTIONS["windows-version"] == "win10" then
+				files {
+					"../../build/vs/win10.manifest",
+				}
+			elseif  _OPTIONS["windows-version"] == "win81" then
+				files {
+					"../../build/vs/win81.manifest",
+				}
+			elseif  _OPTIONS["windows-version"] == "win7" then
+				files {
+					"../../build/vs/win7.manifest",
+				}
+			end
 		else
 			-- nothing
 		end
