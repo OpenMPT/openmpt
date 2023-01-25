@@ -106,7 +106,7 @@ update = {
 				"can_autoupdate": True,
 				"autoupdate_minversion": "1.30.00.08",
 				"os": "windows",
-				"required_windows_version": { "version_major":5, "version_minor":1, "servicepack_major":1, "servicepack_minor":0, "build":0, "wine_major":1, "wine_minor":8, "wine_update":0 },
+				"required_windows_version": { "version_major":5, "version_minor":1, "servicepack_major":3, "servicepack_minor":0, "build":0, "wine_major":1, "wine_minor":8, "wine_update":0 },
 				"required_architectures": { "x86":True },
 				"supported_architectures": { "x86":True,"amd64":True },
 				"required_processor_features": {}
@@ -118,7 +118,7 @@ update = {
 				"can_autoupdate": True,
 				"autoupdate_minversion": "1.30.00.08",
 				"os": "windows",
-				"required_windows_version": { "version_major":5, "version_minor":1, "servicepack_major":1, "servicepack_minor":0, "build":0, "wine_major":1, "wine_minor":8, "wine_update":0 },
+				"required_windows_version": { "version_major":5, "version_minor":1, "servicepack_major":3, "servicepack_minor":0, "build":0, "wine_major":1, "wine_minor":8, "wine_update":0 },
 				"required_architectures": {},
 				"supported_architectures": { "x86":True },
 				"required_processor_features": {}
@@ -130,7 +130,7 @@ update = {
 				"can_autoupdate": True,
 				"autoupdate_minversion": "1.30.00.08",
 				"os": "windows",
-				"required_windows_version": { "version_major":5, "version_minor":2, "servicepack_major":0, "servicepack_minor":0, "build":0, "wine_major":1, "wine_minor":8, "wine_update":0 },
+				"required_windows_version": { "version_major":5, "version_minor":2, "servicepack_major":2, "servicepack_minor":0, "build":0, "wine_major":1, "wine_minor":8, "wine_update":0 },
 				"required_architectures": {},
 				"supported_architectures": { "amd64":True },
 				"required_processor_features": {}

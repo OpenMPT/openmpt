@@ -366,10 +366,10 @@
 		filter {}
 		filter { "architecture:x86" }
 			defines { "_WIN32_WINNT=0x0501" }
-			defines { "NTDDI_VERSION=0x05010100" } -- Windows XP SP1
+			defines { "NTDDI_VERSION=0x05010300" } -- Windows XP SP3
 		filter { "architecture:x86_64" }
 			defines { "_WIN32_WINNT=0x0502" }
-			defines { "NTDDI_VERSION=0x05020000" } -- Windows XP x64
+			defines { "NTDDI_VERSION=0x05020200" } -- Windows XP x64 SP2
 		filter {}
 	end
 
