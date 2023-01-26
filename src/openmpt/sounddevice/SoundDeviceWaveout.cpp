@@ -11,6 +11,7 @@
 #include "SoundDeviceUtilities.hpp"
 
 #include "mpt/base/detect.hpp"
+#include "mpt/base/macros.hpp"
 #include "mpt/base/numeric.hpp"
 #include "mpt/base/saturate_round.hpp"
 #include "mpt/format/message_macros.hpp"
@@ -656,7 +657,7 @@ std::vector<SoundDevice::Info> CWaveDevice::EnumerateDevices(ILogger &logger, So
 		return logger;
 	};
 #else
-	MPT_UNREFERENCED_PARAMETER(logger);
+	MPT_UNUSED(logger);
 #endif
 	MPT_SOUNDDEV_TRACE_SCOPE();
 	std::vector<SoundDevice::Info> devices;
