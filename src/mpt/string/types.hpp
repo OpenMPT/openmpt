@@ -506,12 +506,14 @@ struct is_string_view_type<std::basic_string_view<Tchar, Ttraits>> : public std:
 
 template <typename T>
 inline typename mpt::make_string_type<typename std::decay<T>::type>::type as_string(T && str) {
-	if constexpr (std::is_pointer<typename std::decay<T>::type>::value) {
+	if constexpr (std::is_pointer<typename std::remove_cv<typename std::remove_reference<T>::type>::type>::value) {
 		return str ? typename mpt::make_string_type<typename std::decay<T>::type>::type{std::forward<T>(str)} : typename mpt::make_string_type<typename std::decay<T>::type>::type{};
+	} else if constexpr (std::is_pointer<typename std::decay<T>::type>::value) {
+		return typename mpt::make_string_type<typename std::decay<T>::type>::type{std::forward<T>(str)};
 	} else if constexpr (mpt::is_string_view_type<typename std::decay<T>::type>::value) {
 		return typename mpt::make_string_type<typename std::decay<T>::type>::type{std::forward<T>(str)};
 	} else {
-		return str;
+		return std::move(str);
 	}
 }
 
@@ -519,12 +521,14 @@ inline typename mpt::make_string_type<typename std::decay<T>::type>::type as_str
 
 template <typename T>
 inline typename mpt::make_string_view_type<typename std::decay<T>::type>::type as_string_view(T && str) {
-	if constexpr (std::is_pointer<typename std::decay<T>::type>::value) {
+	if constexpr (std::is_pointer<typename std::remove_cv<typename std::remove_reference<T>::type>::type>::value) {
 		return str ? typename mpt::make_string_view_type<typename std::decay<T>::type>::type{std::forward<T>(str)} : typename mpt::make_string_view_type<typename std::decay<T>::type>::type{};
+	} else if constexpr (std::is_pointer<typename std::decay<T>::type>::value) {
+		return typename mpt::make_string_view_type<typename std::decay<T>::type>::type{std::forward<T>(str)};
 	} else if constexpr (mpt::is_string_view_type<typename std::decay<T>::type>::value) {
 		return typename mpt::make_string_view_type<typename std::decay<T>::type>::type{std::forward<T>(str)};
 	} else {
-		return str;
+		return std::move(str);
 	}
 }
 
