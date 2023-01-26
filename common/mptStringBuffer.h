@@ -297,3 +297,26 @@ namespace String
 
 
 OPENMPT_NAMESPACE_END
+
+
+
+template <typename Tchar>
+struct mpt::make_string_type<OPENMPT_NAMESPACE::mpt::StringModeBufRefImpl<Tchar>> {
+	using type = std::basic_string<typename std::remove_const<Tchar>::type>;
+};
+
+template <typename Tchar>
+struct mpt::make_string_view_type<OPENMPT_NAMESPACE::mpt::StringModeBufRefImpl<Tchar>> {
+	using type = std::basic_string_view<typename std::remove_const<Tchar>::type>;
+};
+
+
+template <std::size_t len, OPENMPT_NAMESPACE::mpt::String::ReadWriteMode mode>
+struct mpt::make_string_type<OPENMPT_NAMESPACE::mpt::modecharbuf<len, mode>> {
+	using type = std::string;
+};
+
+template <std::size_t len, OPENMPT_NAMESPACE::mpt::String::ReadWriteMode mode>
+struct mpt::make_string_view_type<OPENMPT_NAMESPACE::mpt::modecharbuf<len, mode>> {
+	using type = std::string_view;
+};
