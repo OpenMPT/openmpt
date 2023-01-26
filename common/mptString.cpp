@@ -299,7 +299,7 @@ _T() in mptrack/ only because it is shorter.
 
 
 
-namespace mpt { namespace String {
+namespace mpt {
 
 
 
@@ -349,114 +349,141 @@ static constexpr char32_t CharsetTableCP437AMS2[256] = {
 #undef C
 
 
-// templated on 8bit strings because of type-safe variants
-template<typename Tdststring>
-static Tdststring EncodeImpl(Charset charset, const mpt::widestring &src)
-{
-	static_assert(sizeof(typename Tdststring::value_type) == sizeof(char));
-	static_assert(mpt::is_character<typename Tdststring::value_type>::value);
-	switch(charset)
-	{
-#if defined(MPT_ENABLE_CHARSET_LOCALE)
-		case Charset::Locale:           return mpt::encode<Tdststring>(mpt::logical_encoding::locale, src); break;
-#endif
-		case Charset::UTF8:             return mpt::encode<Tdststring>(mpt::common_encoding::utf8, src); break;
-		case Charset::ASCII:            return mpt::encode<Tdststring>(mpt::common_encoding::ascii, src); break;
-		case Charset::ISO8859_1:        return mpt::encode<Tdststring>(mpt::common_encoding::iso8859_1, src); break;
-		case Charset::ISO8859_15:       return mpt::encode<Tdststring>(mpt::common_encoding::iso8859_15, src); break;
-		case Charset::CP437:            return mpt::encode<Tdststring>(mpt::common_encoding::cp437, src); break;
-		case Charset::CP737:            return mpt::encode<Tdststring>(mpt::common_encoding::cp737, src); break;
-		case Charset::CP775:            return mpt::encode<Tdststring>(mpt::common_encoding::cp775, src); break;
-		case Charset::CP850:            return mpt::encode<Tdststring>(mpt::common_encoding::cp850, src); break;
-		case Charset::CP852:            return mpt::encode<Tdststring>(mpt::common_encoding::cp852, src); break;
-		case Charset::CP855:            return mpt::encode<Tdststring>(mpt::common_encoding::cp855, src); break;
-		case Charset::CP857:            return mpt::encode<Tdststring>(mpt::common_encoding::cp857, src); break;
-		case Charset::CP860:            return mpt::encode<Tdststring>(mpt::common_encoding::cp860, src); break;
-		case Charset::CP861:            return mpt::encode<Tdststring>(mpt::common_encoding::cp861, src); break;
-		case Charset::CP862:            return mpt::encode<Tdststring>(mpt::common_encoding::cp862, src); break;
-		case Charset::CP863:            return mpt::encode<Tdststring>(mpt::common_encoding::cp863, src); break;
-		case Charset::CP864:            return mpt::encode<Tdststring>(mpt::common_encoding::cp864, src); break;
-		case Charset::CP865:            return mpt::encode<Tdststring>(mpt::common_encoding::cp865, src); break;
-		case Charset::CP866:            return mpt::encode<Tdststring>(mpt::common_encoding::cp866, src); break;
-		case Charset::CP869:            return mpt::encode<Tdststring>(mpt::common_encoding::cp869, src); break;
-		case Charset::CP874:            return mpt::encode<Tdststring>(mpt::common_encoding::cp874, src); break;
-		case Charset::CP437AMS:         return mpt::encode<Tdststring>(CharsetTableCP437AMS, src); break;
-		case Charset::CP437AMS2:        return mpt::encode<Tdststring>(CharsetTableCP437AMS2, src); break;
-		case Charset::Windows1252:      return mpt::encode<Tdststring>(mpt::common_encoding::windows1252, src); break;
-		case Charset::Amiga:            return mpt::encode<Tdststring>(mpt::common_encoding::amiga, src); break;
-		case Charset::RISC_OS:          return mpt::encode<Tdststring>(mpt::common_encoding::riscos, src); break;
-		case Charset::AtariST:          return mpt::encode<Tdststring>(mpt::common_encoding::atarist, src); break;
-		case Charset::ISO8859_1_no_C1:  return mpt::encode<Tdststring>(mpt::common_encoding::iso8859_1_no_c1, src); break;
-		case Charset::ISO8859_15_no_C1: return mpt::encode<Tdststring>(mpt::common_encoding::iso8859_15_no_c1, src); break;
-		case Charset::Amiga_no_C1:      return mpt::encode<Tdststring>(mpt::common_encoding::amiga_no_c1, src); break;
-	}
-	return Tdststring();
-}
 
-
-// templated on 8bit strings because of type-safe variants
-template<typename Tsrcstring>
-static mpt::widestring DecodeImpl(Charset charset, const Tsrcstring &src)
+struct CharsetTranscoder
 {
-	static_assert(sizeof(typename Tsrcstring::value_type) == sizeof(char));
-	static_assert(mpt::is_character<typename Tsrcstring::value_type>::value);
-	switch(charset)
+
+private:
+
+	Charset m_Charset;
+
+public:
+
+	constexpr CharsetTranscoder(Charset charset)
+		: m_Charset(charset)
 	{
-#if defined(MPT_ENABLE_CHARSET_LOCALE)
-		case Charset::Locale:           return mpt::decode<Tsrcstring>(mpt::logical_encoding::locale, src); break;
-#endif
-		case Charset::UTF8:             return mpt::decode<Tsrcstring>(mpt::common_encoding::utf8, src); break;
-		case Charset::ASCII:            return mpt::decode<Tsrcstring>(mpt::common_encoding::ascii, src); break;
-		case Charset::ISO8859_1:        return mpt::decode<Tsrcstring>(mpt::common_encoding::iso8859_1, src); break;
-		case Charset::ISO8859_15:       return mpt::decode<Tsrcstring>(mpt::common_encoding::iso8859_15, src); break;
-		case Charset::CP437:            return mpt::decode<Tsrcstring>(mpt::common_encoding::cp437, src); break;
-		case Charset::CP737:            return mpt::decode<Tsrcstring>(mpt::common_encoding::cp737, src); break;
-		case Charset::CP775:            return mpt::decode<Tsrcstring>(mpt::common_encoding::cp775, src); break;
-		case Charset::CP850:            return mpt::decode<Tsrcstring>(mpt::common_encoding::cp850, src); break;
-		case Charset::CP852:            return mpt::decode<Tsrcstring>(mpt::common_encoding::cp852, src); break;
-		case Charset::CP855:            return mpt::decode<Tsrcstring>(mpt::common_encoding::cp855, src); break;
-		case Charset::CP857:            return mpt::decode<Tsrcstring>(mpt::common_encoding::cp857, src); break;
-		case Charset::CP860:            return mpt::decode<Tsrcstring>(mpt::common_encoding::cp860, src); break;
-		case Charset::CP861:            return mpt::decode<Tsrcstring>(mpt::common_encoding::cp861, src); break;
-		case Charset::CP862:            return mpt::decode<Tsrcstring>(mpt::common_encoding::cp862, src); break;
-		case Charset::CP863:            return mpt::decode<Tsrcstring>(mpt::common_encoding::cp863, src); break;
-		case Charset::CP864:            return mpt::decode<Tsrcstring>(mpt::common_encoding::cp864, src); break;
-		case Charset::CP865:            return mpt::decode<Tsrcstring>(mpt::common_encoding::cp865, src); break;
-		case Charset::CP866:            return mpt::decode<Tsrcstring>(mpt::common_encoding::cp866, src); break;
-		case Charset::CP869:            return mpt::decode<Tsrcstring>(mpt::common_encoding::cp869, src); break;
-		case Charset::CP874:            return mpt::decode<Tsrcstring>(mpt::common_encoding::cp874, src); break;
-		case Charset::CP437AMS:         return mpt::decode<Tsrcstring>(CharsetTableCP437AMS, src); break;
-		case Charset::CP437AMS2:        return mpt::decode<Tsrcstring>(CharsetTableCP437AMS2, src); break;
-		case Charset::Windows1252:      return mpt::decode<Tsrcstring>(mpt::common_encoding::windows1252, src); break;
-		case Charset::Amiga:            return mpt::decode<Tsrcstring>(mpt::common_encoding::amiga, src); break;
-		case Charset::RISC_OS:          return mpt::decode<Tsrcstring>(mpt::common_encoding::riscos, src); break;
-		case Charset::AtariST:          return mpt::decode<Tsrcstring>(mpt::common_encoding::atarist, src); break;
-		case Charset::ISO8859_1_no_C1:  return mpt::decode<Tsrcstring>(mpt::common_encoding::iso8859_1_no_c1, src); break;
-		case Charset::ISO8859_15_no_C1: return mpt::decode<Tsrcstring>(mpt::common_encoding::iso8859_15_no_c1, src); break;
-		case Charset::Amiga_no_C1:      return mpt::decode<Tsrcstring>(mpt::common_encoding::amiga_no_c1, src); break;
+		return;
 	}
-	return mpt::widestring();
-}
+
+	friend constexpr bool operator==(const CharsetTranscoder &a, const CharsetTranscoder &b)
+	{
+		return a.m_Charset == b.m_Charset;
+	}
+
+	friend constexpr bool operator!=(const CharsetTranscoder &a, const CharsetTranscoder &b)
+	{
+		return a.m_Charset != b.m_Charset;
+	}
+
+	// templated on 8bit strings because of type-safe variants
+	template <typename Tdststring>
+	inline Tdststring encode(const mpt::widestring &src) const
+	{
+		static_assert(sizeof(typename Tdststring::value_type) == sizeof(char));
+		static_assert(mpt::is_character<typename Tdststring::value_type>::value);
+		switch(m_Charset)
+		{
+		#if defined(MPT_ENABLE_CHARSET_LOCALE)
+			case Charset::Locale:           return mpt::encode<Tdststring>(mpt::logical_encoding::locale, src); break;
+		#endif
+			case Charset::UTF8:             return mpt::encode<Tdststring>(mpt::common_encoding::utf8, src); break;
+			case Charset::ASCII:            return mpt::encode<Tdststring>(mpt::common_encoding::ascii, src); break;
+			case Charset::ISO8859_1:        return mpt::encode<Tdststring>(mpt::common_encoding::iso8859_1, src); break;
+			case Charset::ISO8859_15:       return mpt::encode<Tdststring>(mpt::common_encoding::iso8859_15, src); break;
+			case Charset::CP437:            return mpt::encode<Tdststring>(mpt::common_encoding::cp437, src); break;
+			case Charset::CP737:            return mpt::encode<Tdststring>(mpt::common_encoding::cp737, src); break;
+			case Charset::CP775:            return mpt::encode<Tdststring>(mpt::common_encoding::cp775, src); break;
+			case Charset::CP850:            return mpt::encode<Tdststring>(mpt::common_encoding::cp850, src); break;
+			case Charset::CP852:            return mpt::encode<Tdststring>(mpt::common_encoding::cp852, src); break;
+			case Charset::CP855:            return mpt::encode<Tdststring>(mpt::common_encoding::cp855, src); break;
+			case Charset::CP857:            return mpt::encode<Tdststring>(mpt::common_encoding::cp857, src); break;
+			case Charset::CP860:            return mpt::encode<Tdststring>(mpt::common_encoding::cp860, src); break;
+			case Charset::CP861:            return mpt::encode<Tdststring>(mpt::common_encoding::cp861, src); break;
+			case Charset::CP862:            return mpt::encode<Tdststring>(mpt::common_encoding::cp862, src); break;
+			case Charset::CP863:            return mpt::encode<Tdststring>(mpt::common_encoding::cp863, src); break;
+			case Charset::CP864:            return mpt::encode<Tdststring>(mpt::common_encoding::cp864, src); break;
+			case Charset::CP865:            return mpt::encode<Tdststring>(mpt::common_encoding::cp865, src); break;
+			case Charset::CP866:            return mpt::encode<Tdststring>(mpt::common_encoding::cp866, src); break;
+			case Charset::CP869:            return mpt::encode<Tdststring>(mpt::common_encoding::cp869, src); break;
+			case Charset::CP874:            return mpt::encode<Tdststring>(mpt::common_encoding::cp874, src); break;
+			case Charset::CP437AMS:         return mpt::encode<Tdststring>(CharsetTableCP437AMS, src); break;
+			case Charset::CP437AMS2:        return mpt::encode<Tdststring>(CharsetTableCP437AMS2, src); break;
+			case Charset::Windows1252:      return mpt::encode<Tdststring>(mpt::common_encoding::windows1252, src); break;
+			case Charset::Amiga:            return mpt::encode<Tdststring>(mpt::common_encoding::amiga, src); break;
+			case Charset::RISC_OS:          return mpt::encode<Tdststring>(mpt::common_encoding::riscos, src); break;
+			case Charset::AtariST:          return mpt::encode<Tdststring>(mpt::common_encoding::atarist, src); break;
+			case Charset::ISO8859_1_no_C1:  return mpt::encode<Tdststring>(mpt::common_encoding::iso8859_1_no_c1, src); break;
+			case Charset::ISO8859_15_no_C1: return mpt::encode<Tdststring>(mpt::common_encoding::iso8859_15_no_c1, src); break;
+			case Charset::Amiga_no_C1:      return mpt::encode<Tdststring>(mpt::common_encoding::amiga_no_c1, src); break;
+		}
+		return Tdststring();
+	}
+
+	// templated on 8bit strings because of type-safe variants
+	template <typename Tsrcstring>
+	inline mpt::widestring decode(const Tsrcstring &src) const
+	{
+		static_assert(sizeof(typename Tsrcstring::value_type) == sizeof(char));
+		static_assert(mpt::is_character<typename Tsrcstring::value_type>::value);
+		switch(m_Charset)
+		{
+		#if defined(MPT_ENABLE_CHARSET_LOCALE)
+			case Charset::Locale:           return mpt::decode<Tsrcstring>(mpt::logical_encoding::locale, src); break;
+		#endif
+			case Charset::UTF8:             return mpt::decode<Tsrcstring>(mpt::common_encoding::utf8, src); break;
+			case Charset::ASCII:            return mpt::decode<Tsrcstring>(mpt::common_encoding::ascii, src); break;
+			case Charset::ISO8859_1:        return mpt::decode<Tsrcstring>(mpt::common_encoding::iso8859_1, src); break;
+			case Charset::ISO8859_15:       return mpt::decode<Tsrcstring>(mpt::common_encoding::iso8859_15, src); break;
+			case Charset::CP437:            return mpt::decode<Tsrcstring>(mpt::common_encoding::cp437, src); break;
+			case Charset::CP737:            return mpt::decode<Tsrcstring>(mpt::common_encoding::cp737, src); break;
+			case Charset::CP775:            return mpt::decode<Tsrcstring>(mpt::common_encoding::cp775, src); break;
+			case Charset::CP850:            return mpt::decode<Tsrcstring>(mpt::common_encoding::cp850, src); break;
+			case Charset::CP852:            return mpt::decode<Tsrcstring>(mpt::common_encoding::cp852, src); break;
+			case Charset::CP855:            return mpt::decode<Tsrcstring>(mpt::common_encoding::cp855, src); break;
+			case Charset::CP857:            return mpt::decode<Tsrcstring>(mpt::common_encoding::cp857, src); break;
+			case Charset::CP860:            return mpt::decode<Tsrcstring>(mpt::common_encoding::cp860, src); break;
+			case Charset::CP861:            return mpt::decode<Tsrcstring>(mpt::common_encoding::cp861, src); break;
+			case Charset::CP862:            return mpt::decode<Tsrcstring>(mpt::common_encoding::cp862, src); break;
+			case Charset::CP863:            return mpt::decode<Tsrcstring>(mpt::common_encoding::cp863, src); break;
+			case Charset::CP864:            return mpt::decode<Tsrcstring>(mpt::common_encoding::cp864, src); break;
+			case Charset::CP865:            return mpt::decode<Tsrcstring>(mpt::common_encoding::cp865, src); break;
+			case Charset::CP866:            return mpt::decode<Tsrcstring>(mpt::common_encoding::cp866, src); break;
+			case Charset::CP869:            return mpt::decode<Tsrcstring>(mpt::common_encoding::cp869, src); break;
+			case Charset::CP874:            return mpt::decode<Tsrcstring>(mpt::common_encoding::cp874, src); break;
+			case Charset::CP437AMS:         return mpt::decode<Tsrcstring>(CharsetTableCP437AMS, src); break;
+			case Charset::CP437AMS2:        return mpt::decode<Tsrcstring>(CharsetTableCP437AMS2, src); break;
+			case Charset::Windows1252:      return mpt::decode<Tsrcstring>(mpt::common_encoding::windows1252, src); break;
+			case Charset::Amiga:            return mpt::decode<Tsrcstring>(mpt::common_encoding::amiga, src); break;
+			case Charset::RISC_OS:          return mpt::decode<Tsrcstring>(mpt::common_encoding::riscos, src); break;
+			case Charset::AtariST:          return mpt::decode<Tsrcstring>(mpt::common_encoding::atarist, src); break;
+			case Charset::ISO8859_1_no_C1:  return mpt::decode<Tsrcstring>(mpt::common_encoding::iso8859_1_no_c1, src); break;
+			case Charset::ISO8859_15_no_C1: return mpt::decode<Tsrcstring>(mpt::common_encoding::iso8859_15_no_c1, src); break;
+			case Charset::Amiga_no_C1:      return mpt::decode<Tsrcstring>(mpt::common_encoding::amiga_no_c1, src); break;
+		}
+		return mpt::widestring();
+	}
+
+};
 
 
 // templated on 8bit strings because of type-safe variants
 template<typename Tdststring, typename Tsrcstring>
-static Tdststring ConvertImpl(Charset to, Charset from, const Tsrcstring &src)
+static Tdststring ConvertImpl(CharsetTranscoder to, CharsetTranscoder from, const Tsrcstring &src)
 {
 	static_assert(sizeof(typename Tdststring::value_type) == sizeof(char));
 	static_assert(sizeof(typename Tsrcstring::value_type) == sizeof(char));
+	static_assert(mpt::is_character<typename Tdststring::value_type>::value);
+	static_assert(mpt::is_character<typename Tsrcstring::value_type>::value);
 	if(to == from)
 	{
 		const typename Tsrcstring::value_type * src_beg = src.data();
 		const typename Tsrcstring::value_type * src_end = src_beg + src.size();
 		return Tdststring(reinterpret_cast<const typename Tdststring::value_type *>(src_beg), reinterpret_cast<const typename Tdststring::value_type *>(src_end));
 	}
-	return EncodeImpl<Tdststring>(to, DecodeImpl(from, src));
+	return mpt::encode<Tdststring>(to, mpt::decode<Tsrcstring>(from, src));
 }
 
 
-
-} // namespace String
 
 
 bool IsUTF8(const std::string &str)
@@ -468,12 +495,12 @@ bool IsUTF8(const std::string &str)
 #if MPT_WSTRING_CONVERT
 std::wstring ToWide(Charset from, const std::string &str)
 {
-	return String::DecodeImpl(from, str);
+	return mpt::decode(CharsetTranscoder(from), str);
 }
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
 std::wstring ToWide(const mpt::lstring &str)
 {
-	return String::DecodeImpl(Charset::Locale, str);
+	return mpt::decode(CharsetTranscoder(Charset::Locale), str);
 }
 #endif // MPT_ENABLE_CHARSET_LOCALE
 #endif
@@ -481,17 +508,17 @@ std::wstring ToWide(const mpt::lstring &str)
 #if MPT_WSTRING_CONVERT
 std::string ToCharset(Charset to, const std::wstring &str)
 {
-	return String::EncodeImpl<std::string>(to, str);
+	return mpt::encode<std::string>(CharsetTranscoder(to), str);
 }
 #endif
 std::string ToCharset(Charset to, Charset from, const std::string &str)
 {
-	return String::ConvertImpl<std::string>(to, from, str);
+	return ConvertImpl<std::string>(CharsetTranscoder(to), CharsetTranscoder(from), str);
 }
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
 std::string ToCharset(Charset to, const mpt::lstring &str)
 {
-	return String::ConvertImpl<std::string>(to, Charset::Locale, str);
+	return ConvertImpl<std::string>(CharsetTranscoder(to), CharsetTranscoder(Charset::Locale), str);
 }
 #endif // MPT_ENABLE_CHARSET_LOCALE
 
@@ -499,12 +526,12 @@ std::string ToCharset(Charset to, const mpt::lstring &str)
 #if MPT_WSTRING_CONVERT
 mpt::lstring ToLocale(const std::wstring &str)
 {
-	return String::EncodeImpl<mpt::lstring>(Charset::Locale, str);
+	return mpt::encode<mpt::lstring>(CharsetTranscoder(Charset::Locale), str);
 }
 #endif
 mpt::lstring ToLocale(Charset from, const std::string &str)
 {
-	return String::ConvertImpl<mpt::lstring>(Charset::Locale, from, str);
+	return ConvertImpl<mpt::lstring>(CharsetTranscoder(Charset::Locale), CharsetTranscoder(from), str);
 }
 #endif // MPT_ENABLE_CHARSET_LOCALE
 
@@ -586,7 +613,7 @@ CString ToCString(const mpt::lstring &str)
 mpt::lstring ToLocale(const CString &str)
 {
 	#ifdef UNICODE
-		return String::EncodeImpl<mpt::lstring>(Charset::Locale, str.GetString());
+		return mpt::encode<mpt::lstring>(CharsetTranscoder(Charset::Locale), str.GetString());
 	#else
 		return str.GetString();
 	#endif
@@ -608,26 +635,26 @@ mpt::winstring ToWin(const CString &str)
 #if MPT_WSTRING_CONVERT
 mpt::ustring ToUnicode(const std::wstring &str)
 {
-	return String::EncodeImpl<mpt::ustring>(mpt::Charset::UTF8, str);
+	return mpt::encode<mpt::ustring>(CharsetTranscoder(Charset::UTF8), str);
 }
 #endif
 mpt::ustring ToUnicode(Charset from, const std::string &str)
 {
-	return String::ConvertImpl<mpt::ustring>(mpt::Charset::UTF8, from, str);
+	return ConvertImpl<mpt::ustring>(CharsetTranscoder(Charset::UTF8), CharsetTranscoder(from), str);
 }
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
 mpt::ustring ToUnicode(const mpt::lstring &str)
 {
-	return String::ConvertImpl<mpt::ustring>(mpt::Charset::UTF8, mpt::Charset::Locale, str);
+	return ConvertImpl<mpt::ustring>(CharsetTranscoder(Charset::UTF8), CharsetTranscoder(Charset::Locale), str);
 }
 #endif // MPT_ENABLE_CHARSET_LOCALE
 #if defined(MPT_WITH_MFC)
 mpt::ustring ToUnicode(const CString &str)
 {
 	#ifdef UNICODE
-		return String::EncodeImpl<mpt::ustring>(mpt::Charset::UTF8, str.GetString());
+		return mpt::encode<mpt::ustring>(CharsetTranscoder(Charset::UTF8), str.GetString());
 	#else // !UNICODE
-		return String::ConvertImpl<mpt::ustring, std::string>(mpt::Charset::UTF8, mpt::Charset::Locale, str.GetString());
+		return ConvertImpl<mpt::ustring, std::string>(CharsetTranscoder(Charset::UTF8), CharsetTranscoder(Charset::Locale), str.GetString());
 	#endif // UNICODE
 }
 #endif // MPT_WITH_MFC
@@ -639,26 +666,26 @@ mpt::ustring ToUnicode(const CString &str)
 #if MPT_WSTRING_CONVERT
 std::wstring ToWide(const mpt::ustring &str)
 {
-	return String::DecodeImpl<mpt::ustring>(mpt::Charset::UTF8, str);
+	return mpt::decode(CharsetTranscoder(Charset::UTF8), str);
 }
 #endif
 std::string ToCharset(Charset to, const mpt::ustring &str)
 {
-	return String::ConvertImpl<std::string, mpt::ustring>(to, mpt::Charset::UTF8, str);
+	return ConvertImpl<std::string, mpt::ustring>(CharsetTranscoder(to), CharsetTranscoder(Charset::UTF8), str);
 }
 #if defined(MPT_ENABLE_CHARSET_LOCALE)
 mpt::lstring ToLocale(const mpt::ustring &str)
 {
-	return String::ConvertImpl<mpt::lstring, mpt::ustring>(mpt::Charset::Locale, mpt::Charset::UTF8, str);
+	return ConvertImpl<mpt::lstring, mpt::ustring>(CharsetTranscoder(Charset::Locale), CharsetTranscoder(Charset::UTF8), str);
 }
 #endif // MPT_ENABLE_CHARSET_LOCALE
 #if MPT_OS_WINDOWS
 mpt::winstring ToWin(const mpt::ustring &str)
 {
 	#ifdef UNICODE
-		return String::DecodeImpl<mpt::ustring>(mpt::Charset::UTF8, str);
+		return mpt::decode(CharsetTranscoder(Charset::UTF8), str);
 	#else
-		return String::ConvertImpl<mpt::lstring, mpt::ustring>(mpt::Charset::Locale, mpt::Charset::UTF8, str);
+		return ConvertImpl<mpt::lstring, mpt::ustring>(CharsetTranscoder(Charset::Locale), CharsetTranscoder(Charset::UTF8), str);
 	#endif
 }
 #endif // MPT_OS_WINDOWS
@@ -666,9 +693,9 @@ mpt::winstring ToWin(const mpt::ustring &str)
 CString ToCString(const mpt::ustring &str)
 {
 	#ifdef UNICODE
-		return String::DecodeImpl<mpt::ustring>(mpt::Charset::UTF8, str).c_str();
+		return mpt::decode(CharsetTranscoder(Charset::UTF8), str).c_str();
 	#else // !UNICODE
-		return String::ConvertImpl<std::string, mpt::ustring>(mpt::Charset::Locale, mpt::Charset::UTF8, str).c_str();
+		return ConvertImpl<std::string, mpt::ustring>(CharsetTranscoder(Charset::Locale), CharsetTranscoder(Charset::UTF8), str).c_str();
 	#endif // UNICODE
 }
 #endif // MPT_WITH_MFC
@@ -678,99 +705,25 @@ CString ToCString(const mpt::ustring &str)
 
 
 
-static std::optional<mpt::Charset> CharsetFromCodePage(uint16 codepage)
-{
-	std::optional<mpt::Charset> result = std::nullopt;
-	switch(codepage)
-	{
-	case 65001:
-		result = mpt::Charset::UTF8;
-		break;
-	case 20127:
-		result = mpt::Charset::ASCII;
-		break;
-	case 28591:
-		result = mpt::Charset::ISO8859_1;
-		break;
-	case 28605:
-		result = mpt::Charset::ISO8859_15;
-		break;
-	case 437:
-		result = mpt::Charset::CP437;
-		break;
-	case 737:
-		result = mpt::Charset::CP737;
-		break;
-	case 775:
-		result = mpt::Charset::CP775;
-		break;
-	case 850:
-		result = mpt::Charset::CP850;
-		break;
-	case 852:
-		result = mpt::Charset::CP852;
-		break;
-	case 855:
-		result = mpt::Charset::CP855;
-		break;
-	case 857:
-		result = mpt::Charset::CP857;
-		break;
-	case 860:
-		result = mpt::Charset::CP860;
-		break;
-	case 861:
-		result = mpt::Charset::CP861;
-		break;
-	case 862:
-		result = mpt::Charset::CP862;
-		break;
-	case 863:
-		result = mpt::Charset::CP863;
-		break;
-	case 864:
-		result = mpt::Charset::CP864;
-		break;
-	case 865:
-		result = mpt::Charset::CP865;
-		break;
-	case 866:
-		result = mpt::Charset::CP866;
-		break;
-	case 869:
-		result = mpt::Charset::CP869;
-		break;
-	case 874:
-		result = mpt::Charset::CP874;
-		break;
-	case 1252:
-		result = mpt::Charset::Windows1252;
-		break;
-	default:
-		result = std::nullopt;
-		break;
-	}
-	return result;
-}
-
 mpt::ustring ToUnicode(uint16 codepage, mpt::Charset fallback, const std::string &str)
 {
 	#if MPT_OS_WINDOWS && !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
 		mpt::ustring result;
-		std::optional<mpt::Charset> charset = mpt::CharsetFromCodePage(codepage);
-		if(charset)
+		std::optional<mpt::common_encoding> charset = mpt::optional_encoding_from_codepage(codepage);
+		if(charset.has_value())
 		{
-			result = mpt::ToUnicode(*charset, str);
-		} else if(mpt::has_codepage(codepage))
+			result = mpt::transcode<mpt::ustring>(charset.value(), str);
+		} else if(mpt::has_codepage(static_cast<UINT>(codepage)))
 		{
-			result = mpt::ToUnicode(mpt::decode<std::string>(codepage, str));
+			result = mpt::transcode<mpt::ustring>(static_cast<UINT>(codepage), str);
 		} else
 		{
-			result = mpt::ToUnicode(fallback, str);
+			result = mpt::transcode<mpt::ustring>(CharsetTranscoder(fallback), str);
 		}
 		return result;
 	#else // !MPT_OS_WINDOWS
-		return mpt::ToUnicode(mpt::CharsetFromCodePage(codepage).value_or(fallback), str);
+		std::optional<mpt::common_encoding> charset = mpt::optional_encoding_from_codepage(codepage);
+		return charset.has_value() ? mpt::transcode<mpt::ustring>(charset.value(), str) : mpt::transcode<mpt::ustring>(CharsetTranscoder(fallback), str);
 	#endif // MPT_OS_WINDOWS
 }
 
