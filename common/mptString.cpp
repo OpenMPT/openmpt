@@ -810,7 +810,7 @@ mpt::ustring ToUpperCase(const mpt::ustring &s)
 		#endif // UNICODE
 	#else // !MPT_WITH_MFC
 		std::wstring ws = mpt::ToWide(s);
-		std::transform(ws.begin(), ws.end(), ws.begin(), &std::towlower);
+		std::transform(ws.begin(), ws.end(), ws.begin(), &std::towupper);
 		return mpt::ToUnicode(ws);
 	#endif // MPT_WITH_MFC
 }
