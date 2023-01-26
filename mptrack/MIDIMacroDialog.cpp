@@ -175,7 +175,7 @@ void CMidiMacroSetup::UpdateMacroList(int macro)
 		m_EditMacro[m].SetWindowText(s);
 
 		// Macro value:
-		m_EditMacroValue[m].SetWindowText(mpt::ToCString(mpt::Charset::ASCII, m_MidiCfg.SFx[m]));
+		m_EditMacroValue[m].SetWindowText(mpt::ToCString(mpt::Charset::ASCII, static_cast<std::string>(m_MidiCfg.SFx[m])));
 		m_EditMacroValue[m].SetBackColor(m == selectedMacro ? RGB(200, 200, 225) : RGB(245, 245, 245));
 
 		// Macro Type:
@@ -206,7 +206,7 @@ void CMidiMacroSetup::UpdateDialog()
 	if(sfx < m_MidiCfg.SFx.size())
 	{
 		ToggleBoxes(sfx_preset, sfx);
-		m_EditSFx.SetWindowText(mpt::ToCString(mpt::Charset::ASCII, m_MidiCfg.SFx[sfx]));
+		m_EditSFx.SetWindowText(mpt::ToCString(mpt::Charset::ASCII, static_cast<std::string>(m_MidiCfg.SFx[sfx])));
 	}
 
 	UpdateZxxSelection();
@@ -296,7 +296,7 @@ void CMidiMacroSetup::UpdateZxxSelection()
 	UINT zxx = m_CbnZxx.GetCurSel();
 	if(zxx < m_MidiCfg.Zxx.size())
 	{
-		m_EditZxx.SetWindowText(mpt::ToCString(mpt::Charset::ASCII, m_MidiCfg.Zxx[zxx]));
+		m_EditZxx.SetWindowText(mpt::ToCString(mpt::Charset::ASCII, static_cast<std::string>(m_MidiCfg.Zxx[zxx])));
 	}
 }
 
@@ -480,7 +480,7 @@ bool CMidiMacroSetup::ValidateMacroString(CEdit &wnd, const MIDIMacroConfig::Mac
 		{
 			int start, end;
 			wnd.GetSel(start, end);
-			wnd.SetWindowText(mpt::ToCString(mpt::Charset::ASCII, prevMacro));
+			wnd.SetWindowText(mpt::ToCString(mpt::Charset::ASCII, static_cast<std::string>(prevMacro)));
 			wnd.SetSel(start - 1, end - 1, true);
 			MessageBeep(MB_OK);
 		}
@@ -492,7 +492,7 @@ bool CMidiMacroSetup::ValidateMacroString(CEdit &wnd, const MIDIMacroConfig::Mac
 			// Replace text and keep cursor position if there was a case conversion
 			int start, end;
 			wnd.GetSel(start, end);
-			wnd.SetWindowText(mpt::ToCString(mpt::Charset::ASCII, macroStr));
+			wnd.SetWindowText(mpt::ToCString(mpt::Charset::ASCII, static_cast<std::string>(macroStr)));
 			wnd.SetSel(start, end, true);
 		}
 		return true;

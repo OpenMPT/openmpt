@@ -63,7 +63,7 @@ BOOL WelcomeDlg::OnInitDialog()
 			m_vstPath = mpt::PathString();
 		}
 	}
-	SetDlgItemText(IDC_EDIT2, mpt::ToCString(TrackerSettings::Instance().defaultArtist));
+	SetDlgItemText(IDC_EDIT2, mpt::ToCString(TrackerSettings::Instance().defaultArtist.Get()));
 	if(!m_vstPath.empty())
 	{
 		SetDlgItemText(IDC_EDIT1, m_vstPath.AsNative().c_str());
