@@ -5,6 +5,7 @@
 
 
 
+#include "mpt/base/alloc.hpp"
 #include "mpt/base/memory.hpp"
 #include "mpt/base/namespace.hpp"
 #include "mpt/base/saturate_cast.hpp"
