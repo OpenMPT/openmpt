@@ -14,6 +14,7 @@
 #include <string>
 #include <string_view>
 #include <type_traits>
+#include <utility>
 
 #include <cstddef>
 
@@ -504,11 +505,11 @@ struct is_string_view_type<std::basic_string_view<Tchar, Ttraits>> : public std:
 
 
 template <typename T>
-inline typename mpt::make_string_type<T>::type as_string(const T & str) {
-	if constexpr (std::is_pointer<typename std::remove_cv<T>::type>::value) {
-		return str ? typename mpt::make_string_type<T>::type{str} : typename mpt::make_string_type<T>::type{};
-	} else if constexpr (mpt::is_string_view_type<T>::value) {
-		return typename mpt::make_string_type<T>::type{str};
+inline typename mpt::make_string_type<typename std::decay<T>::type>::type as_string(T && str) {
+	if constexpr (std::is_pointer<typename std::decay<T>::type>::value) {
+		return str ? typename mpt::make_string_type<typename std::decay<T>::type>::type{std::forward<T>(str)} : typename mpt::make_string_type<typename std::decay<T>::type>::type{};
+	} else if constexpr (mpt::is_string_view_type<typename std::decay<T>::type>::value) {
+		return typename mpt::make_string_type<typename std::decay<T>::type>::type{std::forward<T>(str)};
 	} else {
 		return str;
 	}
@@ -517,11 +518,11 @@ inline typename mpt::make_string_type<T>::type as_string(const T & str) {
 
 
 template <typename T>
-inline typename mpt::make_string_view_type<T>::type as_string_view(const T & str) {
-	if constexpr (std::is_pointer<typename std::remove_cv<T>::type>::value) {
-		return str ? typename mpt::make_string_view_type<T>::type{str} : typename mpt::make_string_view_type<T>::type{};
-	} else if constexpr (mpt::is_string_view_type<T>::value) {
-		return typename mpt::make_string_view_type<T>::type{str};
+inline typename mpt::make_string_view_type<typename std::decay<T>::type>::type as_string_view(T && str) {
+	if constexpr (std::is_pointer<typename std::decay<T>::type>::value) {
+		return str ? typename mpt::make_string_view_type<typename std::decay<T>::type>::type{std::forward<T>(str)} : typename mpt::make_string_view_type<typename std::decay<T>::type>::type{};
+	} else if constexpr (mpt::is_string_view_type<typename std::decay<T>::type>::value) {
+		return typename mpt::make_string_view_type<typename std::decay<T>::type>::type{std::forward<T>(str)};
 	} else {
 		return str;
 	}
