@@ -2560,6 +2560,7 @@ bool CSoundFile::ReadNote()
 		}
 
 		chn.dwOldFlags = chn.dwFlags;
+		chn.triggerNote = false;  // For SONG_PAUSED mode
 	}
 
 	// If there are more channels being mixed than allowed, order them by volume and discard the most quiet ones
