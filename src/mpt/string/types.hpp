@@ -513,7 +513,7 @@ inline typename mpt::make_string_type<typename std::decay<T>::type>::type as_str
 	} else if constexpr (mpt::is_string_view_type<typename std::decay<T>::type>::value) {
 		return typename mpt::make_string_type<typename std::decay<T>::type>::type{std::forward<T>(str)};
 	} else {
-		return std::move(str);
+		return std::forward<T>(str);
 	}
 }
 
@@ -528,7 +528,7 @@ inline typename mpt::make_string_view_type<typename std::decay<T>::type>::type a
 	} else if constexpr (mpt::is_string_view_type<typename std::decay<T>::type>::value) {
 		return typename mpt::make_string_view_type<typename std::decay<T>::type>::type{std::forward<T>(str)};
 	} else {
-		return std::move(str);
+		return std::forward<T>(str);
 	}
 }
 
