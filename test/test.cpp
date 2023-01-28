@@ -3255,9 +3255,9 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(chns[69].color, ModChannelSettings::INVALID_COLOR);
 #endif
 
-	VERIFY_EQUAL_NONCONT(sndFile.FrequencyToCutOff(sndFile.CutOffToFrequency(0)), 0);
-	VERIFY_EQUAL_NONCONT(sndFile.FrequencyToCutOff(sndFile.CutOffToFrequency(80)), 80);
-	VERIFY_EQUAL_NONCONT(sndFile.FrequencyToCutOff(sndFile.CutOffToFrequency(127)), 127);
+	VERIFY_EQUAL_NONCONT(sndFile.FrequencyToCutOff(static_cast<double>(sndFile.CutOffToFrequency(0))), 0);
+	VERIFY_EQUAL_NONCONT(sndFile.FrequencyToCutOff(static_cast<double>(sndFile.CutOffToFrequency(80))), 80);
+	VERIFY_EQUAL_NONCONT(sndFile.FrequencyToCutOff(static_cast<double>(sndFile.CutOffToFrequency(127))), 127);
 }
 
 
