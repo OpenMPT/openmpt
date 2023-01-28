@@ -197,9 +197,9 @@ protected:
 
 	static double Identity(double v) noexcept { return v; }
 
-	static double CentsToFilterCutoff(double v, const CSoundFile &sndFile, int envBaseCutoff, uint32 envBaseFreq)
+	static double CentsToFilterCutoff(double v, const CSoundFile &sndFile, int envBaseCutoff, float envBaseFreq)
 	{
-		const auto freq = envBaseFreq * std::pow(2.0, v / 1200.0);
+		const auto freq = static_cast<double>(envBaseFreq) * std::pow(2.0, v / 1200.0);
 		return Util::muldivr(sndFile.FrequencyToCutOff(freq), 127, envBaseCutoff) / 127.0;
 	}
 

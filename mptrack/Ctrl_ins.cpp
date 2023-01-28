@@ -33,6 +33,7 @@
 #include "../common/FileReader.h"
 #include "FileDialog.h"
 #include "mpt/string/utility.hpp"
+#include "mpt/base/saturate_round.hpp"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -1580,8 +1581,8 @@ void CCtrlInstruments::UpdateFilterText()
 
 			if((pIns->IsCutoffEnabled() && pIns->GetCutoff() < 0x7F) || resEnabled)
 			{
-				const BYTE cutoff = (resEnabled && !pIns->IsCutoffEnabled()) ? 0x7F : pIns->GetCutoff();
-				wsprintf(s, _T("Z%02X (%u Hz)"), cutoff, m_sndFile.CutOffToFrequency(cutoff));
+				const auto cutoff = (resEnabled && !pIns->IsCutoffEnabled()) ? 0x7F : pIns->GetCutoff();
+				wsprintf(s, _T("Z%02X (%u Hz)"), cutoff, mpt::saturate_round<int32>(m_sndFile.CutOffToFrequency(cutoff)));
 			} else if(pIns->IsCutoffEnabled())
 			{
 				_tcscpy(s, _T("Z7F (Off)"));

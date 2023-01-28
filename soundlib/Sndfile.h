@@ -1153,7 +1153,7 @@ public:
 	// Convert frequency to IT cutoff (0...127)
 	uint8 FrequencyToCutOff(double frequency) const;
 	// Convert IT cutoff (0...127 + modifier) to frequency
-	uint32 CutOffToFrequency(uint32 nCutOff, int envModifier = 256) const; // [0-127] => [1-10KHz]
+	float CutOffToFrequency(uint32 nCutOff, int envModifier = 256) const;
 
 	// Returns true if periods are actually plain frequency values in Hz.
 	bool PeriodsAreFrequencies() const noexcept
