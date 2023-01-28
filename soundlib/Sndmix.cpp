@@ -2306,9 +2306,9 @@ bool CSoundFile::ReadNote()
 		// After MIDI macros have been processed, we can also process the pitch / filter envelope and other pitch-related things.
 		if(samplePlaying)
 		{
-			cutoff = ProcessPitchFilterEnvelope(chn, period);
-			if(cutoff >= 0)
-				cutoff /= 4;
+			int envCutoff = ProcessPitchFilterEnvelope(chn, period);
+			if(envCutoff >= 0)
+				cutoff = envCutoff / 4;
 		}
 
 		// Cutoff doubles as modulator intensity for FM instruments
