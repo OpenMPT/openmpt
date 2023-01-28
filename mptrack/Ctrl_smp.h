@@ -160,7 +160,8 @@ protected:
 
 	afx_msg void OnInitOPLInstrument();
 
-	MPT_NOINLINE void SetModified(SampleHint hint, bool updateAll, bool waveformModified);
+	MPT_NOINLINE void SetModified(SAMPLEINDEX smp, SampleHint hint, bool updateAll, bool waveformModified);
+	void SetModified(SampleHint hint, bool updateAll, bool waveformModified) { SetModified(m_nSample, hint, updateAll, waveformModified); }
 	void PrepareUndo(const char *description, sampleUndoTypes type = sundo_none, SmpLength start = 0, SmpLength end = 0);
 
 	//}}AFX_MSG

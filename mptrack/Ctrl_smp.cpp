@@ -956,18 +956,19 @@ void CCtrlSamples::UpdateView(UpdateHint hint, CObject *pObj)
 
 
 // updateAll: Update all views including this one. Otherwise, only update update other views.
-void CCtrlSamples::SetModified(SampleHint hint, bool updateAll, bool waveformModified)
+void CCtrlSamples::SetModified(SAMPLEINDEX smp, SampleHint hint, bool updateAll, bool waveformModified)
 {
 	m_modDoc.SetModified();
 
 	if(waveformModified)
 	{
 		// Update on-disk sample status in tree
-		ModSample &sample = m_sndFile.GetSample(m_nSample);
-		if(sample.uFlags[SMP_KEEPONDISK] && !sample.uFlags[SMP_MODIFIED]) hint.Names();
+		ModSample &sample = m_sndFile.GetSample(smp);
+		if(sample.uFlags[SMP_KEEPONDISK] && !sample.uFlags[SMP_MODIFIED])
+			hint.Names();
 		sample.uFlags.set(SMP_MODIFIED);
 	}
-	m_modDoc.UpdateAllViews(nullptr, hint.SetData(m_nSample), updateAll ? nullptr : this);
+	m_modDoc.UpdateAllViews(nullptr, hint.SetData(smp), updateAll ? nullptr : this);
 }
 
 
@@ -1622,7 +1623,6 @@ void CCtrlSamples::Normalize(bool allSamples)
 
 
 	BeginWaitCursor();
-	bool modified = false;
 
 	for(SAMPLEINDEX smp = minSample; smp <= maxSample; smp++)
 	{
@@ -1652,26 +1652,23 @@ void CCtrlSamples::Normalize(bool allSamples)
 			selStart *= sample.GetNumChannels();
 			selEnd *= sample.GetNumChannels();
 
+			bool modified = false;
 			if(sample.uFlags[CHN_16BIT])
 			{
-				modified |= DoNormalize(sample.sample16(), selStart, selEnd);
+				modified = DoNormalize(sample.sample16(), selStart, selEnd);
 			} else
 			{
-				modified |= DoNormalize(sample.sample8(), selStart, selEnd);
+				modified = DoNormalize(sample.sample8(), selStart, selEnd);
 			}
 
 			if(modified)
 			{
 				sample.PrecomputeLoops(m_sndFile, false);
-				m_modDoc.UpdateAllViews(nullptr, SampleHint(smp).Data());
+				SetModified(smp, SampleHint().Data(), smp == m_nSample, true);
 			}
 		}
 	}
 
-	if(modified)
-	{
-		SetModified(SampleHint().Data(), false, true);
-	}
 	EndWaitCursor();
 	SwitchToView();
 }
@@ -1729,7 +1726,7 @@ void CCtrlSamples::RemoveDCOffset(bool allSamples)
 
 		reportOffset += offset;
 		numModified++;
-		m_modDoc.UpdateAllViews(nullptr, SampleHint(smp).Info().Data());
+		SetModified(smp, SampleHint().Info().Data(), smp == m_nSample, true);
 	}
 
 	EndWaitCursor();
@@ -1740,7 +1737,6 @@ void CCtrlSamples::RemoveDCOffset(bool allSamples)
 	CString dcInfo;
 	if(numModified)
 	{
-		SetModified(SampleHint().Info().Data(), true, true);
 		if(numModified == 1)
 		{
 			dcInfo.Format(_T("Removed DC offset (%.1f%%)"), reportOffset * 100);
@@ -2112,12 +2108,7 @@ void CCtrlSamples::ApplyResample(SAMPLEINDEX smp, uint32 newRate, ResamplingMode
 		// Update loop wrap-around buffer
 		sample.PrecomputeLoops(m_sndFile);
 
-		auto updateHint = SampleHint(smp).Info().Data();
-		if(sample.uFlags[SMP_KEEPONDISK] && !sample.uFlags[SMP_MODIFIED])
-			updateHint.Names();
-		sample.uFlags.set(SMP_MODIFIED);
-		m_modDoc.SetModified();
-		m_modDoc.UpdateAllViews(nullptr, updateHint, nullptr);
+		SetModified(smp, SampleHint().Info().Data(), smp == m_nSample, true);
 
 		if(selection.selectionActive && !ignoreSelection)
 		{
