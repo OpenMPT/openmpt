@@ -76,13 +76,13 @@ private:
 						state = state::close_seen;
 					} else {
 						state = state::text;
-						traits::append(result, 1, c); // output c here
+						traits::append(result, c); // output c here
 					}
 					break;
 				case state::open_seen:
 					if (c == char_type('{')) {
 						state = state::text;
-						traits::append(result, 1, char_type('{')); // output { here
+						traits::append(result, char_type('{')); // output { here
 					} else if (c == char_type('}')) {
 						state = state::text;
 						unnumbered_args = true;
@@ -135,7 +135,7 @@ private:
 						state = state::error;
 					} else if (c == char_type('}')) {
 						state = state::text;
-						traits::append(result, 1, char_type('}')); // output } here
+						traits::append(result, char_type('}')); // output } here
 					} else {
 						state = state::error;
 					}
