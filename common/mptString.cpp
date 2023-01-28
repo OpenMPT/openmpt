@@ -516,14 +516,20 @@ CString ToCString(const std::wstring &str)
 	#ifdef UNICODE
 		return str.c_str();
 	#else
+		// cppcheck false-positive
+		// cppcheck-suppress returnDanglingLifetime
 		return ToCharset(Charset::Locale, str).c_str();
 	#endif
 }
 CString ToCString(Charset from, const std::string &str)
 {
 	#ifdef UNICODE
+		// cppcheck false-positive
+		// cppcheck-suppress returnDanglingLifetime
 		return ToWide(from, str).c_str();
 	#else
+		// cppcheck false-positive
+		// cppcheck-suppress returnDanglingLifetime
 		return ToCharset(Charset::Locale, from, str).c_str();
 	#endif
 }
@@ -547,6 +553,8 @@ std::string ToCharset(Charset to, const CString &str)
 CString ToCString(const mpt::lstring &str)
 {
 	#ifdef UNICODE
+		// cppcheck false-positive
+		// cppcheck-suppress returnDanglingLifetime
 		return ToWide(str).c_str();
 	#else
 		return str.c_str();
@@ -635,8 +643,12 @@ mpt::winstring ToWin(const mpt::ustring &str)
 CString ToCString(const mpt::ustring &str)
 {
 	#ifdef UNICODE
+		// cppcheck false-positive
+		// cppcheck-suppress returnDanglingLifetime
 		return String::DecodeImpl<mpt::ustring>(mpt::Charset::UTF8, str).c_str();
 	#else // !UNICODE
+		// cppcheck false-positive
+		// cppcheck-suppress returnDanglingLifetime
 		return String::ConvertImpl<std::string, mpt::ustring>(mpt::Charset::Locale, mpt::Charset::UTF8, str).c_str();
 	#endif // UNICODE
 }
