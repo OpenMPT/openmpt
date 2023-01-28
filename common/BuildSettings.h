@@ -203,7 +203,7 @@
 
 
 
-#if MPT_OS_WINDOWS && !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
+#if (MPT_OS_WINDOWS || defined(MODPLUG_TRACKER)) && !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
 
 	// mpt::ToWide
 	// Required on Windows by mpt::PathString.
