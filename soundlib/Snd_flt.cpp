@@ -123,18 +123,18 @@ int CSoundFile::SetupChannelFilter(ModChannel &chn, bool bReset, int envModifier
 	chn.dwFlags.set(CHN_FILTER);
 
 	// 2 * damping factor
-	const float dmpfac = std::pow(10.0f, -resonance * ((24.0f / 128.0f) / 20.0f));
+	const float dmpfac = std::pow(10.0f, static_cast<float>(-resonance) * ((24.0f / 128.0f) / 20.0f));
 	const float fc = CutOffToFrequency(cutoff, envModifier) * (2.0f * mpt::numbers::pi_v<float>);
 	float d, e;
 	if(m_playBehaviour[kITFilterBehaviour] && !m_SongFlags[SONG_EXFILTERRANGE])
 	{
-		const float r = m_MixerSettings.gdwMixingFreq / fc;
+		const float r = static_cast<float>(m_MixerSettings.gdwMixingFreq) / fc;
 
 		d = dmpfac * r + dmpfac - 1.0f;
 		e = r * r;
 	} else
 	{
-		const float r = fc / m_MixerSettings.gdwMixingFreq;
+		const float r = fc / static_cast<float>(m_MixerSettings.gdwMixingFreq);
 
 		d = (1.0f - 2.0f * dmpfac) * r;
 		LimitMax(d, 2.0f);
