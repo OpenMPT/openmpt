@@ -17,10 +17,201 @@
 #include "openmpt/soundbase/SampleDecode.hpp"
 #include "../soundlib/SampleCopy.h"
 
+#if defined(MPT_ENABLE_ARCH_INTRINSICS_SSE2)
+#include <emmintrin.h>
+#endif
+
 OPENMPT_NAMESPACE_BEGIN
 
 namespace SampleEdit
 {
+
+#if defined(MPT_ENABLE_ARCH_INTRINSICS_SSE2)
+
+// SSE2 implementation for min/max finder, packs 8*int16 in a 128-bit XMM register.
+// scanlen = How many samples to process on this channel
+static void sse2_findminmax16(const void *p, SmpLength scanlen, int channels, int &smin, int &smax)
+{
+	scanlen *= channels;
+
+	// Put minimum / maximum in 8 packed int16 values
+	__m128i minVal = _mm_set1_epi16(static_cast<int16>(smin));
+	__m128i maxVal = _mm_set1_epi16(static_cast<int16>(smax));
+
+	SmpLength scanlen8 = scanlen / 8;
+	if(scanlen8)
+	{
+		const __m128i *v = static_cast<const __m128i *>(p);
+		p = static_cast<const __m128i *>(p) + scanlen8;
+
+		while(scanlen8--)
+		{
+			__m128i curVals = _mm_loadu_si128(v++);
+			minVal = _mm_min_epi16(minVal, curVals);
+			maxVal = _mm_max_epi16(maxVal, curVals);
+		}
+
+		// Now we have 8 minima and maxima each, in case of stereo they are interleaved L/R values.
+		// Move the upper 4 values to the lower half and compute the minima/maxima of that.
+		__m128i minVal2 = _mm_unpackhi_epi64(minVal, minVal);
+		__m128i maxVal2 = _mm_unpackhi_epi64(maxVal, maxVal);
+		minVal = _mm_min_epi16(minVal, minVal2);
+		maxVal = _mm_max_epi16(maxVal, maxVal2);
+
+		// Now we have 4 minima and maxima each, in case of stereo they are interleaved L/R values.
+		// Move the upper 2 values to the lower half and compute the minima/maxima of that.
+		minVal2 = _mm_shuffle_epi32(minVal, _MM_SHUFFLE(1, 1, 1, 1));
+		maxVal2 = _mm_shuffle_epi32(maxVal, _MM_SHUFFLE(1, 1, 1, 1));
+		minVal = _mm_min_epi16(minVal, minVal2);
+		maxVal = _mm_max_epi16(maxVal, maxVal2);
+
+		if(channels < 2)
+		{
+			// Mono: Compute the minima/maxima of the both remaining values
+			minVal2 = _mm_shufflelo_epi16(minVal, _MM_SHUFFLE(1, 1, 1, 1));
+			maxVal2 = _mm_shufflelo_epi16(maxVal, _MM_SHUFFLE(1, 1, 1, 1));
+			minVal = _mm_min_epi16(minVal, minVal2);
+			maxVal = _mm_max_epi16(maxVal, maxVal2);
+		}
+	}
+
+	const int16 *p16 = static_cast<const int16 *>(p);
+	while(scanlen & 7)
+	{
+		scanlen -= channels;
+		__m128i curVals = _mm_set1_epi16(*p16);
+		p16 += channels;
+		minVal = _mm_min_epi16(minVal, curVals);
+		maxVal = _mm_max_epi16(maxVal, curVals);
+	}
+
+	smin = static_cast<int16>(_mm_cvtsi128_si32(minVal));
+	smax = static_cast<int16>(_mm_cvtsi128_si32(maxVal));
+}
+
+
+// SSE2 implementation for min/max finder, packs 16*int8 in a 128-bit XMM register.
+// scanlen = How many samples to process on this channel
+static void sse2_findminmax8(const void *p, SmpLength scanlen, int channels, int &smin, int &smax)
+{
+	scanlen *= channels;
+
+	// Put minimum / maximum in 16 packed int8 values
+	__m128i minVal = _mm_set1_epi8(static_cast<int8>(smin ^ 0x80u));
+	__m128i maxVal = _mm_set1_epi8(static_cast<int8>(smax ^ 0x80u));
+
+	// For signed <-> unsigned conversion (_mm_min_epi8/_mm_max_epi8 is SSE4)
+	__m128i xorVal = _mm_set1_epi8(0x80u);
+
+	SmpLength scanlen16 = scanlen / 16;
+	if(scanlen16)
+	{
+		const __m128i *v = static_cast<const __m128i *>(p);
+		p = static_cast<const __m128i *>(p) + scanlen16;
+
+		while(scanlen16--)
+		{
+			__m128i curVals = _mm_loadu_si128(v++);
+			curVals = _mm_xor_si128(curVals, xorVal);
+			minVal = _mm_min_epu8(minVal, curVals);
+			maxVal = _mm_max_epu8(maxVal, curVals);
+		}
+
+		// Now we have 16 minima and maxima each, in case of stereo they are interleaved L/R values.
+		// Move the upper 8 values to the lower half and compute the minima/maxima of that.
+		__m128i minVal2 = _mm_unpackhi_epi64(minVal, minVal);
+		__m128i maxVal2 = _mm_unpackhi_epi64(maxVal, maxVal);
+		minVal = _mm_min_epu8(minVal, minVal2);
+		maxVal = _mm_max_epu8(maxVal, maxVal2);
+
+		// Now we have 8 minima and maxima each, in case of stereo they are interleaved L/R values.
+		// Move the upper 4 values to the lower half and compute the minima/maxima of that.
+		minVal2 = _mm_shuffle_epi32(minVal, _MM_SHUFFLE(1, 1, 1, 1));
+		maxVal2 = _mm_shuffle_epi32(maxVal, _MM_SHUFFLE(1, 1, 1, 1));
+		minVal = _mm_min_epu8(minVal, minVal2);
+		maxVal = _mm_max_epu8(maxVal, maxVal2);
+
+		// Now we have 4 minima and maxima each, in case of stereo they are interleaved L/R values.
+		// Move the upper 2 values to the lower half and compute the minima/maxima of that.
+		minVal2 = _mm_srai_epi32(minVal, 16);
+		maxVal2 = _mm_srai_epi32(maxVal, 16);
+		minVal = _mm_min_epu8(minVal, minVal2);
+		maxVal = _mm_max_epu8(maxVal, maxVal2);
+
+		if(channels < 2)
+		{
+			// Mono: Compute the minima/maxima of the both remaining values
+			minVal2 = _mm_srai_epi16(minVal, 8);
+			maxVal2 = _mm_srai_epi16(maxVal, 8);
+			minVal = _mm_min_epu8(minVal, minVal2);
+			maxVal = _mm_max_epu8(maxVal, maxVal2);
+		}
+	}
+
+	const int8 *p8 = static_cast<const int8 *>(p);
+	while(scanlen & 15)
+	{
+		scanlen -= channels;
+		__m128i curVals = _mm_set1_epi8((*p8) ^ 0x80u);
+		p8 += channels;
+		minVal = _mm_min_epu8(minVal, curVals);
+		maxVal = _mm_max_epu8(maxVal, curVals);
+	}
+
+	smin = static_cast<int8>(_mm_cvtsi128_si32(minVal) ^ 0x80u);
+	smax = static_cast<int8>(_mm_cvtsi128_si32(maxVal) ^ 0x80u);
+}
+
+
+#endif
+
+
+std::pair<int, int> FindMinMax(const int8 *p, SmpLength numSamples, int numChannels)
+{
+	int minVal = 127;
+	int maxVal = -128;
+#if defined(MPT_ENABLE_ARCH_INTRINSICS_SSE2)
+	if(CPU::HasFeatureSet(CPU::feature::sse2) && CPU::HasModesEnabled(CPU::mode::xmm128sse) && numSamples >= 16)
+	{
+		sse2_findminmax8(p, numSamples, numChannels, minVal, maxVal);
+	} else
+#endif
+	{
+		while(numSamples--)
+		{
+
+			int s = *p;
+			if(s < minVal) minVal = s;
+			if(s > maxVal) maxVal = s;
+			p += numChannels;
+		}
+	}
+	return { minVal, maxVal };
+}
+
+
+std::pair<int, int> FindMinMax(const int16 *p, SmpLength numSamples, int numChannels)
+{
+	int minVal = 32767;
+	int maxVal = -32768;
+#if defined(MPT_ENABLE_ARCH_INTRINSICS_SSE2)
+	if(CPU::HasFeatureSet(CPU::feature::sse2) && CPU::HasModesEnabled(CPU::mode::xmm128sse) && numSamples >= 8)
+	{
+		sse2_findminmax16(p, numSamples, numChannels, minVal, maxVal);
+	} else
+#endif
+	{
+		while(numSamples--)
+		{
+			int s = *p;
+			if(s < minVal) minVal = s;
+			if(s > maxVal) maxVal = s;
+			p += numChannels;
+		}
+	}
+	return { minVal, maxVal };
+}
+
 
 std::vector<std::reference_wrapper<SmpLength>> GetCuesAndLoops(ModSample &smp)
 {
@@ -366,6 +557,50 @@ bool AmplifySample(ModSample &smp, SmpLength start, SmpLength end, double amplif
 
 	smp.PrecomputeLoops(sndFile, false);
 	return true;
+}
+
+
+template<typename T>
+static bool ApplyNormalizeImpl(T *p, SmpLength selStart, SmpLength selEnd)
+{
+	auto [min, max] = FindMinMax(p + selStart, selEnd - selStart, 1);
+	max = std::max(-min, max);
+	if(max >= std::numeric_limits<T>::max())
+		return false;
+
+	max++;
+	for(SmpLength i = selStart; i < selEnd; i++)
+	{
+		p[i] = static_cast<T>((static_cast<int>(p[i]) << (sizeof(T) * 8 - 1)) / max);
+	}
+	return true;
+}
+
+
+bool NormalizeSample(ModSample &smp, SmpLength start, SmpLength end, CSoundFile &sndFile)
+{
+	if(!smp.HasSampleData())
+		return false;
+	LimitMax(end, smp.nLength);
+	LimitMax(start, end);
+	if(start >= end)
+	{
+		start = 0;
+		end = smp.nLength;
+	}
+
+	start *= smp.GetNumChannels();
+	end *= smp.GetNumChannels();
+
+	bool modified = false;
+	if(smp.uFlags[CHN_16BIT])
+		modified = ApplyNormalizeImpl(smp.sample16(), start, end);
+	else
+		modified = ApplyNormalizeImpl(smp.sample8(), start, end);
+
+	if(modified)
+		smp.PrecomputeLoops(sndFile, false);
+	return modified;
 }
 
 

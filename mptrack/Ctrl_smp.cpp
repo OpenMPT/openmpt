@@ -1587,24 +1587,6 @@ void CCtrlSamples::OnSamplePlay()
 }
 
 
-template<typename T>
-static bool DoNormalize(T *p, SmpLength selStart, SmpLength selEnd)
-{
-	auto [min, max] = CViewSample::FindMinMax(p + selStart, selEnd - selStart, 1);
-	max = std::max(-min, max);
-	if(max < std::numeric_limits<T>::max())
-	{
-		max++;
-		for(SmpLength i = selStart; i < selEnd; i++)
-		{
-			p[i] = static_cast<T>((static_cast<int>(p[i]) << (sizeof(T) * 8 - 1)) / max);
-		}
-		return true;
-	}
-	return false;
-}
-
-
 void CCtrlSamples::Normalize(bool allSamples)
 {
 	//Default case: Normalize current sample
@@ -1653,21 +1635,8 @@ void CCtrlSamples::Normalize(bool allSamples)
 
 			m_modDoc.GetSampleUndo().PrepareUndo(smp, sundo_update, "Normalize", selStart, selEnd);
 
-			selStart *= sample.GetNumChannels();
-			selEnd *= sample.GetNumChannels();
-
-			bool modified = false;
-			if(sample.uFlags[CHN_16BIT])
+			if(SampleEdit::NormalizeSample(sample, selStart, selEnd, m_sndFile))
 			{
-				modified = DoNormalize(sample.sample16(), selStart, selEnd);
-			} else
-			{
-				modified = DoNormalize(sample.sample8(), selStart, selEnd);
-			}
-
-			if(modified)
-			{
-				sample.PrecomputeLoops(m_sndFile, false);
 				SetModified(smp, SampleHint().Data(), smp == m_nSample, true);
 			}
 		}

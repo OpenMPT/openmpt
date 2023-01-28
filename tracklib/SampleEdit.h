@@ -31,9 +31,11 @@ enum ResetFlag
 	SmpResetVibrato,
 };
 
+std::pair<int, int> FindMinMax(const int8 *p, SmpLength numSamples, int numChannels);
+std::pair<int, int> FindMinMax(const int16 *p, SmpLength numSamples, int numChannels);
+
 // Get a reference to all cue and loop points of the sample
 std::vector<std::reference_wrapper<SmpLength>> GetCuesAndLoops(ModSample &smp);
-
 
 // Insert silence to given location.
 // Note: Is currently implemented only for inserting silence to the beginning and to the end of the sample.
@@ -59,6 +61,9 @@ double RemoveDCOffset(ModSample &smp, SmpLength start, SmpLength end, CSoundFile
 
 // Amplify / fade  sample data
 bool AmplifySample(ModSample &smp, SmpLength start, SmpLength end, double amplifyStart, double amplifyEnd, bool isFadeIn, Fade::Law fadeLaw, CSoundFile &sndFile);
+
+// Normalize entire sample or just a selection
+bool NormalizeSample(ModSample &smp, SmpLength start, SmpLength end, CSoundFile &sndFile);
 
 // Reverse sample data
 bool ReverseSample(ModSample &smp, SmpLength start, SmpLength end, CSoundFile &sndFile);

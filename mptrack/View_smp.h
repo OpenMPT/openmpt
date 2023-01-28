@@ -100,9 +100,6 @@ public:
 	CViewSample();
 	DECLARE_SERIAL(CViewSample)
 
-	static std::pair<int, int> FindMinMax(const int8 *p, SmpLength numSamples, int numChannels);
-	static std::pair<int, int> FindMinMax(const int16 *p, SmpLength numSamples, int numChannels);
-
 protected:
 	MPT_NOINLINE void SetModified(SampleHint hint, bool updateAll, bool waveformModified);
 	void UpdateScrollSize() { UpdateScrollSize(m_nZoom, true); }
