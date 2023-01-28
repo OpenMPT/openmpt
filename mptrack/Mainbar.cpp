@@ -1319,7 +1319,7 @@ void CModTreeBar::OnFilterChanged()
 
 	CString filter;
 	m_filterEdit.GetWindowText(filter);
-	if (filter.GetLength() < 1 || filter.GetLength() > 2)
+	if(filter.GetLength() < 1 || filter.GetLength() > 2)
 	{
 		CancelTimer();
 		m_filterSource->SetInstrumentLibraryFilter(mpt::ToWin(filter));

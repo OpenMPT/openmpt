@@ -600,7 +600,7 @@ void CModTree::RefreshMidiLibrary()
 }
 
 
-void CModTree::RefreshDlsBanks(const bool forceRefresh)
+void CModTree::RefreshDlsBanks()
 {
 	const mpt::Charset charset = mpt::Charset::Locale;
 
@@ -608,14 +608,7 @@ void CModTree::RefreshDlsBanks(const bool forceRefresh)
 		return;
 
 	if(m_tiDLS.size() < CTrackApp::gpDLSBanks.size())
-	{
 		m_tiDLS.resize(CTrackApp::gpDLSBanks.size(), nullptr);
-	}
-
-	auto filter = mpt::ToWin(m_filterString);
-	const bool applyFilter = !filter.empty();
-	if(applyFilter)
-		filter = _T("*") + filter + _T("*");
 
 	LockRedraw();
 	HTREEITEM hInsertAfter = m_hMidiLib;
@@ -632,8 +625,11 @@ void CModTree::RefreshDlsBanks(const bool forceRefresh)
 			continue;
 		}
 
-		if(m_tiDLS[iDls] != nullptr && !forceRefresh)
+		if(m_tiDLS[iDls] != nullptr)
+		{
+			hInsertAfter = m_tiDLS[iDls];
 			continue;
+		}
 
 		// Add DLS file folder
 		const CDLSBank &dlsBank = *CTrackApp::gpDLSBanks[iDls];
@@ -681,10 +677,6 @@ void CModTree::RefreshDlsBanks(const bool forceRefresh)
 							regionName = "";
 					}
 
-					const auto regionNameStr = mpt::ToWin(charset, regionName);
-					if(applyFilter && !PathMatchSpec(regionNameStr.c_str(), filter.c_str()))
-						continue;
-
 					if(!hKit)
 					{
 						if(!hDrums)
@@ -694,6 +686,7 @@ void CModTree::RefreshDlsBanks(const bool forceRefresh)
 						hKit = InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM, szName, IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, lParamInstr, hDrums, TVI_FIRST);
 					}
 
+					const auto regionNameStr = mpt::ToWin(charset, regionName);
 					if(keymin >= keymax)
 					{
 						wsprintf(szName, _T("%s%u: %s"),
@@ -715,48 +708,28 @@ void CModTree::RefreshDlsBanks(const bool forceRefresh)
 							szName, IMAGE_INSTRUMENTS, IMAGE_INSTRUMENTS, 0, 0, lParam, hKit, TVI_FIRST);
 					anyMatches = true;
 				}
-				if(applyFilter && hKit)
-					Expand(hKit, TVE_EXPAND);
 			} else
 			{
 				// Melodic
-				const auto instrName = mpt::ToWin(charset, pDlsIns->szName);
-				if(applyFilter && !PathMatchSpec(instrName.c_str(), filter.c_str()))
-					continue;
-
 				uint16 mbank = (pDlsIns->ulBank & 0x7F7F);
 				auto hbank = banks.find(mbank);
 				if(hbank == banks.end())
 				{
 					wsprintf(szName, mbank ? _T("Melodic Bank %02d.%02d") : _T("Melodic"), mbank >> 8, mbank & 0x7F);
-					// Find out where to insert this bank in the tree
 					hbank = banks.insert(std::make_pair(mbank, nullptr)).first;
 					hbank->second = InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE,
 						szName, IMAGE_FOLDER, IMAGE_FOLDER, 0, 0, 0,
 						m_tiDLS[iDls], TVI_FIRST);
 				}
 
+				const auto instrName = mpt::ToWin(charset, pDlsIns->szName);
 				wsprintf(szName, _T("%u: %s"), pDlsIns->ulInstrument & 0x7F, instrName.c_str());
 				InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM,
 					szName, IMAGE_INSTRUMENTS, IMAGE_INSTRUMENTS, 0, 0, lParamInstr, hbank->second, TVI_FIRST);
 				anyMatches = true;
 			}
 		}
-		if(applyFilter)
-		{
-			for(const auto &bank : banks)
-			{
-				Expand(bank.second, TVE_EXPAND);
-			}
-		}
-		if(!anyMatches && applyFilter)
-		{
-			DeleteItem(m_tiDLS[iDls]);
-			m_tiDLS[iDls] = nullptr;
-		} else
-		{
-			hInsertAfter = m_tiDLS[iDls];
-		}
+		hInsertAfter = m_tiDLS[iDls];
 	}
 	UnlockRedraw();
 }
@@ -2254,11 +2227,7 @@ void CModTree::SetInstrumentLibraryFilter(const mpt::winstring &filter)
 		return;
 
 	m_filterString = filter;
-	LockRedraw();
 	FilterInstrumentLibrary(m_filterString, GetItemText(GetSelectedItem()));
-	if(!IsSampleBrowser())
-		RefreshDlsBanks(true);
-	UnlockRedraw();
 }
 
 
@@ -2486,8 +2455,6 @@ void CModTree::InstrumentLibraryChDir(mpt::PathString dir, bool isSong)
 			ok = true;
 		}
 	}
-	if(updateDLSBanks)
-		RefreshDlsBanks(true);
 
 	EndWaitCursor();
 

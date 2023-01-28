@@ -155,8 +155,8 @@ protected:
 		bool IsPercussion() const noexcept { return ((val1 & DLS_TYPEPERC) == DLS_TYPEPERC); }
 		bool IsMelodic() const noexcept { return !IsPercussion(); }
 
-		static ModItem FromLPARAM(uint32 lparam) { return ModItem{MODITEM_DLSBANK_INSTRUMENT, lparam, 0}; }
-		static LPARAM ToLPARAM(uint16 instr, uint16 region, bool isPerc) { return (instr & DLS_INSTRMASK) | ((region << DLS_REGIONSHIFT) & DLS_REGIONMASK) | (isPerc ? DLS_TYPEPERC : 0); }
+		static ModItem FromLPARAM(uint32 lparam) noexcept { return ModItem{MODITEM_DLSBANK_INSTRUMENT, lparam, 0}; }
+		static LPARAM ToLPARAM(uint16 instr, uint16 region, bool isPerc) noexcept { return (instr & DLS_INSTRMASK) | ((region << DLS_REGIONSHIFT) & DLS_REGIONMASK) | (isPerc ? DLS_TYPEPERC : 0); }
 	};
 
 	static CSoundFile *m_SongFile;  // For browsing samples and instruments inside modules on disk
@@ -230,7 +230,7 @@ public:
 	mpt::PathString InsLibGetFullPath(HTREEITEM hItem) const;
 	bool SetSoundFile(FileReader &file);
 	void RefreshMidiLibrary();
-	void RefreshDlsBanks(const bool forceRefresh = false);
+	void RefreshDlsBanks();
 	void RefreshInstrumentLibrary();
 	void MonitorInstrumentLibrary();
 	ModItem GetModItem(HTREEITEM hItem);
