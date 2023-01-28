@@ -137,6 +137,7 @@ struct string_traits {
 	using string_type = Tstring;
 	using size_type = typename string_type::size_type;
 	using char_type = typename string_type::value_type;
+	using unsigned_char_type = std::make_unsigned<char_type>::type;
 
 	static inline std::size_t length(const string_type & str) {
 		return str.length();
@@ -146,14 +147,21 @@ struct string_traits {
 		str.reserve(size);
 	}
 
-	static inline string_type & append(string_type & str, const string_type & a) {
-		return str.append(a);
+	static inline void set_at(string_type & str, size_type pos, char_type c) {
+		str.data()[pos] = c;
 	}
-	static inline string_type & append(string_type & str, string_type && a) {
-		return str.append(std::move(a));
+
+	static inline void append(string_type & str, const string_type & a) {
+		str.append(a);
 	}
-	static inline string_type & append(string_type & str, std::size_t count, char_type c) {
-		return str.append(count, c);
+	static inline void append(string_type & str, string_type && a) {
+		str.append(std::move(a));
+	}
+	static inline void append(string_type & str, std::size_t count, char_type c) {
+		str.append(count, c);
+	}
+	static inline void append(string_type & str, char_type c) {
+		str.append(1, c);
 	}
 
 	static inline string_type pad(string_type str, std::size_t left, std::size_t right) {
@@ -171,6 +179,7 @@ struct string_traits<CStringA> {
 	using string_type = CStringA;
 	using size_type = int;
 	using char_type = typename CStringA::XCHAR;
+	using unsigned_char_type = std::make_unsigned<char_type>::type;
 
 	static inline size_type length(const string_type & str) {
 		return str.GetLength();
@@ -180,15 +189,20 @@ struct string_traits<CStringA> {
 		str.Preallocate(size);
 	}
 
-	static inline string_type & append(string_type & str, const string_type & a) {
-		str += a;
-		return str;
+	static inline void set_at(string_type & str, size_type pos, char_type c) {
+		str.SetAt(pos, c);
 	}
-	static inline string_type & append(string_type & str, size_type count, char_type c) {
+
+	static inline void append(string_type & str, const string_type & a) {
+		str.Append(a);
+	}
+	static inline void append(string_type & str, size_type count, char_type c) {
 		while (count--) {
 			str.AppendChar(c);
 		}
-		return str;
+	}
+	static inline void append(string_type & str, char_type c) {
+		str.AppendChar(c);
 	}
 
 	static inline string_type pad(const string_type & str, size_type left, size_type right) {
@@ -210,6 +224,7 @@ struct string_traits<CStringW> {
 	using string_type = CStringW;
 	using size_type = int;
 	using char_type = typename CStringW::XCHAR;
+	using unsigned_char_type = std::make_unsigned<char_type>::type;
 
 	static inline size_type length(const string_type & str) {
 		return str.GetLength();
@@ -219,15 +234,20 @@ struct string_traits<CStringW> {
 		str.Preallocate(size);
 	}
 
-	static inline string_type & append(string_type & str, const string_type & a) {
-		str += a;
-		return str;
+	static inline void set_at(string_type & str, size_type pos, char_type c) {
+		str.SetAt(pos, c);
 	}
-	static inline string_type & append(string_type & str, size_type count, char_type c) {
+
+	static inline void append(string_type & str, const string_type & a) {
+		str.Append(a);
+	}
+	static inline void append(string_type & str, size_type count, char_type c) {
 		while (count--) {
 			str.AppendChar(c);
 		}
-		return str;
+	}
+	static inline void append(string_type & str, char_type c) {
+		str.AppendChar(c);
 	}
 
 	static inline string_type pad(const string_type & str, size_type left, size_type right) {
