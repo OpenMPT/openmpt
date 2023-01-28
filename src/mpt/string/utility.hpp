@@ -137,7 +137,7 @@ struct string_traits {
 	using string_type = Tstring;
 	using size_type = typename string_type::size_type;
 	using char_type = typename string_type::value_type;
-	using unsigned_char_type = std::make_unsigned<char_type>::type;
+	using unsigned_char_type = typename std::make_unsigned<char_type>::type;
 
 	static inline std::size_t length(const string_type & str) {
 		return str.length();
@@ -179,7 +179,7 @@ struct string_traits<CStringA> {
 	using string_type = CStringA;
 	using size_type = int;
 	using char_type = typename CStringA::XCHAR;
-	using unsigned_char_type = std::make_unsigned<char_type>::type;
+	using unsigned_char_type = typename std::make_unsigned<char_type>::type;
 
 	static inline size_type length(const string_type & str) {
 		return str.GetLength();
@@ -224,7 +224,7 @@ struct string_traits<CStringW> {
 	using string_type = CStringW;
 	using size_type = int;
 	using char_type = typename CStringW::XCHAR;
-	using unsigned_char_type = std::make_unsigned<char_type>::type;
+	using unsigned_char_type = typename std::make_unsigned<char_type>::type;
 
 	static inline size_type length(const string_type & str) {
 		return str.GetLength();
