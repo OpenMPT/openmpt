@@ -1272,8 +1272,8 @@ public:
 	void ProcessMidiOut(CHANNELINDEX nChn);
 #endif // NO_PLUGINS
 
-	void ProcessGlobalVolume(long countChunk);
-	void ProcessStereoSeparation(long countChunk);
+	void ProcessGlobalVolume(samplecount_t countChunk);
+	void ProcessStereoSeparation(samplecount_t countChunk);
 
 private:
 	PLUGINDEX GetChannelPlugin(const PlayState &playState, CHANNELINDEX nChn, PluginMutePriority respectMutes) const;

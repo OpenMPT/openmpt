@@ -2704,11 +2704,11 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 
 
 template<int channels>
-MPT_FORCEINLINE void ApplyGlobalVolumeWithRamping(int32 *SoundBuffer, int32 *RearBuffer, int32 lCount, int32 m_nGlobalVolume, int32 step, int32 &m_nSamplesToGlobalVolRampDest, int32 &m_lHighResRampingGlobalVolume)
+MPT_FORCEINLINE void ApplyGlobalVolumeWithRamping(int32 *SoundBuffer, int32 *RearBuffer, uint32 lCount, int32 m_nGlobalVolume, int32 step, int32 &m_nSamplesToGlobalVolRampDest, int32 &m_lHighResRampingGlobalVolume)
 {
 	const bool isStereo = (channels >= 2);
 	const bool hasRear = (channels >= 4);
-	for(int pos = 0; pos < lCount; ++pos)
+	for(uint32 pos = 0; pos < lCount; ++pos)
 	{
 		if(m_nSamplesToGlobalVolRampDest > 0)
 		{
@@ -2733,7 +2733,7 @@ MPT_FORCEINLINE void ApplyGlobalVolumeWithRamping(int32 *SoundBuffer, int32 *Rea
 }
 
 
-void CSoundFile::ProcessGlobalVolume(long lCount)
+void CSoundFile::ProcessGlobalVolume(samplecount_t lCount)
 {
 
 	// should we ramp?
@@ -2796,7 +2796,7 @@ void CSoundFile::ProcessGlobalVolume(long lCount)
 }
 
 
-void CSoundFile::ProcessStereoSeparation(long countChunk)
+void CSoundFile::ProcessStereoSeparation(samplecount_t countChunk)
 {
 	ApplyStereoSeparation(MixSoundBuffer, MixRearBuffer, m_MixerSettings.gnChannels, countChunk, m_MixerSettings.m_nStereoSeparation);
 }
