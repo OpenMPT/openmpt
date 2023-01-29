@@ -32,6 +32,37 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.30.10.00 (29 January 2023, revision 18674)
+---------------------------------------------
+Pattern tab
+- [Fix] <js> When jumping around in the module, the tempo was sometimes incorrectly limited to 255 BPM.
+
+Sample tab
+- [Fix] <js> Normalizing all samples or removing DC offset from all samples didn't mark external samples as modified (except for the currently selected one).
+
+Instrument tab
+- [Fix] <js> Previewing filtered instruments produced a repetitive click sound in OpenMPT 1.30.09.00 (http://bugs.openmpt.org/view.php?id=1655).
+
+Comments tab
+- [Fix] <js> The displayed middle-C frequency was slightly off for MOD files.
+
+Mod Conversion
+- [Fix] <js> Translation between MOD / XM E50 and MPTM / IT / S3M S20 Set Finetune commands did not take the different scales of the commands into account.
+- [Fix] <js> Wrong PAL middle-C frequency was used when converting from MOD to MPTM / IT / S3M.
+
+Playback
+- [Fix] <js> Initial instrument cutoff was broken for OPL instruments in OpenMPT 1.30.09.00 (http://bugs.openmpt.org/view.php?id=1657).
+
+Other formats
+- [Fix] <js> Loading DSym files was completely broken in OpenMPT 1.30.09.00.
+
+Misc
+- [Fix] <jh> After auto-updating from a previous version with no modules open, an empty module was created.
+
+Third-Party Libraries
+- [Imp] Update mpg123 (v1.31.2) 
+
+
 v1.30.09.00 (8 January 2023, revision 18451)
 --------------------------------------------
 Tree view
@@ -60,7 +91,7 @@ S3M
 - [Fix] <js> Pattern loop state was not propagated anymore since OpenMPT 1.30, leading to wrong song length calculation and SB0 + SBx being located on different channels not working properly anymore (http://bugs.openmpt.org/view.php?id=1641).
 
 Bundled plugins
-- [Imp] <js> MIDI I/O Plugin: MIDI Start message is no longer sent when previewing notes in patterns / samples or when pattern stepping is enabled (http://forum.openmpt.org/index.php?topic=6880.0).
+- [Imp] <js> MIDI I/O Plugin: MIDI Start message is no longer sent when previewing notes in pattern / sample / instrument editors or when pattern stepping is enabled (http://forum.openmpt.org/index.php?topic=6880.0).
 
 Misc
 - [Fix] <jh> Update Check: On modern portable amd64 installations, updates for the legacy version were downloaded instead (http://bugs.openmpt.org/view.php?id=1642).
@@ -335,7 +366,7 @@ v1.30.01.00 (23 December 2021, revision 16290)
 ----------------------------------------------
 Tree view
 - [Imp] <js> It is now possible to also load instruments from the MIDI library or soundfonts into the sample / instrument tab using Ctrl + (Shift +) Enter (http://bugs.openmpt.org/view.php?id=1491).
-- [Imp] <js> It is now possible to extract a complete drum instrument into a single instrument slot by dragging its folder rather than an individual note (tx Keffie).
+- [Imp] <js> It is now possible to extract a complete soundfont drum kit into a single instrument slot by dragging its folder rather than an individual note (tx Keffie).
 
 General tab
 - [Imp] <js> Changes to channel properties can now be undone and redone.

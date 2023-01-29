@@ -9,6 +9,11 @@ is just a high-level summary.
 
  *  [**Bug**] DSYM: Loading DSYM files got broken in 0.6.7.
 
+ *  When seeking around in a module, the tempo was sometimes incorrectly limited
+    to 255 BPM.
+ *  Initial instrument cutoff was broken for OPL instruments in
+    libopenmnpt 0.6.7.
+
  *  mpg123: Update to v1.31.2 (2023-01-14).
 
 ### libopenmpt 0.6.7 (2023-01-08)
