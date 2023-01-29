@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.4.34-pre
+### libopenmpt 0.4.34 (2023-01-29)
 
  *  When seeking around in a module, the tempo was sometimes incorrectly limited
     to 255 BPM.
