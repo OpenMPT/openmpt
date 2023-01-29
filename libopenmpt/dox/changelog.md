@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.6.8-pre
+### libopenmpt 0.6.8 (2023-01-29)
 
  *  [**Bug**] DSYM: Loading DSYM files got broken in 0.6.7.
 
