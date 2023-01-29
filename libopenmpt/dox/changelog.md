@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt 0.3.42-pre
 
+ *  When seeking around in a module, the tempo was sometimes incorrectly limited
+    to 255 BPM.
+
  *  mpg123: Update to v1.31.2 (2023-01-14).
 
 ### libopenmpt 0.3.41 (2023-01-08)
