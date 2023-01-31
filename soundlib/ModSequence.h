@@ -139,6 +139,7 @@ protected:
 public:
 	ModSequenceSet(CSoundFile &sndFile);
 	ModSequenceSet(ModSequenceSet &&) noexcept = default;
+	ModSequenceSet& operator=(const ModSequenceSet & other);
 
 	// Remove all sequences and initialize default sequence
 	void Initialize();

@@ -28,7 +28,6 @@ ModSequence::ModSequence(CSoundFile &sndFile)
 
 ModSequence& ModSequence::operator=(const ModSequence &other)
 {
-	MPT_ASSERT(&other.m_sndFile == &m_sndFile);
 	if(&other == this)
 		return *this;
 	std::vector<PATTERNINDEX>::assign(other.begin(), other.end());
@@ -275,6 +274,19 @@ ModSequenceSet::ModSequenceSet(CSoundFile &sndFile)
 	: m_sndFile(sndFile)
 {
 	Initialize();
+}
+
+
+ModSequenceSet& ModSequenceSet::operator=(const ModSequenceSet &other)
+{
+	if(&other == this)
+		return *this;
+	m_Sequences = other.m_Sequences;
+	if(m_Sequences.size() > m_sndFile.GetModSpecifications().sequencesMax)
+		m_Sequences.resize(m_sndFile.GetModSpecifications().sequencesMax, ModSequence{m_sndFile});
+	if(m_currentSeq >= m_Sequences.size())
+		m_currentSeq = 0;
+	return *this;
 }
 
 
