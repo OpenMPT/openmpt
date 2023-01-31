@@ -382,7 +382,7 @@ public:
 	static CTuning *GetDefaultTuning() {return nullptr;}
 	CTuningCollection& GetTuneSpecificTunings() {return *m_pTuningsTuneSpecific;}
 
-	mpt::ustring GetNoteName(const ModCommand::NOTE note, const INSTRUMENTINDEX inst) const;
+	mpt::ustring GetNoteName(const ModCommand::NOTE note, const INSTRUMENTINDEX inst, const NoteName *noteNames = nullptr) const;
 	mpt::ustring GetNoteName(const ModCommand::NOTE note) const;
 	static mpt::ustring GetNoteName(const ModCommand::NOTE note, const NoteName *noteNames);
 #ifdef MODPLUG_TRACKER

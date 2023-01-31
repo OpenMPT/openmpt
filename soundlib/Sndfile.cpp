@@ -1586,7 +1586,7 @@ std::unique_ptr<CTuning> CSoundFile::CreateTuning12TET(const mpt::ustring &name)
 }
 
 
-mpt::ustring CSoundFile::GetNoteName(const ModCommand::NOTE note, const INSTRUMENTINDEX inst) const
+mpt::ustring CSoundFile::GetNoteName(const ModCommand::NOTE note, const INSTRUMENTINDEX inst, const NoteName *noteNames) const
 {
 	// For MPTM instruments with custom tuning, find the appropriate note name. Else, use default note names.
 	if(ModCommand::IsNote(note) && GetType() == MOD_TYPE_MPT && inst >= 1 && inst <= GetNumInstruments() && Instruments[inst] && Instruments[inst]->pTuning)
@@ -1594,7 +1594,7 @@ mpt::ustring CSoundFile::GetNoteName(const ModCommand::NOTE note, const INSTRUME
 		return Instruments[inst]->pTuning->GetNoteName(note - NOTE_MIDDLEC);
 	} else
 	{
-		return GetNoteName(note);
+		return GetNoteName(note, noteNames ? noteNames : m_NoteNames);
 	}
 }
 
