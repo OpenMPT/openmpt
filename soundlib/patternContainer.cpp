@@ -28,6 +28,15 @@ CPatternContainer &CPatternContainer::operator=(const CPatternContainer &other)
 }
 
 
+CPatternContainer &CPatternContainer::operator=(CPatternContainer &&other)
+{
+	if(this == &other)
+		return *this;
+	m_Patterns = std::move(other.m_Patterns);
+	return *this;
+}
+
+
 void CPatternContainer::ClearPatterns()
 {
 	DestroyPatterns();

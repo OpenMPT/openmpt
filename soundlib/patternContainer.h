@@ -28,7 +28,10 @@ public:
 
 public:
 	CPatternContainer(CSoundFile &sndFile) : m_rSndFile{sndFile} { }
+	CPatternContainer(const CPatternContainer &) = default;
+	CPatternContainer(CPatternContainer &&) = default;
 	CPatternContainer &operator=(const CPatternContainer &other);
+	CPatternContainer &operator=(CPatternContainer &&other);
 
 	// Empty and initialize all patterns.
 	void ClearPatterns();
