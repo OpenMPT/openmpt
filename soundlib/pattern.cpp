@@ -141,6 +141,8 @@ void CPattern::Deallocate()
 
 CPattern& CPattern::operator= (const CPattern &pat)
 {
+	if(GetNumChannels() != pat.GetNumChannels())
+		return *this;
 	m_ModCommands = pat.m_ModCommands;
 	m_Rows = pat.m_Rows;
 	m_RowsPerBeat = pat.m_RowsPerBeat;

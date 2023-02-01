@@ -21,7 +21,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 CPatternContainer &CPatternContainer::operator=(const CPatternContainer &other)
 {
-	if(this == &other)
+	if(this == &other || m_rSndFile.GetNumChannels() != other.m_rSndFile.GetNumChannels())
 		return *this;
 	m_Patterns = other.m_Patterns;
 	return *this;
@@ -30,7 +30,7 @@ CPatternContainer &CPatternContainer::operator=(const CPatternContainer &other)
 
 CPatternContainer &CPatternContainer::operator=(CPatternContainer &&other)
 {
-	if(this == &other)
+	if(this == &other || m_rSndFile.GetNumChannels() != other.m_rSndFile.GetNumChannels())
 		return *this;
 	m_Patterns = std::move(other.m_Patterns);
 	return *this;
