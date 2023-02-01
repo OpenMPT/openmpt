@@ -19,6 +19,15 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
+CPatternContainer &CPatternContainer::operator=(const CPatternContainer &other)
+{
+	if(this == &other)
+		return *this;
+	m_Patterns = other.m_Patterns;
+	return *this;
+}
+
+
 void CPatternContainer::ClearPatterns()
 {
 	DestroyPatterns();

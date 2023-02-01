@@ -27,7 +27,8 @@ public:
 	const CPattern& operator[](const int pat) const { return m_Patterns[pat]; }
 
 public:
-	CPatternContainer(CSoundFile& sndFile) : m_rSndFile(sndFile) { }
+	CPatternContainer(CSoundFile &sndFile) : m_rSndFile{sndFile} { }
+	CPatternContainer &operator=(const CPatternContainer &other);
 
 	// Empty and initialize all patterns.
 	void ClearPatterns();
