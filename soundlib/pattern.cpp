@@ -143,12 +143,21 @@ CPattern& CPattern::operator= (const CPattern &pat)
 {
 	if(GetNumChannels() != pat.GetNumChannels())
 		return *this;
+
 	m_ModCommands = pat.m_ModCommands;
 	m_Rows = pat.m_Rows;
 	m_RowsPerBeat = pat.m_RowsPerBeat;
 	m_RowsPerMeasure = pat.m_RowsPerMeasure;
 	m_tempoSwing = pat.m_tempoSwing;
 	m_PatternName = pat.m_PatternName;
+
+	if(GetSoundFile().GetType() != pat.GetSoundFile().GetType())
+	{
+		for(ModCommand &m : m_ModCommands)
+		{
+			m.Convert(GetSoundFile().GetType(), pat.GetSoundFile().GetType(), GetSoundFile());
+		}
+	}
 	return *this;
 }
 

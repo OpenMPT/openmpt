@@ -28,6 +28,10 @@ class CPattern
 	friend class CPatternContainer;
 	
 public:
+	CPattern(CPatternContainer &patCont) : m_rPatternContainer{patCont} {}
+	CPattern(const CPattern &) = default;
+	CPattern(CPattern &&) noexcept = default;
+
 	CPattern& operator= (const CPattern &pat);
 	bool operator== (const CPattern &other) const;
 	bool operator!= (const CPattern &other) const { return !(*this == other); }
@@ -113,10 +117,6 @@ public:
 	iterator end() { return m_ModCommands.end(); }
 	const_iterator end() const { return m_ModCommands.end(); }
 	const_iterator cend() const { return m_ModCommands.cend(); }
-
-	CPattern(CPatternContainer& patCont) : m_rPatternContainer(patCont) {}
-	CPattern(const CPattern &) = default;
-	CPattern(CPattern &&) noexcept = default;
 
 protected:
 	ModCommand& GetModCommand(size_t i) { return m_ModCommands[i]; }
