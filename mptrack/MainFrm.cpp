@@ -1501,10 +1501,17 @@ bool CMainFrame::PlayDLSInstrument(const CDLSBank &bank, UINT instr, UINT region
 	BeginWaitCursor();
 	{
 		CriticalSection cs;
-		InitPreview();
-		if(bank.ExtractInstrument(m_WaveFile, 1, instr, region))
+		if(ModCommand::IsNote(note))
 		{
-			PreparePreview(note, volume);
+			InitPreview();
+			if(bank.ExtractInstrument(m_WaveFile, 1, instr, region))
+			{
+				PreparePreview(note, volume);
+				ok = true;
+			}
+		} else
+		{
+			PreparePreview(NOTE_NOTECUT, volume);
 			ok = true;
 		}
 	}
@@ -1642,6 +1649,15 @@ void CMainFrame::InitPreview()
 
 void CMainFrame::PreparePreview(ModCommand::NOTE note, int volume)
 {
+	if(!ModCommand::IsNote(note))
+	{
+		for(auto &chn : m_WaveFile.m_PlayState.Chn)
+		{
+			chn.nFadeOutVol = 0;
+			chn.dwFlags.set(CHN_NOTEFADE | CHN_FASTVOLRAMP);
+		}
+		return;
+	}
 	m_WaveFile.m_SongFlags.reset(SONG_PAUSED);
 	m_WaveFile.SetRepeatCount(-1);
 	m_WaveFile.ResetPlayPos();
