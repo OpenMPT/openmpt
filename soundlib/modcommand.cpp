@@ -169,7 +169,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 	{
 		if(newTypeIsS3M)
 		{
-			param = (param + 1) >> 1;
+			param = static_cast<uint8>((param + 1u) >> 1);
 		} else if(oldTypeIsS3M)
 		{
 			if(param == 0xA4)
@@ -234,9 +234,9 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 				param -= 0x80;
 			}
 			if(param <= 30)
-				param = 0xE0 | ((param + 1u) / 2u);
+				param = static_cast<uint8>(0xE0u | ((param + 1u) / 2u));
 			else
-				param = 0xF0 | std::min(static_cast<PARAM>((param + 7u) / 8u), PARAM(15));
+				param = static_cast<uint8>(0xF0u | std::min(static_cast<PARAM>((param + 7u) / 8u), PARAM(15)));
 		}
 	} // End if(oldTypeIsMPT)
 
@@ -398,7 +398,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 				} else
 				{
 					command = CMD_MODCMDEX;
-					param = (((param & 0x0F) + 3) >> 2) | 0x10;
+					param = static_cast<uint8>((((param & 0x0Fu) + 3u) >> 2) | 0x10u);
 				}
 			} else
 			{
@@ -420,7 +420,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 				} else
 				{
 					command = CMD_MODCMDEX;
-					param = (((param & 0x0F) + 3) >> 2) | 0x20;
+					param = static_cast<uint8>((((param & 0x0Fu) + 3u) >> 2) | 0x20u);
 				}
 			} else
 			{
@@ -495,7 +495,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 			break;
 
 		case CMD_GLOBALVOLUME:
-			param = (std::min(PARAM(0x80), param) + 1) / 2u;
+			param = static_cast<uint8>((std::min(PARAM(0x80), param) + 1u) / 2u);
 			break;
 
 		default:
@@ -511,10 +511,10 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 		{
 		case CMD_VIBRATO:
 			// With linear slides, strength is roughly doubled.
-			param = (param & 0xF0) | (((param & 0x0F) + 1) / 2u);
+			param = static_cast<uint8>((param & 0xF0u) | (((param & 0x0Fu) + 1u) / 2u));
 			break;
 		case CMD_GLOBALVOLUME:
-			param = (std::min(PARAM(0x80), param) + 1) / 2u;
+			param = static_cast<uint8>((std::min(PARAM(0x80), param) + 1u) / 2u);
 			break;
 		default:
 			break;

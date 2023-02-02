@@ -43,7 +43,7 @@ public:
 
 	ORDERINDEX GetLength() const { return mpt::saturate_cast<ORDERINDEX>(size()); }
 	// Returns last accessible index, i.e. GetLength() - 1, or 0 if the order list is empty.
-	ORDERINDEX GetLastIndex() const { return std::max(ORDERINDEX(1), GetLength()) - 1u; }
+	ORDERINDEX GetLastIndex() const { return static_cast<ORDERINDEX>(std::max(ORDERINDEX(1), GetLength()) - 1u); }
 	// Returns length of sequence without counting trailing '---' items.
 	ORDERINDEX GetLengthTailTrimmed() const;
 	// Returns length of sequence stopping counting on first '---' (or at the end of sequence).

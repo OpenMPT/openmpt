@@ -188,7 +188,7 @@ void ModChannel::RecalcTuningFreq(Tuning::RATIOTYPE vibratoFactor, Tuning::NOTEI
 	if(sndFile.m_playBehaviour[kITRealNoteMapping] && note >= NOTE_MIN && note <= NOTE_MAX)
 		note = pModInstrument->NoteMap[note - NOTE_MIN];
 
-	nPeriod = mpt::saturate_round<uint32>(nC5Speed * vibratoFactor * pModInstrument->pTuning->GetRatio(note - NOTE_MIDDLEC + arpeggioSteps, nFineTune + m_PortamentoFineSteps) * (1 << FREQ_FRACBITS));
+	nPeriod = mpt::saturate_round<uint32>(static_cast<float>(nC5Speed) * vibratoFactor * pModInstrument->pTuning->GetRatio(static_cast<Tuning::NOTEINDEXTYPE>(note - NOTE_MIDDLEC + arpeggioSteps), nFineTune + m_PortamentoFineSteps) * (1 << FREQ_FRACBITS));
 }
 
 

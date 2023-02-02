@@ -1618,7 +1618,7 @@ mpt::ustring CSoundFile::GetNoteName(const ModCommand::NOTE note, const NoteName
 	{
 		return mpt::ustring()
 			.append(noteNames[(note - NOTE_MIN) % 12])
-			.append(1, UC_('0') + (note - NOTE_MIN) / 12)
+			.append(1, static_cast<mpt::uchar>(UC_('0') + ((note - NOTE_MIN) / 12)))
 			;	// e.g. "C#" + "5"
 	} else if(note == NOTE_NONE)
 	{
@@ -1827,7 +1827,7 @@ uint32 CSoundFile::GetTickDuration(PlayState &playState) const
 
 	case TempoMode::Modern:
 		{
-			double accurateBufferCount = static_cast<double>(m_MixerSettings.gdwMixingFreq) * (60.0 / (playState.m_nMusicTempo.ToDouble() * Util::mul32to64_unsigned(playState.m_nMusicSpeed, playState.m_nCurrentRowsPerBeat)));
+			double accurateBufferCount = static_cast<double>(m_MixerSettings.gdwMixingFreq) * (60.0 / (playState.m_nMusicTempo.ToDouble() * static_cast<double>(Util::mul32to64_unsigned(playState.m_nMusicSpeed, playState.m_nCurrentRowsPerBeat))));
 			const TempoSwing &swing = (Patterns.IsValidPat(playState.m_nPattern) && Patterns[playState.m_nPattern].HasTempoSwing())
 				? Patterns[playState.m_nPattern].GetTempoSwing()
 				: m_tempoSwing;

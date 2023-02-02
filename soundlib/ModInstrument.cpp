@@ -48,7 +48,7 @@ void InstrumentEnvelope::Convert(MODTYPE fromType, MODTYPE toType)
 			if(at(nLoopEnd).tick - 1 > at(nLoopEnd - 1).tick)
 			{
 				// Insert an interpolated point just before the loop point.
-				EnvelopeNode::tick_t tick = at(nLoopEnd).tick - 1u;
+				EnvelopeNode::tick_t tick = static_cast<EnvelopeNode::tick_t>(at(nLoopEnd).tick - 1u);
 				auto interpolatedValue = static_cast<EnvelopeNode::value_t>(GetValueFromPosition(tick, 64));
 				insert(begin() + nLoopEnd, EnvelopeNode(tick, interpolatedValue));
 			} else

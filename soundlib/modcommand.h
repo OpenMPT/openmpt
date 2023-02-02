@@ -161,11 +161,11 @@ public:
 	void Set(NOTE n, INSTR ins, uint16 volcol, uint16 effectcol) { note = n; instr = ins; SetValueVolCol(volcol); SetValueEffectCol(effectcol); }
 
 	uint16 GetValueVolCol() const { return GetValueVolCol(volcmd, vol); }
-	static uint16 GetValueVolCol(uint8 volcmd, uint8 vol) { return (volcmd << 8) + vol; }
+	static uint16 GetValueVolCol(uint8 volcmd, uint8 vol) { return static_cast<uint16>(volcmd << 8) + vol; }
 	void SetValueVolCol(const uint16 val) { volcmd = static_cast<VOLCMD>(val >> 8); vol = static_cast<uint8>(val & 0xFF); }
 
 	uint16 GetValueEffectCol() const { return GetValueEffectCol(command, param); }
-	static uint16 GetValueEffectCol(uint8 command, uint8 param) { return (command << 8) + param; }
+	static uint16 GetValueEffectCol(uint8 command, uint8 param) { return static_cast<uint16>(command << 8) + param; }
 	void SetValueEffectCol(const uint16 val) { command = static_cast<COMMAND>(val >> 8); param = static_cast<uint8>(val & 0xFF); }
 
 	// Clears modcommand.

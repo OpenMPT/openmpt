@@ -268,7 +268,7 @@ void CSoundFile::UpgradeModule()
 			{
 				// Previously, Pitch/Pan Separation was only half depth (plot twist: it was actually only quarter depth).
 				// This was corrected in compatible mode in OpenMPT 1.18, and in OpenMPT 1.20 it is corrected in normal mode as well.
-				ins->nPPS = (ins->nPPS + (ins->nPPS >= 0 ? 1 : -1)) / 2;
+				ins->nPPS = static_cast<int8>((ins->nPPS + (ins->nPPS >= 0 ? 1 : -1)) / 2);
 			}
 
 			if(!compatModeIT || m_dwLastSavedWithVersion < MPT_V("1.17.03.02"))
@@ -409,13 +409,13 @@ void CSoundFile::UpgradeModule()
 		{
 			ModInstrument *ins = Instruments[i];
 			// Even after fixing it in OpenMPT 1.18, instrument PPS was only half the depth.
-			ins->nPPS = (ins->nPPS + (ins->nPPS >= 0 ? 1 : -1)) / 2;
+			ins->nPPS = static_cast<int8>((ins->nPPS + (ins->nPPS >= 0 ? 1 : -1)) / 2);
 
 			// OpenMPT 1.18 fixed the depth of random pan in compatible mode.
 			// OpenMPT 1.26 fixes it in normal mode too.
 			if(!compatModeIT || m_dwLastSavedWithVersion < MPT_V("1.18.00.00"))
 			{
-				ins->nPanSwing = (ins->nPanSwing + 3) / 4u;
+				ins->nPanSwing = static_cast<uint8>((ins->nPanSwing + 3) / 4u);
 			}
 		}
 	}
