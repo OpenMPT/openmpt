@@ -1913,7 +1913,7 @@ endif
 	mkdir -p                                     bin/$(FLAVOUR_DIR)dist-retro-win98/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Winamp
 	svn export ./libopenmpt/in_openmpt/in_openmpt.txt   bin/$(FLAVOUR_DIR)dist-retro-win98/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Winamp/in_openmpt.txt --native-eol CRLF
 	cp bin/$(FLAVOUR_DIR)in_openmpt.dll                        bin/$(FLAVOUR_DIR)dist-retro-win98/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Winamp/in_openmpt.dll
-	cd bin/$(FLAVOUR_DIR)dist-retro-win98/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/ && ../../../build/tools/7zip/7z a -tzip -mx=9 ../libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.retro.win9x.zip *
+	cd bin/$(FLAVOUR_DIR)dist-retro-win98/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/ && ../../../build/tools/7zip/7z a -tzip -mx=9 ../libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.retro.win98.zip *
 
 .PHONY: bin/$(FLAVOUR_DIR)dist-retro-win95/libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.retro.win95.zip
 bin/$(FLAVOUR_DIR)dist-retro-win95/libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.retro.win95.zip:
