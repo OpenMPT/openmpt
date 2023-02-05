@@ -50,6 +50,10 @@ is just a high-level summary.
     `MINGW_FLAVOUR=[|-posix|-win32]`, `WINDOWS_ARCH=[x86|amd64]`,
     `WINDOWS_FAMILY=[|desktop-app|app|phone-app|pc-app]`, and
     `WINDOWS_VERSION=[win95|win98|winme|winnt4|win2000|winxp|winxp64|winvista|win7|win8|win8.1|win10|win11]`.
+ *  [**New**] New `Makefile` option `CONFIG=mingw` which consolidates all MinGW
+    build configurations with the following options:
+    `MINGW_FLAVOUR=[|-posix|-win32]`, and
+    `WINDOWS_VERSION=[win95|win98|winme|winnt4|win2000|winxp]`.
  *  [**New**] Building with MSYS2 is now fully supported for Makefile and
     Autotools build systems.
  *  [**New**] `Makefile` `CONFIG=djgpp` now supports `CPU=` option to build
@@ -57,7 +61,7 @@ is just a high-level summary.
     available options. `FLAVOURED_DIR=1` places the CPU-specific optimized
     builds in separate folders below `bin/`.
  *  [**New**] Building with a MinGW32 CRTDLL toolchain is now supported via
-    `Makefile` option `CONFIG=mingw32crt-win95`.
+    `Makefile` option `CONFIG=mingw32crt`.
  *  [**New**] `Makefile` now uses `PKG_CONFIG` as path to `pkg-config`.
  *  [**New**] The C++ API is now also enabled for Emscripten builds by default.
  *  [**New**] Support for GCC 7 has been restored.
@@ -76,9 +80,9 @@ is just a high-level summary.
  *  [**Change**] `Makefile` `CONFIG=macosx` and `CONFIG=haiku` have been
     removed. The OS is auto-detected.
  *  [**Change**] `Makefile` options `CONFIG=mingw64-win32`,
-    `CONFIG=mingw64-win64`, `CONFIG=mingw64-winrt-x86`, and
-    `CONFIG=mingw64-winrt-amd64` are deprecated. Please use `CONFIG=mingw-w64`
-    instead.
+    `CONFIG=mingw64-win64`, `CONFIG=mingw64-winrt-x86`,
+    `CONFIG=mingw64-winrt-amd64`, and `CONFIG=mingw-win9x` have been replaced by
+    `CONFIG=mingw-w64`, and `CONFIG=mingw`.
  *  [**Change**] Autotools now default to C++20 and only fall back to C++17 when
     C++20 is not supported.
  *  [**Change**] `Makefile` now defaults to C++20 and only falls back to C++17
