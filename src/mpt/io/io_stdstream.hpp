@@ -34,7 +34,7 @@ private:
 	std::ios & f;
 
 public:
-	FileOperationsStdIos(std::ios & f_)
+	inline FileOperationsStdIos(std::ios & f_)
 		: f(f_) {
 		return;
 	}
@@ -52,7 +52,7 @@ private:
 	std::istream & f;
 
 public:
-	FileOperationsStdIstream(std::istream & f_)
+	inline FileOperationsStdIstream(std::istream & f_)
 		: FileOperationsStdIos(f_)
 		, f(f_) {
 		return;
@@ -139,7 +139,7 @@ private:
 	std::ostream & f;
 
 public:
-	FileOperationsStdOstream(std::ostream & f_)
+	inline FileOperationsStdOstream(std::ostream & f_)
 		: FileOperationsStdIos(f_)
 		, f(f_) {
 		return;
@@ -228,7 +228,7 @@ private:
 	std::iostream & f;
 
 public:
-	FileOperationsStdIOstream(std::iostream & f_)
+	inline FileOperationsStdIOstream(std::iostream & f_)
 		: FileOperationsStdIstream(f_)
 		, FileOperationsStdOstream(f_)
 		, f(f_) {
@@ -273,7 +273,7 @@ template <typename Tstream>
 struct FileOperations<Tstream, typename std::enable_if_t<std::is_base_of<std::iostream, Tstream>::value>>
 	: public FileOperationsStdIOstream {
 public:
-	FileOperations(Tstream & f)
+	inline FileOperations(Tstream & f)
 		: FileOperationsStdIOstream(f) {
 		return;
 	}
@@ -285,7 +285,7 @@ template <typename Tstream>
 struct FileOperations<Tstream, typename std::enable_if_t<std::is_base_of<std::istream, Tstream>::value && !std::is_base_of<std::iostream, Tstream>::value>>
 	: public FileOperationsStdIstream {
 public:
-	FileOperations(Tstream & f)
+	inline FileOperations(Tstream & f)
 		: FileOperationsStdIstream(f) {
 		return;
 	}
@@ -297,7 +297,7 @@ template <typename Tstream>
 struct FileOperations<Tstream, typename std::enable_if_t<std::is_base_of<std::ostream, Tstream>::value && !std::is_base_of<std::iostream, Tstream>::value>>
 	: public FileOperationsStdOstream {
 public:
-	FileOperations(Tstream & f)
+	inline FileOperations(Tstream & f)
 		: FileOperationsStdOstream(f) {
 		return;
 	}
