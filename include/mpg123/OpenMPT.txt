@@ -1,12 +1,9 @@
 libmpg123 library version 1.31.2 (2023-01-14).
 The following changes have been made:
-- ports/MSVC++/config.h and ports/MSVC++/mpg123.h have been retained from older
-  versions.
+- ports/MSVC++/config.h and ports/MSVC++/mpg123.h have been added for MSVC
+  builds.
 - ports/Xcode/config.h and ports/MSVC++/mpg123.h have been retained from older
   versions.
-- ports/MSVC++/config.h has been modified to define OFF_MAX.
-- ports/MSVC++/mpg123.h has been adjusted to provide mpg123_ssize_t and define
-  MPG123_NO_LARGENAME.
 - ports/Xcode/mpg123.h has been adjusted to provide mpg123_ssize_t and define
   MPG123_API_VERSION
 - src/libmpg123/mpg123.h.in has been modified to #include <fmt123.h> as
