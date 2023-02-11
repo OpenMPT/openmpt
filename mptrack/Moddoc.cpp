@@ -1626,7 +1626,7 @@ void CModDoc::UpdateAllViews(CView *pSender, UpdateHint hint, CObject *pHint)
 		for(auto &plug : m_SndFile.m_MixPlugins)
 		{
 			auto mixPlug = plug.pMixPlugin;
-			if(mixPlug != nullptr && mixPlug->GetEditor())
+			if(mixPlug != nullptr && mixPlug->GetEditor() && mixPlug->GetEditor() != pHint)
 			{
 				mixPlug->GetEditor()->UpdateView(hint);
 			}
