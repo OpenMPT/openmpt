@@ -737,7 +737,9 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 		{
 			pFound->InsertPluginInstanceIntoList(*plugin);
 		}
+#ifdef MODPLUG_TRACKER
 		CriticalSection cs;
+#endif
 		mixPlugin.pMixPlugin = plugin;
 		return plugin != nullptr;
 	}
