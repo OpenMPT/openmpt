@@ -737,6 +737,8 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 		{
 			pFound->InsertPluginInstanceIntoList(*plugin);
 		}
+		CriticalSection cs;
+		mixPlugin.pMixPlugin = plugin;
 		return plugin != nullptr;
 	}
 
@@ -785,8 +787,6 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 
 		if(pEffect != nullptr && pEffect->dispatcher != nullptr && pEffect->magic == Vst::kEffectMagic)
 		{
-			validPlugin = true;
-
 			GetPluginInformation(maskCrashes, pEffect, *pFound);
 
 			// Update cached information
@@ -797,10 +797,9 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 			{
 				pFound->InsertPluginInstanceIntoList(*pVstPlug);
 			}
-			if(pVstPlug == nullptr)
-			{
-				validPlugin = false;
-			}
+			validPlugin = (pVstPlug != nullptr);
+			CriticalSection cs;
+			mixPlugin.pMixPlugin = pVstPlug;
 		}
 
 		if(!validPlugin)

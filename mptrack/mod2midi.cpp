@@ -456,6 +456,7 @@ namespace MidiExport
 
 			m_tracks.reserve(m_sndFile.GetNumInstruments() + 1);
 			MidiTrack &tempoTrack = *(new MidiTrack(m_plugFactory, m_sndFile, m_songLength, tempoTrackPlugin, nullptr, mpt::ToUnicode(m_sndFile.GetCharsetInternal(), m_sndFile.m_songName), nullptr, overlappingInstruments));
+			tempoTrackPlugin.pMixPlugin = &tempoTrack;
 			tempoTrack.WriteString(kText, mpt::ToUnicode(m_sndFile.GetCharsetInternal(), m_sndFile.m_songMessage.GetString()));
 			tempoTrack.WriteString(kCopyright, m_sndFile.m_songArtist);
 			m_tracks.push_back(&tempoTrack);

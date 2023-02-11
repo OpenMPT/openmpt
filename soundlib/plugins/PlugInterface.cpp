@@ -54,7 +54,6 @@ IMixPlugin::IMixPlugin(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN 
 	, m_pMixStruct(&mixStruct)
 {
 	m_SndFile.m_loadedPlugins++;
-	m_pMixStruct->pMixPlugin = this;
 	m_MixState.pMixBuffer = mpt::align_bytes<8, MIXBUFFERSIZE * 2>(m_MixBuffer);
 	while(m_pMixStruct != &(m_SndFile.m_MixPlugins[m_nSlot]) && m_nSlot < MAX_MIXPLUGINS - 1)
 	{
