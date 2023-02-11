@@ -847,6 +847,7 @@ static constexpr struct
 	{KeyCommand::Hidden, kcSetFXpanSlide, _T("FX Pan Slide")},
 	{KeyCommand::Hidden, kcSetFXsetEnvPos, _T("FX Set Envelope Position (XM)")},
 	{KeyCommand::Hidden, kcSetFXmacro, _T("FX MIDI Macro")},
+	{KeyCommand::Hidden, kcSetFXDummy, _T("FX Dummy") },
 	{1294, kcSetFXmacroSlide, _T("Smooth MIDI Macro Slide")},
 	{1295, kcSetFXdelaycut, _T("Combined Note Delay and Note Cut")},
 	{KeyCommand::Hidden, kcPatternJumpDownh1Select, _T("kcPatternJumpDownh1Select")},
@@ -2408,7 +2409,7 @@ bool CCommandSet::QuickChange_SetEffects(const CModSpecifications &modSpecs)
 	int choices = 0;
 	KeyCombination kc(kCtxViewPatternsFX, ModNone, 0, kKeyEventDown | kKeyEventRepeat);
 
-	for(CommandID cmd = kcFixedFXStart; cmd <= kcFixedFXend; cmd = static_cast<CommandID>(cmd + 1))
+	for(CommandID cmd = kcSetFXStart; cmd <= kcSetFXEnd; cmd = static_cast<CommandID>(cmd + 1))
 	{
 		// Remove all old choices
 		choices = GetKeyListSize(cmd);

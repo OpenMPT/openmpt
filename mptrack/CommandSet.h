@@ -627,7 +627,6 @@ enum CommandID
 
 	//Effect commands. ORDER IS CRUCIAL and must match EffectCommand enum!
 	kcSetFXStart,
-	kcFixedFXStart = kcSetFXStart,
 	kcSetFXarp = kcSetFXStart,  //0,j
 	kcSetFXportUp,              //1,f
 	kcSetFXportDown,            //2,e
@@ -659,13 +658,13 @@ enum CommandID
 	kcSetFXpanSlide,            //p,p
 	kcSetFXsetEnvPos,           //l,?
 	kcSetFXmacro,               //z,z
-	kcFixedFXend = kcSetFXmacro,
 	kcSetFXmacroSlide,      //?,\ ,
 	kcSetFXdelaycut,        //?,:
 	kcSetFXextension,       //?,#
 	kcSetFXFinetune,        //?,+
 	kcSetFXFinetuneSmooth,  //?,*
-	kcSetFXEnd = kcSetFXFinetuneSmooth,
+	kcSetFXDummy,           //W, 
+	kcSetFXEnd = kcSetFXDummy,
 
 	kcStartInstrumentMisc,
 	kcInstrumentLoad = kcStartInstrumentMisc,
