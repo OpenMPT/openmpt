@@ -324,6 +324,10 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 			}
 			break;
 
+		case CMD_DUMMY:
+			// Command "W" in XM, equivalent implementation in IT / S3M is command " ".
+			// Don't convert this command, as it overwrites effect memory in S3M in particular - a feature not supported by all S3M players.
+			command = CMD_NONE;
 		default:
 			break;
 		}
