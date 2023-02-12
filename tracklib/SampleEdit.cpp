@@ -834,7 +834,7 @@ SmpLength Resample(ModSample &smp, SmpLength start, SmpLength end, uint32 newRat
 	const SmpLength newSelEnd = start + newSelLength;
 	const SmpLength newTotalLength = smp.nLength - selLength + newSelLength;
 	const uint8 numChannels = smp.GetNumChannels();
-	const bool partialResample = selLength == smp.nLength;
+	const bool partialResample = selLength != smp.nLength;
 
 	if(newTotalLength <= 1)
 		return 0;
