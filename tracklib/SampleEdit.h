@@ -15,6 +15,8 @@
 #include "FadeLaws.h"
 #include "../soundlib/Snd_defs.h"
 
+#include <functional>
+
 OPENMPT_NAMESPACE_BEGIN
 
 class CSoundFile;
@@ -91,6 +93,10 @@ bool ConvertTo16Bit(ModSample &smp, CSoundFile &sndFile);
 
 // Convert ping-pong loops to regular loops
 bool ConvertPingPongLoop(ModSample &smp, CSoundFile &sndFile, bool sustainLoop);
+
+// Resample using given resampling method (SRCMODE_DEFAULT = r8brain).
+// Returns end point of resampled data, or 0 on failure.
+SmpLength Resample(ModSample &smp, SmpLength start, SmpLength end, uint32 newRate, ResamplingMode mode, CSoundFile &sndFile, bool updatePatternCommands, const std::function<void()> &prepareSampleUndoFunc, const std::function<void()> &preparePatternUndoFunc);
 
 } // namespace SampleEdit
 

@@ -11,11 +11,16 @@
 #include "stdafx.h"
 #include "SampleEdit.h"
 #include "../soundlib/AudioCriticalSection.h"
-#include "../soundlib/Sndfile.h"
+#include "../soundlib/MixFuncTable.h"
 #include "../soundlib/modsmp_ctrl.h"
-#include "openmpt/soundbase/SampleConvert.hpp"
-#include "openmpt/soundbase/SampleDecode.hpp"
 #include "../soundlib/SampleCopy.h"
+#include "../soundlib/Sndfile.h"
+#include "openmpt/soundbase/Copy.hpp"
+#include "openmpt/soundbase/SampleConvert.hpp"
+#include "openmpt/soundbase/SampleConvertFixedPoint.hpp"
+#include "openmpt/soundbase/SampleDecode.hpp"
+
+#include "../include/r8brain/CDSPResampler.h"
 
 #if defined(MPT_ENABLE_ARCH_INTRINSICS_SSE2)
 #include <emmintrin.h>
@@ -548,9 +553,9 @@ bool AmplifySample(ModSample &smp, SmpLength start, SmpLength end, double amplif
 	start *= smp.GetNumChannels();
 	end *= smp.GetNumChannels();
 
-	if (smp.GetElementarySampleSize() == 2)
+	if(smp.GetElementarySampleSize() == 2)
 		ApplyAmplifyImpl(smp.sample16() + start, end - start, amplifyStart, amplifyEnd, isFadeIn, fadeLaw);
-	else if (smp.GetElementarySampleSize() == 1)
+	else if(smp.GetElementarySampleSize() == 1)
 		ApplyAmplifyImpl(smp.sample8() + start, end - start, amplifyStart, amplifyEnd, isFadeIn, fadeLaw);
 	else
 		return false;
@@ -809,6 +814,243 @@ bool ConvertPingPongLoop(ModSample &smp, CSoundFile &sndFile, bool sustainLoop)
 	smp.uFlags.reset(sustainLoop ? CHN_PINGPONGSUSTAIN : CHN_PINGPONGLOOP);
 	smp.PrecomputeLoops(sndFile, true);
 	return true;
+}
+
+
+// Resample using given resampling method (SRCMODE_DEFAULT = r8brain).
+// Returns end point of resampled data, or 0 on failure.
+SmpLength Resample(ModSample &smp, SmpLength start, SmpLength end, uint32 newRate, ResamplingMode mode, CSoundFile &sndFile, bool updatePatternCommands, const std::function<void()> &prepareSampleUndoFunc, const std::function<void()> &preparePatternUndoFunc)
+{
+	if(!smp.HasSampleData() || smp.uFlags[CHN_ADLIB] || start >= end)
+		return 0;
+
+	const uint32 oldRate = smp.GetSampleRate(sndFile.GetType());
+	if(newRate < 1 || oldRate < 1)
+		return 0;
+	
+	const SmpLength oldLength = smp.nLength;
+	const SmpLength selLength = (end - start);
+	const SmpLength newSelLength = Util::muldivr_unsigned(selLength, newRate, oldRate);
+	const SmpLength newSelEnd = start + newSelLength;
+	const SmpLength newTotalLength = smp.nLength - selLength + newSelLength;
+	const uint8 numChannels = smp.GetNumChannels();
+	const bool partialResample = selLength == smp.nLength;
+
+	if(newTotalLength <= 1)
+		return 0;
+
+	void *newSample = ModSample::AllocateSample(newTotalLength, smp.GetBytesPerSample());
+
+	if(newSample == nullptr)
+		return 0;
+	
+	// First, copy parts of the sample that are not affected by partial upsampling
+	const SmpLength bps = smp.GetBytesPerSample();
+	std::memcpy(newSample, smp.sampleb(), start * bps);
+	std::memcpy(static_cast<char *>(newSample) + newSelEnd * bps, smp.sampleb() + end * bps, (smp.nLength - end) * bps);
+
+	if(mode == SRCMODE_DEFAULT)
+	{
+		// Resample using r8brain
+		const SmpLength bufferSize = std::min(std::max(selLength, SmpLength(oldRate)), SmpLength(1024 * 1024));
+		std::vector<double> convBuffer(bufferSize);
+		r8b::CDSPResampler16 resampler(oldRate, newRate, bufferSize);
+
+		for(uint8 chn = 0; chn < numChannels; chn++)
+		{
+			if(chn != 0)
+				resampler.clear();
+
+			SmpLength readCount = selLength, writeCount = newSelLength;
+			SmpLength readOffset = start * numChannels + chn, writeOffset = readOffset;
+			SmpLength outLatency = newRate;
+			double *outBuffer, lastVal = 0.0;
+
+			{
+				// Pre-fill the resampler with the first sampling point.
+				// Otherwise, it will assume that all samples before the first sampling point are 0,
+				// which can lead to unwanted artefacts (ripples) if the sample doesn't start with a zero crossing.
+				double firstVal = 0.0;
+				switch(smp.GetElementarySampleSize())
+				{
+					case 1:
+						firstVal = SC::Convert<double, int8>()(smp.sample8()[readOffset]);
+						lastVal = SC::Convert<double, int8>()(smp.sample8()[readOffset + selLength - numChannels]);
+						break;
+					case 2:
+						firstVal = SC::Convert<double, int16>()(smp.sample16()[readOffset]);
+						lastVal = SC::Convert<double, int16>()(smp.sample16()[readOffset + selLength - numChannels]);
+						break;
+					default:
+						// When higher bit depth is added, feel free to also replace CDSPResampler16 by CDSPResampler24 above.
+						MPT_ASSERT_MSG(false, "Bit depth not implemented");
+				}
+
+				// 10ms or less would probably be enough, but we will pre-fill the buffer with exactly "oldRate" samples
+				// to prevent any further rounding errors when using smaller buffers or when dividing oldRate or newRate.
+				uint32 remain = oldRate;
+				for(SmpLength i = 0; i < bufferSize; i++)
+					convBuffer[i] = firstVal;
+				while(remain > 0)
+				{
+					uint32 procIn = std::min(remain, mpt::saturate_cast<uint32>(bufferSize));
+					SmpLength procCount = resampler.process(convBuffer.data(), procIn, outBuffer);
+					MPT_ASSERT(procCount <= outLatency);
+					LimitMax(procCount, outLatency);
+					outLatency -= procCount;
+					remain -= procIn;
+				}
+			}
+
+			// Now we can start with the actual resampling work...
+			while(writeCount > 0)
+			{
+				SmpLength smpCount = (SmpLength)convBuffer.size();
+				if(readCount != 0)
+				{
+					LimitMax(smpCount, readCount);
+
+					switch(smp.GetElementarySampleSize())
+					{
+						case 1:
+							CopySample<SC::ConversionChain<SC::Convert<double, int8>, SC::DecodeIdentity<int8>>>(convBuffer.data(), smpCount, 1, smp.sample8() + readOffset, smp.GetSampleSizeInBytes(), smp.GetNumChannels());
+							break;
+						case 2:
+							CopySample<SC::ConversionChain<SC::Convert<double, int16>, SC::DecodeIdentity<int16>>>(convBuffer.data(), smpCount, 1, smp.sample16() + readOffset, smp.GetSampleSizeInBytes(), smp.GetNumChannels());
+							break;
+					}
+					readOffset += smpCount * numChannels;
+					readCount -= smpCount;
+				} else
+				{
+					// Nothing to read, but still to write (compensate for r8brain's output latency)
+					for(SmpLength i = 0; i < smpCount; i++)
+						convBuffer[i] = lastVal;
+				}
+
+				SmpLength procCount = resampler.process(convBuffer.data(), smpCount, outBuffer);
+				const SmpLength procLatency = std::min(outLatency, procCount);
+				procCount = std::min(procCount - procLatency, writeCount);
+
+				switch(smp.GetElementarySampleSize())
+				{
+					case 1:
+						CopySample<SC::ConversionChain<SC::Convert<int8, double>, SC::DecodeIdentity<double>>>(static_cast<int8 *>(newSample) + writeOffset, procCount, smp.GetNumChannels(), outBuffer + procLatency, procCount * sizeof(double), 1);
+						break;
+					case 2:
+						CopySample<SC::ConversionChain<SC::Convert<int16, double>, SC::DecodeIdentity<double>>>(static_cast<int16 *>(newSample) + writeOffset, procCount, smp.GetNumChannels(), outBuffer + procLatency, procCount * sizeof(double), 1);
+						break;
+				}
+				writeOffset += procCount * numChannels;
+				writeCount -= procCount;
+				outLatency -= procLatency;
+			}
+		}
+	} else
+	{
+		// Resample using built-in filters
+		uint32 functionNdx = MixFuncTable::ResamplingModeToMixFlags(mode);
+		if(smp.uFlags[CHN_16BIT]) functionNdx |= MixFuncTable::ndx16Bit;
+		if(smp.uFlags[CHN_STEREO]) functionNdx |= MixFuncTable::ndxStereo;
+		ModChannel chn{};
+		chn.pCurrentSample = smp.samplev();
+		chn.increment = SamplePosition::Ratio(oldRate, newRate);
+		//chn.increment = SamplePosition(((static_cast<int64>(oldRate) << 32) + newRate / 2) / newRate);
+		chn.position.Set(start);
+		chn.leftVol = chn.rightVol = (1 << 8);
+		chn.nLength = smp.nLength;
+
+		SmpLength writeCount = newSelLength;
+		SmpLength writeOffset = start * smp.GetNumChannels();
+		while(writeCount > 0)
+		{
+			SmpLength procCount = std::min(static_cast<SmpLength>(MIXBUFFERSIZE), writeCount);
+			mixsample_t buffer[MIXBUFFERSIZE * 2];
+			MemsetZero(buffer);
+			MixFuncTable::Functions[functionNdx](chn, sndFile.m_Resampler, buffer, procCount);
+
+			for(uint8 c = 0; c < numChannels; c++)
+			{
+				switch(smp.GetElementarySampleSize())
+				{
+					case 1:
+						CopySample<SC::ConversionChain<SC::ConvertFixedPoint<int8, mixsample_t, 23>, SC::DecodeIdentity<mixsample_t>>>(static_cast<int8 *>(newSample) + writeOffset + c, procCount, smp.GetNumChannels(), buffer + c, sizeof(buffer), 2);
+						break;
+					case 2:
+						CopySample<SC::ConversionChain<SC::ConvertFixedPoint<int16, mixsample_t, 23>, SC::DecodeIdentity<mixsample_t>>>(static_cast<int16 *>(newSample) + writeOffset + c, procCount, smp.GetNumChannels(), buffer + c, sizeof(buffer), 2);
+						break;
+				}
+			}
+
+			writeCount -= procCount;
+			writeOffset += procCount * smp.GetNumChannels();
+		}
+	}
+
+	prepareSampleUndoFunc();
+
+	// Adjust loops and cues
+	const auto oldCues = smp.cues;
+	for(SmpLength &point : GetCuesAndLoops(smp))
+	{
+		if(point >= oldLength)
+			point = newTotalLength;
+		else if(point >= end)
+			point += newSelLength - selLength;
+		else if(point > start)
+			point = start + Util::muldivr_unsigned(point - start, newRate, oldRate);
+		LimitMax(point, newTotalLength);
+	}
+
+	if(updatePatternCommands)
+	{
+		const SAMPLEINDEX sample = static_cast<SAMPLEINDEX>(std::distance(&sndFile.GetSample(0), &smp));
+		bool patternUndoCreated = false;
+		sndFile.Patterns.ForEachModCommand([&](ModCommand &m)
+		{
+			if(m.command != CMD_OFFSET && m.command != CMD_REVERSEOFFSET && m.command != CMD_OFFSETPERCENTAGE)
+				return;
+			if(sndFile.GetSampleIndex(m.note, m.instr) != sample)
+				return;
+			SmpLength point = m.param * 256u;
+
+			if(m.command == CMD_OFFSETPERCENTAGE || (m.volcmd == VOLCMD_OFFSET && m.vol == 0))
+				point = Util::muldivr_unsigned(point, oldLength, 65536);
+			else if(m.volcmd == VOLCMD_OFFSET && m.vol <= std::size(oldCues))
+				point += oldCues[m.vol - 1];
+
+			if(point >= oldLength)
+				point = newTotalLength;
+			else if(point >= end)
+				point += newSelLength - selLength;
+			else if(point > start)
+				point = start + Util::muldivr_unsigned(point - start, newRate, oldRate);
+			LimitMax(point, newTotalLength);
+
+			if(m.command == CMD_OFFSETPERCENTAGE || (m.volcmd == VOLCMD_OFFSET && m.vol == 0))
+				point = Util::muldivr_unsigned(point, 65536, newTotalLength);
+			else if(m.volcmd == VOLCMD_OFFSET && m.vol <= std::size(smp.cues))
+				point -= smp.cues[m.vol - 1];
+			if(!patternUndoCreated)
+			{
+				patternUndoCreated = true;
+				preparePatternUndoFunc();
+			}
+			m.param = mpt::saturate_cast<ModCommand::PARAM>(point / 256u);
+		});
+	}
+
+	if(!partialResample && sndFile.GetType() != MOD_TYPE_MOD)
+	{
+		smp.nC5Speed = newRate;
+		smp.FrequencyToTranspose();
+	}
+
+	ctrlSmp::ReplaceSample(smp, newSample, newTotalLength, sndFile);
+	// Update loop wrap-around buffer
+	smp.PrecomputeLoops(sndFile);
+
+	return newSelEnd;
 }
 
 } // namespace SampleEdit

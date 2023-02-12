@@ -35,14 +35,9 @@
 #include "../common/mptFileIO.h"
 #include "../common/FileReader.h"
 #include "openmpt/soundbase/Copy.hpp"
-#include "openmpt/soundbase/SampleConvert.hpp"
-#include "openmpt/soundbase/SampleDecode.hpp"
 #include "../soundlib/SampleCopy.h"
 #include "FileDialog.h"
 #include "ProgressDialog.h"
-#include "../include/r8brain/CDSPResampler.h"
-#include "../soundlib/MixFuncTable.h"
-#include "mpt/audio/span.hpp"
 #include "mpt/parse/parse.hpp"
 #include "mpt/string/utility.hpp"
 
@@ -1859,234 +1854,32 @@ void CCtrlSamples::ApplyResample(SAMPLEINDEX smp, uint32 newRate, ResamplingMode
 		EndWaitCursor();
 		return;
 	}
-	const SmpLength oldLength = sample.nLength;
-	const SmpLength selLength = (selection.nEnd - selection.nStart);
-	const SmpLength newSelLength = Util::muldivr_unsigned(selLength, newRate, oldRate);
-	const SmpLength newSelEnd = selection.nStart + newSelLength;
-	const SmpLength newTotalLength = sample.nLength - selLength + newSelLength;
-	const uint8 numChannels = sample.GetNumChannels();
 
-	if(newTotalLength <= 1)
+	auto prepareSampleUndoFunc = [&]()
+	{
+		m_modDoc.GetSampleUndo().PrepareUndo(smp, sundo_replace, (newRate > oldRate) ? "Upsample" : "Downsample");
+	};
+	auto preparePatternUndoFunc = [&]()
+	{
+		m_modDoc.PrepareUndoForAllPatterns(false, "Resample (Adjust Offsets)");
+	};
+	SmpLength newSelEnd = SampleEdit::Resample(sample, selection.nStart, selection.nEnd, newRate, mode, m_sndFile, updatePatternCommands, prepareSampleUndoFunc, preparePatternUndoFunc);
+	if(!newSelEnd)
 	{
 		MessageBeep(MB_ICONWARNING);
 		EndWaitCursor();
 		return;
 	}
 
-	void *newSample = ModSample::AllocateSample(newTotalLength, sample.GetBytesPerSample());
-
-	if(newSample != nullptr)
+	SetModified(smp, SampleHint().Info().Data(), smp == m_nSample, true);
+	if(updatePatternCommands)
 	{
-		// First, copy parts of the sample that are not affected by partial upsampling
-		const SmpLength bps = sample.GetBytesPerSample();
-		std::memcpy(newSample, sample.sampleb(), selection.nStart * bps);
-		std::memcpy(static_cast<char *>(newSample) + newSelEnd * bps, sample.sampleb() + selection.nEnd * bps, (sample.nLength - selection.nEnd) * bps);
+		m_modDoc.UpdateAllViews(PatternHint().Data());
+	}
 
-		if(mode == SRCMODE_DEFAULT)
-		{
-			// Resample using r8brain
-			const SmpLength bufferSize = std::min(std::max(selLength, SmpLength(oldRate)), SmpLength(1024 * 1024));
-			std::vector<double> convBuffer(bufferSize);
-			r8b::CDSPResampler16 resampler(oldRate, newRate, bufferSize);
-
-			for(uint8 chn = 0; chn < numChannels; chn++)
-			{
-				if(chn != 0) resampler.clear();
-
-				SmpLength readCount = selLength, writeCount = newSelLength;
-				SmpLength readOffset = selection.nStart * numChannels + chn, writeOffset = readOffset;
-				SmpLength outLatency = newRate;
-				double *outBuffer, lastVal = 0.0;
-
-				{
-					// Pre-fill the resampler with the first sampling point.
-					// Otherwise, it will assume that all samples before the first sampling point are 0,
-					// which can lead to unwanted artefacts (ripples) if the sample doesn't start with a zero crossing.
-					double firstVal = 0.0;
-					switch(sample.GetElementarySampleSize())
-					{
-					case 1:
-						firstVal = SC::Convert<double, int8>()(sample.sample8()[readOffset]);
-						lastVal = SC::Convert<double, int8>()(sample.sample8()[readOffset + selLength - numChannels]);
-						break;
-					case 2:
-						firstVal = SC::Convert<double, int16>()(sample.sample16()[readOffset]);
-						lastVal = SC::Convert<double, int16>()(sample.sample16()[readOffset + selLength - numChannels]);
-						break;
-					default:
-						// When higher bit depth is added, feel free to also replace CDSPResampler16 by CDSPResampler24 above.
-						MPT_ASSERT_MSG(false, "Bit depth not implemented");
-					}
-
-					// 10ms or less would probably be enough, but we will pre-fill the buffer with exactly "oldRate" samples
-					// to prevent any further rounding errors when using smaller buffers or when dividing oldRate or newRate.
-					uint32 remain = oldRate;
-					for(SmpLength i = 0; i < bufferSize; i++) convBuffer[i] = firstVal;
-					while(remain > 0)
-					{
-						uint32 procIn = std::min(remain, mpt::saturate_cast<uint32>(bufferSize));
-						SmpLength procCount = resampler.process(convBuffer.data(), procIn, outBuffer);
-						MPT_ASSERT(procCount <= outLatency);
-						LimitMax(procCount, outLatency);
-						outLatency -= procCount;
-						remain -= procIn;
-					}
-				}
-
-				// Now we can start with the actual resampling work...
-				while(writeCount > 0)
-				{
-					SmpLength smpCount = (SmpLength)convBuffer.size();
-					if(readCount != 0)
-					{
-						LimitMax(smpCount, readCount);
-
-						switch(sample.GetElementarySampleSize())
-						{
-						case 1:
-							CopySample<SC::ConversionChain<SC::Convert<double, int8>, SC::DecodeIdentity<int8> > >(convBuffer.data(), smpCount, 1, sample.sample8() + readOffset, sample.GetSampleSizeInBytes(), sample.GetNumChannels());
-							break;
-						case 2:
-							CopySample<SC::ConversionChain<SC::Convert<double, int16>, SC::DecodeIdentity<int16> > >(convBuffer.data(), smpCount, 1, sample.sample16() + readOffset, sample.GetSampleSizeInBytes(), sample.GetNumChannels());
-							break;
-						}
-						readOffset += smpCount * numChannels;
-						readCount -= smpCount;
-					} else
-					{
-						// Nothing to read, but still to write (compensate for r8brain's output latency)
-						for(SmpLength i = 0; i < smpCount; i++) convBuffer[i] = lastVal;
-					}
-
-					SmpLength procCount = resampler.process(convBuffer.data(), smpCount, outBuffer);
-					const SmpLength procLatency = std::min(outLatency, procCount);
-					procCount = std::min(procCount- procLatency, writeCount);
-
-					switch(sample.GetElementarySampleSize())
-					{
-					case 1:
-						CopySample<SC::ConversionChain<SC::Convert<int8, double>, SC::DecodeIdentity<double> > >(static_cast<int8 *>(newSample) + writeOffset, procCount, sample.GetNumChannels(), outBuffer + procLatency, procCount * sizeof(double), 1);
-						break;
-					case 2:
-						CopySample<SC::ConversionChain<SC::Convert<int16, double>, SC::DecodeIdentity<double> > >(static_cast<int16 *>(newSample) + writeOffset, procCount, sample.GetNumChannels(), outBuffer + procLatency, procCount * sizeof(double), 1);
-						break;
-					}
-					writeOffset += procCount * numChannels;
-					writeCount -= procCount;
-					outLatency -= procLatency;
-				}
-			}
-		} else
-		{
-			// Resample using built-in filters
-			uint32 functionNdx = MixFuncTable::ResamplingModeToMixFlags(mode);
-			if(sample.uFlags[CHN_16BIT]) functionNdx |= MixFuncTable::ndx16Bit;
-			if(sample.uFlags[CHN_STEREO]) functionNdx |= MixFuncTable::ndxStereo;
-			ModChannel chn{};
-			chn.pCurrentSample = sample.samplev();
-			chn.increment = SamplePosition::Ratio(oldRate, newRate);
-			chn.position.Set(selection.nStart);
-			chn.leftVol = chn.rightVol = (1 << 8);
-			chn.nLength = sample.nLength;
-
-			SmpLength writeCount = newSelLength;
-			SmpLength writeOffset = selection.nStart * sample.GetNumChannels();
-			while(writeCount > 0)
-			{
-				SmpLength procCount = std::min(static_cast<SmpLength>(MIXBUFFERSIZE), writeCount);
-				mixsample_t buffer[MIXBUFFERSIZE * 2];
-				MemsetZero(buffer);
-				MixFuncTable::Functions[functionNdx](chn, m_sndFile.m_Resampler, buffer, procCount);
-
-				for(uint8 c = 0; c < numChannels; c++)
-				{
-					switch(sample.GetElementarySampleSize())
-					{
-					case 1:
-						CopySample<SC::ConversionChain<SC::ConvertFixedPoint<int8, mixsample_t, 23>, SC::DecodeIdentity<mixsample_t> > >(static_cast<int8 *>(newSample) + writeOffset + c, procCount, sample.GetNumChannels(), buffer + c, sizeof(buffer), 2);
-						break;
-					case 2:
-						CopySample<SC::ConversionChain<SC::ConvertFixedPoint<int16, mixsample_t, 23>, SC::DecodeIdentity<mixsample_t> > >(static_cast<int16 *>(newSample) + writeOffset + c, procCount, sample.GetNumChannels(), buffer + c, sizeof(buffer), 2);
-						break;
-					}
-				}
-
-				writeCount -= procCount;
-				writeOffset += procCount * sample.GetNumChannels();
-			}
-		}
-
-		m_modDoc.GetSampleUndo().PrepareUndo(smp, sundo_replace, (newRate > oldRate) ? "Upsample" : "Downsample");
-
-		// Adjust loops and cues
-		const auto oldCues = sample.cues;
-		for(SmpLength &point : SampleEdit::GetCuesAndLoops(sample))
-		{
-			if(point >= oldLength)
-				point = newTotalLength;
-			else if(point >= selection.nEnd)
-				point += newSelLength - selLength;
-			else if(point > selection.nStart)
-				point = selection.nStart + Util::muldivr_unsigned(point - selection.nStart, newRate, oldRate);
-			LimitMax(point, newTotalLength);
-		}
-
-		if(updatePatternCommands)
-		{
-			bool patternUndoCreated = false;
-			m_sndFile.Patterns.ForEachModCommand([&](ModCommand &m)
-			{
-				if(m.command != CMD_OFFSET && m.command != CMD_REVERSEOFFSET && m.command != CMD_OFFSETPERCENTAGE)
-					return;
-				if(m_sndFile.GetSampleIndex(m.note, m.instr) != smp)
-					return;
-				SmpLength point = m.param * 256u;
-			
-				if(m.command == CMD_OFFSETPERCENTAGE || (m.volcmd == VOLCMD_OFFSET && m.vol == 0))
-					point = Util::muldivr_unsigned(point, oldLength, 65536);
-				else if(m.volcmd == VOLCMD_OFFSET && m.vol <= std::size(oldCues))
-					point += oldCues[m.vol - 1];
-
-				if(point >= oldLength)
-					point = newTotalLength;
-				else if (point >= selection.nEnd)
-					point += newSelLength - selLength;
-				else if (point > selection.nStart)
-					point = selection.nStart + Util::muldivr_unsigned(point - selection.nStart, newRate, oldRate);
-				LimitMax(point, newTotalLength);
-
-				if(m.command == CMD_OFFSETPERCENTAGE || (m.volcmd == VOLCMD_OFFSET && m.vol == 0))
-					point = Util::muldivr_unsigned(point, 65536, newTotalLength);
-				else if(m.volcmd == VOLCMD_OFFSET && m.vol <= std::size(sample.cues))
-					point -= sample.cues[m.vol - 1];
-				if(!patternUndoCreated)
-				{
-					patternUndoCreated = true;
-					m_modDoc.PrepareUndoForAllPatterns(false, "Resample (Adjust Offsets)");
-				}
-				m.param = mpt::saturate_cast<ModCommand::PARAM>(point / 256u);
-			});
-		}
-
-		if(!selection.selectionActive)
-		{
-			if(m_sndFile.GetType() != MOD_TYPE_MOD)
-			{
-				sample.nC5Speed = newRate;
-				sample.FrequencyToTranspose();
-			}
-		}
-
-		ctrlSmp::ReplaceSample(sample, newSample, newTotalLength, m_sndFile);
-		// Update loop wrap-around buffer
-		sample.PrecomputeLoops(m_sndFile);
-
-		SetModified(smp, SampleHint().Info().Data(), smp == m_nSample, true);
-
-		if(selection.selectionActive && !ignoreSelection)
-		{
-			SetSelectionPoints(selection.nStart, newSelEnd);
-		}
+	if(selection.selectionActive && !ignoreSelection)
+	{
+		SetSelectionPoints(selection.nStart, newSelEnd);
 	}
 
 	EndWaitCursor();
