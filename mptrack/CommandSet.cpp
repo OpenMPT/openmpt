@@ -2406,27 +2406,25 @@ bool CCommandSet::QuickChange_SetEffects(const CModSpecifications &modSpecs)
 	}
 	m_oldSpecs = &modSpecs;
 
-	int choices = 0;
 	KeyCombination kc(kCtxViewPatternsFX, ModNone, 0, kKeyEventDown | kKeyEventRepeat);
 
 	for(CommandID cmd = kcSetFXStart; cmd <= kcSetFXEnd; cmd = static_cast<CommandID>(cmd + 1))
 	{
-		// Remove all old choices
-		choices = GetKeyListSize(cmd);
-		for(int p = choices; p >= 0; --p)
-		{
-			Remove(p, cmd);
-		}
-
 		char effect = modSpecs.GetEffectLetter(static_cast<ModCommand::COMMAND>(cmd - kcSetFXStart + 1));
 		if(effect >= 'A' && effect <= 'Z')
 		{
 			// VkKeyScanEx needs lowercase letters
 			effect = effect - 'A' + 'a';
-		} else if(effect < '0' || effect > '9')
+		} else if(effect != '?' && (effect < '0' || effect > '9'))
 		{
-			// Don't map effects that use "weird" effect letters (such as # or \)
-			effect = '?';
+			// Don't map effects that use non-alphanumeric effect letters (such as # or \), they are set up manually instead
+			continue;
+		}
+
+		// Remove all old choices
+		for(int p = GetKeyListSize(cmd) - 1; p >= 0; --p)
+		{
+			Remove(p, cmd);
 		}
 
 		if(effect != '?')
