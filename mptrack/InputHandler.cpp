@@ -41,20 +41,15 @@ CInputHandler::CInputHandler(CWnd *mainframe)
 	// 4. If there were no keybinding setting already, create a keybinding file to default location
 	//    and set its path to settings.
 
-	if (noExistingKbdFileSetting || !m_activeCommandSet->LoadFile(TrackerSettings::Instance().m_szKbdFile))
+	if(noExistingKbdFileSetting || !m_activeCommandSet->LoadFile(TrackerSettings::Instance().m_szKbdFile))
 	{
-		if (noExistingKbdFileSetting)
-			TrackerSettings::Instance().m_szKbdFile = defaultPath;
-		bool success = false;
-		if (mpt::native_fs{}.is_file(defaultPath))
-			success = m_activeCommandSet->LoadFile(defaultPath);
-		if (!success)
+		if(!mpt::native_fs{}.is_file(defaultPath) || !m_activeCommandSet->LoadFile(defaultPath))
 		{
 			// Load keybindings from resources.
 			MPT_LOG_GLOBAL(LogDebug, "InputHandler", U_("Loading keybindings from resources\n"));
 			m_activeCommandSet->LoadDefaultKeymap();
 			if (noExistingKbdFileSetting)
-				m_activeCommandSet->SaveFile(TrackerSettings::Instance().m_szKbdFile);
+				m_activeCommandSet->SaveFile(defaultPath);
 		}
 	}
 	// We will only overwrite the default Keybindings.mkb file from now on.
@@ -142,6 +137,8 @@ CommandID CInputHandler::KeyEvent(const InputTargetContext context, const Keyboa
 {
 	if(InterceptSpecialKeys(event.key, event.flags, false))
 		return kcDummyShortcut;
+	if(IsKeyPressHandledByTextBox(event.key, ::GetFocus()))
+		return kcNull;
 	KeyMapRange cmd = m_keyMap.equal_range(KeyCombination(context, m_modifierMask, event.key, event.keyEventType));
 
 	if(pSourceWnd == nullptr)
