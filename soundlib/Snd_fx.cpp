@@ -2772,7 +2772,10 @@ bool CSoundFile::ProcessEffects()
 				if(oldSample != nullptr)
 				{
 					if(!oldSample->uFlags[SMP_NODEFAULTVOLUME] && (GetType() != MOD_TYPE_S3M || oldSample->HasSampleData()))
+					{
 						chn.nVolume = oldSample->nVolume;
+						chn.dwFlags.set(CHN_FASTVOLRAMP);
+					}
 					if(reloadSampleSettings)
 					{
 						// Also reload panning
