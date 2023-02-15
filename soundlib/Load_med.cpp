@@ -392,7 +392,7 @@ static TEMPO MMDTempoToBPM(uint32 tempo, bool is8Ch, bool bpmMode, uint8 rowsPer
 }
 
 
-static void ConvertMEDEffect(ModCommand &m, const uint8 command, const bool is8ch, const bool bpmMode, const uint8 rowsPerBeat, const bool volHex)
+static std::pair<EffectCommand, ModCommand::PARAM> ConvertMEDEffect(ModCommand &m, const uint8 command, const bool is8ch, const bool bpmMode, const uint8 rowsPerBeat, const bool volHex)
 {
 	m.command = CMD_NONE;
 	switch(command)
@@ -432,10 +432,22 @@ static void ConvertMEDEffect(ModCommand &m, const uint8 command, const bool is8c
 		} else if(m.param <= 0xF0)
 		{
 			m.command = CMD_TEMPO;
-			if(m.param < 0x03)  // This appears to be a bug in OctaMED which is not emulated in MED Soundstudio on Windows.
+			if(m.param < 0x03)
+			{
+				// This appears to be a bug in OctaMED which is not emulated in MED Soundstudio on Windows.
 				m.param = 0x70;
-			else
-				m.param = mpt::saturate_round<ModCommand::PARAM>(MMDTempoToBPM(m.param, is8ch, bpmMode, rowsPerBeat).ToDouble());
+			} else
+			{
+				uint16 tempo = mpt::saturate_round<uint16>(MMDTempoToBPM(m.param, is8ch, bpmMode, rowsPerBeat).ToDouble());
+				if(tempo <= Util::MaxValueOfType(m.param))
+				{
+					m.param = static_cast<ModCommand::PARAM>(tempo);
+				} else
+				{
+					m.param = static_cast<ModCommand::PARAM>(tempo >> 8);
+					return {CMD_XPARAM, static_cast<ModCommand::PARAM>(tempo & 0xFF)};
+				}
+			}
 #ifdef MODPLUG_TRACKER
 			if(m.param < 0x20)
 				m.param = 0x20;
@@ -587,6 +599,7 @@ static void ConvertMEDEffect(ModCommand &m, const uint8 command, const bool is8c
 			m.command = CMD_NONE;
 		break;
 	}
+	return std::make_pair(CMD_NONE, ModCommand::PARAM(0));
 }
 
 #ifdef MPT_WITH_VST
@@ -1346,6 +1359,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 				ModCommand *m = pattern.GetpModCommand(row, 0);
 				for(CHANNELINDEX chn = 0; chn < numTracks; chn++, m++)
 				{
+					const auto oldCmd = std::make_pair(m->command, m->param);
 					int note = NOTE_NONE;
 					uint8 cmd = 0;
 					if(version < 1)
@@ -1379,7 +1393,23 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 
 					if(note >= NOTE_MIN && note <= NOTE_MAX)
 						m->note = static_cast<ModCommand::NOTE>(note);
-					ConvertMEDEffect(*m, cmd, is8Ch, bpmMode, rowsPerBeat, volHex);
+					const auto extraCmd = ConvertMEDEffect(*m, cmd, is8Ch, bpmMode, rowsPerBeat, volHex);
+
+					if(oldCmd.first == CMD_XPARAM)
+					{
+						// Restore X-Param if it was overwritten by an empty effect, or restrict to 8-bit value if this cell was overwritten with a "useful" effect
+						if(m->command == CMD_NONE)
+							m->SetEffectCommand(oldCmd);
+						else if(row > 0)
+							pattern.GetpModCommand(row - 1, chn)->param = Util::MaxValueOfType(m->param);
+					}
+					if(extraCmd.first != CMD_NONE)
+					{
+						if(row < (numRows - 1))
+							pattern.GetpModCommand(row + 1, chn)->SetEffectCommand(extraCmd);
+						else
+							m->param = Util::MaxValueOfType(m->param);  // No space :(
+					}
 				}
 			}
 		}
