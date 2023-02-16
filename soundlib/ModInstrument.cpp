@@ -312,13 +312,23 @@ std::map<SAMPLEINDEX, int8> ModInstrument::CanConvertToDefaultNoteMap() const
 	{
 		if(Keyboard[i] == 0)
 			continue;
-		if(!NoteMap[i] || NoteMap[i] == (i + 1))
+		if(NoteMap[i] == NOTE_NONE)
 			continue;
 
 		const int8 relativeNote = static_cast<int8>(NoteMap[i] - (i + NOTE_MIN));
 		if(transposeMap.count(Keyboard[i]) && transposeMap[Keyboard[i]] != relativeNote)
 			return {};
 		transposeMap[Keyboard[i]] = relativeNote;
+	}
+	// Remove all samples that wouldn't be transposed.
+	// They were previously inserted into the map to catch the case where a specific sample's
+	// map would start with a transpose value of 0 but end with a different value.
+	for(auto it = transposeMap.begin(); it != transposeMap.end();)
+	{
+		if(it->second == 0)
+			it = transposeMap.erase(it);
+		else
+			it++;
 	}
 	return transposeMap;
 }
