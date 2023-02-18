@@ -955,6 +955,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					chn.nNewNote = chn.nLastNote;
 					if(chn.nNewIns != 0) InstrumentChange(chn, chn.nNewIns, porta);
 					NoteChange(chn, m.note, porta);
+					HandleNoteChangeFilter(chn);
 					HandleDigiSamplePlayDirection(playState, nChn);
 					memory.chnSettings[nChn].incChanged = true;
 
