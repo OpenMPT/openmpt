@@ -2280,11 +2280,15 @@ void CViewPattern::OnCursorPaste()
 	PrepareUndo(m_Cursor, m_Cursor, "Cursor Paste");
 	PatternCursor::Columns column = m_Cursor.GetColumnType();
 
+	CSoundFile &sndFile = *GetSoundFile();
+	const auto &specs = sndFile.GetModSpecifications();
 	ModCommand &m = GetCursorCommand();
 
 	switch(column)
 	{
 	case PatternCursor::noteColumn:
+		if(!specs.HasNote(m_cmdOld.note))
+			break;
 		m.note = m_cmdOld.note;
 		[[fallthrough]];
 	case PatternCursor::instrColumn:
@@ -2292,12 +2296,18 @@ void CViewPattern::OnCursorPaste()
 		break;
 
 	case PatternCursor::volumeColumn:
+		if(!specs.HasVolCommand(m_cmdOld.volcmd))
+			break;
 		m.vol = m_cmdOld.vol;
 		m.volcmd = m_cmdOld.volcmd;
 		break;
 
 	case PatternCursor::effectColumn:
 	case PatternCursor::paramColumn:
+		if(!specs.HasCommand(m_cmdOld.command))
+			break;
+		if(m_cmdOld.command == CMD_DUMMY && sndFile.GetType() != MOD_TYPE_XM)
+			break;
 		m.command = m_cmdOld.command;
 		m.param = m_cmdOld.param;
 		break;
@@ -2310,7 +2320,7 @@ void CViewPattern::OnCursorPaste()
 		PatternStep(GetCurrentRow());
 	}
 
-	if(GetSoundFile()->IsPaused() || !m_Status[psFollowSong] || (CMainFrame::GetMainFrame() && CMainFrame::GetMainFrame()->GetFollowSong(GetDocument()) != m_hWnd))
+	if(sndFile.IsPaused() || !m_Status[psFollowSong] || (CMainFrame::GetMainFrame() && CMainFrame::GetMainFrame()->GetFollowSong(GetDocument()) != m_hWnd))
 	{
 		InvalidateCell(m_Cursor);
 		SetCurrentRow(GetCurrentRow() + m_nSpacing);
