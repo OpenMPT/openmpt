@@ -2415,6 +2415,10 @@ bool CCommandSet::QuickChange_SetEffects(const CModSpecifications &modSpecs)
 		{
 			// VkKeyScanEx needs lowercase letters
 			effect = effect - 'A' + 'a';
+		} else if(effect == ' ')
+		{
+			// We don't want to enter "empty" effects in IT / S3M
+			effect = '?';
 		} else if(effect != '?' && (effect < '0' || effect > '9'))
 		{
 			// Don't map effects that use non-alphanumeric effect letters (such as # or \), they are set up manually instead
