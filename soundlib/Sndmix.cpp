@@ -2001,6 +2001,44 @@ void CSoundFile::ProcessRamping(ModChannel &chn) const
 }
 
 
+int CSoundFile::HandleNoteChangeFilter(ModChannel &chn) const
+{
+	int cutoff = -1;
+	if(!chn.triggerNote)
+		return cutoff;
+
+	bool useFilter = !m_SongFlags[SONG_MPTFILTERMODE];
+	if(const ModInstrument *pIns = chn.pModInstrument; pIns != nullptr)
+	{
+		if(pIns->IsResonanceEnabled())
+		{
+			chn.nResonance = pIns->GetResonance();
+			useFilter = true;
+		}
+		if(pIns->IsCutoffEnabled())
+		{
+			chn.nCutOff = pIns->GetCutoff();
+			useFilter = true;
+		}
+		if(useFilter && (pIns->filterMode != FilterMode::Unchanged))
+		{
+			chn.nFilterMode = pIns->filterMode;
+		}
+	} else
+	{
+		chn.nVolSwing = chn.nPanSwing = 0;
+		chn.nCutSwing = chn.nResSwing = 0;
+	}
+	if((chn.nCutOff < 0x7F || m_playBehaviour[kITFilterBehaviour]) && useFilter)
+	{
+		cutoff = SetupChannelFilter(chn, true);
+		if(cutoff >= 0)
+			cutoff = chn.nCutOff / 2u;
+	}
+	return cutoff;
+}
+
+
 // Returns channel increment and frequency with FREQ_FRACBITS fractional bits
 std::pair<SamplePosition, uint32> CSoundFile::GetChannelIncrement(const ModChannel &chn, uint32 period, int periodFrac) const
 {
@@ -2267,38 +2305,7 @@ bool CSoundFile::ReadNote()
 		}
 
 		// Setup Initial Filter for this note
-		int cutoff = -1;
-		if(chn.triggerNote)
-		{
-			bool useFilter = !m_SongFlags[SONG_MPTFILTERMODE];
-			if(pIns)
-			{
-				if(pIns->IsResonanceEnabled())
-				{
-					chn.nResonance = pIns->GetResonance();
-					useFilter = true;
-				}
-				if(pIns->IsCutoffEnabled())
-				{
-					chn.nCutOff = pIns->GetCutoff();
-					useFilter = true;
-				}
-				if(useFilter && (pIns->filterMode != FilterMode::Unchanged))
-				{
-					chn.nFilterMode = pIns->filterMode;
-				}
-			} else
-			{
-				chn.nVolSwing = chn.nPanSwing = 0;
-				chn.nCutSwing = chn.nResSwing = 0;
-			}
-			if((chn.nCutOff < 0x7F || m_playBehaviour[kITFilterBehaviour]) && useFilter)
-			{
-				cutoff = SetupChannelFilter(chn, true);
-				if(cutoff >= 0)
-					cutoff = chn.nCutOff / 2u;
-			}
-		}
+		int cutoff = HandleNoteChangeFilter(chn);
 
 		// Now that all relevant envelopes etc. have been processed, we can parse the MIDI macro data.
 		ProcessMacroOnChannel(nChn);

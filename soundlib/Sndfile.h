@@ -1144,6 +1144,7 @@ protected:
 	void SendMIDINote(CHANNELINDEX chn, uint16 note, uint16 volume);
 
 	int SetupChannelFilter(ModChannel &chn, bool bReset, int envModifier = 256) const;
+	int HandleNoteChangeFilter(ModChannel &chn) const;
 
 	// Low-Level effect processing
 	void DoFreqSlide(ModChannel &chn, int32 &period, int32 amount, bool isTonePorta = false) const;
