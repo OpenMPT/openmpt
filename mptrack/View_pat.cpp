@@ -2277,12 +2277,12 @@ void CViewPattern::OnCursorPaste()
 		return;
 	}
 
-	PrepareUndo(m_Cursor, m_Cursor, "Cursor Paste");
 	PatternCursor::Columns column = m_Cursor.GetColumnType();
 
 	CSoundFile &sndFile = *GetSoundFile();
 	const auto &specs = sndFile.GetModSpecifications();
-	ModCommand &m = GetCursorCommand();
+	ModCommand &mTarget = GetCursorCommand();
+	ModCommand m = mTarget;
 
 	switch(column)
 	{
@@ -2313,7 +2313,12 @@ void CViewPattern::OnCursorPaste()
 		break;
 	}
 
-	SetModified(false);
+	if(m != mTarget)
+	{
+		PrepareUndo(m_Cursor, m_Cursor, "Cursor Paste");
+		mTarget = m;
+		SetModified(false);
+	}
 	// Preview Row
 	if((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_PLAYEDITROW) && !IsLiveRecord())
 	{
