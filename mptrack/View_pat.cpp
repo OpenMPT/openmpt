@@ -2007,7 +2007,8 @@ bool CViewPattern::InsertOrDeleteRows(CHANNELINDEX firstChn, CHANNELINDEX lastCh
 	}
 
 	SetModified();
-	SetCurrentPattern(firstNewPattern);
+	if(firstNewPattern != m_nPattern)
+		SetCurrentPattern(firstNewPattern);
 	InvalidatePattern();
 
 	SetCursorPosition(selection.GetUpperLeft());
