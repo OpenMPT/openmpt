@@ -2616,7 +2616,7 @@ bool CSoundFile::ReadIFFSample(SAMPLEINDEX nSample, FileReader &file)
 
 		// While this is an Amiga format, the 16SV version appears to be only used on PC, and only with little-endian sample data.
 		if(bytesPerSample == 2)
-			sampleIO = SampleIO(SampleIO::_16bit, SampleIO::mono, SampleIO::littleEndian, SampleIO::signedPCM);
+			sampleIO |= SampleIO::_16bit;
 		if(numChannels == 2)
 			sampleIO |= SampleIO::stereoSplit;
 
