@@ -2216,7 +2216,7 @@ void CModTree::FilterInstrumentLibrary(mpt::winstring filter, const TCHAR *selec
 	if(selectedTreeItem)
 	{
 		SelectItem(selectedTreeItem);
-		EnsureVisible(selectedTreeItem);
+		PostMessage(TVM_ENSUREVISIBLE, 0, reinterpret_cast<LPARAM>(selectedTreeItem));  // For some reason this doesn't work properly if the message is sent instead
 	}
 }
 
