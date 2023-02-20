@@ -205,6 +205,11 @@ public:
 	// Returns true if the cell contains an effect command that may affect the global state of the module.
 	bool IsGlobalCommand() const { return IsGlobalCommand(command, param); }
 	static bool IsGlobalCommand(COMMAND command, PARAM param);
+	// Returns true if the cell contains an effect command whose parameter is divided into two nibbles
+	bool CommandHasTwoNibbles() const { return CommandHasTwoNibbles(command); }
+	static bool CommandHasTwoNibbles(COMMAND command);
+	// Returns true if the two commands' parameters have the same 
+	bool IsNormalVolumeSlide() const { return command == CMD_VOLUMESLIDE || command == CMD_VIBRATOVOL || command == CMD_TONEPORTAVOL; }
 
 	// Returns true if the note is inside the Amiga frequency range
 	bool IsAmigaNote() const { return IsAmigaNote(note); }

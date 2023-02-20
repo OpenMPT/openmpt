@@ -2462,7 +2462,7 @@ void CViewPattern::Interpolate(PatternCursor::Columns type)
 			// Allow interpolation between same effect, or anything if it's a PC note.
 			sweepSelection = SweepPattern(
 				[](const ModCommand &start) { return start.command != CMD_NONE || start.IsPcNote(); },
-				[](const ModCommand &start, const ModCommand &end) { return (end.command == start.command || start.IsPcNote()) && (!start.IsPcNote() || end.IsPcNote()); });
+				[](const ModCommand &start, const ModCommand &end) { return (end.command == start.command || (start.IsNormalVolumeSlide() && end.IsNormalVolumeSlide()) || start.IsPcNote()) && (!start.IsPcNote() || end.IsPcNote()); });
 			break;
 		}
 
@@ -2504,7 +2504,7 @@ void CViewPattern::Interpolate(PatternCursor::Columns type)
 		}
 
 		bool doPCinterpolation = false;
-
+		bool isVolSlide = false;
 		int vsrc, vdest, vcmd = 0, verr = 0, distance = row1 - row0;
 
 		const ModCommand srcCmd = *sndFile->Patterns[m_nPattern].GetpModCommand(row0, nchn);
@@ -2584,10 +2584,12 @@ void CViewPattern::Interpolate(PatternCursor::Columns type)
 				vsrc = srcCmd.param;
 				vdest = destCmd.param;
 				vcmd = srcCmd.command;
+				isVolSlide = srcCmd.IsNormalVolumeSlide();
 				if(srcCmd.command == CMD_NONE)
 				{
 					vsrc = vdest;
 					vcmd = destCmd.command;
+					isVolSlide = destCmd.IsNormalVolumeSlide();
 				} else if(destCmd.command == CMD_NONE)
 				{
 					vdest = vsrc;
@@ -2651,11 +2653,23 @@ void CViewPattern::Interpolate(PatternCursor::Columns type)
 					pcmd->SetValueEffectCol(val);
 				} else if(!pcmd->IsPcNote())
 				{
-					if((pcmd->command == CMD_NONE) || (pcmd->command == vcmd))
+					if((pcmd->command == CMD_NONE) || (pcmd->command == vcmd) || (pcmd->IsNormalVolumeSlide() && isVolSlide))
 					{
-						int val = vsrc + ((vdest - vsrc) * i + verr) / distance;
+						if(!isVolSlide || !pcmd->IsNormalVolumeSlide())
+							pcmd->command = static_cast<ModCommand::COMMAND>(vcmd);
+						int val;
+						if(pcmd->CommandHasTwoNibbles())
+						{
+							const int srcLo = (vsrc & 0x0F), destLo = (vdest & 0x0F);
+							const int srcHi = (vsrc >> 4), destHi = (vdest >> 4);
+							const int valLo = srcLo + ((destLo - srcLo) * i + verr) / distance;
+							const int valHi = srcHi + ((destHi - srcHi) * i + verr) / distance;
+							val = (valLo & 0x0F) | ((valHi & 0x0F) << 4);
+						} else
+						{
+							val = vsrc + ((vdest - vsrc) * i + verr) / distance;
+						}
 						pcmd->param = static_cast<ModCommand::PARAM>(val);
-						pcmd->command = static_cast<ModCommand::COMMAND>(vcmd);
 					}
 				}
 				break;
@@ -6813,9 +6827,10 @@ bool CViewPattern::IsInterpolationPossible(ROWINDEX startRow, ROWINDEX endRow, C
 	case PatternCursor::paramColumn:
 		startRowCmd = startRowMC.command;
 		endRowCmd = endRowMC.command;
-		result = (startRowCmd == endRowCmd && startRowCmd != CMD_NONE)   // Interpolate between two identical commands
-		         || (startRowCmd != CMD_NONE && endRowCmd == CMD_NONE)   // Fill in values from the first row
-		         || (startRowCmd == CMD_NONE && endRowCmd != CMD_NONE);  // Fill in values from the last row
+		result = (startRowCmd == endRowCmd && startRowCmd != CMD_NONE)                    // Interpolate between two identical commands
+		         || (startRowMC.IsNormalVolumeSlide() && endRowMC.IsNormalVolumeSlide())  // Interpolate between two compatible volume slide commands
+		         || (startRowCmd != CMD_NONE && endRowCmd == CMD_NONE)                    // Fill in values from the first row
+		         || (startRowCmd == CMD_NONE && endRowCmd != CMD_NONE);                   // Fill in values from the last row
 		break;
 
 	default:

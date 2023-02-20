@@ -1081,6 +1081,39 @@ bool ModCommand::IsGlobalCommand(COMMAND command, PARAM param)
 	}
 }
 
+
+bool ModCommand::CommandHasTwoNibbles(COMMAND command)
+{
+	switch(command)
+	{
+	case CMD_ARPEGGIO:
+	case CMD_VIBRATO:
+	case CMD_TONEPORTAVOL:
+	case CMD_VIBRATOVOL:
+	case CMD_TREMOLO:
+	case CMD_VOLUMESLIDE:
+	case CMD_RETRIG:
+	case CMD_TREMOR:
+	case CMD_MODCMDEX:
+	case CMD_S3MCMDEX:
+	case CMD_CHANNELVOLSLIDE:
+	case CMD_GLOBALVOLSLIDE:
+	case CMD_FINEVIBRATO:
+	case CMD_PANBRELLO:
+	case CMD_XFINEPORTAUPDOWN:
+	case CMD_PANNINGSLIDE:
+	case CMD_DELAYCUT:
+	case CMD_NOTESLIDEUP:
+	case CMD_NOTESLIDEDOWN:
+	case CMD_NOTESLIDEUPRETRIG:
+	case CMD_NOTESLIDEDOWNRETRIG:
+		return true;
+	default:
+		return false;
+	}
+}
+
+
 // "Importance" of every FX command. Table is used for importing from formats with multiple effect colums
 // and is approximately the same as in SchismTracker.
 size_t ModCommand::GetEffectWeight(COMMAND cmd)
