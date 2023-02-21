@@ -612,22 +612,31 @@ bool CInputHandler::IsKeyPressHandledByTextBox(DWORD key, HWND hWnd) const
 	if(!textboxHasFocus)
 		return false;
 
-	//Alpha-numerics (only shift or no modifier):
-	if(!GetModifierMask().test_any_except(ModShift)
-		&&  ((key>='A'&&key<='Z') || (key>='0'&&key<='9') ||
-		 key==VK_DIVIDE  || key==VK_MULTIPLY || key==VK_SPACE || key==VK_RETURN ||
-		 key==VK_CAPITAL || (key>=VK_OEM_1 && key<=VK_OEM_3) || (key>=VK_OEM_4 && key<=VK_OEM_8)))
-		return true;
+	// Alpha-numerics (only shift or no modifier):
+	if(!GetModifierMask().test_any_except(ModShift))
+	{
+		if((key >= 'A' && key <= 'Z') || (key >= '0' && key <= '9')
+		   || key == VK_DIVIDE || key == VK_MULTIPLY || key == VK_SPACE || key == VK_CAPITAL
+		   || (key >= VK_OEM_1 && key <= VK_OEM_3) || (key >= VK_OEM_4 && key <= VK_OEM_8))
+			return true;
+		if(key == VK_RETURN && (GetWindowLong(hWnd, GWL_STYLE) & ES_MULTILINE))
+			return true;
+	}
 
-	//navigation (any modifier):
-	if(key == VK_LEFT || key == VK_RIGHT || key == VK_UP || key == VK_DOWN ||
-		key == VK_HOME || key == VK_END || key == VK_DELETE || key == VK_INSERT || key == VK_BACK)
-		return true;
+	// Navigation (any modifier except Alt without any other modifiers):
+	if(GetModifierMask() != ModAlt)
+	{
+		if(key == VK_LEFT || key == VK_RIGHT || key == VK_UP || key == VK_DOWN
+		   || key == VK_HOME || key == VK_END || key == VK_DELETE || key == VK_INSERT || key == VK_BACK)
+			return true;
+	}
 
-	//Copy paste etc..
-	if(GetModifierMask() == ModCtrl &&
-		(key == 'Y' || key == 'Z' || key == 'X' ||  key == 'C' || key == 'V' || key == 'A'))
-		return true;
+	// Copy paste etc..
+	if(GetModifierMask() == ModCtrl)
+	{
+		if(key == 'Y' || key == 'Z' || key == 'X' ||  key == 'C' || key == 'V' || key == 'A')
+			return true;
+	}
 
 	return false;
 }
