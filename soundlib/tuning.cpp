@@ -576,7 +576,7 @@ SerializationResult CTuning::InitDeserializeOLD(std::istream &inStrm, mpt::Chars
 	if(!inStrm.good())
 		return SerializationResult::Failure;
 
-	const std::streamoff startPos = inStrm.tellg();
+	const std::streamoff startPos = static_cast<std::streamoff>(inStrm.tellg());
 
 	//First checking is there expected begin sequence.
 	char begin[8];
@@ -585,7 +585,7 @@ SerializationResult CTuning::InitDeserializeOLD(std::istream &inStrm, mpt::Chars
 	if(std::memcmp(begin, "CTRTI_B.", 8))
 	{
 		//Returning stream position if beginmarker was not found.
-		inStrm.seekg(startPos);
+		inStrm.seekg(startPos, std::ios::beg);
 		return SerializationResult::Failure;
 	}
 

@@ -106,14 +106,14 @@ Tuning::SerializationResult CTuningCollection::Serialize(std::ostream& oStrm, co
 
 Tuning::SerializationResult CTuningCollection::Deserialize(std::istream &iStrm, mpt::ustring &name, mpt::Charset defaultCharset)
 {
-	std::istream::pos_type startpos = iStrm.tellg();
+	std::streamoff startpos = static_cast<std::streamoff>(iStrm.tellg());
 	
 	const Tuning::SerializationResult oldLoadingResult = DeserializeOLD(iStrm, name, defaultCharset);
 
 	if(oldLoadingResult == Tuning::SerializationResult::NoMagic)
 	{	// An old version was not recognised - trying new version.
 		iStrm.clear();
-		iStrm.seekg(startpos);
+		iStrm.seekg(startpos, std::ios::beg);
 		srlztn::SsbRead ssb(iStrm);
 		ssb.BeginRead("TC", 3); // version
 		int8 use_utf8 = 0;

@@ -62,7 +62,7 @@ public:
 	inline bool IsReadSeekable() {
 		f.clear();
 		std::streampos oldpos = f.tellg();
-		if (f.fail() || oldpos == std::streampos(-1)) {
+		if (f.fail() || oldpos == std::streampos(std::streamoff(-1))) {
 			f.clear();
 			return false;
 		}
@@ -81,7 +81,7 @@ public:
 			return false;
 		}
 		std::streampos length = f.tellg();
-		if (f.fail() || length == std::streampos(-1)) {
+		if (f.fail() || length == std::streampos(std::streamoff(-1))) {
 			f.clear();
 			f.seekg(oldpos);
 			f.clear();
@@ -93,11 +93,11 @@ public:
 	}
 
 	inline IO::Offset TellRead() {
-		return f.tellg();
+		return static_cast<std::streamoff>(f.tellg());
 	}
 
 	inline bool SeekBegin() {
-		f.seekg(0);
+		f.seekg(0, std::ios::beg);
 		return !f.fail();
 	}
 
@@ -149,7 +149,7 @@ public:
 	inline bool IsWriteSeekable() {
 		f.clear();
 		std::streampos oldpos = f.tellp();
-		if (f.fail() || oldpos == std::streampos(-1)) {
+		if (f.fail() || oldpos == std::streampos(std::streamoff(-1))) {
 			f.clear();
 			return false;
 		}
@@ -168,7 +168,7 @@ public:
 			return false;
 		}
 		std::streampos length = f.tellp();
-		if (f.fail() || length == std::streampos(-1)) {
+		if (f.fail() || length == std::streampos(std::streamoff(-1))) {
 			f.clear();
 			f.seekp(oldpos);
 			f.clear();
@@ -180,11 +180,11 @@ public:
 	}
 
 	inline IO::Offset TellWrite() {
-		return f.tellp();
+		return static_cast<std::streamoff>(f.tellp());
 	}
 
 	inline bool SeekBegin() {
-		f.seekp(0);
+		f.seekp(0, std::ios::beg);
 		return !f.fail();
 	}
 

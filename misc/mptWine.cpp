@@ -615,9 +615,9 @@ ExecResult Context::ExecutePosixShellScript(std::string script, FlagSet<ExecFlag
 		if(outputFile)
 		{
 			outputFile.seekg(0, std::ios::end);
-			std::streampos outputFileSize = outputFile.tellg();
+			std::streamoff outputFileSize = static_cast<std::streamoff>(outputFile.tellg());
 			outputFile.seekg(0, std::ios::beg);
-			std::vector<char> outputFileBuf(mpt::saturate_cast<std::size_t>(static_cast<std::streamoff>(outputFileSize)));
+			std::vector<char> outputFileBuf(mpt::saturate_cast<std::size_t>(outputFileSize));
 			outputFile.read(outputFileBuf.data(), outputFileBuf.size());
 			outputString = mpt::buffer_cast<std::string>(outputFileBuf);
 		}
@@ -632,9 +632,9 @@ ExecResult Context::ExecutePosixShellScript(std::string script, FlagSet<ExecFlag
 		if(errorFile)
 		{
 			errorFile.seekg(0, std::ios::end);
-			std::streampos errorFileSize = errorFile.tellg();
+			std::streamoff errorFileSize = static_cast<std::streamoff>(errorFile.tellg());
 			errorFile.seekg(0, std::ios::beg);
-			std::vector<char> errorFileBuf(mpt::saturate_cast<std::size_t>(static_cast<std::streamoff>(errorFileSize)));
+			std::vector<char> errorFileBuf(mpt::saturate_cast<std::size_t>(errorFileSize));
 			errorFile.read(errorFileBuf.data(), errorFileBuf.size());
 			errorString = mpt::buffer_cast<std::string>(errorFileBuf);
 		}

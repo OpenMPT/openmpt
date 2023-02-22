@@ -480,7 +480,7 @@ private:
 template <class T, class FuncObj>
 void SsbWrite::WriteItem(const T& obj, const ID &id, FuncObj Func)
 {
-	const std::streamoff pos = oStrm.tellp();
+	const std::streamoff pos = static_cast<std::streamoff>(oStrm.tellp());
 	Func(oStrm, obj);
 	OnWroteItem(id, pos);
 }
@@ -489,7 +489,7 @@ template <class T, class FuncObj>
 bool SsbRead::ReadItem(T& obj, const ID &id, FuncObj Func)
 {
 	const ReadEntry* pE = Find(id);
-	const std::streamoff pos = iStrm.tellg();
+	const std::streamoff pos = static_cast<std::streamoff>(iStrm.tellg());
 	const bool entryFound = (pE || !m_Flags[RwfRMapHasId]);
 	if(entryFound)
 	{
@@ -506,7 +506,7 @@ bool SsbRead::ReadIterItem(const ReadIterator& iter, T& obj, FuncObj func)
 	iStrm.clear();
 	if (iter->rposStart != 0)
 		iStrm.seekg(m_posStart + iter->rposStart);
-	const std::streamoff pos = iStrm.tellg();
+	const std::streamoff pos = static_cast<std::streamoff>(iStrm.tellg());
 	func(iStrm, obj, iter->nSize);
 	OnReadEntry(&(*iter), ID(&m_Idarray[iter->nIdpos], iter->nIdLength), pos);
 	return true;

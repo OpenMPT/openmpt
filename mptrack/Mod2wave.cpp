@@ -1181,7 +1181,7 @@ void CDoWaveConvert::Run()
 		} else
 		{
 
-			const std::streampos oldPos = fileStream.tellp();
+			const std::streamoff oldPos = static_cast<std::streamoff>(fileStream.tellp());
 			switch(fileEnc->GetSampleFormat())
 			{
 			case SampleFormat::Float64:
@@ -1206,7 +1206,7 @@ void CDoWaveConvert::Run()
 				fileEnc->WriteInterleaved(lRead, buffer.uint8);
 				break;
 			}
-			const std::streampos newPos = fileStream.tellp();
+			const std::streamoff newPos = static_cast<std::streamoff>(fileStream.tellp());
 			bytesWritten += static_cast<uint64>(newPos - oldPos);
 
 			if(!fileStream)
@@ -1285,7 +1285,7 @@ void CDoWaveConvert::Run()
 				normalizeBuffer[i] *= normalizeFactor;
 			}
 
-			const std::streampos oldPos = fileStream.tellp();
+			const std::streamoff oldPos = static_cast<std::streamoff>(fileStream.tellp());
 			std::visit(
 				[&](auto& ditherInstance)
 				{
@@ -1341,7 +1341,7 @@ void CDoWaveConvert::Run()
 				fileEnc->WriteInterleaved(framesChunk, buffer.uint8);
 				break;
 			}
-			const std::streampos newPos = fileStream.tellp();
+			const std::streamoff newPos = static_cast<std::streamoff>(fileStream.tellp());
 			bytesWritten += static_cast<uint64>(newPos - oldPos);
 
 			auto currentTime = timeGetTime();

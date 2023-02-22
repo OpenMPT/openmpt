@@ -179,7 +179,7 @@ PluginArch BridgeWrapper::GetPluginBinaryType(const mpt::PathString &pluginPath)
 		file.read(reinterpret_cast<char *>(&dosHeader), sizeof(dosHeader));
 		if(dosHeader.e_magic == IMAGE_DOS_SIGNATURE)
 		{
-			file.seekg(dosHeader.e_lfanew);
+			file.seekg(dosHeader.e_lfanew, std::ios::beg);
 			file.read(reinterpret_cast<char *>(&ntHeader), sizeof(ntHeader));
 
 			MPT_ASSERT((ntHeader.FileHeader.Characteristics & IMAGE_FILE_DLL) != 0);
