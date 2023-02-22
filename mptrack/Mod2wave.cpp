@@ -1342,7 +1342,7 @@ void CDoWaveConvert::Run()
 				break;
 			}
 			const std::streampos newPos = fileStream.tellp();
-			bytesWritten += static_cast<std::size_t>(newPos - oldPos);
+			bytesWritten += static_cast<uint64>(newPos - oldPos);
 
 			auto currentTime = timeGetTime();
 			if((currentTime - prevTime) >= 16)
