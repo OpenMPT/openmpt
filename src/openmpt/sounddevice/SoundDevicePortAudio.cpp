@@ -34,7 +34,8 @@
 #include "../include/portaudio/src/common/pa_debugprint.h"
 #endif
 #if defined(MPT_BUILD_MSVC) && MPT_COMPILER_MSVC && MPT_ARCH_X86 && !defined(MPT_ARCH_X86_SSE2)
-extern "C" {
+extern "C"
+{
 void PaUtil_InitializeX86PlainConverters(void);
 }
 #endif
