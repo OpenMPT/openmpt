@@ -101,6 +101,8 @@ is just a high-level summary.
     themselves. We will still maintain the status quo of our in_openmpt input
     plugin for users of earlier Winamp version, or users on older systems, or
     users of compatible players.
+ *  [**Change**] The POSIX fd file callbacks implementation now handles `EINTR`
+    and retries the `read()` call.
 
  *  [**Regression**] Full support for Visual Studio 2017 has been removed. We
     still support targeting Windows XP with Visual Studio 2017.
