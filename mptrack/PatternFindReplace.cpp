@@ -46,7 +46,7 @@ void CViewPattern::OnEditFind()
 	{
 		CSoundFile &sndFile = pModDoc->GetSoundFile();
 		FindReplace settings = FindReplace::instance;
-		ModCommand m = ModCommand::Empty();
+		ModCommand m{};
 		if(m_Selection.GetUpperLeft() != m_Selection.GetLowerRight())
 		{
 			settings.findFlags.set(FindReplace::InPatSelection);

@@ -847,7 +847,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 				ModCommand *m = Patterns[writePat].GetpModCommand(row, m_nChannels - 8);
 				for(CHANNELINDEX chn = 0; chn < 8; chn++, m++)
 				{
-					*m = ModCommand::Empty();
+					*m = ModCommand{};
 					if(row >= numRows)
 						continue;
 

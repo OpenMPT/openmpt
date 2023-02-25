@@ -188,7 +188,7 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const std::vector<CHANNELINDEX> &newOrde
 					if(newOrder[chn] < oldNumChannels)  // Case: getting old channel to the new channel order.
 						*m = oldRow[newOrder[chn]];
 					else
-						*m = ModCommand::Empty();
+						*m = ModCommand{};
 				}
 			}
 		}

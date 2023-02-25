@@ -17,7 +17,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-const EffectType effectTypes[] =
+static constexpr EffectType effectTypes[] =
 {
 	EFFECT_TYPE_NORMAL, EFFECT_TYPE_NORMAL,  EFFECT_TYPE_PITCH,  EFFECT_TYPE_PITCH,
 	EFFECT_TYPE_PITCH,  EFFECT_TYPE_PITCH,   EFFECT_TYPE_VOLUME, EFFECT_TYPE_VOLUME,
@@ -36,7 +36,7 @@ const EffectType effectTypes[] =
 static_assert(std::size(effectTypes) == MAX_EFFECTS);
 
 
-const EffectType volumeEffectTypes[] =
+static constexpr EffectType volumeEffectTypes[] =
 {
 	EFFECT_TYPE_NORMAL, EFFECT_TYPE_VOLUME,  EFFECT_TYPE_PANNING, EFFECT_TYPE_VOLUME,
 	EFFECT_TYPE_VOLUME, EFFECT_TYPE_VOLUME,  EFFECT_TYPE_VOLUME,  EFFECT_TYPE_PITCH,

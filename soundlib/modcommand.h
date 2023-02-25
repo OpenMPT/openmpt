@@ -137,9 +137,6 @@ public:
 	// (for example volcmd and vol). The valid value range is [0, maxColumnValue].
 	static constexpr int maxColumnValue = 999;
 
-	// Returns empty modcommand.
-	static ModCommand Empty() { return ModCommand(); }
-
 	bool operator==(const ModCommand &mc) const
 	{
 		return (note == mc.note)

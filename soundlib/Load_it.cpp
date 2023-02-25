@@ -1014,7 +1014,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		CopyPatternName(Patterns[pat], patNames);
 
 		std::vector<uint8> chnMask(GetNumChannels());
-		std::vector<ModCommand> lastValue(GetNumChannels(), ModCommand::Empty());
+		std::vector<ModCommand> lastValue(GetNumChannels(), ModCommand{});
 
 		auto patData = Patterns[pat].begin();
 		ROWINDEX row = 0;
@@ -1038,7 +1038,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			if(ch >= chnMask.size())
 			{
 				chnMask.resize(ch + 1, 0);
-				lastValue.resize(ch + 1, ModCommand::Empty());
+				lastValue.resize(ch + 1, ModCommand{});
 				MPT_ASSERT(chnMask.size() <= GetNumChannels());
 			}
 
@@ -1048,7 +1048,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			}
 
 			// Now we grab the data for this particular row/channel.
-			ModCommand dummy = ModCommand::Empty();
+			ModCommand dummy{};
 			ModCommand &m = ch < m_nChannels ? patData[ch] : dummy;
 
 			if(chnMask[ch] & 0x10)

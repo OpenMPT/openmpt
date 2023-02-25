@@ -37,7 +37,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 // Static initializers
-ModCommand CViewPattern::m_cmdOld = ModCommand::Empty();
+ModCommand CViewPattern::m_cmdOld = ModCommand{};
 int32 CViewPattern::m_nTransposeAmount = 1;
 
 IMPLEMENT_SERIAL(CViewPattern, CModScrollView, 0)
@@ -155,7 +155,6 @@ CViewPattern::CViewPattern()
 
 	m_Dib.Init(CMainFrame::bmpNotes);
 	UpdateColors();
-	m_PCNoteEditMemory = ModCommand::Empty();
 	m_octaveKeyMemory.fill(NOTE_NONE);
 }
 
@@ -899,7 +898,7 @@ void CViewPattern::OnShrinkSelection()
 			} else
 			{
 				// Clean up rows that are now supposed to be empty.
-				src = ModCommand::Empty();
+				src = ModCommand{};
 			}
 
 			for(int i = PatternCursor::firstColumn; i <= PatternCursor::lastColumn; i++)
@@ -2114,7 +2113,7 @@ void CViewPattern::OnSplitPattern()
 	sourcePattern.Resize(std::max(specs.patternRowsMin, splitRow));
 	if(splitRow != sourcePattern.GetNumRows())
 	{
-		std::fill(copyStart, sourcePattern.end(), ModCommand::Empty());
+		std::fill(copyStart, sourcePattern.end(), ModCommand{});
 		sourcePattern.WriteEffect(EffectWriter(CMD_PATTERNBREAK, 0).Row(splitRow - 1).RetryNextRow());
 	}
 	if(numSplitRows != newPattern.GetNumRows())
@@ -3055,7 +3054,7 @@ void CViewPattern::OnDropSelection()
 	BeginWaitCursor();
 	pModDoc->GetPatternUndo().PrepareUndo(m_nPattern, 0, 0, sndFile.GetNumChannels(), pattern.GetNumRows(), moveSelection ? "Move Selection" : "Copy Selection");
 
-	const ModCommand empty = ModCommand::Empty();
+	const ModCommand empty{};
 	auto p = pattern.begin();
 	for(ROWINDEX row = 0; row < pattern.GetNumRows(); row++)
 	{

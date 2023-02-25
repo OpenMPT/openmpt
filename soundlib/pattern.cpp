@@ -87,7 +87,7 @@ bool CPattern::Resize(const ROWINDEX newRowCount, bool enforceFormatLimits, bool
 		size_t count = ((newRowCount > m_Rows) ? (newRowCount - m_Rows) : (m_Rows - newRowCount)) * GetNumChannels();
 
 		if(newRowCount > m_Rows)
-			m_ModCommands.insert(resizeAtEnd ? m_ModCommands.end() : m_ModCommands.begin(), count, ModCommand::Empty());
+			m_ModCommands.insert(resizeAtEnd ? m_ModCommands.end() : m_ModCommands.begin(), count, ModCommand{});
 		else if(resizeAtEnd)
 			m_ModCommands.erase(m_ModCommands.end() - count, m_ModCommands.end());
 		else
@@ -105,7 +105,7 @@ bool CPattern::Resize(const ROWINDEX newRowCount, bool enforceFormatLimits, bool
 
 void CPattern::ClearCommands()
 {
-	std::fill(m_ModCommands.begin(), m_ModCommands.end(), ModCommand::Empty());
+	std::fill(m_ModCommands.begin(), m_ModCommands.end(), ModCommand{});
 }
 
 
@@ -123,7 +123,7 @@ bool CPattern::AllocatePattern(ROWINDEX rows)
 	} else
 	{
 		// Do this in two steps in order to keep the old pattern data in case of OOM
-		decltype(m_ModCommands) newPattern(newSize, ModCommand::Empty());
+		decltype(m_ModCommands) newPattern(newSize, ModCommand{});
 		m_ModCommands = std::move(newPattern);
 	}
 	m_Rows = rows;
@@ -191,7 +191,7 @@ bool CPattern::Expand()
 	decltype(m_ModCommands) newPattern;
 	try
 	{
-		newPattern.assign(m_ModCommands.size() * 2, ModCommand::Empty());
+		newPattern.assign(m_ModCommands.size() * 2, ModCommand{});
 	} catch(mpt::out_of_memory e)
 	{
 		mpt::delete_out_of_memory(e);
@@ -625,7 +625,7 @@ void ReadData(std::istream& iStrm, CPattern& pat, const size_t)
 			mpt::IO::ReadIntLE<uint8>(iStrm, diffmask);
 		uint8 temp = 0;
 
-		ModCommand dummy = ModCommand::Empty();
+		ModCommand dummy{};
 		ModCommand &m = (ch < chns) ? *pat.GetpModCommand(row, ch) : dummy;
 
 		READITEM(noteBit, note, ModCommand::NOTE);

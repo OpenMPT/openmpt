@@ -255,7 +255,7 @@ bool CSoundFile::ReadDSM(FileReader &file, ModLoadingFlags loadFlags)
 			}
 			chunk.Skip(2);
 
-			ModCommand dummy = ModCommand::Empty();
+			ModCommand dummy{};
 			ROWINDEX row = 0;
 			while(chunk.CanRead(1) && row < 64)
 			{
