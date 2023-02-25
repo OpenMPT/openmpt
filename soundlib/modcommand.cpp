@@ -19,18 +19,18 @@ OPENMPT_NAMESPACE_BEGIN
 
 static constexpr EffectType effectTypes[] =
 {
-	EFFECT_TYPE_NORMAL, EFFECT_TYPE_NORMAL,  EFFECT_TYPE_PITCH,  EFFECT_TYPE_PITCH,
-	EFFECT_TYPE_PITCH,  EFFECT_TYPE_PITCH,   EFFECT_TYPE_VOLUME, EFFECT_TYPE_VOLUME,
-	EFFECT_TYPE_VOLUME, EFFECT_TYPE_PANNING, EFFECT_TYPE_NORMAL, EFFECT_TYPE_VOLUME,
-	EFFECT_TYPE_GLOBAL, EFFECT_TYPE_VOLUME,  EFFECT_TYPE_GLOBAL, EFFECT_TYPE_NORMAL,
-	EFFECT_TYPE_GLOBAL, EFFECT_TYPE_GLOBAL,  EFFECT_TYPE_NORMAL, EFFECT_TYPE_NORMAL,
-	EFFECT_TYPE_NORMAL, EFFECT_TYPE_VOLUME,  EFFECT_TYPE_VOLUME, EFFECT_TYPE_GLOBAL,
-	EFFECT_TYPE_GLOBAL, EFFECT_TYPE_NORMAL,  EFFECT_TYPE_PITCH,  EFFECT_TYPE_PANNING,
-	EFFECT_TYPE_PITCH,  EFFECT_TYPE_PANNING, EFFECT_TYPE_NORMAL, EFFECT_TYPE_NORMAL,
-	EFFECT_TYPE_NORMAL, EFFECT_TYPE_NORMAL,  EFFECT_TYPE_NORMAL, EFFECT_TYPE_PITCH,
-	EFFECT_TYPE_PITCH,  EFFECT_TYPE_NORMAL,  EFFECT_TYPE_PITCH,  EFFECT_TYPE_PITCH,
-	EFFECT_TYPE_PITCH,  EFFECT_TYPE_PITCH,   EFFECT_TYPE_NORMAL, EFFECT_TYPE_NORMAL,
-	EFFECT_TYPE_NORMAL, EFFECT_TYPE_NORMAL,
+	EffectType::Normal, EffectType::Normal,  EffectType::Pitch,  EffectType::Pitch,
+	EffectType::Pitch,  EffectType::Pitch,   EffectType::Volume, EffectType::Volume,
+	EffectType::Volume, EffectType::Panning, EffectType::Normal, EffectType::Volume,
+	EffectType::Global, EffectType::Volume,  EffectType::Global, EffectType::Normal,
+	EffectType::Global, EffectType::Global,  EffectType::Normal, EffectType::Normal,
+	EffectType::Normal, EffectType::Volume,  EffectType::Volume, EffectType::Global,
+	EffectType::Global, EffectType::Normal,  EffectType::Pitch,  EffectType::Panning,
+	EffectType::Pitch,  EffectType::Panning, EffectType::Normal, EffectType::Normal,
+	EffectType::Normal, EffectType::Normal,  EffectType::Normal, EffectType::Pitch,
+	EffectType::Pitch,  EffectType::Normal,  EffectType::Pitch,  EffectType::Pitch,
+	EffectType::Pitch,  EffectType::Pitch,   EffectType::Normal, EffectType::Normal,
+	EffectType::Normal, EffectType::Normal,
 };
 
 static_assert(std::size(effectTypes) == MAX_EFFECTS);
@@ -38,10 +38,10 @@ static_assert(std::size(effectTypes) == MAX_EFFECTS);
 
 static constexpr EffectType volumeEffectTypes[] =
 {
-	EFFECT_TYPE_NORMAL, EFFECT_TYPE_VOLUME,  EFFECT_TYPE_PANNING, EFFECT_TYPE_VOLUME,
-	EFFECT_TYPE_VOLUME, EFFECT_TYPE_VOLUME,  EFFECT_TYPE_VOLUME,  EFFECT_TYPE_PITCH,
-	EFFECT_TYPE_PITCH,  EFFECT_TYPE_PANNING, EFFECT_TYPE_PANNING, EFFECT_TYPE_PITCH,
-	EFFECT_TYPE_PITCH,  EFFECT_TYPE_PITCH,   EFFECT_TYPE_NORMAL,  EFFECT_TYPE_NORMAL,
+	EffectType::Normal, EffectType::Volume,  EffectType::Panning, EffectType::Volume,
+	EffectType::Volume, EffectType::Volume,  EffectType::Volume,  EffectType::Pitch,
+	EffectType::Pitch,  EffectType::Panning, EffectType::Panning, EffectType::Pitch,
+	EffectType::Pitch,  EffectType::Pitch,   EffectType::Normal,  EffectType::Normal,
 };
 
 static_assert(std::size(volumeEffectTypes) == MAX_VOLCMDS);
@@ -52,7 +52,7 @@ EffectType ModCommand::GetEffectType(COMMAND cmd)
 	if(cmd < std::size(effectTypes))
 		return effectTypes[cmd];
 	else
-		return EFFECT_TYPE_NORMAL;
+		return EffectType::Normal;
 }
 
 
@@ -61,7 +61,7 @@ EffectType ModCommand::GetVolumeEffectType(VOLCMD volcmd)
 	if(volcmd < std::size(volumeEffectTypes))
 		return volumeEffectTypes[volcmd];
 	else
-		return EFFECT_TYPE_NORMAL;
+		return EffectType::Normal;
 }
 
 

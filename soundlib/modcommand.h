@@ -112,14 +112,14 @@ enum EffectCommand : uint8
 };
 
 
-enum EffectType : uint8
+enum class EffectType : uint8
 {
-	EFFECT_TYPE_NORMAL  = 0,
-	EFFECT_TYPE_GLOBAL  = 1,
-	EFFECT_TYPE_VOLUME  = 2,
-	EFFECT_TYPE_PANNING = 3,
-	EFFECT_TYPE_PITCH   = 4,
-	MAX_EFFECT_TYPE     = 5
+	Normal   = 0,
+	Global   = 1,
+	Volume   = 2,
+	Panning  = 3,
+	Pitch    = 4,
+	NumTypes = 5
 };
 
 

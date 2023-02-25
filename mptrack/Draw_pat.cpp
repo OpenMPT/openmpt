@@ -74,7 +74,7 @@ static constexpr int effectColors[] =
 	MODCOLOR_PITCH,
 };
 
-static_assert(std::size(effectColors) == MAX_EFFECT_TYPE);
+static_assert(std::size(effectColors) == static_cast<size_t>(EffectType::NumTypes));
 
 /////////////////////////////////////////////////////////////////////////////
 // CViewPattern Drawing Implementation
@@ -1075,9 +1075,10 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 						bk_col = MODCOLOR_BACKSELECTED;
 					} else if (!m->IsPcNote() && (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_EFFECTHILIGHT))
 					{
-						if(m->volcmd != VOLCMD_NONE && m->volcmd < MAX_VOLCMDS && effectColors[m->GetVolumeEffectType()] != 0)
+						auto fxColor = effectColors[static_cast<size_t>(m->GetVolumeEffectType())];
+						if(m->volcmd != VOLCMD_NONE && m->volcmd < MAX_VOLCMDS && fxColor != 0)
 						{
-							tx_col = effectColors[m->GetVolumeEffectType()];
+							tx_col = fxColor;
 						} else if(drawDefaultVolume)
 						{
 							tx_col = MODCOLOR_DEFAULTVOLUME;
@@ -1098,8 +1099,8 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 				fx_col = row_col;
 				if (!isPCnote && m->command != CMD_NONE && m->command < MAX_EFFECTS && (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_EFFECTHILIGHT))
 				{
-					if(effectColors[m->GetEffectType()] != 0)
-						fx_col = effectColors[m->GetEffectType()];
+					if(auto fxColor = effectColors[static_cast<size_t>(m->GetEffectType())]; fxColor != 0)
+						fx_col = fxColor;
 					else if(m->command == CMD_DUMMY)
 						fx_col = MODCOLOR_DUMMYCOMMAND;
 				}
