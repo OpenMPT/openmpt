@@ -597,7 +597,7 @@ bool EffectInfo::GetEffectNameEx(CString &pszName, const ModCommand &m, uint32 p
 	case CMD_OFFSET:
 		if (m.volcmd == VOLCMD_OFFSET && m.vol == 0)
 		{
-			pszName.Format(_T("Percentage: %d%%"), m.param * 100 / 256);
+			pszName.Format(_T("Percentage: %u%%"), Util::muldivr_unsigned(m.param, 100, 256));
 		} else if(param || m.volcmd == VOLCMD_OFFSET)
 		{
 			if (m.volcmd == VOLCMD_OFFSET && m.IsNote() && m.instr)
@@ -811,8 +811,7 @@ bool EffectInfo::GetEffectNameEx(CString &pszName, const ModCommand &m, uint32 p
 						default:
 							break;
 						}
-					}
-					if(gFXInfo[ndx].effect == CMD_MODCMDEX)
+					} else if(gFXInfo[ndx].effect == CMD_MODCMDEX)
 					{
 						switch(param & 0xF0)
 						{
@@ -822,6 +821,14 @@ bool EffectInfo::GetEffectNameEx(CString &pszName, const ModCommand &m, uint32 p
 								s = _T("LED Filter Off");
 							else
 								s = _T("LED Filter On");
+							break;
+
+						case 0x10:
+						case 0x20:
+						case 0xA0:
+						case 0xB0:
+							if(!(param & 0x0F) && sndFile.GetType() == MOD_TYPE_XM)
+								s = _T("continue");
 							break;
 
 						case 0x30: // glissando control
@@ -1056,7 +1063,7 @@ bool EffectInfo::GetVolCmdParamInfo(const ModCommand &m, CString *s) const
 		} else
 		{
 			if(m.command == CMD_OFFSET)
-				s->Format(_T("Percentage: %d%%"), m.param * 100 / 256);
+				s->Format(_T("Percentage: %u%%"), Util::muldivr_unsigned(m.param, 100, 256));
 			else
 				*s = _T("continue");
 		}
