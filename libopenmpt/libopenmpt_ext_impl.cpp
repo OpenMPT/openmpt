@@ -104,11 +104,11 @@ namespace openmpt {
 	module_ext_impl::effect_type module_ext_impl::get_pattern_row_channel_volume_effect_type( std::int32_t pattern, std::int32_t row, std::int32_t channel ) const {
 		auto volcmd = static_cast<OpenMPT::VolumeCommand>( get_pattern_row_channel_command( pattern, row, channel, module::command_volumeffect ) );
 		switch ( OpenMPT::ModCommand::GetVolumeEffectType( volcmd ) ) {
-			case OpenMPT::EFFECT_TYPE_NORMAL : return effect_general; break;
-			case OpenMPT::EFFECT_TYPE_GLOBAL : return effect_global ; break;
-			case OpenMPT::EFFECT_TYPE_VOLUME : return effect_volume ; break;
-			case OpenMPT::EFFECT_TYPE_PANNING: return effect_panning; break;
-			case OpenMPT::EFFECT_TYPE_PITCH  : return effect_pitch  ; break;
+			case OpenMPT::EffectType::Normal : return effect_general; break;
+			case OpenMPT::EffectType::Global : return effect_global ; break;
+			case OpenMPT::EffectType::Volume : return effect_volume ; break;
+			case OpenMPT::EffectType::Panning: return effect_panning; break;
+			case OpenMPT::EffectType::Pitch  : return effect_pitch  ; break;
 			default: return effect_unknown; break;
 		}
 	}
@@ -116,11 +116,11 @@ namespace openmpt {
 	module_ext_impl::effect_type module_ext_impl::get_pattern_row_channel_effect_type( std::int32_t pattern, std::int32_t row, std::int32_t channel ) const {
 		auto command = static_cast<OpenMPT::EffectCommand>( get_pattern_row_channel_command( pattern, row, channel, module::command_effect ) );
 		switch (OpenMPT::ModCommand::GetEffectType( command ) ) {
-			case OpenMPT::EFFECT_TYPE_NORMAL : return effect_general; break;
-			case OpenMPT::EFFECT_TYPE_GLOBAL : return effect_global ; break;
-			case OpenMPT::EFFECT_TYPE_VOLUME : return effect_volume ; break;
-			case OpenMPT::EFFECT_TYPE_PANNING: return effect_panning; break;
-			case OpenMPT::EFFECT_TYPE_PITCH  : return effect_pitch  ; break;
+			case OpenMPT::EffectType::Normal : return effect_general; break;
+			case OpenMPT::EffectType::Global : return effect_global ; break;
+			case OpenMPT::EffectType::Volume : return effect_volume ; break;
+			case OpenMPT::EffectType::Panning: return effect_panning; break;
+			case OpenMPT::EffectType::Pitch  : return effect_pitch  ; break;
 			default: return effect_unknown; break;
 		}
 	}
