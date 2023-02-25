@@ -618,7 +618,7 @@ namespace SoundDevice
 {
 namespace Legacy
 {
-typedef uint16 ID;
+using ID = uint16;
 inline constexpr SoundDevice::Legacy::ID MaskType = 0xff00;
 inline constexpr SoundDevice::Legacy::ID MaskIndex = 0x00ff;
 inline constexpr int ShiftType = 8;

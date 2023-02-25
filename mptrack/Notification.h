@@ -31,7 +31,7 @@ struct Notification
 		Default		= GlobalVU,
 	};
 
-	typedef uint16 Item;
+	using Item = uint16;
 
 	static constexpr SmpLength PosInvalid = SmpLength(-1);	// pos[i] is not valid (if it contains sample or envelope position)
 	static constexpr uint32 ClipVU = 0x80000000;			// Master VU clip indicator bit (sound output has previously clipped)

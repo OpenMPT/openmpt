@@ -107,8 +107,8 @@ public:
 	// Write some kind of effect data to the pattern
 	bool WriteEffect(EffectWriter &settings);
 
-	typedef std::vector<ModCommand>::iterator iterator;
-	typedef std::vector<ModCommand>::const_iterator const_iterator;
+	using iterator = std::vector<ModCommand>::iterator;
+	using const_iterator = std::vector<ModCommand>::const_iterator;
 
 	iterator begin() { return m_ModCommands.begin(); }
 	const_iterator begin() const { return m_ModCommands.begin(); }
