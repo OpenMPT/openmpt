@@ -239,7 +239,7 @@ static int ReadULTEvent(ModCommand &m, FileReader &file, uint8 version)
 	{
 		uint32 offset = param1 * 4;
 		param1 = mpt::saturate_cast<uint8>(offset);
-		if(offset > 0xFF && ModCommand::GetEffectWeight(cmd2) < ModCommand::GetEffectType(CMD_OFFSET))
+		if(offset > 0xFF && ModCommand::GetEffectWeight(cmd2) < ModCommand::GetEffectWeight(CMD_OFFSET))
 		{
 			m.command = CMD_OFFSET;
 			m.param = static_cast<ModCommand::PARAM>(offset);
@@ -251,7 +251,7 @@ static int ReadULTEvent(ModCommand &m, FileReader &file, uint8 version)
 	{
 		uint32 offset = param2 * 4;
 		param2 = mpt::saturate_cast<uint8>(offset);
-		if(offset > 0xFF && ModCommand::GetEffectWeight(cmd1) < ModCommand::GetEffectType(CMD_OFFSET))
+		if(offset > 0xFF && ModCommand::GetEffectWeight(cmd1) < ModCommand::GetEffectWeight(CMD_OFFSET))
 		{
 			m.command = CMD_OFFSET;
 			m.param = static_cast<ModCommand::PARAM>(offset);
