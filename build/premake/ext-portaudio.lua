@@ -123,7 +123,7 @@
 	elseif _OPTIONS["windows-family"] == "uwp" then
 		files { "../../build/premake/def/ext-portaudio-uwp.def" }
 	else
-		files { "../../include/portaudio/build/msvc/portaudio.def" }
+		files { "../../build/premake/def/ext-portaudio.def" }
 	end
   filter {}
 

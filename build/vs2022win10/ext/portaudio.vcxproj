@@ -860,7 +860,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ImportLibrary>..\..\..\bin\debug\vs2022-win10-shared\x86\openmpt-portaudio.lib</ImportLibrary>
-      <ModuleDefinitionFile>../../../include/portaudio/build/msvc/portaudio.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>../../premake/def/ext-portaudio.def</ModuleDefinitionFile>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
@@ -885,7 +885,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ImportLibrary>..\..\..\bin\debug\vs2022-win10-shared\amd64\openmpt-portaudio.lib</ImportLibrary>
-      <ModuleDefinitionFile>../../../include/portaudio/build/msvc/portaudio.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>../../premake/def/ext-portaudio.def</ModuleDefinitionFile>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
@@ -910,7 +910,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ImportLibrary>..\..\..\bin\debug\vs2022-win10-shared\arm\openmpt-portaudio.lib</ImportLibrary>
-      <ModuleDefinitionFile>../../../include/portaudio/build/msvc/portaudio.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>../../premake/def/ext-portaudio.def</ModuleDefinitionFile>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
@@ -935,7 +935,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ImportLibrary>..\..\..\bin\debug\vs2022-win10-shared\arm64\openmpt-portaudio.lib</ImportLibrary>
-      <ModuleDefinitionFile>../../../include/portaudio/build/msvc/portaudio.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>../../premake/def/ext-portaudio.def</ModuleDefinitionFile>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
@@ -966,7 +966,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <ImportLibrary>..\..\..\bin\release\vs2022-win10-shared\x86\openmpt-portaudio.lib</ImportLibrary>
-      <ModuleDefinitionFile>../../../include/portaudio/build/msvc/portaudio.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>../../premake/def/ext-portaudio.def</ModuleDefinitionFile>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
@@ -996,7 +996,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <ImportLibrary>..\..\..\bin\release\vs2022-win10-shared\amd64\openmpt-portaudio.lib</ImportLibrary>
-      <ModuleDefinitionFile>../../../include/portaudio/build/msvc/portaudio.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>../../premake/def/ext-portaudio.def</ModuleDefinitionFile>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
@@ -1026,7 +1026,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <ImportLibrary>..\..\..\bin\release\vs2022-win10-shared\arm\openmpt-portaudio.lib</ImportLibrary>
-      <ModuleDefinitionFile>../../../include/portaudio/build/msvc/portaudio.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>../../premake/def/ext-portaudio.def</ModuleDefinitionFile>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
@@ -1056,7 +1056,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <ImportLibrary>..\..\..\bin\release\vs2022-win10-shared\arm64\openmpt-portaudio.lib</ImportLibrary>
-      <ModuleDefinitionFile>../../../include/portaudio/build/msvc/portaudio.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>../../premake/def/ext-portaudio.def</ModuleDefinitionFile>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
@@ -1088,7 +1088,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <ImportLibrary>..\..\..\bin\checked\vs2022-win10-shared\x86\openmpt-portaudio.lib</ImportLibrary>
-      <ModuleDefinitionFile>../../../include/portaudio/build/msvc/portaudio.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>../../premake/def/ext-portaudio.def</ModuleDefinitionFile>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
@@ -1119,7 +1119,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <ImportLibrary>..\..\..\bin\checked\vs2022-win10-shared\amd64\openmpt-portaudio.lib</ImportLibrary>
-      <ModuleDefinitionFile>../../../include/portaudio/build/msvc/portaudio.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>../../premake/def/ext-portaudio.def</ModuleDefinitionFile>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
@@ -1150,7 +1150,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <ImportLibrary>..\..\..\bin\checked\vs2022-win10-shared\arm\openmpt-portaudio.lib</ImportLibrary>
-      <ModuleDefinitionFile>../../../include/portaudio/build/msvc/portaudio.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>../../premake/def/ext-portaudio.def</ModuleDefinitionFile>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
@@ -1181,7 +1181,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <ImportLibrary>..\..\..\bin\checked\vs2022-win10-shared\arm64\openmpt-portaudio.lib</ImportLibrary>
-      <ModuleDefinitionFile>../../../include/portaudio/build/msvc/portaudio.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>../../premake/def/ext-portaudio.def</ModuleDefinitionFile>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
@@ -1239,7 +1239,7 @@
     <ClCompile Include="..\..\premake\lnk\ext-portaudio.c" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\..\include\portaudio\build\msvc\portaudio.def" />
+    <None Include="..\..\premake\def\ext-portaudio.def" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
