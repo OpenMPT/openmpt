@@ -569,7 +569,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 	{
 		switch(command)
 		{
-			case CMD_TONEPORTAVOL:  // lacks memory -> 500 is the same as 300
+		case CMD_TONEPORTAVOL:  // lacks memory -> 500 is the same as 300
 			if(param == 0x00)
 				command = CMD_TONEPORTAMENTO;
 			break;
@@ -586,7 +586,15 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 				command = CMD_NONE;
 			break;
 
-		case CMD_MODCMDEX:  // This would turn into "Set Active Macro", so let's better remove it
+		case CMD_MODCMDEX:
+			// No effect memory
+			if(param == 0x10 || param == 0x20 || param == 0xA0 || param == 0xB0)
+				command = CMD_NONE;
+			// This would turn into "Set Active Macro", so let's better remove it
+			if((param & 0xF0) == 0xF0)
+				command = CMD_NONE;
+			break;
+
 		case CMD_S3MCMDEX:
 			if((param & 0xF0) == 0xF0)
 				command = CMD_NONE;
