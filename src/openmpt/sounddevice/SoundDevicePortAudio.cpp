@@ -8,6 +8,7 @@
 
 #include "SoundDevice.hpp"
 
+#include "mpt/arch/arch.hpp"
 #include "mpt/base/detect.hpp"
 #include "mpt/base/macros.hpp"
 #include "mpt/base/pointer.hpp"
@@ -31,6 +32,11 @@
 #ifdef MPT_WITH_PORTAUDIO
 #if defined(MODPLUG_TRACKER) && MPT_COMPILER_MSVC
 #include "../include/portaudio/src/common/pa_debugprint.h"
+#endif
+#if defined(MPT_BUILD_MSVC) && MPT_COMPILER_MSVC && MPT_ARCH_X86 && !defined(MPT_ARCH_X86_SSE2)
+extern "C" {
+void PaUtil_InitializeX86PlainConverters(void);
+}
 #endif
 #if MPT_OS_WINDOWS
 #include <shellapi.h>
@@ -1047,6 +1053,9 @@ PortAudioInitializer::PortAudioInitializer()
 {
 #if defined(MODPLUG_TRACKER) && MPT_COMPILER_MSVC
 	PaUtil_SetDebugPrintFunction(PortaudioLog);
+#endif
+#if defined(MPT_BUILD_MSVC) && MPT_COMPILER_MSVC && MPT_ARCH_X86 && !defined(MPT_ARCH_X86_SSE2)
+	PaUtil_InitializeX86PlainConverters();
 #endif
 	m_initialized = (Pa_Initialize() == paNoError);
 }
