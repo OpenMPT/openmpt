@@ -2289,7 +2289,8 @@ bool CSoundFile::ReadNote()
 		}
 
 		// Setup Initial Filter for this note
-		int cutoff = HandleNoteChangeFilter(chn);
+		if(int cutoff = HandleNoteChangeFilter(chn); cutoff >= 0 && chn.dwFlags[CHN_ADLIB] && m_opl)
+			m_opl->Volume(nChn, static_cast<uint8>(cutoff), true);
 
 		// Now that all relevant envelopes etc. have been processed, we can parse the MIDI macro data.
 		ProcessMacroOnChannel(nChn);
@@ -2298,13 +2299,10 @@ bool CSoundFile::ReadNote()
 		if(samplePlaying)
 		{
 			int envCutoff = ProcessPitchFilterEnvelope(chn, period);
-			if(envCutoff >= 0)
-				cutoff = envCutoff / 4;
+			// Cutoff doubles as modulator intensity for FM instruments
+			if(envCutoff >= 0 && chn.dwFlags[CHN_ADLIB] && m_opl)
+				m_opl->Volume(nChn, static_cast<uint8>(envCutoff / 4), true);
 		}
-
-		// Cutoff doubles as modulator intensity for FM instruments
-		if(cutoff >= 0 && chn.dwFlags[CHN_ADLIB] && m_opl)
-			m_opl->Volume(nChn, static_cast<uint8>(cutoff), true);
 
 		if(chn.rowCommand.volcmd == VOLCMD_VIBRATODEPTH &&
 			(chn.rowCommand.command == CMD_VIBRATO || chn.rowCommand.command == CMD_VIBRATOVOL || chn.rowCommand.command == CMD_FINEVIBRATO))
