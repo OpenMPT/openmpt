@@ -438,6 +438,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags, CModDoc *pMo
 				{
 					m_songMessage.assign(mpt::ToCharset(mpt::Charset::Locale, unarchiver.GetComment()));
 				}
+				m_ContainerType = ModContainerType::Generic;
 				return true;
 			}
 		}

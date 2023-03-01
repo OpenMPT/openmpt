@@ -118,7 +118,7 @@ static constexpr ModFormatInfo modFormatInfo[] =
 
 struct ModContainerInfo
 {
-	ModContainerType format;  // MOD_CONTAINERTYPE_XXXX
+	ModContainerType format;  // ModContainerType::XXX
 	const mpt::uchar *name;   // "Unreal Music"
 	const char *extension;    // "umx"
 };
@@ -126,13 +126,14 @@ struct ModContainerInfo
 static constexpr ModContainerInfo modContainerInfo[] =
 {
 	// Container formats
-	{ ModContainerType::UMX,   UL_("Unreal Music"),             "umx"   },
-	{ ModContainerType::XPK,   UL_("XPK packed"),               "xpk"   },
-	{ ModContainerType::PP20,  UL_("PowerPack PP20"),           "ppm"   },
-	{ ModContainerType::MMCMP, UL_("Music Module Compressor"),  "mmcmp" },
+	{ ModContainerType::UMX,     UL_("Unreal Music"),             "umx"   },
+	{ ModContainerType::XPK,     UL_("XPK packed"),               "xpk"   },
+	{ ModContainerType::PP20,    UL_("PowerPack PP20"),           "ppm"   },
+	{ ModContainerType::MMCMP,   UL_("Music Module Compressor"),  "mmcmp" },
 #ifdef MODPLUG_TRACKER
-	{ ModContainerType::WAV,   UL_("Wave"),                     "wav"   },
-	{ ModContainerType::UAX,   UL_("Unreal Sounds"),            "uax"   },
+	{ ModContainerType::WAV,     UL_("Wave"),                     "wav"   },
+	{ ModContainerType::UAX,     UL_("Unreal Sounds"),            "uax"   },
+	{ ModContainerType::Generic, UL_("Generic Archive"),          "???"   },
 #endif
 };
 

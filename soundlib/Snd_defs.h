@@ -112,8 +112,9 @@ enum class ModContainerType
 	XPK,
 	PP20,
 	MMCMP,
-	WAV,  // WAV as module
-	UAX,  // Unreal sample set as module
+	WAV,      // WAV as module
+	UAX,      // Unreal sample set as module
+	Generic,  // Generic CUnarchiver container
 };
 
 
