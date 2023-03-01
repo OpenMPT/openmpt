@@ -117,7 +117,7 @@ static constexpr ModFormatInfo modFormatInfo[] =
 
 struct ModContainerInfo
 {
-	MODCONTAINERTYPE format;  // MOD_CONTAINERTYPE_XXXX
+	ModContainerType format;  // ModContainerType::XXX
 	const mpt::uchar *name;   // "Unreal Music"
 	const char *extension;    // "umx"
 };
@@ -125,13 +125,14 @@ struct ModContainerInfo
 static constexpr ModContainerInfo modContainerInfo[] =
 {
 	// Container formats
-	{ MOD_CONTAINERTYPE_UMX,   UL_("Unreal Music"),             "umx"   },
-	{ MOD_CONTAINERTYPE_XPK,   UL_("XPK packed"),               "xpk"   },
-	{ MOD_CONTAINERTYPE_PP20,  UL_("PowerPack PP20"),           "ppm"   },
-	{ MOD_CONTAINERTYPE_MMCMP, UL_("Music Module Compressor"),  "mmcmp" },
+	{ ModContainerType::UMX,     UL_("Unreal Music"),             "umx"   },
+	{ ModContainerType::XPK,     UL_("XPK packed"),               "xpk"   },
+	{ ModContainerType::PP20,    UL_("PowerPack PP20"),           "ppm"   },
+	{ ModContainerType::MMCMP,   UL_("Music Module Compressor"),  "mmcmp" },
 #ifdef MODPLUG_TRACKER
-	{ MOD_CONTAINERTYPE_WAV,   UL_("Wave"),                     "wav"   },
-	{ MOD_CONTAINERTYPE_UAX,   UL_("Unreal Sounds"),            "uax"   },
+	{ ModContainerType::WAV,     UL_("Wave"),                     "wav"   },
+	{ ModContainerType::UAX,     UL_("Unreal Sounds"),            "uax"   },
+	{ ModContainerType::Generic, UL_("Generic Archive"),          "???"   },
 #endif
 };
 
@@ -214,7 +215,7 @@ bool CSoundFile::IsExtensionSupported(std::string_view ext)
 }
 
 
-mpt::ustring CSoundFile::ModContainerTypeToString(MODCONTAINERTYPE containertype)
+mpt::ustring CSoundFile::ModContainerTypeToString(ModContainerType containertype)
 {
 	for(const auto &containerInfo : modContainerInfo)
 	{
@@ -227,7 +228,7 @@ mpt::ustring CSoundFile::ModContainerTypeToString(MODCONTAINERTYPE containertype
 }
 
 
-mpt::ustring CSoundFile::ModContainerTypeToTracker(MODCONTAINERTYPE containertype)
+mpt::ustring CSoundFile::ModContainerTypeToTracker(ModContainerType containertype)
 {
 	std::set<mpt::ustring> retvals;
 	mpt::ustring retval;

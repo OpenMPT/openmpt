@@ -105,15 +105,16 @@ enum MODTYPE
 DECLARE_FLAGSET(MODTYPE)
 
 
-enum MODCONTAINERTYPE
+enum class ModContainerType
 {
-	MOD_CONTAINERTYPE_NONE = 0x0,
-	MOD_CONTAINERTYPE_UMX  = 0x3,
-	MOD_CONTAINERTYPE_XPK  = 0x4,
-	MOD_CONTAINERTYPE_PP20 = 0x5,
-	MOD_CONTAINERTYPE_MMCMP= 0x6,
-	MOD_CONTAINERTYPE_WAV  = 0x7, // WAV as module
-	MOD_CONTAINERTYPE_UAX  = 0x8, // Unreal sample set as module
+	None,
+	UMX,
+	XPK,
+	PP20,
+	MMCMP,
+	WAV,      // WAV as module
+	UAX,      // Unreal sample set as module
+	Generic,  // Generic CUnarchiver container
 };
 
 

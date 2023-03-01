@@ -457,7 +457,7 @@ public:	// for Editing
 #endif // MODPLUG_TRACKER
 	Enum<MODTYPE> m_nType;
 private:
-	MODCONTAINERTYPE m_ContainerType = MOD_CONTAINERTYPE_NONE;
+	ModContainerType m_ContainerType = ModContainerType::None;
 public:
 	CHANNELINDEX m_nChannels = 0;
 	SAMPLEINDEX m_nSamples = 0;
@@ -735,7 +735,7 @@ public:
 	bool Destroy();
 	Enum<MODTYPE> GetType() const noexcept { return m_nType; }
 
-	MODCONTAINERTYPE GetContainerType() const noexcept { return m_ContainerType; }
+	ModContainerType GetContainerType() const noexcept { return m_ContainerType; }
 
 	// rough heuristic, could be improved
 	mpt::Charset GetCharsetFile() const // 8bit string encoding of strings in the on-disk file
@@ -927,8 +927,8 @@ public:
 
 	static std::vector<const char *> GetSupportedExtensions(bool otherFormats);
 	static bool IsExtensionSupported(std::string_view ext); // UTF8, casing of ext is ignored
-	static mpt::ustring ModContainerTypeToString(MODCONTAINERTYPE containertype);
-	static mpt::ustring ModContainerTypeToTracker(MODCONTAINERTYPE containertype);
+	static mpt::ustring ModContainerTypeToString(ModContainerType containertype);
+	static mpt::ustring ModContainerTypeToTracker(ModContainerType containertype);
 
 	// Repair non-standard stuff in modules saved with previous ModPlug versions
 	void UpgradeModule();
