@@ -1874,7 +1874,7 @@ void CCtrlSamples::ApplyResample(SAMPLEINDEX smp, uint32 newRate, ResamplingMode
 	SetModified(smp, SampleHint().Info().Data(), smp == m_nSample, true);
 	if(updatePatternCommands)
 	{
-		m_modDoc.UpdateAllViews(PatternHint().Data());
+		m_modDoc.UpdateAllViews(nullptr, PatternHint().Data(), this);
 	}
 
 	if(selection.selectionActive && !ignoreSelection)
