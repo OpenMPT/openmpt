@@ -265,7 +265,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 	}
 	// If the file was packed in some kind of container (e.g. ZIP, or simply a format like MO3), prompt for new file extension as well
 	// Same if MOD_TYPE_XXX does not indicate actual song format
-	if(m_SndFile.GetContainerType() != MOD_CONTAINERTYPE_NONE || m_SndFile.m_SongFlags[SONG_IMPORTED])
+	if(m_SndFile.GetContainerType() != ModContainerType::None || m_SndFile.m_SongFlags[SONG_IMPORTED])
 	{
 		m_ShowSavedialog = true;
 	}

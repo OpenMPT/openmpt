@@ -191,7 +191,7 @@ void CSoundFile::InitializeGlobals(MODTYPE type)
 		Instruments[i] = nullptr;
 	}
 
-	m_ContainerType = MOD_CONTAINERTYPE_NONE;
+	m_ContainerType = ModContainerType::None;
 	m_nChannels = 0;
 	m_nInstruments = 0;
 	m_nSamples = 0;
@@ -453,17 +453,17 @@ bool CSoundFile::CreateInternal(FileReader file, ModLoadingFlags loadFlags)
 	if(file.IsValid())
 	{
 		std::vector<ContainerItem> containerItems;
-		MODCONTAINERTYPE packedContainerType = MOD_CONTAINERTYPE_NONE;
+		ModContainerType packedContainerType = ModContainerType::None;
 		if(!(loadFlags & skipContainer))
 		{
 			ContainerLoadingFlags containerLoadFlags = (loadFlags == onlyVerifyHeader) ? ContainerOnlyVerifyHeader : ContainerUnwrapData;
 #if !defined(MPT_WITH_ANCIENT)
-			if(packedContainerType == MOD_CONTAINERTYPE_NONE && UnpackXPK(containerItems, file, containerLoadFlags)) packedContainerType = MOD_CONTAINERTYPE_XPK;
-			if(packedContainerType == MOD_CONTAINERTYPE_NONE && UnpackPP20(containerItems, file, containerLoadFlags)) packedContainerType = MOD_CONTAINERTYPE_PP20;
-			if(packedContainerType == MOD_CONTAINERTYPE_NONE && UnpackMMCMP(containerItems, file, containerLoadFlags)) packedContainerType = MOD_CONTAINERTYPE_MMCMP;
+			if(packedContainerType == ModContainerType::None && UnpackXPK(containerItems, file, containerLoadFlags)) packedContainerType = ModContainerType::XPK;
+			if(packedContainerType == ModContainerType::None && UnpackPP20(containerItems, file, containerLoadFlags)) packedContainerType = ModContainerType::PP20;
+			if(packedContainerType == ModContainerType::None && UnpackMMCMP(containerItems, file, containerLoadFlags)) packedContainerType = ModContainerType::MMCMP;
 #endif // !MPT_WITH_ANCIENT
-			if(packedContainerType == MOD_CONTAINERTYPE_NONE && UnpackUMX(containerItems, file, containerLoadFlags)) packedContainerType = MOD_CONTAINERTYPE_UMX;
-			if(packedContainerType != MOD_CONTAINERTYPE_NONE)
+			if(packedContainerType == ModContainerType::None && UnpackUMX(containerItems, file, containerLoadFlags)) packedContainerType = ModContainerType::UMX;
+			if(packedContainerType != ModContainerType::None)
 			{
 				if(loadFlags == onlyVerifyHeader)
 				{
@@ -495,14 +495,14 @@ bool CSoundFile::CreateInternal(FileReader file, ModLoadingFlags loadFlags)
 		if(!loaderSuccess)
 		{
 			m_nType = MOD_TYPE_NONE;
-			m_ContainerType = MOD_CONTAINERTYPE_NONE;
+			m_ContainerType = ModContainerType::None;
 		}
 		if(loadFlags == onlyVerifyHeader)
 		{
 			return loaderSuccess;
 		}
 
-		if(packedContainerType != MOD_CONTAINERTYPE_NONE && m_ContainerType == MOD_CONTAINERTYPE_NONE)
+		if(packedContainerType != ModContainerType::None && m_ContainerType == ModContainerType::None)
 		{
 			m_ContainerType = packedContainerType;
 		}
@@ -814,7 +814,7 @@ bool CSoundFile::Destroy()
 #endif // NO_PLUGINS
 
 	m_nType = MOD_TYPE_NONE;
-	m_ContainerType = MOD_CONTAINERTYPE_NONE;
+	m_ContainerType = ModContainerType::None;
 	m_nChannels = m_nSamples = m_nInstruments = 0;
 	return true;
 }
