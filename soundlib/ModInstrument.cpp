@@ -70,6 +70,9 @@ void InstrumentEnvelope::Convert(MODTYPE fromType, MODTYPE toType)
 // returns value in range [0, rangeOut].
 int32 InstrumentEnvelope::GetValueFromPosition(int position, int32 rangeOut, int32 rangeIn) const
 {
+	if(empty())
+		return 0;
+
 	uint32 pt = size() - 1u;
 	const int32 ENV_PRECISION = 1 << 16;
 
@@ -126,13 +129,20 @@ void InstrumentEnvelope::Sanitize(uint8 maxValue)
 			it->tick = std::max(it->tick, (it - 1)->tick);
 			LimitMax(it->value, maxValue);
 		}
+		LimitMax(nLoopEnd, static_cast<decltype(nLoopEnd)>(size() - 1));
+		LimitMax(nLoopStart, nLoopEnd);
+		LimitMax(nSustainEnd, static_cast<decltype(nSustainEnd)>(size() - 1));
+		LimitMax(nSustainStart, nSustainEnd);
+		if(nReleaseNode != ENV_RELEASE_NODE_UNSET)
+			LimitMax(nReleaseNode, static_cast<decltype(nReleaseNode)>(size() - 1));
+	} else
+	{
+		nLoopStart = 0;
+		nLoopEnd = 0;
+		nSustainStart = 0;
+		nSustainEnd = 0;
+		nReleaseNode = ENV_RELEASE_NODE_UNSET;
 	}
-	LimitMax(nLoopEnd, static_cast<decltype(nLoopEnd)>(size() - 1));
-	LimitMax(nLoopStart, nLoopEnd);
-	LimitMax(nSustainEnd, static_cast<decltype(nSustainEnd)>(size() - 1));
-	LimitMax(nSustainStart, nSustainEnd);
-	if(nReleaseNode != ENV_RELEASE_NODE_UNSET)
-		LimitMax(nReleaseNode, static_cast<decltype(nReleaseNode)>(size() - 1));
 }
 
 
