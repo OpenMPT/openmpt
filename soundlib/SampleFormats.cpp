@@ -2666,7 +2666,7 @@ bool CSoundFile::ReadIFFSample(SAMPLEINDEX nSample, FileReader &file, bool allow
 		int32 minNative = int16_max, maxNative = int16_min, minSwapped = int16_max, maxSwapped = int16_min;
 		for(const auto vNative : sample16)
 		{
-			const int16 vSwapped = mpt::byteswap(vNative);
+			const int16 vSwapped = mpt::SwapBytesImpl(vNative);
 			if(vNative < minNative)
 				minNative = vNative;
 			if(vNative > maxNative)
@@ -2689,7 +2689,7 @@ bool CSoundFile::ReadIFFSample(SAMPLEINDEX nSample, FileReader &file, bool allow
 			{
 				const double diffNative = (*vNative - prev) * factorNative;
 				errorNative += diffNative * diffNative;
-				const double diffSwapped = (mpt::byteswap(*vNative) - mpt::byteswap(static_cast<int16>(prev))) * factorSwapped;
+				const double diffSwapped = (mpt::SwapBytesImpl(*vNative) - mpt::SwapBytesImpl(static_cast<int16>(prev))) * factorSwapped;
 				errorSwapped += diffSwapped * diffSwapped;
 				prev = *vNative;
 			}
@@ -2698,7 +2698,7 @@ bool CSoundFile::ReadIFFSample(SAMPLEINDEX nSample, FileReader &file, bool allow
 		{
 			for(auto &v : sample16)
 			{
-				v = mpt::byteswap(v);
+				v = mpt::SwapBytesImpl(v);
 			}
 		}
 	}
