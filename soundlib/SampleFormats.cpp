@@ -2677,8 +2677,8 @@ bool CSoundFile::ReadIFFSample(SAMPLEINDEX nSample, FileReader &file, bool allow
 				maxSwapped = vSwapped;
 		}
 
-		const int32 minMaxNative = std::max({1, -minNative, maxNative});
-		const int32 minMaxSwapped = std::max({1, -minSwapped, maxSwapped});
+		const int32 minMaxNative = std::max({int32(1), -minNative, maxNative});
+		const int32 minMaxSwapped = std::max({int32(1), -minSwapped, maxSwapped});
 		const double factorNative = 1.0 / minMaxNative, factorSwapped = 1.0 / minMaxSwapped;
 		double errorNative = 0.0, errorSwapped = 0.0;
 		for(uint8 chn = 0; chn < numChannels; chn++)
