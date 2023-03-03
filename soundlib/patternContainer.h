@@ -29,9 +29,9 @@ public:
 public:
 	CPatternContainer(CSoundFile &sndFile) : m_rSndFile{sndFile} { }
 	CPatternContainer(const CPatternContainer &) = default;
-	CPatternContainer(CPatternContainer &&) = default;
+	CPatternContainer(CPatternContainer &&) noexcept = default;
 	CPatternContainer &operator=(const CPatternContainer &other);
-	CPatternContainer &operator=(CPatternContainer &&other);
+	CPatternContainer &operator=(CPatternContainer &&other) noexcept;
 
 	// Empty and initialize all patterns.
 	void ClearPatterns();
@@ -61,36 +61,36 @@ public:
 	template <class Func>
 	Func ForEachModCommand(Func func) { return ForEachModCommand(0, Size() - 1, func); }
 
-	std::vector<CPattern>::iterator begin() { return m_Patterns.begin(); }
-	std::vector<CPattern>::const_iterator begin() const { return m_Patterns.begin(); }
-	std::vector<CPattern>::const_iterator cbegin() const { return m_Patterns.cbegin(); }
-	std::vector<CPattern>::iterator end() { return m_Patterns.end(); }
-	std::vector<CPattern>::const_iterator end() const { return m_Patterns.end(); }
-	std::vector<CPattern>::const_iterator cend() const { return m_Patterns.cend(); }
+	std::vector<CPattern>::iterator begin() noexcept { return m_Patterns.begin(); }
+	std::vector<CPattern>::const_iterator begin() const noexcept { return m_Patterns.begin(); }
+	std::vector<CPattern>::const_iterator cbegin() const noexcept { return m_Patterns.cbegin(); }
+	std::vector<CPattern>::iterator end() noexcept { return m_Patterns.end(); }
+	std::vector<CPattern>::const_iterator end() const noexcept { return m_Patterns.end(); }
+	std::vector<CPattern>::const_iterator cend() const noexcept { return m_Patterns.cend(); }
 
-	PATTERNINDEX Size() const { return static_cast<PATTERNINDEX>(m_Patterns.size()); }
+	PATTERNINDEX Size() const noexcept { return static_cast<PATTERNINDEX>(m_Patterns.size()); }
 
-	CSoundFile& GetSoundFile() { return m_rSndFile; }
-	const CSoundFile& GetSoundFile() const { return m_rSndFile; }
+	CSoundFile& GetSoundFile() noexcept { return m_rSndFile; }
+	const CSoundFile& GetSoundFile() const noexcept { return m_rSndFile; }
 
 	// Return true if pattern can be accessed with operator[](iPat), false otherwise.
-	bool IsValidIndex(const PATTERNINDEX iPat) const { return (iPat < Size()); }
+	bool IsValidIndex(const PATTERNINDEX iPat) const noexcept { return (iPat < Size()); }
 
 	// Return true if IsValidIndex() is true and the corresponding pattern has allocated modcommand array, false otherwise.
-	bool IsValidPat(const PATTERNINDEX iPat) const { return IsValidIndex(iPat) && m_Patterns[iPat].IsValid(); }
+	bool IsValidPat(const PATTERNINDEX iPat) const noexcept { return IsValidIndex(iPat) && m_Patterns[iPat].IsValid(); }
 
 	// Returns true if the pattern is empty, i.e. there are no notes/effects in this pattern
-	bool IsPatternEmpty(const PATTERNINDEX nPat) const;
+	bool IsPatternEmpty(const PATTERNINDEX nPat) const noexcept;
 	
 	void ResizeArray(const PATTERNINDEX newSize);
 
 	void OnModTypeChanged(const MODTYPE oldtype);
 
 	// Returns index of last valid pattern + 1, zero if no such pattern exists.
-	PATTERNINDEX GetNumPatterns() const;
+	PATTERNINDEX GetNumPatterns() const noexcept;
 
 	// Returns index of highest pattern with pattern named + 1.
-	PATTERNINDEX GetNumNamedPatterns() const;
+	PATTERNINDEX GetNumNamedPatterns() const noexcept;
 
 
 private:

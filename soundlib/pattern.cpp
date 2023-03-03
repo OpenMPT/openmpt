@@ -23,18 +23,18 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-CSoundFile& CPattern::GetSoundFile() { return m_rPatternContainer.GetSoundFile(); }
-const CSoundFile& CPattern::GetSoundFile() const { return m_rPatternContainer.GetSoundFile(); }
+CSoundFile& CPattern::GetSoundFile() noexcept { return m_rPatternContainer.GetSoundFile(); }
+const CSoundFile& CPattern::GetSoundFile() const noexcept { return m_rPatternContainer.GetSoundFile(); }
 
 
-CHANNELINDEX CPattern::GetNumChannels() const
+CHANNELINDEX CPattern::GetNumChannels() const noexcept
 {
 	return GetSoundFile().GetNumChannels();
 }
 
 
 // Check if there is any note data on a given row.
-bool CPattern::IsEmptyRow(ROWINDEX row) const
+bool CPattern::IsEmptyRow(ROWINDEX row) const noexcept
 {
 	if(m_ModCommands.empty() || !IsValidRow(row))
 	{
@@ -52,7 +52,7 @@ bool CPattern::IsEmptyRow(ROWINDEX row) const
 }
 
 
-bool CPattern::SetSignature(const ROWINDEX rowsPerBeat, const ROWINDEX rowsPerMeasure)
+bool CPattern::SetSignature(const ROWINDEX rowsPerBeat, const ROWINDEX rowsPerMeasure) noexcept
 {
 	if(rowsPerBeat < 1
 		|| rowsPerBeat > GetSoundFile().GetModSpecifications().patternRowsMax
@@ -103,7 +103,7 @@ bool CPattern::Resize(const ROWINDEX newRowCount, bool enforceFormatLimits, bool
 }
 
 
-void CPattern::ClearCommands()
+void CPattern::ClearCommands() noexcept
 {
 	std::fill(m_ModCommands.begin(), m_ModCommands.end(), ModCommand{});
 }
@@ -163,7 +163,7 @@ CPattern& CPattern::operator= (const CPattern &pat)
 
 
 
-bool CPattern::operator== (const CPattern &other) const
+bool CPattern::operator== (const CPattern &other) const noexcept
 {
 	return GetNumRows() == other.GetNumRows()
 		&& GetNumChannels() == other.GetNumChannels()
