@@ -2620,7 +2620,18 @@ bool CSoundFile::ReadIFFSample(SAMPLEINDEX nSample, FileReader &file, bool allow
 			sampleIO |= SampleIO::stereoSplit;
 
 		loopStart  = sampleHeader.oneShotHiSamples / bytesPerFrame;
-		loopLength = sampleHeader.repeatHiSamples / bytesPerFrame;
+		// Loops are a complicated mess in IFF samples.
+		// Some samples (e.g. those from the Ensoniq Mirage for Amiga collection available at https://archive.org/details/mirage4amiga)
+		// have a repeatHiSamples portion that includes garbage. However, these samples also have an appropriate samplesPerHiCycle value set
+		// which indicates the length of one cycle of the repeating waveform. If we just take that one cycle into account, the samples loop cleanly.
+		// However, some other, non-musical 8SVX samples use bogus samplesPerHiCycle values. The following conditions help us spot this sort of samples:
+		// - If samplesPerHiCycle is 32 or lower, we simply ignore it.
+		// - According to the documentation, repeatHiSamples is intended to be a multiple of samplesPerHiCycle if the latter is set (otherwise we wouldn't get a clean loop).
+		//   So if this is not the case, we ignore samplesPerHiCycle and only use repeatHiSamples.
+		if(sampleHeader.samplesPerHiCycle > 32 && sampleHeader.samplesPerHiCycle < sampleHeader.repeatHiSamples && (sampleHeader.repeatHiSamples % sampleHeader.samplesPerHiCycle) == 0)
+			loopLength = sampleHeader.samplesPerHiCycle / bytesPerFrame;
+		else
+			loopLength = sampleHeader.repeatHiSamples / bytesPerFrame;
 		sampleRate = sampleHeader.samplesPerSec;
 		volume     = sampleHeader.volume;
 		numSamples = mpt::saturate_cast<SmpLength>(sampleData.GetLength() / bytesPerFrame);
@@ -2655,7 +2666,7 @@ bool CSoundFile::ReadIFFSample(SAMPLEINDEX nSample, FileReader &file, bool allow
 
 	if(allowLittleEndian && !memcmp(fileHeader.magic, "16SV", 4))
 	{
-		// Fasttracker 2 (and also Awave Studio at the time of writing) writes little-endian 16-bit data. Great...
+		// Fasttracker 2 (and also Awave Studio up to version 11.7) writes little-endian 16-bit data. Great...
 		// It is relatively safe to assume (see raw sample import dialog) that "proper" sample data usually has some smoothness to it,
 		// i.e. its first derivative mostly consists of small-ish values.
 		// When interpreting the sample data with incorrect endianness, however, the first derivative is usually a lot more jumpy.
