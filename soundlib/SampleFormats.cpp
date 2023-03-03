@@ -2542,7 +2542,7 @@ struct IFFSampleHeader
 MPT_BINARY_STRUCT(IFFSampleHeader, 20)
 
 
-bool CSoundFile::ReadIFFSample(SAMPLEINDEX nSample, FileReader &file)
+bool CSoundFile::ReadIFFSample(SAMPLEINDEX nSample, FileReader &file, bool allowLittleEndian)
 {
 	file.Rewind();
 
@@ -2612,7 +2612,6 @@ bool CSoundFile::ReadIFFSample(SAMPLEINDEX nSample, FileReader &file)
 		const uint8 numChannels    = chanChunk.ReadUint32BE() == 6 ? 2 : 1;
 		const uint8 bytesPerFrame  = bytesPerSample * numChannels;
 
-		// While this is an Amiga format, the 16SV version appears to be only used on PC, and only with little-endian sample data.
 		if(bytesPerSample == 2)
 			sampleIO |= SampleIO::_16bit;
 		if(numChannels == 2)
@@ -2635,7 +2634,7 @@ bool CSoundFile::ReadIFFSample(SAMPLEINDEX nSample, FileReader &file)
 		sample.uFlags.set(CHN_LOOP);
 
 	sample.nC5Speed = sampleRate;
-	if(!sample.nC5Speed)
+	if(sample.nC5Speed <= 1)
 		sample.nC5Speed = 22050;
 
 	sample.nVolume = static_cast<uint16>(volume / 256);
@@ -2651,6 +2650,59 @@ bool CSoundFile::ReadIFFSample(SAMPLEINDEX nSample, FileReader &file)
 		m_szNames[nSample] = "";
 
 	sampleIO.ReadSample(sample, sampleData);
+
+	if(allowLittleEndian && !memcmp(fileHeader.magic, "16SV", 4))
+	{
+		// Fasttracker 2 (and also Awave Studio at the time of writing) writes little-endian 16-bit data. Great...
+		// It is relatively safe to assume (see raw sample import dialog) that "proper" sample data usually has some smoothness to it,
+		// i.e. its first derivative mostly consists of small-ish values.
+		// When interpreting the sample data with incorrect endianness, however, the first derivative is usually a lot more jumpy.
+		// So we compare the two derivatives when interpreting the data as little-endian and big-endian,
+		// and choose the waveform that has less jumps in it.
+		// Sample data is normalized for those comparisons, otherwise 8-bit data converted to 16-bit will almost always be more optimal
+		// when byte-swapped (as the upper byte is always 0).
+		const uint8 numChannels = sample.GetNumChannels();
+		auto sample16 = mpt::as_span(sample.sample16(), sample.nLength * numChannels);
+		int32 minNative = int16_max, maxNative = int16_min, minSwapped = int16_max, maxSwapped = int16_min;
+		for(const auto vNative : sample16)
+		{
+			const int16 vSwapped = mpt::byteswap(vNative);
+			if(vNative < minNative)
+				minNative = vNative;
+			if(vNative > maxNative)
+				maxNative = vNative;
+			if(vSwapped < minSwapped)
+				minSwapped = vSwapped;
+			if(vSwapped > maxSwapped)
+				maxSwapped = vSwapped;
+		}
+
+		const int32 minMaxNative = std::max({1, -minNative, maxNative});
+		const int32 minMaxSwapped = std::max({1, -minSwapped, maxSwapped});
+		const double factorNative = 1.0 / minMaxNative, factorSwapped = 1.0 / minMaxSwapped;
+		double errorNative = 0.0, errorSwapped = 0.0;
+		for(uint8 chn = 0; chn < numChannels; chn++)
+		{
+			const int16 *vNative = sample.sample16() + chn;
+			int32 prev = 0;
+			for(SmpLength i = sample.nLength; i != 0; i--, vNative += numChannels)
+			{
+				const double diffNative = (*vNative - prev) * factorNative;
+				errorNative += diffNative * diffNative;
+				const double diffSwapped = (mpt::byteswap(*vNative) - mpt::byteswap(static_cast<int16>(prev))) * factorSwapped;
+				errorSwapped += diffSwapped * diffSwapped;
+				prev = *vNative;
+			}
+		}
+		if(errorNative > errorSwapped)
+		{
+			for(auto &v : sample16)
+			{
+				v = mpt::byteswap(v);
+			}
+		}
+	}
+
 	sample.PrecomputeLoops(*this, false);
 
 	return true;

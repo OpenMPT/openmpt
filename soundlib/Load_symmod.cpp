@@ -1135,7 +1135,7 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 					chunk = FileReader(mpt::as_span(unpackedSample));
 				}
 
-				if(!ReadIFFSample(sample, chunk)
+				if(!ReadIFFSample(sample, chunk, false)
 				   && !ReadWAVSample(sample, chunk)
 				   && !ReadAIFFSample(sample, chunk)
 				   && !ReadRawSymSample(Samples[sample], chunk))
