@@ -1217,7 +1217,7 @@ protected:
 	bool ReadXISample(SAMPLEINDEX nSample, FileReader &file);
 	bool ReadITSSample(SAMPLEINDEX nSample, FileReader &file, bool rewind = true);
 	bool ReadITISample(SAMPLEINDEX nSample, FileReader &file);
-	bool ReadIFFSample(SAMPLEINDEX sample, FileReader &file);
+	bool ReadIFFSample(SAMPLEINDEX sample, FileReader &file, bool allowLittleEndian = true);
 	bool ReadBRRSample(SAMPLEINDEX sample, FileReader &file);
 	bool ReadFLACSample(SAMPLEINDEX sample, FileReader &file);
 	bool ReadOpusSample(SAMPLEINDEX sample, FileReader &file);
