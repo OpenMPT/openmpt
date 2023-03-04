@@ -25,6 +25,26 @@
 
 static int16_t buffer[BUFFERSIZE];
 
+static int ErrFunc (int error, void *)
+{
+	switch (error)
+	{
+		case OPENMPT_ERROR_INVALID_ARGUMENT:
+		case OPENMPT_ERROR_OUT_OF_RANGE:
+		case OPENMPT_ERROR_LENGTH:
+		case OPENMPT_ERROR_DOMAIN:
+		case OPENMPT_ERROR_LOGIC:
+		case OPENMPT_ERROR_UNDERFLOW:
+		case OPENMPT_ERROR_OVERFLOW:
+		case OPENMPT_ERROR_RANGE:
+		case OPENMPT_ERROR_RUNTIME:
+		case OPENMPT_ERROR_EXCEPTION:
+			abort();
+		default:
+			return OPENMPT_ERROR_FUNC_RESULT_NONE;
+	}
+}
+
 int main( int argc, char * argv[] ) {
 	static FILE * file = NULL;
 	static openmpt_module * mod = NULL;
@@ -35,7 +55,7 @@ int main( int argc, char * argv[] ) {
 	__AFL_INIT();
 #endif
 	file = fopen( argv[1], "rb" );
-	mod = openmpt_module_create( openmpt_stream_get_file_callbacks(), file, NULL, NULL, NULL );
+	mod = openmpt_module_create2( openmpt_stream_get_file_callbacks(), file, NULL, NULL, ErrFunc, NULL, NULL, NULL, NULL );
 	fclose( file );
 	if ( mod == NULL ) return 1;
 	openmpt_module_ctl_set( mod, "render.resampler.emulate_amiga", (openmpt_module_get_num_orders( mod ) & 1) ? "0" : "1" );
