@@ -67,11 +67,19 @@ static CString FillEmptyCaption(const CString &caption)
 }
 
 
-static UINT ShowNotificationImpl(const CString &text, const CString &caption, UINT flags, const CWnd *parent)
+static UINT ShowNotificationImpl(CString text, const CString &caption, UINT flags, const CWnd *parent)
 {
 	if(parent == nullptr)
 	{
 		parent = CMainFrame::GetActiveWindow();
+	}
+	// Workaround MessageBox text length limitation: Better show a truncated string than no message at all.
+	if(text.GetLength() > uint16_max)
+	{
+		text.Truncate(uint16_max);
+		text.SetAt(uint16_max - 1, _T('.'));
+		text.SetAt(uint16_max - 2, _T('.'));
+		text.SetAt(uint16_max - 3, _T('.'));
 	}
 	BypassInputHandler bih;
 	UINT result = ::MessageBox(parent->GetSafeHwnd(), text, caption.IsEmpty() ? CString(MAINFRAME_TITLE) : caption, flags);
