@@ -16,7 +16,18 @@ CmdExtract::CmdExtract(CommandData *Cmd)
   // Common for all archives involved. Set here instead of DoExtract()
   // to use in unrar.dll too. Allows to avoid LinksToDirs() calls
   // and save CPU time in no symlinks including ".." in target were extracted.
-  UpLinkExtracted=false;
+#if defined(_WIN_ALL)
+  // We can't expand symlink path components in another symlink target
+  // in Windows. We can't create symlinks in Android now. Even though we do not
+  // really need LinksToDirs() calls in these systems, we still call it
+  // for extra safety, but only if symlink with ".." in target was extracted.
+  ConvertSymlinkPaths=false;
+#else
+  // We enable it by default in Unix to care about the case when several
+  // archives are unpacked to same directory with several independent RAR runs.
+  // Worst case performance penalty for a lot of small files seems to be ~3%.
+  ConvertSymlinkPaths=true;
+#endif
 
   Unp=new Unpack(&DataIO);
 #ifdef RAR_SMP
@@ -27,13 +38,13 @@ CmdExtract::CmdExtract(CommandData *Cmd)
 
 CmdExtract::~CmdExtract()
 {
-  ReleaseAnalyzeData();
+  FreeAnalyzeData();
   delete Unp;
   delete Analyze;
 }
 
 
-void CmdExtract::ReleaseAnalyzeData()
+void CmdExtract::FreeAnalyzeData()
 {
   for (size_t I=0;I<RefList.Size();I++)
   {
@@ -486,6 +497,13 @@ bool CmdExtract::ExtractCurrentFile(Archive &Arc,size_t HeaderSize,bool &Repeat)
       
         if (!Cmd->Test) // While harmless, it is useless for 't'.
         {
+          // If reference source isn't selected, but target is selected,
+          // we unpack the source under the temporary name and then rename
+          // or copy it to target name. We do not unpack it under the target
+          // name immediately, because the same source can be used by multiple
+          // targets and it is possible that first target isn't unpacked
+          // for some reason. Also targets might have associated service blocks
+          // like ACLs. All this would complicate processing a lot.
           wcsncpyz(DestFileName,*Cmd->TempPath!=0 ? Cmd->TempPath:Cmd->ExtrPath,ASIZE(DestFileName));
           AddEndSlash(DestFileName,ASIZE(DestFileName));
           wcsncatz(DestFileName,L"__tmp_reference_source_",ASIZE(DestFileName));
@@ -622,6 +640,8 @@ bool CmdExtract::ExtractCurrentFile(Archive &Arc,size_t HeaderSize,bool &Repeat)
         break;
       }
     }
+    else
+      DataIO.SetEncryption(false,CRYPT_NONE,NULL,NULL,NULL,0,NULL,NULL);
 
 #ifdef RARDLL
     if (*Cmd->DllDestName!=0)
@@ -629,7 +649,7 @@ bool CmdExtract::ExtractCurrentFile(Archive &Arc,size_t HeaderSize,bool &Repeat)
 #endif
 
     if (ExtrFile && Command!='P' && !Cmd->Test && !Cmd->AbsoluteLinks &&
-        UpLinkExtracted)
+        ConvertSymlinkPaths)
       ExtrFile=LinksToDirs(DestFileName,Cmd->ExtrPath,LastCheckedSymlink);
 
     File CurFile;
@@ -789,7 +809,7 @@ bool CmdExtract::ExtractCurrentFile(Archive &Arc,size_t HeaderSize,bool &Repeat)
             {
               bool UpLink;
               LinkSuccess=ExtractSymlink(Cmd,DataIO,Arc,DestFileName,UpLink);
-              UpLinkExtracted|=LinkSuccess && UpLink;
+              ConvertSymlinkPaths|=LinkSuccess && UpLink;
 
               // We do not actually need to reset the cache here if we cache
               // only the single last checked path, because at this point
@@ -1314,7 +1334,7 @@ void CmdExtract::ExtrCreateDir(Archive &Arc,const wchar *ArcFileName)
         DirExist=FileExist(DestFileName) && IsDir(GetFileAttr(DestFileName));
         if (!DirExist)
         {
-          if (!Cmd->AbsoluteLinks && UpLinkExtracted)
+          if (!Cmd->AbsoluteLinks && ConvertSymlinkPaths)
             LinksToDirs(DestFileName,Cmd->ExtrPath,LastCheckedSymlink);
           CreatePath(DestFileName,true,Cmd->DisableNames);
           MDCode=MakeDir(DestFileName,!Cmd->IgnoreGeneralAttr,Arc.FileHead.FileAttr);
@@ -1398,7 +1418,7 @@ bool CmdExtract::ExtrCreateFile(Archive &Arc,File &CurFile)
 
           MakeNameUsable(DestFileName,true);
 
-          if (!Cmd->AbsoluteLinks && UpLinkExtracted)
+          if (!Cmd->AbsoluteLinks && ConvertSymlinkPaths)
             LinksToDirs(DestFileName,Cmd->ExtrPath,LastCheckedSymlink);
           CreatePath(DestFileName,true,Cmd->DisableNames);
           if (FileCreate(Cmd,&CurFile,DestFileName,ASIZE(DestFileName),&UserReject,Arc.FileHead.UnpSize,&Arc.FileHead.mtime,true))
@@ -1457,7 +1477,7 @@ bool CmdExtract::CheckUnpVer(Archive &Arc,const wchar *ArcFileName)
 // 
 void CmdExtract::AnalyzeArchive(const wchar *ArcName,bool Volume,bool NewNumbering)
 {
-  ReleaseAnalyzeData(); // If processing non-first archive in multiple archives set.
+  FreeAnalyzeData(); // If processing non-first archive in multiple archives set.
 
   wchar *ArgName=Cmd->FileArgs.GetString();
   Cmd->FileArgs.Rewind();
@@ -1472,9 +1492,15 @@ void CmdExtract::AnalyzeArchive(const wchar *ArcName,bool Volume,bool NewNumberi
     wcsncpyz(NextName,ArcName,ASIZE(NextName));
   
   bool MatchFound=false;
-  bool FirstVolume=true;
   bool PrevMatched=false;
   bool OpenNext=false;
+
+  bool FirstVolume=true;
+  
+  // We shall set FirstFile once for all volumes and not for each volume.
+  // So we do not reuse the outdated Analyze->StartPos from previous volume
+  // if extracted file resides completely in the beginning of current one.
+  bool FirstFile=true;
 
   while (true)
   {
@@ -1493,7 +1519,6 @@ void CmdExtract::AnalyzeArchive(const wchar *ArcName,bool Volume,bool NewNumberi
     }
 
     OpenNext=false;
-    bool FirstFile=true;
     while (Arc.ReadHeader()>0)
     {
       Wait();
@@ -1510,17 +1535,28 @@ void CmdExtract::AnalyzeArchive(const wchar *ArcName,bool Volume,bool NewNumberi
         {
           if (!MatchFound && !Arc.FileHead.Solid) // Can start extraction from here.
           {
+            // We would gain nothing and unnecessarily complicate extraction
+            // if we set StartName for first volume or StartPos for first
+            // archived file.
             if (!FirstVolume)
               wcsncpyz(Analyze->StartName,NextName,ASIZE(Analyze->StartName));
+
+            // We shall set FirstFile once for all volumes for this code
+            // to work properly. Alternatively we could append 
+            // "|| Analyze->StartPos!=0" to the condition, so we do not reuse
+            // the outdated Analyze->StartPos value from previous volume.
             if (!FirstFile)
               Analyze->StartPos=Arc.CurBlockPos;
           }
-          FirstFile=false;
 
           if (Cmd->IsProcessFile(Arc.FileHead,NULL,MATCH_WILDSUBPATH,0,NULL,0)!=0)
           {
             MatchFound = true;
             PrevMatched = true;
+
+            // Reset the previously set early exit position, if any, because
+            // we found a new matched file.
+            Analyze->EndPos=0;
 
             // Matched file reference pointing at maybe non-matched source file.
             // Even though we know RedirName, we can't check if source file
@@ -1556,14 +1592,18 @@ void CmdExtract::AnalyzeArchive(const wchar *ArcName,bool Volume,bool NewNumberi
           {
             if (PrevMatched) // First non-matched item after matched.
             {
+              // We would perform the unnecessarily string comparison
+              // when extracting if we set this value for first volume
+              // or non-volume archive.
               if (!FirstVolume)
                 wcsncpyz(Analyze->EndName,NextName,ASIZE(Analyze->EndName));
-              if (!FirstFile)
-                Analyze->EndPos=Arc.CurBlockPos;
+              Analyze->EndPos=Arc.CurBlockPos;
             }
             PrevMatched=false;
           }
         }
+
+        FirstFile=false;
         if (Arc.FileHead.SplitAfter)
         {
           OpenNext=true; // Allow open next volume.
@@ -1578,6 +1618,12 @@ void CmdExtract::AnalyzeArchive(const wchar *ArcName,bool Volume,bool NewNumberi
     {
       NextVolumeName(NextName,ASIZE(NextName),!Arc.NewNumbering);
       FirstVolume=false;
+
+      // Needed for multivolume archives. Added in case some 'break'
+      // will quit early from loop above, so we do not set it in the loop.
+      // Now it can happen for hypothetical archive without file records
+      // and with HEAD_ENDARC record.
+      FirstFile=false;
     }
     else
       break;
