@@ -32,6 +32,44 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.30.11.00 (5 March 2023, revision 18811)
+------------------------------------------
+Tree view
+- [Fix] <js> When previewing soundfont or MIDI library items, a click was heard on note-off (http://bugs.openmpt.org/view.php?id=1659).
+
+Pattern tab
+- [Imp] <js> Quick Paste only sets the module as modified if the pattern contents were changed.
+- [Fix] <js> Don't allow notes or effects not supported by the current module type to be pasted through Quick Cursor Paste.
+- [Fix] <js> After seeking with sample sync, the filter settings of playing notes were not updated since OpenMPT 1.30.09.00.
+- [Fix] <js> Effect info: XM commands E10 / E20 / EA0 / EB0 now correctly show "continue" for parameter info.
+
+Sample tab
+- [Imp] <js> The correct endianness of 16SV IFF sample data is now determined heuristically, to support both IFF files created by some (broken) PC software and files using the correct endianness.
+- [Imp] <js> Fix single-cycle loops in some IFF samples.
+
+Instrument tab
+- [Fix] <js> If the first notes assigned to a sample in a key map required no transposition but the transposition changed for higher notes, the "Transpose Samples / Reset Map" feature was still available, even though it shouldn't be.
+- [Fix] <js> Possible crash when hovering the envelope area of malformed instruments with a set release node but no envelope points (http://bugs.openmpt.org/view.php?id=1672).
+
+Mod Conversion
+- [Fix] <js> MOD commands E10 / E20 / EA0 / EB0 are no longer preserved when converting to other formats, as the MOD format applies no effect memory for them.
+
+Playback
+- [Fix] <js> The fix for the OPL cutoff bug introduced in OpenMPT 1.30.09.00 was incomplete (http://bugs.openmpt.org/view.php?id=1671).
+- [Fix] <js> Avoid potential deadlock when a VST plugin is auto-bypassed due to an exception.
+- [Fix] <js> Possible crash when playing instruments with a set release node but no envelope points (http://bugs.openmpt.org/view.php?id=1672).
+
+Other formats
+- [Fix] <js> ULT: Offset commands exceeding 65535 samples were sometimes not imported correctly even if there was room for them.
+
+Misc
+- [Fix] <js> When saving modules extracted from ZIP files and other archive types, there was no prompt for a new filename, instead overwriting the original archive file.
+- [Fix] <js> Song length calculation and seeking in (malformed) modules with thousands of short sub-songs has been sped up.
+
+Third-Party Libraries
+- [Imp] Update UnRAR (v6.2.6)
+
+
 v1.30.10.00 (29 January 2023, revision 18674)
 ---------------------------------------------
 Pattern tab
@@ -47,7 +85,7 @@ Comments tab
 - [Fix] <js> The displayed middle-C frequency was slightly off for MOD files.
 
 Mod Conversion
-- [Fix] <js> Translation between MOD / XM E50 and MPTM / IT / S3M S20 Set Finetune commands did not take the different scales of the commands into account.
+- [Fix] <js> Translation between MOD / XM E5x and MPTM / IT / S3M S2x Set Finetune commands did not take the different scales of the commands into account.
 - [Fix] <js> Wrong PAL middle-C frequency was used when converting from MOD to MPTM / IT / S3M.
 
 Playback
@@ -97,7 +135,7 @@ Misc
 - [Fix] <jh> Update Check: On modern portable amd64 installations, updates for the legacy version were downloaded instead (http://bugs.openmpt.org/view.php?id=1642).
 
 Third-Party Libraries
-- [Imp] Update UnRAR (v6.2.3) 
+- [Imp] Update UnRAR (v6.2.3)
 
 
 v1.30.08.00 (13 November 2022, revision 18159)
@@ -124,7 +162,7 @@ Misc
 - [Fix] <kk & js> Most keyboard shortcuts were not accessible with Microsoft's RDP client for iOS and potentially other virtual keyboards (http://bugs.openmpt.org/view.php?id=1634).
 
 Third-Party Libraries
-- [Imp] Update flac (v1.4.2), mpg123 (v1.31.1) and UnRAR (v6.2.2) 
+- [Imp] Update flac (v1.4.2), mpg123 (v1.31.1) and UnRAR (v6.2.2)
 
 
 v1.30.07.00 (25 September 2022, revision 17944)

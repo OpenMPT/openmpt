@@ -7,6 +7,18 @@ is just a high-level summary.
 
 ### libopenmpt 0.6.9-pre
 
+ *  [**Bug**] An exception could be thrown during rendering when trying to
+    access the release node of an empty envelope.
+
+ *  The fix for the OPL cutoff bug introduced in libopenmpt 0.6.7 was
+    incomplete.
+ *  ULT: Offset commands exceeding 65535 samples were sometimes not imported
+    correctly even if there was room for them.
+ *  After seeking with seek.sync_samples=1, the filter settings of playing notes
+    were not updated since libopenmpt 0.6.7.
+ *  Loading of and seeking inside (malformed) modules with thousands of short
+    sub-songs has been sped up.
+
 ### libopenmpt 0.6.8 (2023-01-29)
 
  *  [**Bug**] DSYM: Loading DSYM files got broken in 0.6.7.
