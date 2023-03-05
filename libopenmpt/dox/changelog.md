@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.3.44-pre
+
 ### libopenmpt 0.3.43 (2023-03-05)
 
  *  [**Bug**] An exception could be thrown during rendering when trying to
