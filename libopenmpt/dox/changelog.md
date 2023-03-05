@@ -7,6 +7,12 @@ is just a high-level summary.
 
 ### libopenmpt 0.5.23-pre
 
+ *  [**Bug**] An exception could be thrown during rendering when trying to
+    access the release node of an empty envelope.
+
+ *  Loading of and seeking inside (malformed) modules with thousands of short
+    sub-songs has been sped up.
+
 ### libopenmpt 0.5.22 (2023-01-29)
 
  *  When seeking around in a module, the tempo was sometimes incorrectly limited
