@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt 0.3.43-pre
 
+ *  [**Bug**] An exception could be thrown during rendering when trying to
+    access the release node of an empty envelope.
+
 ### libopenmpt 0.3.42 (2023-01-29)
 
  *  When seeking around in a module, the tempo was sometimes incorrectly limited
