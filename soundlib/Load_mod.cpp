@@ -708,6 +708,7 @@ static bool CheckMODMagic(const char magic[4], MODMagicResult &result)
 	{
 		result.madeWithTracker = UL_("NoiseTracker");
 		result.isNoiseTracker = true;
+		result.setMODVBlankTiming = true;
 		result.numChannels = 4;
 	} else if(IsMagic(magic, "OKTA")
 	          || IsMagic(magic, "OCTA"))
