@@ -4316,6 +4316,15 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcPatternGrowSelection:		OnGrowSelection(); return wParam;
 		case kcPatternShrinkSelection:		OnShrinkSelection(); return wParam;
 
+		case kcPatternScrollLeft:
+		case kcPatternScrollRight:
+			OnScrollBy(CSize{(wParam == kcPatternScrollRight) ? m_szCell.cx : -m_szCell.cx, 0});
+			return wParam;
+		case kcPatternScrollUp:
+		case kcPatternScrollDown:
+			OnScrollBy(CSize{0, (wParam == kcPatternScrollDown) ? m_szCell.cy : -m_szCell.cy});
+			return wParam;
+
 		// Pattern navigation:
 		case kcPatternJumpUph1Select:
 		case kcPatternJumpUph1:			CursorJump(-(int)GetRowsPerMeasure(), false); return wParam;

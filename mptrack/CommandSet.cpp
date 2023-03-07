@@ -1239,6 +1239,10 @@ static constexpr struct
 	{2045, kcPlayStopSong, _T("Play Song / Stop Song")},
 	{2046, kcTreeViewDeletePermanently, _T("Delete Item Permanently")},
 	{2047, kcSampleToggleFollowPlayCursor, _T("Toggle Follow Sample Play Cursor")},
+	{2048, kcPatternScrollLeft, _T("Scroll Left")},
+	{2049, kcPatternScrollRight, _T("Scroll Right") },
+	{2050, kcPatternScrollUp, _T("Scroll Up")},
+	{2051, kcPatternScrollDown, _T("Scroll Down")},
 };
 
 // Get command descriptions etc.. loaded up.

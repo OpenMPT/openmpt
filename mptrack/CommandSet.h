@@ -234,7 +234,14 @@ enum CommandID
 
 	//Pattern Editing
 	kcStartPatternEditing,
-	kcStartSelect = kcStartPatternEditing,
+	kcStartPatternScrolling = kcStartPatternEditing,
+	kcPatternScrollLeft = kcStartPatternScrolling,
+	kcPatternScrollRight,
+	kcPatternScrollUp,
+	kcPatternScrollDown,
+	kcEndPatternScrolling = kcPatternScrollDown,
+
+	kcStartSelect,
 	kcSelect = kcStartSelect,
 	kcSelectWithNav,
 	kcSelectOff,
