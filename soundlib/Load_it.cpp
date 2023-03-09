@@ -1246,6 +1246,9 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				m_playBehaviour.reset(kITPortamentoSwapResetsPos);
 				m_playBehaviour.reset(kITMultiSampleInstrumentNumber);
 			}
+			// Initial note memory for channel is C-0: Added 2023-03-09, https://github.com/schismtracker/schismtracker/commit/73e9d60676c2b48c8e94e582373e29517105b2b1
+			if(schismDateVersion < SchismVersionFromDate<2023, 03, 9>::date)
+				m_playBehaviour.reset(kITInitialNoteMemory);
 			break;
 		case 4:
 			madeWithTracker = MPT_UFORMAT("pyIT {}.{}")((fileHeader.cwtv & 0x0F00) >> 8, mpt::ufmt::hex0<2>(fileHeader.cwtv & 0xFF));
