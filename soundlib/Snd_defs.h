@@ -551,6 +551,7 @@ enum PlayBehaviour
 	kPluginIgnoreTonePortamento,    // Use old tone portamento behaviour for plugins (XM: no plugin pitch slides with commands E1x/E2x/X1x/X2x)
 	kST3TonePortaWithAdlibNote,     // Adlib note next to tone portamento is delayed until next row
 	kITResetFilterOnPortaSmpChange, // Filter is reset on portamento if sample is swapped
+	kITInitialNoteMemory,           // Initial "last note memory" for each channel is C-0 and not "no note"
 
 	// Add new play behaviours here.
 
