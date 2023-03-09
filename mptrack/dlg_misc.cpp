@@ -703,6 +703,7 @@ void CLegacyPlaybackSettingsDlg::OnFilterStringChanged()
 			break;
 		case kST3TonePortaWithAdlibNote: desc = _T("Adlib Notes with Tone Portamento are delayed until the next row"); break;
 		case kITResetFilterOnPortaSmpChange: desc = _T("Reset filter on portamento if new note plays a different sample"); break;
+		case kITInitialNoteMemory: desc = _T("Initial Last Note Memory of each channel is C-0 instead of No Note"); break;
 
 		default: MPT_ASSERT_NOTREACHED();
 		}

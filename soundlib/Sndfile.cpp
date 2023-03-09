@@ -182,6 +182,11 @@ void CSoundFile::InitializeGlobals(MODTYPE type)
 
 	MODTYPE bestType = GetBestSaveFormat();
 	m_playBehaviour = GetDefaultPlaybackBehaviour(bestType);
+	if(bestType == MOD_TYPE_IT && type != bestType)
+	{
+		// This is such an odd behaviour that it's unlikely that any of the other formats will need it by default. Re-enable as needed.
+		m_playBehaviour.reset(kITInitialNoteMemory);
+	}
 	SetModSpecsPointer(m_pModSpecs, bestType);
 
 	// Delete instruments in case some previously called loader already created them.
@@ -1153,6 +1158,7 @@ PlayBehaviourSet CSoundFile::GetSupportedPlaybackBehaviour(MODTYPE type)
 		playBehaviour.set(kITDCTBehaviour);
 		playBehaviour.set(kITPitchPanSeparation);
 		playBehaviour.set(kITResetFilterOnPortaSmpChange);
+		playBehaviour.set(kITInitialNoteMemory);
 		if(type == MOD_TYPE_MPT)
 		{
 			playBehaviour.set(kOPLFlexibleNoteOff);

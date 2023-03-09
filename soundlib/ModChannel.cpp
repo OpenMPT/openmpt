@@ -19,7 +19,9 @@ void ModChannel::Reset(ResetFlags resetMask, const CSoundFile &sndFile, CHANNELI
 {
 	if(resetMask & resetSetPosBasic)
 	{
-		nNote = nNewNote = NOTE_NONE;
+		// IT compatibility: Initial "last note memory" of channel is C-0 (so a lonely instrument number without note will play that note).
+		// Test case: InitialNoteMemory.it
+		nNote = nNewNote = (sndFile.m_playBehaviour[kITInitialNoteMemory] ? NOTE_MIN : NOTE_NONE);
 		nArpeggioLastNote = lastMidiNoteWithoutArp = NOTE_NONE;
 		nNewIns = nOldIns = 0;
 		pModSample = nullptr;
