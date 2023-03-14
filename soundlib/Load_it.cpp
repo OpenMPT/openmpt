@@ -721,7 +721,8 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	// Read mix plugins information
 	FileReader pluginChunk = file.ReadChunk((minPtr >= file.GetPosition()) ? minPtr - file.GetPosition() : file.BytesLeft());
 	const auto [hasPluginChunks, isBeRoTracker] = LoadMixPlugins(pluginChunk);
-	hasModPlugExtensions |= hasPluginChunks;
+	if(hasPluginChunks)
+		hasModPlugExtensions = true;
 
 	if(fileHeader.cwtv == 0x0217 && fileHeader.cmwt == 0x0200 && fileHeader.reserved == 0 && !isBeRoTracker)
 	{
@@ -2170,9 +2171,7 @@ void CSoundFile::ReadMixPluginChunk(FileReader &file, SNDMIXPLUGIN &plugin)
 
 			if(!memcmp(code, "DWRT", 4))
 			{
-				plugin.fDryRatio = std::clamp(dataChunk.ReadFloatLE(), 0.0f, 1.0f);
-				if(!std::isnormal(plugin.fDryRatio))
-					plugin.fDryRatio = 0.0f;
+				plugin.fDryRatio = mpt::safe_clamp(dataChunk.ReadFloatLE(), 0.0f, 1.0f);
 			} else if(!memcmp(code, "PROG", 4))
 			{
 				plugin.defaultProgram = dataChunk.ReadUint32LE();
