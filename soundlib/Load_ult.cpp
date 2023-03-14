@@ -269,12 +269,9 @@ static int ReadULTEvent(ModCommand &m, FileReader &file, uint8 version)
 // Functor for postfixing ULT patterns (this is easier than just remembering everything WHILE we're reading the pattern events)
 struct PostFixUltCommands
 {
-	PostFixUltCommands(CHANNELINDEX numChannels)
+	PostFixUltCommands(CHANNELINDEX channels) : numChannels{channels}
 	{
-		this->numChannels = numChannels;
-		curChannel = 0;
-		writeT125 = false;
-		isPortaActive.resize(numChannels, false);
+		isPortaActive.resize(channels, false);
 	}
 
 	void operator()(ModCommand &m)
@@ -326,21 +323,22 @@ struct PostFixUltCommands
 		{
 			writeT125 = false;
 		}
-		curChannel = (curChannel + 1) % numChannels;
+		curChannel++;
+		if(curChannel >= numChannels)
+			curChannel = 0;
 	}
 
 	std::vector<bool> isPortaActive;
-	CHANNELINDEX numChannels, curChannel;
-	bool writeT125;
+	const CHANNELINDEX numChannels;
+	CHANNELINDEX curChannel = 0;
+	bool writeT125 = false;
 };
 
 
 static bool ValidateHeader(const UltFileHeader &fileHeader)
 {
-	if(fileHeader.version < '1'
-		|| fileHeader.version > '4'
-		|| std::memcmp(fileHeader.signature, "MAS_UTrack_V00", sizeof(fileHeader.signature))
-		)
+	if(fileHeader.version < '1' || fileHeader.version > '4'
+	   || std::memcmp(fileHeader.signature, "MAS_UTrack_V00", sizeof(fileHeader.signature)))
 	{
 		return false;
 	}
@@ -464,7 +462,8 @@ bool CSoundFile::ReadULT(FileReader &file, ModLoadingFlags loadFlags)
 				int repeat = ReadULTEvent(evnote, file, fileHeader.version);
 				if(repeat + row > 64)
 					repeat = 64 - row;
-				if(repeat == 0) break;
+				if(repeat == 0)
+					break;
 				while(repeat--)
 				{
 					*note = evnote;
