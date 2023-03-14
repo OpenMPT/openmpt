@@ -504,7 +504,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Reading sample headers
 	m_nSamples = std::min(static_cast<SAMPLEINDEX>(fileHeader.smpNum), static_cast<SAMPLEINDEX>(MAX_SAMPLES - 1));
-	bool anySamples = false;
+	bool anySamples = false, anyADPCM = false;
 	uint16 gusAddresses = 0;
 	for(SAMPLEINDEX smp = 0; smp < m_nSamples; smp++)
 	{
@@ -523,8 +523,11 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 			const uint32 sampleOffset = sampleHeader.GetSampleOffset();
 			if((loadFlags & loadSampleData) && sampleHeader.length != 0 && file.Seek(sampleOffset))
 			{
-				sampleHeader.GetSampleFormat((fileHeader.formatVersion == S3MFileHeader::oldVersion)).ReadSample(Samples[smp + 1], file);
+				SampleIO sampleIO = sampleHeader.GetSampleFormat((fileHeader.formatVersion == S3MFileHeader::oldVersion));
+				sampleIO.ReadSample(Samples[smp + 1], file);
 				anySamples = true;
+				if(sampleIO.GetEncoding() == SampleIO::ADPCM)
+					anyADPCM = true;
 			}
 			gusAddresses |= sampleHeader.gusAddress;
 		}
@@ -535,7 +538,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		// All Scream Tracker versions except for some probably early revisions of Scream Tracker 3.00 write GUS addresses. GUS support might not have existed at that point (1992).
 		// Hence if a file claims to be written with ST3 (but not ST3.00), but has no GUS addresses, we deduce that it must be written by some other software (e.g. some PSM -> S3M conversions)
 		isST3 = false;
-		MPT_UNUSED(isST3);		
+		MPT_UNUSED(isST3);
 		m_modFormat.madeWithTracker = U_("Unknown");
 	} else if(isST3)
 	{
@@ -552,6 +555,9 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		if(useGUS)
 			m_nSamplePreAmp = 48;
 	}
+
+	if(anyADPCM)
+		m_modFormat.madeWithTracker += U_(" (ADPCM packed)");
 
 	// Try to find out if Zxx commands are supposed to be panning commands (PixPlay).
 	// Actually I am only aware of one module that uses this panning style, namely "Crawling Despair" by $volkraq

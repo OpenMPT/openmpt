@@ -698,6 +698,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	uint8 sampleReserved = 0;
 	int instrType = -1;
 	bool unsupportedSamples = false;
+	bool anyADPCM = false;
 
 	// Reading instruments
 	for(INSTRUMENTINDEX instr = 1; instr <= m_nInstruments; instr++)
@@ -824,6 +825,8 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 						madeWith.set(verModPlug1_09);
 					}
 				}
+				if(sampleFlags.back().GetEncoding() == SampleIO::ADPCM)
+					anyADPCM = true;
 			}
 
 			// Read samples
@@ -1037,6 +1040,9 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		m_modFormat.type = U_("xm");
 	}
+
+	if(anyADPCM)
+		m_modFormat.madeWithTracker += U_(" (ADPCM packed)");
 
 	return true;
 }

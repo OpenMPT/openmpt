@@ -1172,6 +1172,7 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Reading samples
+	bool anyADPCM = false;
 	if(loadFlags & loadSampleData)
 	{
 		file.Seek(modMagicResult.patternDataOffset + (readChannels * 64 * 4) * numPatterns);
@@ -1182,9 +1183,13 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				SampleIO::Encoding encoding = SampleIO::signedPCM;
 				if(isInconexia)
+				{
 					encoding = SampleIO::deltaPCM;
-				else if(file.ReadMagic("ADPCM"))
+				} else if(file.ReadMagic("ADPCM"))
+				{
 					encoding = SampleIO::ADPCM;
+					anyADPCM = true;
+				}
 
 				SampleIO sampleIO(
 					SampleIO::_8bit,
@@ -1313,6 +1318,9 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 	if(modMagicResult.madeWithTracker)
 		m_modFormat.madeWithTracker = modMagicResult.madeWithTracker;
 	m_modFormat.charset = mpt::Charset::Amiga_no_C1;
+
+	if(anyADPCM)
+		m_modFormat.madeWithTracker += U_(" (ADPCM packed)");
 
 	return true;
 }

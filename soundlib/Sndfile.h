@@ -956,7 +956,7 @@ public:
 	void SaveExtendedInstrumentProperties(INSTRUMENTINDEX nInstruments, std::ostream &f) const;
 	void SaveExtendedSongProperties(std::ostream &f) const;
 #endif // MODPLUG_NO_FILESAVE
-	void LoadExtendedSongProperties(FileReader &file, bool ignoreChannelCount, bool* pInterpretMptMade = nullptr);
+	bool LoadExtendedSongProperties(FileReader &file, bool ignoreChannelCount, bool* pInterpretMptMade = nullptr);
 	void LoadMPTMProperties(FileReader &file, uint16 cwtv);
 
 	static mpt::ustring GetSchismTrackerVersion(uint16 cwtv, uint32 reserved);
@@ -1267,7 +1267,7 @@ public:
 
 	uint32 MapMidiInstrument(uint8 program, uint16 bank, uint8 midiChannel, uint8 note, bool isXG, std::bitset<16> drumChns);
 	size_t ITInstrToMPT(FileReader &file, ModInstrument &ins, uint16 trkvers);
-	bool LoadMixPlugins(FileReader &file);
+	std::pair<bool, bool> LoadMixPlugins(FileReader &file);
 #ifndef NO_PLUGINS
 	static void ReadMixPluginChunk(FileReader &file, SNDMIXPLUGIN &plugin);
 	void ProcessMidiOut(CHANNELINDEX nChn);
