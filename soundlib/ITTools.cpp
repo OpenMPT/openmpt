@@ -511,7 +511,7 @@ void ITSample::ConvertToIT(const ModSample &mptSmp, MODTYPE fromType, bool compr
 		cvt = ITSample::cvtOPLInstrument;
 	} else if(mptSmp.uFlags[SMP_KEEPONDISK] && allowExternal)
 	{
-#ifndef MPT_EXTERNAL_SAMPLES
+#ifdef MPT_EXTERNAL_SAMPLES
 		// Save external sample (filename at sample pointer)
 		if(allowExternal && mptSmp.HasSampleData())
 		{
