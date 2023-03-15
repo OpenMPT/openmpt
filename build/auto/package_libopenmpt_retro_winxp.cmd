@@ -199,42 +199,18 @@ copy /y ..\..\bin\release\vs2017-winxp-shared\amd64\openmpt-zlib.dll bin\amd64-r
  inc\libopenmpt\libopenmpt_stream_callbacks_file_msvcrt.h ^
  inc\libopenmpt\libopenmpt_stream_callbacks_file_posix.h ^
  inc\libopenmpt\libopenmpt_stream_callbacks_file_posix_lfs64.h ^
- lib\x86\libopenmpt.lib ^
- lib\amd64\libopenmpt.lib ^
- lib\arm\libopenmpt.lib ^
- lib\arm64\libopenmpt.lib ^
- lib\x86-legacy\libopenmpt.lib ^
- lib\amd64-legacy\libopenmpt.lib ^
- bin\x86\libopenmpt.dll ^
- bin\x86\openmpt-mpg123.dll ^
- bin\x86\openmpt-ogg.dll ^
- bin\x86\openmpt-vorbis.dll ^
- bin\x86\openmpt-zlib.dll ^
- bin\amd64\libopenmpt.dll ^
- bin\amd64\openmpt-mpg123.dll ^
- bin\amd64\openmpt-ogg.dll ^
- bin\amd64\openmpt-vorbis.dll ^
- bin\amd64\openmpt-zlib.dll ^
- bin\arm\libopenmpt.dll ^
- bin\arm\openmpt-mpg123.dll ^
- bin\arm\openmpt-ogg.dll ^
- bin\arm\openmpt-vorbis.dll ^
- bin\arm\openmpt-zlib.dll ^
- bin\arm64\libopenmpt.dll ^
- bin\arm64\openmpt-mpg123.dll ^
- bin\arm64\openmpt-ogg.dll ^
- bin\arm64\openmpt-vorbis.dll ^
- bin\arm64\openmpt-zlib.dll ^
- bin\x86-legacy\libopenmpt.dll ^
- bin\x86-legacy\openmpt-mpg123.dll ^
- bin\x86-legacy\openmpt-ogg.dll ^
- bin\x86-legacy\openmpt-vorbis.dll ^
- bin\x86-legacy\openmpt-zlib.dll ^
- bin\amd64-legacy\libopenmpt.dll ^
- bin\amd64-legacy\openmpt-mpg123.dll ^
- bin\amd64-legacy\openmpt-ogg.dll ^
- bin\amd64-legacy\openmpt-vorbis.dll ^
- bin\amd64-legacy\openmpt-zlib.dll ^
+ lib\x86-retro-winxp\libopenmpt.lib ^
+ lib\amd64-retro-winxp\libopenmpt.lib ^
+ bin\x86-retro-winxp\libopenmpt.dll ^
+ bin\x86-retro-winxp\openmpt-mpg123.dll ^
+ bin\x86-retro-winxp\openmpt-ogg.dll ^
+ bin\x86-retro-winxp\openmpt-vorbis.dll ^
+ bin\x86-retro-winxp\openmpt-zlib.dll ^
+ bin\amd64-retro-winxp\libopenmpt.dll ^
+ bin\amd64-retro-winxp\openmpt-mpg123.dll ^
+ bin\amd64-retro-winxp\openmpt-ogg.dll ^
+ bin\amd64-retro-winxp\openmpt-vorbis.dll ^
+ bin\amd64-retro-winxp\openmpt-zlib.dll ^
  || goto error
 cd .. || goto error
 rmdir /s /q libopenmpt-dev-retro-winxp
