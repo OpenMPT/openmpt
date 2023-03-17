@@ -132,7 +132,7 @@ static constexpr ModContainerInfo modContainerInfo[] =
 #ifdef MODPLUG_TRACKER
 	{ ModContainerType::WAV,     UL_("Wave"),                     "wav"   },
 	{ ModContainerType::UAX,     UL_("Unreal Sounds"),            "uax"   },
-	{ ModContainerType::Generic, UL_("Generic Archive"),          "???"   },
+	{ ModContainerType::Generic, UL_("Generic Archive"),          ""      },
 #endif
 };
 
@@ -153,18 +153,20 @@ std::vector<const char *> CSoundFile::GetSupportedExtensions(bool otherFormats)
 	for(const auto &formatInfo : modFormatInfo)
 	{
 		// Avoid dupes in list
-		if(exts.empty() || strcmp(formatInfo.extension, exts.back()))
-		{
+		const std::string_view ext = formatInfo.extension;
+		if(ext.empty())
+			continue;
+		if(exts.empty() || ext != exts.back())
 			exts.push_back(formatInfo.extension);
-		}
 	}
 	for(const auto &containerInfo : modContainerInfo)
 	{
 		// Avoid dupes in list
-		if(exts.empty() || strcmp(containerInfo.extension, exts.back()))
-		{
-			exts.push_back(containerInfo.extension);
-		}
+		const std::string_view ext = containerInfo.extension;
+		if(ext.empty())
+			continue;
+		if(exts.empty() || ext != exts.back())
+			exts.push_back(ext.data());
 	}
 #ifdef MODPLUG_TRACKER
 	if(otherFormats)
