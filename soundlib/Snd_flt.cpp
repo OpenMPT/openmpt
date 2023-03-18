@@ -58,31 +58,31 @@ float CSoundFile::CutOffToFrequency(uint32 nCutOff, int envModifier) const
 
 
 // Update channels with instrument filter settings updated through tracker UI
-void CSoundFile::UpdateInstrumentFilter(const ModInstrument *ins, bool updateMode, bool updateCutoff, bool updateResonance)
+void CSoundFile::UpdateInstrumentFilter(const ModInstrument &ins, bool updateMode, bool updateCutoff, bool updateResonance)
 {
 	for(auto &chn : m_PlayState.Chn)
 	{
-		if(chn.pModInstrument != ins)
+		if(chn.pModInstrument != &ins)
 			continue;
 
 		bool change = false;
-		if(updateMode && ins->filterMode != FilterMode::Unchanged && chn.nFilterMode != ins->filterMode)
+		if(updateMode && ins.filterMode != FilterMode::Unchanged && chn.nFilterMode != ins.filterMode)
 		{
-			chn.nFilterMode = ins->filterMode;
+			chn.nFilterMode = ins.filterMode;
 			change = true;
 		}
 		if(updateCutoff)
 		{
-			chn.nCutOff = ins->IsCutoffEnabled() ? ins->GetCutoff() : 0x7F;
+			chn.nCutOff = ins.IsCutoffEnabled() ? ins.GetCutoff() : 0x7F;
 			change |= (chn.nCutOff < 0x7F || chn.dwFlags[CHN_FILTER]);
 		}
 		if(updateResonance)
 		{
-			chn.nResonance = ins->IsResonanceEnabled() ? ins->GetResonance() : 0;
+			chn.nResonance = ins.IsResonanceEnabled() ? ins.GetResonance() : 0;
 			change |= (chn.nResonance > 0 || chn.dwFlags[CHN_FILTER]);
 		}
 		// If filter envelope is active, the filter will be updated in the next player tick anyway.
-		if(change && (!ins->PitchEnv.dwFlags[ENV_FILTER] || !IsEnvelopeProcessed(chn, ENV_PITCH)))
+		if(change && (!ins.PitchEnv.dwFlags[ENV_FILTER] || !IsEnvelopeProcessed(chn, ENV_PITCH)))
 			SetupChannelFilter(chn, false);
 	}
 }

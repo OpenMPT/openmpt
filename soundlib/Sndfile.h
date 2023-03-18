@@ -1012,7 +1012,7 @@ public:
 	bool IsRenderingToDisc() const { return m_bIsRendering; }
 
 	void PrecomputeSampleLoops(bool updateChannels = false);
-	void UpdateInstrumentFilter(const ModInstrument *ins, bool updateMode, bool updateCutoff, bool updateResonance);
+	void UpdateInstrumentFilter(const ModInstrument &ins, bool updateMode, bool updateCutoff, bool updateResonance);
 
 public:
 	// Mixer Config
