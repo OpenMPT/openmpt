@@ -267,7 +267,8 @@ ROWINDEX CViewPattern::SetCurrentRow(ROWINDEX row, bool wrap, bool updateHorizon
 	if(pSndFile == nullptr || !pSndFile->Patterns.IsValidIndex(m_nPattern))
 		return ROWINDEX_INVALID;
 
-	if(wrap && pSndFile->Patterns[m_nPattern].GetNumRows())
+	const ROWINDEX numRows = pSndFile->Patterns[m_nPattern].GetNumRows();
+	if(wrap && numRows)
 	{
 		const auto &order = Order();
 		if((int)row < 0)
@@ -294,12 +295,11 @@ ROWINDEX CViewPattern::SetCurrentRow(ROWINDEX row, bool wrap, bool updateHorizon
 			{
 				row = static_cast<ROWINDEX>(mpt::wrapping_modulo(static_cast<int>(row), numRows));
 			}
-		} else  //row >= 0
-		    if(row >= pSndFile->Patterns[m_nPattern].GetNumRows())
+		} else if(row >= numRows)
 		{
 			if(m_Status[psKeyboardDragSelect | psMouseDragSelect])
 			{
-				row = pSndFile->Patterns[m_nPattern].GetNumRows() - 1;
+				row = numRows - 1;
 			} else if(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL)
 			{
 				ORDERINDEX curOrder = GetCurrentOrder();
@@ -309,16 +309,16 @@ ROWINDEX CViewPattern::SetCurrentRow(ROWINDEX row, bool wrap, bool updateHorizon
 					PATTERNINDEX nextPat = order[nextOrder];
 					if((nextPat < pSndFile->Patterns.Size()) && (pSndFile->Patterns[nextPat].GetNumRows()))
 					{
-						const ROWINDEX newRow = row - pSndFile->Patterns[m_nPattern].GetNumRows();
+						const ROWINDEX newRow = row - numRows;
 						SetCurrentOrder(nextOrder);
 						if(SetCurrentPattern(nextPat))
 							return SetCurrentRow(newRow);
 					}
 				}
-				row = pSndFile->Patterns[m_nPattern].GetNumRows() - 1;
+				row = numRows - 1;
 			} else if(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_WRAP)
 			{
-				row %= pSndFile->Patterns[m_nPattern].GetNumRows();
+				row %= numRows;
 			}
 		}
 	}
@@ -327,11 +327,11 @@ ROWINDEX CViewPattern::SetCurrentRow(ROWINDEX row, bool wrap, bool updateHorizon
 	{
 		if(static_cast<int>(row) < 0)
 			row = 0;
-		if(row >= pSndFile->Patterns[m_nPattern].GetNumRows())
-			row = pSndFile->Patterns[m_nPattern].GetNumRows() - 1;
+		if(row >= numRows)
+			row = numRows - 1;
 	}
 
-	if((row >= pSndFile->Patterns[m_nPattern].GetNumRows()) || (!m_szCell.cy))
+	if((row >= numRows) || (!m_szCell.cy))
 		return false;
 	// Fix: If cursor isn't on screen move both scrollbars to make it visible
 	InvalidateRow();
