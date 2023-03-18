@@ -26,20 +26,12 @@ private:
 #if MPT_COMPILER_MSVC
 	_Guarded_by_(mutex)
 #endif // MPT_COMPILER_MSVC
-	long lockCount;
+	long lockCount = 0;
 
 public:
 
-	recursive_mutex_with_lock_count()
-		: lockCount(0)
-	{
-		return;
-	}
-
-	~recursive_mutex_with_lock_count()
-	{
-		return;
-	}
+	recursive_mutex_with_lock_count() = default;
+	~recursive_mutex_with_lock_count() = default;
 
 #if MPT_COMPILER_MSVC
 	_Acquires_lock_(mutex)
