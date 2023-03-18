@@ -292,9 +292,7 @@ ROWINDEX CViewPattern::SetCurrentRow(ROWINDEX row, bool wrap, bool updateHorizon
 				row = 0;
 			} else if(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_WRAP)
 			{
-				if((int)row < (int)0)
-					row += pSndFile->Patterns[m_nPattern].GetNumRows();
-				row %= pSndFile->Patterns[m_nPattern].GetNumRows();
+				row = static_cast<ROWINDEX>(mpt::wrapping_modulo(static_cast<int>(row), numRows));
 			}
 		} else  //row >= 0
 		    if(row >= pSndFile->Patterns[m_nPattern].GetNumRows())
