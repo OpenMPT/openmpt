@@ -710,6 +710,7 @@ static bool CheckMODMagic(const char magic[4], MODMagicResult &result)
 	{
 		result.madeWithTracker = UL_("NoiseTracker");
 		result.isNoiseTracker = true;
+		result.setMODVBlankTiming = true;
 		result.numChannels = 4;
 	} else if(IsMagic(magic, "OKTA")
 	          || IsMagic(magic, "OCTA"))
@@ -842,7 +843,6 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Startrekker 8 channel mod (needs special treatment, see below)
 	const bool isFLT8 = isStartrekker && m_nChannels == 8;
-	// Only apply VBlank tests to M.K. (ProTracker) modules.
 	const bool isMdKd = IsMagic(magic, "M.K.");
 	// Adjust finetune values for modules saved with "His Master's Noisetracker"
 	const bool isHMNT = IsMagic(magic, "M&K!") || IsMagic(magic, "FEST");
@@ -1288,7 +1288,7 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 	// In the pattern loader above, a second condition is used: Only tempo commands
 	// below 100 BPM are taken into account. Furthermore, only M.K. (ProTracker)
 	// modules are checked.
-	if(isMdKd && hasTempoCommands && !definitelyCIA)
+	if((isMdKd || IsMagic(magic, "M!K!")) && hasTempoCommands && !definitelyCIA)
 	{
 		const double songTime = GetLength(eNoAdjust).front().duration;
 		if(songTime >= 480.0)
