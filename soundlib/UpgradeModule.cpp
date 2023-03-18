@@ -258,9 +258,11 @@ void CSoundFile::UpgradeModule()
 
 	if(m_dwLastSavedWithVersion < MPT_V("1.20.00.00"))
 	{
-		for(INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++) if(Instruments[i] != nullptr)
+		for(INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++)
 		{
 			ModInstrument *ins = Instruments[i];
+			if(!ins)
+				continue;
 			// Previously, volume swing values ranged from 0 to 64. They should reach from 0 to 100 instead.
 			ins->nVolSwing = static_cast<uint8>(std::min(static_cast<uint32>(ins->nVolSwing * 100 / 64), uint32(100)));
 
@@ -405,9 +407,11 @@ void CSoundFile::UpgradeModule()
 
 	if(m_dwLastSavedWithVersion < MPT_V("1.26.00.00"))
 	{
-		for(INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++) if(Instruments[i] != nullptr)
+		for(INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++)
 		{
 			ModInstrument *ins = Instruments[i];
+			if(!ins)
+				continue;
 			// Even after fixing it in OpenMPT 1.18, instrument PPS was only half the depth.
 			ins->nPPS = static_cast<int8>((ins->nPPS + (ins->nPPS >= 0 ? 1 : -1)) / 2);
 
@@ -422,9 +426,9 @@ void CSoundFile::UpgradeModule()
 
 	if(m_dwLastSavedWithVersion < MPT_V("1.28.00.12"))
 	{
-		for(INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++) if(Instruments[i] != nullptr)
+		for(INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++)
 		{
-			if(Instruments[i]->VolEnv.nReleaseNode != ENV_RELEASE_NODE_UNSET)
+			if(Instruments[i] != nullptr && Instruments[i]->VolEnv.nReleaseNode != ENV_RELEASE_NODE_UNSET)
 			{
 				m_playBehaviour.set(kLegacyReleaseNode);
 				break;
@@ -434,9 +438,9 @@ void CSoundFile::UpgradeModule()
 
 	if(m_dwLastSavedWithVersion < MPT_V("1.28.03.04"))
 	{
-		for(INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++) if (Instruments[i] != nullptr)
+		for(INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++)
 		{
-			if(Instruments[i]->pluginVolumeHandling == PLUGIN_VOLUMEHANDLING_MIDI || Instruments[i]->pluginVolumeHandling == PLUGIN_VOLUMEHANDLING_DRYWET)
+			if(Instruments[i] != nullptr && Instruments[i]->pluginVolumeHandling == PLUGIN_VOLUMEHANDLING_MIDI || Instruments[i]->pluginVolumeHandling == PLUGIN_VOLUMEHANDLING_DRYWET)
 			{
 				m_playBehaviour.set(kMIDIVolumeOnNoteOffBug);
 				break;
@@ -688,9 +692,10 @@ void CSoundFile::UpgradeModule()
 		&& m_dwLastSavedWithVersion >= MPT_V("1.23.01.02") && m_dwLastSavedWithVersion < MPT_V("1.28.00.43"))
 	{
 		// Bug that effectively clamped the release node to the sustain end
-		for(INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++) if(Instruments[i] != nullptr)
+		for(INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++)
 		{
-			if(Instruments[i]->VolEnv.nReleaseNode != ENV_RELEASE_NODE_UNSET
+			if(Instruments[i] != nullptr
+				&& Instruments[i]->VolEnv.nReleaseNode != ENV_RELEASE_NODE_UNSET
 				&& Instruments[i]->VolEnv.dwFlags[ENV_SUSTAIN]
 				&& Instruments[i]->VolEnv.nReleaseNode > Instruments[i]->VolEnv.nSustainEnd)
 			{
