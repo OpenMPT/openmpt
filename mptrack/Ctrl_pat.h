@@ -274,7 +274,6 @@ protected:
 	afx_msg void TogglePluginEditor();
 	afx_msg void OnToggleOverflowPaste();
 	afx_msg void OnSequenceNumChanged();
-	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
 
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
