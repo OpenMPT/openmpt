@@ -29,11 +29,11 @@ public:
 
 	// Effects Description
 	
-	bool GetEffectName(CString &pszDescription, ModCommand::COMMAND command, UINT param, bool bXX = false) const; // bXX: Nxx: ...
+	bool GetEffectName(CString &pszDescription, ModCommand::COMMAND command, UINT param, bool addCommandFormat = false) const; // addCommandFormat: Prepend "Nxx: ..."
 	// Get size of list of known effect commands
 	UINT GetNumEffects() const;
 	// Get range information, effect name, etc... from a given effect.
-	bool GetEffectInfo(UINT ndx, CString *s, bool bXX = false, ModCommand::PARAM *prangeMin = nullptr, ModCommand::PARAM *prangeMax = nullptr) const;
+	bool GetEffectInfo(UINT ndx, CString *s, bool addCommandFormat = false, ModCommand::PARAM *prangeMin = nullptr, ModCommand::PARAM *prangeMax = nullptr) const;
 	// Get effect index in effect list from effect command + param
 	LONG GetIndexFromEffect(ModCommand::COMMAND command, ModCommand::PARAM param) const;
 	// Get effect command + param from effect index

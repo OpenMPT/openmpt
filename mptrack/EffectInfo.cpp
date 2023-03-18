@@ -130,6 +130,17 @@ static constexpr MPTEffectInfo gFXInfo[] =
 };
 
 
+static mpt::tstring FormatPanning(int32 value, int32 center)
+{
+	mpt::tstring s = mpt::tfmt::val(value);
+	if(value == center)
+		s += _T(" (Center)");
+	else
+		s += MPT_TFORMAT(" ({} {})")(std::abs(value - center), (value < center) ? _T("L") : _T("R"));
+	return s;
+}
+
+
 UINT EffectInfo::GetNumEffects() const
 {
 	return static_cast<UINT>(std::size(gFXInfo));
@@ -142,7 +153,7 @@ bool EffectInfo::IsExtendedEffect(UINT ndx) const
 }
 
 
-bool EffectInfo::GetEffectName(CString &pszDescription, ModCommand::COMMAND command, UINT param, bool bXX) const
+bool EffectInfo::GetEffectName(CString &pszDescription, ModCommand::COMMAND command, UINT param, bool addCommandFormat) const
 {
 	bool bSupported;
 	UINT fxndx = static_cast<UINT>(std::size(gFXInfo));
@@ -164,7 +175,7 @@ bool EffectInfo::GetEffectName(CString &pszDescription, ModCommand::COMMAND comm
 	bSupported = ((sndFile.GetType() & gFXInfo[fxndx].supportedFormats));
 	if (gFXInfo[fxndx].name)
 	{
-		if ((bXX) && (bSupported))
+		if (addCommandFormat && bSupported)
 		{
 			pszDescription.Format(_T("%c%c%c: ")
 				, sndFile.GetModSpecifications().GetEffectLetter(command)
@@ -246,14 +257,14 @@ UINT EffectInfo::GetEffectMaskFromIndex(UINT ndx) const
 
 }
 
-bool EffectInfo::GetEffectInfo(UINT ndx, CString *s, bool bXX, ModCommand::PARAM *prangeMin, ModCommand::PARAM *prangeMax) const
+bool EffectInfo::GetEffectInfo(UINT ndx, CString *s, bool addCommandFormat, ModCommand::PARAM *prangeMin, ModCommand::PARAM *prangeMax) const
 {
 
 	if (s) s->Empty();
 	if (prangeMin) *prangeMin = 0;
 	if (prangeMax) *prangeMax = 0;
 	if ((ndx >= std::size(gFXInfo)) || (!(sndFile.GetType() & gFXInfo[ndx].supportedFormats))) return FALSE;
-	if (s) GetEffectName(*s, gFXInfo[ndx].effect, gFXInfo[ndx].paramValue, bXX);
+	if (s) GetEffectName(*s, gFXInfo[ndx].effect, gFXInfo[ndx].paramValue, addCommandFormat);
 	if ((prangeMin) && (prangeMax))
 	{
 		ModCommand::PARAM nmin = 0, nmax = 0xFF;
@@ -509,7 +520,7 @@ bool EffectInfo::GetEffectNameEx(CString &pszName, const ModCommand &m, uint32 p
 		if(sndFile.GetType() == MOD_TYPE_S3M && param == 0xA4)
 			s = _T("Surround");
 		else
-			s.Format(_T("%d"), param);
+			s = FormatPanning(param, (sndFile.GetType() == MOD_TYPE_S3M) ? 0x40 : 0x80).c_str();
 		break;
 
 	case CMD_RETRIG:
@@ -784,6 +795,10 @@ bool EffectInfo::GetEffectNameEx(CString &pszName, const ModCommand &m, uint32 p
 							s += _T(" ticks");
 							break;
 
+						case 0x80: // panning
+							s = FormatPanning(param & 0x0F, 8).c_str();
+							break;
+
 						case 0xA0: // high offset
 							s.Format(_T("+ %u samples"), (param & 0x0F) * 0x10000);
 							break;
@@ -872,6 +887,9 @@ bool EffectInfo::GetEffectNameEx(CString &pszName, const ModCommand &m, uint32 p
 								s = _T("loop start");
 							else
 								s += _T(" times");
+							break;
+						case 0x80: // panning
+							s = FormatPanning(param & 0x0F, 8).c_str();
 							break;
 						case 0x90: // retrigger
 							s.Format(_T("speed %d"), param & 0x0F);
@@ -1001,6 +1019,10 @@ bool EffectInfo::GetVolCmdParamInfo(const ModCommand &m, CString *s) const
 
 	switch(m.volcmd)
 	{
+	case VOLCMD_PANNING:
+		*s = FormatPanning(m.vol, 32).c_str();
+		break;
+
 	case VOLCMD_VOLSLIDEUP:
 	case VOLCMD_VOLSLIDEDOWN:
 	case VOLCMD_FINEVOLUP:
