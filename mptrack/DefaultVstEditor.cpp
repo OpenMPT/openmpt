@@ -294,11 +294,10 @@ void CDefaultVstEditor::UpdateControls(bool updateParamNames)
 
 void CDefaultVstEditor::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
-	CSliderCtrl* pScrolledSlider = reinterpret_cast<CSliderCtrl*>(pScrollBar);
 	// Check if any of the value sliders were affected.
 	for(size_t i = 0; i < controls.size(); i++)
 	{
-		if ((pScrolledSlider->GetDlgCtrlID() == controls[i]->GetSliderID()) && (nSBCode != SB_ENDSCROLL))
+		if((pScrollBar->GetDlgCtrlID() == controls[i]->GetSliderID()) && (nSBCode != SB_ENDSCROLL))
 		{
 			OnParamSliderChanged(controls[i]->GetSliderID());
 			break;
