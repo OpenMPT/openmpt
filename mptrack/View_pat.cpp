@@ -267,30 +267,44 @@ ROWINDEX CViewPattern::SetCurrentRow(ROWINDEX row, bool wrap, bool updateHorizon
 	if(pSndFile == nullptr || !pSndFile->Patterns.IsValidIndex(m_nPattern))
 		return ROWINDEX_INVALID;
 
-	const ROWINDEX numRows = pSndFile->Patterns[m_nPattern].GetNumRows();
+	ROWINDEX numRows = pSndFile->Patterns[m_nPattern].GetNumRows();
 	if(wrap && numRows)
 	{
 		const auto &order = Order();
-		if((int)row < 0)
+		if(static_cast<int>(row) < 0)
 		{
 			if(m_Status[psKeyboardDragSelect | psMouseDragSelect])
 			{
 				row = 0;
 			} else if(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL)
 			{
+				PATTERNINDEX curPattern = m_nPattern;
 				ORDERINDEX curOrder = GetCurrentOrder();
-				const ORDERINDEX prevOrd = order.GetPreviousOrderIgnoringSkips(curOrder);
-				if(prevOrd < curOrder && m_nPattern == order[curOrder])
+				// If current order and pattern are inconsistent, just jump to start of current pattern
+				if(curPattern != order[curOrder])
+					return SetCurrentRow(0);
+
+				do
 				{
-					const PATTERNINDEX nPrevPat = order[prevOrd];
-					if((nPrevPat < pSndFile->Patterns.Size()) && (pSndFile->Patterns[nPrevPat].GetNumRows()))
+					const ORDERINDEX prevOrder = order.GetPreviousOrderIgnoringSkips(curOrder);
+					if(prevOrder >= curOrder || !order.IsValidPat(prevOrder))
 					{
-						SetCurrentOrder(prevOrd);
-						if(SetCurrentPattern(nPrevPat))
-							return SetCurrentRow(pSndFile->Patterns[nPrevPat].GetNumRows() + (int)row);
+						// Didn't manage to jump the specified amount of rows backwards, so jump to first row of last visited pattern
+						row = 0;
+						break;
 					}
+
+					curOrder = prevOrder;
+					curPattern = order[curOrder];
+					numRows = pSndFile->Patterns[curPattern].GetNumRows();
+					row += numRows;
+				} while(row >= numRows);
+				if(curOrder != GetCurrentOrder())
+				{
+					SetCurrentOrder(curOrder);
+					SetCurrentPattern(curPattern, row);
 				}
-				row = 0;
+				MPT_ASSERT(numRows == pSndFile->Patterns[m_nPattern].GetNumRows());
 			} else if(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_WRAP)
 			{
 				row = static_cast<ROWINDEX>(mpt::wrapping_modulo(static_cast<int>(row), numRows));
@@ -302,23 +316,36 @@ ROWINDEX CViewPattern::SetCurrentRow(ROWINDEX row, bool wrap, bool updateHorizon
 				row = numRows - 1;
 			} else if(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL)
 			{
+				PATTERNINDEX curPattern = m_nPattern;
 				ORDERINDEX curOrder = GetCurrentOrder();
-				ORDERINDEX nextOrder = order.GetNextOrderIgnoringSkips(curOrder);
-				if(nextOrder > curOrder && m_nPattern == order[curOrder])
+				// If current order and pattern are inconsistent, just jump to end of current pattern
+				if(curPattern != order[curOrder])
+					return SetCurrentRow(numRows - 1);
+
+				do
 				{
-					PATTERNINDEX nextPat = order[nextOrder];
-					if((nextPat < pSndFile->Patterns.Size()) && (pSndFile->Patterns[nextPat].GetNumRows()))
+					const ORDERINDEX nextOrder = order.GetNextOrderIgnoringSkips(curOrder);
+					if(nextOrder <= curOrder || !order.IsValidPat(nextOrder))
 					{
-						const ROWINDEX newRow = row - numRows;
-						SetCurrentOrder(nextOrder);
-						if(SetCurrentPattern(nextPat))
-							return SetCurrentRow(newRow);
+						// Didn't manage to jump the specified amount of rows forwards, so jump to last row of last visited pattern
+						row = numRows - 1;
+						break;
 					}
+
+					curOrder = nextOrder;
+					row -= numRows;
+					curPattern = order[curOrder];
+					numRows = pSndFile->Patterns[curPattern].GetNumRows();
+				} while(row >= numRows);
+				if(curOrder != GetCurrentOrder())
+				{
+					SetCurrentOrder(curOrder);
+					SetCurrentPattern(curPattern, row);
 				}
-				row = numRows - 1;
+				MPT_ASSERT(numRows == pSndFile->Patterns[m_nPattern].GetNumRows());
 			} else if(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_WRAP)
 			{
-				row %= numRows;
+				row %= pSndFile->Patterns[m_nPattern].GetNumRows();
 			}
 		}
 	}
