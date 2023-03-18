@@ -440,7 +440,7 @@ void CSoundFile::UpgradeModule()
 	{
 		for(INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++)
 		{
-			if(Instruments[i] != nullptr && Instruments[i]->pluginVolumeHandling == PLUGIN_VOLUMEHANDLING_MIDI || Instruments[i]->pluginVolumeHandling == PLUGIN_VOLUMEHANDLING_DRYWET)
+			if(Instruments[i] != nullptr && (Instruments[i]->pluginVolumeHandling == PLUGIN_VOLUMEHANDLING_MIDI || Instruments[i]->pluginVolumeHandling == PLUGIN_VOLUMEHANDLING_DRYWET))
 			{
 				m_playBehaviour.set(kMIDIVolumeOnNoteOffBug);
 				break;
