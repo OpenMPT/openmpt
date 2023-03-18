@@ -174,10 +174,16 @@ LRESULT CViewComments::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 LRESULT CViewComments::OnMidiMsg(WPARAM midiData_, LPARAM)
 {
 	uint32 midiData = static_cast<uint32>(midiData_);
-	// Handle MIDI messages assigned to shortcuts
-	CInputHandler *ih = CMainFrame::GetInputHandler();
-	ih->HandleMIDIMessage(kCtxViewComments, midiData) != kcNull
-		|| ih->HandleMIDIMessage(kCtxAllContexts, midiData) != kcNull;
+	INSTRUMENTINDEX ins = 0;
+	SAMPLEINDEX smp = 0;
+
+	const int item = m_ItemList.GetSelectionMark() + 1;
+	if(item > 0 && m_nListId == IDC_LIST_SAMPLES)
+		smp = static_cast<SAMPLEINDEX>(item);
+	else if(item > 0 && m_nListId == IDC_LIST_INSTRUMENTS)
+		ins = static_cast<INSTRUMENTINDEX>(item);
+
+	GetDocument()->ProcessMIDI(midiData, smp, ins, GetDocument()->GetSoundFile().GetInstrumentPlugin(ins), kCtxViewComments);
 	return 1;
 }
 

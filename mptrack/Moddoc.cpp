@@ -898,7 +898,7 @@ UINT CModDoc::ShowLog(const CString &preamble, const CString &title, CWnd *paren
 }
 
 
-void CModDoc::ProcessMIDI(uint32 midiData, INSTRUMENTINDEX ins, IMixPlugin *plugin, InputTargetContext ctx)
+void CModDoc::ProcessMIDI(uint32 midiData, SAMPLEINDEX smp, INSTRUMENTINDEX ins, IMixPlugin *plugin, InputTargetContext ctx)
 {
 	static uint8 midiVolume = 127;
 
@@ -932,6 +932,7 @@ void CModDoc::ProcessMIDI(uint32 midiData, INSTRUMENTINDEX ins, IMixPlugin *plug
 		return;
 	}
 
+	const bool validInstr = (ins > 0 && ins <= GetNumInstruments()), validSample = (smp > 0 && smp <= GetNumSamples());
 	switch(event)
 	{
 	case MIDIEvents::evNoteOff:
@@ -940,12 +941,12 @@ void CModDoc::ProcessMIDI(uint32 midiData, INSTRUMENTINDEX ins, IMixPlugin *plug
 			m_midiSustainBuffer[channel].push_back(midiData);
 			return;
 		}
-		if(ins > 0 && ins <= GetNumInstruments())
+		if(validInstr || validSample)
 		{
 			LimitMax(note, NOTE_MAX);
 			if(m_midiPlayingNotes[channel][note])
 				m_midiPlayingNotes[channel][note] = false;
-			NoteOff(note, false, ins, m_noteChannel[note - NOTE_MIN]);
+			NoteOff(note, validSample, ins, m_noteChannel[note - NOTE_MIN]);
 			return;
 		} else if(plugin != nullptr)
 		{
@@ -954,11 +955,11 @@ void CModDoc::ProcessMIDI(uint32 midiData, INSTRUMENTINDEX ins, IMixPlugin *plug
 		break;
 
 	case MIDIEvents::evNoteOn:
-		if(ins > 0 && ins <= GetNumInstruments())
+		if(validInstr || validSample)
 		{
 			LimitMax(note, NOTE_MAX);
 			vol = CMainFrame::ApplyVolumeRelatedSettings(midiData, midiVolume);
-			PlayNote(PlayNoteParam(note).Instrument(ins).Volume(vol).CheckNNA(m_midiPlayingNotes[channel]), &m_noteChannel);
+			PlayNote(PlayNoteParam(note).Instrument(ins).Sample(smp).Volume(vol).CheckNNA(m_midiPlayingNotes[channel]), &m_noteChannel);
 			return;
 		} else if(plugin != nullptr)
 		{
@@ -979,7 +980,7 @@ void CModDoc::ProcessMIDI(uint32 midiData, INSTRUMENTINDEX ins, IMixPlugin *plug
 				// Release all notes
 				for(const auto offEvent : m_midiSustainBuffer[channel])
 				{
-					ProcessMIDI(offEvent, ins, plugin, ctx);
+					ProcessMIDI(offEvent, 0, ins, plugin, ctx);
 				}
 				m_midiSustainBuffer[channel].clear();
 			}

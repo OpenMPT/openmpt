@@ -2225,7 +2225,7 @@ LRESULT CViewInstrument::OnMidiMsg(WPARAM midiDataParam, LPARAM)
 	CModDoc *modDoc = GetDocument();
 	if(modDoc != nullptr)
 	{
-		modDoc->ProcessMIDI(midiData, m_nInstrument, modDoc->GetSoundFile().GetInstrumentPlugin(m_nInstrument), kCtxViewInstruments);
+		modDoc->ProcessMIDI(midiData, 0, m_nInstrument, modDoc->GetSoundFile().GetInstrumentPlugin(m_nInstrument), kCtxViewInstruments);
 
 		MIDIEvents::EventType event = MIDIEvents::GetTypeFromEvent(midiData);
 		uint8 midiByte1 = MIDIEvents::GetDataByte1FromEvent(midiData);

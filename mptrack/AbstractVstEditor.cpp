@@ -155,7 +155,7 @@ LRESULT CAbstractVstEditor::OnMidiMsg(WPARAM midiData, LPARAM sender)
 	{
 		if(!CheckInstrument(m_nInstrument))
 			m_nInstrument = GetBestInstrumentCandidate();
-		modDoc->ProcessMIDI((uint32)midiData, m_nInstrument, &m_VstPlugin, kCtxVSTGUI);
+		modDoc->ProcessMIDI((uint32)midiData, 0, m_nInstrument, &m_VstPlugin, kCtxVSTGUI);
 		return 1;
 	}
 	return 0;
