@@ -3018,7 +3018,7 @@ void CViewSample::PlayNote(ModCommand::NOTE note, const SmpLength nStartPos, int
 		} else
 		{
 			if(m_dwStatus[SMPSTATUS_KEYDOWN])
-				pModDoc->NoteOff(note, true, m_noteChannel[note - NOTE_MIN]);
+				pModDoc->NoteOff(note, true, INSTRUMENTINDEX_INVALID, m_noteChannel[note - NOTE_MIN]);
 			else
 				pModDoc->NoteOff(0, true);
 
