@@ -2733,15 +2733,30 @@ LRESULT CModDoc::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 
 		case kcPlayPatternFromCursor: OnPatternPlay(); break;
 		case kcPlayPatternFromStart: OnPatternRestart(); break;
+		case kcPlaySongFromCursorPause:
+			if(CMainFrame::GetMainFrame()->GetModPlaying() == this)
+			{
+				OnPlayerPause();
+				break;
+			}
+			[[fallthrough]];
 		case kcPlaySongFromCursor: OnPatternPlayNoLoop(); break;
 		case kcPlaySongFromStart: OnPlayerPlayFromStart(); break;
-		case kcPlayPauseSong: OnPlayerPlay(); break;
 		case kcPlayStopSong:
 			if(CMainFrame::GetMainFrame()->GetModPlaying() == this)
+			{
 				OnPlayerStop();
-			else
-				OnPlayerPlay();
-			break;
+				break;
+			}
+			[[fallthrough]];
+		case kcPlayPauseSong: OnPlayerPlay(); break;
+		case kcPlaySongFromPatternPause:
+			if (CMainFrame::GetMainFrame()->GetModPlaying() == this)
+			{
+				OnPlayerPause();
+				break;
+			}
+			[[fallthrough]];
 		case kcPlaySongFromPattern: OnPatternRestart(false); break;
 		case kcStopSong: OnPlayerStop(); break;
 		case kcPanic: OnPanic(); break;

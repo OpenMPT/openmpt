@@ -1243,6 +1243,8 @@ static constexpr struct
 	{2049, kcPatternScrollRight, _T("Scroll Right") },
 	{2050, kcPatternScrollUp, _T("Scroll Up")},
 	{2051, kcPatternScrollDown, _T("Scroll Down")},
+	{2052, kcPlaySongFromCursorPause, _T("Play Song from Cursor / Pause")},
+	{2053, kcPlaySongFromPatternPause, _T("Play Song from Pattern Start / Pause")},
 };
 
 // Get command descriptions etc.. loaded up.

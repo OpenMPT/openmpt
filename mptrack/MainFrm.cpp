@@ -2472,6 +2472,8 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcPlayPauseSong:
 		case kcPlayStopSong:
 		case kcPlaySongFromPattern:
+		case kcPlaySongFromCursorPause:
+		case kcPlaySongFromPatternPause:
 		case kcStopSong:
 		case kcToggleLoopSong:
 		case kcPanic:
