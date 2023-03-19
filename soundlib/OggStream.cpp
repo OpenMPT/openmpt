@@ -56,19 +56,8 @@ uint16 PageInfo::GetPageDataSize() const
 
 bool AdvanceToPageMagic(FileCursor &file)
 {
-#if MPT_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable:4127) // conditional expression is constant
-#endif // MPT_COMPILER_MSVC
-	while(true)
-#if MPT_COMPILER_MSVC
-#pragma warning(pop)
-#endif // MPT_COMPILER_MSVC
+	while(mpt::FR::CanRead(file, 4))
 	{
-		if(!mpt::FR::CanRead(file, 4))
-		{
-			return false;
-		}
 		if(mpt::FR::ReadMagic(file, "OggS"))
 		{
 			mpt::FR::SkipBack(file, 4);
@@ -76,6 +65,7 @@ bool AdvanceToPageMagic(FileCursor &file)
 		}
 		mpt::FR::Skip(file, 1);
 	}
+	return false;
 }
 
 
@@ -164,19 +154,8 @@ bool ReadPageAndSkipJunk(FileCursor &file, PageInfo &pageInfo, std::vector<uint8
 {
 	pageInfo = PageInfo();
 	pageData.clear();
-#if MPT_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable:4127) // conditional expression is constant
-#endif // MPT_COMPILER_MSVC
-	while(true)
-#if MPT_COMPILER_MSVC
-#pragma warning(pop)
-#endif // MPT_COMPILER_MSVC
+	while(AdvanceToPageMagic(file))
 	{
-		if(!AdvanceToPageMagic(file))
-		{
-			return false;
-		}
 		if(ReadPage(file, pageInfo, pageData))
 		{
 			return true;
@@ -187,6 +166,7 @@ bool ReadPageAndSkipJunk(FileCursor &file, PageInfo &pageInfo, std::vector<uint8
 		}
 		mpt::FR::Skip(file, 4);
 	}
+	return false;
 }
 
 
