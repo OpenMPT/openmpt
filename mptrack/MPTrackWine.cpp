@@ -10,10 +10,6 @@
 
 #include "stdafx.h"
 
-#if MPT_COMPILER_MSVC
-#pragma warning(disable:4800) // 'T' : forcing value to bool 'true' or 'false' (performance warning)
-#endif // MPT_COMPILER_MSVC
-
 #include "MPTrackWine.h"
 
 #include "mpt/uuid/uuid.hpp"
