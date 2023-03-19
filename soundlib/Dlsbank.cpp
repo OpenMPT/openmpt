@@ -876,6 +876,10 @@ bool CDLSBank::UpdateInstrumentDefinition(DLSINSTRUMENT *pDlsIns, FileReader chu
 				if(!(pDlsIns->ulBank & F_INSTRUMENT_DRUMS))
 				{
 					pDlsIns->nMelodicEnv = static_cast<uint32>(m_Envelopes.size() + 1);
+				} else
+				{
+					if(!pDlsIns->Regions.empty())
+						pDlsIns->Regions.back().uPercEnv = static_cast<uint32>(m_Envelopes.size() + 1);
 				}
 				if(art1.cbSize + art1.cConnectionBlocks * sizeof(ConnectionBlock) > header.len)
 					break;
@@ -1259,6 +1263,13 @@ bool CDLSBank::ConvertSF2ToDLS(SF2LoaderInfo &sf2info)
 				}
 
 				DLSREGION rgn = globalZone;
+
+				if(dlsIns.ulBank & F_INSTRUMENT_DRUMS)
+				{
+					m_Envelopes.push_back(dlsEnv);
+					rgn.uPercEnv = static_cast<uint32>(m_Envelopes.size());
+					pDlsEnv = &m_Envelopes[rgn.uPercEnv - 1];
+				}
 
 				// Region Default Values
 				int32 regionAttn = 0;
@@ -1660,7 +1671,10 @@ uint32 CDLSBank::GetRegionFromKey(uint32 nIns, uint32 nKey) const
 	for(uint32 rgn = 0; rgn < static_cast<uint32>(dlsIns.Regions.size()); rgn++)
 	{
 		const auto &region = dlsIns.Regions[rgn];
-		if(nKey < region.uKeyMin || nKey > region.uKeyMax)
+		// Regions are sorted, if we arrived here we won't find anything in the remaining regions
+		if(region.uKeyMin > nKey)
+			break;
+		if(nKey > region.uKeyMax)
 			continue;
 		if(region.nWaveLink == Util::MaxValueOfType(region.nWaveLink))
 			continue;
@@ -1737,7 +1751,7 @@ bool CDLSBank::ExtractWaveForm(uint32 nIns, uint32 nRgn, std::vector<uint8> &wav
 					{
 						waveData.assign(chunk.len + sizeof(IFFCHUNK), 0);
 						memcpy(waveData.data(), &chunk, sizeof(chunk));
-						mpt::IO::ReadRaw(f, &waveData[sizeof(chunk)], length - sizeof(chunk));
+						mpt::IO::ReadRaw(f, waveData.data() + sizeof(chunk), length - sizeof(chunk));
 					} catch(mpt::out_of_memory e)
 					{
 						mpt::delete_out_of_memory(e);
@@ -1979,11 +1993,13 @@ uint32 DLSENVELOPE::Envelope::ConvertToMPT(InstrumentEnvelope &mptEnv, const Env
 		int32 lSusLevel = -CDLSBank::DLS32BitRelativeLinearToGain(lStartFactor << 10) / 65536;
 		int32 lDecayEndTime = (lReleaseTime * lSusLevel) / 960;
 		lReleaseTime -= lDecayEndTime;
-		for(uint32 i = 0; i < 5; i++)
+		int32 prevFactor = lStartFactor;
+		for(uint32 i = 0; i < 7; i++)
 		{
 			int32 lFactor = 1 + ((lStartFactor * 3) >> (i + 2));
-			if((lFactor <= 1) || (lFactor >= lStartFactor))
+			if((lFactor < 1) ||(lFactor == 1 && prevFactor == 1) || (lFactor >= lStartFactor))
 				continue;
+			prevFactor = lFactor;
 			int32 lev = -CDLSBank::DLS32BitRelativeLinearToGain(lFactor << 10) / 65536;
 			if(lev > 0)
 			{

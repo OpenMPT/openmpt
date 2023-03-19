@@ -25,17 +25,17 @@ OPENMPT_NAMESPACE_BEGIN
 
 struct DLSREGION
 {
-	uint32 ulLoopStart;
-	uint32 ulLoopEnd;
-	uint16 nWaveLink;
-	uint16 uPercEnv;
-	uint16 usVolume;     // 0..256
-	uint16 fuOptions;    // flags + key group
-	int16 sFineTune;     // +128 = +1 semitone
-	int16 panning = -1;  // -1= unset (DLS), otherwise 0...256
-	uint8  uKeyMin;
-	uint8  uKeyMax;
-	uint8  uUnityNote;
+	uint32 ulLoopStart = 0;
+	uint32 ulLoopEnd = 0;
+	uint32 uPercEnv = 0;
+	uint16 nWaveLink = 0;
+	uint16 usVolume = 256;  // 0..256
+	uint16 fuOptions = 0;   // flags + key group
+	int16 sFineTune = 0;    // +128 = +1 semitone
+	int16 panning = -1;     // -1= unset (DLS), otherwise 0...256
+	uint8  uKeyMin = 0;
+	uint8  uKeyMax = 0;
+	uint8  uUnityNote = 0xFF;
 	uint8  tuning = 100;
 
 	constexpr bool IsDummy() const noexcept { return uKeyMin == 0xFF || nWaveLink == Util::MaxValueOfType(nWaveLink); }
