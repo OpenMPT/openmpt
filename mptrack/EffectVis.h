@@ -29,14 +29,14 @@ class CEffectVis : public CDialog
 	DECLARE_DYNAMIC(CEffectVis)
 
 public:
-	enum EditAction
+	enum class Action
 	{
-		kAction_OverwriteFX,
-		kAction_OverwriteFXWithNote,
-		kAction_FillFX,
-		kAction_OverwritePC,
-		kAction_FillPC,
-		kAction_Preserve
+		OverwriteFX,
+		OverwriteFXWithNote,
+		FillFX,
+		OverwritePC,
+		FillPC,
+		Preserve
 	};
 
 	CEffectVis(CViewPattern *pViewPattern, ROWINDEX startRow, ROWINDEX endRow, CHANNELINDEX nchn, CModDoc &modDoc, PATTERNINDEX pat);
@@ -50,10 +50,12 @@ public:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 
 protected:
+	void UpdateEffectList();
+
 	void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV support
 	void PostNcDestroy() override;
 
-	EffectInfo effectInfo;
+	EffectInfo m_effectInfo;
 
 	CBitmap m_bGrid, m_bNodes, m_bPlayPos;
 	HBITMAP m_pbOldGrid = nullptr, m_pbOldNodes = nullptr, m_pbOldPlayPos = nullptr;
@@ -85,7 +87,7 @@ protected:
 	CHANNELINDEX m_nChan;
 	PATTERNINDEX m_nPattern;
 	int m_nFillEffect;
-	static EditAction m_nAction;
+	static Action m_nAction;
 
 	int m_nDragItem = -1;
 	UINT m_nBtnMouseOver;
