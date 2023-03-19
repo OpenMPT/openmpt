@@ -440,19 +440,16 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 			int pos32 = m_SpinTempo.GetPos32();
 			if(pos32 != 0)
 			{
-				TEMPO newTempo;
+				pos32 *= TEMPO::fractFact;
 				if(m_sndFile.GetModSpecifications().hasFractionalTempo)
 				{
-					pos32 *= TEMPO::fractFact;
 					if(CMainFrame::GetMainFrame()->GetInputHandler()->CtrlPressed())
 						pos32 /= 100;
 					else if(CMainFrame::GetMainFrame()->GetInputHandler()->ShiftPressed())
 						pos32 /= 10;
-					newTempo.SetRaw(pos32);
-				} else
-				{
-					newTempo = TEMPO(pos32, 0);
 				}
+				TEMPO newTempo;
+				newTempo.SetRaw(pos32);
 				newTempo += m_sndFile.m_nDefaultTempo;
 				Limit(newTempo, m_tempoMin, m_tempoMax);
 				m_sndFile.m_nDefaultTempo = m_sndFile.m_PlayState.m_nMusicTempo = newTempo;

@@ -846,7 +846,7 @@ static std::vector<std::byte> DecodeSymChunk(FileReader &file)
 		// When using a fuzzer, we should not care if the decompressed buffer has the correct size.
 		// This makes finding new interesting test cases much easier.
 		if(remain)
-			std::vector<std::byte>{}.swap(data);
+			mpt::reconstruct(data);
 #endif
 	} else
 	{

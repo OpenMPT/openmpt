@@ -191,7 +191,7 @@ static void ConvertSTMCommand(ModCommand &m, const uint8 command, const ROWINDEX
 		newTempo = m.param;
 		m.param >>= 4;
 #else
-		MPT_UNUSED_VARIABLE(newTempo);
+		MPT_UNREFERENCED_PARAMETER(newTempo);
 #endif // MODPLUG_TRACKER
 		break;
 
