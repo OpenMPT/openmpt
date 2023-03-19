@@ -136,7 +136,7 @@ static mpt::tstring FormatPanning(int32 value, int32 center)
 	if(value == center)
 		s += _T(" (Center)");
 	else
-		s += MPT_TFORMAT(" ({} {})")(std::abs(value - center), (value < center) ? _T("L") : _T("R"));
+		s += MPT_TFORMAT(" ({} {})")(std::abs(value - center), mpt::tstring(1, (value < center) ? _T('L') : _T('R')));
 	return s;
 }
 
