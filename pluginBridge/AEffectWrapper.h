@@ -89,7 +89,7 @@ using AEffect64 = AEffectProto<int64>;
 #pragma pack(pop)
 
 
-// Translate a VSTEvents struct to bridge format (placed in data vector)
+// Translate a VSTEvents struct to bridge format (placed in outData vector)
 inline void TranslateVstEventsToBridge(std::vector<char> &outData, const Vst::VstEvents &events, int32 targetPtrSize)
 {
 	outData.reserve(outData.size() + sizeof(int32) + sizeof(Vst::VstMidiEvent) * events.numEvents);
@@ -126,7 +126,7 @@ inline void TranslateVstEventsToBridge(std::vector<char> &outData, const Vst::Vs
 }
 
 
-// Translate bridge format (void *ptr) back to VSTEvents struct (placed in data vector)
+// Translate bridge format (void *ptr) back to VSTEvents struct (placed in outData vector)
 inline void TranslateBridgeToVstEvents(std::vector<char> &outData, const void *inData)
 {
 	const int32 numEvents = *static_cast<const int32 *>(inData);

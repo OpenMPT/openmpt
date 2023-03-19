@@ -107,6 +107,6 @@ static void SampleLoop(ModChannel &chn, const CResampler &resampler, typename Tr
 }
 
 // Type of the SampleLoop function above
-typedef void (*MixFuncInterface)(ModChannel &, const CResampler &, mixsample_t *, unsigned int);
+using MixFuncInterface = void (*)(ModChannel &, const CResampler &, mixsample_t *, unsigned int);
 
 OPENMPT_NAMESPACE_END
