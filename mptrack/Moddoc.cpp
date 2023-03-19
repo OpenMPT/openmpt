@@ -2743,7 +2743,7 @@ LRESULT CModDoc::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcPlaySongFromCursor: OnPatternPlayNoLoop(); break;
 		case kcPlaySongFromStart: OnPlayerPlayFromStart(); break;
 		case kcPlayStopSong:
-			if(CMainFrame::GetMainFrame()->GetModPlaying() == this)
+			if(CMainFrame::GetMainFrame()->GetModPlaying() == this && !m_SndFile.m_SongFlags[SONG_PAUSED | SONG_STEP])
 			{
 				OnPlayerStop();
 				break;
