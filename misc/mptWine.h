@@ -47,7 +47,7 @@ public:
 };
 
 
-typedef void (*ExecutePosixCommandProgress)(void *userdata);
+using ExecutePosixCommandProgress = void (*)(void *userdata);
 
 enum ExecuteProgressResult
 {
@@ -55,7 +55,7 @@ enum ExecuteProgressResult
 	ExecuteProgressAsyncCancel = -1,
 };
 
-typedef ExecuteProgressResult (*ExecutePosixShellScriptProgress)(void *userdata);
+using ExecutePosixShellScriptProgress = ExecuteProgressResult (*)(void *userdata);
 
 
 enum ExecFlags

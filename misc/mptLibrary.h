@@ -20,7 +20,7 @@ namespace mpt
 {
 
 
-typedef void* (*FuncPtr)(); // pointer to function returning void*
+using FuncPtr = void* (*)(); // pointer to function returning void*
 
 class LibraryHandle;
 

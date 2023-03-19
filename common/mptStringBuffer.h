@@ -180,7 +180,7 @@ template <std::size_t len, mpt::String::ReadWriteMode mode>
 struct modecharbuf
 {
 public:
-	typedef char Tchar;
+	using Tchar = char;
 	using char_type = Tchar;
 	using string_type = std::basic_string<Tchar>;
 public:

@@ -333,7 +333,7 @@ class SsbRead
 
 public:
 
-	typedef std::vector<ReadEntry>::const_iterator ReadIterator;
+	using ReadIterator = std::vector<ReadEntry>::const_iterator;
 
 	SsbRead(std::istream& iStrm);
 
