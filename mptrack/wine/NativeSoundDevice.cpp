@@ -1,10 +1,6 @@
 
 #include "stdafx.h"
 
-#if MPT_COMPILER_MSVC
-#pragma warning(disable:4800) // 'T' : forcing value to bool 'true' or 'false' (performance warning)
-#endif // MPT_COMPILER_MSVC
-
 #include "NativeSoundDevice.h"
 #include "NativeUtils.h"
 
@@ -194,7 +190,7 @@ public:
 		}
 		uintptr_t result = 0;
 		impl.SoundCallbackIsLockedByCurrentThreadFunc(impl.inst, &result);
-		return result;
+		return result != 0;
 	}
 	// audio thread
 	virtual void SoundCallbackLock()

@@ -262,7 +262,7 @@ inline OpenMPT_SoundDevice_Flags encode(SoundDevice::Flags src) {
 }
 inline SoundDevice::Flags decode(OpenMPT_SoundDevice_Flags src) {
 	SoundDevice::Flags dst;
-	dst.WantsClippedOutput = src.WantsClippedOutput;
+	dst.WantsClippedOutput = src.WantsClippedOutput != 0;
 	return dst;
 }
 
@@ -284,7 +284,7 @@ inline SoundDevice::BufferFormat decode(OpenMPT_SoundDevice_BufferFormat src) {
 	dst.Channels = src.Channels;
 	dst.InputChannels = src.InputChannels;
 	dst.sampleFormat = SampleFormat::FromInt(src.sampleFormat);
-	dst.WantsClippedOutput = src.WantsClippedOutput;
+	dst.WantsClippedOutput = src.WantsClippedOutput != 0;
 	dst.DitherType = src.DitherType;
 	return dst;
 }
