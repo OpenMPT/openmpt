@@ -469,13 +469,13 @@ Const OPENMPT_PROBE_FILE_HEADER_FLAGS_DEFAULT = OPENMPT_PROBE_FILE_HEADER_FLAGS_
 '* Probe for no formats in openmpt_probe_file_header() or openmpt_probe_file_header_without_filesize(). \since 0.3.0
 Const OPENMPT_PROBE_FILE_HEADER_FLAGS_NONE = 0
 
-'* Possible return values fo openmpt_probe_file_header() and openmpt_probe_file_header_without_filesize(). \since 0.3.0
+'* Possible return values for openmpt_probe_file_header() and openmpt_probe_file_header_without_filesize(): The file will most likely be supported by libopenmpt. \since 0.3.0
 Const OPENMPT_PROBE_FILE_HEADER_RESULT_SUCCESS = 1
-'* Possible return values fo openmpt_probe_file_header() and openmpt_probe_file_header_without_filesize(). \since 0.3.0
+'* Possible return values for openmpt_probe_file_header() and openmpt_probe_file_header_without_filesize(): The file is not supported by libopenmpt. \since 0.3.0
 Const OPENMPT_PROBE_FILE_HEADER_RESULT_FAILURE = 0
-'* Possible return values fo openmpt_probe_file_header() and openmpt_probe_file_header_without_filesize(). \since 0.3.0
+'* Possible return values for openmpt_probe_file_header() and openmpt_probe_file_header_without_filesize(): An answer could not be determined with the amount of data provided. \since 0.3.0
 Const OPENMPT_PROBE_FILE_HEADER_RESULT_WANTMOREDATA = -1
-'* Possible return values fo openmpt_probe_file_header() and openmpt_probe_file_header_without_filesize(). \since 0.3.0
+'* Possible return values for openmpt_probe_file_header() and openmpt_probe_file_header_without_filesize(): An internal error occurred. \since 0.3.0
 Const OPENMPT_PROBE_FILE_HEADER_RESULT_ERROR = -255
 
 /'* \brief Probe the provided bytes from the beginning of a file for supported file format headers to find out whether libopenmpt might be able to open it

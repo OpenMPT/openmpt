@@ -298,8 +298,11 @@ enum probe_file_header_flags : std::uint64_t {
 
 //! Possible return values for openmpt::probe_file_header(). \since 0.3.0
 enum probe_file_header_result {
+	//! The file will most likely be supported by libopenmpt. \since 0.3.0
 	probe_file_header_result_success      =  1,
+	//! The file is not supported by libopenmpt. \since 0.3.0
 	probe_file_header_result_failure      =  0,
+	//! An answer could not be determined with the amount of data provided. \since 0.3.0
 	probe_file_header_result_wantmoredata = -1
 };
 

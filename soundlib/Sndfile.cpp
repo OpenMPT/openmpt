@@ -403,7 +403,7 @@ CSoundFile::ProbeResult CSoundFile::Probe(ProbeFlags flags, mpt::span<const std:
 	{
 		if((result == ProbeWantMoreData) && (data.size() >= ProbeRecommendedSize))
 		{
-			// If the prober wants more daat but we already provided the recommended required maximum,
+			// If the prober wants more data but we already provided the recommended required maximum,
 			// just return success as this is the best we can do for the suggestesd probing size.
 			result = ProbeSuccess;
 		}
