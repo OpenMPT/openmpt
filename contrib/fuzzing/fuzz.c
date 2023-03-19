@@ -57,9 +57,15 @@ int main( int argc, char * argv[] ) {
 	file = fopen( argv[1], "rb" );
 	mod = openmpt_module_create2( openmpt_stream_get_file_callbacks(), file, NULL, NULL, ErrFunc, NULL, NULL, NULL, NULL );
 	fclose( file );
-	if ( mod == NULL ) return 1;
+	if ( mod == NULL )
+		return 1;
+
+	// verify API contract : If the file can be loaded, header probing must be successful too.
+	if ( openmpt_probe_file_header_from_stream( OPENMPT_PROBE_FILE_HEADER_FLAGS_DEFAULT, openmpt_stream_get_file_callbacks(), file, NULL, NULL, ErrFunc, NULL, NULL, NULL ) == OPENMPT_PROBE_FILE_HEADER_RESULT_FAILURE )
+		abort();
+
 	openmpt_module_ctl_set( mod, "render.resampler.emulate_amiga", (openmpt_module_get_num_orders( mod ) & 1) ? "0" : "1" );
-	/* render about a second of the module for fuzzing the actual mix routines */
+	// render about a second of the module for fuzzing the actual mix routines
 	for(; i < 50; i++) {
 		count = openmpt_module_read_mono( mod, SAMPLERATE, BUFFERSIZE, buffer );
 		if ( count == 0 ) {
@@ -71,7 +77,7 @@ int main( int argc, char * argv[] ) {
 	openmpt_module_set_position_order_row( mod, 3, 16 );
 	openmpt_module_read_mono( mod, SAMPLERATE, BUFFERSIZE, buffer );
 
-	/* fuzz string-related stuff */
+	// fuzz string-related stuff
 	openmpt_free_string ( openmpt_module_get_metadata( mod, "date" ) );
 	openmpt_free_string ( openmpt_module_get_metadata( mod, "message" ) );
 	openmpt_module_destroy( mod );
