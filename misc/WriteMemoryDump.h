@@ -12,14 +12,7 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
-#if MPT_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable:4091) // 'typedef ': ignored on left of '' when no variable is declared
-#endif // MPT_COMPILER_MSVC
 #include <dbghelp.h>
-#if MPT_COMPILER_MSVC
-#pragma warning(pop)
-#endif // MPT_COMPILER_MSVC
 
 OPENMPT_NAMESPACE_BEGIN
 
