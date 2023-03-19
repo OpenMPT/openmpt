@@ -2128,7 +2128,7 @@ void CModDoc::OnPlayerPlay()
 		}
 
 		const bool isPlaying = (pMainFrm->GetModPlaying() == this);
-		if(isPlaying && !m_SndFile.m_SongFlags[SONG_PAUSED | SONG_STEP/*|SONG_PATTERNLOOP*/])
+		if(isPlaying && !m_SndFile.m_SongFlags[SONG_PAUSED | SONG_STEP])
 		{
 			OnPlayerPause();
 			return;
@@ -2734,7 +2734,7 @@ LRESULT CModDoc::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcPlayPatternFromCursor: OnPatternPlay(); break;
 		case kcPlayPatternFromStart: OnPatternRestart(); break;
 		case kcPlaySongFromCursorPause:
-			if(CMainFrame::GetMainFrame()->GetModPlaying() == this)
+			if(CMainFrame::GetMainFrame()->GetModPlaying() == this && !m_SndFile.m_SongFlags[SONG_PAUSED | SONG_STEP])
 			{
 				OnPlayerPause();
 				break;
@@ -2751,7 +2751,7 @@ LRESULT CModDoc::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 			[[fallthrough]];
 		case kcPlayPauseSong: OnPlayerPlay(); break;
 		case kcPlaySongFromPatternPause:
-			if (CMainFrame::GetMainFrame()->GetModPlaying() == this)
+			if(CMainFrame::GetMainFrame()->GetModPlaying() == this && !m_SndFile.m_SongFlags[SONG_PAUSED | SONG_STEP])
 			{
 				OnPlayerPause();
 				break;
