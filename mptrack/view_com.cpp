@@ -268,6 +268,10 @@ BOOL CViewComments::PreTranslateMessage(MSG *pMsg)
 			{
 				return TRUE;  // Mapped to a command, no need to pass message on.
 			}
+		} else if(pMsg->message == WM_CHAR)
+		{
+			// Avoid Windows warning sound when holding note key
+			return TRUE;
 		}
 	}
 
