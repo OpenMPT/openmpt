@@ -29,7 +29,7 @@ namespace Fade
 	};
 
 	// Maps fade curve position in [0,1] to value in [0,1]
-	typedef double (*Func) (double pos);
+	using Func = double (*)(double pos);
 
 	inline double LinearFunc(double pos)
 		{ return pos; }

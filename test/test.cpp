@@ -3501,7 +3501,7 @@ static mpt::PathString GetTempFilenameBase()
 	return GetTestFilenameBase();
 }
 
-typedef CModDoc *TSoundFileContainer;
+using TSoundFileContainer = CModDoc *;
 
 static CSoundFile &GetSoundFile(TSoundFileContainer &sndFile)
 {
@@ -3561,7 +3561,7 @@ static mpt::PathString GetTempFilenameBase()
 #endif
 }
 
-typedef std::shared_ptr<CSoundFile> TSoundFileContainer;
+using TSoundFileContainer = std::shared_ptr<CSoundFile>;
 
 static CSoundFile &GetSoundFile(TSoundFileContainer &sndFile)
 {
