@@ -135,7 +135,7 @@ class ComponentLibrary
 
 private:
 	
-	using TLibraryMap = typedef std::map<std::string, mpt::Library>;
+	using TLibraryMap = std::map<std::string, mpt::Library>;
 	TLibraryMap m_Libraries;
 	
 	bool m_BindFailed;
