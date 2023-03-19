@@ -499,7 +499,10 @@ static unsigned char pretab_choice[2][22] =
 static int III_dequantize_sample(mpg123_handle *fr, real xr[SBLIMIT][SSLIMIT],int *scf, struct gr_info_s *gr_info,int sfreq,int part2bits)
 {
 	int shift = 1 + gr_info->scalefac_scale;
-	real *xrpnt = (real *) xr;
+	// Pointer cast to make pedantic compilers happy.
+	real *xrpnt = (real*)xr;
+	// Some compiler freaks out over &xr[SBLIMIT][0], which is the same.
+	real *xrpntlimit = (real*)xr+SBLIMIT*SSLIMIT;
 	int l[3],l3;
 	int part2remain = gr_info->part2_3_length - part2bits;
 	const short *me;
@@ -552,10 +555,10 @@ static int III_dequantize_sample(mpg123_handle *fr, real xr[SBLIMIT][SSLIMIT],in
 		}
 	}
 
-#define CHECK_XRPNT if(xrpnt >= &xr[SBLIMIT][0]) \
+#define CHECK_XRPNT if(xrpnt >= xrpntlimit) \
 { \
 	if(NOQUIET) \
-		error2("attempted xrpnt overflow (%p !< %p)", (void*) xrpnt, (void*) &xr[SBLIMIT][0]); \
+		error2("attempted xrpnt overflow (%p !< %p)", (void*) xrpnt, (void*) xrpntlimit); \
 	return 1; \
 }
 
@@ -992,7 +995,7 @@ static int III_dequantize_sample(mpg123_handle *fr, real xr[SBLIMIT][SSLIMIT],in
 		gr_info->maxb       = 1;
 	}
 
-	while(xrpnt < &xr[SBLIMIT][0]) 
+	while(xrpnt < xrpntlimit)
 	*xrpnt++ = DOUBLE_TO_REAL(0.0);
 
 	while( part2remain > 16 )

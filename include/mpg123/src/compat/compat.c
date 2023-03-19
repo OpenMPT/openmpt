@@ -179,6 +179,10 @@ void compat_binmode(int fd, int enable)
 	it late to some official APIs, that's still fine with us.
 */
 
+#ifdef WANT_WIN32_UNICODE
+typedef HRESULT (__stdcall *PCA_ptr)( const wchar_t *, const wchar_t*, unsigned long, wchar_t **);
+#endif
+
 char* compat_catpath(const char *prefix, const char* path)
 {
 	char *ret = NULL;
@@ -193,8 +197,7 @@ char* compat_catpath(const char *prefix, const char* path)
 		ThOr: I presume this hack is for supporting pre-8 Windows, as
 		from Windows 8 on, this is documented in the API.
 	*/
-	HRESULT (__stdcall *mypac)( const wchar_t *in, const wchar_t* more
-	,	unsigned long flags, wchar_t **out ) = NULL;
+	PCA_ptr mypac = NULL;
 	HMODULE pathcch = NULL;
 
 	if(!prefix && !path)
@@ -207,7 +210,7 @@ char* compat_catpath(const char *prefix, const char* path)
 	/* Again: I presume this whole fun is to get at PathAllocCombine
 	   even when pathcch.h is not available (like in MinGW32). */
 	if( (pathcch = GetModuleHandleA("kernelbase")) )
-		mypac = (void *)GetProcAddress(pathcch, "PathAllocCombine");
+		mypac = (PCA_ptr) GetProcAddress(pathcch, "PathAllocCombine");
 	if(mypac) /* PATHCCH_ALLOW_LONG_PATH = 1 per API docs */
 	{
 		debug("Actually calling PathAllocCombine!");

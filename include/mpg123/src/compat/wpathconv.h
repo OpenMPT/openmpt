@@ -26,6 +26,7 @@ static wchar_t* u2wpath(const char *upath)
 	return wpath;
 }
 
+#ifndef HIDE_w2upath
 /* Convert Windows wide character paths to unix UTF-8. */
 static char* w2upath(const wchar_t *wpath)
 {
@@ -37,6 +38,7 @@ static char* w2upath(const wchar_t *wpath)
 			*p = '/';
 	return upath;
 }
+#endif
 
 /* An absolute path that is too long and not already marked with
    \\?\ can be marked as a long one and still work. */
