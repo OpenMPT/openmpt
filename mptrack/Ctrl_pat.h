@@ -206,6 +206,7 @@ protected:
 	INSTRUMENTINDEX m_nInstrument = 0;
 	PatternCursor::Columns m_nDetailLevel = PatternCursor::lastColumn;  // Visible Columns
 	bool m_bRecord = false, m_bVUMeters = false, m_bPluginNames = false;
+	bool m_instrDropdownOpen = false;
 
 public:
 	CCtrlPatterns(CModControlView &parent, CModDoc &document);
@@ -274,6 +275,8 @@ protected:
 	afx_msg void TogglePluginEditor();
 	afx_msg void OnToggleOverflowPaste();
 	afx_msg void OnSequenceNumChanged();
+	afx_msg void OnOpenInstrumentDropdown() { m_instrDropdownOpen = true; }
+	afx_msg void OnCancelInstrumentDropdown() { m_instrDropdownOpen = false; }
 
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()

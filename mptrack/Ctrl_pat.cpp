@@ -68,8 +68,10 @@ BEGIN_MESSAGE_MAP(CCtrlPatterns, CModControlDlg)
 	ON_COMMAND(ID_PATTERNDETAIL_MED,		&CCtrlPatterns::OnDetailMed)
 	ON_COMMAND(ID_PATTERNDETAIL_HI,			&CCtrlPatterns::OnDetailHi)
 	ON_COMMAND(ID_OVERFLOWPASTE,			&CCtrlPatterns::OnToggleOverflowPaste)
-	ON_CBN_SELCHANGE(IDC_COMBO_INSTRUMENT,	&CCtrlPatterns::OnInstrumentChanged)
-	ON_COMMAND(IDC_PATINSTROPLUGGUI,		&CCtrlPatterns::TogglePluginEditor) //rewbs.instroVST
+	ON_CBN_DROPDOWN(IDC_COMBO_INSTRUMENT,	&CCtrlPatterns::OnOpenInstrumentDropdown)
+	ON_CBN_SELENDCANCEL(IDC_COMBO_INSTRUMENT, &CCtrlPatterns::OnCancelInstrumentDropdown)
+	ON_CBN_SELENDOK(IDC_COMBO_INSTRUMENT,	&CCtrlPatterns::OnInstrumentChanged)
+	ON_COMMAND(IDC_PATINSTROPLUGGUI,		&CCtrlPatterns::TogglePluginEditor)
 	ON_EN_CHANGE(IDC_EDIT_SPACING,			&CCtrlPatterns::OnSpacingChanged)
 	ON_EN_CHANGE(IDC_EDIT_PATTERNNAME,		&CCtrlPatterns::OnPatternNameChanged)
 	ON_EN_CHANGE(IDC_EDIT_SEQUENCE_NAME,	&CCtrlPatterns::OnSequenceNameChanged)
@@ -691,7 +693,11 @@ void CCtrlPatterns::OnInstrumentChanged()
 			m_nInstrument = static_cast<INSTRUMENTINDEX>(n);
 			m_parent.InstrumentChanged(m_nInstrument);
 		}
-		SwitchToView();
+		if(m_instrDropdownOpen)
+		{
+			m_instrDropdownOpen = false;
+			SwitchToView();
+		}
 		::EnableWindow(::GetDlgItem(m_hWnd, IDC_PATINSTROPLUGGUI), HasValidPlug(m_nInstrument));
 	}
 }
@@ -709,6 +715,7 @@ void CCtrlPatterns::OnPrevInstrument()
 			pos = n - 1;
 		m_CbnInstrument.SetCurSel(pos);
 		OnInstrumentChanged();
+		SwitchToView();
 	}
 }
 
@@ -723,6 +730,7 @@ void CCtrlPatterns::OnNextInstrument()
 			pos = 0;
 		m_CbnInstrument.SetCurSel(pos);
 		OnInstrumentChanged();
+		SwitchToView();
 	}
 }
 
