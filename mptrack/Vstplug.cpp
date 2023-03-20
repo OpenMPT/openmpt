@@ -147,14 +147,14 @@ AEffect *CVstPlugin::LoadPlugin(bool maskCrashes, VSTPluginLib &plugin, HMODULE 
 			{
 				const CString msg =
 					MPT_CFORMAT("The following error occurred while trying to load\n{}\n\n{}\n\nDo you want to try to load the plugin natively?")
-					(plugin.dllPath, mpt::get_exception_text<mpt::ustring>(e));
+					(plugin.dllPath, mpt::ToUnicode(mpt::Charset::UTF8, mpt::get_exception_text<std::string>(e)));
 				if(Reporting::Confirm(msg, _T("OpenMPT Plugin Bridge")) == cnfNo)
 				{
 					return nullptr;
 				}
 			} else
 			{
-				Reporting::Error(mpt::get_exception_text<mpt::ustring>(e), "OpenMPT Plugin Bridge");
+				Reporting::Error(mpt::ToUnicode(mpt::Charset::UTF8, mpt::get_exception_text<std::string>(e)), "OpenMPT Plugin Bridge");
 				return nullptr;
 			}
 		}
