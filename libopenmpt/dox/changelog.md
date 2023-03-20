@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.6.10-pre
 
+ *  mpg123: Update to v1.31.3 (2023-03-19).
+
 ### libopenmpt 0.6.9 (2023-03-05)
 
  *  [**Bug**] An exception could be thrown during rendering when trying to
