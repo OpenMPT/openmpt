@@ -30,14 +30,14 @@ public:
 };
 
 template <typename T>
-class exception_ustring_wrapper : public T, public virtual mpt::exception_ustring_wrapper_base {
+class exception_ustring_wrapper : public T
+	, public virtual mpt::exception_ustring_wrapper_base {
 private:
 	mpt::ustring m_what;
 public:
 	exception_ustring_wrapper(mpt::ustring str)
 		: T(mpt::transcode<std::string>(mpt::exception_encoding, str))
-		, m_what(str)
-	{
+		, m_what(str) {
 		return;
 	}
 	~exception_ustring_wrapper() override = default;
