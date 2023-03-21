@@ -5,6 +5,8 @@
  * Notes  : There are two types of AMF files, the ASYLUM Music Format (used in Crusader: No Remorse and Crusader: No Regret)
  *          and Advanced Music Format (DSMI / Digital Sound And Music Interface, used in various games such as Pinball World).
  *          Both module types are handled here.
+ *          To make things complete, there appears to be a (potentially unofficial) variant of the DSMI AMF format called DMF,
+ *          used in the game "Tronic". It mostly resembles "normal" AMF files, but with all song and sample names removed.
  * Authors: Olivier Lapicque
  *          OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
@@ -13,6 +15,7 @@
 
 #include "stdafx.h"
 #include "Loaders.h"
+#include "mpt/endian/int24.hpp"
 #include <algorithm>
 
 
@@ -199,19 +202,52 @@ bool CSoundFile::ReadAMF_Asylum(FileReader &file, ModLoadingFlags loadFlags)
 }
 
 
+// DSMI AMF magic bytes
+struct AMFFileSignature
+{
+	char  amf[3];  // "AMF" for regular AMF files, "DMF" for the compact format found in the game Tronic
+	uint8 version;
+
+	bool IsValidAMF() const
+	{
+		return !std::memcmp(amf, "AMF", 3) && (version == 1 || (version >= 8 && version <= 14));
+	}
+
+	bool IsValidDMF() const
+	{
+		// Version checks are only an assumption; Tronic uses version 14 files,
+		// but we can probably assume that if there are earlier versions, they differ in exactly the same way from regular AMF as those files do.
+		return !std::memcmp(amf, "DMF", 3) && (version >= 10 && version <= 14);
+	}
+};
+
+MPT_BINARY_STRUCT(AMFFileSignature, 4)
+
+
 // DSMI AMF File Header
 struct AMFFileHeader
 {
-	char     amf[3];
-	uint8le  version;
-	char     title[32];
 	uint8le  numSamples;
 	uint8le  numOrders;
 	uint16le numTracks;
-	uint8le  numChannels;
+	uint8le  numChannels;  // v9+
+
+	bool IsValid(const uint8 version) const
+	{
+		if(version < 9)
+			return true;
+		
+		return (numChannels >= 1 && numChannels <= 32);
+	}
+
+	// How much of AMFFileHeader should actually be read
+	static size_t GetHeaderSize(const uint8 version)
+	{
+		return (version >= 9) ? sizeof(AMFFileHeader) : 4u;
+	}
 };
 
-MPT_BINARY_STRUCT(AMFFileHeader, 41)
+MPT_BINARY_STRUCT(AMFFileHeader, 5)
 
 
 // DSMI AMF Sample Header (v1-v9)
@@ -282,6 +318,37 @@ struct AMFSampleHeaderNew
 };
 
 MPT_BINARY_STRUCT(AMFSampleHeaderNew, 65)
+
+
+// DSMI DMF ("compact AMF") Sample Header
+struct AMFCompactSampleHeader
+{
+	using uint24le = mpt::uint24le;
+
+	uint8le  type;
+	char     leftOverFirstCharOfSampleName;
+	uint32le index;
+	uint32le length;
+	uint16le sampleRate;
+	uint8le  volume;
+	uint32le loopStart;
+	uint24le loopEnd;
+
+	void ConvertToMPT(ModSample &mptSmp) const
+	{
+		mptSmp.Initialize();
+		mptSmp.filename = std::string(1, leftOverFirstCharOfSampleName);  // Why not :)
+		mptSmp.nLength = length;
+		mptSmp.nC5Speed = sampleRate;
+		mptSmp.nVolume = std::min(volume.get(), uint8(64)) * 4u;
+		mptSmp.nLoopStart = loopStart;
+		mptSmp.nLoopEnd = loopEnd.get();
+		if(type != 0 && mptSmp.nLoopEnd > mptSmp.nLoopStart + 2 && mptSmp.nLoopEnd <= mptSmp.nLength)
+			mptSmp.uFlags.set(CHN_LOOP);
+	}
+};
+
+MPT_BINARY_STRUCT(AMFCompactSampleHeader, 20)
 
 
 // Read a single AMF track (channel) into a pattern.
@@ -448,26 +515,27 @@ static void AMFReadPattern(CPattern &pattern, CHANNELINDEX chn, FileReader &file
 }
 
 
-static bool ValidateHeader(const AMFFileHeader &fileHeader)
-{
-	if(std::memcmp(fileHeader.amf, "AMF", 3)
-	   || (fileHeader.version < 8 && fileHeader.version != 1) || fileHeader.version > 14
-	   || ((fileHeader.numChannels < 1 || fileHeader.numChannels > 32) && fileHeader.version >= 9))
-	{
-		return false;
-	}
-	return true;
-}
-
-
 CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderAMF_DSMI(MemoryFileReader file, const uint64 *pfilesize)
 {
+	AMFFileSignature fileSignature;
+	if(!file.ReadStruct(fileSignature))
+	{
+		return CSoundFile::ProbeWantMoreData;
+	}
+	if(fileSignature.IsValidAMF())
+	{
+		if(!file.Skip(32))
+			return CSoundFile::ProbeWantMoreData;
+	} else if(!fileSignature.IsValidDMF())
+	{
+		return ProbeFailure;
+	}
 	AMFFileHeader fileHeader;
-	if(!file.ReadStruct(fileHeader))
+	if(!file.ReadStructPartial(fileHeader, AMFFileHeader::GetHeaderSize(fileSignature.version)))
 	{
 		return ProbeWantMoreData;
 	}
-	if(!ValidateHeader(fileHeader))
+	if(!fileHeader.IsValid(fileSignature.version))
 	{
 		return ProbeFailure;
 	}
@@ -480,44 +548,57 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 {
 	file.Rewind();
 
+	AMFFileSignature fileSignature;
+	if(!file.ReadStruct(fileSignature))
+		return false;
+	
+	char title[32] = {};
+	bool isDMF = false;
+	if(fileSignature.IsValidAMF())
+		file.ReadArray(title);
+	else if(fileSignature.IsValidDMF())
+		isDMF = true;
+	else
+		return false;
+	
 	AMFFileHeader fileHeader;
-	if(!file.ReadStruct(fileHeader))
-	{
+	if(!file.ReadStructPartial(fileHeader, AMFFileHeader::GetHeaderSize(fileSignature.version)))
 		return false;
-	}
-	if(!ValidateHeader(fileHeader))
-	{
+	if(!fileHeader.IsValid(fileSignature.version))
 		return false;
-	}
+	
 	if(loadFlags == onlyVerifyHeader)
-	{
 		return true;
-	}
 
 	InitializeGlobals(MOD_TYPE_AMF);
 	InitializeChannels();
 
-	m_modFormat.formatName = MPT_UFORMAT("DSMI v{}")(fileHeader.version);
-	m_modFormat.type = U_("amf");
+	if(isDMF)
+	{
+		m_modFormat.formatName = MPT_UFORMAT("DSMI Compact v{}")(fileSignature.version);
+		m_modFormat.type = U_("dmf");
+	} else
+	{
+		m_songName = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, title);
+		m_modFormat.formatName = MPT_UFORMAT("DSMI v{}")(fileSignature.version);
+		m_modFormat.type = U_("amf");
+	}
 	m_modFormat.charset = mpt::Charset::CP437;
 
 	m_nChannels = fileHeader.numChannels;
 	m_nSamples = fileHeader.numSamples;
 
-	m_songName = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, fileHeader.title);
-
-	if(fileHeader.version < 9)
+	if(fileSignature.version < 9)
 	{
 		// Old format revisions are fixed to 4 channels
 		m_nChannels = 4;
-		file.SkipBack(1);
 		SetupMODPanning(true);
 	}
 
 	// Setup Channel Pan Positions
-	if(fileHeader.version >= 11)
+	if(fileSignature.version >= 11)
 	{
-		const CHANNELINDEX readChannels = fileHeader.version >= 12 ? 32 : 16;
+		const CHANNELINDEX readChannels = fileSignature.version >= 12 ? 32 : 16;
 		for(CHANNELINDEX chn = 0; chn < readChannels; chn++)
 		{
 			int8 pan = file.ReadInt8();
@@ -526,7 +607,7 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 			else
 				ChnSettings[chn].nPan = static_cast<uint16>(std::clamp((pan + 64) * 2, 0, 256));
 		}
-	} else if(fileHeader.version >= 9)
+	} else if(fileSignature.version >= 9)
 	{
 		uint8 panPos[16];
 		file.ReadArray(panPos);
@@ -537,7 +618,7 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Get Tempo/Speed
-	if(fileHeader.version >= 13)
+	if(fileSignature.version >= 13)
 	{
 		auto [tempo, speed] = file.ReadArray<uint8, 2>();
 		if(tempo < 32)
@@ -553,8 +634,8 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 	// Setup Order List
 	Order().resize(fileHeader.numOrders);
 	std::vector<uint16> patternLength;
-	const FileReader::off_t trackStartPos = file.GetPosition() + (fileHeader.version >= 14 ? 2 : 0);
-	if(fileHeader.version >= 14)
+	const FileReader::off_t trackStartPos = file.GetPosition() + (fileSignature.version >= 14 ? 2 : 0);
+	if(fileSignature.version >= 14)
 	{
 		patternLength.resize(fileHeader.numOrders);
 	}
@@ -562,7 +643,7 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 	for(ORDERINDEX ord = 0; ord < fileHeader.numOrders; ord++)
 	{
 		Order()[ord] = ord;
-		if(fileHeader.version >= 14)
+		if(fileSignature.version >= 14)
 		{
 			patternLength[ord] = file.ReadUint16LE();
 		}
@@ -572,7 +653,7 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Read Sample Headers
 	bool truncatedSampleHeaders = false;
-	if(fileHeader.version == 10)
+	if(fileSignature.version == 10)
 	{
 		// M2AMF 1.3 included with DMP 2.32 wrote new (v10+) sample headers, but using the old struct length.
 		const auto startPos = file.GetPosition();
@@ -591,12 +672,19 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 	std::vector<uint32> sampleMap(GetNumSamples(), 0);
 	for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
 	{
-		if(fileHeader.version < 10)
+		if(fileSignature.version < 10)
 		{
 			AMFSampleHeaderOld sample;
 			file.ReadStruct(sample);
 			sample.ConvertToMPT(Samples[smp]);
 			m_szNames[smp] = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, sample.name);
+			sampleMap[smp - 1] = sample.index;
+		} else if(isDMF)
+		{
+			AMFCompactSampleHeader sample;
+			file.ReadStruct(sample);
+			sample.ConvertToMPT(Samples[smp]);
+			m_szNames[smp] = "";
 			sampleMap[smp - 1] = sample.index;
 		} else
 		{
@@ -626,7 +714,7 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 		uint16 numEvents = file.ReadUint16LE();
 		file.Skip(1);
 		if(numEvents)
-			trackData[i] = file.ReadChunk(numEvents * 3 + (fileHeader.version == 1 ? 3 : 0));
+			trackData[i] = file.ReadChunk(numEvents * 3 + (fileSignature.version == 1 ? 3 : 0));
 	}
 
 	if(loadFlags & loadSampleData)
@@ -636,7 +724,7 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 			SampleIO::_8bit,
 			SampleIO::mono,
 			SampleIO::littleEndian,
-			SampleIO::unsignedPCM);
+			isDMF ? SampleIO::deltaPCM : SampleIO::unsignedPCM);
 
 		// Note: in theory a sample can be reused by several instruments and appear in a different order in the file
 		// However, M2AMF doesn't take advantage of this and just writes instruments in the order they appear,
@@ -649,7 +737,16 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 				if(sampleMap[target] != smp)
 					continue;
 				file.Seek(startPos);
-				sampleIO.ReadSample(Samples[target + 1], file);
+				ModSample &sample = Samples[target + 1];
+				sampleIO.ReadSample(sample, file);
+				if(isDMF)
+				{
+					// Unsigned delta samples, how novel!
+					for(auto &v : mpt::as_span(sample.sample8(), sample.nLength))
+					{
+						v ^= 0x80;
+					}
+				}
 			}
 		}
 	}
@@ -670,7 +767,7 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 		}
 
 		// Get table with per-channel track assignments
-		file.Seek(trackStartPos + pat * (GetNumChannels() * 2 + (fileHeader.version >= 14 ? 2 : 0)));
+		file.Seek(trackStartPos + pat * (GetNumChannels() * 2 + (fileSignature.version >= 14 ? 2 : 0)));
 		std::vector<uint16le> tracks;
 		if(!file.ReadVector(tracks, GetNumChannels()))
 		{
