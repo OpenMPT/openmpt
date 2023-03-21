@@ -41,7 +41,7 @@ del /f /q "%OUTDIR%\openmpt-wine-support.zip"
  src\mpt\endian\*.hpp ^
  src\mpt\endian\tests\*.hpp ^
  src\mpt\environment\*.hpp ^
- src\mpt\exception_text\*.hpp ^
+ src\mpt\exception\*.hpp ^
  src\mpt\format\*.hpp ^
  src\mpt\format\test\*.hpp ^
  src\mpt\fs\*.hpp ^

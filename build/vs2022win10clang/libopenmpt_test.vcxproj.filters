@@ -70,8 +70,8 @@
     <Filter Include="src\mpt\environment">
       <UniqueIdentifier>{B1B8A85D-1D1A-866B-A687-CC1D12E8BC2A}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\mpt\exception_text">
-      <UniqueIdentifier>{6F821773-5B7C-40C5-44E9-D6D53082A631}</UniqueIdentifier>
+    <Filter Include="src\mpt\exception">
+      <UniqueIdentifier>{2B7E92B2-9794-9048-E00B-1C6A4C6161D0}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\mpt\format">
       <UniqueIdentifier>{C5847241-B152-6647-9AE6-D66D865342AC}</UniqueIdentifier>
@@ -729,8 +729,17 @@
     <ClInclude Include="..\..\src\mpt\environment\environment.hpp">
       <Filter>src\mpt\environment</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\mpt\exception_text\exception_text.hpp">
-      <Filter>src\mpt\exception_text</Filter>
+    <ClInclude Include="..\..\src\mpt\exception\exception.hpp">
+      <Filter>src\mpt\exception</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\exception\exception_text.hpp">
+      <Filter>src\mpt\exception</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\exception\logic_error.hpp">
+      <Filter>src\mpt\exception</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\exception\runtime_error.hpp">
+      <Filter>src\mpt\exception</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\format\concat.hpp">
       <Filter>src\mpt\format</Filter>

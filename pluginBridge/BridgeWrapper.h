@@ -16,7 +16,8 @@
 
 #include "BridgeCommon.h"
 #include "../common/ComponentManager.h"
-#include "mpt/exception_text/exception_text.hpp"
+#include "mpt/exception/exception.hpp"
+#include "mpt/exception/runtime_error.hpp"
 
 OPENMPT_NAMESPACE_BEGIN
 

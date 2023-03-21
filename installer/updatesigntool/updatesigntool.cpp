@@ -5,7 +5,7 @@
 #include "mpt/crypto/hash.hpp"
 #include "mpt/crypto/jwk.hpp"
 #include "mpt/environment/environment.hpp"
-#include "mpt/exception_text/exception_text.hpp"
+#include "mpt/exception/exception_text.hpp"
 #include "mpt/io/base.hpp"
 #include "mpt/io/io.hpp"
 #include "mpt/io/io_stdstream.hpp"

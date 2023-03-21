@@ -28,6 +28,7 @@
 #include "openmpt/sounddevice/SoundDeviceManager.hpp"
 #include "ProgressDialog.h"
 #include "Moddoc.h"
+#include "mpt/exception/runtime_error.hpp"
 #include "mpt/format/join.hpp"
 #include "mpt/fs/fs.hpp"
 #include "mpt/io/io.hpp"

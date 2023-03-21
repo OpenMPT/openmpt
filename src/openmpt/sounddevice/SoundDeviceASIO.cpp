@@ -17,7 +17,7 @@
 #include "mpt/base/macros.hpp"
 #include "mpt/base/saturate_round.hpp"
 #include "mpt/base/utility.hpp"
-#include "mpt/exception_text/exception_text.hpp"
+#include "mpt/exception/exception_text.hpp"
 #include "mpt/format/message_macros.hpp"
 #include "mpt/format/simple.hpp"
 #include "mpt/out_of_memory/out_of_memory.hpp"

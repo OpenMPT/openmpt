@@ -19,7 +19,7 @@
 #include "mpt/base/namespace.hpp"
 #include "mpt/base/preprocessor.hpp"
 #include "mpt/base/saturate_round.hpp"
-#include "mpt/exception_text/exception_text.hpp"
+#include "mpt/exception/exception_text.hpp"
 #include "mpt/format/concat.hpp"
 #include "mpt/format/message.hpp"
 #include "mpt/format/message_macros.hpp"

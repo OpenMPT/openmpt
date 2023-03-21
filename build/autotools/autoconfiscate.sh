@@ -55,7 +55,7 @@ svn export ./src/mpt/crc            bin/dist-autotools/src/mpt/crc
 svn export ./src/mpt/detect         bin/dist-autotools/src/mpt/detect
 svn export ./src/mpt/endian         bin/dist-autotools/src/mpt/endian
 svn export ./src/mpt/environment    bin/dist-autotools/src/mpt/environment
-svn export ./src/mpt/exception_text bin/dist-autotools/src/mpt/exception_text
+svn export ./src/mpt/exception      bin/dist-autotools/src/mpt/exception
 svn export ./src/mpt/format         bin/dist-autotools/src/mpt/format
 #svn export ./src/mpt/fs             bin/dist-autotools/src/mpt/fs
 svn export ./src/mpt/io             bin/dist-autotools/src/mpt/io
@@ -127,7 +127,7 @@ cp -r ./src/mpt/crc            bin/dist-autotools/src/mpt/crc
 cp -r ./src/mpt/detect         bin/dist-autotools/src/mpt/detect
 cp -r ./src/mpt/endian         bin/dist-autotools/src/mpt/endian
 cp -r ./src/mpt/environment    bin/dist-autotools/src/mpt/environment
-cp -r ./src/mpt/exception_text bin/dist-autotools/src/mpt/exception_text
+cp -r ./src/mpt/exception      bin/dist-autotools/src/mpt/exception
 cp -r ./src/mpt/format         bin/dist-autotools/src/mpt/format
 #cp -r ./src/mpt/fs             bin/dist-autotools/src/mpt/fs
 cp -r ./src/mpt/io             bin/dist-autotools/src/mpt/io
