@@ -970,34 +970,22 @@ class CDoUpdate: public CProgressDialog
 private:
 	Update::download download;
 	class Aborted : public std::exception {};
-	class Warning : public std::exception
+	class Warning : public mpt::runtime_error
 	{
-	private:
-		mpt::ustring msg;
 	public:
-		Warning(const mpt::ustring &msg_)
-			: msg(msg_)
+		Warning(const mpt::ustring &msg)
+			: mpt::runtime_error(msg)
 		{
 			return;
-		}
-		mpt::ustring get_msg() const
-		{
-			return msg;
 		}
 	};
-	class Error : public std::exception
+	class Error : public mpt::runtime_error
 	{
-	private:
-		mpt::ustring msg;
 	public:
-		Error(const mpt::ustring &msg_)
-			: msg(msg_)
+		Error(const mpt::ustring &msg)
+			: mpt::runtime_error(msg)
 		{
 			return;
-		}
-		mpt::ustring get_msg() const
-		{
-			return msg;
 		}
 	};
 public:
@@ -1318,12 +1306,12 @@ public:
 			return;
 		} catch(const Warning &e)
 		{
-			Reporting::Warning(e.get_msg(), U_("OpenMPT Update"));
+			Reporting::Warning(mpt::get_exception_text<mpt::ustring>(e), U_("OpenMPT Update"));
 			EndDialog(IDCANCEL);
 			return;
 		} catch(const Error &e)
 		{
-			Reporting::Error(e.get_msg(), U_("OpenMPT Update Error"));
+			Reporting::Error(mpt::get_exception_text<mpt::ustring>(e), U_("OpenMPT Update Error"));
 			EndDialog(IDCANCEL);
 			return;
 		} catch(const std::exception &e)

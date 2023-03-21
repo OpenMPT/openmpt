@@ -10,6 +10,7 @@
 #include "mpt/string_transcode/transcode.hpp"
 
 #include <exception>
+#include <stdexcept>
 
 #include <cstring>
 
@@ -20,9 +21,49 @@ inline namespace MPT_INLINE_NS {
 
 
 
+class exception_ustring_wrapper_base {
+protected:
+	exception_ustring_wrapper_base() = default;
+	virtual ~exception_ustring_wrapper_base() = default;
+public:
+	virtual mpt::ustring uwhat() const = 0;
+};
+
+template <typename T>
+class exception_ustring_wrapper : public T, public virtual mpt::exception_ustring_wrapper_base {
+private:
+	mpt::ustring m_what;
+public:
+	exception_ustring_wrapper(mpt::ustring str)
+		: T(mpt::transcode<std::string>(mpt::exception_encoding, str))
+		, m_what(str)
+	{
+		return;
+	}
+	~exception_ustring_wrapper() override = default;
+	mpt::ustring uwhat() const override {
+		return m_what;
+	}
+};
+
+using runtime_error = mpt::exception_ustring_wrapper<std::runtime_error>;
+using logic_error = mpt::exception_ustring_wrapper<std::logic_error>;
+
+
+
 template <typename Tstring>
 inline Tstring get_exception_text(const std::exception & e) {
-	if (e.what() && (std::strlen(e.what()) > 0)) {
+	if (const mpt::exception_ustring_wrapper_base * pue = dynamic_cast<const mpt::exception_ustring_wrapper_base *>(&e)) {
+		const mpt::exception_ustring_wrapper_base & ue = *pue;
+		mpt::ustring what = ue.uwhat();
+		if (what.length() > 0) {
+			return mpt::transcode<Tstring>(std::move(what));
+		} else if (typeid(ue).name() && (std::strlen(typeid(ue).name()) > 0)) {
+			return mpt::transcode<Tstring>(mpt::source_string{typeid(ue).name()});
+		} else {
+			return mpt::transcode<Tstring>(mpt::source_string{"unknown exception name"});
+		}
+	} else if (e.what() && (std::strlen(e.what()) > 0)) {
 		return mpt::transcode<Tstring>(mpt::exception_string{e.what()});
 	} else if (typeid(e).name() && (std::strlen(typeid(e).name()) > 0)) {
 		return mpt::transcode<Tstring>(mpt::source_string{typeid(e).name()});
@@ -41,6 +82,7 @@ inline std::string get_exception_text<std::string>(const std::exception & e) {
 		return std::string{"unknown exception name"};
 	}
 }
+
 
 
 template <typename Tstring>
@@ -64,6 +106,7 @@ inline std::string get_current_exception_text<std::string>() {
 		return std::string{"unknown exception"};
 	}
 }
+
 
 
 } // namespace MPT_INLINE_NS

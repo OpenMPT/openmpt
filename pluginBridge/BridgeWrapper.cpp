@@ -314,7 +314,7 @@ bool BridgeWrapper::Init(const mpt::PathString &pluginPath, Generation bridgeGen
 	if(!m_queueMem.Create(mapName.c_str(), sizeof(SharedMemLayout))
 	   || !CreateSignals(mapName.c_str()))
 	{
-		throw BridgeException("Could not initialize plugin bridge memory.");
+		throw BridgeException(U_("Could not initialize plugin bridge memory."));
 	}
 	m_sharedMem = m_queueMem.Data<SharedMemLayout>();
 
@@ -360,7 +360,7 @@ bool BridgeWrapper::Init(const mpt::PathString &pluginPath, Generation bridgeGen
 				throw BridgeNotFoundException();
 				break;
 			case ComponentPluginBridge::AvailabilityWrongVersion:
-				throw BridgeException("The plugin bridge version does not match your OpenMPT version.");
+				throw BridgeException(U_("The plugin bridge version does not match your OpenMPT version."));
 				break;
 			default:
 				throw BridgeNotFoundException();
@@ -398,7 +398,7 @@ bool BridgeWrapper::Init(const mpt::PathString &pluginPath, Generation bridgeGen
 
 		if(!CreateProcessW(exeName.ToWide().c_str(), cmdLine.data(), NULL, NULL, FALSE, 0, NULL, NULL, &info, &processInfo))
 		{
-			throw BridgeException("Failed to launch plugin bridge.");
+			throw BridgeException(U_("Failed to launch plugin bridge."));
 		}
 		CloseHandle(processInfo.hThread);
 		m_otherProcess = processInfo.hProcess;
@@ -432,7 +432,7 @@ bool BridgeWrapper::Init(const mpt::PathString &pluginPath, Generation bridgeGen
 	const HANDLE objects[] = {m_sigBridgeReady, m_otherProcess};
 	if(WaitForMultipleObjects(mpt::saturate_cast<DWORD>(std::size(objects)), objects, FALSE, 10000) != WAIT_OBJECT_0)
 	{
-		throw BridgeException("Could not connect to plugin bridge, it probably crashed.");
+		throw BridgeException(U_("Could not connect to plugin bridge, it probably crashed."));
 	}
 	m_otherPluginID = m_sharedMem->bridgePluginID;
 
@@ -441,10 +441,10 @@ bool BridgeWrapper::Init(const mpt::PathString &pluginPath, Generation bridgeGen
 
 	if(!SendToBridge(initMsg))
 	{
-		throw BridgeException("Could not initialize plugin bridge, it probably crashed.");
+		throw BridgeException(U_("Could not initialize plugin bridge, it probably crashed."));
 	} else if(initMsg.init.result != 1)
 	{
-		throw BridgeException(mpt::ToCharset(mpt::Charset::UTF8, initMsg.init.str).c_str());
+		throw BridgeException(mpt::ToUnicode(initMsg.init.str));
 	}
 
 	if(m_sharedMem->effect.flags & effFlagsCanReplacing)
