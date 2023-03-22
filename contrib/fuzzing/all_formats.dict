@@ -3,6 +3,7 @@
 
 amf="ASYLUM Music Format V1.0\x00"
 amf="AMF\x0A"
+amf="DMF\x0E"
 
 ams="Extreme"
 ams="AMShdr\x1A\x02\x02"
