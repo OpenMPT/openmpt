@@ -6,7 +6,9 @@
  *          and Advanced Music Format (DSMI / Digital Sound And Music Interface, used in various games such as Pinball World).
  *          Both module types are handled here.
  *          To make things complete, there appears to be a (potentially unofficial) variant of the DSMI AMF format called DMF,
- *          used in the game "Tronic". It mostly resembles "normal" AMF files, but with all song and sample names removed.
+ *          used in various games published by Webfoot (Tronic, H2O, PowBall, ...).
+ *          It mostly resembles "normal" AMF files, but with all song and sample names removed and using delta-encoded samples
+ *          (probably the origin of the "D" in DMF).
  * Authors: Olivier Lapicque
  *          OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
@@ -205,7 +207,7 @@ bool CSoundFile::ReadAMF_Asylum(FileReader &file, ModLoadingFlags loadFlags)
 // DSMI AMF magic bytes
 struct AMFFileSignature
 {
-	char  amf[3];  // "AMF" for regular AMF files, "DMF" for the compact format found in the game Tronic
+	char  amf[3];  // "AMF" for regular AMF files, "DMF" for the compact format found in Webfoot games
 	uint8 version;
 
 	bool IsValidAMF() const
@@ -215,8 +217,8 @@ struct AMFFileSignature
 
 	bool IsValidDMF() const
 	{
-		// Version checks are only an assumption; Tronic uses version 14 files,
-		// but we can probably assume that if there are earlier versions, they differ in exactly the same way from regular AMF as those files do.
+		// Version checks are only an assumption; All Webfoot games use version 14 files, but we can probably assume
+		// that if there are earlier versions, they differ in exactly the same way from regular AMF as those files do.
 		return !std::memcmp(amf, "DMF", 3) && (version >= 10 && version <= 14);
 	}
 };
@@ -391,12 +393,12 @@ static void AMFReadPattern(CPattern &pattern, CHANNELINDEX chn, FileReader &file
 			// Effect
 			static constexpr EffectCommand effTrans[] =
 			{
-				CMD_NONE,			CMD_SPEED,			CMD_VOLUMESLIDE,		CMD_VOLUME,
-				CMD_PORTAMENTOUP,	CMD_NONE,			CMD_TONEPORTAMENTO,		CMD_TREMOR,
-				CMD_ARPEGGIO,		CMD_VIBRATO,		CMD_TONEPORTAVOL,		CMD_VIBRATOVOL,
-				CMD_PATTERNBREAK,	CMD_POSITIONJUMP,	CMD_NONE,				CMD_RETRIG,
-				CMD_OFFSET,			CMD_VOLUMESLIDE,	CMD_PORTAMENTOUP,		CMD_S3MCMDEX,
-				CMD_S3MCMDEX,		CMD_TEMPO,			CMD_PORTAMENTOUP,		CMD_PANNING8,
+				CMD_NONE,         CMD_SPEED,        CMD_VOLUMESLIDE,    CMD_VOLUME,
+				CMD_PORTAMENTOUP, CMD_NONE,         CMD_TONEPORTAMENTO, CMD_TREMOR,
+				CMD_ARPEGGIO,     CMD_VIBRATO,      CMD_TONEPORTAVOL,   CMD_VIBRATOVOL,
+				CMD_PATTERNBREAK, CMD_POSITIONJUMP, CMD_NONE,           CMD_RETRIG,
+				CMD_OFFSET,       CMD_VOLUMESLIDE,  CMD_PORTAMENTOUP,   CMD_S3MCMDEX,
+				CMD_S3MCMDEX,     CMD_TEMPO,        CMD_PORTAMENTOUP,   CMD_PANNING8,
 			};
 
 			uint8 param = value;
@@ -554,7 +556,7 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 	
 	char title[32] = {};
 	bool isDMF = false;
-	if(fileSignature.IsValidAMF())
+	if(fileSignature.IsValidAMF() && file.CanRead(sizeof(title)))
 		file.ReadArray(title);
 	else if(fileSignature.IsValidDMF())
 		isDMF = true;
