@@ -1872,6 +1872,12 @@ void CMainFrame::SetHelpText(LPCTSTR lpszText)
 }
 
 
+CString CMainFrame::GetHelpText() const
+{
+	return m_wndStatusBar.GetPaneText(0);
+}
+
+
 void CMainFrame::OnDocumentCreated(CModDoc *pModDoc)
 {
 	m_wndTree.OnDocumentCreated(pModDoc);

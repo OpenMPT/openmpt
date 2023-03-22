@@ -455,6 +455,8 @@ CString GetWindowTextString(const CWnd &wnd);
 // Get window text (e.g. edit box content) as a unicode string
 mpt::ustring GetWindowTextUnicode(const CWnd &wnd);
 
+CString FormatFileSize(uint64 fileSize);
+
 ///////////////////////////////////////////////////
 // Tables
 

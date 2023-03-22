@@ -352,13 +352,7 @@ void CViewComments::UpdateView(UpdateHint hint, CObject *)
 						break;
 					case SMPLIST_SIZE:
 						if(sample.nLength && !sample.uFlags[CHN_ADLIB])
-						{
-							auto size = sample.GetSampleSizeInBytes();
-							if(size >= 1024)
-								s.Format(_T("%u KB"), size >> 10);
-							else
-								s.Format(_T("%u B"), size);
-						}
+							s = FormatFileSize(sample.GetSampleSizeInBytes());
 						break;
 					case SMPLIST_TYPE:
 						if(sample.uFlags[CHN_ADLIB])

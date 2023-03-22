@@ -177,6 +177,7 @@ protected:
 	HTREEITEM m_tiPerc[128];
 	std::vector<HTREEITEM> m_tiDLS;
 	std::map<const CModDoc *, ModTreeDocInfo> m_docInfo;
+	CString m_HelpText;
 
 	std::unique_ptr<CDLSBank> m_cachedBank;
 	mpt::PathString m_cachedBankName;
@@ -327,6 +328,7 @@ protected:
 	afx_msg void OnItemRightClick(LPNMHDR, LRESULT *pResult);
 	afx_msg void OnItemExpanded(LPNMHDR pnmhdr, LRESULT *pResult);
 	afx_msg void OnGetDispInfo(LPNMHDR pnmhdr, LRESULT *pResult);
+	afx_msg void OnSelChanged(LPNMHDR pnmhdr, LRESULT *pResult);
 	afx_msg void OnRefreshTree();
 	afx_msg void OnExecuteItem();
 	afx_msg void OnPlayTreeItem();

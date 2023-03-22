@@ -393,6 +393,7 @@ public:
 	void SetInfoText(LPCTSTR lpszText);
 	void SetXInfoText(LPCTSTR lpszText);
 	void SetHelpText(LPCTSTR lpszText);
+	CString GetHelpText() const;
 	UINT GetBaseOctave() const;
 	CModDoc *GetActiveDoc() const;
 	CView *GetActiveView() const;

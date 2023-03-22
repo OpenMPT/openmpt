@@ -1004,7 +1004,6 @@ void CTrackApp::CreatePaths()
 
 	if(!IsPortableMode())
 	{
-
 		// Move the config files if they're still in the old place.
 		MoveConfigFile(P_("mptrack.ini"));
 		MoveConfigFile(P_("plugin.cache"));
@@ -1028,7 +1027,6 @@ void CTrackApp::CreatePaths()
 			FindClose(hFind);
 			RemoveDirectory(oldTunings.AsNative().c_str());
 		}
-
 	}
 
 }
@@ -2079,6 +2077,22 @@ CString GetWindowTextString(const CWnd &wnd)
 mpt::ustring GetWindowTextUnicode(const CWnd &wnd)
 {
 	return mpt::ToUnicode(GetWindowTextString(wnd));
+}
+
+
+CString FormatFileSize(uint64 fileSize)
+{
+	static constexpr std::array<const TCHAR *, 4> Unit = {_T(" B"), _T(" KB"), _T(" MB"), _T(" GB")};
+	double size = static_cast<double>(fileSize);
+	for(int i = 0; i < 4; i++)
+	{
+		if(size < 1024.0 || i == 3)
+		{
+			return mpt::cfmt::flt(size, 3) + Unit[i];
+		}
+		size /= 1024.0;
+	}
+	return _T("");
 }
 
 

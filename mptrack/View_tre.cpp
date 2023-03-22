@@ -109,6 +109,7 @@ BEGIN_MESSAGE_MAP(CModTree, CTreeCtrl)
 	ON_NOTIFY_REFLECT(TVN_BEGINLABELEDIT, &CModTree::OnBeginLabelEdit)
 	ON_NOTIFY_REFLECT(TVN_ENDLABELEDIT,   &CModTree::OnEndLabelEdit)
 	ON_NOTIFY_REFLECT(TVN_GETDISPINFO,    &CModTree::OnGetDispInfo)
+	ON_NOTIFY_REFLECT(TVN_SELCHANGED,     &CModTree::OnSelChanged)
 
 	ON_COMMAND(ID_MODTREE_REFRESH,           &CModTree::OnRefreshTree)
 	ON_COMMAND(ID_MODTREE_EXECUTE,           &CModTree::OnExecuteItem)
@@ -3338,6 +3339,39 @@ void CModTree::OnItemLeftClick(LPNMHDR, LRESULT *pResult)
 }
 
 
+void CModTree::OnSelChanged(LPNMHDR, LRESULT *)
+{
+	HTREEITEM hItem = GetSelectedItem();
+	switch(GetModItem(hItem).type)
+	{
+	case MODITEM_INSLIB_SONG:
+	case MODITEM_INSLIB_SAMPLE:
+	case MODITEM_INSLIB_INSTRUMENT:
+		if(WIN32_FILE_ATTRIBUTE_DATA fad; GetFileAttributesEx(InsLibGetFullPath(hItem).AsNative().c_str(), GetFileExInfoStandard, &fad))
+		{
+			LARGE_INTEGER size;
+			size.HighPart = fad.nFileSizeHigh;
+			size.LowPart = fad.nFileSizeLow;
+			FILETIME localTime;
+			FileTimeToLocalFileTime(&fad.ftLastWriteTime, &localTime);
+			SYSTEMTIME sysTime;
+			FileTimeToSystemTime(&localTime, &sysTime);
+			m_HelpText = MPT_CFORMAT("Size: {}, last modified: {}")(FormatFileSize(size.QuadPart), CTime(sysTime).Format(_T("%d %b %Y, %H:%M:%S")));
+			CMainFrame::GetMainFrame()->SetHelpText(m_HelpText);
+		}
+		break;
+
+	default:
+		if(CMainFrame::GetMainFrame()->GetHelpText() == m_HelpText)
+		{
+			CMainFrame::GetMainFrame()->SetHelpText(_T(""));
+			m_HelpText.Empty();
+		}
+		break;
+	}
+}
+
+
 void CModTree::OnEndDrag(DWORD dwMask)
 {
 	if(m_dwStatus & dwMask)
@@ -4259,6 +4293,11 @@ LRESULT CModTree::OnMidiMsg(WPARAM midiData_, LPARAM)
 
 void CModTree::OnKillFocus(CWnd *pNewWnd)
 {
+	if(CMainFrame::GetMainFrame()->GetHelpText() == m_HelpText)
+	{
+		CMainFrame::GetMainFrame()->SetHelpText(_T(""));
+		m_HelpText.Empty();
+	}
 	CTreeCtrl::OnKillFocus(pNewWnd);
 	CMainFrame::GetMainFrame()->m_bModTreeHasFocus = false;
 	if(pNewWnd != nullptr)
