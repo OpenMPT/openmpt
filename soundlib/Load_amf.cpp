@@ -236,9 +236,10 @@ struct AMFFileHeader
 
 	bool IsValid(const uint8 version) const
 	{
+		if(!numSamples || !numOrders || !numTracks)
+			return false;
 		if(version < 9)
 			return true;
-		
 		return (numChannels >= 1 && numChannels <= 32);
 	}
 
@@ -323,7 +324,7 @@ MPT_BINARY_STRUCT(AMFSampleHeaderNew, 65)
 
 
 // DSMI DMF ("compact AMF") Sample Header
-struct AMFCompactSampleHeader
+struct AMFSampleHeaderCompact
 {
 	using uint24le = mpt::uint24le;
 
@@ -350,7 +351,7 @@ struct AMFCompactSampleHeader
 	}
 };
 
-MPT_BINARY_STRUCT(AMFCompactSampleHeader, 20)
+MPT_BINARY_STRUCT(AMFSampleHeaderCompact, 20)
 
 
 // Read a single AMF track (channel) into a pattern.
@@ -683,7 +684,7 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 			sampleMap[smp - 1] = sample.index;
 		} else if(isDMF)
 		{
-			AMFCompactSampleHeader sample;
+			AMFSampleHeaderCompact sample;
 			file.ReadStruct(sample);
 			sample.ConvertToMPT(Samples[smp]);
 			m_szNames[smp] = "";
