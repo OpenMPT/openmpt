@@ -1,4 +1,4 @@
-# r8brain-free-src - High-Quality Resampler #
+# r8brain-free-src - High-Quality, Fast Resampler #
 
 ## Introduction ##
 
@@ -70,7 +70,7 @@ makes sample rate conversion faster by 23% on average.
 
     #define R8B_IPP 1
 
-If a larger initial processing delay and a very minor sample timing error are
+If a larger initial processing delay and a very minor sample-timing error are
 not an issue, for the most efficiency you can define these macros at
 the beginning of the `r8bconf.h` file, or during compilation:
 
@@ -104,15 +104,15 @@ style.  To generate the documentation locally you may run the
 `doxygen ./other/r8bdoxy.txt` command from the library's folder.
 
 Preliminary tests show that the r8b::CDSPResampler24 resampler class achieves
-`31.8*n_cores` Mrops (`44*n_cores` for Intel IPP FFT) when converting 1
-channel of 24-bit audio from 44100 to 96000 sample rate (2% transition band),
-on a Ryzen 3700X processor-based 64-bit system.  This approximately translates
-to a real-time resampling of `720*n_cores` (`1000*n_cores`) audio streams, at
-100% CPU load.  Speed performance when converting to other sample rates may
-vary greatly.  When comparing performance of this resampler library to another
-library make sure that the competing library is also tuned to produce a fully
-linear-phase response, has similar stop-band characteristics and similar
-sample timing precision.
+`38*n_cores` Mrops (`56*n_cores` for Intel IPP FFT) when converting 1 channel
+of 24-bit audio from 44100 to 96000 sample rate (2% transition band), on a
+Ryzen 3700X processor-based 64-bit system.  This approximately translates to a
+real-time resampling of `860*n_cores` (`1270*n_cores`) audio streams, at 100%
+CPU load.  Performance when converting to other sample rates may vary greatly.
+When comparing performance of this resampler library to another library make
+sure that the competing library is also tuned to produce a fully linear-phase
+response, has similar stop-band characteristics and similar sample-timing
+precision.
 
 ## Dynamic Link Library ##
 
@@ -153,7 +153,7 @@ signal (or the output signal if the downsampling is performed) between the
 low-pass filter's -3 dB point and the Nyquist frequency, and ranges from 0.5%
 to 45%.  Stop-band attenuation can be specified in the range from 49 to 218
 decibel.  Both the transition band and stop-band attenuation affect
-resampler's overall speed performance and initial output delay.  For your
+resampler's overall performance and initial output delay.  For your
 information, transition frequency range spans 175% of the specified transition
 band, which means that for 2% transition band, frequency response below
 0.965\*Nyquist is linear.
@@ -179,7 +179,7 @@ r8brain-free-src is bundled with the following code:
 * PFFFT Copyright (c) 2013 Julien Pommier.
 [Homepage](https://bitbucket.org/jpommier/pffft)
 * PFFFT DOUBLE Copyright (c) 2020 Hayati Ayguen, Dario Mambro.
-[Homepage](https://github.com/unevens/pffft)
+[Homepage](https://github.com/marton78/pffft)
 
 ## Users ##
 
@@ -205,6 +205,55 @@ maintaining confidence in this library among the interested parties. The
 inclusion into this list is not mandatory.
 
 ## Change Log ##
+
+Version 6.2:
+
+* Fixed miscalculation in the recently introduced getInLenBeforeOutPos()
+function for minimum-phase filters.
+* Fixed a mistake in the getInputRequiredForOutput() function.
+* Fixed a long-standing mistake in LatencyFrac value of whole-stepping
+interpolation. However, this mistake gave no practical issues before (absent
+for linear-phase filters, and minor for minimum-phase filters).
+
+Version 6.1:
+
+* Made a micro-optimization of the "whole stepping" interpolation yielding 18%
+performance increase in some conversions (e.g., 44100 to 96000).
+* Implemented the getInLenBeforeOutPos() function which is an ultra-fast and
+flexible replacement for the getInLenBeforeOutStart() function (that became a
+legacy function now). Also added the getInputRequiredForOutput() helper
+function.
+* Updated comment sections across the codebase, to match the latest Doxygen
+version.
+* Reintroduced the r8b_inlen() function in the DLL.
+
+Version 6.0:
+
+* Added SSE and NEON implementations to `CDSPHBDownsampler` yielding 5-16%
+performance improvement of power-of-2 downsampling.
+* Further optimization of filter calculation making it 15% faster.
+* Upped "SpinCount" in Windows mutex to 2000, to be on a safer side when the
+filter cache is fully filled.
+* Made the latest used "static" filter bank pop to the top of the list, for
+cases when multiple "ReqAtten" values are in use in an application.
+
+Version 5.9:
+
+* Optimized filter calculation (Kaiser window function) with negligible change
+in filtering results.
+* Optimized min-phase filter's group delay calculation.
+* Reduced "SpinCount" in Windows mutex to 1000.
+* Made non-essential changes across the codebase and comments.
+
+Version 5.8:
+
+* Rearranged FFT macros, added `R8B_PFFFT` and `R8B_PFFFT_DOUBLE` collision
+check.
+
+Version 5.7:
+
+* Removed the `defined( __ARM_NEON )` macro detection so that the code
+compiles on non-ARM64 platforms.
 
 Version 5.6:
 

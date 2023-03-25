@@ -26,23 +26,23 @@ namespace r8b {
 
 enum EDSPFilterPhaseResponse
 {
-	fprLinearPhase = 0, ///< Linear-phase response. Features a linear-phase
-		///< high-latency response, with the latency expressed as integer
+	fprLinearPhase = 0, ///< Linear-phase response. Features a linear-phase,
+		///< high-latency response, with the latency expressed as an integer
 		///< value.
-		///<
-	fprMinPhase ///< Minimum-phase response. Features a minimal latency
+	fprMinPhase ///< Minimum-phase response. Features a minimal-latency
 		///< response, but the response's phase is non-linear. The latency is
-		///< usually expressed as non-integer value, and usually is small, but
-		///< is never equal to zero. The minimum-phase filter is transformed
-		///< from the linear-phase filter. The transformation has precision
-		///< limits which may skew both the -3 dB point and attenuation of the
-		///< filter being transformed: as it was measured, the skew happens
-		///< purely at random, and in most cases it is within tolerable range.
-		///< In a small (1%) random subset of cases the skew is bigger and
-		///< cannot be predicted. Minimum-phase transform requires 64-bit
-		///< floating point FFT precision, results with 32-bit float FFT are
-		///< far from optimal.
-		///<
+		///< usually expressed as a non-integer value, and is usually small,
+		///< but is never equal to zero. The minimum-phase filter is obtained
+		///< from a linear-phase filter. Note that since in the context of
+		///< r8brain-free-src other filters (interpolation, half-band) remain
+		///< linear-phase, the resulting phase will be "intermediate". The
+		///< minimum-phase transformation has precision limits: this may skew
+		///< both the -3 dB point and attenuation of the filter being
+		///< transformed: as it was measured, the skew happens purely at
+		///< random, and in most cases is within tolerable range. In a small
+		///< (1%) random subset of cases the skew is bigger and cannot be
+		///< predicted. Minimum-phase transform requires 64-bit floating-point
+		///< FFT; results with 32-bit float FFT are far from optimal.
 };
 
 /**
@@ -147,7 +147,7 @@ public:
 	}
 
 	/**
-	 * @return Filter's block length, espressed as Nth power of 2. The actual
+	 * @return Filter's block length, expressed as Nth power of 2. The actual
 	 * length is twice as large due to zero-padding.
 	 */
 
@@ -178,39 +178,26 @@ public:
 
 private:
 	double ReqNormFreq; ///< Required normalized frequency, 0 to 1 inclusive.
-		///<
 	double ReqTransBand; ///< Required transition band in percent, as passed
 		///< by the user.
-		///<
 	double ReqAtten; ///< Required stop-band attenuation in decibel, as passed
 		///< by the user (positive value).
-		///<
 	EDSPFilterPhaseResponse ReqPhase; ///< Required filter's phase response.
-		///<
 	double ReqGain; ///< Required overall filter's gain.
-		///<
 	CDSPFIRFilter* Next; ///< Next FIR filter in cache's list.
-		///<
 	int RefCount; ///< The number of references made to *this FIR filter.
-		///<
 	bool IsZeroPhase; ///< "True" if kernel block of *this filter has
 		///< zero-phase response.
-		///<
 	int Latency; ///< Filter's latency in samples (integer part).
-		///<
 	double LatencyFrac; ///< Filter's latency in samples (fractional part).
-		///<
 	int KernelLen; ///< Filter kernel length, in samples.
-		///<
 	int BlockLenBits; ///< Block length used to store *this FIR filter,
 		///< expressed as Nth power of 2. This value is used directly by the
 		///< convolver.
-		///<
 	CFixedBuffer< double > KernelBlock; ///< FIR filter buffer, capacity
 		///< equals to 1 << ( BlockLenBits + 1 ). Second part of the buffer
 		///< contains zero-padding to allow alias-free convolution.
 		///< Address-aligned.
-		///<
 
 	CDSPFIRFilter()
 		: RefCount( 1 )
@@ -591,6 +578,7 @@ public:
 	 * @param ReqGain Required overall filter's gain (1.0 for unity gain).
 	 * @param AttenCorrs Attentuation correction table, to pass to the filter
 	 * generation function. For internal use.
+	 * @see EDSPFilterPhaseResponse
 	 * @return A reference to a new or a previously calculated low-pass FIR
 	 * filter object with the required characteristics. A reference count is
 	 * incremented in the returned filter object which should be released
@@ -618,9 +606,9 @@ public:
 		{
 			if( CurObj -> ReqNormFreq == ReqNormFreq &&
 				CurObj -> ReqTransBand == ReqTransBand &&
+				CurObj -> ReqGain == ReqGain &&
 				CurObj -> ReqAtten == ReqAtten &&
-				CurObj -> ReqPhase == ReqPhase &&
-				CurObj -> ReqGain == ReqGain )
+				CurObj -> ReqPhase == ReqPhase )
 			{
 				break;
 			}
@@ -692,13 +680,10 @@ public:
 
 private:
 	static CSyncObject StateSync; ///< Cache state synchronizer.
-		///<
 	static CPtrKeeper< CDSPFIRFilter* > Objects; ///< The chain of cached
 		///< objects.
-		///<
 	static int ObjCount; ///< The number of objects currently preset in the
 		///< cache.
-		///<
 };
 
 // ---------------------------------------------------------------------------

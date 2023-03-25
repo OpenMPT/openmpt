@@ -9,7 +9,7 @@
  * This file includes the base virtual class for DSP processing algorithm
  * classes like FIR filtering and interpolation.
  *
- * r8brain-free-src Copyright (c) 2013-2021 Aleksey Vaneev
+ * r8brain-free-src Copyright (c) 2013-2022 Aleksey Vaneev
  * See the "LICENSE" file for license.
  */
 
@@ -40,6 +40,25 @@ public:
 	virtual ~CDSPProcessor()
 	{
 	}
+
+	/**
+	 * Function returns the number of input samples required to advance to
+	 * the specified output sample position (so that the next process() call
+	 * passes this output position), starting at the cleared or
+	 * after-construction state of *this object.
+	 *
+	 * Note that the implementation of this function assumes the caller only
+	 * needs to estimate an initial buffering requirement; passing a full
+	 * sample length value (e.g., greater than 100000) may overflow the
+	 * calculation or cause rounding errors.
+	 *
+	 * @param ReqOutPos The required output position. Set to 0 to obtain
+	 * "input length before output start" latency. Must be a non-negative
+	 * value.
+	 * @return The number of input samples required.
+	 */
+
+	virtual int getInLenBeforeOutPos( const int ReqOutPos ) const = 0;
 
 	/**
 	 * @return The latency, in samples, which is present in the output signal.

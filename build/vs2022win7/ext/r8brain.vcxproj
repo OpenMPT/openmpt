@@ -592,6 +592,7 @@
     <ClCompile Include="..\..\..\include\r8brain\r8bbase.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\..\include\r8brain\CDSPHBDownsampler.inc" />
     <None Include="..\..\..\include\r8brain\CDSPHBUpsampler.inc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

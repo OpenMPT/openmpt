@@ -20,17 +20,13 @@
 
 #include "r8bbase.h"
 
-#if !R8B_IPP && !R8B_PFFFT && !R8B_PFFFT_DOUBLE
-	#include "fft4g.h"
-#endif // !R8B_IPP && !R8B_PFFFT && !R8B_PFFFT_DOUBLE
-
-#if R8B_PFFFT
-	#include "pffft.h"
-#endif // R8B_PFFFT
-
 #if R8B_PFFFT_DOUBLE
 	#include "pffft_double/pffft_double.h"
-#endif // R8B_PFFFT_DOUBLE
+#elif R8B_PFFFT
+	#include "pffft.h"
+#elif !R8B_IPP
+	#include "fft4g.h"
+#endif // !R8B_IPP
 
 namespace r8b {
 
@@ -383,7 +379,8 @@ public:
 
 	/**
 	 * Function converts the specified forward-transformed block into
-	 * "zero-phase" form suitable for use with the multiplyBlocksZ() function.
+	 * "zero-phase" form suitable for use with the multiplyBlocksZP()
+	 * function.
 	 *
 	 * @param[in,out] ap Block to transform.
 	 */
@@ -411,37 +408,24 @@ public:
 
 private:
 	int LenBits; ///< Length of FFT block (expressed as Nth power of 2).
-		///<
 	int Len; ///< Length of FFT block (number of real values).
-		///<
 	double InvMulConst; ///< Inverse FFT multiply constant.
-		///<
 	CDSPRealFFT* Next; ///< Next object in a singly-linked list.
-		///<
 
 	#if R8B_IPP
 		IppsFFTSpec_R_64f* SPtr; ///< Pointer to initialized data buffer
 			///< to be passed to IPP's FFT functions.
-			///<
 		CFixedBuffer< unsigned char > SpecBuffer; ///< Working buffer.
-			///<
 		CFixedBuffer< unsigned char > WorkBuffer; ///< Working buffer.
-			///<
 	#elif R8B_PFFFT
 		PFFFT_Setup* setup; ///< PFFFT setup object.
-			///<
 		CFixedBuffer< float > work; ///< Working buffer.
-			///<
 	#elif R8B_PFFFT_DOUBLE
 		PFFFTD_Setup* setup; ///< PFFFTD setup object.
-			///<
 		CFixedBuffer< double > work; ///< Working buffer.
-			///<
 	#else // R8B_PFFFT_DOUBLE
 		CFixedBuffer< int > wi; ///< Working buffer (ints).
-			///<
 		CFixedBuffer< double > wd; ///< Working buffer (doubles).
-			///<
 	#endif // R8B_IPP
 
 	/**
@@ -477,7 +461,6 @@ private:
 
 	private:
 		CDSPRealFFT* Object; ///< FFT object being kept.
-			///<
 	};
 
 	CDSPRealFFT()
@@ -639,13 +622,10 @@ public:
 
 private:
 	CDSPRealFFT* Object; ///< FFT object.
-		///<
 
 	static CSyncObject StateSync; ///< FFTObjects synchronizer.
-		///<
 	static CDSPRealFFT :: CObjKeeper FFTObjects[]; ///< Pool of FFT objects of
 		///< various lengths.
-		///<
 
 	/**
 	 * Function acquires FFT object from the global pool.
@@ -694,16 +674,16 @@ private:
  *
  * @param[in,out] Kernel Filter kernel buffer.
  * @param KernelLen Filter kernel's length, in samples.
- * @param LenMult Kernel length multiplier. Used as a coefficient of the
- * "oversampling" in the frequency domain. Such oversampling is needed to
+ * @param LenMult Kernel length multiplier. Used as a coefficient of
+ * oversampling in the frequency domain. Such oversampling is needed to
  * improve the precision of the minimum-phase transform. If the filter's
  * attenuation is high, this multiplier should be increased or otherwise the
  * required attenuation will not be reached due to "smoothing" effect of this
  * transform.
  * @param DoFinalMul "True" if the final multiplication after transform should
- * be performed or not. Such multiplication returns the gain of the signal to
- * its original value. This parameter can be set to "false" if normalization
- * of the resulting filter kernel is planned to be used.
+ * be performed. Such multiplication returns the gain of the signal to its
+ * original value. This parameter can be set to "false" if normalization of
+ * the resulting filter kernel is planned to be used.
  * @param[out] DCGroupDelay If not NULL, this variable receives group delay
  * at DC offset, in samples (can be a non-integer value).
  */
@@ -808,10 +788,7 @@ inline void calcMinPhaseTransform( double* const Kernel, const int KernelLen,
 
 	if( DCGroupDelay != NULL )
 	{
-		double tmp;
-
-		calcFIRFilterResponseAndGroupDelay( Kernel, KernelLen, 0.0,
-			tmp, tmp, *DCGroupDelay );
+		*DCGroupDelay = calcFIRFilterGroupDelay( Kernel, KernelLen, 0.0 );
 	}
 }
 

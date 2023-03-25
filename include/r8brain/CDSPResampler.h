@@ -28,8 +28,8 @@ namespace r8b {
  *
  * This class can be considered the "master" sample rate converter (resampler)
  * class since it combines all functionality of this library into a single
- * front-end class to perform sample rate conversion to/from any sample rate,
- * including non-integer sample rates.
+ * front-end class that performs sample rate conversion to/from any sample
+ * rate, including non-integer sample rates.
  *
  * Note that objects of this class can be constructed on the stack as it has a
  * small member data size. The default template parameters of this class are
@@ -68,9 +68,9 @@ public:
 	 * high-frequency content 24-bit, but the original part of the signal will
 	 * remain 16-bit.
 	 *
-	 * @param SrcSampleRate Source signal sample rate. Both sample rates can
+	 * @param SrcSampleRate Source signal's sample rate. Both sample rates can
 	 * be specified as a ratio, e.g. SrcSampleRate = 1.0, DstSampleRate = 2.0.
-	 * @param DstSampleRate Destination signal sample rate. The "power of 2"
+	 * @param DstSampleRate Destination signal's sample rate. The "power of 2"
 	 * ratios between the source and destination sample rates force resampler
 	 * to use several fast "power of 2" resampling steps, without using
 	 * fractional interpolation at all.
@@ -87,13 +87,13 @@ public:
 	 * downsampling is performed) between filter's -3 dB point and the Nyquist
 	 * frequency. The range is from CDSPFIRFilter::getLPMinTransBand() to
 	 * CDSPFIRFilter::getLPMaxTransBand(), inclusive. When upsampling 88200 or
-	 * 96000 audio to a higher sample rates the ReqTransBand can be
-	 * considerably increased, up to 30. The selection of ReqTransBand depends
-	 * on the level of desire to preserve the high-frequency content. While
-	 * values 0.5 to 2 are extremely "greedy" settings, not necessary in most
-	 * cases, values 2 to 3 can be used in most cases. Values 3 to 4 are
-	 * relaxed settings, but they still offer a flat frequency response up to
-	 * 21kHz with 44.1k source or destination sample rate.
+	 * 96000 audio to higher sample rates the ReqTransBand can be considerably
+	 * increased, up to 30. The selection of ReqTransBand depends on the level
+	 * of desire to preserve the high-frequency content. While values 0.5 to 2
+	 * are extremely "greedy" settings, not necessary in most cases, values 2
+	 * to 3 can be used in most cases. Values 3 to 4 are relaxed settings, but
+	 * they still offer a flat frequency response up to 21kHz with 44.1k
+	 * source or destination sample rate.
 	 * @param ReqAtten Required stop-band attenuation in decibel, in the
 	 * range CDSPFIRFilter::getLPMinAtten() to CDSPFIRFilter::getLPMaxAtten(),
 	 * inclusive. The actual attenuation may be 0.40-4.46 dB higher. The
@@ -109,7 +109,7 @@ public:
 	 * stream may become fractionally delayed, depending on the minimum-phase
 	 * filter's actual fractional delay. Linear-phase filters do not have
 	 * fractional delay.
-	 * @see CDSPFIRFilterCache::getLPFilter()
+	 * @see EDSPFilterPhaseResponse
 	 */
 
 	CDSPResampler( const double SrcSampleRate, const double DstSampleRate,
@@ -369,10 +369,10 @@ public:
 
 		for( i = 0; i < c; i++ )
 		{
-			// Use a fixed very relaxed 2X downsampling filters, that at
-			// the final stage only guarantees stop-band between 0.75 and
-			// pi. 0.5-0.75 range will be aliased to 0.25-0.5 range which
-			// will then be filtered out by the final filter.
+			// Use fixed, very relaxed 2X downsampling filters, that at the
+			// final stage only guarantee stop-band between 0.75 and pi.
+			// 0.5-0.75 range will be aliased to 0.25-0.5 range which will
+			// then be filtered out by the final filter.
 
 			addProcessor( new CDSPHBDownsampler( ReqAtten, c - 1 - i, IsThird,
 				LatencyFrac ));
@@ -401,6 +401,86 @@ public:
 		}
 	}
 
+	virtual int getInLenBeforeOutPos( const int ReqOutPos ) const
+	{
+		R8BASSERT( ReqOutPos >= 0 );
+
+		int ReqInSamples = ReqOutPos;
+		int c = StepCount;
+
+		while( --c >= 0 )
+		{
+			ReqInSamples = Steps[ c ] -> getInLenBeforeOutPos( ReqInSamples );
+		}
+
+		return( ReqInSamples );
+	}
+
+	/**
+	 * Function returns the number of input samples required to advance to
+	 * the specified output sample position (so that the next process() call
+	 * passes this output position), starting at the cleared or
+	 * after-construction state of *this object.
+	 *
+	 * This function works by iteratively passing 1 sample at a time until the
+	 * overall output length passes the specified value. This is a relatively
+	 * CPU-consuming operation. This function should be called after the
+	 * clear() function call or after object's construction. The function
+	 * itself calls the clear() function before return.
+	 *
+	 * Note that this function can be considered a legacy function, and is now
+	 * used for testing purposes. It is advised to use "instant" (much faster)
+	 * getInLenBeforeOutPos() and getInputRequiredForOutput() functions
+	 * instead.
+	 *
+	 * @param ReqOutPos The required output position. Must be a non-negative
+	 * value.
+	 * @return The number of input samples required.
+	 */
+
+	int getInLenBeforeOutStart( const int ReqOutPos = 0 )
+	{
+		R8BASSERT( ReqOutPos >= 0 );
+
+		int inc = 0;
+		int outc = 0;
+
+		while( true )
+		{
+			double ins = 0.0;
+			double* op;
+			outc += process( &ins, 1, op );
+
+			if( outc > ReqOutPos )
+			{
+				clear();
+				return( inc );
+			}
+
+			inc++;
+		}
+	}
+
+	/**
+	 * Function returns the number of input samples required to produce at
+	 * least the specified number of output samples, starting at the cleared
+	 * or after-construction state of *this object.
+	 *
+	 * @param ReqOutSamples The number of output samples required. If a
+	 * non-positive value was specified, the function returns 0.
+	 * @return The number of input samples required.
+	 */
+
+	int getInputRequiredForOutput( const int ReqOutSamples ) const
+	{
+		if( ReqOutSamples < 1 )
+		{
+			return( 0 );
+		}
+
+		return( getInLenBeforeOutPos( ReqOutSamples - 1 ) + 1 );
+	}
+
 	virtual int getLatency() const
 	{
 		return( 0 );
@@ -412,12 +492,12 @@ public:
 	}
 
 	/**
-	 * This function ignores the supplied parameter and returns the maximal
-	 * output buffer length that depends on the MaxInLen supplied to the
-	 * constructor.
+	 * @return This function ignores the supplied parameter and returns the
+	 * maximal output buffer length that depends on the MaxInLen supplied to
+	 * the constructor.
 	 */
 
-	virtual int getMaxOutLen( const int/* MaxInLen */ ) const
+	virtual int getMaxOutLen( const int/* MaxInLen */) const
 	{
 		return( CurMaxOutLen );
 	}
@@ -493,7 +573,7 @@ public:
 	/**
 	 * Function performs resampling of an input sample buffer of the specified
 	 * length in the "one-shot" mode. This function can be useful when impulse
-	 * response resampling is required.
+	 * response or time-series resampling is required.
 	 *
 	 * @param ip Input buffer pointer.
 	 * @param iplen Length of the input buffer in samples.
@@ -564,62 +644,21 @@ public:
 		clear();
 	}
 
-	/**
-	 * Function obtains overall input sample count required to produce first
-	 * output sample. Function works by iteratively passing 1 sample at a time
-	 * until output begins. This is a relatively CPU-consuming operation. This
-	 * function should be called after the clear() function call or after
-	 * object's construction. The function itself calls the clear() function
-	 * before return.
-	 *
-	 * Note that it is advisable to cache the value returned by this function,
-	 * for each SrcSampleRate/DstSampleRate pair, if it is called frequently.
-	 */
-
-	int getInLenBeforeOutStart()
-	{
-		int inc = 0;
-
-		while( true )
-		{
-			double ins = 0.0;
-			double* op;
-
-			if( process( &ins, 1, op ) > 0 )
-			{
-				clear();
-				return( inc );
-			}
-
-			inc++;
-		}
-	}
-
 private:
 	CFixedBuffer< CDSPProcessor* > Steps; ///< Array of processing steps.
-		///<
 	int StepCapacity; ///< The capacity of the Steps array.
-		///<
 	int StepCount; ///< The number of created processing steps.
-		///<
 	int MaxInLen; ///< Maximal input length.
-		///<
 	CFixedBuffer< double > TmpBufAll; ///< Buffer containing both temporary
 		///< buffers.
-		///<
 	double* TmpBufs[ 2 ]; ///< Temporary output buffers.
-		///<
 	int TmpBufCapacities[ 2 ]; ///< Capacities of temporary buffers, updated
 		///< during processing steps building.
-		///<
 	int CurTmpBuf; ///< Current temporary buffer.
-		///<
 	int CurMaxOutLen; ///< Current maximal output length.
-		///<
 	double LatencyFrac; ///< Current fractional latency. After object's
 		///< construction, equals to the remaining fractional latency in the
 		///< output.
-		///<
 
 	/**
 	 * Function adds processor, updates MaxOutLen variable and adjusts length
@@ -688,8 +727,8 @@ public:
 	 * Constructor initializes the 16-bit resampler. See the
 	 * r8b::CDSPResampler class for details.
 	 *
-	 * @param SrcSampleRate Source signal sample rate.
-	 * @param DstSampleRate Destination signal sample rate.
+	 * @param SrcSampleRate Source signal's sample rate.
+	 * @param DstSampleRate Destination signal's sample rate.
 	 * @param aMaxInLen The maximal planned length of the input buffer (in
 	 * samples) that will be passed to the resampler.
 	 * @param ReqTransBand Required transition band, in percent.
@@ -719,8 +758,8 @@ public:
 	 * Constructor initializes the 16-bit impulse response resampler. See the
 	 * r8b::CDSPResampler class for details.
 	 *
-	 * @param SrcSampleRate Source signal sample rate.
-	 * @param DstSampleRate Destination signal sample rate.
+	 * @param SrcSampleRate Source signal's sample rate.
+	 * @param DstSampleRate Destination signal's sample rate.
 	 * @param aMaxInLen The maximal planned length of the input buffer (in
 	 * samples) that will be passed to the resampler.
 	 * @param ReqTransBand Required transition band, in percent.
@@ -749,8 +788,8 @@ public:
 	 * Constructor initializes the 24-bit resampler (including 32-bit floating
 	 * point). See the r8b::CDSPResampler class for details.
 	 *
-	 * @param SrcSampleRate Source signal sample rate.
-	 * @param DstSampleRate Destination signal sample rate.
+	 * @param SrcSampleRate Source signal's sample rate.
+	 * @param DstSampleRate Destination signal's sample rate.
 	 * @param aMaxInLen The maximal planned length of the input buffer (in
 	 * samples) that will be passed to the resampler.
 	 * @param ReqTransBand Required transition band, in percent.

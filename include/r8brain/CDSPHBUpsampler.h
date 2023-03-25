@@ -38,6 +38,9 @@ public:
 	 * @param SteepIndex Steepness index - 0=steepest. Corresponds to general
 	 * upsampling/downsampling ratio, e.g. at 4x 0 is used, at 8x 1 is used,
 	 * etc.
+	 * @param[out] flt Resulting pointer to filter taps.
+	 * @param[out] fltt Resulting filter's half-length, in samples (taps).
+	 * @param[out] att Resulting filter's attenuation (the closest found).
 	 */
 
 	static void getHBFilter( const double ReqAtten, const int SteepIndex,
@@ -319,6 +322,9 @@ public:
 	 * @param SteepIndex Steepness index - 0=steepest. Corresponds to general
 	 * upsampling/downsampling ratio, e.g. at 4x 0 is used, at 8x 1 is used,
 	 * etc.
+	 * @param[out] flt Resulting pointer to filter taps.
+	 * @param[out] fltt Resulting filter's half-length, in samples (taps).
+	 * @param[out] att Resulting filter's attenuation (the closest found).
 	 */
 
 	static void getHBFilterThird( const double ReqAtten, const int SteepIndex,
@@ -622,6 +628,11 @@ public:
 		clear();
 	}
 
+	virtual int getInLenBeforeOutPos( const int ReqOutPos ) const
+	{
+		return( fl2 + (int) (( Latency + LatencyFrac + ReqOutPos ) * 0.5 ));
+	}
+
 	virtual int getLatency() const
 	{
 		return( DoConsumeLatency ? 0 : Latency );
@@ -636,7 +647,7 @@ public:
 	{
 		R8BASSERT( MaxInLen >= 0 );
 
-		return( MaxInLen << 1 );
+		return( MaxInLen * 2 );
 	}
 
 	virtual void clear()
@@ -666,17 +677,17 @@ public:
 
 		while( l > 0 )
 		{
-			// Add new input samples to both halves of the ring buffer.
+			// Copy new input samples to the ring buffer.
 
-			const int b = min( min( l, BufLen - WritePos ), flb - BufLeft );
+			const int b = min( l, min( BufLen - WritePos, flb - BufLeft ));
 
 			double* const wp1 = Buf + WritePos;
 			memcpy( wp1, ip, b * sizeof( wp1[ 0 ]));
+			const int ec = flo - WritePos;
 
-			if( WritePos < flo )
+			if( ec > 0 )
 			{
-				const int c = min( b, flo - WritePos );
-				memcpy( wp1 + BufLen, wp1, c * sizeof( wp1[ 0 ]));
+				memcpy( wp1 + BufLen, ip, min( b, ec ) * sizeof( wp1[ 0 ]));
 			}
 
 			ip += b;
@@ -686,11 +697,11 @@ public:
 
 			// Produce output.
 
-			if( BufLeft > fl2 )
-			{
-				const int c = BufLeft - fl2;
+			const int c = BufLeft - fl2;
 
-				double* const opend = op + ( c + c );
+			if( c > 0 )
+			{
+				double* const opend = op + c * 2;
 				( *convfn )( op, opend, fltp, BufRP, ReadPos );
 
 				op = opend;
@@ -724,57 +735,37 @@ private:
 		///< interpolator. The minimum value of this parameter is 5, and
 		///< 1 << BufLenBits should be at least 3 times larger than the
 		///< FilterLen.
-		///<
 	static const int BufLen = 1 << BufLenBits; ///< The length of the ring
-		///< buffer. The actual length is twice as long to allow "beyond max
-		///< position" positioning.
-		///<
+		///< buffer. The actual length is longer, to permit "beyond bounds"
+		///< positioning.
 	static const int BufLenMask = BufLen - 1; ///< Mask used for quick buffer
 		///< position wrapping.
-		///<
 	double Buf[ BufLen + 27 ]; ///< The ring buffer, including overrun
 		///< protection for the largest filter.
-		///<
 	double FltBuf[ 14 + 2 ]; ///< Holder for half-band filter taps, used with
 		///< 16-byte address-aligning, for SIMD use.
-		///<
-	double* fltp; ///< Half-band filter taps, points to FltBuf.
-		///<
-	int fll; ///< Input latency.
-		///<
-	int fl2; ///< Right-side filter length.
-		///<
-	int flo; ///< Overrrun length.
-		///<
-	int flb; ///< Initial read position and maximal buffer write length.
-		///<
 	const double* BufRP; ///< Offseted Buf pointer at ReadPos=0.
-		///<
+	double* fltp; ///< Half-band filter taps, points to FltBuf.
+	int fll; ///< Input latency (left-hand filter length).
+	int fl2; ///< Right-side filter length.
+	int flo; ///< Overrrun length.
+	int flb; ///< Initial buffer read position.
+	double LatencyFrac; ///< Fractional latency left on the output.
+	int Latency; ///< Initial latency that should be removed from the output.
+	int LatencyLeft; ///< Latency left to remove.
+	int BufLeft; ///< The number of samples left in the buffer to process.
+		///< When this value is below "fl2", the interpolation cycle ends.
+	int WritePos; ///< The current buffer write position. Incremented together
+		///< with the BufLeft variable.
+	int ReadPos; ///< The current buffer read position.
 	bool DoConsumeLatency; ///< "True" if the output latency should be
 		///< consumed. Does not apply to the fractional part of the latency
 		///< (if such part is available).
-		///<
-	int Latency; ///< Initial latency that should be removed from the output.
-		///<
-	double LatencyFrac; ///< Fractional latency left on the output.
-		///<
-	int BufLeft; ///< The number of samples left in the buffer to process.
-		///< When this value is below FilterLenD2Plus1, the interpolation
-		///< cycle ends.
-		///<
-	int WritePos; ///< The current buffer write position. Incremented together
-		///< with the BufLeft variable.
-		///<
-	int ReadPos; ///< The current buffer read position.
-		///<
-	int LatencyLeft; ///< Latency left to remove.
-		///<
+
 	typedef void( *CConvolveFn )( double* op, double* const opend,
 		const double* const flt, const double* const rp0, int rpos ); ///<
 		///< Convolution function type.
-		///<
 	CConvolveFn convfn; ///< Convolution function in use.
-		///<
 
 #define R8BHBC1( fn ) \
 	static void fn( double* op, double* const opend, const double* const flt, \

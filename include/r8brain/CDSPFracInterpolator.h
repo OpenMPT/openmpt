@@ -23,7 +23,6 @@ namespace r8b {
 #if R8B_FLTTEST
 	extern int InterpFilterFracs; ///< Force this number of fractional filter
 		///< positions. -1 - use default.
-		///<
 #endif // R8B_FLTTEST
 
 /**
@@ -209,8 +208,8 @@ public:
 	}
 
 	/**
-	 * Function returns the length of the filter. Always an even number, not
-	 * less than 6.
+	 * @return The length of the filter, in samples (taps). Always an even
+	 * number, not less than 6.
 	 */
 
 	int getFilterLen() const
@@ -219,8 +218,7 @@ public:
 	}
 
 	/**
-	 * Function returns the number of fractional positions sampled by the
-	 * bank.
+	 * @return The number of fractional positions sampled by the bank.
 	 */
 
 	int getFilterFracs() const
@@ -249,32 +247,21 @@ public:
 
 private:
 	int FilterLen; ///< Filter length. Always an even number, not less than 6.
-		///<
 	int FilterFracs; ///< Fractional position count.
-		///<
 	int InitFilterFracs; ///< Fractional position count as supplied to the
 		///< constructor, may equal -1.
-		///<
 	int ElementSize; ///< Filter element size.
-		///<
 	int InterpPoints; ///< Interpolation points to use.
-		///<
 	double ReqAtten; ///< Filter's attentuation.
-		///<
 	bool IsThird; ///< "True" if one-third filter is in use.
-		///<
 	int FilterSize; ///< This constant specifies the "size" of a single filter
 		///< in "double" elements.
-		///<
 	CFixedBuffer< double > Table; ///< The table of fractional delay filters
 		///< for all discrete fractional x = 0..1 sample positions, and
 		///< interpolation coefficients.
-		///<
 	CDSPFracDelayFilterBank* Next; ///< Next filter bank in cache's list.
-		///<
 	int RefCount; ///< The number of references made to *this filter bank.
 		///< Not considered for "static" filter bank objects.
-		///<
 
 	/**
 	 * Function returns windowing function parameters for the specified
@@ -460,6 +447,7 @@ public:
 	 * @param IsThird "True" if one-third filter is required.
 	 * @param IsStatic "True" if a permanent static filter should be returned
 	 * that is never removed from the cache until application terminates.
+	 * @return Reference to a filter bank.
 	 */
 
 	static CDSPFracDelayFilterBank& getFilterBank( const int aFilterFracs,
@@ -472,19 +460,30 @@ public:
 
 		if( IsStatic )
 		{
+			CDSPFracDelayFilterBank* PrevObj = NULL;
 			CDSPFracDelayFilterBank* CurObj = StaticObjects;
 
 			while( CurObj != NULL )
 			{
 				if( CurObj -> InitFilterFracs == aFilterFracs &&
+					CurObj -> IsThird == IsThird &&
 					CurObj -> ElementSize == aElementSize &&
 					CurObj -> InterpPoints == aInterpPoints &&
-					CurObj -> ReqAtten == ReqAtten &&
-					CurObj -> IsThird == IsThird )
+					CurObj -> ReqAtten == ReqAtten )
 				{
+					if( PrevObj != NULL )
+					{
+						// Move the object to the top of the list.
+
+						PrevObj -> Next = CurObj -> Next;
+						CurObj -> Next = StaticObjects.unkeep();
+						StaticObjects = CurObj;
+					}
+
 					return( *CurObj );
 				}
 
+				PrevObj = CurObj;
 				CurObj = CurObj -> Next;
 			}
 
@@ -507,10 +506,10 @@ public:
 		while( CurObj != NULL )
 		{
 			if( CurObj -> InitFilterFracs == aFilterFracs &&
+				CurObj -> IsThird == IsThird &&
 				CurObj -> ElementSize == aElementSize &&
 				CurObj -> InterpPoints == aInterpPoints &&
-				CurObj -> ReqAtten == ReqAtten &&
-				CurObj -> IsThird == IsThird )
+				CurObj -> ReqAtten == ReqAtten )
 			{
 				break;
 			}
@@ -576,16 +575,12 @@ public:
 
 private:
 	static CSyncObject StateSync; ///< Cache state synchronizer.
-		///<
 	static CPtrKeeper< CDSPFracDelayFilterBank* > Objects; ///< The chain of
 		///< cached objects.
-		///<
 	static CPtrKeeper< CDSPFracDelayFilterBank* > StaticObjects; ///< The
 		///< chain of static objects.
-		///<
 	static int ObjCount; ///< The number of objects currently preset in the
 		///< Objects cache.
-		///<
 };
 
 // ---------------------------------------------------------------------------
@@ -600,6 +595,9 @@ inline void CDSPFracDelayFilterBank :: unref()
 }
 
 /**
+ * Function interatively searches for a greatest common denominator (GCD) of 2
+ * numbers.
+ *
  * @param l Number 1.
  * @param s Number 2.
  * @param[out] GCD Resulting GCD.
@@ -681,8 +679,8 @@ inline bool getWholeStepping( const double SSampleRate,
  * delay filters. These filters are contained in a bank, and for higher
  * precision they are interpolated between adjacent filters.
  *
- * To increase sample timing precision, this class uses "resettable counter"
- * approach. This gives zero overall sample timing error. With the
+ * To increase the sample-timing precision, this class uses "resettable
+ * counter" approach. This gives zero overall sample-timing error. With the
  * R8B_FASTTIMING configuration option enabled, the sample timing experiences
  * a very minor drift.
  */
@@ -724,33 +722,35 @@ public:
 
 		R8BASSERT( Latency >= 0 );
 
-		#if R8B_FLTTEST
+	#if R8B_FLTTEST
 
-			IsWhole = false;
+		IsWhole = false;
+		LatencyFrac = 0.0;
+		FilterBank = new CDSPFracDelayFilterBank( -1, 3, 8, ReqAtten,
+			IsThird );
+
+	#else // R8B_FLTTEST
+
+		IsWhole = getWholeStepping( SrcSampleRate, DstSampleRate, InStep,
+			OutStep );
+
+		if( IsWhole )
+		{
+			const double spos = InitFracPos * OutStep;
+			InitFracPosW = (int) spos;
+			LatencyFrac = ( spos - InitFracPosW ) / InStep;
+
+			FilterBank = &CDSPFracDelayFilterBankCache :: getFilterBank(
+				OutStep, 1, 2, ReqAtten, IsThird, false );
+		}
+		else
+		{
 			LatencyFrac = 0.0;
-			FilterBank = new CDSPFracDelayFilterBank( -1, 3, 8, ReqAtten,
-				IsThird );
+			FilterBank = &CDSPFracDelayFilterBankCache :: getFilterBank(
+				-1, 3, 8, ReqAtten, IsThird, true );
+		}
 
-		#else // R8B_FLTTEST
-
-			IsWhole = getWholeStepping( SrcSampleRate, DstSampleRate, InStep,
-				OutStep );
-
-			if( IsWhole )
-			{
-				InitFracPosW = (int) ( InitFracPos * OutStep );
-				LatencyFrac = InitFracPos - (double) InitFracPosW / OutStep;
-				FilterBank = &CDSPFracDelayFilterBankCache :: getFilterBank(
-					OutStep, 1, 2, ReqAtten, IsThird, false );
-			}
-			else
-			{
-				LatencyFrac = 0.0;
-				FilterBank = &CDSPFracDelayFilterBankCache :: getFilterBank(
-					-1, 3, 8, ReqAtten, IsThird, true );
-			}
-
-		#endif // R8B_FLTTEST
+	#endif // R8B_FLTTEST
 
 		FilterLen = FilterBank -> getFilterLen();
 		fl2 = FilterLen >> 1;
@@ -790,15 +790,26 @@ public:
 
 	virtual ~CDSPFracInterpolator()
 	{
-		#if R8B_FLTTEST
+	#if R8B_FLTTEST
+		delete FilterBank;
+	#else // R8B_FLTTEST
+		FilterBank -> unref();
+	#endif // R8B_FLTTEST
+	}
 
-			delete FilterBank;
+	virtual int getInLenBeforeOutPos( const int ReqOutPos ) const
+	{
+		const int ilat = fl2 + Latency;
 
-		#else // R8B_FLTTEST
+		if( IsWhole )
+		{
+			return( ilat + (int) (( InitFracPosW +
+				(double) ReqOutPos * InStep ) / OutStep +
+				LatencyFrac * InStep / OutStep ));
+		}
 
-			FilterBank -> unref();
-
-		#endif // R8B_FLTTEST
+		return( ilat + (int) ( InitFracPos + ReqOutPos * SrcSampleRate /
+			DstSampleRate ));
 	}
 
 	virtual int getLatency() const
@@ -836,11 +847,11 @@ public:
 		{
 			InPosFrac = InitFracPos;
 
-			#if !R8B_FASTTIMING
-				InCounter = 0;
-				InPosInt = 0;
-				InPosShift = InitFracPos * DstSampleRate / SrcSampleRate;
-			#endif // !R8B_FASTTIMING
+		#if !R8B_FASTTIMING
+			InCounter = 0;
+			InPosInt = 0;
+			InPosShift = InitFracPos * DstSampleRate / SrcSampleRate;
+		#endif // !R8B_FASTTIMING
 		}
 	}
 
@@ -866,17 +877,17 @@ public:
 
 		while( l > 0 )
 		{
-			// Add new input samples to both halves of the ring buffer.
+			// Copy new input samples to the ring buffer.
 
-			const int b = min( min( l, BufLen - WritePos ), flb - BufLeft );
+			const int b = min( l, min( BufLen - WritePos, flb - BufLeft ));
 
 			double* const wp1 = Buf + WritePos;
 			memcpy( wp1, ip, b * sizeof( wp1[ 0 ]));
+			const int ec = flo - WritePos;
 
-			if( WritePos < flo )
+			if( ec > 0 )
 			{
-				const int c = min( b, flo - WritePos );
-				memcpy( wp1 + BufLen, wp1, c * sizeof( wp1[ 0 ]));
+				memcpy( wp1 + BufLen, ip, min( b, ec ) * sizeof( wp1[ 0 ]));
 			}
 
 			ip += b;
@@ -889,19 +900,19 @@ public:
 			op = ( *this.*convfn )( op );
 		}
 
-		#if !R8B_FASTTIMING
+	#if !R8B_FASTTIMING
 
-			if( !IsWhole && InCounter > 1000 )
-			{
-				// Reset the interpolation position counter to achieve a
-				// higher sample timing precision.
+		if( !IsWhole && InCounter > 1000 )
+		{
+			// Reset the interpolation position counter to achieve a higher
+			// sample-timing precision.
 
-				InCounter = 0;
-				InPosInt = 0;
-				InPosShift = InPosFrac * DstSampleRate / SrcSampleRate;
-			}
+			InCounter = 0;
+			InPosInt = 0;
+			InPosShift = InPosFrac * DstSampleRate / SrcSampleRate;
+		}
 
-		#endif // !R8B_FASTTIMING
+	#endif // !R8B_FASTTIMING
 
 		return( (int) ( op - op0 ));
 	}
@@ -915,82 +926,55 @@ private:
 		///< FilterLen. However, this condition can be easily met if the input
 		///< signal is suitably downsampled first before the interpolation is
 		///< performed.
-		///<
 	static const int BufLen = 1 << BufLenBits; ///< The length of the ring
-		///< buffer. The actual length is twice as long to allow "beyond max
-		///< position" positioning.
-		///<
+		///< buffer. The actual length is longer, to permit "beyond bounds"
+		///< positioning.
 	static const int BufLenMask = BufLen - 1; ///< Mask used for quick buffer
 		///< position wrapping.
-		///<
-	int FilterLen; ///< Filter length, in taps. Even value.
-		///<
-	int fl2; ///< Right-side (half) filter length.
-		///<
-	int fll; ///< Input latency.
-		///<
-	int flo; ///< Overrun length.
-		///<
-	int flb; ///< Initial read position and maximal buffer write length.
-		///<
 	double Buf[ BufLen + 29 ]; ///< The ring buffer, including overrun
 		///< protection for maximal filter length.
-		///<
 	double SrcSampleRate; ///< Source sample rate.
-		///<
 	double DstSampleRate; ///< Destination sample rate.
-		///<
-	bool IsWhole; ///< "True" if whole-number stepping is in use.
-		///<
-	int InStep; ///< Input whole-number stepping.
-		///<
-	int OutStep; ///< Output whole-number stepping (corresponds to filter bank
-		///< size).
-		///<
 	double InitFracPos; ///< Initial fractional position, in samples, in the
 		///< range [0; 1).
-		///<
 	int InitFracPosW; ///< Initial fractional position for whole-number
 		///< stepping.
-		///<
 	int Latency; ///< Initial latency that should be removed from the input.
-		///<
-	double LatencyFrac; ///< Left-over fractional latency.
-		///<
+	double LatencyFrac; ///< Left-over fractional latency on output (always
+		///< zero for non-whole stepping).
+	int FilterLen; ///< Filter length, in taps. Even value.
+	int fll; ///< Input latency (left-hand filter length).
+	int fl2; ///< Right-side (half) filter length.
+	int flo; ///< Overrun length.
+	int flb; ///< Initial buffer read position.
+	int InStep; ///< Input whole-number stepping.
+	int OutStep; ///< Output whole-number stepping (corresponds to filter bank
+		///< size).
+	int LatencyLeft; ///< Input latency left to remove.
 	int BufLeft; ///< The number of samples left in the buffer to process.
-		///<
 	int WritePos; ///< The current buffer write position. Incremented together
 		///< with the BufLeft variable.
-		///<
 	int ReadPos; ///< The current buffer read position.
-		///<
-	int LatencyLeft; ///< Input latency left to remove.
-		///<
-	double InPosFrac; ///< Interpolation position (fractional part).
-		///<
 	int InPosFracW; ///< Interpolation position (fractional part) for
 		///< whole-number stepping. Corresponds to the index into the filter
 		///< bank.
-		///<
-	CDSPFracDelayFilterBank* FilterBank; ///< Filter bank in use, may be
-		///< whole-number stepping filter bank or static bank.
-		///<
+	double InPosFrac; ///< Interpolation position (fractional part).
+
 #if R8B_FASTTIMING
-	double FracStep; ///< Fractional sample timing step.
+	double FracStep; ///< Fractional sample-timing step.
 #else // R8B_FASTTIMING
 	int InCounter; ///< Interpolation step counter.
-		///<
 	int InPosInt; ///< Interpolation position (integer part).
-		///<
 	double InPosShift; ///< Interpolation position fractional shift.
-		///<
 #endif // R8B_FASTTIMING
+
+	CDSPFracDelayFilterBank* FilterBank; ///< Filter bank in use, may be
+		///< whole-number stepping filter bank or static bank.
+	bool IsWhole; ///< "True" if whole-number stepping is in use.
 
 	typedef double*( CDSPFracInterpolator :: *CConvolveFn )( double* op ); ///<
 		///< Convolution function type.
-		///<
 	CConvolveFn convfn; ///< Convolution function in use.
-		///<
 
 	/**
 	 * Convolution function for 0th order resampling.
@@ -1003,10 +987,17 @@ private:
 	template< int fltlen >
 	double* convolve0( double* op )
 	{
-		while( BufLeft > fl2 )
+		const CDSPFracDelayFilterBank& fb = *FilterBank;
+		const int istep = InStep;
+		const int ostep = OutStep;
+		int fpos = InPosFracW;
+		int rpos = ReadPos;
+		int bl = BufLeft - fl2;
+
+		while( bl > 0 )
 		{
-			const double* const ftp = &(*FilterBank)[ InPosFracW ];
-			const double* const rp = Buf + ReadPos;
+			const double* const ftp = &fb[ fpos ];
+			const double* const rp = Buf + rpos;
 			int i;
 
 		#if defined( R8B_SSE2 ) && !defined( __INTEL_COMPILER )
@@ -1049,13 +1040,17 @@ private:
 
 			op++;
 
-			InPosFracW += InStep;
-			const int PosIncr = InPosFracW / OutStep;
-			InPosFracW -= PosIncr * OutStep;
+			fpos += istep;
+			const int PosIncr = fpos / ostep;
+			fpos -= PosIncr * ostep;
 
-			ReadPos = ( ReadPos + PosIncr ) & BufLenMask;
-			BufLeft -= PosIncr;
+			rpos = ( rpos + PosIncr ) & BufLenMask;
+			bl -= PosIncr;
 		}
+
+		BufLeft = bl + fl2;
+		ReadPos = rpos;
+		InPosFracW = fpos;
 
 		return( op );
 	}
@@ -1071,16 +1066,21 @@ private:
 	{
 		const CDSPFracDelayFilterBank& fb = *FilterBank;
 		const int fltlen = FilterLen;
+		const double ssr = SrcSampleRate;
+		const double dsr = DstSampleRate;
+		double fpos = InPosFrac;
+		int rpos = ReadPos;
+		int bl = BufLeft - fl2;
 
-		while( BufLeft > fl2 )
+		while( bl > 0 )
 		{
-			double x = InPosFrac * fb.getFilterFracs();
+			double x = fpos * fb.getFilterFracs();
 			const int fti = (int) x; // Function table index.
-			x -= fti; // Coefficient for interpolation between
-				// adjacent fractional delay filters.
+			x -= fti; // Coefficient for interpolation between adjacent
+				// fractional delay filters.
 			const double x2d = x * x;
 			const double* ftp = &fb[ fti ];
-			const double* const rp = Buf + ReadPos;
+			const double* const rp = Buf + rpos;
 			int i;
 
 		#if defined( R8B_SSE2 ) && defined( R8B_SIMD_ISH )
@@ -1146,28 +1146,30 @@ private:
 
 			op++;
 
-			#if R8B_FASTTIMING
+		#if R8B_FASTTIMING
 
-				InPosFrac += FracStep;
-				const int PosIncr = (int) InPosFrac;
-				InPosFrac -= PosIncr;
+			fpos += FracStep;
+			const int PosIncr = (int) fpos;
+			fpos -= PosIncr;
 
-			#else // R8B_FASTTIMING
+		#else // R8B_FASTTIMING
 
-				InCounter++;
-				const double NextInPos = ( InCounter + InPosShift ) *
-					SrcSampleRate / DstSampleRate;
+			InCounter++;
+			const double NextInPos = ( InCounter + InPosShift ) * ssr / dsr;
+			const int NextInPosInt = (int) NextInPos;
+			const int PosIncr = NextInPosInt - InPosInt;
+			InPosInt = NextInPosInt;
+			fpos = NextInPos - NextInPosInt;
 
-				const int NextInPosInt = (int) NextInPos;
-				const int PosIncr = NextInPosInt - InPosInt;
-				InPosInt = NextInPosInt;
-				InPosFrac = NextInPos - NextInPosInt;
+		#endif // R8B_FASTTIMING
 
-			#endif // R8B_FASTTIMING
-
-			ReadPos = ( ReadPos + PosIncr ) & BufLenMask;
-			BufLeft -= PosIncr;
+			rpos = ( rpos + PosIncr ) & BufLenMask;
+			bl -= PosIncr;
 		}
+
+		BufLeft = bl + fl2;
+		ReadPos = rpos;
+		InPosFrac = fpos;
 
 		return( op );
 	}

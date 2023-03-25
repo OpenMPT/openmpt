@@ -14,11 +14,13 @@
  * @section intro_sec Introduction
  *
  * Open source (under the MIT license) high-quality professional audio sample
- * rate converter (SRC) (resampling) library. Features routines for SRC, both
- * up- and downsampling, to/from any sample rate, including non-integer sample
- * rates: it can be also used for conversion to/from SACD sample rate and even
- * go beyond that. SRC routines were implemented in multi-platform C++ code,
- * and have a high level of optimality.
+ * rate converter (SRC) / resampler C++ library.  Features routines for SRC,
+ * both up- and downsampling, to/from any sample rate, including non-integer
+ * sample rates: it can be also used for conversion to/from SACD/DSD sample
+ * rates, and even go beyond that.  SRC routines were implemented in a
+ * multi-platform C++ code, and have a high level of optimality. Also suitable
+ * for fast general-purpose 1D time-series resampling / interpolation (with
+ * relaxed filter parameters).
  *
  * For more information, please visit
  * https://github.com/avaneev/r8brain-free-src
@@ -51,7 +53,7 @@
  * following way: "Sample rate converter designed by Aleksey Vaneev of
  * Voxengo"
  *
- * @version 5.6
+ * @version 6.2
  */
 
 #ifndef R8BBASE_INCLUDED
@@ -79,7 +81,7 @@
 	#define R8B_SSE2
 	#define R8B_SIMD_ISH
 
-#elif defined( __aarch64__ ) || defined( __arm64__ ) || defined( __ARM_NEON )
+#elif defined( __aarch64__ ) || defined( __arm64__ )
 
 	#include <arm_neon.h>
 
@@ -103,7 +105,7 @@ namespace r8b {
  * Macro defines r8brain-free-src version string.
  */
 
-#define R8B_VERSION "5.6"
+#define R8B_VERSION "6.2"
 
 /**
  * The macro equals to "pi" constant, fits 53-bit floating point mantissa.
@@ -135,7 +137,8 @@ namespace r8b {
 /**
  * A special macro that defines empty copy-constructor and copy operator with
  * the "private:" prefix. This macro should be used in classes that cannot be
- * copied in a standard C++ way.
+ * copied in a standard C++ way. It is also assumed that objects of such
+ * classes are non-relocatable.
  *
  * This macro does not need to be defined in classes derived from a class
  * where such macro was already used.
@@ -159,12 +162,11 @@ class CStdClassAllocator
 {
 public:
 	/**
-	 * @param n The size of the object, in bytes.
 	 * @param p Pointer to object's pre-allocated memory block.
 	 * @return Pointer to object.
 	 */
 
-	void* operator new( size_t, void* p )
+	void* operator new( const size_t, void* const p )
 	{
 		return( p );
 	}
@@ -174,7 +176,7 @@ public:
 	 * @return Pointer to the allocated memory block for the object.
 	 */
 
-	void* operator new( size_t n )
+	void* operator new( const size_t n )
 	{
 		return( :: malloc( n ));
 	}
@@ -184,7 +186,7 @@ public:
 	 * @return Pointer to the allocated memory block for the object.
 	 */
 
-	void* operator new[]( size_t n )
+	void* operator new[]( const size_t n )
 	{
 		return( :: malloc( n ));
 	}
@@ -195,7 +197,7 @@ public:
 	 * @param p Pointer to the allocated memory block for the object.
 	 */
 
-	void operator delete( void* p )
+	void operator delete( void* const p )
 	{
 		:: free( p );
 	}
@@ -206,7 +208,7 @@ public:
 	 * @param p Pointer to the allocated memory block for the object.
 	 */
 
-	void operator delete[]( void* p )
+	void operator delete[]( void* const p )
 	{
 		:: free( p );
 	}
@@ -225,7 +227,7 @@ public:
 	 * Function allocates memory block.
 	 *
 	 * @param Size The size of the block, in bytes.
-	 * @result The pointer to the allocated block.
+	 * @return The pointer to the allocated block.
 	 */
 
 	static void* allocmem( const size_t Size )
@@ -238,10 +240,10 @@ public:
 	 *
 	 * @param p Pointer to the allocated block, can be NULL.
 	 * @param Size The new size of the block, in bytes.
-	 * @result The pointer to the (re)allocated block.
+	 * @return The pointer to the (re)allocated block.
 	 */
 
-	static void* reallocmem( void* p, const size_t Size )
+	static void* reallocmem( void* const p, const size_t Size )
 	{
 		return( :: realloc( p, Size ));
 	}
@@ -252,7 +254,7 @@ public:
 	 * @param p Pointer to the allocated block, can be NULL.
 	 */
 
-	static void freemem( void* p )
+	static void freemem( void* const p )
 	{
 		:: free( p );
 	}
@@ -265,6 +267,7 @@ public:
  * @param ptr Pointer to align.
  * @param align Alignment, in bytes, power-of-2.
  * @tparam T Pointer's element type.
+ * @return Aligned pointer.
  */
 
 template< typename T >
@@ -410,11 +413,8 @@ public:
 private:
 	static const size_t Alignment = 64; ///< Buffer address alignment, in
 		///< bytes.
-		///<
 	void* Data0; ///< Buffer pointer, original unaligned.
-		///<
 	T* Data; ///< Element buffer pointer, aligned.
-		///<
 };
 
 /**
@@ -428,7 +428,7 @@ private:
  * "CDSPFIRFilter*").
  */
 
-template< class T >
+template< typename T >
 class CPtrKeeper
 {
 	R8BNOCTOR( CPtrKeeper );
@@ -446,7 +446,7 @@ public:
 	 * @tparam T2 Object's pointer type.
 	 */
 
-	template< class T2 >
+	template< typename T2 >
 	CPtrKeeper( T2 const aObject )
 		: Object( aObject )
 	{
@@ -465,7 +465,7 @@ public:
 	 * @tparam T2 Object's pointer type.
 	 */
 
-	template< class T2 >
+	template< typename T2 >
 	void operator = ( T2 const aObject )
 	{
 		reset();
@@ -515,7 +515,6 @@ public:
 
 private:
 	T Object; ///< Pointer to keeped object.
-		///<
 };
 
 /**
@@ -536,7 +535,7 @@ public:
 	CSyncObject()
 	{
 		#if defined( _WIN32 )
-			InitializeCriticalSectionAndSpinCount( &CritSec, 4000 );
+			InitializeCriticalSectionAndSpinCount( &CritSec, 2000 );
 		#else // defined( _WIN32 )
 			pthread_mutexattr_t MutexAttrs;
 			pthread_mutexattr_init( &MutexAttrs );
@@ -587,10 +586,8 @@ private:
 	#if defined( _WIN32 )
 		CRITICAL_SECTION CritSec; ///< Standard Windows critical section
 			///< structure.
-			///<
 	#else // defined( _WIN32 )
 		pthread_mutex_t Mutex; ///< pthread.h mutex object.
-			///<
 	#endif // defined( _WIN32 )
 };
 
@@ -647,9 +644,8 @@ public:
 		}
 	}
 
-protected:
+private:
 	CSyncObject* SyncObj; ///< Sync object in use (can be NULL).
-		///<
 };
 
 /**
@@ -660,7 +656,7 @@ protected:
  * synchronization object thus blocking execution of other threads that also
  * use the same R8BSYNC( obj ) macro. The blocked section begins with the
  * R8BSYNC( obj ) macro and finishes at the end of the current C++ code block.
- * Multiple R8BSYNC() macros may be defined from within the same code block.
+ * Multiple R8BSYNC() macros can be defined within the same code block.
  *
  * @param SyncObject An object of the CSyncObject type that is used for
  * synchronization.
@@ -761,11 +757,8 @@ public:
 
 private:
 	double svalue1; ///< Current sine value.
-		///<
 	double svalue2; ///< Previous sine value.
-		///<
 	double sincr; ///< Sine value increment.
-		///<
 };
 
 /**
@@ -871,31 +864,22 @@ inline void calcFIRFilterResponse( const double* flt, int fltlen,
 }
 
 /**
- * Function calculates frequency response and group delay of the specified FIR
- * filter at the specified circular frequency. The group delay is calculated
- * by evaluating the filter's response at close side-band frequencies of "th".
+ * Function calculates group delay of the specified FIR filter at the
+ * specified circular frequency. The group delay is calculated by evaluating
+ * the filter's response at close side-band frequencies of "th".
  *
  * @param flt FIR filter's coefficients.
  * @param fltlen Number of coefficients (taps) in the filter.
  * @param th Circular frequency [0; pi].
- * @param[out] re Resulting real part of the complex frequency response.
- * @param[out] im Resulting imaginary part of the complex frequency response.
- * @param[out] gd Resulting group delay at the specified frequency, in
- * samples.
+ * @return Resulting group delay at the specified frequency, in samples.
  */
 
-inline void calcFIRFilterResponseAndGroupDelay( const double* const flt,
-	const int fltlen, const double th, double& re, double& im, double& gd )
+inline double calcFIRFilterGroupDelay( const double* const flt,
+	const int fltlen, const double th )
 {
-	// Calculate response at "th".
-
-	calcFIRFilterResponse( flt, fltlen, th, re, im );
-
-	// Calculate response at close sideband frequencies.
-
 	const int Count = 2;
 	const double thd2 = 1e-9;
-	double ths[ Count ] = { th - thd2, th + thd2 };
+	double ths[ Count ] = { th - thd2, th + thd2 }; // Side-band frequencies.
 
 	if( ths[ 0 ] < 0.0 )
 	{
@@ -932,7 +916,8 @@ inline void calcFIRFilterResponseAndGroupDelay( const double* const flt,
 	}
 
 	const double thd = ths[ 1 ] - ths[ 0 ];
-	gd = ( ph1[ 1 ] - ph1[ 0 ]) / thd;
+
+	return(( ph1[ 1 ] - ph1[ 0 ]) / thd );
 }
 
 /**
@@ -995,13 +980,13 @@ inline void calcSpline3p8Coeffs( double* const c, const double xm3,
 {
 	c[ 0 ] = x0;
 	c[ 1 ] = ( 61.0 * ( x1 - xm1 ) + 16.0 * ( xm2 - x2 ) +
-		3.0 * ( x3 - xm3 )) / 76.0;
+		3.0 * ( x3 - xm3 )) * 1.31578947368421052e-2;
 
 	c[ 2 ] = ( 106.0 * ( xm1 + x1 ) + 10.0 * x3 + 6.0 * xm3 - 3.0 * x4 -
-		29.0 * ( xm2 + x2 ) - 167.0 * x0 ) / 76.0;
+		29.0 * ( xm2 + x2 ) - 167.0 * x0 ) * 1.31578947368421052e-2;
 
 	c[ 3 ] = ( 91.0 * ( x0 - x1 ) + 45.0 * ( x2 - xm1 ) +
-		13.0 * ( xm2 - x3 ) + 3.0 * ( x4 - xm3 )) / 76.0;
+		13.0 * ( xm2 - x3 ) + 3.0 * ( x4 - xm3 )) * 1.31578947368421052e-2;
 }
 
 /**
@@ -1027,10 +1012,10 @@ inline void calcSpline2p8Coeffs( double* const c, const double xm3,
 {
 	c[ 0 ] = x0;
 	c[ 1 ] = ( 61.0 * ( x1 - xm1 ) + 16.0 * ( xm2 - x2 ) +
-		3.0 * ( x3 - xm3 )) / 76.0;
+		3.0 * ( x3 - xm3 )) * 1.31578947368421052e-2;
 
 	c[ 2 ] = ( 106.0 * ( xm1 + x1 ) + 10.0 * x3 + 6.0 * xm3 - 3.0 * x4 -
-		29.0 * ( xm2 + x2 ) - 167.0 * x0 ) / 76.0;
+		29.0 * ( xm2 + x2 ) - 167.0 * x0 ) * 1.31578947368421052e-2;
 }
 
 /**
@@ -1145,12 +1130,13 @@ inline double sqr( const double x )
 /**
  * @param v Input value.
  * @param p Power factor.
- * @return Returns pow() function's value with input value's sign check.
+ * @return Returns a precise, but generally approximate pow() function's value
+ * of absolute of input value.
  */
 
-inline double pows( const double v, const double p )
+inline double pow_a( const double v, const double p )
 {
-	return( v < 0.0 ? -pow( -v, p ) : pow( v, p ));
+	return( exp( p * log( fabs( v ) + 1e-300 )));
 }
 
 /**
@@ -1176,7 +1162,8 @@ inline double asinh( const double v )
 /**
  * @param x Input value.
  * @return Calculated zero-th order modified Bessel function of the first kind
- * of the input value. Approximate value.
+ * of the input value. Approximate value. Coefficients by Abramowitz and
+ * Stegun.
  */
 
 inline double besselI0( const double x )
