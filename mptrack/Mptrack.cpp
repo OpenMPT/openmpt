@@ -2088,7 +2088,8 @@ CString FormatFileSize(uint64 fileSize)
 	{
 		if(size < 1024.0 || i == 3)
 		{
-			return mpt::cfmt::flt(size, 3) + Unit[i];
+			// Variable-length formatting may decide on a whim to switch to scientific formatting, so used a fixed width and trim manually...
+			return mpt::cfmt::fix(size, 2).TrimRight(_T("0.")) + Unit[i];
 		}
 		size /= 1024.0;
 	}
