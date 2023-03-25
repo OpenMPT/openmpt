@@ -59,23 +59,13 @@ protected:
 
 	CComboBox m_ComboPitch, m_ComboQuality, m_ComboFFT;
 
-	void UpdateTimeStretchParameters();
-	void ReadTimeStretchParameters();
-
-	void ApplyAmplify(const double amp, const double fadeInStart, const double fadeOutEnd, const bool fadeIn, const bool fadeOut, const Fade::Law fadeLaw);
-	void ApplyResample(SAMPLEINDEX smp, uint32 newRate, ResamplingMode mode, bool ignoreSelection = false, bool updatePatternCommands = false);
-
-	SampleSelectionPoints GetSelectionPoints();
-	void SetSelectionPoints(SmpLength nStart, SmpLength nEnd);
-
-	void PropagateAutoVibratoChanges();
-
-	bool IsOPLInstrument() const;
-
 public:
 	CCtrlSamples(CModControlView &parent, CModDoc &document);
 	~CCtrlSamples();
 
+protected:
+	bool IsOPLInstrument() const;
+	
 	bool SetCurrentSample(SAMPLEINDEX nSmp, LONG lZoom = -1, bool bUpdNum = true);
 	bool InsertSample(bool duplicate, int8 *confirm = nullptr);
 	bool OpenSample(const mpt::PathString &fileName, FlagSet<OpenSampleTypes> types = OpenSampleKnown | OpenSampleRaw);
@@ -86,9 +76,21 @@ public:
 	void Normalize(bool allSamples);
 	void RemoveDCOffset(bool allSamples);
 
-	Setting<LONG> &GetSplitPosRef() override {return TrackerSettings::Instance().glSampleWindowHeight;}
+	void UpdateTimeStretchParameters();
+	void ReadTimeStretchParameters();
+
+	void ApplyAmplify(const double amp, const double fadeInStart, const double fadeOutEnd, const bool fadeIn, const bool fadeOut, const Fade::Law fadeLaw);
+	void ApplyResample(SAMPLEINDEX smp, uint32 newRate, ResamplingMode mode, bool ignoreSelection = false, bool updatePatternCommands = false);
+
+	SampleSelectionPoints GetSelectionPoints();
+	void SetSelectionPoints(SmpLength nStart, SmpLength nEnd);
+
+	void PropagateAutoVibratoChanges();
+	void SetFinetune(int step);
 
 public:
+	Setting<LONG> &GetSplitPosRef() override { return TrackerSettings::Instance().glSampleWindowHeight; }
+
 	//{{AFX_VIRTUAL(CCtrlSamples)
 	BOOL OnInitDialog() override;
 	void DoDataExchange(CDataExchange* pDX) override;	// DDX/DDV support

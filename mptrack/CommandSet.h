@@ -746,6 +746,8 @@ enum CommandID
 	kcSampleTransposeDown,
 	kcSampleTransposeOctUp,
 	kcSampleTransposeOctDown,
+	kcSampleFinetuneUp,
+	kcSampleFinetuneDown,
 	kcSampleToggleFollowPlayCursor,
 	kcEndSampleMisc = kcSampleToggleFollowPlayCursor,
 

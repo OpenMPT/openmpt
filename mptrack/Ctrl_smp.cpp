@@ -3139,41 +3139,10 @@ NoSample:
 	// FineTune / C-5 Speed
 	if ((pos = m_SpinFineTune.GetPos32()) != 0)
 	{
-		if (!m_sndFile.UseFinetuneAndTranspose())
-		{
-			if(!m_startedEdit && lastScrollbar != scrollBar) PrepareUndo("Finetune");
-			if(sample.nC5Speed < 1)
-				sample.nC5Speed = 8363;
-			auto oldFreq = sample.nC5Speed;
-			sample.Transpose((pos * TrackerSettings::Instance().m_nFinetuneStep) / 1200.0);
-			if(sample.nC5Speed == oldFreq)
-				sample.nC5Speed += pos;
-			Limit(sample.nC5Speed, 1u, 9999999u); // 9999999 is max. in Impulse Tracker
-			int transp = ModSample::FrequencyToTranspose(sample.nC5Speed).first;
-			int basenote = (NOTE_MIDDLEC - NOTE_MIN) + transp;
-			Clamp(basenote, BASENOTE_MIN, BASENOTE_MAX);
-			basenote -= BASENOTE_MIN;
-			if (basenote != m_CbnBaseNote.GetCurSel()) m_CbnBaseNote.SetCurSel(basenote);
-			SetDlgItemInt(IDC_EDIT5, sample.nC5Speed, FALSE);
-		} else
-		{
-			if(!m_startedEdit && lastScrollbar != scrollBar) PrepareUndo("Finetune");
-			int ftune = (int)sample.nFineTune;
-			// MOD finetune range -8 to 7 translates to -128 to 112
-			if(m_sndFile.GetType() & MOD_TYPE_MOD)
-			{
-				ftune = Clamp((ftune >> 4) + pos, -8, 7);
-				sample.nFineTune = MOD2XMFineTune((signed char)ftune);
-			} else
-			{
-				ftune = Clamp(ftune + pos, -128, 127);
-				sample.nFineTune = (signed char)ftune;
-			}
-			SetDlgItemInt(IDC_EDIT5, ftune, TRUE);
-		}
-		redraw = true;
+		if(!m_startedEdit && lastScrollbar != scrollBar)
+			PrepareUndo("Finetune");
+		SetFinetune(pos);
 		m_SpinFineTune.SetPos(0);
-		OnFineTuneChangedDone();
 	}
 	if(scrollBar->m_hWnd == m_SpinSequenceMs.m_hWnd || scrollBar->m_hWnd == m_SpinSeekWindowMs.m_hWnd || scrollBar->m_hWnd == m_SpinOverlap.m_hWnd)
 	{
@@ -3187,6 +3156,45 @@ NoSample:
 	}
 	lastScrollbar = scrollBar;
 	UnlockControls();
+}
+
+
+void CCtrlSamples::SetFinetune(int step)
+{
+	ModSample &sample = m_sndFile.GetSample(m_nSample);
+	if(!m_sndFile.UseFinetuneAndTranspose())
+	{
+		if(sample.nC5Speed < 1)
+			sample.nC5Speed = 8363;
+		auto oldFreq = sample.nC5Speed;
+		sample.Transpose((step * TrackerSettings::Instance().m_nFinetuneStep) / 1200.0);
+		if(sample.nC5Speed == oldFreq)
+			sample.nC5Speed += step;
+		Limit(sample.nC5Speed, 1u, 9999999u);  // 9999999 is max. in Impulse Tracker
+		int transp = ModSample::FrequencyToTranspose(sample.nC5Speed).first;
+		int basenote = (NOTE_MIDDLEC - NOTE_MIN) + transp;
+		Clamp(basenote, BASENOTE_MIN, BASENOTE_MAX);
+		basenote -= BASENOTE_MIN;
+		if(basenote != m_CbnBaseNote.GetCurSel())
+			m_CbnBaseNote.SetCurSel(basenote);
+		SetDlgItemInt(IDC_EDIT5, sample.nC5Speed, FALSE);
+	} else
+	{
+		int ftune = (int)sample.nFineTune;
+		// MOD finetune range -8 to 7 translates to -128 to 112
+		if(m_sndFile.GetType() & MOD_TYPE_MOD)
+		{
+			ftune = Clamp((ftune >> 4) + step, -8, 7);
+			sample.nFineTune = MOD2XMFineTune((signed char)ftune);
+		} else
+		{
+			ftune = Clamp(ftune + step, -128, 127);
+			sample.nFineTune = (signed char)ftune;
+		}
+		SetDlgItemInt(IDC_EDIT5, ftune, TRUE);
+	}
+	OnFineTuneChangedDone();
+	SetModified(SampleHint().Info().Data(), false, false);
 }
 
 
@@ -3223,6 +3231,8 @@ LRESULT CCtrlSamples::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 	case kcSampleTransposeDown: transpose = -1; break;
 	case kcSampleTransposeOctUp: transpose = 12; break;
 	case kcSampleTransposeOctDown: transpose = -12; break;
+	case kcSampleFinetuneUp: SetFinetune(1); break;
+	case kcSampleFinetuneDown: SetFinetune(-1); break;
 
 	case kcSampleUpsample:
 	case kcSampleDownsample:

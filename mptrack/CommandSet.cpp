@@ -343,6 +343,8 @@ constexpr struct
 	{kcSampleTransposeDown,                    'A',                ModCtrl,            kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
 	{kcSampleTransposeOctUp,                   'Q',                ModShift | ModCtrl, kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
 	{kcSampleTransposeOctDown,                 'A',                ModShift | ModCtrl, kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
+	{kcSampleFinetuneUp,                       VK_UP,              ModShift,           kKeyEventDown | kKeyEventRepeat, kCtxViewSamples,         MPT_V("1.31.00.26")},
+	{kcSampleFinetuneDown,                     VK_DOWN,            ModShift,           kKeyEventDown | kKeyEventRepeat, kCtxViewSamples,         MPT_V("1.31.00.26")},
 	{kcSampleToggleFollowPlayCursor,           'F',                ModShift,           kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31.00.19")},
 	{kcSampleTrim,                             'T',                ModCtrl,            kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
 	{kcSampleTrimToLoopEnd,                    'T',                ModShift | ModCtrl, kKeyEventDown,                   kCtxViewSamples,         MPT_V("1.31")},
@@ -1245,6 +1247,8 @@ static constexpr struct
 	{2051, kcPatternScrollDown, _T("Scroll Down")},
 	{2052, kcPlaySongFromCursorPause, _T("Play Song from Cursor / Pause")},
 	{2053, kcPlaySongFromPatternPause, _T("Play Song from Pattern Start / Pause")},
+	{2054, kcSampleFinetuneUp, _T("Increment Finetune")},
+	{2055, kcSampleFinetuneDown, _T("Decrement Finetune")},
 };
 
 // Get command descriptions etc.. loaded up.
