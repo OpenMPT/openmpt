@@ -77,7 +77,7 @@ static void TranslateGraoumfEffect(CSoundFile &sndFile, ModCommand &m, const uin
 	{
 	case 0x02:  // 2xxx: Set Volume
 		m.volcmd = VOLCMD_VOLUME;
-		m.vol = static_cast<ModCommand::PARAM>(param12bit / 4);
+		m.vol = static_cast<ModCommand::VOL>(std::min(param12bit / 4, 64));
 		return;
 
 	case 0x03:  // 3xxx: Set Logarithmic Volume
@@ -85,7 +85,7 @@ static void TranslateGraoumfEffect(CSoundFile &sndFile, ModCommand &m, const uin
 		if(param12bit == 0)
 			m.vol = 0;
 		else
-			m.vol = mpt::saturate_cast<ModCommand::VOL>(GT2LogToLinearVolume(param12bit) / 4);
+			m.vol = static_cast<ModCommand::VOL>(std::min(GT2LogToLinearVolume(param12bit) / 4, 64));
 		return;
 
 	case 0x04:  // 4xxx: Panning
