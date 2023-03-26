@@ -31,7 +31,7 @@ struct _667FileHeader
 		{
 			for(const char c : name)
 			{
-				if(c >= 0 && c <= 31)
+				if(static_cast<unsigned char>(c) <= 31)
 					return false;
 			}
 		}
@@ -93,12 +93,10 @@ bool CSoundFile::Read667(FileReader &file, ModLoadingFlags loadFlags)
 
 	InitializeChannels();
 
-	std::vector<std::array<uint8, 11>> fmData;
-	file.ReadVector(fmData, m_nSamples);
 	for(SAMPLEINDEX smp = 1; smp <= m_nSamples; smp++)
 	{
 		// Reorder OPL patch bytes (interleave modulator and carrier)
-		const auto &fm = fmData[smp - 1];
+		const auto fm = file.ReadArray<uint8, 11>();
 		OPLPatch patch{{}};
 		patch[0] = fm[1]; patch[1] = fm[6];
 		patch[2] = fm[2]; patch[3] = fm[7];
@@ -111,7 +109,7 @@ bool CSoundFile::Read667(FileReader &file, ModLoadingFlags loadFlags)
 		mptSmp.Initialize(MOD_TYPE_S3M);
 		mptSmp.SetAdlib(true, patch);
 
-		m_szNames[smp] = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, fileHeader.names[smp - 1]);
+		m_szNames[smp] = mpt::String::ReadBuf(mpt::String::spacePadded, fileHeader.names[smp - 1]);
 	}
 
 	if(loadFlags & loadPatternData)
@@ -127,7 +125,7 @@ bool CSoundFile::Read667(FileReader &file, ModLoadingFlags loadFlags)
 			auto rowData = Patterns[pat].GetRow(row);
 			while(row < 32 && file.CanRead(1))
 			{
-				uint8 b  = file.ReadUint8();
+				uint8 b = file.ReadUint8();
 				if(b == 0xFF)
 				{
 					// End of row
@@ -165,7 +163,7 @@ bool CSoundFile::Read667(FileReader &file, ModLoadingFlags loadFlags)
 					uint8 note = file.ReadUint8();
 					if(note >= 0x7C)
 						return false;
-					rowData[b].note = NOTE_MIN + 12 + (note & 0x0F) + ((note >> 4) & 0x07) * 12;
+					rowData[b].note = NOTE_MIN + 12 + (note & 0x0F) + (note >> 4) * 12;
 					if(b % 2u)
 						righChn = true;
 					else
@@ -185,9 +183,9 @@ bool CSoundFile::Read667(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 
-	m_modFormat.formatName = U_("Composer 667");
-	m_modFormat.type = U_("667");
-	m_modFormat.madeWithTracker = U_("Composer 667");
+	m_modFormat.formatName = UL_("Composer 667");
+	m_modFormat.type = UL_("667");
+	m_modFormat.madeWithTracker = UL_("Composer 667");
 	m_modFormat.charset = mpt::Charset::CP437;
 	
 	return true;
