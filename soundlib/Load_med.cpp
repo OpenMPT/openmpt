@@ -1082,7 +1082,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 		uint32 preamp = 32;
 		if(version < 2)
 		{
-			if(songHeader.songLength > 256 || m_nChannels > 16)
+			if(songHeader.songLength > 256)
 				return false;
 			ReadOrderFromArray(order, songHeader.GetMMD0Song().sequence, songHeader.songLength);
 			for(auto &ord : order)
@@ -1091,7 +1091,9 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 			}
 
 			SetupMODPanning(true);
-			for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
+			// With MED SoundStudio 1.03 it's possible to create MMD1 files with more than 16 channels.
+			const CHANNELINDEX numChannelVols = std::min(m_nChannels, CHANNELINDEX(16));
+			for(CHANNELINDEX chn = 0; chn < numChannelVols; chn++)
 			{
 				ChnSettings[chn].nVolume = std::min<uint8>(songHeader.trackVol[chn], 64);
 			}
