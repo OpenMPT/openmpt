@@ -119,17 +119,19 @@ bool CSoundFile::Read667(FileReader &file, ModLoadingFlags loadFlags)
 		Patterns.ResizeArray(128);
 		for(PATTERNINDEX pat = 0; pat < 128; pat++)
 		{
-			if(!Patterns.Insert(pat, 32) || !file.Seek(patternOffset + fileHeader.patOffsets[pat]))
+			// 4674 bytes is the largest sensible pattern size (every cell is written to exactly once + jump at end of pattern)
+			FileReader patData = file.GetChunkAt(patternOffset + fileHeader.patOffsets[pat], 4674);
+			if(!patData.IsValid() || !Patterns.Insert(pat, 32))
 				break;
 			ROWINDEX row = 0;
 			auto rowData = Patterns[pat].GetRow(row);
-			while(row < 32 && file.CanRead(1))
+			while(patData.CanRead(1))
 			{
-				uint8 b = file.ReadUint8();
+				uint8 b = patData.ReadUint8();
 				if(b == 0xFF)
 				{
 					// End of row
-					uint8 skip = file.ReadUint8();
+					uint8 skip = patData.ReadUint8();
 					row += skip;
 					if(row >= 32 || skip == 0)
 						break;
@@ -137,21 +139,21 @@ bool CSoundFile::Read667(FileReader &file, ModLoadingFlags loadFlags)
 				} else if(b == 0xFE)
 				{
 					// Instrument
-					auto instr = file.ReadArray<uint8, 2>();
+					auto instr = patData.ReadArray<uint8, 2>();
 					if(instr[0] >= m_nChannels || instr[1] > 63)
 						return false;
 					rowData[instr[0]].instr = instr[1] + 1;
 				} else if(b == 0xFD)
 				{
 					// Volume
-					auto vol = file.ReadArray<uint8, 2>();
+					auto vol = patData.ReadArray<uint8, 2>();
 					if(vol[0] >= m_nChannels || vol[1] > 63)
 						return false;
 					rowData[vol[0]].SetVolumeCommand(VOLCMD_VOLUME, 63u - vol[1]);
 				} else if(b == 0xFC)
 				{
 					// Jump to pattern
-					uint8 target = file.ReadUint8();
+					uint8 target = patData.ReadUint8();
 					rowData[0].SetEffectCommand(CMD_POSITIONJUMP, target);
 				} else if(b == 0xFB)
 				{
@@ -160,7 +162,7 @@ bool CSoundFile::Read667(FileReader &file, ModLoadingFlags loadFlags)
 				} else if(b < m_nChannels)
 				{
 					// Note data
-					uint8 note = file.ReadUint8();
+					uint8 note = patData.ReadUint8();
 					if(note >= 0x7C)
 						return false;
 					rowData[b].note = NOTE_MIN + 12 + (note & 0x0F) + (note >> 4) * 12;
