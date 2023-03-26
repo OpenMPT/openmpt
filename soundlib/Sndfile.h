@@ -836,6 +836,7 @@ public:
 #endif // !MPT_WITH_ANCIENT
 	static ProbeResult ProbeFileHeaderUMX(MemoryFileReader file, const uint64* pfilesize);
 
+	static ProbeResult ProbeFileHeader667(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeader669(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderAM(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderAMF_Asylum(MemoryFileReader file, const uint64 *pfilesize);
@@ -887,6 +888,7 @@ public:
 	static ProbeResult ProbeFileHeaderWAV(MemoryFileReader file, const uint64 *pfilesize);
 
 	// Module Loaders
+	bool Read667(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool Read669(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadAM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadAMF_Asylum(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);

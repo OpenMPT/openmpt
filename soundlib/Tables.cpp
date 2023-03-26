@@ -55,6 +55,7 @@ static constexpr ModFormatInfo modFormatInfo[] =
 	{ UL_("FastTracker 2"),                      "xm" },
 	{ UL_("Impulse Tracker"),                    "it" },
 
+	{ UL_("Composer 667"),                       "667" },
 	{ UL_("Composer 669 / UNIS 669"),            "669" },
 	{ UL_("ASYLUM Music Format"),                "amf" },
 	{ UL_("DSMI Advanced Music Format"),         "amf" },

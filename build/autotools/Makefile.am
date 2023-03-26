@@ -363,6 +363,7 @@ MPT_FILES_SOUNDLIB += soundlib/ITCompression.cpp
 MPT_FILES_SOUNDLIB += soundlib/ITCompression.h
 MPT_FILES_SOUNDLIB += soundlib/ITTools.cpp
 MPT_FILES_SOUNDLIB += soundlib/ITTools.h
+MPT_FILES_SOUNDLIB += soundlib/Load_667.cpp
 MPT_FILES_SOUNDLIB += soundlib/Load_669.cpp
 MPT_FILES_SOUNDLIB += soundlib/Load_amf.cpp
 MPT_FILES_SOUNDLIB += soundlib/Load_ams.cpp

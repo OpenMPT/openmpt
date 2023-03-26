@@ -21,6 +21,7 @@ Root: HKLM; Subkey: "SOFTWARE\Classes\Applications\OpenMPT.exe\SupportedTypes"; 
 Root: HKLM; Subkey: "SOFTWARE\Classes\Applications\OpenMPT.exe\SupportedTypes"; ValueType: string; ValueName: ".xmz"; ValueData: ""
 Root: HKLM; Subkey: "SOFTWARE\Classes\Applications\OpenMPT.exe\SupportedTypes"; ValueType: string; ValueName: ".itz"; ValueData: ""
 Root: HKLM; Subkey: "SOFTWARE\Classes\Applications\OpenMPT.exe\SupportedTypes"; ValueType: string; ValueName: ".mptmz"; ValueData: ""
+Root: HKLM; Subkey: "SOFTWARE\Classes\Applications\OpenMPT.exe\SupportedTypes"; ValueType: string; ValueName: ".667"; ValueData: ""
 Root: HKLM; Subkey: "SOFTWARE\Classes\Applications\OpenMPT.exe\SupportedTypes"; ValueType: string; ValueName: ".669"; ValueData: ""
 Root: HKLM; Subkey: "SOFTWARE\Classes\Applications\OpenMPT.exe\SupportedTypes"; ValueType: string; ValueName: ".amf"; ValueData: ""
 Root: HKLM; Subkey: "SOFTWARE\Classes\Applications\OpenMPT.exe\SupportedTypes"; ValueType: string; ValueName: ".ams"; ValueData: ""

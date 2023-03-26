@@ -112,6 +112,7 @@ LOCAL_SRC_FILES += \
 	soundlib/InstrumentExtensions.cpp \
 	soundlib/ITCompression.cpp \
 	soundlib/ITTools.cpp \
+	soundlib/Load_667.cpp \
 	soundlib/Load_669.cpp \
 	soundlib/Load_amf.cpp \
 	soundlib/Load_ams.cpp \
