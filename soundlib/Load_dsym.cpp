@@ -11,18 +11,20 @@
 #include "stdafx.h"
 #include "Loaders.h"
 #include "BitReader.h"
+#include "mpt/endian/int24.hpp"
 
 OPENMPT_NAMESPACE_BEGIN
 
 struct DSymFileHeader
 {
+	using uint24le = mpt::uint24le;
+
 	char     magic[8];
 	uint8le  version;      // 0 / 1
 	uint8le  numChannels;  // 1...8
 	uint16le numOrders;    // 0...4096
 	uint16le numTracks;    // 0...4096
-	uint16le infoLenLo;
-	uint8le  infoLenHi;
+	uint24le infoLen;
 
 	bool Validate() const
 	{
@@ -591,7 +593,7 @@ bool CSoundFile::ReadDSym(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 
-	if(const uint32 infoLen = fileHeader.infoLenLo | (fileHeader.infoLenHi << 16); infoLen > 0)
+	if(const uint32 infoLen = fileHeader.infoLen.get(); infoLen > 0)
 	{
 		std::vector<std::byte> infoData;
 		if(!ReadDSymChunk(file, infoData, infoLen))
