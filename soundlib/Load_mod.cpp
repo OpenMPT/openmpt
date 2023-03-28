@@ -497,17 +497,33 @@ MPT_BINARY_STRUCT(PT36InfoChunk, 64)
 
 
 // Check if header magic equals a given string.
-static bool IsMagic(const char *magic1, const char (&magic2)[5])
+static bool IsMagic(const char *magic1, const char (&magic2)[5]) noexcept
 {
 	return std::memcmp(magic1, magic2, 4) == 0;
 }
 
 
-static uint32 ReadSample(FileReader &file, MODSampleHeader &sampleHeader, ModSample &sample, mpt::charbuf<MAX_SAMPLENAME> &sampleName, bool is4Chn)
+// For .DTM files from Apocalypse Abyss, where the first 2108 bytes are swapped
+template<typename T, typename TFileReader>
+static T ReadAndSwap(TFileReader &file, const bool swapBytes)
 {
-	file.ReadStruct(sampleHeader);
-	sampleHeader.ConvertToMPT(sample, is4Chn);
+	T value;
+	if(file.Read(value) && swapBytes)
+	{
+		static_assert(sizeof(value) % 2u == 0);
+		auto byteView = mpt::as_raw_memory(value);
+		for(size_t i = 0; i < sizeof(T); i += 2)
+		{
+			std::swap(byteView[i], byteView[i + 1]);
+		}
+	}
+	return value;
+}
 
+
+static uint32 ReadSample(const MODSampleHeader &sampleHeader, ModSample &sample, mpt::charbuf<MAX_SAMPLENAME> &sampleName, bool is4Chn)
+{
+	sampleHeader.ConvertToMPT(sample, is4Chn);
 	sampleName = mpt::String::ReadBuf(mpt::String::spacePadded, sampleHeader.name);
 	// Get rid of weird characters in sample names.
 	for(auto &c : sampleName.buf)
@@ -689,6 +705,7 @@ struct MODMagicResult
 	bool isStartrekker          = false;
 	bool isGenericMultiChannel  = false;
 	bool setMODVBlankTiming     = false;
+	bool swapBytes              = false;
 };
 
 
@@ -760,6 +777,11 @@ static bool CheckMODMagic(const char magic[4], MODMagicResult &result)
 		// TDZx - TakeTracker (only TDZ1-TDZ3 should exist, but historically this code only supported 4-9 channels, so we keep those for the unlikely case that they were actually used for something)
 		result.madeWithTracker = UL_("TakeTracker");
 		result.numChannels = magic[3] - '0';
+	} else if(IsMagic(magic, ".M.K"))
+	{
+		// Hacked .DMF files from the game "Apocalypse Abyss"
+		result.numChannels = 4;
+		result.swapBytes = true;
 	} else
 	{
 		return false;
@@ -787,8 +809,7 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderMOD(MemoryFileReader file, co
 	uint32 invalidBytes = 0;
 	for(SAMPLEINDEX smp = 1; smp <= 31; smp++)
 	{
-		MODSampleHeader sampleHeader;
-		file.ReadStruct(sampleHeader);
+		MODSampleHeader sampleHeader = ReadAndSwap<MODSampleHeader>(file, modMagicResult.swapBytes);
 		invalidBytes += sampleHeader.GetInvalidByteScore();
 	}
 	if(invalidBytes > modMagicResult.invalidByteThreshold)
@@ -847,7 +868,8 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Reading song title
 	file.Seek(0);
-	file.ReadString<mpt::String::spacePadded>(m_songName, 20);
+	const auto songTitle = ReadAndSwap<std::array<char, 20>>(file, modMagicResult.swapBytes);
+	m_songName = mpt::String::ReadBuf(mpt::String::spacePadded, songTitle);
 
 	// Load Sample Headers
 	SmpLength totalSampleLen = 0, wowSampleLen = 0;
@@ -855,8 +877,8 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 	uint32 invalidBytes = 0;
 	for(SAMPLEINDEX smp = 1; smp <= 31; smp++)
 	{
-		MODSampleHeader sampleHeader;
-		invalidBytes += ReadSample(file, sampleHeader, Samples[smp], m_szNames[smp], m_nChannels == 4);
+		MODSampleHeader sampleHeader = ReadAndSwap<MODSampleHeader>(file, modMagicResult.swapBytes);
+		invalidBytes += ReadSample(sampleHeader, Samples[smp], m_szNames[smp], m_nChannels == 4);
 		totalSampleLen += Samples[smp].nLength;
 
 		if(isHMNT)
@@ -887,8 +909,7 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Read order information
-	MODFileHeader fileHeader;
-	file.ReadStruct(fileHeader);
+	const MODFileHeader fileHeader = ReadAndSwap<MODFileHeader>(file, modMagicResult.swapBytes);
 
 	file.Seek(modMagicResult.patternDataOffset);
 
@@ -981,7 +1002,8 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 			for(uint32 i = 0; i < 256; i++)
 			{
 				ModCommand m;
-				const auto [command, param]= ReadMODPatternEntry(file, m);
+				const auto data = ReadAndSwap<std::array<uint8, 4>>(file, modMagicResult.swapBytes && pat == 0);
+				const auto [command, param] = ReadMODPatternEntry(data, m);
 				if(!m.IsAmigaNote())
 				{
 					isNoiseTracker = onlyAmigaNotes = false;
@@ -1061,7 +1083,8 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 			for(CHANNELINDEX chn = 0; chn < readChannels; chn++)
 			{
 				ModCommand &m = rowBase[chn];
-				auto [command, param] = ReadMODPatternEntry(file, m);
+				const auto data = ReadAndSwap<std::array<uint8, 4>>(file, modMagicResult.swapBytes && pat == 0);
+				auto [command, param] = ReadMODPatternEntry(data, m);
 
 				if(command || param)
 				{
@@ -1502,7 +1525,8 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 	for(SAMPLEINDEX smp = 1; smp <= 15; smp++)
 	{
 		MODSampleHeader sampleHeader;
-		ReadSample(file, sampleHeader, Samples[smp], m_szNames[smp], true);
+		file.ReadStruct(sampleHeader);
+		ReadSample(sampleHeader, Samples[smp], m_szNames[smp], true);
 
 		totalSampleLen += Samples[smp].nLength;
 
@@ -1935,7 +1959,8 @@ bool CSoundFile::ReadICE(FileReader &file, ModLoadingFlags loadFlags)
 	for(SAMPLEINDEX smp = 1; smp <= 31; smp++)
 	{
 		MODSampleHeader sampleHeader;
-		invalidBytes += ReadSample(file, sampleHeader, Samples[smp], m_szNames[smp], true);
+		file.ReadStruct(sampleHeader);
+		invalidBytes += ReadSample(sampleHeader, Samples[smp], m_szNames[smp], true);
 	}
 	if(invalidBytes > MODSampleHeader::INVALID_BYTE_THRESHOLD)
 	{
