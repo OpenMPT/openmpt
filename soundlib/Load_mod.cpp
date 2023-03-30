@@ -811,8 +811,6 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 		return false;
 	}
 
-	InitializeGlobals(MOD_TYPE_MOD);
-
 	MODMagicResult modMagicResult;
 	if(!CheckMODMagic(magic, modMagicResult)
 	   || modMagicResult.numChannels < 1
@@ -826,6 +824,7 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 
+	InitializeGlobals(MOD_TYPE_MOD);
 	m_nChannels = modMagicResult.numChannels;
 
 	bool isNoiseTracker = modMagicResult.isNoiseTracker;
