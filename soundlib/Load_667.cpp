@@ -115,7 +115,7 @@ bool CSoundFile::Read667(FileReader &file, ModLoadingFlags loadFlags)
 	if(loadFlags & loadPatternData)
 	{
 		const auto patternOffset = file.GetPosition();
-		bool leftChn = false, righChn = false;
+		bool leftChn = false, rightChn = false;
 		Patterns.ResizeArray(128);
 		for(PATTERNINDEX pat = 0; pat < 128; pat++)
 		{
@@ -167,7 +167,7 @@ bool CSoundFile::Read667(FileReader &file, ModLoadingFlags loadFlags)
 						return false;
 					rowData[b].note = NOTE_MIN + 12 + (note & 0x0F) + (note >> 4) * 12;
 					if(b % 2u)
-						righChn = true;
+						rightChn = true;
 					else
 						leftChn = true;
 				} else
@@ -176,7 +176,7 @@ bool CSoundFile::Read667(FileReader &file, ModLoadingFlags loadFlags)
 				}
 			}
 		}
-		if(leftChn && righChn)
+		if(leftChn && rightChn)
 		{
 			for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
 			{
@@ -189,7 +189,7 @@ bool CSoundFile::Read667(FileReader &file, ModLoadingFlags loadFlags)
 	m_modFormat.type = UL_("667");
 	m_modFormat.madeWithTracker = UL_("Composer 667");
 	m_modFormat.charset = mpt::Charset::CP437;
-	
+
 	return true;
 }
 
