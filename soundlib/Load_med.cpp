@@ -977,6 +977,11 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 				ins.VolEnv.dwFlags.set(ENV_ENABLED);
 				needInstruments = true;
 			}
+			if(size > offsetof(MMDInstrExt, defaultPitch) && instrExt.defaultPitch != 0)
+			{
+				ins.NoteMap[24] = instrExt.defaultPitch + NOTE_MIN + 23;
+				needInstruments = true;
+			}
 			if(size > offsetof(MMDInstrExt, volume))
 				ins.nGlobalVol = (instrExt.volume + 1u) / 2u;
 			if(size > offsetof(MMDInstrExt, midiBank))
@@ -1294,19 +1299,19 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 			CHANNELINDEX numTracks;
 			ROWINDEX numRows;
 			std::string patName;
-			int transpose;
+			int transpose = NOTE_MIN + 47 + songHeader.playTranspose;
 			FileReader cmdExt;
 
 			if(version < 1)
 			{
-				transpose = NOTE_MIN + 47;
 				MMD0PatternHeader patHeader;
 				file.ReadStruct(patHeader);
 				numTracks = patHeader.numTracks;
 				numRows = patHeader.numRows + 1;
 			} else
 			{
-				transpose = NOTE_MIN + (version <= 2 ? 47 : 23) + songHeader.playTranspose;
+				if(version > 2)
+					transpose -= 24;
 				MMD1PatternHeader patHeader;
 				file.ReadStruct(patHeader);
 				numTracks = patHeader.numTracks;
