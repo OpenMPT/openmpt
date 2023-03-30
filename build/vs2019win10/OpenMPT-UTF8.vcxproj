@@ -2152,6 +2152,7 @@
     <ClCompile Include="..\..\soundlib\Load_ult.cpp" />
     <ClCompile Include="..\..\soundlib\Load_wav.cpp" />
     <ClCompile Include="..\..\soundlib\Load_xm.cpp" />
+    <ClCompile Include="..\..\soundlib\Load_xmf.cpp" />
     <ClCompile Include="..\..\soundlib\MIDIEvents.cpp" />
     <ClCompile Include="..\..\soundlib\MIDIMacros.cpp" />
     <ClCompile Include="..\..\soundlib\MPEGFrame.cpp" />

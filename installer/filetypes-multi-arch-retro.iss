@@ -65,6 +65,7 @@ Root: HKLM; Subkey: "SOFTWARE\Classes\Applications\OpenMPT.exe\SupportedTypes"; 
 Root: HKLM; Subkey: "SOFTWARE\Classes\Applications\OpenMPT.exe\SupportedTypes"; ValueType: string; ValueName: ".ult"; ValueData: ""
 Root: HKLM; Subkey: "SOFTWARE\Classes\Applications\OpenMPT.exe\SupportedTypes"; ValueType: string; ValueName: ".umx"; ValueData: ""
 Root: HKLM; Subkey: "SOFTWARE\Classes\Applications\OpenMPT.exe\SupportedTypes"; ValueType: string; ValueName: ".wow"; ValueData: ""
+Root: HKLM; Subkey: "SOFTWARE\Classes\Applications\OpenMPT.exe\SupportedTypes"; ValueType: string; ValueName: ".xmf"; ValueData: ""
 
 Root: HKLM; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\OpenMPT.exe"; ValueType: string; ValueName: ""; ValueData: "{app}\bin\{code:CodeGetDefaultArch|}\OpenMPT.exe"; Flags: deletekey uninsdeletekey
 

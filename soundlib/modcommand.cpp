@@ -30,7 +30,7 @@ static constexpr EffectType effectTypes[] =
 	EffectType::Normal, EffectType::Normal,  EffectType::Normal, EffectType::Pitch,
 	EffectType::Pitch,  EffectType::Normal,  EffectType::Pitch,  EffectType::Pitch,
 	EffectType::Pitch,  EffectType::Pitch,   EffectType::Normal, EffectType::Normal,
-	EffectType::Normal, EffectType::Normal,
+	EffectType::Normal, EffectType::Normal,  EffectType::Volume
 };
 
 static_assert(std::size(effectTypes) == MAX_EFFECTS);
@@ -146,6 +146,11 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 	{
 		command = CMD_S3MCMDEX;
 		param = 0x9F;
+	}
+	if(command == CMD_VOLUME8)
+	{
+		command = CMD_VOLUME;
+		param = static_cast<PARAM>((param + 3u) / 4u);
 	}
 
 	// helper variables
@@ -1157,6 +1162,7 @@ size_t ModCommand::GetEffectWeight(COMMAND cmd)
 		CMD_VOLUMESLIDE,
 		CMD_VIBRATOVOL,
 		CMD_VOLUME,
+		CMD_VOLUME8,
 		CMD_DIGIREVERSESAMPLE,
 		CMD_REVERSEOFFSET,
 		CMD_OFFSETPERCENTAGE,
@@ -1203,6 +1209,10 @@ std::pair<VolumeCommand, ModCommand::VOL> ModCommand::ConvertToVolCommand(const 
 		break;
 	case CMD_VOLUME:
 		return {VOLCMD_VOLUME, std::min(param, PARAM(64))};
+	case CMD_VOLUME8:
+		if(!force && (param & 3))
+			break;
+		return {VOLCMD_VOLUME, static_cast<VOL>((param + 3u) / 4u)};
 	case CMD_PORTAMENTOUP:
 		// if not force, reject when dividing causes loss of data in LSB, or if the final value is too
 		// large to fit. (volume column Ex/Fx are four times stronger than effect column)

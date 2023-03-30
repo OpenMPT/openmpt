@@ -2632,12 +2632,12 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 	// Check for volume commands
 	uint8 vol = 0xFF;
 	if(chn.rowCommand.volcmd == VOLCMD_VOLUME)
-	{
 		vol = std::min(chn.rowCommand.vol, uint8(64));
-	} else if(chn.rowCommand.command == CMD_VOLUME)
-	{
+	else if(chn.rowCommand.command == CMD_VOLUME)
 		vol = std::min(chn.rowCommand.param, uint8(64));
-	}
+	else if(chn.rowCommand.command == CMD_VOLUME8)
+		vol = static_cast<uint8>((chn.rowCommand.param + 3u) / 4u);
+
 	const bool hasVolCommand = (vol != 0xFF);
 
 	if(m_playBehaviour[kMIDICCBugEmulation])

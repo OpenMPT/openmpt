@@ -108,6 +108,7 @@ enum EffectCommand : uint8
 	CMD_DBMECHO             = 43, // DBM enable/disable echo
 	CMD_OFFSETPERCENTAGE    = 44, // PLM Percentage Offset
 	CMD_DIGIREVERSESAMPLE   = 45, // DIGI reverse sample
+	CMD_VOLUME8             = 46, // 8-bit volume
 	MAX_EFFECTS
 };
 

@@ -882,6 +882,7 @@ public:
 	static ProbeResult ProbeFileHeaderSymMOD(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderULT(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderXM(MemoryFileReader file, const uint64 *pfilesize);
+	static ProbeResult ProbeFileHeaderXMF(MemoryFileReader file, const uint64 *pfilesize);
 
 	static ProbeResult ProbeFileHeaderMID(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderUAX(MemoryFileReader file, const uint64 *pfilesize);
@@ -934,6 +935,7 @@ public:
 	bool ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadULT(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadXM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadXMF(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 
 	bool ReadMID(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadUAX(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);

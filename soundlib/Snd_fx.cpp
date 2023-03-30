@@ -801,6 +801,9 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			case CMD_VOLUME:
 				memory.chnSettings[nChn].vol = param;
 				break;
+			case CMD_VOLUME8:
+				memory.chnSettings[nChn].vol = static_cast<uint8>((param + 3u) / 4u);
+				break;
 			// Global Volume
 			case CMD_GLOBALVOLUME:
 				if(!(GetType() & GLOBALVOL_7BIT_FORMATS) && param < 128) param *= 2;
@@ -1091,12 +1094,11 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				}
 
 				if(m.command == CMD_VOLUME)
-				{
-					chn.nVolume = m.param * 4;
-				} else if(m.volcmd == VOLCMD_VOLUME)
-				{
-					chn.nVolume = m.vol * 4;
-				}
+					chn.nVolume = m.param * 4u;
+				else if(m.command == CMD_VOLUME8)
+					chn.nVolume = m.param;
+				else if(m.volcmd == VOLCMD_VOLUME)
+					chn.nVolume = m.vol * 4u;
 				
 				if(chn.pModSample && !stopNote)
 				{
@@ -3140,6 +3142,13 @@ bool CSoundFile::ProcessEffects()
 			if(m_SongFlags[SONG_FIRSTTICK])
 			{
 				chn.nVolume = (param < 64) ? param * 4 : 256;
+				chn.dwFlags.set(CHN_FASTVOLRAMP);
+			}
+			break;
+		case CMD_VOLUME8:
+			if(m_SongFlags[SONG_FIRSTTICK])
+			{
+				chn.nVolume = param;
 				chn.dwFlags.set(CHN_FASTVOLRAMP);
 			}
 			break;

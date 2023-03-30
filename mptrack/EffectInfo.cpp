@@ -127,6 +127,7 @@ static constexpr MPTEffectInfo gFXInfo[] =
 	{CMD_FINETUNE_SMOOTH,	0,0,	0,	MOD_TYPE_MPT,	_T("Finetune (Smooth)")},
 	{CMD_DUMMY,	0,0,	0,	MOD_TYPE_NONE,	_T("Empty") },
 	{CMD_DIGIREVERSESAMPLE, 0, 0, 0, MOD_TYPE_NONE, _T("Reverse Sample")}, // DIGI effect
+	{CMD_VOLUME8, 0,0, 0, MOD_TYPE_NONE, _T("Set 8-bit Volume")},
 };
 
 

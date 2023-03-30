@@ -34,21 +34,21 @@ void CSoundFile::ConvertModCommand(ModCommand &m, const uint8 command, const uin
 	m.param = param;
 	switch(command)
 	{
-	case 0x00:	if(m.param) m.command = CMD_ARPEGGIO; break;
-	case 0x01:	m.command = CMD_PORTAMENTOUP; break;
-	case 0x02:	m.command = CMD_PORTAMENTODOWN; break;
-	case 0x03:	m.command = CMD_TONEPORTAMENTO; break;
-	case 0x04:	m.command = CMD_VIBRATO; break;
-	case 0x05:	m.command = CMD_TONEPORTAVOL; break;
-	case 0x06:	m.command = CMD_VIBRATOVOL; break;
-	case 0x07:	m.command = CMD_TREMOLO; break;
-	case 0x08:	m.command = CMD_PANNING8; break;
-	case 0x09:	m.command = CMD_OFFSET; break;
-	case 0x0A:	m.command = CMD_VOLUMESLIDE; break;
-	case 0x0B:	m.command = CMD_POSITIONJUMP; break;
-	case 0x0C:	m.command = CMD_VOLUME; break;
-	case 0x0D:	m.command = CMD_PATTERNBREAK; m.param = ((m.param >> 4) * 10) + (m.param & 0x0F); break;
-	case 0x0E:	m.command = CMD_MODCMDEX; break;
+	case 0x00: m.command = m.param ? CMD_ARPEGGIO : CMD_NONE; break;
+	case 0x01: m.command = CMD_PORTAMENTOUP; break;
+	case 0x02: m.command = CMD_PORTAMENTODOWN; break;
+	case 0x03: m.command = CMD_TONEPORTAMENTO; break;
+	case 0x04: m.command = CMD_VIBRATO; break;
+	case 0x05: m.command = CMD_TONEPORTAVOL; break;
+	case 0x06: m.command = CMD_VIBRATOVOL; break;
+	case 0x07: m.command = CMD_TREMOLO; break;
+	case 0x08: m.command = CMD_PANNING8; break;
+	case 0x09: m.command = CMD_OFFSET; break;
+	case 0x0A: m.command = CMD_VOLUMESLIDE; break;
+	case 0x0B: m.command = CMD_POSITIONJUMP; break;
+	case 0x0C: m.command = CMD_VOLUME; break;
+	case 0x0D: m.command = CMD_PATTERNBREAK; m.param = ((m.param >> 4) * 10) + (m.param & 0x0F); break;
+	case 0x0E: m.command = CMD_MODCMDEX; break;
 	case 0x0F:
 		// For a very long time, this code imported 0x20 as CMD_SPEED for MOD files, but this seems to contradict
 		// pretty much the majority of other MOD player out there.
@@ -61,21 +61,21 @@ void CSoundFile::ConvertModCommand(ModCommand &m, const uint8 command, const uin
 		break;
 
 	// Extension for XM extended effects
-	case 'G' - 55:	m.command = CMD_GLOBALVOLUME; break;  //16
-	case 'H' - 55:	m.command = CMD_GLOBALVOLSLIDE; break;
-	case 'K' - 55:	m.command = CMD_KEYOFF; break;
-	case 'L' - 55:	m.command = CMD_SETENVPOSITION; break;
-	case 'P' - 55:	m.command = CMD_PANNINGSLIDE; break;
-	case 'R' - 55:	m.command = CMD_RETRIG; break;
-	case 'T' - 55:	m.command = CMD_TREMOR; break;
-	case 'W' - 55:	m.command = CMD_DUMMY; break;
-	case 'X' - 55:	m.command = CMD_XFINEPORTAUPDOWN;	break;
-	case 'Y' - 55:	m.command = CMD_PANBRELLO; break;   // 34
-	case 'Z' - 55:	m.command = CMD_MIDI; break;        // 35
-	case '\\' - 56:	m.command = CMD_SMOOTHMIDI; break;  // 36 - note: this is actually displayed as "-" in FT2, but seems to be doing nothing.
-	case 37:		m.command = CMD_SMOOTHMIDI; break;  // BeRoTracker uses this for smooth MIDI macros for some reason; in old OpenMPT versions this was reserved for the unimplemented "velocity" command
-	case '#' + 3:	m.command = CMD_XPARAM; break;      // 38
-	default:		m.command = CMD_NONE;
+	case 'G' - 55: m.command = CMD_GLOBALVOLUME; break;  //16
+	case 'H' - 55: m.command = CMD_GLOBALVOLSLIDE; break;
+	case 'K' - 55: m.command = CMD_KEYOFF; break;
+	case 'L' - 55: m.command = CMD_SETENVPOSITION; break;
+	case 'P' - 55: m.command = CMD_PANNINGSLIDE; break;
+	case 'R' - 55: m.command = CMD_RETRIG; break;
+	case 'T' - 55: m.command = CMD_TREMOR; break;
+	case 'W' - 55: m.command = CMD_DUMMY; break;
+	case 'X' - 55: m.command = CMD_XFINEPORTAUPDOWN;	break;
+	case 'Y' - 55: m.command = CMD_PANBRELLO; break;   // 34
+	case 'Z' - 55: m.command = CMD_MIDI; break;        // 35
+	case '\\' - 56: m.command = CMD_SMOOTHMIDI; break;  // 36 - note: this is actually displayed as "-" in FT2, but seems to be doing nothing.
+	case 37:        m.command = CMD_SMOOTHMIDI; break;  // BeRoTracker uses this for smooth MIDI macros for some reason; in old OpenMPT versions this was reserved for the unimplemented "velocity" command
+	case '#' + 3:   m.command = CMD_XPARAM; break;      // 38
+	default:        m.command = CMD_NONE;
 	}
 }
 
@@ -185,6 +185,10 @@ void CSoundFile::ModSaveCommand(const ModCommand &source, uint8 &command, uint8 
 			ModSaveCommand(mConv, command, param, toXM, compatibilityExport);
 		}
 		return;
+	case CMD_VOLUME8:
+		command = 0x0C;
+		param = static_cast<uint8>((param + 3u) / 4u);
+		break;
 	default:
 		command = param = 0;
 	}

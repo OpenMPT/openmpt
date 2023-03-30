@@ -1277,6 +1277,9 @@
     <ClCompile Include="..\..\soundlib\Load_xm.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_xmf.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\soundlib\MIDIEvents.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>

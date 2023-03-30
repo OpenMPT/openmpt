@@ -90,6 +90,7 @@ Root: HKLM; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAsso
 Root: HKLM; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".ult"; ValueData: {#OpenMPTFile}; Components: {#Component}
 Root: HKLM; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".umx"; ValueData: {#OpenMPTFile}; Components: {#Component}
 Root: HKLM; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".wow"; ValueData: {#OpenMPTFile}; Components: {#Component}
+Root: HKLM; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".xmf"; ValueData: {#OpenMPTFile}; Components: {#Component}
 
 Root: HKLM; Subkey: "SOFTWARE\RegisteredApplications"; ValueType: string; ValueName: {#OpenMPTarchFriendly}; ValueData: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities"; Flags: uninsdeletevalue; Components: {#Component}
 

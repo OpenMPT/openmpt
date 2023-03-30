@@ -404,6 +404,7 @@ MPT_FILES_SOUNDLIB += soundlib/Load_uax.cpp
 MPT_FILES_SOUNDLIB += soundlib/Load_ult.cpp
 MPT_FILES_SOUNDLIB += soundlib/Load_wav.cpp
 MPT_FILES_SOUNDLIB += soundlib/Load_xm.cpp
+MPT_FILES_SOUNDLIB += soundlib/Load_xmf.cpp
 MPT_FILES_SOUNDLIB += soundlib/Message.cpp
 MPT_FILES_SOUNDLIB += soundlib/Message.h
 MPT_FILES_SOUNDLIB += soundlib/MIDIEvents.cpp

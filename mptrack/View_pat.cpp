@@ -3429,6 +3429,8 @@ void CViewPattern::OnPatternAmplify()
 
 		if(m.command == CMD_VOLUME)
 			chvol[chn] = std::min(m.param, ModCommand::PARAM(64));
+		else if(m.command == CMD_VOLUME8)
+			chvol[chn] = static_cast<uint8>((m.param + 3u) / 4u);
 		else if(m.volcmd == VOLCMD_VOLUME)
 			chvol[chn] = m.vol;
 		else if(m.instr != 0)
@@ -3446,6 +3448,8 @@ void CViewPattern::OnPatternAmplify()
 
 		if(m.command == CMD_VOLUME)
 			chvol[chn] = std::min(m.param, ModCommand::PARAM(64));
+		else if(m.command == CMD_VOLUME8)
+			chvol[chn] = static_cast<uint8>((m.param + 3u) / 4u);
 		else if(m.volcmd == VOLCMD_VOLUME)
 			chvol[chn] = m.vol;
 		else if(m.instr != 0)
@@ -3474,6 +3478,11 @@ void CViewPattern::OnPatternAmplify()
 
 		if(m_Selection.ContainsHorizontal(PatternCursor(0, chn, PatternCursor::effectColumn)) || m_Selection.ContainsHorizontal(PatternCursor(0, chn, PatternCursor::paramColumn)))
 		{
+			if(m.command == CMD_VOLUME8)
+			{
+				m.command = CMD_VOLUME;
+				m.param = static_cast<ModCommand::PARAM>((m.param + 3u) / 4u);
+			}
 			if(m.command == CMD_VOLUME && m.param <= 64)
 			{
 				int vol = m.param;
@@ -5610,6 +5619,8 @@ void CViewPattern::PreviewNote(ROWINDEX row, CHANNELINDEX channel)
 		int vol = -1;
 		if(m.command == CMD_VOLUME)
 			vol = m.param * 4u;
+		else if(m.command == CMD_VOLUME8)
+			vol = m.param;
 		else if(m.volcmd == VOLCMD_VOLUME)
 			vol = m.vol * 4u;
 		// Note-off any previews from this channel first

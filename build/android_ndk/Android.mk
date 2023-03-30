@@ -152,6 +152,7 @@ LOCAL_SRC_FILES += \
 	soundlib/Load_uax.cpp \
 	soundlib/Load_wav.cpp \
 	soundlib/Load_xm.cpp \
+	soundlib/Load_xmf.cpp \
 	soundlib/Message.cpp \
 	soundlib/MIDIEvents.cpp \
 	soundlib/MIDIMacros.cpp \

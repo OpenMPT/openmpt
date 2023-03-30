@@ -112,7 +112,7 @@ static std::pair<EffectCommand, uint8> TranslateULTCommands(const uint8 e, uint8
 		CMD_OFFSET,
 		CMD_VOLUMESLIDE,
 		CMD_PANNING8,
-		CMD_VOLUME,
+		CMD_VOLUME8,
 		CMD_PATTERNBREAK,
 		CMD_NONE,  // extended effects, processed separately
 		CMD_SPEED,
@@ -149,9 +149,6 @@ static std::pair<EffectCommand, uint8> TranslateULTCommands(const uint8 e, uint8
 		break;
 	case 0x0B:
 		param = (param & 0x0F) * 0x11;
-		break;
-	case 0x0C: // volume
-		param /= 4u;
 		break;
 	case 0x0D: // pattern break
 		param = 10 * (param >> 4) + (param & 0x0F);
