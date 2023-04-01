@@ -1643,7 +1643,7 @@ void CViewGlobals::OnInsertSlot()
 			}
 		}
 
-		m_CbnPlugin.SetCurSel(m_nCurrentPlugin + 1);
+		m_CbnPlugin.SetCurSel(m_nCurrentPlugin);
 		OnPluginChanged();
 		GetDocument()->UpdateAllViews(nullptr, PluginHint().Names().Info());
 
