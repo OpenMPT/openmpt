@@ -239,7 +239,7 @@ void COrderList::UpdateScrollInfo()
 		SCROLLINFO info;
 		UINT nPage;
 
-		int nMax = Order().GetLengthTailTrimmed();
+		int nMax = Order().GetLengthTailTrimmed() + std::max(ORDERINDEX(1), GetMargins()) - 1;
 
 		GetScrollInfo(SB_HORZ, &info, SIF_PAGE | SIF_RANGE);
 		info.fMask = SIF_PAGE | SIF_RANGE;
