@@ -127,18 +127,18 @@ bool CSoundFile::ReadXMF(FileReader &file, ModLoadingFlags loadFlags)
 	file.Rewind();
 	if(file.ReadUint8() != 0x03)
 		return false;
-	if(!file.CanRead(256 * sizeof(XMFSampleHeader) + 256 + 2))
+	if(!file.CanRead(256 * sizeof(XMFSampleHeader) + 256 + 3))
 		return false;
 	static_assert(MAX_SAMPLES > 256);
 	SAMPLEINDEX numSamples = 0;
-	for(SAMPLEINDEX smp = 0; smp < 256; smp++)
+	for(SAMPLEINDEX smp = 1; smp <= 256; smp++)
 	{
 		XMFSampleHeader sampleHeader;
 		file.ReadStruct(sampleHeader);
 		if(!sampleHeader.IsValid())
 			return false;
 		if(sampleHeader.HasSampleData())
-			numSamples = smp + 1;
+			numSamples = smp;
 	}
 	if(!numSamples)
 		return false;
@@ -177,26 +177,26 @@ bool CSoundFile::ReadXMF(FileReader &file, ModLoadingFlags loadFlags)
 		ChnSettings[chn].nPan = file.ReadUint8() * 0x11;
 	}
 
-	if(loadFlags & loadPatternData)
+	Patterns.ResizeArray(numPatterns);
+	for(PATTERNINDEX pat = 0; pat < numPatterns; pat++)
 	{
-		Patterns.ResizeArray(numPatterns);
-		ModCommand dummy;
-		for(PATTERNINDEX pat = 0; pat < numPatterns; pat++)
+		if(!(loadFlags & loadPatternData) || !Patterns.Insert(pat, 64))
 		{
-			if(!Patterns.Insert(pat, 64))
-				break;
-			for(ROWINDEX row = 0; row < 64; row++)
+			file.Skip(m_nChannels * 64 * 6);
+			continue;
+		}
+		ModCommand dummy;
+		for(ROWINDEX row = 0; row < 64; row++)
+		{
+			for(ModCommand &m : Patterns[pat].GetRow(row))
 			{
-				for(ModCommand &m : Patterns[pat].GetRow(row))
-				{
-					const auto data = file.ReadArray<uint8, 6>();
-					if(data[0] > 0 && data[0] <= 84)
-						m.note = NOTE_MIN + 35 + data[0];
-					m.instr = data[1];
-					if(!TranslateXMFEffect(m, data[2], data[5]) || !TranslateXMFEffect(dummy, data[3], data[4]))
-						return false;
-					m.FillInTwoCommands(m.command, m.param, dummy.command, dummy.param);
-				}
+				const auto data = file.ReadArray<uint8, 6>();
+				if(data[0] > 0 && data[0] <= 77)
+					m.note = NOTE_MIN + 35 + data[0];
+				m.instr = data[1];
+				if(!TranslateXMFEffect(m, data[2], data[5]) || !TranslateXMFEffect(dummy, data[3], data[4]))
+					return false;
+				m.FillInTwoCommands(m.command, m.param, dummy.command, dummy.param);
 			}
 		}
 	}
