@@ -3087,8 +3087,8 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 	{
 		const ModInstrument *pIns = sndFile.Instruments[ins];
 		VERIFY_EQUAL_NONCONT(pIns->nGlobalVol, 32);
-		VERIFY_EQUAL_NONCONT(pIns->nFadeOut, 1024);
-		VERIFY_EQUAL_NONCONT(pIns->nPan, 64);
+		VERIFY_EQUAL_NONCONT(pIns->nFadeOut, (ins == 1) ? 1023u : 8992u);
+		VERIFY_EQUAL_NONCONT(pIns->nPan, 63);
 		VERIFY_EQUAL_NONCONT(pIns->dwFlags, INS_SETPANNING);
 
 		VERIFY_EQUAL_NONCONT(pIns->nPPS, 8);
@@ -3116,7 +3116,7 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 		VERIFY_EQUAL_NONCONT(pIns->nMidiChannel, 16);
 		VERIFY_EQUAL_NONCONT(pIns->nMidiProgram, 64);
 		VERIFY_EQUAL_NONCONT(pIns->wMidiBank, 2);
-		VERIFY_EQUAL_NONCONT(pIns->midiPWD, ins);
+		VERIFY_EQUAL_NONCONT(pIns->midiPWD, -1);
 
 		VERIFY_EQUAL_NONCONT(pIns->pTuning, sndFile.GetDefaultTuning());
 
