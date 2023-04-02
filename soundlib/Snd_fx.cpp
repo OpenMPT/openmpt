@@ -2708,10 +2708,6 @@ bool CSoundFile::ProcessEffects()
 				// Test case: PTSwapEmpty.mod, PTInstrVolume.mod, SampleSwap.s3m
 				if(!chn.IsSamplePlaying() && (chn.pModSample == nullptr || !chn.pModSample->HasSampleData()))
 					keepInstr = true;
-				// ProTracker Compatibility: Retrigger with lone instrument number causes instant sample change
-				// Test case: InstrSwapRetrigger.mod
-				else if(chn.rowCommand.command == CMD_MODCMDEX && (chn.rowCommand.param & 0xF0) == 0x90)
-					keepInstr = true;
 			}
 
 			// Now it's time for some FT2 crap...
@@ -5691,6 +5687,14 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, int offset)
 			}
 			if(param < 0x100)
 				resetEnv = true;
+		}
+		// ProTracker Compatibility: Retrigger with lone instrument number causes instant sample change
+		// Test case: InstrSwapRetrigger.mod
+		if(m_playBehaviour[kMODSampleSwap] && chn.rowCommand.instr)
+		{
+			auto oldFineTune = chn.nFineTune;
+			InstrumentChange(chn, chn.rowCommand.instr, false, false);
+			chn.nFineTune = oldFineTune;
 		}
 
 		const bool fading = chn.dwFlags[CHN_NOTEFADE];
