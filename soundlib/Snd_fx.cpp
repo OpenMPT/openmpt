@@ -2701,11 +2701,18 @@ bool CSoundFile::ProcessEffects()
 			// Apparently, any note number in a pattern causes instruments to recall their original volume settings - no matter if there's a Note Off next to it or whatever.
 			// Test cases: keyoff+instr.xm, delay.xm
 			bool reloadSampleSettings = (m_playBehaviour[kFT2ReloadSampleSettings] && instr != 0);
-			// ProTracker Compatibility: If a sample was stopped before, lone instrument numbers can retrigger it
-			// Test case: PTSwapEmpty.mod, PTInstrVolume.mod, SampleSwap.s3m
-			bool keepInstr = (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))
-				|| m_playBehaviour[kST3SampleSwap]
-				|| (m_playBehaviour[kMODSampleSwap] && !chn.IsSamplePlaying() && (chn.pModSample == nullptr || !chn.pModSample->HasSampleData()));
+			bool keepInstr = (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) || m_playBehaviour[kST3SampleSwap];
+			if(m_playBehaviour[kMODSampleSwap])
+			{
+				// ProTracker Compatibility: If a sample was stopped before, lone instrument numbers can retrigger it
+				// Test case: PTSwapEmpty.mod, PTInstrVolume.mod, SampleSwap.s3m
+				if(!chn.IsSamplePlaying() && (chn.pModSample == nullptr || !chn.pModSample->HasSampleData()))
+					keepInstr = true;
+				// ProTracker Compatibility: Retrigger with lone instrument number causes instant sample change
+				// Test case: InstrSwapRetrigger.mod
+				else if(chn.rowCommand.command == CMD_MODCMDEX && (chn.rowCommand.param & 0xF0) == 0x90)
+					keepInstr = true;
+			}
 
 			// Now it's time for some FT2 crap...
 			if (GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2))
