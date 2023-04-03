@@ -3711,7 +3711,7 @@ uint32 CSoundFile::CalculateXParam(PATTERNINDEX pat, ROWINDEX row, CHANNELINDEX 
 		if(m->command != CMD_XPARAM)
 			break;
 		
-		if(xmTempoFix && val < 256)
+		if(xmTempoFix && val >= 0x20 && val < 256)
 		{
 			// With XM, 0x20 is the lowest tempo. Anything below changes ticks per row.
 			val -= 0x20;
