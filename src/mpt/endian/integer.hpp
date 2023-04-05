@@ -28,17 +28,13 @@ inline namespace MPT_INLINE_NS {
 
 
 
-template <typename T, mpt::endian endian, std::size_t size, typename Tint = T>
-MPT_CONSTEXPRINLINE std::array<std::byte, size> EndianEncode(T val) noexcept {
+template <typename base_type, mpt::endian endian, typename int_type = base_type>
+MPT_CONSTEXPRINLINE std::array<std::byte, sizeof(base_type)> EndianEncode(base_type val) noexcept {
 	static_assert(endian == mpt::endian::little || endian == mpt::endian::big);
-	static_assert(std::numeric_limits<Tint>::is_integer);
-	static_assert(!std::numeric_limits<Tint>::is_signed);
-	static_assert(sizeof(T) == size);
-	using base_type = T;
-	using int_type = Tint;
-	using unsigned_base_type = typename std::make_unsigned<int_type>::type;
-	unsigned_base_type uval = static_cast<unsigned_base_type>(val);
-	std::array<std::byte, size> data{};
+	static_assert(std::numeric_limits<int_type>::is_integer);
+	using unsigned_int_type = typename std::make_unsigned<int_type>::type;
+	unsigned_int_type uval = static_cast<unsigned_int_type>(static_cast<int_type>(val));
+	std::array<std::byte, sizeof(base_type)> data{};
 	if constexpr (endian == mpt::endian::little) {
 		for (std::size_t i = 0; i < sizeof(base_type); ++i) {
 			data[i] = static_cast<std::byte>(static_cast<uint8>((uval >> (i * 8)) & 0xffu));
@@ -51,27 +47,23 @@ MPT_CONSTEXPRINLINE std::array<std::byte, size> EndianEncode(T val) noexcept {
 	return data;
 }
 
-template <typename T, mpt::endian endian, std::size_t size, typename Tint = T>
-MPT_CONSTEXPRINLINE T EndianDecode(std::array<std::byte, size> data) noexcept {
+template <typename base_type, mpt::endian endian, typename int_type = base_type>
+MPT_CONSTEXPRINLINE base_type EndianDecode(std::array<std::byte, sizeof(base_type)> data) noexcept {
 	static_assert(endian == mpt::endian::little || endian == mpt::endian::big);
-	static_assert(std::numeric_limits<Tint>::is_integer);
-	static_assert(!std::numeric_limits<Tint>::is_signed);
-	static_assert(sizeof(T) == size);
-	using base_type = T;
-	using int_type = Tint;
-	using unsigned_base_type = typename std::make_unsigned<int_type>::type;
+	static_assert(std::numeric_limits<int_type>::is_integer);
+	using unsigned_int_type = typename std::make_unsigned<int_type>::type;
 	base_type val = base_type();
-	unsigned_base_type uval = unsigned_base_type();
+	unsigned_int_type uval = unsigned_int_type();
 	if constexpr (endian == mpt::endian::little) {
 		for (std::size_t i = 0; i < sizeof(base_type); ++i) {
-			uval |= static_cast<unsigned_base_type>(static_cast<unsigned_base_type>(static_cast<uint8>(data[i])) << (i * 8));
+			uval |= static_cast<unsigned_int_type>(static_cast<unsigned_int_type>(static_cast<uint8>(data[i])) << (i * 8));
 		}
 	} else {
 		for (std::size_t i = 0; i < sizeof(base_type); ++i) {
-			uval |= static_cast<unsigned_base_type>(static_cast<unsigned_base_type>(static_cast<uint8>(data[(sizeof(base_type) - 1) - i])) << (i * 8));
+			uval |= static_cast<unsigned_int_type>(static_cast<unsigned_int_type>(static_cast<uint8>(data[(sizeof(base_type) - 1) - i])) << (i * 8));
 		}
 	}
-	val = static_cast<base_type>(uval);
+	val = static_cast<base_type>(static_cast<int_type>(uval));
 	return val;
 }
 
@@ -118,7 +110,7 @@ public:
 				}
 				std::memcpy(data.data(), &val, sizeof(val));
 			} else {
-				data = EndianEncode<base_type, endian, sizeof(base_type), typename std::make_unsigned<int_type>::type>(val);
+				data = EndianEncode<base_type, endian, int_type>(val);
 			}
 		}
 	}
@@ -147,7 +139,7 @@ public:
 				}
 				return val;
 			} else {
-				return EndianDecode<base_type, endian, sizeof(base_type), typename std::make_unsigned<int_type>::type>(data);
+				return EndianDecode<base_type, endian, int_type>(data);
 			}
 		}
 	}
