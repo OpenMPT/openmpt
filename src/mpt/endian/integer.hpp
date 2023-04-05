@@ -29,7 +29,7 @@ inline namespace MPT_INLINE_NS {
 
 
 template <typename base_type, mpt::endian endian, typename int_type = base_type>
-MPT_CONSTEXPRINLINE std::array<std::byte, sizeof(base_type)> EndianEncode(base_type val) noexcept {
+MPT_CONSTEXPRINLINE std::array<std::byte, sizeof(base_type)> EndianEncodeImpl(base_type val) noexcept {
 	static_assert(endian == mpt::endian::little || endian == mpt::endian::big);
 	static_assert(std::numeric_limits<int_type>::is_integer);
 	using unsigned_int_type = typename std::make_unsigned<int_type>::type;
@@ -48,7 +48,12 @@ MPT_CONSTEXPRINLINE std::array<std::byte, sizeof(base_type)> EndianEncode(base_t
 }
 
 template <typename base_type, mpt::endian endian, typename int_type = base_type>
-MPT_CONSTEXPRINLINE base_type EndianDecode(std::array<std::byte, sizeof(base_type)> data) noexcept {
+MPT_CONSTEXPRINLINE std::array<std::byte, sizeof(base_type)> EndianEncode(base_type val) noexcept {
+	return EndianEncodeImpl<base_type, endian, int_type>(val);
+}
+
+template <typename base_type, mpt::endian endian, typename int_type = base_type>
+MPT_CONSTEXPRINLINE base_type EndianDecodeImpl(std::array<std::byte, sizeof(base_type)> data) noexcept {
 	static_assert(endian == mpt::endian::little || endian == mpt::endian::big);
 	static_assert(std::numeric_limits<int_type>::is_integer);
 	using unsigned_int_type = typename std::make_unsigned<int_type>::type;
@@ -65,6 +70,11 @@ MPT_CONSTEXPRINLINE base_type EndianDecode(std::array<std::byte, sizeof(base_typ
 	}
 	val = static_cast<base_type>(static_cast<int_type>(uval));
 	return val;
+}
+
+template <typename base_type, mpt::endian endian, typename int_type = base_type>
+MPT_CONSTEXPRINLINE base_type EndianDecode(std::array<std::byte, sizeof(base_type)> data) noexcept {
+	return EndianDecodeImpl<base_type, endian, int_type>(data);
 }
 
 
