@@ -325,6 +325,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\openmpt123\openmpt123.manifest">
+      <Filter>openmpt123</Filter>
+    </None>
     <None Include="..\vs\win10.manifest">
       <Filter>build\vs</Filter>
     </None>

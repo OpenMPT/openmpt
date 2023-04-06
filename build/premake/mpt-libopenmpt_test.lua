@@ -18,6 +18,9 @@
 		"MPT_WITH_ZLIB",
 	}
 	
+	files {
+		"../../test/libopenmpt_test.manifest",
+	}
   includedirs {
    "../..",
    "../../src",

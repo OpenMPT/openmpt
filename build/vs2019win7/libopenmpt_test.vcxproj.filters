@@ -1516,6 +1516,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\test\libopenmpt_test.manifest">
+      <Filter>test</Filter>
+    </None>
     <None Include="..\vs\win7.manifest">
       <Filter>build\vs</Filter>
     </None>

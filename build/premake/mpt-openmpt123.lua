@@ -16,6 +16,9 @@
 		"MPT_WITH_PORTAUDIO",
 	}
 	
+	files {
+		"../../openmpt123/openmpt123.manifest",
+	}
   includedirs {
    "../..",
    "../../src",

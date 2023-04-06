@@ -318,6 +318,9 @@
       <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <Manifest>
+      <AdditionalManifestFiles>../../test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -343,6 +346,9 @@
       <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <Manifest>
+      <AdditionalManifestFiles>../../test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -373,6 +379,9 @@
       <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <Manifest>
+      <AdditionalManifestFiles>../../test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -402,6 +411,9 @@
       <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <Manifest>
+      <AdditionalManifestFiles>../../test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -433,6 +445,9 @@
       <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <Manifest>
+      <AdditionalManifestFiles>../../test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -463,6 +478,9 @@
       <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <Manifest>
+      <AdditionalManifestFiles>../../test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -488,6 +506,9 @@
       <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <Manifest>
+      <AdditionalManifestFiles>../../test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -512,6 +533,9 @@
       <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <Manifest>
+      <AdditionalManifestFiles>../../test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -542,6 +566,9 @@
       <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <Manifest>
+      <AdditionalManifestFiles>../../test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -571,6 +598,9 @@
       <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <Manifest>
+      <AdditionalManifestFiles>../../test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -602,6 +632,9 @@
       <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <Manifest>
+      <AdditionalManifestFiles>../../test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -632,6 +665,9 @@
       <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <Manifest>
+      <AdditionalManifestFiles>../../test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -1085,6 +1121,9 @@
     <ClCompile Include="..\..\test\mpt_tests_string_transcode.cpp" />
     <ClCompile Include="..\..\test\mpt_tests_uuid.cpp" />
     <ClCompile Include="..\..\test\test.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\test\libopenmpt_test.manifest" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="ext\mpg123.vcxproj">

@@ -295,7 +295,7 @@
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../vs/win81.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win81.manifest;../../test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -325,7 +325,7 @@
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../vs/win81.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win81.manifest;../../test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -360,7 +360,7 @@
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../vs/win81.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win81.manifest;../../test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -394,7 +394,7 @@
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../vs/win81.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win81.manifest;../../test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -430,7 +430,7 @@
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../vs/win81.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win81.manifest;../../test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -465,7 +465,7 @@
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../vs/win81.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win81.manifest;../../test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -494,7 +494,7 @@
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../vs/win81.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win81.manifest;../../test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -523,7 +523,7 @@
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../vs/win81.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win81.manifest;../../test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -558,7 +558,7 @@
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../vs/win81.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win81.manifest;../../test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -592,7 +592,7 @@
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../vs/win81.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win81.manifest;../../test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -628,7 +628,7 @@
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../vs/win81.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win81.manifest;../../test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -663,7 +663,7 @@
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../vs/win81.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win81.manifest;../../test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1120,6 +1120,7 @@
     <ClCompile Include="..\..\test\test.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\test\libopenmpt_test.manifest" />
     <None Include="..\vs\win81.manifest" />
   </ItemGroup>
   <ItemGroup>

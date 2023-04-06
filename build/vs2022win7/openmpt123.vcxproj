@@ -301,7 +301,7 @@
       <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../vs/win7.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win7.manifest;../../openmpt123/openmpt123.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -337,7 +337,7 @@
       <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../vs/win7.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win7.manifest;../../openmpt123/openmpt123.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -378,7 +378,7 @@
       <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../vs/win7.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win7.manifest;../../openmpt123/openmpt123.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -418,7 +418,7 @@
       <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../vs/win7.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win7.manifest;../../openmpt123/openmpt123.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -460,7 +460,7 @@
       <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../vs/win7.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win7.manifest;../../openmpt123/openmpt123.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -501,7 +501,7 @@
       <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../vs/win7.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win7.manifest;../../openmpt123/openmpt123.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -536,7 +536,7 @@
       <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../vs/win7.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win7.manifest;../../openmpt123/openmpt123.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -571,7 +571,7 @@
       <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../vs/win7.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win7.manifest;../../openmpt123/openmpt123.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -612,7 +612,7 @@
       <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../vs/win7.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win7.manifest;../../openmpt123/openmpt123.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -652,7 +652,7 @@
       <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../vs/win7.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win7.manifest;../../openmpt123/openmpt123.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -694,7 +694,7 @@
       <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../vs/win7.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win7.manifest;../../openmpt123/openmpt123.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -735,7 +735,7 @@
       <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../vs/win7.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win7.manifest;../../openmpt123/openmpt123.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -836,6 +836,7 @@
     <ClCompile Include="..\..\openmpt123\openmpt123.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\openmpt123\openmpt123.manifest" />
     <None Include="..\vs\win7.manifest" />
   </ItemGroup>
   <ItemGroup>

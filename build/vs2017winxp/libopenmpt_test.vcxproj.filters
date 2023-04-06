@@ -1509,4 +1509,9 @@
       <Filter>test</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\test\libopenmpt_test.manifest">
+      <Filter>test</Filter>
+    </None>
+  </ItemGroup>
 </Project>
