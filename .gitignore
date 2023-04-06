@@ -47,6 +47,8 @@
 /build/vs2019win10/*.user
 /build/vs2019win10/.vs
 /build/vs2019win10uwp/.vs
+/build/vs2019win10uwp/Generated Files
+/build/vs2019win10uwp/ext/Generated Files
 /build/vs2019win7/*.user
 /build/vs2019win7/.vs
 /build/vs2019win81/*.user
@@ -59,6 +61,7 @@
 /build/vs2022win10clang/ext/*.user
 /build/vs2022win10uwp/*.user
 /build/vs2022win10uwp/.vs
+/build/vs2022win10uwp/Generated Files
 /build/vs2022win10uwp/ext/.vs
 /build/vs2022win10uwp/ext/Generated Files
 /build/vs2022win7/*.user
