@@ -148,8 +148,6 @@ generic/ssse3     := $(___) -march=i686        $(FPU_SSSE3)  -mtune=generic     
 generic/sse4_1    := $(___) -march=i686        $(FPU_SSE4_1) -mtune=generic     $(OPT_SIMD)   # Intel Core-1st, AMD Bulldozer.., Via Nano-3000..
 generic/sse4_2    := $(___) -march=i686        $(FPU_SSE4_2) -mtune=generic     $(OPT_SIMD)   # Intel Core-1st, AMD Bulldozer.., Via Nano-C..
 
-generic/sse4a     := $(X__) -march=i686        $(FPU_SSE4A)  -mtune=generic     $(OPT_SIMD)   # AMD K10..
-
 
 
 intel/i386        := $(XX_) -march=i386        $(FPU_NONE)   -mtune=i386        $(OPT_DEF)  --param l1-cache-size=0  --param l2-cache-size=$(CACHE_386)
@@ -185,6 +183,7 @@ amd/am486dxe      := $(___) -march=i486        $(FPU_387)    -mtune=i486        
 amd/am5x86        := $(___) -march=i486        $(FPU_387)    -mtune=i486        $(OPT_DEF)  --param l1-cache-size=12 --param l2-cache-size=$(CACHE_486)
 amd/k5            := $(XXX) -march=i586        $(FPU_387)    -mtune=i586        $(OPT_DEF)  --param l1-cache-size=8  --param l2-cache-size=$(CACHE_S7)
 amd/k5-pentium    := $(XXX) -march=i586        $(FPU_387)    -mtune=pentium     $(OPT_DEF)  --param l1-cache-size=8  --param l2-cache-size=$(CACHE_S7)
+amd/k5-pentiumpro := $(XXX) -march=i586        $(FPU_387)    -mtune=pentiumpro  $(OPT_DEF)  --param l1-cache-size=8  --param l2-cache-size=$(CACHE_S7)
 amd/k5-pentium2   := $(XXX) -march=i586        $(FPU_387)    -mtune=pentium2    $(OPT_DEF)  --param l1-cache-size=8  --param l2-cache-size=$(CACHE_S7)
 amd/k5-k6         := $(XXX) -march=i586        $(FPU_387)    -mtune=k6          $(OPT_DEF)  --param l1-cache-size=8  --param l2-cache-size=$(CACHE_S7)
 amd/k6            := $(XXX) -march=k6          $(FPU_MMX)    -mtune=k6          $(OPT_SIMD) --param l1-cache-size=32 --param l2-cache-size=$(CACHE_S7)
