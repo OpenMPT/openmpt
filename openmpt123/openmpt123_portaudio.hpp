@@ -13,9 +13,17 @@
 #include "openmpt123_config.hpp"
 #include "openmpt123.hpp"
 
+#include "mpt/base/detect.hpp"
+
 #if defined(MPT_WITH_PORTAUDIO)
 
 #include <portaudio.h>
+#if defined(MPT_BUILD_MSVC) && MPT_COMPILER_MSVC && MPT_ARCH_X86
+extern "C" {
+void PaUtil_InitializeX86PlainConverters(void);
+}
+#endif
+
 
 namespace openmpt123 {
 
@@ -66,6 +74,9 @@ public:
 #ifdef _MSC_VER
 		PaUtil_SetDebugPrintFunction( portaudio_log_function );
 		log_set = true;
+#endif
+#if defined(MPT_BUILD_MSVC) && MPT_COMPILER_MSVC && MPT_ARCH_X86
+		PaUtil_InitializeX86PlainConverters();
 #endif
 		check_portaudio_error( Pa_Initialize() );
 		portaudio_initialized = true;
