@@ -62,6 +62,7 @@ LDFLAGS  += -static -static-libgcc -static-libstdc++
 
 # enable gc-sections for all configurations in order to remove as much of the
 # stdlib as possible
+MPT_COMPILER_NOSECTIONS=1
 MPT_COMPILER_NOGCSECTIONS=1
 CXXFLAGS += -ffunction-sections -fdata-sections
 CFLAGS   += -ffunction-sections -fdata-sections

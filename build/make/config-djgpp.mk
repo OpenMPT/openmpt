@@ -390,9 +390,13 @@ IS_CROSS=1
 # generates warnings
 MPT_COMPILER_NOVISIBILITY=1
 
-# causes crashes on process shutdown,
-# makes memory locking difficult
+# causes crashes on process shutdown with liballegro
 MPT_COMPILER_NOGCSECTIONS=1
+
+ifeq ($(OPTIMIZE_LTO),1)
+CXXFLAGS += -flto=auto -Wno-attributes
+CFLAGS   += -flto=auto -Wno-attributes
+endif
 
 ifneq ($(DEBUG),1)
 LDFLAGS  += -s

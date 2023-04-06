@@ -445,25 +445,31 @@ else ifeq ($(OPTIMIZE),size)
 CXXFLAGS += -Os
 CFLAGS   += -Os -fno-strict-aliasing
 LDFLAGS  += 
-ifneq ($(MPT_COMPILER_NOGCSECTIONS),1)
+ifneq ($(MPT_COMPILER_NOSECTIONS),1)
 CXXFLAGS += -ffunction-sections -fdata-sections
 CFLAGS   += -ffunction-sections -fdata-sections
+endif
+ifneq ($(MPT_COMPILER_NOGCSECTIONS),1)
 LDFLAGS  += -Wl,--gc-sections
 endif
 else ifeq ($(OPTIMIZE),speed)
 CXXFLAGS += -O2
 CFLAGS   += -O2 -fno-strict-aliasing
-ifneq ($(MPT_COMPILER_NOGCSECTIONS),1)
+ifneq ($(MPT_COMPILER_NOSECTIONS),1)
 CXXFLAGS += -ffunction-sections -fdata-sections
 CFLAGS   += -ffunction-sections -fdata-sections
+endif
+ifneq ($(MPT_COMPILER_NOGCSECTIONS),1)
 LDFLAGS  += -Wl,--gc-sections
 endif
 else ifeq ($(OPTIMIZE),vectorize)
 CXXFLAGS += -O3
 CFLAGS   += -O3 -fno-strict-aliasing
-ifneq ($(MPT_COMPILER_NOGCSECTIONS),1)
+ifneq ($(MPT_COMPILER_NOSECTIONS),1)
 CXXFLAGS += -ffunction-sections -fdata-sections
 CFLAGS   += -ffunction-sections -fdata-sections
+endif
+ifneq ($(MPT_COMPILER_NOGCSECTIONS),1)
 LDFLAGS  += -Wl,--gc-sections
 endif
 endif
