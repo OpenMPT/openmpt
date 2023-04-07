@@ -16,6 +16,7 @@ jobs:
     - uses: cross-platform-actions/action@v0.11.0
       with:
         architecture: x86_64
+        hypervisor: xhyve
         operating_system: openbsd
         version: '7.2'
         shell: bash
