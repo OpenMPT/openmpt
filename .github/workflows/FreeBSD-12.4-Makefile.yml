@@ -2,9 +2,9 @@ name: FreeBSD 12.4 Makefile
 
 on:
   push:
-    branches: [ master ]
+    branches: [ OpenMPT-1.30 ]
   pull_request:
-    branches: [ master ]
+    branches: [ OpenMPT-1.30 ]
 
 jobs:
   build:
