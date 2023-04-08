@@ -26,6 +26,8 @@
 #include <utility>
 #include <vector>
 
+#include <cstddef>
+
 #if MPT_OS_DJGPP
 #include <cstring>
 #endif // MPT_OS_DJGPP
