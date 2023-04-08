@@ -1,9 +1,7 @@
 name: NetBSD 9.2 Makefile
 
 on:
-  push:
-    branches: [ OpenMPT-1.30 ]
-  pull_request:
+  workflow_dispatch:
     branches: [ OpenMPT-1.30 ]
 
 jobs:
