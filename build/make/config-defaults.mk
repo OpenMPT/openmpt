@@ -35,6 +35,11 @@ else ifeq ($(HOST_FLAVOUR),LINUX)
 
 include build/make/config-gcc.mk
 
+else ifeq ($(HOST_FLAVOUR),NETBSD)
+
+include build/make/config-gcc.mk
+NO_PORTAUDIOCPP?=1
+
 else ifeq ($(HOST_FLAVOUR),FREEBSD)
 
 include build/make/config-clang.mk

@@ -296,6 +296,9 @@ endif
 ifeq ($(UNAME_S),Linux)
 HOST_FLAVOUR=LINUX
 endif
+ifeq ($(UNAME_S),NetBSD)
+HOST_FLAVOUR=NETBSD
+endif
 ifeq ($(UNAME_S),FreeBSD)
 HOST_FLAVOUR=FREEBSD
 endif
