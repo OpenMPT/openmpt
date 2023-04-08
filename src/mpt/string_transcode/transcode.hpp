@@ -24,6 +24,8 @@
 #endif // !MPT_COMPILER_QUIRK_NO_WCHAR
 #include <vector>
 
+#include <cstddef>
+
 #if MPT_OS_DJGPP
 #include <cstring>
 #endif // MPT_OS_DJGPP
