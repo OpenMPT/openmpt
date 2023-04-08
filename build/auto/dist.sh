@@ -68,18 +68,23 @@ if [ `uname -s` != "Darwin" ] ; then
 if [ `uname -m` == "x86_64" ] ; then
 if [ "${MSYSTEM}x" == "x" ]; then
 echo " pcc"
-pcc -I. bin/headercheck.c -o bin/headercheck.pcc.out
+pcc -I. bin/headercheck.c -o bin/headercheck.pcc.out 2>bin/headercheck.pcc.err
+cat bin/headercheck.pcc.err | grep -v 'gnu-ld: warning:' | grep -v 'gnu-ld: NOTE:' >&2
 echo " pcc 89"
-pcc -std=c89 -I. bin/headercheck.c -o bin/headercheck.pcc89.out
+pcc -std=c89 -I. bin/headercheck.c -o bin/headercheck.pcc89.out 2>bin/headercheck.pcc89.err
+cat bin/headercheck.pcc89.err | grep -v 'gnu-ld: warning:' | grep -v 'gnu-ld: NOTE:' >&2
 echo " pcc 99"
-pcc -std=c99 -I. bin/headercheck.c -o bin/headercheck.pcc99.out
+pcc -std=c99 -I. bin/headercheck.c -o bin/headercheck.pcc99.out 2>bin/headercheck.pcc99.err
+cat bin/headercheck.pcc99.err | grep -v 'gnu-ld: warning:' | grep -v 'gnu-ld: NOTE:' >&2
 echo " pcc 11"
-pcc -std=c11 -I. bin/headercheck.c -o bin/headercheck.pcc11.out
+pcc -std=c11 -I. bin/headercheck.c -o bin/headercheck.pcc11.out 2>bin/headercheck.pcc11.err
+cat bin/headercheck.pcc11.err | grep -v 'gnu-ld: warning:' | grep -v 'gnu-ld: NOTE:' >&2
 echo " tcc"
 tcc -Wall -Wunusupported -Wwrite-strings -Werror -I. bin/headercheck.c -o bin/headercheck.tcc.out
 fi
 fi
 fi
+rm -f bin/headercheck.*.err
 rm bin/headercheck.*.out
 rm bin/headercheck.c
 echo "Checking C++ header ..."
