@@ -74,7 +74,15 @@ CTuning::CTuning()
 {
 	m_RatioTable.clear();
 	m_NoteMin = s_NoteMinDefault;
+#if MPT_GCC_AT_LEAST(12, 0, 0) && MPT_GCC_BEFORE(13, 1, 0)
+// https://gcc.gnu.org/bugzilla/show_bug.cgi?id=109455
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstringop-overflow"
+#endif
 	m_RatioTable.resize(s_RatioTableSizeDefault, 1);
+#if MPT_GCC_AT_LEAST(12, 0, 0) && MPT_GCC_BEFORE(13, 1, 0)
+#pragma GCC diagnostic pop
+#endif
 	m_GroupSize = 0;
 	m_GroupRatio = 0;
 	m_RatioTableFine.clear();
