@@ -1,7 +1,9 @@
 name: NetBSD 9.2 Makefile
 
 on:
-  workflow_dispatch:
+  push:
+    branches: [ master ]
+  pull_request:
     branches: [ master ]
 
 jobs:
