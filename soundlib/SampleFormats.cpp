@@ -2509,6 +2509,7 @@ struct IFFChunk
 		idMDAT = MagicBE("MDAT"),
 
 		idNAME = MagicBE("NAME"),
+		idANNO = MagicBE("ANNO"),
 	};
 
 	uint32be id;      // See ChunkIdentifiers
@@ -2650,7 +2651,7 @@ bool CSoundFile::ReadIFFSample(SAMPLEINDEX nSample, FileReader &file, bool allow
 	if(sample.nC5Speed <= 1)
 		sample.nC5Speed = 22050;
 
-	sample.nVolume = static_cast<uint16>(volume / 256);
+	sample.nVolume = static_cast<uint16>((volume + 128) / 256);
 	if(!sample.nVolume || sample.nVolume > 256)
 		sample.nVolume = 256;
 
@@ -2720,6 +2721,108 @@ bool CSoundFile::ReadIFFSample(SAMPLEINDEX nSample, FileReader &file, bool allow
 
 	return true;
 }
+
+
+#ifndef MODPLUG_NO_FILESAVE
+
+static uint32 WriteIFFStringChunk(std::ostream& f, IFFChunk::ChunkIdentifiers id, const std::string& str)
+{
+	IFFChunk chunk{};
+	chunk.id = id;
+	chunk.length = static_cast<uint32>(str.size());
+	mpt::IO::Write(f, chunk);
+	mpt::IO::WriteText(f, str);
+	uint32 totalSize = sizeof(IFFChunk) + chunk.length;
+	if(totalSize % 2u)
+	{
+		mpt::IO::WriteIntBE<uint8>(f, 0);
+		totalSize++;
+	}
+	return totalSize;
+}
+
+
+bool CSoundFile::SaveIFFSample(SAMPLEINDEX smp, std::ostream& f) const
+{
+	const ModSample& sample = Samples[smp];
+	if(sample.uFlags[CHN_ADLIB])
+		return false;
+
+	mpt::IO::OFile<std::ostream> ff(f);
+	IFFHeader fileHeader{};
+	memcpy(fileHeader.form, "FORM", 4);
+	if(sample.uFlags[CHN_16BIT])
+		memcpy(fileHeader.magic, "16SV", 4);
+	else
+		memcpy(fileHeader.magic, "8SVX", 4);
+	mpt::IO::Write(f, fileHeader);
+
+	uint32 totalSize = 4 + sizeof(IFFChunk) + sizeof(IFFSampleHeader);
+
+	IFFChunk chunk{};
+	chunk.id = IFFChunk::idVHDR;
+	chunk.length = sizeof(IFFSampleHeader);
+	mpt::IO::Write(f, chunk);
+
+	IFFSampleHeader sampleHeader{};
+	uint32 loopStart = sample.nLength, loopEnd = sample.nLength;
+	if(sample.uFlags[CHN_LOOP])
+	{
+		loopStart = sample.nLoopStart;
+		loopEnd = sample.nLoopEnd;
+	} else if(sample.uFlags[CHN_SUSTAINLOOP])
+	{
+		loopStart = sample.nSustainStart;
+		loopEnd = sample.nSustainEnd;
+	}
+	const uint8 bps = sample.GetBytesPerSample();
+	sampleHeader.oneShotHiSamples = loopStart * bps;
+	sampleHeader.repeatHiSamples = (loopEnd - loopStart) * bps;
+
+	sampleHeader.samplesPerHiCycle = 0;
+	sampleHeader.samplesPerSec = mpt::saturate_cast<uint16>(sample.GetSampleRate(m_nType));
+	sampleHeader.octave = 1;
+	sampleHeader.compression = 0;
+	sampleHeader.volume = mpt::saturate_cast<uint16>(sample.nVolume * 256u);
+	mpt::IO::Write(f, sampleHeader);
+
+	if(sample.uFlags[CHN_STEREO])
+	{
+		chunk.id = IFFChunk::idCHAN;
+		chunk.length = 4;
+		mpt::IO::Write(f, chunk);
+		mpt::IO::WriteIntBE<uint32>(f, 6);
+		totalSize += sizeof(chunk) + chunk.length;
+	}
+
+	totalSize += WriteIFFStringChunk(f, IFFChunk::idNAME, mpt::ToCharset(mpt::Charset::Amiga, GetCharsetInternal(), m_szNames[smp]));
+	totalSize += WriteIFFStringChunk(f, IFFChunk::idANNO, mpt::ToCharset(mpt::Charset::Amiga, Version::Current().GetOpenMPTVersionString()));
+
+	SampleIO sampleIO(
+		sample.uFlags[CHN_16BIT] ? SampleIO::_16bit : SampleIO::_8bit,
+		sample.uFlags[CHN_STEREO] ? SampleIO::stereoSplit : SampleIO::mono,
+		SampleIO::bigEndian,
+		SampleIO::signedPCM);
+
+	chunk.id = IFFChunk::idBODY;
+	chunk.length = mpt::saturate_cast<uint32>(sampleIO.CalculateEncodedSize(sample.nLength));
+	mpt::IO::Write(f, chunk);
+	sampleIO.WriteSample(f, sample);
+	totalSize += sizeof(chunk) + chunk.length;
+	if(totalSize % 2u)
+	{
+		mpt::IO::WriteIntBE<uint8>(f, 0);
+		totalSize++;
+	}
+
+	fileHeader.size = totalSize;
+	mpt::IO::SeekAbsolute(f, 0);
+	mpt::IO::Write(f, fileHeader);
+
+	return true;
+}
+
+#endif  // MODPLUG_NO_FILESAVE
 
 
 OPENMPT_NAMESPACE_END

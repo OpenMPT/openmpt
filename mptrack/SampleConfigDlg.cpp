@@ -59,6 +59,7 @@ BOOL COptionsSampleEditor::OnInitDialog()
 	m_cbnDefaultSampleFormat.SetItemData(m_cbnDefaultSampleFormat.AddString(_T("WAV")), dfWAV);
 	m_cbnDefaultSampleFormat.SetItemData(m_cbnDefaultSampleFormat.AddString(_T("RAW")), dfRAW);
 	m_cbnDefaultSampleFormat.SetItemData(m_cbnDefaultSampleFormat.AddString(_T("S3I")), dfS3I);
+	m_cbnDefaultSampleFormat.SetItemData(m_cbnDefaultSampleFormat.AddString(_T("IFF")), dfIFF);
 	m_cbnDefaultSampleFormat.SetCurSel(TrackerSettings::Instance().m_defaultSampleFormat);
 
 	CSliderCtrl *slider = static_cast<CSliderCtrl *>(GetDlgItem(IDC_SLIDER1));

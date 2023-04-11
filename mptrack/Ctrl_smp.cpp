@@ -1420,6 +1420,11 @@ void CCtrlSamples::SaveSample(bool doBatchSave)
 		if(!mpt::PathCompareNoCase(ext, P_(".flac"))) defaultFormat = dfFLAC;
 		else if(!mpt::PathCompareNoCase(ext, P_(".wav"))) defaultFormat = dfWAV;
 		else if(!mpt::PathCompareNoCase(ext, P_(".s3i"))) defaultFormat = dfS3I;
+		else if(!mpt::PathCompareNoCase(ext, P_(".iff"))) defaultFormat = dfIFF;
+		else if(!mpt::PathCompareNoCase(ext, P_(".8sv"))) defaultFormat = dfIFF;
+		else if(!mpt::PathCompareNoCase(ext, P_(".8svx"))) defaultFormat = dfIFF;
+		else if(!mpt::PathCompareNoCase(ext, P_(".16sv"))) defaultFormat = dfIFF;
+		else if(!mpt::PathCompareNoCase(ext, P_(".16svx"))) defaultFormat = dfIFF;
 
 		hasAdlib = sample.uFlags[CHN_ADLIB];
 	} else
@@ -1449,8 +1454,11 @@ void CCtrlSamples::SaveSample(bool doBatchSave)
 	case dfS3I:
 		filter = 3;
 		break;
-	case dfRAW:
+	case dfIFF:
 		filter = 4;
+		break;
+	case dfRAW:
+		filter = 5;
 		break;
 	}
 	// Do we have to use a format that can save OPL instruments?
@@ -1463,6 +1471,7 @@ void CCtrlSamples::SaveSample(bool doBatchSave)
 		.ExtensionFilter("Wave File (*.wav)|*.wav|"
 			"FLAC File (*.flac)|*.flac|"
 			"S3I Scream Tracker 3 Instrument (*.s3i)|*.s3i|"
+			"IFF (8SVX / 16SVX) (*.iff)|*.iff;*.8sv;*.8svx;*.16sv;*.16svx|"
 			"RAW Audio (*.raw)|*.raw||")
 			.WorkingDirectory(defaultPath)
 			.FilterIndex(&filter);
@@ -1528,6 +1537,8 @@ void CCtrlSamples::SaveSample(bool doBatchSave)
 					ok = m_sndFile.SaveFLACSample(smp, f);
 				else if(thisFormat == dfS3I)
 					ok = m_sndFile.SaveS3ISample(smp, f);
+				else if(thisFormat == dfIFF)
+					ok = m_sndFile.SaveIFFSample(smp, f);
 				else
 					ok = m_sndFile.SaveWAVSample(smp, f);
 			} catch(const std::exception &)

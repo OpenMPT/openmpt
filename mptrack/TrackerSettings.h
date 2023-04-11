@@ -241,6 +241,7 @@ enum SampleEditorDefaultFormat
 	dfWAV,
 	dfRAW,
 	dfS3I,
+	dfIFF,
 };
 
 enum class FollowSamplePlayCursor
@@ -379,6 +380,9 @@ template<> inline SettingValue ToSettingValue(const SampleEditorDefaultFormat &v
 	case dfS3I:
 		format = U_("s3i");
 		break;
+	case dfIFF:
+		format = U_("iff");
+		break;
 	}
 	return SettingValue(format);
 }
@@ -391,6 +395,8 @@ template<> inline SampleEditorDefaultFormat FromSettingValue(const SettingValue 
 		return dfRAW;
 	if(format == U_("s3i"))
 		return dfS3I;
+	if(format == U_("iff"))
+		return dfIFF;
 	else  // if(format == U_("flac"))
 		return dfFLAC;
 }

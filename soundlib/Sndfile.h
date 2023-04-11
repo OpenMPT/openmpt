@@ -1237,6 +1237,7 @@ public:
 	bool SaveRAWSample(SAMPLEINDEX nSample, std::ostream &f) const;
 	bool SaveFLACSample(SAMPLEINDEX nSample, std::ostream &f) const;
 	bool SaveS3ISample(SAMPLEINDEX smp, std::ostream &f) const;
+	bool SaveIFFSample(SAMPLEINDEX smp, std::ostream &f) const;
 #endif
 
 	// Instrument file I/O
