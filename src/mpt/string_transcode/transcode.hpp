@@ -2010,7 +2010,7 @@ inline Tdststring transcode(Tencoding to, Tsrcstring && src) {
 				Tdststring dst;
 				mpt::string_traits<Tdststring>::reserve(dst, mpt::string_traits<decltype(mpt::as_string(std::forward<Tsrcstring>(src)))>::length(src_));
 				for (std::size_t i = 0; i < mpt::saturate_cast<std::size_t>(mpt::string_traits<decltype(mpt::as_string(std::forward<Tsrcstring>(src)))>::length(src_)); ++i) {
-					mpt::string_traits<Tdststring>::append(dst, static_cast<typename mpt::string_traits<Tdststring>::unsigned_char_type>(static_cast<mpt::string_traits<decltype(mpt::as_string(std::forward<Tsrcstring>(src)))>::unsigned_char_type>(src_[i])));
+					mpt::string_traits<Tdststring>::append(dst, static_cast<typename mpt::string_traits<Tdststring>::unsigned_char_type>(static_cast<typename mpt::string_traits<decltype(mpt::as_string(std::forward<Tsrcstring>(src)))>::unsigned_char_type>(src_[i])));
 				}
 				return dst;
 			}
@@ -2028,7 +2028,7 @@ inline Tdststring transcode(Tencoding from, Tsrcstring && src) {
 				Tdststring dst;
 				mpt::string_traits<Tdststring>::reserve(dst, mpt::string_traits<decltype(mpt::as_string(std::forward<Tsrcstring>(src)))>::length(src_));
 				for (std::size_t i = 0; i < mpt::saturate_cast<std::size_t>(mpt::string_traits<decltype(mpt::as_string(std::forward<Tsrcstring>(src)))>::length(src_)); ++i) {
-					mpt::string_traits<Tdststring>::append(dst, static_cast<typename mpt::string_traits<Tdststring>::unsigned_char_type>(static_cast<mpt::string_traits<decltype(mpt::as_string(std::forward<Tsrcstring>(src)))>::unsigned_char_type>(src_[i])));
+					mpt::string_traits<Tdststring>::append(dst, static_cast<typename mpt::string_traits<Tdststring>::unsigned_char_type>(static_cast<typename mpt::string_traits<decltype(mpt::as_string(std::forward<Tsrcstring>(src)))>::unsigned_char_type>(src_[i])));
 				}
 				return dst;
 			}
