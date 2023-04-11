@@ -68,6 +68,10 @@ is just a high-level summary.
  *  [**New**] Support for Clang 6 has been restored.
  *  [**New**] Support for Android NDK 18 has been restored.
 
+ *  [**Change**] xmp-openmpt: The Amiga resampler emulation is now enabled by
+    default.
+ *  [**Change**] in_openmpt: The Amiga resampler emulation is now enabled by
+    default.
  *  [**Change**] The official Windows builds (x86, amd64, arm, arm64) now
     require Windows 10 21H2 (or later). The official legacy Windows builds
     (x86-legacy, amd64-legacy) are unchanged and still require Windows 7 (or
