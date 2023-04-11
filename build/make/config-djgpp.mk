@@ -199,7 +199,7 @@ amd/duron         := $(XX_) -march=athlon      $(FPU_3DNOWA) -mtune=athlon      
 amd/duron-xp      := $(___) -march=athlon-xp   $(FPU_3DASSE) -mtune=athlon-xp   $(OPT_SIMD) --param l1-cache-size=64 --param l2-cache-size=$(CACHE_DURONXP)
 amd/sempron64     := $(___) -march=k8          $(FPU_SSE2)   -mtune=k8          $(OPT_SIMD) --param l1-cache-size=64 --param l2-cache-size=$(CACHE_SEMPRON64)
 
-amd/geode-gx      := $(___) -march=geode       $(FPU_3DNOW)  -mtune=geode       $(OPT_SIMD) --param l1-cache-size=16 --param l2-cache-size=128
+amd/geode-gx      := $(___) -march=geode       $(FPU_3DNOW)  -mtune=geode       $(OPT_SIMD) --param l1-cache-size=16 --param l2-cache-size=0
 amd/geode-lx      := $(___) -march=geode       $(FPU_3DNOW)  -mtune=geode       $(OPT_SIMD) --param l1-cache-size=64 --param l2-cache-size=128
 amd/geode-nx      := $(___) -march=athlon-xp   $(FPU_3DASSE) -mtune=athlon-xp   $(OPT_SIMD) --param l1-cache-size=64 --param l2-cache-size=256
 amd/bobcat        := $(___) -march=btver1      $(FPU_SSE4A)  -mtune=btver1      $(OPT_SIMD) --param l1-cache-size=32 --param l2-cache-size=512
@@ -238,7 +238,7 @@ cyrix/mediagx-gxm := $(___) -march=i686        $(FPU_MMX)     $(TUNE_686MMX)    
 
 
 nsc/geode-gx1     := $(___) -march=i686        $(FPU_MMX)     $(TUNE_686MMX)    $(OPT_SIMD) --param l1-cache-size=9  --param l2-cache-size=0
-nsc/geode-gx2     := $(___) -march=geode       $(FPU_3DNOW)  -mtune=geode       $(OPT_SIMD) --param l1-cache-size=16 --param l2-cache-size=128
+nsc/geode-gx2     := $(___) -march=geode       $(FPU_3DNOW)  -mtune=geode       $(OPT_SIMD) --param l1-cache-size=16 --param l2-cache-size=0
 
 
 
