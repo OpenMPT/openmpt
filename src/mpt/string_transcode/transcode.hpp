@@ -12,6 +12,7 @@
 #include "mpt/base/saturate_cast.hpp"
 #include "mpt/detect/mfc.hpp"
 #include "mpt/string/types.hpp"
+#include "mpt/string/utility.hpp"
 
 #include <array>
 #if !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
@@ -2002,16 +2003,49 @@ inline Tdststring transcode(Tsrcstring && src) {
 
 template <typename Tdststring, typename Tsrcstring, typename Tencoding, std::enable_if_t<std::is_same<Tdststring, std::string>::value, bool> = true, std::enable_if_t<mpt::is_string_type<typename mpt::make_string_type<typename std::decay<Tsrcstring>::type>::type>::value, bool> = true>
 inline Tdststring transcode(Tencoding to, Tsrcstring && src) {
+	if constexpr (std::is_same<Tencoding, mpt::common_encoding>::value) {
+		if constexpr (std::is_same<decltype(mpt::as_string(std::forward<Tsrcstring>(src))), mpt::u8string>::value) {
+			if (to == mpt::common_encoding::utf8) {
+				auto src_ = mpt::as_string(std::forward<Tsrcstring>(src));
+				Tdststring dst;
+				mpt::string_traits<Tdststring>::reserve(dst, mpt::string_traits<decltype(mpt::as_string(std::forward<Tsrcstring>(src)))>::length(src_));
+				for (std::size_t i = 0; i < mpt::saturate_cast<std::size_t>(mpt::string_traits<decltype(mpt::as_string(std::forward<Tsrcstring>(src)))>::length(src_)); ++i) {
+					mpt::string_traits<Tdststring>::append(dst, static_cast<typename mpt::string_traits<Tdststring>::unsigned_char_type>(static_cast<mpt::string_traits<decltype(mpt::as_string(std::forward<Tsrcstring>(src)))>::unsigned_char_type>(src_[i])));
+				}
+				return dst;
+			}
+		}
+	}
 	return mpt::encode<Tdststring>(to, string_transcoder<decltype(mpt::as_string(std::forward<Tsrcstring>(src)))>::decode(mpt::as_string(std::forward<Tsrcstring>(src))));
 }
 
 template <typename Tdststring, typename Tsrcstring, typename Tencoding, std::enable_if_t<std::is_same<typename mpt::make_string_type<typename std::decay<Tsrcstring>::type>::type, std::string>::value, bool> = true, std::enable_if_t<mpt::is_string_type<typename mpt::make_string_type<typename std::decay<Tsrcstring>::type>::type>::value, bool> = true>
 inline Tdststring transcode(Tencoding from, Tsrcstring && src) {
+	if constexpr (std::is_same<Tencoding, mpt::common_encoding>::value) {
+		if constexpr (std::is_same<Tdststring, mpt::u8string>::value) {
+			if (from == mpt::common_encoding::utf8) {
+				auto src_ = mpt::as_string(std::forward<Tsrcstring>(src));
+				Tdststring dst;
+				mpt::string_traits<Tdststring>::reserve(dst, mpt::string_traits<decltype(mpt::as_string(std::forward<Tsrcstring>(src)))>::length(src_));
+				for (std::size_t i = 0; i < mpt::saturate_cast<std::size_t>(mpt::string_traits<decltype(mpt::as_string(std::forward<Tsrcstring>(src)))>::length(src_)); ++i) {
+					mpt::string_traits<Tdststring>::append(dst, static_cast<typename mpt::string_traits<Tdststring>::unsigned_char_type>(static_cast<mpt::string_traits<decltype(mpt::as_string(std::forward<Tsrcstring>(src)))>::unsigned_char_type>(src_[i])));
+				}
+				return dst;
+			}
+		}
+	}
 	return string_transcoder<Tdststring>::encode(mpt::decode<decltype(mpt::as_string(std::forward<Tsrcstring>(src)))>(from, mpt::as_string(std::forward<Tsrcstring>(src))));
 }
 
 template <typename Tdststring, typename Tsrcstring, typename Tto, typename Tfrom, std::enable_if_t<mpt::is_string_type<typename mpt::make_string_type<typename std::decay<Tsrcstring>::type>::type>::value, bool> = true>
 inline Tdststring transcode(Tto to, Tfrom from, Tsrcstring && src) {
+	if constexpr (std::is_same<Tto, Tfrom>::value) {
+		if constexpr (std::is_same<decltype(mpt::as_string(std::forward<Tsrcstring>(src))), Tdststring>::value) {
+			if (to == from) {
+				return mpt::as_string(std::forward<Tsrcstring>(src));
+			}
+		}
+	}
 	return mpt::encode<Tdststring>(to, mpt::decode<decltype(mpt::as_string(std::forward<Tsrcstring>(src)))>(from, mpt::as_string(std::forward<Tsrcstring>(src))));
 }
 
