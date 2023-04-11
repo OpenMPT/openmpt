@@ -27,7 +27,7 @@ struct libopenmpt_settings {
 	int channels = 2;
 	int mastergain_millibel = 0;
 	int stereoseparation = 100;
-	int use_amiga_resampler = 0;
+	int use_amiga_resampler = 1;
 	int amiga_filter_type = 0;
 	int repeatcount = 0;
 	int interpolationfilterlength = 8;
