@@ -331,7 +331,7 @@ inline mpt::ustring ToUnicode(Tencoding &&from, Tsrc &&str)
 	return mpt::transcode<mpt::ustring>(std::forward<Tencoding>(from), std::forward<Tsrc>(str));
 }
 
-#if MPT_WSTRING_CONVERT
+#if !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
 // Convert to a wide character string.
 // The wide encoding is UTF-16 or UTF-32, based on sizeof(wchar_t).
 // If str does not contain any invalid characters, this conversion is lossless.

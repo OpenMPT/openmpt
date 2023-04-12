@@ -203,19 +203,6 @@
 
 
 
-#if (MPT_OS_WINDOWS || defined(MODPLUG_TRACKER)) && !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
-
-	// mpt::ToWide
-	// Required on Windows by mpt::PathString.
-	// Required by MPT_USTRING_MODE_WIDE as they share the conversion functions.
-	#define MPT_WSTRING_CONVERT 1
-
-#else
-
-	#define MPT_WSTRING_CONVERT 0
-
-#endif
-
 #define MPT_TIME_UTC_ON_DISK 0
 #define MPT_TIME_UTC_ON_DISK_VERSION MPT_V("1.31.00.13")
 
