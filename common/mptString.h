@@ -305,34 +305,6 @@ struct Charset
 
 
 
-// source code / preprocessor (i.e. # token)
-inline constexpr auto CharsetSource = Charset::ASCII;
-
-// debug log files
-inline constexpr auto CharsetLogfile = Charset::UTF8;
-
-// std::clog / std::cout / std::cerr
-#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS && defined(MPT_ENABLE_CHARSET_LOCALE)
-inline constexpr auto CharsetStdIO = Charset::Locale;
-#else
-inline constexpr auto CharsetStdIO = Charset::UTF8;
-#endif
-
-// getenv
-#if defined(MPT_ENABLE_CHARSET_LOCALE)
-inline constexpr auto CharsetEnvironment = Charset::Locale;
-#else
-inline constexpr auto CharsetEnvironment = Charset::UTF8;
-#endif
-
-// std::exception::what()
-#if defined(MPT_ENABLE_CHARSET_LOCALE)
-inline constexpr auto CharsetException = Charset::Locale;
-#else
-inline constexpr auto CharsetException = Charset::UTF8;
-#endif
-
-
 
 // Checks if the std::string represents an UTF8 string.
 // This is currently implemented as converting to std::wstring and back assuming UTF8 both ways,

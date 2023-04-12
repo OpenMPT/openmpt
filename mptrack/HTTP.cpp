@@ -112,7 +112,7 @@ namespace HTTP
 
 
 exception::exception(const mpt::ustring &m)
-	: std::runtime_error(std::string("HTTP error: ") + mpt::ToCharset(mpt::CharsetException, m))
+	: std::runtime_error(std::string("HTTP error: ") + mpt::transcode<std::string>(mpt::exception_encoding, m))
 {
 	message = m;
 }

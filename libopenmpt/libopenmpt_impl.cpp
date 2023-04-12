@@ -84,11 +84,11 @@ MPT_WARNING("Warning: libopenmpt is known to trigger bad code generation with Cl
 MPT_NOINLINE void AssertHandler(const mpt::source_location &loc, const char *expr, const char *msg) {
 	if(msg) {
 		mpt::log::GlobalLogger().SendLogMessage(loc, LogError, "ASSERT",
-			MPT_USTRING("ASSERTION FAILED: ") + mpt::ToUnicode(mpt::CharsetSource, msg) + MPT_USTRING(" (") + mpt::ToUnicode(mpt::CharsetSource, expr) + MPT_USTRING(")")
+			MPT_USTRING("ASSERTION FAILED: ") + mpt::transcode<mpt::ustring>(mpt::source_encoding, msg) + MPT_USTRING(" (") + mpt::transcode<mpt::ustring>(mpt::source_encoding, expr) + MPT_USTRING(")")
 			);
 	} else {
 		mpt::log::GlobalLogger().SendLogMessage(loc, LogError, "ASSERT",
-			MPT_USTRING("ASSERTION FAILED: ") + mpt::ToUnicode(mpt::CharsetSource, expr)
+			MPT_USTRING("ASSERTION FAILED: ") + mpt::transcode<mpt::ustring>(mpt::source_encoding, expr)
 			);
 	}
 	#if defined(MPT_BUILD_FATAL_ASSERTS)

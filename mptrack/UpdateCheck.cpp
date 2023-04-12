@@ -1431,7 +1431,7 @@ void CUpdateCheck::ShowFailureGUI(const bool autoUpdate, const CUpdateCheck::Err
 
 
 CUpdateCheck::Error::Error(CString errorMessage)
-	: std::runtime_error(mpt::ToCharset(mpt::CharsetException, errorMessage))
+	: std::runtime_error(mpt::transcode<std::string>(mpt::exception_encoding, errorMessage))
 	, m_Message(errorMessage)
 {
 	return;
@@ -1439,7 +1439,7 @@ CUpdateCheck::Error::Error(CString errorMessage)
 
 
 CUpdateCheck::Error::Error(CString errorMessage, DWORD errorCode)
-	: std::runtime_error(mpt::ToCharset(mpt::CharsetException, FormatErrorCode(errorMessage, errorCode)))
+	: std::runtime_error(mpt::transcode<std::string>(mpt::exception_encoding, FormatErrorCode(errorMessage, errorCode)))
 	, m_Message(errorMessage)
 {
 	return;
