@@ -533,6 +533,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 
+	const bool useGUS = gusAddresses > 1;
 	if(isST3 && anySamples && !gusAddresses && fileHeader.cwtv != S3MFileHeader::trkST3_00)
 	{
 		// All Scream Tracker versions except for some probably early revisions of Scream Tracker 3.00 write GUS addresses. GUS support might not have existed at that point (1992).
@@ -546,7 +547,6 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		// Re-saving that file in ST3 with the SoundBlaster driver loaded will reset the GUS address for all samples to 0 (unused) or 1 (used).
 		// The first used sample will also have an address of 1 with the GUS driver.
 		// So this is a safe way of telling if the file was last saved with the GUS driver loaded or not if there's more than one sample.
-		const bool useGUS = gusAddresses > 1;
 		m_playBehaviour.set(kST3PortaSampleChange, useGUS);
 		m_playBehaviour.set(kST3SampleSwap, !useGUS);
 		m_playBehaviour.set(kITShortSampleRetrig, !useGUS);  // Only half the truth but close enough for now
@@ -646,8 +646,18 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 
 				if(m.command == CMD_S3MCMDEX && (m.param & 0xF0) == 0xA0 && fileHeader.cwtv < S3MFileHeader::trkST3_20)
 				{
-					// Convert old SAx panning to S8x (should only be found in PANIC.S3M by Purple Motion)
-					m.param = 0x80 | ((m.param & 0x0F) ^ 8);
+					// Convert the old messy SoundBlaster stereo control command (or an approximation of it, anyway)
+					const uint8 ctype = fileHeader.channels[channel] & 0x7F;
+					if(useGUS || ctype >= 0x10)
+						m.command = CMD_DUMMY;
+					else if(m.param == 0xA0 || m.param == 0xA2)  // Normal panning
+						m.param = (ctype & 8) ? 0x8C : 0x83;
+					else if(m.param == 0xA1 || m.param == 0xA3)  // Swap left / right channel
+						m.param = (ctype & 8) ? 0x83 : 0x8C;
+					else if(m.param <= 0xA7)  // Center
+						m.param = 0x88;
+					else
+						m.command = CMD_DUMMY;
 				} else if(m.command == CMD_MIDI)
 				{
 					// PixPlay panning test
