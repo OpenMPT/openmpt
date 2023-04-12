@@ -1627,7 +1627,6 @@
     <ClCompile Include="..\..\common\mptFileType.cpp" />
     <ClCompile Include="..\..\common\mptPathString.cpp" />
     <ClCompile Include="..\..\common\mptRandom.cpp" />
-    <ClCompile Include="..\..\common\mptString.cpp" />
     <ClCompile Include="..\..\common\mptStringBuffer.cpp" />
     <ClCompile Include="..\..\common\mptTime.cpp" />
     <ClCompile Include="..\..\common\serialization_utils.cpp" />

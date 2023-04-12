@@ -92,7 +92,6 @@ LOCAL_SRC_FILES += \
 	common/mptFileType.cpp \
 	common/mptPathString.cpp \
 	common/mptRandom.cpp \
-	common/mptString.cpp \
 	common/mptStringBuffer.cpp \
 	common/mptTime.cpp \
 	common/Profiler.cpp \

@@ -328,7 +328,6 @@ MPT_FILES_COMMON += common/mptPathString.cpp
 MPT_FILES_COMMON += common/mptPathString.h
 MPT_FILES_COMMON += common/mptRandom.cpp
 MPT_FILES_COMMON += common/mptRandom.h
-MPT_FILES_COMMON += common/mptString.cpp
 MPT_FILES_COMMON += common/mptString.h
 MPT_FILES_COMMON += common/mptStringBuffer.cpp
 MPT_FILES_COMMON += common/mptStringBuffer.h

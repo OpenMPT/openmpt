@@ -81,7 +81,6 @@
 		976568F7F2B0B929E0E29F37 /* libopenmpt_ext_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7355A89F850CE891FA7AD6DF /* libopenmpt_ext_impl.cpp */; };
 		97AC91CD76C9ABFF52D3080D /* Load_stm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0735F17599C3BB67029C5FB5 /* Load_stm.cpp */; };
 		97B1A0C5975483F7D1A93705 /* Echo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C9696EDF3FC09DFA60A252D /* Echo.cpp */; };
-		9B05DDE07A22F812562C5420 /* mptString.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 464E0CE8D8DBD6DA41B47B28 /* mptString.cpp */; };
 		9F1029ABB9DC985DBDAD2FEB /* ModSample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A32EC1731056CFE511E9BFB3 /* ModSample.cpp */; };
 		9F2D020A8C9494BC298E884A /* PlugInterface.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D89E49F2E528FC64600DC832 /* PlugInterface.cpp */; };
 		9FC1BA253DA2BAD715210065 /* Flanger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3286C74DF54727BF527C058D /* Flanger.cpp */; };
@@ -312,7 +311,6 @@
 		45D0E0DE525B9350CD405F1E /* DigiBoosterEcho.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = DigiBoosterEcho.h; path = ../../soundlib/plugins/DigiBoosterEcho.h; sourceTree = "<group>"; };
 		45DBF5F73F9DB269799CB437 /* Dlsbank.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Dlsbank.h; path = ../../soundlib/Dlsbank.h; sourceTree = "<group>"; };
 		4614D43FB73775316CFE227F /* math.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = math.hpp; path = ../../src/mpt/base/math.hpp; sourceTree = "<group>"; };
-		464E0CE8D8DBD6DA41B47B28 /* mptString.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = mptString.cpp; path = ../../common/mptString.cpp; sourceTree = "<group>"; };
 		46877D383A86C6AABF71DB78 /* PluginStructs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = PluginStructs.h; path = ../../soundlib/plugins/PluginStructs.h; sourceTree = "<group>"; };
 		46BE019F097E621166B33FDF /* SampleNormalize.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SampleNormalize.h; path = ../../soundlib/SampleNormalize.h; sourceTree = "<group>"; };
 		473316F00DC10E627BC33530 /* x86_amd64.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = x86_amd64.hpp; path = ../../src/mpt/arch/x86_amd64.hpp; sourceTree = "<group>"; };
@@ -1051,7 +1049,6 @@
 				C9DD180C21428AFED350A64C /* mptPathString.h */,
 				5D6A74BCEFF83EAE58D0E2FC /* mptRandom.cpp */,
 				BAA825C62BCAC6B8E1917406 /* mptRandom.h */,
-				464E0CE8D8DBD6DA41B47B28 /* mptString.cpp */,
 				4AECD572BC0F766471D623B2 /* mptString.h */,
 				C510221C396A670EB74DF05C /* mptStringBuffer.cpp */,
 				90E45EE632CDFAD829F50D26 /* mptStringBuffer.h */,
@@ -1561,7 +1558,6 @@
 				1F7082161F13654859681856 /* mptFileType.cpp in Sources */,
 				DF08AE5AEEEDDA8CDB61649A /* mptPathString.cpp in Sources */,
 				926864F471857F264D8EDB34 /* mptRandom.cpp in Sources */,
-				9B05DDE07A22F812562C5420 /* mptString.cpp in Sources */,
 				8751165421750B86D19AEC94 /* mptStringBuffer.cpp in Sources */,
 				30BE965074D2678268A3EC90 /* mptTime.cpp in Sources */,
 				EDE4FB2CD37C025E96C1116C /* serialization_utils.cpp in Sources */,

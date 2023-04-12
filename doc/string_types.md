@@ -1,20 +1,3 @@
-/*
- * mptString.cpp
- * -------------
- * Purpose: Small string-related utilities, number and message formatting.
- * Notes  : Currently none.
- * Authors: OpenMPT Devs
- * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
- */
-
-#include "stdafx.h"
-#include "mptString.h"
-
-OPENMPT_NAMESPACE_BEGIN
-
-/*
-
-
 
 Quick guide to the OpenMPT string type jungle
 =============================================
@@ -268,9 +251,3 @@ runtime and not portable across compilers. TEXT() is from <windows.h>. We use
 _T() in mptrack/ only because it is shorter.
 
 
-
-*/
-
-MPT_MSVC_WORKAROUND_LNK4221(mptString)
-
-OPENMPT_NAMESPACE_END
