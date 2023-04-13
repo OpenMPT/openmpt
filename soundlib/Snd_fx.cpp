@@ -911,7 +911,9 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 		// Interpret F00 effect in XM files as "stop song"
 		if(GetType() == MOD_TYPE_XM && playState.m_nMusicSpeed == uint16_max)
 		{
-			break;
+			playState.m_nNextRow = playState.m_nRow;
+			playState.m_nNextOrder = playState.m_nCurrentOrder;
+			continue;
 		}
 
 		playState.m_nCurrentRowsPerBeat = m_nDefaultRowsPerBeat;
