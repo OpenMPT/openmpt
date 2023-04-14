@@ -9,13 +9,14 @@
 
 
 #include "stdafx.h"
-#include "Mptrack.h"
+#include "EffectVis.h"
 #include "Mainfrm.h"
 #include "Childfrm.h"
-#include "Moddoc.h"
 #include "Globals.h"
+#include "InputHandler.h"
+#include "Mptrack.h"
+#include "Moddoc.h"
 #include "View_pat.h"
-#include "EffectVis.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -23,6 +24,22 @@ OPENMPT_NAMESPACE_BEGIN
 CEffectVis::Action CEffectVis::m_nAction = CEffectVis::Action::OverwriteFX;
 
 IMPLEMENT_DYNAMIC(CEffectVis, CDialog)
+
+
+BEGIN_MESSAGE_MAP(CEffectVis, CDialog)
+	ON_WM_ERASEBKGND()
+	ON_WM_PAINT()
+	ON_WM_SIZE()
+	ON_WM_LBUTTONDOWN()
+	ON_WM_LBUTTONUP()
+	ON_WM_MOUSEMOVE()
+	ON_WM_RBUTTONDOWN()
+	ON_WM_RBUTTONUP()
+	ON_CBN_SELCHANGE(IDC_VISACTION,     &CEffectVis::OnActionChanged)
+	ON_CBN_SELCHANGE(IDC_VISEFFECTLIST, &CEffectVis::OnEffectChanged)
+END_MESSAGE_MAP()
+
+
 CEffectVis::CEffectVis(CViewPattern *pViewPattern, ROWINDEX startRow, ROWINDEX endRow, CHANNELINDEX nchn, CModDoc &modDoc, PATTERNINDEX pat)
 	: m_effectInfo(modDoc.GetSoundFile())
 	, m_ModDoc(modDoc)
@@ -34,18 +51,6 @@ CEffectVis::CEffectVis(CViewPattern *pViewPattern, ROWINDEX startRow, ROWINDEX e
 	UpdateSelection(startRow, endRow, nchn, pat);
 }
 
-BEGIN_MESSAGE_MAP(CEffectVis, CDialog)
-	ON_WM_ERASEBKGND()
-	ON_WM_PAINT()
-	ON_WM_SIZE()
-	ON_WM_LBUTTONDOWN()
-	ON_WM_LBUTTONUP()
-	ON_WM_MOUSEMOVE()
-	ON_WM_RBUTTONDOWN()
-	ON_WM_RBUTTONUP()
-	ON_CBN_SELCHANGE(IDC_VISACTION,		&CEffectVis::OnActionChanged)
-	ON_CBN_SELCHANGE(IDC_VISEFFECTLIST,	&CEffectVis::OnEffectChanged)
-END_MESSAGE_MAP()
 
 void CEffectVis::DoDataExchange(CDataExchange* pDX)
 {
@@ -53,6 +58,7 @@ void CEffectVis::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_VISSTATUS, m_edVisStatus);
 	DDX_Control(pDX, IDC_VISACTION, m_cmbActionList);
 }
+
 
 void CEffectVis::OnActionChanged()
 {
@@ -66,6 +72,7 @@ void CEffectVis::OnActionChanged()
 		UpdateEffectList();
 }
 
+
 void CEffectVis::OnEffectChanged()
 {
 	if(m_nAction == Action::FillPC || m_nAction == Action::OverwritePC)
@@ -74,12 +81,14 @@ void CEffectVis::OnEffectChanged()
 		m_nFillEffect = static_cast<UINT>(m_cmbEffectList.GetItemData(m_cmbEffectList.GetCurSel()));
 }
 
+
 void CEffectVis::OnPaint()
 {
 	CPaintDC dc(this); // device context for painting
 	ShowVis(&dc);
 
 }
+
 
 uint16 CEffectVis::GetParam(ROWINDEX row) const
 {
@@ -99,6 +108,7 @@ uint16 CEffectVis::GetParam(ROWINDEX row) const
 
 	return paramValue;
 }
+
 
 // Sets a row's param value based on the vertical cursor position.
 // Sets either plain pattern effect parameter or PC note parameter
@@ -123,6 +133,7 @@ void CEffectVis::SetParamFromY(ROWINDEX row, int y)
 }
 
 
+
 EffectCommand CEffectVis::GetCommand(ROWINDEX row) const
 {
 	if(m_SndFile.Patterns.IsValidPat(m_nPattern))
@@ -130,6 +141,7 @@ EffectCommand CEffectVis::GetCommand(ROWINDEX row) const
 	else
 		return CMD_NONE;
 }
+
 
 void CEffectVis::SetCommand(ROWINDEX row, EffectCommand command)
 {
@@ -147,6 +159,19 @@ void CEffectVis::SetCommand(ROWINDEX row, EffectCommand command)
 		m.command = command;
 	}
 }
+
+
+std::pair<ROWINDEX, ROWINDEX> CEffectVis::GetTimeSignature() const
+{
+	ROWINDEX beat = m_SndFile.m_nDefaultRowsPerBeat, measure = m_SndFile.m_nDefaultRowsPerMeasure;
+	if(m_SndFile.Patterns.IsValidIndex(m_nPattern) && m_SndFile.Patterns[m_nPattern].GetOverrideSignature())
+	{
+		beat = m_SndFile.Patterns[m_nPattern].GetRowsPerBeat();
+		measure = m_SndFile.Patterns[m_nPattern].GetRowsPerMeasure();
+	}
+	return std::make_pair(beat, measure);
+}
+
 
 int CEffectVis::RowToScreenX(ROWINDEX row) const
 {
@@ -177,6 +202,7 @@ int CEffectVis::RowToScreenY(ROWINDEX row) const
 	return screenY;
 }
 
+
 int CEffectVis::FXParamToScreenY(uint16 param) const
 {
 	if(param >= 0x00 && param <= 0xFF)
@@ -184,12 +210,14 @@ int CEffectVis::FXParamToScreenY(uint16 param) const
 	return -1;
 }
 
+
 int CEffectVis::PCParamToScreenY(uint16 param) const
 {
 	if(param >= 0x00 && param <= ModCommand::maxColumnValue)
 		return mpt::saturate_round<int>(m_rcDraw.bottom - param*m_pixelsPerPCParam);
 	return -1;
 }
+
 
 ModCommand::PARAM CEffectVis::ScreenYToFXParam(int y) const
 {
@@ -202,6 +230,7 @@ ModCommand::PARAM CEffectVis::ScreenYToFXParam(int y) const
 	return mpt::saturate_round<ModCommand::PARAM>((m_rcDraw.bottom - y) / m_pixelsPerFXParam);
 }
 
+
 uint16 CEffectVis::ScreenYToPCParam(int y) const
 {
 	if(y <= PCParamToScreenY(ModCommand::maxColumnValue))
@@ -212,6 +241,7 @@ uint16 CEffectVis::ScreenYToPCParam(int y) const
 
 	return mpt::saturate_round<uint16>((m_rcDraw.bottom - y) / m_pixelsPerPCParam);
 }
+
 
 ROWINDEX CEffectVis::ScreenXToRow(int x) const
 {
@@ -229,20 +259,15 @@ void CEffectVis::DrawGrid()
 {
 	// Lots of room for optimisation here.
 	// Draw vertical grid lines
-	ROWINDEX nBeat = m_SndFile.m_nDefaultRowsPerBeat, nMeasure = m_SndFile.m_nDefaultRowsPerMeasure;
-	if(m_SndFile.Patterns[m_nPattern].GetOverrideSignature())
-	{
-		nBeat = m_SndFile.Patterns[m_nPattern].GetRowsPerBeat();
-		nMeasure = m_SndFile.Patterns[m_nPattern].GetRowsPerMeasure();
-	}
+	const auto [beat, measure] = GetTimeSignature();
 
 	m_dcGrid.FillSolidRect(&m_rcDraw, 0);
 	auto oldPen = m_dcGrid.SelectStockObject(DC_PEN);
 	for(ROWINDEX row = m_startRow; row <= m_endRow; row++)
 	{
-		if(row % nMeasure == 0)
+		if(row % measure == 0)
 			m_dcGrid.SetDCPenColor(RGB(0xFF, 0xFF, 0xFF));
-		else if(row % nBeat == 0)
+		else if(row % beat == 0)
 			m_dcGrid.SetDCPenColor(RGB(0x99, 0x99, 0x99));
 		else
 			m_dcGrid.SetDCPenColor(RGB(0x55, 0x55, 0x55));
@@ -394,6 +419,9 @@ void CEffectVis::DrawNodes()
 	if(m_rcDraw.IsRectEmpty())
 		return;
 
+	if(m_nDragItem < m_startRow || m_nDragItem > m_endRow)
+		m_nDragItem = m_startRow;
+
 	//Draw
 	const int lineWidth = Util::ScalePixels(1, m_hWnd);
 	const int nodeSizeHalf = m_nodeSizeHalf;
@@ -431,6 +459,7 @@ void CEffectVis::InvalidateRow(int row)
 //It seems this optimisation doesn't work properly yet.	Disable in Update()
 
 	int x = RowToScreenX(row);
+	RECT invalidated;
 	invalidated.bottom = m_rcDraw.bottom;
 	invalidated.top = m_rcDraw.top;
 	invalidated.left = x - m_nodeSizeHalf;
@@ -587,7 +616,11 @@ void CEffectVis::UpdateSelection(ROWINDEX startRow, ROWINDEX endRow, CHANNELINDE
 	if(!m_SndFile.Patterns[m_nPattern].IsValidRow(m_endRow))
 	{
 		m_endRow = m_SndFile.Patterns[m_nPattern].GetNumRows() - 1;
+		m_nRows = m_endRow - startRow;
 	}
+
+	if(m_nDragItem < m_startRow || m_nDragItem > m_endRow)
+		m_nDragItem = m_startRow;
 
 	if(m_nRows)
 		m_pixelsPerRow = (float)(m_rcDraw.Width() - m_innerBorder * 2) / (float)m_nRows;
@@ -621,7 +654,6 @@ void CEffectVis::OnRButtonUp(UINT nFlags, CPoint point)
 {
 	ReleaseCapture();
 	m_dwStatus = 0x00;
-	m_nDragItem = -1;
 	CDialog::OnRButtonUp(nFlags, point);
 }
 
@@ -631,9 +663,9 @@ void CEffectVis::OnMouseMove(UINT nFlags, CPoint point)
 
 	ROWINDEX row = ScreenXToRow(point.x);
 
-	if ((m_dwStatus & FXVSTATUS_RDRAGGING) && (m_nDragItem>=0) )
+	if(m_dwStatus & FXVSTATUS_RDRAGGING)
 	{
-		m_nRowToErase = m_nDragItem;
+		m_nRowToErase = static_cast<int>(m_nDragItem);
 		m_nParamToErase = GetParam(m_nDragItem);
 
 		MakeChange(m_nDragItem, point.y);
@@ -890,7 +922,7 @@ void CEffectVis::MakeChange(ROWINDEX row, int y)
 	}
 
 	m_ModDoc.SetModified();
-	m_ModDoc.UpdateAllViews(nullptr, PatternHint(m_nPattern).Data());
+	m_ModDoc.UpdateAllViews(nullptr, RowHint(row), this);
 }
 
 void CEffectVis::SetPcNote(ROWINDEX row)
