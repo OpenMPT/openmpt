@@ -68,7 +68,7 @@ is just a high-level summary.
  *  [**New**] Support for Clang 6 has been restored.
  *  [**New**] Support for Android NDK 18 has been restored.
  *  [**New**] openmpt123: `--banner [0|1|2]` allows changing the openmpt123
-    banner style to hidden, shown, and verbose, respectively.
+    banner style to hidden, shown, or verbose, respectively.
 
  *  [**Change**] xmp-openmpt: The Amiga resampler emulation is now enabled by
     default.
