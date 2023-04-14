@@ -374,7 +374,7 @@ static mpt::ustring seconds_to_string( double time ) {
 	return str;
 }
 
-static void show_info( concat_stream<mpt::ustring> & log, bool verbose ) {
+static void show_banner( concat_stream<mpt::ustring> & log, bool verbose ) {
 	log << MPT_USTRING("openmpt123") << MPT_USTRING(" v") << mpt::transcode<mpt::ustring>( mpt::source_encoding, OPENMPT123_VERSION_STRING ) << MPT_USTRING(", libopenmpt ") << mpt::transcode<mpt::ustring>( libopenmpt_encoding, openmpt::string::get( "library_version" ) ) << MPT_USTRING(" (") << MPT_USTRING("OpenMPT ") << mpt::transcode<mpt::ustring>( libopenmpt_encoding, openmpt::string::get( "core_version" ) ) << MPT_USTRING(")") << lf;
 	log << MPT_USTRING("Copyright (c) 2013-2023 OpenMPT Project Developers and Contributors <https://lib.openmpt.org/>") << lf;
 	if ( !verbose ) {
@@ -462,17 +462,17 @@ static void show_short_version( textout & log ) {
 }
 
 static void show_version( textout & log ) {
-	show_info( log, false );
+	show_banner( log, false );
 	log.writeout();
 }
 
 static void show_long_version( textout & log ) {
-	show_info( log, true );
+	show_banner( log, true );
 	log.writeout();
 }
 
 static void show_credits( textout & log ) {
-	show_info( log, false );
+	show_banner( log, false );
 	log << mpt::transcode<mpt::ustring>( libopenmpt_encoding, openmpt::string::get( "contact" ) ) << lf;
 	log << lf;
 	log << mpt::transcode<mpt::ustring>( libopenmpt_encoding, openmpt::string::get( "credits" ) ) << lf;
@@ -480,7 +480,7 @@ static void show_credits( textout & log ) {
 }
 
 static void show_license( textout & log ) {
-	show_info( log, false );
+	show_banner( log, false );
 	log << mpt::transcode<mpt::ustring>( mpt::source_encoding, license ) << lf;
 	log.writeout();
 }
@@ -501,7 +501,7 @@ static mpt::ustring get_device_string( const mpt::ustring & device ) {
 
 static void show_help_keyboard( textout & log, bool man_version = false ) {
 	if ( !man_version ) {
-		show_info( log, false );
+		show_banner( log, false );
 	}
 	log << MPT_USTRING("Keyboard hotkeys (use 'openmpt123 --ui'):") << lf;
 	log << lf;
@@ -529,7 +529,7 @@ static void show_help_keyboard( textout & log, bool man_version = false ) {
 
 static void show_help( textout & log, bool with_info = true, bool longhelp = false, bool man_version = false, const mpt::ustring & message = mpt::ustring() ) {
 	if ( with_info ) {
-		show_info( log, false );
+		show_banner( log, false );
 	}
 	{
 		log << MPT_USTRING("Usage: openmpt123 [options] [--] file1 [file2] ...") << lf;
@@ -2203,7 +2203,7 @@ static int main( int argc, char * argv [] ) {
 		
 		textout & log = flags.quiet ? static_cast<textout&>( dummy_log ) : static_cast<textout&>( stdout_can_ui ? std_out : std_err );
 
-		show_info( log, flags.verbose );
+		show_banner( log, flags.verbose );
 
 		if ( !flags.warnings.empty() ) {
 			log << flags.warnings << lf;
