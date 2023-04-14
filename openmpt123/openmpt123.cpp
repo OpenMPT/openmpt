@@ -280,6 +280,7 @@ static std::int32_t double_to_pitch_flag( double factor ) {
 
 static concat_stream<mpt::ustring> & operator << ( concat_stream<mpt::ustring> & s, const commandlineflags & flags ) {
 	s << MPT_USTRING("Quiet: ") << flags.quiet << lf;
+	s << MPT_USTRING("Banner: ") << flags.banner << lf;
 	s << MPT_USTRING("Verbose: ") << flags.verbose << lf;
 	s << MPT_USTRING("Mode : ") << mode_to_string( flags.mode ) << lf;
 	s << MPT_USTRING("Show progress: ") << flags.show_progress << lf;
@@ -374,10 +375,17 @@ static mpt::ustring seconds_to_string( double time ) {
 	return str;
 }
 
-static void show_banner( concat_stream<mpt::ustring> & log, bool verbose ) {
+static void show_banner( concat_stream<mpt::ustring> & log, verbosity banner ) {
+	if ( banner == verbosity_hidden ) {
+		return;
+	}
+	if ( banner == verbosity_shortversion ) {
+		log << mpt::transcode<mpt::ustring>( mpt::source_encoding, OPENMPT123_VERSION_STRING ) << MPT_USTRING(" / ") << mpt::transcode<mpt::ustring>( libopenmpt_encoding, openmpt::string::get( "library_version" ) ) << MPT_USTRING(" / ") << mpt::transcode<mpt::ustring>( libopenmpt_encoding, openmpt::string::get( "core_version" ) ) << lf;
+		return;
+	}
 	log << MPT_USTRING("openmpt123") << MPT_USTRING(" v") << mpt::transcode<mpt::ustring>( mpt::source_encoding, OPENMPT123_VERSION_STRING ) << MPT_USTRING(", libopenmpt ") << mpt::transcode<mpt::ustring>( libopenmpt_encoding, openmpt::string::get( "library_version" ) ) << MPT_USTRING(" (") << MPT_USTRING("OpenMPT ") << mpt::transcode<mpt::ustring>( libopenmpt_encoding, openmpt::string::get( "core_version" ) ) << MPT_USTRING(")") << lf;
 	log << MPT_USTRING("Copyright (c) 2013-2023 OpenMPT Project Developers and Contributors <https://lib.openmpt.org/>") << lf;
-	if ( !verbose ) {
+	if ( banner == verbosity_normal ) {
 		log << lf;
 		return;
 	}
@@ -457,30 +465,30 @@ static void show_man_version( textout & log ) {
 }
 
 static void show_short_version( textout & log ) {
-	log << mpt::transcode<mpt::ustring>( mpt::source_encoding, OPENMPT123_VERSION_STRING ) << MPT_USTRING(" / ") << mpt::transcode<mpt::ustring>( libopenmpt_encoding, openmpt::string::get( "library_version" ) ) << MPT_USTRING(" / ") << mpt::transcode<mpt::ustring>( libopenmpt_encoding, openmpt::string::get( "core_version" ) ) << lf;
+	show_banner( log, verbosity_shortversion );
 	log.writeout();
 }
 
 static void show_version( textout & log ) {
-	show_banner( log, false );
+	show_banner( log, verbosity_normal );
 	log.writeout();
 }
 
 static void show_long_version( textout & log ) {
-	show_banner( log, true );
+	show_banner( log, verbosity_verbose );
 	log.writeout();
 }
 
-static void show_credits( textout & log ) {
-	show_banner( log, false );
+static void show_credits( textout & log, verbosity banner ) {
+	show_banner( log, banner );
 	log << mpt::transcode<mpt::ustring>( libopenmpt_encoding, openmpt::string::get( "contact" ) ) << lf;
 	log << lf;
 	log << mpt::transcode<mpt::ustring>( libopenmpt_encoding, openmpt::string::get( "credits" ) ) << lf;
 	log.writeout();
 }
 
-static void show_license( textout & log ) {
-	show_banner( log, false );
+static void show_license( textout & log, verbosity banner ) {
+	show_banner( log, banner );
 	log << mpt::transcode<mpt::ustring>( mpt::source_encoding, license ) << lf;
 	log.writeout();
 }
@@ -500,9 +508,6 @@ static mpt::ustring get_device_string( const mpt::ustring & device ) {
 }
 
 static void show_help_keyboard( textout & log, bool man_version = false ) {
-	if ( !man_version ) {
-		show_banner( log, false );
-	}
 	log << MPT_USTRING("Keyboard hotkeys (use 'openmpt123 --ui'):") << lf;
 	log << lf;
 	log << MPT_USTRING(" [q]      quit") << lf;
@@ -527,10 +532,7 @@ static void show_help_keyboard( textout & log, bool man_version = false ) {
 	}
 }
 
-static void show_help( textout & log, bool with_info = true, bool longhelp = false, bool man_version = false, const mpt::ustring & message = mpt::ustring() ) {
-	if ( with_info ) {
-		show_banner( log, false );
-	}
+static void show_help( textout & log, bool longhelp = false, bool man_version = false, const mpt::ustring & message = mpt::ustring() ) {
 	{
 		log << MPT_USTRING("Usage: openmpt123 [options] [--] file1 [file2] ...") << lf;
 		log << lf;
@@ -562,6 +564,8 @@ static void show_help( textout & log, bool with_info = true, bool longhelp = fal
 			log.writeout();
 			return;
 		}
+		log << lf;
+		log << MPT_USTRING("     --banner n             openmpt123 banner style [0=hide,1=show,2=verbose] [default: ") << commandlineflags().banner << MPT_USTRING("]") << lf;
 		log << lf;
 		log << MPT_USTRING("     --terminal-width n     Assume terminal is n characters wide [default: ") << commandlineflags().terminal_width << MPT_USTRING("]") << lf;
 		log << MPT_USTRING("     --terminal-height n    Assume terminal is n characters high [default: ") << commandlineflags().terminal_height << MPT_USTRING("]") << lf;
@@ -1845,6 +1849,11 @@ static void parse_openmpt123( commandlineflags & flags, const std::vector<mpt::u
 				flags.mode = Mode::Batch;
 			} else if ( arg == MPT_USTRING("--render") ) {
 				flags.mode = Mode::Render;
+			} else if ( arg == MPT_USTRING("--banner") && nextarg != MPT_USTRING("") ) {
+				std::int8_t value = static_cast<std::int8_t>( flags.banner );
+				mpt::parse_into( value, nextarg );
+				flags.banner = static_cast<verbosity>( value );
+				++i;
 			} else if ( arg == MPT_USTRING("--terminal-width") && nextarg != MPT_USTRING("") ) {
 				mpt::parse_into( flags.terminal_width, nextarg );
 				++i;
@@ -2191,7 +2200,13 @@ static int main( int argc, char * argv [] ) {
 
 		flags.check_and_sanitize();
 
+	} catch ( args_nofiles_exception & ) {
+		show_banner( std_out, flags.banner );
+		show_help( std_out );
+		std_out.writeout();
+		return 0;
 	} catch ( args_error_exception & ) {
+		show_banner( std_out, flags.banner );
 		show_help( std_out );
 		std_out.writeout();
 		if ( args.size() > 1 ) {
@@ -2200,18 +2215,21 @@ static int main( int argc, char * argv [] ) {
 		}
 		return 1;
 	} catch ( show_man_help_exception & ) {
-		show_help( std_out, false, true, true );
+		show_banner( std_out, flags.banner );
+		show_help( std_out, true, true );
 		return 0;
 	} catch ( show_man_version_exception & ) {
 		show_man_version( std_out );
 		return 0;
 	} catch ( show_help_exception & e ) {
-		show_help( std_out, true, e.longhelp, false, e.message );
+		show_banner( std_out, flags.banner );
+		show_help( std_out, e.longhelp, false, e.message );
 		if ( flags.verbose ) {
-			show_credits( std_out );
+			show_credits( std_out, verbosity_hidden );
 		}
 		return 0;
 	} catch ( show_help_keyboard_exception & ) {
+		show_banner( std_out, flags.banner );
 		show_help_keyboard( std_out );
 		return 0;
 	} catch ( show_long_version_number_exception & ) {
@@ -2224,10 +2242,10 @@ static int main( int argc, char * argv [] ) {
 		show_short_version( std_out );
 		return 0;
 	} catch ( show_credits_exception & ) {
-		show_credits( std_out );
+		show_credits( std_out, flags.banner );
 		return 0;
 	} catch ( show_license_exception & ) {
-		show_license( std_out );
+		show_license( std_out, flags.banner );
 		return 0;
 	} catch ( silent_exit_exception & ) {
 		return 0;
@@ -2277,7 +2295,7 @@ static int main( int argc, char * argv [] ) {
 		
 		textout & log = flags.quiet ? static_cast<textout&>( dummy_log ) : static_cast<textout&>( stdout_can_ui ? std_out : std_err );
 
-		show_banner( log, flags.verbose );
+		show_banner( log, flags.banner );
 
 		if ( !flags.warnings.empty() ) {
 			log << flags.warnings << lf;
@@ -2367,6 +2385,7 @@ static int main( int argc, char * argv [] ) {
 		}
 
 	} catch ( args_error_exception & ) {
+		show_banner( std_out, flags.banner );
 		show_help( std_out );
 		std_err << MPT_USTRING("Error parsing command line.") << lf;
 		std_err.writeout();

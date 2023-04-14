@@ -71,8 +71,12 @@ struct show_help_exception {
 	show_help_exception( const mpt::ustring & msg = MPT_USTRING(""), bool longhelp_ = true ) : message(msg), longhelp(longhelp_) { }
 };
 
+struct args_nofiles_exception {
+	args_nofiles_exception() = default;
+};
+
 struct args_error_exception {
-	args_error_exception() { }
+	args_error_exception() = default;
 };
 
 struct show_help_keyboard_exception { };
@@ -390,6 +394,13 @@ inline mpt::ustring mode_to_string( Mode mode ) {
 inline const std::int32_t default_low = -2;
 inline const std::int32_t default_high = -1;
 
+enum verbosity : std::int8_t {
+	verbosity_shortversion = -1,
+	verbosity_hidden = 0,
+	verbosity_normal = 1,
+	verbosity_verbose = 2,
+};
+
 struct commandlineflags {
 	Mode mode;
 	bool canUI;
@@ -414,6 +425,7 @@ struct commandlineflags {
 	double seek_target;
 	double end_time;
 	bool quiet;
+	verbosity banner;
 	bool verbose;
 	int terminal_width;
 	int terminal_height;
@@ -481,6 +493,7 @@ struct commandlineflags {
 		seek_target = 0.0;
 		end_time = 0.0;
 		quiet = false;
+		banner = verbosity_normal;
 		verbose = false;
 #if MPT_OS_DJGPP
 		terminal_width = 80;
@@ -557,7 +570,7 @@ struct commandlineflags {
 	}
 	void check_and_sanitize() {
 		if ( filenames.size() == 0 ) {
-			throw args_error_exception();
+			throw args_nofiles_exception();
 		}
 		if ( use_stdout && ( device != commandlineflags().device || !output_filename.empty() ) ) {
 			throw args_error_exception();
