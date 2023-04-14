@@ -1749,13 +1749,25 @@ static bool parse_playlist( commandlineflags & flags, mpt::native_path filename,
 }
 
 
-static commandlineflags parse_openmpt123( const std::vector<mpt::ustring> & args, concat_stream<mpt::ustring> & log ) {
+static void parse_openmpt123( commandlineflags & flags, const std::vector<mpt::ustring> & args, concat_stream<mpt::ustring> & log ) {
+
+	enum class action {
+		help,
+		help_keyboard,
+		man_version,
+		man_help,
+		version,
+		short_version,
+		long_version,
+		credits,
+		license,
+	};
+
+	std::optional<action> return_action;
 
 	if ( args.size() <= 1 ) {
 		throw args_error_exception();
 	}
-
-	commandlineflags flags;
 
 	bool files_only = false;
 	// cppcheck false-positive
@@ -1775,27 +1787,54 @@ static commandlineflags parse_openmpt123( const std::vector<mpt::ustring> & args
 			if ( arg == MPT_USTRING("--") ) {
 				files_only = true;
 			} else if ( arg == MPT_USTRING("-h") || arg == MPT_USTRING("--help") ) {
-				throw show_help_exception();
+				if ( return_action ) {
+					throw args_error_exception();
+				}
+				return_action = action::help;
 			} else if ( arg == MPT_USTRING("--help-keyboard") ) {
-				throw show_help_keyboard_exception();
+				if ( return_action ) {
+					throw args_error_exception();
+				}
+				return_action = action::help_keyboard;
+			} else if ( arg == MPT_USTRING("--man-version") ) {
+				if ( return_action ) {
+					throw args_error_exception();
+				}
+				return_action = action::man_version;
+			} else if ( arg == MPT_USTRING("--man-help") ) {
+				if ( return_action ) {
+					throw args_error_exception();
+				}
+				return_action = action::man_help;
+			} else if ( arg == MPT_USTRING("--version") ) {
+				if ( return_action ) {
+					throw args_error_exception();
+				}
+				return_action = action::version;
+			} else if ( arg == MPT_USTRING("--short-version") ) {
+				if ( return_action ) {
+					throw args_error_exception();
+				}
+				return_action = action::short_version;
+			} else if ( arg == MPT_USTRING("--long-version") ) {
+				if ( return_action ) {
+					throw args_error_exception();
+				}
+				return_action = action::long_version;
+			} else if ( arg == MPT_USTRING("--credits") ) {
+				if ( return_action ) {
+					throw args_error_exception();
+				}
+				return_action = action::credits;
+			} else if ( arg == MPT_USTRING("--license") ) {
+				if ( return_action ) {
+					throw args_error_exception();
+				}
+				return_action = action::license;
 			} else if ( arg == MPT_USTRING("-q") || arg == MPT_USTRING("--quiet") ) {
 				flags.quiet = true;
 			} else if ( arg == MPT_USTRING("-v") || arg == MPT_USTRING("--verbose") ) {
 				flags.verbose = true;
-			} else if ( arg == MPT_USTRING("--man-version") ) {
-				throw show_man_version_exception();
-			} else if ( arg == MPT_USTRING("--man-help") ) {
-				throw show_man_help_exception();
-			} else if ( arg == MPT_USTRING("--version") ) {
-				throw show_version_number_exception();
-			} else if ( arg == MPT_USTRING("--short-version") ) {
-				throw show_short_version_number_exception();
-			} else if ( arg == MPT_USTRING("--long-version") ) {
-				throw show_long_version_number_exception();
-			} else if ( arg == MPT_USTRING("--credits") ) {
-				throw show_credits_exception();
-			} else if ( arg == MPT_USTRING("--license") ) {
-				throw show_license_exception();
 			} else if ( arg == MPT_USTRING("--probe") ) {
 				flags.mode = Mode::Probe;
 			} else if ( arg == MPT_USTRING("--info") ) {
@@ -1991,7 +2030,37 @@ static commandlineflags parse_openmpt123( const std::vector<mpt::ustring> & args
 		}
 	}
 
-	return flags;
+	if ( return_action ) {
+		switch ( *return_action ) {
+			case action::help:
+				throw show_help_exception();
+				break;
+			case action::help_keyboard:
+				throw show_help_keyboard_exception();
+				break;
+			case action::man_version:
+				throw show_man_version_exception();
+				break;
+			case action::man_help:
+				throw show_man_help_exception();
+				break;
+			case action::version:
+				throw show_version_number_exception();
+				break;
+			case action::short_version:
+				throw show_short_version_number_exception();
+				break;
+			case action::long_version:
+				throw show_long_version_number_exception();
+				break;
+			case action::credits:
+				throw show_credits_exception();
+				break;
+			case action::license:
+				throw show_license_exception();
+				break;
+		}
+	}
 
 }
 
@@ -2118,12 +2187,17 @@ static int main( int argc, char * argv [] ) {
 
 	try {
 
-		flags = parse_openmpt123( args, std_err );
+		parse_openmpt123( flags, args, std_err );
 
 		flags.check_and_sanitize();
 
 	} catch ( args_error_exception & ) {
 		show_help( std_out );
+		std_out.writeout();
+		if ( args.size() > 1 ) {
+			std_err << MPT_USTRING("Error parsing command line.") << lf;
+			std_err.writeout();
+		}
 		return 1;
 	} catch ( show_man_help_exception & ) {
 		show_help( std_out, false, true, true );
@@ -2294,6 +2368,8 @@ static int main( int argc, char * argv [] ) {
 
 	} catch ( args_error_exception & ) {
 		show_help( std_out );
+		std_err << MPT_USTRING("Error parsing command line.") << lf;
+		std_err.writeout();
 		return 1;
 #ifdef MPT_WITH_ALLEGRO42
 	} catch ( allegro42_exception & e ) {
