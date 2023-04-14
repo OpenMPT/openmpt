@@ -23,7 +23,7 @@
 /*! \brief libopenmpt patch version number */
 #define OPENMPT_API_VERSION_PATCH 0
 /*! \brief libopenmpt pre-release tag */
-#define OPENMPT_API_VERSION_PREREL "-pre.20"
+#define OPENMPT_API_VERSION_PREREL "-pre.21"
 /*! \brief libopenmpt pre-release flag */
 #define OPENMPT_API_VERSION_IS_PREREL 1
 
