@@ -32,6 +32,33 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.30.12.00 (15 April 2023, revision 19028)
+-------------------------------------------
+Sample tab
+- [Fix] <js> Stopping a sample preview could stop unrelated plugin notes.
+
+Instrument tab
+- [Fix] <js> Saving ITI files with embedded samples created broken ITI files if the source samples were marked as external (http://forum.openmpt.org/index.php?topic=6957.0).
+
+MOD
+- [Imp] <js> VBlank heuristics are now applied to MOD files with M!K! signature. Fixes mod.siedler ii (tx AliceLR).
+- [Mod] <js> NoiseTracker MODs are now always played with VBlank timing (tx AliceLR).
+
+Other formats
+- [Imp] MED: Add support for default instrument pitch.
+- [Mod] 669: Reject files with lots of control characters in song message.
+- [Fix] MED: Global play transpose value was not considered for MMD0 files.
+
+Misc
+- [Imp] <js> Allow arrow up / down keys and scroll wheel to modify various edit fields in Stream Export and settings dialogs.
+- [Imp] <js> Tab order in Plugin Manager was changed to make the plugin list reachable more easily (http://bugs.openmpt.org/view.php?id=1680).
+- [Fix] <js> In OpenMPT 1.30.11.00, browsing for all module types showed all 3-letter file extensions in addition to modules (http://bugs.openmpt.org/view.php?id=1678).
+- [Fix] <js> Song length detection stopped at first encountered F00 command in XM files instead of looking for further subsongs.
+
+Third-Party Libraries
+- [Imp] Update mpg123 (v1.31.3)
+
+
 v1.30.11.00 (5 March 2023, revision 18811)
 ------------------------------------------
 Tree view
@@ -98,7 +125,7 @@ Misc
 - [Fix] <jh> After auto-updating from a previous version with no modules open, an empty module was created.
 
 Third-Party Libraries
-- [Imp] Update mpg123 (v1.31.2) 
+- [Imp] Update mpg123 (v1.31.2)
 
 
 v1.30.09.00 (8 January 2023, revision 18451)
@@ -1283,7 +1310,7 @@ Third-Party Libraries
 
 
 v1.28.09.00 (22 December 2019, revision 12387)
----------------------------------------------
+----------------------------------------------
 Pattern tab
 - [Fix] <js> Chord detect interval was broken if the pattern number didn't match its location in the order list (e.g. pattern 3 at position 3) since OpenMPT 1.28.07.00.
 - [Fix] <js> Potential crash when entering notes, in particular if the order list was empty (http://bugs.openmpt.org/view.php?id=1278).
