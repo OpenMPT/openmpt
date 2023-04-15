@@ -7,6 +7,17 @@ is just a high-level summary.
 
 ### libopenmpt 0.5.24-pre
 
+ *  [**Bug**] File probing and loading results could be inconsistent for SFX
+    files, so that probing could claim that a file is definitely not playable
+    even if it would be.
+
+ *  MOD: VBlank heuristics are now applied to MOD files with M!K! signature.
+    Fixes mod.siedler ii.
+ *  NoiseTracker MODs are now always played with VBlank timing.
+ *  MED: Add support for default instrument pitch.
+ *  MED: Global play transpose value was not considered for MMD0 files.
+ *  669: Reject files with lots of control characters in song message.
+
  *  mpg123: Update to v1.31.3 (2023-03-19).
 
 ### libopenmpt 0.5.23 (2023-03-05)
