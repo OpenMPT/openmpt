@@ -7,6 +7,14 @@ is just a high-level summary.
 
 ### libopenmpt 0.3.44-pre
 
+ *  [**Bug**] File probing and loading results could be inconsistent for SFX
+    files, so that probing could claim that a file is definitely not playable
+    even if it would be.
+
+ *  MOD: VBlank heuristics are now applied to MOD files with M!K! signature.
+    Fixes mod.siedler ii.
+ *  NoiseTracker MODs are now always played with VBlank timing.
+
  *  mpg123: Update to v1.31.3 (2023-03-19).
 
 ### libopenmpt 0.3.43 (2023-03-05)
