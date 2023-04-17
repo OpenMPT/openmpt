@@ -17,8 +17,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 CUnarchiver::CUnarchiver(FileReader &file)
-	: impl(nullptr)
-	, inFile(file)
+	: inFile(file)
 	, emptyArchive(inFile)
 #if (defined(MPT_WITH_ZLIB) && defined(MPT_WITH_MINIZIP)) || defined(MPT_WITH_MINIZ)
 	, zipArchive(inFile)

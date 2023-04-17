@@ -40,7 +40,7 @@ class CUnarchiver : public IArchive
 
 private:
 
-	IArchive *impl;
+	IArchive *impl = nullptr;
 
 	FileReader inFile;
 
@@ -74,6 +74,9 @@ public:
 	IArchive::const_iterator begin() const override;
 	IArchive::const_iterator end() const override;
 	const ArchiveFileInfo & operator [] (std::size_t index) const override;
+
+	template<typename T>
+	bool IsKind() const noexcept { return dynamic_cast<T *>(impl) != nullptr; }
 
 public:
 

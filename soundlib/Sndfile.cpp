@@ -438,7 +438,18 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags, CModDoc *pMo
 		CUnarchiver unarchiver(file);
 		if(unarchiver.ExtractBestFile(GetSupportedExtensions(true)))
 		{
-			if(CreateInternal(unarchiver.GetOutputFile(), loadFlags))
+			FileReader outputFile = unarchiver.GetOutputFile();
+#if defined(MPT_WITH_ANCIENT)
+			// Special case for MMCMP/PP20/XPK/etc. inside ZIP/RAR/LHA
+			std::unique_ptr<CAncientArchive> ancientArchive;
+			if(!unarchiver.IsKind<CAncientArchive>())
+			{
+				ancientArchive = std::make_unique<CAncientArchive>(outputFile);
+				if(ancientArchive->IsArchive() && ancientArchive->ExtractFile(0))
+					outputFile = ancientArchive->GetOutputFile();
+			}
+#endif
+			if(CreateInternal(outputFile, loadFlags))
 			{
 				// Read archive comment if there is no song comment
 				if(m_songMessage.empty())
