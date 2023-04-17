@@ -567,6 +567,7 @@ static void show_help( textout & log, bool longhelp = false, bool man_version = 
 		log << lf;
 		log << MPT_USTRING("     --banner n             openmpt123 banner style [0=hide,1=show,2=verbose] [default: ") << commandlineflags().banner << MPT_USTRING("]") << lf;
 		log << lf;
+		log << MPT_USTRING("     --assume-terminal      Skip checking whether stdin/stderr are a terminal, and always allow UI [default: ") << commandlineflags().assume_terminal << MPT_USTRING("]") << lf;
 		log << MPT_USTRING("     --terminal-width n     Assume terminal is n characters wide [default: ") << commandlineflags().terminal_width << MPT_USTRING("]") << lf;
 		log << MPT_USTRING("     --terminal-height n    Assume terminal is n characters high [default: ") << commandlineflags().terminal_height << MPT_USTRING("]") << lf;
 		log << lf;
@@ -1849,6 +1850,8 @@ static void parse_openmpt123( commandlineflags & flags, const std::vector<mpt::u
 				flags.mode = Mode::Batch;
 			} else if ( arg == MPT_USTRING("--render") ) {
 				flags.mode = Mode::Render;
+			} else if ( arg == MPT_USTRING("--assume-terminal") ) {
+				flags.assume_terminal = true;
 			} else if ( arg == MPT_USTRING("--banner") && nextarg != MPT_USTRING("") ) {
 				std::int8_t value = static_cast<std::int8_t>( flags.banner );
 				mpt::parse_into( value, nextarg );

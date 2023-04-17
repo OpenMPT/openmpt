@@ -69,6 +69,9 @@ is just a high-level summary.
  *  [**New**] Support for Android NDK 18 has been restored.
  *  [**New**] openmpt123: `--banner [0|1|2]` allows changing the openmpt123
     banner style to hidden, shown, or verbose, respectively.
+ *  [**New**] openmpt123: `--assume-terminal` allows skipping the openmpt123
+    terminal check, and thus allows running the UI with non-terminal stdin,
+    which can be useful for some very basic remote control functionality.
 
  *  [**Change**] xmp-openmpt: The Amiga resampler emulation is now enabled by
     default.

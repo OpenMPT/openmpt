@@ -403,9 +403,7 @@ enum verbosity : std::int8_t {
 
 struct commandlineflags {
 	Mode mode;
-	bool canUI;
 	std::int32_t ui_redraw_interval;
-	bool canProgress;
 	mpt::ustring driver;
 	mpt::ustring device;
 	std::int32_t buffer;
@@ -427,6 +425,7 @@ struct commandlineflags {
 	bool quiet;
 	verbosity banner;
 	bool verbose;
+	bool assume_terminal;
 	int terminal_width;
 	int terminal_height;
 	bool show_details;
@@ -495,6 +494,7 @@ struct commandlineflags {
 		quiet = false;
 		banner = verbosity_normal;
 		verbose = false;
+		assume_terminal = false;
 #if MPT_OS_DJGPP
 		terminal_width = 80;
 		terminal_height = 25;
@@ -547,16 +547,9 @@ struct commandlineflags {
 #endif // MPT_OS_WINDOWS && !MPT_WINRT_BEFORE(MPT_WIN_10)
 		show_details = true;
 		show_message = false;
-#if MPT_OS_WINDOWS
-		canUI = IsTerminal( 0 ) ? true : false;
-		canProgress = IsTerminal( 2 ) ? true : false;
-#else // !MPT_OS_WINDOWS
-		canUI = isatty( STDIN_FILENO ) ? true : false;
-		canProgress = isatty( STDERR_FILENO ) ? true : false;
-#endif // MPT_OS_WINDOWS
-		show_ui = canUI;
-		show_progress = canProgress;
-		show_meters = canUI && canProgress;
+		show_ui = true;
+		show_progress = true;
+		show_meters = true;
 		show_channel_meters = false;
 		show_pattern = false;
 		use_stdout = false;
@@ -569,6 +562,17 @@ struct commandlineflags {
 		paused = false;
 	}
 	void check_and_sanitize() {
+		bool canUI = true;
+		bool canProgress = true;
+		if ( !assume_terminal ) {
+#if MPT_OS_WINDOWS
+			canUI = IsTerminal( 0 ) ? true : false;
+			canProgress = IsTerminal( 2 ) ? true : false;
+#else // !MPT_OS_WINDOWS
+			canUI = isatty( STDIN_FILENO ) ? true : false;
+			canProgress = isatty( STDERR_FILENO ) ? true : false;
+#endif // MPT_OS_WINDOWS
+		}
 		if ( filenames.size() == 0 ) {
 			throw args_nofiles_exception();
 		}
@@ -584,6 +588,12 @@ struct commandlineflags {
 			}
 		}
 		show_ui = canUI;
+		if ( !canProgress ) {
+			show_progress = false;
+		}
+		if ( !canUI || !canProgress ) {
+			show_meters = false;
+		}
 		if ( mode == Mode::None ) {
 			if ( canUI ) {
 				mode = Mode::UI;
