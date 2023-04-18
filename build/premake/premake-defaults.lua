@@ -244,6 +244,12 @@
 		end
 	 runtime "Release"
    optimize "On"
+		if not _OPTIONS["clang"] then
+			if _ACTION >= "vs2022" then
+				buildoptions { "/Gw" }
+				buildoptions { "/Zc:checkGwOdr" }
+			end
+		end
 	 omitframepointer "Off"
 
   filter { "configurations:CheckedShared" }
@@ -252,6 +258,12 @@
    symbols "On"
 	 runtime "Release"
    optimize "On"
+		if not _OPTIONS["clang"] then
+			if _ACTION >= "vs2022" then
+				buildoptions { "/Gw" }
+				buildoptions { "/Zc:checkGwOdr" }
+			end
+		end
 	 omitframepointer "Off"
 
 	 
@@ -260,6 +272,10 @@
    symbols "On"
 		if not _OPTIONS["clang"] then
 			flags { "LinkTimeOptimization" }
+			if _ACTION >= "vs2022" then
+				buildoptions { "/Gw" }
+				buildoptions { "/Zc:checkGwOdr" }
+			end
 		end
 		if _OPTIONS["windows-family"] ~= "uwp" then
 			staticruntime "On"
@@ -272,6 +288,10 @@
    symbols "On"
 		if not _OPTIONS["clang"] then
 			flags { "LinkTimeOptimization" }
+			if _ACTION >= "vs2022" then
+				buildoptions { "/Gw" }
+				buildoptions { "/Zc:checkGwOdr" }
+			end
 		end
 	 runtime "Release"
    optimize "Speed"

@@ -666,7 +666,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/Gw /Zc:checkGwOdr /wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -697,7 +697,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/Gw /Zc:checkGwOdr /wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -728,7 +728,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/Gw /Zc:checkGwOdr /wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -759,7 +759,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/Gw /Zc:checkGwOdr /wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -792,7 +792,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/Gw /Zc:checkGwOdr /wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -824,7 +824,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/Gw /Zc:checkGwOdr /wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -856,7 +856,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/Gw /Zc:checkGwOdr /wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -888,7 +888,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/Gw /Zc:checkGwOdr /wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -1024,7 +1024,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/Gw /Zc:checkGwOdr /wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -1055,7 +1055,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/Gw /Zc:checkGwOdr /wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -1086,7 +1086,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/Gw /Zc:checkGwOdr /wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -1117,7 +1117,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/Gw /Zc:checkGwOdr /wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -1150,7 +1150,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/Gw /Zc:checkGwOdr /wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -1182,7 +1182,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/Gw /Zc:checkGwOdr /wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -1214,7 +1214,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/Gw /Zc:checkGwOdr /wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -1246,7 +1246,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/Gw /Zc:checkGwOdr /wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
