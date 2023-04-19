@@ -1368,9 +1368,9 @@ Declare Function openmpt_module_highlight_pattern_row_channel_ Alias "openmpt_mo
            - load.skip_subsongs_init: Set to "1" to avoid pre-initializing sub-songs. Skipping results in faster module loading but slower seeking.
            - seek.sync_samples: Set to "0" to not sync sample playback when using openmpt_module_set_position_seconds or openmpt_module_set_position_order_row.
            - subsong: The current subsong. Setting it has identical semantics as openmpt_module_select_subsong(), getting it returns the currently selected subsong.
-           - play.at_end: Chooses the behaviour when the end of song is reached:
+           - play.at_end (text): Chooses the behaviour when the end of song is reached. The song end is considered to be reached after the number of reptitions set by openmpt_module_set_repeat_count was played, so if the song is set to repeat infinitely, its end is never considered to be reached.
                           - "fadeout": Fades the module out for a short while. Subsequent reads after the fadeout will return 0 rendered frames.
-                          - "continue": Returns 0 rendered frames when the song end is reached. Subsequent reads will continue playing from the song start or loop start.
+                          - "continue": Returns 0 rendered frames when the song end is reached. Subsequent reads will continue playing from the loop start (if the song is not programmed to loop, playback resumsed from the song start).
                           - "stop": Returns 0 rendered frames when the song end is reached. Subsequent reads will return 0 rendered frames.
            - play.tempo_factor: Set a floating point tempo factor. "1.0" is the default tempo.
            - play.pitch_factor: Set a floating point pitch factor. "1.0" is the default pitch.
