@@ -1,4 +1,4 @@
-name: OpenBSD 7.2 Makefile
+name: OpenBSD 7.3 Makefile
 
 on:
   push:
@@ -18,7 +18,7 @@ jobs:
         architecture: x86_64
         hypervisor: xhyve
         operating_system: openbsd
-        version: '7.2'
+        version: '7.3'
         shell: bash
         run: |
           sudo pkg_add subversion p5-XML-XPath git mawk gmake pkgconf autoconf autoconf-archive automake libtool libltdl help2man doxygen mpg123 libogg libvorbis flac libsndfile pulseaudio portaudio-svn sdl2
