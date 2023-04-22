@@ -153,6 +153,8 @@ is just a high-level summary.
     number without note triggers that note.
  *  S3M: Better approximation of old "stereo control" SAx command used in
     Purple Motion's PANIC.S3M.
+ *  S3M: In ScreamTracker 3.03 and later, OPL notes with tone portamento next to
+    them are delayed until the next row and then the new pitch is used instantly.
  *  MOD: Lone instrument number with retrigger effect swap sample immediately.
  *  Recalling a sample's default volume using an instrument number (as opposed
     to regular volume commands) previously ramped the volume change smoothly
