@@ -2,9 +2,9 @@ name: Ubuntu 22.04 Makefile
 
 on:
   push:
-    branches: [ master ]
+    branches: [ OpenMPT-1.31 ]
   pull_request:
-    branches: [ master ]
+    branches: [ OpenMPT-1.31 ]
 
 jobs:
   build:
