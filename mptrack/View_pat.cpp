@@ -4654,7 +4654,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcTogglePatternPlayRow:
 			TrackerSettings::Instance().m_dwPatternSetup ^= PATTERN_PLAYNAVIGATEROW;
 			CMainFrame::GetMainFrame()->SetHelpText((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_PLAYNAVIGATEROW)
-				? _T("Play whole row when navigatin was turned is now enabled.") : _T("Play whole row when navigatin was turned is now disabled."));
+				? _T("Play whole row when navigating is now enabled.") : _T("Play whole row when navigating is now disabled."));
 			return wParam;
 	}
 
