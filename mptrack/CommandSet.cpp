@@ -427,6 +427,7 @@ constexpr struct
 	{kcToggleSmpInsList,                       VK_TAB,             ModNone,            kKeyEventDown,                   kCtxViewComments,        MPT_V("1.31")},
 	{kcExecuteSmpInsListItem,                  VK_RETURN,          ModNone,            kKeyEventDown,                   kCtxViewComments,        MPT_V("1.31")},
 	{kcRenameSmpInsListItem,                   VK_RETURN,          ModCtrl,            kKeyEventDown,                   kCtxViewComments,        MPT_V("1.31")},
+	{kcTreeViewSwitchViews,                    VK_TAB,             ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxViewTree,            MPT_V("1.31.00.27")},
 	{kcTreeViewOpen,                           VK_RETURN,          ModNone,            kKeyEventDown,                   kCtxViewTree,            MPT_V("1.31.00.14")},
 	{kcTreeViewPlay,                           VK_SPACE,           ModNone,            kKeyEventDown,                   kCtxViewTree,            MPT_V("1.31.00.14")},
 	{kcTreeViewInsert,                         VK_INSERT,          ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxViewTree,            MPT_V("1.31.00.14")},
@@ -435,6 +436,7 @@ constexpr struct
 	{kcTreeViewDeletePermanently,              VK_DELETE,          ModShift,           kKeyEventDown | kKeyEventRepeat, kCtxViewTree,            MPT_V("1.31.00.16")},
 	{kcTreeViewRename,                         VK_RETURN,          ModCtrl,            kKeyEventDown,                   kCtxViewTree,            MPT_V("1.31.00.14")},
 	{kcTreeViewSendToEditorInsertNew,          VK_RETURN,          ModShift | ModCtrl, kKeyEventDown,                   kCtxViewTree,            MPT_V("1.31.00.15")},
+	{kcTreeViewFolderUp,                       VK_BACK,            ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxViewTree,            MPT_V("1.31.00.27")},
 	{kcTreeViewFind,                           'F',                ModCtrl,            kKeyEventDown,                   kCtxViewTree,            MPT_V("1.31.00.14")},
 	{kcVSTGUIPrevPreset,                       VK_SUBTRACT,        ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxVSTGUI,              MPT_V("1.31")},
 	{kcVSTGUINextPreset,                       VK_ADD,             ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxVSTGUI,              MPT_V("1.31")},
@@ -1249,6 +1251,8 @@ static constexpr struct
 	{2053, kcPlaySongFromPatternPause, _T("Play Song from Pattern Start / Pause")},
 	{2054, kcSampleFinetuneUp, _T("Increment Finetune")},
 	{2055, kcSampleFinetuneDown, _T("Decrement Finetune")},
+	{2056, kcTreeViewSwitchViews, _T("Switch between Upper / Lower Tree View")},
+	{2057, kcTreeViewFolderUp, _T("Go to Parent Folder")},
 };
 
 // Get command descriptions etc.. loaded up.
