@@ -7,7 +7,14 @@ is just a high-level summary.
 
 ### libopenmpt 0.7.0-pre
 
+ *  [**New**] `667` files from Composer 667 are now supported.
  *  [**New**] `GTK` and `GT2` files from Gramouf Tracker are now supported.
+ *  [**New**] Can now read a variant of the DSMI AMF format called DMF, as found
+    in various DOS games distributed by Webfoot (Tronic, H2O, PowBall, etc.).
+ *  [**New**] `DSM` files from Dynamic Studio are now supported.
+ *  [**New**] `XMF` files from the DOS game Imperium Galactica are now supported.
+ *  [**New**] Can now read the hacked MOD format (`DMF`) from the game
+    "Apocalypse Abyss".
  *  [**New**] libopenmpt: New APIs for getting the current tempo as a floating
     point value: `openmpt::module::get_current_tempo2()` (C++), and
     `openmpt_module_get_current_tempo2()` (C).
@@ -131,10 +138,26 @@ is just a high-level summary.
  *  [**Regression**] Using the system-provided liballegro42 is no longer
     supported. The option `BUNDLED_ALLEGRO42=1` does not exist any more.
 
+ *  Reduced aliasing when downsampling with the Sinc + LP resampler.
+ *  The sample position is now rounded instead of truncated when resampling
+    without interpolation.
  *  Seeking with sample sync now supports portamento up / down commands as well
     as IMF/ PTM note slides. Tone portamento is now synchronized correctly when
     seeking in DBM, 669 and MED with fast slides (first tick of portamento was
     previously not executed).
+ *  The filter cutoff frequency is no longer rounded to integer frequency values.
+ *  MED: Tempos higher than 255 BPM can now be imported in pattern data.
+ *  MED: MMD1 files with more than 16 channels are now supported.
+ *  ULT: Import 8-bit volume commands with full precision.
+ *  IT: Initial "last note memory" of every channel is C-0, so a lone instrument
+    number without note triggers that note.
+ *  S3M: Better approximation of old "stereo control" SAx command used in
+    Purple Motion's PANIC.S3M.
+ *  MOD: Lone instrument number with retrigger effect swap sample immediately.
+ *  Recalling a sample's default volume using an instrument number (as opposed
+    to regular volume commands) previously ramped the volume change smoothly
+    over a whole tick. Now the user-configured ramp settings are used instead
+    (as it would happen when using a volume command to achieve the same effect).
 
 ### libopenmpt 0.6.0 (2021-12-23)
 
