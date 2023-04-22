@@ -19,7 +19,14 @@
 
 #include <libopenmpt/libopenmpt.h>
 
+#if defined( __GNUC__ ) && !defined( __clang__ ) && !defined( _MSC_VER )
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstrict-prototypes"
+#endif
 #include <portaudio.h>
+#if defined( __GNUC__ ) && !defined( __clang__ ) && !defined( _MSC_VER )
+#pragma GCC diagnostic pop
+#endif
 
 #define BUFFERSIZE 480
 #define SAMPLERATE 48000
