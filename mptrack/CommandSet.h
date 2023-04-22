@@ -827,6 +827,7 @@ enum CommandID
 
 	kcStartTreeViewCommands,
 	kcTreeViewStopPreview = kcStartTreeViewCommands,
+	kcTreeViewSwitchViews,
 	kcTreeViewOpen,
 	kcTreeViewPlay,
 	kcTreeViewInsert,
@@ -835,6 +836,7 @@ enum CommandID
 	kcTreeViewDeletePermanently,
 	kcTreeViewRename,
 	kcTreeViewSendToEditorInsertNew,
+	kcTreeViewFolderUp,
 	kcTreeViewFind,
 	kcTreeViewSortByName,
 	kcTreeViewSortByDate,

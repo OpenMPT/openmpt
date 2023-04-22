@@ -273,20 +273,6 @@ BOOL CModTree::PreTranslateMessage(MSG *pMsg)
 	{
 		switch(pMsg->wParam)
 		{
-		case VK_TAB:
-			// Tab: Switch between folder and file view.
-			GetOtherView()->SetFocus();
-			return TRUE;
-
-		case VK_BACK:
-			// Backspace: Go up one directory
-			if(GetParentRootItem(GetSelectedItem()) == m_hInsLib || IsSampleBrowser())
-			{
-				InstrumentLibraryChDir(P_(".."), !m_SongFileName.empty());
-				return TRUE;
-			}
-			break;
-
 		case VK_APPS:
 			// Handle Application (menu) key
 			if(HTREEITEM item = GetSelectedItem())
@@ -4160,6 +4146,11 @@ LRESULT CModTree::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		note = NOTE_NOTECUT;
 		break;
 
+	case kcTreeViewSwitchViews:
+		// Tab: Switch between folder and file view.
+		GetOtherView()->SetFocus();
+		return wParam;
+
 	case kcTreeViewOpen:
 		if(HTREEITEM hItem = GetSelectedItem(); hItem)
 		{
@@ -4186,6 +4177,15 @@ LRESULT CModTree::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 	case kcTreeViewDeletePermanently:
 		DeleteTreeItem(GetSelectedItem(), wParam == kcTreeViewDeletePermanently);
 		return wParam;
+
+	case kcTreeViewFolderUp:
+		// Backspace: Go up one directory
+		if(GetParentRootItem(GetSelectedItem()) == m_hInsLib || IsSampleBrowser())
+		{
+			InstrumentLibraryChDir(P_(".."), !m_SongFileName.empty());
+			return wParam;
+		}
+		return kcNull;
 
 	case kcTreeViewFind:
 		OnOpenInstrumentLibraryFilter();
