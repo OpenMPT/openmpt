@@ -6,16 +6,11 @@
  *          MilkyTracker can load it, but the only files of this format seen in the wild are also
  *          available in their original format, so I did not bother implementing it so far.
  *
- *          2. Using both PLAY.EXE v1.02 and v2.00, commands not supported in MOD do not seem to do
- *          anything at all.
- *          In particular commands 0x11-0x13 handled below are ignored, and no files have been spotted
- *          in the wild using any commands > 0x0F at all.
- *          S3M-style retrigger does not seem to exist - it is translated to volume slides by CONV.EXE,
+ *          2. S3M-style retrigger does not seem to exist - it is translated to volume slides by CONV.EXE,
  *          and J00 in S3M files is not converted either. S3M pattern loops (SBx) are not converted
  *          properly by CONV.EXE and completely ignored by PLAY.EXE.
  *          Command 8 (set panning) uses 00-80 for regular panning and A4 for surround, probably
- *          making DSIK one of the first applications to use this particular encoding scheme still
- *          used in "extended" S3Ms today.
+ *          making DSIK one of the first applications to use this convention established by DSMI's AMF format.
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
@@ -290,23 +285,6 @@ bool CSoundFile::ReadDSM(FileReader &file, ModLoadingFlags loadFlags)
 				if(flag & 0x10)
 				{
 					auto [command, param] = chunk.ReadArray<uint8, 2>();
-					switch(command)
-					{
-						// Portamentos
-					case 0x11:
-					case 0x12:
-						command &= 0x0F;
-						break;
-						// 3D Sound (?)
-					case 0x13:
-						command = 'X' - 55;
-						param = 0x91;
-						break;
-					default:
-						// Volume + Offset (?)
-						if(command > 0x10)
-							command = ((command & 0xF0) == 0x20) ? 0x09 : 0xFF;
-					}
 					ConvertModCommand(m, command, param);
 				}
 			}
