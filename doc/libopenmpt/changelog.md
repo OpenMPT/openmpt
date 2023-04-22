@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.8.0-pre
+
 ### libopenmpt 0.7.0-pre
 
  *  [**New**] `GTK` and `GT2` files from Gramouf Tracker are now supported.
