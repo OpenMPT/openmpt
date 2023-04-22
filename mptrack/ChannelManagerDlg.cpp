@@ -726,13 +726,14 @@ void CChannelManagerDlg::OnPaint()
 			const auto endColor = activate ? windowColor : buttonFaceColor;
 			const auto width = btnAdjusted.Width() / 2;
 			auto rect = btnAdjusted;
+			rect.left = rect.right - width;
 			rect.right = rect.left + 1;
 			for(int i = 0; i < width; i++)
 			{
 				auto blend = static_cast<double>(i) / width, blendInv = 1.0 - blend;
-				auto blendColor = RGB(mpt::saturate_round<uint8>(GetRValue(startColor) * blendInv + GetRValue(endColor) * blend),
-				                      mpt::saturate_round<uint8>(GetGValue(startColor) * blendInv + GetGValue(endColor) * blend),
-				                      mpt::saturate_round<uint8>(GetBValue(startColor) * blendInv + GetBValue(endColor) * blend));
+				auto blendColor = RGB(mpt::saturate_round<uint8>(GetRValue(startColor) * blend + GetRValue(endColor) * blendInv),
+				                      mpt::saturate_round<uint8>(GetGValue(startColor) * blend + GetGValue(endColor) * blendInv),
+				                      mpt::saturate_round<uint8>(GetBValue(startColor) * blend + GetBValue(endColor) * blendInv));
 				::SetDCBrushColor(dc, blendColor);
 				::FillRect(dc, &rect, dcBrush);
 				rect.left++;
