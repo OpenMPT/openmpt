@@ -701,7 +701,7 @@ void CLegacyPlaybackSettingsDlg::OnFilterStringChanged()
 			else
 				desc = _T("Ignore tone portamento for instrument plugins");
 			break;
-		case kST3TonePortaWithAdlibNote: desc = _T("Adlib Notes with Tone Portamento are delayed until the next row"); break;
+		case kST3TonePortaWithAdlibNote: desc = _T("OPL notes with Tone Portamento are delayed until the next row"); break;
 		case kITResetFilterOnPortaSmpChange: desc = _T("Reset filter on portamento if new note plays a different sample"); break;
 		case kITInitialNoteMemory: desc = _T("Initial Last Note Memory of each channel is C-0 instead of No Note"); break;
 
