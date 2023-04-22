@@ -67,6 +67,7 @@ static constexpr ModFormatInfo modFormatInfo[] =
 	{ UL_("X-Tracker"),                          "dmf" },
 	{ UL_("DSMI Compact Advanced Music Format"), "dmf" },
 	{ UL_("DSIK Format"),                        "dsm" },
+	{ UL_("Dynamic Studio"),                     "dsm" },
 	{ UL_("Digital Symphony"),                   "dsym" },
 	{ UL_("Digital Tracker"),                    "dtm" },
 	{ UL_("Farandole Composer"),                 "far" },

@@ -849,6 +849,7 @@ public:
 	static ProbeResult ProbeFileHeaderDIGI(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderDMF(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderDSM(MemoryFileReader file, const uint64 *pfilesize);
+	static ProbeResult ProbeFileHeaderDSm(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderDSym(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderFAR(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderFMT(MemoryFileReader file, const uint64* pfilesize);
@@ -902,6 +903,7 @@ public:
 	bool ReadDIGI(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadDMF(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadDSM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadDSm(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadDSym(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadFAR(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadFMT(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
