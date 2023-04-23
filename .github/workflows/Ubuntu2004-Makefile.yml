@@ -3,8 +3,6 @@ name: Ubuntu 20.04 Makefile
 on:
   push:
     branches: [ OpenMPT-1.27 ]
-  pull_request:
-    branches: [ OpenMPT-1.27 ]
 
 jobs:
   build:
