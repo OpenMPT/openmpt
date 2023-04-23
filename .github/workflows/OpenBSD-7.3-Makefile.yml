@@ -3,8 +3,6 @@ name: OpenBSD 7.3 Makefile
 on:
   push:
     branches: [ OpenMPT-1.31 ]
-  pull_request:
-    branches: [ OpenMPT-1.31 ]
 
 jobs:
   build:
