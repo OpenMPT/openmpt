@@ -4,6 +4,10 @@ on:
   push:
     branches: [ OpenMPT-1.27 ]
 
+concurrency:
+  group: ${{ github.ref }}-${{ github.workflow }}
+  cancel-in-progress: true
+
 jobs:
   build:
 
