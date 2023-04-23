@@ -424,6 +424,9 @@ bool CSoundFile::ReadDSm(FileReader &file, ModLoadingFlags loadFlags)
 	}
 	numPatterns++;
 
+	if(!file.CanRead((numPatterns * m_nChannels * 8) + (m_nSamples * sizeof(DSmSampleHeader)) + (numPatterns * m_nChannels * 64 * 4)))
+		return false;
+
 	// Track names for each pattern - we only read the track names of the first pattern
 	for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
 	{
@@ -439,69 +442,69 @@ bool CSoundFile::ReadDSm(FileReader &file, ModLoadingFlags loadFlags)
 		m_szNames[smp] = mpt::String::ReadBuf(mpt::String::spacePadded, sampleHeader.name);
 	}
 
-	if(loadFlags & loadPatternData)
+	Patterns.ResizeArray(numPatterns);
+	for(PATTERNINDEX pat = 0; pat < numPatterns; pat++)
 	{
-		Patterns.ResizeArray(numPatterns);
-		for(PATTERNINDEX pat = 0; pat < numPatterns; pat++)
+		if(!(loadFlags & loadPatternData) || !Patterns.Insert(pat, 64))
 		{
-			if(!file.CanRead(m_nChannels * 64 * 4) || !Patterns.Insert(pat, 64))
-				break;
-			for(ModCommand &m : Patterns[pat])
+			file.Skip(m_nChannels * 64 * 4);
+			continue;
+		}
+		for(ModCommand &m : Patterns[pat])
+		{
+			const auto data = file.ReadArray<uint8, 4>();
+			if(data[1] > 0 && data[1] <= 84 * 2)
+				m.note = (data[1] >> 1) + NOTE_MIN + 35;
+			m.instr = data[0];
+			m.param = data[3];
+			if(data[2] == 0x08)
 			{
-				const auto data = file.ReadArray<uint8, 4>();
-				if(data[1] > 0 && data[1] <= 84 * 2)
-					m.note = (data[1] >> 1) + NOTE_MIN + 35;
-				m.instr = data[0];
-				m.param = data[3];
-				if(data[2] == 0x08)
+				switch(m.param & 0xF0)
 				{
-					switch(m.param & 0xF0)
-					{
-					case 0x00:  // 4-bit panning
-						m.command = CMD_MODCMDEX;
-						m.param |= 0x80;
-						break;
-					case 0x10:  // Default volume slide Up (should stop at sample's default volume)
-						m.command = CMD_VOLUMESLIDE;
-						m.param <<= 4;
-						break;
-					case 0x20:  // Default fine volume slide Up (should stop at sample's default volume)
-						m.command = CMD_MODCMDEX;
-						m.param |= 0xA0;
-						break;
-					case 0x30:  // Fine porta up (support all 5 octaves)
-					case 0x40:  // Fine porta down (support all 5 octaves)
-						m.command = CMD_MODCMDEX;
-						m.param -= 0x20;
-						break;
-					default:
-						break;
-					}
-				} else if(data[2] == 0x13)
-				{
-					// 3D Simulate
-					m.command = CMD_PANNING8;
-					uint32 param = (m.param & 0x7F) * 2u;
-					if(m.param <= 0x40)  // 00 Front -> 40 Right
-						param += 0x80;
-					else if(m.param < 0x80)  // 40 Right -> 80 Back
-						param = 0x180 - param;
-					else if(m.param < 0xC0)  // 80 Back -> C0 Left
-						param = 0x80 - param;
-					else  // C0 Left -> FF Front
-						param -= 0x80;
-					m.param = mpt::saturate_cast<ModCommand::PARAM>(param);
-				} else if((data[2] & 0xF0) == 0x20)
-				{
-					// Offset + volume
-					m.command = CMD_OFFSET;
-					m.volcmd = VOLCMD_VOLUME;
-					m.vol = (data[2] & 0x0F) * 4 + 4;
-				} else if(data[2] <= 0x0F || data[2] == 0x11 || data[2] == 0x12)
-				{
-					// 0x11 and 0x12 support the full 5-octave range, 0x01 and 0x02 presumably only the ProTracker 3-octave range
-					ConvertModCommand(m, data[2] & 0x0F, data[3]);
+				case 0x00:  // 4-bit panning
+					m.command = CMD_MODCMDEX;
+					m.param |= 0x80;
+					break;
+				case 0x10:  // Default volume slide Up (should stop at sample's default volume)
+					m.command = CMD_VOLUMESLIDE;
+					m.param <<= 4;
+					break;
+				case 0x20:  // Default fine volume slide Up (should stop at sample's default volume)
+					m.command = CMD_MODCMDEX;
+					m.param |= 0xA0;
+					break;
+				case 0x30:  // Fine porta up (support all 5 octaves)
+				case 0x40:  // Fine porta down (support all 5 octaves)
+					m.command = CMD_MODCMDEX;
+					m.param -= 0x20;
+					break;
+				default:
+					break;
 				}
+			} else if(data[2] == 0x13)
+			{
+				// 3D Simulate
+				m.command = CMD_PANNING8;
+				uint32 param = (m.param & 0x7F) * 2u;
+				if(m.param <= 0x40)  // 00 Front -> 40 Right
+					param += 0x80;
+				else if(m.param < 0x80)  // 40 Right -> 80 Back
+					param = 0x180 - param;
+				else if(m.param < 0xC0)  // 80 Back -> C0 Left
+					param = 0x80 - param;
+				else  // C0 Left -> FF Front
+					param -= 0x80;
+				m.param = mpt::saturate_cast<ModCommand::PARAM>(param);
+			} else if((data[2] & 0xF0) == 0x20)
+			{
+				// Offset + volume
+				m.command = CMD_OFFSET;
+				m.volcmd = VOLCMD_VOLUME;
+				m.vol = (data[2] & 0x0F) * 4 + 4;
+			} else if(data[2] <= 0x0F || data[2] == 0x11 || data[2] == 0x12)
+			{
+				// 0x11 and 0x12 support the full 5-octave range, 0x01 and 0x02 presumably only the ProTracker 3-octave range
+				ConvertModCommand(m, data[2] & 0x0F, data[3]);
 			}
 		}
 	}
