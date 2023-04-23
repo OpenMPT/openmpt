@@ -3,8 +3,6 @@ name: FreeBSD 13.1 Makefile
 on:
   push:
     branches: [ OpenMPT-1.30 ]
-  pull_request:
-    branches: [ OpenMPT-1.30 ]
 
 jobs:
   build:
