@@ -126,7 +126,7 @@ struct MO3Envelope
 	int16le points[25][2];
 
 	// Convert MO3 envelope data into OpenMPT's internal envelope format
-	void ConvertToMPT(InstrumentEnvelope &mptEnv, uint8 envShift) const
+	void ConvertToMPT(InstrumentEnvelope &mptEnv, uint8 envShift, MODTYPE type) const
 	{
 		if(flags & envEnabled) mptEnv.dwFlags.set(ENV_ENABLED);
 		if(flags & envSustain) mptEnv.dwFlags.set(ENV_SUSTAIN);
@@ -135,7 +135,7 @@ struct MO3Envelope
 		if(flags & envCarry) mptEnv.dwFlags.set(ENV_CARRY);
 		mptEnv.resize(std::min(numNodes.get(), uint8(25)));
 		mptEnv.nSustainStart = sustainStart;
-		mptEnv.nSustainEnd = sustainEnd;
+		mptEnv.nSustainEnd = (type == MOD_TYPE_XM) ? sustainStart : sustainEnd;
 		mptEnv.nLoopStart = loopStart;
 		mptEnv.nLoopEnd = loopEnd;
 		for(uint32 ev = 0; ev < mptEnv.size(); ev++)
@@ -205,9 +205,9 @@ struct MO3Instrument
 				mptIns.Keyboard[i] = sampleMap[i][1] + 1;
 			}
 		}
-		volEnv.ConvertToMPT(mptIns.VolEnv, 0);
-		panEnv.ConvertToMPT(mptIns.PanEnv, 0);
-		pitchEnv.ConvertToMPT(mptIns.PitchEnv, 5);
+		volEnv.ConvertToMPT(mptIns.VolEnv, 0, type);
+		panEnv.ConvertToMPT(mptIns.PanEnv, 0, type);
+		pitchEnv.ConvertToMPT(mptIns.PitchEnv, 5, type);
 		mptIns.nFadeOut = fadeOut;
 
 		if(midiChannel >= 128)
