@@ -1,4 +1,4 @@
-name: FreeBSD 13.1 Makefile
+name: FreeBSD 13.2 Makefile
 
 on:
   push:
@@ -15,12 +15,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - uses: cross-platform-actions/action@v0.11.0
+    - uses: cross-platform-actions/action@v0.13.0
       with:
         architecture: x86_64
         hypervisor: xhyve
         operating_system: freebsd
-        version: '13.1'
+        version: '13.2'
         shell: bash
         run: |
           sudo pkg install -y subversion p5-XML-XPath git mawk gmake pkgconf autoconf autoconf-archive automake libtool help2man doxygen mpg123 libogg libvorbis flac libsndfile pulseaudio portaudio sdl2
