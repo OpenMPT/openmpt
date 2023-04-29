@@ -595,7 +595,10 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		// Old format revisions are fixed to 4 channels
 		m_nChannels = 4;
-		SetupMODPanning(true);
+		for(CHANNELINDEX chn = 0; chn < 4; chn++)
+		{
+			ChnSettings[chn].nPan = (chn & 1) ? 0xC0 : 0x40;
+		}
 	}
 
 	// Setup Channel Pan Positions
@@ -612,11 +615,15 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	} else if(fileSignature.version >= 9)
 	{
-		uint8 panPos[16];
-		file.ReadArray(panPos);
+		// Internally, DSMI assigns an Amiga-like LRRL panning scheme to the channels in pre-v11 files,
+		// but channels are stored in LRLR order (0 1 3 2 typically). The channel remap table that follows
+		// would normally undo this mapping, so that the panning is as expected again.
+		// This can be observed by looking at a 4-channel MOD and the converted AMF file: The last two channels are swapped.
+		// We ignore all this mess and simply assume that all AMF files use the standard remap table.
+		file.Skip(16);
 		for(CHANNELINDEX chn = 0; chn < 16; chn++)
 		{
-			ChnSettings[chn].nPan = (panPos[chn] & 1) ? 0x40 : 0xC0;
+			ChnSettings[chn].nPan = (chn & 1) ? 0xC0 : 0x40;
 		}
 	}
 
