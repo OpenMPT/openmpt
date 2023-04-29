@@ -70,7 +70,7 @@ struct FLACDecoder
 	FileReader &m_file;
 	CSoundFile &m_sndFile;
 	const SAMPLEINDEX m_sample;
-	bool ready = false;
+	bool m_ready = false;
 
 	FLACDecoder(FileReader &f, CSoundFile &sf, SAMPLEINDEX smp) : m_file(f), m_sndFile(sf), m_sample(smp) { }
 
@@ -127,7 +127,7 @@ struct FLACDecoder
 		FLACDecoder &client = *static_cast<FLACDecoder *>(client_data);
 		ModSample &sample = client.m_sndFile.GetSample(client.m_sample);
 
-		if(frame->header.number.sample_number >= sample.nLength || !client.ready)
+		if(frame->header.number.sample_number >= sample.nLength || !client.m_ready)
 		{
 			// We're reading beyond the sample size already, or we aren't even ready to decode yet!
 			return FLAC__STREAM_DECODER_WRITE_STATUS_ABORT;
@@ -194,8 +194,8 @@ struct FLACDecoder
 			sample.nLength = mpt::saturate_cast<SmpLength>(metadata->data.stream_info.total_samples);
 			LimitMax(sample.nLength, MAX_SAMPLE_LENGTH);
 			sample.nC5Speed = metadata->data.stream_info.sample_rate;
-			client.ready = (sample.AllocateSample() != 0);
-		} else if(metadata->type == FLAC__METADATA_TYPE_APPLICATION && !memcmp(metadata->data.application.id, "riff", 4) && client.ready)
+			client.m_ready = (sample.AllocateSample() != 0);
+		} else if(metadata->type == FLAC__METADATA_TYPE_APPLICATION && !memcmp(metadata->data.application.id, "riff", 4) && client.m_ready)
 		{
 			// Try reading RIFF loop points and other sample information
 			FileReader data(mpt::as_span(metadata->data.application.data, metadata->length));
@@ -205,7 +205,7 @@ struct FLACDecoder
 			WAVReader riffReader(data);
 			riffReader.FindMetadataChunks(chunks);
 			riffReader.ApplySampleSettings(sample, client.m_sndFile.GetCharsetInternal(), client.m_sndFile.m_szNames[client.m_sample]);
-		} else if(metadata->type == FLAC__METADATA_TYPE_VORBIS_COMMENT && client.ready)
+		} else if(metadata->type == FLAC__METADATA_TYPE_VORBIS_COMMENT && client.m_ready)
 		{
 			// Try reading Vorbis Comments for sample title, sample rate and loop points
 			SmpLength loopStart = 0, loopLength = 0;
@@ -459,7 +459,7 @@ bool CSoundFile::ReadFLACSample(SAMPLEINDEX sample, FileReader &file)
 	FLAC__stream_decoder_finish(decoder);
 	FLAC__stream_decoder_delete(decoder);
 
-	if(client.ready && Samples[sample].HasSampleData())
+	if(client.m_ready && Samples[sample].HasSampleData())
 	{
 		Samples[sample].Convert(MOD_TYPE_IT, GetType());
 		Samples[sample].PrecomputeLoops(*this, false);
