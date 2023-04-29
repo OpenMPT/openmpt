@@ -4129,28 +4129,6 @@ LRESULT CViewPattern::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 		InvalidatePattern(true, true);
 		break;
 
-	case VIEWMSG_DOMIDISPACING:
-		if(m_nSpacing)
-		{
-			int temp = timeGetTime();
-			if(temp - lParam >= 60)
-			{
-				CModDoc *pModDoc = GetDocument();
-				CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-				if(!m_Status[psFollowSong]
-				   || (pMainFrm->GetFollowSong(pModDoc) != m_hWnd)
-				   || (pModDoc->GetSoundFile().IsPaused()))
-				{
-					SetCurrentRow(GetCurrentRow() + m_nSpacing);
-				}
-			} else
-			{
-				Sleep(0);
-				PostMessage(WM_MOD_VIEWMSG, VIEWMSG_DOMIDISPACING, lParam);
-			}
-		}
-		break;
-
 	case VIEWMSG_LOADSTATE:
 		if(lParam)
 		{
