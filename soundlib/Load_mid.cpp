@@ -1196,7 +1196,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 				}
 			}
 
-			m.command = static_cast<ModCommand::COMMAND>(diff < 0 ? CMD_PORTAMENTODOWN : CMD_PORTAMENTOUP);
+			m.command = (diff < 0) ? CMD_PORTAMENTODOWN : CMD_PORTAMENTOUP;
 			int32 absDiff = std::abs(diff);
 			int32 realDiff = 0;
 			if(absDiff < 16)
