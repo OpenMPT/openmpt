@@ -148,6 +148,13 @@ public:
 	};
 
 protected:
+	enum class WrapMode : uint8
+	{
+		IgnoreInvalidRow,   // If the row is outside the current pattern's bounds, nothing happens.
+		WrapAround,         // Wrap to next / previous pattern(s) if row is out of bounds
+		LimitAtPatternEnd,  // If the row is outside the current pattern's bounds, it is automatically corrected to the pattern's first / last row.
+	};
+
 	CFastBitmap m_Dib;
 	CDC m_offScreenDC, m_vuMeterDC;
 	CBitmap m_offScreenBitmap, m_vuMeterBitmap;
@@ -291,11 +298,11 @@ public:
 	void SetSelToCursor() { SetCurSel(m_Cursor); };
 
 	bool SetCurrentPattern(PATTERNINDEX pat, ROWINDEX row = ROWINDEX_INVALID);
-	ROWINDEX SetCurrentRow(ROWINDEX row, bool wrap = false, bool updateHorizontalScrollbar = true);
+	ROWINDEX SetCurrentRow(ROWINDEX row, WrapMode wrapMode = WrapMode::IgnoreInvalidRow, bool updateHorizontalScrollbar = true);
 	bool SetCurrentColumn(const PatternCursor &cursor) { return SetCurrentColumn(cursor.GetChannel(), cursor.GetColumnType()); };
 	bool SetCurrentColumn(CHANNELINDEX channel, PatternCursor::Columns column = PatternCursor::firstColumn);
 	// This should be used instead of consecutive calls to SetCurrentRow() then SetCurrentColumn()
-	bool SetCursorPosition(const PatternCursor &cursor, bool wrap = false);
+	bool SetCursorPosition(const PatternCursor &cursor, WrapMode wrapMode = WrapMode::IgnoreInvalidRow);
 	bool DragToSel(const PatternCursor &cursor, bool scrollHorizontal, bool scrollVertical, bool noMove = false);
 	bool SetPlayCursor(PATTERNINDEX pat, ROWINDEX row, uint32 tick);
 	bool UpdateScrollbarPositions(bool updateHorizontalScrollbar = true);
