@@ -233,9 +233,9 @@ bool CSoundFile::ReadInstrumentFromSong(INSTRUMENTINDEX targetInstr, const CSoun
 	Instruments[targetInstr] = pIns;
 	*pIns = *srcSong.Instruments[sourceInstr];
 
-	std::vector<SAMPLEINDEX> sourceSample;	// Sample index in source song
-	std::vector<SAMPLEINDEX> targetSample;	// Sample index in target song
-	SAMPLEINDEX targetIndex = 0;		// Next index for inserting sample
+	std::vector<SAMPLEINDEX> sourceSample;  // Sample index in source song
+	std::vector<SAMPLEINDEX> targetSample;  // Sample index in target song
+	SAMPLEINDEX targetIndex = 0;            // Next index for inserting sample
 
 	for(auto &sample : pIns->Keyboard)
 	{
@@ -912,10 +912,10 @@ MPT_BINARY_STRUCT(GF1SampleHeader, 96)
 //  ---------------------------- | | | | | |
 //  <---> attack rate 0          0 1 2 3 4 5 amplitudes
 //       <----> attack rate 1
-//           <> attack rate 2
-//           <--> attack rate 3
-//               <> attack rate 4
-//               <-----> attack rate 5
+//             <> attack rate 2
+//               <--> attack rate 3
+//                   <> attack rate 4
+//                     <-----> attack rate 5
 //
 // -- GF1 Flags --
 //
@@ -931,10 +931,10 @@ MPT_BINARY_STRUCT(GF1SampleHeader, 96)
 
 struct GF1Layer
 {
-	uint8le  previous;		// If !=0 the wavesample to use is from the previous layer. The waveheader is still needed
-	uint8le  id;			// Layer id: 0-3
-	uint32le size;			// data size in bytes in the layer, without the header. to skip to next layer for example:
-	uint8le  samples;		// number of wavesamples
+	uint8le  previous;  // If !=0 the wavesample to use is from the previous layer. The waveheader is still needed
+	uint8le  id;        // Layer id: 0-3
+	uint32le size;      // data size in bytes in the layer, without the header. to skip to next layer for example:
+	uint8le  samples;   // number of wavesamples
 	char     reserved[40];
 };
 
@@ -943,7 +943,7 @@ MPT_BINARY_STRUCT(GF1Layer, 47)
 
 static double PatchFreqToNote(uint32 nFreq)
 {
-	return std::log(nFreq / 2044.0) * (12.0 * 1.44269504088896340736);	// 1.0/std::log(2.0)
+	return std::log(nFreq / 2044.0) * (12.0 * 1.44269504088896340736);  // 1.0/std::log(2.0)
 }
 
 
@@ -1004,7 +1004,7 @@ bool CSoundFile::ReadPATSample(SAMPLEINDEX nSample, FileReader &file)
 {
 	file.Rewind();
 	GF1PatchFileHeader fileHeader;
-	GF1Instrument instrHeader;	// We only support one instrument
+	GF1Instrument instrHeader;  // We only support one instrument
 	GF1Layer layerHeader;
 	if(!file.ReadStruct(fileHeader)
 		|| memcmp(fileHeader.magic, "GF1PATCH", 8)
@@ -1012,7 +1012,7 @@ bool CSoundFile::ReadPATSample(SAMPLEINDEX nSample, FileReader &file)
 		|| memcmp(fileHeader.id, "ID#000002\0", 10)
 		|| !fileHeader.numInstr || !fileHeader.numSamples
 		|| !file.ReadStruct(instrHeader)
-		//|| !instrHeader.layers	// DOO.PAT has 0 layers
+		//|| !instrHeader.layers  // DOO.PAT has 0 layers
 		|| !file.ReadStruct(layerHeader)
 		|| !layerHeader.samples)
 	{
@@ -1036,7 +1036,7 @@ bool CSoundFile::ReadPATInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 {
 	file.Rewind();
 	GF1PatchFileHeader fileHeader;
-	GF1Instrument instrHeader;	// We only support one instrument
+	GF1Instrument instrHeader;  // We only support one instrument
 	GF1Layer layerHeader;
 	if(!file.ReadStruct(fileHeader)
 		|| memcmp(fileHeader.magic, "GF1PATCH", 8)
@@ -1044,7 +1044,7 @@ bool CSoundFile::ReadPATInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 		|| memcmp(fileHeader.id, "ID#000002\0", 10)
 		|| !fileHeader.numInstr || !fileHeader.numSamples
 		|| !file.ReadStruct(instrHeader)
-		//|| !instrHeader.layers	// DOO.PAT has 0 layers
+		//|| !instrHeader.layers  // DOO.PAT has 0 layers
 		|| !file.ReadStruct(layerHeader)
 		|| !layerHeader.samples)
 	{
@@ -1414,7 +1414,7 @@ bool CSoundFile::ReadXISample(SAMPLEINDEX nSample, FileReader &file)
 
 	uint16 numSamples = fileHeader.numSamples;
 	FileReader::off_t samplePos = sizeof(XIInstrumentHeader) + numSamples * sizeof(XMSample);
-	// Preferrably read the middle-C sample
+	// Preferably read the middle-C sample
 	auto sample = fileHeader.instrument.sampleMap[48];
 	if(sample >= fileHeader.numSamples)
 		sample = 0;
@@ -1491,11 +1491,11 @@ struct CAFChunk
 		int64 length = header.mChunkSize;
 		if(length == -1)
 		{
-			length = std::numeric_limits<int64>::max(); // spec
+			length = std::numeric_limits<int64>::max();  // spec
 		}
 		if(length < 0)
 		{
-			length = std::numeric_limits<int64>::max(); // heuristic
+			length = std::numeric_limits<int64>::max();  // heuristic
 		}
 		return mpt::saturate_cast<FileReader::off_t>(length);
 	}
@@ -1767,9 +1767,9 @@ bool CSoundFile::ReadCAFSample(SAMPLEINDEX nSample, FileReader &file, bool mayNo
 // AIFF header
 struct AIFFHeader
 {
-	char     magic[4];	// FORM
-	uint32be length;	// Size of the file, not including magic and length
-	char     type[4];	// AIFF or AIFC
+	char     magic[4];  // FORM
+	uint32be length;    // Size of the file, not including magic and length
+	char     type[4];   // AIFF or AIFC
 };
 
 MPT_BINARY_STRUCT(AIFFHeader, 12)
@@ -1788,8 +1788,8 @@ struct AIFFChunk
 		idNAME	= MagicBE("NAME"),
 	};
 
-	uint32be id;		// See ChunkIdentifiers
-	uint32be length;	// Chunk size without header
+	uint32be id;      // See ChunkIdentifiers
+	uint32be length;  // Chunk size without header
 
 	size_t GetLength() const
 	{
@@ -1811,7 +1811,7 @@ struct AIFFCommonChunk
 	uint16be numChannels;
 	uint32be numSampleFrames;
 	uint16be sampleSize;
-	uint8be  sampleRate[10];		// Sample rate in 80-Bit floating point
+	uint8be  sampleRate[10];  // Sample rate in 80-Bit floating point
 
 	// Convert sample rate to integer
 	uint32 GetSampleRate() const
@@ -1847,8 +1847,8 @@ MPT_BINARY_STRUCT(AIFFSoundChunk, 8)
 struct AIFFMarker
 {
 	uint16be id;
-	uint32be position;		// Position in sample
-	uint8be  nameLength;	// Not counting eventually existing padding byte in name string
+	uint32be position;    // Position in sample
+	uint8be  nameLength;  // Not counting eventually existing padding byte in name string
 };
 
 MPT_BINARY_STRUCT(AIFFMarker, 7)
@@ -1859,14 +1859,14 @@ struct AIFFInstrumentLoop
 {
 	enum PlayModes
 	{
-		noLoop		= 0,
-		loopNormal	= 1,
-		loopBidi	= 2,
+		noLoop     = 0,
+		loopNormal = 1,
+		loopBidi   = 2,
 	};
 
 	uint16be playMode;
-	uint16be beginLoop;	// Marker index
-	uint16be endLoop;	// Marker index
+	uint16be beginLoop;  // Marker index
+	uint16be endLoop;    // Marker index
 };
 
 MPT_BINARY_STRUCT(AIFFInstrumentLoop, 6)
@@ -2314,7 +2314,7 @@ bool CSoundFile::ReadITISample(SAMPLEINDEX nSample, FileReader &file)
 	if(!nsamples)
 		return false;
 
-	// Preferrably read the middle-C sample
+	// Preferably read the middle-C sample
 	auto sample = dummy.Keyboard[NOTE_MIDDLEC - NOTE_MIN];
 	if(sample > 0)
 		sample--;
@@ -2725,7 +2725,7 @@ bool CSoundFile::ReadIFFSample(SAMPLEINDEX nSample, FileReader &file, bool allow
 
 #ifndef MODPLUG_NO_FILESAVE
 
-static uint32 WriteIFFStringChunk(std::ostream& f, IFFChunk::ChunkIdentifiers id, const std::string& str)
+static uint32 WriteIFFStringChunk(std::ostream &f, IFFChunk::ChunkIdentifiers id, const std::string &str)
 {
 	IFFChunk chunk{};
 	chunk.id = id;
@@ -2742,9 +2742,9 @@ static uint32 WriteIFFStringChunk(std::ostream& f, IFFChunk::ChunkIdentifiers id
 }
 
 
-bool CSoundFile::SaveIFFSample(SAMPLEINDEX smp, std::ostream& f) const
+bool CSoundFile::SaveIFFSample(SAMPLEINDEX smp, std::ostream &f) const
 {
-	const ModSample& sample = Samples[smp];
+	const ModSample &sample = Samples[smp];
 	if(sample.uFlags[CHN_ADLIB])
 		return false;
 

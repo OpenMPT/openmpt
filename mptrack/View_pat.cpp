@@ -250,33 +250,30 @@ bool CViewPattern::SetCurrentPattern(PATTERNINDEX pat, ROWINDEX row)
 
 
 // This should be used instead of consecutive calls to SetCurrentRow() then SetCurrentColumn().
-bool CViewPattern::SetCursorPosition(const PatternCursor &cursor, bool wrap)
+bool CViewPattern::SetCursorPosition(const PatternCursor &cursor, WrapMode wrapMode)
 {
 	// Set row, but do not update scroll position yet
 	// as there is another position update on the way:
-	SetCurrentRow(cursor.GetRow(), wrap, false);
+	SetCurrentRow(cursor.GetRow(), wrapMode, false);
 	// Now set column and update scroll position:
 	SetCurrentColumn(cursor);
 	return true;
 }
 
 
-ROWINDEX CViewPattern::SetCurrentRow(ROWINDEX row, bool wrap, bool updateHorizontalScrollbar)
+ROWINDEX CViewPattern::SetCurrentRow(ROWINDEX row, WrapMode wrapMode, bool updateHorizontalScrollbar)
 {
 	const CSoundFile *pSndFile = GetSoundFile();
-	if(pSndFile == nullptr || !pSndFile->Patterns.IsValidIndex(m_nPattern))
+	if(pSndFile == nullptr || !pSndFile->Patterns.IsValidIndex(m_nPattern) || !m_szCell.cy)
 		return ROWINDEX_INVALID;
 
 	ROWINDEX numRows = pSndFile->Patterns[m_nPattern].GetNumRows();
-	if(wrap && numRows)
+	if(wrapMode == WrapMode::WrapAround && numRows)
 	{
 		const auto &order = Order();
 		if(static_cast<int>(row) < 0)
 		{
-			if(m_Status[psKeyboardDragSelect | psMouseDragSelect])
-			{
-				row = 0;
-			} else if(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL)
+			if(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL)
 			{
 				PATTERNINDEX curPattern = m_nPattern;
 				ORDERINDEX curOrder = GetCurrentOrder();
@@ -311,10 +308,7 @@ ROWINDEX CViewPattern::SetCurrentRow(ROWINDEX row, bool wrap, bool updateHorizon
 			}
 		} else if(row >= numRows)
 		{
-			if(m_Status[psKeyboardDragSelect | psMouseDragSelect])
-			{
-				row = numRows - 1;
-			} else if(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL)
+			if(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL)
 			{
 				PATTERNINDEX curPattern = m_nPattern;
 				ORDERINDEX curOrder = GetCurrentOrder();
@@ -348,9 +342,7 @@ ROWINDEX CViewPattern::SetCurrentRow(ROWINDEX row, bool wrap, bool updateHorizon
 				row %= pSndFile->Patterns[m_nPattern].GetNumRows();
 			}
 		}
-	}
-
-	if(!(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL))
+	} else if(wrapMode == WrapMode::LimitAtPatternEnd)
 	{
 		if(static_cast<int>(row) < 0)
 			row = 0;
@@ -358,8 +350,8 @@ ROWINDEX CViewPattern::SetCurrentRow(ROWINDEX row, bool wrap, bool updateHorizon
 			row = numRows - 1;
 	}
 
-	if((row >= numRows) || (!m_szCell.cy))
-		return false;
+	if(row >= numRows)
+		return ROWINDEX_INVALID;
 	// Fix: If cursor isn't on screen move both scrollbars to make it visible
 	InvalidateRow();
 	m_Cursor.SetRow(row);
@@ -2253,8 +2245,10 @@ void CViewPattern::PatternStep(ROWINDEX row)
 		if(row == ROWINDEX_INVALID)
 		{
 			SetCurrentRow(GetCurrentRow() + 1,
-			              (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL) ||  // Wrap around to next pattern if continous scroll is enabled...
-			                  (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_WRAP));     // ...or otherwise if cursor wrap is enabled.
+						  ((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL) ||  // Wrap around to next pattern if continous scroll is enabled...
+						   (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_WRAP))          // ...or otherwise if cursor wrap is enabled.
+							  ? WrapMode::WrapAround
+							  : WrapMode::LimitAtPatternEnd);
 		}
 		SetFocus();
 	}
@@ -2353,7 +2347,7 @@ void CViewPattern::OnCursorPaste()
 	if(sndFile.IsPaused() || !m_Status[psFollowSong] || (CMainFrame::GetMainFrame() && CMainFrame::GetMainFrame()->GetFollowSong(GetDocument()) != m_hWnd))
 	{
 		InvalidateCell(m_Cursor);
-		SetCurrentRow(GetCurrentRow() + m_nSpacing);
+		SetCurrentRow(GetCurrentRow() + m_nSpacing, (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL) ? WrapMode::WrapAround : WrapMode::LimitAtPatternEnd);
 		SetSelToCursor();
 	}
 }
@@ -3576,7 +3570,7 @@ LRESULT CViewPattern::OnPlayerNotify(Notification *pnotify)
 					}
 					if(row != GetCurrentRow())
 					{
-						SetCurrentRow((row < pSndFile->Patterns[pat].GetNumRows()) ? row : 0, false, false);
+						SetCurrentRow((row < pSndFile->Patterns[pat].GetNumRows()) ? row : 0, WrapMode::IgnoreInvalidRow, false);
 					}
 				}
 			} else
@@ -4129,28 +4123,6 @@ LRESULT CViewPattern::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 		InvalidatePattern(true, true);
 		break;
 
-	case VIEWMSG_DOMIDISPACING:
-		if(m_nSpacing)
-		{
-			int temp = timeGetTime();
-			if(temp - lParam >= 60)
-			{
-				CModDoc *pModDoc = GetDocument();
-				CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-				if(!m_Status[psFollowSong]
-				   || (pMainFrm->GetFollowSong(pModDoc) != m_hWnd)
-				   || (pModDoc->GetSoundFile().IsPaused()))
-				{
-					SetCurrentRow(GetCurrentRow() + m_nSpacing);
-				}
-			} else
-			{
-				Sleep(0);
-				PostMessage(WM_MOD_VIEWMSG, VIEWMSG_DOMIDISPACING, lParam);
-			}
-		}
-		break;
-
 	case VIEWMSG_LOADSTATE:
 		if(lParam)
 		{
@@ -4255,7 +4227,7 @@ void CViewPattern::CursorJump(int distance, bool snap)
 		row = (((row + (upwards ? -1 : 0)) / distanceAbs) + (upwards ? 0 : 1)) * distanceAbs;
 	else
 		row += distance;
-	row = SetCurrentRow(row, true);
+	row = SetCurrentRow(row, m_Status[psKeyboardDragSelect | psMouseDragSelect] ? WrapMode::LimitAtPatternEnd : WrapMode::WrapAround);
 
 	if(IsLiveRecord() && !m_Status[psDragActive])
 	{
@@ -4878,7 +4850,7 @@ void CViewPattern::TempEnterVol(int v)
 	{
 		if(m_Cursor.GetRow() + m_nSpacing < pSndFile->Patterns[m_nPattern].GetNumRows() || (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL))
 		{
-			SetCurrentRow(m_Cursor.GetRow() + m_nSpacing, (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL) != 0);
+			SetCurrentRow(m_Cursor.GetRow() + m_nSpacing, (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL) ? WrapMode::WrapAround : WrapMode::LimitAtPatternEnd);
 		}
 	}
 }
@@ -4954,7 +4926,7 @@ void CViewPattern::TempEnterFX(ModCommand::COMMAND c, int v)
 	{
 		if(m_Cursor.GetRow() + m_nSpacing < pSndFile->Patterns[m_nPattern].GetNumRows() || (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL))
 		{
-			SetCurrentRow(m_Cursor.GetRow() + m_nSpacing, (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL) != 0);
+			SetCurrentRow(m_Cursor.GetRow() + m_nSpacing, (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL) ? WrapMode::WrapAround : WrapMode::LimitAtPatternEnd);
 		}
 	}
 }
@@ -5574,7 +5546,7 @@ void CViewPattern::TempEnterNote(ModCommand::NOTE note, int vol, bool fromMidi)
 			{
 				if(editPos.row + m_nSpacing < sndFile.Patterns[editPos.pattern].GetNumRows() || (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL))
 				{
-					SetCurrentRow(editPos.row + m_nSpacing, (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL) != 0);
+					SetCurrentRow(editPos.row + m_nSpacing, (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL) ? WrapMode::WrapAround : WrapMode::LimitAtPatternEnd);
 				}
 			}
 
@@ -5856,7 +5828,7 @@ void CViewPattern::TempEnterChord(ModCommand::NOTE note)
 		{
 			// Shift from entering chord may have triggered this flag, which will prevent us from wrapping to the next pattern.
 			m_Status.reset(psKeyboardDragSelect);
-			SetCurrentRow(GetCurrentRow() + m_nSpacing, (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL) != 0);
+			SetCurrentRow(GetCurrentRow() + m_nSpacing, (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL) ? WrapMode::WrapAround : WrapMode::LimitAtPatternEnd);
 		}
 		SetSelToCursor();
 	}
@@ -6209,7 +6181,7 @@ void CViewPattern::OnClearField(const RowMask &mask, bool step, bool ITStyle)
 		}
 
 		if(m_nSpacing > 0)
-			SetCurrentRow(GetCurrentRow() + m_nSpacing);
+			SetCurrentRow(GetCurrentRow() + m_nSpacing, (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL) ? WrapMode::WrapAround : WrapMode::LimitAtPatternEnd);
 
 		SetSelToCursor();
 	}

@@ -54,12 +54,11 @@ public:
 	//'invisible' - the pattern data is cleared but the actual pattern object won't get removed.
 	void Remove(const PATTERNINDEX index);
 
-	// Applies function object for modcommands in patterns in given range.
-	// Return: Copy of the function object.
+	// Applies function object for modcommands in all patterns.
 	template <class Func>
-	Func ForEachModCommand(PATTERNINDEX nStartPat, PATTERNINDEX nLastPat, Func func);
+	void ForEachModCommand(Func func);
 	template <class Func>
-	Func ForEachModCommand(Func func) { return ForEachModCommand(0, Size() - 1, func); }
+	void ForEachModCommand(Func func) const;
 
 	std::vector<CPattern>::iterator begin() noexcept { return m_Patterns.begin(); }
 	std::vector<CPattern>::const_iterator begin() const noexcept { return m_Patterns.begin(); }
@@ -100,15 +99,19 @@ private:
 
 
 template <class Func>
-Func CPatternContainer::ForEachModCommand(PATTERNINDEX nStartPat, PATTERNINDEX nLastPat, Func func)
+void CPatternContainer::ForEachModCommand(Func func)
 {
-	if (nStartPat > nLastPat || nLastPat >= Size())
-		return func;
-	for (PATTERNINDEX nPat = nStartPat; nPat <= nLastPat; nPat++) if (m_Patterns[nPat].IsValid())
-		std::for_each(m_Patterns[nPat].begin(), m_Patterns[nPat].end(), func);
-	return func;
+	for(auto &pattern : m_Patterns)
+		std::for_each(pattern.begin(), pattern.end(), func);
 }
 
+
+template <class Func>
+void CPatternContainer::ForEachModCommand(Func func) const
+{
+	for(const auto &pattern : m_Patterns)
+		std::for_each(pattern.cbegin(), pattern.cend(), func);
+}
 
 const char FileIdPatterns[] = "mptPc";
 
