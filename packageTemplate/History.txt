@@ -508,7 +508,7 @@ Misc
 - [Imp] <js> SF2: Support tuning on the preset level.
 - [Imp] <js> Added S3I to default format choice in sample editor settings.
 - [Imp] <js> The default artist name can now be set in the Welcome dialog.
-- [Mod] <js> When opening files, they are now first tried to be loaded files as modules, and only when that fails they are tried again as an archive. This fixes loading songs using plugins that store their plugin data chunk as a ZIP file (e.g. RetroPlug, http://bugs.openmpt.org/view.php?id=1548).
+- [Mod] <js> When opening files, they are now first tried to be loaded as modules, and only when that fails they are tried again as an archive. This fixes loading songs using plugins that store their plugin data chunk as a ZIP file (e.g. RetroPlug, http://bugs.openmpt.org/view.php?id=1548).
 - [Mod] <js> The VSTNeverUnloadAnyPlugin hidden setting introduced in OpenMPT 1.30.01.00 was moved from the INI category "BrokenPluginWorkarounds" to category "Broken Plugin Workarounds" (same as VSTMaskAllCrashes setting).
 - [Fix] <js> When trying to open a malformed file in a new OpenMPT instance and sending this file to an already running OpenMPT instance, the newly launched instance tried to open the file a second time after the other instance gave up, so two error messages were shown.
 - [Fix] <js> When passing files to an already running OpenMPT instance, this instance is now moved to the foreground before sending files over, not after. This makes it possible to instantly see error messages in that other instance before it has given control back to the newly launched instance.
@@ -618,6 +618,7 @@ Other formats
 - [Imp] <js> MDL: Implemented finetune command.
 - [Imp] <js> OKT: Various accuracy improvements such as: Sharing volume between mixed channels, volume commands on mixed channels are permanent (not reset with new notes), mixed channels do not support default sample volume, 7-bit samples are actually supposed to be played as-is (not amplified to full 8-bit range), reject speed command parameters >= 20.
 - [Mod] <js> Warn during saving of an imported file when any playback compatibility settings are enabled that are not supported by the current editing format. These settings are disabled automatically.
+- [Reg] <jh> Modules compressed with MMCMP, PP20 or XPK can no longer be read from inside another archive.
 
 Stream Export
 - [New] <jh> Can now export AU files with µ-law and A-law encoding.
