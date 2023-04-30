@@ -12,7 +12,7 @@ https://source.openmpt.org/svn/openmpt/branches/OpenMPT-1.26/doc/libopenmpt_rele
 ---
 
 For libopenmpt 0.3, see
-https://source.openmpt.org/svn/openmpt/branches/OpenMPT-1.27/doc/libopenmpt_release.txt
+https://source.openmpt.org/svn/openmpt/branches/OpenMPT-1.27/doc/libopenmpt_release.md
 .
 
 0.4
