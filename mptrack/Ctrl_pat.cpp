@@ -162,10 +162,6 @@ BOOL CCtrlPatterns::OnInitDialog()
 	m_ToolBar.AddButton(ID_SEPARATOR, 0, TBSTYLE_SEP);
 	m_ToolBar.AddButton(ID_OVERFLOWPASTE, TIMAGE_PATTERN_OVERFLOWPASTE, TBSTYLE_CHECK, ((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_OVERFLOWPASTE) ? TBSTATE_CHECKED : 0) | TBSTATE_ENABLED);
 
-	// Special edit controls -> tab switch to view
-	m_EditSequence.SetParent(this);
-	m_EditSpacing.SetParent(this);
-	m_EditPatName.SetParent(this);
 	m_EditPatName.SetLimitText(MAX_PATTERNNAME - 1);
 	// Spin controls
 	m_SpinSpacing.SetRange32(0, MAX_SPACING);
