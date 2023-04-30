@@ -654,10 +654,6 @@ Installer/release package
 - [New] <js> Added a new German keymap (Impulse Tracker / OpenMPT crossover) by melcom. Updated coda's key map.
 - [New] <jh> OpenMPT is now also available for ARM and ARM64 architectures.
 
-wine fix
-XP support
-RtMidi upgrade
-
 
 v1.29.15.00 (5 December 2021, revision 16116)
 ---------------------------------------------
