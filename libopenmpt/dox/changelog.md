@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt 0.4.37-pre
 
+ *  MO3: Envelope sustain was not imported correctly if the source file was an
+    XM.
+
 ### libopenmpt 0.4.36 (2023-04-15)
 
  *  [**Bug**] File probing and loading results could be inconsistent for SFX
