@@ -5,21 +5,21 @@ libopenmpt release process
 ---
 
 For libopenmpt 0.3, see
-https://source.openmpt.org/svn/openmpt/branches/OpenMPT-1.27/doc/libopenmpt_release.txt
+https://source.openmpt.org/svn/openmpt/branches/OpenMPT-1.27/doc/libopenmpt_release.md
 .
 
 0.4
 ---
 
 For libopenmpt 0.4, see
-https://source.openmpt.org/svn/openmpt/branches/OpenMPT-1.28/doc/libopenmpt_release.txt
+https://source.openmpt.org/svn/openmpt/branches/OpenMPT-1.28/doc/libopenmpt_release.md
 .
 
 0.5
 ---
 
 For libopenmpt 0.4, see
-https://source.openmpt.org/svn/openmpt/branches/OpenMPT-1.29/doc/libopenmpt_release.txt
+https://source.openmpt.org/svn/openmpt/branches/OpenMPT-1.29/doc/libopenmpt_release.md
 .
 
 0.6
