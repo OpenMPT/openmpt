@@ -1,161 +1,191 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-  <meta charset="utf-8">
-  <meta name="language" content="en">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OpenMPT 1.31 Release Notes</title>
-  <style type="text/css">
-    * { font-family: Calibri, Roboto, sans-serif; }
-    body
-    {
-        color: #222;
-        background: #eee;
-        font-size: 13pt;
-        margin: 0 0 1em 0;
-        padding: 0;
-        border: none;
-    }
+<head>
+	<meta charset="utf-8">
+	<meta name="language" content="en">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>OpenMPT 1.31 Release Notes</title>
+	<style type="text/css">
+	* { font-family: Calibri, Roboto, sans-serif; }
+	body
+	{
+		color: #222;
+		background: #eee;
+		font-size: 13pt;
+		margin: 0 0 1em 0;
+		padding: 0;
+		border: none;
+	}
 
-    a { color: #b30; text-decoration: none; }
-    a:visited { color: #910; text-decoration: none; }
-    a:hover { text-decoration: underline; }
+	a { color: #b30; text-decoration: none; }
+	a:visited { color: #910; text-decoration: none; }
+	a:hover { text-decoration: underline; }
 
-    .screenshots
-    {
-        float:right;
-        text-align:right;
-    }
+	.screenshots
+	{
+		float:right;
+		text-align:right;
+	}
 
-    .screenshots img, h1
-    {
-        border: 1px solid #ccc;
-        padding: 3px;
-        background: #f0f0f0;
-        margin: 0 0 3px 3px;
-    }
+	.screenshots img, h1
+	{
+		border: 1px solid #ccc;
+		padding: 3px;
+		background: #f0f0f0;
+		margin: 0 0 3px 3px;
+	}
 
-    p { margin: 0.5em 1em; padding: 0; }
+	p { margin: 0.5em 1em; padding: 0; }
 
-    h1
-    {
-        margin: 0 0 1em 0;
-        padding: 10px;
-        font-size: 24pt;
-        color: #444;
-        text-shadow: 1px 1px 1px #999;
-        background: #ddd;
-        background-image: linear-gradient(bottom, #ddd 20%, #eee 60%);
-        background-image: -o-linear-gradient(bottom, #ddd 20%, #eee 60%);
-        background-image: -moz-linear-gradient(bottom, #ddd 20%, #eee 60%);
-        background-image: -webkit-linear-gradient(bottom, #ddd 20%, #eee 60%);
-        background-image: -ms-linear-gradient(bottom, #ddd 20%, #eee 60%);
-        background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0.2, #ddd), color-stop(0.6, #eee));
-        border-width: 0 0 1px 0;
-    }
+	h1
+	{
+		margin: 0 0 1em 0;
+		padding: 10px;
+		font-size: 24pt;
+		color: #444;
+		text-shadow: 1px 1px 1px #999;
+		background: #ddd;
+		background-image: linear-gradient(bottom, #ddd 20%, #eee 60%);
+		background-image: -o-linear-gradient(bottom, #ddd 20%, #eee 60%);
+		background-image: -moz-linear-gradient(bottom, #ddd 20%, #eee 60%);
+		background-image: -webkit-linear-gradient(bottom, #ddd 20%, #eee 60%);
+		background-image: -ms-linear-gradient(bottom, #ddd 20%, #eee 60%);
+		background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0.2, #ddd), color-stop(0.6, #eee));
+		border-width: 0 0 1px 0;
+	}
 
-    h1 img { vertical-align: middle; margin-right: 0.5em; }
+	h1 img { vertical-align: middle; margin-right: 0.5em; }
 
-    h2, h3, h4
-    {
-        border: 1px solid #ccc;
-        border-width: 0 0 0 3em;
-        margin: 1em 0.5em;
-        padding: 0px 5px;
-        font-size: 18pt;
-        color: #333;
-        text-shadow: 1px 1px #fff;
-    }
+	h2, h3, h4
+	{
+		border: 1px solid #ccc;
+		border-width: 0 0 0 3em;
+		margin: 1em 0.5em;
+		padding: 0px 5px;
+		font-size: 18pt;
+		color: #333;
+		text-shadow: 1px 1px #fff;
+	}
 
-    h3 { border-left-width: 2em; }
-    h4 { border-left-width: 1em; }
+	h3 { border-left-width: 2em; }
+	h4 { border-left-width: 1em; }
 
-    li {list-style-type: none; padding: 0 0 0.5em 0; }
-    li:before { content: "» "; }
+	li {list-style-type: none; padding: 0 0 0.5em 0; }
+	li:before { content: "» "; }
 
-    li li { padding: 0; }
+	li li { padding: 0; }
 
-    /* use this for pattern data */
-    pre
-    {
-        font-family: monospace;
-        display: inline;
-        color: #006;
-    }
+	/* use this for pattern data */
+	pre
+	{
+		font-family: monospace;
+		display: inline;
+		color: #006;
+	}
 
-    tt
-    {
-        font-family: monospace;
-    }
+	tt
+	{
+		font-family: monospace;
+	}
+	</style>
+</head>
+<body>
 
-  </style>
-  </head>
-  <body>
+	<h1>
+		<img src="ReleaseNotesImages/modplug.png" width="64" height="64" alt="OpenMPT Logo">
+		OpenMPT 1.31 - Release Notes
+	</h1>
 
-    <h1>
-        <img src="ReleaseNotesImages/modplug.png" width="64" height="64" alt="OpenMPT Logo">
-        OpenMPT 1.31 - Release Notes
-    </h1>
+	<p>
+		It's been a while since the last major feature update, and we have been working on a bunch of great new features for this new version.
+		This document should give a rough overview about the biggest changes in OpenMPT 1.31.
+	</p>
 
-    <p>
-        It's been a while since the last major feature update, and we have been working on a bunch of great new features for this new version.
-        This document should give a rough overview about the biggest changes in OpenMPT 1.31.
-    </p>
+	<h2>What's new?</h2>
 
-    <h2>What's new?</h2>
+	<h3>General</h3>
+	<ul>
+	<li>Removing unused samples now works more reliably in instrument mode.</li>
+	<li>Instead of re-adding all non-conflicting default shortcuts every time a keymap is loaded, they will now only be added if the keymap was last saved with an older version of OpenMPT than the version that introduced the default shortcut.</li>
+	<li><strong>Channel panning</strong> is now exported in <strong>MIDI export</strong> as MIDI CC 10. If several notes play on the same MIDI channel, the last triggered note's panning is always considered.</li>
+	<li>When a text field is focussed, native text field shortcuts (such as Ctrl+A and others) are now preferred over OpenMPT shortcuts that are specific to the current view. Previously, they already took precedence over global OpenMPT shortcuts that apply to all views.</li>
+	<li>Builds for Windows XP and Vista can now receive automatic updates as well.</li>
+	</ul>
 
-    <h3>General</h3>
-    <ul>
-    </ul>
+	<h3>Instrument Library</h3>
+	<ul>
+	<li>The <strong>Instrument Library</strong> in the Tree View is now <strong>searchable</strong>: Locating files and folders in the instrument library is now as easy as hitting Ctrl+F to open text field and entering a search term. Wildcards (* to match any number of characters, ? to match any single character) are supported, too.</li>
+	<li>It is now also possible to change the <strong>sorting</strong> of the instrument library. From the context menu, you can choose to sort the library alphabetically, by file size or file modification date.</li>
+	<li>Selecting a file in the instrument library shows its file size and modification date in the status bar.</li>
+	</ul>
 
-    <h3>Pattern Editor</h3>
-    <ul>
-    </ul>
-    
-    <h3>Plugins</h3>
-    <ul>
-    </ul>
+	<h3>Pattern Editor</h3>
+	<ul>
+	<li>New <strong>shortcuts to scroll the pattern view</strong> without having to use the mouse.</li>
+	<li>In the <strong>Effect Visualizer</strong>, the currently edited plugin parameter for PC events can now be selected from a dropdown menu.</li>
+	</ul>
+	
+	<h3>Plugins</h3>
+	<ul>
+	<li><strong>Tone portamento</strong> can now be applied to plugins the same way as it works for samples (assuming that the target note is within the plugin's pitch bend range), and as a result now works properly in MIDI export as well. In order to make use of this feature in existing module files made with previous OpenMPT versions, compatibility settings need to be upgraded in the Song Properties dialog.</li>
+	<li>Individual plugins can now be <strong>auto-suspended</strong> if they output silence for four seconds.</li>
+	<li>Arpeggio notes no longer reset the current pitch bend position.</li>
+	</ul>
 
-    <h3>Sample / Instrument Editor</h3>
-    <ul>
-    </ul>
+	<h3>Sample / Instrument Editor</h3>
+	<ul>
+	<li>Is is now possible to follow the play cursor when the sample waveform is zoomed in and not fully visible, as long as only a single note is being previewed. This can be enabled through the settings dialog or a keyboard shortcut (Shift+F by default).</li>
+	<li>Double-clicking a timeline item now pops up an input dialog for finetuning that item.</li>
+	</ul>
 
-    <h3>Playback</h3>
-    <p>
-        A couple of playback behaviours have been changed and improved:
-    </p>
-    <ul>
-    </ul>
+	<h3>Playback</h3>
+	<p>
+		A couple of playback behaviours have been changed and improved:
+	</p>
+	<ul>
+	<li>Reduced <strong>aliasing</strong> when downsampling with the Sinc + Low-Pass resampler.</li>
+	<li>XM fine portamentos are now also sent to plugins and also work when exporting XM to MIDI.</li>
+	<li>The sample position is now rounded instead of truncated when resampling without interpolation.</li>
+	<li>Improved playback compatibility for IT, S3M, MOD, MED, MO3 and ULT files.</li>
+	</ul>
 
-    <h3>File Format Support</h3>
-    <ul>
-    </ul>
+	<h3>File Format Support</h3>
+	<ul>
+	<li>Samples can now be saved as <strong>Amiga IFF</strong> (8SVX / 16SVX) files.</li>
+	<li>OpenMPT 1.31 adds support for the following module formats: <strong>Composer 667</strong> (667), <strong>Graoumf Tracker</strong> (GTK / GT2), <strong>Dynamic Studio</strong> (DSM) and music from the game <strong>Imperium Galactica</strong> (XMF).<br>
+	<strong>Note</strong>: If you actually have a copy of <strong>Dynamic Studio</strong>, please let us know. This tracker seems to be completely lost, and thus correct playback of DSM files cannot be guaranteed.</li>
+	<li>A variant of the <strong>DSMI AMF</strong> format typically using the DMF file extension, found in some DOS games distributed by Webfoot, is now supported as well.</li>
+	<li>A hacked variant of the MOD format (also using the DMF file extension) found in the DOS game "Apocalypse Abyss" can now be read as well.</li>
+	<li>In IT files, mono samples are now stored with <strong>lossless IT sample compression</strong> by default, reducing the file size of IT files. As compressed stereo samples are still not supported properly by some software that is most likely not going to be updated anymore, compression for stereo samples remain disabled for now.</li>
+	<li>FLAC stream export now supports 32-bit resolution.</li>
+	<li>DLS / SF2: Added support for delay and hold envelope sections as well as pitch envelopes. Individual envelopes for each drum key are now supported.</li>
+	</ul>
 
-    <h3>There's more...</h3>
-    <p>
-        For a detailed description of what has changed, check <a href="History.txt">History.txt</a>. If you are new to OpenMPT, be sure to read the manual as well.
-    </p>
+	<h3>There's more...</h3>
+	<p>
+		For a detailed description of what has changed, check <a href="History.txt">History.txt</a>. If you are new to OpenMPT, be sure to read the manual as well.
+	</p>
 
-    <h2>Known Issues</h2>
-    <p>
-        <i>This list is not very comprehensive. The <a href="https://bugs.openmpt.org/">Issue Tracker</a> keeps more fine-grained track of issues.</i>
-    </p>
-    <ul>
-        <li>The plugin bridge is still rather experimental. It is known that some plugins don't work in it at all. Custom plugin GUIs are known to not work in Wine. Please report any issues you may be having with the plugin bridge!</li>
-        <li>Far from perfect VST support (no buses for audio / MIDI routing, not all tracker effects are supported, etc...)</li>
-        <li>Previewing samples from the tree view's file browser stops the playing module.</li>
-        <li>There is no really <em>convenient</em> way to find out what features of the tracker are supported by the original trackers (Impulse Tracker, Fasttracker 2, etc...) when working with those file formats...</li>
-    </ul>
-    <p>
-        Known issues regarding specific VST plugins can be found in the <a href="https://wiki.openmpt.org/Manual:_Known_Issues">manual</a>.
-    </p>
+	<h2>Known Issues</h2>
+	<p>
+		<i>This list is not very comprehensive. The <a href="https://bugs.openmpt.org/">Issue Tracker</a> keeps more fine-grained track of issues.</i>
+	</p>
+	<ul>
+	<li>The plugin bridge is still rather experimental. It is known that some plugins don't work in it at all. Custom plugin GUIs are known to not work in Wine. Please report any issues you may be having with the plugin bridge!</li>
+	<li>Far from perfect VST support (no buses for audio / MIDI routing, not all tracker effects are supported, etc...)</li>
+	<li>Previewing samples from the tree view's file browser stops the playing module.</li>
+	<li>There is no really <em>convenient</em> way to find out what features of the tracker are supported by the original trackers (Impulse Tracker, Fasttracker 2, etc...) when working with those file formats...</li>
+	</ul>
+	<p>
+		Known issues regarding specific VST plugins can be found in the <a href="https://wiki.openmpt.org/Manual:_Known_Issues">manual</a>.
+	</p>
 
-    <h2>Contact</h2>
-    <p>
-        Helpful bug reports, new ideas and brave volunteers to test early development builds or contribute to the code are more than welcome!<br>
-        Our issue tracker is located at <a href="https://bugs.openmpt.org/">https://bugs.openmpt.org/</a> and can be used to report bugs and feature requests.<br>
-        You can also meet us at the ModPlug Central forums: <a href="https://forum.openmpt.org/">https://forum.openmpt.org/</a>.
-    </p>
+	<h2>Contact</h2>
+	<p>
+		Helpful bug reports, new ideas and brave volunteers to test early development builds or contribute to the code are more than welcome!<br>
+		Our issue tracker is located at <a href="https://bugs.openmpt.org/">https://bugs.openmpt.org/</a> and can be used to report bugs and feature requests.<br>
+		You can also meet us at the ModPlug Central forums: <a href="https://forum.openmpt.org/">https://forum.openmpt.org/</a>.
+	</p>
 
-  </body>
+</body>
 </html>

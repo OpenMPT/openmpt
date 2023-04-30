@@ -32,8 +32,8 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.31.01.00 (* April 2023, revision 19099)
-------------------------------------------
+v1.31.01.00 (30 April 2023, revision 19143)
+-------------------------------------------
 Tree view
 - [New] <js> The instrument library can now be filtered. The default shortcut for invoking the filter is Ctrl + F. The filter supports * (any number of characters) and ? (single character) wildcards (http://bugs.openmpt.org/view.php?id=1566).
 - [New] <js> The instrument library can now also be sorted by file size and modification date. Sorting can be changed through the context menu or user-defined keyboard shortcuts.
@@ -50,6 +50,7 @@ Pattern tab
 - [Imp] <js> Dummy command W can now be inserted into XM files for syncing purposes in other module players (http://bugs.openmpt.org/view.php?id=1373).  
 - [Imp] <js> Effect visualizer: For PC events, the currently edited plugin parameter can now be selected from a dropdown menu (http://bugs.openmpt.org/view.php?id=1677).
 - [Imp] <js> Improved focus handling on the instrument selection dropdown: Navigating using cursor keys no longer reverts the keyboard focus back to the pattern editor immediately.
+- [Mod] <js> The selection key being pressed no longer causes automatic cursor moves caused by Edit Step to stop at the pattern end (http://bugs.openmpt.org/view.php?id=1698).
 - [Mod] <js> The hidden setting "Pattern Editor.DefaultSequenceMargins" is now applied to the scroll bar range, too.
 
 Sample tab
@@ -70,7 +71,7 @@ VST / DMO Plugins
 - [Mod] <js> Arpeggio notes no longer reset the current pitch bend position. Fixed some other arpeggio edge cases as well.
 
 Playback
-- [Imp] <js> Reduced aliasing when downsampling with the Sinc + LP resampler (tx eightbitbubsy).
+- [Imp] <js> Reduced aliasing when downsampling with the Sinc + Low-Pass resampler (tx eightbitbubsy).
 - [Imp] <js> XM fine portamentos are now also sent to plugins and also work when exporting XM to MIDI.
 - [Mod] <js> The sample position is now rounded instead of truncated when resampling without interpolation.
 - [Mod] <js> The filter cutoff frequency is no longer rounded to integer frequency values.
@@ -100,20 +101,22 @@ Other formats
 - [Imp] <js> MED: MMD1 files with more than 16 channels are now supported.
 - [Imp] <js> ULT: Import 8-bit volume commands with full precision.
 - [Mod] <js> DSM: Remove special handling for non-MOD effects in DSIK DSM files. The origin of those effect commands is actually the newly-supported Dynamic Studio DSM format, not the DSIK DSM format.
+- [Fix] <js> MO3: Envelope sustain was not imported correctly if the source file was an XM (http://bugs.openmpt.org/view.php?id=1695).
 - [Fix] <js> In OpenMPT 1.30, it was no longer possible to load MMCMP / PP20 / XPK-compressed modules inside ZIP / RAR / LHA containers. This is now possible again (http://bugs.openmpt.org/view.php?id=1549).
 
 Stream Export
-- [Imp] <jh> FLAC: Add 32-Bit output support.
+- [Imp] <jh> FLAC: Added 32-Bit output support.
 
 Module cleanup
 - [Imp] <js> In instrument mode, the whole module is rendered virtually for more accurate detection of unused samples. This takes a bit more time, but finds unused samples more reliably. Especially if a pattern started with an instrument-less note on some channel, that note was marked as used for any instrument, leading to unused samples not being detected.
 
 Misc
 - [New] <js> Added two new shortcuts: Play Song from Cursor / Pause and Play Song from Pattern Start / Pause (http://bugs.openmpt.org/view.php?id=1619).
-- [Imp] <js> Instead of re-adding all non-conflicting default shortcuts everytime a keymap is loaded, they will now only be added if the keymap was last saved with an older version of OpenMPT than the version that introduced the default shortcut (http://bugs.openmpt.org/view.php?id=1615).
+- [Imp] <js> Instead of re-adding all non-conflicting default shortcuts every time a keymap is loaded, they will now only be added if the keymap was last saved with an older version of OpenMPT than the version that introduced the default shortcut (http://bugs.openmpt.org/view.php?id=1615).
 - [Imp] <js> DLS / SF2: Added support for delay and hold envelope sections as well as pitch envelopes. Individual envelopes for each drum key are now supported.
 - [Imp] <js> "Last saved with" field in Song Properties now indicates whether the module was saved with ModPlug Player ADPCM sample compression.
 - [Imp] <js> MIDI Export: Channel panning is now exported as MIDI CC 10. If several notes play on the same MIDI channel, the last triggered note's panning is always considered.
+- [Imp] <jh> Builds for Windows XP and Vista can now receive automatic updates as well.
 - [Mod] <js> When a text field is focussed, native text field shortcuts (such as Ctrl + A and others) are now preferred over OpenMPT shortcuts that are specific to the current view. Previously, they already took precedence over global OpenMPT shortcuts that apply to all views.
 - [Mod] <js> When a text field is focussed, global shortcuts using Shift + Enter or just Enter are no longer blocked if the text field is a single-line field, as well as Alt + Cursor keys in any text fields.
 - [Mod] <js> When pressing the Play / Stop shortcut while the song is in paused or step mode, playback now continues as with the Play / Pause shortcut.
@@ -2599,7 +2602,7 @@ Module cleanup
 - [Fix] <js> Possible crash when removing unused plugins.
 
 Misc
-- [Imp] <js> Channel Manager: Dragging the mouse over buttons now applies the same action to all hovered buttons rather than toggling the action everytime the mouse moves a bit.
+- [Imp] <js> Channel Manager: Dragging the mouse over buttons now applies the same action to all hovered buttons rather than toggling the action every time the mouse moves a bit.
 - [Imp] <js> Channel Manager: Visual improvements, especially in high-DPI mode.
 - [Imp] <js> Various buttons (e.g. pattern editor and sample map) look nicer in high-DPI mode.
 - [Imp] <js> DLS: Experimental support for "art2" chunk.
@@ -6987,3 +6990,86 @@ v2004.02.16
 - [New] Mixpaste, just like in IT2
 - [New] Option to have "follow song" disabled by default under general settings.
 - [New] SDx works on VSTis.
+
+
+The following history of the closed-source ModPlug Tracker releases is incomplete and has mostly been pieced together from the old help file and website.
+
+
+v1.16 (November 2001)
+---------------------
+- [New] Support for DirectX Media Audio Effects.
+- [Imp] Player engine v1.45.02 (Increased max mix channels from 128 to 200)
+- [Fix] Fixed possible random crash when using VST plugins.
+
+
+v1.15
+-----
+- [New] ASIO support.
+- [New] VST effect control through midi macros (SFx + F0F080z).
+- [New] Mute and solo individual instrument.
+- [Imp] Improved Impulse Tracker keyboard mapping preset.
+- [Imp] Faster sample editor display of large samples.
+- [Fix] Fixed MP3 export bug (worked only once).
+
+
+v1.12 (August 2000)
+-------------------
+- [New] Support for VST Effect Plugins (Up to 8 effects per song)!
+
+
+v1.11 (July 2000)
+-----------------
+- [New] Stereo samples support!
+- [Imp] Improved sound engine with some compatibility fixes for high octaves.
+- [Fix] Fixes glitches with the original 1.10 release.
+
+
+v1.10 (June 2000)
+-----------------
+- [New] You can now export a song as a standard MIDI file.
+- [New] When encoding as MP3, you can set the full ID3 tag information (author, genre...).
+- [Fix] Includes all the bug fixes and patches released since the original 1.09.
+
+
+v1.09 (August 1999)
+-------------------
+- [New] Undo button in the pattern editor.
+- [Imp] Major improvements in the instrument library: you can now browse samples inside a song, and drag and drop samples between different songs.
+- [Imp] New reverberator engine (much better).
+
+
+v1.08 (July 1999)
+-----------------
+- Minor improvements, VU-Meters, pattern undo, etc.
+
+
+v1.04 (February 1999)
+---------------------
+- [New] Chord Editor.
+- [New] Drag and Drop editing.
+- [New] MPEG Layer3 encoding (if an external encoder is present).
+- [Imp] Lots of improvements and new features. MIDI Out and help update will be for a future release (1.1?).
+
+
+v1.00b3
+-------
+- Lots of bug fixes, and improvements.
+- The sample library is working: you can drag files from the sample library to the sample/instrument editor.
+- Support for standard sound banks: You can now install DLS and SF2 sound banks.
+
+
+v1.00b (18 June 1998)
+---------------------
+- This is the first public release of ModPlug Tracker Beta. The help file is still quite small, but the interface has been completely redesigned, so it's MUCH easier to use. Drawing in the pattern editor needs to be optimized.
+- This release also include basic MIDI support (no sync on MIDI clock yet) and low-latency DirectSound buffers.
+
+
+v1.00a (15 October 1997)
+------------------------
+- This is the first alpha release of ModPlug Tracker. A lot of features are still missing, but the copy/cut/paste, and support for XI instruments makes ModPlug Tracker good enough for an alpha version. I have to work on the help too.
+
+
+v0.0xa (19 September 1997)
+--------------------------
+- This is the first public release of ModPlug Tracker.
+
