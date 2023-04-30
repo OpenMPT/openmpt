@@ -140,7 +140,7 @@ is just a high-level summary.
  *  [**Regression**] Using the system-provided liballegro42 is no longer
     supported. The option `BUNDLED_ALLEGRO42=1` does not exist any more.
 
- *  Reduced aliasing when downsampling with the Sinc + LP resampler.
+ *  Reduced aliasing when downsampling with the Sinc + Low-Pass resampler.
  *  The sample position is now rounded instead of truncated when resampling
     without interpolation.
  *  Seeking with sample sync now supports portamento up / down commands as well
@@ -157,6 +157,8 @@ is just a high-level summary.
     Purple Motion's PANIC.S3M.
  *  S3M: In ScreamTracker 3.03 and later, OPL notes with tone portamento next to
     them are delayed until the next row and then the new pitch is used instantly.
+ *  MO3: Envelope sustain was not imported correctly if the source file was an
+    XM.
  *  MOD: Lone instrument number with retrigger effect swap sample immediately.
  *  Recalling a sample's default volume using an instrument number (as opposed
     to regular volume commands) previously ramped the volume change smoothly
