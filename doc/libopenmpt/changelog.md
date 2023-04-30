@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.7.1-pre
+
 ### libopenmpt 0.7.0 (2023-04-30)
 
  *  [**New**] `667` files from Composer 667 are now supported.
