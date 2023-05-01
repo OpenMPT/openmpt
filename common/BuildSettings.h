@@ -102,7 +102,7 @@
 // Support for externally linked samples e.g. in MPTM files
 #define MPT_EXTERNAL_SAMPLES
 
-// Support mpt::ChartsetLocale
+// Support mpt::CharsetLocale
 #define MPT_ENABLE_CHARSET_LOCALE
 
 // Use architecture-specific intrinsics
