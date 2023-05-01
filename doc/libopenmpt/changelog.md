@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.7.1-pre
 
+ *  [**Bug**] MSVC porjects failed to build from the packaged source zip.
+
 ### libopenmpt 0.7.0 (2023-04-30)
 
  *  [**New**] `667` files from Composer 667 are now supported.
