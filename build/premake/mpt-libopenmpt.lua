@@ -70,6 +70,7 @@
 		}
 		files {
 			"../../libopenmpt/libopenmpt_version.rc",
+			"../../build/svn_version",
 		}
 	filter { "action:vs*", "kind:SharedLib" }
 		resdefines { "MPT_BUILD_VER_DLL" }
