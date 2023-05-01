@@ -33,6 +33,7 @@
 		resincludedirs {
 			"$(IntDir)/svn_version",
 			"../../build/svn_version",
+			"$(ProjDir)/../../build/svn_version",
 		}
 		files {
 			"../../libopenmpt/libopenmpt_version.rc",
