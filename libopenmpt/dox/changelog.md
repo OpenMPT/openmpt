@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.3.46-pre
+
 ### libopenmpt 0.3.45 (2023-05-01)
 
  *  MO3: Envelope sustain was not imported correctly if the source file was an
