@@ -1,8 +1,0 @@
-
-branches:
-  only:
-    - master
-
-skip_tags: true
-
-skip_branch_with_pr: true
