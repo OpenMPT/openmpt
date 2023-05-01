@@ -1769,6 +1769,7 @@
     <ClCompile Include="..\..\soundlib\tuningCollection.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="$(ProjDir)\..\..\build\svn_version" />
     <None Include="..\svn_version" />
   </ItemGroup>
   <ItemGroup>

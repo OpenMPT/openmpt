@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <Filter Include="$(ProjDir)">
+      <UniqueIdentifier>{D45E2F21-C016-716E-291E-4ACA15F50B5F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="$(ProjDir)\..">
+      <UniqueIdentifier>{5FACCF7A-CB6C-4BB1-94A7-942E0027908D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="$(ProjDir)\..\..">
+      <UniqueIdentifier>{0A12F51A-F60A-146D-1F3D-F9F10B95F378}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="$(ProjDir)\..\..\build">
+      <UniqueIdentifier>{C9BD92CD-B5B7-BB1F-9E24-52308ABD218C}</UniqueIdentifier>
+    </Filter>
     <Filter Include="build">
       <UniqueIdentifier>{D5562E0F-416B-56C0-0AED-F91F76C052F1}</UniqueIdentifier>
     </Filter>
@@ -1444,6 +1456,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="$(ProjDir)\..\..\build\svn_version">
+      <Filter>$(ProjDir)\..\..\build</Filter>
+    </None>
     <None Include="..\svn_version">
       <Filter>build</Filter>
     </None>

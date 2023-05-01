@@ -548,7 +548,7 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A00000A;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;VER_ARCHNAME=\"x86\";MPT_BUILD_VER_FILENAME=\"xmp-openmpt.dll\";MPT_BUILD_VER_FILEDESC=\"xmp-openmpt\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\include\pugixml\src;..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\pugixml\src;..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -579,7 +579,7 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A00000A;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;VER_ARCHNAME=\"amd64\";MPT_BUILD_VER_FILENAME=\"xmp-openmpt.dll\";MPT_BUILD_VER_FILEDESC=\"xmp-openmpt\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\include\pugixml\src;..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\pugixml\src;..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -610,7 +610,7 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A00000A;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;VER_ARCHNAME=\"arm\";MPT_BUILD_VER_FILENAME=\"xmp-openmpt.dll\";MPT_BUILD_VER_FILEDESC=\"xmp-openmpt\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\include\pugixml\src;..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\pugixml\src;..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -641,7 +641,7 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A00000A;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;VER_ARCHNAME=\"arm64\";MPT_BUILD_VER_FILENAME=\"xmp-openmpt.dll\";MPT_BUILD_VER_FILEDESC=\"xmp-openmpt\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\include\pugixml\src;..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\pugixml\src;..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -677,7 +677,7 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A00000A;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;VER_ARCHNAME=\"x86\";MPT_BUILD_VER_FILENAME=\"xmp-openmpt.dll\";MPT_BUILD_VER_FILEDESC=\"xmp-openmpt\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\include\pugixml\src;..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\pugixml\src;..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -714,7 +714,7 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A00000A;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;VER_ARCHNAME=\"amd64\";MPT_BUILD_VER_FILENAME=\"xmp-openmpt.dll\";MPT_BUILD_VER_FILEDESC=\"xmp-openmpt\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\include\pugixml\src;..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\pugixml\src;..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -751,7 +751,7 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A00000A;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;VER_ARCHNAME=\"arm\";MPT_BUILD_VER_FILENAME=\"xmp-openmpt.dll\";MPT_BUILD_VER_FILEDESC=\"xmp-openmpt\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\include\pugixml\src;..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\pugixml\src;..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -788,7 +788,7 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A00000A;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;VER_ARCHNAME=\"arm64\";MPT_BUILD_VER_FILENAME=\"xmp-openmpt.dll\";MPT_BUILD_VER_FILEDESC=\"xmp-openmpt\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\include\pugixml\src;..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\pugixml\src;..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -827,7 +827,7 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A00000A;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;VER_ARCHNAME=\"x86\";MPT_BUILD_VER_FILENAME=\"xmp-openmpt.dll\";MPT_BUILD_VER_FILEDESC=\"xmp-openmpt\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\include\pugixml\src;..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\pugixml\src;..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -865,7 +865,7 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A00000A;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;VER_ARCHNAME=\"amd64\";MPT_BUILD_VER_FILENAME=\"xmp-openmpt.dll\";MPT_BUILD_VER_FILEDESC=\"xmp-openmpt\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\include\pugixml\src;..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\pugixml\src;..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -903,7 +903,7 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A00000A;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;VER_ARCHNAME=\"arm\";MPT_BUILD_VER_FILENAME=\"xmp-openmpt.dll\";MPT_BUILD_VER_FILEDESC=\"xmp-openmpt\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\include\pugixml\src;..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\pugixml\src;..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -941,7 +941,7 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A00000A;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;VER_ARCHNAME=\"arm64\";MPT_BUILD_VER_FILENAME=\"xmp-openmpt.dll\";MPT_BUILD_VER_FILEDESC=\"xmp-openmpt\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\include\pugixml\src;..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\pugixml\src;..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -974,7 +974,7 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A00000A;LIBOPENMPT_USE_DLL;PUGIXML_API=__declspec(dllimport);_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;VER_ARCHNAME=\"x86\";MPT_BUILD_VER_FILENAME=\"xmp-openmpt.dll\";MPT_BUILD_VER_FILEDESC=\"xmp-openmpt\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\include\pugixml\src;..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\pugixml\src;..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -1005,7 +1005,7 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A00000A;LIBOPENMPT_USE_DLL;PUGIXML_API=__declspec(dllimport);_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;VER_ARCHNAME=\"amd64\";MPT_BUILD_VER_FILENAME=\"xmp-openmpt.dll\";MPT_BUILD_VER_FILEDESC=\"xmp-openmpt\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\include\pugixml\src;..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\pugixml\src;..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -1036,7 +1036,7 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A00000A;LIBOPENMPT_USE_DLL;PUGIXML_API=__declspec(dllimport);_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;VER_ARCHNAME=\"arm\";MPT_BUILD_VER_FILENAME=\"xmp-openmpt.dll\";MPT_BUILD_VER_FILEDESC=\"xmp-openmpt\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\include\pugixml\src;..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\pugixml\src;..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -1067,7 +1067,7 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A00000A;LIBOPENMPT_USE_DLL;PUGIXML_API=__declspec(dllimport);_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;VER_ARCHNAME=\"arm64\";MPT_BUILD_VER_FILENAME=\"xmp-openmpt.dll\";MPT_BUILD_VER_FILEDESC=\"xmp-openmpt\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\include\pugixml\src;..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\pugixml\src;..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -1103,7 +1103,7 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A00000A;LIBOPENMPT_USE_DLL;PUGIXML_API=__declspec(dllimport);_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;VER_ARCHNAME=\"x86\";MPT_BUILD_VER_FILENAME=\"xmp-openmpt.dll\";MPT_BUILD_VER_FILEDESC=\"xmp-openmpt\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\include\pugixml\src;..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\pugixml\src;..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -1140,7 +1140,7 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A00000A;LIBOPENMPT_USE_DLL;PUGIXML_API=__declspec(dllimport);_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;VER_ARCHNAME=\"amd64\";MPT_BUILD_VER_FILENAME=\"xmp-openmpt.dll\";MPT_BUILD_VER_FILEDESC=\"xmp-openmpt\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\include\pugixml\src;..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\pugixml\src;..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -1177,7 +1177,7 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A00000A;LIBOPENMPT_USE_DLL;PUGIXML_API=__declspec(dllimport);_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;VER_ARCHNAME=\"arm\";MPT_BUILD_VER_FILENAME=\"xmp-openmpt.dll\";MPT_BUILD_VER_FILEDESC=\"xmp-openmpt\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\include\pugixml\src;..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\pugixml\src;..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -1214,7 +1214,7 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A00000A;LIBOPENMPT_USE_DLL;PUGIXML_API=__declspec(dllimport);_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;VER_ARCHNAME=\"arm64\";MPT_BUILD_VER_FILENAME=\"xmp-openmpt.dll\";MPT_BUILD_VER_FILEDESC=\"xmp-openmpt\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\include\pugixml\src;..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\pugixml\src;..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -1253,7 +1253,7 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A00000A;LIBOPENMPT_USE_DLL;PUGIXML_API=__declspec(dllimport);_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;VER_ARCHNAME=\"x86\";MPT_BUILD_VER_FILENAME=\"xmp-openmpt.dll\";MPT_BUILD_VER_FILEDESC=\"xmp-openmpt\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\include\pugixml\src;..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\pugixml\src;..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -1291,7 +1291,7 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A00000A;LIBOPENMPT_USE_DLL;PUGIXML_API=__declspec(dllimport);_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;VER_ARCHNAME=\"amd64\";MPT_BUILD_VER_FILENAME=\"xmp-openmpt.dll\";MPT_BUILD_VER_FILEDESC=\"xmp-openmpt\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\include\pugixml\src;..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\pugixml\src;..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -1329,7 +1329,7 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A00000A;LIBOPENMPT_USE_DLL;PUGIXML_API=__declspec(dllimport);_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;VER_ARCHNAME=\"arm\";MPT_BUILD_VER_FILENAME=\"xmp-openmpt.dll\";MPT_BUILD_VER_FILEDESC=\"xmp-openmpt\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\include\pugixml\src;..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\pugixml\src;..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -1367,7 +1367,7 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A00000A;LIBOPENMPT_USE_DLL;PUGIXML_API=__declspec(dllimport);_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;VER_ARCHNAME=\"arm64\";MPT_BUILD_VER_FILENAME=\"xmp-openmpt.dll\";MPT_BUILD_VER_FILEDESC=\"xmp-openmpt\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\include\pugixml\src;..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\pugixml\src;..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

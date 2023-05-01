@@ -289,7 +289,7 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;FLAC__NO_DLL;MPT_WITH_FLAC;MPT_WITH_PORTAUDIO;VER_ARCHNAME=\"x86\";MPT_BUILD_VER_FILENAME=\"openmpt123.exe\";MPT_BUILD_VER_FILEDESC=\"openmpt123\";MPT_BUILD_VER_EXE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\portaudio\include;..\..;..\..\src;..\..\openmpt123;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\portaudio\include;..\..;..\..\src;..\..\openmpt123;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -324,7 +324,7 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;FLAC__NO_DLL;MPT_WITH_FLAC;MPT_WITH_PORTAUDIO;VER_ARCHNAME=\"amd64\";MPT_BUILD_VER_FILENAME=\"openmpt123.exe\";MPT_BUILD_VER_FILEDESC=\"openmpt123\";MPT_BUILD_VER_EXE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\portaudio\include;..\..;..\..\src;..\..\openmpt123;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\portaudio\include;..\..;..\..\src;..\..\openmpt123;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -363,7 +363,7 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;FLAC__NO_DLL;MPT_WITH_FLAC;MPT_WITH_PORTAUDIO;VER_ARCHNAME=\"x86\";MPT_BUILD_VER_FILENAME=\"openmpt123.exe\";MPT_BUILD_VER_FILEDESC=\"openmpt123\";MPT_BUILD_VER_EXE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\portaudio\include;..\..;..\..\src;..\..\openmpt123;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\portaudio\include;..\..;..\..\src;..\..\openmpt123;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -402,7 +402,7 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;FLAC__NO_DLL;MPT_WITH_FLAC;MPT_WITH_PORTAUDIO;VER_ARCHNAME=\"amd64\";MPT_BUILD_VER_FILENAME=\"openmpt123.exe\";MPT_BUILD_VER_FILEDESC=\"openmpt123\";MPT_BUILD_VER_EXE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\portaudio\include;..\..;..\..\src;..\..\openmpt123;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\portaudio\include;..\..;..\..\src;..\..\openmpt123;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -443,7 +443,7 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;FLAC__NO_DLL;MPT_WITH_FLAC;MPT_WITH_PORTAUDIO;VER_ARCHNAME=\"x86\";MPT_BUILD_VER_FILENAME=\"openmpt123.exe\";MPT_BUILD_VER_FILEDESC=\"openmpt123\";MPT_BUILD_VER_EXE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\portaudio\include;..\..;..\..\src;..\..\openmpt123;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\portaudio\include;..\..;..\..\src;..\..\openmpt123;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -483,7 +483,7 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;FLAC__NO_DLL;MPT_WITH_FLAC;MPT_WITH_PORTAUDIO;VER_ARCHNAME=\"amd64\";MPT_BUILD_VER_FILENAME=\"openmpt123.exe\";MPT_BUILD_VER_FILEDESC=\"openmpt123\";MPT_BUILD_VER_EXE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\portaudio\include;..\..;..\..\src;..\..\openmpt123;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\portaudio\include;..\..;..\..\src;..\..\openmpt123;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -519,7 +519,7 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;LIBOPENMPT_USE_DLL;MPT_WITH_FLAC;MPT_WITH_PORTAUDIO;VER_ARCHNAME=\"x86\";MPT_BUILD_VER_FILENAME=\"openmpt123.exe\";MPT_BUILD_VER_FILEDESC=\"openmpt123\";MPT_BUILD_VER_EXE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\portaudio\include;..\..;..\..\src;..\..\openmpt123;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\portaudio\include;..\..;..\..\src;..\..\openmpt123;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -553,7 +553,7 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;LIBOPENMPT_USE_DLL;MPT_WITH_FLAC;MPT_WITH_PORTAUDIO;VER_ARCHNAME=\"amd64\";MPT_BUILD_VER_FILENAME=\"openmpt123.exe\";MPT_BUILD_VER_FILEDESC=\"openmpt123\";MPT_BUILD_VER_EXE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\portaudio\include;..\..;..\..\src;..\..\openmpt123;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\portaudio\include;..\..;..\..\src;..\..\openmpt123;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -591,7 +591,7 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;LIBOPENMPT_USE_DLL;MPT_WITH_FLAC;MPT_WITH_PORTAUDIO;VER_ARCHNAME=\"x86\";MPT_BUILD_VER_FILENAME=\"openmpt123.exe\";MPT_BUILD_VER_FILEDESC=\"openmpt123\";MPT_BUILD_VER_EXE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\portaudio\include;..\..;..\..\src;..\..\openmpt123;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\portaudio\include;..\..;..\..\src;..\..\openmpt123;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -630,7 +630,7 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;LIBOPENMPT_USE_DLL;MPT_WITH_FLAC;MPT_WITH_PORTAUDIO;VER_ARCHNAME=\"amd64\";MPT_BUILD_VER_FILENAME=\"openmpt123.exe\";MPT_BUILD_VER_FILEDESC=\"openmpt123\";MPT_BUILD_VER_EXE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\portaudio\include;..\..;..\..\src;..\..\openmpt123;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\portaudio\include;..\..;..\..\src;..\..\openmpt123;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -671,7 +671,7 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;LIBOPENMPT_USE_DLL;MPT_WITH_FLAC;MPT_WITH_PORTAUDIO;VER_ARCHNAME=\"x86\";MPT_BUILD_VER_FILENAME=\"openmpt123.exe\";MPT_BUILD_VER_FILEDESC=\"openmpt123\";MPT_BUILD_VER_EXE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\portaudio\include;..\..;..\..\src;..\..\openmpt123;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\portaudio\include;..\..;..\..\src;..\..\openmpt123;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -711,7 +711,7 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>DEBUG;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;LIBOPENMPT_USE_DLL;MPT_WITH_FLAC;MPT_WITH_PORTAUDIO;VER_ARCHNAME=\"amd64\";MPT_BUILD_VER_FILENAME=\"openmpt123.exe\";MPT_BUILD_VER_FILEDESC=\"openmpt123\";MPT_BUILD_VER_EXE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\portaudio\include;..\..;..\..\src;..\..\openmpt123;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\flac\include;..\..\include\portaudio\include;..\..;..\..\src;..\..\openmpt123;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Console</SubSystem>
