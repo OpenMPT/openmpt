@@ -121,7 +121,7 @@ Misc
 - [Mod] <js> When a text field is focussed, global shortcuts using Shift + Enter or just Enter are no longer blocked if the text field is a single-line field, as well as Alt + Cursor keys in any text fields.
 - [Mod] <js> When pressing the Play / Stop shortcut while the song is in paused or step mode, playback now continues as with the Play / Pause shortcut.
 - [Mod] <js> Channel Manager: Channel color gradient is now right-aligned so that it does not clash with the mute / select indicators.
-- [Reg] <jh> The minimum supported operating version for modern builds is now Windows 10 20H2 Build 19042. Older Windows 10 versions are still supported by legacy builds.
+- [Reg] <jh> The minimum supported operating version for modern builds is now Windows 10 21H2 Build 19042. Older Windows 10 versions are still supported by legacy builds.
 
 Third-Party Libraries
 - [Imp] Update opus (v1.4), r8brain (v6.2) and RtMidi (v5.0.0)
