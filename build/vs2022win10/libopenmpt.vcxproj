@@ -1739,6 +1739,9 @@
     <ClCompile Include="..\..\soundlib\tuningCollection.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\svn_version" />
+  </ItemGroup>
+  <ItemGroup>
     <ResourceCompile Include="..\..\libopenmpt\libopenmpt_version.rc">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
