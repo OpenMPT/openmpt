@@ -1192,7 +1192,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				&& fileHeader.msglength == 0 && fileHeader.msgoffset == 0 && fileHeader.reserved == 0)
 			{
 				madeWithTracker = U_("OpenSPC conversion");
-			} else if(fileHeader.cwtv == 0x0202 && fileHeader.cmwt == 0x0200 && fileHeader.highlight_major == 0 && fileHeader.highlight_minor == 0 && fileHeader.reserved == 0 && !patPos.empty() && !smpPos.empty() && patPos.front() < smpPos.front())
+			} else if(fileHeader.cwtv == 0x0202 && fileHeader.cmwt == 0x0200 && fileHeader.highlight_major == 0 && fileHeader.highlight_minor == 0 && fileHeader.reserved == 0 && !patPos.empty() && !smpPos.empty() && patPos[0] != 0 && patPos[0] < smpPos[0])
 			{
 				// ModPlug Tracker 1.0 pre-alpha up to alpha 4, patterns located before instruments / samples
 				m_dwLastSavedWithVersion = MPT_V("1.00.00.A0");
