@@ -27,7 +27,7 @@ AppUpdatesURL=https://openmpt.org/
 ArchitecturesInstallIn64BitMode=x64 ia64
 ChangesAssociations=yes
 Compression=lzma2/max
-;DefaultDirName={autopf}\OpenMPT
+;DefaultDirName={pf}\OpenMPT
 DefaultDirName={code:CodeGetDefaultDirName|}
 DefaultGroupName=OpenMPT
 DirExistsWarning=auto
@@ -280,7 +280,7 @@ begin
 	end
 	else
 	begin
-		Result := ExpandConstant('{autopf}\OpenMPT');
+		Result := ExpandConstant('{pf}\OpenMPT');
 	end;
 end;
 
