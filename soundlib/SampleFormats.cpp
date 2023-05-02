@@ -2792,7 +2792,7 @@ bool CSoundFile::SaveIFFSample(SAMPLEINDEX smp, std::ostream &f) const
 		chunk.length = 4;
 		mpt::IO::Write(f, chunk);
 		mpt::IO::WriteIntBE<uint32>(f, 6);
-		totalSize += mpt::saturate_cast<uint32>(sizeof(chunk)) + static_cast<uint32>(chunk.length);
+		totalSize += mpt::saturate_cast<uint32>(sizeof(chunk) + chunk.length);
 	}
 
 	totalSize += WriteIFFStringChunk(f, IFFChunk::idNAME, mpt::ToCharset(mpt::Charset::Amiga, GetCharsetInternal(), m_szNames[smp]));
@@ -2808,7 +2808,7 @@ bool CSoundFile::SaveIFFSample(SAMPLEINDEX smp, std::ostream &f) const
 	chunk.length = mpt::saturate_cast<uint32>(sampleIO.CalculateEncodedSize(sample.nLength));
 	mpt::IO::Write(f, chunk);
 	sampleIO.WriteSample(f, sample);
-	totalSize += mpt::saturate_cast<uint32>(sizeof(chunk)) + static_cast<uint32>(chunk.length);
+	totalSize += mpt::saturate_cast<uint32>(sizeof(chunk) + chunk.length);
 	if(totalSize % 2u)
 	{
 		mpt::IO::WriteIntBE<uint8>(f, 0);
