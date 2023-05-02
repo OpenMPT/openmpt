@@ -142,3 +142,14 @@ update = {
 with open("installer/" + "OpenMPT-" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "." + OPENMPT_VERSION_MINOR + "." + OPENMPT_VERSION_MINORMINOR + "-RETRO-update.json", "wb") as f:
 	f.write((json.dumps(update, ensure_ascii=False, indent=1)).encode('utf-8'))
 	f.close()
+
+def sign_file(filename):
+	p = Popen(["bin/release/vs2017-winxp-static/amd64/updatesigntool.exe", "sign", "jws", "auto", filename, filename + ".jws.json"])
+	p.communicate()
+
+sign_file("installer/" + "OpenMPT-" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "." + OPENMPT_VERSION_MINOR + "." + OPENMPT_VERSION_MINORMINOR + "-RETRO-Setup.update.json")
+sign_file("installer/" + "OpenMPT-" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "." + OPENMPT_VERSION_MINOR + "." + OPENMPT_VERSION_MINORMINOR + "-RETRO-portable-x86.update.json")
+sign_file("installer/" + "OpenMPT-" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "." + OPENMPT_VERSION_MINOR + "." + OPENMPT_VERSION_MINORMINOR + "-RETRO-portable-amd64.update.json")
+
+pdumpkey = Popen(["bin/release/vs2017-winxp-static/amd64/updatesigntool.exe", "dumpkey", "auto", "installer/" + "OpenMPT-" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "." + OPENMPT_VERSION_MINOR + "." + OPENMPT_VERSION_MINORMINOR + "-RETRO-update-publickey.jwk.json"])
+pdumpkey.communicate()
