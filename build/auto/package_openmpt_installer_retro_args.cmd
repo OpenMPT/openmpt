@@ -29,15 +29,19 @@ mkdir openmpt\dbg.win-retro\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%
 copy /y ..\installer\OpenMPT-%OPENMPT_VERSION%-RETRO-Setup.exe                                  openmpt\pkg.win-retro\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\OpenMPT-%MPT_REVISION%-RETRO-Setup.exe
 copy /y ..\installer\OpenMPT-%OPENMPT_VERSION%-RETRO-Setup.exe.digests                          openmpt\pkg.win-retro\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\OpenMPT-%MPT_REVISION%-RETRO-Setup.exe.digests
 copy /y ..\installer\OpenMPT-%OPENMPT_VERSION%-RETRO-Setup.update.json                          openmpt\pkg.win-retro\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\OpenMPT-%MPT_REVISION%-RETRO-Setup.update.json
+copy /y ..\installer\OpenMPT-%OPENMPT_VERSION%-RETRO-Setup.update.json.jws.json                 openmpt\pkg.win-retro\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\OpenMPT-%MPT_REVISION%-RETRO-Setup.update.json.jws.json
 copy /y ..\installer\OpenMPT-%OPENMPT_VERSION%-RETRO-portable-x86.zip                           openmpt\pkg.win-retro\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\OpenMPT-%MPT_REVISION%-RETRO-portable-x86.zip
 copy /y ..\installer\OpenMPT-%OPENMPT_VERSION%-RETRO-portable-x86.zip.digests                   openmpt\pkg.win-retro\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\OpenMPT-%MPT_REVISION%-RETRO-portable-x86.zip.digests
 copy /y ..\installer\OpenMPT-%OPENMPT_VERSION%-RETRO-portable-x86.update.json                   openmpt\pkg.win-retro\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\OpenMPT-%MPT_REVISION%-RETRO-portable-x86.update.json
+copy /y ..\installer\OpenMPT-%OPENMPT_VERSION%-RETRO-portable-x86.update.json.jws.json          openmpt\pkg.win-retro\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\OpenMPT-%MPT_REVISION%-RETRO-portable-x86.update.json.jws.json
 copy /y ..\installer\OpenMPT-%OPENMPT_VERSION%-RETRO-portable-amd64.zip                         openmpt\pkg.win-retro\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\OpenMPT-%MPT_REVISION%-RETRO-portable-amd64.zip
 copy /y ..\installer\OpenMPT-%OPENMPT_VERSION%-RETRO-portable-amd64.zip.digests                 openmpt\pkg.win-retro\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\OpenMPT-%MPT_REVISION%-RETRO-portable-amd64.zip.digests
 copy /y ..\installer\OpenMPT-%OPENMPT_VERSION%-RETRO-portable-amd64.update.json                 openmpt\pkg.win-retro\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\OpenMPT-%MPT_REVISION%-RETRO-portable-amd64.update.json
+copy /y ..\installer\OpenMPT-%OPENMPT_VERSION%-RETRO-portable-amd64.update.json.jws.json        openmpt\pkg.win-retro\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\OpenMPT-%MPT_REVISION%-RETRO-portable-amd64.update.json.jws.json
 copy /y ..\installer\OpenMPT-%OPENMPT_VERSION%-RETRO-symbols.7z                                 openmpt\dbg.win-retro\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\OpenMPT-%MPT_REVISION%-RETRO-symbols.7z
 copy /y ..\installer\OpenMPT-%OPENMPT_VERSION%-RETRO-symbols.7z.digests                         openmpt\dbg.win-retro\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\OpenMPT-%MPT_REVISION%-RETRO-symbols.7z.digests
 copy /y ..\installer\OpenMPT-%OPENMPT_VERSION%-RETRO-update.json                                openmpt\pkg.win-retro\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\OpenMPT-%MPT_REVISION%-RETRO-update.json
+copy /y ..\installer\OpenMPT-%OPENMPT_VERSION%-RETRO-update-publickey.jwk.json                  openmpt\pkg.win-retro\%OPENMPT_VERSION_MAJORMAJOR%.%OPENMPT_VERSION_MAJOR%\OpenMPT-%MPT_REVISION%-RETRO-update-publickey.jwk.json
 ..\build\tools\7zip\7z.exe a -ttar openmpt-pkg.win-retro.tar openmpt || goto error
 rmdir /s /q openmpt
 cd .. || goto error
