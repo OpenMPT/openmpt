@@ -1236,6 +1236,11 @@ public:
 					{
 						throw Warning(MPT_UFORMAT("Refusing to launch update '{} {}' when running from source tree.")(updateFilename, mpt::join_format(downloadinfo.autoupdate_installer->arguments, U_(" "))));
 					}
+					if(mpt::OS::Windows::IsOriginal() && mpt::osinfo::windows::Version::Current().IsBefore(mpt::osinfo::windows::Version::WinVista))
+					{
+						wantClose = true;
+						Reporting::Information(U_("OpenMPT cannot automatically restart itself after the update is finished on Windows XP. You will need to restart it manually."), U_("OpenMPT Update"));
+					}
 					if(reinterpret_cast<INT_PTR>(ShellExecute(NULL, NULL,
 						updateFilename.AsNative().c_str(),
 						mpt::ToWin(mpt::join_format(downloadinfo.autoupdate_installer->arguments, U_(" "))).c_str(),
