@@ -44,9 +44,14 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+inline constexpr int32 BASENOTE_MIN = (1 * 12);        // C-1
+inline constexpr int32 BASENOTE_MAX = (10 * 12 + 11);  // B-10
 
-#define	BASENOTE_MIN	(1*12)		// C-1
-#define	BASENOTE_MAX	(10*12+11)	// B-10
+static int32 GetSampleTransponse(const ModSample &sample)
+{
+	return mpt::saturate_round<int32>(std::log(sample.nC5Speed * (1.0 / 8363.0)) * (12.0 / mpt::numbers::ln2));
+}
+
 
 BEGIN_MESSAGE_MAP(CCtrlSamples, CModControlDlg)
 	//{{AFX_MSG_MAP(CCtrlSamples)
@@ -845,7 +850,7 @@ void CCtrlSamples::UpdateView(UpdateHint hint, CObject *pObj)
 			s = mpt::cfmt::val(sample.nC5Speed);
 			m_EditFineTune.SetWindowText(s);
 			if(sample.nC5Speed != 0)
-				transp = ModSample::FrequencyToTranspose(sample.nC5Speed).first;
+				transp = GetSampleTransponse(sample);
 		} else
 		{
 			int ftune = ((int)sample.nFineTune);
@@ -2738,16 +2743,16 @@ void CCtrlSamples::OnBaseNoteChanged()
 
 	if(!m_sndFile.UseFinetuneAndTranspose())
 	{
-		const int oldTransp = ModSample::FrequencyToTranspose(sample.nC5Speed).first;
+		const int oldTransp = GetSampleTransponse(sample);
 		const uint32 newFreq = mpt::saturate_round<uint32>(sample.nC5Speed * std::pow(2.0, (n - oldTransp) / 12.0));
-		if (newFreq > 0 && newFreq <= (m_sndFile.GetType() == MOD_TYPE_S3M ? 65535u : 9999999u) && newFreq != sample.nC5Speed)
+		if(newFreq > 0 && newFreq <= (m_sndFile.GetType() == MOD_TYPE_S3M ? 65535u : 9999999u) && newFreq != sample.nC5Speed)
 		{
 			sample.nC5Speed = newFreq;
 			LockControls();
 			SetDlgItemInt(IDC_EDIT5, newFreq, FALSE);
 
 			// Due to rounding imprecisions if the base note is below 0, we recalculate it here to make sure that the value stays consistent.
-			int basenote = (NOTE_MIDDLEC - NOTE_MIN) + ModSample::FrequencyToTranspose(newFreq).first;
+			int basenote = (NOTE_MIDDLEC - NOTE_MIN) + GetSampleTransponse(sample);
 			Limit(basenote, BASENOTE_MIN, BASENOTE_MAX);
 			basenote -= BASENOTE_MIN;
 			if(basenote != m_CbnBaseNote.GetCurSel())
@@ -2759,7 +2764,7 @@ void CCtrlSamples::OnBaseNoteChanged()
 		}
 	} else
 	{
-		if ((n >= -128) && (n < 128))
+		if((n >= -128) && (n < 128))
 		{
 			sample.RelativeTone = (int8)n;
 			OnFineTuneChangedDone();
@@ -3182,8 +3187,7 @@ void CCtrlSamples::SetFinetune(int step)
 		if(sample.nC5Speed == oldFreq)
 			sample.nC5Speed += step;
 		Limit(sample.nC5Speed, 1u, 9999999u);  // 9999999 is max. in Impulse Tracker
-		int transp = ModSample::FrequencyToTranspose(sample.nC5Speed).first;
-		int basenote = (NOTE_MIDDLEC - NOTE_MIN) + transp;
+		int basenote = (NOTE_MIDDLEC - NOTE_MIN) + GetSampleTransponse(sample);
 		Clamp(basenote, BASENOTE_MIN, BASENOTE_MAX);
 		basenote -= BASENOTE_MIN;
 		if(basenote != m_CbnBaseNote.GetCurSel())
