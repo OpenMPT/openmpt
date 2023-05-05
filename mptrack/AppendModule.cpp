@@ -71,13 +71,11 @@ void CModDoc::AppendModule(const CSoundFile &source)
 	}
 
 	// Check which samples / instruments are actually referenced.
-	for(const auto &pat : source.Patterns) if(pat.IsValid())
+	source.Patterns.ForEachModCommand([&instrMapping] (const ModCommand &m)
 	{
-		for(const auto &m : pat)
-		{
-			if(!m.IsPcNote() && m.instr < instrMapping.size()) instrMapping[m.instr] = 0;
-		}
-	}
+		if(!m.IsPcNote() && m.instr < instrMapping.size())
+			instrMapping[m.instr] = 0;
+	});
 
 	if(m_SndFile.GetNumInstruments())
 	{
@@ -311,6 +309,14 @@ void CModDoc::AppendModule(const CSoundFile &source)
 			targetPat.WriteEffect(EffectWriter(CMD_PATTERNBREAK, 0).Row(copyRows - 1).RetryNextRow());
 		}
 	}
+
+	///////////////////////////////////////////////////////////////////////////
+	// Copy edit history
+	auto &history = m_SndFile.GetFileHistory();
+	const auto &sourceHistory = source.GetFileHistory();
+	history.insert(history.end(), sourceHistory.begin(), sourceHistory.end());
+	std::sort(history.begin(), history.end());
+	history.erase(std::unique(history.begin(), history.end()), history.end());
 }
 
 OPENMPT_NAMESPACE_END
