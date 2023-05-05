@@ -80,25 +80,18 @@ struct Gregorian
 	int64        seconds = 0;
 	friend bool operator==(const Gregorian<tz>& lhs, const Gregorian<tz>& rhs)
 	{
-		return true
-			&& lhs.year == rhs.year
-			&& lhs.month == rhs.month
-			&& lhs.day == rhs.day
-			&& lhs.hours == rhs.hours
-			&& lhs.minutes == rhs.minutes
-			&& lhs.seconds == rhs.seconds
-			;
+		return std::tie(lhs.year, lhs.month, lhs.day, lhs.hours, lhs.minutes, lhs.seconds)
+			== std::tie(rhs.year, rhs.month, rhs.day, rhs.hours, rhs.minutes, rhs.seconds);
 	}
 	friend bool operator!=(const Gregorian<tz>& lhs, const Gregorian<tz>& rhs)
 	{
-		return false
-			|| lhs.year != rhs.year
-			|| lhs.month != rhs.month
-			|| lhs.day != rhs.day
-			|| lhs.hours != rhs.hours
-			|| lhs.minutes != rhs.minutes
-			|| lhs.seconds != rhs.seconds
-			;
+		return std::tie(lhs.year, lhs.month, lhs.day, lhs.hours, lhs.minutes, lhs.seconds)
+			!= std::tie(rhs.year, rhs.month, rhs.day, rhs.hours, rhs.minutes, rhs.seconds);
+	}
+	friend bool operator<(const Gregorian<tz> &lhs, const Gregorian<tz> &rhs)
+	{
+		return std::tie(lhs.year, lhs.month, lhs.day, lhs.hours, lhs.minutes, lhs.seconds)
+			< std::tie(rhs.year, rhs.month, rhs.day, rhs.hours, rhs.minutes, rhs.seconds);
 	}
 };
 
