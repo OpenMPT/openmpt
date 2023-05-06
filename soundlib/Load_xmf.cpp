@@ -44,13 +44,13 @@ struct XMFSampleHeader
 		const uint32 length = dataEnd.get() - dataStart.get();
 		if(type != 2 && length > 0 && sampleRate < 100)
 			return false;
-		if(type == 2 && length > 0 && sampleRate >= 0x8000)  // Any values != 0 are not really usable but when they turn negative, playback really goes really haywire
+		if(type == 2 && length > 0 && sampleRate >= 0x8000)  // Any values != 0 are not really usable but when they turn negative, playback really goes haywire
 			return false;
 		if((flags & smp16Bit) && (length % 2u))
 			return false;
 		if((flags & smpEnableLoop) && !loopEnd.get())
 			return false;
-		if(loopEnd.get() != 0 && (loopEnd.get() > length || loopStart.get() >= loopEnd.get()))
+		if(loopEnd.get() != 0 && (loopEnd.get() >= length || loopStart.get() >= loopEnd.get()))
 			return false;
 		return true;
 	}
@@ -64,8 +64,8 @@ struct XMFSampleHeader
 	{
 		mptSmp.Initialize(MOD_TYPE_MOD);
 		mptSmp.nLength = dataEnd.get() - dataStart.get();
-		mptSmp.nLoopStart = loopStart.get();
-		mptSmp.nLoopEnd = loopEnd.get();
+		mptSmp.nLoopStart = loopStart.get() + 1u;
+		mptSmp.nLoopEnd = loopEnd.get() + 1u;
 		mptSmp.uFlags.set(CHN_LOOP, flags & smpEnableLoop);
 		mptSmp.uFlags.set(CHN_PINGPONGLOOP, flags & smpBidiLoop);
 		if(flags & smp16Bit)
@@ -101,7 +101,9 @@ static bool TranslateXMFEffect(ModCommand &m, uint8 command, uint8 param, uint8 
 		return false;
 	}
 	CSoundFile::ConvertModCommand(m, command, param);
-	if(m.command == CMD_VOLUME)
+	if(type == 4 && m.command == CMD_VOLUME && (!(m.param & 0x03) || m.param == 0xFF))
+		m.param = static_cast<ModCommand::PARAM>((m.param + 3u) / 4u);
+	else if(m.command == CMD_VOLUME)
 		m.command = CMD_VOLUME8;
 	if(type != 4 && m.command == CMD_TEMPO && m.param == 0x20)
 		m.command = CMD_SPEED;
@@ -161,8 +163,9 @@ bool CSoundFile::ReadXMF(FileReader &file, ModLoadingFlags loadFlags)
 
 	InitializeGlobals(MOD_TYPE_MOD);
 	m_SongFlags.set(SONG_IMPORTED);
+	m_SongFlags.reset(SONG_ISAMIGA);
 	m_nSamples = numSamples;
-	m_nSamplePreAmp = (type == 3) ? 192 : 48;
+	m_nSamplePreAmp = (type == 3) ? 192 : 48;  // Imperium Galactica files are really quiet, no other XMFs appear to use type 3
 
 	file.Seek(1);
 	for(SAMPLEINDEX smp = 1; smp <= numSamples; smp++)
@@ -200,19 +203,16 @@ bool CSoundFile::ReadXMF(FileReader &file, ModLoadingFlags loadFlags)
 			continue;
 		}
 		ModCommand dummy;
-		for(ROWINDEX row = 0; row < 64; row++)
+		for(ModCommand &m : Patterns[pat])
 		{
-			for(ModCommand &m : Patterns[pat].GetRow(row))
-			{
-				const auto data = file.ReadArray<uint8, 6>();
-				if(data[0] > 0 && data[0] <= 77)
-					m.note = NOTE_MIN + 35 + data[0];
-				m.instr = data[1];
-				if(!TranslateXMFEffect(m, data[2], data[5], type) || !TranslateXMFEffect(dummy, data[3], data[4], type))
-					return false;
-				if(dummy.command != CMD_NONE)
-					m.FillInTwoCommands(m.command, m.param, dummy.command, dummy.param);
-			}
+			const auto data = file.ReadArray<uint8, 6>();
+			if(data[0] > 0 && data[0] <= 77)
+				m.note = NOTE_MIN + 35 + data[0];
+			m.instr = data[1];
+			if(!TranslateXMFEffect(m, data[2], data[5], type) || !TranslateXMFEffect(dummy, data[3], data[4], type))
+				return false;
+			if(dummy.command != CMD_NONE)
+				m.FillInTwoCommands(m.command, m.param, dummy.command, dummy.param);
 		}
 	}
 
