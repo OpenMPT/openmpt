@@ -33,7 +33,7 @@ struct XMFSampleHeader
 	uint8    flags;
 	uint16le sampleRate;
 
-	bool IsValid() const noexcept
+	bool IsValid(uint8 type) const noexcept
 	{
 		if(flags & ~(smp16Bit | smpEnableLoop | smpBidiLoop))
 			return false;
@@ -42,7 +42,9 @@ struct XMFSampleHeader
 		if(dataStart.get() > dataEnd.get())
 			return false;
 		const uint32 length = dataEnd.get() - dataStart.get();
-		if(length > 0 && sampleRate < 100)
+		if(type != 2 && length > 0 && sampleRate < 100)
+			return false;
+		if(type == 2 && length > 0 && sampleRate >= 0x8000)  // Any values != 0 are not really usable but when they turn negative, playback really goes really haywire
 			return false;
 		if((flags & smp16Bit) && (length % 2u))
 			return false;
@@ -58,7 +60,7 @@ struct XMFSampleHeader
 		return dataEnd.get() > dataStart.get();
 	}
 
-	void ConvertToMPT(ModSample &mptSmp) const
+	void ConvertToMPT(ModSample &mptSmp, uint8 type) const
 	{
 		mptSmp.Initialize(MOD_TYPE_MOD);
 		mptSmp.nLength = dataEnd.get() - dataStart.get();
@@ -72,7 +74,8 @@ struct XMFSampleHeader
 			mptSmp.nLength /= 2;
 		}
 		mptSmp.nVolume = defaultVolume;
-		mptSmp.nC5Speed = sampleRate;
+		if(type != 2)
+			mptSmp.nC5Speed = sampleRate;
 		mptSmp.FrequencyToTranspose();
 	}
 };
@@ -80,7 +83,7 @@ struct XMFSampleHeader
 MPT_BINARY_STRUCT(XMFSampleHeader, 16)
 
 
-static bool TranslateXMFEffect(ModCommand &m, uint8 command, uint8 param)
+static bool TranslateXMFEffect(ModCommand &m, uint8 command, uint8 param, uint8 type)
 {
 	if(command == 0x0B && param < 0xFF)
 	{
@@ -89,13 +92,19 @@ static bool TranslateXMFEffect(ModCommand &m, uint8 command, uint8 param)
 	{
 		param = 0x80 | (command << 4) | (param & 0x0F);
 		command = 0x0E;
-	} else if(command > 0x11)
+	} else if(command == 0x12)
+	{
+		// The ULT to XMF converter uses this to translate ULT command 5 but the player does not handle this command. Thus we will simply ignore it.
+		command = param = 0;
+	} else if(command > 0x12)
 	{
 		return false;
 	}
 	CSoundFile::ConvertModCommand(m, command, param);
 	if(m.command == CMD_VOLUME)
 		m.command = CMD_VOLUME8;
+	if(type != 4 && m.command == CMD_TEMPO && m.param == 0x20)
+		m.command = CMD_SPEED;
 	return true;
 }
 
@@ -105,7 +114,7 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderXMF(MemoryFileReader file, co
 	if(!file.CanRead(1))
 		return ProbeWantMoreData;
 	uint8 type = file.ReadUint8();
-	if(type != 0x03 && type != 0x04)
+	if(type < 2 || type > 4)
 		return ProbeFailure;
 	
 	constexpr size_t probeHeaders = std::min(size_t(256), (ProbeRecommendedSize - 1) / sizeof(XMFSampleHeader));
@@ -114,7 +123,7 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderXMF(MemoryFileReader file, co
 		XMFSampleHeader sampleHeader;
 		if(!file.ReadStruct(sampleHeader))
 			return ProbeWantMoreData;
-		if(!sampleHeader.IsValid())
+		if(!sampleHeader.IsValid(type))
 			return ProbeFailure;
 	}
 
@@ -127,7 +136,10 @@ bool CSoundFile::ReadXMF(FileReader &file, ModLoadingFlags loadFlags)
 {
 	file.Rewind();
 	uint8 type = file.ReadUint8();
-	if(type != 0x03 && type != 0x04)
+	// Type 2: Old UltraTracker finetune behaviour, automatic tone portamento
+	// Type 3: Normal finetune behaviour, automatic tone portamento (like in ULT)
+	// Type 4: Normal finetune behaviour, manual tone portamento (like in MOD)
+	if(type < 2 || type > 4)
 		return false;
 	if(!file.CanRead(256 * sizeof(XMFSampleHeader) + 256 + 3))
 		return false;
@@ -137,7 +149,7 @@ bool CSoundFile::ReadXMF(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		XMFSampleHeader sampleHeader;
 		file.ReadStruct(sampleHeader);
-		if(!sampleHeader.IsValid())
+		if(!sampleHeader.IsValid(type))
 			return false;
 		if(sampleHeader.HasSampleData())
 			numSamples = smp;
@@ -157,7 +169,7 @@ bool CSoundFile::ReadXMF(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		XMFSampleHeader sampleHeader;
 		file.ReadStruct(sampleHeader);
-		sampleHeader.ConvertToMPT(Samples[smp]);
+		sampleHeader.ConvertToMPT(Samples[smp], type);
 		m_szNames[smp] = "";
 	}
 
@@ -196,9 +208,10 @@ bool CSoundFile::ReadXMF(FileReader &file, ModLoadingFlags loadFlags)
 				if(data[0] > 0 && data[0] <= 77)
 					m.note = NOTE_MIN + 35 + data[0];
 				m.instr = data[1];
-				if(!TranslateXMFEffect(m, data[2], data[5]) || !TranslateXMFEffect(dummy, data[3], data[4]))
+				if(!TranslateXMFEffect(m, data[2], data[5], type) || !TranslateXMFEffect(dummy, data[3], data[4], type))
 					return false;
-				m.FillInTwoCommands(m.command, m.param, dummy.command, dummy.param);
+				if(dummy.command != CMD_NONE)
+					m.FillInTwoCommands(m.command, m.param, dummy.command, dummy.param);
 			}
 		}
 	}
