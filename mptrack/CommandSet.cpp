@@ -1991,7 +1991,7 @@ void CCommandSet::GenKeyMap(KeyMap &km)
 
 void CCommandSet::Copy(const CCommandSet *source)
 {
-	m_oldSpecs = nullptr;
+	m_oldSpecs = source->m_oldSpecs;
 	std::copy(std::begin(source->m_commands), std::end(source->m_commands), std::begin(m_commands));
 }
 
@@ -2074,7 +2074,6 @@ bool CCommandSet::LoadFile(std::istream &iStrm, const mpt::ustring &filenameDesc
 	std::string curLine;
 	std::vector<std::string> tokens;
 	int l = 0;
-	m_oldSpecs = nullptr;  // After clearing the key set, need to fix effect letters
 
 	for(auto &cmd : m_commands)
 		cmd.kcList.clear();
@@ -2192,7 +2191,6 @@ bool CCommandSet::LoadFile(std::istream &iStrm, const mpt::ustring &filenameDesc
 			(mpt::ToCString(filenameDescription), errText));
 	}
 
-	m_oldSpecs = nullptr;
 	return true;
 }
 
@@ -2221,6 +2219,13 @@ void CCommandSet::LoadDefaultKeymap()
 
 void CCommandSet::ApplyDefaultKeybindings(const Version onlyCommandsAfterVersion)
 {
+	if(m_oldSpecs)
+	{
+		const auto specs = m_oldSpecs;
+		m_oldSpecs = nullptr;
+		QuickChange_SetEffects(*specs);
+	}
+
 	std::vector<HKL> layouts(GetKeyboardLayoutList(0, nullptr));
 	GetKeyboardLayoutList(static_cast<int>(layouts.size()), layouts.data());
 
@@ -2433,7 +2438,7 @@ bool CCommandSet::QuickChange_SetEffects(const CModSpecifications &modSpecs)
 		{
 			// We don't want to enter "empty" effects in IT / S3M
 			effect = '?';
-		} else if(effect != '?' && (effect < '0' || effect > '9'))
+		} else if(cmd >= kcSetFXuserBegin && cmd <= kcSetFXuserEnd)
 		{
 			// Don't map effects that use non-alphanumeric effect letters (such as # or \), they are set up manually instead
 			continue;

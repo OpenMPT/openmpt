@@ -667,11 +667,13 @@ enum CommandID
 	kcSetFXpanSlide,            //p,p
 	kcSetFXsetEnvPos,           //l,?
 	kcSetFXmacro,               //z,z
-	kcSetFXmacroSlide,      //?,\ ,
-	kcSetFXdelaycut,        //?,:
-	kcSetFXextension,       //?,#
-	kcSetFXFinetune,        //?,+
-	kcSetFXFinetuneSmooth,  //?,*
+	kcSetFXuserBegin,
+	kcSetFXmacroSlide = kcSetFXuserBegin,  //?,\ ,
+	kcSetFXdelaycut,                       //?,:
+	kcSetFXextension,                      //?,#
+	kcSetFXFinetune,                       //?,+
+	kcSetFXFinetuneSmooth,                 //?,*
+	kcSetFXuserEnd = kcSetFXFinetuneSmooth,
 	kcSetFXDummy,           //W, 
 	kcSetFXEnd = kcSetFXDummy,
 
