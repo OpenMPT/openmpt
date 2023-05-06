@@ -1,7 +1,7 @@
 /*
  * Load_xmf.cpp
  * ------------
- * Purpose: Module loader for music files from the DOS game "Imperium Galactica"
+ * Purpose: Module loader for music files from the DOS game "Imperium Galactica" and various Astroidea demos
  * Notes  : This format has nothing to do with the XMF format by the MIDI foundation.
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
@@ -85,11 +85,11 @@ static bool TranslateXMFEffect(ModCommand &m, uint8 command, uint8 param)
 	if(command == 0x0B && param < 0xFF)
 	{
 		param++;
-	} else if(command == 0x10)
+	} else if(command == 0x10 || command == 0x11)
 	{
+		param = 0x80 | (command << 4) | (param & 0x0F);
 		command = 0x0E;
-		param = 0x80 | (param & 0x0F);
-	} else if(command > 0x10)
+	} else if(command > 0x11)
 	{
 		return false;
 	}
@@ -104,7 +104,8 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderXMF(MemoryFileReader file, co
 {
 	if(!file.CanRead(1))
 		return ProbeWantMoreData;
-	if(file.ReadUint8() != 0x03)
+	uint8 type = file.ReadUint8();
+	if(type != 0x03 && type != 0x04)
 		return ProbeFailure;
 	
 	constexpr size_t probeHeaders = std::min(size_t(256), (ProbeRecommendedSize - 1) / sizeof(XMFSampleHeader));
@@ -125,7 +126,8 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderXMF(MemoryFileReader file, co
 bool CSoundFile::ReadXMF(FileReader &file, ModLoadingFlags loadFlags)
 {
 	file.Rewind();
-	if(file.ReadUint8() != 0x03)
+	uint8 type = file.ReadUint8();
+	if(type != 0x03 && type != 0x04)
 		return false;
 	if(!file.CanRead(256 * sizeof(XMFSampleHeader) + 256 + 3))
 		return false;
@@ -148,7 +150,7 @@ bool CSoundFile::ReadXMF(FileReader &file, ModLoadingFlags loadFlags)
 	InitializeGlobals(MOD_TYPE_MOD);
 	m_SongFlags.set(SONG_IMPORTED);
 	m_nSamples = numSamples;
-	m_nSamplePreAmp = 192;
+	m_nSamplePreAmp = (type == 3) ? 192 : 48;
 
 	file.Seek(1);
 	for(SAMPLEINDEX smp = 1; smp <= numSamples; smp++)
@@ -212,7 +214,7 @@ bool CSoundFile::ReadXMF(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 
-	m_modFormat.formatName = UL_("Imperium Galactica XMF");
+	m_modFormat.formatName = UL_("Astroidea XMF");
 	m_modFormat.type = UL_("xmf");
 	m_modFormat.madeWithTracker.clear();
 	m_modFormat.charset = mpt::Charset::CP437;  // No strings in this format...
