@@ -179,20 +179,6 @@ protected:
 };
 
 
-// CPatEdit: Edit control that switches back to the pattern view if Tab key is pressed.
-
-class CPatEdit: public CEdit
-{
-protected:
-	CCtrlPatterns *m_pParent = nullptr;
-
-public:
-	CPatEdit() = default;
-	void SetParent(CCtrlPatterns *parent) { m_pParent = parent; }
-	BOOL PreTranslateMessage(MSG *pMsg) override;
-};
-
-
 class CCtrlPatterns: public CModControlDlg
 {
 	friend class COrderList;
@@ -200,7 +186,7 @@ protected:
 	COrderList m_OrderList;
 	CButton m_BtnPrev, m_BtnNext;
 	CComboBox m_CbnInstrument;
-	CPatEdit m_EditSpacing, m_EditPatName, m_EditSequence;
+	CEdit m_EditSpacing, m_EditPatName, m_EditSequence;
 	CSpinButtonCtrl m_SpinInstrument, m_SpinSpacing, m_SpinSequence;
 	CModControlBar m_ToolBar;
 	INSTRUMENTINDEX m_nInstrument = 0;

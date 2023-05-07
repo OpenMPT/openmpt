@@ -38,23 +38,6 @@ static bool IsCtrlKeyPressed() { return CMainFrame::GetInputHandler()->CtrlPress
 
 
 //////////////////////////////////////////////////////////////
-// CPatEdit
-
-BOOL CPatEdit::PreTranslateMessage(MSG *pMsg)
-{
-	if(((pMsg->message == WM_KEYDOWN) || (pMsg->message == WM_KEYUP)) && (pMsg->wParam == VK_TAB))
-	{
-		if((pMsg->message == WM_KEYUP) && (m_pParent))
-		{
-			m_pParent->SwitchToView();
-		}
-		return TRUE;
-	}
-	return CEdit::PreTranslateMessage(pMsg);
-}
-
-
-//////////////////////////////////////////////////////////////
 // COrderList
 
 BEGIN_MESSAGE_MAP(COrderList, CWnd)
