@@ -5,8 +5,11 @@ CFLAGS_WARNINGS   += -Wcast-align -Wcast-qual -Wdouble-promotion -Wfloat-convers
 CXXFLAGS_WARNINGS += -Wno-psabi
 
 ifeq ($(MODERN),1)
+# GCC >= 12
+# -Wconversion is way too noisy for earlier GCC versions
 CFLAGS_WARNINGS += -Wframe-larger-than=4000
 #CXXFLAGS_WARNINGS += -Wshadow -Wswitch-enum 
+CXXFLAGS_WARNINGS += -Wconversion
 # gold
 LDFLAGS_WARNINGS  += -Wl,-no-undefined -Wl,--detect-odr-violations
 # GCC 8
