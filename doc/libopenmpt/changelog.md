@@ -9,6 +9,9 @@ is just a high-level summary.
 
  *  [**Bug**] MSVC projects failed to build from the packaged source zip.
 
+ *  IT: Improved fingerprinting of early ModPlug Tracker versions.
+ *  XMF: Modules from Astroidea demos can now be read as well.
+
 ### libopenmpt 0.7.0 (2023-04-30)
 
  *  [**New**] `667` files from Composer 667 are now supported.

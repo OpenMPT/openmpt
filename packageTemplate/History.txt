@@ -32,6 +32,30 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.31.02.00 (7 May 2023, revision 19251)
+----------------------------------------
+Pattern tab
+- [Mod] <js> Special handling of Tab key on input fields was removed. The global shortcut for switching between upper / lower views should be used instead (http://bugs.openmpt.org/view.php?id=1697).
+
+Sample tab
+- [Fix] <js> Fixed some rounding issues when transposing samples especially at lower sample rates (tx elz).
+
+IT
+- [Imp] <js> Improved fingerprinting of early ModPlug Tracker versions.
+
+Other formats
+- [Imp] <js> XMF: Modules from Astroidea demos can now be read as well.
+
+Misc
+- [Imp] <js> Appending a module also merges its edit history (http://bugs.openmpt.org/view.php?id=1700).
+- [Fix] <js> Switching between module formats could permanently erase user-assigned effect letter shortcuts (smooth MIDI macros, finetune, etc).
+- [Fix] <js> Loading keyboard shortcuts from a file made automatically assigned effect letter shortcuts inaccessible (potentially fixes http://bugs.openmpt.org/view.php?id=1571).
+- [Fix] <jh> Automatic updates were not available on builds for Windows XP and Vista, despite being advertised to work in OpenMPT 1.31 (http://bugs.openmpt.org/view.php?id=1699).
+
+Installer/release package
+- [Fix] <jh> For new installations, the installer for Windows XP and Vista suggested an incorrect default path (http://bugs.openmpt.org/view.php?id=1699).
+
+
 v1.31.01.00 (30 April 2023, revision 19143)
 -------------------------------------------
 Tree view
