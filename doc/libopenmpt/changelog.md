@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.7.2-pre
+
 ### libopenmpt 0.7.1 (2023-05-07)
 
  *  [**Bug**] MSVC projects failed to build from the packaged source zip.
