@@ -3327,6 +3327,8 @@ void CModTree::OnItemLeftClick(LPNMHDR, LRESULT *pResult)
 
 void CModTree::OnSelChanged(LPNMHDR, LRESULT *)
 {
+	if(m_redrawLockCount)
+		return;
 	HTREEITEM hItem = GetSelectedItem();
 	switch(GetModItem(hItem).type)
 	{
