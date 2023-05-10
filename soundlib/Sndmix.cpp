@@ -1659,7 +1659,7 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int32 &period, Tuning::RATIOT
 		{
 			//Hack implementation: Scaling vibratofactor to [0.95; 1.05]
 			//using figure from above tables and vibratodepth parameter
-			vibratoFactor += 0.05f * (vdelta * chn.nVibratoDepth) / (128.0f * 60.0f);
+			vibratoFactor += 0.05f * static_cast<float>(vdelta * static_cast<int>(chn.nVibratoDepth)) / (128.0f * 60.0f);
 			chn.m_CalculateFreq = true;
 			chn.m_ReCalculateFreqOnFirstTick = false;
 
@@ -1892,7 +1892,7 @@ void CSoundFile::ProcessSampleAutoVibrato(ModChannel &chn, int32 &period, Tuning
 			if(hasTuning)
 			{
 				//Vib sweep is not taken into account here.
-				vibratoFactor += 0.05F * pSmp->nVibDepth * vdelta / 4096.0f; //4096 == 64^2
+				vibratoFactor += 0.05f * static_cast<float>(static_cast<int>(pSmp->nVibDepth) * vdelta) / 4096.0f; //4096 == 64^2
 				//See vibrato for explanation.
 				chn.m_CalculateFreq = true;
 				/*
@@ -2693,7 +2693,7 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 		{
 			case PLUGIN_VOLUMEHANDLING_DRYWET:
 				if(hasVolCommand) pPlugin->SetDryRatio(1.0f - (2 * vol) / 127.0f);
-				else pPlugin->SetDryRatio(1.0f - (2 * defaultVolume) / 127.0f);
+				else pPlugin->SetDryRatio(1.0f - static_cast<float>(2 * defaultVolume) / 127.0f);
 				break;
 			case PLUGIN_VOLUMEHANDLING_MIDI:
 				if(hasVolCommand) pPlugin->MidiCC(MIDIEvents::MIDICC_Volume_Coarse, std::min(uint8(127), static_cast<uint8>(2 * vol)), nChn);
