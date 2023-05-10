@@ -42,7 +42,6 @@ protected:
 		return;
 	}
 
-
 private:
 	void CacheStream() const {
 		if (cached) {

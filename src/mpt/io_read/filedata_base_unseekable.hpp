@@ -74,7 +74,6 @@ private:
 		streamFullyCached = true;
 	}
 
-
 	void CacheStreamUpTo(pos_type pos, pos_type length) const {
 		if (streamFullyCached) {
 			return;
