@@ -952,7 +952,7 @@ void CSoundFile::ProcessTremolo(ModChannel &chn, int &vol) const
 		{
 			// IT compatibility: IT has its own, more precise tables
 			if(m_playBehaviour[kITVibratoTremoloPanbrello])
-				chn.nTremoloPos += 4 * chn.nTremoloSpeed;
+				chn.nTremoloPos += static_cast<uint8>(4u * chn.nTremoloSpeed);
 			else
 				chn.nTremoloPos += chn.nTremoloSpeed;
 		}
@@ -1651,7 +1651,7 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int32 &period, Tuning::RATIOT
 
 		// IT compatibility: IT has its own, more precise tables and pre-increments the vibrato position
 		if(advancePosition && m_playBehaviour[kITVibratoTremoloPanbrello])
-			chn.nVibratoPos += 4 * chn.nVibratoSpeed;
+			chn.nVibratoPos += static_cast<uint8>(4u * chn.nVibratoSpeed);
 
 		int vdelta = GetVibratoDelta(chn.nVibratoType, chn.nVibratoPos);
 
@@ -2768,8 +2768,8 @@ void CSoundFile::ProcessGlobalVolume(samplecount_t lCount)
 		// Still some ramping left to do.
 		int32 highResGlobalVolumeDestination = static_cast<int32>(m_PlayState.m_nGlobalVolumeDestination) << VOLUMERAMPPRECISION;
 
-		const long delta = highResGlobalVolumeDestination - m_PlayState.m_lHighResRampingGlobalVolume;
-		step = delta / static_cast<long>(m_PlayState.m_nSamplesToGlobalVolRampDest);
+		const int32 delta = highResGlobalVolumeDestination - m_PlayState.m_lHighResRampingGlobalVolume;
+		step = delta / m_PlayState.m_nSamplesToGlobalVolRampDest;
 
 		if(m_nMixLevels == MixLevels::v1_17RC2)
 		{
