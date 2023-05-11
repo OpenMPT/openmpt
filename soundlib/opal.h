@@ -24,6 +24,8 @@
 
 
 
+OPENMPT_NAMESPACE_BEGIN
+
 //==================================================================================================
 // Opal class.
 //==================================================================================================
@@ -1332,3 +1334,5 @@ void Opal::Operator::ComputeKeyScaleLevel() {
     uint16_t i = (Chan->GetOctave() << 4) | (Chan->GetFreq() >> 6);
     KeyScaleLevel = levtab[i] >> KeyScaleShift;
 }
+
+OPENMPT_NAMESPACE_END
