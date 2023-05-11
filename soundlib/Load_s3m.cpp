@@ -253,12 +253,12 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 			// MPT and OpenMPT before 1.17.03.02 - Simply keep default (filter) MIDI macros
 			if((fileHeader.masterVolume & 0x80) != 0)
 			{
-				m_dwLastSavedWithVersion = MPT_V("1.16.00.00");
+				m_dwLastSavedWithVersion = MPT_V("1.16");
 				madeWithTracker = U_("ModPlug Tracker / OpenMPT 1.17");
 			} else
 			{
-				// MPT 1.0 alpha5 doesn't set the stereo flag, but MPT 1.0 beta1 does.
-				m_dwLastSavedWithVersion = MPT_V("1.00.00.00");
+				// MPT 1.0 alpha5 doesn't set the stereo flag, but MPT 1.0 alpha6 does.
+				m_dwLastSavedWithVersion = MPT_V("1.00.00.A0");
 				madeWithTracker = U_("ModPlug Tracker 1.0 alpha");
 			}
 			keepMidiMacros = true;
@@ -491,6 +491,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	// Read extended channel panning
 	if(fileHeader.usePanningTable == S3MFileHeader::idPanning)
 	{
+		bool hasChannelsWithoutPanning = false;
 		uint8 pan[32];
 		file.ReadArray(pan);
 		for(CHANNELINDEX i = 0; i < 32; i++)
@@ -498,7 +499,18 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 			if((pan[i] & 0x20) != 0 && (!isST3 || !isAdlibChannel[i]))
 			{
 				ChnSettings[i].nPan = (static_cast<uint16>(pan[i] & 0x0F) * 256 + 8) / 15;
+			} else if(pan[i] < 0x10)
+			{
+				hasChannelsWithoutPanning = true;
 			}
+		}
+		if(m_nChannels < 32 && m_dwLastSavedWithVersion == MPT_V("1.16"))
+		{
+			// MPT 1.0 alpha 6 up to 1.16.203 set ths panning bit for all channels, regardless of whether they are used or not.
+			if(hasChannelsWithoutPanning)
+				m_modFormat.madeWithTracker = U_("ModPlug Tracker 1.16 / OpenMPT 1.17");
+			else
+				m_modFormat.madeWithTracker = U_("ModPlug Tracker");
 		}
 	}
 
