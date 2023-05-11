@@ -203,8 +203,8 @@ void OPL::Frequency(CHANNELINDEX c, uint32 milliHertz, bool keyOff, bool beating
 	fnum |= (block << 10);
 
 	uint16 channel = ChannelToRegister(oplCh);
-	m_KeyOnBlock[oplCh] = (keyOff ? 0 : KEYON_BIT) | (fnum >> 8);  // Key on bit + Octave (block) + F-number high 2 bits
-	Port(c, FNUM_LOW    | channel, fnum & 0xFF);                   // F-Number low 8 bits
+	m_KeyOnBlock[oplCh] = static_cast<uint8>((keyOff ? 0 : KEYON_BIT) | (fnum >> 8));  // Key on bit + Octave (block) + F-number high 2 bits
+	Port(c, FNUM_LOW    | channel, fnum & 0xFFu);                                      // F-Number low 8 bits
 	Port(c, KEYON_BLOCK | channel, m_KeyOnBlock[oplCh]);
 
 	m_isActive = true;
@@ -217,7 +217,7 @@ uint8 OPL::CalcVolume(uint8 trackerVol, uint8 kslVolume)
 		return kslVolume;
 	if(trackerVol > 0)
 		trackerVol++;
-	return (kslVolume & KSL_MASK) | (63u - ((63u - (kslVolume & TOTAL_LEVEL_MASK)) * trackerVol) / 64u);
+	return static_cast<uint8>((kslVolume & KSL_MASK) | (63u - ((63u - (kslVolume & TOTAL_LEVEL_MASK)) * trackerVol) / 64u));
 }
 
 
@@ -258,7 +258,7 @@ int8 OPL::Pan(CHANNELINDEX c, int32 pan)
 		fbConn |= VOICE_TO_RIGHT;
 
 	Port(c, FEEDBACK_CONNECTION | ChannelToRegister(oplCh), fbConn);
-	return ((fbConn & VOICE_TO_LEFT) ? -1 : 0) + ((fbConn & VOICE_TO_RIGHT) ? 1 : 0);
+	return static_cast<int8>(((fbConn & VOICE_TO_LEFT) ? -1 : 0) + ((fbConn & VOICE_TO_RIGHT) ? 1 : 0));
 }
 
 
