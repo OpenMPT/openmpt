@@ -11,7 +11,16 @@
 #include "stdafx.h"
 #include "../common/misc_util.h"
 #include "OPL.h"
+
+#include <cstdint>
+#if MPT_COMPILER_GCC
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wconversion"
+#endif
 #include "opal.h"
+#if MPT_COMPILER_GCC
+#pragma GCC diagnostic pop
+#endif
 
 OPENMPT_NAMESPACE_BEGIN
 
