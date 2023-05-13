@@ -66,7 +66,6 @@
 	#define MPT_ARCH_X86_CX8
 	#define MPT_ARCH_X86_CMOV
 	#define MPT_ARCH_X86_MMX
-	#define MPT_ARCH_X86_3DNOWPREFETCH
 	#define MPT_ARCH_X86_FXSR
 	#define MPT_ARCH_X86_SSE
 	#define MPT_ARCH_X86_SSE2
@@ -81,7 +80,6 @@
 		#define MPT_ARCH_X86_CX8
 		#define MPT_ARCH_X86_CMOV
 		#define MPT_ARCH_X86_MMX
-		#define MPT_ARCH_X86_3DNOWPREFETCH
 		#define MPT_ARCH_X86_FXSR
 		#define MPT_ARCH_X86_SSE
 		#define MPT_ARCH_X86_SSE2
@@ -95,7 +93,6 @@
 		#define MPT_ARCH_X86_CX8
 		#define MPT_ARCH_X86_CMOV
 		#define MPT_ARCH_X86_MMX
-		#define MPT_ARCH_X86_3DNOWPREFETCH
 		#define MPT_ARCH_X86_FXSR
 		#define MPT_ARCH_X86_SSE
 	#elif MPT_MSVC_AT_LEAST(2008, 0)
@@ -120,6 +117,7 @@
 	#endif
 #endif
 #if defined(__AVX__)
+	#define MPT_ARCH_X86_3DNOWPREFETCH
 	#ifndef MPT_ARCH_X86_XSAVE
 	#define MPT_ARCH_X86_XSAVE
 	#endif
@@ -175,11 +173,13 @@
 #ifdef __3dNOW_A__
 	#define MPT_ARCH_X86_3DNOWEXT
 #endif
+#ifdef __PRFCHW__
+	#define MPT_ARCH_X86_3DNOWPREFETCH
+#endif
 #ifdef __FXSR__
 	#define MPT_ARCH_X86_FXSR
 #endif
 #ifdef __SSE__
-	#define MPT_ARCH_X86_3DNOWPREFETCH
 	#define MPT_ARCH_X86_SSE
 	#ifndef MPT_ARCH_X86_CMOV
 	#define MPT_ARCH_X86_CMOV
@@ -317,7 +317,7 @@ inline constexpr feature_flags intel586        = featureset::intel486DX    | fea
 inline constexpr feature_flags intel586_mmx    = featureset::intel586      | feature::mmx;
 inline constexpr feature_flags intel686        = featureset::intel586      | feature::cmov;
 inline constexpr feature_flags intel686_mmx    = featureset::intel686      | feature::mmx;
-inline constexpr feature_flags intel686_sse    = featureset::intel686_mmx  | feature::fxsr | feature::sse | feature::x3dnowprefetch;
+inline constexpr feature_flags intel686_sse    = featureset::intel686_mmx  | feature::fxsr | feature::sse;
 inline constexpr feature_flags intel686_sse2   = featureset::intel686_sse  | feature::sse2;
 inline constexpr feature_flags intel786        = featureset::intel686_sse2;
 inline constexpr feature_flags amd64           = featureset::intel686_sse2;
@@ -328,8 +328,8 @@ inline constexpr feature_flags msvc_x86_2005   = featureset::intel486DX;
 inline constexpr feature_flags msvc_x86_2008   = featureset::intel586;
 inline constexpr feature_flags msvc_x86_sse    = featureset::intel686_sse;
 inline constexpr feature_flags msvc_x86_sse2   = featureset::intel686_sse2;
-inline constexpr feature_flags msvc_x86_avx    = featureset::intel686_sse2 | feature::xsave | feature::avx;
-inline constexpr feature_flags msvc_x86_avx2   = featureset::intel686_sse2 | feature::xsave | feature::avx | feature::avx2 | feature::fma | feature::bmi1;
+inline constexpr feature_flags msvc_x86_avx    = featureset::intel686_sse2 | feature::x3dnowprefetch | feature::xsave | feature::avx;
+inline constexpr feature_flags msvc_x86_avx2   = featureset::intel686_sse2 | feature::x3dnowprefetch | feature::xsave | feature::avx | feature::avx2 | feature::fma | feature::bmi1;
 inline constexpr feature_flags msvc_amd64      = featureset::amd64;
 inline constexpr feature_flags msvc_amd64_avx  = featureset::amd64 | feature::xsave | feature::avx;
 inline constexpr feature_flags msvc_amd64_avx2 = featureset::amd64 | feature::xsave | feature::avx | feature::avx2 | feature::fma | feature::bmi1;
