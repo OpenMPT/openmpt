@@ -2140,11 +2140,11 @@ std::pair<bool, bool> CSoundFile::LoadMixPlugins(FileReader &file)
 		else if(code[0] == 'F' && (code[1] == 'X' || MPT_ISDIGIT(1)) && MPT_ISDIGIT(2) && MPT_ISDIGIT(3))
 #undef MPT_ISDIGIT
 		{
-			PLUGINDEX plug = (code[2] - '0') * 10 + (code[3] - '0');	//calculate plug-in number.
-			if(code[1] != 'X') plug += (code[1] - '0') * 100;
-
-			if(plug < MAX_MIXPLUGINS)
+			uint16 fxplug = (code[2] - '0') * 10 + (code[3] - '0');  //calculate plug-in number.
+			if(code[1] != 'X') fxplug += (code[1] - '0') * 100;
+			if(fxplug < MAX_MIXPLUGINS)
 			{
+				PLUGINDEX plug = static_cast<PLUGINDEX>(fxplug);
 				ReadMixPluginChunk(chunk, m_MixPlugins[plug]);
 			}
 			hasPluginChunks = true;
