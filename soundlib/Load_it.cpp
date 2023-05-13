@@ -2041,9 +2041,9 @@ uint32 CSoundFile::SaveMixPlugins(std::ostream *file, bool updatePlugData)
 				std::ostream &f = *file;
 				// Chunk ID (= plugin ID)
 				char id[4] = { 'F', 'X', '0', '0' };
-				if(i >= 100) id[1] = '0' + (i / 100u);
-				id[2] += (i / 10u) % 10u;
-				id[3] += (i % 10u);
+				if(i >= 100) id[1] = static_cast<unsigned char>(static_cast<unsigned char>('0') + (i / 100u));
+				id[2] = static_cast<unsigned char>(static_cast<unsigned char>('0') + ((i / 10u) % 10u));
+				id[3] = static_cast<unsigned char>(static_cast<unsigned char>('0') + (i % 10u));
 				mpt::IO::WriteRaw(f, id, 4);
 
 				// Write chunk size, plugin info and plugin data chunk
@@ -2140,8 +2140,8 @@ std::pair<bool, bool> CSoundFile::LoadMixPlugins(FileReader &file)
 		else if(code[0] == 'F' && (code[1] == 'X' || MPT_ISDIGIT(1)) && MPT_ISDIGIT(2) && MPT_ISDIGIT(3))
 #undef MPT_ISDIGIT
 		{
-			uint16 fxplug = (code[2] - '0') * 10 + (code[3] - '0');  //calculate plug-in number.
-			if(code[1] != 'X') fxplug += (code[1] - '0') * 100;
+			uint16 fxplug = static_cast<uint16>((code[2] - '0') * 10 + (code[3] - '0'));  //calculate plug-in number.
+			if(code[1] != 'X') fxplug += static_cast<uint16>((code[1] - '0') * 100);
 			if(fxplug < MAX_MIXPLUGINS)
 			{
 				PLUGINDEX plug = static_cast<PLUGINDEX>(fxplug);
@@ -2254,7 +2254,7 @@ void CSoundFile::SaveExtendedSongProperties(std::ostream &f) const
 	if((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && GetNumChannels() > 64)
 	{
 		// IT header has only room for 64 channels. Save the settings that do not fit to the header here as an extension.
-		WRITEMODULARHEADER(MagicBE("ChnS"), (GetNumChannels() - 64) * 2);
+		WRITEMODULARHEADER(MagicBE("ChnS"), static_cast<uint16>((GetNumChannels() - 64) * 2));
 		for(CHANNELINDEX chn = 64; chn < GetNumChannels(); chn++)
 		{
 			uint8 panvol[2];

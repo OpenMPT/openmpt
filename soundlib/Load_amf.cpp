@@ -446,7 +446,7 @@ static void AMFReadPattern(CPattern &pattern, CHANNELINDEX chn, FileReader &file
 				if(param)
 				{
 					if(param & 0x80)
-						param = 0xF0 | ((-static_cast<int8>(param)) & 0x0F);
+						param = static_cast<uint8>(0xF0 | ((-static_cast<int8>(param)) & 0x0F));
 					else
 						param = 0x0F | ((param & 0x0F) << 4);
 				} else
@@ -754,7 +754,7 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 					// Unsigned delta samples, how novel!
 					for(auto &v : mpt::as_span(sample.sample8(), sample.nLength))
 					{
-						v ^= 0x80;
+						v = static_cast<int8>(static_cast<uint8>(v) ^ 0x80u);
 					}
 				}
 			}

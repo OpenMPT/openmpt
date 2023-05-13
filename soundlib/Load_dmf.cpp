@@ -381,7 +381,7 @@ static PATTERNINDEX ConvertDMFPattern(FileReader &file, const uint8 fileVersion,
 					settings.tempoBPM = globalData;  // Tempo in real BPM (depends on rows per beat)
 					if(settings.beat != 0)
 					{
-						settings.tempoTicks = (globalData * settings.beat * 15);	// Automatically updated by X-Tracker
+						settings.tempoTicks = static_cast<uint8>(globalData * settings.beat * 15);  // Automatically updated by X-Tracker
 					}
 					tempoChange = true;
 				}
@@ -540,7 +540,7 @@ static PATTERNINDEX ConvertDMFPattern(FileReader &file, const uint8 fileVersion,
 				if((channelInfo & patVolume) != 0)
 				{
 					m->volcmd = VOLCMD_VOLUME;
-					m->vol = (file.ReadUint8() + 2) / 4;  // Should be + 3 instead of + 2, but volume 1 is silent in X-Tracker.
+					m->vol = static_cast<uint8>((file.ReadUint8() + 2) / 4);  // Should be + 3 instead of + 2, but volume 1 is silent in X-Tracker.
 				}
 
 				////////////////////////////////////////////////////////////////
@@ -846,7 +846,7 @@ static PATTERNINDEX ConvertDMFPattern(FileReader &file, const uint8 fileVersion,
 		}
 		if(writeDelay & 0x0F)
 		{
-			const uint8 param = (writeDelay & 0x0F) * settings.internalTicks / 15;
+			const uint8 param = static_cast<uint8>((writeDelay & 0x0F) * settings.internalTicks / 15);
 			sndFile.Patterns[pat].WriteEffect(EffectWriter(CMD_S3MCMDEX, 0x60u | Clamp(param, uint8(1), uint8(15))).Row(row).AllowMultiple());
 		}
 		writeDelay = 0;

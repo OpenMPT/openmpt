@@ -151,7 +151,7 @@ static std::pair<EffectCommand, uint8> TranslateULTCommands(const uint8 e, uint8
 		param = (param & 0x0F) * 0x11;
 		break;
 	case 0x0D: // pattern break
-		param = 10 * (param >> 4) + (param & 0x0F);
+		param = static_cast<uint8>(10 * (param >> 4) + (param & 0x0F));
 		break;
 	case 0x0E: // special
 		switch(param >> 4)

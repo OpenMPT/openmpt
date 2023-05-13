@@ -490,7 +490,7 @@ static bool ReadSampleData(ModSample &sample, SampleIO sampleFlags, FileReader &
 									CopyAudio(mpt::audio_span_interleaved(sample.sample8() + (offset * sample.GetNumChannels()), sample.GetNumChannels(), decodedSamples), mpt::audio_span_planar(output, channels, decodedSamples));
 								}
 							}
-							offset += decodedSamples;
+							offset += static_cast<SmpLength>(decodedSamples);
 						}
 					}
 				} else

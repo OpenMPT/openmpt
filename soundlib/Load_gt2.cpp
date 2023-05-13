@@ -204,7 +204,7 @@ static void TranslateGraoumfEffect(CSoundFile &sndFile, ModCommand &m, const uin
 		if(!m.IsNote() || !param)
 			break;
 		m.command = CMD_FINETUNE;
-		m.param = 0x80 + ((param & 0xF0) >> 1) - ((param & 0x0F) << 3);
+		m.param = static_cast<uint8>(0x80 + ((param & 0xF0) >> 1) - ((param & 0x0F) << 3));
 		if(!sndFile.GetNumInstruments())
 		{
 			// Need instruments for correct pitch wheel depth
@@ -393,7 +393,7 @@ static void TranslateGraoumfEffect(CSoundFile &sndFile, ModCommand &m, const uin
 		break;
 	case 0xBA:  // BAxx: Fine Offset
 		m.command = CMD_OFFSET;
-		m.param = (m.param + 15u) / 16u;
+		m.param = static_cast<uint8>((m.param + 15u) / 16u);
 		break;
 	case 0xBB:  // BBxx: Very Fine Offset
 		m.command = CMD_OFFSET;
@@ -967,7 +967,7 @@ struct GT2SampleV1
 		mptSmp.Initialize(MOD_TYPE_IT);
 		mptSmp.Set16BitCuePoints();
 
-		mptSmp.nGlobalVol = volume / 4u;
+		mptSmp.nGlobalVol = static_cast<uint16>(volume / 4u);
 		if(defaultPan > 0)
 		{
 			mptSmp.uFlags.set(CHN_PANNING);

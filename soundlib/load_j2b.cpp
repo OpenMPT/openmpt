@@ -211,7 +211,7 @@ struct AMFFInstrumentHeader
 		static_assert(mpt::array_size<decltype(sampleMap)>::size <= mpt::array_size<decltype(mptIns.Keyboard)>::size);
 		for(size_t i = 0; i < std::size(sampleMap); i++)
 		{
-			mptIns.Keyboard[i] = sampleMap[i] + baseSample + 1;
+			mptIns.Keyboard[i] = static_cast<SAMPLEINDEX>(sampleMap[i] + baseSample + 1);
 		}
 
 		mptIns.nFadeOut = fadeout << 5;
@@ -393,7 +393,7 @@ struct AMInstrumentHeader
 		static_assert(mpt::array_size<decltype(sampleMap)>::size <= mpt::array_size<decltype(mptIns.Keyboard)>::size);
 		for(uint8 i = 0; i < std::size(sampleMap); i++)
 		{
-			mptIns.Keyboard[i] = sampleMap[i] + baseSample + 1;
+			mptIns.Keyboard[i] = static_cast<SAMPLEINDEX>(sampleMap[i] + baseSample + 1);
 		}
 
 		mptIns.nFadeOut = volEnv.fadeout << 5;
@@ -430,8 +430,8 @@ struct AMSampleHeader
 	void ConvertToMPT(AMInstrumentHeader &instrHeader, ModSample &mptSmp) const
 	{
 		mptSmp.Initialize();
-		mptSmp.nPan = std::min(pan.get(), uint16(32767)) * 256 / 32767;
-		mptSmp.nVolume = std::min(volume.get(), uint16(32767)) * 256 / 32767;
+		mptSmp.nPan = static_cast<uint16>(std::min(pan.get(), uint16(32767)) * 256 / 32767);
+		mptSmp.nVolume = static_cast<uint16>(std::min(volume.get(), uint16(32767)) * 256 / 32767);
 		mptSmp.nGlobalVol = 64;
 		mptSmp.nLength = length;
 		mptSmp.nLoopStart = loopStart;
@@ -572,7 +572,7 @@ static bool ConvertAMPattern(FileReader chunk, PATTERNINDEX pat, bool isAM, CSou
 					else if(m.param == 0xA4) {m.command = CMD_S3MCMDEX; m.param = 0x91;}
 					break;
 				case CMD_PATTERNBREAK:
-					m.param = ((m.param >> 4) * 10) + (m.param & 0x0F);
+					m.param = static_cast<uint8>(((m.param >> 4) * 10u) + (m.param & 0x0Fu));
 					break;
 				case CMD_MODCMDEX:
 					m.ExtendedMODtoS3MEffect();
@@ -612,7 +612,7 @@ static bool ConvertAMPattern(FileReader chunk, PATTERNINDEX pat, bool isAM, CSou
 				m.vol = chunk.ReadUint8();
 				if(isAM)
 				{
-					m.vol = m.vol * 64 / 127;
+					m.vol = static_cast<uint8>(m.vol * 64u / 127u);
 				}
 			}
 		}

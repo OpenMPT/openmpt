@@ -204,11 +204,11 @@ static std::pair<EffectCommand, uint8> ConvertMDLCommand(const uint8 command, ui
 		param = (param & 0x7F) * 2u;
 		break;
 	case 0x0C:	// Global volume
-		param = (param + 1) / 2u;
+		param = static_cast<uint8>((param + 1) / 2u);
 		break;
 	case 0x0D: // Pattern Break
 		// Convert from BCD
-		param = 10 * (param >> 4) + (param & 0x0F);
+		param = static_cast<uint8>(10 * (param >> 4) + (param & 0x0F));
 		break;
 	case 0x0E: // Special
 		switch(param >> 4)
@@ -245,11 +245,11 @@ static std::pair<EffectCommand, uint8> ConvertMDLCommand(const uint8 command, ui
 			break;
 		case 0xA: // Global vol slide up
 			cmd = CMD_GLOBALVOLSLIDE;
-			param = 0xF0 & (((param & 0x0F) + 1) << 3);
+			param = static_cast<uint8>(0xF0 & (((param & 0x0F) + 1) << 3));
 			break;
 		case 0xB: // Global vol slide down
 			cmd = CMD_GLOBALVOLSLIDE;
-			param = ((param & 0x0F) + 1) >> 1;
+			param = static_cast<uint8>(((param & 0x0F) + 1) >> 1);
 			break;
 		case 0xC: // Note cut
 		case 0xD: // Note delay
@@ -352,7 +352,7 @@ static bool ImportMDLCommands(ModCommand &m, uint8 vol, uint8 cmd1, uint8 cmd2, 
 	if(vol)
 	{
 		m.volcmd = VOLCMD_VOLUME;
-		m.vol = (vol + 2) / 4u;
+		m.vol = static_cast<uint8>((vol + 2) / 4u);
 	}
 
 	// If we have Dxx + G00, or Dxx + H00, combine them into Lxx/Kxx.
@@ -641,7 +641,7 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 				mptSmp.nPan = std::min(static_cast<uint16>(sampleHeader.panning * 2), uint16(254));
 				mptSmp.nVibType = MDLVibratoType[sampleHeader.vibType & 3];
 				mptSmp.nVibSweep = sampleHeader.vibSweep;
-				mptSmp.nVibDepth = (sampleHeader.vibDepth + 3u) / 4u;
+				mptSmp.nVibDepth = static_cast<uint8>((sampleHeader.vibDepth + 3u) / 4u);
 				mptSmp.nVibRate = sampleHeader.vibSpeed;
 				// Convert to IT-like vibrato sweep
 				if(mptSmp.nVibSweep != 0)

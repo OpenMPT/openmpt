@@ -952,7 +952,7 @@ static bool ConvertDSP(const SymEvent event, MIDIMacroConfigData::Macro &macro, 
 	{
 		// Symphonie practically uses the same filter for this as for the sample processing.
 		// The cutoff and resonance are an approximation.
-		const uint8 type = event.note % 5u;
+		const uint8 type = static_cast<uint8>(event.note % 5u);
 		const uint8 cutoff = sndFile.FrequencyToCutOff(event.param * 10000.0 / 240.0);
 		const uint8 reso = static_cast<uint8>(std::min(127, event.inst * 127 / 185));
 
@@ -1667,7 +1667,7 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 								break;
 							m.command = CMD_RETRIG;
 							m.param = static_cast<uint8>(std::min(15, event.inst + 1));
-							chnState.retriggerRemain = event.param * (event.inst + 1u);
+							chnState.retriggerRemain = static_cast<uint16>(event.param * (event.inst + 1u));
 							break;
 
 						case SymEvent::SetSpeed:

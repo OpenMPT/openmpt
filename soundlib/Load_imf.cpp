@@ -286,7 +286,7 @@ static std::pair<EffectCommand, uint8> TranslateIMFEffect(uint8 command, uint8 p
 			param |= 0xE0;
 		break;
 	case 0x16: // cutoff
-		param = (0xFF - param) / 2u;
+		param = static_cast<uint8>((0xFF - param) / 2u);
 		break;
 	case 0x17: // cutoff slide + resonance (TODO: cutoff slide is currently not handled)
 		param = 0x80 | (param & 0x0F);
@@ -443,7 +443,7 @@ bool CSoundFile::ReadIMF(FileReader &file, ModLoadingFlags loadFlags)
 	for(uint8 chn = 0; chn < 32; chn++)
 	{
 		ChnSettings[chn].Reset();
-		ChnSettings[chn].nPan = fileHeader.channels[chn].panning * 256 / 255;
+		ChnSettings[chn].nPan = static_cast<uint16>(fileHeader.channels[chn].panning * 256 / 255);
 
 		ChnSettings[chn].szName = mpt::String::ReadBuf(mpt::String::nullTerminated, fileHeader.channels[chn].name);
 
@@ -543,7 +543,7 @@ bool CSoundFile::ReadIMF(FileReader &file, ModLoadingFlags loadFlags)
 					m.note = NOTE_NONE;
 				} else
 				{
-					m.note = (m.note >> 4) * 12 + (m.note & 0x0F) + 12 + 1;
+					m.note = static_cast<uint8>((m.note >> 4) * 12 + (m.note & 0x0F) + 12 + 1);
 					if(!m.IsNoteOrEmpty())
 					{
 						m.note = NOTE_NONE;

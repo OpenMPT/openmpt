@@ -115,7 +115,7 @@ static void TranslateVolume(ModCommand &m, uint8 volume, bool isFM)
 
 	volume &= 0x0F;
 	m.volcmd = VOLCMD_VOLUME;
-	m.vol = isFM ? fmVolume[volume] : (4u + volume * 4u);
+	m.vol = isFM ? fmVolume[volume] : static_cast<uint8>((4u + volume * 4u));
 }
 
 
@@ -233,8 +233,8 @@ bool CSoundFile::ReadC67(FileReader &file, ModLoadingFlags loadFlags)
 				ModCommand &m = *pattern.GetpModCommand(row, cmd);
 				const auto [note, instrVol] = patChunk.ReadArray<uint8, 2>();
 				bool fmChn = (cmd >= 4);
-				m.note = NOTE_MIN + (fmChn ? 12 : 36) + (note & 0x0F) + ((note >> 4) & 0x07) * 12;
-				m.instr = (fmChn ? 33 : 1) + (instrVol >> 4) + ((note & 0x80) >> 3);
+				m.note = static_cast<uint8>(NOTE_MIN + (fmChn ? 12 : 36) + (note & 0x0F) + ((note >> 4) & 0x07) * 12);
+				m.instr = static_cast<uint8>((fmChn ? 33 : 1) + (instrVol >> 4) + ((note & 0x80) >> 3));
 				TranslateVolume(m, instrVol, fmChn);
 			} else if(cmd >= 0x20 && cmd <= 0x2C)
 			{

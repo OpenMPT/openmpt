@@ -488,13 +488,13 @@ bool CSoundFile::ReadDTM(FileReader &file, ModLoadingFlags loadFlags)
 					const auto [note, instrVol, instrCmd, param] = data;
 					if(note > 0 && note < 0x80)
 					{
-						m.note = (note >> 4) * 12 + (note & 0x0F) + NOTE_MIN + 11;
+						m.note = static_cast<uint8>((note >> 4) * 12 + (note & 0x0F) + NOTE_MIN + 11);
 					}
 					uint8 vol = instrVol >> 2;
 					if(vol)
 					{
 						m.volcmd = VOLCMD_VOLUME;
-						m.vol = vol - 1u;
+						m.vol = static_cast<uint8>(vol - 1u);
 					}
 					m.instr = ((instrVol & 0x03) << 4) | (instrCmd >> 4);
 					command = instrCmd & 0x0F;
@@ -502,7 +502,7 @@ bool CSoundFile::ReadDTM(FileReader &file, ModLoadingFlags loadFlags)
 				} else
 				{
 					std::tie(command, m.param) = ReadMODPatternEntry(data, m);
-					m.instr |= data[0] & 0x30;	// Allow more than 31 instruments
+					m.instr |= static_cast<uint8>(data[0] & 0x30);  // Allow more than 31 instruments
 				}
 				ConvertModCommand(m, command, m.param);
 				// Fix commands without memory and slide nibble precedence

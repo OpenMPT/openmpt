@@ -215,7 +215,7 @@ static bool ConvertMT2Command(CSoundFile *that, ModCommand &m, MT2Command &p)
 	if(p.vol >= 0x10 && p.vol <= 0x90)
 	{
 		m.volcmd = VOLCMD_VOLUME;
-		m.vol = (p.vol - 0x10) / 2;
+		m.vol = static_cast<uint8>((p.vol - 0x10) / 2);
 	} else if(p.vol >= 0xA0 && p.vol <= 0xAF)
 	{
 		m.volcmd = VOLCMD_VOLSLIDEDOWN;
@@ -1039,7 +1039,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 			if(sampleHeader.panning == -128)
 				mptSmp.uFlags.set(CHN_SURROUND);
 			else
-				mptSmp.nPan = sampleHeader.panning + 128;
+				mptSmp.nPan = static_cast<uint16>(sampleHeader.panning + 128);
 			mptSmp.uFlags.set(CHN_PANNING);
 			mptSmp.RelativeTone = sampleHeader.note;
 

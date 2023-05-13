@@ -413,9 +413,9 @@ static std::pair<EffectCommand, ModCommand::PARAM> ConvertMEDEffect(ModCommand &
 	case 0x0C:  // Set Volume
 		m.command = CMD_VOLUME;
 		if(!volHex && m.param < 0x99)
-			m.param = (m.param >> 4) * 10 + (m.param & 0x0F);
+			m.param = static_cast<uint8>((m.param >> 4) * 10 + (m.param & 0x0F));
 		else if(volHex)
-			m.param = ((m.param & 0x7F) + 1) / 2;
+			m.param = static_cast<uint8>(((m.param & 0x7F) + 1) / 2);
 		else
 			m.command = CMD_NONE;
 		break;
@@ -825,7 +825,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 		if(numSamples > 1)
 		{
 			static_assert(MAX_SAMPLES > 63 * 9, "Check IFFOCT multisample code");
-			m_nSamples += numSamples - 1;
+			m_nSamples += static_cast<SAMPLEINDEX>(numSamples - 1);
 			needInstruments = true;
 			static constexpr uint8 OctSampleMap[][8] =
 			{
@@ -853,7 +853,14 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 				for(int note = 0; note < 12; note++)
 				{
 					instr.Keyboard[12 * octave + note] = smp + OctSampleMap[numSamples - 2][octave - 4];
+#if MPT_COMPILER_GCC
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wconversion"
+#endif
 					instr.NoteMap[12 * octave + note] += OctTransposeMap[numSamples - 2][octave - 4];
+#if MPT_COMPILER_GCC
+#pragma GCC diagnostic pop
+#endif
 				}
 			}
 		} else if(maskedType == MMDInstrHeader::EXTSAMPLE)
@@ -1125,7 +1132,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
 				{
-					ChnSettings[chn].nPan = (Clamp<int8, int8>(file.ReadInt8(), -16, 16) + 16) * 8;
+					ChnSettings[chn].nPan = static_cast<uint16>((Clamp<int8, int8>(file.ReadInt8(), -16, 16) + 16) * 8);
 				}
 			} else
 			{

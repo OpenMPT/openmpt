@@ -381,7 +381,8 @@ struct MO3SampleChunk
 		if(!file.Read(nextByte)) \
 			break; \
 		data = nextByte; \
-		data = (data << 1) + 1; \
+		data <<= 1; \
+		data += 1; \
 		carry = (data > 0xFF); \
 		data &= 0xFF; \
 	}
@@ -510,7 +511,7 @@ struct MO3Delta8BitParams
 		do
 		{
 			READ_CTRL_BIT;
-			val = (val << 1) + carry;
+			val = static_cast<unsigned_t>((val << 1) + carry);
 			READ_CTRL_BIT;
 		} while(carry);
 	}
@@ -530,9 +531,9 @@ struct MO3Delta16BitParams
 			do
 			{
 				READ_CTRL_BIT;
-				val = (val << 1) + carry;
+				val = static_cast<unsigned_t>((val << 1) + carry);
 				READ_CTRL_BIT;
-				val = (val << 1) + carry;
+				val = static_cast<unsigned_t>((val << 1) + carry);
 				READ_CTRL_BIT;
 			} while(carry);
 		} else
@@ -540,7 +541,7 @@ struct MO3Delta16BitParams
 			do
 			{
 				READ_CTRL_BIT;
-				val = (val << 1) + carry;
+				val = static_cast<unsigned_t>((val << 1) + carry);
 				READ_CTRL_BIT;
 			} while(carry);
 		}
@@ -569,7 +570,7 @@ static void UnpackMO3DeltaSample(FileReader &file, typename Properties::sample_t
 			while(cl > 0)
 			{
 				READ_CTRL_BIT;
-				val = (val << 1) + carry;
+				val = static_cast<typename Properties::unsigned_t>((val << 1) + carry);
 				cl--;
 			}
 			cl = 1;
@@ -585,7 +586,7 @@ static void UnpackMO3DeltaSample(FileReader &file, typename Properties::sample_t
 			val >>= 1;
 			if(carry == 0)
 				val = ~val;   // negative delta
-			val += previous;  // previous value + delta
+			val = static_cast<typename Properties::unsigned_t>(val + previous);  // previous value + delta
 			*p = val;
 			p += numChannels;
 			previous = val;
@@ -616,7 +617,7 @@ static void UnpackMO3DeltaPredictionSample(FileReader &file, typename Properties
 			while(cl > 0)
 			{
 				READ_CTRL_BIT;
-				val = (val << 1) + carry;
+				val = static_cast<typename Properties::unsigned_t>((val << 1) + carry);
 				cl--;
 			}
 			cl = 1;
@@ -1136,7 +1137,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 						// Pattern break
 						m.SetEffectCommand(CMD_PATTERNBREAK, cmd[1]);
 						if(m_nType != MOD_TYPE_IT)
-							m.param = ((m.param >> 4) * 10) + (m.param & 0x0F);
+							m.param = static_cast<uint8>(((m.param >> 4) * 10) + (m.param & 0x0F));
 						break;
 					case 0x12:
 						// Combined Tempo / Speed command
@@ -1638,7 +1639,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 										CopyAudio(mpt::audio_span_interleaved(sample.sample8() + (offset * sample.GetNumChannels()), sample.GetNumChannels(), decodedSamples), mpt::audio_span_planar(output, channels, decodedSamples));
 									}
 								}
-								offset += decodedSamples;
+								offset += static_cast<SmpLength>(decodedSamples);
 							}
 						}
 					} else
@@ -1873,7 +1874,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 					// Fix pitch / filter envelope being shortened by one tick (for files before v1.20)
 					ins->GetEnvelope(ENV_PITCH).Convert(MOD_TYPE_XM, GetType());
 					// Fix excessive pan swing range (for files before v1.26)
-					ins->nPanSwing = (ins->nPanSwing + 3) / 4u;
+					ins->nPanSwing = static_cast<uint8>((ins->nPanSwing + 3) / 4u);
 				}
 			}
 		}

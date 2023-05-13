@@ -207,12 +207,12 @@ static void ReadAMSPattern(CPattern &pattern, bool newVersion, FileReader &patte
 							case 0xA:
 								// Extra fine volume slide up
 								m.command = CMD_VOLUMESLIDE;
-								m.param = ((((m.param & 0x0F) + 1) / 2) << 4) | 0x0F;
+								m.param = static_cast<uint8>(((((m.param & 0x0F) + 1) / 2) << 4) | 0x0F);
 								break;
 							case 0xB:
 								// Extra fine volume slide down
 								m.command = CMD_VOLUMESLIDE;
-								m.param = (((m.param & 0x0F) + 1) / 2) | 0xF0;
+								m.param = static_cast<uint8>((((m.param & 0x0F) + 1) / 2) | 0xF0);
 								break;
 							default:
 								m.command = CMD_NONE;
@@ -300,7 +300,7 @@ struct AMSSampleHeader
 		mptSmp.nLoopStart = std::min(loopStart, length);
 		mptSmp.nLoopEnd = std::min(loopEnd, length);
 
-		mptSmp.nVolume = (std::min(uint8(127), volume.get()) * 256 + 64) / 127;
+		mptSmp.nVolume = static_cast<uint16>((std::min(uint8(127), volume.get()) * 256 + 64) / 127);
 		if(panFinetune & 0xF0)
 		{
 			mptSmp.nPan = (panFinetune & 0xF0);
@@ -662,7 +662,7 @@ struct AMS2SampleHeader
 		uint32 newC4speed = ModSample::TransposeToFrequency(relativeTone, MOD2XMFineTune(panFinetune & 0x0F));
 		mptSmp.nC5Speed = (mptSmp.nC5Speed * newC4speed) / 8363;
 
-		mptSmp.nVolume = (std::min(volume.get(), uint8(127)) * 256 + 64) / 127;
+		mptSmp.nVolume = static_cast<uint16>((std::min(volume.get(), uint8(127)) * 256 + 64) / 127);
 		if(panFinetune & 0xF0)
 		{
 			mptSmp.nPan = (panFinetune & 0xF0);
@@ -839,7 +839,7 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 		static_assert(mpt::array_size<decltype(instrument->Keyboard)>::size >= std::size(sampleAssignment));
 		for(size_t i = 0; i < 120; i++)
 		{
-			instrument->Keyboard[i] = sampleAssignment[i] + GetNumSamples() + 1;
+			instrument->Keyboard[i] = static_cast<SAMPLEINDEX>(sampleAssignment[i] + GetNumSamples() + 1);
 		}
 
 		AMS2Envelope volEnv, panEnv, vibratoEnv;
@@ -1092,7 +1092,7 @@ void AMSUnpack(mpt::const_byte_span source, mpt::byte_span dest, int8 packCharac
 				uint16 bl = al & bitcount;
 				bl = ((bl | (bl << 8)) >> ((dh + 8 - count) & 7)) & 0xFF;
 				bitcount = ((bitcount | (bitcount << 8)) >> 1) & 0xFF;
-				dst[k++] |= bl;
+				dst[k++] |= (bl & 0xFFu);
 				if(k >= dest.size())
 				{
 					k = 0;

@@ -145,7 +145,7 @@ static void ConvertSTMCommand(ModCommand &m, const uint8 command, const ROWINDEX
 		break;
 
 	case CMD_PATTERNBREAK:
-		m.param = (m.param & 0xF0) * 10 + (m.param & 0x0F);
+		m.param = static_cast<uint8>((m.param & 0xF0) * 10 + (m.param & 0x0F));
 		if(breakPos != ORDERINDEX_INVALID && m.param == 0)
 		{
 			// Merge Bxx + C00 into just Bxx
@@ -177,7 +177,7 @@ static void ConvertSTMCommand(ModCommand &m, const uint8 command, const ROWINDEX
 
 	case CMD_SPEED:
 		if(fileVerMinor < 21)
-			m.param = ((m.param / 10u) << 4u) + m.param % 10u;
+			m.param = static_cast<uint8>(((m.param / 10u) << 4u) + m.param % 10u);
 
 		if(!m.param)
 		{
@@ -249,7 +249,7 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 	
 	uint8 initTempo = fileHeader.initTempo;
 	if(fileHeader.verMinor < 21)
-		initTempo = ((initTempo / 10u) << 4u) + initTempo % 10u;
+		initTempo = static_cast<uint8>(((initTempo / 10u) << 4u) + initTempo % 10u);
 	if(initTempo == 0)
 		initTempo = 0x60;
 
@@ -331,7 +331,7 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 				if(note == 0xFE)
 					m->note = NOTE_NOTECUT;
 				else if(note < 0x60)
-					m->note = (note >> 4) * 12 + (note & 0x0F) + 36 + NOTE_MIN;
+					m->note = static_cast<uint8>((note >> 4) * 12 + (note & 0x0F) + 36 + NOTE_MIN);
 
 				m->instr = insVol >> 3;
 				if(m->instr > 31)

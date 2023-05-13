@@ -369,7 +369,7 @@ struct DSmFileHeader
 
 	uint32 GetHeaderMinimumAdditionalSize() const noexcept
 	{
-		return numChannels + numOrders + numSamples * sizeof(DSmSampleHeader);
+		return static_cast<uint32>(numChannels + numOrders + numSamples * sizeof(DSmSampleHeader));
 	}
 };
 
@@ -500,7 +500,7 @@ bool CSoundFile::ReadDSm(FileReader &file, ModLoadingFlags loadFlags)
 				// Offset + volume
 				m.command = CMD_OFFSET;
 				m.volcmd = VOLCMD_VOLUME;
-				m.vol = (data[2] & 0x0F) * 4 + 4;
+				m.vol = static_cast<uint8>((data[2] & 0x0F) * 4 + 4);
 			} else if(data[2] <= 0x0F || data[2] == 0x11 || data[2] == 0x12)
 			{
 				// 0x11 and 0x12 support the full 5-octave range, 0x01 and 0x02 presumably only the ProTracker 3-octave range

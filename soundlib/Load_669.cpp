@@ -225,7 +225,7 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 				if(noteInstr <= 0xFE)
 				{
 					m->volcmd = VOLCMD_VOLUME;
-					m->vol = ((vol * 64 + 8) / 15);
+					m->vol = static_cast<uint8>((vol * 64 + 8) / 15);
 				}
 
 				if(effParam != 0xFF)

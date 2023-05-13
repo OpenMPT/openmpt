@@ -47,7 +47,7 @@ void CSoundFile::ConvertModCommand(ModCommand &m, const uint8 command, const uin
 	case 0x0A: m.command = CMD_VOLUMESLIDE; break;
 	case 0x0B: m.command = CMD_POSITIONJUMP; break;
 	case 0x0C: m.command = CMD_VOLUME; break;
-	case 0x0D: m.command = CMD_PATTERNBREAK; m.param = ((m.param >> 4) * 10) + (m.param & 0x0F); break;
+	case 0x0D: m.command = CMD_PATTERNBREAK; m.param = static_cast<uint8>(((m.param >> 4) * 10) + (m.param & 0x0F)); break;
 	case 0x0E: m.command = CMD_MODCMDEX; break;
 	case 0x0F:
 		// For a very long time, this code imported 0x20 as CMD_SPEED for MOD files, but this seems to contradict
@@ -742,7 +742,7 @@ static bool CheckMODMagic(const char magic[4], MODMagicResult &result)
 	{
 		// Octalyser on Atari STe/Falcon
 		result.madeWithTracker = UL_("Octalyser (Atari)");
-		result.numChannels = magic[2] - '0';
+		result.numChannels = static_cast<CHANNELINDEX>(magic[2] - '0');
 	} else if(IsMagic(magic, "M\0\0\0") || IsMagic(magic, "8\0\0\0"))
 	{
 		// Inconexia demo by Iguana, delta samples (https://www.pouet.net/prod.php?which=830)
@@ -753,7 +753,7 @@ static bool CheckMODMagic(const char magic[4], MODMagicResult &result)
 	{
 		// Digital Tracker on Atari Falcon
 		result.madeWithTracker = UL_("Digital Tracker");
-		result.numChannels = magic[3] - '0';
+		result.numChannels = static_cast<CHANNELINDEX>(magic[3] - '0');
 		// Digital Tracker MODs contain four bytes (00 40 00 00) right after the magic bytes which don't seem to do anything special.
 		result.patternDataOffset = 1088;
 	} else if((!memcmp(magic, "FLT", 3) || !memcmp(magic, "EXO", 3)) && magic[3] >= '4' && magic[3] <= '9')
@@ -762,25 +762,25 @@ static bool CheckMODMagic(const char magic[4], MODMagicResult &result)
 		result.madeWithTracker = UL_("Startrekker");
 		result.isStartrekker = true;
 		result.setMODVBlankTiming = true;
-		result.numChannels = magic[3] - '0';
+		result.numChannels = static_cast<CHANNELINDEX>(magic[3] - '0');
 	} else if(magic[0] >= '1' && magic[0] <= '9' && !memcmp(magic + 1, "CHN", 3))
 	{
 		// xCHN - Many trackers
 		result.madeWithTracker = UL_("Generic MOD-compatible Tracker");
 		result.isGenericMultiChannel = true;
-		result.numChannels = magic[0] - '0';
+		result.numChannels = static_cast<CHANNELINDEX>(magic[0] - '0');
 	} else if(magic[0] >= '1' && magic[0] <= '9' && magic[1] >= '0' && magic[1] <= '9'
 	          && (!memcmp(magic + 2, "CH", 2) || !memcmp(magic + 2, "CN", 2)))
 	{
 		// xxCN / xxCH - Many trackers
 		result.madeWithTracker = UL_("Generic MOD-compatible Tracker");
 		result.isGenericMultiChannel = true;
-		result.numChannels = (magic[0] - '0') * 10 + magic[1] - '0';
+		result.numChannels = static_cast<CHANNELINDEX>((magic[0] - '0') * 10 + magic[1] - '0');
 	} else if(!memcmp(magic, "TDZ", 3) && magic[3] >= '1' && magic[3] <= '9')
 	{
 		// TDZx - TakeTracker (only TDZ1-TDZ3 should exist, but historically this code only supported 4-9 channels, so we keep those for the unlikely case that they were actually used for something)
 		result.madeWithTracker = UL_("TakeTracker");
-		result.numChannels = magic[3] - '0';
+		result.numChannels = static_cast<CHANNELINDEX>(magic[3] - '0');
 	} else if(IsMagic(magic, ".M.K"))
 	{
 		// Hacked .DMF files from the game "Apocalypse Abyss"
@@ -2410,7 +2410,7 @@ bool CSoundFile::SaveMod(std::ostream &f) const
 					invalidInstruments = true;
 
 				events[eventByte + 0] = ((period >> 8) & 0x0F) | (instr & 0x10);
-				events[eventByte + 1] = period & 0xFF;
+				events[eventByte + 1] = period & 0xFFu;
 				events[eventByte + 2] = ((instr & 0x0F) << 4) | (command & 0x0F);
 				events[eventByte + 3] = param;
 			}

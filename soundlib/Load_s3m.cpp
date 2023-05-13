@@ -35,7 +35,7 @@ void CSoundFile::S3MConvert(ModCommand &m, const uint8 command, const uint8 para
 	case '@': m.command = (m.param ? CMD_DUMMY : CMD_NONE); break;
 	case 'A': m.command = CMD_SPEED; break;
 	case 'B': m.command = CMD_POSITIONJUMP; break;
-	case 'C': m.command = CMD_PATTERNBREAK; if (!fromIT) m.param = (m.param >> 4) * 10 + (m.param & 0x0F); break;
+	case 'C': m.command = CMD_PATTERNBREAK; if (!fromIT) m.param = static_cast<uint8>((m.param >> 4) * 10 + (m.param & 0x0F)); break;
 	case 'D': m.command = CMD_VOLUMESLIDE; break;
 	case 'E': m.command = CMD_PORTAMENTODOWN; break;
 	case 'F': m.command = CMD_PORTAMENTOUP; break;
@@ -84,7 +84,7 @@ void CSoundFile::S3MSaveConvert(const ModCommand &source, uint8 &command, uint8 
 	case CMD_DUMMY:           command = (param ? '@' : 0); break;
 	case CMD_SPEED:           command = 'A'; break;
 	case CMD_POSITIONJUMP:    command = 'B'; break;
-	case CMD_PATTERNBREAK:    command = 'C'; if(!toIT) param = ((param / 10) << 4) + (param % 10); break;
+	case CMD_PATTERNBREAK:    command = 'C'; if(!toIT) param = static_cast<uint8>(((param / 10) << 4) + (param % 10)); break;
 	case CMD_VOLUMESLIDE:     command = 'D'; break;
 	case CMD_PORTAMENTODOWN:  command = 'E'; if (param >= 0xE0 && (GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM))) param = 0xDF; break;
 	case CMD_PORTAMENTOUP:    command = 'F'; if (param >= 0xE0 && (GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM))) param = 0xDF; break;
@@ -498,7 +498,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			if((pan[i] & 0x20) != 0 && (!isST3 || !isAdlibChannel[i]))
 			{
-				ChnSettings[i].nPan = (static_cast<uint16>(pan[i] & 0x0F) * 256 + 8) / 15;
+				ChnSettings[i].nPan = static_cast<uint16>((static_cast<uint16>(pan[i] & 0x0F) * 256 + 8) / 15u);
 			} else if(pan[i] < 0x10)
 			{
 				hasChannelsWithoutPanning = true;
@@ -914,7 +914,7 @@ bool CSoundFile::SaveS3M(std::ostream &f) const
 						} else if(note <= NOTE_MAX)
 						{
 							note -= (12 + NOTE_MIN);
-							note = (note % 12) + ((note / 12) << 4);
+							note = static_cast<uint8>((note % 12) + ((note / 12) << 4));
 						}
 
 						if(m.instr > 0 && m.instr <= GetNumSamples())

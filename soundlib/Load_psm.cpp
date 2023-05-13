@@ -114,7 +114,7 @@ struct PSMSampleHeader
 		// On the other hand, sample 8 of MUSIC_A.PSM from Extreme Pinball will sound detuned if we don't adjust the loop end here.
 		if(loopEnd)
 			mptSmp.nLoopEnd = loopEnd + 1;
-		mptSmp.nVolume = (defaultVolume + 1) * 2;
+		mptSmp.nVolume = static_cast<uint16>((defaultVolume + 1) * 2);
 		mptSmp.uFlags.set(CHN_LOOP, (flags & 0x80) != 0);
 		LimitMax(mptSmp.nLoopEnd, mptSmp.nLength);
 		LimitMax(mptSmp.nLoopStart, mptSmp.nLoopEnd);
@@ -152,7 +152,7 @@ struct PSMSinariaSampleHeader
 		mptSmp.nLength = sampleLength;
 		mptSmp.nLoopStart = loopStart;
 		mptSmp.nLoopEnd = loopEnd;
-		mptSmp.nVolume = (defaultVolume + 1) * 2;
+		mptSmp.nVolume = static_cast<uint16>((defaultVolume + 1) * 2);
 		mptSmp.uFlags.set(CHN_LOOP, (flags & 0x80) != 0);
 		LimitMax(mptSmp.nLoopEnd, mptSmp.nLength);
 		LimitMax(mptSmp.nLoopStart, mptSmp.nLoopEnd);
@@ -683,7 +683,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 						if(note == 0xFF)	// Can be found in a few files but is apparently not supported by MASI
 							note = NOTE_NOTECUT;
 						else
-							if(note < 129) note = (note & 0x0F) + 12 * (note >> 4) + 13;
+							if(note < 129) note = static_cast<uint8>((note & 0x0F) + 12 * (note >> 4) + 13);
 					} else
 					{
 						if(note < 85) note += 36;
@@ -702,7 +702,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 					// Volume present
 					uint8 vol = rowChunk.ReadUint8();
 					m.volcmd = VOLCMD_VOLUME;
-					m.vol = (std::min(vol, uint8(127)) + 1) / 2;
+					m.vol = static_cast<uint8>((std::min(vol, uint8(127)) + 1) / 2);
 				}
 
 				if(flags & effectFlag)
@@ -1140,7 +1140,7 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 		for(CHANNELINDEX i = 0; i < 32; i++)
 		{
 			ChnSettings[i].Reset();
-			ChnSettings[i].nPan = ((15 - (file.ReadUint8() & 0x0F)) * 256 + 8) / 15;	// 15 seems to be left and 0 seems to be right...
+			ChnSettings[i].nPan = static_cast<uint16>(((15 - (file.ReadUint8() & 0x0F)) * 256 + 8) / 15);  // 15 seems to be left and 0 seems to be right...
 			// ChnSettings[i].dwFlags = (i >= fileHeader.numChannelsPlay) ? CHN_MUTE : 0; // don't mute channels, as muted channels are completely ignored in S3M
 		}
 	}

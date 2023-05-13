@@ -160,7 +160,7 @@ static std::pair<EffectCommand, uint8> ConvertDBMEffect(const uint8 cmd, uint8 p
 		break;
 
 	case CMD_PATTERNBREAK:
-		param = ((param >> 4) * 10) + (param & 0x0F);
+		param = static_cast<uint8>(((param >> 4) * 10) + (param & 0x0F));
 		break;
 
 #ifdef MODPLUG_TRACKER
@@ -236,7 +236,7 @@ static std::pair<EffectCommand, uint8> ConvertDBMEffect(const uint8 cmd, uint8 p
 
 	case CMD_MIDI:
 		// Encode echo parameters into fixed MIDI macros
-		param = 128 + (cmd - 32) * 32 + param / 8;
+		param = static_cast<uint8>(128 + (cmd - 32) * 32 + param / 8);
 		break;
 
 	default:
@@ -282,7 +282,7 @@ static void ReadDBMEnvelopeChunk(FileReader chunk, EnvelopeType envType, CSoundF
 				if(scaleEnv)
 				{
 					// Panning envelopes are -128...128 in DigiBooster Pro 3.x
-					val = (val + 128) / 4;
+					val = static_cast<uint16>((val + 128) / 4);
 				}
 				LimitMax(val, uint16(64));
 				mptEnv[i].value = static_cast<uint8>(val);
@@ -518,7 +518,7 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 					if(note == 0x1F)
 						m.note = NOTE_KEYOFF;
 					else if(note > 0 && note < 0xFE)
-						m.note = ((note >> 4) * 12) + (note & 0x0F) + 13;
+						m.note = static_cast<uint8>(((note >> 4) * 12) + (note & 0x0F) + 13);
 				}
 				if(b & 0x02)
 				{
