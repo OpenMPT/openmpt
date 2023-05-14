@@ -742,9 +742,28 @@ UpdateCheckResult CUpdateCheck::SearchUpdate(const CUpdateCheck::Context &contex
 }
 
 
+mpt::PathString CUpdateCheck::GetUpdateTempDirectory(bool portable)
+{
+	if(portable)
+	{
+		return theApp.GetInstallPath().WithTrailingSlash() + P_("Temp") + mpt::PathString::FromNative(mpt::RawPathString(1, mpt::PathString::GetDefaultPathSeparator()));
+	}
+	return mpt::common_directories::get_temp_directory();
+}
+
+
 void CUpdateCheck::CleanOldUpdates(const CUpdateCheck::Settings & /* settings */ , const CUpdateCheck::Context & /* context */ )
 {
-	mpt::PathString dirTemp = mpt::common_directories::get_temp_directory();
+	if(theApp.IsPortableMode())
+	{
+		CleanOldUpdates(GetUpdateTempDirectory(true));
+	}
+	CleanOldUpdates(GetUpdateTempDirectory(false));
+}
+
+
+void CUpdateCheck::CleanOldUpdates(mpt::PathString dirTemp)
+{
 	if(dirTemp.empty())
 	{
 		return;
@@ -1118,13 +1137,17 @@ public:
 				}
 
 				UpdateProgress(_T("Preparing download..."), 6.0);
-				mpt::PathString dirTemp = mpt::common_directories::get_temp_directory();
+				mpt::PathString dirTemp = CUpdateCheck::GetUpdateTempDirectory(theApp.IsPortableMode());
+				if(theApp.IsPortableMode())
+				{
+					::CreateDirectory(mpt::support_long_path(dirTemp.AsNative()).c_str(), NULL);
+				}
 				mpt::PathString dirTempOpenMPT = dirTemp + P_("OpenMPT") + mpt::PathString::FromNative(mpt::RawPathString(1, mpt::PathString::GetDefaultPathSeparator()));
 				dirTempOpenMPTUpdates = dirTempOpenMPT + P_("Updates") + mpt::PathString::FromNative(mpt::RawPathString(1, mpt::PathString::GetDefaultPathSeparator()));
 				updateFilename = dirTempOpenMPTUpdates + mpt::PathString::FromUnicode(downloadinfo.filename);
 				::CreateDirectory(mpt::support_long_path(dirTempOpenMPT.AsNative()).c_str(), NULL);
 				::CreateDirectory(mpt::support_long_path(dirTempOpenMPTUpdates.AsNative()).c_str(), NULL);
-			
+
 				{
 			
 					UpdateProgress(_T("Creating file..."), 7.0);

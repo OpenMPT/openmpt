@@ -130,6 +130,8 @@ public:
 	// v3
 	static std::string GetStatisticsDataV3(const Settings &settings);  // UTF8
 
+	static mpt::PathString GetUpdateTempDirectory(bool portable);
+
 protected:
 
 	static void StartUpdateCheckAsync(bool autoUpdate);
@@ -145,6 +147,8 @@ protected:
 	static void CheckForUpdate(const CUpdateCheck::Settings &settings, const CUpdateCheck::Context &context);
 
 	static UpdateCheckResult SearchUpdate(const CUpdateCheck::Context &context, const CUpdateCheck::Settings &settings, const std::string &statistics); // may throw
+
+	static void CleanOldUpdates(mpt::PathString dirTemp);
 
 	static void CleanOldUpdates(const CUpdateCheck::Settings &settings, const CUpdateCheck::Context &context);
 
