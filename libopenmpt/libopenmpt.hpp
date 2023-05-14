@@ -411,7 +411,7 @@ public:
 	/*!
 	  \param stream Input stream from which the module is loaded. After the constructor has finished successfully, the input position of stream is set to the byte after the last byte that has been read. If the constructor fails, the state of the input position of stream is undefined.
 	  \param log Log where any warnings or errors are printed to. The lifetime of the reference has to be as long as the lifetime of the module instance.
-	  \param ctls A map of initial ctl values, see openmpt::module::get_ctls.
+	  \param ctls A map of initial ctl values, see \ref openmpt::module::get_ctls and openmpt::module::ctl_set.
 	  \throws openmpt::exception Throws an exception derived from openmpt::exception in case the provided file cannot be opened.
 	  \remarks The input data can be discarded after an openmpt::module has been constructed successfully.
 	  \sa \ref libopenmpt_cpp_fileio
@@ -420,7 +420,7 @@ public:
 	/*!
 	  \param data Data to load the module from.
 	  \param log Log where any warnings or errors are printed to. The lifetime of the reference has to be as long as the lifetime of the module instance.
-	  \param ctls A map of initial ctl values, see openmpt::module::get_ctls.
+	  \param ctls A map of initial ctl values, see \ref openmpt::module::get_ctls and openmpt::module::ctl_set.
 	  \throws openmpt::exception Throws an exception derived from openmpt::exception in case the provided file cannot be opened.
 	  \remarks The input data can be discarded after an openmpt::module has been constructed successfully.
 	  \sa \ref libopenmpt_cpp_fileio
@@ -430,7 +430,7 @@ public:
 	  \param beg Begin of data to load the module from.
 	  \param end End of data to load the module from.
 	  \param log Log where any warnings or errors are printed to. The lifetime of the reference has to be as long as the lifetime of the module instance.
-	  \param ctls A map of initial ctl values, see openmpt::module::get_ctls.
+	  \param ctls A map of initial ctl values, see \ref openmpt::module::get_ctls and openmpt::module::ctl_set.
 	  \throws openmpt::exception Throws an exception derived from openmpt::exception in case the provided file cannot be opened.
 	  \remarks The input data can be discarded after an openmpt::module has been constructed successfully.
 	  \sa \ref libopenmpt_cpp_fileio
@@ -449,7 +449,7 @@ public:
 	/*!
 	  \param data Data to load the module from.
 	  \param log Log where any warnings or errors are printed to. The lifetime of the reference has to be as long as the lifetime of the module instance.
-	  \param ctls A map of initial ctl values, see openmpt::module::get_ctls.
+	  \param ctls A map of initial ctl values, see \ref openmpt::module::get_ctls and openmpt::module::ctl_set.
 	  \throws openmpt::exception Throws an exception derived from openmpt::exception in case the provided file cannot be opened.
 	  \remarks The input data can be discarded after an openmpt::module has been constructed successfully.
 	  \sa \ref libopenmpt_cpp_fileio
