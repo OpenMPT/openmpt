@@ -275,8 +275,7 @@ public:
 		}
 		PinnedView(FileCursor & file, bool advance) {
 			Init(file, file.BytesLeft());
-			if (advance)
-			{
+			if (advance) {
 				file.Skip(size_);
 			}
 		}
