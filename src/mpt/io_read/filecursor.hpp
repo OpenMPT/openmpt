@@ -10,6 +10,7 @@
 #include "mpt/base/memory.hpp"
 #include "mpt/base/namespace.hpp"
 #include "mpt/base/span.hpp"
+#include "mpt/base/utility.hpp"
 #include "mpt/out_of_memory/out_of_memory.hpp"
 
 #include <algorithm>
