@@ -568,11 +568,11 @@ static bool ConvertAMPattern(FileReader chunk, PATTERNINDEX pat, bool isAM, CSou
 					if (m.param & 0xF0) m.param &= 0xF0;
 					break;
 				case CMD_PANNING8:
-					if(m.param <= 0x80) m.param = mpt::saturate_cast<uint8>(m.param * 2);
-					else if(m.param == 0xA4) {m.command = CMD_S3MCMDEX; m.param = 0x91;}
+					if(m.param <= 0x80) m.param = mpt::saturate_cast<ModCommand::PARAM>(m.param * 2);
+					else if(m.param == 0xA4) m.SetEffectCommand(CMD_S3MCMDEX, 0x91u);
 					break;
 				case CMD_PATTERNBREAK:
-					m.param = static_cast<uint8>(((m.param >> 4) * 10u) + (m.param & 0x0Fu));
+					m.param = static_cast<ModCommand::PARAM>(((m.param >> 4) * 10u) + (m.param & 0x0Fu));
 					break;
 				case CMD_MODCMDEX:
 					m.ExtendedMODtoS3MEffect();
@@ -612,7 +612,7 @@ static bool ConvertAMPattern(FileReader chunk, PATTERNINDEX pat, bool isAM, CSou
 				m.vol = chunk.ReadUint8();
 				if(isAM)
 				{
-					m.vol = static_cast<uint8>(m.vol * 64u / 127u);
+					m.vol = static_cast<ModCommand::VOL>(m.vol * 64u / 127u);
 				}
 			}
 		}

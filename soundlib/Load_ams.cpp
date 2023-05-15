@@ -207,12 +207,12 @@ static void ReadAMSPattern(CPattern &pattern, bool newVersion, FileReader &patte
 							case 0xA:
 								// Extra fine volume slide up
 								m.command = CMD_VOLUMESLIDE;
-								m.param = static_cast<uint8>(((((m.param & 0x0F) + 1) / 2) << 4) | 0x0F);
+								m.param = static_cast<ModCommand::PARAM>(((((m.param & 0x0F) + 1) / 2) << 4) | 0x0F);
 								break;
 							case 0xB:
 								// Extra fine volume slide down
 								m.command = CMD_VOLUMESLIDE;
-								m.param = static_cast<uint8>((((m.param & 0x0F) + 1) / 2) | 0xF0);
+								m.param = static_cast<ModCommand::PARAM>((((m.param & 0x0F) + 1) / 2) | 0xF0);
 								break;
 							default:
 								m.command = CMD_NONE;
@@ -1090,7 +1090,7 @@ void AMSUnpack(mpt::const_byte_span source, mpt::byte_span dest, int8 packCharac
 			for(uint16 count = 0; count < 8; count++)
 			{
 				uint16 bl = al & bitcount;
-				bl = ((bl | (bl << 8)) >> ((dh + 8 - count) & 7)) & 0xFF;
+				bl = (bl | (bl << 8)) >> ((dh + 8 - count) & 7);
 				bitcount = ((bitcount | (bitcount << 8)) >> 1) & 0xFF;
 				dst[k++] |= (bl & 0xFFu);
 				if(k >= dest.size())

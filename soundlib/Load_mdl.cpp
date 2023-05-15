@@ -351,8 +351,7 @@ static bool ImportMDLCommands(ModCommand &m, uint8 vol, uint8 cmd1, uint8 cmd2, 
 
 	if(vol)
 	{
-		m.volcmd = VOLCMD_VOLUME;
-		m.vol = static_cast<uint8>((vol + 2) / 4u);
+		m.SetVolumeCommand(VOLCMD_VOLUME, static_cast<ModCommand::VOL>((vol + 2) / 4u));
 	}
 
 	// If we have Dxx + G00, or Dxx + H00, combine them into Lxx/Kxx.

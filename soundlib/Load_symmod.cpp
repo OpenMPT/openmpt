@@ -1666,7 +1666,7 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 							if(event.param < 1)
 								break;
 							m.command = CMD_RETRIG;
-							m.param = static_cast<uint8>(std::min(15, event.inst + 1));
+							m.param = static_cast<ModCommand::PARAM>(std::min(15, event.inst + 1));
 							chnState.retriggerRemain = static_cast<uint16>(event.param * (event.inst + 1u));
 							break;
 

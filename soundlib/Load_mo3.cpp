@@ -1137,7 +1137,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 						// Pattern break
 						m.SetEffectCommand(CMD_PATTERNBREAK, cmd[1]);
 						if(m_nType != MOD_TYPE_IT)
-							m.param = static_cast<uint8>(((m.param >> 4) * 10) + (m.param & 0x0F));
+							m.param = static_cast<ModCommand::PARAM>(((m.param >> 4) * 10) + (m.param & 0x0F));
 						break;
 					case 0x12:
 						// Combined Tempo / Speed command

@@ -165,7 +165,7 @@ bool CSoundFile::Read667(FileReader &file, ModLoadingFlags loadFlags)
 					uint8 note = patData.ReadUint8();
 					if(note >= 0x7C)
 						return false;
-					rowData[b].note = static_cast<uint8>(NOTE_MIN + 12 + (note & 0x0F) + (note >> 4) * 12);
+					rowData[b].note = static_cast<ModCommand::NOTE>(NOTE_MIN + 12 + (note & 0x0F) + (note >> 4) * 12);
 					if(b % 2u)
 						rightChn = true;
 					else

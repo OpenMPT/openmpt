@@ -499,8 +499,7 @@ bool CSoundFile::ReadDSm(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				// Offset + volume
 				m.command = CMD_OFFSET;
-				m.volcmd = VOLCMD_VOLUME;
-				m.vol = static_cast<uint8>((data[2] & 0x0F) * 4 + 4);
+				m.SetVolumeCommand(VOLCMD_VOLUME, static_cast<ModCommand::VOL>((data[2] & 0x0F) * 4 + 4));
 			} else if(data[2] <= 0x0F || data[2] == 0x11 || data[2] == 0x12)
 			{
 				// 0x11 and 0x12 support the full 5-octave range, 0x01 and 0x02 presumably only the ProTracker 3-octave range

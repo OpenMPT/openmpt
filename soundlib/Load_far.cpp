@@ -266,8 +266,7 @@ bool CSoundFile::ReadFAR(FileReader &file, ModLoadingFlags loadFlags)
 
 				if(volume > 0 && volume <= 16)
 				{
-					m.volcmd = VOLCMD_VOLUME;
-					m.vol = static_cast<uint8>((volume - 1u) * 64u / 15u);
+					m.SetVolumeCommand(VOLCMD_VOLUME, static_cast<ModCommand::VOL>((volume - 1u) * 64u / 15u));
 				}
 				
 				m.param = effect & 0x0F;
@@ -282,7 +281,7 @@ bool CSoundFile::ReadFAR(FileReader &file, ModLoadingFlags loadFlags)
 					m.param <<= 2;
 					break;
 				case 0x04:	// Retrig
-					m.param = static_cast<uint8>(6 / (1 + (m.param & 0xf)) + 1); // ugh?
+					m.param = static_cast<ModCommand::PARAM>(6 / (1 + (m.param & 0xf)) + 1); // ugh?
 					break;
 				case 0x06:	// Vibrato speed
 				case 0x07:	// Volume slide up
@@ -290,13 +289,13 @@ bool CSoundFile::ReadFAR(FileReader &file, ModLoadingFlags loadFlags)
 					break;
 				case 0x0A:	// Volume-portamento (what!)
 					m.volcmd = VOLCMD_VOLUME;
-					m.vol = static_cast<uint8>((m.param << 2) + 4);
+					m.vol = static_cast<ModCommand::VOL>((m.param << 2) + 4);
 					break;
 				case 0x0B:	// Panning
 					m.param |= 0x80;
 					break;
 				case 0x0C:	// Note offset
-					m.param = static_cast<uint8>(6 / (1 + m.param) + 1);
+					m.param = static_cast<ModCommand::PARAM>(6 / (1 + m.param) + 1);
 					m.param |= 0x0D;
 				}
 				m.command = farEffects[effect >> 4];

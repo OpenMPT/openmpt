@@ -360,7 +360,7 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 					if(note)
 					{
 						note = (note & 0x7F) - 1;  // High bit = no-retrig flag (notes with portamento have this set)
-						m.note = static_cast<uint8>((note & 0x0F) + 12 * (note >> 4) + 12 + NOTE_MIN);
+						m.note = static_cast<ModCommand::NOTE>((note & 0x0F) + 12 * (note >> 4) + 12 + NOTE_MIN);
 						if(!m.IsAmigaNote())
 						{
 							onlyAmigaNotes = false;
@@ -482,10 +482,8 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 						// Move pannings to volume column - should never happen
 						if(m.command == CMD_S3MCMDEX && ((m.param >> 4) == 0x8) && m.volcmd == VOLCMD_NONE)
 						{
-							m.volcmd = VOLCMD_PANNING;
-							m.vol = static_cast<uint8>(((m.param & 0x0F) * 64 + 8) / 15);
-							m.command = oldCmd.command;
-							m.param = oldCmd.param;
+							m.SetVolumeCommand(VOLCMD_PANNING, static_cast<ModCommand::VOL>(((m.param & 0x0F) * 64 + 8) / 15));
+							m.SetEffectCommand(oldCmd);
 						}
 
 						if(!(effByte & effectMore))

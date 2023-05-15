@@ -543,7 +543,7 @@ bool CSoundFile::ReadIMF(FileReader &file, ModLoadingFlags loadFlags)
 					m.note = NOTE_NONE;
 				} else
 				{
-					m.note = static_cast<uint8>((m.note >> 4) * 12 + (m.note & 0x0F) + 12 + 1);
+					m.note = static_cast<ModCommand::NOTE>((m.note >> 4) * 12 + (m.note & 0x0F) + 12 + 1);
 					if(!m.IsNoteOrEmpty())
 					{
 						m.note = NOTE_NONE;

@@ -413,9 +413,9 @@ static std::pair<EffectCommand, ModCommand::PARAM> ConvertMEDEffect(ModCommand &
 	case 0x0C:  // Set Volume
 		m.command = CMD_VOLUME;
 		if(!volHex && m.param < 0x99)
-			m.param = static_cast<uint8>((m.param >> 4) * 10 + (m.param & 0x0F));
+			m.param = static_cast<ModCommand::PARAM>((m.param >> 4) * 10 + (m.param & 0x0F));
 		else if(volHex)
-			m.param = static_cast<uint8>(((m.param & 0x7F) + 1) / 2);
+			m.param = static_cast<ModCommand::PARAM>(((m.param & 0x7F) + 1) / 2);
 		else
 			m.command = CMD_NONE;
 		break;

@@ -47,7 +47,7 @@ void CSoundFile::ConvertModCommand(ModCommand &m, const uint8 command, const uin
 	case 0x0A: m.command = CMD_VOLUMESLIDE; break;
 	case 0x0B: m.command = CMD_POSITIONJUMP; break;
 	case 0x0C: m.command = CMD_VOLUME; break;
-	case 0x0D: m.command = CMD_PATTERNBREAK; m.param = static_cast<uint8>(((m.param >> 4) * 10) + (m.param & 0x0F)); break;
+	case 0x0D: m.command = CMD_PATTERNBREAK; m.param = static_cast<ModCommand::PARAM>(((m.param >> 4) * 10) + (m.param & 0x0F)); break;
 	case 0x0E: m.command = CMD_MODCMDEX; break;
 	case 0x0F:
 		// For a very long time, this code imported 0x20 as CMD_SPEED for MOD files, but this seems to contradict

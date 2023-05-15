@@ -1215,7 +1215,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 				// Need a normal slide.
 				absDiff /= 4 * (ticksPerRow - 1);
 				LimitMax(absDiff, 0xDF);
-				m.param = static_cast<uint8>(absDiff);
+				m.param = static_cast<ModCommand::PARAM>(absDiff);
 				realDiff = absDiff * 4 * (ticksPerRow - 1);
 			}
 			chnState.porta += realDiff * mpt::signum(diff);

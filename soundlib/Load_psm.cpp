@@ -701,8 +701,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 				{
 					// Volume present
 					uint8 vol = rowChunk.ReadUint8();
-					m.volcmd = VOLCMD_VOLUME;
-					m.vol = static_cast<uint8>((std::min(vol, uint8(127)) + 1) / 2);
+					m.SetVolumeCommand(VOLCMD_VOLUME, static_cast<ModCommand::VOL>((std::min(vol, uint8(127)) + 1) / 2));
 				}
 
 				if(flags & effectFlag)

@@ -214,8 +214,7 @@ static bool ConvertMT2Command(CSoundFile *that, ModCommand &m, MT2Command &p)
 	// Volume Column
 	if(p.vol >= 0x10 && p.vol <= 0x90)
 	{
-		m.volcmd = VOLCMD_VOLUME;
-		m.vol = static_cast<uint8>((p.vol - 0x10) / 2);
+		m.SetVolumeCommand(VOLCMD_VOLUME, static_cast<ModCommand::VOL>((p.vol - 0x10) / 2));
 	} else if(p.vol >= 0xA0 && p.vol <= 0xAF)
 	{
 		m.volcmd = VOLCMD_VOLSLIDEDOWN;

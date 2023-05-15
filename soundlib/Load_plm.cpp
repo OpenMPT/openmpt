@@ -296,7 +296,7 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				const auto [note, instr, volume, command, param] = file.ReadArray<uint8, 5>();
 				if(note > 0 && note < 0x90)
-					lastNote[c] = m->note = static_cast<uint8>((note >> 4) * 12 + (note & 0x0F) + 12 + NOTE_MIN);
+					lastNote[c] = m->note = static_cast<ModCommand::NOTE>((note >> 4) * 12 + (note & 0x0F) + 12 + NOTE_MIN);
 				else
 					m->note = NOTE_NONE;
 				m->instr = instr;

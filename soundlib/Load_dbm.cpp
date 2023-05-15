@@ -518,7 +518,7 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 					if(note == 0x1F)
 						m.note = NOTE_KEYOFF;
 					else if(note > 0 && note < 0xFE)
-						m.note = static_cast<uint8>(((note >> 4) * 12) + (note & 0x0F) + 13);
+						m.note = static_cast<ModCommand::NOTE>(((note >> 4) * 12) + (note & 0x0F) + 13);
 				}
 				if(b & 0x02)
 				{

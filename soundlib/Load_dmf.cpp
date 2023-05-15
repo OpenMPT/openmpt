@@ -505,12 +505,12 @@ static PATTERNINDEX ConvertDMFPattern(FileReader &file, const uint8 fileVersion,
 					m->note = file.ReadUint8();
 					if(m->note >= 1 && m->note <= 108)
 					{
-						m->note = static_cast<uint8>(Clamp(m->note + 24, NOTE_MIN, NOTE_MAX));
+						m->note = Clamp(static_cast<ModCommand::NOTE>(m->note + 24), NOTE_MIN, NOTE_MAX);
 						settings.channels[chn].lastNote = m->note;
 					} else if(m->note >= 129 && m->note <= 236)
 					{
 						// "Buffer notes" for portamento (and other effects?) that are actually not played, but just "queued"...
-						m->note = static_cast<uint8>(Clamp((m->note & 0x7F) + 24, NOTE_MIN, NOTE_MAX));
+						m->note = Clamp(static_cast<ModCommand::NOTE>((m->note & 0x7F) + 24), NOTE_MIN, NOTE_MAX);
 						settings.channels[chn].noteBuffer = m->note;
 						m->note = NOTE_NONE;
 					} else if(m->note == 255)
@@ -540,7 +540,7 @@ static PATTERNINDEX ConvertDMFPattern(FileReader &file, const uint8 fileVersion,
 				if((channelInfo & patVolume) != 0)
 				{
 					m->volcmd = VOLCMD_VOLUME;
-					m->vol = static_cast<uint8>((file.ReadUint8() + 2) / 4);  // Should be + 3 instead of + 2, but volume 1 is silent in X-Tracker.
+					m->vol = static_cast<ModCommand::VOL>((file.ReadUint8() + 2) / 4);  // Should be + 3 instead of + 2, but volume 1 is silent in X-Tracker.
 				}
 
 				////////////////////////////////////////////////////////////////
