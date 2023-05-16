@@ -1090,7 +1090,7 @@ void AMSUnpack(mpt::const_byte_span source, mpt::byte_span dest, int8 packCharac
 			for(uint16 count = 0; count < 8; count++)
 			{
 				uint16 bl = al & bitcount;
-				bl = (bl | (bl << 8)) >> ((dh + 8 - count) & 7);
+				bl = static_cast<uint16>((bl | (bl << 8)) >> ((dh + 8 - count) & 7));
 				bitcount = ((bitcount | (bitcount << 8)) >> 1) & 0xFF;
 				dst[k++] |= (bl & 0xFFu);
 				if(k >= dest.size())

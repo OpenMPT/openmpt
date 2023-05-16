@@ -501,7 +501,7 @@ bool CSoundFile::ReadDTM(FileReader &file, ModLoadingFlags loadFlags)
 				} else
 				{
 					std::tie(command, m.param) = ReadMODPatternEntry(data, m);
-					m.instr |= (data[0] & 0x30u);  // Allow more than 31 instruments
+					m.instr |= static_cast<ModCommand::INSTR>(data[0] & 0x30u);  // Allow more than 31 instruments
 				}
 				ConvertModCommand(m, command, m.param);
 				// Fix commands without memory and slide nibble precedence
