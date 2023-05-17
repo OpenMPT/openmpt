@@ -329,6 +329,7 @@
 /include/lame/mpglib/Makefile.in
 /include/lame/mpglib/README
 /include/lame/mpglib/depcomp
+/include/lhasa/m4
 /include/lhasa/test
 /include/minimp3/*.d
 /include/minimp3/*.o
