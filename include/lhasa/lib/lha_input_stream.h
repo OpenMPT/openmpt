@@ -48,4 +48,3 @@ int lha_input_stream_read(LHAInputStream *stream, void *buf, size_t buf_len);
 int lha_input_stream_skip(LHAInputStream *stream, size_t bytes);
 
 #endif /* #ifndef LHASA_LHA_INPUT_STREAM_H */
-

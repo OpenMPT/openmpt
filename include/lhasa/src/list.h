@@ -28,4 +28,3 @@ void list_file_basic(LHAFilter *filter, LHAOptions *options, FILE *fstream);
 void list_file_verbose(LHAFilter *filter, LHAOptions *options, FILE *fstream);
 
 #endif /* #ifndef LHASA_LIST_H */
-

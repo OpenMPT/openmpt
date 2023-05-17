@@ -44,7 +44,7 @@ static void help_page(char *progname)
 	printf(
 	PACKAGE_NAME " v" PACKAGE_VERSION " command line LHA tool  "
 		"- Copyright (C) 2011,2012 Simon Howard\n"
-	"usage: %s [-]{lvtxe[q{num}][finv]}[w=<dir>] archive_file [file...]\n"
+	"usage: %s [-]{lvtxep[q{num}][finv]}[w=<dir>] archive_file [file...]\n"
 	"commands:                          options:\n"
 	" l,v List / Verbose List            f  Force overwrite (no prompt)\n"
 	" t   Test file CRC in archive       i  Ignore directory path\n"
@@ -272,4 +272,3 @@ int main(int argc, char *argv[])
 		return 0;
 	}
 }
-

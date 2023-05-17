@@ -46,4 +46,3 @@ LHADecoder *lha_macbinary_passthrough(LHADecoder *decoder,
                                       LHAFileHeader *header);
 
 #endif /* #ifndef LHASA_MACBINARY_H */
-

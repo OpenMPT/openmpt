@@ -73,7 +73,7 @@ typedef enum {
 	 * "End of directory" policy. In this mode, if a directory
 	 * is extracted, the directory name will be saved. Once the
 	 * contents of the directory appear to have been extracted
-	 * (ie. a file is found that is not within the directory),
+	 * (i.e. a file is found that is not within the directory),
 	 * the directory will be returned again by
 	 * @ref lha_reader_next_file. This time, when the directory
 	 * is "extracted" (via @ref lha_reader_extract), the metadata
@@ -214,4 +214,3 @@ int lha_reader_current_is_fake(LHAReader *reader);
 #endif
 
 #endif /* #ifndef LHASA_PUBLIC_LHA_READER_H */
-

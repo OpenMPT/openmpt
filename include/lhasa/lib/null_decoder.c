@@ -58,4 +58,3 @@ LHADecoderType lha_null_decoder = {
 	BLOCK_READ_SIZE,
 	2048
 };
-

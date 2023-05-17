@@ -1,4 +1,3 @@
-
 bin_PROGRAMS=lha
 check_PROGRAMS=test-lha
 
@@ -20,4 +19,3 @@ test_lha_LDADD=$(top_builddir)/lib/liblhasatest.a
 
 clean-local:
 	rm -f *.gcno *.gcda *.c.gcov
-

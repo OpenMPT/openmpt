@@ -20,4 +20,3 @@ Command line tool:
 Testing:
  * Valgrind.
  * Improve coverage.
-

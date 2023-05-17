@@ -400,4 +400,3 @@ LHAInputStream *lha_input_stream_from_FILE(FILE *stream)
 	lha_arch_set_binary(stream);
 	return lha_input_stream_new(&file_source_unowned, stream);
 }
-

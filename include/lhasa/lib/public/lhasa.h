@@ -27,4 +27,3 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "lha_reader.h"
 
 #endif /* #ifndef LHASA_PUBLIC_LHASA_H */
-

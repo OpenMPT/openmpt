@@ -58,4 +58,3 @@ void lha_filter_init(LHAFilter *filter, LHAReader *reader,
 LHAFileHeader *lha_filter_next_file(LHAFilter *filter);
 
 #endif /* #ifndef LHASA_FILTER_H */
-

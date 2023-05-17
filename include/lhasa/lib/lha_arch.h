@@ -157,4 +157,3 @@ LHAFileType lha_arch_exists(char *filename);
 int lha_arch_symlink(char *path, char *target);
 
 #endif /* ifndef LHASA_LHA_ARCH_H */
-

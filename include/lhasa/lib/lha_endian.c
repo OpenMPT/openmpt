@@ -57,4 +57,3 @@ uint32_t lha_decode_be_uint32(uint8_t *buf)
 	     | ((uint32_t) buf[2] << 8)
 	     | ((uint32_t) buf[3]);
 }
-

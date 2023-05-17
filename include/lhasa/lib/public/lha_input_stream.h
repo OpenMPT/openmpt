@@ -131,4 +131,3 @@ void lha_input_stream_free(LHAInputStream *stream);
 #endif
 
 #endif /* #ifndef LHASA_PUBLIC_LHA_INPUT_STREAM_H */
-

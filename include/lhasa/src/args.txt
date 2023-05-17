@@ -1,4 +1,3 @@
-
 Notes on command line arguments:
 
 Mode - must be the first character of the first argument. Leading '-'
@@ -73,4 +72,3 @@ even if they are inappropriate for the mode, eg. "lha lf".
   w=dir     - Specify destination directory to extract files. Must be
               the last option specified. '=' can be omitted. If combined
               with 'i', all files get placed in that one directory.
-

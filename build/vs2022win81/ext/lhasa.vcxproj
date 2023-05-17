@@ -617,6 +617,7 @@
     <ClCompile Include="..\..\..\include\lhasa\lib\lha_input_stream.c" />
     <ClCompile Include="..\..\..\include\lhasa\lib\lha_reader.c" />
     <ClCompile Include="..\..\..\include\lhasa\lib\lhx_decoder.c" />
+    <ClCompile Include="..\..\..\include\lhasa\lib\lk7_decoder.c" />
     <ClCompile Include="..\..\..\include\lhasa\lib\lz5_decoder.c" />
     <ClCompile Include="..\..\..\include\lhasa\lib\lzs_decoder.c" />
     <ClCompile Include="..\..\..\include\lhasa\lib\macbinary.c" />

@@ -170,4 +170,3 @@ int lha_arch_symlink(char *path, char *target)
 }
 
 #endif /* LHA_ARCH_UNIX */
-

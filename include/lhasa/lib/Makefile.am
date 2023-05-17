@@ -27,6 +27,7 @@ SRC =                                                   \
 	lh6_decoder.c                                   \
 	lh7_decoder.c                                   \
 	lhx_decoder.c                                   \
+	lk7_decoder.c                                   \
 	lz5_decoder.c                                   \
 	lzs_decoder.c                                   \
 	pm1_decoder.c                                   \
@@ -40,4 +41,3 @@ liblhasa_la_SOURCES=$(SRC) $(HEADER_FILES)
 
 clean-local:
 	rm -f *.gcno *.gcda *.c.gcov
-

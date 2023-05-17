@@ -41,4 +41,3 @@ int lha_ext_header_decode(LHAFileHeader *header,
                           size_t data_len);
 
 #endif /* #ifndef LHASA_EXT_HEADER_H */
-

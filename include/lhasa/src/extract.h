@@ -29,4 +29,3 @@ int extract_archive(LHAFilter *filter, LHAOptions *options);
 int print_archive(LHAFilter *filter, LHAOptions *options);
 
 #endif /* #ifndef LHASA_EXTRACT_H */
-

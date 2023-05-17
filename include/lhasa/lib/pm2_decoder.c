@@ -546,4 +546,3 @@ LHADecoderType lha_pm2_decoder = {
 	OUTPUT_BUFFER_SIZE,
 	RING_BUFFER_SIZE
 };
-
