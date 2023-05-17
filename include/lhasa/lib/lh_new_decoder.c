@@ -52,15 +52,17 @@ typedef uint16_t TreeElement;
 
 #define OUTPUT_BUFFER_SIZE   RING_BUFFER_SIZE
 
-// Number of different command codes. 0-255 range are literal byte
-// values, while higher values indicate copy from history.
-
-#define NUM_CODES            510
-
 // Number of possible codes in the "temporary table" used to encode the
-// codes table.
+// codes table. This is a function of the number of bits used to encode
+// the field that contains the number of temp codes.
 
-#define MAX_TEMP_CODES       20
+#define TEMP_CODE_BITS       5
+#define MAX_TEMP_CODES       ((1 << TEMP_CODE_BITS) - 1)
+
+// Similarly, the maximum # of offset codes is a function of the number
+// of offset bits.
+
+#define MAX_OFFSET_CODES     ((1 << OFFSET_BITS) - 1)
 
 typedef struct {
 	// Input bit stream.
@@ -76,15 +78,19 @@ typedef struct {
 
 	unsigned int block_remaining;
 
+	// This table is used to encode the temp-tree, which
+	// is itself used to encode the code tree.
+
+	TreeElement temp_tree[MAX_TEMP_CODES * 2];
+
 	// Table used for the code tree.
 
 	TreeElement code_tree[NUM_CODES * 2];
 
 	// Table used to encode the offset tree, used to read offsets
-	// into the history buffer. This same table is also used to
-	// encode the temp-table, which is bigger; hence the size.
+	// into the history buffer.
 
-	TreeElement offset_tree[MAX_TEMP_CODES * 2];
+	TreeElement offset_tree[MAX_OFFSET_CODES * 2];
 } LHANewDecoder;
 
 // Initialize the history ring buffer.
@@ -116,7 +122,8 @@ static int lha_lh_new_init(void *data, LHADecoderCallback callback,
 	// Initialize tree tables to a known state.
 
 	init_tree(decoder->code_tree, NUM_CODES * 2);
-	init_tree(decoder->offset_tree, MAX_TEMP_CODES * 2);
+	init_tree(decoder->offset_tree, MAX_OFFSET_CODES * 2);
+	init_tree(decoder->temp_tree, MAX_TEMP_CODES * 2);
 
 	return 1;
 }
@@ -163,7 +170,7 @@ static int read_temp_table(LHANewDecoder *decoder)
 
 	// How many codes?
 
-	n = read_bits(&decoder->bit_stream_reader, 5);
+	n = read_bits(&decoder->bit_stream_reader, TEMP_CODE_BITS);
 
 	if (n < 0) {
 		return 0;
@@ -179,7 +186,7 @@ static int read_temp_table(LHANewDecoder *decoder)
 			return 0;
 		}
 
-		set_tree_single(decoder->offset_tree, code);
+		set_tree_single(decoder->temp_tree, code);
 		return 1;
 	}
 
@@ -218,7 +225,7 @@ static int read_temp_table(LHANewDecoder *decoder)
 		}
 	}
 
-	build_tree(decoder->offset_tree, MAX_TEMP_CODES * 2, code_lengths, n);
+	build_tree(decoder->temp_tree, MAX_TEMP_CODES * 2, code_lengths, n);
 
 	return 1;
 }
@@ -297,14 +304,13 @@ static int read_code_table(LHANewDecoder *decoder)
 	}
 
 	// Read the length of each code.
-	// The lengths are encoded using the temp-table previously read;
-	// offset_tree is reused temporarily to hold it.
+	// The lengths are encoded using the temp-table previously read.
 
 	i = 0;
 
 	while (i < n) {
 		code = read_from_tree(&decoder->bit_stream_reader,
-		                      decoder->offset_tree);
+		                      decoder->temp_tree);
 
 		if (code < 0) {
 			return 0;
@@ -340,7 +346,7 @@ static int read_code_table(LHANewDecoder *decoder)
 static int read_offset_table(LHANewDecoder *decoder)
 {
 	int i, n, len, code;
-	uint8_t code_lengths[HISTORY_BITS];
+	uint8_t code_lengths[MAX_OFFSET_CODES];
 
 	// How many codes?
 
@@ -366,8 +372,8 @@ static int read_offset_table(LHANewDecoder *decoder)
 
 	// Enforce a hard limit on the number of codes.
 
-	if (n > HISTORY_BITS) {
-		n = HISTORY_BITS;
+	if (n > MAX_OFFSET_CODES) {
+		n = MAX_OFFSET_CODES;
 	}
 
 	// Read the length of each code.
@@ -382,7 +388,7 @@ static int read_offset_table(LHANewDecoder *decoder)
 		code_lengths[i] = len;
 	}
 
-	build_tree(decoder->offset_tree, MAX_TEMP_CODES * 2, code_lengths, n);
+	build_tree(decoder->offset_tree, MAX_OFFSET_CODES * 2, code_lengths, n);
 
 	return 1;
 }
@@ -404,7 +410,6 @@ static int start_new_block(LHANewDecoder *decoder)
 	decoder->block_remaining = (size_t) len;
 
 	// Read the temporary decode table, used to encode the codes table.
-	// The position table data structure is reused for this.
 
 	if (!read_temp_table(decoder)) {
 		return 0;
@@ -433,12 +438,32 @@ static int read_code(LHANewDecoder *decoder)
 	return read_from_tree(&decoder->bit_stream_reader, decoder->code_tree);
 }
 
+#ifdef LHARK
+static int lhark_read_offset_code(LHANewDecoder *decoder, int code)
+{
+	unsigned int num_low_bits;
+	int low_bits;
+
+	if (code < 4) {
+		return code;
+	}
+
+	num_low_bits = (code - 2) / 2;
+	low_bits = read_bits(&decoder->bit_stream_reader, num_low_bits);
+	if (low_bits < 0) {
+		return -1;
+	}
+	return ((2 + (code % 2)) << num_low_bits)
+	     + low_bits;
+}
+#endif
+
 // Read an offset distance from the input stream.
 // Returns the code, or -1 if an error occurred.
 
 static int read_offset_code(LHANewDecoder *decoder)
 {
-	int bits, result;
+	int bits;
 
 	bits = read_from_tree(&decoder->bit_stream_reader,
 	                      decoder->offset_tree);
@@ -461,7 +486,13 @@ static int read_offset_code(LHANewDecoder *decoder)
 		return 0;
 	} else if (bits == 1) {
 		return 1;
+#ifdef LHARK
 	} else {
+		return lhark_read_offset_code(decoder, bits);
+	}
+#else
+	} else {
+		int result;
 		result = read_bits(&decoder->bit_stream_reader, bits - 1);
 
 		if (result < 0) {
@@ -470,6 +501,7 @@ static int read_offset_code(LHANewDecoder *decoder)
 
 		return result + (1 << (bits - 1));
 	}
+#endif
 }
 
 // Add a byte value to the output stream.
@@ -507,11 +539,31 @@ static void copy_from_history(LHANewDecoder *decoder, uint8_t *buf,
 	}
 }
 
+#ifdef LHARK
+static int lhark_decode_copy_count(LHANewDecoder *decoder, int code)
+{
+	if (code < 264) {
+		return code - 256 + COPY_THRESHOLD;
+	} else if (code < 288) {
+		int low_bits, num_low_bits;
+		num_low_bits = (code - 260) / 4;
+		low_bits = read_bits(&decoder->bit_stream_reader,
+				     num_low_bits);
+		if (low_bits < 0) {
+			return -1;
+		}
+		return ((4 + (code % 4)) << num_low_bits) + low_bits + 3;
+	} else {
+		return 514;
+	}
+}
+#endif
+
 static size_t lha_lh_new_read(void *data, uint8_t *buf)
 {
 	LHANewDecoder *decoder = data;
 	size_t result;
-	int code;
+	int code, copy_count;
 
 	// Start of new block?
 
@@ -538,8 +590,16 @@ static size_t lha_lh_new_read(void *data, uint8_t *buf)
 	if (code < 256) {
 		output_byte(decoder, buf, &result, (uint8_t) code);
 	} else {
-		copy_from_history(decoder, buf, &result,
-		                  code - 256 + COPY_THRESHOLD);
+#ifdef LHARK
+		copy_count = lhark_decode_copy_count(decoder, code);
+		if (copy_count < 0) {
+			return 0;
+		}
+#else
+		copy_count = code - 256 + COPY_THRESHOLD;
+#endif
+
+		copy_from_history(decoder, buf, &result, copy_count);
 	}
 
 	return result;
@@ -566,4 +626,3 @@ LHADecoderType DECODER2_NAME = {
 	RING_BUFFER_SIZE / 4
 };
 #endif
-

@@ -83,7 +83,7 @@ for filename in sorted(sys.argv[1:]):
 	xgcno = glob(path_join(dirname(gcno), "*-" + basename(gcno)))
 	xgcda = glob(path_join(dirname(gcda), "*-" + basename(gcda)))
 
-	# Must rename eg. liblhasatest_a-foo.gcno to foo.gcno:
+	# Must rename e.g. liblhasatest_a-foo.gcno to foo.gcno:
 
 	if len(xgcno) > 0:
 		rename(xgcno[0], gcno)
@@ -112,4 +112,3 @@ for filename in sorted(sys.argv[1:]):
 			format_output(" -> " + subfile, results[subfile])
 
 print
-

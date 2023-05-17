@@ -434,4 +434,3 @@ int lha_ext_header_decode(LHAFileHeader *header,
 
 	return htype->decoder(header, data, data_len);
 }
-

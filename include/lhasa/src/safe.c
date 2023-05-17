@@ -104,4 +104,3 @@ int safe_printf(char *format, ...)
 
 	return result;
 }
-

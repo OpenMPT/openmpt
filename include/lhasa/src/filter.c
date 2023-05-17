@@ -134,4 +134,3 @@ LHAFileHeader *lha_filter_next_file(LHAFilter *filter)
 
 	return header;
 }
-

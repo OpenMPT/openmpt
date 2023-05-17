@@ -1,4 +1,3 @@
-
 The full change history is maintained in git. Rather than reproduce
 the change history history here, it's easier if you clone a copy of
 the git repository and view it:
@@ -10,4 +9,3 @@ the git repository and view it:
 Alternatively, the commit history can be viewed on github:
 
     https://github.com/fragglet/lhasa/commits/master
-

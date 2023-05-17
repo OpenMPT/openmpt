@@ -125,4 +125,3 @@ static int read_bit(BitStreamReader *reader)
 {
 	return read_bits(reader, 1);
 }
-

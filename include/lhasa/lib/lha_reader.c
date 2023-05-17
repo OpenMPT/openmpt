@@ -485,7 +485,7 @@ static int set_timestamps_from_header(char *path, LHAFileHeader *header)
  * Set directory metadata.
  *
  * This is the second stage of directory extraction. Metadata (timestamps
- * and permissions) should be set on a dictory after the contents of
+ * and permissions) should be set on a directory after the contents of
  * the directory has been extracted.
  *
  * @param header     Pointer to file header structure containing the
@@ -883,4 +883,3 @@ int lha_reader_current_is_fake(LHAReader *reader)
 	return reader->curr_file_type == CURR_FILE_FAKE_DIR
 	    || reader->curr_file_type == CURR_FILE_DEFERRED_SYMLINK;
 }
-

@@ -69,4 +69,3 @@ uint16_t lha_decode_be_uint16(uint8_t *buf);
 uint32_t lha_decode_be_uint32(uint8_t *buf);
 
 #endif /* #ifndef LHASA_LHA_ENDIAN_H */
-

@@ -101,7 +101,7 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 // 0x49      - I - Finder flags
 // 0x4a      - Z - "Must be zero for compatibility"
 // 0x4b-0x4c - I - Icon vertical position
-// 0x4d-0x4e - I - Icon horizonal position
+// 0x4d-0x4e - I - Icon horizontal position
 // 0x4f-0x50 - I - Window ID
 // 0x51      - I - "Protected" flag
 // 0x52      - Z - "Must be zero for compatibility"
@@ -448,4 +448,3 @@ LHADecoder *lha_macbinary_passthrough(LHADecoder *decoder,
 
 	return result;
 }
-

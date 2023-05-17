@@ -29,7 +29,7 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  * Basic LHA stream reader.
  *
  * The basic reader structure just reads @ref LHAFileHeader structures
- * from an input stream and decompresses files. The more elaborate 
+ * from an input stream and decompresses files. The more elaborate
  * @ref LHAReader builds upon this to offer more complicated functionality.
  */
 
@@ -96,4 +96,3 @@ size_t lha_basic_reader_read_compressed(LHABasicReader *reader, void *buf,
 LHADecoder *lha_basic_reader_decode(LHABasicReader *reader);
 
 #endif /* #ifndef LHASA_LHA_BASIC_READER_H */
-

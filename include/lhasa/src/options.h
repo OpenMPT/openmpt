@@ -61,4 +61,3 @@ typedef struct {
 } LHAOptions;
 
 #endif /* #ifndef LHASA_OPTIONS_H */
-

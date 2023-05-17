@@ -720,5 +720,3 @@ LHADecoderType lha_lh1_decoder = {
 	OUTPUT_BUFFER_SIZE,
 	RING_BUFFER_SIZE
 };
-
-

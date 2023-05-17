@@ -249,4 +249,3 @@ static int read_from_tree(BitStreamReader *reader, TreeElement *tree)
 
 	return (int) (code & ~TREE_NODE_LEAF);
 }
-

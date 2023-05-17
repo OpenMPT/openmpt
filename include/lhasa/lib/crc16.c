@@ -70,4 +70,3 @@ void lha_crc16_buf(uint16_t *crc, uint8_t *buf, size_t buf_len)
 
 	*crc = tmp;
 }
-

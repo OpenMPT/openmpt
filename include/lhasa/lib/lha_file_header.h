@@ -65,4 +65,3 @@ void lha_file_header_add_ref(LHAFileHeader *header);
 char *lha_file_header_full_path(LHAFileHeader *header);
 
 #endif /* #ifndef LHASA_LHA_FILE_HEADER_H */
-

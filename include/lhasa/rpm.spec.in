@@ -1,10 +1,9 @@
-
 Name: @PACKAGE@
 Summary: Free LZH archive tool
 Version: @VERSION@
 Release: 1
 Source: https://github.com/downloads/fragglet/@PACKAGE@/@PACKAGE@-@VERSION@.tar.gz
-URL: http://fragglet.github.com/lhasa/
+URL: https://fragglet.github.io/lhasa/
 Group: Applications/Archiving
 BuildRoot: /var/tmp/@PACKAGE@-buildroot
 License: ISC license
@@ -50,4 +49,3 @@ rm -rf $RPM_BUILD_ROOT
 /usr/bin/*
 /usr/lib*/*
 /usr/include/*/*
-

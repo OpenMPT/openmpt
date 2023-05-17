@@ -195,4 +195,3 @@ LHADecoderType lha_lz5_decoder = {
 	OUTPUT_BUFFER_SIZE,
 	RING_BUFFER_SIZE
 };
-

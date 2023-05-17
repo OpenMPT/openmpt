@@ -51,4 +51,3 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  * @li @link lha_decoder.h @endlink - routines to decode raw LZH
  *     compressed data.
  */
-

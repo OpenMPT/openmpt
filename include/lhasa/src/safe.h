@@ -25,4 +25,3 @@ int safe_fprintf(FILE *stream, char *format, ...);
 int safe_printf(char *format, ...);
 
 #endif /* #ifndef LHASA_SAFE_H */
-

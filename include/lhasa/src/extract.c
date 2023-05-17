@@ -673,4 +673,3 @@ int print_archive(LHAFilter *filter, LHAOptions *options)
 
 	return 1;
 }
-

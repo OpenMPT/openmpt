@@ -159,4 +159,3 @@ static void update_history_list(HistoryLinkedList *list, uint8_t b)
 
 	list->history_head = b;
 }
-
