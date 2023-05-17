@@ -110,6 +110,9 @@
     <ClCompile Include="..\..\..\include\lhasa\lib\lhx_decoder.c">
       <Filter>include\lhasa\lib</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\include\lhasa\lib\lk7_decoder.c">
+      <Filter>include\lhasa\lib</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\include\lhasa\lib\lz5_decoder.c">
       <Filter>include\lhasa\lib</Filter>
     </ClCompile>
