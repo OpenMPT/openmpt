@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt 0.6.11-pre
 
+ *  [**Bug**] The Opal OPL3 emulator symbols were not namespaced properly.
+ *  [**Bug**] Work-around for MSVC VS2022 17.6.0 ARM64 compiler bug.
+
  *  MO3: Envelope sustain was not imported correctly if the source file was an
     XM.
 
