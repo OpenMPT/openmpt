@@ -5,6 +5,7 @@
 
 
 
+#include "mpt/base/detect_arch.hpp"
 #include "mpt/base/detect_compiler.hpp"
 #include "mpt/base/detect_libc.hpp"
 #include "mpt/base/detect_libcxx.hpp"
@@ -32,6 +33,14 @@
 
 #if MPT_GCC_BEFORE(9, 1, 0)
 #define MPT_COMPILER_QUIRK_NO_CONSTEXPR_THROW
+#endif
+
+
+
+#if MPT_COMPILER_MSVC && MPT_MSVC_AT_LEAST(2022, 6) && MPT_ARCH_AARCH64
+// VS2022 17.6.0 ARM64 gets confused about alignment in std::bit_cast (or equivalent code),
+// causing an ICE.
+#define MPT_COMPILER_QUIRK_BROKEN_BITCAST
 #endif
 
 
