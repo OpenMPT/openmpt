@@ -10,6 +10,9 @@
 #include "mpt/base/namespace.hpp"
 #include "mpt/base/macros.hpp"
 
+#if defined(MPT_COMPILER_QUIRK_BROKEN_BITCAST)
+#include <atomic>
+#endif
 #if MPT_CXX_AT_LEAST(20)
 #include <bit>
 #else // !C++20
@@ -19,7 +22,7 @@
 #include <type_traits>
 
 #include <cstddef>
-#if MPT_CXX_BEFORE(20)
+#if MPT_CXX_BEFORE(20) || defined(MPT_COMPILER_QUIRK_BROKEN_BITCAST)
 #include <cstring>
 #endif // !C++20
 
@@ -30,7 +33,19 @@ inline namespace MPT_INLINE_NS {
 
 
 
-#if MPT_CXX_AT_LEAST(20) && !MPT_CLANG_BEFORE(14, 0, 0)
+#if defined(MPT_COMPILER_QUIRK_BROKEN_BITCAST)
+// VS2022 17.6.0 ARM64 gets confused about alignment in std::bit_cast (or equivalent code),
+// causing an ICE with LTCG turned on.
+// We try to work-around this problem by placing signal fences as an optimization barrier around the (presumably) confused operation.
+template <typename Tdst, typename Tsrc>
+MPT_FORCEINLINE typename std::enable_if<(sizeof(Tdst) == sizeof(Tsrc)) && std::is_trivially_copyable<Tsrc>::value && std::is_trivially_copyable<Tdst>::value, Tdst>::type bit_cast(const Tsrc & src) noexcept {
+	Tdst dst{};
+	std::atomic_signal_fence(std::memory_order_seq_cst);
+	std::memcpy(&dst, &src, sizeof(Tdst));
+	std::atomic_signal_fence(std::memory_order_seq_cst);
+	return dst;
+}
+#elif MPT_CXX_AT_LEAST(20) && !MPT_CLANG_BEFORE(14, 0, 0)
 using std::bit_cast;
 #else  // !C++20
 // C++2a compatible bit_cast.

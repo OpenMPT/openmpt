@@ -11,6 +11,14 @@
 
 
 
+#if MPT_COMPILER_MSVC && MPT_MSVC_AT_LEAST(2022, 6) && defined(_M_ARM64)
+// VS2022 17.6.0 ARM64 gets confused about alignment in std::bit_cast (or equivalent code),
+// causing an ICE.
+#define MPT_COMPILER_QUIRK_BROKEN_BITCAST
+#endif
+
+
+
 #if MPT_COMPILER_MSVC
 // Compiler has multiplication/division semantics when shifting signed integers.
 #define MPT_COMPILER_SHIFT_SIGNED 1
