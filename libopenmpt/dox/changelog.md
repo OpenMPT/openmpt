@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.4.37-pre
 
+ *  [**Bug**] The Opal OPL3 emulator symbols were not namespaced properly.
+
  *  MO3: Envelope sustain was not imported correctly if the source file was an
     XM.
 
