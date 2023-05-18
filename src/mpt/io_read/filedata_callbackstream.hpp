@@ -63,7 +63,7 @@ public:
 		return true;
 	}
 
-	static IFileData::pos_type GetLength(CallbackStreamTemplate<Tstream> stream) {
+	static pos_type GetLength(CallbackStreamTemplate<Tstream> stream) {
 		if (!stream.stream) {
 			return 0;
 		}
@@ -91,7 +91,7 @@ public:
 			return 0;
 		}
 		stream.seek(stream.stream, oldpos, CallbackStream::SeekSet);
-		return mpt::saturate_cast<IFileData::pos_type>(length);
+		return mpt::saturate_cast<pos_type>(length);
 	}
 };
 
