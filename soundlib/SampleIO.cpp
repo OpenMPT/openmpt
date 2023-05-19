@@ -69,7 +69,7 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 		// However, for ProTracker MODs we need to support samples exceeding the end of file
 		// (see the comment about MOD.shorttune2 in Load_mod.cpp), so as a semi-arbitrary threshold,
 		// we do not apply this limit to samples shorter than 256K.
-		size_t maxLength = fileSize - std::min(GetEncodedHeaderSize(), fileSize);
+		std::size_t maxLength = static_cast<std::size_t>(fileSize) - std::min(GetEncodedHeaderSize(), static_cast<std::size_t>(fileSize));
 		uint8 bps = GetEncodedBitsPerSample();
 		if(bps % 8u != 0)
 		{
@@ -146,7 +146,7 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 		if(file.ReadArray(compressionTable))
 		{
 			size_t readLength = (sample.nLength + 1) / 2;
-			LimitMax(readLength, file.BytesLeft());
+			LimitMax(readLength, mpt::saturate_cast<std::size_t>(file.BytesLeft()));
 
 			const uint8 *inBuf = mpt::byte_cast<const uint8*>(sourceBuf) + sizeof(compressionTable);
 			int8 *outBuf = sample.sample8();
