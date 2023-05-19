@@ -252,7 +252,7 @@ public:
 			size_ = 0;
 			pinnedData = nullptr;
 			if (!file.CanRead(size)) {
-				size = file.BytesLeft();
+				size = static_cast<std::size_t>(file.BytesLeft());
 			}
 			size_ = size;
 			if (file.DataContainer().HasPinnedView()) {
