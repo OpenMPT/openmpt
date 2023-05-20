@@ -2271,10 +2271,10 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, ui
 	if(isDrum)
 	{
 		// Create a default envelope for drums
-		pIns->VolEnv.dwFlags.reset(ENV_SUSTAIN);
 		if(!pIns->VolEnv.dwFlags[ENV_ENABLED])
 		{
 			pIns->VolEnv.dwFlags.set(ENV_ENABLED);
+			pIns->VolEnv.dwFlags.reset(ENV_SUSTAIN);
 			pIns->VolEnv.resize(4);
 			pIns->VolEnv[0] = EnvelopeNode(0, ENVELOPE_MAX);
 			pIns->VolEnv[1] = EnvelopeNode(ScaleEnvelope(5, tempoScale), ENVELOPE_MAX);
