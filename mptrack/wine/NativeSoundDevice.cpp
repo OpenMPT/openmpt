@@ -392,26 +392,26 @@ OPENMPT_WINESUPPORT_API char * OPENMPT_WINESUPPORT_CALL OpenMPT_SoundDevice_GetD
 }
 
 OPENMPT_WINESUPPORT_API uintptr_t OPENMPT_WINESUPPORT_CALL OpenMPT_SoundDevice_Init( OpenMPT_SoundDevice * sd, const char * appInfo ) {
-	return sd->impl->Init( OPENMPT_NAMESPACE::json_cast<OPENMPT_NAMESPACE::SoundDevice::AppInfo>( std::string(appInfo) ) );
+	return sd->impl->Init( OPENMPT_NAMESPACE::json_cast<OPENMPT_NAMESPACE::SoundDevice::AppInfo>( std::string(appInfo) ) ) ? 1 : 0;
 }
 
 OPENMPT_WINESUPPORT_API uintptr_t OPENMPT_WINESUPPORT_CALL OpenMPT_SoundDevice_Open( OpenMPT_SoundDevice * sd, const char * settings ) {
-	return sd->impl->Open( OPENMPT_NAMESPACE::json_cast<OPENMPT_NAMESPACE::SoundDevice::Settings>( std::string(settings) ) );
+	return sd->impl->Open( OPENMPT_NAMESPACE::json_cast<OPENMPT_NAMESPACE::SoundDevice::Settings>( std::string(settings) ) ) ? 1 : 0;
 }
 
 OPENMPT_WINESUPPORT_API uintptr_t OPENMPT_WINESUPPORT_CALL OpenMPT_SoundDevice_Close( OpenMPT_SoundDevice * sd ) {
-	return sd->impl->Close();
+	return sd->impl->Close() ? 1 : 0;
 }
 
 OPENMPT_WINESUPPORT_API uintptr_t OPENMPT_WINESUPPORT_CALL OpenMPT_SoundDevice_Start( OpenMPT_SoundDevice * sd ) {
-	return sd->impl->Start();
+	return sd->impl->Start() ? 1 : 0;
 }
 
 OPENMPT_WINESUPPORT_API void OPENMPT_WINESUPPORT_CALL OpenMPT_SoundDevice_Stop( OpenMPT_SoundDevice * sd ) {
-	return sd->impl->Stop();
+	sd->impl->Stop();
 }
 
-OPENMPT_WINESUPPORT_API void OPENMPT_WINESUPPORT_CALL OpenMPT_SoundDevice_GetRequestFlags( const OpenMPT_SoundDevice * sd, uint32_t * result) {
+OPENMPT_WINESUPPORT_API void OPENMPT_WINESUPPORT_CALL OpenMPT_SoundDevice_GetRequestFlags( const OpenMPT_SoundDevice * sd, uint32_t * result ) {
 	*result = sd->impl->GetRequestFlags().GetRaw();
 }
 
@@ -436,11 +436,11 @@ OPENMPT_WINESUPPORT_API uintptr_t OPENMPT_WINESUPPORT_CALL OpenMPT_SoundDevice_I
 }
 
 OPENMPT_WINESUPPORT_API void OPENMPT_WINESUPPORT_CALL OpenMPT_SoundDevice_StopAndAvoidPlayingSilence( OpenMPT_SoundDevice * sd ) {
-	return sd->impl->StopAndAvoidPlayingSilence();
+	sd->impl->StopAndAvoidPlayingSilence();
 }
 
 OPENMPT_WINESUPPORT_API void OPENMPT_WINESUPPORT_CALL OpenMPT_SoundDevice_EndPlayingSilence( OpenMPT_SoundDevice * sd ) {
-	return sd->impl->EndPlayingSilence();
+	sd->impl->EndPlayingSilence();
 }
 
 OPENMPT_WINESUPPORT_API uintptr_t OPENMPT_WINESUPPORT_CALL OpenMPT_SoundDevice_OnIdle( OpenMPT_SoundDevice * sd ) {
