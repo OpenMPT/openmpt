@@ -1269,6 +1269,8 @@ bool CDLSBank::ConvertSF2ToDLS(SF2LoaderInfo &sf2info)
 					m_Envelopes.push_back(dlsEnv);
 					rgn.uPercEnv = static_cast<uint32>(m_Envelopes.size());
 					pDlsEnv = &m_Envelopes[rgn.uPercEnv - 1];
+					if(globalZone.uPercEnv)
+						*pDlsEnv = m_Envelopes[globalZone.uPercEnv - 1];
 				}
 
 				// Region Default Values
