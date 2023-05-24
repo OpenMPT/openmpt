@@ -3,12 +3,10 @@
 
 #include "NativeUtils.h"
 
-#include <string>
-#ifndef _MSC_VER
 #include <condition_variable>
 #include <mutex>
+#include <string>
 #include <thread>
-#endif
 
 #include <cstdint>
 #include <cstdlib>
@@ -19,8 +17,6 @@
 #include <string.h>
 
 OPENMPT_NAMESPACE_BEGIN
-
-#ifndef _MSC_VER
 
 namespace mpt {
 
@@ -66,8 +62,6 @@ public:
 
 } // namespace mpt
 
-#endif
-
 OPENMPT_NAMESPACE_END
 
 extern "C" {
@@ -105,47 +99,34 @@ OPENMPT_WINESUPPORT_API void OPENMPT_WINESUPPORT_CALL OpenMPT_String_Free( char 
 }
 
 typedef struct OpenMPT_Semaphore {
-#ifndef _MSC_VER
 	OPENMPT_NAMESPACE::mpt::semaphore * impl;
-#else
-	void * dummy;
-#endif
 } OpenMPT_Semaphore;
 
 OPENMPT_WINESUPPORT_API OpenMPT_Semaphore * OPENMPT_WINESUPPORT_CALL OpenMPT_Semaphore_Construct(void) {
-#ifndef _MSC_VER
 	OpenMPT_Semaphore * sem = (OpenMPT_Semaphore*)OpenMPT_Alloc( sizeof( OpenMPT_Semaphore ) );
+	if ( !sem ) {
+		return nullptr;
+	}
 	sem->impl = new OPENMPT_NAMESPACE::mpt::semaphore(0);
+	if ( !sem->impl ) {
+		OpenMPT_Free( sem );
+		return nullptr;
+	}
 	return sem;
-#else
-	return nullptr;
-#endif
 }
 
 OPENMPT_WINESUPPORT_API void OPENMPT_WINESUPPORT_CALL OpenMPT_Semaphore_Destruct( OpenMPT_Semaphore * sem ) {
-#ifndef _MSC_VER
 	delete sem->impl;
 	sem->impl = nullptr;
 	OpenMPT_Free( sem );
-#else
-	MPT_UNREFERENCED_PARAMETER(sem);
-#endif
 }
 
 OPENMPT_WINESUPPORT_API void OPENMPT_WINESUPPORT_CALL OpenMPT_Semaphore_Wait( OpenMPT_Semaphore * sem ) {
-#ifndef _MSC_VER
 	sem->impl->wait();
-#else
-	MPT_UNREFERENCED_PARAMETER(sem);
-#endif
 }
 
 OPENMPT_WINESUPPORT_API void OPENMPT_WINESUPPORT_CALL OpenMPT_Semaphore_Post( OpenMPT_Semaphore * sem ) {
-#ifndef _MSC_VER
 	sem->impl->post();
-#else
-	MPT_UNREFERENCED_PARAMETER(sem);
-#endif
 }
 
 } // extern "C"
