@@ -249,7 +249,11 @@ inline mpt::Date::Unix UnixFromLocal(Local local)
 			std::chrono::hours{ local.hours } +
 			std::chrono::minutes{ local.minutes } +
 			std::chrono::seconds{ local.seconds };
+#if defined(MPT_LIBCXX_QUIRK_CHRONO_DATE_BROKEN_ZONED_TIME)
+		return std::chrono::zoned_time{std::chrono::current_zone(), std::chrono::current_zone()->to_sys(local_tp)}.get_sys_time();
+#else
 		return std::chrono::zoned_time{std::chrono::current_zone(), local_tp}.get_sys_time();
+#endif
 	} catch(const std::exception &)
 	{
 		return mpt::Date::UnixFromSeconds(mpt::Date::nochrono::UnixAsSeconds(mpt::Date::nochrono::UnixFromLocal(local)));
