@@ -12,6 +12,8 @@
 
 #include "WineSoundDeviceStub.h"
 
+#include "mpt/out_of_memory/out_of_memory.hpp"
+
 #include "openmpt/sounddevice/SoundDevice.hpp"
 
 #include "../common/misc_util.h"
@@ -95,7 +97,10 @@ void SoundDeviceStub::SetMessageReceiver(SoundDevice::IMessageReceiver *receiver
 	OpenMPT_Wine_Wrapper_SoundDevice_IMessageReceiver messageReceiver = {};
 	messageReceiver.inst = receiver;
 	messageReceiver.SoundDeviceMessageFunc = &SoundDevice_MessageReceiver_SoundDeviceMessage;
-	return w->OpenMPT_Wine_Wrapper_SoundDevice_SetMessageReceiver(impl, &messageReceiver);
+	if(w->OpenMPT_Wine_Wrapper_SoundDevice_SetMessageReceiver(impl, &messageReceiver) == 0)
+	{
+		mpt::throw_out_of_memory();
+	}
 }
 
 static void __cdecl SoundCallbackGetReferenceClockNowNanosecondsFunc( void * inst, uint64_t * result ) {
@@ -258,7 +263,10 @@ void SoundDeviceStub::SetCallback(SoundDevice::ICallback *icallback) {
 	callback.SoundCallbackLockedProcessDoubleFunc = &SoundCallbackLockedProcessDoubleFunc;
 	callback.SoundCallbackLockedProcessDoneFunc = &SoundCallbackLockedProcessDoneFunc;
 	callback.SoundCallbackUnlockFunc = &SoundCallbackUnlockFunc;
-	return w->OpenMPT_Wine_Wrapper_SoundDevice_SetCallback(impl, &callback);
+	if(w->OpenMPT_Wine_Wrapper_SoundDevice_SetCallback(impl, &callback) == 0)
+	{
+		mpt::throw_out_of_memory();
+	}
 }
 
 SoundDevice::Info SoundDeviceStub::GetDeviceInfo() const {
