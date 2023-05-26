@@ -419,8 +419,10 @@ static DWORD WINAPI AudioThread( LPVOID userdata ) {
 			OpenMPT_Semaphore_Post( sd->audiothread_sem_done );
 		}
 	}
-	OpenMPT_PriorityBooster_Destruct(sd->priority_booster);
-	sd->priority_booster = NULL;
+	if ( sd->priority_booster ) {
+		OpenMPT_PriorityBooster_Destruct( sd->priority_booster );
+		sd->priority_booster = NULL;
+	}
 	return 0;
 }
 
@@ -436,23 +438,28 @@ OPENMPT_WINESUPPORT_WRAPPER_API void OPENMPT_WINESUPPORT_WRAPPER_CALL OpenMPT_Wi
 	OpenMPT_Wine_Wrapper_Free( sd );
 }
 
-OPENMPT_WINESUPPORT_WRAPPER_API void OPENMPT_WINESUPPORT_WRAPPER_CALL OpenMPT_Wine_Wrapper_SoundDevice_SetMessageReceiver( OpenMPT_Wine_Wrapper_SoundDevice * sd, const OpenMPT_Wine_Wrapper_SoundDevice_IMessageReceiver * receiver ) {
-	OpenMPT_SoundDevice_SetMessageReceiver( sd->impl, NULL );
+OPENMPT_WINESUPPORT_WRAPPER_API uintptr_t OPENMPT_WINESUPPORT_WRAPPER_CALL OpenMPT_Wine_Wrapper_SoundDevice_SetMessageReceiver( OpenMPT_Wine_Wrapper_SoundDevice * sd, const OpenMPT_Wine_Wrapper_SoundDevice_IMessageReceiver * receiver ) {
+	if ( OpenMPT_SoundDevice_SetMessageReceiver( sd->impl, NULL ) == 0 ) {
+		return 0;
+	}
 	ZeroMemory( &( sd->wine_receiver ), sizeof( sd->wine_receiver ) );
-	if(receiver)
-	{
+	if ( receiver ) {
 		sd->wine_receiver = *receiver;
 	}
 	sd->native_receiver.inst = sd;
 	sd->native_receiver.SoundDeviceMessageFunc = &SoundDeviceMessageFunc;
-	OpenMPT_SoundDevice_SetMessageReceiver( sd->impl, &sd->native_receiver );
+	if ( OpenMPT_SoundDevice_SetMessageReceiver( sd->impl, &sd->native_receiver ) == 0 ) {
+		return 0;
+	}
+	return 1;
 }
 
-OPENMPT_WINESUPPORT_WRAPPER_API void OPENMPT_WINESUPPORT_WRAPPER_CALL OpenMPT_Wine_Wrapper_SoundDevice_SetCallback( OpenMPT_Wine_Wrapper_SoundDevice * sd, const OpenMPT_Wine_Wrapper_SoundDevice_ICallback * callback ) {
-	OpenMPT_SoundDevice_SetCallback( sd->impl, NULL );
+OPENMPT_WINESUPPORT_WRAPPER_API uintptr_t OPENMPT_WINESUPPORT_WRAPPER_CALL OpenMPT_Wine_Wrapper_SoundDevice_SetCallback( OpenMPT_Wine_Wrapper_SoundDevice * sd, const OpenMPT_Wine_Wrapper_SoundDevice_ICallback * callback ) {
+	if ( OpenMPT_SoundDevice_SetCallback( sd->impl, NULL ) == 0 ) {
+		return 0;
+	}
 	ZeroMemory( &( sd->wine_callback ), sizeof( sd->wine_callback) );
-	if(callback)
-	{
+	if ( callback ) {
 		sd->wine_callback = *callback;
 	}
 	sd->native_callback.inst = sd;
@@ -472,7 +479,10 @@ OPENMPT_WINESUPPORT_WRAPPER_API void OPENMPT_WINESUPPORT_WRAPPER_CALL OpenMPT_Wi
 	sd->native_callback.SoundCallbackLockedProcessDoubleFunc = &SoundCallbackLockedProcessDoubleFunc;
 	sd->native_callback.SoundCallbackLockedProcessDoneFunc = &SoundCallbackLockedProcessDoneFunc;
 	sd->native_callback.SoundCallbackUnlockFunc = &SoundCallbackUnlockFunc;
-	OpenMPT_SoundDevice_SetCallback( sd->impl, &sd->native_callback );
+	if ( OpenMPT_SoundDevice_SetCallback( sd->impl, &sd->native_callback ) == 0 ) {
+		return 0;
+	}
+	return 1;
 }
 
 OPENMPT_WINESUPPORT_WRAPPER_API char * OPENMPT_WINESUPPORT_WRAPPER_CALL OpenMPT_Wine_Wrapper_SoundDevice_GetDeviceInfo( const OpenMPT_Wine_Wrapper_SoundDevice * sd ) {

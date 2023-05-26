@@ -93,8 +93,8 @@ public: std::string SoundDevice_EnumerateDevices() const { return result_as_stri
 public: OpenMPT_Wine_Wrapper_SoundDevice * (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_Construct)( const char * info ) = nullptr;
 public: void (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_Destruct)( OpenMPT_Wine_Wrapper_SoundDevice * sd ) = nullptr;
 
-public: void (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_SetMessageReceiver)( OpenMPT_Wine_Wrapper_SoundDevice * sd, const OpenMPT_Wine_Wrapper_SoundDevice_IMessageReceiver * receiver ) = nullptr;
-public: void (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_SetCallback)( OpenMPT_Wine_Wrapper_SoundDevice * sd, const OpenMPT_Wine_Wrapper_SoundDevice_ICallback * callback ) = nullptr;
+public: uintptr_t (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_SetMessageReceiver)( OpenMPT_Wine_Wrapper_SoundDevice * sd, const OpenMPT_Wine_Wrapper_SoundDevice_IMessageReceiver * receiver ) = nullptr;
+public: uintptr_t (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_SetCallback)( OpenMPT_Wine_Wrapper_SoundDevice * sd, const OpenMPT_Wine_Wrapper_SoundDevice_ICallback * callback ) = nullptr;
 
 public: char * (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_GetDeviceInfo)( const OpenMPT_Wine_Wrapper_SoundDevice * sd ) = nullptr;
 public: char * (__cdecl * OpenMPT_Wine_Wrapper_SoundDevice_GetDeviceCaps)( const OpenMPT_Wine_Wrapper_SoundDevice * sd ) = nullptr;

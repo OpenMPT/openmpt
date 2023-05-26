@@ -4,6 +4,8 @@
 #include "NativeSoundDevice.h"
 #include "NativeUtils.h"
 
+#include "mpt/out_of_memory/out_of_memory.hpp"
+
 #include "openmpt/sounddevice/SoundDevice.hpp"
 #include "openmpt/sounddevice/SoundDeviceManager.hpp"
 #include "openmpt/sounddevice/SoundDeviceUtilities.hpp"
@@ -347,34 +349,44 @@ OPENMPT_WINESUPPORT_API void OPENMPT_WINESUPPORT_CALL OpenMPT_SoundDevice_Destru
 	}
 }
 
-OPENMPT_WINESUPPORT_API void OPENMPT_WINESUPPORT_CALL OpenMPT_SoundDevice_SetMessageReceiver( OpenMPT_SoundDevice * sd, const OpenMPT_SoundDevice_IMessageReceiver * receiver ) {
+OPENMPT_WINESUPPORT_API uintptr_t OPENMPT_WINESUPPORT_CALL OpenMPT_SoundDevice_SetMessageReceiver( OpenMPT_SoundDevice * sd, const OpenMPT_SoundDevice_IMessageReceiver * receiver ) {
 	if ( !sd ) {
-		return;
+		return 0;
 	}
 	if ( !sd->impl ) {
-		return;
+		return 0;
 	}
 	sd->impl->SetMessageReceiver( nullptr );
 	delete sd->messageReceiver;
 	sd->messageReceiver = nullptr;
-	sd->messageReceiver = new OPENMPT_NAMESPACE::C::NativeMessageReceiverProxy( receiver );
+	try {
+		sd->messageReceiver = new OPENMPT_NAMESPACE::C::NativeMessageReceiverProxy( receiver );
+	} catch ( mpt::out_of_memory e ) {
+		mpt::delete_out_of_memory( e );
+		return 0;
+	}
 	sd->impl->SetMessageReceiver( sd->messageReceiver );
-	return;
+	return 1;
 }
 
-OPENMPT_WINESUPPORT_API void OPENMPT_WINESUPPORT_CALL OpenMPT_SoundDevice_SetCallback( OpenMPT_SoundDevice * sd, const OpenMPT_SoundDevice_ICallback * callback ) {
+OPENMPT_WINESUPPORT_API uintptr_t OPENMPT_WINESUPPORT_CALL OpenMPT_SoundDevice_SetCallback( OpenMPT_SoundDevice * sd, const OpenMPT_SoundDevice_ICallback * callback ) {
 	if ( !sd ) {
-		return;
+		return 0;
 	}
 	if ( !sd->impl ) {
-		return;
+		return 0;
 	}
 	sd->impl->SetCallback( nullptr );
 	delete sd->callback;
 	sd->callback = nullptr;
-	sd->callback = new OPENMPT_NAMESPACE::C::NativeCallbackProxy( callback );
+	try {
+		sd->callback = new OPENMPT_NAMESPACE::C::NativeCallbackProxy( callback );
+	} catch ( mpt::out_of_memory e ) {
+		mpt::delete_out_of_memory( e );
+		return 0;
+	}
 	sd->impl->SetCallback( sd->callback );
-	return;
+	return 1;
 }
 
 OPENMPT_WINESUPPORT_API char * OPENMPT_WINESUPPORT_CALL OpenMPT_SoundDevice_GetDeviceInfo( const OpenMPT_SoundDevice * sd ) {
@@ -494,13 +506,19 @@ typedef struct OpenMPT_PriorityBooster {
 OPENMPT_WINESUPPORT_API OpenMPT_PriorityBooster * OPENMPT_WINESUPPORT_CALL OpenMPT_PriorityBooster_Construct_From_SoundDevice( const OpenMPT_SoundDevice * sd ) {
 #if !MPT_OS_WINDOWS
 	OpenMPT_PriorityBooster * pb = (OpenMPT_PriorityBooster*)OpenMPT_Alloc( sizeof( OpenMPT_PriorityBooster ) );
-	pb->impl = new OPENMPT_NAMESPACE::SoundDevice::ThreadPriorityGuard
-		( dynamic_cast<OPENMPT_NAMESPACE::SoundDevice::Base*>(sd->impl)->GetLogger()
-		, dynamic_cast<OPENMPT_NAMESPACE::SoundDevice::Base*>(sd->impl)->GetSettings().BoostThreadPriority
-		, dynamic_cast<OPENMPT_NAMESPACE::SoundDevice::Base*>(sd->impl)->GetAppInfo().BoostedThreadRealtimePosix
-		, dynamic_cast<OPENMPT_NAMESPACE::SoundDevice::Base*>(sd->impl)->GetAppInfo().BoostedThreadNicenessPosix
-		, dynamic_cast<OPENMPT_NAMESPACE::SoundDevice::Base*>(sd->impl)->GetAppInfo().BoostedThreadRtprioPosix
-		);
+	try {
+		pb->impl = new OPENMPT_NAMESPACE::SoundDevice::ThreadPriorityGuard
+			( dynamic_cast<OPENMPT_NAMESPACE::SoundDevice::Base*>(sd->impl)->GetLogger()
+			, dynamic_cast<OPENMPT_NAMESPACE::SoundDevice::Base*>(sd->impl)->GetSettings().BoostThreadPriority
+			, dynamic_cast<OPENMPT_NAMESPACE::SoundDevice::Base*>(sd->impl)->GetAppInfo().BoostedThreadRealtimePosix
+			, dynamic_cast<OPENMPT_NAMESPACE::SoundDevice::Base*>(sd->impl)->GetAppInfo().BoostedThreadNicenessPosix
+			, dynamic_cast<OPENMPT_NAMESPACE::SoundDevice::Base*>(sd->impl)->GetAppInfo().BoostedThreadRtprioPosix
+			);
+	}	catch (mpt::out_of_memory e) {
+		mpt::delete_out_of_memory( e );
+		OpenMPT_Free( pb );
+		return nullptr;
+	}
 	return pb;
 #else
 	MPT_UNREFERENCED_PARAMETER(sd);
