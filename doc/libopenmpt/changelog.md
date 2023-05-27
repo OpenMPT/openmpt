@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.7.2-pre
 
+ *  [**Bug**] The C++ API failed to compile with Clang/Emscripten in some
+    situations due to a misplaced `[[deprecated]]`.
  *  [**Bug**] The Opal OPL3 emulator symbols were not namespaced properly.
  *  [**Bug**] Work-around for MSVC VS2022 17.6.0 ARM64 compiler bug.
 
