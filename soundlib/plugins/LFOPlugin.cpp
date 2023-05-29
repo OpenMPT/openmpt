@@ -342,7 +342,7 @@ void LFOPlugin::SetChunk(const ChunkData &chunk, bool)
 {
 	FileReader file(chunk);
 	PluginData data;
-	if(file.ReadStructPartial(data, file.BytesLeft())
+	if(file.ReadStructPartial(data, mpt::saturate_cast<std::size_t>(file.BytesLeft()))
 		&& !memcmp(data.magic, "LFO ", 4)
 		&& data.version == 0)
 	{

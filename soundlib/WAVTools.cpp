@@ -163,7 +163,7 @@ uint16 WAVReader::GetFileCodePage(FileReader::ChunkList<RIFFChunk> &chunks)
 		if(iSFT.ReadMagic("OpenMPT"))
 		{
 			std::string versionString;
-			iSFT.ReadString<mpt::String::maybeNullTerminated>(versionString, iSFT.BytesLeft());
+			iSFT.ReadString<mpt::String::maybeNullTerminated>(versionString, mpt::saturate_cast<std::size_t>(iSFT.BytesLeft()));
 			versionString = mpt::trim(versionString);
 			Version version = Version::Parse(mpt::ToUnicode(mpt::Charset::ISO8859_1, versionString));
 			if(version && version < MPT_V("1.28.00.02"))
@@ -195,7 +195,7 @@ void WAVReader::ApplySampleSettings(ModSample &sample, mpt::Charset sampleCharse
 	if(textChunk.IsValid())
 	{
 		std::string sampleNameEncoded;
-		textChunk.ReadString<mpt::String::nullTerminated>(sampleNameEncoded, textChunk.GetLength());
+		textChunk.ReadString<mpt::String::nullTerminated>(sampleNameEncoded, mpt::saturate_cast<std::size_t>(textChunk.GetLength()));
 		sampleName = mpt::ToCharset(sampleCharset, mpt::ToUnicode(codePage, mpt::Charset::Windows1252, sampleNameEncoded));
 	}
 	if(isDLS)
@@ -282,7 +282,7 @@ void WAVReader::ApplySampleSettings(ModSample &sample, mpt::Charset sampleCharse
 			// internal metadata gets converted to Unicode, we must adjust this to
 			// also specify encoding.
 			xtraChunk.ReadString<mpt::String::nullTerminated>(sampleName, MAX_SAMPLENAME);
-			xtraChunk.ReadString<mpt::String::nullTerminated>(sample.filename, xtraChunk.BytesLeft());
+			xtraChunk.ReadString<mpt::String::nullTerminated>(sample.filename, mpt::saturate_cast<std::size_t>(xtraChunk.BytesLeft()));
 		}
 	}
 }

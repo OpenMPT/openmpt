@@ -644,7 +644,7 @@ static void Wave64TagFromLISTINFO(mpt::ustring & dst, uint16 codePage, const Fil
 		return;
 	}
 	std::string str;
-	textChunk.ReadString<mpt::String::maybeNullTerminated>(str, textChunk.GetLength());
+	textChunk.ReadString<mpt::String::maybeNullTerminated>(str, mpt::saturate_cast<std::size_t>(textChunk.GetLength()));
 	str = mpt::replace(str, std::string("\r\n"), std::string("\n"));
 	str = mpt::replace(str, std::string("\r"), std::string("\n"));
 	dst = mpt::ToUnicode(codePage, mpt::Charset::Windows1252, str);
@@ -2045,7 +2045,7 @@ bool CSoundFile::ReadAIFFSample(SAMPLEINDEX nSample, FileReader &file, bool mayN
 	FileReader nameChunk(chunks.GetChunk(AIFFChunk::idNAME));
 	if(nameChunk.IsValid())
 	{
-		nameChunk.ReadString<mpt::String::spacePadded>(m_szNames[nSample], nameChunk.GetLength());
+		nameChunk.ReadString<mpt::String::spacePadded>(m_szNames[nSample], mpt::saturate_cast<std::size_t>(nameChunk.GetLength()));
 	} else
 	{
 		m_szNames[nSample] = "";
@@ -2661,7 +2661,7 @@ bool CSoundFile::ReadIFFSample(SAMPLEINDEX nSample, FileReader &file, bool allow
 
 	FileReader nameChunk = chunks.GetChunk(IFFChunk::idNAME);
 	if(nameChunk.IsValid())
-		nameChunk.ReadString<mpt::String::maybeNullTerminated>(m_szNames[nSample], nameChunk.GetLength());
+		nameChunk.ReadString<mpt::String::maybeNullTerminated>(m_szNames[nSample], mpt::saturate_cast<std::size_t>(nameChunk.GetLength()));
 	else
 		m_szNames[nSample] = "";
 
