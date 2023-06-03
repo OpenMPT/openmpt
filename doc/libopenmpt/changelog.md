@@ -11,6 +11,8 @@ is just a high-level summary.
     situations due to a misplaced `[[deprecated]]`.
  *  [**Bug**] The Opal OPL3 emulator symbols were not namespaced properly.
  *  [**Bug**] Work-around for MSVC VS2022 17.6.0 ARM64 compiler bug.
+ *  [**Bug**] `Makefile` `CONFIG=emscripten EMSCRIPTEN_PORTS=1` failed to
+    properly use `libogg` and `libvorbis` dependencies. 
 
 ### libopenmpt 0.7.1 (2023-05-07)
 
