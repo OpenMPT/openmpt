@@ -9,6 +9,8 @@ is just a high-level summary.
 
  *  [**Bug**] The Opal OPL3 emulator symbols were not namespaced properly.
  *  [**Bug**] Work-around for MSVC VS2022 17.6.0 ARM64 compiler bug.
+ *  [**Bug**] `Makefile` `CONFIG=emscripten EMSCRIPTEN_PORTS=1` failed to
+    properly use `libogg` and `libvorbis` dependencies. 
 
  *  MO3: Envelope sustain was not imported correctly if the source file was an
     XM.
