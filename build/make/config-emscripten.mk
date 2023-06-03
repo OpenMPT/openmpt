@@ -72,7 +72,7 @@ LDFLAGS  += -flto
 
 ifeq ($(EMSCRIPTEN_TARGET),default)
 # emits whatever is emscripten's default, currently (1.38.8) this is the same as "wasm" below.
-CPPFLAGS += -DMPT_BUILD_WASM
+CPPFLAGS += 
 CXXFLAGS += 
 CFLAGS   += 
 LDFLAGS  += 
@@ -81,7 +81,7 @@ LDFLAGS += -s ALLOW_MEMORY_GROWTH=1
 
 else ifeq ($(EMSCRIPTEN_TARGET),all)
 # emits native wasm AND javascript with full wasm optimizations.
-CPPFLAGS += -DMPT_BUILD_WASM
+CPPFLAGS += 
 CXXFLAGS += 
 CFLAGS   += 
 LDFLAGS  += -s WASM=2 -s LEGACY_VM_SUPPORT=1 -Wno-transpile
@@ -95,7 +95,7 @@ LDFLAGS += -s ALLOW_MEMORY_GROWTH=1
 
 else ifeq ($(EMSCRIPTEN_TARGET),audioworkletprocessor)
 # emits an es6 module in a single file suitable for use in an AudioWorkletProcessor
-CPPFLAGS += -DMPT_BUILD_WASM -DMPT_BUILD_AUDIOWORKLETPROCESSOR
+CPPFLAGS += -DMPT_BUILD_AUDIOWORKLETPROCESSOR
 CXXFLAGS += 
 CFLAGS   += 
 LDFLAGS  += -s WASM=1 -s WASM_ASYNC_COMPILATION=0 -s MODULARIZE=1 -s EXPORT_ES6=1 -s SINGLE_FILE=1
@@ -104,7 +104,7 @@ LDFLAGS += -s ALLOW_MEMORY_GROWTH=1
 
 else ifeq ($(EMSCRIPTEN_TARGET),wasm)
 # emits native wasm.
-CPPFLAGS += -DMPT_BUILD_WASM
+CPPFLAGS += 
 CXXFLAGS += 
 CFLAGS   += 
 LDFLAGS  += -s WASM=1
@@ -113,7 +113,7 @@ LDFLAGS += -s ALLOW_MEMORY_GROWTH=1
 
 else ifeq ($(EMSCRIPTEN_TARGET),js)
 # emits only plain javascript with plain javascript focused optimizations.
-CPPFLAGS += -DMPT_BUILD_ASMJS
+CPPFLAGS += 
 CXXFLAGS += 
 CFLAGS   += 
 LDFLAGS  += -s WASM=0 -s LEGACY_VM_SUPPORT=1 -Wno-transpile
