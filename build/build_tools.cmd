@@ -32,8 +32,8 @@ if exist "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\B
  rem  bin\release\premake5 --to=build/vs2022 vs2022 --no-curl --no-zlib --no-luasocket || goto error
  rem cd ..\.. || goto error
  cd include\premake\build\vs2022 || goto error
-  msbuild Premake5.sln /target:Clean /property:Configuration=Release;Platform=Win32 /maxcpucount /verbosity:minimal || goto error
-  msbuild Premake5.sln /target:Build /property:Configuration=Release;Platform=Win32 /maxcpucount /verbosity:minimal || goto error
+  msbuild Premake5.sln /target:Clean /property:Configuration=Release;Platform=x64 /maxcpucount /verbosity:minimal || goto error
+  msbuild Premake5.sln /target:Build /property:Configuration=Release;Platform=x64 /maxcpucount /verbosity:minimal || goto error
  cd ..\..\..\.. || goto error
  goto premakedone
 )
@@ -80,8 +80,8 @@ if exist "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxil
  rem  bin\release\premake5 --to=build/vs2019 vs2019 --no-curl --no-zlib --no-luasocket || goto error
  rem cd ..\.. || goto error
  cd include\premake\build\vs2019 || goto error
-  msbuild Premake5.sln /target:Clean /property:Configuration=Release;Platform=Win32 /maxcpucount /verbosity:minimal || goto error
-  msbuild Premake5.sln /target:Build /property:Configuration=Release;Platform=Win32 /maxcpucount /verbosity:minimal || goto error
+  msbuild Premake5.sln /target:Clean /property:Configuration=Release;Platform=x64 /maxcpucount /verbosity:minimal || goto error
+  msbuild Premake5.sln /target:Build /property:Configuration=Release;Platform=x64 /maxcpucount /verbosity:minimal || goto error
  cd ..\..\..\.. || goto error
  goto premakedone
 )
@@ -93,8 +93,8 @@ if exist "C:\Program Files\Microsoft Visual Studio\2019\Community\VC\Auxiliary\B
  rem  bin\release\premake5 --to=build/vs2019 vs2019 --no-curl --no-zlib --no-luasocket || goto error
  rem cd ..\.. || goto error
  cd include\premake\build\vs2019 || goto error
-  msbuild Premake5.sln /target:Clean /property:Configuration=Release;Platform=Win32 /maxcpucount /verbosity:minimal || goto error
-  msbuild Premake5.sln /target:Build /property:Configuration=Release;Platform=Win32 /maxcpucount /verbosity:minimal || goto error
+  msbuild Premake5.sln /target:Clean /property:Configuration=Release;Platform=x64 /maxcpucount /verbosity:minimal || goto error
+  msbuild Premake5.sln /target:Build /property:Configuration=Release;Platform=x64 /maxcpucount /verbosity:minimal || goto error
  cd ..\..\..\.. || goto error
  goto premakedone
 )
@@ -106,8 +106,8 @@ if exist "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxil
  rem  bin\release\premake5 --to=build/vs2017 vs2017 --no-curl --no-zlib --no-luasocket || goto error
  rem cd ..\.. || goto error
  cd include\premake\build\vs2017 || goto error
-  msbuild Premake5.sln /target:Clean /property:Configuration=Release;Platform=Win32 /maxcpucount /verbosity:minimal || goto error
-  msbuild Premake5.sln /target:Build /property:Configuration=Release;Platform=Win32 /maxcpucount /verbosity:minimal || goto error
+  msbuild Premake5.sln /target:Clean /property:Configuration=Release;Platform=x64 /maxcpucount /verbosity:minimal || goto error
+  msbuild Premake5.sln /target:Build /property:Configuration=Release;Platform=x64 /maxcpucount /verbosity:minimal || goto error
  cd ..\..\..\.. || goto error
  goto premakedone
 )
@@ -119,8 +119,8 @@ if exist "C:\Program Files\Microsoft Visual Studio\2017\Community\VC\Auxiliary\B
  rem  bin\release\premake5 --to=build/vs2017 vs2017 --no-curl --no-zlib --no-luasocket || goto error
  rem cd ..\.. || goto error
  cd include\premake\build\vs2017 || goto error
-  msbuild Premake5.sln /target:Clean /property:Configuration=Release;Platform=Win32 /maxcpucount /verbosity:minimal || goto error
-  msbuild Premake5.sln /target:Build /property:Configuration=Release;Platform=Win32 /maxcpucount /verbosity:minimal || goto error
+  msbuild Premake5.sln /target:Clean /property:Configuration=Release;Platform=x64 /maxcpucount /verbosity:minimal || goto error
+  msbuild Premake5.sln /target:Build /property:Configuration=Release;Platform=x64 /maxcpucount /verbosity:minimal || goto error
  cd ..\..\..\.. || goto error
  goto premakedone
 )
