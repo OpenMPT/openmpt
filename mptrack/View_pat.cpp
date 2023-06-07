@@ -2621,6 +2621,11 @@ void CViewPattern::Interpolate(PatternCursor::Columns type)
 			return;
 		}
 
+		const int srcLo = (vsrc & 0x0F), destLo = (vdest & 0x0F);
+		const int srcHi = (vsrc >> 4), destHi = (vdest >> 4);
+		const int verrLo = (srcLo < destLo) ? verr : -verr;
+		const int verrHi = (srcHi < destHi) ? verr : -verr;
+
 		if(vdest < vsrc)
 			verr = -verr;
 
@@ -2678,10 +2683,8 @@ void CViewPattern::Interpolate(PatternCursor::Columns type)
 						int val;
 						if(pcmd->CommandHasTwoNibbles())
 						{
-							const int srcLo = (vsrc & 0x0F), destLo = (vdest & 0x0F);
-							const int srcHi = (vsrc >> 4), destHi = (vdest >> 4);
-							const int valLo = srcLo + ((destLo - srcLo) * i + verr) / distance;
-							const int valHi = srcHi + ((destHi - srcHi) * i + verr) / distance;
+							const int valLo = srcLo + ((destLo - srcLo) * i + verrLo) / distance;
+							const int valHi = srcHi + ((destHi - srcHi) * i + verrHi) / distance;
 							val = (valLo & 0x0F) | ((valHi & 0x0F) << 4);
 						} else
 						{
