@@ -66,6 +66,7 @@
 	#define MPT_ARCH_X86_CX8
 	#define MPT_ARCH_X86_CMOV
 	#define MPT_ARCH_X86_MMX
+	#define MPT_ARCH_X86_MMXEXT
 	#define MPT_ARCH_X86_FXSR
 	#define MPT_ARCH_X86_SSE
 	#define MPT_ARCH_X86_SSE2
@@ -80,6 +81,7 @@
 		#define MPT_ARCH_X86_CX8
 		#define MPT_ARCH_X86_CMOV
 		#define MPT_ARCH_X86_MMX
+		#define MPT_ARCH_X86_MMXEXT
 		#define MPT_ARCH_X86_FXSR
 		#define MPT_ARCH_X86_SSE
 		#define MPT_ARCH_X86_SSE2
@@ -93,6 +95,7 @@
 		#define MPT_ARCH_X86_CX8
 		#define MPT_ARCH_X86_CMOV
 		#define MPT_ARCH_X86_MMX
+		#define MPT_ARCH_X86_MMXEXT
 		#define MPT_ARCH_X86_FXSR
 		#define MPT_ARCH_X86_SSE
 	#elif MPT_MSVC_AT_LEAST(2008, 0)
@@ -167,10 +170,10 @@
 	#define MPT_ARCH_X86_MMX
 #endif
 #ifdef __3dNOW__
-	#define MPT_ARCH_X86_MMXEXT
 	#define MPT_ARCH_X86_3DNOW
 #endif
 #ifdef __3dNOW_A__
+	#define MPT_ARCH_X86_MMXEXT
 	#define MPT_ARCH_X86_3DNOWEXT
 #endif
 #ifdef __PRFCHW__
@@ -180,6 +183,9 @@
 	#define MPT_ARCH_X86_FXSR
 #endif
 #ifdef __SSE__
+	#ifndef MPT_ARCH_X86_MMXEXT
+	#define MPT_ARCH_X86_MMXEXT
+	#endif
 	#define MPT_ARCH_X86_SSE
 	#ifndef MPT_ARCH_X86_CMOV
 	#define MPT_ARCH_X86_CMOV
@@ -317,7 +323,7 @@ inline constexpr feature_flags intel586        = featureset::intel486DX    | fea
 inline constexpr feature_flags intel586_mmx    = featureset::intel586      | feature::mmx;
 inline constexpr feature_flags intel686        = featureset::intel586      | feature::cmov;
 inline constexpr feature_flags intel686_mmx    = featureset::intel686      | feature::mmx;
-inline constexpr feature_flags intel686_sse    = featureset::intel686_mmx  | feature::fxsr | feature::sse;
+inline constexpr feature_flags intel686_sse    = featureset::intel686_mmx  | feature::mmxext | feature::fxsr | feature::sse;
 inline constexpr feature_flags intel686_sse2   = featureset::intel686_sse  | feature::sse2;
 inline constexpr feature_flags intel786        = featureset::intel686_sse2;
 inline constexpr feature_flags amd64           = featureset::intel686_sse2;
@@ -359,7 +365,7 @@ inline constexpr mode_flags msvc_x86_avx2   = mode::base | mode::xmm128sse | mod
 inline constexpr mode_flags msvc_amd64      = mode::base | mode::xmm128sse;
 inline constexpr mode_flags msvc_amd64_avx  = mode::base | mode::xmm128sse | mode::ymm256avx;
 inline constexpr mode_flags msvc_amd64_avx2 = mode::base | mode::xmm128sse | mode::ymm256avx;
-} // namespace featureset
+} // namespace modeset
 
 // clang-format on
 
@@ -1351,7 +1357,7 @@ public:
 				Features |= (StandardFeatureFlags.d & (1u << 15)) ? (feature::cmov) : feature::none;
 				Features |= (StandardFeatureFlags.d & (1u << 23)) ? (feature::mmx) : feature::none;
 				Features |= (StandardFeatureFlags.d & (1u << 24)) ? (feature::fxsr) : feature::none;
-				Features |= (StandardFeatureFlags.d & (1u << 25)) ? (feature::sse) : feature::none;
+				Features |= (StandardFeatureFlags.d & (1u << 25)) ? (feature::sse | feature::mmxext) : feature::none;
 				Features |= (StandardFeatureFlags.d & (1u << 26)) ? (feature::sse2) : feature::none;
 				Features |= (StandardFeatureFlags.c & (1u <<  0)) ? (feature::sse3) : feature::none;
 				Features |= (StandardFeatureFlags.c & (1u <<  9)) ? (feature::ssse3) : feature::none;
@@ -1644,7 +1650,7 @@ public:
 		Features |= (IsProcessorFeaturePresent(PF_COMPARE_EXCHANGE_DOUBLE) != 0)       ? (feature::cx8 | feature::intel486) : feature::none;
 		Features |= (IsProcessorFeaturePresent(PF_MMX_INSTRUCTIONS_AVAILABLE) != 0)    ? (feature::mmx | feature::intel486) : feature::none;
 		Features |= (IsProcessorFeaturePresent(PF_3DNOW_INSTRUCTIONS_AVAILABLE) != 0)  ? (feature::x3dnow) : feature::none;
-		Features |= (IsProcessorFeaturePresent(PF_XMMI_INSTRUCTIONS_AVAILABLE) != 0)   ? (feature::sse | feature::fxsr | feature::cmov) : feature::none;
+		Features |= (IsProcessorFeaturePresent(PF_XMMI_INSTRUCTIONS_AVAILABLE) != 0)   ? (feature::sse | feature::mmxext | feature::fxsr | feature::cmov) : feature::none;
 		Features |= (IsProcessorFeaturePresent(PF_XMMI64_INSTRUCTIONS_AVAILABLE) != 0) ? (feature::sse2) : feature::none;
 		Features |= (IsProcessorFeaturePresent(PF_SSE3_INSTRUCTIONS_AVAILABLE) != 0)   ? (feature::sse3) : feature::none;
 		Features |= (IsProcessorFeaturePresent(PF_SSSE3_INSTRUCTIONS_AVAILABLE) != 0)  ? (feature::ssse3) : feature::none;
