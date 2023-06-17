@@ -1351,7 +1351,7 @@ public:
 				Features |= (StandardFeatureFlags.d & (1u << 15)) ? (feature::cmov) : feature::none;
 				Features |= (StandardFeatureFlags.d & (1u << 23)) ? (feature::mmx) : feature::none;
 				Features |= (StandardFeatureFlags.d & (1u << 24)) ? (feature::fxsr) : feature::none;
-				Features |= (StandardFeatureFlags.d & (1u << 25)) ? (feature::sse | feature::x3dnowprefetch) : feature::none;
+				Features |= (StandardFeatureFlags.d & (1u << 25)) ? (feature::sse) : feature::none;
 				Features |= (StandardFeatureFlags.d & (1u << 26)) ? (feature::sse2) : feature::none;
 				Features |= (StandardFeatureFlags.c & (1u <<  0)) ? (feature::sse3) : feature::none;
 				Features |= (StandardFeatureFlags.c & (1u <<  9)) ? (feature::ssse3) : feature::none;
@@ -1644,7 +1644,7 @@ public:
 		Features |= (IsProcessorFeaturePresent(PF_COMPARE_EXCHANGE_DOUBLE) != 0)       ? (feature::cx8 | feature::intel486) : feature::none;
 		Features |= (IsProcessorFeaturePresent(PF_MMX_INSTRUCTIONS_AVAILABLE) != 0)    ? (feature::mmx | feature::intel486) : feature::none;
 		Features |= (IsProcessorFeaturePresent(PF_3DNOW_INSTRUCTIONS_AVAILABLE) != 0)  ? (feature::x3dnow) : feature::none;
-		Features |= (IsProcessorFeaturePresent(PF_XMMI_INSTRUCTIONS_AVAILABLE) != 0)   ? (feature::sse | feature::fxsr | feature::x3dnowprefetch | feature::cmov) : feature::none;
+		Features |= (IsProcessorFeaturePresent(PF_XMMI_INSTRUCTIONS_AVAILABLE) != 0)   ? (feature::sse | feature::fxsr | feature::cmov) : feature::none;
 		Features |= (IsProcessorFeaturePresent(PF_XMMI64_INSTRUCTIONS_AVAILABLE) != 0) ? (feature::sse2) : feature::none;
 		Features |= (IsProcessorFeaturePresent(PF_SSE3_INSTRUCTIONS_AVAILABLE) != 0)   ? (feature::sse3) : feature::none;
 		Features |= (IsProcessorFeaturePresent(PF_SSSE3_INSTRUCTIONS_AVAILABLE) != 0)  ? (feature::ssse3) : feature::none;
