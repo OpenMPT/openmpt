@@ -7,7 +7,10 @@ is just a high-level summary.
 
 ### libopenmpt 0.8.0-pre
 
-### libopenmpt 0.7.0-pre
+ *  [**New**] MOD: Can now read modified 8-channel MOD files from the DOS game
+    Aleshar - The World Of Ice.
+
+### libopenmpt 0.7.0 (2023-04-30)
 
  *  [**New**] `667` files from Composer 667 are now supported.
  *  [**New**] `GTK` and `GT2` files from Gramouf Tracker are now supported.
