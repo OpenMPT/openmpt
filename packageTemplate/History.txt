@@ -32,6 +32,31 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.31.03.00 (18 June 2023, revision 19401)
+------------------------------------------
+Tree view
+- [Fix] <js> Since OpenMPT 1.31.01.00, refreshing the tree view was much slower than necessary when an item in the file browser was selected.
+
+Pattern tab
+- [Fix] <js> Interpolating a command with two independent nibble parameters caused a wrong result if the direction of interpolation differed between the two nibbles (tx NoobTracker).
+
+Sample tab
+- [Fix] <js> Trying to load unsupported files could sometimes cause the currently loaded sample data in that slot to be removed even if the raw sample import dialog was going to be shown later.
+
+MOD
+- [New] <js> Can now read modified 8-channel MOD files from the DOS game Aleshar - The World Of Ice.
+
+Other formats
+- [Fix] <js> MED: Fixed possible crash with some malformed files.
+
+Misc
+- [Mod] <jh> When updating portable installations, the update is now downloaded into the portable installation directory instead of the system's temporary directory, allowing to update several portable installations at the same time (http://bugs.openmpt.org/view.php?id=1702).
+- [Fix] <js> Sustain point was disabled on soundfont drum keys with custom envelope, and envelope settings from a drum kit's global zone were not applied to individual drums (http://bugs.openmpt.org/view.php?id=1706).
+
+Third-Party Libraries
+- [Imp] Update lhasa (v0.4.0)
+
+
 v1.31.02.00 (7 May 2023, revision 19251)
 ----------------------------------------
 Pattern tab
@@ -78,7 +103,7 @@ Pattern tab
 - [Mod] <js> The hidden setting "Pattern Editor.DefaultSequenceMargins" is now applied to the scroll bar range, too.
 
 Sample tab
-- [New] <js> Is is now possible to follow the play cursor when the sample waveform is zoomed in and not fully visible, as long as only a single note is being previewed. This can be enabled through the settings dialog or a keyboard shortcut (Shift + F by default).
+- [New] <js> It is now possible to follow the play cursor when the sample waveform is zoomed in and not fully visible, as long as only a single note is being previewed. This can be enabled through the settings dialog or a keyboard shortcut (Shift + F by default).
 - [New] <js> Added two new shortcuts to finetune the sample rate, working the same way as the spin buttons on the finetune / sample rate edit field. Default bindings are Shift + Up / Down.
 - [New] <js> Samples can now be saved as Amiga IFF (8SVX / 16SVX) as well.
 - [Imp] <js> Double-clicking a timeline item now pops up an input dialog for finetuning that item.

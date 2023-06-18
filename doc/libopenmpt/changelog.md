@@ -7,6 +7,12 @@ is just a high-level summary.
 
 ### libopenmpt 0.7.2-pre
 
+ *  [**New**] MOD: Can now read modified 8-channel MOD files from the DOS game
+    Aleshar - The World Of Ice.
+
+ *  [**Sec**] Possible out-of-bounds read or write when reading malformed MED
+    files. (r19389)
+
  *  [**Bug**] The C++ API failed to compile with Clang/Emscripten in some
     situations due to a misplaced `[[deprecated]]`.
  *  [**Bug**] The Opal OPL3 emulator symbols were not namespaced properly.
