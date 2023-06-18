@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.4.37-pre
+### libopenmpt 0.4.37 (2023-06-18)
 
  *  [**Bug**] The Opal OPL3 emulator symbols were not namespaced properly.
 
