@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt 0.6.11-pre
 
+ *  [**Sec**] Possible out-of-bounds read or write when reading malformed MED
+    files. (r19390)
+
  *  [**Bug**] The Opal OPL3 emulator symbols were not namespaced properly.
  *  [**Bug**] Work-around for MSVC VS2022 17.6.0 ARM64 compiler bug.
  *  [**Bug**] `Makefile` `CONFIG=emscripten EMSCRIPTEN_PORTS=1` failed to
