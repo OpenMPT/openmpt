@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.5.25-pre
+### libopenmpt 0.5.25 (2023-06-18)
 
  *  [**Sec**] Possible out-of-bounds read or write when reading malformed MED
     files. (r19391)
