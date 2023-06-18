@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt 0.5.25-pre
 
+ *  [**Sec**] Possible out-of-bounds read or write when reading malformed MED
+    files. (r19391)
+
  *  [**Bug**] The Opal OPL3 emulator symbols were not namespaced properly.
 
  *  MO3: Envelope sustain was not imported correctly if the source file was an
