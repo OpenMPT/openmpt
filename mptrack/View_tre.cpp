@@ -2094,7 +2094,8 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 		if(m_InstrLibPath != m_WatchDir)
 		{
 			m_WatchDir = m_InstrLibPath;
-			SetEvent(m_hSwitchWatchDir);
+			if(m_hSwitchWatchDir)
+				SetEvent(m_hSwitchWatchDir);
 		}
 	}
 }
