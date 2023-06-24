@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.4.38-pre
 
+ *  FLAC: Update to v1.4.3 (2022-06-23).
+
 ### libopenmpt 0.4.37 (2023-06-18)
 
  *  [**Bug**] The Opal OPL3 emulator symbols were not namespaced properly.
