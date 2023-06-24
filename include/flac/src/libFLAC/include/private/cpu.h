@@ -1,6 +1,6 @@
 /* libFLAC - Free Lossless Audio Codec library
  * Copyright (C) 2001-2009  Josh Coalson
- * Copyright (C) 2011-2022  Xiph.Org Foundation
+ * Copyright (C) 2011-2023  Xiph.Org Foundation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -68,6 +68,7 @@
   #if (__INTEL_COMPILER >= 1000) /* Intel C++ Compiler 10.0 */
     #define FLAC__SSSE3_SUPPORTED 1
     #define FLAC__SSE4_1_SUPPORTED 1
+    #define FLAC__SSE4_2_SUPPORTED 1
   #endif
   #ifdef FLAC__USE_AVX
     #if (__INTEL_COMPILER >= 1110) /* Intel C++ Compiler 11.1 */
@@ -84,10 +85,12 @@
   #define FLAC__SSE2_SUPPORTED 1
   #define FLAC__SSSE3_SUPPORTED 1
   #define FLAC__SSE4_1_SUPPORTED 1
+  #define FLAC__SSE4_2_SUPPORTED 1
   #ifdef FLAC__USE_AVX
     #define FLAC__AVX_SUPPORTED 1
     #define FLAC__AVX2_SUPPORTED 1
     #define FLAC__FMA_SUPPORTED 1
+    #define FLAC__BMI2_SUPPORTED 1
   #endif
 #elif defined __GNUC__ && !defined __clang__ && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 9)) /* GCC 4.9+ */
   #define FLAC__SSE_TARGET(x) __attribute__ ((__target__ (x)))
@@ -95,10 +98,12 @@
   #define FLAC__SSE2_SUPPORTED 1
   #define FLAC__SSSE3_SUPPORTED 1
   #define FLAC__SSE4_1_SUPPORTED 1
+  #define FLAC__SSE4_2_SUPPORTED 1
   #ifdef FLAC__USE_AVX
     #define FLAC__AVX_SUPPORTED 1
     #define FLAC__AVX2_SUPPORTED 1
     #define FLAC__FMA_SUPPORTED 1
+    #define FLAC__BMI2_SUPPORTED 1
   #endif
 #elif defined _MSC_VER
   #define FLAC__SSE_TARGET(x)
@@ -107,6 +112,7 @@
   #if (_MSC_VER >= 1500) /* MS Visual Studio 2008 */
     #define FLAC__SSSE3_SUPPORTED 1
     #define FLAC__SSE4_1_SUPPORTED 1
+    #define FLAC__SSE4_2_SUPPORTED 1
   #endif
   #ifdef FLAC__USE_AVX
     #if (_MSC_FULL_VER >= 160040219) /* MS Visual Studio 2010 SP1 */
@@ -131,6 +137,9 @@
   #ifdef __SSE4_1__
     #define FLAC__SSE4_1_SUPPORTED 1
   #endif
+  #ifdef __SSE4_2__
+    #define FLAC__SSE4_2_SUPPORTED 1
+  #endif
   #ifdef FLAC__USE_AVX
     #ifdef __AVX__
       #define FLAC__AVX_SUPPORTED 1
@@ -153,7 +162,6 @@
 typedef enum {
 	FLAC__CPUINFO_TYPE_IA32,
 	FLAC__CPUINFO_TYPE_X86_64,
-	FLAC__CPUINFO_TYPE_PPC,
 	FLAC__CPUINFO_TYPE_UNKNOWN
 } FLAC__CPUInfo_Type;
 
@@ -172,18 +180,13 @@ typedef struct {
 	FLAC__bool avx;
 	FLAC__bool avx2;
 	FLAC__bool fma;
+	FLAC__bool bmi2;
 } FLAC__CPUInfo_x86;
-
-typedef struct {
-	FLAC__bool arch_3_00;
-	FLAC__bool arch_2_07;
-} FLAC__CPUInfo_ppc;
 
 typedef struct {
 	FLAC__bool use_asm;
 	FLAC__CPUInfo_Type type;
 	FLAC__CPUInfo_x86 x86;
-	FLAC__CPUInfo_ppc ppc;
 } FLAC__CPUInfo;
 
 void FLAC__cpu_info(FLAC__CPUInfo *info);

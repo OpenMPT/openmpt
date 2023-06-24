@@ -1,4 +1,4 @@
-flac 1.4.2.
+flac 1.4.3.
 The FLAC package has been left pretty much untouched, except for a few changes:
  *  In `include/share/compat.h`, the Windows XP compatibility warning has been
     disabled.
