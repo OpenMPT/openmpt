@@ -31,8 +31,10 @@
    "../../include/flac/src/libFLAC/cpu.c",
    "../../include/flac/src/libFLAC/crc.c",
    "../../include/flac/src/libFLAC/fixed.c",
+   "../../include/flac/src/libFLAC/fixed_intrin_avx2.c",
    "../../include/flac/src/libFLAC/fixed_intrin_sse2.c",
    "../../include/flac/src/libFLAC/fixed_intrin_ssse3.c",
+   "../../include/flac/src/libFLAC/fixed_intrin_sse42.c",
    "../../include/flac/src/libFLAC/float.c",
    "../../include/flac/src/libFLAC/format.c",
    "../../include/flac/src/libFLAC/lpc.c",
@@ -119,7 +121,7 @@
   filter {}
   defines { "FLAC__HAS_OGG=1" }
   links { "ogg" }
-  defines { "PACKAGE_VERSION=\"1.4.2\"" }
+  defines { "PACKAGE_VERSION=\"1.4.3\"" }
   filter {}
   filter { "kind:StaticLib" }
    defines { "FLAC__NO_DLL" }
