@@ -1,6 +1,6 @@
 /* libFLAC - Free Lossless Audio Codec library
  * Copyright (C) 2000-2009  Josh Coalson
- * Copyright (C) 2011-2022  Xiph.Org Foundation
+ * Copyright (C) 2011-2023  Xiph.Org Foundation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -55,7 +55,7 @@ FLAC_API const char *FLAC__VENDOR_STRING = "reference libFLAC git-" GIT_COMMIT_H
 #else
 /* PACKAGE_VERSION should come from configure */
 FLAC_API const char *FLAC__VERSION_STRING = PACKAGE_VERSION;
-FLAC_API const char *FLAC__VENDOR_STRING = "reference libFLAC " PACKAGE_VERSION " 20221022";
+FLAC_API const char *FLAC__VENDOR_STRING = "reference libFLAC " PACKAGE_VERSION " 20230623";
 #endif
 
 FLAC_API const FLAC__byte FLAC__STREAM_SYNC_STRING[4] = { 'f','L','a','C' };
@@ -208,7 +208,7 @@ FLAC_API const char * const FLAC__StreamMetadata_Picture_TypeString[] = {
 
 FLAC_API FLAC__bool FLAC__format_sample_rate_is_valid(uint32_t sample_rate)
 {
-	if(sample_rate == 0 || sample_rate > FLAC__MAX_SAMPLE_RATE) {
+	if(sample_rate > FLAC__MAX_SAMPLE_RATE) {
 		return false;
 	}
 	else
@@ -246,6 +246,9 @@ FLAC_API FLAC__bool FLAC__format_seektable_is_legal(const FLAC__StreamMetadata_S
 	FLAC__bool got_prev = false;
 
 	FLAC__ASSERT(0 != seek_table);
+
+	if((FLAC__uint64)(seek_table->num_points) * FLAC__STREAM_METADATA_SEEKPOINT_LENGTH >= (1u << FLAC__STREAM_METADATA_LENGTH_LEN))
+		return false;
 
 	for(i = 0; i < seek_table->num_points; i++) {
 		if(got_prev) {
@@ -522,6 +525,7 @@ FLAC_API FLAC__bool FLAC__format_picture_is_legal(const FLAC__StreamMetadata_Pic
 /*
  * These routines are private to libFLAC
  */
+#if 0 /* UNUSED */
 uint32_t FLAC__format_get_max_rice_partition_order(uint32_t blocksize, uint32_t predictor_order)
 {
 	return
@@ -531,6 +535,7 @@ uint32_t FLAC__format_get_max_rice_partition_order(uint32_t blocksize, uint32_t 
 			predictor_order
 		);
 }
+#endif
 
 uint32_t FLAC__format_get_max_rice_partition_order_from_blocksize(uint32_t blocksize)
 {

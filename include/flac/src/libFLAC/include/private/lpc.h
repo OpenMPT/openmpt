@@ -1,6 +1,6 @@
 /* libFLAC - Free Lossless Audio Codec library
  * Copyright (C) 2000-2009  Josh Coalson
- * Copyright (C) 2011-2022  Xiph.Org Foundation
+ * Copyright (C) 2011-2023  Xiph.Org Foundation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -87,18 +87,6 @@ void FLAC__lpc_compute_autocorrelation_intrin_fma_lag_12(const FLAC__real data[]
 void FLAC__lpc_compute_autocorrelation_intrin_fma_lag_16(const FLAC__real data[], uint32_t data_len, uint32_t lag, double autoc[]);
 #    endif
 #  endif
-#if defined(FLAC__CPU_PPC64) && defined(FLAC__USE_VSX)
-#ifdef FLAC__HAS_TARGET_POWER9
-void FLAC__lpc_compute_autocorrelation_intrin_power9_vsx_lag_8(const FLAC__real data[], uint32_t data_len, uint32_t lag, double autoc[]);
-void FLAC__lpc_compute_autocorrelation_intrin_power9_vsx_lag_10(const FLAC__real data[], uint32_t data_len, uint32_t lag, double autoc[]);
-void FLAC__lpc_compute_autocorrelation_intrin_power9_vsx_lag_14(const FLAC__real data[], uint32_t data_len, uint32_t lag, double autoc[]);
-#endif
-#ifdef FLAC__HAS_TARGET_POWER8
-void FLAC__lpc_compute_autocorrelation_intrin_power8_vsx_lag_8(const FLAC__real data[], uint32_t data_len, uint32_t lag, double autoc[]);
-void FLAC__lpc_compute_autocorrelation_intrin_power8_vsx_lag_10(const FLAC__real data[], uint32_t data_len, uint32_t lag, double autoc[]);
-void FLAC__lpc_compute_autocorrelation_intrin_power8_vsx_lag_14(const FLAC__real data[], uint32_t data_len, uint32_t lag, double autoc[]);
-#endif
-#endif
 #if defined FLAC__CPU_ARM64 && FLAC__HAS_NEONINTRIN && FLAC__HAS_A64NEONINTRIN
 void FLAC__lpc_compute_autocorrelation_intrin_neon_lag_8(const FLAC__real data[], uint32_t data_len, uint32_t lag, double autoc[]);
 void FLAC__lpc_compute_autocorrelation_intrin_neon_lag_10(const FLAC__real data[], uint32_t data_len, uint32_t lag, double autoc[]);

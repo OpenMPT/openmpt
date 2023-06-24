@@ -1,5 +1,5 @@
 /* libFLAC - Free Lossless Audio Codec library
- * Copyright (C) 2012-2022  Xiph.Org Foundation
+ * Copyright (C) 2012-2023  Xiph.Org Foundation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -52,6 +52,7 @@
 #if defined _MSC_VER || defined __BORLANDC__ || defined __MINGW32__
 #include <sys/types.h> /* for off_t */
 #define FLAC__off_t __int64 /* use this instead of off_t to fix the 2 GB limit */
+#define FLAC__OFF_T_MAX INT64_MAX
 #if !defined __MINGW32__
 #define fseeko _fseeki64
 #define ftello _ftelli64
@@ -63,7 +64,10 @@
 #endif
 #else
 #define FLAC__off_t off_t
+#define FLAC__OFF_T_MAX OFF_T_MAX
 #endif
+
+
 
 #ifdef HAVE_INTTYPES_H
 #define __STDC_FORMAT_MACROS

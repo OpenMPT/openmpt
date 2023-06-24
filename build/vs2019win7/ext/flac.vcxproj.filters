@@ -170,7 +170,13 @@
     <ClCompile Include="..\..\..\include\flac\src\libFLAC\fixed.c">
       <Filter>src\libFLAC</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\include\flac\src\libFLAC\fixed_intrin_avx2.c">
+      <Filter>src\libFLAC</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\include\flac\src\libFLAC\fixed_intrin_sse2.c">
+      <Filter>src\libFLAC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\include\flac\src\libFLAC\fixed_intrin_sse42.c">
       <Filter>src\libFLAC</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\flac\src\libFLAC\fixed_intrin_ssse3.c">
