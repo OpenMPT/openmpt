@@ -1,6 +1,6 @@
 /* libFLAC - Free Lossless Audio Codec library
  * Copyright (C) 2000-2009  Josh Coalson
- * Copyright (C) 2011-2022  Xiph.Org Foundation
+ * Copyright (C) 2011-2023  Xiph.Org Foundation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -850,7 +850,7 @@ FLAC_API FLAC__bool FLAC__stream_encoder_set_sample_rate(FLAC__StreamEncoder *en
  * <tr>  <td><b>5</b></td> <td>true</td>  <td>false</td> <td>tukey(0.5)</td>         <td>8</td>  <td>0</td> <td>false</td> <td>false</td> <td>false</td> <td>0</td> <td>5</td> <td>0</td> </tr>
  * <tr>  <td><b>6</b></td> <td>true</td>  <td>false</td> <td>subdivide_tukey(2)</td> <td>8</td>  <td>0</td> <td>false</td> <td>false</td> <td>false</td> <td>0</td> <td>6</td> <td>0</td> </tr>
  * <tr>  <td><b>7</b></td> <td>true</td>  <td>false</td> <td>subdivide_tukey(2)</td> <td>12</td> <td>0</td> <td>false</td> <td>false</td> <td>false</td> <td>0</td> <td>6</td> <td>0</td> </tr>
- * <tr>  <td><b>8</b></td> <td>true</td>  <td>false</td> <td>subdivide_tukey(2)</td> <td>12</td> <td>0</td> <td>false</td> <td>false</td> <td>false</td> <td>0</td> <td>6</td> <td>0</td> </tr>
+ * <tr>  <td><b>8</b></td> <td>true</td>  <td>false</td> <td>subdivide_tukey(3)</td> <td>12</td> <td>0</td> <td>false</td> <td>false</td> <td>false</td> <td>0</td> <td>6</td> <td>0</td> </tr>
  * </table>
  *
  * \default \c 5
