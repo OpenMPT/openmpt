@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.7.3-pre
 
+ *  FLAC: Update to v1.4.3 (2022-06-23).
+
 ### libopenmpt 0.7.2 (2023-06-18)
 
  *  [**New**] MOD: Can now read modified 8-channel MOD files from the DOS game
