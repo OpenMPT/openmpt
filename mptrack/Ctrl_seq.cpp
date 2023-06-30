@@ -78,7 +78,6 @@ BEGIN_MESSAGE_MAP(COrderList, CWnd)
 	ON_COMMAND(ID_ORDERLIST_UNLOCKPLAYBACK,		&COrderList::OnUnlockPlayback)
 	ON_COMMAND_RANGE(ID_SEQUENCE_ITEM, ID_SEQUENCE_ITEM + kMaxSequenceActions - 1, &COrderList::OnSelectSequence)
 	ON_MESSAGE(WM_MOD_DRAGONDROPPING,			&COrderList::OnDragonDropping)
-	ON_MESSAGE(WM_HELPHITTEST,					&COrderList::OnHelpHitTest)
 	ON_MESSAGE(WM_MOD_KEYCOMMAND,				&COrderList::OnCustomKeyMsg)
 	ON_NOTIFY_EX(TTN_NEEDTEXT, 0,				&COrderList::OnToolTipText)
 	//}}AFX_MSG_MAP
@@ -1397,12 +1396,6 @@ void COrderList::OnSetRestartPos()
 		m_modDoc.SetModified();
 		m_modDoc.UpdateAllViews(nullptr, SequenceHint().RestartPos(), this);
 	}
-}
-
-
-LRESULT COrderList::OnHelpHitTest(WPARAM, LPARAM)
-{
-	return HID_BASE_COMMAND + IDC_ORDERLIST;
 }
 
 
