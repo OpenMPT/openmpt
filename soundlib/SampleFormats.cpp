@@ -2519,7 +2519,7 @@ struct IFFChunk
 
 	size_t GetLength() const
 	{
-		if(length == 0)  // Broken files
+		if(length == 0 && id == idBODY)  // Broken files
 			return std::numeric_limits<size_t>::max();
 		return length;
 	}
@@ -2729,6 +2729,8 @@ bool CSoundFile::ReadIFFSample(SAMPLEINDEX nSample, FileReader &file, bool allow
 
 static uint32 WriteIFFStringChunk(std::ostream &f, IFFChunk::ChunkIdentifiers id, const std::string &str)
 {
+	if(str.empty())
+		return 0;
 	IFFChunk chunk{};
 	chunk.id = id;
 	chunk.length = static_cast<uint32>(str.size());
