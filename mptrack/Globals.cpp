@@ -647,23 +647,33 @@ void CModScrollView::UpdateIndicator(LPCTSTR lpszText)
 }
 
 
+// Accumulate mouse wheel steps for laptop precision touchpads that emit wheel events < WHEEL_DELTA
+static short RoundMouseWheelToWholeStep(int value, int &accum)
+{
+	accum += value;
+	value = mpt::align_down(accum, WHEEL_DELTA);
+	accum -= value;
+	return mpt::saturate_cast<short>(value);
+}
+
+
 BOOL CModScrollView::OnMouseWheel(UINT fFlags, short zDelta, CPoint point)
 {
 	// we don't handle anything but scrolling just now
-	if (fFlags & (MK_SHIFT | MK_CONTROL)) return FALSE;
-
-	//if the parent is a splitter, it will handle the message
-	//if (GetParentSplitter(this, TRUE)) return FALSE;
+	if(fFlags & (MK_SHIFT | MK_CONTROL))
+		return FALSE;
 
 	// we can't get out of it--perform the scroll ourselves
-	return DoMouseWheel(fFlags, zDelta, point);
+	return DoMouseWheel(fFlags, RoundMouseWheelToWholeStep(zDelta, m_nScrollPosYfine), point);
 }
 
 
 void CModScrollView::OnMouseHWheel(UINT fFlags, short zDelta, CPoint point)
 {
+	zDelta = RoundMouseWheelToWholeStep(zDelta, m_nScrollPosXfine);
+
 	// we don't handle anything but scrolling just now
-	if (fFlags & (MK_SHIFT | MK_CONTROL))
+	if(fFlags & (MK_SHIFT | MK_CONTROL))
 	{
 		CScrollView::OnMouseHWheel(fFlags, zDelta, point);
 		return;
@@ -716,6 +726,8 @@ BOOL CModScrollView::OnScroll(UINT nScrollCode, UINT nPos, BOOL bDoScroll)
 			nPos = info.nTrackPos;
 		m_nScrollPosY = nPos;
 	}
+	if(bDoScroll)
+		m_nScrollPosXfine = m_nScrollPosYfine = 0;
 	return CScrollView::OnScroll(nScrollCode, nPos, bDoScroll);
 }
 
@@ -736,6 +748,8 @@ BOOL CModScrollView::OnScrollBy(CSize sizeScroll, BOOL bDoScroll)
 			if(GetScrollInfo(SB_VERT, &info, SIF_POS))
 				m_nScrollPosY = info.nPos;
 		}
+		if(bDoScroll)
+			m_nScrollPosXfine = m_nScrollPosYfine = 0;
 	}
 	return ret;
 }
@@ -775,10 +789,6 @@ BOOL CModScrollView::OnGesturePan(CPoint ptFrom, CPoint ptTo)
 
 ////////////////////////////////////////////////////////////////////////////
 // 	CModControlBar
-
-BEGIN_MESSAGE_MAP(CModControlBar, CToolBarCtrl)
-	ON_MESSAGE(WM_HELPHITTEST,	&CModControlBar::OnHelpHitTest)
-END_MESSAGE_MAP()
 
 
 BOOL CModControlBar::Init(CImageList &icons, CImageList &disabledIcons)
@@ -825,19 +835,5 @@ void CModControlBar::UpdateStyle()
 	}
 }
 
-
-LRESULT CModControlBar::OnHelpHitTest(WPARAM, LPARAM lParam)
-{
-	TBBUTTON tbbn;
-	POINT point;
-	point.x = GET_X_LPARAM(lParam);
-	point.y = GET_Y_LPARAM(lParam);
-	int ndx = HitTest(&point);
-	if ((ndx >= 0) && (GetButton(ndx, &tbbn)))
-	{
-		return HID_BASE_COMMAND + tbbn.idCommand;
-	}
-	return 0;
-}
 
 OPENMPT_NAMESPACE_END

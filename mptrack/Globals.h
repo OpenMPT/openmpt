@@ -14,14 +14,6 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-#ifndef WM_HELPHITTEST
-#define WM_HELPHITTEST		0x366
-#endif
-
-#ifndef HID_BASE_COMMAND
-#define HID_BASE_COMMAND	0x10000
-#endif
-
 #define ID_EDIT_MIXPASTE ID_EDIT_PASTE_SPECIAL		//rewbs.mixPaste
 
 class CModControlView;
@@ -34,8 +26,6 @@ public:
 	BOOL Init(CImageList &icons, CImageList &disabledIcons);
 	void UpdateStyle();
 	BOOL AddButton(UINT nID, int iImage=0, UINT nStyle=TBSTYLE_BUTTON, UINT nState=TBSTATE_ENABLED);
-	afx_msg LRESULT OnHelpHitTest(WPARAM, LPARAM);
-	DECLARE_MESSAGE_MAP()
 };
 
 
@@ -190,14 +180,15 @@ protected:
 class CModScrollView: public CScrollView
 {
 protected:
-	HWND m_hWndCtrl;
-	int m_nScrollPosX, m_nScrollPosY;
-	int m_nDPIx, m_nDPIy;	// Cached DPI settings
+	HWND m_hWndCtrl = nullptr;
+	int m_nScrollPosX = 0, m_nScrollPosY = 0;
+	int m_nScrollPosXfine = 0, m_nScrollPosYfine = 0;
+	int m_nDPIx = 0, m_nDPIy = 0;	// Cached DPI settings
 
 public:
 	DECLARE_SERIAL(CModScrollView)
-	CModScrollView() : m_hWndCtrl(nullptr), m_nScrollPosX(0), m_nScrollPosY(0) { }
-	virtual ~CModScrollView() {}
+	CModScrollView() = default;
+	virtual ~CModScrollView() = default;
 
 public:
 	CModDoc* GetDocument() const { return (CModDoc *)m_pDocument; }
