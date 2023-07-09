@@ -24,6 +24,16 @@ goto main
 
 
 
+if exist "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" (
+ call build\auto\setup_vs2022.cmd || goto error
+ cd include\genie\build\vs2019 || goto error
+ devenv genie.sln /Upgrade || goto error
+ msbuild genie.sln /target:Build /property:Configuration=Release;Platform=Win32;WindowsTargetPlatformVersion=10.0 /maxcpucount /verbosity:minimal || goto error
+ svn revert genie.sln || goto error
+ svn revert genie.vcxproj || goto error
+ cd ..\..\..\.. || goto error
+ goto geniedone
+)
 if exist "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" (
  call build\auto\setup_vs2019.cmd || goto error
  cd include\genie\build\vs2019 || goto error
@@ -59,6 +69,30 @@ copy /y include\genie\OpenMPT.txt include\genie\OpenMPT-version.txt
 
 
 
+if exist "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" (
+ call build\auto\setup_vs2022.cmd || goto error
+ rem cd include\premake || goto error
+ rem  nmake -f Bootstrap.mak windows MSDEV=vs2022 || goto error
+ rem  bin\release\premake5 embed --bytecode || goto error
+ rem  bin\release\premake5 --to=build/vs2022 vs2022 --no-curl --no-zlib --no-luasocket || goto error
+ rem cd ..\.. || goto error
+ cd include\premake\build\vs2019 || goto error
+  devenv Premake5.sln /Upgrade || goto error
+  msbuild Premake5.sln /target:Clean /property:Configuration=Release;Platform=Win32 /maxcpucount /verbosity:minimal || goto error
+  msbuild Premake5.sln /target:Build /property:Configuration=Release;Platform=Win32 /maxcpucount /verbosity:minimal || goto error
+  svn revert Premake5.sln || goto error
+  svn revert Premake5.vcxproj || goto error
+  svn revert curl-lib.vcxproj || goto error
+  svn revert example.vcxproj || goto error
+  svn revert lua-lib.vcxproj || goto error
+  svn revert luashim-lib.vcxproj || goto error
+  svn revert luasocket.vcxproj || goto error
+  svn revert mbedtls-lib.vcxproj || goto error
+  svn revert zip-lib.vcxproj || goto error
+  svn revert zlib-lib.vcxproj || goto error
+ cd ..\..\..\.. || goto error
+ goto premakedone
+)
 if exist "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" (
  call build\auto\setup_vs2019.cmd || goto error
  rem cd include\premake || goto error
