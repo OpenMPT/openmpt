@@ -286,6 +286,9 @@
 /include/genie/bin
 /include/genie/build/gmake.linux/obj
 /include/genie/build/vs2017/obj
+/include/genie/build/vs2019/.vs
+/include/genie/build/vs2019/Backup
+/include/genie/build/vs2019/UpgradeLog.htm
 /include/genie/build/vs2019/obj
 /include/lame/ACM
 /include/lame/API
@@ -677,6 +680,7 @@
 /include/premake/build/vs2019/.vs
 /include/premake/build/vs2019/bin
 /include/premake/build/vs2019/obj
+/include/premake/build/vs2022/.vs
 /include/premake/build/vs2022/bin
 /include/premake/build/vs2022/obj
 /include/pugixml/CMakeLists.txt
