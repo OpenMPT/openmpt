@@ -32,6 +32,8 @@ namespace Version
 
 	mpt::ustring GetName(mpt::osinfo::windows::Version version);
 
+	mpt::ustring GetCurrentName();
+
 	mpt::osinfo::windows::Version GetMinimumKernelLevel() noexcept;
 	mpt::osinfo::windows::Version GetMinimumAPILevel() noexcept;
 
