@@ -518,6 +518,7 @@ OPENMPT_WINESUPPORT_WRAPPER_API uintptr_t OPENMPT_WINESUPPORT_WRAPPER_CALL OpenM
 			sd->audiothread_startup_done = NULL;
 			OpenMPT_SoundDevice_Close( sd->impl );
 			sd->impl = NULL;
+			return 0;
 		}
 		sd->audiothread_sem_done = OpenMPT_Semaphore_Construct();
 		if ( sd->audiothread_sem_done == NULL ) {
@@ -527,6 +528,7 @@ OPENMPT_WINESUPPORT_WRAPPER_API uintptr_t OPENMPT_WINESUPPORT_WRAPPER_CALL OpenM
 			sd->audiothread_startup_done = NULL;
 			OpenMPT_SoundDevice_Close( sd->impl );
 			sd->impl = NULL;
+			return 0;
 		}
 		sd->audiothread_command = AudioThreadCommandInvalid;
 		sd->audiothread = CreateThread( NULL, 0, &AudioThread, sd, 0, &threadId );
@@ -539,6 +541,7 @@ OPENMPT_WINESUPPORT_WRAPPER_API uintptr_t OPENMPT_WINESUPPORT_WRAPPER_CALL OpenM
 			sd->audiothread_startup_done = NULL;
 			OpenMPT_SoundDevice_Close( sd->impl );
 			sd->impl = NULL;
+			return 0;
 		}
 		WaitForSingleObject( sd->audiothread_startup_done, INFINITE );
 	}
