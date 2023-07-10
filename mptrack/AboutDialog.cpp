@@ -395,7 +395,7 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 #endif
 			text += MPT_UFORMAT("Available CPU features: {}\n")(CPUFeaturesToString(CPUInfo.get_features()));
 #endif // MPT_ENABLE_ARCH_INTRINSICS
-			text += MPT_UFORMAT("Operating System: {}\n\n")(mpt::OS::Windows::Version::GetName(mpt::osinfo::windows::Version::Current()));
+			text += MPT_UFORMAT("Operating System: {}\n\n")(mpt::OS::Windows::Version::GetCurrentName());
 			text += MPT_UFORMAT("OpenMPT Install Path{1}: {0}\n")(theApp.GetInstallPath(), theApp.IsPortableMode() ? U_(" (portable)") : U_(""));
 			text += MPT_UFORMAT("OpenMPT Executable Path{1}: {0}\n")(theApp.GetInstallBinArchPath(), theApp.IsPortableMode() ? U_(" (portable)") : U_(""));
 			text += MPT_UFORMAT("Settings{1}: {0}\n")(theApp.GetConfigFileName(), theApp.IsPortableMode() ? U_(" (portable)") : U_(""));

@@ -96,6 +96,13 @@ mpt::ustring Version::GetName(mpt::osinfo::windows::Version version)
 		}
 	}
 	name += U_(")");
+	return name;
+}
+
+
+mpt::ustring Version::GetCurrentName()
+{
+	mpt::ustring name = GetName(mpt::osinfo::windows::Version::Current());
 	mpt::ustring result = name;
 	#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
 		if(mpt::OS::Windows::IsWine())
