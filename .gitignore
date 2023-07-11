@@ -142,6 +142,8 @@
 /include/ancient/libancient.pc.in
 /include/ancient/main.cpp
 /include/ancient/test.sh
+/include/ancient/testing
+/include/ancient/src/attic
 /include/asiomodern/changelog.txt
 /include/asiomodern/package.cmd
 /include/asiomodern/package_helper_getversion.cmd
