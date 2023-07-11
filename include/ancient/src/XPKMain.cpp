@@ -40,6 +40,7 @@
 #include "NONEDecompressor.hpp"
 #include "NUKEDecompressor.hpp"
 #include "PPDecompressor.hpp"
+#include "PPMQDecompressor.hpp"
 #include "RAKEDecompressor.hpp"
 #include "RDCNDecompressor.hpp"
 #include "RLENDecompressor.hpp"
@@ -52,6 +53,7 @@
 #include "SXSCDecompressor.hpp"
 #include "TDCSDecompressor.hpp"
 #include "ZENODecompressor.hpp"
+#include "XPKUnimplemented.hpp"
 
 namespace ancient::internal
 {
@@ -96,6 +98,7 @@ static std::vector<std::pair<bool(*)(uint32_t),std::shared_ptr<XPKDecompressor>(
 	{NONEDecompressor::detectHeaderXPK,NONEDecompressor::create},
 	{NUKEDecompressor::detectHeaderXPK,NUKEDecompressor::create},
 	{PPDecompressor::detectHeaderXPK,PPDecompressor::create},
+	{PPMQDecompressor::detectHeaderXPK,PPMQDecompressor::create},
 	{RAKEDecompressor::detectHeaderXPK,RAKEDecompressor::create},
 	{RDCNDecompressor::detectHeaderXPK,RDCNDecompressor::create},
 	{RLENDecompressor::detectHeaderXPK,RLENDecompressor::create},
@@ -107,7 +110,8 @@ static std::vector<std::pair<bool(*)(uint32_t),std::shared_ptr<XPKDecompressor>(
 	{SQSHDecompressor::detectHeaderXPK,SQSHDecompressor::create},
 	{SXSCDecompressor::detectHeaderXPK,SXSCDecompressor::create},
 	{TDCSDecompressor::detectHeaderXPK,TDCSDecompressor::create},
-	{ZENODecompressor::detectHeaderXPK,ZENODecompressor::create}};
+	{ZENODecompressor::detectHeaderXPK,ZENODecompressor::create},
+	{XPKUnimplemented::detectHeaderXPK,XPKUnimplemented::create}};
 
 XPKMain::XPKMain(const Buffer &packedData,bool verify,uint32_t recursionLevel) :
 	_packedData(packedData)
@@ -125,8 +129,8 @@ XPKMain::XPKMain(const Buffer &packedData,bool verify,uint32_t recursionLevel) :
 
 	uint8_t flags=packedData.read8(32);
 	_longHeaders=(flags&1)?true:false;
-	if (flags&2) throw InvalidFormatError();	// needs password. we do not support that
-	if (flags&4)						// extra header
+	if (flags&2) _hasPassword=true;			// Late failure so we can identify format
+	if (flags&4)					// extra header
 	{
 		_headerSize=38+uint32_t(packedData.readBE16(36));
 	} else {
@@ -152,10 +156,9 @@ XPKMain::XPKMain(const Buffer &packedData,bool verify,uint32_t recursionLevel) :
 	auto headerChecksum=[](const Buffer &buffer,size_t offset,size_t len)->bool
 	{
 		if (!len || OverflowCheck::sum(offset,len)>buffer.size()) return false;
-		const uint8_t *ptr=buffer.data()+offset;
 		uint8_t tmp=0;
 		for (size_t i=0;i<len;i++)
-			tmp^=ptr[i];
+			tmp^=buffer[offset+i];
 		return !tmp;
 	};
 
@@ -163,10 +166,9 @@ XPKMain::XPKMain(const Buffer &packedData,bool verify,uint32_t recursionLevel) :
 	auto chunkChecksum=[](const Buffer &buffer,size_t offset,size_t len,uint16_t checkValue)->bool
 	{
 		if (!len || OverflowCheck::sum(offset,len)>buffer.size()) return false;
-		const uint8_t *ptr=buffer.data()+offset;
 		uint8_t tmp[2]={0,0};
 		for (size_t i=0;i<len;i++)
-			tmp[i&1]^=ptr[i];
+			tmp[i&1]^=buffer[offset+i];
 		return tmp[0]==(checkValue>>8) && tmp[1]==(checkValue&0xff);
 	};
 
@@ -233,7 +235,10 @@ size_t XPKMain::getRawSize() const noexcept
 
 void XPKMain::decompressImpl(Buffer &rawData,bool verify)
 {
-	if (rawData.size()<_rawSize) throw DecompressionError();
+	if (rawData.size()<_rawSize)
+		throw DecompressionError();
+	if (_hasPassword)
+		throw DecompressionError();
 
 	uint32_t destOffset=0;
 	std::shared_ptr<XPKDecompressor::State> state;

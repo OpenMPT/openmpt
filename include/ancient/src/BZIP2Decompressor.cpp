@@ -87,7 +87,6 @@ size_t BZIP2Decompressor::getRawSize() const noexcept
 void BZIP2Decompressor::decompressImpl(Buffer &rawData,bool verify)
 {
 	size_t packedSize=_packedSize?_packedSize:_packedData.size();
-	size_t rawSize=_rawSize?_rawSize:rawData.size();
 
 	ForwardInputStream inputStream(_packedData,4,packedSize);
 	MSBBitReader<ForwardInputStream> bitReader(inputStream);
@@ -100,7 +99,7 @@ void BZIP2Decompressor::decompressImpl(Buffer &rawData,bool verify)
 		return bitReader.readBits8(1);
 	};
 
-	ForwardOutputStream outputStream(rawData,0,rawSize);
+	AutoExpandingForwardOutputStream outputStream(rawData);
 
 	// stream verification
 	//
@@ -136,7 +135,6 @@ void BZIP2Decompressor::decompressImpl(Buffer &rawData,bool verify)
 	};
 
 	MemoryBuffer tmpBuffer(_blockSize);
-	uint8_t *tmpBufferPtr=tmpBuffer.data();
 
 	// This is the dark, ancient secret of bzip2.
 	// versions before 0.9.5 had a data randomization for "too regular"
@@ -268,7 +266,7 @@ void BZIP2Decompressor::decompressImpl(Buffer &rawData,bool verify)
 					if (currentRunLength)
 					{
 						if (currentBlockSize+currentRunLength>_blockSize) throw DecompressionError();
-						for (uint32_t i=0;i<currentRunLength;i++) tmpBufferPtr[currentBlockSize++]=huffmanValues[dataMTFMap[0]];
+						for (uint32_t i=0;i<currentRunLength;i++) tmpBuffer[currentBlockSize++]=huffmanValues[dataMTFMap[0]];
 					}
 					currentRunLength=0;
 					currentRLEWeight=1;
@@ -294,7 +292,7 @@ void BZIP2Decompressor::decompressImpl(Buffer &rawData,bool verify)
 						decodeRLE();
 						uint8_t symbol=unMTF(symbolMTF-1,dataMTFMap);
 						if (currentBlockSize>=_blockSize) throw DecompressionError();
-						tmpBufferPtr[currentBlockSize++]=huffmanValues[symbol];
+						tmpBuffer[currentBlockSize++]=huffmanValues[symbol];
 					}
 				}
 				decodeRLE();
@@ -311,7 +309,7 @@ void BZIP2Decompressor::decompressImpl(Buffer &rawData,bool verify)
 
 			for (uint32_t i=0;i<currentBlockSize;i++)
 			{
-				sums[tmpBufferPtr[i]]++;
+				sums[tmpBuffer[i]]++;
 			}
 
 			uint32_t rank[256];
@@ -329,7 +327,7 @@ void BZIP2Decompressor::decompressImpl(Buffer &rawData,bool verify)
 			MemoryBuffer forwardIndex(currentBlockSize*sizeof(uint32_t));
 			auto forwardIndexPtr=forwardIndex.cast<uint32_t>();
 			for (uint32_t i=0;i<currentBlockSize;i++)
-				forwardIndexPtr[rank[tmpBufferPtr[i]]++]=i;
+				forwardIndexPtr[rank[tmpBuffer[i]]++]=i;
 
 			// output + final RLE decoding
 			uint8_t currentCh=0;
@@ -370,7 +368,7 @@ void BZIP2Decompressor::decompressImpl(Buffer &rawData,bool verify)
 			for (uint32_t i=0;i<currentBlockSize;i++)
 			{
 				currentPtr=forwardIndexPtr[currentPtr];
-				outputByte(tmpBufferPtr[currentPtr]);
+				outputByte(tmpBuffer[currentPtr]);
 			}
 			// cleanup the state, a bit hackish way to do it
 			if (currentChCount) outputByte(currentChCount==4?0:~currentCh);
@@ -386,9 +384,8 @@ void BZIP2Decompressor::decompressImpl(Buffer &rawData,bool verify)
 		} else throw DecompressionError();
 	}
 
-	if (!_rawSize) _rawSize=outputStream.getOffset();
-	if (!_packedSize) _packedSize=inputStream.getOffset();
-	if (_rawSize!=outputStream.getOffset()) throw DecompressionError();
+	_rawSize=outputStream.getOffset();
+	_packedSize=inputStream.getOffset();
 }
 
 void BZIP2Decompressor::decompressImpl(Buffer &rawData,const Buffer &previousData,bool verify)

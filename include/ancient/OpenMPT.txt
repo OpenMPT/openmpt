@@ -1,2 +1,2 @@
- *  ancient <https://github.com/temisu/ancient> v2.0.0 (2022-01-12)
+ *  ancient <https://github.com/temisu/ancient> v2.1.0 (2023-07-11)
  *  Unnecssary files have been removed.

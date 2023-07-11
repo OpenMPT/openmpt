@@ -770,18 +770,15 @@ void SXSCDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 	auto deltaDecode16BE=[&]()
 	{
 		size_t length=rawData.size();
-		const uint8_t *src=tmpBuffer->data();
-		const uint8_t *midSrc=&src[length>>1];
-		uint8_t *dest=rawData.data();
 
 		uint8_t ctr=0;
 		for (size_t i=0,j=0;j<length;i++,j+=2)
 		{
-			ctr+=src[i];
-			dest[j]=ctr;
-			dest[j+1]=midSrc[i];
+			ctr+=(*tmpBuffer)[i];
+			rawData[j]=ctr;
+			rawData[j+1]=(*tmpBuffer)[(length>>1)+i];
 		}
-		if (length&1) dest[length-1]=src[length-1];
+		if (length&1) rawData[length-1]=(*tmpBuffer)[length-1];
 	};
 
 	// Stereo, High byte only
@@ -789,18 +786,15 @@ void SXSCDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 	auto deltaDecode16LE=[&]()
 	{
 		size_t length=rawData.size();
-		const uint8_t *src=tmpBuffer->data();
-		const uint8_t *midSrc=&src[length>>1];
-		uint8_t *dest=rawData.data();
 
 		uint8_t ctr=0;
 		for (size_t i=0,j=0;j<length;i++,j+=2)
 		{
-			dest[j]=midSrc[i];
-			ctr+=src[i];
-			dest[j+1]=ctr;
+			rawData[j]=(*tmpBuffer)[(length>>1)+i];
+			ctr+=(*tmpBuffer)[i];
+			rawData[j+1]=ctr;
 		}
-		if (length&1) dest[length-1]=src[length-1];
+		if (length&1) rawData[length-1]=(*tmpBuffer)[length-1];
 	};
 
 	switch (mode)

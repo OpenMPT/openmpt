@@ -14,13 +14,106 @@
 namespace ancient::internal
 {
 
-ForwardOutputStream::ForwardOutputStream(Buffer &buffer,size_t startOffset,size_t endOffset) :
-	_bufPtr(buffer.data()),
+ForwardOutputStreamBase::ForwardOutputStreamBase(Buffer &buffer,size_t startOffset) :
+	_buffer(buffer),
 	_startOffset(startOffset),
-	_currentOffset(startOffset),
+	_currentOffset(startOffset)
+{
+	// should call ensureSize but can't
+}
+
+ForwardOutputStreamBase::~ForwardOutputStreamBase()
+{
+	// nothing needed
+}
+
+void ForwardOutputStreamBase::writeByte(uint8_t value)
+{
+	ensureSize(_currentOffset+1);
+	_buffer[_currentOffset++]=value;
+}
+
+uint8_t ForwardOutputStreamBase::copy(size_t distance,size_t count)
+{
+	ensureSize(OverflowCheck::sum(_currentOffset,count));
+	if (!distance || OverflowCheck::sum(_startOffset,distance)>_currentOffset)
+		throw Decompressor::DecompressionError();
+	uint8_t ret=0;
+	for (size_t i=0;i<count;i++,_currentOffset++)
+		ret=_buffer[_currentOffset]=_buffer[_currentOffset-distance];
+	return ret;
+}
+
+uint8_t ForwardOutputStreamBase::copy(size_t distance,size_t count,const Buffer &prevBuffer)
+{
+	ensureSize(OverflowCheck::sum(_currentOffset,count));
+	if (!distance)
+		throw Decompressor::DecompressionError();
+	size_t prevCount=0;
+	uint8_t ret=0;
+	if (OverflowCheck::sum(_startOffset,distance)>_currentOffset)
+	{
+		size_t prevSize=prevBuffer.size();
+		if (_startOffset+distance>_currentOffset+prevSize)
+			throw Decompressor::DecompressionError(); 
+		size_t prevDist=_startOffset+distance-_currentOffset;
+		prevCount=std::min(count,prevDist);
+		const uint8_t *prev=&prevBuffer[prevSize-prevDist];
+		for (size_t i=0;i<prevCount;i++,_currentOffset++)
+			ret=_buffer[_currentOffset]=prev[i];
+	}
+	for (size_t i=prevCount;i<count;i++,_currentOffset++)
+		ret=_buffer[_currentOffset]=_buffer[_currentOffset-distance];
+	return ret;
+}
+
+uint8_t ForwardOutputStreamBase::copy(size_t distance,size_t count,uint8_t defaultChar)
+{
+	ensureSize(OverflowCheck::sum(_currentOffset,count));
+	if (!distance)
+		throw Decompressor::DecompressionError();
+	size_t prevCount=0;
+	uint8_t ret=0;
+	if (OverflowCheck::sum(_startOffset,distance)>_currentOffset)
+	{
+		prevCount=std::min(count,_startOffset+distance-_currentOffset);
+		for (size_t i=0;i<prevCount;i++,_currentOffset++)
+			ret=_buffer[_currentOffset]=defaultChar;
+	}
+	for (size_t i=prevCount;i<count;i++,_currentOffset++)
+		ret=_buffer[_currentOffset]=_buffer[_currentOffset-distance];
+	return ret;
+}
+
+const uint8_t *ForwardOutputStreamBase::history(size_t distance) const
+{
+	if (OverflowCheck::sum(distance,_startOffset)>_currentOffset)
+		throw Decompressor::DecompressionError();
+	return &_buffer[_currentOffset-distance];
+}
+
+uint8_t *ForwardOutputStreamBase::history(size_t distance)
+{
+	if (OverflowCheck::sum(distance,_startOffset)>_currentOffset)
+		throw Decompressor::DecompressionError();
+	return &_buffer[_currentOffset-distance];
+}
+
+void ForwardOutputStreamBase::produce(const uint8_t *src,size_t bytes)
+{
+	ensureSize(OverflowCheck::sum(_currentOffset,bytes));
+	std::memcpy(&_buffer[_currentOffset],src,bytes);
+	_currentOffset+=bytes;
+}
+
+// ---
+
+ForwardOutputStream::ForwardOutputStream(Buffer &buffer,size_t startOffset,size_t endOffset) :
+	ForwardOutputStreamBase(buffer,startOffset),
 	_endOffset(endOffset)
 {
-	if (_startOffset>_endOffset || _currentOffset>buffer.size() || _endOffset>buffer.size()) throw Decompressor::DecompressionError();
+	if (_startOffset>_endOffset || _endOffset>_buffer.size())
+		throw Decompressor::DecompressionError();
 }
 
 ForwardOutputStream::~ForwardOutputStream()
@@ -28,77 +121,56 @@ ForwardOutputStream::~ForwardOutputStream()
 	// nothing needed
 }
 
-void ForwardOutputStream::writeByte(uint8_t value)
+void ForwardOutputStream::reset(size_t startOffset,size_t endOffset)
 {
-	if (_currentOffset>=_endOffset) throw Decompressor::DecompressionError();
-	_bufPtr[_currentOffset++]=value;
+	_currentOffset=_startOffset=startOffset;
+	_endOffset=endOffset;
+	if (_startOffset>_endOffset || _endOffset>_buffer.size())
+		throw Decompressor::DecompressionError();
 }
 
-uint8_t ForwardOutputStream::copy(size_t distance,size_t count)
+void ForwardOutputStream::ensureSize(size_t offset)
 {
-	if (!distance || OverflowCheck::sum(_startOffset,distance)>_currentOffset || OverflowCheck::sum(_currentOffset,count)>_endOffset) throw Decompressor::DecompressionError();
-	uint8_t ret=0;
-	for (size_t i=0;i<count;i++,_currentOffset++)
-		ret=_bufPtr[_currentOffset]=_bufPtr[_currentOffset-distance];
-	return ret;
+	if (offset>_endOffset)
+		throw Decompressor::DecompressionError();
 }
 
-uint8_t ForwardOutputStream::copy(size_t distance,size_t count,const Buffer &prevBuffer)
+// ---
+
+AutoExpandingForwardOutputStream::AutoExpandingForwardOutputStream(Buffer &buffer) :
+	ForwardOutputStreamBase(buffer,0)
 {
-	if (!distance || OverflowCheck::sum(_currentOffset,count)>_endOffset) throw Decompressor::DecompressionError();
-	size_t prevCount=0;
-	uint8_t ret=0;
-	if (OverflowCheck::sum(_startOffset,distance)>_currentOffset)
+	// nothing needed
+}
+
+AutoExpandingForwardOutputStream::~AutoExpandingForwardOutputStream()
+{
+	// trim
+	if (_hasExpanded && _currentOffset!=_buffer.size())
+		_buffer.resize(_currentOffset);
+}
+
+void AutoExpandingForwardOutputStream::ensureSize(size_t offset)
+{
+	if (offset>Decompressor::getMaxRawSize())
+		throw Decompressor::DecompressionError();
+	if (offset>_buffer.size())
 	{
-		size_t prevSize=prevBuffer.size();
-		if (_startOffset+distance>_currentOffset+prevSize) throw Decompressor::DecompressionError(); 
-		size_t prevDist=_startOffset+distance-_currentOffset;
-		prevCount=std::min(count,prevDist);
-		const uint8_t *prev=&prevBuffer[prevSize-prevDist];
-		for (size_t i=0;i<prevCount;i++,_currentOffset++)
-			ret=_bufPtr[_currentOffset]=prev[i];
+		_buffer.resize(offset+_advance);
+		_hasExpanded=true;
 	}
-	for (size_t i=prevCount;i<count;i++,_currentOffset++)
-		ret=_bufPtr[_currentOffset]=_bufPtr[_currentOffset-distance];
-	return ret;
 }
 
-uint8_t ForwardOutputStream::copy(size_t distance,size_t count,uint8_t defaultChar)
-{
-	if (!distance || OverflowCheck::sum(_currentOffset,count)>_endOffset) throw Decompressor::DecompressionError();
-	size_t prevCount=0;
-	uint8_t ret=0;
-	if (OverflowCheck::sum(_startOffset,distance)>_currentOffset)
-	{
-		prevCount=std::min(count,_startOffset+distance-_currentOffset);
-		for (size_t i=0;i<prevCount;i++,_currentOffset++)
-			ret=_bufPtr[_currentOffset]=defaultChar;
-	}
-	for (size_t i=prevCount;i<count;i++,_currentOffset++)
-		ret=_bufPtr[_currentOffset]=_bufPtr[_currentOffset-distance];
-	return ret;
-}
-
-const uint8_t *ForwardOutputStream::history(size_t distance) const
-{
-	if (distance>_currentOffset) throw Decompressor::DecompressionError();
-	return &_bufPtr[_currentOffset-distance];
-}
-
-void ForwardOutputStream::produce(const uint8_t *src,size_t bytes)
-{
-	if (OverflowCheck::sum(_currentOffset,bytes)>_endOffset) throw Decompressor::DecompressionError();
-	std::memcpy(&_bufPtr[_currentOffset],src,bytes);
-	_currentOffset+=bytes;
-}
+// ---
 
 BackwardOutputStream::BackwardOutputStream(Buffer &buffer,size_t startOffset,size_t endOffset) :
-	_bufPtr(buffer.data()),
+	_buffer(buffer),
 	_startOffset(startOffset),
 	_currentOffset(endOffset),
 	_endOffset(endOffset)
 {
-	if (_startOffset>_endOffset || _currentOffset>buffer.size() || _endOffset>buffer.size()) throw Decompressor::DecompressionError();
+	if (_startOffset>_endOffset || _currentOffset>buffer.size() || _endOffset>buffer.size())
+		throw Decompressor::DecompressionError();
 }
 
 BackwardOutputStream::~BackwardOutputStream()
@@ -109,15 +181,16 @@ BackwardOutputStream::~BackwardOutputStream()
 void BackwardOutputStream::writeByte(uint8_t value)
 {
 	if (_currentOffset<=_startOffset) throw Decompressor::DecompressionError();
-	_bufPtr[--_currentOffset]=value;
+	_buffer[--_currentOffset]=value;
 }
 
 uint8_t BackwardOutputStream::copy(size_t distance,size_t count)
 {
-	if (!distance || OverflowCheck::sum(_startOffset,count)>_currentOffset || OverflowCheck::sum(_currentOffset,distance)>_endOffset) throw Decompressor::DecompressionError();
+	if (!distance || OverflowCheck::sum(_startOffset,count)>_currentOffset || OverflowCheck::sum(_currentOffset,distance)>_endOffset)
+		throw Decompressor::DecompressionError();
 	uint8_t ret=0;
 	for (size_t i=0;i<count;i++,--_currentOffset)
-		ret=_bufPtr[_currentOffset-1]=_bufPtr[_currentOffset+distance-1];
+		ret=_buffer[_currentOffset-1]=_buffer[_currentOffset+distance-1];
 	return ret;
 }
 

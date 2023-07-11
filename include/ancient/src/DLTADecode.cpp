@@ -39,16 +39,11 @@ const std::string &DLTADecode::getSubName() const noexcept
 
 void DLTADecode::decode(Buffer &bufferDest,const Buffer &bufferSrc,size_t offset,size_t size)
 {
-	if (OverflowCheck::sum(offset,size)>bufferSrc.size()) throw Buffer::OutOfBoundsError();
-	if (OverflowCheck::sum(offset,size)>bufferDest.size()) throw Buffer::OutOfBoundsError();
-	const uint8_t *src=bufferSrc.data()+offset;
-	uint8_t *dest=bufferDest.data()+offset;
-
 	uint8_t ctr=0;
 	for (size_t i=0;i<size;i++)
 	{
-		ctr+=src[i];
-		dest[i]=ctr;
+		ctr+=bufferSrc[offset+i];
+		bufferDest[offset+i]=ctr;
 	}
 }
 

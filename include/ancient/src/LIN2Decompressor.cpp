@@ -37,8 +37,7 @@ LIN2Decompressor::LIN2Decompressor(uint32_t hdr,uint32_t recursionLevel,const Bu
 	// Also, the huffman decoder for length is different
 
 	_endStreamOffset=packedData.size()-1;
-	const uint8_t *bufPtr=_packedData.data();
-	while (_endStreamOffset && bufPtr[--_endStreamOffset]!=0xffU);
+	while (_endStreamOffset && _packedData[--_endStreamOffset]!=0xffU);
 	// end stream
 	// 1 byte, byte before 0xff
 	// 0x10 bytes/0x20 for table

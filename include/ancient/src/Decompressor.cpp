@@ -6,13 +6,19 @@
 #include <vector>
 
 #include "BZIP2Decompressor.hpp"
+#include "CompactDecompressor.hpp"
+#include "CompressDecompressor.hpp"
 #include "CRMDecompressor.hpp"
 #include "DEFLATEDecompressor.hpp"
 #include "DMSDecompressor.hpp"
+#include "FreezeDecompressor.hpp"
 #include "IMPDecompressor.hpp"
+#include "LOBDecompressor.hpp"
 #include "MMCMPDecompressor.hpp"
+#include "PackDecompressor.hpp"
 #include "PPDecompressor.hpp"
 #include "RNCDecompressor.hpp"
+#include "SCOCompressDecompressor.hpp"
 #include "StoneCrackerDecompressor.hpp"
 #include "TPWMDecompressor.hpp"
 #include "XPKMain.hpp"
@@ -24,16 +30,23 @@ namespace ancient::internal
 
 static std::vector<std::pair<bool(*)(uint32_t),std::shared_ptr<Decompressor>(*)(const Buffer&,bool,bool)>> decompressors={
 	{BZIP2Decompressor::detectHeader,BZIP2Decompressor::create},
+	{CompactDecompressor::detectHeader,CompactDecompressor::create},
+	{CompressDecompressor::detectHeader,CompressDecompressor::create},
 	{CRMDecompressor::detectHeader,CRMDecompressor::create},
 	{DEFLATEDecompressor::detectHeader,DEFLATEDecompressor::create},
 	{DMSDecompressor::detectHeader,DMSDecompressor::create},
+	{FreezeDecompressor::detectHeader,FreezeDecompressor::create},
 	{IMPDecompressor::detectHeader,IMPDecompressor::create},
+	{LOBDecompressor::detectHeader,LOBDecompressor::create},
 	{MMCMPDecompressor::detectHeader,MMCMPDecompressor::create},
+	{PackDecompressor::detectHeader,PackDecompressor::create},
 	{PPDecompressor::detectHeader,PPDecompressor::create},
 	{RNCDecompressor::detectHeader,RNCDecompressor::create},
-	{StoneCrackerDecompressor::detectHeader,StoneCrackerDecompressor::create},
+	{SCOCompressDecompressor::detectHeader,SCOCompressDecompressor::create},
 	{TPWMDecompressor::detectHeader,TPWMDecompressor::create},
-	{XPKMain::detectHeader,XPKMain::create}};
+	{XPKMain::detectHeader,XPKMain::create},
+	// Putting StoneCracker last since detection can be accidentally be detected instead of correct format
+	{StoneCrackerDecompressor::detectHeader,StoneCrackerDecompressor::create}};
 
 Decompressor::Decompressor() noexcept
 {
@@ -49,7 +62,7 @@ std::shared_ptr<Decompressor> Decompressor::create(const Buffer &packedData,bool
 {
 	try
 	{
-		uint32_t hdr=packedData.readBE32(0);
+		uint32_t hdr=(packedData.size()>=4)?packedData.readBE32(0):(uint32_t(packedData.readBE16(0))<<16);
 		for (auto &it : decompressors)
 		{
 			if (it.first(hdr)) return it.second(packedData,exactSizeKnown,verify);
@@ -95,14 +108,15 @@ size_t Decompressor::getImageOffset() const noexcept
 	return 0;
 }
 
+// 1G should be enough for everyone (this is retro!)
 size_t Decompressor::getMaxPackedSize() noexcept
 {
-	return 0x100'0000U;
+	return 0x4000'0000U;
 }
 
 size_t Decompressor::getMaxRawSize() noexcept
 {
-	return 0x100'0000U;
+	return 0x4000'0000U;
 }
 
 }

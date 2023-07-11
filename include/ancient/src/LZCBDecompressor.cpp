@@ -1,146 +1,15 @@
 /* Copyright (C) Teemu Suutari */
 
-#include <array>
-
 #include "LZCBDecompressor.hpp"
 #include "RangeDecoder.hpp"
 #include "InputStream.hpp"
 #include "OutputStream.hpp"
+#include "FrequencyTree.hpp"
 #include "common/Common.hpp"
 
 
 namespace ancient::internal
 {
-
-template<size_t T>
-class FrequencyTree
-{
-public:
-	FrequencyTree()
-	{
-		for (uint32_t i=0;i<_size;i++)
-			_tree[i]=0;
-	}
-
-	~FrequencyTree()
-	{
-		// nothing needed
-	}
-
-	uint16_t decode(uint16_t value,uint16_t &low,uint16_t &freq) const
-	{
-		if (value>=_tree[_size-1])
-			throw Decompressor::DecompressionError();
-		uint16_t symbol=0;
-		low=0;
-		for (uint32_t i=_levels-2;;i--)
-		{
-			uint16_t tmp=_tree[_levelOffsets[i]+symbol];
-			if (uint32_t(symbol+1)<_levelSizes[i] && value>=tmp)
-			{
-				symbol++;
-				low+=tmp;
-				value-=tmp;
-			}
-			if (!i) break;
-			symbol<<=1;
-		}
-		freq=_tree[symbol];
-		return symbol;
-	}
-
-	bool exists(uint16_t symbol) const
-	{
-		return _tree[symbol];
-	}
-	
-	void increment(uint16_t symbol)
-	{
-		for (uint16_t i=0;i<_levels;i++)
-		{
-			_tree[_levelOffsets[i]+symbol]++;
-			symbol>>=1;
-		}
-	}
-
-	void halve()
-	{
-		// non-standard way
-		for (uint32_t i=0;i<T;i++)
-			_tree[i]>>=1;
-		for (uint32_t i=T;i<_size;i++)
-			_tree[i]=0;
-		for (uint32_t i=0,length=T;i<_levels-1;i++,length=(length+1)>>1)
-		{
-			for (uint32_t j=0;j<length;j++)
-				_tree[_levelOffsets[i+1]+(j>>1)]+=_tree[_levelOffsets[i]+j];
-		}
-	}
-
-	uint32_t getTotal() const
-	{
-		return _tree[_size-1];
-	}
-
-private:
-	static constexpr uint32_t levelSize(uint32_t level)
-	{
-		uint32_t ret=T;
-		for (uint32_t i=0;i<level;i++)
-		{
-			ret=(ret+1)>>1;
-		}
-		return ret;
-	}
-
-	static constexpr uint32_t levels()
-	{
-		uint32_t ret=0;
-		while (levelSize(ret)!=1) ret++;
-		return ret+1;
-	}
-
-	static constexpr uint32_t size()
-	{
-		uint32_t ret=0;
-		for (uint32_t i=0;i<levels();i++)
-			ret+=levelSize(i);
-		return ret;
-	}
-
-	static constexpr uint32_t levelOffset(uint32_t level)
-	{
-		uint32_t ret=0;
-		for (uint32_t i=0;i<level;i++)
-			ret+=levelSize(i);
-		return ret;
-	}
-
-	template<uint32_t... I>
-	static constexpr auto makeLevelOffsetSequence(std::integer_sequence<uint32_t,I...>)
-	{
-		return std::integer_sequence<uint32_t,levelOffset(I)...>{};
-	}
-
-	template<uint32_t... I>
-	static constexpr auto makeLevelSizeSequence(std::integer_sequence<uint32_t,I...>)
-	{
-		return std::integer_sequence<uint32_t,levelSize(I)...>{};
-	}
- 	
-	template<uint32_t... I>
-	static constexpr std::array<uint32_t,sizeof...(I)> makeArray(std::integer_sequence<uint32_t,I...>)
-	{
-		return std::array<uint32_t,sizeof...(I)>{{I...}};
-	}
-
-	static constexpr uint32_t			_size=size();
-	static constexpr uint32_t			_levels=levels();
-	static constexpr std::array<uint32_t,_levels>	_levelOffsets=makeArray(makeLevelOffsetSequence(std::make_integer_sequence<uint32_t,levels()>{}));
-	static constexpr std::array<uint32_t,_levels>	_levelSizes=makeArray(makeLevelSizeSequence(std::make_integer_sequence<uint32_t,levels()>{}));
-
-	uint16_t					_tree[size()];
-};
 
 template<size_t T>
 class FrequencyDecoder
@@ -172,13 +41,15 @@ public:
 			_decoder.scale(0,_threshold,_threshold+_tree.getTotal());
 			symbol=readFunc();
 			// A bug in the encoder
-			if (!symbol && _tree.exists(symbol)) symbol=T;
+			if (!symbol && _tree[symbol]) symbol=T;
 			_threshold++;
 		}
-		_tree.increment(symbol);
+		_tree.add(symbol,1);
 		if (_threshold+_tree.getTotal()>=0x3ffdU)
 		{
-			_tree.halve();
+			for (uint32_t i=0;i<T+1;i++)
+				_tree.set(i,_tree[i]>>1);
+
 			_threshold=(_threshold>>1)+1;
 		}
 		return symbol;
@@ -186,7 +57,7 @@ public:
 
 private:
 	RangeDecoder					&_decoder;
-	FrequencyTree<T+1>				_tree;
+	FrequencyTree<uint16_t,uint16_t,T+1>		_tree;
 	uint16_t					_threshold=1;
 };
 

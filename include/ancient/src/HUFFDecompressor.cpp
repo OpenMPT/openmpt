@@ -60,7 +60,7 @@ void HUFFDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 
 	ForwardOutputStream outputStream(rawData,0,rawData.size());
 
-	HuffmanDecoder<uint32_t> decoder;
+	HuffmanDecoder<uint8_t> decoder;
 	for (uint32_t i=0;i<256;i++)
 	{
 		uint8_t codeBits=readByte()+1;
@@ -74,7 +74,7 @@ void HUFFDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 			shift+=8;
 		}
 		code=(code>>shift)&((1<<codeBits)-1);
-		decoder.insert(HuffmanCode<uint32_t>{codeBits,code,i});
+		decoder.insert(HuffmanCode<uint8_t>{codeBits,code,uint8_t(i)});
 	}
 
 	while (!outputStream.eof())

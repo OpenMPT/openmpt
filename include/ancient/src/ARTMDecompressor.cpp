@@ -2,6 +2,7 @@
 
 #include "ARTMDecompressor.hpp"
 #include "RangeDecoder.hpp"
+#include "FrequencyTree.hpp"
 #include "InputStream.hpp"
 #include "OutputStream.hpp"
 #include "common/Common.hpp"
@@ -77,45 +78,38 @@ void ARTMDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 	for (uint32_t i=0;i<16;i++) initialValue=(initialValue<<1)|bitReader.readBit();
 	RangeDecoder decoder(bitReader,initialValue);
 
-	uint8_t characters[256];
-	uint16_t frequencies[256];
-	uint16_t frequencySums[256];
+	// first one will never be used, but doing it this way saves us on some nasty arith
+	// on every place later
+	FrequencyTree<uint16_t,uint16_t,257> tree;
+	uint8_t characters[257];
 
-	for (uint32_t i=0;i<256;i++)
+	for (uint32_t i=0;i<257;i++)
 	{
-		characters[i]=i;
-		frequencies[i]=1;
-		frequencySums[i]=256-i;
+		tree.add(i,1);
+		characters[i]=256U-i;
 	}
-	uint16_t frequencyTotal=257;
 
 	while (!outputStream.eof())
 	{
-		uint16_t value=decoder.decode(frequencyTotal);
-		uint16_t symbol;
-		for (symbol=0;symbol<256;symbol++)
-			if (frequencySums[symbol]<=value) break;
-		if (symbol==256) throw Decompressor::DecompressionError();
-		decoder.scale(frequencySums[symbol],frequencySums[symbol]+frequencies[symbol],frequencyTotal);
+		uint16_t value=decoder.decode(tree.getTotal());
+		uint16_t low,freq;
+		uint16_t symbol=tree.decode(value,low,freq);
+		if (!symbol)
+			throw Decompressor::DecompressionError();
+		decoder.scale(low,low+freq,tree.getTotal());
 		outputStream.writeByte(characters[symbol]);
 
-		if (frequencyTotal==0x3fffU)
+		if (tree.getTotal()==0x3fffU)
 		{
-			frequencyTotal=1;
-			for (int32_t i=255;i>=0;i--)
-			{
-				frequencySums[i]=frequencyTotal;
-				frequencyTotal+=frequencies[i]=(frequencies[i]+1)>>1;
-			}
+			for (uint32_t i=1;i<=256;i++)
+				tree.set(i,(tree[i]+1)>>1);
 		}
 		
 		uint16_t i;
-		for (i=symbol;i&&frequencies[i-1]==frequencies[i];i--);
+		for (i=symbol;i<256&&tree[i+1]==tree[i];i++);
 		if (i!=symbol)
 			std::swap(characters[symbol],characters[i]);
-		frequencies[i]++;
-		while (i--) frequencySums[i]++;
-		frequencyTotal++;
+		tree.add(i,1);
 	}
 }
 
