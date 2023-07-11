@@ -10,12 +10,6 @@
     <Filter Include="src">
       <UniqueIdentifier>{2DAB880B-99B4-887C-2230-9F7C8E38947C}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\Lzh">
-      <UniqueIdentifier>{EA922FA9-5672-AE44-5F8A-391BCBE814A6}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\Zip">
-      <UniqueIdentifier>{4FCC2FA9-BBAB-AE44-C4C3-391B302215A6}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src\common">
       <UniqueIdentifier>{E5D74254-D18F-84A1-3A97-5DFD266E1F92}</UniqueIdentifier>
     </Filter>
@@ -48,6 +42,12 @@
     <ClInclude Include="..\..\..\include\ancient\src\CYB2Decoder.hpp">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\ancient\src\CompactDecompressor.hpp">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\ancient\src\CompressDecompressor.hpp">
+      <Filter>src</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\include\ancient\src\DEFLATEDecompressor.hpp">
       <Filter>src</Filter>
     </ClInclude>
@@ -70,6 +70,12 @@
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\ancient\src\FRLEDecompressor.hpp">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\ancient\src\FreezeDecompressor.hpp">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\ancient\src\FrequencyTree.hpp">
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\ancient\src\HFMNDecompressor.hpp">
@@ -99,6 +105,9 @@
     <ClInclude Include="..\..\..\include\ancient\src\LIN2Decompressor.hpp">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\ancient\src\LOBDecompressor.hpp">
+      <Filter>src</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\include\ancient\src\LZBSDecompressor.hpp">
       <Filter>src</Filter>
     </ClInclude>
@@ -114,32 +123,11 @@
     <ClInclude Include="..\..\..\include\ancient\src\LZW5Decompressor.hpp">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\ancient\src\LZXDecompressor.hpp">
+    <ClInclude Include="..\..\..\include\ancient\src\LZWDecoder.hpp">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\ancient\src\Lzh\LH1Decompressor.hpp">
-      <Filter>src\Lzh</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\ancient\src\Lzh\LH2Decompressor.hpp">
-      <Filter>src\Lzh</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\ancient\src\Lzh\LH3Decompressor.hpp">
-      <Filter>src\Lzh</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\ancient\src\Lzh\LHXDecompressor.hpp">
-      <Filter>src\Lzh</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\ancient\src\Lzh\LZ5Decompressor.hpp">
-      <Filter>src\Lzh</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\ancient\src\Lzh\LZHDecompressor.hpp">
-      <Filter>src\Lzh</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\ancient\src\Lzh\LZSDecompressor.hpp">
-      <Filter>src\Lzh</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\ancient\src\Lzh\PMDecompressor.hpp">
-      <Filter>src\Lzh</Filter>
+    <ClInclude Include="..\..\..\include\ancient\src\LZXDecompressor.hpp">
+      <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\ancient\src\MASHDecompressor.hpp">
       <Filter>src</Filter>
@@ -159,6 +147,12 @@
     <ClInclude Include="..\..\..\include\ancient\src\PPDecompressor.hpp">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\ancient\src\PPMQDecompressor.hpp">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\ancient\src\PackDecompressor.hpp">
+      <Filter>src</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\include\ancient\src\RAKEDecompressor.hpp">
       <Filter>src</Filter>
     </ClInclude>
@@ -172,6 +166,9 @@
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\ancient\src\RangeDecoder.hpp">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\ancient\src\SCOCompressDecompressor.hpp">
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\ancient\src\SDHCDecompressor.hpp">
@@ -210,20 +207,11 @@
     <ClInclude Include="..\..\..\include\ancient\src\XPKMain.hpp">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\ancient\src\ZENODecompressor.hpp">
+    <ClInclude Include="..\..\..\include\ancient\src\XPKUnimplemented.hpp">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\ancient\src\Zip\ImplodeDecompressor.hpp">
-      <Filter>src\Zip</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\ancient\src\Zip\ReduceDecompressor.hpp">
-      <Filter>src\Zip</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\ancient\src\Zip\ShrinkDecompressor.hpp">
-      <Filter>src\Zip</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\ancient\src\Zip\ZIPDecompressor.hpp">
-      <Filter>src\Zip</Filter>
+    <ClInclude Include="..\..\..\include\ancient\src\ZENODecompressor.hpp">
+      <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\ancient\src\common\Buffer.hpp">
       <Filter>src\common</Filter>
@@ -278,6 +266,12 @@
     <ClCompile Include="..\..\..\include\ancient\src\CYB2Decoder.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\include\ancient\src\CompactDecompressor.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\include\ancient\src\CompressDecompressor.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\include\ancient\src\DEFLATEDecompressor.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -297,6 +291,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\ancient\src\FRLEDecompressor.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\include\ancient\src\FreezeDecompressor.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\ancient\src\HFMNDecompressor.cpp">
@@ -323,6 +320,9 @@
     <ClCompile Include="..\..\..\include\ancient\src\LIN2Decompressor.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\include\ancient\src\LOBDecompressor.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\include\ancient\src\LZBSDecompressor.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -338,32 +338,11 @@
     <ClCompile Include="..\..\..\include\ancient\src\LZW5Decompressor.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\include\ancient\src\LZXDecompressor.cpp">
+    <ClCompile Include="..\..\..\include\ancient\src\LZWDecoder.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\include\ancient\src\Lzh\LH1Decompressor.cpp">
-      <Filter>src\Lzh</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\include\ancient\src\Lzh\LH2Decompressor.cpp">
-      <Filter>src\Lzh</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\include\ancient\src\Lzh\LH3Decompressor.cpp">
-      <Filter>src\Lzh</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\include\ancient\src\Lzh\LHXDecompressor.cpp">
-      <Filter>src\Lzh</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\include\ancient\src\Lzh\LZ5Decompressor.cpp">
-      <Filter>src\Lzh</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\include\ancient\src\Lzh\LZHDecompressor.cpp">
-      <Filter>src\Lzh</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\include\ancient\src\Lzh\LZSDecompressor.cpp">
-      <Filter>src\Lzh</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\include\ancient\src\Lzh\PMDecompressor.cpp">
-      <Filter>src\Lzh</Filter>
+    <ClCompile Include="..\..\..\include\ancient\src\LZXDecompressor.cpp">
+      <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\ancient\src\MASHDecompressor.cpp">
       <Filter>src</Filter>
@@ -383,6 +362,12 @@
     <ClCompile Include="..\..\..\include\ancient\src\PPDecompressor.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\include\ancient\src\PPMQDecompressor.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\include\ancient\src\PackDecompressor.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\include\ancient\src\RAKEDecompressor.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -396,6 +381,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\ancient\src\RangeDecoder.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\include\ancient\src\SCOCompressDecompressor.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\ancient\src\SDHCDecompressor.cpp">
@@ -434,20 +422,11 @@
     <ClCompile Include="..\..\..\include\ancient\src\XPKMain.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\include\ancient\src\ZENODecompressor.cpp">
+    <ClCompile Include="..\..\..\include\ancient\src\XPKUnimplemented.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\include\ancient\src\Zip\ImplodeDecompressor.cpp">
-      <Filter>src\Zip</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\include\ancient\src\Zip\ReduceDecompressor.cpp">
-      <Filter>src\Zip</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\include\ancient\src\Zip\ShrinkDecompressor.cpp">
-      <Filter>src\Zip</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\include\ancient\src\Zip\ZIPDecompressor.cpp">
-      <Filter>src\Zip</Filter>
+    <ClCompile Include="..\..\..\include\ancient\src\ZENODecompressor.cpp">
+      <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\ancient\src\common\Buffer.cpp">
       <Filter>src\common</Filter>
