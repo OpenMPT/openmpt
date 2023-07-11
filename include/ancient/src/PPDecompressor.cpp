@@ -238,7 +238,7 @@ size_t PPDecompressor::getRawSize() const noexcept
 void PPDecompressor::findKeyRound(BackwardInputStream &inputStream,LSBBitReader<BackwardInputStream> &bitReader,uint32_t keyBits,uint32_t keyMask,uint32_t outputPosition)
 {
 
-	uint32_t inputOffset;
+	size_t inputOffset;
 	uint32_t bufContent;
 	uint8_t bufLength;
 	uint32_t savedOutputPosition;
@@ -263,7 +263,7 @@ void PPDecompressor::findKeyRound(BackwardInputStream &inputStream,LSBBitReader<
 			return bit^((keyBits>>bitPos)&1U);
 
 		// meh
-		uint32_t tmpInputOffset=inputStream.getOffset();
+		size_t tmpInputOffset=inputStream.getOffset();
 		uint32_t tmpBufContent=bitReader.getBufContent();
 		uint8_t tmpBufLength=bitReader.getBufLength();
 
@@ -303,7 +303,7 @@ void PPDecompressor::findKeyRound(BackwardInputStream &inputStream,LSBBitReader<
 		count-=bits;
 		if (!count) return;
 		uint32_t bytes=(count>>3U)&~3U;
-		uint32_t offset=inputStream.getOffset();
+		size_t offset=inputStream.getOffset();
 		if (offset<bytes+10U)
 		{
 			failed=true;

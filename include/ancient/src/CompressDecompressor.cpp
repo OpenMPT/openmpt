@@ -114,7 +114,7 @@ void CompressDecompressor::decompressImpl(Buffer &rawData,bool verify)
 	bool maxReached=false;
 	auto readCode=[&]()->uint32_t
 	{
-		if (!maxReached && decoder.getCurrentIndex()>=(1<<codeBits))
+		if (!maxReached && decoder.getCurrentIndex()>=(1U<<codeBits))
 		{
 			reset();
 			if (codeBits!=_maxBits || _maxBits==9U) codeBits++;

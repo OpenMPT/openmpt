@@ -225,7 +225,7 @@ void LOBDecompressor::decompressRound(Buffer &rawData,const Buffer &packedData)
 			decoder.write(firstCode,false,writeByte);
 			while (!outputStream.eof())
 			{
-				if (codeBits!=12U && decoder.getCurrentIndex()+1U>=(1<<codeBits))
+				if (codeBits!=12U && decoder.getCurrentIndex()+1U>=(1U<<codeBits))
 					codeBits++;
 				uint32_t code=readBits(codeBits);
 				if (!code--)

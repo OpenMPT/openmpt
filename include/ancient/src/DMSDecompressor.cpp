@@ -568,7 +568,7 @@ void DMSDecompressor::decompressImpl(Buffer &rawData,bool verify,uint32_t &resta
 						uint16_t fixByte=fileSum-protoSum;
 						if (fixByte>=0x100U)
 							throw DecompressionError();
-						*outputStream.history(1)=fixByte;
+						*outputStream.history(1)=static_cast<uint8_t>(fixByte);
 					}
 				} else handleTrackSize();
 			};
@@ -584,7 +584,7 @@ void DMSDecompressor::decompressImpl(Buffer &rawData,bool verify,uint32_t &resta
 					// nothing needed
 				}
 				finishStream();
-				uint32_t missingNo=tmpOutputStream.getEndOffset()-tmpOutputStream.getOffset();
+				uint32_t missingNo=static_cast<uint32_t>(tmpOutputStream.getEndOffset()-tmpOutputStream.getOffset());
 				ForwardInputStream tmpInputStream(tmpBuffer,0,tmpChunkLength-missingNo);
 				initOutputStream(dataOffset-_rawOffset,rawChunkLength);
 				try

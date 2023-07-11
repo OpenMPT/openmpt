@@ -49,7 +49,7 @@ FreezeDecompressor::FreezeDecompressor(const Buffer &packedData,bool exactSizeKn
 		tmp=_packedData.read8(4U);
 		if (tmp&0xc0U)
 			throw InvalidFormatError();
-		_hufTable[5]=tmp;
+		_hufTable[5]=static_cast<uint8_t>(tmp);
 
 		uint32_t count=62,weights=256;
 		for (uint32_t i=0;i<6U;i++) count-=_hufTable[i];
