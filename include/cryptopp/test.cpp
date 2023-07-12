@@ -193,7 +193,7 @@ int scoped_main(int argc, char *argv[])
 		std::string command, executableName, macFilename;
 
 		if (argc < 2)
-			command = 'h';
+			command = "X-help";
 		else
 			command = argv[1];
 
@@ -398,7 +398,10 @@ int scoped_main(int argc, char *argv[])
 		else if (command == "ir")
 			InformationRecoverFile(argc-3, argv[2], argv+3);
 		else if (command == "v" || command == "vv")
-			return !Validate(argc>2 ? StringToValue<int, true>(argv[2]) : 0, command == "vv" /*thorough*/);
+		{
+			int testNumber = argc>2 ? StringToValue<int, true>(argv[2]) : 0;
+			return Validate(testNumber, command == "vv" /*thorough*/) ? 0 : 1;
+        }
 		else if (command.substr(0,1) == "b") // "b", "b1", "b2", ...
 			BenchmarkWithCommand(argc, argv);
 		else if (command == "z")
@@ -423,10 +426,10 @@ int scoped_main(int argc, char *argv[])
 			HmacFile(argv[2], argv[3]);
 		else if (command == "ae")
 			AES_CTR_Encrypt(argv[2], argv[3], argv[4], argv[5]);
-		else if (command == "h")
+		else if (command == "h" || command == "X-help")
 		{
 			FileSource usage(DataDir("TestData/usage.dat").c_str(), true, new FileSink(std::cout));
-			return argv[1][0] == 'h' ? 0 : 1;
+			return command == "h" ? 0 : 1;
 		}
 		else if (command == "V")
 		{
