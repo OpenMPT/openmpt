@@ -19,7 +19,8 @@ public:
 	DynamicHuffmanDecoder(uint32_t initialCount=maxCount) :
 		_initialCount(initialCount)
 	{
-		if (_initialCount>maxCount) throw Decompressor::DecompressionError();
+		if (_initialCount>maxCount)
+			throw Decompressor::DecompressionError();
 		reset();
 	}
 

@@ -1,6 +1,7 @@
 /* Copyright (C) Teemu Suutari */
 
 #include "BLZWDecompressor.hpp"
+#include "LZWDecoder.hpp"
 #include "InputStream.hpp"
 #include "OutputStream.hpp"
 #include "common/Common.hpp"
@@ -48,46 +49,23 @@ void BLZWDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 	{
 		return bitReader.readBits8(count);
 	};
-	
+
 	ForwardOutputStream outputStream(rawData,0,rawData.size());
-
-	uint32_t maxCode=1<<_maxBits;
-	auto prefix=std::make_unique<uint32_t[]>(maxCode-259);
-	auto suffix=std::make_unique<uint8_t[]>(maxCode-259);
-	auto stack=std::make_unique<uint8_t[]>(_stackLength);
-
-	uint32_t freeIndex,codeBits,prevCode,newCode;
-
-	auto suffixLookup=[&](uint32_t code)->uint32_t
+	auto writeByte=[&](uint8_t value)
 	{
-		if (code>=freeIndex) throw Decompressor::DecompressionError();
-		return (code<259)?code:suffix[code-259];
+		outputStream.writeByte(value);
 	};
 
-	auto insert=[&](uint32_t code)
+	uint32_t codeBits=9U;
+	auto readCode=[&]()->uint32_t
 	{
-		uint32_t stackPos=0;
-		newCode=suffixLookup(code);
-		while (code>=259)
-		{
-			if (stackPos+1>=_stackLength) throw Decompressor::DecompressionError();
-			stack[stackPos++]=newCode;
-			code=prefix[code-259];
-			newCode=suffixLookup(code);
-		}
-		stack[stackPos++]=newCode;
-		while (stackPos) outputStream.writeByte(stack[--stackPos]);
+		return readBits(codeBits);
 	};
 
-	auto init=[&]()
-	{
-		codeBits=9;
-		freeIndex=259;
-		prevCode=readBits(codeBits);
-		insert(prevCode);
-	};
+	uint32_t firstCode=readCode();
+	LZWDecoder decoder(1<<_maxBits,259U,_stackLength,firstCode);
+	decoder.write(firstCode,false,writeByte);
 
-	init();
 	while (!outputStream.eof())
 	{
 		uint32_t code=readBits(codeBits);
@@ -98,27 +76,21 @@ void BLZWDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 			break;
 
 			case 257:
-			init();
+			codeBits=9U;
+			firstCode=readCode();
+			decoder.reset(firstCode);
+			decoder.write(firstCode,false,writeByte);
 			break;
 
 			case 258:
+			if (codeBits>=24)
+				throw Decompressor::DecompressionError();
 			codeBits++;
 			break;
 
 			default:
-			if (code>=freeIndex)
-			{
-				uint32_t tmp=newCode;
-				insert(prevCode);
-				outputStream.writeByte(tmp);
-			} else insert(code);
-			if (freeIndex<maxCode)
-			{
-				suffix[freeIndex-259]=newCode;
-				prefix[freeIndex-259]=prevCode;
-				freeIndex++;
-			}
-			prevCode=code;
+			decoder.write(code,!decoder.isLiteral(code),writeByte);
+			decoder.add(code);
 			break;
 		}
 	}

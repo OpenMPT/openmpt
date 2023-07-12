@@ -169,12 +169,11 @@ std::optional<size_t> Decompressor::getImageOffset() const noexcept
 
 std::vector<uint8_t> Decompressor::decompress(bool verify)
 {
-	std::vector<uint8_t> result((m_impl->_decompressor->getRawSize())?m_impl->_decompressor->getRawSize():m_impl->_decompressor->getMaxRawSize());
+	std::vector<uint8_t> result((m_impl->_decompressor->getRawSize())?m_impl->_decompressor->getRawSize():0);
 	{
 		internal::WrappedVectorBuffer buffer(result);
 		m_impl->_decompressor->decompress(buffer, verify);
 	}
-	result.resize(m_impl->_decompressor->getRawSize());
 	result.shrink_to_fit();
 	return result;
 }

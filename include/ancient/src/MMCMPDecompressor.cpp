@@ -75,7 +75,6 @@ void MMCMPDecompressor::decompressImpl(Buffer &rawData,bool verify)
 	// MMCMP allows gaps in data. Although not used in practice still we memset before decompressing to be sure
 	std::memset(rawData.data(),0,rawData.size());
 
-	uint8_t *rawDataPtr=rawData.data();
 	for (uint32_t i=0;i<_blocks;i++)
 	{
 		uint32_t blockAddr=_packedData.readLE32(_blocksOffset+i*4U);
@@ -120,7 +119,7 @@ void MMCMPDecompressor::decompressImpl(Buffer &rawData,bool verify)
 				readNextSubBlock();
 			}
 			outputSize--;
-			rawDataPtr[outputOffset++]=value;
+			rawData[outputOffset++]=value;
 			if (verify)
 			{
 				if (_version>=0x1310)

@@ -49,7 +49,7 @@ LZXDecompressor::LZXDecompressor(uint32_t hdr,uint32_t recursionLevel,const Buff
 	if (tmp && tmp!=2) throw Decompressor::InvalidFormatError();
 	if (tmp==2) _isCompressed=true;
 
-	_packedOffset=41U+_packedData.read8(40U);
+	_packedOffset=41U+uint32_t(_packedData.read8(40U));
 	_packedOffset+=_packedData.read8(24U);
 	_packedSize+=_packedOffset;
 

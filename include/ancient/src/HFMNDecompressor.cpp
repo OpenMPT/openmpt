@@ -49,40 +49,47 @@ const std::string &HFMNDecompressor::getSubName() const noexcept
 
 void HFMNDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData,bool verify)
 {
+	ForwardOutputStream outputStream(rawData,0,rawData.size());
+	HuffmanDecoder<uint32_t> decoder;
+
 	if (rawData.size()!=_rawSize) throw Decompressor::DecompressionError();
-	ForwardInputStream inputStream(_packedData,2,_headerSize);
+	{
+		ForwardInputStream inputStream(_packedData,2,_headerSize);
+		MSBBitReader<ForwardInputStream> bitReader(inputStream);
+		auto readBit=[&]()->uint32_t
+		{
+			return bitReader.readBits8(1);
+		};
+
+		uint32_t code=1;
+		uint32_t codeBits=1;
+		for (;;)
+		{
+			if (!readBit())
+			{
+				uint32_t lit=0;
+				for (uint32_t i=0;i<8;i++) lit|=readBit()<<i;
+				decoder.insert(HuffmanCode<uint32_t>{codeBits,code,lit});
+				while (!(code&1) && codeBits)
+				{
+					codeBits--;
+					code>>=1;
+				}
+				if (!codeBits) break;
+				code--;
+			} else {
+				code=(code<<1)+1;
+				codeBits++;
+			}
+		}
+	}
+
+	ForwardInputStream inputStream(_packedData,_headerSize,_packedData.size());
 	MSBBitReader<ForwardInputStream> bitReader(inputStream);
 	auto readBit=[&]()->uint32_t
 	{
 		return bitReader.readBits8(1);
 	};
-
-	ForwardOutputStream outputStream(rawData,0,rawData.size());
-
-	HuffmanDecoder<uint32_t> decoder;
-	uint32_t code=1;
-	uint32_t codeBits=1;
-	for (;;)
-	{
-		if (!readBit())
-		{
-			uint32_t lit=0;
-			for (uint32_t i=0;i<8;i++) lit|=readBit()<<i;
-			decoder.insert(HuffmanCode<uint32_t>{codeBits,code,lit});
-			while (!(code&1) && codeBits)
-			{
-				codeBits--;
-				code>>=1;
-			}
-			if (!codeBits) break;	
-			code--;
-		} else {
-			code=(code<<1)+1;
-			codeBits++;
-		}
-	}
-	inputStream=ForwardInputStream(_packedData,_headerSize,_packedData.size());
-	bitReader.reset();
 
 	while (!outputStream.eof())
 		outputStream.writeByte(decoder.decode(readBit));

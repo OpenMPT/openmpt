@@ -210,7 +210,7 @@ void SXSCDecompressor::decompressASC(Buffer &rawData,ForwardInputStream &inputSt
 			if (distanceBits>=2)
 			{
 				uint16_t minRange=1<<(distanceBits-1);
-				uint16_t range=distanceIndex==distanceBits?static_cast<uint16_t>(std::min(outputStream.getOffset(),size_t(31200U)))-minRange:minRange;
+				uint16_t range=distanceIndex==distanceBits?uint16_t(std::min(outputStream.getOffset(),size_t(31200U)))-minRange:minRange;
 				distance=arithDecoder.decode(range);
 				arithDecoder.scale(distance,distance+1,range);
 				distance+=minRange;
@@ -770,18 +770,15 @@ void SXSCDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 	auto deltaDecode16BE=[&]()
 	{
 		size_t length=rawData.size();
-		const uint8_t *src=tmpBuffer->data();
-		const uint8_t *midSrc=&src[length>>1];
-		uint8_t *dest=rawData.data();
 
 		uint8_t ctr=0;
 		for (size_t i=0,j=0;j<length;i++,j+=2)
 		{
-			ctr+=src[i];
-			dest[j]=ctr;
-			dest[j+1]=midSrc[i];
+			ctr+=(*tmpBuffer)[i];
+			rawData[j]=ctr;
+			rawData[j+1]=(*tmpBuffer)[(length>>1)+i];
 		}
-		if (length&1) dest[length-1]=src[length-1];
+		if (length&1) rawData[length-1]=(*tmpBuffer)[length-1];
 	};
 
 	// Stereo, High byte only
@@ -789,18 +786,15 @@ void SXSCDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 	auto deltaDecode16LE=[&]()
 	{
 		size_t length=rawData.size();
-		const uint8_t *src=tmpBuffer->data();
-		const uint8_t *midSrc=&src[length>>1];
-		uint8_t *dest=rawData.data();
 
 		uint8_t ctr=0;
 		for (size_t i=0,j=0;j<length;i++,j+=2)
 		{
-			dest[j]=midSrc[i];
-			ctr+=src[i];
-			dest[j+1]=ctr;
+			rawData[j]=(*tmpBuffer)[(length>>1)+i];
+			ctr+=(*tmpBuffer)[i];
+			rawData[j+1]=ctr;
 		}
-		if (length&1) dest[length-1]=src[length-1];
+		if (length&1) rawData[length-1]=(*tmpBuffer)[length-1];
 	};
 
 	switch (mode)

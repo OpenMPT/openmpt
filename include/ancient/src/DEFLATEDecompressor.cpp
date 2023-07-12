@@ -17,13 +17,10 @@ namespace ancient::internal
 
 static uint32_t Adler32(const Buffer &buffer,size_t offset,size_t len)
 {
-	if (!len || OverflowCheck::sum(offset,len)>buffer.size()) throw Buffer::OutOfBoundsError();
-	const uint8_t *ptr=buffer.data()+offset;
-
 	uint32_t s1=1,s2=0;
 	for (size_t i=0;i<len;i++)
 	{
-		s1+=ptr[i];
+		s1+=buffer[offset+i];
 		if (s1>=65521) s1-=65521;
 		s2+=s1;
 		if (s2>=65521) s2-=65521;
@@ -33,7 +30,7 @@ static uint32_t Adler32(const Buffer &buffer,size_t offset,size_t len)
 
 bool DEFLATEDecompressor::detectHeader(uint32_t hdr) noexcept
 {
-	return ((hdr>>16)==0x1f8b);
+	return ((hdr>>16U)==0x1f8bU)||((hdr>>16U)==0x1fa1U);
 }
 
 bool DEFLATEDecompressor::detectHeaderXPK(uint32_t hdr) noexcept
@@ -81,49 +78,64 @@ DEFLATEDecompressor::DEFLATEDecompressor(const Buffer &packedData,bool exactSize
 	_packedData(packedData),
 	_exactSizeKnown(exactSizeKnown)
 {
-	if (_packedData.size()<18) throw InvalidFormatError();
-	uint32_t hdr=_packedData.readBE32(0);
-	if (!detectHeader(hdr)) throw InvalidFormatError();
+	if (_packedData.size()<2U) throw InvalidFormatError();
+	uint32_t hdr=_packedData.readBE16(0);
+	if (!detectHeader(hdr<<16U)) throw InvalidFormatError();
 
-	uint8_t cm=_packedData.read8(2);
-	if (cm!=8) throw InvalidFormatError();;
-
-	uint8_t flags=_packedData.read8(3);
-	if (flags&0xe0) throw InvalidFormatError();;
-	
-	uint32_t currentOffset=10;
-
-	if (flags&4)
+	if (hdr==0x1f8bU)
 	{
-		uint16_t xlen=_packedData.readLE16(currentOffset);
-		currentOffset+=uint32_t(xlen)+2;
+		// Standard Gzip
+		if (_packedData.size()<18U) throw InvalidFormatError();
+
+		uint8_t cm=_packedData.read8(2);
+		if (cm!=8) throw InvalidFormatError();;
+
+		uint8_t flags=_packedData.read8(3);
+		if (flags&0xe0) throw InvalidFormatError();;
+
+		uint32_t currentOffset=10;
+
+		if (flags&4)
+		{
+			uint16_t xlen=_packedData.readLE16(currentOffset);
+			currentOffset+=uint32_t(xlen)+2;
+		}
+
+		auto skipString=[&]()
+		{
+			uint8_t ch;
+			do {
+				ch=_packedData.read8(currentOffset);
+				currentOffset++;
+			} while (ch);
+		};
+
+		if (flags&8) skipString();		// FNAME
+		if (flags&16) skipString();		// FCOMMENT
+
+		if (flags&2) currentOffset+=2;		// FHCRC, not using that since it is only for header
+		_packedOffset=currentOffset;
+
+		if (OverflowCheck::sum(currentOffset,8U)>_packedData.size())
+			throw InvalidFormatError();
+
+		_type=Type::GZIP;
+	} else {
+		// Quasijarus
+		if (_packedData.size()<10U) throw InvalidFormatError();
+
+		_packedOffset=2U;
+
+		_type=Type::Quasijarus;
 	}
-	
-	auto skipString=[&]()
-	{
-		uint8_t ch;
-		do {
-			ch=_packedData.read8(currentOffset);
-			currentOffset++;
-		} while (ch);
-	};
-	
-	if (flags&8) skipString();		// FNAME
-	if (flags&16) skipString();		// FCOMMENT
-
-	if (flags&2) currentOffset+=2;		// FHCRC, not using that since it is only for header
-	_packedOffset=currentOffset;
-
-	if (OverflowCheck::sum(currentOffset,8U)>_packedData.size()) throw InvalidFormatError();
 
 	if (_exactSizeKnown)
 	{
 		_packedSize=_packedData.size();
 		_rawSize=_packedData.readLE32(_packedData.size()-4);
-		if (!_rawSize) throw InvalidFormatError();
+		if (!_rawSize || _rawSize>getMaxRawSize())
+			throw InvalidFormatError();
 	}
-
-	_type=Type::GZIP;
 }
 
 DEFLATEDecompressor::DEFLATEDecompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify) :
@@ -164,8 +176,9 @@ DEFLATEDecompressor::~DEFLATEDecompressor()
 
 const std::string &DEFLATEDecompressor::getName() const noexcept
 {
-	static std::string names[3]={
+	static std::string names[4]={
 		"gzip: Deflate",
+		"Z: Quasijarus Strong Compression",
 		"zlib: Deflate",
 		"raw: Deflate/Deflate64"};
 	return names[static_cast<uint32_t>(_type)];
@@ -193,7 +206,6 @@ size_t DEFLATEDecompressor::getRawSize() const noexcept
 void DEFLATEDecompressor::decompressImpl(Buffer &rawData,bool verify)
 {
 	size_t packedSize=_packedSize?_packedSize:_packedData.size();
-	size_t rawSize=_rawSize?_rawSize:rawData.size();
 
 	ForwardInputStream inputStream(_packedData,_packedOffset,packedSize);
 	LSBBitReader<ForwardInputStream> bitReader(inputStream);
@@ -206,7 +218,7 @@ void DEFLATEDecompressor::decompressImpl(Buffer &rawData,bool verify)
 		return bitReader.readBits8(1);
 	};
 
-	ForwardOutputStream outputStream(rawData,0,rawSize);
+	AutoExpandingForwardOutputStream outputStream(rawData);
 
 	bool final;
 	do {
@@ -349,25 +361,21 @@ void DEFLATEDecompressor::decompressImpl(Buffer &rawData,bool verify)
 		}
 	} while (!final);
 
-	if (!_rawSize) _rawSize=outputStream.getOffset();
-	if (_type==Type::GZIP)
+	_rawSize=outputStream.getOffset();
+	if (_type==Type::GZIP || _type==Type::Quasijarus)
 	{
 		if (OverflowCheck::sum(inputStream.getOffset(),8U)>packedSize) throw DecompressionError();
-		if (!_packedSize)
-			_packedSize=inputStream.getOffset()+8;
+		_packedSize=inputStream.getOffset()+8;
 	} else if (_type==Type::ZLib) {
 		if (OverflowCheck::sum(inputStream.getOffset(),4U)>packedSize) throw DecompressionError();
-		if (!_packedSize)
-			_packedSize=inputStream.getOffset()+4;
+		_packedSize=inputStream.getOffset()+4;
 	} else {
-		if (!_packedSize)
-			_packedSize=inputStream.getOffset();
+		_packedSize=inputStream.getOffset();
 	}
-	if (_rawSize!=outputStream.getOffset()) throw DecompressionError();
 
 	if (verify)
 	{
-		if (_type==Type::GZIP)
+		if (_type==Type::GZIP || _type==Type::Quasijarus)
 		{
 			uint32_t crc=_packedData.readLE32(inputStream.getOffset());
 			if (CRC32(rawData,0,_rawSize,0)!=crc) throw VerificationError();

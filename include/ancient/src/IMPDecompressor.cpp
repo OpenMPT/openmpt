@@ -139,7 +139,7 @@ void IMPDecompressor::decompressImpl(Buffer &rawData,bool verify)
 	{
 	public:
 		IMPInputStream(const Buffer &buffer,size_t startOffset,size_t endOffset) :
-			_bufPtr(buffer.data()),
+			_buffer(buffer),
 			_currentOffset(endOffset),
 			_endOffset(startOffset),
 			_refOffset(endOffset)
@@ -178,13 +178,13 @@ void IMPDecompressor::decompressImpl(Buffer &rawData,bool verify)
 				}
 			};
 			if (_currentOffset<=_endOffset) throw Decompressor::DecompressionError();
-			return _bufPtr[sourceOffset(--_currentOffset)];
+			return _buffer[sourceOffset(--_currentOffset)];
 		}
 
 		bool eof() const { return _currentOffset==_endOffset; }
 
 	private:
-		const uint8_t		*_bufPtr;
+		const Buffer		&_buffer;
 		size_t			_currentOffset;
 		size_t			_endOffset;
 		size_t			_refOffset;

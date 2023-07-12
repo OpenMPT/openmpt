@@ -33,11 +33,6 @@ public:
 private:
 	void decompressImpl(Buffer &rawData,bool verify,uint32_t &restartPosition);
 
-	class ShortInputError : public Error
-	{
-		// nothing needed
-	};
-
 	const Buffer	&_packedData;
 
 	uint32_t	_packedSize=0;

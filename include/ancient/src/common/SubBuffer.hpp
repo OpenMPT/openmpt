@@ -27,6 +27,7 @@ public:
 		_length(length)
 	{
 		// if the sub-buffer is invalid, we set both _start and _length to 0
+		// TODO: Check if invalid-empty buffers are still required
 		if (OverflowCheck::sum(start,length)>_base.size())
 		{
 			_start=0;

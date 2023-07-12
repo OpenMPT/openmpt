@@ -47,6 +47,7 @@ private:
 	uint32_t	_type=0;
 	bool		_longHeaders=false;
 	uint32_t	_recursionLevel=0;
+	bool		_hasPassword=false;
 };
 
 }

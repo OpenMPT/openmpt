@@ -63,35 +63,31 @@ void SDHCDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 
 	auto deltaDecodeMono=[&]()
 	{
-		uint8_t *buf=rawData.data();
-
 		uint16_t ctr=0;
 		for (size_t i=0;i<length;i+=2)
 		{
 			uint16_t tmp;
-			tmp=(uint16_t(buf[i])<<8)|uint16_t(buf[i+1]);
+			tmp=(uint16_t(rawData[i])<<8)|uint16_t(rawData[i+1]);
 			ctr+=tmp;
-			buf[i]=ctr>>8;
-			buf[i+1]=ctr&0xff;
+			rawData[i]=ctr>>8;
+			rawData[i+1]=ctr&0xff;
 		}
 	};
 
 	auto deltaDecodeStereo=[&]()
 	{
-		uint8_t *buf=rawData.data();
-
 		uint16_t ctr1=0,ctr2=0;
 		for (size_t i=0;i<length;i+=4)
 		{
 			uint16_t tmp;
-			tmp=(uint16_t(buf[i])<<8)|uint16_t(buf[i+1]);
+			tmp=(uint16_t(rawData[i])<<8)|uint16_t(rawData[i+1]);
 			ctr1+=tmp;
-			tmp=(uint16_t(buf[i+2])<<8)|uint16_t(buf[i+3]);
+			tmp=(uint16_t(rawData[i+2])<<8)|uint16_t(rawData[i+3]);
 			ctr2+=tmp;
-			buf[i]=ctr1>>8;
-			buf[i+1]=ctr1&0xff;
-			buf[i+2]=ctr2>>8;
-			buf[i+3]=ctr2&0xff;
+			rawData[i]=ctr1>>8;
+			rawData[i+1]=ctr1&0xff;
+			rawData[i+2]=ctr2>>8;
+			rawData[i+3]=ctr2&0xff;
 		}
 	};
 

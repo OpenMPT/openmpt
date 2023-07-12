@@ -5,6 +5,7 @@
 
 #include "Decompressor.hpp"
 #include "XPKDecompressor.hpp"
+#include "InputStream.hpp"
 
 namespace ancient::internal
 {
@@ -42,12 +43,28 @@ public:
 	static std::shared_ptr<XPKDecompressor> create(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify);
 
 private:
+	class DoneException : public std::exception
+	{
+	public:
+		DoneException(uint32_t key) noexcept : _key(key) {}
+		virtual ~DoneException() {}
+
+		uint32_t getKey() const noexcept { return _key; }
+
+	private:
+		uint32_t	_key;
+	};
+
+	void findKeyRound(BackwardInputStream &inputStream,LSBBitReader<BackwardInputStream> &bitReader,uint32_t keyBits,uint32_t keyMask,uint32_t outputPosition);
+	void findKey(uint32_t keyBits,uint32_t keyMask);
+
 	const Buffer	&_packedData;
 
 	size_t		_dataStart=0;
 	size_t		_rawSize=0;
 	uint8_t		_startShift=0;
 	uint8_t		_modeTable[4];
+	bool		_isObsfuscated=false;
 	bool		_isXPK=false;
 };
 

@@ -1,32 +1,29 @@
 /* Copyright (C) Teemu Suutari */
 
-#ifndef BLZWDECOMPRESSOR_HPP
-#define BLZWDECOMPRESSOR_HPP
+#ifndef PPMQDECOMPRESSOR_HPP
+#define PPMQDECOMPRESSOR_HPP
 
 #include "XPKDecompressor.hpp"
 
 namespace ancient::internal
 {
 
-class BLZWDecompressor : public XPKDecompressor
+class PPMQDecompressor : public XPKDecompressor
 {
 public:
-	BLZWDecompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify);
+	PPMQDecompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify);
 
-	virtual ~BLZWDecompressor();
+	virtual ~PPMQDecompressor();
 
 	virtual const std::string &getSubName() const noexcept override final;
 
 	virtual void decompressImpl(Buffer &rawData,const Buffer &previousData,bool verify) override final;
 
-	static bool detectHeaderXPK(uint32_t hdr);
+	static bool detectHeaderXPK(uint32_t hdr) noexcept;
 	static std::shared_ptr<XPKDecompressor> create(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify);
 
 private:
 	const Buffer	&_packedData;
-
-	uint32_t	_maxBits=0;
-	uint32_t	_stackLength=0;
 };
 
 }

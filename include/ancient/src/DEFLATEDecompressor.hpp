@@ -38,6 +38,7 @@ private:
 	enum class Type
 	{
 		GZIP=0,
+		Quasijarus,
 		ZLib,
 		Raw
 	};

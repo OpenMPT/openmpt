@@ -23,18 +23,22 @@ public:
 	ForwardInputStream(const Buffer &buffer,size_t startOffset,size_t endOffset,bool allowOverrun=false);
 	~ForwardInputStream();
 
+	void reset(size_t startOffset,size_t endOffset);
+
 	uint8_t readByte();
 	const uint8_t *consume(size_t bytes,uint8_t *buffer=nullptr);
 
-	bool eof() const { return _currentOffset==_endOffset; }
-	size_t getOffset() const { return _currentOffset; }
-	size_t getEndOffset() const { return _endOffset; }
-	void link(BackwardInputStream &stream) { _linkedInputStream=&stream; }
+	bool eof() const noexcept { return _currentOffset==_endOffset; }
+	size_t getOffset() const noexcept { return _currentOffset; }
+	size_t getEndOffset() const noexcept { return _endOffset; }
+	void link(BackwardInputStream &stream) noexcept { _linkedInputStream=&stream; }
+
+	void setOffset(size_t offset);
 
 private:
-	void setOffset(size_t offset) { _endOffset=offset; }
+	void setEndOffset(size_t offset) noexcept { _endOffset=offset; }
 
-	const uint8_t		*_bufPtr;
+	const Buffer		&_buffer;
 	size_t			_currentOffset;
 	size_t			_endOffset;
 	bool			_allowOverrun;
@@ -53,14 +57,16 @@ public:
 	uint8_t readByte();
 	const uint8_t *consume(size_t bytes,uint8_t *buffer=nullptr);
 
-	bool eof() const { return _currentOffset==_endOffset; }
-	size_t getOffset() const { return _currentOffset; }
-	void link(ForwardInputStream &stream) { _linkedInputStream=&stream; }
+	bool eof() const noexcept { return _currentOffset==_endOffset; }
+	size_t getOffset() const noexcept { return _currentOffset; }
+	void link(ForwardInputStream &stream) noexcept { _linkedInputStream=&stream; }
+
+	void setOffset(size_t offset);
 
 private:
-	void setOffset(size_t offset) { _endOffset=offset; }
+	void setEndOffset(size_t offset) noexcept { _endOffset=offset; }
 
-	const uint8_t		*_bufPtr;
+	const Buffer		&_buffer;
 	size_t			_currentOffset;
 	size_t			_endOffset;
 	bool			_allowOverrun;
@@ -73,7 +79,7 @@ template<typename T>
 class LSBBitReader
 {
 public:
-	LSBBitReader(T &inputStream) :
+	LSBBitReader(T &inputStream) noexcept :
 		_inputStream(inputStream)
 	{
 		// nothing needed
@@ -102,13 +108,13 @@ public:
 		});
 	}
 
-	uint32_t readBitsBE32(uint32_t count)
+	uint32_t readBitsBE32(uint32_t count,uint32_t xorKey=0)
 	{
 		return readBitsInternal(count,[&](){
 			uint8_t tmp[4];
 			const uint8_t *buf=_inputStream.consume(4,tmp);
-			_bufContent=(uint32_t(buf[0])<<24)|(uint32_t(buf[1])<<16)|
-				(uint32_t(buf[2])<<8)|uint32_t(buf[3]);
+			_bufContent=((uint32_t(buf[0])<<24)|(uint32_t(buf[1])<<16)|
+				(uint32_t(buf[2])<<8)|uint32_t(buf[3]))^xorKey;
 			_bufLength=32;
 		});
 	}
@@ -128,7 +134,10 @@ public:
 		});
 	}
 
-	void reset(uint32_t bufContent=0,uint8_t bufLength=0)
+	uint32_t getBufContent() const noexcept { return _bufContent; }
+	uint8_t getBufLength() const noexcept { return _bufLength; }
+
+	void reset(uint32_t bufContent=0,uint8_t bufLength=0) noexcept
 	{
 		_bufContent=bufContent;
 		_bufLength=bufLength;
@@ -163,7 +172,7 @@ template<typename T>
 class MSBBitReader
 {
 public:
-	MSBBitReader(T &inputStream) :
+	MSBBitReader(T &inputStream) noexcept :
 		_inputStream(inputStream)
 	{
 		// nothing needed
@@ -203,7 +212,20 @@ public:
 		});
 	}
 
-	void reset(uint32_t bufContent=0,uint8_t bufLength=0)
+	uint32_t readBitsLE16(uint32_t count)
+	{
+		return readBitsInternal(count,[&](){
+			uint8_t tmp[2];
+			const uint8_t *buf=_inputStream.consume(2,tmp);
+			_bufContent=(uint32_t(buf[1])<<8)|uint32_t(buf[0]);
+			_bufLength=16;
+		});
+	}
+
+	uint32_t getBufContent() const noexcept { return _bufContent; }
+	uint8_t getBufLength() const noexcept { return _bufLength; }
+
+	void reset(uint32_t bufContent=0,uint8_t bufLength=0) noexcept
 	{
 		_bufContent=bufContent;
 		_bufLength=bufLength;
