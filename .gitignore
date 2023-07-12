@@ -132,6 +132,8 @@
 /include/allegro42/*
 /include/ancient/.github
 /include/ancient/.gitignore
+/include/ancient/Ancient.sln
+/include/ancient/Ancient.vcxproj
 /include/ancient/Makefile.am
 /include/ancient/Makefile.unix
 /include/ancient/README.md
