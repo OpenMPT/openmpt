@@ -552,7 +552,7 @@ void DMSDecompressor::decompressImpl(Buffer &rawData,bool verify,uint32_t &resta
 			{
 				if (mode==6U && !_isObsfuscated)
 				{
-					uint32_t missingNo=outputStream.getEndOffset()-outputStream.getOffset();
+					uint32_t missingNo=uint32_t(outputStream.getEndOffset()-outputStream.getOffset());
 					uint16_t protoSum=checksum(&rawData[dataOffset-_rawOffset],rawChunkLength-missingNo);
 					uint16_t fileSum=_packedData.readBE16(packedOffset+14);
 
@@ -568,7 +568,7 @@ void DMSDecompressor::decompressImpl(Buffer &rawData,bool verify,uint32_t &resta
 						uint16_t fixByte=fileSum-protoSum;
 						if (fixByte>=0x100U)
 							throw DecompressionError();
-						*outputStream.history(1)=static_cast<uint8_t>(fixByte);
+						*outputStream.history(1)=uint8_t(fixByte);
 					}
 				} else handleTrackSize();
 			};

@@ -86,7 +86,7 @@ void CompactDecompressor::decompressImpl(Buffer &rawData,bool verify)
 	mapper[codeCount++]=256U;
 	mapper[codeCount++]=257U;
 	mapper[codeCount++]=readBits(8U);
-	outputStream.writeByte(static_cast<uint8_t>(mapper[2]));
+	outputStream.writeByte(uint8_t(mapper[2]));
 
 	for(;;)
 	{

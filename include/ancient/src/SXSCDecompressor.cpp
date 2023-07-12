@@ -210,7 +210,7 @@ void SXSCDecompressor::decompressASC(Buffer &rawData,ForwardInputStream &inputSt
 			if (distanceBits>=2)
 			{
 				uint16_t minRange=1<<(distanceBits-1);
-				uint16_t range=distanceIndex==distanceBits?static_cast<uint16_t>(std::min(outputStream.getOffset(),size_t(31200U)))-minRange:minRange;
+				uint16_t range=distanceIndex==distanceBits?uint16_t(std::min(outputStream.getOffset(),size_t(31200U)))-minRange:minRange;
 				distance=arithDecoder.decode(range);
 				arithDecoder.scale(distance,distance+1,range);
 				distance+=minRange;

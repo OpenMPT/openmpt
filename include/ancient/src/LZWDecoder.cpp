@@ -6,7 +6,7 @@
 namespace ancient::internal
 {
 
-LZWDecoder::LZWDecoder(uint32_t maxCode,uint32_t literalCodes,size_t stackLength,uint32_t firstCode) :
+LZWDecoder::LZWDecoder(uint32_t maxCode,uint32_t literalCodes,uint32_t stackLength,uint32_t firstCode) :
 	_maxCode(maxCode),
 	_literalCodes(literalCodes),
 	_stackLength(stackLength),

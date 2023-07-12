@@ -168,7 +168,7 @@ void PackDecompressor::decompressImpl(Buffer &rawData,bool verify)
 					throw DecompressionError();
 				break;
 			}
-			outputStream.writeByte(static_cast<uint8_t>(code));
+			outputStream.writeByte(uint8_t(code));
 		}
 	}
 

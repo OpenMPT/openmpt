@@ -238,7 +238,7 @@ size_t PPDecompressor::getRawSize() const noexcept
 void PPDecompressor::findKeyRound(BackwardInputStream &inputStream,LSBBitReader<BackwardInputStream> &bitReader,uint32_t keyBits,uint32_t keyMask,uint32_t outputPosition)
 {
 
-	size_t inputOffset;
+	uint32_t inputOffset;
 	uint32_t bufContent;
 	uint8_t bufLength;
 	uint32_t savedOutputPosition;
@@ -263,7 +263,7 @@ void PPDecompressor::findKeyRound(BackwardInputStream &inputStream,LSBBitReader<
 			return bit^((keyBits>>bitPos)&1U);
 
 		// meh
-		size_t tmpInputOffset=inputStream.getOffset();
+		uint32_t tmpInputOffset=uint32_t(inputStream.getOffset());
 		uint32_t tmpBufContent=bitReader.getBufContent();
 		uint8_t tmpBufLength=bitReader.getBufLength();
 
@@ -303,7 +303,7 @@ void PPDecompressor::findKeyRound(BackwardInputStream &inputStream,LSBBitReader<
 		count-=bits;
 		if (!count) return;
 		uint32_t bytes=(count>>3U)&~3U;
-		size_t offset=inputStream.getOffset();
+		uint32_t offset=uint32_t(inputStream.getOffset());
 		if (offset<bytes+10U)
 		{
 			failed=true;
@@ -323,7 +323,7 @@ void PPDecompressor::findKeyRound(BackwardInputStream &inputStream,LSBBitReader<
 	for (;;)
 	{
 		// this is the checkpoint. Hardly ideal, but best we can do without co-routines
-		inputOffset=inputStream.getOffset();
+		inputOffset=uint32_t(inputStream.getOffset());
 		bufContent=bitReader.getBufContent();
 		bufLength=bitReader.getBufLength();
 		savedOutputPosition=outputPosition;
@@ -384,7 +384,7 @@ void PPDecompressor::findKey(uint32_t keyBits,uint32_t keyMask)
 
 	bitReader.readBitsBE32(_startShift);
 
-	findKeyRound(inputStream,bitReader,keyBits,keyMask,_rawSize);
+	findKeyRound(inputStream,bitReader,keyBits,keyMask,uint32_t(_rawSize));
 }
 
 void PPDecompressor::decompressImpl(Buffer &rawData,bool verify)

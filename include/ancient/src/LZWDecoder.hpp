@@ -14,7 +14,7 @@ namespace ancient::internal
 class LZWDecoder
 {
 public:
-	LZWDecoder(uint32_t maxCode,uint32_t literalCodes,size_t stackLength,uint32_t firstCode);
+	LZWDecoder(uint32_t maxCode,uint32_t literalCodes,uint32_t stackLength,uint32_t firstCode);
 	~LZWDecoder();
 
 	void reset(uint32_t firstCode);
@@ -67,7 +67,7 @@ public:
 private:
 	uint32_t	_maxCode;
 	uint32_t	_literalCodes;
-	size_t	_stackLength;
+	uint32_t	_stackLength;
 	uint32_t	_freeIndex;
 
 	uint32_t	_prevCode;
