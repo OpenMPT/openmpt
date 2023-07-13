@@ -74,8 +74,8 @@ void PPMQDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 	ForwardOutputStream outputStream(rawData,0,rawData.size());
 	BitReader bitReader(inputStream);
 
-	uint32_t history;
-	uint8_t history5;
+	uint32_t history=0;
+	uint8_t history5=0;
 	auto addToHistory=[&](uint8_t ch)
 	{
 		history5=history>>24U;
