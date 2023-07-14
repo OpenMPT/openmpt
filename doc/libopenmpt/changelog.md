@@ -7,15 +7,18 @@ is just a high-level summary.
 
 ### libopenmpt 0.7.3-pre
 
+ *  [**Bug**] Makefile: Emscripten 3.1.31 stopped exporting `malloc` and `free`.
+    We now explicitly export those again to keep compatibility.
+
  *  FLAC: Update to v1.4.3 (2022-06-23).
 
 ### libopenmpt 0.7.2 (2023-06-18)
 
- *  [**New**] MOD: Can now read modified 8-channel MOD files from the DOS game
-    Aleshar - The World Of Ice.
-
  *  [**Sec**] Possible out-of-bounds read or write when reading malformed MED
     files. (r19389)
+
+ *  [**New**] MOD: Can now read modified 8-channel MOD files from the DOS game
+    Aleshar - The World Of Ice.
 
  *  [**Bug**] The C++ API failed to compile with Clang/Emscripten in some
     situations due to a misplaced `[[deprecated]]`.
