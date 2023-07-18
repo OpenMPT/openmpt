@@ -35,7 +35,7 @@ protected:
 	mpt::Wine::Context & wine;
 	std::string m_Title;
 	std::string m_Status;
-	bool m_bAbort;
+	bool m_bAbort = false;
 	std::string m_script;
 	FlagSet<mpt::Wine::ExecFlags> m_Flags;
 	std::map<std::string, std::vector<char> > m_Filetree;
@@ -46,9 +46,9 @@ public:
 
 	CExecutePosixShellScriptProgressDialog(mpt::Wine::Context & wine, std::string script, FlagSet<mpt::Wine::ExecFlags> flags, std::map<std::string, std::vector<char> > filetree, std::string title, std::string status, CWnd *parent = NULL);
 
-	BOOL OnInitDialog();
+	BOOL OnInitDialog() override;
 
-	void OnCancel();
+	void OnCancel() override;
 
 	afx_msg void OnButton1();
 
@@ -80,7 +80,6 @@ CExecutePosixShellScriptProgressDialog::CExecutePosixShellScriptProgressDialog(m
 	, wine(wine)
 	, m_Title(title)
 	, m_Status(status)
-	, m_bAbort(false)
 	, m_script(script)
 	, m_Flags(flags)
 	, m_Filetree(filetree)

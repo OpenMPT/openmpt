@@ -50,14 +50,14 @@ public:
 	int GetMaxVal() const { return m_maxVal; }
 
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX)
+	void DoDataExchange(CDataExchange* pDX) override
 	{
 		CDialog::DoDataExchange(pDX);
 		DDX_Control(pDX, IDC_COMBO1, m_cbnMin);
 		DDX_Control(pDX, IDC_COMBO2, m_cbnMax);
 	}
 
-	virtual BOOL OnInitDialog()
+	BOOL OnInitDialog() override
 	{
 		CDialog::OnInitDialog();
 
@@ -95,7 +95,7 @@ protected:
 		return TRUE;
 	}
 
-	virtual void OnOK()
+	void OnOK() override
 	{
 		CDialog::OnOK();
 		m_minVal = static_cast<int>(m_cbnMin.GetItemData(m_cbnMin.GetCurSel()));
