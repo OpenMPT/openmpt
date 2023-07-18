@@ -34,10 +34,10 @@ public:
 	bool DoMoveChain() const { return moveChain; }
 
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	void DoDataExchange(CDataExchange *pDX) override;  // DDX/DDV support
 
-	virtual void OnOK();
-	virtual BOOL OnInitDialog();
+	void OnOK() override;
+	BOOL OnInitDialog() override;
 };
 
 OPENMPT_NAMESPACE_END

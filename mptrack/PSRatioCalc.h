@@ -21,12 +21,12 @@ class CPSRatioCalc : public CDialog
 	DECLARE_DYNAMIC(CPSRatioCalc)
 
 public:
-	CPSRatioCalc(const CSoundFile &sndFile, SAMPLEINDEX sample, double ratio, CWnd* pParent = NULL);   // standard constructor
+	CPSRatioCalc(const CSoundFile &sndFile, SAMPLEINDEX sample, double ratio, CWnd *pParent = nullptr);
 	double m_dRatio;
 
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	virtual BOOL OnInitDialog();
+	void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV support
+	BOOL OnInitDialog() override;
 
 	CNumberEdit m_EditTempo;
 	const CSoundFile &sndFile;

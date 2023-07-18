@@ -25,8 +25,8 @@ protected:
 	int m_width = 0, m_height = 0;
 
 public:
-	COwnerVstEditor(CVstPlugin &plugin) : CAbstractVstEditor(plugin) { }
-	~COwnerVstEditor() override { }
+	COwnerVstEditor(CVstPlugin &plugin) : CAbstractVstEditor{plugin} {}
+	~COwnerVstEditor() override = default;
 
 	// Plugins may request to change the GUI size.
 	bool IsResizable() const override { return true; }

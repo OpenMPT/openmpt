@@ -67,19 +67,19 @@ protected:
 public:
 
 	CDefaultVstEditor(IMixPlugin &plugin);
-	virtual ~CDefaultVstEditor();
+	~CDefaultVstEditor() override;
 
-	virtual void UpdateParamDisplays() { CAbstractVstEditor::UpdateParamDisplays(); UpdateControls(false); };
+	void UpdateParamDisplays() override { CAbstractVstEditor::UpdateParamDisplays(); UpdateControls(false); };
 
-	virtual bool OpenEditor(CWnd *parent);
+	bool OpenEditor(CWnd *parent) override;
 
 	// Plugins may not request to change the GUI size, since we use our own GUI.
-	virtual bool IsResizable() const { return false; };
-	virtual bool SetSize(int, int) { return false; };
+	bool IsResizable() const override { return false; };
+	bool SetSize(int, int) override { return false; };
 
 protected:
 
-	virtual void DoDataExchange(CDataExchange* pDX);
+	void DoDataExchange(CDataExchange *pDX) override;
 	
 	DECLARE_MESSAGE_MAP()
 

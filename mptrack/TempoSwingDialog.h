@@ -61,10 +61,10 @@ public:
 	CTempoSwingDlg(CWnd *parent, const TempoSwing &currentTempoSwing, CSoundFile &sndFile, PATTERNINDEX pattern = PATTERNINDEX_INVALID);
 
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);
-	virtual BOOL OnInitDialog();
-	virtual void OnOK();
-	virtual void OnCancel();
+	void DoDataExchange(CDataExchange* pDX) override;
+	BOOL OnInitDialog() override;
+	void OnOK() override;
+	void OnCancel() override;
 	void OnClose();
 	afx_msg void OnReset();
 	afx_msg void OnUseGlobal();

@@ -80,8 +80,8 @@ public:
 
 protected:
 	//{{AFX_VIRTUAL(CModCleanupDlg)
-	virtual BOOL OnInitDialog();
-	virtual void OnOK();
+	BOOL OnInitDialog() override;
+	void OnOK() override;
 	//}}AFX_VIRTUAL
 
 	BOOL OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESULT* pResult);
