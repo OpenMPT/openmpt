@@ -2937,20 +2937,17 @@ void CModDoc::OnSongProperties()
 	{
 		UpdateAllViews(nullptr, GeneralHint().General());
 		ScopedLogCapturer logcapturer(*this, _T("Conversion Status"));
-		bool showLog = false;
 		if(dlg.m_nType != GetModType())
 		{
 			if(!ChangeModType(dlg.m_nType))
 				return;
-			showLog = true;
 		}
 
 		CHANNELINDEX newChannels = Clamp(dlg.m_nChannels, m_SndFile.GetModSpecifications().channelsMin, m_SndFile.GetModSpecifications().channelsMax);
 		if(newChannels != GetNumChannels())
 		{
 			const bool showCancelInRemoveDlg = m_SndFile.GetModSpecifications().channelsMax >= m_SndFile.GetNumChannels();
-			if(ChangeNumChannels(newChannels, showCancelInRemoveDlg))
-				showLog = true;
+			ChangeNumChannels(newChannels, showCancelInRemoveDlg);
 
 			// Force update of pattern highlights / num channels
 			UpdateAllViews(nullptr, PatternHint().Data());

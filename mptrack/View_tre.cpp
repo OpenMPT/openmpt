@@ -631,7 +631,6 @@ void CModTree::RefreshDlsBanks()
 
 		// Add Instruments (done backwards to improve performance as per https://devblogs.microsoft.com/oldnewthing/20111125-00/?p=9033)
 		MPT_ASSERT(dlsBank.GetNumInstruments() <= 0x10000);
-		bool anyMatches = false;
 		for(auto iIns = dlsBank.GetNumInstruments(); iIns > 0;)
 		{
 			iIns--;
@@ -693,7 +692,6 @@ void CModTree::RefreshDlsBanks()
 					LPARAM lParam = DlsItem::ToLPARAM(static_cast<uint16>(iIns), static_cast<uint16>(region), true);
 					InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM,
 							szName, IMAGE_INSTRUMENTS, IMAGE_INSTRUMENTS, 0, 0, lParam, hKit, TVI_FIRST);
-					anyMatches = true;
 				}
 			} else
 			{
@@ -713,7 +711,6 @@ void CModTree::RefreshDlsBanks()
 				wsprintf(szName, _T("%u: %s"), pDlsIns->ulInstrument & 0x7F, instrName.c_str());
 				InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM,
 					szName, IMAGE_INSTRUMENTS, IMAGE_INSTRUMENTS, 0, 0, lParamInstr, hbank->second, TVI_FIRST);
-				anyMatches = true;
 			}
 		}
 		hInsertAfter = m_tiDLS[iDls];

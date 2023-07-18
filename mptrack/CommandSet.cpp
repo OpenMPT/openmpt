@@ -2229,8 +2229,6 @@ void CCommandSet::ApplyDefaultKeybindings(const Version onlyCommandsAfterVersion
 	std::vector<HKL> layouts(GetKeyboardLayoutList(0, nullptr));
 	GetKeyboardLayoutList(static_cast<int>(layouts.size()), layouts.data());
 
-	const auto previousVersion = TrackerSettings::Instance().PreviousSettingsVersion;
-
 	for(const auto &kb : DefaultKeybindings)
 	{
 		if(onlyCommandsAfterVersion != Version{})

@@ -1501,30 +1501,22 @@ void COptionsPlayer::OnOK()
 {
 	DWORD dwQuality = 0;
 
-	DWORD dwQualityMask = 0;
-
 #ifndef NO_DSP
-	dwQualityMask |= SNDDSP_MEGABASS;
 	if (IsDlgButtonChecked(IDC_CHECK1)) dwQuality |= SNDDSP_MEGABASS;
 #endif
 #ifndef NO_AGC
-	dwQualityMask |= SNDDSP_AGC;
 	if (IsDlgButtonChecked(IDC_CHECK2)) dwQuality |= SNDDSP_AGC;
 #endif
 #ifndef NO_EQ
-	dwQualityMask |= SNDDSP_EQ;
 	if (IsDlgButtonChecked(IDC_CHECK3)) dwQuality |= SNDDSP_EQ;
 #endif
 #ifndef NO_DSP
-	dwQualityMask |= SNDDSP_SURROUND;
 	if (IsDlgButtonChecked(IDC_CHECK4)) dwQuality |= SNDDSP_SURROUND;
 #endif
 #ifndef NO_REVERB
-	dwQualityMask |= SNDDSP_REVERB;
 	if (IsDlgButtonChecked(IDC_CHECK6)) dwQuality |= SNDDSP_REVERB;
 #endif
 #ifndef NO_DSP
-	dwQualityMask |= SNDDSP_BITCRUSH;
 	if (IsDlgButtonChecked(IDC_CHECK5)) dwQuality |= SNDDSP_BITCRUSH;
 #endif
 

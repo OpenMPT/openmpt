@@ -706,8 +706,6 @@ public:
 
 	BOOL ReadOpenDocumentList() override
 	{
-		BOOL bRet = FALSE;  // return TRUE only if at least one document was found
-
 		{
 			IniFileSettingsBackend ini(theApp.GetConfigPath() + P_("restart.") + mpt::PathString::FromCString(GetRestartIdentifier()) + P_(".ini"));
 			int32 count = ini.ReadSetting({ U_("Restart"), U_("Count") }, SettingValue(0));
@@ -719,7 +717,6 @@ public:
 				if(!document.empty())
 				{
 					m_mapDocNameToAutosaveName[mpt::ToCString(document)] = mpt::ToCString(autosave);
-					bRet = TRUE;
 				}
 			}
 
@@ -736,8 +733,6 @@ public:
 		// opening a new empty document (see CWinApp::RestartInstance() and
 		// after the call to RestartInstance()).
 		// We do not want that, so we always return TRUE.
-		
-		// return bRet;
 		return TRUE;
 
 	}

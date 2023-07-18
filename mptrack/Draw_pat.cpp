@@ -1255,8 +1255,6 @@ void CViewPattern::DrawDragSel(HDC hdc)
 	y1 = m_Selection.GetStartRow();
 	x2 = m_Selection.GetEndChannel();
 	y2 = m_Selection.GetEndRow();
-	PatternCursor::Columns c1 = m_Selection.GetStartColumn();
-	PatternCursor::Columns c2 = m_Selection.GetEndColumn();
 	x1 += dx;
 	x2 += dx;
 	y1 += dy;
@@ -1265,8 +1263,8 @@ void CViewPattern::DrawDragSel(HDC hdc)
 	nRows = pSndFile->Patterns[m_nPattern].GetNumRows();
 	if (x1 < GetXScrollPos()) drawLeft = false;
 	if (x1 >= nChannels) x1 = nChannels - 1;
-	if (x1 < 0) { x1 = 0; c1 = PatternCursor::firstColumn; drawLeft = false; }
-	if (x2 >= nChannels) { x2 = nChannels - 1; c2 = PatternCursor::lastColumn; drawRight = false; }
+	if (x1 < 0) { x1 = 0; drawLeft = false; }
+	if (x2 >= nChannels) { x2 = nChannels - 1; drawRight = false; }
 	if (x2 < 0) x2 = 0;
 	if (y1 < GetYScrollPos() - (int)m_nMidRow) drawTop = false;
 	if (y1 >= nRows) y1 = nRows-1;
