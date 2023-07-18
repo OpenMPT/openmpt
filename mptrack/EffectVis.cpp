@@ -41,10 +41,10 @@ END_MESSAGE_MAP()
 
 
 CEffectVis::CEffectVis(CViewPattern *pViewPattern, ROWINDEX startRow, ROWINDEX endRow, CHANNELINDEX nchn, CModDoc &modDoc, PATTERNINDEX pat)
-	: m_effectInfo(modDoc.GetSoundFile())
-	, m_ModDoc(modDoc)
+	: m_ModDoc(modDoc)
 	, m_SndFile(modDoc.GetSoundFile())
 	, m_pViewPattern(pViewPattern)
+	, m_effectInfo(modDoc.GetSoundFile())
 {
 	m_nFillEffect = m_effectInfo.GetIndexFromEffect(CMD_SMOOTHMIDI, 0);
 	m_templatePCNote.Set(NOTE_PCS, 1, 0, 0);

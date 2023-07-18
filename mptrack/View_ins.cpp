@@ -886,7 +886,7 @@ void CViewInstrument::DrawGrid(CDC *pDC, uint32 speed)
 		windowResized = true;
 	}
 
-	if(windowResized || m_bGridForceRedraw || (m_nScrollPosX != m_GridScrollPos) || (speed != (UINT)m_GridSpeed) && speed > 0)
+	if(windowResized || m_bGridForceRedraw || (m_nScrollPosX != m_GridScrollPos) || (speed != static_cast<uint32>(m_GridSpeed) && speed > 0))
 	{
 		m_GridSpeed = speed;
 		m_GridScrollPos = m_nScrollPosX;

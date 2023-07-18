@@ -270,7 +270,9 @@ void CCtrlPatterns::UpdateView(UpdateHint hint, CObject *pObj)
 		for(INSTRUMENTINDEX i = 1; i <= m_sndFile.GetNumInstruments(); i++)
 		{
 			const auto ins = m_sndFile.Instruments[i];
-			if(ins != nullptr && (!changedPlug && ins->nMixPlug != 0) || (changedPlug && ins->nMixPlug == changedPlug))
+			if(!ins)
+				continue;
+			if((!changedPlug && ins->nMixPlug != 0) || (changedPlug && ins->nMixPlug == changedPlug))
 			{
 				instrPluginsChanged = true;
 				break;

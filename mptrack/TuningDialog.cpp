@@ -42,14 +42,10 @@ using NOTEINDEXTYPE = Tuning::NOTEINDEXTYPE;
 
 // CTuningDialog dialog
 CTuningDialog::CTuningDialog(CWnd* pParent, INSTRUMENTINDEX inst, CSoundFile &csf)
-	: CDialog(CTuningDialog::IDD, pParent),
-	m_sndFile(csf),
-	m_pActiveTuningCollection(NULL),
-	m_TreeCtrlTuning(this),
-	m_TreeItemTuningItemMap(s_notFoundItemTree, s_notFoundItemTuning),
-	m_NoteEditApply(true),
-	m_RatioEditApply(true),
-	m_DoErrorExit(false)
+	: CDialog(CTuningDialog::IDD, pParent)
+	, m_sndFile(csf)
+	, m_TreeCtrlTuning(this)
+	, m_TreeItemTuningItemMap(s_notFoundItemTree, s_notFoundItemTuning)
 {
 	m_TuningCollections.push_back(&(m_sndFile.GetTuneSpecificTunings()));
 	m_TuningCollectionsNames[&(m_sndFile.GetTuneSpecificTunings())] = _T("Tunings");
@@ -1707,16 +1703,13 @@ CTuningDialog::EnSclImport CTuningDialog::ImportScl(std::istream& iStrm, const m
 		return enSclImportTuningCreationFailure;
 	}
 
-	bool allNamesEmpty = true;
 	bool allNamesValid = true;
 	for(NOTEINDEXTYPE note = 0; note < mpt::saturate_cast<NOTEINDEXTYPE>(names.size()); ++note)
 	{
 		if(names[note].empty())
 		{
 			allNamesValid = false;
-		} else
-		{
-			allNamesEmpty = false;
+			break;
 		}
 	}
 

@@ -54,6 +54,9 @@ LRESULT CCustEdit::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 		if(!m_isDummy)
 			m_pOptKeyDlg->OnSetKeyChoice();
 		break;
+
+	default:
+		break;
 	}
 
 	return 1;
@@ -525,7 +528,7 @@ void COptionsKeyboard::OnCommandKeySelChanged()
 	}
 
 	//Fill "choice" list
-	else if((cmd >= 0) && (cmd != m_curCommand) || m_forceUpdate)  // Have we changed command?
+	else if((cmd >= 0 && cmd != m_curCommand) || m_forceUpdate)  // Have we changed command?
 	{
 		m_forceUpdate = false;
 

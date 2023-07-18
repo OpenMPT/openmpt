@@ -1105,7 +1105,7 @@ void CDoWaveConvert::Run()
 	m_SndFile.m_SongFlags.reset(SONG_STEP | SONG_PATTERNLOOP);
 	mainFrame->InitRenderer(&m_SndFile);
 
-	for (UINT n = 0; ; n++)
+	while(true)
 	{
 		UINT lRead = 0;
 		if(m_Settings.normalize)

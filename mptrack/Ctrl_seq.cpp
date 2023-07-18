@@ -1412,6 +1412,7 @@ LRESULT COrderList::OnDragonDropping(WPARAM doDrop, LPARAM lParam)
 	case DRAGONDROP_ORDER:
 		if(pDropInfo->dropItem >= Order().size())
 			break;
+		[[fallthrough]];
 	case DRAGONDROP_PATTERN:
 		canDrop = TRUE;
 		break;

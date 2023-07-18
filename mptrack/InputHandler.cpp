@@ -288,6 +288,9 @@ CommandID CInputHandler::HandleMIDIMessage(InputTargetContext context, uint32 me
 			GeneralKeyEvent(context, HC_MIDI, byte1 | 0x80, kKeyEventUp);
 		}
 		break;
+
+	default:
+		break;
 	}
 
 	return kcNull;

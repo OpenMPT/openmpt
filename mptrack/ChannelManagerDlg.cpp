@@ -1051,7 +1051,7 @@ void CChannelManagerDlg::MouseEvent(UINT nFlags,CPoint point, MouseButton button
 					{
 						if(m_buttonAction == kUndetermined)
 							m_buttonAction = removed[n] ? kAction1 : kAction2;
-							select[n] = false;
+						select[n] = false;
 						removed[n] = (m_buttonAction == kAction2);
 					}
 
