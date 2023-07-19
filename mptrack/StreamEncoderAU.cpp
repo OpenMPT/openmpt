@@ -29,7 +29,7 @@ class AUStreamWriter : public IAudioStreamEncoder
 {
 private:
 
-	const AUEncoder &enc;
+	[[maybe_unused]] const AUEncoder &enc;
 	std::ostream &f;
 	Encoder::Settings settings;
 

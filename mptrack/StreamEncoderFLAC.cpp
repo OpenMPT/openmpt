@@ -26,7 +26,7 @@ OPENMPT_NAMESPACE_BEGIN
 class FLACStreamWriter : public StreamWriterBase
 {
 private:
-	const FLACEncoder &enc;
+	[[maybe_unused]] const FLACEncoder &enc;
 	Encoder::Settings settings;
 	FLAC__StreamMetadata *flac_metadata[1];
 	FLAC__StreamEncoder *encoder;
@@ -121,7 +121,7 @@ public:
 		FLAC__stream_encoder_init_stream(encoder, FLACWriteCallback, FLACSeekCallback, FLACTellCallback, nullptr, this);
 
 	}
-	SampleFormat GetSampleFormat() const
+	SampleFormat GetSampleFormat() const override
 	{
 		return settings.Format.GetSampleFormat();
 	}

@@ -29,7 +29,7 @@ class WavStreamWriter : public IAudioStreamEncoder
 {
 private:
 
-	const WAVEncoder &enc;
+	[[maybe_unused]] const WAVEncoder &enc;
 	std::ostream &f;
 	mpt::IO::OFile<std::ostream> ff;
 	std::unique_ptr<WAVWriter> fileWAV;

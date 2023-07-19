@@ -25,7 +25,7 @@ OPENMPT_NAMESPACE_BEGIN
 class RawStreamWriter : public IAudioStreamEncoder
 {
 private:
-	const RAWEncoder &enc;
+	[[maybe_unused]] const RAWEncoder &enc;
 	std::ostream &f;
 	Encoder::Settings settings;
 
