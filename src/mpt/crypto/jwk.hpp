@@ -77,7 +77,14 @@ namespace crypto {
 
 
 #if defined(MPT_CRYPTO_WINDOWS)
+#if MPT_COMPILER_CLANG
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winline-namespace-reopened-noninline"
+#endif // MPT_COMPILER_CLANG
 namespace windows {
+#if MPT_COMPILER_CLANG
+#pragma clang diagnostic pop
+#endif // MPT_COMPILER_CLANG
 
 
 
@@ -551,7 +558,14 @@ public:
 
 
 #if defined(MPT_CRYPTO_CRYPTOPP)
+#if MPT_COMPILER_CLANG
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winline-namespace-reopened-noninline"
+#endif // MPT_COMPILER_CLANG
 namespace cryptopp {
+#if MPT_COMPILER_CLANG
+#pragma clang diagnostic pop
+#endif // MPT_COMPILER_CLANG
 
 
 
