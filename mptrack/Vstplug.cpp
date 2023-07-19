@@ -38,7 +38,7 @@ DECLARE_FLAGSET(Vst::VstTimeInfoFlags)
 
 OPENMPT_NAMESPACE_BEGIN
 
-static VstTimeInfo g_timeInfoFallback = { 0 };
+static VstTimeInfo g_timeInfoFallback = {};
 
 #ifdef MPT_ALL_LOGGING
 #define VST_LOG
@@ -657,6 +657,7 @@ intptr_t VSTCALLBACK CVstPlugin::MasterCallBack(AEffect *effect, VstOpcodeToHost
 		{
 			return pVstPlugin->VstFileSelector(opcode == audioMasterCloseFileSelector, *static_cast<VstFileSelect *>(ptr));
 		}
+		break;
 
 	// open an editor for audio (defined by XML text in ptr) - DEPRECATED in VST 2.4
 	case audioMasterEditFile:
@@ -801,7 +802,7 @@ intptr_t CVstPlugin::VstFileSelector(bool destructor, VstFileSelect &fileSel)
 		} else
 		{
 			// Plugin wants a directory
-			BrowseForFolder dlg(mpt::PathString::FromLocale(fileSel.initialPath != nullptr ? fileSel.initialPath : ""), mpt::ToCString(mpt::Charset::Locale, fileSel.title != nullptr ? fileSel.title : ""));
+			BrowseForFolder dlg(mpt::PathString::FromLocale(fileSel.initialPath != nullptr ? fileSel.initialPath : ""), mpt::ToCString(mpt::Charset::Locale, fileSel.title));
 			if(!dlg.Show(GetEditor()))
 				return 0;
 
@@ -873,11 +874,11 @@ CVstPlugin::CVstPlugin(bool maskCrashes, HMODULE hLibrary, VSTPluginLib &factory
 	, m_maskCrashes(maskCrashes)
 	, m_Effect(effect)
 	, timeInfo{}
-	, isBridged(!memcmp(&effect.reservedForHost2, "OMPT", 4))
 	, m_hLibrary(hLibrary)
 	, m_nSampleRate(sndFile.GetSampleRate())
 	, m_isInitialized(false)
 	, m_needIdle(false)
+	, isBridged(!memcmp(&effect.reservedForHost2, "OMPT", 4))
 {
 	// Open plugin and initialize data structures
 	Initialize();
