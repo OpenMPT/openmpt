@@ -332,7 +332,7 @@ public:
 			if (result == 0x00000000 /*STATUS_SUCCESS*/) {
 				return;
 			}
-			if (result == 0xC000A000 /*STATUS_INVALID_SIGNATURE*/) {
+			if (static_cast<DWORD>(result) == 0xC000A000 /*STATUS_INVALID_SIGNATURE*/) {
 				throw signature_verification_failed();
 			}
 			CheckNTSTATUS(result, "BCryptVerifySignature");
