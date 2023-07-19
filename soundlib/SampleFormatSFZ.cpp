@@ -737,6 +737,11 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 				case kControl:
 					control.Parse(key, value);
 					break;
+				case kNone:
+				case kCurve:
+				case kEffect:
+				case kUnknown:
+					break;
 				}
 			} else
 			{
@@ -929,6 +934,10 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 			case SFZRegion::LoopMode::kNoLoop:
 			case SFZRegion::LoopMode::kOneShot:
 				sample.uFlags.reset(CHN_LOOP | CHN_SUSTAINLOOP);
+				break;
+			case SFZRegion::LoopMode::kUnspecified:
+				MPT_ASSERT_NOTREACHED();
+				break;
 			}
 		}
 		if(region.loopEnd > region.loopStart)

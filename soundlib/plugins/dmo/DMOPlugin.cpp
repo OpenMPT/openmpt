@@ -205,20 +205,15 @@ PlugParamValue DMOPlugin::GetParameter(PlugParamIndex index)
 {
 	if(index < GetNumParameters() && m_pParamInfo != nullptr && m_pMediaParams != nullptr)
 	{
-		MP_PARAMINFO mpi;
-		MP_DATA md;
-
-		MemsetZero(mpi);
-		md = 0;
+		MP_PARAMINFO mpi{};
+		MP_DATA md = 0;
 		if (m_pParamInfo->GetParamInfo(index, &mpi) == S_OK
 			&& m_pMediaParams->GetParam(index, &md) == S_OK)
 		{
-			float fValue, fMin, fMax, fDefault;
-
-			fValue = md;
-			fMin = mpi.mpdMinValue;
-			fMax = mpi.mpdMaxValue;
-			fDefault = mpi.mpdNeutralValue;
+			float fValue = md;
+			float fMin = mpi.mpdMinValue;
+			float fMax = mpi.mpdMaxValue;
+			//float fDefault = mpi.mpdNeutralValue;
 			if (mpi.mpType == MPT_BOOL)
 			{
 				fMin = 0;
@@ -237,8 +232,7 @@ void DMOPlugin::SetParameter(PlugParamIndex index, PlugParamValue value)
 {
 	if(index < GetNumParameters() && m_pParamInfo != nullptr && m_pMediaParams != nullptr)
 	{
-		MP_PARAMINFO mpi;
-		MemsetZero(mpi);
+		MP_PARAMINFO mpi{};
 		if (m_pParamInfo->GetParamInfo(index, &mpi) == S_OK)
 		{
 			float fMin = mpi.mpdMinValue;

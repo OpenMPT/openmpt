@@ -302,6 +302,8 @@ BOOL CModTree::PreTranslateMessage(MSG *pMsg)
 		case MODITEM_DLSBANK_INSTRUMENT:
 			// Avoid cycling through tree-view elements on key hold
 			return TRUE;
+		default:
+			break;
 		}
 	}
 
@@ -1455,6 +1457,9 @@ bool CModTree::ExecuteItem(HTREEITEM hItem)
 				return true;
 			}
 			break;
+
+		default:
+			break;
 		}
 	}
 	return false;
@@ -1615,6 +1620,9 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, ModCommand::NOTE note, int volume)
 					return TRUE;
 				}
 			}
+
+		default:
+			break;
 		}
 	}
 	return FALSE;
@@ -1792,6 +1800,9 @@ void CModTree::DeleteTreeItem(HTREEITEM hItem, const bool permanently)
 			}
 		}
 		break;
+
+	default:
+		break;
 	}
 }
 
@@ -1811,6 +1822,8 @@ BOOL CModTree::OpenTreeItem(HTREEITEM hItem)
 	case MODITEM_INSLIB_FOLDER:
 		// Open path in Explorer
 		CTrackApp::OpenDirectory(InsLibGetFullPath(hItem));
+		break;
+	default:
 		break;
 	}
 	return TRUE;
@@ -2532,6 +2545,9 @@ bool CModTree::GetDropInfo(DRAGONDROP &dropInfo, mpt::PathString &fullPath)
 			dropInfo.dropParam = m_itemDrag.val1;
 		}
 		break;
+
+	default:
+		break;
 	}
 	return (dropInfo.dropType != DRAGONDROP_NOTHING);
 }
@@ -2735,6 +2751,9 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool doDrop)
 			}
 			return true;
 		}
+		break;
+
+	default:
 		break;
 	}
 	return false;
@@ -3233,6 +3252,9 @@ void CModTree::OnItemRightClick(HTREEITEM hItem, CPoint pt)
 			defaultID = ID_MODTREE_PLAY;
 			AppendMenu(hMenu, MF_STRING, ID_MODTREE_PLAY, ih->GetKeyTextFromCommand(kcTreeViewPlay, _T("&Play Instrument")));
 			break;
+
+		default:
+			break;
 		}
 
 		if(defaultID)
@@ -3314,6 +3336,9 @@ void CModTree::OnItemLeftClick(LPNMHDR, LRESULT *pResult)
 
 			case MODITEM_HDR_SONG:
 				ExecuteItem(hItem);
+				break;
+
+			default:
 				break;
 			}
 		}
@@ -4014,6 +4039,8 @@ DROPEFFECT CModTree::OnDragOver(COleDataObject *, DWORD, CPoint point)
 	case MODITEM_HDR_MIDIGROUP:
 		EnsureVisible(GetChildItem(hItem));
 		break;
+	default:
+		break;
 	}
 	return DROPEFFECT_NONE;
 }
@@ -4049,6 +4076,8 @@ BOOL CModTree::OnDrop(COleDataObject *pDataObject, DROPEFFECT, CPoint)
 				break;
 			case MODITEM_MIDIPERCUSSION:
 				bOk = SetMidiPercussion(m_itemDrag.val1, mpt::PathString::FromNative(fileName.data()));
+				break;
+			default:
 				break;
 			}
 		}
@@ -4268,8 +4297,8 @@ LRESULT CModTree::OnMidiMsg(WPARAM midiData_, LPARAM)
 	uint32 midiData = static_cast<uint32>(midiData_);
 	// Handle MIDI messages assigned to shortcuts
 	CInputHandler *ih = CMainFrame::GetInputHandler();
-	ih->HandleMIDIMessage(kCtxViewTree, midiData) != kcNull
-	    || ih->HandleMIDIMessage(kCtxAllContexts, midiData) != kcNull;
+	if(ih->HandleMIDIMessage(kCtxViewTree, midiData) == kcNull)
+	    ih->HandleMIDIMessage(kCtxAllContexts, midiData);
 
 	uint8 midiByte1 = MIDIEvents::GetDataByte1FromEvent(midiData);
 	int volume;
@@ -4286,8 +4315,9 @@ LRESULT CModTree::OnMidiMsg(WPARAM midiData_, LPARAM)
 	case MIDIEvents::evNoteOff:
 		PlayItem(GetSelectedItem(), NOTE_NOTECUT);
 		return 1;
+	default:
+		return 0;
 	}
-	return 0;
 }
 
 
@@ -4480,6 +4510,9 @@ void CModTree::OnBeginLabelEdit(NMHDR *nmhdr, LRESULT *result)
 				m_doLabelEdit = true;
 			}
 			break;
+
+		default:
+			break;
 		}
 	} else if(modItem.type == MODITEM_HDR_INSTRUMENTLIB)
 	{
@@ -4593,6 +4626,9 @@ void CModTree::OnEndLabelEdit(NMHDR *nmhdr, LRESULT *result)
 				modDoc->SetModified();
 				modDoc->UpdateAllViews(nullptr, InstrumentHint(static_cast<INSTRUMENTINDEX>(modItem.val1)).Info().Names());
 			}
+			break;
+
+		default:
 			break;
 		}
 	} else if(modItem.type == MODITEM_HDR_INSTRUMENTLIB)

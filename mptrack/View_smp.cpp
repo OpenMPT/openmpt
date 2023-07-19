@@ -158,8 +158,8 @@ END_MESSAGE_MAP()
 // CViewSample operations
 
 CViewSample::CViewSample()
-    : m_lastDrawPoint(-1, -1)
-    , m_timelineHeight(TIMELINE_HEIGHT)
+	: m_timelineHeight{TIMELINE_HEIGHT}
+	, m_lastDrawPoint{-1, -1}
 {
 	MemsetZero(m_NcButtonState);
 	m_dwNotifyPos.fill(Notification::PosInvalid);
@@ -3711,7 +3711,7 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 					NoteOff(note);
 					break;
 				}
-				// Fall-through
+				[[fallthrough]];
 			default:
 				PlayNote(note);
 			}
