@@ -107,7 +107,19 @@
   filter {}
   filter { "action:vs*" }
     buildoptions { "/wd6001", "/wd6011", "/wd6053", "/wd6216", "/wd6217", "/wd6255", "/wd6258", "/wd6385", "/wd6386", "/wd6387", "/wd28159" } -- /analyze
-  filter {}
+	filter {}
+		if _OPTIONS["clang"] then
+			buildoptions {
+				"-Wno-implicit-const-int-float-conversion",
+				"-Wno-missing-braces",
+				"-Wno-sometimes-uninitialized",
+				"-Wno-switch",
+				"-Wno-unused-but-set-variable",
+				"-Wno-unused-function",
+				"-Wno-unused-variable",
+			}
+		end
+	filter {}
   filter { "action:vs*" }
    files { "../../build/premake/lnk/ext-portaudio.c" }
   filter {}

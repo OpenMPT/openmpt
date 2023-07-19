@@ -22,7 +22,16 @@
   }
   filter { "action:vs*" }
     buildoptions { "/wd4267" }
-  filter {}
+	filter {}
+		if _OPTIONS["clang"] then
+			buildoptions {
+				"-Wno-bitwise-op-parentheses",
+				"-Wno-shift-op-parentheses",
+				"-Wno-unused-but-set-variable",
+				"-Wno-unused-const-variable",
+			}
+		end
+	filter {}
   filter { "kind:SharedLib" }
    files { "../../build/premake/def/ext-opusfile.def" }
   filter {}

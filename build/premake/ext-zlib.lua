@@ -47,7 +47,16 @@
   filter {}
   filter { "action:vs*" }
     buildoptions { "/wd6297", "/wd6385" } -- /analyze
-  filter {}
+	filter {}
+		if _OPTIONS["clang"] then
+			buildoptions {
+				"-Wno-deprecated-non-prototype",
+				"-Wno-tautological-pointer-compare",
+				"-Wno-unused-but-set-variable",
+				"-Wno-unused-const-variable",
+			}
+		end
+	filter {}
 
 function mpt_use_zlib ()
 	filter {}

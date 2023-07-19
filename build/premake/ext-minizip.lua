@@ -37,6 +37,15 @@
 	filter { "action:vs*" }
 		buildoptions { "/wd6262" } -- analyze
 	filter {}
+	filter {}
+		if _OPTIONS["clang"] then
+			buildoptions {
+				"-Wno-deprecated-non-prototype",
+				"-Wno-unused-but-set-variable",
+				"-Wno-unused-variable",
+			}
+		end
+	filter {}
 
 function mpt_use_minizip ()
 	filter {}

@@ -141,7 +141,20 @@
 			"/wd6262",
 			"/wd28159",
 		} -- analyze
-  filter {}
+	filter {}
+		if _OPTIONS["clang"] then
+			buildoptions {
+				"-Wno-dangling-else",
+				"-Wno-logical-not-parentheses",
+				"-Wno-logical-op-parentheses",
+				"-Wno-missing-braces",
+				"-Wno-switch",
+				"-Wno-unused-but-set-variable",
+				"-Wno-unused-function",
+				"-Wno-unused-variable",
+			}
+		end
+	filter {}
   filter { "kind:SharedLib" }
    files { "../../include/unrar/dll_nocrypt.def" }
   filter {}

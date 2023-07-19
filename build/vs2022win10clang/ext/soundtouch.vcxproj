@@ -516,7 +516,7 @@
       <DebugInformationFormat>None</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalOptions>/wd4267 /wd6262 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4267 /wd6262 -Wno-shift-op-parentheses -Wno-unused-but-set-variable -Wno-unused-const-variable -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
@@ -539,7 +539,7 @@
       <DebugInformationFormat>None</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalOptions>/wd4267 /wd6262 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4267 /wd6262 -Wno-shift-op-parentheses -Wno-unused-but-set-variable -Wno-unused-const-variable -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
@@ -562,7 +562,7 @@
       <DebugInformationFormat>None</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalOptions>/wd4267 /wd6262 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4267 /wd6262 -Wno-shift-op-parentheses -Wno-unused-but-set-variable -Wno-unused-const-variable -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
@@ -585,7 +585,7 @@
       <DebugInformationFormat>None</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalOptions>/wd4267 /wd6262 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4267 /wd6262 -Wno-shift-op-parentheses -Wno-unused-but-set-variable -Wno-unused-const-variable -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
@@ -613,7 +613,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
-      <AdditionalOptions>/wd4267 /wd6262 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4267 /wd6262 -Wno-shift-op-parentheses -Wno-unused-but-set-variable -Wno-unused-const-variable -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
@@ -642,7 +642,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalOptions>/wd4267 /wd6262 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4267 /wd6262 -Wno-shift-op-parentheses -Wno-unused-but-set-variable -Wno-unused-const-variable -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
@@ -671,7 +671,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalOptions>/wd4267 /wd6262 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4267 /wd6262 -Wno-shift-op-parentheses -Wno-unused-but-set-variable -Wno-unused-const-variable -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
@@ -700,7 +700,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalOptions>/wd4267 /wd6262 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4267 /wd6262 -Wno-shift-op-parentheses -Wno-unused-but-set-variable -Wno-unused-const-variable -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
@@ -731,7 +731,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
-      <AdditionalOptions>/wd4267 /wd6262 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4267 /wd6262 -Wno-shift-op-parentheses -Wno-unused-but-set-variable -Wno-unused-const-variable -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
@@ -761,7 +761,7 @@
       <OmitFramePointers>false</OmitFramePointers>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalOptions>/wd4267 /wd6262 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4267 /wd6262 -Wno-shift-op-parentheses -Wno-unused-but-set-variable -Wno-unused-const-variable -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
@@ -791,7 +791,7 @@
       <OmitFramePointers>false</OmitFramePointers>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalOptions>/wd4267 /wd6262 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4267 /wd6262 -Wno-shift-op-parentheses -Wno-unused-but-set-variable -Wno-unused-const-variable -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
@@ -821,7 +821,7 @@
       <OmitFramePointers>false</OmitFramePointers>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalOptions>/wd4267 /wd6262 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4267 /wd6262 -Wno-shift-op-parentheses -Wno-unused-but-set-variable -Wno-unused-const-variable -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
@@ -846,7 +846,7 @@
       <DebugInformationFormat>None</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <AdditionalOptions>/wd4267 /wd6262 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4267 /wd6262 -Wno-shift-op-parentheses -Wno-unused-but-set-variable -Wno-unused-const-variable -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
@@ -869,7 +869,7 @@
       <DebugInformationFormat>None</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <AdditionalOptions>/wd4267 /wd6262 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4267 /wd6262 -Wno-shift-op-parentheses -Wno-unused-but-set-variable -Wno-unused-const-variable -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
@@ -892,7 +892,7 @@
       <DebugInformationFormat>None</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <AdditionalOptions>/wd4267 /wd6262 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4267 /wd6262 -Wno-shift-op-parentheses -Wno-unused-but-set-variable -Wno-unused-const-variable -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
@@ -915,7 +915,7 @@
       <DebugInformationFormat>None</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <AdditionalOptions>/wd4267 /wd6262 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4267 /wd6262 -Wno-shift-op-parentheses -Wno-unused-but-set-variable -Wno-unused-const-variable -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
@@ -943,7 +943,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
-      <AdditionalOptions>/wd4267 /wd6262 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4267 /wd6262 -Wno-shift-op-parentheses -Wno-unused-but-set-variable -Wno-unused-const-variable -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
@@ -972,7 +972,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <AdditionalOptions>/wd4267 /wd6262 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4267 /wd6262 -Wno-shift-op-parentheses -Wno-unused-but-set-variable -Wno-unused-const-variable -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
@@ -1001,7 +1001,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <AdditionalOptions>/wd4267 /wd6262 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4267 /wd6262 -Wno-shift-op-parentheses -Wno-unused-but-set-variable -Wno-unused-const-variable -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
@@ -1030,7 +1030,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <AdditionalOptions>/wd4267 /wd6262 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4267 /wd6262 -Wno-shift-op-parentheses -Wno-unused-but-set-variable -Wno-unused-const-variable -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
@@ -1061,7 +1061,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
-      <AdditionalOptions>/wd4267 /wd6262 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4267 /wd6262 -Wno-shift-op-parentheses -Wno-unused-but-set-variable -Wno-unused-const-variable -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
@@ -1091,7 +1091,7 @@
       <OmitFramePointers>false</OmitFramePointers>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <AdditionalOptions>/wd4267 /wd6262 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4267 /wd6262 -Wno-shift-op-parentheses -Wno-unused-but-set-variable -Wno-unused-const-variable -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
@@ -1121,7 +1121,7 @@
       <OmitFramePointers>false</OmitFramePointers>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <AdditionalOptions>/wd4267 /wd6262 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4267 /wd6262 -Wno-shift-op-parentheses -Wno-unused-but-set-variable -Wno-unused-const-variable -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
@@ -1151,7 +1151,7 @@
       <OmitFramePointers>false</OmitFramePointers>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <AdditionalOptions>/wd4267 /wd6262 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4267 /wd6262 -Wno-shift-op-parentheses -Wno-unused-but-set-variable -Wno-unused-const-variable -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>

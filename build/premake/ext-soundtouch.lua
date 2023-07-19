@@ -51,6 +51,15 @@
 	filter { "action:vs*" }
 		buildoptions { "/wd6262" } -- analyze
 	filter {}
+		if _OPTIONS["clang"] then
+			buildoptions {
+				"-Wno-shift-op-parentheses",
+				"-Wno-unused-but-set-variable",
+				"-Wno-unused-const-variable",
+				"-Wno-unused-variable",
+			}
+		end
+	filter {}
   defines { "DLL_EXPORTS" }
 
 function mpt_use_soundtouch ()

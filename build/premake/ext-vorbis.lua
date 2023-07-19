@@ -93,7 +93,13 @@
   filter {}
   filter { "action:vs*" }
     buildoptions { "/wd6001", "/wd6011", "/wd6255", "/wd6262", "/wd6263", "/wd6297", "/wd6308", "/wd6385", "/wd6386", "/wd6387", "/wd28182" } -- /analyze
-  filter {}
+	filter {}
+		if _OPTIONS["clang"] then
+			buildoptions {
+				"-Wno-unused-but-set-variable",
+			}
+		end
+	filter {}
 
   filter {}
   filter { "kind:SharedLib" }

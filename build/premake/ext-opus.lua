@@ -54,7 +54,14 @@
   filter {}
   filter { "action:vs*" }
 		buildoptions { "/wd6255", "/wd6297" } -- analyze
-  filter {}
+	filter {}
+		if _OPTIONS["clang"] then
+			buildoptions {
+				"-Wno-excess-initializers",
+				"-Wno-macro-redefined",
+			}
+		end
+	filter {}
   filter { "kind:SharedLib" }
    defines { "DLL_EXPORT" }
   filter {}

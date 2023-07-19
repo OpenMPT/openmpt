@@ -55,7 +55,13 @@
   filter {}
   filter { "action:vs*" }
     buildoptions { "/wd6011", "/wd6285", "/wd6297", "/wd6305", "/wd6385", "/wd6386" } -- /analyze
-  filter {}
+	filter {}
+		if _OPTIONS["clang"] then
+			buildoptions {
+				"-Wno-unused-function",
+			}
+		end
+	filter {}
 
 function mpt_use_mpg123 ()
 	filter {}

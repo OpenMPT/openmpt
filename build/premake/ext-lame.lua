@@ -59,6 +59,16 @@
 	filter { "action:vs*" }
 		buildoptions { "/wd6031", "/wd6262" } -- analyze
 	filter {}
+		if _OPTIONS["clang"] then
+			buildoptions {
+				"-Wno-absolute-value",
+				"-Wno-tautological-pointer-compare",
+				"-Wno-unused-but-set-variable",
+				"-Wno-unused-const-variable",
+				"-Wno-unused-function",
+			}
+		end
+	filter {}
 
 function mpt_use_lame ()
 	filter {}
