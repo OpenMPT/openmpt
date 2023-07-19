@@ -251,7 +251,11 @@ IsVbrTag(const unsigned char *buf)
     return (isTag0 || isTag1);
 }
 
+#if 0 /* OpenMPT */
 #define SHIFT_IN_BITS_VALUE(x,n,v) ( x = (x << (n)) | ( (v) & ~(-1 << (n)) ) )
+#else /* OpenMPT */
+#define SHIFT_IN_BITS_VALUE(x,n,v) ( x = (x << (n)) | ( (v) & ~(((unsigned)-1) << (n)) ) ) /* OpenMPT */
+#endif /* OpenMPT */
 
 static void
 setLameTagFrameHeader(lame_internal_flags const *gfc, unsigned char *buffer)
