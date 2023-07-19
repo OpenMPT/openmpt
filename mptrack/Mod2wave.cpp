@@ -458,6 +458,10 @@ void CWaveConvert::FillFormats()
 			}
 			if(showEndian && format.bits != 8 && format.encoding != Encoder::Format::Encoding::Alaw && format.encoding != Encoder::Format::Encoding::ulaw)
 			{
+#if MPT_COMPILER_CLANG
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wswitch"
+#endif // MPT_COMPILER_CLANG
 				switch(format.endian)
 				{
 				case mpt::endian::big:
@@ -467,6 +471,9 @@ void CWaveConvert::FillFormats()
 					description += U_(" Little-Endian");
 					break;
 				}
+#if MPT_COMPILER_CLANG
+#pragma clang diagnostic pop
+#endif // MPT_COMPILER_CLANG
 			}
 			int ndx = m_CbnSampleFormat.AddString(mpt::ToCString(description));
 			m_CbnSampleFormat.SetItemData(ndx, format.AsInt());
