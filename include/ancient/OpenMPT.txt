@@ -1,2 +1,4 @@
  *  ancient <https://github.com/temisu/ancient> v2.1.1 (2023-07-12)
+ *  <https://github.com/temisu/ancient/commit/cdfa1498711e6b7f377013e2e1f8a00561e9a5e2>
+    has been applied.
  *  Unnecssary files have been removed.

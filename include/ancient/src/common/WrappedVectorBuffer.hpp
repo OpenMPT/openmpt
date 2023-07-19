@@ -17,7 +17,7 @@ class WrappedVectorBuffer : public Buffer
 {
 public:
 	WrappedVectorBuffer(std::vector<uint8_t> &refdata);
-	virtual ~WrappedVectorBuffer() override final;
+	~WrappedVectorBuffer();
 
 	virtual const uint8_t *data() const noexcept override final;
 	virtual uint8_t *data() override final;
