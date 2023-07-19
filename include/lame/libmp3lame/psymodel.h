@@ -29,11 +29,19 @@ int     L3psycho_anal_ns(lame_internal_flags * gfc,
                          III_psy_ratio MS_ratio[2][2],
                          FLOAT pe[2], FLOAT pe_MS[2], FLOAT ener[2], int blocktype_d[2]);
 
+#if 0 /* OpenMPT */
 int     L3psycho_anal_vbr(lame_internal_flags * gfc,
                           const sample_t *const buffer[2], int gr,
                           III_psy_ratio ratio[2][2],
                           III_psy_ratio MS_ratio[2][2],
                           FLOAT pe[2], FLOAT pe_MS[2], FLOAT ener[2], int blocktype_d[2]);
+#else /* OpenMPT */
+int     L3psycho_anal_vbr(lame_internal_flags * gfc, /* OpenMPT */
+                          const sample_t *const buffer[2], int gr, /* OpenMPT */
+                          III_psy_ratio ratio[2][2], /* OpenMPT */
+                          III_psy_ratio MS_ratio[2][2], /* OpenMPT */
+                          FLOAT pe[2], FLOAT pe_MS[2], FLOAT ener[4], int blocktype_d[2]); /* OpenMPT */
+#endif /* OpenMPT */
 
 
 int     psymodel_init(lame_global_flags const* gfp);

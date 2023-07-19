@@ -2,6 +2,8 @@ lame library version 3.100.
 The following changes have been made:
  *  Obviously, unnecessary folders and files have been removed.
  *  negative-shift warning in VbrTag.c has been fixed.
+ *  function prototype mismatch has been fixed for on_pe() and
+    L3psycho_anal_vbr().
  *  Forced library name in lame.def has been removed.
  *  All modifications have been marked with /* OpenMPT */.
  *  For building, premake is used to generate Visual Studio project files.
