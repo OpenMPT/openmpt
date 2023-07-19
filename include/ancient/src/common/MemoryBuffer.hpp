@@ -15,7 +15,7 @@ class MemoryBuffer : public Buffer
 public:
 	MemoryBuffer(size_t size);
 	MemoryBuffer(const Buffer &src,size_t offset,size_t size);
-	virtual ~MemoryBuffer() override final;
+	~MemoryBuffer();
 
 	virtual const uint8_t *data() const noexcept override final;
 	virtual uint8_t *data() override final;
