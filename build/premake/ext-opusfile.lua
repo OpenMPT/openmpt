@@ -26,6 +26,7 @@
 		if _OPTIONS["clang"] then
 			buildoptions {
 				"-Wno-bitwise-op-parentheses",
+				"-Wno-logical-op-parentheses",
 				"-Wno-shift-op-parentheses",
 				"-Wno-unused-but-set-variable",
 				"-Wno-unused-const-variable",
