@@ -972,7 +972,6 @@ void CDoWaveConvert::Run()
 	}
 #endif // NO_PLUGINS
 
-	MixerSettings oldmixersettings = m_SndFile.m_MixerSettings;
 	MixerSettings mixersettings = TrackerSettings::Instance().GetMixerSettings();
 	mixersettings.m_nMaxMixChannels = MAX_CHANNELS; // always use max mixing channels when rendering
 	mixersettings.gdwMixingFreq = samplerate;
