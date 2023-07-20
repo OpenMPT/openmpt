@@ -542,6 +542,7 @@ bool DebugReporter::Cleanup(DumpMode mode)
 // Different entry points for different situations in which we want to dump some information
 
 
+#if 0
 static bool IsCxxException(_EXCEPTION_POINTERS *pExceptionInfo)
 {
 	if (!pExceptionInfo)
@@ -552,6 +553,7 @@ static bool IsCxxException(_EXCEPTION_POINTERS *pExceptionInfo)
 		return false;
 	return true;
 }
+#endif
 
 
 template <typename E>
@@ -581,21 +583,21 @@ static const E * GetCxxException(_EXCEPTION_POINTERS *pExceptionInfo)
 		return nullptr;
 	if(pExceptionInfo->ExceptionRecord->ExceptionCode != 0xE06D7363u)
 		return nullptr;
-	#ifdef _WIN64
-		if(pExceptionInfo->ExceptionRecord->NumberParameters != 4)
-			return nullptr;
-	#else
-		if(pExceptionInfo->ExceptionRecord->NumberParameters != 3)
-			return nullptr;
-	#endif
+#ifdef _WIN64
+	if(pExceptionInfo->ExceptionRecord->NumberParameters != 4)
+		return nullptr;
+#else
+	if(pExceptionInfo->ExceptionRecord->NumberParameters != 3)
+		return nullptr;
+#endif
 	if(pExceptionInfo->ExceptionRecord->ExceptionInformation[0] != 0x19930520u)
 		return nullptr;
 	std::uintptr_t base_address = 0;
-	#ifdef _WIN64
-		base_address = pExceptionInfo->ExceptionRecord->ExceptionInformation[3];
-	#else
-		base_address = 0;
-	#endif
+#ifdef _WIN64
+	base_address = pExceptionInfo->ExceptionRecord->ExceptionInformation[3];
+#else
+	base_address = 0;
+#endif
 	std::uintptr_t obj_address = pExceptionInfo->ExceptionRecord->ExceptionInformation[1];
 	if(!obj_address)
 		return nullptr;
@@ -725,7 +727,6 @@ LONG ExceptionHandler::ExceptionFilter(_EXCEPTION_POINTERS *pExceptionInfo)
 }
 
 
-static void mpt_unexpected_handler();
 static void mpt_terminate_handler();
 
 
