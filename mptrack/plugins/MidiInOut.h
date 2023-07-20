@@ -48,7 +48,7 @@ class MidiInOut final : public IMidiPlugin
 	friend class MidiInOutEditor;
 
 protected:
-	enum
+	enum : unsigned int
 	{
 		kInputParameter  = 0,
 		kOutputParameter = 1,
