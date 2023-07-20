@@ -872,12 +872,12 @@ intptr_t CVstPlugin::VstFileSelector(bool destructor, VstFileSelect &fileSel)
 CVstPlugin::CVstPlugin(bool maskCrashes, HMODULE hLibrary, VSTPluginLib &factory, SNDMIXPLUGIN &mixStruct, AEffect &effect, CSoundFile &sndFile)
 	: IMidiPlugin(factory, sndFile, mixStruct)
 	, m_maskCrashes(maskCrashes)
-	, m_Effect(effect)
-	, timeInfo{}
 	, m_hLibrary(hLibrary)
+	, m_Effect(effect)
 	, m_nSampleRate(sndFile.GetSampleRate())
 	, m_isInitialized(false)
 	, m_needIdle(false)
+	, timeInfo{}
 	, isBridged(!memcmp(&effect.reservedForHost2, "OMPT", 4))
 {
 	// Open plugin and initialize data structures
