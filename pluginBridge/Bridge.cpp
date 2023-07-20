@@ -1234,6 +1234,10 @@ intptr_t PluginBridge::DispatchToHost(VstOpcodeToHost opcode, int32 index, intpt
 		// Name in [ptr]
 		strcpy(ptrC, extraData);
 		break;
+
+	default:
+		// nothing
+		break;
 	}
 
 	return static_cast<intptr_t>(resultMsg->result);
