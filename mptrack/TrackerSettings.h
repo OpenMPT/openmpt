@@ -613,7 +613,7 @@ private:
 
 public:
 
-	DebugSettings(SettingsContainer &conf);
+	DebugSettings(SettingsContainer &conf_);
 
 	~DebugSettings();
 

@@ -114,8 +114,8 @@ void SampleUndoBufferSize::CalculateSize()
 }
 
 
-DebugSettings::DebugSettings(SettingsContainer &conf)
-	: conf(conf)
+DebugSettings::DebugSettings(SettingsContainer &conf_)
+	: conf(conf_)
 	// Debug
 #if !defined(MPT_LOG_IS_DISABLED)
 	, DebugLogLevel(conf, U_("Debug"), U_("LogLevel"), static_cast<int>(mpt::log::GlobalLogLevel))
@@ -1069,8 +1069,8 @@ private:
 
 public:
 
-	StoredSoundDeviceSettings(SettingsContainer &conf, const SoundDevice::Info & deviceInfo, const SoundDevice::Settings & defaults)
-		: conf(conf)
+	StoredSoundDeviceSettings(SettingsContainer &conf_, const SoundDevice::Info & deviceInfo, const SoundDevice::Settings & defaults)
+		: conf(conf_)
 		, deviceInfo(deviceInfo)
 		, LatencyUS(conf, U_("Sound Settings"), deviceInfo.GetIdentifier() + U_("_") + U_("Latency"), mpt::saturate_round<int32>(defaults.Latency * 1000000.0))
 		, UpdateIntervalUS(conf, U_("Sound Settings"), deviceInfo.GetIdentifier() + U_("_") + U_("UpdateInterval"), mpt::saturate_round<int32>(defaults.UpdateInterval * 1000000.0))
