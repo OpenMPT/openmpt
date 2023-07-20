@@ -1133,7 +1133,7 @@ BOOL CTrackApp::InitInstanceEarly(CMPTCommandLineInfo &cmdInfo)
 	::SetCurrentDirectory(mpt::common_directories::get_application_directory().AsNative().c_str());
 
 	// Initialize OLE MFC support
-	BOOL oleinit = AfxOleInit();
+	[[maybe_unused]] BOOL oleinit = AfxOleInit();
 	ASSERT(oleinit != FALSE); // no MPT_ASSERT here!
 
 	// Parse command line for standard shell commands, DDE, file open
