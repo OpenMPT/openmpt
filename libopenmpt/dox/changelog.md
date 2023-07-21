@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt 0.5.26-pre
 
+ *  [**Regression**] We no longer provide libopenmpt 0.5 binaries for
+    Emscripten and DOS. If you need those pre-built, use libopenmpt 0.7 instead.
+
  *  FLAC: Update to v1.4.3 (2022-06-23).
 
 ### libopenmpt 0.5.25 (2023-06-18)
