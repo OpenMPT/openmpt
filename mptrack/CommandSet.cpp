@@ -1271,7 +1271,7 @@ void CCommandSet::SetupCommands()
 	static_assert(1924 + kcEndSampleCues - kcStartSampleCues < 1950);
 
 	// Automatically generated note entry keys in non-pattern contexts
-	for(const auto ctx : NoteContexts)
+	for(const auto &ctx : NoteContexts)
 	{
 		const auto contextStartNotes = std::get<1>(ctx);
 		const auto contextStopNotes = std::get<2>(ctx);
@@ -1833,7 +1833,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 			const bool areNoteStarts = (inCmd >= kcVPStartNotes && inCmd <= kcVPEndNotes);
 			const auto startNote = areNoteStarts ? kcVPStartNotes : kcVPStartNoteStops;
 			const auto noteOffset = inCmd - startNote;
-			for(const auto ctx : NoteContexts)
+			for(const auto &ctx : NoteContexts)
 			{
 				const auto context = std::get<0>(ctx);
 				const auto contextStartNote = areNoteStarts ? std::get<1>(ctx) : std::get<2>(ctx);
@@ -2035,7 +2035,7 @@ ctx:UID:Description:Modifier:Key:EventMask
 			if(m_commands[cmd].IsHidden())
 				continue;
 
-			for(const auto kc : m_commands[cmd].kcList)
+			for(const auto &kc : m_commands[cmd].kcList)
 			{
 				if(kc.Context() != ctx)
 					continue;  // Sort by context
