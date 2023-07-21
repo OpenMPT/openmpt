@@ -504,7 +504,7 @@
       <DebugInformationFormat>None</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 -Wno-unused-but-set-variable %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 -Wno-unused-but-set-variable -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -524,7 +524,7 @@
       <DebugInformationFormat>None</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 -Wno-unused-but-set-variable %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 -Wno-unused-but-set-variable -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -544,7 +544,7 @@
       <DebugInformationFormat>None</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 -Wno-unused-but-set-variable %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 -Wno-unused-but-set-variable -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -564,7 +564,7 @@
       <DebugInformationFormat>None</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 -Wno-unused-but-set-variable %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 -Wno-unused-but-set-variable -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -589,7 +589,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
-      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 -Wno-unused-but-set-variable %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 -Wno-unused-but-set-variable -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -615,7 +615,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 -Wno-unused-but-set-variable %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 -Wno-unused-but-set-variable -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -641,7 +641,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 -Wno-unused-but-set-variable %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 -Wno-unused-but-set-variable -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -667,7 +667,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 -Wno-unused-but-set-variable %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 -Wno-unused-but-set-variable -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -695,7 +695,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
-      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 -Wno-unused-but-set-variable %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 -Wno-unused-but-set-variable -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -722,7 +722,7 @@
       <OmitFramePointers>false</OmitFramePointers>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 -Wno-unused-but-set-variable %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 -Wno-unused-but-set-variable -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -749,7 +749,7 @@
       <OmitFramePointers>false</OmitFramePointers>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 -Wno-unused-but-set-variable %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 -Wno-unused-but-set-variable -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -776,7 +776,7 @@
       <OmitFramePointers>false</OmitFramePointers>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 -Wno-unused-but-set-variable %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 -Wno-unused-but-set-variable -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -798,7 +798,7 @@
       <DebugInformationFormat>None</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 -Wno-unused-but-set-variable %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 -Wno-unused-but-set-variable -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -821,7 +821,7 @@
       <DebugInformationFormat>None</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 -Wno-unused-but-set-variable %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 -Wno-unused-but-set-variable -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -844,7 +844,7 @@
       <DebugInformationFormat>None</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 -Wno-unused-but-set-variable %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 -Wno-unused-but-set-variable -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -867,7 +867,7 @@
       <DebugInformationFormat>None</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 -Wno-unused-but-set-variable %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 -Wno-unused-but-set-variable -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -895,7 +895,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
-      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 -Wno-unused-but-set-variable %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 -Wno-unused-but-set-variable -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -924,7 +924,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 -Wno-unused-but-set-variable %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 -Wno-unused-but-set-variable -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -953,7 +953,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 -Wno-unused-but-set-variable %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 -Wno-unused-but-set-variable -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -982,7 +982,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 -Wno-unused-but-set-variable %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 -Wno-unused-but-set-variable -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -1013,7 +1013,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
-      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 -Wno-unused-but-set-variable %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 -Wno-unused-but-set-variable -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -1043,7 +1043,7 @@
       <OmitFramePointers>false</OmitFramePointers>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 -Wno-unused-but-set-variable %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 -Wno-unused-but-set-variable -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -1073,7 +1073,7 @@
       <OmitFramePointers>false</OmitFramePointers>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 -Wno-unused-but-set-variable %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 -Wno-unused-but-set-variable -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -1103,7 +1103,7 @@
       <OmitFramePointers>false</OmitFramePointers>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 -Wno-unused-but-set-variable %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/wd4101 /wd4244 /wd4267 /wd4305 /wd4703 /wd6001 /wd6011 /wd6255 /wd6262 /wd6263 /wd6297 /wd6308 /wd6385 /wd6386 /wd6387 /wd28182 -Wno-unused-but-set-variable -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>

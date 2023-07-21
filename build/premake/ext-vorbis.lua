@@ -97,6 +97,7 @@
 		if _OPTIONS["clang"] then
 			buildoptions {
 				"-Wno-unused-but-set-variable",
+				"-Wno-unused-variable",
 			}
 		end
 	filter {}
