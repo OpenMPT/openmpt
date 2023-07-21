@@ -2575,6 +2575,7 @@ static MPT_NOINLINE void TestSettings()
 		conf.Write(U_("Test"), U_("bar"), 42);
 		conf.Read(U_("Test"), U_("baz"), 4711);
 		foobar = conf.Read(U_("Test"), U_("bar"), 28);
+		VERIFY_EQUAL(foobar, 42);
 	}
 
 	{
