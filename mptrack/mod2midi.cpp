@@ -806,7 +806,7 @@ void CModToMidi::OnChannelChanged()
 void CModToMidi::OnProgramChanged()
 {
 	DWORD_PTR nProgram = m_CbnProgram.GetItemData(m_CbnProgram.GetCurSel());
-	if (nProgram == CB_ERR) return;
+	if (static_cast<LONG_PTR>(nProgram) == CB_ERR) return;
 	if ((m_currentInstr > 0) && (m_currentInstr < MAX_SAMPLES))
 	{
 		m_instrMap[m_currentInstr].program = static_cast<uint8>(nProgram);

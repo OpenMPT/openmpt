@@ -287,18 +287,26 @@ void VSTPresets::SaveProgram(std::ostream &f, IMixPlugin &plugin)
 // Translate error code to string. Returns nullptr if there was no error.
 const char *VSTPresets::GetErrorMessage(ErrorCode code)
 {
+	const char *result = nullptr;
 	switch(code)
 	{
 	case VSTPresets::invalidFile:
-		return "This does not appear to be a valid preset file.";
+		result = "This does not appear to be a valid preset file.";
+		break;
 	case VSTPresets::wrongPlugin:
-		return "This file appears to be for a different plugin.";
+		result = "This file appears to be for a different plugin.";
+		break;
 	case VSTPresets::wrongParameters:
-		return "The number of parameters in this file is incompatible with the current plugin.";
+		result = "The number of parameters in this file is incompatible with the current plugin.";
+		break;
 	case VSTPresets::outOfMemory:
-		return "Not enough memory to load preset data.";
+		result = "Not enough memory to load preset data.";
+		break;
+	case VSTPresets::noError:
+		result = nullptr;
+		break;
 	}
-	return nullptr;
+	return result;
 }
 
 #endif // NO_PLUGINS
