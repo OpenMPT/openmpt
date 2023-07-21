@@ -361,8 +361,12 @@ void COptionsKeyboard::OnKeyboardChanged()
 void COptionsKeyboard::OnCategorySelChanged()
 {
 	int cat = static_cast<int>(m_cmbCategory.GetItemData(m_cmbCategory.GetCurSel()));
+	if(cat < 0)
+		return;
 
-	if(cat >= 0 && cat != m_curCategory)
+	m_eFind.SetWindowText(_T(""));
+	m_eFindHotKey.SetWindowText(_T(""));
+	if(cat != m_curCategory)
 	{
 		// Changed category
 		UpdateShortcutList(cat);
