@@ -99,6 +99,7 @@
 #       endif
 #   endif
 #elif (_MSC_VER >= 1400) && !defined(_WIN32_WCE)
+#if defined(_M_IX86) || defined(_M_AMD64) || defined(_M_X64) /* OpenMPT */ 
 #   include <intrin.h>
 #   pragma intrinsic(_ReadWriteBarrier)
 #   pragma intrinsic(_ReadBarrier)
@@ -107,6 +108,12 @@
 #   define PaUtil_FullMemoryBarrier()  _ReadWriteBarrier()
 #   define PaUtil_ReadMemoryBarrier()  _ReadBarrier()
 #   define PaUtil_WriteMemoryBarrier() _WriteBarrier()
+#else /* OpenMPT */
+#   include <windows.h> /* OpenMPT */
+#   define PaUtil_FullMemoryBarrier()  MemoryBarrier() /* OpenMPT */
+#   define PaUtil_ReadMemoryBarrier()  MemoryBarrier() /* OpenMPT */
+#   define PaUtil_WriteMemoryBarrier() MemoryBarrier() /* OpenMPT */
+#endif /* OpenMPT */
 #elif defined(_WIN32_WCE)
 #   define PaUtil_FullMemoryBarrier()
 #   define PaUtil_ReadMemoryBarrier()
