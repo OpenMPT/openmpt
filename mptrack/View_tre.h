@@ -111,7 +111,7 @@ protected:
 	};
 
 	// Bit mask magic
-	enum
+	enum : unsigned int
 	{
 		MIDILIB_SHIFT = 16,
 		MIDILIB_MASK  = (1 << MIDILIB_SHIFT) - 1,

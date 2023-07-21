@@ -1034,7 +1034,7 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 				}
 				// Drawing note
 				m_Dib.SetTextColor(tx_col, bk_col);
-				if(sndFile.GetType() == MOD_TYPE_MPT && m->instr < MAX_INSTRUMENTS && sndFile.Instruments[m->instr])
+				MPT_MAYBE_CONSTANT_IF(sndFile.GetType() == MOD_TYPE_MPT && m->instr < MAX_INSTRUMENTS && sndFile.Instruments[m->instr])
 					DrawNote(xbmp+x, 0, m->note, sndFile.Instruments[m->instr]->pTuning);
 				else //Original
 					DrawNote(xbmp+x, 0, m->note);

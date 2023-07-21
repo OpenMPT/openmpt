@@ -162,6 +162,9 @@ bool CAutoSaver::SaveSingleFile(CModDoc &modDoc)
 		case MOD_TYPE_XM:  success = sndFile.SaveXM(f); break;
 		case MOD_TYPE_IT:  success = sndFile.SaveIT(f, fileName); break;
 		case MOD_TYPE_MPT: success = sndFile.SaveIT(f, fileName); break;
+		default:
+			// nothing
+			break;
 		}
 	}
 
