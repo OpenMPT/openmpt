@@ -487,6 +487,7 @@ BOOL AddSilenceDlg::OnInitDialog()
 	case kSilenceAtBeginning: buttonID = IDC_RADIO_ADDSILENCE_BEGIN; break;
 	case kSilenceAtEnd:       buttonID = IDC_RADIO_ADDSILENCE_END; break;
 	case kResize:             buttonID = IDC_RADIO_RESIZETO; break;
+	default: break;
 	}
 	CheckDlgButton(buttonID, BST_CHECKED);
 
@@ -512,6 +513,8 @@ void AddSilenceDlg::OnOK()
 		break;
 	case kResize:
 		m_createSamples = m_numSamples;
+		break;
+	default:
 		break;
 	}
 	CDialog::OnOK();

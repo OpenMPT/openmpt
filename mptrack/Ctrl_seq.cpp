@@ -1406,7 +1406,7 @@ LRESULT COrderList::OnDragonDropping(WPARAM doDrop, LPARAM lParam)
 
 	if((!pDropInfo) || (&m_modDoc.GetSoundFile() != pDropInfo->sndFile) || (!m_cxFont))
 		return FALSE;
-	BOOL canDrop = FALSE;
+	bool canDrop = false;
 	switch(pDropInfo->dropType)
 	{
 	case DRAGONDROP_ORDER:
@@ -1414,7 +1414,9 @@ LRESULT COrderList::OnDragonDropping(WPARAM doDrop, LPARAM lParam)
 			break;
 		[[fallthrough]];
 	case DRAGONDROP_PATTERN:
-		canDrop = TRUE;
+		canDrop = true;
+		break;
+	default:
 		break;
 	}
 	if(!canDrop || !doDrop)
@@ -1431,9 +1433,10 @@ LRESULT COrderList::OnDragonDropping(WPARAM doDrop, LPARAM lParam)
 	case DRAGONDROP_PATTERN:
 		Order()[posDest] = static_cast<PATTERNINDEX>(pDropInfo->dropItem);
 		break;
-
 	case DRAGONDROP_ORDER:
 		Order()[posDest] = Order()[pDropInfo->dropItem];
+		break;
+	default:
 		break;
 	}
 	if(canDrop)

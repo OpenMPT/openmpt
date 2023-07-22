@@ -987,6 +987,9 @@ void CModDoc::ProcessMIDI(uint32 midiData, SAMPLEINDEX smp, INSTRUMENTINDEX ins,
 			break;
 		}
 		break;
+
+	default:
+		break;
 	}
 
 	if((TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_MIDITOPLUG) && CMainFrame::GetMainFrame()->GetModPlaying() == this && plugin != nullptr)
