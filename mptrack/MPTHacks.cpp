@@ -60,6 +60,11 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 	case MOD_TYPE_IT:
 		originalSpecs = &ModSpecs::it;
 		break;
+	case MOD_TYPE_MPT:
+		break;
+	default:
+		MPT_ASSERT_NOTREACHED();
+		break;
 	}
 
 	bool foundHacks = false, foundHere = false;

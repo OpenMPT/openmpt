@@ -816,25 +816,25 @@ void CViewInstrument::UpdateNcButtonState()
 
 		switch(cLeftBarButtons[i])
 		{
-		case ID_ENVSEL_VOLUME:		if (m_nEnv == ENV_VOLUME) dwStyle |= NCBTNS_CHECKED; break;
-		case ID_ENVSEL_PANNING:		if (m_nEnv == ENV_PANNING) dwStyle |= NCBTNS_CHECKED; break;
-		case ID_ENVSEL_PITCH:		if (!(sndFile.GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))) dwStyle |= NCBTNS_DISABLED;
-									else if (m_nEnv == ENV_PITCH) dwStyle |= NCBTNS_CHECKED; break;
-		case ID_ENVELOPE_SETLOOP:	if (EnvGetLoop()) dwStyle |= NCBTNS_CHECKED; break;
-		case ID_ENVELOPE_SUSTAIN:	if (EnvGetSustain()) dwStyle |= NCBTNS_CHECKED; break;
-		case ID_ENVELOPE_CARRY:		if (!(sndFile.GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))) dwStyle |= NCBTNS_DISABLED;
-									else if (EnvGetCarry()) dwStyle |= NCBTNS_CHECKED; break;
-		case ID_ENVELOPE_VOLUME:	if (EnvGetVolEnv()) dwStyle |= NCBTNS_CHECKED; break;
-		case ID_ENVELOPE_PANNING:	if (EnvGetPanEnv()) dwStyle |= NCBTNS_CHECKED; break;
-		case ID_ENVELOPE_PITCH:		if (!(sndFile.GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))) dwStyle |= NCBTNS_DISABLED; else
-									if (EnvGetPitchEnv()) dwStyle |= NCBTNS_CHECKED; break;
-		case ID_ENVELOPE_FILTER:	if (!(sndFile.GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))) dwStyle |= NCBTNS_DISABLED; else
-									if (EnvGetFilterEnv()) dwStyle |= NCBTNS_CHECKED; break;
-		case ID_ENVELOPE_VIEWGRID:	if (m_bGrid) dwStyle |= NCBTNS_CHECKED; break;
-		case ID_ENVELOPE_ZOOM_IN:	if (m_zoom >= ENV_MAX_ZOOM) dwStyle |= NCBTNS_DISABLED; break;
-		case ID_ENVELOPE_ZOOM_OUT:	if (m_zoom <= ENV_MIN_ZOOM) dwStyle |= NCBTNS_DISABLED; break;
+		case ID_ENVSEL_VOLUME:     if(m_nEnv == ENV_VOLUME) dwStyle |= NCBTNS_CHECKED; break;
+		case ID_ENVSEL_PANNING:    if(m_nEnv == ENV_PANNING) dwStyle |= NCBTNS_CHECKED; break;
+		case ID_ENVSEL_PITCH:      if(!(sndFile.GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))) dwStyle |= NCBTNS_DISABLED;
+		                           else if(m_nEnv == ENV_PITCH) dwStyle |= NCBTNS_CHECKED; break;
+		case ID_ENVELOPE_SETLOOP:  if(EnvGetLoop()) dwStyle |= NCBTNS_CHECKED; break;
+		case ID_ENVELOPE_SUSTAIN:  if(EnvGetSustain()) dwStyle |= NCBTNS_CHECKED; break;
+		case ID_ENVELOPE_CARRY:    if(!(sndFile.GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))) dwStyle |= NCBTNS_DISABLED;
+		                           else if(EnvGetCarry()) dwStyle |= NCBTNS_CHECKED; break;
+		case ID_ENVELOPE_VOLUME:   if(EnvGetVolEnv()) dwStyle |= NCBTNS_CHECKED; break;
+		case ID_ENVELOPE_PANNING:  if(EnvGetPanEnv()) dwStyle |= NCBTNS_CHECKED; break;
+		case ID_ENVELOPE_PITCH:    if(!(sndFile.GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))) dwStyle |= NCBTNS_DISABLED;
+		                           else if(EnvGetPitchEnv()) dwStyle |= NCBTNS_CHECKED; break;
+		case ID_ENVELOPE_FILTER:   if(!(sndFile.GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))) dwStyle |= NCBTNS_DISABLED;
+		                           else if(EnvGetFilterEnv()) dwStyle |= NCBTNS_CHECKED; break;
+		case ID_ENVELOPE_VIEWGRID: if(m_bGrid) dwStyle |= NCBTNS_CHECKED; break;
+		case ID_ENVELOPE_ZOOM_IN:  if(m_zoom >= ENV_MAX_ZOOM) dwStyle |= NCBTNS_DISABLED; break;
+		case ID_ENVELOPE_ZOOM_OUT: if(m_zoom <= ENV_MIN_ZOOM) dwStyle |= NCBTNS_DISABLED; break;
 		case ID_ENVELOPE_LOAD:
-		case ID_ENVELOPE_SAVE:		if (GetInstrumentPtr() == nullptr) dwStyle |= NCBTNS_DISABLED; break;
+		case ID_ENVELOPE_SAVE:     if(GetInstrumentPtr() == nullptr) dwStyle |= NCBTNS_DISABLED; break;
 		}
 		if (m_nBtnMouseOver == i)
 		{

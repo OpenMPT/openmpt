@@ -3694,6 +3694,9 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 			case FollowSamplePlayCursor::FollowCentered:
 				CMainFrame::GetMainFrame()->SetHelpText(_T("Follow Sample Play Cursor: Follow centered"));
 				break;
+			case FollowSamplePlayCursor::MaxOptions:
+				MPT_ASSERT_NOTREACHED();
+				break;
 			}
 			return wParam;
 	}

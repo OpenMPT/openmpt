@@ -1605,6 +1605,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 			case kcCopySelectWithNav:		cmdOff = kcCopySelectOffWithNav;	break;
 			case kcSelectWithCopySelect:	cmdOff = kcSelectOffWithCopySelect; break;
 			case kcCopySelectWithSelect:	cmdOff = kcCopySelectOffWithSelect; break;
+			default: break;
 		}
 
 		if(cmdOff != kcNull)
