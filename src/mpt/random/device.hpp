@@ -98,7 +98,7 @@ public:
 			hash(std::begin(bytes), std::end(bytes));
 		}
 #endif // !MPT_COMPILER_QUIRK_CHRONO_NO_HIGH_RESOLUTION_CLOCK
-#else // MPT_LIBCXX_QUIRK_NO_CHRONO
+#else  // MPT_LIBCXX_QUIRK_NO_CHRONO
 		{
 			uint64be time;
 			time = static_cast<uint64>(std::time(nullptr));
