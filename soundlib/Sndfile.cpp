@@ -1048,16 +1048,18 @@ void CSoundFile::ResetChannels()
 
 #ifdef MODPLUG_TRACKER
 
-void CSoundFile::PatternTranstionChnSolo(const CHANNELINDEX chnIndex)
+void CSoundFile::PatternTranstionChnSolo(const CHANNELINDEX first, const CHANNELINDEX last)
 {
-	if(chnIndex >= m_nChannels)
+	if(first >= m_nChannels || last < first)
 		return;
 
 	for(CHANNELINDEX i = 0; i < m_nChannels; i++)
 	{
-		m_bChannelMuteTogglePending[i] = !ChnSettings[i].dwFlags[CHN_MUTE];
+		if(i >= first && i <= last)
+			m_bChannelMuteTogglePending[i] = ChnSettings[i].dwFlags[CHN_MUTE];
+		else
+			m_bChannelMuteTogglePending[i] = !ChnSettings[i].dwFlags[CHN_MUTE];
 	}
-	m_bChannelMuteTogglePending[chnIndex] = ChnSettings[chnIndex].dwFlags[CHN_MUTE];
 }
 
 

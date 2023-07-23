@@ -1294,7 +1294,7 @@ void CViewPattern::OnLButtonUp(UINT nFlags, CPoint point)
 			} else if(CMainFrame::GetInputHandler()->AltPressed())
 			{
 				// Solo / Unsolo
-				OnSoloChannel(sourceChn);
+				OnSoloChannel(sourceChn, sourceChn);
 			} else if(!(nFlags & MK_CONTROL))
 			{
 				// Mute / Unmute
@@ -1816,17 +1816,7 @@ void CViewPattern::OnMuteChannel(CHANNELINDEX chn)
 	CModDoc *pModDoc = GetDocument();
 	if(pModDoc)
 	{
-		pModDoc->SoloChannel(chn, false);
 		pModDoc->MuteChannel(chn, !pModDoc->IsChannelMuted(chn));
-
-		//If we just unmuted a channel, make sure none are still considered "solo".
-		if(!pModDoc->IsChannelMuted(chn))
-		{
-			for(CHANNELINDEX i = 0; i < pModDoc->GetNumChannels(); i++)
-			{
-				pModDoc->SoloChannel(i, false);
-			}
-		}
 
 		InvalidateChannelsHeaders();
 		pModDoc->UpdateAllViews(this, GeneralHint(chn).Channels());
@@ -1836,48 +1826,48 @@ void CViewPattern::OnMuteChannel(CHANNELINDEX chn)
 
 void CViewPattern::OnSoloFromClick()
 {
-	OnSoloChannel(m_MenuCursor.GetChannel());
+	OnSoloChannel(m_MenuCursor.GetChannel(), m_MenuCursor.GetChannel());
 }
 
 
 // When trying to solo a channel that is already the only unmuted channel,
 // this will result in unmuting all channels, in order to satisfy user habits.
 // In all other cases, soloing a channel unsoloes all and mutes all except this channel
-void CViewPattern::OnSoloChannel(CHANNELINDEX chn)
+void CViewPattern::OnSoloChannel(CHANNELINDEX first, CHANNELINDEX last)
 {
 	CModDoc *pModDoc = GetDocument();
 	if(pModDoc == nullptr)
 		return;
 
-	if(chn >= pModDoc->GetNumChannels())
+	if(first >= pModDoc->GetNumChannels() || last < first)
 	{
 		return;
 	}
 
-	if(pModDoc->IsChannelSolo(chn))
-	{
-		bool nChnIsOnlyUnMutedChan = true;
-		for(CHANNELINDEX i = 0; i < pModDoc->GetNumChannels(); i++)  //check status of all other chans
-		{
-			if(i != chn && !pModDoc->IsChannelMuted(i))
-			{
-				nChnIsOnlyUnMutedChan = false;  //found a channel that isn't muted!
-				break;
-			}
-		}
-		if(nChnIsOnlyUnMutedChan)  // this is the only playable channel and it is already soloed ->  Unmute all
-		{
-			OnUnmuteAll();
-			return;
-		}
-	}
+	bool isAlreadySolo = true;
 	for(CHANNELINDEX i = 0; i < pModDoc->GetNumChannels(); i++)
 	{
-		pModDoc->MuteChannel(i, !(i == chn));  //mute all chans except nChn, unmute nChn
-		pModDoc->SoloChannel(i, (i == chn));   //unsolo all chans except nChn, solo nChn
+		if((i >= first && i <= last) == pModDoc->IsChannelMuted(i))
+		{
+			isAlreadySolo = false;
+			break;
+		}
+	}
+	if(isAlreadySolo)
+	{
+		OnUnmuteAll();
+		return;
+	}
+
+	for(CHANNELINDEX i = 0; i < pModDoc->GetNumChannels(); i++)
+	{
+		pModDoc->MuteChannel(i, i < first || i > last);
 	}
 	InvalidateChannelsHeaders();
-	pModDoc->UpdateAllViews(this, GeneralHint(chn).Channels());
+	if(first == last)
+		pModDoc->UpdateAllViews(this, GeneralHint(first).Channels());
+	else
+		pModDoc->UpdateAllViews(this, GeneralHint().Channels());
 }
 
 
@@ -1920,7 +1910,6 @@ void CViewPattern::OnUnmuteAll()
 		for(CHANNELINDEX chn = 0; chn < numChannels; chn++)
 		{
 			pModDoc->MuteChannel(chn, false);
-			pModDoc->SoloChannel(chn, false);
 		}
 		InvalidateChannelsHeaders();
 	}
@@ -4284,7 +4273,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcChannelMute:					for(CHANNELINDEX c = m_Selection.GetStartChannel(); c <= m_Selection.GetEndChannel(); c++)
 												OnMuteChannel(c);
 											return wParam;
-		case kcChannelSolo:					OnSoloChannel(GetCurrentChannel()); return wParam;
+		case kcChannelSolo:					OnSoloChannel(m_Selection.GetStartChannel(), m_Selection.GetEndChannel()); return wParam;
 		case kcChannelUnmuteAll:			OnUnmuteAll(); return wParam;
 		case kcToggleChanMuteOnPatTransition: for(CHANNELINDEX c = m_Selection.GetStartChannel(); c <= m_Selection.GetEndChannel(); c++)
 												TogglePendingMute(c);
@@ -4300,7 +4289,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 												ResetChannel(m_Cursor.GetChannel());
 											return wParam;
 		case kcTimeAtRow:					OnShowTimeAtRow(); return wParam;
-		case kcSoloChnOnPatTransition:		PendingSoloChn(GetCurrentChannel()); return wParam;
+		case kcSoloChnOnPatTransition:		PendingSoloChn(m_Selection.GetStartChannel(), m_Selection.GetEndChannel()); return wParam;
 		case kcTransposeUp:					OnTransposeUp(); return wParam;
 		case kcTransposeDown:				OnTransposeDown(); return wParam;
 		case kcTransposeOctUp:				OnTransposeOctUp(); return wParam;
@@ -6877,7 +6866,7 @@ void CViewPattern::OnTogglePendingMuteFromClick()
 // Toggle pending solo status for channel from context menu.
 void CViewPattern::OnPendingSoloChnFromClick()
 {
-	PendingSoloChn(m_MenuCursor.GetChannel());
+	PendingSoloChn(m_MenuCursor.GetChannel(), m_MenuCursor.GetChannel());
 }
 
 
@@ -6894,12 +6883,12 @@ void CViewPattern::OnPendingUnmuteAllChnFromClick()
 
 
 // Toggle pending solo status for a channel.
-void CViewPattern::PendingSoloChn(CHANNELINDEX nChn)
+void CViewPattern::PendingSoloChn(CHANNELINDEX first, CHANNELINDEX last)
 {
 	CSoundFile *pSndFile = GetSoundFile();
 	if(pSndFile != nullptr)
 	{
-		GetSoundFile()->PatternTranstionChnSolo(nChn);
+		GetSoundFile()->PatternTranstionChnSolo(first, last);
 		InvalidateChannelsHeaders();
 	}
 }

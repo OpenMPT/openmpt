@@ -435,7 +435,7 @@ protected:
 	afx_msg void OnTogglePendingMuteFromClick();
 	afx_msg void OnPendingSoloChnFromClick();
 	afx_msg void OnPendingUnmuteAllChnFromClick();
-	afx_msg void OnSoloChannel(CHANNELINDEX chn);
+	afx_msg void OnSoloChannel(CHANNELINDEX first, CHANNELINDEX last);
 	afx_msg void OnMuteChannel(CHANNELINDEX chn);
 	afx_msg void OnUnmuteAll();
 	afx_msg void OnRecordSelect();
@@ -583,7 +583,7 @@ public:
 
 private:
 	void TogglePendingMute(CHANNELINDEX nChn);
-	void PendingSoloChn(CHANNELINDEX nChn);
+	void PendingSoloChn(CHANNELINDEX first, CHANNELINDEX last);
 
 	template <typename Func>
 	void ApplyToSelection(Func func);

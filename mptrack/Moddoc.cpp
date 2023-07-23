@@ -1340,21 +1340,6 @@ bool CModDoc::UpdateChannelMuteStatus(CHANNELINDEX nChn)
 }
 
 
-bool CModDoc::IsChannelSolo(CHANNELINDEX nChn) const
-{
-	if (nChn >= m_SndFile.m_nChannels) return true;
-	return m_SndFile.ChnSettings[nChn].dwFlags[CHN_SOLO];
-}
-
-bool CModDoc::SoloChannel(CHANNELINDEX nChn, bool bSolo)
-{
-	if (nChn >= m_SndFile.m_nChannels) return false;
-	if (MuteToggleModifiesDocument()) SetModified();
-	m_SndFile.ChnSettings[nChn].dwFlags.set(CHN_SOLO, bSolo);
-	return true;
-}
-
-
 bool CModDoc::IsChannelNoFx(CHANNELINDEX nChn) const
 {
 	if (nChn >= m_SndFile.m_nChannels) return true;

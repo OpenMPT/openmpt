@@ -799,7 +799,7 @@ public:
 	static ChannelFlags GetChannelMuteFlag();
 
 #ifdef MODPLUG_TRACKER
-	void PatternTranstionChnSolo(const CHANNELINDEX chnIndex);
+	void PatternTranstionChnSolo(const CHANNELINDEX first, const CHANNELINDEX last);
 	void PatternTransitionChnUnmuteAll();
 
 protected:

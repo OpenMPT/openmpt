@@ -1,5 +1,5 @@
 /*
- * Snd_Defs.h
+ * Snd_defs.h
  * ----------
  * Purpose: Basic definitions of data types, enums, etc. for the playback engine core.
  * Notes  : (currently none)
@@ -150,9 +150,8 @@ enum ChannelFlags
 	CHN_EXTRALOUD       = 0x400000,    // Force sample to play at 0dB
 	CHN_REVERB          = 0x800000,    // Apply reverb on this channel
 	CHN_NOREVERB        = 0x1000000,   // Disable reverb on this channel
-	CHN_SOLO            = 0x2000000,   // Solo channel
-	CHN_NOFX            = 0x4000000,   // Dry channel (no plugins)
-	CHN_SYNCMUTE        = 0x8000000,   // Keep sample sync on mute
+	CHN_NOFX            = 0x2000000,   // Dry channel (no plugins)
+	CHN_SYNCMUTE        = 0x4000000,   // Keep sample sync on mute
 
 	// Sample flags (only present in ModSample::uFlags, may overlap with CHN_CHANNELFLAGS)
 	SMP_MODIFIED        = 0x2000,      // Sample data has been edited in the tracker
@@ -161,8 +160,8 @@ enum ChannelFlags
 };
 DECLARE_FLAGSET(ChannelFlags)
 
-#define CHN_SAMPLEFLAGS (CHN_16BIT | CHN_LOOP | CHN_PINGPONGLOOP | CHN_SUSTAINLOOP | CHN_PINGPONGSUSTAIN | CHN_PANNING | CHN_STEREO | CHN_PINGPONGFLAG | CHN_REVERSE | CHN_SURROUND | CHN_ADLIB)
-#define CHN_CHANNELFLAGS (~CHN_SAMPLEFLAGS | CHN_SURROUND)
+inline constexpr ChannelFlags CHN_SAMPLEFLAGS = (CHN_16BIT | CHN_LOOP | CHN_PINGPONGLOOP | CHN_SUSTAINLOOP | CHN_PINGPONGSUSTAIN | CHN_PANNING | CHN_STEREO | CHN_PINGPONGFLAG | CHN_REVERSE | CHN_SURROUND | CHN_ADLIB).as_enum();
+inline constexpr ChannelFlags CHN_CHANNELFLAGS = (~CHN_SAMPLEFLAGS | CHN_SURROUND).as_enum();
 
 // Sample flags fit into the first 16 bits, and with the current memory layout, storing them as a 16-bit integer packs struct ModSample nicely.
 using SampleFlags = FlagSet<ChannelFlags, uint16>;

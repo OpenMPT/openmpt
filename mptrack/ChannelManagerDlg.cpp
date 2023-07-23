@@ -266,26 +266,8 @@ void CChannelManagerDlg::OnAction1()
 					CHANNELINDEX sourceChn = pattern[chn];
 					if(!removed[sourceChn])
 					{
-						if(select[sourceChn])
-							nbSelect++;
-						if(select[sourceChn] && m_ModDoc->IsChannelSolo(sourceChn))
-							nbOk++;
+						m_ModDoc->MuteChannel(sourceChn, !select[sourceChn]);
 					}
-				}
-				for(CHANNELINDEX chn = 0; chn < m_ModDoc->GetNumChannels(); chn++)
-				{
-					CHANNELINDEX sourceChn = pattern[chn];
-					if(select[sourceChn] && !removed[sourceChn])
-					{
-						if(m_ModDoc->IsChannelMuted(sourceChn))
-							m_ModDoc->MuteChannel(sourceChn, false);
-						if(nbSelect == nbOk)
-							m_ModDoc->SoloChannel(sourceChn, !m_ModDoc->IsChannelSolo(sourceChn));
-						else
-							m_ModDoc->SoloChannel(sourceChn, true);
-					}
-					else if(!m_ModDoc->IsChannelSolo(sourceChn))
-						m_ModDoc->MuteChannel(sourceChn, true);
 				}
 				break;
 			case kRecordSelect:
@@ -356,22 +338,7 @@ void CChannelManagerDlg::OnAction2()
 					if(!removed[sourceChn])
 					{
 						if(select[sourceChn])
-							nbSelect++;
-						if(select[sourceChn] && m_ModDoc->IsChannelMuted(sourceChn))
-							nbOk++;
-					}
-				}
-				for(CHANNELINDEX chn = 0; chn < m_ModDoc->GetNumChannels(); chn++)
-				{
-					CHANNELINDEX sourceChn = pattern[chn];
-					if(select[sourceChn] && !removed[sourceChn])
-					{
-						if(m_ModDoc->IsChannelSolo(sourceChn))
-							m_ModDoc->SoloChannel(sourceChn, false);
-						if(nbSelect == nbOk)
 							m_ModDoc->MuteChannel(sourceChn, !m_ModDoc->IsChannelMuted(sourceChn));
-						else
-							m_ModDoc->MuteChannel(sourceChn, true);
 					}
 				}
 				break;
@@ -434,9 +401,7 @@ void CChannelManagerDlg::OnStore(void)
 			for(CHANNELINDEX chn = 0; chn < m_ModDoc->GetNumChannels(); chn++)
 			{
 				CHANNELINDEX sourceChn = pattern[chn];
-				memory[0][sourceChn] = 0;
-				if(m_ModDoc->IsChannelMuted(sourceChn)) memory[0][chn] |= 1;
-				if(m_ModDoc->IsChannelSolo(sourceChn))  memory[0][chn] |= 2;
+				memory[0][sourceChn] = m_ModDoc->IsChannelMuted(sourceChn) ? 1 : 0;
 			}
 			break;
 		case kRecordSelect:
@@ -469,8 +434,7 @@ void CChannelManagerDlg::OnRestore(void)
 			for(CHANNELINDEX chn = 0; chn < m_ModDoc->GetNumChannels(); chn++)
 			{
 				CHANNELINDEX sourceChn = pattern[chn];
-				m_ModDoc->MuteChannel(sourceChn, (memory[0][chn] & 1) != 0);
-				m_ModDoc->SoloChannel(sourceChn, (memory[0][chn] & 2) != 0);
+				m_ModDoc->MuteChannel(sourceChn, memory[0][chn] != 0);
 			}
 			break;
 		case kRecordSelect:
@@ -997,22 +961,27 @@ void CChannelManagerDlg::MouseEvent(UINT nFlags,CPoint point, MouseButton button
 					if(button == CM_BT_LEFT)
 					{
 						if(m_buttonAction == kUndetermined)
-							m_buttonAction = (!m_ModDoc->IsChannelSolo(n) || m_ModDoc->IsChannelMuted(n)) ? kAction1 : kAction2;
-						if(m_buttonAction == kAction1)
 						{
-							m_ModDoc->MuteChannel(n, false);
-							m_ModDoc->SoloChannel(n, true);
+							bool isAlreadySolo = true;
 							for(CHANNELINDEX chn = 0; chn < m_ModDoc->GetNumChannels(); chn++)
 							{
-								if(chn != n)
-									m_ModDoc->MuteChannel(chn, true);
+								if((chn == n) == m_ModDoc->IsChannelMuted(chn))
+								{
+									isAlreadySolo = false;
+									break;
+								}
 							}
-							invalidate = client = m_drawableArea;
+							m_buttonAction = isAlreadySolo ? kAction2 : kAction1;
+							for(CHANNELINDEX chn = 0; chn < m_ModDoc->GetNumChannels(); chn++)
+							{
+								m_ModDoc->MuteChannel(chn, m_buttonAction == kAction1);
+							}
 						}
-						else m_ModDoc->SoloChannel(n, false);
+						if(m_buttonAction == kAction1)
+							m_ModDoc->MuteChannel(n, false);
+						invalidate = client = m_drawableArea;
 					} else
 					{
-						if(m_ModDoc->IsChannelSolo(n)) m_ModDoc->SoloChannel(n, false);
 						if(m_buttonAction == kUndetermined)
 							m_buttonAction = m_ModDoc->IsChannelMuted(n) ? kAction1 : kAction2;
 						m_ModDoc->MuteChannel(n, m_buttonAction == kAction2);
