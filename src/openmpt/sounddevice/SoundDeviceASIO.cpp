@@ -14,6 +14,7 @@
 #include "SoundDeviceCallback.hpp"
 
 #include "mpt/base/bit.hpp"
+#include "mpt/base/detect.hpp"
 #include "mpt/base/macros.hpp"
 #include "mpt/base/saturate_round.hpp"
 #include "mpt/base/utility.hpp"
