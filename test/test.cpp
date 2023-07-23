@@ -2927,7 +2927,7 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 		VERIFY_EQUAL_NONCONT(mpt::Date::forget_timezone(mpt::Date::UnixAsLocal(mpt::Date::UnixFromUTC(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::UTC>(fh.loadDate)))).year, 2011);
 		VERIFY_EQUAL_NONCONT(mpt::Date::forget_timezone(mpt::Date::UnixAsLocal(mpt::Date::UnixFromUTC(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::UTC>(fh.loadDate)))).month, 6);
 		VERIFY_EQUAL_NONCONT(mpt::Date::forget_timezone(mpt::Date::UnixAsLocal(mpt::Date::UnixFromUTC(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::UTC>(fh.loadDate)))).day, 14);
-#if MPT_CXX_AT_LEAST(20) && !defined(MPT_LIBCXX_QUIRK_NO_CHRONO_DATE)
+#if MPT_CXX_AT_LEAST(20) && !defined(MPT_LIBCXX_QUIRK_NO_CHRONO) && !defined(MPT_LIBCXX_QUIRK_NO_CHRONO_DATE)
 		VERIFY_EQUAL_NONCONT(mpt::Date::forget_timezone(mpt::Date::UnixAsLocal(mpt::Date::UnixFromUTC(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::UTC>(fh.loadDate)))).hours, 21);
 #else
 #if defined(MPT_FALLBACK_TIMEZONE_WINDOWS_HISTORIC)

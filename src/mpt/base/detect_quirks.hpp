@@ -242,6 +242,13 @@
 
 
 #if MPT_CXX_AT_LEAST(20)
+// Clang 14 is incompatible with libstdc++ 13 in C++20 mode
+#if MPT_CLANG_BEFORE(15, 0, 0) && MPT_LIBCXX_GNU_AT_LEAST(13)
+#define MPT_LIBCXX_QUIRK_NO_CHRONO
+#endif
+#endif
+
+#if MPT_CXX_AT_LEAST(20)
 #if MPT_LIBCXX_MS && MPT_OS_WINDOWS
 #if MPT_WIN_BEFORE(MPT_WIN_10_1903)
 // std::chrono timezones require Windows 10 1903 with VS2022 as of 2022-01-22.
