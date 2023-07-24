@@ -17,7 +17,7 @@ task:
 task:
     name: macos13-xcode14
     macos_instance:
-        image: ghcr.io/cirruslabs/macos-ventura-xcode:14.3
+        image: ghcr.io/cirruslabs/macos-ventura-xcode:14.3.1
     install_script: brew update && brew install p7zip help2man doxygen autoconf-archive mpg123 libogg libvorbis portaudio flac libsndfile sdl2
     build_script: make -j$(sysctl -n hw.ncpu) STRICT=1 FORCE_DEPS=1 NO_PULSEAUDIO=1
     test_script: make -j$(sysctl -n hw.ncpu) STRICT=1 FORCE_DEPS=1 NO_PULSEAUDIO=1 check
@@ -33,7 +33,7 @@ task:
 task:
     name: macos12-xcode13
     macos_instance:
-        image: ghcr.io/cirruslabs/macos-monterey-xcode:13.4.1
+        image: ghcr.io/cirruslabs/macos-monterey-xcode:13
     install_script: brew update && brew install p7zip help2man doxygen autoconf-archive mpg123 libogg libvorbis portaudio flac libsndfile sdl2
     build_script: make -j$(sysctl -n hw.ncpu) STRICT=1 FORCE_DEPS=1 NO_PULSEAUDIO=1
     test_script: make -j$(sysctl -n hw.ncpu) STRICT=1 FORCE_DEPS=1 NO_PULSEAUDIO=1 check
@@ -41,7 +41,7 @@ task:
 task:
     name: macos12-xcode13-legacy
     macos_instance:
-        image: ghcr.io/cirruslabs/macos-monterey-xcode:13.4.1
+        image: ghcr.io/cirruslabs/macos-monterey-xcode:13
     install_script: brew update && brew install p7zip help2man doxygen autoconf-archive mpg123 libogg libvorbis portaudio flac libsndfile sdl2
     build_script: env CFLAGS="-mmacosx-version-min=10.13 -arch x86_64" CXXFLAGS="-mmacosx-version-min=10.13 -arch x86_64" LDFLAGS="-mmacosx-version-min=10.13 -arch x86_64" make -j$(sysctl -n hw.ncpu) STRICT=1 FORCE_DEPS=1 CONFIG= NO_ZLIB=1 NO_MPG123=1 NO_OGG=1 NO_VORBIS=1 NO_VORBISFILE=1 NO_STBVORBIS=0 NO_MINIMP3=0 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 OPENMPT123=1 NO_PULSEAUDIO=1 NO_SDL=1 NO_SDL2=1 NO_SNDFILE=1 NO_FLAC=1
     test_script: env CFLAGS="-mmacosx-version-min=10.13 -arch x86_64" CXXFLAGS="-mmacosx-version-min=10.13 -arch x86_64" LDFLAGS="-mmacosx-version-min=10.13 -arch x86_64" make -j$(sysctl -n hw.ncpu) STRICT=1 FORCE_DEPS=1 CONFIG= NO_ZLIB=1 NO_MPG123=1 NO_OGG=1 NO_VORBIS=1 NO_VORBISFILE=1 NO_STBVORBIS=0 NO_MINIMP3=0 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 OPENMPT123=1 NO_PULSEAUDIO=1 NO_SDL=1 NO_SDL2=1 NO_SNDFILE=1 NO_FLAC=1 check
