@@ -461,7 +461,6 @@ bool CASIODevice::InternalOpen()
 		}
 
 		m_CanOutputReady = AsioDriver()->canOutputReady();
-		;
 
 		m_StreamPositionOffset = m_nAsioBufferLen;
 
