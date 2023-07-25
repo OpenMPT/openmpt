@@ -84,19 +84,19 @@ constexpr uint64 uint64_max = std::numeric_limits<uint64>::max();
 
 // fp single
 using single = float;
-constexpr single operator"" _fs(long double lit)
+constexpr single operator""_fs(long double lit)
 {
 	return static_cast<single>(lit);
 }
 
 // fp double
-constexpr double operator"" _fd(long double lit)
+constexpr double operator""_fd(long double lit)
 {
 	return static_cast<double>(lit);
 }
 
 // fp extended
-constexpr long double operator"" _fe(long double lit)
+constexpr long double operator""_fe(long double lit)
 {
 	return static_cast<long double>(lit);
 }
@@ -117,7 +117,7 @@ using float32 = mpt::select_type<sizeof(float) == 4,
 			>::type
 		>::type
 	>::type;
-constexpr float32 operator"" _f32(long double lit)
+constexpr float32 operator""_f32(long double lit)
 {
 	return static_cast<float32>(lit);
 }
@@ -135,7 +135,7 @@ using float64 = mpt::select_type<sizeof(float) == 8,
 			>::type
 		>::type
 	>::type;
-constexpr float64 operator"" _f64(long double lit)
+constexpr float64 operator""_f64(long double lit)
 {
 	return static_cast<float64>(lit);
 }
@@ -179,7 +179,7 @@ using nativefloat = mpt::select_type<std::numeric_limits<float>::is_iec559,
 		>::type
 	>::type;	
 #endif
-constexpr nativefloat operator"" _nf(long double lit)
+constexpr nativefloat operator""_nf(long double lit)
 {
 	return static_cast<nativefloat>(lit);
 }
