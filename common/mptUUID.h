@@ -197,7 +197,7 @@ MPT_CONSTEXPR11_FUN bool operator!=(const mpt::UUID & a, const mpt::UUID & b) no
 } // namespace mpt
 
 
-MPT_CONSTEXPR11_FUN mpt::UUID operator "" _uuid (const char * str, std::size_t len)
+MPT_CONSTEXPR11_FUN mpt::UUID operator ""_uuid (const char * str, std::size_t len)
 {
 	return mpt::UUID::ParseLiteral(str, len);
 }
