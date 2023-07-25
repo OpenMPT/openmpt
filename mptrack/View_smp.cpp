@@ -3800,6 +3800,7 @@ void CViewSample::OnSampleSlice()
 
 			ModSample &newSample = sndFile.GetSample(nextSmp);
 			newSample = sample;
+			newSample.RemoveAllCuePoints();
 			newSample.nLength = cues[i + 1] - cues[i];
 			newSample.pData.pSample = nullptr;
 			sndFile.m_szNames[nextSmp] = sndFile.m_szNames[m_nSample];
