@@ -503,7 +503,7 @@ struct SymInstrument
 				return;
 			CopySample<SC::ConversionChain<SC::Convert<int16, int8>, SC::DecodeIdentity<int8>>>(newSample, mptSmp.nLength * mptSmp.GetNumChannels(), 1, mptSmp.sample8(), mptSmp.GetSampleSizeInBytes(), 1);
 			mptSmp.uFlags.set(CHN_16BIT);
-			ctrlSmp::ReplaceSample(mptSmp, newSample, mptSmp.nLength, sndFile);
+			mptSmp.ReplaceWaveform(newSample, mptSmp.nLength, sndFile);
 		}
 
 		// Highpass
@@ -648,7 +648,7 @@ struct SymInstrument
 			}
 			std::memcpy(newSample + loopEnd * bps, mptSmp.sampleb() + (loopStart + loopLen) * bps, (newLength - loopEnd) * bps);
 			
-			ctrlSmp::ReplaceSample(mptSmp, newSample, mptSmp.nLength, sndFile);
+			mptSmp.ReplaceWaveform(newSample, mptSmp.nLength, sndFile);
 		}
 	}
 

@@ -2716,7 +2716,7 @@ void CViewSample::DoPaste(PasteMode pasteMode)
 				sample = oldSample;
 				sample.uFlags.set(CHN_16BIT);
 				sample.uFlags.set(CHN_STEREO, newNumChannels == 2);
-				ctrlSmp::ReplaceSample(sample, pNewSample, newLength, sndFile);
+				sample.ReplaceWaveform(pNewSample, newLength, sndFile);
 			}
 		} else if(pasteMode == PasteMode::Insert && ok)
 		{

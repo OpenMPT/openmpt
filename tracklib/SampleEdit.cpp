@@ -265,7 +265,7 @@ SmpLength InsertSilence(ModSample &smp, const SmpLength silenceLength, const Smp
 		smp.uFlags.set(CHN_LOOP);
 	}
 
-	ctrlSmp::ReplaceSample(smp, pNewSmp, newLength, sndFile);
+	smp.ReplaceWaveform(pNewSmp, newLength, sndFile);
 	smp.PrecomputeLoops(sndFile, true);
 
 	return smp.nLength;
@@ -341,7 +341,7 @@ SmpLength ResizeSample(ModSample &smp, const SmpLength newLength, CSoundFile &sn
 	// Copy over old data and replace sample by the new one
 	if(newData != nullptr)
 		memcpy(newData, smp.sampleb(), newSmpBytes);
-	ctrlSmp::ReplaceSample(smp, newData, newLength, sndFile);
+	smp.ReplaceWaveform(newData, newLength, sndFile);
 
 	// Sanitize loops and update loop wrap-around buffers
 	smp.PrecomputeLoops(sndFile);
@@ -769,7 +769,7 @@ bool ConvertTo16Bit(ModSample &smp, CSoundFile &sndFile)
 
 	CopySample<SC::ConversionChain<SC::Convert<int16, int8>, SC::DecodeIdentity<int8>>>(newSample, smp.nLength * smp.GetNumChannels(), 1, smp.sample8(), smp.GetSampleSizeInBytes(), 1);
 	smp.uFlags.set(CHN_16BIT);
-	ctrlSmp::ReplaceSample(smp, newSample, smp.nLength, sndFile);
+	smp.ReplaceWaveform(newSample, smp.nLength, sndFile);
 	smp.PrecomputeLoops(sndFile, false);
 	return true;
 }
@@ -1046,7 +1046,7 @@ SmpLength Resample(ModSample &smp, SmpLength start, SmpLength end, uint32 newRat
 		smp.FrequencyToTranspose();
 	}
 
-	ctrlSmp::ReplaceSample(smp, newSample, newTotalLength, sndFile);
+	smp.ReplaceWaveform(newSample, newTotalLength, sndFile);
 	// Update loop wrap-around buffer
 	smp.PrecomputeLoops(sndFile);
 

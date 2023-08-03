@@ -2192,7 +2192,7 @@ public:
 			CSoundFile &sndFile = m_modDoc.GetSoundFile();
 			m_parent.PrepareUndo("Time Stretch", sundo_replace);
 			// Swap sample buffer pointer to new buffer, update song + sample data & free old sample buffer
-			ctrlSmp::ReplaceSample(sample, pNewSample, std::min(outPos + remainLength, newSampleLength), sndFile);
+			sample.ReplaceWaveform(pNewSample, std::min(outPos + remainLength, newSampleLength), sndFile);
 			// Update loops and wrap-around buffer
 			sample.SetLoop(
 				mpt::saturate_round<SmpLength>(sample.nLoopStart * m_ratio),
@@ -2357,7 +2357,7 @@ public:
 			m_parent.PrepareUndo("Pitch Shift", sundo_replace);
 			memcpy(pNewSample, sample.sampleb(), selection.nStart * bps);
 			memcpy(pNewSample + selection.nEnd * bps, sample.sampleb() + selection.nEnd * bps, (sample.nLength - selection.nEnd) * bps);
-			ctrlSmp::ReplaceSample(sample, pNewSample, sample.nLength, m_modDoc.GetSoundFile());
+			sample.ReplaceWaveform(pNewSample, sample.nLength, m_modDoc.GetSoundFile());
 		} else
 		{
 			ModSample::FreeSample(pNewSample);
@@ -2864,12 +2864,11 @@ void CCtrlSamples::OnLoopTypeChanged()
 		{
 			sample.SetLoop(0, sample.nLength, true, n == 2, m_sndFile);
 		}
-		m_modDoc.UpdateAllViews(NULL, SampleHint(m_nSample).Info());
+		m_modDoc.UpdateAllViews(nullptr, SampleHint(m_nSample).Info());
 	} else
 	{
-		sample.PrecomputeLoops(m_sndFile);
+		sample.PrecomputeLoops(m_sndFile, true);
 	}
-	ctrlSmp::UpdateLoopPoints(sample, m_sndFile);
 	SetModified(SampleHint().Info(), false, false);
 }
 
@@ -2913,12 +2912,11 @@ void CCtrlSamples::OnSustainTypeChanged()
 		{
 			sample.SetSustainLoop(0, sample.nLength, true, n == 2, m_sndFile);
 		}
-		m_modDoc.UpdateAllViews(NULL, SampleHint(m_nSample).Info());
+		m_modDoc.UpdateAllViews(nullptr, SampleHint(m_nSample).Info());
 	} else
 	{
-		sample.PrecomputeLoops(m_sndFile);
+		sample.PrecomputeLoops(m_sndFile, true);
 	}
-	ctrlSmp::UpdateLoopPoints(sample, m_sndFile);
 	SetModified(SampleHint().Info(), false, false);
 }
 

@@ -559,7 +559,7 @@ bool CSampleUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, const SAMPLEINDEX s
 
 	if(replace)
 	{
-		ctrlSmp::ReplaceSample(sample, pNewSample, undo.OldSample.nLength, sndFile);
+		sample.ReplaceWaveform(pNewSample, undo.OldSample.nLength, sndFile);
 	}
 	sample.PrecomputeLoops(sndFile, true);
 
