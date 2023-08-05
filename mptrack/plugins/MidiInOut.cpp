@@ -351,7 +351,10 @@ void MidiInOut::Resume()
 	// Resume MIDI I/O
 	m_isResumed = true;
 	m_nextClock = 0;
-	m_outQueue.clear();
+	{
+		mpt::lock_guard<mpt::mutex> lock(m_mutex);
+		m_outQueue.clear();
+	}
 	m_clock.SetResolution(1);
 	OpenDevice(m_inputDevice.index, true);
 	OpenDevice(m_outputDevice.index, false);
