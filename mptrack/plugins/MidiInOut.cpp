@@ -370,6 +370,8 @@ void MidiInOut::Suspend()
 	{
 		try
 		{
+			mpt::lock_guard<mpt::mutex> lock(m_mutex);
+
 			// Need to flush remaining events from HardAllNotesOff
 			for(const auto &message : m_outQueue)
 			{
