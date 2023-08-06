@@ -1245,6 +1245,7 @@ LRESULT CSampleMapDlg::OnKeyboardNotify(WPARAM wParam, LPARAM lParam)
 
 			switch(mouseAction)
 			{
+			case mouseUnknown:
 			case mouseSet:
 				KeyboardMap[note] = sample;
 				break;

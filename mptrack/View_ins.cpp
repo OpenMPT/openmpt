@@ -2108,6 +2108,9 @@ BOOL CViewInstrument::OnDragonDrop(BOOL doDrop, const DRAGONDROP *dropInfo)
 	case DRAGONDROP_MIDIINSTR:
 		canDrop = !dropInfo->GetPath().empty();
 		break;
+
+	default:
+		break;
 	}
 	
 	bool insertNew = CMainFrame::GetInputHandler()->ShiftPressed() && sndFile.GetNumInstruments() > 0;
@@ -2200,6 +2203,9 @@ BOOL CViewInstrument::OnDragonDrop(BOOL doDrop, const DRAGONDROP *dropInfo)
 				canDrop = modified = CTrackApp::gpDLSBanks[dropInfo->dropItem]->ExtractInstrument(sndFile, m_nInstrument, nIns, drumRgn);
 			}
 		}
+		break;
+
+	default:
 		break;
 	}
 	if(modified)

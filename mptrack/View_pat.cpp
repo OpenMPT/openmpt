@@ -1494,12 +1494,12 @@ void CViewPattern::OnRButtonDown(UINT flags, CPoint pt)
 				AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
 			if(BuildEditCtxMenu(hMenu, ih, modDoc))
 				AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
-			if(BuildInterpolationCtxMenu(hMenu, ih)
-			   | BuildTransposeCtxMenu(hMenu, ih))
+			if(bool addSeparator = BuildInterpolationCtxMenu(hMenu, ih)
+			   | BuildTransposeCtxMenu(hMenu, ih); addSeparator)
 				AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
-			if(BuildVisFXCtxMenu(hMenu, ih)
+			if(bool addSeparator = BuildVisFXCtxMenu(hMenu, ih)
 			   | BuildAmplifyCtxMenu(hMenu, ih)
-			   | BuildSetInstCtxMenu(hMenu, ih))
+			   | BuildSetInstCtxMenu(hMenu, ih); addSeparator)
 				AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
 			if(BuildPCNoteCtxMenu(hMenu, ih))
 				AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
@@ -1555,6 +1555,8 @@ void CViewPattern::OnRButtonUp(UINT nFlags, CPoint point)
 				InvalidateChannelsHeaders(sourceChn);
 			}
 		}
+		break;
+	default:
 		break;
 	}
 
@@ -3976,6 +3978,9 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 			}
 		}
 		break;
+
+	default:
+		break;
 	}
 
 	// Write CC or pitch bend message as MIDI macro change.
@@ -5881,7 +5886,10 @@ void CViewPattern::EnterAftertouch(ModCommand::NOTE note, int atValue)
 
 		switch(TrackerSettings::Instance().aftertouchBehaviour)
 		{
-		case atRecordAsVolume:
+			case atDoNotRecord:
+				break;
+
+			case atRecordAsVolume:
 			// Record aftertouch messages as volume commands
 			if(specs.HasVolCommand(VOLCMD_VOLUME))
 			{
@@ -6455,14 +6463,14 @@ bool CViewPattern::BuildInterpolationCtxMenu(HMENU hMenu, CInputHandler *ih) con
 	const bool isPCNote = sndFile->Patterns.IsValidPat(m_nPattern) && sndFile->Patterns[m_nPattern].GetpModCommand(m_Selection.GetStartRow(), m_Selection.GetStartChannel())->IsPcNote();
 
 	HMENU subMenu = CreatePopupMenu();
-	bool possible = false;
-	possible |= BuildInterpolationCtxMenu(subMenu, PatternCursor::noteColumn, ih->GetKeyTextFromCommand(kcPatternInterpolateNote, _T("&Note Column")), ID_PATTERN_INTERPOLATE_NOTE);
-	possible |= BuildInterpolationCtxMenu(subMenu, PatternCursor::instrColumn, ih->GetKeyTextFromCommand(kcPatternInterpolateInstr, isPCNote ? _T("&Plugin Column") : _T("&Instrument Column")), ID_PATTERN_INTERPOLATE_INSTR);
-	possible |= BuildInterpolationCtxMenu(subMenu, PatternCursor::volumeColumn, ih->GetKeyTextFromCommand(kcPatternInterpolateVol, isPCNote ? _T("&Parameter Column") : _T("&Volume Column")), ID_PATTERN_INTERPOLATE_VOLUME);
-	possible |= BuildInterpolationCtxMenu(subMenu, PatternCursor::effectColumn, ih->GetKeyTextFromCommand(kcPatternInterpolateEffect, isPCNote ? _T("&Value Column") : _T("&Effect Column")), ID_PATTERN_INTERPOLATE_EFFECT);
-	if(possible || !(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
+	bool addSeparator = false;
+	addSeparator |= BuildInterpolationCtxMenu(subMenu, PatternCursor::noteColumn, ih->GetKeyTextFromCommand(kcPatternInterpolateNote, _T("&Note Column")), ID_PATTERN_INTERPOLATE_NOTE);
+	addSeparator |= BuildInterpolationCtxMenu(subMenu, PatternCursor::instrColumn, ih->GetKeyTextFromCommand(kcPatternInterpolateInstr, isPCNote ? _T("&Plugin Column") : _T("&Instrument Column")), ID_PATTERN_INTERPOLATE_INSTR);
+	addSeparator |= BuildInterpolationCtxMenu(subMenu, PatternCursor::volumeColumn, ih->GetKeyTextFromCommand(kcPatternInterpolateVol, isPCNote ? _T("&Parameter Column") : _T("&Volume Column")), ID_PATTERN_INTERPOLATE_VOLUME);
+	addSeparator |= BuildInterpolationCtxMenu(subMenu, PatternCursor::effectColumn, ih->GetKeyTextFromCommand(kcPatternInterpolateEffect, isPCNote ? _T("&Value Column") : _T("&Effect Column")), ID_PATTERN_INTERPOLATE_EFFECT);
+	if(addSeparator || !(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
 	{
-		AppendMenu(hMenu, MF_POPUP | (possible ? 0 : MF_GRAYED), reinterpret_cast<UINT_PTR>(subMenu), _T("I&nterpolate..."));
+		AppendMenu(hMenu, MF_POPUP | (addSeparator ? 0 : MF_GRAYED), reinterpret_cast<UINT_PTR>(subMenu), _T("I&nterpolate..."));
 		return true;
 	}
 	return false;
@@ -6471,19 +6479,19 @@ bool CViewPattern::BuildInterpolationCtxMenu(HMENU hMenu, CInputHandler *ih) con
 
 bool CViewPattern::BuildInterpolationCtxMenu(HMENU hMenu, PatternCursor::Columns colType, CString label, UINT command) const
 {
-	bool possible = IsInterpolationPossible(colType);
-	if(!possible && colType == PatternCursor::effectColumn)
+	bool addSeparator = IsInterpolationPossible(colType);
+	if(!addSeparator && colType == PatternCursor::effectColumn)
 	{
 		// Extend search to param column
-		possible = IsInterpolationPossible(PatternCursor::paramColumn);
+		addSeparator = IsInterpolationPossible(PatternCursor::paramColumn);
 	}
 
-	if(possible || !(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
+	if(addSeparator || !(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_OLDCTXMENUSTYLE))
 	{
-		AppendMenu(hMenu, MF_STRING | (possible ? 0 : MF_GRAYED), command, label);
+		AppendMenu(hMenu, MF_STRING | (addSeparator ? 0 : MF_GRAYED), command, label);
 	}
 
-	return possible;
+	return addSeparator;
 }
 
 

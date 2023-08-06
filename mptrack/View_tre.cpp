@@ -1620,6 +1620,7 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, ModCommand::NOTE note, int volume)
 					return TRUE;
 				}
 			}
+			break;
 
 		default:
 			break;

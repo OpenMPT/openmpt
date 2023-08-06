@@ -2140,6 +2140,8 @@ void CViewSample::OnLButtonDblClk(UINT, CPoint pt)
 				if(!sample.uFlags[CHN_SUSTAINLOOP] && sample.nSustainEnd <= sample.nSustainStart)
 					sample.nSustainStart = 0;
 				break;
+			default:
+				break;
 			}
 			sample.PrecomputeLoops(modDoc->GetSoundFile());
 			SetModified(SampleHint().Info(), true, false);
@@ -3113,6 +3115,9 @@ BOOL CViewSample::OnDragonDrop(BOOL doDrop, const DRAGONDROP *dropInfo)
 	case DRAGONDROP_MIDIINSTR:
 		canDrop = !dropInfo->GetPath().empty();
 		break;
+
+	default:
+		break;
 	}
 	
 	bool insertNew = CMainFrame::GetInputHandler()->ShiftPressed();
@@ -3214,6 +3219,9 @@ BOOL CViewSample::OnDragonDrop(BOOL doDrop, const DRAGONDROP *dropInfo)
 				canDrop = modified = dlsBank.ExtractSample(sndFile, m_nSample, nIns, nRgn, transpose);
 			}
 		}
+		break;
+
+	default:
 		break;
 	}
 	if(modified)
@@ -3568,6 +3576,9 @@ LRESULT CViewSample::OnMidiMsg(WPARAM midiDataParam, LPARAM)
 			}
 			break;
 		}
+
+	default:
+		break;
 	}
 
 	return 1;
@@ -3740,6 +3751,8 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 				{
 					NoteOff(note);
 				}
+				break;
+			case seNoteOffOnKeyRestrike:
 				break;
 			}
 			return wParam;
