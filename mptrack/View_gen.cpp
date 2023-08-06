@@ -1310,8 +1310,50 @@ void CViewGlobals::OnBypassChanged()
 	CModDoc *pModDoc = GetDocument();
 	if ((m_nCurrentPlugin >= MAX_MIXPLUGINS) || (!pModDoc)) return;
 
-	pModDoc->GetSoundFile().m_MixPlugins[m_nCurrentPlugin].SetBypass(IsDlgButtonChecked(IDC_CHECK10) != BST_UNCHECKED);
-	SetPluginModified();
+	auto &mixPlugs = pModDoc->GetSoundFile().m_MixPlugins;
+	auto &currentPlug = pModDoc->GetSoundFile().m_MixPlugins[m_nCurrentPlugin];
+	bool bypass = IsDlgButtonChecked(IDC_CHECK10) != BST_UNCHECKED;
+	const bool bypassOthers = CMainFrame::GetInputHandler()->ShiftPressed();
+	const bool bypassOnlyMasterPlugs = CMainFrame::GetInputHandler()->CtrlPressed();
+	if(bypassOthers || bypassOnlyMasterPlugs)
+	{
+		CheckDlgButton(IDC_CHECK10, currentPlug.IsBypassed() ? BST_CHECKED : BST_UNCHECKED);
+		uint8 state = 0;
+		for(const auto &plug : mixPlugs)
+		{
+			if(!plug.pMixPlugin || &plug == &currentPlug)
+				continue;
+			if(!plug.IsMasterEffect() && bypassOnlyMasterPlugs)
+				continue;
+			if(plug.IsBypassed())
+				state |= 1;
+			else
+				state |= 2;
+			if(state == 3)
+				break;
+		}
+		if(!state)
+			return;
+
+		bypass = (state != 1);
+		for(auto &plug : mixPlugs)
+		{
+			if(!plug.pMixPlugin || &plug == &currentPlug)
+				continue;
+			if(!plug.IsMasterEffect() && bypassOnlyMasterPlugs)
+				continue;
+			if(plug.IsBypassed() == bypass)
+				continue;
+			plug.SetBypass(bypass);
+			pModDoc->UpdateAllViews(this, PluginHint(plug.pMixPlugin->GetSlot() + 1).Info());
+		}
+		if(pModDoc->GetSoundFile().GetModSpecifications().supportsPlugins)
+			pModDoc->SetModified();
+	} else
+	{
+		currentPlug.SetBypass(bypass);
+		SetPluginModified();
+	}
 }
 
 
