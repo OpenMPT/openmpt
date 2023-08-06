@@ -40,12 +40,12 @@ consteval usize operator""_uz(unsigned long long val) noexcept {
 	}
 	return static_cast<usize>(val);
 }
-#else // !C++20
+#else  // !C++20
 constexpr usize operator""_uz(unsigned long long val) noexcept {
 	return static_cast<usize>(val);
 }
 #endif // C++20
-}
+} // namespace size_literals
 
 namespace size_literals {
 #if MPT_CXX_AT_LEAST(20)
@@ -55,12 +55,12 @@ consteval ssize operator""_z(unsigned long long val) noexcept {
 	}
 	return static_cast<ssize>(val);
 }
-#else // !C++20
+#else  // !C++20
 constexpr ssize operator""_z(unsigned long long val) noexcept {
 	return static_cast<ssize>(val);
 }
 #endif // C++20
-}
+} // namespace size_literals
 
 
 
