@@ -1032,6 +1032,9 @@
     <ClInclude Include="..\..\src\mpt\base\semantic_version.hpp">
       <Filter>src\mpt\base</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\mpt\base\size.hpp">
+      <Filter>src\mpt\base</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\mpt\base\source_location.hpp">
       <Filter>src\mpt\base</Filter>
     </ClInclude>

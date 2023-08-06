@@ -149,6 +149,7 @@ MPT_FILES_SRC_MPT += src/mpt/base/saturate_cast.hpp
 MPT_FILES_SRC_MPT += src/mpt/base/saturate_round.hpp
 MPT_FILES_SRC_MPT += src/mpt/base/secure.hpp
 MPT_FILES_SRC_MPT += src/mpt/base/semantic_version.hpp
+MPT_FILES_SRC_MPT += src/mpt/base/size.hpp
 MPT_FILES_SRC_MPT += src/mpt/base/source_location.hpp
 MPT_FILES_SRC_MPT += src/mpt/base/span.hpp
 MPT_FILES_SRC_MPT += src/mpt/base/utility.hpp

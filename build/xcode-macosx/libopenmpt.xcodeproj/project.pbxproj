@@ -252,6 +252,7 @@
 		20B693A5E7448B175546B1E5 /* MixerSettings.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MixerSettings.h; path = ../../soundlib/MixerSettings.h; sourceTree = "<group>"; };
 		212A36FD7B2B4DEF4272453D /* semantic_version.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = semantic_version.hpp; path = ../../src/mpt/base/semantic_version.hpp; sourceTree = "<group>"; };
 		2151B0037C9303754FED4E43 /* Mixer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Mixer.h; path = ../../soundlib/Mixer.h; sourceTree = "<group>"; };
+		219A364192BCD73348838481 /* size.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = size.hpp; path = ../../src/mpt/base/size.hpp; sourceTree = "<group>"; };
 		22594181666D12B35A3E97C1 /* fileref.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = fileref.hpp; path = ../../src/mpt/io_file/fileref.hpp; sourceTree = "<group>"; };
 		2323E4A5944685974A0D32E5 /* Snd_defs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Snd_defs.h; path = ../../soundlib/Snd_defs.h; sourceTree = "<group>"; };
 		236E8DFB1D304A6D572F4C3B /* Tagging.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Tagging.h; path = ../../soundlib/Tagging.h; sourceTree = "<group>"; };
@@ -1133,6 +1134,7 @@
 				D941724BCA38E03D363C608B /* saturate_round.hpp */,
 				85812219180EEC0B80E79059 /* secure.hpp */,
 				212A36FD7B2B4DEF4272453D /* semantic_version.hpp */,
+				219A364192BCD73348838481 /* size.hpp */,
 				A105879DAD903A0F287505DD /* source_location.hpp */,
 				F6F37E8F68161F811DDCCCCF /* span.hpp */,
 				8BDA4A4F76C67041BEAC388F /* tests */,

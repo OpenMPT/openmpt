@@ -1414,6 +1414,7 @@
     <ClInclude Include="..\..\src\mpt\base\saturate_round.hpp" />
     <ClInclude Include="..\..\src\mpt\base\secure.hpp" />
     <ClInclude Include="..\..\src\mpt\base\semantic_version.hpp" />
+    <ClInclude Include="..\..\src\mpt\base\size.hpp" />
     <ClInclude Include="..\..\src\mpt\base\source_location.hpp" />
     <ClInclude Include="..\..\src\mpt\base\span.hpp" />
     <ClInclude Include="..\..\src\mpt\base\tests\tests_base_arithmetic_shift.hpp" />
