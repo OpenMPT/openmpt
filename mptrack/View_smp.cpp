@@ -3576,6 +3576,7 @@ LRESULT CViewSample::OnMidiMsg(WPARAM midiDataParam, LPARAM)
 			}
 			break;
 		}
+		break;
 
 	default:
 		break;

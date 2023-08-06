@@ -1494,12 +1494,14 @@ void CViewPattern::OnRButtonDown(UINT flags, CPoint pt)
 				AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
 			if(BuildEditCtxMenu(hMenu, ih, modDoc))
 				AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
-			if(bool addSeparator = BuildInterpolationCtxMenu(hMenu, ih)
-			   | BuildTransposeCtxMenu(hMenu, ih); addSeparator)
+			bool addSeparator = BuildInterpolationCtxMenu(hMenu, ih);
+			addSeparator |= BuildTransposeCtxMenu(hMenu, ih);
+			if(addSeparator)
 				AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
-			if(bool addSeparator = BuildVisFXCtxMenu(hMenu, ih)
-			   | BuildAmplifyCtxMenu(hMenu, ih)
-			   | BuildSetInstCtxMenu(hMenu, ih); addSeparator)
+			addSeparator = BuildVisFXCtxMenu(hMenu, ih);
+			addSeparator |= BuildAmplifyCtxMenu(hMenu, ih);
+			addSeparator |= BuildSetInstCtxMenu(hMenu, ih);
+			if(addSeparator)
 				AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
 			if(BuildPCNoteCtxMenu(hMenu, ih))
 				AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));

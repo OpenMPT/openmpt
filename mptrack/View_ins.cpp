@@ -2898,6 +2898,7 @@ HRESULT CViewInstrument::get_accName(VARIANT varChild, BSTR *pszName)
 	const TCHAR *typeStr = _T("");
 	switch(m_nEnv)
 	{
+	case ENV_MAXTYPES:
 	case ENV_VOLUME: typeStr = _T("Volume"); break;
 	case ENV_PANNING: typeStr = _T("Panning"); break;
 	case ENV_PITCH: typeStr = env->dwFlags[ENV_FILTER] ? _T("Filter") : _T("Pitch"); break;

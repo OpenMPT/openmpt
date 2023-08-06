@@ -37,7 +37,8 @@ OPENMPT_NAMESPACE_BEGIN
 CAbstractVstEditor::WindowSizeAdjuster::WindowSizeAdjuster(CWnd &wnd)
 	: m_wnd(wnd)
 {
-	MENUBARINFO mbi = { sizeof(mbi) };
+	MENUBARINFO mbi{};
+	mbi.cbSize = sizeof(mbi);
 	if(GetMenuBarInfo(m_wnd, OBJID_MENU, 0, &mbi))
 		m_menuHeight = (mbi.rcBar.bottom - mbi.rcBar.top);
 }
@@ -45,7 +46,8 @@ CAbstractVstEditor::WindowSizeAdjuster::WindowSizeAdjuster(CWnd &wnd)
 CAbstractVstEditor::WindowSizeAdjuster::~WindowSizeAdjuster()
 {
 	// Extend window height by the menu size if it changed
-	MENUBARINFO mbi = { sizeof(mbi) };
+	MENUBARINFO mbi{};
+	mbi.cbSize = sizeof(mbi);
 	if(GetMenuBarInfo(m_wnd, OBJID_MENU, 0, &mbi))
 	{
 		CRect windowRect;

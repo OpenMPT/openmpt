@@ -135,7 +135,7 @@ void PatternFont::UpdateFont(HWND hwnd)
 		return;
 	}
 
-	static PATTERNFONT pf = { 0 };
+	static PATTERNFONT pf{};
 	currentFont = &pf;
 
 	static FontSetting previousFont;

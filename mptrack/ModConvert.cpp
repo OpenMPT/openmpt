@@ -258,7 +258,6 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 					else
 						effMemory[chn][m->command] = m->param;
 					break;
-
 				default:
 					break;
 				}
@@ -291,6 +290,8 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 				case CMD_POSITIONJUMP:
 				case CMD_PATTERNBREAK:
 					addBreak = false;
+					break;
+				default:
 					break;
 				}
 			}
