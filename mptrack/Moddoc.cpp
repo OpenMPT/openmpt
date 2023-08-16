@@ -988,6 +988,16 @@ void CModDoc::ProcessMIDI(uint32 midiData, SAMPLEINDEX smp, INSTRUMENTINDEX ins,
 		}
 		break;
 
+	case MIDIEvents::evPitchBend:
+		for(size_t n = NOTE_MIN; n <= NOTE_MAX; n++)
+		{
+			if(!m_midiPlayingNotes[channel][n])
+				continue;
+			CHANNELINDEX chn = m_noteChannel[n - NOTE_MIN];
+			if(chn != CHANNELINDEX_INVALID)
+				m_SndFile.m_PlayState.Chn[chn].SetMIDIPitchBend(midiByte2, midiByte1);
+		}
+
 	default:
 		break;
 	}

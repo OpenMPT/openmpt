@@ -208,6 +208,10 @@ struct ModChannel
 	void InstrumentControl(uint8 param, const CSoundFile &sndFile);
 
 	int32 GetMIDIPitchBend() const noexcept { return (static_cast<int32>(microTuning) + 0x8000) / 4; }
+	void SetMIDIPitchBend(const uint8 high, const uint8 low) noexcept
+	{
+		microTuning = static_cast<int16>(((high << 9) | (low << 2)) - 0x8000);
+	}
 };
 
 

@@ -3568,6 +3568,18 @@ LRESULT CViewSample::OnMidiMsg(WPARAM midiDataParam, LPARAM)
 			}
 			break;
 		}
+		break;
+
+	case MIDIEvents::evPitchBend:
+		for(CHANNELINDEX chn : m_noteChannel)
+		{
+			if(chn != CHANNELINDEX_INVALID)
+				pSndFile->m_PlayState.Chn[chn].SetMIDIPitchBend(midiByte2, midiByte1);
+		}
+		break;
+
+	default:
+		break;
 	}
 
 	return 1;
