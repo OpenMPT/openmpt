@@ -39,6 +39,7 @@ void ExtractStreams20(Archive &Arc,const wchar *FileName)
   CharToWide(Arc.StreamHead.StreamName,StoredName,ASIZE(StoredName));
   ConvertPath(StoredName+1,StoredName+1,ASIZE(StoredName)-1);
 
+
   wcsncatz(StreamName,StoredName,ASIZE(StreamName));
 
   FindData fd;

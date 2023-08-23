@@ -75,7 +75,7 @@ void SecPassword::Clean()
   return;	// OPENMPT ADDITION
   PasswordSet=false;
   if (Password.size()>0)
-    cleandata(&Password[0],Password.size());
+    cleandata(&Password[0],Password.size()*sizeof(Password[0]));
 }
  
 
@@ -151,7 +151,7 @@ size_t SecPassword::Length()
   wchar Plain[MAXPASSWORD];
   Get(Plain,ASIZE(Plain));
   size_t Length=wcslen(Plain);
-  cleandata(Plain,ASIZE(Plain));
+  cleandata(Plain,sizeof(Plain));
   return Length;
 }
 
@@ -167,8 +167,8 @@ bool SecPassword::operator == (SecPassword &psw)
   Get(Plain1,ASIZE(Plain1));
   psw.Get(Plain2,ASIZE(Plain2));
   bool Result=wcscmp(Plain1,Plain2)==0;
-  cleandata(Plain1,ASIZE(Plain1));
-  cleandata(Plain2,ASIZE(Plain2));
+  cleandata(Plain1,sizeof(Plain1));
+  cleandata(Plain2,sizeof(Plain2));
   return Result;
 }
 
