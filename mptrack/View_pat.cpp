@@ -2367,14 +2367,14 @@ void CViewPattern::OnVisualizeEffect()
 		} else
 		{
 			// Open window & send data
-			CriticalSection cs;
 			try
 			{
-				m_pEffectVis = std::make_unique<CEffectVis>(this, row0, row1, nchn, *pModDoc, m_nPattern);
-				m_pEffectVis->OpenEditor(CMainFrame::GetMainFrame());
+				auto effectVis = std::make_unique<CEffectVis>(this, row0, row1, nchn, *pModDoc, m_nPattern);
+				effectVis->OpenEditor(CMainFrame::GetMainFrame());
 				// HACK: to get status window set up; must create clear destinction between
 				// construction, 1st draw code and all draw code.
-				m_pEffectVis->OnSize(0, 0, 0);
+				effectVis->OnSize(0, 0, 0);
+				m_pEffectVis = std::move(effectVis);
 			} catch(mpt::out_of_memory e)
 			{
 				mpt::delete_out_of_memory(e);
