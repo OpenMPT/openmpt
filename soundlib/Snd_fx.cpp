@@ -4156,7 +4156,7 @@ void CSoundFile::TonePortamento(CHANNELINDEX nChn, uint16 param)
 		IMixPlugin *plugin = GetChannelInstrumentPlugin(chn);
 		if(plugin != nullptr)
 		{
-			plugin->MidiTonePortamento(delta, chn.GetPluginNote(m_playBehaviour[kITRealNoteMapping], true), chn.pModInstrument->midiPWD, nChn);
+			plugin->MidiTonePortamento(delta, chn.GetPluginNote(true), chn.pModInstrument->midiPWD, nChn);
 		}
 	}
 #endif  // NO_PLUGINS
