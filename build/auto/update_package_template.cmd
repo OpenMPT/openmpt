@@ -33,7 +33,7 @@ copy /y ..\include\soundtouch\COPYING.TXT                 .\Licenses\License.Sou
 rem copy /y ..\include\stb_vorbis\stb_vorbis.c                .\Licenses\License.stb_vorbis.txt || goto error
 copy /y ..\include\unrar\license.txt                      .\Licenses\License.UnRAR.txt || goto error
 copy /y ..\include\vorbis\COPYING                         .\Licenses\License.Vorbis.txt || goto error
-copy /y ..\include\zlib\README                            .\Licenses\License.zlib.txt || goto error
+copy /y ..\include\zlib\LICENSE                            .\Licenses\License.zlib.txt || goto error
 copy /y ..\include\zlib\contrib\minizip\MiniZip64_info.txt .\Licenses\License.minizip.txt || goto error
 cd .. || goto error
 
