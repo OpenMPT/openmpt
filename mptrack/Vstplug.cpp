@@ -1500,6 +1500,8 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, uint32 numFrames)
 
 bool CVstPlugin::MidiSend(uint32 dwMidiCode)
 {
+	if(IsBypassed())
+		return true;
 	// Note-Offs go at the start of the queue (since OpenMPT 1.17). Needed for situations like this:
 	// ... ..|C-5 01
 	// C-5 01|=== ..
@@ -1519,6 +1521,9 @@ bool CVstPlugin::MidiSend(uint32 dwMidiCode)
 
 bool CVstPlugin::MidiSysexSend(mpt::const_byte_span sysex)
 {
+	if(IsBypassed())
+		return true;
+
 	VstMidiSysexEvent event{};
 	event.type = kVstSysExType;
 	event.byteSize = sizeof(event);
