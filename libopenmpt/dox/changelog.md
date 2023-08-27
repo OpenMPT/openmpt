@@ -8,6 +8,7 @@ is just a high-level summary.
 ### libopenmpt 0.4.38-pre
 
  *  FLAC: Update to v1.4.3 (2022-06-23).
+ *  zlib: Update to v1.3 (2022-08-18).
 
 ### libopenmpt 0.4.37 (2023-06-18)
 
