@@ -11,6 +11,7 @@ is just a high-level summary.
     Emscripten and DOS. If you need those pre-built, use libopenmpt 0.7 instead.
 
  *  FLAC: Update to v1.4.3 (2022-06-23).
+ *  zlib: Update to v1.3 (2022-08-18).
 
 ### libopenmpt 0.5.25 (2023-06-18)
 
