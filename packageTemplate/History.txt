@@ -32,6 +32,32 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.31.04.00 (27 August 2023, revision 19605)
+--------------------------------------------
+Pattern tab
+- [Mod] <js> Fixed volume and envelope position issues when seeking with sample sync and the target row contained a note without instrument number.
+
+Sample tab
+- [Fix] <js> IFF: The workaround for 8SVX files with claimed zero-length body chunks (to accomodate for http://bugs.openmpt.org/view.php?id=117) was too aggressive, causing also files with empty NAME chunks to not load properly (http://bugs.openmpt.org/view.php?id=1715).
+- [Fix] <js> IFF: 16-bit mono samples were saved with native endianness instead of big-endian.
+- [Fix] <js> Remove cue points from newly-created samples after slicing at cue points. The old cue points no longer make sense in the context of the new sample.
+
+VST / DMO Plugins
+- [Mod] <js> MIDI data is no longer sent to bypassed VST plugins.
+- [Fix] <js> The new instrument plugin tone portamento mechanism broke after encountering a note-off event.
+
+Bundled plugins
+- [Fix] <js> MIDI I/O Plugin: Fix potential crash while suspending.
+
+Misc
+- [Imp] <js> MIDI pitch bend is now applied to samples outside of the pattern view as well (e.g. sample / instrument / comments tab).
+- [Fix] <js> Improve scrolling support for laptops with precision touchpads (http://bugs.openmpt.org/view.php?id=1638).
+- [Fix] <js> Clear find text boxes in keyboard configuration when manually switching categories dropdown to avoid inconsistent display.
+
+Third-Party Libraries
+- [Imp] Update ancient (v2.1.1), Crypto++ (v8.8.0), FLAC (v1.4.3), unrar (v6.2.10) and zlib (v.1.3)
+
+
 v1.31.03.00 (18 June 2023, revision 19401)
 ------------------------------------------
 Tree view

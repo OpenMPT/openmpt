@@ -10,7 +10,10 @@ is just a high-level summary.
  *  [**Bug**] Makefile: Emscripten 3.1.31 stopped exporting `malloc` and `free`.
     We now explicitly export those again to keep compatibility.
 
+ *  `set_pitch_factor` no longer affected  OPL instruments since version 0.6.0.
+
  *  FLAC: Update to v1.4.3 (2022-06-23).
+ *  zlib: Update to v1.3 (2022-08-18).
 
 ### libopenmpt 0.7.2 (2023-06-18)
 
