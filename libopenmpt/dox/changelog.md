@@ -11,7 +11,10 @@ is just a high-level summary.
     Emscripten, DOS, Windows XP, and Windows 9x. If you need those pre-built,
     use libopenmpt 0.7 instead.
 
+ *  `set_pitch_factor` no longer affected  OPL instruments since version 0.6.0.
+
  *  FLAC: Update to v1.4.3 (2022-06-23).
+ *  zlib: Update to v1.3 (2022-08-18).
 
 ### libopenmpt 0.6.11 (2023-06-18)
 
