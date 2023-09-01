@@ -5134,7 +5134,7 @@ void CSoundFile::ParseMIDIMacro(PlayState &playState, CHANNELINDEX nChn, bool is
 			data = static_cast<uint8>((nChn >= GetNumChannels() ? (chn.nMasterChn - 1) : nChn) & 0x7F);
 		} else if(macro[pos] == 'm')
 		{
-			// Loop direction (judging from the character, it was supposed to be loop type, though)
+			// Loop direction (on sample channels - MIDI note on MIDI channels)
 			data = chn.dwFlags[CHN_PINGPONGFLAG] ? 1 : 0;
 		} else if(macro[pos] == 'p')
 		{
