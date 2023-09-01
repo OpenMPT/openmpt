@@ -1253,6 +1253,16 @@ static constexpr struct
 	{2055, kcSampleFinetuneDown, _T("Decrement Finetune")},
 	{2056, kcTreeViewSwitchViews, _T("Switch between Upper / Lower Tree View")},
 	{2057, kcTreeViewFolderUp, _T("Go to Parent Folder")},
+	{KeyCommand::Hidden, kcTransposeUpStop, _T("Stop Transpose +1")},
+	{KeyCommand::Hidden, kcTransposeDownStop, _T("Stop Transpose -1")},
+	{KeyCommand::Hidden, kcTransposeOctUpStop, _T("Stop Transpose +1 Octave")},
+	{KeyCommand::Hidden, kcTransposeOctDownStop, _T("Stop Transpose -1 Octave")},
+	{KeyCommand::Hidden, kcTransposeCustomStop, _T("Stop Transpose Custom")},
+	{KeyCommand::Hidden, kcTransposeCustomQuickStop, _T("Stop Transpose Custom (Quick)")},
+	{KeyCommand::Hidden, kcDataEntryUpStop, _T("Stop Data Entry +1")},
+	{KeyCommand::Hidden, kcDataEntryDownStop, _T("Stop Data Entry -1")},
+	{KeyCommand::Hidden, kcDataEntryUpCoarseStop, _T("Stop Data Entry Up (Coarse)")},
+	{KeyCommand::Hidden, kcDataEntryDownCoarseStop, _T("Stop Data Entry Down (Coarse)")},
 };
 
 // Get command descriptions etc.. loaded up.
@@ -1734,52 +1744,28 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 	// Auto set note off on release
 	if (m_enforceRule[krNoteOffOnKeyRelease])
 	{
-		if (inCmd>=kcVPStartNotes && inCmd<=kcVPEndNotes)
+		int cmdOffset = int32_min;
+		if(inCmd >= kcVPStartNotes && inCmd <= kcVPEndNotes)
+			cmdOffset = kcVPStartNoteStops - kcVPStartNotes;
+		else if(inCmd >= kcVPStartChords && inCmd <= kcVPEndChords)
+			cmdOffset = kcVPStartChordStops - kcVPStartChords;
+		else if(inCmd >= kcSetOctave0 && inCmd <= kcSetOctave9)
+			cmdOffset = kcSetOctaveStop0 - kcSetOctave0;
+		else if(inCmd >= kcBeginTranspose && inCmd <= kcEndTranspose)
+			cmdOffset = kcBeginTransposeStop - kcBeginTranspose;
+
+		if(cmdOffset != int32_min)
 		{
-			int noteOffset = inCmd - kcVPStartNotes;
-			newKc=inKc;
+			newKc = inKc;
 			newKc.EventType(kKeyEventUp);
 			if (adding)
 			{
 				LOG_COMMANDSET(U_("Enforcing rule krNoteOffOnKeyRelease: adding note off command"));
-				Add(newKc, (CommandID)(kcVPStartNoteStops+noteOffset), false);
-			}
-			else
+				Add(newKc, static_cast<CommandID>(inCmd + cmdOffset), false);
+			} else
 			{
 				LOG_COMMANDSET(U_("Enforcing rule krNoteOffOnKeyRelease: removing note off command"));
-				Remove(newKc, (CommandID)(kcVPStartNoteStops+noteOffset));
-			}
-		}
-		if (inCmd>=kcVPStartChords && inCmd<=kcVPEndChords)
-		{
-			int noteOffset = inCmd - kcVPStartChords;
-			newKc=inKc;
-			newKc.EventType(kKeyEventUp);
-			if (adding)
-			{
-				LOG_COMMANDSET(U_("Enforcing rule krNoteOffOnKeyRelease: adding Chord off command"));
-				Add(newKc, (CommandID)(kcVPStartChordStops+noteOffset), false);
-			}
-			else
-			{
-				LOG_COMMANDSET(U_("Enforcing rule krNoteOffOnKeyRelease: removing Chord off command"));
-				Remove(newKc, (CommandID)(kcVPStartChordStops+noteOffset));
-			}
-		}
-		if(inCmd >= kcSetOctave0 && inCmd <= kcSetOctave9)
-		{
-			int noteOffset = inCmd - kcSetOctave0;
-			newKc=inKc;
-			newKc.EventType(kKeyEventUp);
-			if (adding)
-			{
-				LOG_COMMANDSET(U_("Enforcing rule krNoteOffOnKeyRelease: adding Chord off command"));
-				Add(newKc, (CommandID)(kcSetOctaveStop0+noteOffset), false);
-			}
-			else
-			{
-				LOG_COMMANDSET(U_("Enforcing rule krNoteOffOnKeyRelease: removing Chord off command"));
-				Remove(newKc, (CommandID)(kcSetOctaveStop0+noteOffset));
+				Remove(newKc, static_cast<CommandID>(inCmd + cmdOffset));
 			}
 		}
 	}

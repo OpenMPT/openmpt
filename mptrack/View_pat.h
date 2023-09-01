@@ -590,6 +590,7 @@ private:
 
 	void PlayNote(ModCommand::NOTE note, ModCommand::INSTR instr, int volume, CHANNELINDEX channel);
 	void PreviewNote(ROWINDEX row, CHANNELINDEX channel);
+	void StopPreview(ROWINDEX row, CHANNELINDEX channel);
 
 	void CreateVUMeterBitmap();
 
