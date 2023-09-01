@@ -4297,6 +4297,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 											return wParam;
 		case kcTimeAtRow:					OnShowTimeAtRow(); return wParam;
 		case kcSoloChnOnPatTransition:		PendingSoloChn(m_Selection.GetStartChannel(), m_Selection.GetEndChannel()); return wParam;
+		
 		case kcTransposeUp:					OnTransposeUp(); return wParam;
 		case kcTransposeDown:				OnTransposeDown(); return wParam;
 		case kcTransposeOctUp:				OnTransposeOctUp(); return wParam;
@@ -4307,6 +4308,23 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcDataEntryDown:				DataEntry(false, false); return wParam;
 		case kcDataEntryUpCoarse:			DataEntry(true, true); return wParam;
 		case kcDataEntryDownCoarse:			DataEntry(false, true); return wParam;
+
+		case kcTransposeUpStop:
+		case kcTransposeDownStop:
+		case kcTransposeOctUpStop:
+		case kcTransposeOctDownStop:
+		case kcTransposeCustomStop:
+		case kcTransposeCustomQuickStop:
+		case kcDataEntryUpStop:
+		case kcDataEntryDownStop:
+		case kcDataEntryUpCoarseStop:
+		case kcDataEntryDownCoarseStop:
+			if(m_Selection.GetNumChannels() == 1 && m_Selection.GetNumRows() == 1 && (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_PLAYTRANSPOSE))
+			{
+				StopPreview(m_Selection.GetStartRow(), m_Selection.GetStartChannel());
+			}
+			return wParam;
+
 		case kcSelectChannel:				OnSelectCurrentChannel(); return wParam;
 		case kcSelectColumn:				OnSelectCurrentColumn(); return wParam;
 		case kcPatternAmplify:				OnPatternAmplify(); return wParam;
@@ -5585,27 +5603,36 @@ void CViewPattern::PlayNote(ModCommand::NOTE note, ModCommand::INSTR instr, int 
 void CViewPattern::PreviewNote(ROWINDEX row, CHANNELINDEX channel)
 {
 	const ModCommand &m = *GetSoundFile()->Patterns[m_nPattern].GetpModCommand(row, channel);
-	if(m.IsNote() && m.instr)
+	if(!m.IsNote() || !m.instr)
+		return;
+
+	int vol = -1;
+	if(m.command == CMD_VOLUME)
+		vol = m.param * 4u;
+	else if(m.command == CMD_VOLUME8)
+		vol = m.param;
+	else if(m.volcmd == VOLCMD_VOLUME)
+		vol = m.vol * 4u;
+	// Note-off any previews from this channel first
+	StopPreview(row, channel);
+	PlayNote(m.note, m.instr, vol, channel);
+}
+
+
+void CViewPattern::StopPreview(ROWINDEX row, CHANNELINDEX channel)
+{
+	const ModCommand& m = *GetSoundFile()->Patterns[m_nPattern].GetpModCommand(row, channel);
+	if(!m.instr)
+		return;
+	ModCommand::NOTE note = NOTE_MIN;
+	const auto &channels = GetSoundFile()->m_PlayState.Chn;
+	for(auto &chn : m_noteChannel)
 	{
-		int vol = -1;
-		if(m.command == CMD_VOLUME)
-			vol = m.param * 4u;
-		else if(m.command == CMD_VOLUME8)
-			vol = m.param;
-		else if(m.volcmd == VOLCMD_VOLUME)
-			vol = m.vol * 4u;
-		// Note-off any previews from this channel first
-		ModCommand::NOTE note = NOTE_MIN;
-		const auto &channels = GetSoundFile()->m_PlayState.Chn;
-		for(auto &chn : m_noteChannel)
+		if(chn != CHANNELINDEX_INVALID && channels[chn].isPreviewNote && channels[chn].nMasterChn == channel + 1)
 		{
-			if(chn != CHANNELINDEX_INVALID && channels[chn].isPreviewNote && channels[chn].nMasterChn == channel + 1)
-			{
-				GetDocument()->NoteOff(note, false, m.instr, chn);
-			}
-			note++;
+			GetDocument()->NoteOff(note, false, m.instr, chn);
 		}
-		PlayNote(m.note, m.instr, vol, channel);
+		note++;
 	}
 }
 
