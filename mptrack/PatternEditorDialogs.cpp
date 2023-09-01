@@ -94,8 +94,7 @@ void getXParam(ModCommand::COMMAND command, PATTERNINDEX nPat, ROWINDEX nRow, CH
 			}
 		} else if(m.command == CMD_OFFSET || m.command == CMD_FINETUNE || m.command == CMD_FINETUNE_SMOOTH)
 		{
-			// No parameter extension to perform (8 bits standard parameter),
-			// just care about offset command special case (16 bits, fake)
+			// Even when no parameter extension is found, extend the offset / finetune parameters to full resolution.
 			mult <<= 8;
 		}
 

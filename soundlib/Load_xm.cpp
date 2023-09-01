@@ -217,7 +217,7 @@ static std::vector<SAMPLEINDEX> AllocateXMSamples(CSoundFile &sndFile, SAMPLEIND
 				candidateSlot = static_cast<SAMPLEINDEX>(std::find(usedSamples.begin() + 1, usedSamples.end(), false) - usedSamples.begin());
 			} else
 			{
-				// No unused sampel slots: Give up :(
+				// No unused sample slots: Give up :(
 				break;
 			}
 		}
@@ -934,11 +934,11 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		if(madeWith[verModPlug1_09])
 		{
-			m_dwLastSavedWithVersion = MPT_V("1.09.00.00");
+			m_dwLastSavedWithVersion = MPT_V("1.09");
 			madeWithTracker = U_("ModPlug Tracker 1.09");
 		} else if(madeWith[verNewModPlug])
 		{
-			m_dwLastSavedWithVersion = MPT_V("1.16.00.00");
+			m_dwLastSavedWithVersion = MPT_V("1.16");
 			madeWithTracker = U_("ModPlug Tracker 1.10 - 1.16");
 		}
 	}
@@ -1006,14 +1006,14 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 
 	LoadExtendedSongProperties(file, true, &isOpenMPTMade);
 
-	if(isOpenMPTMade && m_dwLastSavedWithVersion < MPT_V("1.17.00.00"))
+	if(isOpenMPTMade && m_dwLastSavedWithVersion < MPT_V("1.17"))
 	{
 		// Up to OpenMPT 1.17.02.45 (r165), it was possible that the "last saved with" field was 0
 		// when saving a file in OpenMPT for the first time.
-		m_dwLastSavedWithVersion = MPT_V("1.17.00.00");
+		m_dwLastSavedWithVersion = MPT_V("1.17");
 	}
 
-	if(m_dwLastSavedWithVersion >= MPT_V("1.17.00.00"))
+	if(m_dwLastSavedWithVersion >= MPT_V("1.17"))
 	{
 		madeWithTracker = U_("OpenMPT ") + m_dwLastSavedWithVersion.ToUString();
 	}
