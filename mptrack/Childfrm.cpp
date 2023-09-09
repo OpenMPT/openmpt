@@ -442,28 +442,31 @@ void CChildFrame::DeserializeView(FileReader &file)
 {
 	uint32 version, page;
 	if(file.ReadVarInt(version) && version == 0 &&
-		file.ReadVarInt(page) && page >= 0 && page < CModControlView::MAX_PAGES)
+		file.ReadVarInt(page) && page >= 0 && static_cast<CModControlView::Page>(page) < CModControlView::Page::MaxPages)
 	{
 		UINT pageDlg = 0;
-		switch(page)
+		switch(static_cast<CModControlView::Page>(page))
 		{
-		case CModControlView::VIEW_GLOBALS:
+		case CModControlView::Page::Globals:
 			pageDlg = IDD_CONTROL_GLOBALS;
 			break;
-		case CModControlView::VIEW_PATTERNS:
+		case CModControlView::Page::Patterns:
 			pageDlg = IDD_CONTROL_PATTERNS;
 			file.ReadVarInt(m_ViewPatterns.initialOrder);
 			break;
-		case CModControlView::VIEW_SAMPLES:
+		case CModControlView::Page::Samples:
 			pageDlg = IDD_CONTROL_SAMPLES;
 			file.ReadVarInt(m_ViewSamples.initialSample);
 			break;
-		case CModControlView::VIEW_INSTRUMENTS:
+		case CModControlView::Page::Instruments:
 			pageDlg = IDD_CONTROL_INSTRUMENTS;
 			file.ReadVarInt(m_ViewInstruments.initialInstrument);
 			break;
-		case CModControlView::VIEW_COMMENTS:
+		case CModControlView::Page::Comments:
 			pageDlg = IDD_CONTROL_COMMENTS;
+			break;
+		case CModControlView::Page::Unknown:
+		case CModControlView::Page::MaxPages:
 			break;
 		}
 		GetModControlView()->PostMessage(WM_MOD_ACTIVATEVIEW, pageDlg, (LPARAM)-1);

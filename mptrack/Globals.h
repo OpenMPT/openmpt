@@ -107,22 +107,23 @@ public:
 class CModControlView: public CView
 {
 public:
-	enum Views
+	enum class Page
 	{
-		VIEW_UNKNOWN = -1,
-		VIEW_GLOBALS = 0,
-		VIEW_PATTERNS,
-		VIEW_SAMPLES,
-		VIEW_INSTRUMENTS,
-		VIEW_COMMENTS,
-		VIEW_PLUGINS,
-		MAX_PAGES
+		Unknown = -1,
+		First = 0,
+		Globals = First,
+		Patterns,
+		Samples,
+		Instruments,
+		Comments,
+		MaxPages
 	};
 
 protected:
 	CModTabCtrl m_TabCtrl;
-	std::array<CModControlDlg *, MAX_PAGES> m_Pages = {{}};
-	int m_nActiveDlg = -1, m_nInstrumentChanged = -1;
+	std::array<CModControlDlg *, int(Page::MaxPages)> m_Pages = {{}};
+	Page m_nActiveDlg = Page::Unknown;
+	int m_nInstrumentChanged = -1;
 	HWND m_hWndView = nullptr, m_hWndMDI = nullptr;
 
 protected: // create from serialization only
@@ -137,14 +138,14 @@ public:
 	int GetInstrumentChange() const { return m_nInstrumentChanged; }
 	void SetMDIParentFrame(HWND hwnd) { m_hWndMDI = hwnd; }
 	void ForceRefresh();
-	CModControlDlg *GetCurrentControlDlg() { return m_Pages[m_nActiveDlg]; }
+	CModControlDlg *GetCurrentControlDlg() const;
 
 protected:
 	void RecalcLayout();
 	void UpdateView(UpdateHint hint, CObject *pHint = nullptr);
-	BOOL SetActivePage(int nIndex = -1, LPARAM lParam=-1);
+	bool SetActivePage(Page page = Page::Unknown, LPARAM lParam = -1);
 public:
-	int GetActivePage() const { return m_nActiveDlg; }
+	Page GetActivePage() const { return m_nActiveDlg; }
 
 protected:
 	//{{AFX_VIRTUAL(CModControlView)

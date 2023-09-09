@@ -20,6 +20,7 @@
 #include "Mainfrm.h"
 #include "Moddoc.h"
 #include "Mptrack.h"
+#include "TrackerSettings.h"
 #include "../soundlib/mod_specifications.h"
 
 
@@ -214,7 +215,7 @@ void CModControlView::OnInitialUpdate() // called first time after construct
 	GetClientRect(&rect);
 	m_TabCtrl.Create(WS_CHILD|WS_VISIBLE|TCS_FOCUSNEVER|TCS_FORCELABELLEFT, rect, this, IDC_TABCTRL1);
 	UpdateView(UpdateHint().ModType());
-	SetActivePage(0);
+	SetActivePage(Page::First);
 }
 
 
@@ -234,9 +235,8 @@ void CModControlView::RecalcLayout()
 
 	if (m_TabCtrl.m_hWnd == NULL) return;
 	GetClientRect(&rcClient);
-	if ((m_nActiveDlg >= 0) && (m_nActiveDlg < MAX_PAGES) && (m_Pages[m_nActiveDlg]))
+	if(CWnd *pDlg = GetCurrentControlDlg())
 	{
-		CWnd *pDlg = m_Pages[m_nActiveDlg];
 		CRect rect = rcClient;
 		m_TabCtrl.AdjustRect(FALSE, &rect);
 		HDWP hdwp = BeginDeferWindowPos(2);
@@ -262,77 +262,76 @@ void CModControlView::ForceRefresh()
 }
 
 
-BOOL CModControlView::SetActivePage(int nIndex, LPARAM lParam)
+CModControlDlg *CModControlView::GetCurrentControlDlg() const
+{
+	if(m_nActiveDlg >= Page::First && m_nActiveDlg < Page::MaxPages)
+		return m_Pages[static_cast<size_t>(m_nActiveDlg)];
+	else
+		return nullptr;
+}
+
+
+bool CModControlView::SetActivePage(Page page, LPARAM lParam)
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	CModControlDlg *pDlg = NULL;
+	CModControlDlg *pDlg = nullptr;
 
+	if(page == Page::Unknown)
+		page = static_cast<Page>(m_TabCtrl.GetCurSel());
 
-	if (nIndex == -1) nIndex = m_TabCtrl.GetCurSel();
-
-	const UINT nID = static_cast<UINT>(m_TabCtrl.GetItemData(nIndex));
-	if(nID == 0) return FALSE;
+	const UINT nID = static_cast<UINT>(m_TabCtrl.GetItemData(static_cast<int>(page)));
+	if(nID == 0)
+		return false;
 
 	switch(nID)
 	{
-		//rewbs.graph
-		case IDD_CONTROL_GRAPH:
-			nIndex = 5;
-			break;
-		//end rewbs.graph
 		case IDD_CONTROL_COMMENTS:
-			nIndex = 4;
+			page = Page::Comments;
 			break;
 		case IDD_CONTROL_GLOBALS:
-			nIndex = 0;
+			page = Page::Globals;
 			break;
 		case IDD_CONTROL_PATTERNS:
-			nIndex = 1;
+			page = Page::Patterns;
 			break;
 		case IDD_CONTROL_SAMPLES:
-			nIndex = 2;
+			page = Page::Samples;
 			break;
 		case IDD_CONTROL_INSTRUMENTS:
-			nIndex = 3;
+			page = Page::Instruments;
 			break;
 		default:
-			return FALSE;
+			return false;
 	}
 
-	if ((nIndex < 0) || (nIndex >= MAX_PAGES) || (!pMainFrm)) return FALSE;
+	if(page < Page::First || page >= Page::MaxPages || !pMainFrm)
+		return false;
 
-	if (m_Pages[m_nActiveDlg])
-		m_Pages[m_nActiveDlg]->GetSplitPosRef() = ((CChildFrame *)GetParentFrame())->GetSplitterHeight();
+	CModControlDlg *oldActiveDlg = GetCurrentControlDlg();
+	if(oldActiveDlg)
+		oldActiveDlg->GetSplitPosRef() = static_cast<CChildFrame *>(GetParentFrame())->GetSplitterHeight();
 
-	if (nIndex == m_nActiveDlg)
+	if(page == m_nActiveDlg)
 	{
-		pDlg = m_Pages[m_nActiveDlg];
+		pDlg = oldActiveDlg;
 		PostMessage(WM_MOD_CTRLMSG, CTRLMSG_ACTIVATEPAGE, lParam);
-		return TRUE;
+		return true;
 	}
-	if ((m_nActiveDlg >= 0) && (m_nActiveDlg < MAX_PAGES))
+	if(oldActiveDlg)
 	{
-		if (m_Pages[m_nActiveDlg])
-		{
-			OnModCtrlMsg(CTRLMSG_DEACTIVATEPAGE, 0);
-			m_Pages[m_nActiveDlg]->ShowWindow(SW_HIDE);
-		}
-		m_nActiveDlg = -1;
+		OnModCtrlMsg(CTRLMSG_DEACTIVATEPAGE, 0);
+		oldActiveDlg->ShowWindow(SW_HIDE);
 	}
-	if (m_Pages[nIndex]) //Ctrl window already created?
+	if(m_Pages[static_cast<size_t>(page)]) // Ctrl window already created?
 	{
-		m_nActiveDlg = nIndex;
-		pDlg = m_Pages[nIndex];
-	} else //Ctrl window is not created yet - creating one.
+		m_nActiveDlg = page;
+		pDlg = m_Pages[static_cast<size_t>(page)];
+	} else // Ctrl window is not created yet - creating one.
 	{
+		m_nActiveDlg = Page::Unknown;
 		MPT_ASSERT_ALWAYS(GetDocument() != nullptr);
 		switch(nID)
 		{
-		//rewbs.graph
-		case IDD_CONTROL_GRAPH:
-			//pDlg = new CCtrlGraph();
-			break;
-		//end rewbs.graph
 		case IDD_CONTROL_COMMENTS:
 			pDlg = new CCtrlComments(*this, *GetDocument());
 			break;
@@ -349,41 +348,39 @@ BOOL CModControlView::SetActivePage(int nIndex, LPARAM lParam)
 			pDlg = new CCtrlInstruments(*this, *GetDocument());
 			break;
 		default:
-			return FALSE;
+			return false;
 		}
-		if (!pDlg) return FALSE;
 		pDlg->SetViewWnd(m_hWndView);
 		BOOL bStatus = pDlg->Create(nID, this);
 		if(bStatus == 0) // Creation failed.
 		{
 			delete pDlg;
-			return FALSE;
+			return false;
 		}
-		m_nActiveDlg = nIndex;
-		m_Pages[nIndex] = pDlg;
+		m_nActiveDlg = page;
+		m_Pages[static_cast<size_t>(page)] = pDlg;
 	}
 	RecalcLayout();
 	pMainFrm->SetUserText(_T(""));
 	pMainFrm->SetInfoText(_T(""));
-	pMainFrm->SetXInfoText(_T("")); //rewbs.xinfo
+	pMainFrm->SetXInfoText(_T(""));
 	pDlg->ShowWindow(SW_SHOW);
-	((CChildFrame *)GetParentFrame())->SetSplitterHeight(pDlg->GetSplitPosRef());
+	static_cast<CChildFrame *>(GetParentFrame())->SetSplitterHeight(pDlg->GetSplitPosRef());
 	if (m_hWndMDI) ::PostMessage(m_hWndMDI, WM_MOD_CHANGEVIEWCLASS, (WPARAM)lParam, (LPARAM)pDlg);
-	return TRUE;
+	return true;
 }
 
 
 void CModControlView::OnDestroy()
 {
-	m_nActiveDlg = -1;
-	for (UINT nIndex=0; nIndex<MAX_PAGES; nIndex++)
+	m_nActiveDlg = Page::Unknown;
+	for(auto &pDlg : m_Pages)
 	{
-		CModControlDlg *pDlg = m_Pages[nIndex];
-		if (pDlg)
+		if(pDlg)
 		{
-			m_Pages[nIndex] = NULL;
 			pDlg->DestroyWindow();
 			delete pDlg;
+			pDlg = nullptr;
 		}
 	}
 	CView::OnDestroy();
@@ -392,9 +389,10 @@ void CModControlView::OnDestroy()
 
 void CModControlView::UpdateView(UpdateHint lHint, CObject *pObject)
 {
-	CWnd *pActiveDlg = NULL;
+	CWnd *pActiveDlg = nullptr;
 	CModDoc *pDoc = GetDocument();
-	if (!pDoc) return;
+	if(!pDoc)
+		return;
 	// Module type changed: update tabs
 	if (lHint.GetType()[HINT_MODTYPE])
 	{
@@ -410,11 +408,9 @@ void CModControlView::UpdateView(UpdateHint lHint, CObject *pObject)
 		if (nCount != (UINT)m_TabCtrl.GetItemCount())
 		{
 			UINT count = 0;
-			if ((m_nActiveDlg >= 0) && (m_nActiveDlg < MAX_PAGES))
-			{
-				pActiveDlg = m_Pages[m_nActiveDlg];
-				if (pActiveDlg) pActiveDlg->ShowWindow(SW_HIDE);
-			}
+			pActiveDlg = GetCurrentControlDlg();
+			if(pActiveDlg)
+				pActiveDlg->ShowWindow(SW_HIDE);
 			m_TabCtrl.DeleteAllItems();
 			if (mask & 1) m_TabCtrl.InsertItem(count++, _T("General"), IDD_CONTROL_GLOBALS, IMAGE_GENERAL);
 			if (mask & 2) m_TabCtrl.InsertItem(count++, _T("Patterns"), IDD_CONTROL_PATTERNS, IMAGE_PATTERNS);
@@ -425,7 +421,7 @@ void CModControlView::UpdateView(UpdateHint lHint, CObject *pObject)
 		}
 	}
 	// Update child dialogs
-	for (UINT nIndex=0; nIndex<MAX_PAGES; nIndex++)
+	for (UINT nIndex=0; nIndex<int(Page::MaxPages); nIndex++)
 	{
 		CModControlDlg *pDlg = m_Pages[nIndex];
 		if ((pDlg) && (pObject != pDlg)) pDlg->UpdateView(UpdateHint(lHint), pObject);
@@ -437,8 +433,9 @@ void CModControlView::UpdateView(UpdateHint lHint, CObject *pObject)
 
 void CModControlView::OnTabSelchange(NMHDR*, LRESULT* pResult)
 {
-	SetActivePage(m_TabCtrl.GetCurSel());
-	if (pResult) *pResult = 0;
+	SetActivePage(static_cast<Page>(m_TabCtrl.GetCurSel()));
+	if(pResult)
+		*pResult = 0;
 }
 
 
@@ -452,20 +449,20 @@ LRESULT CModControlView::OnActivateModView(WPARAM nIndex, LPARAM lParam)
 
 	if (m_TabCtrl.m_hWnd)
 	{
-		if (nIndex < 100)
+		if (static_cast<Page>(nIndex) < Page::MaxPages)
 		{
 			m_TabCtrl.SetCurSel(static_cast<int>(nIndex));
-			SetActivePage(static_cast<int>(nIndex), lParam);
+			SetActivePage(static_cast<Page>(nIndex), lParam);
 		} else
 		// Might be a dialog id IDD_XXXX
 		{
 			int nItems = m_TabCtrl.GetItemCount();
-			for (int i=0; i<nItems; i++)
+			for (int i = 0; i < nItems; i++)
 			{
-				if ((WPARAM)m_TabCtrl.GetItemData(i) == nIndex)
+				if (static_cast<WPARAM>(m_TabCtrl.GetItemData(i)) == nIndex)
 				{
 					m_TabCtrl.SetCurSel(i);
-					SetActivePage(i, lParam);
+					SetActivePage(static_cast<Page>(i), lParam);
 					break;
 				}
 			}
@@ -477,38 +474,30 @@ LRESULT CModControlView::OnActivateModView(WPARAM nIndex, LPARAM lParam)
 
 LRESULT CModControlView::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 {
-	if ((m_nActiveDlg >= 0) && (m_nActiveDlg < MAX_PAGES))
+	CModControlDlg *pActiveDlg = GetCurrentControlDlg();
+	if(!pActiveDlg)
+		return 0;
+	switch(wParam)
 	{
-		CModControlDlg *pActiveDlg = m_Pages[m_nActiveDlg];
-		if (pActiveDlg)
+	case CTRLMSG_SETVIEWWND:
+		m_hWndView = reinterpret_cast<HWND>(lParam);
+		for(CModControlDlg *dlg : m_Pages)
 		{
-			switch(wParam)
-			{
-			case CTRLMSG_SETVIEWWND:
-				{
-					m_hWndView = (HWND)lParam;
-					for (UINT i=0; i<MAX_PAGES; i++)
-					{
-						if (m_Pages[i]) m_Pages[i]->SetViewWnd(m_hWndView);
-					}
-				}
-				break;
-			}
-			return pActiveDlg->OnModCtrlMsg(wParam, lParam);
+			if(dlg)
+				dlg->SetViewWnd(m_hWndView);
 		}
+		break;
 	}
-	return 0;
+	return pActiveDlg->OnModCtrlMsg(wParam, lParam);
 }
 
 
 LRESULT CModControlView::OnGetToolTipText(WPARAM uId, LPARAM pszText)
 {
-	if ((m_nActiveDlg >= 0) && (m_nActiveDlg < MAX_PAGES))
-	{
-		CModControlDlg *pActiveDlg = m_Pages[m_nActiveDlg];
-		if (pActiveDlg) return (LRESULT)pActiveDlg->GetToolTipText(static_cast<UINT>(uId), (LPTSTR)pszText);
-	}
-	return 0;
+	CModControlDlg *pActiveDlg = GetCurrentControlDlg();
+	if(!pActiveDlg)
+		return 0;
+	return static_cast<LRESULT>(pActiveDlg->GetToolTipText(static_cast<UINT>(uId), reinterpret_cast<LPTSTR>(pszText)));
 }
 
 

@@ -2870,11 +2870,11 @@ void CMainFrame::OnHelp()
 		{
 			switch(static_cast<CModControlView*>(view)->GetActivePage())
 			{
-				case CModControlView::VIEW_GLOBALS: page = "::/General.html"; break;
-				case CModControlView::VIEW_PATTERNS: page = "::/Patterns.html"; break;
-				case CModControlView::VIEW_SAMPLES: page = "::/Samples.html"; break;
-				case CModControlView::VIEW_INSTRUMENTS: page = "::/Instruments.html"; break;
-				case CModControlView::VIEW_COMMENTS: page = "::/Comments.html"; break;
+				case CModControlView::Page::Globals: page = "::/General.html"; break;
+				case CModControlView::Page::Patterns: page = "::/Patterns.html"; break;
+				case CModControlView::Page::Samples: page = "::/Samples.html"; break;
+				case CModControlView::Page::Instruments: page = "::/Instruments.html"; break;
+				case CModControlView::Page::Comments: page = "::/Comments.html"; break;
 			}
 		}
 	}
