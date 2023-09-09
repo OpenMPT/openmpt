@@ -1556,7 +1556,7 @@ void CVstPlugin::HardAllNotesOff()
 	for(uint8 mc = 0; mc < m_MidiCh.size(); mc++)
 	{
 		PlugInstrChannel &channel = m_MidiCh[mc];
-		channel.ResetProgram();
+		channel.ResetProgram(m_SndFile.m_playBehaviour[kPluginDefaultProgramAndBank1]);
 
 		SendMidiPitchBend(mc, EncodePitchBendParam(MIDIEvents::pitchBendCentre));  // centre pitch bend
 
