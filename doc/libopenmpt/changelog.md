@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.7.4-pre
+
 ### libopenmpt 0.7.3 (2023-09-09)
 
  *  [**Bug**] Makefile: Emscripten 3.1.31 stopped exporting `malloc` and `free`.
