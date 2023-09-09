@@ -12,6 +12,7 @@
 #pragma once
 
 #include "openmpt/all/BuildSettings.hpp"
+#include "Globals.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -26,7 +27,7 @@ public:
 	CCtrlComments(CModControlView &parent, CModDoc &document);
 
 	//{{AFX_VIRTUAL(CCtrlComments)
-	Setting<LONG> &GetSplitPosRef() override { return TrackerSettings::Instance().glCommentsWindowHeight; }
+	Setting<LONG> &GetSplitPosRef() override;
 	BOOL OnInitDialog() override;
 	void DoDataExchange(CDataExchange *pDX) override;  // DDX/DDV support
 	void RecalcLayout() override;

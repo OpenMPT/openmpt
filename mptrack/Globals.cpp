@@ -9,17 +9,17 @@
 
 
 #include "stdafx.h"
-#include "Mptrack.h"
-#include "Mainfrm.h"
-#include "Moddoc.h"
-#include "Childfrm.h"
 #include "Globals.h"
+#include "Childfrm.h"
+#include "Ctrl_com.h"
 #include "Ctrl_gen.h"
+#include "Ctrl_ins.h"
 #include "Ctrl_pat.h"
 #include "Ctrl_smp.h"
-#include "Ctrl_ins.h"
-#include "Ctrl_com.h"
 #include "ImageLists.h"
+#include "Mainfrm.h"
+#include "Moddoc.h"
+#include "Mptrack.h"
 #include "../soundlib/mod_specifications.h"
 
 
@@ -44,15 +44,12 @@ END_MESSAGE_MAP()
 
 CModControlDlg::CModControlDlg(CModControlView &parent, CModDoc &document) : m_modDoc(document), m_sndFile(document.GetSoundFile()), m_parent(parent)
 {
-	m_bInitialized = FALSE;
-	m_hWndView = NULL;
-	m_nLockCount = 0;
 }
 
 
 CModControlDlg::~CModControlDlg()
 {
-	ASSERT(m_hWnd == NULL);
+	MPT_ASSERT(m_hWnd == nullptr);
 }
 
 
@@ -205,22 +202,7 @@ BEGIN_MESSAGE_MAP(CModControlView, CView)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
-
-CModControlView::CModControlView()
-{
-	MemsetZero(m_Pages);
-	m_nActiveDlg = -1;
-	m_nInstrumentChanged = -1;
-	m_hWndView = NULL;
-	m_hWndMDI = NULL;
-}
-
-
-BOOL CModControlView::PreCreateWindow(CREATESTRUCT& cs)
-{
-	return CView::PreCreateWindow(cs);
-}
-
+CModDoc *CModControlView::GetDocument() const noexcept { return static_cast<CModDoc *>(m_pDocument); }
 
 void CModControlView::OnInitialUpdate() // called first time after construct
 {
@@ -573,6 +555,7 @@ BEGIN_MESSAGE_MAP(CModScrollView, CScrollView)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
+CModDoc *CModScrollView::GetDocument() const noexcept { return static_cast<CModDoc *>(m_pDocument); }
 
 LRESULT CModScrollView::SendCtrlMessage(UINT uMsg, LPARAM lParam) const
 {

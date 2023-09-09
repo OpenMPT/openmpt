@@ -15,7 +15,6 @@
 
 #include "CDecimalSupport.h"
 #include "Globals.h"
-#include "TrackerSettings.h"
 #include "../soundlib/modcommand.h"
 
 OPENMPT_NAMESPACE_BEGIN
@@ -134,10 +133,10 @@ public:
 	void SaveInstrument(bool doBatchSave);
 	BOOL EditSample(UINT nSample);
 	void UpdateFilterText();
-	Setting<LONG> &GetSplitPosRef() override {return TrackerSettings::Instance().glInstrumentWindowHeight;}
 
 public:
 	//{{AFX_VIRTUAL(CCtrlInstruments)
+	Setting<LONG> &GetSplitPosRef() override;
 	BOOL OnInitDialog() override;
 	void DoDataExchange(CDataExchange* pDX) override;	// DDX/DDV support
 	CRuntimeClass *GetAssociatedViewClass() override;

@@ -24,6 +24,7 @@
 #include "ProgressDialog.h"
 #include "PSRatioCalc.h"
 #include "SampleEditorDialogs.h"
+#include "TrackerSettings.h"
 #include "View_smp.h"
 #include "WindowMessages.h"
 
@@ -337,6 +338,9 @@ BOOL CCtrlSamples::OnInitDialog()
 	SetRedraw(TRUE);
 	return TRUE;
 }
+
+
+Setting<LONG> &CCtrlSamples::GetSplitPosRef() { return TrackerSettings::Instance().glSampleWindowHeight; }
 
 
 void CCtrlSamples::RecalcLayout()

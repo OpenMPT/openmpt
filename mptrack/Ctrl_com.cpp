@@ -89,6 +89,9 @@ BOOL CCtrlComments::OnInitDialog()
 }
 
 
+Setting<LONG> &CCtrlComments::GetSplitPosRef() { return TrackerSettings::Instance().glCommentsWindowHeight; }
+
+
 void CCtrlComments::RecalcLayout()
 {
 	CRect rcClient, rect;

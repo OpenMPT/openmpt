@@ -21,6 +21,7 @@
 #include "Moddoc.h"
 #include "Mptrack.h"
 #include "SelectPluginDialog.h"
+#include "TrackerSettings.h"
 #include "TuningDialog.h"
 #include "View_ins.h"
 #include "WindowMessages.h"
@@ -1101,6 +1102,9 @@ BOOL CCtrlInstruments::OnInitDialog()
 	SetRedraw(TRUE);
 	return FALSE;
 }
+
+
+Setting<LONG> &CCtrlInstruments::GetSplitPosRef() { return TrackerSettings::Instance().glInstrumentWindowHeight; }
 
 
 void CCtrlInstruments::RecalcLayout()

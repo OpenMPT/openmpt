@@ -14,7 +14,6 @@
 #include "openmpt/all/BuildSettings.hpp"
 
 #include "Globals.h"
-#include "TrackerSettings.h"
 #include "Undo.h"
 #include "UpdateHints.h"
 #include "../soundlib/SampleIO.h"
@@ -93,9 +92,8 @@ protected:
 	void SetFinetune(int step);
 
 public:
-	Setting<LONG> &GetSplitPosRef() override { return TrackerSettings::Instance().glSampleWindowHeight; }
-
 	//{{AFX_VIRTUAL(CCtrlSamples)
+	Setting<LONG> &GetSplitPosRef() override;
 	BOOL OnInitDialog() override;
 	void DoDataExchange(CDataExchange* pDX) override;	// DDX/DDV support
 	CRuntimeClass *GetAssociatedViewClass() override;

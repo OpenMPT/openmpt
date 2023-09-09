@@ -87,6 +87,14 @@ CCtrlGeneral::CCtrlGeneral(CModControlView &parent, CModDoc &document) : CModCon
 }
 
 
+// Determine how the global volume slider should be scaled to actual global volume.
+// Display range for XM / S3M should be 0...64, for other formats it's 0...256.
+uint32 CCtrlGeneral::GetGlobalVolumeFactor() const
+{
+	return (m_sndFile.GetType() & (MOD_TYPE_XM | MOD_TYPE_S3M)) ? uint32(MAX_SLIDER_GLOBAL_VOL / 64) : uint32(MAX_SLIDER_GLOBAL_VOL / 128);
+}
+
+
 BOOL CCtrlGeneral::OnInitDialog()
 {
 	const auto &specs = m_sndFile.GetModSpecifications();
@@ -122,6 +130,9 @@ CRuntimeClass *CCtrlGeneral::GetAssociatedViewClass()
 {
 	return RUNTIME_CLASS(CViewGlobals);
 }
+
+
+Setting<LONG> &CCtrlGeneral::GetSplitPosRef() { return TrackerSettings::Instance().glGeneralWindowHeight; }
 
 
 void CCtrlGeneral::RecalcLayout()

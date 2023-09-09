@@ -18,10 +18,9 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-#define ID_EDIT_MIXPASTE ID_EDIT_PASTE_SPECIAL		//rewbs.mixPaste
+#define ID_EDIT_MIXPASTE ID_EDIT_PASTE_SPECIAL
 
 class CModControlView;
-class CModControlBar;
 class CModDoc;
 class CSoundFile;
 struct DRAGONDROP;
@@ -42,10 +41,10 @@ protected:
 	CModDoc &m_modDoc;
 	CSoundFile &m_sndFile;
 	CModControlView &m_parent;
-	HWND m_hWndView;
-	LONG m_nLockCount;
-	int m_nDPIx, m_nDPIy;	// Cached DPI settings
-	BOOL m_bInitialized;
+	HWND m_hWndView = nullptr;
+	LONG m_nLockCount = 0;
+	int m_nDPIx = 0, m_nDPIy = 0;  // Cached DPI settings
+	BOOL m_bInitialized = FALSE;
 
 public:
 	CModControlDlg(CModControlView &parent, CModDoc &document);
@@ -54,13 +53,13 @@ public:
 public:
 	void SetViewWnd(HWND hwndView) { m_hWndView = hwndView; }
 	HWND GetViewWnd() const { return m_hWndView; }
-	LRESULT SendViewMessage(UINT uMsg, LPARAM lParam=0) const;
-	BOOL PostViewMessage(UINT uMsg, LPARAM lParam=0) const;
+	LRESULT SendViewMessage(UINT uMsg, LPARAM lParam = 0) const;
+	BOOL PostViewMessage(UINT uMsg, LPARAM lParam = 0) const;
 	LRESULT SwitchToView() const { return SendViewMessage(VIEWMSG_SETACTIVE); }
 	void LockControls() { m_nLockCount++; }
 	void UnlockControls() { PostMessage(WM_MOD_UNLOCKCONTROLS); }
 	bool IsLocked() const { return (m_nLockCount > 0); }
-	virtual Setting<LONG> &GetSplitPosRef() = 0; 	//rewbs.varWindowSize
+	virtual Setting<LONG> &GetSplitPosRef() = 0;
 
 	afx_msg void OnEditCut() { if (m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_CUT, 0); }
 	afx_msg void OnEditCopy() { if (m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_COPY, 0); }
@@ -122,19 +121,19 @@ public:
 
 protected:
 	CModTabCtrl m_TabCtrl;
-	CModControlDlg *m_Pages[MAX_PAGES];
-	int m_nActiveDlg, m_nInstrumentChanged;
-	HWND m_hWndView, m_hWndMDI;
+	std::array<CModControlDlg *, MAX_PAGES> m_Pages = {{}};
+	int m_nActiveDlg = -1, m_nInstrumentChanged = -1;
+	HWND m_hWndView = nullptr, m_hWndMDI = nullptr;
 
 protected: // create from serialization only
-	CModControlView();
+	CModControlView() = default;
 	DECLARE_DYNCREATE(CModControlView)
 
 public:
-	virtual ~CModControlView() {}
-	CModDoc* GetDocument() const { return (CModDoc *)m_pDocument; }
+	virtual ~CModControlView() = default;
+	CModDoc *GetDocument() const noexcept;
 	void SampleChanged(SAMPLEINDEX smp);
-	void InstrumentChanged(int nInstr=-1) { m_nInstrumentChanged = nInstr; }
+	void InstrumentChanged(int nInstr = -1) { m_nInstrumentChanged = nInstr; }
 	int GetInstrumentChange() const { return m_nInstrumentChanged; }
 	void SetMDIParentFrame(HWND hwnd) { m_hWndMDI = hwnd; }
 	void ForceRefresh();
@@ -149,10 +148,8 @@ public:
 
 protected:
 	//{{AFX_VIRTUAL(CModControlView)
-public:
-	BOOL PreCreateWindow(CREATESTRUCT& cs) override;
 protected:
-	void OnInitialUpdate() override; // called first time after construct
+	void OnInitialUpdate() override;
 	void OnDraw(CDC *) override {}
 	void OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint) override;
 	//}}AFX_VIRTUAL
@@ -190,7 +187,7 @@ protected:
 	HWND m_hWndCtrl = nullptr;
 	int m_nScrollPosX = 0, m_nScrollPosY = 0;
 	int m_nScrollPosXfine = 0, m_nScrollPosYfine = 0;
-	int m_nDPIx = 0, m_nDPIy = 0;	// Cached DPI settings
+	int m_nDPIx = 0, m_nDPIy = 0;  // Cached DPI settings
 
 public:
 	DECLARE_SERIAL(CModScrollView)
@@ -198,18 +195,18 @@ public:
 	virtual ~CModScrollView() = default;
 
 public:
-	CModDoc* GetDocument() const { return (CModDoc *)m_pDocument; }
-	LRESULT SendCtrlMessage(UINT uMsg, LPARAM lParam=0) const;
+	CModDoc *GetDocument() const noexcept;
 	void SendCtrlCommand(int id) const;
-	BOOL PostCtrlMessage(UINT uMsg, LPARAM lParam=0) const;
+	LRESULT SendCtrlMessage(UINT uMsg, LPARAM lParam = 0) const;
+	BOOL PostCtrlMessage(UINT uMsg, LPARAM lParam = 0) const;
 	void UpdateIndicator(LPCTSTR lpszText = nullptr);
 
 public:
 	//{{AFX_VIRTUAL(CModScrollView)
 	void OnInitialUpdate() override;
 	void OnDraw(CDC *) override {}
-	void OnPrepareDC(CDC*, CPrintInfo*) override {}
-	void OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint) override;
+	void OnPrepareDC(CDC *, CPrintInfo *) override {}
+	void OnUpdate(CView *pSender, LPARAM lHint, CObject *pHint) override;
 	virtual void UpdateView(UpdateHint, CObject *) {}
 	virtual LRESULT OnModViewMsg(WPARAM wParam, LPARAM lParam);
 	virtual BOOL OnDragonDrop(BOOL, const DRAGONDROP *) { return FALSE; }
@@ -227,8 +224,9 @@ protected:
 	afx_msg LRESULT OnDragonDropping(WPARAM bDoDrop, LPARAM lParam) { return OnDragonDrop((BOOL)bDoDrop, (const DRAGONDROP *)lParam); }
 	afx_msg LRESULT OnUpdatePosition(WPARAM, LPARAM);
 	afx_msg LRESULT OnDPIChanged(WPARAM = 0, LPARAM = 0);
+	//}}AFX_MSG
 
-	// Fixes for 16-bit limitation in MFC's CScrollView
+	// Fixes for 16-bit limitation in MFC's CScrollView and support for fractional mouse wheel movements
 	BOOL OnScroll(UINT nScrollCode, UINT nPos, BOOL bDoScroll = TRUE) override;
 	BOOL OnScrollBy(CSize sizeScroll, BOOL bDoScroll = TRUE) override;
 	int SetScrollPos(int nBar, int nPos, BOOL bRedraw = TRUE);
@@ -239,12 +237,6 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
-
-
-/////////////////////////////////////////////////////////////////////////////
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Developer Studio will insert additional declarations immediately before the previous line.
 
 
 OPENMPT_NAMESPACE_END
