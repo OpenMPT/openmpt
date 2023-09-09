@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.5.26-pre
+### libopenmpt 0.5.26 (2023-09-09)
 
  *  [**Regression**] We no longer provide libopenmpt 0.5 binaries for
     Emscripten and DOS. If you need those pre-built, use libopenmpt 0.7 instead.
