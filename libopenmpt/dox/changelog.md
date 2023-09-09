@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.6.13-pre
+
 ### libopenmpt 0.6.12 (2023-09-09)
 
  *  [**Regression**] We no longer provide libopenmpt 0.6 binaries for
