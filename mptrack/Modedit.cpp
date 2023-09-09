@@ -9,30 +9,32 @@
 
 
 #include "stdafx.h"
-#include "Mptrack.h"
-#include "Mainfrm.h"
-#include "Moddoc.h"
 #include "Clipboard.h"
 #include "dlg_misc.h"
 #include "Dlsbank.h"
-#include "../soundlib/modsmp_ctrl.h"
-#include "../soundlib/mod_specifications.h"
-#include "../soundlib/tuning.h"
-#include "../soundlib/OPL.h"
+#include "Mainfrm.h"
+#include "Moddoc.h"
+#include "Mptrack.h"
+#include "TrackerSettings.h"
 #include "../common/misc_util.h"
+#include "../common/mptFileIO.h"
 #include "../common/mptStringBuffer.h"
+#include "../soundlib/mod_specifications.h"
+#include "../soundlib/modsmp_ctrl.h"
+#include "../soundlib/OPL.h"
+#include "../soundlib/tuning.h"
 #include "mpt/io_file/inputfile.hpp"
 #include "mpt/io_file_read/inputfile_filecursor.hpp"
 #include "mpt/io_file/outputfile.hpp"
-#include "../common/mptFileIO.h"
-#include <sstream>
 // Plugin cloning
-#include "../soundlib/plugins/PluginManager.h"
-#include "../soundlib/plugins/PlugInterface.h"
 #include "VstPresets.h"
 #include "../common/FileReader.h"
+#include "../soundlib/plugins/PluginManager.h"
+#include "../soundlib/plugins/PlugInterface.h"
 #include "mpt/io/io.hpp"
 #include "mpt/io/io_stdstream.hpp"
+
+#include <sstream>
 
 
 OPENMPT_NAMESPACE_BEGIN

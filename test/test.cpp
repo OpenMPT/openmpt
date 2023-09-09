@@ -23,6 +23,7 @@
 #include "mpt/crc/crc.hpp"
 #include "mpt/environment/environment.hpp"
 #ifdef MODPLUG_TRACKER
+#include "../mptrack/TrackerSettings.h"
 #include "mpt/fs/common_directories.hpp"
 #include "mpt/fs/fs.hpp"
 #endif // MODPLUG_TRACKER
@@ -65,7 +66,6 @@
 #include "../mptrack/Mptrack.h"
 #include "../mptrack/Moddoc.h"
 #include "../mptrack/ModDocTemplate.h"
-#include "../mptrack/Mainfrm.h"
 #include "../mptrack/Settings.h"
 #include "../mptrack/HTTP.h"
 #endif // MODPLUG_TRACKER

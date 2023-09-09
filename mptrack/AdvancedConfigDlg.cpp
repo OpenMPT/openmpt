@@ -14,16 +14,17 @@
 #include "Mainfrm.h"
 #include "resource.h"
 #include "Settings.h"
+#include "TrackerSettings.h"
 #include "WindowMessages.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
 BEGIN_MESSAGE_MAP(COptionsAdvanced, CPropertyPage)
-	ON_NOTIFY(NM_DBLCLK,	IDC_LIST1,	&COptionsAdvanced::OnOptionDblClick)
+	ON_NOTIFY(NM_DBLCLK, IDC_LIST1, &COptionsAdvanced::OnOptionDblClick)
 #ifdef _AFX_NO_MFC_CONTROLS_IN_DIALOGS
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_LIST1, &COptionsAdvanced::OnCustomDrawList)
 #endif // _AFX_NO_MFC_CONTROLS_IN_DIALOGS
-	ON_EN_CHANGE(IDC_EDIT1,				&COptionsAdvanced::OnFindStringChanged)
+	ON_EN_CHANGE(IDC_EDIT1, &COptionsAdvanced::OnFindStringChanged)
 	ON_COMMAND(IDC_BUTTON1, &COptionsAdvanced::OnSaveNow)
 END_MESSAGE_MAP()
 
@@ -31,7 +32,7 @@ void COptionsAdvanced::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CModTypeDlg)
-	DDX_Control(pDX, IDC_LIST1,			m_List);
+	DDX_Control(pDX, IDC_LIST1, m_List);
 	//}}AFX_DATA_MAP
 }
 

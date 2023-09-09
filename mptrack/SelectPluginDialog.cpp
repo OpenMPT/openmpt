@@ -13,18 +13,19 @@
 
 #ifndef NO_PLUGINS
 
-#include "Mptrack.h"
-#include "Mainfrm.h"
-#include "InputHandler.h"
-#include "ImageLists.h"
-#include "Moddoc.h"
-#include "../common/mptStringBuffer.h"
+#include "SelectPluginDialog.h"
 #include "FileDialog.h"
+#include "FolderScanner.h"
+#include "ImageLists.h"
+#include "InputHandler.h"
+#include "Mainfrm.h"
+#include "Moddoc.h"
+#include "Mptrack.h"
+#include "TrackerSettings.h"
+#include "../common/mptStringBuffer.h"
+#include "../pluginBridge/BridgeWrapper.h"
 #include "../soundlib/plugins/PluginManager.h"
 #include "../soundlib/plugins/PlugInterface.h"
-#include "SelectPluginDialog.h"
-#include "../pluginBridge/BridgeWrapper.h"
-#include "FolderScanner.h"
 #include "mpt/string/utility.hpp"
 
 

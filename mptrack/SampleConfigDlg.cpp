@@ -9,9 +9,10 @@
 
 
 #include "stdafx.h"
+#include "SampleConfigDlg.h"
 #include "Mainfrm.h"
 #include "Moddoc.h"
-#include "SampleConfigDlg.h"
+#include "TrackerSettings.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -44,6 +45,9 @@ void COptionsSampleEditor::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_VOLUME_HANDLING, m_cbnDefaultVolumeHandling);
 	//}}AFX_DATA_MAP
 }
+
+
+COptionsSampleEditor::COptionsSampleEditor() : CPropertyPage{IDD_OPTIONS_SAMPLEEDITOR} {}
 
 
 BOOL COptionsSampleEditor::OnInitDialog()

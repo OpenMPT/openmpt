@@ -20,10 +20,9 @@ protected:
 	CComboBox m_cbnDefaultSampleFormat, m_cbnDefaultVolumeHandling;
 
 public:
-	COptionsSampleEditor() : CPropertyPage(IDD_OPTIONS_SAMPLEEDITOR) { }
+	COptionsSampleEditor();
 
 protected:
-
 	BOOL OnInitDialog() override;
 	void OnOK() override;
 	void DoDataExchange(CDataExchange* pDX) override;

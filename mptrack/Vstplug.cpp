@@ -19,6 +19,7 @@
 #include "ExceptionHandler.h"
 #include "Mainfrm.h"
 #include "Moddoc.h"
+#include "TrackerSettings.h"
 #include "VSTEditor.h"
 #include "WindowMessages.h"
 #endif // MODPLUG_TRACKER

@@ -15,6 +15,7 @@
 #include "Mainfrm.h"
 #include "resource.h"
 #include "SelectPluginDialog.h"
+#include "TrackerSettings.h"
 #include "UpdateCheck.h"
 #include "WindowMessages.h"
 #include "../common/mptStringBuffer.h"
@@ -25,8 +26,8 @@
 OPENMPT_NAMESPACE_BEGIN
 
 BEGIN_MESSAGE_MAP(WelcomeDlg, CDialog)
-	ON_COMMAND(IDC_BUTTON1,	&WelcomeDlg::OnOptions)
-	ON_COMMAND(IDC_BUTTON2,	&WelcomeDlg::OnScanPlugins)
+	ON_COMMAND(IDC_BUTTON1, &WelcomeDlg::OnOptions)
+	ON_COMMAND(IDC_BUTTON2, &WelcomeDlg::OnScanPlugins)
 END_MESSAGE_MAP()
 
 

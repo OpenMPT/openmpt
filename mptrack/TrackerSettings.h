@@ -401,7 +401,7 @@ template<> inline SampleEditorDefaultFormat FromSettingValue(const SettingValue 
 		return dfFLAC;
 }
 
-enum SoundDeviceStopMode
+enum SoundDeviceStopMode : int
 {
 	SoundDeviceStopModeClosed  = 0,
 	SoundDeviceStopModeStopped = 1,

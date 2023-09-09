@@ -22,7 +22,7 @@ protected:
 	CCheckListBox m_CheckList;
 
 public:
-	COptionsGeneral() : CPropertyPage(IDD_OPTIONS_GENERAL) {}
+	COptionsGeneral();
 
 protected:
 	BOOL OnInitDialog() override;
@@ -33,8 +33,8 @@ protected:
 	afx_msg void OnOptionSelChanged();
 	afx_msg void OnSettingsChanged() { SetModified(TRUE); }
 	afx_msg void OnBrowseTemplate();
-	afx_msg void OnDefaultTypeChanged() { CheckRadioButton(IDC_RADIO1, IDC_RADIO3, IDC_RADIO1); OnSettingsChanged(); }
-	afx_msg void OnTemplateChanged() { CheckRadioButton(IDC_RADIO1, IDC_RADIO3, IDC_RADIO3); OnSettingsChanged(); }
+	afx_msg void OnDefaultTypeChanged();
+	afx_msg void OnTemplateChanged();
 
 	DECLARE_MESSAGE_MAP();
 };

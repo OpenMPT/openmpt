@@ -10,8 +10,9 @@
 
 #include "stdafx.h"
 #include "FileDialog.h"
-#include "Mainfrm.h"
 #include "InputHandler.h"
+#include "Mainfrm.h"
+#include "TrackerSettings.h"
 #include "mpt/fs/fs.hpp"
 
 

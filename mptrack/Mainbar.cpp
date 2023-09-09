@@ -15,6 +15,7 @@
 #include "Mainfrm.h"
 #include "Moddoc.h"
 #include "Mptrack.h"
+#include "TrackerSettings.h"
 #include "View_tre.h"
 #include "WindowMessages.h"
 #include "../common/mptStringBuffer.h"

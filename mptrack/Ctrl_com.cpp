@@ -10,15 +10,16 @@
 
 
 #include "stdafx.h"
-#include "Mptrack.h"
+#include "Ctrl_com.h"
+#include "Globals.h"
+#include "InputHandler.h"
 #include "Mainfrm.h"
 #include "Moddoc.h"
-#include "Globals.h"
-#include "Ctrl_com.h"
-#include "mpt/format/join.hpp"
+#include "Mptrack.h"
+#include "TrackerSettings.h"
 #include "view_com.h"
-#include "InputHandler.h"
 #include "../soundlib/mod_specifications.h"
+#include "mpt/format/join.hpp"
 #include "mpt/string/utility.hpp"
 
 
@@ -35,8 +36,8 @@ OPENMPT_NAMESPACE_BEGIN
 
 BEGIN_MESSAGE_MAP(CCtrlComments, CModControlDlg)
 	//{{AFX_MSG_MAP(CCtrlComments)
-	ON_EN_UPDATE(IDC_EDIT_COMMENTS,		&CCtrlComments::OnCommentsUpdated)
-	ON_EN_CHANGE(IDC_EDIT_COMMENTS,		&CCtrlComments::OnCommentsChanged)
+	ON_EN_UPDATE(IDC_EDIT_COMMENTS, &CCtrlComments::OnCommentsUpdated)
+	ON_EN_CHANGE(IDC_EDIT_COMMENTS, &CCtrlComments::OnCommentsChanged)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 

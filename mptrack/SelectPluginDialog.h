@@ -14,6 +14,7 @@
 #include "openmpt/all/BuildSettings.hpp"
 #include "ResizableDialog.h"
 #include "../common/ComponentManager.h"
+#include "../soundlib/Snd_defs.h"
 
 OPENMPT_NAMESPACE_BEGIN
 

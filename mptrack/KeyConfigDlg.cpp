@@ -14,6 +14,7 @@
 #include "Mainfrm.h"
 #include "InputHandler.h"
 #include "resource.h"
+#include "TrackerSettings.h"
 #include "WindowMessages.h"
 #include "../soundlib/mod_specifications.h"
 #include "../soundlib/MIDIEvents.h"

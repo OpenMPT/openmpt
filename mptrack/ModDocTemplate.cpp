@@ -9,12 +9,13 @@
 
 
 #include "stdafx.h"
+#include "ModDocTemplate.h"
 #include "FolderScanner.h"
 #include "Mainfrm.h"
 #include "Moddoc.h"
-#include "ModDocTemplate.h"
 #include "Reporting.h"
 #include "SelectPluginDialog.h"
+#include "TrackerSettings.h"
 #include "../soundlib/plugins/PluginManager.h"
 
 OPENMPT_NAMESPACE_BEGIN

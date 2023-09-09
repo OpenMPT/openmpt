@@ -19,6 +19,7 @@
 #include "../../mptrack/InputHandler.h"
 #include "../../mptrack/Mainfrm.h"
 #include "../../mptrack/Moddoc.h"
+#include "../../mptrack/TrackerSettings.h"
 #include "../../mptrack/WindowMessages.h"
 // LoadProgram/SaveProgram
 #include "../mod_specifications.h"

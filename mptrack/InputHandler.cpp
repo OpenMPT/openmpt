@@ -13,9 +13,10 @@
 #include "CommandSet.h"
 #include "Mainfrm.h"
 #include "resource.h"
+#include "TrackerSettings.h"
 #include "WindowMessages.h"
-#include "mpt/fs/fs.hpp"
 #include "../soundlib/MIDIEvents.h"
+#include "mpt/fs/fs.hpp"
 
 
 OPENMPT_NAMESPACE_BEGIN

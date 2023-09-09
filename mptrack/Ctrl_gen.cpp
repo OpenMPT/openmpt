@@ -10,14 +10,15 @@
 
 
 #include "stdafx.h"
-#include "View_gen.h"
-#include "Mptrack.h"
-#include "Mainfrm.h"
-#include "InputHandler.h"
-#include "Moddoc.h"
-#include "Globals.h"
-#include "dlg_misc.h"
 #include "Ctrl_gen.h"
+#include "dlg_misc.h"
+#include "Globals.h"
+#include "InputHandler.h"
+#include "Mainfrm.h"
+#include "Moddoc.h"
+#include "Mptrack.h"
+#include "TrackerSettings.h"
+#include "View_gen.h"
 #include "WindowMessages.h"
 #include "../common/misc_util.h"
 #include "../common/mptTime.h"
@@ -31,21 +32,21 @@ OPENMPT_NAMESPACE_BEGIN
 BEGIN_MESSAGE_MAP(CCtrlGeneral, CModControlDlg)
 	//{{AFX_MSG_MAP(CCtrlGeneral)
 	ON_WM_VSCROLL()
-	ON_COMMAND(IDC_BUTTON1,					&CCtrlGeneral::OnTapTempo)
-	ON_COMMAND(IDC_BUTTON_MODTYPE,			&CCtrlGeneral::OnSongProperties)
-	ON_COMMAND(IDC_CHECK_LOOPSONG,			&CCtrlGeneral::OnLoopSongChanged)
-	ON_EN_CHANGE(IDC_EDIT_SONGTITLE,		&CCtrlGeneral::OnTitleChanged)
-	ON_EN_CHANGE(IDC_EDIT_ARTIST,			&CCtrlGeneral::OnArtistChanged)
-	ON_EN_CHANGE(IDC_EDIT_TEMPO,			&CCtrlGeneral::OnTempoChanged)
-	ON_EN_CHANGE(IDC_EDIT_SPEED,			&CCtrlGeneral::OnSpeedChanged)
-	ON_EN_CHANGE(IDC_EDIT_GLOBALVOL,		&CCtrlGeneral::OnGlobalVolChanged)
-	ON_EN_CHANGE(IDC_EDIT_RESTARTPOS,		&CCtrlGeneral::OnRestartPosChanged)
-	ON_EN_CHANGE(IDC_EDIT_VSTIVOL,			&CCtrlGeneral::OnVSTiVolChanged)
-	ON_EN_CHANGE(IDC_EDIT_SAMPLEPA,			&CCtrlGeneral::OnSamplePAChanged)
-	ON_MESSAGE(WM_MOD_UPDATEPOSITION,		&CCtrlGeneral::OnUpdatePosition)
-	ON_EN_SETFOCUS(IDC_EDIT_SONGTITLE,		&CCtrlGeneral::OnEnSetfocusEditSongtitle)
-	ON_EN_KILLFOCUS(IDC_EDIT_RESTARTPOS,	&CCtrlGeneral::OnRestartPosDone)
-	ON_CBN_SELCHANGE(IDC_COMBO1,			&CCtrlGeneral::OnResamplingChanged)
+	ON_COMMAND(IDC_BUTTON1,              &CCtrlGeneral::OnTapTempo)
+	ON_COMMAND(IDC_BUTTON_MODTYPE,       &CCtrlGeneral::OnSongProperties)
+	ON_COMMAND(IDC_CHECK_LOOPSONG,       &CCtrlGeneral::OnLoopSongChanged)
+	ON_EN_CHANGE(IDC_EDIT_SONGTITLE,     &CCtrlGeneral::OnTitleChanged)
+	ON_EN_CHANGE(IDC_EDIT_ARTIST,        &CCtrlGeneral::OnArtistChanged)
+	ON_EN_CHANGE(IDC_EDIT_TEMPO,         &CCtrlGeneral::OnTempoChanged)
+	ON_EN_CHANGE(IDC_EDIT_SPEED,         &CCtrlGeneral::OnSpeedChanged)
+	ON_EN_CHANGE(IDC_EDIT_GLOBALVOL,     &CCtrlGeneral::OnGlobalVolChanged)
+	ON_EN_CHANGE(IDC_EDIT_RESTARTPOS,    &CCtrlGeneral::OnRestartPosChanged)
+	ON_EN_CHANGE(IDC_EDIT_VSTIVOL,       &CCtrlGeneral::OnVSTiVolChanged)
+	ON_EN_CHANGE(IDC_EDIT_SAMPLEPA,      &CCtrlGeneral::OnSamplePAChanged)
+	ON_MESSAGE(WM_MOD_UPDATEPOSITION,    &CCtrlGeneral::OnUpdatePosition)
+	ON_EN_SETFOCUS(IDC_EDIT_SONGTITLE,   &CCtrlGeneral::OnEnSetfocusEditSongtitle)
+	ON_EN_KILLFOCUS(IDC_EDIT_RESTARTPOS, &CCtrlGeneral::OnRestartPosDone)
+	ON_CBN_SELCHANGE(IDC_COMBO1,         &CCtrlGeneral::OnResamplingChanged)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 

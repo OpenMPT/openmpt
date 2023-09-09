@@ -9,10 +9,11 @@
 
 
 #include "stdafx.h"
-#include "resource.h"
 #include "PathConfigDlg.h"
 #include "FileDialog.h"
 #include "Mainfrm.h"
+#include "resource.h"
+#include "TrackerSettings.h"
 #include "mpt/fs/fs.hpp"
 
 OPENMPT_NAMESPACE_BEGIN
@@ -42,15 +43,15 @@ void PathConfigDlg::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(PathConfigDlg, CPropertyPage)
 	// Paths
-	ON_EN_CHANGE(IDC_OPTIONS_DIR_MODS,			&PathConfigDlg::OnSettingsChanged)
-	ON_EN_CHANGE(IDC_OPTIONS_DIR_SAMPS,			&PathConfigDlg::OnSettingsChanged)
-	ON_EN_CHANGE(IDC_OPTIONS_DIR_INSTS,			&PathConfigDlg::OnSettingsChanged)
-	ON_EN_CHANGE(IDC_OPTIONS_DIR_VSTPRESETS,	&PathConfigDlg::OnSettingsChanged)
-	ON_COMMAND(IDC_BUTTON_CHANGE_MODDIR,		&PathConfigDlg::OnBrowseSongs)
-	ON_COMMAND(IDC_BUTTON_CHANGE_SAMPDIR,		&PathConfigDlg::OnBrowseSamples)
-	ON_COMMAND(IDC_BUTTON_CHANGE_INSTRDIR,		&PathConfigDlg::OnBrowseInstruments)
-	ON_COMMAND(IDC_BUTTON_CHANGE_VSTDIR,		&PathConfigDlg::OnBrowsePlugins)
-	ON_COMMAND(IDC_BUTTON_CHANGE_VSTPRESETSDIR,	&PathConfigDlg::OnBrowsePresets)
+	ON_EN_CHANGE(IDC_OPTIONS_DIR_MODS,          &PathConfigDlg::OnSettingsChanged)
+	ON_EN_CHANGE(IDC_OPTIONS_DIR_SAMPS,         &PathConfigDlg::OnSettingsChanged)
+	ON_EN_CHANGE(IDC_OPTIONS_DIR_INSTS,         &PathConfigDlg::OnSettingsChanged)
+	ON_EN_CHANGE(IDC_OPTIONS_DIR_VSTPRESETS,    &PathConfigDlg::OnSettingsChanged)
+	ON_COMMAND(IDC_BUTTON_CHANGE_MODDIR,        &PathConfigDlg::OnBrowseSongs)
+	ON_COMMAND(IDC_BUTTON_CHANGE_SAMPDIR,       &PathConfigDlg::OnBrowseSamples)
+	ON_COMMAND(IDC_BUTTON_CHANGE_INSTRDIR,      &PathConfigDlg::OnBrowseInstruments)
+	ON_COMMAND(IDC_BUTTON_CHANGE_VSTDIR,        &PathConfigDlg::OnBrowsePlugins)
+	ON_COMMAND(IDC_BUTTON_CHANGE_VSTPRESETSDIR, &PathConfigDlg::OnBrowsePresets)
 
 	// Autosave
 	ON_COMMAND(IDC_CHECK1,						&PathConfigDlg::OnSettingsChanged)
@@ -189,5 +190,13 @@ BOOL PathConfigDlg::OnKillActive()
 
 	return CPropertyPage::OnKillActive();
 }
+
+void PathConfigDlg::OnBrowseAutosavePath() { BrowseFolder(IDC_AUTOSAVE_PATH); }
+void PathConfigDlg::OnBrowseSongs() { BrowseFolder(IDC_OPTIONS_DIR_MODS); }
+void PathConfigDlg::OnBrowseSamples() { BrowseFolder(IDC_OPTIONS_DIR_SAMPS); }
+void PathConfigDlg::OnBrowseInstruments() { BrowseFolder(IDC_OPTIONS_DIR_INSTS); }
+void PathConfigDlg::OnBrowsePlugins() { BrowseFolder(IDC_OPTIONS_DIR_VSTS); }
+void PathConfigDlg::OnBrowsePresets() { BrowseFolder(IDC_OPTIONS_DIR_VSTPRESETS); }
+
 
 OPENMPT_NAMESPACE_END

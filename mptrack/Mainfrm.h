@@ -11,18 +11,23 @@
 #pragma once
 
 #include "openmpt/all/BuildSettings.hpp"
+#include "AutoSaver.h"
+#include "CImageListEx.h"
+#include "Mainbar.h"
+#include "Mptrack.h"
+#include "Notification.h"
+#include "openmpt/soundbase/Dither.hpp"
+#include "Settings.h"
+#include "UpdateHints.h"
+#include "../common/Dither.h"
+#include "../soundlib/AudioCriticalSection.h"
+#include "../soundlib/Sndfile.h"
+#include "mpt/audio/span.hpp"
+#include "mpt/mutex/mutex.hpp"
+#include "openmpt/sounddevice/SoundDevice.hpp"
+#include "openmpt/sounddevice/SoundDeviceBuffer.hpp"
 
 #include <Msctf.h>
-#include "Mptrack.h"
-#include "AutoSaver.h"
-#include "UpdateHints.h"
-#include "../soundlib/AudioCriticalSection.h"
-#include "mpt/mutex/mutex.hpp"
-#include "../soundlib/Sndfile.h"
-#include "openmpt/soundbase/Dither.hpp"
-#include "../common/Dither.h"
-#include "mpt/audio/span.hpp"
-#include "openmpt/sounddevice/SoundDeviceBuffer.hpp"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -31,6 +36,8 @@ class CInputHandler;
 class CModDoc;
 class CAutoSaver;
 struct UpdateCheckResult;
+struct MODPLUGDIB;
+enum SoundDeviceStopMode : int;
 namespace SoundDevice {
 class Base;
 class ICallback;
@@ -65,16 +72,6 @@ enum OptionsPage
 // Player position notification
 
 #define MAX_UPDATE_HISTORY		2000 // 2 seconds with 1 ms updates
-OPENMPT_NAMESPACE_END
-#include "Notification.h"
-OPENMPT_NAMESPACE_BEGIN
-
-OPENMPT_NAMESPACE_END
-#include "CImageListEx.h"
-#include "Mainbar.h"
-#include "TrackerSettings.h"
-OPENMPT_NAMESPACE_BEGIN
-struct MODPLUGDIB;
 
 template<> inline SettingValue ToSettingValue(const WINDOWPLACEMENT &val)
 {
@@ -82,7 +79,7 @@ template<> inline SettingValue ToSettingValue(const WINDOWPLACEMENT &val)
 }
 template<> inline WINDOWPLACEMENT FromSettingValue(const SettingValue &val)
 {
-	ASSERT(val.GetTypeTag() == "WINDOWPLACEMENT");
+	MPT_ASSERT(val.GetTypeTag() == "WINDOWPLACEMENT");
 	return DecodeBinarySetting<WINDOWPLACEMENT>(val.as<std::vector<std::byte> >());
 }
 
