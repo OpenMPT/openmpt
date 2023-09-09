@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.4.38-pre
+### libopenmpt 0.4.38 (2023-09-09)
 
  *  FLAC: Update to v1.4.3 (2022-06-23).
  *  zlib: Update to v1.3 (2022-08-18).
