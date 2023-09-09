@@ -9,11 +9,12 @@
 
 
 #include "stdafx.h"
-#include "Mainfrm.h"
 #include "ColorConfigDlg.h"
-#include "Settings.h"
-#include "FileDialog.h"
 #include "ColorSchemes.h"
+#include "FileDialog.h"
+#include "Mainfrm.h"
+#include "Settings.h"
+#include "WindowMessages.h"
 #include "../common/mptStringBuffer.h"
 
 
@@ -97,6 +98,13 @@ COptionsColors::COptionsColors()
     , CustomColors(TrackerSettings::Instance().rgbCustomColors)
 {
 }
+
+
+COptionsColors::~COptionsColors()
+{
+	delete m_pPreviewDib;
+}
+
 
 static CString FormatFontName(const FontSetting &font)
 {

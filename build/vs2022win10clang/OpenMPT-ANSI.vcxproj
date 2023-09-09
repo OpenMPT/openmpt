@@ -1660,6 +1660,7 @@
     <ClInclude Include="..\..\mptrack\VstPresets.h" />
     <ClInclude Include="..\..\mptrack\Vstplug.h" />
     <ClInclude Include="..\..\mptrack\WelcomeDialog.h" />
+    <ClInclude Include="..\..\mptrack\WindowMessages.h" />
     <ClInclude Include="..\..\mptrack\WineSoundDeviceStub.h" />
     <ClInclude Include="..\..\mptrack\dlg_misc.h" />
     <ClInclude Include="..\..\mptrack\mod2midi.h" />

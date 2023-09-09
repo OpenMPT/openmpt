@@ -9,26 +9,28 @@
 
 
 #include "stdafx.h"
-#include "../Sndfile.h"
 #include "PlugInterface.h"
-#include "PluginManager.h"
 #include "../../common/FileReader.h"
+#include "../Sndfile.h"
+#include "PluginManager.h"
 #ifdef MODPLUG_TRACKER
-#include "../../mptrack/Moddoc.h"
-#include "../../mptrack/Mainfrm.h"
-#include "../../mptrack/InputHandler.h"
 #include "../../mptrack/AbstractVstEditor.h"
 #include "../../mptrack/DefaultVstEditor.h"
+#include "../../mptrack/InputHandler.h"
+#include "../../mptrack/Mainfrm.h"
+#include "../../mptrack/Moddoc.h"
+#include "../../mptrack/WindowMessages.h"
 // LoadProgram/SaveProgram
+#include "../mod_specifications.h"
+#include "../../common/mptFileIO.h"
 #include "../../mptrack/FileDialog.h"
 #include "../../mptrack/VstPresets.h"
 #include "mpt/io_file/inputfile.hpp"
 #include "mpt/io_file_read/inputfile_filecursor.hpp"
 #include "mpt/io_file/outputfile.hpp"
-#include "../../common/mptFileIO.h"
 #include "mpt/fs/fs.hpp"
-#include "../mod_specifications.h"
 #endif // MODPLUG_TRACKER
+
 #include "../../soundlib/AudioCriticalSection.h"
 #include "mpt/base/aligned_array.hpp"
 #include "mpt/io/base.hpp"

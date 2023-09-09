@@ -10,14 +10,15 @@
 
 #include "stdafx.h"
 #include "WelcomeDialog.h"
-#include "resource.h"
-#include "Mainfrm.h"
-#include "mpt/fs/fs.hpp"
-#include "../common/mptStringBuffer.h"
-#include "InputHandler.h"
 #include "CommandSet.h"
+#include "InputHandler.h"
+#include "Mainfrm.h"
+#include "resource.h"
 #include "SelectPluginDialog.h"
 #include "UpdateCheck.h"
+#include "WindowMessages.h"
+#include "../common/mptStringBuffer.h"
+#include "mpt/fs/fs.hpp"
 #include "mpt/string/utility.hpp"
 
 

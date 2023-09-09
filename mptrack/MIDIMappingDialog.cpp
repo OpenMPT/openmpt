@@ -9,14 +9,15 @@
 
 
 #include "stdafx.h"
-#include "Mainfrm.h"
-#include "Moddoc.h"
 #include "MIDIMappingDialog.h"
 #include "InputHandler.h"
+#include "Mainfrm.h"
+#include "Moddoc.h"
+#include "WindowMessages.h"
+#include "../common/mptStringBuffer.h"
 #include "../soundlib/MIDIEvents.h"
 #include "../soundlib/mod_specifications.h"
 #include "../soundlib/plugins/PlugInterface.h"
-#include "../common/mptStringBuffer.h"
 
 #ifndef NO_PLUGINS
 

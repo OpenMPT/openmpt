@@ -17,6 +17,7 @@
 #include "PatternCursor.h"
 #include "TrackerSettings.h"
 #include "ResizableDialog.h"
+#include "resource.h"
 #include "ColorPickerButton.h"
 
 OPENMPT_NAMESPACE_BEGIN

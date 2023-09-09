@@ -12,8 +12,11 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 #include "ColorPickerButton.h"
+#include "TrackerSettings.h"
 
 OPENMPT_NAMESPACE_BEGIN
+
+struct MODPLUGDIB;
 
 class COptionsColors : public CPropertyPage
 {
@@ -30,7 +33,7 @@ protected:
 
 public:
 	COptionsColors();
-	~COptionsColors() { delete m_pPreviewDib; }
+	~COptionsColors();
 
 protected:
 	BOOL OnInitDialog() override;

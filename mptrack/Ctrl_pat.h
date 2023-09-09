@@ -15,11 +15,14 @@
 
 #include "Globals.h"
 #include "PatternCursor.h"
+#include "resource.h"
+#include "TrackerSettings.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
 class COrderList;
 class CCtrlPatterns;
+class ModSequence;
 
 struct OrdSelection
 {

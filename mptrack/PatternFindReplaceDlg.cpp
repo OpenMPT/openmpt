@@ -10,11 +10,10 @@
 
 
 #include "stdafx.h"
-#include "Mptrack.h"
-#include "Mainfrm.h"
-#include "View_pat.h"
-#include "PatternFindReplace.h"
 #include "PatternFindReplaceDlg.h"
+#include "Mptrack.h"
+#include "PatternFindReplace.h"
+#include "View_pat.h"
 #include "mpt/parse/parse.hpp"
 
 

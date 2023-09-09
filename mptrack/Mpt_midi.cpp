@@ -9,11 +9,13 @@
 
 
 #include "stdafx.h"
-#include <mmsystem.h>
-#include "Mainfrm.h"
-#include "InputHandler.h"
 #include "Dlsbank.h"
+#include "InputHandler.h"
+#include "Mainfrm.h"
+#include "WindowMessages.h"
 #include "../soundlib/MIDIEvents.h"
+
+#include <mmsystem.h>
 
 
 OPENMPT_NAMESPACE_BEGIN

@@ -9,13 +9,13 @@
 
 
 #include "stdafx.h"
-#include "../mptrack/Reporting.h"
-#include "../common/mptStringBuffer.h"
-#include "Mainfrm.h"
-#include "Mptrack.h"
-#include "resource.h"
 #include "MIDIMacroDialog.h"
+#include "Mptrack.h"
+#include "Reporting.h"
+#include "resource.h"
+#include "../common/mptStringBuffer.h"
 #include "../soundlib/MIDIEvents.h"
+#include "../soundlib/Sndfile.h"
 #include "../soundlib/plugins/PlugInterface.h"
 
 
@@ -54,6 +54,15 @@ void CMidiMacroSetup::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_MACROCC,   m_CbnMacroCC);
 }
 
+
+CMidiMacroSetup::CMidiMacroSetup(CSoundFile &sndFile, CWnd *parent)
+	: CDialog{IDD_MIDIMACRO, parent}
+	, m_SndFile{sndFile}
+	, m_vMidiCfg{sndFile.m_MidiCfg}
+	, m_MidiCfg{*m_vMidiCfg}
+{
+
+}
 
 BOOL CMidiMacroSetup::OnInitDialog()
 {

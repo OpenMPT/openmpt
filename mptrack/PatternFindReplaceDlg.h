@@ -14,13 +14,13 @@
 
 #include "EffectInfo.h"
 #include "PatternCursor.h"
+#include "PatternFindReplace.h"
+#include "resource.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
 /////////////////////////////////////////////////////////////////////////
 // Search/Replace
-
-struct FindReplace;
 
 class CFindReplaceTab: public CPropertyPage
 {
@@ -76,18 +76,18 @@ protected:
 	void CheckOnChange(int nIDButton) { CheckDlgButton(nIDButton, BST_CHECKED); CheckReplace(nIDButton); };
 	afx_msg void OnNoteChanged();
 	afx_msg void OnInstrChanged();
-	afx_msg void OnVolCmdChanged()	{ CheckOnChange(IDC_CHECK3); UpdateVolumeList(); };
+	afx_msg void OnVolCmdChanged() { CheckOnChange(IDC_CHECK3); UpdateVolumeList(); };
 	afx_msg void OnVolumeChanged();
-	afx_msg void OnEffectChanged()	{ CheckOnChange(IDC_CHECK5); UpdateParamList(); };
+	afx_msg void OnEffectChanged() { CheckOnChange(IDC_CHECK5); UpdateParamList(); };
 	afx_msg void OnParamChanged();
 	afx_msg void OnPCParamChanged();
 	// When a checkbox is checked, also check "Replace By".
-	afx_msg void OnCheckNote()		{ CheckReplace(IDC_CHECK1); };
-	afx_msg void OnCheckInstr()		{ CheckReplace(IDC_CHECK2); };
-	afx_msg void OnCheckVolCmd()	{ CheckReplace(IDC_CHECK3); };
-	afx_msg void OnCheckVolume()	{ CheckReplace(IDC_CHECK4); };
-	afx_msg void OnCheckEffect()	{ CheckReplace(IDC_CHECK5); };
-	afx_msg void OnCheckParam()		{ CheckReplace(IDC_CHECK6); };
+	afx_msg void OnCheckNote()   { CheckReplace(IDC_CHECK1); };
+	afx_msg void OnCheckInstr()  { CheckReplace(IDC_CHECK2); };
+	afx_msg void OnCheckVolCmd() { CheckReplace(IDC_CHECK3); };
+	afx_msg void OnCheckVolume() { CheckReplace(IDC_CHECK4); };
+	afx_msg void OnCheckEffect() { CheckReplace(IDC_CHECK5); };
+	afx_msg void OnCheckParam()  { CheckReplace(IDC_CHECK6); };
 	// Check "Replace By"
 	afx_msg void CheckReplace(int nIDButton)	{ if(m_isReplaceTab && IsDlgButtonChecked(nIDButton)) CheckDlgButton(IDC_CHECK7, BST_CHECKED); };
 

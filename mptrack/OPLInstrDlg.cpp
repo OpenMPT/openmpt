@@ -9,10 +9,11 @@
 
 #include "stdafx.h"
 #include "OPLInstrDlg.h"
+#include "resource.h"
+#include "UpdateHints.h"
+#include "WindowMessages.h"
 #include "../soundlib/OPL.h"
 #include "../soundlib/Sndfile.h"
-#include "resource.h"
-#include "Mainfrm.h"
 
 OPENMPT_NAMESPACE_BEGIN
 

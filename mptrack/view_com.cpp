@@ -10,20 +10,20 @@
 
 
 #include "stdafx.h"
-#include "Mptrack.h"
-#include "Mainfrm.h"
-#include "InputHandler.h"
+#include "view_com.h"
+#include "ChannelManagerDlg.h"
 #include "Childfrm.h"
 #include "Clipboard.h"
-#include "ImageLists.h"
-#include "Moddoc.h"
-#include "Globals.h"
 #include "Ctrl_com.h"
-#include "ChannelManagerDlg.h"
+#include "Globals.h"
+#include "ImageLists.h"
+#include "InputHandler.h"
+#include "Mainfrm.h"
+#include "Moddoc.h"
+#include "Mptrack.h"
+#include "WindowMessages.h"
 #include "../common/mptStringBuffer.h"
-#include "view_com.h"
 #include "../soundlib/mod_specifications.h"
-
 
 OPENMPT_NAMESPACE_BEGIN
 

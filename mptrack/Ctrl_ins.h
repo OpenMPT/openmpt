@@ -14,9 +14,13 @@
 #include "openmpt/all/BuildSettings.hpp"
 
 #include "CDecimalSupport.h"
+#include "Globals.h"
+#include "TrackerSettings.h"
+#include "../soundlib/modcommand.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
+class CModDoc;
 class CNoteMapWnd;
 class CCtrlInstruments;
 

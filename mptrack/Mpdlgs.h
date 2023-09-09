@@ -10,7 +10,11 @@
 
 #pragma once
 
+#include "resource.h"
+#include "TrackerSettings.h"
+#include "../sounddsp/EQ.h"
 #include "openmpt/all/BuildSettings.hpp"
+#include "openmpt/sounddevice/SoundDevice.hpp"
 
 OPENMPT_NAMESPACE_BEGIN
 

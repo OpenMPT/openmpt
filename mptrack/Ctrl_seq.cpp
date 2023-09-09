@@ -10,13 +10,14 @@
 
 
 #include "stdafx.h"
+#include "Ctrl_pat.h"
+#include "Globals.h"
 #include "Mainfrm.h"
 #include "InputHandler.h"
 #include "Moddoc.h"
-#include "../soundlib/mod_specifications.h"
-#include "Globals.h"
-#include "Ctrl_pat.h"
 #include "PatternClipboard.h"
+#include "WindowMessages.h"
+#include "../soundlib/mod_specifications.h"
 #include "../common/mptStringBuffer.h"
 
 

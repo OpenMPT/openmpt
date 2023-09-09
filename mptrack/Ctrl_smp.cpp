@@ -10,36 +10,39 @@
 
 
 #include "stdafx.h"
-#include "Mptrack.h"
-#include "Mainfrm.h"
-#include "InputHandler.h"
-#include "Childfrm.h"
-#include "ImageLists.h"
-#include "Moddoc.h"
-#include "../soundlib/mod_specifications.h"
-#include "Globals.h"
 #include "Ctrl_smp.h"
-#include "View_smp.h"
-#include "SampleEditorDialogs.h"
-#include "dlg_misc.h"
-#include "PSRatioCalc.h"
-#include <soundtouch/include/SoundTouch.h>
-#include <soundtouch/source/SoundTouchDLL/SoundTouchDLL.h>
-#include <smbPitchShift/smbPitchShift.h>
-#include "../tracklib/SampleEdit.h"
 #include "Autotune.h"
+#include "Childfrm.h"
+#include "dlg_misc.h"
+#include "FileDialog.h"
+#include "Globals.h"
+#include "ImageLists.h"
+#include "InputHandler.h"
+#include "Mainfrm.h"
+#include "Moddoc.h"
+#include "Mptrack.h"
+#include "ProgressDialog.h"
+#include "PSRatioCalc.h"
+#include "SampleEditorDialogs.h"
+#include "View_smp.h"
+#include "WindowMessages.h"
+
 #include "../common/mptStringBuffer.h"
+#include "../common/mptFileIO.h"
+#include "../common/FileReader.h"
+#include "../soundlib/mod_specifications.h"
+#include "../soundlib/SampleCopy.h"
+#include "../tracklib/SampleEdit.h"
 #include "mpt/io_file/inputfile.hpp"
 #include "mpt/io_file_read/inputfile_filecursor.hpp"
 #include "mpt/io_file/outputfile.hpp"
-#include "../common/mptFileIO.h"
-#include "../common/FileReader.h"
-#include "openmpt/soundbase/Copy.hpp"
-#include "../soundlib/SampleCopy.h"
-#include "FileDialog.h"
-#include "ProgressDialog.h"
 #include "mpt/parse/parse.hpp"
 #include "mpt/string/utility.hpp"
+#include "openmpt/soundbase/Copy.hpp"
+
+#include <soundtouch/include/SoundTouch.h>
+#include <soundtouch/source/SoundTouchDLL/SoundTouchDLL.h>
+#include <smbPitchShift/smbPitchShift.h>
 
 
 OPENMPT_NAMESPACE_BEGIN

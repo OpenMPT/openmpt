@@ -12,10 +12,12 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
+#include "../common/FileReaderFwd.h"
+#include "../soundlib/Snd_defs.h"
+#include "../soundlib/plugins/PluginStructs.h"
+
 #include <vector>
 #include <algorithm>
-
-#include "../common/FileReaderFwd.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

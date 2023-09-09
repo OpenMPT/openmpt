@@ -9,10 +9,12 @@
 
 
 #include "stdafx.h"
-#include "Mainfrm.h"
 #include "AdvancedConfigDlg.h"
-#include "Settings.h"
 #include "dlg_misc.h"
+#include "Mainfrm.h"
+#include "resource.h"
+#include "Settings.h"
+#include "WindowMessages.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -32,6 +34,15 @@ void COptionsAdvanced::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_LIST1,			m_List);
 	//}}AFX_DATA_MAP
 }
+
+
+#ifndef _AFX_NO_MFC_CONTROLS_IN_DIALOGS
+COptionsAdvanced::COptionsAdvanced() : CPropertyPage{IDD_OPTIONS_ADVANCED}, m_List{m_indexToPath} {}
+#else   // _AFX_NO_MFC_CONTROLS_IN_DIALOGS
+COptionsAdvanced::COptionsAdvanced() : CPropertyPage{IDD_OPTIONS_ADVANCED} {}
+#endif  // !_AFX_NO_MFC_CONTROLS_IN_DIALOGS
+
+COptionsAdvanced::~COptionsAdvanced() {}
 
 
 BOOL COptionsAdvanced::PreTranslateMessage(MSG *msg)

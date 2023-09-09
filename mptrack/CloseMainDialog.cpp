@@ -10,7 +10,6 @@
 
 #include "stdafx.h"
 #include "Mptrack.h"
-#include "Mainfrm.h"
 #include "Moddoc.h"
 #include "CloseMainDialog.h"
 
@@ -19,9 +18,9 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 BEGIN_MESSAGE_MAP(CloseMainDialog, ResizableDialog)
-	ON_COMMAND(IDC_BUTTON1,			&CloseMainDialog::OnSaveAll)
-	ON_COMMAND(IDC_BUTTON2,			&CloseMainDialog::OnSaveNone)
-	ON_COMMAND(IDC_CHECK1,			&CloseMainDialog::OnSwitchFullPaths)
+	ON_COMMAND(IDC_BUTTON1, &CloseMainDialog::OnSaveAll)
+	ON_COMMAND(IDC_BUTTON2, &CloseMainDialog::OnSaveNone)
+	ON_COMMAND(IDC_CHECK1,  &CloseMainDialog::OnSwitchFullPaths)
 END_MESSAGE_MAP()
 
 

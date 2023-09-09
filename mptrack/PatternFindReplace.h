@@ -11,6 +11,8 @@
 #pragma once
 
 #include "openmpt/all/BuildSettings.hpp"
+#include "PatternCursor.h"
+#include "../soundlib/modcommand.h"
 
 // Find/Replace data
 struct FindReplace

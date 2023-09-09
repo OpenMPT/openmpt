@@ -9,14 +9,16 @@
 
 
 #include "stdafx.h"
-#include "Mptrack.h"
-#include "Mainfrm.h"
-#include "InputHandler.h"
-#include "View_tre.h"
+#include "Mainbar.h"
 #include "ImageLists.h"
+#include "InputHandler.h"
+#include "Mainfrm.h"
 #include "Moddoc.h"
-#include "../soundlib/mod_specifications.h"
+#include "Mptrack.h"
+#include "View_tre.h"
+#include "WindowMessages.h"
 #include "../common/mptStringBuffer.h"
+#include "../soundlib/mod_specifications.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

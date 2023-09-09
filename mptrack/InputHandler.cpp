@@ -9,10 +9,11 @@
 
 
 #include "stdafx.h"
-#include "CommandSet.h"
 #include "InputHandler.h"
-#include "resource.h"
+#include "CommandSet.h"
 #include "Mainfrm.h"
+#include "resource.h"
+#include "WindowMessages.h"
 #include "mpt/fs/fs.hpp"
 #include "../soundlib/MIDIEvents.h"
 

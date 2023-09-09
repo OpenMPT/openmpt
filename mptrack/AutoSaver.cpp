@@ -9,15 +9,16 @@
 
 
 #include "stdafx.h"
-#include "Mptrack.h"
-#include "Mainfrm.h"
-#include "Moddoc.h"
 #include "AutoSaver.h"
 #include "FileDialog.h"
 #include "FolderScanner.h"
+#include "Moddoc.h"
+#include "Mptrack.h"
 #include "resource.h"
-#include "mpt/fs/fs.hpp"
+#include "TrackerSettings.h"
 #include "../soundlib/mod_specifications.h"
+#include "mpt/fs/fs.hpp"
+
 #include <algorithm>
 
 

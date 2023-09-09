@@ -12,6 +12,9 @@
 #pragma once
 
 #include "openmpt/all/BuildSettings.hpp"
+#include "Globals.h"
+#include "Moddoc.h"
+#include "../soundlib/Snd_defs.h"
 
 OPENMPT_NAMESPACE_BEGIN
 

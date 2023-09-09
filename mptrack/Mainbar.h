@@ -11,29 +11,32 @@
 #pragma once
 
 #include "openmpt/all/BuildSettings.hpp"
+#include "CImageListEx.h"
+#include "UpdateHints.h"
 #include "UpdateToolTip.h"
+#include "../soundlib/Snd_defs.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
 class CStereoVU: public CStatic
 {
 protected:
-	uint8 numChannels;
-	uint32 vuMeter[4];
+	uint8 numChannels = 2;
+	uint32 vuMeter[4] = {{}};
 	DWORD lastVuUpdateTime;
-	int lastV[4];
-	bool lastClip[4];
-	bool horizontal;
-	bool allowRightToLeft;
+	int lastV[4] = {{}};
+	bool lastClip[4] = {{}};
+	bool horizontal = true;
+	bool allowRightToLeft = false;
 
 public:
-	CStereoVU() { numChannels = 2; MemsetZero(vuMeter); lastVuUpdateTime = timeGetTime(); horizontal = true; MemsetZero(lastV); MemsetZero(lastClip); allowRightToLeft = false; }
-	void SetVuMeter(uint8 validChannels, const uint32 channels[4], bool force=false);
+	CStereoVU() { lastVuUpdateTime = timeGetTime(); }
+	void SetVuMeter(uint8 validChannels, const uint32 channels[4], bool force = false);
 	void SetOrientation(bool h) { horizontal = h; }
 
 protected:
-	void DrawVuMeters(CDC &dc, bool redraw=false);
-	void DrawVuMeter(CDC &dc, const CRect &rect, int index, bool redraw=false);
+	void DrawVuMeters(CDC &dc, bool redraw = false);
+	void DrawVuMeter(CDC &dc, const CRect &rect, int index, bool redraw = false);
 
 protected:
 	afx_msg void OnPaint();
@@ -48,6 +51,7 @@ class CSoundFile;
 class CModDoc;
 class CModTree;
 class CMainFrame;
+struct Notification;
 
 class CToolBarEx: public CToolBar
 {
@@ -80,14 +84,13 @@ protected:
 	CStatic m_EditTempo, m_EditSpeed, m_EditOctave, m_EditRowsPerBeat;
 	CStatic m_StaticTempo, m_StaticSpeed, m_StaticRowsPerBeat;
 	CSpinButtonCtrl m_SpinTempo, m_SpinSpeed, m_SpinOctave, m_SpinRowsPerBeat;
-	int nCurrentSpeed, nCurrentOctave, nCurrentRowsPerBeat;
+	int nCurrentSpeed = 0, nCurrentOctave = 0, nCurrentRowsPerBeat = 0;
 	TEMPO nCurrentTempo;
 public:
 	CStereoVU m_VuMeter;
 
 public:
-	CMainToolBar() {}
-	~CMainToolBar() override {}
+	CMainToolBar() = default;
 
 protected:
 	void SetRowsPerBeat(ROWINDEX nNewRPB);

@@ -14,23 +14,24 @@
 
 #include "Vstplug.h"
 #ifdef MODPLUG_TRACKER
-#include "Moddoc.h"
-#include "Mainfrm.h"
 #include "AbstractVstEditor.h"
-#include "VSTEditor.h"
 #include "DefaultVstEditor.h"
 #include "ExceptionHandler.h"
+#include "Mainfrm.h"
+#include "Moddoc.h"
+#include "VSTEditor.h"
+#include "WindowMessages.h"
 #endif // MODPLUG_TRACKER
-#include "../soundlib/Sndfile.h"
-#include "../soundlib/MIDIEvents.h"
+#include "FileDialog.h"
 #include "MIDIMappingDialog.h"
 #include "../common/mptStringBuffer.h"
-#include "FileDialog.h"
-#include "../pluginBridge/BridgeWrapper.h"
+#include "../misc/mptOSException.h"
 #include "../pluginBridge/BridgeOpCodes.h"
+#include "../pluginBridge/BridgeWrapper.h"
+#include "../soundlib/MIDIEvents.h"
 #include "../soundlib/plugins/OpCodes.h"
 #include "../soundlib/plugins/PluginManager.h"
-#include "../misc/mptOSException.h"
+#include "../soundlib/Sndfile.h"
 #include "mpt/string/utility.hpp"
 
 using namespace Vst;

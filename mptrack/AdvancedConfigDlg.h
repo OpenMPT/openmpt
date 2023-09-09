@@ -21,6 +21,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+class SettingPath;
 
 #ifndef _AFX_NO_MFC_CONTROLS_IN_DIALOGS
 
@@ -57,11 +58,8 @@ protected:
 	bool m_listGrouped = false;
 
 public:
-#ifndef _AFX_NO_MFC_CONTROLS_IN_DIALOGS
-	COptionsAdvanced():CPropertyPage(IDD_OPTIONS_ADVANCED), m_List(m_indexToPath) {}
-#else // _AFX_NO_MFC_CONTROLS_IN_DIALOGS
-	COptionsAdvanced():CPropertyPage(IDD_OPTIONS_ADVANCED) {}
-#endif // !_AFX_NO_MFC_CONTROLS_IN_DIALOGS
+	COptionsAdvanced();
+	~COptionsAdvanced();
 
 protected:
 	BOOL OnInitDialog() override;

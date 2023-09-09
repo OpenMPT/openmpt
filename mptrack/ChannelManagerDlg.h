@@ -12,6 +12,7 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 #include "PatternEditorDialogs.h"
+#include "UpdateHints.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -29,8 +30,8 @@ class CChannelManagerDlg: public CDialog
 
 public:
 
-	static CChannelManagerDlg * sharedInstance() { return sharedInstance_; }
-	static CChannelManagerDlg * sharedInstanceCreate();
+	static CChannelManagerDlg *sharedInstance() { return sharedInstance_; }
+	static CChannelManagerDlg *sharedInstanceCreate();
 	static void DestroySharedInstance() { delete sharedInstance_; sharedInstance_ = nullptr; }
 	void SetDocument(CModDoc *modDoc);
 	CModDoc *GetDocument() const { return m_ModDoc; }

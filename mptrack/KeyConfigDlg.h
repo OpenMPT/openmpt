@@ -11,7 +11,6 @@
 #pragma once
 
 #include "openmpt/all/BuildSettings.hpp"
-#include "Mainfrm.h"
 #include "InputHandler.h"
 
 OPENMPT_NAMESPACE_BEGIN
@@ -79,7 +78,7 @@ protected:
 	CComboBox m_cmbCategory;
 	CButton m_bKeyDown, m_bKeyHold, m_bKeyUp;
 	CButton m_bnReset;
-	CCustEdit m_eCustHotKey, m_eFindHotKey;
+	CCustEdit m_eCustHotKey{false}, m_eFindHotKey{true};
 	CEdit m_eFind;
 	CEdit m_eReport, m_eChordWaitTime;
 	CommandID m_curCommand = kcNull;
@@ -94,7 +93,7 @@ protected:
 	int GetCategoryFromCommandID(CommandID command) const;
 
 public:
-	COptionsKeyboard() : CPropertyPage(IDD_OPTIONS_KEYBOARD), m_eCustHotKey(false), m_eFindHotKey(true) { }
+	COptionsKeyboard();
 	std::vector<CommandCategory> commandCategories;
 	void DefineCommandCategories();
 

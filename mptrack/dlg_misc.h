@@ -14,11 +14,12 @@
 
 #include "CDecimalSupport.h"
 #include "ResizableDialog.h"
+#include "resource.h"
+#include "../soundlib/Sndfile.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
 class Version;
-class CSoundFile;
 class CModDoc;
 class CDLSBank;
 

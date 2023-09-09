@@ -10,23 +10,23 @@
 
 
 #include "stdafx.h"
-#include "Mptrack.h"
-#include "Mainfrm.h"
-#include "InputHandler.h"
-#include "ImageLists.h"
-#include "Childfrm.h"
-#include "Moddoc.h"
-#include "Globals.h"
-#include "Ctrl_ins.h"
 #include "View_ins.h"
-#include "Dlsbank.h"
 #include "ChannelManagerDlg.h"
+#include "Childfrm.h"
+#include "Ctrl_ins.h"
+#include "Dlsbank.h"
+#include "FileDialog.h"
+#include "Globals.h"
+#include "ImageLists.h"
+#include "InputHandler.h"
+#include "Mainfrm.h"
+#include "Moddoc.h"
+#include "Mptrack.h"
 #include "ScaleEnvPointsDlg.h"
+#include "WindowMessages.h"
+#include "../common/mptStringBuffer.h"
 #include "../soundlib/MIDIEvents.h"
 #include "../soundlib/mod_specifications.h"
-#include "../common/mptStringBuffer.h"
-#include "FileDialog.h"
-
 
 OPENMPT_NAMESPACE_BEGIN
 

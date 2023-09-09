@@ -13,12 +13,19 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 #include "ColorPickerButton.h"
+#include "resource.h"
+#include "UpdateHints.h"
+#include "WindowMessages.h"
+#include "../soundlib/plugins/PluginStructs.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
 //Note: Changing this won't increase the number of tabs in general view. Most
 //of the code use plain number 4.
 #define CHANNELS_IN_TAB	4
+
+class CModDoc;
+class IMixPlugin;
 
 class CViewGlobals: public CFormView
 {
@@ -51,7 +58,7 @@ protected:
 	DECLARE_SERIAL(CViewGlobals)
 
 public:
-	CModDoc* GetDocument() const { return static_cast<CModDoc *>(m_pDocument); }
+	CModDoc* GetDocument() const;
 	void RecalcLayout();
 	void LockControls() { m_nLockCount++; }
 	void UnlockControls() { PostMessage(WM_MOD_UNLOCKCONTROLS); }

@@ -9,13 +9,13 @@
  */
 
 #include "stdafx.h"
-#include "Mainfrm.h"
+#include "PatternFindReplace.h"
 #include "Moddoc.h"
+#include "PatternEditorDialogs.h"
+#include "PatternFindReplaceDlg.h"
 #include "resource.h"
 #include "View_pat.h"
-#include "PatternEditorDialogs.h"
-#include "PatternFindReplace.h"
-#include "PatternFindReplaceDlg.h"
+#include "WindowMessages.h"
 #include "../soundlib/mod_specifications.h"
 
 OPENMPT_NAMESPACE_BEGIN

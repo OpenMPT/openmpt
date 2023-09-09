@@ -14,6 +14,7 @@
 #include "openmpt/all/BuildSettings.hpp"
 
 #include "CDecimalSupport.h"
+#include "Globals.h"
 
 OPENMPT_NAMESPACE_BEGIN
 

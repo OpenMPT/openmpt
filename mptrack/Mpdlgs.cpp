@@ -9,18 +9,19 @@
 
 
 #include "stdafx.h"
-#include "Mptrack.h"
-#include "Sndfile.h"
-#include "Mainfrm.h"
-#include "ImageLists.h"
-#include "Moddoc.h"
 #include "Mpdlgs.h"
 #include "dlg_misc.h"
+#include "ImageLists.h"
+#include "Mainfrm.h"
+#include "Moddoc.h"
+#include "Mptrack.h"
+#include "Sndfile.h"
+#include "WindowMessages.h"
+#include "../common/Dither.h"
 #include "../common/mptStringBuffer.h"
+#include "mpt/parse/parse.hpp"
 #include "openmpt/sounddevice/SoundDevice.hpp"
 #include "openmpt/sounddevice/SoundDeviceManager.hpp"
-#include "../common/Dither.h"
-#include "mpt/parse/parse.hpp"
 
 
 OPENMPT_NAMESPACE_BEGIN

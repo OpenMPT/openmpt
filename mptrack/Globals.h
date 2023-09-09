@@ -11,6 +11,10 @@
 #pragma once
 
 #include "openmpt/all/BuildSettings.hpp"
+#include "resource.h"
+#include "Settings.h"
+#include "UpdateHints.h"
+#include "WindowMessages.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -19,6 +23,9 @@ OPENMPT_NAMESPACE_BEGIN
 class CModControlView;
 class CModControlBar;
 class CModDoc;
+class CSoundFile;
+struct DRAGONDROP;
+struct Notification;
 
 class CModControlBar: public CToolBarCtrl
 {

@@ -10,22 +10,22 @@
 
 
 #include "stdafx.h"
-#include "Mptrack.h"
-#include "Mainfrm.h"
-#include "InputHandler.h"
-#include "Childfrm.h"
-#include "Moddoc.h"
-#include "Globals.h"
-#include "Ctrl_gen.h"
 #include "View_gen.h"
-#include "../soundlib/plugins/PlugInterface.h"
-#include "EffectVis.h"
-#include "MoveFXSlotDialog.h"
-#include "ChannelManagerDlg.h"
-#include "SelectPluginDialog.h"
-#include "../soundlib/mod_specifications.h"
-#include "../common/mptStringBuffer.h"
 #include "AbstractVstEditor.h"
+#include "ChannelManagerDlg.h"
+#include "Childfrm.h"
+#include "Ctrl_gen.h"
+#include "EffectVis.h"
+#include "Globals.h"
+#include "InputHandler.h"
+#include "Mainfrm.h"
+#include "Moddoc.h"
+#include "MoveFXSlotDialog.h"
+#include "Mptrack.h"
+#include "SelectPluginDialog.h"
+#include "../common/mptStringBuffer.h"
+#include "../soundlib/mod_specifications.h"
+#include "../soundlib/plugins/PlugInterface.h"
 
 // This is used for retrieving the correct background colour for the
 // frames on the general tab when using WinXP Luna or Vista/Win7 Aero.
@@ -168,6 +168,9 @@ void CViewGlobals::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BUTTON2,	m_BtnEdit);
 	//}}AFX_DATA_MAP
 }
+
+
+CModDoc* CViewGlobals::GetDocument() const { return static_cast<CModDoc *>(m_pDocument); }
 
 void CViewGlobals::OnInitialUpdate()
 {

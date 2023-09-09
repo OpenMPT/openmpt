@@ -19,6 +19,8 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+class CSoundFile;
+
 class CMidiMacroSetup: public CDialog
 {
 protected:
@@ -30,7 +32,7 @@ protected:
 	CSoundFile &m_SndFile;
 
 public:
-	CMidiMacroSetup(CSoundFile &sndFile, CWnd *parent = nullptr) : CDialog(IDD_MIDIMACRO, parent), m_SndFile(sndFile), m_vMidiCfg(sndFile.m_MidiCfg), m_MidiCfg(*m_vMidiCfg) { }
+	CMidiMacroSetup(CSoundFile &sndFile, CWnd *parent = nullptr);
 private:
 	mpt::heap_value<MIDIMacroConfig> m_vMidiCfg;
 public:

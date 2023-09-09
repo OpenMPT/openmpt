@@ -11,6 +11,7 @@
 #include "stdafx.h"
 #include "Mptrack.h"
 #include "Mainfrm.h"
+#include "WindowMessages.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

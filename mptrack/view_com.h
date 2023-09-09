@@ -14,6 +14,8 @@
 #include "openmpt/all/BuildSettings.hpp"
 
 #include "CListCtrl.h"
+#include "Globals.h"
+#include "../soundlib/modcommand.h"
 
 OPENMPT_NAMESPACE_BEGIN
 

@@ -10,15 +10,16 @@
 
 
 #include "stdafx.h"
-#include "Mptrack.h"
-#include "Mainfrm.h"
-#include "InputHandler.h"
-#include "Moddoc.h"
-#include "View_pat.h"
 #include "PatternEditorDialogs.h"
+#include "InputHandler.h"
+#include "Mainfrm.h"
+#include "Moddoc.h"
+#include "Mptrack.h"
 #include "TempoSwingDialog.h"
-#include "../soundlib/mod_specifications.h"
+#include "View_pat.h"
+#include "WindowMessages.h"
 #include "../common/mptStringBuffer.h"
+#include "../soundlib/mod_specifications.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

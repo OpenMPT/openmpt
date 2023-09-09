@@ -13,6 +13,10 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
+#include "Globals.h"
+#include "TrackerSettings.h"
+#include "Undo.h"
+#include "UpdateHints.h"
 #include "../soundlib/SampleIO.h"
 #include "../tracklib/FadeLaws.h"
 

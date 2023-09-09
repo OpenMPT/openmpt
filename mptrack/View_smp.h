@@ -13,6 +13,8 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 #include "Globals.h"
+#include "Moddoc.h"
+#include "TrackerSettings.h"
 #include "../soundlib/modsmp_ctrl.h"
 
 

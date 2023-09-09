@@ -10,26 +10,28 @@
 
 
 #include "stdafx.h"
-#include "Mptrack.h"
-#include "Mainfrm.h"
-#include "InputHandler.h"
-#include "Childfrm.h"
-#include "Moddoc.h"
-#include "SampleEditorDialogs.h"  // For amplification dialog (which is re-used from sample editor)
-#include "Globals.h"
 #include "View_pat.h"
+#include "Childfrm.h"
 #include "Ctrl_pat.h"
-#include "PatternFont.h"
+#include "EffectVis.h"
+#include "Globals.h"
+#include "InputHandler.h"
+#include "Mainfrm.h"
+#include "MIDIMacros.h"
+#include "Moddoc.h"
+#include "Mptrack.h"
 #include "PatternFindReplace.h"
 #include "PatternFindReplaceDlg.h"
-
-#include "EffectVis.h"
+#include "PatternFont.h"
 #include "PatternGotoDialog.h"
-#include "MIDIMacros.h"
+#include "SampleEditorDialogs.h"  // For amplification dialog (which is re-used from sample editor)
+#include "WindowMessages.h"
+#include "WindowMessages.h"
 #include "../common/misc_util.h"
 #include "../soundlib/MIDIEvents.h"
 #include "../soundlib/mod_specifications.h"
 #include "../soundlib/plugins/PlugInterface.h"
+
 #include <algorithm>
 
 
@@ -258,6 +260,13 @@ bool CViewPattern::SetCursorPosition(const PatternCursor &cursor, WrapMode wrapM
 	// Now set column and update scroll position:
 	SetCurrentColumn(cursor);
 	return true;
+}
+
+
+void CViewPattern::SetCurrentOrder(ORDERINDEX ord)
+{
+	m_nOrder = ord;
+	SendCtrlMessage(CTRLMSG_SETCURRENTORDER, ord);
 }
 
 
@@ -3720,6 +3729,20 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM plugSlot, LPARAM paramIndex
 	}
 
 	return 0;
+}
+
+
+// Return true if recording live (i.e. editing while following playback).
+bool CViewPattern::IsLiveRecord() const
+{
+	const CMainFrame *mainFrm = CMainFrame::GetMainFrame();
+	const CSoundFile *sndFile = GetSoundFile();
+	if(mainFrm == nullptr || sndFile == nullptr)
+	{
+		return false;
+	}
+	//      (following song)      &&       (following in correct document)           &&    (playback is on)
+	return m_Status[psFollowSong] && mainFrm->GetFollowSong(GetDocument()) == m_hWnd && !sndFile->IsPaused();
 }
 
 

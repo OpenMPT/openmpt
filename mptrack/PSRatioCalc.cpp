@@ -9,9 +9,9 @@
 
 
 #include "stdafx.h"
-#include "Mptrack.h"
-#include "Mainfrm.h"
 #include "PSRatioCalc.h"
+#include "Mptrack.h"
+#include "../soundlib/Sndfile.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

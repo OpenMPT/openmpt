@@ -16,8 +16,10 @@
 #include "Globals.h"
 #include "PatternCursor.h"
 #include "Moddoc.h"
+#include "Mptrack.h"
 #include "PatternEditorDialogs.h"
 #include "PatternClipboard.h"
+#include "UpdateHints.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -259,11 +261,7 @@ public:
 	ROWINDEX GetCurrentRow() const { return m_Cursor.GetRow(); }
 	CHANNELINDEX GetCurrentChannel() const { return m_Cursor.GetChannel(); }
 	ORDERINDEX GetCurrentOrder() const { return m_nOrder; }
-	void SetCurrentOrder(ORDERINDEX ord)
-	{
-		m_nOrder = ord;
-		SendCtrlMessage(CTRLMSG_SETCURRENTORDER, ord);
-	}
+	void SetCurrentOrder(ORDERINDEX ord);
 	// Get ModCommand at the pattern cursor position.
 	ModCommand &GetCursorCommand() { return GetModCommand(m_Cursor); };
 	const ModCommand& GetCursorCommand() const { return const_cast<CViewPattern *>(this)->GetModCommand(m_Cursor); };
@@ -542,17 +540,7 @@ private:
 	PatternRect SweepPattern(bool (*startCond)(const ModCommand &), bool (*endCond)(const ModCommand &, const ModCommand &)) const;
 
 	// Return true if recording live (i.e. editing while following playback).
-	bool IsLiveRecord() const
-	{
-		const CMainFrame *mainFrm = CMainFrame::GetMainFrame();
-		const CSoundFile *sndFile = GetSoundFile();
-		if(mainFrm == nullptr || sndFile == nullptr)
-		{
-			return false;
-		}
-		//      (following song)      &&       (following in correct document)           &&    (playback is on)
-		return m_Status[psFollowSong] && mainFrm->GetFollowSong(GetDocument()) == m_hWnd && !sndFile->IsPaused();
-	};
+	bool IsLiveRecord() const;
 
 	// Returns edit position.
 	PatternEditPos GetEditPos(const CSoundFile &sndFile, const bool liveRecord) const;

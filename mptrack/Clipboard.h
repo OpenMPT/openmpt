@@ -10,6 +10,7 @@
 #pragma once
 
 #include "openmpt/all/BuildSettings.hpp"
+#include "Mptrack.h"
 
 class Clipboard
 {

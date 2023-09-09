@@ -660,6 +660,9 @@
     <ClInclude Include="..\..\mptrack\WelcomeDialog.h">
       <Filter>mptrack</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\mptrack\WindowMessages.h">
+      <Filter>mptrack</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\mptrack\WineSoundDeviceStub.h">
       <Filter>mptrack</Filter>
     </ClInclude>

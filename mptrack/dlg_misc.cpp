@@ -9,18 +9,18 @@
 
 
 #include "stdafx.h"
-#include "Mptrack.h"
-#include "Moddoc.h"
-#include "Mainfrm.h"
 #include "dlg_misc.h"
-#include "Dlsbank.h"
-#include "Childfrm.h"
-#include "../soundlib/plugins/PlugInterface.h"
 #include "ChannelManagerDlg.h"
+#include "Childfrm.h"
+#include "Dlsbank.h"
+#include "Moddoc.h"
+#include "Mptrack.h"
 #include "TempoSwingDialog.h"
-#include "../soundlib/mod_specifications.h"
-#include "../common/version.h"
+#include "WindowMessages.h"
 #include "../common/mptStringBuffer.h"
+#include "../common/version.h"
+#include "../soundlib/mod_specifications.h"
+#include "../soundlib/plugins/PlugInterface.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

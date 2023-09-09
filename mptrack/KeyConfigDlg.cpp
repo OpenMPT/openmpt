@@ -11,6 +11,10 @@
 #include "stdafx.h"
 #include "KeyConfigDlg.h"
 #include "FileDialog.h"
+#include "Mainfrm.h"
+#include "InputHandler.h"
+#include "resource.h"
+#include "WindowMessages.h"
 #include "../soundlib/mod_specifications.h"
 #include "../soundlib/MIDIEvents.h"
 
@@ -157,6 +161,9 @@ void COptionsKeyboard::DoDataExchange(CDataExchange *pDX)
 	DDX_Control(pDX, IDC_CHECKKEYUP,	m_bKeyUp);
 	DDX_Control(pDX, IDC_FIND,			m_eFind);
 }
+
+
+COptionsKeyboard::COptionsKeyboard() : CPropertyPage{IDD_OPTIONS_KEYBOARD} { }
 
 
 BOOL COptionsKeyboard::OnSetActive()

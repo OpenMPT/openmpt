@@ -16,6 +16,8 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+class CSoundFile;
+
 class CPSRatioCalc : public CDialog
 {
 	DECLARE_DYNAMIC(CPSRatioCalc)

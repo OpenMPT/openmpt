@@ -10,9 +10,9 @@
 
 
 #include "stdafx.h"
-#include "Moddoc.h"
-#include "Mainfrm.h"
 #include "Undo.h"
+#include "Moddoc.h"
+#include "TrackerSettings.h"
 #include "../common/mptStringBuffer.h"
 #include "../tracklib/SampleEdit.h"
 #include "../soundlib/modsmp_ctrl.h"

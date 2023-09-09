@@ -10,6 +10,7 @@
 
 
 #include "stdafx.h"
+#include "View_gen.h"
 #include "Mptrack.h"
 #include "Mainfrm.h"
 #include "InputHandler.h"
@@ -17,7 +18,7 @@
 #include "Globals.h"
 #include "dlg_misc.h"
 #include "Ctrl_gen.h"
-#include "View_gen.h"
+#include "WindowMessages.h"
 #include "../common/misc_util.h"
 #include "../common/mptTime.h"
 #include "../soundlib/mod_specifications.h"
