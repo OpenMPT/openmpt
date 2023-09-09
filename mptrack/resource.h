@@ -1113,6 +1113,10 @@
 #define ID_PATTERN_INTERPOLATE_INSTR    32908
 #define ID_PATTERN_SPLIT                32909
 #define ID_ORDERLIST_MERGE              32910
+#define ID_QUEUE_AT_PATTERN_END         32911
+#define ID_QUEUE_AT_MEASURE_END         32912
+#define ID_QUEUE_AT_BEAT_END            32913
+#define ID_QUEUE_AT_ROW_END             32914
 #define ID_PRESET_LOAD                  32915
 #define ID_PRESET_SAVE                  32916
 #define ID_PRESET_RANDOM                32917

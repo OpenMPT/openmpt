@@ -11,10 +11,10 @@
 #pragma once
 
 #include "openmpt/all/BuildSettings.hpp"
-#include <string>
 #include "openmpt/base/FlagSet.hpp"
-#include <map>
 #include <bitset>
+#include <map>
+#include <string>
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -165,9 +165,17 @@ enum CommandID
 	kcNextInstrument,
 	kcPrevOctave,
 	kcNextOctave,
-	kcPrevOrder,
+	kcPrevNextOrderStart,
+	kcPrevOrder = kcPrevNextOrderStart,
 	kcNextOrder,
-	kcEndMisc = kcNextOrder,
+	kcPrevOrderAtMeasureEnd,
+	kcNextOrderAtMeasureEnd,
+	kcPrevOrderAtBeatEnd,
+	kcNextOrderAtBeatEnd,
+	kcPrevOrderAtRowEnd,
+	kcNextOrderAtRowEnd,
+	kcPrevNextOrderEnd = kcNextOrderAtRowEnd,
+	kcEndMisc = kcPrevNextOrderEnd,
 
 	kcDummyShortcut,
 	kcGlobalEnd = kcDummyShortcut,
@@ -916,7 +924,13 @@ enum CommandID
 	kcOrderlistLockPlayback = kcStartOrderlistLock,
 	kcOrderlistUnlockPlayback,
 	kcEndOrderlistLock = kcOrderlistUnlockPlayback,
-	kcEndOrderlistCommands = kcEndOrderlistLock,
+	kcStartOrderlistQueue,
+	kcOrderlistQueueAtPatternEnd = kcStartOrderlistQueue,
+	kcOrderlistQueueAtMeasureEnd,
+	kcOrderlistQueueAtBeatEnd,
+	kcOrderlistQueueAtRowEnd,
+	kcEndOrderlistQueue = kcOrderlistQueueAtRowEnd,
+	kcEndOrderlistCommands = kcEndOrderlistQueue,
 
 	kcStartChnSettingsCommands,
 	kcChnSettingsPrev = kcStartChnSettingsCommands,

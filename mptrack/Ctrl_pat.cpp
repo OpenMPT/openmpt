@@ -20,6 +20,7 @@
 #include "Moddoc.h"
 #include "Mptrack.h"
 #include "PatternEditorDialogs.h"
+#include "TrackerSettings.h"
 #include "View_pat.h"
 #include "WindowMessages.h"
 #include "../common/mptStringBuffer.h"
@@ -190,6 +191,7 @@ BOOL CCtrlPatterns::OnInitDialog()
 	return FALSE;
 }
 
+Setting<LONG> &CCtrlPatterns::GetSplitPosRef() { return TrackerSettings::Instance().glPatternWindowHeight; }
 
 void CCtrlPatterns::RecalcLayout()
 {

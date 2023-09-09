@@ -6410,29 +6410,49 @@ IMixPlugin *CSoundFile::GetChannelInstrumentPlugin(const ModChannel &chn) const
 
 
 #ifdef MODPLUG_TRACKER
-void CSoundFile::HandlePatternTransitionEvents()
+void CSoundFile::HandleRowTransitionEvents(bool nextPattern)
 {
-	// MPT sequence override
+	bool doTransition = nextPattern;
+
+	// Jump to another pattern?
 	if(m_PlayState.m_nSeqOverride != ORDERINDEX_INVALID && m_PlayState.m_nSeqOverride < Order().size())
 	{
-		if(m_SongFlags[SONG_PATTERNLOOP])
+		switch(m_PlayState.m_seqOverrideMode)
 		{
-			m_PlayState.m_nPattern = Order()[m_PlayState.m_nSeqOverride];
+		case OrderTransitionMode::AtPatternEnd:
+			doTransition = nextPattern;
+			break;
+		case OrderTransitionMode::AtMeasureEnd:
+			if(m_PlayState.m_nCurrentRowsPerMeasure > 0)
+				doTransition = (m_PlayState.m_nRow % m_PlayState.m_nCurrentRowsPerMeasure) == 0;
+			break;
+		case OrderTransitionMode::AtBeatEnd:
+			if(m_PlayState.m_nCurrentRowsPerBeat > 0)
+				doTransition = (m_PlayState.m_nRow % m_PlayState.m_nCurrentRowsPerBeat) == 0;
+			break;
+		case OrderTransitionMode::AtRowEnd:
+			doTransition = true;
+			break;
 		}
-		m_PlayState.m_nCurrentOrder = m_PlayState.m_nSeqOverride;
-		m_PlayState.m_nSeqOverride = ORDERINDEX_INVALID;
+		if(doTransition)
+		{
+			if(m_SongFlags[SONG_PATTERNLOOP])
+				m_PlayState.m_nPattern = Order()[m_PlayState.m_nSeqOverride];
+			m_PlayState.m_nCurrentOrder = m_PlayState.m_nSeqOverride;
+			m_PlayState.m_nSeqOverride = ORDERINDEX_INVALID;
+		}
 	}
 
-	// Channel mutes
-	for (CHANNELINDEX chan = 0; chan < GetNumChannels(); chan++)
+	if(doTransition && GetpModDoc())
 	{
-		if (m_bChannelMuteTogglePending[chan])
+		// Update channel mutes
+		for(CHANNELINDEX chan = 0; chan < GetNumChannels(); chan++)
 		{
-			if(GetpModDoc())
+			if(m_bChannelMuteTogglePending[chan])
 			{
 				GetpModDoc()->MuteChannel(chan, !GetpModDoc()->IsChannelMuted(chan));
+				m_bChannelMuteTogglePending[chan] = false;
 			}
-			m_bChannelMuteTogglePending[chan] = false;
 		}
 	}
 }

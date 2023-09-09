@@ -496,6 +496,10 @@ constexpr struct
 	{kcOrderlistPatInvalid,                    VK_SPACE,           ModNone,            kKeyEventDown,                   kCtxCtrlOrderlist,       MPT_V("1.31")},
 	{kcOrderlistLockPlayback,                  'L',                ModCtrl,            kKeyEventDown,                   kCtxCtrlOrderlist,       MPT_V("1.31")},
 	{kcOrderlistUnlockPlayback,                'U',                ModCtrl,            kKeyEventDown,                   kCtxCtrlOrderlist,       MPT_V("1.31")},
+	{kcOrderlistQueueAtPatternEnd,             'Q',                ModNone,            kKeyEventDown,                   kCtxCtrlOrderlist,       MPT_V("1.32.00.05")},
+	{kcOrderlistQueueAtMeasureEnd,             'Q',                ModShift,           kKeyEventDown,                   kCtxCtrlOrderlist,       MPT_V("1.32.00.05")},
+	{kcOrderlistQueueAtBeatEnd,                'Q',                ModAlt,             kKeyEventDown,                   kCtxCtrlOrderlist,       MPT_V("1.32.00.05")},
+	{kcOrderlistQueueAtRowEnd,                 'Q',                ModShift | ModAlt,  kKeyEventDown,                   kCtxCtrlOrderlist,       MPT_V("1.32.00.05")},
 	{kcChnSettingsPrev,                        VK_LEFT,            ModAlt,             kKeyEventDown | kKeyEventRepeat, kCtxChannelSettings,     MPT_V("1.31")},
 	{kcChnSettingsPrev,                        VK_BACK,            ModShift,           kKeyEventDown | kKeyEventRepeat, kCtxChannelSettings,     MPT_V("1.31")},
 	{kcChnSettingsNext,                        VK_RIGHT,           ModAlt,             kKeyEventDown | kKeyEventRepeat, kCtxChannelSettings,     MPT_V("1.31")},
@@ -557,6 +561,7 @@ static constexpr struct
 	CommandID cmd = kcNull;
 	const TCHAR *description = nullptr;
 } CommandDefinitions[] =
+// clang-format off
 {
 	{1001, kcPatternRecord, _T("Enable Recording")},
 	{1002, kcPatternPlayRow, _T("Play Row")},
@@ -1263,7 +1268,19 @@ static constexpr struct
 	{KeyCommand::Hidden, kcDataEntryDownStop, _T("Stop Data Entry -1")},
 	{KeyCommand::Hidden, kcDataEntryUpCoarseStop, _T("Stop Data Entry Up (Coarse)")},
 	{KeyCommand::Hidden, kcDataEntryDownCoarseStop, _T("Stop Data Entry Down (Coarse)")},
+	{2058, kcPrevOrderAtMeasureEnd, _T("Previous Order (Transition at end of current measure")},
+	{2059, kcNextOrderAtMeasureEnd, _T("Next Order (Transition at end of current measure")},
+	{2060, kcPrevOrderAtBeatEnd, _T("Previous Order (Transition at end of current beat")},
+	{2061, kcNextOrderAtBeatEnd, _T("Next Order (Transition at end of current beat")},
+	{2062, kcPrevOrderAtRowEnd, _T("Previous Order (Transition at end of current row")},
+	{2063, kcNextOrderAtRowEnd, _T("Next Order (Transition at end of current row")},
+	{2064, kcOrderlistQueueAtPatternEnd, _T("Queue Pattern (Transition at end of current pattern)")},
+	{2065, kcOrderlistQueueAtMeasureEnd, _T("Queue Pattern (Transition at end of current measure)")},
+	{2066, kcOrderlistQueueAtBeatEnd, _T("Queue Pattern (Transition at end of current beat)")},
+	{2067, kcOrderlistQueueAtRowEnd, _T("Queue Pattern (Transition at end of current row)")},
 };
+// clang-format on
+
 
 // Get command descriptions etc.. loaded up.
 void CCommandSet::SetupCommands()

@@ -16,6 +16,7 @@
 #include "InputHandler.h"
 #include "Moddoc.h"
 #include "PatternClipboard.h"
+#include "TrackerSettings.h"
 #include "WindowMessages.h"
 #include "../soundlib/mod_specifications.h"
 #include "../common/mptStringBuffer.h"
@@ -33,9 +34,7 @@ enum SequenceAction : SEQUENCEINDEX
 	kMaxSequenceActions
 };
 
-// Little helper function to avoid copypasta
 static bool IsSelectionKeyPressed() { return CMainFrame::GetInputHandler()->SelectionPressed(); }
-static bool IsCtrlKeyPressed() { return CMainFrame::GetInputHandler()->CtrlPressed(); }
 
 
 //////////////////////////////////////////////////////////////
@@ -56,31 +55,36 @@ BEGIN_MESSAGE_MAP(COrderList, CWnd)
 	ON_WM_HSCROLL()
 	ON_WM_SIZE()
 
-	ON_COMMAND(ID_ORDERLIST_INSERT,				&COrderList::OnInsertOrder)
-	ON_COMMAND(ID_ORDERLIST_INSERT_SEPARATOR,	&COrderList::OnInsertSeparatorPattern)
-	ON_COMMAND(ID_ORDERLIST_DELETE,				&COrderList::OnDeleteOrder)
-	ON_COMMAND(ID_ORDERLIST_RENDER,				&COrderList::OnRenderOrder)
-	ON_COMMAND(ID_ORDERLIST_EDIT_COPY,			&COrderList::OnEditCopy)
-	ON_COMMAND(ID_ORDERLIST_EDIT_CUT,			&COrderList::OnEditCut)
-	ON_COMMAND(ID_ORDERLIST_EDIT_COPY_ORDERS,	&COrderList::OnEditCopyOrders)
+	ON_COMMAND(ID_ORDERLIST_INSERT,           &COrderList::OnInsertOrder)
+	ON_COMMAND(ID_ORDERLIST_INSERT_SEPARATOR, &COrderList::OnInsertSeparatorPattern)
+	ON_COMMAND(ID_ORDERLIST_DELETE,           &COrderList::OnDeleteOrder)
+	ON_COMMAND(ID_ORDERLIST_RENDER,           &COrderList::OnRenderOrder)
+	ON_COMMAND(ID_ORDERLIST_EDIT_COPY,        &COrderList::OnEditCopy)
+	ON_COMMAND(ID_ORDERLIST_EDIT_CUT,         &COrderList::OnEditCut)
+	ON_COMMAND(ID_ORDERLIST_EDIT_COPY_ORDERS, &COrderList::OnEditCopyOrders)
 	
-	ON_COMMAND(ID_PATTERN_PROPERTIES,			&COrderList::OnPatternProperties)
-	ON_COMMAND(ID_PLAYER_PLAY,					&COrderList::OnPlayerPlay)
-	ON_COMMAND(ID_PLAYER_PAUSE,					&COrderList::OnPlayerPause)
-	ON_COMMAND(ID_PLAYER_PLAYFROMSTART,			&COrderList::OnPlayerPlayFromStart)
-	ON_COMMAND(IDC_PATTERN_PLAYFROMSTART,		&COrderList::OnPatternPlayFromStart)
-	ON_COMMAND(ID_ORDERLIST_NEW,				&COrderList::OnCreateNewPattern)
-	ON_COMMAND(ID_ORDERLIST_COPY,				&COrderList::OnDuplicatePattern)
-	ON_COMMAND(ID_ORDERLIST_MERGE,				&COrderList::OnMergePatterns)
-	ON_COMMAND(ID_PATTERNCOPY,					&COrderList::OnPatternCopy)
-	ON_COMMAND(ID_PATTERNPASTE,					&COrderList::OnPatternPaste)
-	ON_COMMAND(ID_SETRESTARTPOS,				&COrderList::OnSetRestartPos)
-	ON_COMMAND(ID_ORDERLIST_LOCKPLAYBACK,		&COrderList::OnLockPlayback)
-	ON_COMMAND(ID_ORDERLIST_UNLOCKPLAYBACK,		&COrderList::OnUnlockPlayback)
+	ON_COMMAND(ID_PATTERN_PROPERTIES,         &COrderList::OnPatternProperties)
+	ON_COMMAND(ID_PLAYER_PLAY,                &COrderList::OnPlayerPlay)
+	ON_COMMAND(ID_PLAYER_PAUSE,               &COrderList::OnPlayerPause)
+	ON_COMMAND(ID_PLAYER_PLAYFROMSTART,       &COrderList::OnPlayerPlayFromStart)
+	ON_COMMAND(IDC_PATTERN_PLAYFROMSTART,     &COrderList::OnPatternPlayFromStart)
+	ON_COMMAND(ID_ORDERLIST_NEW,              &COrderList::OnCreateNewPattern)
+	ON_COMMAND(ID_ORDERLIST_COPY,             &COrderList::OnDuplicatePattern)
+	ON_COMMAND(ID_ORDERLIST_MERGE,            &COrderList::OnMergePatterns)
+	ON_COMMAND(ID_PATTERNCOPY,                &COrderList::OnPatternCopy)
+	ON_COMMAND(ID_PATTERNPASTE,               &COrderList::OnPatternPaste)
+	ON_COMMAND(ID_SETRESTARTPOS,              &COrderList::OnSetRestartPos)
+	ON_COMMAND(ID_ORDERLIST_LOCKPLAYBACK,     &COrderList::OnLockPlayback)
+	ON_COMMAND(ID_ORDERLIST_UNLOCKPLAYBACK,   &COrderList::OnUnlockPlayback)
+	ON_COMMAND(ID_QUEUE_AT_PATTERN_END,       &COrderList::OnQueueAtPatternEnd)
+	ON_COMMAND(ID_QUEUE_AT_MEASURE_END,       &COrderList::OnQueueAtMeasureEnd)
+	ON_COMMAND(ID_QUEUE_AT_BEAT_END,          &COrderList::OnQueueAtBeatEnd)
+	ON_COMMAND(ID_QUEUE_AT_ROW_END,           &COrderList::OnQueueAtRowEnd)
+	ON_MESSAGE(WM_MOD_DRAGONDROPPING,         &COrderList::OnDragonDropping)
+	ON_MESSAGE(WM_MOD_KEYCOMMAND,             &COrderList::OnCustomKeyMsg)
+	ON_NOTIFY_EX(TTN_NEEDTEXT, 0,             &COrderList::OnToolTipText)
+
 	ON_COMMAND_RANGE(ID_SEQUENCE_ITEM, ID_SEQUENCE_ITEM + kMaxSequenceActions - 1, &COrderList::OnSelectSequence)
-	ON_MESSAGE(WM_MOD_DRAGONDROPPING,			&COrderList::OnDragonDropping)
-	ON_MESSAGE(WM_MOD_KEYCOMMAND,				&COrderList::OnCustomKeyMsg)
-	ON_NOTIFY_EX(TTN_NEEDTEXT, 0,				&COrderList::OnToolTipText)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -125,8 +129,7 @@ const ModSequence &COrderList::Order() const { return m_modDoc.GetSoundFile().Or
 void COrderList::SetScrollPos(int pos)
 {
 	// Work around 16-bit limitations of WM_HSCROLL
-	SCROLLINFO si;
-	MemsetZero(si);
+	SCROLLINFO si{};
 	si.cbSize = sizeof(si);
 	si.fMask = SIF_TRACKPOS;
 	GetScrollInfo(SB_HORZ, &si);
@@ -138,8 +141,7 @@ void COrderList::SetScrollPos(int pos)
 int COrderList::GetScrollPos(bool getTrackPos)
 {
 	// Work around 16-bit limitations of WM_HSCROLL
-	SCROLLINFO si;
-	MemsetZero(si);
+	SCROLLINFO si{};
 	si.cbSize = sizeof(si);
 	si.fMask = SIF_TRACKPOS;
 	GetScrollInfo(SB_HORZ, &si);
@@ -555,6 +557,15 @@ LRESULT COrderList::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 	case kcOrderlistUnlockPlayback:
 		OnUnlockPlayback(); return wParam;
 
+	case kcOrderlistQueueAtPatternEnd:
+		QueuePattern(GetCurSel(true).firstOrd, OrderTransitionMode::AtPatternEnd); return wParam;
+	case kcOrderlistQueueAtMeasureEnd:
+		QueuePattern(GetCurSel(true).firstOrd, OrderTransitionMode::AtMeasureEnd); return wParam;
+	case kcOrderlistQueueAtBeatEnd:
+		QueuePattern(GetCurSel(true).firstOrd, OrderTransitionMode::AtBeatEnd); return wParam;
+	case kcOrderlistQueueAtRowEnd:
+		QueuePattern(GetCurSel(true).firstOrd, OrderTransitionMode::AtRowEnd); return wParam;
+
 	case kcDuplicatePattern:
 		OnDuplicatePattern(); return wParam;
 	case kcMergePatterns:
@@ -894,16 +905,16 @@ void COrderList::OnLButtonDown(UINT nFlags, CPoint pt)
 	{
 		SetFocus();
 
-		if(IsCtrlKeyPressed())
+		const ORDERINDEX ord = GetOrderFromPoint(pt);
+		if((nFlags & MK_CONTROL) != 0)
 		{
 			// Queue pattern
-			QueuePattern(pt);
+			QueuePattern(ord, CMainFrame::GetInputHandler()->ModifierKeysToTransitionMode());
 		} else
 		{
 			// mark pattern (+skip to)
 			const int oldXScroll = m_nXScroll;
 
-			ORDERINDEX ord = GetOrderFromPoint(pt);
 			OrdSelection selection = GetCurSel();
 
 			// check if cursor is in selection - if it is, only react on MouseUp as the user might want to drag those orders
@@ -1057,10 +1068,11 @@ void COrderList::OnRButtonDown(UINT nFlags, CPoint pt)
 	if(pt.y >= rect.bottom)
 		return;
 
+	m_menuOrder = GetOrderFromPoint(pt);
 	bool multiSelection = (m_nScrollPos2nd != ORDERINDEX_INVALID);
 
 	if(!multiSelection)
-		SetCurSel(GetOrderFromPoint(pt), false, false, false);
+		SetCurSel(m_menuOrder, false, false, false);
 	SetFocus();
 	HMENU hMenu = ::CreatePopupMenu();
 	if(!hMenu)
@@ -1149,6 +1161,15 @@ void COrderList::OnRButtonDown(UINT nFlags, CPoint pt)
 	AppendMenu(hMenu, MF_SEPARATOR, NULL, _T(""));
 	AppendMenu(hMenu, ((selection.firstOrd == sndFile.m_lockOrderStart && selection.lastOrd == sndFile.m_lockOrderEnd) ? (MF_STRING | MF_CHECKED) : MF_STRING), ID_ORDERLIST_LOCKPLAYBACK, ih->GetKeyTextFromCommand(kcOrderlistLockPlayback, _T("&Lock Playback to Selection")));
 	AppendMenu(hMenu, (sndFile.m_lockOrderStart == ORDERINDEX_INVALID ? (MF_STRING | MF_GRAYED) : MF_STRING), ID_ORDERLIST_UNLOCKPLAYBACK, ih->GetKeyTextFromCommand(kcOrderlistUnlockPlayback, _T("&Unlock Playback")));
+	if(!multiSelection)
+	{
+		HMENU menuQueue = ::CreatePopupMenu();
+		AppendMenu(menuQueue, MF_STRING, ID_QUEUE_AT_PATTERN_END, ih->GetKeyTextFromCommand(kcOrderlistQueueAtPatternEnd, _T("Transition at end of current &pattern")));
+		AppendMenu(menuQueue, MF_STRING, ID_QUEUE_AT_MEASURE_END, ih->GetKeyTextFromCommand(kcOrderlistQueueAtMeasureEnd, _T("Transition at end of current &measure")));
+		AppendMenu(menuQueue, MF_STRING, ID_QUEUE_AT_BEAT_END, ih->GetKeyTextFromCommand(kcOrderlistQueueAtBeatEnd, _T("Transition at end of current &beat")));
+		AppendMenu(menuQueue, MF_STRING, ID_QUEUE_AT_ROW_END, ih->GetKeyTextFromCommand(kcOrderlistQueueAtRowEnd, _T("Transition at end of current &row")));
+		AppendMenu(hMenu, MF_POPUP, reinterpret_cast<UINT_PTR>(menuQueue), _T("&Queue Pattern..."));
+	}
 
 	AppendMenu(hMenu, MF_SEPARATOR, NULL, _T(""));
 	AppendMenu(hMenu, MF_STRING | greyed, ID_ORDERLIST_RENDER, _T("Render to &Wave"));
@@ -1177,7 +1198,7 @@ void COrderList::OnLButtonDblClk(UINT, CPoint)
 void COrderList::OnMButtonDown(UINT nFlags, CPoint pt)
 {
 	MPT_UNREFERENCED_PARAMETER(nFlags);
-	QueuePattern(pt);
+	QueuePattern(GetOrderFromPoint(pt), CMainFrame::GetInputHandler()->ModifierKeysToTransitionMode());
 }
 
 
@@ -1317,9 +1338,8 @@ void COrderList::OnDeleteOrder()
 void COrderList::OnPatternProperties()
 {
 	ModSequence &order = Order();
-	const auto ord = GetCurSel(true).firstOrd;
-	if(order.IsValidPat(ord))
-		m_pParent.PostViewMessage(VIEWMSG_PATTERNPROPERTIES, order[ord]);
+	if(order.IsValidPat(m_menuOrder))
+		m_pParent.PostViewMessage(VIEWMSG_PATTERNPROPERTIES, order[m_menuOrder]);
 }
 
 
@@ -1381,16 +1401,16 @@ void COrderList::OnSetRestartPos()
 {
 	CSoundFile &sndFile = m_modDoc.GetSoundFile();
 	bool modified = false;
-	if(m_nScrollPos == Order().GetRestartPos())
+	if(m_menuOrder == Order().GetRestartPos())
 	{
 		// Unset position
-		modified = (m_nScrollPos != 0);
+		modified = (m_menuOrder != 0);
 		Order().SetRestartPos(0);
 	} else if(sndFile.GetModSpecifications().hasRestartPos)
 	{
 		// Set new position
 		modified = true;
-		Order().SetRestartPos(m_nScrollPos);
+		Order().SetRestartPos(m_menuOrder);
 	}
 	if(modified)
 	{
@@ -1518,28 +1538,20 @@ void COrderList::SelectSequence(const SEQUENCEINDEX seq)
 }
 
 
-void COrderList::QueuePattern(CPoint pt)
+void COrderList::QueuePattern(ORDERINDEX order, OrderTransitionMode transitionMode)
 {
-	CRect rect;
-	GetClientRect(&rect);
-
-	if(!rect.PtInRect(pt))
-		return;
 	CSoundFile &sndFile = m_modDoc.GetSoundFile();
-
-	const PATTERNINDEX ignoreIndex = sndFile.Order.GetIgnoreIndex();
-	const PATTERNINDEX stopIndex = sndFile.Order.GetInvalidPatIndex();
 	const ORDERINDEX length = Order().GetLength();
-	ORDERINDEX order = GetOrderFromPoint(pt);
 
 	// If this is not a playable order item, find the next valid item.
-	while(order < length && (Order()[order] == ignoreIndex || Order()[order] == stopIndex))
+	while(order < length && (Order()[order] == sndFile.Order.GetIgnoreIndex() || Order()[order] == sndFile.Order.GetInvalidPatIndex()))
 	{
 		order++;
 	}
 
 	if(order < length)
 	{
+		CriticalSection cs;
 		if(sndFile.m_PlayState.m_nSeqOverride == order)
 		{
 			// This item is already queued: Dequeue it.
@@ -1551,7 +1563,7 @@ void COrderList::QueuePattern(CPoint pt)
 				// Users wants to go somewhere else, so let them do that.
 				OnUnlockPlayback();
 			}
-
+			sndFile.m_PlayState.m_seqOverrideMode = transitionMode;
 			sndFile.m_PlayState.m_nSeqOverride = order;
 		}
 		Invalidate(FALSE);

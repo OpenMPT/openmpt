@@ -34,7 +34,6 @@ OPENMPT_NAMESPACE_BEGIN
 class CDLSBank;
 class CInputHandler;
 class CModDoc;
-class CAutoSaver;
 struct UpdateCheckResult;
 struct MODPLUGDIB;
 enum SoundDeviceStopMode : int;
@@ -341,8 +340,8 @@ public:
 	inline CModDoc *GetModPlaying() const { return m_pSndFile ? m_pSndFile->GetpModDoc() : nullptr; }
 	// Return currently playing module (nullptr if none is playing)
 	inline CSoundFile *GetSoundFilePlaying() const { return m_pSndFile; }
-	BOOL InitRenderer(CSoundFile*);
-	BOOL StopRenderer(CSoundFile*);
+	void InitRenderer(CSoundFile *);
+	void StopRenderer(CSoundFile *);
 	void SwitchToActiveView();
 
 	void IdleHandlerSounddevice();

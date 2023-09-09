@@ -297,6 +297,16 @@ DECLARE_FLAGSET(SongFlags)
 
 #define MAX_GLOBAL_VOLUME 256u
 
+// When to execute a position override event
+enum class OrderTransitionMode : uint8
+{
+	AtPatternEnd,
+	AtMeasureEnd,
+	AtBeatEnd,
+	AtRowEnd,
+};
+
+
 // Resampling modes
 enum ResamplingMode : uint8
 {

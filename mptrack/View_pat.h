@@ -372,6 +372,10 @@ public:
 	void FindInstrument();
 	void JumpToPrevOrNextEntry(bool nextEntry, bool select);
 
+	void GotoPreviousOrder(std::optional<OrderTransitionMode> transitionMode = std::nullopt);
+	void GotoNextOrder(std::optional<OrderTransitionMode> transitionMode = std::nullopt);
+	void QueuePattern(ORDERINDEX order, OrderTransitionMode transitionMode);
+
 	void TogglePluginEditor(int chan);
 
 	void ExecutePaste(PatternClipboard::PasteModes mode);
@@ -449,8 +453,6 @@ protected:
 	afx_msg void OnSplitPattern();
 	afx_msg void OnPatternStep();
 	afx_msg void OnSwitchToOrderList();
-	afx_msg void OnPrevOrder();
-	afx_msg void OnNextOrder();
 	afx_msg void OnPrevInstrument() { PostCtrlMessage(CTRLMSG_PAT_PREVINSTRUMENT); }
 	afx_msg void OnNextInstrument() { PostCtrlMessage(CTRLMSG_PAT_NEXTINSTRUMENT); }
 	afx_msg void OnPatternRecord() { PostCtrlMessage(CTRLMSG_SETRECORD, -1); }

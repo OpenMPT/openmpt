@@ -16,7 +16,6 @@
 #include "Globals.h"
 #include "PatternCursor.h"
 #include "resource.h"
-#include "TrackerSettings.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -36,17 +35,18 @@ class COrderList: public CWnd
 protected:
 	HFONT m_hFont = nullptr;
 	int m_cxFont = 0, m_cyFont = 0;
-	//m_nXScroll  : The order at the beginning of shown orderlist
-	//m_nScrollPos: The same as order
-	//m_nScrollPos2nd: 2nd selection point if multiple orders are selected
-	//                 (not neccessarily the higher order - GetCurSel() is taking care of that.)
-	ORDERINDEX m_nXScroll = 0, m_nScrollPos = 0, m_nScrollPos2nd = ORDERINDEX_INVALID, m_nDropPos, m_nMouseDownPos, m_playPos = ORDERINDEX_INVALID;
-	ORDERINDEX m_nDragOrder;
-	//To tell how many orders('orderboxes') to show at least
-	//on both sides of current order(when updating orderslist position).
-	int m_nOrderlistMargins;
+
 	CModDoc &m_modDoc;
 	CCtrlPatterns &m_pParent;
+
+	ORDERINDEX m_nXScroll = 0;                        // Index of the leftmost displayed order list item
+	ORDERINDEX m_nScrollPos = 0;                      // First selection point / selected order
+	ORDERINDEX m_nScrollPos2nd = ORDERINDEX_INVALID;  // 2nd selection point if multiple orders are selected (not neccessarily the higher order - GetCurSel() is taking care of that.)
+	ORDERINDEX m_nDropPos = ORDERINDEX_INVALID, m_nMouseDownPos = ORDERINDEX_INVALID, m_playPos = ORDERINDEX_INVALID;
+	ORDERINDEX m_nDragOrder = ORDERINDEX_INVALID, m_menuOrder = ORDERINDEX_INVALID;
+	//To tell how many orders('orderboxes') to show at least
+	//on both sides of current order(when updating orderslist position).
+	int m_nOrderlistMargins = 0;
 	bool m_bScrolling = false, m_bDragging = false;
 
 public:
@@ -60,8 +60,10 @@ public:
 	// make the current selection the secondary selection (used for keyboard orderlist navigation)
 	inline void SetCurSelTo2ndSel(bool isSelectionKeyPressed)
 	{
-		if(isSelectionKeyPressed && m_nScrollPos2nd == ORDERINDEX_INVALID) m_nScrollPos2nd = m_nScrollPos;
-		else if(!isSelectionKeyPressed && m_nScrollPos2nd != ORDERINDEX_INVALID) m_nScrollPos2nd = ORDERINDEX_INVALID;
+		if(isSelectionKeyPressed && m_nScrollPos2nd == ORDERINDEX_INVALID)
+			m_nScrollPos2nd = m_nScrollPos;
+		else if(!isSelectionKeyPressed && m_nScrollPos2nd != ORDERINDEX_INVALID)
+			m_nScrollPos2nd = ORDERINDEX_INVALID;
 	};
 	void SetSelection(ORDERINDEX firstOrd, ORDERINDEX lastOrd = ORDERINDEX_INVALID);
 	// Why VC wants to inline this huge function is beyond my understanding...
@@ -69,7 +71,8 @@ public:
 	void UpdateScrollInfo();
 	void UpdateInfoText();
 	int GetFontWidth();
-	void QueuePattern(CPoint pt);
+
+	void QueuePattern(ORDERINDEX order, OrderTransitionMode transitionMode);
 
 	// Check if this module is currently playing
 	bool IsPlaying() const;
@@ -171,11 +174,14 @@ protected:
 	afx_msg void OnEditCopyOrders() { OnCopy(true); }
 	afx_msg void OnEditCut();
 	afx_msg LRESULT OnDragonDropping(WPARAM bDoDrop, LPARAM lParam);
-	afx_msg LRESULT OnHelpHitTest(WPARAM, LPARAM lParam);
 	afx_msg void OnSelectSequence(UINT nid);
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
 	afx_msg void OnLockPlayback();
 	afx_msg void OnUnlockPlayback();
+	afx_msg void OnQueueAtPatternEnd() { QueuePattern(m_menuOrder, OrderTransitionMode::AtPatternEnd); }
+	afx_msg void OnQueueAtMeasureEnd() { QueuePattern(m_menuOrder, OrderTransitionMode::AtMeasureEnd); }
+	afx_msg void OnQueueAtBeatEnd() { QueuePattern(m_menuOrder, OrderTransitionMode::AtBeatEnd); }
+	afx_msg void OnQueueAtRowEnd() { QueuePattern(m_menuOrder, OrderTransitionMode::AtRowEnd); }
 	afx_msg BOOL OnToolTipText(UINT, NMHDR *pNMHDR, LRESULT *pResult);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
@@ -199,7 +205,6 @@ protected:
 
 public:
 	CCtrlPatterns(CModControlView &parent, CModDoc &document);
-	Setting<LONG> &GetSplitPosRef() override { return TrackerSettings::Instance().glPatternWindowHeight; }
 
 public:
 	const ModSequence &Order() const;
@@ -211,6 +216,7 @@ public:
 	BOOL GetLoopPattern() {return IsDlgButtonChecked(IDC_PATTERN_LOOP);}
 	COrderList &GetOrderList() { return m_OrderList; }
 	//{{AFX_VIRTUAL(CCtrlPatterns)
+	Setting<LONG> &GetSplitPosRef() override;
 	BOOL OnInitDialog() override;
 	void DoDataExchange(CDataExchange* pDX) override;	// DDX/DDV support
 	void RecalcLayout() override;

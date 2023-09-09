@@ -400,13 +400,28 @@ bool CInputHandler::AltPressed() const
 }
 
 
+OrderTransitionMode CInputHandler::ModifierKeysToTransitionMode()
+{
+	const bool shift = ShiftPressed();
+	const bool alt = AltPressed();
+	if(shift && alt)
+		return OrderTransitionMode::AtRowEnd;
+	else if(!shift && alt)
+		return OrderTransitionMode::AtBeatEnd;
+	else if(shift && !alt)
+		return OrderTransitionMode::AtMeasureEnd;
+	else
+		return OrderTransitionMode::AtPatternEnd;
+}
+
+
 void CInputHandler::Bypass(bool b)
 {
 	if(b)
 		m_bypassCount++;
 	else
 		m_bypassCount--;
-	ASSERT(m_bypassCount >= 0);
+	MPT_ASSERT(m_bypassCount >= 0);
 }
 
 

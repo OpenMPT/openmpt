@@ -11,8 +11,8 @@
 #pragma once
 
 #include "openmpt/all/BuildSettings.hpp"
-
 #include "CommandSet.h"
+#include "../soundlib/Snd_defs.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -21,6 +21,8 @@ enum
 {
 	HC_MIDI = 0x8000,
 };
+
+struct CModSpecifications;
 
 class CInputHandler
 {
@@ -68,6 +70,7 @@ public:
 	bool SelectionPressed() const;
 	bool CtrlPressed() const;
 	bool AltPressed() const;
+	OrderTransitionMode ModifierKeysToTransitionMode();
 	bool IsBypassed() const;
 	void Bypass(bool);
 	FlagSet<Modifiers> GetModifierMask() const;

@@ -2527,11 +2527,51 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 			{
 				wnd = pMDIActive->GetActiveView();
 				// Hack: If the upper view is active, we only get the "container" (the dialog view with the tabs), not the view itself.
-				if(!strcmp(wnd->GetRuntimeClass()->m_lpszClassName, "CModControlView"))
+				if(!strcmp(wnd->GetRuntimeClass()->m_lpszClassName, CModControlView::classCModControlView.m_lpszClassName))
 				{
 					wnd = static_cast<CModControlView *>(wnd)->GetCurrentControlDlg();
 				}
 			}
+
+			// Backup solution for order navigation if the currently active view is not a pattern view, but a module is playing
+			if((wParam >= kcPrevNextOrderStart && wParam <= kcPrevNextOrderEnd)
+				&& m_pSndFile && m_pSndFile->GetpModDoc()
+				&& wnd != nullptr
+				&& strcmp(wnd->GetRuntimeClass()->m_lpszClassName, "CViewPattern"))
+			{
+				ResetNotificationBuffer();
+				CriticalSection cs;
+
+				ORDERINDEX order = m_pSndFile->m_PlayState.m_nCurrentOrder;
+				if(wParam == kcPrevNextOrderStart || wParam == kcPrevOrderAtMeasureEnd || wParam == kcPrevOrderAtBeatEnd || wParam == kcPrevOrderAtRowEnd)
+					order = m_pSndFile->Order().GetPreviousOrderIgnoringSkips(order);
+				else
+					order = m_pSndFile->Order().GetNextOrderIgnoringSkips(order);
+				
+				switch(wParam)
+				{
+				case kcPrevOrder:
+				case kcNextOrder:
+					m_pSndFile->GetpModDoc()->SetElapsedTime(order, 0, !m_pSndFile->m_SongFlags[SONG_PAUSED | SONG_STEP]);
+					break;
+				case kcPrevOrderAtMeasureEnd:
+				case kcNextOrderAtMeasureEnd:
+					m_pSndFile->m_PlayState.m_seqOverrideMode = OrderTransitionMode::AtMeasureEnd;
+					m_pSndFile->m_PlayState.m_nSeqOverride = order;
+					break;
+				case kcPrevOrderAtBeatEnd:
+				case kcNextOrderAtBeatEnd:
+					m_pSndFile->m_PlayState.m_seqOverrideMode = OrderTransitionMode::AtBeatEnd;
+					m_pSndFile->m_PlayState.m_nSeqOverride = order;
+					break;
+				case kcPrevOrderAtRowEnd:
+				case kcNextOrderAtRowEnd:
+					m_pSndFile->m_PlayState.m_seqOverrideMode = OrderTransitionMode::AtRowEnd;
+					m_pSndFile->m_PlayState.m_nSeqOverride = order;
+					break;
+				}
+			}
+
 			if(wnd)
 				return wnd->SendMessage(WM_MOD_KEYCOMMAND, wParam, lParam);
 			return kcNull;
@@ -2549,22 +2589,20 @@ void CMainFrame::OnInitMenu(CMenu* pMenu)
 }
 
 
-BOOL CMainFrame::InitRenderer(CSoundFile* pSndFile)
+void CMainFrame::InitRenderer(CSoundFile *pSndFile)
 {
 	CriticalSection cs;
 	pSndFile->m_bIsRendering = true;
 	pSndFile->SuspendPlugins();
 	pSndFile->ResumePlugins();
-	return true;
 }
 
 
-BOOL CMainFrame::StopRenderer(CSoundFile* pSndFile)
+void CMainFrame::StopRenderer(CSoundFile *pSndFile)
 {
 	CriticalSection cs;
 	pSndFile->SuspendPlugins();
 	pSndFile->m_bIsRendering = false;
-	return true;
 }
 
 
@@ -2866,7 +2904,7 @@ void CMainFrame::OnHelp()
 			page = "::/Instruments.html";
 		else if(!strcmp("CViewComments", className))
 			page = "::/Comments.html";
-		else if(!strcmp("CModControlView", className))
+		else if(!strcmp(CModControlView::classCModControlView.m_lpszClassName, className))
 		{
 			switch(static_cast<CModControlView*>(view)->GetActivePage())
 			{

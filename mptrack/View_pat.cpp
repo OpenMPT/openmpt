@@ -1595,10 +1595,15 @@ BOOL CViewPattern::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 
 void CViewPattern::OnXButtonUp(UINT nFlags, UINT nButton, CPoint point)
 {
+	std::optional<OrderTransitionMode> transitionMode = CMainFrame::GetInputHandler()->ModifierKeysToTransitionMode();
+	if(*transitionMode == OrderTransitionMode::AtPatternEnd)
+		transitionMode = std::nullopt;
 	if(nButton == XBUTTON1)
-		OnPrevOrder();
+		GotoPreviousOrder(transitionMode);
 	else if(nButton == XBUTTON2)
-		OnNextOrder();
+		GotoNextOrder(transitionMode);
+	if(transitionMode != std::nullopt)
+		PostCtrlMessage(CTRLMSG_FORCEREFRESH);
 	CModScrollView::OnXButtonUp(nFlags, nButton, point);
 }
 
@@ -3261,15 +3266,41 @@ void CViewPattern::OnSwitchToOrderList()
 }
 
 
-void CViewPattern::OnPrevOrder()
+void CViewPattern::GotoPreviousOrder(std::optional<OrderTransitionMode> transitionMode)
 {
-	PostCtrlMessage(CTRLMSG_PREVORDER);
+	if(CSoundFile *sndFile = GetSoundFile(); sndFile && transitionMode && IsLiveRecord())
+	{
+		const ORDERINDEX order = (sndFile->m_PlayState.m_nSeqOverride != ORDERINDEX_INVALID) ? sndFile->m_PlayState.m_nSeqOverride : m_nOrder;
+		QueuePattern(Order().GetPreviousOrderIgnoringSkips(order), *transitionMode);
+	} else
+	{
+		PostCtrlMessage(CTRLMSG_PREVORDER);
+	}
 }
 
 
-void CViewPattern::OnNextOrder()
+void CViewPattern::GotoNextOrder(std::optional<OrderTransitionMode> transitionMode)
 {
-	PostCtrlMessage(CTRLMSG_NEXTORDER);
+	if(CSoundFile* sndFile = GetSoundFile(); sndFile && transitionMode && IsLiveRecord())
+	{
+		const ORDERINDEX order = (sndFile->m_PlayState.m_nSeqOverride != ORDERINDEX_INVALID) ? sndFile->m_PlayState.m_nSeqOverride : m_nOrder;
+		QueuePattern(Order().GetNextOrderIgnoringSkips(order), *transitionMode);
+	} else
+	{
+		PostCtrlMessage(CTRLMSG_NEXTORDER);
+	}
+}
+
+
+void CViewPattern::QueuePattern(ORDERINDEX order, OrderTransitionMode transitionMode)
+{
+	if(CSoundFile *sndFile = GetSoundFile())
+	{
+		CriticalSection cs;
+		sndFile->m_PlayState.m_seqOverrideMode = transitionMode;
+		sndFile->m_PlayState.m_nSeqOverride = order;
+	}
+	PostCtrlMessage(CTRLMSG_FORCEREFRESH);
 }
 
 
@@ -4292,45 +4323,58 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 
 	switch(wParam)
 	{
-		case kcPrevInstrument:				OnPrevInstrument(); return wParam;
-		case kcNextInstrument:				OnNextInstrument(); return wParam;
-		case kcPrevOrder:					OnPrevOrder(); return wParam;
-		case kcNextOrder:					OnNextOrder(); return wParam;
-		case kcPatternPlayRow:				OnPatternStep(); return wParam;
-		case kcPatternRecord:				OnPatternRecord(); return wParam;
-		case kcCursorCopy:					OnCursorCopy(); return wParam;
-		case kcCursorPaste:					OnCursorPaste(); return wParam;
-		case kcChannelMute:					for(CHANNELINDEX c = m_Selection.GetStartChannel(); c <= m_Selection.GetEndChannel(); c++)
-												OnMuteChannel(c);
-											return wParam;
-		case kcChannelSolo:					OnSoloChannel(m_Selection.GetStartChannel(), m_Selection.GetEndChannel()); return wParam;
-		case kcChannelUnmuteAll:			OnUnmuteAll(); return wParam;
-		case kcToggleChanMuteOnPatTransition: for(CHANNELINDEX c = m_Selection.GetStartChannel(); c <= m_Selection.GetEndChannel(); c++)
-												TogglePendingMute(c);
-											return wParam;
-		case kcUnmuteAllChnOnPatTransition:	OnPendingUnmuteAllChnFromClick(); return wParam;
-		case kcChannelRecordSelect:			for(CHANNELINDEX c = m_Selection.GetStartChannel(); c <= m_Selection.GetEndChannel(); c++)
-												pModDoc->ToggleChannelRecordGroup(c, RecordGroup::Group1);
-											InvalidateChannelsHeaders(); return wParam;
-		case kcChannelSplitRecordSelect:	for(CHANNELINDEX c = m_Selection.GetStartChannel(); c <= m_Selection.GetEndChannel(); c++)
-												pModDoc->ToggleChannelRecordGroup(c, RecordGroup::Group2);
-											InvalidateChannelsHeaders(); return wParam;
-		case kcChannelReset:				for(CHANNELINDEX c = m_Selection.GetStartChannel(); c <= m_Selection.GetEndChannel(); c++)
-												ResetChannel(m_Cursor.GetChannel());
-											return wParam;
-		case kcTimeAtRow:					OnShowTimeAtRow(); return wParam;
-		case kcSoloChnOnPatTransition:		PendingSoloChn(m_Selection.GetStartChannel(), m_Selection.GetEndChannel()); return wParam;
+		case kcPrevInstrument:        OnPrevInstrument(); return wParam;
+		case kcNextInstrument:        OnNextInstrument(); return wParam;
+		case kcPrevOrder:             GotoPreviousOrder(); return wParam;
+		case kcNextOrder:             GotoNextOrder(); return wParam;
+		case kcPrevOrderAtMeasureEnd: GotoPreviousOrder(OrderTransitionMode::AtMeasureEnd); return wParam;
+		case kcNextOrderAtMeasureEnd: GotoNextOrder(OrderTransitionMode::AtMeasureEnd); return wParam;
+		case kcPrevOrderAtBeatEnd:    GotoPreviousOrder(OrderTransitionMode::AtBeatEnd); return wParam;
+		case kcNextOrderAtBeatEnd:    GotoNextOrder(OrderTransitionMode::AtBeatEnd); return wParam;
+		case kcPrevOrderAtRowEnd:     GotoPreviousOrder(OrderTransitionMode::AtRowEnd); return wParam;
+		case kcNextOrderAtRowEnd:     GotoNextOrder(OrderTransitionMode::AtRowEnd); return wParam;
+		case kcPatternPlayRow:        OnPatternStep(); return wParam;
+		case kcPatternRecord:         OnPatternRecord(); return wParam;
+		case kcCursorCopy:            OnCursorCopy(); return wParam;
+		case kcCursorPaste:           OnCursorPaste(); return wParam;
+		case kcChannelMute:
+			for(CHANNELINDEX c = m_Selection.GetStartChannel(); c <= m_Selection.GetEndChannel(); c++)
+				OnMuteChannel(c);
+			return wParam;
+		case kcChannelSolo:      OnSoloChannel(m_Selection.GetStartChannel(), m_Selection.GetEndChannel()); return wParam;
+		case kcChannelUnmuteAll: OnUnmuteAll(); return wParam;
+		case kcToggleChanMuteOnPatTransition:
+			for(CHANNELINDEX c = m_Selection.GetStartChannel(); c <= m_Selection.GetEndChannel(); c++)
+				TogglePendingMute(c);
+			return wParam;
+		case kcUnmuteAllChnOnPatTransition: OnPendingUnmuteAllChnFromClick(); return wParam;
+		case kcChannelRecordSelect:
+			for(CHANNELINDEX c = m_Selection.GetStartChannel(); c <= m_Selection.GetEndChannel(); c++)
+				pModDoc->ToggleChannelRecordGroup(c, RecordGroup::Group1);
+			InvalidateChannelsHeaders();
+			return wParam;
+		case kcChannelSplitRecordSelect:
+			for(CHANNELINDEX c = m_Selection.GetStartChannel(); c <= m_Selection.GetEndChannel(); c++)
+				pModDoc->ToggleChannelRecordGroup(c, RecordGroup::Group2);
+			InvalidateChannelsHeaders();
+			return wParam;
+		case kcChannelReset:
+			for(CHANNELINDEX c = m_Selection.GetStartChannel(); c <= m_Selection.GetEndChannel(); c++)
+				ResetChannel(m_Cursor.GetChannel());
+			return wParam;
+		case kcTimeAtRow:              OnShowTimeAtRow(); return wParam;
+		case kcSoloChnOnPatTransition: PendingSoloChn(m_Selection.GetStartChannel(), m_Selection.GetEndChannel()); return wParam;
 		
-		case kcTransposeUp:					OnTransposeUp(); return wParam;
-		case kcTransposeDown:				OnTransposeDown(); return wParam;
-		case kcTransposeOctUp:				OnTransposeOctUp(); return wParam;
-		case kcTransposeOctDown:			OnTransposeOctDown(); return wParam;
-		case kcTransposeCustom:				OnTransposeCustom(); return wParam;
-		case kcTransposeCustomQuick:		OnTransposeCustomQuick(); return wParam;
-		case kcDataEntryUp:					DataEntry(true, false); return wParam;
-		case kcDataEntryDown:				DataEntry(false, false); return wParam;
-		case kcDataEntryUpCoarse:			DataEntry(true, true); return wParam;
-		case kcDataEntryDownCoarse:			DataEntry(false, true); return wParam;
+		case kcTransposeUp:          OnTransposeUp(); return wParam;
+		case kcTransposeDown:        OnTransposeDown(); return wParam;
+		case kcTransposeOctUp:       OnTransposeOctUp(); return wParam;
+		case kcTransposeOctDown:     OnTransposeOctDown(); return wParam;
+		case kcTransposeCustom:      OnTransposeCustom(); return wParam;
+		case kcTransposeCustomQuick: OnTransposeCustomQuick(); return wParam;
+		case kcDataEntryUp:          DataEntry(true, false); return wParam;
+		case kcDataEntryDown:        DataEntry(false, false); return wParam;
+		case kcDataEntryUpCoarse:    DataEntry(true, true); return wParam;
+		case kcDataEntryDownCoarse:  DataEntry(false, true); return wParam;
 
 		case kcTransposeUpStop:
 		case kcTransposeDownStop:
@@ -4348,19 +4392,18 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 			}
 			return wParam;
 
-		case kcSelectChannel:				OnSelectCurrentChannel(); return wParam;
-		case kcSelectColumn:				OnSelectCurrentColumn(); return wParam;
-		case kcPatternAmplify:				OnPatternAmplify(); return wParam;
+		case kcSelectChannel:            OnSelectCurrentChannel(); return wParam;
+		case kcSelectColumn:             OnSelectCurrentColumn(); return wParam;
+		case kcPatternAmplify:           OnPatternAmplify(); return wParam;
 		case kcPatternSetInstrumentNotEmpty:
-		case kcPatternSetInstrument:		SetSelectionInstrument(static_cast<INSTRUMENTINDEX>(GetCurrentInstrument()), wParam == kcPatternSetInstrument); return wParam;
-		case kcPatternInterpolateNote:		OnInterpolateNote(); return wParam;
-		case kcPatternInterpolateInstr:		OnInterpolateInstr(); return wParam;
-		case kcPatternInterpolateVol:		OnInterpolateVolume(); return wParam;
-		case kcPatternInterpolateEffect:	OnInterpolateEffect(); return wParam;
-		case kcPatternVisualizeEffect:		OnVisualizeEffect(); return wParam;
-		//case kcPatternOpenRandomizer:		OnOpenRandomizer(); return wParam;
-		case kcPatternGrowSelection:		OnGrowSelection(); return wParam;
-		case kcPatternShrinkSelection:		OnShrinkSelection(); return wParam;
+		case kcPatternSetInstrument:     SetSelectionInstrument(static_cast<INSTRUMENTINDEX>(GetCurrentInstrument()), wParam == kcPatternSetInstrument); return wParam;
+		case kcPatternInterpolateNote:   OnInterpolateNote(); return wParam;
+		case kcPatternInterpolateInstr:  OnInterpolateInstr(); return wParam;
+		case kcPatternInterpolateVol:    OnInterpolateVolume(); return wParam;
+		case kcPatternInterpolateEffect: OnInterpolateEffect(); return wParam;
+		case kcPatternVisualizeEffect:   OnVisualizeEffect(); return wParam;
+		case kcPatternGrowSelection:     OnGrowSelection(); return wParam;
+		case kcPatternShrinkSelection:   OnShrinkSelection(); return wParam;
 
 		case kcPatternScrollLeft:
 		case kcPatternScrollRight:
@@ -4373,32 +4416,44 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 
 		// Pattern navigation:
 		case kcPatternJumpUph1Select:
-		case kcPatternJumpUph1:			CursorJump(-(int)GetRowsPerMeasure(), false); return wParam;
+		case kcPatternJumpUph1:
+			CursorJump(-(int)GetRowsPerMeasure(), false); return wParam;
 		case kcPatternJumpDownh1Select:
-		case kcPatternJumpDownh1:		CursorJump(GetRowsPerMeasure(), false);  return wParam;
+		case kcPatternJumpDownh1:
+			CursorJump(GetRowsPerMeasure(), false);  return wParam;
 		case kcPatternJumpUph2Select:
-		case kcPatternJumpUph2:			CursorJump(-(int)GetRowsPerBeat(), false);  return wParam;
+		case kcPatternJumpUph2:
+			CursorJump(-(int)GetRowsPerBeat(), false);  return wParam;
 		case kcPatternJumpDownh2Select:
-		case kcPatternJumpDownh2:		CursorJump(GetRowsPerBeat(), false);  return wParam;
+		case kcPatternJumpDownh2:
+			CursorJump(GetRowsPerBeat(), false);  return wParam;
 
 		case kcPatternSnapUph1Select:
-		case kcPatternSnapUph1:			CursorJump(-(int)GetRowsPerMeasure(), true); return wParam;
+		case kcPatternSnapUph1:
+			CursorJump(-(int)GetRowsPerMeasure(), true); return wParam;
 		case kcPatternSnapDownh1Select:
-		case kcPatternSnapDownh1:		CursorJump(GetRowsPerMeasure(), true);  return wParam;
+		case kcPatternSnapDownh1:
+			CursorJump(GetRowsPerMeasure(), true);  return wParam;
 		case kcPatternSnapUph2Select:
-		case kcPatternSnapUph2:			CursorJump(-(int)GetRowsPerBeat(), true);  return wParam;
+		case kcPatternSnapUph2:
+			CursorJump(-(int)GetRowsPerBeat(), true);  return wParam;
 		case kcPatternSnapDownh2Select:
-		case kcPatternSnapDownh2:		CursorJump(GetRowsPerBeat(), true);  return wParam;
+		case kcPatternSnapDownh2:
+			CursorJump(GetRowsPerBeat(), true);  return wParam;
 
 		case kcNavigateDownSelect:
-		case kcNavigateDown:	CursorJump(1, false); return wParam;
+		case kcNavigateDown:
+			CursorJump(1, false); return wParam;
 		case kcNavigateUpSelect:
-		case kcNavigateUp:		CursorJump(-1, false); return wParam;
+		case kcNavigateUp:
+			CursorJump(-1, false); return wParam;
 
 		case kcNavigateDownBySpacingSelect:
-		case kcNavigateDownBySpacing:	CursorJump(m_nSpacing, false); return wParam;
+		case kcNavigateDownBySpacing:
+			CursorJump(m_nSpacing, false); return wParam;
 		case kcNavigateUpBySpacingSelect:
-		case kcNavigateUpBySpacing:		CursorJump(-(int)m_nSpacing, false); return wParam;
+		case kcNavigateUpBySpacing:
+			CursorJump(-(int)m_nSpacing, false); return wParam;
 
 		case kcNavigateLeftSelect:
 		case kcNavigateLeft:
@@ -4412,38 +4467,56 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcNavigateNextChanSelect:
 		case kcNavigateNextChan: SetCurrentColumn((GetCurrentChannel() + 1) % sndFile.GetNumChannels(), m_Cursor.GetColumnType()); return wParam;
 		case kcNavigatePrevChanSelect:
-		case kcNavigatePrevChan:{if(GetCurrentChannel() > 0)
-									SetCurrentColumn((GetCurrentChannel() - 1) % sndFile.GetNumChannels(), m_Cursor.GetColumnType());
-								else
-									SetCurrentColumn(sndFile.GetNumChannels() - 1, m_Cursor.GetColumnType());
-								SetSelToCursor();
-								return wParam;}
+		case kcNavigatePrevChan:
+			if(GetCurrentChannel() > 0)
+				SetCurrentColumn((GetCurrentChannel() - 1) % sndFile.GetNumChannels(), m_Cursor.GetColumnType());
+			else
+				SetCurrentColumn(sndFile.GetNumChannels() - 1, m_Cursor.GetColumnType());
+			SetSelToCursor();
+			return wParam;
 
 		case kcHomeHorizontalSelect:
-		case kcHomeHorizontal:	if (!m_Cursor.IsInFirstColumn()) SetCurrentColumn(0);
-								else if (GetCurrentRow() > 0) SetCurrentRow(0);
-								return wParam;
+		case kcHomeHorizontal:
+			if(!m_Cursor.IsInFirstColumn())
+				SetCurrentColumn(0);
+			else if(GetCurrentRow() > 0)
+				SetCurrentRow(0);
+			return wParam;
 		case kcHomeVerticalSelect:
-		case kcHomeVertical:	if (GetCurrentRow() > 0) SetCurrentRow(0);
-								else if (!m_Cursor.IsInFirstColumn()) SetCurrentColumn(0);
-								return wParam;
+		case kcHomeVertical:
+			if(GetCurrentRow() > 0)
+				SetCurrentRow(0);
+			else if(!m_Cursor.IsInFirstColumn())
+				SetCurrentColumn(0);
+			return wParam;
 		case kcHomeAbsoluteSelect:
-		case kcHomeAbsolute:	if (!m_Cursor.IsInFirstColumn()) SetCurrentColumn(0);
-								if (GetCurrentRow() > 0) SetCurrentRow(0);
-								return wParam;
+		case kcHomeAbsolute:
+			if(!m_Cursor.IsInFirstColumn())
+				SetCurrentColumn(0);
+			if(GetCurrentRow() > 0)
+				SetCurrentRow(0);
+			return wParam;
 
 		case kcEndHorizontalSelect:
-		case kcEndHorizontal:	if (m_Cursor.CompareColumn(PatternCursor(0, sndFile.GetNumChannels() - 1, m_nDetailLevel)) < 0) SetCurrentColumn(sndFile.GetNumChannels() - 1, m_nDetailLevel);
-								else if (GetCurrentRow() < pModDoc->GetPatternSize(m_nPattern) - 1) SetCurrentRow(pModDoc->GetPatternSize(m_nPattern) - 1);
-								return wParam;
+		case kcEndHorizontal:
+			if(m_Cursor.CompareColumn(PatternCursor(0, sndFile.GetNumChannels() - 1, m_nDetailLevel)) < 0)
+				SetCurrentColumn(sndFile.GetNumChannels() - 1, m_nDetailLevel);
+			else if(GetCurrentRow() < pModDoc->GetPatternSize(m_nPattern) - 1)
+				SetCurrentRow(pModDoc->GetPatternSize(m_nPattern) - 1);
+			return wParam;
 		case kcEndVerticalSelect:
-		case kcEndVertical:		if (GetCurrentRow() < pModDoc->GetPatternSize(m_nPattern) - 1) SetCurrentRow(pModDoc->GetPatternSize(m_nPattern) - 1);
-								else if (m_Cursor.CompareColumn(PatternCursor(0, sndFile.GetNumChannels() - 1, m_nDetailLevel)) < 0) SetCurrentColumn(sndFile.GetNumChannels() - 1, m_nDetailLevel);
-								return wParam;
+		case kcEndVertical:
+			if(GetCurrentRow() < pModDoc->GetPatternSize(m_nPattern) - 1)
+				SetCurrentRow(pModDoc->GetPatternSize(m_nPattern) - 1);
+			else if(m_Cursor.CompareColumn(PatternCursor(0, sndFile.GetNumChannels() - 1, m_nDetailLevel)) < 0)
+				SetCurrentColumn(sndFile.GetNumChannels() - 1, m_nDetailLevel);
+			return wParam;
 		case kcEndAbsoluteSelect:
-		case kcEndAbsolute:		SetCurrentColumn(sndFile.GetNumChannels() - 1, m_nDetailLevel);
-								if (GetCurrentRow() < pModDoc->GetPatternSize(m_nPattern) - 1) SetCurrentRow(pModDoc->GetPatternSize(m_nPattern) - 1);
-								return wParam;
+		case kcEndAbsolute:
+			SetCurrentColumn(sndFile.GetNumChannels() - 1, m_nDetailLevel);
+			if(GetCurrentRow() < pModDoc->GetPatternSize(m_nPattern) - 1)
+				SetCurrentRow(pModDoc->GetPatternSize(m_nPattern) - 1);
+			return wParam;
 
 		case kcPrevEntryInColumn:
 		case kcNextEntryInColumn:
@@ -4454,76 +4527,91 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 			JumpToPrevOrNextEntry(wParam == kcNextEntryInColumnSelect, true);
 			return wParam;
 
-		case kcNextPattern:	{	PATTERNINDEX n = m_nPattern + 1;
-								while ((n < sndFile.Patterns.Size()) && !sndFile.Patterns.IsValidPat(n)) n++;
-								SetCurrentPattern((n < sndFile.Patterns.Size()) ? n : 0);
-								ORDERINDEX currentOrder = GetCurrentOrder();
-								ORDERINDEX newOrder = Order().FindOrder(m_nPattern, currentOrder, true);
-								if(newOrder != ORDERINDEX_INVALID)
-									SetCurrentOrder(newOrder);
-								return wParam;
-							}
-		case kcPrevPattern: {	PATTERNINDEX n = (m_nPattern) ? m_nPattern - 1 : sndFile.Patterns.Size() - 1;
-								while (n > 0 && !sndFile.Patterns.IsValidPat(n)) n--;
-								SetCurrentPattern(n);
-								ORDERINDEX currentOrder = GetCurrentOrder();
-								ORDERINDEX newOrder = Order().FindOrder(m_nPattern, currentOrder, false);
-								if(newOrder != ORDERINDEX_INVALID)
-									SetCurrentOrder(newOrder);
-								return wParam;
-							}
+		case kcNextPattern:
+			{
+				PATTERNINDEX n = m_nPattern + 1;
+				while((n < sndFile.Patterns.Size()) && !sndFile.Patterns.IsValidPat(n))
+					n++;
+				SetCurrentPattern((n < sndFile.Patterns.Size()) ? n : 0);
+				ORDERINDEX currentOrder = GetCurrentOrder();
+				ORDERINDEX newOrder = Order().FindOrder(m_nPattern, currentOrder, true);
+				if(newOrder != ORDERINDEX_INVALID)
+					SetCurrentOrder(newOrder);
+				return wParam;
+			}
+		case kcPrevPattern:
+			{
+				PATTERNINDEX n = (m_nPattern) ? m_nPattern - 1 : sndFile.Patterns.Size() - 1;
+				while(n > 0 && !sndFile.Patterns.IsValidPat(n))
+					n--;
+				SetCurrentPattern(n);
+				ORDERINDEX currentOrder = GetCurrentOrder();
+				ORDERINDEX newOrder = Order().FindOrder(m_nPattern, currentOrder, false);
+				if(newOrder != ORDERINDEX_INVALID)
+					SetCurrentOrder(newOrder);
+				return wParam;
+			}
 		case kcPrevSequence:
 		case kcNextSequence:
 			SendCtrlMessage(CTRLMSG_PAT_SETSEQUENCE, mpt::wrapping_modulo(sndFile.Order.GetCurrentSequenceIndex() + (wParam == kcPrevSequence ? -1 : 1), sndFile.Order.GetNumSequences()));
 			return wParam;
 		case kcSelectWithCopySelect:
 		case kcSelectWithNav:
-		case kcSelect:			if(!m_Status[psDragnDropEdit | psRowSelection | psChannelSelection | psMouseDragSelect]) m_StartSel = m_Cursor;
-									m_Status.set(psKeyboardDragSelect);
-								return wParam;
+		case kcSelect:
+			if(!m_Status[psDragnDropEdit | psRowSelection | psChannelSelection | psMouseDragSelect])
+				m_StartSel = m_Cursor;
+			m_Status.set(psKeyboardDragSelect);
+			return wParam;
 		case kcSelectOffWithCopySelect:
 		case kcSelectOffWithNav:
-		case kcSelectOff:		m_Status.reset(psKeyboardDragSelect | psShiftSelect);
-								return wParam;
+		case kcSelectOff:
+			m_Status.reset(psKeyboardDragSelect | psShiftSelect);
+			return wParam;
 		case kcCopySelectWithSelect:
 		case kcCopySelectWithNav:
-		case kcCopySelect:		if(!m_Status[psDragnDropEdit | psRowSelection | psChannelSelection | psMouseDragSelect]) m_StartSel = m_Cursor;
-									m_Status.set(psCtrlDragSelect); return wParam;
+		case kcCopySelect:
+			if(!m_Status[psDragnDropEdit | psRowSelection | psChannelSelection | psMouseDragSelect])
+				m_StartSel = m_Cursor;
+			m_Status.set(psCtrlDragSelect);
+			return wParam;
 		case kcCopySelectOffWithSelect:
 		case kcCopySelectOffWithNav:
-		case kcCopySelectOff:	m_Status.reset(psCtrlDragSelect); return wParam;
+		case kcCopySelectOff:
+			m_Status.reset(psCtrlDragSelect);
+			return wParam;
 
 		case kcSelectBeat:
 		case kcSelectMeasure:
-			SelectBeatOrMeasure(wParam == kcSelectBeat); return wParam;
+			SelectBeatOrMeasure(wParam == kcSelectBeat);
+			return wParam;
 
-		case kcSelectEvent:		SetCurSel(PatternCursor(m_Selection.GetStartRow(), m_Selection.GetStartChannel(), PatternCursor::firstColumn),
-									PatternCursor(m_Selection.GetEndRow(), m_Selection.GetEndChannel(), PatternCursor::lastColumn));
-								return wParam;
-		case kcSelectRow:		SetCurSel(PatternCursor(m_Selection.GetStartRow(), 0, PatternCursor::firstColumn),
-									PatternCursor(m_Selection.GetEndRow(), sndFile.GetNumChannels(), PatternCursor::lastColumn));
-								return wParam;
+		case kcSelectEvent:
+			SetCurSel(PatternCursor(m_Selection.GetStartRow(), m_Selection.GetStartChannel(), PatternCursor::firstColumn), PatternCursor(m_Selection.GetEndRow(), m_Selection.GetEndChannel(), PatternCursor::lastColumn));
+			return wParam;
+		case kcSelectRow:
+			SetCurSel(PatternCursor(m_Selection.GetStartRow(), 0, PatternCursor::firstColumn), PatternCursor(m_Selection.GetEndRow(), sndFile.GetNumChannels(), PatternCursor::lastColumn));
+			return wParam;
 
-		case kcClearRow:		OnClearField(RowMask(), false);	return wParam;
-		case kcClearField:		OnClearField(RowMask(m_Cursor), false);	return wParam;
-		case kcClearFieldITStyle: OnClearField(RowMask(m_Cursor), false, true);	return wParam;
-		case kcClearRowStep:	OnClearField(RowMask(), true);	return wParam;
-		case kcClearFieldStep:	OnClearField(RowMask(m_Cursor), true);	return wParam;
-		case kcClearFieldStepITStyle:	OnClearField(RowMask(m_Cursor), true, true);	return wParam;
+		case kcClearRow:              OnClearField(RowMask(), false); return wParam;
+		case kcClearField:            OnClearField(RowMask(m_Cursor), false); return wParam;
+		case kcClearFieldITStyle:     OnClearField(RowMask(m_Cursor), false, true); return wParam;
+		case kcClearRowStep:          OnClearField(RowMask(), true); return wParam;
+		case kcClearFieldStep:        OnClearField(RowMask(m_Cursor), true); return wParam;
+		case kcClearFieldStepITStyle: OnClearField(RowMask(m_Cursor), true, true); return wParam;
 
-		case kcDeleteRow:				OnDeleteRow(); return wParam;
-		case kcDeleteWholeRow:			OnDeleteWholeRow(); return wParam;
-		case kcDeleteRowGlobal:			OnDeleteRowGlobal(); return wParam;
-		case kcDeleteWholeRowGlobal:	OnDeleteWholeRowGlobal(); return wParam;
+		case kcDeleteRow:            OnDeleteRow(); return wParam;
+		case kcDeleteWholeRow:       OnDeleteWholeRow(); return wParam;
+		case kcDeleteRowGlobal:      OnDeleteRowGlobal(); return wParam;
+		case kcDeleteWholeRowGlobal: OnDeleteWholeRowGlobal(); return wParam;
 
-		case kcInsertRow:				OnInsertRow(); return wParam;
-		case kcInsertWholeRow:			OnInsertWholeRow(); return wParam;
-		case kcInsertRowGlobal:			OnInsertRowGlobal(); return wParam;
-		case kcInsertWholeRowGlobal:	OnInsertWholeRowGlobal(); return wParam;
+		case kcInsertRow:            OnInsertRow(); return wParam;
+		case kcInsertWholeRow:       OnInsertWholeRow(); return wParam;
+		case kcInsertRowGlobal:      OnInsertRowGlobal(); return wParam;
+		case kcInsertWholeRowGlobal: OnInsertWholeRowGlobal(); return wParam;
 
-		case kcShowNoteProperties: ShowEditWindow(); return wParam;
-		case kcShowPatternProperties: OnPatternProperties(); return wParam;
-		case kcShowSplitKeyboardSettings:	SetSplitKeyboardSettings(); return wParam;
+		case kcShowNoteProperties:        ShowEditWindow(); return wParam;
+		case kcShowPatternProperties:     OnPatternProperties(); return wParam;
+		case kcShowSplitKeyboardSettings: SetSplitKeyboardSettings(); return wParam;
 		case kcShowEditMenu:
 			{
 				CPoint pt = GetPointFromPosition(m_Cursor);
@@ -4548,45 +4636,49 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 				OnRButtonDown(0, pt);
 			}
 			return wParam;
-		case kcPatternGoto:		OnEditGoto(); return wParam;
+		case kcPatternGoto: OnEditGoto(); return wParam;
 
-		case kcNoteCut:			TempEnterNote(NOTE_NOTECUT); return wParam;
-		case kcNoteOff:			TempEnterNote(NOTE_KEYOFF); return wParam;
-		case kcNoteFade:		TempEnterNote(NOTE_FADE); return wParam;
-		case kcNotePC:			TempEnterNote(NOTE_PC); return wParam;
-		case kcNotePCS:			TempEnterNote(NOTE_PCS); return wParam;
+		case kcNoteCut:  TempEnterNote(NOTE_NOTECUT); return wParam;
+		case kcNoteOff:  TempEnterNote(NOTE_KEYOFF); return wParam;
+		case kcNoteFade: TempEnterNote(NOTE_FADE); return wParam;
+		case kcNotePC:   TempEnterNote(NOTE_PC); return wParam;
+		case kcNotePCS:  TempEnterNote(NOTE_PCS); return wParam;
 
-		case kcEditUndo:		OnEditUndo(); return wParam;
-		case kcEditRedo:		OnEditRedo(); return wParam;
-		case kcEditFind:		OnEditFind(); return wParam;
-		case kcEditFindNext:	OnEditFindNext(); return wParam;
-		case kcEditCut:			OnEditCut(); return wParam;
-		case kcEditCopy:		OnEditCopy(); return wParam;
+		case kcEditUndo:     OnEditUndo(); return wParam;
+		case kcEditRedo:     OnEditRedo(); return wParam;
+		case kcEditFind:     OnEditFind(); return wParam;
+		case kcEditFindNext: OnEditFindNext(); return wParam;
+		case kcEditCut:      OnEditCut(); return wParam;
+		case kcEditCopy:     OnEditCopy(); return wParam;
 		case kcCopyAndLoseSelection:
 			OnEditCopy();
 			[[fallthrough]];
 		case kcLoseSelection:
 			SetSelToCursor();
 			return wParam;
-		case kcEditPaste:		OnEditPaste(); return wParam;
-		case kcEditMixPaste:	OnEditMixPaste(); return wParam;
-		case kcEditMixPasteITStyle:	OnEditMixPasteITStyle(); return wParam;
-		case kcEditPasteFlood:	OnEditPasteFlood(); return wParam;
+		
+		case kcEditPaste:            OnEditPaste(); return wParam;
+		case kcEditMixPaste:         OnEditMixPaste(); return wParam;
+		case kcEditMixPasteITStyle:  OnEditMixPasteITStyle(); return wParam;
+		case kcEditPasteFlood:       OnEditPasteFlood(); return wParam;
 		case kcEditPushForwardPaste: OnEditPushForwardPaste(); return wParam;
-		case kcEditSelectAll:	OnEditSelectAll(); return wParam;
-		case kcTogglePluginEditor: TogglePluginEditor(GetCurrentChannel()); return wParam;
-		case kcToggleFollowSong: SendCtrlMessage(CTRLMSG_PAT_FOLLOWSONG, 1); return wParam;
-		case kcChangeLoopStatus: SendCtrlMessage(CTRLMSG_PAT_LOOP, -1); return wParam;
-		case kcNewPattern:		 SendCtrlMessage(CTRLMSG_PAT_NEWPATTERN); return wParam;
-		case kcDuplicatePattern: SendCtrlMessage(CTRLMSG_PAT_DUPPATTERN); return wParam;
-		case kcSwitchToOrderList: OnSwitchToOrderList(); return wParam;
-		case kcToggleOverflowPaste:	TrackerSettings::Instance().m_dwPatternSetup ^= PATTERN_OVERFLOWPASTE; return wParam;
-		case kcToggleNoteOffRecordPC: TrackerSettings::Instance().m_dwPatternSetup ^= PATTERN_KBDNOTEOFF; return wParam;
+		case kcEditSelectAll:        OnEditSelectAll(); return wParam;
+		case kcTogglePluginEditor:   TogglePluginEditor(GetCurrentChannel()); return wParam;
+		case kcToggleFollowSong:     SendCtrlMessage(CTRLMSG_PAT_FOLLOWSONG, 1); return wParam;
+		case kcChangeLoopStatus:     SendCtrlMessage(CTRLMSG_PAT_LOOP, -1); return wParam;
+		case kcNewPattern:           SendCtrlMessage(CTRLMSG_PAT_NEWPATTERN); return wParam;
+		case kcDuplicatePattern:     SendCtrlMessage(CTRLMSG_PAT_DUPPATTERN); return wParam;
+		case kcSwitchToOrderList:    OnSwitchToOrderList(); return wParam;
+		
+		case kcToggleOverflowPaste:     TrackerSettings::Instance().m_dwPatternSetup ^= PATTERN_OVERFLOWPASTE; return wParam;
+		case kcToggleNoteOffRecordPC:   TrackerSettings::Instance().m_dwPatternSetup ^= PATTERN_KBDNOTEOFF; return wParam;
 		case kcToggleNoteOffRecordMIDI: TrackerSettings::Instance().m_dwMidiSetup ^= MIDISETUP_RECORDNOTEOFF; return wParam;
+		
 		case kcPatternEditPCNotePlugin: OnTogglePCNotePluginEditor(); return wParam;
-		case kcQuantizeSettings: OnSetQuantize(); return wParam;
-		case kcLockPlaybackToRows: OnLockPatternRows(); return wParam;
-		case kcFindInstrument: FindInstrument(); return wParam;
+		case kcQuantizeSettings:        OnSetQuantize(); return wParam;
+		case kcLockPlaybackToRows:      OnLockPatternRows(); return wParam;
+		case kcFindInstrument:          FindInstrument(); return wParam;
+		
 		case kcChannelSettings:
 			{
 				// Open centered Quick Channel Settings dialog.
@@ -4598,8 +4690,8 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcChannelTranspose: m_MenuCursor = m_Cursor; OnTransposeChannel(); return wParam;
 		case kcChannelDuplicate: m_MenuCursor = m_Cursor; OnDuplicateChannel(); return wParam;
 		case kcChannelAddBefore: m_MenuCursor = m_Cursor; OnAddChannelFront(); return wParam;
-		case kcChannelAddAfter: m_MenuCursor = m_Cursor; OnAddChannelAfter(); return wParam;
-		case kcChannelRemove: m_MenuCursor = m_Cursor; OnRemoveChannel(); return wParam;
+		case kcChannelAddAfter:  m_MenuCursor = m_Cursor; OnAddChannelAfter(); return wParam;
+		case kcChannelRemove:    m_MenuCursor = m_Cursor; OnRemoveChannel(); return wParam;
 		case kcChannelMoveLeft:
 			if(CHANNELINDEX chn = m_Selection.GetStartChannel(); chn > 0)
 				DragChannel(chn, chn - 1u, m_Selection.GetNumChannels(), false);
@@ -4612,10 +4704,12 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcSplitPattern: m_MenuCursor = m_Cursor; OnSplitPattern(); return wParam;
 
 		case kcDecreaseSpacing:
-			if(m_nSpacing > 0) SetSpacing(m_nSpacing - 1);
+			if(m_nSpacing > 0)
+				SetSpacing(m_nSpacing - 1);
 			return wParam;
 		case kcIncreaseSpacing:
-			if(m_nSpacing < MAX_SPACING) SetSpacing(m_nSpacing + 1);
+			if(m_nSpacing < MAX_SPACING)
+				SetSpacing(m_nSpacing + 1);
 			return wParam;
 
 		case kcChordEditor:

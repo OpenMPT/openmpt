@@ -567,15 +567,16 @@ public:
 		ROWINDEX m_nNextRow = 0;  // Next row to process
 	protected:
 		ROWINDEX m_nextPatStartRow = 0;  // For FT2's E60 bug
-		ROWINDEX m_breakRow = 0;          // Candidate target row for pattern break
-		ROWINDEX m_patLoopRow = 0;        // Candidate target row for pattern loop
-		ORDERINDEX m_posJump = 0;         // Candidate target order for position jump
+		ROWINDEX m_breakRow = 0;         // Candidate target row for pattern break
+		ROWINDEX m_patLoopRow = 0;       // Candidate target row for pattern loop
+		ORDERINDEX m_posJump = 0;        // Candidate target order for position jump
 
 	public:
 		PATTERNINDEX m_nPattern = 0;                     // Current pattern being processed
 		ORDERINDEX m_nCurrentOrder = 0;                  // Current order being processed
 		ORDERINDEX m_nNextOrder = 0;                     // Next order to process
 		ORDERINDEX m_nSeqOverride = ORDERINDEX_INVALID;  // Queued order to be processed next, regardless of what order would normally follow
+		OrderTransitionMode m_seqOverrideMode = OrderTransitionMode::AtPatternEnd;
 
 		// Global volume
 	public:
@@ -803,7 +804,7 @@ public:
 	void PatternTransitionChnUnmuteAll();
 
 protected:
-	void HandlePatternTransitionEvents();
+	void HandleRowTransitionEvents(bool nextPattern);
 #endif  // MODPLUG_TRACKER
 
 public:

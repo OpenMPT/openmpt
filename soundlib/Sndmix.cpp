@@ -440,10 +440,7 @@ bool CSoundFile::ProcessRow()
 		const auto [ignoreRow, patternTransition] = NextRow(m_PlayState, m_SongFlags[SONG_BREAKTOROW]);
 
 #ifdef MODPLUG_TRACKER
-		if(patternTransition)
-		{
-			HandlePatternTransitionEvents();
-		}
+		HandleRowTransitionEvents(patternTransition);
 		// "Lock row" editing feature
 		if(m_lockRowStart != ROWINDEX_INVALID && (m_PlayState.m_nRow < m_lockRowStart || m_PlayState.m_nRow > m_lockRowEnd) && !IsRenderingToDisc())
 		{
