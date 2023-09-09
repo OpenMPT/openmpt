@@ -459,7 +459,7 @@ void MidiInOut::HardAllNotesOff()
 	for(uint8 mc = 0; mc < std::size(m_MidiCh); mc++)		//all midi chans
 	{
 		PlugInstrChannel &channel = m_MidiCh[mc];
-		channel.ResetProgram();
+		channel.ResetProgram(m_SndFile.m_playBehaviour[kPluginDefaultProgramAndBank1]);
 
 		SendMidiPitchBend(mc, EncodePitchBendParam(MIDIEvents::pitchBendCentre));  // centre pitch bend
 		MidiSend(MIDIEvents::CC(MIDIEvents::MIDICC_AllSoundOff, mc, 0));           // all sounds off
