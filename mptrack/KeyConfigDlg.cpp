@@ -10,6 +10,7 @@
 
 #include "stdafx.h"
 #include "KeyConfigDlg.h"
+#include "CListCtrl.h"
 #include "FileDialog.h"
 #include "Mainfrm.h"
 #include "InputHandler.h"
@@ -126,8 +127,9 @@ void CCustEdit::OnKillFocus(CWnd *pNewWnd)
 // Initialisation
 
 BEGIN_MESSAGE_MAP(COptionsKeyboard, CPropertyPage)
+	ON_NOTIFY(LVN_ITEMCHANGED, IDC_COMMAND_LIST, &COptionsKeyboard::OnCommandKeySelChanged)
+
 	ON_LBN_SELCHANGE(IDC_CHOICECOMBO,     &COptionsKeyboard::OnKeyChoiceSelect)
-	ON_LBN_SELCHANGE(IDC_COMMAND_LIST,    &COptionsKeyboard::OnCommandKeySelChanged)
 	ON_LBN_SELCHANGE(IDC_KEYCATEGORY,     &COptionsKeyboard::OnCategorySelChanged)
 	ON_EN_UPDATE(IDC_CHORDDETECTWAITTIME, &COptionsKeyboard::OnChordWaitTimeChanged)
 	ON_COMMAND(IDC_DELETE,                &COptionsKeyboard::OnDeleteKeyChoice)
@@ -182,6 +184,9 @@ BOOL COptionsKeyboard::OnInitDialog()
 
 	m_localCmdSet = std::make_unique<CCommandSet>();
 	m_localCmdSet->Copy(CMainFrame::GetInputHandler()->m_activeCommandSet.get());
+
+	m_lbnCommandKeys.SetExtendedStyle(m_lbnCommandKeys.GetExtendedStyle() | LVS_EX_FULLROWSELECT);
+	m_listGrouped = CListCtrlEx::EnableGroupView(m_lbnCommandKeys);
 
 	//Fill category combo and automatically selects first category
 	DefineCommandCategories();
@@ -436,6 +441,28 @@ void COptionsKeyboard::OnClearHotKey()
 }
 
 
+void COptionsKeyboard::InsertGroup(const TCHAR *title, int groupId)
+{
+	LVGROUP group{};
+#if MPT_WINNT_AT_LEAST(MPT_WIN_VISTA)
+	group.cbSize = LVGROUP_V5_SIZE;
+#else
+	group.cbSize = sizeof(group);
+#endif
+	group.mask = LVGF_HEADER | LVGF_GROUPID;
+	group.pszHeader = const_cast<TCHAR *>(title);
+	group.cchHeader = 0;
+	group.pszFooter = nullptr;
+	group.cchFooter = 0;
+	group.iGroupId = groupId;
+	group.stateMask = 0;
+	group.state = 0;
+	group.uAlign = LVGA_HEADER_LEFT;
+	ListView_InsertGroup(m_lbnCommandKeys.m_hWnd, -1, &group);
+	ListView_SetGroupState(m_lbnCommandKeys.m_hWnd, group.iGroupId, LVGS_COLLAPSIBLE, LVGS_COLLAPSIBLE);
+}
+
+
 // Fills command list and automatically selects first command.
 void COptionsKeyboard::UpdateShortcutList(int category)
 {
@@ -454,8 +481,16 @@ void COptionsKeyboard::UpdateShortcutList(int category)
 		lastCat = static_cast<int>(commandCategories.size()) - 1;
 	}
 
-	CommandID curCommand = static_cast<CommandID>(m_lbnCommandKeys.GetItemData(m_lbnCommandKeys.GetCurSel()));
-	m_lbnCommandKeys.ResetContent();
+	const auto curSelection = m_lbnCommandKeys.GetSelectionMark();
+	CommandID curCommand = (curSelection >= 0) ? static_cast<CommandID>(m_lbnCommandKeys.GetItemData(curSelection)) : kcNull;
+	m_lbnCommandKeys.SetRedraw(FALSE);
+	m_lbnCommandKeys.DeleteColumn(0);
+	m_lbnCommandKeys.RemoveAllGroups();
+	m_lbnCommandKeys.InsertColumn(0, _T(""));
+	m_lbnCommandKeys.DeleteAllItems();
+
+	int currentGroup = -1;
+	int itemID = -1;
 
 	for(int cat = firstCat; cat <= lastCat; cat++)
 	{
@@ -492,43 +527,97 @@ void COptionsKeyboard::UpdateShortcutList(int category)
 			{
 				m_curCategory = cat;
 
+				LVITEMW lvi;
+				lvi.mask = LVIF_TEXT | LVIF_PARAM;
+				if(m_listGrouped)
+					lvi.mask |= LVIF_GROUPID;
+				lvi.iSubItem = 0;
+				lvi.state = 0;
+				lvi.stateMask = 0;
+				lvi.cchTextMax = 0;
+				lvi.iImage = 0;
+				lvi.iIndent = 0;
+				lvi.iGroupId = 0;
+
 				if(!m_localCmdSet->isHidden(com))
 				{
 					if(doSearch && addCategoryName)
 					{
-						const CString catName = _T("------ ") + commandCategories[cat].name.Trim() + _T(" ------");
-						m_lbnCommandKeys.SetItemData(m_lbnCommandKeys.AddString(catName), DWORD_PTR(-1));
+						if(m_listGrouped)
+						{
+							InsertGroup(commandCategories[cat].name.Trim(), ++currentGroup);
+						} else
+						{
+							const CString catName = _T("------ ") + commandCategories[cat].name.Trim() + _T(" ------");
+							lvi.iItem = ++itemID;
+							lvi.lParam = LPARAM(-1);
+							lvi.pszText = const_cast<TCHAR *>(catName.GetString());
+							m_lbnCommandKeys.InsertItem(&lvi);
+						}
 						addCategoryName = false;
+					} else if(currentGroup == -1 && m_listGrouped)
+					{
+						InsertGroup(_T(""), ++currentGroup);
 					}
 
-					int item = m_lbnCommandKeys.AddString(m_localCmdSet->GetCommandText(com));
-					m_lbnCommandKeys.SetItemData(item, com);
+					const CString text = m_localCmdSet->GetCommandText(com);
+					lvi.iItem = ++itemID;
+					lvi.lParam = static_cast<LPARAM>(com);
+					lvi.pszText = const_cast<TCHAR *>(text.GetString());
+					lvi.iGroupId = currentGroup;
+					m_lbnCommandKeys.InsertItem(&lvi);
 
 					if(curCommand == com)
 					{
 						// Keep selection on previously selected string
-						m_lbnCommandKeys.SetCurSel(item);
+						m_lbnCommandKeys.SetSelectionMark(itemID);
 					}
 				}
 
 				if(commandCategories[cat].SeparatorAt(com))
-					m_lbnCommandKeys.SetItemData(m_lbnCommandKeys.AddString(_T("------------------------------------------------------")), DWORD_PTR(-1));
+				{
+					if(m_listGrouped)
+					{
+						InsertGroup(_T(""), ++currentGroup);
+
+					} else
+					{
+						lvi.iItem = ++itemID;
+						lvi.lParam = LPARAM(-1);
+						lvi.pszText = const_cast<TCHAR *>(_T("------------------------------------------------------"));
+						m_lbnCommandKeys.InsertItem(&lvi);
+					}
+				}
 			}
 		}
 	}
 
-	if(m_lbnCommandKeys.GetCurSel() == -1)
+	if(m_lbnCommandKeys.GetSelectionMark() == -1)
 	{
-		m_lbnCommandKeys.SetCurSel(0);
+		m_lbnCommandKeys.SetSelectionMark(0);
 	}
+	m_lbnCommandKeys.SetColumnWidth(0, LVSCW_AUTOSIZE);
+	m_lbnCommandKeys.SetRedraw(TRUE);
 	OnCommandKeySelChanged();
 }
 
 
 // Fills  key choice list and automatically selects first key choice
-void COptionsKeyboard::OnCommandKeySelChanged()
+void COptionsKeyboard::OnCommandKeySelChanged(NMHDR *pNMHDR, LRESULT *)
 {
-	const CommandID cmd = static_cast<CommandID>(m_lbnCommandKeys.GetItemData(m_lbnCommandKeys.GetCurSel()));
+	int selectedItem;
+	if(pNMHDR)
+	{
+		auto hdr = reinterpret_cast<const NMLISTVIEW *>(pNMHDR);
+		if(!(hdr->uNewState & LVIS_SELECTED))
+			return;
+		selectedItem = hdr->iItem;
+	} else
+	{
+		selectedItem = m_lbnCommandKeys.GetSelectionMark();
+	}
+
+	const CommandID cmd = static_cast<CommandID>(m_lbnCommandKeys.GetItemData(selectedItem));
 	CString str;
 
 	//Separator
@@ -548,7 +637,7 @@ void COptionsKeyboard::OnCommandKeySelChanged()
 	}
 
 	//Fill "choice" list
-	else if((cmd >= 0 && cmd != m_curCommand) || m_forceUpdate)  // Have we changed command?
+	else if((cmd >= kcFirst && cmd != m_curCommand) || m_forceUpdate)  // Have we changed command?
 	{
 		m_forceUpdate = false;
 

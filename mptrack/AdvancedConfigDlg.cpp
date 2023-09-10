@@ -63,25 +63,7 @@ BOOL COptionsAdvanced::OnInitDialog()
 
 	m_List.SetExtendedStyle(m_List.GetExtendedStyle() | LVS_EX_GRIDLINES | LVS_EX_FULLROWSELECT);
 
-	ListView_EnableGroupView(m_List.m_hWnd, FALSE); // try to set known state
-	int enableGroupsResult1 = static_cast<int>(ListView_EnableGroupView(m_List.m_hWnd, TRUE));
-	int enableGroupsResult2 = static_cast<int>(ListView_EnableGroupView(m_List.m_hWnd, TRUE));
-	// Looks like we have to check enabling and check that a second enabling does
-	// not change anything.
-	// Just checking if enabling fails with -1 does not work for older control
-	// versions because they just do not know the window message at all and return
-	// 0, always. At least Wine does behave this way.
-	if(enableGroupsResult1 == 1 && enableGroupsResult2 == 0)
-	{
-		m_listGrouped = true;
-	} else
-	{
-		// Did not behave as documented or expected, the actual state of the
-		// control is unknown by now.
-		// Play safe and set and assume the traditional ungrouped mode again.
-		ListView_EnableGroupView(m_List.m_hWnd, FALSE);
-		m_listGrouped = false;
-	}
+	m_listGrouped = m_List.EnableGroupView();
 
 	if(m_listGrouped)
 	{
@@ -171,7 +153,7 @@ void COptionsAdvanced::ReInit()
 			auto gi = m_groups.find(section);
 			if(gi == m_groups.end())
 			{
-				LVGROUP group;
+				LVGROUP group{};
 #if MPT_WINNT_AT_LEAST(MPT_WIN_VISTA)
 				group.cbSize = LVGROUP_V5_SIZE;
 #else
@@ -188,10 +170,11 @@ void COptionsAdvanced::ReInit()
 				group.pszFooter = nullptr;
 				group.cchFooter = 0;
 				group.iGroupId = lvi.iGroupId = numGroups++;
-				group.stateMask = LVGS_COLLAPSIBLE;
-				group.state = LVGS_COLLAPSIBLE;
+				group.stateMask = 0;
+				group.state = 0;
 				group.uAlign = LVGA_HEADER_LEFT;
 				ListView_InsertGroup(m_List.m_hWnd, -1, &group);
+				ListView_SetGroupState(m_List.m_hWnd, group.iGroupId, LVGS_COLLAPSIBLE, LVGS_COLLAPSIBLE);
 				m_groups.insert(std::make_pair(section, lvi.iGroupId));
 			} else
 			{

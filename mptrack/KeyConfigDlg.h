@@ -76,7 +76,7 @@ class COptionsKeyboard: public CPropertyPage
 
 protected:
 	CListBox m_lbnHotKeys;
-	CListBox m_lbnCommandKeys;
+	CListCtrl m_lbnCommandKeys;
 	CComboBox m_cmbKeyChoice;
 	CComboBox m_cmbCategory;
 	CButton m_bKeyDown, m_bKeyHold, m_bKeyUp;
@@ -92,6 +92,7 @@ protected:
 	int m_curCategory = -1, m_curKeyChoice = -1;
 	int m_lockCount = 0;
 	bool m_forceUpdate = false;
+	bool m_listGrouped = false;
 
 public:
 	COptionsKeyboard();
@@ -104,6 +105,7 @@ protected:
 
 	void DefineCommandCategories();
 	void ForceUpdateGUI();
+	void InsertGroup(const TCHAR *title, int groupId);
 	void UpdateShortcutList(int category = -1);
 	void UpdateCategory();
 	int GetCategoryFromCommandID(CommandID command) const;
@@ -116,7 +118,7 @@ protected:
 	afx_msg void UpdateDialog();
 	afx_msg void OnKeyboardChanged();
 	afx_msg void OnKeyChoiceSelect();
-	afx_msg void OnCommandKeySelChanged();
+	afx_msg void OnCommandKeySelChanged(NMHDR *pNMHDR = nullptr, LRESULT *pResult = nullptr);
 	afx_msg void OnCategorySelChanged();
 	afx_msg void OnSearchTermChanged();
 	afx_msg void OnChordWaitTimeChanged();
