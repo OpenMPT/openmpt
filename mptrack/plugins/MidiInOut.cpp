@@ -429,7 +429,7 @@ bool MidiInOut::MidiSend(uint32 midiCode)
 	}
 
 	mpt::lock_guard<mpt::mutex> lock(m_mutex);
-	m_outQueue.push_back(Message(GetOutputTimestamp(), &midiCode, 3));
+	m_outQueue.push_back(Message(GetOutputTimestamp(), &midiCode, MIDIEvents::GetEventLength(midiCode)));
 	return true;
 }
 
