@@ -9,7 +9,7 @@
     RtMidi WWW site: http://www.music.mcgill.ca/~gary/rtmidi/
 
     RtMidi: realtime MIDI i/o C++ classes
-    Copyright (c) 2003-2021 Gary P. Scavone
+    Copyright (c) 2003-2023 Gary P. Scavone
 
     Permission is hereby granted, free of charge, to any person
     obtaining a copy of this software and associated documentation files
@@ -58,7 +58,24 @@
   #endif
 #endif
 
-#define RTMIDI_VERSION "5.0.0"
+#define RTMIDI_VERSION_MAJOR 6
+#define RTMIDI_VERSION_MINOR 0
+#define RTMIDI_VERSION_PATCH 0
+#define RTMIDI_VERSION_BETA  0
+
+#define RTMIDI_TOSTRING2(n) #n
+#define RTMIDI_TOSTRING(n) RTMIDI_TOSTRING2(n)
+
+#if RTMIDI_VERSION_BETA > 0
+    #define RTMIDI_VERSION RTMIDI_TOSTRING(RTMIDI_VERSION_MAJOR) \
+                        "." RTMIDI_TOSTRING(RTMIDI_VERSION_MINOR) \
+                        "." RTMIDI_TOSTRING(RTMIDI_VERSION_PATCH) \
+                     "beta" RTMIDI_TOSTRING(RTMIDI_VERSION_BETA)
+#else
+    #define RTMIDI_VERSION RTMIDI_TOSTRING(RTMIDI_VERSION_MAJOR) \
+                        "." RTMIDI_TOSTRING(RTMIDI_VERSION_MINOR) \
+                        "." RTMIDI_TOSTRING(RTMIDI_VERSION_PATCH)
+#endif
 
 #include <exception>
 #include <iostream>
@@ -144,6 +161,8 @@ class RTMIDI_DLL_PUBLIC RtMidi
     WINDOWS_MM,     /*!< The Microsoft Multimedia MIDI API. */
     RTMIDI_DUMMY,   /*!< A compilable but non-functional API. */
     WEB_MIDI_API,   /*!< W3C Web MIDI API. */
+    WINDOWS_UWP,    /*!< The Microsoft Universal Windows Platform MIDI API. */
+    ANDROID_AMIDI,  /*!< Native Android MIDI API. */
     NUM_APIS        /*!< Number of values in this enum. */
   };
 
@@ -559,7 +578,7 @@ class RTMIDI_DLL_PUBLIC MidiInApi : public MidiApi
   void setCallback( RtMidiIn::RtMidiCallback callback, void *userData );
   void cancelCallback( void );
   virtual void ignoreTypes( bool midiSysex, bool midiTime, bool midiSense );
-  double getMessage( std::vector<unsigned char> *message );
+  virtual double getMessage( std::vector<unsigned char> *message );
   virtual void setBufferSize( unsigned int size, unsigned int count );
 
   // A MIDI structure used internally by the class to store incoming
