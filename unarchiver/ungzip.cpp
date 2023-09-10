@@ -9,8 +9,8 @@
 
 #include "stdafx.h"
 
-#include "../common/FileReader.h"
 #include "ungzip.h"
+#include "../common/FileReader.h"
 
 #if defined(MPT_WITH_ZLIB) || defined(MPT_WITH_MINIZ)
 
@@ -42,6 +42,28 @@ CGzipArchive::CGzipArchive(const FileReader &file) : ArchiveBase(file)
 	}
 	ArchiveFileInfo info;
 	info.type = ArchiveFileType::Normal;
+
+	// Extra block present? (skip the extra data)
+	if(header.flags & GZ_FEXTRA)
+	{
+		inFile.Skip(inFile.ReadUint16LE());
+	}
+
+	// Filename present?
+	std::string str;
+	if(header.flags & GZ_FNAME)
+	{
+		inFile.ReadNullString(str);
+		info.name = mpt::ToUnicode(mpt::Charset::ISO8859_1, str);
+	}
+
+	// Comment present?
+	if(header.flags & GZ_FCOMMENT)
+	{
+		inFile.ReadNullString(str);
+		info.comment = mpt::ToUnicode(mpt::Charset::ISO8859_1, str);
+	}
+
 	contents.push_back(info);
 }
 
@@ -133,7 +155,7 @@ bool CGzipArchive::ExtractFile(std::size_t index)
 			crc = crc32(crc, mpt::byte_cast<Bytef *>(output.data()), static_cast<uInt>(output.size()));
 			data.insert(data.end(), output.begin(), output.end());
 		} while(strm.avail_out == 0);
-	} while(retVal == Z_OK && bytesLeft);
+	} while((retVal == Z_OK || retVal == Z_BUF_ERROR) && bytesLeft);
 	inflateEnd(&strm);
 
 	// Everything went OK? Check return code, number of written bytes and CRC32.
