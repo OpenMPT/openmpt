@@ -43,7 +43,7 @@ public:
 class CCustEdit: public CEdit
 {
 protected:
-	COptionsKeyboard *m_pOptKeyDlg;
+	COptionsKeyboard *m_pOptKeyDlg = nullptr;
 	HWND m_hParent = nullptr;
 	UINT m_nCtrlId = 0;
 	bool m_isFocussed = false, m_isDummy = false;
@@ -52,7 +52,7 @@ public:
 	FlagSet<Modifiers> mod = ModNone;
 	UINT code = 0;
 
-	CCustEdit(bool dummyField) : m_isDummy(dummyField) { }
+	explicit CCustEdit(bool dummyField) : m_isDummy(dummyField) { }
 	void SetParent(HWND h, UINT nID, COptionsKeyboard *pOKD)
 	{
 		m_hParent = h;
@@ -61,10 +61,11 @@ public:
 	}
 	void SetKey(FlagSet<Modifiers> mod, UINT code);
 	
+protected:
 	BOOL PreTranslateMessage(MSG *pMsg) override;
 	
-	afx_msg void OnSetFocus(CWnd* pOldWnd);
-	afx_msg void OnKillFocus(CWnd* pNewWnd);
+	afx_msg void OnSetFocus(CWnd *pOldWnd);
+	afx_msg void OnKillFocus(CWnd *pNewWnd);
 	afx_msg LRESULT OnMidiMsg(WPARAM, LPARAM);
 	
 	DECLARE_MESSAGE_MAP()
@@ -72,6 +73,8 @@ public:
 
 class COptionsKeyboard: public CPropertyPage
 {
+	friend class CCustEdit;
+
 protected:
 	CListBox m_lbnHotKeys;
 	CListBox m_lbnCommandKeys;
@@ -82,29 +85,34 @@ protected:
 	CCustEdit m_eCustHotKey, m_eFindHotKey;
 	CEdit m_eFind;
 	CEdit m_eReport, m_eChordWaitTime;
+	
+	std::vector<CommandCategory> commandCategories;
+	std::unique_ptr<CCommandSet> m_localCmdSet;
+	mpt::PathString m_fullPathName;
 	CommandID m_curCommand = kcNull;
 	int m_curCategory = -1, m_curKeyChoice = -1;
-	mpt::PathString m_fullPathName;
-	std::unique_ptr<CCommandSet> m_localCmdSet;
+	int m_lockCount = 0;
 	bool m_forceUpdate = false;
-
-	void ForceUpdateGUI();
-	void UpdateShortcutList(int category = -1);
-	void UpdateCategory();
-	int GetCategoryFromCommandID(CommandID command) const;
 
 public:
 	COptionsKeyboard() : CPropertyPage(IDD_OPTIONS_KEYBOARD), m_eCustHotKey(false), m_eFindHotKey(true) { }
-	std::vector<CommandCategory> commandCategories;
-	void DefineCommandCategories();
-
-	void OnSetKeyChoice();
 
 protected:
 	BOOL OnInitDialog() override;
 	void OnOK() override;
 	BOOL OnSetActive() override;
 	void DoDataExchange(CDataExchange* pDX) override;
+
+	void DefineCommandCategories();
+	void ForceUpdateGUI();
+	void UpdateShortcutList(int category = -1);
+	void UpdateCategory();
+	int GetCategoryFromCommandID(CommandID command) const;
+	void OnSetKeyChoice();
+
+	void LockControls() { m_lockCount++; }
+	void UnlockControls() { m_lockCount--; MPT_ASSERT(m_lockCount >= 0); }
+	bool IsLocked() const noexcept { return m_lockCount != 0; }
 
 	afx_msg void UpdateDialog();
 	afx_msg void OnKeyboardChanged();
