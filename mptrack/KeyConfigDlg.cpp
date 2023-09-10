@@ -31,7 +31,7 @@ OPENMPT_NAMESPACE_BEGIN
 BEGIN_MESSAGE_MAP(CCustEdit, CEdit)
 	ON_WM_SETFOCUS()
 	ON_WM_KILLFOCUS()
-	ON_MESSAGE(WM_MOD_MIDIMSG,		&CCustEdit::OnMidiMsg)
+	ON_MESSAGE(WM_MOD_MIDIMSG, &CCustEdit::OnMidiMsg)
 END_MESSAGE_MAP()
 
 
@@ -126,41 +126,41 @@ void CCustEdit::OnKillFocus(CWnd *pNewWnd)
 // Initialisation
 
 BEGIN_MESSAGE_MAP(COptionsKeyboard, CPropertyPage)
-	ON_LBN_SELCHANGE(IDC_CHOICECOMBO,		&COptionsKeyboard::OnKeyChoiceSelect)
-	ON_LBN_SELCHANGE(IDC_COMMAND_LIST,		&COptionsKeyboard::OnCommandKeySelChanged)
-	ON_LBN_SELCHANGE(IDC_KEYCATEGORY,		&COptionsKeyboard::OnCategorySelChanged)
-	ON_EN_UPDATE(IDC_CHORDDETECTWAITTIME,	&COptionsKeyboard::OnChordWaitTimeChanged) //rewbs.autochord
-	ON_COMMAND(IDC_DELETE,					&COptionsKeyboard::OnDeleteKeyChoice)
-	ON_COMMAND(IDC_RESTORE,					&COptionsKeyboard::OnRestoreKeyChoice)
-	ON_COMMAND(IDC_LOAD,					&COptionsKeyboard::OnLoad)
-	ON_COMMAND(IDC_SAVE,					&COptionsKeyboard::OnSave)
-	ON_COMMAND(IDC_CHECKKEYDOWN,			&COptionsKeyboard::OnCheck)
-	ON_COMMAND(IDC_CHECKKEYHOLD,			&COptionsKeyboard::OnCheck)
-	ON_COMMAND(IDC_CHECKKEYUP,				&COptionsKeyboard::OnCheck)
-	ON_COMMAND(IDC_NOTESREPEAT,				&COptionsKeyboard::OnNotesRepeat)
-	ON_COMMAND(IDC_NONOTESREPEAT,			&COptionsKeyboard::OnNoNotesRepeat)
-	ON_COMMAND(IDC_CLEARLOG,				&COptionsKeyboard::OnClearLog)
-	ON_COMMAND(IDC_RESTORE_KEYMAP,			&COptionsKeyboard::OnRestoreDefaultKeymap)
-	ON_EN_CHANGE(IDC_FIND,					&COptionsKeyboard::OnSearchTermChanged)
-	ON_EN_CHANGE(IDC_FINDHOTKEY,			&COptionsKeyboard::OnFindHotKey)
-	ON_EN_SETFOCUS(IDC_FINDHOTKEY,			&COptionsKeyboard::OnClearHotKey)
+	ON_LBN_SELCHANGE(IDC_CHOICECOMBO,     &COptionsKeyboard::OnKeyChoiceSelect)
+	ON_LBN_SELCHANGE(IDC_COMMAND_LIST,    &COptionsKeyboard::OnCommandKeySelChanged)
+	ON_LBN_SELCHANGE(IDC_KEYCATEGORY,     &COptionsKeyboard::OnCategorySelChanged)
+	ON_EN_UPDATE(IDC_CHORDDETECTWAITTIME, &COptionsKeyboard::OnChordWaitTimeChanged)
+	ON_COMMAND(IDC_DELETE,                &COptionsKeyboard::OnDeleteKeyChoice)
+	ON_COMMAND(IDC_RESTORE,               &COptionsKeyboard::OnRestoreKeyChoice)
+	ON_COMMAND(IDC_LOAD,                  &COptionsKeyboard::OnLoad)
+	ON_COMMAND(IDC_SAVE,                  &COptionsKeyboard::OnSave)
+	ON_COMMAND(IDC_CHECKKEYDOWN,          &COptionsKeyboard::OnCheck)
+	ON_COMMAND(IDC_CHECKKEYHOLD,          &COptionsKeyboard::OnCheck)
+	ON_COMMAND(IDC_CHECKKEYUP,            &COptionsKeyboard::OnCheck)
+	ON_COMMAND(IDC_NOTESREPEAT,           &COptionsKeyboard::OnNotesRepeat)
+	ON_COMMAND(IDC_NONOTESREPEAT,         &COptionsKeyboard::OnNoNotesRepeat)
+	ON_COMMAND(IDC_CLEARLOG,              &COptionsKeyboard::OnClearLog)
+	ON_COMMAND(IDC_RESTORE_KEYMAP,        &COptionsKeyboard::OnRestoreDefaultKeymap)
+	ON_EN_CHANGE(IDC_FIND,                &COptionsKeyboard::OnSearchTermChanged)
+	ON_EN_CHANGE(IDC_FINDHOTKEY,          &COptionsKeyboard::OnFindHotKey)
+	ON_EN_SETFOCUS(IDC_FINDHOTKEY,        &COptionsKeyboard::OnClearHotKey)
 	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 void COptionsKeyboard::DoDataExchange(CDataExchange *pDX)
 {
 	CPropertyPage::DoDataExchange(pDX);
-	DDX_Control(pDX, IDC_KEYCATEGORY,	m_cmbCategory);
-	DDX_Control(pDX, IDC_COMMAND_LIST,	m_lbnCommandKeys);
-	DDX_Control(pDX, IDC_CHOICECOMBO,	m_cmbKeyChoice);
-	DDX_Control(pDX, IDC_CHORDDETECTWAITTIME, m_eChordWaitTime);//rewbs.autochord
-	DDX_Control(pDX, IDC_KEYREPORT,		m_eReport);
-	DDX_Control(pDX, IDC_CUSTHOTKEY,	m_eCustHotKey);
-	DDX_Control(pDX, IDC_FINDHOTKEY,	m_eFindHotKey);
-	DDX_Control(pDX, IDC_CHECKKEYDOWN,	m_bKeyDown);
-	DDX_Control(pDX, IDC_CHECKKEYHOLD,	m_bKeyHold);
-	DDX_Control(pDX, IDC_CHECKKEYUP,	m_bKeyUp);
-	DDX_Control(pDX, IDC_FIND,			m_eFind);
+	DDX_Control(pDX, IDC_KEYCATEGORY, m_cmbCategory);
+	DDX_Control(pDX, IDC_COMMAND_LIST, m_lbnCommandKeys);
+	DDX_Control(pDX, IDC_CHOICECOMBO, m_cmbKeyChoice);
+	DDX_Control(pDX, IDC_CHORDDETECTWAITTIME, m_eChordWaitTime);
+	DDX_Control(pDX, IDC_KEYREPORT, m_eReport);
+	DDX_Control(pDX, IDC_CUSTHOTKEY, m_eCustHotKey);
+	DDX_Control(pDX, IDC_FINDHOTKEY, m_eFindHotKey);
+	DDX_Control(pDX, IDC_CHECKKEYDOWN, m_bKeyDown);
+	DDX_Control(pDX, IDC_CHECKKEYHOLD, m_bKeyHold);
+	DDX_Control(pDX, IDC_CHECKKEYUP, m_bKeyUp);
+	DDX_Control(pDX, IDC_FIND, m_eFind);
 }
 
 
@@ -371,6 +371,7 @@ void COptionsKeyboard::OnKeyboardChanged()
 
 void COptionsKeyboard::OnCategorySelChanged()
 {
+	LockControls();
 	int cat = static_cast<int>(m_cmbCategory.GetItemData(m_cmbCategory.GetCurSel()));
 	if(cat < 0)
 		return;
@@ -382,6 +383,7 @@ void COptionsKeyboard::OnCategorySelChanged()
 		// Changed category
 		UpdateShortcutList(cat);
 	}
+	UnlockControls();
 }
 
 
@@ -390,7 +392,7 @@ void COptionsKeyboard::UpdateCategory()
 {
 	for(int i = 0; i < m_cmbCategory.GetCount(); i++)
 	{
-		if((int)m_cmbCategory.GetItemData(i) == m_curCategory)
+		if(static_cast<int>(m_cmbCategory.GetItemData(i)) == m_curCategory)
 		{
 			m_cmbCategory.SetCurSel(i);
 			break;
@@ -400,6 +402,9 @@ void COptionsKeyboard::UpdateCategory()
 
 void COptionsKeyboard::OnSearchTermChanged()
 {
+	if(IsLocked())
+		return;
+
 	CString findString;
 	m_eFind.GetWindowText(findString);
 
@@ -413,6 +418,9 @@ void COptionsKeyboard::OnSearchTermChanged()
 
 void COptionsKeyboard::OnFindHotKey()
 {
+	if(IsLocked())
+		return;
+	
 	if(m_eFindHotKey.code == 0)
 	{
 		UpdateCategory();
