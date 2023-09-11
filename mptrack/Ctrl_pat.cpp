@@ -345,6 +345,8 @@ void CCtrlPatterns::UpdateView(UpdateHint hint, CObject *pObj)
 				}
 			}
 			m_CbnInstrument.SetCurSel(nPos);
+			if(nPos == 0)
+				SetCurrentInstrument(0);
 			m_CbnInstrument.SetRedraw(TRUE);
 			m_CbnInstrument.Invalidate(FALSE);
 		}
@@ -532,6 +534,7 @@ BOOL CCtrlPatterns::SetCurrentInstrument(UINT nIns)
 		{
 			m_CbnInstrument.SetCurSel(i);
 			m_nInstrument = static_cast<INSTRUMENTINDEX>(nIns);
+			m_parent.InstrumentChanged(m_nInstrument);
 			GetDlgItem(IDC_PATINSTROPLUGGUI)->EnableWindow(HasValidPlug(m_nInstrument) ? TRUE : FALSE);
 			return TRUE;
 		}

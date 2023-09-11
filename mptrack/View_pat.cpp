@@ -7184,7 +7184,6 @@ void CViewPattern::FindInstrument()
 			if(!m.IsPcNote() && m.instr != 0)
 			{
 				SendCtrlMessage(CTRLMSG_SETCURRENTINSTRUMENT, m.instr);
-				static_cast<CModControlView *>(CWnd::FromHandle(m_hWndCtrl))->InstrumentChanged(m.instr);
 				return;
 			}
 		} while(row-- != 0);
