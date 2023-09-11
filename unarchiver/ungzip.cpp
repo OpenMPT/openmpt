@@ -54,7 +54,7 @@ CGzipArchive::CGzipArchive(const FileReader &file) : ArchiveBase(file)
 	if(header.flags & GZ_FNAME)
 	{
 		inFile.ReadNullString(str);
-		info.name = mpt::ToUnicode(mpt::Charset::ISO8859_1, str);
+		info.name = mpt::PathString::FromUnicode(mpt::ToUnicode(mpt::Charset::ISO8859_1, str));
 	}
 
 	// Comment present?
