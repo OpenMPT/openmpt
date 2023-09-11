@@ -500,7 +500,7 @@ namespace MidiExport
 					{
 						for(auto &key : instr.NoteMap)
 						{
-							key = instrMap[i].program + NOTE_MIN - 1;
+							key = instrMap[i].program + NOTE_MIN;
 						}
 					}
 				}
