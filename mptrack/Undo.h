@@ -12,16 +12,11 @@
 #pragma once
 
 #include "openmpt/all/BuildSettings.hpp"
-
-#include "../soundlib/ModChannel.h"
-#include "../soundlib/modcommand.h"
+#include "../soundlib/Snd_defs.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
 class CModDoc;
-struct ModSample;
-
-#define MAX_UNDO_LEVEL 100000	// 100,000 undo steps for each undo type!
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // Pattern Undo
@@ -32,22 +27,7 @@ class CPatternUndo
 protected:
 	static constexpr auto DELETE_PATTERN = PATTERNINDEX_INVALID;
 
-	struct UndoInfo
-	{
-		std::vector<ModChannelSettings> channelInfo;	// Optional old channel information (pan / volume / etc.)
-		std::vector<ModCommand> content;	// Rescued pattern content
-		const char *description;			// Name of this undo action
-		ROWINDEX numPatternRows;			// Original number of pattern rows (in case of resize, DELETE_PATTERN in case of deletion)
-		ROWINDEX firstRow, numRows;
-		PATTERNINDEX pattern;
-		CHANNELINDEX firstChannel, numChannels;
-		bool linkToPrevious;			// This undo information is linked with the previous undo information
-
-		bool OnlyChannelSettings() const noexcept
-		{
-			return !channelInfo.empty() && numRows < 1 && !linkToPrevious;
-		}
-	};
+	struct UndoInfo;
 
 	using undobuf_t = std::vector<UndoInfo>;
 
@@ -64,6 +44,8 @@ protected:
 	static void RearrangePatterns(undobuf_t &buffer, const std::vector<PATTERNINDEX> &newIndex);
 
 public:
+	CPatternUndo(CModDoc &parent);
+	~CPatternUndo();
 
 	// Removes all undo steps from the buffer.
 	void ClearUndo();
@@ -80,9 +62,9 @@ public:
 	// Returns true if any actions can currently be redone.
 	bool CanRedo() const { return !RedoBuffer.empty(); }
 	// Returns true if a channel-specific action (no pattern data) can currently be undone.
-	bool CanUndoChannelSettings() const { return !UndoBuffer.empty() && UndoBuffer.back().OnlyChannelSettings(); }
+	bool CanUndoChannelSettings() const;
 	// Returns true if a channel-specific action (no pattern data) actions can currently be redone.
-	bool CanRedoChannelSettings() const { return !RedoBuffer.empty() && RedoBuffer.back().OnlyChannelSettings(); }
+	bool CanRedoChannelSettings() const;
 	// Remove the latest added undo step from the undo buffer
 	void RemoveLastUndoStep();
 	// Get name of next undo item
@@ -91,8 +73,6 @@ public:
 	CString GetRedoName() const { return GetName(RedoBuffer); }
 	// Adjust undo buffers for rearranged patterns
 	void RearrangePatterns(const std::vector<PATTERNINDEX> &newIndex);
-
-	CPatternUndo(CModDoc &parent) : modDoc(parent) { }
 };
 
 
@@ -117,15 +97,7 @@ class CSampleUndo
 {
 protected:
 
-	struct UndoInfo
-	{
-		ModSample OldSample;
-		mpt::charbuf<MAX_SAMPLENAME> oldName;
-		void *samplePtr = nullptr;
-		const char *description = nullptr;
-		SmpLength changeStart = 0, changeEnd = 0;
-		sampleUndoTypes changeType = sundo_none;
-	};
+	struct UndoInfo;
 
 	using undobuf_t = std::vector<std::vector<UndoInfo>>;
 	undobuf_t UndoBuffer;
@@ -145,6 +117,8 @@ protected:
 	bool Undo(undobuf_t &fromBuf, undobuf_t &toBuf, const SAMPLEINDEX smp);
 
 public:
+	CSampleUndo(CModDoc &parent);
+	~CSampleUndo();
 
 	// Sample undo functions
 	void ClearUndo();
@@ -159,14 +133,6 @@ public:
 	const char *GetRedoName(const SAMPLEINDEX smp) const;
 	void RestrictBufferSize();
 	void RearrangeSamples(const std::vector<SAMPLEINDEX> &newIndex) { RearrangeSamples(UndoBuffer, newIndex); RearrangeSamples(RedoBuffer, newIndex); }
-
-	CSampleUndo(CModDoc &parent) : modDoc(parent) { }
-
-	~CSampleUndo()
-	{
-		ClearUndo();
-	};
-
 };
 
 
@@ -178,12 +144,7 @@ class CInstrumentUndo
 {
 protected:
 
-	struct UndoInfo
-	{
-		ModInstrument instr;
-		const char *description = nullptr;
-		EnvelopeType editedEnvelope = ENV_MAXTYPES;
-	};
+	struct UndoInfo;
 
 	using undobuf_t = std::vector<std::vector<UndoInfo>>;
 	undobuf_t UndoBuffer;
@@ -202,6 +163,8 @@ protected:
 	bool Undo(undobuf_t &fromBuf, undobuf_t &toBuf, const INSTRUMENTINDEX ins);
 
 public:
+	CInstrumentUndo(CModDoc &parent);
+	~CInstrumentUndo();
 
 	// Instrument undo functions
 	void ClearUndo();
@@ -216,13 +179,6 @@ public:
 	const char *GetRedoName(const INSTRUMENTINDEX ins) const;
 	void RearrangeInstruments(const std::vector<INSTRUMENTINDEX> &newIndex) { RearrangeInstruments(UndoBuffer, newIndex); RearrangeInstruments(RedoBuffer, newIndex); }
 	void RearrangeSamples(const INSTRUMENTINDEX ins, std::vector<SAMPLEINDEX> &newIndex) { RearrangeSamples(UndoBuffer, ins, newIndex); RearrangeSamples(RedoBuffer, ins, newIndex); }
-
-	CInstrumentUndo(CModDoc &parent) : modDoc(parent) { }
-
-	~CInstrumentUndo()
-	{
-		ClearUndo();
-	};
 };
 
 

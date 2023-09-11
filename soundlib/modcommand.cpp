@@ -9,8 +9,9 @@
 
 
 #include "stdafx.h"
-#include "Sndfile.h"
+#include "modcommand.h"
 #include "mod_specifications.h"
+#include "Sndfile.h"
 #include "Tables.h"
 
 

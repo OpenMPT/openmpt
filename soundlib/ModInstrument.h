@@ -123,7 +123,7 @@ struct ModInstrument
 	// WHEN adding new members here, ALSO update InstrumentExtensions.cpp
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-	ModInstrument(SAMPLEINDEX sample = 0);
+	explicit ModInstrument(SAMPLEINDEX sample = 0);
 
 	// Assign all notes to a given sample.
 	void AssignSample(SAMPLEINDEX sample)
