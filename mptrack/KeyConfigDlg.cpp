@@ -485,7 +485,8 @@ void COptionsKeyboard::UpdateShortcutList(int category)
 	CommandID curCommand = (curSelection >= 0) ? static_cast<CommandID>(m_lbnCommandKeys.GetItemData(curSelection)) : kcNull;
 	m_lbnCommandKeys.SetRedraw(FALSE);
 	m_lbnCommandKeys.DeleteColumn(0);
-	m_lbnCommandKeys.RemoveAllGroups();
+	if(m_listGrouped)
+		ListView_RemoveAllGroups(m_lbnCommandKeys);
 	m_lbnCommandKeys.InsertColumn(0, _T(""));
 	m_lbnCommandKeys.DeleteAllItems();
 
