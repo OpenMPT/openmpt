@@ -135,6 +135,7 @@ void CPattern::Deallocate()
 {
 	m_Rows = m_RowsPerBeat = m_RowsPerMeasure = 0;
 	m_ModCommands.clear();
+	m_tempoSwing.clear();
 	m_PatternName.clear();
 }
 
