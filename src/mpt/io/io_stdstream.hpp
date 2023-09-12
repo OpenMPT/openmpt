@@ -273,18 +273,21 @@ public:
 	}
 
 public:
+	// cppcheck-suppress duplInheritedMember
 	inline bool SeekBegin() {
 		FileOperationsStdIstream::SeekBegin();
 		FileOperationsStdOstream::SeekBegin();
 		return !f.fail();
 	}
 
+	// cppcheck-suppress duplInheritedMember
 	inline bool SeekEnd() {
 		FileOperationsStdIstream::SeekEnd();
 		FileOperationsStdOstream::SeekEnd();
 		return !f.fail();
 	}
 
+	// cppcheck-suppress duplInheritedMember
 	inline bool SeekAbsolute(IO::Offset pos) {
 		if (!mpt::in_range<std::streamoff>(pos))
 		{
@@ -295,6 +298,7 @@ public:
 		return !f.fail();
 	}
 
+	// cppcheck-suppress duplInheritedMember
 	inline bool SeekRelative(IO::Offset off) {
 		if (!mpt::in_range<std::streamoff>(off))
 		{
