@@ -37,6 +37,7 @@ protected:
 	};
 
 public:
+	// cppcheck-suppress duplInheritedMember
 	static IMixPlugin* Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct);
 	Flanger(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN *mixStruct);
 
