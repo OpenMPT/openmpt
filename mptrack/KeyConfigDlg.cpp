@@ -450,7 +450,12 @@ void COptionsKeyboard::InsertGroup(const TCHAR *title, int groupId)
 	group.cbSize = sizeof(group);
 #endif
 	group.mask = LVGF_HEADER | LVGF_GROUPID;
+#if defined(UNICODE)
 	group.pszHeader = const_cast<TCHAR *>(title);
+#else
+	std::wstring titlew = mpt::ToWide(mpt::winstring(title));
+	group.pszHeader = const_cast<WCHAR *>(titlew.c_str());
+#endif
 	group.cchHeader = 0;
 	group.pszFooter = nullptr;
 	group.cchFooter = 0;
@@ -528,7 +533,7 @@ void COptionsKeyboard::UpdateShortcutList(int category)
 			{
 				m_curCategory = cat;
 
-				LVITEMW lvi;
+				LVITEM lvi;
 				lvi.mask = LVIF_TEXT | LVIF_PARAM;
 				if(m_listGrouped)
 					lvi.mask |= LVIF_GROUPID;
