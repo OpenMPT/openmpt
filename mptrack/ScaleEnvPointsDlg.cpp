@@ -9,9 +9,9 @@
 
 
 #include "stdafx.h"
-#include "resource.h"
-#include "ModInstrument.h"
 #include "ScaleEnvPointsDlg.h"
+#include "resource.h"
+#include "../soundlib/ModInstrument.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -19,6 +19,13 @@ OPENMPT_NAMESPACE_BEGIN
 double CScaleEnvPointsDlg::m_factorX = 1.0;
 double CScaleEnvPointsDlg::m_factorY = 1.0;
 double CScaleEnvPointsDlg::m_offsetY = 0.0;
+
+CScaleEnvPointsDlg::CScaleEnvPointsDlg(CWnd *pParent, InstrumentEnvelope &env, int nCenter)
+	: CDialog{IDD_SCALE_ENV_POINTS, pParent}
+	, m_Env{env}
+	, m_nCenter{nCenter}
+{
+}
 
 BOOL CScaleEnvPointsDlg::OnInitDialog()
 {

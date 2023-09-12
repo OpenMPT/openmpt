@@ -12,8 +12,9 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
-#include "ResizableDialog.h"
 #include "CListCtrl.h"
+#include "ResizableDialog.h"
+#include "Snd_defs.h"
 
 OPENMPT_NAMESPACE_BEGIN
 

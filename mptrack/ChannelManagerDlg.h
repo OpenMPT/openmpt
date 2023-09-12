@@ -12,11 +12,11 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 #include "PatternEditorDialogs.h"
-#include "UpdateHints.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
 class CModDoc;
+struct UpdateHint;
 
 class CChannelManagerDlg: public CDialog
 {

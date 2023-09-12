@@ -9,21 +9,22 @@
 
 
 #include "stdafx.h"
-#include "Mptrack.h"
-#include "TuningDialog.h"
-#include "mpt/io/base.hpp"
-#include "mpt/io/io.hpp"
-#include "mpt/io/io_stdstream.hpp"
-#include "TrackerSettings.h"
-#include <algorithm>
-#include "mpt/io_file/outputfile.hpp"
-#include "../common/mptFileIO.h"
-#include "../common/misc_util.h"
 #include "TuningDialog.h"
 #include "FileDialog.h"
 #include "Mainfrm.h"
+#include "Mptrack.h"
+#include "TrackerSettings.h"
+#include "TuningDialog.h"
+#include "../common/misc_util.h"
+#include "../common/mptFileIO.h"
+#include "mpt/io/base.hpp"
+#include "mpt/io/io.hpp"
+#include "mpt/io/io_stdstream.hpp"
+#include "mpt/io_file/outputfile.hpp"
 #include "mpt/parse/parse.hpp"
 #include "mpt/string/utility.hpp"
+
+#include <algorithm>
 
 
 OPENMPT_NAMESPACE_BEGIN

@@ -9,6 +9,7 @@
 
 
 #include "stdafx.h"
+#include "UpdateToolTip.h"
 #include "Mptrack.h"
 #include "Mainfrm.h"
 #include "WindowMessages.h"

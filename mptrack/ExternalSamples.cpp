@@ -9,21 +9,21 @@
 
 
 #include "stdafx.h"
-#include "Moddoc.h"
 #include "ExternalSamples.h"
 #include "FileDialog.h"
 #include "FolderScanner.h"
-#include "TrackerSettings.h"
+#include "Moddoc.h"
 #include "Reporting.h"
 #include "resource.h"
+#include "TrackerSettings.h"
 #include "mpt/fs/fs.hpp"
 
 OPENMPT_NAMESPACE_BEGIN
 
 BEGIN_MESSAGE_MAP(MissingExternalSamplesDlg, ResizableDialog)
 	//{{AFX_MSG_MAP(ExternalSamplesDlg)
-	ON_NOTIFY(NM_DBLCLK,	IDC_LIST1,	&MissingExternalSamplesDlg::OnSetPath)
-	ON_COMMAND(IDC_BUTTON1,				&MissingExternalSamplesDlg::OnScanFolder)
+	ON_NOTIFY(NM_DBLCLK, IDC_LIST1, &MissingExternalSamplesDlg::OnSetPath)
+	ON_COMMAND(IDC_BUTTON1,         &MissingExternalSamplesDlg::OnScanFolder)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 

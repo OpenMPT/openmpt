@@ -1,7 +1,7 @@
 /*
  * mod2wave.h
  * ----------
- * Purpose: Module to WAV conversion (dialog + conversion code).
+ * Purpose: Module to steaming audio (WAV, MP3, etc.) conversion (dialog + conversion code).
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
@@ -12,19 +12,16 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
+#include "ProgressDialog.h"
+#include "Settings.h"
 #include "StreamEncoder.h"
 #include "StreamEncoderSettings.h"
-#include "Settings.h"
-#include "ProgressDialog.h"
+#include "../soundlib/Snd_defs.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
 
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-// Direct To Disk Recording
-
-
+class CSoundFile;
 
 struct CWaveConvertSettings
 {

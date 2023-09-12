@@ -14,9 +14,11 @@
 
 #ifndef NO_PLUGINS
 #include "ProgressDialog.h"
+#include "../soundlib/Snd_defs.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
+class CSoundFile;
 
 namespace MidiExport
 {
@@ -35,8 +37,8 @@ protected:
 	CComboBox m_CbnInstrument, m_CbnChannel, m_CbnProgram;
 	CSpinButtonCtrl m_SpinInstrument;
 	CSoundFile &m_sndFile;
-	UINT m_currentInstr;
-	bool m_percussion;
+	size_t m_currentInstr = 1;
+	bool m_percussion = false;
 public:
 	MidiExport::InstrMap m_instrMap;
 	static bool s_overlappingInstruments;

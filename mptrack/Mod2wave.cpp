@@ -1,7 +1,7 @@
 /*
  * mod2wave.cpp
  * ------------
- * Purpose: Module to WAV conversion (dialog + conversion code).
+ * Purpose: Module to steaming audio (WAV, MP3, etc.) conversion (dialog + conversion code).
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
@@ -9,27 +9,28 @@
 
 
 #include "stdafx.h"
-#include "Mptrack.h"
-#include "Sndfile.h"
+#include "mod2wave.h"
 #include "Dlsbank.h"
 #include "Mainfrm.h"
 #include "Mpdlgs.h"
-#include "mod2wave.h"
+#include "Mptrack.h"
+#include "Sndfile.h"
 #include "WAVTools.h"
+#include "../common/Dither.h"
+#include "../common/mptFileIO.h"
 #include "../common/mptFileTemporary.h"
 #include "../common/mptString.h"
 #include "../common/version.h"
-#include "../soundlib/MixerLoops.h"
-#include "openmpt/soundbase/Dither.hpp"
-#include "../common/Dither.h"
 #include "../soundlib/AudioReadTarget.h"
+#include "../soundlib/MixerLoops.h"
 #include "../soundlib/plugins/PlugInterface.h"
-#include "mpt/io_file/fstream.hpp"
-#include "../common/mptFileIO.h"
 #include "mpt/audio/span.hpp"
-#include <variant>
 #include "mpt/io/io.hpp"
 #include "mpt/io/io_stdstream.hpp"
+#include "mpt/io_file/fstream.hpp"
+#include "openmpt/soundbase/Dither.hpp"
+
+#include <variant>
 
 
 OPENMPT_NAMESPACE_BEGIN

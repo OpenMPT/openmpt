@@ -9,23 +9,24 @@
 
 
 #include "stdafx.h"
-#include "Mainfrm.h"
-#include "Mptrack.h"
+#include "ExceptionHandler.h"
 #include "AboutDialog.h"
 #include "InputHandler.h"
-#include "openmpt/sounddevice/SoundDevice.hpp"
+#include "Mainfrm.h"
 #include "Moddoc.h"
-#include <shlwapi.h>
-#include "ExceptionHandler.h"
-#include "../misc/WriteMemoryDump.h"
-#include "../common/version.h"
-#include "mpt/io_file/outputfile.hpp"
 #include "../common/mptFileIO.h"
+#include "../common/version.h"
+#include "../misc/WriteMemoryDump.h"
+#include "../soundlib/mod_specifications.h"
+
 #include "mpt/fs/common_directories.hpp"
 #include "mpt/fs/fs.hpp"
-#include "../soundlib/mod_specifications.h"
+#include "mpt/io_file/outputfile.hpp"
 #include "mpt/string/utility.hpp"
+#include "Mptrack.h"
+#include "openmpt/sounddevice/SoundDevice.hpp"
 
+#include <shlwapi.h>
 #include <atomic>
 
 

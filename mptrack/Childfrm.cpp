@@ -9,28 +9,27 @@
 
 
 #include "stdafx.h"
-#include <afxpriv.h>
-#include "Mptrack.h"
-#include "Mainfrm.h"
-#include "Childfrm.h"
-#include "Moddoc.h"
-#include "Globals.h"
-#include "View_gen.h"
-#include "Ctrl_pat.h"
-#include "View_pat.h"
-#include "Ctrl_smp.h"
-#include "View_smp.h"
-#include "Ctrl_ins.h"
-#include "View_ins.h"
-#include "view_com.h"
 #include "Childfrm.h"
 #include "ChannelManagerDlg.h"
-
+#include "Childfrm.h"
+#include "Ctrl_ins.h"
+#include "Ctrl_pat.h"
+#include "Ctrl_smp.h"
+#include "Globals.h"
+#include "Mainfrm.h"
+#include "Moddoc.h"
+#include "Mptrack.h"
+#include "view_com.h"
+#include "View_gen.h"
+#include "View_ins.h"
+#include "View_pat.h"
+#include "View_smp.h"
+#include "../common/FileReader.h"
 #include "mpt/io/io.hpp"
 #include "mpt/io/io_stdstream.hpp"
 
-#include "../common/FileReader.h"
 #include <sstream>
+#include <afxpriv.h>
 
 
 OPENMPT_NAMESPACE_BEGIN

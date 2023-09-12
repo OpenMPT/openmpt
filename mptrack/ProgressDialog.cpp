@@ -9,9 +9,9 @@
 
 
 #include "stdafx.h"
-#include "resource.h"
 #include "ProgressDialog.h"
 #include "Mptrack.h"
+#include "resource.h"
 
 OPENMPT_NAMESPACE_BEGIN
 

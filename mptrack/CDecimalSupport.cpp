@@ -9,7 +9,6 @@
 
 
 #include "stdafx.h"
-#include "Snd_defs.h"
 #include "CDecimalSupport.h"
 
 OPENMPT_NAMESPACE_BEGIN

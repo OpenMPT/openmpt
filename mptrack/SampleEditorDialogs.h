@@ -13,10 +13,11 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
+#include "CDecimalSupport.h"
+#include "resource.h"
 #include "../common/FileReaderFwd.h"
 #include "../soundlib/SampleIO.h"
 #include "../tracklib/FadeLaws.h"
-#include "CDecimalSupport.h"
 
 OPENMPT_NAMESPACE_BEGIN
 

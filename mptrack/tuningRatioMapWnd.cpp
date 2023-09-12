@@ -9,11 +9,11 @@
 
 
 #include "stdafx.h"
-#include "Mptrack.h"
-#include "Mainfrm.h"
-#include "../soundlib/tuning.h"
 #include "tuningRatioMapWnd.h"
+#include "Mainfrm.h"
+#include "Mptrack.h"
 #include "TuningDialog.h"
+#include "../soundlib/tuning.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

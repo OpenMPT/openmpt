@@ -14,6 +14,8 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+class CModDoc;
+
 class CModCleanupDlg: public CDialog
 {
 private:
@@ -76,7 +78,7 @@ private:
 	bool RemoveUnusedChannels();
 
 public:
-	CModCleanupDlg(CModDoc &modParent, CWnd *parent) : CDialog(IDD_CLEANUP_SONG, parent), modDoc(modParent) { }
+	CModCleanupDlg(CModDoc &modParent, CWnd *parent);
 
 protected:
 	//{{AFX_VIRTUAL(CModCleanupDlg)
@@ -84,7 +86,7 @@ protected:
 	void OnOK() override;
 	//}}AFX_VIRTUAL
 
-	BOOL OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESULT* pResult);
+	BOOL OnToolTipNotify(UINT id, NMHDR *pNMHDR, LRESULT *pResult);
 
 	//{{AFX_MSG(CModCleanupDlg)
 	afx_msg void OnPresetCleanupSong();

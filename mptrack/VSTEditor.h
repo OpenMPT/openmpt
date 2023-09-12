@@ -18,6 +18,8 @@ OPENMPT_NAMESPACE_BEGIN
 
 #ifdef MPT_WITH_VST
 
+class CVstPlugin;
+
 class COwnerVstEditor : public CAbstractVstEditor
 {
 protected:
@@ -25,7 +27,7 @@ protected:
 	int m_width = 0, m_height = 0;
 
 public:
-	COwnerVstEditor(CVstPlugin &plugin) : CAbstractVstEditor{plugin} {}
+	COwnerVstEditor(CVstPlugin &plugin);
 	~COwnerVstEditor() override = default;
 
 	// Plugins may request to change the GUI size.

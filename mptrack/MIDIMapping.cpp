@@ -9,8 +9,8 @@
 
 
 #include "stdafx.h"
-#include "Moddoc.h"
 #include "MIDIMapping.h"
+#include "Moddoc.h"
 #include "../common/FileReader.h"
 #include "../soundlib/MIDIEvents.h"
 #include "../soundlib/plugins/PlugInterface.h"

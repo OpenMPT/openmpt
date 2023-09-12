@@ -9,24 +9,24 @@
 
 
 #include "stdafx.h"
-#include "Mptrack.h"
-#include "Mainfrm.h"
+#include "AbstractVstEditor.h"
 #include "Clipboard.h"
+#include "dlg_misc.h"
+#include "Globals.h"
+#include "InputHandler.h"
+#include "MIDIMacros.h"
+#include "Mainfrm.h"
+#include "Mptrack.h"
+#include "VstPresets.h"
+#include "Vstplug.h"
+#include "../common/FileReader.h"
+#include "../common/mptStringBuffer.h"
 #include "../soundlib/Sndfile.h"
 #include "../soundlib/mod_specifications.h"
 #include "../soundlib/plugins/PlugInterface.h"
 #include "../soundlib/plugins/PluginManager.h"
-#include "Vstplug.h"
-#include "dlg_misc.h"
-#include "AbstractVstEditor.h"
-#include "../common/mptStringBuffer.h"
-#include "MIDIMacros.h"
-#include "VstPresets.h"
-#include "../common/FileReader.h"
-#include "InputHandler.h"
-#include "dlg_misc.h"
+
 #include <sstream>
-#include "Globals.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

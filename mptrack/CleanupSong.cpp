@@ -10,11 +10,12 @@
 
 
 #include "stdafx.h"
-#include "Moddoc.h"
-#include "Mainfrm.h"
-#include "InputHandler.h"
 #include "CleanupSong.h"
+#include "InputHandler.h"
+#include "Mainfrm.h"
+#include "Moddoc.h"
 #include "ProgressDialog.h"
+#include "resource.h"
 #include "../common/mptStringBuffer.h"
 #include "../soundlib/mod_specifications.h"
 #include "../soundlib/modsmp_ctrl.h"
@@ -102,6 +103,9 @@ BEGIN_MESSAGE_MAP(CModCleanupDlg, CDialog)
 	ON_NOTIFY_EX(TTN_NEEDTEXT, 0, &CModCleanupDlg::OnToolTipNotify)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
+
+
+CModCleanupDlg::CModCleanupDlg(CModDoc &modParent, CWnd *parent) : CDialog(IDD_CLEANUP_SONG, parent), modDoc(modParent) { }
 
 
 BOOL CModCleanupDlg::OnInitDialog()

@@ -11,17 +11,18 @@
 #include "stdafx.h"
 
 #ifndef NO_PLUGINS
-#include "../soundlib/Sndfile.h"
-#include "../soundlib/plugins/PlugInterface.h"
+#include "VstPresets.h"
 #ifdef MPT_WITH_VST
 #include "Vstplug.h"
 #endif // MPT_WITH_VST
-#include "VstPresets.h"
 #include "../common/FileReader.h"
-#include <ostream>
+#include "../soundlib/Sndfile.h"
+#include "../soundlib/plugins/PlugInterface.h"
 #include "mpt/io/base.hpp"
 #include "mpt/io/io.hpp"
 #include "mpt/io/io_stdstream.hpp"
+
+#include <ostream>
 
 
 OPENMPT_NAMESPACE_BEGIN

@@ -10,14 +10,14 @@
 
 
 #include "stdafx.h"
-#include "resource.h"
-#include "Reporting.h"
-#include "MPTrackUtil.h"
+#include "SampleEditorDialogs.h"
 #include "Mptrack.h"
+#include "MPTrackUtil.h"
+#include "Reporting.h"
+#include "resource.h"
 #include "../common/misc_util.h"
 #include "../soundlib/Snd_defs.h"
 #include "../soundlib/ModSample.h"
-#include "SampleEditorDialogs.h"
 #include "ProgressDialog.h"
 
 

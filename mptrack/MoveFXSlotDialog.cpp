@@ -9,8 +9,9 @@
 
 
 #include "stdafx.h"
-#include "Mptrack.h"
 #include "MoveFXSlotDialog.h"
+#include "Mptrack.h"
+#include "resource.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -24,7 +25,7 @@ void CMoveFXSlotDialog::DoDataExchange(CDataExchange* pDX)
 
 
 CMoveFXSlotDialog::CMoveFXSlotDialog(CWnd *pParent, PLUGINDEX currentSlot, const std::vector<PLUGINDEX> &emptySlots, PLUGINDEX defaultIndex, bool clone, bool hasChain) :
-	CDialog(CMoveFXSlotDialog::IDD, pParent),
+	CDialog(IDD_MOVEFXSLOT, pParent),
 	m_EmptySlots(emptySlots),
 	m_nDefaultSlot(defaultIndex),
 	moveChain(hasChain)

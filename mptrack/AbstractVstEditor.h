@@ -132,7 +132,6 @@ protected:
 
 	void StoreWindowPos();
 	void RestoreWindowPos();
-
 };
 
 OPENMPT_NAMESPACE_END

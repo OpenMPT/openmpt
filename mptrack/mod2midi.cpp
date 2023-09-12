@@ -9,17 +9,18 @@
 
 
 #include "stdafx.h"
-#include "Mptrack.h"
+#include "mod2midi.h"
 #include "Mainfrm.h"
 #include "Moddoc.h"
-#include "../common/mptStringBuffer.h"
+#include "Mptrack.h"
 #include "../common/mptFileIO.h"
-#include "mod2midi.h"
+#include "../common/mptStringBuffer.h"
 #include "../soundlib/plugins/PlugInterface.h"
 #include "../soundlib/plugins/PluginManager.h"
-#include <sstream>
 #include "mpt/io/io.hpp"
 #include "mpt/io/io_stdstream.hpp"
+
+#include <sstream>
 
 #ifndef NO_PLUGINS
 
@@ -717,7 +718,7 @@ void CModToMidi::FillProgramBox(bool percussion)
 
 void CModToMidi::UpdateDialog()
 {
-	m_currentInstr = static_cast<UINT>(m_CbnInstrument.GetItemData(m_CbnInstrument.GetCurSel()));
+	m_currentInstr = m_CbnInstrument.GetItemData(m_CbnInstrument.GetCurSel());
 	const bool validInstr = (m_currentInstr > 0 && m_currentInstr < m_instrMap.size());
 
 	m_CbnProgram.EnableWindow(validInstr && m_instrMap[m_currentInstr].channel != MidiNoChannel);

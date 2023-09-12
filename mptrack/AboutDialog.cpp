@@ -9,15 +9,15 @@
 
 
 #include "stdafx.h"
-#include "resource.h"
 #include "AboutDialog.h"
-#include "mpt/format/join.hpp"
 #include "Image.h"
 #include "Mptrack.h"
 #include "TrackerSettings.h"
+#include "mpt/format/join.hpp"
+#include "mpt/string/utility.hpp"
+#include "resource.h"
 #include "../common/version.h"
 #include "../misc/mptWine.h"
-#include "mpt/string/utility.hpp"
 
 
 OPENMPT_NAMESPACE_BEGIN

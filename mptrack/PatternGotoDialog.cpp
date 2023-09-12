@@ -9,8 +9,8 @@
 
 
 #include "stdafx.h"
-#include "Mptrack.h"
 #include "PatternGotoDialog.h"
+#include "resource.h"
 #include "Sndfile.h"
 
 

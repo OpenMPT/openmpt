@@ -9,9 +9,10 @@
 
 
 #include "stdafx.h"
-#include "Moddoc.h"
-#include "Mainfrm.h"
 #include "ChannelManagerDlg.h"
+#include "Mainfrm.h"
+#include "Moddoc.h"
+#include "UpdateHints.h"
 #include "../common/mptStringBuffer.h"
 
 #include <functional>
