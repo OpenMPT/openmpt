@@ -12,6 +12,7 @@
 #include "FileDialog.h"
 #include "InputHandler.h"
 #include "Mainfrm.h"
+#include "Mptrack.h"
 #include "TrackerSettings.h"
 #include "mpt/fs/fs.hpp"
 

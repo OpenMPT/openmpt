@@ -12,6 +12,7 @@
 #include "Dlsbank.h"
 #include "InputHandler.h"
 #include "Mainfrm.h"
+#include "resource.h"
 #include "TrackerSettings.h"
 #include "WindowMessages.h"
 #include "../soundlib/MIDIEvents.h"

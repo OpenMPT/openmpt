@@ -13,6 +13,7 @@
 #include "CommandSet.h"
 #include "InputHandler.h"
 #include "Mainfrm.h"
+#include "Mptrack.h"
 #include "resource.h"
 #include "SelectPluginDialog.h"
 #include "TrackerSettings.h"

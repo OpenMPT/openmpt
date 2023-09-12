@@ -12,6 +12,7 @@
 #include "AdvancedConfigDlg.h"
 #include "dlg_misc.h"
 #include "Mainfrm.h"
+#include "Mptrack.h"
 #include "resource.h"
 #include "Settings.h"
 #include "TrackerSettings.h"

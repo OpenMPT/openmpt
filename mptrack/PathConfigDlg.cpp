@@ -12,6 +12,8 @@
 #include "PathConfigDlg.h"
 #include "FileDialog.h"
 #include "Mainfrm.h"
+#include "Mptrack.h"
+#include "Reporting.h"
 #include "resource.h"
 #include "TrackerSettings.h"
 #include "mpt/fs/fs.hpp"

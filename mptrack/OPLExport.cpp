@@ -14,6 +14,8 @@
 #include "Mainfrm.h"
 #include "Moddoc.h"
 #include "ProgressDialog.h"
+#include "Reporting.h"
+#include "resource.h"
 #include "TrackerSettings.h"
 #include "../soundlib/OPL.h"
 #include "../soundlib/Tagging.h"

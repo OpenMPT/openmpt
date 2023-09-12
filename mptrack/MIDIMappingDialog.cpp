@@ -13,6 +13,8 @@
 #include "InputHandler.h"
 #include "Mainfrm.h"
 #include "Moddoc.h"
+#include "Mptrack.h"
+#include "resource.h"
 #include "WindowMessages.h"
 #include "../common/mptStringBuffer.h"
 #include "../soundlib/MIDIEvents.h"

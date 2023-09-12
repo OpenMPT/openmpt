@@ -15,6 +15,8 @@
 #include "Mainfrm.h"
 #include "InputHandler.h"
 #include "Moddoc.h"
+#include "Mptrack.h"
+#include "MPTrackUtil.h"
 #include "PatternClipboard.h"
 #include "TrackerSettings.h"
 #include "WindowMessages.h"

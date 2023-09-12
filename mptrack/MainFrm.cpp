@@ -588,6 +588,18 @@ void CMainFrame::OnUpdateFrameTitle(BOOL bAddToTitle)
 }
 
 
+bool CMainFrame::InGuiThread() const noexcept
+{
+	return theApp.InGuiThread();
+}
+
+
+CMainFrame *CMainFrame::GetMainFrame() noexcept
+{
+	return static_cast<CMainFrame *>(theApp.m_pMainWnd);
+}
+
+
 /////////////////////////////////////////////////////////////////////////////
 // CMainFrame Sound Library
 

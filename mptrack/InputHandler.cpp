@@ -12,6 +12,7 @@
 #include "InputHandler.h"
 #include "CommandSet.h"
 #include "Mainfrm.h"
+#include "Mptrack.h"
 #include "resource.h"
 #include "TrackerSettings.h"
 #include "WindowMessages.h"
@@ -539,7 +540,7 @@ CString CInputHandler::GetMenuText(UINT id) const
 
 void CInputHandler::UpdateMainMenu()
 {
-	CMenu *pMenu = (CMainFrame::GetMainFrame())->GetMenu();
+	CMenu *pMenu = m_pMainFrm->GetMenu();
 	if (!pMenu) return;
 
 	pMenu->GetSubMenu(0)->ModifyMenu(0, MF_BYPOSITION | MF_STRING, 0, GetMenuText(ID_FILE_NEW));

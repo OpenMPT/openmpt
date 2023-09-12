@@ -13,6 +13,8 @@
 #include "ColorSchemes.h"
 #include "FileDialog.h"
 #include "Mainfrm.h"
+#include "Mptrack.h"
+#include "resource.h"
 #include "Settings.h"
 #include "WindowMessages.h"
 #include "../common/mptStringBuffer.h"

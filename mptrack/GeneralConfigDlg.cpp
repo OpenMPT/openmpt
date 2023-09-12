@@ -13,6 +13,8 @@
 #include "FileDialog.h"
 #include "FolderScanner.h"
 #include "Mainfrm.h"
+#include "Mptrack.h"
+#include "resource.h"
 #include "Settings.h"
 #include "TrackerSettings.h"
 #include "../common/mptStringBuffer.h"

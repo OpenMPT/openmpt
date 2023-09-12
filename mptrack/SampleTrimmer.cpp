@@ -14,6 +14,7 @@
 #include "Mainfrm.h"
 #include "Moddoc.h"
 #include "ProgressDialog.h"
+#include "Reporting.h"
 #include "../tracklib/SampleEdit.h"
 #include "../soundlib/OPL.h"
 

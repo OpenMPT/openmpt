@@ -15,6 +15,7 @@
 #include "Mainfrm.h"
 #include "Moddoc.h"
 #include "ProgressDialog.h"
+#include "Reporting.h"
 #include "resource.h"
 #include "../common/mptStringBuffer.h"
 #include "../soundlib/mod_specifications.h"

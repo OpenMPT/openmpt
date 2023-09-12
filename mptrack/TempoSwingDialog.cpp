@@ -11,6 +11,8 @@
 #include "stdafx.h"
 #include "TempoSwingDialog.h"
 #include "Mainfrm.h"
+#include "MPTrackUtil.h"
+#include "resource.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

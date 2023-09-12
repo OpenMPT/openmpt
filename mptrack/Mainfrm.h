@@ -14,11 +14,9 @@
 #include "AutoSaver.h"
 #include "CImageListEx.h"
 #include "Mainbar.h"
-#include "Mptrack.h"
 #include "Notification.h"
 #include "openmpt/soundbase/Dither.hpp"
 #include "Settings.h"
-#include "UpdateHints.h"
 #include "../common/Dither.h"
 #include "../soundlib/AudioCriticalSection.h"
 #include "../soundlib/Sndfile.h"
@@ -35,6 +33,7 @@ class CDLSBank;
 class CInputHandler;
 class CModDoc;
 struct UpdateCheckResult;
+struct UpdateHint;
 struct MODPLUGDIB;
 enum SoundDeviceStopMode : int;
 namespace SoundDevice {
@@ -237,9 +236,9 @@ public:
 	// from SoundDevice::IMessageReceiver
 	void SoundDeviceMessage(LogLevel level, const mpt::ustring &str) override;
 
-	bool InGuiThread() const { return theApp.InGuiThread(); }
-	bool InAudioThread() const { return GetCurrentThreadId() == m_AudioThreadId; }
-	bool InNotifyHandler() const { return m_InNotifyHandler; }
+	bool InGuiThread() const noexcept;
+	bool InAudioThread() const noexcept { return GetCurrentThreadId() == m_AudioThreadId; }
+	bool InNotifyHandler() const noexcept { return m_InNotifyHandler; }
 
 	bool audioOpenDevice();
 	void audioCloseDevice();
@@ -257,7 +256,7 @@ public:
 
 // static functions
 public:
-	static CMainFrame *GetMainFrame() { return (CMainFrame *)theApp.m_pMainWnd; }
+	static CMainFrame *GetMainFrame() noexcept;
 	static void UpdateColors();
 	static HICON GetModIcon() { return m_hIcon; }
 	static HFONT GetGUIFont() { return m_hGUIFont; }

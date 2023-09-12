@@ -42,6 +42,7 @@
 #include "InputHandler.h"
 #include "Mainfrm.h"
 #include "Moddoc.h"
+#include "Reporting.h"
 #include "../soundlib/mod_specifications.h"
 #include "../soundlib/modsmp_ctrl.h"
 #include "../tracklib/SampleEdit.h"
