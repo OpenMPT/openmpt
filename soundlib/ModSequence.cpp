@@ -10,8 +10,8 @@
 
 #include "stdafx.h"
 #include "ModSequence.h"
-#include "Sndfile.h"
 #include "mod_specifications.h"
+#include "Sndfile.h"
 #include "../common/version.h"
 #include "../common/serialization_utils.h"
 #include "mpt/io/io.hpp"

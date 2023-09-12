@@ -12,9 +12,9 @@
 
 #ifndef NO_PLUGINS
 
-#include "../../common/version.h"
 #include "PluginManager.h"
 #include "PlugInterface.h"
+#include "../../common/version.h"
 
 #if defined(MPT_WITH_DMO)
 #include "mpt/uuid/guid.hpp"

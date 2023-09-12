@@ -9,8 +9,8 @@
 
 
 #include "stdafx.h"
-#include "Sndfile.h"
 #include "ModInstrument.h"
+#include "Sndfile.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

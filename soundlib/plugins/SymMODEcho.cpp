@@ -11,8 +11,8 @@
 #include "stdafx.h"
 
 #ifndef NO_PLUGINS
-#include "../Sndfile.h"
 #include "SymMODEcho.h"
+#include "../Sndfile.h"
 
 OPENMPT_NAMESPACE_BEGIN
 

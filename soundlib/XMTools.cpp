@@ -9,10 +9,11 @@
 
 
 #include "stdafx.h"
-#include "Loaders.h"
 #include "XMTools.h"
+#include "Loaders.h"
 #include "Sndfile.h"
 #include "../common/version.h"
+
 #include <algorithm>
 
 

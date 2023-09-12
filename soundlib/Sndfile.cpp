@@ -10,34 +10,35 @@
 
 
 #include "stdafx.h"
-#ifdef MODPLUG_TRACKER
-#include "../mptrack/Mptrack.h"	// For CTrackApp::OpenURL
-#include "../mptrack/TrackerSettings.h"
-#include "../mptrack/Moddoc.h"
-#include "../mptrack/Reporting.h"
-#include "../mptrack/Mainfrm.h"
-#endif // MODPLUG_TRACKER
-#ifdef MPT_EXTERNAL_SAMPLES
-#include "mpt/io_file/inputfile.hpp"
-#include "mpt/io_file_read/inputfile_filecursor.hpp"
-#include "../common/mptFileIO.h"
-#include "../common/mptFileIO.h"
-#endif // MPT_EXTERNAL_SAMPLES
-#include "../common/version.h"
-#include "../soundlib/AudioCriticalSection.h"
-#include "../common/serialization_utils.h"
 #include "Sndfile.h"
-#include "Tables.h"
+#include "Container.h"
 #include "mod_specifications.h"
+#include "OPL.h"
+#include "Tables.h"
 #include "tuningcollection.h"
 #include "plugins/PluginManager.h"
 #include "plugins/PlugInterface.h"
-#include "../common/mptStringBuffer.h"
 #include "../common/FileReader.h"
-#include "Container.h"
-#include "OPL.h"
+#include "../common/mptStringBuffer.h"
+#include "../common/serialization_utils.h"
+#include "../common/version.h"
+#include "../soundlib/AudioCriticalSection.h"
 #include "mpt/io/io.hpp"
 #include "mpt/io/io_stdstream.hpp"
+
+#ifdef MODPLUG_TRACKER
+#include "../mptrack/Mainfrm.h"
+#include "../mptrack/Moddoc.h"
+#include "../mptrack/Mptrack.h"	// For CTrackApp::OpenURL
+#include "../mptrack/Reporting.h"
+#include "../mptrack/TrackerSettings.h"
+#endif // MODPLUG_TRACKER
+
+#ifdef MPT_EXTERNAL_SAMPLES
+#include "../common/mptFileIO.h"
+#include "mpt/io_file/inputfile.hpp"
+#include "mpt/io_file_read/inputfile_filecursor.hpp"
+#endif // MPT_EXTERNAL_SAMPLES
 
 #ifndef NO_ARCHIVE_SUPPORT
 #include "../unarchiver/unarchiver.h"

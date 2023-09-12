@@ -11,13 +11,13 @@
 
 
 #include "stdafx.h"
-#include "Loaders.h"
 #include "SampleIO.h"
-#include "openmpt/soundbase/SampleDecode.hpp"
+#include "BitReader.h"
+#include "ITCompression.h"
+#include "Loaders.h"
+#include "ModSampleCopy.h"
 #include "SampleCopy.h"
 #include "SampleNormalize.h"
-#include "ModSampleCopy.h"
-#include "ITCompression.h"
 #ifndef MODPLUG_NO_FILESAVE
 #include "../common/mptFileIO.h"
 #include "mpt/io/base.hpp"
@@ -25,7 +25,7 @@
 #include "mpt/io/io_stdstream.hpp"
 #include "mpt/io_write/buffer.hpp"
 #endif
-#include "BitReader.h"
+#include "openmpt/soundbase/SampleDecode.hpp"
 
 
 OPENMPT_NAMESPACE_BEGIN

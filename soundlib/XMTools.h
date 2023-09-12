@@ -11,10 +11,15 @@
 #pragma once
 
 #include "openmpt/all/BuildSettings.hpp"
+#include "Snd_defs.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
 
+struct InstrumentEnvelope;
+struct ModInstrument;
+struct ModSample;
+class SampleIO;
 
 // XM File Header
 struct XMFileHeader

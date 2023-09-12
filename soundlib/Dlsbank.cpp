@@ -10,23 +10,23 @@
 
 
 #include "stdafx.h"
+#include "Dlsbank.h"
 #include "Sndfile.h"
 #ifdef MODPLUG_TRACKER
+#include "../common/mptFileIO.h"
 #include "../mptrack/Mptrack.h"
 #include "mpt/io_file/inputfile.hpp"
 #include "mpt/io_file_read/inputfile_filecursor.hpp"
-#include "../common/mptFileIO.h"
 #endif
-#include "Dlsbank.h"
 #include "Loaders.h"
 #include "SampleCopy.h"
-#include "../common/mptStringBuffer.h"
-#include "../common/FileReader.h"
-#include "openmpt/base/Endian.hpp"
 #include "SampleIO.h"
+#include "../common/FileReader.h"
+#include "../common/mptStringBuffer.h"
 #include "mpt/io/base.hpp"
 #include "mpt/io/io.hpp"
 #include "mpt/io/io_stdstream.hpp"
+#include "openmpt/base/Endian.hpp"
 
 OPENMPT_NAMESPACE_BEGIN
 

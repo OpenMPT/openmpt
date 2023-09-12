@@ -9,10 +9,10 @@
 
 
 #include "stdafx.h"
-#include "AudioCriticalSection.h"
-#include "Sndfile.h"
 #include "ModSample.h"
+#include "AudioCriticalSection.h"
 #include "modsmp_ctrl.h"
+#include "Sndfile.h"
 #include "mpt/base/numbers.hpp"
 
 #include <cmath>

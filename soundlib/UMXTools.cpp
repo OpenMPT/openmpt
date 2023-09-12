@@ -9,8 +9,8 @@
 
 
 #include "stdafx.h"
-#include "Loaders.h"
 #include "UMXTools.h"
+#include "Loaders.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

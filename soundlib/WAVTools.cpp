@@ -9,8 +9,8 @@
 
 
 #include "stdafx.h"
-#include "Loaders.h"
 #include "WAVTools.h"
+#include "Loaders.h"
 #include "Tagging.h"
 #include "../common/version.h"
 #ifndef MODPLUG_NO_FILESAVE
