@@ -140,6 +140,7 @@ void CViewComments::OnInitialUpdate()
 }
 
 
+// cppcheck-suppress duplInheritedMember
 void CViewComments::OnDestroy()
 {
 	if(m_lastNote != NOTE_NONE)

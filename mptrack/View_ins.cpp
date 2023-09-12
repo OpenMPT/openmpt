@@ -2714,6 +2714,7 @@ bool CViewInstrument::CanMovePoint(uint32 envPoint, int step)
 }
 
 
+// cppcheck-suppress duplInheritedMember
 BOOL CViewInstrument::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 {
 	// Ctrl + mouse wheel: envelope zoom.

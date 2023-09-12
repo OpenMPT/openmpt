@@ -194,6 +194,7 @@ protected:
 	afx_msg BOOL OnEraseBkgnd(CDC *) { return TRUE; }
 	afx_msg void OnSetFocus(CWnd *pOldWnd);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
+	// cppcheck-suppress duplInheritedMember
 	afx_msg LRESULT OnDPIChanged(WPARAM = 0, LPARAM = 0);
 	afx_msg void OnNcCalcSize(BOOL bCalcValidRects, NCCALCSIZE_PARAMS* lpncsp);
 	afx_msg LRESULT OnNcHitTest(CPoint point);
@@ -233,6 +234,7 @@ protected:
 	afx_msg void OnDropFiles(HDROP hDropInfo);
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
 	afx_msg LRESULT OnMidiMsg(WPARAM, LPARAM);
+	// cppcheck-suppress duplInheritedMember
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 	afx_msg void OnXButtonUp(UINT nFlags, UINT nButton, CPoint point);
 	afx_msg void OnEditUndo();

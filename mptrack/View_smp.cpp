@@ -3950,6 +3950,7 @@ void CViewSample::DoZoom(int direction, const CPoint &zoomPoint)
 }
 
 
+// cppcheck-suppress duplInheritedMember
 BOOL CViewSample::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 {
 	// Ctrl + mouse wheel: zoom control.

@@ -397,7 +397,9 @@ protected:
 	//{{AFX_MSG(CViewPattern)
 	afx_msg BOOL OnEraseBkgnd(CDC *) { return TRUE; }
 	afx_msg void OnSize(UINT nType, int cx, int cy);
+	// cppcheck-suppress duplInheritedMember
 	afx_msg void OnDestroy();
+	// cppcheck-suppress duplInheritedMember
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 	afx_msg void OnXButtonUp(UINT nFlags, UINT nButton, CPoint point);
 	afx_msg void OnMouseMove(UINT, CPoint);
@@ -483,6 +485,7 @@ protected:
 	afx_msg void OnUpdateUndo(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateRedo(CCmdUI *pCmdUI);
 	afx_msg void OnSelectPlugin(UINT nID);
+	// cppcheck-suppress duplInheritedMember
 	afx_msg LRESULT OnUpdatePosition(WPARAM nOrd, LPARAM nRow);
 	afx_msg LRESULT OnMidiMsg(WPARAM, LPARAM);
 	afx_msg LRESULT OnRecordPlugParamChange(WPARAM, LPARAM);
