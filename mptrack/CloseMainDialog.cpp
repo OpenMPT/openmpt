@@ -9,9 +9,9 @@
 
 
 #include "stdafx.h"
-#include "Mptrack.h"
-#include "Moddoc.h"
 #include "CloseMainDialog.h"
+#include "Moddoc.h"
+#include "Mptrack.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -28,21 +28,19 @@ void CloseMainDialog::DoDataExchange(CDataExchange* pDX)
 {
 	ResizableDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(DoDataExchange)
-	DDX_Control(pDX, IDC_LIST1,		m_List);
+	DDX_Control(pDX, IDC_LIST1, m_List);
 	//}}AFX_DATA_MAP
 }
 
 
-CloseMainDialog::CloseMainDialog() : ResizableDialog(IDD_CLOSEDOCUMENTS)
-{
-};
+CloseMainDialog::CloseMainDialog() : ResizableDialog(IDD_CLOSEDOCUMENTS) {}
 
 
-CString CloseMainDialog::FormatTitle(const CModDoc *modDoc, bool fullPath)
+CString CloseMainDialog::FormatTitle(const CModDoc &modDoc, bool fullPath)
 {
 	return MPT_CFORMAT("{} ({})")
-		(mpt::ToCString(modDoc->GetSoundFile().GetCharsetInternal(), modDoc->GetSoundFile().GetTitle()),
-		(!fullPath || modDoc->GetPathNameMpt().empty()) ? modDoc->GetTitle() : modDoc->GetPathNameMpt().ToCString());
+		(mpt::ToCString(modDoc.GetSoundFile().GetCharsetInternal(), modDoc.GetSoundFile().GetTitle()),
+		(!fullPath || modDoc.GetPathNameMpt().empty()) ? modDoc.GetTitle() : modDoc.GetPathNameMpt().ToCString());
 }
 
 
@@ -56,11 +54,11 @@ BOOL CloseMainDialog::OnInitDialog()
 	CheckDlgButton(IDC_CHECK1, BST_CHECKED);
 
 	m_List.SetRedraw(FALSE);
-	for(const auto &modDoc : theApp.GetOpenDocuments())
+	for(CModDoc *modDoc : theApp.GetOpenDocuments())
 	{
 		if(modDoc->IsModified())
 		{
-			int item = m_List.AddString(FormatTitle(modDoc, true));
+			int item = m_List.AddString(FormatTitle(*modDoc, true));
 			m_List.SetItemDataPtr(item, modDoc);
 			m_List.SetSel(item, TRUE);
 		}
@@ -132,7 +130,7 @@ void CloseMainDialog::OnSwitchFullPaths()
 	for(int i = 0; i < count; i++)
 	{
 		CModDoc *modDoc = static_cast<CModDoc *>(m_List.GetItemDataPtr(i));
-		int item = m_List.InsertString(i + 1, FormatTitle(modDoc, fullPath));
+		int item = m_List.InsertString(i + 1, FormatTitle(*modDoc, fullPath));
 		m_List.SetItemDataPtr(item, modDoc);
 		m_List.SetSel(item, m_List.GetSel(i));
 		m_List.DeleteString(i);
