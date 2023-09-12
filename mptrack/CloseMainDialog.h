@@ -16,6 +16,8 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+class CModDoc;
+
 class CloseMainDialog: public ResizableDialog
 {
 protected:
@@ -23,7 +25,7 @@ protected:
 	CPoint m_minSize;
 	BypassInputHandler m_bih;
 
-	static CString FormatTitle(const CModDoc *modDoc, bool fullPath);
+	static CString FormatTitle(const CModDoc &modDoc, bool fullPath);
 
 public:
 	CloseMainDialog();
