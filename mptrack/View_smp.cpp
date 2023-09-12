@@ -23,6 +23,7 @@
 #include "Moddoc.h"
 #include "Mptrack.h"
 #include "OPLInstrDlg.h"
+#include "Reporting.h"
 #include "SampleEditorDialogs.h"
 #include "WindowMessages.h"
 #include "../common/FileReader.h"

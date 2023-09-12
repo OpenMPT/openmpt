@@ -11,6 +11,7 @@
 #include "stdafx.h"
 #include "MoveFXSlotDialog.h"
 #include "Mptrack.h"
+#include "Reporting.h"
 #include "resource.h"
 
 

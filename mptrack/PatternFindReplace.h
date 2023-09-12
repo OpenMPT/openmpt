@@ -50,26 +50,27 @@ struct FindReplace
 		ReplaceOctaveDown = -12000,
 	};
 
-	FlagSet<Flags> findFlags, replaceFlags;	// See Flags
+	FlagSet<Flags> findFlags = FullSearch;
+	FlagSet<Flags> replaceFlags = ReplaceAll;
 
 	// Data to replace with
-	ReplaceMode replaceNoteAction, replaceInstrAction, replaceVolumeAction, replaceParamAction;
-	int replaceNote, replaceInstr, replaceVolume, replaceParam;
-	ModCommand::VOLCMD  replaceVolCmd;
-	ModCommand::COMMAND replaceCommand;
+	ReplaceMode replaceNoteAction = ReplaceValue, replaceInstrAction = ReplaceValue, replaceVolumeAction = ReplaceValue, replaceParamAction = ReplaceValue;
+	int replaceNote = NOTE_NONE, replaceInstr = 0, replaceVolume = 0, replaceParam = 0;
+	ModCommand::VOLCMD  replaceVolCmd = VOLCMD_NONE;
+	ModCommand::COMMAND replaceCommand = CMD_NONE;
 
 	// Data to find
-	ModCommand::NOTE    findNoteMin, findNoteMax;
-	ModCommand::INSTR   findInstrMin, findInstrMax;
-	ModCommand::VOLCMD  findVolCmd;
-	int                 findVolumeMin, findVolumeMax;
-	ModCommand::COMMAND findCommand;
-	int                 findParamMin, findParamMax;
+	ModCommand::NOTE    findNoteMin = NOTE_NONE, findNoteMax = NOTE_NONE;
+	ModCommand::INSTR   findInstrMin = 0, findInstrMax = 0;
+	ModCommand::VOLCMD  findVolCmd = VOLCMD_NONE;
+	int                 findVolumeMin = 0, findVolumeMax = 0;
+	ModCommand::COMMAND findCommand = CMD_NONE;
+	int                 findParamMin = 0, findParamMax = 0;
 
-	PatternRect selection;					// Find in this selection (if FindReplace::InPatSelection is set)
-	CHANNELINDEX findChnMin, findChnMax;	// Find in these channels (if FindReplace::InChannels is set)
+	PatternRect selection;                        // Find in this selection (if FindReplace::InPatSelection is set)
+	CHANNELINDEX findChnMin = 0, findChnMax = 0;  // Find in these channels (if FindReplace::InChannels is set)
 
-	FindReplace();
+	FindReplace() = default;
 };
 
 DECLARE_FLAGSET(FindReplace::Flags);

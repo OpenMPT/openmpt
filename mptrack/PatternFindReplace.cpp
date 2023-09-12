@@ -13,6 +13,7 @@
 #include "Moddoc.h"
 #include "PatternEditorDialogs.h"
 #include "PatternFindReplaceDlg.h"
+#include "Reporting.h"
 #include "resource.h"
 #include "View_pat.h"
 #include "WindowMessages.h"
@@ -21,21 +22,6 @@
 OPENMPT_NAMESPACE_BEGIN
 
 FindReplace FindReplace::instance;
-
-FindReplace::FindReplace()
-	: findFlags(FullSearch), replaceFlags(ReplaceAll)
-	, replaceNoteAction(ReplaceValue), replaceInstrAction(ReplaceValue), replaceVolumeAction(ReplaceValue), replaceParamAction(ReplaceValue)
-	, replaceNote(NOTE_NONE), replaceInstr(0), replaceVolume(0), replaceParam(0)
-	, replaceVolCmd(VOLCMD_NONE), replaceCommand(CMD_NONE)
-	, findNoteMin(NOTE_NONE), findNoteMax(NOTE_NONE)
-	, findInstrMin(0), findInstrMax(0)
-	, findVolCmd(VOLCMD_NONE)
-	, findVolumeMin(0), findVolumeMax(0)
-	, findCommand(CMD_NONE)
-	, findParamMin(0), findParamMax(0)
-	, selection(PatternRect())
-	, findChnMin(0), findChnMax(0)
-{ }
 
 
 void CViewPattern::OnEditFind()

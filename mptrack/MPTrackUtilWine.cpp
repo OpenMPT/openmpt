@@ -11,6 +11,7 @@
 #include "stdafx.h"
 #include "MPTrackUtilWine.h"
 #include "Mptrack.h"
+#include "resource.h"
 #include "../common/misc_util.h"
 #include "../misc/mptWine.h"
 

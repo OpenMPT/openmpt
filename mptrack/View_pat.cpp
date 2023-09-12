@@ -24,6 +24,7 @@
 #include "PatternFindReplaceDlg.h"
 #include "PatternFont.h"
 #include "PatternGotoDialog.h"
+#include "Reporting.h"
 #include "SampleEditorDialogs.h"  // For amplification dialog (which is re-used from sample editor)
 #include "WindowMessages.h"
 #include "WindowMessages.h"

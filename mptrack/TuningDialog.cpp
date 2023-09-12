@@ -13,6 +13,7 @@
 #include "FileDialog.h"
 #include "Mainfrm.h"
 #include "Mptrack.h"
+#include "Reporting.h"
 #include "TrackerSettings.h"
 #include "TuningDialog.h"
 #include "../common/misc_util.h"

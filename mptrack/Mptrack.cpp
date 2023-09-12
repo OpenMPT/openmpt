@@ -26,6 +26,7 @@
 #include "MPTrackUtil.h"
 #include "MPTrackWine.h"
 #include "PlugNotFoundDlg.h"
+#include "Reporting.h"
 #include "TrackerSettings.h"
 #include "UpdateCheck.h"
 #include "WelcomeDialog.h"
@@ -855,6 +856,26 @@ public:
 		return configPath + P_("Components\\") + mpt::PathString::FromUnicode(mpt::OS::Windows::Name(mpt::OS::Windows::GetProcessArchitecture())) + P_("\\");
 	}
 };
+
+
+SettingsContainer &CTrackApp::GetPluginCache()
+{
+	ASSERT(m_pPluginCache);
+	return *m_pPluginCache;
+}
+
+
+SettingsContainer &CTrackApp::GetSongSettings()
+{
+	ASSERT(m_pSongSettings);
+	return *m_pSongSettings;
+}
+
+
+const mpt::PathString &CTrackApp::GetSongSettingsFilename() const
+{
+	return m_pSongSettingsIniFile->GetFilename();
+}
 
 
 // Move a config file called fileName from the App's directory (or one of its sub directories specified by subDir) to

@@ -12,6 +12,7 @@
 #include "CloseMainDialog.h"
 #include "Moddoc.h"
 #include "Mptrack.h"
+#include "resource.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

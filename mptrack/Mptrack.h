@@ -12,15 +12,11 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
-#include "resource.h"  // main symbols
-#include "Settings.h"
 #include "MPTrackUtil.h"
-#include "Reporting.h"
+#include "../common/mptRandom.h"
+#include "../misc/mptMutex.h"
 #include "../soundlib/MIDIMacros.h"
 #include "../soundlib/modcommand.h"
-#include "../common/ComponentManager.h"
-#include "../misc/mptMutex.h"
-#include "../common/mptRandom.h"
 
 #include <future>
 
@@ -37,6 +33,9 @@ struct AllSoundDeviceComponents;
 class CDLSBank;
 class DebugSettings;
 class TrackerSettings;
+class IniFileSettingsBackend;
+class IniFileSettingsContainer;
+class SettingsContainer;
 class ComponentManagerSettings;
 namespace mpt
 {
@@ -254,21 +253,9 @@ public:
 		return m_bSourceTreeMode;
 	}
 
-	SettingsContainer &GetPluginCache()
-	{
-		ASSERT(m_pPluginCache);
-		return *m_pPluginCache;
-	}
-
-	SettingsContainer &GetSongSettings()
-	{
-		ASSERT(m_pSongSettings);
-		return *m_pSongSettings;
-	}
-	const mpt::PathString &GetSongSettingsFilename() const
-	{
-		return m_pSongSettingsIniFile->GetFilename();
-	}
+	SettingsContainer &GetPluginCache();
+	SettingsContainer &GetSongSettings();
+	const mpt::PathString &GetSongSettingsFilename() const;
 
 	void SetWineVersion(std::shared_ptr<mpt::OS::Wine::VersionContext> wineVersion)
 	{
@@ -387,14 +374,14 @@ protected:
 	};
 
 	MODPLUGFASTDIB m_Dib;
-	UINT m_nTextColor, m_nBkColor;
+	UINT m_nTextColor = 0, m_nBkColor = 0;
 	MODPLUGDIB *m_pTextDib;
-	uint8 m_nBlendOffset;
-	uint8 m_n4BitPalette[16];
-	uint8 m_nXShiftFactor;
+	uint8 m_nBlendOffset = 0;
+	uint8 m_n4BitPalette[16] = {{}};
+	uint8 m_nXShiftFactor = 0;
 
 public:
-	CFastBitmap() {}
+	CFastBitmap() = default;
 
 public:
 	void Init(MODPLUGDIB *lpTextDib = nullptr);

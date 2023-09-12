@@ -17,6 +17,7 @@
 #include "MIDIMacros.h"
 #include "Mainfrm.h"
 #include "Mptrack.h"
+#include "Reporting.h"
 #include "VstPresets.h"
 #include "Vstplug.h"
 #include "../common/FileReader.h"

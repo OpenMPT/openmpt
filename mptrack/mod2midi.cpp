@@ -13,6 +13,8 @@
 #include "Mainfrm.h"
 #include "Moddoc.h"
 #include "Mptrack.h"
+#include "Reporting.h"
+#include "resource.h"
 #include "../common/mptFileIO.h"
 #include "../common/mptStringBuffer.h"
 #include "../soundlib/plugins/PlugInterface.h"

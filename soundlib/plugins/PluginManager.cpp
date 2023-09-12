@@ -59,6 +59,7 @@
 
 #ifdef MODPLUG_TRACKER
 #include "../../mptrack/Mptrack.h"
+#include "../../mptrack/Reporting.h"
 #include "../../mptrack/TrackerSettings.h"
 #include "../../mptrack/AbstractVstEditor.h"
 #include "../../soundlib/AudioCriticalSection.h"

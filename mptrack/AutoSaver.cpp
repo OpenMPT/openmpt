@@ -14,6 +14,7 @@
 #include "FolderScanner.h"
 #include "Moddoc.h"
 #include "Mptrack.h"
+#include "Reporting.h"
 #include "resource.h"
 #include "TrackerSettings.h"
 #include "../soundlib/mod_specifications.h"

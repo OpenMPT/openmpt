@@ -15,6 +15,7 @@
 #include "Mainfrm.h"
 #include "Moddoc.h"
 #include "Mptrack.h"
+#include "Reporting.h"
 #include "TempoSwingDialog.h"
 #include "View_pat.h"
 #include "WindowMessages.h"

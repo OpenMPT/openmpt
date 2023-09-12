@@ -14,6 +14,7 @@
 #include "InputHandler.h"
 #include "Mainfrm.h"
 #include "Moddoc.h"
+#include "Reporting.h"
 #include "../common/mptFileIO.h"
 #include "../common/version.h"
 #include "../misc/WriteMemoryDump.h"

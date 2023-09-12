@@ -26,6 +26,7 @@
 #include "mod2wave.h"
 #include "ModDocTemplate.h"
 #include "Mpdlgs.h"
+#include "Reporting.h"
 #include "StreamEncoderAU.h"
 #include "StreamEncoderFLAC.h"
 #include "StreamEncoderMP3.h"

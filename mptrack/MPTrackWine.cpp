@@ -14,26 +14,27 @@
 
 #include "mpt/uuid/uuid.hpp"
 
-#include "Mptrack.h"
-#include "Mainfrm.h"
+#include "Reporting.h"
+
 #include "AboutDialog.h"
+#include "Mainfrm.h"
+#include "Mptrack.h"
+#include "MPTrackUtilWine.h"
 #include "TrackerSettings.h"
 #include "../common/ComponentManager.h"
+#include "../common/FileReader.h"
+#include "../common/mptFileIO.h"
+#include "../misc/mptOS.h"
+#include "../misc/mptWine.h"
+#include "mpt/crc/crc.hpp"
+#include "mpt/fs/fs.hpp"
 #include "mpt/io_file/inputfile.hpp"
 #include "mpt/io_file_read/inputfile_filecursor.hpp"
-#include "../common/mptFileIO.h"
-#include "mpt/fs/fs.hpp"
-#include "../misc/mptOS.h"
-#include "mpt/crc/crc.hpp"
-#include "../common/FileReader.h"
-#include "../misc/mptWine.h"
-#include "MPTrackUtilWine.h"
 #include "mpt/string/utility.hpp"
-
-#include "wine/NativeSoundDevice.h"
 #include "openmpt/sounddevice/SoundDevice.hpp"
-#include "wine/NativeSoundDeviceMarshalling.h"
 #include "openmpt/sounddevice/SoundDeviceManager.hpp"
+#include "wine/NativeSoundDevice.h"
+#include "wine/NativeSoundDeviceMarshalling.h"
 
 #include <ios>
 

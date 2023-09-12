@@ -18,6 +18,7 @@
 #include "Mptrack.h"
 #include "MPTrackUtil.h"
 #include "PatternClipboard.h"
+#include "Reporting.h"
 #include "TrackerSettings.h"
 #include "WindowMessages.h"
 #include "../soundlib/mod_specifications.h"

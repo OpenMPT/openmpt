@@ -15,6 +15,7 @@
 #include "Mainfrm.h"
 #include "Moddoc.h"
 #include "Mptrack.h"
+#include "Reporting.h"
 #include "TrackerSettings.h"
 #include "../common/misc_util.h"
 #include "../common/mptFileIO.h"

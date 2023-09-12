@@ -13,6 +13,7 @@
 #include "Undo.h"
 #include "Moddoc.h"
 #include "TrackerSettings.h"
+#include "UpdateHints.h"
 #include "../common/mptStringBuffer.h"
 #include "../tracklib/SampleEdit.h"
 #include "../soundlib/modsmp_ctrl.h"

@@ -22,6 +22,7 @@
 #include "Mainfrm.h"
 #include "Moddoc.h"
 #include "Mptrack.h"
+#include "Reporting.h"
 #include "ScaleEnvPointsDlg.h"
 #include "WindowMessages.h"
 #include "../common/mptStringBuffer.h"

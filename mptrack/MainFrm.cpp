@@ -32,6 +32,8 @@
 #include "PatternClipboard.h"
 #include "PatternFont.h"
 #include "ProgressDialog.h"
+#include "Reporting.h"
+#include "resource.h"
 #include "SampleConfigDlg.h"
 #include "SelectPluginDialog.h"
 #include "UpdateCheck.h"

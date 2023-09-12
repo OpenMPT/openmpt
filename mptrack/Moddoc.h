@@ -17,12 +17,12 @@
 #include "../common/mptTime.h"
 #include "Undo.h"
 #include "Notification.h"
-#include "UpdateHints.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
 class EncoderFactoryBase;
 class CChildFrame;
+struct UpdateHint;
 
 /////////////////////////////////////////////////////////////////////////
 // Split Keyboard Settings (pattern editor)

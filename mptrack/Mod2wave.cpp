@@ -14,6 +14,7 @@
 #include "Mainfrm.h"
 #include "Mpdlgs.h"
 #include "Mptrack.h"
+#include "Reporting.h"
 #include "Sndfile.h"
 #include "WAVTools.h"
 #include "../common/Dither.h"

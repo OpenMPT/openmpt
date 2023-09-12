@@ -20,6 +20,7 @@
 #include "Moddoc.h"
 #include "Mptrack.h"
 #include "PatternEditorDialogs.h"
+#include "Reporting.h"
 #include "TrackerSettings.h"
 #include "View_pat.h"
 #include "WindowMessages.h"

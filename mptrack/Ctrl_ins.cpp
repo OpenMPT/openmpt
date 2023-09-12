@@ -20,6 +20,7 @@
 #include "Mainfrm.h"
 #include "Moddoc.h"
 #include "Mptrack.h"
+#include "Reporting.h"
 #include "SelectPluginDialog.h"
 #include "TrackerSettings.h"
 #include "TuningDialog.h"

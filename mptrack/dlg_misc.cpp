@@ -15,6 +15,7 @@
 #include "Dlsbank.h"
 #include "Moddoc.h"
 #include "Mptrack.h"
+#include "Reporting.h"
 #include "TempoSwingDialog.h"
 #include "WindowMessages.h"
 #include "../common/mptStringBuffer.h"

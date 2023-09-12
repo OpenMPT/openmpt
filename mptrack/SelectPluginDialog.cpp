@@ -21,6 +21,8 @@
 #include "Mainfrm.h"
 #include "Moddoc.h"
 #include "Mptrack.h"
+#include "Reporting.h"
+#include "resource.h"
 #include "TrackerSettings.h"
 #include "../common/mptStringBuffer.h"
 #include "../pluginBridge/BridgeWrapper.h"

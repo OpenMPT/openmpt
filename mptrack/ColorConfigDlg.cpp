@@ -14,6 +14,7 @@
 #include "FileDialog.h"
 #include "Mainfrm.h"
 #include "Mptrack.h"
+#include "Reporting.h"
 #include "resource.h"
 #include "Settings.h"
 #include "WindowMessages.h"

@@ -23,6 +23,7 @@
 #include "Mptrack.h"
 #include "ProgressDialog.h"
 #include "PSRatioCalc.h"
+#include "Reporting.h"
 #include "SampleEditorDialogs.h"
 #include "TrackerSettings.h"
 #include "View_smp.h"

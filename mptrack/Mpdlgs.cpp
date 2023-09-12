@@ -15,6 +15,7 @@
 #include "Mainfrm.h"
 #include "Moddoc.h"
 #include "Mptrack.h"
+#include "Reporting.h"
 #include "Sndfile.h"
 #include "WindowMessages.h"
 #include "../common/Dither.h"

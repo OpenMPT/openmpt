@@ -11,6 +11,8 @@
 #include "stdafx.h"
 #include "PSRatioCalc.h"
 #include "Mptrack.h"
+#include "Reporting.h"
+#include "resource.h"
 #include "../soundlib/Sndfile.h"
 
 

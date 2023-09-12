@@ -22,6 +22,7 @@
 #include "Moddoc.h"
 #include "MoveFXSlotDialog.h"
 #include "Mptrack.h"
+#include "Reporting.h"
 #include "SelectPluginDialog.h"
 #include "../common/mptStringBuffer.h"
 #include "../soundlib/mod_specifications.h"

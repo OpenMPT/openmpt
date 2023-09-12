@@ -10,6 +10,7 @@
 
 #include "stdafx.h"
 #include "DefaultVstEditor.h"
+#include "resource.h"
 #include "../soundlib/Sndfile.h"
 #include "../soundlib/plugins/PlugInterface.h"
 
