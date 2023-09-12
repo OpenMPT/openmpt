@@ -22,6 +22,7 @@ OPENMPT_NAMESPACE_BEGIN
 namespace DMO
 {
 
+// cppcheck-suppress duplInheritedMember
 IMixPlugin* Flanger::Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN &mixStruct)
 {
 	return new (std::nothrow) Flanger(factory, sndFile, mixStruct, false);
