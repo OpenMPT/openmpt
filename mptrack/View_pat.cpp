@@ -738,6 +738,7 @@ BOOL CViewPattern::PreTranslateMessage(MSG *pMsg)
 ////////////////////////////////////////////////////////////////////////
 // CViewPattern message handlers
 
+// cppcheck-suppress duplInheritedMember
 void CViewPattern::OnDestroy()
 {
 	// Fix: save pattern scrollbar position when switching to other tab
@@ -1575,6 +1576,7 @@ void CViewPattern::OnRButtonUp(UINT nFlags, CPoint point)
 }
 
 
+// cppcheck-suppress duplInheritedMember
 BOOL CViewPattern::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 {
 	if(nFlags & MK_CONTROL)
