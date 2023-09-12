@@ -47,6 +47,7 @@ protected:
 	bool SwitchToList(int list);
 
 	//{{AFX_MSG(CViewGlobals)
+	// cppcheck-suppress duplInheritedMember
 	afx_msg void OnDestroy();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnShowSamples() { SwitchToList(IDC_LIST_SAMPLES); }

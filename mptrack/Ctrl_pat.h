@@ -258,6 +258,7 @@ protected:
 	afx_msg void OnPatternPaste();
 	afx_msg void OnFollowSong();
 	afx_msg void OnChangeLoopStatus();
+	// cppcheck-suppress duplInheritedMember
 	afx_msg void OnSwitchToView();
 	afx_msg void OnInstrumentChanged();
 	afx_msg void OnPrevInstrument();

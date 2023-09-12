@@ -1074,6 +1074,7 @@ void CCtrlPatterns::OnEditUndo()
 }
 
 
+// cppcheck-suppress duplInheritedMember
 void CCtrlPatterns::OnSwitchToView()
 {
 	PostViewMessage(VIEWMSG_SETFOCUS);
