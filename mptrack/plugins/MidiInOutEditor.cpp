@@ -10,8 +10,8 @@
 #include "stdafx.h"
 
 #ifdef MODPLUG_TRACKER
-#include "MidiInOut.h"
 #include "MidiInOutEditor.h"
+#include "MidiInOut.h"
 #include "../Mptrack.h"
 #include "../resource.h"
 #include <rtmidi/RtMidi.h>

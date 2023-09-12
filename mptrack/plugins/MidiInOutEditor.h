@@ -14,12 +14,11 @@
 
 #ifdef MODPLUG_TRACKER
 
+#include "MidiInOut.h"
 #include "../AbstractVstEditor.h"
 #include "../CDecimalSupport.h"
 
 OPENMPT_NAMESPACE_BEGIN
-
-class MidiInOut;
 
 class MidiInOutEditor : public CAbstractVstEditor
 {
