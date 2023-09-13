@@ -653,9 +653,13 @@ static MPT_NOINLINE void TestStringFormatting()
 #endif
 
 	VERIFY_EQUAL(ConvertStrTo<float>(mpt::fmt::val(-87.0)), -87.0f);
+#if MPT_COMPILER_MSVC && defined(_MSC_VER)
 	// VS2022 17.7.2 parses "-5e-07" as -5.0000000000000004e-06 instead of -4.9999999999999998e-07 which is closer
 	// https://developercommunity.visualstudio.com/t/Parsing-double-from-stringstream-returns/10450694
-#if !MPT_OS_DJGPP && !(MPT_COMPILER_MSVC && MPT_COMPILER_MSVC_VERSION == MPT_COMPILER_MAKE_VERSION2(2022, 7))
+#if (_MSC_VER != 1937)
+	VERIFY_EQUAL(ConvertStrTo<double>(mpt::fmt::val(-0.5e-6)), -0.5e-6);
+#endif
+#elif !MPT_OS_DJGPP
 	VERIFY_EQUAL(ConvertStrTo<double>(mpt::fmt::val(-0.5e-6)), -0.5e-6);
 #endif
 
