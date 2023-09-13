@@ -42,11 +42,13 @@ public:
 	BitReader(mpt::span<const std::byte> bytedata) : FileReader(bytedata) { }
 	BitReader(const FileReader &other = FileReader()) : FileReader(other) { }
 
+	// cppcheck-suppress duplInheritedMember
 	off_t GetLength() const
 	{
 		return FileReader::GetLength();
 	}
 
+	// cppcheck-suppress duplInheritedMember
 	off_t GetPosition() const
 	{
 		return FileReader::GetPosition() - m_bufSize + m_bufPos;
