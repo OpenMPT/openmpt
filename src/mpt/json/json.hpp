@@ -16,10 +16,14 @@
 #endif // MPT_DETECTED_NLOHMANN_JSON
 
 #if MPT_DETECTED_NLOHMANN_JSON
+#if MPT_COMPILER_MSVC
 #pragma warning(push)
-#pragma warning(disable:28020)
+#pragma warning(disable : 28020)
+#endif // MPT_COMPILER_MSVC
 #include <nlohmann/json.hpp>
+#if MPT_COMPILER_MSVC
 #pragma warning(pop)
+#endif // MPT_COMPILER_MSVC
 #endif // MPT_DETECTED_NLOHMANN_JSON
 
 
