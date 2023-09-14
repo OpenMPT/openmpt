@@ -20,7 +20,11 @@
 #include "openmpt/soundbase/SampleConvertFixedPoint.hpp"
 #include "openmpt/soundbase/SampleDecode.hpp"
 
+#pragma warning(push)
+#pragma warning(disable:6011)
+#pragma warning(disable:6031)
 #include "../include/r8brain/CDSPResampler.h"
+#pragma warning(pop)
 
 #if defined(MPT_ENABLE_ARCH_INTRINSICS_SSE2)
 #include <emmintrin.h>

@@ -16,7 +16,10 @@
 #endif // MPT_DETECTED_NLOHMANN_JSON
 
 #if MPT_DETECTED_NLOHMANN_JSON
+#pragma warning(push)
+#pragma warning(disable:28020)
 #include <nlohmann/json.hpp>
+#pragma warning(pop)
 #endif // MPT_DETECTED_NLOHMANN_JSON
 
 
