@@ -20,6 +20,6 @@ jobs:
     - name: setup parallel make
       run: echo "MAKEFLAGS=-j$(sysctl -n hw.ncpu)" >> $GITHUB_ENV
     - name: make
-      run: make STRICT=1 FORCE_DEPS=1
+      run: make STRICT=1 FORCE_DEPS=1 NO_PULSEAUDIO=1
     - name: make check
-      run: make STRICT=1 FORCE_DEPS=1 check
+      run: make STRICT=1 FORCE_DEPS=1 NO_PULSEAUDIO=1 check
