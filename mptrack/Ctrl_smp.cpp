@@ -2567,7 +2567,7 @@ void CCtrlSamples::OnNameChanged()
 			if(m_editInstrumentName != INSTRUMENTINDEX_INVALID)
 				m_modDoc.GetInstrumentUndo().PrepareUndo(m_editInstrumentName, "Set Name");
 		}
-		if(m_editInstrumentName <= m_sndFile.GetNumInstruments())
+		if(m_editInstrumentName <= m_sndFile.GetNumInstruments() && m_editInstrumentName < MAX_INSTRUMENTS)
 		{
 			if(auto instr = m_sndFile.Instruments[m_editInstrumentName]; instr != nullptr)
 			{

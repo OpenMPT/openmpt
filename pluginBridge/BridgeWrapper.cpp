@@ -220,7 +220,14 @@ uint64 BridgeWrapper::GetFileVersion(const WCHAR *exePath)
 	}
 
 	char *verData = new(std::nothrow) char[verSize];
+#if MPT_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable:6388) // 'verHandle' might not be '0'.
+#endif // MPT_COMPILER_MSVC
 	if(verData && GetFileVersionInfoW(exePath, verHandle, verSize, verData))
+#if MPT_COMPILER_MSVC
+#pragma warning(pop)
+#endif // MPT_COMPILER_MSVC
 	{
 		UINT size = 0;
 		void *lpBuffer = nullptr;

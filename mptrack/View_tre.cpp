@@ -1171,7 +1171,14 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 					tvi.cchTextMax = mpt::saturate_cast<int>(std::size(stmp));
 					tvi.iImage = tvi.iSelectedImage = image;
 					GetItem(&tvi);
+#if MPT_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable:6054) // String 'stmp' might not be zero-terminated.
+#endif // MPT_COMPILER_MSVC
 					if(tvi.iImage != image || _tcsncmp(s, stmp, std::size(stmp)) || GetItemData(hChild) != nSmp)
+#if MPT_COMPILER_MSVC
+#pragma warning(pop)
+#endif // MPT_COMPILER_MSVC
 					{
 						SetItem(hChild, TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM, s, image, image, 0, 0, nSmp);
 					}

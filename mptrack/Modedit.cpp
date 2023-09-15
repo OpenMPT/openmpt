@@ -667,7 +667,14 @@ void CModDoc::ClonePlugin(SNDMIXPLUGIN &target, const SNDMIXPLUGIN &source)
 		{
 			const std::string data = f.str();
 			FileReader file(mpt::as_span(data));
+#if MPT_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable:6011) // Dereferencing NULL pointer 'newVstPlug'
+#endif // MPT_COMPILER_MSVC
 			VSTPresets::LoadFile(file, *newVstPlug);
+#if MPT_COMPILER_MSVC
+#pragma warning(pop)
+#endif // MPT_COMPILER_MSVC
 		}
 	}
 #endif // !NO_PLUGINS
@@ -1065,7 +1072,7 @@ static bool StringToEnvelope(const std::string_view &s, InstrumentEnvelope &env,
 	{
 		return false;
 	}
-	sscanf(&s[pos], pszEnvFmt, &nPoints, &susBegin, &susEnd, &loopBegin, &loopEnd, &bSus, &bLoop, &bCarry);
+	MPT_DISCARD(sscanf(&s[pos], pszEnvFmt, &nPoints, &susBegin, &susEnd, &loopBegin, &loopEnd, &bSus, &bLoop, &bCarry));
 	while(pos < length && s[pos] != '\r' && s[pos] != '\n')
 		pos++;
 
