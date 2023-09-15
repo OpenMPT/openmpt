@@ -529,7 +529,7 @@ bool CModDoc::ConvertInstrumentsToSamples()
 			else
 				note = NOTE_MIDDLEC - NOTE_MIN;
 
-			if((instr < MAX_INSTRUMENTS) && (m_SndFile.Instruments[instr]))
+			MPT_MAYBE_CONSTANT_IF((instr < MAX_INSTRUMENTS) && (m_SndFile.Instruments[instr]))
 			{
 				const ModInstrument *pIns = m_SndFile.Instruments[instr];
 				newinstr = static_cast<ModCommand::INSTR>(pIns->Keyboard[note]);

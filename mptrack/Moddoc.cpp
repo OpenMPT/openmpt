@@ -1002,6 +1002,7 @@ void CModDoc::ProcessMIDI(uint32 midiData, SAMPLEINDEX smp, INSTRUMENTINDEX ins,
 			if(chn != CHANNELINDEX_INVALID)
 				m_SndFile.m_PlayState.Chn[chn].SetMIDIPitchBend(midiByte2, midiByte1);
 		}
+		break;
 
 	default:
 		break;

@@ -33,20 +33,27 @@ OPENMPT_NAMESPACE_BEGIN
 #define HISTORY_BINS	(12 * BINS_PER_NOTE)	// One octave
 
 
-static double FrequencyToNote(double freq, double pitchReference)
+#if MPT_COMPILER_CLANG
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-function"
+#endif // MPT_COMPILER_CLANG
+static inline double FrequencyToNote(double freq, double pitchReference)
 {
 	return ((12.0 * (log(freq / (pitchReference / 2.0)) / log(2.0))) + 57.0);
 }
+#if MPT_COMPILER_CLANG
+#pragma clang diagnostic pop
+#endif // MPT_COMPILER_CLANG
 
 
-static double NoteToFrequency(double note, double pitchReference)
+static inline double NoteToFrequency(double note, double pitchReference)
 {
 	return pitchReference * pow(2.0, (note - 69.0) / 12.0);
 }
 
 
 // Calculate the amount of samples for autocorrelation shifting for a given note
-static SmpLength NoteToShift(uint32 sampleFreq, int note, double pitchReference)
+static inline SmpLength NoteToShift(uint32 sampleFreq, int note, double pitchReference)
 {
 	const double fundamentalFrequency = NoteToFrequency((double)note / BINS_PER_NOTE, pitchReference);
 	return std::max(mpt::saturate_round<SmpLength>((double)sampleFreq / fundamentalFrequency), SmpLength(1));
@@ -226,6 +233,10 @@ static inline AutotuneHistogram operator+(AutotuneHistogram a, AutotuneHistogram
 }
 
 
+#if MPT_COMPILER_CLANG
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-function"
+#endif // MPT_COMPILER_CLANG
 static inline AutotuneHistogram & operator+=(AutotuneHistogram &a, AutotuneHistogram b) noexcept
 {
 	for(std::size_t i = 0; i < HISTORY_BINS; ++i)
@@ -234,6 +245,9 @@ static inline AutotuneHistogram & operator+=(AutotuneHistogram &a, AutotuneHisto
 	}
 	return a;
 }
+#if MPT_COMPILER_CLANG
+#pragma clang diagnostic pop
+#endif // MPT_COMPILER_CLANG
 
 
 static inline AutotuneHistogram &operator+=(AutotuneHistogram &a, AutotuneHistogramEntry b) noexcept

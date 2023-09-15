@@ -93,9 +93,9 @@ END_MESSAGE_MAP()
 
 
 COrderList::COrderList(CCtrlPatterns &parent, CModDoc &document)
-    : m_nOrderlistMargins(TrackerSettings::Instance().orderlistMargins)
-    , m_modDoc(document)
-    , m_pParent(parent)
+	: m_modDoc(document)
+	, m_pParent(parent)
+	, m_nOrderlistMargins(TrackerSettings::Instance().orderlistMargins)
 {
 	EnableActiveAccessibility();
 }
