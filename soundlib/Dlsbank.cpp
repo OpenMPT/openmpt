@@ -752,7 +752,15 @@ bool CDLSBank::FindAndExtract(CSoundFile &sndFile, const INSTRUMENTINDEX ins, co
 			pIns = sndFile.Instruments[ins]; // Reset pointer because ExtractInstrument may delete the previous value.
 			if((key >= 24) && (key < 24 + std::size(szMidiPercussionNames)))
 			{
+#if MPT_COMPILER_MSVC
+#pragma warning(push)
+// false-positive
+#pragma warning(disable:6385)  // Reading invalid data from 'szMidiPercussionNames'.
+#endif
 				pIns->name = szMidiPercussionNames[key - 24];
+#if MPT_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 			}
 			return true;
 		}
