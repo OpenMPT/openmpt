@@ -1296,7 +1296,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				{
 					chn.nVolume = std::min(memory.chnSettings[n].vol, uint8(64)) * 4;
 				}
-				if(chn.pModSample != nullptr && chn.pModSample->uFlags[CHN_ADLIB] && m_opl)
+				if(!chn.dwFlags[CHN_MUTE | CHN_SYNCMUTE] && chn.pModSample != nullptr && chn.pModSample->uFlags[CHN_ADLIB] && m_opl)
 				{
 					m_opl->Patch(n, chn.pModSample->adlib);
 					m_opl->NoteCut(n);
@@ -2894,7 +2894,7 @@ bool CSoundFile::ProcessEffects()
 
 				InstrumentChange(chn, instr, bPorta, true);
 
-				if(chn.pModSample != nullptr && chn.pModSample->uFlags[CHN_ADLIB] && m_opl)
+				if(!chn.dwFlags[CHN_MUTE | CHN_SYNCMUTE] && chn.pModSample != nullptr && chn.pModSample->uFlags[CHN_ADLIB] && m_opl)
 				{
 					m_opl->Patch(nChn, chn.pModSample->adlib);
 				}
@@ -2945,7 +2945,7 @@ bool CSoundFile::ProcessEffects()
 					InstrumentChange(chn, chn.nNewIns, bPorta, chn.pModSample == nullptr && chn.pModInstrument == nullptr, !(GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2)));
 					chn.nNewIns = 0;
 				}
-				if(chn.pModSample != nullptr && chn.pModSample->uFlags[CHN_ADLIB] && m_opl && (instrChange || !m_opl->IsActive(nChn)))
+				if(!chn.dwFlags[CHN_MUTE | CHN_SYNCMUTE] && chn.pModSample != nullptr && chn.pModSample->uFlags[CHN_ADLIB] && m_opl && (instrChange || !m_opl->IsActive(nChn)))
 				{
 					m_opl->Patch(nChn, chn.pModSample->adlib);
 				}
