@@ -742,6 +742,10 @@ include/mpg123/src/compat/%$(FLAVOUR_O).o : CFLAGS+=$(CFLAGS_SILENT) -DOPT_GENER
 include/mpg123/src/compat/%.test$(FLAVOUR_O).o : CFLAGS+=$(CFLAGS_SILENT) -DOPT_GENERIC
 include/mpg123/src/libmpg123/%$(FLAVOUR_O).o : CFLAGS+=$(CFLAGS_SILENT) -DOPT_GENERIC
 include/mpg123/src/libmpg123/%.test$(FLAVOUR_O).o : CFLAGS+=$(CFLAGS_SILENT) -DOPT_GENERIC
+include/mpg123/src/compat/%$(FLAVOUR_O).o : CPPFLAGS:= -Iinclude/mpg123/src/libmpg123/ -Iinclude/mpg123/src/compat/ -Iinclude/mpg123/src/ -Iinclude/mpg123/ports/makefile/ $(CPPFLAGS)
+include/mpg123/src/compat/%.test$(FLAVOUR_O).o : CPPFLAGS:= -Iinclude/mpg123/src/libmpg123/ -Iinclude/mpg123/src/compat/ -Iinclude/mpg123/src/ -Iinclude/mpg123/ports/makefile/ $(CPPFLAGS)
+include/mpg123/src/libmpg123/%$(FLAVOUR_O).o : CPPFLAGS:= -Iinclude/mpg123/src/libmpg123/ -Iinclude/mpg123/src/compat/ -Iinclude/mpg123/src/ -Iinclude/mpg123/ports/makefile/ $(CPPFLAGS)
+include/mpg123/src/libmpg123/%.test$(FLAVOUR_O).o : CPPFLAGS:= -Iinclude/mpg123/src/libmpg123/ -Iinclude/mpg123/src/compat/ -Iinclude/mpg123/src/ -Iinclude/mpg123/ports/makefile/ $(CPPFLAGS)
 else
 ifeq ($(NO_MPG123),1)
 else
