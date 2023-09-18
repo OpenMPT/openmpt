@@ -40,9 +40,9 @@ static double ispow[8207]; // scale with SCALE_POW43
 static double aa_ca[8],aa_cs[8];
 static double win[4][36];
 static double win1[4][36];
-double COS9[9]; /* dct36_3dnow wants to use that */
+double INT123_COS9[9]; /* INT123_dct36_3dnow wants to use that */
 static double COS6_1,COS6_2;
-double tfcos36[9]; /* dct36_3dnow wants to use that */
+double INT123_tfcos36[9]; /* INT123_dct36_3dnow wants to use that */
 static double tfcos12[3];
 static double cos9[3],cos18[3];
 
@@ -117,7 +117,7 @@ static void print_value( int fixed, double fixed_scale
 	if(fixed)
 		printf("%ld;\n", (long)(DOUBLE_TO_REAL(fixed_scale*val)));
 	else
-		printf("%15.8e;\n", val);
+		printf("%15.8ef;\n", val);
 }
 
 // I feal uneasy about inf appearing as literal.
@@ -143,7 +143,7 @@ static void print_array( int statick, int fixed, double fixed_scale
 			,	statick ? "static " : "", name, count );
 		return;
 	}
-	size_t block = 72/17;
+	size_t block = 72/18;
 	size_t i = 0;
 	if(name)
 		printf( "%sconst%s real %s[%zu] = \n", statick ? "static " : ""
@@ -157,7 +157,7 @@ static void print_array( int statick, int fixed, double fixed_scale
 			printf( "%s%c%11ld", i ? "," : "", j ? ' ' : '\t'
 			,	(long)(DOUBLE_TO_REAL(fixed_scale*tab[i])) );
 		else for(size_t j=0; j<line; ++j, ++i)
-			printf("%s%c%15.8e", i ? "," : "", j ? ' ' : '\t', limit_val(tab[i]));
+			printf("%s%c%15.8ef", i ? "," : "", j ? ' ' : '\t', limit_val(tab[i]));
 		printf("\n");
 	}
 	printf("%s}%s\n", indent, name ? ";" : "");
@@ -303,10 +303,10 @@ void printer(int calc, char *arg)
 			print_array(1, fixed, 1., "", "aa_cs", ASIZE(aa_cs), aa_cs, calc);
 			print_array2d(fixed, 1., "win", 4, 36, win, calc);
 			print_array2d(fixed, 1., "win1", 4, 36, win1, calc);
-			print_array(0, fixed, 1., "", "COS9", ASIZE(COS9), COS9, calc);
+			print_array(0, fixed, 1., "", "INT123_COS9", ASIZE(INT123_COS9), INT123_COS9, calc);
 			print_value(fixed, 1., "COS6_1", COS6_1, calc);
 			print_value(fixed, 1., "COS6_2", COS6_2, calc);
-			print_array(0, fixed, 1., "", "tfcos36", ASIZE(tfcos36), tfcos36, calc);
+			print_array(0, fixed, 1., "", "INT123_tfcos36", ASIZE(INT123_tfcos36), INT123_tfcos36, calc);
 			print_array(1, fixed, 1., "", "tfcos12", ASIZE(tfcos12), tfcos12, calc);
 			print_array(1, fixed, 1., "", "cos9", ASIZE(cos9), cos9, calc);
 			print_array(1, fixed, 1., "", "cos18", ASIZE(cos18), cos18, calc);
@@ -385,9 +385,9 @@ int main(int argc, char **argv)
 		printf(" %s", argv[i]);
 	printf("\n");
 
-	init_costabs();
-	init_layer12();
-	init_layer3();
+	INT123_init_costabs();
+	INT123_init_layer12();
+	INT123_init_layer3();
 
 	printf("\n#if defined(RUNTIME_TABLES)\n");
 	printer(1, argv[1]);

@@ -707,7 +707,7 @@ endif
 endif
 
 ifeq ($(LOCAL_MPG123),1)
-CPPFLAGS_MPG123 := -DMPT_WITH_MPG123
+CPPFLAGS_MPG123 := -DMPT_WITH_MPG123 -DMPG123_NO_LARGENAME
 LDFLAGS_MPG123  := 
 LDLIBS_MPG123   := 
 CPPFLAGS_MPG123 += -Iinclude/mpg123/src/libmpg123/ -Iinclude/mpg123/src/compat/ -Iinclude/mpg123/src/ -Iinclude/mpg123/ports/makefile/
@@ -726,6 +726,7 @@ LOCAL_MPG123_SOURCES += include/mpg123/src/libmpg123/index.c
 LOCAL_MPG123_SOURCES += include/mpg123/src/libmpg123/layer1.c
 LOCAL_MPG123_SOURCES += include/mpg123/src/libmpg123/layer2.c
 LOCAL_MPG123_SOURCES += include/mpg123/src/libmpg123/layer3.c
+LOCAL_MPG123_SOURCES += include/mpg123/src/libmpg123/lfs_wrap.c
 LOCAL_MPG123_SOURCES += include/mpg123/src/libmpg123/libmpg123.c
 LOCAL_MPG123_SOURCES += include/mpg123/src/libmpg123/ntom.c
 LOCAL_MPG123_SOURCES += include/mpg123/src/libmpg123/optimize.c

@@ -69,8 +69,8 @@ dct36_avx_sign:
 	.long 0x80000000,0x80000000,0x80000000,0x80000000
 	.text
 	ALIGN16
-	.globl ASM_NAME(dct36_avx)
-ASM_NAME(dct36_avx):
+	.globl ASM_NAME(INT123_dct36_avx)
+ASM_NAME(INT123_dct36_avx):
 #ifdef IS_MSABI
 	push		%rbp
 	mov			%rsp, %rbp

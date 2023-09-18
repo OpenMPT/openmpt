@@ -1,15 +1,9 @@
-libmpg123 library version 1.31.3 (2023-03-19).
+libmpg123 library version 1.32.0 (2023-09-18).
 The following changes have been made:
-- ports/makefile/config.h and ports/makefile/mpg123.h have been added for plain
-  Makefile builds.
-- ports/MSVC++/config.h and ports/MSVC++/mpg123.h have been added for MSVC
-  builds.
-- ports/Xcode/config.h and ports/MSVC++/mpg123.h have been retained from older
-  versions.
-- ports/Xcode/mpg123.h has been adjusted to provide mpg123_ssize_t and define
-  MPG123_API_VERSION
-- src/libmpg123/mpg123.h.in has been modified to #include <fmt123.h> as
-  #include "fmt123.h"
+- src/libmpg123/lfs_wrap.c has been fixed to export DLL symbols on Windows.
+- ports/makefile/config.h has been added for plain Makefile builds.
+- ports/MSVC++/config.h has been added for MSVC builds.
+- ports/Xcode/config.h has been retained from older versions.
 - ports/Xcode/config.h has been modified to let the build system set OPT_*
 - ports/Xcode/config.h has been modified to #define HAVE_DIRENT_H.
 - Modifications are marked by // OpenMPT or /* OpenMPT */.

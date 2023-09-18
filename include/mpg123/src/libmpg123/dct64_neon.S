@@ -51,11 +51,11 @@ costab_arm:
 	.word 1060439283
 	.word 1060439283
 	ALIGN4
-	GLOBAL_SYMBOL ASM_NAME(dct64_neon)
+	GLOBAL_SYMBOL ASM_NAME(INT123_dct64_neon)
 #ifdef __ELF__
-	.type ASM_NAME(dct64_neon), %function
+	.type ASM_NAME(INT123_dct64_neon), %function
 #endif
-ASM_NAME(dct64_neon):
+ASM_NAME(INT123_dct64_neon):
 	vpush		{q4-q7}
 
 	adr			r3, costab_arm

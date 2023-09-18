@@ -37,7 +37,7 @@
 #include "init_layer3.h"
 #endif
 
-/* Decoder state data, living on the stack of do_layer3. */
+/* Decoder state data, living on the stack of INT123_do_layer3. */
 
 struct gr_info_s
 {
@@ -75,19 +75,19 @@ struct III_sideinfo
 };
 
 #ifdef OPT_MMXORSSE
-real init_layer3_gainpow2_mmx(mpg123_handle *fr, int i)
+real INT123_init_layer3_gainpow2_mmx(mpg123_handle *fr, int i)
 {
 	if(!fr->p.down_sample) return DOUBLE_TO_REAL(16384.0 * pow((double)2.0,-0.25 * (double) (i+210) ));
 	else return DOUBLE_TO_REAL(pow((double)2.0,-0.25 * (double) (i+210)));
 }
 #endif
 
-real init_layer3_gainpow2(mpg123_handle *fr, int i)
+real INT123_init_layer3_gainpow2(mpg123_handle *fr, int i)
 {
 	return DOUBLE_TO_REAL_SCALE_LAYER3(pow((double)2.0,-0.25 * (double) (i+210)),i+256);
 }
 
-void init_layer3_stuff(mpg123_handle *fr, real (*gainpow2_func)(mpg123_handle *fr, int i))
+void INT123_init_layer3_stuff(mpg123_handle *fr, real (*gainpow2_func)(mpg123_handle *fr, int i))
 {
 	int i,j;
 
@@ -414,7 +414,7 @@ static int III_get_scale_factors_2(mpg123_handle *fr, int *scf,struct gr_info_s 
 		}
 	}; 
 
-	if(i_stereo) /* i_stereo AND second channel -> do_layer3() checks this */
+	if(i_stereo) /* i_stereo AND second channel -> INT123_do_layer3() checks this */
 	slen = i_slen2[gr_info->scalefac_compress>>1];
 	else
 	slen = n_slen2[gr_info->scalefac_compress];
@@ -1259,7 +1259,7 @@ static void III_antialias(real xr[SBLIMIT][SSLIMIT],struct gr_info_s *gr_info)
 
 /* Calculation of the inverse MDCT
    used to be static without 3dnow - does that really matter? */
-void dct36(real *inbuf,real *o1,real *o2,const real *wintab,real *tsbuf)
+void INT123_dct36(real *inbuf,real *o1,real *o2,const real *wintab,real *tsbuf)
 {
 	real tmp[18];
 
@@ -1391,7 +1391,7 @@ void dct36(real *inbuf,real *o1,real *o2,const real *wintab,real *tsbuf)
 			t0 = REAL_MUL(cos9[0], (in[5] + in[9]));
 			t1 = REAL_MUL(cos9[1], (in[9] - in[17]));
 
-			tmp[13] = REAL_MUL((t4 + t2 + t2), tfcos36[17-13]);
+			tmp[13] = REAL_MUL((t4 + t2 + t2), INT123_tfcos36[17-13]);
 			t2 = REAL_MUL(cos9[2], (in[5] + in[17]));
 
 			t6 = t3 - t0 - t2;
@@ -1403,21 +1403,21 @@ void dct36(real *inbuf,real *o1,real *o2,const real *wintab,real *tsbuf)
 			t7 = REAL_MUL(COS6_1, in[7]);
 
 			t1 = t2 + t4 + t7;
-			tmp[17] = REAL_MUL((t0 + t1), tfcos36[17-17]);
-			tmp[9]  = REAL_MUL((t0 - t1), tfcos36[17-9]);
+			tmp[17] = REAL_MUL((t0 + t1), INT123_tfcos36[17-17]);
+			tmp[9]  = REAL_MUL((t0 - t1), INT123_tfcos36[17-9]);
 			t1 = REAL_MUL(cos18[2], (in[3] + in[15]));
 			t2 += t1 - t7;
 
-			tmp[14] = REAL_MUL((t3 + t2), tfcos36[17-14]);
+			tmp[14] = REAL_MUL((t3 + t2), INT123_tfcos36[17-14]);
 			t0 = REAL_MUL(COS6_1, (in[11] + in[15] - in[3]));
-			tmp[12] = REAL_MUL((t3 - t2), tfcos36[17-12]);
+			tmp[12] = REAL_MUL((t3 - t2), INT123_tfcos36[17-12]);
 
 			t4 -= t1 + t7;
 
-			tmp[16] = REAL_MUL((t5 - t0), tfcos36[17-16]);
-			tmp[10] = REAL_MUL((t5 + t0), tfcos36[17-10]);
-			tmp[15] = REAL_MUL((t6 + t4), tfcos36[17-15]);
-			tmp[11] = REAL_MUL((t6 - t4), tfcos36[17-11]);
+			tmp[16] = REAL_MUL((t5 - t0), INT123_tfcos36[17-16]);
+			tmp[10] = REAL_MUL((t5 + t0), INT123_tfcos36[17-10]);
+			tmp[15] = REAL_MUL((t6 + t4), INT123_tfcos36[17-15]);
+			tmp[11] = REAL_MUL((t6 - t4), INT123_tfcos36[17-11]);
 		}
 
 #define MACRO(v) { \
@@ -1712,7 +1712,7 @@ static void fill_pinfo_side(mpg123_handle *fr, struct III_sideinfo *si, int gr, 
 #endif
 
 /* And at the end... the main layer3 handler */
-int do_layer3(mpg123_handle *fr)
+int INT123_do_layer3(mpg123_handle *fr)
 {
 	int gr, ch, ss,clip=0;
 	int scalefacs[2][39]; /* max 39 for short[13][3] mode, mixed: 38, long: 22 */
@@ -1750,7 +1750,7 @@ int do_layer3(mpg123_handle *fr)
 		return clip;
 	}
 
-	set_pointer(fr, 1, sideinfo.main_data_begin);
+	INT123_set_pointer(fr, 1, sideinfo.main_data_begin);
 #ifndef NO_MOREINFO
 	if(fr->pinfo)
 	{
@@ -1933,8 +1933,8 @@ int do_layer3(mpg123_handle *fr)
 				if(n > (SSLIMIT-ss)) n=SSLIMIT-ss;
 
 				/* Clip counting makes no sense with this function. */
-				absynth_1to1_i486(hybridOut[0][ss], 0, fr, n);
-				absynth_1to1_i486(hybridOut[1][ss], 1, fr, n);
+				INT123_absynth_1to1_i486(hybridOut[0][ss], 0, fr, n);
+				INT123_absynth_1to1_i486(hybridOut[1][ss], 1, fr, n);
 				ss+=n;
 				fr->buffer.fill+=(2*2*32)*n;
 			}

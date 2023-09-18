@@ -20,11 +20,11 @@ maxmin_s32:
 	.word   1199570944
 	.text
 	ALIGN4
-	.globl ASM_NAME(synth_1to1_s32_s_neon64_asm)
+	.globl ASM_NAME(INT123_synth_1to1_s32_s_neon64_asm)
 #ifdef __ELF__
-	.type ASM_NAME(synth_1to1_s32_s_neon64_asm), %function
+	.type ASM_NAME(INT123_synth_1to1_s32_s_neon64_asm), %function
 #endif
-ASM_NAME(synth_1to1_s32_s_neon64_asm):
+ASM_NAME(INT123_synth_1to1_s32_s_neon64_asm):
 	add		x0, x0, #64
 	sub		x0, x0, x4, lsl #2
 	eor		v31.16b, v31.16b, v31.16b

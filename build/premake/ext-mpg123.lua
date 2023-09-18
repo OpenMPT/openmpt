@@ -31,8 +31,7 @@
    "../../include/mpg123/src/libmpg123/layer1.c",
    "../../include/mpg123/src/libmpg123/layer2.c",
    "../../include/mpg123/src/libmpg123/layer3.c",
-   --"../../include/mpg123/src/libmpg123/lfs_alias.c",
-   --"../../include/mpg123/src/libmpg123/lfs_wrap.c",
+   "../../include/mpg123/src/libmpg123/lfs_wrap.c",
    "../../include/mpg123/src/libmpg123/libmpg123.c",
    "../../include/mpg123/src/libmpg123/ntom.c",
    "../../include/mpg123/src/libmpg123/optimize.c",
@@ -67,17 +66,16 @@ function mpt_use_mpg123 ()
 	filter {}
 	filter { "action:vs*" }
 		includedirs {
-			"../../include/mpg123/ports/MSVC++",
 			"../../include/mpg123/src/libmpg123",
 		}
 	filter { "not action:vs*" }
 		externalincludedirs {
-			"../../include/mpg123/ports/MSVC++",
 			"../../include/mpg123/src/libmpg123",
 		}
 	filter {}
-	links {
-		"mpg123",
-	}
+		defines { "MPG123_NO_LARGENAME" }
+		links {
+			"mpg123",
+		}
 	filter {}
 end

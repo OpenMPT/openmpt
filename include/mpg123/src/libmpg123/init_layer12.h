@@ -8,7 +8,7 @@
 	The type clreal is either double or float. POW() is pow() or powf().
 */
 
-void init_layer12(void)
+void INT123_init_layer12(void)
 {
 	const clreal mulmul[27] =
 	{
@@ -19,8 +19,8 @@ void init_layer12(void)
 		-4.0/5.0 , -2.0/5.0 , 2.0/5.0, 4.0/5.0 ,
 		-8.0/9.0 , -4.0/9.0 , -2.0/9.0 , 2.0/9.0 , 4.0/9.0 , 8.0/9.0
 	};
-	// void init_layer12_stuff()
-	// real* init_layer12_table()
+	// void INT123_init_layer12_stuff()
+	// real* INT123_init_layer12_table()
 	for(int k=0;k<27;k++)
 	{
 		int i,j;
@@ -30,7 +30,7 @@ void init_layer12(void)
 		*table++ = 0.0;
 	}
 
-	// void init_layer12()
+	// void INT123_init_layer12()
 	const unsigned char base[3][9] =
 	{
 		{ 1 , 0, 2 , } ,

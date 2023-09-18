@@ -26,8 +26,8 @@
 	ALIGN8
 .text
 /* int synth_1to1_i586_asm_dither(real *bandPtr, int channel, unsigned char *out, unsigned char *buffs, int bo_and_ditherindex[2], real *decwin, real* dithernoise); */
-.globl ASM_NAME(synth_1to1_i586_asm_dither)
-ASM_NAME(synth_1to1_i586_asm_dither):
+.globl ASM_NAME(INT123_synth_1to1_i586_asm_dither)
+ASM_NAME(INT123_synth_1to1_i586_asm_dither):
 	subl $16,%esp
 	pushl %ebp
 	pushl %edi
@@ -41,7 +41,7 @@ ASM_NAME(synth_1to1_i586_asm_dither):
 #define BO      52(%esp)
 #define DECWIN  56(%esp)
 #define DITHERNOISE 60(%esp)
-/*#define DITHERNOISE $(ASM_NAME(dithernoise))*/
+/*#define DITHERNOISE $(ASM_NAME(INT123_dithernoise))*/
 #define LOC0    16(%esp)
 #define LOC1    20(%esp)
 #define LOC2    24(%esp)
@@ -98,7 +98,7 @@ ASM_NAME(synth_1to1_i586_asm_dither):
 	leal (%ecx,%ebp,4),%eax
 .L74:
 	pushl %eax
-	call FUNC(dct64_i386)
+	call FUNC(INT123_dct64_i386)
 	addl $12,%esp
 /* Now removed the parameters.
    stack: 0(%esp)=%ebx 4=esi 8=edi 12=ebp 16,20,24,28=local 32=back 36=bandptr 40=channel 44=out 48=buffs 52=bo 56=decwin 60=dithernoise */
@@ -374,8 +374,8 @@ ASM_NAME(synth_1to1_i586_asm_dither):
 
 #if defined(PIC) && defined(__APPLE__)
 	.section __IMPORT,__jump_table,symbol_stubs,self_modifying_code+pure_instructions,5
-L_dct64_i386:
-	.indirect_symbol ASM_NAME(dct64_i386)
+FUNC(INT123_dct64_i386):
+	.indirect_symbol ASM_NAME(INT123_dct64_i386)
 	hlt ; hlt ; hlt ; hlt ; hlt
 #endif
 

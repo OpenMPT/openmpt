@@ -18,12 +18,12 @@
 #endif
 
 	.text
-	GLOBAL_SYMBOL ASM_NAME(check_neon)
+	GLOBAL_SYMBOL ASM_NAME(INT123_check_neon)
 #ifdef __ELF__
-	.type ASM_NAME(check_neon), %function
+	.type ASM_NAME(INT123_check_neon), %function
 #endif
 	ALIGN4
-ASM_NAME(check_neon):
+ASM_NAME(INT123_check_neon):
 #ifdef __aarch64__
 	orr		v0.16b, v0.16b, v0.16b
 	ret

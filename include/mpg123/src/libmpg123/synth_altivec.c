@@ -255,7 +255,7 @@
 	vsum4 = vec_mergel(v3,v4); \
 	vsum8 = vec_mergel(v7,v8);
 
-int synth_1to1_altivec(real *bandPtr,int channel,mpg123_handle *fr, int final)
+int INT123_synth_1to1_altivec(real *bandPtr,int channel,mpg123_handle *fr, int final)
 {
 	short *samples = (short *) (fr->buffer.data+fr->buffer.fill);
 	
@@ -263,7 +263,7 @@ int synth_1to1_altivec(real *bandPtr,int channel,mpg123_handle *fr, int final)
 	int clip; 
 	int bo1;
 #ifndef NO_EQUALIZER
-	if(fr->have_eq_settings) do_equalizer(bandPtr,channel,fr->equalizer);
+	if(fr->have_eq_settings) INT123_do_equalizer(bandPtr,channel,fr->equalizer);
 #endif
 	if(!channel)
 	{
@@ -281,13 +281,13 @@ int synth_1to1_altivec(real *bandPtr,int channel,mpg123_handle *fr, int final)
 	{
 		b0 = buf[0];
 		bo1 = fr->bo;
-		dct64_altivec(buf[1]+((fr->bo+1)&0xf),buf[0]+fr->bo,bandPtr);
+		INT123_dct64_altivec(buf[1]+((fr->bo+1)&0xf),buf[0]+fr->bo,bandPtr);
 	}
 	else
 	{
 		b0 = buf[1];
 		bo1 = fr->bo+1;
-		dct64_altivec(buf[0]+fr->bo,buf[1]+fr->bo+1,bandPtr);
+		INT123_dct64_altivec(buf[0]+fr->bo,buf[1]+fr->bo+1,bandPtr);
 	}
 	
 	
@@ -386,7 +386,7 @@ int synth_1to1_altivec(real *bandPtr,int channel,mpg123_handle *fr, int final)
 	return clip;
 }
 
-int synth_1to1_stereo_altivec(real *bandPtr_l, real *bandPtr_r, mpg123_handle *fr)
+int INT123_synth_1to1_stereo_altivec(real *bandPtr_l, real *bandPtr_r, mpg123_handle *fr)
 {
 	short *samples = (short *) (fr->buffer.data+fr->buffer.fill);
 	
@@ -396,8 +396,8 @@ int synth_1to1_stereo_altivec(real *bandPtr_l, real *bandPtr_r, mpg123_handle *f
 #ifndef NO_EQUALIZER
 	if(fr->have_eq_settings)
 	{
-		do_equalizer(bandPtr_l,0,fr->equalizer);
-		do_equalizer(bandPtr_r,1,fr->equalizer);
+		INT123_do_equalizer(bandPtr_l,0,fr->equalizer);
+		INT123_do_equalizer(bandPtr_r,1,fr->equalizer);
 	}
 #endif
 	fr->bo--;
@@ -410,16 +410,16 @@ int synth_1to1_stereo_altivec(real *bandPtr_l, real *bandPtr_r, mpg123_handle *f
 		b0l = bufl[0];
 		b0r = bufr[0];
 		bo1 = fr->bo;
-		dct64_altivec(bufl[1]+((fr->bo+1)&0xf),bufl[0]+fr->bo,bandPtr_l);
-		dct64_altivec(bufr[1]+((fr->bo+1)&0xf),bufr[0]+fr->bo,bandPtr_r);
+		INT123_dct64_altivec(bufl[1]+((fr->bo+1)&0xf),bufl[0]+fr->bo,bandPtr_l);
+		INT123_dct64_altivec(bufr[1]+((fr->bo+1)&0xf),bufr[0]+fr->bo,bandPtr_r);
 	}
 	else
 	{
 		b0l = bufl[1];
 		b0r = bufr[1];
 		bo1 = fr->bo+1;
-		dct64_altivec(bufl[0]+fr->bo,bufl[1]+fr->bo+1,bandPtr_l);
-		dct64_altivec(bufr[0]+fr->bo,bufr[1]+fr->bo+1,bandPtr_r);
+		INT123_dct64_altivec(bufl[0]+fr->bo,bufl[1]+fr->bo+1,bandPtr_l);
+		INT123_dct64_altivec(bufr[0]+fr->bo,bufr[1]+fr->bo+1,bandPtr_r);
 	}
 	
 	
@@ -537,14 +537,14 @@ int synth_1to1_stereo_altivec(real *bandPtr_l, real *bandPtr_r, mpg123_handle *f
 	return clip;
 }
 
-int synth_1to1_real_altivec(real *bandPtr,int channel,mpg123_handle *fr, int final)
+int INT123_synth_1to1_real_altivec(real *bandPtr,int channel,mpg123_handle *fr, int final)
 {
 	real *samples = (real *) (fr->buffer.data+fr->buffer.fill);
 	
 	real *b0, **buf;
 	int bo1;
 #ifndef NO_EQUALIZER
-	if(fr->have_eq_settings) do_equalizer(bandPtr,channel,fr->equalizer);
+	if(fr->have_eq_settings) INT123_do_equalizer(bandPtr,channel,fr->equalizer);
 #endif
 	if(!channel)
 	{
@@ -562,13 +562,13 @@ int synth_1to1_real_altivec(real *bandPtr,int channel,mpg123_handle *fr, int fin
 	{
 		b0 = buf[0];
 		bo1 = fr->bo;
-		dct64_altivec(buf[1]+((fr->bo+1)&0xf),buf[0]+fr->bo,bandPtr);
+		INT123_dct64_altivec(buf[1]+((fr->bo+1)&0xf),buf[0]+fr->bo,bandPtr);
 	}
 	else
 	{
 		b0 = buf[1];
 		bo1 = fr->bo+1;
-		dct64_altivec(buf[0]+fr->bo,buf[1]+fr->bo+1,bandPtr);
+		INT123_dct64_altivec(buf[0]+fr->bo,buf[1]+fr->bo+1,bandPtr);
 	}
 	
 	
@@ -653,7 +653,7 @@ int synth_1to1_real_altivec(real *bandPtr,int channel,mpg123_handle *fr, int fin
 	return 0;
 }
 
-int synth_1to1_fltst_altivec(real *bandPtr_l, real *bandPtr_r, mpg123_handle *fr)
+int INT123_synth_1to1_fltst_altivec(real *bandPtr_l, real *bandPtr_r, mpg123_handle *fr)
 {
 	real *samples = (real *) (fr->buffer.data+fr->buffer.fill);
 	
@@ -662,8 +662,8 @@ int synth_1to1_fltst_altivec(real *bandPtr_l, real *bandPtr_r, mpg123_handle *fr
 #ifndef NO_EQUALIZER
 	if(fr->have_eq_settings)
 	{
-		do_equalizer(bandPtr_l,0,fr->equalizer);
-		do_equalizer(bandPtr_r,1,fr->equalizer);
+		INT123_do_equalizer(bandPtr_l,0,fr->equalizer);
+		INT123_do_equalizer(bandPtr_r,1,fr->equalizer);
 	}
 #endif
 	fr->bo--;
@@ -676,16 +676,16 @@ int synth_1to1_fltst_altivec(real *bandPtr_l, real *bandPtr_r, mpg123_handle *fr
 		b0l = bufl[0];
 		b0r = bufr[0];
 		bo1 = fr->bo;
-		dct64_altivec(bufl[1]+((fr->bo+1)&0xf),bufl[0]+fr->bo,bandPtr_l);
-		dct64_altivec(bufr[1]+((fr->bo+1)&0xf),bufr[0]+fr->bo,bandPtr_r);
+		INT123_dct64_altivec(bufl[1]+((fr->bo+1)&0xf),bufl[0]+fr->bo,bandPtr_l);
+		INT123_dct64_altivec(bufr[1]+((fr->bo+1)&0xf),bufr[0]+fr->bo,bandPtr_r);
 	}
 	else
 	{
 		b0l = bufl[1];
 		b0r = bufr[1];
 		bo1 = fr->bo+1;
-		dct64_altivec(bufl[0]+fr->bo,bufl[1]+fr->bo+1,bandPtr_l);
-		dct64_altivec(bufr[0]+fr->bo,bufr[1]+fr->bo+1,bandPtr_r);
+		INT123_dct64_altivec(bufl[0]+fr->bo,bufl[1]+fr->bo+1,bandPtr_l);
+		INT123_dct64_altivec(bufr[0]+fr->bo,bufr[1]+fr->bo+1,bandPtr_r);
 	}
 	
 	
@@ -765,7 +765,7 @@ int synth_1to1_fltst_altivec(real *bandPtr_l, real *bandPtr_r, mpg123_handle *fr
 	return 0;
 }
 
-int synth_1to1_s32_altivec(real *bandPtr,int channel,mpg123_handle *fr, int final)
+int INT123_synth_1to1_s32_altivec(real *bandPtr,int channel,mpg123_handle *fr, int final)
 {
 	int32_t *samples = (int32_t *) (fr->buffer.data+fr->buffer.fill);
 	
@@ -773,7 +773,7 @@ int synth_1to1_s32_altivec(real *bandPtr,int channel,mpg123_handle *fr, int fina
 	int clip;
 	int bo1;
 #ifndef NO_EQUALIZER
-	if(fr->have_eq_settings) do_equalizer(bandPtr,channel,fr->equalizer);
+	if(fr->have_eq_settings) INT123_do_equalizer(bandPtr,channel,fr->equalizer);
 #endif
 	if(!channel)
 	{
@@ -791,13 +791,13 @@ int synth_1to1_s32_altivec(real *bandPtr,int channel,mpg123_handle *fr, int fina
 	{
 		b0 = buf[0];
 		bo1 = fr->bo;
-		dct64_altivec(buf[1]+((fr->bo+1)&0xf),buf[0]+fr->bo,bandPtr);
+		INT123_dct64_altivec(buf[1]+((fr->bo+1)&0xf),buf[0]+fr->bo,bandPtr);
 	}
 	else
 	{
 		b0 = buf[1];
 		bo1 = fr->bo+1;
-		dct64_altivec(buf[0]+fr->bo,buf[1]+fr->bo+1,bandPtr);
+		INT123_dct64_altivec(buf[0]+fr->bo,buf[1]+fr->bo+1,bandPtr);
 	}
 	
 	
@@ -907,7 +907,7 @@ int synth_1to1_s32_altivec(real *bandPtr,int channel,mpg123_handle *fr, int fina
 }
 
 
-int synth_1to1_s32_stereo_altivec(real *bandPtr_l, real *bandPtr_r, mpg123_handle *fr)
+int INT123_synth_1to1_s32_stereo_altivec(real *bandPtr_l, real *bandPtr_r, mpg123_handle *fr)
 {
 	int32_t *samples = (int32_t *) (fr->buffer.data+fr->buffer.fill);
 	
@@ -917,8 +917,8 @@ int synth_1to1_s32_stereo_altivec(real *bandPtr_l, real *bandPtr_r, mpg123_handl
 #ifndef NO_EQUALIZER
 	if(fr->have_eq_settings)
 	{
-		do_equalizer(bandPtr_l,0,fr->equalizer);
-		do_equalizer(bandPtr_r,1,fr->equalizer);
+		INT123_do_equalizer(bandPtr_l,0,fr->equalizer);
+		INT123_do_equalizer(bandPtr_r,1,fr->equalizer);
 	}
 #endif
 	fr->bo--;
@@ -931,16 +931,16 @@ int synth_1to1_s32_stereo_altivec(real *bandPtr_l, real *bandPtr_r, mpg123_handl
 		b0l = bufl[0];
 		b0r = bufr[0];
 		bo1 = fr->bo;
-		dct64_altivec(bufl[1]+((fr->bo+1)&0xf),bufl[0]+fr->bo,bandPtr_l);
-		dct64_altivec(bufr[1]+((fr->bo+1)&0xf),bufr[0]+fr->bo,bandPtr_r);
+		INT123_dct64_altivec(bufl[1]+((fr->bo+1)&0xf),bufl[0]+fr->bo,bandPtr_l);
+		INT123_dct64_altivec(bufr[1]+((fr->bo+1)&0xf),bufr[0]+fr->bo,bandPtr_r);
 	}
 	else
 	{
 		b0l = bufl[1];
 		b0r = bufr[1];
 		bo1 = fr->bo+1;
-		dct64_altivec(bufl[0]+fr->bo,bufl[1]+fr->bo+1,bandPtr_l);
-		dct64_altivec(bufr[0]+fr->bo,bufr[1]+fr->bo+1,bandPtr_r);
+		INT123_dct64_altivec(bufl[0]+fr->bo,bufl[1]+fr->bo+1,bandPtr_l);
+		INT123_dct64_altivec(bufr[0]+fr->bo,bufr[1]+fr->bo+1,bandPtr_r);
 	}
 	
 	

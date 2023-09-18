@@ -18,11 +18,11 @@ scale:
 	.word   939524096
 	.text
 	ALIGN4
-	.globl ASM_NAME(synth_1to1_real_neon64_asm)
+	.globl ASM_NAME(INT123_synth_1to1_real_neon64_asm)
 #ifdef __ELF__
-	.type ASM_NAME(synth_1to1_real_neon64_asm), %function
+	.type ASM_NAME(INT123_synth_1to1_real_neon64_asm), %function
 #endif
-ASM_NAME(synth_1to1_real_neon64_asm):
+ASM_NAME(INT123_synth_1to1_real_neon64_asm):
 	add		x0, x0, #64
 	sub		x0, x0, x3, lsl #2
 	adrp	x5, AARCH64_PCREL_HI(scale)

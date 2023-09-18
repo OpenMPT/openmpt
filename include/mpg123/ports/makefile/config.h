@@ -28,7 +28,13 @@
 
 /* yeah, POSIX ... */
 
+#if defined(__DJGPP__)
+#define SIZEOF_OFF_T 4
+#else
+#define SIZEOF_OFF_T 8
+#endif
 #define OFF_MAX ((off_t)((sizeof(off_t) == 4) ? ((uint32_t)-1/2) : (sizeof(off_t) == 8) ? ((uint64_t)-1/2) : 0))
+#define OFF_MIN ((off_t)((off_t)0-OFF_MAX-(off_t)1))
 
 /* Features */
 
