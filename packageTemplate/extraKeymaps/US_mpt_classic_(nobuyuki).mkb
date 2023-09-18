@@ -222,6 +222,7 @@ version:1.31.04.00
 4:1209:0:103:1		//Set instrument digit 7: Num 7 (KeyDown)
 4:1209:0:55:1		//Set instrument digit 7: 7 (KeyDown)
 4:1210:0:104:1		//Set instrument digit 8: Num 8 (KeyDown)
+4:1210:0:56:1		//Set instrument digit 8: 8 (KeyDown)
 4:1211:0:105:1		//Set instrument digit 9: Num 9 (KeyDown)
 4:1211:0:57:1		//Set instrument digit 9: 9 (KeyDown)
 
