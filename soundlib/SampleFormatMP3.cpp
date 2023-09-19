@@ -107,7 +107,6 @@ public:
 	static int64_t FileReaderSeek(void *fp, int64_t offset, int whence)
 	{
 		FileReader &file = *static_cast<FileReader *>(fp);
-		FileReader::off_t oldpos = file.GetPosition();
 		if(whence == SEEK_CUR)
 		{
 			if(!mpt::in_range<FileReader::off_t>(file.GetPosition() + offset))
