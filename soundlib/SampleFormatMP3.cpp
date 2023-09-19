@@ -54,7 +54,7 @@
 #endif
 #endif
 #include <mpg123.h>
-#define MPT_USE_MPG123_PORTABLE_API 0  // currently (1.32.0-dev+r5330) broken upstream
+#define MPT_USE_MPG123_PORTABLE_API 1
 
 #endif
 
