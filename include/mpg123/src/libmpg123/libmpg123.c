@@ -648,9 +648,9 @@ int attribute_align_arg mpg123_open_handle(mpg123_handle *mh, void *iohandle)
 #ifndef PORTABLE_API
 	ret = INT123_wrap_open( mh, iohandle, NULL, -1
 	,	mh->p.timeout, mh->p.flags & MPG123_QUIET );
-	if(!ret)
+	if(ret >= 0)
 #endif
-		ret = INT123_open_stream_handle(mh, mh->wrapperdata);
+		ret = INT123_open_stream_handle(mh, ret == LFS_WRAP_NONE ? iohandle : mh->wrapperdata);
 	return ret;
 }
 

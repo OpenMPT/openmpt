@@ -741,7 +741,7 @@ int INT123_wrap_open(mpg123_handle *mh, void *handle, const char *path, int fd, 
 		if(!ioh || ioh->iotype == IO_HANDLE64)
 		{
 			mdebug("user-supplied 64 bit I/O on user-supplied handle %p", handle);
-			return MPG123_OK;
+			return LFS_WRAP_NONE;
 		}
 		if(ioh->iotype == IO_HANDLE)
 		{

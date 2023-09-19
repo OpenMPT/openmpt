@@ -1,4 +1,4 @@
-libmpg123 library version 1.32.0-dev+r5330 (2023-09-19).
+libmpg123 library version 1.32.0-dev+r5332 (2023-09-19).
 The following changes have been made:
 - src/libmpg123/lfs_wrap.c got an assertion for sizeof(off_t).
 - ports/makefile/config.h has been added for plain Makefile builds.

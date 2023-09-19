@@ -29,6 +29,12 @@ int INT123_set_err(mpg123_handle *mh, int err);
 // 1. handle: if path == NULL && fd < 0
 // 2. path: if path != NULL
 // 3. fd: if fd >= 0
+// In case of 64 bit handle setup, this does nothing.
+// Return values:
+//  0: setup for wrapped I/O successful.
+//  1: use user-supplied 64 bit I/O handle directly, no internal wrappery
+// <0: error
+#define LFS_WRAP_NONE 1
 int INT123_wrap_open(mpg123_handle *mh, void *handle, const char *path, int fd, long timeout, int quiet);
 // Deallocate all associated resources and handle memory itself.
 void INT123_wrap_destroy(void * handle);
