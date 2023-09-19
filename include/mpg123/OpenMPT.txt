@@ -1,6 +1,6 @@
-libmpg123 library version 1.32.0 (2023-09-18).
+libmpg123 library version 1.32.0-dev+r5330 (2023-09-19).
 The following changes have been made:
-- src/libmpg123/lfs_wrap.c has been fixed to export DLL symbols on Windows.
+- src/libmpg123/lfs_wrap.c got an assertion for sizeof(off_t).
 - ports/makefile/config.h has been added for plain Makefile builds.
 - ports/MSVC++/config.h has been added for MSVC builds.
 - ports/Xcode/config.h has been retained from older versions.

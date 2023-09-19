@@ -31,12 +31,12 @@
 #define _LARGEFILE64_SOURCE
 #endif
 
+// For correct MPG123_EXPORT.
+#include "abi_align.h"
+
 // Need the full header with non-portable API, for the bare mpg123_open*()
 // declarations. But no renaming shenanigans.
 #define MPG123_NO_LARGENAME
-#if defined(WIN32) && defined(DYNAMIC_BUILD)  /* OpenMPT */
-#define BUILD_MPG123_DLL  /* OpenMPT */
-#endif  /* OpenMPT */
 #include "mpg123.h"
 typedef unsigned char MPG123_STATIC_ASSERT[(SIZEOF_OFF_T == sizeof(off_t)) ? 1 : -1];  /* OpenMPT */
 
