@@ -153,7 +153,6 @@ char* INT123_compat_strdup(const char *s);
 /* If we have the size checks enabled, try to derive some sane printfs.
    Simple start: Use max integer type and format if long is not big enough.
    I am hesitating to use %ll without making sure that it's there... */
-
 #if defined(PRIiMAX)  /* OpenMPT */
 # define OFF_P PRIiMAX  /* OpenMPT */
 typedef intmax_t off_p;  /* OpenMPT */
