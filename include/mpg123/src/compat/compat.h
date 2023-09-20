@@ -351,8 +351,10 @@ size_t INT123_unintr_fwrite(const void *ptr, size_t size, size_t nmemb, FILE *st
 
 #include "true.h"
 
+#ifndef NO_CATCHSIGNAL  /* OpenMPT */
 #if (!defined(WIN32) || defined (__CYGWIN__)) && defined(HAVE_SIGNAL_H)
 void (*INT123_catchsignal(int signum, void(*handler)()))();
 #endif
+#endif  /* OpenMPT */
 
 #endif

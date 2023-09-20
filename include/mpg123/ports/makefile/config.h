@@ -41,6 +41,8 @@
 
 /* #define LFS_LARGEFILE_64 1 */
 
+#define NO_CATCHSIGNAL
+
 /* We want some frame index, eh? */
 #define FRAME_INDEX 1
 #define INDEX_SIZE 1000
