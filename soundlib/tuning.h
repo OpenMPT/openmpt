@@ -36,6 +36,8 @@ public:
 	static constexpr USTEPINDEXTYPE s_RatioTableFineSizeMaxDefault = 1000;
 
 public:
+	CTuning(CTuning &) = default;
+	CTuning(CTuning &&) noexcept = default;
 
 	// To return ratio of certain note.
 	RATIOTYPE GetRatio(const NOTEINDEXTYPE note) const;

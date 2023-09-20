@@ -9,32 +9,36 @@
 
 
 #include "stdafx.h"
-#include "Sndfile.h"
+#include "ITTools.h"
+#include "Loaders.h"
 #include "mod_specifications.h"
+#include "S3MTools.h"
+#include "Sndfile.h"
+#include "Tagging.h"
+#include "tuningcollection.h"
+#include "WAVTools.h"
+#include "XMTools.h"
+#include "../common/FileReader.h"
+#include "../common/misc_util.h"
+#include "../common/version.h"
+#include "../soundlib/AudioCriticalSection.h"
+#include "../soundlib/ModSampleCopy.h"
+#include "mpt/format/join.hpp"
+#include "mpt/string/utility.hpp"
+#include "openmpt/base/Endian.hpp"
+
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/Moddoc.h"
 #include "Dlsbank.h"
 #endif // MODPLUG_TRACKER
-#include "../soundlib/AudioCriticalSection.h"
-#include "mpt/format/join.hpp"
+
 #ifndef MODPLUG_NO_FILESAVE
 #include "mpt/io/base.hpp"
 #include "mpt/io/io.hpp"
 #include "mpt/io/io_stdstream.hpp"
 #include "../common/mptFileIO.h"
 #endif // !MODPLUG_NO_FILESAVE
-#include "../common/misc_util.h"
-#include "openmpt/base/Endian.hpp"
-#include "Tagging.h"
-#include "ITTools.h"
-#include "XMTools.h"
-#include "S3MTools.h"
-#include "WAVTools.h"
-#include "../common/version.h"
-#include "Loaders.h"
-#include "../common/FileReader.h"
-#include "../soundlib/ModSampleCopy.h"
-#include "mpt/string/utility.hpp"
+
 #include <functional>
 #include <map>
 
@@ -275,6 +279,9 @@ bool CSoundFile::ReadInstrumentFromSong(INSTRUMENTINDEX targetInstr, const CSoun
 	}
 #endif
 	pIns->Convert(srcSong.GetType(), GetType());
+
+	if(pIns->pTuning)
+		pIns->pTuning= m_pTuningsTuneSpecific->AddTuning(std::make_unique<CTuning>(*pIns->pTuning));
 
 	// Copy all referenced samples over
 	for(size_t i = 0; i < targetSample.size(); i++)

@@ -208,7 +208,7 @@ static void ReadTuningMapImpl(std::istream& iStrm, CSoundFile& csf, mpt::Charset
 			CTuning *localTuning = TrackerSettings::Instance().oldLocalTunings->GetTuning(str);
 			if(localTuning)
 			{
-				std::unique_ptr<CTuning> pNewTuning = std::unique_ptr<CTuning>(new CTuning(*localTuning));
+				std::unique_ptr<CTuning> pNewTuning = std::make_unique<CTuning>(*localTuning);
 				CTuning *pT = csf.GetTuneSpecificTunings().AddTuning(std::move(pNewTuning));
 				if(pT)
 				{
