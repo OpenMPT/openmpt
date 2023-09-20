@@ -280,7 +280,7 @@ bool CSoundFile::ReadInstrumentFromSong(INSTRUMENTINDEX targetInstr, const CSoun
 #endif
 	pIns->Convert(srcSong.GetType(), GetType());
 
-	if(pIns->pTuning)
+	if(pIns->pTuning && this != &srcSong)
 		pIns->pTuning= m_pTuningsTuneSpecific->AddTuning(std::make_unique<CTuning>(*pIns->pTuning));
 
 	// Copy all referenced samples over
