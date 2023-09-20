@@ -776,7 +776,7 @@ mpt::ustring GetFullCreditsString()
 		"\n"
 #endif
 		"Daniel Collin (emoon/TBL) for providing test infrastructure\n"
-		"https://twitter.com/daniel_collin\n"
+		"https://mastodon.gamedev.place/@daniel_collin\n"
 		"\n"
 		"The people in the ModPlug community for crucial contribution\n"
 		"in the form of ideas, testing and support;\n"
