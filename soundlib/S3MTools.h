@@ -11,12 +11,13 @@
 #pragma once
 
 #include "openmpt/all/BuildSettings.hpp"
-
-#include "../soundlib/ModSample.h"
-#include "../soundlib/SampleIO.h"
-
+#include "openmpt/base/Endian.hpp"
+#include "Snd_defs.h"
 
 OPENMPT_NAMESPACE_BEGIN
+
+struct ModSample;
+class SampleIO;
 
 // S3M File Header
 struct S3MFileHeader
