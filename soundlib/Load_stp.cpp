@@ -365,7 +365,7 @@ bool CSoundFile::ReadSTP(FileReader &file, ModLoadingFlags loadFlags)
 	if(fileHeader.version > 0)
 	{
 		// Scan for total number of channels
-		FileReader::off_t patOffset = file.GetPosition();
+		FileReader::pos_type patOffset = file.GetPosition();
 		for(uint16 pat = 0; pat < numPatterns; pat++)
 		{
 			PATTERNINDEX actualPat = file.ReadUint16BE();

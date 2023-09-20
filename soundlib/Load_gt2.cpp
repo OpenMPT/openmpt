@@ -525,7 +525,7 @@ bool CSoundFile::ReadGTK(FileReader &file, ModLoadingFlags loadFlags)
 		return false;
 	if(!fileHeader.Validate())
 		return false;
-	if(!file.CanRead(mpt::saturate_cast<FileReader::off_t>(fileHeader.GetHeaderMinimumAdditionalSize())))
+	if(!file.CanRead(mpt::saturate_cast<FileReader::pos_type>(fileHeader.GetHeaderMinimumAdditionalSize())))
 		return false;
 	if(loadFlags == onlyVerifyHeader)
 		return true;
@@ -1202,7 +1202,7 @@ bool CSoundFile::ReadGT2(FileReader &file, ModLoadingFlags loadFlags)
 		return false;
 	if(!fileHeader.Validate())
 		return false;
-	if(!file.CanRead(mpt::saturate_cast<FileReader::off_t>(fileHeader.GetHeaderMinimumAdditionalSize())))
+	if(!file.CanRead(mpt::saturate_cast<FileReader::pos_type>(fileHeader.GetHeaderMinimumAdditionalSize())))
 		return false;
 	if(loadFlags == onlyVerifyHeader)
 		return true;

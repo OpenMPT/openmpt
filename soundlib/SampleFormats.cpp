@@ -610,7 +610,7 @@ struct Wave64Chunk
 {
 	Wave64ChunkHeader header;
 
-	FileReader::off_t GetLength() const
+	FileReader::pos_type GetLength() const
 	{
 		uint64 length = header.Size;
 		if(length < sizeof(Wave64ChunkHeader))
@@ -620,7 +620,7 @@ struct Wave64Chunk
 		{
 			length -= sizeof(Wave64ChunkHeader);
 		}
-		return mpt::saturate_cast<FileReader::off_t>(length);
+		return mpt::saturate_cast<FileReader::pos_type>(length);
 	}
 
 	mpt::UUID GetID() const
@@ -1415,7 +1415,7 @@ bool CSoundFile::ReadXISample(SAMPLEINDEX nSample, FileReader &file)
 	}
 
 	uint16 numSamples = fileHeader.numSamples;
-	FileReader::off_t samplePos = sizeof(XIInstrumentHeader) + numSamples * sizeof(XMSample);
+	FileReader::pos_type samplePos = sizeof(XIInstrumentHeader) + numSamples * sizeof(XMSample);
 	// Preferably read the middle-C sample
 	auto sample = fileHeader.instrument.sampleMap[48];
 	if(sample >= fileHeader.numSamples)
@@ -1488,7 +1488,7 @@ struct CAFChunk
 
 	CAFChunkHeader header;
 
-	FileReader::off_t GetLength() const
+	FileReader::pos_type GetLength() const
 	{
 		int64 length = header.mChunkSize;
 		if(length == -1)
@@ -1499,7 +1499,7 @@ struct CAFChunk
 		{
 			length = std::numeric_limits<int64>::max();  // heuristic
 		}
-		return mpt::saturate_cast<FileReader::off_t>(length);
+		return mpt::saturate_cast<FileReader::pos_type>(length);
 	}
 
 	ChunkIdentifiers GetID() const
@@ -1677,9 +1677,9 @@ bool CSoundFile::ReadCAFSample(SAMPLEINDEX nSample, FileReader &file, bool mayNo
 			{
 				uint32 stringID = stringsChunk.ReadUint32BE();
 				int64 offset = stringsChunk.ReadIntBE<int64>();
-				if(offset >= 0 && mpt::in_range<FileReader::off_t>(offset))
+				if(offset >= 0 && mpt::in_range<FileReader::pos_type>(offset))
 				{
-					stringData.Seek(mpt::saturate_cast<FileReader::off_t>(offset));
+					stringData.Seek(mpt::saturate_cast<FileReader::pos_type>(offset));
 					std::string str;
 					if(stringData.ReadNullString(str))
 					{
@@ -2357,7 +2357,7 @@ bool CSoundFile::ReadITIInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 	// In order to properly compute the position, in file, of eventual extended settings
 	// such as "attack" we need to keep the "real" size of the last sample as those extra
 	// setting will follow this sample in the file
-	FileReader::off_t extraOffset = file.GetPosition();
+	FileReader::pos_type extraOffset = file.GetPosition();
 
 	// Reading Samples
 	std::vector<SAMPLEINDEX> samplemap(nsamples, 0);
@@ -2366,7 +2366,7 @@ bool CSoundFile::ReadITIInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 		smp = GetNextFreeSample(nInstr, smp + 1);
 		if(smp == SAMPLEINDEX_INVALID) break;
 		samplemap[i] = smp;
-		const FileReader::off_t offset = file.GetPosition();
+		const FileReader::pos_type offset = file.GetPosition();
 		if(!ReadITSSample(smp, file, false))
 			smp--;
 		extraOffset = std::max(extraOffset, file.GetPosition());

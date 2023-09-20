@@ -109,25 +109,25 @@ public:
 		FileReader &file = *static_cast<FileReader *>(fp);
 		if(whence == SEEK_CUR)
 		{
-			if(!mpt::in_range<FileReader::off_t>(file.GetPosition() + offset))
+			if(!mpt::in_range<FileReader::pos_type>(file.GetPosition() + offset))
 			{
 				return -1;
 			}
-			file.Seek(static_cast<FileReader::off_t>(file.GetPosition() + offset));
+			file.Seek(static_cast<FileReader::pos_type>(file.GetPosition() + offset));
 		} else if(whence == SEEK_END)
 		{
-			if(!mpt::in_range<FileReader::off_t>(file.GetLength() + offset))
+			if(!mpt::in_range<FileReader::pos_type>(file.GetLength() + offset))
 			{
 				return -1;
 			}
-			file.Seek(static_cast<FileReader::off_t>(file.GetLength() + offset));
+			file.Seek(static_cast<FileReader::pos_type>(file.GetLength() + offset));
 		} else
 		{
-			if(!mpt::in_range<FileReader::off_t>(offset))
+			if(!mpt::in_range<FileReader::pos_type>(offset))
 			{
 				return -1;
 			}
-			file.Seek(static_cast<FileReader::off_t>(offset));
+			file.Seek(static_cast<FileReader::pos_type>(offset));
 		}
 		return static_cast<int64_t>(file.GetPosition());
 	}
@@ -142,7 +142,7 @@ public:
 	static mpg123_off_t FileReaderLSeek(void *fp, mpg123_off_t offset, int whence)
 	{
 		FileReader &file = *static_cast<FileReader *>(fp);
-		FileReader::off_t oldpos = file.GetPosition();
+		FileReader::pos_type oldpos = file.GetPosition();
 		if(whence == SEEK_CUR) file.Seek(file.GetPosition() + offset);
 		else if(whence == SEEK_END) file.Seek(file.GetLength() + offset);
 		else file.Seek(offset);

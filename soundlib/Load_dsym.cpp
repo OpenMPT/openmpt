@@ -125,7 +125,7 @@ static std::vector<std::byte> DecompressDSymLZW(FileReader &file, uint32 size)
 	MPT_ASSERT(output.size() == size);
 
 	// Align length to 4 bytes
-	file.Seek(startPos + ((bitFile.GetPosition() - startPos + 3u) & ~FileReader::off_t(3)));
+	file.Seek(startPos + ((bitFile.GetPosition() - startPos + 3u) & ~FileReader::pos_type(3)));
 	return output;
 }
 
@@ -183,7 +183,7 @@ static std::vector<std::byte> DecompressDSymSigmaDelta(FileReader &file, uint32 
 	}
 
 	// Align length to 4 bytes
-	file.Seek(startPos + ((bitFile.GetPosition() - startPos + 3u) & ~FileReader::off_t(3)));
+	file.Seek(startPos + ((bitFile.GetPosition() - startPos + 3u) & ~FileReader::pos_type(3)));
 	return output;
 }
 
@@ -230,7 +230,7 @@ bool CSoundFile::ReadDSym(FileReader &file, ModLoadingFlags loadFlags)
 	file.Rewind();
 	if(!file.ReadStruct(fileHeader) || !fileHeader.Validate())
 		return false;
-	if(!file.CanRead(mpt::saturate_cast<FileReader::off_t>(fileHeader.GetHeaderMinimumAdditionalSize())))
+	if(!file.CanRead(mpt::saturate_cast<FileReader::pos_type>(fileHeader.GetHeaderMinimumAdditionalSize())))
 		return false;
 	if(loadFlags == onlyVerifyHeader)
 		return true;

@@ -79,11 +79,11 @@ struct ZipFileAbstraction
 		default:
 			return -1;
 		}
-		if(!mpt::in_range<FileReader::off_t>(destination))
+		if(!mpt::in_range<FileReader::pos_type>(destination))
 		{
 			return 1;
 		}
-		return (file.Seek(static_cast<FileReader::off_t>(destination)) ? 0 : 1);
+		return (file.Seek(static_cast<FileReader::pos_type>(destination)) ? 0 : 1);
 	}
 
 	static int ZCALLBACK fclose_mem(voidpf, voidpf)

@@ -294,7 +294,7 @@ protected:
 	FileReader sampleData, smplChunk, instChunk, xtraChunk, wsmpChunk, cueChunk;
 	FileReader::ChunkList<RIFFChunk> infoChunk;
 
-	FileReader::off_t sampleLength;
+	FileReader::pos_type sampleLength;
 	WAVFormatChunk formatInfo;
 	uint16 subFormat;
 	uint16 codePage;

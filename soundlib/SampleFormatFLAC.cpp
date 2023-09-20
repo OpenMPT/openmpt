@@ -79,7 +79,7 @@ struct FLACDecoder
 		FileReader &file = static_cast<FLACDecoder *>(client_data)->m_file;
 		if(*bytes > 0)
 		{
-			FileReader::off_t readBytes = *bytes;
+			FileReader::pos_type readBytes = *bytes;
 			LimitMax(readBytes, file.BytesLeft());
 			file.ReadRaw(mpt::byte_cast<mpt::byte_span>(mpt::span(buffer, readBytes)));
 			*bytes = readBytes;
@@ -96,7 +96,7 @@ struct FLACDecoder
 	static FLAC__StreamDecoderSeekStatus seek_cb(const FLAC__StreamDecoder *, FLAC__uint64 absolute_byte_offset, void *client_data)
 	{
 		FileReader &file = static_cast<FLACDecoder *>(client_data)->m_file;
-		if(!file.Seek(static_cast<FileReader::off_t>(absolute_byte_offset)))
+		if(!file.Seek(static_cast<FileReader::pos_type>(absolute_byte_offset)))
 			return FLAC__STREAM_DECODER_SEEK_STATUS_ERROR;
 		else
 			return FLAC__STREAM_DECODER_SEEK_STATUS_OK;

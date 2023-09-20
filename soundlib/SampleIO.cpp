@@ -41,12 +41,12 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 
 	LimitMax(sample.nLength, MAX_SAMPLE_LENGTH);
 
-	FileReader::off_t bytesRead = 0;	// Amount of memory that has been read from file
+	FileReader::pos_type bytesRead = 0;	// Amount of memory that has been read from file
 
-	FileReader::off_t filePosition = file.GetPosition();
+	FileReader::pos_type filePosition = file.GetPosition();
 	const std::byte * sourceBuf = nullptr;
 	FileReader::PinnedView restrictedSampleDataView;
-	FileReader::off_t fileSize = 0;
+	FileReader::pos_type fileSize = 0;
 	if(UsesFileReaderForDecoding())
 	{
 		sourceBuf = nullptr;

@@ -302,7 +302,7 @@ size_t CSoundFile::ITInstrToMPT(FileReader &file, ModInstrument &ins, uint16 trk
 		}
 	} else
 	{
-		const FileReader::off_t offset = file.GetPosition();
+		const FileReader::pos_type offset = file.GetPosition();
 
 		// Try loading extended instrument... instSize will differ between normal and extended instruments.
 		ITInstrumentEx instrumentHeader;
@@ -421,7 +421,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		return false;
 	}
-	if(!file.CanRead(mpt::saturate_cast<FileReader::off_t>(GetHeaderMinimumAdditionalSize(fileHeader))))
+	if(!file.CanRead(mpt::saturate_cast<FileReader::pos_type>(GetHeaderMinimumAdditionalSize(fileHeader))))
 	{
 		return false;
 	}
@@ -776,7 +776,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	// In order to properly compute the position, in file, of eventual extended settings
 	// such as "attack" we need to keep the "real" size of the last sample as those extra
 	// setting will follow this sample in the file
-	FileReader::off_t lastSampleOffset = 0;
+	FileReader::pos_type lastSampleOffset = 0;
 	if(fileHeader.smpnum > 0)
 	{
 		lastSampleOffset = smpPos[fileHeader.smpnum - 1] + sizeof(ITSample);

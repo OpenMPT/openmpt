@@ -224,7 +224,7 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 		return false;
 	if(!fileHeader.Validate())
 		return false;
-	if(!file.CanRead(mpt::saturate_cast<FileReader::off_t>(fileHeader.GetHeaderMinimumAdditionalSize())))
+	if(!file.CanRead(mpt::saturate_cast<FileReader::pos_type>(fileHeader.GetHeaderMinimumAdditionalSize())))
 		return false;
 	if(loadFlags == onlyVerifyHeader)
 		return true;
@@ -376,7 +376,7 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 			// ST2 just plays random noise for samples with a default volume of 0
 			if(sample.nLength && sample.nVolume > 0)
 			{
-				FileReader::off_t sampleOffset = sampleOffsets[smp - 1] << 4;
+				FileReader::pos_type sampleOffset = sampleOffsets[smp - 1] << 4;
 				// acidlamb.stm has some bogus samples with sample offsets past EOF
 				if(sampleOffset > sizeof(STMFileHeader) && file.Seek(sampleOffset))
 				{
@@ -455,7 +455,7 @@ bool CSoundFile::ReadSTX(FileReader &file, ModLoadingFlags loadFlags)
 		return false;
 	if(!fileHeader.Validate())
 		return false;
-	if (!file.CanRead(mpt::saturate_cast<FileReader::off_t>(fileHeader.GetHeaderMinimumAdditionalSize())))
+	if (!file.CanRead(mpt::saturate_cast<FileReader::pos_type>(fileHeader.GetHeaderMinimumAdditionalSize())))
 		return false;
 	if(loadFlags == onlyVerifyHeader)
 		return true;

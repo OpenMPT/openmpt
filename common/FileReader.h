@@ -157,7 +157,6 @@ private:
 public:
 
 	using pos_type = typename traits_type::pos_type;
-	using off_t = pos_type;
 
 	using data_type = typename traits_type::data_type;
 	using ref_data_type = typename traits_type::ref_data_type;
@@ -382,19 +381,19 @@ public:
 	using ChunkList = mpt::IO::FileReader::ChunkList<T, FileReader>;
 
 	template<typename T>
-	Item<T> ReadNextChunk(off_t alignment)
+	Item<T> ReadNextChunk(pos_type alignment)
 	{
 		return mpt::IO::FileReader::ReadNextChunk<T, FileReader>(*this, alignment);
 	}
 
 	template<typename T>
-	ChunkList<T> ReadChunks(off_t alignment)
+	ChunkList<T> ReadChunks(pos_type alignment)
 	{
 		return mpt::IO::FileReader::ReadChunks<T, FileReader>(*this, alignment);
 	}
 
 	template<typename T>
-	ChunkList<T> ReadChunksUntil(off_t alignment, decltype(T().GetID()) stopAtID)
+	ChunkList<T> ReadChunksUntil(pos_type alignment, decltype(T().GetID()) stopAtID)
 	{
 		return mpt::IO::FileReader::ReadChunksUntil<T, FileReader>(*this, alignment, stopAtID);
 	}

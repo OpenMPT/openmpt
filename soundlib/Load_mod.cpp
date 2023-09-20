@@ -1237,7 +1237,7 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 				// On the other hand, the loop points in Purple Motions's SOUL-O-M.MOD are completely broken and shouldn't be treated like this.
 				// As it was most likely written in Scream Tracker, it has empty sample slots with a default volume of 64, which we use for
 				// rejecting this quirk for that file.
-				FileReader::off_t nextSample = file.GetPosition() + sampleIO.CalculateEncodedSize(sample.nLength);
+				FileReader::pos_type nextSample = file.GetPosition() + sampleIO.CalculateEncodedSize(sample.nLength);
 				if(isMdKd && onlyAmigaNotes && !hasEmptySampleWithVolume)
 					sample.nLength = std::max(sample.nLength, sample.nLoopEnd);
 
@@ -1611,7 +1611,7 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 	// Setup channel pan positions and volume
 	SetupMODPanning();
 
-	FileReader::off_t patOffset = file.GetPosition();
+	FileReader::pos_type patOffset = file.GetPosition();
 
 	// Scan patterns to identify Ultimate Soundtracker modules.
 	uint32 illegalBytes = 0, totalNumDxx = 0;

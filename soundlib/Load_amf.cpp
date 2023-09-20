@@ -116,7 +116,7 @@ bool CSoundFile::ReadAMF_Asylum(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		return false;
 	}
-	if(!file.CanRead(mpt::saturate_cast<FileReader::off_t>(GetHeaderMinimumAdditionalSize(fileHeader))))
+	if(!file.CanRead(mpt::saturate_cast<FileReader::pos_type>(GetHeaderMinimumAdditionalSize(fileHeader))))
 	{
 		return false;
 	}
@@ -644,7 +644,7 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 	// Setup Order List
 	Order().resize(fileHeader.numOrders);
 	std::vector<uint16> patternLength;
-	const FileReader::off_t trackStartPos = file.GetPosition() + (fileSignature.version >= 14 ? 2 : 0);
+	const FileReader::pos_type trackStartPos = file.GetPosition() + (fileSignature.version >= 14 ? 2 : 0);
 	if(fileSignature.version >= 14)
 	{
 		patternLength.resize(fileHeader.numOrders);
