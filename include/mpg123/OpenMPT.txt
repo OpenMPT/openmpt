@@ -1,6 +1,7 @@
 libmpg123 library version 1.32.0-dev+r5332 (2023-09-19).
 The following changes have been made:
 - src/libmpg123/lfs_wrap.c got an assertion for sizeof(off_t).
+- #if LFS_LARGEFILE_64 in src/libmpg123/lfs_wrap.c has been fixed.
 - src/compat/compat.h has been modified to not rely on SIZEOF_LONG for OFF_P,
   SIZE_P, and SSIZE_P.
 - ports/makefile/config.h has been added for plain Makefile builds.
