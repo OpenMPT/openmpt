@@ -13,7 +13,7 @@ CFLAGS_WARNINGS   +=                           -Wframe-larger-than=4000
 ifeq ($(MODERN),1)
 CXXFLAGS_WARNINGS += 
 CFLAGS_WARNINGS   += 
-LDFLAGS_WARNINGS  += -Wl,-no-undefined -Wl,--detect-odr-violations
+LDFLAGS_WARNINGS  += -Wl,-no-undefined
 endif
 
 CFLAGS_SILENT += -Wno-\#warnings
