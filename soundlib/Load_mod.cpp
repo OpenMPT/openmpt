@@ -1829,7 +1829,7 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 
-	const mpt::uchar *madeWithTracker = UL_("");
+	const mpt::uchar *madeWithTracker = UL_("");  // NOLINT  (deadcode.DeadStores)
 	switch(minVersion)
 	{
 	case UST1_00:
