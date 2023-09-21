@@ -49,7 +49,7 @@ ifeq ($(MODERN),1)
 LDFLAGS  += -fuse-ld=lld
 CXXFLAGS_WARNINGS += -Wpedantic -Wframe-larger-than=16000
 CFLAGS_WARNINGS   += -Wpedantic -Wframe-larger-than=4000
-LDFLAGS_WARNINGS  += -Wl,-no-undefined -Wl,--detect-odr-violations
+LDFLAGS_WARNINGS  += -Wl,-no-undefined
 # re-renable after 1.29 branch
 #CXXFLAGS_WARNINGS += -Wdouble-promotion
 #CFLAGS_WARNINGS   += -Wdouble-promotion
