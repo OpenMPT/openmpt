@@ -1770,7 +1770,7 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 
-	const MPT_UCHAR_TYPE *madeWithTracker = UL_("");
+	[[maybe_unused]] /* silence clang-tidy deadcode.DeadStores */ const MPT_UCHAR_TYPE *madeWithTracker = UL_("");
 	switch(minVersion)
 	{
 	case UST1_00:
