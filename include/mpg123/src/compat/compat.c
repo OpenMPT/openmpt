@@ -509,7 +509,7 @@ size_t INT123_unintr_fwrite(const void *ptr, size_t size, size_t nmemb, FILE *st
 
 #ifndef NO_CATCHSIGNAL
 #if (!defined(WIN32) || defined (__CYGWIN__)) && defined(HAVE_SIGNAL_H)
-void (*INT123_catchsignal(int signum, void(*handler)()))()
+void (*INT123_catchsignal(int signum, void(*handler)(int)))(int)
 {
 	struct sigaction new_sa;
 	struct sigaction old_sa;
@@ -523,7 +523,7 @@ void (*INT123_catchsignal(int signum, void(*handler)()))()
 	sigemptyset(&new_sa.sa_mask);
 	new_sa.sa_flags = 0;
 	if(sigaction(signum, &new_sa, &old_sa) == -1)
-		return ((void (*)()) -1);
+		return ((void (*)(int)) -1); // Not rather NULL?
 	return (old_sa.sa_handler);
 }
 #endif

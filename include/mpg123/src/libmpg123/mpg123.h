@@ -2196,10 +2196,6 @@ MPG123_EXPORT int mpg123_replace_reader( mpg123_handle *mh
 ,	off_t (*r_lseek)(int, off_t, int)
 );
 
-/* TODO: Implement replace_read_handle() as thin wrapper over mpg123_reader(),
-   triggering the same further code paths, include mpg123_open_handle().
-   And: Implement the below functions, MPG123_PORTABLE_API, at all. */
-
 /** Replace I/O functions with your own ones operating on some kind of
  *  handle instead of integer descriptors.
  *  The handle is a void pointer, so you can pass any data you want...
