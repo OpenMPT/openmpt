@@ -1,6 +1,3 @@
-#if FOOO_BAR
-#error "Meh"
-#endif
 /*
 	lfs_wrap: Wrapper code for reader functions, both internal and external.
 
