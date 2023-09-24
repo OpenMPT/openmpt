@@ -10,8 +10,8 @@
 
 	.text
 	ALIGN4
-	.globl ASM_NAME(getcpuflags)
-ASM_NAME(getcpuflags):
+	.globl ASM_NAME(INT123_getcpuflags)
+ASM_NAME(INT123_getcpuflags):
 	push	%rbp
 	mov		%rsp, %rbp
 	push	%rbx

@@ -30,9 +30,9 @@
 
 #include "mangle.h"
 
-	.globl ASM_NAME(dct36_3dnow)
-/*	.type	 ASM_NAME(dct36_3dnow),@function */
-ASM_NAME(dct36_3dnow):
+	.globl ASM_NAME(INT123_dct36_3dnow)
+/*	.type	 ASM_NAME(INT123_dct36_3dnow),@function */
+ASM_NAME(INT123_dct36_3dnow):
 	pushl %ebp
 	movl %esp,%ebp
 // Not entirely sure about this PIC_GLOBAL_PTR here, but this is highly
@@ -50,12 +50,12 @@ ASM_NAME(dct36_3dnow):
 #ifdef PIC_GLOBAL_PTR
 	#define _COS9_ 0(%edi)
 	#define _tfcos36_ 0(%eax)
-	mov GLOBAL_VAR_PTR(tfcos36), %eax
-	mov GLOBAL_VAR_PTR(COS9), %edi
+	mov GLOBAL_VAR_PTR(INT123_tfcos36), %eax
+	mov GLOBAL_VAR_PTR(INT123_COS9), %edi
 	mov %eax, -4(%ebp)
 #else
-	#define _COS9_ GLOBAL_VAR(COS9)
-	#define _tfcos36_ GLOBAL_VAR(tfcos36)
+	#define _COS9_ GLOBAL_VAR(INT123_COS9)
+	#define _tfcos36_ GLOBAL_VAR(INT123_tfcos36)
 #endif
 
 	movl 8(%ebp),%eax
@@ -551,11 +551,11 @@ ASM_NAME(dct36_3dnow):
 
 #if defined(PIC) && defined(__APPLE__)
 	.section	__IMPORT,__pointers,non_lazy_symbol_pointers
-L_tfcos36:
-	.indirect_symbol	ASM_NAME(tfcos36)
+L_INT123_tfcos36:
+	.indirect_symbol	ASM_NAME(INT123_tfcos36)
 	.long	0
-L_COS9:
-	.indirect_symbol	ASM_NAME(COS9)
+L_INT123_COS9:
+	.indirect_symbol	ASM_NAME(INT123_COS9)
 	.long	0
 #endif
 

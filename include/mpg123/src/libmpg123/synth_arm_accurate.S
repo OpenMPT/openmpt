@@ -23,11 +23,11 @@
 
 	.text
 	ALIGN4
-	.globl ASM_NAME(synth_1to1_arm_accurate_asm)
+	.globl ASM_NAME(INT123_synth_1to1_arm_accurate_asm)
 #ifdef __ELF__
-	.type ASM_NAME(synth_1to1_arm_accurate_asm), %function
+	.type ASM_NAME(INT123_synth_1to1_arm_accurate_asm), %function
 #endif
-ASM_NAME(synth_1to1_arm_accurate_asm):
+ASM_NAME(INT123_synth_1to1_arm_accurate_asm):
 	stmfd	sp!, {r4, r5, r6, r7, r8, r9, r10, r11, lr}
 	
 	add		WINDOW, WINDOW, #64

@@ -1,5 +1,5 @@
 /*
-	dct64_i486.c: DCT64, a plain C variant for i486
+	INT123_dct64_i486.c: DCT64, a plain C variant for i486
 
 	copyright 1998-2006 by the mpg123 project - free software under the terms of the LGPL 2.1
 	see COPYING and AUTHORS files in distribution or http://mpg123.org
@@ -314,10 +314,10 @@ void dct64_1_486(int *out0,int *out1,int *b1,int *b2)
 
 
 /*
- * the call via dct64 is a trick to force GCC to use
+ * the call via INT123_dct64 is a trick to force GCC to use
  * (new) registers for the b1,b2 pointer to the bufs[xx] field
  */
-void dct64_i486(int *a,int *b,real *samples)
+void INT123_dct64_i486(int *a,int *b,real *samples)
 {
   int bufs[64];
   int i;

@@ -35,7 +35,6 @@ end
    "../../include/flac/include",
    "../../include/lame/include",
    "../../include/lhasa/lib/public",
-   "../../include/mpg123/ports/MSVC++",
    "../../include/mpg123/src/libmpg123",
    "../../include/nlohmann-json/include",
    "../../include/ogg/include",
@@ -47,6 +46,7 @@ end
    "../../include/vorbis/include",
    "../../include/zlib",
   }
+	defines { "MPG123_NO_LARGENAME" }
 	filter { "action:vs*" }
 		includedirs ( extincludedirs )
 	filter { "not action:vs*" }

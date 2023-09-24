@@ -44,7 +44,7 @@
 	.data
 #endif
 	ALIGN32
-ASM_NAME(maxmin_x86_64):
+ASM_NAME(INT123_maxmin_x86_64):
 	.long   32767
 	.long   32767
 	.long   32767
@@ -55,8 +55,8 @@ ASM_NAME(maxmin_x86_64):
 	.long   -32769
 	.text
 	ALIGN16
-.globl ASM_NAME(synth_1to1_s_x86_64_asm)
-ASM_NAME(synth_1to1_s_x86_64_asm):
+.globl ASM_NAME(INT123_synth_1to1_s_x86_64_asm)
+ASM_NAME(INT123_synth_1to1_s_x86_64_asm):
 #ifdef IS_MSABI /* should save xmm6-15 */
 	movl		40(%rsp), %eax /* 5th argument; placed after 32-byte shadow space */
 	subq		$168, %rsp /* stack alignment + 10 xmm registers */
@@ -85,7 +85,7 @@ ASM_NAME(synth_1to1_s_x86_64_asm):
 	leaq		32(WINDOW), WINDOW
 	subq		%rax, WINDOW
 	
-	leaq		ASM_NAME(maxmin_x86_64)(%rip), %rax
+	leaq		ASM_NAME(INT123_maxmin_x86_64)(%rip), %rax
 	movaps		(%rax), XMMREG_MAX
 	movaps		16(%rax), XMMREG_MIN
 	pxor		XMMREG_CLIP, XMMREG_CLIP

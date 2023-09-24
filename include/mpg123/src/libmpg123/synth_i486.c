@@ -105,7 +105,7 @@
   b0+=FIR_BUFFER_SIZE;\
 }
 
-int absynth_1to1_i486(real *bandPtr, int channel, mpg123_handle *fr, int nb_blocks)
+int INT123_absynth_1to1_i486(real *bandPtr, int channel, mpg123_handle *fr, int nb_blocks)
 {
   short *samples = (short *) (fr->buffer.data+fr->buffer.fill);
   int *b0,**buf;
@@ -142,9 +142,9 @@ int absynth_1to1_i486(real *bandPtr, int channel, mpg123_handle *fr, int nb_bloc
     }
     
     if(b & 1) {
-      dct64_i486(buf[1]+b,buf[0]+b,bandPtr);
+      INT123_dct64_i486(buf[1]+b,buf[0]+b,bandPtr);
     } else {
-      dct64_i486(buf[0]+b,buf[1]+b,bandPtr);
+      INT123_dct64_i486(buf[0]+b,buf[1]+b,bandPtr);
     }
     bandPtr+=32;
   }
