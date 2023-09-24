@@ -61,8 +61,8 @@ dct36_sse_sign:
 	.long 0x80000000,0x80000000,0x80000000,0x80000000
 	.text
 	ALIGN16
-	.globl ASM_NAME(dct36_sse)
-ASM_NAME(dct36_sse):
+	.globl ASM_NAME(INT123_dct36_sse)
+ASM_NAME(INT123_dct36_sse):
 	push		%ebp
 	mov			%esp, %ebp
 	and			$-16, %esp

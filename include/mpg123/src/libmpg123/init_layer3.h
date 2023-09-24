@@ -9,7 +9,7 @@
 */
 
 // init tables for layer-3 ... specific with the downsampling...
-void init_layer3(void)
+void INT123_init_layer3(void)
 {
 	int i,j,k,l;
 
@@ -41,10 +41,10 @@ void init_layer3(void)
 	}
 
 	for(i=0;i<9;i++)
-	COS9[i] = COS( M_PI / 18.0 * (clreal) i);
+	INT123_COS9[i] = COS( M_PI / 18.0 * (clreal) i);
 
 	for(i=0;i<9;i++)
-	tfcos36[i] = 0.5 / COS( M_PI * (clreal) (i*2+1) / 36.0 );
+	INT123_tfcos36[i] = 0.5 / COS( M_PI * (clreal) (i*2+1) / 36.0 );
 
 	for(i=0;i<3;i++)
 	tfcos12[i] = 0.5 / COS( M_PI * (clreal) (i*2+1) / 12.0 );

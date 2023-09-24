@@ -9,12 +9,12 @@
   dofile "../../build/premake/premake-defaults.lua"
   local extincludedirs = {
    "../../include",
-   "../../include/mpg123/ports/MSVC++",
    "../../include/mpg123/src/libmpg123",
    "../../include/ogg/include",
    "../../include/vorbis/include",
    "../../include/zlib",
   }
+	defines { "MPG123_NO_LARGENAME" }
 	filter { "action:vs*" }
 		includedirs ( extincludedirs )
 	filter { "not action:vs*" }

@@ -33,8 +33,8 @@ scale_sse:
 	.long   939524096
 	.text
 	ALIGN16
-.globl ASM_NAME(synth_1to1_real_sse_asm)
-ASM_NAME(synth_1to1_real_sse_asm):
+.globl ASM_NAME(INT123_synth_1to1_real_sse_asm)
+ASM_NAME(INT123_synth_1to1_real_sse_asm):
 	pushl		%ebp
 	movl		%esp, %ebp
 	pushl		%ebx

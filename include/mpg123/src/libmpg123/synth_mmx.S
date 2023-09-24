@@ -24,9 +24,9 @@
 
 .text
 
-.globl ASM_NAME(synth_1to1_MMX)
+.globl ASM_NAME(INT123_synth_1to1_MMX)
 /* int synth_1to1_MMX(real *bandPtr, int channel, short *out, short *buffs, int *bo, float *decwins); */
-ASM_NAME(synth_1to1_MMX):
+ASM_NAME(INT123_synth_1to1_MMX):
         pushl %ebp
         pushl %edi
         pushl %esi
@@ -61,7 +61,7 @@ ASM_NAME(synth_1to1_MMX):
 2:
         pushl %edx
         pushl %ecx
-        call FUNC(dct64_MMX)
+        call FUNC(INT123_dct64_MMX)
         addl $12,%esp
 /* stack like before, pushed 3, incremented again */
 	leal 1(%ebx), %ecx
@@ -133,8 +133,8 @@ ASM_NAME(synth_1to1_MMX):
 
 #if defined(PIC) && defined(__APPLE__)
 	.section __IMPORT,__jump_table,symbol_stubs,self_modifying_code+pure_instructions,5
-L_dct64_MMX:
-	.indirect_symbol ASM_NAME(dct64_MMX)
+FUNC(INT123_dct64_MMX):
+	.indirect_symbol ASM_NAME(INT123_dct64_MMX)
 	hlt ; hlt ; hlt ; hlt ; hlt
 #endif
 

@@ -72,8 +72,8 @@ dct36_x86_64_sign:
 	.long 0x80000000,0x80000000,0x80000000,0x80000000
 	.text
 	ALIGN16
-	.globl ASM_NAME(dct36_x86_64)
-ASM_NAME(dct36_x86_64):
+	.globl ASM_NAME(INT123_dct36_x86_64)
+ASM_NAME(INT123_dct36_x86_64):
 #ifdef IS_MSABI
 	push		%rbp
 	mov			%rsp, %rbp
