@@ -1749,7 +1749,6 @@
 				);
 				SYMROOT = "../../bin/release/xcode4-ios/all";
 				SYSTEM_HEADER_SEARCH_PATHS = (
-					../../include/mpg123/ports/Xcode,
 					../../include/mpg123/src/libmpg123,
 					../../include/ogg/include,
 					../../include/vorbis/include,
@@ -1795,7 +1794,6 @@
 				);
 				SYMROOT = "../../bin/debug/xcode4-ios/all";
 				SYSTEM_HEADER_SEARCH_PATHS = (
-					../../include/mpg123/ports/Xcode,
 					../../include/mpg123/src/libmpg123,
 					../../include/ogg/include,
 					../../include/vorbis/include,
