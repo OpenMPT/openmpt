@@ -1,7 +1,7 @@
 /*
 	mangle: support defines for preprocessed assembler
 
-	copyright 1995-2007 by the mpg123 project - free software under the terms of the LGPL 2.1
+	copyright 1995-2023 by the mpg123 project - free software under the terms of the LGPL 2.1
 	see COPYING and AUTHORS files in distribution or http://mpg123.org
 
 	This once started out as mangle.h from MPlayer, but you can't really call it derived work... the small part that in principle stems from MPlayer also being not very special (once you decided to use such a header at all, it's quite obvious material).
@@ -11,7 +11,6 @@
 #define __MANGLE_H
 
 #include "config.h"
-#include "intsym.h"
 
 #if (defined OPT_I486)  || (defined OPT_I586) || (defined OPT_I586_DITHER) \
  || (defined OPT_MMX)   || (defined OPT_SSE)  || (defined OPT_3DNOW) || (defined OPT_3DNOWEXT) \
@@ -94,13 +93,13 @@
 #if defined(PIC) && defined(__ELF__)
 
 /* ELF binaries (Unix/Linux) */
-#define LOCAL_VAR(a) a ## @GOTOFF(_EBX_)
-#define GLOBAL_VAR(a) ASM_NAME(a) ## @GOTOFF(_EBX_)
-#define GLOBAL_VAR_PTR(a) ASM_NAME(a) ## @GOT(_EBX_)
+#define LOCAL_VAR(a) MANGLE_MACROCAT(a, @GOTOFF(_EBX_))
+#define GLOBAL_VAR(a) MANGLE_MACROCAT(ASM_NAME(a), @GOTOFF(_EBX_))
+#define GLOBAL_VAR_PTR(a) MANGLE_MACROCAT(ASM_NAME(a), @GOT(_EBX_))
 #define FUNC(a) ASM_NAME(a)
-#define EXTERNAL_FUNC(a) ASM_NAME(a) ## @PLT
+#define EXTERNAL_FUNC(a) MANGLE_MACROCAT(ASM_NAME(a), @PLT)
 #undef ASM_VALUE
-#define ASM_VALUE(a) MANGLE_MACROCAT($,a) ##@GOTOFF
+#define ASM_VALUE(a) MANGLE_MACROCAT(MANGLE_MACROCAT($,a), @GOTOFF)
 #define GET_GOT \
 	call 1f; \
 1: \
@@ -113,11 +112,11 @@
 #elif defined(PIC) && defined(__APPLE__)
 
 /* Mach-O binaries (OSX/iOS) */
-#define LOCAL_VAR(a) a ## - Lpic_base(_EBX_)
+#define LOCAL_VAR(a) MANGLE_MACROCAT(a, - Lpic_base(_EBX_))
 #define GLOBAL_VAR(a) .err This ABI cannot access non-local symbols directly.
-#define GLOBAL_VAR_PTR(a) L_ ## a ## - Lpic_base(_EBX_)
-#define FUNC(a) L_ ## a
-#define EXTERNAL_FUNC(a) L_ ## a
+#define GLOBAL_VAR_PTR(a) MANGLE_MACROCAT(MANGLE_MACROCAT(L_, a), - Lpic_base(_EBX_))
+#define FUNC(a) MANGLE_MACROCAT(L_, a)
+#define EXTERNAL_FUNC(a) MANGLE_MACROCAT(L_, a)
 #define GET_GOT \
 	call Lpic_base; \
 Lpic_base: \

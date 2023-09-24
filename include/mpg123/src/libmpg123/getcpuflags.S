@@ -20,9 +20,9 @@
 .text
 	ALIGN4
 
-.globl ASM_NAME(getcpuflags)
-/*	.type ASM_NAME(getcpuflags),@function */
-ASM_NAME(getcpuflags):
+.globl ASM_NAME(INT123_getcpuflags)
+/*	.type ASM_NAME(INT123_getcpuflags),@function */
+ASM_NAME(INT123_getcpuflags):
 	pushl %ebp
 	movl %esp,%ebp
 	pushl %edx

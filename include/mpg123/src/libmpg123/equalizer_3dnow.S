@@ -10,10 +10,10 @@
 
 .text
 	ALIGN4
-.globl ASM_NAME(do_equalizer_3dnow)
-/*	.type	 ASM_NAME(do_equalizer_3dnow),@function */
+.globl ASM_NAME(INT123_do_equalizer_3dnow)
+/*	.type	 ASM_NAME(INT123_do_equalizer_3dnow),@function */
 /* void do_equalizer(real *bandPtr,int channel, real equalizer[2][32]); */
-ASM_NAME(do_equalizer_3dnow):
+ASM_NAME(INT123_do_equalizer_3dnow):
 	pushl %esi
 	pushl %ebx
 	/* bandPtr */

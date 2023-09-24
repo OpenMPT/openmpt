@@ -41,15 +41,15 @@
 	.data
 #endif
 	ALIGN32
-ASM_NAME(scale_x86_64):
+ASM_NAME(INT123_scale_x86_64):
 	.long   939524096
 	.long   939524096
 	.long   939524096
 	.long   939524096
 	.text
 	ALIGN16
-.globl ASM_NAME(synth_1to1_real_s_x86_64_asm)
-ASM_NAME(synth_1to1_real_s_x86_64_asm):
+.globl ASM_NAME(INT123_synth_1to1_real_s_x86_64_asm)
+ASM_NAME(INT123_synth_1to1_real_s_x86_64_asm):
 #ifdef IS_MSABI /* should save xmm6-15 */
 	movl		40(%rsp), %eax /* 5th argument; placed after 32-byte shadow space */
 	subq		$168, %rsp /* stack alignment + 10 xmm registers */
@@ -65,7 +65,7 @@ ASM_NAME(synth_1to1_real_s_x86_64_asm):
 	movaps		%xmm15, 144(%rsp)
 #endif
 
-	leaq		ASM_NAME(scale_x86_64)(%rip), %r11
+	leaq		ASM_NAME(INT123_scale_x86_64)(%rip), %r11
 	
 #ifdef IS_MSABI
 	shlq		$32, %rax

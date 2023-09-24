@@ -24,11 +24,11 @@
 #endif
 
 	.text
-	.globl ASM_NAME(synth_1to1_s_neon_accurate_asm)
+	.globl ASM_NAME(INT123_synth_1to1_s_neon_accurate_asm)
 #ifdef __ELF__
-	.type ASM_NAME(synth_1to1_s_neon_accurate_asm), %function
+	.type ASM_NAME(INT123_synth_1to1_s_neon_accurate_asm), %function
 #endif
-ASM_NAME(synth_1to1_s_neon_accurate_asm):
+ASM_NAME(INT123_synth_1to1_s_neon_accurate_asm):
 	push		{r4-r7, lr}
 	vpush		{q4-q7}
 	ldr			r4, [sp, #84]

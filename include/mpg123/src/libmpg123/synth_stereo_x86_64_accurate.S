@@ -43,7 +43,7 @@
 	.data
 #endif
 	ALIGN32
-ASM_NAME(maxmin_s16):
+ASM_NAME(INT123_maxmin_s16):
 	.long   1191181824
 	.long   1191181824
 	.long   1191181824
@@ -54,8 +54,8 @@ ASM_NAME(maxmin_s16):
 	.long   -956301312
 	.text
 	ALIGN16
-.globl ASM_NAME(synth_1to1_s_x86_64_accurate_asm)
-ASM_NAME(synth_1to1_s_x86_64_accurate_asm):
+.globl ASM_NAME(INT123_synth_1to1_s_x86_64_accurate_asm)
+ASM_NAME(INT123_synth_1to1_s_x86_64_accurate_asm):
 #ifdef IS_MSABI /* should save xmm6-15 */
 	movl		40(%rsp), %eax /* 5th argument; placed after 32-byte shadow space */
 	pushq		%rsi
@@ -74,7 +74,7 @@ ASM_NAME(synth_1to1_s_x86_64_accurate_asm):
 	subq		$24, %rsp /* stack alignment + temp */
 #endif
 	
-	leaq		ASM_NAME(maxmin_s16)(%rip), %r10
+	leaq		ASM_NAME(INT123_maxmin_s16)(%rip), %r10
 	leaq		16(%r10), %r11
 	xorps		%xmm0, %xmm0
 	movaps		%xmm0, TEMP_CLIP

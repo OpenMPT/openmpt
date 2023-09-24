@@ -8,7 +8,7 @@
 	The type clreal is either double or float, COS() is cos() or cosf() for runtime.
 */
 
-void init_costabs(void)
+void INT123_init_costabs(void)
 {
 	clreal *cpnts[] = { cos64,cos32,cos16,cos8,cos4 };
 	int i,k,kr,divv;

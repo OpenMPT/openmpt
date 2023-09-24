@@ -1,5 +1,5 @@
 /*
-	dct64_altivec.c: Discrete Cosine Tansform (DCT) for Altivec
+	INT123_dct64_altivec.c: Discrete Cosine Tansform (DCT) for Altivec
 
 	copyright ?-2006 by the mpg123 project - free software under the terms of the LGPL 2.1
 	see COPYING and AUTHORS files in distribution or http://mpg123.org
@@ -24,7 +24,7 @@
 #include <altivec.h>
 #endif
 
-void dct64_altivec(real *out0,real *out1,real *samples)
+void INT123_dct64_altivec(real *out0,real *out1,real *samples)
 {
   ALIGNED(16) real bufs[32];
 
@@ -37,7 +37,7 @@ void dct64_altivec(real *out0,real *out1,real *samples)
 		vector float vbs9,vbs10,vbs11,vbs12,vbs13,vbs14,vbs15,vbs16;
 		vector float vzero;
 		b1 = samples;
-		costab = pnts[0];
+		costab = INT123_pnts[0];
 		
 		vzero = vec_xor(vzero,vzero);
 #ifdef __APPLE__
@@ -93,7 +93,7 @@ void dct64_altivec(real *out0,real *out1,real *samples)
 		vbs5 = vec_perm(vbs5,vbs5,vinvert);
 		
 		
-		costab = pnts[1];
+		costab = INT123_pnts[1];
 		
 		v1 = vec_perm(vbs4,vbs4,vinvert);
 		vbs9 = vec_add(vbs1,v1);
@@ -114,7 +114,7 @@ void dct64_altivec(real *out0,real *out1,real *samples)
 		vbs16 = vec_madd(v8,v5,vzero);
 		
 		
-		costab = pnts[2];
+		costab = INT123_pnts[2];
 		
 		v1 = vec_perm(vbs10,vbs10,vinvert);
 		v5 = vec_perm(vbs14,vbs14,vinvert);
@@ -140,7 +140,7 @@ void dct64_altivec(real *out0,real *out1,real *samples)
 		vbs8 = vec_perm(vbs8,vbs8,vinvert);
 		
 		
-		costab = pnts[3];
+		costab = INT123_pnts[3];
 		
 #ifdef __APPLE__
 		vperm1 = (vector unsigned char)(0,1,2,3,4,5,6,7,16,17,18,19,20,21,22,23);
@@ -189,7 +189,7 @@ void dct64_altivec(real *out0,real *out1,real *samples)
 		vbs16 = vec_perm(v3,v5,vperm4);
 		
 		
-		costab = pnts[4];
+		costab = INT123_pnts[4];
 		
 		v1 = vec_lde(0,costab);
 #ifdef __APPLE__
