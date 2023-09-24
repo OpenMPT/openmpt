@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.7.4-pre
 
+ *  mpg123: Update to v1.32.0-dev+r5338 (2023-09-23).
+
 ### libopenmpt 0.7.3 (2023-09-09)
 
  *  [**Bug**] Makefile: Emscripten 3.1.31 stopped exporting `malloc` and `free`.
