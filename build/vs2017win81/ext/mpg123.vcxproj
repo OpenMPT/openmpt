@@ -740,6 +740,8 @@
     </ClCompile>
     <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\layer3.c">
     </ClCompile>
+    <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\lfs_wrap.c">
+    </ClCompile>
     <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\libmpg123.c">
     </ClCompile>
     <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\ntom.c">
