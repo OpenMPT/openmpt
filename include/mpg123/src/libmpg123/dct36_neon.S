@@ -47,11 +47,11 @@ dct36_neon_COS9:
 	.word 0x3f3504f3
 	
 	ALIGN4
-	GLOBAL_SYMBOL ASM_NAME(dct36_neon)
+	GLOBAL_SYMBOL ASM_NAME(INT123_dct36_neon)
 #ifdef __ELF__
-	.type ASM_NAME(dct36_neon), %function
+	.type ASM_NAME(INT123_dct36_neon), %function
 #endif
-ASM_NAME(dct36_neon):
+ASM_NAME(INT123_dct36_neon):
 	push		{r4-r5, lr}
 	vpush		{q4-q7}
 	ldr			r4, [sp, #76]

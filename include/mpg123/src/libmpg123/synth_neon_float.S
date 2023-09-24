@@ -25,12 +25,12 @@
 #endif
 
 	.text
-	GLOBAL_SYMBOL ASM_NAME(synth_1to1_real_neon_asm)
+	GLOBAL_SYMBOL ASM_NAME(INT123_synth_1to1_real_neon_asm)
 #ifdef __ELF__
-	.type ASM_NAME(synth_1to1_real_neon_asm), %function
+	.type ASM_NAME(INT123_synth_1to1_real_neon_asm), %function
 #endif
 	ALIGN4
-ASM_NAME(synth_1to1_real_neon_asm):
+ASM_NAME(INT123_synth_1to1_real_neon_asm):
 	push		{r4-r5, lr}
 	vpush		{q4-q7}
 

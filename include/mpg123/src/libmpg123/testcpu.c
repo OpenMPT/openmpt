@@ -13,7 +13,7 @@ int main()
 {
 	int family;
 	struct cpuflags flags;
-	if(!getcpuflags(&flags)){ printf("CPU won't do cpuid (some old i386 or i486)\n"); return 0; }
+	if(!INT123_getcpuflags(&flags)){ printf("CPU won't do cpuid (some old i386 or i486)\n"); return 0; }
 	family = (flags.id & 0xf00)>>8;
 	printf("family: %i\n", family);
 	printf("stdcpuflags:  0x%08x\n", flags.std);

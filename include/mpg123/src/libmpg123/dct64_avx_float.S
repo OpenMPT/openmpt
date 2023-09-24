@@ -58,8 +58,8 @@ costab_avx:
 	.long 0
 	.text
 	ALIGN16
-.globl ASM_NAME(dct64_real_avx)
-ASM_NAME(dct64_real_avx):
+.globl ASM_NAME(INT123_dct64_real_avx)
+ASM_NAME(INT123_dct64_real_avx):
 #ifdef IS_MSABI
 	push		%rbp
 	mov			%rsp, %rbp

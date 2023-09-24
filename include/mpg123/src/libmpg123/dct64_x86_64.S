@@ -34,7 +34,7 @@
 	.data
 #endif
 	ALIGN32
-ASM_NAME(costab_x86_64):
+ASM_NAME(INT123_costab_x86_64):
 	.long 1056974725
 	.long 1057056395
 	.long 1057223771
@@ -69,8 +69,8 @@ ASM_NAME(costab_x86_64):
 	.long 0
 	.text
 	ALIGN16
-.globl ASM_NAME(dct64_x86_64)
-ASM_NAME(dct64_x86_64):
+.globl ASM_NAME(INT123_dct64_x86_64)
+ASM_NAME(INT123_dct64_x86_64):
 #ifdef IS_MSABI /* should save xmm6-15 */
 	movq		%rcx, ARG0
 	subq		$168, %rsp /* stack alignment + 10 xmm registers */
@@ -86,7 +86,7 @@ ASM_NAME(dct64_x86_64):
 	movaps		%xmm15, 144(%rsp)
 #endif
 
-	leaq		ASM_NAME(costab_x86_64)(%rip), %rcx
+	leaq		ASM_NAME(INT123_costab_x86_64)(%rip), %rcx
 
 	MOVUAPS 	(ARG2), %xmm15
 	MOVUAPS 	16(ARG2), %xmm14

@@ -12,8 +12,8 @@
 
 .data
 	ALIGN32
-.globl ASM_NAME(costab_mmxsse)
-ASM_NAME(costab_mmxsse):
+.globl ASM_NAME(INT123_costab_mmxsse)
+ASM_NAME(INT123_costab_mmxsse):
 	.long 1056974725
 	.long 1057056395
 	.long 1057223771
@@ -86,8 +86,8 @@ intwindiv:
 .text
 	ALIGN32
 /* void make_decode_tables_mmx_asm(long scaleval, float* decwin_mmx, float *decwins); */
-.globl ASM_NAME(make_decode_tables_mmx_asm)
-ASM_NAME(make_decode_tables_mmx_asm):
+.globl ASM_NAME(INT123_make_decode_tables_mmx_asm)
+ASM_NAME(INT123_make_decode_tables_mmx_asm):
 	pushl %ebp
 	mov %esp,%ebp
 	sub $12,%esp

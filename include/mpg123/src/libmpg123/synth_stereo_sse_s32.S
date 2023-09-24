@@ -48,8 +48,8 @@ maxmin_s32:
 	.long   -956301312
 	.text
 	ALIGN16
-.globl ASM_NAME(synth_1to1_s32_s_sse_asm)
-ASM_NAME(synth_1to1_s32_s_sse_asm):
+.globl ASM_NAME(INT123_synth_1to1_s32_s_sse_asm)
+ASM_NAME(INT123_synth_1to1_s32_s_sse_asm):
 	pushl		%ebp
 	movl		%esp, %ebp
 	andl		$-16, %esp

@@ -49,11 +49,11 @@ costab_neon_aarch64:
 	.word 1060439283
 	.text
 	ALIGN4
-	.globl ASM_NAME(dct64_real_neon64)
+	.globl ASM_NAME(INT123_dct64_real_neon64)
 #ifdef __ELF__
-	.type ASM_NAME(dct64_real_neon64), %function
+	.type ASM_NAME(INT123_dct64_real_neon64), %function
 #endif
-ASM_NAME(dct64_real_neon64):
+ASM_NAME(INT123_dct64_real_neon64):
 	add		x3, x2, #64
 	adrp	x4, AARCH64_PCREL_HI(costab_neon_aarch64)
 	add		x4, x4, AARCH64_PCREL_LO(costab_neon_aarch64)

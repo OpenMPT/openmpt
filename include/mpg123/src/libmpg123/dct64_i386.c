@@ -1,5 +1,5 @@
 /*
-	dct64_i386.c: DCT64, a C variant for i386
+	INT123_dct64_i386.c: DCT64, a C variant for i386
 
 	copyright ?-2006 by the mpg123 project - free software under the terms of the LGPL 2.1
 	see COPYING and AUTHORS files in distribution or http://mpg123.org
@@ -10,7 +10,7 @@
  * Discrete Cosine Tansform (DCT) for subband synthesis
  * optimized for machines with no auto-increment. 
  * The performance is highly compiler dependend. Maybe
- * the dct64.c version for 'normal' processor may be faster
+ * the INT123_dct64.c version for 'normal' processor may be faster
  * even for Intel processors.
  */
 
@@ -19,7 +19,7 @@
 static void dct64_1(real *out0,real *out1,real *b1,real *b2,real *samples)
 {
  {
-  register const real *costab = pnts[0];
+  register const real *costab = INT123_pnts[0];
 
   b1[0x00] = samples[0x00] + samples[0x1F];
   b1[0x01] = samples[0x01] + samples[0x1E];
@@ -65,7 +65,7 @@ static void dct64_1(real *out0,real *out1,real *b1,real *b2,real *samples)
 
 
  {
-  register const real *costab = pnts[1];
+  register const real *costab = INT123_pnts[1];
 
   b2[0x00] = b1[0x00] + b1[0x0F]; 
   b2[0x01] = b1[0x01] + b1[0x0E]; 
@@ -111,7 +111,7 @@ static void dct64_1(real *out0,real *out1,real *b1,real *b2,real *samples)
  }
 
  {
-  register const real *costab = pnts[2];
+  register const real *costab = INT123_pnts[2];
 
   b1[0x00] = b2[0x00] + b2[0x07];
   b1[0x07] = REAL_MUL(b2[0x00] - b2[0x07], costab[0]);
@@ -151,8 +151,8 @@ static void dct64_1(real *out0,real *out1,real *b1,real *b2,real *samples)
  }
 
  {
-  register real const cos0 = pnts[3][0];
-  register real const cos1 = pnts[3][1];
+  register real const cos0 = INT123_pnts[3][0];
+  register real const cos1 = INT123_pnts[3][1];
 
   b2[0x00] = b1[0x00] + b1[0x03];
   b2[0x03] = REAL_MUL(b1[0x00] - b1[0x03], cos0);
@@ -196,7 +196,7 @@ static void dct64_1(real *out0,real *out1,real *b1,real *b2,real *samples)
  }
 
  {
-  register real const cos0 = pnts[4][0];
+  register real const cos0 = INT123_pnts[4][0];
 
   b1[0x00] = b2[0x00] + b2[0x01];
   b1[0x01] = REAL_MUL(b2[0x00] - b2[0x01], cos0);
@@ -325,10 +325,10 @@ static void dct64_1(real *out0,real *out1,real *b1,real *b2,real *samples)
 }
 
 /*
- * the call via dct64 is a trick to force GCC to use
+ * the call via INT123_dct64 is a trick to force GCC to use
  * (new) registers for the b1,b2 pointer to the bufs[xx] field
  */
-void dct64_i386(real *a,real *b,real *c)
+void INT123_dct64_i386(real *a,real *b,real *c)
 {
   real bufs[0x40];
   dct64_1(a,b,bufs,bufs+0x20,c);
