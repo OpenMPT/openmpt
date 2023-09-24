@@ -8,7 +8,6 @@
   dofile "../../build/xcode-genie/genie-defaults-LIBorDLL.lua"
   dofile "../../build/xcode-genie/genie-defaults.lua"
   local extincludedirs = {
-   "../../include/mpg123/ports/Xcode",
    "../../include/mpg123/src/libmpg123",
    "../../include/ogg/include",
    "../../include/vorbis/include",

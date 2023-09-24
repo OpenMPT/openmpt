@@ -8,12 +8,12 @@
   dofile "../../build/genie/genie-defaults-LIBorDLL.lua"
   dofile "../../build/genie/genie-defaults.lua"
   local extincludedirs = {
-   "../../include/mpg123/ports/MSVC++",
    "../../include/mpg123/src/libmpg123",
    "../../include/ogg/include",
    "../../include/vorbis/include",
    "../../include/zlib",
   }
+  defines { "MPG123_NO_LARGENAME" }
   includedirs ( extincludedirs )
   includedirs {
    "../..",
