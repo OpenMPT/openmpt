@@ -1158,7 +1158,6 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					../../include,
-					../../include/mpg123/ports/Xcode,
 					../../include/mpg123/src/libmpg123,
 					../../include/ogg/include,
 					../../include/vorbis/include,
@@ -1217,7 +1216,6 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					../../include,
-					../../include/mpg123/ports/Xcode,
 					../../include/mpg123/src/libmpg123,
 					../../include/ogg/include,
 					../../include/vorbis/include,
