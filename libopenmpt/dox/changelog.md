@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.6.13-pre
 
+ *  mpg123: Update to v1.32.0-dev+r5338 (2023-09-23).
+
 ### libopenmpt 0.6.12 (2023-09-09)
 
  *  [**Regression**] We no longer provide libopenmpt 0.6 binaries for
