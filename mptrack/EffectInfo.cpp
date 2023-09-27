@@ -39,7 +39,7 @@ static constexpr FlagSet<MODTYPE> MOD_TYPE_NOMOD = MOD_TYPE_S3M | MOD_TYPE_XM | 
 static constexpr FlagSet<MODTYPE> MOD_TYPE_XMIT = MOD_TYPE_XM | MOD_TYPE_IT;
 static constexpr FlagSet<MODTYPE> MOD_TYPE_XMITMPT = MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT;
 static constexpr FlagSet<MODTYPE> MOD_TYPE_ITMPT = MOD_TYPE_IT | MOD_TYPE_MPT;
-static constexpr FlagSet<MODTYPE> MOD_TYPE_ALL = MODTYPE(~0);
+static constexpr FlagSet<MODTYPE> MOD_TYPE_ALL = FlagSet<MODTYPE>::value_type::from_bits(~FlagSet<MODTYPE>::store_type{0});
 
 static constexpr MPTEffectInfo gFXInfo[] =
 {
