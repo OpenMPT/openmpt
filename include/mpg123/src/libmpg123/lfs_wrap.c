@@ -497,8 +497,16 @@ int attribute_align_arg mpg123_position_32( mpg123_handle *mh, off_t INT123_fram
 
 #endif
 
-// _64 aliases if we got some off64_t to work with.
+// _64 aliases if we either got some off64_t to work with or
+// if there is no explicit 64 bit API but off_t is just always
+// 64 bits.
+#if defined(LFS_LARGEFILE_64) || (SIZEOF_OFF_T == 8)
+
 #ifdef LFS_LARGEFILE_64
+#define OFF64 off64_t
+#else
+#define OFF64 off_t
+#endif
 
 int attribute_align_arg mpg123_open_64(mpg123_handle *mh, const char *path)
 {
@@ -521,89 +529,90 @@ int attribute_align_arg mpg123_open_handle_64(mpg123_handle *mh, void *iohandle)
 	return mpg123_open_handle(mh, iohandle);
 }
 
-int attribute_align_arg mpg123_framebyframe_decode_64(mpg123_handle *mh, off64_t *num, unsigned char **audio, size_t *bytes)
+int attribute_align_arg mpg123_framebyframe_decode_64(mpg123_handle *mh, OFF64 *num, unsigned char **audio, size_t *bytes)
 {
 	return mpg123_framebyframe_decode64(mh, (int64_t*)num, audio, bytes);
 }
 
-int attribute_align_arg mpg123_decode_frame_64(mpg123_handle *mh, off64_t *num, unsigned char **audio, size_t *bytes)
+int attribute_align_arg mpg123_decode_frame_64(mpg123_handle *mh, OFF64 *num, unsigned char **audio, size_t *bytes)
 {
 	return mpg123_decode_frame64(mh, (int64_t*)num, audio, bytes);
 }
 
-off64_t attribute_align_arg mpg123_timeframe_64(mpg123_handle *mh, double seconds)
+OFF64 attribute_align_arg mpg123_timeframe_64(mpg123_handle *mh, double seconds)
 {
 	return mpg123_timeframe64(mh, seconds);
 }
 
-off64_t attribute_align_arg mpg123_tell_64(mpg123_handle *mh)
+OFF64 attribute_align_arg mpg123_tell_64(mpg123_handle *mh)
 {
 	return mpg123_tell64(mh);
 }
 
-off64_t attribute_align_arg mpg123_tellframe_64(mpg123_handle *mh)
+OFF64 attribute_align_arg mpg123_tellframe_64(mpg123_handle *mh)
 {
 	return mpg123_tellframe64(mh);
 }
 
-off64_t attribute_align_arg mpg123_tell_stream_64(mpg123_handle *mh)
+OFF64 attribute_align_arg mpg123_tell_stream_64(mpg123_handle *mh)
 {
 	return mpg123_tell_stream64(mh);
 }
 
-off64_t attribute_align_arg mpg123_seek_64(mpg123_handle *mh, off64_t sampleoff, int whence)
+OFF64 attribute_align_arg mpg123_seek_64(mpg123_handle *mh, OFF64 sampleoff, int whence)
 {
 	return mpg123_seek64(mh, (int64_t)sampleoff, whence);
 }
 
-off64_t attribute_align_arg mpg123_feedseek_64(mpg123_handle *mh, off64_t sampleoff, int whence, off64_t *input_offset)
+OFF64 attribute_align_arg mpg123_feedseek_64(mpg123_handle *mh, OFF64 sampleoff, int whence, OFF64 *input_offset)
 {
 	return mpg123_feedseek64(mh, (int64_t)sampleoff, whence, (int64_t*)input_offset);
 }
 
-off64_t attribute_align_arg mpg123_seek_frame_64(mpg123_handle *mh, off64_t offset, int whence)
+OFF64 attribute_align_arg mpg123_seek_frame_64(mpg123_handle *mh, OFF64 offset, int whence)
 {
 	return mpg123_seek_frame64(mh, (int64_t)offset, whence);
 }
 
-int attribute_align_arg mpg123_set_filesize_64(mpg123_handle *mh, off64_t size)
+int attribute_align_arg mpg123_set_filesize_64(mpg123_handle *mh, OFF64 size)
 {
 	return mpg123_set_filesize64(mh, (int64_t)size);
 }
 
-off64_t attribute_align_arg mpg123_framelength_64(mpg123_handle *mh)
+OFF64 attribute_align_arg mpg123_framelength_64(mpg123_handle *mh)
 {
 	return mpg123_framelength64(mh);
 }
 
-off64_t attribute_align_arg mpg123_length_64(mpg123_handle *mh)
+OFF64 attribute_align_arg mpg123_length_64(mpg123_handle *mh)
 {
 	return mpg123_length64(mh);
 }
 
-int attribute_align_arg mpg123_index_64(mpg123_handle *mh, off64_t **offsets, off64_t *step, size_t *fill)
+int attribute_align_arg mpg123_index_64(mpg123_handle *mh, OFF64 **offsets, OFF64 *step, size_t *fill)
 {
 	return mpg123_index64(mh, (int64_t**)offsets, (int64_t*)step, fill);
 }
 
-int attribute_align_arg mpg123_set_index_64(mpg123_handle *mh, off64_t *offsets, off64_t step, size_t fill)
+int attribute_align_arg mpg123_set_index_64(mpg123_handle *mh, OFF64 *offsets, OFF64 step, size_t fill)
 {
 	return mpg123_set_index64(mh, (int64_t*)offsets, (int64_t)step, fill);
 }
 
-off64_t attribute_align_arg mpg123_framepos_64(mpg123_handle *mh)
+OFF64 attribute_align_arg mpg123_framepos_64(mpg123_handle *mh)
 {
 	return mpg123_framepos64(mh);
 }
 
-int attribute_align_arg mpg123_position_64( mpg123_handle *mh, off64_t INT123_frame_offset
-,	off64_t buffered_bytes, off64_t *current_frame, off64_t *frames_left
+int attribute_align_arg mpg123_position_64( mpg123_handle *mh, OFF64 INT123_frame_offset
+,	OFF64 buffered_bytes, OFF64 *current_frame, OFF64 *frames_left
 ,	double *current_seconds, double *seconds_left )
 {
 	return mpg123_position64( mh, (int64_t)INT123_frame_offset, (int64_t)buffered_bytes
 	,	(int64_t*)current_frame, (int64_t*)frames_left, current_seconds, seconds_left );
 }
 
+#undef OFF64
 #endif
 
 /* =========================================
@@ -770,7 +779,7 @@ int INT123_wrap_open(mpg123_handle *mh, void *handle, const char *path, int fd, 
 #ifdef O_BINARY
 		flags |= O_BINARY;
 #endif
-#ifdef LFS_LARGEFILE_64
+#if defined(LFS_LARGEFILE_64) && defined(HAVE_O_LARGEFILE)
 		flags |= O_LARGEFILE;
 #endif
 		errno = 0;
@@ -950,6 +959,18 @@ int attribute_align_arg mpg123_replace_reader_handle_64(mpg123_handle *mh, mpg12
 
 	/* The real reader replacement will happen while opening. */
 	return MPG123_OK;
+}
+
+#elif SIZEOF_OFF_T == 8
+
+int attribute_align_arg mpg123_replace_reader_64(mpg123_handle *mh, mpg123_ssize_t (*r_read) (int, void *, size_t), off_t (*r_lseek)(int, off_t, int) )
+{
+	return mpg123_replace_reader(mh, r_read, r_lseek);
+}
+
+int attribute_align_arg mpg123_replace_reader_handle_64(mpg123_handle *mh, mpg123_ssize_t (*r_read) (void*, void *, size_t), off_t (*r_lseek)(void*, off_t, int), void (*cleanup)(void*))
+{
+	return mpg123_replace_reader_handle(mh, r_read, r_lseek, cleanup);
 }
 
 #endif
