@@ -1,4 +1,4 @@
-libmpg123 library version 1.32.1 (2023-09-24).
+libmpg123 library version 1.32.2 (2023-09-27).
 The following changes have been made:
  *  `src/libmpg123/lfs_wrap.c` got an assertion for `sizeof(off_t)`.
  *  `#if LFS_LARGEFILE_64` in `src/libmpg123/lfs_wrap.c` has been fixed.
