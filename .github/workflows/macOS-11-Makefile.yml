@@ -18,7 +18,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: install dependencies
-      run: brew uninstall swiftlint && brew update && brew install p7zip help2man doxygen autoconf-archive mpg123 libogg libvorbis portaudio flac libsndfile sdl2 && brew upgrade
+      run: brew uninstall swiftlint && brew uninstall go && brew install go && brew update && brew install p7zip help2man doxygen autoconf-archive mpg123 libogg libvorbis portaudio flac libsndfile sdl2 && brew upgrade
     - name: setup parallel make
       run: echo "MAKEFLAGS=-j$(sysctl -n hw.ncpu)" >> $GITHUB_ENV
     - name: make
