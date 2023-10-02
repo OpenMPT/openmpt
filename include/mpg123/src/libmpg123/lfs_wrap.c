@@ -38,13 +38,15 @@
 // declarations. But no renaming shenanigans.
 #define MPG123_NO_LARGENAME
 #include "mpg123.h"
-typedef unsigned char MPG123_STATIC_ASSERT[(SIZEOF_OFF_T == sizeof(off_t)) ? 1 : -1];  /* OpenMPT */
 
 #include "lfs_wrap.h"
 #include "abi_align.h"
 #include "compat.h"
 #include <sys/stat.h>
 #include <fcntl.h>
+
+// A paranoid check that someone did not define a wrong SIZEOF_OFF_T at configure time.
+typedef unsigned char MPG123_STATIC_ASSERT[(SIZEOF_OFF_T == sizeof(off_t)) ? 1 : -1];
 
 #include "debug.h"
 
@@ -92,7 +94,7 @@ struct wrap_data
 	off_t (*r_lseek)(int, off_t, int);
 	mpg123_ssize_t (*r_h_read)(void *, void *, size_t);
 	off_t (*r_h_lseek)(void*, off_t, int);
-#ifdef LFS_LARGEFILE_64  /* OpenMPT */
+#ifdef LFS_LARGEFILE_64
 	mpg123_ssize_t (*r_read_64) (int, void *, size_t);
 	off64_t (*r_lseek_64)(int, off64_t, int);
 	mpg123_ssize_t (*r_h_read_64)(void *, void *, size_t);
@@ -177,7 +179,7 @@ static struct wrap_data* wrap_get(mpg123_handle *mh, int force_alloc)
 		whd->r_lseek = NULL;
 		whd->r_h_read = NULL;
 		whd->r_h_lseek = NULL;
-#ifdef LFS_LARGEFILE_64  /* OpenMPT */
+#ifdef LFS_LARGEFILE_64
 		whd->r_read_64 = NULL;
 		whd->r_lseek_64 = NULL;
 		whd->r_h_read_64 = NULL;
