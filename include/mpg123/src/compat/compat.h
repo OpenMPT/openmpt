@@ -354,4 +354,9 @@ size_t INT123_unintr_fwrite(const void *ptr, size_t size, size_t nmemb, FILE *st
 void (*INT123_catchsignal(int signum, void(*handler)(int)))(int);
 #endif
 
+// Some ancient toolchains miss the documented errno value.
+#if defined(_WIN32) && !defined(EOVERFLOW)
+#define EOVERFLOW 132
+#endif
+
 #endif
