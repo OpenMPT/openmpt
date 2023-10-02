@@ -751,7 +751,6 @@
     <ClCompile Include="..\..\..\include\cryptopp\allocate.cpp" />
     <ClCompile Include="..\..\..\include\cryptopp\arc4.cpp" />
     <ClCompile Include="..\..\..\include\cryptopp\aria.cpp" />
-    <ClCompile Include="..\..\..\include\cryptopp\aria_simd.cpp" />
     <ClCompile Include="..\..\..\include\cryptopp\ariatab.cpp" />
     <ClCompile Include="..\..\..\include\cryptopp\asn.cpp" />
     <ClCompile Include="..\..\..\include\cryptopp\authenc.cpp" />
@@ -855,6 +854,7 @@
     <ClCompile Include="..\..\..\include\cryptopp\pkcspad.cpp" />
     <ClCompile Include="..\..\..\include\cryptopp\poly1305.cpp" />
     <ClCompile Include="..\..\..\include\cryptopp\polynomi.cpp" />
+    <ClCompile Include="..\..\..\include\cryptopp\primetab.cpp" />
     <ClCompile Include="..\..\..\include\cryptopp\pssr.cpp" />
     <ClCompile Include="..\..\..\include\cryptopp\pubkey.cpp" />
     <ClCompile Include="..\..\..\include\cryptopp\queue.cpp" />

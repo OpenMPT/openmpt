@@ -17,7 +17,6 @@ arc4.cpp
 arc4.h
 ariatab.cpp
 aria.cpp
-aria_simd.cpp
 aria.h
 argnames.h
 arm_simd.h
@@ -262,6 +261,7 @@ power8_ppc.cpp
 power9_ppc.cpp
 ppc_simd.cpp
 ppc_simd.h
+primetab.cpp
 pssr.cpp
 pssr.h
 pubkey.cpp
