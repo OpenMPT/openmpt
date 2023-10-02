@@ -1,5 +1,9 @@
 cryptp++ library version 8.9.0 (2023-10-01).
 The following changes have been made:
+ *  `cpu.c`has been fixed for MSVC x64 builds. See
+    <https://github.com/weidai11/cryptopp/issues/1240> and
+    <https://github.com/weidai11/cryptopp/commit/e65fa006bec60192112f0a3f23174ef0528f8cc4>.
+ *  Modifications are marked by `// OpenMPT` or `/* OpenMPT */`.
  *  Obviously, unnecessary folders and files have been removed.
  *  For building, premake is used to generate Visual Studio project files.
     See ../build/premake/ for details.
