@@ -29,7 +29,11 @@ FolderScanner::~FolderScanner()
 	FindClose(m_hFind);
 }
 
-
+#if MPT_COMPILER_MSVC
+// silence static analyzer false positive for FindFirstFile
+#pragma warning(push)
+#pragma warning(disable:6387) // 'HANDLE' could be '0'
+#endif // MPT_COMPILER_MSVC
 bool FolderScanner::Next(mpt::PathString &file)
 {
 	bool found = false;
@@ -86,5 +90,8 @@ bool FolderScanner::Next(mpt::PathString &file)
 	} while(!found);
 	return true;
 }
+#if MPT_COMPILER_MSVC
+#pragma warning(pop)
+#endif // MPT_COMPILER_MSVC
 
 OPENMPT_NAMESPACE_END

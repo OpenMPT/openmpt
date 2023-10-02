@@ -592,6 +592,11 @@ void CModTree::RefreshMidiLibrary()
 }
 
 
+#if MPT_COMPILER_MSVC
+// silence static analyzer false positive for FindFirstFile
+#pragma warning(push)
+#pragma warning(disable:6387) // 'HANDLE' could be '0'
+#endif // MPT_COMPILER_MSVC
 void CModTree::RefreshDlsBanks()
 {
 	const mpt::Charset charset = mpt::Charset::Locale;
@@ -722,6 +727,9 @@ void CModTree::RefreshDlsBanks()
 	}
 	UnlockRedraw();
 }
+#if MPT_COMPILER_MSVC
+#pragma warning(pop)
+#endif // MPT_COMPILER_MSVC
 
 
 void CModTree::RefreshInstrumentLibrary()
@@ -2289,6 +2297,11 @@ int CModTree::ImageToSortOrder(int image) const
 
 
 // Monitor changes in the instrument library folder.
+#if MPT_COMPILER_MSVC
+// silence static analyzer false positive for FindFirstFile
+#pragma warning(push)
+#pragma warning(disable:6387) // 'HANDLE' could be '0'
+#endif // MPT_COMPILER_MSVC
 void CModTree::MonitorInstrumentLibrary()
 {
 	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_LOWEST);
@@ -2358,6 +2371,9 @@ void CModTree::MonitorInstrumentLibrary()
 		lastWatchDir = mpt::PathString();
 	}
 }
+#if MPT_COMPILER_MSVC
+#pragma warning(pop)
+#endif // MPT_COMPILER_MSVC
 
 
 void CModTree::SetFullInstrumentLibraryPath(mpt::PathString path)
