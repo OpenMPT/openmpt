@@ -388,15 +388,16 @@ extern bool CPU_ProbeSSE2();
 // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=85684.
 word64 XGetBV(word32 num)
 {
+// Explicitly handle CRYPTOPP_DISABLE_ASM case.
+// https://github.com/weidai11/cryptopp/issues/1240
+#if defined(CRYPTOPP_DISABLE_ASM)
+	return 0;
+
 // Required by Visual Studio 2008 and below and Clang on Windows.
 // Use it for all MSVC-compatible compilers.
-#if defined(_M_X64) && defined(CRYPTOPP_MS_STYLE_INLINE_ASSEMBLY)
+#elif defined(_M_X64) && defined(CRYPTOPP_MS_STYLE_INLINE_ASSEMBLY)
 
-#if defined(CRYPTOPP_MSC_VERSION) && (_MSC_FULL_VER >= 160040219)  /* OpenMPT */
-	return _xgetbv(num);  /* OpenMPT */
-#else  /* OpenMPT */
 	return XGETBV64(num);
-#endif  /* OpenMPT */
 
 // Required by Visual Studio 2008 and below and Clang on Windows.
 // Use it for all MSVC-compatible compilers.
@@ -450,17 +451,18 @@ word64 XGetBV(word32 num)
 // cpu.cpp (131): E2211 Inline assembly not allowed in inline and template functions
 bool CpuId(word32 func, word32 subfunc, word32 output[4])
 {
+// Explicitly handle CRYPTOPP_DISABLE_ASM case.
+// https://github.com/weidai11/cryptopp/issues/1240
+#if defined(CRYPTOPP_DISABLE_ASM)
+	output[0] = output[1] = output[2] = output[3] = 0;
+	return false;
+
 // Required by Visual Studio 2008 and below and Clang on Windows.
 // Use it for all MSVC-compatible compilers.
-#if defined(_M_X64) && defined(CRYPTOPP_MS_STYLE_INLINE_ASSEMBLY)
+#elif defined(_M_X64) && defined(CRYPTOPP_MS_STYLE_INLINE_ASSEMBLY)
 
-#if defined(CRYPTOPP_MSC_VERSION) && ((CRYPTOPP_MSC_VERSION >= 1600))  /* OpenMPT */
-	__cpuidex((int *)output, func, subfunc);  /* OpenMPT */
-	return true;  /* OpenMPT */
-#else  /* OpenMPT */
 	CPUID64(func, subfunc, output);
 	return true;
-#endif  /* OpenMPT */
 
 // Required by Visual Studio 2008 and below and Clang on Windows.
 // Use it for all MSVC-compatible compilers.
