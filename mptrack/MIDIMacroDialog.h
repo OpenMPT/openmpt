@@ -26,8 +26,14 @@ class CMidiMacroSetup: public CDialog
 protected:
 	CComboBox m_CbnSFx, m_CbnSFxPreset, m_CbnZxx, m_CbnZxxPreset, m_CbnMacroPlug, m_CbnMacroParam, m_CbnMacroCC;
 	CEdit m_EditSFx, m_EditZxx;
-	CColourEdit m_EditMacroValue[kSFxMacros], m_EditMacroType[kSFxMacros];
-	CButton m_EditMacro[kSFxMacros], m_BtnMacroShowAll[kSFxMacros];
+	struct MacroEdit
+	{
+		CButton Button;
+		CColourEdit Value;
+		CColourEdit Type;
+		CButton ShowAll;
+	};
+	std::vector<MacroEdit> m_EditMacro = std::vector<MacroEdit>(static_cast<int>(kSFxMacros));
 
 	CSoundFile &m_SndFile;
 

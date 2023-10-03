@@ -117,21 +117,21 @@ BOOL CMidiMacroSetup::OnInitDialog()
 
 	for(UINT m = 0; m < kSFxMacros; m++)
 	{
-		m_EditMacro[m].Create(_T(""), WS_CHILD | WS_VISIBLE | WS_TABSTOP,
+		m_EditMacro[m].Button.Create(_T(""), WS_CHILD | WS_VISIBLE | WS_TABSTOP,
 			CRect(offsetx, offsety + m * (separatory + height), offsetx + widthMacro, offsety + m * (separatory + height) + height), this, ID_PLUGSELECT + kSFxMacros + m);
-		m_EditMacro[m].SetFont(GetFont());
+		m_EditMacro[m].Button.SetFont(GetFont());
 
-		m_EditMacroType[m].Create(ES_READONLY | WS_CHILD| WS_VISIBLE | WS_TABSTOP | WS_BORDER, 
+		m_EditMacro[m].Type.Create(ES_READONLY | WS_CHILD| WS_VISIBLE | WS_TABSTOP | WS_BORDER, 
 			CRect(offsetx + separatorx + widthMacro, offsety + m * (separatory + height), offsetx + widthMacro + widthType, offsety + m * (separatory + height) + height), this, ID_PLUGSELECT + kSFxMacros + m);
-		m_EditMacroType[m].SetFont(GetFont());
+		m_EditMacro[m].Type.SetFont(GetFont());
 
-		m_EditMacroValue[m].Create(ES_CENTER | ES_READONLY | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER, 
+		m_EditMacro[m].Value.Create(ES_CENTER | ES_READONLY | WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_BORDER, 
 			CRect(offsetx + separatorx + widthType + widthMacro, offsety + m * (separatory + height), offsetx + widthMacro + widthType + widthVal, offsety + m * (separatory + height) + height), this, ID_PLUGSELECT + kSFxMacros + m);
-		m_EditMacroValue[m].SetFont(GetFont());
+		m_EditMacro[m].Value.SetFont(GetFont());
 
-		m_BtnMacroShowAll[m].Create(_T("Show All..."), WS_CHILD | WS_TABSTOP | WS_VISIBLE,
+		m_EditMacro[m].ShowAll.Create(_T("Show All..."), WS_CHILD | WS_TABSTOP | WS_VISIBLE,
 			CRect(offsetx + separatorx + widthType + widthMacro + widthVal, offsety + m * (separatory + height), offsetx + widthMacro + widthType + widthVal + widthBtn, offsety + m * (separatory + height) + height), this, ID_PLUGSELECT + m);
-		m_BtnMacroShowAll[m].SetFont(GetFont());
+		m_EditMacro[m].ShowAll.SetFont(GetFont());
 	}
 	UpdateMacroList();
 
@@ -157,7 +157,7 @@ BOOL CMidiMacroSetup::OnInitDialog()
 // macro == -1 for updating all macros at once
 void CMidiMacroSetup::UpdateMacroList(int macro)
 {
-	if(!m_EditMacro[0])
+	if(!m_EditMacro[0].Button)
 	{
 		// GUI not yet initialized
 		return;
@@ -181,11 +181,11 @@ void CMidiMacroSetup::UpdateMacroList(int macro)
 	{
 		// SFx
 		s.Format(_T("SF%X"), static_cast<unsigned int>(m));
-		m_EditMacro[m].SetWindowText(s);
+		m_EditMacro[m].Button.SetWindowText(s);
 
 		// Macro value:
-		m_EditMacroValue[m].SetWindowText(mpt::ToCString(mpt::Charset::ASCII, static_cast<std::string>(m_MidiCfg.SFx[m])));
-		m_EditMacroValue[m].SetBackColor(m == selectedMacro ? RGB(200, 200, 225) : RGB(245, 245, 245));
+		m_EditMacro[m].Value.SetWindowText(mpt::ToCString(mpt::Charset::ASCII, static_cast<std::string>(m_MidiCfg.SFx[m])));
+		m_EditMacro[m].Value.SetBackColor(m == selectedMacro ? RGB(200, 200, 225) : RGB(245, 245, 245));
 
 		// Macro Type:
 		const ParameteredMacro macroType = m_MidiCfg.GetParameteredMacroType(m);
@@ -199,11 +199,11 @@ void CMidiMacroSetup::UpdateMacroList(int macro)
 			s = m_MidiCfg.GetParameteredMacroName(m);
 			break;
 		}
-		m_EditMacroType[m].SetWindowText(s);
-		m_EditMacroType[m].SetBackColor(m == selectedMacro ? RGB(200,200,225) : RGB(245,245,245));
+		m_EditMacro[m].Type.SetWindowText(s);
+		m_EditMacro[m].Type.SetBackColor(m == selectedMacro ? RGB(200,200,225) : RGB(245,245,245));
 
 		// Param details button:
-		m_BtnMacroShowAll[m].ShowWindow((macroType == kSFxPlugParam) ? SW_SHOW : SW_HIDE);
+		m_EditMacro[m].ShowAll.ShowWindow((macroType == kSFxPlugParam) ? SW_SHOW : SW_HIDE);
 	}
 }
 
