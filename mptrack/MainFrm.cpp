@@ -706,6 +706,11 @@ void CMainFrame::SoundCallbackLock()
 }
 
 
+#if MPT_COMPILER_MSVC
+// silence static analyzer warning
+#pragma warning(push)
+#pragma warning(disable:26110) // Caller failing to hold lock
+#endif // MPT_COMPILER_MSVC
 void CMainFrame::SoundCallbackUnlock()
 {
 	MPT_TRACE_SCOPE();
@@ -713,6 +718,9 @@ void CMainFrame::SoundCallbackUnlock()
 	m_AudioThreadId = 0;
 	m_SoundDeviceFillBufferCriticalSection.Leave();
 }
+#if MPT_COMPILER_MSVC
+#pragma warning(pop)
+#endif // MPT_COMPILER_MSVC
 
 
 class BufferInputWrapper
