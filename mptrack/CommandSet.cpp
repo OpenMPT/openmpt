@@ -1901,11 +1901,14 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 		{
 			//propagate to InstrumentView
 			const auto newCmd = translatedCmds[std::distance(std::begin(propagateCmds), propCmd)];
-			m_commands[newCmd].kcList.reserve(m_commands[inCmd].kcList.size());
-			for(auto kc : m_commands[inCmd].kcList)
+			if(0 <= inCmd && inCmd < kcNumCommands)
 			{
-				kc.Context(kCtxViewInstruments);
-				m_commands[newCmd].kcList.push_back(kc);
+				m_commands[newCmd].kcList.reserve(m_commands[inCmd].kcList.size());
+				for(auto kc : m_commands[inCmd].kcList)
+				{
+					kc.Context(kCtxViewInstruments);
+					m_commands[newCmd].kcList.push_back(kc);
+				}
 			}
 		}
 
