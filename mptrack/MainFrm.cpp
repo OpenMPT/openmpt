@@ -48,6 +48,7 @@
 #include "../soundlib/plugins/PlugInterface.h"
 #include "../soundlib/plugins/PluginManager.h"
 #include "mpt/audio/span.hpp"
+#include "mpt/base/alloc.hpp"
 #include "mpt/fs/fs.hpp"
 #include "mpt/io_file/inputfile.hpp"
 #include "mpt/io_file_read/inputfile_filecursor.hpp"
@@ -1939,40 +1940,43 @@ void CMainFrame::OnViewOptions()
 		return;
 
 	CPropertySheet dlg(_T("OpenMPT Setup"), this, m_nLastOptionsPage);
-	COptionsGeneral general;
-	COptionsSoundcard sounddlg(TrackerSettings::Instance().m_SoundDeviceIdentifier);
-	COptionsSampleEditor smpeditor;
-	COptionsKeyboard keyboard;
-	COptionsColors colors;
-	COptionsMixer mixerdlg;
-	CMidiSetupDlg mididlg(TrackerSettings::Instance().m_dwMidiSetup, TrackerSettings::Instance().GetCurrentMIDIDevice());
-	PathConfigDlg pathsdlg;
+	mpt::heap_value<COptionsGeneral> general;
+	mpt::heap_value<COptionsSoundcard> sounddlg(TrackerSettings::Instance().m_SoundDeviceIdentifier);
+	mpt::heap_value<COptionsSampleEditor> smpeditor;
+	mpt::heap_value<COptionsKeyboard> keyboard;
+	mpt::heap_value<COptionsColors> colors;
+	mpt::heap_value<COptionsMixer> mixerdlg;
+	mpt::heap_value<CMidiSetupDlg> mididlg(TrackerSettings::Instance().m_dwMidiSetup, TrackerSettings::Instance().GetCurrentMIDIDevice());
+	mpt::heap_value<PathConfigDlg> pathsdlg;
 #if defined(MPT_ENABLE_UPDATE)
-	CUpdateSetupDlg updatedlg;
+	mpt::heap_value<CUpdateSetupDlg> updatedlg;
 #endif // MPT_ENABLE_UPDATE
-	COptionsAdvanced advanced;
-	COptionsWine winedlg;
-	dlg.AddPage(&general);
-	dlg.AddPage(&sounddlg);
-	dlg.AddPage(&mixerdlg);
+	mpt::heap_value<COptionsAdvanced> advanced;
+	mpt::heap_value<COptionsWine> winedlg;
+	dlg.AddPage(&*general);
+	dlg.AddPage(&*sounddlg);
+	dlg.AddPage(&*mixerdlg);
 #if !defined(NO_REVERB) || !defined(NO_DSP) || !defined(NO_EQ) || !defined(NO_AGC)
-	COptionsPlayer dspdlg;
-	dlg.AddPage(&dspdlg);
+	mpt::heap_value<COptionsPlayer> dspdlg;
+	dlg.AddPage(&*dspdlg);
 #endif
-	dlg.AddPage(&smpeditor);
-	dlg.AddPage(&keyboard);
-	dlg.AddPage(&colors);
-	dlg.AddPage(&mididlg);
-	dlg.AddPage(&pathsdlg);
+	dlg.AddPage(&*smpeditor);
+	dlg.AddPage(&*keyboard);
+	dlg.AddPage(&*colors);
+	dlg.AddPage(&*mididlg);
+	dlg.AddPage(&*pathsdlg);
 #if defined(MPT_ENABLE_UPDATE)
-	dlg.AddPage(&updatedlg);
+	dlg.AddPage(&*updatedlg);
 #endif // MPT_ENABLE_UPDATE
-	dlg.AddPage(&advanced);
-	if(mpt::OS::Windows::IsWine()) dlg.AddPage(&winedlg);
+	dlg.AddPage(&*advanced);
+	if(mpt::OS::Windows::IsWine())
+	{
+		dlg.AddPage(&*winedlg);
+	}
 	m_bOptionsLocked = true;
-	m_SoundCardOptionsDialog = &sounddlg;
+	m_SoundCardOptionsDialog = &*sounddlg;
 #if defined(MPT_ENABLE_UPDATE)
-	m_UpdateOptionsDialog = &updatedlg;
+	m_UpdateOptionsDialog = &*updatedlg;
 #endif // MPT_ENABLE_UPDATE
 	dlg.DoModal();
 	m_SoundCardOptionsDialog = nullptr;
