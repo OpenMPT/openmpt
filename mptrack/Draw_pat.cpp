@@ -810,7 +810,7 @@ static constexpr UINT EncodeRowColor(int rowBkCol, int rowCol, bool rowSelected)
 void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnable,
 	bool isPlaying, ROWINDEX startRow, ROWINDEX numRows, CHANNELINDEX startChan, CRect &rcClient, int *pypaint)
 {
-	uint8 selectedCols[MAX_BASECHANNELS];	// Bit mask of selected channel components
+	uint8 selectedCols[MAX_BASECHANNELS] = {};  // Bit mask of selected channel components
 	static_assert(1 << PatternCursor::lastColumn <= Util::MaxValueOfType(selectedCols[0]) , "Columns are used as bitmasks.");
 
 	const CSoundFile &sndFile = GetDocument()->GetSoundFile();
