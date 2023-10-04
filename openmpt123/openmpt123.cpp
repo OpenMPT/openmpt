@@ -283,6 +283,7 @@ static concat_stream<mpt::ustring> & operator << ( concat_stream<mpt::ustring> &
 	s << MPT_USTRING("Banner: ") << flags.banner << lf;
 	s << MPT_USTRING("Verbose: ") << flags.verbose << lf;
 	s << MPT_USTRING("Mode : ") << mode_to_string( flags.mode ) << lf;
+	s << MPT_USTRING("Terminal size : ") << flags.terminal_width << MPT_USTRING("*") << flags.terminal_height << lf;
 	s << MPT_USTRING("Show progress: ") << flags.show_progress << lf;
 	s << MPT_USTRING("Show peak meters: ") << flags.show_meters << lf;
 	s << MPT_USTRING("Show channel peak meters: ") << flags.show_channel_meters << lf;
@@ -970,7 +971,9 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 	meter_type meter;
 	
 	const bool multiline = flags.show_ui;
-	
+
+	const bool narrow = (flags.terminal_width < 72) && (flags.terminal_height > 25);
+
 	int lines = 0;
 
 	int pattern_lines = 0;
@@ -980,10 +983,17 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 		// cppcheck-suppress identicalInnerCondition
 		if ( flags.show_ui ) {
 			lines += 1;
+			if ( narrow ) {
+				lines += 1;
+			}
 		}
 		if ( flags.show_meters ) {
-			for ( int channel = 0; channel < flags.channels; ++channel ) {
+			if ( narrow ) {
 				lines += 1;
+			} else {
+				for ( int channel = 0; channel < flags.channels; ++channel ) {
+					lines += 1;
+				}
 			}
 		}
 		if ( flags.show_channel_meters ) {
@@ -993,6 +1003,9 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 			lines += 1;
 			if ( flags.show_progress ) {
 				lines += 1;
+				if ( narrow ) {
+					lines += 2;
+				}
 			}
 		}
 		if ( flags.show_progress ) {
@@ -1120,7 +1133,13 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 			log.cursor_up( lines );
 			log << lf;
 			if ( flags.show_meters ) {
-				draw_meters( log, meter, flags );
+				if ( narrow ) {
+					log << MPT_USTRING("Level......: ");
+					draw_meters_tiny( log, meter, flags );
+					log << lf;
+				} else {
+					draw_meters( log, meter, flags );
+				}
 			}
 			if ( flags.show_channel_meters ) {
 				int width = ( flags.terminal_width - 3 ) / mod.get_num_channels();
@@ -1183,12 +1202,23 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 				}
 			}
 			if ( flags.show_ui ) {
-				log << MPT_USTRING("Settings...: ");
-				log << MPT_USTRING("Gain: ") << static_cast<float>( flags.gain ) * 0.01f << MPT_USTRING(" dB") << MPT_USTRING("   ");
-				log << MPT_USTRING("Stereo: ") << flags.separation << MPT_USTRING(" %") << MPT_USTRING("   ");
-				log << MPT_USTRING("Filter: ") << flags.filtertaps << MPT_USTRING(" taps") << MPT_USTRING("   ");
-				log << MPT_USTRING("Ramping: ") << flags.ramping << MPT_USTRING("   ");
-				log  << lf;
+				if ( narrow ) {
+					log << MPT_USTRING("Settings...: ");
+					log << MPT_USTRING("Gain: ") << static_cast<float>( flags.gain ) * 0.01f << MPT_USTRING(" dB") << MPT_USTRING("   ");
+					log << MPT_USTRING("Stereo: ") << flags.separation << MPT_USTRING(" %") << MPT_USTRING("   ");
+					log << lf;
+					log << MPT_USTRING("Filter.....: ");
+					log << MPT_USTRING("Length: ") << flags.filtertaps << MPT_USTRING(" taps") << MPT_USTRING("   ");
+					log << MPT_USTRING("Ramping: ") << flags.ramping << MPT_USTRING("   ");
+					log << lf;
+				} else {
+					log << MPT_USTRING("Settings...: ");
+					log << MPT_USTRING("Gain: ") << static_cast<float>( flags.gain ) * 0.01f << MPT_USTRING(" dB") << MPT_USTRING("   ");
+					log << MPT_USTRING("Stereo: ") << flags.separation << MPT_USTRING(" %") << MPT_USTRING("   ");
+					log << MPT_USTRING("Filter: ") << flags.filtertaps << MPT_USTRING(" taps") << MPT_USTRING("   ");
+					log << MPT_USTRING("Ramping: ") << flags.ramping << MPT_USTRING("   ");
+					log << lf;
+				}
 			}
 			if ( flags.show_details ) {
 				log << MPT_USTRING("Mixer......: ");
@@ -1198,18 +1228,37 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 				log << MPT_USTRING("   ");
 				log << lf;
 				if ( flags.show_progress ) {
-					log << MPT_USTRING("Player.....: ");
-					log << MPT_USTRING("Ord:") << align_right<mpt::ustring>( MPT_UCHAR(':'), 3, mod.get_current_order() ) << MPT_USTRING("/") << align_right<mpt::ustring>( MPT_UCHAR(':'), 3, mod.get_num_orders() );
-					log << MPT_USTRING(" ");
-					log << MPT_USTRING("Pat:") << align_right<mpt::ustring>( MPT_UCHAR(':'), 3, mod.get_current_pattern() );
-					log << MPT_USTRING(" ");
-					log << MPT_USTRING("Row:") << align_right<mpt::ustring>( MPT_UCHAR(':'), 3, mod.get_current_row() );
-					log << MPT_USTRING("   ");
-					log << MPT_USTRING("Spd:") << align_right<mpt::ustring>( MPT_UCHAR(':'), 2, mod.get_current_speed() );
-					log << MPT_USTRING(" ");
-					log << MPT_USTRING("Tmp:") << align_right<mpt::ustring>( MPT_UCHAR(':'), 6, mpt::format<mpt::ustring>::fix( mod.get_current_tempo2(), 2 ) );
-					log << MPT_USTRING("   ");
-					log << lf;
+					if ( narrow ) {
+						log << MPT_USTRING("Player.....: ");
+						log << MPT_USTRING("Ord:") << align_right<mpt::ustring>( MPT_UCHAR(':'), 3, mod.get_current_order() ) << MPT_USTRING("/") << align_right<mpt::ustring>( MPT_UCHAR(':'), 3, mod.get_num_orders() );
+						log << MPT_USTRING("   ");
+						log << lf;
+						log << MPT_USTRING("Pattern....: ");
+						log << MPT_USTRING("Pat:") << align_right<mpt::ustring>( MPT_UCHAR(':'), 3, mod.get_current_pattern() );
+						log << MPT_USTRING(" ");
+						log << MPT_USTRING("Row:") << align_right<mpt::ustring>( MPT_UCHAR(':'), 3, mod.get_current_row() );
+						log << MPT_USTRING("   ");
+						log << lf;
+						log << MPT_USTRING("Tempo......: ");
+						log << MPT_USTRING("Spd:") << align_right<mpt::ustring>( MPT_UCHAR(':'), 2, mod.get_current_speed() );
+						log << MPT_USTRING(" ");
+						log << MPT_USTRING("Tmp:") << align_right<mpt::ustring>( MPT_UCHAR(':'), 6, mpt::format<mpt::ustring>::fix( mod.get_current_tempo2(), 2 ) );
+						log << MPT_USTRING("   ");
+						log << lf;
+					} else {
+						log << MPT_USTRING("Player.....: ");
+						log << MPT_USTRING("Ord:") << align_right<mpt::ustring>( MPT_UCHAR(':'), 3, mod.get_current_order() ) << MPT_USTRING("/") << align_right<mpt::ustring>( MPT_UCHAR(':'), 3, mod.get_num_orders() );
+						log << MPT_USTRING(" ");
+						log << MPT_USTRING("Pat:") << align_right<mpt::ustring>( MPT_UCHAR(':'), 3, mod.get_current_pattern() );
+						log << MPT_USTRING(" ");
+						log << MPT_USTRING("Row:") << align_right<mpt::ustring>( MPT_UCHAR(':'), 3, mod.get_current_row() );
+						log << MPT_USTRING("   ");
+						log << MPT_USTRING("Spd:") << align_right<mpt::ustring>( MPT_UCHAR(':'), 2, mod.get_current_speed() );
+						log << MPT_USTRING(" ");
+						log << MPT_USTRING("Tmp:") << align_right<mpt::ustring>( MPT_UCHAR(':'), 6, mpt::format<mpt::ustring>::fix( mod.get_current_tempo2(), 2 ) );
+						log << MPT_USTRING("   ");
+						log << lf;
+					}
 				}
 			}
 			if ( flags.show_progress ) {
