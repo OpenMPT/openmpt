@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt 0.7.4-pre
 
+ *  openmpt123: openmpt123 now uses a narrower layout on terminal windows with a
+    width of less than 72 characters.
+
  *  mpg123: Update to v1.32.3 (2023-10-02).
  *  pugixml: Update to v1.14 (2023-10-01).
 
