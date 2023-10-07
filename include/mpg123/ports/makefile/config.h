@@ -47,6 +47,9 @@
 #define FRAME_INDEX 1
 #define INDEX_SIZE 1000
 
+/* new huffman decoding */
+/* #define USE_NEW_HUFFTABLE 1 */
+
 /* also gapless playback! */
 #define GAPLESS 1
 
