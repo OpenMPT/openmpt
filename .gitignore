@@ -383,6 +383,7 @@
 /include/mpg123/mpg123.spec
 /include/mpg123/mpg123.spec.in
 /include/mpg123/scripts
+/include/mpg123/test_c99.c
 /include/mpg123/windows-builds.sh
 /include/mpg123/ports/README
 /include/mpg123/ports/Sony_PSP
