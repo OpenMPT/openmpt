@@ -911,7 +911,8 @@ static void decode_the_frame(mpg123_handle *fr)
 		if(fr->buffer.fill < needed_bytes)
 		{
 			if(VERBOSE2)
-			fprintf(stderr, "Note: broken frame %li, filling up with %"SIZE_P" zeroes, from %"SIZE_P"\n", (long)fr->num, (size_p)(needed_bytes-fr->buffer.fill), (size_p)fr->buffer.fill);
+				fprintf( stderr, "Note: broken frame %li, filling up with %zu zeroes, from %zu\n"
+				,	(long)fr->num, (needed_bytes-fr->buffer.fill), fr->buffer.fill );
 
 			/*
 				One could do a loop with individual samples instead... but zero is zero
@@ -931,7 +932,7 @@ static void decode_the_frame(mpg123_handle *fr)
 		else
 		{
 			if(NOQUIET)
-			error2("I got _more_ bytes than expected (%"SIZE_P" / %"SIZE_P"), that should not be possible!", (size_p)fr->buffer.fill, (size_p)needed_bytes);
+			error2("I got _more_ bytes than expected (%zu / %zu), that should not be possible!", fr->buffer.fill, needed_bytes);
 		}
 	}
 #endif
