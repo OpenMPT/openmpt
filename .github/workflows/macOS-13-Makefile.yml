@@ -17,8 +17,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: fixup GitHub Homebrew node breakage
-      run: brew unlink node@18 && brew link --overwrite node
     - name: fixup GitHub Homebrew python breakage
       run: brew unlink python@3.11 && brew link --overwrite python@3.11
     - name: install dependencies
