@@ -18,7 +18,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: install dependencies
-      run: brew update && brew install p7zip help2man doxygen autoconf-archive mpg123 libogg libvorbis portaudio flac libsndfile sdl2 && brew upgrade
+      run: brew update && brew link --overwrite python@3.11 && brew upgrade && brew install p7zip help2man doxygen autoconf-archive mpg123 libogg libvorbis portaudio flac libsndfile sdl2 
     - name: setup parallel make
       run: echo "MAKEFLAGS=-j$(sysctl -n hw.ncpu)" >> $GITHUB_ENV
     - name: make
