@@ -2557,6 +2557,7 @@ void CCtrlInstruments::OnMixPlugChanged()
 						{
 							pIns->AssignSample(0);
 							m_NoteMap.Invalidate();
+							UpdateView(InstrumentHint(m_nInstrument).Info());
 						}
 					}
 					return;
