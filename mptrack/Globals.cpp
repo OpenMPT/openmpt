@@ -651,7 +651,7 @@ void CModScrollView::OnMouseHWheel(UINT fFlags, short zDelta, CPoint point)
 		return;
 	}
 
-	if (OnScrollBy(CSize(zDelta * m_lineDev.cx / WHEEL_DELTA, 0), TRUE))
+	if(OnScrollBy(CSize(zDelta * m_lineDev.cx / WHEEL_DELTA, 0), TRUE))
 		UpdateWindow();
 }
 
