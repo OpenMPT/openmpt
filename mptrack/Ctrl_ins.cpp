@@ -1305,9 +1305,9 @@ void CCtrlInstruments::UpdateView(UpdateHint hint, CObject *pObj)
 		hint.ModType(); // For possibly updating note names in Pitch/Pan Separation dropdown
 	}
 	LockControls();
-	if(hint.ToType<PluginHint>().GetType()[HINT_MIXPLUGINS | HINT_PLUGINNAMES])
+	if(hint.ToType<PluginHint>().GetType()[HINT_PLUGINNAMES])
 	{
-		OnMixPlugChanged();
+		UpdatePluginList();
 	}
 	if(hint.ToType<GeneralHint>().GetType()[HINT_TUNINGS])
 	{
