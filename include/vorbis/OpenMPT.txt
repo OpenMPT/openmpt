@@ -2,6 +2,8 @@ libvorbis library version 1.3.7.
 The following changes have been made:
 - Obviously, unnecessary folders and files (doc, examples, m4, macos, macosx,
   symbian, test, vq) have been removed.
+- lib/block.c: -Wmisleading-indentation warning has been fixed.
+- lib/vorbisfile.c: -Wstrict-prototypes warning has been fixed.
 - All modifications have been marked with /* OpenMPT */.
 - For building, premake is used to generate Visual Studio project files.
   See ../build/premake/ for details.

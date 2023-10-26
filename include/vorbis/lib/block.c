@@ -392,9 +392,15 @@ float **vorbis_analysis_buffer(vorbis_dsp_state *v, int vals){
   private_state *b=v->backend_state;
 
   /* free header, header1, header2 */
+#if 0  /* OpenMPT */
   if(b->header)_ogg_free(b->header);b->header=NULL;
   if(b->header1)_ogg_free(b->header1);b->header1=NULL;
   if(b->header2)_ogg_free(b->header2);b->header2=NULL;
+#else  /* OpenMPT */
+  if(b->header){_ogg_free(b->header);b->header=NULL;}
+  if(b->header1){_ogg_free(b->header1);b->header1=NULL;}
+  if(b->header2){_ogg_free(b->header2);b->header2=NULL;}
+#endif  /* OpenMPT */
 
   /* Do we have enough storage space for the requested buffer? If not,
      expand the PCM (and envelope) storage */
