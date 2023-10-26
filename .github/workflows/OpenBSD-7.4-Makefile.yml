@@ -1,4 +1,4 @@
-name: OpenBSD 7.3 Makefile
+name: OpenBSD 7.4 Makefile
 
 on:
   push:
@@ -15,12 +15,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - uses: cross-platform-actions/action@v0.19.1
+    - uses: cross-platform-actions/action@0e13474a2ba7ba382e217ad80230150266611323
       with:
         architecture: x86_64
         hypervisor: xhyve
         operating_system: openbsd
-        version: '7.3'
+        version: '7.4'
         shell: bash
         run: |
           sudo pkg_add subversion p5-XML-XPath git mawk gmake pkgconf autoconf autoconf-archive automake libtool libltdl help2man doxygen mpg123 libogg libvorbis flac libsndfile pulseaudio portaudio-svn sdl2
