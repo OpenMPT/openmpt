@@ -9,6 +9,12 @@ is just a high-level summary.
 
  *  [**New**] MOD: Can now read modified 8-channel MOD files from the DOS game
     Aleshar - The World Of Ice.
+ *  [**New**] `Makefile CONFIG=djgpp` now supports building LGPL libraries as
+    DXE (use `ENABLE_DXE=0` to disable).
+
+ *  [**Change**] DOS builds now use zlib, libmpg123, libogg, and libvorbis
+    instead of miniz, minimp3, and stb_vorbis by default. 
+ *  [**Change**] `Makefile CONFIG=djgpp` now sets `ALLOW_LGPL=1` by default.
 
 ### libopenmpt 0.7.0 (2023-04-30)
 

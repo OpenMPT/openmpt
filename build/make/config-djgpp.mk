@@ -12,6 +12,9 @@ ifeq ($(origin AR),default)
 AR  = i386-pc-msdosdjgpp-ar
 endif
 
+DXE3GEN = i386-pc-msdosdjgpp-dxe3gen
+DXE3RES = i386-pc-msdosdjgpp-dxe3res
+
 # Note that we are using GNU extensions instead of 100% standards-compliant
 # mode, because otherwise DJGPP-specific headers/functions are unavailable.
 ifneq ($(STDCXX),)
@@ -404,6 +407,7 @@ endif
 ifeq ($(FLAVOURED_DIR),1)
 
 EXESUFFIX=.exe
+SOSUFFIX=.dxe
 ifeq ($(findstring -msse,$(CPUFLAGS)),-msse)
 FLAVOUR_DIR=$(CPU)-sse/
 FLAVOUR_O=.$(subst /,-,$(CPU)-sse)
@@ -417,19 +421,26 @@ else ifeq ($(FLAVOURED_EXE),1)
 
 ifeq ($(CPU),generic/common)
 EXESUFFIX=.exe
+SOSUFFIX=.dxe
 else
 EXESUFFIX:=.exe
+SOSUFFIX=.dxe
 ifeq ($(findstring -msse,$(CPUFLAGS)),-msse)
 EXESUFFIX:=-SSE$(EXESUFFIX)
+SOSUFFIX:=-SSE$(SOSUFFIX)
 endif
 ifeq ($(OPTIMIZE),size)
 EXESUFFIX:=-Os$(EXESUFFIX)
+SOSUFFIX:=-Os$(SOSUFFIX)
 else ifeq ($(OPTIMIZE),speed)
 EXESUFFIX:=-O2$(EXESUFFIX)
+SOSUFFIX:=-O2$(SOSUFFIX)
 else ifeq ($(OPTIMIZE),vectorize)
 EXESUFFIX:=-O3$(EXESUFFIX)
+SOSUFFIX:=-O3$(SOSUFFIX)
 endif
 EXESUFFIX:=-$(subst /,-,$(CPU))$(EXESUFFIX)
+SOSUFFIX:=-$(subst /,-,$(CPU))$(SOSUFFIX)
 endif
 ifeq ($(findstring -msse,$(CPUFLAGS)),-msse)
 FLAVOUR_O=.$(subst /,-,$(CPU)-sse)
@@ -440,6 +451,7 @@ endif
 else
 
 EXESUFFIX=.exe
+SOSUFFIX=.dxe
 FLAVOUR_DIR=
 FLAVOUR_O=
 
@@ -456,6 +468,7 @@ OPTIMIZE_FASTMATH=1
 
 include build/make/warnings-gcc.mk
 
+ALLOW_LGPL=1
 DYNLINK=0
 SHARED_LIB=0
 STATIC_LIB=1
@@ -470,6 +483,10 @@ MPT_COMPILER_NOVISIBILITY=1
 
 # causes crashes on process shutdown with liballegro
 MPT_COMPILER_NOGCSECTIONS=1
+
+NO_SHARED_LINKER_FLAG=1
+
+ENABLE_DXE=1
 
 ifeq ($(OPTIMIZE_LTO),1)
 CXXFLAGS += -flto=auto -Wno-attributes

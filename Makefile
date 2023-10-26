@@ -707,8 +707,75 @@ endif
 endif
 
 ifeq ($(LOCAL_MPG123),1)
+
+ifeq ($(ENABLE_DXE),1)
+
 CPPFLAGS_MPG123 := -DMPT_WITH_MPG123 -DMPG123_NO_LARGENAME
 LDFLAGS_MPG123  := 
+LDLIBS_MPG123   :=
+CPPFLAGS_MPG123 += -Iinclude/mpg123/src/libmpg123/ -Iinclude/mpg123/src/compat/ -Iinclude/mpg123/src/ -Iinclude/mpg123/ports/makefile/
+MPG123_SOURCES := 
+MPG123_SOURCES += include/mpg123/src/compat/compat.c
+MPG123_SOURCES += include/mpg123/src/compat/compat_str.c
+MPG123_SOURCES += include/mpg123/src/libmpg123/dct64.c
+MPG123_SOURCES += include/mpg123/src/libmpg123/equalizer.c
+MPG123_SOURCES += include/mpg123/src/libmpg123/feature.c
+MPG123_SOURCES += include/mpg123/src/libmpg123/format.c
+MPG123_SOURCES += include/mpg123/src/libmpg123/frame.c
+MPG123_SOURCES += include/mpg123/src/libmpg123/icy.c
+MPG123_SOURCES += include/mpg123/src/libmpg123/icy2utf8.c
+MPG123_SOURCES += include/mpg123/src/libmpg123/id3.c
+MPG123_SOURCES += include/mpg123/src/libmpg123/index.c
+MPG123_SOURCES += include/mpg123/src/libmpg123/layer1.c
+MPG123_SOURCES += include/mpg123/src/libmpg123/layer2.c
+MPG123_SOURCES += include/mpg123/src/libmpg123/layer3.c
+MPG123_SOURCES += include/mpg123/src/libmpg123/lfs_wrap.c
+MPG123_SOURCES += include/mpg123/src/libmpg123/libmpg123.c
+MPG123_SOURCES += include/mpg123/src/libmpg123/ntom.c
+MPG123_SOURCES += include/mpg123/src/libmpg123/optimize.c
+MPG123_SOURCES += include/mpg123/src/libmpg123/parse.c
+MPG123_SOURCES += include/mpg123/src/libmpg123/readers.c
+MPG123_SOURCES += include/mpg123/src/libmpg123/stringbuf.c
+MPG123_SOURCES += include/mpg123/src/libmpg123/synth.c
+MPG123_SOURCES += include/mpg123/src/libmpg123/synth_8bit.c
+MPG123_SOURCES += include/mpg123/src/libmpg123/synth_real.c
+MPG123_SOURCES += include/mpg123/src/libmpg123/synth_s32.c
+MPG123_SOURCES += include/mpg123/src/libmpg123/tabinit.c
+MPG123_OBJECTS += $(MPG123_SOURCES:.c=$(FLAVOUR_O).o)
+MPG123_DEPENDS = $(MPG123_OBJECTS:$(FLAVOUR_O).o=$(FLAVOUR_O).d)
+ALL_OBJECTS += $(MPG123_OBJECTS)
+ALL_DEPENDS += $(MPG123_DEPENDS)
+include/mpg123/src/compat/%$(FLAVOUR_O).o : CFLAGS+=$(CFLAGS_SILENT) -DOPT_GENERIC
+include/mpg123/src/compat/%.test$(FLAVOUR_O).o : CFLAGS+=$(CFLAGS_SILENT) -DOPT_GENERIC
+include/mpg123/src/libmpg123/%$(FLAVOUR_O).o : CFLAGS+=$(CFLAGS_SILENT) -DOPT_GENERIC
+include/mpg123/src/libmpg123/%.test$(FLAVOUR_O).o : CFLAGS+=$(CFLAGS_SILENT) -DOPT_GENERIC
+include/mpg123/src/compat/%$(FLAVOUR_O).o : CPPFLAGS:= -Iinclude/mpg123/src/libmpg123/ -Iinclude/mpg123/src/compat/ -Iinclude/mpg123/src/ -Iinclude/mpg123/ports/makefile/ $(CPPFLAGS)
+include/mpg123/src/compat/%.test$(FLAVOUR_O).o : CPPFLAGS:= -Iinclude/mpg123/src/libmpg123/ -Iinclude/mpg123/src/compat/ -Iinclude/mpg123/src/ -Iinclude/mpg123/ports/makefile/ $(CPPFLAGS)
+include/mpg123/src/libmpg123/%$(FLAVOUR_O).o : CPPFLAGS:= -Iinclude/mpg123/src/libmpg123/ -Iinclude/mpg123/src/compat/ -Iinclude/mpg123/src/ -Iinclude/mpg123/ports/makefile/ $(CPPFLAGS)
+include/mpg123/src/libmpg123/%.test$(FLAVOUR_O).o : CPPFLAGS:= -Iinclude/mpg123/src/libmpg123/ -Iinclude/mpg123/src/compat/ -Iinclude/mpg123/src/ -Iinclude/mpg123/ports/makefile/ $(CPPFLAGS)
+LOCAL_MPG123_SOURCES :=
+LOCAL_MPG123_SOURCES +=
+LOCAL_MPG123_OBJECTS :=
+LOCAL_MPG123_OBJECTS +=
+LOCAL_MPG123_LIBS :=
+LOCAL_MPG123_LIBS += bin/$(FLAVOUR_DIR)mpg123.a
+
+bin/$(FLAVOUR_DIR)mpg123.a: $(MPG123_OBJECTS)
+	$(INFO) [DXE] $@
+ifeq ($(NO_SHARED_LINKER_FLAG),1)
+	$(SILENT)PATH="./build/djgpp/bin:${PATH}" $(DXE3GEN) -o bin/$(FLAVOUR_DIR)mpg123$(SOSUFFIX) -Y $@ -U $^ $(MPG123_LDFLAGS) $(SO_LDFLAGS)
+else
+	$(SILENT)PATH="./build/djgpp/bin:${PATH}" $(DXE3GEN) -o bin/$(FLAVOUR_DIR)mpg123$(SOSUFFIX) -Y $@ -U $^ -shared $(MPG123_LDFLAGS) $(SO_LDFLAGS)
+endif
+ifeq ($(SHARED_SONAME),1)
+	$(SILENT)mv bin/$(FLAVOUR_DIR)mpg123$(SOSUFFIX) bin/$(FLAVOUR_DIR)$(MPG123_SONAME)
+	$(SILENT)ln -sf $(MPG123_SONAME) bin/$(FLAVOUR_DIR)mpg123$(SOSUFFIX)
+endif
+
+else
+
+CPPFLAGS_MPG123 := -DMPT_WITH_MPG123 -DMPG123_NO_LARGENAME
+LDFLAGS_MPG123  :=
 LDLIBS_MPG123   := 
 CPPFLAGS_MPG123 += -Iinclude/mpg123/src/libmpg123/ -Iinclude/mpg123/src/compat/ -Iinclude/mpg123/src/ -Iinclude/mpg123/ports/makefile/
 LOCAL_MPG123_SOURCES := 
@@ -746,6 +813,9 @@ include/mpg123/src/compat/%$(FLAVOUR_O).o : CPPFLAGS:= -Iinclude/mpg123/src/libm
 include/mpg123/src/compat/%.test$(FLAVOUR_O).o : CPPFLAGS:= -Iinclude/mpg123/src/libmpg123/ -Iinclude/mpg123/src/compat/ -Iinclude/mpg123/src/ -Iinclude/mpg123/ports/makefile/ $(CPPFLAGS)
 include/mpg123/src/libmpg123/%$(FLAVOUR_O).o : CPPFLAGS:= -Iinclude/mpg123/src/libmpg123/ -Iinclude/mpg123/src/compat/ -Iinclude/mpg123/src/ -Iinclude/mpg123/ports/makefile/ $(CPPFLAGS)
 include/mpg123/src/libmpg123/%.test$(FLAVOUR_O).o : CPPFLAGS:= -Iinclude/mpg123/src/libmpg123/ -Iinclude/mpg123/src/compat/ -Iinclude/mpg123/src/ -Iinclude/mpg123/ports/makefile/ $(CPPFLAGS)
+
+endif
+
 else
 ifeq ($(NO_MPG123),1)
 else
@@ -1125,6 +1195,7 @@ include/miniz/miniz.test$(FLAVOUR_O).o : CFLAGS+=$(CFLAGS_SILENT)
 ifeq ($(LOCAL_ZLIB),1)
 LIBOPENMPT_C_SOURCES += $(LOCAL_ZLIB_SOURCES)
 LIBOPENMPTTEST_C_SOURCES += $(LOCAL_ZLIB_SOURCES)
+LIBOPENMPT_OBJECTS += $(LOCAL_ZLIB_OBJECTS)
 else
 ifeq ($(NO_ZLIB),1)
 ifeq ($(NO_MINIZ),1)
@@ -1142,6 +1213,8 @@ include/minimp3/minimp3.test$(FLAVOUR_O).o : CFLAGS+=$(CFLAGS_SILENT)
 ifeq ($(LOCAL_MPG123),1)
 LIBOPENMPT_C_SOURCES += $(LOCAL_MPG123_SOURCES)
 LIBOPENMPTTEST_C_SOURCES += $(LOCAL_MPG123_SOURCES)
+LIBOPENMPT_OBJECTS += $(LOCAL_MPG123_OBJECTS)
+LIBOPENMPT_LIBS += $(LOCAL_MPG123_LIBS)
 else
 ifeq ($(NO_MPG123),1)
 ifeq ($(NO_MINIMP3),1)
@@ -1160,9 +1233,11 @@ ifeq ($(LOCAL_VORBIS),1)
 ifeq ($(LOCAL_OGG),1)
 LIBOPENMPT_C_SOURCES += $(LOCAL_OGG_SOURCES)
 LIBOPENMPTTEST_C_SOURCES += $(LOCAL_OGG_SOURCES)
+LIBOPENMPT_OBJECTS += $(LOCAL_OGG_OBJECTS)
 endif
 LIBOPENMPT_C_SOURCES += $(LOCAL_VORBIS_SOURCES)
 LIBOPENMPTTEST_C_SOURCES += $(LOCAL_VORBIS_SOURCES)
+LIBOPENMPT_OBJECTS += $(LOCAL_VORBIS_OBJECTS)
 else
 ifeq ($(NO_OGG),1)
 ifeq ($(NO_STBVORBIS),1)
@@ -1204,7 +1279,7 @@ ALL_DEPENDS += $(LIBOPENMPT_DEPENDS)
 ifeq ($(DYNLINK),1)
 OUTPUT_LIBOPENMPT += bin/$(FLAVOUR_DIR)libopenmpt$(SOSUFFIX)
 else
-OBJECTS_LIBOPENMPT += $(LIBOPENMPT_OBJECTS)
+OBJECTS_LIBOPENMPT += $(LIBOPENMPT_OBJECTS) $(LIBOPENMPT_LIBS)
 endif
 
 
@@ -1449,9 +1524,9 @@ else
 	bin/$(FLAVOUR_DIR)libopenmpt_test$(EXESUFFIX)
 endif
 
-bin/$(FLAVOUR_DIR)libopenmpt_test$(EXESUFFIX): $(LIBOPENMPTTEST_OBJECTS) 
+bin/$(FLAVOUR_DIR)libopenmpt_test$(EXESUFFIX): $(LIBOPENMPTTEST_OBJECTS) $(LIBOPENMPT_LIBS)
 	$(INFO) [LD-TEST] $@
-	$(SILENT)$(LINK.cc) $(LDFLAGS_RPATH) $(TEST_LDFLAGS) $(LIBOPENMPTTEST_OBJECTS) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPTTEST) -o $@
+	$(SILENT)$(LINK.cc) $(LDFLAGS_RPATH) $(TEST_LDFLAGS) $(LIBOPENMPTTEST_OBJECTS) $(LIBOPENMPT_LIBS) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPTTEST) -o $@
 
 bin/$(FLAVOUR_DIR)libopenmpt.pc:
 	$(INFO) [GEN] $@
@@ -1658,6 +1733,7 @@ bin/$(FLAVOUR_DIR)dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION).makefile.tar: b
 	svn export ./bin                bin/$(FLAVOUR_DIR)dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/bin
 	svn export ./build/download_externals.sh bin/$(FLAVOUR_DIR)dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/download_externals.sh
 	svn export ./build/android_ndk  bin/$(FLAVOUR_DIR)dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/android_ndk
+	svn export ./build/djgpp        bin/$(FLAVOUR_DIR)dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/djgpp
 	svn export ./build/make         bin/$(FLAVOUR_DIR)dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/make
 	svn export ./build/svn_version  bin/$(FLAVOUR_DIR)dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/svn_version
 	svn export ./build/xcode-ios    bin/$(FLAVOUR_DIR)dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/xcode-ios
@@ -1889,6 +1965,11 @@ endif
 	mkdir -p                                     bin/$(FLAVOUR_DIR)dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/SRC
 	cp build/externals/csdpmi7s.zip              bin/$(FLAVOUR_DIR)dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/SRC/CSDPMI7S.ZIP
 	mkdir -p                                     bin/$(FLAVOUR_DIR)dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/BIN
+ifeq ($(ALLOW_LGPL),1)
+ifeq ($(ENABLE_DXE),1)
+	cp bin/$(FLAVOUR_DIR)mpg123.dxe              bin/$(FLAVOUR_DIR)dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/BIN/MPG123.DXE
+endif
+endif
 	cp bin/$(FLAVOUR_DIR)openmpt123.exe          bin/$(FLAVOUR_DIR)dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/BIN/OMPT123.EXE
 	cp include/cwsdpmi/bin/cwsdpmi.doc           bin/$(FLAVOUR_DIR)dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/BIN/CWSDPMI.DOC
 	cp include/cwsdpmi/bin/CWSDPMI.EXE           bin/$(FLAVOUR_DIR)dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/BIN/CWSDPMI.EXE
@@ -1959,11 +2040,11 @@ endif
 	#cp bin/$(FLAVOUR_DIR)in_openmpt.dll                        bin/$(FLAVOUR_DIR)dist-retro-win95/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Winamp/in_openmpt.dll
 	cd bin/$(FLAVOUR_DIR)dist-retro-win95/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/ && 7z a -tzip -mx=9 ../libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.retro.win95.zip *
 
-bin/$(FLAVOUR_DIR)libopenmpt.a: $(LIBOPENMPT_OBJECTS)
+bin/$(FLAVOUR_DIR)libopenmpt.a: $(LIBOPENMPT_OBJECTS) $(LIBOPENMPT_LIBS)
 	$(INFO) [AR] $@
 	$(SILENT)$(AR) $(ARFLAGS) $@ $^
 
-bin/$(FLAVOUR_DIR)libopenmpt$(SOSUFFIX): $(LIBOPENMPT_OBJECTS)
+bin/$(FLAVOUR_DIR)libopenmpt$(SOSUFFIX): $(LIBOPENMPT_OBJECTS) $(LIBOPENMPT_LIBS)
 	$(INFO) [LD] $@
 ifeq ($(NO_SHARED_LINKER_FLAG),1)
 	$(SILENT)$(LINK.cc) $(LIBOPENMPT_LDFLAGS) $(SO_LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) -o $@
@@ -1979,7 +2060,7 @@ bin/$(FLAVOUR_DIR)openmpt123.1: bin/$(FLAVOUR_DIR)openmpt123$(EXESUFFIX) openmpt
 	$(INFO) [HELP2MAN] $@
 	$(SILENT)help2man --no-discard-stderr --no-info --version-option=--man-version --help-option=--man-help --include=openmpt123/openmpt123.h2m $< > $@
 
-bin/$(FLAVOUR_DIR)in_openmpt$(SOSUFFIX): $(INOPENMPT_OBJECTS) $(LIBOPENMPT_OBJECTS)
+bin/$(FLAVOUR_DIR)in_openmpt$(SOSUFFIX): $(INOPENMPT_OBJECTS) $(LIBOPENMPT_OBJECTS) $(LIBOPENMPT_LIBS)
 	$(INFO) [LD] $@
 ifeq ($(NO_SHARED_LINKER_FLAG),1)
 	$(SILENT)$(LINK.cc) $(LIBOPENMPT_LDFLAGS) $(SO_LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) -o $@
@@ -1987,7 +2068,7 @@ else
 	$(SILENT)$(LINK.cc) -shared $(LIBOPENMPT_LDFLAGS) $(SO_LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) -o $@
 endif
 
-bin/$(FLAVOUR_DIR)xmp-openmpt$(SOSUFFIX): $(XMPOPENMPT_OBJECTS) $(LIBOPENMPT_OBJECTS)
+bin/$(FLAVOUR_DIR)xmp-openmpt$(SOSUFFIX): $(XMPOPENMPT_OBJECTS) $(LIBOPENMPT_OBJECTS) $(LIBOPENMPT_LIBS)
 	$(INFO) [LD] $@
 ifeq ($(NO_SHARED_LINKER_FLAG),1)
 	$(SILENT)$(LINK.cc) $(LIBOPENMPT_LDFLAGS) $(SO_LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) -lgdi32 -o $@
