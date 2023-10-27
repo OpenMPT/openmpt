@@ -1082,6 +1082,19 @@ static void WriteSFZEnvelope(std::ostream &f, double tickDuration, int index, co
 		f << "\n// Release Node: " << static_cast<uint32>(env.nReleaseNode);
 }
 
+static std::string SanitizeSFZString(std::string s, mpt::Charset sourceCharset)
+{
+	using namespace std::literals;
+	// Remove characters could trip up the parser
+	std::string::size_type pos = 0;
+	while((pos = s.find_first_of("<=\r\n\t\0"sv, pos)) != std::string::npos)
+	{
+		s[pos++] = ' ';
+	}
+	return mpt::ToCharset(mpt::Charset::UTF8, sourceCharset, s);
+}
+
+
 bool CSoundFile::SaveSFZInstrument(INSTRUMENTINDEX nInstr, std::ostream &f, const mpt::PathString &filename, bool useFLACsamples) const
 {
 #ifdef MODPLUG_TRACKER
@@ -1104,10 +1117,6 @@ bool CSoundFile::SaveSFZInstrument(INSTRUMENTINDEX nInstr, std::ostream &f, cons
 	const double tickDuration = m_PlayState.m_nSamplesPerTick / static_cast<double>(m_MixerSettings.gdwMixingFreq);
 
 	f << std::setprecision(10);
-	if(!ins->name.empty())
-	{
-		f << "// Name: " << mpt::ToCharset(mpt::Charset::UTF8, GetCharsetInternal(), ins->name) << "\n";
-	}
 	f << "// Created with " << mpt::ToCharset(mpt::Charset::UTF8, Version::Current().GetOpenMPTVersionString()) << "\n";
 	f << "// Envelope tempo base: tempo " << m_PlayState.m_nMusicTempo.ToDouble();
 	switch(m_nTempoMode)
@@ -1127,9 +1136,9 @@ bool CSoundFile::SaveSFZInstrument(INSTRUMENTINDEX nInstr, std::ostream &f, cons
 	}
 
 	f << "\n\n<control>\ndefault_path=" << sampleDirName.ToUTF8();
-	if(!ins->name.empty())
+	if(const auto globalName = SanitizeSFZString(ins->name, GetCharsetInternal()); !globalName.empty())
 	{
-		f << "\n\n<global>\nglobal_label=" << mpt::ToCharset(mpt::Charset::UTF8, GetCharsetInternal(), ins->name);
+		f << "\n\n<global>\nglobal_label=" << globalName;
 	}
 	f << "\n\n<group>";
 	f << "\nbend_up=" << ins->midiPWD * 100;
@@ -1231,9 +1240,9 @@ bool CSoundFile::SaveSFZInstrument(INSTRUMENTINDEX nInstr, std::ostream &f, cons
 
 
 		f << "\n\n<region>";
-		if(!m_szNames[ins->Keyboard[i]].empty())
+		if(const auto regionName = SanitizeSFZString(m_szNames[ins->Keyboard[i]], GetCharsetInternal()); !regionName.empty())
 		{
-			f << "\nregion_label=" << mpt::ToCharset(mpt::Charset::UTF8, GetCharsetInternal(), m_szNames[ins->Keyboard[i]]);
+			f << "\nregion_label=" << regionName;
 		}
 		f << "\nsample=" << sampleName.GetFilename().ToUTF8();
 		f << "\nlokey=" << i;
