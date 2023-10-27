@@ -17,7 +17,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - uses: cross-platform-actions/action@0e13474a2ba7ba382e217ad80230150266611323
+    - uses: cross-platform-actions/action@v0.21.0
       with:
         architecture: x86_64
         hypervisor: xhyve
