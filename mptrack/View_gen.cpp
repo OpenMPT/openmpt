@@ -1558,7 +1558,9 @@ bool CViewGlobals::MovePlug(PLUGINDEX src, PLUGINDEX dest, bool bAdjustPat)
 
 	// Move plug data
 	sndFile.m_MixPlugins[dest] = std::move(sndFile.m_MixPlugins[src]);
-	sndFile.m_MixPlugins[src] = SNDMIXPLUGIN();
+	mpt::reconstruct(sndFile.m_MixPlugins[src]);
+
+	sndFile.GetMIDIMapper().MovePlugin(src, dest);
 
 	// Prevent plug from pointing backwards.
 	if(!sndFile.m_MixPlugins[dest].IsOutputToMaster())
@@ -1745,7 +1747,8 @@ void CViewGlobals::OnClonePlug()
 		m_CbnPlugin.SetCurSel(dlg.GetSlot());
 		OnPluginChanged();
 		PopulateChannelPlugins();
-		GetDocument()->UpdateAllViews(this, PluginHint().Names(), this);
+		CView *sender = dlg.DoMoveChain() ? nullptr : this;
+		GetDocument()->UpdateAllViews(sender, PluginHint().Names(), sender);
 
 		SetPluginModified();
 	}

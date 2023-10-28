@@ -169,4 +169,14 @@ void CMIDIMapper::Swap(const size_t a, const size_t b)
 }
 
 
+void CMIDIMapper::MovePlugin(PLUGINDEX from, PLUGINDEX to)
+{
+	for (auto &d : m_Directives)
+	{
+		if(d.GetPlugIndex() == from + 1u)
+			d.SetPlugIndex(to + 1u);
+	}
+}
+
+
 OPENMPT_NAMESPACE_END
