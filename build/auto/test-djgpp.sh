@@ -13,6 +13,8 @@ echo "BIN\\TEST.EXE >BIN\\TEST.LOG" > test.bat
 Xvfb :100 -ac &
 export DISPLAY=:100
 
+sleep 5
+
 dosbox -exit test.bat
 
 kill %1
