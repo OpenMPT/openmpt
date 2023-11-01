@@ -19,6 +19,8 @@
 #define MPT_LIBC_MINGW 1
 #elif (defined(__GLIBC__) || defined(__GNU_LIBRARY__))
 #define MPT_LIBC_GLIBC 1
+#elif defined(_UCRT)
+#define MPT_LIBC_MS 1
 #elif MPT_COMPILER_MSVC
 #define MPT_LIBC_MS 1
 #elif MPT_COMPILER_CLANG && MPT_OS_WINDOWS
