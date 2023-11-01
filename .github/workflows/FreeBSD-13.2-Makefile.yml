@@ -21,6 +21,7 @@ jobs:
       with:
         architecture: x86_64
         hypervisor: xhyve
+        memory: 4G
         operating_system: freebsd
         version: '13.2'
         shell: bash

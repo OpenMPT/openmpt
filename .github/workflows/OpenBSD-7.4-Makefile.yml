@@ -21,6 +21,7 @@ jobs:
       with:
         architecture: x86_64
         hypervisor: xhyve
+        memory: 4G
         operating_system: openbsd
         version: '7.4'
         shell: bash
