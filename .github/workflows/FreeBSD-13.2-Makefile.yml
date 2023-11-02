@@ -24,6 +24,7 @@ jobs:
         memory: 4G
         operating_system: freebsd
         version: '13.2'
+        sync_files: runner-to-vm
         shell: bash
         run: |
           sudo pkg install -y subversion p5-XML-XPath git mawk gmake pkgconf autoconf autoconf-archive automake libtool help2man mpg123 libogg libvorbis flac libsndfile pulseaudio portaudio sdl2

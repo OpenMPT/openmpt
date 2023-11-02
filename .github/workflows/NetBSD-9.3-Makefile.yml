@@ -24,6 +24,7 @@ jobs:
         memory: 4G
         operating_system: netbsd
         version: '9.3'
+        sync_files: runner-to-vm
         shell: bash
         run: |
           sudo pkgin -y install subversion git p5-XML-XPath mawk
