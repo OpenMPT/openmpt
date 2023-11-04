@@ -15,12 +15,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - uses: cross-platform-actions/action@v0.21.0
+    - uses: cross-platform-actions/action@v0.21.1
       with:
         architecture: x86_64
         hypervisor: xhyve
+        memory: 4G
         operating_system: openbsd
         version: '7.4'
+        sync_files: runner-to-vm
         shell: bash
         run: |
           sudo pkg_add subversion p5-XML-XPath git mawk gmake pkgconf autoconf autoconf-archive automake libtool libltdl help2man doxygen mpg123 libogg libvorbis flac libsndfile pulseaudio portaudio-svn sdl2
