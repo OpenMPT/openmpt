@@ -20,7 +20,7 @@ jobs:
     - uses: cross-platform-actions/action@v0.21.1
       with:
         architecture: x86_64
-        hypervisor: xhyve
+        hypervisor: qemu
         memory: 4G
         operating_system: freebsd
         version: '12.4'
