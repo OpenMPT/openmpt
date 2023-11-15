@@ -395,6 +395,12 @@ if _OPTIONS["uwp"] then
 	local function mptClCompileUWP(prj)
 		premake.w('<CompileAsWinRT>false</CompileAsWinRT>')
 	end
+
+	local function mptClCompileUWPC(prj)
+		if premake.languages.isc(prj.language) then
+			premake.w('<ForcedUsingFiles />')
+		end
+	end
 	
 	local function mptOutputPropertiesUWP(prj)
 		premake.w('<IgnoreImportLibrary>false</IgnoreImportLibrary>')
@@ -413,6 +419,12 @@ if _OPTIONS["uwp"] then
 	premake.override(premake.vstudio.vc2010.elements, "clCompile", function(base, prj)
 		local calls = base(prj)
 		table.insert(calls, mptClCompileUWP)
+		return calls
+	end)
+
+	premake.override(premake.vstudio.vc2010.elements, "clCompile", function(base, prj)
+		local calls = base(prj)
+		table.insert(calls, mptClCompileUWPC)
 		return calls
 	end)
 
