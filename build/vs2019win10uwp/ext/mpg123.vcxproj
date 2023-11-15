@@ -561,6 +561,7 @@
       <ConformanceMode>true</ConformanceMode>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -587,6 +588,7 @@
       <ConformanceMode>true</ConformanceMode>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -613,6 +615,7 @@
       <ConformanceMode>true</ConformanceMode>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -638,6 +641,7 @@
       <ConformanceMode>true</ConformanceMode>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -667,6 +671,7 @@
       <ConformanceMode>true</ConformanceMode>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -697,6 +702,7 @@
       <ConformanceMode>true</ConformanceMode>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -727,6 +733,7 @@
       <ConformanceMode>true</ConformanceMode>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -757,6 +764,7 @@
       <ConformanceMode>true</ConformanceMode>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -789,6 +797,7 @@
       <ConformanceMode>true</ConformanceMode>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -820,6 +829,7 @@
       <ConformanceMode>true</ConformanceMode>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -851,6 +861,7 @@
       <ConformanceMode>true</ConformanceMode>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -882,6 +893,7 @@
       <ConformanceMode>true</ConformanceMode>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -909,6 +921,7 @@
       <ConformanceMode>true</ConformanceMode>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -934,6 +947,7 @@
       <ConformanceMode>true</ConformanceMode>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -959,6 +973,7 @@
       <ConformanceMode>true</ConformanceMode>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -984,6 +999,7 @@
       <ConformanceMode>true</ConformanceMode>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -1013,6 +1029,7 @@
       <ConformanceMode>true</ConformanceMode>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -1043,6 +1060,7 @@
       <ConformanceMode>true</ConformanceMode>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -1073,6 +1091,7 @@
       <ConformanceMode>true</ConformanceMode>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -1103,6 +1122,7 @@
       <ConformanceMode>true</ConformanceMode>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -1135,6 +1155,7 @@
       <ConformanceMode>true</ConformanceMode>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -1166,6 +1187,7 @@
       <ConformanceMode>true</ConformanceMode>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -1197,6 +1219,7 @@
       <ConformanceMode>true</ConformanceMode>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -1228,6 +1251,7 @@
       <ConformanceMode>true</ConformanceMode>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

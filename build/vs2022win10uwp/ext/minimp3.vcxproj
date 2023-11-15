@@ -548,6 +548,7 @@
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -570,6 +571,7 @@
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -592,6 +594,7 @@
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -613,6 +616,7 @@
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -639,6 +643,7 @@
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -666,6 +671,7 @@
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -693,6 +699,7 @@
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -720,6 +727,7 @@
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -749,6 +757,7 @@
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -777,6 +786,7 @@
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -805,6 +815,7 @@
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -833,6 +844,7 @@
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -856,6 +868,7 @@
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -880,6 +893,7 @@
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -904,6 +918,7 @@
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -928,6 +943,7 @@
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -957,6 +973,7 @@
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -987,6 +1004,7 @@
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -1017,6 +1035,7 @@
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -1047,6 +1066,7 @@
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -1079,6 +1099,7 @@
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -1110,6 +1131,7 @@
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -1141,6 +1163,7 @@
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -1172,6 +1195,7 @@
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
