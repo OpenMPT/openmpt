@@ -545,6 +545,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <ConformanceMode>true</ConformanceMode>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -564,6 +565,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <ConformanceMode>true</ConformanceMode>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -583,6 +585,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <ConformanceMode>true</ConformanceMode>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -601,6 +604,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <ConformanceMode>true</ConformanceMode>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -623,6 +627,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <ConformanceMode>true</ConformanceMode>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -646,6 +651,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <ConformanceMode>true</ConformanceMode>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -669,6 +675,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <ConformanceMode>true</ConformanceMode>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -692,6 +699,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <ConformanceMode>true</ConformanceMode>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -717,6 +725,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <ConformanceMode>true</ConformanceMode>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -741,6 +750,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <ConformanceMode>true</ConformanceMode>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -765,6 +775,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <ConformanceMode>true</ConformanceMode>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -789,6 +800,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <ConformanceMode>true</ConformanceMode>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -809,6 +821,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <ConformanceMode>true</ConformanceMode>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -829,6 +842,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <ConformanceMode>true</ConformanceMode>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -849,6 +863,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <ConformanceMode>true</ConformanceMode>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -869,6 +884,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <ConformanceMode>true</ConformanceMode>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -893,6 +909,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <ConformanceMode>true</ConformanceMode>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -918,6 +935,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <ConformanceMode>true</ConformanceMode>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -943,6 +961,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <ConformanceMode>true</ConformanceMode>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -968,6 +987,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <ConformanceMode>true</ConformanceMode>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -995,6 +1015,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <ConformanceMode>true</ConformanceMode>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -1021,6 +1042,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <ConformanceMode>true</ConformanceMode>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -1047,6 +1069,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <ConformanceMode>true</ConformanceMode>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -1073,6 +1096,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <ConformanceMode>true</ConformanceMode>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

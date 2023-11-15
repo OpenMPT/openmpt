@@ -547,6 +547,7 @@
       <AdditionalOptions>/wd4018 /wd4100 /wd4101 /wd4127 /wd4244 /wd4267 /wd4456 /wd4706 /wd6262 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -568,6 +569,7 @@
       <AdditionalOptions>/wd4018 /wd4100 /wd4101 /wd4127 /wd4244 /wd4267 /wd4456 /wd4706 /wd6262 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -589,6 +591,7 @@
       <AdditionalOptions>/wd4018 /wd4100 /wd4101 /wd4127 /wd4244 /wd4267 /wd4456 /wd4706 /wd6262 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -609,6 +612,7 @@
       <AdditionalOptions>/wd4018 /wd4100 /wd4101 /wd4127 /wd4244 /wd4267 /wd4456 /wd4706 /wd6262 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -633,6 +637,7 @@
       <AdditionalOptions>/wd4018 /wd4100 /wd4101 /wd4127 /wd4244 /wd4267 /wd4456 /wd4706 /wd6262 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -658,6 +663,7 @@
       <AdditionalOptions>/wd4018 /wd4100 /wd4101 /wd4127 /wd4244 /wd4267 /wd4456 /wd4706 /wd6262 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -683,6 +689,7 @@
       <AdditionalOptions>/wd4018 /wd4100 /wd4101 /wd4127 /wd4244 /wd4267 /wd4456 /wd4706 /wd6262 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -708,6 +715,7 @@
       <AdditionalOptions>/wd4018 /wd4100 /wd4101 /wd4127 /wd4244 /wd4267 /wd4456 /wd4706 /wd6262 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -735,6 +743,7 @@
       <AdditionalOptions>/wd4018 /wd4100 /wd4101 /wd4127 /wd4244 /wd4267 /wd4456 /wd4706 /wd6262 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -761,6 +770,7 @@
       <AdditionalOptions>/wd4018 /wd4100 /wd4101 /wd4127 /wd4244 /wd4267 /wd4456 /wd4706 /wd6262 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -787,6 +797,7 @@
       <AdditionalOptions>/wd4018 /wd4100 /wd4101 /wd4127 /wd4244 /wd4267 /wd4456 /wd4706 /wd6262 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -813,6 +824,7 @@
       <AdditionalOptions>/wd4018 /wd4100 /wd4101 /wd4127 /wd4244 /wd4267 /wd4456 /wd4706 /wd6262 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -835,6 +847,7 @@
       <AdditionalOptions>/wd4018 /wd4100 /wd4101 /wd4127 /wd4244 /wd4267 /wd4456 /wd4706 /wd6262 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -856,6 +869,7 @@
       <AdditionalOptions>/wd4018 /wd4100 /wd4101 /wd4127 /wd4244 /wd4267 /wd4456 /wd4706 /wd6262 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -877,6 +891,7 @@
       <AdditionalOptions>/wd4018 /wd4100 /wd4101 /wd4127 /wd4244 /wd4267 /wd4456 /wd4706 /wd6262 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -898,6 +913,7 @@
       <AdditionalOptions>/wd4018 /wd4100 /wd4101 /wd4127 /wd4244 /wd4267 /wd4456 /wd4706 /wd6262 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -923,6 +939,7 @@
       <AdditionalOptions>/wd4018 /wd4100 /wd4101 /wd4127 /wd4244 /wd4267 /wd4456 /wd4706 /wd6262 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -949,6 +966,7 @@
       <AdditionalOptions>/wd4018 /wd4100 /wd4101 /wd4127 /wd4244 /wd4267 /wd4456 /wd4706 /wd6262 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -975,6 +993,7 @@
       <AdditionalOptions>/wd4018 /wd4100 /wd4101 /wd4127 /wd4244 /wd4267 /wd4456 /wd4706 /wd6262 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -1001,6 +1020,7 @@
       <AdditionalOptions>/wd4018 /wd4100 /wd4101 /wd4127 /wd4244 /wd4267 /wd4456 /wd4706 /wd6262 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -1029,6 +1049,7 @@
       <AdditionalOptions>/wd4018 /wd4100 /wd4101 /wd4127 /wd4244 /wd4267 /wd4456 /wd4706 /wd6262 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -1056,6 +1077,7 @@
       <AdditionalOptions>/wd4018 /wd4100 /wd4101 /wd4127 /wd4244 /wd4267 /wd4456 /wd4706 /wd6262 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -1083,6 +1105,7 @@
       <AdditionalOptions>/wd4018 /wd4100 /wd4101 /wd4127 /wd4244 /wd4267 /wd4456 /wd4706 /wd6262 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -1110,6 +1133,7 @@
       <AdditionalOptions>/wd4018 /wd4100 /wd4101 /wd4127 /wd4244 /wd4267 /wd4456 /wd4706 /wd6262 %(AdditionalOptions)</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <ForcedUsingFiles />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
