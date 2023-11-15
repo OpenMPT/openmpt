@@ -11,7 +11,7 @@
 
 
 
-#if MPT_COMPILER_MSVC && MPT_MSVC_AT_LEAST(2022, 6) && defined(_M_ARM64)
+#if MPT_COMPILER_MSVC && MPT_MSVC_AT_LEAST(2022, 6) && MPT_MSVC_BEFORE(2022, 8) && defined(_M_ARM64)
 // VS2022 17.6.0 ARM64 gets confused about alignment in std::bit_cast (or equivalent code),
 // causing an ICE.
 // See <https://developercommunity.visualstudio.com/t/ICE-when-compiling-for-ARM64-due-to-alig/10367205>.
