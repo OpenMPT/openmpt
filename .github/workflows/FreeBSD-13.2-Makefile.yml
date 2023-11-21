@@ -15,7 +15,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - uses: cross-platform-actions/action@v0.21.1
+    - uses: cross-platform-actions/action@d5b757fcb7b645a0a5057b572aab822f8ccd7de7
       with:
         architecture: x86_64
         hypervisor: qemu
