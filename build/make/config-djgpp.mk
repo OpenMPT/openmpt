@@ -365,7 +365,9 @@ dmnp/vortex86dx   := $(___) -march=i486        $(FPU_387)    -mtune=i486        
 dmnp/vortex86mx   := $(___) -march=i486        $(FPU_387)    -mtune=i486        $(OPT_UARCH_PIPE)     --param l1-cache-size=16 --param l2-cache-size=256
 dmnp/vortex86     := $(___) -march=i586        $(FPU_MMX)     $(TUNE_586MMX)    $(OPT_UARCH_SCAL_64)  --param l1-cache-size=8  --param l2-cache-size=0
 dmnp/vortex86dx2  := $(___) -march=i586        $(FPU_MMX)     $(TUNE_586MMX)    $(OPT_UARCH_SCAL_64)  --param l1-cache-size=16 --param l2-cache-size=256
+dmnp/vortex86mx   := $(___) -march=i586        $(FPU_MMX)     $(TUNE_586MMX)    $(OPT_UARCH_SCAL_64)  --param l1-cache-size=16 --param l2-cache-size=128
 dmnp/vortex86dx3  := $(___) -march=i686        $(FPU_SSE)     $(TUNE_686SSE)    $(OPT_UARCH_SCAL_128) --param l1-cache-size=32 --param l2-cache-size=512
+dmnp/vortex86mx2  := $(___) -march=i686        $(FPU_SSE)     $(TUNE_686SSE)    $(OPT_UARCH_SCAL_128) --param l1-cache-size=32 --param l2-cache-size=128
 
 
 
