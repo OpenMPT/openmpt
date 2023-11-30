@@ -70,6 +70,12 @@ CXXFLAGS += -flto
 CFLAGS   += -flto
 LDFLAGS  += -flto
 
+# Work-around <https://github.com/emscripten-core/emscripten/issues/20810>.
+# The warning with emscripten 3.1.50 sounds very dangerous,
+# and since it is apparently caused by removing whitespace,
+# additional whitespace is a small price to pay for correctness.
+LDFLAGS  += -g1
+
 ifeq ($(EMSCRIPTEN_TARGET),default)
 # emits whatever is emscripten's default, currently (1.38.8) this is the same as "wasm" below.
 CPPFLAGS += 
