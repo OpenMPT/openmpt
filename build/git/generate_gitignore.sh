@@ -2,6 +2,8 @@
 
 set -e
 
+export LANG=C
+
 echo "# This file was generated automatically by running build/git/generate_gitignore.sh inside a svn working copy." > .gitignore
 
 (
