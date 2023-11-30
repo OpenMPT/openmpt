@@ -456,11 +456,13 @@
 /include/nlohmann-json/.github
 /include/nlohmann-json/.gitignore
 /include/nlohmann-json/.travis.yml
+/include/nlohmann-json/BUILD.bazel
 /include/nlohmann-json/CMakeLists.txt
 /include/nlohmann-json/CODE_OF_CONDUCT.md
 /include/nlohmann-json/ChangeLog.md
 /include/nlohmann-json/Makefile
 /include/nlohmann-json/README.md
+/include/nlohmann-json/WORKSPACE.bazel
 /include/nlohmann-json/appveyor.yml
 /include/nlohmann-json/benchmarks
 /include/nlohmann-json/cmake
