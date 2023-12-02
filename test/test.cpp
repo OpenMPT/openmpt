@@ -201,7 +201,7 @@ void DoTests()
 					}
 					return result;
 				};
-				std::cout << "Rounding mode: " << format_rounding(std::fegetround()); << std::endl;
+				std::cout << "Rounding mode: " << format_rounding(std::fegetround()) << std::endl;
 			}
 		#endif // !MPT_LIBC_QUIRK_NO_FENV
 		#if MPT_ARCH_X86 || MPT_ARCH_AMD64
