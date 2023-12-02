@@ -90,7 +90,7 @@ else ifeq ($(EMSCRIPTEN_TARGET),all)
 CPPFLAGS += 
 CXXFLAGS += 
 CFLAGS   += 
-LDFLAGS  += -s WASM=2 -s LEGACY_VM_SUPPORT=1 --closure=1
+LDFLAGS  += -s WASM=2 -s LEGACY_VM_SUPPORT=1 -Wno-transpile
 
 # work-around <https://github.com/emscripten-core/emscripten/issues/17897>.
 CXXFLAGS += -fno-inline-functions
@@ -122,7 +122,7 @@ else ifeq ($(EMSCRIPTEN_TARGET),js)
 CPPFLAGS += 
 CXXFLAGS += 
 CFLAGS   += 
-LDFLAGS  += -s WASM=0 -s LEGACY_VM_SUPPORT=1 --closure=1
+LDFLAGS  += -s WASM=0 -s LEGACY_VM_SUPPORT=1 -Wno-transpile
 
 # work-around <https://github.com/emscripten-core/emscripten/issues/17897>.
 CXXFLAGS += -fno-inline-functions
