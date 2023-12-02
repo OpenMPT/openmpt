@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt 0.7.4-pre
 
+ *  [**Bug**] Makefile: libopenmpt 0.7.3 broke running the test suite for
+    Emscripten builds.
+
  *  openmpt123: openmpt123 now uses a narrower layout on terminal windows with a
     width of less than 72 characters.
 
