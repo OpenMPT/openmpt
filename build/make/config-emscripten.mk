@@ -145,7 +145,7 @@ REQUIRES_RUNPREFIX=1
 EXESUFFIX=.js
 SOSUFFIX=.js
 RUNPREFIX=node 
-TEST_LDFLAGS= --pre-js build/make/test-pre.js -lnodefs.js 
+TEST_LDFLAGS= -lnodefs.js 
 
 ifeq ($(EMSCRIPTEN_THREADS),1)
 RUNPREFIX+=--experimental-wasm-threads --experimental-wasm-bulk-memory 

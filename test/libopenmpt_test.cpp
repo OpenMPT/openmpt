@@ -31,6 +31,10 @@
 #include <crt0.h>
 #endif /* __DJGPP__ */
 
+#if defined(__EMSCRIPTEN__)
+#include <emscripten.h>
+#endif /* __EMSCRIPTEN__ */
+
 using namespace OpenMPT;
 
 #if defined( __DJGPP__ )
@@ -58,6 +62,14 @@ int main( int /*argc*/ , char * /*argv*/ [] ) {
 #if defined( __DJGPP__ )
 	_crt0_startup_flags &= ~_CRT0_FLAG_LOCK_MEMORY;  /* disable automatic locking for all further memory allocations */
 #endif /* __DJGPP__ */
+#if defined(__EMSCRIPTEN__)
+	EM_ASM(
+		FS.mkdir('/test');
+		FS.mount(NODEFS, {'root': '../test/'}, '/test');
+		FS.mkdir('/libopenmpt');
+		FS.mount(NODEFS, {'root': '../libopenmpt/'}, '/libopenmpt');
+	);
+#endif /* __EMSCRIPTEN__ */
 
 	try {
 	
