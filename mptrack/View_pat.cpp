@@ -2870,8 +2870,9 @@ bool CViewPattern::DataEntry(bool up, bool coarse)
 	const PatternCursor::Columns column = m_Selection.GetStartColumn();
 
 	// Don't allow notes outside our supported note range.
-	const ModCommand::NOTE noteMin = pSndFile->GetModSpecifications().noteMin;
-	const ModCommand::NOTE noteMax = pSndFile->GetModSpecifications().noteMax;
+	const auto &modSpecs = pSndFile->GetModSpecifications();
+	const ModCommand::NOTE noteMin = modSpecs.noteMin;
+	const ModCommand::NOTE noteMax = modSpecs.noteMax;
 	const int instrMax = std::min(static_cast<int>(Util::MaxValueOfType(ModCommand::INSTR())), static_cast<int>(pSndFile->GetNumInstruments() ? pSndFile->GetNumInstruments() : pSndFile->GetNumSamples()));
 	const EffectInfo effectInfo(*pSndFile);
 	const int offset = up ? 1 : -1;
@@ -2955,12 +2956,12 @@ bool CViewPattern::DataEntry(bool up, bool coarse)
 				m.SetValueVolCol(static_cast<uint16>(val));
 			} else
 			{
-				int vol = m.vol + offset * (coarse ? 10 : 1);
-				if(m.volcmd == VOLCMD_NONE && m.IsNote() && m.instr)
+				if(m.volcmd == VOLCMD_NONE && m.IsNote() && m.instr && modSpecs.HasVolCommand(VOLCMD_VOLUME))
 				{
 					m.volcmd = VOLCMD_VOLUME;
-					vol = GetDefaultVolume(m);
+					m.vol = GetDefaultVolume(m);
 				}
+				int vol = m.vol + offset * (coarse ? 10 : 1);
 				ModCommand::VOL minValue = 0, maxValue = 64;
 				effectInfo.GetVolCmdInfo(effectInfo.GetIndexFromVolCmd(m.volcmd), nullptr, &minValue, &maxValue);
 				Limit(vol, (int)minValue, (int)maxValue);
