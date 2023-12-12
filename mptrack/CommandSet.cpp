@@ -1278,6 +1278,8 @@ static constexpr struct
 	{2065, kcOrderlistQueueAtMeasureEnd, _T("Queue Pattern (Transition at end of current measure)")},
 	{2066, kcOrderlistQueueAtBeatEnd, _T("Queue Pattern (Transition at end of current beat)")},
 	{2067, kcOrderlistQueueAtRowEnd, _T("Queue Pattern (Transition at end of current row)")},
+	{2068, kcSampleConvertNormalLoopToSustain, _T("Convert Normal Loop to Sustain Loop")},
+	{2069, kcSampleConvertSustainLoopToNormal, _T("Convert Sustain Loop to Normal Loop")},
 };
 // clang-format on
 

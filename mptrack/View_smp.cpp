@@ -131,9 +131,11 @@ BEGIN_MESSAGE_MAP(CViewSample, CModScrollView)
 	ON_COMMAND(ID_SAMPLE_SETLOOPSTART,		&CViewSample::OnSetLoopStart)
 	ON_COMMAND(ID_SAMPLE_SETLOOPEND,		&CViewSample::OnSetLoopEnd)
 	ON_COMMAND(ID_CONVERT_PINGPONG_LOOP,	&CViewSample::OnConvertPingPongLoop)
+	ON_COMMAND(ID_CONVERT_NORMAL_TO_SUSTAIN, &CViewSample::OnConvertNormalLoopToSustain)
 	ON_COMMAND(ID_SAMPLE_SETSUSTAINSTART,	&CViewSample::OnSetSustainStart)
 	ON_COMMAND(ID_SAMPLE_SETSUSTAINEND,		&CViewSample::OnSetSustainEnd)
 	ON_COMMAND(ID_CONVERT_PINGPONG_SUSTAIN,	&CViewSample::OnConvertPingPongSustain)
+	ON_COMMAND(ID_CONVERT_SUSTAIN_TO_NORMAL, &CViewSample::OnConvertSustainLoopToNormal)
 	ON_COMMAND(ID_SAMPLE_ZOOMUP,			&CViewSample::OnZoomUp)
 	ON_COMMAND(ID_SAMPLE_ZOOMDOWN,			&CViewSample::OnZoomDown)
 	ON_COMMAND(ID_SAMPLE_DRAW,				&CViewSample::OnDrawingToggle)
@@ -2225,6 +2227,8 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 						ID_SAMPLE_SETLOOPEND, s);
 					if(sample.HasPingPongLoop())
 						::AppendMenu(hMenu, MF_STRING, ID_CONVERT_PINGPONG_LOOP, ih->GetKeyTextFromCommand(kcSampleConvertPingPongLoop, _T("Convert to Unidirectional Loop")));
+					if(sample.HasLoop() && (sndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)))
+						::AppendMenu(hMenu, MF_STRING, ID_CONVERT_NORMAL_TO_SUSTAIN, ih->GetKeyTextFromCommand(kcSampleConvertNormalLoopToSustain, _T("Convert to Sustain Loop")));
 
 					if (sndFile.GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))
 					{
@@ -2239,6 +2243,8 @@ void CViewSample::OnRButtonDown(UINT, CPoint pt)
 							ID_SAMPLE_SETSUSTAINEND, s);
 						if(sample.HasPingPongSustainLoop())
 							::AppendMenu(hMenu, MF_STRING, ID_CONVERT_PINGPONG_SUSTAIN, ih->GetKeyTextFromCommand(kcSampleConvertPingPongSustain, _T("Convert to Unidirectional Sustain Loop")));
+						if(sample.HasSustainLoop())
+							::AppendMenu(hMenu, MF_STRING, ID_CONVERT_SUSTAIN_TO_NORMAL, ih->GetKeyTextFromCommand(kcSampleConvertSustainLoopToNormal, _T("Convert to Normal Loop")));
 					}
 
 					//if(sndFile.GetModSpecifications().HasVolCommand(VOLCMD_OFFSET))
@@ -3334,6 +3340,29 @@ void CViewSample::OnConvertPingPongLoop()
 }
 
 
+void CViewSample::OnConvertNormalLoopToSustain()
+{
+	CModDoc *pModDoc = GetDocument();
+	if(!pModDoc)
+		return;
+	
+	CSoundFile &sndFile = pModDoc->GetSoundFile();
+	ModSample &sample = sndFile.GetSample(m_nSample);
+	if(!sample.HasLoop())
+		return;
+	pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Convert Normal Loop To Sustain");
+	const auto origStart = sample.nLoopStart, origEnd = sample.nLoopEnd;
+	const bool origPingPong = sample.uFlags[CHN_PINGPONGLOOP];
+	// Swap them
+	if(sample.HasSustainLoop())
+		sample.SetLoop(sample.nSustainStart, sample.nSustainEnd, true, sample.uFlags[CHN_PINGPONGSUSTAIN], sndFile);
+	else
+		sample.uFlags.reset(CHN_LOOP | CHN_PINGPONGLOOP);
+	sample.SetSustainLoop(origStart, origEnd, true, origPingPong, sndFile);
+	SetModified(SampleHint().Info().Data(), true, true);
+}
+
+
 void CViewSample::OnSetSustainStart()
 {
 	CModDoc *pModDoc = GetDocument();
@@ -3385,6 +3414,29 @@ void CViewSample::OnConvertPingPongSustain()
 		else
 			pModDoc->GetSampleUndo().RemoveLastUndoStep(m_nSample);
 	}
+}
+
+
+void CViewSample::OnConvertSustainLoopToNormal()
+{
+	CModDoc *pModDoc = GetDocument();
+	if(!pModDoc)
+		return;
+
+	CSoundFile &sndFile = pModDoc->GetSoundFile();
+	ModSample &sample = sndFile.GetSample(m_nSample);
+	if(!sample.HasSustainLoop())
+		return;
+	pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Convert Sustain Loop To Normal");
+	const auto origStart = sample.nSustainStart, origEnd = sample.nSustainEnd;
+	const bool origPingPong = sample.uFlags[CHN_PINGPONGSUSTAIN];
+	// Swap them
+	if(sample.HasLoop())
+		sample.SetSustainLoop(sample.nLoopStart, sample.nLoopEnd, true, sample.uFlags[CHN_PINGPONGLOOP], sndFile);
+	else
+		sample.uFlags.reset(CHN_SUSTAINLOOP | CHN_PINGPONGSUSTAIN);
+	sample.SetLoop(origStart, origEnd, true, origPingPong, sndFile);
+	SetModified(SampleHint().Info().Data(), true, true);
 }
 
 
