@@ -2959,7 +2959,7 @@ bool CViewPattern::DataEntry(bool up, bool coarse)
 				if(m.volcmd == VOLCMD_NONE && m.IsNote() && m.instr && modSpecs.HasVolCommand(VOLCMD_VOLUME))
 				{
 					m.volcmd = VOLCMD_VOLUME;
-					m.vol = static_cast<ModCommand:VOL>(GetDefaultVolume(m));
+					m.vol = static_cast<ModCommand::VOL>(GetDefaultVolume(m));
 				}
 				int vol = m.vol + offset * (coarse ? 10 : 1);
 				ModCommand::VOL minValue = 0, maxValue = 64;
