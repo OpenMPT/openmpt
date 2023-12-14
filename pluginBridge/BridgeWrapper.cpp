@@ -561,24 +561,24 @@ void BridgeWrapper::DispatchToHost(DispatchMsg &msg)
 		}
 		[[fallthrough]];
 	case audioMasterIOChanged:
-	{
-		// If the song is playing, the rendering thread might be active at the moment,
-		// so we should keep the current processing memory alive until it is done for sure.
-		const CVstPlugin *plug = static_cast<CVstPlugin *>(m_sharedMem->effect.reservedForHost1);
-		const bool isPlaying = plug != nullptr && plug->IsResumed();
-		if(isPlaying)
 		{
-			m_oldProcessMem.CopyFrom(m_processMem);
+			// If the song is playing, the rendering thread might be active at the moment,
+			// so we should keep the current processing memory alive until it is done for sure.
+			const CVstPlugin *plug = static_cast<CVstPlugin *>(m_sharedMem->effect.reservedForHost1);
+			const bool isPlaying = plug != nullptr && plug->IsResumed();
+			if(isPlaying)
+			{
+				m_oldProcessMem.CopyFrom(m_processMem);
+			}
+			// Set up new processing file
+			m_processMem.Open(static_cast<wchar_t *>(ptr));
+			if(isPlaying)
+			{
+				msg.result = 1;
+				return;
+			}
 		}
-		// Set up new processing file
-		m_processMem.Open(static_cast<wchar_t *>(ptr));
-		if(isPlaying)
-		{
-			msg.result = 1;
-			return;
-		}
-	}
-	break;
+		break;
 
 	case audioMasterUpdateDisplay:
 		m_cachedProgNames.clear();
