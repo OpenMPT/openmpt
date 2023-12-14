@@ -70,14 +70,8 @@ CXXFLAGS += -flto
 CFLAGS   += -flto
 LDFLAGS  += -flto
 
-# Work-around <https://github.com/emscripten-core/emscripten/issues/20810>.
-# The warning with emscripten 3.1.50 sounds very dangerous,
-# and since it is apparently caused by removing whitespace,
-# additional whitespace is a small price to pay for correctness.
-LDFLAGS  += -g1
-
 ifeq ($(EMSCRIPTEN_TARGET),default)
-# emits whatever is emscripten's default, currently (1.38.8) this is the same as "wasm" below.
+# emits whatever is emscripten's default, currently (13.1.51) this is the same as "wasm" below.
 CPPFLAGS += 
 CXXFLAGS += 
 CFLAGS   += 
@@ -90,7 +84,7 @@ else ifeq ($(EMSCRIPTEN_TARGET),all)
 CPPFLAGS += 
 CXXFLAGS += 
 CFLAGS   += 
-LDFLAGS  += -s WASM=2 -s LEGACY_VM_SUPPORT=1 -Wno-transpile
+LDFLAGS  += -s WASM=2 -s LEGACY_VM_SUPPORT=1
 
 # work-around <https://github.com/emscripten-core/emscripten/issues/17897>.
 CXXFLAGS += -fno-inline-functions
@@ -122,7 +116,7 @@ else ifeq ($(EMSCRIPTEN_TARGET),js)
 CPPFLAGS += 
 CXXFLAGS += 
 CFLAGS   += 
-LDFLAGS  += -s WASM=0 -s LEGACY_VM_SUPPORT=1 -Wno-transpile
+LDFLAGS  += -s WASM=0 -s LEGACY_VM_SUPPORT=1
 
 # work-around <https://github.com/emscripten-core/emscripten/issues/17897>.
 CXXFLAGS += -fno-inline-functions

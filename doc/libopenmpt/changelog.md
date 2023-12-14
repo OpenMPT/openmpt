@@ -16,6 +16,9 @@ is just a high-level summary.
     instead of miniz, minimp3, and stb_vorbis by default. 
  *  [**Change**] `Makefile CONFIG=djgpp` now sets `ALLOW_LGPL=1` by default.
 
+ *  [**Regression**] Support for Emscripten versions older than 3.1.51 has been
+    removed.
+
 ### libopenmpt 0.7.0 (2023-04-30)
 
  *  [**New**] `667` files from Composer 667 are now supported.
