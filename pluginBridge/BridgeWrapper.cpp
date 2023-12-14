@@ -619,8 +619,22 @@ void BridgeWrapper::DispatchToHost(DispatchMsg &msg)
 		if(msg.result != 0)
 		{
 			std::vector<char> fileSelect;
+#if MPT_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable:6011) // Dereferencing NULL pointer 'ptr'.
+#endif
 			TranslateVstFileSelectToBridge(fileSelect, *static_cast<const VstFileSelect *>(ptr), m_otherPtrSize);
+#if MPT_COMPILER_MSVC
+#pragma warning(pop)
+#endif
+#if MPT_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable:6387) // 'origPtr' could be '0':  this does not adhere to the specification for the function 'memcpy'.
+#endif
 			std::memcpy(origPtr, fileSelect.data(), std::min(fileSelect.size(), static_cast<size_t>(msg.ptr)));
+#if MPT_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 			// Directly free memory on host side, we don't need it anymore
 			CVstPlugin::MasterCallBack(&m_sharedMem->effect, audioMasterCloseFileSelector, msg.index, static_cast<intptr_t>(msg.value), ptr, msg.opt);
 		}
