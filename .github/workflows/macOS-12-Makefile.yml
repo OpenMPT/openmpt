@@ -16,7 +16,7 @@ jobs:
     runs-on: macos-12
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: fixup GitHub Homebrew node breakage
       run: brew unlink node@18 && brew unlink node && brew link --overwrite node
     - name: fixup GitHub Homebrew python breakage
