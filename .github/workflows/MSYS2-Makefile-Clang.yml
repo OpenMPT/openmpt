@@ -17,7 +17,7 @@ jobs:
           - { sys: MINGW32, rep: mingw32, env: i686 }
           - { sys: UCRT64,  rep: ucrt64,  env: ucrt-x86_64 }
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: msys2/setup-msys2@v2
         with:
           msystem: ${{matrix.sys}}
