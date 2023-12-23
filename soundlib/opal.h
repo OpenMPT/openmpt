@@ -408,7 +408,11 @@ void Opal::Port(uint16_t reg_num, uint8_t val) {
 
                 // The 4-op channels are 0, 1, 2, 9, 10, 11
                 uint16_t chan = static_cast<uint16_t>(i < 3 ? i : i + 6);
+                // cppcheck false-positive
+                // cppcheck-suppress arrayIndexOutOfBounds
                 Channel *primary = &Chan[chan];
+                // cppcheck false-positive
+                // cppcheck-suppress arrayIndexOutOfBounds
                 Channel *secondary = &Chan[chan + 3];
 
                 if (val & mask) {
