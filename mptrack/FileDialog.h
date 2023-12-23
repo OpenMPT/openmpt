@@ -52,7 +52,13 @@ public:
 	// Default directory of the dialog.
 	FileDialog &WorkingDirectory(const mpt::PathString &dir) { m_workingDirectory = dir.AsNative(); return *this; }
 	// Pointer to a variable holding the index of the last extension filter to use. Holds the selected filter after the dialog has been closed.
-	FileDialog &FilterIndex(int *index) { m_filterIndex = index; return *this; }
+	FileDialog &FilterIndex(int *index)
+	{
+		// cppcheck false-positive
+		// cppcheck-suppress danglingLifetime
+		m_filterIndex = index;
+		return *this;
+	}
 	// Enable preview of instrument files (if globally enabled).
 	FileDialog &EnableAudioPreview() { m_preview = true; return *this; }
 	// Add a directory to the application-specific quick-access directories in the file dialog
