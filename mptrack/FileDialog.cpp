@@ -185,8 +185,10 @@ bool FileDialog::Show(CWnd *parent)
 		return false;
 	}
 
-	m_workingDirectory = m_filenames.front().AsNative().substr(0, ofn.nFileOffset);
-	m_extension = m_filenames.front().AsNative().substr(ofn.nFileExtension);
+	// Don't rely on nFileOffset / nFileExtension - it was observed on Windows 10 / 11 that when opening a .lnk file,
+	// those offsets are in terms of the .lnk file, while lpstrFile contains the resolved target of that link.
+	m_workingDirectory = m_filenames.front().GetDirectoryWithDrive();
+	m_extension = m_filenames.front().GetFilenameExtension();
 
 	return true;
 }
