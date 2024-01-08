@@ -45,6 +45,19 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#ifndef OFF_MAX
+#undef OFF_MIN
+#if SIZEOF_OFF_T == 4
+#define OFF_MAX INT32_MAX
+#define OFF_MIN INT32_MIN
+#elif SIZEOF_OFF_T == 8
+#define OFF_MAX INT64_MAX
+#define OFF_MIN INT64_MIN
+#else
+#error "Unexpected width of off_t."
+#endif
+#endif
+
 // A paranoid check that someone did not define a wrong SIZEOF_OFF_T at configure time.
 typedef unsigned char MPG123_STATIC_ASSERT[(SIZEOF_OFF_T == sizeof(off_t)) ? 1 : -1];
 

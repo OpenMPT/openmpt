@@ -230,12 +230,6 @@ static inline int32_t scale_rounded(int32_t x, int shift)
 
 #endif
 
-#ifndef REAL_IS_FIXED
-# if (defined SIZEOF_INT32_T) && (SIZEOF_INT32_T != 4)
-#  error "Bad 32bit types!!!"
-# endif
-#endif
-
 #ifndef DOUBLE_TO_REAL
 # define DOUBLE_TO_REAL(x)					(real)(x)
 #endif
