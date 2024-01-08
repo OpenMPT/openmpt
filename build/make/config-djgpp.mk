@@ -210,7 +210,7 @@ generic/686-mmx   := $(XXX) -march=i686        $(FPU_MMX)    -mtune=pentium2    
 generic/686-3dnow := $(___) -march=i686        $(FPU_3DNOW)  -mtune=pentium2    $(OPT_UARCH_OOOE_64)    # VIA Cyrix-3-Joshua
 generic/686-3dnowa:= $(XX_) -march=athlon      $(FPU_3DNOWA) -mtune=athlon      $(OPT_UARCH_OOOE_64)    # AMD Athlon..K10
 
-generic/sse       := $(X__) -march=i686        $(FPU_SSE)    -mtune=pentium3    $(OPT_UARCH_OOOE_128)   # Intel Pentium-3, AMD Athlon-XP, VIA C3-Nehemiah, DM&P Vortex86DX3..
+generic/sse       := $(___) -march=i686        $(FPU_SSE)    -mtune=pentium3    $(OPT_UARCH_OOOE_128)   # Intel Pentium-3, AMD Athlon-XP, VIA C3-Nehemiah, DM&P Vortex86DX3..
 
 generic/sse2      := $(XX_) -march=i686        $(FPU_SSE2)   -mtune=generic     $(OPT_UARCH_OOOE_128)   # Intel Pentium-4.., AMD Athlon-64.., VIA C7-Esther.., Transmeta Efficeon..
 generic/sse3      := $(___) -march=i686        $(FPU_SSE3)   -mtune=generic     $(OPT_UARCH_OOOE_128)   # Intel Core.., AMD Athlon-64-X2.., VIA C7-Esther.., Transmeta Efficeon-88xx..
