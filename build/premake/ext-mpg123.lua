@@ -10,9 +10,7 @@
   targetname "openmpt-mpg123"
   includedirs {
    "../../include/mpg123/ports/MSVC++",
-   "../../include/mpg123/src/libmpg123",
-   "../../include/mpg123/src/compat",
-   "../../include/mpg123/src",
+   "../../include/mpg123/src/include",
   }
 	filter {}
 	filter { "action:vs*" }

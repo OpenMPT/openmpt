@@ -9,9 +9,7 @@
   targetname "openmpt-mpg123"
   includedirs {
    "../../include/mpg123/ports/Xcode",
-   "../../include/mpg123/src/libmpg123",
-   "../../include/mpg123/src/compat",
-   "../../include/mpg123/src",
+   "../../include/mpg123/src/include",
   }
   files {
    "../../include/mpg123/src/compat/compat.c",
