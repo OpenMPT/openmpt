@@ -11,7 +11,7 @@
 
 #include "mpg123lib_intern.h"
 
-#include "debug.h"
+#include "../common/debug.h"
 
 static int stream_init(mpg123_handle *fr);
 static int64_t get_fileinfo(mpg123_handle *);

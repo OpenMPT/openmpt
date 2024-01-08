@@ -85,7 +85,7 @@
 
 #include "mpg123lib_intern.h"
 #include "id3.h"
-#include "debug.h"
+#include "../common/debug.h"
 
 #ifndef NO_ID3V2 /* Only the main parsing routine will always be there. */
 
