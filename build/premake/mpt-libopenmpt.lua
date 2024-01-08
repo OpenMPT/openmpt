@@ -10,7 +10,7 @@
 	dofile "../../build/premake/premake-defaults-strict.lua"
   local extincludedirs = {
    "../../include",
-   "../../include/mpg123/src/libmpg123",
+   "../../include/mpg123/src/include",
    "../../include/ogg/include",
    "../../include/vorbis/include",
    "../../include/zlib",

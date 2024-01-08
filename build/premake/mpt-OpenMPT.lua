@@ -57,7 +57,7 @@ end
    "../../include/flac/include",
    "../../include/lame/include",
    "../../include/lhasa/lib/public",
-   "../../include/mpg123/src/libmpg123",
+   "../../include/mpg123/src/include",
    "../../include/nlohmann-json/include",
    "../../include/ogg/include",
    "../../include/opus/include",
