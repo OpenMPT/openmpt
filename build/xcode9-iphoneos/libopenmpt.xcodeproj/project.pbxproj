@@ -2062,7 +2062,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
-					../../include/mpg123/src/libmpg123,
+					../../include/mpg123/src/include,
 					../../include/ogg/include,
 					../../include/vorbis/include,
 					../..,
@@ -2155,7 +2155,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
-					../../include/mpg123/src/libmpg123,
+					../../include/mpg123/src/include,
 					../../include/ogg/include,
 					../../include/vorbis/include,
 					../..,
