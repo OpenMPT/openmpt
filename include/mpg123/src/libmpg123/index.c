@@ -8,7 +8,7 @@
 */
 
 #include "index.h"
-#include "debug.h"
+#include "../common/debug.h"
 
 /* The next expected frame offset, one step ahead. */
 static int64_t fi_next(struct frame_index *fi)

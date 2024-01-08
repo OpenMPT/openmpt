@@ -7,7 +7,7 @@
 	This is no stand-alone header, precisely to be able to fool it into using fake handle types for testing the math.
 */
 
-#include "debug.h"
+#include "../common/debug.h"
 
 #ifdef GAPLESS
 /* From internal sample number to external. */

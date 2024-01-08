@@ -12,7 +12,7 @@
 
 #define CALCTABLES
 #include "mpg123lib_intern.h"
-#include "debug.h"
+#include "../common/debug.h"
 
 #define ASIZE(a) (sizeof(a)/sizeof(*a))
 

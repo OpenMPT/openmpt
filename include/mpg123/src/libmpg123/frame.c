@@ -9,7 +9,7 @@
 #define WANT_GETCPUFLAGS
 #include "mpg123lib_intern.h"
 #include "getcpuflags.h"
-#include "debug.h"
+#include "../common/debug.h"
 
 static void frame_fixed_reset(mpg123_handle *fr);
 
