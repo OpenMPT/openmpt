@@ -8,7 +8,7 @@
   dofile "../../build/premake-xcode/premake-defaults-LIBorDLL.lua"
   dofile "../../build/premake-xcode/premake-defaults.lua"
   local extincludedirs = {
-   "../../include/mpg123/src/libmpg123",
+   "../../include/mpg123/src/include",
    "../../include/ogg/include",
    "../../include/vorbis/include",
 --   "../../include/zlib",

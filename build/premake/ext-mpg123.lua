@@ -7,9 +7,7 @@
   targetname "openmpt-mpg123"
   includedirs {
    "../../include/mpg123/ports/MSVC++",
-   "../../include/mpg123/src/libmpg123",
-   "../../include/mpg123/src/compat",
-   "../../include/mpg123/src",
+   "../../include/mpg123/src/include",
   }
 	filter {}
   files {
@@ -60,11 +58,11 @@ function mpt_use_mpg123 ()
 	filter {}
 	filter { "action:vs*" }
 		includedirs {
-			"../../include/mpg123/src/libmpg123",
+			"../../include/mpg123/src/include",
 		}
 	filter { "not action:vs*" }
 		externalincludedirs {
-			"../../include/mpg123/src/libmpg123",
+			"../../include/mpg123/src/include",
 		}
 	filter {}
 		defines { "MPG123_NO_LARGENAME" }
