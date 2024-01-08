@@ -32,7 +32,7 @@
 #endif
 
 // For correct MPG123_EXPORT.
-#include "abi_align.h"
+#include "../common/abi_align.h"
 
 // Need the full header with non-portable API, for the bare mpg123_open*()
 // declarations. But no renaming shenanigans.
@@ -40,15 +40,28 @@
 #include "mpg123.h"
 
 #include "lfs_wrap.h"
-#include "abi_align.h"
-#include "compat.h"
+#include "../common/abi_align.h"
+#include "../compat/compat.h"
 #include <sys/stat.h>
 #include <fcntl.h>
+
+#ifndef OFF_MAX
+#undef OFF_MIN
+#if SIZEOF_OFF_T == 4
+#define OFF_MAX INT32_MAX
+#define OFF_MIN INT32_MIN
+#elif SIZEOF_OFF_T == 8
+#define OFF_MAX INT64_MAX
+#define OFF_MIN INT64_MIN
+#else
+#error "Unexpected width of off_t."
+#endif
+#endif
 
 // A paranoid check that someone did not define a wrong SIZEOF_OFF_T at configure time.
 typedef unsigned char MPG123_STATIC_ASSERT[(SIZEOF_OFF_T == sizeof(off_t)) ? 1 : -1];
 
-#include "debug.h"
+#include "../common/debug.h"
 
 // We do not want to expose this publicly, but it is cleaner to have it also defined
 // as portable API to offer the legacy function wrapper over. It's an undocumented
