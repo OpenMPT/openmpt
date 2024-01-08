@@ -314,9 +314,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					../../../include/mpg123/ports/Xcode,
-					../../../include/mpg123/src/libmpg123,
-					../../../include/mpg123/src/compat,
-					../../../include/mpg123/src,
+					../../../include/mpg123/src/include,
 				);
 				OBJROOT = obj/Debug/mpg123;
 				ONLY_ACTIVE_ARCH = YES;
@@ -364,9 +362,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					../../../include/mpg123/ports/Xcode,
-					../../../include/mpg123/src/libmpg123,
-					../../../include/mpg123/src/compat,
-					../../../include/mpg123/src,
+					../../../include/mpg123/src/include,
 				);
 				OBJROOT = obj/Release/mpg123;
 				ONLY_ACTIVE_ARCH = YES;
