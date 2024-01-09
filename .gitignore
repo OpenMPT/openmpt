@@ -354,6 +354,7 @@
 /include/mpg123/mpg123.spec
 /include/mpg123/mpg123.spec.in
 /include/mpg123/scripts
+/include/mpg123/test_c99.c
 /include/mpg123/windows-builds.sh
 /include/mpg123/ports/README
 /include/mpg123/ports/Sony_PSP
@@ -417,6 +418,7 @@
 /include/mpg123/src/win32_net.c
 /include/mpg123/src/win32_support.c
 /include/mpg123/src/win32_support.h
+/include/mpg123/src/common/Makemodule.am
 /include/mpg123/src/compat/Makemodule.am
 /include/mpg123/src/compat/compat_dl.c
 /include/mpg123/src/libmpg123/Makemodule.am
