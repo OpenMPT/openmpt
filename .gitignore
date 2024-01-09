@@ -447,6 +447,7 @@
 /include/mpg123/src/win32_net.c
 /include/mpg123/src/win32_support.c
 /include/mpg123/src/win32_support.h
+/include/mpg123/src/common/Makemodule.am
 /include/mpg123/src/compat/*.d
 /include/mpg123/src/compat/*.o
 /include/mpg123/src/compat/Makemodule.am
