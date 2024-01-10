@@ -1214,6 +1214,21 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			// Qxx with short samples: Added 2016-05-13, https://github.com/schismtracker/schismtracker/commit/e7b1461fe751554309fd403713c2a1ef322105ca
 			if(fileHeader.cwtv < SchismVersionFromDate<2016, 05, 13>::Version())
 				m_playBehaviour.reset(kITShortSampleRetrig);
+			// 2023-10-16: kITEnvelopePositionHandling https://github.com/schismtracker/schismtracker/commit/bc81f605d927ca931a886417641da29fc89283b8
+			if(schismDateVersion < SchismVersionFromDate<2023, 10, 19>::date)
+			{
+				// Panbrello sample & hold random waveform: Added 2023-10-19, https://github.com/schismtracker/schismtracker/commit/411ec16b190ba1a486d8b0907ad8d74f8fdc2840
+				m_playBehaviour.reset(kITPanbrelloHold);
+				// Don't apply any portamento if no previous note is playing: Added 2023-10-19, https://github.com/schismtracker/schismtracker/commit/8ff0a86a715efb50c89770fb9095d4c4089ff187
+				m_playBehaviour.reset(kITPortaNoNote);
+			}
+			if(schismDateVersion < SchismVersionFromDate<2023, 10, 22>::date)
+			{
+				// Note delay delays first-tick behaviour for slides: Added 2023-10-22, https://github.com/schismtracker/schismtracker/commit/b9609e4f827e1b6ce9ebe6573b85e69388ca0ea0
+				m_playBehaviour.reset(kITFirstTickHandling);
+				// Added 2023-10-22, https://github.com/schismtracker/schismtracker/commit/a9e5df533ab52c35190fcc1cbfed4f0347b660bb
+				m_playBehaviour.reset(kITMultiSampleInstrumentNumber);
+			}
 			break;
 		case 4:
 			madeWithTracker = mpt::format(U_("pyIT %1.%2"))((fileHeader.cwtv & 0x0F00) >> 8, mpt::ufmt::hex0<2>(fileHeader.cwtv & 0xFF));
