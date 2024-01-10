@@ -212,9 +212,11 @@ protected:
 	afx_msg void OnSetLoopStart();
 	afx_msg void OnSetLoopEnd();
 	afx_msg void OnConvertPingPongLoop();
+	afx_msg void OnConvertNormalLoopToSustain();
 	afx_msg void OnSetSustainStart();
 	afx_msg void OnSetSustainEnd();
 	afx_msg void OnConvertPingPongSustain();
+	afx_msg void OnConvertSustainLoopToNormal();
 	afx_msg void OnSetCuePoint(UINT nID);
 	afx_msg void OnZoomUp();
 	afx_msg void OnZoomDown();

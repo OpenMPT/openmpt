@@ -1263,6 +1263,8 @@ static constexpr struct
 	{KeyCommand::Hidden, kcDataEntryDownStop, _T("Stop Data Entry -1")},
 	{KeyCommand::Hidden, kcDataEntryUpCoarseStop, _T("Stop Data Entry Up (Coarse)")},
 	{KeyCommand::Hidden, kcDataEntryDownCoarseStop, _T("Stop Data Entry Down (Coarse)")},
+	{2068, kcSampleConvertNormalLoopToSustain, _T("Convert Normal Loop to Sustain Loop")},
+	{2069, kcSampleConvertSustainLoopToNormal, _T("Convert Sustain Loop to Normal Loop")},
 };
 
 // Get command descriptions etc.. loaded up.
