@@ -1230,14 +1230,14 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			if(fileHeader.cwtv < SchismVersionFromDate<2016, 05, 13>::Version())
 				m_playBehaviour.reset(kITShortSampleRetrig);
 			// 2023-10-16: kITEnvelopePositionHandling https://github.com/schismtracker/schismtracker/commit/bc81f605d927ca931a886417641da29fc89283b8
-			if(schismDateVersion < SchismVersionFromDate<2023, 10, 19>::date)
+			if(fileHeader.cwtv < SchismVersionFromDate<2023, 10, 19>::Version())
 			{
 				// Panbrello sample & hold random waveform: Added 2023-10-19, https://github.com/schismtracker/schismtracker/commit/411ec16b190ba1a486d8b0907ad8d74f8fdc2840
 				m_playBehaviour.reset(kITPanbrelloHold);
 				// Don't apply any portamento if no previous note is playing: Added 2023-10-19, https://github.com/schismtracker/schismtracker/commit/8ff0a86a715efb50c89770fb9095d4c4089ff187
 				m_playBehaviour.reset(kITPortaNoNote);
 			}
-			if(schismDateVersion < SchismVersionFromDate<2023, 10, 22>::date)
+			if(fileHeader.cwtv < SchismVersionFromDate<2023, 10, 22>::Version())
 			{
 				// Note delay delays first-tick behaviour for slides: Added 2023-10-22, https://github.com/schismtracker/schismtracker/commit/b9609e4f827e1b6ce9ebe6573b85e69388ca0ea0
 				m_playBehaviour.reset(kITFirstTickHandling);
