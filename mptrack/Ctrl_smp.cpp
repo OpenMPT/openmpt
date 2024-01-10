@@ -2685,7 +2685,7 @@ void CCtrlSamples::OnFineTuneChanged()
 		if ((n > 0) && (n <= (m_sndFile.GetType() == MOD_TYPE_S3M ? 65535 : 9999999)) && (n != (int)m_sndFile.GetSample(m_nSample).nC5Speed))
 		{
 			sample.nC5Speed = n;
-			int transp = ModSample::FrequencyToTranspose(n).first;
+			int transp = GetSampleTransponse(sample);
 			int basenote = (NOTE_MIDDLEC - NOTE_MIN) + transp;
 			Clamp(basenote, BASENOTE_MIN, BASENOTE_MAX);
 			basenote -= BASENOTE_MIN;

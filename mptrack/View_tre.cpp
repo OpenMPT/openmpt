@@ -815,7 +815,6 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 				hItem = GetNextSiblingItem(hItem);
 			}
 		}
-		bool hasPlugs = false;
 		for(PLUGINDEX i = firstPlug; i <= lastPlug; i++)
 		{
 			const SNDMIXPLUGIN &plugin = sndFile.m_MixPlugins[i];
@@ -849,22 +848,9 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 				{
 					InsertItem(TVIF_TEXT | TVIF_HANDLE | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM, s, nImage, nImage, 0, 0, i, info.hEffects, TVI_LAST);
 				}
-				hasPlugs = true;
 			}
 		}
-		if(!hasPlugs && firstPlug == lastPlug)
-		{
-			// If we only updated one plugin, we still need to check all the other slots if there is any plugin in them.
-			for(const auto &plug : sndFile.m_MixPlugins)
-			{
-				if(plug.IsValidPlugin())
-				{
-					hasPlugs = true;
-					break;
-				}
-			}
-		}
-		if(!hasPlugs && info.hEffects)
+		if(!sndFile.m_loadedPlugins && info.hEffects)
 		{
 			DeleteItem(info.hEffects);
 			info.hEffects = nullptr;

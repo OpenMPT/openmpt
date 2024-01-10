@@ -244,7 +244,7 @@ void CCtrlPatterns::UpdateView(UpdateHint hint, CObject *pObj)
 		GetDlgItem(IDC_SPIN_SEQNUM)->EnableWindow(isMultiSeqAvail);
 	}
 
-	if(updateAll || updatePlug)
+	if(updateAll || updatePlug || (hint.GetCategory() == HINTCAT_INSTRUMENTS && hintType[HINT_INSTRUMENT]))
 	{
 		GetDlgItem(IDC_PATINSTROPLUGGUI)->EnableWindow(HasValidPlug(m_nInstrument) ? TRUE : FALSE);
 	}
