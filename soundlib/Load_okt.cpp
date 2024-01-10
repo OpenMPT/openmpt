@@ -117,8 +117,6 @@ static void ReadOKTPattern(FileReader &chunk, PATTERNINDEX pat, CSoundFile &sndF
 		for(CHANNELINDEX chn = 0; chn < chns; chn++)
 		{
 			ModCommand &m = rowCmd[chn];
-			const auto oldCmd = m.command;
-			const auto oldParam = m.param;
 			const auto [note, instr, effect, param] = chunk.ReadArray<uint8, 4>();
 
 			if(note > 0 && note <= 36)
@@ -308,12 +306,6 @@ static void ReadOKTPattern(FileReader &chunk, PATTERNINDEX pat, CSoundFile &sndF
 
 			default:
 				break;
-			}
-
-			// In case we overwrote the volume command from a mixed channel
-			if(oldCmd != CMD_NONE && m.command != oldCmd)
-			{
-				m.FillInTwoCommands(m.command, m.param, oldCmd, oldParam);
 			}
 		}
 	}
