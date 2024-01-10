@@ -81,6 +81,19 @@ static void ReadOKTSamples(FileReader &chunk, std::vector<bool> &sample7bit, CSo
 }
 
 
+// Turn negative arpeggio offset into equivalent positive arpeggio offset
+static uint8 InvertArpeggioParam(uint8 param)
+{
+	param &= 0x0F;
+	if(!param)
+		return param;
+	else if(param <= 0x0C)
+		return (0x0C - param);
+	else
+		return (0x18 - param);
+}
+
+
 // Parse a pattern block
 static void ReadOKTPattern(FileReader &chunk, PATTERNINDEX pat, CSoundFile &sndFile)
 {
@@ -106,6 +119,8 @@ static void ReadOKTPattern(FileReader &chunk, PATTERNINDEX pat, CSoundFile &sndF
 		for(CHANNELINDEX chn = 0; chn < chns; chn++)
 		{
 			ModCommand &m = rowCmd[chn];
+			const auto oldCmd = m.command;
+			const auto oldParam = m.param;
 			const auto [note, instr, effect, param] = chunk.ReadArray<uint8, 4>();
 			m.param = param;
 
@@ -133,15 +148,22 @@ static void ReadOKTPattern(FileReader &chunk, PATTERNINDEX pat, CSoundFile &sndF
 				m.param &= 0x0F;
 				break;
 
-#if 0
-			/* these aren't like Jxx: "down" means to *subtract* the offset from the note.
-			For now I'm going to leave these unimplemented. */
-			case 10: // A Arpeggio 1 (down, orig, up)
-			case 11: // B Arpeggio 2 (orig, up, orig, down)
-				if (m.param)
+			case 10:  // A Arpeggio 1 (down, orig, up)
+				if(param)
+				{
 					m.command = CMD_ARPEGGIO;
+					m.param = (param & 0x0F) | (InvertArpeggioParam(param >> 4) << 4);
+				}
 				break;
-#endif
+
+			case 11:  // B Arpeggio 2 (orig, up, orig, down)
+				if(param)
+				{
+					m.command = CMD_ARPEGGIO;
+					m.param = (param & 0xF0) | InvertArpeggioParam(param & 0x0F);
+				}
+				break;
+
 			// This one is close enough to "standard" arpeggio -- I think!
 			case 12: // C Arpeggio 3 (up, up, orig)
 				if (m.param)
@@ -241,9 +263,14 @@ static void ReadOKTPattern(FileReader &chunk, PATTERNINDEX pat, CSoundFile &sndF
 #endif
 
 			default:
-				m.command = CMD_NONE;
 				m.param = 0;
 				break;
+			}
+
+			// In case we overwrote the volume command from a mixed channel
+			if(oldCmd != CMD_NONE && m.command != oldCmd)
+			{
+				m.FillInTwoCommands(m.command, m.param, oldCmd, oldParam);
 			}
 		}
 	}
