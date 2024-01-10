@@ -171,7 +171,7 @@ struct IMFSample
 	uint8le  unused3[5];
 	uint16le ems;      // Reserved for internal usage
 	uint32le dram;     // Reserved for internal usage
-	char     is10[4];  // 'IS10'
+	char     is10[4];  // 'IS10' or 'IW10' (not verified by Orpheus)
 
 	// Convert an IMFSample to OpenMPT's internal sample representation.
 	void ConvertToMPT(ModSample &mptSmp) const
@@ -633,8 +633,9 @@ bool CSoundFile::ReadIMF(FileReader &file, ModLoadingFlags loadFlags)
 			file.ReadStruct(sampleHeader);
 
 			const SAMPLEINDEX smpID = firstSample + smp;
-			if(memcmp(sampleHeader.is10, "IS10", 4) || smpID >= MAX_SAMPLES)
+			if(smpID >= MAX_SAMPLES)
 			{
+				file.Skip(sampleHeader.length);
 				continue;
 			}
 
