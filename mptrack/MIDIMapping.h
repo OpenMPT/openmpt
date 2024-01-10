@@ -114,6 +114,7 @@ public:
 
 	bool AreOrderEqual(const size_t a, const size_t b) const { return !(m_Directives[a] < m_Directives[b] || m_Directives[b] < m_Directives[a]); }
 
+	void MovePlugin(PLUGINDEX from, PLUGINDEX to);
 private:
 	void Sort() { std::stable_sort(m_Directives.begin(), m_Directives.end()); }
 
