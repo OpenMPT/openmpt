@@ -869,6 +869,7 @@ void CDoMidiConvert::Run()
 	const auto fmt = MPT_TFORMAT("Rendering file... ({}mn{}s, {}mn{}s remaining)");
 	while(m_sndFile.Read(MIXBUFFERSIZE, target) > 0)
 	{
+		m_sndFile.ResetMixStat();
 		auto currentTime = timeGetTime();
 		if(currentTime - prevTime >= 16)
 		{
