@@ -200,6 +200,7 @@ CSoundFile::samplecount_t CSoundFile::ReadOneTick()
 {
 	const auto origMaxMixChannels = m_MixerSettings.m_nMaxMixChannels;
 	m_MixerSettings.m_nMaxMixChannels = 0;
+	ResetMixStat();
 	while(m_PlayState.m_nBufferCount)
 	{
 		auto framesToRender = std::min(m_PlayState.m_nBufferCount, samplecount_t(MIXBUFFERSIZE));
