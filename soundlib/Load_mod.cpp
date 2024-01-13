@@ -885,6 +885,7 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 	SmpLength totalSampleLen = 0, wowSampleLen = 0;
 	m_nSamples = 31;
 	uint32 invalidBytes = 0;
+	bool hasLongSamples = false;
 	for(SAMPLEINDEX smp = 1; smp <= 31; smp++)
 	{
 		MODSampleHeader sampleHeader = ReadAndSwap<MODSampleHeader>(file, modMagicResult.swapBytes);
@@ -892,9 +893,13 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 		totalSampleLen += Samples[smp].nLength;
 
 		if(isHMNT)
+		{
 			Samples[smp].nFineTune = -static_cast<int8>(sampleHeader.finetune << 3);
-		else if(Samples[smp].nLength > 65535)
+		} else if(Samples[smp].nLength > 65535)
+		{
 			isNoiseTracker = false;
+			hasLongSamples = true;
+		}
 		
 		if(sampleHeader.length && !sampleHeader.loopLength)
 			hasRepLen0 = true;
@@ -1044,9 +1049,10 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 	}
 	file.Seek(modMagicResult.patternDataOffset);
 
-	const CHANNELINDEX readChannels = (isFLT8 ? 4 : m_nChannels); // 4 channels per pattern in FLT8 format.
-	if(isFLT8) numPatterns++; // as one logical pattern consists of two real patterns in FLT8 format, the highest pattern number has to be increased by one.
-	bool hasTempoCommands = false, definitelyCIA = false;	// for detecting VBlank MODs
+	const CHANNELINDEX readChannels = (isFLT8 ? 4 : m_nChannels);  // 4 channels per pattern in FLT8 format.
+	if(isFLT8)
+		numPatterns++;                                              // as one logical pattern consists of two real patterns in FLT8 format, the highest pattern number has to be increased by one.
+	bool hasTempoCommands = false, definitelyCIA = hasLongSamples;  // for detecting VBlank MODs
 	// Heuristic for rejecting E0x commands that are most likely not intended to actually toggle the Amiga LED filter, like in naen_leijasi_ptk.mod by ilmarque
 	bool filterState = false;
 	int filterTransitions = 0;
@@ -1361,8 +1367,7 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 
 
 // Check if a name string is valid (i.e. doesn't contain binary garbage data)
-template <size_t N>
-static uint32 CountInvalidChars(const char (&name)[N])
+static uint32 CountInvalidChars(const mpt::span<const char> name)
 {
 	uint32 invalidChars = 0;
 	for(int8 c : name)  // char can be signed or unsigned
