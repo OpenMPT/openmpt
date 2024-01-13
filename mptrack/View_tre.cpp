@@ -2071,7 +2071,7 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 	}
 
 	SortInstrumentLibrary();
-	FilterInstrumentLibrary({}, selectedItem);
+	FilterInstrumentLibrary(m_filterString, selectedItem);
 
 	UnlockRedraw();
 
