@@ -39,6 +39,9 @@ public:
 	CTuning(CTuning &) = default;
 	CTuning(CTuning &&) noexcept = default;
 
+	bool operator==(const CTuning &other) const noexcept = default;
+	bool operator!=(const CTuning &other) const noexcept = default;
+
 	// To return ratio of certain note.
 	RATIOTYPE GetRatio(const NOTEINDEXTYPE note) const;
 
