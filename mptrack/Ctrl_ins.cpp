@@ -1309,7 +1309,7 @@ void CCtrlInstruments::UpdateView(UpdateHint hint, CObject *pObj)
 	{
 		UpdatePluginList();
 	}
-	if(hint.ToType<GeneralHint>().GetType()[HINT_TUNINGS])
+	if(hint.ToType<GeneralHint>().GetType()[HINT_TUNINGS | HINT_MODTYPE])
 	{
 		BuildTuningComboBox();
 	}
@@ -1707,6 +1707,9 @@ bool CCtrlInstruments::OpenInstrument(const CSoundFile &sndFile, INSTRUMENTINDEX
 	m_sndFile.ReadInstrumentFromSong(m_nInstrument, sndFile, nInstr);
 
 	cs.Leave();
+
+	if (m_sndFile.Instruments[m_nInstrument] && m_sndFile.Instruments[m_nInstrument]->pTuning)
+		BuildTuningComboBox();
 
 	{
 		InstrumentHint hint = InstrumentHint().Info().Envelope().Names();

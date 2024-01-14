@@ -2739,7 +2739,11 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool doDrop)
 				} else
 				{
 					// Load instrument into other module
-					sndFile->ReadInstrumentFromSong(static_cast<INSTRUMENTINDEX>(modItemDropID), infoDrag->modDoc.GetSoundFile(), static_cast<INSTRUMENTINDEX>(modItemDragID));
+					if(sndFile->ReadInstrumentFromSong(static_cast<INSTRUMENTINDEX>(modItemDropID), infoDrag->modDoc.GetSoundFile(), static_cast<INSTRUMENTINDEX>(modItemDragID)))
+					{
+						if(sndFile->Instruments[modItemDropID] && sndFile->Instruments[modItemDropID]->pTuning)
+							modDoc->UpdateAllViews(nullptr, GeneralHint().Tunings());
+					}
 				}
 				modDoc->UpdateAllViews(nullptr, InstrumentHint().Info().Envelope().Names());
 				modDoc->UpdateAllViews(nullptr, PatternHint().Data());
