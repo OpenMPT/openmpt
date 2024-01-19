@@ -76,8 +76,8 @@ public:
 	CTuning* GetTuning(const mpt::ustring &name);
 	const CTuning* GetTuning(const mpt::ustring &name) const;
 	
-	CTuning* FindTuning(const CTuning &tuning);
-	const CTuning* FindTuning(const CTuning& tuning) const;
+	CTuning* FindIdenticalTuning(const CTuning &tuning);
+	const CTuning* FindIdenticalTuning(const CTuning& tuning) const;
 
 	Tuning::SerializationResult Serialize(std::ostream &oStrm, const mpt::ustring &name) const;
 	Tuning::SerializationResult Deserialize(std::istream &iStrm, mpt::ustring &name, mpt::Charset defaultCharset);
