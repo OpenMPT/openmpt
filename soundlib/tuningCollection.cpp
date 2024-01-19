@@ -83,22 +83,23 @@ const CTuning* CTuningCollection::GetTuning(const mpt::ustring &name) const
 }
 
 
-const CTuning* CTuningCollection::FindTuning(const CTuning &tuning) const
+const CTuning* CTuningCollection::FindIdenticalTuning(const CTuning &tuning) const
 {
 	auto result = std::find_if(m_Tunings.begin(), m_Tunings.end(), [&tuning](const std::unique_ptr<CTuning> &other)
 	{
 		return other && tuning == *other;
 	});
-	if(result != m_Tunings.end())
-		return result->get();
-	else
-		return nullptr;
+	return (result != m_Tunings.end()) ? result->get() : nullptr;
 }
 
 
-CTuning* CTuningCollection::FindTuning(const CTuning &tuning)
+CTuning* CTuningCollection::FindIdenticalTuning(const CTuning &tuning)
 {
-	return const_cast<CTuning *>(static_cast<const CTuningCollection *>(this)->FindTuning(tuning));
+	auto result = std::find_if(m_Tunings.begin(), m_Tunings.end(), [&tuning](const std::unique_ptr<CTuning> &other)
+	{
+		return other && tuning == *other;
+	});
+	return (result != m_Tunings.end()) ? result->get() : nullptr;
 }
 
 

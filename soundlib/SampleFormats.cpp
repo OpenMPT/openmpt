@@ -282,7 +282,7 @@ bool CSoundFile::ReadInstrumentFromSong(INSTRUMENTINDEX targetInstr, const CSoun
 
 	if(pIns->pTuning && this != &srcSong)
 	{
-		CTuning *existingTuning = m_pTuningsTuneSpecific->FindTuning(*pIns->pTuning);
+		CTuning *existingTuning = m_pTuningsTuneSpecific->FindIdenticalTuning(*pIns->pTuning);
 		if(existingTuning)
 			pIns->pTuning = existingTuning;
 		else
