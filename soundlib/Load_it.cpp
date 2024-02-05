@@ -698,7 +698,9 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Ignore MIDI data. Fixes some files like denonde.it that were made with old versions of Impulse Tracker (which didn't support Zxx filters) and have Zxx effects in the patterns.
-	if(fileHeader.cwtv < 0x0214)
+	// Example: denonde.it by Mystical
+	// Note: Do not compare against cwtv value, as IT 2.14 and 2.15 may write lower values there (see spx-visionsofthepast.it).
+	if(fileHeader.cmwt < 0x0214)
 	{
 		m_MidiCfg.ClearZxxMacros();
 	}
