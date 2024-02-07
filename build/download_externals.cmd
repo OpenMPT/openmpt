@@ -44,7 +44,7 @@ call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://www.un4seen.com/fi
 call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://web.archive.org/web/20200918004813if_/http://download.microsoft.com/download/0/A/9/0A939EF6-E31C-430F-A3DF-DFAE7960D564/htmlhelp.exe" "build\externals\htmlhelp.exe"                 d91371244ea98c691b4674ee266c4a2496a296800c176adae069d21f5c52c0763b21cc7859cfffa865b89e50171a2c99a6d14620c32f7d72c0ef04045348f856 3509072 || goto error
 
 
-call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://www.python.org/ftp/python/3.12.1/python-3.12.1-embed-amd64.zip"                          "build\externals\python-3.12.1-embed-amd64.zip" b46aa3b188dbe8c3f8b14f3f5ca8722b2ed4c37046f743fa3dc9bab8e2eee55c70c1184a5e3f8e22ea71c60aa8d414668facf3565cc24c896de991b7d3f9930d 11061655 || goto error
+call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://www.python.org/ftp/python/3.12.2/python-3.12.2-embed-amd64.zip"                          "build\externals\python-3.12.2-embed-amd64.zip" 51b8f926f5591e804e4ce635ba7b2e944ba99a20834680fd7816063986ebcebdc26fc718c3ff39d478ced3b5c45f6e7500a4f306246bd84cbf5e6d3a6d05f7f4 11068186 || goto error
 
 
 call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://netcologne.dl.sourceforge.net/project/innounp/innounp/innounp%%%%200.50/innounp050.rar"  "build\externals\innounp050.rar"               dbbc809308267a866db9d6b751fdeda6d179e1a65d8ddb14bb51984431ae91493f9a76105e1789b245732043a2c696c869ed10964b48cf59f81e55bd52f85330  141621 || goto error
@@ -73,7 +73,7 @@ call build\scriptlib\unpack.cmd "build\tools\htmlhelp" "build\externals\htmlhelp
 call build\scriptlib\unpack.cmd "include\winamp"   "build\externals\WA5.55_SDK.exe" "."          || goto error
 call build\scriptlib\unpack.cmd "include\xmplay"   "build\externals\xmp-sdk.zip"    "."          || goto error
 
-call build\scriptlib\unpack.cmd "build\tools\python3" "build\externals\python-3.12.1-embed-amd64.zip" "." || goto error
+call build\scriptlib\unpack.cmd "build\tools\python3" "build\externals\python-3.12.2-embed-amd64.zip" "." || goto error
 
 call :killdir "build\tools\innounp"   || goto error
 call :killdir "build\tools\innosetup" || goto error
