@@ -281,7 +281,7 @@ void MidiInOut::Process(float *, float *, uint32 numFrames)
 		{
 			if(m_sendTimingInfo)
 			{
-				m_outQueue.emplace_back(GetOutputTimestamp(), unsigned char(0xF8));
+				m_outQueue.push_back(Message(GetOutputTimestamp(), 0xF8));
 			}
 
 			double bpm = m_SndFile.GetCurrentBPM();
@@ -429,7 +429,7 @@ bool MidiInOut::MidiSend(uint32 midiCode)
 	}
 
 	mpt::lock_guard<mpt::mutex> lock(m_mutex);
-	m_outQueue.emplace_back(GetOutputTimestamp(), &midiCode, MIDIEvents::GetEventLength(static_cast<uint8>(midiCode)));
+	m_outQueue.push_back(Message(GetOutputTimestamp(), &midiCode, MIDIEvents::GetEventLength(static_cast<uint8>(midiCode))));
 	return true;
 }
 
@@ -443,7 +443,7 @@ bool MidiInOut::MidiSysexSend(mpt::const_byte_span sysex)
 	}
 
 	mpt::lock_guard<mpt::mutex> lock(m_mutex);
-	m_outQueue.emplace_back(GetOutputTimestamp(), sysex.data(), sysex.size());
+	m_outQueue.push_back(Message(GetOutputTimestamp(), sysex.data(), sysex.size()));
 	return true;
 }
 
