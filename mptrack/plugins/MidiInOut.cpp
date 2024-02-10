@@ -82,11 +82,11 @@ void MidiInOut::RestoreAllParameters(int32 program)
 
 enum ChunkFlags
 {
-	kLatencyCompensation	= 0x01,	// Implicit in current plugin version
-	kLatencyPresent			= 0x02,	// Latency value is present as double-precision float
-	kIgnoreTiming			= 0x04,	// Do not send timing and sequencing information
-	kFriendlyInputName		= 0x08,	// Preset also stores friendly name of input device
-	kFriendlyOutputName		= 0x10,	// Preset also stores friendly name of output device
+	kLatencyCompensation = 0x01,  // Implicit in current plugin version
+	kLatencyPresent      = 0x02,  // Latency value is present as double-precision float
+	kIgnoreTiming        = 0x04,  // Do not send timing and sequencing information
+	kFriendlyInputName   = 0x08,  // Preset also stores friendly name of input device
+	kFriendlyOutputName  = 0x10,  // Preset also stores friendly name of output device
 };
 
 IMixPlugin::ChunkData MidiInOut::GetChunk(bool /*isBank*/)
@@ -202,9 +202,9 @@ void MidiInOut::SetChunk(const ChunkData &chunk, bool /*isBank*/)
 	m_sendTimingInfo = !(flags & kIgnoreTiming);
 
 	if(flags & kFriendlyInputName)
-		file.ReadString<mpt::String::maybeNullTerminated>(inFriendlyName, file.ReadUint32LE());
+		file.ReadSizedString<uint32le, mpt::String::maybeNullTerminated>(inFriendlyName);
 	if(flags & kFriendlyOutputName)
-		file.ReadString<mpt::String::maybeNullTerminated>(outFriendlyName, file.ReadUint32LE());
+		file.ReadSizedString<uint32le, mpt::String::maybeNullTerminated>(outFriendlyName);
 
 	// Try to match an input port name against stored name or friendly name (preferred)
 	FindPort(inID, m_midiIn.getPortCount(), inName, inFriendlyName, m_inputDevice, true);
@@ -281,7 +281,7 @@ void MidiInOut::Process(float *, float *, uint32 numFrames)
 		{
 			if(m_sendTimingInfo)
 			{
-				m_outQueue.push_back(Message(GetOutputTimestamp(), 0xF8));
+				m_outQueue.emplace_back(GetOutputTimestamp(), unsigned char(0xF8));
 			}
 
 			double bpm = m_SndFile.GetCurrentBPM();
@@ -356,8 +356,8 @@ void MidiInOut::Resume()
 		m_outQueue.clear();
 	}
 	m_clock.SetResolution(1);
-	OpenDevice(m_inputDevice.index, true);
-	OpenDevice(m_outputDevice.index, false);
+	OpenDevice(m_inputDevice, true);
+	OpenDevice(m_outputDevice, false);
 	if(m_midiOut.isPortOpen() && m_sendTimingInfo && !m_SndFile.IsPaused())
 	{
 		MidiSend(0xFA);	// Start
@@ -429,7 +429,7 @@ bool MidiInOut::MidiSend(uint32 midiCode)
 	}
 
 	mpt::lock_guard<mpt::mutex> lock(m_mutex);
-	m_outQueue.push_back(Message(GetOutputTimestamp(), &midiCode, MIDIEvents::GetEventLength(static_cast<uint8>(midiCode))));
+	m_outQueue.emplace_back(GetOutputTimestamp(), &midiCode, MIDIEvents::GetEventLength(static_cast<uint8>(midiCode)));
 	return true;
 }
 
@@ -443,7 +443,7 @@ bool MidiInOut::MidiSysexSend(mpt::const_byte_span sysex)
 	}
 
 	mpt::lock_guard<mpt::mutex> lock(m_mutex);
-	m_outQueue.push_back(Message(GetOutputTimestamp(), sysex.data(), sysex.size()));
+	m_outQueue.emplace_back(GetOutputTimestamp(), sysex.data(), sysex.size());
 	return true;
 }
 
@@ -456,7 +456,7 @@ void MidiInOut::HardAllNotesOff()
 		Resume();
 	}
 
-	for(uint8 mc = 0; mc < std::size(m_MidiCh); mc++)		//all midi chans
+	for(uint8 mc = 0; mc < std::size(m_MidiCh); mc++)  //all midi chans
 	{
 		PlugInstrChannel &channel = m_MidiCh[mc];
 		channel.ResetProgram(m_SndFile.m_playBehaviour[kPluginDefaultProgramAndBank1]);
@@ -481,6 +481,18 @@ void MidiInOut::HardAllNotesOff()
 	{
 		Suspend();
 	}
+}
+
+
+// Open a device for input or output.
+void MidiInOut::OpenDevice(MidiDevice newDevice, bool asInputDevice)
+{
+	std::string friendlyName;
+#ifdef MODPLUG_TRACKER
+	friendlyName = mpt::ToCharset(mpt::Charset::UTF8, theApp.GetFriendlyMIDIPortName(mpt::ToUnicode(mpt::Charset::UTF8, newDevice.name), asInputDevice, false));
+#endif // MODPLUG_TRACKER
+	FindPort(newDevice.index, asInputDevice ? m_midiIn.getPortCount() : m_midiOut.getPortCount(), newDevice.name, friendlyName, newDevice, asInputDevice);
+	SetParameter(asInputDevice ? MidiInOut::kInputParameter : MidiInOut::kOutputParameter, DeviceIDToParameter(newDevice.index));
 }
 
 

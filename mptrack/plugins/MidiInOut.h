@@ -216,6 +216,7 @@ public:
 
 protected:
 	// Open a device for input or output.
+	void OpenDevice(MidiDevice newDevice, bool asInputDevice);
 	void OpenDevice(MidiDevice::ID newDevice, bool asInputDevice);
 	// Close an active device.
 	void CloseDevice(MidiDevice &device);
