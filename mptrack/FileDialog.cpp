@@ -189,6 +189,8 @@ bool FileDialog::Show(CWnd *parent)
 	// those offsets are in terms of the .lnk file, while lpstrFile contains the resolved target of that link.
 	m_workingDirectory = m_filenames.front().GetDirectoryWithDrive();
 	m_extension = m_filenames.front().GetFilenameExtension();
+	if(!m_extension.empty())
+		m_extension.erase(0, 1);
 
 	return true;
 }
