@@ -1789,6 +1789,10 @@ void CViewSample::OnMouseMove(UINT flags, CPoint point)
 
 	if(m_dwStatus[SMPSTATUS_MOUSEDRAG])
 	{
+		if(!m_dwStatus[SMPSTATUS_MOUSEMOVED] && m_startDragPoint == point)
+			return;
+
+		m_dwStatus.set(SMPSTATUS_MOUSEMOVED);
 		const SmpLength len = sndFile.GetSample(m_nSample).nLength;
 		if(!len)
 			return;
@@ -1980,6 +1984,7 @@ void CViewSample::OnLButtonDown(UINT flags, CPoint point)
 		return;
 
 	m_dwStatus.set(SMPSTATUS_MOUSEDRAG);
+	m_dwStatus.reset(SMPSTATUS_MOUSEMOVED);
 	SetFocus();
 	SetCapture();
 	bool oldsel = (m_dwBeginSel != m_dwEndSel);
