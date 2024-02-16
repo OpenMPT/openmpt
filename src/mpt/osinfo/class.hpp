@@ -31,7 +31,7 @@ enum class osclass {
 	Windows,
 	Linux,
 	Darwin,
-	BSD,
+	BSD_,
 	Haiku,
 	DOS,
 };
@@ -47,7 +47,7 @@ inline mpt::osinfo::osclass get_class_from_sysname(const std::string & sysname) 
 	} else if (sysname == "Darwin") {
 		result = mpt::osinfo::osclass::Darwin;
 	} else if (sysname == "FreeBSD" || sysname == "DragonFly" || sysname == "NetBSD" || sysname == "OpenBSD" || sysname == "MidnightBSD") {
-		result = mpt::osinfo::osclass::BSD;
+		result = mpt::osinfo::osclass::BSD_;
 	} else if (sysname == "Haiku") {
 		result = mpt::osinfo::osclass::Haiku;
 	} else if (sysname == "MS-DOS") {
