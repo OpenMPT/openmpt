@@ -18,6 +18,8 @@ is just a high-level summary.
 
  *  [**Regression**] Support for Emscripten versions older than 3.1.51 has been
     removed.
+ *  [**Regression**] Using `EMSCRIPTEN_PORTS=1` with Emscripten older than
+    3.1.54 now requires additionally specifying `ANCIENT=1`.
 
 ### libopenmpt 0.7.0 (2023-04-30)
 
