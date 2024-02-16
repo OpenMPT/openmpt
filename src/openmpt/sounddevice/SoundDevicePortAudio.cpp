@@ -868,12 +868,12 @@ std::vector<SoundDevice::Info> CPortaudioDevice::EnumerateDevices(ILogger &logge
 			result.apiName = MPT_USTRING("OSS");
 			result.default_ = ((Pa_GetHostApiInfo(Pa_GetDeviceInfo(dev)->hostApi)->defaultOutputDevice == static_cast<PaDeviceIndex>(dev)) ? Info::Default::Named : Info::Default::None);
 			result.flags = {
-				sysInfo.SystemClass == mpt::osinfo::osclass::BSD ? Info::Usability::Usable : sysInfo.SystemClass == mpt::osinfo::osclass::Linux ? Info::Usability::Deprecated : Info::Usability::NotAvailable,
+				sysInfo.SystemClass == mpt::osinfo::osclass::BSD_ ? Info::Usability::Usable : sysInfo.SystemClass == mpt::osinfo::osclass::Linux ? Info::Usability::Deprecated : Info::Usability::NotAvailable,
 				Info::Level::Primary,
 				Info::Compatible::No,
-				sysInfo.SystemClass == mpt::osinfo::osclass::BSD ? Info::Api::Native : sysInfo.SystemClass == mpt::osinfo::osclass::Linux ? Info::Api::Emulated : Info::Api::Emulated,
+				sysInfo.SystemClass == mpt::osinfo::osclass::BSD_ ? Info::Api::Native : sysInfo.SystemClass == mpt::osinfo::osclass::Linux ? Info::Api::Emulated : Info::Api::Emulated,
 				Info::Io::FullDuplex,
-				sysInfo.SystemClass == mpt::osinfo::osclass::BSD ? Info::Mixing::Hardware : sysInfo.SystemClass == mpt::osinfo::osclass::Linux ? Info::Mixing::Software : Info::Mixing::Software,
+				sysInfo.SystemClass == mpt::osinfo::osclass::BSD_ ? Info::Mixing::Hardware : sysInfo.SystemClass == mpt::osinfo::osclass::Linux ? Info::Mixing::Software : Info::Mixing::Software,
 				Info::Implementor::External
 			};
 			break;
