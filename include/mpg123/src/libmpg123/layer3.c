@@ -1466,7 +1466,7 @@ static void INT123_dct36(real *inbuf,real *o1,real *o2,const real *wintab,real *
 #define DCT36_WRAP(asmfunc) \
 static void asmfunc ## _wrap(real *inbuf,real *o1,real *o2,const real *wintab,real *tsbuf) \
 { \
-	return asmfunc(inbuf, o1, o2, wintab, tsbuf); \
+	asmfunc(inbuf, o1, o2, wintab, tsbuf); \
 }
 
 #ifdef OPT_SSE
@@ -1529,22 +1529,22 @@ void INT123_dct36_choose(mpg123_handle *fr)
 #endif
 #ifdef OPT_AVX
 	case avx:
-		fr->cpu_opts.the_dct36 = INT123_dct36_avx;
+		fr->cpu_opts.the_dct36 = INT123_dct36_avx_wrap;
 	break;
 #endif
 #ifdef OPT_X86_64
 	case x86_64:
-		fr->cpu_opts.the_dct36 = INT123_dct36_x86_64;
+		fr->cpu_opts.the_dct36 = INT123_dct36_x86_64_wrap;
 	break;
 #endif
 #ifdef OPT_NEON
 	case neon:
-		fr->cpu_opts.the_dct36 = INT123_dct36_neon;
+		fr->cpu_opts.the_dct36 = INT123_dct36_neon_wrap;
 	break;
 #endif
 #ifdef OPT_NEON64
 	case neon:
-		fr->cpu_opts.the_dct36 = INT123_dct36_neon64;
+		fr->cpu_opts.the_dct36 = INT123_dct36_neon64_wrap;
 	break;
 #endif
 	default:
