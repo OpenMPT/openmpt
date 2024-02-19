@@ -17,10 +17,10 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
     - name: Startup VM
-      uses: cross-platform-actions/action@v0.22.0
+      uses: cross-platform-actions/action@v0.23.0
       with:
         architecture: x86_64
-        hypervisor: xhyve
+        hypervisor: qemu
         memory: 4G
         operating_system: openbsd
         version: '7.4'
@@ -29,10 +29,10 @@ jobs:
         shutdown_vm: false
         run: true
     - name: Install dependencies
-      uses: cross-platform-actions/action@v0.22.0
+      uses: cross-platform-actions/action@v0.23.0
       with:
         architecture: x86_64
-        hypervisor: xhyve
+        hypervisor: qemu
         memory: 4G
         operating_system: openbsd
         version: '7.4'
@@ -42,10 +42,10 @@ jobs:
         run: |
           sudo pkg_add subversion p5-XML-XPath git mawk gmake pkgconf autoconf autoconf-archive automake libtool libltdl help2man doxygen mpg123 libogg libvorbis flac libsndfile pulseaudio portaudio-svn sdl2
     - name: Build
-      uses: cross-platform-actions/action@v0.22.0
+      uses: cross-platform-actions/action@v0.23.0
       with:
         architecture: x86_64
-        hypervisor: xhyve
+        hypervisor: qemu
         memory: 4G
         operating_system: openbsd
         version: '7.4'
@@ -55,10 +55,10 @@ jobs:
         run: |
           gmake -j$(sysctl -n hw.ncpu) STRICT=1 VERBOSE=1 AUTO_DEPS=1
     - name: Test
-      uses: cross-platform-actions/action@v0.22.0
+      uses: cross-platform-actions/action@v0.23.0
       with:
         architecture: x86_64
-        hypervisor: xhyve
+        hypervisor: qemu
         memory: 4G
         operating_system: openbsd
         version: '7.4'
@@ -68,10 +68,10 @@ jobs:
         run: |
           gmake -j$(sysctl -n hw.ncpu) STRICT=1 VERBOSE=1 AUTO_DEPS=1 check
     - name: Shutdown VM
-      uses: cross-platform-actions/action@v0.22.0
+      uses: cross-platform-actions/action@v0.23.0
       with:
         architecture: x86_64
-        hypervisor: xhyve
+        hypervisor: qemu
         memory: 4G
         operating_system: openbsd
         version: '7.4'
