@@ -7,6 +7,19 @@ is just a high-level summary.
 
 ### libopenmpt 0.4.39-pre
 
+ *  Setting all possible `load_skip` flags resulted in nothing being loaded at
+    all, instead of just not loading the selected module parts.
+ *  When playing all subsongs, `set_position_seconds` didn't always calculate
+    the correct subsong to jump to.
+
+ *  IT: A few more compatibility flags are now disabled for modules saved with
+    earlier Schism Tracker versions.
+ *  IT: MIDI macros were reset in IT 2.14 / 2.15 files that declared to be
+    compatible with older IT versions (fixes spx-visionsofthepast.it).
+ *  IMF: Ignore magic bytes in sample header. "Leaving All Behind" by Karsten
+    Koch uses unexpected magic bytes, Orpheus ignores them just like the
+	instrument header magic bytes.
+
  *  zlib: Update to v1.3.1 (2024-01-22).
  *  mpg123: Update to v1.32.5 (2024-02-17).
 
