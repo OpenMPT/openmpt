@@ -18,7 +18,7 @@ is just a high-level summary.
     compatible with older IT versions (fixes spx-visionsofthepast.it).
  *  IMF: Ignore magic bytes in sample header. "Leaving All Behind" by Karsten
     Koch uses unexpected magic bytes, Orpheus ignores them just like the
-	instrument header magic bytes.
+    instrument header magic bytes.
 
  *  zlib: Update to v1.3.1 (2024-01-22).
  *  mpg123: Update to v1.32.5 (2024-02-17).
