@@ -7,6 +7,7 @@ is just a high-level summary.
 
 ### libopenmpt 0.5.27-pre
 
+ *  zlib: Update to v1.3.1 (2024-01-22).
  *  mpg123: Update to v1.32.5 (2024-02-17).
  *  pugixml: Update to v1.14 (2023-10-01).
 
