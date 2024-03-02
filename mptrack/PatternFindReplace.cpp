@@ -40,7 +40,7 @@ void CViewPattern::OnEditFind()
 		} else if(sndFile.Patterns.IsValidPat(m_nPattern))
 		{
 			const CPattern &pat = sndFile.Patterns[m_nPattern];
-			m_Cursor.Sanitize(pat.GetNumRows(), pat.GetNumChannels());
+			m_Cursor.Sanitize(pat.GetNumRows(), pat.GetNumChannels(), m_nDetailLevel);
 			m = *pat.GetpModCommand(m_Cursor.GetRow(), m_Cursor.GetChannel());
 		}
 

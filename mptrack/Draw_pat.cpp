@@ -1520,7 +1520,7 @@ void CViewPattern::SetCurSel(PatternCursor beginSel, PatternCursor endSel)
 	m_Selection = PatternRect(beginSel, endSel);
 	if(const CSoundFile *sndFile = GetSoundFile(); sndFile != nullptr && sndFile->Patterns.IsValidPat(m_nPattern))
 	{
-		m_Selection.Sanitize(sndFile->Patterns[m_nPattern].GetNumRows(), sndFile->GetNumChannels());
+		m_Selection.Sanitize(sndFile->Patterns[m_nPattern].GetNumRows(), sndFile->GetNumChannels(), m_nDetailLevel);
 	}
 	UpdateIndicator();
 

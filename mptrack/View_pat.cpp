@@ -3844,8 +3844,8 @@ void CViewPattern::SanitizeCursor()
 	if(pSndFile != nullptr && pSndFile->Patterns.IsValidPat(GetCurrentPattern()))
 	{
 		const auto &pattern = GetSoundFile()->Patterns[m_nPattern];
-		m_Cursor.Sanitize(pattern.GetNumRows(), pattern.GetNumChannels());
-		m_Selection.Sanitize(pattern.GetNumRows(), pattern.GetNumChannels());
+		m_Cursor.Sanitize(pattern.GetNumRows(), pattern.GetNumChannels(), m_nDetailLevel);
+		m_Selection.Sanitize(pattern.GetNumRows(), pattern.GetNumChannels(), m_nDetailLevel);
 	}
 };
 

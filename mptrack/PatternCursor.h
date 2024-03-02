@@ -173,7 +173,7 @@ public:
 
 
 	// Ensure that the point lies within a given pattern size.
-	void Sanitize(ROWINDEX maxRows, CHANNELINDEX maxChans)
+	void Sanitize(ROWINDEX maxRows, CHANNELINDEX maxChans, Columns maxColumn = PatternCursor::lastColumn)
 	{
 		ROWINDEX row = std::min(GetRow(), static_cast<ROWINDEX>(maxRows - 1));
 		CHANNELINDEX chn = GetChannel();
@@ -182,10 +182,10 @@ public:
 		if(chn >= maxChans)
 		{
 			chn = maxChans - 1;
-			col = lastColumn;
-		} else if(col > lastColumn)
+			col = maxColumn;
+		} else if(col > maxColumn)
 		{
-			col = lastColumn;
+			col = maxColumn;
 		}
 		Set(row, chn, col);
 	};
@@ -272,11 +272,11 @@ public:
 	}
 
 	// Ensure that the selection doesn't exceed a given pattern size.
-	void Sanitize(ROWINDEX maxRows, CHANNELINDEX maxChans)
+	void Sanitize(ROWINDEX maxRows, CHANNELINDEX maxChans, PatternCursor::Columns maxColumn = PatternCursor::lastColumn)
 	{
-		upperLeft.Sanitize(maxRows, maxChans);
-		lowerRight.Sanitize(maxRows, maxChans);
-	};
+		upperLeft.Sanitize(maxRows, maxChans, maxColumn);
+		lowerRight.Sanitize(maxRows, maxChans, maxColumn);
+	}
 
 
 	// Get first row of selection
