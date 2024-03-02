@@ -819,6 +819,7 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 		return;
 	}
 	const CPattern &pattern = sndFile.Patterns[nPattern];
+	const auto patternSetupFlags = TrackerSettings::Instance().m_dwPatternSetup.Get();
 
 	const PATTERNFONT *pfnt = PatternFont::currentFont;
 	CRect rect;
@@ -849,8 +850,20 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 			m_Dib.TextBlt(ibmp-4, 0, 4, m_szCell.cy, pfnt->nClrX+pfnt->nWidth-4, pfnt->nClrY, pfnt->dib);
 		} while (ibmp + nColumnWidth <= maxndx);
 	}
-	
-	const bool hexNumbers = (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_HEXDISPLAY);
+
+	// Time signature highlighting
+	ROWINDEX nBeat = sndFile.m_nDefaultRowsPerBeat, nMeasure = sndFile.m_nDefaultRowsPerMeasure;
+	if(TrackerSettings::Instance().patternIgnoreSongTimeSignature)
+	{
+		nBeat = TrackerSettings::Instance().m_nRowHighlightBeats;
+		nMeasure = TrackerSettings::Instance().m_nRowHighlightMeasures;
+	} else if(sndFile.Patterns[nPattern].GetOverrideSignature())
+	{
+		nBeat = sndFile.Patterns[nPattern].GetRowsPerBeat();
+		nMeasure = sndFile.Patterns[nPattern].GetRowsPerMeasure();
+	}
+
+	const bool hexNumbers = (patternSetupFlags & PATTERN_HEXDISPLAY);
 	bool bRowSel = false;
 	int row_col = -1, row_bkcol = -1;
 	for(ROWINDEX row = startRow; row < numRows; row++)
@@ -888,18 +901,11 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 		row_col = MODCOLOR_TEXTNORMAL;
 		row_bkcol = MODCOLOR_BACKNORMAL;
 
-		// time signature highlighting
-		ROWINDEX nBeat = sndFile.m_nDefaultRowsPerBeat, nMeasure = sndFile.m_nDefaultRowsPerMeasure;
-		if(sndFile.Patterns[nPattern].GetOverrideSignature())
-		{
-			nBeat = sndFile.Patterns[nPattern].GetRowsPerBeat();
-			nMeasure = sndFile.Patterns[nPattern].GetRowsPerMeasure();
-		}
 		// secondary highlight (beats)
 		ROWINDEX highlightRow = compRow;
 		if(nMeasure > 0)
 			highlightRow %= nMeasure;
-		if ((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_2NDHIGHLIGHT)
+		if ((patternSetupFlags & PATTERN_2NDHIGHLIGHT)
 			&& nBeat > 0)
 		{
 			if((highlightRow % nBeat) == 0)
@@ -908,7 +914,7 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 			}
 		}
 		// primary highlight (measures)
-		if((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_STDHIGHLIGHT)
+		if((patternSetupFlags & PATTERN_STDHIGHLIGHT)
 			&& nMeasure > 0)
 		{
 			if(highlightRow == 0)
@@ -1007,7 +1013,7 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 			{
 				tx_col = row_col;
 				bk_col = row_bkcol;
-				if((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_EFFECTHILIGHT) && m->IsNote())
+				if((patternSetupFlags & PATTERN_EFFECTHILIGHT) && m->IsNote())
 				{
 					tx_col = MODCOLOR_NOTE;
 
@@ -1047,7 +1053,7 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 				{
 					tx_col = row_col;
 					bk_col = row_bkcol;
-					if ((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_EFFECTHILIGHT) && (m->instr))
+					if ((patternSetupFlags & PATTERN_EFFECTHILIGHT) && (m->instr))
 					{
 						tx_col = MODCOLOR_INSTRUMENT;
 					}
@@ -1073,7 +1079,7 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 					{
 						tx_col = MODCOLOR_TEXTSELECTED;
 						bk_col = MODCOLOR_BACKSELECTED;
-					} else if (!m->IsPcNote() && (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_EFFECTHILIGHT))
+					} else if (!m->IsPcNote() && (patternSetupFlags & PATTERN_EFFECTHILIGHT))
 					{
 						auto fxColor = effectColors[static_cast<size_t>(m->GetVolumeEffectType())];
 						if(m->volcmd != VOLCMD_NONE && m->volcmd < MAX_VOLCMDS && fxColor != 0)
@@ -1097,7 +1103,7 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 				uint16 val = m->GetValueEffectCol();
 				if(val > ModCommand::maxColumnValue) val = ModCommand::maxColumnValue;
 				fx_col = row_col;
-				if (!isPCnote && m->command != CMD_NONE && m->command < MAX_EFFECTS && (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_EFFECTHILIGHT))
+				if (!isPCnote && m->command != CMD_NONE && m->command < MAX_EFFECTS && (patternSetupFlags & PATTERN_EFFECTHILIGHT))
 				{
 					if(auto fxColor = effectColors[static_cast<size_t>(m->GetEffectType())]; fxColor != 0)
 						fx_col = fxColor;

@@ -783,6 +783,7 @@ public:
 	CachedSetting<uint32> m_dwPatternSetup;
 	CachedSetting<uint32> m_nRowHighlightMeasures; // primary (measures) and secondary (beats) highlight
 	CachedSetting<uint32> m_nRowHighlightBeats;	// primary (measures) and secondary (beats) highlight
+	CachedSetting<bool> patternIgnoreSongTimeSignature;
 	CachedSetting<ROWINDEX> recordQuantizeRows;
 	CachedSetting<UINT> gnAutoChordWaitTime;
 	CachedSetting<int32> orderlistMargins;
