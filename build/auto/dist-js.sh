@@ -16,7 +16,6 @@ make CONFIG=emscripten TEST=1 ONLY_TEST=1 EMSCRIPTEN_TARGET=all VERBOSE=1
 make CONFIG=emscripten TEST=1 ONLY_TEST=1 EMSCRIPTEN_TARGET=all VERBOSE=1 check
 make CONFIG=emscripten TEST=0             EMSCRIPTEN_TARGET=all VERBOSE=1
 cp bin/libopenmpt.js      bin/stage/all/
-cp bin/libopenmpt.js.mem  bin/stage/all/
 cp bin/libopenmpt.wasm    bin/stage/all/
 cp bin/libopenmpt.wasm.js bin/stage/all/
 make CONFIG=emscripten                    EMSCRIPTEN_TARGET=all VERBOSE=1 clean
@@ -36,7 +35,6 @@ make CONFIG=emscripten TEST=1 ONLY_TEST=1 EMSCRIPTEN_TARGET=js VERBOSE=1
 make CONFIG=emscripten TEST=1 ONLY_TEST=1 EMSCRIPTEN_TARGET=js VERBOSE=1 check
 make CONFIG=emscripten TEST=0             EMSCRIPTEN_TARGET=js VERBOSE=1
 cp bin/libopenmpt.js     bin/stage/js/
-cp bin/libopenmpt.js.mem bin/stage/js/
 make CONFIG=emscripten                    EMSCRIPTEN_TARGET=js VERBOSE=1 clean
 
 make CONFIG=emscripten                    VERBOSE=1 dist-js
