@@ -1,6 +1,6 @@
-#define RARVER_MAJOR     6
-#define RARVER_MINOR    23
+#define RARVER_MAJOR     7
+#define RARVER_MINOR     0
 #define RARVER_BETA      0
-#define RARVER_DAY       1
-#define RARVER_MONTH     8
-#define RARVER_YEAR   2023
+#define RARVER_DAY      26
+#define RARVER_MONTH     2
+#define RARVER_YEAR   2024
