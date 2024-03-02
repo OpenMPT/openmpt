@@ -31,6 +31,7 @@ public:
 
 	RtMidi &stream;
 	std::string name;  // Charset::UTF8
+	mpt::ustring friendlyName;
 	ID index = NO_MIDI_DEVICE;
 
 public:
@@ -217,7 +218,7 @@ public:
 protected:
 	// Open a device for input or output.
 	void OpenDevice(MidiDevice newDevice, bool asInputDevice);
-	void OpenDevice(MidiDevice::ID newDevice, bool asInputDevice);
+	void OpenDevice(MidiDevice::ID newDevice, bool asInputDevice, bool updateName = true);
 	// Close an active device.
 	void CloseDevice(MidiDevice &device);
 

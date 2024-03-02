@@ -94,8 +94,8 @@ IMixPlugin::ChunkData MidiInOut::GetChunk(bool /*isBank*/)
 	const std::string programName8 = mpt::ToCharset(mpt::Charset::UTF8, m_programName);
 	uint32 flags = kLatencyCompensation | kLatencyPresent | (m_sendTimingInfo ? 0 : kIgnoreTiming);
 #ifdef MODPLUG_TRACKER
-	const std::string inFriendlyName = (m_inputDevice.index == MidiDevice::NO_MIDI_DEVICE) ? m_inputDevice.name : mpt::ToCharset(mpt::Charset::UTF8, theApp.GetFriendlyMIDIPortName(mpt::ToUnicode(mpt::Charset::UTF8, m_inputDevice.name), true, false));
-	const std::string outFriendlyName = (m_outputDevice.index == MidiDevice::NO_MIDI_DEVICE) ? m_outputDevice.name : mpt::ToCharset(mpt::Charset::UTF8, theApp.GetFriendlyMIDIPortName(mpt::ToUnicode(mpt::Charset::UTF8, m_outputDevice.name), false, false));
+	const std::string inFriendlyName = (m_inputDevice.index != MidiDevice::NO_MIDI_DEVICE && !m_inputDevice.friendlyName.empty()) ? mpt::ToCharset(mpt::Charset::UTF8, m_inputDevice.friendlyName) : m_inputDevice.name;
+	const std::string outFriendlyName = (m_outputDevice.index != MidiDevice::NO_MIDI_DEVICE && !m_outputDevice.friendlyName.empty()) ? mpt::ToCharset(mpt::Charset::UTF8, m_outputDevice.friendlyName) : m_outputDevice.name;
 	if(inFriendlyName != m_inputDevice.name)
 	{
 		flags |= kFriendlyInputName;
@@ -107,7 +107,7 @@ IMixPlugin::ChunkData MidiInOut::GetChunk(bool /*isBank*/)
 #endif
 
 	std::ostringstream s;
-	mpt::IO::WriteRaw(s, "fEvN", 4);	// VST program chunk magic
+	mpt::IO::WriteRaw(s, "fEvN", 4);  // VST program chunk magic
 	mpt::IO::WriteIntLE< int32>(s, GetVersion());
 	mpt::IO::WriteIntLE<uint32>(s, 1);	// Number of programs
 	mpt::IO::WriteIntLE<uint32>(s, static_cast<uint32>(programName8.size()));
@@ -138,7 +138,7 @@ IMixPlugin::ChunkData MidiInOut::GetChunk(bool /*isBank*/)
 
 
 // Try to match a port name against stored name or friendly name (preferred)
-static void FindPort(MidiDevice::ID &id, unsigned int numPorts, const std::string &name, const std::string &friendlyName, MidiDevice &midiDevice, bool isInput)
+static void FindPort(MidiDevice::ID &id, unsigned int numPorts, const std::string &name, const mpt::ustring &friendlyName, MidiDevice &midiDevice, bool isInput)
 {
 	bool foundFriendly = false;
 	for(unsigned int i = 0; i < numPorts; i++)
@@ -148,7 +148,7 @@ static void FindPort(MidiDevice::ID &id, unsigned int numPorts, const std::strin
 			auto portName = midiDevice.GetPortName(i);
 			bool deviceNameMatches = (portName == name);
 #ifdef MODPLUG_TRACKER
-			if(!friendlyName.empty() && friendlyName == mpt::ToCharset(mpt::Charset::UTF8, theApp.GetFriendlyMIDIPortName(mpt::ToUnicode(mpt::Charset::UTF8, portName), isInput, false)))
+			if(!friendlyName.empty() && friendlyName == theApp.GetFriendlyMIDIPortName(mpt::ToUnicode(mpt::Charset::UTF8, portName), isInput, false))
 			{
 				// Preferred match
 				id = i;
@@ -207,8 +207,10 @@ void MidiInOut::SetChunk(const ChunkData &chunk, bool /*isBank*/)
 		file.ReadSizedString<uint32le, mpt::String::maybeNullTerminated>(outFriendlyName);
 
 	// Try to match an input port name against stored name or friendly name (preferred)
-	FindPort(inID, m_midiIn.getPortCount(), inName, inFriendlyName, m_inputDevice, true);
-	FindPort(outID, m_midiOut.getPortCount(), outName, outFriendlyName, m_outputDevice, false);
+	m_inputDevice.friendlyName = mpt::ToUnicode(mpt::Charset::UTF8, inFriendlyName);
+	m_outputDevice.friendlyName = mpt::ToUnicode(mpt::Charset::UTF8, outFriendlyName);
+	FindPort(inID, m_midiIn.getPortCount(), inName, m_inputDevice.friendlyName, m_inputDevice, true);
+	FindPort(outID, m_midiOut.getPortCount(), outName, m_outputDevice.friendlyName, m_outputDevice, false);
 
 	SetParameter(MidiInOut::kInputParameter, DeviceIDToParameter(inID));
 	SetParameter(MidiInOut::kOutputParameter, DeviceIDToParameter(outID));
@@ -403,8 +405,8 @@ void MidiInOut::PositionChanged()
 {
 	if(m_sendTimingInfo && !m_SndFile.IsPaused())
 	{
-		MidiSend(0xFC);	// Stop
-		MidiSend(0xFA);	// Start
+		MidiSend(0xFC);  // Stop
+		MidiSend(0xFA);  // Start
 	}
 }
 
@@ -487,17 +489,13 @@ void MidiInOut::HardAllNotesOff()
 // Open a device for input or output.
 void MidiInOut::OpenDevice(MidiDevice newDevice, bool asInputDevice)
 {
-	std::string friendlyName;
-#ifdef MODPLUG_TRACKER
-	friendlyName = mpt::ToCharset(mpt::Charset::UTF8, theApp.GetFriendlyMIDIPortName(mpt::ToUnicode(mpt::Charset::UTF8, newDevice.name), asInputDevice, false));
-#endif // MODPLUG_TRACKER
-	FindPort(newDevice.index, asInputDevice ? m_midiIn.getPortCount() : m_midiOut.getPortCount(), newDevice.name, friendlyName, newDevice, asInputDevice);
-	SetParameter(asInputDevice ? MidiInOut::kInputParameter : MidiInOut::kOutputParameter, DeviceIDToParameter(newDevice.index));
+	FindPort(newDevice.index, asInputDevice ? m_midiIn.getPortCount() : m_midiOut.getPortCount(), newDevice.name, newDevice.friendlyName, newDevice, asInputDevice);
+	OpenDevice(newDevice.index, asInputDevice, false);
 }
 
 
 // Open a device for input or output.
-void MidiInOut::OpenDevice(MidiDevice::ID newDevice, bool asInputDevice)
+void MidiInOut::OpenDevice(MidiDevice::ID newDevice, bool asInputDevice, bool updateName)
 {
 	MidiDevice &device = asInputDevice ? m_inputDevice : m_outputDevice;
 
@@ -515,11 +513,18 @@ void MidiInOut::OpenDevice(MidiDevice::ID newDevice, bool asInputDevice)
 	if(device.index == kNoDevice)
 	{
 		// Dummy device
-		device.name = "<none>";
+		if(updateName)
+			device.name = "<none>";
 		return;
 	}
 
-	device.name = device.GetPortName(newDevice);
+	if(updateName)
+	{
+		device.name = device.GetPortName(newDevice);
+#ifdef MODPLUG_TRACKER
+		device.friendlyName = theApp.GetFriendlyMIDIPortName(mpt::ToUnicode(mpt::Charset::UTF8, device.name), asInputDevice, false);
+#endif // MODPLUG_TRACKER
+	}
 	//if(m_isResumed)
 	{
 		mpt::lock_guard<mpt::mutex> lock(m_mutex);
