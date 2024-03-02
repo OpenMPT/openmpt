@@ -13,6 +13,7 @@ is just a high-level summary.
  *  openmpt123: openmpt123 now uses a narrower layout on terminal windows with a
     width of less than 72 characters.
 
+ *  zlib: Update to v1.3.1 (2024-01-22).
  *  mpg123: Update to v1.32.5 (2024-02-17).
  *  pugixml: Update to v1.14 (2023-10-01).
 
