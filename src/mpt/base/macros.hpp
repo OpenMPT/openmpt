@@ -162,7 +162,12 @@
 #define MPT_ASSUME(expr) __assume(expr)
 #endif
 #if MPT_COMPILER_GCC
-#define MPT_ASSUME(expr) do { if (!expr) { __builtin_unreachable(); } } while(0)
+#define MPT_ASSUME(expr) \
+	do { \
+		if (!expr) { \
+			__builtin_unreachable(); \
+		} \
+	} while (0)
 #endif
 #if !defined(MPT_ASSUME)
 #define MPT_ASSUME(expr) MPT_DISCARD(expr)
