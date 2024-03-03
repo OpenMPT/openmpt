@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.7.4-pre
+### libopenmpt 0.7.4 (2024-03-03)
 
  *  [**Bug**] Makefile: libopenmpt 0.7.3 broke running the test suite for
     Emscripten builds.
