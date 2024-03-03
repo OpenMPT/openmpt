@@ -304,6 +304,10 @@ public:
 
 #endif // MPT_OS_WINDOWS_WINRT
 
+		if (!hModule) {
+			return std::nullopt;
+		}
+
 		return library{hModule};
 	}
 
