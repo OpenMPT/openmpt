@@ -101,6 +101,17 @@ ORDERINDEX ModSequence::GetLengthFirstEmpty() const noexcept
 }
 
 
+ORDERINDEX ModSequence::GetRemainingCapacity() const noexcept
+{
+	const auto &specs = m_sndFile.GetModSpecifications();
+	const ORDERINDEX length = GetLengthTailTrimmed();
+	if(length >= specs.ordersMax)
+		return 0;
+	else
+		return specs.ordersMax - length;
+}
+
+
 ORDERINDEX ModSequence::GetNextOrderIgnoringSkips(const ORDERINDEX start) const noexcept
 {
 	if(empty())
@@ -186,10 +197,10 @@ void ModSequence::assign(ORDERINDEX newSize, PATTERNINDEX pat)
 ORDERINDEX ModSequence::insert(ORDERINDEX pos, ORDERINDEX count, PATTERNINDEX fill)
 {
 	const auto ordersMax = m_sndFile.GetModSpecifications().ordersMax;
+	// Limit number of orders to be inserted so that we don't exceed the format limit or drop items at the end of the order list.
+	LimitMax(count, GetRemainingCapacity());
 	if(pos >= ordersMax || GetLengthTailTrimmed() >= ordersMax || count == 0)
 		return 0;
-	// Limit number of orders to be inserted so that we don't exceed the format limit.
-	LimitMax(count, static_cast<ORDERINDEX>(ordersMax - pos));
 	reserve(std::max(pos, GetLength()) + count);
 	// Inserting past the end of the container?
 	if(pos > size())
