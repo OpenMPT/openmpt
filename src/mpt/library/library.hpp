@@ -283,6 +283,10 @@ public:
 
 #endif
 
+		if (!hModule) {
+			return std::nullopt;
+		}
+
 		return library{hModule};
 	}
 
