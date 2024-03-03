@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.5.28-pre
+
 ### libopenmpt 0.5.27 (2024-03-03)
 
  *  Setting all possible `load_skip` flags resulted in nothing being loaded at
