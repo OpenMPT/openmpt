@@ -32,6 +32,59 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.31.05.00 (3 March 2024, revision 20196)
+------------------------------------------
+Tree view
+- [Fix] <js> The search filter was no longer applied when the instrument library was refreshed.
+
+Pattern tab
+- [New] <js> Using the new hidden setting "Pattern Editor.IgnoreSongTimeSignature", it is now possible to ignore the time signature provided by the module and use the pre-configured defaults from the Display tab instead (http://bugs.openmpt.org/view.php?id=1746).
+- [Fix] <js> Notes no longer hang on transpose or data entry (http://bugs.openmpt.org/view.php?id=1724).
+- [Fix] <js> Data Entry could insert volume column commands even in MOD format when turning "virtual" default volume commands into real commands. This feature of Data Entry is now disabled for MOD files, as the alternative - moving the newly-added command to the effect column - would be counter-intuitive (http://bugs.openmpt.org/view.php?id=1738).
+- [Fix] <js> Assigning / unassigning a plugin to / from an instrument didn't update their plugin editor button in the pattern tab.
+
+Sample tab
+- [New] <js> Can now convert sustain loops to normal loops and vice versa. If both loop types are set, the commands swap the two loops.
+- [Fix] <js> Transpose value was sometimes off-by-one after manually entering sample rate.
+- [Fix] <js> Reset sample reverse flag when loading new samples or converting between formats.
+- [Fix] <js> Avoid accidental single-pixel sample data selections and jumpy selection start / end points with zoomed-out or auto-zoomed samples (quite likely introduced in OpenMPT 1.30.04.00).
+
+Instruments
+- [Imp] <js> SFZ: global_label opcode (instrument name) is now read and written.
+- [Imp] <js> SFZ: Sustain point is no longer set on volume envelopes if it's the last point of the envelope and its value is neutral (0).
+- [Fix] <js> SFZ: <, = and various whitespace characters are now omitted when writing name labels, to ensure that the resulting SFZ file can be parsed unambiguously.
+- [Fix] <js> Clearing the note map due to plugin assignment didn't update other instrument tabs of the same song accordingly.
+
+VST / DMO Plugins
+- [Fix] <js> Prior to OpenMPT 1.30, if an instrument was set to use MIDI program 1 or bank 1, this program or bank change was not set to plugins (unless another instrument previously explicitly selected a different program or bank for this plugin). This was fixed in OpenMPT 1.30, but that behaviour change broke existing modules, so for tracks made with earlier OpenMPT versions, the old behaviour is applied again.
+
+IT
+- [Imp] <js> A few more compatibility flags are now disabled for modules saved with earlier Schism Tracker versions.
+- [Fix] <js> MIDI macros were reset in IT 2.14 / 2.15 files that declared to be compatible with older IT versions (fixes spx-visionsofthepast.it, http://bugs.openmpt.org/view.php?id=1745).
+
+Other formats
+- [Imp] <js> OKT: Work around missing negative arpeggio implementation by transposing the notes up an octave (http://bugs.openmpt.org/view.php?id=1732).
+- [Fix] <js> OKT: Channel volume commands were sometimes lost over less important effects (http://bugs.openmpt.org/view.php?id=1732).
+- [Fix] <js> IMF: Do not verify magic bytes in sample header. "Leaving All Behind" by Karsten Koch uses unexpected magic bytes, Orpheus ignores them just like the instrument header magic bytes.
+- [Fix] <js> Gzip archives: In some cases, decompression failed despite the file being valid.
+
+Misc
+- [Fix] <js> Opening links through the Open File / Save File dialogs could lead to a crash (http://bugs.openmpt.org/view.php?id=1739).
+- [Fix] <js> Allow end-of-tune optimizations for XM F00 command to also work with MIDI / OPL export (http://bugs.openmpt.org/view.php?id=1741).
+- [Fix] <jh> OpenMPT no longer ran on Windows N editions without the Media Feature Pack installed since OpenMPT 1.31.01.00 (http://bugs.openmpt.org/view.php?id=1749).
+- [Fix] <js> Keyboard configuration: Switching between categories broke in OpenMPT 1.31.04.00.
+- [Fix] <js> Moving a plugin didn't update its MIDI mapping directives.
+- [Fix] <js> MIDI Export: Exported drum keys were off by one since OpenMPT 1.30.03.00 unless Mapped mode was chosen.
+- [Fix] <js> Copying an instrument from another module (through the tree view or when appending modules) that referenced a tuning didn't copy that tuning over to the current module, eventually leading to a crash when the other module was closed.
+- [Fix] <js> Fixed possible inconsistent UI state after removing instruments.
+
+Third-Party Libraries
+- [Imp] Update Crypto++ (v8.9.0), mpg123 (v1.32.4), nlohmann-json (v3.11.3), UnRAR (v7.0.7) and zlib (v1.3.1) 
+
+Installer/release package
+- [Mod] <js> Updated US_mpt_classic_(nobuyuki).mkb.
+
+
 v1.31.04.00 (27 August 2023, revision 19605)
 --------------------------------------------
 Pattern tab
@@ -39,7 +92,7 @@ Pattern tab
 
 Sample tab
 - [Fix] <js> IFF: The workaround for 8SVX files with claimed zero-length body chunks (to accomodate for http://bugs.openmpt.org/view.php?id=117) was too aggressive, causing also files with empty NAME chunks to not load properly (http://bugs.openmpt.org/view.php?id=1715).
-- [Fix] <js> IFF: 16-bit mono samples were saved with native endianness instead of big-endian.
+- [Fix] <js> IFF: 16-bit mono samples were saved as little-endian instead of big-endian.
 - [Fix] <js> Remove cue points from newly-created samples after slicing at cue points. The old cue points no longer make sense in the context of the new sample.
 
 VST / DMO Plugins
