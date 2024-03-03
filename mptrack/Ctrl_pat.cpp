@@ -882,63 +882,115 @@ void CCtrlPatterns::OnPatternMerge()
 	const ORDERINDEX numOrders = selection.GetSelCount();
 
 	// Get the total number of lines to be merged
-	ROWINDEX numRows = 0u;
+	std::vector<ModCommand> originalData;
+	ROWINDEX numRows = 0, minPatternSize = MAX_PATTERN_ROWS, maxPatternSize = 0;
 	ModSequence &order = Order();
-	for(ORDERINDEX i = 0; i < numOrders; i++)
+	for(ORDERINDEX ord = selection.firstOrd; ord <= selection.lastOrd; ord++)
 	{
-		PATTERNINDEX pat = order[firstOrder + i];
-		if(m_sndFile.Patterns.IsValidPat(pat))
-			numRows += m_sndFile.Patterns[pat].GetNumRows();
+		const CPattern *pattern = order.PatternAt(ord);
+		if(!pattern)
+			continue;
+		numRows += pattern->GetNumRows();
+		minPatternSize = std::min(minPatternSize, pattern->GetNumRows());
+		maxPatternSize = std::max(maxPatternSize, pattern->GetNumRows());
+		originalData.insert(originalData.end(), pattern->cbegin(), pattern->cend());
 	}
-	if(!numRows || numOrders < 2)
+	if(!numRows || !numOrders)
 	{
 		MessageBeep(MB_ICONWARNING);
 		SwitchToView();
 		return;
 	}
 
-	// Try to create a new pattern for the merge
 	const auto &specs = m_sndFile.GetModSpecifications();
 	const mpt::ustring format = specs.GetFileExtensionUpper();
-	if(numRows > specs.patternRowsMax)
+
+	const ORDERINDEX remainingOrders = order.GetRemainingCapacity(selection.lastOrd + 1) + numOrders;
+	ROWINDEX minRows = (numRows + (remainingOrders - 1)) / remainingOrders;
+	if(minRows > specs.patternRowsMax)
 	{
-		Reporting::Error(MPT_UFORMAT("Merged pattern size ({} rows) exceeds the row limit ({} rows) of the {} format.")(numRows, specs.patternRowsMax, format), U_("Merge Patterns"));
+		Reporting::Error(U_("There are not enough empty orders left to merge the selected patterns into."), U_("Merge Patterns"));
+		SwitchToView();
+		return;
+	}
+
+	const PATTERNINDEX remainingPatterns = m_sndFile.Patterns.GetRemainingCapacity();
+	if(!remainingPatterns)
+	{
+		Reporting::Error(MPT_UFORMAT("Pattern limit of the {} format ({} patterns) has been reached.")(format, specs.patternsMax), U_("Merge Patterns"));
+		SwitchToView();
+		return;
+	}
+	minRows = std::max(minRows, (numRows + (remainingPatterns - 1)) / remainingPatterns);
+	if(minRows > specs.patternRowsMax)
+	{
+		Reporting::Error(U_("There are not enough empty patterns left to merge the selected patterns into."), U_("Merge Patterns"));
+		SwitchToView();
+		return;
+	}
+
+	ROWINDEX patternSize = minRows;
+	if(minRows != specs.patternRowsMax)
+	{
+		CInputDlg dlg(this, _T("New pattern length:"), static_cast<int32>(minRows), static_cast<int32>(specs.patternRowsMax), static_cast<int32>(std::clamp(numRows, minRows, specs.patternRowsMax)));
+		if(dlg.DoModal() != IDOK)
+		{
+			SwitchToView();
+			return;
+		}
+		patternSize = static_cast<ROWINDEX>(dlg.resultAsInt);
+	} else if(minPatternSize == maxPatternSize && minPatternSize == patternSize)
+	{
+		MessageBeep(MB_ICONWARNING);
 		SwitchToView();
 		return;
 	}
 
 	CriticalSection cs;
-	const PATTERNINDEX newPat = m_sndFile.Patterns.InsertAny(std::max(numRows, specs.patternRowsMin), true);
-	if(newPat == PATTERNINDEX_INVALID)
+
+	const PATTERNINDEX patternsRequired = static_cast<PATTERNINDEX>((numRows + (patternSize - 1)) / patternSize);
+	// Double-check if we *still* have enough patterns and orders (right now it should not be possible that this number changed, but in the future it might due to scripting / etc.)
+	if(m_sndFile.Patterns.GetRemainingCapacity() < patternsRequired || (order.GetRemainingCapacity(selection.lastOrd + 1) + numOrders) < patternsRequired)
 	{
 		cs.Leave();
-		Reporting::Error(MPT_UFORMAT("Pattern limit of the {} format ({} patterns) has been reached.")(format, specs.patternsMax), U_("Merge Patterns"));
+		Reporting::Error(U_("There are not enough empty patterns or order lists for this operation."), U_("Merge Patterns"));
 		SwitchToView();
 		return;
 	}
 
-	auto &pattern = m_sndFile.Patterns[newPat];
-	auto it = pattern.begin();
-	for(ORDERINDEX i = 0; i < numOrders; i++)
-	{
-		PATTERNINDEX pat = order[firstOrder + i];
-		if(m_sndFile.Patterns.IsValidPat(pat))
-			it = std::copy(m_sndFile.Patterns[pat].begin(), m_sndFile.Patterns[pat].end(), it);
-	}
-
-	if(pattern.GetNumRows() > numRows)
-		pattern.WriteEffect(EffectWriter(CMD_PATTERNBREAK, 0).Row(numRows - 1).RetryNextRow());
-
-	// Remove the merged patterns...
 	order.Remove(selection.firstOrd, selection.lastOrd);
 	m_OrderList.DeleteUpdatePlaystate(selection.firstOrd, selection.lastOrd);
-	// ...and insert the new one
-	order.insert(firstOrder, 1, newPat);
-	m_OrderList.InsertUpdatePlaystate(firstOrder, firstOrder);
+
+	order.insert(firstOrder, patternsRequired, PATTERNINDEX_INVALID);
+	m_OrderList.InsertUpdatePlaystate(firstOrder, firstOrder + patternsRequired);
+
+	PATTERNINDEX patternsInserted = 0;
+	auto sourceData = originalData.cbegin();
+	while(sourceData != originalData.end())
+	{
+		const ROWINDEX thisPatternSize = std::min(numRows, patternSize);
+
+		const PATTERNINDEX newPat = m_sndFile.Patterns.InsertAny(std::max(thisPatternSize, specs.patternRowsMin), true);
+		if(newPat == PATTERNINDEX_INVALID)
+			break;
+
+		auto &pattern = m_sndFile.Patterns[newPat];
+		auto sourceEnd = sourceData + thisPatternSize * m_sndFile.GetNumChannels();
+		std::copy(sourceData, sourceEnd, pattern.begin());
+		sourceData = sourceEnd;
+
+		if(pattern.GetNumRows() > thisPatternSize)
+			pattern.WriteEffect(EffectWriter(CMD_PATTERNBREAK, 0).Row(thisPatternSize - 1).RetryNextRow());
+
+		order[firstOrder + patternsInserted] = newPat;
+
+		numRows -= thisPatternSize;
+		patternsInserted++;
+	}
 
 	m_OrderList.Invalidate(FALSE);
-	m_OrderList.SetSelection(firstOrder);
-	SetCurrentPattern(newPat);
+	m_OrderList.SetSelection(firstOrder, firstOrder + patternsInserted);
+	SetCurrentPattern(order[firstOrder]);
 
 	m_modDoc.SetModified();
 	m_modDoc.UpdateAllViews(nullptr, SequenceHint().Data(), this);

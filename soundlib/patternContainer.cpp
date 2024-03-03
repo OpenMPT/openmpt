@@ -179,6 +179,18 @@ PATTERNINDEX CPatternContainer::GetNumNamedPatterns() const noexcept
 }
 
 
+PATTERNINDEX CPatternContainer::GetRemainingCapacity() const noexcept
+{
+	PATTERNINDEX numRemaining = m_rSndFile.GetModSpecifications().patternsMax;
+	const PATTERNINDEX size = std::min(Size(), m_rSndFile.GetModSpecifications().patternsMax);
+	for(PATTERNINDEX pat = 0; pat < size; pat++)
+	{
+		if(m_Patterns[pat].IsValid())
+			numRemaining--;
+	}
+	return numRemaining;
+}
+
 
 void WriteModPatterns(std::ostream& oStrm, const CPatternContainer& patc)
 {
