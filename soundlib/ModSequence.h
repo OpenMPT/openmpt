@@ -49,7 +49,7 @@ public:
 	// Returns length of sequence stopping counting on first '---' (or at the end of sequence).
 	ORDERINDEX GetLengthFirstEmpty() const noexcept;
 	// Returns amount of patterns that can be added at the end of the order list before reaching the current format's limits.
-	ORDERINDEX GetRemainingCapacity() const noexcept;
+	ORDERINDEX GetRemainingCapacity(ORDERINDEX startingFrom = ORDERINDEX_INVALID) const noexcept;
 
 	// Replaces order list with 'newSize' copies of 'pat'.
 	void assign(ORDERINDEX newSize, PATTERNINDEX pat);
