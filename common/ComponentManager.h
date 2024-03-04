@@ -438,8 +438,15 @@ inline mpt::PathString GetComponentPath()
 template <typename type>
 std::shared_ptr<const type> GetComponent()
 {
+#if MPT_COMPILER_CLANG
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wexit-time-destructors"
+#endif // MPT_COMPILER_CLANG
 	static std::weak_ptr<type> cache;
 	static mpt::mutex m;
+#if MPT_COMPILER_CLANG
+#pragma clang diagnostic pop
+#endif // MPT_COMPILER_CLANG	mpt::lock_guard<mpt::mutex> l(m);
 	mpt::lock_guard<mpt::mutex> l(m);
 	std::shared_ptr<type> component = cache.lock();
 	if(!component)
