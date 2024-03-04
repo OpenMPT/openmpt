@@ -823,6 +823,7 @@
 /include/zlib/contrib/iostream
 /include/zlib/contrib/iostream2
 /include/zlib/contrib/iostream3
+/include/zlib/contrib/nuget
 /include/zlib/contrib/pascal
 /include/zlib/contrib/puff
 /include/zlib/contrib/testzlib
