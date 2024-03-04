@@ -13,6 +13,9 @@
 #include "mpt/base/saturate_cast.hpp"
 #endif
 
+#if MPT_CXX_BEFORE(23) && !MPT_COMPILER_MSVC && !MPT_COMPILER_GCC && !MPT_COMPILER_CLANG
+#include <exception>
+#endif
 #include <new>
 #include <type_traits>
 #include <utility>
@@ -205,7 +208,7 @@ using std::unreachable;
 #elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 	__builtin_unreachable();
 #else
-	return;
+	std::terminate();
 #endif
 }
 
