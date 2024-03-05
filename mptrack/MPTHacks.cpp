@@ -22,7 +22,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 // Find and fix envelopes where two nodes are on the same tick.
-bool FindIncompatibleEnvelopes(InstrumentEnvelope &env, bool autofix)
+static bool FindIncompatibleEnvelopes(InstrumentEnvelope &env, bool autofix)
 {
 	bool found = false;
 	for(uint32 i = 1; i < env.size(); i++)
@@ -270,6 +270,7 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 
 	// Check for sample extensions
 	foundHere = false;
+	bool opl3inS3M = false;
 	for(SAMPLEINDEX i = 1; i <= m_SndFile.GetNumSamples(); i++)
 	{
 		ModSample &smp = m_SndFile.GetSample(i);
@@ -277,16 +278,27 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 		{
 			foundHere = foundHacks = true;
 			if(autofix)
-			{
 				ctrlSmp::ConvertToMono(smp, m_SndFile, ctrlSmp::mixChannels);
-			} else
+		} else if(modType == MOD_TYPE_S3M && smp.uFlags[CHN_ADLIB])
+		{
+			if(smp.adlib[8] >= 4)
 			{
-				break;
+				opl3inS3M = foundHacks = true;
+				if(autofix)
+					smp.adlib[8] = 0;
+			}
+			if(smp.adlib[9] >= 4)
+			{
+				opl3inS3M = foundHacks = true;
+				if(autofix)
+					smp.adlib[9] = 0;
 			}
 		}
 	}
 	if(foundHere)
 		AddToLog("Stereo samples are not supported in the original XM format");
+	if(opl3inS3M)
+		AddToLog("Extended OPL3 waveforms should not be used in the S3M format");
 
 	// Check for too many instruments
 	if(m_SndFile.GetNumInstruments() > originalSpecs->instrumentsMax)
@@ -336,7 +348,7 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 	if(foundHere)
 		AddToLog("Found MPT instrument extensions");
 	if(foundEnvelopes)
-		AddToLog("Two envelope points may not share the same tick.");
+		AddToLog("Two envelope points may not share the same tick");
 
 	// Check for too many orders
 	if(m_SndFile.Order().GetLengthTailTrimmed() > originalSpecs->ordersMax)
@@ -420,9 +432,9 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 	}
 
 	// Player flags
-	if((modType & (MOD_TYPE_XM|MOD_TYPE_IT)) && !m_SndFile.m_playBehaviour[MSF_COMPATIBLE_PLAY])
+	if((modType & (MOD_TYPE_XM|MOD_TYPE_IT)) && m_SndFile.m_playBehaviour != m_SndFile.GetDefaultPlaybackBehaviour(modType))
 	{
-		AddToLog("Compatible play is deactivated");
+		AddToLog("Some playback compatibility settings are not at their defaults");
 		foundHacks = true;
 		if(autofix)
 			m_SndFile.SetDefaultPlaybackBehaviour(modType);
