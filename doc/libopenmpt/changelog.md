@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.7.5-pre
 
+ *  xmp-openmpt: Metadata retrievel for playlist items was broken.
+
 ### libopenmpt 0.7.4 (2024-03-03)
 
  *  [**Bug**] Makefile: libopenmpt 0.7.3 broke running the test suite for
