@@ -939,7 +939,8 @@ void CCtrlPatterns::OnPatternMerge()
 			return;
 		}
 		patternSize = static_cast<ROWINDEX>(dlg.resultAsInt);
-	} else if(minPatternSize == maxPatternSize && minPatternSize == patternSize)
+	}
+	if(minPatternSize == maxPatternSize && minPatternSize == patternSize)
 	{
 		MessageBeep(MB_ICONWARNING);
 		SwitchToView();
