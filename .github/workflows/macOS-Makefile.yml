@@ -3,9 +3,9 @@ name: macOS Makefile
 
 on:
   push:
-    branches: [ macos-action-test ]
+    branches: [ master ]
   pull_request:
-    branches: [ macos-action-test ]
+    branches: [ master ]
 
 jobs:
   build:
