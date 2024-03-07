@@ -1067,9 +1067,8 @@ static void WINAPI openmpt_GetGeneralInfo( char * buf ) {
 
 	if( !self->single_subsong_mode && self->subsong_lengths.size() > 1 ) {
 		std::vector<std::string> names = self->mod->get_subsong_names();
-
 		for ( std::size_t i = 0; i < self->subsong_lengths.size(); ++i ) {
-			str << ( i == 0 ? "Subsongs\t" : "\t" ) << (i + 1) << ". " << seconds_to_string( self->subsong_lengths[i] ) << " " << self->subsong_names[i] << "\r";
+			str << ( i == 0 ? "Subsongs\t" : "\t" ) << (i + 1) << ". " << seconds_to_string( self->subsong_lengths[i] ) << " " << names[i] << "\r";
 		}
 	}
 
