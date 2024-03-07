@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.5.28-pre
 
+ *  xmp-openmpt: Metadata retrievel for playlist items was broken.
+
 ### libopenmpt 0.5.27 (2024-03-03)
 
  *  Setting all possible `load_skip` flags resulted in nothing being loaded at
