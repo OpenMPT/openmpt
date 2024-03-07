@@ -1710,9 +1710,10 @@ void CMainFrame::PreparePreview(ModCommand::NOTE note, int volume)
 			m[0].instr = 1;
 		}
 		// Infinite loop on second row
-		m[1 * 2].command = CMD_POSITIONJUMP;
-		m[1 * 2 + 1].command = CMD_PATTERNBREAK;
-		m[1 * 2 + 1].param = 1;
+		m = m_WaveFile.Patterns[0].GetRow(1);
+		m[0].command = CMD_POSITIONJUMP;
+		m[1].command = CMD_PATTERNBREAK;
+		m[1].param = 1;
 	}
 	m_WaveFile.InitPlayer(true);
 }
