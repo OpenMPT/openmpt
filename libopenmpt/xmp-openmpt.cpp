@@ -765,15 +765,36 @@ static char * build_xmplay_tags( const openmpt::module & mod, int32_t subsong = 
 	return result;
 }
 
-static float * build_xmplay_length( const openmpt::module & /* mod */ ) {
-	float * result = static_cast<float*>( xmpfmisc->Alloc( sizeof( float ) * self->subsong_lengths.size() ) );
+static std::vector<double> build_subsong_lengths( openmpt::module & mod ) {
+	std::int32_t num_subsongs = mod.get_num_subsongs();
+	std::vector<double> subsong_lengths( num_subsongs );
+	for ( std::int32_t i = 0; i < num_subsongs; ++i ) {
+		mod.select_subsong( i );
+		subsong_lengths[i] = mod.get_duration_seconds();
+	}
+	return subsong_lengths;
+}
+
+static float * build_xmplay_length( openmpt::module & mod ) {
+	const auto subsong_lengths = build_subsong_lengths( mod );
+	float * result = static_cast<float*>( xmpfmisc->Alloc( sizeof( float ) * subsong_lengths.size() ) );
 	if ( !result ) {
 		return nullptr;
 	}
-	for ( std::size_t i = 0; i < self->subsong_lengths.size(); ++i ) {
-		result[i] = static_cast<float>( self->subsong_lengths[i] );
+	for ( std::size_t i = 0; i < subsong_lengths.size(); ++i ) {
+		result[i] = static_cast<float>( subsong_lengths[i] );
 	}
 	return result;
+}
+
+static DWORD build_xmplay_file_info( openmpt::module & mod, float ** length, char ** tags ) {
+	if ( length ) {
+		*length = build_xmplay_length( mod );
+	}
+	if ( tags ) {
+		*tags = build_xmplay_tags( mod );
+	}
+	return static_cast<DWORD>( mod.get_num_subsongs() );
 }
 
 static void clear_xmplay_string( char * str ) {
@@ -885,6 +906,7 @@ static BOOL WINAPI openmpt_CheckFile( const char * filename, XMPFILE file ) {
 
 static DWORD WINAPI openmpt_GetFileInfo( const char * filename, XMPFILE file, float * * length, char * * tags ) {
 	static_cast<void>( filename );
+	DWORD subsongs = 0;
 	try {
 		std::map< std::string, std::string > ctls
 		{
@@ -897,12 +919,7 @@ static DWORD WINAPI openmpt_GetFileInfo( const char * filename, XMPFILE file, fl
 					case XMPFILE_TYPE_MEMORY:
 						{
 							openmpt::module mod( xmpffile->GetMemory( file ), xmpffile->GetSize( file ), std::clog, ctls );
-							if ( length ) {
-								*length = build_xmplay_length( mod );
-							}
-							if ( tags ) {
-								*tags = build_xmplay_tags( mod );
-							}
+							subsongs = build_xmplay_file_info( mod, length, tags );
 						}
 						break;
 					case XMPFILE_TYPE_FILE:
@@ -912,50 +929,30 @@ static DWORD WINAPI openmpt_GetFileInfo( const char * filename, XMPFILE file, fl
 						{
 							xmplay_istream s( file );
 							openmpt::module mod( s, std::clog, ctls );
-							if ( length ) {
-								*length = build_xmplay_length( mod );
-							}
-							if ( tags ) {
-								*tags = build_xmplay_tags( mod );
-							}
+							subsongs = build_xmplay_file_info( mod, length, tags );
 						}
 						break;
 				}
 			#else
 				if ( xmpffile->GetType( file ) == XMPFILE_TYPE_MEMORY ) {
 					openmpt::module mod( xmpffile->GetMemory( file ), xmpffile->GetSize( file ), std::clog, ctls );
-					if ( length ) {
-						*length = build_xmplay_length( mod );
-					}
-					if ( tags ) {
-						*tags = build_xmplay_tags( mod );
-					}
+					subsongs = build_xmplay_file_info( mod, length, tags );
 				} else {
 					openmpt::module mod( read_XMPFILE_vector( file ), std::clog, ctls );
-					if ( length ) {
-						*length = build_xmplay_length( mod );
-					}
-					if ( tags ) {
-						*tags = build_xmplay_tags( mod );
-					}
+					subsongs = build_xmplay_file_info( mod, length, tags );
 				}
 			#endif
 		#else
 			std::ifstream s( filename, std::ios_base::binary );
 			openmpt::module mod( s, std::clog, ctls );
-			if ( length ) {
-				*length = build_xmplay_length( mod );
-			}
-			if ( tags ) {
-				*tags = build_xmplay_tags( mod );
-			}
-		#endif
+			subsongs = build_xmplay_file_info( mod, length, tags );
+#endif
 	} catch ( ... ) {
 		if ( length ) *length = nullptr;
 		if ( tags ) *tags = nullptr;
 		return 0;
 	}
-	return self->subsong_lengths.size() + XMPIN_INFO_NOSUBTAGS;
+	return subsongs;
 }
 
 // open a file for playback
@@ -1002,12 +999,7 @@ static DWORD WINAPI openmpt_Open( const char * filename, XMPFILE file ) {
 		reset_timeinfos();
 		apply_options();
 
-		std::int32_t num_subsongs = self->mod->get_num_subsongs();
-		self->subsong_lengths.resize( num_subsongs );
-		for ( std::int32_t i = 0; i < num_subsongs; ++i ) {
-			self->mod->select_subsong( i );
-			self->subsong_lengths[i] = self->mod->get_duration_seconds();
-		}
+		self->subsong_lengths = build_subsong_lengths( *self->mod );
 		self->subsong_names = self->mod->get_subsong_names();
 		self->mod->select_subsong( 0 );
 		self->tempo_factor = 0;
