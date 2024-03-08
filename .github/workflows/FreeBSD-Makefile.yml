@@ -12,12 +12,12 @@ jobs:
     strategy:
       matrix:
         include:
-          - { version: 14.0, deps: sys  , cpa: v0.23.0 }
-          - { version: 14.0, deps: local, cpa: v0.23.0 }
-          - { version: 14.0, deps: small, cpa: v0.23.0 }
-          - { version: 13.2, deps: sys  , cpa: v0.23.0 }
-          - { version: 13.2, deps: local, cpa: v0.23.0 }
-          - { version: 13.2, deps: small, cpa: v0.23.0 }
+          - { version: 14.0, deps: sys   }
+          - { version: 14.0, deps: local }
+          - { version: 14.0, deps: small }
+          - { version: 13.2, deps: sys   }
+          - { version: 13.2, deps: local }
+          - { version: 13.2, deps: small }
 
     concurrency:
       group: ${{github.ref}}-${{github.workflow}}-${{matrix.version}}-${{matrix.deps}}
@@ -29,7 +29,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
     - name: Startup VM
-      uses: cross-platform-actions/action@${{matrix.cpa}}
+      uses: cross-platform-actions/action@v0.23.0
       with:
         architecture: x86_64
         hypervisor: qemu
@@ -41,7 +41,7 @@ jobs:
         shutdown_vm: false
         run: true
     - name: Install dependencies
-      uses: cross-platform-actions/action@${{matrix.cpa}}
+      uses: cross-platform-actions/action@v0.23.0
       with:
         architecture: x86_64
         hypervisor: qemu
@@ -54,7 +54,7 @@ jobs:
         run: |
           sudo pkg install -y subversion p5-XML-XPath git mawk gmake pkgconf autoconf autoconf-archive automake libtool help2man doxygen mpg123 libogg libvorbis flac libsndfile pulseaudio portaudio sdl2
     - name: Build
-      uses: cross-platform-actions/action@${{matrix.cpa}}
+      uses: cross-platform-actions/action@v0.23.0
       with:
         architecture: x86_64
         hypervisor: qemu
@@ -67,7 +67,7 @@ jobs:
         run: |
           gmake -j$(sysctl -n hw.ncpu) STRICT=1 VERBOSE=1 ${{ (matrix.deps == 'sys') && 'AUTO_DEPS=1' || (matrix.deps == 'local') && 'LOCAL_ZLIB=1 LOCAL_MPG123=1 LOCAL_OGG=1 LOCAL_VORBIS=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' || 'NO_ZLIB=1 NO_MPG123=1 NO_OGG=1 NO_VORBIS=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' }}
     - name: Test
-      uses: cross-platform-actions/action@${{matrix.cpa}}
+      uses: cross-platform-actions/action@v0.23.0
       with:
         architecture: x86_64
         hypervisor: qemu
@@ -80,7 +80,7 @@ jobs:
         run: |
           gmake -j$(sysctl -n hw.ncpu) STRICT=1 VERBOSE=1 ${{ (matrix.deps == 'sys') && 'AUTO_DEPS=1' || (matrix.deps == 'local') && 'LOCAL_ZLIB=1 LOCAL_MPG123=1 LOCAL_OGG=1 LOCAL_VORBIS=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' || 'NO_ZLIB=1 NO_MPG123=1 NO_OGG=1 NO_VORBIS=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' }} check
     - name: Shutdown VM
-      uses: cross-platform-actions/action@${{matrix.cpa}}
+      uses: cross-platform-actions/action@v0.23.0
       with:
         architecture: x86_64
         hypervisor: qemu
