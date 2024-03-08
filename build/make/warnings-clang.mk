@@ -24,6 +24,7 @@ CFLAGS_SILENT += -Wno-float-conversion
 CFLAGS_SILENT += -Wno-frame-larger-than
 CFLAGS_SILENT += -Wno-missing-prototypes
 CFLAGS_SILENT += -Wno-sign-compare
+CFLAGS_SILENT += -Wno-unused-but-set-variable
 CFLAGS_SILENT += -Wno-unused-function
 CFLAGS_SILENT += -Wno-unused-parameter
 CFLAGS_SILENT += -Wno-unused-variable
