@@ -32,11 +32,13 @@ include build/make/config-gcc.mk
 else ifeq ($(HOST_FLAVOUR),NETBSD)
 
 include build/make/config-gcc.mk
+MPT_COMPILER_NOALLOCAH=1
 NO_PORTAUDIOCPP?=1
 
 else ifeq ($(HOST_FLAVOUR),FREEBSD)
 
 include build/make/config-clang.mk
+MPT_COMPILER_NOALLOCAH=1
 NO_PORTAUDIOCPP?=1
 
 else ifeq ($(HOST_FLAVOUR),OPENBSD)
@@ -44,6 +46,7 @@ else ifeq ($(HOST_FLAVOUR),OPENBSD)
 NO_PORTAUDIOCPP?=1
 NO_PULSEAUDIO?=1
 include build/make/config-clang.mk
+MPT_COMPILER_NOALLOCAH=1
 
 else ifeq ($(HOST_FLAVOUR),HAIKU)
 
