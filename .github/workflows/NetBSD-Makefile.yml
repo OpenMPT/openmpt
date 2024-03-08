@@ -8,6 +8,7 @@ jobs:
   build:
 
     strategy:
+      fail-fast: false
       matrix:
         include:
           - { version: '9.3', deps: sys   }
