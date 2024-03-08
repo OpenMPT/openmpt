@@ -11,9 +11,9 @@
 #include "stdafx.h"
 
 #ifndef NO_PLUGINS
-#include "../../Sndfile.h"
 #include "Flanger.h"
-#endif // !NO_PLUGINS
+#include "../../Sndfile.h"
+#endif  // !NO_PLUGINS
 
 OPENMPT_NAMESPACE_BEGIN
 
