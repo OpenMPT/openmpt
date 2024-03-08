@@ -10,9 +10,9 @@ jobs:
     strategy:
       matrix:
         include:
-          - { version: 7.4, deps: sys   }
-          - { version: 7.4, deps: local }
-          - { version: 7.4, deps: small }
+          - { version: '7.4', deps: sys   }
+          - { version: '7.4', deps: local }
+          - { version: '7.4', deps: small }
 
     concurrency:
       group: ${{github.ref}}-${{github.workflow}}-${{matrix.version}}-${{matrix.deps}}
