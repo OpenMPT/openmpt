@@ -800,7 +800,10 @@ ifeq ($(LOCAL_VORBIS),1)
 CPPFLAGS_VORBIS := -DMPT_WITH_VORBIS
 LDFLAGS_VORBIS  := 
 LDLIBS_VORBIS   := 
-CPPFLAGS_VORBIS += -Iinclude/vorbis/include/ -Iinclude/vorbis/lib/ -DHAVE_ALLOCA_H
+CPPFLAGS_VORBIS += -Iinclude/vorbis/include/ -Iinclude/vorbis/lib/
+ifneq ($(MPT_COMPILER_NOALLOCAH),1)
+CPPFLAGS_VORBIS += -DHAVE_ALLOCA_H
+endif
 LOCAL_VORBIS_SOURCES := 
 LOCAL_VORBIS_SOURCES += include/vorbis/lib/analysis.c
 LOCAL_VORBIS_SOURCES += include/vorbis/lib/bitrate.c

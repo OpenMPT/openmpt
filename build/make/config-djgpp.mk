@@ -393,6 +393,8 @@ MPT_COMPILER_NOVISIBILITY=1
 # causes crashes on process shutdown with liballegro
 MPT_COMPILER_NOGCSECTIONS=1
 
+MPT_COMPILER_NOALLOCAH=1
+
 ifeq ($(OPTIMIZE_LTO),1)
 CXXFLAGS += -flto=auto -Wno-attributes
 CFLAGS   += -flto=auto -Wno-attributes

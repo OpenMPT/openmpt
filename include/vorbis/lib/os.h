@@ -62,11 +62,9 @@ void *_alloca(size_t size);
 
 #endif /* _V_IFDEFJAIL_H_ */
 
-#if !defined(__DJGPP__) /* OpenMPT */
 #ifdef HAVE_ALLOCA_H
 #  include <alloca.h>
 #endif
-#endif /* OpenMPT */
 
 #ifdef USE_MEMORY_H
 #  include <memory.h>
