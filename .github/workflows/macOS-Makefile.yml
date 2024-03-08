@@ -1,0 +1,59 @@
+
+name: macOS Makefile
+
+on:
+  push:
+    branches: [ OpenMPT-1.31 ]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - { host: macos-14, compiler: 15.2, arch: ''    , target: ''   , deps: sys,  check: true  }
+          - { host: macos-14, compiler: 15.2, arch: arm64 , target: ''   , deps: local, check: true  }
+          - { host: macos-14, compiler: 15.2, arch: x64_64, target: ''   , deps: local, check: true  }
+          - { host: macos-14, compiler: 15.2, arch: arm64 , target: ''   , deps: small, check: true  }
+          - { host: macos-14, compiler: 15.2, arch: x64_64, target: ''   , deps: small, check: true  }
+          - { host: macos-14, compiler: 15.2, arch: arm64 , target: 14   , deps: local, check: true  }
+          - { host: macos-14, compiler: 15.2, arch: x64_64, target: 14   , deps: local, check: true  }
+          - { host: macos-14, compiler: 15.2, arch: arm64 , target: 13   , deps: local, check: true  }
+          - { host: macos-14, compiler: 15.2, arch: x64_64, target: 13   , deps: local, check: true  }
+          - { host: macos-14, compiler: 15.2, arch: arm64 , target: 12   , deps: local, check: true  }
+          - { host: macos-14, compiler: 15.2, arch: x64_64, target: 12   , deps: local, check: true  }
+          - { host: macos-14, compiler: 15.2, arch: arm64 , target: 11   , deps: local, check: true  }
+          - { host: macos-14, compiler: 15.2, arch: x64_64, target: 11   , deps: local, check: true  }
+          - { host: macos-14, compiler: 15.2, arch: x64_64, target: 10.15, deps: local, check: true  }
+          - { host: macos-14, compiler: 15.2, arch: x64_64, target: 10.14, deps: local, check: true  }
+          - { host: macos-14, compiler: 15.2, arch: i386  , target: 10.14, deps: local, check: false }
+          - { host: macos-14, compiler: 15.2, arch: x64_64, target: 10.13, deps: local, check: true  }
+          - { host: macos-14, compiler: 15.2, arch: i386  , target: 10.13, deps: local, check: false }
+          - { host: macos-13, compiler: 15.2, arch: x64_64, target: 10.13, deps: local, check: true  }
+          - { host: macos-13, compiler: 15.2, arch: i386  , target: 10.13, deps: local, check: false }
+          - { host: macos-12, compiler: 14.2, arch: x64_64, target: 10.13, deps: local, check: true  }
+          - { host: macos-12, compiler: 14.2, arch: i386  , target: 10.13, deps: local, check: false }
+          - { host: macos-12, compiler: 14.2, arch: x64_64, target: 10.13, deps: small, check: true  }
+          - { host: macos-12, compiler: 14.2, arch: i386  , target: 10.13, deps: small, check: false }
+    concurrency:
+      group: ${{github.ref}}-${{github.workflow}}-${{matrix.host}}-${{matrix.compiler}}-${{matrix.arch}}-${{matrix.target}}-${{matrix.deps}}
+      cancel-in-progress: true
+    runs-on: ${{matrix.host}}
+    steps:
+    - uses: actions/checkout@v4
+    - name: fixup GitHub Homebrew node breakage
+      if: ${{ matrix.host == 'macos-12' }}
+      run: brew unlink node@18 && brew unlink node && brew link --overwrite node
+    - name: fixup GitHub Homebrew python breakage
+      if: ${{ matrix.host == 'macos-12' || matrix.host == 'macos-13' }}
+      run: brew unlink python@3.11 && brew unlink python@3.12 && brew link --overwrite python@3.11 && brew link --overwrite python@3.12
+    - name: install dependencies
+      run: brew update && brew upgrade && brew install p7zip help2man doxygen autoconf-archive mpg123 libogg libvorbis portaudio flac libsndfile sdl2
+    - name: selecting Xcode version
+      run: sudo xcode-select --switch /Applications/Xcode_${{matrix.compiler}}.app
+    - name: setup parallel make
+      run: echo "MAKEFLAGS=-j$(sysctl -n hw.ncpu)" >> $GITHUB_ENV
+    - name: make
+      run: make ${{ matrix.arch == '' && '' || join('ARCH=',matrix.arch) }} ${{ matrix.target == '' && '' || join('MACOSX_VERSION_MIN=',matrix.target) }} STRICT=1 ${{ (matrix.deps == 'sys') && 'FORCE_DEPS=1' || (matrix.deps == 'local') && 'LOCAL_ZLIB=1 LOCAL_MPG123=1 LOCAL_OGG=1 LOCAL_VORBIS=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' || 'NO_ZLIB=1 NO_MPG123=1 NO_OGG=1 NO_VORBIS=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' }}
+    - name: make check
+      if: ${{ matrix.check }}
+      run: make ${{ matrix.arch == '' && '' || join('ARCH=',matrix.arch) }} ${{ matrix.target == '' && '' || join('MACOSX_VERSION_MIN=',matrix.target) }} STRICT=1 ${{ (matrix.deps == 'sys') && 'FORCE_DEPS=1' || (matrix.deps == 'local') && 'LOCAL_ZLIB=1 LOCAL_MPG123=1 LOCAL_OGG=1 LOCAL_VORBIS=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' || 'NO_ZLIB=1 NO_MPG123=1 NO_OGG=1 NO_VORBIS=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' }} check
