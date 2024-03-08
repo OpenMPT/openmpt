@@ -687,14 +687,6 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		m_MidiCfg.Sanitize();
 	}
 
-	// Ignore MIDI data. Fixes some files like denonde.it that were made with old versions of Impulse Tracker (which didn't support Zxx filters) and have Zxx effects in the patterns.
-	// Example: denonde.it by Mystical
-	// Note: Do not compare against cwtv value, as IT 2.14 and 2.15 may write lower values there (see spx-visionsofthepast.it).
-	if(fileHeader.cmwt < 0x0214)
-	{
-		m_MidiCfg.ClearZxxMacros();
-	}
-
 	bool hasModPlugExtensions = false;
 
 	// Read pattern names: "PNAM"
@@ -1329,6 +1321,17 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 
 	if(anyADPCM)
 		madeWithTracker += U_(" (ADPCM packed)");
+
+	// Ignore MIDI data. Fixes some files like denonde.it that were made with old versions of Impulse Tracker (which didn't support Zxx filters) and have Zxx effects in the patterns.
+	// Example: denonde.it by Mystical
+	// Note: Only checking the cwtv "made with" version is not enough: spx-visionsofthepast.it has the strange combination of cwtv=2.00, cmwt=2.16
+	// Hence to be sure, we check that both values are below 2.14.
+	// Note that all ModPlug Tracker alpha versions do not support filters yet. Earlier alphas identify as cwtv=2.02, cmwt=2.00, but later alpha versions identify as IT 2.14.
+	// Apart from that, there's an unknown XM conversion tool declaring a lower comaptible version, which naturally also does not support filters, so it's okay that it is caught here.
+	if((fileHeader.cwtv < 0x0214 && fileHeader.cmwt < 0x0214) || (m_dwLastSavedWithVersion && m_dwLastSavedWithVersion <= MPT_V("1.00.00.A6")))
+	{
+		m_MidiCfg.ClearZxxMacros();
+	}
 
 	if(GetType() == MOD_TYPE_MPT)
 	{
