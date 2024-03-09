@@ -1248,7 +1248,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	// Hence to be sure, we check that both values are below 2.14.
 	// Note that all ModPlug Tracker alpha versions do not support filters yet. Earlier alphas identify as cwtv=2.02, cmwt=2.00, but later alpha versions identify as IT 2.14.
 	// Apart from that, there's an unknown XM conversion tool declaring a lower comaptible version, which naturally also does not support filters, so it's okay that it is caught here.
-	if((fileHeader.cwtv < 0x0214 && fileHeader.cmwt < 0x0214) || (m_dwLastSavedWithVersion && m_dwLastSavedWithVersion <= MPT_V("1.00.00.A6")))
+	if((fileHeader.cwtv < 0x0214 && fileHeader.cmwt < 0x0214) || (m_dwLastSavedWithVersion && m_dwLastSavedWithVersion <= MAKE_VERSION_NUMERIC(1, 00, 00, A6)))
 	{
 		m_MidiCfg.ClearZxxMacros();
 	}
