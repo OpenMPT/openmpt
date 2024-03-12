@@ -2713,6 +2713,7 @@ void CViewSample::DoPaste(PasteMode pasteMode)
 			int16 *pNewSample = static_cast<int16 *>(ModSample::AllocateSample(newLength, 2u * newNumChannels));
 			if(pNewSample == nullptr)
 			{
+				cs.Leave();
 				ErrorBox(IDS_ERR_OUTOFMEMORY, this);
 				ok = false;
 			} else
@@ -2792,6 +2793,7 @@ void CViewSample::DoPaste(PasteMode pasteMode)
 		{
 			SetCurSel(selBegin, selEnd);
 			sample.PrecomputeLoops(sndFile, true);
+			cs.Leave();
 			SetModified(SampleHint().Info().Data().Names(), true, false);
 			if(pasteMode == PasteMode::Replace)
 			{
