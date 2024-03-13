@@ -741,9 +741,6 @@ static char * build_xmplay_tags( const openmpt::module & mod, int32_t subsong = 
 	if ( subsong >= 0 && static_cast<size_t>( subsong ) < subsong_names.size() ) {
 		first_subsong += subsong;
 		last_subsong = first_subsong + 1;
-	} else
-	{
-		last_subsong = first_subsong + 1;
 	}
 
 	for ( auto subsong_name = first_subsong; subsong_name != last_subsong; subsong_name++ ) {
