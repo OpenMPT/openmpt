@@ -934,7 +934,7 @@ bool CSoundFile::ReadDMF(FileReader &file, ModLoadingFlags loadFlags)
 		// I don't know when exactly this stopped, but I have no version 5-7 files to check (and no X-Tracker version that writes those versions).
 		// Since this is practically always the last chunk in the file, the following code is safe for those versions, though.
 		else if(fileHeader.version < 8 && chunkHeader.GetID() == DMFChunk::idSMPD)
-			chunkLength = uint32_max;
+			chunkLength = mpt::saturate_cast<uint32>(file.BytesLeft());
 		chunks.chunks.push_back(ChunkReader::Item<DMFChunk>{chunkHeader, file.ReadChunk(chunkLength)});
 		file.Skip(chunkSkip);
 	}
