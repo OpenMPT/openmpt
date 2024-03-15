@@ -135,10 +135,7 @@ public:
 	{
 		return;
 	}
-	virtual ~xmp_openmpt_settings()
-	{
-		return;
-	}
+	virtual ~xmp_openmpt_settings() = default;
 };
 
 struct self_xmplay_t {
@@ -166,9 +163,6 @@ struct self_xmplay_t {
 			delete mod;
 			mod = 0;
 		}
-	}
-	~self_xmplay_t() {
-		return;
 	}
 };
 
@@ -517,8 +511,8 @@ public:
 	explicit xmplay_streambuf( XMPFILE & file );
 private:
 	int_type underflow() override;
-	xmplay_streambuf( const xmplay_streambuf & );
-	xmplay_streambuf & operator = ( const xmplay_streambuf & );
+	xmplay_streambuf( const xmplay_streambuf & ) = delete;
+	xmplay_streambuf & operator = ( const xmplay_streambuf & ) = delete;
 private:
 	XMPFILE & file;
 	static inline constexpr std::size_t put_back = 4096;
@@ -554,13 +548,10 @@ class xmplay_istream : public std::istream {
 private:
 	xmplay_streambuf buf;
 private:
-	xmplay_istream( const xmplay_istream & );
-	xmplay_istream & operator = ( const xmplay_istream & );
+	xmplay_istream( const xmplay_istream & ) = delete;
+	xmplay_istream & operator = ( const xmplay_istream & ) = delete;
 public:
 	xmplay_istream( XMPFILE & file ) : std::istream(&buf), buf(file) {
-		return;
-	}
-	~xmplay_istream() {
 		return;
 	}
 }; // class xmplay_istream
