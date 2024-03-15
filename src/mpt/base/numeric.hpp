@@ -86,8 +86,7 @@ constexpr T saturate_align_up(T x, T target) {
 	if (x > (std::numeric_limits<T>::max() - (target - 1))) {
 		return std::numeric_limits<T>::max();
 	}
-	T result = ((x + (target - 1)) / target) * target;
-	return result;
+	return ((x + (target - 1)) / target) * target;
 }
 
 // Returns sign of a number (-1 for negative numbers, 1 for positive numbers, 0 for 0)
