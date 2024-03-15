@@ -633,6 +633,9 @@
     <ClInclude Include="..\..\src\mpt\base\tests\tests_base_math.hpp">
       <Filter>src\mpt\base\tests</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\mpt\base\tests\tests_base_numeric.hpp">
+      <Filter>src\mpt\base\tests</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\mpt\base\tests\tests_base_saturate_cast.hpp">
       <Filter>src\mpt\base\tests</Filter>
     </ClInclude>
