@@ -2101,7 +2101,7 @@ bool CCommandSet::LoadFile(std::istream &iStrm, const mpt::ustring &filenameDesc
 			keymapVersion = Version::Parse(mpt::ToUnicode(mpt::Charset::ASCII, tokens[1]));
 			if(keymapVersion > Version::Current())
 			{
-				errText += MPT_CFORMAT("Keymap was saved with OpenMPT {}, but you are running OpenMPT {}.")(keymapVersion, Version::Current());
+				errText += MPT_CFORMAT("Keymap was saved with OpenMPT {}, but you are running OpenMPT {}.\n")(keymapVersion, Version::Current());
 			}
 			continue;
 		}
