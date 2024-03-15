@@ -2109,7 +2109,10 @@ CString FormatFileSize(uint64 fileSize)
 			// Variable-length formatting may decide on a whim to switch to scientific formatting, so used a fixed width and trim manually...
 			CString s = mpt::cfmt::fix(size, 2);
 			if(i == 0)
-				s.TrimRight(_T("0."));
+			{
+				if(int pos = s.ReverseFind(_T('.')); pos >= 0)
+					s.Delete(pos, s.GetLength() - pos);
+			}
 			return s + Unit[i];
 		}
 		size /= 1024.0;
