@@ -7,6 +7,15 @@ is just a high-level summary.
 
 ### libopenmpt 0.4.40-pre
 
+ *  [**Sec**] Null-pointer write (32bit platforms) or excessive memory
+    allocation (64bit platforms) when reading close to 4GiB of data from
+    unseekable files (r20350, r20351).
+ *  [**Sec**] Write buffer overflow when reading unseekable files close to
+    4GiB in size (r20352).
+ *  [**Sec**] Possible out-of-memory (32bit platforms) or excessive memory
+    allocation (64bit platforms) when reading malformed data from unseekable
+    files (r20353).
+
 ### libopenmpt 0.4.39 (2024-03-03)
 
  *  Setting all possible `load_skip` flags resulted in nothing being loaded at
