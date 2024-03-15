@@ -87,15 +87,14 @@ private:
 			return;
 		}
 		std::size_t alignedpos = mpt::saturate_align_up<std::size_t>(target, QUANTUM_SIZE);
-		std::size_t needcount = alignedpos - cachesize;
-		EnsureCacheBuffer(needcount);
-		std::size_t readcount = InternalReadUnseekable(mpt::span(&cache[cachesize], alignedpos - cachesize)).size();
-		cachesize += readcount;
-		if (!InternalEof()) {
-			// can read further
-			return;
+		while (!InternalEof() && (cachesize < alignedpos)) {
+			EnsureCacheBuffer(BUFFER_SIZE);
+			std::size_t readcount = InternalReadUnseekable(mpt::span(&cache[cachesize], BUFFER_SIZE)).size();
+			cachesize += readcount;
 		}
-		streamFullyCached = true;
+		if (InternalEof()) {
+			streamFullyCached = true;
+		}
 	}
 
 private:
