@@ -697,6 +697,18 @@ namespace Util {
 		return (x / target) * target;
 	}
 
+	// rounds x up to multiples of target or saturation of T
+	template <typename T>
+	inline T SaturateAlignUp(T x, T target)
+	{
+		if(x > (std::numeric_limits<T>::max() - (target - 1)))
+		{
+			return std::numeric_limits<T>::max();
+		}
+		T result = ((x + (target - 1)) / target) * target;
+		return result;
+	}
+
 } // namespace Util
 
 
