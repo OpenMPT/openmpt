@@ -50,7 +50,7 @@ private:
 	};
 
 	void EnsureCacheBuffer(std::size_t requiredbuffersize) const {
-		if (cache.size() >= cachesize + requiredbuffersize) {
+		if (cache.size() - cachesize >= requiredbuffersize) {
 			return;
 		}
 		if (cache.size() == 0) {
