@@ -537,10 +537,10 @@ std::streambuf::int_type xmplay_streambuf::underflow() {
 		start += put_back_count;
 	}
 	std::size_t n = xmpffile->Read( file, start, buffer.size() - ( start - base ) );
+	setg( base, start, start + n );
 	if ( n == 0 ) {
 		return traits_type::eof();
 	}
-	setg( base, start, start + n );
 	return traits_type::to_int_type( *gptr() );
 }
 
