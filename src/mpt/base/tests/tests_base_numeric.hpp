@@ -62,7 +62,6 @@ MPT_TEST_GROUP_INLINE("mpt/base/numeric")
 	MPT_TEST_EXPECT_EQUAL(mpt::saturate_align_up<int32>(std::numeric_limits<int32>::max() - 2, 4), std::numeric_limits<int32>::max());
 	MPT_TEST_EXPECT_EQUAL(mpt::saturate_align_up<int32>(std::numeric_limits<int32>::max() - 1, 4), std::numeric_limits<int32>::max());
 	MPT_TEST_EXPECT_EQUAL(mpt::saturate_align_up<int32>(std::numeric_limits<int32>::max() - 0, 4), std::numeric_limits<int32>::max());
-
 }
 
 } // namespace numeric
