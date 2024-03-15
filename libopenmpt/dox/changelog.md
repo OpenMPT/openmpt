@@ -7,6 +7,17 @@ is just a high-level summary.
 
 ### libopenmpt 0.6.14-pre
 
+ *  [**Sec**] Null-pointer write (32bit platforms) or excessive memory
+    allocation (64bit platforms) when reading close to 4GiB of data from
+    unseekable files (r20341, r20343).
+ *  [**Sec**] Write buffer overflow when reading unseekable files close to
+    4GiB in size (r20344).
+ *  [**Sec**] Possible out-of-memory (32bit platforms) or excessive memory
+    allocation (64bit platforms) when reading malformed data from unseekable
+    files (r20345).
+ *  [**Sec**] DMF: Possible null-pointer write or excessive memory allocation
+    when reading DMF files (r20324).
+
  *  xmp-openmpt: Metadata retrievel for playlist items was broken.
 
 ### libopenmpt 0.6.13 (2024-03-03)
