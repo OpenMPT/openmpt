@@ -54,9 +54,9 @@ private:
 			return;
 		}
 		if (cache.size() == 0) {
-			cache.resize(mpt::align_up<std::size_t>(cachesize + requiredbuffersize, BUFFER_SIZE));
+			cache.resize(mpt::saturate_align_up<std::size_t>(cachesize + requiredbuffersize, BUFFER_SIZE));
 		} else if (mpt::exponential_grow(cache.size()) < cachesize + requiredbuffersize) {
-			cache.resize(mpt::align_up<std::size_t>(cachesize + requiredbuffersize, BUFFER_SIZE));
+			cache.resize(mpt::saturate_align_up<std::size_t>(cachesize + requiredbuffersize, BUFFER_SIZE));
 		} else {
 			cache.resize(mpt::exponential_grow(cache.size()));
 		}
@@ -86,7 +86,7 @@ private:
 		if (target <= cachesize) {
 			return;
 		}
-		std::size_t alignedpos = mpt::align_up<std::size_t>(target, QUANTUM_SIZE);
+		std::size_t alignedpos = mpt::saturate_align_up<std::size_t>(target, QUANTUM_SIZE);
 		std::size_t needcount = alignedpos - cachesize;
 		EnsureCacheBuffer(needcount);
 		std::size_t readcount = InternalReadUnseekable(mpt::span(&cache[cachesize], alignedpos - cachesize)).size();
