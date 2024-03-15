@@ -475,16 +475,16 @@ void FileDataContainerUnseekable::CacheStreamUpTo(off_t pos, off_t length) const
 		return;
 	}
 	std::size_t alignedpos = Util::SaturateAlignUp<std::size_t>(target, QUANTUM_SIZE);
-	std::size_t needcount = alignedpos - cachesize;
-	EnsureCacheBuffer(needcount);
-	std::size_t readcount = InternalRead(&cache[cachesize], alignedpos - cachesize);
-	cachesize += readcount;
-	if(!InternalEof())
+	while(!InternalEof() && (cachesize < alignedpos))
 	{
-		// can read further
-		return;
+		EnsureCacheBuffer(BUFFER_SIZE);
+		std::size_t readcount = InternalRead(&cache[cachesize], BUFFER_SIZE);
+		cachesize += readcount;
 	}
-	streamFullyCached = true;
+	if(InternalEof())
+	{
+		streamFullyCached = true;
+	}
 }
 
 void FileDataContainerUnseekable::ReadCached(mpt::byte *dst, IFileDataContainer::off_t pos, IFileDataContainer::off_t count) const
