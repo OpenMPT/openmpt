@@ -233,6 +233,7 @@ MPT_FILES_SRC_MPT += src/mpt/uuid/uuid.hpp
 MPT_FILES_SRC_MPT += src/mpt/base/tests/tests_base_arithmetic_shift.hpp
 MPT_FILES_SRC_MPT += src/mpt/base/tests/tests_base_bit.hpp
 MPT_FILES_SRC_MPT += src/mpt/base/tests/tests_base_math.hpp
+MPT_FILES_SRC_MPT += src/mpt/base/tests/tests_base_numeric.hpp
 MPT_FILES_SRC_MPT += src/mpt/base/tests/tests_base_saturate_cast.hpp
 MPT_FILES_SRC_MPT += src/mpt/base/tests/tests_base_saturate_round.hpp
 MPT_FILES_SRC_MPT += src/mpt/base/tests/tests_base_wrapping_divide.hpp
