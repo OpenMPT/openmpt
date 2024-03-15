@@ -354,7 +354,7 @@ FileDataContainerUnseekable::FileDataContainerUnseekable()
 
 void FileDataContainerUnseekable::EnsureCacheBuffer(std::size_t requiredbuffersize) const
 {
-	if(cache.size() >= cachesize + requiredbuffersize)
+	if(cache.size() - cachesize >= requiredbuffersize)
 	{
 		return;
 	}
