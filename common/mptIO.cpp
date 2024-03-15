@@ -360,10 +360,10 @@ void FileDataContainerUnseekable::EnsureCacheBuffer(std::size_t requiredbuffersi
 	}
 	if(cache.size() == 0)
 	{
-		cache.resize(Util::AlignUp<std::size_t>(cachesize + requiredbuffersize, BUFFER_SIZE));
+		cache.resize(Util::SaturateAlignUp<std::size_t>(cachesize + requiredbuffersize, BUFFER_SIZE));
 	} else if(Util::ExponentialGrow(cache.size()) < cachesize + requiredbuffersize)
 	{
-		cache.resize(Util::AlignUp<std::size_t>(cachesize + requiredbuffersize, BUFFER_SIZE));
+		cache.resize(Util::SaturateAlignUp<std::size_t>(cachesize + requiredbuffersize, BUFFER_SIZE));
 	} else
 	{
 		cache.resize(Util::ExponentialGrow(cache.size()));
@@ -400,7 +400,7 @@ void FileDataContainerUnseekable::CacheStreamUpTo(off_t pos, off_t length) const
 	{
 		return;
 	}
-	std::size_t alignedpos = Util::AlignUp<std::size_t>(target, QUANTUM_SIZE);
+	std::size_t alignedpos = Util::SaturateAlignUp<std::size_t>(target, QUANTUM_SIZE);
 	std::size_t needcount = alignedpos - cachesize;
 	EnsureCacheBuffer(needcount);
 	std::size_t readcount = InternalRead(&cache[cachesize], alignedpos - cachesize);
