@@ -16,6 +16,11 @@ is just a high-level summary.
     allocation (64bit platforms) when reading malformed data from unseekable
     files (r20353).
 
+ *  IT: In the previous version, Zxx macros in IT files made with older MPT
+    versions were no longer working.
+ *  An older bugfix for undefined behaviour in the Distortion DMO plugin was
+    incorrect, causing the distorted sound to be different in some situations.
+
 ### libopenmpt 0.4.39 (2024-03-03)
 
  *  Setting all possible `load_skip` flags resulted in nothing being loaded at
