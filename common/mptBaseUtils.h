@@ -709,8 +709,7 @@ namespace Util {
 		{
 			return std::numeric_limits<T>::max();
 		}
-		T result = ((x + (target - 1)) / target) * target;
-		return result;
+		return ((x + (target - 1)) / target) * target;
 	}
 
 } // namespace Util
