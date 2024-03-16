@@ -510,10 +510,11 @@ class xmplay_streambuf : public std::streambuf {
 public:
 	explicit xmplay_streambuf( XMPFILE & file );
 private:
-	int_type underflow() override;
 	xmplay_streambuf( const xmplay_streambuf & ) = delete;
 	xmplay_streambuf & operator = ( const xmplay_streambuf & ) = delete;
-private:
+protected:
+	int_type underflow() override;
+protected:
 	XMPFILE & file;
 	static inline constexpr std::size_t put_back = 4096;
 	static inline constexpr std::size_t buf_size = 65536;
@@ -521,24 +522,18 @@ private:
 }; // class xmplay_streambuf
 
 xmplay_streambuf::xmplay_streambuf( XMPFILE & file_ ) : file(file_), buffer(buf_size) {
-	char * end = &buffer.front() + buffer.size();
-	setg( end, end, end );
+	setg( buffer.data(), buffer.data() + buffer.size(), buffer.data() + buffer.size() );
 }
 
 std::streambuf::int_type xmplay_streambuf::underflow() {
 	if ( gptr() < egptr() ) {
 		return traits_type::to_int_type( *gptr() );
 	}
-	char * base = &buffer.front();
-	char * start = base;
-	if ( eback() == base ) {
-		std::size_t put_back_count = std::min( put_back, static_cast<std::size_t>( egptr() - base ) );
-		std::memmove( base, egptr() - put_back_count, put_back_count );
-		start += put_back_count;
-	}
-	std::size_t n = xmpffile->Read( file, start, buffer.size() - ( start - base ) );
-	setg( base, start, start + n );
-	if ( n == 0 ) {
+	std::size_t put_back_count = std::min( put_back, static_cast<std::size_t>( egptr() - buffer.data() ) );
+	std::memmove( buffer.data(), egptr() - put_back_count, put_back_count );
+	std::size_t readcount = xmpffile->Read( file, buffer.data() + put_back_count, buffer.size() - put_back_count );
+	setg( buffer.data(), buffer.data() + put_back_count, buffer.data() + put_back_count + readcount );
+	if ( readcount == 0 ) {
 		return traits_type::eof();
 	}
 	return traits_type::to_int_type( *gptr() );
