@@ -18,6 +18,11 @@ is just a high-level summary.
  *  [**Sec**] DMF: Possible null-pointer write or excessive memory allocation
     when reading DMF files (r20325).
 
+ *  IT: In the previous version, Zxx macros in IT files made with older MPT
+    versions were no longer working.
+ *  An older bugfix for undefined behaviour in the Distortion DMO plugin was
+    incorrect, causing the distorted sound to be different in some situations.
+
  *  xmp-openmpt: Metadata retrievel for playlist items was broken.
 
 ### libopenmpt 0.5.27 (2024-03-03)
