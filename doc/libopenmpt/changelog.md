@@ -21,6 +21,8 @@ is just a high-level summary.
  *  [**Regression**] Using `EMSCRIPTEN_PORTS=1` with Emscripten older than
     3.1.54 now requires additionally specifying `ANCIENT=1`.
 
+ *  xmp-openmpt: Memory consumption during file loading has been reduced.
+
 ### libopenmpt 0.7.0 (2023-04-30)
 
  *  [**New**] `667` files from Composer 667 are now supported.
