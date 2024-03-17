@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.5.29-pre
+
 ### libopenmpt 0.5.28 (2024-03-17)
 
  *  [**Sec**] Null-pointer write (32bit platforms) or excessive memory
