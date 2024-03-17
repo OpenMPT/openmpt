@@ -818,6 +818,9 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 			instr.AssignSample(0);
 		}
 
+		MMD0Sample sampleHeader;
+		sampleHeaderChunk.ReadStruct(sampleHeader);
+
 		uint8 numSamples = 1;
 		static constexpr uint8 SamplesPerType[] = {1, 5, 3, 2, 4, 6, 7};
 		if(!isSynth && maskedType < std::size(SamplesPerType))
@@ -850,10 +853,10 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 			// TODO: Move octaves so that they align better (C-4 = lowest, we don't have access to the highest four octaves)
 			for(int octave = 4; octave < 10; octave++)
 			{
-				for(int note = 0; note < 12; note++)
+				for(int note = 0, i = 12 * octave; note < 12; note++, i++)
 				{
-					instr.Keyboard[12 * octave + note] = smp + OctSampleMap[numSamples - 2][octave - 4];
-					instr.NoteMap[12 * octave + note] += OctTransposeMap[numSamples - 2][octave - 4];
+					instr.Keyboard[i] = smp + OctSampleMap[numSamples - 2][octave - 4];
+					instr.NoteMap[i] = static_cast<uint8>(instr.NoteMap[i] + OctTransposeMap[numSamples - 2][octave - 4]);
 				}
 			}
 		} else if(maskedType == MMDInstrHeader::EXTSAMPLE)
@@ -862,17 +865,13 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 			instr.Transpose(-24);
 		} else if(!isSynth && hardwareMixSamples)
 		{
-			for(int octave = 7; octave < 10; octave++)
+			for(auto &note : instr.NoteMap)
 			{
-				for(int note = 0; note < 12; note++)
-				{
-					instr.NoteMap[12 * octave + note] -= static_cast<uint8>((octave - 6) * 12);
-				}
+				int realNote = note + sampleHeader.sampleTranspose;
+				if(realNote >= NOTE_MIDDLEC + 24)
+					note -= static_cast<uint8>(mpt::align_down(realNote - NOTE_MIDDLEC - 12, 12));
 			}
 		}
-
-		MMD0Sample sampleHeader;
-		sampleHeaderChunk.ReadStruct(sampleHeader);
 
 		// midiChannel = 0xFF == midi instrument but with invalid channel, midiChannel = 0x00 == sample-based instrument?
 		if(sampleHeader.midiChannel > 0 && sampleHeader.midiChannel <= 16)
@@ -1153,12 +1152,12 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 				if(!order.empty())
 					order.push_back(order.GetIgnoreIndex());
 
+				const size_t orderStart = order.size();
 				size_t readOrders = playSeq.length;
 				if(!file.CanRead(readOrders))
 					LimitMax(readOrders, file.BytesLeft());
 				LimitMax(readOrders, ORDERINDEX_MAX);
 
-				size_t orderStart = order.size();
 				order.reserve(orderStart + readOrders);
 				for(size_t ord = 0; ord < readOrders; ord++)
 				{
