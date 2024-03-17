@@ -20,6 +20,7 @@
 #include "WindowMessages.h"
 #include "../common/Dither.h"
 #include "../common/mptStringBuffer.h"
+#include "../soundlib/mod_specifications.h"
 #include "mpt/parse/parse.hpp"
 #include "openmpt/sounddevice/SoundDevice.hpp"
 #include "openmpt/sounddevice/SoundDeviceManager.hpp"
@@ -1790,8 +1791,8 @@ BOOL CMidiSetupDlg::OnInitDialog()
 			m_Quantize.SetCurSel(item);
 		}
 	}
-	m_SpinSpd.SetRange(2, 16);
-	m_SpinPat.SetRange(1, MAX_PATTERN_ROWS);
+	m_SpinSpd.SetRange32(2, 16);
+	m_SpinPat.SetRange32(ModSpecs::mptm.patternRowsMin, ModSpecs::mptm.patternRowsMax);
 	return TRUE;
 }
 
@@ -1871,8 +1872,11 @@ void CMidiSetupDlg::OnOK()
 	GetDlgItemText(IDC_EDIT4, cc);
 	TrackerSettings::Instance().midiIgnoreCCs = StringToIgnoredCCs(mpt::ToUnicode(cc));
 
-	TrackerSettings::Instance().midiImportTicks = static_cast<uint8>(Clamp(GetDlgItemInt(IDC_EDIT1), uint8(2), uint8(16)));
-	TrackerSettings::Instance().midiImportPatternLen = Clamp(GetDlgItemInt(IDC_EDIT2), ROWINDEX(1), MAX_PATTERN_ROWS);
+	int minVal, maxVal;
+	m_SpinSpd.GetRange32(minVal, maxVal);
+	TrackerSettings::Instance().midiImportTicks = static_cast<uint8>(Clamp(static_cast<int>(GetDlgItemInt(IDC_EDIT1)), minVal, maxVal));
+	m_SpinPat.GetRange32(minVal, maxVal);
+	TrackerSettings::Instance().midiImportPatternLen = static_cast<ROWINDEX>(Clamp(static_cast<int>(GetDlgItemInt(IDC_EDIT2)), minVal, maxVal));
 	if(m_Quantize.GetCurSel() != -1)
 	{
 		TrackerSettings::Instance().midiImportQuantize = static_cast<uint32>(m_Quantize.GetItemData(m_Quantize.GetCurSel()));

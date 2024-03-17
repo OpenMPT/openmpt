@@ -12,6 +12,7 @@
 #include "Loaders.h"
 #include "Dlsbank.h"
 #include "MIDIEvents.h"
+#include "mod_specifications.h"
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/TrackerSettings.h"
 #include "../mptrack/Moddoc.h"
@@ -625,7 +626,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 
 #ifdef MODPLUG_TRACKER
 	const uint32 quantize = Clamp(TrackerSettings::Instance().midiImportQuantize.Get(), 4u, 256u);
-	const ROWINDEX patternLen = Clamp(TrackerSettings::Instance().midiImportPatternLen.Get(), ROWINDEX(1), MAX_PATTERN_ROWS);
+	const ROWINDEX patternLen = Clamp(TrackerSettings::Instance().midiImportPatternLen.Get(), GetModSpecifications().patternRowsMin, GetModSpecifications().patternRowsMax);
 	const uint8 ticksPerRow = Clamp(TrackerSettings::Instance().midiImportTicks.Get(), uint8(2), uint8(16));
 #else
 	const uint32 quantize = 32;		// Must be 4 or higher

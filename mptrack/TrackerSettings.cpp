@@ -890,7 +890,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	MigrateTunings(storedVersion);
 
 	// Sanitize MIDI import data
-	if(midiImportPatternLen < 1 || midiImportPatternLen > MAX_PATTERN_ROWS)
+	if(midiImportPatternLen < ModSpecs::mptm.patternRowsMin || midiImportPatternLen > ModSpecs::mptm.patternRowsMax)
 		midiImportPatternLen = 128;
 	if(midiImportQuantize < 4 || midiImportQuantize > 256)
 		midiImportQuantize = 32;
