@@ -850,7 +850,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				int realNote = note + sampleHeader.sampleTranspose;
 				if(realNote >= NOTE_MIDDLEC + 24)
-					note -= static_cast<uint8>(mpt::align_down(realNote - NOTE_MIDDLEC - 12, 12));
+					note -= static_cast<uint8>(((realNote - NOTE_MIDDLEC - 12) / 12) * 12);
 			}
 		}
 
