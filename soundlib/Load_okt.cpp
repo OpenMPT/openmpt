@@ -29,8 +29,8 @@ struct OktIffChunk
 		idSBOD	= MagicBE("SBOD"),
 	};
 
-	uint32be signature;	// IFF chunk name
-	uint32be chunksize;	// chunk size without header
+	uint32be signature;  // IFF chunk name
+	uint32be chunksize;  // chunk size without header
 };
 
 MPT_BINARY_STRUCT(OktIffChunk, 8)
@@ -328,19 +328,6 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderOKT(MemoryFileReader file, co
 	{
 		return ProbeFailure;
 	}
-	OktIffChunk iffHead;
-	if(!file.ReadStruct(iffHead))
-	{
-		return ProbeWantMoreData;
-	}
-	if(iffHead.chunksize == 0)
-	{
-		return ProbeFailure;
-	}
-	if((iffHead.signature & 0x80808080u) != 0) // ASCII?
-	{
-		return ProbeFailure;
-	}
 	MPT_UNREFERENCED_PARAMETER(pfilesize);
 	return ProbeSuccess;
 }
@@ -354,7 +341,6 @@ bool CSoundFile::ReadOKT(FileReader &file, ModLoadingFlags loadFlags)
 		return false;
 	}
 
-	// prepare some arrays to store offsets etc.
 	std::vector<FileReader> patternChunks;
 	std::vector<FileReader> sampleChunks;
 	std::array<int8, 8> pairedChn{{}};
@@ -371,15 +357,11 @@ bool CSoundFile::ReadOKT(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		OktIffChunk iffHead;
 		if(!file.ReadStruct(iffHead))
-		{
 			break;
-		}
 
 		FileReader chunk = file.ReadChunk(iffHead.chunksize);
 		if(!chunk.IsValid())
-		{
-			break;
-		}
+			continue;
 
 		switch(iffHead.signature)
 		{
@@ -456,12 +438,6 @@ bool CSoundFile::ReadOKT(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				sampleChunks.push_back(chunk);
 			}
-			break;
-
-		default:
-			// Non-ASCII chunk ID?
-			if(iffHead.signature & 0x80808080)
-				return false;
 			break;
 		}
 	}
