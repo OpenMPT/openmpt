@@ -640,7 +640,6 @@ struct SymInstrument
 			if(!newSample)
 				return;
 
-			mptSmp.nLength = newLength;
 			std::memcpy(newSample, mptSmp.sampleb(), (loopStart + loopLen) * bps);
 			for(uint8 i = 0; i < numRepetitions; i++)
 			{
@@ -648,7 +647,7 @@ struct SymInstrument
 			}
 			std::memcpy(newSample + loopEnd * bps, mptSmp.sampleb() + (loopStart + loopLen) * bps, (newLength - loopEnd) * bps);
 			
-			mptSmp.ReplaceWaveform(newSample, mptSmp.nLength, sndFile);
+			mptSmp.ReplaceWaveform(newSample, newLength, sndFile);
 		}
 	}
 
@@ -657,8 +656,8 @@ struct SymInstrument
 		if(type != Loop && type != Sustain)
 			return {0, 0};
 
-		SmpLength loopStart = static_cast<SmpLength>(std::min(loopStartHigh.get(), uint8(100)));
-		SmpLength loopLen = static_cast<SmpLength>(std::min(loopLenHigh.get(), uint8(100)));
+		SmpLength loopStart = std::min(loopStartHigh.get(), uint8(100));
+		SmpLength loopLen = std::min(loopLenHigh.get(), uint8(100));
 		if(sampleFlags & NewLoopSystem)
 		{
 			loopStart = (loopStart << 16) + loopStartFine;
