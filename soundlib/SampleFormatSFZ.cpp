@@ -1130,7 +1130,7 @@ bool CSoundFile::SaveSFZInstrument(INSTRUMENTINDEX nInstr, std::ostream &f, cons
 	case TempoMode::Modern:
 		f << ", " << m_PlayState.m_nMusicSpeed << " ticks per row, " << m_PlayState.m_nCurrentRowsPerBeat << " rows per beat (modern tempo mode)";
 		break;
-	default:
+	case TempoMode::NumModes:
 		MPT_ASSERT_NOTREACHED();
 		break;
 	}

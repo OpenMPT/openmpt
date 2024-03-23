@@ -610,7 +610,7 @@ PLUGINDEX CModDoc::RemovePlugs(const std::vector<bool> &keepMask)
 		}
 
 		plug.Destroy();
-		plug = {};
+		mpt::reconstruct(plug);
 
 		for(PLUGINDEX srcPlugSlot = 0; srcPlugSlot < nPlug; srcPlugSlot++)
 		{
