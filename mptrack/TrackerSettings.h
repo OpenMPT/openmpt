@@ -209,7 +209,7 @@ struct MPTChord
 	std::array<NoteType, notesPerChord - 1> notes;  // Additional chord notes
 };
 
-using MPTChords = std::array<MPTChord, 3 * 12>;	// 3 octaves
+using MPTChords = std::array<MPTChord, 60>;  // Size == kcCommandSetNumNotes
 
 // MIDI recording
 enum RecordAftertouchOptions

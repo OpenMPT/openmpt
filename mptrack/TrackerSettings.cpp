@@ -404,26 +404,26 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	// init old and messy stuff:
 
 	// Default chords
-	MemsetZero(Chords);
-	for(UINT ichord = 0; ichord < 3 * 12; ichord++)
+	for(size_t i = 0; i < Chords.size(); i++)
 	{
-		Chords[ichord].key = (uint8)ichord;
-		Chords[ichord].notes[0] = MPTChord::noNote;
-		Chords[ichord].notes[1] = MPTChord::noNote;
-		Chords[ichord].notes[2] = MPTChord::noNote;
+		mpt::reset(Chords[i]);
+		Chords[i].key = static_cast<uint8>(i);
+		Chords[i].notes[0] = MPTChord::noNote;
+		Chords[i].notes[1] = MPTChord::noNote;
+		Chords[i].notes[2] = MPTChord::noNote;
 
-		if(ichord < 12)
+		if(i < 12)
 		{
 			// Major Chords
-			Chords[ichord].notes[0] = (int8)(ichord + 4);
-			Chords[ichord].notes[1] = (int8)(ichord + 7);
-			Chords[ichord].notes[2] = (int8)(ichord + 10);
-		} else if(ichord < 24)
+			Chords[i].notes[0] = static_cast<int8>(i + 4);
+			Chords[i].notes[1] = static_cast<int8>(i + 7);
+			Chords[i].notes[2] = static_cast<int8>(i + 10);
+		} else if(i < 24)
 		{
 			// Minor Chords
-			Chords[ichord].notes[0] = (int8)(ichord - 9);
-			Chords[ichord].notes[1] = (int8)(ichord - 5);
-			Chords[ichord].notes[2] = (int8)(ichord - 2);
+			Chords[i].notes[0] = static_cast<int8>(i - 9);
+			Chords[i].notes[1] = static_cast<int8>(i - 5);
+			Chords[i].notes[2] = static_cast<int8>(i - 2);
 		}
 	}
 
@@ -1406,7 +1406,7 @@ std::vector<uint32> TrackerSettings::GetDefaultSampleRates()
 
 void TrackerSettings::LoadChords(MPTChords &chords)
 {
-	for(std::size_t i = 0; i < std::size(chords); i++)
+	for(std::size_t i = 0; i < chords.size(); i++)
 	{
 		uint32 chord;
 		mpt::ustring noteName = MPT_UFORMAT("{}{}")(mpt::ustring(NoteNamesSharp[i % 12]), i / 12);
@@ -1435,7 +1435,7 @@ void TrackerSettings::LoadChords(MPTChords &chords)
 
 void TrackerSettings::SaveChords(MPTChords &chords)
 {
-	for(std::size_t i = 0; i < std::size(chords); i++)
+	for(std::size_t i = 0; i < chords.size(); i++)
 	{
 		auto notes = chords[i].notes;
 		for(auto &note : notes)

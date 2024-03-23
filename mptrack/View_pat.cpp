@@ -5649,6 +5649,7 @@ int CViewPattern::ConstructChord(int note, ModCommand::NOTE (&outNotes)[MPTChord
 {
 	const MPTChords &chords = TrackerSettings::GetChords();
 	UINT chordNum = note - GetBaseNote();
+	static_assert(mpt::extent<decltype(chords)>() == kcCommandSetNumNotes + 1);
 
 	if(chordNum >= chords.size())
 	{
