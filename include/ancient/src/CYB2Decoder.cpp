@@ -25,7 +25,8 @@ CYB2Decoder::CYB2Decoder(uint32_t hdr,uint32_t recursionLevel,const Buffer &pack
 	XPKDecompressor(recursionLevel),
 	_packedData(packedData)
 {
-	if (!detectHeaderXPK(hdr) || _packedData.size()<=10) throw Decompressor::InvalidFormatError();
+	if (!detectHeaderXPK(hdr) || _packedData.size()<=10)
+		throw Decompressor::InvalidFormatError();
 	_blockHeader=_packedData.readBE32(0);
 	// after the block header, the next 6 bytes seem to be
 	// 00 64 00 00 00 00
@@ -34,28 +35,23 @@ CYB2Decoder::CYB2Decoder(uint32_t hdr,uint32_t recursionLevel,const Buffer &pack
 	if (verify)
 	{
 		// trigger child checks...
-		ConstSubBuffer blockData(_packedData,10,_packedData.size()-10);
-		std::shared_ptr<XPKDecompressor::State> state;
-		auto sub=XPKMain::createDecompressor(_blockHeader,_recursionLevel+1,blockData,state,true);
+		ConstSubBuffer blockData{_packedData,10,_packedData.size()-10};
+		std::shared_ptr<XPKDecompressor::State> subState;
+		auto sub=XPKMain::createDecompressor(_blockHeader,_recursionLevel+1,blockData,subState,true);
 	}
-}
-
-CYB2Decoder::~CYB2Decoder()
-{
-	// nothing needed
 }
 
 const std::string &CYB2Decoder::getSubName() const noexcept
 {
-	static std::string name="XPK-CYB2: xpkCybPrefs container";
+	static std::string name{"XPK-CYB2: xpkCybPrefs container"};
 	return name;
 }
 
 void CYB2Decoder::decompressImpl(Buffer &rawData,const Buffer &previousData,bool verify)
 {
-	ConstSubBuffer blockData(_packedData,10,_packedData.size()-10);
+	ConstSubBuffer blockData{_packedData,10,_packedData.size()-10};
 	std::shared_ptr<XPKDecompressor::State> state;
-	auto sub=XPKMain::createDecompressor(_blockHeader,_recursionLevel+1,blockData,state,verify);
+	auto sub{XPKMain::createDecompressor(_blockHeader,_recursionLevel+1,blockData,state,verify)};
 	sub->decompressImpl(rawData,previousData,verify);
 }
 

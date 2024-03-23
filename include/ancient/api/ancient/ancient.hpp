@@ -52,28 +52,28 @@ class ANCIENT_API Error : public std::exception
 {
 public:
 	Error() noexcept;
-	virtual ~Error();
+	virtual ~Error() noexcept;
 };
 
 class ANCIENT_API InvalidFormatError : public Error
 {
 public:
 	InvalidFormatError() noexcept;
-	virtual ~InvalidFormatError();
+	~InvalidFormatError() noexcept;
 };
 
 class ANCIENT_API DecompressionError : public Error
 {
 public:
 	DecompressionError() noexcept;
-	virtual ~DecompressionError();
+	~DecompressionError() noexcept;
 };
 
 class ANCIENT_API VerificationError : public Error
 {
 public:
 	VerificationError() noexcept;
-	virtual ~VerificationError();
+	~VerificationError() noexcept;
 };
 
 class ANCIENT_API Decompressor final
@@ -128,7 +128,7 @@ public:
 	// can throw VerificationError if verify enabled and checksum does not match
 	std::vector<uint8_t> decompress(bool verify);
 
-	~Decompressor();
+	~Decompressor() noexcept;
 
 private:
 

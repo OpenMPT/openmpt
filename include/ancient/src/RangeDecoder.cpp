@@ -6,24 +6,9 @@
 namespace ancient::internal
 {
 
-RangeDecoder::BitReader::BitReader()
-{
-	// nothing needed
-}
-
-RangeDecoder::BitReader::~BitReader()
-{
-	// nothing needed
-}
-
 RangeDecoder::RangeDecoder(BitReader &bitReader,uint16_t initialValue) :
-		_bitReader(bitReader),
-		_stream(initialValue)
-{
-	// nothing needed
-}
-
-RangeDecoder::~RangeDecoder()
+		_bitReader{bitReader},
+		_stream{initialValue}
 {
 	// nothing needed
 }
@@ -35,8 +20,8 @@ uint16_t RangeDecoder::decode(uint16_t length)
 
 void RangeDecoder::scale(uint16_t newLow,uint16_t newHigh,uint16_t newRange)
 {
-	uint32_t range=uint32_t(_high-_low)+1;
-	_high=(range*newHigh)/newRange+_low-1;
+	uint32_t range{uint32_t(_high-_low)+1U};
+	_high=(range*newHigh)/newRange+_low-1U;
 	_low=(range*newLow)/newRange+_low;
 
 	auto doubleContext=[&](uint16_t decr)

@@ -20,27 +20,23 @@ std::shared_ptr<XPKDecompressor> SLZ3Decompressor::create(uint32_t hdr,uint32_t 
 }
 
 SLZ3Decompressor::SLZ3Decompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify) :
-	XPKDecompressor(recursionLevel),
-	_packedData(packedData)
+	XPKDecompressor{recursionLevel},
+	_packedData{packedData}
 {
-	if (!detectHeaderXPK(hdr)) throw Decompressor::InvalidFormatError();
-}
-
-SLZ3Decompressor::~SLZ3Decompressor()
-{
-	// nothing needed
+	if (!detectHeaderXPK(hdr))
+		throw Decompressor::InvalidFormatError();
 }
 
 const std::string &SLZ3Decompressor::getSubName() const noexcept
 {
-	static std::string name="XPK-SLZ3: SLZ3 CyberYAFA compressor";
+	static std::string name{"XPK-SLZ3: SLZ3 CyberYAFA compressor"};
 	return name;
 }
 
 void SLZ3Decompressor::decompressImpl(Buffer &rawData,const Buffer &previousData,bool verify)
 {
-	ForwardInputStream inputStream(_packedData,0,_packedData.size());
-	MSBBitReader<ForwardInputStream> bitReader(inputStream);
+	ForwardInputStream inputStream{_packedData,0,_packedData.size()};
+	MSBBitReader<ForwardInputStream> bitReader{inputStream};
 	auto readBit=[&]()->uint32_t
 	{
 		return bitReader.readBits8(1);
@@ -58,11 +54,12 @@ void SLZ3Decompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 		{
 			outputStream.writeByte(readByte());
 		} else {
-			uint8_t tmp=readByte();
-			if (!tmp) throw Decompressor::DecompressionError();
-			uint32_t distance=uint32_t(tmp&0xf0)<<4;
-			distance|=uint32_t(readByte());
-			uint32_t count=uint32_t(tmp&0xf)+2;
+			uint8_t tmp{readByte()};
+			if (!tmp)
+				throw Decompressor::DecompressionError();
+			uint32_t distance={uint32_t(tmp&0xf0U)<<4U};
+			distance|=readByte();
+			uint32_t count{uint32_t(tmp&0xfU)+2U};
 			outputStream.copy(distance,count);
 		}
 	}

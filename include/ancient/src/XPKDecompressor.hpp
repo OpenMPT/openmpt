@@ -22,17 +22,15 @@ public:
 		State(const State&)=delete;
 		State& operator=(const State&)=delete;
 
-		State()=default;
-		virtual ~State();
-
-		uint32_t getRecursionLevel() const;
+		State() noexcept=default;
+		virtual ~State() noexcept=default;
 	};
 
 	XPKDecompressor(const XPKDecompressor&)=delete;
 	XPKDecompressor& operator=(const XPKDecompressor&)=delete;
 
 	XPKDecompressor(uint32_t recursionLevel=0);
-	virtual ~XPKDecompressor();
+	virtual ~XPKDecompressor() noexcept=default;
 
 	virtual const std::string &getSubName() const noexcept=0;
 

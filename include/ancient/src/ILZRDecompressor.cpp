@@ -20,40 +20,37 @@ std::shared_ptr<XPKDecompressor> ILZRDecompressor::create(uint32_t hdr,uint32_t 
 }
 
 ILZRDecompressor::ILZRDecompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify) :
-	XPKDecompressor(recursionLevel),
-	_packedData(packedData)
+	XPKDecompressor{recursionLevel},
+	_packedData{packedData}
 {
 	if (!detectHeaderXPK(hdr) || packedData.size()<2)
 		throw Decompressor::InvalidFormatError();
 	_rawSize=_packedData.readBE16(0);
-	if (!_rawSize) throw Decompressor::InvalidFormatError();
-}
-
-ILZRDecompressor::~ILZRDecompressor()
-{
-	// nothing needed
+	if (!_rawSize)
+		throw Decompressor::InvalidFormatError();
 }
 
 const std::string &ILZRDecompressor::getSubName() const noexcept
 {
-	static std::string name="XPK-ILZR: Incremental Lempel-Ziv-Renau compressor";
+	static std::string name{"XPK-ILZR: Incremental Lempel-Ziv-Renau compressor"};
 	return name;
 }
 
 void ILZRDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData,bool verify)
 {
-	if (rawData.size()!=_rawSize) throw Decompressor::DecompressionError();
+	if (rawData.size()!=_rawSize)
+		throw Decompressor::DecompressionError();
 
-	ForwardInputStream inputStream(_packedData,2,_packedData.size());
-	MSBBitReader<ForwardInputStream> bitReader(inputStream);
+	ForwardInputStream inputStream{_packedData,2,_packedData.size()};
+	MSBBitReader<ForwardInputStream> bitReader{inputStream};
 	auto readBits=[&](uint32_t count)->uint32_t
 	{
 		return bitReader.readBits8(count);
 	};
 
-	ForwardOutputStream outputStream(rawData,0,rawData.size());
+	ForwardOutputStream outputStream{rawData,0,rawData.size()};
 
-	uint32_t bits=8;
+	uint32_t bits{8};
 	while (!outputStream.eof())
 	{
 		if (readBits(1))
@@ -61,10 +58,11 @@ void ILZRDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 			outputStream.writeByte(readBits(8));
 		} else {
 			while (outputStream.getOffset()>(1ULL<<bits)) bits++;
-			uint32_t position=readBits(bits);
-			uint32_t count=readBits(4)+3;
+			uint32_t position{readBits(bits)};
+			uint32_t count{readBits(4)+3};
 
-			if (position>=outputStream.getOffset()) throw Decompressor::DecompressionError();
+			if (position>=outputStream.getOffset())
+				throw Decompressor::DecompressionError();
 			outputStream.copy(outputStream.getOffset()-position,count);
 		}
 	}

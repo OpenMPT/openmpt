@@ -13,22 +13,24 @@ namespace ancient::internal
 
 class XPKMain : public Decompressor
 {
-friend class XPKDecompressor;
-public:
+private:
 	XPKMain(const Buffer &packedData,bool verify,uint32_t recursionLevel);
 
-	virtual ~XPKMain();
+public:
+	~XPKMain() noexcept=default;
 
-	virtual const std::string &getName() const noexcept override final;
-	virtual size_t getPackedSize() const noexcept override final;
-	virtual size_t getRawSize() const noexcept override final;
+	const std::string &getName() const noexcept final;
+	size_t getPackedSize() const noexcept final;
+	size_t getRawSize() const noexcept final;
 
-	virtual void decompressImpl(Buffer &rawData,bool verify) override final;
+	void decompressImpl(Buffer &rawData,bool verify) final;
 
 	static bool detectHeader(uint32_t hdr) noexcept;
 
 	static std::shared_ptr<Decompressor> create(const Buffer &packedData,bool exactSizeKnown,bool verify);
 
+	// Can be used for direct recursion
+	static std::shared_ptr<Decompressor> createDecompressor(uint32_t recursionLevel,const Buffer &buffer,bool verify);
 	// Can be used to create directly decoder for chunk (needed by CYB2)
 	static std::shared_ptr<XPKDecompressor> createDecompressor(uint32_t type,uint32_t recursionLevel,const Buffer &buffer,std::shared_ptr<XPKDecompressor::State> &state,bool verify);
 
@@ -41,13 +43,13 @@ private:
 
 	const Buffer	&_packedData;
 
-	uint32_t	_packedSize=0;
-	uint32_t	_rawSize=0;
-	uint32_t	_headerSize=0;
-	uint32_t	_type=0;
-	bool		_longHeaders=false;
-	uint32_t	_recursionLevel=0;
-	bool		_hasPassword=false;
+	uint32_t	_packedSize{0};
+	uint32_t	_rawSize{0};
+	uint32_t	_headerSize{0};
+	uint32_t	_type{0};
+	bool		_longHeaders{false};
+	uint32_t	_recursionLevel{0};
+	bool		_hasPassword{false};
 };
 
 }

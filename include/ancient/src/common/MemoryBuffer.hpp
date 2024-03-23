@@ -15,14 +15,14 @@ class MemoryBuffer : public Buffer
 public:
 	MemoryBuffer(size_t size);
 	MemoryBuffer(const Buffer &src,size_t offset,size_t size);
-	~MemoryBuffer();
+	~MemoryBuffer() noexcept;
 
-	virtual const uint8_t *data() const noexcept override final;
-	virtual uint8_t *data() override final;
-	virtual size_t size() const noexcept override final;
+	const uint8_t *data() const noexcept final;
+	uint8_t *data() final;
+	size_t size() const noexcept final;
 
-	virtual bool isResizable() const noexcept override final;
-	virtual void resize(size_t newSize) override final;
+	bool isResizable() const noexcept final;
+	void resize(size_t newSize) final;
 
 private:
 	uint8_t*			_data;

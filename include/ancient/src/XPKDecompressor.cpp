@@ -6,18 +6,8 @@
 namespace ancient::internal
 {
 
-XPKDecompressor::State::~State()
-{
-	// nothing needed
-}
-
 XPKDecompressor::XPKDecompressor(uint32_t recursionLevel) :
-	_recursionLevel(recursionLevel)
-{
-	// nothing needed
-}
-
-XPKDecompressor::~XPKDecompressor()
+	_recursionLevel{recursionLevel}
 {
 	// nothing needed
 }

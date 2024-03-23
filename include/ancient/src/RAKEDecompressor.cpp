@@ -6,6 +6,7 @@
 #include "OutputStream.hpp"
 #include "common/Common.hpp"
 
+#include <array>
 
 namespace ancient::internal
 {
@@ -21,26 +22,22 @@ std::shared_ptr<XPKDecompressor> RAKEDecompressor::create(uint32_t hdr,uint32_t 
 }
 
 RAKEDecompressor::RAKEDecompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify) :
-	XPKDecompressor(recursionLevel),
-	_packedData(packedData),
-	_isRAKE(hdr==FourCC("RAKE"))
+	XPKDecompressor{recursionLevel},
+	_packedData{packedData},
+	_isRAKE{hdr==FourCC("RAKE")}
 {
 	if (!detectHeaderXPK(hdr) || packedData.size()<4)
 		throw Decompressor::InvalidFormatError();
 
 	_midStreamOffset=packedData.readBE16(2);
-	if (_midStreamOffset>=packedData.size()) throw Decompressor::InvalidFormatError();
-}
-
-RAKEDecompressor::~RAKEDecompressor()
-{
-	// nothing needed
+	if (_midStreamOffset>=packedData.size())
+		throw Decompressor::InvalidFormatError();
 }
 
 const std::string &RAKEDecompressor::getSubName() const noexcept
 {
-	static std::string nameFRHT="XPK-FRHT: LZ77-compressor";
-	static std::string nameRAKE="XPK-RAKE: LZ77-compressor";
+	static std::string nameFRHT{"XPK-FRHT: LZ77-compressor"};
+	static std::string nameRAKE{"XPK-RAKE: LZ77-compressor"};
 	return (_isRAKE)?nameRAKE:nameFRHT;
 }
 
@@ -49,9 +46,9 @@ void RAKEDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 	// 2 streams
 	// 1st: bit stream starting from _midStreamOffset(+1) going to packedSize
 	// 2nd: byte stream starting from _midStreamOffset going backwards to 4
-	ForwardInputStream forwardInputStream(_packedData,_midStreamOffset+(_midStreamOffset&1),_packedData.size());
-	BackwardInputStream backwardInputStream(_packedData,4,_midStreamOffset);
-	MSBBitReader<ForwardInputStream> bitReader(forwardInputStream);
+	ForwardInputStream forwardInputStream{_packedData,_midStreamOffset+(_midStreamOffset&1),_packedData.size()};
+	BackwardInputStream backwardInputStream{_packedData,4,_midStreamOffset};
+	MSBBitReader<ForwardInputStream> bitReader{forwardInputStream};
 	auto readBits=[&](uint32_t count)->uint32_t
 	{
 		return bitReader.readBitsBE32(count);
@@ -65,19 +62,18 @@ void RAKEDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 		return backwardInputStream.readByte();
 	};
 	{
-		uint16_t tmp=_packedData.readBE16(0);
-	        if (tmp>32) throw Decompressor::DecompressionError();
-		const uint8_t *buf=forwardInputStream.consume(4);
-		uint32_t content=(uint32_t(buf[0])<<24)|(uint32_t(buf[1])<<16)|
-			(uint32_t(buf[2])<<8)|uint32_t(buf[3]);
+		uint16_t tmp{_packedData.readBE16(0)};
+	        if (tmp>32)
+	        	throw Decompressor::DecompressionError();
+		uint32_t content{forwardInputStream.readBE32()};
 		bitReader.reset(content>>tmp,32-tmp);
 	}
 
-	BackwardOutputStream outputStream(rawData,0,rawData.size());
+	BackwardOutputStream outputStream{rawData,0,rawData.size()};
 
-	HuffmanDecoder<uint32_t> lengthDecoder;
+	HuffmanDecoder<uint8_t> lengthDecoder;
 	// is there some logic into this?
-	static const uint8_t decTable[255][2]={
+	const std::array<std::array<uint8_t,2>,255> decTable{{
 		{ 1,0x01},{ 3,0x03},{ 5,0x05},{ 6,0x09},{ 7,0x0c},{ 9,0x13},{12,0x34},{18,0xc0},
 		{18,0xc2},{18,0xc3},{18,0xc6},{16,0x79},{18,0xc7},{18,0xd6},{18,0xd7},{18,0xd8},
 		{17,0xa8},{17,0x92},{17,0x8a},{17,0x82},{16,0x6c},{17,0x94},{18,0xda},{18,0xca},
@@ -109,12 +105,12 @@ void RAKEDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 		{15,0x51},{16,0x78},{16,0x6a},{13,0x46},{11,0x25},{16,0x72},{16,0x6e},{15,0x5b},
 		{15,0x61},{15,0x52},{13,0x40},{13,0x43},{13,0x44},{13,0x3f},{15,0x5c},{17,0x93},
 		{17,0x80},{17,0x8d},{17,0x8b},{17,0x86},{17,0x89},{17,0x97},{17,0x8f},{17,0x90},
-		{17,0x91},{16,0x6d},{12,0x2b},{12,0x2d},{12,0x35},{10,0x1e},{ 3,0x02}};
+		{17,0x91},{16,0x6d},{12,0x2b},{12,0x2d},{12,0x35},{10,0x1e},{ 3,0x02}}};
 
-	uint32_t hufCode=0;
+	uint32_t hufCode{0};
 	for (auto &it: decTable)
 	{
-		lengthDecoder.insert(HuffmanCode<uint32_t>{it[0],hufCode>>(32-it[0]),it[1]});
+		lengthDecoder.insert(HuffmanCode{it[0],hufCode>>(32-it[0]),it[1]});
 		hufCode+=1<<(32-it[0]);
 	}
 
@@ -124,7 +120,7 @@ void RAKEDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 		{
 			outputStream.writeByte(readByte());
 		} else {
-			uint32_t count=lengthDecoder.decode(readBit);
+			uint32_t count{lengthDecoder.decode(readBit)};
 			count+=2;
 
 			uint32_t distance;

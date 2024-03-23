@@ -20,26 +20,22 @@ std::shared_ptr<XPKDecompressor> DLTADecode::create(uint32_t hdr,uint32_t recurs
 }
 
 DLTADecode::DLTADecode(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify) :
-	XPKDecompressor(recursionLevel),
-	_packedData(packedData)
+	XPKDecompressor{recursionLevel},
+	_packedData{packedData}
 {
-	if (!detectHeaderXPK(hdr)) throw Decompressor::InvalidFormatError();
-}
-
-DLTADecode::~DLTADecode()
-{
-	// nothing needed
+	if (!detectHeaderXPK(hdr))
+		throw Decompressor::InvalidFormatError();
 }
 
 const std::string &DLTADecode::getSubName() const noexcept
 {
-	static std::string name="XPK-DLTA: Delta encoding";
+	static std::string name{"XPK-DLTA: Delta encoding"};
 	return name;
 }
 
 void DLTADecode::decode(Buffer &bufferDest,const Buffer &bufferSrc,size_t offset,size_t size)
 {
-	uint8_t ctr=0;
+	uint8_t ctr{0};
 	for (size_t i=0;i<size;i++)
 	{
 		ctr+=bufferSrc[offset+i];
@@ -50,7 +46,8 @@ void DLTADecode::decode(Buffer &bufferDest,const Buffer &bufferSrc,size_t offset
 
 void DLTADecode::decompressImpl(Buffer &rawData,const Buffer &previousData,bool verify)
 {
-	if (rawData.size()<_packedData.size()) throw Decompressor::DecompressionError();
+	if (rawData.size()<_packedData.size())
+		throw Decompressor::DecompressionError();
 	decode(rawData,_packedData,0,_packedData.size());
 }
 

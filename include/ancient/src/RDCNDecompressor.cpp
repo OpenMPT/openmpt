@@ -20,27 +20,23 @@ std::shared_ptr<XPKDecompressor> RDCNDecompressor::create(uint32_t hdr,uint32_t 
 }
 
 RDCNDecompressor::RDCNDecompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify) :
-	XPKDecompressor(recursionLevel),
-	_packedData(packedData)
+	XPKDecompressor{recursionLevel},
+	_packedData{packedData}
 {
-	if (!detectHeaderXPK(hdr)) throw Decompressor::InvalidFormatError();
-}
-
-RDCNDecompressor::~RDCNDecompressor()
-{
-	// nothing needed
+	if (!detectHeaderXPK(hdr))
+		throw Decompressor::InvalidFormatError();
 }
 
 const std::string &RDCNDecompressor::getSubName() const noexcept
 {
-	static std::string name="XPK-RDCN: Ross data compression";
+	static std::string name{"XPK-RDCN: Ross data compression"};
 	return name;
 }
 
 void RDCNDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData,bool verify)
 {
-	ForwardInputStream inputStream(_packedData,0,_packedData.size());
-	MSBBitReader<ForwardInputStream> bitReader(inputStream);
+	ForwardInputStream inputStream{_packedData,0,_packedData.size()};
+	MSBBitReader<ForwardInputStream> bitReader{inputStream};
 	auto readBit=[&]()->uint32_t
 	{
 		return bitReader.readBitsBE16(1);
@@ -50,7 +46,7 @@ void RDCNDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 		return inputStream.readByte();
 	};
 
-	ForwardOutputStream outputStream(rawData,0,rawData.size());
+	ForwardOutputStream outputStream{rawData,0,rawData.size()};
 
 	while (!outputStream.eof())
 	{
@@ -58,12 +54,12 @@ void RDCNDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 		{
 			outputStream.writeByte(readByte());
 		} else {
-			uint8_t tmp=readByte();
-			uint32_t count=tmp&0xf;
-			uint32_t code=tmp>>4;
-			uint32_t distance=0;
-			uint8_t repeatChar=0;
-			bool doRLE=false;
+			uint8_t tmp{readByte()};
+			uint32_t count{tmp&0xfU};
+			uint32_t code{uint32_t(tmp>>4U)};
+			uint32_t distance{0};
+			uint8_t repeatChar{0};
+			bool doRLE{false};
 			switch (code)
 			{
 				case 0:
@@ -73,18 +69,18 @@ void RDCNDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 				break;
 
 				case 1:
-				count=(count|(uint32_t(readByte())<<4))+19;
+				count=(count|(uint32_t(readByte())<<4U))+19U;
 				repeatChar=readByte();
 				doRLE=true;
 				break;
 
 				case 2:
-				distance=(count|(uint32_t(readByte())<<4))+3;
-				count=uint32_t(readByte())+16;
+				distance=(count|(uint32_t(readByte())<<4U))+3U;
+				count=uint32_t(readByte())+16U;
 				break;
 
 				default: /* 3 to 15 */
-				distance=(count|(uint32_t(readByte())<<4))+3;
+				distance=(count|(uint32_t(readByte())<<4U))+3U;
 				count=code;
 				break;
 			}

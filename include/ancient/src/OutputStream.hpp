@@ -15,7 +15,7 @@ class ForwardOutputStreamBase
 {
 public:
 	ForwardOutputStreamBase(Buffer &buffer,size_t startOffset);
-	virtual ~ForwardOutputStreamBase();
+	virtual ~ForwardOutputStreamBase() noexcept=default;
 
 	void writeByte(uint8_t value);
 
@@ -24,7 +24,7 @@ public:
 	uint8_t copy(size_t distance,size_t count,uint8_t defaultChar);
 	uint8_t *history(size_t distance);
 	const uint8_t *history(size_t distance) const;
-	void produce(const uint8_t *src,size_t bytes);
+	void produce(const Buffer &src);
 
 	size_t getOffset() const { return _currentOffset; }
 
@@ -40,7 +40,7 @@ class ForwardOutputStream : public ForwardOutputStreamBase
 {
 public:
 	ForwardOutputStream(Buffer &buffer,size_t startOffset,size_t endOffset);
-	virtual ~ForwardOutputStream();
+	~ForwardOutputStream() noexcept=default;
 
 	void reset(size_t startOffset,size_t endOffset);
 
@@ -48,7 +48,7 @@ public:
 	size_t getEndOffset() const { return _endOffset; }
 
 protected:
-	virtual void ensureSize(size_t offset) override final;
+	void ensureSize(size_t offset) final;
 
 private:
 	size_t		_endOffset;
@@ -58,13 +58,13 @@ class AutoExpandingForwardOutputStream : public ForwardOutputStreamBase
 {
 public:
 	AutoExpandingForwardOutputStream(Buffer &buffer);
-	virtual ~AutoExpandingForwardOutputStream();
+	~AutoExpandingForwardOutputStream() noexcept;
 
 protected:
-	virtual void ensureSize(size_t offset) override final;
+	void ensureSize(size_t offset) final;
 
 private:
-	static constexpr size_t _advance=65536U;
+	static constexpr size_t _advance{65536U};
 
 	bool		_hasExpanded=false;
 };
@@ -73,7 +73,7 @@ class BackwardOutputStream
 {
 public:
 	BackwardOutputStream(Buffer &buffer,size_t startOffset,size_t endOffset);
-	~BackwardOutputStream();
+	~BackwardOutputStream() noexcept=default;
 
 	void writeByte(uint8_t value);
 

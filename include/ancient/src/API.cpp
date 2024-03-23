@@ -22,18 +22,18 @@ class DecompressorImpl
 public:
 	ConstStaticBuffer _buffer;
 	std::shared_ptr<Decompressor> _decompressor;
-public:
+
 	DecompressorImpl(const std::vector<uint8_t> &packedData,bool exactSizeKnown,bool verify) :
-		_buffer(packedData.data(), packedData.size()),
-		_decompressor(Decompressor::create(_buffer, exactSizeKnown, verify))
+		_buffer{packedData.data(), packedData.size()},
+		_decompressor{Decompressor::create(_buffer, exactSizeKnown, verify)}
 	{
-		return;
+		// nothing needed
 	}
 	DecompressorImpl(const uint8_t *packedData,size_t packedSize,bool exactSizeKnown,bool verify) :
-		_buffer(packedData, packedSize),
-		_decompressor(Decompressor::create(_buffer, exactSizeKnown, verify))
+		_buffer{packedData, packedSize},
+		_decompressor{Decompressor::create(_buffer, exactSizeKnown, verify)}
 	{
-		return;
+		// nothing needed
 	}
 };
 
@@ -49,7 +49,7 @@ Error::Error() noexcept
 	// nothing needed
 }
 
-Error::~Error()
+Error::~Error() noexcept
 {
 	// nothing needed
 }
@@ -59,7 +59,7 @@ InvalidFormatError::InvalidFormatError() noexcept
 	// nothing needed
 }
 
-InvalidFormatError::~InvalidFormatError()
+InvalidFormatError::~InvalidFormatError() noexcept
 {
 	// nothing needed
 }
@@ -69,7 +69,7 @@ DecompressionError::DecompressionError() noexcept
 	// nothing needed
 }
 
-DecompressionError::~DecompressionError()
+DecompressionError::~DecompressionError() noexcept
 {
 	// nothing needed
 }
@@ -79,7 +79,7 @@ VerificationError::VerificationError() noexcept
 	// nothing needed
 }
 
-VerificationError::~VerificationError()
+VerificationError::~VerificationError() noexcept
 {
 	// nothing needed
 }
@@ -97,13 +97,13 @@ bool Decompressor::detect(const uint8_t *packedData, size_t packedSize) noexcept
 }
 
 Decompressor::Decompressor(const std::vector<uint8_t> &packedData,bool exactSizeKnown,bool verify) :
-	m_impl(std::make_unique<internal::APIv2::DecompressorImpl>(packedData, exactSizeKnown, verify))
+	m_impl{std::make_unique<internal::APIv2::DecompressorImpl>(packedData, exactSizeKnown, verify)}
 {
 	return;
 }
 
 Decompressor::Decompressor(const uint8_t *packedData,size_t packedSize,bool exactSizeKnown,bool verify) :
-	m_impl(std::make_unique<internal::APIv2::DecompressorImpl>(packedData, packedSize, exactSizeKnown, verify))
+	m_impl{std::make_unique<internal::APIv2::DecompressorImpl>(packedData, packedSize, exactSizeKnown, verify)}
 {
 	return;
 }
@@ -178,7 +178,7 @@ std::vector<uint8_t> Decompressor::decompress(bool verify)
 	return result;
 }
 
-Decompressor::~Decompressor()
+Decompressor::~Decompressor() noexcept
 {
 	// nothing needed
 }

@@ -14,21 +14,21 @@ namespace ancient::internal
 {
 
 MemoryBuffer::MemoryBuffer(size_t size) :
-	_data(reinterpret_cast<uint8_t*>(std::malloc(size))),
-	_size(size)
+	_data{reinterpret_cast<uint8_t*>(std::malloc(size))},
+	_size{size}
 {
 	if (!_data) throw std::bad_alloc();
 }
 
 MemoryBuffer::MemoryBuffer(const Buffer &src,size_t offset,size_t size) :
-	MemoryBuffer(size)
+	MemoryBuffer{size}
 {
 	if(OverflowCheck::sum(offset,size)>src.size()) throw InvalidOperationError();
 	std::memcpy(_data,src.data()+offset,size);
 }
 
 
-MemoryBuffer::~MemoryBuffer()
+MemoryBuffer::~MemoryBuffer() noexcept
 {
 	std::free(_data);
 }

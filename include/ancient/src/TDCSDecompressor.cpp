@@ -20,27 +20,23 @@ std::shared_ptr<XPKDecompressor> TDCSDecompressor::create(uint32_t hdr,uint32_t 
 }
 
 TDCSDecompressor::TDCSDecompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify) :
-	XPKDecompressor(recursionLevel),
-	_packedData(packedData)
+	XPKDecompressor{recursionLevel},
+	_packedData{packedData}
 {
-	if (!detectHeaderXPK(hdr)) throw Decompressor::InvalidFormatError();
-}
-
-TDCSDecompressor::~TDCSDecompressor()
-{
-	// nothing needed
+	if (!detectHeaderXPK(hdr))
+		throw Decompressor::InvalidFormatError();
 }
 
 const std::string &TDCSDecompressor::getSubName() const noexcept
 {
-	static std::string name="XPK-TDCS: LZ77-compressor";
+	static std::string name{"XPK-TDCS: LZ77-compressor"};
 	return name;
 }
 
 void TDCSDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData,bool verify)
 {
-	ForwardInputStream inputStream(_packedData,0,_packedData.size());
-	MSBBitReader<ForwardInputStream> bitReader(inputStream);
+	ForwardInputStream inputStream{_packedData,0,_packedData.size()};
+	MSBBitReader<ForwardInputStream> bitReader{inputStream};
 	auto read2Bits=[&]()->uint32_t
 	{
 		return bitReader.readBitsBE32(2);
@@ -50,12 +46,12 @@ void TDCSDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 		return inputStream.readByte();
 	};
 
-	ForwardOutputStream outputStream(rawData,0,rawData.size());
+	ForwardOutputStream outputStream{rawData,0,rawData.size()};
 
 	while (!outputStream.eof())
 	{
-		uint32_t distance=0;
-		uint32_t count=0;
+		uint32_t distance{0};
+		uint32_t count{0};
 		uint32_t tmp;
 		switch (read2Bits())
 		{
@@ -64,25 +60,26 @@ void TDCSDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 			break;
 
 			case 1:
-			tmp=uint32_t(readByte())<<8;
+			tmp=uint32_t(readByte())<<8U;
 			tmp|=uint32_t(readByte());
-			count=(tmp&3)+3;
-			distance=((tmp>>2)^0x3fff)+1;
+			count=(tmp&3U)+3U;
+			distance=((tmp>>2U)^0x3fffU)+1U;
 			break;
 
 			case 2:
-			tmp=uint32_t(readByte())<<8;
+			tmp=uint32_t(readByte())<<8U;
 			tmp|=uint32_t(readByte());
-			count=(tmp&0xf)+3;
-			distance=((tmp>>4)^0xfff)+1;
+			count=(tmp&0xfU)+3U;
+			distance=((tmp>>4U)^0xfffU)+1U;
 			break;
 
 			case 3:
-			distance=uint32_t(readByte())<<8;
+			distance=uint32_t(readByte())<<8U;
 			distance|=uint32_t(readByte());
-			count=uint32_t(readByte())+3;
-			if (!distance) throw Decompressor::DecompressionError();
-			distance=(distance^0xffff)+1;
+			count=uint32_t(readByte())+3U;
+			if (!distance)
+				throw Decompressor::DecompressionError();
+			distance=(distance^0xffffU)+1U;
 			break;
 			
 			default:

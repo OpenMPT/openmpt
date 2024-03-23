@@ -7,6 +7,7 @@
 #include "LZWDecoder.hpp"
 #include "common/Common.hpp"
 #include "common/SubBuffer.hpp"
+#include "common/MemoryBuffer.hpp"
 #include "common/OverflowCheck.hpp"
 
 
@@ -24,14 +25,14 @@ std::shared_ptr<Decompressor> LOBDecompressor::create(const Buffer &packedData,b
 }
 
 LOBDecompressor::LOBDecompressor(const Buffer &packedData,bool verify) :
-	_packedData(packedData)
+	_packedData{packedData}
 {
-	uint32_t hdr=packedData.readBE32(0);
+	uint32_t hdr{packedData.readBE32(0)};
 	if (!detectHeader(hdr) || packedData.size()<12U)
 		throw InvalidFormatError();
 	_methodCount=hdr>>24U;
 
-	uint8_t method=packedData.read8(4U);
+	uint8_t method{packedData.read8(4U)};
 	if (method<1U || method>6U)
 		throw InvalidFormatError();
 	if (_methodCount==1U)
@@ -44,13 +45,13 @@ LOBDecompressor::LOBDecompressor(const Buffer &packedData,bool verify) :
 	// now parse the huffman tables to get the correct size
 	if (method==2U)
 	{
-		uint32_t count=2U;
+		uint32_t count{2U};
 		for (uint32_t i=0;i<count;i+=2U)
 		{
 			if (_packedSize+count>packedData.size())
 				throw InvalidFormatError();
-			uint32_t t1=_packedData.read8(_packedSize+i);
-			uint32_t t2=_packedData.read8(_packedSize+i+1U);
+			uint32_t t1{_packedData.read8(_packedSize+i)};
+			uint32_t t2{_packedData.read8(_packedSize+i+1U)};
 			if (t1!=t2)
 			{
 				t1=std::max(t1,t2);
@@ -63,11 +64,6 @@ LOBDecompressor::LOBDecompressor(const Buffer &packedData,bool verify) :
 	}
 	if (_packedSize>packedData.size())
 		throw InvalidFormatError();
-}
-
-LOBDecompressor::~LOBDecompressor()
-{
-	// nothing needed
 }
 
 const std::string &LOBDecompressor::getName() const noexcept
@@ -92,14 +88,14 @@ size_t LOBDecompressor::getRawSize() const noexcept
 
 void LOBDecompressor::decompressRound(Buffer &rawData,const Buffer &packedData)
 {
-	uint8_t method=packedData.read8(0);
+	uint8_t method{packedData.read8(0)};
 	if (method<1U || method>6U)
 		throw DecompressionError();
-	uint32_t rawSize=packedData.readBE32(0)&0xff'ffffU;
-	uint32_t packedSize=OverflowCheck::sum(packedData.readBE32(4U),8U);
+	uint32_t rawSize{packedData.readBE32(0)&0xff'ffffU};
+	uint32_t packedSize{OverflowCheck::sum(packedData.readBE32(4U),8U)};
 
-	ForwardInputStream inputStream(packedData,8U,packedSize);
-	MSBBitReader<ForwardInputStream> bitReader(inputStream);
+	ForwardInputStream inputStream{packedData,8U,packedSize};
+	MSBBitReader<ForwardInputStream> bitReader{inputStream};
 	auto readBit=[&]()->uint32_t
 	{
 		return bitReader.readBits8(1U);
@@ -113,7 +109,7 @@ void LOBDecompressor::decompressRound(Buffer &rawData,const Buffer &packedData)
 		return inputStream.readByte();
 	};
 
-	ForwardOutputStream outputStream(rawData,0,rawSize);
+	ForwardOutputStream outputStream{rawData,0,rawSize};
 	auto writeByte=[&](uint8_t value)
 	{
 		outputStream.writeByte(value);
@@ -125,7 +121,7 @@ void LOBDecompressor::decompressRound(Buffer &rawData,const Buffer &packedData)
 		case 1U:
 		while (!outputStream.eof())
 		{
-			uint32_t count=readByte();
+			uint32_t count{readByte()};
 			if (count<0x80U)
 			{
 				count++;
@@ -142,13 +138,13 @@ void LOBDecompressor::decompressRound(Buffer &rawData,const Buffer &packedData)
 		case 2U:
 		{
 			HuffmanDecoder<uint8_t> decoder;
-			uint16_t tree[1024];
+			std::array<uint16_t,1024> tree;
 
 			uint32_t count=2U;
 			for (uint32_t i=0;i<count;i+=2U)
 			{
-				uint32_t t1=packedData.read8(packedSize+i);
-				uint32_t t2=packedData.read8(packedSize+i+1U);
+				uint32_t t1{packedData.read8(packedSize+i)};
+				uint32_t t2{packedData.read8(packedSize+i+1U)};
 				if (t1!=t2)
 				{
 					t1=t1*2U+2U;
@@ -182,7 +178,7 @@ void LOBDecompressor::decompressRound(Buffer &rawData,const Buffer &packedData)
 				} else {
 					if (!length)
 						throw DecompressionError();
-					decoder.insert(HuffmanCode<uint8_t>{length,bits,uint8_t(tree[node+1])});
+					decoder.insert(HuffmanCode{length,bits,uint8_t(tree[node+1])});
 				}
 			};
 			branch(0,0,0,branch);
@@ -195,12 +191,12 @@ void LOBDecompressor::decompressRound(Buffer &rawData,const Buffer &packedData)
 		// LZW (12-bit fixed code LZW)
 		case 3U:
 		{
-			uint32_t firstCode=readBits(12U);
-			LZWDecoder decoder(4096U,256U,65536U,firstCode);
+			uint32_t firstCode{readBits(12U)};
+			LZWDecoder decoder{4096U,256U,65536U,firstCode};
 			decoder.write(firstCode,false,writeByte);
 			while (!outputStream.eof())
 			{
-				uint32_t code=readBits(12U);
+				uint32_t code{readBits(12U)};
 				if (code==0xfffU)
 				{
 					firstCode=readBits(12U);
@@ -217,17 +213,17 @@ void LOBDecompressor::decompressRound(Buffer &rawData,const Buffer &packedData)
 		// LZB (9 to 12-bit LZW)
 		case 4U:
 		{
-			uint32_t codeBits=9U;
-			uint32_t firstCode=readBits(codeBits);
+			uint32_t codeBits{9U};
+			uint32_t firstCode{readBits(codeBits)};
 			if (!firstCode--)
 				throw DecompressionError();
-			LZWDecoder decoder(4096U,256U,65536U,firstCode);
+			LZWDecoder decoder{4096U,256U,65536U,firstCode};
 			decoder.write(firstCode,false,writeByte);
 			while (!outputStream.eof())
 			{
 				if (codeBits!=12U && decoder.getCurrentIndex()+1U>=(1U<<codeBits))
 					codeBits++;
-				uint32_t code=readBits(codeBits);
+				uint32_t code{readBits(codeBits)};
 				if (!code--)
 				{
 					codeBits=9U;
@@ -243,19 +239,18 @@ void LOBDecompressor::decompressRound(Buffer &rawData,const Buffer &packedData)
 			}
 		}
 		break;
-		break;
 
 		// MSP (something lz)
 		case 5U:
 		{
 			HuffmanDecoder<uint8_t> decoder
 			{
-				HuffmanCode<uint8_t>{2,0b000,0},
-				HuffmanCode<uint8_t>{2,0b001,1},
-				HuffmanCode<uint8_t>{3,0b100,2},
-				HuffmanCode<uint8_t>{3,0b101,3},
-				HuffmanCode<uint8_t>{3,0b110,4},
-				HuffmanCode<uint8_t>{3,0b111,5}
+				HuffmanCode{2,0b000,uint8_t{0}},
+				HuffmanCode{2,0b001,uint8_t{1}},
+				HuffmanCode{3,0b100,uint8_t{2}},
+				HuffmanCode{3,0b101,uint8_t{3}},
+				HuffmanCode{3,0b110,uint8_t{4}},
+				HuffmanCode{3,0b111,uint8_t{5}}
 			};
 			// will fail if size<2
 			outputStream.writeByte(readByte());
@@ -272,7 +267,9 @@ void LOBDecompressor::decompressRound(Buffer &rawData,const Buffer &packedData)
 					break;
 
 					case 1U:
+					[[fallthrough]];
 					case 2U:
+					[[fallthrough]];
 					case 3U:
 					distance=readBits(value+7U)+1U;
 					outputStream.copy(distance,value+1U);
@@ -332,10 +329,10 @@ void LOBDecompressor::decompressImpl(Buffer &rawData,bool verify)
 
 		case 2U:
 		{
-			uint32_t rawSize=_packedData.readBE32(4U)&0xff'ffffU;
+			uint32_t rawSize{_packedData.readBE32(4U)&0xff'ffffU};
 			if (!rawSize || rawSize>getMaxRawSize())
 				throw DecompressionError();
-			MemoryBuffer tmpBuffer(rawSize);
+			MemoryBuffer tmpBuffer{rawSize};
 			decompressRound(tmpBuffer,ConstSubBuffer(_packedData,4U,_packedData.size()-4U));
 			rawSize=tmpBuffer.readBE32(0U)&0xff'ffffU;
 			if (!rawSize || rawSize>getMaxRawSize())
@@ -349,15 +346,15 @@ void LOBDecompressor::decompressImpl(Buffer &rawData,bool verify)
 
 		case 3U:
 		{
-			uint32_t rawSize=_packedData.readBE32(4U)&0xff'ffffU;
+			uint32_t rawSize{_packedData.readBE32(4U)&0xff'ffffU};
 			if (!rawSize || rawSize>getMaxRawSize())
 				throw DecompressionError();
-			MemoryBuffer tmpBuffer(rawSize);
+			MemoryBuffer tmpBuffer{rawSize};
 			decompressRound(tmpBuffer,ConstSubBuffer(_packedData,4U,_packedData.size()-4U));
 			rawSize=tmpBuffer.readBE32(0U)&0xff'ffffU;
 			if (!rawSize || rawSize>getMaxRawSize())
 				throw DecompressionError();
-			MemoryBuffer tmpBuffer2(rawSize);
+			MemoryBuffer tmpBuffer2{rawSize};
 			decompressRound(tmpBuffer2,tmpBuffer);
 			rawSize=tmpBuffer2.readBE32(0U)&0xff'ffffU;
 			if (!rawSize || rawSize>getMaxRawSize())

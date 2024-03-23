@@ -1,3 +1,4 @@
+/* Copyright (C) Teemu Suutari */
 
 #include "LZWDecoder.hpp"
 #include "common/Common.hpp"
@@ -7,23 +8,17 @@ namespace ancient::internal
 {
 
 LZWDecoder::LZWDecoder(uint32_t maxCode,uint32_t literalCodes,uint32_t stackLength,uint32_t firstCode) :
-	_maxCode(maxCode),
-	_literalCodes(literalCodes),
-	_stackLength(stackLength),
-	_freeIndex(literalCodes),
-	_prevCode(firstCode),
-	_prefix(std::make_unique<uint32_t[]>(maxCode-literalCodes)),
-	_suffix(std::make_unique<uint8_t[]>(maxCode-literalCodes)),
-	_stack(std::make_unique<uint8_t[]>(stackLength))
+	_maxCode{maxCode},
+	_literalCodes{literalCodes},
+	_stackLength{stackLength},
+	_freeIndex{literalCodes},
+	_prevCode{firstCode},
+	_prefix{std::make_unique<uint32_t[]>(maxCode-literalCodes)},
+	_suffix{std::make_unique<uint8_t[]>(maxCode-literalCodes)},
+	_stack{std::make_unique<uint8_t[]>(stackLength)}
 {
 	// nothing needed
 }
-
-LZWDecoder::~LZWDecoder()
-{
-	// nothing needed
-}
-
 
 void LZWDecoder::reset(uint32_t firstCode)
 {

@@ -21,7 +21,7 @@ std::shared_ptr<Decompressor> CompressDecompressor::create(const Buffer &packedD
 }
 
 CompressDecompressor::CompressDecompressor(const Buffer &packedData,bool exactSizeKnown,bool verify) :
-	_packedData(packedData)
+	_packedData{packedData}
 {
 	// Can't do anything with undefined size stream
 	if (!exactSizeKnown)
@@ -31,19 +31,13 @@ CompressDecompressor::CompressDecompressor(const Buffer &packedData,bool exactSi
 	uint32_t hdr=_packedData.readBE16(0);
 	if (!detectHeader(hdr<<16))
 		throw InvalidFormatError();
-	uint8_t tmp=_packedData.read8(2);
+	uint8_t tmp{_packedData.read8(2)};
 	_hasBlocks=tmp&0x80U;
 	tmp&=0x7fU;
 	if (tmp<9U||tmp>16U)
 		throw InvalidFormatError();
 	_maxBits=tmp;
 }
-
-CompressDecompressor::~CompressDecompressor()
-{
-	// nothing needed
-}
-
 
 const std::string &CompressDecompressor::getName() const noexcept
 {
@@ -75,24 +69,24 @@ void CompressDecompressor::decompressImpl(Buffer &rawData,bool verify)
 		return;
 	}
 
-	ForwardInputStream inputStream(_packedData,3,_packedData.size());
-	LSBBitReader<ForwardInputStream> bitReader(inputStream);
+	ForwardInputStream inputStream{_packedData,3,_packedData.size()};
+	LSBBitReader<ForwardInputStream> bitReader{inputStream};
 	auto readBits=[&](uint32_t count)->uint32_t
 	{
 		return bitReader.readBits8(count);
 	};
 
-	AutoExpandingForwardOutputStream outputStream(rawData);
+	AutoExpandingForwardOutputStream outputStream{rawData};
 	auto writeByte=[&](uint8_t value)
 	{
 		outputStream.writeByte(value);
 	};
 
-	uint32_t codeBits=9U;
+	uint32_t codeBits{9U};
 	size_t prevCodePos=inputStream.getOffset();
 
-	uint32_t firstCode=readBits(codeBits);
-	LZWDecoder decoder(1<<_maxBits,_hasBlocks?257U:256U,69001U,firstCode);
+	uint32_t firstCode{readBits(codeBits)};
+	LZWDecoder decoder{1U<<_maxBits,_hasBlocks?257U:256U,8192U,firstCode};
 	decoder.write(firstCode,false,writeByte);
 
 	// This is actually surprising for a compressor
@@ -103,15 +97,16 @@ void CompressDecompressor::decompressImpl(Buffer &rawData,bool verify)
 	// unbounded bit size compressor (here we throw in case we can more than 16 bits)
 	// gzip seems to limit the minimum max bits to 12ish, which is more sane
 	// (debugging that was entertaining though)
-	uint32_t codeCounter=1;				// previous read for first byte included
+	uint32_t codeCounter{1};			// previous read for first byte included
 	auto reset=[&]()
 	{
 		bitReader.reset(0,0);
-		inputStream.setOffset(prevCodePos+codeBits);
+		prevCodePos+=codeBits;
+		inputStream.setOffset(prevCodePos);
 		codeCounter=0;
 	};
 
-	bool maxReached=false;
+	bool maxReached{false};
 	auto readCode=[&]()->uint32_t
 	{
 		if (!maxReached && decoder.getCurrentIndex()>=(1U<<codeBits))
@@ -132,8 +127,7 @@ void CompressDecompressor::decompressImpl(Buffer &rawData,bool verify)
 	// since the codes are larger than 8 bits, we can do this
 	while (!inputStream.eof())
 	{
-		uint32_t code=readCode();
-		if (_hasBlocks && code==256U)
+		if (uint32_t code{readCode()};_hasBlocks && code==256U)
 		{
 			reset();
 			if (inputStream.eof())

@@ -22,54 +22,52 @@ std::shared_ptr<XPKDecompressor> HFMNDecompressor::create(uint32_t hdr,uint32_t 
 }
 
 HFMNDecompressor::HFMNDecompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify) :
-	XPKDecompressor(recursionLevel),
-	_packedData(packedData)
+	XPKDecompressor{recursionLevel},
+	_packedData{packedData}
 {
 	if (!detectHeaderXPK(hdr) || packedData.size()<4)
 		throw Decompressor::InvalidFormatError();
-	uint16_t tmp=packedData.readBE16(0);
-	if (tmp&3U) throw Decompressor::InvalidFormatError();	// header is being written in 4 byte chunks
+	uint16_t tmp{packedData.readBE16(0)};
+	if (tmp&3U)
+		throw Decompressor::InvalidFormatError();	// header is being written in 4 byte chunks
 	_headerSize=tmp&0x1ffU;					// the top 7 bits are flags. No definition what they are and they are ignored in decoder...
-	if (OverflowCheck::sum(_headerSize,4U)>packedData.size()) throw Decompressor::InvalidFormatError();
+	if (OverflowCheck::sum(_headerSize,4U)>packedData.size())
+		throw Decompressor::InvalidFormatError();
 	_rawSize=packedData.readBE16(_headerSize+2U);
-	if (!_rawSize) throw Decompressor::InvalidFormatError();
+	if (!_rawSize)
+		throw Decompressor::InvalidFormatError();
 	_headerSize+=4;
-}
-
-HFMNDecompressor::~HFMNDecompressor()
-{
-	// nothing needed
 }
 
 const std::string &HFMNDecompressor::getSubName() const noexcept
 {
-	static std::string name="XPK-HFMN: Huffman compressor";
+	static std::string name{"XPK-HFMN: Huffman compressor"};
 	return name;
 }
 
 void HFMNDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData,bool verify)
 {
-	ForwardOutputStream outputStream(rawData,0,rawData.size());
+	ForwardOutputStream outputStream{rawData,0,rawData.size()};
 	HuffmanDecoder<uint32_t> decoder;
 
-	if (rawData.size()!=_rawSize) throw Decompressor::DecompressionError();
+	if (rawData.size()!=_rawSize)
+		throw Decompressor::DecompressionError();
 	{
-		ForwardInputStream inputStream(_packedData,2,_headerSize);
-		MSBBitReader<ForwardInputStream> bitReader(inputStream);
+		ForwardInputStream inputStream{_packedData,2,_headerSize};
+		MSBBitReader<ForwardInputStream> bitReader{inputStream};
 		auto readBit=[&]()->uint32_t
 		{
 			return bitReader.readBits8(1);
 		};
 
-		uint32_t code=1;
-		uint32_t codeBits=1;
+		uint32_t code{1};
+		uint32_t codeBits{1};
 		for (;;)
 		{
 			if (!readBit())
 			{
-				uint32_t lit=0;
-				for (uint32_t i=0;i<8;i++) lit|=readBit()<<i;
-				decoder.insert(HuffmanCode<uint32_t>{codeBits,code,lit});
+				uint32_t lit=rotateBits(bitReader.readBits8(8),8);
+				decoder.insert(HuffmanCode{codeBits,code,lit});
 				while (!(code&1) && codeBits)
 				{
 					codeBits--;
@@ -84,8 +82,8 @@ void HFMNDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 		}
 	}
 
-	ForwardInputStream inputStream(_packedData,_headerSize,_packedData.size());
-	MSBBitReader<ForwardInputStream> bitReader(inputStream);
+	ForwardInputStream inputStream{_packedData,_headerSize,_packedData.size()};
+	MSBBitReader<ForwardInputStream> bitReader{inputStream};
 	auto readBit=[&]()->uint32_t
 	{
 		return bitReader.readBits8(1);

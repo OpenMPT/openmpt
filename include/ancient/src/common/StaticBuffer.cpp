@@ -6,14 +6,9 @@
 namespace ancient::internal
 {
 
-ConstStaticBuffer::ConstStaticBuffer(const uint8_t *data,size_t length) :
-	_data(data),
-	_length(length)
-{
-	// nothing needed
-}
-
-ConstStaticBuffer::~ConstStaticBuffer()
+ConstStaticBuffer::ConstStaticBuffer(const uint8_t *data,size_t length) noexcept :
+	_data{data},
+	_length{length}
 {
 	// nothing needed
 }

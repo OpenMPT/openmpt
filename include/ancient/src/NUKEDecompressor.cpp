@@ -6,6 +6,7 @@
 #include "DLTADecode.hpp"
 #include "InputStream.hpp"
 #include "OutputStream.hpp"
+#include "VariableLengthCodeDecoder.hpp"
 #include "common/Common.hpp"
 
 
@@ -23,22 +24,18 @@ std::shared_ptr<XPKDecompressor> NUKEDecompressor::create(uint32_t hdr,uint32_t 
 }
 
 NUKEDecompressor::NUKEDecompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify) :
-	XPKDecompressor(recursionLevel),
-	_packedData(packedData)
+	XPKDecompressor{recursionLevel},
+	_packedData{packedData}
 {
-	if (!detectHeaderXPK(hdr)) throw Decompressor::InvalidFormatError();
+	if (!detectHeaderXPK(hdr))
+		throw Decompressor::InvalidFormatError();
 	if (hdr==FourCC("DUKE")) _isDUKE=true;
-}
-
-NUKEDecompressor::~NUKEDecompressor()
-{
-	// nothing needed
 }
 
 const std::string &NUKEDecompressor::getSubName() const noexcept
 {
-	static std::string nameN="XPK-NUKE: LZ77-compressor";
-	static std::string nameD="XPK-DUKE: LZ77-compressor with delta encoding";
+	static std::string nameN{"XPK-NUKE: LZ77-compressor"};
+	static std::string nameD{"XPK-DUKE: LZ77-compressor with delta encoding"};
 	return (_isDUKE)?nameD:nameN;
 }
 
@@ -47,14 +44,14 @@ void NUKEDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 	// there are 2 streams, reverse stream for bytes and
 	// normal stream for bits, the bit stream is divided
 	// into single bit, 2 bit, 4 bit and random accumulator
-	ForwardInputStream forwardInputStream(_packedData,0,_packedData.size());
-	BackwardInputStream backwardInputStream(_packedData,0,_packedData.size());
+	ForwardInputStream forwardInputStream{_packedData,0,_packedData.size()};
+	BackwardInputStream backwardInputStream{_packedData,0,_packedData.size()};
 	forwardInputStream.link(backwardInputStream);
 	backwardInputStream.link(forwardInputStream);
-	MSBBitReader<ForwardInputStream> bit1Reader(forwardInputStream);
-	MSBBitReader<ForwardInputStream> bit2Reader(forwardInputStream);
-	LSBBitReader<ForwardInputStream> bit4Reader(forwardInputStream);
-	MSBBitReader<ForwardInputStream> bitXReader(forwardInputStream);
+	MSBBitReader<ForwardInputStream> bit1Reader{forwardInputStream};
+	MSBBitReader<ForwardInputStream> bit2Reader{forwardInputStream};
+	LSBBitReader<ForwardInputStream> bit4Reader{forwardInputStream};
+	MSBBitReader<ForwardInputStream> bitXReader{forwardInputStream};
 	auto readBit=[&]()->uint32_t
 	{
 		return bit1Reader.readBitsBE16(1);
@@ -76,13 +73,18 @@ void NUKEDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 		return backwardInputStream.readByte();
 	};
 
-	ForwardOutputStream outputStream(rawData,0,rawData.size());
+	ForwardOutputStream outputStream{rawData,0,rawData.size()};
+
+	VariableLengthCodeDecoder vlcDecoder{
+		 4, 6, 8, 9,
+		-4, 7, 9,11,13,14,
+		-5, 7, 9,11,13,14};
 
 	for (;;)
 	{
 		if (!readBit())
 		{
-			uint32_t count=0;
+			uint32_t count{0};
 			if (readBit())
 			{
 				count=1;
@@ -97,17 +99,9 @@ void NUKEDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 			for (uint32_t i=0;i<count;i++) outputStream.writeByte(readByte());
 		}
 		if (outputStream.eof()) break;
-		uint32_t distanceIndex=read4Bits();
-		static const uint8_t distanceBits[16]={
-			4,6,8,9,
-			4,7,9,11,13,14,
-			5,7,9,11,13,14};
-		static const uint32_t distanceAdditions[16]={
-			0,0x10,0x50,0x150,
-			0,0x10,0x90,0x290,0xa90,0x2a90,
-			0,0x20,0xa0,0x2a0,0xaa0,0x2aa0};
-		uint32_t distance=readBits(distanceBits[distanceIndex])+distanceAdditions[distanceIndex];
-		uint32_t count=(distanceIndex<4)?2:(distanceIndex<10)?3:0;
+		uint32_t distanceIndex{read4Bits()};
+		uint32_t distance{vlcDecoder.decode(readBits,distanceIndex)};
+		uint32_t count{(distanceIndex<4U)?2U:(distanceIndex<10)?3U:0};
 		if (!count)
 		{
 			count=read2Bits();

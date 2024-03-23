@@ -5,6 +5,8 @@
 
 #include "Decompressor.hpp"
 
+#include <array>
+
 namespace ancient::internal
 {
 
@@ -12,14 +14,14 @@ class FreezeDecompressor : public Decompressor
 {
 public:
 	FreezeDecompressor(const Buffer &packedData,bool exactSizeKnown,bool verify);
-	virtual ~FreezeDecompressor();
+	~FreezeDecompressor() noexcept=default;
 
-	virtual size_t getRawSize() const noexcept override final;
-	virtual size_t getPackedSize() const noexcept override final;
+	size_t getRawSize() const noexcept final;
+	size_t getPackedSize() const noexcept final;
 
-	virtual const std::string &getName() const noexcept override final;
+	const std::string &getName() const noexcept final;
 
-	virtual void decompressImpl(Buffer &rawData,bool verify) override final;
+	void decompressImpl(Buffer &rawData,bool verify) final;
 
 	static bool detectHeader(uint32_t hdr) noexcept;
 
@@ -28,12 +30,12 @@ public:
 private:
 	const Buffer	&_packedData;
 
-	size_t		_packedSize=0;
-	size_t		_rawSize=0;
+	size_t		_packedSize{0};
+	size_t		_rawSize{0};
 	bool		_isOldVersion;
 	bool		_exactSizeKnown;
 
-	uint8_t		_hufTable[8];
+	std::array<uint8_t,8> _hufTable;
 };
 
 }

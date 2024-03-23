@@ -6,7 +6,7 @@
 namespace ancient::internal
 {
 
-uint32_t rotateBits(uint32_t value,uint32_t count)
+uint32_t rotateBits(uint32_t value,uint32_t count) noexcept
 {
 	static const uint8_t rotateNibble[16]={
 		0x0,0x8,0x4,0xc,

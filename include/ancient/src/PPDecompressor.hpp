@@ -7,6 +7,8 @@
 #include "XPKDecompressor.hpp"
 #include "InputStream.hpp"
 
+#include <array>
+
 namespace ancient::internal
 {
 
@@ -16,8 +18,8 @@ private:
 	class PPState : public XPKDecompressor::State
 	{
 	public:
-		PPState(uint32_t mode);
-		virtual ~PPState();
+		PPState(uint32_t mode) noexcept;
+		~PPState() noexcept=default;
 
 		uint32_t _cachedMode;
 	};
@@ -25,16 +27,16 @@ private:
 public:
 	PPDecompressor(const Buffer &packedData,bool exactSizeKnown,bool verify);
 	PPDecompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify);
-	virtual ~PPDecompressor();
+	~PPDecompressor() noexcept=default;
 
-	virtual const std::string &getName() const noexcept override final;
-	virtual const std::string &getSubName() const noexcept override final;
+	const std::string &getName() const noexcept final;
+	const std::string &getSubName() const noexcept final;
 
-	virtual size_t getPackedSize() const noexcept override final;
-	virtual size_t getRawSize() const noexcept override final;
+	size_t getPackedSize() const noexcept final;
+	size_t getRawSize() const noexcept final;
 
-	virtual void decompressImpl(Buffer &rawData,bool verify) override final;
-	virtual void decompressImpl(Buffer &rawData,const Buffer &previousData,bool verify) override final;
+	void decompressImpl(Buffer &rawData,bool verify) final;
+	void decompressImpl(Buffer &rawData,const Buffer &previousData,bool verify) final;
 
 	static bool detectHeader(uint32_t hdr) noexcept;
 	static bool detectHeaderXPK(uint32_t hdr) noexcept;
@@ -47,7 +49,7 @@ private:
 	{
 	public:
 		DoneException(uint32_t key) noexcept : _key(key) {}
-		virtual ~DoneException() {}
+		~DoneException() noexcept=default;
 
 		uint32_t getKey() const noexcept { return _key; }
 
@@ -58,14 +60,14 @@ private:
 	void findKeyRound(BackwardInputStream &inputStream,LSBBitReader<BackwardInputStream> &bitReader,uint32_t keyBits,uint32_t keyMask,uint32_t outputPosition);
 	void findKey(uint32_t keyBits,uint32_t keyMask);
 
-	const Buffer	&_packedData;
+	const Buffer		&_packedData;
 
-	size_t		_dataStart=0;
-	size_t		_rawSize=0;
-	uint8_t		_startShift=0;
-	uint8_t		_modeTable[4];
-	bool		_isObsfuscated=false;
-	bool		_isXPK=false;
+	size_t			_dataStart{0};
+	size_t			_rawSize{0};
+	uint8_t			_startShift{0};
+	std::array<uint8_t,4>	_modeTable;
+	bool			_isObsfuscated{false};
+	bool			_isXPK{false};
 };
 
 }

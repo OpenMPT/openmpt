@@ -10,6 +10,7 @@
 
 #include <map>
 #include <list>
+#include <array>
 
 namespace ancient::internal
 {
@@ -25,20 +26,16 @@ std::shared_ptr<XPKDecompressor> PPMQDecompressor::create(uint32_t hdr,uint32_t 
 }
 
 PPMQDecompressor::PPMQDecompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify) :
-	XPKDecompressor(recursionLevel),
-	_packedData(packedData)
+	XPKDecompressor{recursionLevel},
+	_packedData{packedData}
 {
-	if (!detectHeaderXPK(hdr)) throw Decompressor::InvalidFormatError();
-}
-
-PPMQDecompressor::~PPMQDecompressor()
-{
-	// nothing needed
+	if (!detectHeaderXPK(hdr))
+		throw Decompressor::InvalidFormatError();
 }
 
 const std::string &PPMQDecompressor::getSubName() const noexcept
 {
-	static std::string name="XPK-PPMQ: PPM compressor";
+	static std::string name{"XPK-PPMQ: PPM compressor"};
 	return name;
 }
 
@@ -52,7 +49,6 @@ void PPMQDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 		{
 			// nothing needed
 		}
-
 		~BitReader() noexcept=default;
 
 		uint32_t readBit() final
@@ -70,12 +66,12 @@ void PPMQDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 	};
 
 
-	ForwardInputStream inputStream(_packedData,0,_packedData.size(),true);
-	ForwardOutputStream outputStream(rawData,0,rawData.size());
-	BitReader bitReader(inputStream);
+	ForwardInputStream inputStream{_packedData,0,_packedData.size(),16U};
+	ForwardOutputStream outputStream{rawData,0,rawData.size()};
+	BitReader bitReader{inputStream};
 
-	uint32_t history=0;
-	uint8_t history5=0;
+	uint32_t history{0};
+	uint8_t history5{0};
 	auto addToHistory=[&](uint8_t ch)
 	{
 		history5=history>>24U;
@@ -87,12 +83,12 @@ void PPMQDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 		// files shorter than 5 bytes are not supported by the encoder.
 		// In practice this most probably just means padding
 		if (outputStream.eof()) return;
-		uint8_t ch=bitReader.readBits(8U);
+		uint8_t ch{uint8_t(bitReader.readBits(8U))};
 		outputStream.writeByte(ch);
 		addToHistory(ch);
 	}
 
-	RangeDecoder decoder(bitReader,bitReader.readBits(16));
+	RangeDecoder decoder{bitReader,uint16_t(bitReader.readBits(16))};
 
 	class InclusionList
 	{
@@ -104,7 +100,6 @@ void PPMQDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 			{
 				parent.registerCallback(this);
 			}
-
 			~InclusionCallback() noexcept=default;
 
 			virtual void symbolIncluded(uint8_t symbol) noexcept=0;
@@ -116,7 +111,6 @@ void PPMQDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 			for (uint32_t i=0;i<256U;i++)
 				_tree.set(i,1);
 		}
-
 		~InclusionList() noexcept=default;
 
 		void reset() noexcept
@@ -171,7 +165,6 @@ void PPMQDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 		{
 			for (uint32_t i=0;i<256U;i++) _charCounts[i]=0;
 		}
-
 		~ShadedFrequencyTree() noexcept=default;
 
 		uint16_t operator[](uint8_t symbol) const
@@ -224,17 +217,17 @@ void PPMQDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 
 		InclusionList				&_inclusionList;
 		FrequencyTree<uint16_t,uint8_t,256U>	_tree;
-		uint16_t				_charCounts[256];
+		std::array<uint16_t,256>		_charCounts;
 	};
 
-	// Sparse frequency map with MFT, no good data type for this one.
-	// Note that there is no sense to do MFT here. It is just something
+	// Sparse frequency map with MTF, no good data type for this one.
+	// Note that there is no sense to do MTF here. It is just something
 	// the original implementation did (maybe to optimize linked list traversing)
 	// Worse yet, this embeds to the exclusion logic in the original.
 	// By using just tree and separate MFT, the mem-usage would be in gigabytes -> lets not do that
 	// No matter how I rotate this rubics cube, the star's wont align to do something nice
 	// so lets do something ugly
-	class ShadedSparseFMTFrequencyList
+	class ShadedSparseMTFFrequencyList
 	{
 	public:
 		struct Node
@@ -243,16 +236,16 @@ void PPMQDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 			uint8_t				symbol;
 		};
 
-		ShadedSparseFMTFrequencyList(InclusionList &inclusionList) noexcept :
+		ShadedSparseMTFFrequencyList(InclusionList &inclusionList) noexcept :
 			_inclusionList{inclusionList}
 		{
+			// nothing needed
 		}
-
-		~ShadedSparseFMTFrequencyList() noexcept=default;
+		~ShadedSparseMTFFrequencyList() noexcept=default;
 
 		uint16_t getTotal() const noexcept
 		{
-			uint16_t ret=0;
+			uint16_t ret{0};
 			for (auto &node : _nodes)
 			{
 				if (_inclusionList.isIncluded(node.symbol))
@@ -286,15 +279,15 @@ void PPMQDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 
 		Node &decode(uint16_t value,uint16_t &low,uint16_t &freq)
 		{
-			uint16_t tmp=0;
+			uint16_t tmp{0};
 			for (auto it=_nodes.begin();it!=_nodes.end();it++)
 			{
-				auto &node=*it;
+				auto &node{*it};
 				if (_inclusionList.isIncluded(node.symbol))
 				{
 					if (value<tmp+node.freq)
 					{
-						Node nodeCopy=node;
+						Node nodeCopy{node};
 						freq=node.freq;
 						low=tmp;
 						_nodes.erase(it);
@@ -332,7 +325,6 @@ void PPMQDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 		{
 			// nothing needed
 		}
-
 		virtual ~Model() noexcept=default;
 
 		virtual bool decode(uint32_t history,uint8_t history5,uint8_t &ch)=0;
@@ -358,12 +350,11 @@ void PPMQDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 				_totals[i][j]=j?(j<<2)+1U:2U;
 			}
 		}
-
 		~Model2() noexcept=default;
 
 		bool decode(uint32_t history,uint8_t history5,uint8_t &ch) final
 		{
-			auto context=_cf(history,history5);
+			auto context{_cf(history,history5)};
 
 			auto scale=[&](Context &ctx,uint16_t total)
 			{
@@ -376,12 +367,12 @@ void PPMQDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 
 			if (auto it=_contexts.find(context);it!=_contexts.end())
 			{
-				Context &ctx=it->second;
+				Context &ctx{it->second};
 				if (ctx.nodes.size()==1U)
 				{
-					auto &node=ctx.nodes.front();
-					uint16_t count=std::min(node.freq,uint16_t{17U});
-					uint32_t index=std::get<0>(context)&0x1fU;
+					auto &node{ctx.nodes.front()};
+					uint16_t count{std::min(node.freq,uint16_t{17U})};
+					uint32_t index{std::get<0>(context)&0x1fU};
 					if (_totals[index][count]>16300U)
 					{
 						_freqs[index][count]>>=1U;
@@ -395,10 +386,10 @@ void PPMQDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 					if (node.freq>16300U) node.freq>>=1U;
 					if (_inclusionList.isIncluded(node.symbol))
 					{
-						uint16_t freq=_freqs[index][count];
-						uint16_t total=_totals[index][count];
+						uint16_t freq{_freqs[index][count]};
+						uint16_t total{_totals[index][count]};
 
-						uint16_t value=_decoder.decode(total);
+						uint16_t value{_decoder.decode(total)};
 						if (value<freq)
 						{
 							_decoder.scale(0,freq,total);
@@ -418,8 +409,8 @@ void PPMQDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 					_addNewContext=true;
 					return false;
 				}
-				uint16_t total=ctx.nodes.getTotal();
-				uint16_t value=_decoder.decode(total+ctx.escapeFreq);
+				uint16_t total{ctx.nodes.getTotal()};
+				uint16_t value{_decoder.decode(total+ctx.escapeFreq)};
 				if (value<ctx.escapeFreq)
 				{
 					_decoder.scale(0,ctx.escapeFreq,total+ctx.escapeFreq);
@@ -431,7 +422,7 @@ void PPMQDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 					return false;
 				} else {
 					uint16_t low,freq;
-					auto &node=ctx.nodes.decode(value-ctx.escapeFreq,low,freq);
+					auto &node{ctx.nodes.decode(value-ctx.escapeFreq,low,freq)};
 					_decoder.scale(ctx.escapeFreq+low,ctx.escapeFreq+low+freq,total+ctx.escapeFreq);
 					if (node.freq==1U && ctx.escapeFreq>1U) ctx.escapeFreq--;
 					node.freq++;
@@ -468,19 +459,18 @@ void PPMQDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 			{
 				nodes.addNew(ch);
 			};
-
 			~Context() noexcept=default;
 
 			uint16_t			escapeFreq;
-			ShadedSparseFMTFrequencyList	nodes;
+			ShadedSparseMTFFrequencyList	nodes;
 		};
 
 		contextFunc				_cf;
 		bool					_addNewContext=false;
 		std::tuple<uint32_t,uint16_t,uint8_t>	_delayedContext;
 		std::map<std::tuple<uint32_t,uint16_t,uint8_t>,Context> _contexts;
-		uint16_t				_freqs[32][18];
-		uint16_t				_totals[32][18];
+		std::array<std::array<uint16_t,18>,32>	_freqs;
+		std::array<std::array<uint16_t,18>,32>	_totals;
 	};
 
 	class Model1 : public Model
@@ -494,12 +484,11 @@ void PPMQDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 		{
 			// nothing needed
 		}
-
 		~Model1() noexcept=default;
 
 		bool decode(uint32_t history,uint8_t history5,uint8_t &ch) final
 		{
-			auto context=_cf(history);
+			auto context{_cf(history)};
 
 			auto scale=[&](Context &ctx,uint16_t total)
 			{
@@ -512,9 +501,9 @@ void PPMQDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 
 			if (auto it=_contexts.find(context);it!=_contexts.end())
 			{
-				Context &ctx=it->second;
-				uint16_t total=ctx.nodes.getTotal();
-				uint16_t value=_decoder.decode(total+ctx.escapeFreq);
+				Context &ctx{it->second};
+				uint16_t total{ctx.nodes.getTotal()};
+				uint16_t value{_decoder.decode(total+ctx.escapeFreq)};
 				if (value<ctx.escapeFreq)
 				{
 					_decoder.scale(0,ctx.escapeFreq,total+ctx.escapeFreq);
@@ -526,7 +515,7 @@ void PPMQDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 					return false;
 				} else {
 					uint16_t low,freq;
-					auto &node=ctx.nodes.decode(value-ctx.escapeFreq,low,freq);
+					auto &node{ctx.nodes.decode(value-ctx.escapeFreq,low,freq)};
 					_decoder.scale(ctx.escapeFreq+low,ctx.escapeFreq+low+freq,total+ctx.escapeFreq);
 					if (node.freq==1U && ctx.escapeFreq>1U) ctx.escapeFreq--;
 					node.freq++;
@@ -563,11 +552,10 @@ void PPMQDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 			{
 				nodes.addNew(ch);
 			};
-
 			~Context() noexcept=default;
 
 			uint16_t			escapeFreq;
-			ShadedSparseFMTFrequencyList	nodes;
+			ShadedSparseMTFFrequencyList	nodes;
 		};
 
 		contextFunc				_cf;
@@ -592,7 +580,7 @@ void PPMQDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 
 		bool decode(uint32_t history,uint8_t history5,uint8_t &ch) final
 		{
-			uint16_t value=_decoder.decode(_tree.getTotal()+_escapeFreq);
+			uint16_t value{_decoder.decode(_tree.getTotal()+_escapeFreq)};
 			if (value<_escapeFreq)
 			{
 				_decoder.scale(0,_escapeFreq,_tree.getTotal()+_escapeFreq);
@@ -604,7 +592,7 @@ void PPMQDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 				decodeFallback(ch);
 			} else {
 				uint16_t low,freq;
-				uint8_t symbol=_tree.decode(value-_escapeFreq,low,freq);
+				uint8_t symbol{_tree.decode(value-_escapeFreq,low,freq)};
 				_decoder.scale(_escapeFreq+low,_escapeFreq+low+freq,_tree.getTotal()+_escapeFreq);
 
 				switch (_tree[symbol])
@@ -635,7 +623,7 @@ void PPMQDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 	private:
 		void decodeFallback(uint8_t &ch)
 		{
-			uint16_t value=_decoder.decode(_inclusionList.getTotal());
+			uint16_t value{_decoder.decode(_inclusionList.getTotal())};
 			uint16_t low,freq;
 			ch=_inclusionList.decode(value,low,freq);
 			_decoder.scale(low,low+freq,_inclusionList.getTotal());
@@ -644,7 +632,7 @@ void PPMQDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 			_escapeFreq++;
 		}
 
-		uint16_t				_escapeFreq=1U;
+		uint16_t				_escapeFreq{1U};
 		ShadedFrequencyTree			_tree;
 	};
 
@@ -653,13 +641,13 @@ void PPMQDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 	// Different sources put different names on the models: PPM, PPMI etc. with different contexts
 	// Also, nothing seems to be exactly same as some public sources. The xpk library is "special"
 	// -> I just call them with numbers and letters so I don't get confused
-	Model2 model2A(decoder,inclusionList,[](uint32_t c,uint8_t c5)noexcept{return std::make_tuple(c,uint16_t(c^(c>>15U)),c5);});
-	Model2 model2B(decoder,inclusionList,[](uint32_t c,uint8_t c5)noexcept{return std::make_tuple(c,uint16_t(c^(c>>15U)),uint8_t{0});});
-	Model1 model1A(decoder,inclusionList,[](uint32_t c)noexcept{return std::make_pair(c&0xff'ffffU,uint16_t(c^(c>>7U)));});
-	Model1 model1B(decoder,inclusionList,[](uint32_t c)noexcept{return std::make_pair(c&0xffffU,uint16_t(c&0xffffU));});
-	Model1 model1C(decoder,inclusionList,[](uint32_t c)noexcept{return std::make_pair(c&0xffU,uint16_t(c&0xffU));});
-	Model0 model0(decoder,inclusionList);
-	Model *models[6]={&model2A,&model2B,&model1A,&model1B,&model1C,&model0};
+	Model2 model2A{decoder,inclusionList,[](uint32_t c,uint8_t c5)noexcept{return std::make_tuple(c,uint16_t(c^(c>>15U)),c5);}};
+	Model2 model2B{decoder,inclusionList,[](uint32_t c,uint8_t c5)noexcept{return std::make_tuple(c,uint16_t(c^(c>>15U)),uint8_t{0});}};
+	Model1 model1A{decoder,inclusionList,[](uint32_t c)noexcept{return std::make_pair(c&0xff'ffffU,uint16_t(c^(c>>7U)));}};
+	Model1 model1B{decoder,inclusionList,[](uint32_t c)noexcept{return std::make_pair(c&0xffffU,uint16_t(c&0xffffU));}};
+	Model1 model1C{decoder,inclusionList,[](uint32_t c)noexcept{return std::make_pair(c&0xffU,uint16_t(c&0xffU));}};
+	Model0 model0{decoder,inclusionList};
+	const std::array<Model*,6> models{&model2A,&model2B,&model1A,&model1B,&model1C,&model0};
 
 	while (!outputStream.eof())
 	{
