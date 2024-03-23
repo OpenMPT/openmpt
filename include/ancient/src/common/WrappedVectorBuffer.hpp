@@ -16,15 +16,15 @@ namespace ancient::internal
 class WrappedVectorBuffer : public Buffer
 {
 public:
-	WrappedVectorBuffer(std::vector<uint8_t> &refdata);
-	~WrappedVectorBuffer();
+	WrappedVectorBuffer(std::vector<uint8_t> &refdata) noexcept;
+	~WrappedVectorBuffer() noexcept=default;
 
-	virtual const uint8_t *data() const noexcept override final;
-	virtual uint8_t *data() override final;
-	virtual size_t size() const noexcept override final;
+	const uint8_t *data() const noexcept final;
+	uint8_t *data() final;
+	size_t size() const noexcept final;
 
-	virtual bool isResizable() const noexcept override final;
-	virtual void resize(size_t newSize) override final;
+	bool isResizable() const noexcept final;
+	void resize(size_t newSize) final;
 
 private:
 	std::vector<uint8_t> & _refdata;

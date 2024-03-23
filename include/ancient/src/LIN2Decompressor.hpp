@@ -12,12 +12,11 @@ class LIN2Decompressor : public XPKDecompressor
 {
 public:
 	LIN2Decompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify);
+	~LIN2Decompressor() noexcept=default;
 
-	virtual ~LIN2Decompressor();
+	const std::string &getSubName() const noexcept final;
 
-	virtual const std::string &getSubName() const noexcept override final;
-
-	virtual void decompressImpl(Buffer &rawData,const Buffer &previousData,bool verify) override final;
+	void decompressImpl(Buffer &rawData,const Buffer &previousData,bool verify) final;
 
 	static bool detectHeaderXPK(uint32_t hdr) noexcept;
 	static std::shared_ptr<XPKDecompressor> create(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify);
@@ -25,9 +24,9 @@ public:
 private:
 	const Buffer	&_packedData;
 
-	uint32_t	_ver=0;
-	size_t		_endStreamOffset=0;
-	size_t		_midStreamOffset=0;
+	uint32_t	_ver{0};
+	size_t		_endStreamOffset{0};
+	size_t		_midStreamOffset{0};
 };
 
 }

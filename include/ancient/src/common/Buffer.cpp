@@ -7,48 +7,6 @@
 namespace ancient::internal
 {
 
-Buffer::Error::Error() noexcept
-{
-	// nothing needed
-}
-
-Buffer::Error::~Error()
-{
-	// nothing needed
-}
-
-Buffer::OutOfBoundsError::OutOfBoundsError() noexcept
-{
-	// nothing needed
-}
-
-Buffer::OutOfBoundsError::~OutOfBoundsError()
-{
-	// nothing needed
-}
-
-Buffer::InvalidOperationError::InvalidOperationError() noexcept
-{
-	// nothing needed
-}
-
-Buffer::InvalidOperationError::~InvalidOperationError()
-{
-	// nothing needed
-}
-
-// ---
-
-Buffer::Buffer() noexcept
-{
-	// nothing needed
-}
-
-Buffer::~Buffer()
-{
-	// nothing needed
-}
-
 void Buffer::resize(size_t newSize)
 {
 	throw InvalidOperationError();

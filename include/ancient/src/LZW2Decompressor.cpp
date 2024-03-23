@@ -20,29 +20,25 @@ std::shared_ptr<XPKDecompressor> LZW2Decompressor::create(uint32_t hdr,uint32_t 
 }
 
 LZW2Decompressor::LZW2Decompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify) :
-	XPKDecompressor(recursionLevel),
-	_packedData(packedData)
+	XPKDecompressor{recursionLevel},
+	_packedData{packedData}
 {
-	if (!detectHeaderXPK(hdr)) throw Decompressor::InvalidFormatError();
+	if (!detectHeaderXPK(hdr))
+		throw Decompressor::InvalidFormatError();
 	_ver=(hdr==FourCC("LZW2"))?2:3;
-}
-
-LZW2Decompressor::~LZW2Decompressor()
-{
-	// nothing needed
 }
 
 const std::string &LZW2Decompressor::getSubName() const noexcept
 {
-	static std::string name2="XPK-LZW2: LZW2 CyberYAFA compressor";
-	static std::string name3="XPK-LZW3: LZW3 CyberYAFA compressor";
+	static std::string name2{"XPK-LZW2: LZW2 CyberYAFA compressor"};
+	static std::string name3{"XPK-LZW3: LZW3 CyberYAFA compressor"};
 	return (_ver==2)?name2:name3;
 }
 
 void LZW2Decompressor::decompressImpl(Buffer &rawData,const Buffer &previousData,bool verify)
 {
-	ForwardInputStream inputStream(_packedData,0,_packedData.size());
-	LSBBitReader<ForwardInputStream> bitReader(inputStream);
+	ForwardInputStream inputStream{_packedData,0,_packedData.size()};
+	LSBBitReader<ForwardInputStream> bitReader{inputStream};
 	auto readBit=[&]()->uint32_t
 	{
 		return bitReader.readBitsBE32(1);
@@ -52,7 +48,7 @@ void LZW2Decompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 		return inputStream.readByte();
 	};
 
-	ForwardOutputStream outputStream(rawData,0,rawData.size());
+	ForwardOutputStream outputStream{rawData,0,rawData.size()};
 
 	while (!outputStream.eof())
 	{
@@ -60,11 +56,12 @@ void LZW2Decompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 		{
 			outputStream.writeByte(readByte());
 		} else {
-			uint32_t distance=uint32_t(readByte())<<8;
+			uint32_t distance{uint32_t(readByte())<<8};
 			distance|=uint32_t(readByte());
-			if (!distance) throw Decompressor::DecompressionError();
+			if (!distance)
+				throw Decompressor::DecompressionError();
 			distance=65536-distance;
-			uint32_t count=uint32_t(readByte())+4;
+			uint32_t count{uint32_t(readByte())+4};
 
 			outputStream.copy(distance,count);
 		}

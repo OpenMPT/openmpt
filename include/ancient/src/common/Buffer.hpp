@@ -14,34 +14,34 @@ namespace ancient::internal
 class Buffer
 {
 protected:
-	Buffer() noexcept;
+	Buffer() noexcept=default;
 
 public:
 	class Error : public std::exception
 	{
 	public:
-		Error() noexcept;
-		virtual ~Error();
+		Error() noexcept=default;
+		virtual ~Error() noexcept=default;
 	};
 
 	class OutOfBoundsError : public Error
 	{
 	public:
-		OutOfBoundsError() noexcept;
-		virtual ~OutOfBoundsError();
+		OutOfBoundsError() noexcept=default;
+		virtual ~OutOfBoundsError() noexcept=default;
 	};
 
 	class InvalidOperationError : public Error
 	{
 	public:
-		InvalidOperationError() noexcept;
-		virtual ~InvalidOperationError();
+		InvalidOperationError() noexcept=default;
+		virtual ~InvalidOperationError() noexcept=default;
 	};
 
 	Buffer(const Buffer&)=delete;
 	Buffer& operator=(const Buffer&)=delete;
 
-	virtual ~Buffer();
+	virtual ~Buffer() noexcept=default;
 
 	virtual const uint8_t *data() const noexcept=0;
 	virtual uint8_t *data()=0;

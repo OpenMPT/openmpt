@@ -6,15 +6,10 @@
 namespace ancient::internal
 {
 
-WrappedVectorBuffer::WrappedVectorBuffer(std::vector<uint8_t> &refdata) :
-	_refdata(refdata)
+WrappedVectorBuffer::WrappedVectorBuffer(std::vector<uint8_t> &refdata) noexcept :
+	_refdata{refdata}
 {
-	return;
-}
-
-WrappedVectorBuffer::~WrappedVectorBuffer()
-{
-	return;
+	// nothing needed
 }
 
 const uint8_t *WrappedVectorBuffer::data() const noexcept

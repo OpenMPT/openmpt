@@ -21,55 +21,51 @@ std::shared_ptr<XPKDecompressor> BLZWDecompressor::create(uint32_t hdr,uint32_t 
 }
 
 BLZWDecompressor::BLZWDecompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify) :
-	XPKDecompressor(recursionLevel),
-	_packedData(packedData)
+	XPKDecompressor{recursionLevel},
+	_packedData{packedData}
 {
-	if (!detectHeaderXPK(hdr)) throw Decompressor::InvalidFormatError();
+	if (!detectHeaderXPK(hdr))
+		throw Decompressor::InvalidFormatError();
 	_maxBits=_packedData.readBE16(0);
-	if (_maxBits<9 || _maxBits>20) throw Decompressor::InvalidFormatError();;
+	if (_maxBits<9 || _maxBits>20)
+		throw Decompressor::InvalidFormatError();;
 	_stackLength=uint32_t(_packedData.readBE16(2))+5;
-}
-
-BLZWDecompressor::~BLZWDecompressor()
-{
-	// nothing needed
 }
 
 const std::string &BLZWDecompressor::getSubName() const noexcept
 {
-	static std::string name="XPK-BLZW: LZW-compressor";
+	static std::string name{"XPK-BLZW: LZW-compressor"};
 	return name;
 }
 
 void BLZWDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData,bool verify)
 {
-	ForwardInputStream inputStream(_packedData,4,_packedData.size());
-	MSBBitReader<ForwardInputStream> bitReader(inputStream);
+	ForwardInputStream inputStream{_packedData,4,_packedData.size()};
+	MSBBitReader<ForwardInputStream> bitReader{inputStream};
 	auto readBits=[&](uint32_t count)->uint32_t
 	{
 		return bitReader.readBits8(count);
 	};
 
-	ForwardOutputStream outputStream(rawData,0,rawData.size());
+	ForwardOutputStream outputStream{rawData,0,rawData.size()};
 	auto writeByte=[&](uint8_t value)
 	{
 		outputStream.writeByte(value);
 	};
 
-	uint32_t codeBits=9U;
+	uint32_t codeBits{9U};
 	auto readCode=[&]()->uint32_t
 	{
 		return readBits(codeBits);
 	};
 
 	uint32_t firstCode=readCode();
-	LZWDecoder decoder(1<<_maxBits,259U,_stackLength,firstCode);
+	LZWDecoder decoder{1U<<_maxBits,259U,_stackLength,firstCode};
 	decoder.write(firstCode,false,writeByte);
 
 	while (!outputStream.eof())
 	{
-		uint32_t code=readBits(codeBits);
-		switch (code)
+		switch (uint32_t code{readBits(codeBits)};code)
 		{
 			case 256:
 			throw Decompressor::DecompressionError();

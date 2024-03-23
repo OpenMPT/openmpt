@@ -15,7 +15,7 @@ class LZWDecoder
 {
 public:
 	LZWDecoder(uint32_t maxCode,uint32_t literalCodes,uint32_t stackLength,uint32_t firstCode);
-	~LZWDecoder();
+	~LZWDecoder() noexcept=default;
 
 	void reset(uint32_t firstCode);
 	void add(uint32_t code);
@@ -30,9 +30,9 @@ public:
 			return (value<_literalCodes)?value:_suffix[value-_literalCodes];
 		};
 
-		uint32_t stackPos=0;
+		uint32_t stackPos{0};
 
-		uint32_t tmp=_newCode;
+		uint32_t tmp{_newCode};
 		if (addNew) code=_prevCode;
 
 		_newCode=suffixLookup(code);
@@ -49,20 +49,11 @@ public:
 		if (addNew) func(tmp);
 	}
 
-	bool isLiteral(uint32_t code)
-	{
-		return code<_freeIndex;
-	}
+	bool isLiteral(uint32_t code) { return code<_freeIndex; }
 
-	bool isFull()
-	{
-		return _freeIndex==_maxCode;
-	}
+	bool isFull() { return _freeIndex==_maxCode; }
 
-	uint32_t getCurrentIndex()
-	{
-		return _freeIndex;
-	}
+	uint32_t getCurrentIndex() { return _freeIndex; }
 
 private:
 	uint32_t	_maxCode;
@@ -71,7 +62,7 @@ private:
 	uint32_t	_freeIndex;
 
 	uint32_t	_prevCode;
-	uint32_t	_newCode=0;
+	uint32_t	_newCode{0};
 
 	std::unique_ptr<uint32_t[]> _prefix;
 	std::unique_ptr<uint8_t[]> _suffix;

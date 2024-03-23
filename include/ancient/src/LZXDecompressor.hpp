@@ -12,11 +12,11 @@ class LZXDecompressor : public XPKDecompressor
 {
 public:
 	LZXDecompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify);
-	virtual ~LZXDecompressor();
+	~LZXDecompressor() noexcept=default;
 
-	virtual const std::string &getSubName() const noexcept override final;
+	const std::string &getSubName() const noexcept final;
 
-	virtual void decompressImpl(Buffer &rawData,const Buffer &previousData,bool verify) override final;
+	void decompressImpl(Buffer &rawData,const Buffer &previousData,bool verify) final;
 
 	static bool detectHeaderXPK(uint32_t hdr) noexcept;
 	static std::shared_ptr<XPKDecompressor> create(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify);
@@ -24,12 +24,12 @@ public:
 private:
 	const Buffer	&_packedData;
 
-	bool		_isSampled=false;
-	bool		_isCompressed=false;
-	size_t		_packedSize=0;
-	size_t		_packedOffset=0;
-	size_t		_rawSize=0;
-	uint32_t	_rawCRC=0;
+	bool		_isSampled{false};
+	bool		_isCompressed{false};
+	size_t		_packedSize{0};
+	size_t		_packedOffset{0};
+	size_t		_rawSize{0};
+	uint32_t	_rawCRC{0};
 };
 
 }

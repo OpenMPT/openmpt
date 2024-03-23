@@ -15,14 +15,14 @@ public:
 	class BitReader
 	{
 	public:
-		BitReader();
-		virtual ~BitReader();
+		BitReader() noexcept=default;
+		virtual ~BitReader() noexcept=default;
 		
 		virtual uint32_t readBit()=0;
 	};
 
 	RangeDecoder(BitReader &bitReader,uint16_t initialValue);
-	~RangeDecoder();
+	~RangeDecoder() noexcept=default;
 
 	uint16_t decode(uint16_t length);
 	void scale(uint16_t newLow,uint16_t newHigh,uint16_t newRange);
@@ -30,8 +30,8 @@ public:
 private:
 	BitReader			&_bitReader;
 
-	uint16_t			_low=0;
-	uint16_t			_high=0xffffU;
+	uint16_t			_low{0};
+	uint16_t			_high{0xffffU};
 	uint16_t			_stream;
 };
 

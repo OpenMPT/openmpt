@@ -12,14 +12,13 @@ class RNCDecompressor : public Decompressor
 {
 public:
 	RNCDecompressor(const Buffer &packedData,bool verify);
+	~RNCDecompressor() noexcept=default;
 
-	virtual ~RNCDecompressor();
+	const std::string &getName() const noexcept final;
+	size_t getPackedSize() const noexcept final;
+	size_t getRawSize() const noexcept final;
 
-	virtual const std::string &getName() const noexcept override final;
-	virtual size_t getPackedSize() const noexcept override final;
-	virtual size_t getRawSize() const noexcept override final;
-
-	virtual void decompressImpl(Buffer &rawData,bool verify) override final;
+	void decompressImpl(Buffer &rawData,bool verify) final;
 
 	static bool detectHeader(uint32_t hdr) noexcept;
 
@@ -30,19 +29,20 @@ private:
 	{
 		RNC1Old=0,
 		RNC1New,
-		RNC2
+		RNC2Old,
+		RNC2New
 	};
 
-	void RNC1DecompressOld(Buffer &rawData,bool verify);
+	void RNCDecompressOld(Buffer &rawData,bool verify,bool rnc2);
 	void RNC1DecompressNew(Buffer &rawData,bool verify);
-	void RNC2Decompress(Buffer &rawData,bool verify);
+	void RNC2DecompressNew(Buffer &rawData,bool verify);
 
 	const Buffer	&_packedData;
 
-	uint32_t	_rawSize=0;
-	uint32_t	_packedSize=0;
-	uint16_t	_rawCRC=0;
-	uint8_t		_chunks=0;
+	uint32_t	_rawSize{0};
+	uint32_t	_packedSize{0};
+	uint16_t	_rawCRC{0};
+	uint8_t		_chunks{0};
 	Version		_ver;
 };
 

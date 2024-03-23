@@ -11,7 +11,7 @@ namespace ancient::internal
 
 bool XPKUnimplemented::detectHeaderXPK(uint32_t hdr) noexcept
 {
-	auto &modes=getModes();
+	auto &modes{getModes()};
 	for (auto &mode : modes)
 		if (mode.fourcc==hdr) return true;
 	return false;
@@ -23,22 +23,18 @@ std::shared_ptr<XPKDecompressor> XPKUnimplemented::create(uint32_t hdr,uint32_t 
 }
 
 XPKUnimplemented::XPKUnimplemented(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify) :
-	XPKDecompressor(recursionLevel),
-	_modeIndex(0)
+	XPKDecompressor{recursionLevel},
+	_modeIndex{0}
 {
-	if (!detectHeaderXPK(hdr)) throw Decompressor::InvalidFormatError();
-	auto &modes=getModes();
+	if (!detectHeaderXPK(hdr))
+		throw Decompressor::InvalidFormatError();
+	auto &modes{getModes()};
 	for (uint32_t i=0;i<modes.size();i++)
 		if (modes[i].fourcc==hdr)
 		{
 			_modeIndex=i;
 			break;
 		}
-}
-
-XPKUnimplemented::~XPKUnimplemented()
-{
-	// nothing needed
 }
 
 const std::string &XPKUnimplemented::getSubName() const noexcept
@@ -58,8 +54,8 @@ std::vector<XPKUnimplemented::Mode> &XPKUnimplemented::getModes()
 	// (And I'm sure after writing that someone points me to 7 more formats)
 	// Unimplemented reasons are as follows:
 	// 1. Missing - there is no compressor available anywhere
-	// 2. PowerPC only - Amiga OS 4 libraries that are nothing but modern compression methods wrapped in AmigaOS
-	// 3. Float point based formats - Fragile formats that require exact 68881/68882 semantics
+	// 2. PowerPC only - Amiga OS 4 (or 3.5+) libraries that are nothing but modern compression methods wrapped in AmigaOS
+	// 3. Floating point based formats - Fragile formats that require exact 68881/68882 semantics
 	// 4. Encryption formats - Encryption formats requiring a proper passphrase
 	static std::vector<Mode> modes={
 		Mode{FourCC("BLFH"),"XPK-BLFH: Blowfish encryption (unimplemented)"},	// Encryption format

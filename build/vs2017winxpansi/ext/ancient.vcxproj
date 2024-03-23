@@ -636,8 +636,7 @@
     <ClInclude Include="..\..\..\include\ancient\src\RangeDecoder.hpp" />
     <ClInclude Include="..\..\..\include\ancient\src\SCOCompressDecompressor.hpp" />
     <ClInclude Include="..\..\..\include\ancient\src\SDHCDecompressor.hpp" />
-    <ClInclude Include="..\..\..\include\ancient\src\SHR3Decompressor.hpp" />
-    <ClInclude Include="..\..\..\include\ancient\src\SHRIDecompressor.hpp" />
+    <ClInclude Include="..\..\..\include\ancient\src\SHRXDecompressor.hpp" />
     <ClInclude Include="..\..\..\include\ancient\src\SLZ3Decompressor.hpp" />
     <ClInclude Include="..\..\..\include\ancient\src\SMPLDecompressor.hpp" />
     <ClInclude Include="..\..\..\include\ancient\src\SQSHDecompressor.hpp" />
@@ -645,6 +644,8 @@
     <ClInclude Include="..\..\..\include\ancient\src\StoneCrackerDecompressor.hpp" />
     <ClInclude Include="..\..\..\include\ancient\src\TDCSDecompressor.hpp" />
     <ClInclude Include="..\..\..\include\ancient\src\TPWMDecompressor.hpp" />
+    <ClInclude Include="..\..\..\include\ancient\src\VariableLengthCodeDecoder.hpp" />
+    <ClInclude Include="..\..\..\include\ancient\src\VicXDecompressor.hpp" />
     <ClInclude Include="..\..\..\include\ancient\src\XPKDecompressor.hpp" />
     <ClInclude Include="..\..\..\include\ancient\src\XPKMain.hpp" />
     <ClInclude Include="..\..\..\include\ancient\src\XPKUnimplemented.hpp" />
@@ -709,8 +710,7 @@
     <ClCompile Include="..\..\..\include\ancient\src\RangeDecoder.cpp" />
     <ClCompile Include="..\..\..\include\ancient\src\SCOCompressDecompressor.cpp" />
     <ClCompile Include="..\..\..\include\ancient\src\SDHCDecompressor.cpp" />
-    <ClCompile Include="..\..\..\include\ancient\src\SHR3Decompressor.cpp" />
-    <ClCompile Include="..\..\..\include\ancient\src\SHRIDecompressor.cpp" />
+    <ClCompile Include="..\..\..\include\ancient\src\SHRXDecompressor.cpp" />
     <ClCompile Include="..\..\..\include\ancient\src\SLZ3Decompressor.cpp" />
     <ClCompile Include="..\..\..\include\ancient\src\SMPLDecompressor.cpp" />
     <ClCompile Include="..\..\..\include\ancient\src\SQSHDecompressor.cpp" />
@@ -718,6 +718,7 @@
     <ClCompile Include="..\..\..\include\ancient\src\StoneCrackerDecompressor.cpp" />
     <ClCompile Include="..\..\..\include\ancient\src\TDCSDecompressor.cpp" />
     <ClCompile Include="..\..\..\include\ancient\src\TPWMDecompressor.cpp" />
+    <ClCompile Include="..\..\..\include\ancient\src\VicXDecompressor.cpp" />
     <ClCompile Include="..\..\..\include\ancient\src\XPKDecompressor.cpp" />
     <ClCompile Include="..\..\..\include\ancient\src\XPKMain.cpp" />
     <ClCompile Include="..\..\..\include\ancient\src\XPKUnimplemented.cpp" />

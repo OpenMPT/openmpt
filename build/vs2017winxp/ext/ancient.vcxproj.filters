@@ -174,10 +174,7 @@
     <ClInclude Include="..\..\..\include\ancient\src\SDHCDecompressor.hpp">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\ancient\src\SHR3Decompressor.hpp">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\ancient\src\SHRIDecompressor.hpp">
+    <ClInclude Include="..\..\..\include\ancient\src\SHRXDecompressor.hpp">
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\ancient\src\SLZ3Decompressor.hpp">
@@ -199,6 +196,12 @@
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\ancient\src\TPWMDecompressor.hpp">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\ancient\src\VariableLengthCodeDecoder.hpp">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\ancient\src\VicXDecompressor.hpp">
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\ancient\src\XPKDecompressor.hpp">
@@ -389,10 +392,7 @@
     <ClCompile Include="..\..\..\include\ancient\src\SDHCDecompressor.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\include\ancient\src\SHR3Decompressor.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\include\ancient\src\SHRIDecompressor.cpp">
+    <ClCompile Include="..\..\..\include\ancient\src\SHRXDecompressor.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\ancient\src\SLZ3Decompressor.cpp">
@@ -414,6 +414,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\ancient\src\TPWMDecompressor.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\include\ancient\src\VicXDecompressor.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\ancient\src\XPKDecompressor.cpp">

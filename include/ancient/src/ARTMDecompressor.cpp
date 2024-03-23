@@ -7,6 +7,7 @@
 #include "OutputStream.hpp"
 #include "common/Common.hpp"
 
+#include <array>
 
 namespace ancient::internal
 {
@@ -22,21 +23,18 @@ std::shared_ptr<XPKDecompressor> ARTMDecompressor::create(uint32_t hdr,uint32_t 
 }
 
 ARTMDecompressor::ARTMDecompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify) :
-	XPKDecompressor(recursionLevel),
-	_packedData(packedData)
+	XPKDecompressor{recursionLevel},
+	_packedData{packedData}
 {
-	if (!detectHeaderXPK(hdr)) throw Decompressor::InvalidFormatError();
-	if (packedData.size()<2) throw Decompressor::InvalidFormatError(); 
-}
-
-ARTMDecompressor::~ARTMDecompressor()
-{
-	// nothing needed
+	if (!detectHeaderXPK(hdr))
+		throw Decompressor::InvalidFormatError();
+	if (packedData.size()<2)
+		throw Decompressor::InvalidFormatError(); 
 }
 
 const std::string &ARTMDecompressor::getSubName() const noexcept
 {
-	static std::string name="XPK-ARTM: Arithmetic encoding compressor";
+	static std::string name{"XPK-ARTM: Arithmetic encoding compressor"};
 	return name;
 }
 
@@ -49,20 +47,21 @@ void ARTMDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 	class BitReader : public RangeDecoder::BitReader
 	{
 	public:
-		BitReader(ForwardInputStream &stream) :
-			_reader(stream)
+		BitReader(ForwardInputStream &stream) noexcept:
+			_reader{stream}
 		{
 			// nothing needed
 		}
+		~BitReader() noexcept=default;
 
-		virtual ~BitReader()
-		{
-			// nothing needed
-		}
-
-		virtual uint32_t readBit() override final
+		uint32_t readBit() final
 		{
 			return _reader.readBits8(1);
+		}
+
+		uint32_t readBits(uint32_t count)
+		{
+			return _reader.readBits8(count);
 		}
 
 	private:
@@ -70,18 +69,16 @@ void ARTMDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 	};
 
 
-	ForwardInputStream inputStream(_packedData,0,_packedData.size(),true);
-	ForwardOutputStream outputStream(rawData,0,rawData.size());
-	BitReader bitReader(inputStream);
+	ForwardInputStream inputStream{_packedData,0,_packedData.size(),3U};
+	ForwardOutputStream outputStream{rawData,0,rawData.size()};
+	BitReader bitReader{inputStream};
 
-	uint16_t initialValue=0;
-	for (uint32_t i=0;i<16;i++) initialValue=(initialValue<<1)|bitReader.readBit();
-	RangeDecoder decoder(bitReader,initialValue);
+	RangeDecoder decoder{bitReader,uint16_t(rotateBits(bitReader.readBits(16U),16U))};
 
 	// first one will never be used, but doing it this way saves us on some nasty arith
 	// on every place later
 	FrequencyTree<uint16_t,uint16_t,257> tree;
-	uint8_t characters[257];
+	std::array<uint8_t,257> characters;
 
 	for (uint32_t i=0;i<257;i++)
 	{

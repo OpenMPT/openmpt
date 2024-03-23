@@ -1,18 +1,18 @@
 /* Copyright (C) Teemu Suutari */
 
-#ifndef COMPACTDECOMPRESSOR_HPP
-#define COMPACTDECOMPRESSOR_HPP
+#ifndef VICXDECOMPRESSOR_HPP
+#define VICXDECOMPRESSOR_HPP
 
 #include "Decompressor.hpp"
 
 namespace ancient::internal
 {
 
-class CompactDecompressor : public Decompressor
+class VicXDecompressor : public Decompressor
 {
 public:
-	CompactDecompressor(const Buffer &packedData,bool exactSizeKnown,bool verify);
-	~CompactDecompressor() noexcept=default;
+	VicXDecompressor(const Buffer &packedData,bool exactSizeKnown,bool verify);
+	~VicXDecompressor() noexcept=default;
 
 	size_t getRawSize() const noexcept final;
 	size_t getPackedSize() const noexcept final;
@@ -30,8 +30,7 @@ private:
 
 	size_t		_packedSize{0};
 	size_t		_rawSize{0};
-
-	bool		_exactSizeKnown;
+	bool		_isVic2;
 };
 
 }

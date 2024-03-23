@@ -18,26 +18,25 @@ public:
 	StaticBuffer(const StaticBuffer&)=delete;
 	StaticBuffer& operator=(const StaticBuffer&)=delete;
 
-	StaticBuffer() { }
-	
-	virtual ~StaticBuffer() { }
+	StaticBuffer() noexcept=default;
+	~StaticBuffer() noexcept=default;
 
-	virtual const uint8_t *data() const noexcept override
+	const uint8_t *data() const noexcept final
 	{
 		return _data;
 	}
 
-	virtual uint8_t *data() override
+	uint8_t *data() final
 	{
 		return _data;
 	}
 
-	virtual size_t size() const noexcept override
+	size_t size() const noexcept final
 	{
 		return N;
 	}
 
-	virtual bool isResizable() const noexcept override
+	bool isResizable() const noexcept final
 	{
 		return false;
 	}
@@ -53,14 +52,14 @@ public:
 	ConstStaticBuffer(const ConstStaticBuffer&)=delete;
 	ConstStaticBuffer& operator=(const ConstStaticBuffer&)=delete;
 
-	ConstStaticBuffer(const uint8_t *data,size_t length);
-	virtual ~ConstStaticBuffer();
+	ConstStaticBuffer(const uint8_t *data,size_t length) noexcept;
+	~ConstStaticBuffer() noexcept=default;
 
-	virtual const uint8_t *data() const noexcept override;
-	virtual uint8_t *data() override;
+	const uint8_t *data() const noexcept final;
+	uint8_t *data() final;
 
-	virtual size_t size() const noexcept override;
-	virtual bool isResizable() const noexcept override;
+	size_t size() const noexcept final;
+	bool isResizable() const noexcept final;
 
 private:
 	const uint8_t 	*_data;

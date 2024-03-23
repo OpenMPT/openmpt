@@ -23,21 +23,17 @@ public:
 		for (uint32_t i=0;i<_size;i++)
 			_tree[i]=0;
 	}
-
-	~FrequencyTree()
-	{
-		// nothing needed
-	}
+	~FrequencyTree() noexcept=default;
 
 	U decode(T value,T &low,T &freq) const
 	{
 		if (value>=_tree[_size-1])
 			throw Decompressor::DecompressionError();
-		U symbol=0;
+		U symbol{0};
 		low=0;
 		for (uint32_t i=_levels-2;;i--)
 		{
-			T tmp=_tree[_levelOffsets[i]+symbol];
+			T tmp{_tree[_levelOffsets[i]+symbol]};
 			if (uint32_t(symbol+1)<_levelSizes[i] && value>=tmp)
 			{
 				symbol++;
@@ -54,8 +50,8 @@ public:
 	template <typename F>
 	void onNotZero(F func)
 	{
-		uint32_t step=1U<<(_levels-1);
-		uint32_t level=_levels-1;
+		uint32_t step{1U<<(_levels-1)};
+		uint32_t level{_levels-1};
 
 		for (uint32_t symbol=0;symbol<V;)
 		{
@@ -83,8 +79,8 @@ public:
 	template <typename F>
 	void onNotOne(F func)
 	{
-		uint32_t step=1U<<(_levels-1);
-		uint32_t level=_levels-1;
+		uint32_t step{1U<<(_levels-1)};
+		uint32_t level{_levels-1};
 
 		for (uint32_t symbol=0;symbol<V;)
 		{
@@ -146,22 +142,20 @@ private:
 	{
 		uint32_t ret=V;
 		for (uint32_t i=0;i<level;i++)
-		{
 			ret=(ret+1)>>1;
-		}
 		return ret;
 	}
 
 	static constexpr uint32_t levels()
 	{
-		uint32_t ret=0;
+		uint32_t ret{0};
 		while (levelSize(ret)!=1) ret++;
 		return ret+1;
 	}
 
 	static constexpr uint32_t size()
 	{
-		uint32_t ret=0;
+		uint32_t ret{0};
 		for (uint32_t i=0;i<levels();i++)
 			ret+=levelSize(i);
 		return ret;
@@ -169,7 +163,7 @@ private:
 
 	static constexpr uint32_t levelOffset(uint32_t level)
 	{
-		uint32_t ret=0;
+		uint32_t ret{0};
 		for (uint32_t i=0;i<level;i++)
 			ret+=levelSize(i);
 		return ret;
@@ -193,12 +187,12 @@ private:
 		return std::array<uint32_t,sizeof...(I)>{{I...}};
 	}
 
-	static constexpr uint32_t			_size=size();
-	static constexpr uint32_t			_levels=levels();
-	static constexpr std::array<uint32_t,_levels>	_levelOffsets=makeArray(makeLevelOffsetSequence(std::make_integer_sequence<uint32_t,levels()>{}));
-	static constexpr std::array<uint32_t,_levels>	_levelSizes=makeArray(makeLevelSizeSequence(std::make_integer_sequence<uint32_t,levels()>{}));
+	static constexpr uint32_t			_size{size()};
+	static constexpr uint32_t			_levels{levels()};
+	static constexpr std::array<uint32_t,_levels>	_levelOffsets{makeArray(makeLevelOffsetSequence(std::make_integer_sequence<uint32_t,levels()>{}))};
+	static constexpr std::array<uint32_t,_levels>	_levelSizes{makeArray(makeLevelSizeSequence(std::make_integer_sequence<uint32_t,levels()>{}))};
 
-	T						_tree[size()];
+	std::array<T,size()>				_tree;
 };
 
 }

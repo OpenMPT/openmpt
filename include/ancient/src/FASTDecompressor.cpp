@@ -20,30 +20,26 @@ std::shared_ptr<XPKDecompressor> FASTDecompressor::create(uint32_t hdr,uint32_t 
 }
 
 FASTDecompressor::FASTDecompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify) :
-	XPKDecompressor(recursionLevel),
-	_packedData(packedData)
+	XPKDecompressor{recursionLevel},
+	_packedData{packedData}
 {
-	if (!detectHeaderXPK(hdr)) throw Decompressor::InvalidFormatError();
-}
-
-FASTDecompressor::~FASTDecompressor()
-{
-	// nothing needed
+	if (!detectHeaderXPK(hdr))
+		throw Decompressor::InvalidFormatError();
 }
 
 const std::string &FASTDecompressor::getSubName() const noexcept
 {
-	static std::string name="XPK-FAST: Fast LZ77 compressor";
+	static std::string name{"XPK-FAST: Fast LZ77 compressor"};
 	return name;
 }
 
 void FASTDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData,bool verify)
 {
-	ForwardInputStream forwardInputStream(_packedData,0,_packedData.size());
-	BackwardInputStream backwardInputStream(_packedData,0,_packedData.size());
+	ForwardInputStream forwardInputStream{_packedData,0,_packedData.size()};
+	BackwardInputStream backwardInputStream{_packedData,0,_packedData.size()};
 	forwardInputStream.link(backwardInputStream);
 	backwardInputStream.link(forwardInputStream);
-	MSBBitReader<BackwardInputStream> bitReader(backwardInputStream);
+	MSBBitReader<BackwardInputStream> bitReader{backwardInputStream};
 	auto readBit=[&]()->uint32_t
 	{
 		return bitReader.readBitsBE16(1);
@@ -54,12 +50,10 @@ void FASTDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 	};
 	auto readShort=[&]()->uint16_t
 	{
-		const uint8_t *buf=backwardInputStream.consume(2);
-		uint16_t ret=uint16_t(buf[0])<<8;
-		return ret|uint16_t(buf[1]);
+		return backwardInputStream.readBE16();
 	};
 
-	ForwardOutputStream outputStream(rawData,0,rawData.size());
+	ForwardOutputStream outputStream{rawData,0,rawData.size()};
 
 	while (!outputStream.eof())
 	{
@@ -67,9 +61,9 @@ void FASTDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 		{
 			outputStream.writeByte(readByte());
 		} else {
-			uint16_t ld=readShort();
-			uint32_t count=std::min(18U-(ld&0xf),uint32_t(outputStream.getEndOffset()-outputStream.getOffset()));
-			uint32_t distance=ld>>4;
+			uint16_t ld{readShort()};
+			uint32_t count{std::min(18U-(ld&0xf),uint32_t(outputStream.getEndOffset()-outputStream.getOffset()))};
+			uint32_t distance{uint32_t(ld>>4U)};
 			outputStream.copy(distance,count);
 		}
 	}

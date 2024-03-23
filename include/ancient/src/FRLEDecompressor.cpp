@@ -20,28 +20,24 @@ std::shared_ptr<XPKDecompressor> FRLEDecompressor::create(uint32_t hdr,uint32_t 
 }
 
 FRLEDecompressor::FRLEDecompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify) :
-	XPKDecompressor(recursionLevel),
-	_packedData(packedData)
+	XPKDecompressor{recursionLevel},
+	_packedData{packedData}
 {
-	if (!detectHeaderXPK(hdr)) throw Decompressor::InvalidFormatError();
-}
-
-FRLEDecompressor::~FRLEDecompressor()
-{
-	// nothing needed
+	if (!detectHeaderXPK(hdr))
+		throw Decompressor::InvalidFormatError();
 }
 
 const std::string &FRLEDecompressor::getSubName() const noexcept
 {
-	static std::string name="XPK-FRLE: RLE-compressor";
+	static std::string name{"XPK-FRLE: RLE-compressor"};
 	return name;
 }
 
 void FRLEDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData,bool verify)
 {
-	ForwardInputStream inputStream(_packedData,0,_packedData.size());
+	ForwardInputStream inputStream{_packedData,0,_packedData.size()};
 
-	ForwardOutputStream outputStream(rawData,0,rawData.size());
+	ForwardOutputStream outputStream{rawData,0,rawData.size()};
 
 	while (!outputStream.eof())
 	{
@@ -50,15 +46,13 @@ void FRLEDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 			return (32-(count&0x1f))+(count&0x60);
 		};
 
-		uint32_t count=uint32_t(inputStream.readByte());
-
-		if (count<128)
+		if (uint32_t count{inputStream.readByte()};count<128)
 		{
 			count=countMod(count);
 			for (uint32_t i=0;i<count;i++) outputStream.writeByte(inputStream.readByte());
 		} else {
 			count=countMod(count)+1;
-			uint8_t ch=inputStream.readByte();
+			uint8_t ch{inputStream.readByte()};
 			for (uint32_t i=0;i<count;i++) outputStream.writeByte(ch);
 		}
 	}

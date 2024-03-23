@@ -20,26 +20,23 @@ std::shared_ptr<XPKDecompressor> NONEDecompressor::create(uint32_t hdr,uint32_t 
 }
 
 NONEDecompressor::NONEDecompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify) :
-	XPKDecompressor(recursionLevel),
-	_packedData(packedData)
+	XPKDecompressor{recursionLevel},
+	_packedData{packedData}
 {
-	if (!detectHeaderXPK(hdr)) throw Decompressor::InvalidFormatError();
-}
-
-NONEDecompressor::~NONEDecompressor()
-{
-	// nothing needed
+	if (!detectHeaderXPK(hdr))
+		throw Decompressor::InvalidFormatError();
 }
 
 const std::string &NONEDecompressor::getSubName() const noexcept
 {
-	static std::string name="XPK-NONE: Null compressor";
+	static std::string name{"XPK-NONE: Null compressor"};
 	return name;
 }
 
 void NONEDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData,bool verify)
 {
-	if (rawData.size()!=_packedData.size()) throw Decompressor::DecompressionError();
+	if (rawData.size()!=_packedData.size())
+		throw Decompressor::DecompressionError();
 
 	std::memcpy(rawData.data(),_packedData.data(),_packedData.size());
 }

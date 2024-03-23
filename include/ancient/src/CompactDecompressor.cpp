@@ -6,6 +6,7 @@
 #include "OutputStream.hpp"
 #include "common/Common.hpp"
 
+#include <array>
 
 namespace ancient::internal
 {
@@ -25,27 +26,21 @@ std::shared_ptr<Decompressor> CompactDecompressor::create(const Buffer &packedDa
 }
 
 CompactDecompressor::CompactDecompressor(const Buffer &packedData,bool exactSizeKnown,bool verify) :
-	_packedData(packedData),
-	_exactSizeKnown(exactSizeKnown)
+	_packedData{packedData},
+	_exactSizeKnown{exactSizeKnown}
 {
 	if (_packedData.size()<2U)
 		throw InvalidFormatError();
-	uint32_t hdr=_packedData.readBE16(0);
+	uint32_t hdr{_packedData.readBE16(0)};
 	if (!detectHeader(hdr<<16))
 		throw InvalidFormatError();
 	if (exactSizeKnown)
 		_packedSize=packedData.size();
 }
 
-CompactDecompressor::~CompactDecompressor()
-{
-	// nothing needed
-}
-
-
 const std::string &CompactDecompressor::getName() const noexcept
 {
-	static std::string name="C: Compact";
+	static std::string name{"C: Compact"};
 	return name;
 }
 
@@ -64,9 +59,9 @@ size_t CompactDecompressor::getRawSize() const noexcept
 
 void CompactDecompressor::decompressImpl(Buffer &rawData,bool verify)
 {
-	ForwardInputStream inputStream(_packedData,2U,_packedSize?_packedSize:_packedData.size());
+	ForwardInputStream inputStream{_packedData,2U,_packedSize?_packedSize:_packedData.size()};
 
-	MSBBitReader<ForwardInputStream> bitReader(inputStream);
+	MSBBitReader<ForwardInputStream> bitReader{inputStream};
 	auto readBits=[&](uint32_t count)->uint32_t
 	{
 		return bitReader.readBits8(count);
@@ -77,10 +72,10 @@ void CompactDecompressor::decompressImpl(Buffer &rawData,bool verify)
 		return bitReader.readBits8(1U)^1U;
 	};
 
-	AutoExpandingForwardOutputStream outputStream(rawData);
-	DynamicHuffmanDecoder<258U> decoder(3U);
-	uint32_t codeCount=0;
-	uint16_t mapper[258U];
+	AutoExpandingForwardOutputStream outputStream{rawData};
+	DynamicHuffmanDecoder<258U> decoder{3U};
+	uint32_t codeCount{0};
+	std::array<uint16_t,258> mapper;
 
 	// Magic!
 	mapper[codeCount++]=256U;
@@ -90,7 +85,7 @@ void CompactDecompressor::decompressImpl(Buffer &rawData,bool verify)
 
 	for(;;)
 	{
-		uint32_t code=decoder.decode(readBit);
+		uint32_t code{decoder.decode(readBit)};
 		decoder.update(code);
 		code=mapper[code];
 		if (code==257U)

@@ -12,12 +12,11 @@ class RAKEDecompressor : public XPKDecompressor
 {
 public:
 	RAKEDecompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify);
+	~RAKEDecompressor() noexcept=default;
 
-	virtual ~RAKEDecompressor();
+	const std::string &getSubName() const noexcept final;
 
-	virtual const std::string &getSubName() const noexcept override final;
-
-	virtual void decompressImpl(Buffer &rawData,const Buffer &previousData,bool verify) override final;
+	void decompressImpl(Buffer &rawData,const Buffer &previousData,bool verify) final;
 
 	static bool detectHeaderXPK(uint32_t hdr) noexcept;
 	static std::shared_ptr<XPKDecompressor> create(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify);
@@ -26,7 +25,7 @@ private:
 	const Buffer	&_packedData;
 
 	bool		_isRAKE;
-	size_t		_midStreamOffset=0;
+	size_t		_midStreamOffset{0};
 };
 
 }

@@ -20,34 +20,30 @@ std::shared_ptr<XPKDecompressor> FBR2Decompressor::create(uint32_t hdr,uint32_t 
 }
 
 FBR2Decompressor::FBR2Decompressor(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify) :
-	XPKDecompressor(recursionLevel),
-	_packedData(packedData)
+	XPKDecompressor{recursionLevel},
+	_packedData{packedData}
 {
-	if (!detectHeaderXPK(hdr)) throw Decompressor::InvalidFormatError();;
-}
-
-FBR2Decompressor::~FBR2Decompressor()
-{
-	// nothing needed
+	if (!detectHeaderXPK(hdr))
+		throw Decompressor::InvalidFormatError();;
 }
 
 const std::string &FBR2Decompressor::getSubName() const noexcept
 {
-	static std::string name="XPK-FBR2: FBR2 CyberYAFA compressor";
+	static std::string name{"XPK-FBR2: FBR2 CyberYAFA compressor"};
 	return name;
 }
 
 void FBR2Decompressor::decompressImpl(Buffer &rawData,const Buffer &previousData,bool verify)
 {
-	ForwardInputStream inputStream(_packedData,0,_packedData.size());
+	ForwardInputStream inputStream{_packedData,0,_packedData.size()};
 
-	ForwardOutputStream outputStream(rawData,0,rawData.size());
+	ForwardOutputStream outputStream{rawData,0,rawData.size()};
 
 	uint8_t mode=inputStream.readByte();
 	while (!outputStream.eof())
 	{
-		bool doCopy=false;
-		uint32_t count=0;
+		bool doCopy{false};
+		uint32_t count{0};
 		switch (mode)
 		{
 			case 33:
@@ -89,7 +85,7 @@ void FBR2Decompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 		if (doCopy) {
 			for (uint32_t i=0;i<count;i++) outputStream.writeByte(inputStream.readByte());
 		} else {
-			uint8_t repeatChar=inputStream.readByte();
+			uint8_t repeatChar{inputStream.readByte()};
 			for (uint32_t i=0;i<count;i++) outputStream.writeByte(repeatChar);
 		}
 	}

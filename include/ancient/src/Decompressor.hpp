@@ -18,7 +18,7 @@ namespace ancient::internal
 class Decompressor
 {
 protected:
-	Decompressor() noexcept;
+	Decompressor() noexcept=default;
 
 public:
 
@@ -30,7 +30,7 @@ public:
 	Decompressor(const Decompressor&)=delete;
 	Decompressor& operator=(const Decompressor&)=delete;
 
-	virtual ~Decompressor();
+	virtual ~Decompressor() noexcept=default;
 
 	// Name returned is human readable long name
 	virtual const std::string &getName() const noexcept=0;
