@@ -10,9 +10,10 @@ is just a high-level summary.
  *  [**Sec**] Undefined behaviour in song length calculation with nested loops
     that cause a length of infinity to be calculated (r20422).
 
- *  MED: Transposed samples were playing too low in some files (e.g. mix94.mmd1).
- *  OKT: Some files with garbage at the end were rejected
-    (e.g. katharsis - piano lesson.okta).
+ *  MED: Transposed samples were playing too low in some files (e.g.
+    mix94.mmd1).
+ *  OKT: Some files with garbage at the end were rejected (e.g.
+    katharsis - piano lesson.okta).
  *  Compressor DMO: It was possible that the plugin would not behave as intended
     at mix rates above 500 kHz.
 
