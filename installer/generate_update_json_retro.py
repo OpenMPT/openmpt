@@ -95,7 +95,7 @@ with open("installer/" + "OpenMPT-" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT
 update = {
 	"OpenMPT " + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR: {
 		"version": version,
-		"date": datetime.datetime.utcnow().isoformat(),
+		"date": datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None).isoformat(),
 		"announcement_url": announcement_url,
 		"changelog_url": changelog_url,
 		"downloads": {
