@@ -192,7 +192,7 @@ private:
 	static constexpr std::array<uint32_t,_levels>	_levelOffsets{makeArray(makeLevelOffsetSequence(std::make_integer_sequence<uint32_t,levels()>{}))};
 	static constexpr std::array<uint32_t,_levels>	_levelSizes{makeArray(makeLevelSizeSequence(std::make_integer_sequence<uint32_t,levels()>{}))};
 
-	std::array<T,size()>				_tree;
+	std::array<T,_size>					_tree;
 };
 
 }
