@@ -32,6 +32,32 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.31.06.00 (24 March 2024, revision 20438)
+-------------------------------------------
+Sample tab
+- [Imp] <js> Audio is no longer blocked while updating the GUI after pasting a sample.
+
+VST / DMO Plugins
+- [Mod] <js> The "Triangle" waveform in the Chorus / Flanger DMO plugins is now labelled "Square" instead to reflect its actual behaviour.
+- [Fix] <js> There was a periodic click when playing a module using the Chorus or Flanger DMO plugin at a mix rate exceeding ~136.5 kHz (http://bugs.openmpt.org/view.php?id=1752).
+- [Fix] <js> Since OpenMPT 1.29.13.00, the Distortion plugin sounded incorrect when using certain parameter combinations.
+
+IT
+- [Fix] <js> In OpenMPT 1.31.05.00, MIDI macros in IT files made with older MPT versions were no longer working (http://bugs.openmpt.org/view.php?id=1753).
+
+Other formats
+- [Fix] <js> MED: Transposed samples were playing too low in some files (e.g. mix94.mmd1).
+- [Fix] <js> OKT: Some files with garbage at the end were rejected (e.g. katharsis - piano lesson.okta).
+- [Fix] <js> SymMOD: Fixed potential crash with malformed sustain loops.
+
+Misc
+- [New] <js> Added two more octaves worth of note key assignments suitable for micro-tuning (http://bugs.openmpt.org/view.php?id=1727).
+- [Fix] <js> File / sample sizes in the instrument browser and comments tab were displayed incorrectly if a file size less than 1024 bytes ended in 0.
+
+Third-Party Libraries
+- [Imp] Update ancient (2024-03-23). 
+
+
 v1.31.05.00 (3 March 2024, revision 20196)
 ------------------------------------------
 Tree view
