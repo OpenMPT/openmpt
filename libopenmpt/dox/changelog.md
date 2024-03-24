@@ -10,13 +10,14 @@ is just a high-level summary.
  *  [**Sec**] Potential heap out-of-bounds read or write past sample end with
     malformed sustain loops in SymMOD files (r20421).
 
- *  MED: Transposed samples were playing too low in some files (e.g. mix94.mmd1).
- *  OKT: Some files with garbage at the end were rejected
-    (e.g. katharsis - piano lesson.okta).
+ *  MED: Transposed samples were playing too low in some files (e.g.
+    mix94.mmd1).
+ *  OKT: Some files with garbage at the end were rejected (e.g.
+    katharsis - piano lesson.okta).
  *  Compressor DMO: It was possible that the plugin would not behave as intended
     at mix rates above 500 kHz.
  *  Avoid re-allocating the loop state map contents on every playthrough of the
-    module
+    module.
 
 ### libopenmpt 0.6.14 (2024-03-17)
 
