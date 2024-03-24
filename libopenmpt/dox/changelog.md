@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.4.41-pre
+### libopenmpt 0.4.41 (2024-03-24)
 
  *  [**Sec**] Undefined behaviour in song length calculation with nested loops
     that cause a length of infinity to be calculated (r20423).
