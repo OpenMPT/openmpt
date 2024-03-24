@@ -91,7 +91,7 @@ bool CChannelManagerDlg::IsDisplayed() const
 	return m_show;
 }
 
-void CChannelManagerDlg::Update(UpdateHint hint, CObject* pHint)
+void CChannelManagerDlg::Update(UpdateHint hint, CObject *pHint)
 {
 	if(!m_hWnd || !m_show)
 		return;
@@ -613,7 +613,7 @@ void CChannelManagerDlg::OnPaint()
 					btn.left, btn.top, btn.Width(), btn.Height(), ftn);
 			}
 		}
-		::SelectObject(bdc, (HBITMAP)NULL);
+		::SelectObject(bdc, nullptr);
 		::DeleteDC(bdc);
 
 		::EndPaint(m_hWnd, &pDC);
@@ -925,7 +925,7 @@ void CChannelManagerDlg::OnMButtonDown(UINT /*nFlags*/, CPoint point)
 {
 	CHANNELINDEX chn;
 	CRect rect;
-	if(m_ModDoc != nullptr && (m_ModDoc->GetModType() & (MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT)) && ButtonHit(point, &chn, &rect))
+	if(m_ModDoc != nullptr && ButtonHit(point, &chn, &rect))
 	{
 		ClientToScreen(&point);
 		m_quickChannelProperties.Show(m_ModDoc, pattern[chn], point);
