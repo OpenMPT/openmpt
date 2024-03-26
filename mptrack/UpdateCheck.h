@@ -62,12 +62,14 @@ public:
 	static std::vector<mpt::ustring> GetDefaultUpdateSigningKeysRootAnchors();
 	static mpt::ustring GetDefaultAPIURL();
 	
-	int32 GetNumCurrentRunningInstances();
+	static int32 GetNumCurrentRunningInstances();
 
 	static bool IsSuitableUpdateMoment();
 
 	static void DoAutoUpdateCheck() { StartUpdateCheckAsync(true); }
 	static void DoManualUpdateCheck() { StartUpdateCheckAsync(false); }
+
+	static void WaitForUpdateCheckFinished();
 
 public:
 

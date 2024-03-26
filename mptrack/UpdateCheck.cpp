@@ -462,6 +462,24 @@ bool CUpdateCheck::IsSuitableUpdateMoment()
 }
 
 
+void CUpdateCheck::WaitForUpdateCheckFinished()
+{
+	while(GetNumCurrentRunningInstances() > 0)
+	{
+		MSG msg;
+		while(::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+		{
+			::TranslateMessage(&msg);
+			::DispatchMessage(&msg);
+		}
+		if(GetNumCurrentRunningInstances() > 0)
+		{
+			Sleep(1);
+		}
+	}
+}
+
+
 // Start update check
 void CUpdateCheck::StartUpdateCheckAsync(bool isAutoUpdate)
 {
