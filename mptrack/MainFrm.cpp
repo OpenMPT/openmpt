@@ -370,6 +370,10 @@ void CMainFrame::OnClose()
 		}
 	}
 
+#if defined(MPT_ENABLE_UPDATE)
+	m_cancelUpdateCheck = true;
+#endif // MPT_ENABLE_UPDATE
+
 	CChildFrame *pMDIActive = (CChildFrame *)MDIGetActive();
 
 	BeginWaitCursor();
@@ -394,6 +398,10 @@ void CMainFrame::OnClose()
 	{
 		m_InputHandler->m_activeCommandSet->SaveFile(TrackerSettings::Instance().m_szKbdFile);
 	}
+
+#if defined(MPT_ENABLE_UPDATE)
+	CUpdateCheck::WaitForUpdateCheckFinished();
+#endif // MPT_ENABLE_UPDATE
 
 	EndWaitCursor();
 	CMDIFrameWnd::OnClose();
@@ -2699,6 +2707,10 @@ LRESULT CMainFrame::OnUpdateCheckStart(WPARAM wparam, LPARAM lparam)
 
 LRESULT CMainFrame::OnUpdateCheckProgress(WPARAM wparam, LPARAM lparam)
 {
+	if(m_cancelUpdateCheck)
+	{
+		return FALSE;
+	}
 	bool isAutoUpdate = wparam != 0;
 	CString updateText = MPT_CFORMAT("Checking for updates... {}%")(lparam);
 	if(isAutoUpdate)

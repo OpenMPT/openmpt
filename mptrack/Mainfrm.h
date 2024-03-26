@@ -312,6 +312,7 @@ protected:
 #if defined(MPT_ENABLE_UPDATE)
 	class CUpdateSetupDlg *m_UpdateOptionsDialog = nullptr;
 	std::unique_ptr<UpdateCheckResult> m_updateCheckResult;
+	bool m_cancelUpdateCheck = false;
 #endif // MPT_ENABLE_UPDATE
 	DWORD helpCookie = 0;
 	bool m_bOptionsLocked = false;
