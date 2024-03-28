@@ -13,24 +13,24 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { host: macos-14, compiler: '15.2', arch: ''    , target: ''   , deps: sys,  check: true  }
-          - { host: macos-14, compiler: '15.2', arch: arm64 , target: ''   , deps: local, check: true  }
-          - { host: macos-14, compiler: '15.2', arch: x64_64, target: ''   , deps: local, check: true  }
-          - { host: macos-14, compiler: '15.2', arch: arm64 , target: ''   , deps: small, check: true  }
-          - { host: macos-14, compiler: '15.2', arch: x64_64, target: ''   , deps: small, check: true  }
-          - { host: macos-14, compiler: '15.2', arch: arm64 , target: 14   , deps: local, check: true  }
-          - { host: macos-14, compiler: '15.2', arch: x64_64, target: 14   , deps: local, check: true  }
-          - { host: macos-14, compiler: '15.2', arch: arm64 , target: 13   , deps: local, check: true  }
-          - { host: macos-14, compiler: '15.2', arch: x64_64, target: 13   , deps: local, check: true  }
-          - { host: macos-14, compiler: '15.2', arch: arm64 , target: 12   , deps: local, check: true  }
-          - { host: macos-14, compiler: '15.2', arch: x64_64, target: 12   , deps: local, check: true  }
-          - { host: macos-14, compiler: '15.2', arch: arm64 , target: 11   , deps: local, check: true  }
-          - { host: macos-14, compiler: '15.2', arch: x64_64, target: 11   , deps: local, check: true  }
-          - { host: macos-14, compiler: '15.2', arch: x64_64, target: 10.15, deps: local, check: true  }
-          - { host: macos-14, compiler: '15.2', arch: x64_64, target: 10.14, deps: local, check: true  }
-          - { host: macos-14, compiler: '15.2', arch: i386  , target: 10.14, deps: local, check: false }
-          - { host: macos-14, compiler: '15.2', arch: x64_64, target: 10.13, deps: local, check: true  }
-          - { host: macos-14, compiler: '15.2', arch: i386  , target: 10.13, deps: local, check: false }
+          - { host: macos-14, compiler: '15.3', arch: ''    , target: ''   , deps: sys  , check: true  }
+          - { host: macos-14, compiler: '15.3', arch: arm64 , target: ''   , deps: local, check: true  }
+          - { host: macos-14, compiler: '15.3', arch: x64_64, target: ''   , deps: local, check: true  }
+          - { host: macos-14, compiler: '15.3', arch: arm64 , target: ''   , deps: small, check: true  }
+          - { host: macos-14, compiler: '15.3', arch: x64_64, target: ''   , deps: small, check: true  }
+          - { host: macos-14, compiler: '15.3', arch: arm64 , target: 14   , deps: local, check: true  }
+          - { host: macos-14, compiler: '15.3', arch: x64_64, target: 14   , deps: local, check: true  }
+          - { host: macos-14, compiler: '15.3', arch: arm64 , target: 13   , deps: local, check: true  }
+          - { host: macos-14, compiler: '15.3', arch: x64_64, target: 13   , deps: local, check: true  }
+          - { host: macos-14, compiler: '15.3', arch: arm64 , target: 12   , deps: local, check: true  }
+          - { host: macos-14, compiler: '15.3', arch: x64_64, target: 12   , deps: local, check: true  }
+          - { host: macos-14, compiler: '15.3', arch: arm64 , target: 11   , deps: local, check: true  }
+          - { host: macos-14, compiler: '15.3', arch: x64_64, target: 11   , deps: local, check: true  }
+          - { host: macos-14, compiler: '15.3', arch: x64_64, target: 10.15, deps: local, check: true  }
+          - { host: macos-14, compiler: '15.3', arch: x64_64, target: 10.14, deps: local, check: true  }
+          - { host: macos-14, compiler: '15.3', arch: i386  , target: 10.14, deps: local, check: false }
+          - { host: macos-14, compiler: '15.3', arch: x64_64, target: 10.13, deps: local, check: true  }
+          - { host: macos-14, compiler: '15.3', arch: i386  , target: 10.13, deps: local, check: false }
           - { host: macos-13, compiler: '15.2', arch: x64_64, target: 10.13, deps: local, check: true  }
           - { host: macos-13, compiler: '15.2', arch: i386  , target: 10.13, deps: local, check: false }
           - { host: macos-12, compiler: '14.2', arch: x64_64, target: 10.13, deps: local, check: true  }
