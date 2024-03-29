@@ -28,8 +28,6 @@
 		files {
 			"../../include/opus/celt/*.c",
 			"../../include/opus/celt/*.h",
-			"../../include/opus/dnn/*.c",
-			"../../include/opus/dnn/*.h",
 			"../../include/opus/silk/*.c",
 			"../../include/opus/silk/*.h",
 			"../../include/opus/silk/float/*.c",
@@ -41,8 +39,6 @@
 		files {
 			"../../include/opus/celt/x86/*.c",
 			"../../include/opus/celt/x86/*.h",
-			"../../include/opus/dnn/x86/*.c",
-			"../../include/opus/dnn/x86/*.h",
 			"../../include/opus/silk/float/x86/*.c",
 			"../../include/opus/silk/float/x86/*.h",
 			"../../include/opus/silk/x86/*.c",
@@ -53,8 +49,6 @@
 		files {
 			"../../include/opus/celt/arm/*.c",
 			"../../include/opus/celt/arm/*.h",
-			"../../include/opus/dnn/arm/*.c",
-			"../../include/opus/dnn/arm/*.h",
 			"../../include/opus/silk/float/arm/*.c",
 			"../../include/opus/silk/float/arm/*.h",
 			"../../include/opus/silk/arm/*.c",
@@ -63,12 +57,6 @@
 	filter {}
 		excludes {
 			"../../include/opus/celt/opus_custom_demo.c",
-			"../../include/opus/dnn/dump_data.c",
-			"../../include/opus/dnn/lossgen.c",
-			"../../include/opus/dnn/lossgen_data.c",
-			"../../include/opus/dnn/lossgen_demo.c",
-			"../../include/opus/dnn/lpcnet_demo.c",
-			"../../include/opus/dnn/write_lpcnet_weights.c",
 			"../../include/opus/src/opus_compare.c",
 			"../../include/opus/src/opus_demo.c",
 			"../../include/opus/src/repacketizer_demo.c",
@@ -77,16 +65,48 @@
 		defines {
 			"OPUS_BUILD=1",
 			"PACKAGE_VERISON=\"1.5.1\"",
-			"ENABLE_DEEP_PLC=1",
-			"ENABLE_DRED=1",
 			"ENABLE_HARDENING=1",
-			"ENABLE_OSCE=1",
 			"HAVE_STDINT_H=1",
 			"HAVE_STDIO_H=1",
 			"HAVE_STDLIB_H=1",
 			"HAVE_STRING_H=1",
 			"USE_ALLOCA=1",
 		}
+	filter {}
+		if false then -- NoLACE (OSCE) / LACE (OSCE) / DEEP-PLC (DEEP_PLC || DRED) / DRED (DRED).
+			filter {}
+				files {
+					"../../include/opus/dnn/*.c",
+					"../../include/opus/dnn/*.h",
+				}
+				defines {
+					"ENABLE_DEEP_PLC=1",
+					"ENABLE_DRED=1",
+					"ENABLE_OSCE=1",
+				}
+			filter {}
+			filter { "architecture:x86 or x86_64" }
+				files {
+					"../../include/opus/dnn/x86/*.c",
+					"../../include/opus/dnn/x86/*.h",
+				}
+			filter {}
+			filter { "architecture:arm or arm64" }
+				files {
+					"../../include/opus/dnn/arm/*.c",
+					"../../include/opus/dnn/arm/*.h",
+				}
+			filter {}
+				excludes {
+					"../../include/opus/dnn/dump_data.c",
+					"../../include/opus/dnn/lossgen.c",
+					"../../include/opus/dnn/lossgen_data.c",
+					"../../include/opus/dnn/lossgen_demo.c",
+					"../../include/opus/dnn/lpcnet_demo.c",
+					"../../include/opus/dnn/write_lpcnet_weights.c",
+				}
+			filter {}
+		end
 	filter {}
 	if _OPTIONS["clang"] then
 		filter { "architecture:x86" }
