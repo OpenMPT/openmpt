@@ -1,5 +1,3 @@
  *  ancient <https://github.com/temisu/ancient> commit
-    c6038c179aeac138667c4319e997d6dd5a25a4be (2024-03-23)
- *  <https://github.com/temisu/ancient/commit/35e1f2883b246de860dc3fe7dc2de2a75a840b90>
-    has been applied.
+    1a176949acdebefb6303d69e315837fc0d8bb166 (2024-03-26)
  *  Unnecssary files have been removed.
