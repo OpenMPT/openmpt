@@ -893,13 +893,9 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 		totalSampleLen += Samples[smp].nLength;
 
 		if(isHMNT)
-		{
 			Samples[smp].nFineTune = -static_cast<int8>(sampleHeader.finetune << 3);
-		} else if(Samples[smp].nLength > 65535)
-		{
-			isNoiseTracker = false;
+		else if(Samples[smp].nLength > 65535)
 			hasLongSamples = true;
-		}
 		
 		if(sampleHeader.length && !sampleHeader.loopLength)
 			hasRepLen0 = true;
@@ -999,7 +995,7 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Before loading patterns, apply some heuristics:
 	// - Scan patterns to check if file could be a NoiseTracker file in disguise.
-	//   In this case, the parameter of Dxx commands needs to be ignored.
+	//   In this case, the parameter of Dxx commands needs to be ignored (see 1.11song2.mod, 2-3song6.mod).
 	// - Use the same code to find notes that would be out-of-range on Amiga.
 	// - Detect 7-bit panning and whether 8xx / E8x commands should be interpreted as panning at all.
 	bool onlyAmigaNotes = true;
@@ -1008,13 +1004,13 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 	const uint8 ENABLE_MOD_PANNING_THRESHOLD = 0x30;
 	if(!isNoiseTracker)
 	{
+		const uint32 patternLength = m_nChannels * 64;
 		bool leftPanning = false, extendedPanning = false;  // For detecting 800-880 panning
-		isNoiseTracker = isMdKd;
+		isNoiseTracker = isMdKd && !hasEmptySampleWithVolume && !hasLongSamples;
 		for(PATTERNINDEX pat = 0; pat < numPatterns; pat++)
 		{
 			uint16 patternBreaks = 0;
-
-			for(uint32 i = 0; i < 256; i++)
+			for(uint32 i = 0; i < patternLength; i++)
 			{
 				ModCommand m;
 				const auto data = ReadAndSwap<std::array<uint8, 4>>(file, modMagicResult.swapBytes && pat == 0);
@@ -1251,6 +1247,8 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 				file.Seek(nextSample);
 			}
 		}
+		if(isMdKd && file.ReadArray<char, 9>() == std::array<char, 9>{0x00, 0x11, 0x55, 0x33, 0x22, 0x11, 0x04, 0x01, 0x01})
+			modMagicResult.madeWithTracker = UL_("Tetramed");
 	}
 
 #if defined(MPT_EXTERNAL_SAMPLES) || defined(MPT_BUILD_FUZZER)
