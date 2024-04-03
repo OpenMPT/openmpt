@@ -272,7 +272,7 @@ BOOL CViewComments::PreTranslateMessage(MSG *pMsg)
 		} else if(pMsg->message == WM_CHAR)
 		{
 			// Avoid Windows warning sound when holding note key
-			if(!CMainFrame::GetInputHandler()->IsBypassed() && CInputHandler::GetKeyEventType(HIWORD(pMsg->lParam)) == kKeyEventRepeat)
+			if(!CMainFrame::GetInputHandler()->IsBypassed() && CInputHandler::GetKeyEventType(*pMsg) == kKeyEventRepeat)
 				return TRUE;
 		}
 	}

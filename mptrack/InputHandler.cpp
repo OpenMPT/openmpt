@@ -348,6 +348,12 @@ CInputHandler::KeyboardEvent CInputHandler::Translate(const MSG &msg)
 }
 
 
+KeyEventType CInputHandler::GetKeyEventType(const MSG &msg)
+{
+	return GetKeyEventType(HIWORD(msg.lParam));
+}
+
+
 KeyEventType CInputHandler::GetKeyEventType(UINT nFlags)
 {
 	if (nFlags & TRANSITIONBIT)
@@ -637,8 +643,10 @@ bool CInputHandler::IsKeyPressHandledByTextBox(DWORD key, HWND hWnd) const
 	if(!GetModifierMask().test_any_except(ModShift))
 	{
 		if((key >= 'A' && key <= 'Z') || (key >= '0' && key <= '9')
-		   || key == VK_DIVIDE || key == VK_MULTIPLY || key == VK_SPACE || key == VK_CAPITAL
+		   || (key >= VK_MULTIPLY && key <= VK_DIVIDE) || key == VK_SPACE || key == VK_CAPITAL
 		   || (key >= VK_OEM_1 && key <= VK_OEM_3) || (key >= VK_OEM_4 && key <= VK_OEM_8))
+			return true;
+		if((key >= VK_NUMPAD0 && key <= VK_NUMPAD9) && GetModifierMask() == ModNone)
 			return true;
 		if(key == VK_RETURN && (GetWindowLong(hWnd, GWL_STYLE) & ES_MULTILINE))
 			return true;

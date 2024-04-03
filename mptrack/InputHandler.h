@@ -52,6 +52,7 @@ public:
 	CommandID GeneralKeyEvent(InputTargetContext context, int code, WPARAM wParam, LPARAM lParam);
 	CommandID KeyEvent(const InputTargetContext context, const KeyboardEvent &event, CWnd *pSourceWnd = nullptr);
 	static KeyboardEvent Translate(const MSG &msg);
+	static KeyEventType GetKeyEventType(const MSG &msg);
 	static KeyEventType GetKeyEventType(UINT nFlags);
 	bool IsKeyPressHandledByTextBox(DWORD wparam, HWND hWnd) const;
 	CommandID HandleMIDIMessage(InputTargetContext context, uint32 message);

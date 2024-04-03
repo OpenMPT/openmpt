@@ -95,11 +95,8 @@ BOOL CNoteMapWnd::PreTranslateMessage(MSG *pMsg)
 	//The key was not handled by a command, but it might still be useful
 	if (pMsg->message == WM_CHAR) //key is a character
 	{
-		UINT nFlags = HIWORD(pMsg->lParam);
-		KeyEventType kT = CMainFrame::GetInputHandler()->GetKeyEventType(nFlags);
-
-		if (kT == kKeyEventDown)
-			if (HandleChar(wParam))
+		if(CInputHandler::GetKeyEventType(*pMsg) == kKeyEventDown)
+			if(HandleChar(wParam))
 				return true;
 	}
 	else if (pMsg->message == WM_KEYDOWN) //key is not a character
