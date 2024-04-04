@@ -16,6 +16,9 @@ jobs:
           - { version: '10.0', deps: sys   }
           - { version: '10.0', deps: local }
           - { version: '10.0', deps: small }
+          - { version: '9.3' , deps: sys   }
+          - { version: '9.3' , deps: local }
+          - { version: '9.3' , deps: small }
 
     concurrency:
       group: ${{github.ref}}-${{github.workflow}}-${{matrix.version}}-${{matrix.deps}}
