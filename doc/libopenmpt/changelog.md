@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.7.7-pre
 
+ *  mpg123: Update to v1.32.6 (2024-04-04).
+
 ### libopenmpt 0.7.6 (2024-03-24)
 
  *  [**Sec**] Potential heap out-of-bounds read or write past sample end with
