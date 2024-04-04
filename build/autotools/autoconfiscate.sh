@@ -9,11 +9,19 @@ set -e
 #    checkout. The invests no effort in verifying this precondition.
 #
 
+echo "Detecting OS ..."
+UNAME_S="$(uname -s)"
+if [[ $UNAME_S == *"BSD"* ]]; then
+ MAKE=gmake
+else
+ MAKE=make
+fi
+
 echo "Gathering version ..."
 . libopenmpt/libopenmpt_version.mk
 
 echo "Cleaning local build ..."
-make clean
+$MAKE clean
 
 echo "Cleaning dist-autotools.tar ..."
 rm -rf bin/dist-autotools.tar || true
@@ -188,14 +196,14 @@ echo " BUILD_SVNVERSION=${BUILD_SVNVERSION}"
 echo " BUILD_SVNDATE=${BUILD_SVNDATE}"
 
 echo "Building man pages ..."
-make bin/openmpt123.1
+$MAKE bin/openmpt123.1
 
 echo "Copying man pages ..."
 mkdir bin/dist-autotools/man
 cp bin/openmpt123.1 bin/dist-autotools/man/openmpt123.1
 
 echo "Cleaning local buid ..."
-make clean
+$MAKE clean
 
 echo "Changing to autotools package directory ..."
 OLDDIR="$(pwd)"
@@ -239,24 +247,23 @@ echo "Running './configure' ..."
 ./configure
 
 echo "Running 'make dist' ..."
-make dist
+$MAKE dist
 
 echo "Running 'make distcheck' ..."
-#make distcheck
 (
- make distcheck 3>&1 1>&2 2>&3 | ( grep -v 'libtool: install: warning:' || true ) | ( grep -v 'libtool: warning: remember to run' || true ) | ( grep -v "libtool: warning: '.*la' has not been installed" || true )
+ $MAKE distcheck 3>&1 1>&2 2>&3 | ( grep -v 'libtool: install: warning:' || true ) | ( grep -v 'libtool: warning: remember to run' || true ) | ( grep -v "libtool: warning: '.*la' has not been installed" || true )
  exit ${PIPESTATUS[0]}
 ) 3>&1 1>&2 2>&3
 
 echo "Running 'make' ..."
-make
+$MAKE
 
 echo "Running 'make check' ..."
-make check
+$MAKE check
 
 echo "Building dist-autotools.tar ..."
 cd "$OLDDIR"
-MPT_LIBOPENMPT_VERSION=$(make distversion-tarball)
+MPT_LIBOPENMPT_VERSION=$($MAKE distversion-tarball)
 cd bin/dist-autotools
 rm -rf libopenmpt
 mkdir -p libopenmpt/src.autotools/$MPT_LIBOPENMPT_VERSION/
