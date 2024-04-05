@@ -54,10 +54,8 @@ jobs:
           sudo pkgin -y install subversion git p5-XML-XPath mawk
           sudo pkgin -y install gmake pkgconf
           sudo pkgin -y install mpg123 libogg libvorbis flac libsndfile pulseaudio portaudio SDL2
-          sudo pkgin -y install gcc7-libs   # for libstdc++7
           sudo pkgin -y install autoconf autoconf-archive automake libtool libltdl
-          sudo pkgin -y install help2man
-          #sudo pkgin -y install doxygen   # broken
+          sudo pkgin -y install doxygen help2man
     - name: Build
       uses: cross-platform-actions/action@141cc293701219fd2f72b3abd9ca1fc322cf7d84
       with:
