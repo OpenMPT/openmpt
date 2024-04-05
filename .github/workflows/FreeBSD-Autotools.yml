@@ -1,0 +1,77 @@
+name: FreeBSD Autotools
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { version: '14.0' }
+          - { version: '13.3' }
+
+    concurrency:
+      group: ${{github.ref}}-${{github.workflow}}-${{matrix.version}}-autotools
+      cancel-in-progress: true
+
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Startup VM
+      uses: cross-platform-actions/action@c127ecaef41abd571584abbbc5eaf17364bfbbe9
+      with:
+        architecture: x86_64
+        hypervisor: qemu
+        memory: 4G
+        operating_system: freebsd
+        version: ${{matrix.version}}
+        shell: bash
+        sync_files: runner-to-vm
+        shutdown_vm: false
+        run: true
+    - name: Install dependencies
+      uses: cross-platform-actions/action@c127ecaef41abd571584abbbc5eaf17364bfbbe9
+      with:
+        architecture: x86_64
+        hypervisor: qemu
+        memory: 4G
+        operating_system: freebsd
+        version: ${{matrix.version}}
+        shell: bash
+        sync_files: false
+        shutdown_vm: false
+        run: |
+          sudo pkg install -y subversion p5-XML-XPath git mawk gmake pkgconf autoconf autoconf-archive automake libtool help2man doxygen mpg123 libogg libvorbis flac libsndfile pulseaudio portaudio sdl2
+    - name: Build
+      uses: cross-platform-actions/action@c127ecaef41abd571584abbbc5eaf17364bfbbe9
+      with:
+        architecture: x86_64
+        hypervisor: qemu
+        memory: 4G
+        operating_system: freebsd
+        version: ${{matrix.version}}
+        shell: bash
+        sync_files: false
+        shutdown_vm: false
+        run: |
+          ./build/autotools/autoconfiscate.sh
+    - name: Shutdown VM
+      uses: cross-platform-actions/action@c127ecaef41abd571584abbbc5eaf17364bfbbe9
+      with:
+        architecture: x86_64
+        hypervisor: qemu
+        memory: 4G
+        operating_system: freebsd
+        version: ${{matrix.version}}
+        shell: bash
+        sync_files: false
+        shutdown_vm: true
+        run: true
