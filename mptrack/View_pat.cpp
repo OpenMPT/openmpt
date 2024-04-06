@@ -3601,11 +3601,9 @@ LRESULT CViewPattern::OnPlayerNotify(Notification *pnotify)
 						else if(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SHOWPREVIOUS)
 							InvalidatePattern(true, true);  // Redraw previous / next pattern
 
+						m_nOrder = ord;
 						if(ord < order.GetLength())
-						{
-							m_nOrder = ord;
 							SendCtrlMessage(CTRLMSG_NOTIFYCURRENTORDER, ord);
-						}
 						updateOrderList = false;
 					}
 					if(row != GetCurrentRow())
