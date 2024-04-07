@@ -12,6 +12,7 @@
 #include "AutoSaver.h"
 #include "FileDialog.h"
 #include "FolderScanner.h"
+#include "Mainfrm.h"
 #include "Moddoc.h"
 #include "Mptrack.h"
 #include "Reporting.h"
@@ -60,35 +61,39 @@ uint32 CAutoSaver::GetSaveInterval() const
 
 bool CAutoSaver::DoSave(DWORD curTime)
 {
-	bool success = true;
+	// Do nothing if we are already saving, or if time to save has not been reached yet.
+	if(m_saveInProgress || !CheckTimer(curTime))
+		return true;
+		
+	bool success = true, clearStatus = false;
+	m_saveInProgress = true;
 
-	//If time to save and not already having save in progress.
-	if (CheckTimer(curTime) && !m_saveInProgress)
-	{ 
-		m_saveInProgress = true;
+	theApp.BeginWaitCursor(); // Display hour glass
 
-		theApp.BeginWaitCursor(); //display hour glass
-
-		for(auto &modDoc : theApp.GetOpenDocuments())
+	for(auto &modDoc : theApp.GetOpenDocuments())
+	{
+		if(modDoc->ModifiedSinceLastAutosave())
 		{
-			if(modDoc->ModifiedSinceLastAutosave())
+			clearStatus = true;
+			static_cast<CMainFrame *>(theApp.GetMainWnd())->SetHelpText(MPT_CFORMAT("Auto-saving {}...")(modDoc->GetPathNameMpt().GetFilename()));
+			if(SaveSingleFile(*modDoc))
 			{
-				if(SaveSingleFile(*modDoc))
-				{
-					CleanUpBackups(*modDoc);
-				} else
-				{
-					TrackerSettings::Instance().AutosaveEnabled = false;
-					Reporting::Warning("Warning: Auto Save failed and has been disabled. Please:\n- Review your Auto Save paths\n- Check available disk space and filesystem access rights");
-					success = false;
-				}
+				CleanUpBackups(*modDoc);
+			} else
+			{
+				TrackerSettings::Instance().AutosaveEnabled = false;
+				Reporting::Warning("Warning: Auto Save failed and has been disabled. Please:\n- Review your Auto Save paths\n- Check available disk space and filesystem access rights");
+				success = false;
 			}
 		}
-
-		m_lastSave = timeGetTime();
-		theApp.EndWaitCursor();  // End display hour glass
-		m_saveInProgress = false;
 	}
+
+	m_lastSave = timeGetTime();
+	theApp.EndWaitCursor();  // End display hour glass
+	m_saveInProgress = false;
+
+	if(clearStatus)
+		static_cast<CMainFrame *>(theApp.GetMainWnd())->SetHelpText(_T(""));
 	
 	return success;
 }
