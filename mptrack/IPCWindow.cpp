@@ -10,9 +10,11 @@
 
 #include "stdafx.h"
 #include "IPCWindow.h"
+#include "Mainfrm.h"
+#include "ModDocTemplate.h"
+#include "Mptrack.h"
 
 #include "../common/version.h"
-#include "Mptrack.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -84,6 +86,13 @@ namespace IPCWindow
 					const WCHAR* data = static_cast<const WCHAR *>(copyData.lpData);
 					const std::wstring path = std::wstring(data, data + count);
 					result = (theApp.GetConfigPath().ToWide() == path) ? 1 : 0;
+				}
+				break;
+			case Function::PlayCurrent:
+				if(CMainFrame::GetMainFrame())
+				{
+					if(CMainFrame::GetMainFrame()->PlayMod(CMainFrame::GetMainFrame()->GetActiveDoc()))
+						result = 1;
 				}
 				break;
 			default:
@@ -209,7 +218,7 @@ namespace IPCWindow
 
 
 
-	bool SendToIPC(const std::vector<mpt::PathString> &filenames)
+	bool SendToIPC(const std::vector<mpt::PathString> &filenames, bool autoplay)
 	{
 		HWND ipcWnd = FindIPCWindow();
 		if(!ipcWnd)
@@ -226,6 +235,10 @@ namespace IPCWindow
 			{
 				return false;
 			}
+		}
+		if(autoplay)
+		{
+			SendIPC(ipcWnd, Function::PlayCurrent);
 		}
 		return true;
 	}
