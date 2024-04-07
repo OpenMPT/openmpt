@@ -1468,10 +1468,6 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 
 	pMainFrame->ShowWindow(m_nCmdShow);
 	pMainFrame->UpdateWindow();
-	if(cmdInfo.m_autoPlay)
-	{
-		pMainFrame->PlayMod(pMainFrame->GetActiveDoc());
-	}
 
 	EndWaitCursor();
 
@@ -1525,6 +1521,11 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 		pMainFrame->InitPreview();
 		pMainFrame->PreparePreview(NOTE_NOTECUT, 0);
 		pMainFrame->PlayPreview();
+	}
+
+	if(cmdInfo.m_autoPlay)
+	{
+		pMainFrame->PlayMod(pMainFrame->GetActiveDoc());
 	}
 
 	if(!TrackerSettings::Instance().FirstRun)
