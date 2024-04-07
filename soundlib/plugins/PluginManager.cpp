@@ -415,6 +415,7 @@ void CVstPluginManager::EnumerateDirectXDMOs()
 		"120CED89-3BF4-4173-A132-3CB406CF3231"_uuid, // ParamEq
 		"87FC0268-9A55-4360-95AA-004A1D9DE26C"_uuid, // WavesReverb
 		"F447B69E-1884-4A7E-8055-346F74D6EDB3"_uuid, // Resampler DMO (not usable)
+		"A8122FF4-9E52-4374-B3D9-B4063E77109D"_uuid, // XnaVisualizerDmo (not usable)
 	};
 
 	HKEY hkEnum;
