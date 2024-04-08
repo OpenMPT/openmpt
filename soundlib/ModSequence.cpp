@@ -497,6 +497,7 @@ bool ModSequenceSet::MergeSequences()
 		firstSeq.reserve(firstOrder + lengthTrimmed);
 		firstSeq.push_back(); // Separator item
 		RestartPosToPattern(seqNum);
+		patternsFixed.resize(m_sndFile.Patterns.Size(), SEQUENCEINDEX_INVALID);  // Previous line might have increased pattern count
 		for(ORDERINDEX ord = 0; ord < lengthTrimmed; ord++)
 		{
 			PATTERNINDEX pat = seq[ord];
@@ -535,6 +536,7 @@ bool ModSequenceSet::MergeSequences()
 		}
 	}
 	m_Sequences.erase(m_Sequences.begin() + 1, m_Sequences.end());
+	m_currentSeq = 0;
 	return true;
 }
 
