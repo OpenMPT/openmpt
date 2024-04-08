@@ -1363,9 +1363,9 @@ static bool ValidateHeader(const M15FileHeaders &fileHeaders)
 	// However, there are quite a few SoundTracker modules in the wild with random
 	// characters. To still be able to distguish them from other formats, we just reject
 	// files with *too* many bogus characters. Arbitrary threshold: 48 bogus characters in total
-	// or more than 5 invalid characters just in the title alone.
+	// or more than 11 invalid characters just in the title alone (just enough to make scramble_2.mod load).
 	uint32 invalidChars = CountInvalidChars(fileHeaders.songname);
-	if(invalidChars > 5)
+	if(invalidChars > 11)
 	{
 		return false;
 	}
@@ -1379,10 +1379,13 @@ static bool ValidateHeader(const M15FileHeaders &fileHeaders)
 
 		invalidChars += CountInvalidChars(sampleHeader.name);
 
+		// schmokk.mod has a non-zero value here but it should not be treated as finetune
+		if(sampleHeader.finetune != 0)
+			invalidChars += 16;
+
 		// Sanity checks - invalid character count adjusted for ata.mod (MD5 937b79b54026fa73a1a4d3597c26eace, SHA1 3322ca62258adb9e0ae8e9afe6e0c29d39add874)
 		if(invalidChars > 48
 		   || sampleHeader.volume > 64
-		   || sampleHeader.finetune != 0
 		   || sampleHeader.length > 32768)
 		{
 			return false;
@@ -1490,10 +1493,12 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 	file.Seek(20);
 	for(SAMPLEINDEX smp = 1; smp <= 15; smp++)
 	{
+		ModSample &mptSmp = Samples[smp];
 		MODSampleHeader sampleHeader;
 		ReadSample(file, sampleHeader, Samples[smp], m_szNames[smp], true);
+		mptSmp.nFineTune = 0;
 
-		totalSampleLen += Samples[smp].nLength;
+		totalSampleLen += mptSmp.nLength;
 
 		if(m_szNames[smp][0] && ((memcmp(m_szNames[smp].buf, "st-", 3) && memcmp(m_szNames[smp].buf, "ST-", 3)) || m_szNames[smp][5] != ':'))
 		{
@@ -1504,9 +1509,9 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 		// Loop start is always in bytes, not words, so don't trust the auto-fix magic in the sample header conversion (fixes loop of "st-01:asia" in mod.drag 10)
 		if(sampleHeader.loopLength > 1)
 		{
-			Samples[smp].nLoopStart = sampleHeader.loopStart;
-			Samples[smp].nLoopEnd = sampleHeader.loopStart + sampleHeader.loopLength * 2;
-			Samples[smp].SanitizeLoops();
+			mptSmp.nLoopStart = sampleHeader.loopStart;
+			mptSmp.nLoopEnd = sampleHeader.loopStart + sampleHeader.loopLength * 2;
+			mptSmp.SanitizeLoops();
 		}
 
 		// UST only handles samples up to 9999 bytes. Master Soundtracker 1.0 and SoundTracker 2.0 introduce 32KB samples.
