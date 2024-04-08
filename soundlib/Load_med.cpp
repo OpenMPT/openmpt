@@ -1197,12 +1197,15 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 		const bool is8Ch = (songHeader.flags & MMDSong::FLAG_8CHANNEL) != 0;
 		const bool bpmMode = (songHeader.flags2 & MMDSong::FLAG2_BPM) != 0;
 		const uint8 rowsPerBeat = 1 + (songHeader.flags2 & MMDSong::FLAG2_BMASK);
-		m_nDefaultTempo = MMDTempoToBPM(songHeader.defaultTempo, is8Ch, bpmMode, rowsPerBeat);
-		m_nDefaultSpeed = Clamp<uint8, uint8>(songHeader.tempo2, 1, 32);
-		if(bpmMode)
+		if(song == 0)
 		{
-			m_nDefaultRowsPerBeat = rowsPerBeat;
-			m_nDefaultRowsPerMeasure = m_nDefaultRowsPerBeat * 4u;
+			m_nDefaultTempo = MMDTempoToBPM(songHeader.defaultTempo, is8Ch, bpmMode, rowsPerBeat);
+			m_nDefaultSpeed = Clamp<uint8, uint8>(songHeader.tempo2, 1, 32);
+			if(bpmMode)
+			{
+				m_nDefaultRowsPerBeat = rowsPerBeat;
+				m_nDefaultRowsPerMeasure = m_nDefaultRowsPerBeat * 4u;
+			}
 		}
 
 		if(songHeader.masterVol)
@@ -1422,7 +1425,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 		}
 
 		// Fix jump order commands
-		for(const auto & [from, to] : jumpTargets)
+		for(const auto &[from, to] : jumpTargets)
 		{
 			PATTERNINDEX pat;
 			if(from > 0 && order.IsValidPat(from - 1))
@@ -1440,6 +1443,21 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 			Patterns[pat].WriteEffect(EffectWriter(CMD_POSITIONJUMP, mpt::saturate_cast<ModCommand::PARAM>(to)).Row(Patterns[pat].GetNumRows() - 1).RetryPreviousRow());
 			if(pat >= numPatterns)
 				numPatterns = pat + 1;
+		}
+
+		if(numSongs > 1)
+		{
+			PATTERNINDEX firstPat = order.EnsureUnique(0);
+			if(firstPat != PATTERNINDEX_INVALID)
+			{
+				for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
+				{
+					Patterns[firstPat].WriteEffect(EffectWriter(CMD_CHANNELVOLUME, ChnSettings[chn].nVolume).Channel(chn).RetryNextRow());
+					Patterns[firstPat].WriteEffect(EffectWriter(CMD_PANNING8, mpt::saturate_cast<ModCommand::PARAM>(ChnSettings[chn].nPan)).Channel(chn).RetryNextRow());
+				}
+				if(firstPat >= numPatterns)
+					numPatterns = firstPat + 1;
+			}
 		}
 
 		basePattern += numPatterns;
