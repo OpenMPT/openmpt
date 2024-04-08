@@ -14,10 +14,6 @@
 
 #include "mpt/parse/parse.hpp"
 
-#ifdef LIBOPENMPT_BUILD
-#define MPT_PSM_USE_REAL_SUBSONGS
-#endif
-
 OPENMPT_NAMESPACE_BEGIN
 
 ////////////////////////////////////////////////////////////
@@ -166,8 +162,6 @@ struct PSMSubSong // For internal use (pattern conversion)
 {
 	std::vector<uint8> channelPanning, channelVolume;
 	std::vector<bool> channelSurround;
-	ORDERINDEX startOrder = ORDERINDEX_INVALID, endOrder = ORDERINDEX_INVALID, restartPos = 0;
-	uint8 defaultTempo = 125, defaultSpeed = 6;
 	char songName[10] = {};
 
 	PSMSubSong()
@@ -360,7 +354,6 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 		PSMSubSong subsong;
 		mpt::String::WriteAutoBuf(subsong.songName) = mpt::String::ReadBuf(mpt::String::nullTerminated, songHeader.songType);
 
-#ifdef MPT_PSM_USE_REAL_SUBSONGS
 		if(!Order().empty())
 		{
 			// Add a new sequence for this subsong
@@ -368,7 +361,6 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 				break;
 		}
 		Order().SetName(mpt::ToUnicode(mpt::Charset::CP437, subsong.songName));
-#endif // MPT_PSM_USE_REAL_SUBSONGS
 
 		// Read "Sub chunks"
 		auto subChunks = chunk.ReadChunks<PSMChunk>(1);
@@ -422,9 +414,6 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 						{
 						case 0x01: // Play order list item
 							{
-								if(subsong.startOrder == ORDERINDEX_INVALID)
-									subsong.startOrder = Order().GetLength();
-								subsong.endOrder = Order().GetLength();
 								PATTERNINDEX pat = ReadPSMPatternIndex(subChunk, sinariaFormat);
 								if(pat == 0xFF)
 									pat = Order.GetInvalidPatIndex();
@@ -446,8 +435,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 							{
 								uint16 restartChunk = subChunk.ReadUint16LE();
 								if(restartChunk >= firstOrderChunk)
-									subsong.restartPos = static_cast<ORDERINDEX>(restartChunk - firstOrderChunk);  // Close enough - we assume that order list is continuous (like in any real-world PSM)
-								Order().SetRestartPos(subsong.restartPos);
+									Order().SetRestartPos(static_cast<ORDERINDEX>(restartChunk - firstOrderChunk));  // Close enough - we assume that order list is continuous (like in any real-world PSM)
 								if(opcode == 0x03)
 									subChunk.Skip(1);
 							}
@@ -465,11 +453,11 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 							break;
 
 						case 0x07: // Default Speed
-							subsong.defaultSpeed = subChunk.ReadUint8();
+							Order().SetDefaultSpeed(subChunk.ReadUint8());
 							break;
 
 						case 0x08: // Default Tempo
-							subsong.defaultTempo =  subChunk.ReadUint8();
+							Order().SetDefaultTempoInt(subChunk.ReadUint8());
 							break;
 
 						case 0x0C: // Sample map table
@@ -545,17 +533,11 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 		}
 
 		// Attach this subsong to the subsong list - finally, all "sub sub sub ..." chunks are parsed.
-		if(subsong.startOrder != ORDERINDEX_INVALID && subsong.endOrder != ORDERINDEX_INVALID)
-		{
-			// Separate subsongs by "---" patterns
-			Order().push_back();
+		if(!Order().empty())
 			subsongs.push_back(subsong);
-		}
 	}
 
-#ifdef MPT_PSM_USE_REAL_SUBSONGS
 	Order.SetSequence(0);
-#endif // MPT_PSM_USE_REAL_SUBSONGS
 
 	if(subsongs.empty())
 		return false;
@@ -608,9 +590,6 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Make the default variables of the first subsong global
-	m_nDefaultSpeed = subsongs[0].defaultSpeed;
-	m_nDefaultTempo.Set(subsongs[0].defaultTempo);
-	Order().SetRestartPos(subsongs[0].restartPos);
 	for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
 	{
 		ChnSettings[chn].Reset();
@@ -874,16 +853,11 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 		// Write subsong "configuration" to patterns (only if there are multiple subsongs)
 		for(size_t i = 0; i < subsongs.size(); i++)
 		{
-#ifdef MPT_PSM_USE_REAL_SUBSONGS
-			ModSequence &order = Order(static_cast<SEQUENCEINDEX>(i));
-#else
-			ModSequence &order = Order();
-#endif // MPT_PSM_USE_REAL_SUBSONGS
 			const PSMSubSong &subsong = subsongs[i];
-			PATTERNINDEX startPattern = order[subsong.startOrder];
-			if(Patterns.IsValidPat(startPattern))
+			ModSequence &order = Order(static_cast<SEQUENCEINDEX>(i));
+			if(order.IsValidPat(0))
 			{
-				startPattern = order.EnsureUnique(subsong.startOrder);
+				PATTERNINDEX startPattern = startPattern = order.EnsureUnique(0);
 				// Subsongs with different panning setup -> write to pattern (MUSIC_C.PSM)
 				// Don't write channel volume for now, as there is no real-world module which needs it.
 				if(subsongPanningDiffers)
@@ -896,37 +870,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 							Patterns[startPattern].WriteEffect(EffectWriter(CMD_PANNING8, subsong.channelPanning[chn]).Row(0).Channel(chn).RetryNextRow());
 					}
 				}
-				// Write default tempo/speed to pattern
-				Patterns[startPattern].WriteEffect(EffectWriter(CMD_SPEED, subsong.defaultSpeed).Row(0).RetryNextRow());
-				Patterns[startPattern].WriteEffect(EffectWriter(CMD_TEMPO, subsong.defaultTempo).Row(0).RetryNextRow());
 			}
-
-#ifndef MPT_PSM_USE_REAL_SUBSONGS
-			// Add restart position to the last pattern
-			PATTERNINDEX endPattern = order[subsong.endOrder];
-			if(Patterns.IsValidPat(endPattern))
-			{
-				endPattern = order.EnsureUnique(subsong.endOrder);
-				ROWINDEX lastRow = Patterns[endPattern].GetNumRows() - 1;
-				auto m = Patterns[endPattern].cbegin();
-				for(uint32 cell = 0; cell < m_nChannels * Patterns[endPattern].GetNumRows(); cell++, m++)
-				{
-					if(m->command == CMD_PATTERNBREAK || m->command == CMD_POSITIONJUMP)
-					{
-						lastRow = cell / m_nChannels;
-						break;
-					}
-				}
-				Patterns[endPattern].WriteEffect(EffectWriter(CMD_POSITIONJUMP, mpt::saturate_cast<ModCommand::PARAM>(subsong.startOrder + subsong.restartPos)).Row(lastRow).RetryPreviousRow());
-			}
-
-			// Set the subsong name to all pattern names
-			for(ORDERINDEX ord = subsong.startOrder; ord <= subsong.endOrder; ord++)
-			{
-				if(Patterns.IsValidIndex(order[ord]))
-					Patterns[order[ord]].SetName(subsong.songName);
-			}
-#endif // MPT_PSM_USE_REAL_SUBSONGS
 		}
 	}
 
@@ -1122,8 +1066,8 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 		// Most of the time, the master volume value makes sense... Just not when it's 255.
 		m_nSamplePreAmp = 48;
 	}
-	m_nDefaultSpeed = fileHeader.songSpeed;
-	m_nDefaultTempo.Set(fileHeader.songTempo);
+	Order().SetDefaultSpeed(fileHeader.songSpeed);
+	Order().SetDefaultTempoInt(fileHeader.songTempo);
 
 	m_songName = mpt::String::ReadBuf(mpt::String::spacePadded, fileHeader.songName);
 

@@ -158,8 +158,8 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 	m_songName = mpt::String::ReadBuf(mpt::String::spacePadded, fileHeader.songName);
 	m_nChannels = fileHeader.numChannels + 1;	// Additional channel for writing pattern breaks
 	m_nSamplePreAmp = fileHeader.amplify;
-	m_nDefaultTempo.Set(fileHeader.tempo);
-	m_nDefaultSpeed = fileHeader.speed;
+	Order().SetDefaultTempoInt(fileHeader.tempo);
+	Order().SetDefaultSpeed(fileHeader.speed);
 	for(CHANNELINDEX chn = 0; chn < fileHeader.numChannels; chn++)
 	{
 		ChnSettings[chn].nPan = fileHeader.panPos[chn] * 0x11;

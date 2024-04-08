@@ -263,8 +263,8 @@ bool CSoundFile::ReadSTP(FileReader &file, ModLoadingFlags loadFlags)
 	m_nChannels = 4;
 	m_nSamples = 0;
 
-	m_nDefaultSpeed = fileHeader.speed;
-	m_nDefaultTempo = ConvertTempo(fileHeader.timerCount);
+	Order().SetDefaultSpeed(fileHeader.speed);
+	Order().SetDefaultTempo(ConvertTempo(fileHeader.timerCount));
 
 	m_nMinPeriod = 14 * 4;
 	m_nMaxPeriod = 3424 * 4;

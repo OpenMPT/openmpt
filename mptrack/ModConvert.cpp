@@ -456,22 +456,22 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		bool firstPatValid = firstPat != m_SndFile.Order().cend();
 		bool lossy = false;
 
-		if(m_SndFile.m_nDefaultSpeed != 6)
+		if(m_SndFile.Order().GetDefaultSpeed() != 6)
 		{
 			if(firstPatValid)
 			{
-				m_SndFile.Patterns[*firstPat].WriteEffect(EffectWriter(CMD_SPEED, ModCommand::PARAM(m_SndFile.m_nDefaultSpeed)).RetryNextRow());
+				m_SndFile.Patterns[*firstPat].WriteEffect(EffectWriter(CMD_SPEED, ModCommand::PARAM(m_SndFile.Order().GetDefaultSpeed())).RetryNextRow());
 			}
-			m_SndFile.m_nDefaultSpeed = 6;
+			m_SndFile.Order().SetDefaultSpeed(6);
 			lossy = true;
 		}
-		if(m_SndFile.m_nDefaultTempo != TEMPO(125, 0))
+		if(m_SndFile.Order().GetDefaultTempo() != TEMPO(125, 0))
 		{
 			if(firstPatValid)
 			{
-				m_SndFile.Patterns[*firstPat].WriteEffect(EffectWriter(CMD_TEMPO, ModCommand::PARAM(m_SndFile.m_nDefaultTempo.GetInt())).RetryNextRow());
+				m_SndFile.Patterns[*firstPat].WriteEffect(EffectWriter(CMD_TEMPO, ModCommand::PARAM(m_SndFile.Order().GetDefaultTempo().GetInt())).RetryNextRow());
 			}
-			m_SndFile.m_nDefaultTempo.Set(125);
+			m_SndFile.Order().SetDefaultTempoInt(125);
 			lossy = true;
 		}
 		if(m_SndFile.m_nDefaultGlobalVolume != MAX_GLOBAL_VOLUME || m_SndFile.m_nSamplePreAmp != 48 || m_SndFile.m_nVSTiVolume != 48)
@@ -493,7 +493,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		if(m_SndFile.Order(seq).GetRestartPos() > 0 && !specs.hasRestartPos)
 		{
 			// Try to fix it by placing a pattern jump command in the pattern.
-			if(!m_SndFile.Order.RestartPosToPattern(seq))
+			if(!m_SndFile.Order.WriteGlobalsToPattern(seq, true, false))
 			{
 				// Couldn't fix it! :(
 				warnings.set(wRestartPos);
@@ -578,17 +578,19 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		warnings.set(wMixmode);
 	}
 
-	if(!specs.hasFractionalTempo && m_SndFile.m_nDefaultTempo.GetFract() != 0)
+	for(auto &order : m_SndFile.Order)
 	{
-		m_SndFile.m_nDefaultTempo.Set(m_SndFile.m_nDefaultTempo.GetInt(), 0);
-		warnings.set(wFractionalTempo);
+		if(!specs.hasFractionalTempo && order.GetDefaultTempo().GetFract() != 0)
+		{
+			order.SetDefaultTempoInt(order.GetDefaultTempo().GetInt());
+			warnings.set(wFractionalTempo);
+		}
+
+		order.SetDefaultTempo(Clamp(order.GetDefaultTempo(), specs.GetTempoMin(), specs.GetTempoMax()));
+		order.SetDefaultSpeed(Clamp(order.GetDefaultSpeed(), specs.speedMin, specs.speedMax));
 	}
 
 	ChangeFileExtension(nNewType);
-
-	// Check mod specifications
-	Limit(m_SndFile.m_nDefaultTempo, specs.GetTempoMin(), specs.GetTempoMax());
-	Limit(m_SndFile.m_nDefaultSpeed, specs.speedMin, specs.speedMax);
 
 	for(INSTRUMENTINDEX i = 1; i <= m_SndFile.GetNumInstruments(); i++) if(m_SndFile.Instruments[i] != nullptr)
 	{

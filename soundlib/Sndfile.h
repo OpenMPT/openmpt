@@ -471,8 +471,7 @@ public:
 	CHANNELINDEX m_nChannels = 0;
 	SAMPLEINDEX m_nSamples = 0;
 	INSTRUMENTINDEX m_nInstruments = 0;
-	uint32 m_nDefaultSpeed, m_nDefaultGlobalVolume;
-	TEMPO m_nDefaultTempo;
+	uint32 m_nDefaultGlobalVolume;
 	FlagSet<SongFlags> m_SongFlags;
 	CHANNELINDEX m_nMixChannels = 0;
 private:

@@ -2696,8 +2696,8 @@ static void TestLoadXMFile(const CSoundFile &sndFile)
 	// Global Variables
 	VERIFY_EQUAL_NONCONT(sndFile.GetTitle(), "Test Module");
 	VERIFY_EQUAL_NONCONT(sndFile.m_songMessage.substr(0, 32), "OpenMPT Module Loader Test Suite");
-	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultTempo, TEMPO(139, 0));
-	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultSpeed, 5);
+	VERIFY_EQUAL_NONCONT(sndFile.Order().GetDefaultTempo(), TEMPO(139, 0));
+	VERIFY_EQUAL_NONCONT(sndFile.Order().GetDefaultSpeed(), 5);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultGlobalVolume, 128);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nVSTiVolume, 42);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nSamplePreAmp, 23);
@@ -2896,8 +2896,6 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 	// Global Variables
 	VERIFY_EQUAL_NONCONT(sndFile.GetTitle(), "Test Module_____________X");
 	VERIFY_EQUAL_NONCONT(sndFile.m_songMessage.substr(0, 32), "OpenMPT Module Loader Test Suite");
-	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultTempo, TEMPO(139, 999));
-	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultSpeed, 5);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultGlobalVolume, 128);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nVSTiVolume, 42);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nSamplePreAmp, 23);
@@ -3165,6 +3163,8 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(sndFile.Order(0)[1], 0);
 	VERIFY_EQUAL_NONCONT(sndFile.Order(0)[2], sndFile.Order.GetIgnoreIndex());
 	VERIFY_EQUAL_NONCONT(sndFile.Order(0).GetRestartPos(), 1);
+	VERIFY_EQUAL_NONCONT(sndFile.Order(0).GetDefaultTempo(), TEMPO(139, 999));
+	VERIFY_EQUAL_NONCONT(sndFile.Order(0).GetDefaultSpeed(), 5);
 
 	VERIFY_EQUAL_NONCONT(sndFile.Order(1).GetLengthTailTrimmed(), 3);
 	VERIFY_EQUAL_NONCONT(sndFile.Order(1).GetName(), U_("Second Sequence"));
@@ -3172,6 +3172,8 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(sndFile.Order(1)[1], 2);
 	VERIFY_EQUAL_NONCONT(sndFile.Order(1)[2], 3);
 	VERIFY_EQUAL_NONCONT(sndFile.Order(1).GetRestartPos(), 2);
+	VERIFY_EQUAL_NONCONT(sndFile.Order(1).GetDefaultTempo(), TEMPO(123, 4500));
+	VERIFY_EQUAL_NONCONT(sndFile.Order(1).GetDefaultSpeed(), 67);
 
 	// Patterns
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns.GetNumPatterns(), 2);
@@ -3271,8 +3273,8 @@ static void TestLoadS3MFile(const CSoundFile &sndFile, bool resaved)
 
 	// Global Variables
 	VERIFY_EQUAL_NONCONT(sndFile.GetTitle(), "S3M_Test__________________X");
-	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultTempo, TEMPO(33, 0));
-	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultSpeed, 254);
+	VERIFY_EQUAL_NONCONT(sndFile.Order().GetDefaultTempo(), TEMPO(33, 0));
+	VERIFY_EQUAL_NONCONT(sndFile.Order().GetDefaultSpeed(), 254);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultGlobalVolume, 32 * 4);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nVSTiVolume, 36);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nSamplePreAmp, 16);

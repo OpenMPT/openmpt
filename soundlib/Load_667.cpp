@@ -79,8 +79,8 @@ bool CSoundFile::Read667(FileReader &file, ModLoadingFlags loadFlags)
 
 	InitializeGlobals(MOD_TYPE_S3M);
 	m_SongFlags.set(SONG_IMPORTED);
-	m_nDefaultTempo.Set(150);
-	m_nDefaultSpeed = fileHeader.speed;
+	Order().SetDefaultTempoInt(150);
+	Order().SetDefaultSpeed(fileHeader.speed);
 	m_nChannels = 18;
 	m_nSamples = 64;
 

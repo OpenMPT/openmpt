@@ -599,8 +599,8 @@ bool CSoundFile::ReadGTK(FileReader &file, ModLoadingFlags loadFlags)
 
 	Patterns.ResizeArray(numPatterns);
 	const uint8 eventSize = fileHeader.fileVersion < 4 ? 4 : 5;
-	TEMPO currentTempo = m_nDefaultTempo;
-	uint32 currentSpeed = m_nDefaultSpeed;
+	TEMPO currentTempo = Order().GetDefaultTempo();
+	uint32 currentSpeed = Order().GetDefaultSpeed();
 	for(PATTERNINDEX pat = 0; pat < numPatterns; pat++)
 	{
 		if(!(loadFlags & loadPatternData) || !file.CanRead(fileHeader.numRows * GetNumChannels() * eventSize) || !Patterns.Insert(pat, fileHeader.numRows))
@@ -1234,8 +1234,8 @@ bool CSoundFile::ReadGT2(FileReader &file, ModLoadingFlags loadFlags)
 
 	if(fileHeader.fileVersion <= 5)
 	{
-		m_nDefaultSpeed = std::max(fileHeader.speed.get(), uint16(1));
-		m_nDefaultTempo.Set(std::max(fileHeader.tempo.get(), uint16(1)));
+		Order().SetDefaultSpeed(std::max(fileHeader.speed.get(), uint16(1)));
+		Order().SetDefaultTempoInt(std::max(fileHeader.tempo.get(), uint16(1)));
 		m_nDefaultGlobalVolume = std::min(Util::muldivr_unsigned(fileHeader.masterVol, MAX_GLOBAL_VOLUME, 4095), uint32(MAX_GLOBAL_VOLUME));
 		uint16 tracks = fileHeader.numPannedTracks;
 		LimitMax(tracks, MAX_BASECHANNELS);
@@ -1296,8 +1296,8 @@ bool CSoundFile::ReadGT2(FileReader &file, ModLoadingFlags loadFlags)
 	if(auto chunk = chunks.GetChunk(GT2Chunk::idTCN2); chunk.CanRead(12))
 	{
 		const auto [chunkVersion, bpmInt, bpmFract, speed, timeSigNum, timeSigDenum] = chunk.ReadArray<uint16be, 6>();
-		m_nDefaultTempo = TEMPO(Clamp<uint16, uint16>(bpmInt, 32, 999), Util::muldivr_unsigned(bpmFract, TEMPO::fractFact, 65536));
-		m_nDefaultSpeed = Clamp<uint16, uint16>(speed, 1, 255);
+		Order().SetDefaultTempo(TEMPO(Clamp<uint16, uint16>(bpmInt, 32, 999), Util::muldivr_unsigned(bpmFract, TEMPO::fractFact, 65536)));
+		Order().SetDefaultSpeed(Clamp<uint16, uint16>(speed, 1, 255));
 		m_nDefaultRowsPerBeat = 16 / Clamp<uint16, uint16>(timeSigDenum, 1, 16);
 		m_nDefaultRowsPerMeasure = m_nDefaultRowsPerBeat * Clamp<uint16, uint16>(timeSigNum, 1, 16);
 		if(chunkVersion >= 1)
@@ -1520,8 +1520,8 @@ bool CSoundFile::ReadGT2(FileReader &file, ModLoadingFlags loadFlags)
 
 	auto patterns = chunks.GetAllChunks(GT2Chunk::idPATD);
 	Patterns.ResizeArray(static_cast<PATTERNINDEX>(patterns.size()));
-	TEMPO currentTempo = m_nDefaultTempo;
-	uint32 currentSpeed = m_nDefaultSpeed;
+	TEMPO currentTempo = Order().GetDefaultTempo();
+	uint32 currentSpeed = Order().GetDefaultSpeed();
 	for(auto &patChunk : patterns)
 	{
 		if(!(loadFlags & loadPatternData) || !patChunk.CanRead(24))

@@ -980,8 +980,8 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 		Order().SetRestartPos(0);
 	}
 
-	m_nDefaultSpeed = 6;
-	m_nDefaultTempo.Set(125);
+	Order().SetDefaultSpeed(6);
+	Order().SetDefaultTempoInt(125);
 	m_nMinPeriod = 14 * 4;
 	m_nMaxPeriod = 3424 * 4;
 	// Prevent clipping based on number of channels... If all channels are playing at full volume, "256 / #channels"
@@ -1595,11 +1595,11 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 	if(!memcmp(songname, "jjk55", 6))
 		fileHeader.restartPos = 0x78;
 	// Sample 7 in echoing.mod won't "loop" correctly if we don't convert the VBlank tempo.
-	m_nDefaultTempo.Set(125);
+	Order().SetDefaultTempoInt(125);
 	if(fileHeader.restartPos != 0x78)
 	{
 		// Convert to CIA timing
-		m_nDefaultTempo = TEMPO((709379.0 * 125.0 / 50.0) / ((240 - fileHeader.restartPos) * 122.0));
+		Order().SetDefaultTempo(TEMPO((709379.0 * 125.0 / 50.0) / ((240 - fileHeader.restartPos) * 122.0)));
 		if(minVersion > UST1_80)
 		{
 			// D.O.C. SoundTracker IX re-introduced the variable tempo after some other versions dropped it.
@@ -2009,8 +2009,8 @@ bool CSoundFile::ReadICE(FileReader &file, ModLoadingFlags loadFlags)
 	// Now we can be pretty sure that this is a valid MOD file. Set up default song settings.
 	m_nChannels = 4;
 	m_nInstruments = 0;
-	m_nDefaultSpeed = 6;
-	m_nDefaultTempo.Set(125);
+	Order().SetDefaultSpeed(6);
+	Order().SetDefaultTempoInt(125);
 	m_nMinPeriod = 14 * 4;
 	m_nMaxPeriod = 3424 * 4;
 	m_nSamplePreAmp = 64;
@@ -2227,7 +2227,7 @@ bool CSoundFile::ReadPT36(FileReader &file, ModLoadingFlags loadFlags)
 		if(info.volume != 0)
 			m_nSamplePreAmp = std::min(uint16(64), static_cast<uint16>(info.volume));
 		if(info.tempo != 0 && !vblank)
-			m_nDefaultTempo.Set(info.tempo);
+			Order().SetDefaultTempoInt(info.tempo);
 
 		if(info.name[0])
 			m_songName = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, info.name);

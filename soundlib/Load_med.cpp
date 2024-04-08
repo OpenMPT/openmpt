@@ -1197,15 +1197,12 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 		const bool is8Ch = (songHeader.flags & MMDSong::FLAG_8CHANNEL) != 0;
 		const bool bpmMode = (songHeader.flags2 & MMDSong::FLAG2_BPM) != 0;
 		const uint8 rowsPerBeat = 1 + (songHeader.flags2 & MMDSong::FLAG2_BMASK);
-		if(song == 0)
+		order.SetDefaultTempo(MMDTempoToBPM(songHeader.defaultTempo, is8Ch, bpmMode, rowsPerBeat));
+		order.SetDefaultSpeed(Clamp<uint8, uint8>(songHeader.tempo2, 1, 32));
+		if(bpmMode)
 		{
-			m_nDefaultTempo = MMDTempoToBPM(songHeader.defaultTempo, is8Ch, bpmMode, rowsPerBeat);
-			m_nDefaultSpeed = Clamp<uint8, uint8>(songHeader.tempo2, 1, 32);
-			if(bpmMode)
-			{
-				m_nDefaultRowsPerBeat = rowsPerBeat;
-				m_nDefaultRowsPerMeasure = m_nDefaultRowsPerBeat * 4u;
-			}
+			m_nDefaultRowsPerBeat = rowsPerBeat;
+			m_nDefaultRowsPerMeasure = m_nDefaultRowsPerBeat * 4u;
 		}
 
 		if(songHeader.masterVol)

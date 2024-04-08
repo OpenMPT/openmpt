@@ -243,7 +243,7 @@ void CCtrlGeneral::OnTapTempo()
 
 	double newTempo = 60.0 / secondsPerBeat;
 	if(m_sndFile.m_nTempoMode != TempoMode::Modern)
-		newTempo *= (m_sndFile.m_nDefaultSpeed * m_sndFile.m_nDefaultRowsPerBeat) / 24.0;
+		newTempo *= (m_sndFile.Order().GetDefaultSpeed() * m_sndFile.m_nDefaultRowsPerBeat) / 24.0;
 	if(!m_sndFile.GetModSpecifications().hasFractionalTempo)
 		newTempo = std::round(newTempo);
 	TEMPO t(newTempo);
@@ -291,7 +291,7 @@ void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
 		m_tempoMax = specs.GetTempoMax();
 		// IT Hack: There are legacy OpenMPT-made ITs out there which use a higher default speed than 255.
 		// Changing the upper tempo limit in the mod specs would break them, so do it here instead.
-		if(m_sndFile.GetType() == MOD_TYPE_IT && m_sndFile.m_nDefaultTempo <= TEMPO(255, 0))
+		if(m_sndFile.GetType() == MOD_TYPE_IT && m_sndFile.Order().GetDefaultTempo() <= TEMPO(255, 0))
 			m_tempoMax.Set(255);
 		// Lower resolution for BPM above 256
 		if(m_tempoMax >= TEMPO_SPLIT_THRESHOLD)
@@ -349,14 +349,23 @@ void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
 		m_SpinRestartPos.SetRange32(0, std::max(m_sndFile.Order().GetRestartPos(), static_cast<ORDERINDEX>(m_sndFile.Order().GetLengthTailTrimmed() - 1)));
 		SetDlgItemInt(IDC_EDIT_RESTARTPOS, m_sndFile.Order().GetRestartPos(), FALSE);
 	}
+
+	if(updateAll || (hint.GetCategory() == HINTCAT_GENERAL && hintType[HINT_MODGENERAL]) || (hint.GetCategory() == HINTCAT_SEQUENCE && hint.ToType<SequenceHint>().GetSequence() == SEQUENCEINDEX_INVALID))
+	{
+		if(!m_editsLocked)
+		{
+			m_EditTempo.SetTempoValue(m_sndFile.Order().GetDefaultTempo());
+			SetDlgItemInt(IDC_EDIT_SPEED, m_sndFile.Order().GetDefaultSpeed(), FALSE);
+		}
+		m_SliderTempo.SetPos(TempoToSlider(m_sndFile.Order().GetDefaultTempo()));
+	}
+
 	if (updateAll || (hint.GetCategory() == HINTCAT_GENERAL && hintType[HINT_MODGENERAL]))
 	{
 		if (!m_editsLocked)
 		{
 			m_EditTitle.SetWindowText(mpt::ToCString(m_sndFile.GetCharsetInternal(), m_sndFile.GetTitle()));
 			m_EditArtist.SetWindowText(mpt::ToCString(m_sndFile.m_songArtist));
-			m_EditTempo.SetTempoValue(m_sndFile.m_nDefaultTempo);
-			SetDlgItemInt(IDC_EDIT_SPEED, m_sndFile.m_nDefaultSpeed, FALSE);
 			SetDlgItemInt(IDC_EDIT_GLOBALVOL, m_sndFile.m_nDefaultGlobalVolume / GetGlobalVolumeFactor(), FALSE);
 			SetDlgItemInt(IDC_EDIT_VSTIVOL, m_sndFile.m_nVSTiVolume, FALSE);
 			SetDlgItemInt(IDC_EDIT_SAMPLEPA, m_sndFile.m_nSamplePreAmp, FALSE);
@@ -365,7 +374,6 @@ void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
 		m_SliderGlobalVol.SetPos(MAX_SLIDER_GLOBAL_VOL - m_sndFile.m_nDefaultGlobalVolume);
 		m_SliderVSTiVol.SetPos(MAX_SLIDER_VSTI_VOL - m_sndFile.m_nVSTiVolume);
 		m_SliderSamplePreAmp.SetPos(MAX_SLIDER_SAMPLE_VOL - m_sndFile.m_nSamplePreAmp);
-		m_SliderTempo.SetPos(TempoToSlider(m_sndFile.m_nDefaultTempo));
 	}
 
 	if(updateAll || hintType == HINT_MPTOPTIONS || (hint.GetCategory() == HINTCAT_GENERAL && hintType[HINT_MODGENERAL]))
@@ -400,9 +408,9 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 		if (pSlider == &m_SliderTempo)
 		{
 			const TEMPO tempo = SliderToTempo(m_SliderTempo.GetPos());
-			if ((tempo >= m_sndFile.GetModSpecifications().GetTempoMin()) && (tempo <= m_sndFile.GetModSpecifications().GetTempoMax()) && (tempo != m_sndFile.m_nDefaultTempo))
+			if ((tempo >= m_sndFile.GetModSpecifications().GetTempoMin()) && (tempo <= m_sndFile.GetModSpecifications().GetTempoMax()) && (tempo != m_sndFile.Order().GetDefaultTempo()))
 			{
-				m_sndFile.m_nDefaultTempo = m_sndFile.m_PlayState.m_nMusicTempo = tempo;
+				m_sndFile.Order().SetDefaultTempo(m_sndFile.m_PlayState.m_nMusicTempo = tempo);
 				m_modDoc.SetModified();
 				m_modDoc.UpdateAllViews(nullptr, GeneralHint().General(), this);
 				m_EditTempo.SetTempoValue(tempo);
@@ -463,9 +471,9 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 				}
 				TEMPO newTempo;
 				newTempo.SetRaw(pos32);
-				newTempo += m_sndFile.m_nDefaultTempo;
+				newTempo += m_sndFile.Order().GetDefaultTempo();
 				Limit(newTempo, m_tempoMin, m_tempoMax);
-				m_sndFile.m_nDefaultTempo = m_sndFile.m_PlayState.m_nMusicTempo = newTempo;
+				m_sndFile.Order().SetDefaultTempo(m_sndFile.m_PlayState.m_nMusicTempo = newTempo);
 				m_modDoc.SetModified();
 				LockControls();
 				m_modDoc.UpdateAllViews(nullptr, GeneralHint().General(), this);
@@ -516,11 +524,11 @@ void CCtrlGeneral::OnTempoChanged()
 		TEMPO tempo = m_EditTempo.GetTempoValue();
 		Limit(tempo, m_tempoMin, m_tempoMax);
 		if(!m_sndFile.GetModSpecifications().hasFractionalTempo) tempo.Set(tempo.GetInt());
-		if (tempo != m_sndFile.m_nDefaultTempo)
+		if (tempo != m_sndFile.Order().GetDefaultTempo())
 		{
 			m_editsLocked = true;
 			m_EditTempo.SetModify(FALSE);
-			m_sndFile.m_nDefaultTempo = tempo;
+			m_sndFile.Order().SetDefaultTempo(tempo);
 			m_sndFile.m_PlayState.m_nMusicTempo = tempo;
 			m_modDoc.SetModified();
 			m_modDoc.UpdateAllViews(nullptr, GeneralHint().General());
@@ -540,11 +548,11 @@ void CCtrlGeneral::OnSpeedChanged()
 		{
 			UINT n = mpt::parse<UINT>(s);
 			n = Clamp(n, m_sndFile.GetModSpecifications().speedMin, m_sndFile.GetModSpecifications().speedMax);
-			if (n != m_sndFile.m_nDefaultSpeed)
+			if (n != m_sndFile.Order().GetDefaultSpeed())
 			{
 				m_editsLocked = true;
 				m_EditSpeed.SetModify(FALSE);
-				m_sndFile.m_nDefaultSpeed = n;
+				m_sndFile.Order().SetDefaultSpeed(n);
 				m_sndFile.m_PlayState.m_nMusicSpeed = n;
 				m_modDoc.SetModified();
 				m_modDoc.UpdateAllViews(nullptr, GeneralHint().General(), this);

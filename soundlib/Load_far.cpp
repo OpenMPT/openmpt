@@ -165,8 +165,8 @@ bool CSoundFile::ReadFAR(FileReader &file, ModLoadingFlags loadFlags)
 	InitializeGlobals(MOD_TYPE_FAR);
 	m_nChannels = 16;
 	m_nSamplePreAmp = 32;
-	m_nDefaultSpeed = fileHeader.defaultSpeed;
-	m_nDefaultTempo.Set(80);
+	Order().SetDefaultSpeed(fileHeader.defaultSpeed);
+	Order().SetDefaultTempoInt(80);
 	m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 	m_SongFlags = SONG_LINEARSLIDES;
 	m_playBehaviour.set(kPeriodsAreHertz);

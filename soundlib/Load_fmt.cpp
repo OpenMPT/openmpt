@@ -89,7 +89,7 @@ bool CSoundFile::ReadFMT(FileReader &file, ModLoadingFlags loadFlags)
 	InitializeChannels();
 	m_nChannels = 8;
 	m_nSamples = 8;
-	m_nDefaultTempo = TEMPO(45.5);  // 18.2 Hz timer
+	Order().SetDefaultTempo(TEMPO(45.5));  // 18.2 Hz timer
 	m_playBehaviour.set(kOPLNoteStopWith0Hz);
 	m_SongFlags.set(SONG_IMPORTED);
 	m_songName = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, fileHeader.songName);
@@ -118,7 +118,7 @@ bool CSoundFile::ReadFMT(FileReader &file, ModLoadingFlags loadFlags)
 		if(delay < 1 || delay > 8)
 			return false;
 	}
-	m_nDefaultSpeed = delays[0];
+	Order().SetDefaultSpeed(delays[0]);
 
 	const PATTERNINDEX numPatterns = fileHeader.lastPattern + 1u;
 	const ROWINDEX numRows = fileHeader.lastRow + 1u;

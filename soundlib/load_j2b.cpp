@@ -743,8 +743,8 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 	m_SongFlags.set(SONG_LINEARSLIDES, !(mainChunk.flags & AMFFMainChunk::amigaSlides));
 
 	m_nChannels = std::min(static_cast<CHANNELINDEX>(mainChunk.channels), static_cast<CHANNELINDEX>(MAX_BASECHANNELS));
-	m_nDefaultSpeed = mainChunk.speed;
-	m_nDefaultTempo.Set(mainChunk.tempo);
+	Order().SetDefaultSpeed(mainChunk.speed);
+	Order().SetDefaultTempoInt(mainChunk.tempo);
 	m_nDefaultGlobalVolume = mainChunk.globalvolume * 2;
 
 	m_modFormat.formatName = isAM ? UL_("Galaxy Sound System (new version)") : UL_("Galaxy Sound System (old version)");

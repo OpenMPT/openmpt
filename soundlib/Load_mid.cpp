@@ -649,13 +649,13 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 	SetMixLevels(MixLevels::v1_17RC3);
 	m_nTempoMode = TempoMode::Modern;
 	m_SongFlags = SONG_LINEARSLIDES;
-	m_nDefaultTempo.Set(120);
-	m_nDefaultSpeed = ticksPerRow;
+	TEMPO tempo{120, 0};
+	Order().SetDefaultTempo(tempo);
+	Order().SetDefaultSpeed(ticksPerRow);
 	m_nChannels = MAX_BASECHANNELS;
 	m_nDefaultRowsPerBeat = quantize / 4;
 	m_nDefaultRowsPerMeasure = 4 * m_nDefaultRowsPerBeat;
 	m_nSamplePreAmp = m_nVSTiVolume = 32;
-	TEMPO tempo = m_nDefaultTempo;
 	uint16 ppqn = fileHeader.division;
 	if(ppqn & 0x8000)
 	{
@@ -832,7 +832,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 					TEMPO newTempo(60000000.0 / tempoInt);
 					if(!tick)
 					{
-						m_nDefaultTempo = newTempo;
+						Order().SetDefaultTempo(newTempo);
 					} else if(newTempo != tempo)
 					{
 						patRow[tempoChannel].command = CMD_TEMPO;

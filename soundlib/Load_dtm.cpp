@@ -234,9 +234,9 @@ bool CSoundFile::ReadDTM(FileReader &file, ModLoadingFlags loadFlags)
 	m_playBehaviour.reset(kITVibratoTremoloPanbrello);
 	// Various files have a default speed or tempo of 0
 	if(fileHeader.tempo)
-		m_nDefaultTempo.Set(fileHeader.tempo);
+		Order().SetDefaultTempoInt(fileHeader.tempo);
 	if(fileHeader.speed)
-		m_nDefaultSpeed = fileHeader.speed;
+		Order().SetDefaultSpeed(fileHeader.speed);
 	if(fileHeader.stereoMode == 0)
 		SetupMODPanning(true);
 
@@ -282,7 +282,7 @@ bool CSoundFile::ReadDTM(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		chunk.Skip(2);	// Ticks per quarter note, typically 24
 		uint32 fractionalTempo = chunk.ReadUint32BE();
-		m_nDefaultTempo = TEMPO(m_nDefaultTempo.GetInt() + fractionalTempo / 4294967296.0);
+		Order().SetDefaultTempo(TEMPO(Order().GetDefaultTempo().GetInt() + fractionalTempo / 4294967296.0));
 
 		uint16be panning[32];
 		chunk.ReadArray(panning);
@@ -410,7 +410,7 @@ bool CSoundFile::ReadDTM(FileReader &file, ModLoadingFlags loadFlags)
 		if(patternFormat == DTM_206_PATTERN_FORMAT)
 		{
 			// The stored data is actually not row-based, but tick-based.
-			numRows /= m_nDefaultSpeed;
+			numRows /= Order().GetDefaultSpeed();
 		}
 		if(!(loadFlags & loadPatternData) || patNum > 255 || !Patterns.Insert(patNum, numRows))
 		{
@@ -474,7 +474,7 @@ bool CSoundFile::ReadDTM(FileReader &file, ModLoadingFlags loadFlags)
 						tick += (delay & 0x7F) * 0x100 + rowChunk.ReadUint8();
 					else
 						tick += delay;
-					position = std::div(tick, m_nDefaultSpeed);
+					position = std::div(tick, Order().GetDefaultSpeed());
 				}
 			}
 		} else

@@ -253,8 +253,8 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 	if(initTempo == 0)
 		initTempo = 0x60;
 
-	m_nDefaultTempo = ConvertST2Tempo(initTempo);
-	m_nDefaultSpeed = initTempo >> 4;
+	Order().SetDefaultTempo(ConvertST2Tempo(initTempo));
+	Order().SetDefaultSpeed(initTempo >> 4);
 	if(fileHeader.verMinor > 10)
 		m_nDefaultGlobalVolume = std::min(fileHeader.globalVolume, uint8(64)) * 4u;
 
@@ -475,8 +475,8 @@ bool CSoundFile::ReadSTX(FileReader &file, ModLoadingFlags loadFlags)
 	if(initTempo == 0)
 		initTempo = 0x60;
 
-	m_nDefaultTempo = ConvertST2Tempo(initTempo);
-	m_nDefaultSpeed = initTempo >> 4;
+	Order().SetDefaultTempo(ConvertST2Tempo(initTempo));
+	Order().SetDefaultSpeed(initTempo >> 4);
 	m_nDefaultGlobalVolume = std::min(fileHeader.globalVolume, uint8(64)) * 4u;
 
 	// Setting up channels

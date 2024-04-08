@@ -350,34 +350,37 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 	if(foundEnvelopes)
 		AddToLog("Two envelope points may not share the same tick");
 
-	// Check for too many orders
-	if(m_SndFile.Order().GetLengthTailTrimmed() > originalSpecs->ordersMax)
+	for(auto &order : m_SndFile.Order)
 	{
-		AddToLog(MPT_AFORMAT("Found too many orders ({} allowed)")(originalSpecs->ordersMax));
-		foundHacks = true;
-		if(autofix)
+		// Check for too many orders
+		if(order.GetLengthTailTrimmed() > originalSpecs->ordersMax)
 		{
-			// Can we be more intelligent here and maybe remove stop patterns and such?
-			m_SndFile.Order().resize(originalSpecs->ordersMax);
+			AddToLog(MPT_AFORMAT("Found too many orders ({} allowed)")(originalSpecs->ordersMax));
+			foundHacks = true;
+			if(autofix)
+			{
+				// Can we be more intelligent here and maybe remove stop patterns and such?
+				order.resize(originalSpecs->ordersMax);
+			}
 		}
-	}
 
-	// Check for invalid default tempo
-	if(m_SndFile.m_nDefaultTempo > originalSpecs->GetTempoMax() || m_SndFile.m_nDefaultTempo < originalSpecs->GetTempoMin())
-	{
-		AddToLog(MPT_AFORMAT("Found incompatible default tempo (must be between {} and {})")(originalSpecs->GetTempoMin().GetInt(), originalSpecs->GetTempoMax().GetInt()));
-		foundHacks = true;
-		if(autofix)
-			m_SndFile.m_nDefaultTempo = Clamp(m_SndFile.m_nDefaultTempo, originalSpecs->GetTempoMin(), originalSpecs->GetTempoMax());
-	}
+		// Check for invalid default tempo
+		if(order.GetDefaultTempo() > originalSpecs->GetTempoMax() || order.GetDefaultTempo() < originalSpecs->GetTempoMin())
+		{
+			AddToLog(MPT_AFORMAT("Found incompatible default tempo (must be between {} and {})")(originalSpecs->GetTempoMin().GetInt(), originalSpecs->GetTempoMax().GetInt()));
+			foundHacks = true;
+			if(autofix)
+				order.SetDefaultTempo(Clamp(order.GetDefaultTempo(), originalSpecs->GetTempoMin(), originalSpecs->GetTempoMax()));
+		}
 
-	// Check for invalid default speed
-	if(m_SndFile.m_nDefaultSpeed > originalSpecs->speedMax || m_SndFile.m_nDefaultSpeed < originalSpecs->speedMin)
-	{
-		AddToLog(MPT_AFORMAT("Found incompatible default speed (must be between {} and {})")(originalSpecs->speedMin, originalSpecs->speedMax));
-		foundHacks = true;
-		if(autofix)
-			m_SndFile.m_nDefaultSpeed = Clamp(m_SndFile.m_nDefaultSpeed, originalSpecs->speedMin, originalSpecs->speedMax);
+		// Check for invalid default speed
+		if(order.GetDefaultSpeed() > originalSpecs->speedMax || order.GetDefaultSpeed() < originalSpecs->speedMin)
+		{
+			AddToLog(MPT_AFORMAT("Found incompatible default speed (must be between {} and {})")(originalSpecs->speedMin, originalSpecs->speedMax));
+			foundHacks = true;
+			if(autofix)
+				order.SetDefaultSpeed(Clamp(order.GetDefaultSpeed(), originalSpecs->speedMin, originalSpecs->speedMax));
+		}
 	}
 
 	// Check for invalid rows per beat / measure values
@@ -449,7 +452,7 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 			foundHacks = true;
 			if(autofix)
 			{
-				m_SndFile.Order.RestartPosToPattern(seq);
+				m_SndFile.Order.WriteGlobalsToPattern(seq, true, false);
 			}
 		}
 	}

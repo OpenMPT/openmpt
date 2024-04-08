@@ -129,8 +129,8 @@ bool CSoundFile::ReadAMF_Asylum(FileReader &file, ModLoadingFlags loadFlags)
 	InitializeChannels();
 	SetupMODPanning(true);
 	m_nChannels = 8;
-	m_nDefaultSpeed = fileHeader.defaultSpeed;
-	m_nDefaultTempo.Set(fileHeader.defaultTempo);
+	Order().SetDefaultSpeed(fileHeader.defaultSpeed);
+	Order().SetDefaultTempoInt(fileHeader.defaultTempo);
 	m_nSamples = fileHeader.numSamples;
 	if(fileHeader.restartPos < fileHeader.numOrders)
 	{
@@ -633,12 +633,12 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 		auto [tempo, speed] = file.ReadArray<uint8, 2>();
 		if(tempo < 32)
 			tempo = 125;
-		m_nDefaultTempo.Set(tempo);
-		m_nDefaultSpeed = speed;
+		Order().SetDefaultTempoInt(tempo);
+		Order().SetDefaultSpeed(speed);
 	} else
 	{
-		m_nDefaultTempo.Set(125);
-		m_nDefaultSpeed = 6;
+		Order().SetDefaultTempoInt(125);
+		Order().SetDefaultSpeed(6);
 	}
 
 	// Setup Order List

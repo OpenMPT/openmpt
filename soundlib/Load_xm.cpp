@@ -666,9 +666,9 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	m_nChannels = fileHeader.channels;
 	m_nInstruments = std::min(static_cast<uint16>(fileHeader.instruments), static_cast<uint16>(MAX_INSTRUMENTS - 1));
 	if(fileHeader.speed)
-		m_nDefaultSpeed = fileHeader.speed;
+		Order().SetDefaultSpeed(fileHeader.speed);
 	if(fileHeader.tempo)
-		m_nDefaultTempo = Clamp(TEMPO(fileHeader.tempo, 0), ModSpecs::xmEx.GetTempoMin(), ModSpecs::xmEx.GetTempoMax());
+		Order().SetDefaultTempo(Clamp(TEMPO(fileHeader.tempo, 0), ModSpecs::xmEx.GetTempoMin(), ModSpecs::xmEx.GetTempoMax()));
 
 	m_SongFlags.reset();
 	m_SongFlags.set(SONG_LINEARSLIDES, (fileHeader.flags & XMFileHeader::linearSlides) != 0);
@@ -1135,8 +1135,8 @@ bool CSoundFile::SaveXM(std::ostream &f, bool compatibilityExport)
 	fileHeader.flags = fileHeader.flags;
 
 	// Fasttracker 2 will happily accept any tempo faster than 255 BPM. XMPlay does also support this, great!
-	fileHeader.tempo = mpt::saturate_cast<uint16>(m_nDefaultTempo.GetInt());
-	fileHeader.speed = static_cast<uint16>(Clamp(m_nDefaultSpeed, 1u, 31u));
+	fileHeader.tempo = mpt::saturate_cast<uint16>(Order().GetDefaultTempo().GetInt());
+	fileHeader.speed = static_cast<uint16>(Clamp(Order().GetDefaultSpeed(), 1u, 31u));
 
 	mpt::IO::Write(f, fileHeader);
 

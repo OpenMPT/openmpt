@@ -1519,7 +1519,6 @@ void COrderList::SelectSequence(const SEQUENCEINDEX seq)
 			sndFile.Order.SetSequence(newIndex);
 			if(const auto name = sndFile.Order().GetName(); duplicate && !name.empty())
 				sndFile.Order().SetName(name + U_(" (Copy)"));
-			m_modDoc.UpdateAllViews(nullptr, SequenceHint(SEQUENCEINDEX_INVALID).Names().Data());
 		}
 	} else if(seq == sndFile.Order.GetCurrentSequenceIndex())
 		return;
@@ -1536,8 +1535,13 @@ void COrderList::SelectSequence(const SEQUENCEINDEX seq)
 	cs.Leave();
 
 	if(editSequence)
+	{
 		m_modDoc.SetModified();
-	m_modDoc.UpdateAllViews(nullptr, SequenceHint().Data(), nullptr);
+		m_modDoc.UpdateAllViews(nullptr, SequenceHint(SEQUENCEINDEX_INVALID).Names().Data(), nullptr);
+	} else
+	{
+		m_modDoc.UpdateAllViews(nullptr, SequenceHint(SEQUENCEINDEX_INVALID).Data(), nullptr);
+	}
 }
 
 

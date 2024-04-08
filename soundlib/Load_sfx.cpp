@@ -192,8 +192,8 @@ bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)
 
 	m_nChannels = 4;
 	m_nInstruments = 0;
-	m_nDefaultTempo = TEMPO((14565.0 * 122.0) / fileHeader.speed);
-	m_nDefaultSpeed = 6;
+	Order().SetDefaultTempo(TEMPO((14565.0 * 122.0) / fileHeader.speed));
+	Order().SetDefaultSpeed(6);
 	m_nMinPeriod = 14 * 4;
 	m_nMaxPeriod = 3424 * 4;
 	m_nSamplePreAmp = 64;

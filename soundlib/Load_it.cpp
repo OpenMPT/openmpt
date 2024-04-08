@@ -533,8 +533,8 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	if(m_nDefaultGlobalVolume > MAX_GLOBAL_VOLUME)
 		m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 	if(fileHeader.speed)
-		m_nDefaultSpeed = fileHeader.speed;
-	m_nDefaultTempo.Set(std::max(uint8(31), static_cast<uint8>(fileHeader.tempo)));
+		Order().SetDefaultSpeed(fileHeader.speed);
+	Order().SetDefaultTempoInt(std::max(uint8(31), static_cast<uint8>(fileHeader.tempo)));
 	m_nSamplePreAmp = std::min(static_cast<uint8>(fileHeader.mv), uint8(128));
 
 	// Reading Channels Pan Positions
@@ -1548,8 +1548,8 @@ bool CSoundFile::SaveIT(std::ostream &f, const mpt::PathString &filename, bool c
 
 	itHeader.globalvol = static_cast<uint8>(m_nDefaultGlobalVolume / 2u);
 	itHeader.mv = static_cast<uint8>(std::min(m_nSamplePreAmp, uint32(128)));
-	itHeader.speed = mpt::saturate_cast<uint8>(m_nDefaultSpeed);
- 	itHeader.tempo = mpt::saturate_cast<uint8>(m_nDefaultTempo.GetInt()); // We save the real tempo in an extension below if it exceeds 255.
+	itHeader.speed = mpt::saturate_cast<uint8>(Order().GetDefaultSpeed());
+ 	itHeader.tempo = mpt::saturate_cast<uint8>(Order().GetDefaultTempo().GetInt()); // We save the real tempo in an extension below if it exceeds 255.
 	itHeader.sep = 128; // pan separation
 	// IT doesn't have a per-instrument Pitch Wheel Depth setting, so we just store the first non-zero PWD setting in the header.
 	for(INSTRUMENTINDEX ins = 1; ins <= GetNumInstruments(); ins++)
@@ -2249,14 +2249,14 @@ void CSoundFile::SaveExtendedSongProperties(std::ostream &f) const
 		mpt::IO::WriteIntLE(f, field); \
 	}
 
-	if(m_nDefaultTempo.GetInt() > 255)
+	if(Order().GetDefaultTempo().GetInt() > 255)
 	{
-		uint32 tempo = m_nDefaultTempo.GetInt();
+		uint32 tempo = Order().GetDefaultTempo().GetInt();
 		WRITEMODULAR(MagicBE("DT.."), tempo);
 	}
-	if(m_nDefaultTempo.GetFract() != 0 && specs.hasFractionalTempo)
+	if(Order().GetDefaultTempo().GetFract() != 0 && specs.hasFractionalTempo)
 	{
-		uint32 tempo = m_nDefaultTempo.GetFract();
+		uint32 tempo = Order().GetDefaultTempo().GetFract();
 		WRITEMODULAR(MagicLE("DTFR"), tempo);
 	}
 
@@ -2472,8 +2472,8 @@ bool CSoundFile::LoadExtendedSongProperties(FileReader &file, bool ignoreChannel
 
 		switch (code)					// interpret field code
 		{
-			case MagicBE("DT.."): { uint32 tempo; ReadField(chunk, size, tempo); m_nDefaultTempo.Set(tempo, m_nDefaultTempo.GetFract()); break; }
-			case MagicLE("DTFR"): { uint32 tempoFract; ReadField(chunk, size, tempoFract); m_nDefaultTempo.Set(m_nDefaultTempo.GetInt(), tempoFract); break; }
+			case MagicBE("DT.."): { uint32 tempo; ReadField(chunk, size, tempo); Order().SetDefaultTempo(TEMPO(tempo, Order().GetDefaultTempo().GetFract())); break; }
+			case MagicLE("DTFR"): { uint32 tempoFract; ReadField(chunk, size, tempoFract); Order().SetDefaultTempo(TEMPO(Order().GetDefaultTempo().GetInt(), tempoFract)); break; }
 			case MagicBE("RPB."): ReadField(chunk, size, m_nDefaultRowsPerBeat); break;
 			case MagicBE("RPM."): ReadField(chunk, size, m_nDefaultRowsPerMeasure); break;
 				// FIXME: If there are only PC events on the last few channels in an MPTM MO3, they won't be imported!
@@ -2589,7 +2589,7 @@ bool CSoundFile::LoadExtendedSongProperties(FileReader &file, bool ignoreChannel
 	}
 
 	// Validate read values.
-	Limit(m_nDefaultTempo, GetModSpecifications().GetTempoMin(), GetModSpecifications().GetTempoMax());
+	Order().SetDefaultTempo(Clamp(Order().GetDefaultTempo(), GetModSpecifications().GetTempoMin(), GetModSpecifications().GetTempoMax()));
 	if(m_nTempoMode >= TempoMode::NumModes)
 		m_nTempoMode = TempoMode::Classic;
 	if(m_nMixLevels >= MixLevels::NumMixLevels)

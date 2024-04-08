@@ -790,29 +790,29 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 	uint16 headerFlags;
 	if(fileHeader.versionLow >= 2)
 	{
-		uint16 tempo = std::max(uint16(32 << 8), file.ReadUint16LE());	// 8.8 tempo
-		m_nDefaultTempo.SetRaw((tempo * TEMPO::fractFact) >> 8);
-		m_nDefaultSpeed = std::max(uint8(1), file.ReadUint8());
-		file.Skip(3);	// Default values for pattern editor
+		uint16 tempo = std::max(uint16(32 << 8), file.ReadUint16LE());  // 8.8 tempo
+		Order().SetDefaultTempo(TEMPO{}.SetRaw((tempo * TEMPO::fractFact) >> 8));
+		Order().SetDefaultSpeed(std::max(uint8(1), file.ReadUint8()));
+		file.Skip(3);  // Default values for pattern editor
 		headerFlags = file.ReadUint16LE();
 	} else
 	{
-		m_nDefaultTempo.Set(std::max(uint8(32), file.ReadUint8()));
-		m_nDefaultSpeed = std::max(uint8(1), file.ReadUint8());
+		Order().SetDefaultTempoInt(std::max(uint8(32), file.ReadUint8()));
+		Order().SetDefaultSpeed(std::max(uint8(1), file.ReadUint8()));
 		headerFlags = file.ReadUint8();
 	}
 
 	m_SongFlags = SONG_ITCOMPATGXX | SONG_ITOLDEFFECTS | ((headerFlags & AMS2FileHeader::linearSlides) ? SONG_LINEARSLIDES : SongFlags(0));
 
 	// Instruments
-	std::vector<SAMPLEINDEX> firstSample;	// First sample of instrument
-	std::vector<uint16> sampleSettings;		// Shadow sample map... Lo byte = Instrument, Hi byte, lo nibble = Sample index in instrument, Hi byte, hi nibble = Sample pack status
+	std::vector<SAMPLEINDEX> firstSample;  // First sample of instrument
+	std::vector<uint16> sampleSettings;    // Shadow sample map... Lo byte = Instrument, Hi byte, lo nibble = Sample index in instrument, Hi byte, hi nibble = Sample pack status
 	enum
 	{
-		instrIndexMask		= 0xFF,		// Shadow instrument
-		sampleIndexMask		= 0x7F00,	// Sample index in instrument
+		instrIndexMask		= 0xFF,    // Shadow instrument
+		sampleIndexMask		= 0x7F00,  // Sample index in instrument
 		sampleIndexShift	= 8,
-		packStatusMask		= 0x8000,	// If bit is set, sample is packed
+		packStatusMask		= 0x8000,  // If bit is set, sample is packed
 	};
 
 	static_assert(MAX_INSTRUMENTS > 255);
@@ -827,11 +827,11 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 
 		uint8 numSamples = file.ReadUint8();
 		uint8 sampleAssignment[120];
-		MemsetZero(sampleAssignment);	// Only really needed for v2.0, where the lowest and highest octave aren't cleared.
+		MemsetZero(sampleAssignment);  // Only really needed for v2.0, where the lowest and highest octave aren't cleared.
 
 		if(numSamples == 0
-			|| (fileHeader.versionLow > 0 && !file.ReadArray(sampleAssignment))	// v2.01+: 120 Notes
-			|| (fileHeader.versionLow == 0 && !file.ReadRaw(mpt::span(sampleAssignment + 12, 96)).size()))	// v2.0: 96 Notes
+			|| (fileHeader.versionLow > 0 && !file.ReadArray(sampleAssignment))  // v2.01+: 120 Notes
+			|| (fileHeader.versionLow == 0 && !file.ReadRaw(mpt::span(sampleAssignment + 12, 96)).size()))  // v2.0: 96 Notes
 		{
 			continue;
 		}

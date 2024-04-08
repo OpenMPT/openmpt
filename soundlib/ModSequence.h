@@ -28,9 +28,11 @@ class ModSequence: public std::vector<PATTERNINDEX>
 	friend class ModSequenceSet;
 
 protected:
-	mpt::ustring m_name;          // Sequence name
-	CSoundFile &m_sndFile;        // Associated CSoundFile
-	ORDERINDEX m_restartPos = 0;  // Restart position when playback of this order ended
+	mpt::ustring m_name;           // Sequence name
+	CSoundFile &m_sndFile;         // Associated CSoundFile
+	ORDERINDEX m_restartPos = 0;   // Restart position when playback of this order ended
+	TEMPO m_defaultTempo{125, 0};  // Default tempo at start of sequence
+	uint32 m_defaultSpeed = 6;     // Default ticks per row at start of sequence
 
 public:
 	ModSequence(CSoundFile &sndFile);
@@ -118,13 +120,18 @@ public:
 	bool HasSubsongs() const noexcept;
 #endif // MODPLUG_TRACKER
 
-	// Sequence name setter / getter
 	inline void SetName(mpt::ustring newName) noexcept { m_name = std::move(newName); }
 	inline mpt::ustring GetName() const { return m_name; }
 
-	// Restart position setter / getter
 	inline void SetRestartPos(ORDERINDEX restartPos) noexcept { m_restartPos = restartPos; }
 	inline ORDERINDEX GetRestartPos() const noexcept { return m_restartPos; }
+
+	void SetDefaultTempo(TEMPO tempo) noexcept;
+	inline void SetDefaultTempoInt(uint32 tempo) noexcept { SetDefaultTempo(TEMPO{mpt::saturate_cast<uint16>(tempo), 0}); }
+	inline TEMPO GetDefaultTempo() const noexcept { return m_defaultTempo; }
+
+	inline void SetDefaultSpeed(uint32 speed) noexcept { m_defaultSpeed = speed ? speed : 6; }
+	inline uint32 GetDefaultSpeed() const noexcept { return m_defaultSpeed; }
 };
 
 
@@ -184,8 +191,8 @@ public:
 	// Returns true if sequences were modified, false otherwise.
 	bool SplitSubsongsToMultipleSequences();
 
-	// Convert the sequence's restart position information to a pattern command.
-	bool RestartPosToPattern(SEQUENCEINDEX seq);
+	// Convert the sequence's restart position and tempo information to a pattern command.
+	bool WriteGlobalsToPattern(SEQUENCEINDEX seq, bool writeRestartPos, bool writeTempo);
 	// Merges multiple sequences into one and destroys all other sequences.
 	// Returns false if there were no sequences to merge, true otherwise.
 	bool MergeSequences();

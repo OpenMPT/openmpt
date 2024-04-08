@@ -457,8 +457,8 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 
 	m_songName = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, fileHeader.songName);
 	m_nChannels = fileHeader.numChannels;
-	m_nDefaultSpeed = Clamp<uint8, uint8>(fileHeader.ticksPerLine, 1, 31);
-	m_nDefaultTempo.Set(125);
+	Order().SetDefaultSpeed(Clamp<uint8, uint8>(fileHeader.ticksPerLine, 1, 31));
+	Order().SetDefaultTempoInt(125);
 	m_SongFlags = SONG_LINEARSLIDES | SONG_ITCOMPATGXX | SONG_EXFILTERRANGE;
 	m_nInstruments = fileHeader.numInstruments;
 	m_nSamples = fileHeader.numSamples;
@@ -563,11 +563,11 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		if(hasLegacyTempo)
 		{
-			m_nDefaultTempo.SetRaw(Util::muldivr(110250, TEMPO::fractFact, fileHeader.samplesPerTick));
+			Order().SetDefaultTempo(TEMPO{}.SetRaw(Util::muldivr(110250, TEMPO::fractFact, fileHeader.samplesPerTick)));
 			m_nTempoMode = TempoMode::Classic;
 		} else
 		{
-			m_nDefaultTempo = TEMPO(44100.0 * 60.0 / (m_nDefaultSpeed * m_nDefaultRowsPerBeat * fileHeader.samplesPerTick));
+			Order().SetDefaultTempo(TEMPO(44100.0 * 60.0 / (Order().GetDefaultSpeed() * m_nDefaultRowsPerBeat * fileHeader.samplesPerTick)));
 			m_nTempoMode = TempoMode::Modern;
 		}
 	}
@@ -589,7 +589,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 				double d = chunk.ReadDoubleLE();
 				if(d > 0.00000001)
 				{
-					m_nDefaultTempo = TEMPO(44100.0 * 60.0 / (m_nDefaultSpeed * m_nDefaultRowsPerBeat * d));
+					Order().SetDefaultTempo(TEMPO(44100.0 * 60.0 / (Order().GetDefaultSpeed() * m_nDefaultRowsPerBeat * d)));
 				}
 			}
 			break;

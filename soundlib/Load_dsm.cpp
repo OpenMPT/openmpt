@@ -214,8 +214,8 @@ bool CSoundFile::ReadDSM(FileReader &file, ModLoadingFlags loadFlags)
 
 	m_songName = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, songHeader.songName);
 	m_nChannels = std::max(songHeader.numChannels.get(), uint16(1));
-	m_nDefaultSpeed = songHeader.speed;
-	m_nDefaultTempo.Set(songHeader.bpm);
+	Order().SetDefaultSpeed(songHeader.speed);
+	Order().SetDefaultTempoInt(songHeader.bpm);
 	m_nDefaultGlobalVolume = std::min(songHeader.globalVol.get(), uint8(64)) * 4u;
 	if(!m_nDefaultGlobalVolume) m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 	if(songHeader.mastervol == 0x80)

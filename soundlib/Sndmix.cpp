@@ -495,8 +495,8 @@ bool CSoundFile::ProcessRow()
 					{
 						//rewbs.instroVSTi: stop all VSTi at end of song, if looping.
 						StopAllVsti();
-						m_PlayState.m_nMusicSpeed = m_nDefaultSpeed;
-						m_PlayState.m_nMusicTempo = m_nDefaultTempo;
+						m_PlayState.m_nMusicSpeed = Order().GetDefaultSpeed();
+						m_PlayState.m_nMusicTempo = Order().GetDefaultTempo();
 						m_PlayState.m_nGlobalVolume = m_nDefaultGlobalVolume;
 						for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
 						{

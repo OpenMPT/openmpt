@@ -204,8 +204,6 @@ void CSoundFile::InitializeGlobals(MODTYPE type)
 	m_nSamplePreAmp = 48;
 	m_nVSTiVolume = 48;
 	m_OPLVolumeFactor = m_OPLVolumeFactorScale;
-	m_nDefaultSpeed = 6;
-	m_nDefaultTempo.Set(125);
 	m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 	m_SongFlags.reset();
 	m_nMinPeriod = 16;
@@ -649,13 +647,6 @@ bool CSoundFile::CreateInternal(FileReader file, ModLoadingFlags loadFlags)
 	m_nInstruments = maxInstr;
 
 	// Set default play state values
-	if(!m_nDefaultTempo.GetInt())
-		m_nDefaultTempo.Set(125);
-	else
-		LimitMax(m_nDefaultTempo, TEMPO(uint16_max, 0));
-	if(!m_nDefaultSpeed)
-		m_nDefaultSpeed = 6;
-
 	if(!m_nDefaultRowsPerBeat && m_nTempoMode == TempoMode::Modern)
 		m_nDefaultRowsPerBeat = 1;
 	if(m_nDefaultRowsPerMeasure < m_nDefaultRowsPerBeat)
@@ -666,8 +657,8 @@ bool CSoundFile::CreateInternal(FileReader file, ModLoadingFlags loadFlags)
 	if(!m_tempoSwing.empty())
 		m_tempoSwing.resize(m_nDefaultRowsPerBeat);
 
-	m_PlayState.m_nMusicSpeed = m_nDefaultSpeed;
-	m_PlayState.m_nMusicTempo = m_nDefaultTempo;
+	m_PlayState.m_nMusicSpeed = Order().GetDefaultSpeed();
+	m_PlayState.m_nMusicTempo = Order().GetDefaultTempo();
 	m_PlayState.m_nCurrentRowsPerBeat = m_nDefaultRowsPerBeat;
 	m_PlayState.m_nCurrentRowsPerMeasure = m_nDefaultRowsPerMeasure;
 	m_PlayState.m_nGlobalVolume = static_cast<int32>(m_nDefaultGlobalVolume);
@@ -696,9 +687,7 @@ bool CSoundFile::CreateInternal(FileReader file, ModLoadingFlags loadFlags)
 	{
 		order.Shrink();
 		if(order.GetRestartPos() >= order.size())
-		{
 			order.SetRestartPos(0);
-		}
 	}
 
 	if(GetType() == MOD_TYPE_NONE)
@@ -897,8 +886,8 @@ void CSoundFile::ResetPlayPos()
 	m_SongFlags.reset(SONG_FADINGSONG | SONG_ENDREACHED);
 
 	m_PlayState.m_nGlobalVolume = m_nDefaultGlobalVolume;
-	m_PlayState.m_nMusicSpeed = m_nDefaultSpeed;
-	m_PlayState.m_nMusicTempo = m_nDefaultTempo;
+	m_PlayState.m_nMusicSpeed = Order().GetDefaultSpeed();
+	m_PlayState.m_nMusicTempo = Order().GetDefaultTempo();
 
 	// Do not ramp global volume when starting playback
 	m_PlayState.ResetGlobalVolumeRamping();
@@ -1360,6 +1349,8 @@ MODTYPE CSoundFile::GetBestSaveFormat() const
 		}
 		return MOD_TYPE_XM;
 	case MOD_TYPE_PSM:
+		if(Order.GetNumSequences() > 1)
+			return MOD_TYPE_MPT;
 		if(GetNumChannels() > 16)
 			return MOD_TYPE_IT;
 		for(CHANNELINDEX i = 0; i < GetNumChannels(); i++)

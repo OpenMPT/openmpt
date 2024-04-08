@@ -1075,7 +1075,7 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 			break;
 
 		case ChunkType::Tempo:
-			m_nDefaultTempo = TEMPO(1.24 * std::min(file.ReadUint32BE(), uint32(800)));
+			Order().SetDefaultTempo(TEMPO(1.24 * std::min(file.ReadUint32BE(), uint32(800))));
 			break;
 
 		// Unused values

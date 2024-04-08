@@ -637,9 +637,8 @@ void CModDoc::InitializeMod()
 
 		Clear(m_SndFile.m_szNames);
 
-		m_SndFile.m_PlayState.m_nMusicTempo.Set(125);
-		m_SndFile.m_nDefaultTempo.Set(125);
-		m_SndFile.m_PlayState.m_nMusicSpeed = m_SndFile.m_nDefaultSpeed = 6;
+		m_SndFile.Order().SetDefaultTempoInt(125);
+		m_SndFile.Order().SetDefaultSpeed(6);
 
 		// Set up mix levels
 		m_SndFile.m_PlayState.m_nGlobalVolume = m_SndFile.m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;

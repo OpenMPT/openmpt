@@ -835,8 +835,8 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	Order().SetRestartPos(fileHeader.restartPos);
 	m_nInstruments = fileHeader.numInstruments;
 	m_nSamples = fileHeader.numSamples;
-	m_nDefaultSpeed = fileHeader.defaultSpeed ? fileHeader.defaultSpeed : 6;
-	m_nDefaultTempo.Set(fileHeader.defaultTempo ? fileHeader.defaultTempo : 125, 0);
+	Order().SetDefaultSpeed(fileHeader.defaultSpeed ? fileHeader.defaultSpeed : 6);
+	Order().SetDefaultTempoInt(fileHeader.defaultTempo ? fileHeader.defaultTempo : 125);
 
 	if(fileHeader.flags & MO3FileHeader::isIT)
 		SetType(MOD_TYPE_IT);

@@ -2264,7 +2264,7 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, ui
 	float tempoScale = 1.0f;
 	if(sndFile.m_nTempoMode == TempoMode::Modern)
 	{
-		uint32 ticksPerBeat = sndFile.m_nDefaultRowsPerBeat * sndFile.m_nDefaultSpeed;
+		uint32 ticksPerBeat = sndFile.m_nDefaultRowsPerBeat * sndFile.Order().GetDefaultSpeed();
 		if(ticksPerBeat != 0)
 			tempoScale = ticksPerBeat / 24.0f;
 	}

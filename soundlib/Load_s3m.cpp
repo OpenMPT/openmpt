@@ -403,21 +403,17 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		m_SongFlags.set(SONG_FASTVOLSLIDES);
 	}
 
-	// Speed
-	m_nDefaultSpeed = fileHeader.speed;
-	if(m_nDefaultSpeed == 0 || (m_nDefaultSpeed == 255 && isST3))
-	{
-		// Even though ST3 accepts the command AFF as expected, it mysteriously fails to load a default speed of 255...
-		m_nDefaultSpeed = 6;
-	}
+	// Even though ST3 accepts the command AFF as expected, it mysteriously fails to load a default speed of 255...
+	if(fileHeader.speed == 0 || (fileHeader.speed == 255 && isST3))
+		Order().SetDefaultSpeed(6);
+	else
+		Order().SetDefaultSpeed(fileHeader.speed);
 
-	// Tempo
-	m_nDefaultTempo.Set(fileHeader.tempo);
+	// ST3 also fails to load an otherwise valid default tempo of 32...
 	if(fileHeader.tempo < 33)
-	{
-		// ST3 also fails to load an otherwise valid default tempo of 32...
-		m_nDefaultTempo.Set(isST3 ? 125 : 32);
-	}
+		Order().SetDefaultTempoInt(isST3 ? 125 : 32);
+	else
+		Order().SetDefaultTempoInt(fileHeader.tempo);
 
 	// Global Volume
 	m_nDefaultGlobalVolume = std::min(fileHeader.globalVol.get(), uint8(64)) * 4u;
@@ -790,8 +786,8 @@ bool CSoundFile::SaveS3M(std::ostream &f) const
 
 	// Song Variables
 	fileHeader.globalVol = static_cast<uint8>(std::min(m_nDefaultGlobalVolume / 4u, uint32(64)));
-	fileHeader.speed = static_cast<uint8>(Clamp(m_nDefaultSpeed, 1u, 254u));
-	fileHeader.tempo = static_cast<uint8>(Clamp(m_nDefaultTempo.GetInt(), 33u, 255u));
+	fileHeader.speed = static_cast<uint8>(Clamp(Order().GetDefaultSpeed(), 1u, 254u));
+	fileHeader.tempo = static_cast<uint8>(Clamp(Order().GetDefaultTempo().GetInt(), 33u, 255u));
 	fileHeader.masterVolume = static_cast<uint8>(Clamp(m_nSamplePreAmp, 16u, 127u) | 0x80);
 	fileHeader.ultraClicks = 16;
 	fileHeader.usePanningTable = S3MFileHeader::idPanning;

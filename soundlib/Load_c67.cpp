@@ -165,8 +165,8 @@ bool CSoundFile::ReadC67(FileReader &file, ModLoadingFlags loadFlags)
 	m_modFormat.madeWithTracker = U_("Composer 670");
 	m_modFormat.charset = mpt::Charset::CP437;
 
-	m_nDefaultSpeed = fileHeader.speed;
-	m_nDefaultTempo.Set(143);
+	Order().SetDefaultSpeed(fileHeader.speed);
+	Order().SetDefaultTempoInt(143);
 	Order().SetRestartPos(fileHeader.restartPos);
 	m_nSamples = 64;
 	m_nChannels = 4 + 9;

@@ -111,8 +111,8 @@ bool CSoundFile::ReadWAV(FileReader &file, ModLoadingFlags loadFlags)
 
 	m_nSamples = wavFile.GetNumChannels();
 	m_nInstruments = 0;
-	m_nDefaultSpeed = ticksPerRow;
-	m_nDefaultTempo.Set(125);
+	Order().SetDefaultSpeed(ticksPerRow);
+	Order().SetDefaultTempoInt(125);
 	m_SongFlags = SONG_LINEARSLIDES;
 
 	for(CHANNELINDEX channel = 0; channel < m_nChannels; channel++)

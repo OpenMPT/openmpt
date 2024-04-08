@@ -208,8 +208,8 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	m_nDefaultGlobalVolume = std::min(fileHeader.masterVol * 4u, 256u);
-	m_nDefaultSpeed = fileHeader.tempo;
-	m_nDefaultTempo.Set(fileHeader.bpm);
+	Order().SetDefaultSpeed(fileHeader.tempo);
+	Order().SetDefaultTempoInt(fileHeader.bpm);
 
 	// Read orders
 	if(file.Seek(fileHeader.orderOffset))

@@ -3050,7 +3050,7 @@ void CCtrlInstruments::OnBnClickedCheckPitchtempolock()
 		}
 		if(!ptl.GetRaw())
 		{
-			ptl = m_sndFile.m_nDefaultTempo;
+			ptl = m_sndFile.Order().GetDefaultTempo();
 		}
 		m_EditPitchTempoLock.SetTempoValue(ptl);
 		isZero = true;

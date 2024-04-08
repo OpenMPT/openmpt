@@ -411,10 +411,13 @@ void CModTypeDlg::OnOK()
 		sndFile.m_nTempoMode = static_cast<TempoMode>(m_TempoModeBox.GetItemData(sel));
 		if(oldMode == TempoMode::Modern && sndFile.m_nTempoMode != TempoMode::Modern)
 		{
-			double newTempo = sndFile.m_nDefaultTempo.ToDouble() * (sndFile.m_nDefaultSpeed * sndFile.m_nDefaultRowsPerBeat) / ((sndFile.m_nTempoMode == TempoMode::Classic) ? 24 : 60);
-			if(!newModSpecs.hasFractionalTempo)
-				newTempo = std::round(newTempo);
-			sndFile.m_nDefaultTempo = Clamp(TEMPO(newTempo), newModSpecs.GetTempoMin(), newModSpecs.GetTempoMax());
+			for(auto &order : sndFile.Order)
+			{
+				double newTempo = order.GetDefaultTempo().ToDouble() * (order.GetDefaultSpeed() * sndFile.m_nDefaultRowsPerBeat) / ((sndFile.m_nTempoMode == TempoMode::Classic) ? 24 : 60);
+				if(!newModSpecs.hasFractionalTempo)
+					newTempo = std::round(newTempo);
+				order.SetDefaultTempo(Clamp(TEMPO(newTempo), newModSpecs.GetTempoMin(), newModSpecs.GetTempoMax()));
+			}
 		}
 	}
 	if(sndFile.m_nTempoMode == TempoMode::Modern)

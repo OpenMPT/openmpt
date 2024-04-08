@@ -81,8 +81,8 @@ public:
 			state->m_midiMacroEvaluationResults.emplace();
 		elapsedTime = 0.0;
 		state->m_lTotalSampleCount = 0;
-		state->m_nMusicSpeed = sndFile.m_nDefaultSpeed;
-		state->m_nMusicTempo = sndFile.m_nDefaultTempo;
+		state->m_nMusicSpeed = sndFile.Order().GetDefaultSpeed();
+		state->m_nMusicTempo = sndFile.Order().GetDefaultTempo();
 		state->m_nGlobalVolume = sndFile.m_nDefaultGlobalVolume;
 		chnSettings.assign(sndFile.GetNumChannels(), ChnSettings());
 		const auto muteFlag = CSoundFile::GetChannelMuteFlag();
@@ -1341,8 +1341,8 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 		} else if(adjustMode != eAdjustOnSuccess)
 		{
 			// Target not found (e.g. when jumping to a hidden sub song), reset global variables...
-			m_PlayState.m_nMusicSpeed = m_nDefaultSpeed;
-			m_PlayState.m_nMusicTempo = m_nDefaultTempo;
+			m_PlayState.m_nMusicSpeed = Order().GetDefaultSpeed();
+			m_PlayState.m_nMusicTempo = Order().GetDefaultTempo();
 			m_PlayState.m_nGlobalVolume = m_nDefaultGlobalVolume;
 		}
 		// When adjusting the playback status, we will also want to update the visited rows vector according to the current position.

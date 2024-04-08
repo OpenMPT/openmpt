@@ -483,8 +483,8 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 	m_songArtist = mpt::ToUnicode(mpt::Charset::CP437, mpt::String::ReadBuf(mpt::String::spacePadded, info.composer));
 
 	m_nDefaultGlobalVolume = info.globalVol + 1;
-	m_nDefaultSpeed = Clamp<uint8, uint8>(info.speed, 1, 255);
-	m_nDefaultTempo.Set(Clamp<uint8, uint8>(info.tempo, 4, 255));
+	Order().SetDefaultSpeed(Clamp<uint8, uint8>(info.speed, 1, 255));
+	Order().SetDefaultTempoInt(Clamp<uint8, uint8>(info.tempo, 4, 255));
 
 	ReadOrderFromFile<uint8>(Order(), chunk, info.numOrders);
 	Order().SetRestartPos(info.restartPos);

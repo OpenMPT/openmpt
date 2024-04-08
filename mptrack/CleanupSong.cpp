@@ -1012,11 +1012,11 @@ bool CModCleanupDlg::ResetVariables()
 	sndFile.m_MidiCfg.Reset();
 	
 	// Global vars
-	sndFile.m_nDefaultTempo.Set(125);
-	sndFile.m_nDefaultSpeed = 6;
 	sndFile.m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 	sndFile.m_nSamplePreAmp = 48;
 	sndFile.m_nVSTiVolume = 48;
+	sndFile.Order().SetDefaultTempoInt(125);
+	sndFile.Order().SetDefaultSpeed(6);
 	sndFile.Order().SetRestartPos(0);
 
 	if(sndFile.Order().empty())

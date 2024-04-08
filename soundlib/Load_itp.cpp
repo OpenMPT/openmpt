@@ -193,8 +193,8 @@ bool CSoundFile::ReadITP(FileReader &file, ModLoadingFlags loadFlags)
 
 	m_nDefaultGlobalVolume = file.ReadUint32LE();
 	m_nSamplePreAmp = file.ReadUint32LE();
-	m_nDefaultSpeed = std::max(uint32(1), file.ReadUint32LE());
-	m_nDefaultTempo.Set(std::max(uint32(32), file.ReadUint32LE()));
+	Order().SetDefaultSpeed(std::max(uint32(1), file.ReadUint32LE()));
+	Order().SetDefaultTempoInt(std::max(uint32(32), file.ReadUint32LE()));
 	m_nChannels = static_cast<CHANNELINDEX>(file.ReadUint32LE());
 	if(m_nChannels == 0 || m_nChannels > MAX_BASECHANNELS)
 	{
