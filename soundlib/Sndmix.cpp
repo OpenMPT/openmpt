@@ -643,8 +643,8 @@ bool CSoundFile::ProcessRow()
 						m_PlayState.Chn[i].Reset(ModChannel::resetSetPosFull, *this, i, muteFlag);
 					StopAllVsti();
 					// ...and the global playback information.
-					m_PlayState.m_nMusicSpeed = m_nDefaultSpeed;
-					m_PlayState.m_nMusicTempo = m_nDefaultTempo;
+					m_PlayState.m_nMusicSpeed = Order().GetDefaultSpeed();
+					m_PlayState.m_nMusicTempo = Order().GetDefaultTempo();
 					m_PlayState.m_nGlobalVolume = m_nDefaultGlobalVolume;
 
 					m_PlayState.m_nNextOrder = m_PlayState.m_nCurrentOrder;
