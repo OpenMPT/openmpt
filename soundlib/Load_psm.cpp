@@ -857,7 +857,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 			ModSequence &order = Order(static_cast<SEQUENCEINDEX>(i));
 			if(order.IsValidPat(0))
 			{
-				PATTERNINDEX startPattern = startPattern = order.EnsureUnique(0);
+				PATTERNINDEX startPattern = order.EnsureUnique(0);
 				// Subsongs with different panning setup -> write to pattern (MUSIC_C.PSM)
 				// Don't write channel volume for now, as there is no real-world module which needs it.
 				if(subsongPanningDiffers)
