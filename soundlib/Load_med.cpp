@@ -1452,7 +1452,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
 				{
-					Patterns[firstPat].WriteEffect(EffectWriter(CMD_CHANNELVOLUME, ChnSettings[chn].nVolume).Channel(chn).RetryNextRow());
+					Patterns[firstPat].WriteEffect(EffectWriter(CMD_CHANNELVOLUME, static_cast<ModCommand::PARAM>(ChnSettings[chn].nVolume)).Channel(chn).RetryNextRow());
 					Patterns[firstPat].WriteEffect(EffectWriter(CMD_PANNING8, mpt::saturate_cast<ModCommand::PARAM>(ChnSettings[chn].nPan)).Channel(chn).RetryNextRow());
 				}
 				if(firstPat >= numPatterns)
