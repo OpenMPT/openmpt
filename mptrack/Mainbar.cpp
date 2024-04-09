@@ -642,7 +642,17 @@ void CMainToolBar::OnTbnDropDownToolBar(NMHDR *pNMHDR, LRESULT *pResult)
 	switch(pToolBar->iItem)
 	{
 	case ID_FILE_NEW:
-		CMainFrame::GetMainFrame()->GetFileMenu()->GetSubMenu(0)->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, pToolBar->rcButton.left, pToolBar->rcButton.bottom, this);
+		{
+			auto *mainFrm = CMainFrame::GetMainFrame();
+			CMenu *newMenu = mainFrm->GetFileMenu()->GetSubMenu(0);
+			CMenu *templateMenu = mainFrm->GetFileMenu()->GetSubMenu(2);
+			const bool hasTemplates = templateMenu->GetMenuItemID(0) != 0;
+			if(hasTemplates)
+				newMenu->AppendMenu(MF_POPUP, reinterpret_cast<UINT_PTR>(templateMenu->m_hMenu), _T("&Templates"));
+			newMenu->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, pToolBar->rcButton.left, pToolBar->rcButton.bottom, this);
+			if(hasTemplates)
+				newMenu->RemoveMenu(newMenu->GetMenuItemCount() - 1, MF_BYPOSITION);
+		}
 		break;
 	case ID_MIDI_RECORD:
 		// Show a list of MIDI devices
