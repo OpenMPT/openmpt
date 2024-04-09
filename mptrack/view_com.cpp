@@ -64,7 +64,7 @@ static constexpr CListCtrlEx::Header SampleHeaders[SMPLIST_COLUMNS] =
 	{ _T("Type"),        80,  LVCFMT_RIGHT },
 	{ _T("C-5 Freq"),    80,  LVCFMT_RIGHT },
 	{ _T("Instr"),       64,  LVCFMT_RIGHT },
-	{ _T("File Name"),   128, LVCFMT_RIGHT },
+	{ _T("File Name"),   160, LVCFMT_RIGHT },
 	{ _T("Path"),        256, LVCFMT_LEFT },
 };
 
@@ -74,7 +74,7 @@ static constexpr CListCtrlEx::Header InstrumentHeaders[INSLIST_COLUMNS] =
 	{ _T("Num"),             45,  LVCFMT_RIGHT },
 	{ _T("Samples"),         64,  LVCFMT_RIGHT },
 	{ _T("Envelopes"),       128, LVCFMT_RIGHT },
-	{ _T("File Name"),       128, LVCFMT_RIGHT },
+	{ _T("File Name"),       160, LVCFMT_RIGHT },
 	{ _T("Plugin"),          128, LVCFMT_RIGHT },
 };
 
@@ -690,6 +690,7 @@ void CViewComments::OnCustomDrawList(NMHDR *pNMHDR, LRESULT *pResult)
 	const auto &lvcd = *reinterpret_cast<NMLVCUSTOMDRAW *>(pNMHDR);
 	*pResult = CDRF_DODEFAULT;
 
+	const bool useFont = lvcd.iSubItem == 0 || (m_nListId == IDC_LIST_SAMPLES && lvcd.iSubItem == SMPLIST_FILENAME) || (m_nListId == IDC_LIST_INSTRUMENTS && lvcd.iSubItem == INSLIST_FILENAME);
 	switch(lvcd.nmcd.dwDrawStage)
 	{
 		case CDDS_PREPAINT:
@@ -699,14 +700,14 @@ void CViewComments::OnCustomDrawList(NMHDR *pNMHDR, LRESULT *pResult)
 			*pResult = CDRF_NOTIFYSUBITEMDRAW;
 			break;
 		case CDDS_ITEMPREPAINT | CDDS_SUBITEM:
-			if(lvcd.iSubItem == 0)
+			if(useFont)
 			{
 				m_oldFont = SelectFont(lvcd.nmcd.hdc, m_fixedFont);
 				*pResult = CDRF_NEWFONT | CDRF_NOTIFYPOSTPAINT;
 			}
 			break;
 		case CDDS_ITEMPOSTPAINT | CDDS_SUBITEM:
-			if(lvcd.iSubItem == 0)
+			if(useFont)
 			{
 				SelectFont(lvcd.nmcd.hdc, m_oldFont);
 				*pResult = CDRF_NEWFONT;
