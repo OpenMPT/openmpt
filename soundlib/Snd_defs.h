@@ -245,7 +245,8 @@ enum class DuplicateNoteAction : uint8
 // Module flags - contains both song configuration and playback state... Use SONG_FILE_FLAGS and SONG_PLAY_FLAGS distinguish between the two.
 enum SongFlags
 {
-	SONG_FASTVOLSLIDES =       0x02,  // Old Scream Tracker 3.0 volume slides
+	SONG_FASTPORTAS    =       0x01,  // Portamentos are executed on every tick
+	SONG_FASTVOLSLIDES =       0x02,  // Old Scream Tracker 3.0 volume slides (executed on every tick)
 	SONG_ITOLDEFFECTS  =       0x04,  // Old Impulse Tracker effect implementations
 	SONG_ITCOMPATGXX   =       0x08,  // IT "Compatible Gxx" (IT's flag to behave more like other trackers w/r/t portamento effects)
 	SONG_LINEARSLIDES  =       0x10,  // Linear slides vs. Amiga slides
@@ -269,7 +270,7 @@ enum SongFlags
 };
 DECLARE_FLAGSET(SongFlags)
 
-#define SONG_FILE_FLAGS (SONG_FASTVOLSLIDES|SONG_ITOLDEFFECTS|SONG_ITCOMPATGXX|SONG_LINEARSLIDES|SONG_EXFILTERRANGE|SONG_AMIGALIMITS|SONG_S3MOLDVIBRATO|SONG_PT_MODE|SONG_ISAMIGA|SONG_IMPORTED)
+#define SONG_FILE_FLAGS (SONG_FASTPORTAS|SONG_FASTVOLSLIDES|SONG_ITOLDEFFECTS|SONG_ITCOMPATGXX|SONG_LINEARSLIDES|SONG_EXFILTERRANGE|SONG_AMIGALIMITS|SONG_S3MOLDVIBRATO|SONG_PT_MODE|SONG_ISAMIGA|SONG_IMPORTED)
 #define SONG_PLAY_FLAGS (~SONG_FILE_FLAGS)
 
 // Global Options (Renderer)

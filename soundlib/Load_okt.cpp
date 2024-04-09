@@ -451,6 +451,7 @@ bool CSoundFile::ReadOKT(FileReader &file, ModLoadingFlags loadFlags)
 	m_nSamplePreAmp = m_nVSTiVolume = 48;
 	m_nMinPeriod = 113 * 4;
 	m_nMaxPeriod = 856 * 4;
+	m_SongFlags.set(SONG_FASTPORTAS);
 
 	// Fix orderlist
 	Order().resize(numOrders);

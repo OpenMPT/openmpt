@@ -3826,8 +3826,7 @@ void CSoundFile::PortamentoUp(PlayState &playState, CHANNELINDEX nChn, ModComman
 	// Regular Slide
 	if(!chn.isFirstTick
 	   || (m_PlayState.m_nMusicSpeed == 1 && m_playBehaviour[kSlidesAtSpeed1])
-	   || (GetType() & (MOD_TYPE_669 | MOD_TYPE_OKT))
-	   || (GetType() == MOD_TYPE_MED && m_SongFlags[SONG_FASTVOLSLIDES]))
+	   || m_SongFlags[SONG_FASTPORTAS])
 	{
 		DoFreqSlide(chn, chn.nPeriod, param * 4);
 	}
@@ -3898,8 +3897,7 @@ void CSoundFile::PortamentoDown(PlayState &playState, CHANNELINDEX nChn, ModComm
 
 	if(!chn.isFirstTick
 	   || (m_PlayState.m_nMusicSpeed == 1 && m_playBehaviour[kSlidesAtSpeed1])
-	   || (GetType() & (MOD_TYPE_669 | MOD_TYPE_OKT))
-	   || (GetType() == MOD_TYPE_MED && m_SongFlags[SONG_FASTVOLSLIDES]))
+	   || m_SongFlags[SONG_FASTPORTAS])
 	{
 		DoFreqSlide(chn, chn.nPeriod, param * -4);
 	}
@@ -4226,9 +4224,9 @@ int32 CSoundFile::TonePortamento(PlayState &playState, CHANNELINDEX nChn, uint16
 		return 0;
 
 	bool doPorta = !chn.isFirstTick
-	               || (GetType() & (MOD_TYPE_DBM | MOD_TYPE_669))
+	               || GetType() == MOD_TYPE_DBM
 	               || (playState.m_nMusicSpeed == 1 && m_playBehaviour[kSlidesAtSpeed1])
-	               || (GetType() == MOD_TYPE_MED && m_SongFlags[SONG_FASTVOLSLIDES]);
+	               || m_SongFlags[SONG_FASTPORTAS];
 
 	int32 delta = chn.portamentoSlide;
 	if(GetType() == MOD_TYPE_PLM && delta >= 0xF0)

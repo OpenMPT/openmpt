@@ -1209,8 +1209,8 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 			m_nDefaultGlobalVolume = std::min<uint8>(songHeader.masterVol, 64) * 4;
 		m_nSamplePreAmp = m_nVSTiVolume = preamp;
 
-		// For MED, this affects both volume and pitch slides
 		m_SongFlags.set(SONG_FASTVOLSLIDES, !(songHeader.flags & MMDSong::FLAG_STSLIDE));
+		m_SongFlags.set(SONG_FASTPORTAS, !(songHeader.flags& MMDSong::FLAG_STSLIDE));
 
 		if(expData.songNameOffset && file.Seek(expData.songNameOffset))
 		{
