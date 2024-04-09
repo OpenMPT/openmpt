@@ -2353,12 +2353,13 @@ void CSoundFile::SaveExtendedSongProperties(std::ostream &f) const
 
 	// Playback compatibility flags
 	{
-		uint8 bits[(kMaxPlayBehaviours + 7) / 8u];
-		MemsetZero(bits);
+		const auto supportedBehaviours = GetSupportedPlaybackBehaviour(GetBestSaveFormat());
+		std::array<uint8, (kMaxPlayBehaviours + 7) / 8u> bits;
+		bits.fill(0);
 		size_t maxBit = 0;
 		for(size_t i = 0; i < kMaxPlayBehaviours; i++)
 		{
-			if(m_playBehaviour[i])
+			if(m_playBehaviour[i] && supportedBehaviours[i])
 			{
 				bits[i >> 3] |= 1 << (i & 0x07);
 				maxBit = i + 8;
@@ -2366,7 +2367,7 @@ void CSoundFile::SaveExtendedSongProperties(std::ostream &f) const
 		}
 		uint16 numBytes = static_cast<uint16>(maxBit / 8u);
 		WRITEMODULARHEADER(MagicBE("MSF."), numBytes);
-		mpt::IO::WriteRaw(f, bits, numBytes);
+		mpt::IO::WriteRaw(f, bits.data(), numBytes);
 	}
 
 	if(!m_songArtist.empty() && specs.hasArtistName)
