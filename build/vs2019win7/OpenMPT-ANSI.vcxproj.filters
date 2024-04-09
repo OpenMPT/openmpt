@@ -2051,6 +2051,9 @@
     <ClCompile Include="..\..\soundlib\Load_gdm.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_gmc.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_gt2.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>

@@ -865,8 +865,9 @@ public:
 	static ProbeResult ProbeFileHeaderDSm(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderDSym(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderFAR(MemoryFileReader file, const uint64 *pfilesize);
-	static ProbeResult ProbeFileHeaderFMT(MemoryFileReader file, const uint64* pfilesize);
+	static ProbeResult ProbeFileHeaderFMT(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderGDM(MemoryFileReader file, const uint64 *pfilesize);
+	static ProbeResult ProbeFileHeaderGMC(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderGT2(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderGTK(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderICE(MemoryFileReader file, const uint64 *pfilesize);
@@ -921,6 +922,7 @@ public:
 	bool ReadFAR(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadFMT(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadGDM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadGMC(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadGT2(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadGTK(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadICE(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);

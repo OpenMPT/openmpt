@@ -69,6 +69,7 @@
 		7DDE7A6B76A93A1D011DA0AB /* SampleFormatMediaFoundation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D2D268330651A7A51E4B8673 /* SampleFormatMediaFoundation.cpp */; };
 		7FDA539F18273951466E39DF /* Load_it.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 62235C27A6720199E8993A67 /* Load_it.cpp */; };
 		80EEA677809189A9BAE63CB7 /* MIDIMacros.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 50FB747FA860E7715A6F02BF /* MIDIMacros.cpp */; };
+		81C26ED360DF89053CE8E513 /* Load_gmc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D668A71B68F6710DD1CF155B /* Load_gmc.cpp */; };
 		8479AC1F9F461AD1A316B25F /* Load_digi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D14936A73E714519400434E7 /* Load_digi.cpp */; };
 		84A9E60B844CC93DBEA17C4B /* MixerLoops.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B810F0D30F7663C5C1847F13 /* MixerLoops.cpp */; };
 		8676CA3F6593E471419D407F /* Load_gt2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 10E0ADC7A36E77B90C471C07 /* Load_gt2.cpp */; };
@@ -541,6 +542,7 @@
 		D35A7771C759C0E34C44D5B1 /* WavesReverb.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = WavesReverb.h; path = ../../soundlib/plugins/dmo/WavesReverb.h; sourceTree = "<group>"; };
 		D37D7529660B3F1BCEE3E369 /* MIDIMacros.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MIDIMacros.h; path = ../../soundlib/MIDIMacros.h; sourceTree = "<group>"; };
 		D432AEE7E417DB19D08B6527 /* tests_parse.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = tests_parse.hpp; path = ../../src/mpt/parse/tests/tests_parse.hpp; sourceTree = "<group>"; };
+		D668A71B68F6710DD1CF155B /* Load_gmc.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Load_gmc.cpp; path = ../../soundlib/Load_gmc.cpp; sourceTree = "<group>"; };
 		D6BBDE00997C3E72F6B11C40 /* LFOPlugin.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = LFOPlugin.cpp; path = ../../soundlib/plugins/LFOPlugin.cpp; sourceTree = "<group>"; };
 		D89E49F2E528FC64600DC832 /* PlugInterface.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = PlugInterface.cpp; path = ../../soundlib/plugins/PlugInterface.cpp; sourceTree = "<group>"; };
 		D941724BCA38E03D363C608B /* saturate_round.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = saturate_round.hpp; path = ../../src/mpt/base/saturate_round.hpp; sourceTree = "<group>"; };
@@ -1273,6 +1275,7 @@
 				9BB2E75F2E40B1519719559F /* Load_far.cpp */,
 				9CF744BB2F850EAD985DB2FB /* Load_fmt.cpp */,
 				97BF12BD2A4CDCAF932580FD /* Load_gdm.cpp */,
+				D668A71B68F6710DD1CF155B /* Load_gmc.cpp */,
 				10E0ADC7A36E77B90C471C07 /* Load_gt2.cpp */,
 				34D45985C7622377303AC7C5 /* Load_imf.cpp */,
 				62235C27A6720199E8993A67 /* Load_it.cpp */,
@@ -1598,6 +1601,7 @@
 				D1EA5157B1076B898D10C797 /* Load_far.cpp in Sources */,
 				BD4216739C5F30A578688CB3 /* Load_fmt.cpp in Sources */,
 				707EA3954F9BBDC72BA519D5 /* Load_gdm.cpp in Sources */,
+				81C26ED360DF89053CE8E513 /* Load_gmc.cpp in Sources */,
 				8676CA3F6593E471419D407F /* Load_gt2.cpp in Sources */,
 				537472DD32918D0F0E9AE91D /* Load_imf.cpp in Sources */,
 				7FDA539F18273951466E39DF /* Load_it.cpp in Sources */,
