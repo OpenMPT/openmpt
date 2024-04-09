@@ -58,24 +58,24 @@ enum
 
 static constexpr CListCtrlEx::Header SampleHeaders[SMPLIST_COLUMNS] =
 {
-	{ _T("Sample Name"),	192, LVCFMT_LEFT },
-	{ _T("Num"),			45, LVCFMT_RIGHT },
-	{ _T("Size"),			72, LVCFMT_RIGHT },
-	{ _T("Type"),			80, LVCFMT_RIGHT },
-	{ _T("C-5 Freq"),		80, LVCFMT_RIGHT },
-	{ _T("Instr"),			64, LVCFMT_RIGHT },
-	{ _T("File Name"),		128, LVCFMT_RIGHT },
-	{ _T("Path"),			256, LVCFMT_LEFT },
+	{ _T("Sample Name"), 208, LVCFMT_LEFT },
+	{ _T("Num"),         45,  LVCFMT_RIGHT },
+	{ _T("Size"),        72,  LVCFMT_RIGHT },
+	{ _T("Type"),        80,  LVCFMT_RIGHT },
+	{ _T("C-5 Freq"),    80,  LVCFMT_RIGHT },
+	{ _T("Instr"),       64,  LVCFMT_RIGHT },
+	{ _T("File Name"),   128, LVCFMT_RIGHT },
+	{ _T("Path"),        256, LVCFMT_LEFT },
 };
 
 static constexpr CListCtrlEx::Header InstrumentHeaders[INSLIST_COLUMNS] =
 {
-	{ _T("Instrument Name"),	192, LVCFMT_LEFT },
-	{ _T("Num"),				45, LVCFMT_RIGHT },
-	{ _T("Samples"),			64, LVCFMT_RIGHT },
-	{ _T("Envelopes"),			128, LVCFMT_RIGHT },
-	{ _T("File Name"),			128, LVCFMT_RIGHT },
-	{ _T("Plugin"),				128, LVCFMT_RIGHT },
+	{ _T("Instrument Name"), 208, LVCFMT_LEFT },
+	{ _T("Num"),             45,  LVCFMT_RIGHT },
+	{ _T("Samples"),         64,  LVCFMT_RIGHT },
+	{ _T("Envelopes"),       128, LVCFMT_RIGHT },
+	{ _T("File Name"),       128, LVCFMT_RIGHT },
+	{ _T("Plugin"),          128, LVCFMT_RIGHT },
 };
 
 
@@ -95,6 +95,7 @@ BEGIN_MESSAGE_MAP(CViewComments, CModScrollView)
 	ON_NOTIFY(LVN_BEGINLABELEDIT,	IDC_LIST_DETAILS,	&CViewComments::OnBeginLabelEdit)
 	ON_NOTIFY(NM_DBLCLK, IDC_LIST_DETAILS,	&CViewComments::OnDblClickListItem)
 	ON_NOTIFY(NM_RCLICK, IDC_LIST_DETAILS,	&CViewComments::OnRClickListItem)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_LIST_DETAILS, &CViewComments::OnCustomDrawList)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -130,13 +131,14 @@ void CViewComments::OnInitialUpdate()
 	m_ToolBar.Init(CMainFrame::GetMainFrame()->m_MiscIcons, CMainFrame::GetMainFrame()->m_MiscIconsDisabled);
 	m_ItemList.Create(WS_CHILD | WS_VISIBLE | LVS_REPORT | LVS_SINGLESEL | LVS_EDITLABELS | LVS_NOSORTHEADER, rect, this, IDC_LIST_DETAILS);
 	m_ItemList.ModifyStyleEx(0, WS_EX_STATICEDGE);
+
 	// Add ToolBar Buttons
 	m_ToolBar.AddButton(IDC_LIST_SAMPLES, IMAGE_SAMPLES);
 	m_ToolBar.AddButton(IDC_LIST_INSTRUMENTS, IMAGE_INSTRUMENTS);
 	//m_ToolBar.AddButton(IDC_LIST_PATTERNS, TIMAGE_TAB_PATTERNS);
 	m_ToolBar.SetIndent(4);
 	UpdateButtonState();
-	UpdateView(UpdateHint().ModType());
+	UpdateView(UpdateHint().ModType().MPTOptions());
 }
 
 
@@ -153,6 +155,7 @@ void CViewComments::OnDestroy()
 		commentState.initialized = true;
 		commentState.nId = m_nListId;
 	}
+	m_fixedFont.DeleteObject();
 	CModScrollView::OnDestroy();
 }
 
@@ -293,6 +296,16 @@ void CViewComments::UpdateView(UpdateHint hint, CObject *)
 	if (hintType[HINT_MPTOPTIONS])
 	{
 		m_ToolBar.UpdateStyle();
+		
+		// Font for sample / instrument names
+		CFont *font = m_ItemList.GetFont();
+		LOGFONT lf;
+		font->GetLogFont(&lf);
+		mpt::WriteWinBuf(lf.lfFaceName) = mpt::ToWin(TrackerSettings::Instance().commentsFont.Get().name);
+		m_fixedFont.DeleteObject();
+		m_fixedFont.CreateFontIndirect(&lf);
+
+		m_ItemList.Invalidate(FALSE);
 	}
 	const SampleHint sampleHint = hint.ToType<SampleHint>();
 	const InstrumentHint instrHint = hint.ToType<InstrumentHint>();
@@ -555,8 +568,8 @@ void CViewComments::OnBeginLabelEdit(LPNMHDR, LRESULT *)
 void CViewComments::OnEndLabelEdit(LPNMHDR pnmhdr, LRESULT *)
 {
 	CMainFrame::GetInputHandler()->Bypass(false);
-	LV_DISPINFO *plvDispInfo = (LV_DISPINFO *)pnmhdr;
-	LV_ITEM &lvItem = plvDispInfo->item;
+	LV_DISPINFO &lvDispInfo = *reinterpret_cast<LV_DISPINFO *>(pnmhdr);
+	LV_ITEM &lvItem = lvDispInfo.item;
 	CModDoc *pModDoc = GetDocument();
 
 	if(lvItem.pszText != nullptr && !lvItem.iSubItem && pModDoc)
@@ -669,6 +682,37 @@ void CViewComments::OnRClickListItem(NMHDR *, LRESULT *)
 	::TrackPopupMenu(menu, TPM_LEFTALIGN | TPM_RIGHTBUTTON, pt.x, pt.y, 0, m_hWnd, NULL);
 	::DestroyMenu(menu);
 
+}
+
+
+void CViewComments::OnCustomDrawList(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	const auto &lvcd = *reinterpret_cast<NMLVCUSTOMDRAW *>(pNMHDR);
+	*pResult = CDRF_DODEFAULT;
+
+	switch(lvcd.nmcd.dwDrawStage)
+	{
+		case CDDS_PREPAINT:
+			*pResult = CDRF_NOTIFYITEMDRAW;
+			break;
+		case CDDS_ITEMPREPAINT:
+			*pResult = CDRF_NOTIFYSUBITEMDRAW;
+			break;
+		case CDDS_ITEMPREPAINT | CDDS_SUBITEM:
+			if(lvcd.iSubItem == 0)
+			{
+				m_oldFont = SelectFont(lvcd.nmcd.hdc, m_fixedFont);
+				*pResult = CDRF_NEWFONT | CDRF_NOTIFYPOSTPAINT;
+			}
+			break;
+		case CDDS_ITEMPOSTPAINT | CDDS_SUBITEM:
+			if(lvcd.iSubItem == 0)
+			{
+				SelectFont(lvcd.nmcd.hdc, m_oldFont);
+				*pResult = CDRF_NEWFONT;
+			}
+			break;
+	}
 }
 
 
