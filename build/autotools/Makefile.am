@@ -25,6 +25,7 @@ EXTRA_DIST += test/test.mptm
 EXTRA_DIST += man/openmpt123.1
 EXTRA_DIST += examples/.clang-format
 EXTRA_DIST += libopenmpt/bindings/freebasic/libopenmpt.bi
+EXTRA_DIST += libopenmpt/bindings/freebasic/libopenmpt_ext.bi
 MOSTLYCLEANFILES = 
 
 dist_doc_DATA = 
@@ -35,6 +36,7 @@ nobase_dist_doc_DATA += examples/libopenmpt_example_cxx.cpp
 nobase_dist_doc_DATA += examples/libopenmpt_example_c_mem.c
 nobase_dist_doc_DATA += examples/libopenmpt_example_c_unsafe.c
 nobase_dist_doc_DATA += examples/libopenmpt_example_c.c
+nobase_dist_doc_DATA += examples/libopenmpt_example_c_pipe.c
 nobase_dist_doc_DATA += examples/libopenmpt_example_c_probe.c
 nobase_dist_doc_DATA += examples/libopenmpt_example_c_stdout.c
 
@@ -47,8 +49,9 @@ endif
 
 if ENABLE_EXAMPLES
 
-check_PROGRAMS += libopenmpt_example_c_stdout
+check_PROGRAMS += libopenmpt_example_c_pipe
 check_PROGRAMS += libopenmpt_example_c_probe
+check_PROGRAMS += libopenmpt_example_c_stdout
 if HAVE_PORTAUDIO
 check_PROGRAMS += libopenmpt_example_c
 check_PROGRAMS += libopenmpt_example_c_mem
@@ -58,8 +61,9 @@ if HAVE_PORTAUDIOCPP
 check_PROGRAMS += libopenmpt_example_cxx
 endif
 
-libopenmpt_example_c_stdout_SOURCES = examples/libopenmpt_example_c_stdout.c
+libopenmpt_example_c_pipe_SOURCES = examples/libopenmpt_example_c_pipe.c
 libopenmpt_example_c_probe_SOURCES = examples/libopenmpt_example_c_probe.c
+libopenmpt_example_c_stdout_SOURCES = examples/libopenmpt_example_c_stdout.c
 if HAVE_PORTAUDIO
 libopenmpt_example_c_SOURCES = examples/libopenmpt_example_c.c
 libopenmpt_example_c_mem_SOURCES = examples/libopenmpt_example_c_mem.c
@@ -69,8 +73,9 @@ if HAVE_PORTAUDIOCPP
 libopenmpt_example_cxx_SOURCES = examples/libopenmpt_example_cxx.cpp
 endif
 
-libopenmpt_example_c_stdout_CPPFLAGS = 
+libopenmpt_example_c_pipe_CPPFLAGS = 
 libopenmpt_example_c_probe_CPPFLAGS = 
+libopenmpt_example_c_stdout_CPPFLAGS = 
 if HAVE_PORTAUDIO
 libopenmpt_example_c_CPPFLAGS = $(PORTAUDIO_CFLAGS)
 libopenmpt_example_c_mem_CPPFLAGS = $(PORTAUDIO_CFLAGS)
@@ -80,8 +85,9 @@ if HAVE_PORTAUDIOCPP
 libopenmpt_example_cxx_CPPFLAGS = $(MINGWSTDTHREADS_CPPFLAGS) $(PORTAUDIOCPP_CFLAGS)
 endif
 
-libopenmpt_example_c_stdout_CFLAGS = $(WIN32_CONSOLE_CFLAGS)
+libopenmpt_example_c_pipe_CFLAGS = $(WIN32_CONSOLE_CFLAGS)
 libopenmpt_example_c_probe_CFLAGS = $(WIN32_CONSOLE_CFLAGS)
+libopenmpt_example_c_stdout_CFLAGS = $(WIN32_CONSOLE_CFLAGS)
 if HAVE_PORTAUDIO
 libopenmpt_example_c_CFLAGS = $(WIN32_CONSOLE_CFLAGS)
 libopenmpt_example_c_mem_CFLAGS = $(WIN32_CONSOLE_CFLAGS)
@@ -91,8 +97,9 @@ if HAVE_PORTAUDIOCPP
 libopenmpt_example_cxx_CXXFLAGS = $(WIN32_CONSOLE_CXXFLAGS)
 endif
 
-libopenmpt_example_c_stdout_LDADD = $(lib_LTLIBRARIES)
+libopenmpt_example_c_pipe_LDADD = $(lib_LTLIBRARIES)
 libopenmpt_example_c_probe_LDADD = $(lib_LTLIBRARIES)
+libopenmpt_example_c_stdout_LDADD = $(lib_LTLIBRARIES)
 if HAVE_PORTAUDIO
 libopenmpt_example_c_LDADD = $(lib_LTLIBRARIES) $(PORTAUDIO_LIBS)
 libopenmpt_example_c_mem_LDADD = $(lib_LTLIBRARIES) $(PORTAUDIO_LIBS)
