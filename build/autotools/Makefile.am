@@ -29,6 +29,7 @@ EXTRA_DIST += test/test.mptm
 EXTRA_DIST += man/openmpt123.1
 EXTRA_DIST += examples/.clang-format
 EXTRA_DIST += libopenmpt/bindings/freebasic/libopenmpt.bi
+EXTRA_DIST += libopenmpt/bindings/freebasic/libopenmpt_ext.bi
 MOSTLYCLEANFILES = 
 
 dist_doc_DATA = 
