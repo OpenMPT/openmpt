@@ -7,6 +7,10 @@ is just a high-level summary.
 
 ### libopenmpt 0.6.16-pre
 
+ *  [**Bug**] `examples/libopenmpt_example_c_pipe.c` and
+    `libopenmpt/bindings/freebasic/libopenmpt_ext.bi` were missing from the
+    Autotools package.
+
  *  mpg123: Update to v1.32.6 (2024-04-04).
 
 ### libopenmpt 0.6.15 (2024-03-24)
