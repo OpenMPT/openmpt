@@ -46,6 +46,9 @@ using std::span;
 // objects, i.e. equivalent to a (beg,end) or (data,size) tuple.
 //  Can eventually be replaced without further modifications with a full C++20
 // std::span.
+
+inline constexpr std::size_t dynamic_extent = std::numeric_limits<std::size_t>::max();
+
 template <typename T>
 class span
 {
@@ -115,6 +118,8 @@ public:
 
 	index_type size() const noexcept { return static_cast<index_type>(std::distance(m_beg, m_end)); }
 	index_type length() const noexcept { return size(); }
+
+	span subspan(std::size_t offset, std::size_t count = mpt::dynamic_extent) const { return span(data() + offset, (count == mpt::dynamic_extent) ? (size() - offset) : count); }
 
 }; // class span
 
