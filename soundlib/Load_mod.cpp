@@ -548,9 +548,9 @@ static uint32 ReadSample(const MODSampleHeader &sampleHeader, ModSample &sample,
 
 
 // Count malformed bytes in MOD pattern data
-static uint32 CountMalformedMODPatternData(const MODPatternData &patternData, const bool allow31Samples)
+static uint32 CountMalformedMODPatternData(const MODPatternData &patternData, const bool extendedFormat)
 {
-	const uint8 mask = allow31Samples ? 0xE0 : 0xF0;
+	const uint8 mask = extendedFormat ? 0xE0 : 0xF0;
 	uint32 malformedBytes = 0;
 	for(const auto &row : patternData)
 	{
@@ -558,6 +558,18 @@ static uint32 CountMalformedMODPatternData(const MODPatternData &patternData, co
 		{
 			if(data[0] & mask)
 				malformedBytes++;
+			if(!extendedFormat)
+			{
+				const uint16 period = (((static_cast<uint16>(data[0]) & 0x0F) << 8) | data[1]);
+				if(period && period != 0xFFF)
+				{
+					// Allow periods to deviate by +/-1 as found in some files
+					const auto CompareFunc = [](uint16 l, uint16 r) { return l > (r + 1); };
+					const auto PeriodTable = mpt::as_span(ProTrackerPeriodTable).subspan(24, 36);
+					if(!std::binary_search(PeriodTable.begin(), PeriodTable.end(), period, CompareFunc))
+						malformedBytes += 2;
+				}
+			}
 		}
 	}
 	return malformedBytes;
@@ -566,12 +578,12 @@ static uint32 CountMalformedMODPatternData(const MODPatternData &patternData, co
 
 // Check if number of malformed bytes in MOD pattern data exceeds some threshold
 template <typename TFileReader>
-static bool ValidateMODPatternData(TFileReader &file, const uint32 threshold, const bool allow31Samples)
+static bool ValidateMODPatternData(TFileReader &file, const uint32 threshold, const bool extendedFormat)
 {
 	MODPatternData patternData;
 	if(!file.Read(patternData))
 		return false;
-	return CountMalformedMODPatternData(patternData, allow31Samples) <= threshold;
+	return CountMalformedMODPatternData(patternData, extendedFormat) <= threshold;
 }
 
 
@@ -1655,7 +1667,7 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 			// "operation wolf" soundtrack have 15 patterns for several songs, but the last few patterns are just garbage.
 			// Apart from those hidden patterns, the files play fine.
 			// Example: operation wolf - wolf1.mod (MD5 739acdbdacd247fbefcac7bc2d8abe6b, SHA1 e6b4813daacbf95f41ce9ec3b22520a2ae07eed8)
-			if(illegalBytes > 512)
+			if(illegalBytes > std::max(512u, numPatterns * 128u))
 				return false;
 		}
 		for(ROWINDEX row = 0; row < 64; row++)
