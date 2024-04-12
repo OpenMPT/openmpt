@@ -239,7 +239,6 @@ static inline mm256i_emu mm256_madd_epi16(mm256i_emu a, mm256i_emu b) {
 }
 #define _mm256_madd_epi16(a,b) mm256_madd_epi16(a,b)
 
-#if defined(__SSSE3__)  /* OpenMPT */
 static inline mm256i_emu mm256_maddubs_epi16(mm256i_emu a, mm256i_emu b) {
   mm256i_emu ret;
   ret.lo = _mm_maddubs_epi16(a.lo, b.lo);
@@ -247,7 +246,6 @@ static inline mm256i_emu mm256_maddubs_epi16(mm256i_emu a, mm256i_emu b) {
   return ret;
 }
 #define _mm256_maddubs_epi16(a,b) mm256_maddubs_epi16(a,b)
-#endif  /* OpenMPT */
 
 
 

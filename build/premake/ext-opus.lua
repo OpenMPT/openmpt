@@ -64,7 +64,7 @@
 	filter {}
 		defines {
 			"OPUS_BUILD=1",
-			"PACKAGE_VERISON=\"1.5.1\"",
+			"PACKAGE_VERISON=\"1.5.2\"",
 			"ENABLE_HARDENING=1",
 			"HAVE_STDINT_H=1",
 			"HAVE_STDIO_H=1",
@@ -99,10 +99,10 @@
 			filter {}
 				excludes {
 					"../../include/opus/dnn/dump_data.c",
+					"../../include/opus/dnn/fargan_demo.c",
 					"../../include/opus/dnn/lossgen.c",
 					"../../include/opus/dnn/lossgen_data.c",
 					"../../include/opus/dnn/lossgen_demo.c",
-					"../../include/opus/dnn/lpcnet_demo.c",
 					"../../include/opus/dnn/write_lpcnet_weights.c",
 				}
 			filter {}
