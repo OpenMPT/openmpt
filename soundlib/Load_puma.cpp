@@ -91,7 +91,7 @@ struct PumaFileHeader
 MPT_BINARY_STRUCT(PumaFileHeader, 80)
 
 
-bool TranslatePumaScript(InstrumentSynth::Events &events, ModInstrument &instr, FileReader &file, bool isVolume)
+static bool TranslatePumaScript(InstrumentSynth::Events &events, ModInstrument &instr, FileReader &file, bool isVolume)
 {
 	bool isFirst = true;
 	while(file.CanRead(4))
