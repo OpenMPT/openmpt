@@ -150,9 +150,9 @@ struct InstrumentSynth
 	protected:
 		constexpr Event(Type type, uint8 b1, uint8 b2, uint8 b3) noexcept : type{type}, u8{b1}, bytes{b2, b3} {}
 		constexpr Event(Type type, uint16 u16, uint8 u8 = 0) noexcept : type{type}, u8{u8}, u16{u16} {}
-		constexpr Event(Type type, int16 i16) noexcept : type{type}, i16{i16} {}
-		constexpr Event(Type type, uint8 u8) noexcept : type{type}, u8{u8} {}
-		constexpr Event(Type type, int8 i8) noexcept : type{type}, i8{i8} {}
+		constexpr Event(Type type, int16 i16) noexcept : type{type}, u8{}, i16{i16} {}
+		constexpr Event(Type type, uint8 u8) noexcept : type{type}, u8{u8}, u16{} {}
+		constexpr Event(Type type, int8 i8) noexcept : type{type}, i8{i8}, u16{} {}
 		explicit constexpr Event(Type type) noexcept : type{type}, u8{}, u16{} {}
 	};
 
