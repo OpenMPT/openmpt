@@ -75,9 +75,9 @@ struct InstrumentSynth
 		};
 		union
 		{
-			uint16 u16 = 0;
+			uint16 u16;
 			int16 i16;
-			std::array<uint8, 2> bytes;
+			std::array<uint8, 2> bytes = {{}};
 		};
 
 		static constexpr Event StopScript() noexcept { return Event{Type::StopScript}; }
