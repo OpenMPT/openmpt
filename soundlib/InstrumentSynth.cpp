@@ -242,8 +242,8 @@ void InstrumentSynth::States::State::NextTick(const Events &events, ModChannel &
 	// MED stuff
 	if(m_medArpOffset < events.size())
 	{
-		m_linearPitchFactor = 16 * events[m_medArpOffset + m_medArpPos].bytes[0];
-		m_medArpPos = (m_medArpPos + 1) % events[m_medArpOffset].bytes[1];
+		m_linearPitchFactor = 16 * events[m_medArpOffset + m_medArpPos].u8;
+		m_medArpPos = (m_medArpPos + 1) % static_cast<uint8>(events[m_medArpOffset].u16);
 	}
 	if(m_medVibratoDepth)
 	{
@@ -296,7 +296,7 @@ void InstrumentSynth::States::State::NextTick(const Events &events, ModChannel &
 	}
 	if(m_volumeAdd != int16_min)
 	{
-		chn.nRealVolume = std::clamp(chn.nRealVolume + m_volumeAdd, 0, 16384);
+		chn.nRealVolume = std::clamp(chn.nRealVolume + m_volumeAdd, int32(0), int32(16384));
 	}
 	if(m_panning != 2048)
 	{
@@ -384,10 +384,10 @@ bool InstrumentSynth::States::State::EvaluateEvent(const Event &event, ModChanne
 		m_gtkTremorEnabled = event.u8 != 0;
 		return false;
 	case Event::Type::GTK_SetTremorTime:
-		if(event.bytes[0])
-			m_gtkTremorOnTime = event.bytes[0];
-		if(event.bytes[1])
-			m_gtkTremorOffTime = event.bytes[1];
+		if(event.Byte0())
+			m_gtkTremorOnTime = event.Byte0();
+		if(event.Byte1())
+			m_gtkTremorOffTime = event.Byte1();
 		m_gtkTremorPos = 0;
 		return false;
 	case Event::Type::GTK_EnableTremolo:
@@ -407,27 +407,27 @@ bool InstrumentSynth::States::State::EvaluateEvent(const Event &event, ModChanne
 			m_gtkVibratoSpeed = 8;
 		return false;
 	case Event::Type::GTK_SetVibratoParams:
-		if(event.bytes[0])
-			m_gtkVibratoWidth = event.bytes[0];
-		if(event.bytes[1])
-			m_gtkVibratoSpeed = event.bytes[1];
+		if(event.Byte0())
+			m_gtkVibratoWidth = event.Byte0();
+		if(event.Byte1())
+			m_gtkVibratoSpeed = event.Byte1();
 		return false;
 
 	case Event::Type::Puma_SetWaveform:
-		m_pumaWaveform = m_pumaStartWaveform = event.bytes[0] + 1;
-		if(event.bytes[0] < 10)
+		m_pumaWaveform = m_pumaStartWaveform = event.Byte0() + 1;
+		if(event.Byte0() < 10)
 		{
 			m_pumaWaveformStep = 0;
 		} else
 		{
-			m_pumaWaveformStep = event.bytes[1];
-			m_pumaEndWaveform = event.bytes[2] + m_pumaStartWaveform;
+			m_pumaWaveformStep = event.Byte1();
+			m_pumaEndWaveform = event.Byte2() + m_pumaStartWaveform;
 		}
 		ChannelSetSample(chn, sndFile, m_pumaWaveform);
 		return false;
 	case Event::Type::Puma_VolumeRamp:
-		m_ticksRemain = event.bytes[2];
-		m_volumeAdd = event.bytes[0] * 256 - 16384;
+		m_ticksRemain = event.Byte2();
+		m_volumeAdd = event.Byte0() * 256 - 16384;
 		return true;
 	case Event::Type::Puma_StopVoice:
 		chn.nRealVolume = 0;
@@ -435,25 +435,25 @@ bool InstrumentSynth::States::State::EvaluateEvent(const Event &event, ModChanne
 		m_nextRow = STOP_ROW;
 		return true;
 	case Event::Type::Puma_SetPitch:
-		m_linearPitchFactor = static_cast<int8>(event.bytes[0]) * 8;
+		m_linearPitchFactor = static_cast<int8>(event.Byte0()) * 8;
 		m_periodAdd = 0;
-		m_ticksRemain = event.bytes[2];
+		m_ticksRemain = event.Byte2();
 		return true;
 	case Event::Type::Puma_PitchRamp:
 		m_linearPitchFactor = 0;
-		m_periodAdd = static_cast<int8>(event.bytes[0]) * 4;
-		m_ticksRemain = event.bytes[2];
+		m_periodAdd = static_cast<int8>(event.Byte0()) * 4;
+		m_ticksRemain = event.Byte2();
 		return true;
 
 	case Event::Type::Mupp_SetWaveform:
-		ChannelSetSample(chn, sndFile, 32 + event.bytes[0] * 28 + event.bytes[1]);
-		m_volumeFactor = static_cast<uint16>(std::min(event.bytes[2] & 0x7F, 64) * 256u);
+		ChannelSetSample(chn, sndFile, 32 + event.Byte0() * 28 + event.Byte1());
+		m_volumeFactor = static_cast<uint16>(std::min(event.Byte2() & 0x7F, 64) * 256u);
 		return true;
 
 	case Event::Type::MED_DefineArpeggio:
-		if(!event.bytes[1])
+		if(!event.Byte1())
 			return false;
-		m_nextRow = m_currentRow + event.bytes[1];
+		m_nextRow = m_currentRow + event.u16;
 		m_medArpOffset = m_currentRow;
 		m_medArpPos = 0;
 		return true;
@@ -465,10 +465,10 @@ bool InstrumentSynth::States::State::EvaluateEvent(const Event &event, ModChanne
 		}
 		return false;
 	case Event::Type::MED_SetEnvelope:
-		if(event.bytes[2])
-			m_medVolumeEnv = (event.bytes[0] & 0x3F) | (event.bytes[1] ? 0x80 : 0x00);
+		if(event.Byte2())
+			m_medVolumeEnv = (event.Byte0() & 0x3F) | (event.Byte1() ? 0x80 : 0x00);
 		else
-			m_medVibratoEnvelope = event.bytes[0];
+			m_medVibratoEnvelope = event.Byte0();
 		m_medVolumeEnvPos = 0;
 		return false;
 	case Event::Type::MED_SetVolume:
@@ -505,12 +505,12 @@ void InstrumentSynth::States::State::EvaluateRunningEvent(const Event &event)
 	switch(event.type)
 	{
 	case Event::Type::Puma_VolumeRamp:
-		if(event.bytes[2] > 0)
-			m_volumeAdd = static_cast<int16>((event.bytes[1] + Util::muldivr(event.bytes[0] - event.bytes[1], m_ticksRemain, event.bytes[2])) * 256 - 16384);
+		if(event.Byte2() > 0)
+			m_volumeAdd = static_cast<int16>((event.Byte1() + Util::muldivr(event.Byte0() - event.Byte1(), m_ticksRemain, event.Byte2())) * 256 - 16384);
 		break;
 	case Event::Type::Puma_PitchRamp:
-		if(event.bytes[2] > 0)
-			m_periodAdd = static_cast<int16>((static_cast<int8>(event.bytes[1]) + Util::muldivr(static_cast<int8>(event.bytes[0]) - static_cast<int8>(event.bytes[1]), m_ticksRemain, event.bytes[2])) * 4);
+		if(event.Byte2() > 0)
+			m_periodAdd = static_cast<int16>((static_cast<int8>(event.Byte1()) + Util::muldivr(static_cast<int8>(event.Byte0()) - static_cast<int8>(event.Byte1()), m_ticksRemain, event.Byte2())) * 4);
 		break;
 	default:
 		break;

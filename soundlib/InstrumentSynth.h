@@ -55,7 +55,7 @@ struct InstrumentSynth
 
 			Mupp_SetWaveform,  // Parameter: Source instrument (uint8), waveform (uint8), volume (uint8)
 
-			MED_DefineArpeggio,   // Parameter: Arpeggio note (uint8), arp length or 0 if it's not the first note (uint8)
+			MED_DefineArpeggio,   // Parameter: Arpeggio note (uint8), arp length or 0 if it's not the first note (uint16)
 			MED_JumpScript,       // Parameter: Script index (uint8), jump target (uint16)
 			MED_SetEnvelope,      // Parameter: Envelope index (uint8), loop on/off (uint8), is volume envelope (uint8)
 			MED_SetVolume,        // Parameter: Volume (uint8)
@@ -70,17 +70,14 @@ struct InstrumentSynth
 		Type type = Type::StopScript;
 		union
 		{
-			std::array<uint8, 3> bytes = {{}};
-			struct
-			{
-				uint16 u16;
-				uint8 u8;
-			};
-			struct
-			{
-				int16 i16;
-				int8 i8;
-			};
+			uint8 u8 = 0;
+			int8 i8;
+		};
+		union
+		{
+			uint16 u16 = 0;
+			int16 i16;
+			std::array<uint8, 2> bytes;
 		};
 
 		static constexpr Event StopScript() noexcept { return Event{Type::StopScript}; }
@@ -113,7 +110,7 @@ struct InstrumentSynth
 
 		static constexpr Event Mupp_SetWaveform(uint8 instr, uint8 waveform, uint8 volume) noexcept { return Event{Type::Mupp_SetWaveform, instr, waveform, volume}; }
 
-		static constexpr Event MED_DefineArpeggio(uint8 note, uint8 noteCount) noexcept { return Event{Type::MED_DefineArpeggio, note, noteCount, uint8(0)}; }
+		static constexpr Event MED_DefineArpeggio(uint8 note, uint16 noteCount) noexcept { return Event{Type::MED_DefineArpeggio, noteCount, note}; }
 		static constexpr Event MED_JumpScript(uint8 scriptIndex, uint16 target) noexcept { return Event{Type::MED_JumpScript, target, scriptIndex}; }
 		static constexpr Event MED_SetEnvelope(uint8 envelope, bool loop, bool volumeEnv) noexcept { return Event{Type::MED_SetEnvelope, envelope, uint8(loop ? 1 : 0), uint8(volumeEnv ? 1 : 0)}; }
 		static constexpr Event MED_SetVolume(uint8 volume) noexcept { return Event{Type::MED_SetVolume, volume}; }
@@ -146,13 +143,17 @@ struct InstrumentSynth
 				u16 = uint16_max;
 		}
 
+		constexpr uint8 Byte0() const noexcept { return u8; }
+		constexpr uint8 Byte1() const noexcept { return bytes[0]; }
+		constexpr uint8 Byte2() const noexcept { return bytes[1]; }
+
 	protected:
-		constexpr Event(Type type, uint8 b1, uint8 b2, uint8 b3) noexcept : type{type}, bytes{b1, b2, b3} {}
+		constexpr Event(Type type, uint8 b1, uint8 b2, uint8 b3) noexcept : type{type}, u8{b1}, bytes{b2, b3} {}
 		constexpr Event(Type type, uint16 u16, uint8 u8 = 0) noexcept : type{type}, u16{u16}, u8{u8} {}
 		constexpr Event(Type type, int16 i16) noexcept : type{type}, i16{i16} {}
 		constexpr Event(Type type, uint8 u8) noexcept : type{type}, u8{u8} {}
 		constexpr Event(Type type, int8 i8) noexcept : type{type}, i8{i8} {}
-		explicit constexpr Event(Type type) noexcept : type{type}, bytes{{}} {}
+		explicit constexpr Event(Type type) noexcept : type{type}, u8{}, u16{} {}
 	};
 
 	using Events = std::vector<Event>;

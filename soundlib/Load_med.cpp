@@ -665,7 +665,7 @@ static void TranslateMEDSynthScript(std::array<uint8, 128> &arr, size_t numEntri
 					arpSize++;
 				}
 				if(arpSize)
-					events[firstEvent].bytes[1] = arpSize;
+					events[firstEvent].u16 = arpSize;
 			}
 			break;
 		case 0xFA:  // JWV / JWS - Jump waveform / volume sequence
