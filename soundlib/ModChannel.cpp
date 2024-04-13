@@ -50,6 +50,7 @@ void ModChannel::Reset(ResetFlags resetMask, const CSoundFile &sndFile, CHANNELI
 		isPaused = false;
 		portaTargetReached = false;
 		rowCommand.Clear();
+		synthState.Stop();
 	}
 
 	if(resetMask & resetSetPosAdvanced)

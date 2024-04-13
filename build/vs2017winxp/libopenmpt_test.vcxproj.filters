@@ -330,6 +330,9 @@
     <ClInclude Include="..\..\soundlib\ITTools.h">
       <Filter>soundlib</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\soundlib\InstrumentSynth.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\soundlib\IntMixer.h">
       <Filter>soundlib</Filter>
     </ClInclude>
@@ -1163,6 +1166,9 @@
     <ClCompile Include="..\..\soundlib\InstrumentExtensions.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\soundlib\InstrumentSynth.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_667.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>
@@ -1254,6 +1260,9 @@
       <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_ptm.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_puma.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_s3m.cpp">

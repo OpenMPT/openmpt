@@ -91,6 +91,7 @@ static constexpr ModFormatInfo modFormatInfo[] =
 	{ UL_("Epic Megagames MASI"),                "psm" },
 	{ UL_("ProTracker"),                         "pt36" },
 	{ UL_("PolyTracker"),                        "ptm" },
+	{ UL_("Puma Tracker"),                       "puma" },
 	{ UL_("SoundFX"),                            "sfx" },
 	{ UL_("SoundFX"),                            "sfx2" },
 	{ UL_("SoundTracker 2.6"),                   "st26" },

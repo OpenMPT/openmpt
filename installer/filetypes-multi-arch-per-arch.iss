@@ -81,6 +81,7 @@ Root: HKA; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssoc
 Root: HKA; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".psm"; ValueData: {#OpenMPTFile}; Components: {#Component}
 Root: HKA; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".pt36"; ValueData: {#OpenMPTFile}; Components: {#Component}
 Root: HKA; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".ptm"; ValueData: {#OpenMPTFile}; Components: {#Component}
+Root: HKA; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".puma"; ValueData: {#OpenMPTFile}; Components: {#Component}
 Root: HKA; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".sfx"; ValueData: {#OpenMPTFile}; Components: {#Component}
 Root: HKA; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".sfx2"; ValueData: {#OpenMPTFile}; Components: {#Component}
 Root: HKA; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".st26"; ValueData: {#OpenMPTFile}; Components: {#Component}

@@ -1141,6 +1141,9 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 				} else if(m.command == CMD_PATTERNBREAK && isNoiseTracker)
 				{
 					m.param = 0;
+				} else if(m.command == CMD_TREMOLO && isHMNT)
+				{
+					m.command = CMD_HMN_MEGA_ARP;
 				} else if(m.command == CMD_PANNING8 && fix7BitPanning)
 				{
 					// Fix MODs with 7-bit + surround panning
@@ -1338,6 +1341,67 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 #endif  // MPT_EXTERNAL_SAMPLES || MPT_BUILD_FUZZER
+
+	// His Master's Noise "Mupp" instrument extensions
+	if((loadFlags & loadSampleData) && isHMNT)
+	{
+		uint8 muppCount = 0;
+		for(SAMPLEINDEX smp = 1; smp <= 31; smp++)
+		{
+			file.Seek(20 + (smp - 1) * sizeof(MODSampleHeader));
+			if(!file.ReadMagic("Mupp") || !CanAddMoreSamples(28))
+				continue;
+
+			if(!m_nInstruments)
+			{
+				m_playBehaviour.set(kMODSampleSwap);
+				m_nInstruments = 31;
+				for(INSTRUMENTINDEX ins = 1; ins <= 31; ins++)
+				{
+					if(ModInstrument *instr = AllocateInstrument(ins, ins); instr != nullptr)
+						instr->name = m_szNames[ins];
+				}
+			}
+			ModInstrument *instr = Instruments[smp];
+			if(!instr)
+				continue;
+
+			const auto [muppPattern, loopStart, loopEnd] = file.ReadArray<uint8, 3>();
+			file.Seek(1084 + 1024 * muppPattern);
+			SAMPLEINDEX startSmp = m_nSamples + 1;
+			m_nSamples += 28;
+			instr->AssignSample(startSmp);
+
+			SampleIO sampleIO(SampleIO::_8bit, SampleIO::mono, SampleIO::littleEndian, SampleIO::signedPCM);
+			for(SAMPLEINDEX muppSmp = startSmp; muppSmp <= m_nSamples; muppSmp++)
+			{
+				ModSample &mptSmp = Samples[muppSmp];
+				mptSmp.Initialize(MOD_TYPE_MOD);
+				mptSmp.nLength = 32;
+				mptSmp.nLoopStart = 0;
+				mptSmp.nLoopEnd = 32;
+				mptSmp.nFineTune = Samples[smp].nFineTune;
+				mptSmp.nVolume = Samples[smp].nVolume;
+				mptSmp.uFlags.set(CHN_LOOP);
+				sampleIO.ReadSample(mptSmp, file);
+			}
+
+			auto &events = instr->synth.m_scripts.emplace_back();
+			events.reserve(std::min(loopEnd + 1, 64));
+			const auto waveforms = file.ReadArray<uint8, 64>();
+			const auto volumes = file.ReadArray<uint8, 64>();
+			for(uint8 i = 0; i < 64; i++)
+			{
+				events.push_back(InstrumentSynth::Event::Mupp_SetWaveform(muppCount, waveforms[i], volumes[i]));
+				if(i == loopEnd && loopStart <= loopEnd)
+				{
+					events.push_back(InstrumentSynth::Event::Jump(loopStart));
+					break;
+				}
+			}
+			muppCount++;
+		}
+	}
 
 	// Fix VBlank MODs. Arbitrary threshold: 8 minutes (enough for "frame of mind" by Dascon...).
 	// Basically, this just converts all tempo commands into speed commands
@@ -1571,7 +1635,7 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 
 		totalSampleLen += mptSmp.nLength;
 
-		if(m_szNames[smp][0] && sampleHeader.HasDiskName())
+		if(sampleHeader.HasDiskName())
 		{
 			// Ultimate Soundtracker 1.8 and D.O.C. SoundTracker IX always have sample names containing disk names.
 			hasDiskNames = false;

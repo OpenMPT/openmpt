@@ -3481,8 +3481,18 @@ bool CSoundFile::ProcessEffects()
 					chn.PanEnv.nEnvPosition = param;
 					chn.PitchEnv.nEnvPosition = param;
 				}
-
 			}
+			break;
+
+		// MED Synth Jump (handled in InstrumentSynth) / MIDI Panning
+		case CMD_MED_SYNTH_JUMP:
+#ifndef NO_PLUGINS
+			if(chn.isFirstTick)
+			{
+				if(IMixPlugin *plugin = GetChannelInstrumentPlugin(chn); plugin != nullptr)
+					plugin->MidiCC(MIDIEvents::MIDICC_Panposition_Coarse, static_cast<uint8>(param & 0x7F), nChn);
+			}
+#endif  // NO_PLUGINS
 			break;
 
 		// Position Jump

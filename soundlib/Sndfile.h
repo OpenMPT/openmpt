@@ -44,16 +44,16 @@
 #include "../sounddsp/EQ.h"
 #endif
 
-#include "modcommand.h"
-#include "ModSample.h"
-#include "ModInstrument.h"
-#include "ModChannel.h"
-#include "plugins/PluginStructs.h"
-#include "RowVisitor.h"
 #include "Message.h"
+#include "ModChannel.h"
+#include "modcommand.h"
+#include "ModInstrument.h"
+#include "ModSample.h"
+#include "ModSequence.h"
 #include "pattern.h"
 #include "patternContainer.h"
-#include "ModSequence.h"
+#include "plugins/PluginStructs.h"
+#include "RowVisitor.h"
 
 #include "mpt/audio/span.hpp"
 
@@ -889,6 +889,7 @@ public:
 	static ProbeResult ProbeFileHeaderPSM16(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderPT36(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderPTM(MemoryFileReader file, const uint64 *pfilesize);
+	static ProbeResult ProbeFileHeaderPuma(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderS3M(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderSFX(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderSTM(MemoryFileReader file, const uint64 *pfilesize);
@@ -944,6 +945,7 @@ public:
 	bool ReadPSM16(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadPT36(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadPTM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadPuma(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadS3M(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadSFX(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadSTM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
@@ -1167,11 +1169,11 @@ protected:
 	int SetupChannelFilter(ModChannel &chn, bool bReset, int envModifier = 256) const;
 	int HandleNoteChangeFilter(ModChannel &chn) const;
 
-	// Low-Level effect processing
-	void DoFreqSlide(ModChannel &chn, int32 &period, int32 amount, bool isTonePorta = false) const;
 	void UpdateTimeSignature();
 
 public:
+	void DoFreqSlide(ModChannel &chn, int32 &period, int32 amount, bool isTonePorta = false) const;
+
 	// Convert frequency to IT cutoff (0...127)
 	uint8 FrequencyToCutOff(double frequency) const;
 	// Convert IT cutoff (0...127 + modifier) to frequency

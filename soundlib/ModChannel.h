@@ -12,6 +12,7 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
+#include "InstrumentSynth.h"
 #include "ModSample.h"
 #include "ModInstrument.h"
 #include "modcommand.h"
@@ -62,6 +63,7 @@ struct ModChannel
 
 	const ModSample *pModSample;  // Currently assigned sample slot (may already be stopped)
 	Paula::State paulaState;
+	InstrumentSynth::States synthState;
 
 	// Information not used in the mixer
 	const ModInstrument *pModInstrument;  // Currently assigned instrument slot

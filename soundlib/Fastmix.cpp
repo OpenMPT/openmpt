@@ -502,7 +502,12 @@ void CSoundFile::CreateStereoMix(int count)
 				chn.pModSample = &smp;
 				chn.pCurrentSample = smp.samplev();
 				chn.dwFlags = (chn.dwFlags & CHN_CHANNELFLAGS) | smp.uFlags;
-				chn.nLength = smp.uFlags[CHN_LOOP] ? smp.nLoopEnd : 0; // non-looping sample continue in oneshot mode (i.e. they will most probably just play silence)
+				if(smp.uFlags[CHN_LOOP])
+					chn.nLength = smp.nLoopEnd;
+				else if(!m_playBehaviour[kMODOneShotLoops])
+					chn.nLength = smp.nLength;
+				else
+					chn.nLength = 0; // non-looping sample continue in oneshot mode (i.e. they will most probably just play silence)
 				chn.nLoopStart = smp.nLoopStart;
 				chn.nLoopEnd = smp.nLoopEnd;
 				chn.position.SetInt(chn.nLoopStart);

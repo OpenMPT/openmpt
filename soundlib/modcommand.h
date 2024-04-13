@@ -108,6 +108,8 @@ enum EffectCommand : uint8
 	CMD_OFFSETPERCENTAGE    = 44, // PLM Percentage Offset
 	CMD_DIGIREVERSESAMPLE   = 45, // DIGI reverse sample
 	CMD_VOLUME8             = 46, // 8-bit volume
+	CMD_HMN_MEGA_ARP        = 47, // His Master's Noise "mega-arp"
+	CMD_MED_SYNTH_JUMP      = 48, // MED synth jump / MIDI panning
 	MAX_EFFECTS
 };
 

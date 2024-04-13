@@ -12,11 +12,13 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
+#include "InstrumentSynth.h"
 #include "modcommand.h"
 #include "tuningbase.h"
 #include "Snd_defs.h"
 #include "openmpt/base/FlagSet.hpp"
 #include "../common/misc_util.h"
+
 #include <map>
 #include <set>
 
@@ -105,6 +107,7 @@ struct ModInstrument
 
 	TEMPO pitchToTempoLock;      // BPM at which the samples assigned to this instrument loop correctly (0 = unset)
 	CTuning *pTuning = nullptr;  // sample tuning assigned to this instrument
+	InstrumentSynth synth;       // Synth scripts for this instrument
 
 	InstrumentEnvelope VolEnv;    // Volume envelope data
 	InstrumentEnvelope PanEnv;    // Panning envelope data

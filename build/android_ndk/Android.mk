@@ -109,6 +109,7 @@ LOCAL_SRC_FILES += \
 	soundlib/Dlsbank.cpp \
 	soundlib/Fastmix.cpp \
 	soundlib/InstrumentExtensions.cpp \
+	soundlib/InstrumentSynth.cpp \
 	soundlib/ITCompression.cpp \
 	soundlib/ITTools.cpp \
 	soundlib/Load_667.cpp \
@@ -143,6 +144,7 @@ LOCAL_SRC_FILES += \
 	soundlib/Load_plm.cpp \
 	soundlib/Load_psm.cpp \
 	soundlib/Load_ptm.cpp \
+	soundlib/Load_puma.cpp \
 	soundlib/Load_s3m.cpp \
 	soundlib/Load_sfx.cpp \
 	soundlib/Load_stm.cpp \

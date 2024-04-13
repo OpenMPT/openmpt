@@ -31,7 +31,8 @@ static constexpr EffectType effectTypes[] =
 	EffectType::Normal, EffectType::Normal,  EffectType::Normal, EffectType::Pitch,
 	EffectType::Pitch,  EffectType::Normal,  EffectType::Pitch,  EffectType::Pitch,
 	EffectType::Pitch,  EffectType::Pitch,   EffectType::Normal, EffectType::Normal,
-	EffectType::Normal, EffectType::Normal,  EffectType::Volume
+	EffectType::Normal, EffectType::Normal,  EffectType::Volume, EffectType::Normal,
+	EffectType::Normal,
 };
 
 static_assert(std::size(effectTypes) == MAX_EFFECTS);
@@ -1139,6 +1140,7 @@ size_t ModCommand::GetEffectWeight(COMMAND cmd)
 		CMD_DUMMY,
 		CMD_XPARAM,
 		CMD_SETENVPOSITION,
+		CMD_MED_SYNTH_JUMP,
 		CMD_KEYOFF,
 		CMD_TREMOLO,
 		CMD_FINEVIBRATO,
@@ -1170,6 +1172,7 @@ size_t ModCommand::GetEffectWeight(COMMAND cmd)
 		CMD_OFFSET,
 		CMD_TREMOR,
 		CMD_RETRIG,
+		CMD_HMN_MEGA_ARP,
 		CMD_ARPEGGIO,
 		CMD_TONEPORTAMENTO,
 		CMD_TONEPORTAVOL,

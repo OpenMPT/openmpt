@@ -253,6 +253,29 @@ struct MMDPackedSampleHeader
 MPT_BINARY_STRUCT(MMDPackedSampleHeader, 14)
 
 
+struct MMDSynthInstr
+{
+	uint8    defaultDecay;  // Not used in modules
+	char     reserved[3];
+	uint16be loopStart;  // Only for hybrid
+	uint16be loopLength;
+	uint16be volTableLen;
+	uint16be waveTableLen;
+	uint8    volSpeed;
+	uint8    waveSpeed;
+	uint16be numWaveforms;
+	std::array<uint8, 128> volTable;
+	std::array<uint8, 128> waveTable;
+
+	bool IsValid() const
+	{
+		return volTableLen <= 128 && waveTableLen <= 128 && (numWaveforms <= 64 || numWaveforms == 0xFFFF);
+	}
+};
+
+MPT_BINARY_STRUCT(MMDSynthInstr, 272)
+
+
 struct MMDInstrExt
 {
 	enum
@@ -422,8 +445,8 @@ static std::pair<EffectCommand, ModCommand::PARAM> ConvertMEDEffect(ModCommand &
 	case 0x0D:
 		m.command = CMD_VOLUMESLIDE;
 		break;
-	case 0x0E:  // Synth jump
-		m.command = CMD_NONE;
+	case 0x0E:  // Synth jump / MIDI panning
+		m.command = CMD_MED_SYNTH_JUMP;
 		break;
 	case 0x0F:  // Misc
 		if(m.param == 0)
@@ -602,6 +625,105 @@ static std::pair<EffectCommand, ModCommand::PARAM> ConvertMEDEffect(ModCommand &
 	return std::make_pair(CMD_NONE, ModCommand::PARAM(0));
 }
 
+
+static void TranslateMEDSynthScript(std::array<uint8, 128> &arr, size_t numEntries, uint8 speed, uint8 hold, uint8 decay, InstrumentSynth::Events &events, bool isVolume)
+{
+	events.push_back(InstrumentSynth::Event::SetStepSpeed(speed));
+	if(hold && isVolume)
+		events.push_back(InstrumentSynth::Event::MED_HoldDecay(hold, decay));
+
+	std::map<uint16, uint16> entryFromByte;
+
+	FileReader chunk{mpt::as_span(arr).subspan(0, std::min(arr.size(), numEntries))};
+	while(chunk.CanRead(1))
+	{
+		const uint16 scriptPos = static_cast<uint16>(chunk.GetPosition());
+		entryFromByte[scriptPos] = static_cast<uint16>(events.size());
+		events.push_back(InstrumentSynth::Event::JumpMarker(scriptPos));
+		uint8 b = chunk.ReadUint8();
+		switch(b)
+		{
+		case 0xFF:  // END - End sequence
+		case 0xFB:  // HLT - Halt
+			events.push_back(InstrumentSynth::Event::StopScript());
+			break;
+		case 0xFE:  // JMP - Jump
+			events.push_back(InstrumentSynth::Event::Jump(chunk.ReadUint8()));
+			break;
+		case 0xFD:  // ARE - End arpeggio definition
+			break;
+		case 0xFC:  // ARP - Begin arpeggio definition
+			{
+				size_t firstEvent = events.size();
+				uint8 arpSize = 0;
+				while(chunk.CanRead(1))
+				{
+					b = chunk.ReadUint8();
+					if(b >= 0x80)
+						break;
+					events.push_back(InstrumentSynth::Event::MED_DefineArpeggio(b, 0));
+					arpSize++;
+				}
+				if(arpSize)
+					events[firstEvent].bytes[1] = arpSize;
+			}
+			break;
+		case 0xFA:  // JWV / JWS - Jump waveform / volume sequence
+			events.push_back(InstrumentSynth::Event::MED_JumpScript(isVolume ? 1 : 0, chunk.ReadUint8()));
+			break;
+		case 0xF7:  //  -  / VWF - Set vibrato waveform
+			if(!isVolume)
+				events.push_back(InstrumentSynth::Event::MED_SetEnvelope(chunk.ReadUint8(), true, false));
+			break;
+		case 0xF6:  // EST / RES - ? / reset pitch
+			if(!isVolume)
+				events.push_back(InstrumentSynth::Event::Puma_PitchRamp(0, 0, 0));
+			break;
+		case 0xF5:  // EN2 / VBS - Looping envelope / set vibrato speed
+			if(isVolume)
+				events.push_back(InstrumentSynth::Event::MED_SetEnvelope(chunk.ReadUint8(), true, true));
+			else
+				events.push_back(InstrumentSynth::Event::MED_SetVibratoSpeed(chunk.ReadUint8()));
+			break;
+		case 0xF4:  // EN1 - VBD - One shot envelope / set vibrato depth
+			if(isVolume)
+				events.push_back(InstrumentSynth::Event::MED_SetEnvelope(chunk.ReadUint8(), false, true));
+			else
+				events.push_back(InstrumentSynth::Event::MED_SetVibratoDepth(chunk.ReadUint8()));
+			break;
+		case 0xF3:  // CHU - Change volume / pitch up speed
+			if(isVolume)
+				events.push_back(InstrumentSynth::Event::MED_SetVolumeStep(chunk.ReadUint8()));
+			else
+				events.push_back(InstrumentSynth::Event::MED_SetPeriodStep(chunk.ReadUint8()));
+			break;
+		case 0xF2:  // CHD - Change volume / pitch down speed
+			if(isVolume)
+				events.push_back(InstrumentSynth::Event::MED_SetVolumeStep(-static_cast<int16>(chunk.ReadUint8())));
+			else
+				events.push_back(InstrumentSynth::Event::MED_SetPeriodStep(-static_cast<int16>(chunk.ReadUint8())));
+			break;
+		case 0xF1:  // WAI - Wait
+			events.push_back(InstrumentSynth::Event::Delay(std::max(chunk.ReadUint8(), uint8(1)) - 1));
+			break;
+		case 0xF0:  // SPD - Set Speed
+			events.push_back(InstrumentSynth::Event::SetStepSpeed(chunk.ReadUint8()));
+			break;
+		default:
+			if(isVolume && b <= 64)
+				events.push_back(InstrumentSynth::Event::MED_SetVolume(b));
+			else if(!isVolume)
+				events.push_back(InstrumentSynth::Event::MED_SetWaveform(b));
+			break;
+		}
+	}
+	for(auto &event : events)
+	{
+		event.FixupJumpTarget(entryFromByte);
+	}
+}
+
+
 #ifdef MPT_WITH_VST
 static std::wstring ReadMEDStringUTF16BE(FileReader &file)
 {
@@ -756,6 +878,19 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 	}
 	m_nInstruments = m_nSamples = songHeader.numSamples;
 
+	FileReader expDataChunk;
+	if(expData.instrExtOffset != 0 && file.Seek(expData.instrExtOffset))
+	{
+		const uint16 entries = std::min<uint16>(expData.instrExtEntries, songHeader.numSamples);
+		expDataChunk = file.ReadChunk(expData.instrExtEntrySize * entries);
+	}
+	FileReader instrInfoChunk;
+	if(expData.instrInfoOffset != 0 && file.Seek(expData.instrInfoOffset))
+	{
+		const uint16 entries = std::min<uint16>(expData.instrInfoEntries, songHeader.numSamples);
+		instrInfoChunk = file.ReadChunk(expData.instrInfoEntrySize * entries);
+	}
+
 	// In MMD0 / MMD1, octave wrapping is not done for synth instruments
 	// - It's required e.g. for automatic terminated to.mmd0 and you got to let the music.mmd1
 	// - starkelsesirap.mmd0 (synth instruments) on the other hand don't need it
@@ -763,7 +898,6 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 	const bool hardwareMixSamples = (version < 2) || (version >= 2 && !(songHeader.flags2 & MMDSong::FLAG2_MIX));
 
 	bool needInstruments = false;
-	bool anySynthInstrs = false;
 #ifdef MPT_WITH_VST
 	PLUGINDEX numPlugins = 0;
 #endif  // MPT_WITH_VST
@@ -772,6 +906,9 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 		if(!AllocateInstrument(ins, smp))
 			return false;
 		ModInstrument &instr = *Instruments[ins];
+
+		MMDInstrExt instrExt{};
+		expDataChunk.ReadStructPartial(instrExt, expData.instrExtEntrySize);
 
 		MMDInstrHeader instrHeader{};
 		FileReader sampleChunk;
@@ -783,6 +920,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 				chunkLength *= 2u;
 			sampleChunk = file.ReadChunk(chunkLength);
 		}
+		std::vector<uint32be> waveformOffsets;  // For synth instruments
 		const bool isSynth = instrHeader.type < 0;
 		const size_t maskedType = static_cast<size_t>(instrHeader.type & MMDInstrHeader::TYPEMASK);
 
@@ -811,23 +949,44 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 			}
 		} else
 #endif  // MPT_WITH_VST
-		if(isSynth)
+		if(instrHeader.type == MMDInstrHeader::SYNTHETIC || instrHeader.type == MMDInstrHeader::HYBRID)
 		{
-			// TODO: Figure out synth instruments
-			anySynthInstrs = true;
+			needInstruments = true;
+			MMDSynthInstr synthInstr;
+			sampleChunk.ReadStruct(synthInstr);
+			if(!synthInstr.IsValid())
+				return false;
+
+			if(instrHeader.type == MMDInstrHeader::SYNTHETIC)
+				instr.filename = "Synth";
+			else
+				instr.filename = "Hybrid";
+
+			instr.AssignSample(smp);
+			if(instrHeader.type == MMDInstrHeader::SYNTHETIC && version <= 2)
+				instr.Transpose(-24);
+
+			instr.synth.m_scripts.resize(2);
+			TranslateMEDSynthScript(synthInstr.volTable, synthInstr.volTableLen, synthInstr.volSpeed, instrExt.hold, instrExt.decay, instr.synth.m_scripts[0], true);
+			TranslateMEDSynthScript(synthInstr.waveTable, synthInstr.waveTableLen, synthInstr.waveSpeed, instrExt.hold, instrExt.decay, instr.synth.m_scripts[1], false);
+
+			file.ReadVector(waveformOffsets, synthInstr.numWaveforms);
+		} else if(isSynth)
+		{
 			instr.AssignSample(0);
 		}
 
 		MMD0Sample sampleHeader;
 		sampleHeaderChunk.ReadStruct(sampleHeader);
 
-		uint8 numSamples = 1;
+		uint8 numSamples = std::max(uint8(1), static_cast<uint8>(waveformOffsets.size()));
 		static constexpr uint8 SamplesPerType[] = {1, 5, 3, 2, 4, 6, 7};
 		if(!isSynth && maskedType < std::size(SamplesPerType))
 			numSamples = SamplesPerType[maskedType];
 		if(numSamples > 1)
 		{
-			static_assert(MAX_SAMPLES > 63 * 9, "Check IFFOCT multisample code");
+			if(!CanAddMoreSamples(numSamples - 1))
+				continue;
 			m_nSamples += static_cast<SAMPLEINDEX>(numSamples - 1);
 			needInstruments = true;
 			static constexpr uint8 OctSampleMap[][8] =
@@ -851,12 +1010,15 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 			};
 
 			// TODO: Move octaves so that they align better (C-4 = lowest, we don't have access to the highest four octaves)
-			for(int octave = 4; octave < 10; octave++)
+			if(!isSynth)
 			{
-				for(int note = 0, i = 12 * octave; note < 12; note++, i++)
+				for(int octave = 4; octave < 10; octave++)
 				{
-					instr.Keyboard[i] = smp + OctSampleMap[numSamples - 2][octave - 4];
-					instr.NoteMap[i] = static_cast<uint8>(instr.NoteMap[i] + OctTransposeMap[numSamples - 2][octave - 4]);
+					for(int note = 0, i = 12 * octave; note < 12; note++, i++)
+					{
+						instr.Keyboard[i] = smp + OctSampleMap[numSamples - 2][octave - 4];
+						instr.NoteMap[i] = static_cast<uint8>(instr.NoteMap[i] + OctTransposeMap[numSamples - 2][octave - 4]);
+					}
 				}
 			}
 		} else if(maskedType == MMDInstrHeader::EXTSAMPLE)
@@ -910,99 +1072,115 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 			mptSmp.RelativeTone = sampleHeader.sampleTranspose;
 		}
 
-		if(isSynth || !(loadFlags & loadSampleData))
-		{
-			smp += numSamples;
-			continue;
-		}
-
 		SampleIO sampleIO(
 			SampleIO::_8bit,
 			SampleIO::mono,
 			SampleIO::bigEndian,
 			SampleIO::signedPCM);
 
-		const bool hasLoop = sampleHeader.loopLength > 1;
-		SmpLength loopStart = sampleHeader.loopStart * 2;
-		SmpLength loopEnd = loopStart + sampleHeader.loopLength * 2;
-
-		SmpLength length = mpt::saturate_cast<SmpLength>(sampleChunk.GetLength());
-		if(instrHeader.type & MMDInstrHeader::S_16)
+		if(isSynth)
 		{
-			sampleIO |= SampleIO::_16bit;
-			length /= 2;
-		}
-		if(instrHeader.type & MMDInstrHeader::STEREO)
-		{
-			sampleIO |= SampleIO::stereoSplit;
-			length /= 2;
-		}
-		if(instrHeader.type & MMDInstrHeader::DELTA)
-		{
-			sampleIO |= SampleIO::deltaPCM;
-		}
-
-		if(numSamples > 1)
-			length = length / ((1u << numSamples) - 1);
-
-		for(SAMPLEINDEX i = 0; i < numSamples; i++)
-		{
-			ModSample &mptSmp = Samples[smp + i];
-
-			mptSmp.nLength = length;
-			sampleIO.ReadSample(mptSmp, sampleChunk);
-
-			if(hasLoop)
+			for(size_t i = 0; i < waveformOffsets.size(); i++)
 			{
-				mptSmp.nLoopStart = loopStart;
-				mptSmp.nLoopEnd = loopEnd;
-				mptSmp.uFlags.set(CHN_LOOP);
+				const uint32 offset = waveformOffsets[i];
+				if(offset <= sizeof(MMDInstrHeader) + sizeof(MMDSynthInstr) || !file.Seek(instrOffsets[ins - 1] + offset))
+					continue;
+				
+				ModSample &mptSmp = Samples[smp + i];
+				if(instrHeader.type == MMDInstrHeader::SYNTHETIC || i > 0)
+				{
+					mptSmp.nLength = file.ReadUint16BE() * 2;
+					mptSmp.nLoopStart = 0;
+					mptSmp.nLoopEnd = mptSmp.nLength;
+					mptSmp.uFlags.set(CHN_LOOP);
+					m_szNames[smp + i] = "Synth";
+				} else
+				{
+					MMDInstrHeader hybridHeader;
+					file.ReadStruct(hybridHeader);
+					if(hybridHeader.type == MMDInstrHeader::SAMPLE)
+						mptSmp.nLength = hybridHeader.length;
+					m_szNames[smp + i] = "Hybrid";
+				}
+				if(loadFlags & loadSampleData)
+					sampleIO.ReadSample(mptSmp, file);
+			}
+		} else
+		{
+			const bool hasLoop = sampleHeader.loopLength > 1;
+			SmpLength loopStart = sampleHeader.loopStart * 2;
+			SmpLength loopEnd = loopStart + sampleHeader.loopLength * 2;
+
+			SmpLength length = mpt::saturate_cast<SmpLength>(sampleChunk.GetLength());
+			if(instrHeader.type & MMDInstrHeader::S_16)
+			{
+				sampleIO |= SampleIO::_16bit;
+				length /= 2;
+			}
+			if(instrHeader.type & MMDInstrHeader::STEREO)
+			{
+				sampleIO |= SampleIO::stereoSplit;
+				length /= 2;
+			}
+			if(instrHeader.type & MMDInstrHeader::DELTA)
+			{
+				sampleIO |= SampleIO::deltaPCM;
 			}
 
-			length *= 2;
-			loopStart *= 2;
-			loopEnd *= 2;
+			if(numSamples > 1)
+				length = length / ((1u << numSamples) - 1);
+
+			for(SAMPLEINDEX i = 0; i < numSamples; i++)
+			{
+				ModSample &mptSmp = Samples[smp + i];
+
+				mptSmp.nLength = length;
+				if(loadFlags & loadSampleData)
+					sampleIO.ReadSample(mptSmp, sampleChunk);
+
+				if(hasLoop)
+				{
+					mptSmp.nLoopStart = loopStart;
+					mptSmp.nLoopEnd = loopEnd;
+					mptSmp.uFlags.set(CHN_LOOP);
+				}
+
+				length *= 2;
+				loopStart *= 2;
+				loopEnd *= 2;
+			}
 		}
 
-		smp += numSamples;
-	}
-
-	if(expData.instrExtOffset != 0 && expData.instrExtEntries != 0 && file.Seek(expData.instrExtOffset))
-	{
-		const uint16 entries = std::min<uint16>(expData.instrExtEntries, songHeader.numSamples);
-		const uint16 size = expData.instrExtEntrySize;
-		for(uint16 i = 0; i < entries; i++)
+		// On to the extended instrument info...
+		if(expDataChunk.IsValid())
 		{
-			MMDInstrExt instrExt;
-			file.ReadStructPartial(instrExt, size);
-
-			ModInstrument &ins = *Instruments[i + 1];
-			if(instrExt.hold)
+			const uint16 size = expData.instrExtEntrySize;
+			if(instrExt.hold && !isSynth)
 			{
-				ins.VolEnv.assign({
+				instr.VolEnv.assign({
 					EnvelopeNode{0u, ENVELOPE_MAX},
 					EnvelopeNode{static_cast<EnvelopeNode::tick_t>(instrExt.hold - 1), ENVELOPE_MAX},
 					EnvelopeNode{static_cast<EnvelopeNode::tick_t>(instrExt.hold + (instrExt.decay ? 64u / instrExt.decay : 0u)), ENVELOPE_MIN},
 				});
 				if(instrExt.hold == 1)
-					ins.VolEnv.erase(ins.VolEnv.begin());
-				ins.nFadeOut = instrExt.decay ? (instrExt.decay * 512) : 32767;
-				ins.VolEnv.dwFlags.set(ENV_ENABLED);
+					instr.VolEnv.erase(instr.VolEnv.begin());
+				instr.nFadeOut = instrExt.decay ? (instrExt.decay * 512) : 32767;
+				instr.VolEnv.dwFlags.set(ENV_ENABLED);
 				needInstruments = true;
 			}
 			if(size > offsetof(MMDInstrExt, defaultPitch) && instrExt.defaultPitch != 0)
 			{
-				ins.NoteMap[24] = instrExt.defaultPitch + NOTE_MIN + 23;
+				instr.NoteMap[24] = instrExt.defaultPitch + NOTE_MIN + 23;
 				needInstruments = true;
 			}
 			if(size > offsetof(MMDInstrExt, volume))
-				ins.nGlobalVol = (instrExt.volume + 1u) / 2u;
+				instr.nGlobalVol = (instrExt.volume + 1u) / 2u;
 			if(size > offsetof(MMDInstrExt, midiBank))
-				ins.wMidiBank = instrExt.midiBank;
+				instr.wMidiBank = instrExt.midiBank;
 #ifdef MPT_WITH_VST
-			if(ins.nMixPlug > 0)
+			if(instr.nMixPlug > 0)
 			{
-				PLUGINDEX plug = ins.nMixPlug - 1;
+				PLUGINDEX plug = instr.nMixPlug - 1;
 				auto &mixPlug = m_MixPlugins[plug];
 				if(mixPlug.Info.dwPluginId2 == PLUGMAGIC('M', 'M', 'I', 'D'))
 				{
@@ -1021,7 +1199,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 							&& otherPlug.Info.dwPluginId2 == mixPlug.Info.dwPluginId2
 							&& otherPlug.pluginData == mixPlug.pluginData)
 						{
-							ins.nMixPlug = p + 1;
+							instr.nMixPlug = p + 1;
 							mixPlug = {};
 							break;
 						}
@@ -1030,37 +1208,42 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 			}
 #endif  // MPT_WITH_VST
 
-			ModSample &sample = Samples[ins.Keyboard[NOTE_MIDDLEC]];
-			sample.nFineTune = MOD2XMFineTune(instrExt.finetune);
+			for(SAMPLEINDEX i = 0; i < numSamples; i++)
+			{
+				ModSample &sample = Samples[smp + i];
+				sample.nFineTune = MOD2XMFineTune(instrExt.finetune);
 
-			if(size > offsetof(MMDInstrExt, loopLength))
-			{
-				sample.nLoopStart = instrExt.loopStart;
-				sample.nLoopEnd = instrExt.loopStart + instrExt.loopLength;
-			}
-			if(size > offsetof(MMDInstrExt, instrFlags))
-			{
-				sample.uFlags.set(CHN_LOOP, (instrExt.instrFlags & MMDInstrExt::SSFLG_LOOP) != 0);
-				sample.uFlags.set(CHN_PINGPONGLOOP, (instrExt.instrFlags & MMDInstrExt::SSFLG_PINGPONG) != 0);
-				if(instrExt.instrFlags & MMDInstrExt::SSFLG_DISABLED)
-					sample.nGlobalVol = 0;
+				if(!isSynth && size > offsetof(MMDInstrExt, loopLength))
+				{
+					sample.nLoopStart = instrExt.loopStart;
+					sample.nLoopEnd = instrExt.loopStart + instrExt.loopLength;
+				}
+				if(size > offsetof(MMDInstrExt, instrFlags))
+				{
+					if(!isSynth)
+					{
+						sample.uFlags.set(CHN_LOOP, (instrExt.instrFlags & MMDInstrExt::SSFLG_LOOP) != 0);
+						sample.uFlags.set(CHN_PINGPONGLOOP, (instrExt.instrFlags & MMDInstrExt::SSFLG_PINGPONG) != 0);
+					}
+					if(instrExt.instrFlags & MMDInstrExt::SSFLG_DISABLED)
+						sample.nGlobalVol = 0;
+				}
 			}
 		}
-	}
-	if(expData.instrInfoOffset != 0 && expData.instrInfoEntries != 0 && file.Seek(expData.instrInfoOffset))
-	{
-		const uint16 entries = std::min<uint16>(expData.instrInfoEntries, songHeader.numSamples);
-		const uint16 size = expData.instrInfoEntrySize;
-		for(uint16 i = 0; i < entries; i++)
+
+		// And even more optional data!
+		if(instrInfoChunk.IsValid())
 		{
 			MMDInstrInfo instrInfo;
-			file.ReadStructPartial(instrInfo, size);
-			Instruments[i + 1]->name = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, instrInfo.name);
-			for(auto smp : Instruments[i + 1]->GetSamples())
+			instrInfoChunk.ReadStructPartial(instrInfo, expData.instrInfoEntrySize);
+			instr.name = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, instrInfo.name);
+			for(SAMPLEINDEX i = 0; i < numSamples; i++)
 			{
-				m_szNames[smp] = Instruments[i + 1]->name;
+				m_szNames[smp + i] = instr.name;
 			}
 		}
+
+		smp += numSamples;
 	}
 
 	// Setup a program change macro for command 1C (even if MIDI plugin is disabled, as otherwise these commands may act as filter commands)
@@ -1473,9 +1656,6 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 		}
 		m_nInstruments = 0;
 	}
-
-	if(anySynthInstrs)
-		AddToLog(LogWarning, U_("Synthesized MED instruments are not supported."));
 
 	const mpt::uchar *madeWithTracker = MPT_ULITERAL("");
 	switch(version)
