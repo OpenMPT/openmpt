@@ -121,7 +121,7 @@ struct InstrumentSynth
 		static constexpr Event MED_SetPeriodStep(int16 periodStep) noexcept { return Event{Type::MED_SetPeriodStep, periodStep}; }
 		static constexpr Event MED_HoldDecay(uint8 hold, uint16 decay) noexcept { return Event{Type::MED_HoldDecay, decay, hold}; }
 
-		constexpr Event() noexcept = default;
+		constexpr Event() noexcept : u8{}, u16{} {};
 		constexpr Event(const Event &other) noexcept = default;
 		constexpr Event(Event &&other) noexcept = default;
 		constexpr Event &operator=(const Event &other) noexcept = default;
