@@ -367,6 +367,7 @@ MPT_FILES_SOUNDLIB += soundlib/Fastmix.cpp
 MPT_FILES_SOUNDLIB += soundlib/FloatMixer.h
 MPT_FILES_SOUNDLIB += soundlib/InstrumentExtensions.cpp
 MPT_FILES_SOUNDLIB += soundlib/InstrumentSynth.cpp
+MPT_FILES_SOUNDLIB += soundlib/InstrumentSynth.h
 MPT_FILES_SOUNDLIB += soundlib/IntMixer.h
 MPT_FILES_SOUNDLIB += soundlib/ITCompression.cpp
 MPT_FILES_SOUNDLIB += soundlib/ITCompression.h
