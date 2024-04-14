@@ -422,13 +422,13 @@ bool InstrumentSynth::States::State::EvaluateEvent(const Event &event, ModChanne
 		m_nextRow = STOP_ROW;
 		return true;
 	case Event::Type::Puma_SetPitch:
-		m_linearPitchFactor = static_cast<int8>(event.Byte0()) * 8;
+		m_linearPitchFactor = event.i8 * 8;
 		m_periodAdd = 0;
 		m_ticksRemain = event.Byte2();
 		return true;
 	case Event::Type::Puma_PitchRamp:
 		m_linearPitchFactor = 0;
-		m_periodAdd = static_cast<int8>(event.Byte0()) * 4;
+		m_periodAdd = event.i8 * 4;
 		m_ticksRemain = event.Byte2();
 		return true;
 

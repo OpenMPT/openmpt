@@ -105,7 +105,7 @@ static bool TranslatePumaScript(InstrumentSynth::Events &events, ModInstrument &
 			if(isVolume)
 				events.push_back(InstrumentSynth::Event::Puma_VolumeRamp(std::min(data[1], uint8(64)), std::min(data[2], uint8(64)), data[3]));
 			else
-				events.push_back(InstrumentSynth::Event::Puma_PitchRamp(data[1], data[2], data[3]));
+				events.push_back(InstrumentSynth::Event::Puma_PitchRamp(static_cast<int8>(data[1]), static_cast<int8>(data[2]), data[3]));
 			break;
 		case 0xB0:  // Jump
 			if(data[1] & 3)
@@ -124,7 +124,7 @@ static bool TranslatePumaScript(InstrumentSynth::Events &events, ModInstrument &
 			// Odd values can be entered in the editor but playback will freeze
 			if((data[1] & 1) || isVolume)
 				return false;
-			events.push_back(InstrumentSynth::Event::Puma_SetPitch(data[1], data[3]));
+			events.push_back(InstrumentSynth::Event::Puma_SetPitch(static_cast<int8>(data[1]), data[3]));
 			break;
 		case 0xE0:  // Stop sound / End of script
 			if(isVolume)

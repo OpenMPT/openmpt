@@ -50,7 +50,7 @@ struct InstrumentSynth
 			Puma_SetWaveform,  // Parameter: Waveform (uint8), wavestorm step (uint8), number of waveforms to cycle (uint8)
 			Puma_VolumeRamp,   // Parameter: Start volume (uint8), end volume (uint8), number of ticks (uint8)
 			Puma_StopVoice,    // No parameter
-			Puma_SetPitch,     // Parameter: Pitch offset (int8), number of ticks (uint8)
+			Puma_SetPitch,     // Parameter: Pitch offset (int8), <unused> (uint8), number of ticks (uint8)
 			Puma_PitchRamp,    // Parameter: Start pitch offset (int8), end pitch offset (int8), number of ticks (uint8)
 
 			Mupp_SetWaveform,  // Parameter: Source instrument (uint8), waveform (uint8), volume (uint8)
@@ -97,16 +97,16 @@ struct InstrumentSynth
 		static constexpr Event GTK_SetPanningStep(int16 stepSize) noexcept { return Event{Type::GTK_SetPanningStep, stepSize}; }
 		static constexpr Event GTK_SetSpeed(uint8 speed) noexcept { return Event{Type::GTK_SetSpeed, speed}; }
 		static constexpr Event GTK_EnableTremor(uint8 enable) noexcept { return Event{Type::GTK_EnableTremor, enable}; }
-		static constexpr Event GTK_SetTremorTime(uint8 onTime, uint8 offTime) noexcept { return Event{Type::GTK_SetTremorTime, onTime, offTime, uint8(0)}; }
+		static constexpr Event GTK_SetTremorTime(uint8 onTime, uint8 offTime) noexcept { return Event{Type::GTK_SetTremorTime, onTime, offTime}; }
 		static constexpr Event GTK_EnableTremolo(uint8 enable) noexcept { return Event{Type::GTK_EnableTremolo, enable}; }
 		static constexpr Event GTK_EnableVibrato(uint8 enable) noexcept { return Event{Type::GTK_EnableVibrato, enable}; }
-		static constexpr Event GTK_SetVibratoParams(uint8 width, uint8 speed) noexcept { return Event{Type::GTK_SetVibratoParams, width, speed, uint8(0)}; }
+		static constexpr Event GTK_SetVibratoParams(uint8 width, uint8 speed) noexcept { return Event{Type::GTK_SetVibratoParams, width, speed}; }
 
 		static constexpr Event Puma_SetWaveform(uint8 waveform, uint8 step, uint8 count) noexcept { return Event{Type::Puma_SetWaveform, waveform, step, count}; }
 		static constexpr Event Puma_VolumeRamp(uint8 startVol, uint8 endVol, uint8 ticks) noexcept { return Event{Type::Puma_VolumeRamp, startVol, endVol, ticks}; }
 		static constexpr Event Puma_StopVoice() noexcept { return Event{Type::Puma_StopVoice}; }
-		static constexpr Event Puma_SetPitch(uint8 pitchOffset, uint8 ticks) noexcept { return Event{Type::Puma_SetPitch, pitchOffset, uint8(0), ticks}; }
-		static constexpr Event Puma_PitchRamp(uint8 startPitch, uint8 endPitch, uint8 ticks) noexcept { return Event{Type::Puma_PitchRamp, startPitch, endPitch, ticks}; }
+		static constexpr Event Puma_SetPitch(int8 pitchOffset, uint8 ticks) noexcept { return Event{Type::Puma_SetPitch, pitchOffset, uint8(0), ticks}; }
+		static constexpr Event Puma_PitchRamp(int8 startPitch, int8 endPitch, uint8 ticks) noexcept { return Event{Type::Puma_PitchRamp, startPitch, endPitch, ticks}; }
 
 		static constexpr Event Mupp_SetWaveform(uint8 instr, uint8 waveform, uint8 volume) noexcept { return Event{Type::Mupp_SetWaveform, instr, waveform, volume}; }
 
@@ -149,7 +149,11 @@ struct InstrumentSynth
 
 	protected:
 		constexpr Event(Type type, uint8 b1, uint8 b2, uint8 b3) noexcept : type{type}, u8{b1}, bytes{b2, b3} {}
-		constexpr Event(Type type, uint16 u16, uint8 u8 = 0) noexcept : type{type}, u8{u8}, u16{u16} {}
+		constexpr Event(Type type, int8 b1, uint8 b2, uint8 b3) noexcept : type{type}, i8{b1}, bytes{b2, b3} {}
+		constexpr Event(Type type, int8 b1, int8 b2, uint8 b3) noexcept : type{type}, i8{b1}, bytes{static_cast<uint8>(b2), b3} {}
+		constexpr Event(Type type, uint8 b1, uint8 b2) noexcept : type{type}, u8{b1}, bytes{b2, 0} {}
+		constexpr Event(Type type, uint16 u16, uint8 u8) noexcept : type{type}, u8{u8}, u16{u16} {}
+		constexpr Event(Type type, uint16 u16) noexcept : type{type}, u8{0}, u16{u16} {}
 		constexpr Event(Type type, int16 i16) noexcept : type{type}, u8{}, i16{i16} {}
 		constexpr Event(Type type, uint8 u8) noexcept : type{type}, u8{u8}, u16{} {}
 		constexpr Event(Type type, int8 i8) noexcept : type{type}, i8{i8}, u16{} {}
