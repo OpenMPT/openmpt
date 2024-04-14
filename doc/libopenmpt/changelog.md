@@ -11,6 +11,17 @@ is just a high-level summary.
     `libopenmpt/bindings/freebasic/libopenmpt_ext.bi` were missing from the
     Autotools package.
 
+ *  M15: Loosen SoundTracker file rejection heuristics a bit to allow loading of
+    schmokk.mod and scramble_2.mod. Other heuristics has been tightened a bit.
+ *  MOD: Change VBlank timing heuristic to always assume CIA timing when long
+    samples unsupported by original ProTracker) are found.
+ *  MOD: Disable NoiseTracker quirks if empty sample slots have a default volume
+    other than 0.
+ *  MOD: 7-bit panning detection may have returned incorrect results for MODs
+    with a channel count other than 4.
+ *  MED: Improve handling of default tempo, panning and channel volume in files
+    containing more than one song.
+
  *  mpg123: Update to v1.32.6 (2024-04-04).
 
 ### libopenmpt 0.7.6 (2024-03-24)
