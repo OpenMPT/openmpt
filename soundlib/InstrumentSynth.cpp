@@ -438,7 +438,7 @@ bool InstrumentSynth::States::State::EvaluateEvent(const Event &event, ModChanne
 		return true;
 
 	case Event::Type::MED_DefineArpeggio:
-		if(!event.Byte1())
+		if(!event.u16)
 			return false;
 		m_nextRow = m_currentRow + event.u16;
 		m_medArpOffset = m_currentRow;
