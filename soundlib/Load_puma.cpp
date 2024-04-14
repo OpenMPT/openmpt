@@ -84,7 +84,7 @@ struct PumaFileHeader
 
 	uint32 GetHeaderMinimumAdditionalSize() const
 	{
-		return NumOrders() * sizeof(PumaPlaylistEntry) + numPatterns * 8 + 4 + numInstruments * 16 + 4;
+		return NumOrders() * static_cast<uint32>(sizeof(PumaPlaylistEntry)) + numPatterns * 8 + 4 + numInstruments * 16 + 4;
 	}
 };
 
@@ -237,7 +237,7 @@ bool CSoundFile::ReadPuma(FileReader &file, ModLoadingFlags loadFlags)
 			for(const auto &p : patternData[chnInfo.pattern])
 			{
 				if(p[0])
-					m->note = NOTE_MIDDLEC - 49 + (p[0] + chnInfo.noteTranspose) / 2;
+					m->note = static_cast<uint8>(NOTE_MIDDLEC - 49 + (p[0] + chnInfo.noteTranspose) / 2);
 				if(uint8 instr = (p[1] & 0x1F); instr != 0)
 					m->instr = (instr + chnInfo.instrTranspose) & 0x1F;
 				if(!m->instr && m->note != NOTE_NONE)

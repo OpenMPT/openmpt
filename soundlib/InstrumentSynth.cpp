@@ -243,7 +243,7 @@ void InstrumentSynth::States::State::NextTick(const Events &events, ModChannel &
 	if(m_medArpOffset < events.size())
 	{
 		m_linearPitchFactor = 16 * events[m_medArpOffset + m_medArpPos].u8;
-		m_medArpPos = (m_medArpPos + 1) % static_cast<uint8>(events[m_medArpOffset].u16);
+		m_medArpPos = static_cast<uint8>((m_medArpPos + 1) % static_cast<uint8>(events[m_medArpOffset].u16));
 	}
 	if(m_medVibratoDepth)
 	{
@@ -280,7 +280,7 @@ void InstrumentSynth::States::State::NextTick(const Events &events, ModChannel &
 	}
 	if(m_gtkTremoloEnabled)
 	{
-		m_volumeAdd = ModSinusTable[(m_gtkVibratoPos / 4u) % std::size(ModSinusTable)] * m_gtkVibratoWidth / 2;
+		m_volumeAdd = static_cast<int16>(ModSinusTable[(m_gtkVibratoPos / 4u) % std::size(ModSinusTable)] * m_gtkVibratoWidth / 2);
 		m_gtkVibratoPos = (m_gtkVibratoPos + m_gtkVibratoSpeed) % (32u * 16u);
 	}
 	if(m_gtkVibratoEnabled)
@@ -427,7 +427,7 @@ bool InstrumentSynth::States::State::EvaluateEvent(const Event &event, ModChanne
 		return false;
 	case Event::Type::Puma_VolumeRamp:
 		m_ticksRemain = event.Byte2();
-		m_volumeAdd = event.Byte0() * 256 - 16384;
+		m_volumeAdd = static_cast<int16>(event.Byte0() * 256 - 16384);
 		return true;
 	case Event::Type::Puma_StopVoice:
 		chn.nRealVolume = 0;
@@ -446,7 +446,7 @@ bool InstrumentSynth::States::State::EvaluateEvent(const Event &event, ModChanne
 		return true;
 
 	case Event::Type::Mupp_SetWaveform:
-		ChannelSetSample(chn, sndFile, 32 + event.Byte0() * 28 + event.Byte1());
+		ChannelSetSample(chn, sndFile, static_cast<SAMPLEINDEX>(32 + event.Byte0() * 28 + event.Byte1()));
 		m_volumeFactor = static_cast<uint16>(std::min(event.Byte2() & 0x7F, 64) * 256u);
 		return true;
 
