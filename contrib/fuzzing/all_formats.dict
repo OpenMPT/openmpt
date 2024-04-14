@@ -146,9 +146,7 @@ mo3="MO3\x05"
 # A couple of magic bytes are commented out because they do not modify the loader's behaviour, apart from setting a "made with" string.
 mod="M.K."
 #mod="M!K!"
-mod="M&K!"
 mod="N.T."
-#mod="FEST"
 #mod="NSMS"
 #mod="LARD"
 mod="OKTA"
@@ -169,6 +167,10 @@ sfx="SO31"
 # External Startrekker instrument files.
 stam="ST1.3 ModuleINFO"
 stam="AudioSculpture10"
+
+hmn="M&K!"
+#hmn="FEST"
+hmn="Mupp"
 
 mptm="->MPT_ORIGINAL_IT<-"
 mptm=".tpm"
@@ -348,3 +350,7 @@ iff="CHAN"
 iff="MHDR"
 iff="MDAT"
 iff="NAME"
+
+puma="patt"
+puma="inst"
+puma="insf"
