@@ -780,8 +780,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 					// Sample commands
 					case 0x29: // 3-byte offset - we only support the middle byte.
 						m.command = CMD_OFFSET;
-						m.param = rowChunk.ReadUint8();
-						rowChunk.Skip(1);
+						m.param = rowChunk.ReadArray<uint8, 2>()[0];
 						break;
 					case 0x2A: // retrigger
 						m.command = CMD_RETRIG;
@@ -855,20 +854,20 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			const PSMSubSong &subsong = subsongs[i];
 			ModSequence &order = Order(static_cast<SEQUENCEINDEX>(i));
-			if(order.IsValidPat(0))
+			const PATTERNINDEX startPattern = order.EnsureUnique(order.GetFirstValidIndex());
+			if(startPattern == PATTERNINDEX_INVALID)
+				continue;
+
+			// Subsongs with different panning setup -> write to pattern (MUSIC_C.PSM)
+			// Don't write channel volume for now, as there is no real-world module which needs it.
+			if(subsongPanningDiffers)
 			{
-				PATTERNINDEX startPattern = order.EnsureUnique(0);
-				// Subsongs with different panning setup -> write to pattern (MUSIC_C.PSM)
-				// Don't write channel volume for now, as there is no real-world module which needs it.
-				if(subsongPanningDiffers)
+				for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
 				{
-					for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
-					{
-						if(subsong.channelSurround[chn])
-							Patterns[startPattern].WriteEffect(EffectWriter(CMD_S3MCMDEX, 0x91).Row(0).Channel(chn).RetryNextRow());
-						else
-							Patterns[startPattern].WriteEffect(EffectWriter(CMD_PANNING8, subsong.channelPanning[chn]).Row(0).Channel(chn).RetryNextRow());
-					}
+					if(subsong.channelSurround[chn])
+						Patterns[startPattern].WriteEffect(EffectWriter(CMD_S3MCMDEX, 0x91).Row(0).Channel(chn).RetryNextRow());
+					else
+						Patterns[startPattern].WriteEffect(EffectWriter(CMD_PANNING8, subsong.channelPanning[chn]).Row(0).Channel(chn).RetryNextRow());
 				}
 			}
 		}
@@ -1225,7 +1224,7 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 					case 0x0E: // tone portamento
 						m.command = CMD_TONEPORTAMENTO;
 						break;
-					case 0x0F: // glissando control
+					case 0x0F: // glissando control (note: this can be found in the Odyssey music from Silverball but it seems like it was actually a literal translation from MOD effect F)
 						m.command = CMD_S3MCMDEX;
 						m.param |= 0x10;
 						break;
@@ -1267,8 +1266,7 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 					// Sample commands
 					case 0x28: // 3-byte offset - we only support the middle byte.
 						m.command = CMD_OFFSET;
-						m.param = patternChunk.ReadUint8();
-						patternChunk.Skip(1);
+						m.param = patternChunk.ReadArray<uint8, 2>()[0];
 						break;
 					case 0x29: // retrigger
 						m.command = CMD_RETRIG;
