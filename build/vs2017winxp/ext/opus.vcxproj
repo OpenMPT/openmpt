@@ -294,15 +294,15 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>MPT_BUILD_RETRO;MPT_CHECK_CXX_IGNORE_PREPROCESSOR;DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0501;NTDDI_VERSION=0x05010300;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\include\opus\include;..\..\..\include\opus\celt;..\..\..\include\opus\silk;..\..\..\include\opus\silk\float;..\..\..\include\opus\src;..\..\..\include\opus\win32;..\..\..\include\opus;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>MPT_BUILD_RETRO;MPT_CHECK_CXX_IGNORE_PREPROCESSOR;DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0501;NTDDI_VERSION=0x05010300;OPUS_BUILD=1;PACKAGE_VERISON="1.5.2";ENABLE_HARDENING=1;HAVE_STDINT_H=1;HAVE_STDIO_H=1;HAVE_STDLIB_H=1;HAVE_STRING_H=1;USE_ALLOCA=1;OPUS_HAVE_RTCD=1;CPU_INFO_BY_C=1;OPUS_X86_MAY_HAVE_SSE=1;OPUS_X86_MAY_HAVE_SSE2=1;OPUS_X86_MAY_HAVE_SSE4_1=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\include\opus\include;..\..\..\include\opus\celt;..\..\..\include\opus\dnn;..\..\..\include\opus\silk;..\..\..\include\opus\silk\fixed;..\..\..\include\opus\silk\float;..\..\..\include\opus\src;..\..\..\include\opus\win32;..\..\..\include\opus;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <EnableEnhancedInstructionSet>NoExtensions</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/Zc:threadSafeInit- /wd4244 /wd4334 /wd6255 /wd6297 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/Zc:threadSafeInit- /wd4244 /wd4305 /wd6255 /wd6297 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -314,14 +314,14 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>MPT_BUILD_RETRO;MPT_CHECK_CXX_IGNORE_PREPROCESSOR;DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0502;NTDDI_VERSION=0x05020200;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\include\opus\include;..\..\..\include\opus\celt;..\..\..\include\opus\silk;..\..\..\include\opus\silk\float;..\..\..\include\opus\src;..\..\..\include\opus\win32;..\..\..\include\opus;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>MPT_BUILD_RETRO;MPT_CHECK_CXX_IGNORE_PREPROCESSOR;DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0502;NTDDI_VERSION=0x05020200;OPUS_BUILD=1;PACKAGE_VERISON="1.5.2";ENABLE_HARDENING=1;HAVE_STDINT_H=1;HAVE_STDIO_H=1;HAVE_STDLIB_H=1;HAVE_STRING_H=1;USE_ALLOCA=1;OPUS_HAVE_RTCD=1;CPU_INFO_BY_C=1;OPUS_X86_MAY_HAVE_SSE=1;OPUS_X86_MAY_HAVE_SSE2=1;OPUS_X86_MAY_HAVE_SSE4_1=1;OPUS_X86_MAY_HAVE_AVX2=1;OPUS_X86_PRESUME_SSE;OPUS_X86_PRESUME_SSE2;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\include\opus\include;..\..\..\include\opus\celt;..\..\..\include\opus\dnn;..\..\..\include\opus\silk;..\..\..\include\opus\silk\fixed;..\..\..\include\opus\silk\float;..\..\..\include\opus\src;..\..\..\include\opus\win32;..\..\..\include\opus;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/Zc:threadSafeInit- /wd4244 /wd4334 /wd6255 /wd6297 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/Zc:threadSafeInit- /wd4244 /wd4305 /wd6255 /wd6297 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -333,8 +333,8 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>MPT_BUILD_RETRO;MPT_CHECK_CXX_IGNORE_PREPROCESSOR;NDEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0501;NTDDI_VERSION=0x05010300;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\include\opus\include;..\..\..\include\opus\celt;..\..\..\include\opus\silk;..\..\..\include\opus\silk\float;..\..\..\include\opus\src;..\..\..\include\opus\win32;..\..\..\include\opus;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>MPT_BUILD_RETRO;MPT_CHECK_CXX_IGNORE_PREPROCESSOR;NDEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0501;NTDDI_VERSION=0x05010300;OPUS_BUILD=1;PACKAGE_VERISON="1.5.2";ENABLE_HARDENING=1;HAVE_STDINT_H=1;HAVE_STDIO_H=1;HAVE_STDLIB_H=1;HAVE_STRING_H=1;USE_ALLOCA=1;OPUS_HAVE_RTCD=1;CPU_INFO_BY_C=1;OPUS_X86_MAY_HAVE_SSE=1;OPUS_X86_MAY_HAVE_SSE2=1;OPUS_X86_MAY_HAVE_SSE4_1=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\include\opus\include;..\..\..\include\opus\celt;..\..\..\include\opus\dnn;..\..\..\include\opus\silk;..\..\..\include\opus\silk\fixed;..\..\..\include\opus\silk\float;..\..\..\include\opus\src;..\..\..\include\opus\win32;..\..\..\include\opus;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -344,7 +344,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <EnableEnhancedInstructionSet>NoExtensions</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/Zc:threadSafeInit- /wd4244 /wd4334 /wd6255 /wd6297 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/Zc:threadSafeInit- /wd4244 /wd4305 /wd6255 /wd6297 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -357,8 +357,8 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>MPT_BUILD_RETRO;MPT_CHECK_CXX_IGNORE_PREPROCESSOR;NDEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0502;NTDDI_VERSION=0x05020200;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\include\opus\include;..\..\..\include\opus\celt;..\..\..\include\opus\silk;..\..\..\include\opus\silk\float;..\..\..\include\opus\src;..\..\..\include\opus\win32;..\..\..\include\opus;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>MPT_BUILD_RETRO;MPT_CHECK_CXX_IGNORE_PREPROCESSOR;NDEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0502;NTDDI_VERSION=0x05020200;OPUS_BUILD=1;PACKAGE_VERISON="1.5.2";ENABLE_HARDENING=1;HAVE_STDINT_H=1;HAVE_STDIO_H=1;HAVE_STDLIB_H=1;HAVE_STRING_H=1;USE_ALLOCA=1;OPUS_HAVE_RTCD=1;CPU_INFO_BY_C=1;OPUS_X86_MAY_HAVE_SSE=1;OPUS_X86_MAY_HAVE_SSE2=1;OPUS_X86_MAY_HAVE_SSE4_1=1;OPUS_X86_MAY_HAVE_AVX2=1;OPUS_X86_PRESUME_SSE;OPUS_X86_PRESUME_SSE2;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\include\opus\include;..\..\..\include\opus\celt;..\..\..\include\opus\dnn;..\..\..\include\opus\silk;..\..\..\include\opus\silk\fixed;..\..\..\include\opus\silk\float;..\..\..\include\opus\src;..\..\..\include\opus\win32;..\..\..\include\opus;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -367,7 +367,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/Zc:threadSafeInit- /wd4244 /wd4334 /wd6255 /wd6297 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/Zc:threadSafeInit- /wd4244 /wd4305 /wd6255 /wd6297 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -380,8 +380,8 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>MPT_BUILD_RETRO;MPT_CHECK_CXX_IGNORE_PREPROCESSOR;DEBUG;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0501;NTDDI_VERSION=0x05010300;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\include\opus\include;..\..\..\include\opus\celt;..\..\..\include\opus\silk;..\..\..\include\opus\silk\float;..\..\..\include\opus\src;..\..\..\include\opus\win32;..\..\..\include\opus;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>MPT_BUILD_RETRO;MPT_CHECK_CXX_IGNORE_PREPROCESSOR;DEBUG;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0501;NTDDI_VERSION=0x05010300;OPUS_BUILD=1;PACKAGE_VERISON="1.5.2";ENABLE_HARDENING=1;HAVE_STDINT_H=1;HAVE_STDIO_H=1;HAVE_STDLIB_H=1;HAVE_STRING_H=1;USE_ALLOCA=1;OPUS_HAVE_RTCD=1;CPU_INFO_BY_C=1;OPUS_X86_MAY_HAVE_SSE=1;OPUS_X86_MAY_HAVE_SSE2=1;OPUS_X86_MAY_HAVE_SSE4_1=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\include\opus\include;..\..\..\include\opus\celt;..\..\..\include\opus\dnn;..\..\..\include\opus\silk;..\..\..\include\opus\silk\fixed;..\..\..\include\opus\silk\float;..\..\..\include\opus\src;..\..\..\include\opus\win32;..\..\..\include\opus;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -392,7 +392,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <EnableEnhancedInstructionSet>NoExtensions</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/Zc:threadSafeInit- /wd4244 /wd4334 /wd6255 /wd6297 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/Zc:threadSafeInit- /wd4244 /wd4305 /wd6255 /wd6297 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -405,8 +405,8 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>MPT_BUILD_RETRO;MPT_CHECK_CXX_IGNORE_PREPROCESSOR;DEBUG;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0502;NTDDI_VERSION=0x05020200;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\include\opus\include;..\..\..\include\opus\celt;..\..\..\include\opus\silk;..\..\..\include\opus\silk\float;..\..\..\include\opus\src;..\..\..\include\opus\win32;..\..\..\include\opus;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>MPT_BUILD_RETRO;MPT_CHECK_CXX_IGNORE_PREPROCESSOR;DEBUG;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0502;NTDDI_VERSION=0x05020200;OPUS_BUILD=1;PACKAGE_VERISON="1.5.2";ENABLE_HARDENING=1;HAVE_STDINT_H=1;HAVE_STDIO_H=1;HAVE_STDLIB_H=1;HAVE_STRING_H=1;USE_ALLOCA=1;OPUS_HAVE_RTCD=1;CPU_INFO_BY_C=1;OPUS_X86_MAY_HAVE_SSE=1;OPUS_X86_MAY_HAVE_SSE2=1;OPUS_X86_MAY_HAVE_SSE4_1=1;OPUS_X86_MAY_HAVE_AVX2=1;OPUS_X86_PRESUME_SSE;OPUS_X86_PRESUME_SSE2;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\include\opus\include;..\..\..\include\opus\celt;..\..\..\include\opus\dnn;..\..\..\include\opus\silk;..\..\..\include\opus\silk\fixed;..\..\..\include\opus\silk\float;..\..\..\include\opus\src;..\..\..\include\opus\win32;..\..\..\include\opus;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -416,7 +416,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/Zc:threadSafeInit- /wd4244 /wd4334 /wd6255 /wd6297 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/Zc:threadSafeInit- /wd4244 /wd4305 /wd6255 /wd6297 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -429,15 +429,15 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>MPT_BUILD_RETRO;MPT_CHECK_CXX_IGNORE_PREPROCESSOR;DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0501;NTDDI_VERSION=0x05010300;HAVE_CONFIG_H;DLL_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\include\opus\include;..\..\..\include\opus\celt;..\..\..\include\opus\silk;..\..\..\include\opus\silk\float;..\..\..\include\opus\src;..\..\..\include\opus\win32;..\..\..\include\opus;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>MPT_BUILD_RETRO;MPT_CHECK_CXX_IGNORE_PREPROCESSOR;DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0501;NTDDI_VERSION=0x05010300;OPUS_BUILD=1;PACKAGE_VERISON="1.5.2";ENABLE_HARDENING=1;HAVE_STDINT_H=1;HAVE_STDIO_H=1;HAVE_STDLIB_H=1;HAVE_STRING_H=1;USE_ALLOCA=1;OPUS_HAVE_RTCD=1;CPU_INFO_BY_C=1;OPUS_X86_MAY_HAVE_SSE=1;OPUS_X86_MAY_HAVE_SSE2=1;OPUS_X86_MAY_HAVE_SSE4_1=1;DLL_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\include\opus\include;..\..\..\include\opus\celt;..\..\..\include\opus\dnn;..\..\..\include\opus\silk;..\..\..\include\opus\silk\fixed;..\..\..\include\opus\silk\float;..\..\..\include\opus\src;..\..\..\include\opus\win32;..\..\..\include\opus;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <EnableEnhancedInstructionSet>NoExtensions</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/Zc:threadSafeInit- /wd4244 /wd4334 /wd6255 /wd6297 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/Zc:threadSafeInit- /wd4244 /wd4305 /wd6255 /wd6297 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -450,14 +450,14 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>MPT_BUILD_RETRO;MPT_CHECK_CXX_IGNORE_PREPROCESSOR;DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0502;NTDDI_VERSION=0x05020200;HAVE_CONFIG_H;DLL_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\include\opus\include;..\..\..\include\opus\celt;..\..\..\include\opus\silk;..\..\..\include\opus\silk\float;..\..\..\include\opus\src;..\..\..\include\opus\win32;..\..\..\include\opus;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>MPT_BUILD_RETRO;MPT_CHECK_CXX_IGNORE_PREPROCESSOR;DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0502;NTDDI_VERSION=0x05020200;OPUS_BUILD=1;PACKAGE_VERISON="1.5.2";ENABLE_HARDENING=1;HAVE_STDINT_H=1;HAVE_STDIO_H=1;HAVE_STDLIB_H=1;HAVE_STRING_H=1;USE_ALLOCA=1;OPUS_HAVE_RTCD=1;CPU_INFO_BY_C=1;OPUS_X86_MAY_HAVE_SSE=1;OPUS_X86_MAY_HAVE_SSE2=1;OPUS_X86_MAY_HAVE_SSE4_1=1;OPUS_X86_MAY_HAVE_AVX2=1;OPUS_X86_PRESUME_SSE;OPUS_X86_PRESUME_SSE2;DLL_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\include\opus\include;..\..\..\include\opus\celt;..\..\..\include\opus\dnn;..\..\..\include\opus\silk;..\..\..\include\opus\silk\fixed;..\..\..\include\opus\silk\float;..\..\..\include\opus\src;..\..\..\include\opus\win32;..\..\..\include\opus;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/Zc:threadSafeInit- /wd4244 /wd4334 /wd6255 /wd6297 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/Zc:threadSafeInit- /wd4244 /wd4305 /wd6255 /wd6297 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -470,8 +470,8 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>MPT_BUILD_RETRO;MPT_CHECK_CXX_IGNORE_PREPROCESSOR;NDEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0501;NTDDI_VERSION=0x05010300;HAVE_CONFIG_H;DLL_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\include\opus\include;..\..\..\include\opus\celt;..\..\..\include\opus\silk;..\..\..\include\opus\silk\float;..\..\..\include\opus\src;..\..\..\include\opus\win32;..\..\..\include\opus;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>MPT_BUILD_RETRO;MPT_CHECK_CXX_IGNORE_PREPROCESSOR;NDEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0501;NTDDI_VERSION=0x05010300;OPUS_BUILD=1;PACKAGE_VERISON="1.5.2";ENABLE_HARDENING=1;HAVE_STDINT_H=1;HAVE_STDIO_H=1;HAVE_STDLIB_H=1;HAVE_STRING_H=1;USE_ALLOCA=1;OPUS_HAVE_RTCD=1;CPU_INFO_BY_C=1;OPUS_X86_MAY_HAVE_SSE=1;OPUS_X86_MAY_HAVE_SSE2=1;OPUS_X86_MAY_HAVE_SSE4_1=1;DLL_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\include\opus\include;..\..\..\include\opus\celt;..\..\..\include\opus\dnn;..\..\..\include\opus\silk;..\..\..\include\opus\silk\fixed;..\..\..\include\opus\silk\float;..\..\..\include\opus\src;..\..\..\include\opus\win32;..\..\..\include\opus;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -481,7 +481,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <EnableEnhancedInstructionSet>NoExtensions</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/Zc:threadSafeInit- /wd4244 /wd4334 /wd6255 /wd6297 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/Zc:threadSafeInit- /wd4244 /wd4305 /wd6255 /wd6297 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -496,8 +496,8 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>MPT_BUILD_RETRO;MPT_CHECK_CXX_IGNORE_PREPROCESSOR;NDEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0502;NTDDI_VERSION=0x05020200;HAVE_CONFIG_H;DLL_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\include\opus\include;..\..\..\include\opus\celt;..\..\..\include\opus\silk;..\..\..\include\opus\silk\float;..\..\..\include\opus\src;..\..\..\include\opus\win32;..\..\..\include\opus;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>MPT_BUILD_RETRO;MPT_CHECK_CXX_IGNORE_PREPROCESSOR;NDEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0502;NTDDI_VERSION=0x05020200;OPUS_BUILD=1;PACKAGE_VERISON="1.5.2";ENABLE_HARDENING=1;HAVE_STDINT_H=1;HAVE_STDIO_H=1;HAVE_STDLIB_H=1;HAVE_STRING_H=1;USE_ALLOCA=1;OPUS_HAVE_RTCD=1;CPU_INFO_BY_C=1;OPUS_X86_MAY_HAVE_SSE=1;OPUS_X86_MAY_HAVE_SSE2=1;OPUS_X86_MAY_HAVE_SSE4_1=1;OPUS_X86_MAY_HAVE_AVX2=1;OPUS_X86_PRESUME_SSE;OPUS_X86_PRESUME_SSE2;DLL_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\include\opus\include;..\..\..\include\opus\celt;..\..\..\include\opus\dnn;..\..\..\include\opus\silk;..\..\..\include\opus\silk\fixed;..\..\..\include\opus\silk\float;..\..\..\include\opus\src;..\..\..\include\opus\win32;..\..\..\include\opus;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -506,7 +506,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/Zc:threadSafeInit- /wd4244 /wd4334 /wd6255 /wd6297 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/Zc:threadSafeInit- /wd4244 /wd4305 /wd6255 /wd6297 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -521,8 +521,8 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>MPT_BUILD_RETRO;MPT_CHECK_CXX_IGNORE_PREPROCESSOR;DEBUG;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0501;NTDDI_VERSION=0x05010300;HAVE_CONFIG_H;DLL_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\include\opus\include;..\..\..\include\opus\celt;..\..\..\include\opus\silk;..\..\..\include\opus\silk\float;..\..\..\include\opus\src;..\..\..\include\opus\win32;..\..\..\include\opus;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>MPT_BUILD_RETRO;MPT_CHECK_CXX_IGNORE_PREPROCESSOR;DEBUG;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0501;NTDDI_VERSION=0x05010300;OPUS_BUILD=1;PACKAGE_VERISON="1.5.2";ENABLE_HARDENING=1;HAVE_STDINT_H=1;HAVE_STDIO_H=1;HAVE_STDLIB_H=1;HAVE_STRING_H=1;USE_ALLOCA=1;OPUS_HAVE_RTCD=1;CPU_INFO_BY_C=1;OPUS_X86_MAY_HAVE_SSE=1;OPUS_X86_MAY_HAVE_SSE2=1;OPUS_X86_MAY_HAVE_SSE4_1=1;DLL_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\include\opus\include;..\..\..\include\opus\celt;..\..\..\include\opus\dnn;..\..\..\include\opus\silk;..\..\..\include\opus\silk\fixed;..\..\..\include\opus\silk\float;..\..\..\include\opus\src;..\..\..\include\opus\win32;..\..\..\include\opus;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -533,7 +533,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <EnableEnhancedInstructionSet>NoExtensions</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/Zc:threadSafeInit- /wd4244 /wd4334 /wd6255 /wd6297 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/Zc:threadSafeInit- /wd4244 /wd4305 /wd6255 /wd6297 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -548,8 +548,8 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>MPT_BUILD_RETRO;MPT_CHECK_CXX_IGNORE_PREPROCESSOR;DEBUG;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0502;NTDDI_VERSION=0x05020200;HAVE_CONFIG_H;DLL_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\include\opus\include;..\..\..\include\opus\celt;..\..\..\include\opus\silk;..\..\..\include\opus\silk\float;..\..\..\include\opus\src;..\..\..\include\opus\win32;..\..\..\include\opus;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>MPT_BUILD_RETRO;MPT_CHECK_CXX_IGNORE_PREPROCESSOR;DEBUG;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0502;NTDDI_VERSION=0x05020200;OPUS_BUILD=1;PACKAGE_VERISON="1.5.2";ENABLE_HARDENING=1;HAVE_STDINT_H=1;HAVE_STDIO_H=1;HAVE_STDLIB_H=1;HAVE_STRING_H=1;USE_ALLOCA=1;OPUS_HAVE_RTCD=1;CPU_INFO_BY_C=1;OPUS_X86_MAY_HAVE_SSE=1;OPUS_X86_MAY_HAVE_SSE2=1;OPUS_X86_MAY_HAVE_SSE4_1=1;OPUS_X86_MAY_HAVE_AVX2=1;OPUS_X86_PRESUME_SSE;OPUS_X86_PRESUME_SSE2;DLL_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\include\opus\include;..\..\..\include\opus\celt;..\..\..\include\opus\dnn;..\..\..\include\opus\silk;..\..\..\include\opus\silk\fixed;..\..\..\include\opus\silk\float;..\..\..\include\opus\src;..\..\..\include\opus\win32;..\..\..\include\opus;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -559,7 +559,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/Zc:threadSafeInit- /wd4244 /wd4334 /wd6255 /wd6297 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/Zc:threadSafeInit- /wd4244 /wd4305 /wd6255 /wd6297 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -604,6 +604,7 @@
     <ClInclude Include="..\..\..\include\opus\celt\x86\celt_lpc_sse.h" />
     <ClInclude Include="..\..\..\include\opus\celt\x86\pitch_sse.h" />
     <ClInclude Include="..\..\..\include\opus\celt\x86\vq_sse.h" />
+    <ClInclude Include="..\..\..\include\opus\celt\x86\x86_arch_macros.h" />
     <ClInclude Include="..\..\..\include\opus\celt\x86\x86cpu.h" />
     <ClInclude Include="..\..\..\include\opus\include\opus.h" />
     <ClInclude Include="..\..\..\include\opus\include\opus_custom.h" />
@@ -641,7 +642,6 @@
     <ClInclude Include="..\..\..\include\opus\src\mapping_matrix.h" />
     <ClInclude Include="..\..\..\include\opus\src\mlp.h" />
     <ClInclude Include="..\..\..\include\opus\src\opus_private.h" />
-    <ClInclude Include="..\..\..\include\opus\src\tansig_table.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\include\opus\celt\bands.c" />
@@ -663,6 +663,7 @@
     <ClCompile Include="..\..\..\include\opus\celt\rate.c" />
     <ClCompile Include="..\..\..\include\opus\celt\vq.c" />
     <ClCompile Include="..\..\..\include\opus\celt\x86\celt_lpc_sse4_1.c" />
+    <ClCompile Include="..\..\..\include\opus\celt\x86\pitch_avx.c" />
     <ClCompile Include="..\..\..\include\opus\celt\x86\pitch_sse.c" />
     <ClCompile Include="..\..\..\include\opus\celt\x86\pitch_sse2.c" />
     <ClCompile Include="..\..\..\include\opus\celt\x86\pitch_sse4_1.c" />
@@ -738,6 +739,7 @@
     <ClCompile Include="..\..\..\include\opus\silk\float\sort_FLP.c" />
     <ClCompile Include="..\..\..\include\opus\silk\float\warped_autocorrelation_FLP.c" />
     <ClCompile Include="..\..\..\include\opus\silk\float\wrappers_FLP.c" />
+    <ClCompile Include="..\..\..\include\opus\silk\float\x86\inner_product_FLP_avx2.c" />
     <ClCompile Include="..\..\..\include\opus\silk\gain_quant.c" />
     <ClCompile Include="..\..\..\include\opus\silk\init_decoder.c" />
     <ClCompile Include="..\..\..\include\opus\silk\init_encoder.c" />
@@ -774,12 +776,14 @@
     <ClCompile Include="..\..\..\include\opus\silk\tables_other.c" />
     <ClCompile Include="..\..\..\include\opus\silk\tables_pitch_lag.c" />
     <ClCompile Include="..\..\..\include\opus\silk\tables_pulses_per_block.c" />
+    <ClCompile Include="..\..\..\include\opus\silk\x86\NSQ_del_dec_avx2.c" />
     <ClCompile Include="..\..\..\include\opus\silk\x86\NSQ_del_dec_sse4_1.c" />
     <ClCompile Include="..\..\..\include\opus\silk\x86\NSQ_sse4_1.c" />
     <ClCompile Include="..\..\..\include\opus\silk\x86\VAD_sse4_1.c" />
     <ClCompile Include="..\..\..\include\opus\silk\x86\VQ_WMat_EC_sse4_1.c" />
     <ClCompile Include="..\..\..\include\opus\silk\x86\x86_silk_map.c" />
     <ClCompile Include="..\..\..\include\opus\src\analysis.c" />
+    <ClCompile Include="..\..\..\include\opus\src\extensions.c" />
     <ClCompile Include="..\..\..\include\opus\src\mapping_matrix.c" />
     <ClCompile Include="..\..\..\include\opus\src\mlp.c" />
     <ClCompile Include="..\..\..\include\opus\src\mlp_data.c" />

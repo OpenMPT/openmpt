@@ -29,14 +29,14 @@
 #include "config.h"
 #endif
 
+#if defined(OPUS_X86_MAY_HAVE_SSE4_1)  /* OpenMPT */
+
 #include <xmmintrin.h>
 #include <emmintrin.h>
 #include <smmintrin.h>
 
 #include "main.h"
 #include "stack_alloc.h"
-
-#if defined(OPUS_X86_MAY_HAVE_SSE4_1) /* OpenMPT */
 
 /* Weighting factors for tilt measure */
 static const opus_int32 tiltWeights[ VAD_N_BANDS ] = { 30000, 6000, -12000, -12000 };
@@ -146,7 +146,7 @@ opus_int silk_VAD_GetSA_Q8_sse4_1(                  /* O    Return value, 0 if s
 
             for( i = 0; i < dec_subframe_length - 7; i += 8 )
             {
-                xmm_X   = _mm_loadu_si128( (__m128i *)&(X[ X_offset[ b ] + i + dec_subframe_offset ] ) );
+                xmm_X   = _mm_loadu_si128( (__m128i *)(void*)&(X[ X_offset[ b ] + i + dec_subframe_offset ] ) );
                 xmm_X   = _mm_srai_epi16( xmm_X, 3 );
                 xmm_X   = _mm_madd_epi16( xmm_X, xmm_X );
                 xmm_acc = _mm_add_epi32( xmm_acc, xmm_X );
@@ -290,4 +290,4 @@ opus_int silk_VAD_GetSA_Q8_sse4_1(                  /* O    Return value, 0 if s
     return( ret );
 }
 
-#endif /* OpenMPT */
+#endif  /* OpenMPT */

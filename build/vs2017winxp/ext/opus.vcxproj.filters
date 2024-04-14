@@ -16,6 +16,9 @@
     <Filter Include="silk\float">
       <UniqueIdentifier>{1DF5E91A-09AD-2B68-72B4-04C45E8BC658}</UniqueIdentifier>
     </Filter>
+    <Filter Include="silk\float\x86">
+      <UniqueIdentifier>{520705BB-3ED5-F8C0-2769-69E713D6D425}</UniqueIdentifier>
+    </Filter>
     <Filter Include="silk\x86">
       <UniqueIdentifier>{CD038233-B9D0-DC3E-E2E9-CAE6CE1512CD}</UniqueIdentifier>
     </Filter>
@@ -121,6 +124,9 @@
       <Filter>celt\x86</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\opus\celt\x86\vq_sse.h">
+      <Filter>celt\x86</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\opus\celt\x86\x86_arch_macros.h">
       <Filter>celt\x86</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\opus\celt\x86\x86cpu.h">
@@ -234,9 +240,6 @@
     <ClInclude Include="..\..\..\include\opus\src\opus_private.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\opus\src\tansig_table.h">
-      <Filter>src</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\include\opus\celt\bands.c">
@@ -294,6 +297,9 @@
       <Filter>celt</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\opus\celt\x86\celt_lpc_sse4_1.c">
+      <Filter>celt\x86</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\include\opus\celt\x86\pitch_avx.c">
       <Filter>celt\x86</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\opus\celt\x86\pitch_sse.c">
@@ -521,6 +527,9 @@
     <ClCompile Include="..\..\..\include\opus\silk\float\wrappers_FLP.c">
       <Filter>silk\float</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\include\opus\silk\float\x86\inner_product_FLP_avx2.c">
+      <Filter>silk\float\x86</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\include\opus\silk\gain_quant.c">
       <Filter>silk</Filter>
     </ClCompile>
@@ -629,6 +638,9 @@
     <ClCompile Include="..\..\..\include\opus\silk\tables_pulses_per_block.c">
       <Filter>silk</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\include\opus\silk\x86\NSQ_del_dec_avx2.c">
+      <Filter>silk\x86</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\include\opus\silk\x86\NSQ_del_dec_sse4_1.c">
       <Filter>silk\x86</Filter>
     </ClCompile>
@@ -645,6 +657,9 @@
       <Filter>silk\x86</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\opus\src\analysis.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\include\opus\src\extensions.c">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\opus\src\mapping_matrix.c">

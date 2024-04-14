@@ -537,6 +537,8 @@
 /include/opus/depcomp
 /include/opus/doc
 /include/opus/install-sh
+/include/opus/lpcnet_headers.mk
+/include/opus/lpcnet_sources.mk
 /include/opus/ltmain.sh
 /include/opus/m4
 /include/opus/meson
@@ -557,11 +559,12 @@
 /include/opus/tests
 /include/opus/celt/meson.build
 /include/opus/celt/tests
+/include/opus/dnn/README.md
+/include/opus/dnn/meson.build
 /include/opus/include/meson.build
 /include/opus/silk/meson.build
 /include/opus/silk/tests
 /include/opus/src/meson.build
-/include/opus/win32/VS2015
 /include/opusenc/Makefile.am
 /include/opusenc/Makefile.in
 /include/opusenc/README.md
