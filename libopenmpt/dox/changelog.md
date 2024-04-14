@@ -11,6 +11,9 @@ is just a high-level summary.
     `libopenmpt/bindings/freebasic/libopenmpt_ext.bi` were missing from the
     Autotools package.
 
+ *  M15: Loosen SoundTracker file rejection heuristics a bit to allow loading of
+    schmokk.mod and scramble_2.mod. Other heuristics has been tightened a bit.
+
  *  mpg123: Update to v1.32.6 (2024-04-04).
 
 ### libopenmpt 0.5.29 (2024-03-24)
