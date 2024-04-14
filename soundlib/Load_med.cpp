@@ -1627,7 +1627,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 
 		if(numSongs > 1)
 		{
-			PATTERNINDEX firstPat = order.EnsureUnique(0);
+			PATTERNINDEX firstPat = order.EnsureUnique(order.GetFirstValidIndex());
 			if(firstPat != PATTERNINDEX_INVALID)
 			{
 				for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)

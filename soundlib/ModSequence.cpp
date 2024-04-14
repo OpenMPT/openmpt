@@ -149,6 +149,18 @@ ORDERINDEX ModSequence::GetPreviousOrderIgnoringSkips(const ORDERINDEX start) co
 }
 
 
+ORDERINDEX ModSequence::GetFirstValidIndex() const noexcept
+{
+	const ORDERINDEX length = GetLength();
+	for(ORDERINDEX ord = 0; ord < length; ord++)
+	{
+		if(IsValidPat(ord))
+			return ord;
+	}
+	return ORDERINDEX_INVALID;
+}
+
+
 void ModSequence::Remove(ORDERINDEX posBegin, ORDERINDEX posEnd) noexcept
 {
 	if(posEnd < posBegin || posEnd >= size())
