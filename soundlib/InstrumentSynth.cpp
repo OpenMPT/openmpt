@@ -33,31 +33,19 @@ struct InstrumentSynth::States::State
 	int16 m_periodAdd = 0;
 
 	uint16 m_gtkKeyOffOffset = STOP_ROW;
-	int16 m_gtkVolumeStep = 0;
-	int16 m_gtkPitchStep = 0;
-	int16 m_gtkPanningStep = 0;
+	int16 m_gtkVolumeStep = 0, m_gtkPitchStep = 0, m_gtkPanningStep = 0;
 	uint16 m_gtkPitch = 4096;
-	uint8 m_gtkCount = 0;
-	uint8 m_gtkSpeed = 1;
-	uint8 m_gtkSpeedRemain = 1;
+	uint8 m_gtkLoopCount = 0;
+	uint8 m_gtkSpeed = 1, m_gtkSpeedRemain = 1;
 	bool m_gtkTremorEnabled = false;
-	uint8 m_gtkTremorOnTime = 3;
-	uint8 m_gtkTremorOffTime = 3;
-	uint8 m_gtkTremorPos = 0;
+	uint8 m_gtkTremorOnTime = 3, m_gtkTremorOffTime = 3, m_gtkTremorPos = 0;
 	bool m_gtkTremoloEnabled = false;
 	bool m_gtkVibratoEnabled = false;
-	uint8 m_gtkVibratoWidth = 0;
-	uint8 m_gtkVibratoSpeed = 0;
-	uint8 m_gtkVibratoPos = 0;
+	uint8 m_gtkVibratoWidth = 0, m_gtkVibratoSpeed = 0, m_gtkVibratoPos = 0;
 
-	uint8 m_pumaStartWaveform = 0;
-	uint8 m_pumaEndWaveform = 0;
-	int8 m_pumaWaveformStep = 0;
-	uint8 m_pumaWaveform = 0;
+	uint8 m_pumaStartWaveform = 0, m_pumaEndWaveform = 0, m_pumaWaveformStep = 0, m_pumaWaveform = 0;
 
-	uint8 m_medVibratoEnvelope = uint8_max;
-	uint8 m_medVibratoSpeed = 0;
-	uint8 m_medVibratoDepth = 0;
+	uint8 m_medVibratoEnvelope = uint8_max, m_medVibratoSpeed = 0, m_medVibratoDepth = 0;
 	uint16 m_medVibratoPos = 0;
 	int16 m_medVolumeStep = 0;
 	int16 m_medPeriodStep = 0;
@@ -65,8 +53,7 @@ struct InstrumentSynth::States::State
 	uint8 m_medArpPos = 0;
 	uint8 m_medHold = uint8_max;
 	uint16 m_medDecay = STOP_ROW;
-	uint8 m_medVolumeEnv = uint8_max;
-	uint8 m_medVolumeEnvPos = 0;
+	uint8 m_medVolumeEnv = uint8_max, m_medVolumeEnvPos = 0;
 
 	void JumpToPosition(const Events &events, uint16 position);
 	void NextTick(const Events &events, ModChannel &chn, int32 &period, const CSoundFile &sndFile);
@@ -243,7 +230,7 @@ void InstrumentSynth::States::State::NextTick(const Events &events, ModChannel &
 	if(m_medArpOffset < events.size())
 	{
 		m_linearPitchFactor = 16 * events[m_medArpOffset + m_medArpPos].u8;
-		m_medArpPos = static_cast<uint8>((m_medArpPos + 1) % static_cast<uint8>(events[m_medArpOffset].u16));
+		m_medArpPos = static_cast<uint8>((m_medArpPos + 1) % events[m_medArpOffset].u16);
 	}
 	if(m_medVibratoDepth)
 	{
@@ -281,12 +268,12 @@ void InstrumentSynth::States::State::NextTick(const Events &events, ModChannel &
 	if(m_gtkTremoloEnabled)
 	{
 		m_volumeAdd = static_cast<int16>(ModSinusTable[(m_gtkVibratoPos / 4u) % std::size(ModSinusTable)] * m_gtkVibratoWidth / 2);
-		m_gtkVibratoPos = (m_gtkVibratoPos + m_gtkVibratoSpeed) % (32u * 16u);
+		m_gtkVibratoPos += m_gtkVibratoSpeed;
 	}
 	if(m_gtkVibratoEnabled)
 	{
 		sndFile.DoFreqSlide(chn, period, -ModSinusTable[(m_gtkVibratoPos / 4u) % std::size(ModSinusTable)] * m_gtkVibratoWidth / 96, false);
-		m_gtkVibratoPos = (m_gtkVibratoPos + m_gtkVibratoSpeed) % (32u * 16u);
+		m_gtkVibratoPos += m_gtkVibratoSpeed;
 	}
 
 	const bool periodsAreFrequencies = sndFile.PeriodsAreFrequencies();
@@ -345,12 +332,12 @@ bool InstrumentSynth::States::State::EvaluateEvent(const Event &event, ModChanne
 		return false;
 
 	case Event::Type::GTK_SetLoopCounter:
-		m_gtkCount = event.u8;
+		m_gtkLoopCount = event.u8;
 		return false;
 	case Event::Type::GTK_EvaluateLoopCounter:
-		if(m_gtkCount)
+		if(m_gtkLoopCount)
 		{
-			if(--m_gtkCount)
+			if(--m_gtkLoopCount)
 				m_nextRow = event.u16;
 		}
 		return false;
