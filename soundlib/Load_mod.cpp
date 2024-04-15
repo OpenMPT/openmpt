@@ -744,7 +744,7 @@ static bool CheckMODMagic(const char magic[4], MODMagicResult &result)
 	          || IsMagic(magic, "FEST")  // "His Master's Noise" musicdisk
 	          || IsMagic(magic, "N.T."))
 	{
-		result.madeWithTracker = UL_("NoiseTracker");
+		result.madeWithTracker = IsMagic(magic, "N.T.") ? UL_("NoiseTracker") : UL_("His Master's NoiseTracker");
 		result.isNoiseTracker = true;
 		result.setMODVBlankTiming = true;
 		result.numChannels = 4;
