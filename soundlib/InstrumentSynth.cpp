@@ -43,7 +43,8 @@ struct InstrumentSynth::States::State
 	bool m_gtkVibratoEnabled = false;
 	uint8 m_gtkVibratoWidth = 0, m_gtkVibratoSpeed = 0, m_gtkVibratoPos = 0;
 
-	uint8 m_pumaStartWaveform = 0, m_pumaEndWaveform = 0, m_pumaWaveformStep = 0, m_pumaWaveform = 0;
+	uint8 m_pumaStartWaveform = 0, m_pumaEndWaveform = 0, m_pumaWaveform = 0;
+	int8 m_pumaWaveformStep = 0;
 
 	uint8 m_medVibratoEnvelope = uint8_max, m_medVibratoSpeed = 0, m_medVibratoDepth = 0;
 	uint16 m_medVibratoPos = 0;
@@ -227,7 +228,7 @@ void InstrumentSynth::States::State::NextTick(const Events &events, ModChannel &
 	}
 
 	// MED stuff
-	if(m_medArpOffset < events.size())
+	if(m_medArpOffset < events.size() && events[m_medArpOffset].u16)
 	{
 		m_linearPitchFactor = 16 * events[m_medArpOffset + m_medArpPos].u8;
 		m_medArpPos = static_cast<uint8>((m_medArpPos + 1) % events[m_medArpOffset].u16);
@@ -407,7 +408,7 @@ bool InstrumentSynth::States::State::EvaluateEvent(const Event &event, ModChanne
 			m_pumaWaveformStep = 0;
 		} else
 		{
-			m_pumaWaveformStep = event.Byte1();
+			m_pumaWaveformStep = static_cast<int8>(event.Byte1());
 			m_pumaEndWaveform = event.Byte2() + m_pumaStartWaveform;
 		}
 		ChannelSetSample(chn, sndFile, m_pumaWaveform);
