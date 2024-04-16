@@ -19,6 +19,7 @@
 #include "mpt/io/base.hpp"
 #include "mpt/io/io.hpp"
 #include "mpt/io/io_stdstream.hpp"
+#include "mpt/io_read/filedata_base_unseekable_buffer.hpp"
 
 #include "Tables.h"
 #include "../common/version.h"
@@ -404,99 +405,165 @@ struct MO3SampleInfo
 	}
 
 
-static bool UnpackMO3Data(FileReader &file, std::vector<uint8> &uncompressed, const uint32 size)
+class MO3FileReaderBuffer final : public mpt::IO::FileDataUnseekableBuffer
 {
-	if(!size)
-		return false;
-
-	uint16 data = 0;
-	int8 carry = 0;    // x86 carry (used to propagate the most significant bit from one byte to another)
-	int32 strLen = 0;  // length of previous string
-	int32 strOffset;   // string offset
-	uint32 previousPtr = 0;
-
-	// Read first uncompressed byte
-	uncompressed.push_back(file.ReadUint8());
-	uint32 remain = size - 1;
-
-	while(remain > 0)
+public:
+	MO3FileReaderBuffer(const FileReader &file, uint32 targetSize, uint32 suggestedReserveSize)
+		: file{file}
+		, m_suggestedReserveSize{suggestedReserveSize}
+		, m_targetSize{targetSize}
+		, m_totalRemain{targetSize}
 	{
-		READ_CTRL_BIT;
-		if(!carry)
+	}
+
+	bool UnpackedSuccessfully() const
+	{
+		return !m_totalRemain && !m_broken;
+	}
+
+	auto SourcePosition() const
+	{
+		return file.GetPosition();
+	}
+
+protected:
+	bool InternalEof() const override
+	{
+		return !m_totalRemain || m_broken;
+	}
+
+	void InternalReadContinue(std::vector<std::byte> &streamCache, std::size_t suggestedCount) const override
+	{
+		if(!suggestedCount|| !m_targetSize || m_broken)
+			return;
+
+		uint32 remain = std::min(m_totalRemain, mpt::saturate_cast<uint32>(suggestedCount));
+
+		if(streamCache.empty())
 		{
-			// a 0 ctrl bit means 'copy', not compressed byte
-			if(uint8 b; file.Read(b))
-				uncompressed.push_back(b);
-			else
-				break;
+			// Fist byte is always read verbatim
+			streamCache.reserve(std::min(m_targetSize, m_suggestedReserveSize));
+			streamCache.push_back(mpt::byte_cast<std::byte>(file.ReadUint8()));
+			m_totalRemain--;
 			remain--;
-		} else
+		}
+
+		int32 strLen = m_strLen;
+		if(strLen)
 		{
-			// a 1 ctrl bit means compressed bytes are following
-			uint8 lengthAdjust = 0;  // length adjustment
-			DECODE_CTRL_BITS;        // read length, and if strLen > 3 (coded using more than 1 bits pair) also part of the offset value
-			strLen -= 3;
-			if(strLen < 0)
-			{
-				// means LZ ptr with same previous relative LZ ptr (saved one)
-				strOffset = previousPtr;  // restore previous Ptr
-				strLen++;
-			} else
-			{
-				// LZ ptr in ctrl stream
-				if(uint8 b; file.Read(b))
-					strOffset = mpt::lshift_signed(strLen, 8) | b;  // read less significant offset byte from stream
-				else
-					break;
-				strLen = 0;
-				strOffset = ~strOffset;
-				if(strOffset < -1280)
-					lengthAdjust++;
-				lengthAdjust++;  // length is always at least 1
-				if(strOffset < -32000)
-					lengthAdjust++;
-				previousPtr = strOffset;  // save current Ptr
-			}
-
-			// read the next 2 bits as part of strLen
-			READ_CTRL_BIT;
-			strLen = mpt::lshift_signed(strLen, 1) + carry;
-			READ_CTRL_BIT;
-			strLen = mpt::lshift_signed(strLen, 1) + carry;
-			if(strLen == 0)
-			{
-				// length does not fit in 2 bits
-				DECODE_CTRL_BITS;  // decode length: 1 is the most significant bit,
-				strLen += 2;       // then first bit of each bits pairs (noted n1), until n0.
-			}
-			strLen += lengthAdjust;  // length adjustment
-
-			if(remain < static_cast<uint32>(strLen) || strLen <= 0)
-				break;
-			if(strOffset >= 0 || -static_cast<ptrdiff_t>(uncompressed.size()) > strOffset)
-				break;
-
-			// Copy previous string
-			// Need to do this in two steps as source and destination may overlap (e.g. strOffset = -1, strLen = 2 repeats last character twice)
-			uncompressed.insert(uncompressed.end(), strLen, 0);
-			remain -= strLen;
-			auto src = uncompressed.cend() - strLen + strOffset;
-			auto dst = uncompressed.end() - strLen;
+			// Previous string copy is still in progress
+			uint32 copyLen = std::min(static_cast<uint32>(strLen), remain);
+			m_totalRemain -= copyLen;
+			remain -= copyLen;
+			strLen -= copyLen;
+			streamCache.insert(streamCache.end(), copyLen, std::byte{});
+			auto src = streamCache.cend() - copyLen + m_strOffset;
+			auto dst = streamCache.end() - copyLen;
 			do
 			{
-				strLen--;
+				copyLen--;
 				*dst++ = *src++;
-			} while(strLen > 0);
+			} while(copyLen > 0);
 		}
+		
+		uint16 data = m_data;
+		int8 carry = 0;  // x86 carry (used to propagate the most significant bit from one byte to another)
+		while(remain)
+		{
+			READ_CTRL_BIT;
+			if(!carry)
+			{
+				// a 0 ctrl bit means 'copy', not compressed byte
+				if(std::byte b; file.Read(b))
+					streamCache.push_back(b);
+				else
+					break;
+				m_totalRemain--;
+				remain--;
+			} else
+			{
+				// a 1 ctrl bit means compressed bytes are following
+				uint8 lengthAdjust = 0;  // length adjustment
+				DECODE_CTRL_BITS;        // read length, and if strLen > 3 (coded using more than 1 bits pair) also part of the offset value
+				strLen -= 3;
+				if(strLen < 0)
+				{
+					// means LZ ptr with same previous relative LZ ptr (saved one)
+					m_strOffset = m_previousPtr;  // restore previous Ptr
+					strLen++;
+				} else
+				{
+					// LZ ptr in ctrl stream
+					if(uint8 b; file.Read(b))
+						m_strOffset = mpt::lshift_signed(strLen, 8) | b;  // read less significant offset byte from stream
+					else
+						break;
+					strLen = 0;
+					m_strOffset = ~m_strOffset;
+					if(m_strOffset < -1280)
+						lengthAdjust++;
+					lengthAdjust++;  // length is always at least 1
+					if(m_strOffset < -32000)
+						lengthAdjust++;
+					m_previousPtr = m_strOffset;  // save current Ptr
+				}
+
+				// read the next 2 bits as part of strLen
+				READ_CTRL_BIT;
+				strLen = mpt::lshift_signed(strLen, 1) + carry;
+				READ_CTRL_BIT;
+				strLen = mpt::lshift_signed(strLen, 1) + carry;
+				if(strLen == 0)
+				{
+					// length does not fit in 2 bits
+					DECODE_CTRL_BITS;  // decode length: 1 is the most significant bit,
+					strLen += 2;       // then first bit of each bits pairs (noted n1), until n0.
+				}
+				strLen += lengthAdjust;  // length adjustment
+
+				if(strLen <= 0 || m_totalRemain < static_cast<uint32>(strLen))
+					break;
+				if(m_strOffset >= 0 || -static_cast<ptrdiff_t>(streamCache.size()) > m_strOffset)
+					break;
+
+				// Copy previous string
+				// Need to do this in two steps (allocate, then copy) as source and destination may overlap (e.g. strOffset = -1, strLen = 2 repeats last character twice)
+				uint32 copyLen = std::min(static_cast<uint32>(strLen), remain);
+				m_totalRemain -= copyLen;
+				remain -= copyLen;
+				strLen -= copyLen;
+				streamCache.insert(streamCache.end(), copyLen, std::byte{});
+				auto src = streamCache.cend() - copyLen + m_strOffset;
+				auto dst = streamCache.end() - copyLen;
+				do
+				{
+					copyLen--;
+					*dst++ = *src++;
+				} while(copyLen > 0);
+			}
+		}
+		m_data = data;
+		m_strLen = strLen;
+		// Premature EOF or corrupted stream?
+		if(remain)
+			m_broken = true;
 	}
-#ifdef MPT_BUILD_FUZZER
-	// When using a fuzzer, we should not care if the decompressed buffer has the correct size.
-	// This makes finding new interesting test cases much easier.
-	return true;
-#else
-	return remain == 0;
-#endif // MPT_BUILD_FUZZER
-}
+
+	bool HasPinnedView() const override
+	{
+		return false;
+	}
+
+	mutable FileReader file;
+	const uint32 m_suggestedReserveSize;
+	const uint32 m_targetSize;
+	mutable bool m_broken = false;
+	mutable uint16 m_data = 0;
+	mutable int32 m_strLen = 0;     // Length of repeated string
+	mutable int32 m_strOffset = 0;  // Offset of repeated string
+	mutable uint32 m_previousPtr = 0;
+	mutable uint32 m_totalRemain = 0;
+};
 
 
 struct MO3Delta8BitParams
@@ -800,31 +867,23 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		reserveSize = std::min(Util::MaxValueOfType(reserveSize) / 32u, compressedSize) * 32u;
 	}
 
-	std::vector<uint8> musicData;
-	// We don't always reserve the whole uncompressed size as claimed by the module to guard against broken files
-	// that e.g. claim that the uncompressed size is 1GB while the MO3 file itself is only 100 bytes.
-	// As the LZ compression used in MO3 doesn't allow for establishing a clear upper bound for the maximum size,
-	// this is probably the only sensible way we can prevent DoS due to huge allocations.
-	musicData.reserve(std::min(reserveSize, containerHeader.musicSize.get()));
-	if(!UnpackMO3Data(file, musicData, containerHeader.musicSize))
-	{
-		return false;
-	}
-	if(version >= 5)
-	{
-		file.Seek(12 + compressedSize);
-	}
+	std::shared_ptr<mpt::PathString> filenamePtr;
+	if(auto filename = file.GetOptionalFileName(); filename)
+		filenamePtr = std::make_shared<mpt::PathString>(std::move(*filename));
+	auto musicChunkData = std::make_shared<MO3FileReaderBuffer>(file, containerHeader.musicSize, reserveSize);
+	mpt::IO::FileCursor<mpt::IO::FileCursorTraitsFileData, mpt::IO::FileCursorFilenameTraits<mpt::PathString>> fileCursor{musicChunkData, std::move(filenamePtr)};
+	FileReader musicChunk{fileCursor};
 
 	InitializeGlobals();
 	InitializeChannels();
 
-	FileReader musicChunk(mpt::as_span(musicData));
 	musicChunk.ReadNullString(m_songName);
 	musicChunk.ReadNullString(m_songMessage);
 
 	MO3FileHeader fileHeader;
 	if(!musicChunk.ReadStruct(fileHeader)
 	   || fileHeader.numChannels == 0 || fileHeader.numChannels > MAX_BASECHANNELS
+	   || fileHeader.restartPos > fileHeader.numOrders
 	   || fileHeader.numInstruments >= MAX_INSTRUMENTS
 	   || fileHeader.numSamples >= MAX_SAMPLES)
 	{
@@ -1247,7 +1306,8 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 				while(musicChunk.ReadUint8() != 0)
 					;
 			}
-			musicChunk.Skip(sizeof(MO3Instrument));
+			if(!musicChunk.Skip(sizeof(MO3Instrument)))
+				return false;
 			continue;
 		}
 
@@ -1262,7 +1322,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 
 		MO3Instrument insHeader;
 		if(!musicChunk.ReadStruct(insHeader))
-			break;
+			return false;
 		insHeader.ConvertToMPT(*pIns, m_nType);
 
 		if(m_nType == MOD_TYPE_XM)
@@ -1272,7 +1332,6 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		m_nInstruments = 0;
 
 	std::vector<MO3SampleInfo> sampleInfos;
-
 	const bool frequencyIsHertz = (version >= 5 || !(fileHeader.flags & MO3FileHeader::linearSlides));
 	for(SAMPLEINDEX smp = 1; smp <= m_nSamples; smp++)
 	{
@@ -1287,7 +1346,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 
 		MO3Sample smpHeader;
 		if(!musicChunk.ReadStruct(smpHeader))
-			break;
+			return false;
 		smpHeader.ConvertToMPT(sample, m_nType, frequencyIsHertz);
 		sample.filename = name;
 
@@ -1515,6 +1574,17 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 
 	if(!(loadFlags & loadSampleData))
 		return true;
+
+	if(containerHeader.version < 5)
+	{
+		// As we don't know where the compressed data ends, we don't know where the sample data starts, either.
+		if(!musicChunkData->UnpackedSuccessfully())
+			return false;
+		file.Seek(musicChunkData->SourcePosition());
+	} else
+	{
+		file.Seek(12 + compressedSize);
+	}
 
 	bool unsupportedSamples = false;
 	for(SAMPLEINDEX smp = 1; smp <= m_nSamples; smp++)
