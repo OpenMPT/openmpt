@@ -1604,6 +1604,7 @@
     <ClInclude Include="..\..\src\mpt\io_read\filedata_base_buffered.hpp" />
     <ClInclude Include="..\..\src\mpt\io_read\filedata_base_seekable.hpp" />
     <ClInclude Include="..\..\src\mpt\io_read\filedata_base_unseekable.hpp" />
+    <ClInclude Include="..\..\src\mpt\io_read\filedata_base_unseekable_buffer.hpp" />
     <ClInclude Include="..\..\src\mpt\io_read\filedata_callbackstream.hpp" />
     <ClInclude Include="..\..\src\mpt\io_read\filedata_memory.hpp" />
     <ClInclude Include="..\..\src\mpt\io_read\filedata_stdstream.hpp" />

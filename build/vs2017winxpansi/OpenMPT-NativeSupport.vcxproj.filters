@@ -666,6 +666,9 @@
     <ClInclude Include="..\..\src\mpt\io_read\filedata_base_unseekable.hpp">
       <Filter>src\mpt\io_read</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\mpt\io_read\filedata_base_unseekable_buffer.hpp">
+      <Filter>src\mpt\io_read</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\mpt\io_read\filedata_callbackstream.hpp">
       <Filter>src\mpt\io_read</Filter>
     </ClInclude>

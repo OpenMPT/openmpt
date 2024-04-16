@@ -227,6 +227,7 @@ MPT_FILES_SRC_MPT += src/mpt/io_read/filedata_base.hpp
 MPT_FILES_SRC_MPT += src/mpt/io_read/filedata_base_buffered.hpp
 MPT_FILES_SRC_MPT += src/mpt/io_read/filedata_base_seekable.hpp
 MPT_FILES_SRC_MPT += src/mpt/io_read/filedata_base_unseekable.hpp
+MPT_FILES_SRC_MPT += src/mpt/io_read/filedata_base_unseekable_buffer.hpp
 MPT_FILES_SRC_MPT += src/mpt/io_read/filedata_callbackstream.hpp
 MPT_FILES_SRC_MPT += src/mpt/io_read/filedata_memory.hpp
 MPT_FILES_SRC_MPT += src/mpt/io_read/filedata_stdstream.hpp
