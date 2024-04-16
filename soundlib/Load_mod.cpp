@@ -1387,7 +1387,7 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 			}
 
 			auto &events = instr->synth.m_scripts.emplace_back();
-			events.reserve(std::min(loopEnd + 1, 64));
+			events.reserve(std::min(loopEnd + 1, 65));
 			const auto waveforms = file.ReadArray<uint8, 64>();
 			const auto volumes = file.ReadArray<uint8, 64>();
 			for(uint8 i = 0; i < 64; i++)
