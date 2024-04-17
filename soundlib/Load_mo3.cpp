@@ -180,7 +180,7 @@ struct MO3Instrument
 	uint8le  midiPatch;
 	uint8le  midiBend;
 	uint8le  globalVol;  // 0...128
-	uint16le panning;   // 0...256 if enabled, 0xFFFF otherwise
+	uint16le panning;    // 0...256 if enabled, 0xFFFF otherwise
 	uint8le  nna;
 	uint8le  pps;
 	uint8le  ppc;
@@ -488,8 +488,7 @@ protected:
 				strLen -= 3;
 				if(strLen < 0)
 				{
-					// means LZ ptr with same previous relative LZ ptr (saved one)
-					m_strOffset = m_previousPtr;  // restore previous Ptr
+					// reuse same previous relative LZ ptr (m_strOffset is not re-computed)
 					strLen++;
 				} else
 				{
@@ -505,8 +504,9 @@ protected:
 					lengthAdjust++;  // length is always at least 1
 					if(m_strOffset < -32000)
 						lengthAdjust++;
-					m_previousPtr = m_strOffset;  // save current Ptr
 				}
+				if(m_strOffset >= 0 || -static_cast<ptrdiff_t>(streamCache.size()) > m_strOffset)
+					break;
 
 				// read the next 2 bits as part of strLen
 				READ_CTRL_BIT;
@@ -522,8 +522,6 @@ protected:
 				strLen += lengthAdjust;  // length adjustment
 
 				if(strLen <= 0 || m_totalRemain < static_cast<uint32>(strLen))
-					break;
-				if(m_strOffset >= 0 || -static_cast<ptrdiff_t>(streamCache.size()) > m_strOffset)
 					break;
 
 				// Copy previous string
@@ -561,7 +559,6 @@ protected:
 	mutable uint16 m_data = 0;
 	mutable int32 m_strLen = 0;     // Length of repeated string
 	mutable int32 m_strOffset = 0;  // Offset of repeated string
-	mutable uint32 m_previousPtr = 0;
 	mutable uint32 m_totalRemain = 0;
 };
 
@@ -794,7 +791,7 @@ static long VorbisfileFilereaderTell(void *datasource)
 
 struct MO3ContainerHeader
 {
-	char     magic[3];   // MO3
+	char     magic[3];  // MO3
 	uint8le  version;
 	uint32le musicSize;
 };
@@ -1389,7 +1386,10 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 			PLUGINDEX plug = musicChunk.ReadUint8();
 			if(!plug)
 				break;
-			FileReader pluginChunk = musicChunk.ReadChunk(musicChunk.ReadUint32LE());
+			uint32 len = musicChunk.ReadUint32LE();
+			if(len >= containerHeader.musicSize || containerHeader.musicSize - len < musicChunk.GetPosition())
+				return false;
+			FileReader pluginChunk = musicChunk.ReadChunk(len);
 #ifndef NO_PLUGINS
 			if(plug <= MAX_MIXPLUGINS)
 			{
@@ -1406,6 +1406,8 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		uint32 id = musicChunk.ReadUint32LE();
 		uint32 len = musicChunk.ReadUint32LE();
+		if(len >= containerHeader.musicSize || containerHeader.musicSize - len < musicChunk.GetPosition())
+			return false;
 		FileReader chunk = musicChunk.ReadChunk(len);
 		switch(id)
 		{
