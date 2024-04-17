@@ -1977,44 +1977,35 @@ bool CSoundFile::ReadM15(FileReader &file, ModLoadingFlags loadFlags)
 CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderICE(MemoryFileReader file, const uint64 *pfilesize)
 {
 	if(!file.CanRead(1464 + 4))
-	{
 		return ProbeWantMoreData;
-	}
+	
 	file.Seek(1464);
 	char magic[4];
 	file.ReadArray(magic);
 	if(!IsMagic(magic, "MTN\0") && !IsMagic(magic, "IT10"))
-	{
 		return ProbeFailure;
-	}
+
 	file.Seek(20);
 	uint32 invalidBytes = 0;
 	for(SAMPLEINDEX smp = 1; smp <= 31; smp++)
 	{
 		MODSampleHeader sampleHeader;
-		if(!file.ReadStruct(sampleHeader))
-		{
-			return ProbeWantMoreData;
-		}
+		file.ReadStruct(sampleHeader);
 		invalidBytes += sampleHeader.GetInvalidByteScore();
-	}
-	if(invalidBytes > MODSampleHeader::INVALID_BYTE_THRESHOLD)
-	{
-		return ProbeFailure;
+		if(invalidBytes > MODSampleHeader::INVALID_BYTE_THRESHOLD)
+			return ProbeFailure;
 	}
 	const auto [numOrders, numTracks] = file.ReadArray<uint8, 2>();
 	if(numOrders > 128)
 	{
 		return ProbeFailure;
 	}
-	uint8 tracks[128 * 4];
+	std::array<uint8, 128 * 4> tracks;
 	file.ReadArray(tracks);
 	for(auto track : tracks)
 	{
 		if(track > numTracks)
-		{
 			return ProbeFailure;
-		}
 	}
 	MPT_UNREFERENCED_PARAMETER(pfilesize);
 	return ProbeSuccess;
@@ -2032,19 +2023,16 @@ bool CSoundFile::ReadICE(FileReader &file, ModLoadingFlags loadFlags)
 		return false;
 	}
 
-	InitializeGlobals(MOD_TYPE_MOD);
-	m_playBehaviour.reset(kMODOneShotLoops);
-	m_playBehaviour.set(kMODIgnorePanning);
-	m_playBehaviour.set(kMODSampleSwap);  // untested
-
 	if(IsMagic(magic, "MTN\0"))
 	{
+		InitializeGlobals(MOD_TYPE_MOD);
 		m_modFormat.formatName = U_("MnemoTroN SoundTracker");
 		m_modFormat.type = U_("st26");
 		m_modFormat.madeWithTracker = U_("SoundTracker 2.6");
 		m_modFormat.charset = mpt::Charset::Amiga_no_C1;
 	} else if(IsMagic(magic, "IT10"))
 	{
+		InitializeGlobals(MOD_TYPE_MOD);
 		m_modFormat.formatName = U_("Ice Tracker");
 		m_modFormat.type = U_("ice");
 		m_modFormat.madeWithTracker = U_("Ice Tracker 1.0 / 1.1");
@@ -2066,55 +2054,48 @@ bool CSoundFile::ReadICE(FileReader &file, ModLoadingFlags loadFlags)
 		MODSampleHeader sampleHeader;
 		file.ReadStruct(sampleHeader);
 		invalidBytes += ReadSample(sampleHeader, Samples[smp], m_szNames[smp], true);
-	}
-	if(invalidBytes > MODSampleHeader::INVALID_BYTE_THRESHOLD)
-	{
-		return false;
+		if(invalidBytes > MODSampleHeader::INVALID_BYTE_THRESHOLD)
+			return false;
 	}
 
 	const auto [numOrders, numTracks] = file.ReadArray<uint8, 2>();
 	if(numOrders > 128)
-	{
 		return false;
-	}
 
-	uint8 tracks[128 * 4];
+	std::array<uint8, 128 * 4> tracks;
 	file.ReadArray(tracks);
 	for(auto track : tracks)
 	{
 		if(track > numTracks)
-		{
 			return false;
-		}
 	}
 
 	if(loadFlags == onlyVerifyHeader)
-	{
 		return true;
-	}
 
 	// Now we can be pretty sure that this is a valid MOD file. Set up default song settings.
 	m_nChannels = 4;
-	m_nInstruments = 0;
+	SetupMODPanning(true);
 	Order().SetDefaultSpeed(6);
 	Order().SetDefaultTempoInt(125);
 	m_nMinPeriod = 14 * 4;
 	m_nMaxPeriod = 3424 * 4;
 	m_nSamplePreAmp = 64;
 	m_SongFlags.set(SONG_PT_MODE | SONG_IMPORTED);
-
-	// Setup channel pan positions and volume
-	SetupMODPanning();
+	m_playBehaviour.reset(kMODOneShotLoops);
+	m_playBehaviour.set(kMODIgnorePanning);
+	m_playBehaviour.set(kMODSampleSwap);  // untested
 
 	// Reading patterns
 	Order().resize(numOrders);
 	uint8 speed[2] = {0, 0}, speedPos = 0;
-	Patterns.ResizeArray(numOrders);
+	if(loadFlags & loadPatternData)
+		Patterns.ResizeArray(numOrders);
 	for(PATTERNINDEX pat = 0; pat < numOrders; pat++)
 	{
 		Order()[pat] = pat;
-		if(!Patterns.Insert(pat, 64))
-			continue;
+		if(!(loadFlags & loadPatternData) || !Patterns.Insert(pat, 64))
+			break;
 
 		for(CHANNELINDEX chn = 0; chn < 4; chn++)
 		{
