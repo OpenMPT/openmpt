@@ -33,8 +33,6 @@ public:
 	CPatternContainer &operator=(const CPatternContainer &other);
 	CPatternContainer &operator=(CPatternContainer &&other) noexcept;
 
-	// Empty and initialize all patterns.
-	void ClearPatterns();
 	// Delete all patterns.
 	void DestroyPatterns();
 	

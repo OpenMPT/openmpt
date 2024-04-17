@@ -214,7 +214,7 @@ void CSoundFile::InitializeGlobals(MODTYPE type)
 
 	SetMixLevels(MixLevels::Compatible);
 
-	Patterns.ClearPatterns();
+	Patterns.DestroyPatterns();
 	Order.Initialize();
 
 	m_songName.clear();

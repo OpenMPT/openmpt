@@ -37,13 +37,6 @@ CPatternContainer &CPatternContainer::operator=(CPatternContainer &&other) noexc
 }
 
 
-void CPatternContainer::ClearPatterns()
-{
-	DestroyPatterns();
-	m_Patterns.assign(m_Patterns.size(), CPattern(*this));
-}
-
-
 void CPatternContainer::DestroyPatterns()
 {
 	m_Patterns.clear();
