@@ -989,6 +989,10 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	for(auto &track : tracks)
 	{
 		uint32 len = musicChunk.ReadUint32LE();
+		// A pattern can be at most 65535 rows long, one row can contain at most 15 events (with the status bytes, that 31 bytes per row).
+		// Leaving some margin for error, that gives us an upper limit of 2MB per track.
+		if(len >= 0x20'0000)
+			return false;
 		track = musicChunk.ReadChunk(len);
 	}
 
