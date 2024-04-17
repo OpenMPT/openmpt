@@ -218,20 +218,21 @@ bool CSoundFile::ReadPuma(FileReader &file, ModLoadingFlags loadFlags)
 		return false;
 
 	Order().resize(numOrders);
+	if(loadFlags & loadPatternData)
+		Patterns.ResizeArray(numOrders);
 	for(ORDERINDEX ord = 0; ord < numOrders; ord++)
 	{
-		const PATTERNINDEX pat = Patterns.InsertAny(numRows);
-		if(pat == PATTERNINDEX_INVALID)
-			return false;
 		if(!orderData[ord].IsValid())
 			return false;
-		Order()[ord] = pat;
+		if(!(loadFlags & loadPatternData) || !Patterns.Insert(ord, numRows))
+			continue;
+		Order()[ord] = ord;
 		for(CHANNELINDEX chn = 0; chn < 4; chn++)
 		{
 			const auto &chnInfo = orderData[ord].channels[chn];
 			if(chnInfo.pattern >= patternData.size())
 				continue;
-			ModCommand *m = Patterns[pat].GetpModCommand(0, chn);
+			ModCommand *m = Patterns[ord].GetpModCommand(0, chn);
 			// Auto-portmentos appear to stop on pattern transitions and revert to the note's original pitch.
 			VolumeCommand autoPorta = VOLCMD_NONE;
 			for(const auto &p : patternData[chnInfo.pattern])
@@ -270,7 +271,7 @@ bool CSoundFile::ReadPuma(FileReader &file, ModLoadingFlags loadFlags)
 			}
 		}
 		if(orderData[ord].speed)
-			Patterns[pat].WriteEffect(EffectWriter(CMD_SPEED, orderData[ord].speed).RetryNextRow());
+			Patterns[ord].WriteEffect(EffectWriter(CMD_SPEED, orderData[ord].speed).RetryNextRow());
 	}
 
 	for(INSTRUMENTINDEX ins = 1; ins <= m_nInstruments; ins++)
