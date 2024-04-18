@@ -2211,7 +2211,7 @@ bool CSoundFile::ReadKRIS(FileReader &file, ModLoadingFlags loadFlags)
 	std::array<std::array<uint8, 2>, 128 * 4> tracks;
 	if(!file.ReadArray(tracks))
 		return false;
-	uint16 tracksOffset = 1984;
+	uint32 tracksOffset = 1984;
 
 	InitializeGlobals(MOD_TYPE_MOD);
 
@@ -2241,7 +2241,7 @@ bool CSoundFile::ReadKRIS(FileReader &file, ModLoadingFlags loadFlags)
 		if(invalidBytes > MODSampleHeader::INVALID_BYTE_THRESHOLD)
 			return false;
 	}
-	tracksOffset += numSynthWaveforms * 64;
+	tracksOffset += numSynthWaveforms * 64u;
 
 	if(loadFlags == onlyVerifyHeader)
 		return true;
