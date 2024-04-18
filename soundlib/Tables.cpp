@@ -51,6 +51,7 @@ static constexpr ModFormatInfo modFormatInfo[] =
 {
 	{ UL_("OpenMPT"),                            "mptm" },
 	{ UL_("ProTracker"),                         "mod" },
+	{ UL_("ChipTracker"),                        "mod" },
 	{ UL_("Scream Tracker 3"),                   "s3m" },
 	{ UL_("FastTracker 2"),                      "xm" },
 	{ UL_("Impulse Tracker"),                    "it" },
