@@ -927,31 +927,22 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				chnMask.resize(ch + 1, 0);
 			}
 
-			if(b & IT_bitmask_patternChanEnabled_c)            // 0x80 check if the upper bit is enabled.
+			if(b & IT_bitmask_patternChanEnabled_c)  // 0x80 check if the upper bit is enabled.
 			{
-				chnMask[ch] = patternData.ReadUint8();       // set the channel mask for this channel.
+				chnMask[ch] = patternData.ReadUint8();  // set the channel mask for this channel.
 			}
 			// Channel used
-			if(chnMask[ch] & 0x0F)         // if this channel is used set m_nChannels
+			if(chnMask[ch] & 0x0F)  // if this channel is used set m_nChannels
 			{
 				if(ch >= GetNumChannels() && ch < MAX_BASECHANNELS)
 				{
 					m_nChannels = ch + 1;
 				}
+
+				// Skip a number of bytes depending on note, instrument, volume, effect being present.
+				static constexpr uint8 maskToSkips[] = {0, 1, 1, 2, 1, 2, 2, 3, 2, 3, 3, 4, 3, 4, 4, 5};
+				patternData.Skip(maskToSkips[chnMask[ch] & 0x0F]);
 			}
-			// Now we actually update the pattern-row entry the note,instrument etc.
-			// Note
-			if(chnMask[ch] & 1)
-				patternData.Skip(1);
-			// Instrument
-			if(chnMask[ch] & 2)
-				patternData.Skip(1);
-			// Volume
-			if(chnMask[ch] & 4)
-				patternData.Skip(1);
-			// Effect
-			if(chnMask[ch] & 8)
-				patternData.Skip(2);
 		}
 		lastSampleOffset = std::max(lastSampleOffset, file.GetPosition());
 	}
