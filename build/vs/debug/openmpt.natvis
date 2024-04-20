@@ -130,4 +130,9 @@
   <Type Name="mpt::mptx::packed&lt;unsigned char,1,unsigned char&gt;">
     <DisplayString>{(uint8)data[0]}</DisplayString>
   </Type>
+
+  <!-- Floating-point Little-Endian -->
+  <Type Name="mpt::mptx::IEEE754binary32Emulated&lt;3,2,1,0&gt;">
+    <DisplayString>{*(float*)&amp;bytes}</DisplayString>
+  </Type>
 </AutoVisualizer>
