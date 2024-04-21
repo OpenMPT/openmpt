@@ -886,7 +886,7 @@ void CSoundFile::ResetPlayPos()
 		m_PlayState.Chn[i].Reset(ModChannel::resetSetPosFull, *this, i, muteFlag);
 
 	m_visitedRows.Initialize(true);
-	m_SongFlags.reset(SONG_FADINGSONG | SONG_ENDREACHED);
+	m_PlayState.m_flags.reset(SONG_FADINGSONG | SONG_ENDREACHED);
 
 	m_PlayState.m_nGlobalVolume = m_nDefaultGlobalVolume;
 	m_PlayState.m_nMusicSpeed = Order().GetDefaultSpeed();
@@ -952,7 +952,7 @@ void CSoundFile::SetCurrentOrder(ORDERINDEX nOrder)
 		m_PlayState.m_nextPatStartRow = 0;
 	}
 
-	m_SongFlags.reset(SONG_FADINGSONG | SONG_ENDREACHED);
+	m_PlayState.m_flags.reset(SONG_FADINGSONG | SONG_ENDREACHED);
 }
 
 void CSoundFile::SuspendPlugins()
@@ -1024,7 +1024,7 @@ void CSoundFile::RecalculateGainForAllPlugs()
 
 void CSoundFile::ResetChannels()
 {
-	m_SongFlags.reset(SONG_FADINGSONG | SONG_ENDREACHED);
+	m_PlayState.m_flags.reset(SONG_FADINGSONG | SONG_ENDREACHED);
 	m_PlayState.m_nBufferCount = 0;
 	for(auto &chn : m_PlayState.Chn)
 	{
@@ -1071,7 +1071,7 @@ void CSoundFile::LoopPattern(PATTERNINDEX nPat, ROWINDEX nRow)
 {
 	if(!Patterns.IsValidPat(nPat))
 	{
-		m_SongFlags.reset(SONG_PATTERNLOOP);
+		m_PlayState.m_flags.reset(SONG_PATTERNLOOP);
 	} else
 	{
 		if(nRow >= Patterns[nPat].GetNumRows()) nRow = 0;
@@ -1081,7 +1081,7 @@ void CSoundFile::LoopPattern(PATTERNINDEX nPat, ROWINDEX nRow)
 		m_PlayState.m_nPatternDelay = 0;
 		m_PlayState.m_nFrameDelay = 0;
 		m_PlayState.m_nextPatStartRow = 0;
-		m_SongFlags.set(SONG_PATTERNLOOP);
+		m_PlayState.m_flags.set(SONG_PATTERNLOOP);
 	}
 	m_PlayState.m_nBufferCount = 0;
 }
@@ -1098,7 +1098,7 @@ void CSoundFile::DontLoopPattern(PATTERNINDEX nPat, ROWINDEX nRow)
 	m_PlayState.m_nFrameDelay = 0;
 	m_PlayState.m_nBufferCount = 0;
 	m_PlayState.m_nextPatStartRow = 0;
-	m_SongFlags.reset(SONG_PATTERNLOOP);
+	m_PlayState.m_flags.reset(SONG_PATTERNLOOP);
 }
 
 

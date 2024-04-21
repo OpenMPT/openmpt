@@ -978,7 +978,7 @@ void CDoWaveConvert::Run()
 	mixersettings.m_nMaxMixChannels = MAX_CHANNELS; // always use max mixing channels when rendering
 	mixersettings.gdwMixingFreq = samplerate;
 	mixersettings.gnChannels = channels;
-	m_SndFile.m_SongFlags.reset(SONG_PAUSED | SONG_STEP);
+	m_SndFile.m_PlayState.m_flags.reset(SONG_PAUSED | SONG_STEP);
 	if(m_Settings.normalize)
 	{
 #ifndef NO_AGC
@@ -1062,7 +1062,7 @@ void CDoWaveConvert::Run()
 
 	// Reset song position tracking
 	m_SndFile.ResetPlayPos();
-	m_SndFile.m_SongFlags.reset(SONG_PATTERNLOOP);
+	m_SndFile.m_PlayState.m_flags.reset(SONG_PATTERNLOOP);
 	ORDERINDEX startOrder = 0;
 	GetLengthTarget target;
 	if(m_Settings.minOrder != ORDERINDEX_INVALID && m_Settings.maxOrder != ORDERINDEX_INVALID)
@@ -1110,7 +1110,7 @@ void CDoWaveConvert::Run()
 
 	auto mainFrame = CMainFrame::GetMainFrame();
 	mainFrame->PauseMod();
-	m_SndFile.m_SongFlags.reset(SONG_STEP | SONG_PATTERNLOOP);
+	m_SndFile.m_PlayState.m_flags.reset(SONG_STEP | SONG_PATTERNLOOP);
 	mainFrame->InitRenderer(&m_SndFile);
 
 	while(true)

@@ -385,23 +385,23 @@ bool COrderList::SetCurSel(ORDERINDEX sel, bool setPlayPos, bool shiftClick, boo
 		const bool isPlaying = IsPlaying();
 		bool changedPos = false;
 
-		if(isPlaying && sndFile.m_SongFlags[SONG_PATTERNLOOP])
+		if(isPlaying && sndFile.m_PlayState.m_flags[SONG_PATTERNLOOP])
 		{
 			pMainFrm->ResetNotificationBuffer();
 
 			// Update channel parameters and play time
 			CriticalSection cs;
-			m_modDoc.SetElapsedTime(m_nScrollPos, 0, !sndFile.m_SongFlags[SONG_PAUSED | SONG_STEP]);
+			m_modDoc.SetElapsedTime(m_nScrollPos, 0, !sndFile.m_PlayState.m_flags[SONG_PAUSED | SONG_STEP]);
 
 			changedPos = true;
 		} else if(m_pParent.GetFollowSong())
 		{
-			FlagSet<SongFlags> pausedFlags = sndFile.m_SongFlags & (SONG_PAUSED | SONG_STEP | SONG_PATTERNLOOP);
+			FlagSet<PlayFlags> pausedFlags = sndFile.m_PlayState.m_flags & (SONG_PAUSED | SONG_STEP | SONG_PATTERNLOOP);
 			// Update channel parameters and play time
 			CriticalSection cs;
 			sndFile.SetCurrentOrder(m_nScrollPos);
-			m_modDoc.SetElapsedTime(m_nScrollPos, 0, !sndFile.m_SongFlags[SONG_PAUSED | SONG_STEP]);
-			sndFile.m_SongFlags.set(pausedFlags);
+			m_modDoc.SetElapsedTime(m_nScrollPos, 0, !sndFile.m_PlayState.m_flags[SONG_PAUSED | SONG_STEP]);
+			sndFile.m_PlayState.m_flags.set(pausedFlags);
 
 			if(isPlaying)
 				pMainFrm->ResetNotificationBuffer();

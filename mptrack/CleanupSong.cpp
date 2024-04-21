@@ -552,7 +552,7 @@ protected:
 		{
 			sndFile.ResetPlayPos();
 			sndFile.GetLength(eAdjust, GetLengthTarget(song.startOrder, song.startRow).StartPos(song.sequence, 0, 0));
-			sndFile.m_SongFlags.reset(SONG_PLAY_FLAGS);
+			sndFile.m_PlayState.m_flags.reset();
 			while(!m_abort)
 			{
 				auto tickSamples = sndFile.ReadOneTick();

@@ -2701,7 +2701,7 @@ static void TestLoadXMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultGlobalVolume, 128);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nVSTiVolume, 42);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nSamplePreAmp, 23);
-	VERIFY_EQUAL_NONCONT((sndFile.m_SongFlags & SONG_FILE_FLAGS), SONG_LINEARSLIDES | SONG_EXFILTERRANGE);
+	VERIFY_EQUAL_NONCONT(sndFile.m_SongFlags, SONG_LINEARSLIDES | SONG_EXFILTERRANGE);
 	VERIFY_EQUAL_NONCONT(sndFile.m_playBehaviour[MSF_COMPATIBLE_PLAY], true);
 	VERIFY_EQUAL_NONCONT(sndFile.m_playBehaviour[kMIDICCBugEmulation], false);
 	VERIFY_EQUAL_NONCONT(sndFile.m_playBehaviour[kMPTOldSwingBehaviour], false);
@@ -2899,7 +2899,7 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultGlobalVolume, 128);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nVSTiVolume, 42);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nSamplePreAmp, 23);
-	VERIFY_EQUAL_NONCONT((sndFile.m_SongFlags & SONG_FILE_FLAGS), SONG_LINEARSLIDES | SONG_EXFILTERRANGE | SONG_ITCOMPATGXX | SONG_ITOLDEFFECTS);
+	VERIFY_EQUAL_NONCONT(sndFile.m_SongFlags, SONG_LINEARSLIDES | SONG_EXFILTERRANGE | SONG_ITCOMPATGXX | SONG_ITOLDEFFECTS);
 	VERIFY_EQUAL_NONCONT(sndFile.m_playBehaviour[MSF_COMPATIBLE_PLAY], true);
 	VERIFY_EQUAL_NONCONT(sndFile.m_playBehaviour[kMIDICCBugEmulation], false);
 	VERIFY_EQUAL_NONCONT(sndFile.m_playBehaviour[kMPTOldSwingBehaviour], false);
@@ -3278,7 +3278,7 @@ static void TestLoadS3MFile(const CSoundFile &sndFile, bool resaved)
 	VERIFY_EQUAL_NONCONT(sndFile.m_nDefaultGlobalVolume, 32 * 4);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nVSTiVolume, 36);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nSamplePreAmp, 16);
-	VERIFY_EQUAL_NONCONT((sndFile.m_SongFlags & SONG_FILE_FLAGS), SONG_FASTVOLSLIDES);
+	VERIFY_EQUAL_NONCONT(sndFile.m_SongFlags, SONG_FASTVOLSLIDES);
 	VERIFY_EQUAL_NONCONT(sndFile.GetMixLevels(), MixLevels::Compatible);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nTempoMode, TempoMode::Classic);
 	VERIFY_EQUAL_NONCONT(sndFile.m_dwLastSavedWithVersion, resaved ? Version::Current() : MPT_V("1.27.00.00"));
@@ -3404,7 +3404,7 @@ static void TestLoadMODFile(CSoundFile &sndFile)
 {
 	// Global Variables
 	VERIFY_EQUAL_NONCONT(sndFile.GetTitle(), "MOD_Test___________X");
-	VERIFY_EQUAL_NONCONT((sndFile.m_SongFlags & SONG_FILE_FLAGS), SONG_PT_MODE | SONG_AMIGALIMITS | SONG_ISAMIGA);
+	VERIFY_EQUAL_NONCONT(sndFile.m_SongFlags, SONG_PT_MODE | SONG_AMIGALIMITS | SONG_ISAMIGA);
 	VERIFY_EQUAL_NONCONT(sndFile.GetMixLevels(), MixLevels::Compatible);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nTempoMode, TempoMode::Classic);
 	VERIFY_EQUAL_NONCONT(sndFile.GetNumChannels(), 4);

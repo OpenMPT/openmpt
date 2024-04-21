@@ -440,7 +440,7 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 	case CTRLMSG_SETVIEWWND:
 		{
 			SendViewMessage(VIEWMSG_FOLLOWSONG, IsDlgButtonChecked(IDC_PATTERN_FOLLOWSONG));
-			SendViewMessage(VIEWMSG_PATTERNLOOP, (m_sndFile.m_SongFlags & SONG_PATTERNLOOP) ? TRUE : FALSE);
+			SendViewMessage(VIEWMSG_PATTERNLOOP, (m_sndFile.m_PlayState.m_flags[SONG_PATTERNLOOP]) ? TRUE : FALSE);
 			OnSpacingChanged();
 			SendViewMessage(VIEWMSG_SETDETAIL, m_nDetailLevel);
 			SendViewMessage(VIEWMSG_SETRECORD, m_bRecord);
@@ -493,13 +493,13 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 			if (lParam == -1)
 			{
 				//Toggle loop state
-				setLoop = !m_sndFile.m_SongFlags[SONG_PATTERNLOOP];
+				setLoop = !m_sndFile.m_PlayState.m_flags[SONG_PATTERNLOOP];
 			} else
 			{
 				setLoop = (lParam != 0);
 			}
 
-			m_sndFile.m_SongFlags.set(SONG_PATTERNLOOP, setLoop);
+			m_sndFile.m_PlayState.m_flags.set(SONG_PATTERNLOOP, setLoop);
 			CheckDlgButton(IDC_PATTERN_LOOP, setLoop ? BST_CHECKED : BST_UNCHECKED);
 			break;
 		}

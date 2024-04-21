@@ -462,7 +462,7 @@ public:
 
 public:	// for Editing
 #ifdef MODPLUG_TRACKER
-	CModDoc *m_pModDoc = nullptr; // Can be a null pointer for example when previewing samples from the treeview.
+	CModDoc *m_pModDoc = nullptr;  // Can be a null pointer for example when previewing samples from the treeview.
 #endif // MODPLUG_TRACKER
 	Enum<MODTYPE> m_nType;
 private:
@@ -477,7 +477,7 @@ public:
 private:
 	CHANNELINDEX m_nMixStat;
 public:
-	ROWINDEX m_nDefaultRowsPerBeat, m_nDefaultRowsPerMeasure;	// default rows per beat and measure for this module
+	ROWINDEX m_nDefaultRowsPerBeat, m_nDefaultRowsPerMeasure;  // default rows per beat and measure for this module
 	TempoMode m_nTempoMode = TempoMode::Classic;
 
 #ifdef MODPLUG_TRACKER
@@ -586,7 +586,7 @@ public:
 		int32 m_lHighResRampingGlobalVolume = 0;  // Global volume ramping
 
 	public:
-		bool m_bPositionChanged = true; // Report to plugins that we jumped around in the module
+		FlagSet<PlayFlags> m_flags = SONG_POSITIONCHANGED;
 
 	public:
 		CHANNELINDEX ChnMix[MAX_CHANNELS]; // Index of channels in Chn to be actually mixed
@@ -832,7 +832,7 @@ public:
 	// A repeat count value of -1 means infinite loop
 	void SetRepeatCount(int n) { m_nRepeatCount = n; }
 	int GetRepeatCount() const { return m_nRepeatCount; }
-	bool IsPaused() const { return m_SongFlags[SONG_PAUSED | SONG_STEP]; }	// Added SONG_STEP as it seems to be desirable in most cases to check for this as well.
+	bool IsPaused() const { return m_PlayState.m_flags[SONG_PAUSED | SONG_STEP]; }	// Added SONG_STEP as it seems to be desirable in most cases to check for this as well.
 	void LoopPattern(PATTERNINDEX nPat, ROWINDEX nRow = 0);
 
 	bool InitChannel(CHANNELINDEX nChn);
@@ -1033,7 +1033,7 @@ private:
 	void ProcessInputChannels(IAudioSource &source, std::size_t countChunk);
 public:
 	samplecount_t GetTotalSampleCount() const { return m_PlayState.m_lTotalSampleCount; }
-	bool HasPositionChanged() { bool b = m_PlayState.m_bPositionChanged; m_PlayState.m_bPositionChanged = false; return b; }
+	bool HasPositionChanged() { bool b = m_PlayState.m_flags[SONG_POSITIONCHANGED]; m_PlayState.m_flags.reset(SONG_POSITIONCHANGED); return b; }
 	bool IsRenderingToDisc() const { return m_bIsRendering; }
 
 	void PrecomputeSampleLoops(bool updateChannels = false);

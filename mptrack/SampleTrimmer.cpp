@@ -75,7 +75,7 @@ public:
 			const auto &song = subSongs[i];
 			m_SndFile.ResetPlayPos();
 			m_SndFile.GetLength(eAdjust, GetLengthTarget(song.startOrder, song.startRow).StartPos(song.sequence, 0, 0));
-			m_SndFile.m_SongFlags.reset(SONG_PLAY_FLAGS);
+			m_SndFile.m_PlayState.m_flags.reset();
 
 			size_t subsongSamples = 0;
 			DummyAudioTarget target;

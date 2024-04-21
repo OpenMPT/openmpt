@@ -321,7 +321,7 @@ intptr_t VSTCALLBACK CVstPlugin::MasterCallBack(AEffect *effect, VstOpcodeToHost
 			if(pVstPlugin->IsSongPlaying())
 			{
 				timeInfo.flags |= kVstTransportPlaying;
-				if(pVstPlugin->GetSoundFile().m_SongFlags[SONG_PATTERNLOOP]) timeInfo.flags |= kVstTransportCycleActive;
+				if(pVstPlugin->GetSoundFile().m_PlayState.m_flags[SONG_PATTERNLOOP]) timeInfo.flags |= kVstTransportCycleActive;
 				timeInfo.samplePos = sndFile.GetTotalSampleCount();
 				if(pVstPlugin->m_positionChanged)
 				{

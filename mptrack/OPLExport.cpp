@@ -535,7 +535,7 @@ public:
 
 			m_sndFile.ResetPlayPos();
 			m_sndFile.GetLength(eAdjust, GetLengthTarget(song.startOrder, song.startRow).StartPos(song.sequence, 0, 0));
-			m_sndFile.m_SongFlags.reset(SONG_PLAY_FLAGS);
+			m_sndFile.m_PlayState.m_flags.reset();
 
 			m_oplLogger.Reset();
 			m_sndFile.m_opl = std::make_unique<OPL>(m_oplLogger);
@@ -571,7 +571,7 @@ public:
 				}
 			}
 
-			if(m_sndFile.m_SongFlags[SONG_BREAKTOROW] && loopStart == Util::MaxValueOfType(loopStart) && song.loopStartOrder == song.startOrder && song.loopStartRow == song.startRow)
+			if(m_sndFile.m_PlayState.m_flags[SONG_BREAKTOROW] && loopStart == Util::MaxValueOfType(loopStart) && song.loopStartOrder == song.startOrder && song.loopStartRow == song.startRow)
 				loopStart = 0;
 
 			mpt::PathString currentFileName = fileName;

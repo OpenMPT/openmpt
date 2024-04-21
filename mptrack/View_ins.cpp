@@ -2024,7 +2024,7 @@ void CViewInstrument::PlayNote(ModCommand::NOTE note)
 			{
 				if(pMainFrm->GetModPlaying() != pModDoc)
 				{
-					sndFile.m_SongFlags.set(SONG_PAUSED);
+					sndFile.m_PlayState.m_flags.set(SONG_PAUSED);
 					sndFile.ResetChannels();
 					if(!pMainFrm->PlayMod(pModDoc))
 						return;

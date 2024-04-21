@@ -1037,7 +1037,7 @@ bool CMainFrame::DoNotification(DWORD dwSamplesRead, int64 streamPosition)
 
 	m_pSndFile->ResetMixStat();
 
-	if(m_pSndFile->m_SongFlags[SONG_ENDREACHED]) notification.type.set(Notification::EOS);
+	if(m_pSndFile->m_PlayState.m_flags[SONG_ENDREACHED]) notification.type.set(Notification::EOS);
 
 	if(notifyType[Notification::Sample])
 	{
@@ -1048,7 +1048,7 @@ bool CMainFrame::DoNotification(DWORD dwSamplesRead, int64 streamPosition)
 			for(CHANNELINDEX k = 0; k < MAX_CHANNELS; k++)
 			{
 				const ModChannel &chn = m_pSndFile->m_PlayState.Chn[k];
-				if(chn.pModSample == &m_pSndFile->GetSample(smp) && chn.nLength != 0	// Corrent sample is set up on this channel
+				if(chn.pModSample == &m_pSndFile->GetSample(smp) && chn.nLength != 0	// Correct sample is set up on this channel
 					&& (!chn.dwFlags[CHN_NOTEFADE] || chn.nFadeOutVol))					// And it hasn't completely faded out yet, so it's still playing
 				{
 					notification.pos[k] = chn.position.GetInt();
@@ -1359,7 +1359,7 @@ void CMainFrame::UnsetPlaybackSoundFile()
 		{
 			m_wndTree.UpdatePlayPos(m_pSndFile->GetpModDoc(), nullptr);
 		}
-		m_pSndFile->m_SongFlags.reset(SONG_PAUSED);
+		m_pSndFile->m_PlayState.m_flags.reset(SONG_PAUSED);
 		if(m_pSndFile == &m_WaveFile)
 		{
 			// Unload previewed instrument
@@ -1412,11 +1412,11 @@ bool CMainFrame::PlayMod(CModDoc *pModDoc)
 	SetPlaybackSoundFile(&sndFile);
 
 	const bool bPaused = m_pSndFile->IsPaused();
-	const bool bPatLoop = m_pSndFile->m_SongFlags[SONG_PATTERNLOOP];
+	const bool bPatLoop = m_pSndFile->m_PlayState.m_flags[SONG_PATTERNLOOP];
 
-	m_pSndFile->m_SongFlags.reset(SONG_FADINGSONG | SONG_ENDREACHED);
+	m_pSndFile->m_PlayState.m_flags.reset(SONG_FADINGSONG | SONG_ENDREACHED);
 
-	if(!bPatLoop && bPaused) sndFile.m_SongFlags.set(SONG_PAUSED);
+	if(!bPatLoop && bPaused) sndFile.m_PlayState.m_flags.set(SONG_PAUSED);
 	sndFile.SetRepeatCount((TrackerSettings::Instance().gbLoopSong) ? -1 : 0);
 
 	sndFile.InitPlayer(true);
@@ -1582,7 +1582,7 @@ bool CMainFrame::PlaySoundFile(const mpt::PathString &filename, ModCommand::NOTE
 				if(file.IsValid())
 				{
 					InitPreview();
-					m_WaveFile.m_SongFlags.set(SONG_PAUSED);
+					m_WaveFile.m_PlayState.m_flags.set(SONG_PAUSED);
 					// Avoid hanging audio while reading file - we have removed all sample and instrument references before,
 					// so it's safe to replace the sample / instrument now.
 					cs.Leave();
@@ -1690,7 +1690,7 @@ void CMainFrame::PreparePreview(ModCommand::NOTE note, int volume)
 		}
 		return;
 	}
-	m_WaveFile.m_SongFlags.reset(SONG_PAUSED);
+	m_WaveFile.m_PlayState.m_flags.reset(SONG_PAUSED);
 	m_WaveFile.SetRepeatCount(-1);
 	m_WaveFile.ResetPlayPos();
 
@@ -2587,7 +2587,7 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 				{
 				case kcPrevOrder:
 				case kcNextOrder:
-					m_pSndFile->GetpModDoc()->SetElapsedTime(order, 0, !m_pSndFile->m_SongFlags[SONG_PAUSED | SONG_STEP]);
+					m_pSndFile->GetpModDoc()->SetElapsedTime(order, 0, !m_pSndFile->m_PlayState.m_flags[SONG_PAUSED | SONG_STEP]);
 					break;
 				case kcPrevOrderAtMeasureEnd:
 				case kcNextOrderAtMeasureEnd:
@@ -3165,7 +3165,7 @@ BOOL CMainFrame::OnQueryEndSession()
 
 void CMainFrame::NotifyAccessibilityUpdate(CWnd &source)
 {
-	if(!IsPlaying() || m_pSndFile->m_SongFlags[SONG_PAUSED])
+	if(!IsPlaying() || m_pSndFile->m_PlayState.m_flags[SONG_PAUSED])
 		source.NotifyWinEvent(EVENT_OBJECT_NAMECHANGE, OBJID_CLIENT, CHILDID_SELF);
 }
 

@@ -857,7 +857,7 @@ void CDoMidiConvert::Run()
 
 	m_sndFile.SetCurrentOrder(0);
 	m_sndFile.GetLength(eAdjust, GetLengthTarget(0, 0));
-	m_sndFile.m_SongFlags.reset(SONG_PATTERNLOOP);
+	m_sndFile.m_PlayState.m_flags.reset(SONG_PATTERNLOOP);
 	int oldRepCount = m_sndFile.GetRepeatCount();
 	m_sndFile.SetRepeatCount(0);
 	m_sndFile.m_bIsRendering = true;

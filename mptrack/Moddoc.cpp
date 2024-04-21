@@ -1036,7 +1036,7 @@ CHANNELINDEX CModDoc::PlayNote(PlayNoteParam &params, NoteToChannelMap *noteChan
 			// All notes off when resuming paused playback
 			m_SndFile.ResetChannels();
 
-			m_SndFile.m_SongFlags.set(SONG_PAUSED);
+			m_SndFile.m_PlayState.m_flags.set(SONG_PAUSED);
 			pMainFrm->PlayMod(this);
 		}
 
@@ -2131,7 +2131,7 @@ void CModDoc::OnPlayerPlay()
 		}
 
 		const bool isPlaying = (pMainFrm->GetModPlaying() == this);
-		if(isPlaying && !m_SndFile.m_SongFlags[SONG_PAUSED | SONG_STEP])
+		if(isPlaying && !m_SndFile.m_PlayState.m_flags[SONG_PAUSED | SONG_STEP])
 		{
 			OnPlayerPause();
 			return;
@@ -2146,7 +2146,7 @@ void CModDoc::OnPlayerPlay()
 			if (!isPlaying) m_SndFile.m_PlayState.Chn[i].nLength = 0;
 		}
 
-		m_SndFile.m_PlayState.m_bPositionChanged = true;
+		m_SndFile.m_PlayState.m_flags.set(SONG_POSITIONCHANGED);
 
 		if(isPlaying)
 		{
@@ -2155,7 +2155,7 @@ void CModDoc::OnPlayerPlay()
 
 		cs.Leave();
 
-		m_SndFile.m_SongFlags.reset(SONG_STEP | SONG_PAUSED | SONG_PATTERNLOOP);
+		m_SndFile.m_PlayState.m_flags.reset(SONG_STEP | SONG_PAUSED | SONG_PATTERNLOOP);
 		pMainFrm->PlayMod(this);
 	}
 }
@@ -2168,7 +2168,7 @@ void CModDoc::OnPlayerPause()
 	{
 		if (pMainFrm->GetModPlaying() == this)
 		{
-			bool isLooping = m_SndFile.m_SongFlags[SONG_PATTERNLOOP];
+			bool isLooping = m_SndFile.m_PlayState.m_flags[SONG_PATTERNLOOP];
 			PATTERNINDEX nPat = m_SndFile.m_PlayState.m_nPattern;
 			ROWINDEX nRow = m_SndFile.m_PlayState.m_nRow;
 			ROWINDEX nNextRow = m_SndFile.m_PlayState.m_nNextRow;
@@ -2228,11 +2228,11 @@ void CModDoc::OnPlayerPlayFromStart()
 
 		pMainFrm->PauseMod();
 		CriticalSection cs;
-		m_SndFile.m_SongFlags.reset(SONG_STEP | SONG_PATTERNLOOP);
+		m_SndFile.m_PlayState.m_flags.reset(SONG_STEP | SONG_PATTERNLOOP);
 		m_SndFile.ResetPlayPos();
 		//m_SndFile.visitedSongRows.Initialize(true);
 
-		m_SndFile.m_PlayState.m_bPositionChanged = true;
+		m_SndFile.m_PlayState.m_flags.set(SONG_POSITIONCHANGED);
 
 		cs.Leave();
 
@@ -2537,7 +2537,7 @@ void CModDoc::OnPatternRestart(bool loop)
 			chn.dwFlags.set(CHN_NOTEFADE | CHN_KEYOFF);
 		}
 		if ((nOrd < m_SndFile.Order().size()) && (m_SndFile.Order()[nOrd] == nPat)) m_SndFile.m_PlayState.m_nCurrentOrder = m_SndFile.m_PlayState.m_nNextOrder = nOrd;
-		m_SndFile.m_SongFlags.reset(SONG_PAUSED | SONG_STEP);
+		m_SndFile.m_PlayState.m_flags.reset(SONG_PAUSED | SONG_STEP);
 		if(loop)
 			m_SndFile.LoopPattern(nPat);
 		else
@@ -2590,7 +2590,7 @@ void CModDoc::OnPatternPlay()
 			m_SndFile.m_PlayState.Chn[i].dwFlags.set(CHN_NOTEFADE | CHN_KEYOFF);
 		}
 		if ((nOrd < m_SndFile.Order().size()) && (m_SndFile.Order()[nOrd] == nPat)) m_SndFile.m_PlayState.m_nCurrentOrder = m_SndFile.m_PlayState.m_nNextOrder = nOrd;
-		m_SndFile.m_SongFlags.reset(SONG_PAUSED | SONG_STEP);
+		m_SndFile.m_PlayState.m_flags.reset(SONG_PAUSED | SONG_STEP);
 		m_SndFile.LoopPattern(nPat);
 
 		// set playback timer in the status bar (and update channel status)
@@ -2639,7 +2639,7 @@ void CModDoc::OnPatternPlayNoLoop()
 		{
 			m_SndFile.m_PlayState.Chn[i].dwFlags.set(CHN_NOTEFADE | CHN_KEYOFF);
 		}
-		m_SndFile.m_SongFlags.reset(SONG_PAUSED | SONG_STEP);
+		m_SndFile.m_PlayState.m_flags.reset(SONG_PAUSED | SONG_STEP);
 		m_SndFile.SetCurrentOrder(nOrd);
 		if(nOrd < m_SndFile.Order().size() && m_SndFile.Order()[nOrd] == nPat)
 			m_SndFile.DontLoopPattern(nPat, nRow);
@@ -2737,7 +2737,7 @@ LRESULT CModDoc::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcPlayPatternFromCursor: OnPatternPlay(); break;
 		case kcPlayPatternFromStart: OnPatternRestart(); break;
 		case kcPlaySongFromCursorPause:
-			if(CMainFrame::GetMainFrame()->GetModPlaying() == this && !m_SndFile.m_SongFlags[SONG_PAUSED | SONG_STEP])
+			if(CMainFrame::GetMainFrame()->GetModPlaying() == this && !m_SndFile.m_PlayState.m_flags[SONG_PAUSED | SONG_STEP])
 			{
 				OnPlayerPause();
 				break;
@@ -2746,7 +2746,7 @@ LRESULT CModDoc::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcPlaySongFromCursor: OnPatternPlayNoLoop(); break;
 		case kcPlaySongFromStart: OnPlayerPlayFromStart(); break;
 		case kcPlayStopSong:
-			if(CMainFrame::GetMainFrame()->GetModPlaying() == this && !m_SndFile.m_SongFlags[SONG_PAUSED | SONG_STEP])
+			if(CMainFrame::GetMainFrame()->GetModPlaying() == this && !m_SndFile.m_PlayState.m_flags[SONG_PAUSED | SONG_STEP])
 			{
 				OnPlayerStop();
 				break;
@@ -2754,7 +2754,7 @@ LRESULT CModDoc::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 			[[fallthrough]];
 		case kcPlayPauseSong: OnPlayerPlay(); break;
 		case kcPlaySongFromPatternPause:
-			if(CMainFrame::GetMainFrame()->GetModPlaying() == this && !m_SndFile.m_SongFlags[SONG_PAUSED | SONG_STEP])
+			if(CMainFrame::GetMainFrame()->GetModPlaying() == this && !m_SndFile.m_PlayState.m_flags[SONG_PAUSED | SONG_STEP])
 			{
 				OnPlayerPause();
 				break;

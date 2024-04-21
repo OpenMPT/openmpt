@@ -2240,8 +2240,8 @@ void CViewPattern::PatternStep(ROWINDEX row)
 		}
 		sndFile.LoopPattern(m_nPattern);
 		sndFile.m_PlayState.m_nNextRow = row == ROWINDEX_INVALID ? GetCurrentRow() : row;
-		sndFile.m_SongFlags.reset(SONG_PAUSED);
-		sndFile.m_SongFlags.set(SONG_STEP);
+		sndFile.m_PlayState.m_flags.reset(SONG_PAUSED);
+		sndFile.m_PlayState.m_flags.set(SONG_STEP);
 
 		SetPlayCursor(m_nPattern, sndFile.m_PlayState.m_nNextRow, 0);
 		cs.Leave();
@@ -3558,7 +3558,7 @@ LRESULT CViewPattern::OnPlayerNotify(Notification *pnotify)
 		}
 		m_nLastPlayedRow = row;
 
-		if(!pSndFile->m_SongFlags[SONG_PAUSED | SONG_STEP])
+		if(!pSndFile->m_PlayState.m_flags[SONG_PAUSED | SONG_STEP])
 		{
 			const auto &order = Order();
 			if(ord >= order.GetLength() || order[ord] != pat)
@@ -5436,7 +5436,7 @@ void CViewPattern::TempEnterNote(ModCommand::NOTE note, int vol, bool fromMidi)
 	}
 
 	const bool liveRecord = IsLiveRecord();
-	const bool usePlaybackPosition = (liveRecord && (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_AUTODELAY) && !sndFile.m_SongFlags[SONG_STEP]);
+	const bool usePlaybackPosition = (liveRecord && (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_AUTODELAY) && !sndFile.m_PlayState.m_flags[SONG_STEP]);
 	const bool isSpecial = note >= NOTE_MIN_SPECIAL;
 	const bool isSplit = IsNoteSplit(note);
 
@@ -6122,7 +6122,7 @@ void CViewPattern::QuantizeRow(PATTERNINDEX &pat, ROWINDEX &row) const
 	if(!sndFile->Patterns[pat].IsValidRow(row))
 	{
 		// Quantization exceeds current pattern, try stuffing note into next pattern instead.
-		PATTERNINDEX nextPat = sndFile->m_SongFlags[SONG_PATTERNLOOP] ? m_nPattern : GetNextPattern();
+		PATTERNINDEX nextPat = sndFile->m_PlayState.m_flags[SONG_PATTERNLOOP] ? m_nPattern : GetNextPattern();
 		if(nextPat != PATTERNINDEX_INVALID)
 		{
 			pat = nextPat;

@@ -242,36 +242,41 @@ enum class DuplicateNoteAction : uint8
 };
 
 
+enum PlayFlags : uint16
+{
+	SONG_PATTERNLOOP     =  0x01,  // Loop current pattern (pattern editor)
+	SONG_STEP            =  0x02,  // Song is in "step" mode (pattern editor)
+	SONG_PAUSED          =  0x04,  // Song is paused (no tick processing, just rendering audio)
+	SONG_FADINGSONG      =  0x08,  // Song is fading out
+	SONG_ENDREACHED      =  0x10,  // Song is finished
+	SONG_FIRSTTICK       =  0x20,  // Is set when the current tick is the first tick of the row
+	SONG_MPTFILTERMODE   =  0x40,  // Local filter mode (reset filter on each note)
+	SONG_SURROUNDPAN     =  0x80,  // Pan in the rear channels
+	SONG_POSJUMP         = 0x100,  // Position jump encountered (internal flag, do not touch)
+	SONG_BREAKTOROW      = 0x200,  // Break to row command encountered (internal flag, do not touch)
+	SONG_POSITIONCHANGED = 0x400,  // Report to plugins that we jumped around in the module
+};
+DECLARE_FLAGSET(PlayFlags)
+
+
 // Module flags - contains both song configuration and playback state... Use SONG_FILE_FLAGS and SONG_PLAY_FLAGS distinguish between the two.
 enum SongFlags
 {
-	SONG_FASTPORTAS    =       0x01,  // Portamentos are executed on every tick
-	SONG_FASTVOLSLIDES =       0x02,  // Old Scream Tracker 3.0 volume slides (executed on every tick)
-	SONG_ITOLDEFFECTS  =       0x04,  // Old Impulse Tracker effect implementations
-	SONG_ITCOMPATGXX   =       0x08,  // IT "Compatible Gxx" (IT's flag to behave more like other trackers w/r/t portamento effects)
-	SONG_LINEARSLIDES  =       0x10,  // Linear slides vs. Amiga slides
-	SONG_PATTERNLOOP   =       0x20,  // Loop current pattern (pattern editor)
-	SONG_STEP          =       0x40,  // Song is in "step" mode (pattern editor)
-	SONG_PAUSED        =       0x80,  // Song is paused (no tick processing, just rendering audio)
-	SONG_FADINGSONG    =     0x0100,  // Song is fading out
-	SONG_ENDREACHED    =     0x0200,  // Song is finished
-	SONG_FIRSTTICK     =     0x1000,  // Is set when the current tick is the first tick of the row
-	SONG_MPTFILTERMODE =     0x2000,  // Local filter mode (reset filter on each note)
-	SONG_SURROUNDPAN   =     0x4000,  // Pan in the rear channels
-	SONG_EXFILTERRANGE =     0x8000,  // Cutoff Filter has double frequency range (up to ~10Khz)
-	SONG_AMIGALIMITS   =   0x1'0000,  // Enforce amiga frequency limits
-	SONG_S3MOLDVIBRATO =   0x2'0000,  // ScreamTracker 2 vibrato in S3M files
-	SONG_BREAKTOROW    =   0x8'0000,  // Break to row command encountered (internal flag, do not touch)
-	SONG_POSJUMP       =  0x10'0000,  // Position jump encountered (internal flag, do not touch)
-	SONG_PT_MODE       =  0x20'0000,  // ProTracker 1/2 playback mode
-	SONG_PLAYALLSONGS  =  0x40'0000,  // Play all subsongs consecutively (libopenmpt)
-	SONG_ISAMIGA       =  0x80'0000,  // Is an Amiga module and thus qualifies to be played using the Paula BLEP resampler
-	SONG_IMPORTED      = 0x100'0000,  // Song type does not represent actual module format / was imported from a different format (OpenMPT)
+	SONG_FASTPORTAS    =  0x01,  // Portamentos are executed on every tick
+	SONG_FASTVOLSLIDES =  0x02,  // Old Scream Tracker 3.0 volume slides (executed on every tick)
+	SONG_ITOLDEFFECTS  =  0x04,  // Old Impulse Tracker effect implementations
+	SONG_ITCOMPATGXX   =  0x08,  // IT "Compatible Gxx" (IT's flag to behave more like other trackers w/r/t portamento effects)
+	SONG_LINEARSLIDES  =  0x10,  // Linear slides vs. Amiga slides
+	SONG_EXFILTERRANGE =  0x20,  // Cutoff Filter has double frequency range (up to ~10Khz)
+	SONG_AMIGALIMITS   =  0x40,  // Enforce amiga frequency limits
+	SONG_S3MOLDVIBRATO =  0x80,  // ScreamTracker 2 vibrato in S3M files
+	SONG_PT_MODE       = 0x100,  // ProTracker 1/2 playback mode
+	SONG_ISAMIGA       = 0x200,  // Is an Amiga module and thus qualifies to be played using the Paula BLEP resampler
+	SONG_IMPORTED      = 0x400,  // Song type does not represent actual module format / was imported from a different format (OpenMPT)
+	SONG_PLAYALLSONGS  = 0x800,  // Play all subsongs consecutively (libopenmpt)
 };
 DECLARE_FLAGSET(SongFlags)
 
-#define SONG_FILE_FLAGS (SONG_FASTPORTAS|SONG_FASTVOLSLIDES|SONG_ITOLDEFFECTS|SONG_ITCOMPATGXX|SONG_LINEARSLIDES|SONG_EXFILTERRANGE|SONG_AMIGALIMITS|SONG_S3MOLDVIBRATO|SONG_PT_MODE|SONG_ISAMIGA|SONG_IMPORTED)
-#define SONG_PLAY_FLAGS (~SONG_FILE_FLAGS)
 
 // Global Options (Renderer)
 #ifndef NO_AGC

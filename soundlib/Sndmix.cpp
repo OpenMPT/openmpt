@@ -223,7 +223,7 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioTarget &ta
 	samplecount_t countRendered = 0;
 	samplecount_t countToRender = count;
 
-	while(!m_SongFlags[SONG_ENDREACHED] && countToRender > 0)
+	while(!m_PlayState.m_flags[SONG_ENDREACHED] && countToRender > 0)
 	{
 
 		// Update Channel Data
@@ -231,10 +231,10 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioTarget &ta
 		{
 			// Last tick or fade completely processed, find out what to do next
 
-			if(m_SongFlags[SONG_FADINGSONG])
+			if(m_PlayState.m_flags[SONG_FADINGSONG])
 			{
 				// Song was faded out
-				m_SongFlags.set(SONG_ENDREACHED);
+				m_PlayState.m_flags.set(SONG_ENDREACHED);
 			} else if(ReadNote())
 			{
 				// Render next tick (normal progress)
@@ -256,29 +256,29 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioTarget &ta
 				#ifdef MODPLUG_TRACKER
 					if((m_nMaxOrderPosition) && (m_PlayState.m_nCurrentOrder >= m_nMaxOrderPosition))
 					{
-						m_SongFlags.set(SONG_ENDREACHED);
+						m_PlayState.m_flags.set(SONG_ENDREACHED);
 					}
 				#endif // MODPLUG_TRACKER
 				if(IsRenderingToDisc())
 				{
 					// Disable song fade when rendering or when requested in libopenmpt.
-					m_SongFlags.set(SONG_ENDREACHED);
+					m_PlayState.m_flags.set(SONG_ENDREACHED);
 				} else
 				{ // end of song reached, fade it out
 					if(FadeSong(FADESONGDELAY)) // sets m_nBufferCount xor returns false
 					{ // FadeSong sets m_nBufferCount here
 						MPT_ASSERT(m_PlayState.m_nBufferCount > 0);
-						m_SongFlags.set(SONG_FADINGSONG);
+						m_PlayState.m_flags.set(SONG_FADINGSONG);
 					} else
 					{
-						m_SongFlags.set(SONG_ENDREACHED);
+						m_PlayState.m_flags.set(SONG_ENDREACHED);
 					}
 				}
 			}
 
 		}
 
-		if(m_SongFlags[SONG_ENDREACHED])
+		if(m_PlayState.m_flags[SONG_ENDREACHED])
 		{
 			// Mix done.
 
@@ -375,7 +375,7 @@ CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioTarget &ta
 			// the end of the next tick.
 			if(m_PlayState.m_nMusicSpeed == uint16_max && (m_nMixStat == 0 || m_PlayState.m_nGlobalVolume == 0) && GetType() == MOD_TYPE_XM && !m_PlayState.m_nBufferCount)
 			{
-				m_SongFlags.set(SONG_ENDREACHED);
+				m_PlayState.m_flags.set(SONG_ENDREACHED);
 			}
 		}
 #endif // MODPLUG_TRACKER
@@ -438,7 +438,7 @@ bool CSoundFile::ProcessRow()
 {
 	while(++m_PlayState.m_nTickCount >= m_PlayState.TicksOnRow())
 	{
-		const auto [ignoreRow, patternTransition] = NextRow(m_PlayState, m_SongFlags[SONG_BREAKTOROW]);
+		const auto [ignoreRow, patternTransition] = NextRow(m_PlayState, m_PlayState.m_flags[SONG_BREAKTOROW]);
 
 #ifdef MODPLUG_TRACKER
 		HandleRowTransitionEvents(patternTransition);
@@ -457,7 +457,7 @@ bool CSoundFile::ProcessRow()
 #endif // MODPLUG_TRACKER
 
 		// Check if pattern is valid
-		if(!m_SongFlags[SONG_PATTERNLOOP])
+		if(!m_PlayState.m_flags[SONG_PATTERNLOOP])
 		{
 			m_PlayState.m_nPattern = (m_PlayState.m_nCurrentOrder < Order().size()) ? Order()[m_PlayState.m_nCurrentOrder] : Order.GetInvalidPatIndex();
 			if (m_PlayState.m_nPattern < Patterns.Size() && !Patterns[m_PlayState.m_nPattern].IsValid()) m_PlayState.m_nPattern = Order.GetIgnoreIndex();
@@ -488,10 +488,10 @@ bool CSoundFile::ProcessRow()
 					if(!(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_RESETCHANNELS))
 #endif // MODPLUG_TRACKER
 					{
-						m_SongFlags.set(SONG_BREAKTOROW);
+						m_PlayState.m_flags.set(SONG_BREAKTOROW);
 					}
 
-					if (restartPosOverride == 0 && !m_SongFlags[SONG_BREAKTOROW])
+					if (restartPosOverride == 0 && !m_PlayState.m_flags[SONG_BREAKTOROW])
 					{
 						//rewbs.instroVSTi: stop all VSTi at end of song, if looping.
 						StopAllVsti();
@@ -534,7 +534,7 @@ bool CSoundFile::ProcessRow()
 
 					//Handle Repeat position
 					m_PlayState.m_nCurrentOrder = restartPosOverride;
-					m_SongFlags.reset(SONG_BREAKTOROW);
+					m_PlayState.m_flags.reset(SONG_BREAKTOROW);
 					//If restart pos points to +++, move along
 					while(m_PlayState.m_nCurrentOrder < Order().size() && Order()[m_PlayState.m_nCurrentOrder] == Order.GetIgnoreIndex())
 					{
@@ -577,7 +577,7 @@ bool CSoundFile::ProcessRow()
 		// But: We will not mark the row as modified if the song is not in loop mode but
 		// the pattern loop (editor flag, not to be confused with the pattern loop effect)
 		// flag is set - because in that case, the module would stop after the first pattern loop...
-		const bool overrideLoopCheck = (m_nRepeatCount != -1) && m_SongFlags[SONG_PATTERNLOOP];
+		const bool overrideLoopCheck = (m_nRepeatCount != -1) && m_PlayState.m_flags[SONG_PATTERNLOOP];
 		if(!overrideLoopCheck && m_visitedRows.Visit(m_PlayState.m_nCurrentOrder, m_PlayState.m_nRow, m_PlayState.Chn, ignoreRow))
 		{
 			if(m_nRepeatCount)
@@ -663,7 +663,7 @@ bool CSoundFile::ProcessRow()
 			}
 		}
 
-		SetupNextRow(m_PlayState, m_SongFlags[SONG_PATTERNLOOP]);
+		SetupNextRow(m_PlayState, m_PlayState.m_flags[SONG_PATTERNLOOP]);
 
 		// Reset channel values
 		ModCommand *m = Patterns[m_PlayState.m_nPattern].GetpModCommand(m_PlayState.m_nRow, 0);
@@ -735,17 +735,17 @@ bool CSoundFile::ProcessRow()
 #ifdef MODPLUG_TRACKER
 	if (m_PlayState.m_nTickCount >= m_PlayState.TicksOnRow() - 1)
 	{
-		if(m_SongFlags[SONG_STEP])
+		if(m_PlayState.m_flags[SONG_STEP])
 		{
-			m_SongFlags.reset(SONG_STEP);
-			m_SongFlags.set(SONG_PAUSED);
+			m_PlayState.m_flags.reset(SONG_STEP);
+			m_PlayState.m_flags.set(SONG_PAUSED);
 		}
 	}
 #endif // MODPLUG_TRACKER
 
 	if (m_PlayState.m_nTickCount)
 	{
-		m_SongFlags.reset(SONG_FIRSTTICK);
+		m_PlayState.m_flags.reset(SONG_FIRSTTICK);
 		if(!(GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2))
 		   && (GetType() != MOD_TYPE_MOD || m_SongFlags[SONG_PT_MODE])  // Fix infinite loop in "GamerMan " by MrGamer, which was made with FT2
 		   && m_PlayState.m_nTickCount < m_PlayState.TicksOnRow())
@@ -754,13 +754,13 @@ bool CSoundFile::ProcessRow()
 			// Test cases: PatternDelaysRetrig.it, PatternDelaysRetrig.s3m, PatternDelaysRetrig.xm, PatternDelaysRetrig.mod
 			if(!(m_PlayState.m_nTickCount % (m_PlayState.m_nMusicSpeed + m_PlayState.m_nFrameDelay)))
 			{
-				m_SongFlags.set(SONG_FIRSTTICK);
+				m_PlayState.m_flags.set(SONG_FIRSTTICK);
 			}
 		}
 	} else
 	{
-		m_SongFlags.set(SONG_FIRSTTICK);
-		m_SongFlags.reset(SONG_BREAKTOROW);
+		m_PlayState.m_flags.set(SONG_FIRSTTICK);
+		m_PlayState.m_flags.reset(SONG_BREAKTOROW);
 	}
 
 	// Update Effects
@@ -907,7 +907,7 @@ void CSoundFile::ProcessTremolo(ModChannel &chn, int &vol) const
 {
 	if (chn.dwFlags[CHN_TREMOLO])
 	{
-		if(m_SongFlags.test_all(SONG_FIRSTTICK | SONG_PT_MODE))
+		if(m_SongFlags[SONG_PT_MODE] && m_PlayState.m_flags[SONG_FIRSTTICK])
 		{
 			// ProTracker doesn't apply tremolo nor advance on the first tick.
 			// Test case: VibratoReset.mod
@@ -923,12 +923,12 @@ void CSoundFile::ProcessTremolo(ModChannel &chn, int &vol) const
 			int delta = GetVibratoDelta(chn.nTremoloType, chn.nTremoloPos);
 			if((chn.nTremoloType & 0x03) == 1 && m_playBehaviour[kFT2MODTremoloRampWaveform])
 			{
-				// FT2 compatibility: Tremolo ramp down / triangle implementation is weird and affected by vibrato position (copypaste bug)
+				// FT2 compatibility: Tremolo ramp down / triangle implementation is weird and affected by vibrato position (copy-paste bug)
 				// Test case: TremoloWaveforms.xm, TremoloVibrato.xm
 				uint8 ramp = (chn.nTremoloPos * 4u) & 0x7F;
-				// Volume-colum vibrato gets executed first in FT2, so we may need to advance the vibrato position first
+				// Volume-column vibrato gets executed first in FT2, so we may need to advance the vibrato position first
 				uint32 vibPos = chn.nVibratoPos;
-				if(!m_SongFlags[SONG_FIRSTTICK] && chn.dwFlags[CHN_VIBRATO])
+				if(!m_PlayState.m_flags[SONG_FIRSTTICK] && chn.dwFlags[CHN_VIBRATO])
 					vibPos += chn.nVibratoSpeed;
 				if((vibPos & 0x3F) >= 32)
 					ramp ^= 0x7F;
@@ -946,7 +946,7 @@ void CSoundFile::ProcessTremolo(ModChannel &chn, int &vol) const
 				vol -= (vol * chn.nTremoloDepth * (64 - delta)) / (128 * 64);
 			}
 		}
-		if(!m_SongFlags[SONG_FIRSTTICK] || ((GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT)) && !m_SongFlags[SONG_ITOLDEFFECTS]))
+		if(!m_PlayState.m_flags[SONG_FIRSTTICK] || ((GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT)) && !m_SongFlags[SONG_ITOLDEFFECTS]))
 		{
 			// IT compatibility: IT has its own, more precise tables
 			if(m_playBehaviour[kITVibratoTremoloPanbrello])
@@ -968,7 +968,7 @@ void CSoundFile::ProcessTremor(CHANNELINDEX nChn, int &vol)
 		// Test case: Tremor.xm
 		if(chn.nTremorCount & 0x80)
 		{
-			if(!m_SongFlags[SONG_FIRSTTICK] && chn.nCommand == CMD_TREMOR)
+			if(!m_PlayState.m_flags[SONG_FIRSTTICK] && chn.nCommand == CMD_TREMOR)
 			{
 				chn.nTremorCount &= ~0x20;
 				if(chn.nTremorCount == 0x80)
@@ -1026,7 +1026,7 @@ void CSoundFile::ProcessTremor(CHANNELINDEX nChn, int &vol)
 				chn.nTremorCount = tremcount + 1;
 			} else
 			{
-				if(m_SongFlags[SONG_FIRSTTICK])
+				if(m_PlayState.m_flags[SONG_FIRSTTICK])
 				{
 					// tremcount is only 0 on the first tremor tick after triggering a note.
 					if(tremcount > 0)
@@ -1510,7 +1510,7 @@ void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int32 &period, Tuning::NOTEI
 			chn.m_ReCalculateFreqOnFirstTick = true;
 		} else
 		{
-			if(GetType() == MOD_TYPE_MT2 && m_SongFlags[SONG_FIRSTTICK])
+			if(GetType() == MOD_TYPE_MT2 && m_PlayState.m_flags[SONG_FIRSTTICK])
 			{
 				// MT2 resets any previous portamento when an arpeggio occurs.
 				chn.nPeriod = period = GetPeriodFromNote(chn.nNote, chn.nFineTune, chn.nC5Speed);
@@ -1539,7 +1539,7 @@ void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int32 &period, Tuning::NOTEI
 			} else if(m_playBehaviour[kFT2Arpeggio])
 			{
 				// FastTracker 2: Swedish tracker logic (TM) arpeggio
-				if(!m_SongFlags[SONG_FIRSTTICK])
+				if(!m_PlayState.m_flags[SONG_FIRSTTICK])
 				{
 					// Arpeggio is added on top of current note, but cannot do it the IT way because of
 					// the behaviour in ArpeggioClamp.xm.
@@ -1660,7 +1660,7 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int32 &period, Tuning::RATIOT
 
 	if(chn.dwFlags[CHN_VIBRATO])
 	{
-		const bool advancePosition = !m_SongFlags[SONG_FIRSTTICK] || ((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && !(m_SongFlags[SONG_ITOLDEFFECTS]));
+		const bool advancePosition = !m_PlayState.m_flags[SONG_FIRSTTICK] || ((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && !(m_SongFlags[SONG_ITOLDEFFECTS]));
 
 		if(GetType() == MOD_TYPE_669)
 		{
@@ -1691,7 +1691,7 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int32 &period, Tuning::RATIOT
 		} else
 		{
 			// Original behaviour
-			if(m_SongFlags.test_all(SONG_FIRSTTICK | SONG_PT_MODE) || ((GetType() & (MOD_TYPE_DIGI | MOD_TYPE_DBM)) && m_SongFlags[SONG_FIRSTTICK]))
+			if((m_SongFlags[SONG_PT_MODE] || (GetType() & (MOD_TYPE_DIGI | MOD_TYPE_DBM))) && m_PlayState.m_flags[SONG_FIRSTTICK])
 			{
 				// ProTracker doesn't apply vibrato nor advance on the first tick.
 				// Test case: VibratoReset.mod
@@ -2030,7 +2030,7 @@ int CSoundFile::HandleNoteChangeFilter(ModChannel &chn) const
 	if(!chn.triggerNote)
 		return cutoff;
 
-	bool useFilter = !m_SongFlags[SONG_MPTFILTERMODE];
+	bool useFilter = !m_PlayState.m_flags[SONG_MPTFILTERMODE];
 	if(const ModInstrument *pIns = chn.pModInstrument; pIns != nullptr)
 	{
 		if(pIns->IsResonanceEnabled())
@@ -2100,7 +2100,7 @@ bool CSoundFile::ReadNote()
 {
 #ifdef MODPLUG_TRACKER
 	// Checking end of row ?
-	if(m_SongFlags[SONG_PAUSED])
+	if(m_PlayState.m_flags[SONG_PAUSED])
 	{
 		m_PlayState.m_nTickCount = 0;
 		if (!m_PlayState.m_nMusicSpeed) m_PlayState.m_nMusicSpeed = 6;
@@ -2284,7 +2284,7 @@ bool CSoundFile::ReadNote()
 
 			// When glissando mode is set to semitones, clamp to the next halftone.
 			if((chn.dwFlags & (CHN_GLISSANDO | CHN_PORTAMENTO)) == (CHN_GLISSANDO | CHN_PORTAMENTO)
-				&& (!m_SongFlags[SONG_PT_MODE] || (chn.rowCommand.IsPortamento() && !m_SongFlags[SONG_FIRSTTICK])))
+				&& (!m_SongFlags[SONG_PT_MODE] || (chn.rowCommand.IsPortamento() && !m_PlayState.m_flags[SONG_FIRSTTICK])))
 			{
 				if(period != chn.cachedPeriod)
 				{
@@ -2322,7 +2322,7 @@ bool CSoundFile::ReadNote()
 
 		// IT Compatibility: Ensure that there is no pan swing, panbrello, panning envelopes, etc. applied on surround channels.
 		// Test case: surround-pan.it
-		if(chn.dwFlags[CHN_SURROUND] && !m_SongFlags[SONG_SURROUNDPAN] && m_playBehaviour[kITNoSurroundPan])
+		if(chn.dwFlags[CHN_SURROUND] && !m_PlayState.m_flags[SONG_SURROUNDPAN] && m_playBehaviour[kITNoSurroundPan])
 		{
 			chn.nRealPan = 128;
 		}
@@ -2351,7 +2351,7 @@ bool CSoundFile::ReadNote()
 				// XM Compatibility: Vibrato should be advanced twice (but not added up) if both volume-column and effect column vibrato is present.
 				// Effect column vibrato parameter has precedence if non-zero.
 				// Test case: VibratoDouble.xm
-				if(!m_SongFlags[SONG_FIRSTTICK])
+				if(!m_PlayState.m_flags[SONG_FIRSTTICK])
 					chn.nVibratoPos += chn.nVibratoSpeed;
 			} else if(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))
 			{
@@ -2615,7 +2615,7 @@ void CSoundFile::ProcessMacroOnChannel(CHANNELINDEX nChn)
 		//ProcessMIDIMacro(m_PlayState, nChn, false, m_MidiCfg.Global[MIDIOUT_PAN]);
 		//ProcessMIDIMacro(m_PlayState, nChn, false, m_MidiCfg.Global[MIDIOUT_VOLUME]);
 
-		if((chn.rowCommand.command == CMD_MIDI && m_SongFlags[SONG_FIRSTTICK]) || chn.rowCommand.command == CMD_SMOOTHMIDI)
+		if((chn.rowCommand.command == CMD_MIDI && m_PlayState.m_flags[SONG_FIRSTTICK]) || chn.rowCommand.command == CMD_SMOOTHMIDI)
 		{
 			if(chn.rowCommand.param < 0x80)
 				ProcessMIDIMacro(m_PlayState, nChn, (chn.rowCommand.command == CMD_SMOOTHMIDI), m_MidiCfg.SFx[chn.nActiveMacro], chn.rowCommand.param);
