@@ -787,7 +787,7 @@ CPPCHECK_FLAGS += -j $(NUMTHREADS)
 CPPCHECK_FLAGS += --std=c99 --std=c++17
 CPPCHECK_FLAGS += --quiet
 CPPCHECK_FLAGS += --enable=warning --inline-suppr --template='{file}:{line}: warning: {severity}: {message} [{id}]'
-CPPCHECL_FLAGS += --check-level=exhaustive
+CPPCHECK_FLAGS += --check-level=exhaustive
 CPPCHECK_FLAGS += --suppress=missingIncludeSystem
 CPPCHECK_FLAGS += --suppress=uninitMemberVar
 
