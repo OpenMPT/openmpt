@@ -740,7 +740,9 @@ static bool ValidateHeader(const MO3ContainerHeader &containerHeader)
 	{
 		return false;
 	}
-	if(containerHeader.musicSize <= sizeof(MO3FileHeader) || containerHeader.musicSize >= uint32_max / 2u)
+	// Due to the LZ algorithm's unbounded back window, we could reach gigantic sizes with just a few dozen bytes.
+	// 512 MB of music data (not samples) is chosen as a safeguard that is probably (hopefully) *way* beyond anything a real-world module will ever reach.
+	if(containerHeader.musicSize <= sizeof(MO3FileHeader) || containerHeader.musicSize >= 0x2000'0000)
 	{
 		return false;
 	}
