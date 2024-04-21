@@ -1220,7 +1220,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				m_playBehaviour.reset(kITShortSampleRetrig);
 			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0214 && fileHeader.special <= 1 && fileHeader.pwd == 0 && fileHeader.reserved == 0
 				&& (fileHeader.flags & (ITFileHeader::vol0Optimisations | ITFileHeader::instrumentMode | ITFileHeader::useMIDIPitchController | ITFileHeader::reqEmbeddedMIDIConfig | ITFileHeader::extendedFilterRange)) == ITFileHeader::instrumentMode
-				&& m_nSamples > 0 && (Samples[1].filename == "XXXXXXXX.YYY"))
+				&& m_nSamples > 1 && (Samples[1].filename == "XXXXXXXX.YYY"))
 			{
 				madeWithTracker = U_("CheeseTracker");
 			} else if(fileHeader.cwtv == 0 && madeWithTracker.empty())
@@ -1285,11 +1285,13 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			// Initial note memory for channel is C-0: Added 2023-03-09, https://github.com/schismtracker/schismtracker/commit/73e9d60676c2b48c8e94e582373e29517105b2b1
 			if(schismDateVersion < SchismVersionFromDate<2023, 03, 9>::date)
 				m_playBehaviour.reset(kITInitialNoteMemory);
-			// 2023-10-16: kITEnvelopePositionHandling https://github.com/schismtracker/schismtracker/commit/bc81f605d927ca931a886417641da29fc89283b8
+			// DCT note comparison: Added 2023-10-17, https://github.com/schismtracker/schismtracker/commit/31d36dc00013fc5ab0efa20c782af18e8b006e07
+			if(schismDateVersion < SchismVersionFromDate<2023, 10, 17>::date)
+				m_playBehaviour.reset(kITDCTBehaviour);
 			if(schismDateVersion < SchismVersionFromDate<2023, 10, 19>::date)
 			{
 				// Panbrello sample & hold random waveform: Added 2023-10-19, https://github.com/schismtracker/schismtracker/commit/411ec16b190ba1a486d8b0907ad8d74f8fdc2840
-				m_playBehaviour.reset(kITPanbrelloHold);
+				m_playBehaviour.reset(kITSampleAndHoldPanbrello);
 				// Don't apply any portamento if no previous note is playing: Added 2023-10-19, https://github.com/schismtracker/schismtracker/commit/8ff0a86a715efb50c89770fb9095d4c4089ff187
 				m_playBehaviour.reset(kITPortaNoNote);
 			}
@@ -1297,9 +1299,12 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				// Note delay delays first-tick behaviour for slides: Added 2023-10-22, https://github.com/schismtracker/schismtracker/commit/b9609e4f827e1b6ce9ebe6573b85e69388ca0ea0
 				m_playBehaviour.reset(kITFirstTickHandling);
-				// Added 2023-10-22, https://github.com/schismtracker/schismtracker/commit/a9e5df533ab52c35190fcc1cbfed4f0347b660bb
+				// https://github.com/schismtracker/schismtracker/commit/a9e5df533ab52c35190fcc1cbfed4f0347b660bb
 				m_playBehaviour.reset(kITMultiSampleInstrumentNumber);
 			}
+			// Panbrello hold: Added 2024-03-09, https://github.com/schismtracker/schismtracker/commit/ebdebaa8c8a735a7bf49df55debded1b7aac3605
+			if(schismDateVersion < SchismVersionFromDate<2024, 03, 9>::date)
+				m_playBehaviour.reset(kITPanbrelloHold);
 			break;
 		case 4:
 			madeWithTracker = MPT_UFORMAT("pyIT {}.{}")((fileHeader.cwtv & 0x0F00) >> 8, mpt::ufmt::hex0<2>(fileHeader.cwtv & 0xFF));
