@@ -4831,6 +4831,7 @@ void CSoundFile::ExtendedS3MCommands(CHANNELINDEX nChn, ModCommand::PARAM param)
 		{
 			ExtendedChannelEffect(chn, param, m_PlayState); break;
 		}
+		break;
 	// SAx: Set 64k Offset
 	case 0xA0:	if(m_PlayState.m_flags[SONG_FIRSTTICK])
 				{
