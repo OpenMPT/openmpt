@@ -523,7 +523,7 @@ std::size_t module_impl::read_wrapper( std::size_t count, std::int16_t * left, s
 	}
 	if ( count_read == 0 && m_ctl_play_at_end == song_end_action::continue_song ) {
 		// This is the song end, but allow the song or loop to restart on the next call
-		m_sndFile->m_SongFlags.reset(OpenMPT::SONG_ENDREACHED);
+		m_sndFile->m_PlayState.m_flags.reset(OpenMPT::SONG_ENDREACHED);
 	}
 	return count_read;
 }
@@ -546,7 +546,7 @@ std::size_t module_impl::read_wrapper( std::size_t count, float * left, float * 
 	}
 	if ( count_read == 0 && m_ctl_play_at_end == song_end_action::continue_song ) {
 		// This is the song end, but allow the song or loop to restart on the next call
-		m_sndFile->m_SongFlags.reset(OpenMPT::SONG_ENDREACHED);
+		m_sndFile->m_PlayState.m_flags.reset(OpenMPT::SONG_ENDREACHED);
 	}
 	return count_read;
 }
@@ -568,7 +568,7 @@ std::size_t module_impl::read_interleaved_wrapper( std::size_t count, std::size_
 	}
 	if ( count_read == 0 && m_ctl_play_at_end == song_end_action::continue_song ) {
 		// This is the song end, but allow the song or loop to restart on the next call
-		m_sndFile->m_SongFlags.reset(OpenMPT::SONG_ENDREACHED);
+		m_sndFile->m_PlayState.m_flags.reset(OpenMPT::SONG_ENDREACHED);
 	}
 	return count_read;
 }
@@ -590,7 +590,7 @@ std::size_t module_impl::read_interleaved_wrapper( std::size_t count, std::size_
 	}
 	if ( count_read == 0 && m_ctl_play_at_end == song_end_action::continue_song ) {
 		// This is the song end, but allow the song or loop to restart on the next call
-		m_sndFile->m_SongFlags.reset(OpenMPT::SONG_ENDREACHED);
+		m_sndFile->m_PlayState.m_flags.reset(OpenMPT::SONG_ENDREACHED);
 	}
 	return count_read;
 }
