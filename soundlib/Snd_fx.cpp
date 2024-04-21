@@ -715,21 +715,8 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			case CMD_S3MCMDEX:
 				switch(param & 0xF0)
 				{
-				case 0x90:
-					if(param <= 0x91)
-						chn.dwFlags.set(CHN_SURROUND, param == 0x91);
-					break;
-
-				case 0xA0:  // High sample offset
-					chn.nOldHiOffset = param & 0x0F;
-					break;
-
 				case 0xB0:  // Pattern Loop
 					PatternLoop(playState, nChn, param & 0x0F);
-					break;
-				
-				case 0xF0:  // Active macro
-					chn.nActiveMacro = param & 0x0F;
 					break;
 				}
 				break;
@@ -740,17 +727,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				case 0x60:  // Pattern Loop
 					PatternLoop(playState, nChn, param & 0x0F);
 					break;
-
-				case 0xF0:  // Active macro
-					chn.nActiveMacro = param & 0x0F;
-					break;
 				}
-				break;
-
-			case CMD_XFINEPORTAUPDOWN:
-				// ignore high offset in compatible mode
-				if(((param & 0xF0) == 0xA0) && !m_playBehaviour[kFT2RestrictXCommand])
-					chn.nOldHiOffset = param & 0x0F;
 				break;
 
 			default:
@@ -873,20 +850,52 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				Panning(chn, param, Pan8bit);
 				break;
 			case CMD_MODCMDEX:
-				if(param < 0x10)
+				switch(param & 0xF0)
 				{
-					// LED filter
+				case 0x00:  // LED filter
 					for(CHANNELINDEX channel = 0; channel < GetNumChannels(); channel++)
 					{
 						playState.Chn[channel].dwFlags.set(CHN_AMIGAFILTER, !(param & 1));
 					}
-				}
-				[[fallthrough]];
-			case CMD_S3MCMDEX:
-				if((param & 0xF0) == 0x80)
-				{
+					break;
+
+				case 0x80:  // Panning
 					Panning(chn, (param & 0x0F), Pan4bit);
+					break;
+
+				case 0xF0:  // Active macro
+					chn.nActiveMacro = param & 0x0F;
+					break;
 				}
+				break;
+
+			case CMD_S3MCMDEX:
+				switch(param & 0xF0)
+				{
+				case 0x80:  // Panning
+					Panning(chn, (param & 0x0F), Pan4bit);
+					break;
+
+				case 0x90:  // Extended channel effects
+					// Change play direction is handled in adjustSamplePos case
+					if (param < 0x9E)
+						ExtendedChannelEffect(chn, param, playState);
+					break;
+
+				case 0xA0:  // High sample offset
+					chn.nOldHiOffset = param & 0x0F;
+					break;
+
+				case 0xF0:  // Active macro
+					chn.nActiveMacro = param & 0x0F;
+					break;
+				}
+				break;
+
+			case CMD_XFINEPORTAUPDOWN:
+				// ignore high offset in compatible mode
+				if (((param & 0xF0) == 0xA0) && !m_playBehaviour[kFT2RestrictXCommand])
+					chn.nOldHiOffset = param & 0x0F;
 				break;
 
 			case CMD_VIBRATOVOL:
@@ -945,7 +954,6 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			case CMD_VIBRATO:
 			case CMD_FINEVIBRATO:
 			case CMD_VIBRATOVOL:
-				if(adjustMode & eAdjust)
 				{
 					uint32 vibTicks = ((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && !m_SongFlags[SONG_ITOLDEFFECTS]) ? numTicks : nonRowTicks;
 					uint32 inc = chn.nVibratoSpeed * vibTicks;
@@ -956,7 +964,6 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				break;
 
 			case CMD_TREMOLO:
-				if(adjustMode & eAdjust)
 				{
 					uint32 tremTicks = ((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && !m_SongFlags[SONG_ITOLDEFFECTS]) ? numTicks : nonRowTicks;
 					uint32 inc = chn.nTremoloSpeed * tremTicks;
@@ -967,12 +974,9 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				break;
 
 			case CMD_PANBRELLO:
-				if(adjustMode & eAdjust)
-				{
-					// Panbrello effect is permanent in compatible mode, so actually apply panbrello for the last tick of this row
-					chn.nPanbrelloPos += static_cast<uint8>(chn.nPanbrelloSpeed * (numTicks - 1));
-					ProcessPanbrello(chn);
-				}
+				// Panbrello effect is permanent in compatible mode, so actually apply panbrello for the last tick of this row
+				chn.nPanbrelloPos += static_cast<uint8>(chn.nPanbrelloSpeed * nonRowTicks);
+				ProcessPanbrello(chn);
 				break;
 
 			default:
@@ -1162,19 +1166,13 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 						break;
 
 					case CMD_S3MCMDEX:
-						if(m.param == 0x9E)
+						if((m.param & 0xF0) == 0x90)
 						{
-							// Play forward
-							memory.RenderChannel(nChn, oldTickDuration);  // Re-sync what we've got so far
-							chn.dwFlags.reset(CHN_PINGPONGFLAG);
-						} else if(m.param == 0x9F)
-						{
-							// Reverse
-							memory.RenderChannel(nChn, oldTickDuration);  // Re-sync what we've got so far
-							chn.dwFlags.set(CHN_PINGPONGFLAG);
-							if(!chn.position.GetInt() && chn.nLength && (m.IsNote() || !chn.dwFlags[CHN_LOOP]))
+							// Change play direction - other cases already handled above
+							if(m.param == 0x9E || m.param == 0x9F)
 							{
-								chn.position.Set(chn.nLength - 1, SamplePosition::fractMax);
+								memory.RenderChannel(nChn, oldTickDuration);  // Re-sync what we've got so far
+								ExtendedChannelEffect(chn, m.param, playState);
 							}
 						} else if((m.param & 0xF0) == 0x70)
 						{
@@ -4828,7 +4826,11 @@ void CSoundFile::ExtendedS3MCommands(CHANNELINDEX nChn, ModCommand::PARAM param)
 		}
 		break;
 	// S9x: Sound Control
-	case 0x90:	ExtendedChannelEffect(chn, param); break;
+	case 0x90:
+		if(m_PlayState.m_flags[SONG_FIRSTTICK])
+		{
+			ExtendedChannelEffect(chn, param, m_PlayState); break;
+		}
 	// SAx: Set 64k Offset
 	case 0xA0:	if(m_PlayState.m_flags[SONG_FIRSTTICK])
 				{
@@ -4873,16 +4875,15 @@ void CSoundFile::ExtendedS3MCommands(CHANNELINDEX nChn, ModCommand::PARAM param)
 }
 
 
-void CSoundFile::ExtendedChannelEffect(ModChannel &chn, uint32 param)
+void CSoundFile::ExtendedChannelEffect(ModChannel &chn, uint32 param, PlayState &playState) const
 {
 	// S9x and X9x commands (S3M/XM/IT only)
-	if(!m_PlayState.m_flags[SONG_FIRSTTICK]) return;
 	switch(param & 0x0F)
 	{
 	// S90: Surround Off
-	case 0x00:	chn.dwFlags.reset(CHN_SURROUND);	break;
+	case 0x00: chn.dwFlags.reset(CHN_SURROUND); break;
 	// S91: Surround On
-	case 0x01:	chn.dwFlags.set(CHN_SURROUND); chn.nPan = 128; break;
+	case 0x01: chn.dwFlags.set(CHN_SURROUND); chn.nPan = 128; break;
 
 	////////////////////////////////////////////////////////////
 	// ModPlug Extensions
@@ -4898,19 +4899,19 @@ void CSoundFile::ExtendedChannelEffect(ModChannel &chn, uint32 param)
 		break;
 	// S9A: 2-Channels surround mode
 	case 0x0A:
-		m_PlayState.m_flags.reset(SONG_SURROUNDPAN);
+		playState.m_flags.reset(SONG_SURROUNDPAN);
 		break;
 	// S9B: 4-Channels surround mode
 	case 0x0B:
-		m_PlayState.m_flags.set(SONG_SURROUNDPAN);
+		playState.m_flags.set(SONG_SURROUNDPAN);
 		break;
 	// S9C: IT Filter Mode
 	case 0x0C:
-		m_PlayState.m_flags.reset(SONG_MPTFILTERMODE);
+		playState.m_flags.reset(SONG_MPTFILTERMODE);
 		break;
 	// S9D: MPT Filter Mode
 	case 0x0D:
-		m_PlayState.m_flags.set(SONG_MPTFILTERMODE);
+		playState.m_flags.set(SONG_MPTFILTERMODE);
 		break;
 	// S9E: Go forward
 	case 0x0E:

@@ -1155,7 +1155,7 @@ protected:
 	bool HandleNextRow(PlayState &state, const ModSequence &order, bool honorPatternLoop) const;
 	void ExtendedMODCommands(CHANNELINDEX nChn, ModCommand::PARAM param);
 	void ExtendedS3MCommands(CHANNELINDEX nChn, ModCommand::PARAM param);
-	void ExtendedChannelEffect(ModChannel &chn, uint32 param);
+	void ExtendedChannelEffect(ModChannel &chn, uint32 param, PlayState &playState) const;
 	void InvertLoop(ModChannel &chn);
 	void PositionJump(PlayState &state, CHANNELINDEX chn) const;
 	ROWINDEX PatternBreak(PlayState &state, CHANNELINDEX chn, uint8 param) const;
