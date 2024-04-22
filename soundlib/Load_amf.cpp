@@ -578,12 +578,12 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 
 	if(isDMF)
 	{
-		m_modFormat.formatName = MPT_UFORMAT("DSMI Compact v{}")(fileSignature.version);
+		m_modFormat.formatName = MPT_UFORMAT("DSMI Compact Advanced Music Format v{}")(fileSignature.version);
 		m_modFormat.type = U_("dmf");
 	} else
 	{
 		m_songName = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, title);
-		m_modFormat.formatName = MPT_UFORMAT("DSMI v{}")(fileSignature.version);
+		m_modFormat.formatName = MPT_UFORMAT("DSMI Advanced Music Format v{}")(fileSignature.version);
 		m_modFormat.type = U_("amf");
 	}
 	m_modFormat.charset = mpt::Charset::CP437;
