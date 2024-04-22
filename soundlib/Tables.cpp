@@ -66,7 +66,7 @@ static constexpr ModFormatInfo modFormatInfo[] =
 	{ UL_("DigiBooster Pro"),                    "dbm" },
 	{ UL_("DigiBooster"),                        "digi" },
 	{ UL_("X-Tracker"),                          "dmf" },
-	{ UL_("DSMI Compact Advanced Music Format"), "dmf" },
+	{ UL_("DSMI Advanced Music Format (Compact)"), "dmf" },
 	{ UL_("DSIK Format"),                        "dsm" },
 	{ UL_("Dynamic Studio"),                     "dsm" },
 	{ UL_("Digital Symphony"),                   "dsym" },
