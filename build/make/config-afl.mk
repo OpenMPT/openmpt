@@ -16,7 +16,7 @@ ifneq ($(STDCXX),)
 CXXFLAGS_STDCXX = -std=$(STDCXX) -fexceptions -frtti -pthread
 # We do not enable C++20 for fuzzer builds, because it prevents detecting
 # shifting of signed values which changed from undefined to defined behaviour
-# in C++20. As we still support C+ü+17, we need to catch these problem cases.
+# in C++20. As we still support C++17, we need to catch these problem cases.
 #else ifeq ($(shell printf '\n' > bin/empty.cpp ; if $(CXX) -std=c++20 -c bin/empty.cpp -o bin/empty.out > /dev/null 2>&1 ; then echo 'c++20' ; fi ), c++20)
 #CXXFLAGS_STDCXX = -std=c++20 -fexceptions -frtti -pthread
 else
