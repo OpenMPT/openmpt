@@ -66,6 +66,7 @@
 #include "mpt/base/span.hpp"
 #include "mpt/check/compiler.hpp"
 #include "mpt/check/libc.hpp"
+#include "mpt/check/libcxx.hpp"
 #if defined(MPT_WITH_MFC)
 #include "mpt/check/mfc.hpp"
 #endif
