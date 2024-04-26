@@ -439,14 +439,17 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	else
 		m_nSamplePreAmp = std::max(fileHeader.masterVolume & 0x7F, 0x10);  // Bit 7 = Stereo (we always use stereo)
 
-	const bool isStereo = (fileHeader.masterVolume & 0x80) != 0 || m_dwLastSavedWithVersion;
-	if(!isStereo)
-		m_nSamplePreAmp = Util::muldivr_unsigned(m_nSamplePreAmp, 8, 11);
-
 	// Approximately as loud as in DOSBox and a real SoundBlaster 16
 	m_nVSTiVolume = 36;
 	if(isSchism && schismDateVersion < SchismVersionFromDate<2018, 11, 12>::date)
 		m_nVSTiVolume = 64;
+
+	const bool isStereo = (fileHeader.masterVolume & 0x80) != 0 || m_dwLastSavedWithVersion;
+	if(!isStereo)
+	{
+		m_nSamplePreAmp = Util::muldivr_unsigned(m_nSamplePreAmp, 8, 11);
+		m_nVSTiVolume = Util::muldivr_unsigned(m_nVSTiVolume, 8, 11);
+	}
 
 	// Channel setup
 	m_nChannels = 4;
@@ -491,8 +494,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	// Read extended channel panning
 	if(fileHeader.usePanningTable == S3MFileHeader::idPanning)
 	{
-		uint8 pan[32];
-		file.ReadArray(pan);
+		const auto pan = file.ReadArray<uint8, 32>();
 		for(CHANNELINDEX i = 0; i < 32; i++)
 		{
 			if((pan[i] & 0x20) != 0 && (!isST3 || !isAdlibChannel[i]))
@@ -839,7 +841,8 @@ bool CSoundFile::SaveS3M(std::ostream &f) const
 
 	// Write patterns
 	enum class S3MChannelType : uint8 { kUnused = 0, kPCM = 1, kAdlib = 2 };
-	FlagSet<S3MChannelType> channelType[32] = { S3MChannelType::kUnused };
+	std::array<FlagSet<S3MChannelType>, 32> channelType;
+	channelType.fill(S3MChannelType::kUnused);
 	bool globalCmdOnMutedChn = false;
 	for(PATTERNINDEX pat = 0; pat < writePatterns; pat++)
 	{
