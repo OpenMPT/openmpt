@@ -23,8 +23,10 @@ Dependencies
      *  **Microsoft Visual Studio 2017 XP targeting toolset**
      *  **GCC 7.1** or higher
      *  **Clang 6** or higher
-     *  **MinGW-W64 7.1** or higher (it is recommended to preferably use
-        posix threading model as opposed to win32 threading model)
+     *  **MinGW-W64 7.1 (posix threading model)**  or higher
+     *  **MinGW-W64 13.1 (mcfgthread threading model)**  or higher
+     *  **MinGW-W64 7.1 (win32 threading model)** up to
+        **MinGW-W64 13.0 (win32 threading model)** 
      *  **emscripten 3.1.1** or higher
      *  **DJGPP GCC 7.1** or higher
      *  any other **C++20 or C++17 compliant** compiler
