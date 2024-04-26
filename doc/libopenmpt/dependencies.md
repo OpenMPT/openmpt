@@ -24,7 +24,7 @@ Dependencies
      *  **GCC 7.1** or higher
      *  **Clang 6** or higher
      *  **MinGW-W64 7.1** or higher (it is recommended to preferably use
-        posix threading model as opposed to win32 threading model)
+        mcfgthread or posix threading model as opposed to win32 threading model)
      *  **emscripten 3.1.1** or higher
      *  **DJGPP GCC 7.1** or higher
      *  any other **C++20 or C++17 compliant** compiler
