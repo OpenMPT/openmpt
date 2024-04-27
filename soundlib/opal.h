@@ -22,6 +22,7 @@
 
 
 #include <cstdint>
+#include "../common/mptBaseUtils.h"
 
 
 
@@ -574,9 +575,9 @@ void Opal::Sample(int16_t *left, int16_t *right) {
     }
 
     // Mix with the partial accumulation
-    int32_t omblend = SampleRate - SampleAccum;
-    *left = static_cast<uint16_t>((LastOutput[0] * omblend + CurrOutput[0] * SampleAccum) / SampleRate);
-    *right = static_cast<uint16_t>((LastOutput[1] * omblend + CurrOutput[1] * SampleAccum) / SampleRate);
+    const int32_t fract = Util::muldivr(SampleAccum, 65536, SampleRate);
+    *left = static_cast<int16_t>(LastOutput[0] + ((fract * (CurrOutput[0] - LastOutput[0])) / 65536));
+    *right = static_cast<int16_t>(LastOutput[1] + ((fract * (CurrOutput[1] - LastOutput[1])) / 65536));
 
     SampleAccum += OPL3SampleRate;
 }
@@ -606,14 +607,14 @@ void Opal::Output(int16_t &left, int16_t &right) {
     else if (leftmix > 0x7FFF)
         left = 0x7FFF;
     else
-        left = static_cast<uint16_t>(leftmix);
+        left = static_cast<int16_t>(leftmix);
 
     if (rightmix < -0x8000)
         right = -0x8000;
     else if (rightmix > 0x7FFF)
         right = 0x7FFF;
     else
-        right = static_cast<uint16_t>(rightmix);
+        right = static_cast<int16_t>(rightmix);
 
     Clock++;
 
