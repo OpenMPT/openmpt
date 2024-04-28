@@ -558,6 +558,9 @@
     <ClInclude Include="..\..\mptrack\PlugNotFoundDlg.h">
       <Filter>mptrack</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\mptrack\PluginComboBox.h">
+      <Filter>mptrack</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\mptrack\ProgressDialog.h">
       <Filter>mptrack</Filter>
     </ClInclude>
@@ -1845,6 +1848,9 @@
       <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\PlugNotFoundDlg.cpp">
+      <Filter>mptrack</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mptrack\PluginComboBox.cpp">
       <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\ProgressDialog.cpp">

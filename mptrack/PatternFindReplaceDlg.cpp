@@ -366,11 +366,14 @@ void CFindReplaceTab::UpdateInstrumentList()
 		if(m_settings.findInstrMin < m_settings.findInstrMax)
 			sel = 1;
 	}
+	// Did we switch from an instrument index > MAX_MIXPLUGINS to plugin list?
+	const bool updateInstr = (sel == -1 && isPCEvent && oldSelection > MAX_MIXPLUGINS);
 	if(sel == -1)
 		sel = m_cbnInstr.GetCount() + oldSelection - 1;
+
 	if(isPCEvent)
 	{
-		AddPluginNamesToCombobox(m_cbnInstr, m_sndFile.m_MixPlugins, false);
+		m_cbnInstr.Update(PluginComboBox::Config{PluginComboBox::ShowEmptySlots | PluginComboBox::DoNotResetContent}, m_sndFile);
 	} else
 	{
 		CString s;
@@ -384,9 +387,11 @@ void CFindReplaceTab::UpdateInstrumentList()
 			m_cbnInstr.SetItemData(m_cbnInstr.AddString(s), n);
 		}
 	}
-	m_cbnInstr.SetCurSel(sel);
+	m_cbnInstr.SetRawSelection(sel);
 	m_cbnInstr.SetRedraw(TRUE);
 	m_cbnInstr.Invalidate(FALSE);
+	if(updateInstr)
+		OnInstrChanged();
 }
 
 
@@ -492,25 +497,30 @@ void CFindReplaceTab::UpdateVolumeList()
 	m_cbnParam.EnableWindow(enable);
 
 	// Update plugin parameter list
-	int plug = static_cast<int>(m_cbnInstr.GetItemData(m_cbnInstr.GetCurSel()));
-	if(isPCEvent && (m_cbnPCParam.GetCount() == 0 || GetWindowLongPtr(m_cbnPCParam.m_hWnd, GWLP_USERDATA) != plug))
+	PLUGINDEX plug = PLUGINDEX_INVALID;
+	int plugData = 0;
+	if(int sel = m_cbnInstr.GetRawSelection(); sel >= 0 && m_cbnInstr.GetItemData(sel) < kBeginSpecial)
 	{
-		SetWindowLongPtr(m_cbnPCParam.m_hWnd, GWLP_USERDATA, plug);
+		plug = m_cbnInstr.GetSelection().value_or(PLUGINDEX_INVALID);
+		plugData = (plug != PLUGINDEX_INVALID) ? plug + 1 : 0;
+	}
+	if(isPCEvent && (m_cbnPCParam.GetCount() == 0 || GetWindowLongPtr(m_cbnPCParam.m_hWnd, GWLP_USERDATA) != plugData))
+	{
+		SetWindowLongPtr(m_cbnPCParam.m_hWnd, GWLP_USERDATA, plugData);
 
 		CheckDlgButton(IDC_CHECK5, BST_UNCHECKED);
 		CheckDlgButton(IDC_CHECK6, BST_UNCHECKED);
 
 		int sel = m_isReplaceTab ? m_settings.replaceParam : m_settings.findParamMin;
-		plug--;
 		m_cbnPCParam.SetRedraw(FALSE);
 		m_cbnPCParam.ResetContent();
-		if(plug >= 0 && plug < MAX_MIXPLUGINS && m_sndFile.m_MixPlugins[plug].pMixPlugin != nullptr)
+		if(plug < MAX_MIXPLUGINS && m_sndFile.m_MixPlugins[plug].pMixPlugin != nullptr)
 		{
 			AddPluginParameternamesToCombobox(m_cbnPCParam, *m_sndFile.m_MixPlugins[plug].pMixPlugin);
 		} else
 		{
 			m_cbnPCParam.InitStorage(ModCommand::maxColumnValue + 1, 20);
-			for(int i = 0; i < ModCommand::maxColumnValue + 1; i++)
+			for(int i = 0; i <= ModCommand::maxColumnValue; i++)
 			{
 				wsprintf(s, _T("%02u: Parameter %02u"), static_cast<unsigned int>(i), static_cast<unsigned int>(i));
 				m_cbnPCParam.SetItemData(m_cbnPCParam.AddString(s), i);
@@ -656,7 +666,15 @@ void CFindReplaceTab::OnNoteChanged()
 void CFindReplaceTab::OnInstrChanged()
 {
 	CheckOnChange(IDC_CHECK2);
-	int item = static_cast<int>(m_cbnInstr.GetItemData(m_cbnInstr.GetCurSel()));
+	int item = static_cast<int>(m_cbnInstr.GetItemData(m_cbnInstr.GetRawSelection()));
+	if(item < kBeginSpecial && IsPCEvent())
+	{
+		if(auto sel = m_cbnInstr.GetSelection(); sel)
+			item = *sel + 1;
+		else
+			item = 0;
+	}
+
 	if(m_isReplaceTab)
 	{
 		m_settings.replaceInstrAction = FindReplace::ReplaceRelative;

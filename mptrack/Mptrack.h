@@ -420,13 +420,6 @@ void DrawButtonRect(HDC hdc, const RECT *lpRect, LPCWSTR lpszText = nullptr, BOO
 // Misc functions
 void ErrorBox(UINT nStringID, CWnd *p = nullptr);
 
-// Helper function declarations.
-struct SNDMIXPLUGIN;
-class IMixPlugin;
-void AddPluginNamesToCombobox(CComboBox &CBox, const std::array<SNDMIXPLUGIN, MAX_MIXPLUGINS> &plugins, const bool libraryName = false, const PLUGINDEX updatePlug = PLUGINDEX_INVALID);
-void AddPluginParameternamesToCombobox(CComboBox &CBox, SNDMIXPLUGIN &plugarray);
-void AddPluginParameternamesToCombobox(CComboBox &CBox, IMixPlugin &plug);
-
 // Append note names in range [noteStart, noteEnd] to given combobox. Index starts from 0.
 void AppendNotesToControl(CComboBox &combobox, ModCommand::NOTE noteStart, ModCommand::NOTE noteEnd);
 
@@ -443,6 +436,7 @@ CString GetWindowTextString(const CWnd &wnd);
 mpt::ustring GetWindowTextUnicode(const CWnd &wnd);
 
 CString FormatFileSize(uint64 fileSize);
+
 
 ///////////////////////////////////////////////////
 // Tables

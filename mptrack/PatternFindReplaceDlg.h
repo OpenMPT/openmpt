@@ -15,6 +15,7 @@
 #include "EffectInfo.h"
 #include "PatternCursor.h"
 #include "PatternFindReplace.h"
+#include "PluginComboBox.h"
 #include "resource.h"
 
 OPENMPT_NAMESPACE_BEGIN
@@ -25,7 +26,8 @@ OPENMPT_NAMESPACE_BEGIN
 class CFindReplaceTab: public CPropertyPage
 {
 protected:
-	CComboBox m_cbnNote, m_cbnInstr, m_cbnVolCmd, m_cbnVolume, m_cbnCommand, m_cbnParam, m_cbnPCParam;
+	CComboBox m_cbnNote, m_cbnVolCmd, m_cbnVolume, m_cbnCommand, m_cbnParam, m_cbnPCParam;
+	PluginComboBox m_cbnInstr;
 
 	CSoundFile &m_sndFile;
 	FindReplace &m_settings;
@@ -49,6 +51,8 @@ protected:
 
 		kReplaceInstrumentMinusOne = INT_MAX - 5,
 		kReplaceInstrumentPlusOne = INT_MAX - 6,
+
+		kBeginSpecial = kReplaceInstrumentPlusOne
 	};
 
 public:

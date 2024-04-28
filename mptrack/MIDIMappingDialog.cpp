@@ -128,7 +128,7 @@ BOOL CMIDIMappingDialog::OnInitDialog()
 	}
 
 	// Add plugin names
-	AddPluginNamesToCombobox(m_PluginCBox, m_sndFile.m_MixPlugins);
+	m_PluginCBox.Update(PluginComboBox::Config{PluginComboBox::ShowEmptySlots}, m_sndFile);
 
 	// Initialize mapping table
 	static constexpr CListCtrlEx::Header headers[] =
@@ -243,7 +243,10 @@ void CMIDIMappingDialog::UpdateDialog(int selItem)
 	}
 
 	m_ControllerCBox.SetCurSel(m_Setting.GetController());
-	m_PluginCBox.SetCurSel(m_Setting.GetPlugIndex() - 1);
+	if(PLUGINDEX plug = m_Setting.GetPlugIndex(); plug > 0)
+		m_PluginCBox.SetSelection(plug - 1);
+	else
+		m_PluginCBox.SetSelection(PLUGINDEX_INVALID);
 	m_PlugParamCBox.SetCurSel(m_Setting.GetParamIndex());
 
 	UpdateEvent();
@@ -343,9 +346,10 @@ void CMIDIMappingDialog::OnCbnSelchangeComboChannel()
 
 void CMIDIMappingDialog::OnCbnSelchangeComboPlugin()
 {
-	int i = m_PluginCBox.GetCurSel();
-	if(i < 0 || i >= MAX_MIXPLUGINS) return;
-	m_Setting.SetPlugIndex(i+1);
+	PLUGINDEX i = m_PluginCBox.GetSelection().value_or(PLUGINDEX_INVALID);
+	if(i >= MAX_MIXPLUGINS)
+		return;
+	m_Setting.SetPlugIndex(i + 1);
 	UpdateParameters();
 }
 

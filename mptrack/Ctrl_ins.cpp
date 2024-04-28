@@ -1202,7 +1202,7 @@ void CCtrlInstruments::OnActivatePage(LPARAM lParam)
 		m_parent.InstrumentChanged(static_cast<INSTRUMENTINDEX>(lParam));
 	}
 
-	UpdatePluginList();
+	m_CbnMixPlug.Update(PluginComboBox::Config{PluginComboBox::ShowNoPlugin | PluginComboBox::ShowEmptySlots}, m_sndFile);
 
 	CChildFrame *pFrame = (CChildFrame *)GetParentFrame();
 	INSTRUMENTVIEWSTATE &instrumentState = pFrame->GetInstrumentViewState();
@@ -1302,9 +1302,9 @@ void CCtrlInstruments::UpdateView(UpdateHint hint, CObject *pObj)
 		hint.ModType(); // For possibly updating note names in Pitch/Pan Separation dropdown
 	}
 	LockControls();
-	if(hint.ToType<PluginHint>().GetType()[HINT_PLUGINNAMES])
+	if(hint.ToType<PluginHint>().GetType()[HINT_PLUGINNAMES | HINT_MODTYPE])
 	{
-		UpdatePluginList();
+		m_CbnMixPlug.Update(PluginComboBox::Config{hint, pObj}, m_sndFile);
 	}
 	if(hint.ToType<GeneralHint>().GetType()[HINT_TUNINGS | HINT_MODTYPE])
 	{
@@ -1455,12 +1455,12 @@ void CCtrlInstruments::UpdateView(UpdateHint hint, CObject *pObj)
 			{
 				m_CbnMidiCh.SetCurSel(0);
 			}
-			if (pIns->nMixPlug <= MAX_MIXPLUGINS)
+			if (pIns->nMixPlug > 0)
 			{
-				m_CbnMixPlug.SetCurSel(pIns->nMixPlug);
+				m_CbnMixPlug.SetSelection(pIns->nMixPlug - 1);
 			} else
 			{
-				m_CbnMixPlug.SetCurSel(0);
+				m_CbnMixPlug.SetSelection(PLUGINDEX_INVALID);
 			}
 			OnMixPlugChanged();
 			for(int resMode = 0; resMode<m_CbnResampling.GetCount(); resMode++)
@@ -1532,7 +1532,7 @@ void CCtrlInstruments::UpdateView(UpdateHint hint, CObject *pObj)
 
 			if(m_sndFile.GetType() & (MOD_TYPE_XM|MOD_TYPE_IT|MOD_TYPE_MPT))
 			{
-				BOOL enableVol = (m_CbnMixPlug.GetCurSel() > 0 && !m_sndFile.m_playBehaviour[kMIDICCBugEmulation]) ? TRUE : FALSE;
+				BOOL enableVol = (m_CbnMixPlug.GetSelection() != PLUGINDEX_INVALID && !m_sndFile.m_playBehaviour[kMIDICCBugEmulation]) ? TRUE : FALSE;
 				velocityStyle.EnableWindow(enableVol);
 				m_CbnPluginVolumeHandling.EnableWindow(enableVol);
 			}
@@ -1557,10 +1557,6 @@ void CCtrlInstruments::UpdateView(UpdateHint hint, CObject *pObj)
 		m_CbnFilterMode.Invalidate(FALSE);
 		m_CbnPluginVolumeHandling.Invalidate(FALSE);
 		m_ComboTuning.Invalidate(FALSE);
-	}
-	if(hint.ToType<PluginHint>().GetType()[HINT_MIXPLUGINS | HINT_PLUGINNAMES | HINT_MODTYPE])
-	{
-		UpdatePluginList();
 	}
 
 	if (!m_bInitialized)
@@ -2477,24 +2473,24 @@ void CCtrlInstruments::OnResamplingChanged()
 void CCtrlInstruments::OnMixPlugChanged()
 {
 	ModInstrument *pIns = m_sndFile.Instruments[m_nInstrument];
-	PLUGINDEX nPlug = static_cast<PLUGINDEX>(m_CbnMixPlug.GetItemData(m_CbnMixPlug.GetCurSel()));
+	const PLUGINDEX nPlug = m_CbnMixPlug.GetSelection().value_or(PLUGINDEX_INVALID);
 
 	bool wasOpenedWithMouse = m_openendPluginListWithMouse;
 	m_openendPluginListWithMouse = false;
 
 	if (pIns)
 	{
-		BOOL enableVol = (nPlug < 1 || m_sndFile.m_playBehaviour[kMIDICCBugEmulation]) ? FALSE : TRUE;
+		BOOL enableVol = (nPlug == PLUGINDEX_INVALID || m_sndFile.m_playBehaviour[kMIDICCBugEmulation]) ? FALSE : TRUE;
 		velocityStyle.EnableWindow(enableVol);
 		m_CbnPluginVolumeHandling.EnableWindow(enableVol);
 
-		if(nPlug >= 0 && nPlug <= MAX_MIXPLUGINS)
+		if(nPlug < MAX_MIXPLUGINS)
 		{
 			bool active = !IsLocked();
-			if (active && pIns->nMixPlug != nPlug)
+			if (active && pIns->nMixPlug != (nPlug + 1))
 			{
 				PrepareUndo("Set Plugin");
-				pIns->nMixPlug = nPlug;
+				pIns->nMixPlug = nPlug + 1;
 				SetModified(InstrumentHint().Info(), false);
 			}
 
@@ -2510,16 +2506,14 @@ void CCtrlInstruments::OnMixPlugChanged()
 				if(!plugin.IsValidPlugin() && active && wasOpenedWithMouse)
 				{
 					// No plugin in this slot yet: Ask user to add one.
-					CSelectPluginDlg dlg(&m_modDoc, nPlug - 1, this);
+					CSelectPluginDlg dlg(&m_modDoc, nPlug, this);
 					if (dlg.DoModal() == IDOK)
 					{
 						if(m_sndFile.GetModSpecifications().supportsPlugins)
 						{
 							m_modDoc.SetModified();
 						}
-						UpdatePluginList();
-
-						m_modDoc.UpdateAllViews(nullptr, PluginHint(nPlug).Info().Names());
+						m_modDoc.UpdateAllViews(nullptr, PluginHint(nPlug + 1).Info().Names());
 					}
 				}
 
@@ -2845,7 +2839,7 @@ void CCtrlInstruments::TogglePluginEditor()
 {
 	if(m_nInstrument)
 	{
-		m_modDoc.TogglePluginEditor(static_cast<PLUGINDEX>(m_CbnMixPlug.GetItemData(m_CbnMixPlug.GetCurSel()) - 1), CMainFrame::GetInputHandler()->ShiftPressed());
+		m_modDoc.TogglePluginEditor(m_CbnMixPlug.GetSelection().value_or(PLUGINDEX_INVALID), CMainFrame::GetInputHandler()->ShiftPressed());
 	}
 }
 
@@ -3143,22 +3137,6 @@ void CCtrlInstruments::BuildTuningComboBox()
 	m_ComboTuning.AddString(_T("Control Tunings..."));
 	UpdateTuningComboBox();
 	m_ComboTuning.SetRedraw(TRUE);
-}
-
-
-void CCtrlInstruments::UpdatePluginList()
-{
-	m_CbnMixPlug.SetRedraw(FALSE);
-	m_CbnMixPlug.Clear();
-	m_CbnMixPlug.ResetContent();
-#ifndef NO_PLUGINS
-	m_CbnMixPlug.SetItemData(m_CbnMixPlug.AddString(_T("No plugin")), 0);
-	AddPluginNamesToCombobox(m_CbnMixPlug, m_sndFile.m_MixPlugins, false);
-#endif // NO_PLUGINS
-	m_CbnMixPlug.Invalidate(FALSE);
-	m_CbnMixPlug.SetRedraw(TRUE);
-	ModInstrument *pIns = m_sndFile.Instruments[m_nInstrument];
-	if ((pIns) && (pIns->nMixPlug <= MAX_MIXPLUGINS)) m_CbnMixPlug.SetCurSel(pIns->nMixPlug);
 }
 
 

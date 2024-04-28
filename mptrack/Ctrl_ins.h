@@ -15,6 +15,7 @@
 
 #include "CDecimalSupport.h"
 #include "Globals.h"
+#include "PluginComboBox.h"
 #include "../soundlib/modcommand.h"
 
 OPENMPT_NAMESPACE_BEGIN
@@ -97,7 +98,8 @@ protected:
 	CModControlBar m_ToolBar;
 	CSpinButtonCtrl m_SpinInstrument, m_SpinFadeOut, m_SpinGlobalVol, m_SpinPanning;
 	CSpinButtonCtrl m_SpinMidiPR, m_SpinPPS, m_SpinMidiBK, m_SpinPWD;
-	CComboBox m_ComboNNA, m_ComboDCT, m_ComboDCA, m_ComboPPC, m_CbnMidiCh, m_CbnMixPlug, m_CbnResampling, m_CbnFilterMode, m_CbnPluginVolumeHandling;
+	CComboBox m_ComboNNA, m_ComboDCT, m_ComboDCA, m_ComboPPC, m_CbnMidiCh, m_CbnResampling, m_CbnFilterMode, m_CbnPluginVolumeHandling;
+	PluginComboBox m_CbnMixPlug;
 	CEdit m_EditName, m_EditFileName, m_EditGlobalVol, m_EditPanning, m_EditFadeOut;
 	CNumberEdit m_EditPPS, m_EditPWD;
 	CButton m_CheckPanning, m_CheckCutOff, m_CheckResonance, velocityStyle;
@@ -119,8 +121,6 @@ protected:
 	void UpdateTuningComboBox();
 	void BuildTuningComboBox();
 
-	void UpdatePluginList();
-	
 public:
 	CCtrlInstruments(CModControlView &parent, CModDoc &document);
 

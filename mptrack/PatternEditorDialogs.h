@@ -15,6 +15,7 @@
 #include "dlg_misc.h"	// for keyboard control
 #include "EffectInfo.h"
 #include "PatternCursor.h"
+#include "PluginComboBox.h"
 #include "TrackerSettings.h"
 #include "ResizableDialog.h"
 #include "resource.h"
@@ -57,7 +58,8 @@ protected:
 class CEditCommand: public CDialog
 {
 protected:
-	CComboBox cbnNote, cbnInstr, cbnVolCmd, cbnCommand, cbnPlugParam;
+	CComboBox cbnNote, cbnVolCmd, cbnCommand, cbnPlugParam;
+	PluginComboBox cbnInstr;
 	CSliderCtrl sldVolParam, sldParam;
 	CSoundFile &sndFile;
 	const CModSpecifications *oldSpecs = nullptr;

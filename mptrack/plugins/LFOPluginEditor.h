@@ -13,6 +13,7 @@
 #include "openmpt/all/BuildSettings.hpp"
 
 #include "../AbstractVstEditor.h"
+#include "../PluginComboBox.h"
 #include "../../soundlib/plugins/LFOPlugin.h"
 
 OPENMPT_NAMESPACE_BEGIN
@@ -22,7 +23,8 @@ struct UpdateHint;
 class LFOPluginEditor : public CAbstractVstEditor
 {
 protected:
-	CComboBox m_plugParam, m_outPlug, m_midiCC;
+	CComboBox m_plugParam, m_midiCC;
+	PluginComboBox m_outPlug;
 	CSliderCtrl m_amplitudeSlider, m_offsetSlider, m_frequencySlider;
 	CEdit m_midiChnEdit;
 	CSpinButtonCtrl m_midiChnSpin;

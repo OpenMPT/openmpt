@@ -14,8 +14,9 @@
 
 #ifndef NO_PLUGINS
 
-#include "MIDIMapping.h"
 #include "CListCtrl.h"
+#include "MIDIMapping.h"
+#include "PluginComboBox.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -35,7 +36,7 @@ protected:
 
 	// Dialog Data
 	CComboBox m_ControllerCBox;
-	CComboBox m_PluginCBox;
+	PluginComboBox m_PluginCBox;
 	CComboBox m_PlugParamCBox;
 	CComboBox m_ChannelCBox;
 	CComboBox m_EventCBox;

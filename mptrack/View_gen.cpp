@@ -21,7 +21,6 @@
 #include "Mainfrm.h"
 #include "Moddoc.h"
 #include "MoveFXSlotDialog.h"
-#include "Mptrack.h"
 #include "Reporting.h"
 #include "SelectPluginDialog.h"
 #include "../common/mptStringBuffer.h"
@@ -318,11 +317,12 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 	const CModDoc *pModDoc = GetDocument();
 	int nTabCount, nTabIndex;
 
-	if (!pModDoc || pObject == this ) return;
+	if(!pModDoc || pObject == this)
+		return;
 	const CSoundFile &sndFile = pModDoc->GetSoundFile();
 	const GeneralHint genHint = hint.ToType<GeneralHint>();
 	const PluginHint plugHint = hint.ToType<PluginHint>();
-	if (!genHint.GetType()[HINT_MODTYPE | HINT_MODCHANNELS]
+	if(!genHint.GetType()[HINT_MODTYPE | HINT_MODCHANNELS]
 		&& !plugHint.GetType()[HINT_MIXPLUGINS | HINT_PLUGINNAMES | HINT_PLUGINPARAM])
 	{
 		return;
@@ -429,8 +429,12 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 	// Update plugin names
 	if(genHint.GetType()[HINT_MODTYPE | HINT_MODCHANNELS] || plugHint.GetType()[HINT_PLUGINNAMES])
 	{
-		PopulateChannelPlugins(plugHint.GetPlugin() ? plugHint.GetPlugin() - 1 : PLUGINDEX_INVALID);
-		SetDlgItemText(IDC_EDIT13, mpt::ToCString(sndFile.m_MixPlugins[m_nCurrentPlugin].GetName()));
+		PopulateChannelPlugins(hint, pObject);
+		if(plugHint.GetType()[HINT_MODTYPE | HINT_PLUGINNAMES])
+		{
+			m_CbnPlugin.Update(PluginComboBox::Config{PluginComboBox::ShowEmptySlots | PluginComboBox::ShowLibraryNames}.Hint(plugHint, pObject).CurrentSelection(m_nCurrentPlugin), sndFile);
+			SetDlgItemText(IDC_EDIT13, mpt::ToCString(sndFile.m_MixPlugins[m_nCurrentPlugin].GetName()));
+		}
 	}
 	// Update plugin info
 	const SNDMIXPLUGIN &plugin = sndFile.m_MixPlugins[m_nCurrentPlugin];
@@ -438,14 +442,9 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 	const bool updateWholePluginView = updateAll || (plugHint.GetType()[HINT_MIXPLUGINS] && updatePlug);
 	if(updateWholePluginView)
 	{
-		const PLUGINDEX plugIndex = (plugHint.GetPlugin() != 0) ? plugHint.GetPlugin() - 1 : PLUGINDEX_INVALID;
-		m_CbnPlugin.SetRedraw(FALSE);
-		if(plugIndex == PLUGINDEX_INVALID)
-			m_CbnPlugin.ResetContent();
-		AddPluginNamesToCombobox(m_CbnPlugin, sndFile.m_MixPlugins, true, plugIndex);
-		m_CbnPlugin.SetRedraw(TRUE);
-		m_CbnPlugin.SetCurSel(m_nCurrentPlugin);
-		if (m_nCurrentPlugin >= MAX_MIXPLUGINS) m_nCurrentPlugin = 0;
+		if(m_nCurrentPlugin >= MAX_MIXPLUGINS)
+			m_nCurrentPlugin = 0;
+		m_CbnPlugin.SetSelection(m_nCurrentPlugin);
 		SetDlgItemText(IDC_EDIT13, mpt::ToCString(plugin.GetName()));
 		CheckDlgButton(IDC_CHECK9, plugin.IsMasterEffect() ? BST_CHECKED : BST_UNCHECKED);
 		CheckDlgButton(IDC_CHECK10, plugin.IsBypassed() ? BST_CHECKED : BST_UNCHECKED);
@@ -609,57 +608,15 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 }
 
 
-void CViewGlobals::PopulateChannelPlugins(PLUGINDEX plugin)
+void CViewGlobals::PopulateChannelPlugins(UpdateHint hint, const CObject *pObj)
 {
-	// Channel effect lists
 	const CSoundFile &sndFile = GetDocument()->GetSoundFile();
-	CString s;
 	for(CHANNELINDEX ichn = 0; ichn < CHANNELS_IN_TAB; ichn++)
 	{
-		const CHANNELINDEX nChn = m_nActiveTab * CHANNELS_IN_TAB + ichn;
-		auto &comboBox = m_CbnEffects[ichn];
-		if(nChn < MAX_BASECHANNELS)
+		if(const CHANNELINDEX nChn = m_nActiveTab * CHANNELS_IN_TAB + ichn; nChn < MAX_BASECHANNELS)
 		{
-			comboBox.SetRedraw(FALSE);
-			int insertAt = 1;
-			if(plugin == PLUGINDEX_INVALID)
-			{
-				comboBox.ResetContent();
-				comboBox.SetItemData(comboBox.AddString(_T("No plugin")), 0);
-			} else
-			{
-				const int items = comboBox.GetCount();
-				for(insertAt = 1; insertAt < items; insertAt++)
-				{
-					auto thisPlugin = static_cast<PLUGINDEX>(comboBox.GetItemData(insertAt));
-					if(thisPlugin == (plugin + 1))
-						comboBox.DeleteString(insertAt);
-					if(thisPlugin >= (plugin + 1))
-						break;
-				}
-			}
-			int fxsel = 0;
-			for(PLUGINDEX ifx = 0; ifx < MAX_MIXPLUGINS; ifx++)
-			{
-				if(plugin != PLUGINDEX_INVALID && ifx != plugin)
-					continue;
-				if(sndFile.m_MixPlugins[ifx].IsValidPlugin()
-					|| (sndFile.m_MixPlugins[ifx].GetName() != U_(""))
-					|| (sndFile.ChnSettings[nChn].nMixPlugin == ifx + 1))
-				{
-					s = MPT_CFORMAT("FX{}: ")(ifx + 1);
-					s += mpt::ToCString(sndFile.m_MixPlugins[ifx].GetName());
-					insertAt = comboBox.InsertString(insertAt, s);
-					comboBox.SetItemData(insertAt, ifx + 1);
-					if(sndFile.ChnSettings[nChn].nMixPlugin == ifx + 1)
-						fxsel = insertAt;
-					insertAt++;
-				}
-			}
-			comboBox.SetRedraw(TRUE);
-			if(plugin == PLUGINDEX_INVALID || fxsel > 0)
-				comboBox.SetCurSel(fxsel);
-			comboBox.Invalidate(FALSE);
+			PLUGINDEX sel = sndFile.ChnSettings[nChn].nMixPlugin ? sndFile.ChnSettings[nChn].nMixPlugin - 1 : PLUGINDEX_INVALID;
+			m_CbnEffects[ichn].Update(PluginComboBox::Config{PluginComboBox::ShowNoPlugin}.Hint(hint, pObj).CurrentSelection(sel), sndFile);
 		}
 	}
 }
@@ -1008,12 +965,15 @@ void CViewGlobals::OnFxChanged(const CHANNELINDEX chnMod4)
 	{
 		CSoundFile &sndFile = pModDoc->GetSoundFile();
 		CHANNELINDEX nChn = m_nActiveTab * CHANNELS_IN_TAB + chnMod4;
-		int nfx = static_cast<int>(m_CbnEffects[chnMod4].GetItemData(m_CbnEffects[chnMod4].GetCurSel()));
-		if ((nfx >= 0) && (nfx <= MAX_MIXPLUGINS) && (nChn < sndFile.GetNumChannels())
-		 && (sndFile.ChnSettings[nChn].nMixPlugin != (UINT)nfx))
+		PLUGINDEX nfx = m_CbnEffects[chnMod4].GetSelection().value_or(PLUGINDEX_INVALID);
+		if(nfx == PLUGINDEX_INVALID)
+			nfx = 0;
+		else
+			nfx++;
+		if(nChn < sndFile.GetNumChannels() && sndFile.ChnSettings[nChn].nMixPlugin != nfx)
 		{
 			PrepareUndo(chnMod4);
-			sndFile.ChnSettings[nChn].nMixPlugin = (PLUGINDEX)nfx;
+			sndFile.ChnSettings[nChn].nMixPlugin = nfx;
 			if(sndFile.GetModSpecifications().supportsPlugins)
 				pModDoc->SetModified();
 			pModDoc->UpdateAllViews(this, GeneralHint(nChn).Channels());
@@ -1044,21 +1004,16 @@ void CViewGlobals::OnPluginNameChanged()
 			plugin.Info.szName = mpt::ToCharset(mpt::Charset::Locale, s);
 			if(sndFile.GetModSpecifications().supportsPlugins)
 				pModDoc->SetModified();
-			pModDoc->UpdateAllViews(this, PluginHint(m_nCurrentPlugin + 1).Info().Names(), this);
+			const auto updateHint = PluginHint(m_nCurrentPlugin + 1).Names();
+			pModDoc->UpdateAllViews(this, updateHint, this);
 
 			IMixPlugin *pPlugin = plugin.pMixPlugin;
 			if(pPlugin != nullptr && pPlugin->GetEditor() != nullptr)
 			{
 				pPlugin->GetEditor()->SetTitle();
 			}
-			// Update channel plugin assignments
-			PopulateChannelPlugins(m_nCurrentPlugin);
-
-			m_CbnPlugin.SetRedraw(FALSE);
-			AddPluginNamesToCombobox(m_CbnPlugin, sndFile.m_MixPlugins, true, m_nCurrentPlugin);
-			m_CbnPlugin.SetCurSel(m_nCurrentPlugin);
-			m_CbnPlugin.Invalidate(FALSE);
-			m_CbnPlugin.SetRedraw(TRUE);
+			m_CbnPlugin.Update(PluginComboBox::Config{updateHint}, sndFile);
+			PopulateChannelPlugins(updateHint);
 		}
 	}
 }
@@ -1089,11 +1044,10 @@ void CViewGlobals::OnNextPlugin()
 
 void CViewGlobals::OnPluginChanged()
 {
-	CModDoc *pModDoc = GetDocument();
-	int nPlugin = m_CbnPlugin.GetCurSel();
-	if ((pModDoc) && (nPlugin >= 0) && (nPlugin < MAX_MIXPLUGINS))
+	const PLUGINDEX plugin = m_CbnPlugin.GetSelection().value_or(PLUGINDEX_INVALID);
+	if(plugin != PLUGINDEX_INVALID)
 	{
-		m_nCurrentPlugin = (PLUGINDEX)nPlugin;
+		m_nCurrentPlugin = plugin;
 		UpdateView(PluginHint(m_nCurrentPlugin + 1).Info());
 	}
 	m_CbnPreset.SetCurSel(0);
@@ -1437,7 +1391,7 @@ void CViewGlobals::OnOutputRoutingChanged()
 				SetPluginModified();
 				nroute = 0x80 + i;
 				m_nCurrentPlugin = i;
-				m_CbnPlugin.SetCurSel(i);
+				m_CbnPlugin.SetSelection(i);
 				OnPluginChanged();
 				break;
 			}
@@ -1521,7 +1475,7 @@ void CViewGlobals::OnMovePlugToSlot()
 			}
 		} while(dlg.DoMoveChain());
 
-		m_CbnPlugin.SetCurSel(dlg.GetSlot());
+		m_CbnPlugin.SetSelection(dlg.GetSlot());
 		OnPluginChanged();
 		GetDocument()->UpdateAllViews(nullptr, PluginHint().Names().Info());
 	}
@@ -1691,7 +1645,7 @@ void CViewGlobals::OnInsertSlot()
 			}
 		}
 
-		m_CbnPlugin.SetCurSel(m_nCurrentPlugin);
+		m_CbnPlugin.SetSelection(m_nCurrentPlugin);
 		OnPluginChanged();
 		GetDocument()->UpdateAllViews(nullptr, PluginHint().Names().Info());
 
@@ -1744,11 +1698,10 @@ void CViewGlobals::OnClonePlug()
 			}
 		} while(dlg.DoMoveChain());
 
-		m_CbnPlugin.SetCurSel(dlg.GetSlot());
+		m_CbnPlugin.SetSelection(dlg.GetSlot());
 		OnPluginChanged();
-		PopulateChannelPlugins();
-		CView *sender = dlg.DoMoveChain() ? nullptr : this;
-		GetDocument()->UpdateAllViews(sender, PluginHint().Names(), sender);
+		//PopulateChannelPlugins(PluginHint().Names());
+		GetDocument()->UpdateAllViews(nullptr, PluginHint().Names(), nullptr);
 
 		SetPluginModified();
 	}

@@ -469,8 +469,7 @@ void CEditCommand::InitNote()
 	if(m->IsPcNote())
 	{
 		// control plugin param note
-		cbnInstr.SetItemData(cbnInstr.AddString(_T("No Effect")), 0);
-		AddPluginNamesToCombobox(cbnInstr, sndFile.m_MixPlugins, false);
+		cbnInstr.Update(PluginComboBox::Config{PluginComboBox::ShowNoPlugin | PluginComboBox::ShowEmptySlots}.CurrentSelection(m->instr ? (m->instr - 1) : PLUGINDEX_INVALID), sndFile);
 	} else
 	{
 		// instrument / sample
@@ -488,8 +487,8 @@ void CEditCommand::InitNote()
 				s += mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.m_szNames[i]);
 			cbnInstr.SetItemData(cbnInstr.AddString(s), i);
 		}
+		cbnInstr.SetRawSelection(m->instr);
 	}
-	cbnInstr.SetCurSel(m->instr);
 	cbnInstr.SetRedraw(TRUE);
 }
 
@@ -662,9 +661,17 @@ void CEditCommand::OnNoteChanged()
 	if(n >= 0)
 		newNote = static_cast<ModCommand::NOTE>(cbnNote.GetItemData(n));
 
-	n = cbnInstr.GetCurSel();
-	if(n >= 0)
-		newInstr = static_cast<ModCommand::INSTR>(cbnInstr.GetItemData(n));
+	if(wasParamControl)
+	{
+		if(auto sel = cbnInstr.GetSelection(); sel)
+			newInstr = *sel + 1;
+		else
+			newInstr = 0;
+	} else
+	{
+		if(n = cbnInstr.GetRawSelection(); n >= 0)
+			newInstr = static_cast<ModCommand::INSTR>(cbnInstr.GetItemData(n));
+	}
 
 	if(m->note != newNote || m->instr != newInstr)
 	{

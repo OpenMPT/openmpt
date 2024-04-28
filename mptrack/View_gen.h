@@ -13,6 +13,7 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 #include "ColorPickerButton.h"
+#include "PluginComboBox.h"
 #include "resource.h"
 #include "UpdateHints.h"
 #include "WindowMessages.h"
@@ -32,8 +33,9 @@ class CViewGlobals: public CFormView
 protected:
 	CRect m_rcClient;
 	CTabCtrl m_TabCtrl;
-	CComboBox m_CbnEffects[CHANNELS_IN_TAB];
-	CComboBox m_CbnPlugin, m_CbnParam, m_CbnOutput;
+	PluginComboBox m_CbnEffects[CHANNELS_IN_TAB];
+	PluginComboBox m_CbnPlugin;
+	CComboBox m_CbnParam, m_CbnOutput;
 
 	CSliderCtrl m_sbVolume[CHANNELS_IN_TAB], m_sbPan[CHANNELS_IN_TAB], m_sbValue, m_sbDryRatio;
 	ColorPickerButton m_channelColor[CHANNELS_IN_TAB];
@@ -64,7 +66,7 @@ public:
 	void UnlockControls() { PostMessage(WM_MOD_UNLOCKCONTROLS); }
 	bool IsLocked() const noexcept { return (m_nLockCount > 0); }
 	int GetDlgItemIntEx(UINT nID);
-	void PopulateChannelPlugins(PLUGINDEX plugin = PLUGINDEX_INVALID);
+	void PopulateChannelPlugins(UpdateHint hint, const CObject *pObj = nullptr);
 	void BuildEmptySlotList(std::vector<PLUGINDEX> &emptySlots);
 	bool MovePlug(PLUGINDEX src, PLUGINDEX dest, bool bAdjustPat = AdjustPattern);
 

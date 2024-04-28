@@ -11,6 +11,7 @@
 #include "stdafx.h"
 #include "MIDIMacroDialog.h"
 #include "Mptrack.h"
+#include "PluginComboBox.h"
 #include "Reporting.h"
 #include "resource.h"
 #include "../common/mptStringBuffer.h"

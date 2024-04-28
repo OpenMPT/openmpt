@@ -874,6 +874,7 @@
     <ClInclude Include="..\..\mptrack\PatternFont.h" />
     <ClInclude Include="..\..\mptrack\PatternGotoDialog.h" />
     <ClInclude Include="..\..\mptrack\PlugNotFoundDlg.h" />
+    <ClInclude Include="..\..\mptrack\PluginComboBox.h" />
     <ClInclude Include="..\..\mptrack\ProgressDialog.h" />
     <ClInclude Include="..\..\mptrack\Reporting.h" />
     <ClInclude Include="..\..\mptrack\ResizableDialog.h" />
@@ -1305,6 +1306,7 @@
     <ClCompile Include="..\..\mptrack\PatternFont.cpp" />
     <ClCompile Include="..\..\mptrack\PatternGotoDialog.cpp" />
     <ClCompile Include="..\..\mptrack\PlugNotFoundDlg.cpp" />
+    <ClCompile Include="..\..\mptrack\PluginComboBox.cpp" />
     <ClCompile Include="..\..\mptrack\ProgressDialog.cpp" />
     <ClCompile Include="..\..\mptrack\Reporting.cpp" />
     <ClCompile Include="..\..\mptrack\ResizableDialog.cpp" />

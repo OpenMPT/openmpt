@@ -37,7 +37,6 @@
 #include "SampleConfigDlg.h"
 #include "SelectPluginDialog.h"
 #include "UpdateCheck.h"
-#include "Vstplug.h"
 #include "WindowMessages.h"
 
 #include "../common/FileReader.h"
@@ -45,8 +44,6 @@
 #include "../common/Profiler.h"
 #include "../common/version.h"
 #include "../soundlib/AudioReadTarget.h"
-#include "../soundlib/plugins/PlugInterface.h"
-#include "../soundlib/plugins/PluginManager.h"
 #include "mpt/audio/span.hpp"
 #include "mpt/base/alloc.hpp"
 #include "mpt/fs/fs.hpp"
@@ -3256,81 +3253,5 @@ ULONG TfLanguageProfileNotifySink::Release()
 	// Don't let COM do anything to this object
 	return 1;
 }
-
-
-/////////////////////////////////////////////
-//Misc helper functions
-/////////////////////////////////////////////
-
-void AddPluginNamesToCombobox(CComboBox &CBox, const std::array<SNDMIXPLUGIN, MAX_MIXPLUGINS> &plugins, const bool libraryName, const PLUGINDEX updatePlug)
-{
-#ifndef NO_PLUGINS
-	int insertAt = CBox.GetCount();
-	if(updatePlug != PLUGINDEX_INVALID)
-	{
-		const int items = insertAt;
-		for(insertAt = 0; insertAt < items; insertAt++)
-		{
-			auto thisPlugin = static_cast<PLUGINDEX>(CBox.GetItemData(insertAt));
-			if(thisPlugin == (updatePlug + 1))
-				CBox.DeleteString(insertAt);
-			if(thisPlugin >= (updatePlug + 1))
-				break;
-		}
-	}
-
-	mpt::tstring str;
-	str.reserve(80);
-	for(PLUGINDEX plug = 0; plug < MAX_MIXPLUGINS; plug++)
-	{
-		if(updatePlug != PLUGINDEX_INVALID && plug != updatePlug)
-			continue;
-		const SNDMIXPLUGIN &plugin = plugins[plug];
-		str.clear();
-		str += MPT_TFORMAT("FX{}: ")(plug + 1);
-		const auto plugName = plugin.GetName(), libName = plugin.GetLibraryName();
-		str += mpt::ToWin(plugName);
-		if(libraryName && plugName != libName && !libName.empty())
-			str += _T(" (") + mpt::ToWin(libName) + _T(")");
-		else if(plugName.empty() && (!libraryName || libName.empty()))
-			str += _T("--");
-#ifdef MPT_WITH_VST
-		auto *vstPlug = dynamic_cast<const CVstPlugin *>(plugin.pMixPlugin);
-		if(vstPlug != nullptr && vstPlug->isBridged)
-		{
-			VSTPluginLib &lib = vstPlug->GetPluginFactory();
-			str += MPT_TFORMAT(" ({} Bridged)")(lib.GetDllArchNameUser());
-		}
-#endif // MPT_WITH_VST
-
-		insertAt = CBox.InsertString(insertAt, str.c_str());
-		CBox.SetItemData(insertAt, plug + 1);
-		insertAt++;
-	}
-#endif // NO_PLUGINS
-}
-
-
-void AddPluginParameternamesToCombobox(CComboBox& CBox, SNDMIXPLUGIN& plug)
-{
-#ifndef NO_PLUGINS
-	if(plug.pMixPlugin)
-		AddPluginParameternamesToCombobox(CBox, *plug.pMixPlugin);
-#endif // NO_PLUGINS
-}
-
-
-void AddPluginParameternamesToCombobox(CComboBox& CBox, IMixPlugin& plug)
-{
-#ifndef NO_PLUGINS
-	const PlugParamIndex numParams = plug.GetNumParameters();
-	plug.CacheParameterNames(0, numParams);
-	for(PlugParamIndex i = 0; i < numParams; i++)
-	{
-		CBox.SetItemData(CBox.AddString(plug.GetFormattedParamName(i)), i);
-	}
-#endif // NO_PLUGINS
-}
-
 
 OPENMPT_NAMESPACE_END
