@@ -509,8 +509,8 @@ void CFindReplaceTab::UpdateVolumeList()
 			AddPluginParameternamesToCombobox(m_cbnPCParam, *m_sndFile.m_MixPlugins[plug].pMixPlugin);
 		} else
 		{
-			m_cbnPCParam.InitStorage(ModCommand::maxColumnValue, 20);
-			for(int i = 0; i < ModCommand::maxColumnValue; i++)
+			m_cbnPCParam.InitStorage(ModCommand::maxColumnValue + 1, 20);
+			for(int i = 0; i < ModCommand::maxColumnValue + 1; i++)
 			{
 				wsprintf(s, _T("%02u: Parameter %02u"), static_cast<unsigned int>(i), static_cast<unsigned int>(i));
 				m_cbnPCParam.SetItemData(m_cbnPCParam.AddString(s), i);

@@ -373,6 +373,8 @@ void LFOPluginEditor::OnOutputPlugChanged()
 			m_lfoPlugin.GetSoundFile().m_MixPlugins[m_lfoPlugin.GetSlot()].SetOutputPlugin(plug);
 			m_lfoPlugin.SetModified();
 			UpdateParamDisplays();
+			if(CModDoc *modDoc = m_lfoPlugin.GetSoundFile().GetpModDoc(); modDoc != nullptr)
+				modDoc->UpdateAllViews(nullptr, PluginHint(m_lfoPlugin.GetSlot() + 1).Info(), this);
 		}
 	}
 }
