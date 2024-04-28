@@ -20,7 +20,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: install dependencies
-      run: dnf -y upgrade --refresh && dnf -y install subversion perl-XML-XPath git mawk zip unzip p7zip xz-utils make binutils gcc gcc-g++ clang pcc pkgconf help2man doxygen autoconf autoconf-archive automake libtool ccache zlib-devel mpg123-devel libogg-devel libvorbis-devel portaudio-devel pulseaudio-libs-devel SDL2-devel flac-devel libsndfile-devel libtool-ltdl-devel
+      run: dnf -y upgrade --refresh && dnf -y install subversion perl-XML-XPath git mawk zip unzip p7zip xz make binutils gcc gcc-g++ clang pcc pkgconf help2man doxygen autoconf autoconf-archive automake libtool ccache zlib-devel mpg123-devel libogg-devel libvorbis-devel portaudio-devel pulseaudio-libs-devel SDL2-devel flac-devel libsndfile-devel libtool-ltdl-devel
     - name: make
       run: make -j$(nproc) STRICT=1
     - name: make check
