@@ -1,0 +1,29 @@
+name: Fedora Autotools
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+concurrency:
+  group: ${{ github.ref }}-${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+
+    steps:
+    - name: Install dependencies
+      run: dnf -y upgrade --refresh && dnf -y install subversion perl-XML-XPath git mawk zip unzip p7zip xz make binutils gcc gcc-g++ clang pcc pkgconf help2man doxygen autoconf autoconf-archive automake libtool ccache zlib-devel mpg123-devel libogg-devel libvorbis-devel portaudio-devel pulseaudio-libs-devel SDL2-devel flac-devel libsndfile-devel libtool-ltdl-devel
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: fix git
+      # https://github.com/actions/runner/issues/2033
+      run: chown -R $(id -u):$(id -g) $(pwd)
+    - name: Build
+      run: export MAKEFLAGS=-j$(nproc); ./build/autotools/autoconfiscate.sh
