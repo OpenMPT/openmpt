@@ -11,7 +11,6 @@
 #include "stdafx.h"
 #include "MIDIMacroDialog.h"
 #include "Mptrack.h"
-#include "PluginComboBox.h"
 #include "Reporting.h"
 #include "resource.h"
 #include "../common/mptStringBuffer.h"
@@ -135,22 +134,9 @@ BOOL CMidiMacroSetup::OnInitDialog()
 		m_EditMacro[m].ShowAll.SetFont(GetFont());
 	}
 	UpdateMacroList();
-
-#ifndef NO_PLUGINS
-	for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
-	{
-		const SNDMIXPLUGIN &plugin = m_SndFile.m_MixPlugins[i];
-
-		if(plugin.IsValidPlugin())
-		{
-			s.Format(_T("FX%d: "), i + 1);
-			s += mpt::ToCString(plugin.GetName());
-			m_CbnMacroPlug.SetItemData(m_CbnMacroPlug.AddString(s), i);
-		}
-	}
-	m_CbnMacroPlug.SetCurSel(0);
+	m_CbnMacroPlug.Update(PluginComboBox::Config{PluginComboBox::Flags::ShowLibraryNames}, m_SndFile);
+	m_CbnMacroPlug.SetRawSelection(0);
 	OnPlugChanged();
-#endif  // NO_PLUGINS
 	return FALSE;
 }
 
@@ -378,7 +364,7 @@ void CMidiMacroSetup::OnViewAllParams(UINT id)
 void CMidiMacroSetup::OnPlugChanged()
 {
 #ifndef NO_PLUGINS
-	DWORD_PTR plug = m_CbnMacroPlug.GetItemData(m_CbnMacroPlug.GetCurSel());
+	PLUGINDEX plug = m_CbnMacroPlug.GetSelection().value_or(PLUGINDEX_INVALID);
 
 	if(plug >= MAX_MIXPLUGINS)
 		return;

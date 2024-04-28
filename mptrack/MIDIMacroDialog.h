@@ -13,6 +13,7 @@
 #include "openmpt/all/BuildSettings.hpp"
 
 #include "ColourEdit.h"
+#include "PluginComboBox.h"
 #include "../common/misc_util.h"
 #include "../soundlib/MIDIMacros.h"
 #include "mpt/base/alloc.hpp"
@@ -24,7 +25,8 @@ class CSoundFile;
 class CMidiMacroSetup: public CDialog
 {
 protected:
-	CComboBox m_CbnSFx, m_CbnSFxPreset, m_CbnZxx, m_CbnZxxPreset, m_CbnMacroPlug, m_CbnMacroParam, m_CbnMacroCC;
+	CComboBox m_CbnSFx, m_CbnSFxPreset, m_CbnZxx, m_CbnZxxPreset, m_CbnMacroParam, m_CbnMacroCC;
+	PluginComboBox m_CbnMacroPlug;
 	CEdit m_EditSFx, m_EditZxx;
 	struct MacroEdit
 	{
