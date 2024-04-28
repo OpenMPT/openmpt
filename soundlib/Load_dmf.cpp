@@ -346,7 +346,7 @@ static PATTERNINDEX ConvertDMFPattern(FileReader &file, const uint8 fileVersion,
 	// Counters for channel packing (including global track)
 	std::vector<uint8> channelCounter(numChannels + 1, 0);
 
-	for(ROWINDEX row = 0; row < numRows; row++)
+	for(ROWINDEX row = 0; row < numRows && file.CanRead(1); row++)
 	{
 		// Global track info counter reached 0 => read global track data
 		if(channelCounter[0] == 0)
@@ -970,6 +970,8 @@ bool CSoundFile::ReadDMF(FileReader &file, ModLoadingFlags loadFlags)
 			const uint8 headerSize = fileHeader.version < 3 ? 9 : 8;
 			chunk.Skip(headerSize - sizeof(uint32le));
 			const uint32 patLength = chunk.ReadUint32LE();
+			if(!chunk.CanRead(patLength))
+				return false;
 			chunk.SkipBack(headerSize);
 			patternChunk = chunk.ReadChunk(headerSize + patLength);
 		}
