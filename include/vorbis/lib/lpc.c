@@ -75,7 +75,14 @@ float vorbis_lpc_from_data(float *data,float *lpci,int n,int m){
   /* Generate lpc coefficients from autocorr values */
 
   /* set our noise floor to about -100dB */
+#if defined(__GNUC__) && !defined(__clang__) && !defined(_MSC_VER)  /* OpenMPT */
+#pragma GCC diagnostic push  /* OpenMPT */
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"  /* OpenMPT */
+#endif  /* OpenMPT */
   error=aut[0] * (1. + 1e-10);
+#if defined(__GNUC__) && !defined(__clang__) && !defined(_MSC_VER)  /* OpenMPT */
+#pragma GCC diagnostic pop  /* OpenMPT */
+#endif  /* OpenMPT */
   epsilon=1e-9*aut[0]+1e-10;
 
   for(i=0;i<m;i++){
