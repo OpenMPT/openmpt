@@ -11,6 +11,8 @@ is just a high-level summary.
     Aleshar - The World Of Ice.
  *  [**New**] `Makefile CONFIG=djgpp` now supports building LGPL libraries as
     DXE (use `ENABLE_DXE=0` to disable).
+ *  [**New**] New `Makefile` `CONFIG=mingw-w64` option
+    `WINDOWS_CRT=[crtdll,msvcrt,ucrt]` to select the toolchain CRT library.
 
  *  [**Change**] DOS builds now use zlib, libmpg123, libogg, and libvorbis
     instead of miniz, minimp3, and stb_vorbis by default. 
