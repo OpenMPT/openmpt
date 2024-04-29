@@ -11,6 +11,9 @@ is just a high-level summary.
     `libopenmpt/bindings/freebasic/libopenmpt_ext.bi` were missing from the
     Autotools package.
 
+ *  [**New**] New `Makefile` `CONFIG=mingw-w64` option
+    `WINDOWS_CRT=[crtdll,msvcrt,ucrt]` to select the toolchain CRT library.
+
  *  M15: Loosen SoundTracker file rejection heuristics a bit to allow loading of
     schmokk.mod and scramble_2.mod. Other heuristics has been tightened a bit.
  *  MOD: Change VBlank timing heuristic to always assume CIA timing when long
