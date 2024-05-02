@@ -308,7 +308,7 @@ public:
 };
 
 
-using deterministc_random_device = mpt::prng_random_device<mpt::lcg_musl, mpt::prng_random_device_deterministic_seeder>;
+using deterministic_random_device = mpt::prng_random_device<mpt::lcg_musl, mpt::prng_random_device_deterministic_seeder>;
 
 
 } // namespace MPT_INLINE_NS
