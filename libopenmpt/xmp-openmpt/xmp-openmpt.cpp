@@ -20,6 +20,7 @@
 
 #include <cctype>
 #include <cstring>
+#include <numeric>
 
 #include <tchar.h>
 
@@ -234,6 +235,9 @@ static std::string StringUpperCase( std::string str ) {
 }
 
 static std::string seconds_to_string( double time ) {
+	if ( !std::isnormal( time ) ) {
+		return "?";
+	}
 	std::int64_t time_ms = static_cast<std::int64_t>( time * 1000 );
 	std::int64_t seconds = ( time_ms / 1000 ) % 60;
 	std::int64_t minutes = ( time_ms / ( 1000 * 60 ) ) % 60;
@@ -1278,11 +1282,7 @@ static void WINAPI openmpt_GetSamples( char * buf ) {
 }
 
 static DWORD WINAPI openmpt_GetSubSongs( float * length ) {
-	double tmp = 0.0;
-	for ( auto sub_length : self->subsong_lengths ) {
-		tmp += sub_length;
-	}
-	*length = static_cast<float>( tmp );
+	*length = static_cast<float>( std::accumulate( self->subsong_lengths.cbegin(), self->subsong_lengths.cend(), 0.0 ) );
 	return static_cast<DWORD>( self->subsong_lengths.size() );
 }
 
