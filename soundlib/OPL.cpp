@@ -152,6 +152,8 @@ void OPL::MoveChannel(CHANNELINDEX from, CHANNELINDEX to)
 	m_OPLtoChan[oplCh] = to;
 	m_ChanToOPL[from] = OPL_CHANNEL_INVALID;
 	m_ChanToOPL[to] = oplCh;
+	if(m_logger)
+		m_logger->MoveChannel(from, to);
 }
 
 
@@ -159,6 +161,8 @@ void OPL::NoteOff(CHANNELINDEX c)
 {
 	uint8 oplCh = GetVoice(c);
 	if(oplCh == OPL_CHANNEL_INVALID || m_opl == nullptr)
+		return;
+	if(!(m_KeyOnBlock[oplCh] & KEYON_BIT))
 		return;
 	m_KeyOnBlock[oplCh] &= ~KEYON_BIT;
 	Port(c, KEYON_BLOCK | ChannelToRegister(oplCh), m_KeyOnBlock[oplCh]);
@@ -323,31 +327,64 @@ void OPL::Port(CHANNELINDEX c, OPL::Register reg, OPL::Value value)
 }
 
 
-std::vector<OPL::Register> OPL::AllVoiceRegisters()
+std::vector<OPL::Register> OPL::AllVoiceRegisters(uint8 oplCh)
 {
 	static constexpr uint8 opRegisters[] = {AM_VIB, KSL_LEVEL, ATTACK_DECAY, SUSTAIN_RELEASE, WAVE_SELECT};
 	static constexpr uint8 chnRegisters[] = {FNUM_LOW, KEYON_BLOCK, FEEDBACK_CONNECTION};
 	std::vector<OPL::Register> result;
-	result.reserve(234);
-	for(uint16 chip = 0; chip < 2; chip++)
+	uint8 minVoice = 0, maxVoice = OPL_CHANNELS;
+	if(oplCh < OPL_CHANNELS)
 	{
+		minVoice = oplCh;
+		maxVoice = oplCh + 1;
+	}
+	result.reserve(13 * (maxVoice - minVoice));
+	for(uint8 voice = minVoice; voice < maxVoice; voice++)
+	{
+		const Register opBaseReg = OperatorToRegister(voice);
 		for(uint8 opReg : opRegisters)
 		{
-			for(uint8 op = 0; op < 22; op++)
+			for(uint8 op = 0; op <= 3; op += 3)
 			{
-				if((op & 7) < 6)
-					result.push_back((chip << 8) | opReg | op);
+				result.push_back(opReg | (opBaseReg + op));
+				MPT_ASSERT(RegisterToVoice(result.back()) == voice);
 			}
 		}
+		const Register chnBaseReg = ChannelToRegister(voice);
 		for(uint8 chnReg : chnRegisters)
 		{
-			for(uint8 chn = 0; chn < 9; chn++)
-			{
-				result.push_back((chip << 8) | chnReg | chn);
-			}
+			result.push_back(chnReg | chnBaseReg);
+			MPT_ASSERT(RegisterToVoice(result.back()) == voice);
 		}
 	}
 	return result;
+}
+
+
+uint8 OPL::RegisterToVoice(OPL::Register reg)
+{
+	const OPL::Register regLo = reg & 0xE0;
+	const uint8 baseCh = (reg > 0xFF) ? 9 : 0;
+	if(reg == TREMOLO_VIBRATO_DEPTH)
+		return 0xFF;
+	if(regLo >= FNUM_LOW && regLo <= FEEDBACK_CONNECTION)
+		return baseCh + static_cast<uint8>(reg & 0x0F);
+	if(regLo >= AM_VIB && regLo <= WAVE_SELECT)
+		return baseCh + static_cast<uint8>((reg & 0x07) % 3u + ((reg & 0x1F) >> 3) * 3);
+	return 0xFF;
+}
+
+
+OPL::Register OPL::StripVoiceFromRegister(OPL::Register reg)
+{
+	const OPL::Register regLo = reg & 0xE0;
+	if(reg == TREMOLO_VIBRATO_DEPTH)
+		return reg;
+	if(regLo >= FNUM_LOW && regLo <= FEEDBACK_CONNECTION)
+		return (reg & 0xF0);
+	if(regLo >= AM_VIB && regLo <= WAVE_SELECT)
+		return (reg & 0xE0) + ((reg & 0x07) >= 3 ? 3 : 0);
+	return reg;
 }
 
 

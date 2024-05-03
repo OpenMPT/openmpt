@@ -183,6 +183,9 @@
     <ClInclude Include="..\..\common\FileReaderFwd.h">
       <Filter>common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\common\GzipWriter.h">
+      <Filter>common</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\common\Logging.h">
       <Filter>common</Filter>
     </ClInclude>
@@ -1068,6 +1071,9 @@
     <ClInclude Include="..\..\src\openmpt\soundbase\SampleFormat.hpp">
       <Filter>src\openmpt\soundbase</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\test\PlaybackTest.h">
+      <Filter>test</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\test\TestTools.h">
       <Filter>test</Filter>
     </ClInclude>
@@ -1486,6 +1492,9 @@
     </ClCompile>
     <ClCompile Include="..\..\soundlib\tuningCollection.cpp">
       <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\PlaybackTest.cpp">
+      <Filter>test</Filter>
     </ClCompile>
     <ClCompile Include="..\..\test\TestToolsLib.cpp">
       <Filter>test</Filter>

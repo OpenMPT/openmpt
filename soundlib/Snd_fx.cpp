@@ -2126,9 +2126,6 @@ CHANNELINDEX CSoundFile::GetNNAChannel(CHANNELINDEX nChn) const
 		// Plugin channel with already released note
 		if(!c.nLength && c.dwFlags[CHN_KEYOFF | CHN_NOTEFADE])
 			return i;
-		// Stopped OPL channel
-		if(c.dwFlags[CHN_ADLIB] && (!m_opl || !m_opl->IsActive(i)))
-			return i;
 	}
 
 	uint32 vol = 0x800000;
@@ -2146,6 +2143,9 @@ CHANNELINDEX CSoundFile::GetNNAChannel(CHANNELINDEX nChn) const
 	for(CHANNELINDEX i = m_nChannels; i < MAX_CHANNELS; i++)
 	{
 		const ModChannel &c = m_PlayState.Chn[i];
+		// Stopped OPL channel
+		if(c.dwFlags[CHN_ADLIB] && (!m_opl || !m_opl->IsActive(i)))
+			return i;
 		if(c.nLength && !c.nFadeOutVol)
 			return i;
 		// Use a combination of real volume [14 bit] (which includes volume envelopes, but also potentially global volume) and note volume [9 bit].
@@ -2198,6 +2198,7 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 		// Cut the note
 		chn.nFadeOutVol = 0;
 		chn.dwFlags.set(CHN_NOTEFADE | CHN_FASTVOLRAMP);
+		chn.nnaGeneration = ++srcChn.nnaGeneration;
 		// Stop this channel
 		srcChn.nLength = 0;
 		srcChn.position.Set(0);
@@ -2392,6 +2393,7 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 
 	chn.nMasterChn = nChn < GetNumChannels() ? nChn + 1 : 0;
 	chn.nCommand = CMD_NONE;
+	chn.nnaGeneration = ++srcChn.nnaGeneration;
 
 	// Key Off the note
 	switch(srcChn.nNNA)
@@ -2400,9 +2402,14 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 		KeyOff(chn);
 		if(chn.dwFlags[CHN_ADLIB] && m_opl)
 		{
-			m_opl->NoteOff(nChn);
 			if(m_playBehaviour[kOPLwithNNA])
+			{
 				m_opl->MoveChannel(nChn, nnaChn);
+				m_opl->NoteOff(nnaChn);  // This needs to be done on the NNA channel so that our PlaybackTest implementation knows that it belongs to the "old" note, not to the "new" note
+			} else
+			{
+				m_opl->NoteOff(nChn);
+			}
 		}
 		break;
 	case NewNoteAction::NoteCut:

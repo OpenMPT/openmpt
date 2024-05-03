@@ -17,12 +17,11 @@
 #include "Reporting.h"
 #include "resource.h"
 #include "TrackerSettings.h"
+#include "../common/GzipWriter.h"
 #include "../soundlib/OPL.h"
 #include "../soundlib/Tagging.h"
 #include "mpt/io_file/outputfile.hpp"
 #include "mpt/string/utility.hpp"
-
-#include <zlib/zlib.h>
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -184,25 +183,7 @@ public:
 		WriteVGM(outStream, loopStart, fileTags);
 
 		std::string outData = std::move(outStream).str();
-		z_stream strm{};
-		strm.avail_in = static_cast<uInt>(outData.size());
-		strm.next_in = reinterpret_cast<Bytef *>(outData.data());
-		if(deflateInit2(&strm, Z_BEST_COMPRESSION, Z_DEFLATED, 15 | 16, 9, Z_DEFAULT_STRATEGY) != Z_OK)
-			throw std::runtime_error{"zlib init failed"};
-		gz_header gzHeader{};
-		gzHeader.time = static_cast<uLong>(time(nullptr));
-		std::string filenameISO = mpt::ToCharset(mpt::Charset::ISO8859_1, filename);
-		gzHeader.name = reinterpret_cast<Bytef *>(filenameISO.data());
-		deflateSetHeader(&strm, &gzHeader);
-		do
-		{
-			std::array<Bytef, mpt::IO::BUFFERSIZE_TINY> buffer;
-			strm.avail_out = static_cast<uInt>(buffer.size());
-			strm.next_out = buffer.data();
-			deflate(&strm, Z_FINISH);
-			mpt::IO::WritePartial(f, buffer, buffer.size() - strm.avail_out);
-		} while(strm.avail_out == 0);
-		deflateEnd(&strm);
+		WriteGzip(f, outData, filename);
 	}
 	
 	void WriteVGM(std::ostream &f, const CSoundFile::samplecount_t loopStart, const FileTags &fileTags) const
@@ -343,6 +324,8 @@ private:
 		m_registerDump.push_back({m_sndFile.GetTotalSampleCount(), static_cast<uint8>(reg & 0xFF), static_cast<uint8>(reg >> 8), value});
 		m_prevRegisters[reg] = value;
 	}
+
+	void MoveChannel(CHANNELINDEX, CHANNELINDEX) override {}
 
 	std::vector<RegisterDump> m_registerDump;
 	std::map<OPL::Register, OPL::Value> m_prevRegisters, m_registerDumpAtLoopStart;

@@ -91,6 +91,7 @@ struct ModChannel
 	int16 nVolSwing, nPanSwing;
 	int16 nCutSwing, nResSwing;
 	uint16 nRestorePanOnNewNote;  // If > 0, nPan should be set to nRestorePanOnNewNote - 1 on new note. Used to recover from pan swing and IT sample / instrument panning. High bit set = surround
+	uint16 nnaGeneration;         // For PlaybackTest implementation
 	CHANNELINDEX nMasterChn;
 	ModCommand rowCommand;
 	// 8-bit members

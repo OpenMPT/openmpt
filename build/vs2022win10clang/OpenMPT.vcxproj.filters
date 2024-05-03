@@ -237,6 +237,9 @@
     <ClInclude Include="..\..\common\FileReaderFwd.h">
       <Filter>common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\common\GzipWriter.h">
+      <Filter>common</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\common\Logging.h">
       <Filter>common</Filter>
     </ClInclude>
@@ -1512,6 +1515,9 @@
     <ClInclude Include="..\..\src\openmpt\sounddevice\SoundDeviceWaveout.hpp">
       <Filter>src\openmpt\sounddevice</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\test\PlaybackTest.h">
+      <Filter>test</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\test\TestTools.h">
       <Filter>test</Filter>
     </ClInclude>
@@ -2329,6 +2335,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\openmpt\sounddevice\SoundDeviceWaveout.cpp">
       <Filter>src\openmpt\sounddevice</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\test\PlaybackTest.cpp">
+      <Filter>test</Filter>
     </ClCompile>
     <ClCompile Include="..\..\test\TestToolsLib.cpp">
       <Filter>test</Filter>

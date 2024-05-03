@@ -233,6 +233,7 @@ class CTuningCollection;
 using CTuningCollection = Tuning::CTuningCollection;
 struct CModSpecifications;
 class OPL;
+class PlaybackTest;
 class CModDoc;
 
 
@@ -1310,6 +1311,7 @@ private:
 public:
 	PLUGINDEX GetBestPlugin(const PlayState &playState, CHANNELINDEX nChn, PluginPriority priority, PluginMutePriority respectMutes) const;
 
+	PlaybackTest CreatePlaybackTest(uint32 mixingFreq = 0, uint32 outputChannels = 0, uint32 mixerChannels = 0, ResamplingMode srcMode = SRCMODE_CUBIC);
 };
 
 

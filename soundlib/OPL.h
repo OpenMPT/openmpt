@@ -76,6 +76,7 @@ public:
 	{
 	public:
 		virtual void Port(CHANNELINDEX c, Register reg, Value value) = 0;
+		virtual void MoveChannel(CHANNELINDEX from, CHANNELINDEX to) = 0;
 		virtual ~IRegisterLogger() {}
 	};
 
@@ -96,8 +97,12 @@ public:
 	void MoveChannel(CHANNELINDEX from, CHANNELINDEX to);
 	void Reset();
 
-	// A list of all registers for channels and operators
-	static std::vector<Register> AllVoiceRegisters();
+	// A list of all registers for channels and operators if oplCh == 0xFF, otherwise all registers for the given channel and its operators
+	static std::vector<Register> AllVoiceRegisters(uint8 oplCh = 0xFF);
+	// Returns voice for given register, or 0xFF if it's not a voice-specific register
+	static uint8 RegisterToVoice(Register reg);
+	// Returns register without any voice offset, so as if it was triggering the first voice
+	static Register StripVoiceFromRegister(Register reg);
 
 protected:
 	static Register ChannelToRegister(uint8 oplCh);
