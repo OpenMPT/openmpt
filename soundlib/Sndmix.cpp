@@ -1156,7 +1156,6 @@ void CSoundFile::ProcessPanningEnvelope(ModChannel &chn) const
 			pan += (envval * (pan)) / 32;
 		}
 		chn.nRealPan = Clamp(pan, 0, 256);
-
 	}
 }
 
@@ -1374,7 +1373,8 @@ void CSoundFile::ProcessInstrumentFade(ModChannel &chn, int &vol) const
 		if (fadeout)
 		{
 			chn.nFadeOutVol -= fadeout * 2;
-			if (chn.nFadeOutVol <= 0) chn.nFadeOutVol = 0;
+			if (chn.nFadeOutVol <= 0)
+				chn.nFadeOutVol = 0;
 			vol = (vol * chn.nFadeOutVol) / 65536;
 		} else if (!chn.nFadeOutVol)
 		{

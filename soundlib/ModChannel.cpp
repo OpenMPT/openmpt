@@ -1,7 +1,8 @@
 /*
  * ModChannel.cpp
  * --------------
- * Purpose: Module Channel header class and helpers
+ * Purpose: The ModChannel struct represents the state of one mixer channel.
+ *          ModChannelSettings represents the default settings of one pattern channel.
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
@@ -9,8 +10,8 @@
 
 
 #include "stdafx.h"
-#include "Sndfile.h"
 #include "ModChannel.h"
+#include "Sndfile.h"
 #include "tuning.h"
 
 OPENMPT_NAMESPACE_BEGIN
@@ -128,7 +129,13 @@ void ModChannel::UpdateInstrumentVolume(const ModSample *smp, const ModInstrumen
 }
 
 
-ModCommand::NOTE ModChannel::GetPluginNote(bool ignoreArpeggio) const
+uint32 ModChannel::GetVSTVolume() const noexcept
+{
+	return pModInstrument ? pModInstrument->nGlobalVol * 4 : nVolume;
+}
+
+
+ModCommand::NOTE ModChannel::GetPluginNote(bool ignoreArpeggio) const noexcept
 {
 	if(nArpeggioLastNote != NOTE_NONE && !ignoreArpeggio)
 	{
@@ -141,6 +148,24 @@ ModCommand::NOTE ModChannel::GetPluginNote(bool ignoreArpeggio) const
 		plugNote = pModInstrument->NoteMap[plugNote - NOTE_MIN];
 	}
 	return plugNote;
+}
+
+
+bool ModChannel::HasMIDIOutput() const noexcept
+{
+	return pModInstrument != nullptr && pModInstrument->HasValidMIDIChannel();
+}
+
+
+bool ModChannel::HasCustomTuning() const noexcept
+{
+	return pModInstrument != nullptr && pModInstrument->pTuning != nullptr;
+}
+
+
+bool ModChannel::InSustainLoop() const noexcept
+{
+	return (dwFlags & (CHN_LOOP | CHN_KEYOFF)) == CHN_LOOP && pModSample->uFlags[CHN_SUSTAINLOOP];
 }
 
 

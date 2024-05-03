@@ -1,7 +1,8 @@
 /*
  * ModChannel.h
  * ------------
- * Purpose: Module Channel header class and helpers
+ * Purpose: The ModChannel struct represents the state of one mixer channel.
+ *          ModChannelSettings represents the default settings of one pattern channel.
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
@@ -13,8 +14,6 @@
 #include "openmpt/all/BuildSettings.hpp"
 
 #include "InstrumentSynth.h"
-#include "ModSample.h"
-#include "ModInstrument.h"
 #include "modcommand.h"
 #include "Paula.h"
 #include "tuningbase.h"
@@ -22,6 +21,8 @@
 OPENMPT_NAMESPACE_BEGIN
 
 class CSoundFile;
+struct ModSample;
+struct ModInstrument;
 
 // Mix Channel Struct
 struct ModChannel
@@ -187,17 +188,17 @@ struct ModChannel
 
 	bool IsSamplePlaying() const noexcept { return !increment.IsZero(); }
 
-	uint32 GetVSTVolume() const noexcept { return (pModInstrument) ? pModInstrument->nGlobalVol * 4 : nVolume; }
+	uint32 GetVSTVolume() const noexcept;
 
-	ModCommand::NOTE GetPluginNote(bool ignoreArpeggio = false) const;
+	ModCommand::NOTE GetPluginNote(bool ignoreArpeggio = false) const noexcept;
 
 	// Check if the channel has a valid MIDI output. A return value of true implies that pModInstrument != nullptr.
-	bool HasMIDIOutput() const noexcept { return pModInstrument != nullptr && pModInstrument->HasValidMIDIChannel(); }
+	bool HasMIDIOutput() const noexcept;
 	// Check if the channel uses custom tuning. A return value of true implies that pModInstrument != nullptr.
-	bool HasCustomTuning() const noexcept { return pModInstrument != nullptr && pModInstrument->pTuning != nullptr; }
+	bool HasCustomTuning() const noexcept;
 
 	// Check if currently processed loop is a sustain loop. pModSample is not checked for validity!
-	bool InSustainLoop() const noexcept { return (dwFlags & (CHN_LOOP | CHN_KEYOFF)) == CHN_LOOP && pModSample->uFlags[CHN_SUSTAINLOOP]; }
+	bool InSustainLoop() const noexcept;
 
 	void UpdateInstrumentVolume(const ModSample *smp, const ModInstrument *ins);
 

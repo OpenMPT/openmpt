@@ -336,7 +336,7 @@ private:
 		mpt::IO::Write(f, s16le);
 	}
 
-	void Port(CHANNELINDEX, uint16 reg, uint8 value) override
+	void Port(CHANNELINDEX, OPL::Register reg, OPL::Value value) override
 	{
 		if(const auto prevValue = m_prevRegisters.find(reg); prevValue != m_prevRegisters.end() && prevValue->second == value)
 			return;
@@ -345,7 +345,7 @@ private:
 	}
 
 	std::vector<RegisterDump> m_registerDump;
-	std::map<uint16, uint8> m_prevRegisters, m_registerDumpAtLoopStart;
+	std::map<OPL::Register, OPL::Value> m_prevRegisters, m_registerDumpAtLoopStart;
 	CSoundFile &m_sndFile;
 };
 

@@ -9,8 +9,8 @@
  */
 
 #include "stdafx.h"
-#include "../common/misc_util.h"
 #include "OPL.h"
+#include "../common/misc_util.h"
 
 #include <cstdint>
 #if MPT_COMPILER_GCC
@@ -24,9 +24,9 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-OPL::OPL(uint32 samplerate)
+OPL::OPL(uint32 sampleRate)
 {
-	Initialize(samplerate);
+	Initialize(sampleRate);
 }
 
 
@@ -43,12 +43,12 @@ OPL::~OPL()
 }
 
 
-void OPL::Initialize(uint32 samplerate)
+void OPL::Initialize(uint32 sampleRate)
 {
 	if(m_opl == nullptr)
-		m_opl = std::make_unique<Opal>(samplerate);
+		m_opl = std::make_unique<Opal>(sampleRate);
 	else
-		m_opl->SetSampleRate(samplerate);
+		m_opl->SetSampleRate(sampleRate);
 	Reset();
 }
 
@@ -71,7 +71,7 @@ void OPL::Mix(int32 *target, size_t count, uint32 volumeFactorQ16)
 }
 
 
-uint16 OPL::ChannelToRegister(uint8 oplCh)
+OPL::Register OPL::ChannelToRegister(uint8 oplCh)
 {
 	if(oplCh < 9)
 		return oplCh;
@@ -81,7 +81,7 @@ uint16 OPL::ChannelToRegister(uint8 oplCh)
 
 
 // Translate a channel's first operator address into a register
-uint16 OPL::OperatorToRegister(uint8 oplCh)
+OPL::Register OPL::OperatorToRegister(uint8 oplCh)
 {
 	static constexpr uint8 OPLChannelToOperator[] = { 0, 1, 2, 8, 9, 10, 16, 17, 18 };
 	if(oplCh < 9)
@@ -211,7 +211,7 @@ void OPL::Frequency(CHANNELINDEX c, uint32 milliHertz, bool keyOff, bool beating
 
 	fnum |= (block << 10);
 
-	uint16 channel = ChannelToRegister(oplCh);
+	OPL::Register channel = ChannelToRegister(oplCh);
 	m_KeyOnBlock[oplCh] = static_cast<uint8>((keyOff ? 0 : KEYON_BIT) | (fnum >> 8));  // Key on bit + Octave (block) + F-number high 2 bits
 	Port(c, FNUM_LOW    | channel, fnum & 0xFFu);                                      // F-Number low 8 bits
 	Port(c, KEYON_BLOCK | channel, m_KeyOnBlock[oplCh]);
@@ -237,7 +237,7 @@ void OPL::Volume(CHANNELINDEX c, uint8 vol, bool applyToModulator)
 		return;
 
 	const auto &patch = m_Patches[oplCh];
-	const uint16 modulator = OperatorToRegister(oplCh), carrier = modulator + 3;
+	const OPL::Register modulator = OperatorToRegister(oplCh), carrier = modulator + 3;
 	if((patch[10] & CONNECTION_BIT) || applyToModulator)
 	{
 		// Set volume of both operators in additive mode
@@ -279,7 +279,7 @@ void OPL::Patch(CHANNELINDEX c, const OPLPatch &patch)
 
 	m_Patches[oplCh] = patch;
 
-	const uint16 modulator = OperatorToRegister(oplCh), carrier = modulator + 3;
+	const OPL::Register modulator = OperatorToRegister(oplCh), carrier = modulator + 3;
 	for(uint8 op = 0; op < 2; op++)
 	{
 		const auto opReg = op ? carrier : modulator;
@@ -314,7 +314,7 @@ void OPL::Reset()
 }
 
 
-void OPL::Port(CHANNELINDEX c, uint16 reg, uint8 value)
+void OPL::Port(CHANNELINDEX c, OPL::Register reg, OPL::Value value)
 {
 	if(!m_logger)
 		m_opl->Port(reg, value);
@@ -323,11 +323,11 @@ void OPL::Port(CHANNELINDEX c, uint16 reg, uint8 value)
 }
 
 
-std::vector<uint16> OPL::AllVoiceRegisters()
+std::vector<OPL::Register> OPL::AllVoiceRegisters()
 {
-	static constexpr uint8 opRegisters[] = {OPL::AM_VIB, OPL::KSL_LEVEL, OPL::ATTACK_DECAY, OPL::SUSTAIN_RELEASE, OPL::WAVE_SELECT};
-	static constexpr uint8 chnRegisters[] = {OPL::FNUM_LOW, OPL::KEYON_BLOCK, OPL::FEEDBACK_CONNECTION};
-	std::vector<uint16> result;
+	static constexpr uint8 opRegisters[] = {AM_VIB, KSL_LEVEL, ATTACK_DECAY, SUSTAIN_RELEASE, WAVE_SELECT};
+	static constexpr uint8 chnRegisters[] = {FNUM_LOW, KEYON_BLOCK, FEEDBACK_CONNECTION};
+	std::vector<OPL::Register> result;
 	result.reserve(234);
 	for(uint16 chip = 0; chip < 2; chip++)
 	{
