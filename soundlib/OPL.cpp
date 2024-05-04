@@ -370,7 +370,7 @@ uint8 OPL::RegisterToVoice(OPL::Register reg)
 	if(regLo >= FNUM_LOW && regLo <= FEEDBACK_CONNECTION)
 		return baseCh + static_cast<uint8>(reg & 0x0F);
 	if(regLo >= AM_VIB && regLo <= WAVE_SELECT)
-		return baseCh + static_cast<uint8>((reg & 0x07) % 3u + ((reg & 0x1F) >> 3) * 3);
+		return static_cast<uint8>(baseCh + (reg & 0x07) % 3u + ((reg & 0x1F) >> 3) * 3);
 	return 0xFF;
 }
 
@@ -383,7 +383,7 @@ OPL::Register OPL::StripVoiceFromRegister(OPL::Register reg)
 	if(regLo >= FNUM_LOW && regLo <= FEEDBACK_CONNECTION)
 		return (reg & 0xF0);
 	if(regLo >= AM_VIB && regLo <= WAVE_SELECT)
-		return regLo + static_cast<OPL::Register>((reg & 0x07) >= 3 ? 3 : 0);
+		return static_cast<OPL::Register>(regLo + ((reg & 0x07) >= 3 ? 3 : 0));
 	return reg;
 }
 

@@ -18,7 +18,7 @@
 
 #include "mpt/base/bit.hpp"
 #include "mpt/binary/hex.hpp"
-#include "mpt/crypto/hash.hpp"
+#include "mpt/crc/crc.hpp"
 #include "mpt/io/io.hpp"
 #include "mpt/io/io_stdstream.hpp"
 #include "openmpt/base/Endian.hpp"
@@ -105,8 +105,8 @@ struct TestDataChannel
 MPT_BINARY_STRUCT(TestDataChannel, 44)
 
 
-using SampleDataHashAlgorithm = mpt::crypto::hash::SHA256;
-using SampleDataHash = decltype(SampleDataHashAlgorithm{}.result());
+using SampleDataHashAlgorithm = mpt::crc64_jones;
+using SampleDataHash = mpt::packed<decltype(SampleDataHashAlgorithm{}.result()), mpt::endian::little>;
 
 
 struct PlaybackTestData
@@ -411,7 +411,7 @@ void PlaybackTest::ToTSV(std::ostream &output) const noexcept(false)
 		"\nSample data hashes:\n";
 
 	for(SAMPLEINDEX smp = 1; smp <= header.numSamples; smp++)
-		output << mpt::ToCharset(mpt::Charset::UTF8, mpt::encode_hex(mpt::as_span(m_testData->sampleDataHashes[smp - 1]))) << "\t" << smp << "\n";
+		output << mpt::ToCharset(mpt::Charset::UTF8, mpt::encode_hex(mpt::as_raw_memory(m_testData->sampleDataHashes[smp - 1]))) << "\t" << smp << "\n";
 
 	output << "\nChannel data:\n"
 		"index\torder\trow\ttick\tglobalVolume\ttickLength\tchannel\tsample\tleftVol\trightVol\tsurround\tspeed\tposition\tfilterType\tfilterA0\tfilterB0\tfilterB1\tsrcMode\toplRegisters\n";
@@ -525,7 +525,7 @@ std::vector<mpt::ustring> PlaybackTest::Compare(const PlaybackTest &otherTest) c
 	for(size_t smp = 0; smp < std::min(m_testData->sampleDataHashes.size(), other.sampleDataHashes.size()); smp++)
 	{
 		if(m_testData->sampleDataHashes[smp] != other.sampleDataHashes[smp])
-			errors.push_back(MPT_UFORMAT("Sample hash in slot {} differs: {} vs {}")(smp + 1, mpt::encode_hex(mpt::as_span(m_testData->sampleDataHashes[smp])), mpt::encode_hex(mpt::as_span(other.sampleDataHashes[smp]))));
+			errors.push_back(MPT_UFORMAT("Sample hash in slot {} differs: {} vs {}")(smp + 1, mpt::encode_hex(mpt::as_raw_memory(m_testData->sampleDataHashes[smp])), mpt::encode_hex(mpt::as_raw_memory(other.sampleDataHashes[smp]))));
 	}
 
 	uint64 lDuration = 0, rDuration = 0;
@@ -675,7 +675,9 @@ PlaybackTest CSoundFile::CreatePlaybackTest(uint32 mixingFreq, uint32 outputChan
 			const auto s = std::move(ss).str();
 			hasher.process(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(s)));
 		}
-		testData.sampleDataHashes.push_back(hasher.result());
+		SampleDataHash result;
+		result.set(hasher.result());
+		testData.sampleDataHashes.push_back(result);
 	}
 
 	for(const auto &song : GetAllSubSongs())
