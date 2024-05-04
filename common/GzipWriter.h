@@ -14,6 +14,7 @@
 
 #include "mptString.h"
 #include "mpt/io/io.hpp"
+#include "mpt/io/io_stdstream.hpp"
 
 #ifdef MPT_WITH_ZLIB
 

@@ -20,6 +20,7 @@
 #include "mpt/binary/hex.hpp"
 #include "mpt/crypto/hash.hpp"
 #include "mpt/io/io.hpp"
+#include "mpt/io/io_stdstream.hpp"
 #include "openmpt/base/Endian.hpp"
 
 #include <sstream>
@@ -380,7 +381,7 @@ void PlaybackTest::Serialize(std::ostream &output, const mpt::ustring &filename)
 	}
 
 #ifdef MPT_WITH_ZLIB
-	std::string outData = std::move(outStream.str());
+	std::string outData = std::move(outStream).str();
 	WriteGzip(output, outData, filename);
 #else
 	// miniz doesn't have gzip convenience functions

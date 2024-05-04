@@ -66,6 +66,9 @@ OPENMPT_NAMESPACE_BEGIN
 
 #define MPTTIMER_PERIOD		200
 
+#if defined(MPT_BUILD_DEBUG)
+#define MPT_ENABLE_PLAYBACK_TEST_MENU
+#endif
 
 /////////////////////////////////////////////////////////////////////////////
 // CMainFrame
@@ -126,11 +129,11 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 #endif // MPT_ENABLE_UPDATE
 	ON_COMMAND(ID_HELPSHOW,					&CMainFrame::OnHelp)
 
-#ifdef MPT_BUILD_DEBUG
+#ifdef MPT_ENABLE_PLAYBACK_TEST_MENU
 	ON_COMMAND(ID_CREATE_MIXERDUMP, &CMainFrame::OnCreateMixerDump)
 	ON_COMMAND(ID_VERIFY_MIXERDUMP, &CMainFrame::OnVerifyMixerDump)
 	ON_COMMAND(ID_CONVERT_MIXERDUMP, &CMainFrame::OnConvertMixerDumpToText)
-#endif // MPT_BUILD_DEBUG
+#endif // ENABLE_PLAYBACK_TEST_MENU
 
 	ON_COMMAND_RANGE(ID_MRU_LIST_FIRST, ID_MRU_LIST_LAST, &CMainFrame::OnOpenMRUItem)
 	ON_UPDATE_COMMAND_UI(ID_MRU_LIST_FIRST,	&CMainFrame::OnUpdateMRUItem)
@@ -237,14 +240,14 @@ void CMainFrame::Initialize()
 	CreateTemplateModulesMenu();
 	UpdateMRUList();
 
-#ifdef MPT_BUILD_DEBUG
+#ifdef MPT_ENABLE_PLAYBACK_TEST_MENU
 	CMenu debugMenu;
 	debugMenu.CreatePopupMenu();
 	debugMenu.AppendMenu(MF_STRING, ID_CREATE_MIXERDUMP, _T("Create Mixer Dump for &File(s)..."));
 	debugMenu.AppendMenu(MF_STRING, ID_VERIFY_MIXERDUMP, _T("&Verify File(s)..."));
 	debugMenu.AppendMenu(MF_STRING, ID_CONVERT_MIXERDUMP, _T("Convert Mixer Dump to &TSV..."));
 	GetMenu()->AppendMenu(MF_STRING | MF_POPUP, reinterpret_cast<UINT_PTR>(debugMenu.Detach()), _T("Debug"));
-#endif  // MPT_BUILD_DEBUG
+#endif  // ENABLE_PLAYBACK_TEST_MENU
 }
 
 
@@ -3176,7 +3179,7 @@ BOOL CMainFrame::OnQueryEndSession()
 }
 
 
-#ifdef MPT_BUILD_DEBUG
+#ifdef MPT_ENABLE_PLAYBACK_TEST_MENU
 void CMainFrame::OnCreateMixerDump()
 {
 	std::string exts;
@@ -3283,7 +3286,7 @@ void CMainFrame::OnConvertMixerDumpToText()
 	}
 }
 
-#endif  // MPT_BUILD_DEBUG
+#endif  // ENABLE_PLAYBACK_TEST_MENU
 
 
 void CMainFrame::NotifyAccessibilityUpdate(CWnd &source)

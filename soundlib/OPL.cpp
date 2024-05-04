@@ -383,7 +383,7 @@ OPL::Register OPL::StripVoiceFromRegister(OPL::Register reg)
 	if(regLo >= FNUM_LOW && regLo <= FEEDBACK_CONNECTION)
 		return (reg & 0xF0);
 	if(regLo >= AM_VIB && regLo <= WAVE_SELECT)
-		return (reg & 0xE0) + ((reg & 0x07) >= 3 ? 3 : 0);
+		return regLo + static_cast<OPL::Register>((reg & 0x07) >= 3 ? 3 : 0);
 	return reg;
 }
 
