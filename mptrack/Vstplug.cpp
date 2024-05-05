@@ -584,8 +584,7 @@ intptr_t VSTCALLBACK CVstPlugin::MasterCallBack(AEffect *effect, VstOpcodeToHost
 
 	// string in ptr, see below
 	case audioMasterCanDo:
-		//Other possible Can Do strings are:
-		if(!strcmp((char*)ptr, HostCanDo::sendVstEvents)
+		if(!strcmp((char *)ptr, HostCanDo::sendVstEvents)
 		   || !strcmp((char *)ptr, HostCanDo::sendVstMidiEvent)
 		   || !strcmp((char *)ptr, HostCanDo::sendVstTimeInfo)
 		   || !strcmp((char *)ptr, HostCanDo::receiveVstEvents)
@@ -769,7 +768,8 @@ intptr_t CVstPlugin::VstFileSelector(bool destructor, VstFileSelect &fileSel)
 			}
 			dlg.ExtensionFilter(extensions)
 				.WorkingDirectory(mpt::PathString::FromLocale(workingDir))
-				.AddPlace(GetPluginFactory().dllPath.GetDirectoryWithDrive());
+				.AddPlace(GetPluginFactory().dllPath.GetDirectoryWithDrive())
+				.AddPlace(TrackerSettings::Instance().PathPluginPresets.GetWorkingDir());
 			if(!dlg.Show(GetEditor()))
 				return 0;
 
