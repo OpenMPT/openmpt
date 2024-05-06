@@ -239,24 +239,17 @@ void IMixPlugin::ProcessMixOps(float * MPT_RESTRICT pOutL, float * MPT_RESTRICT 
 	// -> mixop == 4 : MIX -= middle - WET * wetRatio + middle - DRY
 	// -> mixop == 5 : MIX_L += wetRatio * (WET_L - DRY_L) + dryRatio * (DRY_R - WET_R)
 	//                 MIX_R += dryRatio * (WET_L - DRY_L) + wetRatio * (DRY_R - WET_R)
+	// -> mixop == 6:  same as normal, but forces dry ratio to 1
 
 	MPT_ASSERT(m_pMixStruct != nullptr);
 
-	int mixop;
-	if(IsInstrument())
-	{
-		// Force normal mix mode for instruments
-		mixop = 0;
-	} else
-	{
-		mixop = m_pMixStruct->GetMixMode();
-	}
+	const PluginMixMode mixop = m_pMixStruct->GetMixMode();
 
-	float wetRatio = 1 - m_pMixStruct->fDryRatio;
-	float dryRatio = IsInstrument() ? 1 : m_pMixStruct->fDryRatio; // Always mix full dry if this is an instrument
+	float wetRatio = 1.f - m_pMixStruct->fDryRatio;
+	float dryRatio = (mixop == PluginMixMode::Instrument) ? 1.f : m_pMixStruct->fDryRatio;
 
 	// Wet / Dry range expansion [0,1] -> [-1,1]
-	if(GetNumInputChannels() > 0 && m_pMixStruct->IsExpandedMix())
+	if(m_pMixStruct->IsExpandedMix())
 	{
 		wetRatio = 2.0f * wetRatio - 1.0f;
 		dryRatio = -wetRatio;
@@ -273,17 +266,17 @@ void IMixPlugin::ProcessMixOps(float * MPT_RESTRICT pOutL, float * MPT_RESTRICT 
 	{
 
 	// Default mix
-	case 0:
+	case PluginMixMode::Default:
+	case PluginMixMode::Instrument:
 		for(uint32 i = 0; i < numFrames; i++)
 		{
-			//rewbs.wetratio - added the factors. [20040123]
 			pOutL[i] += leftPlugOutput[i] * wetRatio + plugInputL[i] * dryRatio;
 			pOutR[i] += rightPlugOutput[i] * wetRatio + plugInputR[i] * dryRatio;
 		}
 		break;
 
 	// Wet subtract
-	case 1:
+	case PluginMixMode::WetSubtract:
 		for(uint32 i = 0; i < numFrames; i++)
 		{
 			pOutL[i] += plugInputL[i] - leftPlugOutput[i] * wetRatio;
@@ -292,7 +285,7 @@ void IMixPlugin::ProcessMixOps(float * MPT_RESTRICT pOutL, float * MPT_RESTRICT 
 		break;
 
 	// Dry subtract
-	case 2:
+	case PluginMixMode::DrySubtract:
 		for(uint32 i = 0; i < numFrames; i++)
 		{
 			pOutL[i] += leftPlugOutput[i] - plugInputL[i] * dryRatio;
@@ -301,7 +294,7 @@ void IMixPlugin::ProcessMixOps(float * MPT_RESTRICT pOutL, float * MPT_RESTRICT 
 		break;
 
 	// Mix subtract
-	case 3:
+	case PluginMixMode::MixSubtract:
 		for(uint32 i = 0; i < numFrames; i++)
 		{
 			pOutL[i] -= leftPlugOutput[i] - plugInputL[i] * wetRatio;
@@ -310,17 +303,17 @@ void IMixPlugin::ProcessMixOps(float * MPT_RESTRICT pOutL, float * MPT_RESTRICT 
 		break;
 
 	// Middle subtract
-	case 4:
+	case PluginMixMode::MiddleSubtract:
 		for(uint32 i = 0; i < numFrames; i++)
 		{
-			float middle = (pOutL[i] + plugInputL[i] + pOutR[i] + plugInputR[i]) / 2.0f;
+			float middle = (pOutL[i] + plugInputL[i] + pOutR[i] + plugInputR[i]) * 0.5f;
 			pOutL[i] -= middle - leftPlugOutput[i] * wetRatio + middle - plugInputL[i];
 			pOutR[i] -= middle - rightPlugOutput[i] * wetRatio + middle - plugInputR[i];
 		}
 		break;
 
 	// Left / Right balance
-	case 5:
+	case PluginMixMode::LRBalance:
 		if(m_pMixStruct->IsExpandedMix())
 		{
 			wetRatio /= 2.0f;
@@ -336,8 +329,8 @@ void IMixPlugin::ProcessMixOps(float * MPT_RESTRICT pOutL, float * MPT_RESTRICT 
 	}
 
 	// If dry mix is ticked, we add the unprocessed buffer,
-	// except if this is an instrument since then it has already been done:
-	if(m_pMixStruct->IsWetMix() && !IsInstrument())
+	// except with the instrument mixop as it has already been done:
+	if(m_pMixStruct->IsDryMix() && mixop != PluginMixMode::Instrument)
 	{
 		for(uint32 i = 0; i < numFrames; i++)
 		{

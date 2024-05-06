@@ -735,6 +735,15 @@ bool CSoundFile::CreateInternal(FileReader file, ModLoadingFlags loadFlags)
 				{
 					// Plugin was found
 					plugin.pMixPlugin->RestoreAllParameters(plugin.defaultProgram);
+
+					// Special handling for instrument plugins in ProcessMixOps was removed
+					if(m_dwLastSavedWithVersion < MPT_V("1.32.00.11"))
+					{
+						if(plugin.pMixPlugin->IsInstrument())
+							plugin.SetMixMode(PluginMixMode::Instrument);
+						if(!plugin.pMixPlugin->GetNumInputChannels())
+							plugin.SetExpandedMix(false);
+					}
 				} else
 				{
 					// Plugin not found - add to list

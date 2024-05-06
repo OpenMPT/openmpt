@@ -32,6 +32,17 @@ class CSoundFile;
 
 #ifndef NO_PLUGINS
 
+enum class PluginMixMode : uint8
+{
+	Default        = 0,
+	WetSubtract    = 1,
+	DrySubtract    = 2,
+	MixSubtract    = 3,
+	MiddleSubtract = 4,
+	LRBalance      = 5,
+	Instrument     = 6,
+};
+
 struct SNDMIXPLUGININFO
 {
 	// dwInputRouting flags
@@ -39,7 +50,7 @@ struct SNDMIXPLUGININFO
 	{
 		irApplyToMaster = 0x01,  // Apply to master mix
 		irBypass        = 0x02,  // Bypass effect
-		irWetMix        = 0x04,  // Wet Mix (dry added)
+		irDryMix        = 0x04,  // Wet Mix (dry added)
 		irExpandMix     = 0x08,  // [0%,100%] -> [-200%,200%]
 		irAutoSuspend   = 0x10,  // Plugin will automatically suspend on silence
 	};
@@ -92,12 +103,12 @@ struct SNDMIXPLUGIN
 	// Input routing getters
 	uint8 GetGain() const
 		{ return Info.gain; }
-	uint8 GetMixMode() const
-		{ return Info.mixMode; }
+	PluginMixMode GetMixMode() const
+		{ return static_cast<PluginMixMode>(Info.mixMode.get()); }
 	bool IsMasterEffect() const
 		{ return (Info.routingFlags & SNDMIXPLUGININFO::irApplyToMaster) != 0; }
-	bool IsWetMix() const
-		{ return (Info.routingFlags & SNDMIXPLUGININFO::irWetMix) != 0; }
+	bool IsDryMix() const
+		{ return (Info.routingFlags & SNDMIXPLUGININFO::irDryMix) != 0; }
 	bool IsExpandedMix() const
 		{ return (Info.routingFlags & SNDMIXPLUGININFO::irExpandMix) != 0; }
 	bool IsBypassed() const
@@ -107,12 +118,12 @@ struct SNDMIXPLUGIN
 
 	// Input routing setters
 	void SetGain(uint8 gain);
-	void SetMixMode(uint8 mixMode)
-		{ Info.mixMode = mixMode; }
+	void SetMixMode(PluginMixMode mixMode)
+		{ Info.mixMode = static_cast<uint8>(mixMode); }
 	void SetMasterEffect(bool master = true)
 		{ if(master) Info.routingFlags |= SNDMIXPLUGININFO::irApplyToMaster; else Info.routingFlags &= uint8(~SNDMIXPLUGININFO::irApplyToMaster); }
-	void SetWetMix(bool wetMix = true)
-		{ if(wetMix) Info.routingFlags |= SNDMIXPLUGININFO::irWetMix; else Info.routingFlags &= uint8(~SNDMIXPLUGININFO::irWetMix); }
+	void SetDryMix(bool wetMix = true)
+		{ if(wetMix) Info.routingFlags |= SNDMIXPLUGININFO::irDryMix; else Info.routingFlags &= uint8(~SNDMIXPLUGININFO::irDryMix); }
 	void SetExpandedMix(bool expanded = true)
 		{ if(expanded) Info.routingFlags |= SNDMIXPLUGININFO::irExpandMix; else Info.routingFlags &= uint8(~SNDMIXPLUGININFO::irExpandMix); }
 	void SetBypass(bool bypass = true);

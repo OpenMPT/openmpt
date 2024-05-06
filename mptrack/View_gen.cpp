@@ -227,6 +227,7 @@ void CViewGlobals::OnInitialUpdate()
 	m_CbnSpecialMixProcessing.AddString(_T("Mix Subtract"));
 	m_CbnSpecialMixProcessing.AddString(_T("Middle Subtract"));
 	m_CbnSpecialMixProcessing.AddString(_T("LR Balance"));
+	m_CbnSpecialMixProcessing.AddString(_T("Instrument"));
 	m_SpinMixGain.SetRange(0, 80);
 	m_SpinMixGain.SetPos(10);
 	SetDlgItemText(IDC_EDIT16, _T("Gain: x1.0"));
@@ -448,7 +449,7 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 		SetDlgItemText(IDC_EDIT13, mpt::ToCString(plugin.GetName()));
 		CheckDlgButton(IDC_CHECK9, plugin.IsMasterEffect() ? BST_CHECKED : BST_UNCHECKED);
 		CheckDlgButton(IDC_CHECK10, plugin.IsBypassed() ? BST_CHECKED : BST_UNCHECKED);
-		CheckDlgButton(IDC_CHECK11, plugin.IsWetMix() ? BST_CHECKED : BST_UNCHECKED);
+		CheckDlgButton(IDC_CHECK11, plugin.IsDryMix() ? BST_CHECKED : BST_UNCHECKED);
 		CheckDlgButton(IDC_CHECK13, plugin.IsAutoSuspendable() ? BST_CHECKED : BST_UNCHECKED);
 		IMixPlugin *pPlugin = plugin.pMixPlugin;
 		m_BtnEdit.EnableWindow((pPlugin != nullptr && (pPlugin->HasEditor() || pPlugin->GetNumParameters())) ? TRUE : FALSE);
@@ -457,17 +458,8 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 		GetDlgItem(IDC_CLONEPLUG)->EnableWindow((pPlugin) ? TRUE : FALSE);
 		UpdateDryWetDisplay();
 
-		if(pPlugin && pPlugin->IsInstrument())
-		{
-			m_CbnSpecialMixProcessing.EnableWindow(FALSE);
-			GetDlgItem(IDC_CHECK12)->EnableWindow(FALSE);
-		} else
-		{
-			m_CbnSpecialMixProcessing.EnableWindow(TRUE);
-			GetDlgItem(IDC_CHECK12)->EnableWindow(TRUE);
-			m_CbnSpecialMixProcessing.SetCurSel(plugin.GetMixMode());
-			CheckDlgButton(IDC_CHECK12, plugin.IsExpandedMix() ? BST_CHECKED : BST_UNCHECKED);
-		}
+		m_CbnSpecialMixProcessing.SetCurSel(static_cast<int>(plugin.GetMixMode()));
+		CheckDlgButton(IDC_CHECK12, plugin.IsExpandedMix() ? BST_CHECKED : BST_UNCHECKED);
 		int gain = plugin.GetGain();
 		if(gain == 0) gain = 10;
 		float value = 0.1f * (float)gain;
@@ -1342,7 +1334,7 @@ void CViewGlobals::OnSpecialMixProcessingChanged()
 	CModDoc *pModDoc = GetDocument();
 	if ((m_nCurrentPlugin >= MAX_MIXPLUGINS) || (!pModDoc)) return;
 
-	pModDoc->GetSoundFile().m_MixPlugins[m_nCurrentPlugin].SetMixMode((uint8)m_CbnSpecialMixProcessing.GetCurSel());
+	pModDoc->GetSoundFile().m_MixPlugins[m_nCurrentPlugin].SetMixMode(static_cast<PluginMixMode>(m_CbnSpecialMixProcessing.GetCurSel()));
 	SetPluginModified();
 }
 
@@ -1352,7 +1344,7 @@ void CViewGlobals::OnDryMixChanged()
 	CModDoc *pModDoc = GetDocument();
 	if ((m_nCurrentPlugin >= MAX_MIXPLUGINS) || (!pModDoc)) return;
 
-	pModDoc->GetSoundFile().m_MixPlugins[m_nCurrentPlugin].SetWetMix(IsDlgButtonChecked(IDC_CHECK11) != BST_UNCHECKED);
+	pModDoc->GetSoundFile().m_MixPlugins[m_nCurrentPlugin].SetDryMix(IsDlgButtonChecked(IDC_CHECK11) != BST_UNCHECKED);
 	SetPluginModified();
 }
 

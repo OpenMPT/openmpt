@@ -166,7 +166,7 @@ void CSelectPluginDlg::OnOK()
 				{
 					// Enable drymix by default for these known plugins
 				case Vst::FourCC("Scop"):
-					m_pPlugin->SetWetMix();
+					m_pPlugin->SetDryMix();
 					break;
 				}
 			}
@@ -189,6 +189,8 @@ void CSelectPluginDlg::OnOK()
 					{
 						m_pPlugin->Info.szName = mpt::ToCharset(mpt::Charset::Locale, name);
 					}
+					m_pPlugin->SetDryMix(p->IsInstrument());
+
 					// Check if plugin slot is already assigned to any instrument, and if not, create one.
 					if(p->IsInstrument() && m_pModDoc->HasInstrumentForPlugin(m_nPlugSlot) == INSTRUMENTINDEX_INVALID)
 					{
