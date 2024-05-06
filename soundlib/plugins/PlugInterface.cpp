@@ -241,8 +241,6 @@ void IMixPlugin::ProcessMixOps(float * MPT_RESTRICT pOutL, float * MPT_RESTRICT 
 	//                 MIX_R += dryRatio * (WET_L - DRY_L) + wetRatio * (DRY_R - WET_R)
 	// -> mixop == 6:  same as normal, but forces dry ratio to 1
 
-	MPT_ASSERT(m_pMixStruct != nullptr);
-
 	const PluginMixMode mixop = m_pMixStruct->GetMixMode();
 
 	float wetRatio = 1.f - m_pMixStruct->fDryRatio;
