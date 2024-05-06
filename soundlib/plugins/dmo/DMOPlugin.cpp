@@ -14,9 +14,9 @@
 
 #include "mpt/base/aligned_array.hpp"
 #if defined(MPT_WITH_DMO)
+#include "DMOPlugin.h"
 #include "mpt/uuid/guid.hpp"
 #include "../../Sndfile.h"
-#include "DMOPlugin.h"
 #include "../PluginManager.h"
 #include <uuids.h>
 #include <medparam.h>

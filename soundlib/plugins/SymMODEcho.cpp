@@ -209,15 +209,15 @@ CString SymMODEcho::GetParamDisplay(PlugParamIndex param)
 	switch(static_cast<Parameters>(param))
 	{
 	case kEchoType:
-			switch(GetDSPType())
-			{
-				case DSPType::Off: return _T("Off");
-				case DSPType::Normal: return _T("Normal");
-				case DSPType::Cross: return _T("Cross");
-				case DSPType::Cross2: return _T("Cross 2");
-				case DSPType::Center: return _T("Center");
-				case DSPType::NumTypes: break;
-			}
+		switch(GetDSPType())
+		{
+			case DSPType::Off: return _T("Off");
+			case DSPType::Normal: return _T("Normal");
+			case DSPType::Cross: return _T("Cross");
+			case DSPType::Cross2: return _T("Cross 2");
+			case DSPType::Center: return _T("Center");
+			case DSPType::NumTypes: break;
+		}
 		break;
 	case kEchoDelay:
 		return mpt::cfmt::val(m_chunk.param[kEchoDelay]);

@@ -275,7 +275,8 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 		const uint32 patternEnd = ord.x + patHeader.numRows;
 		maxPos = std::max(maxPos, patternEnd);
 
-		ModCommand::NOTE lastNote[32] = { 0 };
+		std::array<ModCommand::NOTE, 32> lastNote;
+		lastNote.fill(NOTE_NONE);
 		for(ROWINDEX r = 0; r < patHeader.numRows; r++, curRow++)
 		{
 			if(curRow >= rowsPerPat)

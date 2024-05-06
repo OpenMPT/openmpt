@@ -924,7 +924,7 @@ const CUpdateCheck::Error &CUpdateCheck::MessageAsError(WPARAM /* wparam */ , LP
 
 
 
-static const char * const updateScript = R"vbs(
+static const char updateScript[] = R"vbs(
 
 Wscript.Echo
 Wscript.Echo "OpenMPT portable Update"

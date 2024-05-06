@@ -773,10 +773,10 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		return true;
 	}
-	
+
 	InitializeGlobals(MOD_TYPE_AMS);
-	
-	m_songName = songName;
+
+	m_songName = std::move(songName);
 
 	m_nInstruments = fileHeader.numIns;
 	m_nChannels = 32;

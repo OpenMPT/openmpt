@@ -11,8 +11,8 @@
 #include "stdafx.h"
 
 #ifndef NO_PLUGINS
-#include "../../Sndfile.h"
 #include "Echo.h"
+#include "../../Sndfile.h"
 #endif // !NO_PLUGINS
 
 OPENMPT_NAMESPACE_BEGIN

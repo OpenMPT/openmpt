@@ -11,8 +11,8 @@
 #include "stdafx.h"
 
 #ifndef NO_PLUGINS
-#include "../../Sndfile.h"
 #include "ParamEq.h"
+#include "../../Sndfile.h"
 #include "mpt/base/numbers.hpp"
 #endif // !NO_PLUGINS
 

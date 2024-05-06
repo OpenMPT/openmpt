@@ -279,7 +279,7 @@ void COptionsAdvanced::OnCustomDrawList(NMHDR* pNMHDR, LRESULT* pResult)
 			pLVCD->clrTextBk = isDefault ? defColor : modColor;
 		}
 		break;
-	}	
+	}
 }
 
 

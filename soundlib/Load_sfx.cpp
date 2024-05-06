@@ -60,7 +60,7 @@ struct SFXSampleHeader
 	uint16be loopStart;
 	uint16be loopLength;
 
-	// Convert an MOD sample header to OpenMPT's internal sample header.
+	// Convert an SFX sample header to OpenMPT's internal sample header.
 	void ConvertToMPT(ModSample &mptSmp, uint32 length) const
 	{
 		mptSmp.Initialize(MOD_TYPE_MOD);

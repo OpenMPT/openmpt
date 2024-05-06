@@ -625,7 +625,7 @@ void COptionsKeyboard::OnCommandKeySelChanged(NMHDR *pNMHDR, LRESULT *)
 		selectedItem = m_lbnCommandKeys.GetSelectionMark();
 	}
 
-	const CommandID cmd = static_cast<CommandID>(m_lbnCommandKeys.GetItemData(selectedItem));
+	const CommandID cmd = (selectedItem >= 0) ? static_cast<CommandID>(m_lbnCommandKeys.GetItemData(selectedItem)) : kcNull;
 	CString str;
 
 	//Separator

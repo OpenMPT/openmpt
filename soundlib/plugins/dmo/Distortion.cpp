@@ -13,8 +13,8 @@
 #include "stdafx.h"
 
 #ifndef NO_PLUGINS
-#include "../../Sndfile.h"
 #include "Distortion.h"
+#include "../../Sndfile.h"
 #include "DMOUtils.h"
 #include "mpt/base/numbers.hpp"
 #endif // !NO_PLUGINS
