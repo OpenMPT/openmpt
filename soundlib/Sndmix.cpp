@@ -1627,27 +1627,8 @@ void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int32 &period, Tuning::NOTEI
 		}
 	} else if(chn.rowCommand.command == CMD_HMN_MEGA_ARP)
 	{
-		static constexpr std::array<uint8, 16> MegaArp[] =
-		{
-			{0,  3,  7,  12, 15, 12, 7,  3,  0,  3,  7,  12, 15, 12, 7,  3 },
-			{0,  4,  7,  12, 16, 12, 7,  4,  0,  4,  7,  12, 16, 12, 7,  4 },
-			{0,  3,  8,  12, 15, 12, 8,  3,  0,  3,  8,  12, 15, 12, 8,  3 },
-			{0,  4,  8,  12, 16, 12, 8,  4,  0,  4,  8,  12, 16, 12, 8,  4 },
-			{0,  5,  8,  12, 17, 12, 8,  5,  0,  5,  8,  12, 17, 12, 8,  5 },
-			{0,  5,  9,  12, 17, 12, 9,  5,  0,  5,  9,  12, 17, 12, 9,  5 },
-			{12, 0,  7,  0,  3,  0,  7,  0,  12, 0,  7,  0,  3,  0,  7,  0 },
-			{12, 0,  7,  0,  4,  0,  7,  0,  12, 0,  7,  0,  4,  0,  7,  0 },
-			{0,  3,  7,  3,  7,  12, 7,  12, 15, 12, 7,  12, 7,  3,  7,  3 },
-			{0,  4,  7,  4,  7,  12, 7,  12, 16, 12, 7,  12, 7,  4,  7,  4 },
-			{31, 27, 24, 19, 15, 12, 7,  3,  0,  3,  7,  12, 15, 19, 24, 27},
-			{31, 28, 24, 19, 16, 12, 7,  4,  0,  4,  7,  12, 16, 19, 24, 28},
-			{0,  12, 0,  12, 0,  12, 0,  12, 0,  12, 0,  12, 0,  12, 0,  12},
-			{0,  12, 24, 12, 0,  12, 24, 12, 0,  12, 24, 12, 0,  12, 24, 12},
-			{0,  3,  0,  3,  0,  3,  0,  3,  0,  3,  0,  3,  0,  3,  0,  3 },
-			{0,  4,  0,  4,  0,  4,  0,  4,  0,  4,  0,  4,  0,  4,  0,  4 }
-		};
 		uint8 note = static_cast<uint8>(GetNoteFromPeriod(period, chn.nFineTune, chn.nC5Speed));
-		note += MegaArp[chn.rowCommand.param & 0x0F][chn.nArpeggio & 0x0F];
+		note += HisMastersNoiseMegaArp[chn.rowCommand.param & 0x0F][chn.nArpeggio & 0x0F];
 		chn.nArpeggio++;
 		period = GetPeriodFromNote(note, chn.nFineTune, chn.nC5Speed);
 	}

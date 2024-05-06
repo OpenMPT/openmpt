@@ -917,6 +917,10 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 	if((command == CMD_REVERSEOFFSET || command == CMD_OFFSETPERCENTAGE) && !newSpecs.HasCommand(command))
 	{
 		command = CMD_OFFSET;
+	} else if(command == CMD_HMN_MEGA_ARP && !newSpecs.HasCommand(CMD_HMN_MEGA_ARP))
+	{
+		command = CMD_ARPEGGIO;
+		param = (HisMastersNoiseMegaArp[param & 0x0F][1] << 4) | HisMastersNoiseMegaArp[param & 0x0F][2];
 	}
 
 	if(!newSpecs.HasNote(note))
