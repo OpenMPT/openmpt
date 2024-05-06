@@ -14,6 +14,9 @@ is just a high-level summary.
  *  [**New**] New `Makefile` `CONFIG=mingw-w64` option
     `WINDOWS_CRT=[crtdll,msvcrt,ucrt]` to select the toolchain CRT library.
 
+ *  [**Change**] `build/download_externals.sh` now verifies the integrity of any
+    downloaded files and uses curl instead of wget.
+
  *  M15: Loosen SoundTracker file rejection heuristics a bit to allow loading of
     schmokk.mod and scramble_2.mod. Other heuristics has been tightened a bit.
  *  MOD: Change VBlank timing heuristic to always assume CIA timing when long
