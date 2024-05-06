@@ -63,7 +63,7 @@ struct UltSample
 		mptSmp.nSustainEnd = std::min(static_cast<SmpLength>(loopEnd), mptSmp.nLength);
 		mptSmp.nVolume = volume;
 
-		mptSmp.nC5Speed = speed;
+		mptSmp.nC5Speed = speed * 2;  // Doubled to fit the note range
 		if(finetune)
 		{
 			mptSmp.Transpose(finetune / (12.0 * 32768.0));
@@ -207,7 +207,7 @@ static int ReadULTEvent(ModCommand &m, FileReader &file, uint8 version)
 		b = file.ReadUint8();
 	}
 
-	m.note = (b > 0 && b < 61) ? (b + 35 + NOTE_MIN) : NOTE_NONE;
+	m.note = (b > 0 && b < 97) ? (b + 23 + NOTE_MIN) : NOTE_NONE;
 
 	const auto [instr, cmd, para1, para2] = file.ReadArray<uint8, 4>();
 	
