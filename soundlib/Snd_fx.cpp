@@ -5163,12 +5163,17 @@ void CSoundFile::ParseMIDIMacro(PlayState &playState, CHANNELINDEX nChn, bool is
 		{
 			// SysEx Checksum (not an original Impulse Tracker macro variable, but added for convenience)
 			auto startPos = outPos;
-			while(startPos > 0 && out[--startPos] != 0xF0);
-			if(outPos - startPos < 5 || out[startPos] != 0xF0)
-			{
+			while(startPos > 0 && out[--startPos] != 0xF0)
+				;
+
+			if(outPos - startPos < 3 || out[startPos] != 0xF0)
 				continue;
-			}
-			for(auto p = startPos + 5u; p != outPos; p++)
+
+			uint8 checksumStart = out[startPos + 3] ? 5 : 6;
+			if(outPos - startPos < checksumStart)
+				continue;
+
+			for(auto p = startPos + checksumStart; p != outPos; p++)
 			{
 				data += out[p];
 			}
