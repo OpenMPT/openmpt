@@ -17,6 +17,8 @@ is just a high-level summary.
  *  [**Change**] DOS builds now use zlib, libmpg123, libogg, and libvorbis
     instead of miniz, minimp3, and stb_vorbis by default. 
  *  [**Change**] `Makefile CONFIG=djgpp` now sets `ALLOW_LGPL=1` by default.
+ *  [**Change**] `build/download_externals.sh` now verifies the integrity of any
+    downloaded files and uses curl instead of wget.
 
  *  [**Regression**] Support for Emscripten versions older than 3.1.51 has been
     removed.
