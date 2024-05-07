@@ -320,6 +320,7 @@ static constexpr FileFormatLoader ModuleFormatLoaders[] =
 	MPT_DECLARE_FORMAT(XMF),
 	MPT_DECLARE_FORMAT(Puma),
 	MPT_DECLARE_FORMAT(GMC),
+	MPT_DECLARE_FORMAT(IMS),
 };
 
 #undef MPT_DECLARE_FORMAT

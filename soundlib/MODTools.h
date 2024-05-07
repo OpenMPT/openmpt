@@ -107,6 +107,10 @@ static T ReadAndSwap(TFileReader &file, const bool swapBytes)
 uint32 ReadMODSample(const MODSampleHeader &sampleHeader, ModSample &sample, mpt::charbuf<MAX_SAMPLENAME> &sampleName, bool is4Chn);
 
 
+// Check if a name string is valid (i.e. doesn't contain binary garbage data)
+uint32 CountInvalidChars(const mpt::span<const char> name);
+
+
 // Count malformed bytes in MOD pattern data
 uint32 CountMalformedMODPatternData(const MODPatternData &patternData, const bool extendedFormat);
 

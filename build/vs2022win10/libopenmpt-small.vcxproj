@@ -1661,6 +1661,7 @@
     <ClCompile Include="..\..\soundlib\Load_gt2.cpp" />
     <ClCompile Include="..\..\soundlib\Load_ice.cpp" />
     <ClCompile Include="..\..\soundlib\Load_imf.cpp" />
+    <ClCompile Include="..\..\soundlib\Load_ims.cpp" />
     <ClCompile Include="..\..\soundlib\Load_it.cpp" />
     <ClCompile Include="..\..\soundlib\Load_itp.cpp" />
     <ClCompile Include="..\..\soundlib\Load_kris.cpp" />

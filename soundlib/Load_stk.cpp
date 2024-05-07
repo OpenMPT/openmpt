@@ -14,20 +14,6 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-// Check if a name string is valid (i.e. doesn't contain binary garbage data)
-static uint32 CountInvalidChars(const mpt::span<const char> name)
-{
-	uint32 invalidChars = 0;
-	for(int8 c : name)  // char can be signed or unsigned
-	{
-		// Check for any Extended ASCII and control characters
-		if(c != 0 && c < ' ')
-			invalidChars++;
-	}
-	return invalidChars;
-}
-
-
 // We'll have to do some heuristic checks to find out whether this is an old Ultimate Soundtracker module
 // or if it was made with the newer Soundtracker versions.
 // Thanks for Fraggie for this information! (https://www.un4seen.com/forum/?topic=14471.msg100829#msg100829)

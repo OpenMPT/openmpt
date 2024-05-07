@@ -39,6 +39,7 @@ Root: HKLM; Subkey: "SOFTWARE\Classes\Applications\OpenMPT.exe\SupportedTypes"; 
 Root: HKLM; Subkey: "SOFTWARE\Classes\Applications\OpenMPT.exe\SupportedTypes"; ValueType: string; ValueName: ".gtk"; ValueData: ""
 Root: HKLM; Subkey: "SOFTWARE\Classes\Applications\OpenMPT.exe\SupportedTypes"; ValueType: string; ValueName: ".gt2"; ValueData: ""
 Root: HKLM; Subkey: "SOFTWARE\Classes\Applications\OpenMPT.exe\SupportedTypes"; ValueType: string; ValueName: ".imf"; ValueData: ""
+Root: HKLM; Subkey: "SOFTWARE\Classes\Applications\OpenMPT.exe\SupportedTypes"; ValueType: string; ValueName: ".ims"; ValueData: ""
 Root: HKLM; Subkey: "SOFTWARE\Classes\Applications\OpenMPT.exe\SupportedTypes"; ValueType: string; ValueName: ".ice"; ValueData: ""
 Root: HKLM; Subkey: "SOFTWARE\Classes\Applications\OpenMPT.exe\SupportedTypes"; ValueType: string; ValueName: ".itp"; ValueData: ""
 Root: HKLM; Subkey: "SOFTWARE\Classes\Applications\OpenMPT.exe\SupportedTypes"; ValueType: string; ValueName: ".j2b"; ValueData: ""

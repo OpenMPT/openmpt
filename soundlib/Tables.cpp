@@ -74,6 +74,7 @@ static constexpr ModFormatInfo modFormatInfo[] =
 	{ UL_("Farandole Composer"),                 "far" },
 	{ UL_("FM Tracker"),                         "fmt" },
 	{ UL_("Imago Orpheus"),                      "imf" },
+	{ UL_("Images Music System"),                "ims" },
 	{ UL_("Ice Tracker"),                        "ice" },
 #ifdef MPT_EXTERNAL_SAMPLES
 	{ UL_("Impulse Tracker Project"),            "itp" },

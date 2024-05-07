@@ -64,6 +64,7 @@ Root: HKLM; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAsso
 Root: HKLM; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".gtk"; ValueData: {#OpenMPTFile}; Components: {#Component}
 Root: HKLM; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".gt2"; ValueData: {#OpenMPTFile}; Components: {#Component}
 Root: HKLM; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".imf"; ValueData: {#OpenMPTFile}; Components: {#Component}
+Root: HKLM; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".ims"; ValueData: {#OpenMPTFile}; Components: {#Component}
 Root: HKLM; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".ice"; ValueData: {#OpenMPTFile}; Components: {#Component}
 Root: HKLM; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".itp"; ValueData: {#OpenMPTFile}; Components: {#Component}
 Root: HKLM; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".j2b"; ValueData: {#OpenMPTFile}; Components: {#Component}

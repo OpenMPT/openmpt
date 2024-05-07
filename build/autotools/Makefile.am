@@ -395,6 +395,7 @@ MPT_FILES_SOUNDLIB += soundlib/Load_gmc.cpp
 MPT_FILES_SOUNDLIB += soundlib/Load_gt2.cpp
 MPT_FILES_SOUNDLIB += soundlib/Load_ice.cpp
 MPT_FILES_SOUNDLIB += soundlib/Load_imf.cpp
+MPT_FILES_SOUNDLIB += soundlib/Load_ims.cpp
 MPT_FILES_SOUNDLIB += soundlib/Load_it.cpp
 MPT_FILES_SOUNDLIB += soundlib/Load_itp.cpp
 MPT_FILES_SOUNDLIB += soundlib/load_j2b.cpp

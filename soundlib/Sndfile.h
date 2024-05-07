@@ -873,6 +873,7 @@ public:
 	static ProbeResult ProbeFileHeaderGTK(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderICE(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderIMF(MemoryFileReader file, const uint64 *pfilesize);
+	static ProbeResult ProbeFileHeaderIMS(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderIT(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderITP(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderJ2B(MemoryFileReader file, const uint64 *pfilesize);
@@ -930,6 +931,7 @@ public:
 	bool ReadGTK(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadICE(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadIMF(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadIMS(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadIT(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadITP(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadJ2B(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);

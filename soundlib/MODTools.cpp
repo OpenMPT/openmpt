@@ -313,6 +313,20 @@ uint32 ReadMODSample(const MODSampleHeader &sampleHeader, ModSample &sample, mpt
 }
 
 
+// Check if a name string is valid (i.e. doesn't contain binary garbage data)
+uint32 CountInvalidChars(const mpt::span<const char> name)
+{
+	uint32 invalidChars = 0;
+	for(int8 c : name)  // char can be signed or unsigned
+	{
+		// Check for any Extended ASCII and control characters
+		if(c != 0 && c < ' ')
+			invalidChars++;
+	}
+	return invalidChars;
+}
+
+
 // Count malformed bytes in MOD pattern data
 uint32 CountMalformedMODPatternData(const MODPatternData &patternData, const bool extendedFormat)
 {

@@ -130,6 +130,7 @@ LOCAL_SRC_FILES += \
 	soundlib/Load_gt2.cpp \
 	soundlib/Load_ice.cpp \
 	soundlib/Load_imf.cpp \
+	soundlib/Load_ims.cpp \
 	soundlib/Load_it.cpp \
 	soundlib/Load_itp.cpp \
 	soundlib/load_j2b.cpp \
