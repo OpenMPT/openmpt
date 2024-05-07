@@ -200,7 +200,7 @@ static bool CheckMODMagic(const char magic[4], MODMagicResult &result)
 		result.numChannels = static_cast<CHANNELINDEX>(magic[3] - '0');
 		// Digital Tracker MODs contain four bytes (00 40 00 00) right after the magic bytes which don't seem to do anything special.
 		result.patternDataOffset = 1088;
-	} else if((!memcmp(magic, "FLT", 3) || !memcmp(magic, "EXO", 3)) && magic[3] >= '4' && magic[3] <= '9')
+	} else if((!memcmp(magic, "FLT", 3) || !memcmp(magic, "EXO", 3)) && (magic[3] == '4' || magic[3] == '8'))
 	{
 		// FLTx / EXOx - Startrekker by Exolon / Fairlight
 		result.madeWithTracker = UL_("Startrekker");
