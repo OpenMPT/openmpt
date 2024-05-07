@@ -878,7 +878,7 @@ public:
 	static ProbeResult ProbeFileHeaderJ2B(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderKRIS(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderMUS_KM(MemoryFileReader file, const uint64 *pfilesize);
-	static ProbeResult ProbeFileHeaderM15(MemoryFileReader file, const uint64 *pfilesize);
+	static ProbeResult ProbeFileHeaderSTK(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderMDL(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderMED(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderMO3(MemoryFileReader file, const uint64 *pfilesize);
@@ -935,7 +935,7 @@ public:
 	bool ReadJ2B(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadKRIS(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadMUS_KM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
-	bool ReadM15(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadSTK(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadMDL(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadMED(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadMO3(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);

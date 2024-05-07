@@ -128,10 +128,12 @@ LOCAL_SRC_FILES += \
 	soundlib/Load_gdm.cpp \
 	soundlib/Load_gmc.cpp \
 	soundlib/Load_gt2.cpp \
+	soundlib/Load_ice.cpp \
 	soundlib/Load_imf.cpp \
 	soundlib/Load_it.cpp \
 	soundlib/Load_itp.cpp \
 	soundlib/load_j2b.cpp \
+	soundlib/Load_kris.cpp \
 	soundlib/Load_mdl.cpp \
 	soundlib/Load_med.cpp \
 	soundlib/Load_mid.cpp \
@@ -143,10 +145,12 @@ LOCAL_SRC_FILES += \
 	soundlib/Load_okt.cpp \
 	soundlib/Load_plm.cpp \
 	soundlib/Load_psm.cpp \
+	soundlib/Load_pt36.cpp \
 	soundlib/Load_ptm.cpp \
 	soundlib/Load_puma.cpp \
 	soundlib/Load_s3m.cpp \
 	soundlib/Load_sfx.cpp \
+	soundlib/Load_stk.cpp \
 	soundlib/Load_stm.cpp \
 	soundlib/Load_stp.cpp \
 	soundlib/Load_symmod.cpp \
@@ -168,6 +172,7 @@ LOCAL_SRC_FILES += \
 	soundlib/ModSequence.cpp \
 	soundlib/modsmp_ctrl.cpp \
 	soundlib/mod_specifications.cpp \
+	soundlib/MODTools.cpp \
 	soundlib/MPEGFrame.cpp \
 	soundlib/OggStream.cpp \
 	soundlib/OPL.cpp \

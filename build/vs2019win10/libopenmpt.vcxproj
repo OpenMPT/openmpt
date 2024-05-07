@@ -1330,6 +1330,7 @@
     <ClInclude Include="..\..\soundlib\Loaders.h" />
     <ClInclude Include="..\..\soundlib\MIDIEvents.h" />
     <ClInclude Include="..\..\soundlib\MIDIMacros.h" />
+    <ClInclude Include="..\..\soundlib\MODTools.h" />
     <ClInclude Include="..\..\soundlib\MPEGFrame.h" />
     <ClInclude Include="..\..\soundlib\Message.h" />
     <ClInclude Include="..\..\soundlib\MixFuncTable.h" />
@@ -1618,9 +1619,11 @@
     <ClCompile Include="..\..\soundlib\Load_gdm.cpp" />
     <ClCompile Include="..\..\soundlib\Load_gmc.cpp" />
     <ClCompile Include="..\..\soundlib\Load_gt2.cpp" />
+    <ClCompile Include="..\..\soundlib\Load_ice.cpp" />
     <ClCompile Include="..\..\soundlib\Load_imf.cpp" />
     <ClCompile Include="..\..\soundlib\Load_it.cpp" />
     <ClCompile Include="..\..\soundlib\Load_itp.cpp" />
+    <ClCompile Include="..\..\soundlib\Load_kris.cpp" />
     <ClCompile Include="..\..\soundlib\Load_mdl.cpp" />
     <ClCompile Include="..\..\soundlib\Load_med.cpp" />
     <ClCompile Include="..\..\soundlib\Load_mid.cpp" />
@@ -1632,10 +1635,12 @@
     <ClCompile Include="..\..\soundlib\Load_okt.cpp" />
     <ClCompile Include="..\..\soundlib\Load_plm.cpp" />
     <ClCompile Include="..\..\soundlib\Load_psm.cpp" />
+    <ClCompile Include="..\..\soundlib\Load_pt36.cpp" />
     <ClCompile Include="..\..\soundlib\Load_ptm.cpp" />
     <ClCompile Include="..\..\soundlib\Load_puma.cpp" />
     <ClCompile Include="..\..\soundlib\Load_s3m.cpp" />
     <ClCompile Include="..\..\soundlib\Load_sfx.cpp" />
+    <ClCompile Include="..\..\soundlib\Load_stk.cpp" />
     <ClCompile Include="..\..\soundlib\Load_stm.cpp" />
     <ClCompile Include="..\..\soundlib\Load_stp.cpp" />
     <ClCompile Include="..\..\soundlib\Load_symmod.cpp" />
@@ -1646,6 +1651,7 @@
     <ClCompile Include="..\..\soundlib\Load_xmf.cpp" />
     <ClCompile Include="..\..\soundlib\MIDIEvents.cpp" />
     <ClCompile Include="..\..\soundlib\MIDIMacros.cpp" />
+    <ClCompile Include="..\..\soundlib\MODTools.cpp" />
     <ClCompile Include="..\..\soundlib\MPEGFrame.cpp" />
     <ClCompile Include="..\..\soundlib\Message.cpp" />
     <ClCompile Include="..\..\soundlib\MixFuncTable.cpp" />
