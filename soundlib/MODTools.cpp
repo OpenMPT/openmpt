@@ -296,6 +296,23 @@ bool MODSampleHeader::HasDiskName() const
 }
 
 
+uint32 ReadMODSample(const MODSampleHeader &sampleHeader, ModSample &sample, mpt::charbuf<MAX_SAMPLENAME> &sampleName, bool is4Chn)
+{
+	sampleHeader.ConvertToMPT(sample, is4Chn);
+	sampleName = mpt::String::ReadBuf(mpt::String::spacePadded, sampleHeader.name);
+	// Get rid of weird characters in sample names.
+	for(auto &c : sampleName.buf)
+	{
+		if(c > 0 && c < ' ')
+		{
+			c = ' ';
+		}
+	}
+	// Check for invalid values
+	return sampleHeader.GetInvalidByteScore();
+}
+
+
 // Count malformed bytes in MOD pattern data
 uint32 CountMalformedMODPatternData(const MODPatternData &patternData, const bool extendedFormat)
 {

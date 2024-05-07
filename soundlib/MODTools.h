@@ -79,7 +79,7 @@ MPT_BINARY_STRUCT(MODSampleHeader, 30)
 using MODPatternData = std::array<std::array<std::array<uint8, 4>, 4>, 64>;
 
 // Check if header magic equals a given string.
-static bool IsMagic(const char *magic1, const char (&magic2)[5]) noexcept
+static inline bool IsMagic(const char *magic1, const char (&magic2)[5]) noexcept
 {
 	return std::memcmp(magic1, magic2, 4) == 0;
 }
@@ -103,21 +103,8 @@ static T ReadAndSwap(TFileReader &file, const bool swapBytes)
 }
 
 
-static uint32 ReadMODSample(const MODSampleHeader &sampleHeader, ModSample &sample, mpt::charbuf<MAX_SAMPLENAME> &sampleName, bool is4Chn)
-{
-	sampleHeader.ConvertToMPT(sample, is4Chn);
-	sampleName = mpt::String::ReadBuf(mpt::String::spacePadded, sampleHeader.name);
-	// Get rid of weird characters in sample names.
-	for(auto &c : sampleName.buf)
-	{
-		if(c > 0 && c < ' ')
-		{
-			c = ' ';
-		}
-	}
-	// Check for invalid values
-	return sampleHeader.GetInvalidByteScore();
-}
+// Convert MOD sample header and validate
+uint32 ReadMODSample(const MODSampleHeader &sampleHeader, ModSample &sample, mpt::charbuf<MAX_SAMPLENAME> &sampleName, bool is4Chn);
 
 
 // Count malformed bytes in MOD pattern data
