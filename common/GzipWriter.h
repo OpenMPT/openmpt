@@ -22,7 +22,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-static void WriteGzip(std::ostream &output, std::string &outData, const mpt::ustring &fileName)
+inline void WriteGzip(std::ostream &output, std::string &outData, const mpt::ustring &fileName)
 {
 	z_stream strm{};
 	strm.avail_in = static_cast<uInt>(outData.size());
