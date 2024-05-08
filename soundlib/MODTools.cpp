@@ -314,7 +314,7 @@ uint32 ReadMODSample(const MODSampleHeader &sampleHeader, ModSample &sample, mpt
 
 
 // Check if a name string is valid (i.e. doesn't contain binary garbage data)
-uint32 CountInvalidChars(const mpt::span<const char> name)
+uint32 CountInvalidChars(const mpt::span<const char> name) noexcept
 {
 	uint32 invalidChars = 0;
 	for(int8 c : name)  // char can be signed or unsigned
@@ -324,6 +324,27 @@ uint32 CountInvalidChars(const mpt::span<const char> name)
 			invalidChars++;
 	}
 	return invalidChars;
+}
+
+
+// Check if a name is a valid null - terminated ASCII string with no garbage after the null terminator, or if it's empty
+NameClassification ClassifyName(const mpt::span<const char> name) noexcept
+{
+	bool foundNull = false, foundNormal = false;
+	for(auto c : name)
+	{
+		if(c > 0 && c < ' ')
+			return NameClassification::Invalid;
+		if(c == 0)
+			foundNull = true;
+		else if(foundNull)
+			return NameClassification::Invalid;
+		else
+			foundNormal = true;
+	}
+	if(!foundNull)
+		return NameClassification::Invalid;
+	return foundNormal ? NameClassification::ValidASCII : NameClassification::Empty;
 }
 
 

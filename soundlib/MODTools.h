@@ -108,7 +108,18 @@ uint32 ReadMODSample(const MODSampleHeader &sampleHeader, ModSample &sample, mpt
 
 
 // Check if a name string is valid (i.e. doesn't contain binary garbage data)
-uint32 CountInvalidChars(const mpt::span<const char> name);
+uint32 CountInvalidChars(const mpt::span<const char> name) noexcept;
+
+
+enum class NameClassification
+{
+	Empty,
+	ValidASCII,
+	Invalid,
+};
+
+// Check if a name is a valid null-terminated ASCII string with no garbage after the null terminator, or if it's empty
+NameClassification ClassifyName(const mpt::span<const char> name) noexcept;
 
 
 // Count malformed bytes in MOD pattern data
