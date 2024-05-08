@@ -79,7 +79,7 @@ MPT_BINARY_STRUCT(MODSampleHeader, 30)
 using MODPatternData = std::array<std::array<std::array<uint8, 4>, 4>, 64>;
 
 // Check if header magic equals a given string.
-static inline bool IsMagic(const char *magic1, const char (&magic2)[5]) noexcept
+inline bool IsMagic(const char *magic1, const char (&magic2)[5]) noexcept
 {
 	return std::memcmp(magic1, magic2, 4) == 0;
 }
@@ -87,7 +87,7 @@ static inline bool IsMagic(const char *magic1, const char (&magic2)[5]) noexcept
 
 // For .DTM files from Apocalypse Abyss, where the first 2108 bytes are swapped
 template<typename T, typename TFileReader>
-static T ReadAndSwap(TFileReader &file, const bool swapBytes)
+inline T ReadAndSwap(TFileReader &file, const bool swapBytes)
 {
 	T value;
 	if(file.Read(value) && swapBytes)
@@ -117,7 +117,7 @@ uint32 CountMalformedMODPatternData(const MODPatternData &patternData, const boo
 
 // Check if number of malformed bytes in MOD pattern data exceeds some threshold
 template <typename TFileReader>
-static bool ValidateMODPatternData(TFileReader &file, const uint32 threshold, const bool extendedFormat)
+inline bool ValidateMODPatternData(TFileReader &file, const uint32 threshold, const bool extendedFormat)
 {
 	MODPatternData patternData;
 	if(!file.Read(patternData))
