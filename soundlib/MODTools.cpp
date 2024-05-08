@@ -17,51 +17,39 @@ OPENMPT_NAMESPACE_BEGIN
 
 void CSoundFile::ConvertModCommand(ModCommand &m, const uint8 command, const uint8 param)
 {
-	m.param = param;
-	switch(command)
+	static constexpr EffectCommand effTrans[] =
 	{
-	case 0x00: m.command = m.param ? CMD_ARPEGGIO : CMD_NONE; break;
-	case 0x01: m.command = CMD_PORTAMENTOUP; break;
-	case 0x02: m.command = CMD_PORTAMENTODOWN; break;
-	case 0x03: m.command = CMD_TONEPORTAMENTO; break;
-	case 0x04: m.command = CMD_VIBRATO; break;
-	case 0x05: m.command = CMD_TONEPORTAVOL; break;
-	case 0x06: m.command = CMD_VIBRATOVOL; break;
-	case 0x07: m.command = CMD_TREMOLO; break;
-	case 0x08: m.command = CMD_PANNING8; break;
-	case 0x09: m.command = CMD_OFFSET; break;
-	case 0x0A: m.command = CMD_VOLUMESLIDE; break;
-	case 0x0B: m.command = CMD_POSITIONJUMP; break;
-	case 0x0C: m.command = CMD_VOLUME; break;
-	case 0x0D: m.command = CMD_PATTERNBREAK; m.param = static_cast<ModCommand::PARAM>(((m.param >> 4) * 10) + (m.param & 0x0F)); break;
-	case 0x0E: m.command = CMD_MODCMDEX; break;
-	case 0x0F:
-		// For a very long time, this code imported 0x20 as CMD_SPEED for MOD files, but this seems to contradict
-		// pretty much the majority of other MOD player out there.
+		// MOD effects
+		CMD_ARPEGGIO,     CMD_PORTAMENTOUP,     CMD_PORTAMENTODOWN, CMD_TONEPORTAMENTO,  // 0123
+		CMD_VIBRATO,      CMD_TONEPORTAVOL,     CMD_VIBRATOVOL,     CMD_TREMOLO,         // 4567
+		CMD_PANNING8,     CMD_OFFSET,           CMD_VOLUMESLIDE,    CMD_POSITIONJUMP,    // 89AB
+		CMD_VOLUME,       CMD_PATTERNBREAK,     CMD_MODCMDEX,       CMD_TEMPO,           // CDEF
+		// XM extended effects
+		CMD_GLOBALVOLUME, CMD_GLOBALVOLSLIDE,   CMD_NONE,      CMD_NONE,    // GHIJ
+		CMD_KEYOFF,       CMD_SETENVPOSITION,   CMD_NONE,      CMD_NONE,    // KLMN
+		CMD_NONE,         CMD_PANNINGSLIDE,     CMD_NONE,      CMD_RETRIG,  // OPQR
+		CMD_NONE,         CMD_TREMOR,           CMD_NONE,      CMD_NONE,    // STUV
+		CMD_DUMMY,        CMD_XFINEPORTAUPDOWN, CMD_PANBRELLO, CMD_MIDI,    // WXYZ
+		CMD_SMOOTHMIDI,   CMD_SMOOTHMIDI,       CMD_XPARAM,                 // \\# (BeRoTracker uses command 37 instead of 36 for smooth MIDI macros; in old OpenMPT versions this was reserved for the unimplemented "velocity" command)
+	};
+
+	m.command = CMD_NONE;
+	m.param = param;
+	if(command == 0x00 && param == 0x00)
+	{
+		m.command = CMD_NONE;
+	} else if(command == 0x0F && param < 0x20)
+	{
+		// For a very long time (until OpenMPT 1.25.02.02), this code also imported 0x20 as CMD_SPEED for MOD files,
+		// but this seems to contradict pretty much the majority of other MOD player out there.
 		// 0x20 is Speed: Impulse Tracker, Scream Tracker, old ModPlug
 		// 0x20 is Tempo: ProTracker, XMPlay, Imago Orpheus, Cubic Player, ChibiTracker, BeRoTracker, DigiTrakker, DigiTrekker, Disorder Tracker 2, DMP, Extreme's Tracker, ...
-		if(m.param < 0x20)
-			m.command = CMD_SPEED;
-		else
-			m.command = CMD_TEMPO;
-		break;
-
-	// Extension for XM extended effects
-	case 'G' - 55: m.command = CMD_GLOBALVOLUME; break;  //16
-	case 'H' - 55: m.command = CMD_GLOBALVOLSLIDE; break;
-	case 'K' - 55: m.command = CMD_KEYOFF; break;
-	case 'L' - 55: m.command = CMD_SETENVPOSITION; break;
-	case 'P' - 55: m.command = CMD_PANNINGSLIDE; break;
-	case 'R' - 55: m.command = CMD_RETRIG; break;
-	case 'T' - 55: m.command = CMD_TREMOR; break;
-	case 'W' - 55: m.command = CMD_DUMMY; break;
-	case 'X' - 55: m.command = CMD_XFINEPORTAUPDOWN;	break;
-	case 'Y' - 55: m.command = CMD_PANBRELLO; break;   // 34
-	case 'Z' - 55: m.command = CMD_MIDI; break;        // 35
-	case '\\' - 56: m.command = CMD_SMOOTHMIDI; break;  // 36 - note: this is actually displayed as "-" in FT2, but seems to be doing nothing.
-	case 37:        m.command = CMD_SMOOTHMIDI; break;  // BeRoTracker uses this for smooth MIDI macros for some reason; in old OpenMPT versions this was reserved for the unimplemented "velocity" command
-	case '#' + 3:   m.command = CMD_XPARAM; break;      // 38
-	default:        m.command = CMD_NONE;
+		m.command = CMD_SPEED;
+	} else if(command < std::size(effTrans))
+	{
+		m.command = effTrans[command];
+		if(m.command == CMD_PATTERNBREAK)
+			m.param = static_cast<ModCommand::PARAM>(((m.param >> 4) * 10) + (m.param & 0x0F));
 	}
 }
 
@@ -73,29 +61,35 @@ void CSoundFile::ModSaveCommand(const ModCommand &source, uint8 &command, uint8 
 	param = source.param;
 	switch(source.command)
 	{
-	case CMD_NONE:		command = param = 0; break;
-	case CMD_ARPEGGIO:	command = 0; break;
+	case CMD_NONE:     command = param = 0; break;
+	case CMD_ARPEGGIO: command = 0; break;
 	case CMD_PORTAMENTOUP:
-		if (GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_STM|MOD_TYPE_MPT))
-		{
-			if ((param & 0xF0) == 0xE0) { command = 0x0E; param = ((param & 0x0F) >> 2) | 0x10; break; }
-			else if ((param & 0xF0) == 0xF0) { command = 0x0E; param &= 0x0F; param |= 0x10; break; }
-		}
 		command = 0x01;
+		if(UseCombinedPortamentoCommands() && param >= 0xE0)
+		{
+			command = 0x0E;
+			if(param < 0xF0)
+				param = ((param & 0x0F) >> 2) | 0x10;
+			else
+				param = (param & 0x0F) | 0x10;
+		}
 		break;
 	case CMD_PORTAMENTODOWN:
-		if(GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_STM|MOD_TYPE_MPT))
-		{
-			if ((param & 0xF0) == 0xE0) { command = 0x0E; param= ((param & 0x0F) >> 2) | 0x20; break; }
-			else if ((param & 0xF0) == 0xF0) { command = 0x0E; param &= 0x0F; param |= 0x20; break; }
-		}
 		command = 0x02;
+		if(UseCombinedPortamentoCommands() && param >= 0xE0)
+		{
+			command = 0x0E;
+			if(param < 0xF0)
+				param = ((param & 0x0F) >> 2) | 0x20;
+			else
+				param = (param & 0x0F) | 0x20;
+		}
 		break;
-	case CMD_TONEPORTAMENTO:	command = 0x03; break;
-	case CMD_VIBRATO:			command = 0x04; break;
-	case CMD_TONEPORTAVOL:		command = 0x05; break;
-	case CMD_VIBRATOVOL:		command = 0x06; break;
-	case CMD_TREMOLO:			command = 0x07; break;
+	case CMD_TONEPORTAMENTO: command = 0x03; break;
+	case CMD_VIBRATO:        command = 0x04; break;
+	case CMD_TONEPORTAVOL:   command = 0x05; break;
+	case CMD_VIBRATOVOL:     command = 0x06; break;
+	case CMD_TREMOLO:        command = 0x07; break;
 	case CMD_PANNING8:
 		command = 0x08;
 		if(GetType() & MOD_TYPE_S3M)
@@ -103,14 +97,12 @@ void CSoundFile::ModSaveCommand(const ModCommand &source, uint8 &command, uint8 
 			if(param <= 0x80)
 			{
 				param = mpt::saturate_cast<uint8>(param * 2);
-			}
-			else if(param == 0xA4)	// surround
+			} else if(param == 0xA4)  // Surround
 			{
 				if(compatibilityExport || !toXM)
 				{
 					command = param = 0;
-				}
-				else
+				} else
 				{
 					command = 'X' - 55;
 					param = 91;
@@ -118,25 +110,36 @@ void CSoundFile::ModSaveCommand(const ModCommand &source, uint8 &command, uint8 
 			}
 		}
 		break;
-	case CMD_OFFSET:			command = 0x09; break;
-	case CMD_VOLUMESLIDE:		command = 0x0A; break;
-	case CMD_POSITIONJUMP:		command = 0x0B; break;
-	case CMD_VOLUME:			command = 0x0C; break;
-	case CMD_PATTERNBREAK:		command = 0x0D; param = ((param / 10) << 4) | (param % 10); break;
-	case CMD_MODCMDEX:			command = 0x0E; break;
-	case CMD_SPEED:				command = 0x0F; param = std::min(param, uint8(0x1F)); break;
-	case CMD_TEMPO:				command = 0x0F; param = std::max(param, uint8(0x20)); break;
-	case CMD_GLOBALVOLUME:		command = 'G' - 55; break;
-	case CMD_GLOBALVOLSLIDE:	command = 'H' - 55; break;
-	case CMD_KEYOFF:			command = 'K' - 55; break;
-	case CMD_SETENVPOSITION:	command = 'L' - 55; break;
-	case CMD_PANNINGSLIDE:		command = 'P' - 55; break;
-	case CMD_RETRIG:			command = 'R' - 55; break;
-	case CMD_TREMOR:			command = 'T' - 55; break;
-	case CMD_DUMMY:				command = 'W' - 55; break;
-	case CMD_XFINEPORTAUPDOWN:	command = 'X' - 55;
-		if(compatibilityExport && param >= 0x30)	// X1x and X2x are legit, everything above are MPT extensions, which don't belong here.
-			param = 0;	// Don't set command to 0 to indicate that there *was* some X command here...
+	case CMD_OFFSETPERCENTAGE:
+	case CMD_OFFSET:       command = 0x09; break;
+	case CMD_VOLUMESLIDE:  command = 0x0A; break;
+	case CMD_POSITIONJUMP: command = 0x0B; break;
+	case CMD_VOLUME:       command = 0x0C; break;
+	case CMD_PATTERNBREAK:
+		command = 0x0D;
+		param = ((param / 10) << 4) | (param % 10);
+		break;
+	case CMD_MODCMDEX: command = 0x0E; break;
+	case CMD_SPEED:
+		command = 0x0F;
+		param = std::min(param, uint8(0x1F));
+		break;
+	case CMD_TEMPO:
+		command = 0x0F;
+		param = std::max(param, uint8(0x20));
+		break;
+	case CMD_GLOBALVOLUME:   command = 'G' - 55; break;
+	case CMD_GLOBALVOLSLIDE: command = 'H' - 55; break;
+	case CMD_KEYOFF:         command = 'K' - 55; break;
+	case CMD_SETENVPOSITION: command = 'L' - 55; break;
+	case CMD_PANNINGSLIDE:   command = 'P' - 55; break;
+	case CMD_RETRIG:         command = 'R' - 55; break;
+	case CMD_TREMOR:         command = 'T' - 55; break;
+	case CMD_DUMMY:          command = 'W' - 55; break;
+	case CMD_XFINEPORTAUPDOWN:
+		command = 'X' - 55;
+		if(compatibilityExport && param >= 0x30)  // X1x and X2x are legit, everything above are MPT extensions, which don't belong here.
+			param = 0;                            // Don't set command to 0 to indicate that there *was* some X command here...
 		break;
 	case CMD_PANBRELLO:
 		if(compatibilityExport)
@@ -150,13 +153,13 @@ void CSoundFile::ModSaveCommand(const ModCommand &source, uint8 &command, uint8 
 		else
 			command = 'Z' - 55;
 		break;
-	case CMD_SMOOTHMIDI: //rewbs.smoothVST: 36
+	case CMD_SMOOTHMIDI:
 		if(compatibilityExport)
 			command = param = 0;
 		else
 			command = '\\' - 56;
 		break;
-	case CMD_XPARAM: //rewbs.XMfixes - XParam is 38
+	case CMD_XPARAM:
 		if(compatibilityExport)
 			command = param = 0;
 		else
