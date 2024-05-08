@@ -1,4 +1,4 @@
-name: Ubuntu 20.04 Makefile
+name: Ubuntu Autotools
 
 on:
   push:
@@ -6,14 +6,22 @@ on:
   pull_request:
     branches: [ master ]
 
-concurrency:
-  group: ${{ github.ref }}-${{ github.workflow }}
-  cancel-in-progress: true
-
 jobs:
   build:
 
-    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { version: '24.04' }
+          - { version: '22.04' }
+          - { version: '20.04' }
+
+    concurrency:
+      group: ${{github.ref}}-${{github.workflow}}-${{matrix.version}}-autotools
+      cancel-in-progress: true
+
+    runs-on: ubuntu-${{matrix.version}}
 
     steps:
     - uses: actions/checkout@v4
@@ -21,7 +29,5 @@ jobs:
       run: sudo apt-get update && sudo apt-get install -y subversion libxml-xpath-perl git mawk zip unzip p7zip xz-utils make binutils gcc g++ clang tcc pcc pkg-config help2man doxygen autoconf autoconf-archive automake libtool ccache zlib1g-dev libmpg123-dev libogg-dev libvorbis-dev portaudio19-dev libpulse-dev libsdl2-dev libflac-dev libsndfile1-dev libltdl-dev
     - name: setup parallel make
       run: echo "MAKEFLAGS=-j$(nproc)" >> $GITHUB_ENV
-    - name: make
-      run: make STRICT=1
-    - name: make check
-      run: make STRICT=1 check
+    - name: Build
+      run: ./build/autotools/autoconfiscate.sh
