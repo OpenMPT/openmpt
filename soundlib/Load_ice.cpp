@@ -111,7 +111,7 @@ bool CSoundFile::ReadICE(FileReader &file, ModLoadingFlags loadFlags)
 	if(loadFlags == onlyVerifyHeader)
 		return true;
 
-	// Now we can be pretty sure that this is a valid MOD file. Set up default song settings.
+	// Now we can be pretty sure that this is a valid ICE file. Set up default song settings.
 	m_nChannels = 4;
 	SetupMODPanning(true);
 	Order().SetDefaultSpeed(6);

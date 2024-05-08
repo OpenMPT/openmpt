@@ -44,7 +44,7 @@ struct IMSFileHeader
 		const auto patternDiv = std::div(sampleDataOffset - 1084, 768);
 		if(patternDiv.rem)
 			return false;
-		const PATTERNINDEX numPatterns = mpt::saturate_cast<PATTERNINDEX>(patternDiv.quot);
+		const uint8 numPatterns = mpt::saturate_cast<uint8>(patternDiv.quot);
 		if(numPatterns > 128)
 			return false;
 
@@ -151,7 +151,7 @@ bool CSoundFile::ReadIMS(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	m_modFormat.formatName = UL_("Images Music System");
-	m_modFormat.type = UL_("IMS");
+	m_modFormat.type = UL_("ims");
 	m_modFormat.charset = mpt::Charset::Amiga_no_C1;
 
 	return true;
