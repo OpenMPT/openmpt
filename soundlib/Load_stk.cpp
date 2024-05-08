@@ -83,35 +83,25 @@ static bool ValidateHeader(const STKFileHeaders &fileHeaders)
 
 	// scramble_2.mod has a lot of garbage in the song title, but it has lots of properly-formatted sample names, so we consider those to be more important than the garbage bytes.
 	if(invalidCharsInTitle > 5 && (validNameCount < 4 || invalidNames))
-	{
 		return false;
-	}
 
 	// Reject any files with no (or only silent) samples at all, as this might just be a random binary file (e.g. ID3 tags with tons of padding)
 	if(totalSampleLen == 0 || allVolumes == 0)
-	{
 		return false;
-	}
 
 	// Sanity check: No more than 128 positions. ST's GUI limits tempo to [1, 220].
 	// There are some mods with a tempo of 0 (explora3-death.mod) though, so ignore the lower limit.
 	if(fileHeaders.fileHeader.numOrders > 128 || fileHeaders.fileHeader.restartPos > 220)
-	{
 		return false;
-	}
 
 	uint8 maxPattern = *std::max_element(std::begin(fileHeaders.fileHeader.orderList), std::end(fileHeaders.fileHeader.orderList));
 	// Sanity check: 64 patterns max.
 	if(maxPattern > 63)
-	{
 		return false;
-	}
 
 	// No playable song, and lots of null values => most likely a sparse binary file but not a module
 	if(fileHeaders.fileHeader.restartPos == 0 && fileHeaders.fileHeader.numOrders == 0 && maxPattern == 0)
-	{
 		return false;
-	}
 
 	return true;
 }
@@ -129,21 +119,13 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderSTK(MemoryFileReader file, co
 {
 	STKFileHeaders fileHeaders;
 	if(!file.ReadStruct(fileHeaders))
-	{
 		return ProbeWantMoreData;
-	}
 	if(!ValidateHeader(fileHeaders))
-	{
 		return ProbeFailure;
-	}
 	if(!file.CanRead(sizeof(MODPatternData)))
-	{
 		return ProbeWantMoreData;
-	}
 	if(!ValidateFirstSTKPattern(file))
-	{
 		return ProbeFailure;
-	}
 	MPT_UNREFERENCED_PARAMETER(pfilesize);
 	return ProbeSuccess;
 }
@@ -155,20 +137,12 @@ bool CSoundFile::ReadSTK(FileReader &file, ModLoadingFlags loadFlags)
 
 	STKFileHeaders fileHeaders;
 	if(!file.ReadStruct(fileHeaders))
-	{
 		return false;
-	}
 	if(!ValidateHeader(fileHeaders))
-	{
 		return false;
-	}
 	if(!ValidateFirstSTKPattern(file))
-	{
 		return false;
-	}
-
-	char songname[20];
-	std::memcpy(songname, fileHeaders.songname, 20);
+	file.Seek(sizeof(STKFileHeaders));
 
 	InitializeGlobals(MOD_TYPE_MOD);
 	m_playBehaviour.reset(kMODOneShotLoops);
@@ -182,12 +156,10 @@ bool CSoundFile::ReadSTK(FileReader &file, ModLoadingFlags loadFlags)
 	SmpLength totalSampleLen = 0;
 	m_nSamples = 15;
 
-	file.Seek(20);
 	for(SAMPLEINDEX smp = 1; smp <= 15; smp++)
 	{
 		ModSample &mptSmp = Samples[smp];
-		MODSampleHeader sampleHeader;
-		file.ReadStruct(sampleHeader);
+		const MODSampleHeader &sampleHeader = fileHeaders.sampleHeaders[smp - 1];
 		ReadMODSample(sampleHeader, Samples[smp], m_szNames[smp], true);
 		mptSmp.nFineTune = 0;
 
@@ -212,9 +184,7 @@ bool CSoundFile::ReadSTK(FileReader &file, ModLoadingFlags loadFlags)
 			minVersion = std::max(minVersion, MST1_00);
 	}
 
-	MODFileHeader fileHeader;
-	file.ReadStruct(fileHeader);
-
+	MODFileHeader &fileHeader = fileHeaders.fileHeader;
 	ReadOrderFromArray(Order(), fileHeader.orderList);
 	PATTERNINDEX numPatterns = GetNumPatterns(file, Order(), fileHeader.numOrders, totalSampleLen, m_nChannels, 0, true);
 
@@ -237,7 +207,7 @@ bool CSoundFile::ReadSTK(FileReader &file, ModLoadingFlags loadFlags)
 	if(!fileHeader.restartPos)
 		fileHeader.restartPos = 0x78;
 	// jjk55 by Jesper Kyd has a weird tempo set, but it needs to be ignored.
-	if(!memcmp(songname, "jjk55", 6))
+	if(!memcmp(fileHeaders.songname, "jjk55", 6))
 		fileHeader.restartPos = 0x78;
 	// Sample 7 in echoing.mod won't "loop" correctly if we don't convert the VBlank tempo.
 	Order().SetDefaultTempoInt(125);
@@ -259,7 +229,7 @@ bool CSoundFile::ReadSTK(FileReader &file, ModLoadingFlags loadFlags)
 	m_nMaxPeriod = 856 * 4;
 	m_nSamplePreAmp = 64;
 	m_SongFlags.set(SONG_PT_MODE);
-	m_songName = mpt::String::ReadBuf(mpt::String::spacePadded, songname);
+	m_songName = mpt::String::ReadBuf(mpt::String::spacePadded, fileHeaders.songname);
 
 	// Setup channel pan positions and volume
 	SetupMODPanning();
