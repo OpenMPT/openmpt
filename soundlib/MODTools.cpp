@@ -331,9 +331,9 @@ uint32 CountInvalidChars(const mpt::span<const char> name) noexcept
 NameClassification ClassifyName(const mpt::span<const char> name) noexcept
 {
 	bool foundNull = false, foundNormal = false;
-	for(auto c : name)
+	for(int8 c : name)
 	{
-		if(c > 0 && c < ' ')
+		if(c != 0 && c < ' ')
 			return NameClassification::Invalid;
 		if(c == 0)
 			foundNull = true;
