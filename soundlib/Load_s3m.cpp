@@ -248,7 +248,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 			madeWithTracker = U_("Akord");
 		break;
 	case S3MFileHeader::trkScreamTracker:
-		if(fileHeader.cwtv == S3MFileHeader::trkST3_20 && fileHeader.special == 0 && (fileHeader.ordNum & 0x0F) == 0 && fileHeader.ultraClicks == 0 && (fileHeader.flags & ~0x50) == 0)
+		if(fileHeader.cwtv == S3MFileHeader::trkST3_20 && fileHeader.special == 0 && (fileHeader.ordNum & 0x0F) == 0 && fileHeader.ultraClicks == 0 && (fileHeader.flags & ~0x50) == 0 && fileHeader.usePanningTable == S3MFileHeader::idPanning)
 		{
 			// MPT and OpenMPT before 1.17.03.02 - Simply keep default (filter) MIDI macros
 			if((fileHeader.masterVolume & 0x80) != 0)
@@ -266,7 +266,10 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 			m_playBehaviour.set(kST3LimitPeriod);
 		} else if(fileHeader.cwtv == S3MFileHeader::trkST3_20 && fileHeader.special == 0 && fileHeader.ultraClicks == 0 && fileHeader.flags == 0 && fileHeader.usePanningTable == 0)
 		{
-			madeWithTracker = U_("Velvet Studio");
+			if(fileHeader.globalVol == 64 && fileHeader.masterVolume == 48)
+				madeWithTracker = U_("PlayerPRO");
+			else  // Always stereo
+				madeWithTracker = U_("Velvet Studio");
 		} else
 		{
 			// ST3.20 should only ever write ultra-click values 16, 24 and 32 (corresponding to 8, 12 and 16 in the GUI), ST3.01/3.03 should only write 0,
