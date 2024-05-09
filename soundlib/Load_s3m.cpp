@@ -279,8 +279,11 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		}
 		break;
 	case S3MFileHeader::trkImagoOrpheus:
-		madeWithTracker = U_("Imago Orpheus");
-		formatTrackerStr = true;
+		formatTrackerStr = (fileHeader.cwtv != S3MFileHeader::trkPlayerPRO);
+		if(formatTrackerStr)
+			madeWithTracker = U_("Imago Orpheus");
+		else
+			madeWithTracker = U_("PlayerPRO");
 		nonCompatTracker = true;
 		break;
 	case S3MFileHeader::trkImpulseTracker:
