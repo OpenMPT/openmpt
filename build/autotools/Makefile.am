@@ -622,7 +622,6 @@ libopenmpttest_CFLAGS += $(WIN32_CFLAGS) $(ZLIB_CFLAGS) $(MPG123_CFLAGS) $(OGG_C
 libopenmpttest_LDADD =
 libopenmpttest_LDADD += $(ZLIB_LIBS) $(MPG123_LIBS) $(OGG_LIBS) $(VORBIS_LIBS) $(VORBISFILE_LIBS) $(LIBOPENMPT_WIN32_LIBS) $(LIBOPENMPTTEST_WIN32_LIBS)
 libopenmpttest_SOURCES = 
-libopenmpttest_SOURCES += test/libopenmpt_test.cpp
 libopenmpttest_SOURCES += test/mpt_tests_base.cpp
 libopenmpttest_SOURCES += test/mpt_tests_binary.cpp
 libopenmpttest_SOURCES += test/mpt_tests_crc.cpp
@@ -669,6 +668,7 @@ libopenmpttest_SOURCES += libopenmpt/libopenmpt_stream_callbacks_file_msvcrt.h
 libopenmpttest_SOURCES += libopenmpt/libopenmpt_stream_callbacks_file_posix.h
 libopenmpttest_SOURCES += libopenmpt/libopenmpt_stream_callbacks_file_posix_lfs64.h
 libopenmpttest_SOURCES += libopenmpt/libopenmpt_version.h
+libopenmpttest_SOURCES += libopenmpt/libopenmpt_test/libopenmpt_test.cpp
 endif
 
 if ENABLE_OPENMPT123

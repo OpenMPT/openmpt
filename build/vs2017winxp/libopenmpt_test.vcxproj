@@ -319,7 +319,7 @@
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -347,7 +347,7 @@
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -380,7 +380,7 @@
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -412,7 +412,7 @@
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -446,7 +446,7 @@
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -479,7 +479,7 @@
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -507,7 +507,7 @@
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -534,7 +534,7 @@
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -567,7 +567,7 @@
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -599,7 +599,7 @@
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -633,7 +633,7 @@
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -666,7 +666,7 @@
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1000,6 +1000,7 @@
     <ClCompile Include="..\..\libopenmpt\libopenmpt_cxx.cpp" />
     <ClCompile Include="..\..\libopenmpt\libopenmpt_ext_impl.cpp" />
     <ClCompile Include="..\..\libopenmpt\libopenmpt_impl.cpp" />
+    <ClCompile Include="..\..\libopenmpt\libopenmpt_test\libopenmpt_test.cpp" />
     <ClCompile Include="..\..\sounddsp\AGC.cpp" />
     <ClCompile Include="..\..\sounddsp\DSP.cpp" />
     <ClCompile Include="..\..\sounddsp\EQ.cpp" />
@@ -1127,7 +1128,6 @@
     <ClCompile Include="..\..\soundlib\tuningCollection.cpp" />
     <ClCompile Include="..\..\test\PlaybackTest.cpp" />
     <ClCompile Include="..\..\test\TestToolsLib.cpp" />
-    <ClCompile Include="..\..\test\libopenmpt_test.cpp" />
     <ClCompile Include="..\..\test\mpt_tests_base.cpp" />
     <ClCompile Include="..\..\test\mpt_tests_binary.cpp" />
     <ClCompile Include="..\..\test\mpt_tests_crc.cpp" />
@@ -1143,7 +1143,7 @@
     <ClCompile Include="..\..\unarchiver\ungzip.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\test\libopenmpt_test.manifest" />
+    <None Include="..\..\libopenmpt\libopenmpt_test\libopenmpt_test.manifest" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="ext\mpg123.vcxproj">

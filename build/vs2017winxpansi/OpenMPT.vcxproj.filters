@@ -2363,9 +2363,6 @@
     <ClCompile Include="..\..\test\TestToolsLib.cpp">
       <Filter>test</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\test\libopenmpt_test.cpp">
-      <Filter>test</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\test\mpt_tests_base.cpp">
       <Filter>test</Filter>
     </ClCompile>

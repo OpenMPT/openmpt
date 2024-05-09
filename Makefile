@@ -1323,7 +1323,7 @@ ALL_DEPENDS += $(OPENMPT123_DEPENDS)
 
 
 LIBOPENMPTTEST_CXX_SOURCES += \
- test/libopenmpt_test.cpp \
+ libopenmpt/libopenmpt_test/libopenmpt_test.cpp \
  $(SOUNDLIB_CXX_SOURCES) \
  test/mpt_tests_base.cpp \
  test/mpt_tests_binary.cpp \

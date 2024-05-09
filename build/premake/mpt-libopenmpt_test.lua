@@ -19,7 +19,7 @@
 	}
 	
 	files {
-		"../../test/libopenmpt_test.manifest",
+		"../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest",
 	}
   includedirs {
    "../..",
@@ -67,6 +67,7 @@
    "../../libopenmpt/libopenmpt_cxx.cpp",
    "../../libopenmpt/libopenmpt_ext_impl.cpp",
    "../../libopenmpt/libopenmpt_impl.cpp",
+   "../../libopenmpt/libopenmpt_test/libopenmpt_test.cpp",
   }
 	excludes {
 		"../../src/mpt/crypto/**.cpp",
