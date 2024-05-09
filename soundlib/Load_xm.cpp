@@ -358,19 +358,19 @@ static void ReadXMPatterns(FileReader &file, const XMFileHeader &fileHeader, CSo
 
 enum TrackerVersions
 {
-	verUnknown		= 0x00,		// Probably not made with MPT
-	verOldModPlug	= 0x01,		// Made with MPT Alpha / Beta
-	verNewModPlug	= 0x02,		// Made with MPT (not Alpha / Beta)
-	verModPlug1_09	= 0x04,		// Made with MPT 1.09 or possibly other version
-	verOpenMPT		= 0x08,		// Made with OpenMPT
-	verConfirmed	= 0x10,		// We are very sure that we found the correct tracker version.
+	verUnknown         =  0x00,  // Probably not made with MPT
+	verOldModPlug      =  0x01,  // Made with MPT Alpha / Beta
+	verNewModPlug      =  0x02,  // Made with MPT (not Alpha / Beta)
+	verModPlugBidiFlag =  0x04,  // MPT up to v1.11 sets both normal loop and pingpong loop flags
+	verOpenMPT         =  0x08,  // Made with OpenMPT
+	verConfirmed       =  0x10,  // We are very sure that we found the correct tracker version.
 
-	verFT2Generic	= 0x20,		// "FastTracker v2.00", but FastTracker has NOT been ruled out
-	verOther		= 0x40,		// Something we don't know, testing for DigiTrakker.
-	verFT2Clone		= 0x80,		// NOT FT2: itype changed between instruments, or \0 found in song title
-	verDigiTrakker	= 0x100,	// Probably DigiTrakker
-	verUNMO3		= 0x200,	// TODO: UNMO3-ed XMs are detected as MPT 1.16
-	verEmptyOrders	= 0x400,	// Allow empty order list like in OpenMPT (FT2 just plays pattern 0 if the order list is empty according to the header)
+	verFT2Generic      =  0x20,  // "FastTracker v2.00", but FastTracker has NOT been ruled out
+	verOther           =  0x40,  // Something we don't know, testing for DigiTrakker.
+	verFT2Clone        =  0x80,  // NOT FT2: itype changed between instruments, or \0 found in song title
+	verDigiTrakker     = 0x100,  // Probably DigiTrakker
+	verUNMO3           = 0x200,  // TODO: UNMO3-ed XMs are detected as MPT 1.16
+	verEmptyOrders     = 0x400,  // Allow empty order list like in OpenMPT (FT2 just plays pattern 0 if the order list is empty according to the header)
 };
 DECLARE_FLAGSET(TrackerVersions)
 
@@ -819,10 +819,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 					m_szNames[mptSample] = mpt::String::ReadBuf(mpt::String::spacePadded, sampleHeader.name);
 
 					if((sampleHeader.flags & 3) == 3 && madeWith[verNewModPlug])
-					{
-						// MPT 1.09 and maybe newer / older versions set both loop flags for bidi loops.
-						madeWith.set(verModPlug1_09);
-					}
+						madeWith.set(verModPlugBidiFlag);
 				}
 				if(sampleFlags.back().GetEncoding() == SampleIO::ADPCM)
 					anyADPCM = true;
@@ -931,14 +928,14 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 
 	if(madeWith[verConfirmed])
 	{
-		if(madeWith[verModPlug1_09])
+		if(madeWith[verModPlugBidiFlag])
 		{
-			m_dwLastSavedWithVersion = MPT_V("1.09");
-			madeWithTracker = U_("ModPlug Tracker 1.09");
+			m_dwLastSavedWithVersion = MPT_V("1.11");
+			madeWithTracker = U_("ModPlug Tracker 1.0 - 1.11");
 		} else if(madeWith[verNewModPlug])
 		{
 			m_dwLastSavedWithVersion = MPT_V("1.16");
-			madeWithTracker = U_("ModPlug Tracker 1.10 - 1.16");
+			madeWithTracker = U_("ModPlug Tracker 1.0 - 1.16");
 		}
 	}
 
