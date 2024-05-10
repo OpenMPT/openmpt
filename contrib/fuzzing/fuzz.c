@@ -46,16 +46,12 @@ static int ErrFunc (int error, void *)
 }
 
 int main( int argc, char * argv[] ) {
-	static FILE * file = NULL;
-	static openmpt_module * mod = NULL;
-	static size_t count = 0;
-	static int i = 0;
 	(void)argc;
 #ifdef __AFL_HAVE_MANUAL_CONTROL
 	__AFL_INIT();
 #endif
-	file = fopen( argv[1], "rb" );
-	mod = openmpt_module_create2( openmpt_stream_get_file_callbacks(), file, NULL, NULL, ErrFunc, NULL, NULL, NULL, NULL );
+	FILE * file = fopen( argv[1], "rb" );
+	openmpt_module * mod = openmpt_module_create2( openmpt_stream_get_file_callbacks(), file, NULL, NULL, ErrFunc, NULL, NULL, NULL, NULL );
 	fclose( file );
 	if ( mod == NULL )
 		return 1;
@@ -66,8 +62,8 @@ int main( int argc, char * argv[] ) {
 
 	openmpt_module_ctl_set( mod, "render.resampler.emulate_amiga", (openmpt_module_get_num_orders( mod ) & 1) ? "0" : "1" );
 	// render about a second of the module for fuzzing the actual mix routines
-	for(; i < 50; i++) {
-		count = openmpt_module_read_mono( mod, SAMPLERATE, BUFFERSIZE, buffer );
+	for(int i = 0; i < 50; i++) {
+		size_t count = openmpt_module_read_mono( mod, SAMPLERATE, BUFFERSIZE, buffer );
 		if ( count == 0 ) {
 			break;
 		}
