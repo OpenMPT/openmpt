@@ -748,7 +748,7 @@ private:
 		result.d = CPUInfo[3];
 		return result;
 
-#elif MPT_COMPILER_GCC || (MPT_COMPILER_CLANG && !MPT_ARCH_AMD64) || MPT_CLANG_AT_LEAST(13,0,0)
+#elif MPT_COMPILER_GCC || (MPT_COMPILER_CLANG && !MPT_ARCH_AMD64) || MPT_CLANG_AT_LEAST(13, 0, 0)
 		// <https://reviews.llvm.org/D101338>
 
 		cpuid_result result;
@@ -762,7 +762,7 @@ private:
 		result.c = regecx;
 		result.d = regedx;
 		return result;
-		
+
 #elif MPT_COMPILER_CLANG && MPT_ARCH_AMD64
 		// <https://reviews.llvm.org/D101338>
 
@@ -824,7 +824,7 @@ private:
 		result.d = CPUInfo[3];
 		return result;
 
-#elif MPT_COMPILER_GCC || (MPT_COMPILER_CLANG && !MPT_ARCH_AMD64) || MPT_CLANG_AT_LEAST(13,0,0)
+#elif MPT_COMPILER_GCC || (MPT_COMPILER_CLANG && !MPT_ARCH_AMD64) || MPT_CLANG_AT_LEAST(13, 0, 0)
 		// <https://reviews.llvm.org/D101338>
 
 		cpuid_result result;
