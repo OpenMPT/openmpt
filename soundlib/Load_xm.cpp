@@ -761,6 +761,10 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 			else if(madeWith[verFT2Clone | verFT2Generic] && instrHeader.size != 33)
 			{
 				// Sure isn't FT2.
+				// 4-mat's eternity.xm has an empty instruments with a header size of 29.
+				// Another module using that size is funky_dumbass.xm. Mysterious!
+				// Note: This may happen when the XM Commenter by Aka (XMC.EXE) adds empty instruments at the end of the list,
+				// which would explain the latter case, but in eternity.xm the empty slots are not at the end of the list.
 				madeWith = verUnknown;
 			}
 			if(instrHeader.size != 33)
@@ -772,8 +776,6 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 				// Note: FT2 NORMALLY writes sampleHeaderSize=40 for all samples, but for any instruments before the first
 				// instrument that has numSamples != 0, sampleHeaderSize will be uninitialized. It will always be the same
 				// value, though.
-				// Note: 4-mat's eternity.xm has an instrument header size of 29 (without the previously described condition).
-				// Another module with that size is funky_dumbass.xm. Mysterious!
 				if(instrumentWithSamplesEncountered || (lastSampleHeaderSize != -1 && instrHeader.sampleHeaderSize != lastSampleHeaderSize))
 					madeWith = verPlayerPRO | verConfirmed;
 				lastSampleHeaderSize = instrHeader.sampleHeaderSize;
@@ -794,6 +796,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			// FT2 writes some random junk for the instrument type field,
 			// but it's always the SAME junk for every instrument saved.
+			// Note: This may happen when running an FT2-made XM through PutInst and adding new instrument slots.
 			madeWith.reset(verFT2Generic);
 			madeWith.set(verFT2Clone);
 		}
