@@ -18,7 +18,7 @@ struct UltFileHeader
 {
 	char  signature[14];		// "MAS_UTrack_V00"
 	uint8 version;				// '1'...'4'
-	char  songName[32];			// Song Name, not guaranteed to be null-terminated
+	char  songName[32];			// Song Name, space-padded
 	uint8 messageLength;		// Number of Lines
 };
 
@@ -50,7 +50,7 @@ struct UltSample
 	{
 		mptSmp.Initialize();
 
-		mpt::String::Read<mpt::String::maybeNullTerminated>(mptSmp.filename, filename);
+		mpt::String::Read<mpt::String::spacePadded>(mptSmp.filename, filename);
 
 		if(sizeEnd <= sizeStart)
 		{
@@ -400,7 +400,7 @@ bool CSoundFile::ReadULT(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	InitializeGlobals(MOD_TYPE_ULT);
-	mpt::String::Read<mpt::String::maybeNullTerminated>(m_songName, fileHeader.songName);
+	mpt::String::Read<mpt::String::spacePadded>(m_songName, fileHeader.songName);
 
 	const MPT_UCHAR_TYPE *versions[] = {UL_("<1.4"), UL_("1.4"), UL_("1.5"), UL_("1.6")};
 	m_modFormat.formatName = U_("UltraTracker");
@@ -433,7 +433,7 @@ bool CSoundFile::ReadULT(FileReader &file, ModLoadingFlags loadFlags)
 		}
 
 		sampleHeader.ConvertToMPT(Samples[smp]);
-		mpt::String::Read<mpt::String::maybeNullTerminated>(m_szNames[smp], sampleHeader.name);
+		mpt::String::Read<mpt::String::spacePadded>(m_szNames[smp], sampleHeader.name);
 	}
 
 	ReadOrderFromFile<uint8>(Order(), file, 256, 0xFF, 0xFE);

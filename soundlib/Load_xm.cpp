@@ -128,18 +128,16 @@ static void ReadXMPatterns(FileReader &file, const XMFileHeader &fileHeader, CSo
 	for(PATTERNINDEX pat = 0; pat < fileHeader.patterns; pat++)
 	{
 		FileReader::off_t curPos = file.GetPosition();
-		uint32 headerSize = file.ReadUint32LE();
-		file.Skip(1);	// Pack method (= 0)
+		const uint32 headerSize = file.ReadUint32LE();
+		if(headerSize < 8 || !file.CanRead(headerSize - 4))
+			break;
+		file.Skip(1);  // Pack method (= 0)
 
-		ROWINDEX numRows = 64;
-
+		ROWINDEX numRows;
 		if(fileHeader.version == 0x0102)
-		{
 			numRows = file.ReadUint8() + 1;
-		} else
-		{
+		else
 			numRows = file.ReadUint16LE();
-		}
 
 		// A packed size of 0 indicates a completely empty pattern.
 		const uint16 packedSize = file.ReadUint16LE();
@@ -152,10 +150,8 @@ static void ReadXMPatterns(FileReader &file, const XMFileHeader &fileHeader, CSo
 		file.Seek(curPos + headerSize);
 		FileReader patternChunk = file.ReadChunk(packedSize);
 
-		if(!sndFile.Patterns.Insert(pat, numRows) || packedSize == 0)
-		{
+		if(pat >= MAX_PATTERNS || !sndFile.Patterns.Insert(pat, numRows) || packedSize == 0)
 			continue;
-		}
 
 		enum PatternFlags
 		{
@@ -171,6 +167,9 @@ static void ReadXMPatterns(FileReader &file, const XMFileHeader &fileHeader, CSo
 
 		for(auto &m : sndFile.Patterns[pat])
 		{
+			if(!file.CanRead(1))
+				break;
+
 			uint8 info = patternChunk.ReadUint8();
 
 			uint8 vol = 0;
@@ -925,7 +924,7 @@ bool CSoundFile::SaveXM(std::ostream &f, bool compatibilityExport)
 			if(!p->IsEmpty())
 				emptyPattern = false;
 
-			// Apparently, completely empty patterns are loaded as empty 64-row patterns in FT2, regardless of their original size.
+			// Completely empty patterns are loaded as empty 64-row patterns in FT2, regardless of their original size.
 			// We have to avoid this, so we add a "break to row 0" command in the last row.
 			if(j == 1 && emptyPattern && numRows != 64)
 			{
