@@ -388,6 +388,16 @@
 
 #endif // MPT_COMPILER_MSVC
 
+#if MPT_COMPILER_GCC
+
+#ifdef MPT_COMPILER_QUIRK_GCC_NO_O2
+#if defined(__OPTIMIZE__)
+#pragma GCC optimize("O1")
+#endif
+#endif // MPT_COMPILER_QUIRK_GCC_NO_O2
+
+#endif // MPT_COMPILER_GCC
+
 #if MPT_COMPILER_CLANG
 
 #if defined(MPT_BUILD_MSVC)
