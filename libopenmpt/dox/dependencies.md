@@ -20,12 +20,12 @@ Dependencies
         headers and implementation, which significantly increases the matrix of
         possible configurations to test.
         
-     *  **GCC 8.1** or higher
+     *  **GCC 8.1** up to **GCC 13.x**
      *  **Clang 7** or higher
-     *  **MinGW-W64 8.1** or higher (it is recommended to preferably use
-        posix threading model as opposed to win32 threading model)
+     *  **MinGW-W64 8.1**  up to **GCC 13.x** (it is recommended to preferably
+        use posix threading model as opposed to win32 threading model)
      *  **emscripten 1.39.1** or higher
-     *  **DJGPP GCC 8.1** or higher
+     *  **DJGPP GCC 8.1**  up to **GCC 13.x**
      *  any other **C++17 compliant** compiler
         
         libopenmpt makes the following assumptions about the C++ implementation
