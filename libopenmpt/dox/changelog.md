@@ -11,6 +11,9 @@ is just a high-level summary.
     `libopenmpt/bindings/freebasic/libopenmpt_ext.bi` were missing from the
     Autotools package.
 
+ *  [**Regression**] GCC 14 or later is unsupported on libopenmpt 0.4. Please
+    use libopenmpt 0.7 or later.
+
  *  mpg123: Update to v1.32.6 (2024-04-04).
 
 ### libopenmpt 0.4.41 (2024-03-24)
