@@ -12,6 +12,7 @@
 
 #include "BuildSettings.h"
 
+#include "mptBaseTypes.h"
 #include "mptMutex.h"
 
 #include <limits>
