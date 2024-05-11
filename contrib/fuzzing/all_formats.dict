@@ -5,7 +5,7 @@ amf="ASYLUM Music Format V1.0\x00"
 amf="AMF\x0A"
 
 ams="Extreme"
-ams="AMShdr\x1A\x02\x02"
+ams="AMShdr\x1A\x00\x02\x02"
 
 #dbm="DBM0"
 dbm="NAME"
@@ -49,7 +49,7 @@ far="\x0D\x0A\x1A"
 fmt="FMTracker\x01\x01"
 
 gdm="GDM\xFE"
-gdm="GMFS"
+gdm="\x0D\x0A\x1AGMFS\x01\x00"
 
 imf="IM10"
 imf="IS10"
@@ -202,7 +202,7 @@ psm16="PSAH"
 psm16="PPAT"
 
 ptm="PTMF"
-ptm="\x1A\x03\x02"
+ptm="\x1A\x03\x02\x00"
 
 s3m="SCRM"
 #s3m="SCRS"
