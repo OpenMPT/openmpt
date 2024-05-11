@@ -860,6 +860,8 @@
 /libopenmpt/libopenmpt_plugin_gui.aps
 /libopenmpt/libopenmpt_version.aps
 /libopenmpt/in_openmpt/*.d
+/libopenmpt/libopenmpt_test/*.d
+/libopenmpt/libopenmpt_test/*.o
 /libopenmpt/plugin-common/*.d
 /libopenmpt/xmp-openmpt/*.d
 /mptrack/*.aps
