@@ -16,7 +16,10 @@
 
 #include <libopenmpt/libopenmpt.h>
 
-#include "../../common/mptRandom.h"
+namespace OpenMPT::mpt
+{
+	void reinit_global_random();
+}
 
 #define BUFFERSIZE 450  // shouldn't match OpenMPT's internal mix buffer size (512)
 #define SAMPLERATE 22050
