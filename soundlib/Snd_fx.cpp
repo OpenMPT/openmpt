@@ -2889,7 +2889,25 @@ bool CSoundFile::ProcessEffects()
 			if(ModCommand::IsNote(note))
 			{
 				chn.nNewNote = chn.nLastNote = note;
+			}
 
+			// IT compatibility: Empty sample mapping
+			// This is probably the single biggest WTF replayer bug in Impulse Tracker.
+			// In instrument mode, when an note + instrument is triggered that does not map to any sample, the entire cell (including potentially present global effects!)
+			// is ignored. Even better, if on a following row another instrument number (this time without a note) is encountered, we end up in the same situation!
+			// Test cases: NoMap.it, NoMapEffects.it
+			if(m_playBehaviour[kITEmptyNoteMapSlotIgnoreCell] && instr > 0 && instr <= GetNumInstruments()
+			   && Instruments[instr] != nullptr
+			   && ModCommand::IsNote(chn.nNewNote) && Instruments[instr]->Keyboard[chn.nNewNote - NOTE_MIN] == 0
+			   && !Instruments[instr]->HasValidMIDIChannel())
+			{
+				chn.nNewIns = static_cast<ModCommand::INSTR>(instr);
+				chn.ClearRowCmd();
+				continue;
+			}
+
+			if(ModCommand::IsNote(note))
+			{
 				// New Note Action ?
 				if(!bPorta)
 				{

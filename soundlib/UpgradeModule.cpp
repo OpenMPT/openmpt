@@ -597,6 +597,7 @@ void CSoundFile::UpgradeModule()
 			{ kITResetFilterOnPortaSmpChange, MPT_V("1.30.08.02") },
 			{ kITInitialNoteMemory,           MPT_V("1.31.00.25") },
 			{ kITNoSustainOnPortamento,       MPT_V("1.32.00.13") },
+			{ kITEmptyNoteMapSlotIgnoreCell,  MPT_V("1.32.00.13") },
 		};
 
 		for(const auto &b : behaviours)
