@@ -1747,10 +1747,10 @@ ifeq ($(SHARED_LIB),1)
 endif
 endif
 
-contrib/fuzzing/fuzz.o: contrib/fuzzing/fuzz.c
-	$(INFO) [CC] $<
-	$(VERYSILENT)$(CC) $(CFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -M -MT$@ $< > $*.d
-	$(SILENT)$(COMPILE.c) $(OUTPUT_OPTION) $<
+contrib/fuzzing/fuzz.o: contrib/fuzzing/fuzz.cpp
+	$(INFO) [CXX] $<
+	$(VERYSILENT)$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -M -MT$@ $< > $*.d
+	$(SILENT)$(COMPILE.cc) $(OUTPUT_OPTION) $<
 bin/fuzz$(EXESUFFIX): contrib/fuzzing/fuzz.o $(OBJECTS_LIBOPENMPT) $(OUTPUT_LIBOPENMPT)
 	$(INFO) [LD] $@
 	$(SILENT)$(LINK.cc) $(LDFLAGS_LIBOPENMPT) contrib/fuzzing/fuzz.o $(OBJECTS_LIBOPENMPT) $(LOADLIBES) $(LDLIBS) $(LDLIBS_LIBOPENMPT) -o $@
