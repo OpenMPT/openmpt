@@ -17,6 +17,10 @@ is just a high-level summary.
  *  [**Change**] `build/download_externals.sh` now verifies the integrity of any
     downloaded files and uses curl instead of wget.
 
+ *  [**Regression**]: Optimization level when compiling with GCC 14 has been
+    forced down to `-O1` due to the severe miscompilation GCC 14 has shown on
+    MinGW-w64 amd64.
+
  *  M15: Loosen SoundTracker file rejection heuristics a bit to allow loading of
     schmokk.mod and scramble_2.mod. Other heuristics has been tightened a bit.
  *  MOD: Change VBlank timing heuristic to always assume CIA timing when long
