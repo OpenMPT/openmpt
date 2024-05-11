@@ -11,6 +11,9 @@ is just a high-level summary.
     `libopenmpt/bindings/freebasic/libopenmpt_ext.bi` were missing from the
     Autotools package.
 
+ *  [**Regression**] GCC 14 or later is unsupported on libopenmpt 0.5. Please
+    use libopenmpt 0.7 or later.
+
  *  M15: Loosen SoundTracker file rejection heuristics a bit to allow loading of
     schmokk.mod and scramble_2.mod. Other heuristics has been tightened a bit.
 

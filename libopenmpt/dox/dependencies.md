@@ -11,13 +11,13 @@ Dependencies
  *  Supported compilers for building libopenmpt:
      *  **Microsoft Visual Studio 2017** or higher, running on a x86-64 build
         system (other target systems are supported)
-     *  **GCC 7.1** or higher
+     *  **GCC 7.1** up to **GCC 13.x**
      *  **Clang 5** or higher
-     *  **MinGW-W64 7.1** or higher (it is recommended to preferably use
-        posix threading model as opposed to win32 threading model, or at least
-        have mingw-std-threads available otherwise)
+     *  **MinGW-W64 7.1** up to **GCC 13.x** (it is recommended to preferably
+        use posix threading model as opposed to win32 threading model, or at
+        least have mingw-std-threads available otherwise)
      *  **emscripten 1.39.1** or higher
-     *  **DJGPP GCC 7.2** or higher
+     *  **DJGPP GCC 7.2** up to **GCC 13.x**
      *  any other **C++17 compliant** compiler
         
         libopenmpt makes the following assumptions about the C++ implementation
