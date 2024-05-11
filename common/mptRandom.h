@@ -721,6 +721,10 @@ public:
 mpt::random_device & global_random_device();
 mpt::thread_safe_prng<mpt::default_prng> & global_prng();
 
+#ifdef MPT_BUILD_FUZZER
+void reinit_global_random();
+#endif  // MPT_BUILD_FUZZER
+
 #if defined(MODPLUG_TRACKER) && !defined(MPT_BUILD_WINESUPPORT)
 void set_global_random_device(mpt::random_device *rd);
 void set_global_prng(mpt::thread_safe_prng<mpt::default_prng> *rng);
