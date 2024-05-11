@@ -1382,7 +1382,7 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 
 
 // Check if a name string is valid (i.e. doesn't contain binary garbage data)
-static uint32 CountInvalidChars(const mpt::span<const char> name)
+static uint32 CountInvalidChars(const mpt::span<const char> name) noexcept
 {
 	uint32 invalidChars = 0;
 	for(int8 c : name)  // char can be signed or unsigned
@@ -1392,6 +1392,34 @@ static uint32 CountInvalidChars(const mpt::span<const char> name)
 			invalidChars++;
 	}
 	return invalidChars;
+}
+
+
+enum class NameClassification
+{
+	Empty,
+	ValidASCII,
+	Invalid,
+};
+
+// Check if a name is a valid null-terminated ASCII string with no garbage after the null terminator, or if it's empty
+static NameClassification ClassifyName(const mpt::span<const char> name) noexcept
+{
+	bool foundNull = false, foundNormal = false;
+	for(auto c : name)
+	{
+		if(c > 0 && c < ' ')
+			return NameClassification::Invalid;
+		if(c == 0)
+			foundNull = true;
+		else if(foundNull)
+			return NameClassification::Invalid;
+		else
+			foundNormal = true;
+	}
+	if(!foundNull)
+		return NameClassification::Invalid;
+	return foundNormal ? NameClassification::ValidASCII : NameClassification::Empty;
 }
 
 
@@ -1433,7 +1461,8 @@ static bool ValidateHeader(const M15FileHeaders &fileHeaders)
 
 	SmpLength totalSampleLen = 0;
 	uint8 allVolumes = 0;
-	uint8 diskNameCount = 0;
+	uint8 validNameCount = 0;
+	bool invalidNames = false;
 
 	for(SAMPLEINDEX smp = 0; smp < 15; smp++)
 	{
@@ -1444,13 +1473,16 @@ static bool ValidateHeader(const M15FileHeaders &fileHeaders)
 		// schmokk.mod has a non-zero value here but it should not be treated as finetune
 		if(sampleHeader.finetune != 0)
 			invalidChars += 16;
-		if(sampleHeader.HasDiskName())
-			diskNameCount++;
+		if(const auto nameType = ClassifyName(sampleHeader.name); nameType == NameClassification::ValidASCII)
+			validNameCount++;
+		else if(nameType == NameClassification::Invalid)
+			invalidNames = true;
 
 		// Sanity checks - invalid character count adjusted for ata.mod (MD5 937b79b54026fa73a1a4d3597c26eace, SHA1 3322ca62258adb9e0ae8e9afe6e0c29d39add874)
+		// Sample length adjusted for romantic.stk which has a (valid) sample of length 72222
 		if(invalidChars > 48
 		   || sampleHeader.volume > 64
-		   || sampleHeader.length > 32768)
+		   || sampleHeader.length > 37000)
 		{
 			return false;
 		}
@@ -1459,8 +1491,8 @@ static bool ValidateHeader(const M15FileHeaders &fileHeaders)
 		allVolumes |= sampleHeader.volume;
 	}
 
-	// scramble_2.mod has a lot of garbage in the song title, but it has lots of sample names starting with st-01, so we consider those to be more important than the garbage bytes.
-	if(invalidCharsInTitle > 5 && diskNameCount < 4)
+	// scramble_2.mod has a lot of garbage in the song title, but it has lots of properly-formatted sample names, so we consider those to be more important than the garbage bytes.
+	if(invalidCharsInTitle > 5 && (validNameCount < 4 || invalidNames))
 	{
 		return false;
 	}
