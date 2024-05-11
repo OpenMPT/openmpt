@@ -1595,9 +1595,15 @@ void CSoundFile::InstrumentChange(ModChannel &chn, uint32 instr, bool bPorta, bo
 		return;
 	}
 
+	const bool wasKeyOff = chn.dwFlags[CHN_KEYOFF];
+
 	// Tone-Portamento doesn't reset the pingpong direction flag
 	if(bPorta && pSmp == chn.pModSample && pSmp != nullptr)
 	{
+		// IT compatibility: Instrument change but sample stays the same: still reset the key-off flags
+		// Test case: SampleSustainAfterPortaInstrMode.it
+		if(instrumentChanged && pIns && m_playBehaviour[kITNoSustainOnPortamento])
+			chn.dwFlags.reset(CHN_KEYOFF | CHN_NOTEFADE);
 		// If channel length is 0, we cut a previous sample using SCx. In that case, we have to update sample length, loop points, etc...
 		if(GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT) && chn.nLength != 0)
 			return;
@@ -1706,7 +1712,9 @@ void CSoundFile::InstrumentChange(ModChannel &chn, uint32 instr, bool bPorta, bo
 	}
 	chn.m_PortamentoFineSteps = 0;
 
-	if(chn.dwFlags[CHN_SUSTAINLOOP])
+	// IT compatibility: Do not reset sustain loop status when using portamento after key-off
+	// Test case: SampleSustainAfterPorta.it, SampleSustainAfterPortaCompatGxx.it, SampleSustainAfterPortaInstrMode.it
+	if(chn.dwFlags[CHN_SUSTAINLOOP] && (!m_playBehaviour[kITNoSustainOnPortamento] || !bPorta || (pIns && !wasKeyOff)))
 	{
 		chn.nLoopStart = pSmp->nSustainStart;
 		chn.nLoopEnd = pSmp->nSustainEnd;

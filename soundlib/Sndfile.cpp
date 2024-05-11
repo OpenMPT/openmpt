@@ -1124,6 +1124,10 @@ PlayBehaviourSet CSoundFile::GetSupportedPlaybackBehaviour(MODTYPE type)
 	switch(type)
 	{
 	case MOD_TYPE_MPT:
+		playBehaviour.set(kOPLFlexibleNoteOff);
+		playBehaviour.set(kOPLwithNNA);
+		playBehaviour.set(kOPLNoteOffOnNoteChange);
+		[[fallthrough]];
 	case MOD_TYPE_IT:
 		playBehaviour.set(MSF_COMPATIBLE_PLAY);
 		playBehaviour.set(kPeriodsAreHertz);
@@ -1178,12 +1182,7 @@ PlayBehaviourSet CSoundFile::GetSupportedPlaybackBehaviour(MODTYPE type)
 		playBehaviour.set(kITPitchPanSeparation);
 		playBehaviour.set(kITResetFilterOnPortaSmpChange);
 		playBehaviour.set(kITInitialNoteMemory);
-		if(type == MOD_TYPE_MPT)
-		{
-			playBehaviour.set(kOPLFlexibleNoteOff);
-			playBehaviour.set(kOPLwithNNA);
-			playBehaviour.set(kOPLNoteOffOnNoteChange);
-		}
+		playBehaviour.set(kITNoSustainOnPortamento);
 		break;
 
 	case MOD_TYPE_XM:

@@ -709,6 +709,7 @@ void CLegacyPlaybackSettingsDlg::OnFilterStringChanged()
 		case kITResetFilterOnPortaSmpChange: desc = _T("Reset filter on portamento if new note plays a different sample"); break;
 		case kITInitialNoteMemory: desc = _T("Initial Last Note Memory of each channel is C-0 instead of No Note"); break;
 		case kPluginDefaultProgramAndBank1: desc = _T("Assume initial plugin MIDI program and bank number is 1"); break;
+		case kITNoSustainOnPortamento: desc = _T("Portamento after note-off does not re-enable sample sustain loop"); break;
 
 		default: MPT_ASSERT_NOTREACHED();
 		}
