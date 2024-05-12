@@ -2904,6 +2904,7 @@ bool CSoundFile::ProcessEffects()
 					instr = 0;
 			}
 
+			const auto previousNewNote = chn.nNewNote;
 			if(ModCommand::IsNote(note))
 			{
 				chn.nNewNote = chn.nLastNote = note;
@@ -2973,7 +2974,14 @@ bool CSoundFile::ProcessEffects()
 				const bool instrChange = (!instr) && (chn.nNewIns) && ModCommand::IsNote(note);
 				if(instrChange)
 				{
+					// If we change to a new instrument, we need to do so based on whatever previous note would have played
+					// - so that we trigger the correct sample in a multisampled instrument (based on the previous note, not the new note).
+					// Test case: InitialNoteMemoryInstrMode.it
+					if(m_playBehaviour[kITEmptyNoteMapSlotIgnoreCell] && ModCommand::IsNote(previousNewNote))
+						chn.nNewNote = previousNewNote;
+
 					InstrumentChange(chn, chn.nNewIns, bPorta, chn.pModSample == nullptr && chn.pModInstrument == nullptr, !(GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2)));
+					chn.nNewNote = note;
 					chn.nNewIns = 0;
 				}
 				if(!chn.dwFlags[CHN_MUTE | CHN_SYNCMUTE] && chn.pModSample != nullptr && chn.pModSample->uFlags[CHN_ADLIB] && m_opl && (instrChange || !m_opl->IsActive(nChn)))
