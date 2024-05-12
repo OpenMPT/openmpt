@@ -14,6 +14,15 @@ is just a high-level summary.
  *  [**Regression**] GCC 14 or later is unsupported on libopenmpt 0.4. Please
     use libopenmpt 0.7 or later.
 
+ *  XM: Files with impossibly small pattern headers are now rejected, like
+    FastTracker 2 does.
+ *  MO3: Reduced maximum allowed music data (not samples) size from 2 GiB to
+    512 MiB.
+ *  MDL: Slightly more accurate import of pattern command 9 (enabling envelopes
+    instead of setting envelope position).
+ *  OPL emulation could produce clicks when using a mix rate higher than
+    65536 Hz.
+
  *  mpg123: Update to v1.32.6 (2024-04-04).
 
 ### libopenmpt 0.4.41 (2024-03-24)
@@ -366,7 +375,7 @@ is just a high-level summary.
  *  S3M: Support old-style sample pre-amp value in very early S3M files.
  *  S3M: Only force-enable fast slides for files ST 3.00. Previously, any S3M
     file made with an ST3 version older than 3.20 enabled them.
- *  M15: Improve tracker detection heuristics to never assume SoundTracker 2.0
+ *  STK: Improve tracker detection heuristics to never assume SoundTracker 2.0
     if there is a huge number of Dxx commands, as that is a definite hint that
     they should be treated as volume slides. Fixes Monty On The Run by
     Master Blaster.
@@ -635,7 +644,7 @@ is just a high-level summary.
  *  XM: Do not default recall volume / panning for delayed instrument-less notes
  *  XM :E60 loop bug was not considered in song length calucation.
  *  S3M: Notes without instrument number use previous note's sample offset.
- *  Tighten M15 and MOD file rejection heuristics.
+ *  Tighten STK and MOD file rejection heuristics.
  *  J2B: Ignore frequency limits from file header. Fixes Medivo.j2b, broken
     since libopenmpt-0.2.6401-beta17.
  *  STM: More accurate tempo calculation.
@@ -823,7 +832,7 @@ is just a high-level summary.
     malformed STM files to load which were previously rejected.
  *  Detect whether "hidden" patterns in the order list of SoundTracker modules
     should be taken into account or not.
- *  Tighten heuristics for rejecting invalid 669, M15, MOD and ICE files and
+ *  Tighten heuristics for rejecting invalid 669, STK, MOD and ICE files and
     loosen them in other places to allow some valid MOD files to load.
  *  Improvements to seeking: Channel panning was not always updated from
     instruments / samples when seeking, and out-of-range global volume was not
