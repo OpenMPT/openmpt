@@ -391,6 +391,7 @@
 #if MPT_COMPILER_GCC
 
 #ifdef MPT_COMPILER_QUIRK_GCC_NO_O2
+// See <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=115049>.
 #if defined(__OPTIMIZE__)
 #pragma GCC optimize("O1")
 #endif
