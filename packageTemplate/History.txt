@@ -20,6 +20,7 @@ Developers:
    <sp>    pelya      / Sergiy Pylypenko [pelya]
    <tn>    plastik_s  / Trevor Nunes     [plastik_s]
 Patch submitters:
+   <cs127> cs127
    <cs>    kode54     / Christopher Snowhill
    <da>    Revenant   / Devin Acker
    <ih>    xaimus     / Imran Hameed
@@ -32,15 +33,59 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.31.07.00 (12 May 2024, revision 20796)
+-----------------------------------------
+Pattern tab
+- [Fix] <js> Find & Replace: In the plugin parameter dropdown, parameter 999 was missing if the number of plugin parameters was unknown.
+
+Comments tab
+- [Fix] <js> Sample / instrument name editing was broken since OpenMPT 1.31.01.00 (tx SoDa7).
+
+Playback
+- [Fix] <js> The OPL emulation produced unwanted clicks with mix rates exceeding 65 kHz (http://bugs.openmpt.org/view.php?id=1775).
+- [Fix] <js> MIDI macro command s didn't compute the correct checksum if a device ID was made up from two bytes (e.g. Roland XV-5080).
+
+IT
+- [Imp] <js> Disable a few more compatibility flags for ITs made with older Schism Tracker versions (http://bugs.openmpt.org/view.php?id=1764).
+- [Mod] <js> Halve the output volume of files saved with ChibiTracker, as its mixer is about half as loud as ours.
+
+XM
+- [Imp] <js> Detect files saved with PlayerPRO. Improved detection of files saved with ModPlug Tracker.
+- [Mod] <js> Files with impossibly small pattern headers are now rejected, like FastTracker 2 does.
+
+S3M
+- [Imp] <js> Detect files saved with PlayerPRO.
+- [Fix] <js> In mono mode, the ratio between sample and OPL volume was incorrect (http://bugs.openmpt.org/view.php?id=1774).
+
+MOD
+- [Mod] <js> Changed VBlank timing heuristic to always assume CIA timing when long samples (unsupported by original ProTracker) are found.
+- [Fix] <js> Disable NoiseTracker quirks if empty sample slots have a default volume other than 0 (http://bugs.openmpt.org/view.php?id=1765).
+- [Fix] <js> 7-bit panning detection may have returned incorrect results for MODs with a channel count other than 4.
+
+Other formats
+- [Imp] <js> STK: Loosen SoundTracker file rejection heuristics a bit to allow loading of files with overly long samples (romantic.stk) and malformed song titles (schmokk.mod, scramble_2.mod and others). Other heuristics has been tightened a bit.
+- [Imp] <js> MED: Improve handling of default tempo, panning and channel volume in files containing more than one song (fixes sugar n spice.mmd3, https://www.un4seen.com/forum/?topic=15448.msg142659#msg142659).
+- [Mod] <js> MO3: Further reduce maximum allowed music data (not samples) size from 2 GiB to 512 MiB.
+- [Mod] <js> MDL: Slightly more accurate import of pattern command 9 (enabling envelopes instead of setting envelope position).
+- [Fix] <cs127> ULT: Support the highest three octaves.
+
+Misc
+- [Mod] <js> Channel Manager: Allow middle-click to open Quick Channel Settings for all formats.
+- [Imp] <js> When auto-saving, display the currently saving module's filename in the status bar.
+- [Fix] <js> Fixed possible crash when merging sequences.
+- [Fix] <jh> It was possible that OpenMPT would crash on shutdown if an automatic update check was still running in the background (http://bugs.openmpt.org/view.php?id=1760).
+
+Bundled plugins
+- [Fix] <js> When changing the output plugin from the LFO plugin's editor, the change was not reflected in the General tab.
+
+Third-Party Libraries
+- [Imp] Update mpg123 (v1.32.6), opus (v1.5.2)
+
+
 v1.31.06.00 (24 March 2024, revision 20438)
 -------------------------------------------
 Sample tab
 - [Imp] <js> Audio is no longer blocked while updating the GUI after pasting a sample.
-
-VST / DMO Plugins
-- [Mod] <js> The "Triangle" waveform in the Chorus / Flanger DMO plugins is now labelled "Square" instead to reflect its actual behaviour.
-- [Fix] <js> There was a periodic click when playing a module using the Chorus or Flanger DMO plugin at a mix rate exceeding ~136.5 kHz (http://bugs.openmpt.org/view.php?id=1752).
-- [Fix] <js> Since OpenMPT 1.29.13.00, the Distortion plugin sounded incorrect when using certain parameter combinations.
 
 IT
 - [Fix] <js> In OpenMPT 1.31.05.00, MIDI macros in IT files made with older MPT versions were no longer working (http://bugs.openmpt.org/view.php?id=1753).
@@ -52,10 +97,15 @@ Other formats
 
 Misc
 - [New] <js> Added two more octaves worth of note key assignments suitable for micro-tuning (http://bugs.openmpt.org/view.php?id=1727).
-- [Fix] <js> File / sample sizes in the instrument browser and comments tab were displayed incorrectly if a file size less than 1024 bytes ended in 0.
+- [Fix] <js> File / sample sizes in the instrument browser and comments tab were displayed incorrectly if a size less than 1024 bytes ended in 0.
+
+Bundled plugins
+- [Mod] <js> The "Triangle" waveform in the Chorus / Flanger DMO plugins is now labelled "Square" instead to reflect its actual behaviour.
+- [Fix] <js> There was a periodic click when playing a module using the Chorus or Flanger DMO plugin at a mix rate exceeding ~136.5 kHz (http://bugs.openmpt.org/view.php?id=1752).
+- [Fix] <js> Since OpenMPT 1.29.13.00, the Distortion plugin sounded incorrect when using certain parameter combinations.
 
 Third-Party Libraries
-- [Imp] Update ancient (2024-03-23). 
+- [Imp] Update ancient (2024-03-23)
 
 
 v1.31.05.00 (3 March 2024, revision 20196)
@@ -1338,7 +1388,7 @@ MOD
 - [Fix] <js> Fix an infinite loop in GamerMan by MrGamer by playing non-ProTracker MODs more like FT2 would (http://bugs.openmpt.org/view.php?id=1337).
 
 Other formats
-- [Imp] <js> M15: Improve tracker detection heuristics to never assume SoundTracker 2.0 if there is a huge number of Dxx commands, as that is a definite hint that they should be treated as volume slides. Fixes Monty On The Run by Master Blaster.
+- [Imp] <js> STK: Improve tracker detection heuristics to never assume SoundTracker 2.0 if there is a huge number of Dxx commands, as that is a definite hint that they should be treated as volume slides. Fixes Monty On The Run by Master Blaster.
 - [Imp] <js> MO3: Support OPL patches in MO3 files created from MPTM and S3M.
 - [Imp] <js> DBM: If a global pattern command would be lost because both effect commands in a cell would have to go into the regular effect column (e.g. a speed and a tempo command), the lost command is now attempted to be written into a different cell on the same row. Fixes "Party-Question V" by grogon (http://bugs.openmpt.org/view.php?id=1346).
 - [Imp] <js> STM: Try to import ST2 tempo more correctly.
@@ -1459,7 +1509,7 @@ MPTM::Custom Tuning
 - [New] <js> Added character '.' to drawable letters for built-in fonts.
 
 IT
-- [Mod] <js> Disable retrigger with short notes quirk for modules saved with Chibi Tracker, as it does not implement that quirk.
+- [Mod] <js> Disable retrigger with short notes quirk for modules saved with ChibiTracker, as it does not implement that quirk.
 
 IT::Compatible Playback Mode
 - [Fix] <js> Instrument and sample panning no longer override channel panning for following notes (http://bugs.openmpt.org/view.php?id=1220).
@@ -1708,7 +1758,7 @@ MOD
 - [Fix] <js> Saving 16-bit stereo samples (which should be converted to 8-bit mono) was broken since OpenMPT 1.28.01.00.
 
 Other formats
-- [Imp] <js> M15: SoundTracker default tempo is no longer rounded.
+- [Imp] <js> STK: SoundTracker default tempo is no longer rounded.
 - [Fix] <js> MTM: Ignore unused Exy commands on import (http://bugs.openmpt.org/view.php?id=1204).
 - [Fix] <js> Startrekker: Clamp speed to 31 ticks per row (http://bugs.openmpt.org/view.php?id=1201).
 
@@ -2140,7 +2190,7 @@ XM
 
 MOD
 - [New] <js> Support MOD files from the Inconexia demo by Iguana.
-- [Mod] <jh & js> Tighten M15 and MOD file rejection heuristics.
+- [Mod] <jh & js> Tighten STK and MOD file rejection heuristics.
 
 Other formats
 - [Fix] <js> J2B: Ignore frequency limits from file header. Fixes Medivo.j2b, broken since OpenMPT 1.26.
@@ -2503,7 +2553,7 @@ MOD
 
 Other formats
 - [Imp] <js> PT36: Enable VBlank timing as specified in file and read song comment (http://bugs.openmpt.org/view.php?id=962).
-- [Imp] <js> M15: Loosen heuristics to allow a few more semi-damaged files to play.
+- [Imp] <js> STK: Loosen heuristics to allow a few more semi-damaged files to play.
 - [Fix] <js> MT2: If there were instruments with both sample and plugin assignments, sample data was not read correctly.
 
 Module cleanup
@@ -5335,7 +5385,7 @@ IT::Compatible Playback Mode
 IT::Loading and Saving
 - [New] <js> Edit history information can now be read from and saved to IT / MPTM files. This is based on an undocumented feature in Impulse Tracker. Use View -> Edit History for viewing or deleting this information.
 - [Imp] <js> Autovibrato sweep is now fixed when loading IT files made with old versions of (Open)MPT.
-- [Imp] <js> IT files made with ModPlug Tracker 1.00a5 are now also detected as such. Since long patterns can also be created in other trackers (e.g. Chibi), long patterns are not used to identify files made with MPT anymore.
+- [Imp] <js> IT files made with ModPlug Tracker 1.00a5 are now also detected as such. Since long patterns can also be created in other trackers (e.g. ChibiTracker), long patterns are not used to identify files made with MPT anymore.
 - [Mod] <js> MIDI macros are now cleared when loading IT files made with old Impulse Tracker versions (< 2.14), so that Zxx commands won't break the songs anymore (fixes denonde.it, fix from Schism Tracker).
 - [Mod] <js> Sane values are used again for the "cwtv" and "cmwt" header fields when saving IT files; in fact the same values as in compatibility export are used. To be able to distinguish between raped and compatibility-exported IT files, "OMPT" is written in the "reserved" header field. As a consequence, IT files made with OpenMPT can now be loaded in Impulse Tracker again.
 - [Fix] <js> Note mapping items that aren't notes (e.g. empty notes) are now ignored when loading and saving.
