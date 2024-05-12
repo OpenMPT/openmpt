@@ -14,8 +14,18 @@ is just a high-level summary.
  *  [**Regression**] GCC 14 or later is unsupported on libopenmpt 0.6. Please
     use libopenmpt 0.7 or later.
 
- *  M15: Loosen SoundTracker file rejection heuristics a bit to allow loading of
-    schmokk.mod and scramble_2.mod. Other heuristics has been tightened a bit.
+ *  S3M: In mono mode, the ratio between sample and OPL volume was incorrect.
+ *  XM: Files with impossibly small pattern headers are now rejected, like
+    FastTracker 2 does.
+ *  STK: Loosen SoundTracker file rejection heuristics a bit to allow loading of
+    files with malformed song titles and overly long samples.
+    Other heuristics has been tightened a bit.
+ *  MO3: Reduced maximum allowed music data (not samples) size from 2 GiB to
+    512 MiB.
+ *  MDL: Slightly more accurate import of pattern command 9 (enabling envelopes
+    instead of setting envelope position).
+ *  OPL emulation could produce clicks when using a mix rate higher than
+    65536 Hz.
 
  *  mpg123: Update to v1.32.6 (2024-04-04).
 
@@ -606,7 +616,7 @@ is just a high-level summary.
  *  XM: Do not default recall volume / panning for delayed instrument-less notes
  *  XM :E60 loop bug was not considered in song length calucation.
  *  S3M: Notes without instrument number use previous note's sample offset.
- *  Tighten M15 and MOD file rejection heuristics.
+ *  Tighten STK and MOD file rejection heuristics.
  *  J2B: Ignore frequency limits from file header. Fixes Medivo.j2b, broken
     since libopenmpt-0.2.6401-beta17.
  *  STM: More accurate tempo calculation.
@@ -794,7 +804,7 @@ is just a high-level summary.
     malformed STM files to load which were previously rejected.
  *  Detect whether "hidden" patterns in the order list of SoundTracker modules
     should be taken into account or not.
- *  Tighten heuristics for rejecting invalid 669, M15, MOD and ICE files and
+ *  Tighten heuristics for rejecting invalid 669, STK, MOD and ICE files and
     loosen them in other places to allow some valid MOD files to load.
  *  Improvements to seeking: Channel panning was not always updated from
     instruments / samples when seeking, and out-of-range global volume was not
