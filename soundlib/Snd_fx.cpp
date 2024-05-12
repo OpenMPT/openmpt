@@ -2536,6 +2536,24 @@ bool CSoundFile::ProcessEffects()
 			bPorta = false;
 		}
 
+		// IT compatibility: Empty sample mapping
+		// This is probably the single biggest WTF replayer bug in Impulse Tracker.
+		// In instrument mode, when an note + instrument is triggered that does not map to any sample, the entire cell (including potentially present global effects!)
+		// is ignored. Even better, if on a following row another instrument number (this time without a note) is encountered, we end up in the same situation!
+		// Test cases: NoMap.it, NoMapEffects.it
+		if(m_playBehaviour[kITEmptyNoteMapSlotIgnoreCell] && instr > 0 && instr <= GetNumInstruments()
+		   && Instruments[instr] != nullptr && !Instruments[instr]->HasValidMIDIChannel())
+		{
+			auto note = (chn.rowCommand.note != NOTE_NONE) ? chn.rowCommand.note : chn.nNewNote;
+			if(ModCommand::IsNote(note) && Instruments[instr]->Keyboard[note - NOTE_MIN] == 0)
+			{
+				chn.nNewNote = chn.nLastNote = note;
+				chn.nNewIns = static_cast<ModCommand::INSTR>(instr);
+				chn.ClearRowCmd();
+				continue;
+			}
+		}
+
 		// Process Invert Loop (MOD Effect, called every row if it's active)
 		if(!m_PlayState.m_flags[SONG_FIRSTTICK])
 		{
@@ -2889,25 +2907,7 @@ bool CSoundFile::ProcessEffects()
 			if(ModCommand::IsNote(note))
 			{
 				chn.nNewNote = chn.nLastNote = note;
-			}
 
-			// IT compatibility: Empty sample mapping
-			// This is probably the single biggest WTF replayer bug in Impulse Tracker.
-			// In instrument mode, when an note + instrument is triggered that does not map to any sample, the entire cell (including potentially present global effects!)
-			// is ignored. Even better, if on a following row another instrument number (this time without a note) is encountered, we end up in the same situation!
-			// Test cases: NoMap.it, NoMapEffects.it
-			if(m_playBehaviour[kITEmptyNoteMapSlotIgnoreCell] && instr > 0 && instr <= GetNumInstruments()
-			   && Instruments[instr] != nullptr
-			   && ModCommand::IsNote(chn.nNewNote) && Instruments[instr]->Keyboard[chn.nNewNote - NOTE_MIN] == 0
-			   && !Instruments[instr]->HasValidMIDIChannel())
-			{
-				chn.nNewIns = static_cast<ModCommand::INSTR>(instr);
-				chn.ClearRowCmd();
-				continue;
-			}
-
-			if(ModCommand::IsNote(note))
-			{
 				// New Note Action ?
 				if(!bPorta)
 				{
@@ -5212,6 +5212,7 @@ void CSoundFile::ParseMIDIMacro(PlayState &playState, CHANNELINDEX nChn, bool is
 			if(outPos - startPos < 3 || out[startPos] != 0xF0)
 				continue;
 
+			// If first byte of model number is 0, read one more
 			uint8 checksumStart = out[startPos + 3] ? 5 : 6;
 			if(outPos - startPos < checksumStart)
 				continue;
