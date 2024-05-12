@@ -21,8 +21,18 @@ is just a high-level summary.
     forced down to `-O1` due to the severe miscompilation GCC 14 has shown on
     MinGW-w64 amd64.
 
- *  M15: Loosen SoundTracker file rejection heuristics a bit to allow loading of
-    schmokk.mod and scramble_2.mod. Other heuristics has been tightened a bit.
+ *  IT: Disable a few more compatibility flags for older SchismTracker builds.
+ *  IT: Halve the output volume of files saved with ChibiTracker, as its mixer
+ *  is about half as loud as ours.
+ *  S3M: In mono mode, the ratio between sample and OPL volume was incorrect.
+ *  S3M: Detect files saved with PlayerPRO.
+ *  XM: Detect files saved with PlayerPRO. Improved detection of files saved
+    with ModPlug Tracker.
+ *  XM: Files with impossibly small pattern headers are now rejected, like
+    FastTracker 2 does.
+ *  STK: Loosen SoundTracker file rejection heuristics a bit to allow loading of
+    files with malformed song titles and overly long samples.
+    Other heuristics has been tightened a bit.
  *  MOD: Change VBlank timing heuristic to always assume CIA timing when long
     samples unsupported by original ProTracker) are found.
  *  MOD: Disable NoiseTracker quirks if empty sample slots have a default volume
@@ -31,6 +41,17 @@ is just a high-level summary.
     with a channel count other than 4.
  *  MED: Improve handling of default tempo, panning and channel volume in files
     containing more than one song.
+ *  MO3: Reduced maximum allowed music data (not samples) size from 2 GiB to
+    512 MiB.
+ *  XMF: Header validation is now stricter.
+ *  MDL: Slightly more accurate import of pattern command 9 (enabling envelopes
+    instead of setting envelope position).
+ *  ULT: Support the highest three octaves.
+ *  OPL emulation could produce clicks when using a mix rate higher than
+    65536 Hz.
+
+ *  xmp-openmpt: Subsongs whose length could not be calculate no longer show a
+    duration of -12:-55.
 
  *  mpg123: Update to v1.32.6 (2024-04-04).
 
@@ -638,7 +659,7 @@ is just a high-level summary.
  *  XM: Do not default recall volume / panning for delayed instrument-less notes
  *  XM :E60 loop bug was not considered in song length calucation.
  *  S3M: Notes without instrument number use previous note's sample offset.
- *  Tighten M15 and MOD file rejection heuristics.
+ *  Tighten STK and MOD file rejection heuristics.
  *  J2B: Ignore frequency limits from file header. Fixes Medivo.j2b, broken
     since libopenmpt-0.2.6401-beta17.
  *  STM: More accurate tempo calculation.
@@ -826,7 +847,7 @@ is just a high-level summary.
     malformed STM files to load which were previously rejected.
  *  Detect whether "hidden" patterns in the order list of SoundTracker modules
     should be taken into account or not.
- *  Tighten heuristics for rejecting invalid 669, M15, MOD and ICE files and
+ *  Tighten heuristics for rejecting invalid 669, STK, MOD and ICE files and
     loosen them in other places to allow some valid MOD files to load.
  *  Improvements to seeking: Channel panning was not always updated from
     instruments / samples when seeking, and out-of-range global volume was not
