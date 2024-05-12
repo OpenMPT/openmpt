@@ -1297,9 +1297,13 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			// Panbrello hold: Added 2024-03-09, https://github.com/schismtracker/schismtracker/commit/ebdebaa8c8a735a7bf49df55debded1b7aac3605
 			if(schismDateVersion < SchismVersionFromDate<2024, 03, 9>::date)
 				m_playBehaviour.reset(kITPanbrelloHold);
-			// Empty instrument sample map slot ignores complete pattern cell: Added 2024-05-12, https://github.com/schismtracker/schismtracker/commit/aa84148e019a65f3d52ecd33fd84bfecfdb87bf4
 			if(schismDateVersion < SchismVersionFromDate<2024, 05, 12>::date)
+			{
+				// Do not re-enable sustain loop on portamento-ed note: Added 2024-05-12, https://github.com/schismtracker/schismtracker/commit/6f68f2855a7e5e4ffe825869244e631e15741037
+				m_playBehaviour.reset(kITNoSustainOnPortamento);
+				// Empty instrument sample map slot ignores complete pattern cell: Added 2024-05-12, https://github.com/schismtracker/schismtracker/commit/aa84148e019a65f3d52ecd33fd84bfecfdb87bf4
 				m_playBehaviour.reset(kITEmptyNoteMapSlotIgnoreCell);
+			}
 			break;
 		case 4:
 			madeWithTracker = MPT_UFORMAT("pyIT {}.{}")((fileHeader.cwtv & 0x0F00) >> 8, mpt::ufmt::hex0<2>(fileHeader.cwtv & 0xFF));
