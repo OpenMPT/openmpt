@@ -10,12 +10,12 @@
 
 #include "stdafx.h"
 #include "EffectVis.h"
-#include "Mainfrm.h"
 #include "Childfrm.h"
 #include "Globals.h"
 #include "InputHandler.h"
-#include "Mptrack.h"
+#include "Mainfrm.h"
 #include "Moddoc.h"
+#include "Mptrack.h"
 #include "View_pat.h"
 
 
