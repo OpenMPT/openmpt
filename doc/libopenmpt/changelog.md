@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.7.7-pre
+### libopenmpt 0.7.7 (2024-05-12)
 
  *  [**Bug**] `examples/libopenmpt_example_c_pipe.c` and
     `libopenmpt/bindings/freebasic/libopenmpt_ext.bi` were missing from the
