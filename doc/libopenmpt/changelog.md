@@ -19,7 +19,7 @@ is just a high-level summary.
 
  *  [**Regression**]: Optimization level when compiling with GCC 14 has been
     forced down to `-O1` due to the severe miscompilation GCC 14 has shown on
-    MinGW-w64 amd64.
+    MinGW-w64 amd64 (see <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=115049>).
 
  *  IT: Disable a few more compatibility flags for older SchismTracker builds.
  *  IT: Halve the output volume of files saved with ChibiTracker, as its mixer
