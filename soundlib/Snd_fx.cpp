@@ -5,7 +5,7 @@
  * Notes  : This needs some heavy refactoring.
  *          I thought of actually adding an effect interface class. Every pattern effect
  *          could then be moved into its own class that inherits from the effect interface.
- *          If effect handling differs severly between module formats, every format would have
+ *          If effect handling differs severely between module formats, every format would have
  *          its own class for that effect. Then, a call chain of effect classes could be set up
  *          for each format, since effects cannot be processed in the same order in all formats.
  * Authors: Olivier Lapicque
@@ -22,7 +22,7 @@
 #endif // MODPLUG_TRACKER
 #include "tuning.h"
 #include "Tables.h"
-#include "modsmp_ctrl.h"	// For updating the loop wraparound data with the invert loop effect
+#include "modsmp_ctrl.h"  // For updating the loop wraparound data with the invert loop effect
 #include "plugins/PlugInterface.h"
 #include "OPL.h"
 #include "MIDIEvents.h"
@@ -520,6 +520,25 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				chn.rowCommand.Clear();
 				continue;
 			}
+
+			if(p->IsNote())
+				chn.nNewNote = chn.nLastNote = p->note;
+			else if(p->note > NOTE_MAX && m_playBehaviour[kITClearOldNoteAfterCut])
+				chn.nNewNote = NOTE_NONE;
+
+			if(m_playBehaviour[kITEmptyNoteMapSlotIgnoreCell] && p->instr > 0 && p->instr <= GetNumInstruments()
+				&& Instruments[p->instr] != nullptr && !Instruments[p->instr]->HasValidMIDIChannel())
+			{
+				auto note = (chn.rowCommand.note != NOTE_NONE) ? p->note : chn.nNewNote;
+				if (ModCommand::IsNote(note) && Instruments[p->instr]->Keyboard[note - NOTE_MIN] == 0)
+				{
+					chn.nNewNote = chn.nLastNote = note;
+					chn.nNewIns = static_cast<ModCommand::INSTR>(p->instr);
+					chn.rowCommand.Clear();
+					continue;
+				}
+			}
+
 			chn.rowCommand = *p;
 			switch(p->command)
 			{
@@ -589,12 +608,10 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				if(chn.rowCommand.instr)
 				{
 					chn.nNewIns = chn.rowCommand.instr;
-					chn.nLastNote = NOTE_NONE;
 					memory.chnSettings[nChn].vol = 0xFF;
 				}
 				if(chn.rowCommand.IsNote())
 				{
-					chn.nLastNote = note;
 					chn.RestorePanAndFilter();
 
 					if(!adjustSamplePos || memory.chnSettings[nChn].ticksToRender == GetLengthMemory::IGNORE_CHANNEL)
@@ -1035,7 +1052,6 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 						chn.increment = GetChannelIncrement(chn, chn.nPeriod, 0).first;
 					}
 					int32 setPan = chn.nPan;
-					chn.nNewNote = chn.nLastNote;
 					if(chn.nNewIns != 0) InstrumentChange(chn, chn.nNewIns, porta);
 					NoteChange(chn, m.note, porta);
 					HandleNoteChangeFilter(chn);
@@ -1286,10 +1302,6 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			for(CHANNELINDEX n = 0; n < GetNumChannels(); n++)
 			{
 				auto &chn = m_PlayState.Chn[n];
-				if(chn.nLastNote != NOTE_NONE)
-				{
-					chn.nNewNote = chn.nLastNote;
-				}
 				if(memory.chnSettings[n].vol != 0xFF && !adjustSamplePos)
 				{
 					chn.nVolume = std::min(memory.chnSettings[n].vol, uint8(64)) * 4;
@@ -1434,7 +1446,7 @@ void CSoundFile::InstrumentChange(ModChannel &chn, uint32 instr, bool bPorta, bo
 			// but still uses the sample info from the old one (bug?)
 			returnAfterVolumeAdjust = true;
 		}
-		// IT compatbility: Reset filter if portamento results in sample change
+		// IT compatibility: Reset filter if portamento results in sample change
 		// Test case: FilterPortaSmpChange.it, FilterPortaSmpChange-InsMode.it
 		if(m_playBehaviour[kITResetFilterOnPortaSmpChange] && !m_nInstruments)
 			chn.triggerNote = true;
@@ -2527,7 +2539,7 @@ bool CSoundFile::ProcessEffects()
 		// To achieve this, clearing the note data so that rest of the process sees the row as empty row.
 		if(ModCommand::IsPcNote(chn.rowCommand.note))
 		{
-			chn.ClearRowCmd();
+			chn.rowCommand.Clear();
 			instr = 0;
 			volcmd = VOLCMD_NONE;
 			vol = 0;
@@ -2549,7 +2561,7 @@ bool CSoundFile::ProcessEffects()
 			{
 				chn.nNewNote = chn.nLastNote = note;
 				chn.nNewIns = static_cast<ModCommand::INSTR>(instr);
-				chn.ClearRowCmd();
+				chn.rowCommand.Clear();
 				continue;
 			}
 		}
@@ -2757,7 +2769,7 @@ bool CSoundFile::ProcessEffects()
 					note = NOTE_NONE;
 					instr = 0;
 					retrigEnv = false;
-					// FT2 Compatbility: Start fading the note for notes with no delay. Only relevant when a volume command is encountered after the note-off.
+					// FT2 Compatibility: Start fading the note for notes with no delay. Only relevant when a volume command is encountered after the note-off.
 					// Test case: NoteOffFadeNoEnv.xm
 					if(m_PlayState.m_flags[SONG_FIRSTTICK] && m_playBehaviour[kFT2NoteOffFlags])
 						chn.dwFlags.set(CHN_NOTEFADE);
@@ -2879,7 +2891,7 @@ bool CSoundFile::ProcessEffects()
 					chn.nAutoVibDepth = 0;
 					chn.nAutoVibPos = 0;
 					chn.nFadeOutVol = 65536;
-					// FT2 Compatbility: Reset key-off status with instrument number
+					// FT2 Compatibility: Reset key-off status with instrument number
 					// Test case: NoteOffInstrChange.xm
 					if(m_playBehaviour[kFT2NoteOffFlags])
 						chn.dwFlags.reset(CHN_KEYOFF);
