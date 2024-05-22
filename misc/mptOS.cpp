@@ -53,6 +53,7 @@ static constexpr struct { mpt::osinfo::windows::Version version; const mpt::ucha
 	{ mpt::osinfo::windows::Version{ mpt::osinfo::windows::Version::Win10, mpt::osinfo::windows::Version::ServicePack{ 0, 0 }, 14393, 0 }, UL_("Windows 10 1607"), true },
 	{ mpt::osinfo::windows::Version{ mpt::osinfo::windows::Version::Win10, mpt::osinfo::windows::Version::ServicePack{ 0, 0 }, 10586, 0 }, UL_("Windows 10 1511"), true },
 	{ mpt::osinfo::windows::Version{ mpt::osinfo::windows::Version::Win10, mpt::osinfo::windows::Version::ServicePack{ 0, 0 }, 10240, 0 }, UL_("Windows 10 1507"), true },
+	{ mpt::osinfo::windows::Version{ mpt::osinfo::windows::Version::Win10Pre, mpt::osinfo::windows::Version::ServicePack{ 0, 0 }, 0, 0 }, UL_("Windows 10 Preview"), true },
 	{ mpt::osinfo::windows::Version{ mpt::osinfo::windows::Version::Win81, mpt::osinfo::windows::Version::ServicePack{ 0, 0 }, 0, 0 }, UL_("Windows 8.1"), true },
 	{ mpt::osinfo::windows::Version{ mpt::osinfo::windows::Version::Win8, mpt::osinfo::windows::Version::ServicePack{ 0, 0 }, 0, 0 }, UL_("Windows 8"), true },
 	{ mpt::osinfo::windows::Version{ mpt::osinfo::windows::Version::Win7, mpt::osinfo::windows::Version::ServicePack{ 0, 0 }, 0, 0 }, UL_("Windows 7"), true },
