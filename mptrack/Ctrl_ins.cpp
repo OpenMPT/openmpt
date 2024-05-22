@@ -2478,19 +2478,20 @@ void CCtrlInstruments::OnMixPlugChanged()
 	bool wasOpenedWithMouse = m_openendPluginListWithMouse;
 	m_openendPluginListWithMouse = false;
 
-	if (pIns)
+	if(pIns)
 	{
 		BOOL enableVol = (nPlug == PLUGINDEX_INVALID || m_sndFile.m_playBehaviour[kMIDICCBugEmulation]) ? FALSE : TRUE;
 		velocityStyle.EnableWindow(enableVol);
 		m_CbnPluginVolumeHandling.EnableWindow(enableVol);
 
-		if(nPlug < MAX_MIXPLUGINS)
+		const PLUGINDEX mixPlug = (nPlug != PLUGINDEX_INVALID) ? nPlug + 1 : 0;
+		if(mixPlug <= MAX_MIXPLUGINS)
 		{
 			bool active = !IsLocked();
-			if (active && pIns->nMixPlug != (nPlug + 1))
+			if(active && pIns->nMixPlug != mixPlug)
 			{
 				PrepareUndo("Set Plugin");
-				pIns->nMixPlug = nPlug + 1;
+				pIns->nMixPlug = mixPlug;
 				SetModified(InstrumentHint().Info(), false);
 			}
 
@@ -2513,7 +2514,7 @@ void CCtrlInstruments::OnMixPlugChanged()
 						{
 							m_modDoc.SetModified();
 						}
-						m_modDoc.UpdateAllViews(nullptr, PluginHint(nPlug + 1).Info().Names());
+						m_modDoc.UpdateAllViews(nullptr, PluginHint(mixPlug).Info().Names());
 					}
 				}
 
