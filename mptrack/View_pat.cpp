@@ -4256,12 +4256,9 @@ void CViewPattern::CursorJump(int distance, bool snap)
 			sndFile.m_PlayState.m_nNextOrder++;
 		}
 		CMainFrame::GetMainFrame()->ResetNotificationBuffer();
-	} else
+	} else if(row != ROWINDEX_INVALID && (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_PLAYNAVIGATEROW))
 	{
-		if(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_PLAYNAVIGATEROW)
-		{
-			PatternStep(row);
-		}
+		PatternStep(row);
 	}
 }
 
