@@ -392,53 +392,59 @@ static TEMPO MMDTempoToBPM(uint32 tempo, bool is8Ch, bool bpmMode, uint8 rowsPer
 }
 
 
-static std::pair<EffectCommand, ModCommand::PARAM> ConvertMEDEffect(ModCommand &m, const uint8 command, const bool is8ch, const bool bpmMode, const uint8 rowsPerBeat, const bool volHex)
+struct TranslateMEDPatternContext
 {
-	m.command = CMD_NONE;
+	const int16 transpose;
+	const CHANNELINDEX numTracks;
+	const uint8 version;
+	const uint8 rowsPerBeat;
+	const bool hardwareMixSamples : 1;
+	const bool is8Ch : 1;
+	const bool bpmMode : 1;
+	const bool volHex : 1;
+};
+
+
+static std::pair<EffectCommand, ModCommand::PARAM> ConvertMEDEffect(ModCommand &m, const uint8 command, const uint8 param, const uint8 param2, const TranslateMEDPatternContext ctx)
+{
+	const uint8 nibbleLo = std::min(param, uint8(0x0F));
 	switch(command)
 	{
 	case 0x04:  // Vibrato (twice as deep as in ProTracker)
-		m.command = CMD_VIBRATO;
-		m.param = (std::min<uint8>(m.param >> 3, 0x0F) << 4) | std::min<uint8>((m.param & 0x0F) * 2, 0x0F);
+		m.SetEffectCommand(CMD_VIBRATO, (std::min<uint8>(param >> 3, 0x0F) << 4) | std::min<uint8>((param & 0x0F) * 2, 0x0F));
 		break;
 	case 0x08:  // Hold and decay
-		m.command = CMD_NONE;
 		break;
 	case 0x09:  // Set secondary speed
-		if(m.param > 0 && m.param <= 20)
-			m.command = CMD_SPEED;
-		else
-			m.command = CMD_NONE;
+		if(param > 0 && param <= 20)
+			m.SetEffectCommand(CMD_SPEED, param);
 		break;
 	case 0x0C:  // Set Volume
-		m.command = CMD_VOLUME;
-		if(!volHex && m.param < 0x99)
-			m.param = (m.param >> 4) * 10 + (m.param & 0x0F);
-		else if(volHex)
-			m.param = ((m.param & 0x7F) + 1) / 2;
-		else
-			m.command = CMD_NONE;
+		if(!ctx.volHex && param < 0x99)
+			m.SetEffectCommand(CMD_VOLUME, static_cast<ModCommand::PARAM>((param >> 4) * 10 + (param & 0x0F)));
+		else if(ctx.volHex)
+			m.SetEffectCommand(CMD_VOLUME, static_cast<ModCommand::PARAM>(((param & 0x7F) + 1) / 2));
 		break;
 	case 0x0D:
-		m.command = CMD_VOLUMESLIDE;
+		m.SetEffectCommand(CMD_VOLUMESLIDE, param);
 		break;
 	case 0x0E:  // Synth jump
 		m.command = CMD_NONE;
 		break;
 	case 0x0F:  // Misc
-		if(m.param == 0)
+		if(param == 0)
 		{
-			m.command = CMD_PATTERNBREAK;
-		} else if(m.param <= 0xF0)
+			m.SetEffectCommand(CMD_PATTERNBREAK, param);
+		} else if(param <= 0xF0)
 		{
 			m.command = CMD_TEMPO;
-			if(m.param < 0x03)
+			if(param < 0x03)
 			{
 				// This appears to be a bug in OctaMED which is not emulated in MED Soundstudio on Windows.
 				m.param = 0x70;
 			} else
 			{
-				uint16 tempo = mpt::saturate_round<uint16>(MMDTempoToBPM(m.param, is8ch, bpmMode, rowsPerBeat).ToDouble());
+				uint16 tempo = mpt::saturate_round<uint16>(MMDTempoToBPM(param, ctx.is8Ch, ctx.bpmMode, ctx.rowsPerBeat).ToDouble());
 				if(tempo <= Util::MaxValueOfType(m.param))
 				{
 					m.param = static_cast<ModCommand::PARAM>(tempo);
@@ -455,152 +461,176 @@ static std::pair<EffectCommand, ModCommand::PARAM> ConvertMEDEffect(ModCommand &
 		} else switch(command)
 		{
 			case 0xF1:  // Play note twice
-				m.command = CMD_MODCMDEX;
-				m.param = 0x93;
+				m.SetEffectCommand(CMD_MODCMDEX, 0x93);
 				break;
 			case 0xF2:  // Delay note
-				m.command = CMD_MODCMDEX;
-				m.param = 0xD3;
+				m.SetEffectCommand(CMD_MODCMDEX, 0xD3);
 				break;
 			case 0xF3:  // Play note three times
-				m.command = CMD_MODCMDEX;
-				m.param = 0x92;
+				m.SetEffectCommand(CMD_MODCMDEX, 0x92);
 				break;
 			case 0xF8:  // Turn filter off
 			case 0xF9:  // Turn filter on
-				m.command = CMD_MODCMDEX;
-				m.param = 0xF9 - m.param;
+				m.SetEffectCommand(CMD_MODCMDEX, 0xF9 - param);
 				break;
 			case 0xFA:  // MIDI pedal on
 			case 0xFB:  // MIDI pedal off
 			case 0xFD:  // Set pitch
 			case 0xFE:  // End of song
-				m.command = CMD_NONE;
 				break;
 			case 0xFF:  // Turn note off
 				m.note = NOTE_NOTECUT;
-				m.command = CMD_NONE;
-				break;
-			default:
-				m.command = CMD_NONE;
 				break;
 		}
 		break;
 	case 0x10:  // MIDI message
-		m.command = CMD_MIDI;
-		m.param |= 0x80;
+		m.SetEffectCommand(CMD_MIDI, param | 0x80);
 		break;
 	case 0x11:  // Slide pitch up
-		m.command = CMD_MODCMDEX;
-		m.param = 0x10 | std::min<uint8>(m.param, 0x0F);
+		m.SetEffectCommand(CMD_MODCMDEX, 0x10 | nibbleLo);
 		break;
 	case 0x12:  // Slide pitch down
-		m.command = CMD_MODCMDEX;
-		m.param = 0x20 | std::min<uint8>(m.param, 0x0F);
+		m.SetEffectCommand(CMD_MODCMDEX, 0x20 | nibbleLo);
 		break;
 	case 0x14:  // Vibrato (ProTracker compatible depth, but faster)
-		m.command = CMD_VIBRATO;
-		m.param = (std::min<uint8>((m.param >> 4) + 1, 0x0F) << 4) | (m.param & 0x0F);
+		m.SetEffectCommand(CMD_VIBRATO, (std::min<uint8>((param >> 4) + 1, 0x0F) << 4) | (param & 0x0F));
 		break;
 	case 0x15:  // Set finetune
-		m.command = CMD_MODCMDEX;
-		m.param = 0x50 | (m.param & 0x0F);
+		m.SetEffectCommand(CMD_MODCMDEX, 0x50 | (param & 0x0F));
 		break;
 	case 0x16:  // Loop
-		m.command = CMD_MODCMDEX;
-		m.param = 0x60 | std::min<uint8>(m.param, 0x0F);
+		m.SetEffectCommand(CMD_MODCMDEX, 0x60 | nibbleLo);
 		break;
 	case 0x18:  // Stop note
-		m.command = CMD_MODCMDEX;
-		m.param = 0xC0 | std::min<uint8>(m.param, 0x0F);
+		m.SetEffectCommand(CMD_MODCMDEX, 0xC0 | nibbleLo);
 		break;
 	case 0x19:  // Sample Offset
-		m.command = CMD_OFFSET;
+		m.SetEffectCommand(CMD_OFFSET, param);
 		break;
 	case 0x1A:  // Slide volume up once
-		m.command = CMD_MODCMDEX;
-		m.param = 0xA0 | std::min<uint8>(m.param, 0x0F);
+		m.SetEffectCommand(CMD_MODCMDEX, 0xA0 | nibbleLo);
 		break;
 	case 0x1B:  // Slide volume down once
-		m.command = CMD_MODCMDEX;
-		m.param = 0xB0 | std::min<uint8>(m.param, 0x0F);
+		m.SetEffectCommand(CMD_MODCMDEX, 0xB0 | nibbleLo);
 		break;
 	case 0x1C:  // MIDI program
-		if(m.param > 0 && m.param <= 128)
-		{
-			m.command = CMD_MIDI;
-			m.param--;
-		} else
-		{
-			m.command = CMD_NONE;
-		}
+		if(param > 0 && param <= 128)
+			m.SetEffectCommand(CMD_MIDI, param - 1);
 		break;
 	case 0x1D:  // Pattern break (in hex)
-		m.command = CMD_PATTERNBREAK;
+		m.SetEffectCommand(CMD_PATTERNBREAK, param);
 		break;
 	case 0x1E:  // Repeat row
-		m.command = CMD_MODCMDEX;
-		m.param = 0xE0 | std::min<uint8>(m.param, 0x0F);
+		m.SetEffectCommand(CMD_MODCMDEX, 0xE0 | std::min<uint8>(param, 0x0F));
 		break;
 	case 0x1F:  // Note delay and retrigger
 	{
-		if(m.param & 0xF0)
-		{
-			m.command = CMD_MODCMDEX;
-			m.param = 0xD0 | (m.param >> 4);
-		} else if(m.param & 0x0F)
-		{
-			m.command = CMD_MODCMDEX;
-			m.param = 0x90 | m.param;
-		} else
-		{
-			m.command = CMD_NONE;
-		}
+		if(param & 0xF0)
+			m.SetEffectCommand(CMD_MODCMDEX, 0xD0 | (param >> 4));
+		else if(param & 0x0F)
+			m.SetEffectCommand(CMD_MODCMDEX, 0x90 | param);
 		break;
 	}
 	case 0x20:  // Reverse sample + skip samples
-		if(m.param == 0 && m.vol == 0)
+		if(param == 0 && param2 == 0)
 		{
 			if(m.IsNote())
 			{
-				m.command = CMD_S3MCMDEX;
-				m.param = 0x9F;
+				m.SetEffectCommand(CMD_XFINEPORTAUPDOWN, 0x9F);
 			}
 		} else
 		{
 			// Skip given number of samples
-			m.command = CMD_NONE;
 		}
 		break;
 	case 0x29:  // Relative sample offset
-		if(m.vol > 0)
-		{
-			m.command = CMD_OFFSETPERCENTAGE;
-			m.param = mpt::saturate_cast<ModCommand::PARAM>(Util::muldiv_unsigned(m.param, 0x100, m.vol));
-		} else
-		{
-			m.command = CMD_NONE;
-		}
+		if(param2 > 0)
+			m.SetEffectCommand(CMD_OFFSETPERCENTAGE, mpt::saturate_cast<ModCommand::PARAM>(Util::muldiv_unsigned(param, 0x100, param2)));
 		break;
 	case 0x2E:  // Set panning
-		if(m.param <= 0x10 || m.param >= 0xF0)
-		{
-			m.command = CMD_PANNING8;
-			m.param = mpt::saturate_cast<ModCommand::PARAM>(((m.param ^ 0x80) - 0x70) * 8);
-		} else
-		{
-			m.command = CMD_NONE;
-		}
+		if(param <= 0x10 || param >= 0xF0)
+			m.SetEffectCommand(CMD_PANNING8, mpt::saturate_cast<ModCommand::PARAM>(((param ^ 0x80) - 0x70) * 8));
 		break;
 	default:
-		if(command < 0x10)
-			CSoundFile::ConvertModCommand(m, command, m.param);
-		else
-			m.command = CMD_NONE;
+		if((command > 0 || param) && command < 0x10)
+			CSoundFile::ConvertModCommand(m, command, param);
 		break;
 	}
 	return std::make_pair(CMD_NONE, ModCommand::PARAM(0));
 }
+
+
+static bool TranslateMEDPattern(FileReader &file, FileReader &cmdExt, CPattern &pattern, const TranslateMEDPatternContext ctx, const bool isExtraPage)
+{
+	bool needInstruments = false;
+	for(ROWINDEX row = 0; row < pattern.GetNumRows(); row++)
+	{
+		ModCommand *m = pattern.GetpModCommand(row, 0);
+		for(CHANNELINDEX chn = 0; chn < ctx.numTracks; chn++, m++)
+		{
+			const auto oldCmd = std::make_pair(m->command, m->param);
+			int note = NOTE_NONE;
+			uint8 cmd = 0, param1 = 0, param2 = 0;
+			if(ctx.version < 1)
+			{
+				const auto [noteInstr, instrCmd, param] = file.ReadArray<uint8, 3>();
+
+				if(noteInstr & 0x3F)
+					note = (noteInstr & 0x3F) + ctx.transpose;
+
+				m->instr = (instrCmd >> 4) | ((noteInstr & 0x80) >> 3) | ((noteInstr & 0x40) >> 1);
+
+				cmd = instrCmd & 0x0F;
+				param1 = param;
+			} else if(isExtraPage)
+			{
+				const auto [command, param] = file.ReadArray<uint8, 2>();
+				param2 = cmdExt.ReadUint8();
+				cmd = command;
+				param1 = param;
+			} else
+			{
+				const auto [noteVal, instr, command, param] = file.ReadArray<uint8, 4>();
+				param2 = cmdExt.ReadUint8();
+
+				if(noteVal & 0x7F)
+					note = (noteVal & 0x7F) + ctx.transpose;
+				else if(noteVal == 0x80)
+					m->note = NOTE_NOTECUT;
+
+				if(instr & 0x3F)
+					m->instr = instr & 0x3F;
+				cmd = command;
+				param1 = param;
+			}
+			// Octave wrapping for 4-channel modules (TODO: this should not be set because of synth instruments)
+			if(ctx.hardwareMixSamples && note >= NOTE_MIDDLEC + 2 * 12)
+				needInstruments = true;
+
+			if(note >= NOTE_MIN && note <= NOTE_MAX)
+				m->note = static_cast<ModCommand::NOTE>(note);
+			const auto extraCmd = ConvertMEDEffect(*m, cmd, param1, param2, ctx);
+
+			if(oldCmd.first != CMD_NONE)
+			{
+				// Restore effect from previous page or X-Param if it was overwritten by an empty effect, or restrict to 8-bit value if this cell was overwritten with a "useful" effect
+				if(m->command == CMD_NONE)
+					m->SetEffectCommand(oldCmd);
+				else if(row > 0 && oldCmd.first == CMD_XPARAM)
+					pattern.GetpModCommand(row - 1, chn)->param = Util::MaxValueOfType(m->param);
+			}
+			if(extraCmd.first != CMD_NONE)
+			{
+				if(row < (pattern.GetNumRows() - 1))
+					pattern.GetpModCommand(row + 1, chn)->SetEffectCommand(extraCmd);
+				else
+					m->param = Util::MaxValueOfType(m->param);  // No space :(
+			}
+		}
+	}
+	return needInstruments;
+}
+
 
 #ifdef MPT_WITH_VST
 static std::wstring ReadMEDStringUTF16BE(FileReader &file)
@@ -1318,8 +1348,9 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 			CHANNELINDEX numTracks;
 			ROWINDEX numRows;
 			std::string patName;
-			int transpose = NOTE_MIN + 47 + songHeader.playTranspose;
-			FileReader cmdExt;
+			int16 transpose = NOTE_MIN + 47 + songHeader.playTranspose;
+			uint16 numPages = 0;
+			FileReader cmdExt, commandPages;
 
 			if(version < 1)
 			{
@@ -1346,11 +1377,20 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 						// We have now chased four pointers to get this far... lovely format.
 						file.ReadString<mpt::String::maybeNullTerminated>(patName, blockInfo.nameLength);
 					}
+					if(blockInfo.pageTableOffset
+					   && file.Seek(blockInfo.pageTableOffset)
+					   && file.CanRead(8))
+					{
+						numPages = file.ReadUint16BE();
+						file.Skip(2);
+						commandPages = file.ReadChunk(4 * numPages);
+					}
+
 					if(blockInfo.cmdExtTableOffset
 					   && file.Seek(blockInfo.cmdExtTableOffset)
 					   && file.Seek(file.ReadUint32BE()))
 					{
-						cmdExt = file.ReadChunk(numTracks * numRows);
+						cmdExt = file.ReadChunk(numTracks * numRows * (1 + numPages));
 					}
 
 					file.Seek(offset);
@@ -1364,63 +1404,15 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 			pattern.SetName(patName);
 			LimitMax(numTracks, m_nChannels);
 
-			for(ROWINDEX row = 0; row < numRows; row++)
+			TranslateMEDPatternContext context{transpose, numTracks, version, rowsPerBeat, hardwareMixSamples, is8Ch, bpmMode, volHex};
+			needInstruments |= TranslateMEDPattern(file, cmdExt, pattern, context, false);
+
+			for(uint16 page = 0; page < numPages; page++)
 			{
-				ModCommand *m = pattern.GetpModCommand(row, 0);
-				for(CHANNELINDEX chn = 0; chn < numTracks; chn++, m++)
-				{
-					const auto oldCmd = std::make_pair(m->command, m->param);
-					int note = NOTE_NONE;
-					uint8 cmd = 0;
-					if(version < 1)
-					{
-						const auto [noteInstr, instrCmd, param] = file.ReadArray<uint8, 3>();
-
-						if(noteInstr & 0x3F)
-							note = (noteInstr & 0x3F) + transpose;
-
-						m->instr = (instrCmd >> 4) | ((noteInstr & 0x80) >> 3) | ((noteInstr & 0x40) >> 1);
-
-						cmd = instrCmd & 0x0F;
-						m->param = param;
-					} else
-					{
-						const auto [noteVal, instr, command, param1] = file.ReadArray<uint8, 4>();
-						m->vol = cmdExt.ReadUint8();
-
-						if(noteVal & 0x7F)
-							note = (noteVal & 0x7F) + transpose;
-						else if(noteVal == 0x80)
-							m->note = NOTE_NOTECUT;
-
-						m->instr = instr & 0x3F;
-						cmd = command;
-						m->param = param1;
-					}
-					// Octave wrapping for 4-channel modules (TODO: this should not be set because of synth instruments)
-					if(hardwareMixSamples && note >= NOTE_MIDDLEC + 2 * 12)
-						needInstruments = true;
-
-					if(note >= NOTE_MIN && note <= NOTE_MAX)
-						m->note = static_cast<ModCommand::NOTE>(note);
-					const auto extraCmd = ConvertMEDEffect(*m, cmd, is8Ch, bpmMode, rowsPerBeat, volHex);
-
-					if(oldCmd.first == CMD_XPARAM)
-					{
-						// Restore X-Param if it was overwritten by an empty effect, or restrict to 8-bit value if this cell was overwritten with a "useful" effect
-						if(m->command == CMD_NONE)
-							m->SetEffectCommand(oldCmd);
-						else if(row > 0)
-							pattern.GetpModCommand(row - 1, chn)->param = Util::MaxValueOfType(m->param);
-					}
-					if(extraCmd.first != CMD_NONE)
-					{
-						if(row < (numRows - 1))
-							pattern.GetpModCommand(row + 1, chn)->SetEffectCommand(extraCmd);
-						else
-							m->param = Util::MaxValueOfType(m->param);  // No space :(
-					}
-				}
+				const uint32 pageOffset = commandPages.ReadUint32BE();
+				if(!pageOffset || !file.Seek(pageOffset))
+					continue;
+				TranslateMEDPattern(file, cmdExt, pattern, context, true);
 			}
 		}
 
