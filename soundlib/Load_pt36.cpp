@@ -1,6 +1,6 @@
 /*
- * Load_mod.cpp
- * ------------
+ * Load_pt36.cpp
+ * -------------
  * Purpose: ProTracker 3.6 wrapper format loader
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
@@ -10,7 +10,6 @@
 
 #include "stdafx.h"
 #include "Loaders.h"
-#include "MODTools.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
