@@ -591,7 +591,7 @@ static bool TranslateMEDPattern(FileReader &file, FileReader &cmdExt, CPattern &
 		ModCommand *m = pattern.GetpModCommand(row, 0);
 		for(CHANNELINDEX chn = 0; chn < ctx.numTracks; chn++, m++)
 		{
-			const auto oldCmd = std::make_pair(m->command, m->param);
+			auto oldCmd = std::make_pair(m->command, m->param);
 			int note = NOTE_NONE;
 			uint8 cmd = 0, param1 = 0, param2 = 0;
 			if(ctx.version < 1)
@@ -641,6 +641,8 @@ static bool TranslateMEDPattern(FileReader &file, FileReader &cmdExt, CPattern &
 					m->SetEffectCommand(oldCmd);
 				else if(row > 0 && oldCmd.first == CMD_XPARAM)
 					pattern.GetpModCommand(row - 1, chn)->param = Util::MaxValueOfType(m->param);
+				else if(!ModCommand::CombineEffects(m->command, m->param, oldCmd.first, oldCmd.second) && m->volcmd == VOLCMD_NONE)
+					m->FillInTwoCommands(m->command, m->param, oldCmd.first, oldCmd.second);
 			}
 			if(extraCmd.first != CMD_NONE)
 			{
