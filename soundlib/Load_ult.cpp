@@ -313,6 +313,7 @@ bool CSoundFile::ReadULT(FileReader &file, ModLoadingFlags loadFlags)
 	m_modFormat.charset = mpt::Charset::CP437;
 
 	m_SongFlags = SONG_AUTO_TONEPORTA | SONG_ITCOMPATGXX | SONG_ITOLDEFFECTS;  // this will be converted to IT format by MPT.
+	m_playBehaviour.reset(kITClearPortaTarget);
 
 	// Read "messageLength" lines, each containing 32 characters.
 	m_songMessage.ReadFixedLineLength(file, fileHeader.messageLength * 32, 32, 0);
