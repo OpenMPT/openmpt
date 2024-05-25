@@ -1000,7 +1000,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				break;
 			}
 		
-			if(m_playBehaviour[kST3EffectMemory] && param != 0)
+			if(m_playBehaviour[kST3EffectMemory] && command != CMD_NONE && param != 0)
 			{
 				UpdateS3MEffectMemory(chn, param);
 			}
@@ -3614,7 +3614,7 @@ bool CSoundFile::ProcessEffects()
 			break;
 		}
 
-		if(m_playBehaviour[kST3EffectMemory] && param != 0)
+		if(m_playBehaviour[kST3EffectMemory] && cmd != CMD_NONE && param != 0)
 		{
 			UpdateS3MEffectMemory(chn, static_cast<ModCommand::PARAM>(param));
 		}
