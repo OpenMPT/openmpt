@@ -168,7 +168,7 @@ bool CSoundFile::ReadFAR(FileReader &file, ModLoadingFlags loadFlags)
 	Order().SetDefaultSpeed(fileHeader.defaultSpeed);
 	Order().SetDefaultTempoInt(80);
 	m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
-	m_SongFlags = SONG_LINEARSLIDES | SONG_AUTO_TONEPORTA;
+	m_SongFlags = SONG_LINEARSLIDES | SONG_AUTO_TONEPORTA | SONG_AUTO_TONEPORTA_CONT;
 	m_playBehaviour.set(kPeriodsAreHertz);
 
 	m_modFormat.formatName = U_("Farandole Composer");

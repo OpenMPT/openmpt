@@ -4366,7 +4366,7 @@ int32 CSoundFile::TonePortamento(PlayState &playState, CHANNELINDEX nChn, uint16
 	ModChannel &chn = playState.Chn[nChn];
 	chn.dwFlags.set(CHN_PORTAMENTO);
 	if(m_SongFlags[SONG_AUTO_TONEPORTA])
-		chn.autoSlide.SetActive(AutoSlideCommand::TonePortamento, param != 0);
+		chn.autoSlide.SetActive(AutoSlideCommand::TonePortamento, param != 0 || m_SongFlags[SONG_AUTO_TONEPORTA_CONT]);
 
 	//IT compatibility 03: Share effect memory with portamento up/down
 	if((!m_SongFlags[SONG_ITCOMPATGXX] && m_playBehaviour[kITPortaMemoryShare]) || GetType() == MOD_TYPE_PLM)

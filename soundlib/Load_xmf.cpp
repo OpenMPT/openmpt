@@ -166,7 +166,7 @@ bool CSoundFile::ReadXMF(FileReader &file, ModLoadingFlags loadFlags)
 	InitializeGlobals(MOD_TYPE_MOD);
 	m_SongFlags.set(SONG_IMPORTED);
 	m_SongFlags.reset(SONG_ISAMIGA);
-	m_SongFlags.set(SONG_AUTO_TONEPORTA, type < 4);
+	m_SongFlags.set(SONG_AUTO_TONEPORTA | SONG_AUTO_TONEPORTA_CONT, type < 4);
 	m_nSamples = numSamples;
 	m_nSamplePreAmp = (type == 3) ? 192 : 48;  // Imperium Galactica files are really quiet, no other XMFs appear to use type 3
 
