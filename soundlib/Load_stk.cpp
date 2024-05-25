@@ -236,12 +236,13 @@ bool CSoundFile::ReadSTK(FileReader &file, ModLoadingFlags loadFlags)
 
 	FileReader::pos_type patOffset = file.GetPosition();
 
-	// Scan patterns to identify Ultimate Soundtracker modules.
+	// Scan patterns to identify Soundtracker versions and reject garbage.
 	uint32 illegalBytes = 0, totalNumDxx = 0;
+	bool useAutoSlides = false;
 	for(PATTERNINDEX pat = 0; pat < numPatterns; pat++)
 	{
 		const bool patternInUse = mpt::contains(Order(), pat);
-		uint8 numDxx = 0;
+		uint8 numDxx = 0, autoSlides = 0;
 		uint8 emptyCmds = 0;
 		MODPatternData patternData;
 		file.ReadArray(patternData);
@@ -318,6 +319,10 @@ bool CSoundFile::ReadSTK(FileReader &file, ModLoadingFlags loadFlags)
 							break;
 						}
 						numDxx++;
+					} else if(eff == 0x0E)
+					{
+						if(param > 1 || ++autoSlides > 1)
+							useAutoSlides = true;
 					}
 					break;
 				case 0x0F:
@@ -395,7 +400,7 @@ bool CSoundFile::ReadSTK(FileReader &file, ModLoadingFlags loadFlags)
 					{
 						// Volume is sent as-is to the chip, which ignores the highest bit.
 						param &= 0x7F;
-					} else if(command == 0x0E && (param > 0x01 || minVersion < ST_IX))
+					} else if(command == 0x0E && (param > 0x01 || minVersion < ST_IX) && useAutoSlides)
 					{
 						// Import auto-slides as normal slides and fake them using volume column slides.
 						command = 0x0A;
