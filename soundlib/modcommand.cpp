@@ -32,7 +32,8 @@ static constexpr EffectType effectTypes[] =
 	EffectType::Pitch,  EffectType::Normal,  EffectType::Pitch,  EffectType::Pitch,
 	EffectType::Pitch,  EffectType::Pitch,   EffectType::Normal, EffectType::Normal,
 	EffectType::Normal, EffectType::Normal,  EffectType::Volume, EffectType::Normal,
-	EffectType::Normal,
+	EffectType::Normal, EffectType::Volume,  EffectType::Pitch,  EffectType::Pitch,
+	EffectType::Pitch,  EffectType::Pitch,
 };
 
 static_assert(std::size(effectTypes) == MAX_EFFECTS);
@@ -947,6 +948,10 @@ bool ModCommand::IsAnyPitchSlide() const
 	case CMD_NOTESLIDEDOWN:
 	case CMD_NOTESLIDEUPRETRIG:
 	case CMD_NOTESLIDEDOWNRETRIG:
+	case CMD_AUTO_PORTAUP:
+	case CMD_AUTO_PORTADOWN:
+	case CMD_AUTO_PORTAUP_FINE:
+	case CMD_AUTO_PORTADOWN_FINE:
 		return true;
 	case CMD_MODCMDEX:
 	case CMD_XFINEPORTAUPDOWN:
@@ -986,6 +991,12 @@ bool ModCommand::IsContinousCommand(const CSoundFile &sndFile) const
 	case CMD_NOTESLIDEDOWN:
 	case CMD_NOTESLIDEUPRETRIG:
 	case CMD_NOTESLIDEDOWNRETRIG:
+	case CMD_HMN_MEGA_ARP:
+	case CMD_AUTO_VOLUMESLIDE:
+	case CMD_AUTO_PORTAUP:
+	case CMD_AUTO_PORTADOWN:
+	case CMD_AUTO_PORTAUP_FINE:
+	case CMD_AUTO_PORTADOWN_FINE:
 		return true;
 	case CMD_PORTAMENTOUP:
 	case CMD_PORTAMENTODOWN:
@@ -1051,6 +1062,7 @@ bool ModCommand::IsSlideUpDownCommand() const
 		case CMD_GLOBALVOLSLIDE:
 		case CMD_CHANNELVOLSLIDE:
 		case CMD_PANNINGSLIDE:
+		case CMD_AUTO_VOLUMESLIDE:
 			return true;
 		default:
 			return false;
@@ -1126,6 +1138,7 @@ bool ModCommand::CommandHasTwoNibbles(COMMAND command)
 	case CMD_NOTESLIDEDOWN:
 	case CMD_NOTESLIDEUPRETRIG:
 	case CMD_NOTESLIDEDOWNRETRIG:
+	case CMD_AUTO_VOLUMESLIDE:
 		return true;
 	default:
 		return false;
@@ -1165,8 +1178,13 @@ size_t ModCommand::GetEffectWeight(COMMAND cmd)
 		CMD_NOTESLIDEDOWNRETRIG,
 		CMD_NOTESLIDEDOWN,
 		CMD_PORTAMENTOUP,
+		CMD_AUTO_PORTAUP_FINE,
+		CMD_AUTO_PORTAUP,
 		CMD_PORTAMENTODOWN,
+		CMD_AUTO_PORTADOWN_FINE,
+		CMD_AUTO_PORTADOWN,
 		CMD_VOLUMESLIDE,
+		CMD_AUTO_VOLUMESLIDE,
 		CMD_VIBRATOVOL,
 		CMD_VOLUME,
 		CMD_VOLUME8,

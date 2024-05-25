@@ -118,6 +118,23 @@ enum class ModContainerType
 };
 
 
+enum class AutoSlideCommand
+{
+	TonePortamento,
+	PortamentoUp,
+	PortamentoDown,
+	FinePortamentoUp,
+	FinePortamentoDown,
+	FineVolumeSlideUp,
+	FineVolumeSlideDown,
+	VolumeSlideSTK,
+	GlobalVolumeSlide,
+	Vibrato,
+	Tremolo,
+	NumCommands
+};
+
+
 // Module channel / sample flags
 enum ChannelFlags : uint32
 {
@@ -262,18 +279,23 @@ DECLARE_FLAGSET(PlayFlags)
 // Module flags - contains both song configuration and playback state... Use SONG_FILE_FLAGS and SONG_PLAY_FLAGS distinguish between the two.
 enum SongFlags
 {
-	SONG_FASTPORTAS    =  0x01,  // Portamentos are executed on every tick
-	SONG_FASTVOLSLIDES =  0x02,  // Old Scream Tracker 3.0 volume slides (executed on every tick)
-	SONG_ITOLDEFFECTS  =  0x04,  // Old Impulse Tracker effect implementations
-	SONG_ITCOMPATGXX   =  0x08,  // IT "Compatible Gxx" (IT's flag to behave more like other trackers w/r/t portamento effects)
-	SONG_LINEARSLIDES  =  0x10,  // Linear slides vs. Amiga slides
-	SONG_EXFILTERRANGE =  0x20,  // Cutoff Filter has double frequency range (up to ~10Khz)
-	SONG_AMIGALIMITS   =  0x40,  // Enforce amiga frequency limits
-	SONG_S3MOLDVIBRATO =  0x80,  // ScreamTracker 2 vibrato in S3M files
-	SONG_PT_MODE       = 0x100,  // ProTracker 1/2 playback mode
-	SONG_ISAMIGA       = 0x200,  // Is an Amiga module and thus qualifies to be played using the Paula BLEP resampler
-	SONG_IMPORTED      = 0x400,  // Song type does not represent actual module format / was imported from a different format (OpenMPT)
-	SONG_PLAYALLSONGS  = 0x800,  // Play all subsongs consecutively (libopenmpt)
+	SONG_FASTPORTAS        =     0x01,  // Portamentos are executed on every tick
+	SONG_FASTVOLSLIDES     =     0x02,  // Old Scream Tracker 3.0 volume slides (executed on every tick)
+	SONG_ITOLDEFFECTS      =     0x04,  // Old Impulse Tracker effect implementations
+	SONG_ITCOMPATGXX       =     0x08,  // IT "Compatible Gxx" (IT's flag to behave more like other trackers w/r/t portamento effects)
+	SONG_LINEARSLIDES      =     0x10,  // Linear slides vs. Amiga slides
+	SONG_EXFILTERRANGE     =     0x20,  // Cutoff Filter has double frequency range (up to ~10Khz)
+	SONG_AMIGALIMITS       =     0x40,  // Enforce amiga frequency limits
+	SONG_S3MOLDVIBRATO     =     0x80,  // ScreamTracker 2 vibrato in S3M files
+	SONG_PT_MODE           =    0x100,  // ProTracker 1/2 playback mode
+	SONG_ISAMIGA           =    0x200,  // Is an Amiga module and thus qualifies to be played using the Paula BLEP resampler
+	SONG_IMPORTED          =    0x400,  // Song type does not represent actual module format / was imported from a different format (OpenMPT)
+	SONG_PLAYALLSONGS      =    0x800,  // Play all subsongs consecutively (libopenmpt)
+	SONG_AUTO_TONEPORTA    =   0x1000,  // Tone portamento command is continued automatically
+	SONG_AUTO_GLOBALVOL    =   0x2000,  // Global volume slide command is continued automatically
+	SONG_AUTO_VIBRATO      =   0x4000,  // Vibrato command is continued automatically
+	SONG_AUTO_TREMOLO      =   0x8000,  // Tremolo command is continued automatically
+	SONG_AUTO_VOLSLIDE_STK = 0x1'0000,  // Automatic volume slide command is interpreted like in STK files (rather than like in STP files)
 };
 DECLARE_FLAGSET(SongFlags)
 

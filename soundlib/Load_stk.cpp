@@ -228,7 +228,7 @@ bool CSoundFile::ReadSTK(FileReader &file, ModLoadingFlags loadFlags)
 	m_nMinPeriod = 113 * 4;
 	m_nMaxPeriod = 856 * 4;
 	m_nSamplePreAmp = 64;
-	m_SongFlags.set(SONG_PT_MODE);
+	m_SongFlags.set(SONG_PT_MODE | SONG_AUTO_VOLSLIDE_STK);
 	m_songName = mpt::String::ReadBuf(mpt::String::spacePadded, fileHeaders.songname);
 
 	// Setup channel pan positions and volume
@@ -359,7 +359,6 @@ bool CSoundFile::ReadSTK(FileReader &file, ModLoadingFlags loadFlags)
 			continue;
 		}
 
-		uint8 autoSlide[4] = {0, 0, 0, 0};
 		for(ROWINDEX row = 0; row < 64; row++)
 		{
 			auto rowBase = Patterns[pat].GetRow(row);
@@ -368,24 +367,8 @@ bool CSoundFile::ReadSTK(FileReader &file, ModLoadingFlags loadFlags)
 				ModCommand &m = rowBase[chn];
 				auto [command, param] = ReadMODPatternEntry(patternData[row][chn], m);
 
-				if(!param || command == 0x0E)
-				{
-					autoSlide[chn] = 0;
-				}
 				if(command || param)
 				{
-					if(autoSlide[chn] != 0)
-					{
-						if(autoSlide[chn] & 0xF0)
-						{
-							m.volcmd = VOLCMD_VOLSLIDEUP;
-							m.vol = autoSlide[chn] >> 4;
-						} else
-						{
-							m.volcmd = VOLCMD_VOLSLIDEDOWN;
-							m.vol = autoSlide[chn] & 0x0F;
-						}
-					}
 					if(command == 0x0D)
 					{
 						if(minVersion != ST2_00)
@@ -402,9 +385,9 @@ bool CSoundFile::ReadSTK(FileReader &file, ModLoadingFlags loadFlags)
 						param &= 0x7F;
 					} else if(command == 0x0E && (param > 0x01 || minVersion < ST_IX) && useAutoSlides)
 					{
-						// Import auto-slides as normal slides and fake them using volume column slides.
-						command = 0x0A;
-						autoSlide[chn] = param;
+						m.command = CMD_AUTO_VOLUMESLIDE;
+						m.param = param;
+						continue;
 					} else if(command == 0x0F)
 					{
 						// Only the low nibble is evaluated in Soundtracker.
@@ -449,9 +432,6 @@ bool CSoundFile::ReadSTK(FileReader &file, ModLoadingFlags loadFlags)
 					{
 						ConvertModCommand(m, command, param);
 					}
-				} else
-				{
-					autoSlide[chn] = 0;
 				}
 			}
 		}

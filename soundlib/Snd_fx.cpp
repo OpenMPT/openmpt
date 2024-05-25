@@ -183,6 +183,17 @@ public:
 					break;
 				}
 
+				if(chn.autoSlide.IsActive(AutoSlideCommand::TonePortamento) && !chn.rowCommand.IsTonePortamento())
+					sndFile.TonePortamento(*state, channel, chn.portamentoSlide);
+				if(chn.autoSlide.IsActive(AutoSlideCommand::PortamentoUp))
+					sndFile.PortamentoUp(*state, channel, chn.nOldPortaUp, true);
+				else if(chn.autoSlide.IsActive(AutoSlideCommand::PortamentoDown))
+					sndFile.PortamentoDown(*state, channel, chn.nOldPortaDown, true);
+				else if(chn.autoSlide.IsActive(AutoSlideCommand::FinePortamentoUp))
+					sndFile.FinePortamentoUp(chn, chn.nOldFinePortaUpDown);
+				else if(chn.autoSlide.IsActive(AutoSlideCommand::FinePortamentoDown))
+					sndFile.FinePortamentoDown(chn, chn.nOldFinePortaUpDown);
+
 				updateInc = true;
 			}
 
@@ -274,6 +285,43 @@ public:
 		}
 		chnSettings[channel].ticksToRender = 0;
 	}
+
+	void GlobalVolSlide(ModChannel &chn, ModCommand::PARAM param, uint32 nonRowTicks)
+	{
+		if(sndFile.m_SongFlags[SONG_AUTO_GLOBALVOL])
+			chn.autoSlide.SetActive(AutoSlideCommand::GlobalVolumeSlide, param != 0);
+		if(param)
+			chn.nOldGlobalVolSlide = param;
+		else
+			param = chn.nOldGlobalVolSlide;
+
+		if((param & 0x0F) == 0x0F && (param & 0xF0))
+		{
+			param >>= 4;
+			if(!(sndFile.GetType() & GLOBALVOL_7BIT_FORMATS))
+				param <<= 1;
+			state->m_nGlobalVolume += param << 1;
+		} else if((param & 0xF0) == 0xF0 && (param & 0x0F))
+		{
+			param = (param & 0x0F) << 1;
+			if(!(sndFile.GetType() & GLOBALVOL_7BIT_FORMATS))
+				param <<= 1;
+			state->m_nGlobalVolume -= param;
+		} else if(param & 0xF0)
+		{
+			param >>= 4;
+			param <<= 1;
+			if(!(sndFile.GetType() & GLOBALVOL_7BIT_FORMATS))
+				param <<= 1;
+			state->m_nGlobalVolume += param * nonRowTicks;
+		} else
+		{
+			param = (param & 0x0F) << 1;
+			if(!(sndFile.GetType() & GLOBALVOL_7BIT_FORMATS)) param <<= 1;
+			state->m_nGlobalVolume -= param * nonRowTicks;
+		}
+		Limit(state->m_nGlobalVolume, 0, 256);
+	}
 };
 
 
@@ -326,7 +374,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				for(CHANNELINDEX i = 0; i < GetNumChannels(); i++, m++)
 				{
 					if(m->note == NOTE_NOTECUT || m->note == NOTE_KEYOFF || (m->note == NOTE_FADE && GetNumInstruments())
-						|| (m->IsNote() && m->instr && !m->IsPortamento()))
+						|| (m->IsNote() && m->instr && !m->IsTonePortamento()))
 					{
 						memory.chnSettings[i].ticksToRender = GetLengthMemory::IGNORE_CHANNEL;
 					}
@@ -597,13 +645,13 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 		for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); nChn++)
 		{
 			ModChannel &chn = playState.Chn[nChn];
-			if(chn.rowCommand.IsEmpty())
+			if(chn.rowCommand.IsEmpty() && !chn.autoSlide.AnyActive())
 				continue;
 			ModCommand::COMMAND command = chn.rowCommand.command;
 			ModCommand::PARAM param = chn.rowCommand.param;
 			ModCommand::NOTE note = chn.rowCommand.note;
 
-			if(adjustMode & eAdjust)
+			if((adjustMode & eAdjust) && !chn.rowCommand.IsEmpty())
 			{
 				if(chn.rowCommand.instr)
 				{
@@ -627,6 +675,9 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 							if(instr->IsResonanceEnabled())
 								chn.nResonance = instr->GetResonance();
 						}
+						const bool wasGlobalSlideRunning = chn.autoSlide.IsActive(AutoSlideCommand::GlobalVolumeSlide);
+						chn.autoSlide.Reset();
+						chn.autoSlide.SetActive(AutoSlideCommand::GlobalVolumeSlide, wasGlobalSlideRunning);
 					}
 				}
 
@@ -754,6 +805,9 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			// The following calculations are not interesting if we just want to get the song length.
 			if(!(adjustMode & eAdjust))
 				continue;
+
+			ResetAutoSlides(chn);
+
 			switch(command)
 			{
 			// Portamento Up/Down
@@ -791,6 +845,9 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			case CMD_TONEPORTAVOL:
 				if (param) chn.nOldVolumeSlide = param;
 				break;
+			case CMD_AUTO_VOLUMESLIDE:
+				AutoVolumeSlide(chn, param);
+				break;
 			// Set Volume
 			case CMD_VOLUME:
 				memory.chnSettings[nChn].vol = param;
@@ -809,40 +866,11 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				{
 					playState.m_nGlobalVolume = 256;
 				}
+				playState.Chn[m_playBehaviour[kPerChannelGlobalVolSlide] ? nChn : 0].autoSlide.SetActive(AutoSlideCommand::GlobalVolumeSlide, false);
 				break;
 			// Global Volume Slide
 			case CMD_GLOBALVOLSLIDE:
-				if(m_playBehaviour[kPerChannelGlobalVolSlide])
-				{
-					// IT compatibility 16. Global volume slide params are stored per channel (FT2/IT)
-					if (param) chn.nOldGlobalVolSlide = param; else param = chn.nOldGlobalVolSlide;
-				} else
-				{
-					if (param) playState.Chn[0].nOldGlobalVolSlide = param; else param = playState.Chn[0].nOldGlobalVolSlide;
-				}
-				if (((param & 0x0F) == 0x0F) && (param & 0xF0))
-				{
-					param >>= 4;
-					if (!(GetType() & GLOBALVOL_7BIT_FORMATS)) param <<= 1;
-					playState.m_nGlobalVolume += param << 1;
-				} else if (((param & 0xF0) == 0xF0) && (param & 0x0F))
-				{
-					param = (param & 0x0F) << 1;
-					if (!(GetType() & GLOBALVOL_7BIT_FORMATS)) param <<= 1;
-					playState.m_nGlobalVolume -= param;
-				} else if (param & 0xF0)
-				{
-					param >>= 4;
-					param <<= 1;
-					if (!(GetType() & GLOBALVOL_7BIT_FORMATS)) param <<= 1;
-					playState.m_nGlobalVolume += param * nonRowTicks;
-				} else
-				{
-					param = (param & 0x0F) << 1;
-					if (!(GetType() & GLOBALVOL_7BIT_FORMATS)) param <<= 1;
-					playState.m_nGlobalVolume -= param * nonRowTicks;
-				}
-				Limit(playState.m_nGlobalVolume, 0, 256);
+				memory.GlobalVolSlide(playState.Chn[m_playBehaviour[kPerChannelGlobalVolSlide] ? nChn : 0], param, nonRowTicks);
 				break;
 			case CMD_CHANNELVOLUME:
 				if (param <= 64) chn.nGlobalVol = param;
@@ -930,6 +958,9 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				break;
 			case CMD_PANBRELLO:
 				Panbrello(chn, param);
+				// Panbrello effect is permanent in compatible mode, so actually apply panbrello for the last tick of this row
+				chn.nPanbrelloPos += static_cast<uint8>(chn.nPanbrelloSpeed * nonRowTicks);
+				ProcessPanbrello(chn);
 				break;
 
 			case CMD_MIDI:
@@ -965,39 +996,36 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				break;
 			}
 
-			// Process vibrato / tremolo / panbrello
-			switch(chn.rowCommand.command)
+			chn.isFirstTick = true;
+			if(chn.autoSlide.IsActive(AutoSlideCommand::FineVolumeSlideUp) && command != CMD_AUTO_VOLUMESLIDE)
+				FineVolumeUp(chn, 0, false);
+			if(chn.autoSlide.IsActive(AutoSlideCommand::FineVolumeSlideDown) && command != CMD_AUTO_VOLUMESLIDE)
+				FineVolumeDown(chn, 0, false);
+			if(chn.autoSlide.IsActive(AutoSlideCommand::VolumeSlideSTK))
 			{
-			case CMD_VIBRATO:
-			case CMD_FINEVIBRATO:
-			case CMD_VIBRATOVOL:
+				for(uint32 i = 0; i < numTicks; i++)
 				{
-					uint32 vibTicks = ((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && !m_SongFlags[SONG_ITOLDEFFECTS]) ? numTicks : nonRowTicks;
-					uint32 inc = chn.nVibratoSpeed * vibTicks;
-					if(m_playBehaviour[kITVibratoTremoloPanbrello])
-						inc *= 4;
-					chn.nVibratoPos += static_cast<uint8>(inc);
+					chn.isFirstTick = (i == 0);
+					VolumeSlide(chn, 0);
 				}
-				break;
-
-			case CMD_TREMOLO:
-				{
-					uint32 tremTicks = ((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && !m_SongFlags[SONG_ITOLDEFFECTS]) ? numTicks : nonRowTicks;
-					uint32 inc = chn.nTremoloSpeed * tremTicks;
-					if(m_playBehaviour[kITVibratoTremoloPanbrello])
-						inc *= 4;
-					chn.nTremoloPos += static_cast<uint8>(inc);
-				}
-				break;
-
-			case CMD_PANBRELLO:
-				// Panbrello effect is permanent in compatible mode, so actually apply panbrello for the last tick of this row
-				chn.nPanbrelloPos += static_cast<uint8>(chn.nPanbrelloSpeed * nonRowTicks);
-				ProcessPanbrello(chn);
-				break;
-
-			default:
-				break;
+			}
+			if(chn.autoSlide.IsActive(AutoSlideCommand::GlobalVolumeSlide) && command != CMD_GLOBALVOLSLIDE)
+				memory.GlobalVolSlide(chn, chn.nOldGlobalVolSlide, nonRowTicks);
+			if(command == CMD_VIBRATO || command == CMD_FINEVIBRATO || command == CMD_VIBRATOVOL || chn.autoSlide.IsActive(AutoSlideCommand::Vibrato))
+			{
+				uint32 vibTicks = ((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && !m_SongFlags[SONG_ITOLDEFFECTS]) ? numTicks : nonRowTicks;
+				uint32 inc = chn.nVibratoSpeed * vibTicks;
+				if(m_playBehaviour[kITVibratoTremoloPanbrello])
+					inc *= 4;
+				chn.nVibratoPos += static_cast<uint8>(inc);
+			}
+			if(command == CMD_TREMOLO || chn.autoSlide.IsActive(AutoSlideCommand::Tremolo))
+			{
+				uint32 tremTicks = ((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && !m_SongFlags[SONG_ITOLDEFFECTS]) ? numTicks : nonRowTicks;
+				uint32 inc = chn.nTremoloSpeed * tremTicks;
+				if(m_playBehaviour[kITVibratoTremoloPanbrello])
+					inc *= 4;
+				chn.nTremoloPos += static_cast<uint8>(inc);
 			}
 		
 			if(m_playBehaviour[kST3EffectMemory] && command != CMD_NONE && param != 0)
@@ -1040,7 +1068,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 
 				uint32 paramHi = m.param >> 4, paramLo = m.param & 0x0F;
 				uint32 startTick = 0;
-				const bool porta = m.IsPortamento();
+				const bool porta = m.IsTonePortamento();
 				bool stopNote = false;
 
 				if(m.instr) chn.prevNoteOffset = 0;
@@ -1206,6 +1234,25 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 						memory.RenderChannel(nChn, oldTickDuration);  // Re-sync what we've got so far
 						chn.microTuning = CalculateFinetuneTarget(playState.m_nPattern, playState.m_nRow, nChn);  // TODO should render each tick individually for CMD_FINETUNE_SMOOTH for higher sync accuracy
 						break;
+
+						// Auto portamentos
+					case CMD_AUTO_PORTAUP:
+						chn.autoSlide.SetActive(AutoSlideCommand::PortamentoUp, m.param != 0);
+						chn.nOldPortaUp = m.param;
+						break;
+					case CMD_AUTO_PORTADOWN:
+						chn.autoSlide.SetActive(AutoSlideCommand::PortamentoDown, m.param != 0);
+						chn.nOldPortaDown = m.param;
+						break;
+					case CMD_AUTO_PORTAUP_FINE:
+						chn.autoSlide.SetActive(AutoSlideCommand::FinePortamentoUp, m.param != 0);
+						chn.nOldFinePortaUpDown = m.param;
+						break;
+					case CMD_AUTO_PORTADOWN_FINE:
+						chn.autoSlide.SetActive(AutoSlideCommand::FinePortamentoDown, m.param != 0);
+						chn.nOldFinePortaUpDown = m.param;
+						break;
+
 					default:
 						break;
 					}
@@ -1245,7 +1292,8 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 
 					if(chn.isPaused)
 						continue;
-					if(m.IsAnyPitchSlide())
+
+					if(m.IsAnyPitchSlide() || chn.autoSlide.AnyPitchSlideActive())
 					{
 						// Portamento needs immediate syncing, as the pitch changes on each tick
 						uint32 portaTick = memory.chnSettings[nChn].ticksToRender + startTick;
@@ -2107,6 +2155,9 @@ void CSoundFile::NoteChange(ModChannel &chn, int note, bool bPorta, bool bResetE
 	{
 		chn.paulaState.Reset();
 	}
+	const bool wasGlobalSlideRunning = chn.autoSlide.IsActive(AutoSlideCommand::GlobalVolumeSlide);
+	chn.autoSlide.Reset();
+	chn.autoSlide.SetActive(AutoSlideCommand::GlobalVolumeSlide, wasGlobalSlideRunning);
 }
 
 
@@ -2482,7 +2533,7 @@ bool CSoundFile::ProcessEffects()
 		uint32 vol = chn.rowCommand.vol;
 		ModCommand::COMMAND cmd = chn.rowCommand.command;
 		uint32 param = chn.rowCommand.param;
-		bool bPorta = chn.rowCommand.IsPortamento();
+		bool bPorta = chn.rowCommand.IsTonePortamento();
 
 		uint32 nStartTick = 0;
 		chn.isFirstTick = m_PlayState.m_flags[SONG_FIRSTTICK];
@@ -3038,6 +3089,8 @@ bool CSoundFile::ProcessEffects()
 		if(m_playBehaviour[kST3NoMutedChannels] && ChnSettings[nChn].dwFlags[CHN_MUTE])	// not even effects are processed on muted S3M channels
 			continue;
 
+		ResetAutoSlides(chn);
+
 		// Volume Column Effect (except volume & panning)
 		/*	A few notes, paraphrased from ITTECH.TXT by Storlek (creator of schismtracker):
 			Ex/Fx/Gx are shared with Exx/Fxx/Gxx; Ex/Fx are 4x the 'normal' slide value
@@ -3221,6 +3274,24 @@ bool CSoundFile::ProcessEffects()
 				PortamentoDown(nChn, static_cast<ModCommand::PARAM>(param), false);
 			break;
 
+		// Auto portamentos
+		case CMD_AUTO_PORTAUP:
+			chn.autoSlide.SetActive(AutoSlideCommand::PortamentoUp, param != 0);
+			chn.nOldPortaUp = static_cast<uint8>(param);
+			break;
+		case CMD_AUTO_PORTADOWN:
+			chn.autoSlide.SetActive(AutoSlideCommand::PortamentoDown, param != 0);
+			chn.nOldPortaDown = static_cast<uint8>(param);
+			break;
+		case CMD_AUTO_PORTAUP_FINE:
+			chn.autoSlide.SetActive(AutoSlideCommand::FinePortamentoUp, param != 0);
+			chn.nOldFinePortaUpDown = static_cast<uint8>(param);
+			break;
+		case CMD_AUTO_PORTADOWN_FINE:
+			chn.autoSlide.SetActive(AutoSlideCommand::FinePortamentoDown, param != 0);
+			chn.nOldFinePortaUpDown = static_cast<uint8>(param);
+			break;
+
 		// Volume Slide
 		case CMD_VOLUMESLIDE:
 			if (param || (GetType() != MOD_TYPE_MOD)) VolumeSlide(chn, static_cast<ModCommand::PARAM>(param));
@@ -3393,15 +3464,13 @@ bool CSoundFile::ProcessEffects()
 			{
 				m_PlayState.m_nGlobalVolume = 256;
 			}
+			m_PlayState.Chn[m_playBehaviour[kPerChannelGlobalVolSlide] ? nChn : 0].autoSlide.SetActive(AutoSlideCommand::GlobalVolumeSlide, false);
 			break;
 
 		// Global Volume Slide
 		case CMD_GLOBALVOLSLIDE:
 			//IT compatibility 16. Saving last global volume slide param per channel (FT2/IT)
-			if(m_playBehaviour[kPerChannelGlobalVolSlide])
-				GlobalVolSlide(static_cast<ModCommand::PARAM>(param), chn.nOldGlobalVolSlide);
-			else
-				GlobalVolSlide(static_cast<ModCommand::PARAM>(param), m_PlayState.Chn[0].nOldGlobalVolSlide);
+			GlobalVolSlide(m_PlayState, static_cast<ModCommand::PARAM>(param), m_playBehaviour[kPerChannelGlobalVolSlide] ? nChn : 0);
 			break;
 
 		// Set 8-bit Panning
@@ -3610,6 +3679,10 @@ bool CSoundFile::ProcessEffects()
 			DigiBoosterSampleReverse(chn, static_cast<ModCommand::PARAM>(param));
 			break;
 		
+		case CMD_AUTO_VOLUMESLIDE:
+			AutoVolumeSlide(chn, static_cast<ModCommand::PARAM>(param));
+			break;
+
 		default:
 			break;
 		}
@@ -3625,6 +3698,7 @@ bool CSoundFile::ProcessEffects()
 			chn.nOldIns = chn.rowCommand.instr;
 		}
 
+		ProcessAutoSlides(m_PlayState, nChn);
 	} // for(...) end
 
 	// Navigation Effects
@@ -3708,6 +3782,70 @@ bool CSoundFile::HandleNextRow(PlayState &state, const ModSequence &order, bool 
 
 ////////////////////////////////////////////////////////////
 // Channels effects
+
+
+void CSoundFile::ResetAutoSlides(ModChannel &chn) const
+{
+	const auto cmd = chn.rowCommand.command;
+	const auto volcmd = chn.rowCommand.volcmd;
+	if(cmd != CMD_NONE && GetType() == MOD_TYPE_669)
+	{
+		chn.autoSlide.Reset();
+		return;
+	}
+
+	if(cmd == CMD_NONE && chn.autoSlide.IsActive(AutoSlideCommand::VolumeSlideSTK))
+		chn.autoSlide.SetActive(AutoSlideCommand::VolumeSlideSTK, false);
+
+	if(chn.autoSlide.IsActive(AutoSlideCommand::FinePortamentoDown) || chn.autoSlide.IsActive(AutoSlideCommand::PortamentoDown)
+	   || chn.autoSlide.IsActive(AutoSlideCommand::FinePortamentoUp) || chn.autoSlide.IsActive(AutoSlideCommand::PortamentoUp))
+	{
+		if(!chn.rowCommand.IsTonePortamento() && chn.rowCommand.IsAnyPitchSlide())
+		{
+			chn.autoSlide.SetActive(AutoSlideCommand::FinePortamentoDown, false);
+			chn.autoSlide.SetActive(AutoSlideCommand::PortamentoDown, false);
+			chn.autoSlide.SetActive(AutoSlideCommand::FinePortamentoUp, false);
+			chn.autoSlide.SetActive(AutoSlideCommand::PortamentoUp, false);
+		}
+	}
+	if(chn.autoSlide.IsActive(AutoSlideCommand::FineVolumeSlideUp) || chn.autoSlide.IsActive(AutoSlideCommand::FineVolumeSlideDown))
+	{
+		if(cmd == CMD_VOLUME || cmd == CMD_AUTO_VOLUMESLIDE || chn.rowCommand.IsNormalVolumeSlide()
+		   || volcmd == VOLCMD_VOLUME || volcmd == VOLCMD_VOLSLIDEUP || volcmd == VOLCMD_VOLSLIDEDOWN || volcmd == VOLCMD_FINEVOLUP || volcmd == VOLCMD_FINEVOLDOWN)
+		{
+			chn.autoSlide.SetActive(AutoSlideCommand::FineVolumeSlideUp, false);
+			chn.autoSlide.SetActive(AutoSlideCommand::FineVolumeSlideDown, false);
+		}
+	}
+}
+
+
+void CSoundFile::ProcessAutoSlides(PlayState &playState, CHANNELINDEX channel)
+{
+	ModChannel &chn = playState.Chn[channel];
+	if(chn.autoSlide.IsActive(AutoSlideCommand::TonePortamento) && !chn.rowCommand.IsTonePortamento())
+		TonePortamento(channel, chn.portamentoSlide);
+	if(chn.autoSlide.IsActive(AutoSlideCommand::PortamentoUp))
+		PortamentoUp(channel, chn.nOldPortaUp, true);
+	else if(chn.autoSlide.IsActive(AutoSlideCommand::PortamentoDown))
+		PortamentoDown(channel, chn.nOldPortaDown, true);
+	else if(chn.autoSlide.IsActive(AutoSlideCommand::FinePortamentoUp))
+		FinePortamentoUp(chn, chn.nOldFinePortaUpDown);
+	else if(chn.autoSlide.IsActive(AutoSlideCommand::FinePortamentoDown))
+		FinePortamentoDown(chn, chn.nOldFinePortaUpDown);
+	if(chn.autoSlide.IsActive(AutoSlideCommand::FineVolumeSlideUp) && chn.rowCommand.command != CMD_AUTO_VOLUMESLIDE)
+		FineVolumeUp(chn, 0, false);
+	if(chn.autoSlide.IsActive(AutoSlideCommand::FineVolumeSlideDown) && chn.rowCommand.command != CMD_AUTO_VOLUMESLIDE)
+		FineVolumeDown(chn, 0, false);
+	if(chn.autoSlide.IsActive(AutoSlideCommand::VolumeSlideSTK))
+		VolumeSlide(chn, 0);
+	if(chn.autoSlide.IsActive(AutoSlideCommand::GlobalVolumeSlide) && chn.rowCommand.command != CMD_GLOBALVOLSLIDE)
+		GlobalVolSlide(playState, chn.nOldGlobalVolSlide, channel);
+	if(chn.autoSlide.IsActive(AutoSlideCommand::Vibrato))
+		chn.dwFlags.set(CHN_VIBRATO);
+	if(chn.autoSlide.IsActive(AutoSlideCommand::Tremolo))
+		chn.dwFlags.set(CHN_TREMOLO);
+}
 
 
 // Update the effect memory of all S3M effects that use the last non-zero effect parameter as memory (Dxy, Exx, Fxx, Ixy, Jxy, Kxy, Lxy, Qxy, Rxy, Sxy)
@@ -4227,6 +4365,8 @@ int32 CSoundFile::TonePortamento(PlayState &playState, CHANNELINDEX nChn, uint16
 {
 	ModChannel &chn = playState.Chn[nChn];
 	chn.dwFlags.set(CHN_PORTAMENTO);
+	if(m_SongFlags[SONG_AUTO_TONEPORTA])
+		chn.autoSlide.SetActive(AutoSlideCommand::TonePortamento, param != 0);
 
 	//IT compatibility 03: Share effect memory with portamento up/down
 	if((!m_SongFlags[SONG_ITCOMPATGXX] && m_playBehaviour[kITPortaMemoryShare]) || GetType() == MOD_TYPE_PLM)
@@ -4331,7 +4471,10 @@ void CSoundFile::Vibrato(ModChannel &chn, uint32 param) const
 {
 	if (param & 0x0F) chn.nVibratoDepth = (param & 0x0F) * 4;
 	if (param & 0xF0) chn.nVibratoSpeed = (param >> 4) & 0x0F;
-	chn.dwFlags.set(CHN_VIBRATO);
+	if(m_SongFlags[SONG_AUTO_VIBRATO])
+		chn.autoSlide.SetActive(AutoSlideCommand::Vibrato, param != 0);
+	else
+		chn.dwFlags.set(CHN_VIBRATO);
 }
 
 
@@ -4339,7 +4482,10 @@ void CSoundFile::FineVibrato(ModChannel &chn, uint32 param) const
 {
 	if (param & 0x0F) chn.nVibratoDepth = param & 0x0F;
 	if (param & 0xF0) chn.nVibratoSpeed = (param >> 4) & 0x0F;
-	chn.dwFlags.set(CHN_VIBRATO);
+	if(m_SongFlags[SONG_AUTO_VIBRATO])
+		chn.autoSlide.SetActive(AutoSlideCommand::Vibrato, param != 0);
+	else
+		chn.dwFlags.set(CHN_VIBRATO);
 	// ST3 compatibility: Do not distinguish between vibrato types in effect memory
 	// Test case: VibratoTypeChange.s3m
 	if(m_playBehaviour[kST3VibratoMemory] && (param & 0x0F))
@@ -4404,6 +4550,27 @@ void CSoundFile::Panning(ModChannel &chn, uint32 param, PanningType panBits) con
 	{
 		chn.nPanSwing = 0;
 		chn.nPanbrelloOffset = 0;
+	}
+}
+
+
+void CSoundFile::AutoVolumeSlide(ModChannel &chn, ModCommand::PARAM param) const
+{
+	if(m_SongFlags[SONG_AUTO_VOLSLIDE_STK])
+	{
+		chn.nOldVolumeSlide = param;
+		chn.autoSlide.SetActive(AutoSlideCommand::VolumeSlideSTK);
+	} else
+	{
+		if(param & 0x0F)
+		{
+			FineVolumeDown(chn, param, false);
+			chn.autoSlide.SetActive(AutoSlideCommand::FineVolumeSlideDown);
+		} else
+		{
+			FineVolumeUp(chn, param, false);
+			chn.autoSlide.SetActive(AutoSlideCommand::FineVolumeSlideUp);
+		}
 	}
 }
 
@@ -4610,7 +4777,10 @@ void CSoundFile::Tremolo(ModChannel &chn, uint32 param) const
 {
 	if (param & 0x0F) chn.nTremoloDepth = (param & 0x0F) << 2;
 	if (param & 0xF0) chn.nTremoloSpeed = (param >> 4) & 0x0F;
-	chn.dwFlags.set(CHN_TREMOLO);
+	if(m_SongFlags[SONG_AUTO_TREMOLO])
+		chn.autoSlide.SetActive(AutoSlideCommand::Tremolo, (param & 0x0F) != 0);
+	else
+		chn.dwFlags.set(CHN_TREMOLO);
 }
 
 
@@ -6129,10 +6299,15 @@ void CSoundFile::PatternLoop(PlayState &state, CHANNELINDEX nChn, ModCommand::PA
 }
 
 
-void CSoundFile::GlobalVolSlide(ModCommand::PARAM param, uint8 &nOldGlobalVolSlide)
+void CSoundFile::GlobalVolSlide(PlayState &playState, ModCommand::PARAM param, CHANNELINDEX chn) const
 {
-	int32 nGlbSlide = 0;
-	if (param) nOldGlobalVolSlide = param; else param = nOldGlobalVolSlide;
+	if(m_SongFlags[SONG_AUTO_GLOBALVOL])
+		playState.Chn[chn].autoSlide.SetActive(AutoSlideCommand::GlobalVolumeSlide, param != 0);
+
+	if(param)
+		playState.Chn[chn].nOldGlobalVolSlide = param;
+	else
+		param = playState.Chn[chn].nOldGlobalVolSlide;
 
 	if((GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2)))
 	{
@@ -6146,16 +6321,17 @@ void CSoundFile::GlobalVolSlide(ModCommand::PARAM param, uint8 &nOldGlobalVolSli
 		}
 	}
 
+	int32 nGlbSlide = 0;
 	if (((param & 0x0F) == 0x0F) && (param & 0xF0))
 	{
-		if(m_PlayState.m_flags[SONG_FIRSTTICK]) nGlbSlide = (param >> 4) * 2;
+		if(playState.m_flags[SONG_FIRSTTICK]) nGlbSlide = (param >> 4) * 2;
 	} else
 	if (((param & 0xF0) == 0xF0) && (param & 0x0F))
 	{
-		if(m_PlayState.m_flags[SONG_FIRSTTICK]) nGlbSlide = - (int)((param & 0x0F) * 2);
+		if(playState.m_flags[SONG_FIRSTTICK]) nGlbSlide = - (int)((param & 0x0F) * 2);
 	} else
 	{
-		if(!m_PlayState.m_flags[SONG_FIRSTTICK])
+		if(!playState.m_flags[SONG_FIRSTTICK])
 		{
 			if (param & 0xF0)
 			{
@@ -6171,9 +6347,9 @@ void CSoundFile::GlobalVolSlide(ModCommand::PARAM param, uint8 &nOldGlobalVolSli
 	if (nGlbSlide)
 	{
 		if(!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_IMF | MOD_TYPE_J2B | MOD_TYPE_MID | MOD_TYPE_AMS | MOD_TYPE_DBM))) nGlbSlide *= 2;
-		nGlbSlide += m_PlayState.m_nGlobalVolume;
+		nGlbSlide += playState.m_nGlobalVolume;
 		Limit(nGlbSlide, 0, 256);
-		m_PlayState.m_nGlobalVolume = nGlbSlide;
+		playState.m_nGlobalVolume = nGlbSlide;
 	}
 }
 

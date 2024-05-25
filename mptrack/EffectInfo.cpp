@@ -128,6 +128,11 @@ static constexpr MPTEffectInfo gFXInfo[] =
 	{CMD_VOLUME8, 0, 0, 0, MOD_TYPE_NONE, _T("Set 8-bit Volume")},
 	{CMD_HMN_MEGA_ARP, 0, 0, 0, MOD_TYPE_NONE, _T("His Master's Noise Mega-Arpeggio")},
 	{CMD_MED_SYNTH_JUMP, 0, 0, 0, MOD_TYPE_NONE, _T("MED Synth Jump / MIDI Panning")},
+	{CMD_AUTO_VOLUMESLIDE, 0, 0, 0, MOD_TYPE_NONE, _T("Automatic Volume Slide")},
+	{CMD_AUTO_PORTAUP, 0, 0, 0, MOD_TYPE_NONE, _T("Automatic Portamento Up")},
+	{CMD_AUTO_PORTADOWN, 0, 0, 0, MOD_TYPE_NONE, _T("Automatic Portamento Down")},
+	{CMD_AUTO_PORTAUP_FINE, 0, 0, 0, MOD_TYPE_NONE, _T("Automatic Fine Portamento Up")},
+	{CMD_AUTO_PORTADOWN_FINE, 0, 0, 0, MOD_TYPE_NONE, _T("Automatic Fine Portamento Down")},
 };
 
 
@@ -944,21 +949,21 @@ struct MPTVolCmdInfo
 
 static constexpr MPTVolCmdInfo gVolCmdInfo[] =
 {
-	{VOLCMD_VOLUME,			MOD_TYPE_NOMOD,		_T("Set Volume")},
-	{VOLCMD_PANNING,		MOD_TYPE_NOMOD,		_T("Set Panning")},
-	{VOLCMD_VOLSLIDEUP,		MOD_TYPE_XMITMPT,	_T("Volume slide up")},
-	{VOLCMD_VOLSLIDEDOWN,	MOD_TYPE_XMITMPT,	_T("Volume slide down")},
-	{VOLCMD_FINEVOLUP,		MOD_TYPE_XMITMPT,	_T("Fine volume up")},
-	{VOLCMD_FINEVOLDOWN,	MOD_TYPE_XMITMPT,	_T("Fine volume down")},
-	{VOLCMD_VIBRATOSPEED,	MOD_TYPE_XM,		_T("Vibrato speed")},
-	{VOLCMD_VIBRATODEPTH,	MOD_TYPE_XMITMPT,	_T("Vibrato depth")},
-	{VOLCMD_PANSLIDELEFT,	MOD_TYPE_XM,		_T("Pan slide left")},
-	{VOLCMD_PANSLIDERIGHT,	MOD_TYPE_XM,		_T("Pan slide right")},
-	{VOLCMD_TONEPORTAMENTO,	MOD_TYPE_XMITMPT,	_T("Tone portamento")},
-	{VOLCMD_PORTAUP,		MOD_TYPE_ITMPT,		_T("Portamento up")},
-	{VOLCMD_PORTADOWN,		MOD_TYPE_ITMPT,		_T("Portamento down")},
-	{VOLCMD_PLAYCONTROL,	MOD_TYPE_NONE,		_T("Play Control")},
-	{VOLCMD_OFFSET,			MOD_TYPE_MPT,		_T("Sample Cue")},
+	{VOLCMD_VOLUME,         MOD_TYPE_NOMOD,   _T("Set Volume")},
+	{VOLCMD_PANNING,        MOD_TYPE_NOMOD,   _T("Set Panning")},
+	{VOLCMD_VOLSLIDEUP,     MOD_TYPE_XMITMPT, _T("Volume slide up")},
+	{VOLCMD_VOLSLIDEDOWN,   MOD_TYPE_XMITMPT, _T("Volume slide down")},
+	{VOLCMD_FINEVOLUP,      MOD_TYPE_XMITMPT, _T("Fine volume up")},
+	{VOLCMD_FINEVOLDOWN,    MOD_TYPE_XMITMPT, _T("Fine volume down")},
+	{VOLCMD_VIBRATOSPEED,   MOD_TYPE_XM,      _T("Vibrato speed")},
+	{VOLCMD_VIBRATODEPTH,   MOD_TYPE_XMITMPT, _T("Vibrato depth")},
+	{VOLCMD_PANSLIDELEFT,   MOD_TYPE_XM,      _T("Pan slide left")},
+	{VOLCMD_PANSLIDERIGHT,  MOD_TYPE_XM,      _T("Pan slide right")},
+	{VOLCMD_TONEPORTAMENTO, MOD_TYPE_XMITMPT, _T("Tone portamento")},
+	{VOLCMD_PORTAUP,        MOD_TYPE_ITMPT,   _T("Portamento up")},
+	{VOLCMD_PORTADOWN,      MOD_TYPE_ITMPT,   _T("Portamento down")},
+	{VOLCMD_PLAYCONTROL,    MOD_TYPE_NONE,    _T("Play Control")},
+	{VOLCMD_OFFSET,         MOD_TYPE_MPT,     _T("Sample Cue")},
 };
 
 static_assert(mpt::array_size<decltype(gVolCmdInfo)>::size == (MAX_VOLCMDS - 1));

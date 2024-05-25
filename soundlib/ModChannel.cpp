@@ -34,6 +34,7 @@ void ModChannel::Reset(ResetFlags resetMask, const CSoundFile &sndFile, CHANNELI
 		nFadeOutVol = 0;
 		dwFlags.set(CHN_KEYOFF | CHN_NOTEFADE);
 		dwOldFlags.reset();
+		autoSlide.Reset();
 		nnaGeneration = 0;
 		//IT compatibility 15. Retrigger
 		if(sndFile.m_playBehaviour[kITRetrigger])

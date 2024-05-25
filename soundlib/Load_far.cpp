@@ -168,7 +168,7 @@ bool CSoundFile::ReadFAR(FileReader &file, ModLoadingFlags loadFlags)
 	Order().SetDefaultSpeed(fileHeader.defaultSpeed);
 	Order().SetDefaultTempoInt(80);
 	m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
-	m_SongFlags = SONG_LINEARSLIDES;
+	m_SongFlags = SONG_LINEARSLIDES | SONG_AUTO_TONEPORTA;
 	m_playBehaviour.set(kPeriodsAreHertz);
 
 	m_modFormat.formatName = U_("Farandole Composer");
@@ -244,12 +244,9 @@ bool CSoundFile::ReadFAR(FileReader &file, ModLoadingFlags loadFlags)
 		ROWINDEX breakRow = patternChunk.ReadUint8();
 		patternChunk.Skip(1);
 		if(breakRow > 0 && breakRow < numRows - 2)
-		{
 			breakRow++;
-		} else
-		{
+		else
 			breakRow = ROWINDEX_INVALID;
-		}
 
 		// Read pattern data
 		for(ROWINDEX row = 0; row < numRows; row++)
@@ -277,24 +274,25 @@ bool CSoundFile::ReadFAR(FileReader &file, ModLoadingFlags loadFlags)
 				case 0x02:
 					m.param |= 0xF0;
 					break;
-				case 0x03:	// Porta to note (TODO: Parameter is number of rows the portamento should take)
-					m.param <<= 2;
+				case 0x03:  // Porta to note (TODO: Parameter is number of rows the portamento should take)
+					if(m.param != 0)
+						m.param = 60 / m.param;
 					break;
-				case 0x04:	// Retrig
-					m.param = static_cast<ModCommand::PARAM>(6 / (1 + (m.param & 0xf)) + 1); // ugh?
+				case 0x04:  // Retrig
+					m.param = static_cast<ModCommand::PARAM>(6 / (1 + (m.param & 0xf)) + 1);
 					break;
-				case 0x06:	// Vibrato speed
-				case 0x07:	// Volume slide up
+				case 0x06:  // Vibrato speed
+				case 0x07:  // Volume slide up
 					m.param *= 8;
 					break;
-				case 0x0A:	// Volume-portamento (what!)
+				case 0x0A:  // Volume-portamento (what!)
 					m.volcmd = VOLCMD_VOLUME;
 					m.vol = static_cast<ModCommand::VOL>((m.param << 2) + 4);
 					break;
-				case 0x0B:	// Panning
+				case 0x0B:  // Panning
 					m.param |= 0x80;
 					break;
-				case 0x0C:	// Note offset
+				case 0x0C:  // Note offset
 					m.param = static_cast<ModCommand::PARAM>(6 / (1 + m.param) + 1);
 					m.param |= 0x0D;
 				}

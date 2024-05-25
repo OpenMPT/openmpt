@@ -1118,6 +1118,8 @@ protected:
 		Pan8bit = 8,
 	};
 	// Channel Effects
+	void ResetAutoSlides(ModChannel &chn) const;
+	void ProcessAutoSlides(PlayState &playState, CHANNELINDEX channel);
 	void UpdateS3MEffectMemory(ModChannel &chn, ModCommand::PARAM param) const;
 	void PortamentoUp(CHANNELINDEX nChn, ModCommand::PARAM param, const bool doFinePortamentoAsRegular);
 	void PortamentoUp(PlayState &playState, CHANNELINDEX nChn, ModCommand::PARAM param, const bool doFinePortamentoAsRegular) const;
@@ -1139,6 +1141,7 @@ protected:
 	int32 TonePortamento(PlayState &playState, CHANNELINDEX nChn, uint16 param) const;
 	void Vibrato(ModChannel &chn, uint32 param) const;
 	void FineVibrato(ModChannel &chn, uint32 param) const;
+	void AutoVolumeSlide(ModChannel& chn, ModCommand::PARAM param) const;
 	void VolumeSlide(ModChannel &chn, ModCommand::PARAM param) const;
 	void PanningSlide(ModChannel &chn, ModCommand::PARAM param, bool memory = true) const;
 	void ChannelVolSlide(ModChannel &chn, ModCommand::PARAM param) const;
@@ -1162,7 +1165,7 @@ protected:
 	void InvertLoop(ModChannel &chn);
 	void PositionJump(PlayState &state, CHANNELINDEX chn) const;
 	ROWINDEX PatternBreak(PlayState &state, CHANNELINDEX chn, uint8 param) const;
-	void GlobalVolSlide(ModCommand::PARAM param, uint8 &nOldGlobalVolSlide);
+	void GlobalVolSlide(PlayState &playState, ModCommand::PARAM param, CHANNELINDEX chn) const;
 
 	void ProcessMacroOnChannel(CHANNELINDEX nChn);
 	void ProcessMIDIMacro(PlayState &playState, CHANNELINDEX nChn, bool isSmooth, const MIDIMacroConfigData::Macro &macro, uint8 param = 0, PLUGINDEX plugin = 0);

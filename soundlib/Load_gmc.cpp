@@ -152,7 +152,6 @@ bool CSoundFile::ReadGMC(FileReader &file, ModLoadingFlags loadFlags)
 			continue;
 		}
 
-		std::array<uint8, 4> portaOn = {0, 0, 0, 0};
 		for(ROWINDEX row = 0; row < 64; row++)
 		{
 			auto rowBase = Patterns[pat].GetRow(row);
@@ -175,7 +174,6 @@ bool CSoundFile::ReadGMC(FileReader &file, ModLoadingFlags loadFlags)
 					break;
 				case 0x01:  // Portamento up
 				case 0x02:  // Portamento down
-					portaOn[chn] = (param != 0) ? command : 0;
 					break;
 				case 0x03:  // Volume
 					command = 0x0C;
@@ -207,16 +205,11 @@ bool CSoundFile::ReadGMC(FileReader &file, ModLoadingFlags loadFlags)
 				ConvertModCommand(m, command, param);
 				if(noteCut)
 					m.note = NOTE_NOTECUT;
-				if(command != 1 && command != 2)
-				{
-					if(m.note != NOTE_NONE)
-						portaOn[chn] = 0;
-					else if(portaOn[chn] == 1)
-						m.volcmd = VOLCMD_PORTAUP;
-					else if(portaOn[chn] == 2)
-						m.volcmd = VOLCMD_PORTADOWN;
-				}
-				if(m.command == CMD_TEMPO)
+				if(m.command == CMD_PORTAMENTOUP)
+					m.command = CMD_AUTO_PORTAUP;
+				else if(m.command == CMD_PORTAMENTODOWN)
+					m.command = CMD_AUTO_PORTADOWN;
+				else if(m.command == CMD_TEMPO)
 					m.command = CMD_SPEED;
 			}
 		}

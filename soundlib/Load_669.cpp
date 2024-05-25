@@ -142,7 +142,7 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 	Order().SetDefaultSpeed(4);
 	m_nChannels = 8;
 	m_playBehaviour.set(kPeriodsAreHertz);
-	m_SongFlags.set(SONG_FASTPORTAS);
+	m_SongFlags.set(SONG_FASTPORTAS | SONG_AUTO_TONEPORTA);
 #ifdef MODPLUG_TRACKER
 	// 669 uses frequencies rather than periods, so linear slides mode will sound better in the higher octaves.
 	//m_SongFlags.set(SONG_LINEARSLIDES);
@@ -195,8 +195,8 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 
 		static constexpr ModCommand::COMMAND effTrans[] =
 		{
-			CMD_PORTAMENTOUP,    // Slide up (param * 80) Hz on every tick
-			CMD_PORTAMENTODOWN,  // Slide down (param * 80) Hz on every tick
+			CMD_AUTO_PORTAUP,    // Slide up (param * 80) Hz on every tick
+			CMD_AUTO_PORTADOWN,  // Slide down (param * 80) Hz on every tick
 			CMD_TONEPORTAMENTO,  // Slide to note by (param * 40) Hz on every tick
 			CMD_S3MCMDEX,        // Add (param * 80) Hz to sample frequency
 			CMD_VIBRATO,         // Add (param * 669) Hz on every other tick

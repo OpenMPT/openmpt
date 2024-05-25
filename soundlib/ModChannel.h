@@ -41,6 +41,23 @@ struct ModChannel
 		}
 	};
 
+	struct AutoSlideStatus
+	{
+		bool AnyActive() const noexcept { return m_set.any(); }
+		bool IsActive(AutoSlideCommand cmd) const noexcept { return m_set[static_cast<size_t>(cmd)]; }
+		void SetActive(AutoSlideCommand cmd, bool active = true) noexcept { m_set[static_cast<size_t>(cmd)] = active; }
+		void Reset() noexcept { m_set.reset(); }
+
+		bool AnyPitchSlideActive() const noexcept
+		{
+			return IsActive(AutoSlideCommand::TonePortamento)
+				|| IsActive(AutoSlideCommand::PortamentoUp) || IsActive(AutoSlideCommand::PortamentoDown)
+				|| IsActive(AutoSlideCommand::FinePortamentoUp) || IsActive(AutoSlideCommand::FinePortamentoDown);
+		}
+	private:
+		std::bitset<static_cast<size_t>(AutoSlideCommand::NumCommands)> m_set;
+	};
+
 	// Information used in the mixer (should be kept tight for better caching)
 	SamplePosition position;     // Current play position (fixed point)
 	SamplePosition increment;    // Sample speed relative to mixing frequency (fixed point)
@@ -84,6 +101,7 @@ struct ModChannel
 	int32 nAutoVibDepth;
 	uint32 nEFxOffset;  // Offset memory for Invert Loop (EFx, .MOD only)
 	ROWINDEX nPatternLoop;
+	AutoSlideStatus autoSlide;
 	uint16 portamentoSlide;
 	int16 nTranspose;
 	int16 nFineTune;
@@ -145,8 +163,6 @@ struct ModChannel
 	float m_plugParamValueStep, m_plugParamTargetValue;
 	uint16 m_RowPlugParam;
 	PLUGINDEX m_RowPlug;
-
-	void ClearRowCmd() { rowCommand = ModCommand(); }
 
 	// Get a reference to a specific envelope of this channel
 	const EnvInfo &GetEnvelope(EnvelopeType envType) const
