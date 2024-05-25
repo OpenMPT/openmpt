@@ -18,6 +18,8 @@
 #include "Paula.h"
 #include "tuningbase.h"
 
+#include <bitset>
+
 OPENMPT_NAMESPACE_BEGIN
 
 class CSoundFile;
