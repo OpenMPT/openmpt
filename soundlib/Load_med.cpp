@@ -2,7 +2,7 @@
  * Load_med.cpp
  * ------------
  * Purpose: OctaMED / MED Soundstudio module loader
- * Notes  : Support for synthesized instruments is still missing.
+ * Notes  : (currently none)
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
@@ -101,7 +101,7 @@ struct MMDSong
 	{
 		FLAG_FILTERON   = 0x01,  // The hardware audio filter is on
 		FLAG_JUMPINGON  = 0x02,  // Mouse pointer jumping on
-		FLAG_JUMP8TH    = 0x04,  // ump every 8th line (not in OctaMED Pro)
+		FLAG_JUMP8TH    = 0x04,  // Jump every 8th line (not in OctaMED Pro)
 		FLAG_INSTRSATT  = 0x08,  // sng+samples indicator (not useful in MMDs)
 		FLAG_VOLHEX     = 0x10,  // volumes are HEX
 		FLAG_STSLIDE    = 0x20,  // use ST/NT/PT compatible sliding
@@ -474,8 +474,7 @@ static void ConvertMEDEffect(ModCommand &m, bool is8ch, bool bpmMode, uint8 rows
 		}
 		break;
 	case 0x10:  // MIDI message
-		m.command = CMD_MIDI;
-		m.param |= 0x80;
+		m.SetEffectCommand(CMD_MIDI, 0x80 | param);
 		break;
 	case 0x11:  // Slide pitch up
 		m.command = CMD_MODCMDEX;
@@ -1322,7 +1321,9 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 					file.Seek(patHeader.blockInfoOffset);
 					MMDBlockInfo blockInfo;
 					file.ReadStruct(blockInfo);
-					if(file.Seek(blockInfo.nameOffset))
+					if(blockInfo.nameLength
+					   && blockInfo.nameOffset
+					   && file.Seek(blockInfo.nameOffset))
 					{
 						// We have now chased four pointers to get this far... lovely format.
 						file.ReadString<mpt::String::maybeNullTerminated>(patName, blockInfo.nameLength);
