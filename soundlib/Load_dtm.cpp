@@ -231,6 +231,7 @@ bool CSoundFile::ReadDTM(FileReader &file, ModLoadingFlags loadFlags)
 	InitializeGlobals(MOD_TYPE_DTM);
 	InitializeChannels();
 	m_SongFlags.set(SONG_ITCOMPATGXX | SONG_ITOLDEFFECTS);
+	m_playBehaviour.reset(kPeriodsAreHertz);
 	m_playBehaviour.reset(kITVibratoTremoloPanbrello);
 	// Various files have a default speed or tempo of 0
 	if(fileHeader.tempo)
