@@ -101,7 +101,7 @@ struct MMDSong
 	{
 		FLAG_FILTERON   = 0x01,  // The hardware audio filter is on
 		FLAG_JUMPINGON  = 0x02,  // Mouse pointer jumping on
-		FLAG_JUMP8TH    = 0x04,  // ump every 8th line (not in OctaMED Pro)
+		FLAG_JUMP8TH    = 0x04,  // Jump every 8th line (not in OctaMED Pro)
 		FLAG_INSTRSATT  = 0x08,  // sng+samples indicator (not useful in MMDs)
 		FLAG_VOLHEX     = 0x10,  // volumes are HEX
 		FLAG_STSLIDE    = 0x20,  // use ST/NT/PT compatible sliding
@@ -484,7 +484,7 @@ static std::pair<EffectCommand, ModCommand::PARAM> ConvertMEDEffect(ModCommand &
 		}
 		break;
 	case 0x10:  // MIDI message
-		m.SetEffectCommand(CMD_MIDI, param | 0x80);
+		m.SetEffectCommand(CMD_MIDI, 0x80 | param);
 		break;
 	case 0x11:  // Slide pitch up
 		m.SetEffectCommand(CMD_MODCMDEX, 0x10 | nibbleLo);
@@ -1374,7 +1374,9 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 					file.Seek(patHeader.blockInfoOffset);
 					MMDBlockInfo blockInfo;
 					file.ReadStruct(blockInfo);
-					if(file.Seek(blockInfo.nameOffset))
+					if(blockInfo.nameLength
+					   && blockInfo.nameOffset
+					   && file.Seek(blockInfo.nameOffset))
 					{
 						// We have now chased four pointers to get this far... lovely format.
 						file.ReadString<mpt::String::maybeNullTerminated>(patName, blockInfo.nameLength);

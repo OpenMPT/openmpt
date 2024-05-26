@@ -478,6 +478,7 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 	m_SongFlags = SONG_ITCOMPATGXX;
 	m_playBehaviour.set(kPerChannelGlobalVolSlide);
 	m_playBehaviour.set(kApplyOffsetWithoutNote);
+	m_playBehaviour.reset(kPeriodsAreHertz);
 	m_playBehaviour.reset(kITVibratoTremoloPanbrello);
 	m_playBehaviour.reset(kITSCxStopsSample);	// Gate effect in underbeat.mdl
 
