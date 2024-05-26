@@ -6395,6 +6395,7 @@ uint32 CSoundFile::GetPeriodFromNote(uint32 note, int32 nFineTune, uint32 nC5Spe
 		if(GetType() & (MOD_TYPE_MDL | MOD_TYPE_DTM))
 		{
 			// MDL uses non-linear slides, but their effectiveness does not depend on the middle-C frequency.
+			MPT_ASSERT(!PeriodsAreFrequencies());
 			return (FreqS3MTable[note % 12u] << 4) >> (note / 12);
 		}
 		if(!nC5Speed)
@@ -6513,6 +6514,7 @@ uint32 CSoundFile::GetFreqFromPeriod(uint32 period, uint32 c5speed, int32 nPerio
 		return (period + c5speed - 8363) << FREQ_FRACBITS;
 	} else if(GetType() & (MOD_TYPE_MDL | MOD_TYPE_DTM))
 	{
+		MPT_ASSERT(!PeriodsAreFrequencies());
 		LimitMax(period, Util::MaxValueOfType(period) >> 8);
 		if (!c5speed) c5speed = 8363;
 		return Util::muldiv_unsigned(c5speed, (1712L << 7) << FREQ_FRACBITS, (period << 8) + nPeriodFrac);
