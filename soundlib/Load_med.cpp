@@ -2,7 +2,7 @@
  * Load_med.cpp
  * ------------
  * Purpose: OctaMED / MED Soundstudio module loader
- * Notes  : (currently none)
+ * Notes  : Support for synthesized instruments is still missing.
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
@@ -474,7 +474,8 @@ static void ConvertMEDEffect(ModCommand &m, bool is8ch, bool bpmMode, uint8 rows
 		}
 		break;
 	case 0x10:  // MIDI message
-		m.SetEffectCommand(CMD_MIDI, 0x80 | param);
+		m.command = CMD_MIDI;
+		m.param |= 0x80;
 		break;
 	case 0x11:  // Slide pitch up
 		m.command = CMD_MODCMDEX;
