@@ -5683,6 +5683,8 @@ void CSoundFile::SampleOffset(ModChannel &chn, SmpLength param) const
 		param /= 2u;
 	}
 
+	// IT compatibility: Offset with instrument number but note note recalls previous note and executes offset.
+	// Test case: OffsetWithInstr.it
 	const auto note = (m_playBehaviour[kITOffsetWithInstrNumber] && chn.rowCommand.instr) ? chn.nNewNote : chn.rowCommand.note;
 	if(ModCommand::IsNote(note) || m_playBehaviour[kApplyOffsetWithoutNote])
 	{
