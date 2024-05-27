@@ -711,6 +711,7 @@ void CLegacyPlaybackSettingsDlg::OnFilterStringChanged()
 		case kPluginDefaultProgramAndBank1: desc = _T("Assume initial plugin MIDI program and bank number is 1"); break;
 		case kITNoSustainOnPortamento: desc = _T("Portamento after note-off does not re-enable sample sustain loop"); break;
 		case kITEmptyNoteMapSlotIgnoreCell: desc = _T("Ignore pattern cell completely when trying to play unmapped instrument note"); break;
+		case kITOffsetWithInstrNumber: desc = _T("Offset command with instrument number recalls offset with last note"); break;
 
 		default: MPT_ASSERT_NOTREACHED();
 		}

@@ -590,6 +590,7 @@ enum PlayBehaviour
 	kPluginDefaultProgramAndBank1,  // Default program and bank is set to 1 for plugins, so if an instrument is set to either of those, the program / bank change event is not sent to the plugin
 	kITNoSustainOnPortamento,       // Do not re-enable sustain loop on portamento, even when switching between samples
 	kITEmptyNoteMapSlotIgnoreCell,  // IT ignores the entire pattern cell when trying to play an unmapped note of an instrument
+	kITOffsetWithInstrNumber,       // IT applies offset commands even if just an instrument number without note is present
 
 	// Add new play behaviours here.
 

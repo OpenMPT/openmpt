@@ -5683,13 +5683,14 @@ void CSoundFile::SampleOffset(ModChannel &chn, SmpLength param) const
 		param /= 2u;
 	}
 
-	if(chn.rowCommand.IsNote() || m_playBehaviour[kApplyOffsetWithoutNote])
+	const auto note = (m_playBehaviour[kITOffsetWithInstrNumber] && chn.rowCommand.instr) ? chn.nNewNote : chn.rowCommand.note;
+	if(ModCommand::IsNote(note) || m_playBehaviour[kApplyOffsetWithoutNote])
 	{
 		// IT compatibility: If this note is not mapped to a sample, ignore it.
 		// Test case: empty_sample_offset.it
-		if(chn.pModInstrument != nullptr && chn.rowCommand.IsNote())
+		if(chn.pModInstrument != nullptr && ModCommand::IsNote(note))
 		{
-			SAMPLEINDEX smp = chn.pModInstrument->Keyboard[chn.rowCommand.note - NOTE_MIN];
+			SAMPLEINDEX smp = chn.pModInstrument->Keyboard[note - NOTE_MIN];
 			if(smp == 0 || smp > GetNumSamples())
 				return;
 		}
