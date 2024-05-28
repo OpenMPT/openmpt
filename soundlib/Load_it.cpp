@@ -1304,6 +1304,9 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				// Empty instrument sample map slot ignores complete pattern cell: Added 2024-05-12, https://github.com/schismtracker/schismtracker/commit/aa84148e019a65f3d52ecd33fd84bfecfdb87bf4
 				m_playBehaviour.reset(kITEmptyNoteMapSlotIgnoreCell);
 			}
+			// Offset without note: Added 2024-05-27, https://github.com/schismtracker/schismtracker/commit/9237960d45079a54ad73f87bacfe5dd8ae82e273
+			if(schismDateVersion < SchismVersionFromDate<2024, 05, 27>::date)
+				m_playBehaviour.reset(kITOffsetWithInstrNumber);
 			break;
 		case 4:
 			madeWithTracker = MPT_UFORMAT("pyIT {}.{}")((fileHeader.cwtv & 0x0F00) >> 8, mpt::ufmt::hex0<2>(fileHeader.cwtv & 0xFF));
