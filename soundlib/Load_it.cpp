@@ -1246,67 +1246,40 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			break;
 		case 1:
 			madeWithTracker = GetSchismTrackerVersion(fileHeader.cwtv, fileHeader.reserved);
-			// Hertz in linear mode: Added 2015-01-29, https://github.com/schismtracker/schismtracker/commit/671b30311082a0e7df041fca25f989b5d2478f69
-			if(schismDateVersion < SchismVersionFromDate<2015, 01, 29>::date && m_SongFlags[SONG_LINEARSLIDES])
-				m_playBehaviour.reset(kPeriodsAreHertz);
+			{
+				static constexpr std::pair<int32, PlayBehaviour> SchismQuirks[] =
+				{
+					{SchismVersionFromDate<2015,  1, 29>::date, kPeriodsAreHertz              },  // https://github.com/schismtracker/schismtracker/commit/671b30311082a0e7df041fca25f989b5d2478f69
+					{SchismVersionFromDate<2016,  5, 13>::date, kITShortSampleRetrig          },  // https://github.com/schismtracker/schismtracker/commit/e7b1461fe751554309fd403713c2a1ef322105ca
+					{SchismVersionFromDate<2021,  5,  2>::date, kITDoNotOverrideChannelPan    },  // https://github.com/schismtracker/schismtracker/commit/a34ec86dc819915debc9e06f4727b77bf2dd29ee
+					{SchismVersionFromDate<2021,  5,  2>::date, kITPanningReset               },  // https://github.com/schismtracker/schismtracker/commit/648f5116f984815c69e11d018b32dfec53c6b97a
+					{SchismVersionFromDate<2021, 11,  1>::date, kITPitchPanSeparation         },  // https://github.com/schismtracker/schismtracker/commit/6e9f1207015cae0fe1b829fff7bb867e02ec6dea
+					{SchismVersionFromDate<2022,  4, 30>::date, kITEmptyNoteMapSlot           },  // https://github.com/schismtracker/schismtracker/commit/1b2f7d5522fcb971f134a6664182ca569f7c8008
+					{SchismVersionFromDate<2022,  4, 30>::date, kITPortamentoSwapResetsPos    },  // https://github.com/schismtracker/schismtracker/commit/1b2f7d5522fcb971f134a6664182ca569f7c8008
+					{SchismVersionFromDate<2022,  4, 30>::date, kITMultiSampleInstrumentNumber},  // https://github.com/schismtracker/schismtracker/commit/1b2f7d5522fcb971f134a6664182ca569f7c8008
+					{SchismVersionFromDate<2023,  3,  9>::date, kITInitialNoteMemory          },  // https://github.com/schismtracker/schismtracker/commit/73e9d60676c2b48c8e94e582373e29517105b2b1
+					{SchismVersionFromDate<2023, 10, 17>::date, kITDCTBehaviour               },  // https://github.com/schismtracker/schismtracker/commit/31d36dc00013fc5ab0efa20c782af18e8b006e07
+					{SchismVersionFromDate<2023, 10, 19>::date, kITSampleAndHoldPanbrello     },  // https://github.com/schismtracker/schismtracker/commit/411ec16b190ba1a486d8b0907ad8d74f8fdc2840
+					{SchismVersionFromDate<2023, 10, 19>::date, kITPortaNoNote                },  // https://github.com/schismtracker/schismtracker/commit/8ff0a86a715efb50c89770fb9095d4c4089ff187
+					{SchismVersionFromDate<2023, 10, 22>::date, kITFirstTickHandling          },  // https://github.com/schismtracker/schismtracker/commit/b9609e4f827e1b6ce9ebe6573b85e69388ca0ea0
+					{SchismVersionFromDate<2023, 10, 22>::date, kITMultiSampleInstrumentNumber},  // https://github.com/schismtracker/schismtracker/commit/a9e5df533ab52c35190fcc1cbfed4f0347b660bb
+					{SchismVersionFromDate<2024,  3,  9>::date, kITPanbrelloHold              },  // https://github.com/schismtracker/schismtracker/commit/ebdebaa8c8a735a7bf49df55debded1b7aac3605
+					{SchismVersionFromDate<2024,  5, 12>::date, kITNoSustainOnPortamento      },  // https://github.com/schismtracker/schismtracker/commit/6f68f2855a7e5e4ffe825869244e631e15741037
+					{SchismVersionFromDate<2024,  5, 12>::date, kITEmptyNoteMapSlotIgnoreCell },  // https://github.com/schismtracker/schismtracker/commit/aa84148e019a65f3d52ecd33fd84bfecfdb87bf4
+					{SchismVersionFromDate<2024,  5, 27>::date, kITOffsetWithInstrNumber      },  // https://github.com/schismtracker/schismtracker/commit/9237960d45079a54ad73f87bacfe5dd8ae82e273
+				};
+				for(const auto &quirk : SchismQuirks)
+				{
+					if(schismDateVersion < quirk.first)
+						m_playBehaviour.reset(quirk.second);
+				}
+			}
 			// Hertz in Amiga mode: Added 2021-05-02, https://github.com/schismtracker/schismtracker/commit/c656a6cbd5aaf81198a7580faf81cb7960cb6afa
-			else if(schismDateVersion < SchismVersionFromDate<2021, 05, 02>::date && !m_SongFlags[SONG_LINEARSLIDES])
+			if(schismDateVersion < SchismVersionFromDate<2021, 05, 02>::date && !m_SongFlags[SONG_LINEARSLIDES])
 				m_playBehaviour.reset(kPeriodsAreHertz);
-			// Qxx with short samples: Added 2016-05-13, https://github.com/schismtracker/schismtracker/commit/e7b1461fe751554309fd403713c2a1ef322105ca
-			if(schismDateVersion < SchismVersionFromDate<2016, 05, 13>::date)
-				m_playBehaviour.reset(kITShortSampleRetrig);
-			// Instrument pan doesn't override channel pan: Added 2021-05-02, https://github.com/schismtracker/schismtracker/commit/a34ec86dc819915debc9e06f4727b77bf2dd29ee
-			if(schismDateVersion < SchismVersionFromDate<2021, 05, 02>::date)
-				m_playBehaviour.reset(kITDoNotOverrideChannelPan);
-			// Notes set instrument panning, not instrument numbers: Added 2021-05-02, https://github.com/schismtracker/schismtracker/commit/648f5116f984815c69e11d018b32dfec53c6b97a
-			if(schismDateVersion < SchismVersionFromDate<2021, 05, 02>::date)
-				m_playBehaviour.reset(kITPanningReset);
 			// Imprecise calculation of ping-pong loop wraparound: Added 2021-11-01, https://github.com/schismtracker/schismtracker/commit/22cbb9b676e9c2c9feb7a6a17deca7a17ac138cc
 			if(schismDateVersion < SchismVersionFromDate<2021, 11, 01>::date)
 				m_playBehaviour.set(kImprecisePingPongLoops);
-			// Pitch/Pan Separation can be overridden by panning commands: Added 2021-11-01, https://github.com/schismtracker/schismtracker/commit/6e9f1207015cae0fe1b829fff7bb867e02ec6dea
-			if(schismDateVersion < SchismVersionFromDate<2021, 11, 01>::date)
-				m_playBehaviour.reset(kITPitchPanSeparation);
-			// Various fixes to multisampled instruments: Added 2022-04-30, https://github.com/schismtracker/schismtracker/commit/1b2f7d5522fcb971f134a6664182ca569f7c8008
-			if(schismDateVersion < SchismVersionFromDate<2022, 04, 30>::date)
-			{
-				m_playBehaviour.reset(kITEmptyNoteMapSlot);
-				m_playBehaviour.reset(kITPortamentoSwapResetsPos);
-				m_playBehaviour.reset(kITMultiSampleInstrumentNumber);
-			}
-			// Initial note memory for channel is C-0: Added 2023-03-09, https://github.com/schismtracker/schismtracker/commit/73e9d60676c2b48c8e94e582373e29517105b2b1
-			if(schismDateVersion < SchismVersionFromDate<2023, 03, 9>::date)
-				m_playBehaviour.reset(kITInitialNoteMemory);
-			// DCT note comparison: Added 2023-10-17, https://github.com/schismtracker/schismtracker/commit/31d36dc00013fc5ab0efa20c782af18e8b006e07
-			if(schismDateVersion < SchismVersionFromDate<2023, 10, 17>::date)
-				m_playBehaviour.reset(kITDCTBehaviour);
-			if(schismDateVersion < SchismVersionFromDate<2023, 10, 19>::date)
-			{
-				// Panbrello sample & hold random waveform: Added 2023-10-19, https://github.com/schismtracker/schismtracker/commit/411ec16b190ba1a486d8b0907ad8d74f8fdc2840
-				m_playBehaviour.reset(kITSampleAndHoldPanbrello);
-				// Don't apply any portamento if no previous note is playing: Added 2023-10-19, https://github.com/schismtracker/schismtracker/commit/8ff0a86a715efb50c89770fb9095d4c4089ff187
-				m_playBehaviour.reset(kITPortaNoNote);
-			}
-			if(schismDateVersion < SchismVersionFromDate<2023, 10, 22>::date)
-			{
-				// Note delay delays first-tick behaviour for slides: Added 2023-10-22, https://github.com/schismtracker/schismtracker/commit/b9609e4f827e1b6ce9ebe6573b85e69388ca0ea0
-				m_playBehaviour.reset(kITFirstTickHandling);
-				// https://github.com/schismtracker/schismtracker/commit/a9e5df533ab52c35190fcc1cbfed4f0347b660bb
-				m_playBehaviour.reset(kITMultiSampleInstrumentNumber);
-			}
-			// Panbrello hold: Added 2024-03-09, https://github.com/schismtracker/schismtracker/commit/ebdebaa8c8a735a7bf49df55debded1b7aac3605
-			if(schismDateVersion < SchismVersionFromDate<2024, 03, 9>::date)
-				m_playBehaviour.reset(kITPanbrelloHold);
-			if(schismDateVersion < SchismVersionFromDate<2024, 05, 12>::date)
-			{
-				// Do not re-enable sustain loop on portamento-ed note: Added 2024-05-12, https://github.com/schismtracker/schismtracker/commit/6f68f2855a7e5e4ffe825869244e631e15741037
-				m_playBehaviour.reset(kITNoSustainOnPortamento);
-				// Empty instrument sample map slot ignores complete pattern cell: Added 2024-05-12, https://github.com/schismtracker/schismtracker/commit/aa84148e019a65f3d52ecd33fd84bfecfdb87bf4
-				m_playBehaviour.reset(kITEmptyNoteMapSlotIgnoreCell);
-			}
-			// Offset without note: Added 2024-05-27, https://github.com/schismtracker/schismtracker/commit/9237960d45079a54ad73f87bacfe5dd8ae82e273
-			if(schismDateVersion < SchismVersionFromDate<2024, 05, 27>::date)
-				m_playBehaviour.reset(kITOffsetWithInstrNumber);
 			break;
 		case 4:
 			madeWithTracker = MPT_UFORMAT("pyIT {}.{}")((fileHeader.cwtv & 0x0F00) >> 8, mpt::ufmt::hex0<2>(fileHeader.cwtv & 0xFF));
