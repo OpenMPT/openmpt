@@ -98,14 +98,11 @@ struct ModChannel
 	int32 cachedPeriod, glissandoPeriod;
 	int32 nCalcVolume;                 // Calculated channel volume, 14-Bit (without global volume, pre-amp etc applied) - for MIDI macros
 	EnvInfo VolEnv, PanEnv, PitchEnv;  // Envelope playback info
-	int32 nGlobalVol;                  // Channel volume (CV in ITTECH.TXT) 0...64
-	int32 nInsVol;                     // Sample / Instrument volume (SV * IV in ITTECH.TXT) 0...64
 	int32 nAutoVibDepth;
 	uint32 nEFxOffset;  // Offset memory for Invert Loop (EFx, .MOD only)
 	ROWINDEX nPatternLoop;
 	AutoSlideStatus autoSlide;
 	uint16 portamentoSlide;
-	int16 nTranspose;
 	int16 nFineTune;
 	int16 microTuning;  // Micro-tuning / MIDI pitch wheel command
 	int16 nVolSwing, nPanSwing;
@@ -115,6 +112,9 @@ struct ModChannel
 	CHANNELINDEX nMasterChn;
 	ModCommand rowCommand;
 	// 8-bit members
+	uint8 nGlobalVol;  // Channel volume (CV in ITTECH.TXT) 0...64
+	uint8 nInsVol;     // Sample / Instrument volume (SV * IV in ITTECH.TXT) 0...64
+	int8 nTranspose;
 	ResamplingMode resamplingMode;
 	uint8 nRestoreResonanceOnNewNote;  // See nRestorePanOnNewNote
 	uint8 nRestoreCutoffOnNewNote;     // ditto
@@ -246,7 +246,7 @@ struct ModChannelSettings
 #endif                              // MODPLUG_TRACKER
 	FlagSet<ChannelFlags> dwFlags;  // Channel flags
 	uint16 nPan = 128;              // Initial pan (0...256)
-	uint16 nVolume = 64;            // Initial channel volume (0...64)
+	uint8 nVolume = 64;             // Initial channel volume (0...64)
 	PLUGINDEX nMixPlugin = 0;       // Assigned plugin
 
 	mpt::charbuf<MAX_CHANNELNAME> szName;  // Channel name

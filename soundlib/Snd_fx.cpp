@@ -888,7 +888,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					else							// Up
 						volume += ((param & 0xF0) >> 4) * nonRowTicks;
 					Limit(volume, 0, 64);
-					chn.nGlobalVol = volume;
+					chn.nGlobalVol = static_cast<uint8>(volume);
 				}
 				break;
 			case CMD_PANNING8:
@@ -3573,7 +3573,7 @@ bool CSoundFile::ProcessEffects()
 			if(!m_PlayState.m_flags[SONG_FIRSTTICK]) break;
 			if (param <= 64)
 			{
-				chn.nGlobalVol = param;
+				chn.nGlobalVol = static_cast<uint8>(param);
 				chn.dwFlags.set(CHN_FASTVOLRAMP);
 			}
 			break;
@@ -4812,8 +4812,8 @@ void CSoundFile::ChannelVolSlide(ModChannel &chn, ModCommand::PARAM param) const
 	if (nChnSlide)
 	{
 		nChnSlide += chn.nGlobalVol;
-		nChnSlide = Clamp(nChnSlide, 0, 64);
-		chn.nGlobalVol = nChnSlide;
+		Limit(nChnSlide, 0, 64);
+		chn.nGlobalVol = static_cast<uint8>(nChnSlide);
 	}
 }
 

@@ -125,9 +125,9 @@ void ModChannel::UpdateInstrumentVolume(const ModSample *smp, const ModInstrumen
 {
 	nInsVol = 64;
 	if(smp != nullptr)
-		nInsVol = smp->nGlobalVol;
+		nInsVol = static_cast<uint8>(smp->nGlobalVol);
 	if(ins != nullptr)
-		nInsVol = (nInsVol * ins->nGlobalVol) / 64;
+		nInsVol = static_cast<uint8>((nInsVol * ins->nGlobalVol) / 64);
 }
 
 

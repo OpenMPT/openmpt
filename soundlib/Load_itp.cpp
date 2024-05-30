@@ -212,7 +212,7 @@ bool CSoundFile::ReadITP(FileReader &file, ModLoadingFlags loadFlags)
 		uint32 flags = file.ReadUint32LE();
 		if(flags & 0x100) ChnSettings[chn].dwFlags.set(CHN_MUTE);
 		if(flags & 0x800) ChnSettings[chn].dwFlags.set(CHN_SURROUND);
-		ChnSettings[chn].nVolume = std::min(static_cast<uint16>(file.ReadUint32LE()), uint16(64));
+		ChnSettings[chn].nVolume = std::min(static_cast<uint8>(file.ReadUint32LE()), uint8(64));
 		file.ReadString<mpt::String::maybeNullTerminated>(ChnSettings[chn].szName, size);
 	}
 

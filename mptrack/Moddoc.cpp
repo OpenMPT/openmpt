@@ -1472,11 +1472,11 @@ bool CModDoc::SetChannelGlobalVolume(CHANNELINDEX nChn, uint16 nVolume)
 	if(nChn >= m_SndFile.GetNumChannels() || nVolume > 64) return false;
 	if(m_SndFile.ChnSettings[nChn].nVolume != nVolume)
 	{
-		m_SndFile.ChnSettings[nChn].nVolume = nVolume;
+		m_SndFile.ChnSettings[nChn].nVolume = static_cast<uint8>(nVolume);
 		if(m_SndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) SetModified();
 		ok = true;
 	}
-	m_SndFile.m_PlayState.Chn[nChn].nGlobalVol = nVolume;
+	m_SndFile.m_PlayState.Chn[nChn].nGlobalVol = static_cast<uint8>(nVolume);
 	return ok;
 }
 

@@ -585,7 +585,7 @@ bool CSoundFile::CreateInternal(FileReader file, ModLoadingFlags loadFlags)
 	const auto muteFlag = GetChannelMuteFlag();
 	for(CHANNELINDEX chn = 0; chn < MAX_BASECHANNELS; chn++)
 	{
-		LimitMax(ChnSettings[chn].nVolume, uint16(64));
+		LimitMax(ChnSettings[chn].nVolume, uint8(64));
 		if(ChnSettings[chn].nPan > 256)
 			ChnSettings[chn].nPan = 128;
 		if(ChnSettings[chn].nMixPlugin > MAX_MIXPLUGINS)
