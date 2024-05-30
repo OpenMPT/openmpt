@@ -2560,7 +2560,7 @@ struct IFFSampleHeader
 MPT_BINARY_STRUCT(IFFSampleHeader, 20)
 
 
-bool CSoundFile::ReadIFFSample(SAMPLEINDEX nSample, FileReader &file, bool allowLittleEndian)
+bool CSoundFile::ReadIFFSample(SAMPLEINDEX nSample, FileReader &file, bool allowLittleEndian, uint8 octave)
 {
 	file.Rewind();
 
@@ -2651,6 +2651,18 @@ bool CSoundFile::ReadIFFSample(SAMPLEINDEX nSample, FileReader &file, bool allow
 		sampleRate = sampleHeader.samplesPerSec;
 		volume     = sampleHeader.volume;
 		numSamples = mpt::saturate_cast<SmpLength>(sampleData.GetLength() / bytesPerFrame);
+
+		if(octave < sampleHeader.octave)
+		{
+			numSamples = sampleHeader.oneShotHiSamples + sampleHeader.repeatHiSamples;
+			for(uint8 o = 0; o < octave; o++)
+			{
+				sampleData.Skip(numSamples * bytesPerSample * numChannels);
+				numSamples *= 2;
+				loopStart *= 2;
+				loopLength *= 2;
+			}
+		}
 	}
 
 	DestroySampleThreadsafe(nSample);
