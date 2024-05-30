@@ -196,7 +196,7 @@ void CSoundFile::ProcessInputChannels(IAudioSource &source, std::size_t countChu
 
 
 // Read one tick but skip all expensive rendering options
-CSoundFile::samplecount_t CSoundFile::ReadOneTick()
+samplecount_t CSoundFile::ReadOneTick()
 {
 	const auto origMaxMixChannels = m_MixerSettings.m_nMaxMixChannels;
 	m_MixerSettings.m_nMaxMixChannels = 0;
@@ -216,7 +216,7 @@ CSoundFile::samplecount_t CSoundFile::ReadOneTick()
 }
 
 
-CSoundFile::samplecount_t CSoundFile::Read(samplecount_t count, IAudioTarget &target, IAudioSource &source, std::optional<std::reference_wrapper<IMonitorOutput>> outputMonitor, std::optional<std::reference_wrapper<IMonitorInput>> inputMonitor)
+samplecount_t CSoundFile::Read(samplecount_t count, IAudioTarget &target, IAudioSource &source, std::optional<std::reference_wrapper<IMonitorOutput>> outputMonitor, std::optional<std::reference_wrapper<IMonitorInput>> inputMonitor)
 {
 	MPT_ASSERT_ALWAYS(m_MixerSettings.IsValid());
 

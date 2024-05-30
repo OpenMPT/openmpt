@@ -86,7 +86,7 @@ class OPLCapture final : public OPL::IRegisterLogger
 {
 	struct RegisterDump
 	{
-		CSoundFile::samplecount_t sampleOffset;
+		samplecount_t sampleOffset;
 		uint8 regLo;
 		uint8 regHi;
 		uint8 value;
@@ -124,7 +124,7 @@ public:
 
 		mpt::IO::Write(f, header);
 
-		CSoundFile::samplecount_t prevOffset = 0, prevOffsetMs = 0;
+		samplecount_t prevOffset = 0, prevOffsetMs = 0;
 		bool prevHigh = false;
 		for(const auto &reg : m_registerDump)
 		{
@@ -177,7 +177,7 @@ public:
 		mpt::IO::Write(f, header);
 	}
 
-	void WriteVGZ(std::ostream &f, const CSoundFile::samplecount_t loopStart, const FileTags &fileTags, const mpt::ustring &filename) const
+	void WriteVGZ(std::ostream &f, const samplecount_t loopStart, const FileTags &fileTags, const mpt::ustring &filename) const
 	{
 		std::ostringstream outStream;
 		WriteVGM(outStream, loopStart, fileTags);
@@ -186,7 +186,7 @@ public:
 		WriteGzip(f, outData, filename);
 	}
 	
-	void WriteVGM(std::ostream &f, const CSoundFile::samplecount_t loopStart, const FileTags &fileTags) const
+	void WriteVGM(std::ostream &f, const samplecount_t loopStart, const FileTags &fileTags) const
 	{
 		VGMHeader header{};
 		memcpy(header.magic, VGMHeader::VgmMagic, 4);
@@ -200,7 +200,7 @@ public:
 		mpt::IO::Write(f, header);
 
 		bool wroteLoopStart = (header.loopNumSamples == 0);
-		CSoundFile::samplecount_t prevOffset = 0;
+		samplecount_t prevOffset = 0;
 		for(const auto &reg : m_registerDump)
 		{
 			if(reg.sampleOffset >= loopStart && !wroteLoopStart)
@@ -284,7 +284,7 @@ private:
 		return bytesWritten;
 	}
 
-	static void WriteVGMDelay(std::ostream &f, CSoundFile::samplecount_t delay)
+	static void WriteVGMDelay(std::ostream &f, samplecount_t delay)
 	{
 		while(delay)
 		{
@@ -524,7 +524,7 @@ public:
 			m_sndFile.m_opl = std::make_unique<OPL>(m_oplLogger);
 
 			auto prevTime = timeGetTime();
-			CSoundFile::samplecount_t loopStart = std::numeric_limits<CSoundFile::samplecount_t>::max(), subsongSamples = 0;
+			samplecount_t loopStart = std::numeric_limits<samplecount_t>::max(), subsongSamples = 0;
 			while(!m_abort)
 			{
 				auto count = m_sndFile.ReadOneTick();

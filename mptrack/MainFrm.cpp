@@ -812,12 +812,12 @@ void CMainFrame::SoundCallbackLockedCallback(SoundDevice::CallbackBuffer<Dithers
 	OPENMPT_PROFILE_FUNCTION(Profiler::Audio);
 	BufferInputWrapper source(buffer);
 	BufferOutputWrapper target(buffer);
-	MPT_ASSERT(buffer.GetNumFrames() <= std::numeric_limits<CSoundFile::samplecount_t>::max());
-	CSoundFile::samplecount_t framesToRender = static_cast<CSoundFile::samplecount_t>(buffer.GetNumFrames());
+	MPT_ASSERT(buffer.GetNumFrames() <= std::numeric_limits<samplecount_t>::max());
+	samplecount_t framesToRender = static_cast<samplecount_t>(buffer.GetNumFrames());
 	MPT_ASSERT(framesToRender > 0);
-	CSoundFile::samplecount_t renderedFrames = m_pSndFile->Read(framesToRender, target, source, std::ref(m_VUMeterOutput), std::ref(m_VUMeterInput));
+	samplecount_t renderedFrames = m_pSndFile->Read(framesToRender, target, source, std::ref(m_VUMeterOutput), std::ref(m_VUMeterInput));
 	MPT_ASSERT(renderedFrames <= framesToRender);
-	[[maybe_unused]] CSoundFile::samplecount_t remainingFrames = framesToRender - renderedFrames;
+	[[maybe_unused]] samplecount_t remainingFrames = framesToRender - renderedFrames;
 	MPT_ASSERT(remainingFrames >= 0); // remaining buffer is filled with silence automatically
 }
 
@@ -827,8 +827,8 @@ void CMainFrame::SoundCallbackLockedProcessDone(SoundDevice::TimeInfo timeInfo)
 	MPT_TRACE_SCOPE();
 	MPT_ASSERT(InAudioThread());
 	OPENMPT_PROFILE_FUNCTION(Profiler::Notify);
-	MPT_ASSERT((timeInfo.RenderStreamPositionAfter.Frames - timeInfo.RenderStreamPositionBefore.Frames) < std::numeric_limits<CSoundFile::samplecount_t>::max());
-	CSoundFile::samplecount_t framesRendered = static_cast<CSoundFile::samplecount_t>(timeInfo.RenderStreamPositionAfter.Frames - timeInfo.RenderStreamPositionBefore.Frames);
+	MPT_ASSERT((timeInfo.RenderStreamPositionAfter.Frames - timeInfo.RenderStreamPositionBefore.Frames) < std::numeric_limits<samplecount_t>::max());
+	samplecount_t framesRendered = static_cast<samplecount_t>(timeInfo.RenderStreamPositionAfter.Frames - timeInfo.RenderStreamPositionBefore.Frames);
 	int64 streamPosition = timeInfo.RenderStreamPositionAfter.Frames;
 	DoNotification(framesRendered, streamPosition);
 	//m_pSndFile->m_TimingInfo = TimingInfo(); // reset
@@ -2114,7 +2114,7 @@ void CMainFrame::OnTimerGUI()
 	IdleHandlerSounddevice();
 
 	// Display Time in status bar
-	CSoundFile::samplecount_t time = 0;
+	samplecount_t time = 0;
 	if(m_pSndFile != nullptr && m_pSndFile->GetSampleRate() != 0)
 	{
 		time = m_pSndFile->GetTotalSampleCount() / m_pSndFile->GetSampleRate();

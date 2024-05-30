@@ -512,7 +512,7 @@ std::size_t module_impl::read_wrapper( std::size_t count, std::int16_t * left, s
 	OpenMPT::AudioTargetBufferWithGain<mpt::audio_span_planar<std::int16_t>> target( mpt::audio_span_planar<std::int16_t>( buffers, valid_channels( buffers, std::size( buffers ) ), count ), *m_Dithers, m_Gain );
 	while ( count > 0 ) {
 		std::size_t count_chunk = m_sndFile->Read(
-			static_cast<OpenMPT::CSoundFile::samplecount_t>( std::min( static_cast<std::uint64_t>( count ), static_cast<std::uint64_t>( std::numeric_limits<OpenMPT::CSoundFile::samplecount_t>::max() / 2 / 4 / 4 ) ) ), // safety margin / samplesize / channels
+			static_cast<OpenMPT::samplecount_t>( std::min( static_cast<std::uint64_t>( count ), static_cast<std::uint64_t>( std::numeric_limits<OpenMPT::samplecount_t>::max() / 2 / 4 / 4 ) ) ), // safety margin / samplesize / channels
 			target
 			);
 		if ( count_chunk == 0 ) {
@@ -535,7 +535,7 @@ std::size_t module_impl::read_wrapper( std::size_t count, float * left, float * 
 	OpenMPT::AudioTargetBufferWithGain<mpt::audio_span_planar<float>> target( mpt::audio_span_planar<float>( buffers, valid_channels( buffers, std::size( buffers ) ), count ), *m_Dithers, m_Gain );
 	while ( count > 0 ) {
 		std::size_t count_chunk = m_sndFile->Read(
-			static_cast<OpenMPT::CSoundFile::samplecount_t>( std::min( static_cast<std::uint64_t>( count ), static_cast<std::uint64_t>( std::numeric_limits<OpenMPT::CSoundFile::samplecount_t>::max() / 2 / 4 / 4 ) ) ), // safety margin / samplesize / channels
+			static_cast<OpenMPT::samplecount_t>( std::min( static_cast<std::uint64_t>( count ), static_cast<std::uint64_t>( std::numeric_limits<OpenMPT::samplecount_t>::max() / 2 / 4 / 4 ) ) ), // safety margin / samplesize / channels
 			target
 			);
 		if ( count_chunk == 0 ) {
@@ -557,7 +557,7 @@ std::size_t module_impl::read_interleaved_wrapper( std::size_t count, std::size_
 	OpenMPT::AudioTargetBufferWithGain<mpt::audio_span_interleaved<std::int16_t>> target( mpt::audio_span_interleaved<std::int16_t>( interleaved, channels, count ), *m_Dithers, m_Gain );
 	while ( count > 0 ) {
 		std::size_t count_chunk = m_sndFile->Read(
-			static_cast<OpenMPT::CSoundFile::samplecount_t>( std::min( static_cast<std::uint64_t>( count ), static_cast<std::uint64_t>( std::numeric_limits<OpenMPT::CSoundFile::samplecount_t>::max() / 2 / 4 / 4 ) ) ), // safety margin / samplesize / channels
+			static_cast<OpenMPT::samplecount_t>( std::min( static_cast<std::uint64_t>( count ), static_cast<std::uint64_t>( std::numeric_limits<OpenMPT::samplecount_t>::max() / 2 / 4 / 4 ) ) ), // safety margin / samplesize / channels
 			target
 			);
 		if ( count_chunk == 0 ) {
@@ -579,7 +579,7 @@ std::size_t module_impl::read_interleaved_wrapper( std::size_t count, std::size_
 	OpenMPT::AudioTargetBufferWithGain<mpt::audio_span_interleaved<float>> target( mpt::audio_span_interleaved<float>( interleaved, channels, count ), *m_Dithers, m_Gain );
 	while ( count > 0 ) {
 		std::size_t count_chunk = m_sndFile->Read(
-			static_cast<OpenMPT::CSoundFile::samplecount_t>( std::min( static_cast<std::uint64_t>( count ), static_cast<std::uint64_t>( std::numeric_limits<OpenMPT::CSoundFile::samplecount_t>::max() / 2 / 4 / 4 ) ) ), // safety margin / samplesize / channels
+			static_cast<OpenMPT::samplecount_t>( std::min( static_cast<std::uint64_t>( count ), static_cast<std::uint64_t>( std::numeric_limits<OpenMPT::samplecount_t>::max() / 2 / 4 / 4 ) ) ), // safety margin / samplesize / channels
 			target
 			);
 		if ( count_chunk == 0 ) {

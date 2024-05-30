@@ -41,7 +41,7 @@ extern const TCHAR *gszChnCfgNames[3];
 
 
 template <typename Tsample>
-static CSoundFile::samplecount_t ReadInterleaved(CSoundFile &sndFile, Tsample *outputBuffer, std::size_t channels, CSoundFile::samplecount_t count, DithersOpenMPT &dithers)
+static samplecount_t ReadInterleaved(CSoundFile &sndFile, Tsample *outputBuffer, std::size_t channels, samplecount_t count, DithersOpenMPT &dithers)
 {
 	sndFile.ResetMixStat();
 	MPT_ASSERT(sndFile.m_MixerSettings.gnChannels == channels);

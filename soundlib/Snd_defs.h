@@ -57,6 +57,8 @@ inline constexpr CHANNELINDEX MAX_CHANNELS       = 256; // Maximum number of mix
 
 enum { FREQ_FRACBITS = 4 }; // Number of fractional bits in return value of CSoundFile::GetFreqFromPeriod()
 
+using samplecount_t = uint32;  // Number of rendered samples
+
 // String lengths (including trailing null char)
 enum
 {

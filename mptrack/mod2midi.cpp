@@ -71,9 +71,9 @@ namespace MidiExport
 
 		std::ostringstream f;
 		double m_tempo = 0.0;
-		double m_ticks = 0.0;                           // MIDI ticks since previous event
-		CSoundFile::samplecount_t m_samplePos = 0;      // Current sample position
-		CSoundFile::samplecount_t m_prevEventTime = 0;  // Sample position of previous event
+		double m_ticks = 0.0;               // MIDI ticks since previous event
+		samplecount_t m_samplePos = 0;      // Current sample position
+		samplecount_t m_prevEventTime = 0;  // Sample position of previous event
 		uint32 m_sampleRate;
 		uint32 m_oldSigNumerator = 0;
 		int32 m_oldGlobalVol = -1;

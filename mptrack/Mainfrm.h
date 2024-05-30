@@ -183,7 +183,7 @@ protected:
 	CMainToolBar m_wndToolBar;
 	CSoundFile *m_pSndFile = nullptr; // != NULL only when currently playing or rendering
 	HWND m_hWndMidi = nullptr;
-	CSoundFile::samplecount_t m_dwTimeSec = 0;
+	samplecount_t m_dwTimeSec = 0;
 	UINT_PTR m_nTimer = 0;
 	UINT m_nAvgMixChn = 0, m_nMixChn = 0;
 	// Misc
@@ -281,7 +281,7 @@ public:
 	void UpdateTree(CModDoc *pModDoc, UpdateHint hint, CObject *pHint = nullptr);
 	void RefreshDlsBanks();
 	static CInputHandler* GetInputHandler() { return m_InputHandler; }
-	void SetElapsedTime(double t) { m_dwTimeSec = static_cast<CSoundFile::samplecount_t>(t); }
+	void SetElapsedTime(double t) { m_dwTimeSec = static_cast<samplecount_t>(t); }
 
 #if defined(MPT_ENABLE_UPDATE)
 	bool ShowUpdateIndicator(const UpdateCheckResult &result, const CString &releaseVersion, const CString &infoURL, bool showHighlight);

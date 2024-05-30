@@ -457,8 +457,6 @@ public:
 	BitCrush m_BitCrush;
 #endif
 
-	using samplecount_t = uint32; // Number of rendered samples
-
 	static constexpr uint32 TICKS_ROW_FINISHED = uint32_max - 1u;
 
 public:	// for Editing
