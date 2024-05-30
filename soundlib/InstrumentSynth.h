@@ -11,13 +11,14 @@
 #pragma once
 
 #include "openmpt/all/BuildSettings.hpp"
+#include "Snd_defs.h"
 
 #include <vector>
 
 OPENMPT_NAMESPACE_BEGIN
 
 class CSoundFile;
-struct ModChannel;
+struct PlayState;
 
 struct InstrumentSynth
 {
@@ -25,14 +26,19 @@ struct InstrumentSynth
 	{
 		enum class Type : uint8
 		{
-			StopScript,    // No parameter
-			Jump,          // Parameter: Event index (uint16)
-			Delay,         // Parameter: Number of ticks (uint16)
-			SetStepSpeed,  // Parameter: Speed (uint8)
-			JumpMarker,    // Parameter: Marker ID (uint16)
+			StopScript,           // No parameter
+			Jump,                 // Parameter: Event index (uint16)
+			JumpIfTrue,           // Parameter: Event index (uint16)
+			Delay,                // Parameter: Number of ticks (uint16)
+			SetStepSpeed,         // Parameter: Speed (uint8)
+			JumpMarker,           // Parameter: Marker ID (uint16)
+			SampleOffset,         // Parameter: Offset (uint32)
+			SampleOffsetAdd,      // Parameter: Offset (uint32)
+			SampleOffsetSub,      // Parameter: Offset (uint32)
+			SetLoopCounter,       // Parameter: Count (uint16), force? (bool)
+			EvaluateLoopCounter,  // Parameter: Event index (uint16)
+			NoteCut,              // No parameter
 
-			GTK_SetLoopCounter,       // Parameter: Count (uint8)
-			GTK_EvaluateLoopCounter,  // Parameter: Jump target once counter reaches 0 (uint16)
 			GTK_KeyOff,               // Parameter: Jump target once key is released (uint16)
 			GTK_SetVolume,            // Parameter: Volume (uint16)
 			GTK_SetPitch,             // Parameter: Pitch (uint16)
@@ -65,6 +71,36 @@ struct InstrumentSynth
 			MED_SetVolumeStep,    // Parameter: Volume step (int16)
 			MED_SetPeriodStep,    // Parameter: Period step (int16)
 			MED_HoldDecay,        // Parameter: Hold time (uint8), decay point (uint16)
+
+			FTM_PlaySample,        // No parameter
+			FTM_SetPitch,          // Parameter: New pitch (uint16)
+			FTM_AddPitch,          // Parameter: Pitch amount (int16)
+			FTM_SetDetune,         // Parameter: Detune amount (uint16)
+			FTM_AddDetune,         // Parameter: Detune amount (int16)
+			FTM_SetVolume,         // Parameter: Channel volume (uint8)
+			FTM_AddVolume,         // Parameter: Volume amount (int16)
+			FTM_SetSample,         // Parameter: New sample (uint8)
+			FTM_SetCondition,      // Parameter: Pitch/volume threshold (uint16), condition type (uint8)
+			FTM_SetInterrupt,      // Parameter: Jump target (uint16), interrupt type (uint8)
+			FTM_SetSampleStart,    // Parameter: Offset (uint16), modification type (uint8)
+			FTM_SetOneshotLength,  // Parameter: Length (uint16), modification type (uint8)
+			FTM_SetRepeatLength,   // Parameter: Length (uint16), modification type (uint8)
+			FTM_CloneTrack,        // Parameter: Track (uint8), properties (uint8)
+			FTM_StartLFO,          // Parameter: LFO index (uint8), target/waveform (uint8)
+			FTM_LFOAddSub,         // Parameter: LFO/addSub (uint8), speed (uint8), depth (uint8)
+			FTM_SetWorkTrack,      // Parameter: Channel index (uint8), is relative? (bool)
+			FTM_SetGlobalVolume,   // Parameter: Global volume (uint16)
+			FTM_SetTempo,          // Parameter: Tempo (uint16)
+			FTM_SetSpeed,          // Parameter: Speed (uint16)
+			FTM_SetPlayPosition,   // Parameter: Pattern to play (uint16), row in pattern (uint8)
+		};
+
+		static constexpr Type JumpEvents[] =
+		{
+			Type::Jump, Type::JumpIfTrue, Type::EvaluateLoopCounter,
+			Type::GTK_KeyOff,
+			Type::MED_JumpScript, Type::MED_HoldDecay,
+			Type::FTM_SetInterrupt,
 		};
 
 		Type type = Type::StopScript;
@@ -82,12 +118,17 @@ struct InstrumentSynth
 
 		static constexpr Event StopScript() noexcept { return Event{Type::StopScript}; }
 		static constexpr Event Jump(uint16 target) noexcept { return Event{Type::Jump, target}; }
+		static constexpr Event JumpIfTrue(uint16 target) noexcept { return Event{Type::JumpIfTrue, target}; }
 		static constexpr Event Delay(uint16 ticks) noexcept { return Event{Type::Delay, ticks}; }
 		static constexpr Event SetStepSpeed(uint8 speed) noexcept { return Event{Type::SetStepSpeed, speed}; }
 		static constexpr Event JumpMarker(uint16 data) noexcept { return Event{Type::JumpMarker, data}; }
+		static constexpr Event SampleOffset(uint32 offset) noexcept { return Event24Bit(Type::SampleOffset, offset); }
+		static constexpr Event SampleOffsetAdd(uint32 offset) noexcept { return Event24Bit(Type::SampleOffsetAdd, offset); }
+		static constexpr Event SampleOffsetSub(uint32 offset) noexcept { return Event24Bit(Type::SampleOffsetSub, offset); }
+		static constexpr Event SetLoopCounter(uint16 count, bool force) noexcept { return Event{Type::SetLoopCounter, count, uint8(force ? 1 : 0)}; }
+		static constexpr Event EvaluateLoopCounter(uint16 target) noexcept { return Event{Type::EvaluateLoopCounter, target}; }
+		static constexpr Event NoteCut() noexcept { return Event{Type::NoteCut}; }
 
-		static constexpr Event GTK_SetLoopCounter(uint8 count) noexcept { return Event{Type::GTK_SetLoopCounter, count}; }
-		static constexpr Event GTK_EvaluateLoopCounter(uint16 target) noexcept { return Event{Type::GTK_EvaluateLoopCounter, target}; }
 		static constexpr Event GTK_KeyOff(uint16 target) noexcept { return Event{Type::GTK_KeyOff, target}; }
 		static constexpr Event GTK_SetVolume(uint16 volume) noexcept { return Event{Type::GTK_SetVolume, volume}; }
 		static constexpr Event GTK_SetPitch(uint16 pitch) noexcept { return Event{Type::GTK_SetPitch, pitch}; }
@@ -121,6 +162,28 @@ struct InstrumentSynth
 		static constexpr Event MED_SetPeriodStep(int16 periodStep) noexcept { return Event{Type::MED_SetPeriodStep, periodStep}; }
 		static constexpr Event MED_HoldDecay(uint8 hold, uint16 decay) noexcept { return Event{Type::MED_HoldDecay, decay, hold}; }
 
+		static constexpr Event FTM_SetCondition(uint16 threshold, uint8 condition) noexcept { return Event{Type::FTM_SetCondition, threshold, condition}; }
+		static constexpr Event FTM_SetInterrupt(uint16 target, uint8 type) noexcept { return Event{Type::FTM_SetInterrupt, target, type}; }
+		static constexpr Event FTM_PlaySample() noexcept { return Event{Type::FTM_PlaySample}; }
+		static constexpr Event FTM_SetPitch(uint16 pitch) noexcept { return Event{Type::FTM_SetPitch, pitch}; }
+		static constexpr Event FTM_AddPitch(int16 pitch) noexcept { return Event{Type::FTM_AddPitch, pitch}; }
+		static constexpr Event FTM_SetDetune(uint16 detune) noexcept { return Event{Type::FTM_SetDetune, detune}; }
+		static constexpr Event FTM_AddDetune(int16 detune) noexcept { return Event{Type::FTM_AddDetune, detune}; }
+		static constexpr Event FTM_SetVolume(uint8 volume) noexcept { return Event{Type::FTM_SetVolume, volume}; }
+		static constexpr Event FTM_AddVolume(int16 volume) noexcept { return Event{Type::FTM_AddVolume, volume}; }
+		static constexpr Event FTM_SetSample(uint8 sample) noexcept { return Event{Type::FTM_SetSample, sample}; }
+		static constexpr Event FTM_SetSampleStart(uint16 offset, uint8 type) noexcept { return Event{Type::FTM_SetSampleStart, offset, type}; }
+		static constexpr Event FTM_SetOneshotLength(uint16 length, uint8 type) noexcept { return Event{Type::FTM_SetOneshotLength, length, type}; }
+		static constexpr Event FTM_SetRepeatLength(uint16 length, uint8 type) noexcept { return Event{ Type::FTM_SetRepeatLength, length, type }; }
+		static constexpr Event FTM_CloneTrack(uint8 track, uint8 properties) noexcept { return Event{Type::FTM_CloneTrack, track, properties}; }
+		static constexpr Event FTM_StartLFO(uint8 lfo, uint8 targetWaveform) noexcept { return Event{Type::FTM_StartLFO, lfo, targetWaveform, 0}; }
+		static constexpr Event FTM_LFOAddSub(uint8 lfoAddSub, uint8 speed, uint8 depth) noexcept { return Event{Type::FTM_LFOAddSub, lfoAddSub, speed, depth}; }
+		static constexpr Event FTM_SetWorkTrack(uint8 track, bool relative) noexcept { return Event{ Type::FTM_SetWorkTrack, track, uint8(relative ? 1 : 0), 0}; }
+		static constexpr Event FTM_SetGlobalVolume(uint16 globalVolume) noexcept { return Event{Type::FTM_SetGlobalVolume, globalVolume}; }
+		static constexpr Event FTM_SetTempo(uint16 tempo) noexcept { return Event{Type::FTM_SetTempo, tempo}; }
+		static constexpr Event FTM_SetSpeed(uint16 speed) noexcept { return Event{Type::FTM_SetSpeed, speed}; }
+		static constexpr Event FTM_SetPlayPosition(uint16 pattern, uint8 row) noexcept { return Event{Type::FTM_SetPlayPosition, pattern, row}; }
+
 		constexpr Event() noexcept : u8{}, u16{} {}
 		constexpr Event(const Event &other) noexcept = default;
 		constexpr Event(Event &&other) noexcept = default;
@@ -129,7 +192,7 @@ struct InstrumentSynth
 
 		constexpr bool IsJumpEvent() const noexcept
 		{
-			return type == Type::Jump || type == Type::GTK_KeyOff || type == Type::GTK_EvaluateLoopCounter || type == Type::MED_JumpScript || type == Type::MED_HoldDecay;
+			return mpt::contains(JumpEvents, type);
 		}
 
 		template <typename TMap>
@@ -146,6 +209,7 @@ struct InstrumentSynth
 		constexpr uint8 Byte0() const noexcept { return u8; }
 		constexpr uint8 Byte1() const noexcept { return bytes[0]; }
 		constexpr uint8 Byte2() const noexcept { return bytes[1]; }
+		constexpr uint32 Value24Bit() const noexcept { return Byte0() | (Byte1() << 8) | (Byte2() << 16); }
 
 	protected:
 		constexpr Event(Type type, uint8 b1, uint8 b2, uint8 b3) noexcept : type{type}, u8{b1}, bytes{b2, b3} {}
@@ -158,23 +222,27 @@ struct InstrumentSynth
 		constexpr Event(Type type, uint8 u8) noexcept : type{type}, u8{u8}, u16{} {}
 		constexpr Event(Type type, int8 i8) noexcept : type{type}, i8{i8}, u16{} {}
 		explicit constexpr Event(Type type) noexcept : type{type}, u8{}, u16{} {}
+
+		static constexpr Event Event24Bit(Type type, uint32 value) { value = std::min(value, uint32(0xFFFFFF)); return Event{type, static_cast<uint8>(value & 0xFF), static_cast<uint8>(value >> 8), static_cast<uint8>(value >> 16)}; }
 	};
 
 	using Events = std::vector<Event>;
 
-	struct States
+	class States
 	{
+	public:
 		struct State;
+		friend struct State;
 
 		States();
 		States(const States &other);
 		States(States &&other) noexcept;
-		~States();
+		virtual ~States();
 		States& operator=(const States &other);
 		States& operator=(States &&other) noexcept;
 
 		void Stop();
-		void NextTick(ModChannel &chn, int32 &period, const CSoundFile &sndFile);
+		void NextTick(PlayState &playState, CHANNELINDEX channel, int32 &period, const CSoundFile &sndFile);
 
 	protected:
 		std::vector<State> states;
@@ -185,6 +253,14 @@ struct InstrumentSynth
 	bool HasScripts() const noexcept { return !m_scripts.empty(); }
 	void Clear() { m_scripts.clear(); }
 	void Sanitize();
+};
+
+
+struct GlobalScriptState final : private InstrumentSynth::States
+{
+	void Initialize(const CSoundFile &sndFile);
+	void NextTick(PlayState &playState, const CSoundFile &sndFile);
+	void ApplyChannelState(PlayState &playState, CHANNELINDEX chn, int32 &period, const CSoundFile &sndFile);
 };
 
 OPENMPT_NAMESPACE_END

@@ -123,6 +123,7 @@ enum class ModContainerType
 enum class AutoSlideCommand
 {
 	TonePortamento,
+	TonePortamentoWithDuration,
 	PortamentoUp,
 	PortamentoDown,
 	FinePortamentoUp,
@@ -130,6 +131,7 @@ enum class AutoSlideCommand
 	FineVolumeSlideUp,
 	FineVolumeSlideDown,
 	VolumeSlideSTK,
+	VolumeDownWithDuration,
 	GlobalVolumeSlide,
 	Vibrato,
 	Tremolo,
@@ -593,6 +595,7 @@ enum PlayBehaviour
 	kITNoSustainOnPortamento,       // Do not re-enable sustain loop on portamento, even when switching between samples
 	kITEmptyNoteMapSlotIgnoreCell,  // IT ignores the entire pattern cell when trying to play an unmapped note of an instrument
 	kITOffsetWithInstrNumber,       // IT applies offset commands even if just an instrument number without note is present
+	kContinueSampleWithoutInstr,    // FTM: A note without instrument number continues looped samples with the new pitch instead of retriggering them
 
 	// Add new play behaviours here.
 

@@ -238,6 +238,15 @@ ORDERINDEX ModSequence::insert(ORDERINDEX pos, ORDERINDEX count, PATTERNINDEX fi
 }
 
 
+ORDERINDEX ModSequence::insert(ORDERINDEX pos, const mpt::span<const PATTERNINDEX> orders)
+{
+	MPT_ASSERT(reinterpret_cast<uintptr_t>(orders.data()) < reinterpret_cast<uintptr_t>(data()) || reinterpret_cast<uintptr_t>(orders.data()) > reinterpret_cast<uintptr_t>(data() + size()));
+	ORDERINDEX count = insert(pos, mpt::saturate_cast<ORDERINDEX>(orders.size()));
+	std::copy(orders.begin(), orders.begin() + count, begin() + pos);
+	return count;
+}
+
+
 bool ModSequence::IsValidPat(ORDERINDEX ord) const noexcept
 {
 	if(ord < size())

@@ -712,6 +712,7 @@ void CLegacyPlaybackSettingsDlg::OnFilterStringChanged()
 		case kITNoSustainOnPortamento: desc = _T("Portamento after note-off does not re-enable sample sustain loop"); break;
 		case kITEmptyNoteMapSlotIgnoreCell: desc = _T("Ignore pattern cell completely when trying to play unmapped instrument note"); break;
 		case kITOffsetWithInstrNumber: desc = _T("Offset command with instrument number recalls offset with last note"); break;
+		case kContinueSampleWithoutInstr: desc = _T("New note without instrument number does not play looped samples from the start"); break;
 
 		default: MPT_ASSERT_NOTREACHED();
 		}

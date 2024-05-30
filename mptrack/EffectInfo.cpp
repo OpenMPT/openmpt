@@ -127,12 +127,14 @@ static constexpr MPTEffectInfo gFXInfo[] =
 	{CMD_DIGIREVERSESAMPLE, 0, 0, 0, MOD_TYPE_NONE, _T("Reverse Sample")}, // DIGI effect
 	{CMD_VOLUME8, 0, 0, 0, MOD_TYPE_NONE, _T("Set 8-bit Volume")},
 	{CMD_HMN_MEGA_ARP, 0, 0, 0, MOD_TYPE_NONE, _T("His Master's Noise Mega-Arpeggio")},
-	{CMD_MED_SYNTH_JUMP, 0, 0, 0, MOD_TYPE_NONE, _T("MED Synth Jump / MIDI Panning")},
+	{CMD_MED_SYNTH_JUMP, 0, 0, 0, MOD_TYPE_NONE, _T("Synth Jump / MIDI Panning")},
 	{CMD_AUTO_VOLUMESLIDE, 0, 0, 0, MOD_TYPE_NONE, _T("Automatic Volume Slide")},
 	{CMD_AUTO_PORTAUP, 0, 0, 0, MOD_TYPE_NONE, _T("Automatic Portamento Up")},
 	{CMD_AUTO_PORTADOWN, 0, 0, 0, MOD_TYPE_NONE, _T("Automatic Portamento Down")},
 	{CMD_AUTO_PORTAUP_FINE, 0, 0, 0, MOD_TYPE_NONE, _T("Automatic Fine Portamento Up")},
 	{CMD_AUTO_PORTADOWN_FINE, 0, 0, 0, MOD_TYPE_NONE, _T("Automatic Fine Portamento Down")},
+	{CMD_TONEPORTA_DURATION, 0, 0, 0, MOD_TYPE_NONE, _T("Tone Portamento with Duration")},
+	{CMD_VOLUMEDOWN_DURATION, 0, 0, 0, MOD_TYPE_NONE, _T("Channel Volume Down with Duration")},
 };
 
 

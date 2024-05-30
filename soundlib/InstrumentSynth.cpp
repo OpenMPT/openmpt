@@ -31,11 +31,12 @@ struct InstrumentSynth::States::State
 	uint16 m_panning = 2048;
 	int16 m_linearPitchFactor = 0;
 	int16 m_periodAdd = 0;
+	uint16 m_loopCount = 0;
+	bool m_condition = false;
 
 	uint16 m_gtkKeyOffOffset = STOP_ROW;
 	int16 m_gtkVolumeStep = 0, m_gtkPitchStep = 0, m_gtkPanningStep = 0;
 	uint16 m_gtkPitch = 4096;
-	uint8 m_gtkLoopCount = 0;
 	uint8 m_gtkSpeed = 1, m_gtkSpeedRemain = 1;
 	bool m_gtkTremorEnabled = false;
 	uint8 m_gtkTremorOnTime = 3, m_gtkTremorOffTime = 3, m_gtkTremorPos = 0;
@@ -56,17 +57,63 @@ struct InstrumentSynth::States::State
 	uint16 m_medDecay = STOP_ROW;
 	uint8 m_medVolumeEnv = uint8_max, m_medVolumeEnvPos = 0;
 
+	uint32 m_ftmSampleStart = 0;
+	int16 m_ftmDetune = 1;
+	uint16 m_ftmVolumeChangeJump = STOP_ROW;
+	uint16 m_ftmPitchChangeJump = STOP_ROW;
+	uint16 m_ftmSampleChangeJump = STOP_ROW;
+	uint16 m_ftmReleaseJump = STOP_ROW;
+	uint16 m_ftmVolumeDownJump = STOP_ROW;
+	uint16 m_ftmPortamentoJump = STOP_ROW;
+	struct LFO
+	{
+		uint8 targetWaveform = 0, speed = 0, depth = 0, position = 0;
+	};
+	std::array<LFO, 4> m_ftmLFO;
+	uint8 m_ftmWorkTrack = 0;
+
 	void JumpToPosition(const Events &events, uint16 position);
-	void NextTick(const Events &events, ModChannel &chn, int32 &period, const CSoundFile &sndFile);
-	bool EvaluateEvent(const Event &event, ModChannel &chn, const CSoundFile *sndFile);
+	void NextTick(const Events &events, PlayState &playState, CHANNELINDEX channel, int32 &period, const CSoundFile &sndFile, States &states);
+	void ApplyChannelState(ModChannel &chn, int32 &period, const CSoundFile &sndFile);
+	bool EvaluateEvent(const Event &event, PlayState &playState, CHANNELINDEX channel, const CSoundFile &sndFile, States &states);
 	void EvaluateRunningEvent(const Event &event);
+	void HandleFTMInterrupt(uint16 &target, const bool condition);
+
+	CHANNELINDEX FTMRealChannel(CHANNELINDEX channel, const CSoundFile &sndFile) const noexcept
+	{
+		if(m_ftmWorkTrack)
+			return (m_ftmWorkTrack - 1) % sndFile.GetNumChannels();
+		else
+			return channel;
+	}
 };
+
+
+static int32 ApplyLinearPitchSlide(int32 target, const int32 totalAmount, const bool periodsAreFrequencies)
+{
+	const auto &table = (periodsAreFrequencies ^ (totalAmount < 0)) ? LinearSlideUpTable : LinearSlideDownTable;
+	size_t value = std::abs(totalAmount);
+	while(value > 0)
+	{
+		const size_t amount = std::min(value, std::size(table) - size_t(1));
+		target = Util::muldivr(target, table[amount], 65536);
+		value -= amount;
+	}
+	return target;
+}
 
 
 static int16 TranslateGT2Pitch(uint16 pitch)
 {
 	// 4096 = normal, 8192 = one octave up
 	return mpt::saturate_round<int16>((mpt::log2(8192.0 / std::max(pitch, uint16(1))) - 1.0) * (16 * 12));
+}
+
+
+static int32 TranslateFTMPitch(uint16 pitch, const ModChannel &chn, const CSoundFile &sndFile)
+{
+	int32 period = sndFile.GetPeriodFromNote(NOTE_MIDDLEC - 12 + pitch / 16, chn.nFineTune, chn.nC5Speed);
+	return ApplyLinearPitchSlide(period, pitch % 16, sndFile.PeriodsAreFrequencies());
 }
 
 
@@ -84,22 +131,22 @@ static int8 MEDEnvelopeFromSample(const ModInstrument &instr, const CSoundFile &
 }
 
 
-static void ChannelSetSample(ModChannel &chn, const CSoundFile *sndFile, SAMPLEINDEX smp)
+static void ChannelSetSample(ModChannel &chn, const CSoundFile &sndFile, SAMPLEINDEX smp)
 {
-	if(!sndFile || smp < 1 || smp > sndFile->GetNumSamples())
+	if(smp < 1 || smp > sndFile.GetNumSamples())
 		return;
-	if(sndFile->m_playBehaviour[kMODSampleSwap] && smp <= uint8_max)
+	if(sndFile.m_playBehaviour[kMODSampleSwap] && smp <= uint8_max)
 	{
 		chn.nNewIns = static_cast<uint8>(smp);
 		return;
 	}
-	const ModSample &sample = sndFile->GetSample(smp);
+	const ModSample &sample = sndFile.GetSample(smp);
 	if(chn.pModSample == &sample)
 		return;
 	chn.pModSample = &sample;
 	chn.pCurrentSample = sample.samplev();
 	chn.dwFlags = (chn.dwFlags & CHN_CHANNELFLAGS) | sample.uFlags;
-	chn.nLength = sample.uFlags[CHN_LOOP] ? sample.nLoopEnd : 0;
+	chn.nLength = sample.uFlags[CHN_LOOP] ? sample.nLoopEnd : sample.nLength;
 	chn.nLoopStart = sample.nLoopStart;
 	chn.nLoopEnd = sample.nLoopEnd;
 	if(chn.position.GetUInt() >= chn.nLength)
@@ -123,8 +170,9 @@ void InstrumentSynth::States::Stop()
 }
 
 
-void InstrumentSynth::States::NextTick(ModChannel &chn, int32 &period, const CSoundFile &sndFile)
+void InstrumentSynth::States::NextTick(PlayState &playState, CHANNELINDEX channel, int32 &period, const CSoundFile &sndFile)
 {
+	ModChannel &chn = playState.Chn[channel];
 	if(!chn.pModInstrument || !chn.pModInstrument->synth.HasScripts())
 		return;
 
@@ -138,7 +186,8 @@ void InstrumentSynth::States::NextTick(ModChannel &chn, int32 &period, const CSo
 		if(i == 1 && chn.rowCommand.command == CMD_MED_SYNTH_JUMP && chn.isFirstTick)
 			state.JumpToPosition(scripts[i], chn.rowCommand.param);
 
-		state.NextTick(scripts[i], chn, period, sndFile);
+		state.NextTick(scripts[i], playState, channel, period, sndFile, *this);
+		state.ApplyChannelState(chn, period, sndFile);
 	}
 }
 
@@ -157,12 +206,15 @@ void InstrumentSynth::States::State::JumpToPosition(const Events &events, uint16
 }
 
 
-void InstrumentSynth::States::State::NextTick(const Events &events, ModChannel &chn, int32 &period, const CSoundFile &sndFile)
+void InstrumentSynth::States::State::NextTick(const Events &events, PlayState &playState, CHANNELINDEX channel, int32 &period, const CSoundFile &sndFile, States &states)
 {
 	if(events.empty())
 		return;
 
-	if(m_gtkKeyOffOffset != STOP_ROW && chn.dwFlags[CHN_KEYOFF])
+	channel = FTMRealChannel(channel, sndFile);
+	ModChannel *chn = &playState.Chn[channel];
+
+	if(m_gtkKeyOffOffset != STOP_ROW && chn->dwFlags[CHN_KEYOFF])
 	{
 		m_nextRow = m_gtkKeyOffOffset;
 		m_ticksRemain = 0;
@@ -173,7 +225,7 @@ void InstrumentSynth::States::State::NextTick(const Events &events, ModChannel &
 		m_pumaWaveform = static_cast<uint8>(Clamp(m_pumaWaveform + m_pumaWaveformStep, m_pumaStartWaveform, m_pumaEndWaveform));
 		if(m_pumaWaveform <= m_pumaStartWaveform || m_pumaWaveform >= m_pumaEndWaveform)
 			m_pumaWaveformStep = -m_pumaWaveformStep;
-		ChannelSetSample(chn, &sndFile, m_pumaWaveform);
+		ChannelSetSample(*chn, sndFile, m_pumaWaveform);
 	}
 
 	if(m_medHold != uint8_max)
@@ -181,6 +233,14 @@ void InstrumentSynth::States::State::NextTick(const Events &events, ModChannel &
 		if(!m_medHold--)
 			m_nextRow = m_medDecay;
 	}
+
+	const ModCommand &m = chn->rowCommand;
+	HandleFTMInterrupt(m_ftmPitchChangeJump, m.IsNote());
+	HandleFTMInterrupt(m_ftmVolumeChangeJump, m.command == CMD_CHANNELVOLUME);
+	HandleFTMInterrupt(m_ftmSampleChangeJump, m.instr != 0);
+	HandleFTMInterrupt(m_ftmReleaseJump, m.note == NOTE_KEYOFF);
+	HandleFTMInterrupt(m_ftmVolumeDownJump, m.command == CMD_VOLUMEDOWN_DURATION);
+	HandleFTMInterrupt(m_ftmPortamentoJump, m.command == CMD_TONEPORTA_DURATION);
 
 	if(m_stepSpeed && !m_stepsRemain--)
 	{
@@ -191,9 +251,9 @@ void InstrumentSynth::States::State::NextTick(const Events &events, ModChannel &
 			m_volumeFactor = static_cast<int16>(std::clamp(m_volumeFactor + m_medVolumeStep, 0, 16384));
 		if(m_medPeriodStep)
 			m_periodAdd = mpt::saturate_cast<int16>(m_periodAdd - m_medPeriodStep);
-		if(m_medVolumeEnv != uint8_max && chn.pModInstrument)
+		if(m_medVolumeEnv != uint8_max && chn->pModInstrument)
 		{
-			m_volumeFactor = static_cast<uint16>(std::clamp((MEDEnvelopeFromSample(*chn.pModInstrument, sndFile, m_medVolumeEnv & 0x7F, m_medVolumeEnvPos) + 128) * 64, 0, 16384));
+			m_volumeFactor = static_cast<uint16>(std::clamp((MEDEnvelopeFromSample(*chn->pModInstrument, sndFile, m_medVolumeEnv & 0x7F, m_medVolumeEnvPos) + 128) * 64, 0, 16384));
 			m_medVolumeEnvPos++;
 			if(m_medVolumeEnvPos >= 128 && (m_medVolumeEnv & 0x80))
 				m_medVolumeEnvPos = 0;
@@ -213,15 +273,20 @@ void InstrumentSynth::States::State::NextTick(const Events &events, ModChannel &
 				if(m_currentRow >= events.size())
 					break;
 				m_nextRow++;
-				if(EvaluateEvent(events[m_currentRow], chn, &sndFile))
+				if(EvaluateEvent(events[m_currentRow], playState, channel, sndFile, states))
 					break;
 
-				MPT_ASSERT(m_nextRow == States::State::STOP_ROW || m_nextRow == m_currentRow + 1 || events[m_currentRow].IsJumpEvent());
+				MPT_ASSERT(m_nextRow == STOP_ROW || m_nextRow == m_currentRow + 1 || events[m_currentRow].IsJumpEvent());
 				if(events[m_currentRow].IsJumpEvent())
 				{
 					// This smells like an infinite loop
 					if(jumpCount++ > 10)
 						break;
+				}
+				if(m_ftmWorkTrack)
+				{
+					channel = FTMRealChannel(channel, sndFile);
+					chn = &playState.Chn[channel];
 				}
 			}
 		}
@@ -239,8 +304,8 @@ void InstrumentSynth::States::State::NextTick(const Events &events, ModChannel &
 		uint16 offset = m_medVibratoPos / 16u;
 		if(m_medVibratoEnvelope == uint8_max)
 			period += ModSinusTable[(offset * 2) % std::size(ModSinusTable)] * m_medVibratoDepth / 64;
-		else if(chn.pModInstrument)
-			period += MEDEnvelopeFromSample(*chn.pModInstrument, sndFile, m_medVibratoEnvelope, offset) * m_medVibratoDepth / 64;
+		else if(chn->pModInstrument)
+			period += MEDEnvelopeFromSample(*chn->pModInstrument, sndFile, m_medVibratoEnvelope, offset) * m_medVibratoDepth / 64;
 		m_medVibratoPos = (m_medVibratoPos + m_medVibratoSpeed) % (32u * 16u);
 	}
 
@@ -263,7 +328,7 @@ void InstrumentSynth::States::State::NextTick(const Events &events, ModChannel &
 		if(m_gtkTremorPos >= m_gtkTremorOnTime + m_gtkTremorOffTime)
 			m_gtkTremorPos = 0;
 		else if(m_gtkTremorPos >= m_gtkTremorOnTime)
-			chn.nRealVolume = 0;
+			chn->nRealVolume = 0;
 		m_gtkTremorPos++;
 	}
 	if(m_gtkTremoloEnabled)
@@ -273,11 +338,61 @@ void InstrumentSynth::States::State::NextTick(const Events &events, ModChannel &
 	}
 	if(m_gtkVibratoEnabled)
 	{
-		sndFile.DoFreqSlide(chn, period, -ModSinusTable[(m_gtkVibratoPos / 4u) % std::size(ModSinusTable)] * m_gtkVibratoWidth / 96, false);
+		sndFile.DoFreqSlide(*chn, period, -ModSinusTable[(m_gtkVibratoPos / 4u) % std::size(ModSinusTable)] * m_gtkVibratoWidth / 96, false);
 		m_gtkVibratoPos += m_gtkVibratoSpeed;
 	}
 
-	const bool periodsAreFrequencies = sndFile.PeriodsAreFrequencies();
+	// FTM LFOs
+	for(auto &lfo : m_ftmLFO)
+	{
+		if(!lfo.speed && !lfo.depth)
+			continue;
+
+		const uint8 lutPos = static_cast<uint8>(Util::muldivr_unsigned(lfo.position, 256, 192));
+		int32 value = 0;
+		switch(lfo.targetWaveform & 0x07)
+		{
+		case 0: value = ITSinusTable[lutPos]; break;
+		case 1: value = lutPos < 128 ? 64 : -64; break;
+		case 2: value = 64 - std::abs(((lutPos + 64) % 256) - 128); break;
+		case 3: value = 64 - lutPos / 2; break;
+		case 4: value = lutPos / 2 - 64; break;
+		}
+		if((lfo.targetWaveform & 0xF0) < 0xA0)
+			value += 64;
+		value *= lfo.depth;  // -8192...+8192 or 0...16384 for LFO targets
+
+		switch(lfo.targetWaveform & 0xF0)
+		{
+		case 0x10: m_ftmLFO[0].speed = static_cast<uint8>(value / 64); break;
+		case 0x20: m_ftmLFO[1].speed = static_cast<uint8>(value / 64); break;
+		case 0x30: m_ftmLFO[2].speed = static_cast<uint8>(value / 64); break;
+		case 0x40: m_ftmLFO[3].speed = static_cast<uint8>(value / 64); break;
+		case 0x50: m_ftmLFO[0].depth = static_cast<uint8>(value / 64); break;
+		case 0x60: m_ftmLFO[1].depth = static_cast<uint8>(value / 64); break;
+		case 0x70: m_ftmLFO[2].depth = static_cast<uint8>(value / 64); break;
+		case 0x80: m_ftmLFO[3].depth = static_cast<uint8>(value / 64); break;
+		case 0xA0: m_volumeAdd = mpt::saturate_cast<int16>(value * 4); break;
+		case 0xF0: m_linearPitchFactor = static_cast<int16>(value / 32); break;
+		}
+		
+		uint16 newPos = lfo.position + lfo.speed;
+		if(newPos >= 192)
+		{
+			newPos -= 192;
+			if(lfo.targetWaveform & 0x08)
+			{
+				lfo.speed = 0;
+				newPos = 191;
+			}
+		}
+		lfo.position = static_cast<uint8>(newPos);
+	}
+}
+
+
+void InstrumentSynth::States::State::ApplyChannelState(ModChannel &chn, int32 &period, const CSoundFile &sndFile)
+{
 	if(m_volumeFactor != 16384)
 	{
 		chn.nRealVolume = Util::muldivr(chn.nRealVolume, m_volumeFactor, 16384);
@@ -293,28 +408,24 @@ void InstrumentSynth::States::State::NextTick(const Events &events, ModChannel &
 		else
 			chn.nRealPan += ((m_panning - 2048) * (chn.nRealPan)) / 2048;
 	}
+	const bool periodsAreFrequencies = sndFile.PeriodsAreFrequencies();
 	if(m_linearPitchFactor != 0)
-	{
-		const auto &table = (periodsAreFrequencies ^ (m_linearPitchFactor < 0)) ? LinearSlideUpTable : LinearSlideDownTable;
-		size_t value = std::abs(m_linearPitchFactor);
-		while(value > 0)
-		{
-			const size_t amount = std::min(value, std::size(table) - size_t(1));
-			period = Util::muldivr(period, table[amount], 65536);
-			value -= amount;
-		}
-	}
+		period = ApplyLinearPitchSlide(period, m_linearPitchFactor, periodsAreFrequencies);
 	if(periodsAreFrequencies)
 		period -= m_periodAdd;
 	else
 		period += m_periodAdd;
 	if(period < 1)
 		period = 1;
+
+	if(m_ftmDetune != 1)
+		chn.microTuning = m_ftmDetune;
 }
 
 
-bool InstrumentSynth::States::State::EvaluateEvent(const Event &event, ModChannel &chn, const CSoundFile *sndFile)
+bool InstrumentSynth::States::State::EvaluateEvent(const Event &event, PlayState &playState, CHANNELINDEX channel, const CSoundFile &sndFile, States &states)
 {
+	ModChannel &chn = playState.Chn[channel];
 	switch(event.type)
 	{
 	case Event::Type::StopScript:
@@ -322,6 +433,10 @@ bool InstrumentSynth::States::State::EvaluateEvent(const Event &event, ModChanne
 		return true;
 	case Event::Type::Jump:
 		m_nextRow = event.u16;
+		return false;
+	case Event::Type::JumpIfTrue:
+		if(m_condition)
+			m_nextRow = event.u16;
 		return false;
 	case Event::Type::Delay:
 		m_ticksRemain = event.u16;
@@ -331,17 +446,35 @@ bool InstrumentSynth::States::State::EvaluateEvent(const Event &event, ModChanne
 		return false;
 	case Event::Type::JumpMarker:
 		return false;
-
-	case Event::Type::GTK_SetLoopCounter:
-		m_gtkLoopCount = event.u8;
-		return false;
-	case Event::Type::GTK_EvaluateLoopCounter:
-		if(m_gtkLoopCount)
+	case Event::Type::SampleOffset:
+	case Event::Type::SampleOffsetAdd:
+	case Event::Type::SampleOffsetSub:
 		{
-			if(--m_gtkLoopCount)
-				m_nextRow = event.u16;
+			int64 pos = event.Value24Bit();
+			if(event.type == Event::Type::SampleOffsetAdd)
+				pos += chn.position.GetInt();
+			else if(event.type == Event::Type::SampleOffsetSub)
+				pos = chn.position.GetInt() - pos;
+			else
+				pos += m_ftmSampleStart;
+			chn.position.Set(std::min(chn.nLength, mpt::saturate_cast<SmpLength>(pos)), 0);
 		}
 		return false;
+	case Event::Type::SetLoopCounter:
+		if(!m_loopCount || event.u8)
+			m_loopCount = 1 + std::min(event.u16, uint16(0xFFFE));
+		return false;
+	case Event::Type::EvaluateLoopCounter:
+		if(m_loopCount > 1)
+			m_nextRow = event.u16;
+		if(m_loopCount)
+			m_loopCount--;
+		return false;
+	case Event::Type::NoteCut:
+		chn.nFadeOutVol = 0;
+		chn.dwFlags.set(CHN_NOTEFADE);
+		return false;
+
 	case Event::Type::GTK_KeyOff:
 		m_gtkKeyOffOffset = event.u16;
 		return false;
@@ -482,7 +615,202 @@ bool InstrumentSynth::States::State::EvaluateEvent(const Event &event, ModChanne
 		m_medHold = event.u8;
 		m_medDecay = event.u16;
 		return false;
+
+	case Event::Type::FTM_SetCondition:
+ 		{
+ 			const int32 threshold = (event.u8 < 3) ? TranslateFTMPitch(event.u16, chn, sndFile) : event.u16;
+			const int32 compare = (event.u8 < 3) ? chn.nPeriod : chn.nGlobalVol;
+			switch(event.u8 % 3u)
+			{
+			case 0: m_condition = (compare == threshold); break;
+			case 1: m_condition = (compare < threshold); break;
+			case 2: m_condition = (compare > threshold); break;
+			}
+		}
+		return false;
+	case Event::Type::FTM_SetInterrupt:
+		if(event.u8 & 0x01) m_ftmPitchChangeJump = event.u16;
+		if(event.u8 & 0x02) m_ftmVolumeChangeJump = event.u16;
+		if(event.u8 & 0x04) m_ftmSampleChangeJump = event.u16;
+		if(event.u8 & 0x08) m_ftmReleaseJump = event.u16;
+		if(event.u8 & 0x10) m_ftmPortamentoJump = event.u16;
+		if(event.u8 & 0x20) m_ftmVolumeDownJump = event.u16;
+		return false;
+	case Event::Type::FTM_PlaySample:
+		if(chn.nNewIns > 0 && chn.nNewIns <= sndFile.GetNumSamples())
+			chn.pModSample = &sndFile.GetSample(chn.nNewIns);
+		if(chn.pModSample)
+		{
+			const ModSample &sample = *chn.pModSample;
+			chn.nVolume = sample.nVolume;
+			chn.UpdateInstrumentVolume(&sample, nullptr);
+			chn.nC5Speed = sample.nC5Speed;
+			chn.dwFlags = (chn.dwFlags & (CHN_CHANNELFLAGS ^ CHN_NOTEFADE)) | sample.uFlags;
+			chn.nLength = chn.pModSample->uFlags[CHN_LOOP] ? sample.nLoopEnd : sample.nLength;
+			chn.nLoopStart = sample.nLoopStart;
+			chn.nLoopEnd = sample.nLoopEnd;
+		}
+		chn.position.Set(0);
+		return false;
+	case Event::Type::FTM_SetPitch:
+		chn.nPeriod = TranslateFTMPitch(event.u16 * 2, chn, sndFile);
+		return false;
+	case Event::Type::FTM_SetDetune:
+		// Detune always applies to the first channel of a channel pair (and only if the other channel is playing a sample)
+		states.states[channel & ~1].m_ftmDetune = event.u16 * -8;
+		return false;
+	case Event::Type::FTM_AddDetune:
+		states.states[channel & ~1].m_ftmDetune -= event.i16 * 8;
+		return false;
+	case Event::Type::FTM_AddPitch:
+		if(event.i16)
+		{
+			chn.nPeriod = ApplyLinearPitchSlide(chn.nPeriod, event.i16 * 2, sndFile.PeriodsAreFrequencies());
+			const int32 limit = TranslateFTMPitch((event.i16 < 0) ? 0 : 0x21E, chn, sndFile);
+			if((event.i16 > 0) == sndFile.PeriodsAreFrequencies())
+				chn.nPeriod = std::min(chn.nPeriod, limit);
+			else
+				chn.nPeriod = std::max(chn.nPeriod, limit);
+		}
+		return false;
+	case Event::Type::FTM_SetVolume:
+		chn.nGlobalVol = std::min(event.u8, uint8(64));
+		return false;
+	case Event::Type::FTM_AddVolume:
+		chn.nGlobalVol = static_cast<uint8>(std::clamp(chn.nGlobalVol + event.i16, 0, 64));
+		return false;
+	case Event::Type::FTM_SetSample:
+		chn.nNewIns = event.u8 + 1;
+		return false;
+	case Event::Type::FTM_SetSampleStart:
+		// Documentation says this should be in words, but it really appears to work with bytes.
+		// The relative variants appear to be completely broken.
+		if(event.u8 == 1)
+			m_ftmSampleStart += std::min(static_cast<uint32>(event.u16), Util::MaxValueOfType(m_ftmSampleStart) - m_ftmSampleStart);
+		else if(event.u8 == 2)
+			m_ftmSampleStart -= std::min(static_cast<uint32>(event.u16), m_ftmSampleStart);
+		else
+			m_ftmSampleStart = event.u16 * 2u;
+		return false;
+	case Event::Type::FTM_SetOneshotLength:
+		if(chn.pModSample)
+		{
+			const SmpLength loopLength = chn.nLoopEnd - chn.nLoopStart;
+			int64 loopStart = event.u16 * 2;
+			if(event.u8 == 1)
+				loopStart += chn.nLoopStart;
+			else if(event.u8 == 2)
+				loopStart = chn.nLoopStart - loopStart;
+			loopStart = std::clamp(loopStart, int64(0), static_cast<int64>(chn.pModSample->nLength));
+			chn.nLoopStart = static_cast<SmpLength>(loopStart);
+			chn.nLoopEnd = chn.nLoopStart + loopLength;
+			LimitMax(chn.nLoopEnd, chn.pModSample->nLength);
+			chn.nLength = chn.nLoopEnd;
+			chn.dwFlags.set(CHN_LOOP, chn.nLoopEnd > chn.nLoopStart);
+			if(chn.position.GetUInt() >= chn.nLength && chn.dwFlags[CHN_LOOP])
+				chn.position.SetInt(chn.nLoopStart);
+		}
+		return false;
+	case Event::Type::FTM_SetRepeatLength:
+		if(chn.pModSample)
+		{
+			int64 loopEnd = chn.nLoopStart + event.u16 * 2;
+			if(event.u8 == 1)
+				loopEnd = chn.nLoopEnd + event.u16 * 2;
+			else if(event.u8 == 2)
+				loopEnd = chn.nLoopEnd - event.u16 * 2;
+			loopEnd = std::clamp(loopEnd, static_cast<int64>(chn.nLoopStart), static_cast<int64>(chn.pModSample->nLength));
+			chn.nLoopEnd = static_cast<SmpLength>(loopEnd);
+			chn.nLength = chn.nLoopEnd;
+			chn.dwFlags.set(CHN_LOOP, chn.nLoopEnd > chn.nLoopStart);
+			if(chn.position.GetUInt() >= chn.nLength && chn.dwFlags[CHN_LOOP])
+				chn.position.SetInt(chn.nLoopStart);
+		}
+		return false;
+	case Event::Type::FTM_CloneTrack:
+		if(event.Byte0() < sndFile.GetNumChannels())
+		{
+			const ModChannel &srcChn = playState.Chn[event.Byte0()];
+			if(event.Byte1() & (0x01 | 0x08))
+				chn.nPeriod = srcChn.nPeriod;
+			if(event.Byte1() & (0x02 | 0x08))
+				chn.nGlobalVol = srcChn.nGlobalVol;
+			if(event.Byte1() & (0x04 | 0x08))
+			{
+				chn.nNewIns = srcChn.nNewIns;
+				chn.pModSample = srcChn.pModSample;
+				chn.position = srcChn.position;
+				if(srcChn.pModSample)
+					chn.dwFlags = (chn.dwFlags & CHN_CHANNELFLAGS) | srcChn.pModSample->uFlags;
+				chn.nLength = srcChn.nLength;
+				chn.nLoopStart = srcChn.nLoopStart;
+				chn.nLoopEnd = srcChn.nLoopEnd;
+			}
+			if(event.Byte1() & 0x08)
+			{
+				// Note: This does not appear to behave entirely as documented.
+				// When the command is triggered, it copies frequency, volume, sample and the state of running slide commands.
+				// Running LFOs are not copied. But any notes and effects (including newly triggered LFOs) on the source track on following rows are copied.
+				// There appears to be no way to stop this cloning once it has started.
+				// As no FTM in the wild makes use of this command, we will glance over this ugly detail.
+				chn.position = srcChn.position;
+				chn.portamentoSlide = srcChn.portamentoSlide;
+				chn.nPortamentoDest = srcChn.nPortamentoDest;
+				chn.volSlideDownStart = srcChn.volSlideDownStart;
+				chn.volSlideDownTotal = srcChn.volSlideDownTotal;
+				chn.volSlideDownRemain = srcChn.volSlideDownRemain;
+				chn.autoSlide.SetActive(AutoSlideCommand::TonePortamentoWithDuration, srcChn.autoSlide.IsActive(AutoSlideCommand::TonePortamentoWithDuration));
+				chn.autoSlide.SetActive(AutoSlideCommand::VolumeDownWithDuration, srcChn.autoSlide.IsActive(AutoSlideCommand::VolumeDownWithDuration));
+			}
+		}
+		return false;
+	case Event::Type::FTM_StartLFO:
+		{
+			auto &lfo = m_ftmLFO[event.Byte0() & 3];
+			lfo.targetWaveform = event.Byte1();
+			lfo.speed = lfo.depth = lfo.position = 0;
+		}
+		return false;
+	case Event::Type::FTM_LFOAddSub:
+		{
+			auto &lfo = m_ftmLFO[event.Byte0() & 3];
+			int factor = (event.Byte0() & 4) ? -1 : 1;
+			lfo.speed = std::min(mpt::saturate_cast<uint8>(lfo.speed + event.Byte1() * factor), uint8(0xBF));
+			lfo.depth = std::min(mpt::saturate_cast<uint8>(lfo.depth + event.Byte2() * factor), uint8(0x7F));
+		}
+		return false;
+	case Event::Type::FTM_SetWorkTrack:
+		if(event.Byte0() == uint8_max)
+		{
+			m_ftmWorkTrack = 0;
+		} else if(const bool isRelative = event.Byte1() != 0; isRelative && event.Byte0())
+		{
+			if(!m_ftmWorkTrack)
+				m_ftmWorkTrack = static_cast<uint8>(channel + 1);
+			m_ftmWorkTrack = static_cast<uint8>((m_ftmWorkTrack - 1u + event.Byte0()) % sndFile.GetNumChannels() + 1);
+		} else if(!isRelative)
+		{
+			m_ftmWorkTrack = event.Byte0() + 1;
+		}
+		return false;
+	case Event::Type::FTM_SetGlobalVolume:
+		playState.m_nGlobalVolume = event.u16;
+		return false;
+	case Event::Type::FTM_SetTempo:
+		playState.m_nMusicTempo = TEMPO(1766278.163 / event.u16);
+		return false;
+	case Event::Type::FTM_SetSpeed:
+		playState.m_nMusicSpeed = event.u16;
+		return false;
+	case Event::Type::FTM_SetPlayPosition:
+		if(ORDERINDEX playPos = sndFile.Order().FindOrder(event.u16, event.u16); playPos != ORDERINDEX_INVALID)
+		{
+			playState.m_nNextOrder = playPos;
+			playState.m_nNextRow = event.u8;
+		}
+		return false;
 	}
+
 	MPT_ASSERT_NOTREACHED();
 	return false;
 }
@@ -502,6 +830,56 @@ void InstrumentSynth::States::State::EvaluateRunningEvent(const Event &event)
 		break;
 	default:
 		break;
+	}
+}
+
+
+void InstrumentSynth::States::State::HandleFTMInterrupt(uint16 &target, const bool condition)
+{
+	if(target == STOP_ROW || !condition)
+		return;
+	m_nextRow = target;
+	m_ticksRemain = 0;
+	m_stepsRemain = 0;
+	target = STOP_ROW;
+}
+
+
+void GlobalScriptState::Initialize(const CSoundFile &sndFile)
+{
+	if(!sndFile.m_globalScript.empty())
+		states.assign(sndFile.GetNumChannels(), {});
+}
+
+
+void GlobalScriptState::NextTick(PlayState &playState, const CSoundFile &sndFile)
+{
+	if(sndFile.m_globalScript.empty())
+		return;
+	states.resize(sndFile.GetNumChannels());
+	for(CHANNELINDEX chn = 0; chn < sndFile.GetNumChannels(); chn++)
+	{
+		auto &state = states[chn];
+		CHANNELINDEX realChn = state.FTMRealChannel(chn, sndFile);
+		auto &modChn = playState.Chn[realChn];
+		if(modChn.rowCommand.command == CMD_MED_SYNTH_JUMP && modChn.isFirstTick)
+			states[chn].JumpToPosition(sndFile.m_globalScript, modChn.rowCommand.param);
+		int32 period = 0;
+		state.NextTick(sndFile.m_globalScript, playState, chn, period, sndFile, *this);
+	}
+}
+
+
+void GlobalScriptState::ApplyChannelState(PlayState &playState, CHANNELINDEX chn, int32 &period, const CSoundFile &sndFile)
+{
+	if(sndFile.m_globalScript.empty())
+		return;
+	for(CHANNELINDEX s = 0; s < states.size(); s++)
+	{
+		if(states[s].FTMRealChannel(s, sndFile) == chn)
+		{
+			states[s].ApplyChannelState(playState.Chn[chn], period, sndFile);
+		}
 	}
 }
 

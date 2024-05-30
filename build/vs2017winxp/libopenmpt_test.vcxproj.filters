@@ -402,6 +402,9 @@
     <ClInclude Include="..\..\soundlib\Paula.h">
       <Filter>soundlib</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\soundlib\PlayState.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\soundlib\Resampler.h">
       <Filter>soundlib</Filter>
     </ClInclude>
@@ -1238,6 +1241,9 @@
     <ClCompile Include="..\..\soundlib\Load_fmt.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_ftm.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_gdm.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>
@@ -1383,6 +1389,9 @@
       <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\Paula.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\PlayState.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\RowVisitor.cpp">

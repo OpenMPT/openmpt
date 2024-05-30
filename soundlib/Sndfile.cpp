@@ -102,13 +102,6 @@ mpt::ustring FileHistory::AsISO8601(mpt::Date::LogicalTimezone internalTimezone)
 }
 
 
-CSoundFile::PlayState::PlayState()
-{
-	std::fill(std::begin(Chn), std::end(Chn), ModChannel{});
-	m_midiMacroScratchSpace.reserve(kMacroLength);  // Note: If macros ever become variable-length, the scratch space needs to be at least one byte longer than the longest macro in the file for end-of-SysEx insertion to stay allocation-free in the mixer!
-}
-
-
 //////////////////////////////////////////////////////////
 // CSoundFile
 
@@ -217,6 +210,7 @@ void CSoundFile::InitializeGlobals(MODTYPE type)
 	Patterns.DestroyPatterns();
 	Order.Initialize();
 
+	m_globalScript.clear();
 	m_songName.clear();
 	m_songArtist.clear();
 	m_songMessage.clear();
@@ -315,6 +309,7 @@ static constexpr FileFormatLoader ModuleFormatLoaders[] =
 	MPT_DECLARE_FORMAT(667),
 	MPT_DECLARE_FORMAT(C67),
 	MPT_DECLARE_FORMAT(MO3),
+	MPT_DECLARE_FORMAT(FTM),
 	MPT_DECLARE_FORMAT(DSm),
 	MPT_DECLARE_FORMAT(STK),
 	MPT_DECLARE_FORMAT(XMF),
@@ -599,7 +594,7 @@ bool CSoundFile::CreateInternal(FileReader file, ModLoadingFlags loadFlags)
 		ModSample &sample = Samples[nSmp];
 
 #ifdef MPT_EXTERNAL_SAMPLES
-		if(SampleHasPath(nSmp))
+		if(SampleHasPath(nSmp) && (loadFlags & loadSampleData))
 		{
 			mpt::PathString filename = GetSamplePath(nSmp);
 			if(file.GetOptionalFileName())
@@ -913,6 +908,7 @@ void CSoundFile::ResetPlayPos()
 	m_PlayState.m_nFrameDelay = 0;
 	m_PlayState.m_nextPatStartRow = 0;
 	m_PlayState.m_lTotalSampleCount = 0;
+	m_PlayState.m_globalScriptState.Initialize(*this);
 }
 
 
@@ -960,6 +956,7 @@ void CSoundFile::SetCurrentOrder(ORDERINDEX nOrder)
 		m_PlayState.m_nPatternDelay = 0;
 		m_PlayState.m_nFrameDelay = 0;
 		m_PlayState.m_nextPatStartRow = 0;
+		m_PlayState.m_globalScriptState.Initialize(*this);
 	}
 
 	m_PlayState.m_flags.reset(SONG_FADINGSONG | SONG_ENDREACHED);

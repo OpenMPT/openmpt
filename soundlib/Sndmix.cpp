@@ -2095,6 +2095,7 @@ bool CSoundFile::ReadNote()
 	////////////////////////////////////////////////////////////////////////////////////
 	if (m_PlayState.m_nMusicTempo.GetRaw() == 0) return false;
 
+	m_PlayState.m_globalScriptState.NextTick(m_PlayState, *this);
 	m_PlayState.m_nSamplesPerTick = GetTickDuration(m_PlayState);
 	m_PlayState.m_nBufferCount = m_PlayState.m_nSamplesPerTick;
 
@@ -2348,7 +2349,8 @@ bool CSoundFile::ReadNote()
 
 		if(samplePlaying)
 		{
-			chn.synthState.NextTick(chn, period, *this);
+			chn.synthState.NextTick(m_PlayState, nChn, period, *this);
+			m_PlayState.m_globalScriptState.ApplyChannelState(m_PlayState, nChn, period, *this);
 
 			int nPeriodFrac = 0;
 			ProcessSampleAutoVibrato(chn, period, vibratoFactor, nPeriodFrac);

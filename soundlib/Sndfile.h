@@ -19,9 +19,6 @@
 #include "../common/mptFileType.h"
 #include "../common/mptRandom.h"
 #include "../common/version.h"
-#include <vector>
-#include <bitset>
-#include <set>
 #include "Snd_defs.h"
 #include "tuningbase.h"
 #include "MIDIMacros.h"
@@ -52,12 +49,17 @@
 #include "ModSequence.h"
 #include "pattern.h"
 #include "patternContainer.h"
+#include "PlayState.h"
 #include "plugins/PluginStructs.h"
 #include "RowVisitor.h"
 
 #include "mpt/audio/span.hpp"
 
 #include "../common/FileReaderFwd.h"
+
+#include <vector>
+#include <bitset>
+#include <set>
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -514,6 +516,7 @@ protected:
 	ModSample Samples[MAX_SAMPLES];
 public:
 	ModInstrument *Instruments[MAX_INSTRUMENTS];  // Instrument Headers
+	InstrumentSynth::Events m_globalScript;
 	MIDIMacroConfig m_MidiCfg;                    // MIDI Macro config table
 #ifndef NO_PLUGINS
 	std::array<SNDMIXPLUGIN, MAX_MIXPLUGINS> m_MixPlugins;  // Mix plugins
@@ -538,85 +541,6 @@ protected:
 	MixLevels m_nMixLevels;
 
 public:
-	struct PlayState
-	{
-		friend class CSoundFile;
-
-	public:
-		samplecount_t m_lTotalSampleCount = 0;  // Total number of rendered samples
-	protected:
-		samplecount_t m_nBufferCount = 0;  // Remaining number samples to render for this tick
-		double m_dBufferDiff = 0.0;        // Modern tempo rounding error compensation
-
-	public:
-		uint32 m_nTickCount = 0;  // Current tick being processed
-	protected:
-		uint32 m_nPatternDelay = 0;  // Pattern delay (rows)
-		uint32 m_nFrameDelay = 0;    // Fine pattern delay (ticks)
-	public:
-		uint32 m_nSamplesPerTick = 0;
-		ROWINDEX m_nCurrentRowsPerBeat = 0;     // Current time signature
-		ROWINDEX m_nCurrentRowsPerMeasure = 0;  // Current time signature
-		uint32 m_nMusicSpeed = 0;               // Current speed
-		TEMPO m_nMusicTempo;                    // Current tempo
-
-		// Playback position
-		ROWINDEX m_nRow = 0;      // Current row being processed
-		ROWINDEX m_nNextRow = 0;  // Next row to process
-	protected:
-		ROWINDEX m_nextPatStartRow = 0;  // For FT2's E60 bug
-		ROWINDEX m_breakRow = 0;         // Candidate target row for pattern break
-		ROWINDEX m_patLoopRow = 0;       // Candidate target row for pattern loop
-		ORDERINDEX m_posJump = 0;        // Candidate target order for position jump
-
-	public:
-		PATTERNINDEX m_nPattern = 0;                     // Current pattern being processed
-		ORDERINDEX m_nCurrentOrder = 0;                  // Current order being processed
-		ORDERINDEX m_nNextOrder = 0;                     // Next order to process
-		ORDERINDEX m_nSeqOverride = ORDERINDEX_INVALID;  // Queued order to be processed next, regardless of what order would normally follow
-		OrderTransitionMode m_seqOverrideMode = OrderTransitionMode::AtPatternEnd;
-
-		// Global volume
-	public:
-		int32 m_nGlobalVolume = MAX_GLOBAL_VOLUME;  // Current global volume (0...MAX_GLOBAL_VOLUME)
-	protected:
-		int32 m_nSamplesToGlobalVolRampDest = 0, m_nGlobalVolumeRampAmount = 0,
-		      m_nGlobalVolumeDestination = 0;     // Global volume ramping
-		int32 m_lHighResRampingGlobalVolume = 0;  // Global volume ramping
-
-	public:
-		FlagSet<PlayFlags> m_flags = SONG_POSITIONCHANGED;
-
-	public:
-		CHANNELINDEX ChnMix[MAX_CHANNELS]; // Index of channels in Chn to be actually mixed
-		ModChannel Chn[MAX_CHANNELS];      // Mixing channels... First m_nChannels channels are master channels (i.e. they are never NNA channels)!
-
-		struct MIDIMacroEvaluationResults
-		{
-			std::map<PLUGINDEX, float> pluginDryWetRatio;
-			std::map<std::pair<PLUGINDEX, PlugParamIndex>, PlugParamValue> pluginParameter;
-		};
-
-		std::vector<uint8> m_midiMacroScratchSpace;
-		std::optional<MIDIMacroEvaluationResults> m_midiMacroEvaluationResults;
-
-	public:
-		PlayState();
-
-		void ResetGlobalVolumeRamping()
-		{
-			m_lHighResRampingGlobalVolume = m_nGlobalVolume << VOLUMERAMPPRECISION;
-			m_nGlobalVolumeDestination = m_nGlobalVolume;
-			m_nSamplesToGlobalVolRampDest = 0;
-			m_nGlobalVolumeRampAmount = 0;
-		}
-
-		constexpr uint32 TicksOnRow() const noexcept
-		{
-			return (m_nMusicSpeed + m_nFrameDelay) * std::max(m_nPatternDelay, uint32(1));
-		}
-	};
-
 	PlayState m_PlayState;
 
 protected:
@@ -865,6 +789,7 @@ public:
 	static ProbeResult ProbeFileHeaderDSym(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderFAR(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderFMT(MemoryFileReader file, const uint64 *pfilesize);
+	static ProbeResult ProbeFileHeaderFTM(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderGDM(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderGMC(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderGT2(MemoryFileReader file, const uint64 *pfilesize);
@@ -923,6 +848,7 @@ public:
 	bool ReadDSym(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadFAR(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadFMT(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadFTM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadGDM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadGMC(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadGT2(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
@@ -1137,12 +1063,14 @@ protected:
 	std::pair<uint16, bool> GetVolCmdTonePorta(const ModCommand &m, uint32 startTick) const;
 	void TonePortamento(CHANNELINDEX chn, uint16 param);
 	int32 TonePortamento(PlayState &playState, CHANNELINDEX nChn, uint16 param) const;
+	void TonePortamentoWithDuration(ModChannel &chn, uint16 param = uint16_max) const;
 	void Vibrato(ModChannel &chn, uint32 param) const;
 	void FineVibrato(ModChannel &chn, uint32 param) const;
 	void AutoVolumeSlide(ModChannel& chn, ModCommand::PARAM param) const;
 	void VolumeSlide(ModChannel &chn, ModCommand::PARAM param) const;
 	void PanningSlide(ModChannel &chn, ModCommand::PARAM param, bool memory = true) const;
 	void ChannelVolSlide(ModChannel &chn, ModCommand::PARAM param) const;
+	void ChannelVolumeDownWithDuration(ModChannel &chn, uint16 param = uint16_max) const;
 	void FineVolumeUp(ModChannel &chn, ModCommand::PARAM param, bool volCol) const;
 	void FineVolumeDown(ModChannel &chn, ModCommand::PARAM param, bool volCol) const;
 	void Tremolo(ModChannel &chn, uint32 param) const;

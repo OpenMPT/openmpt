@@ -115,6 +115,8 @@ enum EffectCommand : uint8
 	CMD_AUTO_PORTADOWN      = 51,
 	CMD_AUTO_PORTAUP_FINE   = 52,
 	CMD_AUTO_PORTADOWN_FINE = 53,
+	CMD_TONEPORTA_DURATION  = 54, // Parameter = how many rows the slide should last
+	CMD_VOLUMEDOWN_DURATION = 55, // Parameter = how many rows the slide should last
 	MAX_EFFECTS
 };
 
@@ -198,7 +200,7 @@ public:
 	bool IsNoteOrEmpty() const { return note == NOTE_NONE || IsNote(); }
 	static bool IsNoteOrEmpty(NOTE note) { return note == NOTE_NONE || IsNote(note); }
 	// Returns true if any of the commands in this cell trigger a tone portamento.
-	bool IsTonePortamento() const { return command == CMD_TONEPORTAMENTO || command == CMD_TONEPORTAVOL || volcmd == VOLCMD_TONEPORTAMENTO; }
+	bool IsTonePortamento() const { return command == CMD_TONEPORTAMENTO || command == CMD_TONEPORTAVOL || command == CMD_TONEPORTA_DURATION || volcmd == VOLCMD_TONEPORTAMENTO; }
 	// Returns true if any commands in this cell trigger any sort of pitch slide / portamento.
 	bool IsAnyPitchSlide() const;
 	// Returns true if the cell contains a sliding or otherwise continuous effect command.

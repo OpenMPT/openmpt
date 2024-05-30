@@ -1074,10 +1074,10 @@ static void ConvertGT2Envelope(InstrumentSynth &synth, const uint16 envNum, std:
 				events.push_back(InstrumentSynth::Event::Delay(std::max(chunk.ReadUint16BE(), uint16(1)) - 1));
 				break;
 			case 0x03:  // 03: Set Counter
-				events.push_back(InstrumentSynth::Event::GTK_SetLoopCounter(chunk.ReadUint8()));
+				events.push_back(InstrumentSynth::Event::SetLoopCounter(std::max(chunk.ReadUint8(), uint8(1)) - 1, true));
 				break;
 			case 0x04:  // 04: Loop
-				events.push_back(InstrumentSynth::Event::GTK_EvaluateLoopCounter(jumpOffset + chunk.ReadUint16BE()));
+				events.push_back(InstrumentSynth::Event::EvaluateLoopCounter(jumpOffset + chunk.ReadUint16BE()));
 				break;
 			case 0x05:  // 05: Key Off
 				events.push_back(InstrumentSynth::Event::Jump(keyoffOffset));

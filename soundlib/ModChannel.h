@@ -107,6 +107,7 @@ struct ModChannel
 	int16 microTuning;  // Micro-tuning / MIDI pitch wheel command
 	int16 nVolSwing, nPanSwing;
 	int16 nCutSwing, nResSwing;
+	uint16 volSlideDownRemain, volSlideDownTotal;
 	uint16 nRestorePanOnNewNote;  // If > 0, nPan should be set to nRestorePanOnNewNote - 1 on new note. Used to recover from pan swing and IT sample / instrument panning. High bit set = surround
 	uint16 nnaGeneration;         // For PlaybackTest implementation
 	CHANNELINDEX nMasterChn;
@@ -140,6 +141,7 @@ struct ModChannel
 	uint8 nPatternLoopCount;
 	uint8 nLeftVU, nRightVU;
 	uint8 nActiveMacro;
+	uint8 volSlideDownStart;
 	FilterMode nFilterMode;
 	uint8 nEFxSpeed, nEFxDelay;              // memory for Invert Loop (EFx, .MOD only)
 	uint8 noteSlideParam, noteSlideCounter;  // IMF / PTM Note Slide

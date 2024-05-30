@@ -129,7 +129,7 @@ class OPLPlaybackLog final : public OPL::IRegisterLogger
 public:
 	using OPLData = std::vector<uint8>;
 
-	OPLPlaybackLog(const CSoundFile::PlayState &playState) : m_playState{playState} {}
+	OPLPlaybackLog(const PlayState &playState) : m_playState{playState} {}
 
 	void Reset()
 	{
@@ -288,7 +288,7 @@ protected:
 	std::map<std::pair<CHANNELINDEX, uint16>, std::map<uint8, uint8>> m_chnRegisters;      // Maps [source channel, age] to [voice register, voice value]
 	std::map<std::pair<CHANNELINDEX, uint16>, std::map<uint8, uint8>> m_prevChnRegisters;  // Previous state of registers for this channel
 
-	const CSoundFile::PlayState &m_playState;
+	const PlayState &m_playState;
 };
 
 

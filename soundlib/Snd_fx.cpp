@@ -56,7 +56,7 @@ protected:
 	const CSoundFile &sndFile;
 
 public:
-	std::unique_ptr<CSoundFile::PlayState> state;
+	std::unique_ptr<PlayState> state;
 	struct ChnSettings
 	{
 		uint32 ticksToRender = 0;	// When using sample sync, we still need to render this many ticks
@@ -70,7 +70,7 @@ public:
 
 	GetLengthMemory(const CSoundFile &sf)
 		: sndFile(sf)
-		, state(std::make_unique<CSoundFile::PlayState>(sf.m_PlayState))
+		, state(std::make_unique<PlayState>(sf.m_PlayState))
 	{
 		Reset();
 	}
@@ -84,6 +84,7 @@ public:
 		state->m_nMusicSpeed = sndFile.Order().GetDefaultSpeed();
 		state->m_nMusicTempo = sndFile.Order().GetDefaultTempo();
 		state->m_nGlobalVolume = sndFile.m_nDefaultGlobalVolume;
+		state->m_globalScriptState.Initialize(sndFile);
 		chnSettings.assign(sndFile.GetNumChannels(), ChnSettings());
 		const auto muteFlag = CSoundFile::GetChannelMuteFlag();
 		for(CHANNELINDEX chn = 0; chn < sndFile.GetNumChannels(); chn++)
@@ -185,6 +186,8 @@ public:
 
 				if(chn.autoSlide.IsActive(AutoSlideCommand::TonePortamento) && !chn.rowCommand.IsTonePortamento())
 					sndFile.TonePortamento(*state, channel, chn.portamentoSlide);
+				else if(chn.autoSlide.IsActive(AutoSlideCommand::TonePortamentoWithDuration))
+					sndFile.TonePortamentoWithDuration(chn, 0);
 				if(chn.autoSlide.IsActive(AutoSlideCommand::PortamentoUp))
 					sndFile.PortamentoUp(*state, channel, chn.nOldPortaUp, true);
 				else if(chn.autoSlide.IsActive(AutoSlideCommand::PortamentoDown))
@@ -343,7 +346,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 	const ModSequence &orderList = Order(sequence);
 
 	GetLengthMemory memory(*this);
-	CSoundFile::PlayState &playState = *memory.state;
+	PlayState &playState = *memory.state;
 	// Temporary visited rows vector (so that GetLength() won't interfere with the player code if the module is playing at the same time)
 	RowVisitor visitedRows(*this, sequence);
 	ROWINDEX allowedPatternLoopComplexity = 32768;
@@ -552,6 +555,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 		for(CHANNELINDEX nChn = 0; nChn < GetNumChannels(); nChn++, p++)
 		{
 			ModChannel &chn = playState.Chn[nChn];
+			chn.isFirstTick = true;
 			if(p->IsEmpty() || (ignoreMutedChn && ChnSettings[nChn].dwFlags[CHN_MUTE]))  // not even effects are processed on muted S3M channels
 			{
 				chn.rowCommand.Clear();
@@ -635,6 +639,9 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				break;
 			}
 		}
+		// This may change speed/tempo/global volume/next row
+		playState.m_globalScriptState.NextTick(playState, *this);
+
 		const uint32 numTicks = playState.TicksOnRow();
 		const uint32 nonRowTicks = numTicks - std::max(playState.m_nPatternDelay, uint32(1));
 
@@ -891,6 +898,9 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					chn.nGlobalVol = static_cast<uint8>(volume);
 				}
 				break;
+			case CMD_VOLUMEDOWN_DURATION:
+				ChannelVolumeDownWithDuration(chn, param);
+				break;
 			case CMD_PANNING8:
 				Panning(chn, param, Pan8bit);
 				break;
@@ -1008,6 +1018,11 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					chn.isFirstTick = (i == 0);
 					VolumeSlide(chn, 0);
 				}
+			}
+			if(chn.autoSlide.IsActive(AutoSlideCommand::VolumeDownWithDuration))
+			{
+				chn.volSlideDownRemain -= std::min(chn.volSlideDownRemain, mpt::saturate_cast<uint16>(numTicks - 1));
+				ChannelVolumeDownWithDuration(chn);
 			}
 			if(chn.autoSlide.IsActive(AutoSlideCommand::GlobalVolumeSlide) && command != CMD_GLOBALVOLSLIDE)
 				memory.GlobalVolSlide(chn, chn.nOldGlobalVolSlide, nonRowTicks);
@@ -1251,6 +1266,11 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					case CMD_AUTO_PORTADOWN_FINE:
 						chn.autoSlide.SetActive(AutoSlideCommand::FinePortamentoDown, m.param != 0);
 						chn.nOldFinePortaUpDown = m.param;
+						break;
+
+					case CMD_TONEPORTA_DURATION:
+						if(chn.rowCommand.IsNote())
+							TonePortamentoWithDuration(chn, m.param);
 						break;
 
 					default:
@@ -2617,6 +2637,10 @@ bool CSoundFile::ProcessEffects()
 			}
 		}
 
+		const bool continueNote = !bPorta && m_playBehaviour[kContinueSampleWithoutInstr] && !chn.rowCommand.instr && chn.dwFlags[CHN_LOOP] && chn.pCurrentSample;
+		if(continueNote)
+			bPorta = true;
+
 		// Process Invert Loop (MOD Effect, called every row if it's active)
 		if(!m_PlayState.m_flags[SONG_FIRSTTICK])
 		{
@@ -3053,6 +3077,8 @@ bool CSoundFile::ProcessEffects()
 				}
 
 				NoteChange(chn, note, bPorta, !(GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2)), false, nChn);
+				if(continueNote)
+					chn.nPeriod = chn.nPortamentoDest;
 				HandleDigiSamplePlayDirection(m_PlayState, nChn);
 				if ((bPorta) && (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2)) && (instr))
 				{
@@ -3683,6 +3709,16 @@ bool CSoundFile::ProcessEffects()
 			AutoVolumeSlide(chn, static_cast<ModCommand::PARAM>(param));
 			break;
 
+		case CMD_TONEPORTA_DURATION:
+			if(chn.rowCommand.IsNote() && triggerNote)
+				TonePortamentoWithDuration(chn, static_cast<ModCommand::PARAM>(param));
+			break;
+
+		case CMD_VOLUMEDOWN_DURATION:
+			if(m_PlayState.m_nTickCount == 0)
+				ChannelVolumeDownWithDuration(chn, static_cast<ModCommand::PARAM>(param));
+			break;
+
 		default:
 			break;
 		}
@@ -3796,6 +3832,8 @@ void CSoundFile::ResetAutoSlides(ModChannel &chn) const
 
 	if(cmd == CMD_NONE && chn.autoSlide.IsActive(AutoSlideCommand::VolumeSlideSTK))
 		chn.autoSlide.SetActive(AutoSlideCommand::VolumeSlideSTK, false);
+	if((cmd == CMD_CHANNELVOLUME || cmd == CMD_CHANNELVOLSLIDE) && chn.autoSlide.IsActive(AutoSlideCommand::VolumeDownWithDuration))
+		chn.autoSlide.SetActive(AutoSlideCommand::VolumeDownWithDuration, false);
 
 	if(chn.autoSlide.IsActive(AutoSlideCommand::FinePortamentoDown) || chn.autoSlide.IsActive(AutoSlideCommand::PortamentoDown)
 	   || chn.autoSlide.IsActive(AutoSlideCommand::FinePortamentoUp) || chn.autoSlide.IsActive(AutoSlideCommand::PortamentoUp))
@@ -3825,6 +3863,8 @@ void CSoundFile::ProcessAutoSlides(PlayState &playState, CHANNELINDEX channel)
 	ModChannel &chn = playState.Chn[channel];
 	if(chn.autoSlide.IsActive(AutoSlideCommand::TonePortamento) && !chn.rowCommand.IsTonePortamento())
 		TonePortamento(channel, chn.portamentoSlide);
+	else if(chn.autoSlide.IsActive(AutoSlideCommand::TonePortamentoWithDuration))
+		TonePortamentoWithDuration(chn);
 	if(chn.autoSlide.IsActive(AutoSlideCommand::PortamentoUp))
 		PortamentoUp(channel, chn.nOldPortaUp, true);
 	else if(chn.autoSlide.IsActive(AutoSlideCommand::PortamentoDown))
@@ -3841,6 +3881,8 @@ void CSoundFile::ProcessAutoSlides(PlayState &playState, CHANNELINDEX channel)
 		VolumeSlide(chn, 0);
 	if(chn.autoSlide.IsActive(AutoSlideCommand::GlobalVolumeSlide) && chn.rowCommand.command != CMD_GLOBALVOLSLIDE)
 		GlobalVolSlide(playState, chn.nOldGlobalVolSlide, channel);
+	if(chn.autoSlide.IsActive(AutoSlideCommand::VolumeDownWithDuration))
+		ChannelVolumeDownWithDuration(chn);
 	if(chn.autoSlide.IsActive(AutoSlideCommand::Vibrato))
 		chn.dwFlags.set(CHN_VIBRATO);
 	if(chn.autoSlide.IsActive(AutoSlideCommand::Tremolo))
@@ -4467,6 +4509,47 @@ int32 CSoundFile::TonePortamento(PlayState &playState, CHANNELINDEX nChn, uint16
 }
 
 
+void CSoundFile::TonePortamentoWithDuration(ModChannel &chn, uint16 param) const
+{
+	if(param != uint16_max)
+	{
+		// Prepare portamento
+		if(!chn.rowCommand.IsNote())
+			return;
+		chn.autoSlide.SetActive(AutoSlideCommand::TonePortamentoWithDuration, param != 0);
+		if(param == 0)
+		{
+			chn.nPeriod = chn.nPortamentoDest;
+			return;
+		}
+		uint32 sourceNote = GetNoteFromPeriod(chn.nPeriod, chn.nFineTune, chn.nC5Speed);
+		chn.portamentoSlide = static_cast<uint16>(Util::muldivr_unsigned(std::abs(static_cast<int>(chn.rowCommand.note - sourceNote)), 64, m_PlayState.m_nMusicSpeed * param));
+	} else if(chn.nPeriod && chn.nPortamentoDest)
+	{
+		// Run portamento
+		chn.dwFlags.set(CHN_PORTAMENTO);
+		const int32 actualDelta = PeriodsAreFrequencies() ? chn.portamentoSlide : -chn.portamentoSlide;
+		if(chn.nPeriod < chn.nPortamentoDest)
+		{
+			DoFreqSlide(chn, chn.nPeriod, actualDelta, true);
+			if(chn.nPeriod >= chn.nPortamentoDest)
+			{
+				chn.nPeriod = chn.nPortamentoDest;
+				chn.nPortamentoDest = 0;
+			}
+		} else if(chn.nPeriod > chn.nPortamentoDest)
+		{
+			DoFreqSlide(chn, chn.nPeriod, -actualDelta, true);
+			if(chn.nPeriod <= chn.nPortamentoDest)
+			{
+				chn.nPeriod = chn.nPortamentoDest;
+				chn.nPortamentoDest = 0;
+			}
+		}
+	}
+}
+
+
 void CSoundFile::Vibrato(ModChannel &chn, uint32 param) const
 {
 	if (param & 0x0F) chn.nVibratoDepth = (param & 0x0F) * 4;
@@ -4814,6 +4897,30 @@ void CSoundFile::ChannelVolSlide(ModChannel &chn, ModCommand::PARAM param) const
 		nChnSlide += chn.nGlobalVol;
 		Limit(nChnSlide, 0, 64);
 		chn.nGlobalVol = static_cast<uint8>(nChnSlide);
+	}
+}
+
+
+void CSoundFile::ChannelVolumeDownWithDuration(ModChannel &chn, uint16 param) const
+{
+	if(param != uint16_max)
+	{
+		// Prepare slide
+		chn.autoSlide.SetActive(AutoSlideCommand::VolumeDownWithDuration, param != 0);
+		if(param == 0)
+		{
+			chn.nGlobalVol = 0;
+			return;
+		}
+		chn.volSlideDownStart = chn.nGlobalVol;
+		chn.volSlideDownTotal = chn.volSlideDownRemain = mpt::saturate_cast<uint16>(param * m_PlayState.m_nMusicSpeed);
+	} else if(chn.volSlideDownTotal)
+	{
+		// Run slide
+		if(chn.volSlideDownRemain)
+			chn.nGlobalVol = static_cast<uint8>(Util::muldivr(chn.volSlideDownStart, --chn.volSlideDownRemain, chn.volSlideDownTotal));
+		else
+			chn.nGlobalVol = 0;
 	}
 }
 

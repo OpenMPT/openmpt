@@ -33,7 +33,7 @@ static constexpr EffectType effectTypes[] =
 	EffectType::Pitch,  EffectType::Pitch,   EffectType::Normal, EffectType::Normal,
 	EffectType::Normal, EffectType::Normal,  EffectType::Volume, EffectType::Normal,
 	EffectType::Normal, EffectType::Volume,  EffectType::Pitch,  EffectType::Pitch,
-	EffectType::Pitch,  EffectType::Pitch,
+	EffectType::Pitch,  EffectType::Pitch,   EffectType::Pitch,  EffectType::Volume,
 };
 
 static_assert(std::size(effectTypes) == MAX_EFFECTS);
@@ -952,6 +952,7 @@ bool ModCommand::IsAnyPitchSlide() const
 	case CMD_AUTO_PORTADOWN:
 	case CMD_AUTO_PORTAUP_FINE:
 	case CMD_AUTO_PORTADOWN_FINE:
+	case CMD_TONEPORTA_DURATION:
 		return true;
 	case CMD_MODCMDEX:
 	case CMD_XFINEPORTAUPDOWN:
@@ -1196,9 +1197,11 @@ size_t ModCommand::GetEffectWeight(COMMAND cmd)
 		CMD_RETRIG,
 		CMD_HMN_MEGA_ARP,
 		CMD_ARPEGGIO,
+		CMD_TONEPORTA_DURATION,
 		CMD_TONEPORTAMENTO,
 		CMD_TONEPORTAVOL,
 		CMD_DBMECHO,
+		CMD_VOLUMEDOWN_DURATION,
 		CMD_CHANNELVOLSLIDE,
 		CMD_CHANNELVOLUME,
 		CMD_GLOBALVOLSLIDE,

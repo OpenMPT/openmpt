@@ -125,6 +125,7 @@ LOCAL_SRC_FILES += \
 	soundlib/Load_dtm.cpp \
 	soundlib/Load_far.cpp \
 	soundlib/Load_fmt.cpp \
+	soundlib/Load_ftm.cpp \
 	soundlib/Load_gdm.cpp \
 	soundlib/Load_gmc.cpp \
 	soundlib/Load_gt2.cpp \
@@ -180,6 +181,7 @@ LOCAL_SRC_FILES += \
 	soundlib/Paula.cpp \
 	soundlib/patternContainer.cpp \
 	soundlib/pattern.cpp \
+	soundlib/PlayState.cpp \
 	soundlib/RowVisitor.cpp \
 	soundlib/S3MTools.cpp \
 	soundlib/SampleFormats.cpp \

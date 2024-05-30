@@ -61,6 +61,7 @@ public:
 	// Return: Number of orders inserted (up to 'count' many).
 	ORDERINDEX insert(ORDERINDEX pos, ORDERINDEX count) { return insert(pos, count, GetInvalidPatIndex()); }
 	ORDERINDEX insert(ORDERINDEX pos, ORDERINDEX count, PATTERNINDEX fill);
+	ORDERINDEX insert(ORDERINDEX pos, const mpt::span<const PATTERNINDEX> orders);
 
 	void push_back() { push_back(GetInvalidPatIndex()); }
 	void push_back(PATTERNINDEX pat) { if(GetLength() < MAX_ORDERS) std::vector<PATTERNINDEX>::push_back(pat); }

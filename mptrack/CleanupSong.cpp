@@ -544,7 +544,7 @@ protected:
 		const auto origRepeatCount = sndFile.GetRepeatCount();
 		sndFile.SetRepeatCount(0);
 		sndFile.m_bIsRendering = true;
-		auto origPlayState = std::make_unique<CSoundFile::PlayState>(std::move(sndFile.m_PlayState));
+		auto origPlayState = std::make_unique<PlayState>(std::move(sndFile.m_PlayState));
 		mpt::reconstruct(sndFile.m_PlayState);
 		auto prevTime = timeGetTime();
 		uint64 renderedSamples = 0;
