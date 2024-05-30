@@ -190,7 +190,7 @@ struct InstrumentSynth
 		constexpr Event &operator=(const Event &other) noexcept = default;
 		constexpr Event &operator=(Event &&other) noexcept = default;
 
-		constexpr bool IsJumpEvent() const noexcept
+		MPT_CONSTEXPR20_FUN bool IsJumpEvent() const noexcept
 		{
 			return mpt::contains(JumpEvents, type);
 		}
