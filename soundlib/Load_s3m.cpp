@@ -312,6 +312,9 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		m_playBehaviour.set(kITRetrigger);
 		m_playBehaviour.set(kITShortSampleRetrig);
 		m_playBehaviour.set(kST3SampleSwap);  // Not exactly like ST3, but close enough
+		// alien.s3m by Davers (pattern 13) needs these to play the Gxx with sample switch as intended
+		m_playBehaviour.set(kITPortaNoNote);
+		m_playBehaviour.set(kITPortamentoSwapResetsPos);
 		m_nMinPeriod = 1;
 		break;
 	case S3MFileHeader::trkSchismTracker:
@@ -371,7 +374,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		m_playBehaviour.reset(kST3NoMutedChannels);
 		m_playBehaviour.reset(kST3EffectMemory);
-		m_playBehaviour.reset(kST3PortaSampleChange);
+		m_playBehaviour.set(kST3PortaSampleChange, (fileHeader.cwtv& S3MFileHeader::trackerMask) == S3MFileHeader::trkImpulseTracker);
 		m_playBehaviour.reset(kST3VibratoMemory);
 		m_playBehaviour.reset(KST3PortaAfterArpeggio);
 		m_playBehaviour.reset(kST3OffsetWithoutInstrument);
