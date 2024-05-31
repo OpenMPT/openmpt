@@ -260,6 +260,7 @@ void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
 
 	const auto resamplingModes = Resampling::AllModes();
 
+	LockControls();
 	if (hintType == HINT_MPTOPTIONS || updateAll)
 	{
 		CString defaultResampler;
@@ -394,6 +395,7 @@ void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
 		m_VuMeterLeft.InvalidateRect(NULL, FALSE);
 		m_VuMeterRight.InvalidateRect(NULL, FALSE);
 	}
+	UnlockControls();
 }
 
 
