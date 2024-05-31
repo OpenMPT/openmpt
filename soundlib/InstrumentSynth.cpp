@@ -30,6 +30,7 @@ struct InstrumentSynth::States::State
 	int16 m_volumeAdd = int16_min;
 	uint16 m_panning = 2048;
 	int16 m_linearPitchFactor = 0;
+	int16 m_periodFreqSlide = 0;
 	int16 m_periodAdd = 0;
 	uint16 m_loopCount = 0;
 	bool m_condition = false;
@@ -110,10 +111,11 @@ static int16 TranslateGT2Pitch(uint16 pitch)
 }
 
 
-static int32 TranslateFTMPitch(uint16 pitch, const ModChannel &chn, const CSoundFile &sndFile)
+static int32 TranslateFTMPitch(uint16 pitch, ModChannel &chn, const CSoundFile &sndFile)
 {
 	int32 period = sndFile.GetPeriodFromNote(NOTE_MIDDLEC - 12 + pitch / 16, chn.nFineTune, chn.nC5Speed);
-	return ApplyLinearPitchSlide(period, pitch % 16, sndFile.PeriodsAreFrequencies());
+	sndFile.DoFreqSlide(chn, period, (pitch % 16) * 4);
+	return period;
 }
 
 
@@ -211,6 +213,7 @@ void InstrumentSynth::States::State::NextTick(const Events &events, PlayState &p
 	if(events.empty())
 		return;
 
+	const CHANNELINDEX origChannel = channel;
 	channel = FTMRealChannel(channel, sndFile);
 	ModChannel *chn = &playState.Chn[channel];
 
@@ -283,11 +286,9 @@ void InstrumentSynth::States::State::NextTick(const Events &events, PlayState &p
 					if(jumpCount++ > 10)
 						break;
 				}
-				if(m_ftmWorkTrack)
-				{
-					channel = FTMRealChannel(channel, sndFile);
-					chn = &playState.Chn[channel];
-				}
+
+				channel = FTMRealChannel(origChannel, sndFile);
+				chn = &playState.Chn[channel];
 			}
 		}
 	}
@@ -373,7 +374,7 @@ void InstrumentSynth::States::State::NextTick(const Events &events, PlayState &p
 		case 0x70: m_ftmLFO[2].depth = static_cast<uint8>(value / 64); break;
 		case 0x80: m_ftmLFO[3].depth = static_cast<uint8>(value / 64); break;
 		case 0xA0: m_volumeAdd = mpt::saturate_cast<int16>(value * 4); break;
-		case 0xF0: m_linearPitchFactor = static_cast<int16>(value / 32); break;
+		case 0xF0: m_periodFreqSlide = static_cast<int16>(value / 8); break;
 		}
 		
 		uint16 newPos = lfo.position + lfo.speed;
@@ -411,10 +412,20 @@ void InstrumentSynth::States::State::ApplyChannelState(ModChannel &chn, int32 &p
 	const bool periodsAreFrequencies = sndFile.PeriodsAreFrequencies();
 	if(m_linearPitchFactor != 0)
 		period = ApplyLinearPitchSlide(period, m_linearPitchFactor, periodsAreFrequencies);
+	if(m_periodFreqSlide != 0)
+		sndFile.DoFreqSlide(chn, period, m_periodFreqSlide);
 	if(periodsAreFrequencies)
 		period -= m_periodAdd;
 	else
 		period += m_periodAdd;
+
+	if((m_linearPitchFactor || m_periodFreqSlide || m_periodAdd) && !sndFile.PeriodsAreFrequencies())
+	{
+		if(period < sndFile.m_nMinPeriod)
+			period = sndFile.m_nMinPeriod;
+		else if(period > sndFile.m_nMaxPeriod && sndFile.m_playBehaviour[kApplyUpperPeriodLimit])
+			period = sndFile.m_nMaxPeriod;
+	}
 	if(period < 1)
 		period = 1;
 
@@ -618,8 +629,9 @@ bool InstrumentSynth::States::State::EvaluateEvent(const Event &event, PlayState
 
 	case Event::Type::FTM_SetCondition:
  		{
- 			const int32 threshold = (event.u8 < 3) ? TranslateFTMPitch(event.u16, chn, sndFile) : event.u16;
-			const int32 compare = (event.u8 < 3) ? chn.nPeriod : chn.nGlobalVol;
+			MPT_ASSERT(!sndFile.PeriodsAreFrequencies());
+ 			const int32 threshold = (event.u8 < 3) ? int32_max - TranslateFTMPitch(event.u16, chn, sndFile) : event.u16;
+			const int32 compare = (event.u8 < 3) ? int32_max - chn.nPeriod : chn.nGlobalVol;
 			switch(event.u8 % 3u)
 			{
 			case 0: m_condition = (compare == threshold); break;
@@ -665,7 +677,7 @@ bool InstrumentSynth::States::State::EvaluateEvent(const Event &event, PlayState
 	case Event::Type::FTM_AddPitch:
 		if(event.i16)
 		{
-			chn.nPeriod = ApplyLinearPitchSlide(chn.nPeriod, event.i16 * 2, sndFile.PeriodsAreFrequencies());
+			sndFile.DoFreqSlide(chn, chn.nPeriod, event.i16 * 8);
 			const int32 limit = TranslateFTMPitch((event.i16 < 0) ? 0 : 0x21E, chn, sndFile);
 			if((event.i16 > 0) == sndFile.PeriodsAreFrequencies())
 				chn.nPeriod = std::min(chn.nPeriod, limit);

@@ -102,7 +102,7 @@ bool CSoundFile::ReadFTM(FileReader &file, ModLoadingFlags loadFlags)
 	else if(loadFlags == onlyVerifyHeader)
 		return true;
 
-	InitializeGlobals(MOD_TYPE_IT);
+	InitializeGlobals(MOD_TYPE_MOD);
 	m_nChannels = 8;
 	InitializeChannels();
 	for(CHANNELINDEX chn = 0; chn < 8; chn++)
@@ -113,7 +113,7 @@ bool CSoundFile::ReadFTM(FileReader &file, ModLoadingFlags loadFlags)
 	m_SongFlags.set(SONG_LINEARSLIDES | SONG_ISAMIGA | SONG_IMPORTED);
 	m_playBehaviour.set(kContinueSampleWithoutInstr);
 	m_playBehaviour.set(kST3NoMutedChannels);
-	m_playBehaviour.reset(kITInitialNoteMemory);
+	m_playBehaviour.set(kApplyUpperPeriodLimit);
 	Order().SetDefaultSpeed(fileHeader.ticksPerRow);
 	Order().SetDefaultTempo(TEMPO(1766278.163 / fileHeader.tempo));
 	m_nDefaultRowsPerMeasure = fileHeader.rowsPerMeasure;
@@ -122,8 +122,8 @@ bool CSoundFile::ReadFTM(FileReader &file, ModLoadingFlags loadFlags)
 	else
 		m_nDefaultRowsPerBeat = m_nDefaultRowsPerMeasure / 4;
 	m_nDefaultGlobalVolume = Util::muldivr_unsigned(fileHeader.globalVolume, MAX_GLOBAL_VOLUME, 63);
-	m_nMinPeriod = 113 * 4;
-	m_nMaxPeriod = 856 * 4;
+	m_nMinPeriod = 3208;
+	m_nMaxPeriod = 5172;
 	const bool moduleWithSamples = (fileHeader.flags & 0x01);
 	
 	m_modFormat.formatName = U_("Face The Music");

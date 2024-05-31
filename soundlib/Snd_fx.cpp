@@ -6115,28 +6115,33 @@ void CSoundFile::DoFreqSlide(ModChannel &chn, int32 &period, int32 amount, bool 
 	} else if(GetType() == MOD_TYPE_FAR)
 	{
 		period += (amount * 36318 / 1024);
-	} else if(m_SongFlags[SONG_LINEARSLIDES] && GetType() != MOD_TYPE_XM)
+	} else if(m_SongFlags[SONG_LINEARSLIDES] && !(GetType() & (MOD_TYPE_XM | MOD_TYPE_MOD)))
 	{
 		// IT Linear slides
 		const auto oldPeriod = period;
-		uint32 n = std::abs(amount);
-		LimitMax(n, 255u * 4u);
+		uint32 absAmount = std::abs(amount);
 
 		// Note: IT ignores the lower 2 bits when abs(mount) > 16 (it either uses the fine *or* the regular table, not both)
 		// This means that vibratos are slightly less accurate in this range than they could be.
 		// Other code paths will *either* have an amount that's a multiple of 4 *or* it's less than 16.
-		if(amount > 0)
+		if(absAmount < 16)
 		{
-			if(n < 16)
-				period = Util::muldivr(period, GetFineLinearSlideUpTable(this, n), 65536);
+			if(amount > 0)
+				period = Util::muldivr(period, GetFineLinearSlideUpTable(this, absAmount), 65536);
 			else
-				period = Util::muldivr(period, GetLinearSlideUpTable(this, n / 4u), 65536);
+				period = Util::muldivr(period, GetFineLinearSlideDownTable(this, absAmount), 65536);
 		} else
 		{
-			if(n < 16)
-				period = Util::muldivr(period, GetFineLinearSlideDownTable(this, n), 65536);
-			else
-				period = Util::muldivr(period, GetLinearSlideDownTable(this, n / 4u), 65536);
+			absAmount /= 4u;
+			while(absAmount > 0)
+			{
+				const uint32 n = std::min(absAmount, static_cast<uint32>(std::size(LinearSlideUpTable) - 1));
+				if(amount > 0)
+					period = Util::muldivr(period, GetLinearSlideUpTable(this, n), 65536);
+				else
+					period = Util::muldivr(period, GetLinearSlideDownTable(this, n), 65536);
+				absAmount -= n;
+			}
 		}
 
 		if(period == oldPeriod)
@@ -6524,7 +6529,7 @@ uint32 CSoundFile::GetPeriodFromNote(uint32 note, int32 nFineTune, uint32 nC5Spe
 			return Util::muldiv_unsigned(8363, (FreqS3MTable[note % 12u] << 5), nC5Speed << (note / 12u));
 			//8363 * freq[note%12] / nC5Speed * 2^(5-note/12)
 		}
-	} else if(GetType() & (MOD_TYPE_XM | MOD_TYPE_MTM))
+	} else if((GetType() & (MOD_TYPE_XM | MOD_TYPE_MTM)) || m_SongFlags[SONG_LINEARSLIDES])
 	{
 		if (note < 12) note = 12;
 		note -= 12;
@@ -6582,7 +6587,7 @@ uint32 CSoundFile::GetPeriodFromNote(uint32 note, int32 nFineTune, uint32 nC5Spe
 uint32 CSoundFile::GetFreqFromPeriod(uint32 period, uint32 c5speed, int32 nPeriodFrac) const
 {
 	if (!period) return 0;
-	if (GetType() & (MOD_TYPE_XM | MOD_TYPE_MTM))
+	if ((GetType() & (MOD_TYPE_XM | MOD_TYPE_MTM)) || (m_SongFlags[SONG_LINEARSLIDES] && UseFinetuneAndTranspose()))
 	{
 		if(m_playBehaviour[kFT2Periods])
 		{
