@@ -86,10 +86,7 @@ bool CModDoc::ChangeNumChannels(CHANNELINDEX nNewChannels, const bool showCancel
 		// Increasing number of channels
 		BeginWaitCursor();
 		std::vector<CHANNELINDEX> channels(nNewChannels, CHANNELINDEX_INVALID);
-		for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
-		{
-			channels[chn] = chn;
-		}
+		std::iota(channels.begin(), channels.begin() + GetNumChannels(), CHANNELINDEX(0));
 
 		bool success = (ReArrangeChannels(channels) == nNewChannels);
 		if(success)
@@ -107,11 +104,12 @@ bool CModDoc::ChangeNumChannels(CHANNELINDEX nNewChannels, const bool showCancel
 // Return true on success.
 bool CModDoc::RemoveChannels(const std::vector<bool> &keepMask, bool verbose)
 {
+	MPT_ASSERT(keepMask.size() == GetNumChannels());
 	CHANNELINDEX nRemainingChannels = 0;
 	//First calculating how many channels are to be left
-	for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
+	for(bool keep : keepMask)
 	{
-		if(keepMask[chn])
+		if(keep)
 			nRemainingChannels++;
 	}
 	if(nRemainingChannels == GetNumChannels() || nRemainingChannels < m_SndFile.GetModSpecifications().channelsMin)
@@ -135,9 +133,7 @@ bool CModDoc::RemoveChannels(const std::vector<bool> &keepMask, bool verbose)
 	for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
 	{
 		if(keepMask[chn])
-		{
 			channels[i++] = chn;
-		}
 	}
 	const bool success = (ReArrangeChannels(channels) == nRemainingChannels);
 	if(success)
@@ -255,7 +251,7 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const std::vector<CHANNELINDEX> &newOrde
 			channel.Reset(ModChannel::resetTotal, m_SndFile, chn, muteFlag);
 	}
 
-	std::vector<ModChannel> chns(std::begin(m_SndFile.m_PlayState.Chn), std::begin(m_SndFile.m_PlayState.Chn) + oldNumChannels);
+	std::vector<ModChannel> chns(m_SndFile.m_PlayState.Chn.begin(), m_SndFile.m_PlayState.Chn.begin() + oldNumChannels);
 	std::vector<ModChannelSettings> settings(std::begin(m_SndFile.ChnSettings), std::begin(m_SndFile.ChnSettings) + oldNumChannels);
 	std::vector<RecordGroup> recordStates(oldNumChannels);
 	auto chnMutePendings = m_SndFile.m_bChannelMuteTogglePending;
@@ -377,7 +373,7 @@ SAMPLEINDEX CModDoc::ReArrangeSamples(const std::vector<SAMPLEINDEX> &newOrder)
 	GetSampleUndo().RearrangeSamples(newIndex);
 
 	const auto muteFlag = CSoundFile::GetChannelMuteFlag();
-	for(CHANNELINDEX c = 0; c < std::size(m_SndFile.m_PlayState.Chn); c++)
+	for(CHANNELINDEX c = 0; c < m_SndFile.m_PlayState.Chn.size(); c++)
 	{
 		ModChannel &chn = m_SndFile.m_PlayState.Chn[c];
 		for(SAMPLEINDEX i = 1; i <= oldNumSamples; i++)

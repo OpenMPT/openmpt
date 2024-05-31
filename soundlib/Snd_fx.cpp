@@ -2208,7 +2208,7 @@ void CSoundFile::ApplyInstrumentPanning(ModChannel &chn, const ModInstrument *in
 CHANNELINDEX CSoundFile::GetNNAChannel(CHANNELINDEX nChn) const
 {
 	// Check for empty channel
-	for(CHANNELINDEX i = m_nChannels; i < MAX_CHANNELS; i++)
+	for(CHANNELINDEX i = m_nChannels; i < m_PlayState.Chn.size(); i++)
 	{
 		const ModChannel &c = m_PlayState.Chn[i];
 		// No sample and no plugin playing
@@ -2231,7 +2231,7 @@ CHANNELINDEX CSoundFile::GetNNAChannel(CHANNELINDEX nChn) const
 	// All channels are used: check for lowest volume
 	CHANNELINDEX result = CHANNELINDEX_INVALID;
 	uint32 envpos = 0;
-	for(CHANNELINDEX i = m_nChannels; i < MAX_CHANNELS; i++)
+	for(CHANNELINDEX i = m_nChannels; i < m_PlayState.Chn.size(); i++)
 	{
 		const ModChannel &c = m_PlayState.Chn[i];
 		// Stopped OPL channel
@@ -2326,7 +2326,7 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 	if(srcChn.dwFlags[CHN_MUTE])
 		return CHANNELINDEX_INVALID;
 
-	for(CHANNELINDEX i = nChn; i < MAX_CHANNELS; i++)
+	for(CHANNELINDEX i = nChn; i < m_PlayState.Chn.size(); i++)
 	{
 		// Only apply to background channels, or the same pattern channel
 		if(i < m_nChannels && i != nChn)
@@ -4278,11 +4278,10 @@ void CSoundFile::ProcessFinetune(PATTERNINDEX pattern, ROWINDEX row, CHANNELINDE
 {
 	SetFinetune(pattern, row, channel, m_PlayState, isSmooth);
 	// Also apply to notes played via CModDoc::PlayNote
-	for(CHANNELINDEX chn = GetNumChannels(); chn < MAX_CHANNELS; chn++)
+	for(ModChannel &chn : m_PlayState.BackgroundChannels(*this))
 	{
-		auto &modChn = m_PlayState.Chn[chn];
-		if(modChn.nMasterChn == channel + 1 && modChn.isPreviewNote && !modChn.dwFlags[CHN_KEYOFF])
-			modChn.microTuning = m_PlayState.Chn[channel].microTuning;
+		if(chn.nMasterChn == channel + 1 && chn.isPreviewNote && !chn.dwFlags[CHN_KEYOFF])
+			chn.microTuning = m_PlayState.Chn[channel].microTuning;
 	}
 }
 
@@ -5109,7 +5108,7 @@ void CSoundFile::ExtendedS3MCommands(CHANNELINDEX nChn, ModCommand::PARAM param)
 				case 1:
 				case 2:
 					{
-						for (CHANNELINDEX i = m_nChannels; i < MAX_CHANNELS; i++)
+						for(CHANNELINDEX i = m_nChannels; i < m_PlayState.Chn.size(); i++)
 						{
 							ModChannel &bkChn = m_PlayState.Chn[i];
 							if (bkChn.nMasterChn == nChn + 1)
@@ -6380,11 +6379,10 @@ void CSoundFile::PatternLoop(PlayState &state, CHANNELINDEX nChn, ModCommand::PA
 		// IT compatibility 10. Pattern loops (+ same fix for XM / MOD / S3M files)
 		if(!m_playBehaviour[kITFT2PatternLoop] && !(GetType() & (MOD_TYPE_MOD | MOD_TYPE_S3M)))
 		{
-			auto p = std::cbegin(state.Chn);
-			for(CHANNELINDEX i = 0; i < GetNumChannels(); i++, p++)
+			for(const ModChannel &otherChn : state.PatternChannels(*this))
 			{
 				// Loop on other channel
-				if(p != &chn && p->nPatternLoopCount)
+				if(&otherChn != &chn && otherChn.nPatternLoopCount)
 					return;
 			}
 		}
@@ -6651,7 +6649,7 @@ uint32 CSoundFile::GetFreqFromPeriod(uint32 period, uint32 c5speed, int32 nPerio
 
 PLUGINDEX CSoundFile::GetBestPlugin(const PlayState &playState, CHANNELINDEX nChn, PluginPriority priority, PluginMutePriority respectMutes) const
 {
-	if (nChn >= MAX_CHANNELS)		//Check valid channel number
+	if (nChn >= m_PlayState.Chn.size())		//Check valid channel number
 	{
 		return 0;
 	}

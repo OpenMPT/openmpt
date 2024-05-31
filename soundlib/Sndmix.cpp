@@ -498,7 +498,7 @@ bool CSoundFile::ProcessRow()
 						m_PlayState.m_nMusicSpeed = Order().GetDefaultSpeed();
 						m_PlayState.m_nMusicTempo = Order().GetDefaultTempo();
 						m_PlayState.m_nGlobalVolume = m_nDefaultGlobalVolume;
-						for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
+						for(CHANNELINDEX i = 0; i < m_PlayState.Chn.size(); i++)
 						{
 							auto &chn = m_PlayState.Chn[i];
 							if(chn.dwFlags[CHN_ADLIB] && m_opl)
@@ -639,7 +639,7 @@ bool CSoundFile::ProcessRow()
 					}
 					// When jumping to the next subsong, stop all playing notes from the previous song...
 					const auto muteFlag = CSoundFile::GetChannelMuteFlag();
-					for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
+					for(CHANNELINDEX i = 0; i < m_PlayState.Chn.size(); i++)
 						m_PlayState.Chn[i].Reset(ModChannel::resetSetPosFull, *this, i, muteFlag);
 					StopAllVsti();
 					// ...and the global playback information.
@@ -667,55 +667,55 @@ bool CSoundFile::ProcessRow()
 
 		// Reset channel values
 		ModCommand *m = Patterns[m_PlayState.m_nPattern].GetpModCommand(m_PlayState.m_nRow, 0);
-		for (ModChannel *pChn = m_PlayState.Chn, *pEnd = pChn + m_nChannels; pChn != pEnd; pChn++, m++)
+		for(ModChannel &chn : m_PlayState.PatternChannels(*this))
 		{
 			// First, handle some quirks that happen after the last tick of the previous row...
 			if(m_playBehaviour[KST3PortaAfterArpeggio]
-				&& pChn->nCommand == CMD_ARPEGGIO	// Previous row state!
+				&& chn.nCommand == CMD_ARPEGGIO	// Previous row state!
 				&& (m->command == CMD_PORTAMENTOUP || m->command == CMD_PORTAMENTODOWN))
 			{
 				// In ST3, a portamento immediately following an arpeggio continues where the arpeggio left off.
 				// Test case: PortaAfterArp.s3m
-				pChn->nPeriod = GetPeriodFromNote(pChn->nArpeggioLastNote, pChn->nFineTune, pChn->nC5Speed);
+				chn.nPeriod = GetPeriodFromNote(chn.nArpeggioLastNote, chn.nFineTune, chn.nC5Speed);
 			}
 
 			if(m_playBehaviour[kMODOutOfRangeNoteDelay]
 				&& !m->IsNote()
-				&& pChn->rowCommand.IsNote()
-				&& pChn->rowCommand.command == CMD_MODCMDEX && (pChn->rowCommand.param & 0xF0) == 0xD0
-				&& (pChn->rowCommand.param & 0x0Fu) >= m_PlayState.m_nMusicSpeed)
+				&& chn.rowCommand.IsNote()
+				&& chn.rowCommand.command == CMD_MODCMDEX && (chn.rowCommand.param & 0xF0) == 0xD0
+				&& (chn.rowCommand.param & 0x0Fu) >= m_PlayState.m_nMusicSpeed)
 			{
 				// In ProTracker, a note triggered by an out-of-range note delay can be heard on the next row
 				// if there is no new note on that row.
 				// Test case: NoteDelay-NextRow.mod
-				pChn->nPeriod = GetPeriodFromNote(pChn->rowCommand.note, pChn->nFineTune, 0);
+				chn.nPeriod = GetPeriodFromNote(chn.rowCommand.note, chn.nFineTune, 0);
 			}
 			if(m_playBehaviour[kST3TonePortaWithAdlibNote]
 				&& !m->IsNote()
-				&& pChn->dwFlags[CHN_ADLIB]
-				&& pChn->nPortamentoDest
-				&& pChn->rowCommand.IsNote()
-				&& pChn->rowCommand.IsTonePortamento())
+				&& chn.dwFlags[CHN_ADLIB]
+				&& chn.nPortamentoDest
+				&& chn.rowCommand.IsNote()
+				&& chn.rowCommand.IsTonePortamento())
 			{
 				// ST3: Adlib Note + Tone Portamento does not execute the slide, but changes to the target note instantly on the next row (unless there is another note with tone portamento)
 				// Test case: TonePortamentoWithAdlibNote.s3m
-				pChn->nPeriod = pChn->nPortamentoDest;
+				chn.nPeriod = chn.nPortamentoDest;
 			}
-			if(m_playBehaviour[kMODTempoOnSecondTick] && !m_playBehaviour[kMODVBlankTiming] && m_PlayState.m_nMusicSpeed == 1 && pChn->rowCommand.command == CMD_TEMPO)
+			if(m_playBehaviour[kMODTempoOnSecondTick] && !m_playBehaviour[kMODVBlankTiming] && m_PlayState.m_nMusicSpeed == 1 && chn.rowCommand.command == CMD_TEMPO)
 			{
 				// ProTracker sets the tempo after the first tick. This block handles the case of one tick per row.
 				// Test case: TempoChange.mod
-				m_PlayState.m_nMusicTempo = TEMPO(std::max(ModCommand::PARAM(1), pChn->rowCommand.param), 0);
+				m_PlayState.m_nMusicTempo = TEMPO(std::max(ModCommand::PARAM(1), chn.rowCommand.param), 0);
 			}
 
-			pChn->rowCommand = *m;
-
-			pChn->rightVol = pChn->newRightVol;
-			pChn->leftVol = pChn->newLeftVol;
-			pChn->dwFlags.reset(CHN_VIBRATO | CHN_TREMOLO);
-			if(!m_playBehaviour[kITVibratoTremoloPanbrello]) pChn->nPanbrelloOffset = 0;
-			pChn->nCommand = CMD_NONE;
-			pChn->m_plugParamValueStep = 0;
+			chn.rightVol = chn.newRightVol;
+			chn.leftVol = chn.newLeftVol;
+			chn.dwFlags.reset(CHN_VIBRATO | CHN_TREMOLO);
+			if(!m_playBehaviour[kITVibratoTremoloPanbrello])
+				chn.nPanbrelloOffset = 0;
+			chn.nCommand = CMD_NONE;
+			chn.m_plugParamValueStep = 0;
+			chn.rowCommand = *m++;
 		}
 
 		// Now that we know which pattern we're on, we can update time signatures (global or pattern-specific)
@@ -2139,7 +2139,7 @@ bool CSoundFile::ReadNote()
 	////////////////////////////////////////////////////////////////////////////////////
 	// Update channels data
 	m_nMixChannels = 0;
-	for (CHANNELINDEX nChn = 0; nChn < MAX_CHANNELS; nChn++)
+	for(CHANNELINDEX nChn = 0; nChn < m_PlayState.Chn.size(); nChn++)
 	{
 		ModChannel &chn = m_PlayState.Chn[nChn];
 		// FT2 Compatibility: Prevent notes to be stopped after a fadeout. This way, a portamento effect can pick up a faded instrument which is long enough.

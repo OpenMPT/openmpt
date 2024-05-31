@@ -567,10 +567,8 @@ private:
 #endif // MODPLUG_TRACKER
 
 public:
-#ifdef LIBOPENMPT_BUILD
-#ifndef NO_PLUGINS
+#if defined(LIBOPENMPT_BUILD) && !defined(NO_PLUGINS)
 	std::unique_ptr<CVstPluginManager> m_PluginManager;
-#endif
 #endif
 
 public:

@@ -2234,9 +2234,9 @@ void CViewPattern::PatternStep(ROWINDEX row)
 			InvalidatePattern(true, true);
 
 		// Cut instruments/samples in virtual channels
-		for(CHANNELINDEX i = sndFile.GetNumChannels(); i < MAX_CHANNELS; i++)
+		for(ModChannel &chn : sndFile.m_PlayState.BackgroundChannels(sndFile))
 		{
-			sndFile.m_PlayState.Chn[i].dwFlags.set(CHN_NOTEFADE | CHN_KEYOFF);
+			chn.dwFlags.set(CHN_NOTEFADE | CHN_KEYOFF);
 		}
 		sndFile.LoopPattern(m_nPattern);
 		sndFile.m_PlayState.m_nNextRow = row == ROWINDEX_INVALID ? GetCurrentRow() : row;

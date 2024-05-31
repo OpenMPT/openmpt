@@ -70,8 +70,8 @@ protected:
 public:
 	FlagSet<PlayFlags> m_flags = SONG_POSITIONCHANGED;
 
-	CHANNELINDEX ChnMix[MAX_CHANNELS]; // Index of channels in Chn to be actually mixed
-	ModChannel Chn[MAX_CHANNELS];      // Mixing channels... First m_nChannels channels are master channels (i.e. they are never NNA channels)!
+	std::array<CHANNELINDEX, MAX_CHANNELS> ChnMix;  // Index of channels in Chn to be actually mixed
+	std::array<ModChannel, MAX_CHANNELS> Chn;       // Mixing channels... First m_nChannels channels are directly mapped to pattern channels (i.e. they are never NNA channels)!
 	GlobalScriptState m_globalScriptState;
 
 	struct MIDIMacroEvaluationResults
@@ -91,6 +91,18 @@ public:
 	constexpr uint32 TicksOnRow() const noexcept
 	{
 		return (m_nMusicSpeed + m_nFrameDelay) * std::max(m_nPatternDelay, uint32(1));
+	}
+
+	mpt::span<ModChannel> PatternChannels(const CSoundFile &sndFile) noexcept;
+	mpt::span<const ModChannel> PatternChannels(const CSoundFile &sndFile) const noexcept
+	{
+		return const_cast<PlayState *>(this)->PatternChannels(sndFile);
+	}
+
+	mpt::span<ModChannel> BackgroundChannels(const CSoundFile &sndFile) noexcept;
+	mpt::span<const ModChannel> BackgroundChannels(const CSoundFile &sndFile) const noexcept
+	{
+		return const_cast<PlayState *>(this)->PatternChannels(sndFile);
 	}
 };
 

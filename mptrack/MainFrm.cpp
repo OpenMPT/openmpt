@@ -1383,12 +1383,12 @@ void CMainFrame::UnsetPlaybackSoundFile()
 		} else
 		{
 			// Stop sample preview channels
-			for(CHANNELINDEX i = m_pSndFile->m_nChannels; i < MAX_CHANNELS; i++)
+			for(ModChannel &chn : m_pSndFile->m_PlayState.BackgroundChannels(*m_pSndFile))
 			{
-				if(m_pSndFile->m_PlayState.Chn[i].isPreviewNote)
+				if(chn.isPreviewNote)
 				{
-					m_pSndFile->m_PlayState.Chn[i].nLength = 0;
-					m_pSndFile->m_PlayState.Chn[i].position.Set(0);
+					chn.nLength = 0;
+					chn.position.Set(0);
 				}
 			}
 		}

@@ -887,7 +887,7 @@ double CSoundFile::GetCurrentBPM() const
 void CSoundFile::ResetPlayPos()
 {
 	const auto muteFlag = GetChannelMuteFlag();
-	for(CHANNELINDEX i = 0; i < MAX_CHANNELS; i++)
+	for(CHANNELINDEX i = 0; i < m_PlayState.Chn.size(); i++)
 		m_PlayState.Chn[i].Reset(ModChannel::resetSetPosFull, *this, i, muteFlag);
 
 	m_visitedRows.Initialize(true);
@@ -1033,15 +1033,13 @@ void CSoundFile::ResetChannels()
 {
 	m_PlayState.m_flags.reset(SONG_FADINGSONG | SONG_ENDREACHED);
 	m_PlayState.m_nBufferCount = 0;
-	for(auto &chn : m_PlayState.Chn)
+	for(CHANNELINDEX channel = 0; channel < m_PlayState.Chn.size(); channel++)
 	{
+		ModChannel &chn = m_PlayState.Chn[channel];
 		chn.nROfs = chn.nLOfs = 0;
 		chn.nLength = 0;
 		if(chn.dwFlags[CHN_ADLIB] && m_opl)
-		{
-			CHANNELINDEX c = static_cast<CHANNELINDEX>(std::distance(std::begin(m_PlayState.Chn), &chn));
-			m_opl->NoteCut(c);
-		}
+			m_opl->NoteCut(channel);
 	}
 }
 
@@ -1901,10 +1899,8 @@ double CSoundFile::GetRowDuration(TEMPO tempo, uint32 speed) const
 		return static_cast<double>(2500 * speed) / tempo.ToDouble();
 
 	case TempoMode::Modern:
-		{
-			// If there are any row delay effects, the row length factor compensates for those.
-			return 60000.0 / tempo.ToDouble() / static_cast<double>(m_PlayState.m_nCurrentRowsPerBeat);
-		}
+		// If there are any row delay effects, the row length factor compensates for those.
+		return 60000.0 / tempo.ToDouble() / static_cast<double>(m_PlayState.m_nCurrentRowsPerBeat);
 
 	case TempoMode::Alternative:
 		return static_cast<double>(1000 * speed) / tempo.ToDouble();

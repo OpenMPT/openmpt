@@ -1155,9 +1155,8 @@ CHANNELINDEX CModDoc::PlayNote(PlayNoteParam &params, NoteToChannelMap *noteChan
 		CriticalSection cs;
 		// Apply note cut / off / fade (also on preview channels)
 		m_SndFile.NoteChange(m_SndFile.m_PlayState.Chn[channel], note);
-		for(CHANNELINDEX c = m_SndFile.GetNumChannels(); c < MAX_CHANNELS; c++)
+		for(ModChannel &chn : m_SndFile.m_PlayState.BackgroundChannels(m_SndFile))
 		{
-			ModChannel &chn = m_SndFile.m_PlayState.Chn[c];
 			if(chn.isPreviewNote && (chn.pModSample || chn.pModInstrument))
 			{
 				m_SndFile.NoteChange(chn, note);
@@ -1263,13 +1262,13 @@ void CModDoc::CheckNNA(ModCommand::NOTE note, INSTRUMENTINDEX ins, std::bitset<1
 // If note == 0, just check if an instrument or sample is playing.
 bool CModDoc::IsNotePlaying(UINT note, SAMPLEINDEX nsmp, INSTRUMENTINDEX nins)
 {
-	ModChannel *pChn = &m_SndFile.m_PlayState.Chn[m_SndFile.GetNumChannels()];
-	for (CHANNELINDEX i = m_SndFile.GetNumChannels(); i < MAX_CHANNELS; i++, pChn++) if (pChn->isPreviewNote)
+	for(ModChannel &chn : m_SndFile.m_PlayState.BackgroundChannels(m_SndFile))
 	{
-		if(pChn->nLength != 0 && !pChn->dwFlags[CHN_NOTEFADE | CHN_KEYOFF| CHN_MUTE]
-			&& (note == pChn->nNewNote || note == NOTE_NONE)
-			&& (pChn->pModSample == &m_SndFile.GetSample(nsmp) || !nsmp)
-			&& (pChn->pModInstrument == m_SndFile.Instruments[nins] || !nins)) return true;
+		if(chn.isPreviewNote && chn.nLength != 0 && !chn.dwFlags[CHN_NOTEFADE | CHN_KEYOFF| CHN_MUTE]
+		   && (note == chn.nNewNote || note == NOTE_NONE)
+		   && (chn.pModSample == &m_SndFile.GetSample(nsmp) || !nsmp)
+		   && (chn.pModInstrument == m_SndFile.Instruments[nins] || !nins))
+			return true;
 	}
 	return false;
 }
@@ -2140,10 +2139,14 @@ void CModDoc::OnPlayerPlay()
 		CriticalSection cs;
 
 		// Kill editor voices
-		for(CHANNELINDEX i = m_SndFile.GetNumChannels(); i < MAX_CHANNELS; i++) if (m_SndFile.m_PlayState.Chn[i].isPreviewNote)
+		for(ModChannel &chn : m_SndFile.m_PlayState.BackgroundChannels(m_SndFile))
 		{
-			m_SndFile.m_PlayState.Chn[i].dwFlags.set(CHN_NOTEFADE | CHN_KEYOFF);
-			if (!isPlaying) m_SndFile.m_PlayState.Chn[i].nLength = 0;
+			if(chn.isPreviewNote)
+			{
+				chn.dwFlags.set(CHN_NOTEFADE | CHN_KEYOFF);
+				if(!isPlaying)
+					chn.nLength = 0;
+			}
 		}
 
 		m_SndFile.m_PlayState.m_flags.set(SONG_POSITIONCHANGED);
@@ -2585,9 +2588,9 @@ void CModDoc::OnPatternPlay()
 		CriticalSection cs;
 
 		// Cut instruments/samples
-		for(CHANNELINDEX i = m_SndFile.GetNumChannels(); i < MAX_CHANNELS; i++)
+		for(ModChannel &chn : m_SndFile.m_PlayState.BackgroundChannels(m_SndFile))
 		{
-			m_SndFile.m_PlayState.Chn[i].dwFlags.set(CHN_NOTEFADE | CHN_KEYOFF);
+			chn.dwFlags.set(CHN_NOTEFADE | CHN_KEYOFF);
 		}
 		if ((nOrd < m_SndFile.Order().size()) && (m_SndFile.Order()[nOrd] == nPat)) m_SndFile.m_PlayState.m_nCurrentOrder = m_SndFile.m_PlayState.m_nNextOrder = nOrd;
 		m_SndFile.m_PlayState.m_flags.reset(SONG_PAUSED | SONG_STEP);
@@ -2635,9 +2638,9 @@ void CModDoc::OnPatternPlayNoLoop()
 
 		CriticalSection cs;
 		// Cut instruments/samples
-		for(CHANNELINDEX i = m_SndFile.GetNumChannels(); i < MAX_CHANNELS; i++)
+		for(ModChannel &chn : m_SndFile.m_PlayState.BackgroundChannels(m_SndFile))
 		{
-			m_SndFile.m_PlayState.Chn[i].dwFlags.set(CHN_NOTEFADE | CHN_KEYOFF);
+			chn.dwFlags.set(CHN_NOTEFADE | CHN_KEYOFF);
 		}
 		m_SndFile.m_PlayState.m_flags.reset(SONG_PAUSED | SONG_STEP);
 		m_SndFile.SetCurrentOrder(nOrd);
@@ -2876,7 +2879,7 @@ void CModDoc::ChangeFileExtension(MODTYPE nNewType)
 		SetPathName(newPath, FALSE);
 	}
 
-	UpdateAllViews(NULL, UpdateHint().ModType());
+	UpdateAllViews(nullptr, UpdateHint().ModType());
 }
 
 
