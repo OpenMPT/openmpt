@@ -31,9 +31,9 @@ if not exist "build\tools"     mkdir "build\tools"
 
 call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://7-zip.org/a/7za920.zip"                                                              "build\externals\7za920.zip"                   84e830c91a0e8ae499cc4814080da6569d8a6acbddc585c8b62abc86c809793aeb669b0a741063a379fd281ade85f120bc27efeb67d63bf961be893eec8bc3b3  384846 || goto error
 
-call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://7-zip.org/a/7z2301-extra.7z"                                                         "build\externals\7z2301-extra.7z"              c849c2cb489cf5b6eeb92bfbc27dcb37d0349c36971e1bc7ef32c7cde1b659e19e8b46d734ba90f47affe07fdfd5b4774cbfa0fdf4b681e9f60bb46bba1f7f9b 1027828 || goto error
+call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://7-zip.org/a/7z2406-extra.7z"                                                         "build\externals\7z2406-extra.7z"              6b88a761f7cc8b8affc074b24750bcdc65cc3ab18d127c8bfdd1eca953d43e21558eb1137c4b934689990564d7d24cf14e249a773dc1e5ddb7316b10d73682f8 1610111 || goto error
 
-call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://7-zip.org/a/7z2301-x64.exe"                                                              "build\externals\7z2301-x64.exe"                   1f4da167ff2f1d34eeaf76c3003ba5fcabfc7a7da40e73e317aa99c6e1321cdf97e00f4feb9e79e1a72240e0376af0c3becb3d309e5bb0385e5192da17ea77ff 1589510 || goto error
+call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://7-zip.org/a/7z2406-x64.exe"                                                              "build\externals\7z2406-x64.exe"                   b635b449f49aac29234f677e662be35f72a059401ea0786d956485d07134f9dd10ed284338503f08ff7aad16833cf034eb955ca34e1faf35a8177ccad1f20c75 1619556 || goto error
 
 
 call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://web.archive.org/web/20131217072017if_/http://download.nullsoft.com/winamp/plugin-dev/WA5.55_SDK.exe" "build\externals\WA5.55_SDK.exe"               394375db8a16bf155b5de9376f6290488ab339e503dbdfdc4e2f5bede967799e625c559cca363bc988324f1a8e86e5fd28a9f697422abd7bb3dcde4a766607b5  336166 || goto error
@@ -63,10 +63,10 @@ call :killdir "build\tools\7zip" || goto error
 rem Get old 7zip distributed as zip and unpack with built-in zip depacker
 rem Get current 7zip commandline version which can unpack 7zip and the 7zip installer but not other archive formats
 rem Get 7zip installer and unpack it with current commandline 7zip
-rem This is a mess for automatic. Oh well.
+rem This is a mess for automation. Oh well.
 cscript build\scriptlib\unpack-zip.vbs "build\externals\7za920.zip" "build\tools\7zipold" || goto error
-build\tools\7zipold\7za.exe x -y -obuild\tools\7zipa "build\externals\7z2301-extra.7z" || goto error
-build\tools\7zipa\7za.exe x -y -obuild\tools\7zip "build\externals\7z2301-x64.exe" || goto error
+build\tools\7zipold\7za.exe x -y -obuild\tools\7zipa "build\externals\7z2406-extra.7z" || goto error
+build\tools\7zipa\7za.exe x -y -obuild\tools\7zip "build\externals\7z2406-x64.exe" || goto error
 
 call build\scriptlib\unpack.cmd "build\tools\htmlhelp" "build\externals\htmlhelp.exe" "." || goto error
 

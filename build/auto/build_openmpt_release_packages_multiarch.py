@@ -296,7 +296,7 @@ p7zarm64 = Popen([path7z, "a", "-tzip", "-mx=9", "../" + openmpt_version_name + 
 if singleThreaded:
 	p7zarm64.communicate()
 
-p7zsymbols = Popen([path7z, "a", "-t7z", "-mx=9", "-mf=off", "../" + openmpt_version_name + "-symbols.7z", "."], cwd=openmpt_zip_symbols_basepath)
+p7zsymbols = Popen([path7z, "a", "-t7z", "-mx=9", "-myv=1512", "../" + openmpt_version_name + "-symbols.7z", "."], cwd=openmpt_zip_symbols_basepath)
 if singleThreaded:
 	p7zsymbols.communicate()
 
