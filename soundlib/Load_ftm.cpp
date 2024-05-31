@@ -123,7 +123,7 @@ bool CSoundFile::ReadFTM(FileReader &file, ModLoadingFlags loadFlags)
 		m_nDefaultRowsPerBeat = m_nDefaultRowsPerMeasure / 4;
 	m_nDefaultGlobalVolume = Util::muldivr_unsigned(fileHeader.globalVolume, MAX_GLOBAL_VOLUME, 63);
 	m_nMinPeriod = 3208;
-	m_nMaxPeriod = 5172;
+	m_nMaxPeriod = 5376;
 	const bool moduleWithSamples = (fileHeader.flags & 0x01);
 	
 	m_modFormat.formatName = U_("Face The Music");
