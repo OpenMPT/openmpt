@@ -15,6 +15,10 @@
 #include "plugins/PluginStructs.h"
 #include "Snd_defs.h"
 
+#include <map>
+#include <optional>
+#include <vector>
+
 OPENMPT_NAMESPACE_BEGIN
 
 struct PlayState
