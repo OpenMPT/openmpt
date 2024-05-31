@@ -82,7 +82,7 @@ struct InstrumentSynth::States::State
 	CHANNELINDEX FTMRealChannel(CHANNELINDEX channel, const CSoundFile &sndFile) const noexcept
 	{
 		if(m_ftmWorkTrack)
-			return (m_ftmWorkTrack - 1) % sndFile.GetNumChannels();
+			return static_cast<CHANNELINDEX>(m_ftmWorkTrack - 1) % sndFile.GetNumChannels();
 		else
 			return channel;
 	}
@@ -657,10 +657,10 @@ bool InstrumentSynth::States::State::EvaluateEvent(const Event &event, PlayState
 		return false;
 	case Event::Type::FTM_SetDetune:
 		// Detune always applies to the first channel of a channel pair (and only if the other channel is playing a sample)
-		states.states[channel & ~1].m_ftmDetune = event.u16 * -8;
+		states.states[channel & ~1].m_ftmDetune = static_cast<int16>(event.u16 * -8);
 		return false;
 	case Event::Type::FTM_AddDetune:
-		states.states[channel & ~1].m_ftmDetune -= event.i16 * 8;
+		states.states[channel & ~1].m_ftmDetune -= static_cast<int16>(event.i16 * 8);
 		return false;
 	case Event::Type::FTM_AddPitch:
 		if(event.i16)

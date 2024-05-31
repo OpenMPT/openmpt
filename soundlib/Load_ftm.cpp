@@ -62,7 +62,7 @@ struct FTMFileHeader
 
 	uint32 GetHeaderMinimumAdditionalSize() const
 	{
-		return numSamples * sizeof(FTMSampleHeader) + numEffects * 4;
+		return static_cast<uint32>(numSamples * sizeof(FTMSampleHeader) + numEffects * 4);
 	}
 };
 
@@ -266,15 +266,15 @@ bool CSoundFile::ReadFTM(FileReader &file, ModLoadingFlags loadFlags)
 				break;
 			case 25:  // DETUNE/PITCH ADD [dddppp]
 			case 26:  // DETUNE/PITCH SUB [dddppp]
-				events.push_back(InstrumentSynth::Event::FTM_AddDetune(u12hi * ((item.type == 26) ? -1 : 1)));
-				events.push_back(InstrumentSynth::Event::FTM_AddPitch(u12lo * ((item.type == 26) ? -1 : 1)));
+				events.push_back(InstrumentSynth::Event::FTM_AddDetune((item.type == 26) ? -static_cast<int16>(u12hi) : u12hi));
+				events.push_back(InstrumentSynth::Event::FTM_AddPitch((item.type == 26) ? -static_cast<int16>(u12lo) : u12lo));
 				break;
 			case 27:  // VOLUME = [....vv]
 				events.push_back(InstrumentSynth::Event::FTM_SetVolume(u8));
 				break;
 			case 28:  // VOLUME ADD [....vv]
 			case 29:  // VOLUME SUB [....vv]
-				events.push_back(InstrumentSynth::Event::FTM_AddVolume(u8 * ((item.type == 29) ? -1 : 1)));
+				events.push_back(InstrumentSynth::Event::FTM_AddVolume((item.type == 29) ? -static_cast<int16>(u8) : u8));
 				break;
 			case 30:  // CURRENT SAMPLE = [....ss]
 				events.push_back(InstrumentSynth::Event::FTM_SetSample(u8));
@@ -304,7 +304,7 @@ bool CSoundFile::ReadFTM(FileReader &file, ModLoadingFlags loadFlags)
 			case 47:  // 2ND LFO START [mfssdd]
 			case 50:  // 3RD LFO START [mfssdd]
 			case 53:  // 4TH LFO START [mfssdd]
-				events.push_back(InstrumentSynth::Event::FTM_StartLFO((item.type - 44u) / 3u, item.data[0]));
+				events.push_back(InstrumentSynth::Event::FTM_StartLFO(static_cast<uint8>((item.type - 44u) / 3u), item.data[0]));
 				[[fallthrough]];
 			case 45:  // 1ST LFO SP/DE ADD [..ssdd]
 			case 46:  // 1ST LFO SP/DE SUB [..ssdd]
@@ -314,7 +314,7 @@ bool CSoundFile::ReadFTM(FileReader &file, ModLoadingFlags loadFlags)
 			case 52:  // 3RD LFO SP/DE SUB [..ssdd]
 			case 54:  // 4TH LFO SP/DE ADD [..ssdd]
 			case 55:  // 4TH LFO SP/DE SUB [..ssdd]
-				events.push_back(InstrumentSynth::Event::FTM_LFOAddSub(((item.type - 44u) / 3u) | (((item.type - 44u) % 3u == 2) ? 4 : 0), item.data[1], item.data[2]));
+				events.push_back(InstrumentSynth::Event::FTM_LFOAddSub(static_cast<uint8>(((item.type - 44u) / 3u) | (((item.type - 44u) % 3u == 2) ? 4 : 0)), item.data[1], item.data[2]));
 				break;
 			case 56:  // WORK ON TRACK t [.....t]
 			case 57:  // WORKTRACK ADD [.....t]
@@ -399,7 +399,7 @@ bool CSoundFile::ReadFTM(FileReader &file, ModLoadingFlags loadFlags)
 					m.SetEffectCommand(CMD_VOLUMEDOWN_DURATION, param);
 					break;
 				case 0xE0:  // Loop
-					loopPoints.push_back({pat, param, chn, static_cast<uint8>(position.rem)});
+					loopPoints.push_back({pat, static_cast<uint8>(param & 0x3F), static_cast<uint8>(chn & 0x07), static_cast<uint8>(position.rem & 0x7F)});
 					break;
 				case 0xF0:  // Already handled
 					break;
