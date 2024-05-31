@@ -73,6 +73,7 @@ static constexpr ModFormatInfo modFormatInfo[] =
 	{ UL_("Digital Tracker"),                    "dtm" },
 	{ UL_("Farandole Composer"),                 "far" },
 	{ UL_("FM Tracker"),                         "fmt" },
+	{ UL_("Face The Music"),                     "ftm" },
 	{ UL_("Imago Orpheus"),                      "imf" },
 	{ UL_("Images Music System"),                "ims" },
 	{ UL_("Ice Tracker"),                        "ice" },
