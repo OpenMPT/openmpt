@@ -19,6 +19,10 @@
 LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
 #pragma code_page(1252)
 
+#if !defined(WS_EX_COMPOSITED)
+#define WS_EX_COMPOSITED 0x02000000L
+#endif
+
 /////////////////////////////////////////////////////////////////////////////
 //
 // Dialog
