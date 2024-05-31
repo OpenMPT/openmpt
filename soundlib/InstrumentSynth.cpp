@@ -860,8 +860,7 @@ void GlobalScriptState::NextTick(PlayState &playState, const CSoundFile &sndFile
 	for(CHANNELINDEX chn = 0; chn < sndFile.GetNumChannels(); chn++)
 	{
 		auto &state = states[chn];
-		CHANNELINDEX realChn = state.FTMRealChannel(chn, sndFile);
-		auto &modChn = playState.Chn[realChn];
+		auto &modChn = playState.Chn[chn];
 		if(modChn.rowCommand.command == CMD_MED_SYNTH_JUMP && modChn.isFirstTick)
 			states[chn].JumpToPosition(sndFile.m_globalScript, modChn.rowCommand.param);
 		int32 period = 0;

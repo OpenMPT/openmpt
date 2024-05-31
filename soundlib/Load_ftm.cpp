@@ -179,14 +179,17 @@ bool CSoundFile::ReadFTM(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	auto &events = m_globalScript;
+	constexpr uint16 STOP_INDEX = uint16_max - 1;
 	std::map<uint16, uint16> offsetToIndex;
+	std::bitset<64> effectDefined;
 	for(uint8 effect = 0; effect < fileHeader.numEffects; effect++)
 	{
 		const auto [numLines, index] = file.ReadArray<uint16be, 2>();
 		if(numLines > 0x200 || index > 63 || offsetToIndex.count(index << 10))
 			return false;
-		events.reserve(5 + numLines);
-		events.push_back(InstrumentSynth::Event::StopScript());
+		effectDefined.set(index);
+		events.reserve(events.size() + 4 + numLines);
+		events.push_back(InstrumentSynth::Event::Jump(STOP_INDEX));
 		events.push_back(InstrumentSynth::Event::JumpMarker(index));
 		events.push_back(InstrumentSynth::Event::FTM_SetWorkTrack(uint8_max, false));
 		events.push_back(InstrumentSynth::Event::FTM_SetInterrupt(uint16_max, uint8_max));
@@ -223,8 +226,7 @@ bool CSoundFile::ReadFTM(FileReader &file, ModLoadingFlags loadFlags)
 				events.push_back(InstrumentSynth::Event::Jump(static_cast<uint16>((u12hi << 10) | (jumpTarget & 0x3FF))));
 				break;
 			case 5:  // END OF EFFECT [......]
-				events.push_back(InstrumentSynth::Event::FTM_SetInterrupt(uint16_max, uint8_max));
-				events.push_back(InstrumentSynth::Event::StopScript());
+				events.push_back(InstrumentSynth::Event::Jump(STOP_INDEX));
 				break;
 			case 6:   // IF PITCH=v GOTO l [ppplll]
 			case 7:   // IF PITCH<v GOTO l [ppplll]
@@ -334,6 +336,11 @@ bool CSoundFile::ReadFTM(FileReader &file, ModLoadingFlags loadFlags)
 				break;
 			}
 		}
+	}
+	if(fileHeader.numEffects)
+	{
+		events.push_back(InstrumentSynth::Event::JumpMarker(64));
+		offsetToIndex[STOP_INDEX] = static_cast<uint16>(events.size());
 		events.push_back(InstrumentSynth::Event::FTM_SetInterrupt(uint16_max, uint8_max));
 	}
 	for(auto &event : events)
@@ -390,7 +397,7 @@ bool CSoundFile::ReadFTM(FileReader &file, ModLoadingFlags loadFlags)
 					m.instr = param;
 					break;
 				case 0xB0:  // SEL effect
-					m.SetEffectCommand(CMD_MED_SYNTH_JUMP, param);
+					m.SetEffectCommand(CMD_MED_SYNTH_JUMP, (param < effectDefined.size() && effectDefined[param]) ? param : 64);
 					break;
 				case 0xC0:  // Pitch bend
 					m.SetEffectCommand(CMD_TONEPORTA_DURATION, param);
