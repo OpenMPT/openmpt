@@ -1173,7 +1173,7 @@ size_t ModCommand::GetEffectWeight(COMMAND cmd)
 		CMD_TONEPORTAMENTO,
 		CMD_TONEPORTAVOL,
 		CMD_DBMECHO,
-		CMD_GLOBALVOLSLIDE,
+		CMD_CHANNELVOLSLIDE,
 		CMD_CHANNELVOLUME,
 		CMD_GLOBALVOLSLIDE,
 		CMD_GLOBALVOLUME,
@@ -1192,6 +1192,7 @@ size_t ModCommand::GetEffectWeight(COMMAND cmd)
 		}
 	}
 	// Invalid / unknown command.
+	MPT_ASSERT_NOTREACHED();
 	return 0;
 }
 

@@ -401,6 +401,7 @@ bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	InitializeGlobals(MOD_TYPE_AMS);
+	InitializeChannels();
 
 	m_SongFlags = SONG_ITCOMPATGXX | SONG_ITOLDEFFECTS;
 	m_nChannels = (fileHeader.channelConfig & 0x1F) + 1;
@@ -435,7 +436,6 @@ bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 	// Read channel names
 	for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
 	{
-		ChnSettings[chn].Reset();
 		file.ReadSizedString<uint8le, mpt::String::spacePadded>(ChnSettings[chn].szName);
 	}
 
