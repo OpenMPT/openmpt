@@ -266,10 +266,6 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderPSM(MemoryFileReader file, co
 	{
 		return ProbeFailure;
 	}
-	if((chunkHeader.id & 0x7F7F7F7Fu) != chunkHeader.id) // ASCII?
-	{
-		return ProbeFailure;
-	}
 	MPT_UNREFERENCED_PARAMETER(pfilesize);
 	return ProbeSuccess;
 }
