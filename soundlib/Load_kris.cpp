@@ -33,7 +33,8 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderKRIS(MemoryFileReader file, c
 	{
 		MODSampleHeader sampleHeader;
 		file.ReadStruct(sampleHeader);
-		invalidBytes += sampleHeader.GetInvalidByteScore();
+		if(sampleHeader.name[0] != 0)
+			invalidBytes += sampleHeader.GetInvalidByteScore();
 		if(invalidBytes > MODSampleHeader::INVALID_BYTE_THRESHOLD)
 			return ProbeFailure;
 	}
