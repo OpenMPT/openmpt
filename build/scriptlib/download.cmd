@@ -1,17 +1,34 @@
-rem bDOWNLOAD bAUTO URL FILE HASH SIZE 
-echo URL %3
-if "%1" == "yes" (
- if "%2" == "xauto" (
-  echo Check %3 ...
-  if exist "%~4" (
-   powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue %5 -filesize %6 -filename %4 || del /Q "%4"
+rem FILE SIZE HASH [URLS...]
+set MPT_DOWNLOAD_FILENAME=%~1
+set MPT_DOWNLOAD_FILESIZE=%2
+set MPT_DOWNLOAD_FILEHASH=%3
+shift
+shift
+shift
+
+echo "Checking '%MPT_DOWNLOAD_FILENAME%' ..."
+if exist "%MPT_DOWNLOAD_FILENAME%" (
+ powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -filename %MPT_DOWNLOAD_FILENAME% -filesize %MPT_DOWNLOAD_FILESIZE% -hashvalue %MPT_DOWNLOAD_FILEHASH% || del /Q "%MPT_DOWNLOAD_FILENAME%"
+)
+
+if "x%MPT_DOWNLOAD_DO%" == "xyes" (
+ :loop
+ if not "%~1" == "" (
+  if not exist "%MPT_DOWNLOAD_FILENAME%" (
+   echo "Downloading '%MPT_DOWNLOAD_FILENAME%' from '%~1' ..."
+   powershell -Command "(New-Object Net.WebClient).DownloadFile('%~1', '%MPT_DOWNLOAD_FILENAME%')" || exit /B 1
+   echo "Verifying '%~1' ..."
+   if exist "%MPT_DOWNLOAD_FILENAME%" (
+    powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -filename %MPT_DOWNLOAD_FILENAME% -filesize %MPT_DOWNLOAD_FILESIZE% -hashvalue %MPT_DOWNLOAD_FILEHASH% || del /Q "%MPT_DOWNLOAD_FILENAME%"
+   )
   )
- )
- if not exist "%~4" (
-  echo Download %3 ...
-  powershell -Command "(New-Object Net.WebClient).DownloadFile('%~3', '%~4')" || exit /B 1
+  shift
+  goto loop
  )
 )
-echo Verify %4 ...
-powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue %5 -filesize %6 -filename %4 || exit /B 1
-exit /B 0
+
+if not exist "%MPT_DOWNLOAD_FILENAME%" (
+ echo "Failed to download '%MPT_DOWNLOAD_FILENAME%'."
+ exit /B 1
+)
+exit /b 0

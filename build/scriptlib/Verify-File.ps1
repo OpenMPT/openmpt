@@ -6,13 +6,13 @@ Function Get-FileHashWin7([String] $FileName, $HashName) {
 	$FileStream.Close()
 	$StringBuilder.ToString()
 }
-Write-Output "Verify " $filename
+Write-Output "Verify $filename"
 if ((Get-Item $filename).length -ne $filesize) {
-	Write-Output "Failed " $filename
+	Write-Output "Failed $filename"
 	exit 1
 }
 if ((Get-FileHashWin7 $filename $hashname) -ne $hashvalue) {
-	Write-Output "Failed " $filename
+	Write-Output "Failed $filename"
 	exit 1
 }
 exit 0
