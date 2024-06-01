@@ -103,7 +103,7 @@ copy /y ..\..\bin\release\%MPT_VS_VER%-win7-static\x86\xmp-openmpt.dll .\XMPlay-
 copy /y ..\..\bin\release\%MPT_VS_VER%-win7-static\x86\openmpt-mpg123.dll .\XMPlay-legacy\ || goto error
 copy /y ..\..\bin\release\%MPT_VS_VER%-win7-static\x86\in_openmpt.dll .\Winamp-legacy\ || goto error
 copy /y ..\..\bin\release\%MPT_VS_VER%-win7-static\x86\openmpt-mpg123.dll .\Winamp-legacy\ || goto error
-..\..\build\tools\7zip\7z.exe a -t%MPT_PKG_FORMAT% -mx=9 ..\libopenmpt\bin.windows\%LIBOPENMPT_VERSION_STRING%\libopenmpt-%MPT_REVISION%.bin.windows.%MPT_PKG_FORMAT% ^
+..\..\build\tools\7zip\7z.exe a -t%MPT_PKG_FORMAT% -mx=9 %MPT_PKG_FORMAT_OPTIONS% ..\libopenmpt\bin.windows\%LIBOPENMPT_VERSION_STRING%\libopenmpt-%MPT_REVISION%.bin.windows.%MPT_PKG_FORMAT% ^
  LICENSE.txt ^
  Licenses ^
  changelog.md ^
@@ -248,7 +248,7 @@ copy /y ..\..\bin\release\%MPT_VS_VER%-win7-shared\amd64\openmpt-mpg123.dll bin\
 copy /y ..\..\bin\release\%MPT_VS_VER%-win7-shared\amd64\openmpt-ogg.dll bin\amd64-legacy\ || goto error
 copy /y ..\..\bin\release\%MPT_VS_VER%-win7-shared\amd64\openmpt-vorbis.dll bin\amd64-legacy\ || goto error
 copy /y ..\..\bin\release\%MPT_VS_VER%-win7-shared\amd64\openmpt-zlib.dll bin\amd64-legacy\ || goto error
-..\..\build\tools\7zip\7z.exe a -t%MPT_PKG_FORMAT% -mx=9 ..\libopenmpt\dev.windows.%MPT_VS_VER%\%LIBOPENMPT_VERSION_STRING%\libopenmpt-%MPT_REVISION%.dev.windows.%MPT_VS_VER%.%MPT_PKG_FORMAT% ^
+..\..\build\tools\7zip\7z.exe a -t%MPT_PKG_FORMAT% -mx=9 %MPT_PKG_FORMAT_OPTIONS% ..\libopenmpt\dev.windows.%MPT_VS_VER%\%LIBOPENMPT_VERSION_STRING%\libopenmpt-%MPT_REVISION%.dev.windows.%MPT_VS_VER%.%MPT_PKG_FORMAT% ^
  LICENSE.txt ^
  Licenses ^
  changelog.md ^

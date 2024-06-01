@@ -83,7 +83,7 @@ copy /y ..\..\bin\release\vs2017-winxp-static\x86\xmp-openmpt.dll .\XMPlay\ || g
 copy /y ..\..\bin\release\vs2017-winxp-static\x86\openmpt-mpg123.dll .\XMPlay\ || goto error
 copy /y ..\..\bin\release\vs2017-winxp-static\x86\in_openmpt.dll .\Winamp\ || goto error
 copy /y ..\..\bin\release\vs2017-winxp-static\x86\openmpt-mpg123.dll .\Winamp\ || goto error
-..\..\build\tools\7zip\7z.exe a -t%MPT_PKG_FORMAT% -mx=9 ..\libopenmpt\bin.retro.winxp\%LIBOPENMPT_VERSION_STRING%\libopenmpt-%MPT_REVISION%.bin.retro.winxp.%MPT_PKG_FORMAT% ^
+..\..\build\tools\7zip\7z.exe a -t%MPT_PKG_FORMAT% -mx=9 %MPT_PKG_FORMAT_OPTIONS% ..\libopenmpt\bin.retro.winxp\%LIBOPENMPT_VERSION_STRING%\libopenmpt-%MPT_REVISION%.bin.retro.winxp.%MPT_PKG_FORMAT% ^
  LICENSE.txt ^
  Licenses ^
  changelog.md ^
@@ -182,7 +182,7 @@ copy /y ..\..\bin\release\vs2017-winxp-shared\amd64\openmpt-mpg123.dll bin\amd64
 copy /y ..\..\bin\release\vs2017-winxp-shared\amd64\openmpt-ogg.dll bin\amd64-retro-winxp\ || goto error
 copy /y ..\..\bin\release\vs2017-winxp-shared\amd64\openmpt-vorbis.dll bin\amd64-retro-winxp\ || goto error
 copy /y ..\..\bin\release\vs2017-winxp-shared\amd64\openmpt-zlib.dll bin\amd64-retro-winxp\ || goto error
-..\..\build\tools\7zip\7z.exe a -t%MPT_PKG_FORMAT% -mx=9 ..\libopenmpt\dev.windows.retro.winxp\%LIBOPENMPT_VERSION_STRING%\libopenmpt-%MPT_REVISION%.dev.windows.retro.winxp.%MPT_PKG_FORMAT% ^
+..\..\build\tools\7zip\7z.exe a -t%MPT_PKG_FORMAT% -mx=9 %MPT_PKG_FORMAT_OPTIONS% ..\libopenmpt\dev.windows.retro.winxp\%LIBOPENMPT_VERSION_STRING%\libopenmpt-%MPT_REVISION%.dev.windows.retro.winxp.%MPT_PKG_FORMAT% ^
  LICENSE.txt ^
  Licenses ^
  changelog.md ^
