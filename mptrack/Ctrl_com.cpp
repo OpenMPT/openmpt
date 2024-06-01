@@ -123,8 +123,8 @@ void CCtrlComments::UpdateView(UpdateHint hint, CObject *pHint)
 {
 	CommentHint commentHint = hint.ToType<CommentHint>();
 	if (pHint == this || !commentHint.GetType()[HINT_MODCOMMENTS | HINT_MPTOPTIONS | HINT_MODTYPE]) return;
-	if (m_nLockCount) return;
-	m_nLockCount++;
+	if (IsLocked()) return;
+	LockControls();
 
 	static FontSetting previousFont;
 	FontSetting font = TrackerSettings::Instance().commentsFont;
@@ -176,7 +176,7 @@ void CCtrlComments::UpdateView(UpdateHint hint, CObject *pHint)
 	}
 
 	m_EditComments.SetRedraw(TRUE);
-	m_nLockCount--;
+	UnlockControls();
 }
 
 

@@ -247,6 +247,7 @@ void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
 
 	const auto resamplingModes = Resampling::AllModes();
 
+	LockControls();
 	if (hintType == HINT_MPTOPTIONS || updateAll)
 	{
 		CString defaultResampler;
@@ -373,6 +374,7 @@ void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
 		m_VuMeterLeft.InvalidateRect(NULL, FALSE);
 		m_VuMeterRight.InvalidateRect(NULL, FALSE);
 	}
+	UnlockControls();
 }
 
 
@@ -498,7 +500,7 @@ void CCtrlGeneral::OnArtistChanged()
 
 void CCtrlGeneral::OnTempoChanged()
 {
-	if (m_bInitialized && m_EditTempo.GetWindowTextLength() > 0)
+	if (m_bInitialized && m_EditTempo.GetWindowTextLength() > 0 && !IsLocked())
 	{
 		TEMPO tempo = m_EditTempo.GetTempoValue();
 		Limit(tempo, m_tempoMin, m_tempoMax);
