@@ -752,8 +752,7 @@ bool InstrumentSynth::States::State::EvaluateEvent(const Event &event, PlayState
 				chn.nNewIns = srcChn.nNewIns;
 				chn.pModSample = srcChn.pModSample;
 				chn.position = srcChn.position;
-				if(srcChn.pModSample)
-					chn.dwFlags = (chn.dwFlags & CHN_CHANNELFLAGS) | srcChn.pModSample->uFlags;
+				chn.dwFlags = (chn.dwFlags & CHN_CHANNELFLAGS) | (srcChn.dwFlags & CHN_SAMPLEFLAGS);
 				chn.nLength = srcChn.nLength;
 				chn.nLoopStart = srcChn.nLoopStart;
 				chn.nLoopEnd = srcChn.nLoopEnd;
