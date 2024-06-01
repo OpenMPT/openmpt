@@ -29,7 +29,7 @@ struct FTMFileHeader
 	uint8    version;     // ...I guess?
 	uint8    numSamples;  // 0...63
 	uint16be numMeasures;
-	uint16be tempo;         // Smaller values = faster, the default of 14209 is ~124.307 BPM
+	uint16be tempo;         // Smaller values = faster, the default of 14209 is ~125.098 BPM (though it seems to fluctuate and *sometimes* it drops to 124.307 BPM?)
 	uint8    tonality;      // Not relevant for playback (0 = C/a, 1 = Db/bb, etc.)
 	uint8    muteStatus;
 	uint8    globalVolume;  // 0...63
@@ -115,7 +115,7 @@ bool CSoundFile::ReadFTM(FileReader &file, ModLoadingFlags loadFlags)
 	m_playBehaviour.set(kST3NoMutedChannels);
 	m_playBehaviour.set(kApplyUpperPeriodLimit);
 	Order().SetDefaultSpeed(fileHeader.ticksPerRow);
-	Order().SetDefaultTempo(TEMPO(1766278.163 / fileHeader.tempo));
+	Order().SetDefaultTempo(TEMPO(1777517.482 / fileHeader.tempo));
 	m_nDefaultRowsPerMeasure = fileHeader.rowsPerMeasure;
 	if(fileHeader.ticksPerRow == 2 || fileHeader.ticksPerRow == 4 || fileHeader.ticksPerRow == 8 || fileHeader.ticksPerRow == 16)
 		m_nDefaultRowsPerBeat = m_nDefaultRowsPerMeasure / 3;

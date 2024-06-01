@@ -809,7 +809,7 @@ bool InstrumentSynth::States::State::EvaluateEvent(const Event &event, PlayState
 		playState.m_nGlobalVolume = event.u16;
 		return false;
 	case Event::Type::FTM_SetTempo:
-		playState.m_nMusicTempo = TEMPO(1766278.163 / event.u16);
+		playState.m_nMusicTempo = TEMPO(1777517.482 / event.u16);
 		return false;
 	case Event::Type::FTM_SetSpeed:
 		playState.m_nMusicSpeed = event.u16;
