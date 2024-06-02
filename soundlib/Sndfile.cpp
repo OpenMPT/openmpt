@@ -244,7 +244,7 @@ struct FileFormatLoader
 	decltype(&CSoundFile::ReadXM) loader;
 };
 
-#ifdef MODPLUG_TRACKER
+#if defined(MODPLUG_TRACKER) && !defined(MPT_BUILD_DEBUG)
 #define MPT_DECLARE_FORMAT(format) { nullptr, &CSoundFile::Read ## format }
 #else
 #define MPT_DECLARE_FORMAT(format) { CSoundFile::ProbeFileHeader ## format, &CSoundFile::Read ## format }
@@ -507,7 +507,17 @@ bool CSoundFile::CreateInternal(FileReader file, ModLoadingFlags loadFlags)
 		{
 			loaderSuccess = (this->*(format.loader))(file, loadFlags);
 			if(loaderSuccess)
+			{
+#if defined(MPT_BUILD_DEBUG)
+				// Verify that the probing function is consistent with our API contract
+				file.Rewind();
+				const auto data = file.GetRawDataAsByteVector(ProbeRecommendedSize);
+				MemoryFileReader mf{mpt::as_span(data)};
+				const uint64 size = file.GetLength();
+				MPT_ASSERT(format.prober(mf, &size) != ProbeFailure);
+#endif
 				break;
+			}
 		}
 
 		if(!loaderSuccess)
