@@ -63,7 +63,7 @@ int main( int argc, char * argv[] ) {
 		OpenMPT::mpt::reinit_global_random();
 		openmpt_module * mod = openmpt_module_create_from_memory2( fileBuffer, fileSize, nullptr, nullptr, ErrFunc, nullptr, nullptr, nullptr, nullptr);
 		if ( mod == NULL )
-			return 1;
+			break;
 
 		// verify API contract: If the file can be loaded, header probing must be successful too.
 		if ( openmpt_probe_file_header( OPENMPT_PROBE_FILE_HEADER_FLAGS_DEFAULT, fileBuffer, fileSize, fileSize, nullptr, nullptr, ErrFunc, nullptr, nullptr, nullptr ) == OPENMPT_PROBE_FILE_HEADER_RESULT_FAILURE )
