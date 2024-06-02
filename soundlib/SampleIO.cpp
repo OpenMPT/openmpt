@@ -56,7 +56,7 @@ size_t SampleIO::ReadSample(ModSample &sample, FileReader &file) const
 		restrictedSampleDataView = file.GetPinnedView(CalculateEncodedSize(sample.nLength));
 		sourceBuf = restrictedSampleDataView.data();
 		fileSize = restrictedSampleDataView.size();
-		if(sourceBuf == nullptr)
+		if(fileSize < 1)
 			return 0;
 	} else
 	{
