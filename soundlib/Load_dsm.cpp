@@ -511,7 +511,7 @@ bool CSoundFile::ReadDSm(FileReader &file, ModLoadingFlags loadFlags)
 
 	if(loadFlags & loadSampleData)
 	{
-		for(SAMPLEINDEX smp = 1; smp <= m_nSamplePreAmp; smp++)
+		for(SAMPLEINDEX smp = 1; smp <= m_nSamples; smp++)
 		{
 			SampleIO(Samples[smp].uFlags[CHN_16BIT] ? SampleIO::_16bit : SampleIO::_8bit,
 				SampleIO::mono,
