@@ -448,7 +448,7 @@ bool CSoundFile::ReadFTM(FileReader &file, ModLoadingFlags loadFlags)
 				const std::vector<PATTERNINDEX> ordersToCopy(Order().begin() + start, Order().begin() + ord + 1);
 				for(uint8 rep = 1; rep < loopStart[activeLoops].second && canAddMore; rep++)
 				{
-					if(ORDERINDEX inserted = Order().insert(ord + 1, mpt::as_span(ordersToCopy)); inserted == ordersToCopy.size())
+					if(ORDERINDEX inserted = Order().insert(ord + 1, mpt::as_span(ordersToCopy), false); inserted == ordersToCopy.size())
 						ordersInserted += inserted;
 					else
 						canAddMore = false;

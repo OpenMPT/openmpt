@@ -51,7 +51,7 @@ public:
 	// Returns length of sequence stopping counting on first '---' (or at the end of sequence).
 	ORDERINDEX GetLengthFirstEmpty() const noexcept;
 	// Returns amount of patterns that can be added at the end of the order list before reaching the current format's limits.
-	ORDERINDEX GetRemainingCapacity(ORDERINDEX startingFrom = ORDERINDEX_INVALID) const noexcept;
+	ORDERINDEX GetRemainingCapacity(ORDERINDEX startingFrom = ORDERINDEX_INVALID, bool enforceFormatLimits = true) const noexcept;
 
 	// Replaces order list with 'newSize' copies of 'pat'.
 	void assign(ORDERINDEX newSize, PATTERNINDEX pat);
@@ -59,9 +59,9 @@ public:
 	// Inserts 'count' orders starting from 'pos' using 'fill' as the pattern index for all inserted orders.
 	// Sequence will automatically grow if needed and if it can't grow enough, some tail orders will be discarded.
 	// Return: Number of orders inserted (up to 'count' many).
-	ORDERINDEX insert(ORDERINDEX pos, ORDERINDEX count) { return insert(pos, count, GetInvalidPatIndex()); }
-	ORDERINDEX insert(ORDERINDEX pos, ORDERINDEX count, PATTERNINDEX fill);
-	ORDERINDEX insert(ORDERINDEX pos, const mpt::span<const PATTERNINDEX> orders);
+	ORDERINDEX insert(ORDERINDEX pos, ORDERINDEX count) { return insert(pos, count, GetInvalidPatIndex(), true); }
+	ORDERINDEX insert(ORDERINDEX pos, ORDERINDEX count, PATTERNINDEX fill, bool enforceFormatLimits = true);
+	ORDERINDEX insert(ORDERINDEX pos, const mpt::span<const PATTERNINDEX> orders, bool enforceFormatLimits = true);
 
 	void push_back() { push_back(GetInvalidPatIndex()); }
 	void push_back(PATTERNINDEX pat) { if(GetLength() < MAX_ORDERS) std::vector<PATTERNINDEX>::push_back(pat); }

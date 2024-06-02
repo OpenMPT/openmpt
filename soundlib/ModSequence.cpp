@@ -112,16 +112,16 @@ ORDERINDEX ModSequence::GetLengthFirstEmpty() const noexcept
 }
 
 
-ORDERINDEX ModSequence::GetRemainingCapacity(ORDERINDEX startingFrom) const noexcept
+ORDERINDEX ModSequence::GetRemainingCapacity(ORDERINDEX startingFrom, bool enforceFormatLimits) const noexcept
 {
-	const auto &specs = m_sndFile.GetModSpecifications();
+	const ORDERINDEX ordersMax = enforceFormatLimits ? m_sndFile.GetModSpecifications().ordersMax : MAX_ORDERS;
 	ORDERINDEX length = GetLengthTailTrimmed();
 	if(startingFrom != ORDERINDEX_INVALID && startingFrom > length)
 		length = startingFrom;
-	if(length >= specs.ordersMax)
+	if(length >= ordersMax)
 		return 0;
 	else
-		return specs.ordersMax - length;
+		return ordersMax - length;
 }
 
 
@@ -219,11 +219,11 @@ void ModSequence::assign(ORDERINDEX newSize, PATTERNINDEX pat)
 }
 
 
-ORDERINDEX ModSequence::insert(ORDERINDEX pos, ORDERINDEX count, PATTERNINDEX fill)
+ORDERINDEX ModSequence::insert(ORDERINDEX pos, ORDERINDEX count, PATTERNINDEX fill, bool enforceFormatLimits)
 {
-	const auto ordersMax = m_sndFile.GetModSpecifications().ordersMax;
+	const ORDERINDEX ordersMax = enforceFormatLimits ? m_sndFile.GetModSpecifications().ordersMax : MAX_ORDERS;
 	// Limit number of orders to be inserted so that we don't exceed the format limit or drop items at the end of the order list.
-	LimitMax(count, GetRemainingCapacity(pos));
+	LimitMax(count, GetRemainingCapacity(pos, enforceFormatLimits));
 	if(pos >= ordersMax || GetLengthTailTrimmed() >= ordersMax || count == 0)
 		return 0;
 	reserve(std::max(pos, GetLength()) + count);
@@ -238,10 +238,10 @@ ORDERINDEX ModSequence::insert(ORDERINDEX pos, ORDERINDEX count, PATTERNINDEX fi
 }
 
 
-ORDERINDEX ModSequence::insert(ORDERINDEX pos, const mpt::span<const PATTERNINDEX> orders)
+ORDERINDEX ModSequence::insert(ORDERINDEX pos, const mpt::span<const PATTERNINDEX> orders, bool enforceFormatLimits)
 {
 	MPT_ASSERT(reinterpret_cast<uintptr_t>(orders.data()) < reinterpret_cast<uintptr_t>(data()) || reinterpret_cast<uintptr_t>(orders.data()) > reinterpret_cast<uintptr_t>(data() + size()));
-	ORDERINDEX count = insert(pos, mpt::saturate_cast<ORDERINDEX>(orders.size()));
+	ORDERINDEX count = insert(pos, mpt::saturate_cast<ORDERINDEX>(orders.size()), 0, enforceFormatLimits);
 	std::copy(orders.begin(), orders.begin() + count, begin() + pos);
 	return count;
 }
