@@ -3830,7 +3830,7 @@ void CSoundFile::ResetAutoSlides(ModChannel &chn) const
 		return;
 	}
 
-	if(cmd == CMD_NONE && chn.autoSlide.IsActive(AutoSlideCommand::VolumeSlideSTK))
+	if((cmd == CMD_NONE || !chn.rowCommand.param) && chn.autoSlide.IsActive(AutoSlideCommand::VolumeSlideSTK))
 		chn.autoSlide.SetActive(AutoSlideCommand::VolumeSlideSTK, false);
 	if((cmd == CMD_CHANNELVOLUME || cmd == CMD_CHANNELVOLSLIDE) && chn.autoSlide.IsActive(AutoSlideCommand::VolumeDownWithDuration))
 		chn.autoSlide.SetActive(AutoSlideCommand::VolumeDownWithDuration, false);
