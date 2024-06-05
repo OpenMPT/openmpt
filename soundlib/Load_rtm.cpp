@@ -59,7 +59,6 @@ struct RTMMHeader
 	bool IsValid() const
 	{
 		return numChannels > 0 && numChannels <= 32
-			&& numInstruments < MAX_INSTRUMENTS
 			&& numOrders <= 999
 			&& numPatterns <= 999
 			&& speed != 0
