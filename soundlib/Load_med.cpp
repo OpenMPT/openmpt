@@ -609,14 +609,15 @@ static bool TranslateMEDPattern(FileReader &file, FileReader &cmdExt, CPattern &
 
 			if(note >= NOTE_MIN && note <= NOTE_MAX)
 				m->note = static_cast<ModCommand::NOTE>(note);
+
+			if(!cmd && !param1)
+				continue;
 			const auto extraCmd = ConvertMEDEffect(*m, cmd, param1, param2, ctx);
 
-			if(oldCmd.first != CMD_NONE)
+			if(oldCmd.first != CMD_NONE && m->command != oldCmd.first)
 			{
-				// Restore effect from previous page or X-Param if it was overwritten by an empty effect, or restrict to 8-bit value if this cell was overwritten with a "useful" effect
-				if(m->command == CMD_NONE)
-					m->SetEffectCommand(oldCmd);
-				else if(row > 0 && oldCmd.first == CMD_XPARAM)
+				// Restore effect from previous page, or reset X-Param to 8-bit value if this cell was overwritten with a "useful" effect
+				if(row > 0 && oldCmd.first == CMD_XPARAM)
 					pattern.GetpModCommand(row - 1, chn)->param = Util::MaxValueOfType(m->param);
 				else if(!ModCommand::CombineEffects(m->command, m->param, oldCmd.first, oldCmd.second) && m->volcmd == VOLCMD_NONE)
 					m->FillInTwoCommands(m->command, m->param, oldCmd.first, oldCmd.second);
@@ -915,7 +916,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 			if(!isSynth)
 			{
 				auto &mixPlug = m_MixPlugins[numPlugins];
-				mixPlug = {};
+				mpt::reconstruct(mixPlug);
 				mixPlug.Info.dwPluginId1 = PLUGMAGIC('V', 's', 't', 'P');
 				mixPlug.Info.dwPluginId2 = PLUGMAGIC('M', 'M', 'I', 'D');
 				mixPlug.Info.gain = 10;
