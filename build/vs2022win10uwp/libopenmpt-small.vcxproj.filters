@@ -1271,6 +1271,9 @@
     <ClCompile Include="..\..\soundlib\Load_puma.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_rtm.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_s3m.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>

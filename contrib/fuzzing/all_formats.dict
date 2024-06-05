@@ -128,6 +128,8 @@ j2b="ORDR"
 j2b="AI  "
 j2b="AS  "
 
+kris="KRIS"
+
 MDL="DMDL"
 # Most chunk IDs are commented out as they are substrings of other dictionary entries
 #mdl="IN"
@@ -357,4 +359,4 @@ puma="patt"
 puma="inst"
 puma="insf"
 
-kris="KRIS"
+rtm="RTMM "

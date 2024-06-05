@@ -150,6 +150,7 @@ LOCAL_SRC_FILES += \
 	soundlib/Load_pt36.cpp \
 	soundlib/Load_ptm.cpp \
 	soundlib/Load_puma.cpp \
+	soundlib/Load_rtm.cpp \
 	soundlib/Load_s3m.cpp \
 	soundlib/Load_sfx.cpp \
 	soundlib/Load_stk.cpp \

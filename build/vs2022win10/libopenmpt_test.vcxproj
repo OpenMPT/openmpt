@@ -1751,6 +1751,7 @@
     <ClCompile Include="..\..\soundlib\Load_pt36.cpp" />
     <ClCompile Include="..\..\soundlib\Load_ptm.cpp" />
     <ClCompile Include="..\..\soundlib\Load_puma.cpp" />
+    <ClCompile Include="..\..\soundlib\Load_rtm.cpp" />
     <ClCompile Include="..\..\soundlib\Load_s3m.cpp" />
     <ClCompile Include="..\..\soundlib\Load_sfx.cpp" />
     <ClCompile Include="..\..\soundlib\Load_stk.cpp" />

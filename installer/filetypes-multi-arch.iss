@@ -59,6 +59,7 @@ Root: HKA; Subkey: "SOFTWARE\Classes\Applications\OpenMPT.exe\SupportedTypes"; V
 Root: HKA; Subkey: "SOFTWARE\Classes\Applications\OpenMPT.exe\SupportedTypes"; ValueType: string; ValueName: ".pt36"; ValueData: ""
 Root: HKA; Subkey: "SOFTWARE\Classes\Applications\OpenMPT.exe\SupportedTypes"; ValueType: string; ValueName: ".ptm"; ValueData: ""
 Root: HKA; Subkey: "SOFTWARE\Classes\Applications\OpenMPT.exe\SupportedTypes"; ValueType: string; ValueName: ".puma"; ValueData: ""
+Root: HKA; Subkey: "SOFTWARE\Classes\Applications\OpenMPT.exe\SupportedTypes"; ValueType: string; ValueName: ".rtm"; ValueData: ""
 Root: HKA; Subkey: "SOFTWARE\Classes\Applications\OpenMPT.exe\SupportedTypes"; ValueType: string; ValueName: ".sfx"; ValueData: ""
 Root: HKA; Subkey: "SOFTWARE\Classes\Applications\OpenMPT.exe\SupportedTypes"; ValueType: string; ValueName: ".sfx2"; ValueData: ""
 Root: HKA; Subkey: "SOFTWARE\Classes\Applications\OpenMPT.exe\SupportedTypes"; ValueType: string; ValueName: ".st26"; ValueData: ""
