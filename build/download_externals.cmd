@@ -28,24 +28,8 @@ goto error
 if not exist "build\externals" mkdir "build\externals"
 if not exist "build\tools"     mkdir "build\tools"
 
-
-call build\scriptlib\download.cmd "build\externals\7za920.zip"                      384846 84e830c91a0e8ae499cc4814080da6569d8a6acbddc585c8b62abc86c809793aeb669b0a741063a379fd281ade85f120bc27efeb67d63bf961be893eec8bc3b3 "https://7-zip.org/a/7za920.zip" || goto error
-call build\scriptlib\download.cmd "build\externals\7z2406-extra.7z"                1610111 6b88a761f7cc8b8affc074b24750bcdc65cc3ab18d127c8bfdd1eca953d43e21558eb1137c4b934689990564d7d24cf14e249a773dc1e5ddb7316b10d73682f8 "https://7-zip.org/a/7z2406-extra.7z" || goto error
-call build\scriptlib\download.cmd "build\externals\7z2406-x64.exe"                 1619556 b635b449f49aac29234f677e662be35f72a059401ea0786d956485d07134f9dd10ed284338503f08ff7aad16833cf034eb955ca34e1faf35a8177ccad1f20c75 "https://7-zip.org/a/7z2406-x64.exe" || goto error
-
-call build\scriptlib\download.cmd "build\externals\WA5.55_SDK.exe"                  336166 394375db8a16bf155b5de9376f6290488ab339e503dbdfdc4e2f5bede967799e625c559cca363bc988324f1a8e86e5fd28a9f697422abd7bb3dcde4a766607b5 "http://download.nullsoft.com/winamp/plugin-dev/WA5.55_SDK.exe" "https://web.archive.org/web/20131217072017if_/http://download.nullsoft.com/winamp/plugin-dev/WA5.55_SDK.exe" || goto error
-call build\scriptlib\download.cmd "build\externals\xmp-sdk.zip"                     322744 62c442d656d4bb380360368a0f5f01da11b4ed54333d7f54f875a9a5ec390b08921e00bd08e62cd7a0a5fe642e3377023f20a950cc2a42898ff4cda9ab88fc91 "https://www.un4seen.com/files/xmp-sdk.zip" || goto error
-
-call build\scriptlib\download.cmd "build\externals\htmlhelp.exe"                   3509072 d91371244ea98c691b4674ee266c4a2496a296800c176adae069d21f5c52c0763b21cc7859cfffa865b89e50171a2c99a6d14620c32f7d72c0ef04045348f856 "https://web.archive.org/web/20200918004813if_/http://download.microsoft.com/download/0/A/9/0A939EF6-E31C-430F-A3DF-DFAE7960D564/htmlhelp.exe" || goto error
-
-call build\scriptlib\download.cmd "build\externals\python-3.12.3-embed-amd64.zip" 11055461 b09fb48e9e17117d0e370e4a9934296c1211556594933ecaed4438daaa5e55fe673bb40e9ee0bc1bf7a038fa0711fbcc853422c84f3862703085cf891fae4298 "https://www.python.org/ftp/python/3.12.3/python-3.12.3-embed-amd64.zip" || goto error
-
-call build\scriptlib\download.cmd "build\externals\innounp050.rar"                  141621 dbbc809308267a866db9d6b751fdeda6d179e1a65d8ddb14bb51984431ae91493f9a76105e1789b245732043a2c696c869ed10964b48cf59f81e55bd52f85330 "https://netcologne.dl.sourceforge.net/project/innounp/innounp/innounp%%%%200.50/innounp050.rar" || goto error
-call build\scriptlib\download.cmd "build\externals\innosetup-6.2.2.exe"            4722512 496375b1ce9c0d2f8eb3930ebd8366f5c4c938bc1eda47aed415e3f02bd8651a84a770a15f2825bf3c8ed9dbefa355b9eb805dd76bc782f6d8c8096d80443099 "https://files.jrsoftware.org/is/6/innosetup-6.2.2.exe" || goto error
-call build\scriptlib\download.cmd "build\externals\isetup-5.5.8-unicode.exe"       2342456 da7e27d85caec85b4194c7b1412c5a64c0ae12f22d903b94f2f4ee9ea0cb99c91b2d1dbb49262eefae8129e6b91f5c46f26f353011076e77e75f9c955fc5e1cb "https://files.jrsoftware.org/is/5/isetup-5.5.8-unicode.exe" || goto error
-
-call build\scriptlib\download.cmd "build\externals\example_songs_ompt_1_30.7z"     4881392 bfecf7f97fd71bd52bcfb38307ccb98c751e6a0fa0c1f31208b22b9392f03ea3da8f9271327df2de4fc2e463e0c13c6a24107fbe18caf8f446b7e7cf93073fa5 "https://download.openmpt.org/resources/modules/example_songs_ompt_1_30.7z" || goto error
-
+rem download
+for /f "delims=" %%a in ('type "build\download_externals.txt"') do ( call build\scriptlib\download.cmd %%a || goto error )
 
 call :killdir "build\tools\7zipold" || goto error
 call :killdir "build\tools\7zipa" || goto error
