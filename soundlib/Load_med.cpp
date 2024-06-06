@@ -930,9 +930,9 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 	const bool hardwareMixSamples = (version < 2) || (version >= 2 && !(songHeader.flags2 & MMDSong::FLAG2_MIX));
 
 	bool needInstruments = false;
-#ifdef MPT_WITH_VST
+#ifndef NO_PLUGINS
 	PLUGINDEX numPlugins = 0;
-#endif  // MPT_WITH_VST
+#endif  // !NO_PLUGINS
 	for(SAMPLEINDEX ins = 1, smp = 1; ins <= m_nInstruments; ins++)
 	{
 		if(!AllocateInstrument(ins, smp))
