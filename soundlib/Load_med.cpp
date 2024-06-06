@@ -639,11 +639,11 @@ static bool TranslateMEDPattern(FileReader &file, FileReader &cmdExt, CPattern &
 
 			if(oldCmd.first != CMD_NONE && m->command != oldCmd.first)
 			{
-				// Restore effect from previous page, or reset X-Param to 8-bit value if this cell was overwritten with a "useful" effect
-				if(row > 0 && oldCmd.first == CMD_XPARAM)
-					pattern.GetpModCommand(row - 1, chn)->param = Util::MaxValueOfType(m->param);
-				else if(!ModCommand::CombineEffects(m->command, m->param, oldCmd.first, oldCmd.second) && m->volcmd == VOLCMD_NONE)
+				if(!ModCommand::CombineEffects(m->command, m->param, oldCmd.first, oldCmd.second) && m->volcmd == VOLCMD_NONE)
 					m->FillInTwoCommands(m->command, m->param, oldCmd.first, oldCmd.second);
+				// Reset X-Param to 8-bit value if this cell was overwritten with a "useful" effect
+				if(row > 0 && oldCmd.first == CMD_XPARAM && m->command != CMD_XPARAM)
+					pattern.GetpModCommand(row - 1, chn)->param = Util::MaxValueOfType(m->param);
 			}
 			if(extraCmd.first != CMD_NONE)
 			{
