@@ -228,7 +228,7 @@ struct RTSMHeader
 		mptSmp.uFlags.set(CHN_SUSTAINLOOP, loopType == 2);
 		mptSmp.nC5Speed = sampleRate;
 		mptSmp.Transpose((48 - baseNote) / 12.0);
-		mptSmp.nPan = (panning + 64) * 2;
+		mptSmp.nPan = static_cast<uint16>((panning + 64) * 2);
 
 		mptSmp.nVibType = static_cast<VibratoType>(insHeader.vibratoType);
 		mptSmp.nVibDepth = insHeader.vibratoDepth * 2;
@@ -333,7 +333,7 @@ bool CSoundFile::ReadRTM(FileReader& file, ModLoadingFlags loadFlags)
 	ReadOrderFromFile<uint16le>(Order(), extraData, songHeader.numOrders);
 	for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
 	{
-		ChnSettings[chn].nPan = (songHeader.panning[chn] + 64) * 2;
+		ChnSettings[chn].nPan = static_cast<uint16>((songHeader.panning[chn] + 64) * 2);
 		if(songHeader.flags & RTMMHeader::songTrackNames)
 			extraData.ReadString<mpt::String::maybeNullTerminated>(ChnSettings[chn].szName, 16);
 	}
