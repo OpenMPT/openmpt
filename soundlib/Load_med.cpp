@@ -1171,6 +1171,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 				const float feedback = 1.0f / (1 << std::max(header.mixEchoDepth, uint8(1)));  // The feedback we want
 				const float initialFeedback = std::sqrt(1.0f - (feedback * feedback));         // Actual strength of first delay's feedback
 				const float wetFactor = feedback / initialFeedback;                            // Factor to compensate for this
+				const float delay = (std::max(header.mixEchoLength.get(), uint16(1)) - 1) / 1999.0f;
 				SNDMIXPLUGIN &mixPlug = m_MixPlugins[numPlugins];
 				mpt::reconstruct(mixPlug);
 				memcpy(&mixPlug.Info.dwPluginId1, "OMXD", 4);
@@ -1184,8 +1185,8 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 				std::array<float32le, 6> params{};
 				params[1] = 1.0f;                                   // WetDryMix
 				params[2] = feedback;                               // Feedback
-				params[3] = header.mixEchoLength / 2000.0f;         // LeftDelay
-				params[4] = params[3];                              // RightDelay
+				params[3] = delay;                                  // LeftDelay
+				params[4] = delay;                                  // RightDelay
 				params[5] = header.mixEchoType == 2 ? 1.0f : 0.0f;  // PanDelay
 				mixPlug.pluginData.resize(sizeof(params));
 				memcpy(mixPlug.pluginData.data(), params.data(), sizeof(params));
