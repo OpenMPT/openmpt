@@ -84,10 +84,10 @@ struct MMD2Song
 	uint32be flags3;
 	uint16be volAdjust;       // Volume adjust (%)
 	uint16be mixChannels;     // Mixing channels, 0 means 4
-	uint8be  mixEchoType;     // 0 = nothing, 1 = normal, 2 = cross
-	uint8be  mixEchoDepth;    // 1 - 6, 0 = default
+	uint8    mixEchoType;     // 0 = nothing, 1 = normal, 2 = cross
+	uint8    mixEchoDepth;    // 1 - 6, 0 = default
 	uint16be mixEchoLength;   // Echo length in milliseconds
-	int8be   mixStereoSep;    // Stereo separation
+	int8     mixStereoSep;    // Stereo separation
 	char     pad0[223];
 };
 
@@ -966,7 +966,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 			if(type == L"VST")
 			{
 				auto &mixPlug = m_MixPlugins[numPlugins];
-				mixPlug = {};
+				mpt::reconstruct(mixPlug);
 				mixPlug.Info.dwPluginId1 = Vst::kEffectMagic;
 				mixPlug.Info.gain = 10;
 				mixPlug.Info.szName = mpt::ToCharset(mpt::Charset::Locale, name);
@@ -1345,6 +1345,34 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				SetupMODPanning(true);
 			}
+
+#ifndef NO_PLUGINS
+			if((header.mixEchoType == 1 || header.mixEchoType == 2) && numPlugins < MAX_MIXPLUGINS)
+			{
+				// Emulating MED echo using the DMO echo requires to compensate for the differences in initial feedback in the latter.
+				const float feedback = 1.0f / (1 << std::max(header.mixEchoDepth, uint8(1)));  // The feedback we want
+				const float initialFeedback = std::sqrt(1.0f - (feedback * feedback));         // Actual strength of first delay's feedback
+				const float wetFactor = feedback / initialFeedback;                            // Factor to compensate for this
+				SNDMIXPLUGIN &mixPlug = m_MixPlugins[numPlugins];
+				mpt::reconstruct(mixPlug);
+				memcpy(&mixPlug.Info.dwPluginId1, "OMXD", 4);
+				memcpy(&mixPlug.Info.dwPluginId2, "\x2C\x93\x3E\xEF", 4);
+				mixPlug.Info.routingFlags = SNDMIXPLUGININFO::irApplyToMaster | SNDMIXPLUGININFO::irAutoSuspend;
+				mixPlug.fDryRatio = 1.0f - wetFactor / (wetFactor + 1.0f);
+				mixPlug.Info.gain = 10;
+				mixPlug.Info.szName = "Echo";
+				mixPlug.Info.szLibraryName = "Echo";
+
+				std::array<float32le, 6> params{};
+				params[1] = 1.0f;                                   // WetDryMix
+				params[2] = feedback;                               // Feedback
+				params[3] = header.mixEchoLength / 2000.0f;         // LeftDelay
+				params[4] = params[3];                              // RightDelay
+				params[5] = header.mixEchoType == 2 ? 1.0f : 0.0f;  // PanDelay
+				mixPlug.pluginData.resize(sizeof(params));
+				memcpy(mixPlug.pluginData.data(), params.data(), sizeof(params));
+			}
+#endif
 
 			std::vector<uint16be> sections;
 			if(!file.Seek(header.sectionTableOffset)
