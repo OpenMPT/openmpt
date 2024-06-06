@@ -258,13 +258,6 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 	if(fileHeader.verMinor > 10)
 		m_nDefaultGlobalVolume = std::min(fileHeader.globalVolume, uint8(64)) * 4u;
 
-	// Setting up channels
-	for(CHANNELINDEX chn = 0; chn < 4; chn++)
-	{
-		ChnSettings[chn].Reset();
-		ChnSettings[chn].nPan = (chn & 1) ? 0x40 : 0xC0;
-	}
-
 	// Read samples
 	uint16 sampleOffsets[31];
 	for(SAMPLEINDEX smp = 1; smp <= 31; smp++)
@@ -478,13 +471,6 @@ bool CSoundFile::ReadSTX(FileReader &file, ModLoadingFlags loadFlags)
 	Order().SetDefaultTempo(ConvertST2Tempo(initTempo));
 	Order().SetDefaultSpeed(initTempo >> 4);
 	m_nDefaultGlobalVolume = std::min(fileHeader.globalVolume, uint8(64)) * 4u;
-
-	// Setting up channels
-	for(CHANNELINDEX chn = 0; chn < 4; chn++)
-	{
-		ChnSettings[chn].Reset();
-		ChnSettings[chn].nPan = (chn & 1) ? 0x40 : 0xC0;
-	}
 
 	std::vector<uint16le> patternOffsets, sampleOffsets;
 	file.Seek(fileHeader.patTableOffset << 4);
