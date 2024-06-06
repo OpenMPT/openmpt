@@ -797,9 +797,9 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 
 	bool needInstruments = false;
 	bool anySynthInstrs = false;
-#ifdef MPT_WITH_VST
+#ifndef NO_PLUGINS
 	PLUGINDEX numPlugins = 0;
-#endif  // MPT_WITH_VST
+#endif  // !NO_PLUGINS
 	for(SAMPLEINDEX ins = 1, smp = 1; ins <= m_nInstruments; ins++)
 	{
 		if(!AllocateInstrument(ins, smp))
