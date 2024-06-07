@@ -233,7 +233,7 @@ size_t PPDecompressor::getRawSize() const noexcept
 	In any case this should serve as a warning to anyone trying to create their own crypto.
 */
 
-void PPDecompressor::findKeyRound(BackwardInputStream &inputStream,LSBBitReader<BackwardInputStream> &bitReader,uint32_t keyBits,uint32_t keyMask,uint32_t outputPosition)
+void PPDecompressor::findKeyRound(BackwardInputStream &inputStream,LSBBitReader<BackwardInputStream> &bitReader,uint32_t keyBits,uint32_t keyMask,uint32_t outputPosition,uint32_t &iterCount)
 {
 
 	uint32_t inputOffset;
@@ -268,7 +268,7 @@ void PPDecompressor::findKeyRound(BackwardInputStream &inputStream,LSBBitReader<
 		// try 0
 		inputStream.setOffset(inputOffset);
 		bitReader.reset(bufContent,bufLength);
-		findKeyRound(inputStream,bitReader,keyBits,keyMask|(1U<<bitPos),savedOutputPosition);
+		findKeyRound(inputStream,bitReader,keyBits,keyMask|(1U<<bitPos),savedOutputPosition,iterCount);
 
 		// try 1
 		inputStream.setOffset(tmpInputOffset);
@@ -318,9 +318,8 @@ void PPDecompressor::findKeyRound(BackwardInputStream &inputStream,LSBBitReader<
 		bitReader.readBitsBE32(count);
 	};
 
-	uint32_t foundIter=0;
 	// TODO: Random constant. For decompression/keyfinding bombs
-	while (foundIter<1024)
+	while (iterCount<1048576)
 	{
 		// this is the checkpoint. Hardly ideal, but best we can do without co-routines
 		inputOffset=uint32_t(inputStream.getOffset());
@@ -371,7 +370,7 @@ void PPDecompressor::findKeyRound(BackwardInputStream &inputStream,LSBBitReader<
 		if (failed) break;
 		outputPosition-=count;
 
-		if (keyMask==0xffff'ffffU) foundIter++;
+		iterCount++;
 	}
 	if (failed) return;
 	// If not all bits are resolved, that is bad
@@ -386,7 +385,8 @@ void PPDecompressor::findKey(uint32_t keyBits,uint32_t keyMask)
 
 	bitReader.readBitsBE32(_startShift);
 
-	findKeyRound(inputStream,bitReader,keyBits,keyMask,uint32_t(_rawSize));
+	uint32_t iterCount=0;
+	findKeyRound(inputStream,bitReader,keyBits,keyMask,uint32_t(_rawSize),iterCount);
 }
 
 void PPDecompressor::decompressImpl(Buffer &rawData,bool verify)
