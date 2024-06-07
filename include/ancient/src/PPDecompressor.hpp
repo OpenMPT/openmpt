@@ -57,7 +57,7 @@ private:
 		uint32_t	_key;
 	};
 
-	void findKeyRound(BackwardInputStream &inputStream,LSBBitReader<BackwardInputStream> &bitReader,uint32_t keyBits,uint32_t keyMask,uint32_t outputPosition);
+	void findKeyRound(BackwardInputStream &inputStream,LSBBitReader<BackwardInputStream> &bitReader,uint32_t keyBits,uint32_t keyMask,uint32_t outputPosition,uint32_t &iterCount);
 	void findKey(uint32_t keyBits,uint32_t keyMask);
 
 	const Buffer		&_packedData;

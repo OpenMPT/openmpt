@@ -1,3 +1,2 @@
- *  ancient <https://github.com/temisu/ancient> commit
-    bdff39426d0460a6b114712b14da6cb40ccadb77 (2024-06-05)
+ *  ancient <https://github.com/temisu/ancient> v2.2.0 (2024-06-07)
  *  Unnecssary files have been removed.
