@@ -738,11 +738,10 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 
-	InitializeGlobals(MOD_TYPE_J2B);
+	InitializeGlobals(MOD_TYPE_J2B, std::min(static_cast<CHANNELINDEX>(mainChunk.channels), static_cast<CHANNELINDEX>(MAX_BASECHANNELS)));
 	m_SongFlags = SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX;
 	m_SongFlags.set(SONG_LINEARSLIDES, !(mainChunk.flags & AMFFMainChunk::amigaSlides));
 
-	m_nChannels = std::min(static_cast<CHANNELINDEX>(mainChunk.channels), static_cast<CHANNELINDEX>(MAX_BASECHANNELS));
 	Order().SetDefaultSpeed(mainChunk.speed);
 	Order().SetDefaultTempoInt(mainChunk.tempo);
 	m_nDefaultGlobalVolume = mainChunk.globalvolume * 2;
@@ -758,8 +757,6 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 	// be a limitation in mod2j2b.
 	for(CHANNELINDEX nChn = 0; nChn < m_nChannels; nChn++)
 	{
-		ChnSettings[nChn].Reset();
-
 		uint8 pan = chunkMain.ReadUint8();
 		if(isAM)
 		{

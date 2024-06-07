@@ -168,11 +168,11 @@ bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)
 	SFXFileHeader fileHeader;
 	if(file.Seek(0x3C) && file.ReadStruct(fileHeader) && fileHeader.IsValid(15))
 	{
-		InitializeGlobals(MOD_TYPE_SFX);
+		InitializeGlobals(MOD_TYPE_SFX, 4);
 		m_nSamples = 15;
 	} else if(file.Seek(0x7C) && file.ReadStruct(fileHeader) && fileHeader.IsValid(31))
 	{
-		InitializeGlobals(MOD_TYPE_SFX);
+		InitializeGlobals(MOD_TYPE_SFX, 4);
 		m_nSamples = 31;
 	} else
 	{
@@ -190,7 +190,6 @@ bool CSoundFile::ReadSFX(FileReader &file, ModLoadingFlags loadFlags)
 	}
 	file.Skip(sizeof(SFXFileHeader));
 
-	m_nChannels = 4;
 	m_nInstruments = 0;
 	Order().SetDefaultTempo(TEMPO((14565.0 * 122.0) / fileHeader.speed));
 	Order().SetDefaultSpeed(6);

@@ -145,8 +145,7 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 		return false;
 	}
 
-	InitializeGlobals(MOD_TYPE_PLM);
-	InitializeChannels();
+	InitializeGlobals(MOD_TYPE_PLM, fileHeader.numChannels + 1);  // Additional channel for writing pattern breaks
 	m_SongFlags = SONG_ITOLDEFFECTS;
 	m_playBehaviour.set(kApplyOffsetWithoutNote);
 
@@ -156,7 +155,6 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Some PLMs use ASCIIZ, some space-padding strings...weird. Oh, and the file browser stops at 0 bytes in the name, the main GUI doesn't.
 	m_songName = mpt::String::ReadBuf(mpt::String::spacePadded, fileHeader.songName);
-	m_nChannels = fileHeader.numChannels + 1;	// Additional channel for writing pattern breaks
 	m_nSamplePreAmp = fileHeader.amplify;
 	Order().SetDefaultTempoInt(fileHeader.tempo);
 	Order().SetDefaultSpeed(fileHeader.speed);

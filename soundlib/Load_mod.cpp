@@ -297,8 +297,7 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 
-	InitializeGlobals(MOD_TYPE_MOD);
-	m_nChannels = modMagicResult.numChannels;
+	InitializeGlobals(MOD_TYPE_MOD, modMagicResult.numChannels);
 
 	bool isNoiseTracker = modMagicResult.isNoiseTracker;
 	bool isStartrekker = modMagicResult.isStartrekker;

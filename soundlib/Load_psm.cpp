@@ -311,8 +311,21 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 	else if(loadFlags == onlyVerifyHeader)
 		return true;
 
+	auto songChunks = chunks.GetAllChunks(PSMChunk::idSONG);
+	CHANNELINDEX numChannels = 0;
+	for(FileReader chunk : songChunks)
+	{
+		PSMSongHeader songHeader;
+		if(!chunk.ReadStruct(songHeader) || songHeader.compression != 0x01)  // No compression for PSM files
+			return false;
+		// Subsongs *might* have different channel count
+		numChannels = Clamp(static_cast<CHANNELINDEX>(songHeader.numChannels), numChannels, MAX_BASECHANNELS);
+	}
+	if(!numChannels)
+		return false;
+
 	// Yep, this seems to be a valid file.
-	InitializeGlobals(MOD_TYPE_PSM);
+	InitializeGlobals(MOD_TYPE_PSM, numChannels);
 	m_SongFlags = SONG_ITOLDEFFECTS | SONG_ITCOMPATGXX;
 
 	// "TITL" - Song Title
@@ -326,17 +339,10 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 	bool sinariaFormat = false; // The game "Sinaria" uses a slightly modified PSM structure - in some ways it's more like PSM16 (e.g. effects).
 
 	// "SONG" - Subsong information (channel count etc)
-	auto songChunks = chunks.GetAllChunks(PSMChunk::idSONG);
 	for(ChunkReader chunk : songChunks)
 	{
 		PSMSongHeader songHeader;
-		if(!chunk.ReadStruct(songHeader)
-			|| songHeader.compression != 0x01)	// No compression for PSM files
-		{
-			return false;
-		}
-		// Subsongs *might* have different channel count
-		m_nChannels = Clamp(static_cast<CHANNELINDEX>(songHeader.numChannels), m_nChannels, MAX_BASECHANNELS);
+		chunk.ReadStruct(songHeader);
 
 		PSMSubSong subsong;
 		mpt::String::WriteAutoBuf(subsong.songName) = mpt::String::ReadBuf(mpt::String::nullTerminated, songHeader.songType);
@@ -579,7 +585,6 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 	// Make the default variables of the first subsong global
 	for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
 	{
-		ChnSettings[chn].Reset();
 		ChnSettings[chn].nVolume = subsongs[0].channelVolume[chn];
 		ChnSettings[chn].nPan = subsongs[0].channelPanning[chn];
 		ChnSettings[chn].dwFlags.set(CHN_SURROUND, subsongs[0].channelSurround[chn]);
@@ -589,7 +594,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 	m_modFormat.type = U_("psm");
 	m_modFormat.charset = mpt::Charset::CP437;
 
-	if(!(loadFlags & loadPatternData) || m_nChannels == 0)
+	if(!(loadFlags & loadPatternData))
 	{
 		return true;
 	}
@@ -1039,13 +1044,12 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Seems to be valid!
-	InitializeGlobals(MOD_TYPE_PSM);
+	InitializeGlobals(MOD_TYPE_PSM, Clamp(CHANNELINDEX(fileHeader.numChannelsPlay), CHANNELINDEX(fileHeader.numChannelsReal), MAX_BASECHANNELS));
 	
 	m_modFormat.formatName = U_("Epic MegaGames MASI (Old Version)");
 	m_modFormat.type = U_("psm");
 	m_modFormat.charset = mpt::Charset::CP437;
 
-	m_nChannels = Clamp(CHANNELINDEX(fileHeader.numChannelsPlay), CHANNELINDEX(fileHeader.numChannelsReal), MAX_BASECHANNELS);
 	m_nSamplePreAmp = fileHeader.masterVolume;
 	if(m_nSamplePreAmp == 255)
 	{
@@ -1068,7 +1072,6 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		for(CHANNELINDEX i = 0; i < 32; i++)
 		{
-			ChnSettings[i].Reset();
 			ChnSettings[i].nPan = static_cast<uint16>(((15 - (file.ReadUint8() & 0x0F)) * 256 + 8) / 15);  // 15 seems to be left and 0 seems to be right...
 			// ChnSettings[i].dwFlags = (i >= fileHeader.numChannelsPlay) ? CHN_MUTE : 0; // don't mute channels, as muted channels are completely ignored in S3M
 		}

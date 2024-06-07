@@ -430,7 +430,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 
-	InitializeGlobals(MOD_TYPE_IT);
+	InitializeGlobals(MOD_TYPE_IT, 0);
 
 	bool interpretModPlugMade = false;
 	mpt::ustring madeWithTracker;
@@ -536,17 +536,6 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		Order().SetDefaultSpeed(fileHeader.speed);
 	Order().SetDefaultTempoInt(std::max(uint8(31), static_cast<uint8>(fileHeader.tempo)));
 	m_nSamplePreAmp = std::min(static_cast<uint8>(fileHeader.mv), uint8(128));
-
-	// Reading Channels Pan Positions
-	for(CHANNELINDEX i = 0; i < 64; i++) if(fileHeader.chnpan[i] != 0xFF)
-	{
-		ChnSettings[i].Reset();
-		ChnSettings[i].nVolume = Clamp<uint8, uint8>(fileHeader.chnvol[i], 0, 64);
-		if(fileHeader.chnpan[i] & 0x80) ChnSettings[i].dwFlags.set(CHN_MUTE);
-		uint8 n = fileHeader.chnpan[i] & 0x7F;
-		if(n <= 64) ChnSettings[i].nPan = n * 4;
-		if(n == 100) ChnSettings[i].dwFlags.set(CHN_SURROUND);
-	}
 
 	// Reading orders
 	file.Seek(sizeof(ITFileHeader));
@@ -697,18 +686,15 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		hasModPlugExtensions = true;
 	}
 
-	m_nChannels = 1;
 	// Read channel names: "CNAM"
 	if(file.ReadMagic("CNAM"))
 	{
 		FileReader chnNames = file.ReadChunk(file.ReadUint32LE());
-		const CHANNELINDEX readChns = std::min(MAX_BASECHANNELS, static_cast<CHANNELINDEX>(chnNames.GetLength() / MAX_CHANNELNAME));
-		m_nChannels = readChns;
+		m_nChannels = std::min(MAX_BASECHANNELS, static_cast<CHANNELINDEX>(chnNames.GetLength() / MAX_CHANNELNAME));
 		hasModPlugExtensions = true;
-
-		for(CHANNELINDEX i = 0; i < readChns; i++)
+		for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
 		{
-			chnNames.ReadString<mpt::String::maybeNullTerminated>(ChnSettings[i].szName, MAX_CHANNELNAME);
+			chnNames.ReadString<mpt::String::maybeNullTerminated>(ChnSettings[chn].szName, MAX_CHANNELNAME);
 		}
 	}
 
@@ -983,6 +969,22 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	}
 	// Need to do this before reading the patterns because m_nChannels might be modified by LoadExtendedSongProperties. *sigh*
 	const bool hasExtendedSongProperties = LoadExtendedSongProperties(file, false, &interpretModPlugMade);
+
+	// Reading Channels Pan Positions
+	const CHANNELINDEX headerChannels = std::min(GetNumChannels(), CHANNELINDEX(64));
+	for(CHANNELINDEX i = 0; i < headerChannels; i++)
+	{
+		if(fileHeader.chnpan[i] == 0xFF)
+			continue;
+		ChnSettings[i].nVolume = Clamp<uint8, uint8>(fileHeader.chnvol[i], 0, 64);
+		if(fileHeader.chnpan[i] & 0x80)
+			ChnSettings[i].dwFlags.set(CHN_MUTE);
+		uint8 n = fileHeader.chnpan[i] & 0x7F;
+		if(n <= 64)
+			ChnSettings[i].nPan = n * 4;
+		if(n == 100)
+			ChnSettings[i].dwFlags.set(CHN_SURROUND);
+	}
 
 	// Reading Patterns
 	Patterns.ResizeArray(numPats);

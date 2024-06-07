@@ -77,11 +77,10 @@ bool CSoundFile::Read667(FileReader &file, ModLoadingFlags loadFlags)
 	if(loadFlags == onlyVerifyHeader)
 		return true;
 
-	InitializeGlobals(MOD_TYPE_S3M);
+	InitializeGlobals(MOD_TYPE_S3M, 18);
 	m_SongFlags.set(SONG_IMPORTED);
 	Order().SetDefaultTempoInt(150);
 	Order().SetDefaultSpeed(fileHeader.speed);
-	m_nChannels = 18;
 	m_nSamples = 64;
 
 	ReadOrderFromFile<uint8>(Order(), file, fileHeader.numOrders);
@@ -90,8 +89,6 @@ bool CSoundFile::Read667(FileReader &file, ModLoadingFlags loadFlags)
 		if(pat >= 128)
 			return false;
 	}
-
-	InitializeChannels();
 
 	for(SAMPLEINDEX smp = 1; smp <= m_nSamples; smp++)
 	{

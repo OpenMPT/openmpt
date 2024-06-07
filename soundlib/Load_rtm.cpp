@@ -310,9 +310,7 @@ bool CSoundFile::ReadRTM(FileReader& file, ModLoadingFlags loadFlags)
 	if(loadFlags == onlyVerifyHeader)
 		return true;
 
-	InitializeGlobals(MOD_TYPE_IT);
-	InitializeChannels();
-	m_nChannels = songHeader.numChannels;
+	InitializeGlobals(MOD_TYPE_IT, songHeader.numChannels);
 	m_nInstruments = std::min(static_cast<INSTRUMENTINDEX>(songHeader.numInstruments), static_cast<INSTRUMENTINDEX>(MAX_INSTRUMENTS - 1));
 	m_SongFlags = SONG_ITCOMPATGXX | SONG_ITOLDEFFECTS;
 	m_SongFlags.set(SONG_LINEARSLIDES, songHeader.flags & RTMMHeader::songLinearSlides);

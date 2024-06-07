@@ -169,10 +169,8 @@ bool CSoundFile::ReadMUS_KM(FileReader &file, ModLoadingFlags loadFlags)
 	if(songChunks.empty() || sampleChunks.empty())
 		return false;
 
-	InitializeGlobals(MOD_TYPE_MOD);
-	InitializeChannels();
+	InitializeGlobals(MOD_TYPE_MOD, 4);
 	m_SongFlags = SONG_AMIGALIMITS | SONG_IMPORTED | SONG_ISAMIGA;  // Yes, those were not Amiga games but the format fully conforms to Amiga limits, so allow the Amiga Resampler to be used.
-	m_nChannels = 4;
 	m_nSamples = 0;
 
 	static constexpr uint16 MUS_SAMPLE_UNUSED = 255;  // Sentinel value to check if a sample needs to be duplicated

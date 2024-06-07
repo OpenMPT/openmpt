@@ -85,7 +85,7 @@ public:
 		state->m_nMusicTempo = sndFile.Order().GetDefaultTempo();
 		state->m_nGlobalVolume = sndFile.m_nDefaultGlobalVolume;
 		state->m_globalScriptState.Initialize(sndFile);
-		chnSettings.assign(sndFile.GetNumChannels(), ChnSettings());
+		chnSettings.assign(sndFile.GetNumChannels(), {});
 		const auto muteFlag = CSoundFile::GetChannelMuteFlag();
 		for(CHANNELINDEX chn = 0; chn < sndFile.GetNumChannels(); chn++)
 		{
@@ -6706,7 +6706,7 @@ PLUGINDEX CSoundFile::GetChannelPlugin(const PlayState &playState, CHANNELINDEX 
 			nChn = channel.nMasterChn - 1;
 		}
 
-		if(nChn < MAX_BASECHANNELS)
+		if(nChn < ChnSettings.size())
 		{
 			plugin = ChnSettings[nChn].nMixPlugin;
 		} else

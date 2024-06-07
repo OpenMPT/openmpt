@@ -89,19 +89,17 @@ bool CSoundFile::ReadIMS(FileReader &file, ModLoadingFlags loadFlags)
 	if(loadFlags == onlyVerifyHeader)
 		return true;
 
-	InitializeGlobals(MOD_TYPE_MOD);
+	InitializeGlobals(MOD_TYPE_MOD, 4);
 	m_SongFlags.set(SONG_IMPORTED);
 	Order().SetDefaultTempoInt(125);
 	Order().SetDefaultSpeed(6);
 	Order().SetRestartPos(fileHeader.order.restartPos);
 	m_nMinPeriod = 113 * 4;
 	m_nMaxPeriod = 1712 * 4;
-	m_nChannels = 4;
 	m_nSamples = 31;
 	m_songName = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, fileHeader.songName);
 
 	ReadOrderFromArray(Order(), fileHeader.order.orderList, fileHeader.order.numOrders);
-	InitializeChannels();
 
 	file.Seek(20);
 	for(SAMPLEINDEX smp = 1; smp <= m_nSamples; smp++)

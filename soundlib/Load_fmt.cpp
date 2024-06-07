@@ -85,9 +85,7 @@ bool CSoundFile::ReadFMT(FileReader &file, ModLoadingFlags loadFlags)
 	if(loadFlags == onlyVerifyHeader)
 		return true;
 
-	InitializeGlobals(MOD_TYPE_S3M);
-	InitializeChannels();
-	m_nChannels = 8;
+	InitializeGlobals(MOD_TYPE_S3M, 8);
 	m_nSamples = 8;
 	Order().SetDefaultTempo(TEMPO(45.5));  // 18.2 Hz timer
 	m_playBehaviour.set(kOPLNoteStopWith0Hz);

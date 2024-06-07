@@ -152,7 +152,7 @@ bool CPatternUndo::PrepareBuffer(undobuf_t &buffer, PATTERNINDEX pattern, CHANNE
 
 	if(storeChannelInfo)
 	{
-		undo.channelInfo.assign(std::begin(sndFile.ChnSettings) + firstChn, std::begin(sndFile.ChnSettings) + firstChn + numChns);
+		undo.channelInfo.assign(sndFile.ChnSettings.begin() + firstChn, sndFile.ChnSettings.begin() + firstChn + numChns);
 	}
 
 	buffer.push_back(std::move(undo));

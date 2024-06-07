@@ -135,12 +135,11 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 		return false;
 	}
 
-	InitializeGlobals(MOD_TYPE_669);
+	InitializeGlobals(MOD_TYPE_669, 8);
 	m_nMinPeriod = 28 << 2;
 	m_nMaxPeriod = 1712 << 3;
 	Order().SetDefaultTempoInt(78);
 	Order().SetDefaultSpeed(4);
-	m_nChannels = 8;
 	m_playBehaviour.set(kPeriodsAreHertz);
 	m_SongFlags.set(SONG_FASTPORTAS | SONG_AUTO_TONEPORTA);
 #ifdef MODPLUG_TRACKER
@@ -179,7 +178,6 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 	// Set up panning
 	for(CHANNELINDEX chn = 0; chn < 8; chn++)
 	{
-		ChnSettings[chn].Reset();
 		ChnSettings[chn].nPan = (chn & 1) ? 0xD0 : 0x30;
 	}
 

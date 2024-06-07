@@ -235,15 +235,13 @@ bool CSoundFile::ReadDSym(FileReader &file, ModLoadingFlags loadFlags)
 	if(loadFlags == onlyVerifyHeader)
 		return true;
 
-	InitializeGlobals(MOD_TYPE_MOD);
+	InitializeGlobals(MOD_TYPE_MOD, fileHeader.numChannels);
 	m_SongFlags.set(SONG_IMPORTED | SONG_AMIGALIMITS);
 	m_SongFlags.reset(SONG_ISAMIGA);
-	m_nChannels = fileHeader.numChannels;
 	m_nSamples = 63;
 
 	for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
 	{
-		InitChannel(chn);
 		ChnSettings[chn].nPan = (((chn & 3) == 1) || ((chn & 3) == 2)) ? 64 : 192;
 	}
 

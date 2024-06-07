@@ -873,10 +873,6 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 	if(loadFlags == onlyVerifyHeader)
 		return true;
 	
-	InitializeGlobals(MOD_TYPE_MED);
-	InitializeChannels();
-	const uint8 version = fileHeader.version - '0';
-
 	file.Seek(fileHeader.songOffset);
 	FileReader sampleHeaderChunk = file.ReadChunk(63 * sizeof(MMD0Sample));
 
@@ -886,16 +882,12 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 	if(songHeader.numSamples > 63 || songHeader.numBlocks > 0x7FFF)
 		return false;
 
-	MMD0Exp expData{};
-	if(fileHeader.expDataOffset && file.Seek(fileHeader.expDataOffset))
-	{
-		file.ReadStruct(expData);
-	}
-
+	const uint8 version = fileHeader.version - '0';
 	const auto [numChannels, numSongs] = MEDScanNumChannels(file, version);
 	if(numChannels < 1 || numChannels > MAX_BASECHANNELS)
 		return false;
-	m_nChannels = numChannels;
+
+	InitializeGlobals(MOD_TYPE_MED, numChannels);
 
 	// Start with the instruments, as those are shared between songs
 
@@ -909,6 +901,12 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 		return false;
 	}
 	m_nInstruments = m_nSamples = songHeader.numSamples;
+
+	MMD0Exp expData{};
+	if(fileHeader.expDataOffset && file.Seek(fileHeader.expDataOffset))
+	{
+		file.ReadStruct(expData);
+	}
 
 	FileReader expDataChunk;
 	if(expData.instrExtOffset != 0 && file.Seek(expData.instrExtOffset))

@@ -346,7 +346,7 @@ bool CSoundFile::ReadOKT(FileReader &file, ModLoadingFlags loadFlags)
 	std::array<int8, 8> pairedChn{{}};
 	ORDERINDEX numOrders = 0;
 
-	InitializeGlobals(MOD_TYPE_OKT);
+	InitializeGlobals(MOD_TYPE_OKT, 0);
 
 	m_modFormat.formatName = U_("Oktalyzer");
 	m_modFormat.type = U_("okt");
@@ -367,7 +367,7 @@ bool CSoundFile::ReadOKT(FileReader &file, ModLoadingFlags loadFlags)
 		{
 		case OktIffChunk::idCMOD:
 			// Channel setup table
-			if(m_nChannels == 0 && chunk.GetLength() >= 8)
+			if(m_nChannels == 0 && chunk.CanRead(8))
 			{
 				const auto chnTable = chunk.ReadArray<uint16be, 4>();
 				for(CHANNELINDEX chn = 0; chn < 4; chn++)
@@ -376,10 +376,10 @@ bool CSoundFile::ReadOKT(FileReader &file, ModLoadingFlags loadFlags)
 					{
 						pairedChn[m_nChannels] = 1;
 						pairedChn[m_nChannels + 1] = -1;
-						ChnSettings[m_nChannels].Reset();
+						mpt::reconstruct(ChnSettings[m_nChannels]);
 						ChnSettings[m_nChannels++].nPan = (((chn & 3) == 1) || ((chn & 3) == 2)) ? 0xC0 : 0x40;
 					}
-					ChnSettings[m_nChannels].Reset();
+					mpt::reconstruct(ChnSettings[m_nChannels]);
 					ChnSettings[m_nChannels++].nPan = (((chn & 3) == 1) || ((chn & 3) == 2)) ? 0xC0 : 0x40;
 				}
 

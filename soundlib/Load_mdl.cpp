@@ -65,10 +65,21 @@ struct MDLInfoBlock
 	char     composer[20];
 	uint16le numOrders;
 	uint16le restartPos;
-	uint8le  globalVol;	// 1...255
-	uint8le  speed;		// 1...255
-	uint8le  tempo;		// 4...255
+	uint8le  globalVol;  // 1...255
+	uint8le  speed;      // 1...255
+	uint8le  tempo;      // 4...255
 	uint8le  chnSetup[32];
+
+	uint8 GetNumChannels() const
+	{
+		uint8 numChannels = 0;
+		for(uint8 c = 0; c < 32; c++)
+		{
+			if(!(chnSetup[c] & 0x80))
+				numChannels = c + 1;
+		}
+		return numChannels;
+	}
 };
 
 MPT_BINARY_STRUCT(MDLInfoBlock, 91)
@@ -418,6 +429,28 @@ static void CopyEnvelope(InstrumentEnvelope &mptEnv, uint8 flags, std::vector<MD
 }
 
 
+static uint8 GetMDLPatternChannelCount(FileReader chunk, uint8 numChannels, const uint8 fileVersion)
+{
+	const uint8 numPats = chunk.ReadUint8();
+	for(uint8 pat = 0; pat < numPats && numChannels < 32; pat++)
+	{
+		uint8 readChans = 32;
+		if(fileVersion >= 0x10)
+		{
+			MDLPatternHeader patHead;
+			chunk.ReadStruct(patHead);
+			readChans = patHead.channels;
+		}
+		for(uint8 chn = 0; chn < readChans; chn++)
+		{
+			if(chunk.ReadUint16LE() > 0 && chn >= numChannels && chn < 32)
+				numChannels = chn + 1;
+		}
+	}
+	return numChannels;
+}
+
+
 static bool ValidateHeader(const MDLFileHeader &fileHeader)
 {
 	if(std::memcmp(fileHeader.id, "DMDL", 4)
@@ -473,7 +506,9 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 		return false;
 	}
 
-	InitializeGlobals(MOD_TYPE_MDL);
+	// In case any muted channels contain data, be sure that we import them as well.
+	const uint8 numChannels = std::max(GetMDLPatternChannelCount(chunks.GetChunk(MDLChunk::idPats), info.GetNumChannels(), fileHeader.version), uint8(1));
+	InitializeGlobals(MOD_TYPE_MDL, numChannels);
 	m_SongFlags = SONG_ITCOMPATGXX;
 	m_playBehaviour.set(kPerChannelGlobalVolSlide);
 	m_playBehaviour.set(kApplyOffsetWithoutNote);
@@ -500,17 +535,13 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 	ReadOrderFromFile<uint8>(Order(), chunk, info.numOrders);
 	Order().SetRestartPos(info.restartPos);
 
-	m_nChannels = 0;
-	for(CHANNELINDEX c = 0; c < 32; c++)
+	for(CHANNELINDEX c = 0; c < GetNumChannels(); c++)
 	{
-		ChnSettings[c].Reset();
 		ChnSettings[c].nPan = (info.chnSetup[c] & 0x7F) * 2u;
 		if(ChnSettings[c].nPan == 254)
 			ChnSettings[c].nPan = 256;
 		if(info.chnSetup[c] & 0x80)
 			ChnSettings[c].dwFlags.set(CHN_MUTE);
-		else
-			m_nChannels = c + 1;
 		chunk.ReadString<mpt::String::spacePadded>(ChnSettings[c].szName, 8);
 	}
 
@@ -680,27 +711,6 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 	if((loadFlags & loadPatternData) && (chunk = chunks.GetChunk(MDLChunk::idPats)).IsValid())
 	{
 		PATTERNINDEX numPats = chunk.ReadUint8();
-
-		// In case any muted channels contain data, be sure that we import them as well.
-		for(PATTERNINDEX pat = 0; pat < numPats; pat++)
-		{
-			CHANNELINDEX numChans = 32;
-			if(fileHeader.version >= 0x10)
-			{
-				MDLPatternHeader patHead;
-				chunk.ReadStruct(patHead);
-				if(patHead.channels > m_nChannels && patHead.channels <= 32)
-					m_nChannels = patHead.channels;
-				numChans = patHead.channels;
-			}
-			for(CHANNELINDEX chn = 0; chn < numChans; chn++)
-			{
-				if(chunk.ReadUint16LE() > 0 && chn >= m_nChannels && chn < 32)
-					m_nChannels = chn + 1;
-			}
-		}
-		chunk.Seek(1);
-
 		Patterns.ResizeArray(numPats);
 		for(PATTERNINDEX pat = 0; pat < numPats; pat++)
 		{

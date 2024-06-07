@@ -371,7 +371,7 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 		{
 			const CHANNELINDEX nChn = m_nActiveTab * CHANNELS_IN_TAB + ichn;
 			const BOOL bEnable = (nChn < sndFile.GetNumChannels()) ? TRUE : FALSE;
-			if(nChn < MAX_BASECHANNELS)
+			if(nChn < sndFile.GetNumChannels())
 			{
 				const auto &chnSettings = sndFile.ChnSettings[nChn];
 				// Text
@@ -605,7 +605,7 @@ void CViewGlobals::PopulateChannelPlugins(UpdateHint hint, const CObject *pObj)
 	const CSoundFile &sndFile = GetDocument()->GetSoundFile();
 	for(CHANNELINDEX ichn = 0; ichn < CHANNELS_IN_TAB; ichn++)
 	{
-		if(const CHANNELINDEX nChn = m_nActiveTab * CHANNELS_IN_TAB + ichn; nChn < MAX_BASECHANNELS)
+		if(const CHANNELINDEX nChn = m_nActiveTab * CHANNELS_IN_TAB + ichn; nChn < sndFile.GetNumChannels())
 		{
 			PLUGINDEX sel = sndFile.ChnSettings[nChn].nMixPlugin ? sndFile.ChnSettings[nChn].nMixPlugin - 1 : PLUGINDEX_INVALID;
 			m_CbnEffects[ichn].Update(PluginComboBox::Config{PluginComboBox::ShowNoPlugin}.Hint(hint, pObj).CurrentSelection(sel), sndFile);

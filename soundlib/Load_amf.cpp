@@ -125,10 +125,8 @@ bool CSoundFile::ReadAMF_Asylum(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 
-	InitializeGlobals(MOD_TYPE_AMF0);
-	InitializeChannels();
+	InitializeGlobals(MOD_TYPE_AMF0, 8);
 	SetupMODPanning(true);
-	m_nChannels = 8;
 	Order().SetDefaultSpeed(fileHeader.defaultSpeed);
 	Order().SetDefaultTempoInt(fileHeader.defaultTempo);
 	m_nSamples = fileHeader.numSamples;
@@ -573,8 +571,7 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 	if(loadFlags == onlyVerifyHeader)
 		return true;
 
-	InitializeGlobals(MOD_TYPE_AMF);
-	InitializeChannels();
+	InitializeGlobals(MOD_TYPE_AMF, (fileSignature.version < 9) ? 4 : fileHeader.numChannels);
 
 	if(isDMF)
 	{
@@ -588,13 +585,11 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 	}
 	m_modFormat.charset = mpt::Charset::CP437;
 
-	m_nChannels = fileHeader.numChannels;
 	m_nSamples = fileHeader.numSamples;
 
 	if(fileSignature.version < 9)
 	{
 		// Old format revisions are fixed to 4 channels
-		m_nChannels = 4;
 		for(CHANNELINDEX chn = 0; chn < 4; chn++)
 		{
 			ChnSettings[chn].nPan = (chn & 1) ? 0xC0 : 0x40;

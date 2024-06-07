@@ -169,10 +169,12 @@ void CSoundFile::AddToLog(LogLevel level, const mpt::ustring &text) const
 
 
 // Global variable initializer for loader functions
-void CSoundFile::InitializeGlobals(MODTYPE type)
+void CSoundFile::InitializeGlobals(MODTYPE type, CHANNELINDEX numChannels)
 {
 	// Do not add or change any of these values! And if you do, review each and every loader to check if they require these defaults!
 	m_nType = type;
+	MPT_ASSERT(numChannels <= MAX_BASECHANNELS);
+	LimitMax(numChannels, MAX_BASECHANNELS);
 
 	MODTYPE bestType = GetBestSaveFormat();
 	m_playBehaviour = GetDefaultPlaybackBehaviour(bestType);
@@ -191,7 +193,7 @@ void CSoundFile::InitializeGlobals(MODTYPE type)
 	}
 
 	m_ContainerType = ModContainerType::None;
-	m_nChannels = 0;
+	m_nChannels = numChannels;
 	m_nInstruments = 0;
 	m_nSamples = 0;
 	m_nSamplePreAmp = 48;
@@ -226,14 +228,10 @@ void CSoundFile::InitializeGlobals(MODTYPE type)
 	{
 		m_SongFlags.set(SONG_ISAMIGA);
 	}
-}
 
-
-void CSoundFile::InitializeChannels()
-{
-	for(CHANNELINDEX nChn = 0; nChn < MAX_BASECHANNELS; nChn++)
+	for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
 	{
-		InitChannel(nChn);
+		InitChannel(chn);
 	}
 }
 
@@ -540,7 +538,7 @@ bool CSoundFile::CreateInternal(FileReader file, ModLoadingFlags loadFlags)
 	} else
 	{
 		// New song
-		InitializeGlobals();
+		InitializeGlobals(MOD_TYPE_NONE, 0);
 		m_visitedRows.Initialize(true);
 		m_dwCreatedWithVersion = Version::Current();
 #if MPT_TIME_UTC_ON_DISK
@@ -589,7 +587,7 @@ bool CSoundFile::CreateInternal(FileReader file, ModLoadingFlags loadFlags)
 
 	// Adjust channels
 	const auto muteFlag = GetChannelMuteFlag();
-	for(CHANNELINDEX chn = 0; chn < MAX_BASECHANNELS; chn++)
+	for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
 	{
 		LimitMax(ChnSettings[chn].nVolume, uint8(64));
 		if(ChnSettings[chn].nPan > 256)
@@ -1436,7 +1434,7 @@ bool CSoundFile::InitChannel(CHANNELINDEX nChn)
 	if(nChn >= MAX_BASECHANNELS)
 		return true;
 
-	ChnSettings[nChn].Reset();
+	mpt::reconstruct(ChnSettings[nChn]);
 	m_PlayState.Chn[nChn].Reset(ModChannel::resetTotal, *this, nChn, GetChannelMuteFlag());
 
 #ifdef MODPLUG_TRACKER
@@ -2114,14 +2112,13 @@ void CSoundFile::SetupMODPanning(bool bForceSetup)
 	// Setup LRRL panning, max channel volume
 	if(!(GetType() & MOD_TYPE_MOD) && bForceSetup == false) return;
 
-	for(CHANNELINDEX nChn = 0; nChn < MAX_BASECHANNELS; nChn++)
+	for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
 	{
-		ChnSettings[nChn].nVolume = 64;
-		ChnSettings[nChn].dwFlags.reset(CHN_SURROUND);
+		ChnSettings[chn].dwFlags.reset(CHN_SURROUND);
 		if(m_MixerSettings.MixerFlags & SNDMIX_MAXDEFAULTPAN)
-			ChnSettings[nChn].nPan = (((nChn & 3) == 1) || ((nChn & 3) == 2)) ? 256 : 0;
+			ChnSettings[chn].nPan = (((chn & 3) == 1) || ((chn & 3) == 2)) ? 256 : 0;
 		else
-			ChnSettings[nChn].nPan = (((nChn & 3) == 1) || ((nChn & 3) == 2)) ? 0xC0 : 0x40;
+			ChnSettings[chn].nPan = (((chn & 3) == 1) || ((chn & 3) == 2)) ? 0xC0 : 0x40;
 	}
 }
 

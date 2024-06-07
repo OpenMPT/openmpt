@@ -160,10 +160,15 @@ bool CSoundFile::ReadXMF(FileReader &file, ModLoadingFlags loadFlags)
 	}
 	if(!numSamples)
 		return false;
+
+	file.Skip(256);
+	const uint8 lastChannel = file.ReadUint8();
+	if(lastChannel > 31)
+		return false;
 	if(loadFlags == onlyVerifyHeader)
 		return true;
 
-	InitializeGlobals(MOD_TYPE_MOD);
+	InitializeGlobals(MOD_TYPE_MOD, lastChannel + 1);
 	m_SongFlags.set(SONG_IMPORTED);
 	m_SongFlags.reset(SONG_ISAMIGA);
 	m_SongFlags.set(SONG_AUTO_TONEPORTA | SONG_AUTO_TONEPORTA_CONT, type < 4);
@@ -182,18 +187,13 @@ bool CSoundFile::ReadXMF(FileReader &file, ModLoadingFlags loadFlags)
 	file.Seek(1 + 256 * sizeof(XMFSampleHeader));
 	ReadOrderFromFile<uint8>(Order(), file, 256, 0xFF);
 
-	const uint8 lastChannel = file.ReadUint8();
-	if(lastChannel > 31)
-		return false;
-	m_nChannels = lastChannel + 1u;
+	file.Skip(1);  // Channel count already read
 	const PATTERNINDEX numPatterns  = file.ReadUint8() + 1u;
-
 	if(!file.CanRead(m_nChannels + numPatterns * m_nChannels * 64 * 6))
 		return false;
 
 	for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
 	{
-		ChnSettings[chn].Reset();
 		ChnSettings[chn].nPan = file.ReadUint8() * 0x11;
 	}
 

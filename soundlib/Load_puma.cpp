@@ -180,11 +180,9 @@ bool CSoundFile::ReadPuma(FileReader &file, ModLoadingFlags loadFlags)
 	if(loadFlags == onlyVerifyHeader)
 		return true;
 
-	InitializeGlobals(MOD_TYPE_MOD);
-	InitializeChannels();
+	InitializeGlobals(MOD_TYPE_MOD, 4);
 	SetupMODPanning(true);
 	m_SongFlags.set(SONG_IMPORTED | SONG_ISAMIGA | SONG_FASTPORTAS);
-	m_nChannels = 4;
 	m_nSamples = 52;
 	m_nInstruments = fileHeader.numInstruments;
 	m_playBehaviour.set(kMODSampleSwap);

@@ -87,7 +87,7 @@ void ModChannel::Reset(ResetFlags resetMask, const CSoundFile &sndFile, CHANNELI
 
 	if(resetMask & resetChannelSettings)
 	{
-		if(sourceChannel < MAX_BASECHANNELS)
+		if(sourceChannel < sndFile.ChnSettings.size())
 		{
 			dwFlags = sndFile.ChnSettings[sourceChannel].dwFlags;
 			nPan = sndFile.ChnSettings[sourceChannel].nPan;

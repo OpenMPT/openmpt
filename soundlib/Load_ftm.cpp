@@ -102,9 +102,7 @@ bool CSoundFile::ReadFTM(FileReader &file, ModLoadingFlags loadFlags)
 	else if(loadFlags == onlyVerifyHeader)
 		return true;
 
-	InitializeGlobals(MOD_TYPE_MOD);
-	m_nChannels = 8;
-	InitializeChannels();
+	InitializeGlobals(MOD_TYPE_MOD, 8);
 	for(CHANNELINDEX chn = 0; chn < 8; chn++)
 	{
 		ChnSettings[chn].nPan = (chn < 2 || chn > 5) ? 64 : 192;

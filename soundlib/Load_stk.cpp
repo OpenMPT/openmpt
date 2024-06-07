@@ -144,11 +144,10 @@ bool CSoundFile::ReadSTK(FileReader &file, ModLoadingFlags loadFlags)
 		return false;
 	file.Seek(sizeof(STKFileHeaders));
 
-	InitializeGlobals(MOD_TYPE_MOD);
+	InitializeGlobals(MOD_TYPE_MOD, 4);
 	m_playBehaviour.reset(kMODOneShotLoops);
 	m_playBehaviour.set(kMODIgnorePanning);
 	m_playBehaviour.set(kMODSampleSwap);  // untested
-	m_nChannels = 4;
 
 	STVersions minVersion = UST1_00;
 

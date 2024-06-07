@@ -228,8 +228,30 @@ bool CSoundFile::ReadDTM(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 
-	InitializeGlobals(MOD_TYPE_DTM);
-	InitializeChannels();
+	std::string songName;
+	file.ReadString<mpt::String::maybeNullTerminated>(songName, fileHeader.headerSize - (sizeof(fileHeader) - 8u));
+
+	auto chunks = ChunkReader(file).ReadChunks<DTMChunk>(1);
+
+	// Read pattern properties
+	uint32 patternFormat;
+	if(FileReader chunk = chunks.GetChunk(DTMChunk::idPATT))
+	{
+		const uint16 numChannels = chunk.ReadUint16BE();
+		if(numChannels < 1 || numChannels > 32)
+			return false;
+
+		InitializeGlobals(MOD_TYPE_DTM, numChannels);
+
+		Patterns.ResizeArray(chunk.ReadUint16BE());  // Number of stored patterns, may be lower than highest pattern number
+		patternFormat = chunk.ReadUint32BE();
+		if(patternFormat != DTM_PT_PATTERN_FORMAT && patternFormat != DTM_204_PATTERN_FORMAT && patternFormat != DTM_206_PATTERN_FORMAT)
+			return false;
+	} else
+	{
+		return false;
+	}
+
 	m_SongFlags.set(SONG_ITCOMPATGXX | SONG_ITOLDEFFECTS | SONG_FASTPORTAS);
 	m_playBehaviour.reset(kPeriodsAreHertz);
 	m_playBehaviour.reset(kITVibratoTremoloPanbrello);
@@ -240,10 +262,7 @@ bool CSoundFile::ReadDTM(FileReader &file, ModLoadingFlags loadFlags)
 		Order().SetDefaultSpeed(fileHeader.speed);
 	if(fileHeader.stereoMode == 0)
 		SetupMODPanning(true);
-
-	file.ReadString<mpt::String::maybeNullTerminated>(m_songName, fileHeader.headerSize - (sizeof(fileHeader) - 8u));
-
-	auto chunks = ChunkReader(file).ReadChunks<DTMChunk>(1);
+	m_songName = std::move(songName);
 
 	// Read order list
 	if(FileReader chunk = chunks.GetChunk(DTMChunk::idS_Q_))
@@ -253,26 +272,6 @@ bool CSoundFile::ReadDTM(FileReader &file, ModLoadingFlags loadFlags)
 		chunk.Skip(4);	// Reserved
 		ReadOrderFromFile<uint8>(Order(), chunk, ordLen);
 		Order().SetRestartPos(restartPos);
-	} else
-	{
-		return false;
-	}
-
-	// Read pattern properties
-	uint32 patternFormat;
-	if(FileReader chunk = chunks.GetChunk(DTMChunk::idPATT))
-	{
-		m_nChannels = chunk.ReadUint16BE();
-		if(m_nChannels < 1 || m_nChannels > 32)
-		{
-			return false;
-		}
-		Patterns.ResizeArray(chunk.ReadUint16BE());	// Number of stored patterns, may be lower than highest pattern number
-		patternFormat = chunk.ReadUint32BE();
-		if(patternFormat != DTM_PT_PATTERN_FORMAT && patternFormat != DTM_204_PATTERN_FORMAT && patternFormat != DTM_206_PATTERN_FORMAT)
-		{
-			return false;
-		}
 	} else
 	{
 		return false;

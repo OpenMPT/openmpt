@@ -206,14 +206,13 @@ bool CSoundFile::ReadDSM(FileReader &file, ModLoadingFlags loadFlags)
 		return false;
 	}
 
-	InitializeGlobals(MOD_TYPE_DSM);
+	InitializeGlobals(MOD_TYPE_DSM, std::max(songHeader.numChannels.get(), uint16(1)));
 
 	m_modFormat.formatName = U_("DSIK Format");
 	m_modFormat.type = U_("dsm");
 	m_modFormat.charset = mpt::Charset::CP437;
 
 	m_songName = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, songHeader.songName);
-	m_nChannels = std::max(songHeader.numChannels.get(), uint16(1));
 	Order().SetDefaultSpeed(songHeader.speed);
 	Order().SetDefaultTempoInt(songHeader.bpm);
 	m_nDefaultGlobalVolume = std::min(songHeader.globalVol.get(), uint8(64)) * 4u;
@@ -224,9 +223,8 @@ bool CSoundFile::ReadDSM(FileReader &file, ModLoadingFlags loadFlags)
 		m_nSamplePreAmp = songHeader.mastervol & 0x7F;
 
 	// Read channel panning
-	for(CHANNELINDEX chn = 0; chn < 16; chn++)
+	for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
 	{
-		ChnSettings[chn].Reset();
 		if(songHeader.panPos[chn] <= 0x80)
 		{
 			ChnSettings[chn].nPan = songHeader.panPos[chn] * 2;
@@ -400,9 +398,8 @@ bool CSoundFile::ReadDSm(FileReader &file, ModLoadingFlags loadFlags)
 	if(loadFlags == onlyVerifyHeader)
 		return true;
 
-	InitializeGlobals(MOD_TYPE_MOD);
+	InitializeGlobals(MOD_TYPE_MOD, fileHeader.numChannels);
 	m_SongFlags = SONG_IMPORTED;
-	m_nChannels = fileHeader.numChannels;
 	static_assert(MAX_BASECHANNELS >= 32 && MAX_SAMPLES > 255);
 	m_nSamples = fileHeader.numSamples;
 	m_nDefaultGlobalVolume = Util::muldivr_unsigned(fileHeader.globalVol, MAX_GLOBAL_VOLUME, 100);
@@ -412,7 +409,6 @@ bool CSoundFile::ReadDSm(FileReader &file, ModLoadingFlags loadFlags)
 
 	for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
 	{
-		ChnSettings[chn].Reset();
 		ChnSettings[chn].nPan = (file.ReadUint8() & 0x0F) * 0x11;
 	}
 	

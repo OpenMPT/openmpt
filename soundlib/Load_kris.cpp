@@ -58,7 +58,7 @@ bool CSoundFile::ReadKRIS(FileReader &file, ModLoadingFlags loadFlags)
 		return false;
 	uint32 tracksOffset = 1984;
 
-	InitializeGlobals(MOD_TYPE_MOD);
+	InitializeGlobals(MOD_TYPE_MOD, 4);
 
 	file.Seek(0);
 	file.ReadString<mpt::String::spacePadded>(m_songName, 22);
@@ -91,7 +91,6 @@ bool CSoundFile::ReadKRIS(FileReader &file, ModLoadingFlags loadFlags)
 	if(loadFlags == onlyVerifyHeader)
 		return true;
 
-	m_nChannels = 4;
 	SetupMODPanning(true);
 	Order().SetDefaultSpeed(6);
 	Order().SetDefaultTempoInt(125);

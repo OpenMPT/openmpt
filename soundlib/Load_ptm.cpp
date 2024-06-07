@@ -166,7 +166,7 @@ bool CSoundFile::ReadPTM(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 
-	InitializeGlobals(MOD_TYPE_PTM);
+	InitializeGlobals(MOD_TYPE_PTM, fileHeader.numChannels);
 
 	m_songName = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, fileHeader.songname);
 
@@ -176,14 +176,12 @@ bool CSoundFile::ReadPTM(FileReader &file, ModLoadingFlags loadFlags)
 	m_modFormat.charset = mpt::Charset::CP437;
 
 	m_SongFlags = SONG_ITCOMPATGXX | SONG_ITOLDEFFECTS;
-	m_nChannels = fileHeader.numChannels;
 	m_nSamples = std::min(static_cast<SAMPLEINDEX>(fileHeader.numSamples), static_cast<SAMPLEINDEX>(MAX_SAMPLES - 1));
 	ReadOrderFromArray(Order(), fileHeader.orders, fileHeader.numOrders, 0xFF, 0xFE);
 
 	// Reading channel panning
 	for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
 	{
-		ChnSettings[chn].Reset();
 		ChnSettings[chn].nPan = ((fileHeader.chnPan[chn] & 0x0F) << 4) + 4;
 	}
 

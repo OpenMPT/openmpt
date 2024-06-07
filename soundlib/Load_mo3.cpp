@@ -873,11 +873,9 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 	mpt::IO::FileCursor<mpt::IO::FileCursorTraitsFileData, mpt::IO::FileCursorFilenameTraits<mpt::PathString>> fileCursor{musicChunkData, std::move(filenamePtr)};
 	FileReader musicChunk{fileCursor};
 
-	InitializeGlobals();
-	InitializeChannels();
-
-	musicChunk.ReadNullString(m_songName);
-	musicChunk.ReadNullString(m_songMessage);
+	std::string songName, songMessage;
+	musicChunk.ReadNullString(songName);
+	musicChunk.ReadNullString(songMessage);
 
 	MO3FileHeader fileHeader;
 	if(!musicChunk.ReadStruct(fileHeader)
@@ -889,23 +887,24 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		return false;
 	}
 
-	m_nChannels = fileHeader.numChannels;
+	MODTYPE modType = MOD_TYPE_XM;
+	if(fileHeader.flags & MO3FileHeader::isIT)
+		modType = MOD_TYPE_IT;
+	else if(fileHeader.flags & MO3FileHeader::isS3M)
+		modType = MOD_TYPE_S3M;
+	else if(fileHeader.flags & MO3FileHeader::isMOD)
+		modType = MOD_TYPE_MOD;
+	else if(fileHeader.flags & MO3FileHeader::isMTM)
+		modType = MOD_TYPE_MTM;
+
+	InitializeGlobals(modType, fileHeader.numChannels);
 	Order().SetRestartPos(fileHeader.restartPos);
 	m_nInstruments = fileHeader.numInstruments;
 	m_nSamples = fileHeader.numSamples;
 	Order().SetDefaultSpeed(fileHeader.defaultSpeed ? fileHeader.defaultSpeed : 6);
 	Order().SetDefaultTempoInt(fileHeader.defaultTempo ? fileHeader.defaultTempo : 125);
-
-	if(fileHeader.flags & MO3FileHeader::isIT)
-		SetType(MOD_TYPE_IT);
-	else if(fileHeader.flags & MO3FileHeader::isS3M)
-		SetType(MOD_TYPE_S3M);
-	else if(fileHeader.flags & MO3FileHeader::isMOD)
-		SetType(MOD_TYPE_MOD);
-	else if(fileHeader.flags & MO3FileHeader::isMTM)
-		SetType(MOD_TYPE_MTM);
-	else
-		SetType(MOD_TYPE_XM);
+	m_songName = std::move(songName);
+	m_songMessage.SetRaw(std::move(songMessage));
 
 	m_SongFlags.set(SONG_IMPORTED);
 	if(fileHeader.flags & MO3FileHeader::linearSlides)

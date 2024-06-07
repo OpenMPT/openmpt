@@ -621,8 +621,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 
-	InitializeGlobals(MOD_TYPE_MID);
-	InitializeChannels();
+	InitializeGlobals(MOD_TYPE_MID, MAX_BASECHANNELS);
 
 #ifdef MODPLUG_TRACKER
 	const uint32 quantize = Clamp(TrackerSettings::Instance().midiImportQuantize.Get(), 4u, 256u);
@@ -652,7 +651,6 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 	TEMPO tempo{120, 0};
 	Order().SetDefaultTempo(tempo);
 	Order().SetDefaultSpeed(ticksPerRow);
-	m_nChannels = MAX_BASECHANNELS;
 	m_nDefaultRowsPerBeat = quantize / 4;
 	m_nDefaultRowsPerMeasure = 4 * m_nDefaultRowsPerBeat;
 	m_nSamplePreAmp = m_nVSTiVolume = 32;

@@ -119,10 +119,7 @@ bool CSoundFile::ReadDIGI(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Globals
-	InitializeGlobals(MOD_TYPE_DIGI);
-	InitializeChannels();
-
-	m_nChannels = fileHeader.numChannels;
+	InitializeGlobals(MOD_TYPE_DIGI, fileHeader.numChannels);
 	m_nSamples = 31;
 	m_nSamplePreAmp = 256 / m_nChannels;
 

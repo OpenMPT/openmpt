@@ -596,8 +596,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 
-	InitializeGlobals(MOD_TYPE_XM);
-	InitializeChannels();
+	InitializeGlobals(MOD_TYPE_XM, fileHeader.channels);
 	m_nMixLevels = MixLevels::Compatible;
 
 	FlagSet<TrackerVersions> madeWith(verUnknown);
@@ -680,7 +679,6 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	m_nMaxPeriod = 31999;
 
 	Order().SetRestartPos(fileHeader.restartPos);
-	m_nChannels = fileHeader.channels;
 	m_nInstruments = std::min(static_cast<uint16>(fileHeader.instruments), static_cast<uint16>(MAX_INSTRUMENTS - 1));
 	if(fileHeader.speed)
 		Order().SetDefaultSpeed(fileHeader.speed);

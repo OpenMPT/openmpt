@@ -35,14 +35,20 @@ struct SymFileHeader
 {
 	char     magic[4];  // "SymM"
 	uint32be version;
+	// Technically this is already the first chunk; for simplicity we always assume that the channel count comes first (which in practice it does)
+	int32be  firstChunkID;
+	uint32be numChannels;
 
 	bool Validate() const
 	{
-		return !std::memcmp(magic, "SymM", 4) && version == 1;
+		return !std::memcmp(magic, "SymM", 4)
+			&& version == 1
+			&& firstChunkID == -1
+			&& numChannels > 0 && numChannels <= MAX_BASECHANNELS;
 	}
 };
 
-MPT_BINARY_STRUCT(SymFileHeader, 8)
+MPT_BINARY_STRUCT(SymFileHeader, 16)
 
 
 struct SymEvent
@@ -987,10 +993,6 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderSymMOD(MemoryFileReader file,
 		return ProbeWantMoreData;
 	if(!fileHeader.Validate())
 		return ProbeFailure;
-	if(!file.CanRead(sizeof(uint32be)))
-		return ProbeWantMoreData;
-	if(file.ReadInt32BE() >= 0)
-		return ProbeFailure;
 	return ProbeSuccess;
 }
 
@@ -1001,16 +1003,15 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 	SymFileHeader fileHeader;
 	if(!file.ReadStruct(fileHeader) || !fileHeader.Validate())
 		return false;
-	if(file.ReadInt32BE() >= 0)
-		return false;
 	else if(loadFlags == onlyVerifyHeader)
 		return true;
 
-	InitializeGlobals(MOD_TYPE_MPT);
+	InitializeGlobals(MOD_TYPE_MPT, static_cast<CHANNELINDEX>(fileHeader.numChannels));
 
 	m_SongFlags.set(SONG_LINEARSLIDES | SONG_EXFILTERRANGE | SONG_IMPORTED);
 	m_playBehaviour = GetDefaultPlaybackBehaviour(MOD_TYPE_IT);
 	m_playBehaviour.reset(kITShortSampleRetrig);
+	m_nSamplePreAmp = Clamp(512 / m_nChannels, 16, 128);
 
 	enum class ChunkType : int32
 	{
@@ -1048,7 +1049,6 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 	std::vector<SymEvent> patternData;
 	std::vector<SymInstrument> instruments;
 
-	file.SkipBack(sizeof(int32));
 	while(file.CanRead(sizeof(int32)))
 	{
 		const ChunkType chunkType = static_cast<ChunkType>(file.ReadInt32BE());
@@ -1056,11 +1056,7 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 		{
 		// Simple values
 		case ChunkType::NumChannels:
-			if(auto numChannels = static_cast<CHANNELINDEX>(file.ReadUint32BE()); !m_nChannels && numChannels > 0 && numChannels <= MAX_BASECHANNELS)
-			{
-				m_nChannels = numChannels;
-				m_nSamplePreAmp = Clamp(512 / m_nChannels, 16, 128);
-			}
+			file.Skip(sizeof(uint32be));  // Already handled
 			break;
 
 		case ChunkType::TrackLength:
@@ -1207,7 +1203,7 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 
-	if(!m_nChannels || !trackLen || instruments.empty())
+	if(!trackLen || instruments.empty())
 		return false;
 	if((loadFlags & loadPatternData) && (positions.empty() || patternData.empty() || sequences.empty()))
 		return false;
@@ -1923,9 +1919,8 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 #endif // NO_PLUGINS
 
 	// Channel panning
-	for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
+	for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
 	{
-		InitChannel(chn);
 		ChnSettings[chn].nPan = (chn & 1) ? 256 : 0;
 		ChnSettings[chn].nMixPlugin = useDSP ? 1 : 0;  // For MIDI macros controlling the echo DSP
 	}

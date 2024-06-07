@@ -110,8 +110,7 @@ bool CSoundFile::ReadGMC(FileReader &file, ModLoadingFlags loadFlags)
 	else if(loadFlags == onlyVerifyHeader)
 		return true;
 
-	InitializeGlobals(MOD_TYPE_MOD);
-	m_nChannels = 4;
+	InitializeGlobals(MOD_TYPE_MOD, 4);
 	m_nSamples = 15;
 	m_nMinPeriod = 113 * 4;
 	m_nMaxPeriod = 856 * 4;

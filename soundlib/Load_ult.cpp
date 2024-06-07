@@ -303,7 +303,7 @@ bool CSoundFile::ReadULT(FileReader &file, ModLoadingFlags loadFlags)
 	if(!file.CanRead(mpt::saturate_cast<FileReader::pos_type>(GetHeaderMinimumAdditionalSize(fileHeader))))
 		return false;
 
-	InitializeGlobals(MOD_TYPE_ULT);
+	InitializeGlobals(MOD_TYPE_ULT, 0);
 	m_songName = mpt::String::ReadBuf(mpt::String::spacePadded, fileHeader.songName);
 
 	const mpt::uchar *versions[] = {UL_("<1.4"), UL_("1.4"), UL_("1.5"), UL_("1.6")};
@@ -355,7 +355,7 @@ bool CSoundFile::ReadULT(FileReader &file, ModLoadingFlags loadFlags)
 
 	for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
 	{
-		ChnSettings[chn].Reset();
+		mpt::reconstruct(ChnSettings[chn]);
 		if(fileHeader.version >= '3')
 			ChnSettings[chn].nPan = ((file.ReadUint8() & 0x0F) << 4) + 8;
 		else

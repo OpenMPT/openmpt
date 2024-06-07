@@ -400,11 +400,9 @@ bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 
-	InitializeGlobals(MOD_TYPE_AMS);
-	InitializeChannels();
+	InitializeGlobals(MOD_TYPE_AMS, (fileHeader.channelConfig & 0x1F) + 1);
 
 	m_SongFlags = SONG_ITCOMPATGXX | SONG_ITOLDEFFECTS;
-	m_nChannels = (fileHeader.channelConfig & 0x1F) + 1;
 	m_nSamples = fileHeader.numSamps;
 	SetupMODPanning(true);
 
@@ -774,12 +772,11 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 
-	InitializeGlobals(MOD_TYPE_AMS);
+	InitializeGlobals(MOD_TYPE_AMS, 32);
 
 	m_songName = std::move(songName);
 
 	m_nInstruments = fileHeader.numIns;
-	m_nChannels = 32;
 	SetupMODPanning(true);
 
 	m_modFormat.formatName = U_("Velvet Studio");
@@ -912,7 +909,6 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 	// Channel names
 	for(CHANNELINDEX chn = 0; chn < 32; chn++)
 	{
-		ChnSettings[chn].Reset();
 		file.ReadSizedString<uint8le, mpt::String::spacePadded>(ChnSettings[chn].szName);
 	}
 

@@ -228,7 +228,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 
-	InitializeGlobals(MOD_TYPE_S3M);
+	InitializeGlobals(MOD_TYPE_S3M, fileHeader.GetNumChannels());
 	m_nMinPeriod = 64;
 	m_nMaxPeriod = 32767;
 
@@ -456,23 +456,14 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Channel setup
-	m_nChannels = 4;
 	std::bitset<32> isAdlibChannel;
-	for(CHANNELINDEX i = 0; i < 32; i++)
+	for(CHANNELINDEX i = 0; i < GetNumChannels(); i++)
 	{
-		ChnSettings[i].Reset();
-
 		uint8 ctype = fileHeader.channels[i] & ~0x80;
-		if(fileHeader.channels[i] != 0xFF)
-		{
-			m_nChannels = i + 1;
-			if(isStereo)
-				ChnSettings[i].nPan = (ctype & 8) ? 0xCC : 0x33;	// 200 : 56
-		}
+		if(fileHeader.channels[i] != 0xFF && isStereo)
+			ChnSettings[i].nPan = (ctype & 8) ? 0xCC : 0x33;  // 200 : 56
 		if(fileHeader.channels[i] & 0x80)
-		{
 			ChnSettings[i].dwFlags = CHN_MUTE;
-		}
 		if(ctype >= 16 && ctype <= 29)
 		{
 			// Adlib channel - except for OpenMPT 1.19 and older, which would write wrong channel types for PCM channels 16-32.
@@ -480,10 +471,6 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 			ChnSettings[i].nPan = 128;
 			isAdlibChannel[i] = true;
 		}
-	}
-	if(m_nChannels < 1)
-	{
-		m_nChannels = 1;
 	}
 
 	ReadOrderFromFile<uint8>(Order(), file, fileHeader.ordNum, 0xFF, 0xFE);

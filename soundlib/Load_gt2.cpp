@@ -532,12 +532,10 @@ bool CSoundFile::ReadGTK(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 
 	// Globals
-	InitializeGlobals(MOD_TYPE_MPT);
-	InitializeChannels();
+	InitializeGlobals(MOD_TYPE_MPT, fileHeader.numChannels);
 	m_SongFlags.set(SONG_IMPORTED);
 	m_playBehaviour = GetDefaultPlaybackBehaviour(MOD_TYPE_IT);
 	m_playBehaviour.set(kApplyOffsetWithoutNote);
-	m_nChannels = fileHeader.numChannels;
 	SetupMODPanning(true);
 
 	m_modFormat.madeWithTracker = U_("Graoumf Tracker");
@@ -1182,9 +1180,24 @@ bool CSoundFile::ReadGT2(FileReader &file, ModLoadingFlags loadFlags)
 	if(loadFlags == onlyVerifyHeader)
 		return true;
 
+	std::vector<uint16be> pannedTracks;
+	file.ReadVector(pannedTracks, fileHeader.numPannedTracks);
+
+	ChunkReader chunkFile(file);
+	auto chunks = chunkFile.ReadChunksUntil<GT2Chunk>(1, GT2Chunk::idENDC);
+
+	if(auto chunk = chunks.GetChunk(GT2Chunk::idPATS); chunk.CanRead(2))
+	{
+		if(uint16 channels = chunk.ReadUint16BE(); channels >= 1 && channels <= MAX_BASECHANNELS)
+			InitializeGlobals(MOD_TYPE_MPT, channels);
+		else
+			return false;
+	} else
+	{
+		return false;
+	}
+
 	// Globals
-	InitializeGlobals(MOD_TYPE_MPT);
-	InitializeChannels();
 	m_SongFlags.set(SONG_IMPORTED | SONG_EXFILTERRANGE);
 	m_playBehaviour = GetDefaultPlaybackBehaviour(MOD_TYPE_IT);
 	m_playBehaviour.set(kFT2ST3OffsetOutOfRange, fileHeader.fileVersion >= 6);
@@ -1196,7 +1209,6 @@ bool CSoundFile::ReadGT2(FileReader &file, ModLoadingFlags loadFlags)
 	mptHistory.loadDate.year = fileHeader.year;
 	m_FileHistory.push_back(mptHistory);
 
-	m_nChannels = 32;
 	m_modFormat.madeWithTracker = mpt::ToUnicode(mpt::Charset::ASCII, mpt::String::ReadBuf(mpt::String::spacePadded, fileHeader.trackerName));
 	m_modFormat.formatName = (fileHeader.fileVersion <= 5 ? MPT_UFORMAT("Graoumf Tracker v{}") : MPT_UFORMAT("Graoumf Tracker 2 v{}"))(fileHeader.fileVersion);
 	m_modFormat.type = U_("gt2");
@@ -1205,35 +1217,20 @@ bool CSoundFile::ReadGT2(FileReader &file, ModLoadingFlags loadFlags)
 	m_songName = mpt::String::ReadBuf(mpt::String::spacePadded, fileHeader.songName);
 
 	m_nSamplePreAmp = 256;
-	m_nDefaultGlobalVolume = 384 / (3 + m_nChannels);  // See documentation on command 5xxx
+	m_nDefaultGlobalVolume = 384 / (3 + m_nChannels);  // See documentation on command 5xxx: Default linear master volume is 12288 / (3 + number of channels)
 
 	if(fileHeader.fileVersion <= 5)
 	{
 		Order().SetDefaultSpeed(std::max(fileHeader.speed.get(), uint16(1)));
 		Order().SetDefaultTempoInt(std::max(fileHeader.tempo.get(), uint16(1)));
 		m_nDefaultGlobalVolume = std::min(Util::muldivr_unsigned(fileHeader.masterVol, MAX_GLOBAL_VOLUME, 4095), uint32(MAX_GLOBAL_VOLUME));
-		uint16 tracks = fileHeader.numPannedTracks;
-		LimitMax(tracks, MAX_BASECHANNELS);
+		const CHANNELINDEX tracks = std::min(static_cast<CHANNELINDEX>(pannedTracks.size()), m_nChannels);
 		for(CHANNELINDEX chn = 0; chn < tracks; chn++)
 		{
-			ChnSettings[chn].nPan = std::min(static_cast<uint16>(Util::muldivr_unsigned(file.ReadUint16BE(), 256, 4095)), uint16(256));
+			ChnSettings[chn].nPan = std::min(static_cast<uint16>(Util::muldivr_unsigned(pannedTracks[chn], 256, 4095)), uint16(256));
 		}
 	}
 	file.Seek(fileHeader.headerSize);
-
-	ChunkReader chunkFile(file);
-	auto chunks = chunkFile.ReadChunksUntil<GT2Chunk>(1, GT2Chunk::idENDC);
-
-	if(auto chunk = chunks.GetChunk(GT2Chunk::idPATS); chunk.CanRead(2))
-	{
-		if(uint16 channels = chunk.ReadUint16BE(); channels >= 1 && channels <= MAX_BASECHANNELS)
-			m_nChannels = channels;
-		else
-			return false;
-	} else
-	{
-		return false;
-	}
 
 	if(auto chunk = chunks.GetChunk(GT2Chunk::idSONG); chunk.CanRead(2))
 	{

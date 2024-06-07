@@ -509,7 +509,7 @@ public:
 	ResamplingMode m_nResampling; // Resampling mode (if overriding the globally set resampling)
 	int32 m_nRepeatCount = 0;     // -1 means repeat infinitely.
 	ORDERINDEX m_nMaxOrderPosition;
-	ModChannelSettings ChnSettings[MAX_BASECHANNELS];  // Initial channels settings
+	std::array<ModChannelSettings, MAX_BASECHANNELS> ChnSettings;  // Initial channels settings
 	CPatternContainer Patterns;
 	ModSequenceSet Order;  // Pattern sequences (order lists)
 protected:
@@ -1003,8 +1003,7 @@ public:
 protected:
 	// Global variable initializer for loader functions
 	void SetType(MODTYPE type);
-	void InitializeGlobals(MODTYPE type = MOD_TYPE_NONE);
-	void InitializeChannels();
+	void InitializeGlobals(MODTYPE type, CHANNELINDEX numChannels);
 
 	// Channel effect processing
 	int GetVibratoDelta(int type, int position) const;

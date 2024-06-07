@@ -34,7 +34,7 @@ struct GDMFileHeader
 	uint16le trackerID;         // Composing Tracker ID code (00 = 2GDM)
 	uint8le  trackerMajorVer;   // Tracker's major version
 	uint8le  trackerMinorVer;   // Tracker's minor version
-	uint8le  panMap[32];        // 0-Left to 15-Right, 255-N/U
+	uint8le  panMap[32];        // 0-Left to 15-Right, 16=Surround, 255-N/U
 	uint8le  masterVol;         // Range: 0...64
 	uint8le  tempo;             // Initial music tempo (6)
 	uint8le  bpm;               // Initial music BPM (125)
@@ -57,6 +57,11 @@ struct GDMFileHeader
 	uint16le scrollyScriptLength;
 	uint32le textGraphicOffset;    // Offset of text graphic (huh?)
 	uint16le textGraphicLength;
+
+	uint8 GetNumChannels() const
+	{
+		return static_cast<uint8>(std::distance(std::begin(panMap), std::find(std::begin(panMap), std::end(panMap), uint8_max)));
+	}
 };
 
 MPT_BINARY_STRUCT(GDMFileHeader, 157)
@@ -120,7 +125,8 @@ static bool ValidateHeader(const GDMFileHeader &fileHeader)
 		|| std::memcmp(fileHeader.magic2, "GMFS", 4)
 		|| fileHeader.formatMajorVer != 1 || fileHeader.formatMinorVer != 0
 		|| fileHeader.originalFormat >= std::size(gdmFormatOrigin)
-		|| fileHeader.originalFormat == 0)
+		|| fileHeader.originalFormat == 0
+		|| !fileHeader.GetNumChannels())
 	{
 		return false;
 	}
@@ -162,7 +168,7 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 
-	InitializeGlobals(gdmFormatOrigin[fileHeader.originalFormat]);
+	InitializeGlobals(gdmFormatOrigin[fileHeader.originalFormat], fileHeader.GetNumChannels());
 	m_SongFlags.set(SONG_IMPORTED);
 
 	m_modFormat.formatName = U_("General Digital Music");
@@ -185,10 +191,8 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Read channel pan map... 0...15 = channel panning, 16 = surround channel, 255 = channel does not exist
-	m_nChannels = 32;
-	for(CHANNELINDEX i = 0; i < 32; i++)
+	for(CHANNELINDEX i = 0; i < GetNumChannels(); i++)
 	{
-		ChnSettings[i].Reset();
 		if(fileHeader.panMap[i] < 16)
 		{
 			ChnSettings[i].nPan = static_cast<uint16>(std::min((fileHeader.panMap[i] * 16) + 8, 256));
@@ -196,15 +200,7 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			ChnSettings[i].nPan = 128;
 			ChnSettings[i].dwFlags = CHN_SURROUND;
-		} else if(fileHeader.panMap[i] == 0xFF)
-		{
-			m_nChannels = i;
-			break;
 		}
-	}
-	if(m_nChannels < 1)
-	{
-		return false;
 	}
 
 	m_nDefaultGlobalVolume = std::min(fileHeader.masterVol * 4u, 256u);

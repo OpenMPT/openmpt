@@ -252,11 +252,6 @@ struct ModChannelSettings
 	PLUGINDEX nMixPlugin = 0;       // Assigned plugin
 
 	mpt::charbuf<MAX_CHANNELNAME> szName;  // Channel name
-
-	void Reset()
-	{
-		*this = {};
-	}
 };
 
 OPENMPT_NAMESPACE_END

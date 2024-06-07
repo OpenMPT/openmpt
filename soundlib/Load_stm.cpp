@@ -229,8 +229,7 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 	if(loadFlags == onlyVerifyHeader)
 		return true;
 
-	InitializeGlobals(MOD_TYPE_STM);
-	InitializeChannels();
+	InitializeGlobals(MOD_TYPE_STM, 4);
 
 	m_songName = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, fileHeader.songname);
 
@@ -242,7 +241,6 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 	m_playBehaviour.set(kST3SampleSwap);
 
 	m_nSamples = 31;
-	m_nChannels = 4;
 	m_nMinPeriod = 64;
 	m_nMaxPeriod = 0x7FFF;
 	
@@ -454,13 +452,11 @@ bool CSoundFile::ReadSTX(FileReader &file, ModLoadingFlags loadFlags)
 	if(loadFlags == onlyVerifyHeader)
 		return true;
 
-	InitializeGlobals(MOD_TYPE_STM);
-	InitializeChannels();
+	InitializeGlobals(MOD_TYPE_STM, 4);
 
 	m_songName = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, fileHeader.songName);
 
 	m_nSamples = fileHeader.numSamples;
-	m_nChannels = 4;
 	m_nMinPeriod = 64;
 	m_nMaxPeriod = 0x7FFF;
 

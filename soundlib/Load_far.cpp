@@ -162,8 +162,7 @@ bool CSoundFile::ReadFAR(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Globals
-	InitializeGlobals(MOD_TYPE_FAR);
-	m_nChannels = 16;
+	InitializeGlobals(MOD_TYPE_FAR, 16);
 	m_nSamplePreAmp = 32;
 	Order().SetDefaultSpeed(fileHeader.defaultSpeed);
 	Order().SetDefaultTempoInt(80);
@@ -180,7 +179,6 @@ bool CSoundFile::ReadFAR(FileReader &file, ModLoadingFlags loadFlags)
 	// Read channel settings
 	for(CHANNELINDEX chn = 0; chn < 16; chn++)
 	{
-		ChnSettings[chn].Reset();
 		ChnSettings[chn].dwFlags = fileHeader.onOff[chn] ? ChannelFlags(0) : CHN_MUTE;
 		ChnSettings[chn].nPan = ((fileHeader.chnPanning[chn] & 0x0F) << 4) + 8;
 	}

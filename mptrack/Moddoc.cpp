@@ -643,14 +643,6 @@ void CModDoc::InitializeMod()
 		// Set up mix levels
 		m_SndFile.m_PlayState.m_nGlobalVolume = m_SndFile.m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 		m_SndFile.m_nSamplePreAmp = m_SndFile.m_nVSTiVolume = 48;
-
-		for (CHANNELINDEX nChn = 0; nChn < MAX_BASECHANNELS; nChn++)
-		{
-			m_SndFile.ChnSettings[nChn].dwFlags.reset();
-			m_SndFile.ChnSettings[nChn].nVolume = 64;
-			m_SndFile.ChnSettings[nChn].nPan = 128;
-			m_SndFile.m_PlayState.Chn[nChn].nGlobalVol = 64;
-		}
 		// Setup LRRL panning scheme for MODs
 		m_SndFile.SetupMODPanning();
 	}
@@ -1178,9 +1170,9 @@ bool CModDoc::NoteOff(UINT note, bool fade, INSTRUMENTINDEX ins, CHANNELINDEX cu
 		{
 			PLUGINDEX plug = pIns->nMixPlug;      // First try intrument VST
 			if((!plug || plug > MAX_MIXPLUGINS)   // No good plug yet
-				&& currentChn < MAX_BASECHANNELS) // Chan OK
+				&& currentChn < m_SndFile.ChnSettings.size())
 			{
-				plug = m_SndFile.ChnSettings[currentChn].nMixPlugin;// Then try Channel VST
+				plug = m_SndFile.ChnSettings[currentChn].nMixPlugin;  // Then try Channel VST
 			}
 
 			if(plug && plug <= MAX_MIXPLUGINS)
