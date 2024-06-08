@@ -238,6 +238,8 @@ struct AMFFileHeader
 			return false;
 		if(version < 9)
 			return true;
+		if(version < 12)
+			return (numChannels >= 1 && numChannels <= 16);
 		return (numChannels >= 1 && numChannels <= 32);
 	}
 
@@ -600,14 +602,15 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 	if(fileSignature.version >= 11)
 	{
 		const CHANNELINDEX readChannels = fileSignature.version >= 12 ? 32 : 16;
-		for(CHANNELINDEX chn = 0; chn < readChannels; chn++)
+		for(auto &chn : ChnSettings)
 		{
 			int8 pan = file.ReadInt8();
 			if(pan == 100)
-				ChnSettings[chn].dwFlags = CHN_SURROUND;
+				chn.dwFlags = CHN_SURROUND;
 			else
-				ChnSettings[chn].nPan = static_cast<uint16>(std::clamp((pan + 64) * 2, 0, 256));
+				chn.nPan = static_cast<uint16>(std::clamp((pan + 64) * 2, 0, 256));
 		}
+		file.Skip(readChannels - GetNumChannels());
 	} else if(fileSignature.version >= 9)
 	{
 		// Internally, DSMI assigns an Amiga-like LRRL panning scheme to the channels in pre-v11 files,
@@ -616,7 +619,7 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 		// This can be observed by looking at a 4-channel MOD and the converted AMF file: The last two channels are swapped.
 		// We ignore all this mess and simply assume that all AMF files use the standard remap table.
 		file.Skip(16);
-		for(CHANNELINDEX chn = 0; chn < 16; chn++)
+		for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
 		{
 			ChnSettings[chn].nPan = (chn & 1) ? 0xC0 : 0x40;
 		}
