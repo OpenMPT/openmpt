@@ -367,20 +367,21 @@ bool CSoundFile::ReadOKT(FileReader &file, ModLoadingFlags loadFlags)
 		{
 		case OktIffChunk::idCMOD:
 			// Channel setup table
-			if(m_nChannels == 0 && chunk.CanRead(8))
+			if(GetNumChannels() == 0 && chunk.CanRead(8))
 			{
 				const auto chnTable = chunk.ReadArray<uint16be, 4>();
+				ChnSettings.reserve(8);
+				CHANNELINDEX realChn = 0;
 				for(CHANNELINDEX chn = 0; chn < 4; chn++)
 				{
 					if(chnTable[chn])
 					{
-						pairedChn[m_nChannels] = 1;
-						pairedChn[m_nChannels + 1] = -1;
-						mpt::reconstruct(ChnSettings[m_nChannels]);
-						ChnSettings[m_nChannels++].nPan = (((chn & 3) == 1) || ((chn & 3) == 2)) ? 0xC0 : 0x40;
+						pairedChn[realChn++] = 1;
+						pairedChn[realChn] = -1;
+						ChnSettings.emplace_back().nPan = (((chn & 3) == 1) || ((chn & 3) == 2)) ? 0xC0 : 0x40;
 					}
-					mpt::reconstruct(ChnSettings[m_nChannels]);
-					ChnSettings[m_nChannels++].nPan = (((chn & 3) == 1) || ((chn & 3) == 2)) ? 0xC0 : 0x40;
+					realChn++;
+					ChnSettings.emplace_back().nPan = (((chn & 3) == 1) || ((chn & 3) == 2)) ? 0xC0 : 0x40;
 				}
 
 				if(loadFlags == onlyVerifyHeader)
@@ -443,7 +444,7 @@ bool CSoundFile::ReadOKT(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// If there wasn't even a CMOD chunk, we can't really load this.
-	if(m_nChannels == 0)
+	if(GetNumChannels() == 0)
 		return false;
 
 	Order().SetDefaultTempoInt(125);

@@ -193,7 +193,6 @@ void CSoundFile::InitializeGlobals(MODTYPE type, CHANNELINDEX numChannels)
 	}
 
 	m_ContainerType = ModContainerType::None;
-	m_nChannels = numChannels;
 	m_nInstruments = 0;
 	m_nSamples = 0;
 	m_nSamplePreAmp = 48;
@@ -229,10 +228,7 @@ void CSoundFile::InitializeGlobals(MODTYPE type, CHANNELINDEX numChannels)
 		m_SongFlags.set(SONG_ISAMIGA);
 	}
 
-	for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
-	{
-		InitChannel(chn);
-	}
+	ChnSettings.assign(numChannels, {});
 }
 
 
@@ -587,7 +583,7 @@ bool CSoundFile::CreateInternal(FileReader file, ModLoadingFlags loadFlags)
 
 	// Adjust channels
 	const auto muteFlag = GetChannelMuteFlag();
-	for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
+	for(CHANNELINDEX chn = 0; chn < ChnSettings.size(); chn++)
 	{
 		LimitMax(ChnSettings[chn].nVolume, uint8(64));
 		if(ChnSettings[chn].nPan > 256)
@@ -820,6 +816,7 @@ bool CSoundFile::Destroy()
 	m_songArtist.clear();
 	m_songMessage.clear();
 	m_FileHistory.clear();
+	ChnSettings.clear();
 #ifdef MPT_EXTERNAL_SAMPLES
 	m_samplePaths.clear();
 #endif // MPT_EXTERNAL_SAMPLES
@@ -842,7 +839,7 @@ bool CSoundFile::Destroy()
 
 	m_nType = MOD_TYPE_NONE;
 	m_ContainerType = ModContainerType::None;
-	m_nChannels = m_nSamples = m_nInstruments = 0;
+	m_nSamples = m_nInstruments = 0;
 	return true;
 }
 
@@ -1057,10 +1054,10 @@ void CSoundFile::ResetChannels()
 
 void CSoundFile::PatternTranstionChnSolo(const CHANNELINDEX first, const CHANNELINDEX last)
 {
-	if(first >= m_nChannels || last < first)
+	if(first >= GetNumChannels() || last < first)
 		return;
 
-	for(CHANNELINDEX i = 0; i < m_nChannels; i++)
+	for(CHANNELINDEX i = 0; i < GetNumChannels(); i++)
 	{
 		if(i >= first && i <= last)
 			m_bChannelMuteTogglePending[i] = ChnSettings[i].dwFlags[CHN_MUTE];
@@ -1072,7 +1069,7 @@ void CSoundFile::PatternTranstionChnSolo(const CHANNELINDEX first, const CHANNEL
 
 void CSoundFile::PatternTransitionChnUnmuteAll()
 {
-	for(CHANNELINDEX i = 0; i < m_nChannels; i++)
+	for(CHANNELINDEX i = 0; i < GetNumChannels(); i++)
 	{
 		m_bChannelMuteTogglePending[i] = ChnSettings[i].dwFlags[CHN_MUTE];
 	}
@@ -1426,29 +1423,6 @@ const char *CSoundFile::GetInstrumentName(INSTRUMENTINDEX nInstr) const
 
 	MPT_ASSERT(nInstr <= GetNumInstruments());
 	return Instruments[nInstr]->name.buf;
-}
-
-
-bool CSoundFile::InitChannel(CHANNELINDEX nChn)
-{
-	if(nChn >= MAX_BASECHANNELS)
-		return true;
-
-	mpt::reconstruct(ChnSettings[nChn]);
-	m_PlayState.Chn[nChn].Reset(ModChannel::resetTotal, *this, nChn, GetChannelMuteFlag());
-
-#ifdef MODPLUG_TRACKER
-	if(GetpModDoc() != nullptr)
-	{
-		GetpModDoc()->SetChannelRecordGroup(nChn, RecordGroup::NoGroup);
-	}
-#endif // MODPLUG_TRACKER
-
-#ifdef MODPLUG_TRACKER
-	m_bChannelMuteTogglePending[nChn] = false;
-#endif // MODPLUG_TRACKER
-
-	return false;
 }
 
 

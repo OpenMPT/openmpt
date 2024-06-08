@@ -376,7 +376,7 @@ bool CSoundFile::ReadSTP(FileReader &file, ModLoadingFlags loadFlags)
 			channels = file.ReadUint16BE();
 			if(channels > MAX_BASECHANNELS)
 				return false;
-			m_nChannels = std::max(m_nChannels, channels);
+			ChnSettings.resize(std::max(GetNumChannels(), channels));
 
 			file.Skip(channels * patternLength * 4u);
 		}
@@ -628,7 +628,7 @@ bool CSoundFile::ReadSTP(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// after we know how many channels there really are...
-	m_nSamplePreAmp = 256 / m_nChannels;
+	m_nSamplePreAmp = 256 / GetNumChannels();
 	// Setup channel pan positions and volume
 	SetupMODPanning(true);
 

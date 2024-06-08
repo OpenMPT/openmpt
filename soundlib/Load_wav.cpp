@@ -114,7 +114,7 @@ bool CSoundFile::ReadWAV(FileReader &file, ModLoadingFlags loadFlags)
 	Order().SetDefaultTempoInt(125);
 	m_SongFlags = SONG_LINEARSLIDES;
 
-	for(CHANNELINDEX channel = 0; channel < m_nChannels; channel++)
+	for(CHANNELINDEX channel = 0; channel < GetNumChannels(); channel++)
 	{
 		ChnSettings[channel].nPan = (channel % 2u) ? 256 : 0;
 	}

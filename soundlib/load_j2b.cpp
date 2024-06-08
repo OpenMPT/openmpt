@@ -755,21 +755,21 @@ bool CSoundFile::ReadAM(FileReader &file, ModLoadingFlags loadFlags)
 	// It seems like there's no way to differentiate between
 	// Muted and Surround channels (they're all 0xA0) - might
 	// be a limitation in mod2j2b.
-	for(CHANNELINDEX nChn = 0; nChn < m_nChannels; nChn++)
+	for(auto &chn : ChnSettings)
 	{
 		uint8 pan = chunkMain.ReadUint8();
 		if(isAM)
 		{
 			if(pan > 128)
-				ChnSettings[nChn].dwFlags = CHN_MUTE;
+				chn.dwFlags = CHN_MUTE;
 			else
-				ChnSettings[nChn].nPan = pan * 2;
+				chn.nPan = pan * 2;
 		} else
 		{
 			if(pan >= 128)
-				ChnSettings[nChn].dwFlags = CHN_MUTE;
+				chn.dwFlags = CHN_MUTE;
 			else
-				ChnSettings[nChn].nPan = static_cast<uint16>(std::min(pan * 4, 256));
+				chn.nPan = static_cast<uint16>(std::min(pan * 4, 256));
 		}
 	}
 

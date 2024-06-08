@@ -285,7 +285,7 @@ public:
 	void ToggleChannelRecordGroup(CHANNELINDEX channel, RecordGroup recordGroup);
 	void ReinitRecordState(bool unselect = true);
 
-	CHANNELINDEX GetNumChannels() const { return m_SndFile.m_nChannels; }
+	CHANNELINDEX GetNumChannels() const noexcept { return m_SndFile.GetNumChannels(); }
 	UINT GetPatternSize(PATTERNINDEX nPat) const;
 	bool IsChildSample(INSTRUMENTINDEX nIns, SAMPLEINDEX nSmp) const;
 	INSTRUMENTINDEX FindSampleParent(SAMPLEINDEX sample) const;
@@ -346,7 +346,9 @@ public:
 	// Check whether an instrument is used (only for instrument mode).
 	bool IsInstrumentUsed(INSTRUMENTINDEX instr, bool searchInMutedChannels = true) const;
 
-// protected members
+	void InitChannel(CHANNELINDEX chn);
+	
+	// protected members
 protected:
 
 	void InitializeMod();

@@ -1152,8 +1152,8 @@ bool CSoundFile::SaveXM(std::ostream &f, bool compatibilityExport)
 	fileHeader.size = sizeof(XMFileHeader) - 60;	// minus everything before this field
 	fileHeader.restartPos = Order().GetRestartPos();
 
-	fileHeader.channels = m_nChannels;
-	if((m_nChannels % 2u) && m_nChannels < 32)
+	fileHeader.channels = GetNumChannels();
+	if((GetNumChannels() % 2u) && GetNumChannels() < 32)
 	{
 		// Avoid odd channel count for FT2 compatibility
 		fileHeader.channels++;
@@ -1243,10 +1243,10 @@ bool CSoundFile::SaveXM(std::ostream &f, bool compatibilityExport)
 		// Empty patterns are always loaded as 64-row patterns in FT2, regardless of their real size...
 		bool emptyPattern = true;
 
-		for(size_t j = m_nChannels * numRows; j > 0; j--, p++)
+		for(size_t j = GetNumChannels() * numRows; j > 0; j--, p++)
 		{
 			// Don't write more than 32 channels
-			if(compatibilityExport && m_nChannels - ((j - 1) % m_nChannels) > 32) continue;
+			if(compatibilityExport && GetNumChannels() - ((j - 1) % GetNumChannels()) > 32) continue;
 
 			uint8 note = p->note, command = 0, param = 0;
 			ModSaveCommand(*p, command, param, true, compatibilityExport);
@@ -1325,7 +1325,7 @@ bool CSoundFile::SaveXM(std::ostream &f, bool compatibilityExport)
 				if (b & 16) s[len++] = param;
 			}
 
-			if(addChannel && (j % m_nChannels == 1 || m_nChannels == 1))
+			if(addChannel && (j % GetNumChannels() == 1 || GetNumChannels() == 1))
 			{
 				ASSERT_CAN_WRITE(1);
 				s[len++] = 0x80;
@@ -1489,7 +1489,7 @@ bool CSoundFile::SaveXM(std::ostream &f, bool compatibilityExport)
 		// Writing Channel Names
 		{
 			CHANNELINDEX numNamedChannels = 0;
-			for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
+			for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
 			{
 				if (ChnSettings[chn].szName[0]) numNamedChannels = chn + 1;
 			}

@@ -23,7 +23,7 @@ General hints
   Entire structs containing integers with defined endianness can be read in one
   go if they are tagged with `MPT_BINARY_STRUCT` (see existing loaders for an
   example).
-* `CSoundFile::m_nChannels` **MUST NOT** be changed after a pattern has been
+* `CSoundFile::ChnSettings` **MUST NOT** be resized after a pattern has been
   created, as existing patterns will be interpreted incorrectly. For module
   formats that support per-pattern channel amounts, the maximum number of
   channels must be determined beforehand.

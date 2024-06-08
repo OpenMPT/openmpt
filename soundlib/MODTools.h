@@ -17,8 +17,8 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+class CSoundFile;
 struct ModSample;
-class ModSequence;
 
 // File header following the sample headers
 struct MODFileHeader
@@ -138,7 +138,7 @@ inline bool ValidateMODPatternData(TFileReader &file, const uint32 threshold, co
 
 
 // Parse the order list to determine how many patterns are used in the file.
-PATTERNINDEX GetNumPatterns(FileReader &file, ModSequence &Order, ORDERINDEX numOrders, SmpLength totalSampleLen, CHANNELINDEX &numChannels, SmpLength wowSampleLen, bool validateHiddenPatterns);
+PATTERNINDEX GetNumPatterns(FileReader &file, CSoundFile &sndFile, ORDERINDEX numOrders, SmpLength totalSampleLen, SmpLength wowSampleLen, bool validateHiddenPatterns);
 
 
 OPENMPT_NAMESPACE_END

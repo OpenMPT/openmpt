@@ -1309,7 +1309,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 
 			SetupMODPanning(true);
 			// With MED SoundStudio 1.03 it's possible to create MMD1 files with more than 16 channels.
-			const CHANNELINDEX numChannelVols = std::min(m_nChannels, CHANNELINDEX(16));
+			const CHANNELINDEX numChannelVols = std::min(GetNumChannels(), CHANNELINDEX(16));
 			for(CHANNELINDEX chn = 0; chn < numChannelVols; chn++)
 			{
 				ChnSettings[chn].nVolume = std::min<uint8>(songHeader.trackVol[chn], 64);
@@ -1317,7 +1317,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 		} else
 		{
 			const MMD2Song header = songHeader.GetMMD2Song();
-			if(header.numTracks < 1 || header.numTracks > 64 || m_nChannels > 64)
+			if(header.numTracks < 1 || header.numTracks > 64 || GetNumChannels() > 64)
 				return false;
 
 			const bool freePan = (header.flags3 & MMD2Song::FLAG3_FREEPAN);
@@ -1328,14 +1328,14 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 
 			if(file.Seek(header.trackVolsOffset))
 			{
-				for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
+				for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
 				{
 					ChnSettings[chn].nVolume = std::min<uint8>(file.ReadUint8(), 64);
 				}
 			}
 			if(header.trackPanOffset && file.Seek(header.trackPanOffset))
 			{
-				for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
+				for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
 				{
 					ChnSettings[chn].nPan = static_cast<uint16>((Clamp<int8, int8>(file.ReadInt8(), -16, 16) + 16) * 8);
 				}
@@ -1516,7 +1516,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 		// Track Names
 		if(version >= 2 && expData.trackInfoOffset)
 		{
-			for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
+			for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
 			{
 				if(file.Seek(expData.trackInfoOffset + chn * 4)
 				   && file.Seek(file.ReadUint32BE()))
@@ -1613,7 +1613,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 
 			CPattern &pattern = Patterns[basePattern + pat];
 			pattern.SetName(patName);
-			LimitMax(numTracks, m_nChannels);
+			LimitMax(numTracks, GetNumChannels());
 
 			TranslateMEDPatternContext context{transpose, numTracks, version, rowsPerBeat, hardwareMixSamples, is8Ch, bpmMode, volHex};
 			needInstruments |= TranslateMEDPattern(file, cmdExt, pattern, context, false);
@@ -1653,7 +1653,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 			PATTERNINDEX firstPat = order.EnsureUnique(order.GetFirstValidIndex());
 			if(firstPat != PATTERNINDEX_INVALID)
 			{
-				for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
+				for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
 				{
 					Patterns[firstPat].WriteEffect(EffectWriter(CMD_CHANNELVOLUME, static_cast<ModCommand::PARAM>(ChnSettings[chn].nVolume)).Channel(chn).RetryNextRow());
 					Patterns[firstPat].WriteEffect(EffectWriter(CMD_PANNING8, mpt::saturate_cast<ModCommand::PARAM>(ChnSettings[chn].nPan)).Channel(chn).RetryNextRow());
@@ -1683,7 +1683,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 	const mpt::uchar *madeWithTracker = MPT_ULITERAL("");
 	switch(version)
 	{
-	case 0: madeWithTracker = m_nChannels > 4 ? MPT_ULITERAL("OctaMED v2.10 (MMD0)") : MPT_ULITERAL("MED v2 (MMD0)"); break;
+	case 0: madeWithTracker = GetNumChannels() > 4 ? MPT_ULITERAL("OctaMED v2.10 (MMD0)") : MPT_ULITERAL("MED v2 (MMD0)"); break;
 	case 1: madeWithTracker = MPT_ULITERAL("OctaMED v4 (MMD1)"); break;
 	case 2: madeWithTracker = MPT_ULITERAL("OctaMED v5 (MMD2)"); break;
 	case 3: madeWithTracker = MPT_ULITERAL("OctaMED Soundstudio (MMD3)"); break;

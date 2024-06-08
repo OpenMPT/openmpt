@@ -189,10 +189,10 @@ bool CSoundFile::ReadXMF(FileReader &file, ModLoadingFlags loadFlags)
 
 	file.Skip(1);  // Channel count already read
 	const PATTERNINDEX numPatterns  = file.ReadUint8() + 1u;
-	if(!file.CanRead(m_nChannels + numPatterns * m_nChannels * 64 * 6))
+	if(!file.CanRead(GetNumChannels() + numPatterns * GetNumChannels() * 64 * 6))
 		return false;
 
-	for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
+	for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
 	{
 		ChnSettings[chn].nPan = file.ReadUint8() * 0x11;
 	}
@@ -202,7 +202,7 @@ bool CSoundFile::ReadXMF(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		if(!(loadFlags & loadPatternData) || !Patterns.Insert(pat, 64))
 		{
-			file.Skip(m_nChannels * 64 * 6);
+			file.Skip(GetNumChannels() * 64 * 6);
 			continue;
 		}
 		ModCommand dummy;

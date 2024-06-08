@@ -653,7 +653,7 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 			patternLength[ord] = file.ReadUint16LE();
 		}
 		// Track positions will be read as needed.
-		file.Skip(m_nChannels * 2);
+		file.Skip(GetNumChannels() * 2);
 	}
 
 	// Read Sample Headers

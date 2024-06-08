@@ -121,7 +121,7 @@ bool CSoundFile::ReadDIGI(FileReader &file, ModLoadingFlags loadFlags)
 	// Globals
 	InitializeGlobals(MOD_TYPE_DIGI, fileHeader.numChannels);
 	m_nSamples = 31;
-	m_nSamplePreAmp = 256 / m_nChannels;
+	m_nSamplePreAmp = 256 / GetNumChannels();
 
 	m_modFormat.formatName = U_("DigiBooster");
 	m_modFormat.type = U_("digi");

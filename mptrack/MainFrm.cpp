@@ -1686,7 +1686,7 @@ void CMainFrame::InitPreview()
 	m_WaveFile.Order().SetDefaultTempoInt(125);
 	m_WaveFile.Order().SetDefaultSpeed(6);
 	m_WaveFile.m_nType = MOD_TYPE_MPT;
-	m_WaveFile.m_nChannels = 2;
+	m_WaveFile.ChnSettings.resize(2);
 	m_WaveFile.m_nInstruments = 1;
 	m_WaveFile.m_nTempoMode = TempoMode::Classic;
 	m_WaveFile.Order().assign(1, 0);

@@ -185,7 +185,7 @@ bool CSoundFile::ReadSTK(FileReader &file, ModLoadingFlags loadFlags)
 
 	MODFileHeader &fileHeader = fileHeaders.fileHeader;
 	ReadOrderFromArray(Order(), fileHeader.orderList);
-	PATTERNINDEX numPatterns = GetNumPatterns(file, Order(), fileHeader.numOrders, totalSampleLen, m_nChannels, 0, true);
+	PATTERNINDEX numPatterns = GetNumPatterns(file, *this, fileHeader.numOrders, totalSampleLen, 0, true);
 
 	// Most likely just a file with lots of NULs at the start
 	if(fileHeader.restartPos == 0 && fileHeader.numOrders == 0 && numPatterns <= 1)

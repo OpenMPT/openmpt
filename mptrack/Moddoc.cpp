@@ -602,18 +602,18 @@ void CModDoc::OnAppendModule()
 void CModDoc::InitializeMod()
 {
 	// New module ?
-	if (!m_SndFile.m_nChannels)
+	if (!m_SndFile.GetNumChannels())
 	{
 		switch(GetModType())
 		{
 		case MOD_TYPE_MOD:
-			m_SndFile.m_nChannels = 4;
+			m_SndFile.ChnSettings.resize(4);
 			break;
 		case MOD_TYPE_S3M:
-			m_SndFile.m_nChannels = 16;
+			m_SndFile.ChnSettings.resize(16);
 			break;
 		default:
-			m_SndFile.m_nChannels = 32;
+			m_SndFile.ChnSettings.resize(32);
 			break;
 		}
 
@@ -670,6 +670,17 @@ void CModDoc::InitializeMod()
 	}
 	m_SndFile.ResetPlayPos();
 	m_SndFile.m_songArtist = TrackerSettings::Instance().defaultArtist;
+}
+
+
+void CModDoc::InitChannel(CHANNELINDEX chn)
+{
+	if(chn >= GetNumChannels())
+		return;
+
+	SetChannelRecordGroup(chn, RecordGroup::NoGroup);
+	m_SndFile.m_PlayState.Chn[chn].Reset(ModChannel::resetTotal, m_SndFile, chn, CSoundFile::GetChannelMuteFlag());
+	m_SndFile.m_bChannelMuteTogglePending[chn] = false;
 }
 
 
@@ -1187,7 +1198,7 @@ bool CModDoc::NoteOff(UINT note, bool fade, INSTRUMENTINDEX ins, CHANNELINDEX cu
 	}
 
 	const FlagSet<ChannelFlags> mask = (fade ? CHN_NOTEFADE : (CHN_NOTEFADE | CHN_KEYOFF));
-	const CHANNELINDEX startChn = currentChn != CHANNELINDEX_INVALID ? currentChn : m_SndFile.m_nChannels;
+	const CHANNELINDEX startChn = currentChn != CHANNELINDEX_INVALID ? currentChn : m_SndFile.GetNumChannels();
 	const CHANNELINDEX endChn = currentChn != CHANNELINDEX_INVALID ? currentChn + 1 : MAX_CHANNELS;
 	ModChannel *pChn = &m_SndFile.m_PlayState.Chn[startChn];
 	for(CHANNELINDEX i = startChn; i < endChn; i++, pChn++)
@@ -1348,14 +1359,14 @@ bool CModDoc::UpdateChannelMuteStatus(CHANNELINDEX nChn)
 
 bool CModDoc::IsChannelNoFx(CHANNELINDEX nChn) const
 {
-	if (nChn >= m_SndFile.m_nChannels) return true;
+	if (nChn >= m_SndFile.GetNumChannels()) return true;
 	return m_SndFile.ChnSettings[nChn].dwFlags[CHN_NOFX];
 }
 
 
 bool CModDoc::NoFxChannel(CHANNELINDEX nChn, bool bNoFx, bool updateMix)
 {
-	if (nChn >= m_SndFile.m_nChannels) return false;
+	if (nChn >= m_SndFile.GetNumChannels()) return false;
 	m_SndFile.ChnSettings[nChn].dwFlags.set(CHN_NOFX, bNoFx);
 	if(updateMix) m_SndFile.m_PlayState.Chn[nChn].dwFlags.set(CHN_NOFX, bNoFx);
 	return true;

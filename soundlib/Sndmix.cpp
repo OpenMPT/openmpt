@@ -508,7 +508,7 @@ bool CSoundFile::ProcessRow()
 							chn.dwFlags.set(CHN_NOTEFADE | CHN_KEYOFF);
 							chn.nFadeOutVol = 0;
 
-							if(i < m_nChannels)
+							if(i < GetNumChannels())
 							{
 								chn.nGlobalVol = ChnSettings[i].nVolume;
 								chn.nVolume = ChnSettings[i].nVolume;
@@ -2102,7 +2102,7 @@ bool CSoundFile::ReadNote()
 	// Master Volume + Pre-Amplification / Attenuation setup
 	uint32 nMasterVol;
 	{
-		CHANNELINDEX nchn32 = Clamp(m_nChannels, CHANNELINDEX(1), CHANNELINDEX(31));
+		CHANNELINDEX nchn32 = Clamp(GetNumChannels(), CHANNELINDEX(1), CHANNELINDEX(31));
 
 		uint32 mastervol;
 
@@ -2151,9 +2151,9 @@ bool CSoundFile::ReadNote()
 			chn.nROfs = chn.nLOfs = 0;
 		}
 		// Check for unused channel
-		if(chn.dwFlags[CHN_MUTE] || (nChn >= m_nChannels && !chn.nLength))
+		if(chn.dwFlags[CHN_MUTE] || (nChn >= GetNumChannels() && !chn.nLength))
 		{
-			if(nChn < m_nChannels)
+			if(nChn < GetNumChannels())
 			{
 				// Process MIDI macros on channels that are currently muted.
 				ProcessMacroOnChannel(nChn);
@@ -2180,7 +2180,7 @@ bool CSoundFile::ReadNote()
 		// Also process envelopes etc. when there's a plugin on this channel, for possible fake automation using volume and pan data.
 		// We only care about master channels, though, since automation only "happens" on them.
 		const bool samplePlaying = (chn.nPeriod && chn.nLength);
-		const bool plugAssigned = (nChn < m_nChannels) && (ChnSettings[nChn].nMixPlugin || (chn.pModInstrument != nullptr && chn.pModInstrument->nMixPlug));
+		const bool plugAssigned = (nChn < GetNumChannels()) && (ChnSettings[nChn].nMixPlugin || (chn.pModInstrument != nullptr && chn.pModInstrument->nMixPlug));
 		if (samplePlaying || plugAssigned)
 		{
 			int vol = chn.nVolume;

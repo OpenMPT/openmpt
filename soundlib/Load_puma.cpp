@@ -265,7 +265,7 @@ bool CSoundFile::ReadPuma(FileReader &file, ModLoadingFlags loadFlags)
 					else if(autoPorta != VOLCMD_NONE)
 						m->volcmd = autoPorta;
 				}
-				m += m_nChannels;
+				m += GetNumChannels();
 			}
 		}
 		if(orderData[ord].speed)

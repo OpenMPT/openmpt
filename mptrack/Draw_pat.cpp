@@ -1265,7 +1265,7 @@ void CViewPattern::DrawDragSel(HDC hdc)
 	x2 += dx;
 	y1 += dy;
 	y2 += dy;
-	nChannels = pSndFile->m_nChannels;
+	nChannels = pSndFile->GetNumChannels();
 	nRows = pSndFile->Patterns[m_nPattern].GetNumRows();
 	if (x1 < GetXScrollPos()) drawLeft = false;
 	if (x1 >= nChannels) x1 = nChannels - 1;

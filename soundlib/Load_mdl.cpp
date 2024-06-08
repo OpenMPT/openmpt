@@ -736,7 +736,7 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 			for(CHANNELINDEX chn = 0; chn < numChans; chn++)
 			{
 				uint16 trkNum = chunk.ReadUint16LE();
-				if(!trkNum || trkNum >= tracks.size() || chn >= m_nChannels)
+				if(!trkNum || trkNum >= tracks.size() || chn >= GetNumChannels())
 					continue;
 
 				FileReader &track = tracks[trkNum];
@@ -761,7 +761,7 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 							do
 							{
 								*m = orig;
-								m += m_nChannels;
+								m += GetNumChannels();
 								row++;
 							} while (row < numRows && x--);
 						}

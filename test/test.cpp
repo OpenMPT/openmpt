@@ -3858,7 +3858,7 @@ static MPT_NOINLINE void TestEditing()
 	auto modDoc = static_cast<CModDoc *>(theApp.GetModDocTemplate()->CreateNewDocument());
 	auto &sndFile = modDoc->GetSoundFile();
 	sndFile.Create(FileReader(), CSoundFile::loadCompleteModule, modDoc);
-	sndFile.m_nChannels = 4;
+	sndFile.ChnSettings.resize(4);
 	sndFile.ChangeModTypeTo(MOD_TYPE_MPT);
 
 	// Rearrange channels
@@ -4059,7 +4059,7 @@ static MPT_NOINLINE void TestPCnoteSerialization()
 	CSoundFile &sndFile = *pSndFile.get();
 	sndFile.m_nType = MOD_TYPE_MPT;
 	sndFile.Patterns.DestroyPatterns();
-	sndFile.m_nChannels = ModSpecs::mptm.channelsMax;
+	sndFile.ChnSettings.resize(ModSpecs::mptm.channelsMax);
 
 	sndFile.Patterns.Insert(0, ModSpecs::mptm.patternRowsMin);
 	sndFile.Patterns.Insert(1, 64);

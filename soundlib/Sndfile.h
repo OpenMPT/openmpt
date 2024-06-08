@@ -469,7 +469,6 @@ public:	// for Editing
 private:
 	ModContainerType m_ContainerType = ModContainerType::None;
 public:
-	CHANNELINDEX m_nChannels = 0;
 	SAMPLEINDEX m_nSamples = 0;
 	INSTRUMENTINDEX m_nInstruments = 0;
 	uint32 m_nDefaultGlobalVolume;
@@ -509,7 +508,7 @@ public:
 	ResamplingMode m_nResampling; // Resampling mode (if overriding the globally set resampling)
 	int32 m_nRepeatCount = 0;     // -1 means repeat infinitely.
 	ORDERINDEX m_nMaxOrderPosition;
-	std::array<ModChannelSettings, MAX_BASECHANNELS> ChnSettings;  // Initial channels settings
+	std::vector<ModChannelSettings> ChnSettings;  // Initial channels settings
 	CPatternContainer Patterns;
 	ModSequenceSet Order;  // Pattern sequences (order lists)
 protected:
@@ -706,7 +705,7 @@ public:
 	constexpr SAMPLEINDEX GetNumSamples() const noexcept { return m_nSamples; }
 	constexpr PATTERNINDEX GetCurrentPattern() const noexcept { return m_PlayState.m_nPattern; }
 	constexpr ORDERINDEX GetCurrentOrder() const noexcept { return m_PlayState.m_nCurrentOrder; }
-	constexpr CHANNELINDEX GetNumChannels() const noexcept { return m_nChannels; }
+	MPT_CONSTEXPR20_FUN CHANNELINDEX GetNumChannels() const noexcept { return static_cast<CHANNELINDEX>(ChnSettings.size()); }
 
 	constexpr bool CanAddMoreSamples(SAMPLEINDEX amount = 1) const noexcept { return (amount < MAX_SAMPLES) && m_nSamples < (MAX_SAMPLES - amount); }
 	constexpr bool CanAddMoreInstruments(INSTRUMENTINDEX amount = 1) const noexcept { return (amount < MAX_INSTRUMENTS) && m_nInstruments < (MAX_INSTRUMENTS - amount); }
@@ -756,7 +755,6 @@ public:
 	bool IsPaused() const { return m_PlayState.m_flags[SONG_PAUSED | SONG_STEP]; }	// Added SONG_STEP as it seems to be desirable in most cases to check for this as well.
 	void LoopPattern(PATTERNINDEX nPat, ROWINDEX nRow = 0);
 
-	bool InitChannel(CHANNELINDEX nChn);
 	void InitAmigaResampler();
 
 	void InitOPL();

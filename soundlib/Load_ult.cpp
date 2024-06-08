@@ -347,7 +347,7 @@ bool CSoundFile::ReadULT(FileReader &file, ModLoadingFlags loadFlags)
 	ReadOrderFromFile<uint8>(Order(), file, 256, 0xFF, 0xFE);
 
 	if(CHANNELINDEX numChannels = file.ReadUint8() + 1u; numChannels <= MAX_BASECHANNELS)
-		m_nChannels = numChannels;
+		ChnSettings.resize(numChannels);
 	else
 		return false;
 
@@ -355,7 +355,6 @@ bool CSoundFile::ReadULT(FileReader &file, ModLoadingFlags loadFlags)
 
 	for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
 	{
-		mpt::reconstruct(ChnSettings[chn]);
 		if(fileHeader.version >= '3')
 			ChnSettings[chn].nPan = ((file.ReadUint8() & 0x0F) << 4) + 8;
 		else
@@ -370,7 +369,7 @@ bool CSoundFile::ReadULT(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	bool postFixSpeedCommands = false;
-	for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
+	for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
 	{
 		ModCommand evnote;
 		for(PATTERNINDEX pat = 0; pat < numPats && file.CanRead(5); pat++)

@@ -1011,7 +1011,7 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 	m_SongFlags.set(SONG_LINEARSLIDES | SONG_EXFILTERRANGE | SONG_IMPORTED);
 	m_playBehaviour = GetDefaultPlaybackBehaviour(MOD_TYPE_IT);
 	m_playBehaviour.reset(kITShortSampleRetrig);
-	m_nSamplePreAmp = Clamp(512 / m_nChannels, 16, 128);
+	m_nSamplePreAmp = Clamp(512 / GetNumChannels(), 16, 128);
 
 	enum class ChunkType : int32
 	{
@@ -1307,7 +1307,7 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 	std::map<SymEvent, uint8> macroMap;
 
 	bool useDSP = false;
-	const uint32 patternSize = m_nChannels * trackLen;
+	const uint32 patternSize = GetNumChannels() * trackLen;
 	const PATTERNINDEX numPatterns = mpt::saturate_cast<PATTERNINDEX>(patternData.size() / patternSize);
 
 	Patterns.ResizeArray(numPatterns);
@@ -1335,7 +1335,7 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 		uint16 retriggerRemain = 0;
 		uint16 tonePortaRemain = 0;
 	};
-	std::vector<ChnState> chnStates(m_nChannels);
+	std::vector<ChnState> chnStates(GetNumChannels());
 
 	// In Symphonie, sequences represent the structure of a song, and not separate songs like in OpenMPT. Hence they will all be loaded into the same ModSequence.
 	for(SymSequence &seq : sequences)
@@ -1382,14 +1382,14 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 				uint8 patternSpeed = static_cast<uint8>(pos.speed);
 
 				// This may intentionally read into the next pattern
-				auto srcEvent = patternData.cbegin() + (pos.pattern * patternSize) + (pos.start * m_nChannels);
+				auto srcEvent = patternData.cbegin() + (pos.pattern * patternSize) + (pos.start * GetNumChannels());
 				const SymEvent emptyEvent{};
 				ModCommand syncPlayCommand;
 				for(ROWINDEX row = 0; row < pos.length; row++)
 				{
 					ModCommand *rowBase = Patterns[patternIndex].GetpModCommand(row, 0);
 					bool applySyncPlay = false;
-					for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
+					for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
 					{
 						ModCommand &m = rowBase[chn];
 						const SymEvent &event = (srcEvent != patternData.cend()) ? *srcEvent : emptyEvent;
@@ -1539,7 +1539,7 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 							}
 
 							// Key-On commands with stereo instruments are played on both channels - unless there's already some sort of event
-							if(event.note > 0 && (chn < m_nChannels - 1) && !(chn % 2u)
+							if(event.note > 0 && (chn < GetNumChannels() - 1) && !(chn % 2u)
 							   && origInst < instruments.size() && instruments[origInst].channel == SymInstrument::StereoL)
 							{
 								ModCommand &next = rowBase[chn + 1];
@@ -1689,7 +1689,7 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 									m.command = CMD_CHANNELVOLUME;
 									m.param   = chnState.calculatedVol = static_cast<uint8>(Util::muldivr_unsigned(chnState.lastVol, chnState.channelVol, 100));
 								}
-								if(event.note == 4 && chn < (m_nChannels - 1) && chnStates[chn + 1].channelVol != volR)
+								if(event.note == 4 && chn < (GetNumChannels() - 1) && chnStates[chn + 1].channelVol != volR)
 								{
 									chnStates[chn + 1].channelVol = volR;
 
@@ -1902,7 +1902,7 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 	if(useDSP)
 	{
 		SNDMIXPLUGIN &plugin = m_MixPlugins[0];
-		plugin.Destroy();
+		mpt::reconstruct(plugin);
 		memcpy(&plugin.Info.dwPluginId1, "SymM", 4);
 		memcpy(&plugin.Info.dwPluginId2, "Echo", 4);
 		plugin.Info.routingFlags    = SNDMIXPLUGININFO::irAutoSuspend;

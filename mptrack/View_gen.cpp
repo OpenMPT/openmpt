@@ -336,7 +336,7 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 		return;
 
 	CString s;
-	nTabCount = (sndFile.m_nChannels + (CHANNELS_IN_TAB - 1)) / CHANNELS_IN_TAB;
+	nTabCount = (sndFile.GetNumChannels() + (CHANNELS_IN_TAB - 1)) / CHANNELS_IN_TAB;
 	if (nTabCount != m_TabCtrl.GetItemCount())
 	{
 		UINT nOldSel = m_TabCtrl.GetCurSel();

@@ -547,7 +547,7 @@ bool ModSequenceSet::MergeSequences()
 			if(!m_sndFile.Patterns.IsValidPat(pat)) continue;
 
 			auto m = m_sndFile.Patterns[pat].begin();
-			for(size_t len = 0; len < m_sndFile.Patterns[pat].GetNumRows() * m_sndFile.m_nChannels; m++, len++)
+			for(size_t len = 0; len < m_sndFile.Patterns[pat].GetNumRows() * m_sndFile.GetNumChannels(); m++, len++)
 			{
 				if(m->command == CMD_POSITIONJUMP)
 				{

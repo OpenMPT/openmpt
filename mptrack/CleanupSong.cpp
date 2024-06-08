@@ -1041,7 +1041,8 @@ bool CModCleanupDlg::ResetVariables()
 
 	for(CHANNELINDEX chn = 0; chn < sndFile.GetNumChannels(); chn++)
 	{
-		sndFile.InitChannel(chn);
+		mpt::reconstruct(sndFile.ChnSettings[chn]);
+		modDoc.InitChannel(chn);
 	}
 
 	// reset samples

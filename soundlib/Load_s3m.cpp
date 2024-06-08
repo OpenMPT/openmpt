@@ -497,7 +497,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 				hasChannelsWithoutPanning = true;
 			}
 		}
-		if(m_nChannels < 32 && m_dwLastSavedWithVersion == MPT_V("1.16"))
+		if(GetNumChannels() < 32 && m_dwLastSavedWithVersion == MPT_V("1.16"))
 		{
 			// MPT 1.0 alpha 6 up to 1.16.203 set ths panning bit for all channels, regardless of whether they are used or not.
 			if(hasChannelsWithoutPanning)
@@ -686,7 +686,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 
-	if(pixPlayPanning && zxxCountLeft + zxxCountRight >= m_nChannels && (-zxxCountLeft + zxxCountRight) < static_cast<int>(m_nChannels))
+	if(pixPlayPanning && zxxCountLeft + zxxCountRight >= GetNumChannels() && (-zxxCountLeft + zxxCountRight) < static_cast<int>(GetNumChannels()))
 	{
 		// There are enough Zxx commands, so let's assume this was made to be played with PixPlay
 		Patterns.ForEachModCommand([](ModCommand &m)
@@ -713,7 +713,7 @@ bool CSoundFile::SaveS3M(std::ostream &f) const
 		0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
 	};
 
-	if(m_nChannels == 0)
+	if(GetNumChannels() == 0)
 	{
 		return false;
 	}

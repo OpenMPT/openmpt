@@ -313,7 +313,7 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Startrekker 8 channel mod (needs special treatment, see below)
-	const bool isFLT8 = isStartrekker && m_nChannels == 8;
+	const bool isFLT8 = isStartrekker && GetNumChannels() == 8;
 	const bool isMdKd = IsMagic(magic, "M.K.");
 	// Adjust finetune values for modules saved with "His Master's Noisetracker"
 	const bool isHMNT = IsMagic(magic, "M&K!") || IsMagic(magic, "FEST");
@@ -332,7 +332,7 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 	for(SAMPLEINDEX smp = 1; smp <= 31; smp++)
 	{
 		MODSampleHeader sampleHeader = ReadAndSwap<MODSampleHeader>(file, modMagicResult.swapBytes);
-		invalidBytes += ReadMODSample(sampleHeader, Samples[smp], m_szNames[smp], m_nChannels == 4);
+		invalidBytes += ReadMODSample(sampleHeader, Samples[smp], m_szNames[smp], GetNumChannels() == 4);
 		totalSampleLen += Samples[smp].nLength;
 
 		if(isHMNT)
@@ -390,7 +390,7 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Get number of patterns (including some order list sanity checks)
-	PATTERNINDEX numPatterns = GetNumPatterns(file, Order(), realOrders, totalSampleLen, m_nChannels, wowSampleLen, false);
+	PATTERNINDEX numPatterns = GetNumPatterns(file, *this, realOrders, totalSampleLen, wowSampleLen, false);
 	if(maybeWOW && GetNumChannels() == 8)
 	{
 		// M.K. with 8 channels = Mod's Grave
@@ -418,7 +418,7 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 	// Files that have an order list longer than 0x78 with restart pos = 0x78: my_shoe_is_barking.mod, papermix.mod
 	// - in both cases it does not appear like the restart position should be used.
 	MPT_ASSERT(fileHeader.restartPos != 0x78 || fileHeader.restartPos + 1u >= realOrders);
-	if(fileHeader.restartPos > realOrders || (fileHeader.restartPos == 0x78 && m_nChannels == 4))
+	if(fileHeader.restartPos > realOrders || (fileHeader.restartPos == 0x78 && GetNumChannels() == 4))
 	{
 		Order().SetRestartPos(0);
 	}
@@ -430,7 +430,7 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 	// Prevent clipping based on number of channels... If all channels are playing at full volume, "256 / #channels"
 	// is the maximum possible sample pre-amp without getting distortion (Compatible mix levels given).
 	// The more channels we have, the less likely it is that all of them are used at the same time, though, so cap at 32...
-	m_nSamplePreAmp = Clamp(256 / m_nChannels, 32, 128);
+	m_nSamplePreAmp = Clamp(256 / GetNumChannels(), 32, 128);
 	m_SongFlags.reset();  // SONG_ISAMIGA will be set conditionally
 
 	// Setup channel pan positions and volume
@@ -447,7 +447,7 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 	const uint8 ENABLE_MOD_PANNING_THRESHOLD = 0x30;
 	if(!isNoiseTracker)
 	{
-		const uint32 patternLength = m_nChannels * 64;
+		const uint32 patternLength = GetNumChannels() * 64;
 		bool leftPanning = false, extendedPanning = false;  // For detecting 800-880 panning
 		isNoiseTracker = isMdKd && !hasEmptySampleWithVolume && !hasLongSamples;
 		for(PATTERNINDEX pat = 0; pat < numPatterns; pat++)
@@ -488,7 +488,7 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 	}
 	file.Seek(modMagicResult.patternDataOffset);
 
-	const CHANNELINDEX readChannels = (isFLT8 ? 4 : m_nChannels);  // 4 channels per pattern in FLT8 format.
+	const CHANNELINDEX readChannels = (isFLT8 ? 4 : GetNumChannels());  // 4 channels per pattern in FLT8 format.
 	if(isFLT8)
 		numPatterns++;                                              // as one logical pattern consists of two real patterns in FLT8 format, the highest pattern number has to be increased by one.
 	bool hasTempoCommands = false, definitelyCIA = hasLongSamples;  // for detecting VBlank MODs
@@ -529,7 +529,7 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 		std::vector<ModCommand::INSTR> lastInstrument(GetNumChannels(), 0);
 		std::vector<uint8> instrWithoutNoteCount(GetNumChannels(), 0);
 
-		for(ROWINDEX row = 0; row < 64; row++, rowBase += m_nChannels)
+		for(ROWINDEX row = 0; row < 64; row++, rowBase += GetNumChannels())
 		{
 			// If we have more than one Fxx command on this row and one can be interpreted as speed
 			// and the other as tempo, we can be rather sure that it is not a VBlank mod.
@@ -875,7 +875,7 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 
 bool CSoundFile::SaveMod(std::ostream &f) const
 {
-	if(m_nChannels == 0)
+	if(GetNumChannels() == 0)
 	{
 		return false;
 	}

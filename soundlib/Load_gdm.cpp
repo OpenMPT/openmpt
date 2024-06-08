@@ -344,7 +344,7 @@ bool CSoundFile::ReadGDM(FileReader &file, ModLoadingFlags loadFlags)
 			while((channelByte = chunk.ReadUint8()) != rowDone)
 			{
 				CHANNELINDEX channel = channelByte & channelMask;
-				if(channel >= m_nChannels) break; // Better safe than sorry!
+				if(channel >= GetNumChannels()) break; // Better safe than sorry!
 
 				ModCommand &m = rowBase[channel];
 

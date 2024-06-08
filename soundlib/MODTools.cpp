@@ -381,8 +381,9 @@ uint32 CountMalformedMODPatternData(const MODPatternData &patternData, const boo
 
 
 // Parse the order list to determine how many patterns are used in the file.
-PATTERNINDEX GetNumPatterns(FileReader &file, ModSequence &Order, ORDERINDEX numOrders, SmpLength totalSampleLen, CHANNELINDEX &numChannels, SmpLength wowSampleLen, bool validateHiddenPatterns)
+PATTERNINDEX GetNumPatterns(FileReader &file, CSoundFile &sndFile, ORDERINDEX numOrders, SmpLength totalSampleLen, SmpLength wowSampleLen, bool validateHiddenPatterns)
 {
+	ModSequence &Order = sndFile.Order();
 	PATTERNINDEX numPatterns = 0;         // Total number of patterns in file (determined by going through the whole order list) with pattern number < 128
 	PATTERNINDEX officialPatterns = 0;    // Number of patterns only found in the "official" part of the order list (i.e. order positions < claimed order length)
 	PATTERNINDEX numPatternsIllegal = 0;  // Total number of patterns in file, also counting in "invalid" pattern indexes >= 128
@@ -409,7 +410,7 @@ PATTERNINDEX GetNumPatterns(FileReader &file, ModSequence &Order, ORDERINDEX num
 
 	const size_t patternStartOffset = file.GetPosition();
 	const size_t sizeWithoutPatterns = totalSampleLen + patternStartOffset;
-	const size_t sizeWithOfficialPatterns = sizeWithoutPatterns + officialPatterns * numChannels * 256;
+	const size_t sizeWithOfficialPatterns = sizeWithoutPatterns + officialPatterns * sndFile.GetNumChannels() * 256;
 
 	if(wowSampleLen && (wowSampleLen + patternStartOffset) + numPatterns * 8 * 256 == (file.GetLength() & ~1))
 	{
@@ -418,7 +419,7 @@ PATTERNINDEX GetNumPatterns(FileReader &file, ModSequence &Order, ORDERINDEX num
 		// (e.g. ponylips.mod, MD5 c039af363b1d99a492dafc5b5f9dd949, SHA1 1bee1941c47bc6f913735ce0cf1880b248b8fc93)
 		file.Seek(patternStartOffset + numPatterns * 4 * 256);
 		if(ValidateMODPatternData(file, 16, true))
-			numChannels = 8;
+			sndFile.ChnSettings.resize(8);
 		file.Seek(patternStartOffset);
 	} else if(numPatterns != officialPatterns && (validateHiddenPatterns || sizeWithOfficialPatterns == file.GetLength()))
 	{
@@ -444,13 +445,13 @@ PATTERNINDEX GetNumPatterns(FileReader &file, ModSequence &Order, ORDERINDEX num
 		// correctly when also loading the inofficial patterns.
 		// On the other hand, "Shofixti Ditty.mod" from Star Control 2 (MD5 62b7b0819123400e4d5a7813eef7fc7d, SHA1 8330cd595c61f51c37a3b6f2a8559cf3fcaaa6e8)
 		// doesn't sound correct when taking the second "inofficial" pattern into account.
-		file.Seek(patternStartOffset + officialPatterns * numChannels * 256);
+		file.Seek(patternStartOffset + officialPatterns * sndFile.GetNumChannels() * 256);
 		if(!ValidateMODPatternData(file, 64, true))
 			numPatterns = officialPatterns;
 		file.Seek(patternStartOffset);
 	}
 
-	if(numPatternsIllegal > numPatterns && sizeWithoutPatterns + numPatternsIllegal * numChannels * 256 == file.GetLength())
+	if(numPatternsIllegal > numPatterns && sizeWithoutPatterns + numPatternsIllegal * sndFile.GetNumChannels() * 256 == file.GetLength())
 	{
 		// Even those illegal pattern indexes (> 128) appear to be valid... What a weird file!
 		// e.g. NIETNU.MOD, where the end of the order list is filled with FF rather than 00, and the file actually contains 256 patterns.

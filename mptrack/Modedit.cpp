@@ -172,6 +172,7 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const std::vector<CHANNELINDEX> &newOrde
 	}
 
 	CriticalSection cs;
+	const std::vector<ModChannelSettings> settings = m_SndFile.ChnSettings;
 	if(oldNumChannels == newNumChannels)
 	{
 		// Optimization with no pattern re-allocation
@@ -197,6 +198,7 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const std::vector<CHANNELINDEX> &newOrde
 		std::vector<std::vector<ModCommand>> newPatterns;
 		try
 		{
+			m_SndFile.ChnSettings.reserve(newNumChannels);
 			newPatterns.resize(m_SndFile.Patterns.Size());
 			for(PATTERNINDEX i = 0; i < m_SndFile.Patterns.Size(); i++)
 			{
@@ -209,7 +211,7 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const std::vector<CHANNELINDEX> &newOrde
 			return oldNumChannels;
 		}
 
-		m_SndFile.m_nChannels = newNumChannels;
+		m_SndFile.ChnSettings.resize(newNumChannels);
 		for(PATTERNINDEX i = 0; i < m_SndFile.Patterns.Size(); i++)
 		{
 			CPattern &pat = m_SndFile.Patterns[i];
@@ -252,7 +254,6 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const std::vector<CHANNELINDEX> &newOrde
 	}
 
 	std::vector<ModChannel> chns(m_SndFile.m_PlayState.Chn.begin(), m_SndFile.m_PlayState.Chn.begin() + oldNumChannels);
-	std::vector<ModChannelSettings> settings(std::begin(m_SndFile.ChnSettings), std::begin(m_SndFile.ChnSettings) + oldNumChannels);
 	std::vector<RecordGroup> recordStates(oldNumChannels);
 	auto chnMutePendings = m_SndFile.m_bChannelMuteTogglePending;
 	for(CHANNELINDEX chn = 0; chn < oldNumChannels; chn++)
@@ -274,7 +275,8 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const std::vector<CHANNELINDEX> &newOrde
 				m_SndFile.m_opl->MoveChannel(srcChn, chn);
 		} else
 		{
-			m_SndFile.InitChannel(chn);
+			mpt::reconstruct(m_SndFile.ChnSettings[chn]);
+			InitChannel(chn);
 			SetDefaultChannelColors(chn);
 		}
 	}

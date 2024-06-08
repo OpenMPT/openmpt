@@ -2208,7 +2208,7 @@ void CSoundFile::ApplyInstrumentPanning(ModChannel &chn, const ModInstrument *in
 CHANNELINDEX CSoundFile::GetNNAChannel(CHANNELINDEX nChn) const
 {
 	// Check for empty channel
-	for(CHANNELINDEX i = m_nChannels; i < m_PlayState.Chn.size(); i++)
+	for(CHANNELINDEX i = GetNumChannels(); i < m_PlayState.Chn.size(); i++)
 	{
 		const ModChannel &c = m_PlayState.Chn[i];
 		// No sample and no plugin playing
@@ -2231,7 +2231,7 @@ CHANNELINDEX CSoundFile::GetNNAChannel(CHANNELINDEX nChn) const
 	// All channels are used: check for lowest volume
 	CHANNELINDEX result = CHANNELINDEX_INVALID;
 	uint32 envpos = 0;
-	for(CHANNELINDEX i = m_nChannels; i < m_PlayState.Chn.size(); i++)
+	for(CHANNELINDEX i = GetNumChannels(); i < m_PlayState.Chn.size(); i++)
 	{
 		const ModChannel &c = m_PlayState.Chn[i];
 		// Stopped OPL channel
@@ -2329,7 +2329,7 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 	for(CHANNELINDEX i = nChn; i < m_PlayState.Chn.size(); i++)
 	{
 		// Only apply to background channels, or the same pattern channel
-		if(i < m_nChannels && i != nChn)
+		if(i < GetNumChannels() && i != nChn)
 			continue;
 
 		ModChannel &chn = m_PlayState.Chn[i];
@@ -3689,7 +3689,7 @@ bool CSoundFile::ProcessEffects()
 				if(echoType == 1)
 				{
 					firstChn = 0;
-					lastChn = m_nChannels - 1;
+					lastChn = GetNumChannels() - 1;
 				}
 				for(CHANNELINDEX c = firstChn; c <= lastChn; c++)
 				{
@@ -5108,7 +5108,7 @@ void CSoundFile::ExtendedS3MCommands(CHANNELINDEX nChn, ModCommand::PARAM param)
 				case 1:
 				case 2:
 					{
-						for(CHANNELINDEX i = m_nChannels; i < m_PlayState.Chn.size(); i++)
+						for(CHANNELINDEX i = GetNumChannels(); i < m_PlayState.Chn.size(); i++)
 						{
 							ModChannel &bkChn = m_PlayState.Chn[i];
 							if (bkChn.nMasterChn == nChn + 1)

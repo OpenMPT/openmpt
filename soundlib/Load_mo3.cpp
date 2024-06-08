@@ -933,7 +933,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		m_nSamplePreAmp = static_cast<uint32>(std::exp(fileHeader.sampleVolume * 3.1 / 20.0)) + 51;
 
 	// Header only has room for 64 channels, like in IT
-	const CHANNELINDEX headerChannels = std::min(m_nChannels, CHANNELINDEX(64));
+	const CHANNELINDEX headerChannels = std::min(GetNumChannels(), CHANNELINDEX(64));
 	for(CHANNELINDEX i = 0; i < headerChannels; i++)
 	{
 		if(m_nType == MOD_TYPE_IT)
@@ -1381,9 +1381,9 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		if(pluginFlags & 1)
 		{
 			// Channel plugins
-			for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
+			for(auto &chn : ChnSettings)
 			{
-				ChnSettings[chn].nMixPlugin = static_cast<PLUGINDEX>(musicChunk.ReadUint32LE());
+				chn.nMixPlugin = static_cast<PLUGINDEX>(musicChunk.ReadUint32LE());
 			}
 		}
 		while(musicChunk.CanRead(1))

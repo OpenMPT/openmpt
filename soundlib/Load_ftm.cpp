@@ -364,7 +364,7 @@ bool CSoundFile::ReadFTM(FileReader &file, ModLoadingFlags loadFlags)
 			bool operator<(const PatternLoopPoint other) const noexcept { return std::tie(order, row, channel) < std::tie(other.order, other.row, other.channel); }
 		};
 		std::vector<PatternLoopPoint> loopPoints;
-		for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
+		for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
 		{
 			const uint16 defaultSpacing = file.ReadUint16BE();
 			FileReader channelChunk = file.ReadChunk(file.ReadUint32BE());

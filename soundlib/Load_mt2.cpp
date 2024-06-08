@@ -476,11 +476,11 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 	FileReader drumData = file.ReadChunk(hasDrumChannels ? sizeof(MT2DrumsData) : 0);
 	FileReader extraData = file.ReadChunk(file.ReadUint32LE());
 
-	const CHANNELINDEX channelsWithoutDrums = m_nChannels;
+	const CHANNELINDEX channelsWithoutDrums = GetNumChannels();
 	static_assert(MAX_BASECHANNELS >= 64 + 8);
 	if(hasDrumChannels)
 	{
-		m_nChannels += 8;
+		ChnSettings.resize(GetNumChannels() + 8);
 	}
 
 	bool hasLegacyTempo = false;
@@ -616,7 +616,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 			break;
 
 		case MagicLE("TRKL"):
-			for(CHANNELINDEX i = 0; i < m_nChannels && chunk.CanRead(1); i++)
+			for(CHANNELINDEX i = 0; i < GetNumChannels() && chunk.CanRead(1); i++)
 			{
 				std::string name;
 				chunk.ReadNullString(name);
@@ -688,7 +688,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 					mixPlug.Info.szLibraryName = libraryName;
 					mixPlug.Info.dwPluginId1 = Vst::kEffectMagic;
 					mixPlug.Info.dwPluginId2 = vstHeader.fxID;
-					if(vstHeader.track >= m_nChannels)
+					if(vstHeader.track >= GetNumChannels())
 					{
 						mixPlug.SetMasterEffect(true);
 					} else
@@ -841,7 +841,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 			const ROWINDEX numRows = static_cast<ROWINDEX>(chunk.GetLength() / 32u);
 			for(ROWINDEX row = 0; row < Patterns[writePat].GetNumRows(); row++)
 			{
-				ModCommand *m = Patterns[writePat].GetpModCommand(row, m_nChannels - 8);
+				ModCommand *m = Patterns[writePat].GetpModCommand(row, GetNumChannels() - 8);
 				for(CHANNELINDEX chn = 0; chn < 8; chn++, m++)
 				{
 					*m = ModCommand{};
@@ -873,7 +873,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 	// Read automation envelopes
 	if(fileHeader.flags & MT2FileHeader::automation)
 	{
-		const uint32 numEnvelopes = ((fileHeader.flags & MT2FileHeader::drumsAutomation) ? m_nChannels : channelsWithoutDrums)
+		const uint32 numEnvelopes = ((fileHeader.flags & MT2FileHeader::drumsAutomation) ? GetNumChannels() : channelsWithoutDrums)
 			+ ((fileHeader.version >= 0x0250) ? numVST : 0)
 			+ ((fileHeader.flags & MT2FileHeader::masterAutomation) ? 1 : 0);
 

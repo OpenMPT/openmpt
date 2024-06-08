@@ -666,10 +666,10 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 	Order().clear();
 
 	MidiChannelState midiChnStatus[16];
-	const CHANNELINDEX tempoChannel = m_nChannels - 2, globalVolChannel = m_nChannels - 1;
+	const CHANNELINDEX tempoChannel = GetNumChannels() - 2, globalVolChannel = GetNumChannels() - 1;
 	const uint16 numTracks = fileHeader.numTracks;
 	std::vector<TrackState> tracks(numTracks);
-	std::vector<ModChannelState> modChnStatus(m_nChannels);
+	std::vector<ModChannelState> modChnStatus(GetNumChannels());
 	std::bitset<16> drumChns;
 	drumChns.set(MIDI_DRUMCHANNEL - 1);
 
@@ -1267,8 +1267,8 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 	Order.SetSequence(0);
 
 	std::vector<CHANNELINDEX> channels;
-	channels.reserve(m_nChannels);
-	for(CHANNELINDEX i = 0; i < m_nChannels; i++)
+	channels.reserve(GetNumChannels());
+	for(CHANNELINDEX i = 0; i < GetNumChannels(); i++)
 	{
 		if(modChnStatus[i].midiCh != ModChannelState::NOMIDI
 #ifdef MODPLUG_TRACKER

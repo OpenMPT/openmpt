@@ -500,8 +500,8 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 
 			case PSMChunk::idPPAN: // PPAN - Channel panning table (used in Sinaria)
 				// In some Sinaria tunes, this is actually longer than 2 * channels...
-				MPT_ASSERT(subChunkHead.GetLength() >= m_nChannels * 2u);
-				for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
+				MPT_ASSERT(subChunkHead.GetLength() >= GetNumChannels() * 2u);
+				for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
 				{
 					if(!subChunk.CanRead(2))
 						break;
@@ -583,7 +583,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Make the default variables of the first subsong global
-	for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
+	for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
 	{
 		ChnSettings[chn].nVolume = subsongs[0].channelVolume[chn];
 		ChnSettings[chn].nPan = subsongs[0].channelPanning[chn];
@@ -643,7 +643,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				const auto [flags, channel] = rowChunk.ReadArray<uint8, 2>();
 				// Point to the correct channel
-				ModCommand &m = rowBase[std::min(static_cast<CHANNELINDEX>(m_nChannels - 1), static_cast<CHANNELINDEX>(channel))];
+				ModCommand &m = rowBase[std::min(static_cast<CHANNELINDEX>(GetNumChannels() - 1), static_cast<CHANNELINDEX>(channel))];
 
 				if(flags & noteFlag)
 				{
@@ -854,7 +854,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 			// Don't write channel volume for now, as there is no real-world module which needs it.
 			if(subsongPanningDiffers)
 			{
-				for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
+				for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
 				{
 					if(subsong.channelSurround[chn])
 						Patterns[startPattern].WriteEffect(EffectWriter(CMD_S3MCMDEX, 0x91).Row(0).Channel(chn).RetryNextRow());
@@ -1155,7 +1155,7 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 					continue;
 				}
 
-				ModCommand &m = *Patterns[pat].GetpModCommand(curRow, std::min(static_cast<CHANNELINDEX>(chnFlag & channelMask), static_cast<CHANNELINDEX>(m_nChannels - 1)));
+				ModCommand &m = *Patterns[pat].GetpModCommand(curRow, std::min(static_cast<CHANNELINDEX>(chnFlag & channelMask), static_cast<CHANNELINDEX>(GetNumChannels() - 1)));
 
 				if(chnFlag & noteFlag)
 				{

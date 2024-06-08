@@ -1217,14 +1217,14 @@ bool CSoundFile::ReadGT2(FileReader &file, ModLoadingFlags loadFlags)
 	m_songName = mpt::String::ReadBuf(mpt::String::spacePadded, fileHeader.songName);
 
 	m_nSamplePreAmp = 256;
-	m_nDefaultGlobalVolume = 384 / (3 + m_nChannels);  // See documentation on command 5xxx: Default linear master volume is 12288 / (3 + number of channels)
+	m_nDefaultGlobalVolume = 384 / (3 + GetNumChannels());  // See documentation on command 5xxx: Default linear master volume is 12288 / (3 + number of channels)
 
 	if(fileHeader.fileVersion <= 5)
 	{
 		Order().SetDefaultSpeed(std::max(fileHeader.speed.get(), uint16(1)));
 		Order().SetDefaultTempoInt(std::max(fileHeader.tempo.get(), uint16(1)));
 		m_nDefaultGlobalVolume = std::min(Util::muldivr_unsigned(fileHeader.masterVol, MAX_GLOBAL_VOLUME, 4095), uint32(MAX_GLOBAL_VOLUME));
-		const CHANNELINDEX tracks = std::min(static_cast<CHANNELINDEX>(pannedTracks.size()), m_nChannels);
+		const CHANNELINDEX tracks = std::min(static_cast<CHANNELINDEX>(pannedTracks.size()), GetNumChannels());
 		for(CHANNELINDEX chn = 0; chn < tracks; chn++)
 		{
 			ChnSettings[chn].nPan = std::min(static_cast<uint16>(Util::muldivr_unsigned(pannedTracks[chn], 256, 4095)), uint16(256));
@@ -1550,7 +1550,7 @@ bool CSoundFile::ReadGT2(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			GT2TrackName trackName;
 			chunk.ReadStruct(trackName);
-			if(trackName.type == 0 && trackName.trackNumber < m_nChannels)
+			if(trackName.type == 0 && trackName.trackNumber < GetNumChannels())
 			{
 				ChnSettings[trackName.trackNumber].szName = mpt::String::ReadBuf(mpt::String::spacePadded, trackName.name);
 			}

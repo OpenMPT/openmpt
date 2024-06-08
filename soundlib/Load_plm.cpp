@@ -323,7 +323,7 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 						{
 							uint16 target = order[m->param].x;
 							m->param = static_cast<ModCommand::PARAM>(target / rowsPerPat);
-							ModCommand *mBreak = Patterns[pat].GetpModCommand(curRow, m_nChannels - 1);
+							ModCommand *mBreak = Patterns[pat].GetpModCommand(curRow, GetNumChannels() - 1);
 							mBreak->command = CMD_PATTERNBREAK;
 							mBreak->param = static_cast<ModCommand::PARAM>(target % rowsPerPat);
 						}
@@ -331,7 +331,7 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 					case 0x0C:	// Jump to end of order
 						{
 							m->param = static_cast<ModCommand::PARAM>(patternEnd / rowsPerPat);
-							ModCommand *mBreak = Patterns[pat].GetpModCommand(curRow, m_nChannels - 1);
+							ModCommand *mBreak = Patterns[pat].GetpModCommand(curRow, GetNumChannels() - 1);
 							mBreak->command = CMD_PATTERNBREAK;
 							mBreak->param = static_cast<ModCommand::PARAM>(patternEnd % rowsPerPat);
 						}

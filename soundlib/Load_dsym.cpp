@@ -240,7 +240,7 @@ bool CSoundFile::ReadDSym(FileReader &file, ModLoadingFlags loadFlags)
 	m_SongFlags.reset(SONG_ISAMIGA);
 	m_nSamples = 63;
 
-	for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
+	for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
 	{
 		ChnSettings[chn].nPan = (((chn & 3) == 1) || ((chn & 3) == 2)) ? 64 : 192;
 	}
@@ -289,14 +289,14 @@ bool CSoundFile::ReadDSym(FileReader &file, ModLoadingFlags loadFlags)
 		if(!(loadFlags & loadPatternData) || !Patterns.Insert(pat, 64))
 			continue;
 
-		for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
+		for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
 		{
-			const uint16 track = sequence[pat * m_nChannels + chn];
+			const uint16 track = sequence[pat * GetNumChannels() + chn];
 			if(track >= fileHeader.numTracks)
 				continue;
 
 			ModCommand *m = Patterns[pat].GetpModCommand(0, chn);
-			for(ROWINDEX row = 0; row < 64; row++, m += m_nChannels)
+			for(ROWINDEX row = 0; row < 64; row++, m += GetNumChannels())
 			{
 				const auto data = tracks.subspan(track * 256 + row * 4, 4);
 				m->note = data[0] & 0x3F;
@@ -423,7 +423,7 @@ bool CSoundFile::ReadDSym(FileReader &file, ModLoadingFlags loadFlags)
 						break;
 					case 0x2B:  // 2B xyy Line Jump
 						m->command = CMD_PATTERNBREAK;
-						for(CHANNELINDEX brkChn = 0; brkChn < m_nChannels; brkChn++)
+						for(CHANNELINDEX brkChn = 0; brkChn < GetNumChannels(); brkChn++)
 						{
 							ModCommand &cmd = *(m - chn + brkChn);
 							if(cmd.command != CMD_NONE)

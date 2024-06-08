@@ -563,7 +563,7 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 		if(hasEchoEnable)
 		{
 			// If there are any Vxx effects to dynamically enable / disable echo, use the CHN_NOFX flag.
-			for(CHANNELINDEX i = 0; i < m_nChannels; i++)
+			for(CHANNELINDEX i = 0; i < GetNumChannels(); i++)
 			{
 				ChnSettings[i].nMixPlugin = 1;
 				ChnSettings[i].dwFlags.set(CHN_NOFX);
@@ -580,7 +580,7 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 			for(uint16 i = 0; i < maskLen; i++)
 			{
 				bool enabled = (dspChunk.ReadUint8() == 0);
-				if(i < m_nChannels)
+				if(i < GetNumChannels())
 				{
 					if(hasEchoEnable)
 					{

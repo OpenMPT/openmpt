@@ -437,8 +437,8 @@ bool CSoundFile::ReadIMF(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Read channel configuration
 	std::bitset<32> ignoreChannels;  // bit set for each channel that's completely disabled
-	uint64 channelMuteStatus = 0xAAAA'AAAA << (m_nChannels * 2);
-	for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
+	uint64 channelMuteStatus = 0xAAAA'AAAA << (GetNumChannels() * 2);
+	for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
 	{
 		ChnSettings[chn].nPan = static_cast<uint16>(fileHeader.channels[chn].panning * 256 / 255);
 		ChnSettings[chn].szName = mpt::String::ReadBuf(mpt::String::nullTerminated, fileHeader.channels[chn].name);
@@ -461,7 +461,7 @@ bool CSoundFile::ReadIMF(FileReader &file, ModLoadingFlags loadFlags)
 	// mikmod refers to this as an Orpheus bug, but I haven't seen any other files like this, so maybe it's just an incorrectly saved file?
 	if(channelMuteStatus == 0xAAAA'AAAA'5555'5554)
 	{
-		for(CHANNELINDEX chn = 1; chn < m_nChannels; chn++)
+		for(CHANNELINDEX chn = 1; chn < GetNumChannels(); chn++)
 			ChnSettings[chn].dwFlags.reset(CHN_MUTE);
 	}
 

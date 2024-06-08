@@ -137,14 +137,14 @@ bool CSoundFile::Read667(FileReader &file, ModLoadingFlags loadFlags)
 				{
 					// Instrument
 					auto instr = patData.ReadArray<uint8, 2>();
-					if(instr[0] >= m_nChannels || instr[1] > 63)
+					if(instr[0] >= GetNumChannels() || instr[1] > 63)
 						return false;
 					rowData[instr[0]].instr = instr[1] + 1;
 				} else if(b == 0xFD)
 				{
 					// Volume
 					auto vol = patData.ReadArray<uint8, 2>();
-					if(vol[0] >= m_nChannels || vol[1] > 63)
+					if(vol[0] >= GetNumChannels() || vol[1] > 63)
 						return false;
 					rowData[vol[0]].SetVolumeCommand(VOLCMD_VOLUME, 63u - vol[1]);
 				} else if(b == 0xFC)
@@ -156,7 +156,7 @@ bool CSoundFile::Read667(FileReader &file, ModLoadingFlags loadFlags)
 				{
 					// Pattern break
 					rowData[0].SetEffectCommand(CMD_PATTERNBREAK, 0);
-				} else if(b < m_nChannels)
+				} else if(b < GetNumChannels())
 				{
 					// Note data
 					uint8 note = patData.ReadUint8();
@@ -175,7 +175,7 @@ bool CSoundFile::Read667(FileReader &file, ModLoadingFlags loadFlags)
 		}
 		if(leftChn && rightChn)
 		{
-			for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
+			for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
 			{
 				ChnSettings[chn].nPan = (chn % 2u) ? 256 : 0;
 			}

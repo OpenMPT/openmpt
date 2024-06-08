@@ -329,7 +329,7 @@ bool CSoundFile::ReadRTM(FileReader& file, ModLoadingFlags loadFlags)
 
 	FileReader extraData = file.ReadChunk(songHeader.extraDataSize);
 	ReadOrderFromFile<uint16le>(Order(), extraData, songHeader.numOrders);
-	for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
+	for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
 	{
 		ChnSettings[chn].nPan = static_cast<uint16>((songHeader.panning[chn] + 64) * 2);
 		if(songHeader.flags & RTMMHeader::songTrackNames)

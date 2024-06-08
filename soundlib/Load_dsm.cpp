@@ -218,7 +218,7 @@ bool CSoundFile::ReadDSM(FileReader &file, ModLoadingFlags loadFlags)
 	m_nDefaultGlobalVolume = std::min(songHeader.globalVol.get(), uint8(64)) * 4u;
 	if(!m_nDefaultGlobalVolume) m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
 	if(songHeader.mastervol == 0x80)
-		m_nSamplePreAmp = std::min(256u / m_nChannels, 128u);
+		m_nSamplePreAmp = std::min(256u / GetNumChannels(), 128u);
 	else
 		m_nSamplePreAmp = songHeader.mastervol & 0x7F;
 
@@ -407,7 +407,7 @@ bool CSoundFile::ReadDSm(FileReader &file, ModLoadingFlags loadFlags)
 	m_songName = mpt::String::ReadBuf(mpt::String::spacePadded, fileHeader.title);
 	m_songArtist = mpt::ToUnicode(mpt::Charset::CP437, mpt::String::ReadBuf(mpt::String::spacePadded, fileHeader.artist));
 
-	for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
+	for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
 	{
 		ChnSettings[chn].nPan = (file.ReadUint8() & 0x0F) * 0x11;
 	}
@@ -420,15 +420,15 @@ bool CSoundFile::ReadDSm(FileReader &file, ModLoadingFlags loadFlags)
 	}
 	numPatterns++;
 
-	if(!file.CanRead((numPatterns * m_nChannels * 8) + (m_nSamples * sizeof(DSmSampleHeader)) + (numPatterns * m_nChannels * 64 * 4)))
+	if(!file.CanRead((numPatterns * GetNumChannels() * 8) + (m_nSamples * sizeof(DSmSampleHeader)) + (numPatterns * GetNumChannels() * 64 * 4)))
 		return false;
 
 	// Track names for each pattern - we only read the track names of the first pattern
-	for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
+	for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
 	{
 		ChnSettings[chn].szName = mpt::String::ReadBuf(mpt::String::spacePadded, file.ReadArray<char, 8>());
 	}
-	file.Skip((numPatterns - 1) * m_nChannels * 8);
+	file.Skip((numPatterns - 1) * GetNumChannels() * 8);
 
 	for(SAMPLEINDEX smp = 1; smp <= m_nSamples; smp++)
 	{
@@ -443,7 +443,7 @@ bool CSoundFile::ReadDSm(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		if(!(loadFlags & loadPatternData) || !Patterns.Insert(pat, 64))
 		{
-			file.Skip(m_nChannels * 64 * 4);
+			file.Skip(GetNumChannels() * 64 * 4);
 			continue;
 		}
 		for(ModCommand &m : Patterns[pat])

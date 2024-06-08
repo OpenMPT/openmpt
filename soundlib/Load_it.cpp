@@ -690,11 +690,11 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	if(file.ReadMagic("CNAM"))
 	{
 		FileReader chnNames = file.ReadChunk(file.ReadUint32LE());
-		m_nChannels = std::min(MAX_BASECHANNELS, static_cast<CHANNELINDEX>(chnNames.GetLength() / MAX_CHANNELNAME));
+		ChnSettings.resize(std::min(MAX_BASECHANNELS, static_cast<CHANNELINDEX>(chnNames.GetLength() / MAX_CHANNELNAME)));
 		hasModPlugExtensions = true;
-		for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
+		for(auto &chn : ChnSettings)
 		{
-			chnNames.ReadString<mpt::String::maybeNullTerminated>(ChnSettings[chn].szName, MAX_CHANNELNAME);
+			chnNames.ReadString<mpt::String::maybeNullTerminated>(chn.szName, MAX_CHANNELNAME);
 		}
 	}
 
@@ -876,6 +876,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Checking for number of used channels, which is not explicitely specified in the file.
+	CHANNELINDEX numChannels = GetNumChannels();
 	for(PATTERNINDEX pat = 0; pat < numPats; pat++)
 	{
 		if(patPos[pat] == 0 || !file.Seek(patPos[pat]))
@@ -891,7 +892,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 
 		FileReader patternData = file.ReadChunk(len);
 		ROWINDEX row = 0;
-		std::vector<uint8> chnMask(GetNumChannels());
+		std::vector<uint8> chnMask(numChannels);
 
 		while(row < numRows && patternData.CanRead(1))
 		{
@@ -920,9 +921,9 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			// Channel used
 			if(chnMask[ch] & 0x0F)  // if this channel is used set m_nChannels
 			{
-				if(ch >= GetNumChannels() && ch < MAX_BASECHANNELS)
+				if(ch >= numChannels && ch < MAX_BASECHANNELS)
 				{
-					m_nChannels = ch + 1;
+					numChannels = ch + 1;
 				}
 
 				// Skip a number of bytes depending on note, instrument, volume, effect being present.
@@ -932,6 +933,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		}
 		lastSampleOffset = std::max(lastSampleOffset, file.GetPosition());
 	}
+	ChnSettings.resize(numChannels);
 
 	// Compute extra instruments settings position
 	if(lastSampleOffset > 0)
@@ -1051,7 +1053,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 
 			// Now we grab the data for this particular row/channel.
 			ModCommand dummy{};
-			ModCommand &m = ch < m_nChannels ? patData[ch] : dummy;
+			ModCommand &m = ch < GetNumChannels() ? patData[ch] : dummy;
 
 			if(chnMask[ch] & 0x10)
 			{
@@ -1548,7 +1550,7 @@ bool CSoundFile::SaveIT(std::ostream &f, const mpt::PathString &filename, bool c
 	memset(itHeader.chnpan, 0xA0, 64);
 	memset(itHeader.chnvol, 64, 64);
 
-	for(CHANNELINDEX ich = 0; ich < std::min(m_nChannels, CHANNELINDEX(64)); ich++) // Header only has room for settings for 64 chans...
+	for(CHANNELINDEX ich = 0; ich < std::min(GetNumChannels(), CHANNELINDEX(64)); ich++) // Header only has room for settings for 64 chans...
 	{
 		itHeader.chnpan[ich] = (uint8)(ChnSettings[ich].nPan >> 2);
 		if (ChnSettings[ich].dwFlags[CHN_SURROUND]) itHeader.chnpan[ich] = 100;
@@ -1562,7 +1564,7 @@ bool CSoundFile::SaveIT(std::ostream &f, const mpt::PathString &filename, bool c
 	// Channel names
 	if(!compatibilityExport)
 	{
-		for(CHANNELINDEX i = 0; i < m_nChannels; i++)
+		for(CHANNELINDEX i = 0; i < GetNumChannels(); i++)
 		{
 			if(ChnSettings[i].szName[0])
 			{
@@ -2250,7 +2252,7 @@ void CSoundFile::SaveExtendedSongProperties(std::ostream &f) const
 
 	if(GetType() != MOD_TYPE_XM)
 	{
-		WRITEMODULAR(MagicBE("C..."), m_nChannels);
+		WRITEMODULAR(MagicBE("C..."), GetNumChannels());
 	}
 
 	if((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && GetNumChannels() > 64)
@@ -2378,7 +2380,7 @@ void CSoundFile::SaveExtendedSongProperties(std::ostream &f) const
 	// Channel colors
 	{
 		CHANNELINDEX numChannels = 0;
-		for(CHANNELINDEX i = 0; i < m_nChannels; i++)
+		for(CHANNELINDEX i = 0; i < GetNumChannels(); i++)
 		{
 			if(ChnSettings[i].color != ModChannelSettings::INVALID_COLOR)
 			{
@@ -2460,7 +2462,7 @@ bool CSoundFile::LoadExtendedSongProperties(FileReader &file, bool ignoreChannel
 			case MagicBE("RPB."): ReadField(chunk, size, m_nDefaultRowsPerBeat); break;
 			case MagicBE("RPM."): ReadField(chunk, size, m_nDefaultRowsPerMeasure); break;
 				// FIXME: If there are only PC events on the last few channels in an MPTM MO3, they won't be imported!
-			case MagicBE("C..."): if(!ignoreChannelCount) { CHANNELINDEX chn = 0; ReadField(chunk, size, chn); m_nChannels = Clamp(chn, m_nChannels, MAX_BASECHANNELS); } break;
+			case MagicBE("C..."): if(!ignoreChannelCount) { CHANNELINDEX chn = 0; ReadField(chunk, size, chn); ChnSettings.resize(Clamp(chn, GetNumChannels(), MAX_BASECHANNELS)); } break;
 			case MagicBE("TM.."): ReadFieldCast(chunk, size, m_nTempoMode); break;
 			case MagicBE("PMM."): ReadFieldCast(chunk, size, m_nMixLevels); break;
 			case MagicBE("CWV."): { uint32 ver = 0; ReadField(chunk, size, ver); m_dwCreatedWithVersion = Version(ver); break; }
@@ -2500,11 +2502,12 @@ bool CSoundFile::LoadExtendedSongProperties(FileReader &file, bool ignoreChannel
 				break;
 			case MagicBE("ChnS"):
 				// Channel settings for channels 65+
+				static_assert(MAX_BASECHANNELS >= 64);
 				if(size <= (MAX_BASECHANNELS - 64) * 2 && (size % 2u) == 0)
 				{
-					static_assert(mpt::array_size<decltype(ChnSettings)>::size >= 64);
-					const CHANNELINDEX loopLimit = std::min(uint16(64 + size / 2), uint16(std::size(ChnSettings)));
-
+					const CHANNELINDEX channelsInFile = mpt::saturate_cast<CHANNELINDEX>(64 + size / 2);
+					ChnSettings.resize(std::clamp(GetNumChannels(), channelsInFile, MAX_BASECHANNELS));
+					const CHANNELINDEX loopLimit = std::min(channelsInFile, GetNumChannels());
 					for(CHANNELINDEX chn = 64; chn < loopLimit; chn++)
 					{
 						auto [pan, vol] = chunk.ReadArray<uint8, 2>();
