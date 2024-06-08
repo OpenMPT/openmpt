@@ -705,7 +705,11 @@ public:
 	constexpr SAMPLEINDEX GetNumSamples() const noexcept { return m_nSamples; }
 	constexpr PATTERNINDEX GetCurrentPattern() const noexcept { return m_PlayState.m_nPattern; }
 	constexpr ORDERINDEX GetCurrentOrder() const noexcept { return m_PlayState.m_nCurrentOrder; }
+#ifndef MPT_LIBCXX_QUIRK_NO_CONSTEXPR_VECTOR
 	MPT_CONSTEXPR20_FUN CHANNELINDEX GetNumChannels() const noexcept { return static_cast<CHANNELINDEX>(ChnSettings.size()); }
+#else
+	MPT_FORCEINLINE CHANNELINDEX GetNumChannels() const noexcept { return static_cast<CHANNELINDEX>(ChnSettings.size()); }
+#endif
 
 	constexpr bool CanAddMoreSamples(SAMPLEINDEX amount = 1) const noexcept { return (amount < MAX_SAMPLES) && m_nSamples < (MAX_SAMPLES - amount); }
 	constexpr bool CanAddMoreInstruments(INSTRUMENTINDEX amount = 1) const noexcept { return (amount < MAX_INSTRUMENTS) && m_nInstruments < (MAX_INSTRUMENTS - amount); }
