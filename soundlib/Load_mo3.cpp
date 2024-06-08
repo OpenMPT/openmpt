@@ -1630,7 +1630,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		}
 
 		// Not a compressed sample?
-		if(!smpInfo.chunk.IsValid())
+		if(!smpHeader.length || !smpInfo.chunk.IsValid())
 			continue;
 
 		if(smpHeader.flags & MO3Sample::smp16Bit)
