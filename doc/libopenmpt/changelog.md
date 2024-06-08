@@ -7,6 +7,24 @@ is just a high-level summary.
 
 ### libopenmpt 0.7.8-pre
 
+ *  [**Sec**] Potential heap out-of-bounds read with malformed Dynamic Studio
+    DSm files (r20912).
+
+ *  MED: Additional command pages can now be read.
+ *  MED: Echo DSP is now emulated.
+ *  AMS: Default channel panning was broken, using all-center panning instead of
+    MOD-style panning.
+ *  STP: Correctly import volume slides where both nibbles are set.
+ *  MDL: Pitch slide depth was wrong since libopenmpt 0.6.0.
+ *  DTM: Fix pitch slide depth for samples with finetune.
+ *  DSm: Don't import as Amiga module (and thus allow Amiga resampler to be
+    enabled), as this PC format can easily exceed the Amiga frequency range.
+ *  DSm: Only the first 48 samples were ever read.
+ *  STM / STX: Don't set channel panning. ScreamTracker 2 only outputs mono
+    sound.
+ *  PSM: File header probing was stricter than actual file loader, rejecting
+    manipulated files that would otherwise load fine.
+
 ### libopenmpt 0.7.7 (2024-05-12)
 
  *  [**Bug**] `examples/libopenmpt_example_c_pipe.c` and
