@@ -1346,6 +1346,8 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 			if(smpHeader.flags & MO3Sample::smpStereo) sample.uFlags.set(CHN_STEREO);
 
 			FileReader sampleData = file.ReadChunk(smpHeader.compressedSize);
+			if(!smpHeader.length)
+				continue;
 			const uint8 numChannels = sample.GetNumChannels();
 
 			if(compression == MO3Sample::smpDeltaCompression || compression == MO3Sample::smpDeltaPrediction)
