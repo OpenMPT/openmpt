@@ -487,15 +487,12 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		bool hasChannelsWithoutPanning = false;
 		const auto pan = file.ReadArray<uint8, 32>();
-		for(CHANNELINDEX i = 0; i < 32; i++)
+		for(CHANNELINDEX i = 0; i < GetNumChannels(); i++)
 		{
 			if((pan[i] & 0x20) != 0 && (!isST3 || !isAdlibChannel[i]))
-			{
 				ChnSettings[i].nPan = static_cast<uint16>((static_cast<uint16>(pan[i] & 0x0F) * 256 + 8) / 15u);
-			} else if(pan[i] < 0x10)
-			{
+			else if(pan[i] < 0x10)
 				hasChannelsWithoutPanning = true;
-			}
 		}
 		if(GetNumChannels() < 32 && m_dwLastSavedWithVersion == MPT_V("1.16"))
 		{
