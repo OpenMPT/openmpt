@@ -2503,10 +2503,11 @@ bool CSoundFile::LoadExtendedSongProperties(FileReader &file, bool ignoreChannel
 			case MagicBE("ChnS"):
 				// Channel settings for channels 65+
 				static_assert(MAX_BASECHANNELS >= 64);
-				if(size <= (MAX_BASECHANNELS - 64) * 2 && (size % 2u) == 0)
+				if(size <= (MAX_BASECHANNELS - 64) * 2 && (size % 2u) == 0 && (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)))
 				{
 					const CHANNELINDEX channelsInFile = mpt::saturate_cast<CHANNELINDEX>(64 + size / 2);
-					ChnSettings.resize(std::clamp(GetNumChannels(), channelsInFile, MAX_BASECHANNELS));
+					if(!ignoreChannelCount)
+						ChnSettings.resize(std::clamp(GetNumChannels(), channelsInFile, MAX_BASECHANNELS));
 					const CHANNELINDEX loopLimit = std::min(channelsInFile, GetNumChannels());
 					for(CHANNELINDEX chn = 64; chn < loopLimit; chn++)
 					{
