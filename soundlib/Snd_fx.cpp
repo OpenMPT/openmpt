@@ -6505,11 +6505,16 @@ uint32 CSoundFile::GetPeriodFromNote(uint32 note, int32 nFineTune, uint32 nC5Spe
 	note -= NOTE_MIN;
 	if(!UseFinetuneAndTranspose())
 	{
-		if(GetType() & (MOD_TYPE_MDL | MOD_TYPE_DTM))
+		if(GetType() == MOD_TYPE_MDL)
 		{
 			// MDL uses non-linear slides, but their effectiveness does not depend on the middle-C frequency.
 			MPT_ASSERT(!PeriodsAreFrequencies());
 			return (FreqS3MTable[note % 12u] << 4) >> (note / 12);
+		} else if(GetType() == MOD_TYPE_DTM)
+		{
+			// Similar to MDL, but finetune is factored in and we don't transpose everything by an octave
+			MPT_ASSERT(!PeriodsAreFrequencies());
+			return (ProTrackerTunedPeriods[XM2MODFineTune(nFineTune) * 12u + note % 12u] << 5) >> (note / 12u);
 		}
 		if(!nC5Speed)
 			nC5Speed = 8363;
@@ -6625,7 +6630,7 @@ uint32 CSoundFile::GetFreqFromPeriod(uint32 period, uint32 c5speed, int32 nPerio
 	{
 		// We only really use c5speed for the finetune pattern command. All samples in 669 files have the same middle-C speed (imported as 8363 Hz).
 		return (period + c5speed - 8363) << FREQ_FRACBITS;
-	} else if(GetType() & (MOD_TYPE_MDL | MOD_TYPE_DTM))
+	} else if(GetType() == MOD_TYPE_MDL)
 	{
 		MPT_ASSERT(!PeriodsAreFrequencies());
 		LimitMax(period, Util::MaxValueOfType(period) >> 8);
@@ -6639,7 +6644,7 @@ uint32 CSoundFile::GetFreqFromPeriod(uint32 period, uint32 c5speed, int32 nPerio
 			// Input is already a frequency in Hertz, not a period.
 			static_assert(FREQ_FRACBITS <= 8, "Check this shift operator");
 			return uint32(((uint64(period) << 8) + nPeriodFrac) >> (8 - FREQ_FRACBITS));
-		} else if(m_SongFlags[SONG_LINEARSLIDES])
+		} else if(m_SongFlags[SONG_LINEARSLIDES] || GetType() == MOD_TYPE_DTM)
 		{
 			if(!c5speed)
 				c5speed = 8363;
