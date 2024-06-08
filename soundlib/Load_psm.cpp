@@ -996,10 +996,10 @@ static bool ValidateHeader(const PSM16FileHeader &fileHeader)
 	if(std::memcmp(fileHeader.formatID, "PSM\xFE", 4)
 		|| fileHeader.lineEnd != 0x1A
 		|| (fileHeader.formatVersion != 0x10 && fileHeader.formatVersion != 0x01) // why is this sometimes 0x01?
-		|| fileHeader.patternVersion != 0 // 255ch pattern version not supported (did anyone use this?)
+		|| fileHeader.patternVersion != 0 // 255ch pattern version not supported (does it actually exist? The pattern format is not documented)
 		|| (fileHeader.songType & 3) != 0
-		|| fileHeader.numChannelsPlay > MAX_BASECHANNELS
-		|| fileHeader.numChannelsReal > MAX_BASECHANNELS
+		|| fileHeader.numChannelsPlay > 32
+		|| fileHeader.numChannelsReal > 32
 		|| std::max(fileHeader.numChannelsPlay, fileHeader.numChannelsReal) == 0)
 	{
 		return false;
@@ -1070,7 +1070,7 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 	// Read pan positions
 	if(fileHeader.panOffset > 4 && file.Seek(fileHeader.panOffset - 4) && file.ReadMagic("PPAN"))
 	{
-		for(CHANNELINDEX i = 0; i < 32; i++)
+		for(CHANNELINDEX i = 0; i < GetNumChannels(); i++)
 		{
 			ChnSettings[i].nPan = static_cast<uint16>(((15 - (file.ReadUint8() & 0x0F)) * 256 + 8) / 15);  // 15 seems to be left and 0 seems to be right...
 			// ChnSettings[i].dwFlags = (i >= fileHeader.numChannelsPlay) ? CHN_MUTE : 0; // don't mute channels, as muted channels are completely ignored in S3M
