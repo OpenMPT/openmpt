@@ -426,7 +426,7 @@ void CommandData::ProcessSwitch(const wchar *Switch)
               break;
             case '4':
               // Convert slashes here than before every comparison.
-              SlashToNative(Switch+3,ArcPath);
+              SlashToNative(Switch+3,ExclArcPath);
               break;
             default:
               BadSwitch(Switch);
