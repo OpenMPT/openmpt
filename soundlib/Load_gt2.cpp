@@ -1259,7 +1259,8 @@ bool CSoundFile::ReadGT2(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		// Only channel mute status is of interest here
 		uint32 muteStatus = chunk.ReadUint32BE();
-		for(CHANNELINDEX i = 0; i < 32; i++)
+		const CHANNELINDEX numChannels = std::min(GetNumChannels(), CHANNELINDEX(32));
+		for(CHANNELINDEX i = 0; i < numChannels; i++)
 		{
 			ChnSettings[i].dwFlags.set(CHN_MUTE, !(muteStatus & (1u << i)));
 		}
