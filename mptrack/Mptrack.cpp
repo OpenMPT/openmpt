@@ -849,14 +849,6 @@ public:
 	{
 		return conf.IsComponentBlocked(key);
 	}
-	mpt::PathString Path() const override
-	{
-		if(mpt::OS::Windows::Name(mpt::OS::Windows::GetProcessArchitecture()).empty())
-		{
-			return mpt::PathString();
-		}
-		return configPath + P_("Components\\") + mpt::PathString::FromUnicode(mpt::OS::Windows::Name(mpt::OS::Windows::GetProcessArchitecture())) + P_("\\");
-	}
 };
 
 
@@ -1011,17 +1003,8 @@ void CTrackApp::CreatePaths()
 			CreateDirectory(m_ConfigPath.AsNative().c_str(), 0);
 		}
 	}
-	if(!mpt::native_fs{}.is_directory(GetConfigPath() + P_("Components")))
-	{
-		CreateDirectory((GetConfigPath() + P_("Components")).AsNative().c_str(), 0);
-	}
-	if(!mpt::native_fs{}.is_directory(GetConfigPath() + P_("Components\\") + mpt::PathString::FromUnicode(mpt::OS::Windows::Name(mpt::OS::Windows::GetProcessArchitecture()))))
-	{
-		CreateDirectory((GetConfigPath() + P_("Components\\") + mpt::PathString::FromUnicode(mpt::OS::Windows::Name(mpt::OS::Windows::GetProcessArchitecture()))).AsNative().c_str(), 0);
-	}
 
 	// Handle updates from old versions.
-
 	if(!IsPortableMode())
 	{
 		// Move the config files if they're still in the old place.
