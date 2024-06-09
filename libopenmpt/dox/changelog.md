@@ -7,6 +7,12 @@ is just a high-level summary.
 
 ### libopenmpt 0.5.31-pre
 
+ *  AMS: Default channel panning was broken, using all-center panning instead of
+    MOD-style panning.
+ *  STP: Correctly import volume slides where both nibbles are set.
+ *  PSM: File header probing was stricter than actual file loader, rejecting
+    manipulated files that would otherwise load fine.
+
 ### libopenmpt 0.5.30 (2024-05-12)
 
  *  [**Bug**] `examples/libopenmpt_example_c_pipe.c` and
