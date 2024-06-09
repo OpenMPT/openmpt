@@ -33,6 +33,29 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.31.08.00 (9 June 2024, revision 20987)
+-----------------------------------------
+General tab
+- [Fix] <js> Updates received from other views could cause unintended data changes (e.g. truncating fractional tempo if it is technically unsupported by current format).
+- [Fix] <js> Since OpenMPT 1.30, it was possible that leftovers from a previously visited tab could remain visible under some circumstances.
+
+Pattern tab
+- [Fix] <js> Navigating up on the first row of a pattern with "Play whole row while navigating" enabled but "Continuous scroll" disabled played the row and advanced to the second row instead of doing nothing (http://bugs.openmpt.org/view.php?id=1781).
+- [Fix] <js> After deleting an effect, it was possible that its now-invisible parameter could still affect effect memory in S3M files.
+
+Other formats
+- [Imp] <js> MED: Additional command pages can now be read (http://bugs.openmpt.org/view.php?id=1783).
+- [Imp] <js> MED: Echo DSP is now emulated (http://www.un4seen.com/forum/?topic=15448.msg143034#msg143034).
+- [Fix] <js> AMS: Default channel panning was broken, using all-center panning instead of MOD-style panning.
+- [Fix] <js> STP: Correctly import volume slides where both nibbles are set.
+- [Fix] <js> DSm: Only the first 48 samples were ever read.
+- [Fix] <js> DSm: Don't import as Amiga module (and thus allow Amiga resampler to be enabled), as this PC format can easily exceed the Amiga frequency range.
+- [Fix] <cs127 & js> STM / STX: Don't set channel panning. ScreamTracker 2 only outputs mono sound.
+
+Third-Party Libraries
+- [Imp] Update ancient (v2.2.0) and UnRAR (v7.0.9)
+
+
 v1.31.07.00 (12 May 2024, revision 20796)
 -----------------------------------------
 Pattern tab
@@ -79,7 +102,7 @@ Bundled plugins
 - [Fix] <js> When changing the output plugin from the LFO plugin's editor, the change was not reflected in the General tab.
 
 Third-Party Libraries
-- [Imp] Update mpg123 (v1.32.6), opus (v1.5.2)
+- [Imp] Update mpg123 (v1.32.6) and opus (v1.5.2)
 
 
 v1.31.06.00 (24 March 2024, revision 20438)
