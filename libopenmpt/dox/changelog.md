@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.6.18-pre
+
 ### libopenmpt 0.6.17 (2024-06-09)
 
  *  AMS: Default channel panning was broken, using all-center panning instead of
