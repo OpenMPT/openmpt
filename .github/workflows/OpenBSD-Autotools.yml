@@ -1,0 +1,77 @@
+name: OpenBSD Autotools
+
+on:
+  push:
+    branches: [ OpenMPT-1.31 ]
+
+jobs:
+  build:
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { version: '7.5' }
+          - { version: '7.4' }
+
+    concurrency:
+      group: ${{github.ref}}-${{github.workflow}}-${{matrix.version}}-autotools
+      cancel-in-progress: true
+
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Startup VM
+      uses: cross-platform-actions/action@v0.24.0
+      with:
+        architecture: x86_64
+        hypervisor: qemu
+        memory: 4G
+        operating_system: openbsd
+        version: ${{matrix.version}}
+        shell: bash
+        sync_files: runner-to-vm
+        shutdown_vm: false
+        run: true
+    - name: Install dependencies
+      uses: cross-platform-actions/action@v0.24.0
+      with:
+        architecture: x86_64
+        hypervisor: qemu
+        memory: 4G
+        operating_system: openbsd
+        version: ${{matrix.version}}
+        shell: bash
+        sync_files: false
+        shutdown_vm: false
+        run: |
+          sudo pkg_add -I ${{ (matrix.version == '7.5') && 'ghostscript-10.03.1' || (matrix.version == '7.4') && 'ghostscript-10.02.0' || 'ghostscript' }}
+          sudo pkg_add -I ${{ (matrix.version == '7.5') && 'autoconf-2.71 automake-1.16.5' || (matrix.version == '7.4') && 'autoconf-2.71 automake-1.16.5' || 'autoconf automake' }}
+          sudo pkg_add -I subversion p5-XML-XPath git mawk gmake pkgconf autoconf-archive libtool libltdl help2man doxygen mpg123 libogg libvorbis flac libsndfile pulseaudio portaudio-svn sdl2
+    - name: Build
+      uses: cross-platform-actions/action@v0.24.0
+      with:
+        architecture: x86_64
+        hypervisor: qemu
+        memory: 4G
+        operating_system: openbsd
+        version: ${{matrix.version}}
+        shell: bash
+        sync_files: false
+        shutdown_vm: false
+        run: |
+          export MAKEFLAGS="-j$(sysctl -n hw.ncpu)"; ${{ (matrix.version == '7.5') && 'export AUTOCONF_VERSION=2.71' || (matrix.version == '7.4') && 'export AUTOCONF_VERSION=2.71' || '' }} ; ${{ (matrix.version == '7.5') && 'export AUTOMAKE_VERSION=1.16' || (matrix.version == '7.4') && 'export AUTOMAKE_VERSION=1.16' || '' }} ;./build/autotools/autoconfiscate.sh
+    - name: Shutdown VM
+      uses: cross-platform-actions/action@v0.24.0
+      with:
+        architecture: x86_64
+        hypervisor: qemu
+        memory: 4G
+        operating_system: openbsd
+        version: ${{matrix.version}}
+        shell: bash
+        sync_files: false
+        shutdown_vm: true
+        run: true
