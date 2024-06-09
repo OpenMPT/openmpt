@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.7.8-pre
+### libopenmpt 0.7.8 (2024-06-09)
 
  *  [**Sec**] Potential heap out-of-bounds read with malformed Dynamic Studio
     DSm files (r20912).
