@@ -18,6 +18,11 @@ else
  BSD=0
  MAKE=make
 fi
+if [[ $UNAME_S == "OpenBSD" ]]; then
+ OPENBSD=1
+else
+ OPENBSD=0
+fi
 
 echo "Gathering version ..."
 . libopenmpt/libopenmpt_version.mk
@@ -271,9 +276,12 @@ rm -rf libopenmpt
 mkdir -p libopenmpt/src.autotools/$MPT_LIBOPENMPT_VERSION/
 cp *.tar.gz libopenmpt/src.autotools/$MPT_LIBOPENMPT_VERSION/
 if [[ $BSD == "1" ]]; then
-	tar -cv --numeric-owner --uname	"" --gname "" --uid 0 --gid 0 -f ../dist-autotools.tar libopenmpt
+	if [[ $OPENBSD == "1" ]]; then
+		tar -cv -N -f ../dist-autotools.tar libopenmpt
+	else
+		tar -cv --numeric-owner --uname	"" --gname "" --uid 0 --gid 0 -f ../dist-autotools.tar libopenmpt
+	fi
 else
 	tar -cv --numeric-owner --owner=0 --group=0 -f ../dist-autotools.tar libopenmpt
 fi
 cd ../..
-
