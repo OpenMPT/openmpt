@@ -12,16 +12,15 @@ set -e
 echo "Detecting OS ..."
 UNAME_S="$(uname -s)"
 if [[ $UNAME_S == *"BSD"* ]]; then
- BSD=1
+ if [[ $UNAME_S == "OpenBSD" ]]; then
+  TAR_FLAVOUR=bsd
+ else
+  TAR_FLAVOUR=libarchive
+ fi
  MAKE=gmake
 else
- BSD=0
+ TAR_FLAVOUR=gnu
  MAKE=make
-fi
-if [[ $UNAME_S == "OpenBSD" ]]; then
- OPENBSD=1
-else
- OPENBSD=0
 fi
 
 echo "Gathering version ..."
@@ -275,13 +274,20 @@ cd bin/dist-autotools
 rm -rf libopenmpt
 mkdir -p libopenmpt/src.autotools/$MPT_LIBOPENMPT_VERSION/
 cp *.tar.gz libopenmpt/src.autotools/$MPT_LIBOPENMPT_VERSION/
-if [[ $BSD == "1" ]]; then
-	if [[ $OPENBSD == "1" ]]; then
-		tar -cv -N -f ../dist-autotools.tar libopenmpt
-	else
-		tar -cv --numeric-owner --uname	"" --gname "" --uid 0 --gid 0 -f ../dist-autotools.tar libopenmpt
-	fi
-else
-	tar -cv --numeric-owner --owner=0 --group=0 -f ../dist-autotools.tar libopenmpt
-fi
+
+case $TAR_FLAVOUR in
+ bsd)
+  tar -cv -N -f ../dist-autotools.tar libopenmpt
+  ;;
+ libarchive)
+  tar -cv --numeric-owner --uname	"" --gname "" --uid 0 --gid 0 -f ../dist-autotools.tar libopenmpt
+  ;;
+ gnu)
+  tar -cv --numeric-owner --owner=0 --group=0 -f ../dist-autotools.tar libopenmpt
+  ;;
+ *)
+  tar -cv -f ../dist-autotools.tar libopenmpt
+  ;;
+esac
+
 cd ../..
