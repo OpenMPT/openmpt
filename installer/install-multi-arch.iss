@@ -26,7 +26,7 @@ AppPublisher=OpenMPT
 AppPublisherURL=https://openmpt.org/
 AppSupportURL=https://forum.openmpt.org/
 AppUpdatesURL=https://openmpt.org/
-ArchitecturesInstallIn64BitMode=x64 arm64 ia64
+ArchitecturesInstallIn64BitMode=x64os arm64
 ChangesAssociations=yes
 Compression=lzma2/ultra64
 ;DefaultDirName={autopf}\OpenMPT
@@ -244,10 +244,6 @@ begin
 			begin
 				WizardSelectComponents('archx86,archamd64,!archarm,!archarm64');
 			end;
-		paIA64:
-			begin
-				WizardSelectComponents('archx86,!archamd64,!archarm,!archarm64');
-			end;
 		paARM64:
 			begin
 				WizardSelectComponents('archx86,archamd64,archarm,archarm64');
@@ -270,10 +266,6 @@ begin
 		paX64:
 			begin
 				Result := 'amd64';
-			end;
-		paIA64:
-			begin
-				Result := 'x86';
 			end;
 		paARM64:
 			begin

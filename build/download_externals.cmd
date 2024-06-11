@@ -49,11 +49,14 @@ call build\scriptlib\unpack.cmd "include\xmplay"   "build\externals\xmp-sdk.zip"
 
 call build\scriptlib\unpack.cmd "build\tools\python3" "build\externals\python-3.12.4-embed-amd64.zip" "." || goto error
 
-call :killdir "build\tools\innounp"   || goto error
+
 call :killdir "build\tools\innosetup" || goto error
+mkdir "build\tools\innosetup" || goto error
+"build\externals\innosetup-6.3.1.exe" /PORTABLE=1 /CURRENTUSER /DIR="%CD%\build\tools\innosetup\{app}" /LOG="%CD%\build\tools\innosetup\setup.log" /SILENT || goto error
+
+call :killdir "build\tools\innounp"   || goto error
 call :killdir "build\tools\innosetup5" || goto error
 call build\scriptlib\unpack.cmd "build\tools\innounp" "build\externals\innounp050.rar" "." || goto error
-build\tools\innounp\innounp.exe -x -dbuild\tools\innosetup "build\externals\innosetup-6.2.2.exe" || goto error
 build\tools\innounp\innounp.exe -x -dbuild\tools\innosetup5 "build\externals\isetup-5.5.8-unicode.exe" || goto error
 
 call build\scriptlib\unpack.cmd "packageTemplate\ExampleSongs" "build\externals\example_songs_ompt_1_30.7z" "." || goto error
