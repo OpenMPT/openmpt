@@ -299,6 +299,10 @@ ibm/386slc           := $(___) -march=i386        $(FPU_NONE)   -mtune=i386     
 ibm/486slc           := $(___) -march=i486        $(FPU_NONE)   -mtune=i386        $(OPT_UARCH_CISC)     --param l1-cache-size=12 --param l2-cache-size=$(CACHE_386)
 ibm/486bl            := $(___) -march=i486        $(FPU_NONE)   -mtune=i386        $(OPT_UARCH_CISC)     --param l1-cache-size=12 --param l2-cache-size=$(CACHE_486)
 
+ibm/386slc+fasmath   := $(___) -march=i386        $(FPU_387)    -mtune=i386        $(OPT_UARCH_CISC)     --param l1-cache-size=6  --param l2-cache-size=$(CACHE_386)
+ibm/486slc+fasmath   := $(___) -march=i486        $(FPU_387)    -mtune=i386        $(OPT_UARCH_CISC)     --param l1-cache-size=12 --param l2-cache-size=$(CACHE_386)
+ibm/486bl+fasmath    := $(___) -march=i486        $(FPU_387)    -mtune=i386        $(OPT_UARCH_CISC)     --param l1-cache-size=12 --param l2-cache-size=$(CACHE_486)
+
 
 
 cyrix/cx486slc       := $(___) -march=i486        $(FPU_NONE)   -mtune=i486        $(OPT_UARCH_PIPE)     --param l1-cache-size=1  --param l2-cache-size=$(CACHE_386)
