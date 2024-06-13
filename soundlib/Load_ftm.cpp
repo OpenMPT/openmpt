@@ -132,7 +132,7 @@ bool CSoundFile::ReadFTM(FileReader &file, ModLoadingFlags loadFlags)
 	m_songName = mpt::String::ReadBuf(mpt::String::nullTerminated, fileHeader.title);
 	m_songArtist = mpt::ToUnicode(mpt::Charset::Amiga_no_C1, mpt::String::ReadBuf(mpt::String::nullTerminated, fileHeader.artist));
 
-	m_nSamples = m_nInstruments = fileHeader.numSamples;
+	m_nSamples = fileHeader.numSamples;
 	for(SAMPLEINDEX smp = 1; smp <= m_nSamples; smp++)
 	{
 		Samples[smp].Initialize(MOD_TYPE_MOD);
