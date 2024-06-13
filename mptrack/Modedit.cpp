@@ -616,11 +616,10 @@ PLUGINDEX CModDoc::RemovePlugs(const std::vector<bool> &keepMask)
 			if(srcPlug.GetOutputPlugin() == nPlug)
 			{
 				srcPlug.SetOutputToMaster();
-				UpdateAllViews(nullptr, PluginHint(static_cast<PLUGINDEX>(srcPlugSlot + 1)).Info());
 			}
 		}
-		UpdateAllViews(nullptr, PluginHint(static_cast<PLUGINDEX>(nPlug + 1)).Info().Names());
 	}
+	UpdateAllViews(nullptr, PluginHint().Info().Names());
 
 	if(nRemoved && m_SndFile.GetModSpecifications().supportsPlugins)
 		SetModified();
