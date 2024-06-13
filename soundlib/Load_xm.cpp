@@ -480,6 +480,13 @@ static bool ReadSampleData(ModSample &sample, SampleIO sampleFlags, FileReader &
 						{
 							decodedSamples = ret;
 							LimitMax(decodedSamples, mpt::saturate_cast<long>(sample.nLength - offset));
+							if(offset == 0 && channels == 1 && sample.GetNumChannels() == 2)
+							{
+								// oggmod doesn't know what stereo samples are, so it treats them as mono samples, but doesn't clear the unknown stereo flag.
+								// We just take the left channel in this case, as it is difficult (if possible at all) to properly reconstruct the waveform of the right channel.
+								// Due to XM's delta-encoding and Vorbis being a lossless codec, samples could distort easily even when the delta encoding was off by a very small amount.
+								sample.uFlags.reset(CHN_STEREO);
+							}
 							if(decodedSamples > 0 && channels == sample.GetNumChannels())
 							{
 								if(sample.uFlags[CHN_16BIT])
