@@ -2707,8 +2707,8 @@ bool CSoundFile::ProcessEffects()
 			if(m_playBehaviour[kMODSampleSwap])
 			{
 				// ProTracker Compatibility: If a sample was stopped before, lone instrument numbers can retrigger it
-				// Test case: PTSwapEmpty.mod, PTInstrVolume.mod, SampleSwap.s3m
-				if(!chn.IsSamplePlaying() && (chn.pModSample == nullptr || !chn.pModSample->HasSampleData()))
+				// Test cases: PTSwapEmpty.mod, PTInstrVolume.mod, PTStoppedSwap.mod
+				if(!chn.IsSamplePlaying() && instr <= GetNumSamples() && Samples[instr].uFlags[CHN_LOOP])
 					keepInstr = true;
 			}
 
