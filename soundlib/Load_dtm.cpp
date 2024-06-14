@@ -576,6 +576,9 @@ bool CSoundFile::ReadDTM(FileReader &file, ModLoadingFlags loadFlags)
 	if(patternFormat == DTM_206_PATTERN_FORMAT)
 	{
 		tracker = U_("Digital Home Studio");
+	} else if(patternFormat == DTM_PT_PATTERN_FORMAT)
+	{
+		tracker = U_("Digital Tracker 2.3");
 	} else if(FileReader chunk = chunks.GetChunk(DTMChunk::idVERS))
 	{
 		uint32 version = chunk.ReadUint32BE();

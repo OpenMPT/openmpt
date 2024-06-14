@@ -1320,7 +1320,12 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				madeWithTracker = MPT_UFORMAT("ITMCK {}.{}.{}")((fileHeader.cwtv >> 8) & 0x0F, (fileHeader.cwtv >> 4) & 0x0F, fileHeader.cwtv & 0x0F);
 			break;
 		case 0xD:
-			madeWithTracker = U_("spc2it");
+			if(fileHeader.cwtv == 0xDAEB)
+				madeWithTracker = U_("spc2it");
+			else if(fileHeader.cwtv == 0xD1CE)
+				madeWithTracker = U_("itwriter");
+			else
+				madeWithTracker = U_("Unknown");
 			break;
 		}
 	}
