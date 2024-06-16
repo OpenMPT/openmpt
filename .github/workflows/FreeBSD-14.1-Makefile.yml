@@ -1,4 +1,4 @@
-name: FreeBSD 14.0 Makefile
+name: FreeBSD 14.1 Makefile
 
 on:
   push:
