@@ -426,7 +426,9 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	// Global Volume
 	m_nDefaultGlobalVolume = std::min(fileHeader.globalVol.get(), uint8(64)) * 4u;
 	// The following check is probably not very reliable, but it fixes a few tunes, e.g.
-	// DARKNESS.S3M by Purple Motion (ST 3.00) and "Image of Variance" by C.C.Catch (ST 3.01):
+	// DARKNESS.S3M by Purple Motion (ST 3.00) and "Image of Variance" by C.C.Catch (ST 3.01).
+	// Note that even ST 3.01b imports these files with a global volume of 0,
+	// so it's not clear if these files ever played "as intended" in any ST3 versions (I don't have any older ST3 versions).
 	if(m_nDefaultGlobalVolume == 0 && fileHeader.cwtv < S3MFileHeader::trkST3_20)
 	{
 		m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
@@ -496,7 +498,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		}
 		if(GetNumChannels() < 32 && m_dwLastSavedWithVersion == MPT_V("1.16"))
 		{
-			// MPT 1.0 alpha 6 up to 1.16.203 set ths panning bit for all channels, regardless of whether they are used or not.
+			// MPT 1.0 alpha 6 up to 1.16.203 set the panning bit for all channels, regardless of whether they are used or not.
 			if(hasChannelsWithoutPanning)
 				m_modFormat.madeWithTracker = U_("ModPlug Tracker 1.16 / OpenMPT 1.17");
 			else
@@ -597,6 +599,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		ROWINDEX row = 0;
 		auto rowBase = Patterns[pat].GetRow(0);
 
+		ModCommand dummy;
 		while(row < 64)
 		{
 			uint8 info = file.ReadUint8();
@@ -612,7 +615,6 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 			}
 
 			CHANNELINDEX channel = (info & s3mChannelMask);
-			ModCommand dummy;
 			ModCommand &m = (channel < GetNumChannels()) ? rowBase[channel] : dummy;
 
 			if(info & s3mNotePresent)

@@ -3293,15 +3293,14 @@ LRESULT CCtrlSamples::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 
 // Return currently selected part of the sample.
 // The whole sample size will be returned if no part of the sample is selected.
-// However, point.bSelected indicates whether a sample selection exists or not.
+// However, points.selectionActive indicates whether a sample selection exists or not.
 CCtrlSamples::SampleSelectionPoints CCtrlSamples::GetSelectionPoints()
 {
 	SampleSelectionPoints points;
-	SAMPLEVIEWSTATE viewstate;
+	SAMPLEVIEWSTATE viewstate{};
 	const ModSample &sample = m_sndFile.GetSample(m_nSample);
 
-	Clear(viewstate);
-	SendViewMessage(VIEWMSG_SAVESTATE, (LPARAM)&viewstate);
+	SendViewMessage(VIEWMSG_SAVESTATE, reinterpret_cast<LPARAM>(&viewstate));
 	points.nStart = viewstate.dwBeginSel;
 	points.nEnd = viewstate.dwEndSel;
 	if(points.nEnd > sample.nLength) points.nEnd = sample.nLength;
@@ -3325,13 +3324,12 @@ void CCtrlSamples::SetSelectionPoints(SmpLength nStart, SmpLength nEnd)
 	Limit(nStart, SmpLength(0), sample.nLength);
 	Limit(nEnd, SmpLength(0), sample.nLength);
 
-	SAMPLEVIEWSTATE viewstate;
-	Clear(viewstate);
-	SendViewMessage(VIEWMSG_SAVESTATE, (LPARAM)&viewstate);
+	SAMPLEVIEWSTATE viewstate{};
+	SendViewMessage(VIEWMSG_SAVESTATE, reinterpret_cast<LPARAM>(&viewstate));
 
 	viewstate.dwBeginSel = nStart;
 	viewstate.dwEndSel = nEnd;
-	SendViewMessage(VIEWMSG_LOADSTATE, (LPARAM)&viewstate);
+	SendViewMessage(VIEWMSG_LOADSTATE, reinterpret_cast<LPARAM>(&viewstate));
 }
 
 

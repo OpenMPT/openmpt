@@ -654,7 +654,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	} else if(possiblyUNMO3 && fileHeader.special <= 1)
 	{
 		// UNMO3 < v2.4.0.1 will set the edit history special bit iff the MIDI macro embed bit is also set,
-		// but it always writes the two extra bytes for the edit history length (zeroes).
+		// but it always writes the two extra bytes for the edit history length (zeros).
 		// If MIDI macros are embedded, we are fine and end up in the first case of the if statement (read edit history).
 		// Otherwise we end up here and might have to read the edit history length.
 		if(file.ReadUint16LE() == 0)
@@ -875,7 +875,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 		numPats = 0;
 	}
 
-	// Checking for number of used channels, which is not explicitely specified in the file.
+	// Checking for number of used channels, which is not explicitly specified in the file.
 	CHANNELINDEX numChannels = GetNumChannels();
 	for(PATTERNINDEX pat = 0; pat < numPats; pat++)
 	{
@@ -1083,14 +1083,11 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 					if(note > NOTE_MAX && note < 0xFD) note = NOTE_FADE;
 					else if(note == 0xFD) note = NOTE_NONE;
 				}
-				m.note = note;
-				lastValue[ch].note = note;
+				m.note = lastValue[ch].note = note;
 			}
 			if(chnMask[ch] & 2)
 			{
-				uint8 instr = patternData.ReadUint8();
-				m.instr = instr;
-				lastValue[ch].instr = instr;
+				m.instr = lastValue[ch].instr = patternData.ReadUint8();
 			}
 			if(chnMask[ch] & 4)
 			{
