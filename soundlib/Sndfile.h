@@ -1222,7 +1222,7 @@ public:
 
 	uint32 MapMidiInstrument(uint8 program, uint16 bank, uint8 midiChannel, uint8 note, bool isXG, std::bitset<16> drumChns);
 	size_t ITInstrToMPT(FileReader &file, ModInstrument &ins, uint16 trkvers);
-	std::pair<bool, bool> LoadMixPlugins(FileReader &file);
+	std::pair<bool, bool> LoadMixPlugins(FileReader &file, bool ignoreChannelCount = true);
 #ifndef NO_PLUGINS
 	static void ReadMixPluginChunk(FileReader &file, SNDMIXPLUGIN &plugin);
 	void ProcessMidiOut(CHANNELINDEX nChn);

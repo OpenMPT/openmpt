@@ -700,7 +700,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Read mix plugins information
 	FileReader pluginChunk = file.ReadChunk((minPtr >= file.GetPosition()) ? minPtr - file.GetPosition() : file.BytesLeft());
-	const auto [hasPluginChunks, isBeRoTracker] = LoadMixPlugins(pluginChunk);
+	const auto [hasPluginChunks, isBeRoTracker] = LoadMixPlugins(pluginChunk, false);
 	if(hasPluginChunks)
 		hasModPlugExtensions = true;
 
@@ -2112,7 +2112,7 @@ uint32 CSoundFile::SaveMixPlugins(std::ostream *file, bool updatePlugData)
 #endif // MODPLUG_NO_FILESAVE
 
 
-std::pair<bool, bool> CSoundFile::LoadMixPlugins(FileReader &file)
+std::pair<bool, bool> CSoundFile::LoadMixPlugins(FileReader &file, bool ignoreChannelCount)
 {
 	bool hasPluginChunks = false, isBeRoTracker = false;
 	while(file.CanRead(9))
@@ -2134,9 +2134,9 @@ std::pair<bool, bool> CSoundFile::LoadMixPlugins(FileReader &file)
 		// Channel FX
 		if(!memcmp(code, "CHFX", 4))
 		{
-			if(GetNumChannels() == 0)
+			if(!ignoreChannelCount)
 			{
-				ChnSettings.resize(std::min(MAX_BASECHANNELS, static_cast<CHANNELINDEX>(chunkSize / 4)));
+				ChnSettings.resize(std::clamp(static_cast<CHANNELINDEX>(chunkSize / 4), GetNumChannels(), MAX_BASECHANNELS));
 			}
 			for(auto &chn : ChnSettings)
 			{
