@@ -2134,6 +2134,10 @@ std::pair<bool, bool> CSoundFile::LoadMixPlugins(FileReader &file)
 		// Channel FX
 		if(!memcmp(code, "CHFX", 4))
 		{
+			if(GetNumChannels() == 0)
+			{
+				ChnSettings.resize(std::min(MAX_BASECHANNELS, static_cast<CHANNELINDEX>(chunkSize / 4)));
+			}
 			for(auto &chn : ChnSettings)
 			{
 				chn.nMixPlugin = static_cast<PLUGINDEX>(chunk.ReadUint32LE());
