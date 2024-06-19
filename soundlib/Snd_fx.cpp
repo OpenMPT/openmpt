@@ -2951,7 +2951,8 @@ bool CSoundFile::ProcessEffects()
 				}
 
 				NoteChange(chn, note, bPorta, !(GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2)), false, nChn);
-				HandleDigiSamplePlayDirection(m_PlayState, nChn);
+				if(ModCommand::IsNote(note))
+					HandleDigiSamplePlayDirection(m_PlayState, nChn);
 				if ((bPorta) && (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2)) && (instr))
 				{
 					chn.dwFlags.set(CHN_FASTVOLRAMP);
