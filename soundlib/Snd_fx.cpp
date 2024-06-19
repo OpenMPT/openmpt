@@ -3079,7 +3079,8 @@ bool CSoundFile::ProcessEffects()
 				NoteChange(chn, note, bPorta, !(GetType() & (MOD_TYPE_XM | MOD_TYPE_MT2)), false, nChn);
 				if(continueNote)
 					chn.nPeriod = chn.nPortamentoDest;
-				HandleDigiSamplePlayDirection(m_PlayState, nChn);
+				if(ModCommand::IsNote(note))
+					HandleDigiSamplePlayDirection(m_PlayState, nChn);
 				if ((bPorta) && (GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2)) && (instr))
 				{
 					chn.dwFlags.set(CHN_FASTVOLRAMP);
@@ -6659,7 +6660,7 @@ uint32 CSoundFile::GetFreqFromPeriod(uint32 period, uint32 c5speed, int32 nPerio
 
 PLUGINDEX CSoundFile::GetBestPlugin(const PlayState &playState, CHANNELINDEX nChn, PluginPriority priority, PluginMutePriority respectMutes) const
 {
-	if (nChn >= m_PlayState.Chn.size())		//Check valid channel number
+	if (nChn >= playState.Chn.size())		//Check valid channel number
 	{
 		return 0;
 	}
