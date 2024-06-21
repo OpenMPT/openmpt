@@ -876,7 +876,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Checking for number of used channels, which is not explicitly specified in the file.
-	CHANNELINDEX numChannels = GetNumChannels();
+	CHANNELINDEX numChannels = std::max(GetNumChannels(), CHANNELINDEX(1));
 	for(PATTERNINDEX pat = 0; pat < numPats; pat++)
 	{
 		if(patPos[pat] == 0 || !file.Seek(patPos[pat]))
