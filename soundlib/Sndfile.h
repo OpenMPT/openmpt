@@ -1285,7 +1285,7 @@ public:
 	// Resolve note/instrument combination to real sample index. Return value is guaranteed to be in [0, GetNumSamples()].
 	SAMPLEINDEX GetSampleIndex(ModCommand::NOTE note, uint32 instr) const noexcept;
 
-	uint32 MapMidiInstrument(uint8 program, uint16 bank, uint8 midiChannel, uint8 note, bool isXG, std::bitset<16> drumChns);
+	uint32 MapMidiInstrument(uint8 program, uint16 bank, uint8 midiChannel, uint8 note, bool isXG, std::bitset<32> drumChns);
 	size_t ITInstrToMPT(FileReader &file, ModInstrument &ins, uint16 trkvers);
 	std::pair<bool, bool> LoadMixPlugins(FileReader &file);
 #ifndef NO_PLUGINS
