@@ -2,7 +2,7 @@
  * Load_cba.cpp
  * ------------
  * Purpose: Chuck Biscuits / Black Artist (CBA) module loader
- * Notes  : This format appears to have been only used for the Expoze musicdisk by Heretics.
+ * Notes  : This format appears to have been used only for the Expoze musicdisk by Heretics.
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
@@ -106,7 +106,7 @@ bool CSoundFile::ReadCBA(FileReader &file, ModLoadingFlags loadFlags)
 
 	for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
 	{
-		ChnSettings[chn].nPan = (chn % 2u) ? 208 : 48;
+		ChnSettings[chn].nPan = fileHeader.panPos[chn] * 2;
 	}
 
 	for(SAMPLEINDEX smp = 1; smp <= m_nSamples; smp++)
