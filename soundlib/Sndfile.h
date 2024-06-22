@@ -930,7 +930,7 @@ public:
 	// Converts 4 bytes formatted like SoundTracker/NoiseTracker/ProTracker pattern data by converting the period to a note and filling the instrument number, and returns the effect command and parameter bytes.
 	static std::pair<uint8, uint8> ReadMODPatternEntry(const std::array<uint8, 4> data, ModCommand &m);
 
-	void SetupMODPanning(bool bForceSetup = false); // Setup LRRL panning, max channel volume
+	void SetupMODPanning(bool forceSetup = false);  // Setup LRRL panning
 
 public:
 	// Real-time sound functions

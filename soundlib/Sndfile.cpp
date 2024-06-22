@@ -2080,11 +2080,12 @@ bool CSoundFile::LoadExternalSample(SAMPLEINDEX smp, const mpt::PathString &file
 #endif // MPT_EXTERNAL_SAMPLES
 
 
-// Set up channel panning and volume suitable for MOD + similar files. If the current mod type is not MOD, bForceSetup has to be set to true.
-void CSoundFile::SetupMODPanning(bool bForceSetup)
+// Set up channel panning suitable for MOD + similar files. If the current mod type is not MOD, forceSetup has to be set to true for this function to take effect.
+void CSoundFile::SetupMODPanning(bool forceSetup)
 {
 	// Setup LRRL panning, max channel volume
-	if(!(GetType() & MOD_TYPE_MOD) && bForceSetup == false) return;
+	if(!(GetType() & MOD_TYPE_MOD) && !forceSetup)
+		return;
 
 	for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
 	{
