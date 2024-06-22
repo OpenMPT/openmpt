@@ -132,7 +132,7 @@ bool CSoundFile::ReadCBA(FileReader &file, ModLoadingFlags loadFlags)
 			m.instr = instr;
 			if(note == 255)
 				m.note = NOTE_NOTECUT;
-			else if(note <= 96)
+			else if(note > 0 && note <= 96)
 				m.note = NOTE_MIDDLEC - 49 + note;
 			
 			if(vol)
