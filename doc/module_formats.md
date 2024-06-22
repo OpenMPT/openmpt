@@ -85,7 +85,7 @@ the first `CSoundFile::ProbeRecommendedSize` bytes of the file.
   any file that would normally be accepted by the loader. In particular, this
   means that any header checks must not be any more aggressive than they would
   be in the real loader (hence it is a good idea to not copy-paste this code but
-  rather put it in a separate function), and the minimum additional size passed
+  rather put it in a reusable function), and the minimum additional size passed
   to `CSoundFile::ProbeAdditionalSize` must not be higher than the biggest size
   that would cause a hard failure (i.e. returning `false`) in the module loader.
 * Probing functions **may** return ProbeSuccess for files that would be rejected
@@ -103,5 +103,8 @@ that need to be updated:
 * Run `build/regenerate_vs_projects.sh` / `build/regenerate_vs_projects.cmd`
   (depending on your platform)
 * Add file extension to `installer/filetypes-*.iss`.
-* Add file extension to `CTrackApp::OpenModulesDialog` in `mptrack/Mptrack.cpp`.
+* Add file extension to `CTrackApp::OpenModulesDialog` in `mptrack/Mptrack.cpp`
+  as required (e.g. if it's a compressed container format or if it's relevant
+  enough to be mentioned).
 * Add format information to `soundlib/Tables.cpp`.
+* Add magic bytes to  `contrib/fuzzing/all_formats.dict`.

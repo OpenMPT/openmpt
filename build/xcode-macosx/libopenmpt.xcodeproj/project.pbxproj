@@ -27,6 +27,7 @@
 		247D3937039A5369DFA3AF77 /* Load_plm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4E4D213FE0DAEB3149B38F7F /* Load_plm.cpp */; };
 		281FA911C06C8EC3EEB38F51 /* Sndfile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BAF08779FF3F2CEB416665B9 /* Sndfile.cpp */; };
 		2837D1CEECED2840A15BD00E /* openmpt-ogg.lib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5DFCA7B6A69BE5E8C9C79DF6 /* openmpt-ogg.lib */; };
+		2AE422F10A013D23E60A9931 /* Load_cba.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF8E6598086B04BE95F5499 /* Load_cba.cpp */; };
 		2B1F4A030A3C6435E645C043 /* Load_mo3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0F49974BA1D7613D0AB0058B /* Load_mo3.cpp */; };
 		30BE965074D2678268A3EC90 /* mptTime.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B176D8582299794AD8602698 /* mptTime.cpp */; };
 		30C4FED93067E20B6ABC9519 /* ModChannel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5FDB15C1B74088B3694EA401 /* ModChannel.cpp */; };
@@ -599,6 +600,7 @@
 		EABA2F1F4147999119C0AD5F /* AGC.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AGC.h; path = ../../sounddsp/AGC.h; sourceTree = "<group>"; };
 		EC1456C17EA220B3E77AC501 /* Load_mid.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Load_mid.cpp; path = ../../soundlib/Load_mid.cpp; sourceTree = "<group>"; };
 		ED3DBD7D7FCB876FE8A42BBD /* memory.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = memory.hpp; path = ../../src/mpt/base/memory.hpp; sourceTree = "<group>"; };
+		EDF8E6598086B04BE95F5499 /* Load_cba.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Load_cba.cpp; path = ../../soundlib/Load_cba.cpp; sourceTree = "<group>"; };
 		EEC8D9B98156A3ABEA2F47F9 /* tuningbase.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = tuningbase.h; path = ../../soundlib/tuningbase.h; sourceTree = "<group>"; };
 		EF78F5224ABA48941E149362 /* Dither.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Dither.h; path = ../../common/Dither.h; sourceTree = "<group>"; };
 		F06C78E982FA42DBEBD2E729 /* RowVisitor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = RowVisitor.h; path = ../../soundlib/RowVisitor.h; sourceTree = "<group>"; };
@@ -1298,6 +1300,7 @@
 				37F80675CA85D067335E74B5 /* Load_amf.cpp */,
 				29DC06EFBC69D0E12542752F /* Load_ams.cpp */,
 				B99E396D4C2C035FB504A7AD /* Load_c67.cpp */,
+				EDF8E6598086B04BE95F5499 /* Load_cba.cpp */,
 				6A66E753FCF4B14565CD5593 /* Load_dbm.cpp */,
 				D14936A73E714519400434E7 /* Load_digi.cpp */,
 				36CAA59BC9586F8D323113DB /* Load_dmf.cpp */,
@@ -1638,6 +1641,7 @@
 				A7B576CD86D290FF62DBED0D /* Load_amf.cpp in Sources */,
 				BA54A1E79971BC19757B1827 /* Load_ams.cpp in Sources */,
 				44F9DD452416F77700205385 /* Load_c67.cpp in Sources */,
+				2AE422F10A013D23E60A9931 /* Load_cba.cpp in Sources */,
 				7B65168B5A8230BD368B8CCB /* Load_dbm.cpp in Sources */,
 				8479AC1F9F461AD1A316B25F /* Load_digi.cpp in Sources */,
 				C81D1553A73A2F8583438B93 /* Load_dmf.cpp in Sources */,

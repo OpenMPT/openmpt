@@ -26,6 +26,7 @@ Root: HKA; Subkey: "SOFTWARE\Classes\Applications\OpenMPT.exe\SupportedTypes"; V
 Root: HKA; Subkey: "SOFTWARE\Classes\Applications\OpenMPT.exe\SupportedTypes"; ValueType: string; ValueName: ".amf"; ValueData: ""
 Root: HKA; Subkey: "SOFTWARE\Classes\Applications\OpenMPT.exe\SupportedTypes"; ValueType: string; ValueName: ".ams"; ValueData: ""
 Root: HKA; Subkey: "SOFTWARE\Classes\Applications\OpenMPT.exe\SupportedTypes"; ValueType: string; ValueName: ".c67"; ValueData: ""
+Root: HKA; Subkey: "SOFTWARE\Classes\Applications\OpenMPT.exe\SupportedTypes"; ValueType: string; ValueName: ".cba"; ValueData: ""
 Root: HKA; Subkey: "SOFTWARE\Classes\Applications\OpenMPT.exe\SupportedTypes"; ValueType: string; ValueName: ".dbm"; ValueData: ""
 Root: HKA; Subkey: "SOFTWARE\Classes\Applications\OpenMPT.exe\SupportedTypes"; ValueType: string; ValueName: ".digi"; ValueData: ""
 Root: HKA; Subkey: "SOFTWARE\Classes\Applications\OpenMPT.exe\SupportedTypes"; ValueType: string; ValueName: ".dmf"; ValueData: ""

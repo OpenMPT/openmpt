@@ -776,6 +776,7 @@ public:
 	static ProbeResult ProbeFileHeaderAMS(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderAMS2(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderC67(MemoryFileReader file, const uint64 *pfilesize);
+	static ProbeResult ProbeFileHeaderCBA(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderDBM(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderDTM(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderDIGI(MemoryFileReader file, const uint64 *pfilesize);
@@ -836,6 +837,7 @@ public:
 	bool ReadAMS(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadAMS2(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadC67(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadCBA(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadDBM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadDTM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadDIGI(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);

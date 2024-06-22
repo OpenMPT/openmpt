@@ -10,6 +10,8 @@ amf="DMF\x0E"
 ams="Extreme"
 ams="AMShdr\x1A\x00\x02\x02"
 
+cba="CBA\xF9"
+
 #dbm="DBM0"
 dbm="NAME"
 dbm="INFO"

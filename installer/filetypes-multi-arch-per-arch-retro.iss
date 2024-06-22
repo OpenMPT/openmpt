@@ -51,6 +51,7 @@ Root: HKLM; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAsso
 Root: HKLM; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".amf"; ValueData: {#OpenMPTFile}; Components: {#Component}
 Root: HKLM; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".ams"; ValueData: {#OpenMPTFile}; Components: {#Component}
 Root: HKLM; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".c67"; ValueData: {#OpenMPTFile}; Components: {#Component}
+Root: HKLM; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".cba"; ValueData: {#OpenMPTFile}; Components: {#Component}
 Root: HKLM; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".dbm"; ValueData: {#OpenMPTFile}; Components: {#Component}
 Root: HKLM; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".digi"; ValueData: {#OpenMPTFile}; Components: {#Component}
 Root: HKLM; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".dmf"; ValueData: {#OpenMPTFile}; Components: {#Component}

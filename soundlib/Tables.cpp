@@ -63,6 +63,7 @@ static constexpr ModFormatInfo modFormatInfo[] =
 	{ UL_("Extreme's Tracker"),                  "ams" },
 	{ UL_("Velvet Studio"),                      "ams" },
 	{ UL_("CDFM / Composer 670"),                "c67" },
+	{ UL_("Chuck Biscuits / Black Artist"),      "cba" },
 	{ UL_("DigiBooster Pro"),                    "dbm" },
 	{ UL_("DigiBooster"),                        "digi" },
 	{ UL_("X-Tracker"),                          "dmf" },
