@@ -5,9 +5,9 @@ set -e
 svn up
 
 NEWVER=$(make distversion-pure)
-NEWREV=$(svn info --xml . | xpath -e '/info/entry/commit/@revision' -q | sed 's/revision//g' | tr '"' ' ' | tr '=' ' ' | sed 's/ //g')
+NEWREV=$(svn info --xml . | xpath -e 'string(/info/entry/commit/@revision)' -q)
 svn cp -m "tag libopenmpt-${NEWVER}" -r ${NEWREV} https://source.openmpt.org/svn/openmpt/branches/OpenMPT-1.32 https://source.openmpt.org/svn/openmpt/tags/libopenmpt-${NEWVER}
-TAGREV=$(svn info --xml https://source.openmpt.org/svn/openmpt/tags/libopenmpt-${NEWVER} | xpath -e '/info/entry/commit/@revision' -q | sed 's/revision//g' | tr '"' ' ' | tr '=' ' ' | sed 's/ //g')
+TAGREV=$(svn info --xml https://source.openmpt.org/svn/openmpt/tags/libopenmpt-${NEWVER} | xpath -e 'string(/info/entry/commit/@revision)' -q)
 
 echo "ALL DONE."
 echo "run './release-0.8.sh $NEWVER +r${TAGREV}' in a website checkout after buildbot has finished."

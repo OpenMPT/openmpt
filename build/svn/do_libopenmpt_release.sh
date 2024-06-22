@@ -15,7 +15,7 @@ build/update_libopenmpt_version.sh release
 svn ci -m "[Mod] libopenmpt: Prepare for release."
 svn up
 NEWVER=$(make distversion-pure)
-NEWREV=$(svn info --xml . | xpath -e '/info/entry/commit/@revision' -q | sed 's/revision//g' | tr '"' ' ' | tr '=' ' ' | sed 's/ //g')
+NEWREV=$(svn info --xml . | xpath -e 'string(/info/entry/commit/@revision)' -q)
 svn cp -m "tag libopenmpt-${NEWVER}" -r ${NEWREV} https://source.openmpt.org/svn/openmpt/branches/OpenMPT-1.32 https://source.openmpt.org/svn/openmpt/tags/libopenmpt-${NEWVER}
 build/update_libopenmpt_version.sh bumppatch
 build/update_libopenmpt_version.sh bumpltrev

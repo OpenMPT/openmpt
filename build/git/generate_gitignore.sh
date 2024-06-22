@@ -7,7 +7,7 @@ export LANG=C
 echo "# This file was generated automatically by running build/git/generate_gitignore.sh inside a svn working copy." > .gitignore
 
 (
-	svn pl --recursive --xml | xpath -q -e '/properties/target[property/@name = "svn:ignore"]' | grep '^<target' | sed 's/<target path=//g' | sed 's/>$//g' | sed 's/"//g'
+	svn pl --recursive --xml | xpath -q -e '/properties/target[property/@name = "svn:ignore"]/@path' | sed 's/ path=//g' | sed 's/>$//g' | sed 's/"//g'
 ) | sort | while IFS=$'\n' read -r WCDIR ; do
 	if [ "x$WCDIR" = "x." ] ; then
 		PREFIX="/"
