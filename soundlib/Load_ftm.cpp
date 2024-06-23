@@ -383,9 +383,9 @@ bool CSoundFile::ReadFTM(FileReader &file, ModLoadingFlags loadFlags)
 				}
 
 				const auto position = std::div(globalRow + spacing, fileHeader.rowsPerMeasure);
-				PATTERNINDEX pat = static_cast<PATTERNINDEX>(position.quot);
-				if(pat >= Patterns.GetNumPatterns())
+				if(position.quot >= fileHeader.numMeasures)
 					break;
+				const PATTERNINDEX pat = static_cast<PATTERNINDEX>(position.quot);
 
 				ModCommand &m = *Patterns[pat].GetpModCommand(position.rem, chn);
 				const uint8 param = ((data[0] & 0x0F) << 2) | (data[1] >> 6);  // 0...63
