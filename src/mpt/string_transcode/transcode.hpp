@@ -679,6 +679,51 @@ inline char32_t decode_single_utf16(std::size_t & i, const Tsrcstring & in) {
 	return ucs4;
 }
 
+inline void encode_single_wide(mpt::widestring & out, char32_t ucs4) {
+	if constexpr (sizeof(mpt::widechar) == 2) {
+		if (ucs4 <= 0xffff) {
+			out.push_back(static_cast<mpt::widechar>(static_cast<uint16>(static_cast<uint32>(ucs4))));
+		} else {
+			uint32 surrogate = static_cast<uint32>(ucs4) - 0x10000;
+			uint16 hi_sur = static_cast<uint16>((0x36 << 10) | ((surrogate >> 10) & ((1 << 10) - 1)));
+			uint16 lo_sur = static_cast<uint16>((0x37 << 10) | ((surrogate >> 0) & ((1 << 10) - 1)));
+			out.push_back(static_cast<mpt::widechar>(hi_sur));
+			out.push_back(static_cast<mpt::widechar>(lo_sur));
+		}
+	} else {
+		out.push_back(static_cast<mpt::widechar>(static_cast<uint32>(ucs4)));
+	}
+}
+
+inline char32_t decode_single_wide(std::size_t & i, const mpt::widestring & in) {
+	char32_t ucs4 = 0;
+	mpt::widechar wc = in[i];
+	if constexpr (sizeof(mpt::widechar) == 2) {
+		uint16 c = static_cast<uint16>(wc);
+		if (i + 1 < in.length()) {
+			// check for surrogate pair
+			uint16 hi_sur = in[i + 0];
+			uint16 lo_sur = in[i + 1];
+			if (hi_sur >> 10 == 0x36 && lo_sur >> 10 == 0x37) {
+				// surrogate pair
+				++i;
+				hi_sur &= (1 << 10) - 1;
+				lo_sur &= (1 << 10) - 1;
+				ucs4 = (static_cast<uint32>(hi_sur) << 10) | (static_cast<uint32>(lo_sur) << 0);
+			} else {
+				// no surrogate pair
+				ucs4 = static_cast<char32_t>(c);
+			}
+		} else {
+			// no surrogate possible
+			ucs4 = static_cast<char32_t>(c);
+		}
+	} else {
+		ucs4 = static_cast<char32_t>(static_cast<uint32>(wc));
+	}
+	return ucs4;
+}
+
 
 
 template <typename Tsrcstring>
@@ -723,10 +768,8 @@ inline mpt::widestring decode_utf8(const Tsrcstring & str, mpt::widechar replace
 						charsleft = 0;
 						continue;
 					}
-					encode_single_utf16(out, ucs4);			
-				} else {
-					out.push_back(static_cast<mpt::widechar>(static_cast<uint32>(ucs4)));
 				}
+				encode_single_wide(out, ucs4);			
 				ucs4 = 0;
 			}
 		}
@@ -744,12 +787,7 @@ inline Tdststring encode_utf8(const mpt::widestring & str, typename Tdststring::
 	const mpt::widestring & in = str;
 	Tdststring out;
 	for (std::size_t i = 0; i < in.length(); i++) {
-		char32_t ucs4 = 0;
-		if constexpr (sizeof(mpt::widechar) == 2) {
-			ucs4 = decode_single_utf16(i, in);
-		} else {
-			ucs4 = static_cast<char32_t>(static_cast<uint32>(in[i]));
-		}
+		char32_t ucs4 = decode_single_wide(i, in);
 		if (ucs4 > 0x1fffff) {
 			out.push_back(replacement);
 			continue;
