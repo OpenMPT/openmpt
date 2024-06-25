@@ -1376,8 +1376,6 @@ std::pair<EffectCommand, ModCommand::PARAM> ModCommand::FillInTwoCommands(Effect
 		case CMD_OFFSETPERCENTAGE:
 		case CMD_DIGIREVERSESAMPLE:
 		case CMD_VOLUME8:
-		case CMD_HMN_MEGA_ARP:
-		case CMD_MED_SYNTH_JUMP:
 			effect2 = CMD_NONE;
 			break;
 		}
