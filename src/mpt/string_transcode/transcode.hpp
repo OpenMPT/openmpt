@@ -653,7 +653,7 @@ inline void encode_single_utf16(Tdststring & out, char32_t ucs4) {
 }
 
 template <typename Tsrcstring>
-inline char32_t decode_single_utf16(std::size_t & i, Tsrcstring & in) {
+inline char32_t decode_single_utf16(std::size_t & i, const Tsrcstring & in) {
 	static_assert(sizeof(typename Tsrcstring::value_type) == 2);
 	char32_t ucs4 = 0;
 	typename Tsrcstring::value_type wc = in[i];
