@@ -47,6 +47,7 @@ jobs:
         sync_files: false
         shutdown_vm: false
         run: |
+          sudo pkg upgrade -y
           sudo pkg install -y subversion p5-XML-XPath git mawk gmake pkgconf autoconf autoconf-archive automake libtool help2man doxygen mpg123 libogg libvorbis flac libsndfile pulseaudio portaudio sdl2
     - name: Build
       uses: cross-platform-actions/action@6acac3ca1b632aa762721d537dea32398ba0f2b1
