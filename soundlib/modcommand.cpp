@@ -1378,6 +1378,8 @@ std::pair<EffectCommand, ModCommand::PARAM> ModCommand::FillInTwoCommands(Effect
 		case CMD_VOLUME8:
 			effect2 = CMD_NONE;
 			break;
+		default:
+			break;
 		}
 	}
 
