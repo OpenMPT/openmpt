@@ -575,7 +575,7 @@ inline mpt::widestring decode_8bit(const Tsrcstring & str, const char32_t (&tabl
 	for (std::size_t i = 0; i < str.length(); ++i) {
 		std::size_t c = static_cast<std::size_t>(mpt::char_value(str[i]));
 		if (c < std::size(table)) {
-			res.push_back(static_cast<mpt::widechar>(table[c]));
+			encode_single_wide(res, table[c]);
 		} else {
 			res.push_back(replacement);
 		}
@@ -588,7 +588,7 @@ inline Tdststring encode_8bit(const mpt::widestring & str, const char32_t (&tabl
 	Tdststring res;
 	res.reserve(str.length());
 	for (std::size_t i = 0; i < str.length(); ++i) {
-		char32_t c = static_cast<char32_t>(str[i]);
+		char32_t c = decode_single_wide(i, str);
 		bool found = false;
 		// Try non-control characters first.
 		// In cases where there are actual characters mirrored in this range (like in AMS/AMS2 character sets),
@@ -626,7 +626,7 @@ inline mpt::widestring decode_8bit_no_c1(const Tsrcstring & str, const char32_t 
 		if ((0x80 <= c) && (c <= 0x9f)) {
 			res.push_back(replacement);
 		} else if (c < std::size(table)) {
-			res.push_back(static_cast<mpt::widechar>(table[c]));
+			encode_single_wide(res, table[c]);
 		} else {
 			res.push_back(replacement);
 		}
@@ -639,7 +639,7 @@ inline Tdststring encode_8bit_no_c1(const mpt::widestring & str, const char32_t 
 	Tdststring res;
 	res.reserve(str.length());
 	for (std::size_t i = 0; i < str.length(); ++i) {
-		char32_t c = static_cast<char32_t>(str[i]);
+		char32_t c = decode_single_wide(i, str);
 		bool found = false;
 		// Try non-control characters first.
 		// In cases where there are actual characters mirrored in this range (like in AMS/AMS2 character sets),
@@ -678,7 +678,7 @@ inline mpt::widestring decode_ascii(const Tsrcstring & str, mpt::widechar replac
 	for (std::size_t i = 0; i < str.length(); ++i) {
 		uint8 c = mpt::char_value(str[i]);
 		if (c <= 0x7f) {
-			res.push_back(static_cast<mpt::widechar>(static_cast<uint32>(c)));
+			encode_single_wide(res, static_cast<char32_t>(static_cast<uint32>(c)));
 		} else {
 			res.push_back(replacement);
 		}
@@ -691,9 +691,9 @@ inline Tdststring encode_ascii(const mpt::widestring & str, char replacement = '
 	Tdststring res;
 	res.reserve(str.length());
 	for (std::size_t i = 0; i < str.length(); ++i) {
-		char32_t c = static_cast<char32_t>(str[i]);
+		char32_t c = decode_single_wide(i, str);
 		if (c <= 0x7f) {
-			res.push_back(static_cast<typename Tdststring::value_type>(static_cast<uint8>(c)));
+			res.push_back(static_cast<typename Tdststring::value_type>(static_cast<uint8>(static_cast<uint32>(c))));
 		} else {
 			res.push_back(replacement);
 		}
@@ -708,7 +708,7 @@ inline mpt::widestring decode_iso8859_1(const Tsrcstring & str, mpt::widechar re
 	res.reserve(str.length());
 	for (std::size_t i = 0; i < str.length(); ++i) {
 		uint8 c = mpt::char_value(str[i]);
-		res.push_back(static_cast<mpt::widechar>(static_cast<uint32>(c)));
+		encode_single_wide(res, static_cast<char32_t>(static_cast<uint32>(c)));
 	}
 	return res;
 }
@@ -718,7 +718,7 @@ inline Tdststring encode_iso8859_1(const mpt::widestring & str, char replacement
 	Tdststring res;
 	res.reserve(str.length());
 	for (std::size_t i = 0; i < str.length(); ++i) {
-		char32_t c = static_cast<char32_t>(str[i]);
+		char32_t c = decode_single_wide(i, str);
 		if (c <= 0xff) {
 			res.push_back(static_cast<typename Tdststring::value_type>(static_cast<uint8>(c)));
 		} else {
