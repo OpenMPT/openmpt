@@ -773,7 +773,7 @@ inline mpt::widestring decode_utf8(const Tsrcstring & str, mpt::widechar replace
 						continue;
 					}
 				}
-				encode_single_wide(out, ucs4);			
+				encode_single_wide(out, ucs4);
 				ucs4 = 0;
 			}
 		}
