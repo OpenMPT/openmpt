@@ -190,7 +190,7 @@ protected:
 	};
 
 	bool m_retry = true;
-	bool m_allowMultiple = true;
+	bool m_allowMultiple = false;
 	bool m_isVolEffect = false;
 };
 
