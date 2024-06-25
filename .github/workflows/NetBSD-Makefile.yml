@@ -53,6 +53,8 @@ jobs:
         sync_files: false
         shutdown_vm: false
         run: |
+          sudo pkgin -y update
+          sudo pkgin -y full-upgrade
           sudo pkgin -y install subversion git p5-XML-XPath mawk
           sudo pkgin -y install gmake pkgconf
           sudo pkgin -y install mpg123 libogg libvorbis flac libsndfile pulseaudio portaudio SDL2
