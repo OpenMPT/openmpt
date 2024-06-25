@@ -1127,7 +1127,8 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				{
 					if(m.command == CMD_OFFSET)
 					{
-						ProcessSampleOffset(chn, nChn, playState);
+						if(!porta || !(GetType() & (MOD_TYPE_XM | MOD_TYPE_DBM)))
+							ProcessSampleOffset(chn, nChn, playState);
 					} else if(m.command == CMD_OFFSETPERCENTAGE)
 					{
 						SampleOffset(chn, Util::muldiv_unsigned(chn.nLength, m.param, 256));
@@ -3378,7 +3379,7 @@ bool CSoundFile::ProcessEffects()
 			{
 				// FT2 compatibility: Portamento + Offset = Ignore offset
 				// Test case: porta-offset.xm
-				if(bPorta && GetType() == MOD_TYPE_XM)
+				if(bPorta && (GetType() & (MOD_TYPE_XM | MOD_TYPE_DBM)))
 					break;
 
 				ProcessSampleOffset(chn, nChn, m_PlayState);
