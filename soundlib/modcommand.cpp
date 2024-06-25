@@ -1409,6 +1409,8 @@ std::pair<EffectCommand, ModCommand::PARAM> ModCommand::FillInTwoCommands(Effect
 		case CMD_MED_SYNTH_JUMP:
 			effect2 = CMD_NONE;
 			break;
+		default:
+			break;
 		}
 	}
 
