@@ -1348,6 +1348,41 @@ bool ModCommand::CombineEffects(EffectCommand &eff1, uint8 &param1, EffectComman
 
 std::pair<EffectCommand, ModCommand::PARAM> ModCommand::FillInTwoCommands(EffectCommand effect1, uint8 param1, EffectCommand effect2, uint8 param2)
 {
+	if(effect1 == effect2)
+	{
+		// For non-sliding, absolute effects, it doesn't make sense to keep both commands
+		switch(effect1)
+		{
+		case CMD_ARPEGGIO:
+		case CMD_PANNING8:
+		case CMD_OFFSET:
+		case CMD_POSITIONJUMP:
+		case CMD_VOLUME:
+		case CMD_PATTERNBREAK:
+		case CMD_SPEED:
+		case CMD_TEMPO:
+		case CMD_CHANNELVOLUME:
+		case CMD_GLOBALVOLUME:
+		case CMD_KEYOFF:
+		case CMD_SETENVPOSITION:
+		case CMD_MIDI:
+		case CMD_SMOOTHMIDI:
+		case CMD_DELAYCUT:
+		case CMD_FINETUNE:
+		case CMD_FINETUNE_SMOOTH:
+		case CMD_DUMMY:
+		case CMD_REVERSEOFFSET:
+		case CMD_DBMECHO:
+		case CMD_OFFSETPERCENTAGE:
+		case CMD_DIGIREVERSESAMPLE:
+		case CMD_VOLUME8:
+		case CMD_HMN_MEGA_ARP:
+		case CMD_MED_SYNTH_JUMP:
+			effect2 = CMD_NONE;
+			break;
+		}
+	}
+
 	for(uint8 n = 0; n < 4; n++)
 	{
 		if(auto volCmd = ModCommand::ConvertToVolCommand(effect1, param1, (n > 1)); effect1 == CMD_NONE || volCmd.first != VOLCMD_NONE)
