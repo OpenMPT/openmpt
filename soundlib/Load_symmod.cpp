@@ -1421,8 +1421,8 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 							m = syncPlayCommand;
 							if(m.command == CMD_NONE && chnState.calculatedVol != chnStates[chn - 1].calculatedVol)
 							{
-								m.command = CMD_CHANNELVOLUME;
-								m.param = chnState.calculatedVol = chnStates[chn - 1].calculatedVol;
+								chnState.calculatedVol = chnStates[chn - 1].calculatedVol;
+								m.SetEffectCommand(CMD_CHANNELVOLUME, chnState.calculatedVol);
 							}
 							if(!event.IsGlobal())
 								continue;
@@ -1437,37 +1437,32 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 								switch(event.param)
 								{
 								case SymEvent::StopSample:
-									m.volcmd = VOLCMD_PLAYCONTROL;
-									m.vol = 0;
+									m.SetVolumeCommand(VOLCMD_PLAYCONTROL, 0);
 									chnState.stopped = true;
 									break;
 
 								case SymEvent::ContSample:
-									m.volcmd = VOLCMD_PLAYCONTROL;
-									m.vol = 1;
+									m.SetVolumeCommand(VOLCMD_PLAYCONTROL, 1);
 									chnState.stopped = false;
 									break;
 
 								case SymEvent::KeyOff:
 									if(m.note == NOTE_NONE)
 										m.note = chnState.lastNote;
-									m.volcmd = VOLCMD_OFFSET;
-									m.vol = 1;
+									m.SetVolumeCommand(VOLCMD_OFFSET, 1);
 									break;
 
 								case SymEvent::SpeedDown:
 									if(patternSpeed > 1)
 									{
-										m.command = CMD_SPEED;
-										m.param = --patternSpeed;
+										m.SetEffectCommand(CMD_SPEED, --patternSpeed);
 									}
 									break;
 
 								case SymEvent::SpeedUp:
 									if(patternSpeed < 0xFF)
 									{
-										m.command = CMD_SPEED;
-										m.param = ++patternSpeed;
+										m.SetEffectCommand(CMD_SPEED, ++patternSpeed);
 									}
 									break;
 
@@ -1476,36 +1471,29 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 									if(mappedInst != chnState.lastInst)
 										break;
 									m.note = note;
-									m.command = CMD_TONEPORTAMENTO;
-									m.param = 0xFF;
+									m.SetEffectCommand(CMD_TONEPORTAMENTO, 0xFF);
 									chnState.curPitchSlide = 0;
 									chnState.tonePortaRemain = 0;
 									break;
 
 								// fine portamentos with range up to half a semitone
 								case SymEvent::PitchUp:
-									m.command = CMD_PORTAMENTOUP;
-									m.param = 0xF2;
+									m.SetEffectCommand(CMD_PORTAMENTOUP, 0xF2);
 									break;
 								case SymEvent::PitchDown:
-									m.command = CMD_PORTAMENTODOWN;
-									m.param = 0xF2;
+									m.SetEffectCommand(CMD_PORTAMENTODOWN, 0xF2);
 									break;
 								case SymEvent::PitchUp2:
-									m.command = CMD_PORTAMENTOUP;
-									m.param = 0xF4;
+									m.SetEffectCommand(CMD_PORTAMENTOUP, 0xF4);
 									break;
 								case SymEvent::PitchDown2:
-									m.command = CMD_PORTAMENTODOWN;
-									m.param = 0xF4;
+									m.SetEffectCommand(CMD_PORTAMENTODOWN, 0xF4);
 									break;
 								case SymEvent::PitchUp3:
-									m.command = CMD_PORTAMENTOUP;
-									m.param = 0xF8;
+									m.SetEffectCommand(CMD_PORTAMENTOUP, 0xF8);
 									break;
 								case SymEvent::PitchDown3:
-									m.command = CMD_PORTAMENTODOWN;
-									m.param = 0xF8;
+									m.SetEffectCommand(CMD_PORTAMENTODOWN, 0xF8);
 									break;
 								}
 							} else
@@ -1534,8 +1522,7 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 							   applyVolume || chnState.calculatedVol != newVol)
 							{
 								chnState.calculatedVol = newVol;
-								m.command = CMD_CHANNELVOLUME;
-								m.param = newVol;
+								m.SetEffectCommand(CMD_CHANNELVOLUME, newVol);
 							}
 
 							// Key-On commands with stereo instruments are played on both channels - unless there's already some sort of event
@@ -1604,8 +1591,8 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 								const int distance = std::abs((note - chnState.lastNote) * 32);
 								chnState.curPitchSlide = 0;
 								m.note = chnState.lastNote = note;
-								m.command = CMD_TONEPORTAMENTO;
-								chnState.tonePortaAmt = m.param = mpt::saturate_cast<ModCommand::PARAM>(distance / (2 * event.param));
+								chnState.tonePortaAmt = mpt::saturate_cast<ModCommand::PARAM>(distance / (2 * event.param));
+								m.SetEffectCommand(CMD_TONEPORTAMENTO, chnState.tonePortaAmt);
 								chnState.tonePortaRemain = static_cast<uint16>(distance - std::min(distance, chnState.tonePortaAmt * (patternSpeed - 1)));
 							}
 							break;
@@ -1625,8 +1612,7 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 							break;
 						case SymEvent::AddHalfTone:
 							m.note = chnState.lastNote = Clamp(static_cast<uint8>(chnState.lastNote + event.param), NOTE_MIN, NOTE_MAX);
-							m.command = CMD_TONEPORTAMENTO;
-							m.param = 0xFF;
+							m.SetEffectCommand(CMD_TONEPORTAMENTO, 0xFF);
 							chnState.tonePortaRemain = 0;
 							break;
 
@@ -1638,15 +1624,13 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 #endif
 							if(macroMap.count(event))
 							{
-								m.command = CMD_MIDI;
-								m.param = macroMap[event];
+								m.SetEffectCommand(CMD_MIDI, macroMap[event]);
 							} else if(macroMap.size() < m_MidiCfg.Zxx.size())
 							{
 								uint8 param = static_cast<uint8>(macroMap.size());
 								if(ConvertDSP(event, m_MidiCfg.Zxx[param], *this))
 								{
-									m.command = CMD_MIDI;
-									m.param = macroMap[event] = 0x80 | param;
+									m.SetEffectCommand(CMD_MIDI, macroMap[event] = 0x80 | param);
 
 									if(event.command == SymEvent::DSPEcho || event.command == SymEvent::DSPDelay)
 										useDSP = true;
@@ -1660,14 +1644,13 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 							// The effect continues on the following rows until the correct amount is reached.
 							if(event.param < 1)
 								break;
-							m.command = CMD_RETRIG;
-							m.param = static_cast<ModCommand::PARAM>(std::min(15, event.inst + 1));
+							m.SetEffectCommand(CMD_RETRIG, static_cast<ModCommand::PARAM>(std::min(15, event.inst + 1)));
 							chnState.retriggerRemain = static_cast<uint16>(event.param * (event.inst + 1u));
 							break;
 
 						case SymEvent::SetSpeed:
-							m.command = CMD_SPEED;
-							m.param = patternSpeed = event.param ? event.param : 4u;
+							patternSpeed = event.param ? event.param : 4u;
+							m.SetEffectCommand(CMD_SPEED, patternSpeed);
 							break;
 
 							// TODO this applies a fade on the sample level
@@ -1685,17 +1668,14 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 								if(volL != chnState.channelVol)
 								{
 									chnState.channelVol = volL;
-
-									m.command = CMD_CHANNELVOLUME;
-									m.param   = chnState.calculatedVol = static_cast<uint8>(Util::muldivr_unsigned(chnState.lastVol, chnState.channelVol, 100));
+									chnState.calculatedVol = static_cast<uint8>(Util::muldivr_unsigned(chnState.lastVol, chnState.channelVol, 100));
+									m.SetEffectCommand(CMD_CHANNELVOLUME, chnState.calculatedVol);
 								}
 								if(event.note == 4 && chn < (GetNumChannels() - 1) && chnStates[chn + 1].channelVol != volR)
 								{
 									chnStates[chn + 1].channelVol = volR;
-
-									ModCommand &next = rowBase[chn + 1];
-									next.command = CMD_CHANNELVOLUME;
-									next.param   = chnState.calculatedVol = static_cast<uint8>(Util::muldivr_unsigned(chnState.lastVol, chnState.channelVol, 100));
+									chnState.calculatedVol = static_cast<uint8>(Util::muldivr_unsigned(chnState.lastVol, chnState.channelVol, 100));
+									rowBase[chn + 1].SetEffectCommand(CMD_CHANNELVOLUME, chnState.calculatedVol);
 								}
 							}
 							break;
@@ -1732,8 +1712,7 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 								m.instr = chnState.lastInst = mappedInst;
 							if(event.command == SymEvent::ReplayFrom)
 							{
-								m.volcmd = VOLCMD_TONEPORTAMENTO;
-								m.vol = 1;
+								m.SetVolumeCommand(VOLCMD_TONEPORTAMENTO, 1);
 							}
 							// don't always add the command, because often FromAndPitch is used with offset 0
 							// to act as a key-on which doesn't cancel volume slides, etc
@@ -1742,8 +1721,7 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 								double sampleVib = 0.0;
 								if(chnState.sampleVibDepth)
 									sampleVib = chnState.sampleVibDepth * (std::sin(chnState.sampleVibPhase * (mpt::numbers::pi * 2.0 / 1024.0) + 1.5 * mpt::numbers::pi) - 1.0) / 4.0;
-								m.command = CMD_OFFSETPERCENTAGE;
-								m.param   = mpt::saturate_round<ModCommand::PARAM>(event.param + chnState.fromAdd + sampleVib);
+								m.SetEffectCommand(CMD_OFFSETPERCENTAGE, mpt::saturate_round<ModCommand::PARAM>(event.param + chnState.fromAdd + sampleVib));
 							}
 							chnState.tonePortaRemain = 0;
 							break;
@@ -1759,10 +1737,7 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 						{
 							chnState.retriggerRemain = std::max(chnState.retriggerRemain, static_cast<uint16>(patternSpeed)) - patternSpeed;
 							if(m.command == CMD_NONE)
-							{
-								m.command = CMD_RETRIG;
-								m.param = 0;
-							}
+								m.SetEffectCommand(CMD_RETRIG, 0);
 						}
 
 						// Handle fractional volume slides
@@ -1776,29 +1751,25 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 									uint8 slideAmt = std::min<uint8>(15, mpt::saturate_round<uint8>(chnState.curVolSlideAmt / (patternSpeed - 1)));
 									chnState.curVolSlideAmt -= static_cast<float>(slideAmt * (patternSpeed - 1));
 									// normal slide up
-									m.command = CMD_CHANNELVOLSLIDE;
-									m.param = slideAmt << 4;
+									m.SetEffectCommand(CMD_CHANNELVOLSLIDE, slideAmt << 4);
 								} else if(chnState.curVolSlideAmt >= 1.0f)
 								{
 									uint8 slideAmt = std::min<uint8>(15, mpt::saturate_round<uint8>(chnState.curVolSlideAmt));
 									chnState.curVolSlideAmt -= static_cast<float>(slideAmt);
 									// fine slide up
-									m.command = CMD_CHANNELVOLSLIDE;
-									m.param = (slideAmt << 4) | 0x0F;
+									m.SetEffectCommand(CMD_CHANNELVOLSLIDE, (slideAmt << 4) | 0x0F);
 								} else if(patternSpeed > 1 && chnState.curVolSlideAmt <= -(patternSpeed - 1))
 								{
 									uint8 slideAmt = std::min<uint8>(15, mpt::saturate_round<uint8>(-chnState.curVolSlideAmt / (patternSpeed - 1)));
 									chnState.curVolSlideAmt += static_cast<float>(slideAmt * (patternSpeed - 1));
 									// normal slide down
-									m.command = CMD_CHANNELVOLSLIDE;
-									m.param = slideAmt;
+									m.SetEffectCommand(CMD_CHANNELVOLSLIDE, slideAmt);
 								} else if(chnState.curVolSlideAmt <= -1.0f)
 								{
 									uint8 slideAmt = std::min<uint8>(14, mpt::saturate_round<uint8>(-chnState.curVolSlideAmt));
 									chnState.curVolSlideAmt += static_cast<float>(slideAmt);
 									// fine slide down
-									m.command = CMD_CHANNELVOLSLIDE;
-									m.param = slideAmt | 0xF0;
+									m.SetEffectCommand(CMD_CHANNELVOLSLIDE, slideAmt | 0xF0);
 								}
 							}
 						}
@@ -1813,29 +1784,25 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 									uint8 slideAmt = std::min<uint8>(0xDF, mpt::saturate_round<uint8>(chnState.curPitchSlideAmt / (patternSpeed - 1)));
 									chnState.curPitchSlideAmt -= static_cast<float>(slideAmt * (patternSpeed - 1));
 									// normal slide up
-									m.command = CMD_PORTAMENTOUP;
-									m.param = slideAmt;
+									m.SetEffectCommand(CMD_PORTAMENTOUP, slideAmt);
 								} else if(chnState.curPitchSlideAmt >= 1.0f)
 								{
 									uint8 slideAmt = std::min<uint8>(15, mpt::saturate_round<uint8>(chnState.curPitchSlideAmt));
 									chnState.curPitchSlideAmt -= static_cast<float>(slideAmt);
 									// fine slide up
-									m.command = CMD_PORTAMENTOUP;
-									m.param = slideAmt | 0xF0;
+									m.SetEffectCommand(CMD_PORTAMENTOUP, slideAmt | 0xF0);
 								} else if(patternSpeed > 1 && chnState.curPitchSlideAmt <= -(patternSpeed - 1))
 								{
 									uint8 slideAmt = std::min<uint8>(0xDF, mpt::saturate_round<uint8>(-chnState.curPitchSlideAmt / (patternSpeed - 1)));
 									chnState.curPitchSlideAmt += static_cast<float>(slideAmt * (patternSpeed - 1));
 									// normal slide down
-									m.command = CMD_PORTAMENTODOWN;
-									m.param = slideAmt;
+									m.SetEffectCommand(CMD_PORTAMENTODOWN, slideAmt);
 								} else if(chnState.curPitchSlideAmt <= -1.0f)
 								{
 									uint8 slideAmt = std::min<uint8>(14, mpt::saturate_round<uint8>(-chnState.curPitchSlideAmt));
 									chnState.curPitchSlideAmt += static_cast<float>(slideAmt);
 									// fine slide down
-									m.command = CMD_PORTAMENTODOWN;
-									m.param = slideAmt | 0xF0;
+									m.SetEffectCommand(CMD_PORTAMENTODOWN, slideAmt | 0xF0);
 								}
 							}
 							// TODO: use volume column if effect column is occupied
@@ -1845,27 +1812,23 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 								{
 									uint8 slideAmt = std::min<uint8>(9, mpt::saturate_round<uint8>(chnState.curPitchSlideAmt / (patternSpeed - 1)) / 4);
 									chnState.curPitchSlideAmt -= static_cast<float>(slideAmt * (patternSpeed - 1) * 4);
-									m.volcmd = VOLCMD_PORTAUP;
-									m.vol = slideAmt;
+									m.SetVolumeCommand(VOLCMD_PORTAUP, slideAmt);
 								} else if(patternSpeed > 1 && chnState.curPitchSlideAmt / 4 <= -(patternSpeed - 1))
 								{
 									uint8 slideAmt = std::min<uint8>(9, mpt::saturate_round<uint8>(-chnState.curPitchSlideAmt / (patternSpeed - 1)) / 4);
 									chnState.curPitchSlideAmt += static_cast<float>(slideAmt * (patternSpeed - 1) * 4);
-									m.volcmd = VOLCMD_PORTADOWN;
-									m.vol = slideAmt;
+									m.SetVolumeCommand(VOLCMD_PORTADOWN, slideAmt);
 								}
 							}
 						}
 						// Vibrato and Tremolo
 						if(m.command == CMD_NONE && chnState.curVibrato != 0)
 						{
-							m.command = CMD_VIBRATO;
-							m.param = chnState.curVibrato;
+							m.SetEffectCommand(CMD_VIBRATO, chnState.curVibrato);
 						}
 						if(m.command == CMD_NONE && chnState.curTremolo != 0)
 						{
-							m.command = CMD_TREMOLO;
-							m.param = chnState.curTremolo;
+							m.SetEffectCommand(CMD_TREMOLO, chnState.curTremolo);
 						}
 						// Tone Portamento
 						if(m.command != CMD_TONEPORTAMENTO && chnState.tonePortaRemain)
