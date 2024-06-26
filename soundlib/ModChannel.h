@@ -230,6 +230,8 @@ struct ModChannel
 
 	// IT command S73-S7E
 	void InstrumentControl(uint8 param, const CSoundFile &sndFile);
+	// Volume command :xx
+	void PlayControl(uint8 param);
 
 	int32 GetMIDIPitchBend() const noexcept { return (static_cast<int32>(microTuning) + 0x8000) / 4; }
 	void SetMIDIPitchBend(const uint8 high, const uint8 low) noexcept

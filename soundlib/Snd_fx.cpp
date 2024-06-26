@@ -1304,8 +1304,9 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 						}
 						break;
 					case VOLCMD_PLAYCONTROL:
-						if(m.vol <= 1)
-							chn.isPaused = (m.vol == 0);
+						if(m.vol >= 2 && m.vol <= 4)
+							memory.RenderChannel(nChn, oldTickDuration);  // Re-sync what we've got so far
+						chn.PlayControl(m.vol);
 						break;
 					default:
 						break;
@@ -3261,8 +3262,7 @@ bool CSoundFile::ProcessEffects()
 					break;
 
 				case VOLCMD_PLAYCONTROL:
-					if(vol <= 1)
-						chn.isPaused = (vol == 0);
+					chn.PlayControl(vol);
 					break;
 
 				default:

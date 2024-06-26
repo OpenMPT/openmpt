@@ -1300,22 +1300,26 @@ std::pair<VolumeCommand, ModCommand::VOL> ModCommand::ConvertToVolCommand(const 
 			return {VOLCMD_FINEVOLDOWN, static_cast<VOL>(param & 0x0F)};
 		break;
 	case CMD_S3MCMDEX:
-		switch(param >> 4)
+		switch(param & 0xF0)
 		{
-		case 0x08:
+		case 0x80:
 			return {VOLCMD_PANNING, static_cast<VOL>(((param & 0x0F) << 2) + 2)};
+		case 0x90:
+			if(param >= 0x9E && force)
+				return {VOLCMD_PLAYCONTROL, static_cast<VOL>(param - 0x9E + 2)};
+			break;
 		default:
 			break;
 		}
 		break;
 	case CMD_MODCMDEX:
-		switch(param >> 4)
+		switch(param & 0xF0)
 		{
-			case 0x08:
+			case 0x80:
 				return {VOLCMD_PANNING, static_cast<VOL>(((param & 0x0F) << 2) + 2)};
-			case 0x0A:
+			case 0xA0:
 				return {VOLCMD_FINEVOLUP, static_cast<VOL>(param & 0x0F)};
-			case 0x0B:
+			case 0xB0:
 				return {VOLCMD_FINEVOLDOWN, static_cast<VOL>(param & 0x0F)};
 			default:
 				break;

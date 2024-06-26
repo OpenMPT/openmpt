@@ -249,4 +249,18 @@ void ModChannel::InstrumentControl(uint8 param, const CSoundFile &sndFile)
 }
 
 
+// Volume command :xx
+void ModChannel::PlayControl(uint8 param)
+{
+	switch(param)
+	{
+	case 0: isPaused = true; break;
+	case 1: isPaused = false; break;
+	case 2: dwFlags.set(CHN_PINGPONGFLAG, false); break;
+	case 3: dwFlags.set(CHN_PINGPONGFLAG, true); break;
+	case 4: dwFlags.flip(CHN_PINGPONGFLAG); break;
+	}
+}
+
+
 OPENMPT_NAMESPACE_END
