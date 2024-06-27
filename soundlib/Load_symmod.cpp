@@ -1008,7 +1008,7 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 
 	InitializeGlobals(MOD_TYPE_MPT, static_cast<CHANNELINDEX>(fileHeader.numChannels));
 
-	m_SongFlags.set(SONG_LINEARSLIDES | SONG_EXFILTERRANGE | SONG_IMPORTED);
+	m_SongFlags.set(SONG_LINEARSLIDES | SONG_EXFILTERRANGE | SONG_AUTO_VIBRATO | SONG_AUTO_TREMOLO | SONG_IMPORTED);
 	m_playBehaviour = GetDefaultPlaybackBehaviour(MOD_TYPE_IT);
 	m_playBehaviour.reset(kITShortSampleRetrig);
 	m_nSamplePreAmp = Clamp(512 / GetNumChannels(), 16, 128);
@@ -1326,7 +1326,9 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 		uint8 channelVol       = 100;    // Volume multiplier, 0...100
 		uint8 calculatedVol    = 64;     // Final channel volume
 		uint8 fromAdd          = 0;      // Base sample offset for FROM and FR&P effects
+		bool  retrigVibrato    = false;
 		uint8 curVibrato       = 0;
+		bool  retrigTremolo    = false;
 		uint8 curTremolo       = 0;
 		uint8 sampleVibSpeed   = 0;
 		uint8 sampleVibDepth   = 0;
@@ -1474,6 +1476,7 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 									m.SetEffectCommand(CMD_TONEPORTAMENTO, 0xFF);
 									chnState.curPitchSlide = 0;
 									chnState.tonePortaRemain = 0;
+									chnState.retrigVibrato = chnState.retrigTremolo = true;
 									break;
 
 								// fine portamentos with range up to half a semitone
@@ -1506,6 +1509,7 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 										m.instr = chnState.lastInst = mappedInst;
 										chnState.curPitchSlide = 0;
 										chnState.tonePortaRemain = 0;
+										chnState.retrigVibrato = chnState.retrigTremolo = true;
 									}
 
 									if(event.param > 0)
@@ -1561,14 +1565,18 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 							m.command = CMD_NONE;
 							break;
 						case SymEvent::Tremolo:
-						{
-							// both tremolo speed and depth can go much higher than OpenMPT supports,
-							// but modules will probably use pretty sane, supportable values anyway
-							// TODO: handle very small nonzero params
-							uint8 speed = std::min<uint8>(15, event.inst >> 3);
-							uint8 depth = std::min<uint8>(15, event.param >> 3);
-							chnState.curTremolo = (speed << 4) | depth;
-						}
+							{
+								// both tremolo speed and depth can go much higher than OpenMPT supports,
+								// but modules will probably use pretty sane, supportable values anyway
+								// TODO: handle very small nonzero params
+								uint8 speed = std::min<uint8>(15, event.inst >> 3);
+								uint8 depth = std::min<uint8>(15, event.param >> 3);
+								chnState.curTremolo = (speed << 4) | depth;
+								if(chnState.curTremolo)
+									chnState.retrigTremolo = true;
+								else
+									m.SetEffectCommand(CMD_TREMOLO, 0);
+							}
 							break;
 
 							// pitch effects
@@ -1601,14 +1609,18 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 							m.command = CMD_NONE;
 							break;
 						case SymEvent::Vibrato:
-						{
-							// both vibrato speed and depth can go much higher than OpenMPT supports,
-							// but modules will probably use pretty sane, supportable values anyway
-							// TODO: handle very small nonzero params
-							uint8 speed = std::min<uint8>(15, event.inst >> 3);
-							uint8 depth = std::min<uint8>(15, event.param);
-							chnState.curVibrato = (speed << 4) | depth;
-						}
+							{
+								// both vibrato speed and depth can go much higher than OpenMPT supports,
+								// but modules will probably use pretty sane, supportable values anyway
+								// TODO: handle very small nonzero params
+								uint8 speed = std::min<uint8>(15, event.inst >> 3);
+								uint8 depth = std::min<uint8>(15, event.param);
+								chnState.curVibrato = (speed << 4) | depth;
+								if(chnState.curVibrato)
+									chnState.retrigVibrato = true;
+								else
+									m.SetEffectCommand(CMD_VIBRATO, 0);
+							}
 							break;
 						case SymEvent::AddHalfTone:
 							m.note = chnState.lastNote = Clamp(static_cast<uint8>(chnState.lastNote + event.param), NOTE_MIN, NOTE_MAX);
@@ -1822,13 +1834,15 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 							}
 						}
 						// Vibrato and Tremolo
-						if(m.command == CMD_NONE && chnState.curVibrato != 0)
+						if(m.command == CMD_NONE && chnState.curVibrato && chnState.retrigVibrato)
 						{
 							m.SetEffectCommand(CMD_VIBRATO, chnState.curVibrato);
+							chnState.retrigVibrato = false;
 						}
-						if(m.command == CMD_NONE && chnState.curTremolo != 0)
+						if(m.command == CMD_NONE && chnState.curTremolo && chnState.retrigTremolo)
 						{
 							m.SetEffectCommand(CMD_TREMOLO, chnState.curTremolo);
+							chnState.retrigTremolo = false;
 						}
 						// Tone Portamento
 						if(m.command != CMD_TONEPORTAMENTO && chnState.tonePortaRemain)
