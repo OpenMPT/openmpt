@@ -809,8 +809,9 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				break;
 			}
 
-			// The following calculations are not interesting if we just want to get the song length.
-			if(!(adjustMode & eAdjust))
+			// The following calculations are not interesting if we just want to get the song length...
+			// ...unless we're playing a Face The Music module with scripts that may modify the speed or tempo based on some volume or pitch variable (see schlendering.ftm)
+			if(!(adjustMode & eAdjust) && m_globalScript.empty())
 				continue;
 
 			ResetAutoSlides(chn);
@@ -1046,6 +1047,14 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			if(m_playBehaviour[kST3EffectMemory] && command != CMD_NONE && param != 0)
 			{
 				UpdateS3MEffectMemory(chn, param);
+			}
+		}
+
+		if(!m_globalScript.empty())
+		{
+			for(uint32 i = 0; i < nonRowTicks; i++)
+			{
+				playState.m_globalScriptState.NextTick(playState, *this);
 			}
 		}
 
