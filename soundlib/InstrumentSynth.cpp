@@ -569,12 +569,12 @@ bool InstrumentSynth::States::State::EvaluateEvent(const Event &event, PlayState
 	case Event::Type::Puma_SetPitch:
 		m_linearPitchFactor = event.i8 * 8;
 		m_periodAdd = 0;
-		m_ticksRemain = event.Byte2();
+		m_ticksRemain = std::max(event.Byte2(), uint8(1)) - 1;
 		return true;
 	case Event::Type::Puma_PitchRamp:
 		m_linearPitchFactor = 0;
 		m_periodAdd = event.i8 * 4;
-		m_ticksRemain = event.Byte2();
+		m_ticksRemain = std::max(event.Byte2(), uint8(1)) - 1;
 		return true;
 
 	case Event::Type::Mupp_SetWaveform:
