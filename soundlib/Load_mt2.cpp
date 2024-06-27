@@ -683,7 +683,7 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 					if(libraryName.length() > 4 && libraryName[libraryName.length() - 4] == '.')
 					{
 						// Remove ".dll" from library name
-						libraryName.resize(libraryName.length() - 4 );
+						libraryName.resize(libraryName.length() - 4);
 					}
 					mixPlug.Info.szLibraryName = libraryName;
 					mixPlug.Info.dwPluginId1 = Vst::kEffectMagic;

@@ -15,8 +15,8 @@ OPENMPT_NAMESPACE_BEGIN
 
 struct FTMSampleHeader
 {
-	char  name[30];   // FTM cannot load samples with a filename longer than 29 samples
-	uint8 unknown;    // Probably padding. Usually contains null or space
+	char  name[30];   // FTM cannot load samples with a filename longer than 29 characters
+	uint8 unknown;    // Probably padding. Usually contains null or space (probably overflowing from name)
 	uint8 iffOctave;  // Only relevant in song mode
 };
 
@@ -165,7 +165,7 @@ bool CSoundFile::ReadFTM(FileReader &file, ModLoadingFlags loadFlags)
 			}
 			if(!ok)
 			{
-				// Fall back to external sample mechanism. TODO: external sample loading ignores loop data on purpose, and does not support raw samples. How do we get it back?
+				// Fall back to external sample mechanism. TODO: external sample loading ignores loop data on purpose, and does not support raw samples or IFF octave selection. How do we get it back?
 				Samples[smp].uFlags.set(SMP_KEEPONDISK);
 				SetSamplePath(smp, filename);
 			}
