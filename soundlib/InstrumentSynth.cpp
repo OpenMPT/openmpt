@@ -808,10 +808,13 @@ bool InstrumentSynth::States::State::EvaluateEvent(const Event &event, PlayState
 		playState.m_nGlobalVolume = event.u16;
 		return false;
 	case Event::Type::FTM_SetTempo:
-		playState.m_nMusicTempo = TEMPO(1777517.482 / event.u16);
+		playState.m_nMusicTempo = TEMPO(1777517.482 / std::clamp(event.u16, uint16(0x1000), uint16(0x4FFF)));
 		return false;
 	case Event::Type::FTM_SetSpeed:
-		playState.m_nMusicSpeed = event.u16;
+		if(event.u16)
+			playState.m_nMusicSpeed = event.u16;
+		else
+			playState.m_nMusicSpeed = uint16_max;
 		return false;
 	case Event::Type::FTM_SetPlayPosition:
 		if(ORDERINDEX playPos = sndFile.Order().FindOrder(event.u16, event.u16); playPos != ORDERINDEX_INVALID)
