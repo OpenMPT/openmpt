@@ -2552,7 +2552,7 @@ bool CSoundFile::ProcessEffects()
 		const uint32 tickCount = m_PlayState.m_nTickCount % (m_PlayState.m_nMusicSpeed + m_PlayState.m_nFrameDelay);
 		uint32 instr = chn.rowCommand.instr;
 		ModCommand::VOLCMD volcmd = chn.rowCommand.volcmd;
-		uint32 vol = chn.rowCommand.vol;
+		ModCommand::VOL vol = chn.rowCommand.vol;
 		ModCommand::COMMAND cmd = chn.rowCommand.command;
 		uint32 param = chn.rowCommand.param;
 		bool bPorta = chn.rowCommand.IsTonePortamento();
@@ -3176,7 +3176,7 @@ bool CSoundFile::ProcessEffects()
 				{
 					// IT Compatibility: Effects in the volume column don't have an unified memory.
 					// Test case: VolColMemory.it
-					if(vol) chn.nOldVolParam = static_cast<ModCommand::PARAM>(vol); else vol = chn.nOldVolParam;
+					if(vol) chn.nOldVolParam = vol; else vol = chn.nOldVolParam;
 				}
 
 				switch(volcmd)
@@ -3192,7 +3192,7 @@ bool CSoundFile::ProcessEffects()
 							break;
 					} else
 					{
-						chn.nOldVolParam = static_cast<ModCommand::PARAM>(vol);
+						chn.nOldVolParam = vol;
 					}
 					VolumeSlide(chn, static_cast<ModCommand::PARAM>(volcmd == VOLCMD_VOLSLIDEUP ? (vol << 4) : vol));
 					break;
@@ -3204,7 +3204,7 @@ bool CSoundFile::ProcessEffects()
 					{
 						// IT Compatibility: Volume column volume slides have their own memory
 						// Test case: VolColMemory.it
-						FineVolumeUp(chn, static_cast<ModCommand::PARAM>(vol), m_playBehaviour[kITVolColMemory]);
+						FineVolumeUp(chn, vol, m_playBehaviour[kITVolColMemory]);
 					}
 					break;
 
@@ -3215,7 +3215,7 @@ bool CSoundFile::ProcessEffects()
 					{
 						// IT Compatibility: Volume column volume slides have their own memory
 						// Test case: VolColMemory.it
-						FineVolumeDown(chn, static_cast<ModCommand::PARAM>(vol), m_playBehaviour[kITVolColMemory]);
+						FineVolumeDown(chn, vol, m_playBehaviour[kITVolColMemory]);
 					}
 					break;
 
@@ -3232,7 +3232,7 @@ bool CSoundFile::ProcessEffects()
 					break;
 
 				case VOLCMD_PANSLIDELEFT:
-					PanningSlide(chn, static_cast<ModCommand::PARAM>(vol), !m_playBehaviour[kFT2VolColMemory]);
+					PanningSlide(chn, vol, !m_playBehaviour[kFT2VolColMemory]);
 					break;
 
 				case VOLCMD_PANSLIDERIGHT:
