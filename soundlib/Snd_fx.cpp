@@ -2178,8 +2178,10 @@ void CSoundFile::NoteChange(ModChannel &chn, int note, bool bPorta, bool bResetE
 		chn.paulaState.Reset();
 	}
 	const bool wasGlobalSlideRunning = chn.autoSlide.IsActive(AutoSlideCommand::GlobalVolumeSlide);
+	const bool wasChannelVolSlideRunning = chn.autoSlide.IsActive(AutoSlideCommand::VolumeDownWithDuration);
 	chn.autoSlide.Reset();
 	chn.autoSlide.SetActive(AutoSlideCommand::GlobalVolumeSlide, wasGlobalSlideRunning);
+	chn.autoSlide.SetActive(AutoSlideCommand::VolumeDownWithDuration, wasChannelVolSlideRunning);
 }
 
 
