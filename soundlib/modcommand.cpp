@@ -913,6 +913,16 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 		{
 			param = vol << 3;
 		}
+	} else if(volcmd == VOLCMD_PLAYCONTROL && (vol == 2 || vol == 3) && command == CMD_NONE
+		&& !newSpecs.HasVolCommand(VOLCMD_PLAYCONTROL)
+		&& (newSpecs.HasCommand(CMD_S3MCMDEX) || newSpecs.HasCommand(CMD_XFINEPORTAUPDOWN)))
+	{
+		volcmd = VOLCMD_NONE;
+		param = vol - 2 + 0x9E;
+		if(newSpecs.HasCommand(CMD_S3MCMDEX))
+			command = CMD_S3MCMDEX;
+		else
+			command = CMD_XFINEPORTAUPDOWN;
 	}
 
 	if((command == CMD_REVERSEOFFSET || command == CMD_OFFSETPERCENTAGE) && !newSpecs.HasCommand(command))
