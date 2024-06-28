@@ -875,7 +875,7 @@ void GlobalScriptState::NextTick(PlayState &playState, const CSoundFile &sndFile
 	{
 		auto &state = states[chn];
 		auto &modChn = playState.Chn[chn];
-		if(modChn.rowCommand.command == CMD_MED_SYNTH_JUMP && modChn.isFirstTick)
+		if(modChn.rowCommand.command == CMD_MED_SYNTH_JUMP && !playState.m_nTickCount)
 			states[chn].JumpToPosition(sndFile.m_globalScript, modChn.rowCommand.param);
 		int32 period = 0;
 		state.NextTick(sndFile.m_globalScript, playState, chn, period, sndFile, *this);
