@@ -797,7 +797,7 @@ bool EffectInfo::GetEffectNameEx(CString &pszName, const ModCommand &m, uint32 p
 							break;
 
 						case 0x80: // panning
-							s = FormatPanning(param & 0x0F, 8).c_str();
+							s = FormatPanning(param & 0x0F, (param & 0x0F) < 8 ? 8 : 7).c_str();
 							break;
 
 						case 0xA0: // high offset
@@ -890,7 +890,7 @@ bool EffectInfo::GetEffectNameEx(CString &pszName, const ModCommand &m, uint32 p
 								s += _T(" times");
 							break;
 						case 0x80: // panning
-							s = FormatPanning(param & 0x0F, 8).c_str();
+							s = FormatPanning(param & 0x0F, (param & 0x0F) < 8 ? 8 : 7).c_str();
 							break;
 						case 0x90: // retrigger
 							s.Format(_T("speed %d"), param & 0x0F);
