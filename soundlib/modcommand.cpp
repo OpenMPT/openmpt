@@ -1142,8 +1142,6 @@ std::pair<EffectCommand, ModCommand::PARAM> ModCommand::TwoRegularCommandsToMPT(
 		case CMD_MIDI:
 		case CMD_SMOOTHMIDI:
 		case CMD_DELAYCUT:
-		case CMD_FINETUNE:
-		case CMD_FINETUNE_SMOOTH:
 		case CMD_DUMMY:
 		case CMD_REVERSEOFFSET:
 		case CMD_DBMECHO:
