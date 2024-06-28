@@ -353,6 +353,8 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 	m_playBehaviour.set(kSlidesAtSpeed1);
 	m_playBehaviour.reset(kITVibratoTremoloPanbrello);
 	m_playBehaviour.reset(kITArpeggio);
+	m_playBehaviour.reset(kITInstrWithNoteOff);
+	m_playBehaviour.reset(kITInstrWithNoteOffOldEffects);
 
 	m_modFormat.formatName = U_("DigiBooster Pro");
 	m_modFormat.type = U_("dbm");
@@ -535,6 +537,14 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 					{
 						std::swap(cmd1, cmd2);
 						std::swap(param1, param2);
+					} else if(cmd1 == CMD_TONEPORTAMENTO && cmd2 == CMD_OFFSET && param2 == 0)
+					{
+						// Offset + Portmaneto: Ignore portamento. If the offset command has a non-zero parameter, keep it for effect memory.
+						cmd2 = CMD_NONE;
+					} else if(cmd2 == CMD_TONEPORTAMENTO && cmd1 == CMD_OFFSET && param1 == 0)
+					{
+						// Ditto
+						cmd1 = CMD_NONE;
 					}
 
 					const auto lostCommand = ModCommand::TwoRegularCommandsToMPT(cmd1, param1, cmd2, param2);
