@@ -415,7 +415,10 @@ void CViewSample::UpdateOPLEditor()
 	if(!IsOPLInstrument())
 	{
 		if(m_oplEditor)
+		{
 			m_oplEditor->ShowWindow(SW_HIDE);
+			m_oplEditor->EnableWindow(FALSE);
+		}
 		return;
 	}
 	CSoundFile &sndFile = GetDocument()->GetSoundFile();
@@ -435,6 +438,7 @@ void CViewSample::UpdateOPLEditor()
 		if(m_oplEditor)
 		{
 			m_oplEditor->SetPatch(sample.adlib);
+			m_oplEditor->EnableWindow(TRUE);
 			auto size = m_oplEditor->GetMinimumSize();
 			m_oplEditor->SetWindowPos(nullptr, -m_nScrollPosX, -m_nScrollPosY, std::max(size.cx, m_rcClient.right), std::max(size.cy, m_rcClient.bottom), SWP_NOZORDER | SWP_NOACTIVATE | SWP_SHOWWINDOW);
 		}
