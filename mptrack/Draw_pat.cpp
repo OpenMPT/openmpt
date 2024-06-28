@@ -633,7 +633,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 	if ((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SHOWPREVIOUS) && (ypaint < rcClient.bottom) && (ypaint == ypatternend))
 	{
 		int nVisRows = (rcClient.bottom - ypaint + m_szCell.cy - 1) / m_szCell.cy;
-		if ((nVisRows > 0) && (m_nMidRow))
+		if(nVisRows > 0)
 		{
 			PATTERNINDEX nNextPat = PATTERNINDEX_INVALID;
 			ORDERINDEX nNextOrder = order.GetNextOrderIgnoringSkips(m_nOrder);
