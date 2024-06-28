@@ -354,6 +354,8 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 	m_playBehaviour.set(kSlidesAtSpeed1);
 	m_playBehaviour.reset(kITVibratoTremoloPanbrello);
 	m_playBehaviour.reset(kITArpeggio);
+	m_playBehaviour.reset(kITInstrWithNoteOff);
+	m_playBehaviour.reset(kITInstrWithNoteOffOldEffects);
 
 	m_modFormat.formatName = U_("DigiBooster Pro");
 	m_modFormat.type = U_("dbm");
