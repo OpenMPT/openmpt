@@ -1,7 +1,7 @@
 /*
  * Globals.h
  * ---------
- * Purpose: Implementation of various views of the tracker interface.
+ * Purpose: Implementation of the base classes for the upper and lower half of the MDI child windows.
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
@@ -119,6 +119,7 @@ protected:
 	Page m_nActiveDlg = Page::Unknown;
 	int m_nInstrumentChanged = -1;
 	HWND m_hWndView = nullptr, m_hWndMDI = nullptr;
+	HWND m_oldWnd = nullptr;
 
 protected: // create from serialization only
 	CModControlView() = default;
@@ -153,6 +154,8 @@ protected:
 
 protected:
 	//{{AFX_MSG(CModControlView)
+	afx_msg LRESULT OnSaveFocusItem(WPARAM, LPARAM);
+	afx_msg void OnSetFocus(CWnd *pOldWnd);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnDestroy();
 	afx_msg void OnTabSelchange(NMHDR* pNMHDR, LRESULT* pResult);

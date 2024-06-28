@@ -1,8 +1,9 @@
 /*
- * globals.cpp
+ * Globals.cpp
  * -----------
- * Purpose: Implementation of various views of the tracker interface.
- * Notes  : (currently none)
+ * Purpose: Implementation of the base classes for the upper and lower half of the MDI child windows.
+ * Notes  : CModControlDlg = Upper half (Ctrl_*.cpp/h), which is contained inside a CModControlView together with the tab switcher (CModTabCtrl).
+ *          CModScrollView = Lower half (View_*.cpp/h).
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
@@ -192,10 +193,12 @@ BEGIN_MESSAGE_MAP(CModControlView, CView)
 	//{{AFX_MSG_MAP(CModControlView)
 	ON_WM_SIZE()
 	ON_WM_DESTROY()
+	ON_WM_SETFOCUS()
 	ON_NOTIFY(TCN_SELCHANGE, IDC_TABCTRL1,	&CModControlView::OnTabSelchange)
 	ON_MESSAGE(WM_MOD_ACTIVATEVIEW,			&CModControlView::OnActivateModView)
 	ON_MESSAGE(WM_MOD_CTRLMSG,				&CModControlView::OnModCtrlMsg)
 	ON_MESSAGE(WM_MOD_GETTOOLTIPTEXT,		&CModControlView::OnGetToolTipText)
+	ON_MESSAGE(WM_MOD_MDIDEACTIVATE,		&CModControlView::OnSaveFocusItem)
 	ON_COMMAND(ID_EDIT_CUT,					&CModControlView::OnEditCut)
 	ON_COMMAND(ID_EDIT_COPY,				&CModControlView::OnEditCopy)
 	ON_COMMAND(ID_EDIT_PASTE,				&CModControlView::OnEditPaste)
@@ -224,6 +227,22 @@ void CModControlView::OnInitialUpdate() // called first time after construct
 	m_TabCtrl.Create(WS_CHILD|WS_VISIBLE|TCS_FOCUSNEVER|TCS_FORCELABELLEFT, rect, this, IDC_TABCTRL1);
 	UpdateView(UpdateHint().ModType());
 	SetActivePage(Page::First);
+}
+
+
+LRESULT CModControlView::OnSaveFocusItem(WPARAM, LPARAM)
+{
+	// Ugly workaround for focus issue in upper view (https://bugs.openmpt.org/view.php?id=1795)
+	m_oldWnd = ::GetFocus();
+	return 0;
+}
+
+
+void CModControlView::OnSetFocus(CWnd* pOldWnd)
+{
+	if(m_oldWnd && ::IsChild(m_hWnd, m_oldWnd))
+		::SetFocus(m_oldWnd);
+	CView::OnSetFocus(pOldWnd);
 }
 
 
