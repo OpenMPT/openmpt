@@ -4057,7 +4057,7 @@ static MPT_NOINLINE void TestPCnoteSerialization()
 	FileReader file;
 	std::unique_ptr<CSoundFile> pSndFile = std::make_unique<CSoundFile>();
 	CSoundFile &sndFile = *pSndFile.get();
-	sndFile.m_nType = MOD_TYPE_MPT;
+	sndFile.ChangeModTypeTo(MOD_TYPE_MPT, false);
 	sndFile.Patterns.DestroyPatterns();
 	sndFile.ChnSettings.resize(ModSpecs::mptm.channelsMax);
 
