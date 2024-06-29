@@ -1041,10 +1041,10 @@ bool CMainFrame::DoNotification(DWORD dwSamplesRead, int64 streamPosition)
 	FlagSet<Notification::Type> notifyType(Notification::Default);
 	Notification::Item notifyItem = 0;
 
-	if(m_pSndFile->m_pModDoc)
+	if(CModDoc *modDoc = m_pSndFile->GetpModDoc())
 	{
-		notifyType = m_pSndFile->m_pModDoc->GetNotificationType();
-		notifyItem = m_pSndFile->m_pModDoc->GetNotificationItem();
+		notifyType = modDoc->GetNotificationType();
+		notifyItem = modDoc->GetNotificationItem();
 	}
 
 	// Add an entry to the notification history
@@ -1643,7 +1643,8 @@ bool CMainFrame::PlaySoundFile(CSoundFile &sndFile, INSTRUMENTINDEX nInstrument,
 	{
 		CriticalSection cs;
 		InitPreview();
-		m_WaveFile.m_nType = sndFile.GetType();
+		m_WaveFile.ChangeModTypeTo(sndFile.GetType(), false);
+		m_WaveFile.m_playBehaviour = sndFile.m_playBehaviour;
 		if ((nInstrument) && (nInstrument <= sndFile.GetNumInstruments()))
 		{
 			m_WaveFile.m_nInstruments = 1;
@@ -1685,7 +1686,7 @@ void CMainFrame::InitPreview()
 	m_WaveFile.Create(FileReader());
 	m_WaveFile.Order().SetDefaultTempoInt(125);
 	m_WaveFile.Order().SetDefaultSpeed(6);
-	m_WaveFile.m_nType = MOD_TYPE_MPT;
+	m_WaveFile.ChangeModTypeTo(MOD_TYPE_MPT, false);
 	m_WaveFile.ChnSettings.resize(2);
 	m_WaveFile.m_nInstruments = 1;
 	m_WaveFile.m_nTempoMode = TempoMode::Classic;

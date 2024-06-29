@@ -461,12 +461,11 @@ public:
 
 	static constexpr uint32 TICKS_ROW_FINISHED = uint32_max - 1u;
 
-public:	// for Editing
+private:
 #ifdef MODPLUG_TRACKER
 	CModDoc *m_pModDoc = nullptr;  // Can be a null pointer for example when previewing samples from the treeview.
 #endif // MODPLUG_TRACKER
 	Enum<MODTYPE> m_nType;
-private:
 	ModContainerType m_ContainerType = ModContainerType::None;
 public:
 	SAMPLEINDEX m_nSamples = 0;

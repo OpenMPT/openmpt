@@ -177,7 +177,7 @@ public:
 	void PostMessageToAllViews(UINT uMsg, WPARAM wParam = 0, LPARAM lParam = 0);
 	void SendNotifyMessageToAllViews(UINT uMsg, WPARAM wParam = 0, LPARAM lParam = 0);
 	void SendMessageToActiveView(UINT uMsg, WPARAM wParam = 0, LPARAM lParam = 0);
-	MODTYPE GetModType() const { return m_SndFile.m_nType; }
+	MODTYPE GetModType() const noexcept { return m_SndFile.GetType(); }
 	INSTRUMENTINDEX GetNumInstruments() const { return m_SndFile.m_nInstruments; }
 	SAMPLEINDEX GetNumSamples() const { return m_SndFile.m_nSamples; }
 

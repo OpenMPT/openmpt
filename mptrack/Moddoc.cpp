@@ -243,7 +243,7 @@ BOOL CModDoc::OnOpenDocument(LPCTSTR lpszPathName)
 		MPT_CFORMAT("File: {}\nLast saved with: {}, you are using OpenMPT {}\n\n")
 		(filename, m_SndFile.m_modFormat.madeWithTracker, Version::Current()));
 
-	if((m_SndFile.m_nType == MOD_TYPE_NONE) || (!m_SndFile.GetNumChannels()))
+	if((GetModType() == MOD_TYPE_NONE) || (!m_SndFile.GetNumChannels()))
 		return FALSE;
 
 	const bool noColors = std::find_if(std::begin(m_SndFile.ChnSettings), std::begin(m_SndFile.ChnSettings) + GetNumChannels(), [](const auto &settings) {

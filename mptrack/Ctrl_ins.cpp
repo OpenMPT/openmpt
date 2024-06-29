@@ -713,7 +713,7 @@ bool CNoteMapWnd::HandleChar(WPARAM c)
 			return true;
 		}
 
-		else if ((!m_bIns) && (sndFile.m_nType & (MOD_TYPE_IT | MOD_TYPE_MPT)))	//in note column
+		else if(!m_bIns && !(sndFile.GetType() & MOD_TYPE_XM))
 		{
 			uint32 n = pIns->NoteMap[m_nNote];
 
