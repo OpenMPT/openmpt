@@ -58,7 +58,7 @@ enum
 
 static constexpr CListCtrlEx::Header SampleHeaders[SMPLIST_COLUMNS] =
 {
-	{ _T("Sample Name"), 208, LVCFMT_LEFT },
+	{ _T("Sample Name"), 212, LVCFMT_LEFT },
 	{ _T("Num"),         45,  LVCFMT_RIGHT },
 	{ _T("Size"),        72,  LVCFMT_RIGHT },
 	{ _T("Type"),        80,  LVCFMT_RIGHT },
@@ -70,7 +70,7 @@ static constexpr CListCtrlEx::Header SampleHeaders[SMPLIST_COLUMNS] =
 
 static constexpr CListCtrlEx::Header InstrumentHeaders[INSLIST_COLUMNS] =
 {
-	{ _T("Instrument Name"), 208, LVCFMT_LEFT },
+	{ _T("Instrument Name"), 212, LVCFMT_LEFT },
 	{ _T("Num"),             45,  LVCFMT_RIGHT },
 	{ _T("Samples"),         64,  LVCFMT_RIGHT },
 	{ _T("Envelopes"),       128, LVCFMT_RIGHT },
