@@ -1369,11 +1369,11 @@ static constexpr struct
 	{KeyCommand::Hidden, kcDataEntryDownCoarseStop, _T("Stop Data Entry Down (Coarse)")},
 	{2068, kcSampleConvertNormalLoopToSustain, _T("Convert Normal Loop to Sustain Loop")},
 	{2069, kcSampleConvertSustainLoopToNormal, _T("Convert Sustain Loop to Normal Loop")},
-	{2070, kcGotoNoteColumn, _T("Go to note column")},
-	{2071, kcGotoInstrColumn, _T("Go to instrument column")},
-	{2072, kcGotoVolumeColumn, _T("Go to volume effect column")},
-	{2073, kcGotoCommandColumn, _T("Go to effect command column")},
-	{2074, kcGotoParamColumn, _T("Go to effect parameter column")},
+	{2096, kcGotoNoteColumn, _T("Go to note column")},
+	{2097, kcGotoInstrColumn, _T("Go to instrument column")},
+	{2098, kcGotoVolumeColumn, _T("Go to volume effect column")},
+	{2099, kcGotoCommandColumn, _T("Go to effect command column")},
+	{2100, kcGotoParamColumn, _T("Go to effect parameter column")},
 };
 
 // Get command descriptions etc.. loaded up.
