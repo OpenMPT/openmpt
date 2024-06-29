@@ -244,7 +244,16 @@ enum CommandID
 
 	//Pattern Editing
 	kcStartPatternEditing,
-	kcStartPatternScrolling = kcStartPatternEditing,
+
+	kcStartGotoColumn = kcStartPatternEditing,
+	kcGotoNoteColumn = kcStartGotoColumn,
+	kcGotoInstrColumn,
+	kcGotoVolumeColumn,
+	kcGotoCommandColumn,
+	kcGotoParamColumn,
+	kcEndGotoColumn = kcGotoParamColumn,
+
+	kcStartPatternScrolling,
 	kcPatternScrollLeft = kcStartPatternScrolling,
 	kcPatternScrollRight,
 	kcPatternScrollUp,

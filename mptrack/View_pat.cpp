@@ -4517,6 +4517,14 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 				SetCurrentRow(pModDoc->GetPatternSize(m_nPattern) - 1);
 			return wParam;
 
+		case kcGotoNoteColumn:
+		case kcGotoInstrColumn:
+		case kcGotoVolumeColumn:
+		case kcGotoCommandColumn:
+		case kcGotoParamColumn:
+			SetCurrentColumn(m_Cursor.GetChannel(), static_cast<PatternCursor::Columns>(wParam - kcGotoNoteColumn + PatternCursor::firstColumn));
+			return wParam;
+
 		case kcPrevEntryInColumn:
 		case kcNextEntryInColumn:
 			JumpToPrevOrNextEntry(wParam == kcNextEntryInColumn, false);

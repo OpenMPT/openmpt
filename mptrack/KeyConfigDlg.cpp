@@ -264,6 +264,7 @@ void COptionsKeyboard::DefineCommandCategories()
 		newCat.AddCommands(kcStartPlainNavigate, kcEndPlainNavigate, true);
 		newCat.AddCommands(kcStartJumpSnap, kcEndJumpSnap, true);
 		newCat.AddCommands(kcStartHomeEnd, kcEndHomeEnd, true);
+		newCat.AddCommands(kcStartGotoColumn, kcEndGotoColumn, true);
 		newCat.AddCommands(kcPrevPattern, kcNextSequence, true);
 		newCat.AddCommands(kcStartPatternScrolling, kcEndPatternScrolling, true);
 		newCat.AddCommands(kcStartSelect, kcEndSelect, true);
