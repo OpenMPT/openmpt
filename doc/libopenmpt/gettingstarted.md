@@ -165,9 +165,9 @@ How to compile
             ./build/download_externals.sh    # download liballegro source
             make CONFIG=djgpp USE_ALLEGRO42=1 BUNDLED_ALLEGRO42=1
 
-     -  American Fuzzy Lop:
+     -  afl++:
 
-        To compile libopenmpt with fuzzing instrumentation for afl-fuzz, run:
+        To compile libopenmpt with fuzzing instrumentation using afl++, run:
         
             make CONFIG=afl
         
