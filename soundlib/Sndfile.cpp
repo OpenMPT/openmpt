@@ -409,6 +409,14 @@ CSoundFile::ProbeResult CSoundFile::Probe(ProbeFlags flags, mpt::span<const std:
 }
 
 
+void CSoundFile::Create(MODTYPE type, CHANNELINDEX numChannels, CModDoc *modDoc)
+{
+	Create(FileReader{}, CSoundFile::loadCompleteModule, modDoc);
+	SetType(type);
+	ChnSettings.resize(numChannels);
+}
+
+
 bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags, CModDoc *pModDoc)
 {
 	m_nMixChannels = 0;

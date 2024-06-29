@@ -1683,11 +1683,9 @@ bool CMainFrame::PlaySoundFile(CSoundFile &sndFile, INSTRUMENTINDEX nInstrument,
 void CMainFrame::InitPreview()
 {
 	m_WaveFile.Destroy();
-	m_WaveFile.Create(FileReader());
+	m_WaveFile.Create(MOD_TYPE_MPT, 2);
 	m_WaveFile.Order().SetDefaultTempoInt(125);
 	m_WaveFile.Order().SetDefaultSpeed(6);
-	m_WaveFile.ChangeModTypeTo(MOD_TYPE_MPT, false);
-	m_WaveFile.ChnSettings.resize(2);
 	m_WaveFile.m_nInstruments = 1;
 	m_WaveFile.m_nTempoMode = TempoMode::Classic;
 	m_WaveFile.Order().assign(1, 0);

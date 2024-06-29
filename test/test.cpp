@@ -3857,9 +3857,7 @@ static MPT_NOINLINE void TestEditing()
 #ifdef MODPLUG_TRACKER
 	auto modDoc = static_cast<CModDoc *>(theApp.GetModDocTemplate()->CreateNewDocument());
 	auto &sndFile = modDoc->GetSoundFile();
-	sndFile.Create(FileReader(), CSoundFile::loadCompleteModule, modDoc);
-	sndFile.ChnSettings.resize(4);
-	sndFile.ChangeModTypeTo(MOD_TYPE_MPT);
+	sndFile.Create(MOD_TYPE_MPT, 4, modDoc);
 
 	// Rearrange channels
 	sndFile.Patterns.ResizeArray(2);
@@ -4055,11 +4053,9 @@ static void GenerateCommands(CPattern& pat, const double dProbPcs, const double 
 static MPT_NOINLINE void TestPCnoteSerialization()
 {
 	FileReader file;
-	std::unique_ptr<CSoundFile> pSndFile = std::make_unique<CSoundFile>();
-	CSoundFile &sndFile = *pSndFile.get();
-	sndFile.ChangeModTypeTo(MOD_TYPE_MPT, false);
-	sndFile.Patterns.DestroyPatterns();
-	sndFile.ChnSettings.resize(ModSpecs::mptm.channelsMax);
+	mpt::heap_value<CSoundFile> pSndFile;
+	CSoundFile &sndFile = *pSndFile;
+	sndFile.Create(MOD_TYPE_MPT, ModSpecs::mptm.channelsMax);
 
 	sndFile.Patterns.Insert(0, ModSpecs::mptm.patternRowsMin);
 	sndFile.Patterns.Insert(1, 64);

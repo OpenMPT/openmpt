@@ -663,6 +663,7 @@ public:
 	CModDoc *GetpModDoc() const noexcept { return m_pModDoc; }
 #endif  // MODPLUG_TRACKER
 
+	void Create(MODTYPE type, CHANNELINDEX numChannels, CModDoc *pModDoc = nullptr);
 	bool Create(FileReader file, ModLoadingFlags loadFlags = loadCompleteModule, CModDoc *pModDoc = nullptr);
 private:
 	bool CreateInternal(FileReader file, ModLoadingFlags loadFlags);
