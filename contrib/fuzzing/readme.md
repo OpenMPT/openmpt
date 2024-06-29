@@ -16,7 +16,7 @@ Contents:
   scripts are set up to use different exploration strategies.
 * `fuzz-settings.sh`: Set up your preferences and afl settings here before the
   first run.
-* `fuzz.c`: A tiny C program that is used by the fuzzer to test libopenmpt.
+* `fuzz.cpp`: A tiny C++ program that is used by the fuzzer to test libopenmpt.
 * `get-afl.sh`: A simple script to obtain the latest version of afl++.
   You can also make it download from a specific branch or tag, e.g.
   `GET_AFL_VERSION=stable ./get-afl.sh` to download the latest stable but
