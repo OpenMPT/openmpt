@@ -61,10 +61,10 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-#define TIMERID_GUI 1
-#define TIMERID_NOTIFY 2
+static constexpr uint32 TIMERID_GUI = 1;
+static constexpr uint32 TIMERID_NOTIFY = 2;
 
-#define MPTTIMER_PERIOD		200
+static constexpr uint32 MPTTIMER_PERIOD = 100;
 
 #if defined(MPT_BUILD_DEBUG)
 #define MPT_ENABLE_PLAYBACK_TEST_MENU
@@ -2113,10 +2113,9 @@ void CMainFrame::OnTimerGUI()
 	IdleHandlerSounddevice();
 
 	// Display Time in status bar
-	samplecount_t time = 0;
 	if(m_pSndFile != nullptr && m_pSndFile->GetSampleRate() != 0)
 	{
-		time = m_pSndFile->GetTotalSampleCount() / m_pSndFile->GetSampleRate();
+		samplecount_t time = Util::muldivr(m_pSndFile->GetTotalSampleCount(), 10, m_pSndFile->GetSampleRate());
 		if(time != m_dwTimeSec)
 		{
 			m_dwTimeSec = time;
@@ -2222,8 +2221,9 @@ void CMainFrame::SwitchToActiveView()
 void CMainFrame::OnUpdateTime(CCmdUI *)
 {
 	TCHAR s[64];
-	wsprintf(s, _T("%u:%02u:%02u"),
-		m_dwTimeSec / 3600, (m_dwTimeSec / 60) % 60, m_dwTimeSec % 60);
+	auto timeSec = m_dwTimeSec / 10u;
+	wsprintf(s, _T("%u:%02u:%02u.%u"),
+		timeSec / 3600u, (timeSec / 60u) % 60u, timeSec % 60u, m_dwTimeSec % 10u);
 
 	if(m_pSndFile != nullptr && m_pSndFile != &m_WaveFile && !m_pSndFile->IsPaused())
 	{
@@ -2232,9 +2232,9 @@ void CMainFrame::OnUpdateTime(CCmdUI *)
 		{
 			if(nPat < 10) _tcscat(s, _T(" "));
 			if(nPat < 100) _tcscat(s, _T(" "));
-			wsprintf(s + _tcslen(s), _T(" [%d]"), nPat);
+			wsprintf(s + _tcslen(s), _T(" [%u]"), nPat);
 		}
-		wsprintf(s + _tcslen(s), _T(" %dch"), m_nAvgMixChn);
+		wsprintf(s + _tcslen(s), _T(" %uch"), m_nAvgMixChn);
 	}
 	m_wndStatusBar.SetPaneText(m_wndStatusBar.CommandToIndex(ID_INDICATOR_TIME), s, TRUE);
 }
