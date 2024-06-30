@@ -15,7 +15,7 @@ FUZZING_FINDINGS_DIR=~/libopenmpt-fuzzing
 # Fuzzer timeout in ms, + = don't abort on timeout
 FUZZING_TIMEOUT=5000+
 # Path to afl-fuzz binary
-FUZZING_AFL_DIR=afl
+AFL_PATH=afl
 
 # AFL specific envs
 AFL_TRY_AFFINITY=1
