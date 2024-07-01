@@ -384,9 +384,10 @@ void COptionsKeyboard::OnCategorySelChanged()
 	if(cat < 0)
 		return;
 
+	const bool refresh = cat != m_curCategory || m_eFind.GetWindowTextLength() > 0 || m_eFindHotKey.GetWindowTextLength() > 0;
 	m_eFind.SetWindowText(_T(""));
-	m_eFindHotKey.SetWindowText(_T(""));
-	if(cat != m_curCategory)
+	OnClearHotKey();
+	if(refresh)
 	{
 		// Changed category
 		UpdateShortcutList(cat);
