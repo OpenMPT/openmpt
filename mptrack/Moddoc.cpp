@@ -330,24 +330,39 @@ bool CModDoc::OnSaveDocument(const mpt::PathString &filename, const bool setPath
 		mpt::IO::ofstream &f = sf;
 		if(f)
 		{
-			if(m_SndFile.m_SongFlags[SONG_IMPORTED] && !(GetModType() & (MOD_TYPE_MOD | MOD_TYPE_S3M)))
+			if(m_SndFile.m_SongFlags[SONG_IMPORTED])
 			{
-				// Check if any non-supported playback behaviours are enabled due to being imported from a different format
-				const auto supportedBehaviours = m_SndFile.GetSupportedPlaybackBehaviour(GetModType());
-				bool showWarning = true;
-				for(size_t i = 0; i < kMaxPlayBehaviours; i++)
+				const auto formatName = m_SndFile.GetModSpecifications().GetFileExtensionUpper();
+				if(!(GetModType() & (MOD_TYPE_MOD | MOD_TYPE_S3M)))
 				{
-					if(m_SndFile.m_playBehaviour[i] && !supportedBehaviours[i])
+					// Check if any non-supported playback behaviours are enabled due to being imported from a different format
+					const auto supportedBehaviours = m_SndFile.GetSupportedPlaybackBehaviour(GetModType());
+					bool showWarning = true;
+					for(size_t i = 0; i < kMaxPlayBehaviours; i++)
 					{
-						if(showWarning)
+						if(m_SndFile.m_playBehaviour[i] && !supportedBehaviours[i])
 						{
-							AddToLog(LogWarning, MPT_UFORMAT("Some imported Compatibility Settings that are not supported by the {} format have been disabled. Verify that the module still sounds as intended.")
-								(m_SndFile.GetModSpecifications().GetFileExtensionUpper()));
-							showWarning = false;
+							if(showWarning)
+							{
+								AddToLog(LogWarning, MPT_UFORMAT("Some imported Compatibility Settings that are not supported by the {} format have been disabled. Verify that the module still sounds as intended.")
+									(formatName));
+								showWarning = false;
+							}
+							m_SndFile.m_playBehaviour.reset(i);
 						}
-						m_SndFile.m_playBehaviour.reset(i);
 					}
 				}
+
+				for(INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++)
+				{
+					if(m_SndFile.Instruments[i] && m_SndFile.Instruments[i]->synth.HasScripts())
+					{
+						AddToLog(LogWarning, MPT_UFORMAT("Scripted instruments are not supported by the {} format and will not be exported.")(formatName));
+						break;
+					}
+				}
+				if(!m_SndFile.m_globalScript.empty())
+					AddToLog(LogWarning, MPT_UFORMAT("Global instrument scripts are not supported by the {} format and will not be exported.")(formatName));
 			}
 
 			f.exceptions(f.exceptions() | std::ios::badbit | std::ios::failbit);
