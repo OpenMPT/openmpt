@@ -32,7 +32,7 @@ struct GMCSampleHeader
 
 		if(loopLength > 2)
 		{
-			mptSmp.nLoopStart = mptSmp.nLength - loopLength;
+			mptSmp.nLoopStart = mptSmp.nLength - loopLength * 2u;
 			mptSmp.nLoopEnd = mptSmp.nLength;
 			mptSmp.uFlags.set(CHN_LOOP);
 		}
@@ -44,7 +44,7 @@ struct GMCSampleHeader
 			return false;
 		if(length > 0x7FFF || dataStart > 0x7FFF || (dataStart & 1))
 			return false;
-		if(loopLength > 2 && loopLength > (length * 2u))
+		if(loopLength > 2 && loopLength > length)
 			return false;
 		if(volume > 64)
 			return false;
