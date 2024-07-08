@@ -389,6 +389,7 @@ MPT_FILES_SOUNDLIB += soundlib/Load_dsm.cpp
 MPT_FILES_SOUNDLIB += soundlib/Load_dsym.cpp
 MPT_FILES_SOUNDLIB += soundlib/Load_dtm.cpp
 MPT_FILES_SOUNDLIB += soundlib/Loaders.h
+MPT_FILES_SOUNDLIB += soundlib/Load_etx.cpp
 MPT_FILES_SOUNDLIB += soundlib/Load_far.cpp
 MPT_FILES_SOUNDLIB += soundlib/Load_fmt.cpp
 MPT_FILES_SOUNDLIB += soundlib/Load_ftm.cpp

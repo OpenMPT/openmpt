@@ -130,6 +130,7 @@ enum class AutoSlideCommand
 	FinePortamentoDown,
 	FineVolumeSlideUp,
 	FineVolumeSlideDown,
+	VolumeDownETX,
 	VolumeSlideSTK,
 	VolumeDownWithDuration,
 	GlobalVolumeSlide,

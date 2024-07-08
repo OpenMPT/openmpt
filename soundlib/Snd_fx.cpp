@@ -857,6 +857,9 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			case CMD_AUTO_VOLUMESLIDE:
 				AutoVolumeSlide(chn, param);
 				break;
+			case CMD_VOLUMEDOWN_ETX:
+				VolumeDownETX(playState, chn, param);
+				break;
 			// Set Volume
 			case CMD_VOLUME:
 				memory.chnSettings[nChn].vol = param;
@@ -3130,7 +3133,8 @@ bool CSoundFile::ProcessEffects()
 		if(m_playBehaviour[kST3NoMutedChannels] && ChnSettings[nChn].dwFlags[CHN_MUTE])	// not even effects are processed on muted S3M channels
 			continue;
 
-		ResetAutoSlides(chn);
+		if(!m_PlayState.m_nTickCount)
+			ResetAutoSlides(chn);
 
 		// Volume Column Effect (except volume & panning)
 		/*	A few notes, paraphrased from ITTECH.TXT by Storlek (creator of schismtracker):
@@ -3722,6 +3726,10 @@ bool CSoundFile::ProcessEffects()
 		case CMD_AUTO_VOLUMESLIDE:
 			AutoVolumeSlide(chn, static_cast<ModCommand::PARAM>(param));
 			break;
+		case CMD_VOLUMEDOWN_ETX:
+			if(chn.isFirstTick)
+				VolumeDownETX(m_PlayState, chn, static_cast<ModCommand::PARAM>(param));
+			break;
 
 		case CMD_TONEPORTA_DURATION:
 			if(chn.rowCommand.IsNote() && triggerNote)
@@ -3860,13 +3868,14 @@ void CSoundFile::ResetAutoSlides(ModChannel &chn) const
 			chn.autoSlide.SetActive(AutoSlideCommand::PortamentoUp, false);
 		}
 	}
-	if(chn.autoSlide.IsActive(AutoSlideCommand::FineVolumeSlideUp) || chn.autoSlide.IsActive(AutoSlideCommand::FineVolumeSlideDown))
+	if(chn.autoSlide.IsActive(AutoSlideCommand::FineVolumeSlideUp) || chn.autoSlide.IsActive(AutoSlideCommand::FineVolumeSlideDown) || chn.autoSlide.IsActive(AutoSlideCommand::VolumeDownETX))
 	{
-		if(cmd == CMD_VOLUME || cmd == CMD_AUTO_VOLUMESLIDE || chn.rowCommand.IsNormalVolumeSlide()
+		if(cmd == CMD_VOLUME || cmd == CMD_AUTO_VOLUMESLIDE || cmd == CMD_VOLUMEDOWN_ETX || chn.rowCommand.IsNormalVolumeSlide()
 		   || volcmd == VOLCMD_VOLUME || volcmd == VOLCMD_VOLSLIDEUP || volcmd == VOLCMD_VOLSLIDEDOWN || volcmd == VOLCMD_FINEVOLUP || volcmd == VOLCMD_FINEVOLDOWN)
 		{
 			chn.autoSlide.SetActive(AutoSlideCommand::FineVolumeSlideUp, false);
 			chn.autoSlide.SetActive(AutoSlideCommand::FineVolumeSlideDown, false);
+			chn.autoSlide.SetActive(AutoSlideCommand::VolumeDownETX, false);
 		}
 	}
 }
@@ -3891,6 +3900,8 @@ void CSoundFile::ProcessAutoSlides(PlayState &playState, CHANNELINDEX channel)
 		FineVolumeUp(chn, 0, false);
 	if(chn.autoSlide.IsActive(AutoSlideCommand::FineVolumeSlideDown) && chn.rowCommand.command != CMD_AUTO_VOLUMESLIDE)
 		FineVolumeDown(chn, 0, false);
+	if(chn.autoSlide.IsActive(AutoSlideCommand::VolumeDownETX))
+		chn.nVolume = std::max(0, chn.nVolume - chn.nOldVolumeSlide);
 	if(chn.autoSlide.IsActive(AutoSlideCommand::VolumeSlideSTK))
 		VolumeSlide(chn, 0);
 	if(chn.autoSlide.IsActive(AutoSlideCommand::GlobalVolumeSlide) && chn.rowCommand.command != CMD_GLOBALVOLSLIDE)
@@ -4668,6 +4679,17 @@ void CSoundFile::AutoVolumeSlide(ModChannel &chn, ModCommand::PARAM param) const
 			chn.autoSlide.SetActive(AutoSlideCommand::FineVolumeSlideUp);
 		}
 	}
+}
+
+
+void CSoundFile::VolumeDownETX(const PlayState &playState, ModChannel &chn, ModCommand::PARAM param) const
+{
+	chn.autoSlide.SetActive(AutoSlideCommand::VolumeDownETX, param != 0);
+	if(!param || !playState.m_nSamplesPerTick)
+		return;
+	const uint32 slideDuration = Util::muldivr_unsigned(m_MixerSettings.gdwMixingFreq, 600, 1000) / param;  // 600ms at maximum volume
+	const uint32 neededTicks = std::max(uint32(1), (slideDuration + playState.m_nSamplesPerTick / 2u) / playState.m_nSamplesPerTick);
+	chn.nOldVolumeSlide = mpt::saturate_cast<uint8>(256 / neededTicks);
 }
 
 

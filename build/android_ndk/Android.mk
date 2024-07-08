@@ -124,6 +124,7 @@ LOCAL_SRC_FILES += \
 	soundlib/Load_dsm.cpp \
 	soundlib/Load_dsym.cpp \
 	soundlib/Load_dtm.cpp \
+	soundlib/Load_etx.cpp \
 	soundlib/Load_far.cpp \
 	soundlib/Load_fmt.cpp \
 	soundlib/Load_ftm.cpp \

@@ -125,6 +125,7 @@
 		CB31B3AF3F1A2B616167D9EF /* modsmp_ctrl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 09E33737D0712EA93E735577 /* modsmp_ctrl.cpp */; };
 		CC12FBA114B239D337DDF1E1 /* Compressor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9334A009842C0DFBF02F8E49 /* Compressor.cpp */; };
 		CCEFFE57CC92E18906E79497 /* MIDIEvents.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A78B5E5FFEF0D151B0FEEC9F /* MIDIEvents.cpp */; };
+		CE9155C7ADAE6FF989B7CC07 /* Load_etx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 14754CCFA70316C10FDBBB0F /* Load_etx.cpp */; };
 		CEDA1F2FDEBF4B61CB32D56F /* Chorus.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A787B7269123A91DB835F7 /* Chorus.cpp */; };
 		CF000469179F429B3ACAFAA9 /* tuningCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFE0BC51D0D82A433CDBAA91 /* tuningCollection.cpp */; };
 		CF116C1742F9E3C965479257 /* Load_symmod.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7D070D1F43950491B1972B5F /* Load_symmod.cpp */; };
@@ -243,6 +244,7 @@
 		13F63AEAA68404DC0F5CA92A /* mptFileIO.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = mptFileIO.cpp; path = ../../common/mptFileIO.cpp; sourceTree = "<group>"; };
 		13F9789407F8C2068CE3D6D4 /* ComponentManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ComponentManager.cpp; path = ../../common/ComponentManager.cpp; sourceTree = "<group>"; };
 		14715833DAFF4FA549017673 /* WindowedFIR.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = WindowedFIR.cpp; path = ../../soundlib/WindowedFIR.cpp; sourceTree = "<group>"; };
+		14754CCFA70316C10FDBBB0F /* Load_etx.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Load_etx.cpp; path = ../../soundlib/Load_etx.cpp; sourceTree = "<group>"; };
 		159B6F7E099AB8F08E85CDBE /* PluginManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = PluginManager.h; path = ../../soundlib/plugins/PluginManager.h; sourceTree = "<group>"; };
 		15A918AF09A862218E9376EF /* aligned_array.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = aligned_array.hpp; path = ../../src/mpt/base/aligned_array.hpp; sourceTree = "<group>"; };
 		1679D9615AC87ED39CEFB7A1 /* alloc.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = alloc.hpp; path = ../../src/mpt/base/alloc.hpp; sourceTree = "<group>"; };
@@ -1307,6 +1309,7 @@
 				F5D60F958863D987F13C7DD5 /* Load_dsm.cpp */,
 				9BE2D067090ADED90A9DCEA7 /* Load_dsym.cpp */,
 				0D18D5B79FA69FA9087F43F7 /* Load_dtm.cpp */,
+				14754CCFA70316C10FDBBB0F /* Load_etx.cpp */,
 				9BB2E75F2E40B1519719559F /* Load_far.cpp */,
 				9CF744BB2F850EAD985DB2FB /* Load_fmt.cpp */,
 				0C4FEA7B9EDDB46D07B658BB /* Load_ftm.cpp */,
@@ -1648,6 +1651,7 @@
 				8B4D81ED6A6A9C1F4673F82D /* Load_dsm.cpp in Sources */,
 				D2EFC1DFEDBC3091F18CC81F /* Load_dsym.cpp in Sources */,
 				F5A6792FD4C39361B0CCEF6F /* Load_dtm.cpp in Sources */,
+				CE9155C7ADAE6FF989B7CC07 /* Load_etx.cpp in Sources */,
 				D1EA5157B1076B898D10C797 /* Load_far.cpp in Sources */,
 				BD4216739C5F30A578688CB3 /* Load_fmt.cpp in Sources */,
 				609638333FB352651BBCAE73 /* Load_ftm.cpp in Sources */,

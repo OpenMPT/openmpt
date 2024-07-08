@@ -72,6 +72,7 @@ static constexpr ModFormatInfo modFormatInfo[] =
 	{ UL_("Dynamic Studio"),                     "dsm" },
 	{ UL_("Digital Symphony"),                   "dsym" },
 	{ UL_("Digital Tracker"),                    "dtm" },
+	{ UL_("EasyTrax"),                           "etx" },
 	{ UL_("Farandole Composer"),                 "far" },
 	{ UL_("FM Tracker"),                         "fmt" },
 	{ UL_("Face The Music"),                     "ftm" },

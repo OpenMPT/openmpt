@@ -784,6 +784,7 @@ public:
 	static ProbeResult ProbeFileHeaderDSM(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderDSm(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderDSym(MemoryFileReader file, const uint64 *pfilesize);
+	static ProbeResult ProbeFileHeaderETX(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderFAR(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderFMT(MemoryFileReader file, const uint64 *pfilesize);
 	static ProbeResult ProbeFileHeaderFTM(MemoryFileReader file, const uint64 *pfilesize);
@@ -845,6 +846,7 @@ public:
 	bool ReadDSM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadDSm(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadDSym(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
+	bool ReadETX(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadFAR(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadFMT(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
 	bool ReadFTM(FileReader &file, ModLoadingFlags loadFlags = loadCompleteModule);
@@ -1065,7 +1067,8 @@ protected:
 	void TonePortamentoWithDuration(ModChannel &chn, uint16 param = uint16_max) const;
 	void Vibrato(ModChannel &chn, uint32 param) const;
 	void FineVibrato(ModChannel &chn, uint32 param) const;
-	void AutoVolumeSlide(ModChannel& chn, ModCommand::PARAM param) const;
+	void AutoVolumeSlide(ModChannel &chn, ModCommand::PARAM param) const;
+	void VolumeDownETX(const PlayState &playState, ModChannel &chn, ModCommand::PARAM param) const;
 	void VolumeSlide(ModChannel &chn, ModCommand::PARAM param) const;
 	void PanningSlide(ModChannel &chn, ModCommand::PARAM param, bool memory = true) const;
 	void ChannelVolSlide(ModChannel &chn, ModCommand::PARAM param) const;

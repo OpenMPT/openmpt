@@ -50,6 +50,8 @@ dtm="S.Q."
 dtm="DAPT"
 dtm="DAIT"
 
+etx="EASYTRAX 1.0\x01\x00z\x01\x20\x00\x00\x00\x20\x04\x00\x00"
+
 far="FAR\xFE"
 far="\x0D\x0A\x1A"
 
