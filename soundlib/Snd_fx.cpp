@@ -3901,7 +3901,7 @@ void CSoundFile::ProcessAutoSlides(PlayState &playState, CHANNELINDEX channel)
 	if(chn.autoSlide.IsActive(AutoSlideCommand::FineVolumeSlideDown) && chn.rowCommand.command != CMD_AUTO_VOLUMESLIDE)
 		FineVolumeDown(chn, 0, false);
 	if(chn.autoSlide.IsActive(AutoSlideCommand::VolumeDownETX))
-		chn.nVolume = std::max(0, chn.nVolume - chn.nOldVolumeSlide);
+		chn.nVolume = std::max(int32(0), chn.nVolume - chn.nOldVolumeSlide);
 	if(chn.autoSlide.IsActive(AutoSlideCommand::VolumeSlideSTK))
 		VolumeSlide(chn, 0);
 	if(chn.autoSlide.IsActive(AutoSlideCommand::GlobalVolumeSlide) && chn.rowCommand.command != CMD_GLOBALVOLSLIDE)

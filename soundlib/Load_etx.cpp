@@ -142,7 +142,7 @@ bool CSoundFile::ReadETX(FileReader &file, ModLoadingFlags loadFlags)
 				{
 					m->note = NOTE_MIDDLEC - 24 + note;
 					m->instr = instr + 1;
-					m->SetVolumeCommand(VOLCMD_VOLUME, (std::min(vol, uint8(127)) + 1u) / 2u);
+					m->SetVolumeCommand(VOLCMD_VOLUME, static_cast<ModCommand::VOL>((std::min(vol, uint8(127)) + 1u) / 2u));
 				}
 			}
 		}
