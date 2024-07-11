@@ -339,7 +339,19 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		nonCompatTracker = true;
 		break;
 	case S3MFileHeader::trkOpenMPT:
-		if(fileHeader.cwtv != S3MFileHeader::trkGraoumfTracker)
+		if((fileHeader.cwtv & 0xFF00) == S3MFileHeader::trkNESMusa)
+		{
+			madeWithTracker = U_("NESMusa");
+			formatTrackerStr = true;
+		} else if(fileHeader.reserved2 == 0 && fileHeader.ultraClicks == 16 && fileHeader.channels[1] != 1)
+		{
+			// Liquid Tracker's ID clashes with OpenMPT's.
+			// OpenMPT started writing full version information with OpenMPT 1.29 and later changed the ultraClicks value from 8 to 16.
+			// Liquid Tracker writes an ultraClicks value of 16.
+			// So we assume that a file was saved with Liquid Tracker if the reserved fields are 0 and ultraClicks is 16.
+			madeWithTracker = U_("Liquid Tracker");
+			formatTrackerStr = true;
+		} else if(fileHeader.cwtv != S3MFileHeader::trkGraoumfTracker)
 		{
 			uint32 mptVersion = (fileHeader.cwtv & S3MFileHeader::versionMask) << 16;
 			if(mptVersion >= 0x01'29'00'00)

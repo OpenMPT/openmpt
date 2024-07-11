@@ -53,8 +53,9 @@ struct S3MFileHeader
 		trkIT2_14         = 0x3214,
 		trkBeRoTrackerOld = 0x4100,  // Used from 2004 to 2012
 		trkGraoumfTracker = 0x5447,
+		trkNESMusa        = 0x5700,
 		trkCamoto         = 0xCA00,
-		trkPlayerPRO      = 0x2013  // PlayerPRO on Intel doesn't byte-swap the tracker ID bytes
+		trkPlayerPRO      = 0x2013,  // PlayerPRO on Intel doesn't byte-swap the tracker ID bytes
 	};
 
 	// Flags
