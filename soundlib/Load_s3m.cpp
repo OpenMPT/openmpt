@@ -270,6 +270,9 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 				madeWithTracker = U_("PlayerPRO");
 			else  // Always stereo
 				madeWithTracker = U_("Velvet Studio");
+		} else if(fileHeader.cwtv == S3MFileHeader::trkST3_20 && fileHeader.special == 0 && fileHeader.ultraClicks == 0 && fileHeader.flags == 8 && fileHeader.usePanningTable == 0)
+		{
+			madeWithTracker = U_("Impulse Tracker < 1.03");  // Not sure if 1.02 saves like this as I don't have it
 		} else
 		{
 			// ST3.20 should only ever write ultra-click values 16, 24 and 32 (corresponding to 8, 12 and 16 in the GUI), ST3.01/3.03 should only write 0,
@@ -294,6 +297,9 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			madeWithTracker = U_("Impulse Tracker");
 			formatTrackerStr = true;
+		} else if (fileHeader.cwtv == S3MFileHeader::trkIT1_old)
+		{
+			madeWithTracker = U_("Impulse Tracker 1.03");  // Could also be 1.02, maybe? I don't have that one
 		} else
 		{
 			madeWithTracker = MPT_UFORMAT("Impulse Tracker 2.14p{}")(fileHeader.cwtv - S3MFileHeader::trkIT2_14);
