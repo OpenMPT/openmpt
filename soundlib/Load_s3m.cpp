@@ -248,7 +248,10 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 			madeWithTracker = U_("Akord");
 		break;
 	case S3MFileHeader::trkScreamTracker:
-		if(fileHeader.cwtv == S3MFileHeader::trkST3_20 && fileHeader.special == 0 && (fileHeader.ordNum & 0x0F) == 0 && fileHeader.ultraClicks == 0 && (fileHeader.flags & ~0x50) == 0 && fileHeader.usePanningTable == S3MFileHeader::idPanning)
+		if(!memcmp(&fileHeader.reserved2, "SCLUB2.0", 8))
+		{
+			madeWithTracker = U_("Sound Club 2");
+		} else if(fileHeader.cwtv == S3MFileHeader::trkST3_20 && fileHeader.special == 0 && (fileHeader.ordNum & 0x0F) == 0 && fileHeader.ultraClicks == 0 && (fileHeader.flags & ~0x50) == 0 && fileHeader.usePanningTable == S3MFileHeader::idPanning)
 		{
 			// MPT and OpenMPT before 1.17.03.02 - Simply keep default (filter) MIDI macros
 			if((fileHeader.masterVolume & 0x80) != 0)
