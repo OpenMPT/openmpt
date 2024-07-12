@@ -669,6 +669,10 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 			// Fix arpeggios in kragle_-_happy_day.xm
 			m_playBehaviour.reset(kFT2Arpeggio);
 			isMadTracker = true;
+			if(memcmp(fileHeader.trackerName + 15, "\0\0\0\0", 4))
+				madeWithTracker = UL_("MadTracker 2 (registered)");
+			else
+				madeWithTracker = UL_("MadTracker 2");
 		} else if(!memcmp(fileHeader.trackerName, "Skale Tracker\0", 14) || !memcmp(fileHeader.trackerName, "Sk@le Tracker\0", 14))
 		{
 			m_playBehaviour.reset(kFT2ST3OffsetOutOfRange);
