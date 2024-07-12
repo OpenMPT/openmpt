@@ -568,9 +568,9 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		MPT_UNUSED(isST3);
 		m_modFormat.madeWithTracker = UL_("Unknown");
 		// Check these only after we are certain that it can't be ST3.01 because that version doesn't sanitize the ultraClicks value yet
-		if(fileHeader.cwtv == S3MFileHeader::trkST3_00 && fileHeader.ultraClicks == 0)
+		if(fileHeader.cwtv == S3MFileHeader::trkST3_01 && fileHeader.ultraClicks == 0)
 		{
-			if(!(fileHeader.flags & ~S3MFileHeader::fastVolumeSlides) && (fileHeader.masterVolume & 0x80) && usePanningTable)
+			if(!(fileHeader.flags & ~(S3MFileHeader::fastVolumeSlides | S3MFileHeader::amigaLimits)) && (fileHeader.masterVolume & 0x80) && usePanningTable)
 				m_modFormat.madeWithTracker = UL_("UNMO3");
 			else if(!fileHeader.flags && fileHeader.globalVol == 48 && fileHeader.masterVolume == 176 && fileHeader.tempo == 150 && !usePanningTable)
 				m_modFormat.madeWithTracker = UL_("deMODifier");  // SoundSmith to S3M converter
