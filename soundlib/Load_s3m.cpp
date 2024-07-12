@@ -35,7 +35,7 @@ void CSoundFile::S3MConvert(ModCommand &m, const uint8 command, const uint8 para
 	case '@': m.command = (m.param ? CMD_DUMMY : CMD_NONE); break;
 	case 'A': m.command = CMD_SPEED; break;
 	case 'B': m.command = CMD_POSITIONJUMP; break;
-	case 'C': m.command = CMD_PATTERNBREAK; if (!fromIT) m.param = static_cast<uint8>((m.param >> 4) * 10 + (m.param & 0x0F)); break;
+	case 'C': m.command = CMD_PATTERNBREAK; if(!fromIT) m.param = static_cast<uint8>((m.param >> 4) * 10 + (m.param & 0x0F)); break;
 	case 'D': m.command = CMD_VOLUMESLIDE; break;
 	case 'E': m.command = CMD_PORTAMENTODOWN; break;
 	case 'F': m.command = CMD_PORTAMENTOUP; break;
@@ -86,8 +86,8 @@ void CSoundFile::S3MSaveConvert(const ModCommand &source, uint8 &command, uint8 
 	case CMD_POSITIONJUMP:    command = 'B'; break;
 	case CMD_PATTERNBREAK:    command = 'C'; if(!toIT) param = static_cast<uint8>(((param / 10) << 4) + (param % 10)); break;
 	case CMD_VOLUMESLIDE:     command = 'D'; break;
-	case CMD_PORTAMENTODOWN:  command = 'E'; if (param >= 0xE0 && (GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM))) param = 0xDF; break;
-	case CMD_PORTAMENTOUP:    command = 'F'; if (param >= 0xE0 && (GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM))) param = 0xDF; break;
+	case CMD_PORTAMENTODOWN:  command = 'E'; if(param >= 0xE0 && (GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM))) param = 0xDF; break;
+	case CMD_PORTAMENTOUP:    command = 'F'; if(param >= 0xE0 && (GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM))) param = 0xDF; break;
 	case CMD_TONEPORTAMENTO:  command = 'G'; break;
 	case CMD_VIBRATO:         command = 'H'; break;
 	case CMD_TREMOR:          command = 'I'; break;
@@ -110,11 +110,11 @@ void CSoundFile::S3MSaveConvert(const ModCommand &source, uint8 &command, uint8 
 		command = 'X';
 		if(toIT && !(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM | MOD_TYPE_MOD)))
 		{
-			if (param == 0xA4) { command = 'S'; param = 0x91; }
-			else if (param == 0x80) { param = 0xFF; }
-			else if (param < 0x80) { param <<= 1; }
+			if(param == 0xA4) { command = 'S'; param = 0x91; }
+			else if(param == 0x80) { param = 0xFF; }
+			else if(param < 0x80) { param <<= 1; }
 			else command = 0;
-		} else if (!toIT && (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM | MOD_TYPE_MOD)))
+		} else if(!toIT && (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM | MOD_TYPE_MOD)))
 		{
 			param >>= 1;
 		}
@@ -240,49 +240,50 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	bool nonCompatTracker = false;
 	bool isST3 = false;
 	bool isSchism = false;
+	const bool usePanningTable = fileHeader.usePanningTable == S3MFileHeader::idPanning;
 	const int32 schismDateVersion = SchismTrackerEpoch + ((fileHeader.cwtv == 0x4FFF) ? fileHeader.reserved2 : (fileHeader.cwtv - 0x4050));
 	switch(fileHeader.cwtv & S3MFileHeader::trackerMask)
 	{
 	case S3MFileHeader::trkAkord & S3MFileHeader::trackerMask:
 		if(fileHeader.cwtv == S3MFileHeader::trkAkord)
-			madeWithTracker = U_("Akord");
+			madeWithTracker = UL_("Akord");
 		break;
 	case S3MFileHeader::trkScreamTracker:
 		if(!memcmp(&fileHeader.reserved2, "SCLUB2.0", 8))
 		{
-			madeWithTracker = U_("Sound Club 2");
-		} else if(fileHeader.cwtv == S3MFileHeader::trkST3_20 && fileHeader.special == 0 && (fileHeader.ordNum & 0x0F) == 0 && fileHeader.ultraClicks == 0 && (fileHeader.flags & ~0x50) == 0 && fileHeader.usePanningTable == S3MFileHeader::idPanning)
+			madeWithTracker = UL_("Sound Club 2");
+		} else if(fileHeader.cwtv == S3MFileHeader::trkST3_20 && fileHeader.special == 0 && (fileHeader.ordNum & 0x0F) == 0 && fileHeader.ultraClicks == 0 && (fileHeader.flags & ~0x50) == 0 && usePanningTable)
 		{
 			// MPT and OpenMPT before 1.17.03.02 - Simply keep default (filter) MIDI macros
 			if((fileHeader.masterVolume & 0x80) != 0)
 			{
 				m_dwLastSavedWithVersion = MPT_V("1.16");
-				madeWithTracker = U_("ModPlug Tracker / OpenMPT 1.17");
+				madeWithTracker = UL_("ModPlug Tracker / OpenMPT 1.17");
 			} else
 			{
 				// MPT 1.0 alpha5 doesn't set the stereo flag, but MPT 1.0 alpha6 does.
 				m_dwLastSavedWithVersion = MPT_V("1.00.00.A0");
-				madeWithTracker = U_("ModPlug Tracker 1.0 alpha");
+				madeWithTracker = UL_("ModPlug Tracker 1.0 alpha");
 			}
 			keepMidiMacros = true;
 			nonCompatTracker = true;
 			m_playBehaviour.set(kST3LimitPeriod);
-		} else if(fileHeader.cwtv == S3MFileHeader::trkST3_20 && fileHeader.special == 0 && fileHeader.ultraClicks == 0 && fileHeader.flags == 0 && fileHeader.usePanningTable == 0)
+		} else if(fileHeader.cwtv == S3MFileHeader::trkST3_20 && fileHeader.special == 0 && fileHeader.ultraClicks == 0 && fileHeader.flags == 0 && !usePanningTable)
 		{
 			if(fileHeader.globalVol == 64 && fileHeader.masterVolume == 48)
-				madeWithTracker = U_("PlayerPRO");
+				madeWithTracker = UL_("PlayerPRO");
 			else  // Always stereo
-				madeWithTracker = U_("Velvet Studio");
-		} else if(fileHeader.cwtv == S3MFileHeader::trkST3_20 && fileHeader.special == 0 && fileHeader.ultraClicks == 0 && fileHeader.flags == 8 && fileHeader.usePanningTable == 0)
+				madeWithTracker = UL_("Velvet Studio");
+		} else if(fileHeader.cwtv == S3MFileHeader::trkST3_20 && fileHeader.special == 0 && fileHeader.ultraClicks == 0 && fileHeader.flags == 8 && !usePanningTable)
 		{
-			madeWithTracker = U_("Impulse Tracker < 1.03");  // Not sure if 1.02 saves like this as I don't have it
+			madeWithTracker = UL_("Impulse Tracker < 1.03");  // Not sure if 1.02 saves like this as I don't have it
 		} else
 		{
 			// ST3.20 should only ever write ultra-click values 16, 24 and 32 (corresponding to 8, 12 and 16 in the GUI), ST3.01/3.03 should only write 0,
 			// though several ST3.01/3.03 files with ultra-click values of 16 have been found as well.
 			// However, we won't fingerprint these values here as it's unlikely that there is any other tracker out there disguising as ST3 and using a strange ultra-click value.
 			// Also, re-saving a file with a strange ultra-click value in ST3 doesn't fix this value unless the user manually changes it, or if it's below 16.
-			madeWithTracker = U_("Scream Tracker");
+			madeWithTracker = UL_("Scream Tracker");
 			formatTrackerStr = true;
 			isST3 = true;
 		}
@@ -290,19 +291,19 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	case S3MFileHeader::trkImagoOrpheus:
 		formatTrackerStr = (fileHeader.cwtv != S3MFileHeader::trkPlayerPRO);
 		if(formatTrackerStr)
-			madeWithTracker = U_("Imago Orpheus");
+			madeWithTracker = UL_("Imago Orpheus");
 		else
-			madeWithTracker = U_("PlayerPRO");
+			madeWithTracker = UL_("PlayerPRO");
 		nonCompatTracker = true;
 		break;
 	case S3MFileHeader::trkImpulseTracker:
 		if(fileHeader.cwtv <= S3MFileHeader::trkIT2_14)
 		{
-			madeWithTracker = U_("Impulse Tracker");
+			madeWithTracker = UL_("Impulse Tracker");
 			formatTrackerStr = true;
-		} else if (fileHeader.cwtv == S3MFileHeader::trkIT1_old)
+		} else if(fileHeader.cwtv == S3MFileHeader::trkIT1_old)
 		{
-			madeWithTracker = U_("Impulse Tracker 1.03");  // Could also be 1.02, maybe? I don't have that one
+			madeWithTracker = UL_("Impulse Tracker 1.03");  // Could also be 1.02, maybe? I don't have that one
 		} else
 		{
 			madeWithTracker = MPT_UFORMAT("Impulse Tracker 2.14p{}")(fileHeader.cwtv - S3MFileHeader::trkIT2_14);
@@ -328,7 +329,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	case S3MFileHeader::trkSchismTracker:
 		if(fileHeader.cwtv == S3MFileHeader::trkBeRoTrackerOld)
 		{
-			madeWithTracker = U_("BeRoTracker");
+			madeWithTracker = UL_("BeRoTracker");
 			m_playBehaviour.set(kST3LimitPeriod);
 		} else
 		{
@@ -346,7 +347,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	case S3MFileHeader::trkOpenMPT:
 		if((fileHeader.cwtv & 0xFF00) == S3MFileHeader::trkNESMusa)
 		{
-			madeWithTracker = U_("NESMusa");
+			madeWithTracker = UL_("NESMusa");
 			formatTrackerStr = true;
 		} else if(fileHeader.reserved2 == 0 && fileHeader.ultraClicks == 16 && fileHeader.channels[1] != 1)
 		{
@@ -354,7 +355,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 			// OpenMPT started writing full version information with OpenMPT 1.29 and later changed the ultraClicks value from 8 to 16.
 			// Liquid Tracker writes an ultraClicks value of 16.
 			// So we assume that a file was saved with Liquid Tracker if the reserved fields are 0 and ultraClicks is 16.
-			madeWithTracker = U_("Liquid Tracker");
+			madeWithTracker = UL_("Liquid Tracker");
 			formatTrackerStr = true;
 		} else if(fileHeader.cwtv != S3MFileHeader::trkGraoumfTracker)
 		{
@@ -362,22 +363,22 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 			if(mptVersion >= 0x01'29'00'00)
 				mptVersion |= fileHeader.reserved2;
 			m_dwLastSavedWithVersion = Version(mptVersion);
-			madeWithTracker = U_("OpenMPT ") + mpt::ufmt::val(m_dwLastSavedWithVersion);
+			madeWithTracker = UL_("OpenMPT ") + mpt::ufmt::val(m_dwLastSavedWithVersion);
 		} else
 		{
-			madeWithTracker = U_("Graoumf Tracker");
+			madeWithTracker = UL_("Graoumf Tracker");
 		}
 		break; 
 	case S3MFileHeader::trkBeRoTracker:
-		madeWithTracker = U_("BeRoTracker");
+		madeWithTracker = UL_("BeRoTracker");
 		m_playBehaviour.set(kST3LimitPeriod);
 		break;
 	case S3MFileHeader::trkCreamTracker:
-		madeWithTracker = U_("CreamTracker");
+		madeWithTracker = UL_("CreamTracker");
 		break;
 	default:
 		if(fileHeader.cwtv == S3MFileHeader::trkCamoto)
-			madeWithTracker = U_("Camoto");
+			madeWithTracker = UL_("Camoto");
 		break;
 	}
 	if(formatTrackerStr)
@@ -385,8 +386,8 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		madeWithTracker = MPT_UFORMAT("{} {}.{}")(madeWithTracker, (fileHeader.cwtv & 0xF00) >> 8, mpt::ufmt::hex0<2>(fileHeader.cwtv & 0xFF));
 	}
 
-	m_modFormat.formatName = U_("Scream Tracker 3");
-	m_modFormat.type = U_("s3m");
+	m_modFormat.formatName = UL_("Scream Tracker 3");
+	m_modFormat.type = UL_("s3m");
 	m_modFormat.madeWithTracker = std::move(madeWithTracker);
 	m_modFormat.charset = m_dwLastSavedWithVersion ? mpt::Charset::Windows1252 : mpt::Charset::CP437;
 
@@ -400,7 +401,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		m_playBehaviour.reset(kST3OffsetWithoutInstrument);
 		m_playBehaviour.reset(kApplyUpperPeriodLimit);
 	}
-	if (fileHeader.cwtv <= S3MFileHeader::trkST3_01)
+	if(fileHeader.cwtv <= S3MFileHeader::trkST3_01)
 	{
 		// This broken behaviour is not present in ST3.01
 		m_playBehaviour.reset(kST3TonePortaWithAdlibNote);
@@ -506,7 +507,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	file.ReadVector(patternOffsets, fileHeader.patNum);
 
 	// Read extended channel panning
-	if(fileHeader.usePanningTable == S3MFileHeader::idPanning)
+	if(usePanningTable)
 	{
 		bool hasChannelsWithoutPanning = false;
 		const auto pan = file.ReadArray<uint8, 32>();
@@ -521,9 +522,9 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			// MPT 1.0 alpha 6 up to 1.16.203 set the panning bit for all channels, regardless of whether they are used or not.
 			if(hasChannelsWithoutPanning)
-				m_modFormat.madeWithTracker = U_("ModPlug Tracker 1.16 / OpenMPT 1.17");
+				m_modFormat.madeWithTracker = UL_("ModPlug Tracker 1.16 / OpenMPT 1.17");
 			else
-				m_modFormat.madeWithTracker = U_("ModPlug Tracker");
+				m_modFormat.madeWithTracker = UL_("ModPlug Tracker");
 		}
 	}
 
@@ -565,7 +566,17 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		// Hence if a file claims to be written with ST3 (but not ST3.00), but has no GUS addresses, we deduce that it must be written by some other software (e.g. some PSM -> S3M conversions)
 		isST3 = false;
 		MPT_UNUSED(isST3);
-		m_modFormat.madeWithTracker = U_("Unknown");
+		m_modFormat.madeWithTracker = UL_("Unknown");
+		// Check these only after we are certain that it can't be ST3.01 because that version doesn't sanitize the ultraClicks value yet
+		if(fileHeader.cwtv == S3MFileHeader::trkST3_00 && fileHeader.ultraClicks == 0)
+		{
+			if(!(fileHeader.flags & ~S3MFileHeader::fastVolumeSlides) && (fileHeader.masterVolume & 0x80) && usePanningTable)
+				m_modFormat.madeWithTracker = UL_("UNMO3");
+			else if(!fileHeader.flags && fileHeader.globalVol == 48 && fileHeader.masterVolume == 176 && fileHeader.tempo == 150 && !usePanningTable)
+				m_modFormat.madeWithTracker = UL_("deMODifier");  // SoundSmith to S3M converter
+			else if(!fileHeader.flags && fileHeader.globalVol == 64 && fileHeader.speed == 6 && fileHeader.tempo == 125 && !usePanningTable)
+				m_modFormat.madeWithTracker = UL_("Kosmic To-S3M");  // MTM to S3M converter by Zab/Kosmic
+		}
 	} else if(isST3)
 	{
 		// Saving an S3M file in ST3 with the Gravis Ultrasound driver loaded will write a unique GUS memory address for each non-empty sample slot (and 0 for unused slots).
@@ -582,7 +593,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	if(anyADPCM)
-		m_modFormat.madeWithTracker += U_(" (ADPCM packed)");
+		m_modFormat.madeWithTracker += UL_(" (ADPCM packed)");
 
 	// Try to find out if Zxx commands are supposed to be panning commands (PixPlay).
 	// Actually I am only aware of one module that uses this panning style, namely "Crawling Despair" by $volkraq
