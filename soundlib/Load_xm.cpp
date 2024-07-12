@@ -729,6 +729,11 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	// Reading instruments
 	for(INSTRUMENTINDEX instr = 1; instr <= m_nInstruments; instr++)
 	{
+		if(!AllocateInstrument(instr))
+			return false;
+		if(!file.CanRead(4))
+			continue;
+
 		// First, try to read instrument header length...
 		uint32 headerSize = file.ReadUint32LE();
 		if(headerSize == 0)
@@ -789,11 +794,6 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 					madeWith = verPlayerPRO | verConfirmed;
 				lastSampleHeaderSize = instrHeader.sampleHeaderSize;
 			}
-		}
-
-		if(AllocateInstrument(instr) == nullptr)
-		{
-			continue;
 		}
 
 		instrHeader.ConvertToMPT(*Instruments[instr]);
