@@ -17,7 +17,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
     - name: Startup VM
-      uses: cross-platform-actions/action@6acac3ca1b632aa762721d537dea32398ba0f2b1
+      uses: cross-platform-actions/action@v0.25.0
       with:
         architecture: x86_64
         hypervisor: qemu
@@ -29,7 +29,7 @@ jobs:
         shutdown_vm: false
         run: true
     - name: Install dependencies
-      uses: cross-platform-actions/action@6acac3ca1b632aa762721d537dea32398ba0f2b1
+      uses: cross-platform-actions/action@v0.25.0
       with:
         architecture: x86_64
         hypervisor: qemu
@@ -43,7 +43,7 @@ jobs:
           sudo pkg upgrade -y
           sudo pkg install -y subversion p5-XML-XPath git mawk gmake pkgconf autoconf autoconf-archive automake libtool help2man doxygen mpg123 libogg libvorbis flac libsndfile pulseaudio portaudio sdl2
     - name: Build
-      uses: cross-platform-actions/action@6acac3ca1b632aa762721d537dea32398ba0f2b1
+      uses: cross-platform-actions/action@v0.25.0
       with:
         architecture: x86_64
         hypervisor: qemu
@@ -56,7 +56,7 @@ jobs:
         run: |
           gmake -j$(sysctl -n hw.ncpu) STRICT=1 VERBOSE=1 AUTO_DEPS=1
     - name: Test
-      uses: cross-platform-actions/action@6acac3ca1b632aa762721d537dea32398ba0f2b1
+      uses: cross-platform-actions/action@v0.25.0
       with:
         architecture: x86_64
         hypervisor: qemu
@@ -69,7 +69,7 @@ jobs:
         run: |
           gmake -j$(sysctl -n hw.ncpu) STRICT=1 VERBOSE=1 AUTO_DEPS=1 check
     - name: Shutdown VM
-      uses: cross-platform-actions/action@6acac3ca1b632aa762721d537dea32398ba0f2b1
+      uses: cross-platform-actions/action@v0.25.0
       with:
         architecture: x86_64
         hypervisor: qemu
