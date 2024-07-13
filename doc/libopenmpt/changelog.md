@@ -7,6 +7,38 @@ is just a high-level summary.
 
 ### libopenmpt 0.7.9-pre
 
+ *  IT: Identify files saved with itwriter.
+ *  XM: For files saved with registered MadTracker 2 versions, do not put
+    binary garbage (the user ID) in the tracker metadata field. It is replaced
+    with "registered" instead.
+ *  For some truncated files, the used tracker was not identified correctly. 
+ *  XM: oggmod does not support stereo samples but keeps the stereo flag when
+    encoding such samples. Such samples are now imported as mono samples instead
+    of not importing them at all.
+ *  S3M: Identify files saved with early Impulse Tracker versions, Sound Club 2,
+    Liquid Tracker, NESMusa, UNMO3, deMODifier, Kosmic To-S3M, and better tell
+    old ModPlug Tracker versions apart.
+ *  S3M: When skipping sample loading, some tracker identifications were not
+    working as intended.
+ *  MOD: Allow sample swapping to work when swapping from a non-looping, stopped
+    sample back to a looping sample (fixes MOD.energy).
+ *  DTM: Identify files saved with Digital Tracker 2.3.
+ *  DBM: Import second sustain point in case the first sustain point is not set,
+    or if it has a lower index than the first.
+ *  DBM: When several instruments referenced the same sample with different
+    properties (volume, loop points, etc.), only one set of properties was
+    imported (fixes DBM.Supernova).
+ *  DBM: Prioritize effects more correctly when the same effect is encountered
+    in both effect columns of a cell (fixes DBM.143_Gnoj).
+ *  DBM: Avoid importing offset effects when there's a tone portmento next to
+    them (fixes DBM.123_Savo).
+ *  DBM: A few IT-specific playback quirks are disabled for more accurate
+    playback (e.g. in "Are You Flying With Me?" by Jazzcat).
+ *  AMF: When running out of sample slots, file reading became be misaligned
+    because the sample name was not skipped.
+ *  DIGI: Sample play direction was reset if adjacent channel contained a
+    Note Cut note.
+
 ### libopenmpt 0.7.8 (2024-06-09)
 
  *  [**Sec**] Potential heap out-of-bounds read with malformed Dynamic Studio
