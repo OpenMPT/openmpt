@@ -462,8 +462,8 @@ bool CSoundFile::ReadSTK(FileReader &file, ModLoadingFlags loadFlags)
 		break;
 	}
 
-	m_modFormat.formatName = U_("Soundtracker");
-	m_modFormat.type = U_("stk");
+	m_modFormat.formatName = UL_("Soundtracker");
+	m_modFormat.type = UL_("stk");
 	m_modFormat.madeWithTracker = madeWithTracker;
 	m_modFormat.charset = mpt::Charset::Amiga_no_C1;
 

@@ -348,8 +348,8 @@ bool CSoundFile::ReadOKT(FileReader &file, ModLoadingFlags loadFlags)
 
 	InitializeGlobals(MOD_TYPE_OKT, 0);
 
-	m_modFormat.formatName = U_("Oktalyzer");
-	m_modFormat.type = U_("okt");
+	m_modFormat.formatName = UL_("Oktalyzer");
+	m_modFormat.type = UL_("okt");
 	m_modFormat.charset = mpt::Charset::Amiga_no_C1;
 
 	// Go through IFF chunks...

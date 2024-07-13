@@ -135,8 +135,8 @@ bool CSoundFile::ReadAMF_Asylum(FileReader &file, ModLoadingFlags loadFlags)
 		Order().SetRestartPos(fileHeader.restartPos);
 	}
 
-	m_modFormat.formatName = U_("ASYLUM Music Format");
-	m_modFormat.type = U_("amf");
+	m_modFormat.formatName = UL_("ASYLUM Music Format");
+	m_modFormat.type = UL_("amf");
 	m_modFormat.charset = mpt::Charset::CP437;
 
 	uint8 orders[256];
@@ -578,12 +578,12 @@ bool CSoundFile::ReadAMF_DSMI(FileReader &file, ModLoadingFlags loadFlags)
 	if(isDMF)
 	{
 		m_modFormat.formatName = MPT_UFORMAT("DSMI Advanced Music Format (Compact) v{}")(fileSignature.version);
-		m_modFormat.type = U_("dmf");
+		m_modFormat.type = UL_("dmf");
 	} else
 	{
 		m_songName = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, title);
 		m_modFormat.formatName = MPT_UFORMAT("DSMI Advanced Music Format v{}")(fileSignature.version);
-		m_modFormat.type = U_("amf");
+		m_modFormat.type = UL_("amf");
 	}
 	m_modFormat.charset = mpt::Charset::CP437;
 

@@ -134,9 +134,9 @@ bool CSoundFile::ReadKRIS(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 
-	m_modFormat.formatName = U_("ChipTracker");
-	m_modFormat.type = U_("mod");
-	m_modFormat.madeWithTracker = U_("ChipTracker");
+	m_modFormat.formatName = UL_("ChipTracker");
+	m_modFormat.type = UL_("mod");
+	m_modFormat.madeWithTracker = UL_("ChipTracker");
 	m_modFormat.charset = mpt::Charset::Amiga_no_C1;
 
 	if(loadFlags & loadSampleData)

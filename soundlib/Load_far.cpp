@@ -170,8 +170,8 @@ bool CSoundFile::ReadFAR(FileReader &file, ModLoadingFlags loadFlags)
 	m_SongFlags = SONG_LINEARSLIDES | SONG_AUTO_TONEPORTA | SONG_AUTO_TONEPORTA_CONT;
 	m_playBehaviour.set(kPeriodsAreHertz);
 
-	m_modFormat.formatName = U_("Farandole Composer");
-	m_modFormat.type = U_("far");
+	m_modFormat.formatName = UL_("Farandole Composer");
+	m_modFormat.type = UL_("far");
 	m_modFormat.charset = mpt::Charset::CP437;
 
 	m_songName = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, fileHeader.songName);

@@ -538,9 +538,9 @@ bool CSoundFile::ReadGTK(FileReader &file, ModLoadingFlags loadFlags)
 	m_playBehaviour.set(kApplyOffsetWithoutNote);
 	SetupMODPanning(true);
 
-	m_modFormat.madeWithTracker = U_("Graoumf Tracker");
+	m_modFormat.madeWithTracker = UL_("Graoumf Tracker");
 	m_modFormat.formatName = MPT_UFORMAT("Graoumf Tracker v{}")(fileHeader.fileVersion);
-	m_modFormat.type = U_("gtk");
+	m_modFormat.type = UL_("gtk");
 	m_modFormat.charset = mpt::Charset::ISO8859_1_no_C1;
 
 	m_songName = mpt::String::ReadBuf(mpt::String::spacePadded, fileHeader.songName);
@@ -1211,7 +1211,7 @@ bool CSoundFile::ReadGT2(FileReader &file, ModLoadingFlags loadFlags)
 
 	m_modFormat.madeWithTracker = mpt::ToUnicode(mpt::Charset::ASCII, mpt::String::ReadBuf(mpt::String::spacePadded, fileHeader.trackerName));
 	m_modFormat.formatName = (fileHeader.fileVersion <= 5 ? MPT_UFORMAT("Graoumf Tracker v{}") : MPT_UFORMAT("Graoumf Tracker 2 v{}"))(fileHeader.fileVersion);
-	m_modFormat.type = U_("gt2");
+	m_modFormat.type = UL_("gt2");
 	m_modFormat.charset = mpt::Charset::ISO8859_1_no_C1;
 
 	m_songName = mpt::String::ReadBuf(mpt::String::spacePadded, fileHeader.songName);

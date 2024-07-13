@@ -754,12 +754,12 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 			{
 				// ModPlug Tracker Alpha
 				m_dwLastSavedWithVersion = MPT_V("1.00.00.A5");
-				madeWithTracker = U_("ModPlug Tracker 1.0 alpha");
+				madeWithTracker = UL_("ModPlug Tracker 1.0 alpha");
 			} else if(instrHeader.size == 263)
 			{
 				// ModPlug Tracker Beta (Beta 1 still behaves like Alpha, but Beta 3.3 does it this way)
 				m_dwLastSavedWithVersion = MPT_V("1.00.00.B3");
-				madeWithTracker = U_("ModPlug Tracker 1.0 beta");
+				madeWithTracker = UL_("ModPlug Tracker 1.0 beta");
 			} else
 			{
 				// WTF?
@@ -1010,18 +1010,18 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 		if(madeWith[verModPlugBidiFlag])
 		{
 			m_dwLastSavedWithVersion = MPT_V("1.11");
-			madeWithTracker = U_("ModPlug Tracker 1.0 - 1.11");
+			madeWithTracker = UL_("ModPlug Tracker 1.0 - 1.11");
 		} else if(madeWith[verNewModPlug] && !madeWith[verPlayerPRO])
 		{
 			m_dwLastSavedWithVersion = MPT_V("1.16");
-			madeWithTracker = U_("ModPlug Tracker 1.0 - 1.16");
+			madeWithTracker = UL_("ModPlug Tracker 1.0 - 1.16");
 		} else if(madeWith[verNewModPlug] && madeWith[verPlayerPRO])
 		{
 			m_dwLastSavedWithVersion = MPT_V("1.16");
-			madeWithTracker = U_("ModPlug Tracker 1.0 - 1.16 / PlayerPRO");
+			madeWithTracker = UL_("ModPlug Tracker 1.0 - 1.16 / PlayerPRO");
 		} else if(!madeWith[verNewModPlug] && madeWith[verPlayerPRO])
 		{
-			madeWithTracker = U_("PlayerPRO");
+			madeWithTracker = UL_("PlayerPRO");
 		}
 	}
 
@@ -1070,13 +1070,13 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		if(madeWith[verDigiTrakker] && sampleReserved == 0 && (lastInstrType ? lastInstrType : -1) == -1)
 		{
-			madeWithTracker = U_("DigiTrakker");
+			madeWithTracker = UL_("DigiTrakker");
 		} else if(madeWith[verFT2Generic])
 		{
-			madeWithTracker = U_("FastTracker 2 or compatible");
+			madeWithTracker = UL_("FastTracker 2 or compatible");
 		} else
 		{
-			madeWithTracker = U_("Unknown");
+			madeWithTracker = UL_("Unknown");
 		}
 	}
 
@@ -1097,7 +1097,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 
 	if(m_dwLastSavedWithVersion >= MPT_V("1.17"))
 	{
-		madeWithTracker = U_("OpenMPT ") + m_dwLastSavedWithVersion.ToUString();
+		madeWithTracker = UL_("OpenMPT ") + m_dwLastSavedWithVersion.ToUString();
 	}
 
 	// We no longer allow any --- or +++ items in the order list now.
@@ -1115,16 +1115,16 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 	if(isOXM)
 	{
 		m_modFormat.originalFormatName = std::move(m_modFormat.formatName);
-		m_modFormat.formatName = U_("OggMod FastTracker 2");
-		m_modFormat.type = U_("oxm");
-		m_modFormat.originalType = U_("xm");
+		m_modFormat.formatName = UL_("OggMod FastTracker 2");
+		m_modFormat.type = UL_("oxm");
+		m_modFormat.originalType = UL_("xm");
 	} else
 	{
-		m_modFormat.type = U_("xm");
+		m_modFormat.type = UL_("xm");
 	}
 
 	if(anyADPCM)
-		m_modFormat.madeWithTracker += U_(" (ADPCM packed)");
+		m_modFormat.madeWithTracker += UL_(" (ADPCM packed)");
 
 	return true;
 }

@@ -64,16 +64,16 @@ bool CSoundFile::ReadICE(FileReader &file, ModLoadingFlags loadFlags)
 	if(IsMagic(magic, "MTN\0"))
 	{
 		InitializeGlobals(MOD_TYPE_MOD, 4);
-		m_modFormat.formatName = U_("MnemoTroN SoundTracker");
-		m_modFormat.type = U_("st26");
-		m_modFormat.madeWithTracker = U_("SoundTracker 2.6");
+		m_modFormat.formatName = UL_("MnemoTroN SoundTracker");
+		m_modFormat.type = UL_("st26");
+		m_modFormat.madeWithTracker = UL_("SoundTracker 2.6");
 		m_modFormat.charset = mpt::Charset::Amiga_no_C1;
 	} else if(IsMagic(magic, "IT10"))
 	{
 		InitializeGlobals(MOD_TYPE_MOD, 4);
-		m_modFormat.formatName = U_("Ice Tracker");
-		m_modFormat.type = U_("ice");
-		m_modFormat.madeWithTracker = U_("Ice Tracker 1.0 / 1.1");
+		m_modFormat.formatName = UL_("Ice Tracker");
+		m_modFormat.type = UL_("ice");
+		m_modFormat.madeWithTracker = UL_("Ice Tracker 1.0 / 1.1");
 		m_modFormat.charset = mpt::Charset::Amiga_no_C1;
 	} else
 	{

@@ -124,9 +124,9 @@ bool CSoundFile::ReadFTM(FileReader &file, ModLoadingFlags loadFlags)
 	m_nMaxPeriod = 5376;
 	const bool moduleWithSamples = (fileHeader.flags & 0x01);
 	
-	m_modFormat.formatName = U_("Face The Music");
-	m_modFormat.type = U_("ftm");
-	m_modFormat.madeWithTracker = U_("Face The Music");
+	m_modFormat.formatName = UL_("Face The Music");
+	m_modFormat.type = UL_("ftm");
+	m_modFormat.madeWithTracker = UL_("Face The Music");
 	m_modFormat.charset = mpt::Charset::Amiga_no_C1;
 	
 	m_songName = mpt::String::ReadBuf(mpt::String::nullTerminated, fileHeader.title);

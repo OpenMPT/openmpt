@@ -233,8 +233,8 @@ bool CSoundFile::ReadSTM(FileReader &file, ModLoadingFlags loadFlags)
 
 	m_songName = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, fileHeader.songname);
 
-	m_modFormat.formatName = U_("Scream Tracker 2");
-	m_modFormat.type = U_("stm");
+	m_modFormat.formatName = UL_("Scream Tracker 2");
+	m_modFormat.type = UL_("stm");
 	m_modFormat.madeWithTracker = MPT_UFORMAT("Scream Tracker {}.{}")(fileHeader.verMajor, mpt::ufmt::dec0<2>(fileHeader.verMinor));
 	m_modFormat.charset = mpt::Charset::CP437;
 
@@ -588,8 +588,8 @@ bool CSoundFile::ReadSTX(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 
-	m_modFormat.formatName = U_("Scream Tracker Music Interface Kit");
-	m_modFormat.type = U_("stx");
+	m_modFormat.formatName = UL_("Scream Tracker Music Interface Kit");
+	m_modFormat.type = UL_("stx");
 	m_modFormat.charset = mpt::Charset::CP437;
 	m_modFormat.madeWithTracker = MPT_UFORMAT("STM2STX 1.{}")(formatVersion);
 

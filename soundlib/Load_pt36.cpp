@@ -154,7 +154,7 @@ bool CSoundFile::ReadPT36(FileReader &file, ModLoadingFlags loadFlags)
 
 	if(version.empty())
 	{
-		version = U_("3.6");
+		version = UL_("3.6");
 	}
 
 	// both an info chunk and a module are required
@@ -202,7 +202,7 @@ bool CSoundFile::ReadPT36(FileReader &file, ModLoadingFlags loadFlags)
 			}
 		}
 
-		m_modFormat.madeWithTracker = U_("ProTracker ") + version;
+		m_modFormat.madeWithTracker = UL_("ProTracker ") + version;
 	}
 	m_SongFlags.set(SONG_PT_MODE);
 	m_playBehaviour.set(kMODIgnorePanning);

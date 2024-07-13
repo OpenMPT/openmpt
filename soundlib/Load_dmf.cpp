@@ -952,7 +952,7 @@ bool CSoundFile::ReadDMF(FileReader &file, ModLoadingFlags loadFlags)
 
 	m_modFormat.formatName = MPT_UFORMAT("Delusion Digital Music Format v{}")(fileHeader.version);
 	m_modFormat.madeWithTracker = fileHeader.version == 10 ? UL_("X-Tracker 32") : UL_("X-Tracker");
-	m_modFormat.type = U_("dmf");
+	m_modFormat.type = UL_("dmf");
 	m_modFormat.charset = mpt::Charset::CP437;
 
 	m_songName = mpt::String::ReadBuf(mpt::String::spacePadded, fileHeader.songname);

@@ -643,10 +643,10 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 	const ORDERINDEX MPT_MIDI_IMPORT_MAX_ORDERS = MAX_ORDERS;
 #endif
 
-	m_songArtist = U_("MIDI Conversion");
-	m_modFormat.formatName = U_("Standard MIDI File");
+	m_songArtist = UL_("MIDI Conversion");
+	m_modFormat.formatName = UL_("Standard MIDI File");
 	m_modFormat.type = isRIFF ? UL_("rmi") : UL_("mid");
-	m_modFormat.madeWithTracker = U_("Standard MIDI File");
+	m_modFormat.madeWithTracker = UL_("Standard MIDI File");
 	m_modFormat.charset = mpt::Charset::ISO8859_1;
 
 	SetMixLevels(MixLevels::v1_17RC3);

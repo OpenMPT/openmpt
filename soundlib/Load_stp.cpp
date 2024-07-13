@@ -257,7 +257,7 @@ bool CSoundFile::ReadSTP(FileReader &file, ModLoadingFlags loadFlags)
 	InitializeGlobals(MOD_TYPE_STP, 4);
 
 	m_modFormat.formatName = MPT_UFORMAT("Soundtracker Pro II v{}")(fileHeader.version);
-	m_modFormat.type = U_("stp");
+	m_modFormat.type = UL_("stp");
 	m_modFormat.charset = mpt::Charset::Amiga_no_C1;
 
 	m_nSamples = 0;

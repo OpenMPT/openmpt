@@ -431,8 +431,8 @@ bool CSoundFile::ReadIMF(FileReader &file, ModLoadingFlags loadFlags)
 
 	InitializeGlobals(MOD_TYPE_IMF, fileHeader.GetNumChannels());
 
-	m_modFormat.formatName = U_("Imago Orpheus");
-	m_modFormat.type = U_("imf");
+	m_modFormat.formatName = UL_("Imago Orpheus");
+	m_modFormat.type = UL_("imf");
 	m_modFormat.charset = mpt::Charset::CP437;
 
 	// Read channel configuration

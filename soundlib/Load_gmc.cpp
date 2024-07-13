@@ -229,8 +229,8 @@ bool CSoundFile::ReadGMC(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 
-	m_modFormat.madeWithTracker = U_("Game Music Creator");
-	m_modFormat.formatName = U_("Game Music Creator");
+	m_modFormat.madeWithTracker = UL_("Game Music Creator");
+	m_modFormat.formatName = UL_("Game Music Creator");
 	m_modFormat.type = UL_("GMC");
 	m_modFormat.charset = mpt::Charset::Amiga_no_C1;  // No strings in this format...
 

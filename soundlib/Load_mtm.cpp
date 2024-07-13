@@ -139,8 +139,8 @@ bool CSoundFile::ReadMTM(FileReader &file, ModLoadingFlags loadFlags)
 	m_songName = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, fileHeader.songName);
 	m_nSamples = fileHeader.numSamples;
 	
-	m_modFormat.formatName = U_("MultiTracker");
-	m_modFormat.type = U_("mtm");
+	m_modFormat.formatName = UL_("MultiTracker");
+	m_modFormat.type = UL_("mtm");
 	m_modFormat.madeWithTracker = MPT_UFORMAT("MultiTracker {}.{}")(fileHeader.version >> 4, fileHeader.version & 0x0F);
 	m_modFormat.charset = mpt::Charset::CP437;
 

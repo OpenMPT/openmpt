@@ -859,13 +859,13 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 
 	std::transform(std::begin(magic), std::end(magic), std::begin(magic), [](unsigned char c) -> unsigned char { return (c < ' ') ? ' ' : c; });
 	m_modFormat.formatName = MPT_UFORMAT("ProTracker MOD ({})")(mpt::ToUnicode(mpt::Charset::ASCII, std::string(std::begin(magic), std::end(magic))));
-	m_modFormat.type = U_("mod");
+	m_modFormat.type = UL_("mod");
 	if(modMagicResult.madeWithTracker)
 		m_modFormat.madeWithTracker = modMagicResult.madeWithTracker;
 	m_modFormat.charset = mpt::Charset::Amiga_no_C1;
 
 	if(anyADPCM)
-		m_modFormat.madeWithTracker += U_(" (ADPCM packed)");
+		m_modFormat.madeWithTracker += UL_(" (ADPCM packed)");
 
 	return true;
 }

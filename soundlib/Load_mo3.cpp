@@ -1489,7 +1489,7 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 
 			if(m_dwLastSavedWithVersion)
 			{
-				madeWithTracker = U_("OpenMPT ") + mpt::ufmt::val(m_dwLastSavedWithVersion);
+				madeWithTracker = UL_("OpenMPT ") + mpt::ufmt::val(m_dwLastSavedWithVersion);
 			}
 			break;
 		}
@@ -1537,36 +1537,36 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		madeWithTracker = MPT_UFORMAT("MO3 v{} ({})")(version, madeWithTracker);
 
 	m_modFormat.formatName = MPT_UFORMAT("Un4seen MO3 v{}")(version);
-	m_modFormat.type = U_("mo3");
+	m_modFormat.type = UL_("mo3");
 
 	switch(GetType())
 	{
 	case MOD_TYPE_MTM:
-		m_modFormat.originalType = U_("mtm");
-		m_modFormat.originalFormatName = U_("MultiTracker");
+		m_modFormat.originalType = UL_("mtm");
+		m_modFormat.originalFormatName = UL_("MultiTracker");
 		break;
 	case MOD_TYPE_MOD:
-		m_modFormat.originalType = U_("mod");
-		m_modFormat.originalFormatName = U_("Generic MOD");
+		m_modFormat.originalType = UL_("mod");
+		m_modFormat.originalFormatName = UL_("Generic MOD");
 		break;
 	case MOD_TYPE_XM:
-		m_modFormat.originalType = U_("xm");
-		m_modFormat.originalFormatName = U_("FastTracker 2");
+		m_modFormat.originalType = UL_("xm");
+		m_modFormat.originalFormatName = UL_("FastTracker 2");
 		break;
 	case MOD_TYPE_S3M:
-		m_modFormat.originalType = U_("s3m");
-		m_modFormat.originalFormatName = U_("Scream Tracker 3");
+		m_modFormat.originalType = UL_("s3m");
+		m_modFormat.originalFormatName = UL_("Scream Tracker 3");
 		break;
 	case MOD_TYPE_IT:
-		m_modFormat.originalType = U_("it");
+		m_modFormat.originalType = UL_("it");
 		if(cmwt)
 			m_modFormat.originalFormatName = MPT_UFORMAT("Impulse Tracker {}.{}")(cmwt >> 8, mpt::ufmt::hex0<2>(cmwt & 0xFF));
 		else
-			m_modFormat.originalFormatName = U_("Impulse Tracker");
+			m_modFormat.originalFormatName = UL_("Impulse Tracker");
 		break;
 	case MOD_TYPE_MPT:
-		m_modFormat.originalType = U_("mptm");
-		m_modFormat.originalFormatName = U_("OpenMPT MPTM");
+		m_modFormat.originalType = UL_("mptm");
+		m_modFormat.originalFormatName = UL_("OpenMPT MPTM");
 		break;
 	default:
 		MPT_ASSERT_NOTREACHED();

@@ -390,8 +390,8 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 	m_playBehaviour.reset(kITInstrWithNoteOff);
 	m_playBehaviour.reset(kITInstrWithNoteOffOldEffects);
 
-	m_modFormat.formatName = U_("DigiBooster Pro");
-	m_modFormat.type = U_("dbm");
+	m_modFormat.formatName = UL_("DigiBooster Pro");
+	m_modFormat.type = UL_("dbm");
 	m_modFormat.madeWithTracker = MPT_UFORMAT("DigiBooster Pro {}.{}")(mpt::ufmt::hex(fileHeader.trkVerHi), mpt::ufmt::hex(fileHeader.trkVerLo));
 	m_modFormat.charset = mpt::Charset::Amiga_no_C1;
 

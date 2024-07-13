@@ -373,8 +373,8 @@ bool CSoundFile::ReadMUS_KM(FileReader &file, ModLoadingFlags loadFlags)
 
 	Order.SetSequence(0);
 
-	m_modFormat.formatName = U_("Karl Morton Music Format");
-	m_modFormat.type = U_("mus");
+	m_modFormat.formatName = UL_("Karl Morton Music Format");
+	m_modFormat.type = UL_("mus");
 	m_modFormat.charset = mpt::Charset::CP437;
 
 	return true;

@@ -182,8 +182,8 @@ bool CSoundFile::ReadFMT(FileReader &file, ModLoadingFlags loadFlags)
 		m->param = delay;
 	}
 
-	m_modFormat.formatName = U_("FM Tracker");
-	m_modFormat.type = U_("fmt");
+	m_modFormat.formatName = UL_("FM Tracker");
+	m_modFormat.type = UL_("fmt");
 	m_modFormat.madeWithTracker = mpt::ToUnicode(mpt::Charset::CP437, mpt::String::ReadBuf(mpt::String::maybeNullTerminated, fileHeader.trackerName));
 	m_modFormat.charset = mpt::Charset::CP437;
 

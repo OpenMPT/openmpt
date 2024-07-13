@@ -307,8 +307,8 @@ bool CSoundFile::ReadULT(FileReader &file, ModLoadingFlags loadFlags)
 	m_songName = mpt::String::ReadBuf(mpt::String::spacePadded, fileHeader.songName);
 
 	const mpt::uchar *versions[] = {UL_("<1.4"), UL_("1.4"), UL_("1.5"), UL_("1.6")};
-	m_modFormat.formatName = U_("UltraTracker");
-	m_modFormat.type = U_("ult");
+	m_modFormat.formatName = UL_("UltraTracker");
+	m_modFormat.type = UL_("ult");
 	m_modFormat.madeWithTracker = U_("UltraTracker ") + versions[fileHeader.version - '1'];
 	m_modFormat.charset = mpt::Charset::CP437;
 

@@ -406,8 +406,8 @@ bool CSoundFile::ReadAMS(FileReader &file, ModLoadingFlags loadFlags)
 	m_nSamples = fileHeader.numSamps;
 	SetupMODPanning(true);
 
-	m_modFormat.formatName = U_("Extreme's Tracker");
-	m_modFormat.type = U_("ams");
+	m_modFormat.formatName = UL_("Extreme's Tracker");
+	m_modFormat.type = UL_("ams");
 	m_modFormat.madeWithTracker = MPT_UFORMAT("Extreme's Tracker {}.{}")(fileHeader.versionHigh, fileHeader.versionLow);
 	m_modFormat.charset = mpt::Charset::CP437;
 
@@ -779,8 +779,8 @@ bool CSoundFile::ReadAMS2(FileReader &file, ModLoadingFlags loadFlags)
 	m_nInstruments = fileHeader.numIns;
 	SetupMODPanning(true);
 
-	m_modFormat.formatName = U_("Velvet Studio");
-	m_modFormat.type = U_("ams");
+	m_modFormat.formatName = UL_("Velvet Studio");
+	m_modFormat.type = UL_("ams");
 	m_modFormat.madeWithTracker = MPT_UFORMAT("Velvet Studio {}.{}")(fileHeader.versionHigh.get(), mpt::ufmt::dec0<2>(fileHeader.versionLow.get()));
 	m_modFormat.charset = mpt::Charset::CP437;
 

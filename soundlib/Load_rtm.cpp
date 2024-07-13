@@ -337,7 +337,7 @@ bool CSoundFile::ReadRTM(FileReader& file, ModLoadingFlags loadFlags)
 	}
 
 	m_modFormat.formatName = MPT_UFORMAT("Real Tracker {}.{}")(fileHeader.version >> 8, mpt::ufmt::hex0<2>(fileHeader.version & 0xFF));
-	m_modFormat.type = U_("rtm");
+	m_modFormat.type = UL_("rtm");
 	m_modFormat.madeWithTracker = mpt::ToUnicode(mpt::Charset::CP437, mpt::String::ReadBuf(mpt::String::maybeNullTerminated, songHeader.software));
 	m_modFormat.charset = mpt::Charset::CP437;
 

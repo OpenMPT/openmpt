@@ -601,8 +601,8 @@ bool CSoundFile::ReadDSym(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	m_modFormat.formatName = MPT_UFORMAT("Digital Symphony v{}")(fileHeader.version);
-	m_modFormat.type = U_("dsym");  // RISC OS doesn't use file extensions but this is a common abbreviation used for this tracker
-	m_modFormat.madeWithTracker = U_("Digital Symphony");
+	m_modFormat.type = UL_("dsym");  // RISC OS doesn't use file extensions but this is a common abbreviation used for this tracker
+	m_modFormat.madeWithTracker = UL_("Digital Symphony");
 	m_modFormat.charset = mpt::Charset::RISC_OS;
 
 	return true;

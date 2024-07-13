@@ -590,8 +590,8 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 		ChnSettings[chn].dwFlags.set(CHN_SURROUND, subsongs[0].channelSurround[chn]);
 	}
 
-	m_modFormat.formatName = sinariaFormat ? U_("Epic MegaGames MASI (New Version / Sinaria)") : U_("Epic MegaGames MASI (New Version)");
-	m_modFormat.type = U_("psm");
+	m_modFormat.formatName = sinariaFormat ? UL_("Epic MegaGames MASI (New Version / Sinaria)") : UL_("Epic MegaGames MASI (New Version)");
+	m_modFormat.type = UL_("psm");
 	m_modFormat.charset = mpt::Charset::CP437;
 
 	if(!(loadFlags & loadPatternData))
@@ -1046,8 +1046,8 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 	// Seems to be valid!
 	InitializeGlobals(MOD_TYPE_PSM, Clamp(CHANNELINDEX(fileHeader.numChannelsPlay), CHANNELINDEX(fileHeader.numChannelsReal), MAX_BASECHANNELS));
 	
-	m_modFormat.formatName = U_("Epic MegaGames MASI (Old Version)");
-	m_modFormat.type = U_("psm");
+	m_modFormat.formatName = UL_("Epic MegaGames MASI (Old Version)");
+	m_modFormat.type = UL_("psm");
 	m_modFormat.charset = mpt::Charset::CP437;
 
 	m_nSamplePreAmp = fileHeader.masterVolume;

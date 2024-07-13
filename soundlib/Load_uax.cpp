@@ -44,7 +44,7 @@ bool CSoundFile::ReadUAX(FileReader &file, ModLoadingFlags loadFlags)
 
 	InitializeGlobals(MOD_TYPE_MPT, 4);
 	m_modFormat.formatName = MPT_UFORMAT("Unreal Package v{}")(fileHeader.packageVersion);
-	m_modFormat.type = U_("uax");
+	m_modFormat.type = UL_("uax");
 	m_modFormat.charset = mpt::Charset::Windows1252;
 	
 	// Read export table

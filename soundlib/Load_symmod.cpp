@@ -1902,14 +1902,14 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 		ChnSettings[chn].nMixPlugin = useDSP ? 1 : 0;  // For MIDI macros controlling the echo DSP
 	}
 
-	m_modFormat.formatName = U_("Symphonie");
-	m_modFormat.type = U_("symmod");
+	m_modFormat.formatName = UL_("Symphonie");
+	m_modFormat.type = UL_("symmod");
 	if(!isSymphoniePro)
-		m_modFormat.madeWithTracker = U_("Symphonie");  // or Symphonie Jr
+		m_modFormat.madeWithTracker = UL_("Symphonie");  // or Symphonie Jr
 	else if(instruments.size() <= 128)
-		m_modFormat.madeWithTracker = U_("Symphonie Pro");
+		m_modFormat.madeWithTracker = UL_("Symphonie Pro");
 	else
-		m_modFormat.madeWithTracker = U_("Symphonie Pro 256");
+		m_modFormat.madeWithTracker = UL_("Symphonie Pro 256");
 	m_modFormat.charset = mpt::Charset::Amiga_no_C1;
 
 	return true;

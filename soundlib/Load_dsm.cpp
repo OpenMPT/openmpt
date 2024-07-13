@@ -208,8 +208,8 @@ bool CSoundFile::ReadDSM(FileReader &file, ModLoadingFlags loadFlags)
 
 	InitializeGlobals(MOD_TYPE_DSM, std::max(songHeader.numChannels.get(), uint16(1)));
 
-	m_modFormat.formatName = U_("DSIK Format");
-	m_modFormat.type = U_("dsm");
+	m_modFormat.formatName = UL_("DSIK Format");
+	m_modFormat.type = UL_("dsm");
 	m_modFormat.charset = mpt::Charset::CP437;
 
 	m_songName = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, songHeader.songName);
@@ -515,8 +515,8 @@ bool CSoundFile::ReadDSm(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 
-	m_modFormat.formatName = U_("Dynamic Studio");
-	m_modFormat.type = U_("dsm");
+	m_modFormat.formatName = UL_("Dynamic Studio");
+	m_modFormat.type = UL_("dsm");
 	m_modFormat.charset = mpt::Charset::CP437;
 
 	return true;
