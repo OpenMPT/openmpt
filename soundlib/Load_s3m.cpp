@@ -546,11 +546,11 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 
 		if(sampleHeader.sampleType < S3MSampleHeader::typeAdMel)
 		{
-			const uint32 sampleOffset = sampleHeader.GetSampleOffset();
-			if((loadFlags & loadSampleData) && sampleHeader.length != 0 && file.Seek(sampleOffset))
+			if(sampleHeader.length != 0)
 			{
 				SampleIO sampleIO = sampleHeader.GetSampleFormat((fileHeader.formatVersion == S3MFileHeader::oldVersion));
-				sampleIO.ReadSample(Samples[smp + 1], file);
+				if((loadFlags & loadSampleData) && file.Seek(sampleHeader.GetSampleOffset()))
+					sampleIO.ReadSample(Samples[smp + 1], file);
 				anySamples = true;
 				if(sampleIO.GetEncoding() == SampleIO::ADPCM)
 					anyADPCM = true;
@@ -574,7 +574,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 				m_modFormat.madeWithTracker = UL_("UNMO3");
 			else if(!fileHeader.flags && fileHeader.globalVol == 48 && fileHeader.masterVolume == 176 && fileHeader.tempo == 150 && !usePanningTable)
 				m_modFormat.madeWithTracker = UL_("deMODifier");  // SoundSmith to S3M converter
-			else if(!fileHeader.flags && fileHeader.globalVol == 64 && fileHeader.speed == 6 && fileHeader.tempo == 125 && !usePanningTable)
+			else if(!fileHeader.flags && fileHeader.globalVol == 64 && (fileHeader.masterVolume & 0x7F) == 48 && fileHeader.speed == 6 && fileHeader.tempo == 125 && !usePanningTable)
 				m_modFormat.madeWithTracker = UL_("Kosmic To-S3M");  // MTM to S3M converter by Zab/Kosmic
 		}
 	} else if(isST3)
