@@ -342,12 +342,12 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 		default:
 			break;
 		}
-	} // End if(oldTypeIsMOD_XM && newTypeIsS3M_IT_MPT)
+	} // End if(!oldTypeIsS3M_IT_MPT && newTypeIsS3M_IT_MPT)
 
 
 	/////////////////////////////////////////
 	// Convert S3M / IT / MPTM to MOD / XM
-	else if(oldTypeIsS3M_IT_MPT && newTypeIsMOD_XM)
+	else if(!oldTypeIsMOD_XM && newTypeIsMOD_XM)
 	{
 		if(note == NOTE_NOTECUT)
 		{
@@ -478,7 +478,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 		default:
 			break;
 		}
-	} // End if(oldTypeIsS3M_IT_MPT && newTypeIsMOD_XM)
+	} // End if(!oldTypeIsMOD_XM && newTypeIsMOD_XM)
 
 
 	///////////////////////
