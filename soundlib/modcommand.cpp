@@ -251,7 +251,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 
 	/////////////////////////////////////////
 	// Convert MOD / XM to S3M / IT / MPTM
-	if(oldTypeIsMOD_XM && newTypeIsS3M_IT_MPT)
+	if(!oldTypeIsS3M_IT_MPT && newTypeIsS3M_IT_MPT)
 	{
 		switch(command)
 		{
@@ -318,7 +318,7 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 				command = CMD_S3MCMDEX;
 				if(param == 0)
 					instr = 0;
-				param = 0xD0 | (param & 0x0F);
+				param = 0xD0 | std::min(param, PARAM(0x0F));
 			}
 			break;
 

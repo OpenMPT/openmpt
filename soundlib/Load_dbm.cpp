@@ -573,7 +573,7 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 						std::swap(param1, param2);
 					} else if(cmd1 == CMD_TONEPORTAMENTO && cmd2 == CMD_OFFSET && param2 == 0)
 					{
-						// Offset + Portmaneto: Ignore portamento. If the offset command has a non-zero parameter, keep it for effect memory.
+						// Offset + Portamento: Ignore portamento. If the offset command has a non-zero parameter, keep it for effect memory.
 						cmd2 = CMD_NONE;
 					} else if(cmd2 == CMD_TONEPORTAMENTO && cmd1 == CMD_OFFSET && param1 == 0)
 					{

@@ -1282,7 +1282,7 @@ bool CModDoc::IsNotePlaying(UINT note, SAMPLEINDEX nsmp, INSTRUMENTINDEX nins)
 {
 	for(ModChannel &chn : m_SndFile.m_PlayState.BackgroundChannels(m_SndFile))
 	{
-		if(chn.isPreviewNote && chn.nLength != 0 && !chn.dwFlags[CHN_NOTEFADE | CHN_KEYOFF| CHN_MUTE]
+		if(chn.isPreviewNote && chn.nLength != 0 && !chn.dwFlags[CHN_NOTEFADE | CHN_KEYOFF | CHN_MUTE]
 		   && (note == chn.nNewNote || note == NOTE_NONE)
 		   && (chn.pModSample == &m_SndFile.GetSample(nsmp) || !nsmp)
 		   && (chn.pModInstrument == m_SndFile.Instruments[nins] || !nins))

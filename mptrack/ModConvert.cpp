@@ -411,7 +411,7 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 		{
 			for(size_t i = 0; i < std::size(pIns->NoteMap); i++)
 			{
-				if (pIns->NoteMap[i] && pIns->NoteMap[i] != (i + 1))
+				if(pIns->Keyboard[i] && pIns->NoteMap[i] && pIns->NoteMap[i] != (i + NOTE_MIN))
 				{
 					warnings.set(wBrokenNoteMap);
 					break;
