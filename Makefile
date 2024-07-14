@@ -585,6 +585,12 @@ endif
 
 endif
 
+ifeq ($(MPT_COMPILER_NOIPARA),1)
+# See <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=115049>.
+CXXFLAGS += -fno-ipa-ra
+CFLAGS   += -fno-ipa-ra
+endif
+
 ifeq ($(CHECKED),1)
 CPPFLAGS += -DMPT_BUILD_CHECKED
 CXXFLAGS += -g -fno-omit-frame-pointer
