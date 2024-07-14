@@ -20,7 +20,6 @@ jobs:
       uses: cross-platform-actions/action@v0.25.0
       with:
         architecture: x86_64
-        hypervisor: qemu
         memory: 4G
         operating_system: freebsd
         version: '13.3'
@@ -32,7 +31,6 @@ jobs:
       uses: cross-platform-actions/action@v0.25.0
       with:
         architecture: x86_64
-        hypervisor: qemu
         memory: 4G
         operating_system: freebsd
         version: '13.3'
@@ -46,7 +44,6 @@ jobs:
       uses: cross-platform-actions/action@v0.25.0
       with:
         architecture: x86_64
-        hypervisor: qemu
         memory: 4G
         operating_system: freebsd
         version: '13.3'
@@ -59,7 +56,6 @@ jobs:
       uses: cross-platform-actions/action@v0.25.0
       with:
         architecture: x86_64
-        hypervisor: qemu
         memory: 4G
         operating_system: freebsd
         version: '13.3'
@@ -72,7 +68,6 @@ jobs:
       uses: cross-platform-actions/action@v0.25.0
       with:
         architecture: x86_64
-        hypervisor: qemu
         memory: 4G
         operating_system: freebsd
         version: '13.3'
