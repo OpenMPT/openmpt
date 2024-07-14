@@ -376,6 +376,9 @@ ARFLAGS  := rcs
 
 OPTIMIZE_FASTMATH=1
 
+# See <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=115049>.
+MPT_COMPILER_NOIPARA=1
+
 include build/make/warnings-gcc.mk
 
 DYNLINK=0

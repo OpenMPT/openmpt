@@ -117,6 +117,11 @@ else
 $(error unknown WINDOWS_VERSION)
 endif
 
+ifneq ($(MINGW_COMPILER),clang)
+# See <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=115049>.
+MPT_COMPILER_NOIPARA=1
+endif
+
 ifeq ($(MINGW_COMPILER),clang)
 include build/make/warnings-clang.mk
 else
