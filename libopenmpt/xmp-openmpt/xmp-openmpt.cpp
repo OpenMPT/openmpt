@@ -715,7 +715,7 @@ static char * build_xmplay_tags( const openmpt::module & mod, int32_t subsong = 
 
 	for ( auto subsong_name = first_subsong; subsong_name != last_subsong; subsong_name++ ) {
 		append_xmplay_tag( tags, "filetype", convert_to_native( StringUpperCase( mod.get_metadata( "type" ) ) ) );
-		append_xmplay_tag( tags, "title", convert_to_native( ( subsong_name->empty() || subsong == -1 ) ? title : *subsong_name ) );
+		append_xmplay_tag( tags, "title", convert_to_native( ( subsong_name->empty() || subsong == -1 || subsong_names.size() == 1 ) ? title : *subsong_name ) );
 		append_xmplay_tag( tags, "artist", convert_to_native( mod.get_metadata( "artist" ) ) );
 		append_xmplay_tag( tags, "album", convert_to_native( mod.get_metadata( "xmplay-album" ) ) );  // todo, libopenmpt does not support that
 		append_xmplay_tag( tags, "date", convert_to_native( extract_date( mod ) ) );
