@@ -462,6 +462,7 @@
 		9E8AC865F88BDF57BFD2D6A5 /* tests_binary.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = tests_binary.hpp; path = ../../src/mpt/binary/tests/tests_binary.hpp; sourceTree = "<group>"; };
 		9EB0D073130B156590EE9EB3 /* Compressor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Compressor.h; path = ../../soundlib/plugins/dmo/Compressor.h; sourceTree = "<group>"; };
 		9F187E69B9E4ED1BBDB584A9 /* outputfile.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = outputfile.hpp; path = ../../src/mpt/io_file/outputfile.hpp; sourceTree = "<group>"; };
+		9F2E1C1AF92F330CC0762A5A /* BuildSettingsCompiler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = BuildSettingsCompiler.h; path = ../../common/BuildSettingsCompiler.h; sourceTree = "<group>"; };
 		9FCB791A628BD98CBFC0B75A /* dos_memory.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = dos_memory.hpp; path = ../../src/mpt/osinfo/dos_memory.hpp; sourceTree = "<group>"; };
 		A0ADCD61E4FC72D32723ABA1 /* MPEGFrame.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MPEGFrame.h; path = ../../soundlib/MPEGFrame.h; sourceTree = "<group>"; };
 		A105879DAD903A0F287505DD /* source_location.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = source_location.hpp; path = ../../src/mpt/base/source_location.hpp; sourceTree = "<group>"; };
@@ -1026,6 +1027,7 @@
 			isa = PBXGroup;
 			children = (
 				A235F524F99B6816ABA98364 /* BuildSettings.h */,
+				9F2E1C1AF92F330CC0762A5A /* BuildSettingsCompiler.h */,
 				13F9789407F8C2068CE3D6D4 /* ComponentManager.cpp */,
 				0A20B0FECCE111702A15EF3E /* ComponentManager.h */,
 				EF78F5224ABA48941E149362 /* Dither.h */,

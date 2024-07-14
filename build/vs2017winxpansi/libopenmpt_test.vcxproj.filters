@@ -171,6 +171,9 @@
     <ClInclude Include="..\..\common\BuildSettings.h">
       <Filter>common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\common\BuildSettingsCompiler.h">
+      <Filter>common</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\common\ComponentManager.h">
       <Filter>common</Filter>
     </ClInclude>

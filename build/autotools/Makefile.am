@@ -313,6 +313,7 @@ MPT_FILES_SRC_OPENMPT += src/openmpt/soundbase/SampleEncode.hpp
 MPT_FILES_SRC_OPENMPT += src/openmpt/soundbase/SampleFormat.hpp
 MPT_FILES_COMMON = 
 MPT_FILES_COMMON += common/BuildSettings.h
+MPT_FILES_COMMON += common/BuildSettingsCompiler.h
 MPT_FILES_COMMON += common/ComponentManager.cpp
 MPT_FILES_COMMON += common/ComponentManager.h
 MPT_FILES_COMMON += common/Dither.h
