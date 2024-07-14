@@ -54,6 +54,18 @@ AX_PTHREAD([
  []
 )
 
+# work-around <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=115049>
+# This is somewhat pessimistic, but necessary for GCC 8 or earlier,
+# which we still support and where we cannot use #pragma GCC optimize.
+AC_LANG_PUSH([C])
+AX_CHECK_COMPILE_FLAG([-fno-ipa-ra], [CFLAGS="$CFLAGS -fno-ipa-ra"])
+AX_CFLAGS_WARN_ALL
+AC_LANG_POP([C])
+AC_LANG_PUSH([C++])
+AX_CHECK_COMPILE_FLAG([-fno-ipa-ra], [CXXFLAGS="$CXXFLAGS -fno-ipa-ra"])
+AX_CXXFLAGS_WARN_ALL
+AC_LANG_POP([C++])
+
 
 LIBOPENMPT_LTVER_CURRENT=!!MPT_LIBOPENMPT_LTVER_CURRENT!!
 LIBOPENMPT_LTVER_REVISION=!!MPT_LIBOPENMPT_LTVER_REVISION!!
