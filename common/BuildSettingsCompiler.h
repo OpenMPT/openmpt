@@ -51,7 +51,7 @@
 // We need to check for 9.0 instead of 9.1 because of
 // <https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1028580>.
 // It also gets confused when setting global optimization -O1,
-// so we have no way of fixing GCC 9 or earlier.
+// so we have no way of fixing GCC 8 or earlier.
 //#pragma GCC optimize("O1")
 #else
 #pragma GCC optimize("no-ipa-ra")
