@@ -171,7 +171,7 @@ public:
 
 			if(chn.position.GetUInt() >= sampleEnd)
 			{
-				if(chn.dwFlags[CHN_LOOP])
+				if(chn.dwFlags[CHN_LOOP] && loopLength)
 				{
 					// We exceeded the sample loop, go back to loop start.
 					if(chn.dwFlags[CHN_PINGPONGLOOP])
@@ -1371,7 +1371,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 void CSoundFile::InstrumentChange(ModChannel &chn, uint32 instr, bool bPorta, bool bUpdVol, bool bResetEnv) const
 {
 	const ModInstrument *pIns = instr <= GetNumInstruments() ? Instruments[instr] : nullptr;
-	const ModSample *pSmp = &Samples[instr];
+	const ModSample *pSmp = &Samples[instr <= GetNumSamples() ? instr : 0];
 	const auto oldInsVol = chn.nInsVol;
 	ModCommand::NOTE note = chn.nNewNote;
 
