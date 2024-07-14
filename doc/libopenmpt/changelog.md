@@ -7,6 +7,11 @@ is just a high-level summary.
 
 ### libopenmpt 0.7.9-pre
 
+ *  [**Change**] The work-around for
+    <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=115049> has been changed from
+    forcing `-O1` on GCC 14 to setting `-fno-ipa-ra` on all GCC versions on
+    non-ELF platforms.
+
  *  IT: Identify files saved with itwriter.
  *  XM: For files saved with registered MadTracker 2 versions, do not put
     binary garbage (the user ID) in the tracker metadata field. It is replaced
