@@ -19,18 +19,6 @@
 
 
 
-#if MPT_COMPILER_GCC
-// GCC 14 causes severe miscompilation of inline functions on MinGW.
-// See <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=115049>.
-// Current investigation suggests a general problem with -fipa-ra on non-ELF
-// platforms.
-#if !defined(__ELF__)
-#define MPT_COMPILER_QUIRK_GCC_NO_IPA_RA
-#endif
-#endif
-
-
-
 #if MPT_OS_DJGPP
 #define MPT_ARCH_QUIRK_NO_SIMD256
 #endif
