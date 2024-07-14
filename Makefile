@@ -585,34 +585,6 @@ endif
 
 endif
 
-ifeq ($(OPTIMIZE_FASTMATH),2)
-CPPFLAGS += -DMPT_CHECK_CXX_IGNORE_WARNING_FASTMATH -DMPT_CHECK_CXX_IGNORE_WARNING_FINITEMATH
-CXXFLAGS += -ffast-math
-CFLAGS   += -ffast-math
-else ifeq ($(OPTIMIZE_FASTMATH),1)
-CPPFLAGS += -DMPT_CHECK_CXX_IGNORE_WARNING_FINITEMATH
-CXXFLAGS += -fassociative-math
-CXXFLAGS += -fcx-limited-range
-CXXFLAGS += -fexcess-precision=fast
-CXXFLAGS += -ffinite-math-only
-CXXFLAGS += -freciprocal-math
-CXXFLAGS += -fno-math-errno
-CXXFLAGS += -fno-rounding-math
-CXXFLAGS += -fno-signaling-nans
-CXXFLAGS += -fno-signed-zeros
-CXXFLAGS += -fno-trapping-math
-CFLAGS += -fassociative-math
-CFLAGS += -fcx-limited-range
-CFLAGS += -fexcess-precision=fast
-CFLAGS += -ffinite-math-only
-CFLAGS += -freciprocal-math
-CFLAGS += -fno-math-errno
-CFLAGS += -fno-rounding-math
-CFLAGS += -fno-signaling-nans
-CFLAGS += -fno-signed-zeros
-CFLAGS += -fno-trapping-math
-endif
-
 ifeq ($(CHECKED),1)
 CPPFLAGS += -DMPT_BUILD_CHECKED
 CXXFLAGS += -g -fno-omit-frame-pointer
