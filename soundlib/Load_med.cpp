@@ -481,7 +481,7 @@ static std::pair<EffectCommand, ModCommand::PARAM> ConvertMEDEffect(ModCommand &
 			if(m.param < 0x20)
 				m.param = 0x20;
 #endif  // MODPLUG_TRACKER
-		} else switch(command)
+		} else switch(param)
 		{
 			case 0xF1:  // Play note twice
 				m.SetEffectCommand(CMD_MODCMDEX, 0x93);
@@ -626,7 +626,7 @@ static bool TranslateMEDPattern(FileReader &file, FileReader &cmdExt, CPattern &
 				cmd = command;
 				param1 = param;
 			}
-			// Octave wrapping for 4-channel modules (TODO: this should not be set because of synth instruments)
+			// Octave wrapping for 4-channel modules
 			if(ctx.hardwareMixSamples && note >= NOTE_MIDDLEC + 2 * 12)
 				needInstruments = true;
 
