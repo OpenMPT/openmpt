@@ -926,6 +926,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 	// - starkelsesirap.mmd0 (synth instruments) on the other hand don't need it
 	// In MMD2 / MMD3, the mix flag is used instead.
 	const bool hardwareMixSamples = (version < 2) || (version >= 2 && !(songHeader.flags2 & MMDSong::FLAG2_MIX));
+	m_nMinPeriod = hardwareMixSamples ? (113 * 4) : (55 * 4);
 
 	bool needInstruments = false;
 #ifndef NO_PLUGINS
