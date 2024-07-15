@@ -50,7 +50,7 @@ static bool readIMPHeader(uint32_t hdr,uint32_t &addition) noexcept
 	}
 }
 
-bool IMPDecompressor::detectHeader(uint32_t hdr) noexcept
+bool IMPDecompressor::detectHeader(uint32_t hdr,uint32_t footer) noexcept
 {
 	uint32_t dummy;
 	return readIMPHeader(hdr,dummy);

@@ -11,7 +11,7 @@
 namespace ancient::internal
 {
 
-bool SCOCompressDecompressor::detectHeader(uint32_t hdr) noexcept
+bool SCOCompressDecompressor::detectHeader(uint32_t hdr,uint32_t footer) noexcept
 {
 	return ((hdr>>16)==0x1fa0U);
 }
@@ -28,7 +28,7 @@ SCOCompressDecompressor::SCOCompressDecompressor(const Buffer &packedData,bool e
 	if (_packedData.size()<4U)
 		throw InvalidFormatError();
 	uint32_t hdr{_packedData.readBE16(0)};
-	if (!detectHeader(hdr<<16))
+	if (!detectHeader(hdr<<16,0))
 		throw InvalidFormatError();
 
 	if (exactSizeKnown)

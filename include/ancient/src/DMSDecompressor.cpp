@@ -19,7 +19,7 @@
 namespace ancient::internal
 {
 
-bool DMSDecompressor::detectHeader(uint32_t hdr) noexcept
+bool DMSDecompressor::detectHeader(uint32_t hdr,uint32_t footer) noexcept
 {
 	return hdr==FourCC("DMS!");
 }
@@ -33,7 +33,7 @@ DMSDecompressor::DMSDecompressor(const Buffer &packedData,bool verify) :
 	_packedData{packedData}
 {
 	uint32_t hdr{packedData.readBE32(0)};
-	if (!detectHeader(hdr) || packedData.size()<56)
+	if (!detectHeader(hdr,0) || packedData.size()<56)
 		throw InvalidFormatError();
 
 	if (verify && CRC16(packedData,4,50,0)!=packedData.readBE16(54))

@@ -13,7 +13,7 @@
 namespace ancient::internal
 {
 
-bool CRMDecompressor::detectHeader(uint32_t hdr) noexcept
+bool CRMDecompressor::detectHeader(uint32_t hdr,uint32_t footer) noexcept
 {
 	switch (hdr)
 	{
@@ -63,7 +63,7 @@ CRMDecompressor::CRMDecompressor(const Buffer &packedData,uint32_t recursionLeve
 	_packedData{packedData}
 {
 	uint32_t hdr{packedData.readBE32(0)};
-	if (!detectHeader(hdr) || packedData.size()<20)
+	if (!detectHeader(hdr,0) || packedData.size()<20)
 		throw Decompressor::InvalidFormatError();
 	if (hdr==0x1805'1973U || hdr==FourCC("CD\xb3\xb9") ||
 		hdr==FourCC("Iron") || hdr==FourCC("MSS!")) hdr=FourCC("CrM2");

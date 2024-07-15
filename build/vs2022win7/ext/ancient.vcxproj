@@ -630,7 +630,9 @@
     <ClInclude Include="..\..\..\include\ancient\src\HuffmanDecoder.hpp" />
     <ClInclude Include="..\..\..\include\ancient\src\ILZRDecompressor.hpp" />
     <ClInclude Include="..\..\..\include\ancient\src\IMPDecompressor.hpp" />
+    <ClInclude Include="..\..\..\include\ancient\src\IceDecompressor.hpp" />
     <ClInclude Include="..\..\..\include\ancient\src\InputStream.hpp" />
+    <ClInclude Include="..\..\..\include\ancient\src\LHDecompressor.hpp" />
     <ClInclude Include="..\..\..\include\ancient\src\LHLBDecompressor.hpp" />
     <ClInclude Include="..\..\..\include\ancient\src\LIN1Decompressor.hpp" />
     <ClInclude Include="..\..\..\include\ancient\src\LIN2Decompressor.hpp" />
@@ -647,6 +649,7 @@
     <ClInclude Include="..\..\..\include\ancient\src\NONEDecompressor.hpp" />
     <ClInclude Include="..\..\..\include\ancient\src\NUKEDecompressor.hpp" />
     <ClInclude Include="..\..\..\include\ancient\src\OutputStream.hpp" />
+    <ClInclude Include="..\..\..\include\ancient\src\PMCDecompressor.hpp" />
     <ClInclude Include="..\..\..\include\ancient\src\PPDecompressor.hpp" />
     <ClInclude Include="..\..\..\include\ancient\src\PPMQDecompressor.hpp" />
     <ClInclude Include="..\..\..\include\ancient\src\PackDecompressor.hpp" />
@@ -704,7 +707,9 @@
     <ClCompile Include="..\..\..\include\ancient\src\HUFFDecompressor.cpp" />
     <ClCompile Include="..\..\..\include\ancient\src\ILZRDecompressor.cpp" />
     <ClCompile Include="..\..\..\include\ancient\src\IMPDecompressor.cpp" />
+    <ClCompile Include="..\..\..\include\ancient\src\IceDecompressor.cpp" />
     <ClCompile Include="..\..\..\include\ancient\src\InputStream.cpp" />
+    <ClCompile Include="..\..\..\include\ancient\src\LHDecompressor.cpp" />
     <ClCompile Include="..\..\..\include\ancient\src\LHLBDecompressor.cpp" />
     <ClCompile Include="..\..\..\include\ancient\src\LIN1Decompressor.cpp" />
     <ClCompile Include="..\..\..\include\ancient\src\LIN2Decompressor.cpp" />
@@ -721,6 +726,7 @@
     <ClCompile Include="..\..\..\include\ancient\src\NONEDecompressor.cpp" />
     <ClCompile Include="..\..\..\include\ancient\src\NUKEDecompressor.cpp" />
     <ClCompile Include="..\..\..\include\ancient\src\OutputStream.cpp" />
+    <ClCompile Include="..\..\..\include\ancient\src\PMCDecompressor.cpp" />
     <ClCompile Include="..\..\..\include\ancient\src\PPDecompressor.cpp" />
     <ClCompile Include="..\..\..\include\ancient\src\PPMQDecompressor.cpp" />
     <ClCompile Include="..\..\..\include\ancient\src\PackDecompressor.cpp" />

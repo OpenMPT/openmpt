@@ -10,7 +10,7 @@
 namespace ancient::internal
 {
 
-bool CompressDecompressor::detectHeader(uint32_t hdr) noexcept
+bool CompressDecompressor::detectHeader(uint32_t hdr,uint32_t footer) noexcept
 {
 	return ((hdr>>16)==0x1f9dU);
 }
@@ -29,7 +29,7 @@ CompressDecompressor::CompressDecompressor(const Buffer &packedData,bool exactSi
 	if (_packedData.size()<3U)
 		throw InvalidFormatError();
 	uint32_t hdr=_packedData.readBE16(0);
-	if (!detectHeader(hdr<<16))
+	if (!detectHeader(hdr<<16,0))
 		throw InvalidFormatError();
 	uint8_t tmp{_packedData.read8(2)};
 	_hasBlocks=tmp&0x80U;

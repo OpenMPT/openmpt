@@ -41,6 +41,7 @@ public:
 	size_t getEndOffset() const noexcept { return _endOffset; }
 	void link(BackwardInputStream &stream) noexcept { _linkedInputStream=&stream; }
 
+	size_t available() const noexcept { return _endOffset-_currentOffset; }
 	void setOffset(size_t offset);
 
 private:
@@ -72,6 +73,7 @@ public:
 	size_t getOffset() const noexcept { return _currentOffset; }
 	void link(ForwardInputStream &stream) noexcept { _linkedInputStream=&stream; }
 
+	size_t available() const noexcept { return _currentOffset-_endOffset; }
 	void setOffset(size_t offset);
 
 private:
@@ -138,7 +140,7 @@ public:
 	{
 		uint32_t ret{0};
 		uint32_t pos{0};
-		if (count>32)
+		if (count>32U)
 			throw Decompressor::DecompressionError();
 		while (count)
 		{
@@ -153,6 +155,8 @@ public:
 		}
 		return ret;
 	}
+
+	size_t available() const noexcept { return _inputStream.available()*8U+_bufLength; }
 
 private:
 	T			&_inputStream;
@@ -213,7 +217,7 @@ public:
 	uint32_t readBitsGeneric(uint32_t count,F readWord)
 	{
 		uint32_t ret{0};
-		if (count>32)
+		if (count>32U)
 			throw Decompressor::DecompressionError();
 		while (count)
 		{
@@ -226,6 +230,8 @@ public:
 		}
 		return ret;
 	}
+
+	size_t available() const noexcept { return _inputStream.available()*8U+_bufLength; }
 
 private:
 	T			&_inputStream;

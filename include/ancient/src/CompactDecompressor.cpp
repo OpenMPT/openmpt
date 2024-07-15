@@ -11,7 +11,7 @@
 namespace ancient::internal
 {
 
-bool CompactDecompressor::detectHeader(uint32_t hdr) noexcept
+bool CompactDecompressor::detectHeader(uint32_t hdr,uint32_t footer) noexcept
 {
 	// If a compact file has signature of 0x1fff it means the its endianess is wrongly configured
 	// (This is easy since it only knows of vax and pdp-11)
@@ -32,7 +32,7 @@ CompactDecompressor::CompactDecompressor(const Buffer &packedData,bool exactSize
 	if (_packedData.size()<2U)
 		throw InvalidFormatError();
 	uint32_t hdr{_packedData.readBE16(0)};
-	if (!detectHeader(hdr<<16))
+	if (!detectHeader(hdr<<16,0))
 		throw InvalidFormatError();
 	if (exactSizeKnown)
 		_packedSize=packedData.size();

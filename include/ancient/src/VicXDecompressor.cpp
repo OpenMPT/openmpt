@@ -15,7 +15,7 @@
 namespace ancient::internal
 {
 
-bool VicXDecompressor::detectHeader(uint32_t hdr) noexcept
+bool VicXDecompressor::detectHeader(uint32_t hdr,uint32_t footer) noexcept
 {
 	return hdr==FourCC("Vice") || hdr==FourCC("Vic2");
 }
@@ -29,7 +29,7 @@ VicXDecompressor::VicXDecompressor(const Buffer &packedData,bool exactSizeKnown,
 	_packedData{packedData}
 {
 	uint32_t hdr{_packedData.readBE32(0)};
-	if (!detectHeader(hdr))
+	if (!detectHeader(hdr,0))
 		throw InvalidFormatError();
 	_isVic2=hdr==FourCC("Vic2");
 
