@@ -50,11 +50,11 @@ bool StoneCrackerDecompressor::detectHeaderAndGeneration(uint32_t hdr,uint32_t &
 	// Specials
 	switch (hdr&0xffff'ff00U)
 	{
-		case FourCC("1AM\000"):		// Reunion
+		case FourCC("1AM\0"):		// Reunion
 		generation=3;
 		return true;
 
-		case FourCC("2AM\000"):		// Reunion
+		case FourCC("2AM\0"):		// Reunion
 		generation=6;
 		return true;
 
@@ -100,7 +100,7 @@ bool StoneCrackerDecompressor::detectHeaderAndGeneration(uint32_t hdr,uint32_t &
 	}
 }
 
-bool StoneCrackerDecompressor::detectHeader(uint32_t hdr) noexcept
+bool StoneCrackerDecompressor::detectHeader(uint32_t hdr,uint32_t footer) noexcept
 {
 	uint32_t dummy;
 	return detectHeaderAndGeneration(hdr,dummy);
@@ -302,7 +302,6 @@ void StoneCrackerDecompressor::decompressGen1(Buffer &rawData)
 	{
 		return bitReader.readBitsBE32(1);
 	};
-
 
 	// anchor-bit handling
 	{

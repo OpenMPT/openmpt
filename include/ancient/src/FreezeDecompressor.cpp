@@ -11,7 +11,7 @@
 namespace ancient::internal
 {
 
-bool FreezeDecompressor::detectHeader(uint32_t hdr) noexcept
+bool FreezeDecompressor::detectHeader(uint32_t hdr,uint32_t footer) noexcept
 {
 	return ((hdr>>16)==0x1f9eU||(hdr>>16)==0x1f9fU);
 }
@@ -28,7 +28,7 @@ FreezeDecompressor::FreezeDecompressor(const Buffer &packedData,bool exactSizeKn
 	if (_packedData.size()<2U)
 		throw InvalidFormatError();
 	uint32_t hdr{_packedData.readBE16(0)};
-	if (!detectHeader(hdr<<16))
+	if (!detectHeader(hdr<<16,0))
 		throw InvalidFormatError();
 	_isOldVersion=hdr==0x1f9eU;
 	if (_isOldVersion)

@@ -16,7 +16,7 @@
 namespace ancient::internal
 {
 
-bool BZIP2Decompressor::detectHeader(uint32_t hdr) noexcept
+bool BZIP2Decompressor::detectHeader(uint32_t hdr,uint32_t footer) noexcept
 {
 	return ((hdr&0xffff'ff00U)==FourCC("BZh\0") && (hdr&0xffU)>='1' && (hdr&0xffU)<='9');
 }
@@ -41,7 +41,7 @@ BZIP2Decompressor::BZIP2Decompressor(const Buffer &packedData,bool exactSizeKnow
 	_packedSize{0}
 {
 	uint32_t hdr=packedData.readBE32(0);
-	if (!detectHeader(hdr))
+	if (!detectHeader(hdr,0))
 		throw Decompressor::InvalidFormatError();;
 	_blockSize=((hdr&0xffU)-'0')*100'000;
 }
@@ -52,7 +52,7 @@ BZIP2Decompressor::BZIP2Decompressor(uint32_t hdr,uint32_t recursionLevel,const 
 	_packedSize{_packedData.size()}
 {
 	uint32_t blockHdr=packedData.readBE32(0);
-	if (!detectHeader(blockHdr))
+	if (!detectHeader(blockHdr,0))
 		throw Decompressor::InvalidFormatError();;
 	_blockSize=((blockHdr&0xffU)-'0')*100'000;
 }

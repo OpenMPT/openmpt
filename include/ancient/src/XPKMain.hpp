@@ -25,7 +25,7 @@ public:
 
 	void decompressImpl(Buffer &rawData,bool verify) final;
 
-	static bool detectHeader(uint32_t hdr) noexcept;
+	static bool detectHeader(uint32_t hdr,uint32_t footer) noexcept;
 
 	static std::shared_ptr<Decompressor> create(const Buffer &packedData,bool exactSizeKnown,bool verify);
 

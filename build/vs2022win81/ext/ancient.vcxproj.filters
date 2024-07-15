@@ -93,7 +93,13 @@
     <ClInclude Include="..\..\..\include\ancient\src\IMPDecompressor.hpp">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\ancient\src\IceDecompressor.hpp">
+      <Filter>src</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\include\ancient\src\InputStream.hpp">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\ancient\src\LHDecompressor.hpp">
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\ancient\src\LHLBDecompressor.hpp">
@@ -142,6 +148,9 @@
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\ancient\src\OutputStream.hpp">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\ancient\src\PMCDecompressor.hpp">
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\ancient\src\PPDecompressor.hpp">
@@ -311,7 +320,13 @@
     <ClCompile Include="..\..\..\include\ancient\src\IMPDecompressor.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\include\ancient\src\IceDecompressor.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\include\ancient\src\InputStream.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\include\ancient\src\LHDecompressor.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\ancient\src\LHLBDecompressor.cpp">
@@ -360,6 +375,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\ancient\src\OutputStream.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\include\ancient\src\PMCDecompressor.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\ancient\src\PPDecompressor.cpp">

@@ -17,7 +17,7 @@ PPDecompressor::PPState::PPState(uint32_t mode) noexcept :
 	// nothing needed
 }
 
-bool PPDecompressor::detectHeader(uint32_t hdr) noexcept
+bool PPDecompressor::detectHeader(uint32_t hdr,uint32_t footer) noexcept
 {
 	return hdr==FourCC("PP11") || hdr==FourCC("PP20") || hdr==FourCC("PX20")
 		|| hdr==FourCC("CHFC")		// Sky High Stuntman
@@ -50,7 +50,7 @@ PPDecompressor::PPDecompressor(const Buffer &packedData,bool exactSizeKnown,bool
 	_dataStart=_packedData.size()-4;
 
 	uint32_t hdr{packedData.readBE32(0)};
-	if (!detectHeader(hdr))
+	if (!detectHeader(hdr,0))
 		throw InvalidFormatError(); 
 	if (hdr==FourCC("PX20"))
 	{

@@ -267,13 +267,15 @@ void PPMQDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData
 
 		void scale() noexcept
 		{
-
 			for (auto it=_nodes.begin();it!=_nodes.end();)
 			{
-				auto next=it++;
 				it->freq>>=1U;
-				if (!it->freq) _nodes.erase(it);
-				it=next;
+				if (!it->freq)
+				{
+					it = _nodes.erase(it);
+				} else {
+					it++;
+				}
 			}
 		}
 

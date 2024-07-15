@@ -9,7 +9,7 @@
 namespace ancient::internal
 {
 
-bool TPWMDecompressor::detectHeader(uint32_t hdr) noexcept
+bool TPWMDecompressor::detectHeader(uint32_t hdr,uint32_t footer) noexcept
 {
 	return hdr==FourCC("TPWM");
 }
@@ -23,7 +23,7 @@ TPWMDecompressor::TPWMDecompressor(const Buffer &packedData,bool verify) :
 	_packedData{packedData}
 {
 	uint32_t hdr{packedData.readBE32(0)};
-	if (!detectHeader(hdr) || packedData.size()<12)
+	if (!detectHeader(hdr,0) || packedData.size()<12)
 		throw InvalidFormatError();
 
 	_rawSize=packedData.readBE32(4);

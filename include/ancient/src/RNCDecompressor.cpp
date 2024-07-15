@@ -22,7 +22,7 @@
 namespace ancient::internal
 {
 
-bool RNCDecompressor::detectHeader(uint32_t hdr) noexcept
+bool RNCDecompressor::detectHeader(uint32_t hdr,uint32_t footer) noexcept
 {
 	return hdr==FourCC("RNC\001") || hdr==FourCC("RNC\002")
 		|| hdr==FourCC("...\001");		// Total Carnage

@@ -30,7 +30,7 @@ static uint32_t Adler32(const Buffer &buffer,size_t offset,size_t len)
 	return (s2<<16)|s1;
 }
 
-bool DEFLATEDecompressor::detectHeader(uint32_t hdr) noexcept
+bool DEFLATEDecompressor::detectHeader(uint32_t hdr,uint32_t footer) noexcept
 {
 	return ((hdr>>16U)==0x1f8bU)||((hdr>>16U)==0x1fa1U);
 }
@@ -83,7 +83,7 @@ DEFLATEDecompressor::DEFLATEDecompressor(const Buffer &packedData,bool exactSize
 	if (_packedData.size()<2U)
 		throw InvalidFormatError();
 	uint32_t hdr{_packedData.readBE16(0)};
-	if (!detectHeader(hdr<<16U))
+	if (!detectHeader(hdr<<16U,0))
 		throw InvalidFormatError();
 
 	if (hdr==0x1f8bU)

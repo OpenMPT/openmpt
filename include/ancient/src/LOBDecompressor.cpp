@@ -14,7 +14,7 @@
 namespace ancient::internal
 {
 
-bool LOBDecompressor::detectHeader(uint32_t hdr) noexcept
+bool LOBDecompressor::detectHeader(uint32_t hdr,uint32_t footer) noexcept
 {
 	return hdr==FourCC("\001LOB")||hdr==FourCC("\002LOB")||hdr==FourCC("\003LOB");
 }
@@ -28,7 +28,7 @@ LOBDecompressor::LOBDecompressor(const Buffer &packedData,bool verify) :
 	_packedData{packedData}
 {
 	uint32_t hdr{packedData.readBE32(0)};
-	if (!detectHeader(hdr) || packedData.size()<12U)
+	if (!detectHeader(hdr,0) || packedData.size()<12U)
 		throw InvalidFormatError();
 	_methodCount=hdr>>24U;
 

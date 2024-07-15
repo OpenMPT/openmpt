@@ -13,7 +13,7 @@
 namespace ancient::internal
 {
 
-bool MMCMPDecompressor::detectHeader(uint32_t hdr) noexcept
+bool MMCMPDecompressor::detectHeader(uint32_t hdr,uint32_t footer) noexcept
 {
 	return hdr==FourCC("ziRC");
 }
@@ -26,7 +26,7 @@ std::shared_ptr<Decompressor> MMCMPDecompressor::create(const Buffer &packedData
 MMCMPDecompressor::MMCMPDecompressor(const Buffer &packedData,bool exactSizeKnown,bool verify) :
 	_packedData{packedData}
 {
-	if (!detectHeader(packedData.readBE32(0)) || packedData.readBE32(4U)!=FourCC("ONia") ||
+	if (!detectHeader(packedData.readBE32(0),0) || packedData.readBE32(4U)!=FourCC("ONia") ||
 		packedData.readLE16(8U)!=14U || packedData.size()<24U)
 		throw InvalidFormatError();
 	_version=packedData.readLE16(10U);

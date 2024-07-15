@@ -88,12 +88,12 @@ VerificationError::~VerificationError() noexcept
 
 bool Decompressor::detect(const std::vector<uint8_t> &packedData) noexcept
 {
-	return internal::Decompressor::detect(internal::ConstStaticBuffer(packedData.data(), packedData.size()));
+	return internal::Decompressor::detect(internal::ConstStaticBuffer(packedData.data(), packedData.size()),true);
 }
 
 bool Decompressor::detect(const uint8_t *packedData, size_t packedSize) noexcept
 {
-	return internal::Decompressor::detect(internal::ConstStaticBuffer(packedData, packedSize));
+	return internal::Decompressor::detect(internal::ConstStaticBuffer(packedData, packedSize),true);
 }
 
 Decompressor::Decompressor(const std::vector<uint8_t> &packedData,bool exactSizeKnown,bool verify) :
