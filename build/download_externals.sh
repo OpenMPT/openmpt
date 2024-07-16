@@ -34,7 +34,11 @@ function download () {
   URL="$(echo ""$1"" | sed 's/ /%20/g')"
   if [ ! -f "$MPT_GET_FILE_NAME" ]; then
    echo "Downloading '$MPT_GET_FILE_NAME' from '$URL' ..."
-   curl --location -o "$MPT_GET_FILE_NAME" "$URL" || true
+   if command -v curl &> /dev/null ; then
+    curl --location -o "$MPT_GET_FILE_NAME" "$URL" || true
+   elif command -v wget &> /dev/null ; then
+    wget -O "$MPT_GET_FILE_NAME" "$URL" || true
+   fi
    echo "Verifying '$URL' ..."
    if [ -f "$MPT_GET_FILE_NAME" ]; then
     FILE_SIZE=$(find "$MPT_GET_FILE_NAME" -printf '%s')
