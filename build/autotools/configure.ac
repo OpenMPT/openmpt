@@ -84,8 +84,9 @@ AC_ARG_VAR(CXXSTDLIB_PCLIBSPRIVATE, [C++ standard library (or libraries) require
 
 
 AC_CANONICAL_HOST
-case $host_os in
- mingw32*)
+
+AS_CASE([$host_os],
+ [mingw32*],[
   LIBOPENMPT_WIN32_LIBS=
   LIBOPENMPT_LIBS_PRIVATE_WIN32=
   LIBOPENMPTTEST_WIN32_LIBS="-lole32 -lrpcrt4"
@@ -95,8 +96,8 @@ case $host_os in
   WIN32_CFLAGS="-municode -mthreads"
   WIN32_CONSOLE_CXXFLAGS=-mconsole
   WIN32_CONSOLE_CFLAGS=-mconsole
-  ;;
- *)
+ ],
+ [
   LIBOPENMPT_WIN32_LIBS=
   LIBOPENMPT_LIBS_PRIVATE_WIN32=
   LIBOPENMPTTEST_WIN32_LIBS=
@@ -106,8 +107,8 @@ case $host_os in
   WIN32_CFLAGS=
   WIN32_CONSOLE_CXXFLAGS=
   WIN32_CONSOLE_CFLAGS=
-  ;;
-esac
+ ]
+)
 AC_SUBST([LIBOPENMPT_WIN32_LIBS])
 AC_SUBST([LIBOPENMPTTEST_WIN32_LIBS])
 AC_SUBST([OPENMPT123_WIN32_LIBS])
@@ -210,8 +211,8 @@ AM_CONDITIONAL([ENABLE_TESTS], [test "x$enable_tests" != "xno"])
 # Optional openmpt123 dependency
 AC_ARG_WITH([pulseaudio], AS_HELP_STRING([--with-pulseaudio], [Enable use of libpulse and libpulse-simple (enabled by default on Linux).]))
 AS_IF([test "x$enable_openmpt123" != "xno"],[
-case $host_os in
- linux*)
+AS_CASE([$host_os],
+ [linux*],[
 AS_IF([test "x$with_pulseaudio" != "xno"],
  [
   PKG_CHECK_MODULES([PULSEAUDIO], [libpulse libpulse-simple],
@@ -248,8 +249,9 @@ AS_IF([test "x$with_pulseaudio" = "xyes"],
   have_pulseaudio=0
  ]
 )
- ;;
-esac
+ ],
+ []
+)
 ],[have_pulseaudio=0])
 
 # Optional openmpt123 and examples dependency
