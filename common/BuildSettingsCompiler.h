@@ -44,7 +44,7 @@
 
 #if MPT_COMPILER_GCC
 
-#ifdef MPT_COMPILER_SETTING_QUIRK_GCC_NO_IPA_RA
+#ifdef MPT_COMPILER_SETTING_QUIRK_GCC_BROKEN_IPA
 // See <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=115049>.
 #if MPT_GCC_BEFORE(9, 0, 0)
 // Earlier GCC get confused about setting a global function attribute.
@@ -56,7 +56,7 @@
 #else
 #pragma GCC optimize("no-ipa-ra")
 #endif
-#endif // MPT_COMPILER_SETTING_QUIRK_GCC_NO_IPA_RA
+#endif // MPT_COMPILER_SETTING_QUIRK_GCC_BROKEN_IPA
 
 #endif // MPT_COMPILER_GCC
 
