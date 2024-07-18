@@ -85,6 +85,12 @@ AC_ARG_VAR(CXXSTDLIB_PCLIBSPRIVATE, [C++ standard library (or libraries) require
 
 AC_CANONICAL_HOST
 
+# work-around NetBSD toolchain not understanding transitive shared object dependencies at all
+AS_CASE([$host_os],
+ [netbsd*], [LIBS="$LIBS -lstdc++"],
+ []
+)
+
 AS_CASE([$host_os],
  [mingw32*],[
   LIBOPENMPT_WIN32_LIBS=
