@@ -207,12 +207,20 @@
 // detect compiler setting quirks
 
 #if MPT_COMPILER_GCC
+#if MPT_GCC_BEFORE(15, 0, 0) && !MPT_GCC_AT_LEAST(14, 2, 0)
 // GCC 14 causes severe miscompilation of inline functions on MinGW.
 // See <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=115049>.
 // Current investigation suggests a general problem with -fipa-ra on non-ELF
 // platforms.
+// As far as we understand the issue, it could possibly also manifest with
+// other inter-procedure-optimizations and with older GCC versions.
+// Fixed in GCC 15
+// (<https://gcc.gnu.org/git/?p=gcc.git;h=5080840d8fbf25a321dd27543a1462d393d338bc>)
+// and GCC 14.2
+// (<https://gcc.gnu.org/git/?p=gcc.git;h=747c4b58573ea00419f64293a61537eb69f43307>).
 #if !defined(__ELF__)
-#define MPT_COMPILER_SETTING_QUIRK_GCC_NO_IPA_RA
+#define MPT_COMPILER_SETTING_QUIRK_GCC_BROKEN_IPA
+#endif
 #endif
 #endif
 
