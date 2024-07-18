@@ -1,0 +1,79 @@
+name: NetBSD Autotools
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { version: '10.0' }
+          - { version: '9.4'  }
+
+    concurrency:
+      group: ${{github.ref}}-${{github.workflow}}-${{matrix.version}}-autotools
+      cancel-in-progress: true
+
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Startup VM
+      uses: cross-platform-actions/action@v0.25.0
+      with:
+        architecture: x86_64
+        memory: 4G
+        operating_system: netbsd
+        version: ${{matrix.version}}
+        shell: bash
+        sync_files: runner-to-vm
+        shutdown_vm: false
+        run: true
+    - name: Install dependencies
+      uses: cross-platform-actions/action@v0.25.0
+      with:
+        architecture: x86_64
+        memory: 4G
+        operating_system: netbsd
+        version: ${{matrix.version}}
+        shell: bash
+        sync_files: false
+        shutdown_vm: false
+        run: |
+          sudo pkgin -y update
+          sudo pkgin -y full-upgrade
+          sudo pkgin -y install subversion-base p5-subversion py311-subversion ruby32-subversion git p5-XML-XPath mawk
+          sudo pkgin -y install gmake pkgconf
+          sudo pkgin -y install mpg123 libogg libvorbis flac libsndfile pulseaudio portaudio SDL2
+          sudo pkgin -y install autoconf autoconf-archive automake libtool libltdl
+          sudo pkgin -y install doxygen help2man
+    - name: Build
+      uses: cross-platform-actions/action@v0.25.0
+      with:
+        architecture: x86_64
+        memory: 4G
+        operating_system: netbsd
+        version: ${{matrix.version}}
+        shell: bash
+        sync_files: false
+        shutdown_vm: false
+        run: |
+          export MAKEFLAGS="-j4"; ./build/autotools/autoconfiscate.sh
+    - name: Shutdown VM
+      uses: cross-platform-actions/action@v0.25.0
+      with:
+        architecture: x86_64
+        memory: 4G
+        operating_system: netbsd
+        version: ${{matrix.version}}
+        shell: bash
+        sync_files: false
+        shutdown_vm: true
+        run: true
