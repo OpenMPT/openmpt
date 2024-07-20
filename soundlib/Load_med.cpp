@@ -419,9 +419,11 @@ static std::pair<EffectCommand, ModCommand::PARAM> ConvertMEDEffect(ModCommand &
 		if(param > 0 && param <= 20)
 			m.SetEffectCommand(CMD_SPEED, param);
 		break;
-	case 0x0C:  // Set Volume
+	case 0x0C:  // Set Volume (note: parameters >= 0x80 (only in hex mode?) should set the default instrument volume, which we don't support)
 		if(!ctx.volHex && param < 0x99)
 			m.SetEffectCommand(CMD_VOLUME, static_cast<ModCommand::PARAM>((param >> 4) * 10 + (param & 0x0F)));
+		else if(ctx.volHex && ctx.version < 3)
+			m.SetEffectCommand(CMD_VOLUME, static_cast<ModCommand::PARAM>(std::min(param & 0x7F, 64)));
 		else if(ctx.volHex)
 			m.SetEffectCommand(CMD_VOLUME, static_cast<ModCommand::PARAM>(((param & 0x7F) + 1) / 2));
 		break;
@@ -1154,7 +1156,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 					ChnSettings[chn].nVolume = std::min<uint8>(file.ReadUint8(), 64);
 				}
 			}
-			if(header.trackPanOffset && file.Seek(header.trackPanOffset))
+			if((freePan || version > 2) && header.trackPanOffset && file.Seek(header.trackPanOffset))
 			{
 				for(CHANNELINDEX chn = 0; chn < m_nChannels; chn++)
 				{
@@ -1184,11 +1186,11 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 				mixPlug.Info.szLibraryName = "Echo";
 
 				std::array<float32le, 6> params{};
-				params[1] = 1.0f;                                   // WetDryMix
-				params[2] = feedback;                               // Feedback
-				params[3] = delay;                                  // LeftDelay
-				params[4] = delay;                                  // RightDelay
-				params[5] = header.mixEchoType == 2 ? 1.0f : 0.0f;  // PanDelay
+				params[1] = 1.0f;                       // WetDryMix
+				params[2] = feedback;                   // Feedback
+				params[3] = delay;                      // LeftDelay
+				params[4] = delay;                      // RightDelay
+				params[5] = header.mixEchoType - 1.0f;  // PanDelay
 				mixPlug.pluginData.resize(sizeof(params));
 				memcpy(mixPlug.pluginData.data(), params.data(), sizeof(params));
 			}
