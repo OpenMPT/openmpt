@@ -2477,7 +2477,7 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 			case NewNoteAction::NoteCut:
 			case NewNoteAction::NoteFade:
 				// Switch off note played on this plugin, on this tracker channel and midi channel
-				SendMIDINote(nChn, NOTE_KEYOFF, 0);
+				SendMIDINote(nChn, NOTE_KEYOFF, 0, m_playBehaviour[kMIDINotesFromChannelPlugin] ? pPlugin : nullptr);
 				srcChn.nArpeggioLastNote = NOTE_NONE;
 				srcChn.lastMidiNoteWithoutArp = NOTE_NONE;
 				break;
@@ -5748,24 +5748,22 @@ void CSoundFile::SendMIDIData(PlayState &playState, CHANNELINDEX nChn, bool isSm
 }
 
 
-void CSoundFile::SendMIDINote(CHANNELINDEX chn, uint16 note, uint16 volume)
+void CSoundFile::SendMIDINote(CHANNELINDEX chn, uint16 note, uint16 volume, IMixPlugin *plugin)
 {
 #ifndef NO_PLUGINS
 	auto &channel = m_PlayState.Chn[chn];
 	const ModInstrument *pIns = channel.pModInstrument;
 	// instro sends to a midi chan
-	if (pIns && pIns->HasValidMIDIChannel())
+	if(pIns && pIns->HasValidMIDIChannel())
 	{
-		PLUGINDEX plug = pIns->nMixPlug;
-		if(plug > 0 && plug <= MAX_MIXPLUGINS)
+		if(plugin == nullptr && pIns->nMixPlug > 0 && pIns->nMixPlug <= MAX_MIXPLUGINS)
+			plugin = m_MixPlugins[pIns->nMixPlug - 1].pMixPlugin;
+
+		if(plugin != nullptr)
 		{
-			IMixPlugin *pPlug = m_MixPlugins[plug - 1].pMixPlugin;
-			if (pPlug != nullptr)
-			{
-				pPlug->MidiCommand(*pIns, note, volume, chn);
-				if(note < NOTE_MIN_SPECIAL)
-					channel.nLeftVU = channel.nRightVU = 0xFF;
-			}
+			plugin->MidiCommand(*pIns, note, volume, chn);
+			if(note < NOTE_MIN_SPECIAL)
+				channel.nLeftVU = channel.nRightVU = 0xFF;
 		}
 	}
 #endif // NO_PLUGINS
@@ -6743,17 +6741,12 @@ PLUGINDEX CSoundFile::GetChannelPlugin(const PlayState &playState, CHANNELINDEX 
 		// If it looks like this is an NNA channel, we need to find the master channel.
 		// This ensures we pick up the right ChnSettings.
 		if(channel.nMasterChn > 0)
-		{
 			nChn = channel.nMasterChn - 1;
-		}
 
 		if(nChn < ChnSettings.size())
-		{
 			plugin = ChnSettings[nChn].nMixPlugin;
-		} else
-		{
+		else
 			plugin = 0;
-		}
 	}
 	return plugin;
 }
@@ -6768,13 +6761,10 @@ PLUGINDEX CSoundFile::GetActiveInstrumentPlugin(const ModChannel &chn, PluginMut
 	if(chn.pModInstrument != nullptr)
 	{
 		// TODO this looks fishy. Shouldn't it check the mute status of the instrument itself?!
-		if(respectMutes == RespectMutes && chn.pModSample && chn.pModSample->uFlags[CHN_MUTE])
-		{
+		if(respectMutes == RespectMutes && chn.pModInstrument->dwFlags[INS_MUTE])
 			plug = 0;
-		} else
-		{
+		else
 			plug = chn.pModInstrument->nMixPlug;
-		}
 	}
 	return plug;
 }

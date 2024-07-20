@@ -597,6 +597,7 @@ enum PlayBehaviour
 	kITEmptyNoteMapSlotIgnoreCell,  // IT ignores the entire pattern cell when trying to play an unmapped note of an instrument
 	kITOffsetWithInstrNumber,       // IT applies offset commands even if just an instrument number without note is present
 	kContinueSampleWithoutInstr,    // FTM: A note without instrument number continues looped samples with the new pitch instead of retriggering them
+	kMIDINotesFromChannelPlugin,    // Behaviour before OpenMPT 1.26: Channel plugin can be used to send MIDI notes
 
 	// Add new play behaviours here.
 

@@ -431,9 +431,11 @@ void CSoundFile::UpgradeModule()
 			// OpenMPT 1.18 fixed the depth of random pan in compatible mode.
 			// OpenMPT 1.26 fixes it in normal mode too.
 			if(!compatModeIT || m_dwLastSavedWithVersion < MPT_V("1.18.00.00"))
-			{
 				ins->nPanSwing = static_cast<uint8>((ins->nPanSwing + 3) / 4u);
-			}
+
+			// Before OpenMPT 1.26 (r6129), it was possible to trigger MIDI notes using channel plugins if the instrument had a valid MIDI channel.
+			if(!ins->nMixPlug && ins->HasValidMIDIChannel() && m_dwLastSavedWithVersion >= MPT_V("1.17.00.00"))
+				m_playBehaviour.set(kMIDINotesFromChannelPlugin);
 		}
 	}
 

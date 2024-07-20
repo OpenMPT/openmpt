@@ -668,7 +668,7 @@ void CLegacyPlaybackSettingsDlg::OnFilterStringChanged()
 		case kST3EffectMemory: desc = _T("Most effects share the same memory"); break;
 		case kST3PortaSampleChange: desc = _T("Portamento with instrument number applies volume settings of new sample, but not the new sample itself (GUS)"); break;
 		case kST3VibratoMemory: desc = _T("Do not remember vibrato type in effect memory"); break;
-		case kST3LimitPeriod: desc = _T("ModPlug Tracker frequency limits"); break;
+		case kST3LimitPeriod: desc = _T("Stop note when reaching the format's maximum note frequency"); break;
 		case KST3PortaAfterArpeggio: desc = _T("Portamento immediately following an arpeggio effect continues at the last arpeggiated note"); break;
 		case kMODOneShotLoops: desc = _T("ProTracker one-shot loops"); break;
 		case kMODIgnorePanning: desc = _T("Ignore panning commands"); break;
@@ -713,6 +713,7 @@ void CLegacyPlaybackSettingsDlg::OnFilterStringChanged()
 		case kITEmptyNoteMapSlotIgnoreCell: desc = _T("Ignore pattern cell completely when trying to play unmapped instrument note"); break;
 		case kITOffsetWithInstrNumber: desc = _T("Offset command with instrument number recalls offset with last note"); break;
 		case kContinueSampleWithoutInstr: desc = _T("New note without instrument number does not play looped samples from the start"); break;
+		case kMIDINotesFromChannelPlugin: desc = _T("MIDI notes can be sent to channel plugins"); break;
 
 		default: MPT_ASSERT_NOTREACHED();
 		}

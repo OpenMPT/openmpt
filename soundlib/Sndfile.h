@@ -1100,7 +1100,7 @@ protected:
 	void ParseMIDIMacro(PlayState &playState, CHANNELINDEX nChn, bool isSmooth, const mpt::span<const char> macro, mpt::span<uint8> &out, uint8 param = 0, PLUGINDEX plugin = 0) const;
 	static float CalculateSmoothParamChange(const PlayState &playState, float currentValue, float param);
 	void SendMIDIData(PlayState &playState, CHANNELINDEX nChn, bool isSmooth, const mpt::span<const uint8> macro, PLUGINDEX plugin);
-	void SendMIDINote(CHANNELINDEX chn, uint16 note, uint16 volume);
+	void SendMIDINote(CHANNELINDEX chn, uint16 note, uint16 volume, IMixPlugin *plugin = nullptr);
 
 	int SetupChannelFilter(ModChannel &chn, bool bReset, int envModifier = 256) const;
 	int HandleNoteChangeFilter(ModChannel &chn) const;

@@ -2658,7 +2658,7 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 			ModCommand::NOTE realNote = note;
 			if(ModCommand::IsNote(note))
 				realNote = pIns->NoteMap[note - NOTE_MIN];
-			SendMIDINote(nChn, realNote, static_cast<uint16>(chn.nVolume));
+			SendMIDINote(nChn, realNote, static_cast<uint16>(chn.nVolume), m_playBehaviour[kMIDINotesFromChannelPlugin] ? pPlugin : nullptr);
 		} else if(hasVolCommand)
 		{
 			pPlugin->MidiCC(MIDIEvents::MIDICC_Volume_Fine, vol, nChn);
@@ -2692,7 +2692,7 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 		// Experimental VST panning
 		//ProcessMIDIMacro(nChn, false, m_MidiCfg.Global[MIDIOUT_PAN], 0, nPlugin);
 		if(m_playBehaviour[kPluginIgnoreTonePortamento] || !chn.rowCommand.IsTonePortamento())
-			SendMIDINote(nChn, realNote, static_cast<uint16>(velocity));
+			SendMIDINote(nChn, realNote, static_cast<uint16>(velocity), m_playBehaviour[kMIDINotesFromChannelPlugin] ? pPlugin : nullptr);
 	}
 
 	const bool processVolumeAlsoOnNote = (pIns->pluginVelocityHandling == PLUGIN_VELOCITYHANDLING_VOLUME);
