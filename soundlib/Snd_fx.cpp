@@ -6760,7 +6760,6 @@ PLUGINDEX CSoundFile::GetActiveInstrumentPlugin(const ModChannel &chn, PluginMut
 	PLUGINDEX plug = 0;
 	if(chn.pModInstrument != nullptr)
 	{
-		// TODO this looks fishy. Shouldn't it check the mute status of the instrument itself?!
 		if(respectMutes == RespectMutes && chn.pModInstrument->dwFlags[INS_MUTE])
 			plug = 0;
 		else
