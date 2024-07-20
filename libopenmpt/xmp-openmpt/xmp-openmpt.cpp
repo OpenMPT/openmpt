@@ -1261,7 +1261,7 @@ static void add_names( std::ostream & str, const std::string & title, const std:
 		}
 		str << title << " Names:" << "\r";
 		for ( std::size_t i = 0; i < names.size(); i++ ) {
-			str << std::setfill('0') << std::setw(2) << (display_offset + i) << std::setw(0) << "\t" << convert_to_native( names[i] ) << "\r";
+			str << std::setfill( '0' ) << std::setw( 2 ) << ( display_offset + i ) << std::setw( 0 ) << "\t" << convert_to_native( sanitize_xmplay_info_string( names[i] ) ) << "\r";
 		}
 		str << "\r";
 	}
