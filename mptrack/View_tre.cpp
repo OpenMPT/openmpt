@@ -3370,21 +3370,24 @@ void CModTree::OnSelChanged(LPNMHDR, LRESULT *)
 	if(m_redrawLockCount)
 		return;
 	HTREEITEM hItem = GetSelectedItem();
-	switch(GetModItem(hItem).type)
+	const auto type = GetModItem(hItem).type;
+	switch(type)
 	{
 	case MODITEM_INSLIB_SONG:
 	case MODITEM_INSLIB_SAMPLE:
 	case MODITEM_INSLIB_INSTRUMENT:
-		if(WIN32_FILE_ATTRIBUTE_DATA fad; GetFileAttributesEx(InsLibGetFullPath(hItem).AsNative().c_str(), GetFileExInfoStandard, &fad))
+		if(uint32 itemData = static_cast<uint32>(GetItemData(hItem)); itemData > 0 && itemData <= m_fileBrowserEntries.size())
 		{
-			LARGE_INTEGER size;
-			size.HighPart = fad.nFileSizeHigh;
-			size.LowPart = fad.nFileSizeLow;
-			FILETIME localTime;
-			FileTimeToLocalFileTime(&fad.ftLastWriteTime, &localTime);
-			SYSTEMTIME sysTime;
-			FileTimeToSystemTime(&localTime, &sysTime);
-			m_HelpText = MPT_CFORMAT("Size: {}, last modified: {}")(FormatFileSize(size.QuadPart), CTime(sysTime).Format(_T("%d %b %Y, %H:%M:%S")));
+			const auto &entry = m_fileBrowserEntries[itemData - 1];
+			m_HelpText = MPT_CFORMAT("Size: {}")(FormatFileSize(entry.size));
+			if(!m_SongFile)
+			{
+				const FILETIME modtime{LODWORD(entry.modtime), HIDWORD(entry.modtime)};
+				m_HelpText += MPT_CFORMAT(", last modified: {}")(CTime(modtime).Format(_T("%d %b %Y, %H:%M:%S")));
+			} else if(type != MODITEM_INSLIB_SAMPLE)
+			{
+				m_HelpText.Empty();
+			}
 			CMainFrame::GetMainFrame()->SetHelpText(m_HelpText);
 		}
 		break;
