@@ -165,6 +165,9 @@ void CModDoc::AppendModule(const CSoundFile &source)
 		{
 			m_SndFile.Order.AddSequence();
 			m_SndFile.Order().SetName(srcOrder.GetName());
+			m_SndFile.Order().SetDefaultTempo(srcOrder.GetDefaultTempo());
+			m_SndFile.Order().SetDefaultSpeed(srcOrder.GetDefaultSpeed());
+			m_SndFile.Order().SetRestartPos(srcOrder.GetRestartPos());
 		} else
 		{
 			insertPos = m_SndFile.Order().GetLengthTailTrimmed();
