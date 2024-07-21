@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.7.9-pre
+### libopenmpt 0.7.9 (2024-07-21)
 
  *  [**Sec**] Potential division by 0 when seeking in the module with
     `seek.sync_samples` enabled (r21167).
