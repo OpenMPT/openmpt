@@ -1,5 +1,5 @@
 /*
- * ChildFrm.cpp
+ * Childfrm.cpp
  * ------------
  * Purpose: Implementation of the MDI document child windows.
  * Notes  : (currently none)
@@ -11,7 +11,6 @@
 #include "stdafx.h"
 #include "Childfrm.h"
 #include "ChannelManagerDlg.h"
-#include "Childfrm.h"
 #include "Ctrl_ins.h"
 #include "Ctrl_pat.h"
 #include "Ctrl_smp.h"
@@ -62,7 +61,7 @@ CChildFrame::CChildFrame()
 {
 	m_bInitialActivation=true; //rewbs.fix3185
 	m_szCurrentViewClassName[0] = 0;
-	m_hWndCtrl = m_hWndView = NULL;
+	m_hWndCtrl = m_hWndView = nullptr;
 	m_bMaxWhenClosed = false;
 	glMdiOpenCount++;
 }

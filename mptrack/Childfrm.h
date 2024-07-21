@@ -1,7 +1,7 @@
 /*
  * Childfrm.h
  * ----------
- * Purpose: Implementation of tab interface class.
+ * Purpose: Implementation of the MDI document child windows.
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
@@ -76,6 +76,7 @@ class CChildFrame: public CMDIChildWnd
 	DECLARE_DYNCREATE(CChildFrame)
 public:
 	CChildFrame();
+	~CChildFrame() override;
 
 protected:
 	static CChildFrame *m_lastActiveFrame;
@@ -125,16 +126,12 @@ public:
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CChildFrame)
-	public:
+public:
 	BOOL OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext) override;
 	BOOL PreCreateWindow(CREATESTRUCT& cs) override;
 	void ActivateFrame(int nCmdShow) override;
 	void OnUpdateFrameTitle(BOOL bAddToTitle) override;
 	//}}AFX_VIRTUAL
-
-// Implementation
-public:
-	virtual ~CChildFrame();
 
 // Generated message map functions
 protected:
