@@ -98,7 +98,7 @@ is just a high-level summary.
 
  *  IT: Disable a few more compatibility flags for older SchismTracker builds.
  *  IT: Halve the output volume of files saved with ChibiTracker, as its mixer
- *  is about half as loud as ours.
+    is about half as loud as ours.
  *  S3M: In mono mode, the ratio between sample and OPL volume was incorrect.
  *  S3M: Detect files saved with PlayerPRO.
  *  XM: Detect files saved with PlayerPRO. Improved detection of files saved
