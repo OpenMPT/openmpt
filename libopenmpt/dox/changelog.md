@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.5.33-pre
+
 ### libopenmpt 0.5.32 (2024-07-21)
 
  *  [**Sec**] Potential division by 0 when seeking in the module with
