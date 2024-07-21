@@ -10,7 +10,11 @@ is just a high-level summary.
  *  [**Change**] The work-around for
     <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=115049> has been changed from
     forcing `-O1` on GCC 14 to setting `-fno-ipa-ra` on all GCC versions on
-    non-ELF platforms.
+    non-ELF platforms. We are still not 100% sure if this work-around is
+    sufficient in all circumstances. if you are using a non-ELF platform, it is
+    strongly recommended to update GCC to versions 12.5.0, 13.4.0, 14.2.0, or
+    15.1.0 as soon as they are released, or to apply the patch from the linked
+    GCC issues.
 
  *  IT: Identify files saved with itwriter.
  *  XM: For files saved with registered MadTracker 2 versions, do not put
