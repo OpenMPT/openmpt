@@ -7,6 +7,14 @@ is just a high-level summary.
 
 ### libopenmpt 0.4.44-pre
 
+ *  [**Sec**] Potential division by 0 when seeking in the module with
+    `seek.sync_samples` enabled (r21170).
+
+ *  DBM: Prioritize effects more correctly when the same effect is encountered
+    in both effect columns of a cell (fixes DBM.143_Gnoj).
+ *  DBM: A few IT-specific playback quirks are disabled for more accurate
+    playback (e.g. in "Are You Flying With Me?" by Jazzcat).
+
 ### libopenmpt 0.4.43 (2024-06-09)
 
  *  AMS: Default channel panning was broken, using all-center panning instead of
