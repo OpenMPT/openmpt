@@ -434,7 +434,7 @@ static void ConvertMEDEffect(ModCommand &m, bool is8ch, bool bpmMode, uint8 rows
 			if(m.param < 0x20)
 				m.param = 0x20;
 #endif  // MODPLUG_TRACKER
-		} else switch(m.command)
+		} else switch(m.param)
 		{
 			case 0xF1:  // Play note twice
 				m.command = CMD_MODCMDEX;
@@ -742,6 +742,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 	// - starkelsesirap.mmd0 (synth instruments) on the other hand don't need it
 	// In MMD2 / MMD3, the mix flag is used instead.
 	const bool hardwareMixSamples = (version < 2) || (version >= 2 && !(songHeader.flags2 & MMDSong::FLAG2_MIX));
+	m_nMinPeriod = hardwareMixSamples ? (113 * 4) : (55 * 4);
 
 	bool needInstruments = false;
 	bool anySynthInstrs = false;
