@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt 0.7.9-pre
 
+ *  [**Sec**] Potential division by 0 when seeking in the module with
+    `seek.sync_samples` enabled (r21167).
+
  *  [**Change**] The work-around for
     <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=115049> has been changed from
     forcing `-O1` on GCC 14 to setting `-fno-ipa-ra` on all GCC versions on
@@ -16,22 +19,8 @@ is just a high-level summary.
     15.1.0 as soon as they are released, or to apply the patch from the linked
     GCC issues.
 
- *  IT: Identify files saved with itwriter.
- *  XM: For files saved with registered MadTracker 2 versions, do not put
-    binary garbage (the user ID) in the tracker metadata field. It is replaced
-    with "registered" instead.
- *  For some truncated files, the used tracker was not identified correctly. 
- *  XM: oggmod does not support stereo samples but keeps the stereo flag when
-    encoding such samples. Such samples are now imported as mono samples instead
-    of not importing them at all.
- *  S3M: Identify files saved with early Impulse Tracker versions, Sound Club 2,
-    Liquid Tracker, NESMusa, UNMO3, deMODifier, Kosmic To-S3M, and better tell
-    old ModPlug Tracker versions apart.
- *  S3M: When skipping sample loading, some tracker identifications were not
-    working as intended.
  *  MOD: Allow sample swapping to work when swapping from a non-looping, stopped
     sample back to a looping sample (fixes MOD.energy).
- *  DTM: Identify files saved with Digital Tracker 2.3.
  *  DBM: Import second sustain point in case the first sustain point is not set,
     or if it has a lower index than the first.
  *  DBM: When several instruments referenced the same sample with different
@@ -39,14 +28,37 @@ is just a high-level summary.
     imported (fixes DBM.Supernova).
  *  DBM: Prioritize effects more correctly when the same effect is encountered
     in both effect columns of a cell (fixes DBM.143_Gnoj).
- *  DBM: Avoid importing offset effects when there's a tone portmento next to
-    them (fixes DBM.123_Savo).
+ *  DBM: Don't import offset effects when there's a tone portmento next to them.
  *  DBM: A few IT-specific playback quirks are disabled for more accurate
     playback (e.g. in "Are You Flying With Me?" by Jazzcat).
- *  AMF: When running out of sample slots, file reading became be misaligned
-    because the sample name was not skipped.
  *  DIGI: Sample play direction was reset if adjacent channel contained a
     Note Cut note.
+ *  AMF: When running out of sample slots, file reading became be misaligned
+    because the sample name was not skipped.
+ *  MED: Command 0F was not imported.
+ *  MED: Upper frequency limits should be more accurate now.
+ *  MED: Channel panning is now only applied in MMD2 files if the free pan flag
+    is set.
+ *  MED: Volume command resolution was incorrect for pre-MMD3 files.
+ *  XM: oggmod does not support stereo samples but keeps the stereo flag when
+    encoding such samples. Such samples are now imported as mono samples instead
+    of not importing them at all.
+ *  XM: For files saved with registered MadTracker 2 versions, do not put
+    binary garbage (the user ID) in the tracker metadata field. It is replaced
+    with "registered" instead.
+ *  For some truncated files, the used tracker was not identified correctly. 
+ *  S3M: Identify files saved with early Impulse Tracker versions, Sound Club 2,
+    Liquid Tracker, NESMusa, UNMO3, deMODifier, Kosmic To-S3M, and better tell
+    old ModPlug Tracker versions apart.
+ *  S3M: When skipping sample loading, some tracker identifications were not
+    working as intended.
+ *  IT: Identify files saved with itwriter.
+ *  DTM: Identify files saved with Digital Tracker 2.3.
+
+ *  xmp-openmpt: If there is only one subsong, set the song title to the
+    "global" song title instead of the name of that subsong.
+ *  xmp-openmpt: Sample and instrument names were not sanitized, sometimes
+    showing on multiple rows.
 
 ### libopenmpt 0.7.8 (2024-06-09)
 
