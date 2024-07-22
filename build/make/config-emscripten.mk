@@ -19,6 +19,8 @@ EMSCRIPTEN_PORTS?=0
 
 ifneq ($(STDCXX),)
 CXXFLAGS_STDCXX = -std=$(STDCXX)
+else ifeq ($(shell printf '\n' > bin/empty.cpp ; if $(CXX) -std=c++23 -c bin/empty.cpp -o bin/empty.out > /dev/null 2>&1 ; then echo 'c++23' ; fi ), c++23)
+CXXFLAGS_STDCXX = -std=c++23
 else ifeq ($(shell printf '\n' > bin/empty.cpp ; if $(CXX) -std=c++20 -c bin/empty.cpp -o bin/empty.out > /dev/null 2>&1 ; then echo 'c++20' ; fi ), c++20)
 CXXFLAGS_STDCXX = -std=c++20
 else
@@ -26,6 +28,10 @@ CXXFLAGS_STDCXX = -std=c++17
 endif
 ifneq ($(STDC),)
 CFLAGS_STDC = -std=$(STDC)
+else ifeq ($(shell printf '\n' > bin/empty.c ; if $(CC) -std=c23 -c bin/empty.c -o bin/empty.out > /dev/null 2>&1 ; then echo 'c23' ; fi ), c23)
+CFLAGS_STDC = -std=c23
+else ifeq ($(shell printf '\n' > bin/empty.c ; if $(CC) -std=c18 -c bin/empty.c -o bin/empty.out > /dev/null 2>&1 ; then echo 'c18' ; fi ), c18)
+CFLAGS_STDC = -std=c18
 else ifeq ($(shell printf '\n' > bin/empty.c ; if $(CC) -std=c17 -c bin/empty.c -o bin/empty.out > /dev/null 2>&1 ; then echo 'c17' ; fi ), c17)
 CFLAGS_STDC = -std=c17
 else
