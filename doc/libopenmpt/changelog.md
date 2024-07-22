@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.7.10-pre
 
+ *  [**Bug**] The Android NDK build system did not enable C++20 when available.
+
 ### libopenmpt 0.7.9 (2024-07-21)
 
  *  [**Sec**] Potential division by 0 when seeking in the module with
