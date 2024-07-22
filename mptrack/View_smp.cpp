@@ -448,7 +448,7 @@ void CViewSample::UpdateOPLEditor()
 
 void CViewSample::OnSetFocus(CWnd *pOldWnd)
 {
-	CScrollView::OnSetFocus(pOldWnd);
+	CModScrollView::OnSetFocus(pOldWnd);
 	SetCurrentSample(m_nSample);
 }
 
@@ -762,15 +762,6 @@ LRESULT CViewSample::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 
 	case VIEWMSG_PREPAREUNDO:
 		GetDocument()->GetSampleUndo().PrepareUndo(m_nSample, sundo_none, "Edit OPL Patch");
-		break;
-
-	case VIEWMSG_SETFOCUS:
-	case VIEWMSG_SETACTIVE:
-		GetParentFrame()->SetActiveView(this);
-		if(IsOPLInstrument() && m_oplEditor)
-			m_oplEditor->SetFocus();
-		else
-			SetFocus();
 		break;
 
 	default:

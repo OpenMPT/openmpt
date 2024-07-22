@@ -768,7 +768,7 @@ void CViewPattern::OnDestroy()
 
 void CViewPattern::OnSetFocus(CWnd *pOldWnd)
 {
-	CScrollView::OnSetFocus(pOldWnd);
+	CModScrollView::OnSetFocus(pOldWnd);
 	m_Status.set(psFocussed);
 	InvalidateRow();
 	CModDoc *pModDoc = GetDocument();
@@ -3266,7 +3266,7 @@ void CViewPattern::OnRunScript()
 
 void CViewPattern::OnSwitchToOrderList()
 {
-	PostCtrlMessage(CTRLMSG_SETFOCUS);
+	PostCtrlMessage(CTRLMSG_PAT_SETORDERLISTFOCUS);
 }
 
 

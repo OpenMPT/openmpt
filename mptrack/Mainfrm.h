@@ -144,7 +144,7 @@ public:
 
 	// Globals
 	static OptionsPage m_nLastOptionsPage;
-	static HHOOK ghKbdHook;
+	static HHOOK ghKbdHook, g_focusHook;
 
 	// GDI
 	static HICON m_hIcon;
@@ -264,6 +264,7 @@ public:
 	static HFONT &GetCommentsFont() { return m_hFixedFont; }
 	static void UpdateAllViews(UpdateHint hint, CObject *pHint=NULL);
 	static LRESULT CALLBACK KeyboardProc(int code, WPARAM wParam, LPARAM lParam);
+	static LRESULT CALLBACK FocusChangeProc(int code, WPARAM wParam, LPARAM lParam);
 	static CInputHandler *m_InputHandler;
 
 	// Misc functions

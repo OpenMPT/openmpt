@@ -453,7 +453,7 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		SetDlgItemInt(IDC_EDIT_SPACING, static_cast<UINT>(lParam));
 		break;
 
-	case CTRLMSG_SETFOCUS:
+	case CTRLMSG_PAT_SETORDERLISTFOCUS:
 		GetParentFrame()->SetActiveView(&m_parent);
 		m_OrderList.SetFocus();
 		break;

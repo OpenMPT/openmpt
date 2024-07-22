@@ -147,23 +147,24 @@ END_MESSAGE_MAP()
 
 // Globals
 OptionsPage CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_DEFAULT;
-HHOOK CMainFrame::ghKbdHook = NULL;
+HHOOK CMainFrame::ghKbdHook = nullptr;
+HHOOK CMainFrame::g_focusHook = nullptr;
 
 // GDI
-HICON CMainFrame::m_hIcon = NULL;
-HFONT CMainFrame::m_hGUIFont = NULL;
-HFONT CMainFrame::m_hFixedFont = NULL;
-HPEN CMainFrame::penDarkGray = NULL;
-HPEN CMainFrame::penGray99 = NULL;
-HPEN CMainFrame::penHalfDarkGray = NULL;
+HICON CMainFrame::m_hIcon = nullptr;
+HFONT CMainFrame::m_hGUIFont = nullptr;
+HFONT CMainFrame::m_hFixedFont = nullptr;
+HPEN CMainFrame::penDarkGray = nullptr;
+HPEN CMainFrame::penGray99 = nullptr;
+HPEN CMainFrame::penHalfDarkGray = nullptr;
 
-HCURSOR CMainFrame::curDragging = NULL;
-HCURSOR CMainFrame::curArrow = NULL;
-HCURSOR CMainFrame::curNoDrop = NULL;
-HCURSOR CMainFrame::curNoDrop2 = NULL;
-HCURSOR CMainFrame::curVSplit = NULL;
+HCURSOR CMainFrame::curDragging = nullptr;
+HCURSOR CMainFrame::curArrow = nullptr;
+HCURSOR CMainFrame::curNoDrop = nullptr;
+HCURSOR CMainFrame::curNoDrop2 = nullptr;
+HCURSOR CMainFrame::curVSplit = nullptr;
 MODPLUGDIB *CMainFrame::bmpNotes = nullptr;
-COLORREF CMainFrame::gcolrefVuMeter[NUM_VUMETER_PENS*2];
+COLORREF CMainFrame::gcolrefVuMeter[NUM_VUMETER_PENS * 2];
 
 CInputHandler *CMainFrame::m_InputHandler = nullptr;
 
@@ -232,6 +233,7 @@ void CMainFrame::Initialize()
 
 	// Setup Keyboard Hook
 	ghKbdHook = SetWindowsHookEx(WH_KEYBOARD, KeyboardProc, AfxGetInstanceHandle(), GetCurrentThreadId());
+	g_focusHook = SetWindowsHookEx(WH_CBT, FocusChangeProc, AfxGetInstanceHandle(), GetCurrentThreadId());
 
 	// Update the tree
 	m_wndTree.Init();
@@ -348,18 +350,24 @@ BOOL CMainFrame::DestroyWindow()
 #endif
 
 	// Uninstall Keyboard Hook
-	if (ghKbdHook)
+	if(ghKbdHook)
 	{
 		UnhookWindowsHookEx(ghKbdHook);
-		ghKbdHook = NULL;
+		ghKbdHook = nullptr;
+	}
+	if(g_focusHook)
+	{
+		UnhookWindowsHookEx(g_focusHook);
+		g_focusHook = nullptr;
 	}
 	// Kill Timer
-	if (m_nTimer)
+	if(m_nTimer)
 	{
 		KillTimer(m_nTimer);
 		m_nTimer = 0;
 	}
-	if (shMidiIn) midiCloseDevice();
+	if(shMidiIn)
+		midiCloseDevice();
 	// Delete bitmaps
 	delete bmpNotes;
 	bmpNotes = nullptr;
@@ -554,6 +562,57 @@ LRESULT CALLBACK CMainFrame::KeyboardProc(int code, WPARAM wParam, LPARAM lParam
 	}
 
 	return result;
+}
+
+
+LRESULT CALLBACK CMainFrame::FocusChangeProc(int code, WPARAM wParam, LPARAM lParam)
+{
+	// Hook to keep track of last focussed GUI item. This solves various focus issues when switching between
+	// CModControlDlg / CModScrollView via keyboard shortcuts, or when switching to another application and back.
+	// See https://bugs.openmpt.org/view.php?id=1795 / https://bugs.openmpt.org/view.php?id=1799 / https://bugs.openmpt.org/view.php?id=1800
+	if(code != HCBT_SETFOCUS || !wParam || !lParam)
+		return CallNextHookEx(g_focusHook, code, wParam, lParam);
+
+	const HWND mainWnd = CMainFrame::GetMainFrame()->GetSafeHwnd();
+	HWND lostFocusWnd = reinterpret_cast<HWND>(lParam), gainFocusWnd = reinterpret_cast<HWND>(wParam);
+	CModControlDlg *parentCtrl = nullptr;
+	CModScrollView *parentScroll = nullptr;
+	do
+	{
+		// Does the window that lost focus belong to the upper or lower half of a module view?
+		auto wnd = CWnd::FromHandlePermanent(lostFocusWnd);
+		if(parentCtrl = dynamic_cast<CModControlDlg *>(wnd); parentCtrl != nullptr)
+			break;
+		else if(parentScroll = dynamic_cast<CModScrollView *>(wnd); parentScroll != nullptr)
+			break;
+
+		lostFocusWnd = ::GetParent(lostFocusWnd);
+	} while(lostFocusWnd && lostFocusWnd != mainWnd);
+
+	if(parentCtrl || parentScroll)
+	{
+		// Focus was lost inside an MDI view. Check if the new focus item inside the same view.
+		// If both are part of the same view, store the new focus item, otherwise the old one.
+		bool sameParent = false;
+		do
+		{
+			if((parentCtrl && gainFocusWnd == parentCtrl->m_hWnd) || (parentScroll && gainFocusWnd == parentScroll->m_hWnd))
+			{
+				sameParent = true;
+				break;
+			}
+
+			gainFocusWnd = ::GetParent(gainFocusWnd);
+		} while(gainFocusWnd && gainFocusWnd != mainWnd);
+
+		HWND lastFocus = sameParent ? reinterpret_cast<HWND>(wParam) : reinterpret_cast<HWND>(lParam);
+		if(parentCtrl && parentCtrl->m_hWnd != lastFocus)
+			parentCtrl->SaveLastFocusItem(lastFocus);
+		else if(parentScroll && parentScroll->m_hWnd != lastFocus)
+			parentScroll->SaveLastFocusItem(lastFocus);
+	}
+
+	return CallNextHookEx(g_focusHook, code, wParam, lParam);
 }
 
 
@@ -2554,6 +2613,8 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 			}
 
 		case kcSwitchToInstrLibrary:
+			if(!m_wndTree.IsVisible())
+				break;
 			if(m_bModTreeHasFocus)
 				SwitchToActiveView();
 			else
