@@ -79,10 +79,37 @@ MPT_TRY_PORTAUDIO?=1
 MPT_TRY_PULSEAUDIO?=1
 MPT_TRY_RTAUDIO?=1
 
-CPPFLAGS += $(MPT_ARCH_TARGET) -Icommon -Isrc -Iinclude/nlohmann-json/include -Iinclude
-CXXFLAGS += $(MPT_ARCH_TARGET) -std=gnu++17 -fpermissive -fPIC -fvisibility=hidden
-CFLAGS   += $(MPT_ARCH_TARGET) -std=c99                  -fPIC -fvisibility=hidden
-LDFLAGS  += $(MPT_ARCH_TARGET) 
+CPPFLAGS += $(MPT_ARCH_TARGET)
+CXXFLAGS += $(MPT_ARCH_TARGET)
+CFLAGS   += $(MPT_ARCH_TARGET)
+LDFLAGS  += $(MPT_ARCH_TARGET)
+LDLIBS   += 
+ARFLAGS  += 
+
+ifeq ($(shell printf '\n' > build/wine/empty.cpp ; if $(CXX) -std=gnu++23 -c build/wine/empty.cpp -o build/wine/empty.out > /dev/null 2>&1 ; then echo 'gnu++23' ; fi ), gnu++23)
+CXXFLAGS += -std=gnu++23
+else ifeq ($(shell printf '\n' > build/wine/empty.cpp ; if $(CXX) -std=gnu++20 -c build/wine/empty.cpp -o build/wine/empty.out > /dev/null 2>&1 ; then echo 'gnu++20' ; fi ), gnu++20)
+CXXFLAGS += -std=gnu++20
+else
+CXXFLAGS += -std=gnu++17
+endif
+
+ifeq ($(shell printf '\n' > build/wine/empty.c ; if $(CC) -std=c23 -c build/wine/empty.c -o build/wine/empty.out > /dev/null 2>&1 ; then echo 'c23' ; fi ), c23)
+CFLAGS   += -std=c23
+else ifeq ($(shell printf '\n' > build/wine/empty.c ; if $(CC) -std=c18 -c build/wine/empty.c -o build/wine/empty.out > /dev/null 2>&1 ; then echo 'c18' ; fi ), c18)
+CFLAGS   += -std=c18
+else ifeq ($(shell printf '\n' > build/wine/empty.c ; if $(CC) -std=c17 -c build/wine/empty.c -o build/wine/empty.out > /dev/null 2>&1 ; then echo 'c17' ; fi ), c17)
+CFLAGS   += -std=c17
+else ifeq ($(shell printf '\n' > build/wine/empty.c ; if $(CC) -std=c11 -c build/wine/empty.c -o build/wine/empty.out > /dev/null 2>&1 ; then echo 'c11' ; fi ), c11)
+CFLAGS   += -std=c11
+else
+CFLAGS   += -std=c99
+endif
+
+CPPFLAGS += -Icommon -Isrc -Iinclude/nlohmann-json/include -Iinclude
+CXXFLAGS += -fpermissive -fPIC -fvisibility=hidden
+CFLAGS   +=              -fPIC -fvisibility=hidden
+LDFLAGS  += 
 LDLIBS   += -lm -lpthread
 ARFLAGS  += 
 

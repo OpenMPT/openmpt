@@ -76,11 +76,38 @@ else
 MPT_ARCH_TARGET:=-m$(MPT_ARCH_BITS)
 endif
 
-CPPFLAGS += $(MPT_ARCH_TARGET) -DMPT_WINEGCC -Icommon 
-CXXFLAGS += $(MPT_ARCH_TARGET) -std=gnu++17 -fpermissive -fPIC -fvisibility=hidden
-CFLAGS   += $(MPT_ARCH_TARGET) -std=gnu99                -fPIC -fvisibility=hidden
-LDFLAGS  += $(MPT_ARCH_TARGET) 
-LDLIBS   += -lm 
+CPPFLAGS += $(MPT_ARCH_TARGET)
+CXXFLAGS += $(MPT_ARCH_TARGET)
+CFLAGS   += $(MPT_ARCH_TARGET)
+LDFLAGS  += $(MPT_ARCH_TARGET)
+LDLIBS   += 
+ARFLAGS  += 
+
+ifeq ($(shell printf '\n' > build/wine/empty.cpp ; if $(WINEGXX) -std=gnu++23 -c build/wine/empty.cpp -o build/wine/empty.out > /dev/null 2>&1 ; then echo 'gnu++23' ; fi ), gnu++23)
+CXXFLAGS += -std=gnu++23
+else ifeq ($(shell printf '\n' > build/wine/empty.cpp ; if $(WINEGXX) -std=gnu++20 -c build/wine/empty.cpp -o build/wine/empty.out > /dev/null 2>&1 ; then echo 'gnu++20' ; fi ), gnu++20)
+CXXFLAGS += -std=gnu++20
+else
+CXXFLAGS += -std=gnu++17
+endif
+
+ifeq ($(shell printf '\n' > build/wine/empty.c ; if $(WINEGXX) -std=gnu23 -c build/wine/empty.c -o build/wine/empty.out > /dev/null 2>&1 ; then echo 'gnu' ; fi ), gnu23)
+CFLAGS   += -std=gnu23
+else ifeq ($(shell printf '\n' > build/wine/empty.c ; if $(WINEGXX) -std=gnu18 -c build/wine/empty.c -o build/wine/empty.out > /dev/null 2>&1 ; then echo 'gnu18' ; fi ), gnu18)
+CFLAGS   += -std=gnu18
+else ifeq ($(shell printf '\n' > build/wine/empty.c ; if $(WINEGXX) -std=gnu17 -c build/wine/empty.c -o build/wine/empty.out > /dev/null 2>&1 ; then echo 'gnu17' ; fi ), gnu17)
+CFLAGS   += -std=gnu17
+else ifeq ($(shell printf '\n' > build/wine/empty.c ; if $(WINEGXX) -std=gnu11 -c build/wine/empty.c -o build/wine/empty.out > /dev/null 2>&1 ; then echo 'gnu11' ; fi ), gnu11)
+CFLAGS   += -std=gnu11
+else
+CFLAGS   += -std=gnu99
+endif
+
+CPPFLAGS += -DMPT_WINEGCC -Icommon 
+CXXFLAGS += -fpermissive -fPIC -fvisibility=hidden
+CFLAGS   +=              -fPIC -fvisibility=hidden
+LDFLAGS  += 
+LDLIBS   += -lm
 ARFLAGS  += 
 
 CXXFLAGS += -Os
