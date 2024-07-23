@@ -236,6 +236,7 @@ BOOL CViewInstrument::SetCurrentInstrument(INSTRUMENTINDEX nIns, EnvelopeType nE
 }
 
 
+// cppcheck-suppress duplInheritedMember
 void CViewInstrument::OnSetFocus(CWnd *pOldWnd)
 {
 	CModScrollView::OnSetFocus(pOldWnd);

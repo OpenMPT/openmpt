@@ -742,7 +742,7 @@ intptr_t CVstPlugin::VstFileSelector(bool destructor, VstFileSelect &fileSel)
 #elif MPT_OS_GENERIC_UNIX
 				extensions += "*.";
 				extensions += type.unixType;
-#else
+#elif !defined(CPPCHECK)
 #error Platform-specific code missing
 #endif
 				extensions += "|";

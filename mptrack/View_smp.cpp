@@ -443,6 +443,7 @@ void CViewSample::UpdateOPLEditor()
 }
 
 
+// cppcheck-suppress duplInheritedMember
 void CViewSample::OnSetFocus(CWnd *pOldWnd)
 {
 	CModScrollView::OnSetFocus(pOldWnd);

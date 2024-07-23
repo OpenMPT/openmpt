@@ -766,6 +766,7 @@ void CViewPattern::OnDestroy()
 }
 
 
+// cppcheck-suppress duplInheritedMember
 void CViewPattern::OnSetFocus(CWnd *pOldWnd)
 {
 	CModScrollView::OnSetFocus(pOldWnd);
