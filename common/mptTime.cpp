@@ -17,7 +17,7 @@
 
 #include "mptStringBuffer.h"
 
-#if MPT_CXX_AT_LEAST(20) && !defined(MPT_LIBCXX_QUIRK_NO_CHRONO) && !defined(MPT_LIBCXX_QUIRK_NO_CHRONO_DATE)
+#if MPT_CXX_AT_LEAST(20) && !defined(MPT_LIBCXX_QUIRK_NO_CHRONO) && !defined(MPT_LIBCXX_QUIRK_NO_CHRONO_DATE) && !(defined(MOGPLUG_TRACKER) && defined(MPT_LIBCXX_QUIRK_CHRONO_DATE_NO_ZONED_TIME))
 #include <chrono>
 #endif
 
