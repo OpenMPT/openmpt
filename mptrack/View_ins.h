@@ -195,6 +195,7 @@ public:
 protected:
 	//{{AFX_MSG(CViewInstrument)
 	afx_msg BOOL OnEraseBkgnd(CDC *) { return TRUE; }
+	// cppcheck-suppress duplInheritedMember
 	afx_msg void OnSetFocus(CWnd *pOldWnd);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	// cppcheck-suppress duplInheritedMember
