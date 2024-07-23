@@ -1044,7 +1044,21 @@ CPPFLAGS += -DMPT_BUILD_HACK_ARCHIVE_SUPPORT
 endif
 
 CPPCHECK_FLAGS += -j $(NUMTHREADS)
-CPPCHECK_FLAGS += --std=c11 --std=c++17
+ifneq ($(STDC),)
+CPPCHECK_FLAGS += --std=$(STDC)
+else
+#CPPCHECK_FLAGS += --std=c23
+#CPPCHECK_FLAGS += --std=c18
+#CPPCHECK_FLAGS += --std=c17
+CPPCHECK_FLAGS += --std=c11
+endif
+ifneq ($(STDCXX),)
+CPPCHECK_FLAGS += --std=$(STDCXX)
+else
+#CPPCHECK_FLAGS += --std=c++23
+#CPPCHECK_FLAGS += --std=c++20
+CPPCHECK_FLAGS += --std=c++17
+endif
 CPPCHECK_FLAGS += --quiet
 CPPCHECK_FLAGS += --enable=warning --inline-suppr --template='{file}:{line}: warning: {severity}: {message} [{id}]'
 CPPCHECK_FLAGS += --check-level=exhaustive
