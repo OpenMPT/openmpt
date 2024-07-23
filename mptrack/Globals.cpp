@@ -30,7 +30,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 static void RestoreLastFocusItem(HWND parent, HWND &lastFocusItem)
 {
-	if(lastFocusItem && ::IsChild(parent, lastFocusItem))
+	if(lastFocusItem && ::IsChild(parent, lastFocusItem) && ::IsWindowEnabled(lastFocusItem))
 		::SetFocus(lastFocusItem);
 	else if(HWND firstWnd = ::GetTopWindow(parent))
 		::SetFocus(lastFocusItem = firstWnd);
@@ -113,7 +113,7 @@ LRESULT CModControlDlg::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 	switch(wParam)
 	{
 	case CTRLMSG_SETVIEWWND:
-		m_hWndView = (HWND)lParam;
+		m_hWndView = reinterpret_cast<HWND>(lParam);
 		break;
 
 	case CTRLMSG_ACTIVATEPAGE:
@@ -365,6 +365,7 @@ bool CModControlView::SetActivePage(Page page, LPARAM lParam)
 	{
 		m_nActiveDlg = page;
 		pDlg = m_Pages[static_cast<size_t>(page)];
+		pDlg->ForgetLastFocusItem();
 	} else // Ctrl window is not created yet - creating one.
 	{
 		m_nActiveDlg = Page::Unknown;
@@ -405,7 +406,8 @@ bool CModControlView::SetActivePage(Page page, LPARAM lParam)
 	pMainFrm->SetXInfoText(_T(""));
 	pDlg->ShowWindow(SW_SHOW);
 	static_cast<CChildFrame *>(GetParentFrame())->SetSplitterHeight(pDlg->GetSplitPosRef());
-	if (m_hWndMDI) ::PostMessage(m_hWndMDI, WM_MOD_CHANGEVIEWCLASS, (WPARAM)lParam, (LPARAM)pDlg);
+	if(m_hWndMDI)
+		::PostMessage(m_hWndMDI, WM_MOD_CHANGEVIEWCLASS, (WPARAM)lParam, (LPARAM)pDlg);
 	return true;
 }
 

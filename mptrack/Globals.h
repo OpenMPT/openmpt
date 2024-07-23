@@ -63,6 +63,7 @@ public:
 	virtual Setting<LONG> &GetSplitPosRef() = 0;
 
 	void SaveLastFocusItem(HWND hwnd);
+	void ForgetLastFocusItem() { m_lastFocusItem = nullptr; }
 	void RestoreLastFocusItem();
 
 	afx_msg void OnEditCut() { if (m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_CUT, 0); }

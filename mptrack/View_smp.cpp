@@ -421,28 +421,25 @@ void CViewSample::UpdateOPLEditor()
 		}
 		return;
 	}
+	const bool hadFocus = m_oplEditor && m_oplEditor->IsChild(GetFocus());
 	CSoundFile &sndFile = GetDocument()->GetSoundFile();
-	ModSample &sample = sndFile.GetSample(m_nSample);
-	if(sample.uFlags[CHN_ADLIB])
+	if(!m_oplEditor)
 	{
-		if(!m_oplEditor)
+		try
 		{
-			try
-			{
-				m_oplEditor = std::make_unique<OPLInstrDlg>(*this, sndFile);
-			} catch(mpt::out_of_memory e)
-			{
-				mpt::delete_out_of_memory(e);
-			}
-		}
-		if(m_oplEditor)
+			m_oplEditor = std::make_unique<OPLInstrDlg>(*this, sndFile);
+		} catch(mpt::out_of_memory e)
 		{
-			m_oplEditor->SetPatch(sample.adlib);
-			m_oplEditor->EnableWindow(TRUE);
-			auto size = m_oplEditor->GetMinimumSize();
-			m_oplEditor->SetWindowPos(nullptr, -m_nScrollPosX, -m_nScrollPosY, std::max(size.cx, m_rcClient.right), std::max(size.cy, m_rcClient.bottom), SWP_NOZORDER | SWP_NOACTIVATE | SWP_SHOWWINDOW);
+			mpt::delete_out_of_memory(e);
+			return;
 		}
 	}
+	m_oplEditor->SetPatch(sndFile.GetSample(m_nSample).adlib);
+	m_oplEditor->EnableWindow(TRUE);
+	auto size = m_oplEditor->GetMinimumSize();
+	m_oplEditor->SetWindowPos(nullptr, -m_nScrollPosX, -m_nScrollPosY, std::max(size.cx, m_rcClient.right), std::max(size.cy, m_rcClient.bottom), SWP_NOZORDER | SWP_NOACTIVATE | SWP_SHOWWINDOW);
+	if(!hadFocus)
+		m_oplEditor->GetTopWindow()->SetFocus();
 }
 
 
