@@ -29,11 +29,11 @@ LOCAL_CPPFLAGS += -std=c++20
 else ifeq ($(NDK_MAJOR),25)
 # clang 14
 LOCAL_CFLAGS   += -std=c18
-LOCAL_CPPFLAGS += -std=c++23
+LOCAL_CPPFLAGS += -std=c++20
 else ifeq ($(NDK_MAJOR),26)
 # clang 17
 LOCAL_CFLAGS   += -std=c18
-LOCAL_CPPFLAGS += -std=c++23
+LOCAL_CPPFLAGS += -std=c++20
 else ifeq ($(NDK_MAJOR),27)
 # clang 18
 LOCAL_CFLAGS   += -std=c23

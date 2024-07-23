@@ -22,11 +22,11 @@ APP_CPPFLAGS := -std=c++20 -fexceptions -frtti
 else ifeq ($(NDK_MAJOR),25)
 # clang 14
 APP_CFLAGS   := -std=c18
-APP_CPPFLAGS := -std=c++23 -fexceptions -frtti
+APP_CPPFLAGS := -std=c++20 -fexceptions -frtti
 else ifeq ($(NDK_MAJOR),26)
 # clang 17
 APP_CFLAGS   := -std=c18
-APP_CPPFLAGS := -std=c++23 -fexceptions -frtti
+APP_CPPFLAGS := -std=c++20 -fexceptions -frtti
 else ifeq ($(NDK_MAJOR),27)
 # clang 18
 APP_CFLAGS   := -std=c23
