@@ -175,7 +175,7 @@ Local UnixAsLocal(Unix tp);
 
 } // namespace nochrono
 
-#if MPT_CXX_AT_LEAST(20) && !defined(MPT_LIBCXX_QUIRK_NO_CHRONO) && !defined(MPT_LIBCXX_QUIRK_NO_CHRONO_DATE) && !(defined(MOGPLUG_TRACKER) && defined(MPT_LIBCXX_QUIRK_CHRONO_DATE_NO_ZONED_TIME))
+#if MPT_CXX_AT_LEAST(20) && !defined(MPT_LIBCXX_QUIRK_NO_CHRONO) && !defined(MPT_LIBCXX_QUIRK_NO_CHRONO_DATE) && !(defined(MODPLUG_TRACKER) && defined(MPT_LIBCXX_QUIRK_CHRONO_DATE_NO_ZONED_TIME))
 
 using Unix = std::chrono::system_clock::time_point;
 
