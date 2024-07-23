@@ -8,7 +8,9 @@ CPPCHECK_INCLUDES="-Isrc -Iinclude -Iinclude/vstsdk2.4 -Iinclude/ASIOSDK2/common
 
 CPPCHECK_DEFINES="-DMODPLUG_TRACKER -DMPT_BUILD_MSVC -DMPT_BUILD_MSVC_STATIC"
 
-case ${1} in
+CPPCHECK_STD=${1}
+
+case ${2} in
 win32W)
 	CPPCHECK_PLATFORM="--platform=win32W -D_WIN32 -DWIN32                  -D_UNICODE -DUNICODE -D_WINDOWS -DWINDOWS -D_MFC_VER"
 	;;
@@ -23,7 +25,7 @@ win32A)
 	;;
 esac
 
-CPPCHECK_OPTIONS=${2}
+CPPCHECK_OPTIONS=${3}
 
 CPPCHECK_FILES="common/ soundbase/ sounddev/ sounddsp/ soundlib/ test/ unarchiver/ mptrack/ pluginBridge/"
 
@@ -32,6 +34,6 @@ NPROC=$(nproc)
 echo "Platform: $CPPCHECK_PLATFORM"
 
 echo "Checking config ..."
-cppcheck -j $NPROC -DCPPCHECK -DMPT_CPPCHECK_CUSTOM $CPPCHECK_PLATFORM --std=c11 --std=c++17 --library=windows.cfg --library=microsoft_atl.cfg --library=mfc.cfg --library=build/cppcheck/mfc-extras.cfg --library=build/cppcheck/nlohmann-json.cfg --suppressions-list=build/cppcheck/nlohmann-json.suppressions.txt --suppressions-list=build/cppcheck/r8brain.suppressions.txt --enable=warning --inline-suppr --template='{file}:{line}: warning: {severity}: {message} [{id}]' --suppress=missingIncludeSystem --suppress=uninitMemberVar $CPPCHECK_OPTIONS $CPPCHECK_DEFINES $CPPCHECK_INCLUDES --check-level=exhaustive --check-config --suppress=unmatchedSuppression $CPPCHECK_FILES
+cppcheck -j $NPROC -DCPPCHECK -DMPT_CPPCHECK_CUSTOM $CPPCHECK_PLATFORM $CPPCHECK_STD --library=windows.cfg --library=microsoft_atl.cfg --library=mfc.cfg --library=build/cppcheck/mfc-extras.cfg --library=build/cppcheck/nlohmann-json.cfg --suppressions-list=build/cppcheck/nlohmann-json.suppressions.txt --suppressions-list=build/cppcheck/r8brain.suppressions.txt --enable=warning --inline-suppr --template='{file}:{line}: warning: {severity}: {message} [{id}]' --suppress=missingIncludeSystem --suppress=uninitMemberVar $CPPCHECK_OPTIONS $CPPCHECK_DEFINES $CPPCHECK_INCLUDES --check-level=exhaustive --check-config --suppress=unmatchedSuppression $CPPCHECK_FILES
 echo "Checking C++ ..."
-cppcheck -j $NPROC -DCPPCHECK -DMPT_CPPCHECK_CUSTOM $CPPCHECK_PLATFORM --std=c11 --std=c++17 --library=windows.cfg --library=microsoft_atl.cfg --library=mfc.cfg --library=build/cppcheck/mfc-extras.cfg --library=build/cppcheck/nlohmann-json.cfg --suppressions-list=build/cppcheck/nlohmann-json.suppressions.txt --suppressions-list=build/cppcheck/r8brain.suppressions.txt --enable=warning --inline-suppr --template='{file}:{line}: warning: {severity}: {message} [{id}]' --suppress=missingIncludeSystem --suppress=uninitMemberVar $CPPCHECK_OPTIONS $CPPCHECK_DEFINES $CPPCHECK_INCLUDES --check-level=exhaustive $CPPCHECK_FILES
+cppcheck -j $NPROC -DCPPCHECK -DMPT_CPPCHECK_CUSTOM $CPPCHECK_PLATFORM $CPPCHECK_STD --library=windows.cfg --library=microsoft_atl.cfg --library=mfc.cfg --library=build/cppcheck/mfc-extras.cfg --library=build/cppcheck/nlohmann-json.cfg --suppressions-list=build/cppcheck/nlohmann-json.suppressions.txt --suppressions-list=build/cppcheck/r8brain.suppressions.txt --enable=warning --inline-suppr --template='{file}:{line}: warning: {severity}: {message} [{id}]' --suppress=missingIncludeSystem --suppress=uninitMemberVar $CPPCHECK_OPTIONS $CPPCHECK_DEFINES $CPPCHECK_INCLUDES --check-level=exhaustive $CPPCHECK_FILES
