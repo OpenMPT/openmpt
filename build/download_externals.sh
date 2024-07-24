@@ -119,4 +119,4 @@ ln -s OUT.H include/winamp/Winamp/out.h
 
 mkdir -p build/tools/svn_apply_autoprops
 cp "build/externals/svn_apply_autoprops.py" "build/tools/svn_apply_autoprops/"
-chmod u+x "build/tools/svn_apply_autoprops/build/externals/svn_apply_autoprops.py"
+chmod u+x "build/tools/svn_apply_autoprops/svn_apply_autoprops.py"
