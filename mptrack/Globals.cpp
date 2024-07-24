@@ -28,14 +28,26 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
+static bool IsWindowAndParentsEnabled(HWND hwnd, HWND stopAtWnd)
+{
+	do
+	{
+		if(!IsWindowEnabled(hwnd))
+			return false;
+		hwnd = GetParent(hwnd);
+	} while(hwnd && hwnd != stopAtWnd);
+	return true;
+}
+
+
 static void RestoreLastFocusItem(HWND parent, HWND &lastFocusItem)
 {
-	if(lastFocusItem && ::IsChild(parent, lastFocusItem) && ::IsWindowEnabled(lastFocusItem))
-		::SetFocus(lastFocusItem);
-	else if(HWND firstWnd = ::GetTopWindow(parent))
-		::SetFocus(lastFocusItem = firstWnd);
+	if(lastFocusItem && IsChild(parent, lastFocusItem) && IsWindowAndParentsEnabled(lastFocusItem, parent))
+		SetFocus(lastFocusItem);
+	else if(HWND firstWnd = GetNextDlgTabItem(parent, nullptr, FALSE))
+		SetFocus(lastFocusItem = firstWnd);
 	else
-		::SetFocus(parent);
+		SetFocus(parent);
 }
 
 
@@ -624,8 +636,7 @@ void CModScrollView::SaveLastFocusItem(HWND hwnd)
 
 void CModScrollView::OnSetFocus(CWnd *pOldWnd)
 {
-	if(m_lastFocusItem && ::IsChild(m_hWnd, m_lastFocusItem))
-		::SetFocus(m_lastFocusItem);
+	RestoreLastFocusItem(*this, m_lastFocusItem);
 	CScrollView::OnSetFocus(pOldWnd);
 }
 

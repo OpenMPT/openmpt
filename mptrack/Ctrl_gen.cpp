@@ -146,7 +146,6 @@ void CCtrlGeneral::OnActivatePage(LPARAM)
 	m_modDoc.SetNotifications(Notification::Default);
 	m_modDoc.SetFollowWnd(m_hWnd);
 	PostViewMessage(VIEWMSG_SETACTIVE, NULL);
-	SetFocus();
 
 	// Combo boxes randomly disappear without this... why?
 	Invalidate();

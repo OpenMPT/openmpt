@@ -439,7 +439,7 @@ void CViewSample::UpdateOPLEditor()
 	auto size = m_oplEditor->GetMinimumSize();
 	m_oplEditor->SetWindowPos(nullptr, -m_nScrollPosX, -m_nScrollPosY, std::max(size.cx, m_rcClient.right), std::max(size.cy, m_rcClient.bottom), SWP_NOZORDER | SWP_NOACTIVATE | SWP_SHOWWINDOW);
 	if(!hadFocus)
-		m_oplEditor->GetTopWindow()->SetFocus();
+		m_oplEditor->GetNextDlgTabItem(nullptr)->SetFocus();
 }
 
 
