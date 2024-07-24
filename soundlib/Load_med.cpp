@@ -1111,6 +1111,9 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 			SampleIO::bigEndian,
 			SampleIO::signedPCM);
 
+		const bool hasLoop = sampleHeader.loopLength > 1;
+		SmpLength loopStart = sampleHeader.loopStart * 2;
+		SmpLength loopEnd = loopStart + sampleHeader.loopLength * 2;
 		if(isSynth)
 		{
 			for(size_t i = 0; i < waveformOffsets.size(); i++)
@@ -1132,7 +1135,15 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 					MMDInstrHeader hybridHeader;
 					file.ReadStruct(hybridHeader);
 					if(hybridHeader.type == MMDInstrHeader::SAMPLE)
+					{
 						mptSmp.nLength = hybridHeader.length;
+						if(hasLoop)
+						{
+							mptSmp.nLoopStart = loopStart;
+							mptSmp.nLoopEnd = loopEnd;
+							mptSmp.uFlags.set(CHN_LOOP);
+						}
+					}
 					m_szNames[smp + i] = "Hybrid";
 				}
 				if(loadFlags & loadSampleData)
@@ -1140,9 +1151,6 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 			}
 		} else
 		{
-			const bool hasLoop = sampleHeader.loopLength > 1;
-			SmpLength loopStart = sampleHeader.loopStart * 2;
-			SmpLength loopEnd = loopStart + sampleHeader.loopLength * 2;
 
 			SmpLength length = mpt::saturate_cast<SmpLength>(sampleChunk.GetLength());
 			if(instrHeader.type & MMDInstrHeader::S_16)
