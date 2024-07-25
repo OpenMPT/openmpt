@@ -415,10 +415,12 @@ void CViewSample::UpdateOPLEditor()
 	if(!IsOPLInstrument())
 	{
 		if(m_oplEditor && m_oplEditor->IsWindowVisible())
+		{
 			m_oplEditor->SetEnabled(false);
+			SetFocus();
+		}
 		return;
 	}
-	const bool hadFocus = m_oplEditor && m_oplEditor->IsChild(GetFocus());
 	CSoundFile &sndFile = GetDocument()->GetSoundFile();
 	if(!m_oplEditor)
 	{
@@ -435,13 +437,6 @@ void CViewSample::UpdateOPLEditor()
 	auto size = m_oplEditor->GetMinimumSize();
 	m_oplEditor->SetWindowPos(nullptr, -m_nScrollPosX, -m_nScrollPosY, std::max(size.cx, m_rcClient.right), std::max(size.cy, m_rcClient.bottom), SWP_NOZORDER | SWP_NOACTIVATE);
 	m_oplEditor->SetEnabled(true);
-	if(!hadFocus)
-	{
-		if(::IsChild(*m_oplEditor, m_lastFocusItem))
-			::SetFocus(m_lastFocusItem);
-		else
-			m_oplEditor->GetNextDlgTabItem(nullptr)->SetFocus();
-	}
 }
 
 

@@ -143,6 +143,9 @@ static uint8 KeyScaleLevel(uint8 kslVolume)
 
 void OPLInstrDlg::SetEnabled(bool enabled)
 {
+	if(!enabled)
+		m_lastFocusItem = ::GetFocus();
+	
 	const auto EnableProc = [](HWND hwnd, LPARAM lParam) -> BOOL
 	{
 		::EnableWindow(hwnd, lParam ? TRUE : FALSE);
@@ -150,6 +153,14 @@ void OPLInstrDlg::SetEnabled(bool enabled)
 	};
 	EnumChildWindows(m_hWnd, EnableProc, enabled);
 	ShowWindow(enabled ? SW_SHOW : SW_HIDE);
+
+	if(enabled && !IsChild(GetFocus()))
+	{
+		if(::IsChild(m_hWnd, m_lastFocusItem))
+			::SetFocus(m_lastFocusItem);
+		else
+			GetNextDlgTabItem(nullptr)->SetFocus();
+	}
 }
 
 
