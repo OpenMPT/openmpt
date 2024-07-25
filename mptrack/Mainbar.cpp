@@ -1,7 +1,7 @@
 /*
  * Mainbar.cpp
  * -----------
- * Purpose: Implementation of OpenMPT's window toolbar.
+ * Purpose: Implementation of OpenMPT's window toolbar and parent container of the tree view.
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
@@ -889,6 +889,14 @@ BOOL CModTreeBar::PreTranslateMessage(MSG *pMsg)
 		}
 	}
 	return CDialogBar::PreTranslateMessage(pMsg);
+}
+
+
+void CModTreeBar::DelayShow(BOOL show)
+{
+	if(!show && IsChild(GetFocus()))
+		CMainFrame::GetMainFrame()->SetFocus();
+	CDialogBar::DelayShow(show);
 }
 
 

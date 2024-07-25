@@ -1,7 +1,7 @@
 /*
  * Mainbar.h
  * ---------
- * Purpose: Implementation of OpenMPT's window toolbar.
+ * Purpose: Implementation of OpenMPT's window toolbar and parent container of the tree view.
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
@@ -155,6 +155,8 @@ public:
 
 	CModTreeBar();
 	~CModTreeBar() override;
+
+	void DelayShow(BOOL show) override;
 
 public:
 	void Init();
