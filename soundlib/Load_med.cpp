@@ -479,10 +479,6 @@ static std::pair<EffectCommand, ModCommand::PARAM> ConvertMEDEffect(ModCommand &
 					return {CMD_XPARAM, static_cast<ModCommand::PARAM>(tempo & 0xFF)};
 				}
 			}
-#ifdef MODPLUG_TRACKER
-			if(m.param < 0x20)
-				m.param = 0x20;
-#endif  // MODPLUG_TRACKER
 		} else switch(param)
 		{
 			case 0xF1:  // Play note twice
