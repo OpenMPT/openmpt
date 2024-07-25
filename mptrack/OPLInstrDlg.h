@@ -29,6 +29,7 @@ class OPLInstrDlg : public CDialog
 public:
 	OPLInstrDlg(CWnd &parent, const CSoundFile &sndFile);
 	~OPLInstrDlg();
+	void SetEnabled(bool enabled);
 	void SetPatch(OPLPatch &patch);
 	CSize GetMinimumSize() const { return m_windowSize; }
 

@@ -414,11 +414,8 @@ void CViewSample::UpdateOPLEditor()
 {
 	if(!IsOPLInstrument())
 	{
-		if(m_oplEditor)
-		{
-			m_oplEditor->ShowWindow(SW_HIDE);
-			m_oplEditor->EnableWindow(FALSE);
-		}
+		if(m_oplEditor && m_oplEditor->IsWindowVisible())
+			m_oplEditor->SetEnabled(false);
 		return;
 	}
 	const bool hadFocus = m_oplEditor && m_oplEditor->IsChild(GetFocus());
@@ -435,11 +432,16 @@ void CViewSample::UpdateOPLEditor()
 		}
 	}
 	m_oplEditor->SetPatch(sndFile.GetSample(m_nSample).adlib);
-	m_oplEditor->EnableWindow(TRUE);
 	auto size = m_oplEditor->GetMinimumSize();
-	m_oplEditor->SetWindowPos(nullptr, -m_nScrollPosX, -m_nScrollPosY, std::max(size.cx, m_rcClient.right), std::max(size.cy, m_rcClient.bottom), SWP_NOZORDER | SWP_NOACTIVATE | SWP_SHOWWINDOW);
+	m_oplEditor->SetWindowPos(nullptr, -m_nScrollPosX, -m_nScrollPosY, std::max(size.cx, m_rcClient.right), std::max(size.cy, m_rcClient.bottom), SWP_NOZORDER | SWP_NOACTIVATE);
+	m_oplEditor->SetEnabled(true);
 	if(!hadFocus)
-		m_oplEditor->GetNextDlgTabItem(nullptr)->SetFocus();
+	{
+		if(::IsChild(*m_oplEditor, m_lastFocusItem))
+			::SetFocus(m_lastFocusItem);
+		else
+			m_oplEditor->GetNextDlgTabItem(nullptr)->SetFocus();
+	}
 }
 
 

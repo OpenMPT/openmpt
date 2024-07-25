@@ -141,6 +141,18 @@ static uint8 KeyScaleLevel(uint8 kslVolume)
 }
 
 
+void OPLInstrDlg::SetEnabled(bool enabled)
+{
+	const auto EnableProc = [](HWND hwnd, LPARAM lParam) -> BOOL
+	{
+		::EnableWindow(hwnd, lParam ? TRUE : FALSE);
+		return TRUE;
+	};
+	EnumChildWindows(m_hWnd, EnableProc, enabled);
+	ShowWindow(enabled ? SW_SHOW : SW_HIDE);
+}
+
+
 void OPLInstrDlg::SetPatch(OPLPatch &patch)
 {
 	SetRedraw(FALSE);
