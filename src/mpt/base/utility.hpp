@@ -196,7 +196,7 @@ constexpr bool cmp_greater_equal(Ta a, Tb b) noexcept {
 
 
 
-#if MPT_CXX_AT_LEAST(23)
+#if MPT_CXX_AT_LEAST(23) && !MPT_LIBCXX_GNU_BEFORE(12)
 
 using std::unreachable;
 

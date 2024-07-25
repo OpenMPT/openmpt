@@ -152,7 +152,7 @@
 
 
 
-#if MPT_CXX_AT_LEAST(23)
+#if MPT_CXX_AT_LEAST(23) && !MPT_GCC_BEFORE(13, 0, 0) && !MPT_CLANG_BEFORE(19, 0, 0) && !MPT_COMPILER_MSVC
 #define MPT_ASSUME(expr) [[assume(expr)]]
 #else // !C++23
 #if MPT_COMPILER_CLANG
