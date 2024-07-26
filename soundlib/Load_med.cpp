@@ -404,7 +404,7 @@ static void ConvertMEDEffect(ModCommand &m, bool is8ch, bool bpmMode, uint8 rows
 		m.command = CMD_NONE;
 		break;
 	case 0x09:  // Set secondary speed
-		if(m.param > 0 && m.param <= 20)
+		if(m.param > 0 && m.param <= 0x20)
 			m.command = CMD_SPEED;
 		else
 			m.command = CMD_NONE;
@@ -435,10 +435,6 @@ static void ConvertMEDEffect(ModCommand &m, bool is8ch, bool bpmMode, uint8 rows
 				m.param = 0x70;
 			else
 				m.param = mpt::saturate_round<ModCommand::PARAM>(MMDTempoToBPM(m.param, is8ch, bpmMode, rowsPerBeat).ToDouble());
-#ifdef MODPLUG_TRACKER
-			if(m.param < 0x20)
-				m.param = 0x20;
-#endif  // MODPLUG_TRACKER
 		} else switch(m.param)
 		{
 			case 0xF1:  // Play note twice
