@@ -72,11 +72,13 @@ public:
 
 	std::vector<ChnSettings> chnSettings;
 	double elapsedTime;
+	const SEQUENCEINDEX m_sequence;
 	static constexpr uint32 IGNORE_CHANNEL = uint32_max;
 
-	GetLengthMemory(const CSoundFile &sf)
-		: sndFile(sf)
-		, state(std::make_unique<PlayState>(sf.m_PlayState))
+	GetLengthMemory(const CSoundFile &sf, SEQUENCEINDEX sequence)
+		: sndFile{sf}
+		, state{std::make_unique<PlayState>(sf.m_PlayState)}
+		, m_sequence{sequence}
 	{
 		Reset();
 	}
@@ -87,8 +89,8 @@ public:
 			state->m_midiMacroEvaluationResults.emplace();
 		elapsedTime = 0.0;
 		state->m_lTotalSampleCount = 0;
-		state->m_nMusicSpeed = sndFile.Order().GetDefaultSpeed();
-		state->m_nMusicTempo = sndFile.Order().GetDefaultTempo();
+		state->m_nMusicSpeed = sndFile.Order(m_sequence).GetDefaultSpeed();
+		state->m_nMusicTempo = sndFile.Order(m_sequence).GetDefaultTempo();
 		state->m_nGlobalVolume = sndFile.m_nDefaultGlobalVolume;
 		state->m_globalScriptState.Initialize(sndFile);
 		chnSettings.assign(sndFile.GetNumChannels(), {});
@@ -351,7 +353,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 	if(sequence >= Order.GetNumSequences()) sequence = Order.GetCurrentSequenceIndex();
 	const ModSequence &orderList = Order(sequence);
 
-	GetLengthMemory memory(*this);
+	GetLengthMemory memory(*this, sequence);
 	PlayState &playState = *memory.state;
 	// Temporary visited rows vector (so that GetLength() won't interfere with the player code if the module is playing at the same time)
 	RowVisitor visitedRows(*this, sequence);
@@ -1440,8 +1442,8 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 		} else if(adjustMode != eAdjustOnSuccess)
 		{
 			// Target not found (e.g. when jumping to a hidden sub song), reset global variables...
-			m_PlayState.m_nMusicSpeed = Order().GetDefaultSpeed();
-			m_PlayState.m_nMusicTempo = Order().GetDefaultTempo();
+			m_PlayState.m_nMusicSpeed = Order(sequence).GetDefaultSpeed();
+			m_PlayState.m_nMusicTempo = Order(sequence).GetDefaultTempo();
 			m_PlayState.m_nGlobalVolume = m_nDefaultGlobalVolume;
 		}
 		// When adjusting the playback status, we will also want to update the visited rows vector according to the current position.
