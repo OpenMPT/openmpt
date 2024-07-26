@@ -439,7 +439,7 @@ static std::pair<EffectCommand, ModCommand::PARAM> ConvertMEDEffect(ModCommand &
 	case 0x08:  // Hold and decay
 		break;
 	case 0x09:  // Set secondary speed
-		if(param > 0 && param <= 20)
+		if(param > 0 && param <= 0x20)
 			m.SetEffectCommand(CMD_SPEED, param);
 		break;
 	case 0x0C:  // Set Volume (note: parameters >= 0x80 (only in hex mode?) should set the default instrument volume, which we don't support)
