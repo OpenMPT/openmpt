@@ -44,6 +44,12 @@ static uint32 GetLinearSlideUpTable      (const CSoundFile *sndFile, uint32 i) {
 static uint32 GetFineLinearSlideDownTable(const CSoundFile *sndFile, uint32 i) { MPT_ASSERT(i < CountOf(FineLinearSlideDownTable)); return sndFile->m_playBehaviour[kHertzInLinearMode] ? FineLinearSlideDownTable[i] : FineLinearSlideUpTable[i]; }
 static uint32 GetFineLinearSlideUpTable  (const CSoundFile *sndFile, uint32 i) { MPT_ASSERT(i < CountOf(FineLinearSlideDownTable)); return sndFile->m_playBehaviour[kHertzInLinearMode] ? FineLinearSlideUpTable[i]   : FineLinearSlideDownTable[i]; }
 
+// Minimum parameter of tempo command that is considered to be a BPM rather than a tempo slide
+static constexpr TEMPO GetMinimumTempoParam(MODTYPE modType)
+{
+	return (modType & (MOD_TYPE_MDL | MOD_TYPE_MED | MOD_TYPE_XM | MOD_TYPE_MOD)) ? TEMPO(1, 0) : TEMPO(32, 0);
+}
+
 
 ////////////////////////////////////////////////////////////
 // Length
@@ -652,7 +658,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					}
 
 					const auto &specs = GetModSpecifications();
-					if(tempo.GetInt() >= 0x20)
+					if(tempo >= GetMinimumTempoParam(GetType()))
 					{
 #if MPT_MSVC_BEFORE(2019, 0)
 						// Work-around for VS2017 /std:c++17 /permissive-
@@ -5881,7 +5887,7 @@ void CSoundFile::SetTempo(TEMPO param, bool setFromUI)
 	const CModSpecifications &specs = GetModSpecifications();
 
 	// Anything lower than the minimum tempo is considered to be a tempo slide
-	const TEMPO minTempo = (GetType() & (MOD_TYPE_MDL | MOD_TYPE_MED)) ? TEMPO(1, 0) : TEMPO(32, 0);
+	const TEMPO minTempo = GetMinimumTempoParam(GetType());
 
 	if(setFromUI)
 	{
