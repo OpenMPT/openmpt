@@ -364,7 +364,7 @@
 			elseif _OPTIONS["windows-version"] == "win81" then
 				systemversion "10.0.20348.0"
 			else
-				systemversion "10.0.22621.0"
+				systemversion "10.0.26100.0"
 			end
 		filter {}
 	end
