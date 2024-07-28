@@ -358,7 +358,16 @@
 		filter { "action:vs2019" }
 			systemversion "10.0.20348.0"
 		filter {}
-		filter { "action:vs2022" }
+		filter { "action:vs2022", "architecture:ARM" }
+			if _OPTIONS["windows-version"] == "win7" then
+				systemversion "10.0.20348.0"
+			elseif _OPTIONS["windows-version"] == "win81" then
+				systemversion "10.0.20348.0"
+			else
+				systemversion "10.0.22621.0"
+			end
+		filter {}
+		filter { "action:vs2022", "not architecture:ARM" }
 			if _OPTIONS["windows-version"] == "win7" then
 				systemversion "10.0.20348.0"
 			elseif _OPTIONS["windows-version"] == "win81" then
