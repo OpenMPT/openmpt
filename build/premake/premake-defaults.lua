@@ -54,6 +54,10 @@
 				files {
 					"../../build/vs/win81.manifest",
 				}
+			elseif  _OPTIONS["windows-version"] == "win8" then
+				files {
+					"../../build/vs/win8.manifest",
+				}
 			elseif  _OPTIONS["windows-version"] == "win7" then
 				files {
 					"../../build/vs/win7.manifest",
@@ -68,6 +72,10 @@
 			elseif  _OPTIONS["windows-version"] == "win81" then
 				files {
 					"../../build/vs/win81.manifest",
+				}
+			elseif  _OPTIONS["windows-version"] == "win8" then
+				files {
+					"../../build/vs/win8.manifest",
 				}
 			elseif  _OPTIONS["windows-version"] == "win7" then
 				files {
@@ -361,6 +369,8 @@
 		filter { "action:vs2022", "architecture:ARM" }
 			if _OPTIONS["windows-version"] == "win7" then
 				systemversion "10.0.20348.0"
+			elseif _OPTIONS["windows-version"] == "win8" then
+				systemversion "10.0.20348.0"
 			elseif _OPTIONS["windows-version"] == "win81" then
 				systemversion "10.0.20348.0"
 			else
@@ -369,6 +379,8 @@
 		filter {}
 		filter { "action:vs2022", "not architecture:ARM" }
 			if _OPTIONS["windows-version"] == "win7" then
+				systemversion "10.0.20348.0"
+			elseif _OPTIONS["windows-version"] == "win8" then
 				systemversion "10.0.20348.0"
 			elseif _OPTIONS["windows-version"] == "win81" then
 				systemversion "10.0.20348.0"
@@ -398,6 +410,10 @@
 		filter {}
 		defines { "_WIN32_WINNT=0x0603" }
 		defines { "NTDDI_VERSION=0x06030000" }
+	elseif _OPTIONS["windows-version"] == "win8" then
+		filter {}
+		defines { "_WIN32_WINNT=0x0602" }
+		defines { "NTDDI_VERSION=0x06020000" }
 	elseif _OPTIONS["windows-version"] == "win7" then
 		filter {}
 		defines { "_WIN32_WINNT=0x0601" }

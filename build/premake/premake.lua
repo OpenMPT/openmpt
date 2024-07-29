@@ -28,6 +28,7 @@ newoption {
 	allowed = {
 		{ "winxp", "Windows XP" },
 		{ "win7", "Windows 7" },
+		{ "win8", "Windows 8" },
 		{ "win81", "Windows 8.1" },
 		{ "win10", "Wiondows 10" }
 	}
@@ -153,7 +154,9 @@ mpt_bindirsuffix = _OPTIONS["windows-version"]
 if _OPTIONS["windows-version"] == "win10" then
 	allplatforms = { "x86", "x86_64", "arm", "arm64" }
 elseif _OPTIONS["windows-version"] == "win81" then
-	allplatforms = { "x86", "x86_64" }
+	allplatforms = { "x86", "x86_64", "arm" }
+elseif _OPTIONS["windows-version"] == "win8" then
+	allplatforms = { "x86", "x86_64", "arm" }
 elseif _OPTIONS["windows-version"] == "win7" then
 	allplatforms = { "x86", "x86_64" }
 elseif _OPTIONS["windows-version"] == "winxp" then

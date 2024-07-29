@@ -4,6 +4,9 @@
     <Filter Include="celt">
       <UniqueIdentifier>{0D15957C-F94B-960D-A238-7C108E4E120F}</UniqueIdentifier>
     </Filter>
+    <Filter Include="celt\arm">
+      <UniqueIdentifier>{1C451E3C-0812-7947-312B-67EF1D57AED5}</UniqueIdentifier>
+    </Filter>
     <Filter Include="celt\x86">
       <UniqueIdentifier>{429F1E3C-2E6C-7947-5785-67EF43B1AED5}</UniqueIdentifier>
     </Filter>
@@ -12,6 +15,9 @@
     </Filter>
     <Filter Include="silk">
       <UniqueIdentifier>{18EC9D7C-0423-9F0D-AD0F-851099251B0F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="silk\arm">
+      <UniqueIdentifier>{A7A98133-9376-DC3E-BC8F-CAE6A8BB11CD}</UniqueIdentifier>
     </Filter>
     <Filter Include="silk\float">
       <UniqueIdentifier>{1DF5E91A-09AD-2B68-72B4-04C45E8BC658}</UniqueIdentifier>
@@ -32,6 +38,33 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\opus\celt\arch.h">
       <Filter>celt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\opus\celt\arm\armcpu.h">
+      <Filter>celt\arm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\opus\celt\arm\fft_arm.h">
+      <Filter>celt\arm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\opus\celt\arm\fixed_arm64.h">
+      <Filter>celt\arm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\opus\celt\arm\fixed_armv4.h">
+      <Filter>celt\arm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\opus\celt\arm\fixed_armv5e.h">
+      <Filter>celt\arm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\opus\celt\arm\kiss_fft_armv4.h">
+      <Filter>celt\arm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\opus\celt\arm\kiss_fft_armv5e.h">
+      <Filter>celt\arm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\opus\celt\arm\mdct_arm.h">
+      <Filter>celt\arm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\opus\celt\arm\pitch_arm.h">
+      <Filter>celt\arm</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\opus\celt\bands.h">
       <Filter>celt</Filter>
@@ -171,6 +204,33 @@
     <ClInclude Include="..\..\..\include\opus\silk\SigProc_FIX.h">
       <Filter>silk</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\opus\silk\arm\LPC_inv_pred_gain_arm.h">
+      <Filter>silk\arm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\opus\silk\arm\NSQ_del_dec_arm.h">
+      <Filter>silk\arm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\opus\silk\arm\NSQ_neon.h">
+      <Filter>silk\arm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\opus\silk\arm\SigProc_FIX_armv4.h">
+      <Filter>silk\arm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\opus\silk\arm\SigProc_FIX_armv5e.h">
+      <Filter>silk\arm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\opus\silk\arm\biquad_alt_arm.h">
+      <Filter>silk\arm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\opus\silk\arm\macros_arm64.h">
+      <Filter>silk\arm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\opus\silk\arm\macros_armv4.h">
+      <Filter>silk\arm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\opus\silk\arm\macros_armv5e.h">
+      <Filter>silk\arm</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\include\opus\silk\control.h">
       <Filter>silk</Filter>
     </ClInclude>
@@ -242,6 +302,12 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\include\opus\celt\arm\arm_celt_map.c">
+      <Filter>celt\arm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\include\opus\celt\arm\armcpu.c">
+      <Filter>celt\arm</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\include\opus\celt\bands.c">
       <Filter>celt</Filter>
     </ClCompile>
@@ -382,6 +448,21 @@
     </ClCompile>
     <ClCompile Include="..\..\..\include\opus\silk\ana_filt_bank_1.c">
       <Filter>silk</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\include\opus\silk\arm\LPC_inv_pred_gain_neon_intr.c">
+      <Filter>silk\arm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\include\opus\silk\arm\NSQ_del_dec_neon_intr.c">
+      <Filter>silk\arm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\include\opus\silk\arm\NSQ_neon.c">
+      <Filter>silk\arm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\include\opus\silk\arm\arm_silk_map.c">
+      <Filter>silk\arm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\include\opus\silk\arm\biquad_alt_neon_intr.c">
+      <Filter>silk\arm</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\opus\silk\biquad_alt.c">
       <Filter>silk</Filter>
