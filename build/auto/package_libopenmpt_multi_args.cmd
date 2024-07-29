@@ -89,8 +89,8 @@ copy /y ..\..\bin\release\%MPT_VS_VER%-win10-static\amd64\openmpt123.exe .\openm
 copy /y ..\..\bin\release\%MPT_VS_VER%-win10-static\amd64\openmpt-mpg123.dll .\openmpt123\amd64\ || goto error
 copy /y ..\..\bin\release\%MPT_VS_VER%-win10-static\arm64\openmpt123.exe .\openmpt123\arm64\ || goto error
 copy /y ..\..\bin\release\%MPT_VS_VER%-win10-static\arm64\openmpt-mpg123.dll .\openmpt123\arm64\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win8-static\arm-legacy\openmpt123.exe .\openmpt123\arm-legacy\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win8-static\arm-legacy\openmpt-mpg123.dll .\openmpt123\arm-legacy\ || goto error
+copy /y ..\..\bin\release\%MPT_VS_VER%-win8-static\arm\openmpt123.exe .\openmpt123\arm-legacy\ || goto error
+copy /y ..\..\bin\release\%MPT_VS_VER%-win8-static\arm\openmpt-mpg123.dll .\openmpt123\arm-legacy\ || goto error
 copy /y ..\..\bin\release\%MPT_VS_VER%-win7-static\x86\openmpt123.exe .\openmpt123\x86-legacy\ || goto error
 copy /y ..\..\bin\release\%MPT_VS_VER%-win7-static\x86\openmpt-mpg123.dll .\openmpt123\x86-legacy\ || goto error
 copy /y ..\..\bin\release\%MPT_VS_VER%-win7-static\amd64\openmpt123.exe .\openmpt123\amd64-legacy\ || goto error
