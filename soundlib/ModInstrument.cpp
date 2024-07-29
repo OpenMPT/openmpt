@@ -41,6 +41,12 @@ void InstrumentEnvelope::Convert(MODTYPE fromType, MODTYPE toType)
 			// So we have to disable the sustain loop if it was behind the normal loop.
 			dwFlags.reset(ENV_SUSTAIN);
 		}
+		if(!dwFlags.test_all(ENV_LOOP | ENV_SUSTAIN))
+		{
+			// XM has no automatic fade-out behaviour at the end of the envelope.
+			dwFlags.set(ENV_SUSTAIN);
+			nSustainStart = nSustainEnd = LastPoint();
+		}
 
 		// XM -> IT / MPTM: Shorten loop by one tick by inserting bogus point
 		if(nLoopEnd > nLoopStart && dwFlags[ENV_LOOP] && nLoopEnd < size())
@@ -73,11 +79,11 @@ int32 InstrumentEnvelope::GetValueFromPosition(int position, int32 rangeOut, int
 	if(empty())
 		return 0;
 
-	uint32 pt = size() - 1u;
+	uint32 pt = LastPoint();
 	const int32 ENV_PRECISION = 1 << 16;
 
 	// Checking where current 'tick' is relative to the envelope points.
-	for(uint32 i = 0; i < size() - 1u; i++)
+	for(uint32 i = 0; i < LastPoint(); i++)
 	{
 		if (position <= at(i).tick)
 		{
@@ -129,12 +135,12 @@ void InstrumentEnvelope::Sanitize(uint8 maxValue)
 			it->tick = std::max(it->tick, (it - 1)->tick);
 			LimitMax(it->value, maxValue);
 		}
-		LimitMax(nLoopEnd, static_cast<decltype(nLoopEnd)>(size() - 1));
+		LimitMax(nLoopEnd, LastPoint());
 		LimitMax(nLoopStart, nLoopEnd);
-		LimitMax(nSustainEnd, static_cast<decltype(nSustainEnd)>(size() - 1));
+		LimitMax(nSustainEnd, LastPoint());
 		LimitMax(nSustainStart, nSustainEnd);
 		if(nReleaseNode != ENV_RELEASE_NODE_UNSET)
-			LimitMax(nReleaseNode, static_cast<decltype(nReleaseNode)>(size() - 1));
+			LimitMax(nReleaseNode, LastPoint());
 	} else
 	{
 		nLoopStart = 0;
