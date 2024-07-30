@@ -38,7 +38,7 @@ mkdir openmpt123\x86
 mkdir openmpt123\amd64
 mkdir openmpt123\x86-legacy
 mkdir openmpt123\amd64-legacy
-mkdir openmpt123\arm
+mkdir openmpt123\arm-legacy
 mkdir openmpt123\arm64
 mkdir XMPlay
 mkdir Winamp
@@ -154,15 +154,15 @@ mkdir inc\libopenmpt
 mkdir lib
 mkdir lib\x86
 mkdir lib\amd64
-mkdir lib\arm
 mkdir lib\arm64
+mkdir lib\arm-legacy
 mkdir lib\x86-legacy
 mkdir lib\amd64-legacy
 mkdir bin
 mkdir bin\x86
 mkdir bin\amd64
-mkdir bin\arm
 mkdir bin\arm64
+mkdir bin\arm-legacy
 mkdir bin\x86-legacy
 mkdir bin\amd64-legacy
 copy /y ..\..\LICENSE .\LICENSE.txt || goto error
