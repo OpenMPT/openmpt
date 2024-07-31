@@ -1,0 +1,40 @@
+name: macOS Autotools
+
+on:
+  push:
+    branches: [ OpenMPT-1.31 ]
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { host: macos-14, compiler: '16.0' }
+          - { host: macos-14, compiler: '15.4' }
+          - { host: macos-14, compiler: '15.3' }
+          - { host: macos-13, compiler: '15.2' }
+          - { host: macos-12, compiler: '14.2' }
+    concurrency:
+      group: ${{github.ref}}-${{github.workflow}}-${{matrix.host}}-${{matrix.compiler}}-autotools
+      cancel-in-progress: true
+    runs-on: ${{matrix.host}}
+    steps:
+    - uses: actions/checkout@v4
+    - name: fixup GitHub Homebrew xcbeautify breakage
+      if: ${{ matrix.host == 'macos-12' }}
+      run: brew pin xcbeautify
+    - name: fixup GitHub Homebrew node breakage
+      if: ${{ matrix.host == 'macos-12' }}
+      run: brew unlink node@18 && brew unlink node && brew link --overwrite node
+    - name: fixup GitHub Homebrew python breakage
+      if: ${{ matrix.host == 'macos-12' || matrix.host == 'macos-13' }}
+      run: brew unlink python@3.11 && brew unlink python@3.12 && brew link --overwrite python@3.11 && brew link --overwrite python@3.12
+    - name: install dependencies
+      run: brew update && brew upgrade && brew install p7zip help2man doxygen autoconf autoconf-archive automake libtool mpg123 libogg libvorbis portaudio flac libsndfile sdl2
+    - name: selecting Xcode version
+      run: sudo xcode-select --switch /Applications/Xcode_${{matrix.compiler}}.app
+    - name: setup parallel make
+      run: echo "MAKEFLAGS=-j$(sysctl -n hw.ncpu)" >> $GITHUB_ENV
+    - name: build
+      run: ./build/autotools/autoconfiscate.sh
