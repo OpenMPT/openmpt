@@ -73,7 +73,7 @@ jobs:
       if: ${{ matrix.host == 'macos-12' || matrix.host == 'macos-13' }}
       run: brew unlink python@3.11 && brew unlink python@3.12 && brew link --overwrite python@3.11 && brew link --overwrite python@3.12
     - name: install dependencies
-      run: brew update && brew upgrade && brew install p7zip help2man doxygen autoconf-archive mpg123 libogg libvorbis portaudio flac libsndfile sdl2
+      run: brew update && brew upgrade && brew install p7zip help2man doxygen autoconf autoconf-archive automake mpg123 libogg libvorbis portaudio flac libsndfile sdl2
     - name: selecting Xcode version
       run: sudo xcode-select --switch /Applications/Xcode_${{matrix.compiler}}.app
     - name: setup parallel make
