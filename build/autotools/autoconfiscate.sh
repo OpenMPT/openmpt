@@ -11,17 +11,25 @@ set -e
 
 echo "Detecting OS ..."
 UNAME_S="$(uname -s)"
-if [[ $UNAME_S == *"BSD"* ]]; then
- if [[ $UNAME_S == "OpenBSD" ]]; then
+
+case $UNAME_S in
+ Darwin)
+  TAR_FLAVOUR=mac
+  MAKE=make
+  ;;
+ OpenBSD)
   TAR_FLAVOUR=bsd
- else
+  MAKE=gmake
+  ;;
+ *BSD*)
   TAR_FLAVOUR=libarchive
- fi
- MAKE=gmake
-else
- TAR_FLAVOUR=gnu
- MAKE=make
-fi
+  MAKE=gmake
+  ;;
+ *)
+  TAR_FLAVOUR=gnu
+  MAKE=make
+  ;;
+esac
 
 echo "Gathering version ..."
 . libopenmpt/libopenmpt_version.mk
@@ -276,11 +284,14 @@ mkdir -p libopenmpt/src.autotools/$MPT_LIBOPENMPT_VERSION/
 cp *.tar.gz libopenmpt/src.autotools/$MPT_LIBOPENMPT_VERSION/
 
 case $TAR_FLAVOUR in
+ mac)
+  tar -cv -f ../dist-autotools.tar libopenmpt
+  ;;
  bsd)
   tar -cv -N -f ../dist-autotools.tar libopenmpt
   ;;
  libarchive)
-  tar -cv --numeric-owner --uname	"" --gname "" --uid 0 --gid 0 -f ../dist-autotools.tar libopenmpt
+  tar -cv --numeric-owner --uname "" --gname "" --uid 0 --gid 0 -f ../dist-autotools.tar libopenmpt
   ;;
  gnu)
   tar -cv --numeric-owner --owner=0 --group=0 -f ../dist-autotools.tar libopenmpt
