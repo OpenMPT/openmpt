@@ -747,40 +747,6 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 		return plugin != nullptr;
 	}
 
-#ifdef MODPLUG_TRACKER
-	bool maskCrashes = TrackerSettings::Instance().BrokenPluginsWorkaroundVSTMaskAllCrashes;
-
-	if(!pFound && (mixPlugin.GetLibraryName() != U_("")))
-	{
-		// Try finding the plugin DLL in the plugin directory or plugin cache instead.
-		mpt::PathString fullPath = TrackerSettings::Instance().PathPlugins.GetDefaultDir();
-		if(fullPath.empty())
-		{
-			fullPath = theApp.GetInstallPath() + P_("Plugins\\");
-		}
-		fullPath += mpt::PathString::FromUnicode(mixPlugin.GetLibraryName()) + P_(".dll");
-
-		pFound = AddPlugin(fullPath, maskCrashes);
-		if(!pFound)
-		{
-			// Try plugin cache (search for library name)
-			SettingsContainer &cacheFile = theApp.GetPluginCache();
-			mpt::ustring IDs = cacheFile.Read<mpt::ustring>(cacheSection, mixPlugin.GetLibraryName(), U_(""));
-			if(IDs.length() >= 16)
-			{
-				fullPath = cacheFile.Read<mpt::PathString>(cacheSection, IDs, P_(""));
-				if(!fullPath.empty())
-				{
-					fullPath = theApp.PathInstallRelativeToAbsolute(fullPath);
-					if(mpt::native_fs{}.is_file(fullPath))
-					{
-						pFound = AddPlugin(fullPath, maskCrashes);
-					}
-				}
-			}
-		}
-	}
-
 #ifdef MPT_WITH_VST
 	// Note: we don't check if dwPluginId1 matches Vst::kEffectMagic here, even if it should.
 	// I have an old file I made with OpenMPT 1.17 where the primary plugin ID has an unexpected value.
@@ -788,6 +754,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 	// after instantiating a plugin and the cached plugin ID was blindly written to the module file)
 	if(pFound)
 	{
+		bool maskCrashes = TrackerSettings::Instance().BrokenPluginsWorkaroundVSTMaskAllCrashes;
 		Vst::AEffect *pEffect = nullptr;
 		HINSTANCE hLibrary = nullptr;
 		bool validPlugin = false;
@@ -826,7 +793,6 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 	}
 #endif // MPT_WITH_VST
 
-#endif // MODPLUG_TRACKER
 	return false;
 }
 
