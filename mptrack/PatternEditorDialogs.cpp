@@ -598,7 +598,7 @@ void CEditCommand::UpdateVolCmdRange()
 		sldVolParam.EnableWindow(TRUE);
 		sldVolParam.SetRange(rangeMin, rangeMax);
 		Limit(m->vol, rangeMin, rangeMax);
-		sldVolParam.SetPos(m->vol);
+		sldVolParam.SetPos(effectInfo.MapVolumeToPos(m->volcmd, m->vol));
 	} else
 	{
 		// Why does this not update the display at all?
@@ -706,7 +706,7 @@ void CEditCommand::OnVolCmdChanged()
 		newVolCmd = effectInfo.GetVolCmdFromIndex(static_cast<UINT>(cbnVolCmd.GetItemData(n)));
 	}
 
-	newVol = static_cast<ModCommand::VOL>(sldVolParam.GetPos());
+	newVol = effectInfo.MapPosToVolume(newVolCmd, sldVolParam.GetPos());
 
 	const bool volCmdChanged = m->volcmd != newVolCmd;
 	if(volCmdChanged || m->vol != newVol)
@@ -1439,7 +1439,7 @@ void QuickChannelProperties::OnHScroll(UINT, UINT, CScrollBar *bar)
 	bool update = false;
 
 	// Volume slider
-	if(bar == reinterpret_cast<CScrollBar *>(&m_volSlider))
+	if(bar->m_hWnd == m_volSlider.m_hWnd)
 	{
 		uint16 pos = static_cast<uint16>(m_volSlider.GetPos());
 		PrepareUndo();
@@ -1450,7 +1450,7 @@ void QuickChannelProperties::OnHScroll(UINT, UINT, CScrollBar *bar)
 		}
 	}
 	// Pan slider
-	if(bar == reinterpret_cast<CScrollBar *>(&m_panSlider))
+	if(bar->m_hWnd == m_panSlider.m_hWnd)
 	{
 		uint16 pos = static_cast<uint16>(m_panSlider.GetPos());
 		PrepareUndo();

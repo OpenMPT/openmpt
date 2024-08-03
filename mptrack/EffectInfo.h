@@ -62,6 +62,10 @@ public:
 	bool GetVolCmdInfo(UINT ndx, CString *s, ModCommand::VOL *prangeMin = nullptr, ModCommand::VOL *prangeMax = nullptr) const;
 	// Get effect name and parameter description
 	bool GetVolCmdParamInfo(const ModCommand &m, CString *s) const;
+	// Map an effect value to slider position
+	UINT MapVolumeToPos(VolumeCommand cmd, ModCommand::VOL param) const;
+	// Map slider position to an effect value
+	ModCommand::VOL MapPosToVolume(VolumeCommand cmd, UINT pos) const;
 };
 
 OPENMPT_NAMESPACE_END

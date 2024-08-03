@@ -988,25 +988,29 @@ VolumeCommand EffectInfo::GetVolCmdFromIndex(UINT ndx) const
 
 bool EffectInfo::GetVolCmdInfo(UINT ndx, CString *s, ModCommand::VOL *prangeMin, ModCommand::VOL *prangeMax) const
 {
-	if (s) s->Empty();
-	if (prangeMin) *prangeMin = 0;
-	if (prangeMax) *prangeMax = 0;
-	if (ndx >= std::size(gVolCmdInfo)) return false;
-	if (s)
-	{
+	if(s)
+		s->Empty();
+	if(prangeMin)
+		*prangeMin = 0;
+	if(prangeMax)
+		*prangeMax = 0;
+	if(ndx >= std::size(gVolCmdInfo))
+		return false;
+	if(s)
 		s->Format(_T("%c: %s"), sndFile.GetModSpecifications().GetVolEffectLetter(GetVolCmdFromIndex(ndx)), gVolCmdInfo[ndx].name);
-	}
-	if ((prangeMin) && (prangeMax))
+	if(prangeMin && prangeMax)
 	{
 		switch(gVolCmdInfo[ndx].volCmd)
 		{
 		case VOLCMD_VOLUME:
-		case VOLCMD_PANNING:
 			*prangeMax = 64;
 			break;
-
+		case VOLCMD_PANNING:
+			*prangeMax = (sndFile.GetType() & MOD_TYPE_XM) ? 15 : 64;
+			break;
 		default:
 			*prangeMax = (sndFile.GetType() & MOD_TYPE_XM) ? 15 : 9;
+			break;
 		}
 	}
 	return (sndFile.GetType() & gVolCmdInfo[ndx].supportedFormats);
@@ -1104,6 +1108,25 @@ bool EffectInfo::GetVolCmdParamInfo(const ModCommand &m, CString *s) const
 		break;
 	}
 	return true;
+}
+
+	// Map an effect value to slider position
+UINT EffectInfo::MapVolumeToPos(VolumeCommand cmd, ModCommand::VOL param) const
+{
+	if(cmd == VOLCMD_PANNING && sndFile.GetType() == MOD_TYPE_XM)
+		return param / 4u;
+	else
+		return param;
+}
+
+
+// Map slider position to an effect value
+ModCommand::VOL EffectInfo::MapPosToVolume(VolumeCommand cmd, UINT pos) const
+{
+	if(cmd == VOLCMD_PANNING && sndFile.GetType() == MOD_TYPE_XM)
+		return static_cast<ModCommand::VOL>(std::min(pos * 4u, 64u));
+	else
+		return static_cast<ModCommand::VOL>(std::min(pos, 64u));
 }
 
 
