@@ -27,31 +27,30 @@ class IMixPlugin;
 struct SNDMIXPLUGIN;
 enum PluginArch : int;
 
+enum class PluginCategory : uint8
+{
+	// Same plugin categories as defined in VST SDK
+	Unknown = 0,
+	Effect,          // Simple Effect
+	Synth,           // VST Instrument (Synths, samplers,...)
+	Analysis,        // Scope, Tuner, ...
+	Mastering,       // Dynamics, ...
+	Spacializer,     // Panners, ...
+	RoomFx,          // Delays and Reverbs
+	SurroundFx,      // Dedicated surround processor
+	Restoration,     // Denoiser, ...
+	OfflineProcess,  // Offline Process
+	Shell,           // Plug-in is container of other plug-ins
+	Generator,       // Tone Generator, ...
+	// Custom categories
+	DMO,     // DirectX media object plugin
+	Hidden,  // For internal plugins that should not be visible to the user (e.g. because they only exist for legacy reasons)
+
+	NumCategories
+};
+
 struct VSTPluginLib
 {
-public:
-	enum PluginCategory : uint8
-	{
-		// Same plugin categories as defined in VST SDK
-		catUnknown = 0,
-		catEffect,          // Simple Effect
-		catSynth,           // VST Instrument (Synths, samplers,...)
-		catAnalysis,        // Scope, Tuner, ...
-		catMastering,       // Dynamics, ...
-		catSpacializer,     // Panners, ...
-		catRoomFx,          // Delays and Reverbs
-		catSurroundFx,      // Dedicated surround processor
-		catRestoration,     // Denoiser, ...
-		catOfflineProcess,  // Offline Process
-		catShell,           // Plug-in is container of other plug-ins
-		catGenerator,       // Tone Generator, ...
-		// Custom categories
-		catDMO,     // DirectX media object plugin
-		catHidden,  // For internal plugins that should not be visible to the user (e.g. because they only exist for legacy reasons)
-
-		numCategories
-	};
-
 public:
 	using CreateProc = IMixPlugin *(*)(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN &mixStruct);
 
@@ -68,7 +67,7 @@ public:
 #endif // MODPLUG_TRACKER
 	int32 pluginId1 = 0;                // Plugin type (kEffectMagic, kDmoMagic, ...)
 	int32 pluginId2 = 0;                // Plugin unique ID
-	PluginCategory category = catUnknown;
+	PluginCategory category = PluginCategory::Unknown;
 	const bool isBuiltIn : 1;
 	bool isInstrument : 1;
 	bool useBridge : 1, shareBridgeInstance : 1, modernBridge : 1;
@@ -87,7 +86,7 @@ public:
 		, tags(tags)
 		, vendor(vendor)
 #endif // MODPLUG_TRACKER
-		, category(catUnknown)
+		, category(PluginCategory::Unknown)
 		, isBuiltIn(isBuiltIn), isInstrument(false)
 		, useBridge(false), shareBridgeInstance(true), modernBridge(true)
 	{
@@ -117,7 +116,7 @@ public:
 	{
 		// Format: 00000000.0000000M.AAAAAASB.CCCCCCCI
 		return (isInstrument ? 1 : 0)
-			| (category << 1)
+			| (static_cast<uint32>(category) << 1)
 			| (useBridge ? 0x100 : 0)
 			| (shareBridgeInstance ? 0x200 : 0)
 			| ((dllArch / 8) << 10)
@@ -128,14 +127,14 @@ public:
 	void DecodeCacheFlags(uint32 flags)
 	{
 		category = static_cast<PluginCategory>((flags & 0xFF) >> 1);
-		if(category >= numCategories)
+		if(category >= PluginCategory::NumCategories)
 		{
-			category = catUnknown;
+			category = PluginCategory::Unknown;
 		}
 		if(flags & 1)
 		{
 			isInstrument = true;
-			category = catSynth;
+			category = PluginCategory::Synth;
 		}
 		useBridge = (flags & 0x100) != 0;
 		shareBridgeInstance = (flags & 0x200) != 0;

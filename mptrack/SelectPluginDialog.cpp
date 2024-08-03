@@ -309,34 +309,34 @@ void CSelectPluginDlg::UpdatePluginsList(const VSTPluginLib *forceSelect)
 
 	static constexpr struct
 	{
-		VSTPluginLib::PluginCategory category;
+		PluginCategory category;
 		const TCHAR *description;
 	} categories[] =
 	{
-		{ VSTPluginLib::catEffect,         _T("Audio Effects") },
-		{ VSTPluginLib::catGenerator,      _T("Tone Generators") },
-		{ VSTPluginLib::catRestoration,    _T("Audio Restauration") },
-		{ VSTPluginLib::catSurroundFx,     _T("Surround Effects") },
-		{ VSTPluginLib::catRoomFx,         _T("Room Effects") },
-		{ VSTPluginLib::catSpacializer,    _T("Spacializers") },
-		{ VSTPluginLib::catMastering,      _T("Mastering Plugins") },
-		{ VSTPluginLib::catAnalysis,       _T("Analysis Plugins") },
-		{ VSTPluginLib::catOfflineProcess, _T("Offline Processing") },
-		{ VSTPluginLib::catShell,          _T("Shell Plugins") },
-		{ VSTPluginLib::catUnknown,        _T("Unsorted") },
-		{ VSTPluginLib::catDMO,            _T("DirectX Media Audio Effects") },
-		{ VSTPluginLib::catSynth,          _T("Instrument Plugins") },
-		{ VSTPluginLib::catHidden,         _T("Legacy Plugins") },
+		{ PluginCategory::Effect,         _T("Audio Effects") },
+		{ PluginCategory::Generator,      _T("Tone Generators") },
+		{ PluginCategory::Restoration,    _T("Audio Restauration") },
+		{ PluginCategory::SurroundFx,     _T("Surround Effects") },
+		{ PluginCategory::RoomFx,         _T("Room Effects") },
+		{ PluginCategory::Spacializer,    _T("Spacializers") },
+		{ PluginCategory::Mastering,      _T("Mastering Plugins") },
+		{ PluginCategory::Analysis,       _T("Analysis Plugins") },
+		{ PluginCategory::OfflineProcess, _T("Offline Processing") },
+		{ PluginCategory::Shell,          _T("Shell Plugins") },
+		{ PluginCategory::Unknown,        _T("Unsorted") },
+		{ PluginCategory::DMO,            _T("DirectX Media Audio Effects") },
+		{ PluginCategory::Synth,          _T("Instrument Plugins") },
+		{ PluginCategory::Hidden,         _T("Legacy Plugins") },
 	};
 
 	const HTREEITEM noPlug = AddTreeItem(_T("No plugin (empty slot)"), IMAGE_NOPLUGIN, false);
 	HTREEITEM currentPlug = noPlug;
 
-	std::bitset<VSTPluginLib::numCategories> categoryUsed;
-	HTREEITEM categoryFolders[VSTPluginLib::numCategories];
+	std::bitset<uint8(PluginCategory::NumCategories)> categoryUsed;
+	HTREEITEM categoryFolders[uint8(PluginCategory::NumCategories)];
 	for(const auto &cat : categories)
 	{
-		categoryFolders[cat.category] = AddTreeItem(cat.description, IMAGE_FOLDER, false);
+		categoryFolders[static_cast<uint32>(cat.category)] = AddTreeItem(cat.description, IMAGE_FOLDER, false);
 	}
 
 	enum PlugMatchQuality
@@ -361,7 +361,7 @@ void CSelectPluginDlg::UpdatePluginsList(const VSTPluginLib *forceSelect)
 		{
 			MPT_ASSERT(p);
 			const VSTPluginLib &plug = *p;
-			if(plug.category == VSTPluginLib::catHidden && (m_pPlugin == nullptr || m_pPlugin->pMixPlugin == nullptr || &m_pPlugin->pMixPlugin->GetPluginFactory() != p))
+			if(plug.category == PluginCategory::Hidden && (m_pPlugin == nullptr || m_pPlugin->pMixPlugin == nullptr || &m_pPlugin->pMixPlugin->GetPluginFactory() != p))
 				continue;
 
 			if(nameFilterActive)
@@ -408,8 +408,8 @@ void CSelectPluginDlg::UpdatePluginsList(const VSTPluginLib *forceSelect)
 				title += MPT_CFORMAT(" ({})")(plug.GetDllArchNameUser());
 			}
 #endif // MPT_WITH_VST
-			HTREEITEM h = AddTreeItem(title, plug.isInstrument ? IMAGE_PLUGININSTRUMENT : IMAGE_EFFECTPLUGIN, true, categoryFolders[plug.category], reinterpret_cast<LPARAM>(&plug));
-			categoryUsed[plug.category] = true;
+			HTREEITEM h = AddTreeItem(title, plug.isInstrument ? IMAGE_PLUGININSTRUMENT : IMAGE_EFFECTPLUGIN, true, categoryFolders[static_cast<uint32>(plug.category)], reinterpret_cast<LPARAM>(&plug));
+			categoryUsed[static_cast<uint32>(plug.category)] = true;
 
 			if(nameFilterActive)
 			{
