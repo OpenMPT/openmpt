@@ -287,15 +287,16 @@ void CPatternPropertiesDlg::OnOK()
 	const ROWINDEX newSize = (ROWINDEX)GetDlgItemInt(IDC_COMBO1, NULL, FALSE);
 
 	// Check if any pattern data would be removed.
-	bool resize = (newSize != sndFile.Patterns[m_nPattern].GetNumRows());
-	bool resizeAtEnd = IsDlgButtonChecked(IDC_RADIO2) != BST_UNCHECKED;
-	if(newSize < sndFile.Patterns[m_nPattern].GetNumRows())
+	const ROWINDEX oldSize = pattern.GetNumRows();
+	bool resize = newSize != oldSize;
+	const bool resizeAtEnd = IsDlgButtonChecked(IDC_RADIO2) != BST_UNCHECKED;
+	if(newSize < pattern.GetNumRows())
 	{
 		ROWINDEX firstRow = resizeAtEnd ? newSize : 0;
-		ROWINDEX lastRow = resizeAtEnd ? sndFile.Patterns[m_nPattern].GetNumRows() : sndFile.Patterns[m_nPattern].GetNumRows() - newSize;
+		ROWINDEX lastRow = resizeAtEnd ? oldSize : oldSize - newSize;
 		for(ROWINDEX row = firstRow; row < lastRow; row++)
 		{
-			if(!sndFile.Patterns[m_nPattern].IsEmptyRow(row))
+			if(!pattern.IsEmptyRow(row))
 			{
 				resize = (Reporting::Confirm(MPT_AFORMAT("Data at the {} of the pattern will be lost.\nDo you want to continue?")(resizeAtEnd ? "end" : "start"), "Shrink Pattern") == cnfYes);
 				break;
@@ -305,10 +306,25 @@ void CPatternPropertiesDlg::OnOK()
 
 	if(resize)
 	{
+		const bool copyContents = (newSize > oldSize) && IsDlgButtonChecked(IDC_CHECK2) != BST_UNCHECKED;
 		modDoc.BeginWaitCursor();
-		modDoc.GetPatternUndo().PrepareUndo(m_nPattern, 0, 0, sndFile.Patterns[m_nPattern].GetNumChannels(), sndFile.Patterns[m_nPattern].GetNumRows(), "Resize");
+		modDoc.GetPatternUndo().PrepareUndo(m_nPattern, 0, 0, sndFile.Patterns[m_nPattern].GetNumChannels(), oldSize, "Resize");
 		if(sndFile.Patterns[m_nPattern].Resize(newSize, true, resizeAtEnd))
 		{
+			if(copyContents)
+			{
+				const ROWINDEX copyRows = newSize - oldSize;
+				const ROWINDEX sourceBaseRow = resizeAtEnd ? 0 : copyRows;
+				const ROWINDEX baseOffset = resizeAtEnd ? 0 : (oldSize - copyRows % oldSize);
+				ROWINDEX destRow = resizeAtEnd ? oldSize : 0;
+				for(ROWINDEX row = 0; row < copyRows; row++, destRow++)
+				{
+					ROWINDEX sourceRow = sourceBaseRow + (baseOffset + row) % oldSize;
+					const auto sourceRowData = pattern.GetRow(sourceRow);
+					auto destRowData = pattern.GetRow(destRow);
+					std::copy(sourceRowData.begin(), sourceRowData.end(), destRowData.begin());
+				}
+			}
 			modDoc.SetModified();
 		}
 		modDoc.EndWaitCursor();
