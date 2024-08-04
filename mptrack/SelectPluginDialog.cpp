@@ -156,6 +156,7 @@ void CSelectPluginDlg::OnOK()
 				m_pPlugin->SetOutputPlugin(oldOutput);
 			m_pPlugin->Info.dwPluginId1 = pFactory->pluginId1;
 			m_pPlugin->Info.dwPluginId2 = pFactory->pluginId2;
+			m_pPlugin->Info.shellPluginID = pFactory->shellPluginID;
 			m_pPlugin->editorX = m_pPlugin->editorY = int32_min;
 			m_pPlugin->SetAutoSuspend(TrackerSettings::Instance().enableAutoSuspend);
 
@@ -216,7 +217,7 @@ void CSelectPluginDlg::OnOK()
 	if(changed)
 	{
 		if(m_pPlugin->Info.dwPluginId2)
-			TrackerSettings::Instance().gnPlugWindowLast = m_pPlugin->Info.dwPluginId2;
+			TrackerSettings::Instance().lastSelectedPlugin = {static_cast<uint32>(m_pPlugin->Info.dwPluginId1), static_cast<uint32>(m_pPlugin->Info.dwPluginId2), m_pPlugin->Info.shellPluginID};
 		if(m_pModDoc)
 		{
 			m_pModDoc->UpdateAllViews(nullptr, PluginHint(static_cast<PLUGINDEX>(m_nPlugSlot + 1)).Info().Names());
@@ -349,7 +350,7 @@ void CSelectPluginDlg::UpdatePluginsList(const VSTPluginLib *forceSelect)
 	};
 	PlugMatchQuality foundPlugin = kNoMatch;
 
-	const int32 lastPluginID = TrackerSettings::Instance().gnPlugWindowLast;
+	const auto lastPluginID = TrackerSettings::Instance().lastSelectedPlugin.Get();
 	const bool nameFilterActive = !m_nameFilter.empty();
 	const auto currentTags = mpt::split(m_nameFilter, U_(" "));
 
@@ -357,11 +358,11 @@ void CSelectPluginDlg::UpdatePluginsList(const VSTPluginLib *forceSelect)
 	{
 		bool first = true;
 
-		for(auto p : *pManager)
+		for(auto &p : *pManager)
 		{
 			MPT_ASSERT(p);
 			const VSTPluginLib &plug = *p;
-			if(plug.category == PluginCategory::Hidden && (m_pPlugin == nullptr || m_pPlugin->pMixPlugin == nullptr || &m_pPlugin->pMixPlugin->GetPluginFactory() != p))
+			if(plug.category == PluginCategory::Hidden && (m_pPlugin == nullptr || m_pPlugin->pMixPlugin == nullptr || &m_pPlugin->pMixPlugin->GetPluginFactory() != p.get()))
 				continue;
 
 			if(nameFilterActive)
@@ -445,12 +446,16 @@ void CSelectPluginDlg::UpdatePluginsList(const VSTPluginLib *forceSelect)
 				{
 					// Plugin with matching ID to current slot's plug
 					if(plug.pluginId1 == m_pPlugin->Info.dwPluginId1
-						&& plug.pluginId2 == m_pPlugin->Info.dwPluginId2)
+						&& plug.pluginId2 == m_pPlugin->Info.dwPluginId2
+						&& plug.shellPluginID == m_pPlugin->Info.shellPluginID)
 					{
 						currentPlug = h;
 						foundPlugin = kSameIdAsCurrent;
 					}
-				} else if(plug.pluginId2 == lastPluginID && foundPlugin < kSameIdAsLastWithPlatformMatch)
+				} else if(static_cast<uint32>(plug.pluginId1) == lastPluginID.pluginID1
+					&& static_cast<uint32>(plug.pluginId2) == lastPluginID.pluginID2
+					&& plug.shellPluginID == lastPluginID.shellPluginID
+					&& foundPlugin < kSameIdAsLastWithPlatformMatch)
 				{
 					// Previously selected plugin
 #ifdef MPT_WITH_VST
@@ -689,8 +694,7 @@ void CSelectPluginDlg::OnAddPlugin()
 
 	for(const auto &file : dlg.GetFilenames())
 	{
-		VSTPluginLib *lib = plugManager->AddPlugin(file, TrackerSettings::Instance().BrokenPluginsWorkaroundVSTMaskAllCrashes, mpt::ustring(), false);
-		if(lib != nullptr)
+		for(VSTPluginLib *lib : plugManager->AddPlugin(file, TrackerSettings::Instance().BrokenPluginsWorkaroundVSTMaskAllCrashes, false))
 		{
 			update = true;
 			if(!VerifyPlugin(lib, this))
@@ -701,7 +705,7 @@ void CSelectPluginDlg::OnAddPlugin()
 				plugLib = lib;
 
 				// If this plugin was missing anywhere, try loading it
-				ReloadMissingPlugins(lib);
+				ReloadMissingPlugins(*lib);
 			}
 		}
 	}
@@ -726,9 +730,9 @@ void CSelectPluginDlg::OnScanFolder()
 	UpdatePluginsList(plugLib);
 
 	// If any of the plugins was missing anywhere, try loading it
-	for(auto p : *theApp.GetPluginManager())
+	for(auto &p : *theApp.GetPluginManager())
 	{
-		ReloadMissingPlugins(p);
+		ReloadMissingPlugins(*p);
 	}
 }
 
@@ -763,8 +767,7 @@ VSTPluginLib *CSelectPluginDlg::ScanPlugins(const mpt::PathString &path, CWnd *p
 				::DispatchMessage(&msg);
 			}
 
-			VSTPluginLib *lib = pManager->AddPlugin(fileName, maskCrashes, mpt::ustring(), false);
-			if(lib)
+			for(VSTPluginLib *lib : pManager->AddPlugin(fileName, maskCrashes, false))
 			{
 				update = true;
 				if(!VerifyPlugin(lib, parent))
@@ -793,7 +796,7 @@ VSTPluginLib *CSelectPluginDlg::ScanPlugins(const mpt::PathString &path, CWnd *p
 
 
 // After adding new plugins, check if they were missing in any open songs.
-void CSelectPluginDlg::ReloadMissingPlugins(const VSTPluginLib *lib) const
+void CSelectPluginDlg::ReloadMissingPlugins(const VSTPluginLib &lib) const
 {
 	CVstPluginManager *plugManager = theApp.GetPluginManager();
 	auto docs = theApp.GetOpenDocuments();
@@ -804,8 +807,9 @@ void CSelectPluginDlg::ReloadMissingPlugins(const VSTPluginLib *lib) const
 		for(auto &plugin : sndFile.m_MixPlugins)
 		{
 			if(plugin.pMixPlugin == nullptr
-				&& plugin.Info.dwPluginId1 == lib->pluginId1
-				&& plugin.Info.dwPluginId2 == lib->pluginId2)
+				&& plugin.Info.dwPluginId1 == lib.pluginId1
+				&& plugin.Info.dwPluginId2 == lib.pluginId2
+				&& plugin.Info.shellPluginID == lib.shellPluginID)
 			{
 				updateDoc = true;
 				plugManager->CreateMixPlugin(plugin, sndFile);

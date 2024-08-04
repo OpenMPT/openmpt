@@ -12,6 +12,8 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
+#include <functional>
+
 OPENMPT_NAMESPACE_BEGIN
 
 constexpr int32 PLUGMAGIC(char a, char b, char c, char d) noexcept
@@ -67,6 +69,7 @@ public:
 #endif // MODPLUG_TRACKER
 	int32 pluginId1 = 0;                // Plugin type (kEffectMagic, kDmoMagic, ...)
 	int32 pluginId2 = 0;                // Plugin unique ID
+	uint32 shellPluginID = 0;           // ID of shell child plugin
 	PluginCategory category = PluginCategory::Unknown;
 	const bool isBuiltIn : 1;
 	bool isInstrument : 1;
@@ -75,20 +78,26 @@ protected:
 	mutable uint8 dllArch = 0;
 
 public:
-	VSTPluginLib(CreateProc factoryProc, bool isBuiltIn, const mpt::PathString &dllPath, const mpt::PathString &libraryName
-#ifdef MODPLUG_TRACKER
-		, const mpt::ustring &tags = mpt::ustring(), const CString &vendor = CString()
-#endif // MODPLUG_TRACKER
-		)
+	VSTPluginLib(CreateProc factoryProc, bool isBuiltIn, mpt::PathString dllPath, mpt::PathString libraryName)
 		: Create(factoryProc)
-		, libraryName(libraryName), dllPath(dllPath)
-#ifdef MODPLUG_TRACKER
-		, tags(tags)
-		, vendor(vendor)
-#endif // MODPLUG_TRACKER
+		, libraryName(std::move(libraryName)), dllPath(std::move(dllPath))
 		, category(PluginCategory::Unknown)
 		, isBuiltIn(isBuiltIn), isInstrument(false)
 		, useBridge(false), shareBridgeInstance(true), modernBridge(true)
+	{
+	}
+	VSTPluginLib(VSTPluginLib &&) = default;
+	VSTPluginLib(const VSTPluginLib &other)
+		: Create(other.Create)
+		, libraryName(other.libraryName), dllPath(other.dllPath)
+#ifdef MODPLUG_TRACKER
+		, tags(other.tags), vendor(other.vendor)
+#endif  // MODPLUG_TRACKER
+		, pluginId1(other.pluginId1), pluginId2(other.pluginId2), shellPluginID(other.shellPluginID)
+		, category(other.category)
+		, isBuiltIn(other.isBuiltIn), isInstrument(other.isInstrument)
+		, useBridge(other.useBridge), shareBridgeInstance(other.shareBridgeInstance), modernBridge(other.modernBridge)
+		, dllArch(other.dllArch)
 	{
 	}
 
@@ -151,14 +160,14 @@ protected:
 #if defined(MPT_WITH_DMO)
 	bool MustUnInitilizeCOM = false;
 #endif
-	std::vector<VSTPluginLib *> pluginList;
+	std::vector<std::unique_ptr<VSTPluginLib>> pluginList;
 
 public:
 	CVstPluginManager();
 	~CVstPluginManager();
 
-	using iterator = std::vector<VSTPluginLib *>::iterator;
-	using const_iterator = std::vector<VSTPluginLib *>::const_iterator;
+	using iterator = decltype(pluginList)::iterator;
+	using const_iterator = decltype(pluginList)::const_iterator;
 
 	iterator begin() { return pluginList.begin(); }
 	const_iterator begin() const { return pluginList.begin(); }
@@ -168,7 +177,7 @@ public:
 	size_t size() const { return pluginList.size(); }
 
 	bool IsValidPlugin(const VSTPluginLib *pLib) const;
-	VSTPluginLib *AddPlugin(const mpt::PathString &dllPath, bool maskCrashes, const mpt::ustring &tags = mpt::ustring(), bool fromCache = true, bool *fileFound = nullptr);
+	std::vector<VSTPluginLib *> AddPlugin(const mpt::PathString &dllPath, bool maskCrashes, bool fromCache = true, bool *fileFound = nullptr, uint32 shellPluginID = 0);
 	bool RemovePlugin(VSTPluginLib *);
 	bool CreateMixPlugin(SNDMIXPLUGIN &, CSoundFile &);
 	void OnIdle();
@@ -176,6 +185,8 @@ public:
 
 protected:
 	void EnumerateDirectXDMOs();
+
+	std::vector<VSTPluginLib *> AddPluginsToList(std::vector<VSTPluginLib> containedPlugins, std::function<void(VSTPluginLib &, bool)> updateFunc);
 
 #else // NO_PLUGINS
 public:

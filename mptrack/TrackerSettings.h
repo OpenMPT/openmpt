@@ -178,7 +178,7 @@ template<> inline SettingValue ToSettingValue(const EQPreset &val)
 template<> inline EQPreset FromSettingValue(const SettingValue &val)
 {
 	ASSERT(val.GetTypeTag() == "EQPreset");
-	EQPresetPacked valpacked = DecodeBinarySetting<EQPresetPacked>(val.as<std::vector<std::byte> >());
+	EQPresetPacked valpacked = DecodeBinarySetting<EQPresetPacked>(val.as<std::vector<std::byte>>());
 	EQPreset valresult;
 	std::memcpy(valresult.szName, valpacked.szName, std::size(valresult.szName));
 	std::copy(valpacked.Gains, valpacked.Gains + MAX_EQ_BANDS, valresult.Gains);
@@ -209,7 +209,7 @@ struct MPTChord
 	std::array<NoteType, notesPerChord - 1> notes;  // Additional chord notes
 };
 
-using MPTChords = std::array<MPTChord, 60>;  // Size == kcCommandSetNumNotes
+using MPTChords = std::array<MPTChord, 60>;  // Size == kcCommandSetNumNotes + 1
 
 // MIDI recording
 enum RecordAftertouchOptions
@@ -278,7 +278,7 @@ protected:
 public:
 	enum
 	{
-		defaultSize = 10,	// In percent
+		defaultSize = 10,  // In percent
 	};
 
 	SampleUndoBufferSize(int32 percent = defaultSize) : sizePercent(percent) { CalculateSize(); }
@@ -290,6 +290,15 @@ public:
 
 template<> inline SettingValue ToSettingValue(const SampleUndoBufferSize &val) { return SettingValue(val.GetSizeInPercent()); }
 template<> inline SampleUndoBufferSize FromSettingValue(const SettingValue &val) { return SampleUndoBufferSize(val.as<int32>()); }
+
+
+struct LastPluginID
+{
+	uint32 pluginID1, pluginID2, shellPluginID;
+};
+
+template<> inline SettingValue ToSettingValue(const LastPluginID &val) { return EncodeBinarySetting(val); }
+template<> inline LastPluginID FromSettingValue(const SettingValue &val) { return DecodeBinarySetting<LastPluginID>(val.as<std::vector<std::byte>>()); }
 
 
 mpt::ustring IgnoredCCsToString(const std::bitset<128> &midiIgnoreCCs);
@@ -673,7 +682,7 @@ public:
 	Setting<int32> gnPlugWindowY;
 	Setting<int32> gnPlugWindowWidth;
 	Setting<int32> gnPlugWindowHeight;
-	Setting<int32> gnPlugWindowLast;	// Last selected plugin ID
+	Setting<LastPluginID> lastSelectedPlugin;
 
 	Setting<uint32> gnMsgBoxVisiblityFlags;
 	Setting<uint32> GUIUpdateInterval;

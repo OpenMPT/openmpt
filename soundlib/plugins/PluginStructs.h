@@ -55,16 +55,17 @@ struct SNDMIXPLUGININFO
 		irAutoSuspend   = 0x10,  // Plugin will automatically suspend on silence
 	};
 
-	int32le dwPluginId1;   // Plugin type (kEffectMagic, kDmoMagic, kBuzzMagic)
+	int32le dwPluginId1;   // Plugin type (kEffectMagic, kDmoMagic or custom for built-in plugins)
 	int32le dwPluginId2;   // Plugin unique ID
 	uint8le routingFlags;  // See RoutingFlags
 	uint8le mixMode;
 	uint8le gain;  // Divide by 10 to get real gain
 	uint8le reserved;
 	uint32le dwOutputRouting;                                         // 0 = send to master 0x80 + x = send to plugin x
-	uint32le dwReserved[4];                                           // Reserved for routing info
+	uint32le shellPluginID;                                           // For shell plugins: The child plugin to load
+	uint32le dwReserved[3];                                           // Reserved for routing info
 	mpt::modecharbuf<32, mpt::String::nullTerminated> szName;         // User-chosen plugin display name - this is locale ANSI!
-	mpt::modecharbuf<64, mpt::String::nullTerminated> szLibraryName;  // original DLL name - this is UTF-8!
+	mpt::modecharbuf<64, mpt::String::nullTerminated> szLibraryName;  // original DLL name (shell plugins: child plugin name) - this is UTF-8!
 
 	// Should only be called from SNDMIXPLUGIN::SetBypass() and IMixPlugin::Bypass()
 	void SetBypass(bool bypass = true) { if(bypass) routingFlags |= irBypass; else routingFlags &= uint8(~irBypass); }

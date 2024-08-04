@@ -242,7 +242,10 @@ void VSTPluginLib::WriteToCache() const
 		pathStr = theApp.PathAbsoluteToInstallRelative(dllPath).ToUnicode();
 	else
 		pathStr = dllPath.ToUnicode();
-	
+
+	if(shellPluginID)
+		pathStr += U_("|") + mpt::ufmt::HEX0<8>(shellPluginID);
+
 	// CRC is used to distinguish plugins sharing the same IDs
 	const std::string crcName = mpt::ToCharset(mpt::Charset::UTF8, pathStr);
 	const mpt::crc32 crc(crcName);
@@ -350,19 +353,15 @@ CVstPluginManager::CVstPluginManager()
 	pluginList.reserve(std::size(BuiltInPlugins));
 	for(const auto &plugin : BuiltInPlugins)
 	{
-		VSTPluginLib *plug = new (std::nothrow) VSTPluginLib(plugin.createProc, true, mpt::PathString::FromUTF8(plugin.filename), mpt::PathString::FromUTF8(plugin.name));
-		if(plug != nullptr)
-		{
-			pluginList.push_back(plug);
-			plug->pluginId1 = plugin.pluginId1;
-			plug->pluginId2 = plugin.pluginId2;
-			plug->category = plugin.category;
-			plug->isInstrument = plugin.isInstrument;
+		auto &plug = pluginList.emplace_back(std::make_unique<VSTPluginLib>(plugin.createProc, true, mpt::PathString::FromUTF8(plugin.filename), mpt::PathString::FromUTF8(plugin.name)));
+		plug->pluginId1 = plugin.pluginId1;
+		plug->pluginId2 = plugin.pluginId2;
+		plug->category = plugin.category;
+		plug->isInstrument = plugin.isInstrument;
 #ifdef MODPLUG_TRACKER
-			if(plugin.isOurs)
-				plug->vendor = _T("OpenMPT Project");
+		if(plugin.isOurs)
+			plug->vendor = _T("OpenMPT Project");
 #endif // MODPLUG_TRACKER
-		}
 	}
 
 #ifdef MODPLUG_TRACKER
@@ -382,7 +381,6 @@ CVstPluginManager::~CVstPluginManager()
 			plug->RemovePluginInstanceFromList(*pluginInstance);
 			pluginInstance->Release();
 		}
-		delete plug;
 	}
 #if defined(MPT_WITH_DMO)
 	if(MustUnInitilizeCOM)
@@ -396,7 +394,10 @@ CVstPluginManager::~CVstPluginManager()
 
 bool CVstPluginManager::IsValidPlugin(const VSTPluginLib *pLib) const
 {
-	return mpt::contains(pluginList, pLib);
+	return std::find_if(pluginList.begin(), pluginList.end(), [pLib](const std::unique_ptr<VSTPluginLib> &value)
+	{
+		return value.get() == pLib;
+	}) != pluginList.end();
 }
 
 
@@ -444,24 +445,13 @@ void CVstPluginManager::EnumerateDirectXDMOs()
 
 						if(ERROR_SUCCESS == RegQueryValueEx(hksub, nullptr, 0, &datatype, (LPBYTE)name, &datasize))
 						{
-							VSTPluginLib *plug = new (std::nothrow) VSTPluginLib(DMOPlugin::Create, true, mpt::PathString::FromNative(mpt::GUIDToString(clsid)), mpt::PathString::FromNative(ParseMaybeNullTerminatedStringFromBufferWithSizeInBytes<mpt::winstring>(name, datasize)));
-							if(plug != nullptr)
-							{
-								try
-								{
-									pluginList.push_back(plug);
-									plug->pluginId1 = kDmoMagic;
-									plug->pluginId2 = clsid.Data1;
-									plug->category = PluginCategory::DMO;
-								} catch(mpt::out_of_memory e)
-								{
-									mpt::delete_out_of_memory(e);
-									delete plug;
-								}
+							auto &plug = pluginList.emplace_back(std::make_unique<VSTPluginLib>(DMOPlugin::Create, true, mpt::PathString::FromNative(mpt::GUIDToString(clsid)), mpt::PathString::FromNative(ParseMaybeNullTerminatedStringFromBufferWithSizeInBytes<mpt::winstring>(name, datasize))));
+							plug->pluginId1 = kDmoMagic;
+							plug->pluginId2 = clsid.Data1;
+							plug->category = PluginCategory::DMO;
 #ifdef DMO_LOG
-								MPT_LOG_GLOBAL(LogDebug, "DMO", MPT_UFORMAT("Found \"{}\" clsid={}\n")(plug->libraryName, plug->dllPath));
+							MPT_LOG_GLOBAL(LogDebug, "DMO", MPT_UFORMAT("Found \"{}\" clsid={}\n")(plug->libraryName, plug->dllPath));
 #endif
-							}
 						}
 						RegCloseKey(hksub);
 					}
@@ -475,74 +465,50 @@ void CVstPluginManager::EnumerateDirectXDMOs()
 }
 
 
-// Extract instrument and category information from plugin.
 #ifdef MPT_WITH_VST
-static void GetPluginInformation(bool maskCrashes, Vst::AEffect *effect, VSTPluginLib &library)
+// Convert CVstPlugin::LoadResult into a collection of VSTPluginLibs.
+static std::vector<VSTPluginLib> GetPluginInformation(VSTPluginLib plug, const CVstPlugin::LoadResult &loadResult)
 {
-	unsigned long exception = 0;
-	library.category = static_cast<PluginCategory>(CVstPlugin::DispatchSEH(maskCrashes, effect, Vst::effGetPlugCategory, 0, 0, nullptr, 0, exception));
-	library.isInstrument = ((effect->flags & Vst::effFlagsIsSynth) || !effect->numInputs);
+	plug.pluginId1 = loadResult.magic;
+	plug.pluginId2 = loadResult.uniqueID;
+	plug.isInstrument = CVstPlugin::IsInstrument(*loadResult.effect);
 
-	if(library.isInstrument)
+	std::vector<VSTPluginLib> containedPlugins;
+	if(loadResult.shellPlugins.empty())
 	{
-		library.category = PluginCategory::Synth;
-	} else if(library.category >= PluginCategory::NumCategories)
-	{
-		library.category = PluginCategory::Unknown;
-	}
-
 #ifdef MODPLUG_TRACKER
-	std::vector<char> s(256, 0);
-	CVstPlugin::DispatchSEH(maskCrashes, effect, Vst::effGetVendorString, 0, 0, s.data(), 0, exception);
-	library.vendor = mpt::ToCString(mpt::Charset::Locale, s.data());
-#endif // MODPLUG_TRACKER
-}
-#endif // MPT_WITH_VST
-
-
-#ifdef MPT_WITH_VST
-static bool TryLoadPlugin(bool maskCrashes, VSTPluginLib *plug, HINSTANCE hLib, unsigned long &exception)
-{
-	Vst::AEffect *pEffect = CVstPlugin::LoadPlugin(maskCrashes, *plug, hLib, CVstPlugin::BridgeMode::DetectRequiredBridgeMode);
-	if(!pEffect || pEffect->magic != Vst::kEffectMagic || !pEffect->dispatcher)
+		plug.WriteToCache();
+#endif  // MODPLUG_TRACKER
+		containedPlugins.push_back(std::move(plug));
+	} else
 	{
-		return false;
+		for(auto &shellPlug : loadResult.shellPlugins)
+		{
+			plug.shellPluginID = shellPlug.shellPluginID;
+			plug.libraryName = mpt::PathString::FromLocale(shellPlug.name);
+#ifdef MODPLUG_TRACKER
+			plug.WriteToCache();
+#endif  // MODPLUG_TRACKER
+			containedPlugins.push_back(plug);
+		}
 	}
 
-	CVstPlugin::DispatchSEH(maskCrashes, pEffect, Vst::effOpen, 0, 0, 0, 0, exception);
-
-	plug->pluginId1 = pEffect->magic;
-	plug->pluginId2 = pEffect->uniqueID;
-
-	GetPluginInformation(maskCrashes, pEffect, *plug);
-
-#ifdef VST_LOG
-	intptr_t nver = CVstPlugin::DispatchSEH(maskCrashes, pEffect, Vst::effGetVstVersion, 0,0, nullptr, 0, exception);
-	if (!nver) nver = pEffect->version;
-	MPT_LOG_GLOBAL(LogDebug, "VST", MPT_UFORMAT("{}: v{}.0, {} in, {} out, {} programs, {} params, flags=0x{} realQ={} offQ={}")(
-		plug->libraryName, nver,
-		pEffect->numInputs, pEffect->numOutputs,
-		mpt::ufmt::dec0<2>(pEffect->numPrograms), mpt::ufmt::dec0<2>(pEffect->numParams),
-		mpt::ufmt::HEX0<4>(static_cast<int32>(pEffect->flags)), pEffect->realQualities, pEffect->offQualities));
-#endif // VST_LOG
-
-	CVstPlugin::DispatchSEH(maskCrashes, pEffect, Vst::effClose, 0, 0, 0, 0, exception);
-
-	return true;
+	return containedPlugins;
 }
-#endif // !NO_NVST
+#endif // !NO_VST
 
 
 #ifdef MODPLUG_TRACKER
 // Add a plugin to the list of known plugins.
-VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool maskCrashes, const mpt::ustring &tags, bool fromCache, bool *fileFound)
+std::vector<VSTPluginLib *> CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool maskCrashes, bool fromCache, bool *fileFound, uint32 shellPluginID)
 {
 	const mpt::PathString fileName = dllPath.GetFilenameBase();
 
-	// Check if this is already a known plugin.
+	// Check if this is already a known plugin
 	for(const auto &dupePlug : pluginList)
 	{
-		if(!mpt::PathCompareNoCase(dllPath, dupePlug->dllPath)) return dupePlug;
+		if(shellPluginID == dupePlug->shellPluginID && !mpt::PathCompareNoCase(dllPath, dupePlug->dllPath))
+			return {dupePlug.get()};
 	}
 
 	if(fileFound != nullptr)
@@ -553,24 +519,23 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 	// Look if the plugin info is stored in the PluginCache
 	if(fromCache)
 	{
-		SettingsContainer & cacheFile = theApp.GetPluginCache();
+		mpt::ustring shellStr;
+		if(shellPluginID)
+			shellStr = UL_("|") + mpt::ufmt::HEX0<8>(shellPluginID);
+
+		SettingsContainer &cacheFile = theApp.GetPluginCache();
 		// First try finding the full path
-		mpt::ustring IDs = cacheFile.Read<mpt::ustring>(cacheSection, dllPath.ToUnicode(), U_(""));
+		mpt::ustring IDs = cacheFile.Read<mpt::ustring>(cacheSection, dllPath.ToUnicode() + shellStr, U_(""));
 		if(IDs.length() < 16)
 		{
 			// If that didn't work out, find relative path
 			mpt::PathString relPath = theApp.PathAbsoluteToInstallRelative(dllPath);
-			IDs = cacheFile.Read<mpt::ustring>(cacheSection, relPath.ToUnicode(), U_(""));
+			IDs = cacheFile.Read<mpt::ustring>(cacheSection, relPath.ToUnicode() + shellStr, U_(""));
 		}
 
 		if(IDs.length() >= 16)
 		{
-			VSTPluginLib *plug = new (std::nothrow) VSTPluginLib(nullptr, false, dllPath, fileName, tags);
-			if(plug == nullptr)
-			{
-				return nullptr;
-			}
-			pluginList.push_back(plug);
+			auto &plug = pluginList.emplace_back(std::make_unique<VSTPluginLib>(nullptr, false, dllPath, fileName));
 
 			// Extract plugin IDs
 			uint32 id1 = 0, id2 = 0;
@@ -591,11 +556,12 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 			const mpt::ustring flagKey = IDs + U_(".Flags");
 			plug->DecodeCacheFlags(cacheFile.Read<int32>(cacheSection, flagKey, 0));
 			plug->vendor = cacheFile.Read<CString>(cacheSection, IDs + U_(".Vendor"), CString());
+			plug->shellPluginID = shellPluginID;
 
 #ifdef VST_LOG
 			MPT_LOG_GLOBAL(LogDebug, "VST", MPT_UFORMAT("Plugin \"{}\" found in PluginCache")(plug->libraryName));
 #endif // VST_LOG
-			return plug;
+			return {plug.get()};
 		} else
 		{
 #ifdef VST_LOG
@@ -607,33 +573,41 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 	// If this key contains a file name on program launch, a plugin previously crashed OpenMPT.
 	theApp.GetSettings().Write<mpt::PathString>(U_("VST Plugins"), U_("FailedPlugin"), dllPath, SettingWriteThrough);
 
-	bool validPlug = false;
-
-	VSTPluginLib *plug = new (std::nothrow) VSTPluginLib(nullptr, false, dllPath, fileName, tags);
-	if(plug == nullptr)
-	{
-		return nullptr;
-	}
+	std::vector<VSTPluginLib *> foundPlugins;
 
 #ifdef MPT_WITH_VST
 	unsigned long exception = 0;
 	// Always scan plugins in a separate process
-	HINSTANCE hLib = NULL;
 	{
-#ifdef MODPLUG_TRACKER
-		ExceptionHandler::Context ectx{ MPT_UFORMAT("VST Plugin: {}")(plug->dllPath.ToUnicode()) };
+		ExceptionHandler::Context ectx{ MPT_UFORMAT("VST Plugin: {}")(dllPath.ToUnicode()) };
 		ExceptionHandler::ContextSetter ectxguard{&ectx};
-#endif // MODPLUG_TRACKER
 
-		validPlug = TryLoadPlugin(maskCrashes, plug, hLib, exception);
-	}
-	if(hLib)
-	{
-		FreeLibrary(hLib);
+		VSTPluginLib plug{nullptr, false, dllPath, fileName};
+		auto loadResult = CVstPlugin::LoadPlugin(maskCrashes, plug, CVstPlugin::BridgeMode::DetectRequiredBridgeMode, exception);
+		Vst::AEffect *pEffect = loadResult.effect;
+		if(pEffect)
+		{
+			foundPlugins = AddPluginsToList(GetPluginInformation(std::move(plug), loadResult),
+				[&](VSTPluginLib &library, bool updateExisting)
+				{
+					if(updateExisting)
+						return;
+					if(library.shellPluginID)
+					{
+						if(!CVstPlugin::SelectShellPlugin(maskCrashes, loadResult, library))
+							return;
+					}
+					CVstPlugin::GetPluginMetadata(maskCrashes, loadResult, library);
+				});
+		}
+		if(loadResult.library)
+		{
+			FreeLibrary(loadResult.library);
+		}
 	}
 	if(exception != 0)
 	{
-		CVstPluginManager::ReportPlugException(MPT_UFORMAT("Exception {} while trying to load plugin \"{}\"!\n")(mpt::ufmt::HEX0<8>(exception), plug->libraryName));
+		CVstPluginManager::ReportPlugException(MPT_UFORMAT("Exception {} while trying to load plugin \"{}\"!\n")(mpt::ufmt::HEX0<8>(exception), fileName));
 	}
 
 #endif // MPT_WITH_VST
@@ -641,17 +615,7 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 	// Now it should be safe to assume that this plugin loaded properly. :)
 	theApp.GetSettings().Remove(U_("VST Plugins"), U_("FailedPlugin"));
 
-	// If OK, write the information in PluginCache
-	if(validPlug)
-	{
-		pluginList.push_back(plug);
-		plug->WriteToCache();
-	} else
-	{
-		delete plug;
-	}
-
-	return (validPlug ? plug : nullptr);
+	return foundPlugins;
 }
 
 
@@ -660,7 +624,7 @@ bool CVstPluginManager::RemovePlugin(VSTPluginLib *pFactory)
 {
 	for(const_iterator p = begin(); p != end(); p++)
 	{
-		VSTPluginLib *plug = *p;
+		VSTPluginLib *plug = p->get();
 		if(plug == pFactory)
 		{
 			// Kill all instances of this plugin
@@ -673,7 +637,6 @@ bool CVstPluginManager::RemovePlugin(VSTPluginLib *pFactory)
 				pluginInstance->Release();
 			}
 			pluginList.erase(p);
-			delete plug;
 			return true;
 		}
 	}
@@ -696,7 +659,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 		kMatchNameAndId,
 	};
 
-	PlugMatchQuality match = kNoMatch;	// "Match quality" of found plugin. Higher value = better match.
+	PlugMatchQuality match = kNoMatch;  // "Match quality" of found plugin. Higher value = better match.
 #if MPT_OS_WINDOWS && !MPT_OS_WINDOWS_WINRT
 	const mpt::PathString libraryName = mpt::PathString::FromUnicode(mixPlugin.GetLibraryName());
 #else
@@ -705,7 +668,8 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 	for(const auto &plug : pluginList)
 	{
 		const bool matchID = (plug->pluginId1 == mixPlugin.Info.dwPluginId1)
-			&& (plug->pluginId2 == mixPlugin.Info.dwPluginId2);
+			&& (plug->pluginId2 == mixPlugin.Info.dwPluginId2)
+			&& (plug->shellPluginID == mixPlugin.Info.shellPluginID);
 #if MPT_OS_WINDOWS && !MPT_OS_WINDOWS_WINRT
 		const bool matchName = !mpt::PathCompareNoCase(plug->libraryName, libraryName);
 #else
@@ -714,7 +678,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 
 		if(matchID && matchName)
 		{
-			pFound = plug;
+			pFound = plug.get();
 #ifdef MPT_WITH_VST
 			if(plug->IsNative(false))
 			{
@@ -725,11 +689,11 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 			match = kMatchNameAndId;
 		} else if(matchID && match < kMatchId)
 		{
-			pFound = plug;
+			pFound = plug.get();
 			match = kMatchId;
 		} else if(matchName && match < kMatchName)
 		{
-			pFound = plug;
+			pFound = plug.get();
 			match = kMatchName;
 		}
 	}
@@ -756,20 +720,19 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 	if(pFound)
 	{
 		bool maskCrashes = TrackerSettings::Instance().BrokenPluginsWorkaroundVSTMaskAllCrashes;
-		Vst::AEffect *pEffect = nullptr;
-		HINSTANCE hLibrary = nullptr;
 		bool validPlugin = false;
 
-		pEffect = CVstPlugin::LoadPlugin(maskCrashes, *pFound, hLibrary, TrackerSettings::Instance().bridgeAllPlugins ? CVstPlugin::BridgeMode::ForceBridgeWithFallback : CVstPlugin::BridgeMode::Automatic);
+		unsigned long exception = 0;
+		auto loadResult = CVstPlugin::LoadPlugin(maskCrashes, *pFound, TrackerSettings::Instance().bridgeAllPlugins ? CVstPlugin::BridgeMode::ForceBridgeWithFallback : CVstPlugin::BridgeMode::Automatic, exception);
+		Vst::AEffect *pEffect = loadResult.effect;
 
-		if(pEffect != nullptr && pEffect->dispatcher != nullptr && pEffect->magic == Vst::kEffectMagic)
+		if(pEffect != nullptr)
 		{
-			GetPluginInformation(maskCrashes, pEffect, *pFound);
+			// If filename matched during load but plugin ID didn't, make sure it's updated.
+			mixPlugin.Info.dwPluginId1 = pFound->pluginId1 = loadResult.magic;
+			mixPlugin.Info.dwPluginId2 = pFound->pluginId2 = loadResult.uniqueID;
 
-			// Update cached information
-			pFound->WriteToCache();
-
-			CVstPlugin *pVstPlug = new (std::nothrow) CVstPlugin(maskCrashes, hLibrary, *pFound, mixPlugin, *pEffect, sndFile);
+			CVstPlugin *pVstPlug = new (std::nothrow) CVstPlugin(maskCrashes, loadResult.library, *pFound, mixPlugin, *pEffect, sndFile);
 			if(pVstPlug)
 			{
 				pFound->InsertPluginInstanceIntoList(*pVstPlug);
@@ -777,11 +740,20 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 			validPlugin = (pVstPlug != nullptr);
 			CriticalSection cs;
 			mixPlugin.pMixPlugin = pVstPlug;
+
+#ifdef MODPLUG_TRACKER
+			AddPluginsToList(GetPluginInformation(*pFound, loadResult),
+				[&](VSTPluginLib &library, bool updateExisting)
+				{
+					if(&library == pFound && updateExisting)
+						CVstPlugin::GetPluginMetadata(maskCrashes, loadResult, library);
+				});
+#endif
 		}
 
-		if(!validPlugin)
+		if(!validPlugin && loadResult.library)
 		{
-			FreeLibrary(hLibrary);
+			FreeLibrary(loadResult.library);
 			CVstPluginManager::ReportPlugException(MPT_UFORMAT("Unable to create plugin \"{}\"!\n")(pFound->libraryName));
 		}
 		return validPlugin;
@@ -796,6 +768,84 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 
 	return false;
 }
+
+
+#ifdef MPT_WITH_VST
+std::vector<VSTPluginLib *> CVstPluginManager::AddPluginsToList(std::vector<VSTPluginLib> containedPlugins, std::function<void(VSTPluginLib &, bool)> updateFunc)
+{
+	std::vector<VSTPluginLib *> newPlugins;
+	if(containedPlugins.empty())
+		return newPlugins;
+
+	// Find existing shell plugins belonging to the same file first, so that we don't have to iterate through the whole plugin list again and again
+	std::map<uint32, size_t> existingCandidates;
+	for(size_t i = 0; i < pluginList.size(); i++)
+	{
+		const auto &plug = pluginList[i];
+		if(plug->pluginId1 == containedPlugins.front().pluginId1 && plug->pluginId2 == containedPlugins.front().pluginId2)
+		{
+			if(!mpt::PathCompareNoCase(plug->dllPath, containedPlugins.front().dllPath))
+				existingCandidates[plug->shellPluginID] = i;
+		}
+	}
+
+	// Add found plugins to list or update them if they already exist
+	std::set<uint32> containedIDs;
+	VSTPluginLib *first = nullptr;
+	for(auto &containedPlug : containedPlugins)
+	{
+		containedIDs.insert(containedPlug.shellPluginID);
+		VSTPluginLib *found = nullptr;
+		if(auto it = existingCandidates.find(containedPlug.shellPluginID); it != existingCandidates.end())
+		{
+			auto &plug = pluginList[it->second];
+			MPT_ASSERT(plug->pluginId1 == containedPlug.pluginId1 && plug->pluginId2 == containedPlug.pluginId2);
+			if(plug->shellPluginID == containedPlug.shellPluginID)
+				found = plug.get();
+		}
+		const bool updateExisting = found != nullptr;
+		if(updateExisting)
+		{
+			found->libraryName = containedPlug.libraryName;
+		} else
+		{
+			auto &plug = pluginList.emplace_back(std::make_unique<VSTPluginLib>(std::move(containedPlug)));
+			found = plug.get();
+			newPlugins.push_back(found);
+		}
+		updateFunc(*found, updateExisting);
+
+		if(found)
+		{
+			if(!first)
+				first = found;
+			
+#ifdef MODPLUG_TRACKER
+			found->WriteToCache();
+#endif // MODPLUG_TRACKER
+		}
+	}
+
+	// Are there any shell plugins in our list that are no longer part of the shell plugin?
+	if(containedPlugins.size() > 1)
+	{
+		size_t deleted = 0;
+		for(const auto &[id, i] : existingCandidates)
+		{
+			if(!containedIDs.contains(id) && !pluginList[i - deleted]->pPluginsList)
+			{
+				MPT_ASSERT(pluginList[i - deleted]->shellPluginID == id);
+				pluginList.erase(pluginList.begin() + i - deleted);
+				deleted++;
+			}
+		}
+	}
+
+	if(newPlugins.empty() && first)
+		newPlugins.push_back(first);
+	return newPlugins;
+}
+#endif // MPT_WITH_VST
 
 
 #ifdef MODPLUG_TRACKER

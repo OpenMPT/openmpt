@@ -134,14 +134,15 @@ CDocument *CModDocManager::OpenDocumentFile(LPCTSTR lpszFileName, BOOL bAddToMRU
 	{
 		if(auto plugManager = theApp.GetPluginManager(); plugManager != nullptr)
 		{
-			if(auto plugLib = plugManager->AddPlugin(filename, TrackerSettings::Instance().BrokenPluginsWorkaroundVSTMaskAllCrashes); plugLib != nullptr)
+			bool isPlugin = false;
+			for(VSTPluginLib *plugLib : plugManager->AddPlugin(filename, TrackerSettings::Instance().BrokenPluginsWorkaroundVSTMaskAllCrashes))
 			{
+				isPlugin = true;
 				if(!CSelectPluginDlg::VerifyPlugin(plugLib, nullptr))
-				{
 					plugManager->RemovePlugin(plugLib);
-				}
-				return nullptr;
 			}
+			if(isPlugin)
+				return nullptr;
 		}
 	}
 

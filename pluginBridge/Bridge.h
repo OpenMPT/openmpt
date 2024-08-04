@@ -34,6 +34,7 @@ protected:
 
 	// Plugin
 	Vst::AEffect *m_nativeEffect = nullptr;
+	Vst::MainProc m_mainProc = nullptr;
 	HMODULE m_library = nullptr;
 	HWND m_window = nullptr;
 	int m_windowWidth = 0, m_windowHeight = 0;

@@ -69,7 +69,7 @@ protected:
 	VSTPluginLib *GetSelectedPlugin();
 	void SaveWindowPos() const;
 
-	void ReloadMissingPlugins(const VSTPluginLib *lib) const;
+	void ReloadMissingPlugins(const VSTPluginLib &lib) const;
 
 	void UpdatePluginsList(const VSTPluginLib *forceSelect = nullptr);
 

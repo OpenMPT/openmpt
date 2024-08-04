@@ -2287,8 +2287,14 @@ void CFastBitmap::SetSize(int x, int y)
 
 ///////////////////////////////////////////////////////////////////////////////////
 //
-// DirectX Plugins
+// Restore / save plugin list
 //
+
+static const auto PLUGFORMAT_FILENAME = MPT_UFORMAT("Plugin{}");
+static const auto PLUGFORMAT_TAGS = MPT_UFORMAT("Plugin{}.Tags");
+static const auto PLUGFORMAT_TAGS_BUILTIN = MPT_UFORMAT("Plugin{}{}.Tags");
+static const auto PLUGFORMAT_LIBNAME = MPT_UFORMAT("Plugin{}.LibraryName");
+static const auto PLUGFORMAT_SHELLID = MPT_UFORMAT("Plugin{}.ShellPluginID");
 
 void CTrackApp::InitializeDXPlugins()
 {
@@ -2298,17 +2304,17 @@ void CTrackApp::InitializeDXPlugins()
 	bool maskCrashes = TrackerSettings::Instance().BrokenPluginsWorkaroundVSTMaskAllCrashes;
 
 	std::vector<VSTPluginLib *> nonFoundPlugs;
-	const mpt::PathString failedPlugin = GetSettings().Read<mpt::PathString>(U_("VST Plugins"), U_("FailedPlugin"), P_(""));
+	const mpt::PathString failedPlugin = GetSettings().Read<mpt::PathString>(U_("VST Plugins"), U_("FailedPlugin"));
+	ConfirmAnswer skipFailed = cnfCancel;
 
 	CDialog pluginScanDlg;
 	CWnd *textWnd = nullptr;
 	DWORD64 scanStart = Util::GetTickCount64();
 
 	// Read tags for built-in plugins
-	for(auto plug : *m_pPluginManager)
+	for(auto &plug : *m_pPluginManager)
 	{
-		mpt::ustring key = MPT_UFORMAT("Plugin{}{}.Tags")(mpt::ufmt::HEX0<8>(plug->pluginId1), mpt::ufmt::HEX0<8>(plug->pluginId2));
-		plug->tags = GetSettings().Read<mpt::ustring>(U_("VST Plugins"), key, mpt::ustring());
+		plug->tags = GetSettings().Read<mpt::ustring>(U_("VST Plugins"), PLUGFORMAT_TAGS_BUILTIN(mpt::ufmt::HEX0<8>(plug->pluginId1), mpt::ufmt::HEX0<8>(plug->pluginId2)));
 	}
 
 	// Restructured plugin cache
@@ -2319,58 +2325,68 @@ void CTrackApp::InitializeDXPlugins()
 	}
 
 	m_pPluginManager->reserve(numPlugins);
-	auto plugIDFormat = MPT_UFORMAT("Plugin{}");
 	auto scanFormat = MPT_CFORMAT("Scanning Plugin {} / {}...\n{}");
-	auto tagFormat = MPT_UFORMAT("Plugin{}.Tags");
 	for(size_t plug = 0; plug < numPlugins; plug++)
 	{
-		mpt::PathString plugPath = GetSettings().Read<mpt::PathString>(U_("VST Plugins"), plugIDFormat(plug), mpt::PathString());
-		if(!plugPath.empty())
+		const mpt::PathString plugPath = PathInstallRelativeToAbsolute(GetSettings().Read<mpt::PathString>(U_("VST Plugins"), PLUGFORMAT_FILENAME(plug)));
+		if(plugPath.empty())
+			continue;
+
+		if(!pluginScanDlg.m_hWnd && Util::GetTickCount64() >= scanStart + 2000)
 		{
-			plugPath = PathInstallRelativeToAbsolute(plugPath);
+			// If this is taking too long, show the user what they're waiting for.
+			pluginScanDlg.Create(IDD_SCANPLUGINS, gpSplashScreen);
+			pluginScanDlg.ShowWindow(SW_SHOW);
+			pluginScanDlg.CenterWindow(gpSplashScreen);
+			textWnd = pluginScanDlg.GetDlgItem(IDC_SCANTEXT);
+		} else if(pluginScanDlg.m_hWnd && Util::GetTickCount64() >= scanStart + 30)
+		{
+			textWnd->SetWindowText(scanFormat(plug + 1, numPlugins + 1, plugPath));
+			MSG msg;
+			while(::PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
+			{
+				::TranslateMessage(&msg);
+				::DispatchMessage(&msg);
+			}
+			scanStart = Util::GetTickCount64();
+		}
 
-			if(!pluginScanDlg.m_hWnd && Util::GetTickCount64() >= scanStart + 2000)
+		if(plugPath == failedPlugin)
+		{
+			GetSettings().Remove(U_("VST Plugins"), U_("FailedPlugin"));
+			if(skipFailed == cnfCancel)
 			{
-				// If this is taking too long, show the user what they're waiting for.
-				pluginScanDlg.Create(IDD_SCANPLUGINS, gpSplashScreen);
-				pluginScanDlg.ShowWindow(SW_SHOW);
-				pluginScanDlg.CenterWindow(gpSplashScreen);
-				textWnd = pluginScanDlg.GetDlgItem(IDC_SCANTEXT);
-			} else if(pluginScanDlg.m_hWnd && Util::GetTickCount64() >= scanStart + 30)
-			{
-				textWnd->SetWindowText(scanFormat(plug + 1, numPlugins + 1, plugPath));
-				MSG msg;
-				while(::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
-				{
-					::TranslateMessage(&msg);
-					::DispatchMessage(&msg);
-				}
-				scanStart = Util::GetTickCount64();
+				const CString text = MPT_CFORMAT("The following plugin has previously crashed OpenMPT during initialisation:\n\n{}\n\nDo you still want to load it?")
+					(failedPlugin.ToCString());
+				skipFailed = Reporting::Confirm(text, false, true, &pluginScanDlg);
 			}
 
-			if(plugPath == failedPlugin)
-			{
-				GetSettings().Remove(U_("VST Plugins"), U_("FailedPlugin"));
-				const CString text = _T("The following plugin has previously crashed OpenMPT during initialisation:\n\n") + failedPlugin.ToCString() + _T("\n\nDo you still want to load it?");
-				if(Reporting::Confirm(text, false, true, &pluginScanDlg) == cnfNo)
-				{
-					continue;
-				}
-			}
+			if(skipFailed == cnfNo)
+				continue;
+		}
 
-			mpt::ustring plugTags = GetSettings().Read<mpt::ustring>(U_("VST Plugins"), tagFormat(plug), mpt::ustring());
-
-			bool plugFound = true;
-			VSTPluginLib *lib = m_pPluginManager->AddPlugin(plugPath, maskCrashes, plugTags, true, &plugFound);
-			if(!plugFound && lib != nullptr)
-			{
-				nonFoundPlugs.push_back(lib);
-			}
-			if(lib != nullptr && lib->libraryName == P_("MIDI Input Output") && lib->pluginId1 == PLUGMAGIC('V','s','t','P') && lib->pluginId2 == PLUGMAGIC('M','M','I','D'))
+		const uint32 shellPluginID = mpt::parse_hex<uint32>(GetSettings().Read<mpt::ustring>(U_("VST Plugins"), PLUGFORMAT_SHELLID(plug)));
+		bool plugFound = true;
+		for(VSTPluginLib *lib : m_pPluginManager->AddPlugin(plugPath, maskCrashes, true, &plugFound, shellPluginID))
+		{
+			if(lib->libraryName == P_("MIDI Input Output") && lib->pluginId1 == PLUGMAGIC('V', 's', 't', 'P') && lib->pluginId2 == PLUGMAGIC('M', 'M', 'I', 'D') && !lib->shellPluginID)
 			{
 				// This appears to be an old version of our MIDI I/O plugin, which is now built right into the main executable.
 				m_pPluginManager->RemovePlugin(lib);
+				continue;
 			}
+			if(!plugFound)
+				nonFoundPlugs.push_back(lib);
+			if(shellPluginID && lib->shellPluginID != shellPluginID)
+				continue;
+
+			lib->tags = GetSettings().Read<mpt::ustring>(U_("VST Plugins"), PLUGFORMAT_TAGS(plug));
+			if(shellPluginID != 0)
+			{
+				if(mpt::PathString libName = GetSettings().Read<mpt::PathString>(U_("VST Plugins"), PLUGFORMAT_LIBNAME(plug)); !libName.empty())
+					lib->libraryName = std::move(libName);
+			}
+
 		}
 	}
 	GetPluginCache().Flush();
@@ -2392,24 +2408,34 @@ void CTrackApp::UninitializeDXPlugins()
 #ifndef NO_PLUGINS
 
 	size_t plugIndex = 0;
-	for(auto plug : *m_pPluginManager)
+	for(auto &plug : *m_pPluginManager)
 	{
 		if(!plug->isBuiltIn)
 		{
-			mpt::PathString plugPath = plug->dllPath;
+			mpt::PathString plugPath;
 			if(theApp.IsPortableMode())
+				plugPath = PathAbsoluteToInstallRelative(plug->dllPath);
+			else
+				plugPath = plug->dllPath;
+			
+			const auto libName = PLUGFORMAT_LIBNAME(plugIndex), shellID = PLUGFORMAT_SHELLID(plugIndex);
+			if(plug->shellPluginID != 0)
 			{
-				plugPath = PathAbsoluteToInstallRelative(plugPath);
+				theApp.GetSettings().Write(U_("VST Plugins"), libName, plug->libraryName);
+				theApp.GetSettings().Write(U_("VST Plugins"), shellID, mpt::ufmt::HEX0<8>(plug->shellPluginID));
+			} else
+			{
+				theApp.GetSettings().Remove(U_("VST Plugins"), libName);
+				theApp.GetSettings().Remove(U_("VST Plugins"), shellID);
 			}
-			theApp.GetSettings().Write<mpt::PathString>(U_("VST Plugins"), MPT_UFORMAT("Plugin{}")(plugIndex), plugPath);
 
-			theApp.GetSettings().Write(U_("VST Plugins"), MPT_UFORMAT("Plugin{}.Tags")(plugIndex), plug->tags);
+			theApp.GetSettings().Write<mpt::PathString>(U_("VST Plugins"), PLUGFORMAT_FILENAME(plugIndex), plugPath);
+			theApp.GetSettings().Write(U_("VST Plugins"), PLUGFORMAT_TAGS(plugIndex), plug->tags);
 
 			plugIndex++;
 		} else
 		{
-			mpt::ustring key = MPT_UFORMAT("Plugin{}{}.Tags")(mpt::ufmt::HEX0<8>(plug->pluginId1), mpt::ufmt::HEX0<8>(plug->pluginId2));
-			theApp.GetSettings().Write(U_("VST Plugins"), key, plug->tags);
+			theApp.GetSettings().Write(U_("VST Plugins"), PLUGFORMAT_TAGS_BUILTIN(mpt::ufmt::HEX0<8>(plug->pluginId1), mpt::ufmt::HEX0<8>(plug->pluginId2)), plug->tags);
 		}
 	}
 	theApp.GetSettings().Write(U_("VST Plugins"), U_("NumPlugins"), static_cast<uint32>(plugIndex));

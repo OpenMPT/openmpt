@@ -440,7 +440,7 @@ namespace MidiExport
 	public:
 		Conversion(CSoundFile &sndFile, const InstrMap &instrMap, std::ostream &file, bool overlappingInstruments, const GetLengthType &songLength)
 			: m_oldInstruments(sndFile.GetNumInstruments())
-			, m_plugFactory(nullptr, true, {}, {}, {})
+			, m_plugFactory(nullptr, true, {}, {})
 			, m_sndFile(sndFile)
 			, m_file(file)
 			, m_songLength(songLength)

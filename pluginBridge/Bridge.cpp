@@ -368,17 +368,15 @@ void PluginBridge::InitBridge(InitMsg &msg)
 		return;
 	}
 
-	auto mainProc = (Vst::MainProc)GetProcAddress(m_library, "VSTPluginMain");
-	if(mainProc == nullptr)
-	{
-		mainProc = (Vst::MainProc)GetProcAddress(m_library, "main");
-	}
+	m_mainProc = reinterpret_cast<Vst::MainProc>(GetProcAddress(m_library, "VSTPluginMain"));
+	if(m_mainProc == nullptr)
+		m_mainProc = reinterpret_cast<Vst::MainProc>(GetProcAddress(m_library, "main"));
 
-	if(mainProc != nullptr)
+	if(m_mainProc != nullptr)
 	{
 		__try
 		{
-			m_nativeEffect = mainProc(MasterCallback);
+			m_nativeEffect = m_mainProc(MasterCallback);
 		} __except(EXCEPTION_EXECUTE_HANDLER)
 		{
 			m_nativeEffect = nullptr;
@@ -624,6 +622,13 @@ void PluginBridge::DispatchToPlugin(DispatchMsg &msg)
 					}
 				}
 				break;
+			case kCallVSTPluginMain:
+				if(m_mainProc)
+				{
+					Dispatch(effClose, 0, 0, nullptr, 0.0f);
+					m_nativeEffect = m_mainProc(MasterCallback);
+					UpdateEffectStruct();
+				}
 			default:
 				msg.result = 0;
 			}
