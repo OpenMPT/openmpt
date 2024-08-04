@@ -237,17 +237,18 @@ void VSTPluginLib::WriteToCache() const
 {
 	SettingsContainer &cacheFile = theApp.GetPluginCache();
 
-	const std::string crcName = dllPath.ToUTF8();
+	mpt::ustring pathStr;
+	if(theApp.IsPortableMode())
+		pathStr = theApp.PathAbsoluteToInstallRelative(dllPath).ToUnicode();
+	else
+		pathStr = dllPath.ToUnicode();
+	
+	// CRC is used to distinguish plugins sharing the same IDs
+	const std::string crcName = mpt::ToCharset(mpt::Charset::UTF8, pathStr);
 	const mpt::crc32 crc(crcName);
 	const mpt::ustring IDs = mpt::ufmt::HEX0<8>(static_cast<uint32>(pluginId1)) + mpt::ufmt::HEX0<8>(static_cast<uint32>(pluginId2)) + mpt::ufmt::HEX0<8>(crc.result());
 
-	mpt::PathString writePath = dllPath;
-	if(theApp.IsPortableMode())
-	{
-		writePath = theApp.PathAbsoluteToInstallRelative(writePath);
-	}
-
-	cacheFile.Write<mpt::ustring>(cacheSection, writePath.ToUnicode(), IDs);
+	cacheFile.Write<mpt::ustring>(cacheSection, pathStr, IDs);
 	cacheFile.Write<CString>(cacheSection, IDs + U_(".Vendor"), vendor);
 	cacheFile.Write<int32>(cacheSection, IDs + U_(".Flags"), EncodeCacheFlags());
 }
