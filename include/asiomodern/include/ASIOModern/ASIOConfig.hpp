@@ -46,6 +46,17 @@
 #endif
 
 
+#if ASIO_COMPILER_MSVC
+#if defined(_MSVC_LANG)
+#define ASIO_CXX_VERSION _MSVC_LANG
+#else
+#define ASIO_CXX_VERSION __cplusplus
+#endif
+#else
+#define ASIO_CXX_VERSION __cplusplus
+#endif
+
+
 #if ASIO_COMPILER_MSVC || ASIO_COMPILER_CLANG || ASIO_COMPILER_GCC || ASIO_SYSTEM_WINDOWS
 // assume #pragma pack support on Windows
 #define ASIO_HAVE_PRAGMA_PACK 1

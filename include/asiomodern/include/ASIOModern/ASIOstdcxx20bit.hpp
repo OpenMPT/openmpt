@@ -9,7 +9,7 @@
 
 
 
-#if (__cplusplus > 202000L)
+#if (ASIO_CXX_VERSION >= 202002L)
 #include <bit>
 namespace ASIO {
 inline namespace ASIO_VERSION_NAMESPACE {
