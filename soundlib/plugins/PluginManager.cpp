@@ -815,15 +815,12 @@ std::vector<VSTPluginLib *> CVstPluginManager::AddPluginsToList(std::vector<VSTP
 		}
 		updateFunc(*found, updateExisting);
 
-		if(found)
-		{
-			if(!first)
-				first = found;
+		if(!first)
+			first = found;
 			
 #ifdef MODPLUG_TRACKER
-			found->WriteToCache();
+		found->WriteToCache();
 #endif // MODPLUG_TRACKER
-		}
 	}
 
 	// Are there any shell plugins in our list that are no longer part of the shell plugin?
@@ -832,7 +829,7 @@ std::vector<VSTPluginLib *> CVstPluginManager::AddPluginsToList(std::vector<VSTP
 		size_t deleted = 0;
 		for(const auto &[id, i] : existingCandidates)
 		{
-			if(!mpt::contains(containedIDs, id) && !pluginList[i - deleted]->pPluginsList)
+			if(auto it = containedIDs.find(id); it == containedIDs.end() && !pluginList[i - deleted]->pPluginsList)
 			{
 				MPT_ASSERT(pluginList[i - deleted]->shellPluginID == id);
 				pluginList.erase(pluginList.begin() + i - deleted);
