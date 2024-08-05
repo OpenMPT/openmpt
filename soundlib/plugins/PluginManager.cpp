@@ -698,29 +698,22 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 		}
 	}
 
-	if(pFound != nullptr && pFound->Create != nullptr)
-	{
-		IMixPlugin *plugin = pFound->Create(*pFound, sndFile, mixPlugin);
-		if(plugin)
-		{
-			pFound->InsertPluginInstanceIntoList(*plugin);
-		}
-#ifdef MODPLUG_TRACKER
-		CriticalSection cs;
-#endif
-		mixPlugin.pMixPlugin = plugin;
-		return plugin != nullptr;
-	}
+	if(!pFound)
+		return false;
 
+	IMixPlugin *plugin = nullptr;
+	if(pFound->Create != nullptr)
+	{
+		plugin = pFound->Create(*pFound, sndFile, mixPlugin);
+	}
 #ifdef MPT_WITH_VST
 	// Note: we don't check if dwPluginId1 matches Vst::kEffectMagic here, even if it should.
 	// I have an old file I made with OpenMPT 1.17 where the primary plugin ID has an unexpected value.
 	// No idea how that could happen, apart from some plugin.cache corruption (back then, the IDs were not re-checked
 	// after instantiating a plugin and the cached plugin ID was blindly written to the module file)
-	if(pFound)
+	else
 	{
 		bool maskCrashes = TrackerSettings::Instance().BrokenPluginsWorkaroundVSTMaskAllCrashes;
-		bool validPlugin = false;
 
 		unsigned long exception = 0;
 		auto loadResult = CVstPlugin::LoadPlugin(maskCrashes, *pFound, TrackerSettings::Instance().bridgeAllPlugins ? CVstPlugin::BridgeMode::ForceBridgeWithFallback : CVstPlugin::BridgeMode::Automatic, exception);
@@ -728,18 +721,11 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 
 		if(pEffect != nullptr)
 		{
-			// If filename matched during load but plugin ID didn't, make sure it's updated.
-			mixPlugin.Info.dwPluginId1 = pFound->pluginId1 = loadResult.magic;
-			mixPlugin.Info.dwPluginId2 = pFound->pluginId2 = loadResult.uniqueID;
+			// If filename matched during load but plugin ID didn't (or vice versa), make sure it's updated.
+			pFound->pluginId1 = loadResult.magic;
+			pFound->pluginId2 = loadResult.uniqueID;
 
-			CVstPlugin *pVstPlug = new (std::nothrow) CVstPlugin(maskCrashes, loadResult.library, *pFound, mixPlugin, *pEffect, sndFile);
-			if(pVstPlug)
-			{
-				pFound->InsertPluginInstanceIntoList(*pVstPlug);
-			}
-			validPlugin = (pVstPlug != nullptr);
-			CriticalSection cs;
-			mixPlugin.pMixPlugin = pVstPlug;
+			plugin = new (std::nothrow) CVstPlugin(maskCrashes, loadResult.library, *pFound, mixPlugin, *pEffect, sndFile);
 
 #ifdef MODPLUG_TRACKER
 			AddPluginsToList(GetPluginInformation(*pFound, loadResult),
@@ -751,22 +737,26 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 #endif
 		}
 
-		if(!validPlugin && loadResult.library)
+		if(!plugin && loadResult.library)
 		{
 			FreeLibrary(loadResult.library);
 			CVstPluginManager::ReportPlugException(MPT_UFORMAT("Unable to create plugin \"{}\"!\n")(pFound->libraryName));
 		}
-		return validPlugin;
-	} else
-	{
-		// "plug not found" notification code MOVED to CSoundFile::Create
-#ifdef VST_LOG
-		MPT_LOG_GLOBAL(LogDebug, "VST", U_("Unknown plugin"));
-#endif
 	}
 #endif // MPT_WITH_VST
 
-	return false;
+#ifdef MODPLUG_TRACKER
+	CriticalSection cs;
+#endif
+	if(plugin)
+		pFound->InsertPluginInstanceIntoList(*plugin);
+	mixPlugin.pMixPlugin = plugin;
+	// If filename matched during load but plugin ID didn't (or vice versa), make sure it's updated.
+	mixPlugin.Info.dwPluginId1 = pFound->pluginId1;
+	mixPlugin.Info.dwPluginId2 = pFound->pluginId2;
+	mixPlugin.Info.szLibraryName = pFound->libraryName.ToUTF8();
+
+	return plugin != nullptr;
 }
 
 
