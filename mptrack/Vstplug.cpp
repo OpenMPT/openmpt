@@ -263,7 +263,7 @@ CVstPlugin::LoadResult CVstPlugin::LoadPlugin(bool maskCrashes, VSTPluginLib &pl
 		while((childID = CVstPlugin::DispatchSEH(maskCrashes, *effect, Vst::effShellGetNextPlugin, 0, 0, name.data(), 0.0f, exception)) != 0)
 		{
 			name[63] = 0;
-			result.shellPlugins.emplace_back(name.data(),  static_cast<uint32>(childID));
+			result.shellPlugins.emplace_back(LoadResult::ShellPlugin{name.data(), static_cast<uint32>(childID)});
 
 			if(static_cast<uint32>(childID) == plugin.shellPluginID)
 				shellPlugIndex = result.shellPlugins.size();
