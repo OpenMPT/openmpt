@@ -163,7 +163,17 @@
 
 
 
-#if MPT_COMPILER_GENERIC || MPT_COMPILER_GCC || MPT_COMPILER_CLANG
+#if MPT_COMPILER_GENERIC
+
+#if (__cplusplus >= 202302)
+#define MPT_CXX 23
+#elif (__cplusplus >= 202002)
+#define MPT_CXX 20
+#elif (__cplusplus >= 201703)
+#define MPT_CXX 17
+#endif
+
+#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 
 #if (__cplusplus >= 202302)
 #define MPT_CXX 23
@@ -176,8 +186,6 @@
 #endif
 #elif (__cplusplus >= 201703)
 #define MPT_CXX 17
-#else
-#define MPT_CXX 17
 #endif
 
 #elif MPT_COMPILER_MSVC
@@ -188,22 +196,15 @@
 #elif (_MSVC_LANG >= 202002)
 #define MPT_CXX 20
 #elif (_MSVC_LANG >= 201703)
-#if MPT_MSVC_AT_LEAST(2019, 10) && (_MSVC_LANG >= 201705)
-#define MPT_CXX 20
-#else
 #define MPT_CXX 17
 #endif
-#else
-#define MPT_CXX 17
-#endif
-#else
-#define MPT_CXX 17
 #endif
 
-#else
+#endif
 
+// default to C++17
+#ifndef MPT_CXX
 #define MPT_CXX 17
-
 #endif
 
 // MPT_CXX is stricter than just using __cplusplus directly.
