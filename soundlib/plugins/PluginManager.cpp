@@ -832,7 +832,7 @@ std::vector<VSTPluginLib *> CVstPluginManager::AddPluginsToList(std::vector<VSTP
 		size_t deleted = 0;
 		for(const auto &[id, i] : existingCandidates)
 		{
-			if(!containedIDs.contains(id) && !pluginList[i - deleted]->pPluginsList)
+			if(!mpt::contains(containedIDs, id) && !pluginList[i - deleted]->pPluginsList)
 			{
 				MPT_ASSERT(pluginList[i - deleted]->shellPluginID == id);
 				pluginList.erase(pluginList.begin() + i - deleted);
