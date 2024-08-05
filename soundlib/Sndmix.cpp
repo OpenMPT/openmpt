@@ -1589,6 +1589,11 @@ void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int32 &period, Tuning::NOTEI
 				uint8 note = (GetType() != MOD_TYPE_MOD) ? chn.nNote : static_cast<uint8>(GetNoteFromPeriod(period, chn.nFineTune, chn.nC5Speed));
 				if(GetType() & (MOD_TYPE_DBM | MOD_TYPE_DIGI))
 					tick += 2;
+
+				// SFX uses a 0-1-2-0-2-1 pattern (fixed at 6 ticks per row)
+				if(GetType() == MOD_TYPE_SFX && tick > 3)
+					tick ^= 3;
+
 				switch(tick % 3)
 				{
 				case 1: note += (chn.nArpeggio >> 4); break;
@@ -1611,7 +1616,7 @@ void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int32 &period, Tuning::NOTEI
 					}
 					period = GetPeriodFromNote(note, chn.nFineTune, chn.nC5Speed);
 
-					if(GetType() & (MOD_TYPE_DBM | MOD_TYPE_DIGI | MOD_TYPE_PSM | MOD_TYPE_STM | MOD_TYPE_OKT))
+					if(GetType() & (MOD_TYPE_DBM | MOD_TYPE_DIGI | MOD_TYPE_PSM | MOD_TYPE_STM | MOD_TYPE_OKT | MOD_TYPE_SFX))
 					{
 						// The arpeggio note offset remains effective after the end of the current row in ScreamTracker 2.
 						// This fixes the flute lead in MORPH.STM by Skaven, pattern 27.
