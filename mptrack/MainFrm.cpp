@@ -50,6 +50,7 @@
 #include "Vstplug.h"
 #include "FileDialog.h"
 #include "ProgressDialog.h"
+#include "IPCWindow.h"
 #include <HtmlHelp.h>
 #include <Dbt.h>  // device change messages
 #include "mpt/audio/span.hpp"
@@ -465,11 +466,13 @@ void CMainFrame::OnDropFiles(HDROP hDropInfo)
 }
 
 
-void CMainFrame::OnActivateApp(BOOL active, DWORD /*threadID*/)
+void CMainFrame::OnActivateApp(BOOL active, DWORD threadID)
 {
-	// Ensure modifiers are reset when we leave the window (e.g. Alt-Tab)
-	if(!active)
-		m_InputHandler->SetModifierMask(ModNone);
+	if(active)
+		IPCWindow::UpdateLastUsed();
+	else	
+		m_InputHandler->SetModifierMask(ModNone);	// Ensure modifiers are reset when we leave the window (e.g. Alt-Tab)
+	CMDIFrameWnd::OnActivateApp(active, threadID);
 }
 
 
@@ -2443,7 +2446,7 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 	{
 		case kcViewTree: OnBarCheck(IDD_TREEVIEW); break;
 		case kcViewOptions: OnViewOptions(); break;
-		case kcViewMain: OnBarCheck(59392 /* MAINVIEW */); break;
+		case kcViewMain: OnBarCheck(ID_VIEW_TOOLBAR); break;
 	 	case kcFileImportMidiLib: OnImportMidiLib(); break;
 		case kcFileAddSoundBank: OnAddDlsBank(); break;
 		case kcPauseSong:	OnPlayerPause(); break;

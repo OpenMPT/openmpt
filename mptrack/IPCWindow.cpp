@@ -120,6 +120,12 @@ namespace IPCWindow
 		ipcWindow = nullptr;
 	}
 
+	void UpdateLastUsed()
+	{
+		if(ipcWindow)
+			SetWindowLongPtr(ipcWindow, GWLP_USERDATA, mpt::saturate_cast<LONG_PTR>(GetTickCount64() / 100));
+	}
+
 	LRESULT SendIPC(HWND ipcWnd, Function function, mpt::const_byte_span data)
 	{
 		if(!ipcWnd)
@@ -144,13 +150,14 @@ namespace IPCWindow
 
 	struct EnumWindowState
 	{
-		FlagSet<InstanceRequirements> require;
+		uint64 lastActive = 0;
 		HWND result = nullptr;
+		FlagSet<InstanceRequirements> require;
 	};
 
 	static BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam)
 	{
-		EnumWindowState &state = *reinterpret_cast<EnumWindowState*>(lParam);
+		EnumWindowState &state = *reinterpret_cast<EnumWindowState *>(lParam);
 		if(hwnd)
 		{
 			TCHAR className[256];
@@ -187,9 +194,13 @@ namespace IPCWindow
 							return TRUE; // continue
 						}
 					}
-					state.result = hwnd;
+					uint64 lastActive = GetWindowLongPtr(hwnd, GWLP_USERDATA);
+					if(!state.result || lastActive >= state.lastActive)
+					{
+						state.result = hwnd;
+						state.lastActive = lastActive;
+					}
 					return TRUE; // continue
-					//return FALSE; // done
 				}
 			}
 		}
