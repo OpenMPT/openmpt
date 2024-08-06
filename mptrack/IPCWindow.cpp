@@ -132,7 +132,7 @@ namespace IPCWindow
 	void UpdateLastUsed()
 	{
 		if(ipcWindow)
-			SetWindowLongPtr(ipcWindow, GWLP_USERDATA, mpt::saturate_cast<LONG_PTR>(GetTickCount64() / 100));
+			SetWindowLongPtr(ipcWindow, GWLP_USERDATA, mpt::saturate_cast<LONG_PTR>(Util::GetTickCount64() / 100));
 	}
 
 	LRESULT SendIPC(HWND ipcWnd, Function function, mpt::const_byte_span data)
@@ -159,7 +159,7 @@ namespace IPCWindow
 
 	struct EnumWindowState
 	{
-		uint64 lastActive = 0;
+		uintptr_t lastActive = 0;
 		HWND result = nullptr;
 		FlagSet<InstanceRequirements> require;
 	};
@@ -203,7 +203,7 @@ namespace IPCWindow
 							return TRUE; // continue
 						}
 					}
-					uint64 lastActive = GetWindowLongPtr(hwnd, GWLP_USERDATA);
+					uintptr_t lastActive = GetWindowLongPtr(hwnd, GWLP_USERDATA);
 					if(!state.result || lastActive >= state.lastActive)
 					{
 						state.result = hwnd;
