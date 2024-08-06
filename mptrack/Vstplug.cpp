@@ -290,7 +290,7 @@ CVstPlugin::LoadResult CVstPlugin::LoadPlugin(bool maskCrashes, VSTPluginLib &pl
 
 bool CVstPlugin::SelectShellPlugin(bool maskCrashes, LoadResult &loadResult, const VSTPluginLib &plugin)
 {
-	g_shellPluginToLoad = plugin.shellPluginID.ToInt();
+	g_shellPluginToLoad = plugin.shellPluginID;
 	if(loadResult.effect && IsBridged(*loadResult.effect))
 	{
 		loadResult.effect->dispatcher(loadResult.effect, Vst::effVendorSpecific, kVendorOpenMPT, kCallVSTPluginMain, nullptr, 0.0f);
