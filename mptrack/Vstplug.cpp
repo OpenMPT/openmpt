@@ -255,7 +255,7 @@ CVstPlugin::LoadResult CVstPlugin::LoadPlugin(bool maskCrashes, VSTPluginLib &pl
 	result.magic = effect->magic;
 	result.uniqueID = effect->uniqueID;
 
-	size_t shellPlugIndex = 0;
+	bool requestedShellPluginFound = false;
 	if(static_cast<PluginCategory>(DispatchSEH(maskCrashes, *effect, Vst::effGetPlugCategory, 0, 0, nullptr, 0, exception)) == PluginCategory::Shell)
 	{
 		std::vector<char> name(256, 0);  // 64 chars officially supported, but our plugin bridge assumes 256 chars max for all strings
@@ -266,13 +266,13 @@ CVstPlugin::LoadResult CVstPlugin::LoadPlugin(bool maskCrashes, VSTPluginLib &pl
 			result.shellPlugins.push_back(LoadResult::ShellPlugin{name.data(), static_cast<uint32>(childID)});
 
 			if(static_cast<uint32>(childID) == plugin.shellPluginID)
-				shellPlugIndex = result.shellPlugins.size();
+				requestedShellPluginFound = true;
 		}
 	}
 
 	if(plugin.shellPluginID)
 	{
-		if(!shellPlugIndex)
+		if(!requestedShellPluginFound)
 		{
 			result.effect = nullptr;
 			Reporting::Error(MPT_UFORMAT("The shell plugin \"{}\" does not contain \"{}\".")
@@ -290,11 +290,8 @@ CVstPlugin::LoadResult CVstPlugin::LoadPlugin(bool maskCrashes, VSTPluginLib &pl
 
 bool CVstPlugin::SelectShellPlugin(bool maskCrashes, LoadResult &loadResult, const VSTPluginLib &plugin)
 {
-	if(!loadResult.effect)
-		return false;
-
-	g_shellPluginToLoad = plugin.shellPluginID;
-	if(IsBridged(*loadResult.effect))
+	g_shellPluginToLoad = plugin.shellPluginID.ToInt();
+	if(loadResult.effect && IsBridged(*loadResult.effect))
 	{
 		loadResult.effect->dispatcher(loadResult.effect, Vst::effVendorSpecific, kVendorOpenMPT, kCallVSTPluginMain, nullptr, 0.0f);
 	} else
