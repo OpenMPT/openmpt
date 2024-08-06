@@ -629,6 +629,7 @@ void PluginBridge::DispatchToPlugin(DispatchMsg &msg)
 					m_nativeEffect = m_mainProc(MasterCallback);
 					UpdateEffectStruct();
 				}
+				break;
 			default:
 				msg.result = 0;
 			}
