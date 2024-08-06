@@ -599,6 +599,7 @@ std::vector<VSTPluginLib *> CVstPluginManager::AddPlugin(const mpt::PathString &
 					}
 					CVstPlugin::GetPluginMetadata(maskCrashes, loadResult, library);
 				});
+			CVstPlugin::DispatchSEH(maskCrashes, *pEffect, Vst::effClose, 0, 0, 0, 0, exception);
 		}
 		if(loadResult.library)
 		{
