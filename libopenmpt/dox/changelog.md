@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.5.33-pre
 
+ *  mpg123: Update to v1.32.7 (2024-08-07).
+
 ### libopenmpt 0.5.32 (2024-07-21)
 
  *  [**Sec**] Potential division by 0 when seeking in the module with
