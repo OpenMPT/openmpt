@@ -1,3 +1,3 @@
 param([String]$filename="")
-Remove-Item $filenme
+Remove-Item $filename
 exit 0
