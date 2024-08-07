@@ -44,7 +44,7 @@ call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://www.un4seen.com/fi
 call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://web.archive.org/web/20200918004813id_/http://download.microsoft.com/download/0/A/9/0A939EF6-E31C-430F-A3DF-DFAE7960D564/htmlhelp.exe" "build\externals\htmlhelp.exe"                 d91371244ea98c691b4674ee266c4a2496a296800c176adae069d21f5c52c0763b21cc7859cfffa865b89e50171a2c99a6d14620c32f7d72c0ef04045348f856 3509072 || goto error
 
 
-call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://www.python.org/ftp/python/3.12.4/python-3.12.4-embed-amd64.zip" "build\externals\python-3.12.4-embed-amd64.zip" f07be8d84645f2411d061262b378d783498f23a961a9eb3dc3cf5c785af75de551cd4f413c385f47219601d2b09fa6ae88242226b1e31cf009929d3ff5d6673e 11065736 || goto error
+call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://www.python.org/ftp/python/3.12.5/python-3.12.5-embed-amd64.zip" "build\externals\python-3.12.5-embed-amd64.zip" d1f478a24c16aa46ca7950a13881563c46301bd698f614077a6b2076d2cea49d6cf0555515b5ead94be43f95cf9bc6e30d1b6ded77555b0f42d2f4c140ec6a96 11058677 || goto error
 
 
 call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://netcologne.dl.sourceforge.net/project/innounp/innounp/innounp%%%%200.50/innounp050.rar"  "build\externals\innounp050.rar"               dbbc809308267a866db9d6b751fdeda6d179e1a65d8ddb14bb51984431ae91493f9a76105e1789b245732043a2c696c869ed10964b48cf59f81e55bd52f85330  141621 || goto error
@@ -73,7 +73,7 @@ call build\scriptlib\unpack.cmd "build\tools\htmlhelp" "build\externals\htmlhelp
 call build\scriptlib\unpack.cmd "include\winamp"   "build\externals\WA5.55_SDK.exe" "."          || goto error
 call build\scriptlib\unpack.cmd "include\xmplay"   "build\externals\xmp-sdk.zip"    "."          || goto error
 
-call build\scriptlib\unpack.cmd "build\tools\python3" "build\externals\python-3.12.4-embed-amd64.zip" "." || goto error
+call build\scriptlib\unpack.cmd "build\tools\python3" "build\externals\python-3.12.5-embed-amd64.zip" "." || goto error
 
 call :killdir "build\tools\innounp"   || goto error
 call :killdir "build\tools\innosetup" || goto error
