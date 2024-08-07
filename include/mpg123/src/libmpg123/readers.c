@@ -732,13 +732,8 @@ static void bc_forget(struct bufferchain *bc)
 		bc->pos  -= b->size;
 		bc->size -= b->size;
 
-#if 1  /* OpenMPT */
-		debug5("bc_forget: forgot %p with %td, pos=%td, size=%td, fileoff=%"PRIi64  /* OpenMPT */
-		,	(void*)b->data, b->size, bc->pos,  bc->size, bc->fileoff);  /* OpenMPT */
-#else  /* OpenMPT */
-		debug5("bc_forget: forgot %p with %td, pos=%td, size=%td, fileoff=%td"
+		debug5("bc_forget: forgot %p with %td, pos=%td, size=%td, fileoff=%"PRIi64
 		,	(void*)b->data, b->size, bc->pos,  bc->size, bc->fileoff);
-#endif  /* OpenMPT */
 
 		bc_free(bc, b);
 		b = n;

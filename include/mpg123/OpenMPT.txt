@@ -1,4 +1,4 @@
-libmpg123 library version 1.32.6 (2024-04-04).
+libmpg123 library version 1.32.7-dev+r5424 (2024-08-07).
 The following changes have been made:
  *  `ports/makefile/config.h` has been added for plain `Makefile` builds.
  *  `ports/MSVC++/config.h` has been added for MSVC builds.
@@ -6,7 +6,6 @@ The following changes have been made:
  *  `ports/Xcode/config.h` has been modified to let the build system set
     `OPT_*`.
  *  `ports/Xcode/config.h` has been modified to `#define HAVE_DIRENT_H`.
- *  A warning in `src/libmpg123/readers.c` has been fixed.
  *  Modifications are marked by `// OpenMPT` or `/* OpenMPT */`.
  *  Obviously, unnecessary folders and files have been removed.
  *  For building, premake is used to generate Visual Studio project files.

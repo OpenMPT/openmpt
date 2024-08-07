@@ -207,7 +207,7 @@ static struct wrap_data* wrap_get(mpg123_handle *mh, int force_alloc)
 
 /* After settling the data... start with some simple wrappers. */
 
-// The fist block of wrappers is always present, using the native off_t width.
+// The first block of wrappers is always present, using the native off_t width.
 // (Exception: If explicitly disabled using FORCED_OFF_64.)
 // A second block mirrors that in case of sizeof(off_t)==4 with _32 suffix.
 // A third block follows if 64 bit off_t is available with _64 suffix, just aliasing
