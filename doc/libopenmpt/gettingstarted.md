@@ -207,3 +207,78 @@ How to compile
  -  Android NDK
 
     See `build/android_ndk/README.AndroidNDK.txt`.
+
+
+
+### Building libopenmpt with any other build system
+
+libopenmpt is very simple to build with any build system of your choice. The
+only required information is listed below. We currently only support building
+libopenmpt itself this way, but the test suite and openmpt123 may follow later.
+
+ -  language:
+     -  C++17 / C++20
+
+ -  defines:
+     -  LIBOPENMPT_BUILD
+
+ -  private include directories:
+     -  .
+     -  common
+     -  src
+
+ -  files:
+     -  common/*.cpp
+     -  sounddsp/*.cpp
+     -  soundlib/*.cpp
+     -  soundlib/plugins/*.cpp
+     -  soundlib/plugins/dmo/*.cpp
+     -  libopenmpt/*.cpp
+
+ -  public include directories:
+     -  .
+
+ -  public header files:
+     -  libopenmpt/libopenmpt.h
+     -  libopenmpt/libopenmpt.hpp
+     -  libopenmpt/libopenmpt_config.h
+     -  libopenmpt/libopenmpt_ext.h
+     -  libopenmpt/libopenmpt_ext.hpp
+     -  libopenmpt/libopenmpt_version.h
+     -  libopenmpt/libopenmpt_stream_callbacks_buffer.h
+     -  libopenmpt/libopenmpt_stream_callbacks_fd.h
+     -  libopenmpt/libopenmpt_stream_callbacks_file_mingw.h
+     -  libopenmpt/libopenmpt_stream_callbacks_file_msvcrt.h
+     -  libopenmpt/libopenmpt_stream_callbacks_file_posix.h
+     -  libopenmpt/libopenmpt_stream_callbacks_file_posix_lfs64.h
+
+ -  dependencies:
+     -  zlib:
+         -  pkg-config
+             -  zlib
+         -  defines
+             -  MPT_WITH_ZLIB
+     -  libmpg123:
+         -  pkg-config
+             -  mpg123
+         -  defines
+             -  MPT_WITH_MPG123
+     -  libogg:
+         -  pkg-config
+             -  ogg
+         -  defines
+             -  MPT_WITH_OGG
+     -  libvorbis:
+         -  pkg-config
+             -  vorbis
+         -  defines
+             -  MPT_WITH_VORBIS
+     -  libvorbisfile:
+         -  pkg-config
+             -  vorbisfile
+         -  defines
+             -  MPT_WITH_VORBISFILE
+
+ -  dllbuild:
+     -  defines
+         -  LIBOPENMPT_BUILD_DLL
