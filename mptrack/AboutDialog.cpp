@@ -385,11 +385,13 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 			text += MPT_UFORMAT("System Architecture: {}\n")(mpt::OS::Windows::Name(mpt::OS::Windows::GetHostArchitecture()));
 #ifdef MPT_ENABLE_ARCH_INTRINSICS
 #if MPT_ARCH_X86 || MPT_ARCH_AMD64
-			text += MPT_UFORMAT("CPU: {}, Family {}, Model {}, Stepping {}\n")
+			text += MPT_UFORMAT("CPU: {}, Family {}, Model {}, Stepping {} ({}/{})\n")
 				( mpt::ToUnicode(mpt::Charset::ASCII, (CPUInfo.get_vendor_string().length() > 0) ? CPUInfo.get_vendor_string() : std::string("Generic"))
 				, CPUInfo.get_family()
 				, CPUInfo.get_model()
 				, CPUInfo.get_stepping()
+				, mpt::ToUnicode(mpt::Charset::ASCII, CPUInfo.get_vendor_string())
+				, mpt::ufmt::hex0<8>(CPUInfo.get_cpuid())
 				);
 			text += MPT_UFORMAT("CPU Name: {}\n")(mpt::ToUnicode(mpt::Charset::ASCII, (CPUInfo.get_brand_string().length() > 0) ? CPUInfo.get_brand_string() : std::string("")));
 #endif
