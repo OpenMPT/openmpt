@@ -9,6 +9,8 @@ is just a high-level summary.
 
  *  [**Bug**] The Android NDK build system did not enable C++20 when available.
 
+ *  mpg123: Update to v1.32.7 (2024-08-07).
+
 ### libopenmpt 0.7.9 (2024-07-21)
 
  *  [**Sec**] Potential division by 0 when seeking in the module with
