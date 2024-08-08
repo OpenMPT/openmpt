@@ -279,6 +279,10 @@ libopenmpt itself this way, but the test suite and openmpt123 may follow later.
          -  defines
              -  MPT_WITH_VORBISFILE
 
- -  dllbuild:
-     -  defines
-         -  LIBOPENMPT_BUILD_DLL
+ -  dll:
+     -  build:
+         -  defines
+             -  LIBOPENMPT_BUILD_DLL
+     -  use:
+         -  defines
+             -  LIBOPENMPT_USE_DLL
